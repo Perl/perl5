@@ -18,7 +18,7 @@
  *
  * The main job of of this grammar is to call the various newFOO()
  * functions in op.c to build a syntax tree of OP structs.
- * It relies in the lexer in toke.c to do the tokenizing.
+ * It relies on the lexer in toke.c to do the tokenizing.
  */
 
 /*  Make the parser re-entrant. */

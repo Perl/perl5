@@ -14,7 +14,7 @@
  */
 
 /* This file contains utility routines to dump the contents of SV and OP
- * structures, as used by comand-line options like -Dt and -Dx, and
+ * structures, as used by command-line options like -Dt and -Dx, and
  * by Devel::Peek.
  *
  * It also holds the debugging version of the  runops function.

@@ -5,8 +5,8 @@
  * "A fair jaw-cracker dwarf-language must be."  --Samwise Gamgee
  */
 
-/* This file contains functions for compiling a regular expresssion.  See
- * also regexec.c which funnnily enough, contains functions for executing
+/* This file contains functions for compiling a regular expression.  See
+ * also regexec.c which funnily enough, contains functions for executing
  * a regular expression.
  */
 

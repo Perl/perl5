@@ -22,9 +22,9 @@
 /*
 =head1 Pad Data Structures
 
-This file contains the functions that create and manipluate scratchpads,
+This file contains the functions that create and manipulate scratchpads,
 which are array-of-array data structures attached to a CV (ie a sub)
-and which store lexical variables and opcode temporay and per-thread
+and which store lexical variables and opcode temporary and per-thread
 values.
 
 =for apidoc m|AV *|CvPADLIST|CV *cv

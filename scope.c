@@ -13,7 +13,7 @@
  * levels..."
  */
 
-/* This function contains functions to manipluate various of perl's stacks;
+/* This file contains functions to manipulate various of perl's stacks;
  * in particular it contains code to push various types of things onto
  * the savestack, then to pop them off and perform the correct restorative
  * action for each one. This corresponds to the cleanup Perl does at

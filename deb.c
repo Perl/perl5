@@ -14,8 +14,8 @@
  */
 
 /*
- * This file contains various utilites for producing debugging output
- * (mainly related to  displaying the stack)
+ * This file contains various utilities for producing debugging output
+ * (mainly related to displaying the stack)
  */
 
 #include "EXTERN.h"

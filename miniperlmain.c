@@ -18,12 +18,12 @@
  *
  * Miniperl is like perl except that does not support dynamic loading,
  * and in fact is used to build the dynamic modules need for the 'real'
- * perl execuable.
+ * perl executable.
  */
 
 #ifdef OEMVS
 #ifdef MYMALLOC
-/* sbrk is limited to first heap segement so make it big */
+/* sbrk is limited to first heap segment so make it big */
 #pragma runopts(HEAP(8M,500K,ANYWHERE,KEEP,8K,4K) STACK(,,ANY,) ALL31(ON))
 #else
 #pragma runopts(HEAP(2M,500K,ANYWHERE,KEEP,8K,4K) STACK(,,ANY,) ALL31(ON))
