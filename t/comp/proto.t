@@ -492,7 +492,7 @@ sub sreftest (\$$) {
 # string "parse error".
 #
 for my $p ( "", qw{ () ($) ($@) ($%) ($;$) (&) (&\@) (&@) (%) (\%) (\@) } ) {
-  no warnings 'redefine';
+  no warnings 'prototype';
   my $eval = "sub evaled_subroutine $p { &void *; }";
   eval $eval;
   print "# eval[$eval]\nnot " unless $@ && $@ =~ /(parse|syntax) error/i;
