@@ -6947,8 +6947,10 @@ Perl_scan_num(pTHX_ char *start)
 	/* make an sv from the string */
 	sv = NEWSV(92,0);
 
-#if (defined(USE_64_BIT_INT) && (!defined(HAS_STRTOLL)|| !defined(HAS_STRTOULL))) || \
-   (!defined(USE_64_BIT_INT) && (!defined(HAS_STRTOL) || !defined(HAS_STRTOUL)))
+#if ( defined(USE_64_BIT_INT) && \
+	(!defined(HAS_STRTOLL)|| !defined(HAS_STRTOULL))) || \
+    (!defined(USE_64_BIT_INT) && \
+	(!defined(HAS_STRTOL) || !defined(HAS_STRTOUL)))
 
 	/*
 	   No working strto[u]l[l]. Since atoi() doesn't do range checks,
@@ -6985,20 +6987,22 @@ Perl_scan_num(pTHX_ char *start)
     	    UV uv;
 	    errno = 0;
 #ifdef USE_64_BIT_INT
-	    iv = (*PL_tokenbuf == '-') ?
-		   strtoll(PL_tokenbuf,&tp,10) :
-		   (IV)strtoull(PL_tokenbuf,&tp,10);
+	    if (*PL_tokenbuf == '-')
+		iv = strtoll(PL_tokenbuf,&tp,10);
+	    else
+		uv = strtoull(PL_tokenbuf,&tp,10);
 #else
-	    iv = (*PL_tokenbuf == '-') ?
-	          strtol(PL_tokenbuf,&tp,10) :
-	          (IV)strtoul(PL_tokenbuf,&tp,10);
+	    if (*PL_tokenbuf == '-')
+		iv = strtol(PL_tokenbuf,&tp,10);
+	    else
+		uv = strtoul(PL_tokenbuf,&tp,10);
 #endif
 	    if (*tp || errno)
 	    	floatit = TRUE; /* probably just too large */
 	    else if (*PL_tokenbuf == '-')
 	    	sv_setiv(sv, iv);
 	    else
-	    	sv_setuv(sv, (UV)iv);
+	    	sv_setuv(sv, uv);
 	}
 	if (floatit) {
 	    char *tp;
