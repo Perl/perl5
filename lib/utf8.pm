@@ -71,8 +71,9 @@ attempt to canonicalize variable names for you.)
 =item *
 
 Regular expressions match characters instead of bytes.  For instance,
-"." matches a character instead of a byte.  (However, the C<\O> pattern
-is provided to force a match a single byte ("octet", hence C<\O>).)
+"." matches a character instead of a byte.  (However, the C<\C> pattern
+is provided to force a match a single byte ("C<char>" in C, hence
+C<\C>).)
 
 =item *
 

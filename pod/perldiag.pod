@@ -1725,9 +1725,9 @@ ended earlier on the current line.
 mentioned with the $ in Perl, unlike in the shells, where it can vary from
 one line to the next.
 
-=item Missing %sbrace%s on \C{}
+=item Missing %sbrace%s on \N{}
 
-(F) Wrong syntax of character name literal C<\C{charname}> within
+(F) Wrong syntax of character name literal C<\N{charname}> within
 double-quotish context.
 
 =item Missing comma after first argument to %s function

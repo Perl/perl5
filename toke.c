@@ -1151,7 +1151,7 @@ S_scan_const(pTHX_ char *start)
 	: UTF;
     char *leaveit =			/* set of acceptably-backslashed characters */
 	PL_lex_inpat
-	    ? "\\.^$@AGZdDwWsSbBpPXO+*?|()-nrtfeaxcz0123456789[{]} \t\n\r\f\v#"
+	    ? "\\.^$@AGZdDwWsSbBpPXC+*?|()-nrtfeaxcz0123456789[{]} \t\n\r\f\v#"
 	    : "";
 
     while (s < send || dorange) {
@@ -1372,8 +1372,8 @@ S_scan_const(pTHX_ char *start)
 		}
 		continue;
 
- 	    /* \C{latin small letter a} is a named character */
- 	    case 'C':
+ 	    /* \N{latin small letter a} is a named character */
+ 	    case 'N':
  		++s;
  		if (*s == '{') {
  		    char* e = strchr(s, '}');
