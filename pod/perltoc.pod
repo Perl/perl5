@@ -4508,6 +4508,8 @@ A, p, d, s, n, r, f, M, o, x, m, X, E, b
 
 =item Source Documentation
 
+=item Backwards compatibility
+
 =back
 
 =item Unicode Support
@@ -4671,7 +4673,7 @@ PL_modglobal, PL_na, PL_sv_no, PL_sv_undef, PL_sv_yes
 =item GV Functions
 
 GvSV, gv_fetchmeth, gv_fetchmethod, gv_fetchmethod_autoload,
-gv_fetchmeth_autoload, gv_stashpv, gv_stashsv
+gv_fetchmeth_autoload, gv_stashpv, gv_stashpvn, gv_stashsv
 
 =item Handy Values
 
@@ -4695,7 +4697,7 @@ SvSetSV, SvSetSV_nosteal, SvSHARE, SvUNLOCK
 =item Memory Management
 
 Copy, CopyD, Move, MoveD, New, Newc, Newz, Poison, Renew, Renewc, Safefree,
-savepv, savepvn, savesharedpv, StructCopy, Zero, ZeroD
+savepv, savepvn, savesharedpv, savesvpv, StructCopy, Zero, ZeroD
 
 =item Miscellaneous Functions
 
@@ -5189,6 +5191,8 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item Use fchown/fchmod internally
 
+=item Constant folding
+
 =back
 
 =item Tests
@@ -5198,8 +5202,6 @@ I<The Road goes ever on and on, down from the door where it began.>
 =item Make Schwern poorer
 
 =item test B
-
-=item Improve tests for Config.pm
 
 =item common test code for timed bailout
 
@@ -5252,6 +5254,8 @@ I<The Road goes ever on and on, down from the door where it began.>
 =item A decent benchmark
 
 =item readpipe(LIST)
+
+=item Self ties
 
 =back
 
@@ -5312,7 +5316,7 @@ B<-V>
 
 =back
 
-=head2 perldelta, perl586delta - what is new for perl v5.8.6
+=head2 perldelta - what is new for perl v5.8.7
 
 =over 4
 
@@ -5326,7 +5330,11 @@ B<-V>
 
 =item Utility Changes
 
+=item New Documentation
+
 =item Performance Enhancements
+
+=item Installation and Configuration Improvements
 
 =item Selected Bug Fixes
 
@@ -5335,6 +5343,10 @@ B<-V>
 =item Changed Internals
 
 =item New Tests
+
+=item Known Problems
+
+=item Platform Specific Problems
 
 =item Reporting Bugs
 
@@ -7655,25 +7667,29 @@ B<Unix emulation for AmigaOS: ixemul.library>, B<Version of Amiga OS>
 
 =back
 
-=head2 perlbeos, README.beos - Perl version 5 on BeOS
+=head2 perlbeos, README.beos - Perl version 5.8+ on BeOS
 
 =over 4
 
 =item DESCRIPTION
 
+=item BUILD AND INSTALL
+
 =over 4
 
-=item General Issues with Perl on BeOS
+=item Requirements
 
-=item BeOS Release-specific Notes
+=item Configure
 
-R4 x86, R4 PPC
+=item Build
 
-=item Contact Information
-
-=item Update 2002-05-30
+=item Install
 
 =back
+
+=item KNOWN PROBLEMS
+
+=item CONTACT
 
 =back
 
@@ -11413,22 +11429,22 @@ C<d_statfs_f_flags>, C<d_statfs_s>, C<d_statvfs>, C<d_stdio_cnt_lval>,
 C<d_stdio_ptr_lval>, C<d_stdio_ptr_lval_nochange_cnt>,
 C<d_stdio_ptr_lval_sets_cnt>, C<d_stdio_stream_array>, C<d_stdiobase>,
 C<d_stdstdio>, C<d_strchr>, C<d_strcoll>, C<d_strctcpy>, C<d_strerrm>,
-C<d_strerror>, C<d_strerror_r>, C<d_strftime>, C<d_strtod>, C<d_strtol>,
-C<d_strtold>, C<d_strtoll>, C<d_strtoq>, C<d_strtoul>, C<d_strtoull>,
-C<d_strtouq>, C<d_strxfrm>, C<d_suidsafe>, C<d_symlink>, C<d_syscall>,
-C<d_syscallproto>, C<d_sysconf>, C<d_sysernlst>, C<d_syserrlst>,
-C<d_system>, C<d_tcgetpgrp>, C<d_tcsetpgrp>, C<d_telldir>,
-C<d_telldirproto>, C<d_time>, C<d_times>, C<d_tm_tm_gmtoff>,
-C<d_tm_tm_zone>, C<d_tmpnam_r>, C<d_truncate>, C<d_ttyname_r>, C<d_tzname>,
-C<d_u32align>, C<d_ualarm>, C<d_umask>, C<d_uname>, C<d_union_semun>,
-C<d_unordered>, C<d_usleep>, C<d_usleepproto>, C<d_ustat>, C<d_vendorarch>,
-C<d_vendorbin>, C<d_vendorlib>, C<d_vendorscript>, C<d_vfork>,
-C<d_void_closedir>, C<d_voidsig>, C<d_voidtty>, C<d_volatile>,
-C<d_vprintf>, C<d_wait4>, C<d_waitpid>, C<d_wcstombs>, C<d_wctomb>,
-C<d_writev>, C<d_xenix>, C<date>, C<db_hashtype>, C<db_prefixtype>,
-C<db_version_major>, C<db_version_minor>, C<db_version_patch>,
-C<defvoidused>, C<direntrytype>, C<dlext>, C<dlsrc>, C<doublesize>,
-C<drand01>, C<drand48_r_proto>, C<dynamic_ext>
+C<d_strerror>, C<d_strerror_r>, C<d_strftime>, C<d_strlcat>, C<d_strlcpy>,
+C<d_strtod>, C<d_strtol>, C<d_strtold>, C<d_strtoll>, C<d_strtoq>,
+C<d_strtoul>, C<d_strtoull>, C<d_strtouq>, C<d_strxfrm>, C<d_suidsafe>,
+C<d_symlink>, C<d_syscall>, C<d_syscallproto>, C<d_sysconf>,
+C<d_sysernlst>, C<d_syserrlst>, C<d_system>, C<d_tcgetpgrp>,
+C<d_tcsetpgrp>, C<d_telldir>, C<d_telldirproto>, C<d_time>, C<d_times>,
+C<d_tm_tm_gmtoff>, C<d_tm_tm_zone>, C<d_tmpnam_r>, C<d_truncate>,
+C<d_ttyname_r>, C<d_tzname>, C<d_u32align>, C<d_ualarm>, C<d_umask>,
+C<d_uname>, C<d_union_semun>, C<d_unordered>, C<d_usleep>,
+C<d_usleepproto>, C<d_ustat>, C<d_vendorarch>, C<d_vendorbin>,
+C<d_vendorlib>, C<d_vendorscript>, C<d_vfork>, C<d_void_closedir>,
+C<d_voidsig>, C<d_voidtty>, C<d_volatile>, C<d_vprintf>, C<d_wait4>,
+C<d_waitpid>, C<d_wcstombs>, C<d_wctomb>, C<d_writev>, C<d_xenix>, C<date>,
+C<db_hashtype>, C<db_prefixtype>, C<db_version_major>, C<db_version_minor>,
+C<db_version_patch>, C<defvoidused>, C<direntrytype>, C<dlext>, C<dlsrc>,
+C<doublesize>, C<drand01>, C<drand48_r_proto>, C<dynamic_ext>
 
 =item e
 
@@ -11588,11 +11604,11 @@ C<u16size>, C<u16type>, C<u32size>, C<u32type>, C<u64size>, C<u64type>,
 C<u8size>, C<u8type>, C<uidformat>, C<uidsign>, C<uidsize>, C<uidtype>,
 C<uname>, C<uniq>, C<uquadtype>, C<use5005threads>, C<use64bitall>,
 C<use64bitint>, C<usecrosscompile>, C<usedl>, C<usefaststdio>,
-C<useithreads>, C<uselargefiles>, C<uselongdouble>, C<usemorebits>,
-C<usemultiplicity>, C<usemymalloc>, C<usenm>, C<useopcode>, C<useperlio>,
-C<useposix>, C<usereentrant>, C<usesfio>, C<useshrplib>, C<usesocks>,
-C<usethreads>, C<usevendorprefix>, C<usevfork>, C<usrinc>, C<uuname>,
-C<uvoformat>, C<uvsize>, C<uvtype>, C<uvuformat>, C<uvxformat>,
+C<useithreads>, C<uselargefiles>, C<uselongdouble>, C<usemallocwrap>,
+C<usemorebits>, C<usemultiplicity>, C<usemymalloc>, C<usenm>, C<useopcode>,
+C<useperlio>, C<useposix>, C<usereentrant>, C<usesfio>, C<useshrplib>,
+C<usesocks>, C<usethreads>, C<usevendorprefix>, C<usevfork>, C<usrinc>,
+C<uuname>, C<uvoformat>, C<uvsize>, C<uvtype>, C<uvuformat>, C<uvxformat>,
 C<uvXUformat>
 
 =item v
@@ -15585,7 +15601,8 @@ new ( FILENAME [,MODE [,PERMS]] ), new_tmpfile
 
 =item METHODS
 
-open( FILENAME [,MODE [,PERMS]] ), open( FILENAME, IOLAYERS )
+open( FILENAME [,MODE [,PERMS]] ), open( FILENAME, IOLAYERS ), binmode(
+[LAYER] )
 
 =item SEE ALSO
 
@@ -15823,7 +15840,8 @@ new ( FILENAME [,MODE [,PERMS]] ), new_tmpfile
 
 =item METHODS
 
-open( FILENAME [,MODE [,PERMS]] ), open( FILENAME, IOLAYERS )
+open( FILENAME [,MODE [,PERMS]] ), open( FILENAME, IOLAYERS ), binmode(
+[LAYER] )
 
 =item SEE ALSO
 
@@ -19849,6 +19867,8 @@ B<new>
 
 =back
 
+B<reset>
+
 =over 4
 
 =item Setting up tests
@@ -19915,6 +19935,8 @@ B<diag>
 
 B<_print>
 
+B<_print_diag>
+
 B<output>, B<failure_output>, B<todo_output>
 
 =over 4
@@ -19940,6 +19962,8 @@ B<_whoa>
 B<_my_exit>
 
 =over 4
+
+=item EXIT CODES
 
 =item THREADS
 
@@ -20326,18 +20350,19 @@ B<builder>
 
 =over 4
 
-=item NOTES
+=item EXIT CODES
 
-=item BUGS and CAVEATS
+=item CAVEATS and NOTES
 
-Making your own ok(), The eq_* family has some caveats, Test::Harness
-upgrades
+Backwards compatibility, Overloaded objects, Threads, Test::Harness upgrade
 
 =item HISTORY
 
 =item SEE ALSO
 
 =item AUTHORS
+
+=item BUGS
 
 =item COPYRIGHT
 
