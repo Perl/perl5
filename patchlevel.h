@@ -5,7 +5,7 @@
 
 #define PERL_REVISION	5		/* age */
 #define PERL_VERSION	5		/* epoch */
-#define PERL_SUBVERSION	59		/* generation */
+#define PERL_SUBVERSION	60		/* generation */
 
 /*
 	local_patches -- list of locally applied less-than-subversion patches.
