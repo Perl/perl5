@@ -223,6 +223,11 @@ sub runperl {
 	$runperl .= qq( "$args{progfile}");
     }
     if (defined $args{stdin}) {
+        # so we don't try to put literal newlines and crs onto the
+        # command line.
+        $args{stdin} =~ s/\n/\\n/g;
+        $args{stdin} =~ s/\r/\\r/g;
+
 	if ($is_mswin || $is_netware || $is_vms) {
 	    $runperl = qq{$^X -e "print qq(} .
 		$args{stdin} . q{)" | } . $runperl;
