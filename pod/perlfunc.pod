@@ -453,7 +453,7 @@ Arranges for FILEHANDLE to be read or written in "binary" or "text"
 mode on systems where the run-time libraries distinguish between
 binary and text files.  If FILEHANDLE is an expression, the value is
 taken as the name of the filehandle.  Returns true on success,
-C<undef> on failure.
+otherwise it returns C<undef> and sets C<$!> (errno).
 
 If LAYER is omitted or specified as C<:raw> the filehandle is made
 suitable for passing binary data. This includes turning off possible CRLF
@@ -1805,11 +1805,11 @@ C<formline> always returns true.  See L<perlform> for other examples.
 =item getc
 
 Returns the next character from the input file attached to FILEHANDLE,
-or the undefined value at end of file, or if there was an error.
-If FILEHANDLE is omitted, reads from STDIN.  This is not particularly
-efficient.  However, it cannot be used by itself to fetch single
-characters without waiting for the user to hit enter.  For that, try
-something more like:
+or the undefined value at end of file, or if there was an error (in
+the latter case C<$!> is set).  If FILEHANDLE is omitted, reads from
+STDIN.  This is not particularly efficient.  However, it cannot be
+used by itself to fetch single characters without waiting for the user
+to hit enter.  For that, try something more like:
 
     if ($BSD_STYLE) {
 	system "stty cbreak </dev/tty >/dev/tty 2>&1";
@@ -3767,13 +3767,13 @@ with the wrong number of RANDBITS.)
 
 Attempts to read LENGTH I<characters> of data into variable SCALAR
 from the specified FILEHANDLE.  Returns the number of characters
-actually read, C<0> at end of file, or undef if there was an error.
-SCALAR will be grown or shrunk to the length actually read.  If SCALAR
-needs growing, the new bytes will be zero bytes.  An OFFSET may be
-specified to place the read data into some other place in SCALAR than
-the beginning.  The call is actually implemented in terms of either
-Perl's or system's fread() call.  To get a true read(2) system call,
-see C<sysread>.
+actually read, C<0> at end of file, or undef if there was an error (in
+the latter case C<$!> is also set).  SCALAR will be grown or shrunk to
+the length actually read.  If SCALAR needs growing, the new bytes will
+be zero bytes.  An OFFSET may be specified to place the read data into
+some other place in SCALAR than the beginning.  The call is actually
+implemented in terms of either Perl's or system's fread() call.  To
+get a true read(2) system call, see C<sysread>.
 
 Note the I<characters>: depending on the status of the filehandle,
 either (8-bit) bytes or characters are read.  By default all
@@ -5519,14 +5519,15 @@ See L<perlopentut> for a kinder, gentler explanation of opening files.
 
 =item sysread FILEHANDLE,SCALAR,LENGTH
 
-Attempts to read LENGTH I<characters> of data into variable SCALAR from
-the specified FILEHANDLE, using the system call read(2).  It bypasses
-buffered IO, so mixing this with other kinds of reads, C<print>,
-C<write>, C<seek>, C<tell>, or C<eof> can cause confusion because
-stdio usually buffers data.  Returns the number of characters actually
-read, C<0> at end of file, or undef if there was an error.  SCALAR
-will be grown or shrunk so that the last byte actually read is the
-last byte of the scalar after the read.
+Attempts to read LENGTH I<characters> of data into variable SCALAR
+from the specified FILEHANDLE, using the system call read(2).  It
+bypasses buffered IO, so mixing this with other kinds of reads,
+C<print>, C<write>, C<seek>, C<tell>, or C<eof> can cause confusion
+because stdio usually buffers data.  Returns the number of characters
+actually read, C<0> at end of file, or undef if there was an error (in
+the latter case C<$!> is also set).  SCALAR will be grown or shrunk so
+that the last byte actually read is the last byte of the scalar after
+the read.
 
 Note the I<characters>: depending on the status of the filehandle,
 either (8-bit) bytes or characters are read.  By default all
@@ -5644,9 +5645,10 @@ is not specified, writes whole SCALAR.  It bypasses buffered IO, so
 mixing this with reads (other than C<sysread())>, C<print>, C<write>,
 C<seek>, C<tell>, or C<eof> may cause confusion because stdio usually
 buffers data.  Returns the number of characters actually written, or
-C<undef> if there was an error.  If the LENGTH is greater than the
-available data in the SCALAR after the OFFSET, only as much data as is
-available will be written.
+C<undef> if there was an error (in this case the errno variable C<$!>
+is also set).  If the LENGTH is greater than the available data in the
+SCALAR after the OFFSET, only as much data as is available will be
+written.
 
 An OFFSET may be specified to write the data from some part of the
 string other than the beginning.  A negative OFFSET specifies writing
