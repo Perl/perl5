@@ -1571,9 +1571,12 @@ PP(pp_caller)
     {
 	SV * mask ;
 	SV * old_warnings = cx->blk_oldcop->cop_warnings ;
-	if  (old_warnings == pWARN_NONE || old_warnings == pWARN_STD)
+
+	if  (old_warnings == pWARN_NONE || 
+		(old_warnings == pWARN_STD && (PL_dowarn & G_WARN_ON) == 0))
             mask = newSVpvn(WARN_NONEstring, WARNsize) ;
-        else if (old_warnings == pWARN_ALL)
+        else if (old_warnings == pWARN_ALL || 
+		  (old_warnings == pWARN_STD && PL_dowarn & G_WARN_ON))
             mask = newSVpvn(WARN_ALLstring, WARNsize) ;
         else
             mask = newSVsv(old_warnings);

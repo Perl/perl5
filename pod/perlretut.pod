@@ -344,7 +344,7 @@ become the svelte C<[0-9]> and C<[a-z]>.  Some examples are
     /[0-9bx-z]aa/;  # matches '0aa', ..., '9aa',
                     # 'baa', 'xaa', 'yaa', or 'zaa'
     /[0-9a-fA-F]/;  # matches a hexadecimal digit
-    /[0-9a-zA-Z_]/; # matches an alphanumeric character,
+    /[0-9a-zA-Z_]/; # matches a "word" character,
                     # like those in a perl variable name
 
 If C<'-'> is the first or last character in a character class, it is
