@@ -63,7 +63,7 @@ SKIP: {
 	    } else {
 		$expected->[0] = $ENV{PERLIO} if $expected->[0] eq "stdio";
 	    }
-	} elsif (!$FASTSTDIO) {
+	} elsif (!$FASTSTDIO && !$DOSISH) {
 	    splice(@$result, 0, 2, "stdio")
 		if @$result >= 2 &&
 		   $result->[0] eq "unix" &&
