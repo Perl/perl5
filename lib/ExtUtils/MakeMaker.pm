@@ -441,7 +441,9 @@ sub ExtUtils::MakeMaker::new {
 	}
 	if ($self->{PARENT}) {
 	    $self->{PARENT}->{CHILDREN}->{$newclass} = $self;
-	    $self->{CAPI} = $self->{PARENT}->{CAPI};
+	    if (exists $self->{PARENT}->{CAPI}) {
+		$self->{CAPI} = $self->{PARENT}->{CAPI};
+	    }
 	}
     } else {
 	parse_args($self,split(' ', $ENV{PERL_MM_OPT} || ''),@ARGV);
