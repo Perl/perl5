@@ -4260,9 +4260,6 @@ S_reginclasslen(pTHX_ register regnode *n, register U8* p, STRLEN* lenp, registe
 		if (swash_fetch(sw, p, do_utf8))
 		    match = TRUE;
 		else if (flags & ANYOF_FOLD) {
-		    U8 tmpbuf[UTF8_MAXLEN_FOLD+1];
-		    STRLEN tmplen;
-
 		    if (!match && lenp && av) {
 		        I32 i;
 		      
@@ -4279,12 +4276,10 @@ S_reginclasslen(pTHX_ register regnode *n, register U8* p, STRLEN* lenp, registe
 			}
 		    }
 		    if (!match) {
+		        U8 tmpbuf[UTF8_MAXLEN_FOLD+1];
+			STRLEN tmplen;
+
 		        to_utf8_fold(p, tmpbuf, &tmplen);
-			if (swash_fetch(sw, tmpbuf, do_utf8))
-			    match = TRUE;
-		    }
-		    if (!match) {
-		        to_utf8_upper(p, tmpbuf, &tmplen);
 			if (swash_fetch(sw, tmpbuf, do_utf8))
 			    match = TRUE;
 		    }
