@@ -2674,6 +2674,8 @@ PP(pp_require)
 
 	RETPUSHUNDEF;
     }
+    else
+	errno = 0;
 
     /* Assume success here to prevent recursive requirement. */
     (void)hv_store(GvHVn(PL_incgv), name, strlen(name),
