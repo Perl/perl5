@@ -47,23 +47,34 @@ cd t || exit 1
 
 ln -sf ../perl.pixie .
 
-the_t=`echo base/*.t comp/*.t cmd/*.t run/*.t io/*.t; echo op/*.t pragma/*.t lib/*.t pod/*.t camel-III/*.t`
+if test $# = 0; then
+  the_t=`echo base/*.t comp/*.t cmd/*.t run/*.t io/*.t; echo op/*.t uni/*.t pod/*.t x2p/*.t; find ../ext ../lib -name '*.t' -print`
+else
+  the_t=$@
+fi
 
 PERL_DESTRUCT_LEVEL=2
 export PERL_DESTRUCT_LEVEL
+PERL_CORE=1
+export PERL_CORE
 
 rm -f all.Counts
 
 for t in $the_t
 do
-    echo `echo $t|sed s:\.t$::`" \c"
     case "$t" in
-    *taint*|pragma/locale.t|lib/basename.t)
-	T=-T ;;
-    *)
-	T='' ;;
+    ext/*|lib/*) t=../$t ;;
+    t/*) t=`echo $t|sed 's:^t/::'` ;;
     esac
-    ./perl.pixie $T $t > /dev/null
+    echo $t|sed 's:\.t$::'
+    sw=''
+    case "`head -1 $t|egrep -e '^#.* -.*T'`" in
+    *-*T*) sw="$sw -T" ;;
+    esac
+    case "`head -1 $t|egrep -e '^#.* -.*t'`" in
+    *-*t*) sw="$sw -t" ;;
+    esac
+    ./perl.pixie -I../lib $sw $t > /dev/null
     if cd ..
     then
         if test -f all.Counts
@@ -72,7 +83,7 @@ do
             mv new.Counts all.Counts
         else
             mv t/perl.Counts all.Counts
-        fi 
+        fi
         cd t
     fi
 done

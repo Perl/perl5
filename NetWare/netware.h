@@ -49,6 +49,9 @@ struct tms {
 struct interp_intern {
     void *	internal_host;
     long	perlshell_items;	// For system() ;  Ananth, 3 Sept 2001
+
+    char *	perlshell_tokens;	// For system() ; From Win32 of Perl 5.8 on 24 June 2002
+    char **	perlshell_vec;	// For system() ; From Win32 of Perl 5.8 on 24 June 2002
 };
 
 /*
@@ -68,6 +71,9 @@ typedef u_int           SOCKET;
 
 #define nw_internal_host		(PL_sys_intern.internal_host)
 #define nw_perlshell_items	(PL_sys_intern.perlshell_items)		// For system() ;  Ananth, 3 Sept 2001
+
+#define nw_perlshell_tokens	(PL_sys_intern.perlshell_tokens)	// For system() ; From Win32 of Perl 5.8 on 24 June 2002
+#define nw_perlshell_vec	(PL_sys_intern.perlshell_vec)	// For system() ; From Win32 of Perl 5.8 on 24 June 2002
 
 EXTERN_C void	Perl_nw5_init(int *argcp, char ***argvp);
 

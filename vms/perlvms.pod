@@ -338,7 +338,7 @@ Perl functions were implemented in the VMS port of Perl
     caller, chdir, chmod, chown, chomp, chop, chr,
     close, closedir, cos, crypt*, defined, delete,
     die, do, dump*, each, endpwent, eof, eval, exec*,
-    exists, exit, exp, fileno, fork*, getc, getlogin,
+    exists, exit, exp, fileno, getc, getlogin, getppid,
     getpwent*, getpwnam*, getpwuid*, glob, gmtime*, goto,
     grep, hex, import, index, int, join, keys, kill*,
     last, lc, lcfirst, length, local, localtime, log, m//,
@@ -358,8 +358,8 @@ The following functions were not implemented in the VMS port,
 and calling them produces a fatal error (usually) or 
 undefined behavior (rarely, we hope):
 
-    chroot, dbmclose, dbmopen, flock,
-    getpgrp, getppid, getpriority, getgrent, getgrgid,
+    chroot, dbmclose, dbmopen, flock, fork*,
+    getpgrp, getpriority, getgrent, getgrgid,
     getgrnam, setgrent, endgrent, ioctl, link, lstat,
     msgctl, msgget, msgsend, msgrcv, readlink, semctl,
     semget, semop, setpgrp, setpriority, shmctl, shmget,
@@ -482,49 +482,30 @@ affected by calling C<dump>.
 
 =item exec LIST
 
-The C<exec> operator behaves in one of two different ways.  
-If called after a call to C<fork>, it will invoke the CRTL 
-C<execv()> routine, passing its arguments to the subprocess 
-created by C<fork> for execution.  In this case, it is 
-subject to all limitations that affect C<execv()>.  (In 
-particular, this usually means that the command executed in 
-the subprocess must be an image compiled from C source code, 
-and that your options for passing file descriptors and signal 
-handlers to the subprocess are limited.)
-
-If the call to C<exec> does not follow a call to C<fork>, it 
-will cause Perl to exit, and to invoke the command given as 
-an argument to C<exec> via C<lib$do_command>.  If the argument 
-begins with '@' or '$' (other than as part of a filespec), then it 
-is executed as a DCL command.  Otherwise, the first token on 
-the command line is treated as the filespec of an image to 
-run, and an attempt is made to invoke it (using F<.Exe> and 
-the process defaults to expand the filespec) and pass the 
-rest of C<exec>'s argument to it as parameters.  If the token
-has no file type, and matches a file with null type, then an
-attempt is made to determine whether the file is an executable
-image which should be invoked using C<MCR> or a text file which
-should be passed to DCL as a command procedure.
-
-You can use C<exec> in both ways within the same script, as 
-long as you call C<fork> and C<exec> in pairs.  Perl
-keeps track of how many times C<fork> and C<exec> have been
-called, and will call the CRTL C<execv()> routine if there have
-previously been more calls to C<fork> than to C<exec>.
+A call to C<exec> will cause Perl to exit, and to invoke the command
+given as an argument to C<exec> via C<lib$do_command>.  If the
+argument begins with '@' or '$' (other than as part of a filespec),
+then it is executed as a DCL command.  Otherwise, the first token on
+the command line is treated as the filespec of an image to run, and
+an attempt is made to invoke it (using F<.Exe> and the process
+defaults to expand the filespec) and pass the rest of C<exec>'s
+argument to it as parameters.  If the token has no file type, and
+matches a file with null type, then an attempt is made to determine
+whether the file is an executable image which should be invoked
+using C<MCR> or a text file which should be passed to DCL as a
+command procedure.
 
 =item fork
 
-The C<fork> operator works in the same way as the CRTL 
-C<vfork()> routine, which is quite different under VMS than 
-under Unix.  Specifically, while C<fork> returns 0 after it 
-is called and the subprocess PID after C<exec> is called, in 
-both cases the thread of execution is within the parent 
-process, so there is no opportunity to perform operations in 
-the subprocess before calling C<exec>.
-
-In general, the use of C<fork> and C<exec> to create 
-subprocesses is not recommended under VMS; wherever possible, 
-use the C<system> operator or piped filehandles instead.
+While in principle the C<fork> operator could be implemented via
+(and with the same rather severe limitations as) the CRTL C<vfork()>
+routine, and while some internal support to do just that is in
+place, the implementation has never been completed, making C<fork>
+currently unavailable.  A true kernel C<fork()> is expected in a
+future version of VMS, and the pseudo-fork based on interpreter
+threads may be available in a future version of Perl on VMS (see
+L<perlfork>).  In the meantime, use C<system>, backticks, or piped
+filehandles to create subprocesses.
 
 =item getpwent
 

@@ -2468,8 +2468,8 @@ static ULONG
 my_os_version() {
     static ULONG res;			/* Cannot be on stack! */
 
-    /* Can't just call emx_init(), since it moves the stack pointer */
-    /* It also busts a lot of registers, so be extra careful */
+    /* Can't just call __os_version(), since it does not follow C
+       calling convention: it busts a lot of registers, so be extra careful */
     __asm__(	"pushf\n"
 		"pusha\n"
 		"call ___os_version\n"

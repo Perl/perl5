@@ -1567,7 +1567,7 @@ Available only on Windows NT (not on Windows 95). (Win32)
 
 =item fork
 
-Not implemented. (S<Mac OS>, AmigaOS, S<RISC OS>, VOS, VM/ESA)
+Not implemented. (S<Mac OS>, AmigaOS, S<RISC OS>, VOS, VM/ESA, VMS)
 
 Emulated using multiple interpreters.  See L<perlfork>.  (Win32)
 
@@ -1584,7 +1584,7 @@ Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>, VOS)
 
 =item getppid
 
-Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>)
+Not implemented. (S<Mac OS>, Win32, S<RISC OS>)
 
 =item getpriority WHICH,WHO
 
@@ -1794,7 +1794,7 @@ Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>, VOS)
 
 =item setgrent
 
-Not implemented. (S<Mac OS>, MPE/iX, VMS, Win32, VMS, S<RISC OS>)
+Not implemented. (S<Mac OS>, MPE/iX, VMS, Win32, S<RISC OS>)
 
 =item setpgrp PID,PGRP
 

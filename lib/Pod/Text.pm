@@ -1,7 +1,7 @@
 # Pod::Text -- Convert POD data to formatted ASCII text.
-# $Id: Text.pm,v 2.18 2002/01/01 02:40:51 eagle Exp $
+# $Id: Text.pm,v 2.19 2002/06/23 19:16:21 eagle Exp $
 #
-# Copyright 1999, 2000, 2001 by Russ Allbery <rra@stanford.edu>
+# Copyright 1999, 2000, 2001, 2002 by Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -43,7 +43,7 @@ use vars qw(@ISA @EXPORT %ESCAPES $VERSION);
 # Don't use the CVS revision as the version, since this module is also in Perl
 # core and too many things could munge CVS magic revision strings.  This
 # number should ideally be the same as the CVS revision in podlators, however.
-$VERSION = 2.18;
+$VERSION = 2.19;
 
 
 ##############################################################################
@@ -459,7 +459,7 @@ sub seq_c {
        | \$+ [\#^]? \S $index                           # special ($^Foo, $")
        | [\$\@%&*]+ \#? [:\'\w]+ $index                 # plain var or func
        | [\$\@%&*]* [:\'\w]+ (?: -> )? \(\s*[^\s,]\s*\) # 0/1-arg func call
-       | [+-]? [\d.]+ (?: [eE] [+-]? \d+ )?             # a number
+       | [+-]? ( \d[\d.]* | \.\d+ ) (?: [eE][+-]?\d+ )? # a number
        | 0x [a-fA-F\d]+                                 # a hex constant
       )
       \s*\z
@@ -821,7 +821,7 @@ Pod::Parser by Brad Appleton <bradapp@enteract.com>.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 1999, 2000, 2001 by Russ Allbery <rra@stanford.edu>.
+Copyright 1999, 2000, 2001, 2002 by Russ Allbery <rra@stanford.edu>.
 
 This program is free software; you may redistribute it and/or modify it
 under the same terms as Perl itself.
