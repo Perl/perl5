@@ -922,8 +922,13 @@
 #define more_he			S_more_he
 #define new_he			S_new_he
 #define del_he			S_del_he
-#define save_hek		S_save_hek
+#define save_hek_flags		S_save_hek_flags
 #define hv_magic_check		S_hv_magic_check
+#define unshare_hek_or_pvn	S_unshare_hek_or_pvn
+#define share_hek_flags		S_share_hek_flags
+#define hv_store_flags		S_hv_store_flags
+#define hv_fetch_flags		S_hv_fetch_flags
+#define hv_notallowed		S_hv_notallowed
 #endif
 #if defined(PERL_IN_MG_C) || defined(PERL_DECL_PROT)
 #define save_magic		S_save_magic
@@ -2471,8 +2476,13 @@
 #define more_he()		S_more_he(aTHX)
 #define new_he()		S_new_he(aTHX)
 #define del_he(a)		S_del_he(aTHX_ a)
-#define save_hek(a,b,c)		S_save_hek(aTHX_ a,b,c)
+#define save_hek_flags(a,b,c,d)	S_save_hek_flags(aTHX_ a,b,c,d)
 #define hv_magic_check(a,b,c)	S_hv_magic_check(aTHX_ a,b,c)
+#define unshare_hek_or_pvn(a,b,c,d)	S_unshare_hek_or_pvn(aTHX_ a,b,c,d)
+#define share_hek_flags(a,b,c,d)	S_share_hek_flags(aTHX_ a,b,c,d)
+#define hv_store_flags(a,b,c,d,e,f)	S_hv_store_flags(aTHX_ a,b,c,d,e,f)
+#define hv_fetch_flags(a,b,c,d,e)	S_hv_fetch_flags(aTHX_ a,b,c,d,e)
+#define hv_notallowed(a,b,c,d)	S_hv_notallowed(aTHX_ a,b,c,d)
 #endif
 #if defined(PERL_IN_MG_C) || defined(PERL_DECL_PROT)
 #define save_magic(a,b)		S_save_magic(aTHX_ a,b)

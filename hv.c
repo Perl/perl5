@@ -121,10 +121,10 @@ Perl_he_dup(pTHX_ HE *e, bool shared, CLONE_PARAMS* param)
 #endif	/* USE_ITHREADS */
 
 static void
-Perl_hv_notallowed(pTHX_ int flags, const char *key, I32 klen,
-		   const char *msg)
+S_hv_notallowed(pTHX_ int flags, const char *key, I32 klen,
+		const char *msg)
 {
-    SV *sv = sv_newmortal();
+    SV *sv = sv_newmortal(), *esv = sv_newmortal();
     if (!(flags & HVhek_FREEKEY)) {
 	sv_setpvn(sv, key, klen);
     }
@@ -136,7 +136,8 @@ Perl_hv_notallowed(pTHX_ int flags, const char *key, I32 klen,
     if (flags & HVhek_UTF8) {
 	SvUTF8_on(sv);
     }
-    Perl_croak(aTHX_ msg, sv);
+    Perl_sv_setpvf(aTHX_ esv, "Attempt to %s a restricted hash", msg);
+    Perl_croak(aTHX_ SvPVX(esv), sv);
 }
 
 /* (klen == HEf_SVKEY) is special for MAGICAL hv entries, meaning key slot
@@ -305,9 +306,9 @@ S_hv_fetch_flags(pTHX_ HV *hv, const char *key, I32 klen, I32 lval, int flags)
     }
 #endif
     if (!entry && SvREADONLY(hv)) {
-	Perl_hv_notallowed(aTHX_ flags, key, klen,
-                 "Attempt to access disallowed key '%"SVf"' in a fixed hash"
-                           );
+	S_hv_notallowed(aTHX_ flags, key, klen,
+			"access disallowed key '%"SVf"' in"
+			);
     }
     if (lval) {		/* gonna assign to this, so it better be there */
 	sv = NEWSV(61,0);
@@ -458,9 +459,9 @@ Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
     }
 #endif
     if (!entry && SvREADONLY(hv)) {
-	Perl_hv_notallowed(aTHX_ flags, key, klen,
-                 "Attempt to access disallowed key '%"SVf"' in a fixed hash"
-                           );
+	S_hv_notallowed(aTHX_ flags, key, klen,
+			"access disallowed key '%"SVf"' in"
+			);
     }
     if (flags & HVhek_FREEKEY)
 	Safefree(key);
@@ -621,9 +622,9 @@ S_hv_store_flags(pTHX_ HV *hv, const char *key, I32 klen, SV *val,
     }
 
     if (SvREADONLY(hv)) {
-	Perl_hv_notallowed(aTHX_ flags, key, klen,
-                 "Attempt to access disallowed key '%"SVf"' to a fixed hash"
-                           );
+	S_hv_notallowed(aTHX_ flags, key, klen,
+			"access disallowed key '%"SVf"' to"
+			);
     }
 
     entry = new_HE();
@@ -768,9 +769,9 @@ Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, U32 hash)
     }
 
     if (SvREADONLY(hv)) {
-	Perl_hv_notallowed(aTHX_ flags, key, klen,
-                 "Attempt to access disallowed key '%"SVf"' to a fixed hash"
-                           );
+	S_hv_notallowed(aTHX_ flags, key, klen,
+			"access disallowed key '%"SVf"' to"
+			);
     }
 
     entry = new_HE();
@@ -903,9 +904,9 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen, I32 flags)
 	    }
 	}
 	else if (SvREADONLY(hv) && HeVAL(entry) && SvREADONLY(HeVAL(entry))) {
-	    Perl_hv_notallowed(aTHX_ k_flags, key, klen,
-                   "Attempt to delete readonly key '%"SVf"' from a fixed hash"
-                               );
+	    S_hv_notallowed(aTHX_ k_flags, key, klen,
+			    "delete readonly key '%"SVf"' from"
+			    );
 	}
 
 	if (flags & G_DISCARD)
@@ -941,9 +942,9 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen, I32 flags)
 	return sv;
     }
     if (SvREADONLY(hv)) {
-	Perl_hv_notallowed(aTHX_ k_flags, key, klen,
-               "Attempt to access disallowed key '%"SVf"' from a fixed hash"
-                           );
+	S_hv_notallowed(aTHX_ k_flags, key, klen,
+			"access disallowed key '%"SVf"' from"
+			);
     }
 
     if (k_flags & HVhek_FREEKEY)
@@ -1059,9 +1060,9 @@ Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
            return Nullsv;
 	}
 	else if (SvREADONLY(hv) && HeVAL(entry) && SvREADONLY(HeVAL(entry))) {
-	    Perl_hv_notallowed(aTHX_ k_flags, key, klen,
-                   "Attempt to delete readonly key '%"SVf"' from a fixed hash"
-                               );
+	    S_hv_notallowed(aTHX_ k_flags, key, klen,
+			    "delete readonly key '%"SVf"' from"
+			    );
 	}
 
 	if (flags & G_DISCARD)
@@ -1097,9 +1098,9 @@ Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
 	return sv;
     }
     if (SvREADONLY(hv)) {
-        Perl_hv_notallowed(aTHX_ k_flags, key, klen,
-            "Attempt to delete disallowed key '%"SVf"' from a fixed hash"
-           );
+        S_hv_notallowed(aTHX_ k_flags, key, klen,
+			"delete disallowed key '%"SVf"' from"
+			);
     }
 
     if (k_flags & HVhek_FREEKEY)
@@ -1619,7 +1620,7 @@ Perl_hv_clear(pTHX_ HV *hv)
 	return;
 
     if(SvREADONLY(hv)) {
-        Perl_croak(aTHX_ "Attempt to clear a fixed hash");
+        Perl_croak(aTHX_ "Attempt to clear a restricted hash");
     }
 
     xhv = (XPVHV*)SvANY(hv);

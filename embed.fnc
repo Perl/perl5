@@ -994,6 +994,7 @@ s	|SV**	|hv_store_flags	|HV* tb|const char* key|I32 klen|SV* val \
 				|U32 hash|int flags
 s	|SV**	|hv_fetch_flags	|HV* tb|const char* key|I32 klen|I32 lval \
                                 |int flags
+s	|void	|hv_notallowed	|int flags|const char *key|I32 klen|const char *msg
 #endif
 
 #if defined(PERL_IN_MG_C) || defined(PERL_DECL_PROT)
