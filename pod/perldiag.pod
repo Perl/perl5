@@ -1840,8 +1840,8 @@ have a name with which they can be found.
 
 (W) Typographical errors often show up as unique variable names.
 If you had a good reason for having a unique name, then just mention
-it again somehow to suppress the message.  The C<use vars> pragma is
-provided for just this purpose.
+it again somehow to suppress the message.  The C<our> declaration is
+provided for this purpose.
 
 =item Negative length
 

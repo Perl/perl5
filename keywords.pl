@@ -166,6 +166,7 @@ open
 opendir
 or
 ord
+our
 pack
 package
 pipe

@@ -2700,6 +2700,18 @@ Returns the numeric (ASCII or Unicode) value of the first character of EXPR.  If
 EXPR is omitted, uses C<$_>.  For the reverse, see L</chr>.
 See L<utf8> for more about Unicode.
 
+=item our EXPR
+
+An C<our> declares the listed variables to be valid globals within
+the enclosing block, file, or C<eval>.  That is, it has the same
+scoping rules as a "my" declaration, but does not create a local
+variable.  If more than one value is listed, the list must be placed
+in parentheses.  The C<our> declaration has no semantic effect unless
+"use strict vars" is in effect, in which case it lets you use the
+declared global variable without qualifying it with a package name.
+(But only within the lexical scope of the C<our> declaration.  In this
+it differs from "use vars", which is package scoped.)
+
 =item pack TEMPLATE,LIST
 
 Takes a list of values and packs it into a binary structure,

@@ -135,3 +135,4 @@ HV *GvHVn();
 #define GV_ADDWARN	0x04	/* add, but warn if symbol wasn't already there */
 #define GV_ADDINEVAL	0x08	/* add, as though we're doing so within an eval */
 #define GV_NOINIT	0x10	/* add, but don't init symbol, if type != PVGV */
+#define GV_ADDOUR	0x20	/* add "our" variable */

@@ -153,6 +153,8 @@ struct io {
 
 /* Some private flags. */
 
+#define SVpad_OUR	0x80000000	/* pad name is "our" instead of "my" */
+
 #define SVf_IVisUV	0x80000000	/* use XPVUV instead of XPVIV */
 
 #define SVpfm_COMPILED	0x80000000	/* FORMLINE is compiled */
