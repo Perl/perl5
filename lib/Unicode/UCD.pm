@@ -14,7 +14,7 @@ use Carp;
 
 =head1 NAME
 
-Unicode - Unicode character database
+Unicode::UCD - Unicode character database
 
 =head1 SYNOPSIS
 

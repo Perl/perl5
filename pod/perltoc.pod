@@ -15738,7 +15738,7 @@ VAL, TYPE ), UNIVERSAL::can ( VAL, METHOD )
 
 =back
 
-=head2 Unicode::UCD, Unicode - Unicode character database
+=head2 Unicode::UCD - Unicode character database
 
 =over 4
 
