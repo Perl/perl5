@@ -2136,7 +2136,7 @@ PP(pp_chr)
 {
     djSP; dTARGET;
     char *tmps;
-    I32 value = POPi;
+    U32 value = POPu;
 
     (void)SvUPGRADE(TARG,SVt_PV);
 
