@@ -2155,6 +2155,11 @@
 #ifdef PERL_CORE
 #define magic_scalarpack	Perl_magic_scalarpack
 #endif
+#ifdef PERL_IN_SV_C
+#ifdef PERL_CORE
+#define find_uninit_var		S_find_uninit_var
+#endif
+#endif
 #ifdef PERL_NEED_MY_HTOLE16
 #ifdef PERL_CORE
 #define my_htole16		Perl_my_htole16
@@ -3745,7 +3750,7 @@
 #define report_evil_fh(a,b,c)	Perl_report_evil_fh(aTHX_ a,b,c)
 #endif
 #ifdef PERL_CORE
-#define report_uninit()		Perl_report_uninit(aTHX)
+#define report_uninit(a)	Perl_report_uninit(aTHX_ a)
 #endif
 #define vwarn(a,b)		Perl_vwarn(aTHX_ a,b)
 #define vwarner(a,b,c)		Perl_vwarner(aTHX_ a,b,c)
@@ -4769,6 +4774,11 @@
 #define hv_scalar(a)		Perl_hv_scalar(aTHX_ a)
 #ifdef PERL_CORE
 #define magic_scalarpack(a,b)	Perl_magic_scalarpack(aTHX_ a,b)
+#endif
+#ifdef PERL_IN_SV_C
+#ifdef PERL_CORE
+#define find_uninit_var(a,b,c)	S_find_uninit_var(aTHX_ a,b,c)
+#endif
 #endif
 #ifdef PERL_NEED_MY_HTOLE16
 #ifdef PERL_CORE

@@ -219,7 +219,7 @@ EXPECT
 use warnings;
 eval 'print $foo';
 EXPECT
-Use of uninitialized value in print at (eval 1) line 1.
+Use of uninitialized value $foo in print at (eval 1) line 1.
 ########
 # pp_ctl.c
 use warnings 'portable';

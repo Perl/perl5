@@ -399,7 +399,7 @@ Only HASH reference supported as argument to :alias at
 use charnames ":short", ":alias" => { e_ACUTE => "LATIN:e WITH ACUTE", "a_ACUTE" };
 "Here: \N{e_ACUTE}\N{a_ACUTE}!\n";
 EXPECT
-Use of uninitialized value in string eq at
+Use of uninitialized value
 ########
 # alias with hashref two aliases
 use charnames ":short", ":alias" => {

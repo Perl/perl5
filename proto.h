@@ -805,7 +805,7 @@ PERL_CALLCONV U32	Perl_parse_unicode_opts(pTHX_ char **popt);
 PERL_CALLCONV U32	Perl_seed(pTHX);
 PERL_CALLCONV UV	Perl_get_hash_seed(pTHX);
 PERL_CALLCONV void	Perl_report_evil_fh(pTHX_ GV *gv, IO *io, I32 op);
-PERL_CALLCONV void	Perl_report_uninit(pTHX);
+PERL_CALLCONV void	Perl_report_uninit(pTHX_ SV* uninit_sv);
 PERL_CALLCONV void	Perl_warn(pTHX_ const char* pat, ...)
 	__attribute__format__(__printf__,pTHX_1,pTHX_2);
 PERL_CALLCONV void	Perl_vwarn(pTHX_ const char* pat, va_list* args);
@@ -1344,6 +1344,9 @@ PERL_CALLCONV void	Perl_hv_clear_placeholders(pTHX_ HV* hb);
 
 PERL_CALLCONV SV*	Perl_hv_scalar(pTHX_ HV* hv);
 PERL_CALLCONV SV*	Perl_magic_scalarpack(pTHX_ HV* hv, MAGIC*	mg);
+#ifdef PERL_IN_SV_C
+STATIC SV*	S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool top);
+#endif
 
 #ifdef PERL_NEED_MY_HTOLE16
 PERL_CALLCONV U16	Perl_my_htole16(U16 n);

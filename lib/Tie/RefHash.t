@@ -208,6 +208,7 @@ sub runtests {
             s/ at .+ line \d+\.$//mg;
             s/ at .+ line \d+, at .*//mg;
             s/ at .+ line \d+, near .*//mg;
+	    s/(uninitialized value)( within)? [\$@%].*? in /$1 in /g;
         }
 
         my (@warnings, %seen);

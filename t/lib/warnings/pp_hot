@@ -145,7 +145,7 @@ my @b = @$a;
 no warnings 'uninitialized' ;
 my @c = @$a;
 EXPECT
-Use of uninitialized value in array dereference at - line 4.
+Use of uninitialized value $a in array dereference at - line 4.
 ########
 # pp_hot.c [pp_rv2hv]
 use warnings 'uninitialized' ;
@@ -154,7 +154,7 @@ my %b = %$a;
 no warnings 'uninitialized' ;
 my %c = %$a;
 EXPECT
-Use of uninitialized value in hash dereference at - line 4.
+Use of uninitialized value $a in hash dereference at - line 4.
 ########
 # pp_hot.c [pp_aassign]
 use warnings 'misc' ;
@@ -269,11 +269,11 @@ a($x . $y);	# should warn twice
 $x .= $y;	# should warn once
 $y .= $y;	# should warn once
 EXPECT
-Use of uninitialized value in concatenation (.) or string at - line 5.
-Use of uninitialized value in concatenation (.) or string at - line 6.
-Use of uninitialized value in concatenation (.) or string at - line 6.
-Use of uninitialized value in concatenation (.) or string at - line 7.
-Use of uninitialized value in concatenation (.) or string at - line 8.
+Use of uninitialized value $x in concatenation (.) or string at - line 5.
+Use of uninitialized value $y in concatenation (.) or string at - line 6.
+Use of uninitialized value $x in concatenation (.) or string at - line 6.
+Use of uninitialized value $y in concatenation (.) or string at - line 7.
+Use of uninitialized value $y in concatenation (.) or string at - line 8.
 ########
 # pp_hot.c [pp_concat]
 use warnings 'y2k';

@@ -491,12 +491,12 @@ Perl_magic_len(pTHX_ SV *sv, MAGIC *mg)
 	    }
 	    else {
 		if (ckWARN(WARN_UNINITIALIZED))
-		    report_uninit();
+		    report_uninit(sv);
 	    }
 	}
 	else {
 	    if (ckWARN(WARN_UNINITIALIZED))
-		report_uninit();
+		report_uninit(sv);
 	}
 	return 0;
     case '+':

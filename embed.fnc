@@ -845,7 +845,7 @@ p	|U32	|parse_unicode_opts|char **popt
 p	|U32	|seed
 p	|UV	|get_hash_seed
 p	|void	|report_evil_fh	|GV *gv|IO *io|I32 op
-pd	|void	|report_uninit
+pd	|void	|report_uninit	|SV* uninit_sv
 Afpd	|void	|warn		|const char* pat|...
 Ap	|void	|vwarn		|const char* pat|va_list* args
 Afp	|void	|warner		|U32 err|const char* pat|...
@@ -1403,6 +1403,9 @@ Apd	|void	|hv_clear_placeholders|HV* hb
 
 Apd	|SV*	|hv_scalar	|HV* hv|
 p	|SV*	|magic_scalarpack|HV* hv|MAGIC*	mg
+#ifdef PERL_IN_SV_C
+sMd	|SV*	|find_uninit_var|OP* obase|SV* uninit_sv|bool top
+#endif
 
 #ifdef PERL_NEED_MY_HTOLE16
 np	|U16	|my_htole16	|U16 n

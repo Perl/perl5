@@ -1270,7 +1270,7 @@ Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
     switch (SvTYPE(sv)) {
     case SVt_NULL:
 	if (ckWARN(WARN_UNINITIALIZED))
-	    report_uninit();
+	    report_uninit(sv);
 	return TRUE;
     case SVt_IV:
 	if (SvIOK(sv)) {

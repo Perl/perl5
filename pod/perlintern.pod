@@ -791,11 +791,32 @@ Found in file pp.h
 
 =over 8
 
+=item find_uninit_var
+
+Find the name of the undefined variable (if any) that caused the operator o
+to issue a "Use of uninitialized value" warning.
+If match is true, only return a name if it's value matches uninit_sv.
+So roughly speaking, if a unary operator (such as OP_COS) generates a
+warning, then following the direct child of the op may yield an
+OP_PADSV or OP_GV that gives the name of the undefined variable. On the
+other hand, with OP_ADD there are two branches to follow, so we only print
+the variable name if we get an exact match.
+
+The name is returned as a mortal SV.
+
+Assumes that PL_op is the op that originally triggered the error, and that
+PL_comppad/PL_curpad points to the currently executing pad.
+
+	SV*	find_uninit_var(OP* obase, SV* uninit_sv, bool top)
+
+=for hackers
+Found in file sv.c
+
 =item report_uninit
 
 Print appropriate "Use of uninitialized variable" warning
 
-	void	report_uninit()
+	void	report_uninit(SV* uninit_sv)
 
 =for hackers
 Found in file sv.c

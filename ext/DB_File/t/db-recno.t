@@ -1313,6 +1313,8 @@ sub test_splice {
     foreach ($s_error, @s_warnings) {
 	chomp;
 	s/ at \S+ line \d+\.$//;
+	# only built-in splice identifies name of uninit value
+	s/(uninitialized value) \$\w+/$1/;
     }
 
     # Now do the same for DB_File's version of splice

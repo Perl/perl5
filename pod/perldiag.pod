@@ -4388,13 +4388,14 @@ arguments.  See L<perlsec>.
 defined.  It was interpreted as a "" or a 0, but maybe it was a mistake.
 To suppress this warning assign a defined value to your variables.
 
-To help you figure out what was undefined, perl tells you what operation
-you used the undefined value in.  Note, however, that perl optimizes your
-program and the operation displayed in the warning may not necessarily
-appear literally in your program.  For example, C<"that $foo"> is
-usually optimized into C<"that " . $foo>, and the warning will refer to
-the C<concatenation (.)> operator, even though there is no C<.> in your
-program.
+To help you figure out what was undefined, perl will try to tell you the
+name of the variable (if any) that was undefined. In some cases it cannot
+do this, so it also tells you what operation you used the undefined value
+in.  Note, however, that perl optimizes your program and the operation
+displayed in the warning may not necessarily appear literally in your
+program.  For example, C<"that $foo"> is usually optimized into C<"that "
+. $foo>, and the warning will refer to the C<concatenation (.)> operator,
+even though there is no C<.> in your program.
 
 =item Using a hash as a reference is deprecated
 
