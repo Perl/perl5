@@ -286,8 +286,9 @@ Perl_mg_copy(pTHX_ SV *sv, SV *nsv, const char *key, I32 klen)
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
 	if (isUPPER(mg->mg_type)) {
 	    sv_magic(nsv,
-		     mg->mg_type == 'P' ? SvTIED_obj(sv, mg) :
-		     (mg->mg_type == 'D' && mg->mg_obj) ? sv : mg->mg_obj,
+		     mg->mg_type == PERL_MAGIC_tied ? SvTIED_obj(sv, mg) :
+		     (mg->mg_type == PERL_MAGIC_regdata && mg->mg_obj)
+							? sv : mg->mg_obj,
 		     toLOWER(mg->mg_type), key, klen);
 	    count++;
 	}
@@ -313,7 +314,7 @@ Perl_mg_free(pTHX_ SV *sv)
 	moremagic = mg->mg_moremagic;
 	if (vtbl && vtbl->svt_free)
 	    CALL_FPTR(vtbl->svt_free)(aTHX_ sv, mg);
-	if (mg->mg_ptr && mg->mg_type != 'g') {
+	if (mg->mg_ptr && mg->mg_type != PERL_MAGIC_regex_global) {
 	    if (mg->mg_len >= 0)
 		Safefree(mg->mg_ptr);
 	    else if (mg->mg_len == HEf_SVKEY)
@@ -1130,7 +1131,7 @@ Perl_magic_getnkeys(pTHX_ SV *sv, MAGIC *mg)
 
     if (hv) {
 	(void) hv_iterinit(hv);
-	if (! SvTIED_mg((SV*)hv, 'P'))
+	if (! SvTIED_mg((SV*)hv, PERL_MAGIC_tied))
 	    i = HvKEYS(hv);
 	else {
 	    /*SUPPRESS 560*/
@@ -1169,7 +1170,7 @@ S_magic_methcall(pTHX_ SV *sv, MAGIC *mg, char *meth, I32 flags, int n, SV *val)
 	    else if (mg->mg_len == HEf_SVKEY)
 		PUSHs((SV*)mg->mg_ptr);
 	}
-	else if (mg->mg_type == 'p') {
+	else if (mg->mg_type == PERL_MAGIC_tiedelem) {
 	    PUSHs(sv_2mortal(newSViv(mg->mg_len)));
 	}
     }
@@ -1332,7 +1333,7 @@ Perl_magic_getpos(pTHX_ SV *sv, MAGIC *mg)
     SV* lsv = LvTARG(sv);
 
     if (SvTYPE(lsv) >= SVt_PVMG && SvMAGIC(lsv)) {
-	mg = mg_find(lsv, 'g');
+	mg = mg_find(lsv, PERL_MAGIC_regex_global);
 	if (mg && mg->mg_len >= 0) {
 	    I32 i = mg->mg_len;
 	    if (DO_UTF8(lsv))
@@ -1356,12 +1357,12 @@ Perl_magic_setpos(pTHX_ SV *sv, MAGIC *mg)
     mg = 0;
 
     if (SvTYPE(lsv) >= SVt_PVMG && SvMAGIC(lsv))
-	mg = mg_find(lsv, 'g');
+	mg = mg_find(lsv, PERL_MAGIC_regex_global);
     if (!mg) {
 	if (!SvOK(sv))
 	    return 0;
-	sv_magic(lsv, (SV*)0, 'g', Nullch, 0);
-	mg = mg_find(lsv, 'g');
+	sv_magic(lsv, (SV*)0, PERL_MAGIC_regex_global, Nullch, 0);
+	mg = mg_find(lsv, PERL_MAGIC_regex_global);
     }
     else if (!SvOK(sv)) {
 	mg->mg_len = -1;
@@ -1581,7 +1582,7 @@ Perl_vivify_defelem(pTHX_ SV *sv)
     MAGIC *mg;
     SV *value = Nullsv;
 
-    if (!LvTARGLEN(sv) || !(mg = mg_find(sv, 'y')))
+    if (!LvTARGLEN(sv) || !(mg = mg_find(sv, PERL_MAGIC_defelem)))
 	return;
     if (mg->mg_obj) {
 	SV *ahv = LvTARG(sv);
@@ -1650,7 +1651,7 @@ Perl_magic_setmglob(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_setbm(pTHX_ SV *sv, MAGIC *mg)
 {
-    sv_unmagic(sv, 'B');
+    sv_unmagic(sv, PERL_MAGIC_bm);
     SvVALID_off(sv);
     return 0;
 }
@@ -1658,7 +1659,7 @@ Perl_magic_setbm(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_setfm(pTHX_ SV *sv, MAGIC *mg)
 {
-    sv_unmagic(sv, 'f');
+    sv_unmagic(sv, PERL_MAGIC_fm);
     SvCOMPILED_off(sv);
     return 0;
 }

@@ -80,7 +80,7 @@ Perl_gv_fetchfile(pTHX_ const char *name)
 	gv_init(gv, PL_defstash, tmpbuf, tmplen, FALSE);
 	sv_setpv(GvSV(gv), name);
 	if (PERLDB_LINE)
-	    hv_magic(GvHVn(gv_AVadd(gv)), Nullgv, 'L');
+	    hv_magic(GvHVn(gv_AVadd(gv)), Nullgv, PERL_MAGIC_dbfile);
     }
     if (tmpbuf != smallbuf)
 	Safefree(tmpbuf);
@@ -110,7 +110,7 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
     GvFILE(gv) = CopFILE(PL_curcop) ? CopFILE(PL_curcop) : "";
     GvCVGEN(gv) = 0;
     GvEGV(gv) = gv;
-    sv_magic((SV*)gv, (SV*)gv, '*', Nullch, 0);
+    sv_magic((SV*)gv, (SV*)gv, PERL_MAGIC_glob, Nullch, 0);
     GvSTASH(gv) = (HV*)SvREFCNT_inc(stash);
     GvNAME(gv) = savepvn(name, len);
     GvNAMELEN(gv) = len;
@@ -752,7 +752,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	if (strEQ(name, "ISA")) {
 	    AV* av = GvAVn(gv);
 	    GvMULTI_on(gv);
-	    sv_magic((SV*)av, (SV*)gv, 'I', Nullch, 0);
+	    sv_magic((SV*)av, (SV*)gv, PERL_MAGIC_isa, Nullch, 0);
 	    /* NOTE: No support for tied ISA */
 	    if ((add & GV_ADDMULTI) && strEQ(nambeg,"AnyDBM_File::ISA")
 		&& AvFILLp(av) == -1)
@@ -775,7 +775,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
         if (strEQ(name, "OVERLOAD")) {
             HV* hv = GvHVn(gv);
             GvMULTI_on(gv);
-            hv_magic(hv, Nullgv, 'A');
+            hv_magic(hv, Nullgv, PERL_MAGIC_overload);
         }
         break;
     case 'S':
@@ -789,7 +789,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	    }
 	    GvMULTI_on(gv);
 	    hv = GvHVn(gv);
-	    hv_magic(hv, Nullgv, 'S');
+	    hv_magic(hv, Nullgv, PERL_MAGIC_sig);
 	    for (i = 1; i < SIG_SIZE; i++) {
 	    	SV ** init;
 	    	init = hv_fetch(hv, PL_sig_name[i], strlen(PL_sig_name[i]), 1);
@@ -848,7 +848,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	   now (rather than going to magicalize)
 	*/
 
-	sv_magic(GvSV(gv), (SV*)gv, 0, name, len);
+	sv_magic(GvSV(gv), (SV*)gv, PERL_MAGIC_sv, name, len);
 
 	if (sv_type == SVt_PVHV)
 	    require_errno(gv);
@@ -859,7 +859,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	    break;
 	else {
             AV* av = GvAVn(gv);
-            sv_magic((SV*)av, Nullsv, 'D', Nullch, 0);
+            sv_magic((SV*)av, Nullsv, PERL_MAGIC_regdata, Nullch, 0);
 	    SvREADONLY_on(av);
         }
 	goto magicalize;
@@ -917,7 +917,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	    break;
 	else {
             AV* av = GvAVn(gv);
-            sv_magic((SV*)av, (SV*)av, 'D', Nullch, 0);
+            sv_magic((SV*)av, (SV*)av, PERL_MAGIC_regdata, Nullch, 0);
 	    SvREADONLY_on(av);
         }
 	/* FALL THROUGH */
@@ -933,7 +933,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
       ro_magicalize:
 	SvREADONLY_on(GvSV(gv));
       magicalize:
-	sv_magic(GvSV(gv), (SV*)gv, 0, name, len);
+	sv_magic(GvSV(gv), (SV*)gv, PERL_MAGIC_sv, name, len);
 	break;
 
     case '\014':	/* $^L */
@@ -1218,7 +1218,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 {
   GV* gv;
   CV* cv;
-  MAGIC* mg=mg_find((SV*)stash,'c');
+  MAGIC* mg=mg_find((SV*)stash, PERL_MAGIC_overload_table);
   AMT *amtp = (mg) ? (AMT*)mg->mg_ptr: (AMT *) NULL;
   AMT amt;
   STRLEN n_a;
@@ -1226,7 +1226,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
   if (mg && amtp->was_ok_am == PL_amagic_generation
       && amtp->was_ok_sub == PL_sub_generation)
       return AMT_OVERLOADED(amtp);
-  sv_unmagic((SV*)stash, 'c');
+  sv_unmagic((SV*)stash, PERL_MAGIC_overload_table);
 
   DEBUG_o( Perl_deb(aTHX_ "Recalcing overload magic in package %s\n",HvNAME(stash)) );
 
@@ -1305,14 +1305,16 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
       AMT_AMAGIC_on(&amt);
       if (have_ovl)
 	  AMT_OVERLOADED_on(&amt);
-      sv_magic((SV*)stash, 0, 'c', (char*)&amt, sizeof(AMT));
+      sv_magic((SV*)stash, 0, PERL_MAGIC_overload_table,
+						(char*)&amt, sizeof(AMT));
       return have_ovl;
     }
   }
   /* Here we have no table: */
   /* no_table: */
   AMT_AMAGIC_off(&amt);
-  sv_magic((SV*)stash, 0, 'c', (char*)&amt, sizeof(AMTS));
+  sv_magic((SV*)stash, 0, PERL_MAGIC_overload_table,
+						(char*)&amt, sizeof(AMTS));
   return FALSE;
 }
 
@@ -1325,11 +1327,11 @@ Perl_gv_handler(pTHX_ HV *stash, I32 id)
 
     if (!stash)
         return Nullcv;
-    mg = mg_find((SV*)stash,'c');
+    mg = mg_find((SV*)stash, PERL_MAGIC_overload_table);
     if (!mg) {
       do_update:
 	Gv_AMupdate(stash);
-	mg = mg_find((SV*)stash,'c');
+	mg = mg_find((SV*)stash, PERL_MAGIC_overload_table);
     }
     amtp = (AMT*)mg->mg_ptr;
     if ( amtp->was_ok_am != PL_amagic_generation
@@ -1352,7 +1354,8 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
   int postpr = 0, force_cpy = 0, assignshift = assign ? 1 : 0;
   HV* stash;
   if (!(AMGf_noleft & flags) && SvAMAGIC(left)
-      && (mg = mg_find((SV*)(stash=SvSTASH(SvRV(left))),'c'))
+      && (mg = mg_find((SV*)(stash=SvSTASH(SvRV(left))),
+			PERL_MAGIC_overload_table))
       && (ocvp = cvp = (AMT_AMAGIC((AMT*)mg->mg_ptr)
 			? (oamtp = amtp = (AMT*)mg->mg_ptr)->table
 			: (CV **) NULL))
@@ -1465,7 +1468,8 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 	 }
 	 if (!cv) goto not_found;
     } else if (!(AMGf_noright & flags) && SvAMAGIC(right)
-	       && (mg = mg_find((SV*)(stash=SvSTASH(SvRV(right))),'c'))
+	       && (mg = mg_find((SV*)(stash=SvSTASH(SvRV(right))),
+			PERL_MAGIC_overload_table))
 	       && (cvp = (AMT_AMAGIC((AMT*)mg->mg_ptr)
 			  ? (amtp = (AMT*)mg->mg_ptr)->table
 			  : (CV **) NULL))

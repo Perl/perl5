@@ -810,13 +810,17 @@ copy of the name is stored in C<mg_ptr> field.
 The sv_magic function uses C<how> to determine which, if any, predefined
 "Magic Virtual Table" should be assigned to the C<mg_virtual> field.
 See the "Magic Virtual Table" section below.  The C<how> argument is also
-stored in the C<mg_type> field.
+stored in the C<mg_type> field. The value of C<how> should be chosen
+from the set of macros C<PERL_MAGIC_foo> found perl.h. Note that before
+these macros were added, perl internals used to directly use character
+literals, so you may occasionally come across old code or documentation
+referrring to 'U' magic rather than C<PERL_MAGIC_uvar> for example.
 
 The C<obj> argument is stored in the C<mg_obj> field of the C<MAGIC>
 structure.  If it is not the same as the C<sv> argument, the reference
 count of the C<obj> object is incremented.  If it is the same, or if
-the C<how> argument is "#", or if it is a NULL pointer, then C<obj> is
-merely stored, without the reference count being incremented.
+the C<how> argument is C<PERL_MAGIC_arylen>", or if it is a NULL pointer,
+then C<obj> is merely stored, without the reference count being incremented.
 
 There is also a function to add magic to an C<HV>:
 
@@ -860,67 +864,76 @@ actions depending on which function is being called.
     svt_free            Free any extra storage associated with the SV.
 
 For instance, the MGVTBL structure called C<vtbl_sv> (which corresponds
-to an C<mg_type> of '\0') contains:
+to an C<mg_type> of C<PERL_MAGIC_sv>) contains:
 
     { magic_get, magic_set, magic_len, 0, 0 }
 
-Thus, when an SV is determined to be magical and of type '\0', if a get
-operation is being performed, the routine C<magic_get> is called.  All
-the various routines for the various magical types begin with C<magic_>.
-NOTE: the magic routines are not considered part of the Perl API, and may
-not be exported by the Perl library.
+Thus, when an SV is determined to be magical and of type C<PERL_MAGIC_sv>,
+if a get operation is being performed, the routine C<magic_get> is
+called.  All the various routines for the various magical types begin
+with C<magic_>.  NOTE: the magic routines are not considered part of
+the Perl API, and may not be exported by the Perl library.
 
 The current kinds of Magic Virtual Tables are:
 
-    mg_type  MGVTBL              Type of magic
-    -------  ------              ----------------------------
-    \0       vtbl_sv             Special scalar variable
-    A        vtbl_amagic         %OVERLOAD hash
-    a        vtbl_amagicelem     %OVERLOAD hash element
-    c        (none)              Holds overload table (AMT) on stash
-    B        vtbl_bm             Boyer-Moore (fast string search)
-    D        vtbl_regdata        Regex match position data (@+ and @- vars)
-    d        vtbl_regdatum       Regex match position data element
-    E        vtbl_env            %ENV hash
-    e        vtbl_envelem        %ENV hash element
-    f        vtbl_fm             Formline ('compiled' format)
-    g        vtbl_mglob          m//g target / study()ed string
-    I        vtbl_isa            @ISA array
-    i        vtbl_isaelem        @ISA array element
-    k        vtbl_nkeys          scalar(keys()) lvalue
-    L        (none)              Debugger %_<filename 
-    l        vtbl_dbline         Debugger %_<filename element
-    o        vtbl_collxfrm       Locale transformation
-    P        vtbl_pack           Tied array or hash
-    p        vtbl_packelem       Tied array or hash element
-    q        vtbl_packelem       Tied scalar or handle
-    S        vtbl_sig            %SIG hash
-    s        vtbl_sigelem        %SIG hash element
-    t        vtbl_taint          Taintedness
-    U        vtbl_uvar           Available for use by extensions
-    v        vtbl_vec            vec() lvalue
-    x        vtbl_substr         substr() lvalue
-    y        vtbl_defelem        Shadow "foreach" iterator variable /
-                                  smart parameter vivification
-    *        vtbl_glob           GV (typeglob)
-    #        vtbl_arylen         Array length ($#ary)
-    .        vtbl_pos            pos() lvalue
-    ~        (none)              Available for use by extensions
+    mg_type
+    (old-style char and macro)   MGVTBL         Type of magic
+    --------------------------   ------         ----------------------------
+    \0 PERL_MAGIC_sv             vtbl_sv        Special scalar variable
+    A  PERL_MAGIC_overload       vtbl_amagic    %OVERLOAD hash
+    a  PERL_MAGIC_overload_elem  vtbl_amagicelem %OVERLOAD hash element
+    c  PERL_MAGIC_overload_table (none)         Holds overload table (AMT)
+						on stash
+    B  PERL_MAGIC_bm             vtbl_bm        Boyer-Moore (fast string search)
+    D  PERL_MAGIC_regdata        vtbl_regdata   Regex match position data
+						(@+ and @- vars)
+    d  PERL_MAGIC_regdatum       vtbl_regdatum  Regex match position data
+						element
+    E  PERL_MAGIC_env            vtbl_env       %ENV hash
+    e  PERL_MAGIC_envelem        vtbl_envelem   %ENV hash element
+    f  PERL_MAGIC_fm             vtbl_fm        Formline ('compiled' format)
+    g  PERL_MAGIC_regex_global   vtbl_mglob     m//g target / study()ed string
+    I  PERL_MAGIC_isa            vtbl_isa       @ISA array
+    i  PERL_MAGIC_isaelem        vtbl_isaelem   @ISA array element
+    k  PERL_MAGIC_nkeys          vtbl_nkeys     scalar(keys()) lvalue
+    L  PERL_MAGIC_dbfile         (none)         Debugger %_<filename
+    l  PERL_MAGIC_dbline         vtbl_dbline    Debugger %_<filename element
+    m  PERL_MAGIC_mutex          vtbl_mutex     ???
+    o  PERL_MAGIC_collxfrm       vtbl_collxfrm  Locale transformation
+    P  PERL_MAGIC_tied           vtbl_pack      Tied array or hash
+    p  PERL_MAGIC_tiedelem       vtbl_packelem  Tied array or hash element
+    q  PERL_MAGIC_tiedscalar     vtbl_packelem  Tied scalar or handle
+    r  PERL_MAGIC_qr             vtbl_qr        precompiled qr// regex
+    S  PERL_MAGIC_sig            vtbl_sig       %SIG hash
+    s  PERL_MAGIC_sigelem        vtbl_sigelem   %SIG hash element
+    t  PERL_MAGIC_taint          vtbl_taint     Taintedness
+    U  PERL_MAGIC_uvar           vtbl_uvar      Available for use by extensions
+    v  PERL_MAGIC_vec            vtbl_vec       vec() lvalue
+    x  PERL_MAGIC_substr         vtbl_substr    substr() lvalue
+    y  PERL_MAGIC_defelem        vtbl_defelem   Shadow "foreach" iterator
+						variable / smart parameter
+						vivification
+    *  PERL_MAGIC_glob           vtbl_glob      GV (typeglob)
+    #  PERL_MAGIC_arylen         vtbl_arylen    Array length ($#ary)
+    .  PERL_MAGIC_pos            vtbl_pos       pos() lvalue
+    <  PERL_MAGIC_backref        vtbl_backref   ???
+    ~  PERL_MAGIC_ext            (none)         Available for use by extensions
 
 When an uppercase and lowercase letter both exist in the table, then the
 uppercase letter is used to represent some kind of composite type (a list
 or a hash), and the lowercase letter is used to represent an element of
-that composite type.
+that composite type. Some internals code makes use of this case
+relationship.
 
-The '~' and 'U' magic types are defined specifically for use by
-extensions and will not be used by perl itself.  Extensions can use
-'~' magic to 'attach' private information to variables (typically
-objects).  This is especially useful because there is no way for
-normal perl code to corrupt this private information (unlike using
-extra elements of a hash object).
+The C<PERL_MAGIC_ext> and C<PERL_MAGIC_uvar> magic types are defined
+specifically for use by extensions and will not be used by perl itself.
+Extensions can use C<PERL_MAGIC_ext> magic to 'attach' private information
+to variables (typically objects).  This is especially useful because
+there is no way for normal perl code to corrupt this private information
+(unlike using extra elements of a hash object).
 
-Similarly, 'U' magic can be used much like tie() to call a C function
-any time a scalar's value is used or changed.  The C<MAGIC>'s
+Similarly, C<PERL_MAGIC_uvar> magic can be used much like tie() to call a
+C function any time a scalar's value is used or changed.  The C<MAGIC>'s
 C<mg_ptr> field points to a C<ufuncs> structure:
 
     struct ufuncs {
@@ -930,8 +943,8 @@ C<mg_ptr> field points to a C<ufuncs> structure:
     };
 
 When the SV is read from or written to, the C<uf_val> or C<uf_set>
-function will be called with C<uf_index> as the first arg and a
-pointer to the SV as the second.  A simple example of how to add 'U'
+function will be called with C<uf_index> as the first arg and a pointer to
+the SV as the second.  A simple example of how to add C<PERL_MAGIC_uvar>
 magic is shown below.  Note that the ufuncs structure is copied by
 sv_magic, so you can safely allocate it on the stack.
 
@@ -944,14 +957,14 @@ sv_magic, so you can safely allocate it on the stack.
         uf.uf_val   = &my_get_fn;
         uf.uf_set   = &my_set_fn;
         uf.uf_index = 0;
-        sv_magic(sv, 0, 'U', (char*)&uf, sizeof(uf));
+        sv_magic(sv, 0, PERL_MAGIC_uvar, (char*)&uf, sizeof(uf));
 
-Note that because multiple extensions may be using '~' or 'U' magic,
-it is important for extensions to take extra care to avoid conflict.
-Typically only using the magic on objects blessed into the same class
-as the extension is sufficient.  For '~' magic, it may also be
-appropriate to add an I32 'signature' at the top of the private data
-area and check that.
+Note that because multiple extensions may be using C<PERL_MAGIC_ext>
+or C<PERL_MAGIC_uvar> magic, it is important for extensions to take
+extra care to avoid conflict.  Typically only using the magic on
+objects blessed into the same class as the extension is sufficient.
+For C<PERL_MAGIC_ext> magic, it may also be appropriate to add an I32
+'signature' at the top of the private data area and check that.
 
 Also note that the C<sv_set*()> and C<sv_cat*()> functions described
 earlier do B<not> invoke 'set' magic on their targets.  This must
@@ -981,7 +994,8 @@ the mg_type field is changed to be the lowercase letter.
 
 =head2 Understanding the Magic of Tied Hashes and Arrays
 
-Tied hashes and arrays are magical beasts of the 'P' magic type.
+Tied hashes and arrays are magical beasts of the C<PERL_MAGIC_tied>
+magic type.
 
 WARNING: As of the 5.004 release, proper usage of the array and hash
 access functions requires understanding a few caveats.  Some
@@ -1012,7 +1026,7 @@ to do this.
         tie = newRV_noinc((SV*)newHV());
         stash = gv_stashpv("MyTie", TRUE);
         sv_bless(tie, stash);
-        hv_magic(hash, tie, 'P');
+        hv_magic(hash, tie, PERL_MAGIC_tied);
         RETVAL = newRV_noinc(hash);
     OUTPUT:
         RETVAL

@@ -251,7 +251,7 @@ do_test(15,
     PV = 0
     MAGIC = $ADDR
       MG_VIRTUAL = $ADDR
-      MG_TYPE = \'r\'
+      MG_TYPE = PERL_MAGIC_qr\(r\)
       MG_OBJ = $ADDR
     STASH = $ADDR\\t"Regexp"');
 
@@ -283,7 +283,7 @@ do_test(17,
   NV = 0
   MAGIC = $ADDR
     MG_VIRTUAL = &PL_vtbl_glob
-    MG_TYPE = \'\\*\'
+    MG_TYPE = PERL_MAGIC_glob\(\*\)
     MG_OBJ = $ADDR
   NAME = "a"
   NAMELEN = 1

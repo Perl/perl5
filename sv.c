@@ -2699,7 +2699,7 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
 			   (SVs_OBJECT|SVf_OK|SVs_GMG|SVs_SMG|SVs_RMG))
 			  == (SVs_OBJECT|SVs_RMG))
 			 && strEQ(s=HvNAME(SvSTASH(sv)), "Regexp")
-			 && (mg = mg_find(sv, 'r'))) {
+			 && (mg = mg_find(sv, PERL_MAGIC_qr))) {
 			regexp *re = (regexp *)mg->mg_obj;
 
 			if (!mg->mg_ptr) {
@@ -3270,7 +3270,7 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 		char *name = GvNAME(sstr);
 		STRLEN len = GvNAMELEN(sstr);
 		sv_upgrade(dstr, SVt_PVGV);
-		sv_magic(dstr, dstr, '*', Nullch, 0);
+		sv_magic(dstr, dstr, PERL_MAGIC_glob, Nullch, 0);
 		GvSTASH(dstr) = (HV*)SvREFCNT_inc(GvSTASH(sstr));
 		GvNAME(dstr) = savepvn(name, len);
 		GvNAMELEN(dstr) = len;
@@ -3995,12 +3995,23 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
     MAGIC* mg;
 
     if (SvREADONLY(sv)) {
-	if (PL_curcop != &PL_compiling && !strchr("gBf", how))
+	if (PL_curcop != &PL_compiling
+	    /* XXX this used to be !strchr("gBf", how), which seems to
+	     * implicity be equal to !strchr("gBf\0", how), ie \0 matches
+	     * too. I find this suprising, but have hadded PERL_MAGIC_sv
+	     * to the list of things to check - DAPM 19-May-01 */
+	    && how != PERL_MAGIC_regex_global
+	    && how != PERL_MAGIC_bm
+	    && how != PERL_MAGIC_fm
+	    && how != PERL_MAGIC_sv 
+	   )
+	{
 	    Perl_croak(aTHX_ PL_no_modify);
+	}
     }
-    if (SvMAGICAL(sv) || (how == 't' && SvTYPE(sv) >= SVt_PVMG)) {
+    if (SvMAGICAL(sv) || (how == PERL_MAGIC_taint && SvTYPE(sv) >= SVt_PVMG)) {
 	if (SvMAGIC(sv) && (mg = mg_find(sv, how))) {
-	    if (how == 't')
+	    if (how == PERL_MAGIC_taint)
 		mg->mg_len |= 1;
 	    return;
 	}
@@ -4016,7 +4027,9 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
        each other.  To prevent a avoid a reference loop that would prevent such
        objects being freed, we look for such loops and if we find one we avoid
        incrementing the object refcount. */
-    if (!obj || obj == sv || how == '#' || how == 'r' ||
+    if (!obj || obj == sv ||
+	how == PERL_MAGIC_arylen ||
+	how == PERL_MAGIC_qr ||
 	(SvTYPE(obj) == SVt_PVGV &&
 	    (GvSV(obj) == sv || GvHV(obj) == (HV*)sv || GvAV(obj) == (AV*)sv ||
 	    GvCV(obj) == (CV*)sv || GvIOp(obj) == (IO*)sv ||
@@ -4038,117 +4051,118 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
     }
 
     switch (how) {
-    case 0:
+    case PERL_MAGIC_sv:
 	mg->mg_virtual = &PL_vtbl_sv;
 	break;
-    case 'A':
+    case PERL_MAGIC_overload:
         mg->mg_virtual = &PL_vtbl_amagic;
         break;
-    case 'a':
+    case PERL_MAGIC_overload_elem:
         mg->mg_virtual = &PL_vtbl_amagicelem;
         break;
-    case 'c':
+    case PERL_MAGIC_overload_table:
         mg->mg_virtual = &PL_vtbl_ovrld;
         break;
-    case 'B':
+    case PERL_MAGIC_bm:
 	mg->mg_virtual = &PL_vtbl_bm;
 	break;
-    case 'D':
+    case PERL_MAGIC_regdata:
 	mg->mg_virtual = &PL_vtbl_regdata;
 	break;
-    case 'd':
+    case PERL_MAGIC_regdatum:
 	mg->mg_virtual = &PL_vtbl_regdatum;
 	break;
-    case 'E':
+    case PERL_MAGIC_env:
 	mg->mg_virtual = &PL_vtbl_env;
 	break;
-    case 'f':
+    case PERL_MAGIC_fm:
 	mg->mg_virtual = &PL_vtbl_fm;
 	break;
-    case 'e':
+    case PERL_MAGIC_envelem:
 	mg->mg_virtual = &PL_vtbl_envelem;
 	break;
-    case 'g':
+    case PERL_MAGIC_regex_global:
 	mg->mg_virtual = &PL_vtbl_mglob;
 	break;
-    case 'I':
+    case PERL_MAGIC_isa:
 	mg->mg_virtual = &PL_vtbl_isa;
 	break;
-    case 'i':
+    case PERL_MAGIC_isaelem:
 	mg->mg_virtual = &PL_vtbl_isaelem;
 	break;
-    case 'k':
+    case PERL_MAGIC_nkeys:
 	mg->mg_virtual = &PL_vtbl_nkeys;
 	break;
-    case 'L':
+    case PERL_MAGIC_dbfile:
 	SvRMAGICAL_on(sv);
 	mg->mg_virtual = 0;
 	break;
-    case 'l':
+    case PERL_MAGIC_dbline:
 	mg->mg_virtual = &PL_vtbl_dbline;
 	break;
 #ifdef USE_THREADS
-    case 'm':
+    case PERL_MAGIC_mutex:
 	mg->mg_virtual = &PL_vtbl_mutex;
 	break;
 #endif /* USE_THREADS */
 #ifdef USE_LOCALE_COLLATE
-    case 'o':
+    case PERL_MAGIC_collxfrm:
         mg->mg_virtual = &PL_vtbl_collxfrm;
         break;
 #endif /* USE_LOCALE_COLLATE */
-    case 'P':
+    case PERL_MAGIC_tied:
 	mg->mg_virtual = &PL_vtbl_pack;
 	break;
-    case 'p':
-    case 'q':
+    case PERL_MAGIC_tiedelem:
+    case PERL_MAGIC_tiedscalar:
 	mg->mg_virtual = &PL_vtbl_packelem;
 	break;
-    case 'r':
+    case PERL_MAGIC_qr:
 	mg->mg_virtual = &PL_vtbl_regexp;
 	break;
-    case 'S':
+    case PERL_MAGIC_sig:
 	mg->mg_virtual = &PL_vtbl_sig;
 	break;
-    case 's':
+    case PERL_MAGIC_sigelem:
 	mg->mg_virtual = &PL_vtbl_sigelem;
 	break;
-    case 't':
+    case PERL_MAGIC_taint:
 	mg->mg_virtual = &PL_vtbl_taint;
 	mg->mg_len = 1;
 	break;
-    case 'U':
+    case PERL_MAGIC_uvar:
 	mg->mg_virtual = &PL_vtbl_uvar;
 	break;
-    case 'v':
+    case PERL_MAGIC_vec:
 	mg->mg_virtual = &PL_vtbl_vec;
 	break;
-    case 'x':
+    case PERL_MAGIC_substr:
 	mg->mg_virtual = &PL_vtbl_substr;
 	break;
-    case 'y':
+    case PERL_MAGIC_defelem:
 	mg->mg_virtual = &PL_vtbl_defelem;
 	break;
-    case '*':
+    case PERL_MAGIC_glob:
 	mg->mg_virtual = &PL_vtbl_glob;
 	break;
-    case '#':
+    case PERL_MAGIC_arylen:
 	mg->mg_virtual = &PL_vtbl_arylen;
 	break;
-    case '.':
+    case PERL_MAGIC_pos:
 	mg->mg_virtual = &PL_vtbl_pos;
 	break;
-    case '<':
+    case PERL_MAGIC_backref:
 	mg->mg_virtual = &PL_vtbl_backref;
 	break;
-    case '~':	/* Reserved for use by extensions not perl internals.	*/
+    case PERL_MAGIC_ext:
+	/* Reserved for use by extensions not perl internals.	        */
 	/* Useful for attaching extension internal data to perl vars.	*/
 	/* Note that multiple extensions may clash if magical scalars	*/
 	/* etc holding private data from one are passed to another.	*/
 	SvRMAGICAL_on(sv);
 	break;
     default:
-	Perl_croak(aTHX_ "Don't know how to handle magic of type '%c'", how);
+	Perl_croak(aTHX_ "Don't know how to handle magic of type \\%o", how);
     }
     mg_magical(sv);
     if (SvGMAGICAL(sv))
@@ -4177,7 +4191,7 @@ Perl_sv_unmagic(pTHX_ SV *sv, int type)
 	    *mgp = mg->mg_moremagic;
 	    if (vtbl && vtbl->svt_free)
 		CALL_FPTR(vtbl->svt_free)(aTHX_ sv, mg);
-	    if (mg->mg_ptr && mg->mg_type != 'g') {
+	    if (mg->mg_ptr && mg->mg_type != PERL_MAGIC_regex_global) {
 		if (mg->mg_len >= 0)
 		    Safefree(mg->mg_ptr);
 		else if (mg->mg_len == HEf_SVKEY)
@@ -4231,11 +4245,11 @@ S_sv_add_backref(pTHX_ SV *tsv, SV *sv)
 {
     AV *av;
     MAGIC *mg;
-    if (SvMAGICAL(tsv) && (mg = mg_find(tsv, '<')))
+    if (SvMAGICAL(tsv) && (mg = mg_find(tsv, PERL_MAGIC_backref)))
 	av = (AV*)mg->mg_obj;
     else {
 	av = newAV();
-	sv_magic(tsv, (SV*)av, '<', NULL, 0);
+	sv_magic(tsv, (SV*)av, PERL_MAGIC_backref, NULL, 0);
 	SvREFCNT_dec(av);           /* for sv_magic */
     }
     av_push(av,sv);
@@ -4249,7 +4263,7 @@ S_sv_del_backref(pTHX_ SV *sv)
     I32 i;
     SV *tsv = SvRV(sv);
     MAGIC *mg;
-    if (!SvMAGICAL(tsv) || !(mg = mg_find(tsv, '<')))
+    if (!SvMAGICAL(tsv) || !(mg = mg_find(tsv, PERL_MAGIC_backref)))
 	Perl_croak(aTHX_ "panic: del_backref");
     av = (AV *)mg->mg_obj;
     svp = AvARRAY(av);
@@ -4954,7 +4968,7 @@ Perl_sv_cmp_locale(pTHX_ register SV *sv1, register SV *sv2)
 
 #ifdef USE_LOCALE_COLLATE
 /*
- * Any scalar variable may carry an 'o' magic that contains the
+ * Any scalar variable may carry PERL_MAGIC_collxfrm magic that contains the
  * scalar data of the variable transformed to such a format that
  * a normal memory comparison can be used to compare the data
  * according to the locale settings.
@@ -4964,7 +4978,7 @@ Perl_sv_collxfrm(pTHX_ SV *sv, STRLEN *nxp)
 {
     MAGIC *mg;
 
-    mg = SvMAGICAL(sv) ? mg_find(sv, 'o') : (MAGIC *) NULL;
+    mg = SvMAGICAL(sv) ? mg_find(sv, PERL_MAGIC_collxfrm) : (MAGIC *) NULL;
     if (!mg || !mg->mg_ptr || *(U32*)mg->mg_ptr != PL_collation_ix) {
 	char *s, *xf;
 	STRLEN len, xlen;
@@ -4979,8 +4993,8 @@ Perl_sv_collxfrm(pTHX_ SV *sv, STRLEN *nxp)
 		return xf + sizeof(PL_collation_ix);
 	    }
 	    if (! mg) {
-		sv_magic(sv, 0, 'o', 0, 0);
-		mg = mg_find(sv, 'o');
+		sv_magic(sv, 0, PERL_MAGIC_collxfrm, 0, 0);
+		mg = mg_find(sv, PERL_MAGIC_collxfrm);
 		assert(mg);
 	    }
 	    mg->mg_ptr = xf;
@@ -6544,7 +6558,7 @@ S_sv_unglob(pTHX_ SV *sv)
 	SvREFCNT_dec(GvSTASH(sv));
 	GvSTASH(sv) = Nullhv;
     }
-    sv_unmagic(sv, '*');
+    sv_unmagic(sv, PERL_MAGIC_glob);
     Safefree(GvNAME(sv));
     GvMULTI_off(sv);
 
@@ -6611,14 +6625,14 @@ Perl_sv_unref(pTHX_ SV *sv)
 void
 Perl_sv_taint(pTHX_ SV *sv)
 {
-    sv_magic((sv), Nullsv, 't', Nullch, 0);
+    sv_magic((sv), Nullsv, PERL_MAGIC_taint, Nullch, 0);
 }
 
 void
 Perl_sv_untaint(pTHX_ SV *sv)
 {
     if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
-	MAGIC *mg = mg_find(sv, 't');
+	MAGIC *mg = mg_find(sv, PERL_MAGIC_taint);
 	if (mg)
 	    mg->mg_len &= ~1;
     }
@@ -6628,7 +6642,7 @@ bool
 Perl_sv_tainted(pTHX_ SV *sv)
 {
     if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
-	MAGIC *mg = mg_find(sv, 't');
+	MAGIC *mg = mg_find(sv, PERL_MAGIC_taint);
 	if (mg && ((mg->mg_len & 1) || ((mg->mg_len & 2) && mg->mg_obj == sv)))
 	    return TRUE;
     }
@@ -7705,7 +7719,7 @@ Perl_mg_dup(pTHX_ MAGIC *mg)
 	nmg->mg_private	= mg->mg_private;
 	nmg->mg_type	= mg->mg_type;
 	nmg->mg_flags	= mg->mg_flags;
-	if (mg->mg_type == 'r') {
+	if (mg->mg_type == PERL_MAGIC_qr) {
 	    nmg->mg_obj	= (SV*)re_dup((REGEXP*)mg->mg_obj);
 	}
 	else {
@@ -7715,10 +7729,12 @@ Perl_mg_dup(pTHX_ MAGIC *mg)
 	}
 	nmg->mg_len	= mg->mg_len;
 	nmg->mg_ptr	= mg->mg_ptr;	/* XXX random ptr? */
-	if (mg->mg_ptr && mg->mg_type != 'g') {
+	if (mg->mg_ptr && mg->mg_type != PERL_MAGIC_regex_global) {
 	    if (mg->mg_len >= 0) {
 		nmg->mg_ptr	= SAVEPVN(mg->mg_ptr, mg->mg_len);
-		if (mg->mg_type == 'c' && AMT_AMAGIC((AMT*)mg->mg_ptr)) {
+		if (mg->mg_type == PERL_MAGIC_overload_table &&
+			AMT_AMAGIC((AMT*)mg->mg_ptr))
+		{
 		    AMT *amtp = (AMT*)mg->mg_ptr;
 		    AMT *namtp = (AMT*)nmg->mg_ptr;
 		    I32 i;

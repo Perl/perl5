@@ -451,9 +451,9 @@ XS(XS_io_MODIFY_SCALAR_ATTRIBUTES)
  MAGIC *mg;
  int count = 0;
  int i;
- sv_magic(sv, (SV *)av, '~', NULL, 0);
+ sv_magic(sv, (SV *)av, PERL_MAGIC_ext, NULL, 0);
  SvRMAGICAL_off(sv);
- mg = mg_find(sv,'~');
+ mg = mg_find(sv, PERL_MAGIC_ext);
  mg->mg_virtual = &perlio_vtab;
  mg_magical(sv);
  Perl_warn(aTHX_ "attrib %"SVf,sv);

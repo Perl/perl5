@@ -66,7 +66,7 @@ Perl_taint_env(pTHX)
 	    TAINT;
 	    taint_proper("Insecure %s%s", "$ENV{DCL$PATH}");
 	}
-	if ((mg = mg_find(*svp, 'e')) && MgTAINTEDDIR(mg)) {
+	if ((mg = mg_find(*svp, PERL_MAGIC_envelem)) && MgTAINTEDDIR(mg)) {
 	    TAINT;
 	    taint_proper("Insecure directory in %s%s", "$ENV{DCL$PATH}");
 	}
@@ -81,7 +81,7 @@ Perl_taint_env(pTHX)
 	    TAINT;
 	    taint_proper("Insecure %s%s", "$ENV{PATH}");
 	}
-	if ((mg = mg_find(*svp, 'e')) && MgTAINTEDDIR(mg)) {
+	if ((mg = mg_find(*svp, PERL_MAGIC_envelem)) && MgTAINTEDDIR(mg)) {
 	    TAINT;
 	    taint_proper("Insecure directory in %s%s", "$ENV{PATH}");
 	}

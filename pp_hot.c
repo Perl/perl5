@@ -553,7 +553,7 @@ PP(pp_print)
 	gv = (GV*)*++MARK;
     else
 	gv = PL_defoutgv;
-    if ((mg = SvTIED_mg((SV*)gv, 'q'))) {
+    if ((mg = SvTIED_mg((SV*)gv, PERL_MAGIC_tiedscalar))) {
       had_magic:
 	if (MARK == ORIGMARK) {
 	    /* If using default handle then we need to make space to
@@ -577,7 +577,8 @@ PP(pp_print)
 	RETURN;
     }
     if (!(io = GvIO(gv))) {
-        if ((GvEGV(gv)) && (mg = SvTIED_mg((SV*)GvEGV(gv),'q')))
+        if ((GvEGV(gv))
+		&& (mg = SvTIED_mg((SV*)GvEGV(gv), PERL_MAGIC_tiedscalar)))
             goto had_magic;
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
 	    report_evil_fh(gv, io, PL_op->op_type);
@@ -1184,7 +1185,7 @@ PP(pp_qr)
     register PMOP *pm = cPMOP;
     SV *rv = sv_newmortal();
     SV *sv = newSVrv(rv, "Regexp");
-    sv_magic(sv,(SV*)ReREFCNT_inc(pm->op_pmregexp),'r',0,0);
+    sv_magic(sv,(SV*)ReREFCNT_inc(pm->op_pmregexp), PERL_MAGIC_qr,0,0);
     RETURNX(PUSHs(rv));
 }
 
@@ -1242,7 +1243,7 @@ PP(pp_match)
     if ((global = pm->op_pmflags & PMf_GLOBAL)) {
 	rx->startp[0] = -1;
 	if (SvTYPE(TARG) >= SVt_PVMG && SvMAGIC(TARG)) {
-	    MAGIC* mg = mg_find(TARG, 'g');
+	    MAGIC* mg = mg_find(TARG, PERL_MAGIC_regex_global);
 	    if (mg && mg->mg_len >= 0) {
 		if (!(rx->reganch & ROPT_GPOS_SEEN))
 		    rx->endp[0] = rx->startp[0] = mg->mg_len;
@@ -1342,10 +1343,10 @@ play_it_again:
 	if (global) {
 	    MAGIC* mg = 0;
 	    if (SvTYPE(TARG) >= SVt_PVMG && SvMAGIC(TARG))
-		mg = mg_find(TARG, 'g');
+		mg = mg_find(TARG, PERL_MAGIC_regex_global);
 	    if (!mg) {
-		sv_magic(TARG, (SV*)0, 'g', Nullch, 0);
-		mg = mg_find(TARG, 'g');
+		sv_magic(TARG, (SV*)0, PERL_MAGIC_regex_global, Nullch, 0);
+		mg = mg_find(TARG, PERL_MAGIC_regex_global);
 	    }
 	    if (rx->startp[0] != -1) {
 		mg->mg_len = rx->endp[0];
@@ -1404,7 +1405,7 @@ nope:
 ret_no:
     if (global && !(pm->op_pmflags & PMf_CONTINUE)) {
 	if (SvTYPE(TARG) >= SVt_PVMG && SvMAGIC(TARG)) {
-	    MAGIC* mg = mg_find(TARG, 'g');
+	    MAGIC* mg = mg_find(TARG, PERL_MAGIC_regex_global);
 	    if (mg)
 		mg->mg_len = -1;
 	}
@@ -1428,7 +1429,7 @@ Perl_do_readline(pTHX)
     I32 gimme = GIMME_V;
     MAGIC *mg;
 
-    if ((mg = SvTIED_mg((SV*)PL_last_in_gv, 'q'))) {
+    if ((mg = SvTIED_mg((SV*)PL_last_in_gv, PERL_MAGIC_tiedscalar))) {
 	PUSHMARK(SP);
 	XPUSHs(SvTIED_obj((SV*)PL_last_in_gv, mg));
 	PUTBACK;
@@ -1649,7 +1650,7 @@ PP(pp_helem)
 	    lv = sv_newmortal();
 	    sv_upgrade(lv, SVt_PVLV);
 	    LvTYPE(lv) = 'y';
-	    sv_magic(lv, key2 = newSVsv(keysv), 'y', Nullch, 0);
+	    sv_magic(lv, key2 = newSVsv(keysv), PERL_MAGIC_defelem, Nullch, 0);
 	    SvREFCNT_dec(key2);	/* sv_magic() increments refcount */
 	    LvTARG(lv) = SvREFCNT_inc(hv);
 	    LvTARGLEN(lv) = 1;
@@ -1838,7 +1839,7 @@ PP(pp_iter)
 	    lv = cx->blk_loop.iterlval = NEWSV(26, 0);
 	    sv_upgrade(lv, SVt_PVLV);
 	    LvTYPE(lv) = 'y';
-	    sv_magic(lv, Nullsv, 'y', Nullch, 0);
+	    sv_magic(lv, Nullsv, PERL_MAGIC_defelem, Nullch, 0);
 	}
 	LvTARG(lv) = SvREFCNT_inc(av);
 	LvTARGOFF(lv) = cx->blk_loop.iterix;
@@ -2899,7 +2900,7 @@ PP(pp_aelem)
 	    lv = sv_newmortal();
 	    sv_upgrade(lv, SVt_PVLV);
 	    LvTYPE(lv) = 'y';
-	    sv_magic(lv, Nullsv, 'y', Nullch, 0);
+	    sv_magic(lv, Nullsv, PERL_MAGIC_defelem, Nullch, 0);
 	    LvTARG(lv) = SvREFCNT_inc(av);
 	    LvTARGOFF(lv) = elem;
 	    LvTARGLEN(lv) = 1;

@@ -91,7 +91,7 @@ PP(pp_regcomp)
     if (SvROK(tmpstr)) {
 	SV *sv = SvRV(tmpstr);
 	if(SvMAGICAL(sv))
-	    mg = mg_find(sv, 'r');
+	    mg = mg_find(sv, PERL_MAGIC_qr);
     }
     if (mg) {
 	regexp *re = (regexp *)mg->mg_obj;
@@ -227,9 +227,9 @@ PP(pp_substcont)
 	I32 i;
 	if (SvTYPE(sv) < SVt_PVMG)
 	    (void)SvUPGRADE(sv, SVt_PVMG);
-	if (!(mg = mg_find(sv, 'g'))) {
-	    sv_magic(sv, Nullsv, 'g', Nullch, 0);
-	    mg = mg_find(sv, 'g');
+	if (!(mg = mg_find(sv, PERL_MAGIC_regex_global))) {
+	    sv_magic(sv, Nullsv, PERL_MAGIC_regex_global, Nullch, 0);
+	    mg = mg_find(sv, PERL_MAGIC_regex_global);
 	}
 	i = m - orig;
 	if (DO_UTF8(sv))
@@ -3779,7 +3779,7 @@ S_doparseform(pTHX_ SV *sv)
     }
     Copy(fops, s, arg, U16);
     Safefree(fops);
-    sv_magic(sv, Nullsv, 'f', Nullch, 0);
+    sv_magic(sv, Nullsv, PERL_MAGIC_fm, Nullch, 0);
     SvCOMPILED_on(sv);
 }
 

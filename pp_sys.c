@@ -510,7 +510,7 @@ PP(pp_open)
     if (GvIOp(gv))
 	IoFLAGS(GvIOp(gv)) &= ~IOf_UNTAINT;
 
-    if ((mg = SvTIED_mg((SV*)gv, 'q'))) {
+    if ((mg = SvTIED_mg((SV*)gv, PERL_MAGIC_tiedscalar))) {
 	/* Method's args are same as ours ... */
 	/* ... except handle is replaced by the object */
 	*MARK-- = SvTIED_obj((SV*)gv, mg);
@@ -553,7 +553,7 @@ PP(pp_close)
     else
 	gv = (GV*)POPs;
 
-    if ((mg = SvTIED_mg((SV*)gv, 'q'))) {
+    if ((mg = SvTIED_mg((SV*)gv, PERL_MAGIC_tiedscalar))) {
 	PUSHMARK(SP);
 	XPUSHs(SvTIED_obj((SV*)gv, mg));
 	PUTBACK;
@@ -635,7 +635,7 @@ PP(pp_fileno)
 	RETPUSHUNDEF;
     gv = (GV*)POPs;
 
-    if (gv && (mg = SvTIED_mg((SV*)gv, 'q'))) {
+    if (gv && (mg = SvTIED_mg((SV*)gv, PERL_MAGIC_tiedscalar))) {
 	PUSHMARK(SP);
 	XPUSHs(SvTIED_obj((SV*)gv, mg));
 	PUTBACK;
@@ -703,7 +703,7 @@ PP(pp_binmode)
 
     gv = (GV*)POPs;
 
-    if (gv && (mg = SvTIED_mg((SV*)gv, 'q'))) {
+    if (gv && (mg = SvTIED_mg((SV*)gv, PERL_MAGIC_tiedscalar))) {
 	PUSHMARK(SP);
 	XPUSHs(SvTIED_obj((SV*)gv, mg));
 	if (discp)
@@ -744,7 +744,7 @@ PP(pp_tie)
     SV *sv;
     I32 markoff = MARK - PL_stack_base;
     char *methname;
-    int how = 'P';
+    int how = PERL_MAGIC_tied;
     U32 items;
     STRLEN n_a;
 
@@ -763,11 +763,11 @@ PP(pp_tie)
 	    }
 #endif
 	    methname = "TIEHANDLE";
-	    how = 'q';
+	    how = PERL_MAGIC_tiedscalar;
 	    break;
 	default:
 	    methname = "TIESCALAR";
-	    how = 'q';
+	    how = PERL_MAGIC_tiedscalar;
 	    break;
     }
     items = SP - MARK++;
@@ -823,7 +823,8 @@ PP(pp_untie)
 {
     dSP;
     SV *sv = POPs;
-    char how = (SvTYPE(sv) == SVt_PVHV || SvTYPE(sv) == SVt_PVAV) ? 'P' : 'q';
+    char how = (SvTYPE(sv) == SVt_PVHV || SvTYPE(sv) == SVt_PVAV)
+		? PERL_MAGIC_tied : PERL_MAGIC_tiedscalar;
 
         MAGIC * mg ;
         if ((mg = SvTIED_mg(sv, how))) {
@@ -856,7 +857,8 @@ PP(pp_tied)
 {
     dSP;
     SV *sv = POPs;
-    char how = (SvTYPE(sv) == SVt_PVHV || SvTYPE(sv) == SVt_PVAV) ? 'P' : 'q';
+    char how = (SvTYPE(sv) == SVt_PVHV || SvTYPE(sv) == SVt_PVAV)
+		? PERL_MAGIC_tied : PERL_MAGIC_tiedscalar;
     MAGIC *mg;
 
     if ((mg = SvTIED_mg(sv, how))) {
@@ -919,8 +921,8 @@ PP(pp_dbmopen)
     }
 
     if (sv_isobject(TOPs)) {
-	sv_unmagic((SV *) hv, 'P');
-	sv_magic((SV*)hv, TOPs, 'P', Nullch, 0);
+	sv_unmagic((SV *) hv, PERL_MAGIC_tied);
+	sv_magic((SV*)hv, TOPs, PERL_MAGIC_tied, Nullch, 0);
     }
     LEAVE;
     RETURN;
@@ -1127,7 +1129,7 @@ PP(pp_getc)
     else
 	gv = (GV*)POPs;
 
-    if ((mg = SvTIED_mg((SV*)gv, 'q'))) {
+    if ((mg = SvTIED_mg((SV*)gv, PERL_MAGIC_tiedscalar))) {
 	I32 gimme = GIMME_V;
 	PUSHMARK(SP);
 	XPUSHs(SvTIED_obj((SV*)gv, mg));
@@ -1384,7 +1386,7 @@ PP(pp_prtf)
     else
 	gv = PL_defoutgv;
 
-    if ((mg = SvTIED_mg((SV*)gv, 'q'))) {
+    if ((mg = SvTIED_mg((SV*)gv, PERL_MAGIC_tiedscalar))) {
 	if (MARK == ORIGMARK) {
 	    MEXTEND(SP, 1);
 	    ++MARK;
@@ -1503,7 +1505,7 @@ PP(pp_sysread)
 
     gv = (GV*)*++MARK;
     if ((PL_op->op_type == OP_READ || PL_op->op_type == OP_SYSREAD) &&
-	(mg = SvTIED_mg((SV*)gv, 'q')))
+	(mg = SvTIED_mg((SV*)gv, PERL_MAGIC_tiedscalar)))
     {
 	SV *sv;
 	
@@ -1729,7 +1731,9 @@ PP(pp_send)
     MAGIC *mg;
 
     gv = (GV*)*++MARK;
-    if (PL_op->op_type == OP_SYSWRITE && (mg = SvTIED_mg((SV*)gv, 'q'))) {
+    if (PL_op->op_type == OP_SYSWRITE
+		&& (mg = SvTIED_mg((SV*)gv, PERL_MAGIC_tiedscalar)))
+    {
 	SV *sv;
 	
 	PUSHMARK(MARK-1);
@@ -1874,7 +1878,7 @@ PP(pp_eof)
     else
 	gv = PL_last_in_gv = (GV*)POPs;		/* eof(FH) */
 
-    if (gv && (mg = SvTIED_mg((SV*)gv, 'q'))) {
+    if (gv && (mg = SvTIED_mg((SV*)gv, PERL_MAGIC_tiedscalar))) {
 	PUSHMARK(SP);
 	XPUSHs(SvTIED_obj((SV*)gv, mg));
 	PUTBACK;
@@ -1900,7 +1904,7 @@ PP(pp_tell)
     else
 	gv = PL_last_in_gv = (GV*)POPs;
 
-    if (gv && (mg = SvTIED_mg((SV*)gv, 'q'))) {
+    if (gv && (mg = SvTIED_mg((SV*)gv, PERL_MAGIC_tiedscalar))) {
 	PUSHMARK(SP);
 	XPUSHs(SvTIED_obj((SV*)gv, mg));
 	PUTBACK;
@@ -1938,7 +1942,7 @@ PP(pp_sysseek)
 
     gv = PL_last_in_gv = (GV*)POPs;
 
-    if (gv && (mg = SvTIED_mg((SV*)gv, 'q'))) {
+    if (gv && (mg = SvTIED_mg((SV*)gv, PERL_MAGIC_tiedscalar))) {
 	PUSHMARK(SP);
 	XPUSHs(SvTIED_obj((SV*)gv, mg));
 #if LSEEKSIZE > IVSIZE

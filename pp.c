@@ -341,7 +341,7 @@ PP(pp_av2arylen)
     if (!sv) {
 	AvARYLEN(av) = sv = NEWSV(0,0);
 	sv_upgrade(sv, SVt_IV);
-	sv_magic(sv, (SV*)av, '#', Nullch, 0);
+	sv_magic(sv, (SV*)av, PERL_MAGIC_arylen, Nullch, 0);
     }
     SETs(sv);
     RETURN;
@@ -354,7 +354,7 @@ PP(pp_pos)
     if (PL_op->op_flags & OPf_MOD || LVRET) {
 	if (SvTYPE(TARG) < SVt_PVLV) {
 	    sv_upgrade(TARG, SVt_PVLV);
-	    sv_magic(TARG, Nullsv, '.', Nullch, 0);
+	    sv_magic(TARG, Nullsv, PERL_MAGIC_pos, Nullch, 0);
 	}
 
 	LvTYPE(TARG) = '.';
@@ -370,7 +370,7 @@ PP(pp_pos)
 	MAGIC* mg;
 
 	if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
-	    mg = mg_find(sv, 'g');
+	    mg = mg_find(sv, PERL_MAGIC_regex_global);
 	    if (mg && mg->mg_len >= 0) {
 		I32 i = mg->mg_len;
 		if (DO_UTF8(sv))
@@ -715,7 +715,8 @@ PP(pp_study)
     }
 
     SvSCREAM_on(sv);
-    sv_magic(sv, Nullsv, 'g', Nullch, 0);	/* piggyback on m//g magic */
+    /* piggyback on m//g magic */
+    sv_magic(sv, Nullsv, PERL_MAGIC_regex_global, Nullch, 0);
     RETPUSHYES;
 }
 
@@ -783,11 +784,13 @@ PP(pp_defined)
 	RETPUSHNO;
     switch (SvTYPE(sv)) {
     case SVt_PVAV:
-	if (AvMAX(sv) >= 0 || SvGMAGICAL(sv) || (SvRMAGICAL(sv) && mg_find(sv,'P')))
+	if (AvMAX(sv) >= 0 || SvGMAGICAL(sv)
+		|| (SvRMAGICAL(sv) && mg_find(sv, PERL_MAGIC_tied)))
 	    RETPUSHYES;
 	break;
     case SVt_PVHV:
-	if (HvARRAY(sv) || SvGMAGICAL(sv) || (SvRMAGICAL(sv) && mg_find(sv,'P')))
+	if (HvARRAY(sv) || SvGMAGICAL(sv)
+		|| (SvRMAGICAL(sv) && mg_find(sv, PERL_MAGIC_tied)))
 	    RETPUSHYES;
 	break;
     case SVt_PVCV:
@@ -2809,7 +2812,7 @@ PP(pp_substr)
 	tmps += pos;
 	sv_setpvn(TARG, tmps, rem);
 #ifdef USE_LOCALE_COLLATE
-	sv_unmagic(TARG, 'o');
+	sv_unmagic(TARG, PERL_MAGIC_collxfrm);
 #endif
 	if (utf8_curlen)
 	    SvUTF8_on(TARG);
@@ -2845,7 +2848,7 @@ PP(pp_substr)
 
 	    if (SvTYPE(TARG) < SVt_PVLV) {
 		sv_upgrade(TARG, SVt_PVLV);
-		sv_magic(TARG, Nullsv, 'x', Nullch, 0);
+		sv_magic(TARG, Nullsv, PERL_MAGIC_substr, Nullch, 0);
 	    }
 
 	    LvTYPE(TARG) = 'x';
@@ -2875,7 +2878,7 @@ PP(pp_vec)
     if (lvalue) {			/* it's an lvalue! */
 	if (SvTYPE(TARG) < SVt_PVLV) {
 	    sv_upgrade(TARG, SVt_PVLV);
-	    sv_magic(TARG, Nullsv, 'v', Nullch, 0);
+	    sv_magic(TARG, Nullsv, PERL_MAGIC_vec, Nullch, 0);
 	}
 	LvTYPE(TARG) = 'v';
 	if (LvTARG(TARG) != src) {
@@ -3710,7 +3713,7 @@ PP(pp_splice)
     SV **tmparyval = 0;
     MAGIC *mg;
 
-    if ((mg = SvTIED_mg((SV*)ary, 'P'))) {
+    if ((mg = SvTIED_mg((SV*)ary, PERL_MAGIC_tied))) {
 	*MARK-- = SvTIED_obj((SV*)ary, mg);
 	PUSHMARK(MARK);
 	PUTBACK;
@@ -3904,7 +3907,7 @@ PP(pp_push)
     register SV *sv = &PL_sv_undef;
     MAGIC *mg;
 
-    if ((mg = SvTIED_mg((SV*)ary, 'P'))) {
+    if ((mg = SvTIED_mg((SV*)ary, PERL_MAGIC_tied))) {
 	*MARK-- = SvTIED_obj((SV*)ary, mg);
 	PUSHMARK(MARK);
 	PUTBACK;
@@ -3960,7 +3963,7 @@ PP(pp_unshift)
     register I32 i = 0;
     MAGIC *mg;
 
-    if ((mg = SvTIED_mg((SV*)ary, 'P'))) {
+    if ((mg = SvTIED_mg((SV*)ary, PERL_MAGIC_tied))) {
 	*MARK-- = SvTIED_obj((SV*)ary, mg);
 	PUSHMARK(MARK);
 	PUTBACK;
@@ -5843,7 +5846,7 @@ PP(pp_split)
 	av_extend(ary,0);
 	av_clear(ary);
 	SPAGAIN;
-	if ((mg = SvTIED_mg((SV*)ary, 'P'))) {
+	if ((mg = SvTIED_mg((SV*)ary, PERL_MAGIC_tied))) {
 	    PUSHMARK(SP);
 	    XPUSHs(SvTIED_obj((SV*)ary, mg));
 	}
@@ -6090,7 +6093,7 @@ PP(pp_split)
 void
 Perl_unlock_condpair(pTHX_ void *svv)
 {
-    MAGIC *mg = mg_find((SV*)svv, 'm');
+    MAGIC *mg = mg_find((SV*)svv, PERL_MAGIC_mutex);
 
     if (!mg)
 	Perl_croak(aTHX_ "panic: unlock_condpair unlocking non-mutex");

@@ -235,7 +235,7 @@ usage:
 		stash = CvSTASH(sv);
 	    break;
 	case SVt_PVMG:
-	    if (!(SvFAKE(sv) && SvTIED_mg(sv, '*')))
+	    if (!(SvFAKE(sv) && SvTIED_mg(sv, PERL_MAGIC_glob)))
 		break;
 	    /*FALLTHROUGH*/
 	case SVt_PVGV:

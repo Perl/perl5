@@ -2300,6 +2300,52 @@ Gid_t getegid (void);
 #endif /* DEBUGGING */
 
 
+/* These constants should be used in preference to to raw characters
+ * when using magic. Note that some perl guts still assume
+ * certain character properties of these constants, namely that
+ * isUPPER() and toLOWER() may do useful mappings.
+ *
+ * Update the magic_names table in dump.c when adding/amending these
+ */
+
+#define PERL_MAGIC_sv		  '\0' /* Special scalar variable */
+#define PERL_MAGIC_overload	  'A' /* %OVERLOAD hash */
+#define PERL_MAGIC_overload_elem  'a' /* %OVERLOAD hash element */
+#define PERL_MAGIC_overload_table 'c' /* Holds overload table (AMT) on stash */
+#define PERL_MAGIC_bm		  'B' /* Boyer-Moore (fast string search) */
+#define PERL_MAGIC_regdata	  'D' /* Regex match position data
+					(@+ and @- vars) */
+#define PERL_MAGIC_regdatum	  'd' /* Regex match position data element */
+#define PERL_MAGIC_env		  'E' /* %ENV hash */
+#define PERL_MAGIC_envelem	  'e' /* %ENV hash element */
+#define PERL_MAGIC_fm		  'f' /* Formline ('compiled' format) */
+#define PERL_MAGIC_regex_global	  'g' /* m//g target / study()ed string */
+#define PERL_MAGIC_isa		  'I' /* @ISA array */
+#define PERL_MAGIC_isaelem	  'i' /* @ISA array element */
+#define PERL_MAGIC_nkeys	  'k' /* scalar(keys()) lvalue */
+#define PERL_MAGIC_dbfile	  'L' /* Debugger %_<filename */
+#define PERL_MAGIC_dbline	  'l' /* Debugger %_<filename element */
+#define PERL_MAGIC_mutex	  'm' /* ??? */
+#define PERL_MAGIC_collxfrm	  'o' /* Locale transformation */
+#define PERL_MAGIC_tied		  'P' /* Tied array or hash */
+#define PERL_MAGIC_tiedelem	  'p' /* Tied array or hash element */
+#define PERL_MAGIC_tiedscalar	  'q' /* Tied scalar or handle */
+#define PERL_MAGIC_qr		  'r' /* precompiled qr// regex */
+#define PERL_MAGIC_sig		  'S' /* %SIG hash */
+#define PERL_MAGIC_sigelem	  's' /* %SIG hash element */
+#define PERL_MAGIC_taint	  't' /* Taintedness */
+#define PERL_MAGIC_uvar		  'U' /* Available for use by extensions */
+#define PERL_MAGIC_vec		  'v' /* vec() lvalue */
+#define PERL_MAGIC_substr	  'x' /* substr() lvalue */
+#define PERL_MAGIC_defelem	  'y' /* Shadow "foreach" iterator variable /
+					smart parameter vivification */
+#define PERL_MAGIC_glob		  '*' /* GV (typeglob) */
+#define PERL_MAGIC_arylen	  '#' /* Array length ($#ary) */
+#define PERL_MAGIC_pos		  '.' /* pos() lvalue */
+#define PERL_MAGIC_backref	  '<' /* ??? */
+#define PERL_MAGIC_ext		  '~' /* Available for use by extensions */
+
+
 #define YYMAXDEPTH 300
 
 #ifndef assert  /* <assert.h> might have been included somehow */
@@ -2317,7 +2363,7 @@ struct ufuncs {
     IV uf_index;
 };
 
-/* In pre-5.7-Perls the 'U' magic didn't get the thread context.
+/* In pre-5.7-Perls the PERL_MAGIC_uvar magic didn't get the thread context.
  * XS code wanting to be backward compatible can do something
  * like the following:
 
