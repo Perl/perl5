@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Jan 25 16:35:03 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Wed Jan 26 09:59:39 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -761,7 +761,7 @@ subversion=''
 version=''
 perladmin=''
 perlpath=''
-d_nvpresuv=''
+d_nv_preserves_uv=''
 i16size=''
 i16type=''
 i32size=''
@@ -908,69 +908,64 @@ fi
 
 i_whoami=''
 : list of known cpp symbols, sorted alphabetically
-al="AMIX BIT_MSF BSD BSD4_3 BSD_NET2 CMU CRAY DGUX DOLPHIN DPX2"
-al="$al GO32 GOULD_PN HP700 I386 I80960 I960 Lynx M68000 M68K MACH"
-al="$al MIPSEB MIPSEL MSDOS MTXINU MULTIMAX MVS"
-al="$al M_COFF M_I186 M_I286 M_I386 M_I8086 M_I86 M_I86SM"
-al="$al M_SYS3 M_SYS5 M_SYSIII M_SYSV M_UNIX M_XENIX"
-al="$al NeXT OCS88 OSF1 PARISC PC532 PORTAR POSIX"
-al="$al PWB R3000 RES RISC6000 RT Sun386i SVR3 SVR4 SVR5"
-al="$al SYSTYPE_BSD SYSTYPE_SVR4 SYSTYPE_SYSV Tek4132 Tek4300"
-al="$al UMAXV USGr4 USGr4_2 UTEK UTS UTek UnicomPBB UnicomPBD Utek"
-al="$al VMS Xenix286"
-al="$al _AIX _AIX32 _AIX370 _AIX41 _AM29000 _COFF _CRAY _CX_UX _EPI"
-al="$al _IBMESA _IBMR2 _M88K _M88KBCS_TARGET _POWER"
-al="$al _MIPSEB _MIPSEL _M_COFF _M_I86 _M_I86SM _M_SYS3"
-al="$al _M_SYS5 _M_SYSIII _M_SYSV _M_UNIX _M_XENIX _NLS _PGC_ _R3000"
-al="$al _SYSTYPE_BSD _SYSTYPE_BSD43 _SYSTYPE_SVR4"
-al="$al _SYSTYPE_SYSV _SYSV3 _U370 _UNICOS"
-al="$al __386BSD__ __BIG_ENDIAN __BIG_ENDIAN__ __BSD_4_4__"
-al="$al __DGUX__ __DPX2__ __H3050R __H3050RX"
-al="$al __LITTLE_ENDIAN __LITTLE_ENDIAN__ __MACH__"
-al="$al __MIPSEB __MIPSEB__ __MIPSEL __MIPSEL__"
-al="$al __Next__ __OSF1__ __PARAGON__ __PGC__ __PWB __STDC__"
-al="$al __SVR4_2__ __UMAXV__"
-al="$al ____386BSD____ __alpha __alpha__ __amiga"
-al="$al __bsd4_2 __bsd4_2__ __bsdi__ __convex__"
-al="$al __host_mips__"
-al="$al __hp9000s200 __hp9000s300 __hp9000s400 __hp9000s500"
-al="$al __hp9000s500 __hp9000s700 __hp9000s800"
-al="$al __hppa __hpux __hp_osf __i286 __i286__ __i386 __i386__"
-al="$al __i486 __i486__ __i860 __i860__ __ibmesa __ksr1__ __linux__"
-al="$al __m68k __m68k__ __m88100__ __m88k __m88k__"
-al="$al __mc68000 __mc68000__ __mc68020 __mc68020__"
-al="$al __mc68030 __mc68030__ __mc68040 __mc68040__"
-al="$al __mc88100 __mc88100__ __mips __mips__"
-al="$al __motorola__ __osf__ __pa_risc __sparc__ __stdc__"
-al="$al __sun __sun__ __svr3__ __svr4__ __ultrix __ultrix__"
-al="$al __unix __unix__ __uxpm__ __uxps__ __vax __vax__"
-al="$al _host_mips _mips _unix"
-al="$al a29k aegis aix aixpc alliant alpha am29000 amiga ansi ardent"
-al="$al apollo ardent att386 att3b"
-al="$al bsd bsd43 bsd4_2 bsd4_3 bsd4_4 bsdi bull"
-al="$al cadmus clipper concurrent convex cray ctix"
-al="$al dmert encore gcos gcx gimpel gould"
-al="$al hbullx20 hcx host_mips hp200 hp300 hp700 hp800"
-al="$al hp9000 hp9000s300 hp9000s400 hp9000s500"
-al="$al hp9000s700 hp9000s800 hp9k8 hppa hpux"
-al="$al i186 i286 i386 i486 i8086"
-al="$al i80960 i860 iAPX286 ibm ibm032 ibmrt interdata is68k"
-al="$al ksr1 linux luna luna88k m68k m88100 m88k"
-al="$al mc300 mc500 mc68000 mc68010 mc68020 mc68030"
-al="$al mc68040 mc68060 mc68k mc68k32 mc700"
-al="$al mc88000 mc88100 merlin mert mips mvs n16"
-al="$al ncl_el ncl_mr"
-al="$al news1500 news1700 news1800 news1900 news3700"
-al="$al news700 news800 news900 ns16000 ns32000"
-al="$al ns32016 ns32332 ns32k nsc32000 os osf"
-al="$al parisc pc532 pdp11 plexus posix pyr"
-al="$al riscix riscos scs sequent sgi sinix sony sony_news"
-al="$al sonyrisc sparc sparclite spectrum stardent stratos"
-al="$al sun sun3 sun386 svr4 sysV68 sysV88"
-al="$al titan tower tower32 tower32_200 tower32_600 tower32_700"
-al="$al tower32_800 tower32_850 tss u370 u3b u3b2 u3b20 u3b200"
-al="$al u3b20d u3b5 ultrix unix unixpc unos vax venix vms"
-al="$al xenix z8000"
+al="386BSD 3b1 a29k ABI64 aegis AES_SOURCE AIX AIX32 AIX370"
+al="$al AIX41 AIX42 AIX43 AIX_SOURCE aixpc ALL_SOURCE"
+al="$al alliant alpha am29000 AM29000 amiga AMIGAOS AMIX"
+al="$al ansi ANSI_C_SOURCE apollo ardent atarist att386 att3b BeOS"
+al="$al BIG_ENDIAN BIT_MSF bsd BSD bsd43 bsd4_2 bsd4_3 BSD4_3 bsd4_4"
+al="$al BSD_4_3 BSD_4_4 BSD_NET2 BSD_TIME BSD_TYPES BSDCOMPAT bsdi"
+al="$al bull c cadmus clipper CMU COFF COMPILER_VERSION"
+al="$al concurrent convex cpu cray CRAY CRAYMPP ctix CX_UX"
+al="$al CYGWIN DGUX DGUX_SOURCE DJGPP dmert DOLPHIN DPX2 DSO"
+al="$al Dynix DynixPTX ELF encore EPI EXTENSIONS FILE_OFFSET_BITS"
+al="$al FreeBSD GCC_NEW_VARARGS gcos gcx gimpel"
+al="$al GNU_SOURCE GNUC GNUC_MINOR GO32 gould GOULD_PN"
+al="$al H3050R H3050RX hbullx20 hcx host_mips"
+al="$al hp200 hp300 hp700 HP700 hp800 hp9000"
+al="$al hp9000s200 hp9000s300 hp9000s400 hp9000s500"
+al="$al hp9000s700 hp9000s800 hp9k8 hp_osf hppa hpux HPUX_SOURCE"
+al="$al i186 i286 i386 i486 i586 i686 i8086 i80960 i860 I960"
+al="$al iAPX286 ibm ibm032 ibmesa IBMR2 ibmrt ILP32 ILP64"
+al="$al INLINE_INTRINSICS INTRINSICS INT64 interdata is68k ksr1"
+al="$al LANGUAGE_C LARGE_FILE_API LARGEFILE64_SOURCE"
+al="$al LARGEFILE_SOURCE LFS64_LARGEFILE LFS_LARGEFILE"
+al="$al Linux LITTLE_ENDIAN LONG64 LONG_DOUBLE LONG_LONG"
+al="$al LONGDOUBLE LONGLONG LP64 luna luna88k Lynx"
+al="$al M68000 m68k m88100 m88k M88KBCS_TARGET M_COFF"
+al="$al M_I186 M_I286 M_I386 M_I8086 M_I86 M_I86SM M_SYS3"
+al="$al M_SYS5 M_SYSIII M_SYSV M_UNIX M_XENIX MACH machine MachTen"
+al="$al MATH_HAS_NO_SIDE_EFFECTS"
+al="$al mc300 mc500 mc68000 mc68010 mc68020 mc68030 mc68040"
+al="$al mc68060 mc68k mc68k32 mc700 mc88000 mc88100 merlin"
+al="$al mert MiNT mips MIPS_FPSET MIPS_ISA MIPS_SIM MIPS_SZINT"
+al="$al MIPS_SZLONG MIPS_SZPTR MIPSEB MIPSEL MODERN_C motorola"
+al="$al mpeix MSDOS MTXINU MULTIMAX mvs MVS n16 ncl_el ncl_mr"
+al="$al NetBSD news1500 news1700 news1800 news1900 news3700"
+al="$al news700 news800 news900 NeXT NLS ns16000 ns32000"
+al="$al ns32016 ns32332 ns32k nsc32000"
+al="$al OCS88 OEMVS OpenBSD os OS2 OS390 osf OSF1 OSF_SOURCE"
+al="$al pa_risc PA_RISC1_1 PA_RISC2_0 PARAGON parisc"
+al="$al pc532 pdp11 PGC PIC plexus PORTAR posix"
+al="$al POSIX1B_SOURCE POSIX2_SOURCE POSIX4_SOURCE"
+al="$al POSIX_C_SOURCE POSIX_SOURCE POWER"
+al="$al PROTOTYPES PWB pyr QNX R3000 REENTRANT RES Rhapsody RISC6000"
+al="$al riscix riscos RT scs SCO sequent sgi SGI_SOURCE sinix"
+al="$al SIZE_INT SIZE_LONG SIZE_PTR SOCKET_SOURCE SOCKETS_SOURCE"
+al="$al sony sony_news sonyrisc sparc sparclite spectrum"
+al="$al stardent stdc STDC_EXT stratos sun sun3 sun386"
+al="$al Sun386i svr3 svr4 SVR4_2 SVR4_SOURCE svr5"
+al="$al SX system SYSTYPE_BSD SYSTYPE_BSD43 SYSTYPE_BSD44"
+al="$al SYSTYPE_SVR4 SYSTYPE_SVR5 SYSTYPE_SYSV SYSV SYSV3 SYSV4 SYSV5"
+al="$al sysV68 sysV88 Tek4132 Tek4300 titan"
+al="$al tower tower32 tower32_200 tower32_600 tower32_700"
+al="$al tower32_800 tower32_850 tss"
+al="$al u370 u3b u3b2 u3b20 u3b200 u3b20d u3b5"
+al="$al ultrix UMAXV UnicomPBB UnicomPBD UNICOS UNICOSMK"
+al="$al unix UNIX95 UNIX99 unixpc unos USGr4 USGr4_2"
+al="$al Utek UTek UTS UWIN uxpm uxps vax venix VMESA vms xenix Xenix286"
+al="$al XOPEN_SOURCE XOPEN_SOURCE_EXTENDED XPG2 XPG2_EXTENDED"
+al="$al XPG3 XPG3_EXTENDED XPG4 XPG4_EXTENDED"
+al="$al z8000"
 
 : set useposix=false in your hint file to disable the POSIX extension.
 useposix=true
@@ -9892,13 +9887,13 @@ EOP
 set try
 if eval $compile; then
 	case "`./try$exe_ext`" in
-	preserve) d_nvpresuv="$define" ;;
+	preserve) d_nv_preserves_uv="$define" ;;
 	esac
 fi	
-case "$d_nvpresuv" in
+case "$d_nv_preserves_uv" in
 $define) $echo "Yes, they can."  2>&1 ;;
 *)	 $echo "No, they can't." 2>&1
-	 d_nvpresuv="$undef"
+	 d_nv_preserves_uv="$undef"
 	 ;;
 esac
 
@@ -13700,8 +13695,17 @@ eval $inhdr
 
 : get C preprocessor symbols handy
 echo " "
-$echo $n "Hmm... $c"
-echo $al | $tr ' ' $trnl >Cppsym.know
+$echo "Guessing which symbols your C compiler and preprocessor define..." >&4 
+echo $al $osname | $tr ' ' $trnl >Cppsym.know
+./tr '[a-z]' '[A-Z]' < Cppsym.know > Cppsym.a
+./tr '[A-Z]' '[a-z]' < Cppsym.know > Cppsym.b
+cat Cppsym.a Cppsym.b >> Cppsym.know
+$sed 's/^/_/'           < Cppsym.know > Cppsym.a
+$sed 's/^/__/'          < Cppsym.know > Cppsym.b
+$sed 's/\(.*\)/__\1__/' < Cppsym.know > Cppsym.c
+$cat Cppsym.know Cppsym.a Cppsym.b Cppsym.c | sort | uniq > Cppsym.d
+mv Cppsym.d Cppsym.know
+rm Cppsym.?
 $cat <<EOSS >Cppsym
 $startsh
 case "\$1" in
@@ -14598,7 +14602,7 @@ d_msgrcv='$d_msgrcv'
 d_msgsnd='$d_msgsnd'
 d_mymalloc='$d_mymalloc'
 d_nice='$d_nice'
-d_nvpresuv='$d_nvpresuv'
+d_nv_preserves_uv='$d_nv_preserves_uv'
 d_off64_t='$d_off64_t'
 d_old_pthread_create_joinable='$d_old_pthread_create_joinable'
 d_oldpthreads='$d_oldpthreads'

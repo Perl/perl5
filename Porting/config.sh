@@ -8,7 +8,7 @@
 
 # Package name      : perl5
 # Source directory  : .
-# Configuration time: Thu Jan 20 00:43:41 EET 2000
+# Configuration time: Wed Jan 26 09:55:17 EET 2000
 # Configured by     : jhi
 # Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
 
@@ -31,9 +31,9 @@ alignbytes='8'
 ansi2knr=''
 aphostname=''
 api_revision='5'
-api_subversion='640'
+api_subversion='0'
 api_version='5'
-api_versionstring='5.5.640'
+api_versionstring='5.005'
 ar='ar'
 archlib='/opt/perl/lib/5.5.640/alpha-dec_osf-thread-multi'
 archlibexp='/opt/perl/lib/5.5.640/alpha-dec_osf-thread-multi'
@@ -56,10 +56,10 @@ cc='cc'
 cccdlflags=' '
 ccdlflags='  -Wl,-rpath,/opt/perl/lib/5.5.640/alpha-dec_osf-thread-multi/CORE'
 ccflags='-pthread -std -DLANGUAGE_C'
-ccsymbols='__LANGUAGE_C__=1 _LONGLONG=1 LANGUAGE_C=1 SYSTYPE_BSD=1'
+ccsymbols='__alpha=1 __LANGUAGE_C__=1 __osf__=1 __unix__=1 _LONGLONG=1 _SYSTYPE_BSD=1 SYSTYPE_BSD=1'
 cf_by='jhi'
 cf_email='yourname@yourhost.yourplace.com'
-cf_time='Thu Jan 20 00:43:41 EET 2000'
+cf_time='Wed Jan 26 09:55:17 EET 2000'
 charsize='1'
 chgrp=''
 chmod=''
@@ -72,7 +72,7 @@ cp='cp'
 cpio=''
 cpp='cpp'
 cpp_stuff='42'
-cppccsymbols='__alpha=1 __osf__=1 __unix__=1 _SYSTYPE_BSD=1 unix=1'
+cppccsymbols='LANGUAGE_C=1 unix=1'
 cppflags='-pthread -std -DLANGUAGE_C'
 cpplast=''
 cppminus=''
@@ -229,7 +229,7 @@ d_msgrcv='define'
 d_msgsnd='define'
 d_mymalloc='undef'
 d_nice='define'
-d_nvpresuv='undef'
+d_nv_preserves_uv='undef'
 d_off64_t='undef'
 d_old_pthread_create_joinable='undef'
 d_oldpthreads='undef'
@@ -762,7 +762,7 @@ PERL_VERSION=5
 PERL_SUBVERSION=640
 PERL_API_REVISION=5
 PERL_API_VERSION=5
-PERL_API_SUBVERSION=640
+PERL_API_SUBVERSION=0
 CONFIGDOTSH=true
 # Variables propagated from previous config.sh file.
 pp_sys_cflags='ccflags="$ccflags -DNO_EFF_ONLY_OK"'
