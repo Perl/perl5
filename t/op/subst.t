@@ -2,7 +2,7 @@
 
 # $RCSfile: s.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:22 $
 
-print "1..61\n";
+print "1..62\n";
 
 $x = 'foo';
 $_ = "x";
@@ -234,3 +234,8 @@ print exp_vars('foo $(DIR)/yyy bar',0) eq 'foo $(UNDEFINEDNAME)/xxx/yyy bar'
 $_ = "abcd";
 s/../$x = $&, m#.#/eg;
 print $x eq "cd" ? "ok 61\n" : "not ok 61\n";
+
+# check parsing of split subst with comment
+eval 's{foo} # this is a comment, not a delimiter
+       {bar};';
+print @? ? "not ok 62\n" : "ok 62\n";

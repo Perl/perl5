@@ -310,6 +310,7 @@ av_len
 av_make
 av_pop
 av_push
+av_reify
 av_shift
 av_store
 av_undef
@@ -530,6 +531,7 @@ magic_setsubstr
 magic_settaint
 magic_setuvar
 magic_setvec
+magic_set_all_env
 magic_wipepack
 magicname
 markstack_grow

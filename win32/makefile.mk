@@ -267,6 +267,11 @@ WIN32_OBJ = win32.obj \
 	win32io.obj \
 	win32sck.obj
 
+PERL95_OBJ = perl95.obj \
+	win32mt.obj \
+	win32iomt.obj \
+	win32sckmt.obj
+
 DLL_OBJ = perllib.obj $(DYNALOADER).obj
 
 CORE_H = ..\av.h	\
@@ -455,9 +460,15 @@ perl95.obj : perl95.c
 win32iomt.obj : win32io.c
 	$(CC) $(CFLAGS) -MT -c $(OBJOUT_FLAG)win32iomt.obj win32io.c
 
-$(PERL95EXE): $(PERLDLL) $(CONFIGPM) perl95.obj win32iomt.obj
+win32sckmt.obj : win32sck.c
+	$(CC) $(CFLAGS) -MT -c $(OBJOUT_FLAG)win32sckmt.obj win32sck.c
+
+win32mt.obj : win32.c
+	$(CC) $(CFLAGS) -MT -c $(OBJOUT_FLAG)win32mt.obj win32.c
+
+$(PERL95EXE): $(PERLDLL) $(CONFIGPM) $(PERL95_OBJ)
 	$(LINK32) -subsystem:console -out:perl95.exe $(LINK_FLAGS) \
-	    perl95.obj win32iomt.obj $(PERLIMPLIB) 
+	    $(PERL95_OBJ) $(PERLIMPLIB) 
 	copy perl95.exe $@
 	del perl95.exe
 

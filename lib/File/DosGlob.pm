@@ -100,16 +100,55 @@ sub doglob {
 }
 
 #
-# this can be used to override CORE::glob
-# by saying C<use File::DosGlob 'glob';>.
+# this can be used to override CORE::glob in a specific
+# package by saying C<use File::DosGlob 'glob';> in that
+# namespace.
 #
-sub glob { doglob(1,@_) }
+
+# context (keyed by second cxix arg provided by core)
+my %iter;
+my %entries;
+
+sub glob {
+    my $pat = shift;
+    my $cxix = shift;
+
+    # glob without args defaults to $_
+    $pat = $_ unless defined $pat;
+
+    # assume global context if not provided one
+    $cxix = '_G_' unless defined $cxix;
+    $iter{$cxix} = 0 unless exists $iter{$cxix};
+
+    # if we're just beginning, do it all first
+    if ($iter{$cxix} == 0) {
+	$entries{$cxix} = [doglob(1,$pat)];
+    }
+
+    # chuck it all out, quick or slow
+    if (wantarray) {
+	delete $iter{$cxix};
+	return @{delete $entries{$cxix}};
+    }
+    else {
+	if ($iter{$cxix} = scalar @{$entries{$cxix}}) {
+	    return shift @{$entries{$cxix}};
+	}
+	else {
+	    # return undef for EOL
+	    delete $iter{$cxix};
+	    delete $entries{$cxix};
+	    return undef;
+	}
+    }
+}
 
 sub import {
     my $pkg = shift;
     my $callpkg = caller(0);
     my $sym = shift;
-    *{$callpkg.'::'.$sym} = \&{$pkg.'::'.$sym} if $sym eq 'glob';
+    *{$callpkg.'::'.$sym} = \&{$pkg.'::'.$sym}
+	if defined($sym) and $sym eq 'glob';
 }
 
 1;
@@ -125,11 +164,14 @@ perlglob.bat - a more capable perlglob.exe replacement
 =head1 SYNOPSIS
 
     require 5.004;
-    use File::DosGlob 'glob';  # override CORE::glob
+    
+    # override CORE::glob in current package
+    use File::DosGlob 'glob';
+    
     @perlfiles = glob  "..\\pe?l/*.p?";
     print <..\\pe?l/*.p?>;
     
-    # from the command line
+    # from the command line (overrides only in main::)
     > perl -MFile::DosGlob=glob -e "print <../pe*/*p?>"
     
     > perlglob ../pe*/*p?
@@ -155,7 +197,10 @@ to standard output.
 While one may replace perlglob.exe with this, usage by overriding
 CORE::glob via importation should be much more efficient, because
 it avoids launching a separate process, and is therefore strongly
-recommended.
+recommended.  Note that it is currently possible to override
+builtins like glob() only on a per-package basis, not "globally".
+Thus, every namespace that wants to override glob() must explicitly
+request the override.  See L<perlsub>.
 
 Extending it to csh patterns is left as an exercise to the reader.
 
@@ -175,6 +220,10 @@ Gurusamy Sarathy <gsar@umich.edu>
 =head1 HISTORY
 
 =over 4
+
+=item *
+
+Scalar context, independent iterator context fixes (GSAR 15-SEP-97)
 
 =item *
 

@@ -92,7 +92,7 @@ sub import {
 	*OSNAME
 );
 
-# The ground of all being.
+# The ground of all being. @ARG is deprecated (5.005 makes @_ lexical)
 
 	*ARG					= *_	;
 

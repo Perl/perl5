@@ -46,6 +46,7 @@
 #define av_make			Perl_av_make
 #define av_pop			Perl_av_pop
 #define av_push			Perl_av_push
+#define av_reify		Perl_av_reify
 #define av_shift		Perl_av_shift
 #define av_store		Perl_av_store
 #define av_undef		Perl_av_undef
@@ -325,6 +326,7 @@
 #define magic_len		Perl_magic_len
 #define magic_nextpack		Perl_magic_nextpack
 #define magic_set		Perl_magic_set
+#define magic_set_all_env	Perl_magic_set_all_env
 #define magic_setamagic		Perl_magic_setamagic
 #define magic_setarylen		Perl_magic_setarylen
 #define magic_setbm		Perl_magic_setbm

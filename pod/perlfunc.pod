@@ -551,23 +551,30 @@ omitted, does chroot to $_.
 
 Closes the file or pipe associated with the file handle, returning TRUE
 only if stdio successfully flushes buffers and closes the system file
-descriptor.  If the file handle came from a piped open C<close> will
-additionally return FALSE if one of the other system calls involved
-fails or if the program exits with non-zero status.  (If the problem was
-that the program exited non-zero $! will be set to 0.)
-You don't have to close FILEHANDLE if you are immediately
-going to do another open() on it, because open() will close it for you.  (See
-open().)  However, an explicit close on an input file resets the line
-counter ($.), while the implicit close done by open() does not.  Also,
-closing a pipe will wait for the process executing on the pipe to
-complete, in case you want to look at the output of the pipe
-afterwards.  Closing a pipe explicitly also puts the status value of
-the command into C<$?>.  Example:
+descriptor.
 
-    open(OUTPUT, '|sort >foo');	# pipe to sort
+You don't have to close FILEHANDLE if you are immediately going to do
+another open() on it, because open() will close it for you.  (See
+open().)  However, an explicit close on an input file resets the line
+counter ($.), while the implicit close done by open() does not.
+
+If the file handle came from a piped open C<close> will additionally
+return FALSE if one of the other system calls involved fails or if the
+program exits with non-zero status.  (If the only problem was that the
+program exited non-zero $! will be set to 0.) Also, closing a pipe will
+wait for the process executing on the pipe to complete, in case you
+want to look at the output of the pipe afterwards.  Closing a pipe
+explicitly also puts the exit status value of the command into C<$?>.
+Example:
+
+    open(OUTPUT, '|sort >foo')  # pipe to sort
+        or die "Can't start sort: $!";
     ...				# print stuff to output
-    close OUTPUT;		# wait for sort to finish
-    open(INPUT, 'foo');		# get sort's results
+    close OUTPUT		# wait for sort to finish
+        or warn $! ? "Error closing sort pipe: $!"
+                   : "Exit status $? from sort";
+    open(INPUT, 'foo')		# get sort's results
+        or die "Can't open 'foo' for input: $!";
 
 FILEHANDLE may be an expression whose value gives the real filehandle name.
 
@@ -803,11 +810,28 @@ produce, respectively
 
 See also exit() and warn().
 
+If LIST is empty and $@ already contains a value (typically from a
+previous eval) that value is reused after appending "\t...propagated".
+This is useful for propagating exceptions:
+
+    eval { ... };
+    die unless $@ =~ /Expected exception/;
+
+If $@ is empty then the string "Died" is used.
+
 You can arrange for a callback to be called just before the die() does
 its deed, by setting the C<$SIG{__DIE__}> hook.  The associated handler
 will be called with the error text and can change the error message, if
-it sees fit, by calling die() again.  See L<perlvar> for details on
-setting C<%SIG> entries, and eval() for some examples.
+it sees fit, by calling die() again.  See L<perlvar/$SIG{expr}> for details on
+setting C<%SIG> entries, and L<"eval BLOCK"> for some examples.
+
+Note that the C<$SIG{__DIE__}> hook is called even inside eval()ed
+blocks/strings.  If one wants the hook to do nothing in such
+situations, put
+
+	die @_ if $^S;
+
+as the first line of the handler (see L<perlvar/$^S>).
 
 =item do BLOCK
 
@@ -830,7 +854,7 @@ from a Perl subroutine library.
 
 is just like
 
-    eval `cat stat.pl`;
+    scalar eval `cat stat.pl`;
 
 except that it's more efficient, more concise, keeps track of the
 current filename for error messages, and searches all the B<-I>
@@ -1030,10 +1054,10 @@ in case 6.
 
 =item exec LIST
 
-The exec() function executes a system command I<AND NEVER RETURNS>,
-unless the command does not exist and is executed directly instead of
-via your system's command shell (see below).  Use system() instead of
-exec() if you want it to return.
+The exec() function executes a system command I<AND NEVER RETURNS> -
+use system() instead of exec() if you want it to return. It fails and
+returns FALSE only if the command does not exist I<and> it is executed
+directly instead of via your system's command shell (see below).
 
 If there is more than one argument in LIST, or if LIST is an array with
 more than one value, calls execvp(3) with the arguments in LIST.  If
@@ -1532,8 +1556,10 @@ supported, it can cause bizarre results if the LIST is not a named
 array.  Similarly, grep returns aliases into the original list,
 much like the way that L<Foreach Loops>'s index variable aliases the list
 elements.  That is, modifying an element of a list returned by grep
+(for example, in a C<foreach>, C<map> or another C<grep>)
 actually modifies the element in the original list.
 
+See also L</map> for an array composed of the results of the BLOCK or EXPR.
 =item hex EXPR
 
 =item hex
@@ -1764,6 +1790,8 @@ In a scalar context, returns the ctime(3) value:
 
     $now_string = localtime;  # e.g., "Thu Oct 13 04:54:34 1994"
 
+This scalar value is B<not> locale dependent, see L<perllocale>,
+but instead a Perl builtin.
 Also see the Time::Local module, and the strftime(3) and mktime(3)
 function available via the POSIX module.
 
@@ -1811,6 +1839,12 @@ is just a funny way to write
     foreach $_ (@array) {
 	$hash{getkey($_)} = $_;
     }
+
+Note that, because $_ is a reference into the list value, it can be used
+to modify the elements of the array.  While this is useful and
+supported, it can cause bizarre results if the LIST is not a named
+array.  See also L</grep> for an array composed of those items of the 
+original list for which the BLOCK or EXPR evaluates to true.
 
 =item mkdir FILENAME,MODE
 
@@ -1932,6 +1966,14 @@ and those that don't is their text file formats.  Systems like Unix and
 Plan9 that delimit lines with a single character, and that encode that
 character in C as '\n', do not need C<binmode>.  The rest need it.
 
+When opening a file, it's usually a bad idea to continue normal execution
+if the request failed, so C<open> is frequently used in connection with
+C<die>. Even if C<die> won't do what you want (say, in a CGI script,
+where you want to make a nicely formatted error message (but there are
+modules which can help with that problem)) you should always check
+the return value from opening a file. The infrequent exception is when
+working with an unopened filehandle is actually what you want to do.
+
 Examples:
 
     $ARTICLE = 100;
@@ -1939,12 +1981,16 @@ Examples:
     while (<ARTICLE>) {...
 
     open(LOG, '>>/usr/spool/news/twitlog'); # (log is reserved)
+    # if the open fails, output is discarded
 
-    open(DBASE, '+<dbase.mine');	    # open for update
+    open(DBASE, '+<dbase.mine')		    # open for update
+	or die "Can't open 'dbase.mine' for update: $!";
 
-    open(ARTICLE, "caesar <$article |");    # decrypt article
+    open(ARTICLE, "caesar <$article |")     # decrypt article
+	or die "Can't start caesar: $!";
 
-    open(EXTRACT, "|sort >/tmp/Tmp$$");     # $$ is our process id
+    open(EXTRACT, "|sort >/tmp/Tmp$$")      # $$ is our process id
+	or die "Can't start sort: $!";
 
     # process argument list of files along with any includes
 
@@ -3060,12 +3106,13 @@ value.)  The use of implicit split to @_ is deprecated, however.
 If EXPR is omitted, splits the $_ string.  If PATTERN is also omitted,
 splits on whitespace (after skipping any leading whitespace).  Anything
 matching PATTERN is taken to be a delimiter separating the fields.  (Note
-that the delimiter may be longer than one character.)  If LIMIT is
-specified and is not negative, splits into no more than that many fields
-(though it may split into fewer).  If LIMIT is unspecified, trailing null
-fields are stripped (which potential users of pop() would do well to
-remember).  If LIMIT is negative, it is treated as if an arbitrarily large
-LIMIT had been specified.
+that the delimiter may be longer than one character.)
+
+If LIMIT is specified and is not negative, splits into no more than
+that many fields (though it may split into fewer).  If LIMIT is
+unspecified, trailing null fields are stripped (which potential users
+of pop() would do well to remember).  If LIMIT is negative, it is
+treated as if an arbitrarily large LIMIT had been specified.
 
 A pattern matching the null string (not to be confused with
 a null pattern C<//>, which is just one member of the set of patterns
@@ -3099,7 +3146,7 @@ If you had the entire header of a normal Unix email message in $header,
 you could split it up into fields and their values this way:
 
     $header =~ s/\n\s+/ /g;  # fix continuation lines
-    %hdrs   =  (UNIX_FROM => split /^(.*?):\s*/m, $header);
+    %hdrs   =  (UNIX_FROM => split /^(\S*?):\s*/m, $header);
 
 The pattern C</PATTERN/> may be replaced with an expression to specify
 patterns that vary at runtime.  (To do runtime compilation only once,
@@ -3412,6 +3459,17 @@ like numbers.
 Note that Perl supports passing of up to only 14 arguments to your system call,
 which in practice should usually suffice.
 
+Syscall returns whatever value returned by the system call it calls.
+If the system call fails, syscall returns -1 and sets C<$!> (errno).
+Note that some system calls can legitimately return -1.  The proper
+way to handle such calls is to assign C<$!=0;> before the call and
+check the value of <$!> if syscall returns -1.
+
+There's a problem with C<syscall(&SYS_pipe)>: it returns the file
+number of the read end of the pipe it creates.  There is no way
+to retrieve the file number of the other end.  You can avoid this 
+problem by using C<pipe> instead.
+
 =item sysopen FILEHANDLE,FILENAME,MODE
 
 =item sysopen FILEHANDLE,FILENAME,MODE,PERMS
@@ -3441,12 +3499,12 @@ into that kind of thing.
 =item sysread FILEHANDLE,SCALAR,LENGTH
 
 Attempts to read LENGTH bytes of data into variable SCALAR from the
-specified FILEHANDLE, using the system call read(2).  It bypasses stdio,
-so mixing this with other kinds of reads, print(), write(), seek(), or
-tell() can cause confusion.  Returns the number of bytes actually read,
-or undef if there was an error.  SCALAR will be grown or shrunk so that
-the last byte actually read is the last byte of the scalar after the
-read.
+specified FILEHANDLE, using the system call read(2).  It bypasses
+stdio, so mixing this with other kinds of reads, print(), write(),
+seek(), or tell() can cause confusion because stdio usually buffers
+data.  Returns the number of bytes actually read, or undef if there
+was an error.  SCALAR will be grown or shrunk so that the last byte
+actually read is the last byte of the scalar after the read.
 
 An OFFSET may be specified to place the read data at some place in the
 string other than the beginning.  A negative OFFSET specifies
@@ -3527,14 +3585,16 @@ for details.
 Attempts to write LENGTH bytes of data from variable SCALAR to the
 specified FILEHANDLE, using the system call write(2).  It bypasses
 stdio, so mixing this with reads (other than sysread()), print(),
-write(), seek(), or tell() may cause confusion.  Returns the number of
-bytes actually written, or undef if there was an error.  If the length
-is greater than the available data, only as much data as is available
+write(), seek(), or tell() may cause confusion because stdio usually
+buffers data.  Returns the number of bytes actually written, or undef
+if there was an error.  If the LENGTH is greater than the available
+data in the SCALAR after the OFFSET, only as much data as is available
 will be written.
 
 An OFFSET may be specified to write the data from some part of the
 string other than the beginning.  A negative OFFSET specifies writing
-that many bytes counting backwards from the end of the string.
+that many bytes counting backwards from the end of the string.  In the
+case the SCALAR is empty you can use OFFSET but only zero offset.
 
 =item tell FILEHANDLE
 

@@ -26,18 +26,22 @@ open PATCH_LEVEL, "<../patchlevel.h" or die "Can't open patchlevel.h: $!";
 my $patchlevel_date = (stat PATCH_LEVEL)[9];
 
 while (<PATCH_LEVEL>) {
-    last if index($_, "static\tchar\t*local_patches[] = {") >= 0;
+    last if $_ =~ /^\s*static\s+char.*?local_patches\[\]\s*=\s*{\s*$/;
 };
 
-my $patches;
+my @patches;
 while (<PATCH_LEVEL>) {
-    last if /^}/;
+    last if /^\s*}/;
     chomp;
     s/^\s+,?"?//;
     s/"?,?$//;
     s/(['\\])/\\$1/g;
-    $patches .= "'$_',\n" unless $_ eq 'NULL';
+    push @patches, $_ unless $_ eq 'NULL';
 };
+my $patch_desc = "'" . join("',\n\t'", @patches) . "'";
+my @patch_tags = map { my $p=$_; $p=~s/\s.*//; $p } @patches;
+my $patch_tags = join " ", map { "+$_" } @patch_tags;
+$patch_tags .= " " if $patch_tags;
 
 close PATCH_LEVEL;
 
@@ -56,8 +60,13 @@ $Config{startperl}
     eval 'exec $Config{perlpath} -S \$0 \${1+"\$@"}'
 	if \$running_under_some_shell;
 
+my \$config_tag1 = '$] - $Config{cf_time}';
+
 my \$patchlevel_date = $patchlevel_date;
-my \@patches = ( $patches );
+my \$patch_tags = '$patch_tags';
+my \@patches = (
+	$patch_desc
+);
 !GROK!THIS!
 
 # In the following, perl variables are not expanded during extraction.
@@ -80,7 +89,7 @@ use strict;
 sub paraprint;
 
 
-my($Version) = "1.19";
+my($Version) = "1.20";
 
 # Changed in 1.06 to skip Mail::Send and Mail::Util if not available.
 # Changed in 1.07 to see more sendmail execs, and added pipe output.
@@ -104,6 +113,7 @@ my($Version) = "1.19";
 # Changed in 1.19 '-ok' default not '-v'
 #                 add local patch information
 #                 warn on '-ok' if this is an old system; add '-okay'
+# Changed in 1.20 Added patchlevel.h reading and version/config checks
 
 # TODO: - Allow the user to re-name the file on mail failure, and
 #       make sure failure (transmission-wise) of Mail::Send is 
@@ -113,6 +123,8 @@ my($Version) = "1.19";
 my( $file, $usefile, $cc, $address, $perlbug, $testaddress, $filename,
     $subject, $from, $verbose, $ed, 
     $fh, $me, $Is_MSWin32, $Is_VMS, $msg, $body, $andcc, %REP, $ok);
+
+my $config_tag2 = "$] - $Config{cf_time}";
 
 Init();
 
@@ -204,8 +216,8 @@ EOF
 		$::opt_S = 1; # don't prompt for send
 		$::opt_C = 1; # don't send a copy to the local admin
 		$::opt_s = 1;
-		$subject = "OK: perl $] on"
-			  ." $::Config{'osname'} $::Config{'osvers'} $subject";
+		$subject = "OK: perl $] ${patch_tags}on"
+			  ." $::Config{'archname'} $::Config{'osvers'} $subject";
 		$::opt_b = 1;
 		$body    = "Perl reported to build OK on this system.\n";
 		$ok = 1;
@@ -292,12 +304,9 @@ EOF
 			$domain = Mail::Util::maildomain();
 		} elsif ($Is_MSWin32) {
 			$domain = $ENV{'USERDOMAIN'};
-		} elsif ($Is_VMS) {
+		} else {
 			require Sys::Hostname;
 			$domain = Sys::Hostname::hostname();
-		} else {
-			$domain = `hostname`.".".`domainname`;
-			$domain =~ s/[\r\n]+//g;
 		}
 	    
 	    my($guess);
@@ -534,9 +543,13 @@ EOF
 sub Dump {
 	local(*OUT) = @_;
 	
-	print OUT <<EOF;
+	print REP "\n---\n";
 
----
+	print REP "This perlbug was built using Perl $config_tag1\n",
+		  "It is being executed now by  Perl $config_tag2.\n\n"
+	    if $config_tag2 ne $config_tag1;
+
+	print OUT <<EOF;
 Site configuration information for perl $]:
 
 EOF
@@ -548,7 +561,7 @@ EOF
 	print OUT Config::myconfig;
 
 	if (@patches) {
-		print OUT join "\n\t", "\nLocally applied patches:", @patches;
+		print OUT join "\n\t", "Locally applied patches:", @patches;
                 print OUT "\n";
         };
 
@@ -878,8 +891,9 @@ Options:
         This prints out your configuration data, without mailing
         anything. You can use this with -v to get more complete data.
   -ok   Report successful build on this system to perl porters
-        (use alone or with -v).
-  -okay As -ok but also report on older systems.
+        (use alone or with -v). Only use -ok if *everything* was ok.
+        If there were *any* problems at all then don't use -ok.
+  -okay As -ok but allow report from old builds.
   -h    Print this help message. 
   
 EOF

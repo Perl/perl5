@@ -180,6 +180,9 @@ ENDOFSET
 
 print CONFIG <<'ENDOFTAIL';
 
+# avoid Config..Exporter..UNIVERSAL search for DESTROY then AUTOLOAD
+sub DESTROY { }
+
 tie %Config, 'Config';
 
 1;

@@ -1,5 +1,39 @@
 package vars;
 
+require 5.002;
+
+# The following require can't be removed during maintenance
+# releases, sadly, because of the risk of buggy code that does
+# require Carp; Carp::croak "..."; without brackets dying
+# if Carp hasn't been loaded in earlier compile time. :-(
+# We'll let those bugs get found on the development track.
+require Carp if $] < 5.00450;
+
+sub import {
+    my $callpack = caller;
+    my ($pack, @imports, $sym, $ch) = @_;
+    foreach $sym (@imports) {
+	if ($sym =~ /::/) {
+	    require Carp;
+	    Carp::croak("Can't declare another package's variables");
+	}
+        ($ch, $sym) = unpack('a1a*', $sym);
+        *{"${callpack}::$sym"} =
+          (  $ch eq "\$" ? \$   {"${callpack}::$sym"}
+           : $ch eq "\@" ? \@   {"${callpack}::$sym"}
+           : $ch eq "\%" ? \%   {"${callpack}::$sym"}
+           : $ch eq "\*" ? \*   {"${callpack}::$sym"}
+           : $ch eq "\&" ? \&   {"${callpack}::$sym"}
+           : do {
+		require Carp;
+		Carp::croak("'$ch$sym' is not a valid variable name\n");
+	     });
+    }
+};
+
+1;
+__END__
+
 =head1 NAME
 
 vars - Perl pragma to predeclare global variable names
@@ -30,24 +64,3 @@ later-loaded routines.
 See L<perlmod/Pragmatic Modules>.
 
 =cut
-
-require 5.002;
-use Carp;
-
-sub import {
-    my $callpack = caller;
-    my ($pack, @imports, $sym, $ch) = @_;
-    foreach $sym (@imports) {
-	croak "Can't declare another package's variables" if $sym =~ /::/;
-        ($ch, $sym) = unpack('a1a*', $sym);
-        *{"${callpack}::$sym"} =
-          (  $ch eq "\$" ? \$   {"${callpack}::$sym"}
-           : $ch eq "\@" ? \@   {"${callpack}::$sym"}
-           : $ch eq "\%" ? \%   {"${callpack}::$sym"}
-           : $ch eq "\*" ? \*   {"${callpack}::$sym"}
-           : $ch eq "\&" ? \&   {"${callpack}::$sym"}
-           : croak "'$ch$sym' is not a valid variable name\n");
-    }
-};
-
-1;

@@ -27,6 +27,7 @@ $vers.= sprintf( "_%02d", $subversion) if $subversion;
 
 $perl = "perl$vers";
 $reldir = "$relroot/$perl";
+$reldir .= "-$ARGV[0]" if $ARGV[0];
 
 print "\nMaking a release for $perl in $reldir\n\n";
 
@@ -47,7 +48,9 @@ print "\n";
 
 
 print "Setting file permissions...\n";
-system("find . -type f -print | xargs chmod -w");
+system("find . -type f -print     | xargs chmod -w");
+system("find . -type d -print     | xargs chmod g-s");
+system("find t -name '*.t' -print | xargs chmod +x");
 system("chmod +w configure"); # special case (see pumpkin.pod)
 @exe = qw(
     Configure
@@ -76,7 +79,7 @@ print "\n";
 
 print "Creating $reldir release directory...\n";
 die "$reldir release directory already exists\n"   if -e "../$perl";
-die "$reldir.tar.gz release file already exists\n" if -e "../$perl.tar.gz";
+die "$reldir.tar.gz release file already exists\n" if -e "../$reldir.tar.gz";
 mkdir($reldir, 0755) or die "mkdir $reldir: $!\n";
 print "\n";
 

@@ -34,6 +34,7 @@ sub install {
     use File::Copy qw(copy);
     use File::Find qw(find);
     use File::Path qw(mkpath);
+    use File::Compare qw(compare);
 
     my(%hash) = %$hash;
     my(%pack, %write, $dir, $warn_permissions);
@@ -96,7 +97,7 @@ sub install {
 	    my $diff = 0;
 	    if ( -f $targetfile && -s _ == $size) {
 		# We have a good chance, we can skip this one
-		$diff = my_cmp($_,$targetfile);
+		$diff = compare($_,$targetfile);
 	    } else {
 		print "$_ differs\n" if $verbose>1;
 		$diff++;
@@ -166,32 +167,6 @@ sub install_default {
 	  },1,0,0);
 }
 
-sub my_cmp {
-    my($one,$two) = @_;
-    local(*F,*T);
-    my $diff = 0;
-    open T, $two or return 1;
-    open F, $one or Carp::croak("Couldn't open $one: $!");
-    my($fr, $tr, $fbuf, $tbuf, $size);
-    $size = 1024;
-    # print "Reading $one\n";
-    while ( $fr = read(F,$fbuf,$size)) {
-	unless (
-		$tr = read(T,$tbuf,$size) and 
-		$tbuf eq $fbuf
-	       ){
-	    # print "diff ";
-	    $diff++;
-	    last;
-	}
-	# print "$fr/$tr ";
-    }
-    # print "\n";
-    close F;
-    close T;
-    $diff;
-}
-
 sub uninstall {
     my($fil,$verbose,$nonono) = @_;
     die "no packlist file found: $fil" unless -f $fil;
@@ -226,7 +201,7 @@ sub inc_uninstall {
 	my $diff = 0;
 	if ( -f $targetfile && -s _ == -s $file) {
 	    # We have a good chance, we can skip this one
-	    $diff = my_cmp($file,$targetfile);
+	    $diff = compare($file,$targetfile);
 	} else {
 	    print "#$file and $targetfile differ\n" if $verbose>1;
 	    $diff++;
@@ -253,6 +228,7 @@ sub pm_to_blib {
     use File::Basename qw(dirname);
     use File::Copy qw(copy);
     use File::Path qw(mkpath);
+    use File::Compare qw(compare);
     use AutoSplit;
     # my $my_req = $self->catfile(qw(auto ExtUtils Install forceunlink.al));
     # require $my_req; # Hairy, but for the first
@@ -272,7 +248,7 @@ sub pm_to_blib {
     mkpath($autodir,0,0755);
     foreach (keys %$fromto) {
 	next if -f $fromto->{$_} && -M $fromto->{$_} < -M $_;
-	unless (my_cmp($_,$fromto->{$_})){
+	unless (compare($_,$fromto->{$_})){
 	    print "Skip $fromto->{$_} (unchanged)\n";
 	    next;
 	}

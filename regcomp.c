@@ -257,8 +257,8 @@ PMOP* pm;
 	if (sawplus && (!sawopen || !regsawback))
 	    r->reganch |= ROPT_SKIP;	/* x+ must match 1st of run */
 
-	DEBUG_r(PerlIO_printf(Perl_debug_log, "first %d next %d offset %d\n",
-	   OP(first), OP(NEXTOPER(first)), first - scan));
+	DEBUG_r(PerlIO_printf(Perl_debug_log, "first %d next %d offset %ld\n",
+	   OP(first), OP(NEXTOPER(first)), (long)(first - scan)));
 	/*
 	* If there's something expensive in the r.e., find the
 	* longest literal string that must appear and make it the
@@ -702,7 +702,7 @@ I32 *flagp;
     }
 
     if (!(flags&HASWIDTH) && op != '?')
-      FAIL("regexp *+ operand could be empty");
+      FAIL("regexp *+ operand could be empty"); /* else may core dump */
 
     nextchar();
 
@@ -1539,13 +1539,13 @@ regexp *r;
 	op = OP(s);
 	/* where, what */
 	regprop(sv, s);
-	PerlIO_printf(Perl_debug_log, "%2d%s", s - r->program, SvPVX(sv));
+	PerlIO_printf(Perl_debug_log, "%2ld%s", (long)(s - r->program), SvPVX(sv));
 	next = regnext(s);
 	s += regarglen[(U8)op];
 	if (next == NULL)		/* Next ptr. */
 	    PerlIO_printf(Perl_debug_log, "(0)");
 	else 
-	    PerlIO_printf(Perl_debug_log, "(%d)", (s-r->program)+(next-s));
+	    PerlIO_printf(Perl_debug_log, "(%ld)", (long)(s-r->program)+(next-s));
 	s += 3;
 	if (op == ANYOF) {
 	    s += 33;

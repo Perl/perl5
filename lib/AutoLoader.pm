@@ -1,6 +1,5 @@
 package AutoLoader;
 
-use Carp;
 use vars qw(@EXPORT @EXPORT_OK);
 
 BEGIN {
@@ -42,7 +41,9 @@ AUTOLOAD {
 	    }
 	    if ($@){
 		$@ =~ s/ at .*\n//;
-		croak $@;
+		my $error = $@;
+		require Carp;
+		Carp::croak($error);
 	    }
 	}
     }
@@ -83,7 +84,11 @@ sub import {
 	    $path ="auto/$calldir/autosplit.ix";
 	    eval { require $path; };
 	}
-	carp $@ if ($@);  
+	if ($@) {
+	    my $error = $@;
+	    require Carp;
+	    Carp::carp($error);
+	}
     } 
 }
 
@@ -169,6 +174,7 @@ Instead, they should define their own AUTOLOAD subroutines along these
 lines:
 
     use AutoLoader;
+    use Carp;
 
     sub AUTOLOAD {
         my $constname;
@@ -183,7 +189,7 @@ lines:
                 croak "Your vendor has not defined constant $constname";
             }
         }
-        eval "sub $AUTOLOAD { $val }";
+	*$AUTOLOAD = sub { $val }; # same as: eval "sub $AUTOLOAD { $val }";
         goto &$AUTOLOAD;
     }
 

@@ -39,6 +39,7 @@ sub load
 		$handle = DynaLoader::dl_load_file("$_/$file.dll");
 		last if $handle;
 	}
+	$handle = DynaLoader::dl_load_file($file) unless $handle;
 	return undef unless $handle;
 	eval "package OS2::REXX::$file; \@ISA = ('OS2::REXX');"
 	   . "sub AUTOLOAD {"
@@ -244,7 +245,8 @@ variables may be usable even without C<REXX_call> though.
 NAME is DLL name, without path and extension.
 
 Directories are searched WHERE first (list of dirs), then environment
-paths PERL5REXX, PERLREXX or, as last resort, PATH.
+paths PERL5REXX, PERLREXX, PATH or, as last resort, OS/2-ish search 
+is performed in default DLL path (without adding paths and extensions).
 
 The DLL is not unloaded when the variable dies.
 

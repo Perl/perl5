@@ -1764,7 +1764,6 @@ EOM
 			;;
 		linux) osname=linux
 			case "$3" in
-			1*) osvers=1 ;;
 			*)	osvers="$3" ;;
 			esac
 			;;
