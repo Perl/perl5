@@ -652,13 +652,16 @@ sperl$(OBJ_EXT): perl.c $(h)
 
 # We have to call our ./makedir because Ultrix 4.3 make can't handle the line
 #	test -d lib/auto || mkdir lib/auto
+# We need to autosplit in two steps because VOS can't handle so many args
 #
 .PHONY: preplibrary
 preplibrary: miniperl$(EXE_EXT) lib/Config.pm lib/lib.pm $(PREPLIBRARY_LIBPERL)
 	@sh ./makedir lib/auto
 	@echo "	AutoSplitting perl library"
 	$(LDLIBPTH) ./miniperl -Ilib -e 'use AutoSplit; \
-		autosplit_lib_modules(@ARGV)' lib/*.pm lib/*/*.pm
+		autosplit_lib_modules(@ARGV)' lib/*.pm
+	$(LDLIBPTH) ./miniperl -Ilib -e 'use AutoSplit; \
+		autosplit_lib_modules(@ARGV)' lib/*/*.pm
 	$(MAKE) lib/re.pm
 
 # Take care to avoid modifying lib/Config.pm without reason
