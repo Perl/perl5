@@ -423,6 +423,14 @@ simple, platform-independent mailing.
 The Unix System V IPC (C<msg*(), sem*(), shm*()>) is not available
 even on all Unix platforms.
 
+Do not use either the bare result of C<pack("N", 10, 20, 30, 40)
+or bare v-strings (such as C<v10.20.30.40>) or the to represent
+IPv4 addresses: both forms just pack the four bytes into network order.
+That this would be equal to the C language C<in_addr> struct (which is
+what the socket code internally uses) is not guaranteed.  To be
+portable use the routines of the Socket extension, such as
+C<inet_aton()>, C<inet_ntoa()>, and C<sockaddr_in()>.
+
 The rule of thumb for portable code is: Do it all in portable Perl, or
 use a module (that may internally implement it with platform-specific
 code, but expose a common interface).
