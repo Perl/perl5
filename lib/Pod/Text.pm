@@ -112,7 +112,6 @@ POD_DIRECTIVE: while (<IN>) {
     }me;
     # Translate verbatim paragraph
     if (/^\s/) {
-	$needspace = 1;
 	output($_);
 	next;
     }
