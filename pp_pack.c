@@ -1283,8 +1283,8 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, char *s, char *strbeg, char *strend, char 
 		from = group ? strbeg + group->strbeg : strbeg;
 	    }
 	    sv = from <= s ?
-		newSVuv(  u8 ? (UV) utf8_length(from, s) : (UV) (s-from)) :
-		newSViv(-(u8 ? (IV) utf8_length(s, from) : (IV) (from-s)));
+		newSVuv(  u8 ? (UV) utf8_length((const U8*)from, (const U8*)s) : (UV) (s-from)) :
+		newSViv(-(u8 ? (IV) utf8_length((const U8*)s, (const U8*)from) : (IV) (from-s)));
 	    XPUSHs(sv_2mortal(sv));
 	    break;
 	}
