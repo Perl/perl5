@@ -881,6 +881,11 @@ sub tool_xsubpp {
 	unshift( @tmargs, $self->{XSOPT} );
     }
 
+    if ($Config{'ldflags'} && 
+        $Config{'ldflags'} =~ m!/Debug!i &&
+        (!exists($self->{XSOPT}) || $self->{XSOPT} !~ /linenumbers/)) {
+        unshift(@tmargs,'-nolinenumbers');
+    }
     my $xsubpp_version = $self->xsubpp_version($self->catfile($xsdir,'xsubpp'));
 
     # What are the correct thresholds for version 1 && 2 Paul?
@@ -1209,7 +1214,7 @@ $(BASEEXT).opt : Makefile.PL
 	                   s/.*[:>\/\]]//;       # Trim off dir spec
 			   $upcase ? uc($_) : $_;
 	                 } split ' ', $self->eliminate_macros($self->{OBJECT});
-        my($tmp, @lines,$elt) = '';
+        my($tmp,@lines,$elt) = '';
 	$tmp = shift @omods;
 	foreach $elt (@omods) {
 	    $tmp .= ",$elt";
