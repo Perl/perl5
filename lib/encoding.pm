@@ -77,6 +77,13 @@ since the C<\xDF> on the left will B<not> be upgraded to C<\x{3af}>
 because of the C<\x{100}> on the left.  You should not be mixing your
 legacy data and Unicode in the same string.
 
+This pragma also affects encoding of the 0x80..0xFF code point range:
+normally characters in that range are left as eight-bit bytes (unless
+they are combined with characters with code points 0x100 or larger,
+in which case all characters need to become UTF-8 encoded), but if
+the C<encoding> pragma is present, even the 0x80..0xFF range always
+gets UTF-8 encoded.
+
 If no encoding is specified, the environment variable L<PERL_ENCODING>
 is consulted.  If that fails, "latin1" (ISO 8859-1) is assumed.  If no
 encoding can be found, C<Unknown encoding '...'> error will be thrown.
