@@ -4434,13 +4434,14 @@ matching PATTERN is taken to be a delimiter separating the fields.  (Note
 that the delimiter may be longer than one character.)
 
 If LIMIT is specified and positive, it represents the maximum number
-of fields the EXPR will be split into, though the number of fields 
-returned depends on the number of occurrences of PATTERN within EXPR.
-If LIMIT is unspecified or zero, trailing null fields are stripped
-(which potential users of C<pop> would do well to remember).  If LIMIT
-is negative, it is treated as if an arbitrarily large LIMIT had been 
-specified.  Note that splitting an EXPR that evaluates to the empty
-string always returns the empty list, regardless of the LIMIT specified.
+of fields the EXPR will be split into, though the actual number of
+fields returned depends on the number of times PATTERN matches within
+EXPR.  If LIMIT is unspecified or zero, trailing null fields are
+stripped (which potential users of C<pop> would do well to remember).
+If LIMIT is negative, it is treated as if an arbitrarily large LIMIT
+had been specified.  Note that splitting an EXPR that evaluates to the
+empty string always returns the empty list, regardless of the LIMIT
+specified.
 
 A pattern matching the null string (not to be confused with
 a null pattern C<//>, which is just one member of the set of patterns
