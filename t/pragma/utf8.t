@@ -10,7 +10,7 @@ BEGIN {
     }
 }
 
-print "1..101\n";
+print "1..103\n";
 
 my $test = 1;
 
@@ -540,6 +540,21 @@ sub nok_bytes {
 
     # For symmetry with the above.
     "\x{1234}$2";
+
+    print "ok $test\n";
+    $test++;
+
+    *pi = \undef;
+    # This bug existed earlier than the $2 bug, but is fixed with the same
+    # patch. Without the fix this will also croak:
+    # Modification of a read-only value attempted at ...
+    "$pi\x{1234}";
+
+    print "ok $test\n";
+    $test++;
+
+    # For symmetry with the above.
+    "\x{1234}$pi";
 
     print "ok $test\n";
     $test++;
