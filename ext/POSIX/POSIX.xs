@@ -3651,13 +3651,13 @@ strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
 	    } else {
 		/* Possibly buf overflowed - try again with a bigger buf */
 		int	bufsize = strlen(fmt) + sizeof(tmpbuf);
-		char* 	buf = safemalloc(bufsize);
+		char* 	buf = (char *) safemalloc(bufsize);
 		int	buflen;
 		while( buf ) {
 		    buflen = strftime(buf, bufsize, fmt, &mytm);
 		    if ( buflen > 0 && buflen < bufsize ) break;
 		    bufsize *= 2;
-		    buf = saferealloc(buf, bufsize);
+		    buf = (char *) saferealloc(buf, bufsize);
 		}
 		if ( buf ) {
 		    ST(0) = sv_2mortal(newSVpv(buf, buflen));
