@@ -28,4 +28,3 @@ use fields qw(foo bar);
 my $foo = fields::new('Foo');
 $foo->{foo} = 42;
 EXPECT
-Pseudo-hashes are deprecated at - line 5.

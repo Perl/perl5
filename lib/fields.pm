@@ -11,7 +11,7 @@ unless( eval q{require warnings::register; warnings::register->import} ) {
 }
 use vars qw(%attr $VERSION);
 
-$VERSION = '2.0';
+$VERSION = '2.01';
 
 # constant.pm is slow
 sub PUBLIC     () { 2**0  }
@@ -37,6 +37,8 @@ sub import {
     my $fields = \%{"$package\::FIELDS"};
     my $fattr = ($attr{$package} ||= [1]);
     my $next = @$fattr;
+
+    bless \%{"$package\::FIELDS"}, 'pseudohash'; # New since 1.03 (Perl 5.8.1)
 
     if ($next > $fattr->[0]
 	and ($fields->{$_[0]} || 0) >= $fattr->[0])
@@ -308,6 +310,15 @@ Pseudo-hashes have been removed from Perl as of 5.10.  Consider using
 restricted hashes instead.  Using fields::phash() will cause an error.
 
 =back
+
+=head2 NOTES
+
+Note that in Perl 5.8.1 (fields 2.01) the first element of
+a pseudo-hash, the hash reference mapping the allowed keys into indices,
+is blessed into the C<pseudohash> package.  This was done to avoid
+giving warnings about deprecation of the pseudo-hash feature when
+they are created using the fields::new() interface.
+B<Pseudo-hashes will be completely removed in Perl 5.10.>
 
 =head1 SEE ALSO
 
