@@ -130,6 +130,7 @@ ext/DB_File/typemap		Berkeley DB extension interface types
 ext/DB_File/version.c		Berkeley DB extension interface version check
 ext/Devel/DProf/Changes		Perl code profiler changelog
 ext/Devel/DProf/DProf.pm	Perl code profiler
+ext/Devel/DProf/DProf.t		Perl code profiler
 ext/Devel/DProf/DProf.xs	Perl code profiler
 ext/Devel/DProf/Makefile.PL	Perl code profiler makefile writer
 ext/Devel/DProf/Todo		Perl code profiler todo list
@@ -802,7 +803,6 @@ lib/autouse.pm			Load and call a function only when it's used
 lib/autouse.t			See if autouse works
 lib/base.pm			Establish IS-A relationship at compile time
 lib/Benchmark.pm		Measure execution time
-lib/Benchmark.t			Perl code profiler testsuite driver
 lib/bigfloat.pl			An arbitrary precision floating point package
 lib/bigfloat.t			See if bigfloat.pl works
 lib/bigint.pl			An arbitrary precision integer arithmetic package
