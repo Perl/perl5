@@ -140,6 +140,36 @@ Static_Ext_Xtr =	\
 	Storable:Storable Time:HiRes:HiRes
 Static_Ext_Mac	= 	\
 	MacPerl:MacPerl 
+#	Mac:err:err				\
+#	Mac:AppleEvents:AppleEvents		\
+#	Mac:Components:Components		\
+#	Mac:Controls:Controls			\
+#	Mac:Dialogs:Dialogs			\
+#	Mac:Events:Events			\
+#	Mac:Files:Files				\
+#	Mac:Fonts:Fonts				\
+#	Mac:Gestalt:Gestalt			\
+#	Mac:InternetConfig:InternetConfig	\
+#	Mac:Lists:Lists				\
+#	Mac:Memory:Memory			\
+#	Mac:Menus:Menus				\
+#	Mac:MoreFiles:MoreFiles			\
+#	Mac:Movies:Movies			\
+#	Mac:Notification:Notification		\
+#	Mac:OSA:OSA				\
+#	Mac:Processes:Processes			\
+#	Mac:QDOffscreen:QDOffscreen		\
+#	Mac:QuickDraw:QuickDraw			\
+#	Mac:QuickTimeVR:QuickTimeVR		\
+#	Mac:Resources:Resources			\
+#	Mac:Sound:Sound				\
+#	Mac:Speech:Speech			\
+#	Mac:SpeechRecognition:SpeechRecognition	\
+#	Mac:StandardFile:StandardFile		\
+#	Mac:TextEdit:TextEdit			\
+#	Mac:Types:Types				\
+#	Mac:Windows:Windows
+
 Static_Ext_Std	= 	\
 	B:B ByteLoader:ByteLoader Data:Dumper:Dumper DB_File:DB_File \
 	Devel:DProf:DProf Devel:Peek:Peek DynaLoader:DynaLoader \

@@ -5,6 +5,10 @@ MACPERL_SRC	=	:::
 
 COpt += -i :::
 
+# Navigation:Navigation
+# DCon:DCon
+# SAT:SAT
+# ImageCompression:ImageCompression
 dirs = 	\
 	err:err					\
 	AppleEvents:AppleEvents			\
@@ -21,6 +25,7 @@ dirs = 	\
 	Menus:Menus				\
 	MoreFiles:MoreFiles			\
 	Movies:Movies				\
+	Notification:Notification		\
 	OSA:OSA					\
 	Processes:Processes			\
 	QDOffscreen:QDOffscreen			\
