@@ -5222,7 +5222,7 @@ Perl_keyword(pTHX_ register char *d, I32 len)
 	    if (strEQ(d,"exit"))		return -KEY_exit;
 	    if (strEQ(d,"eval"))		return KEY_eval;
 	    if (strEQ(d,"exec"))		return -KEY_exec;
-	    if (strEQ(d,"each"))		return KEY_each;
+           if (strEQ(d,"each"))                return -KEY_each;
 	    break;
 	case 5:
 	    if (strEQ(d,"elsif"))		return KEY_elsif;
@@ -5366,7 +5366,7 @@ Perl_keyword(pTHX_ register char *d, I32 len)
 	break;
     case 'k':
 	if (len == 4) {
-	    if (strEQ(d,"keys"))		return KEY_keys;
+           if (strEQ(d,"keys"))                return -KEY_keys;
 	    if (strEQ(d,"kill"))		return -KEY_kill;
 	}
 	break;
@@ -5448,11 +5448,11 @@ Perl_keyword(pTHX_ register char *d, I32 len)
     case 'p':
 	switch (len) {
 	case 3:
-	    if (strEQ(d,"pop"))			return KEY_pop;
+           if (strEQ(d,"pop"))                 return -KEY_pop; 
 	    if (strEQ(d,"pos"))			return KEY_pos;
 	    break;
 	case 4:
-	    if (strEQ(d,"push"))		return KEY_push;
+           if (strEQ(d,"push"))                return -KEY_push;
 	    if (strEQ(d,"pack"))		return -KEY_pack;
 	    if (strEQ(d,"pipe"))		return -KEY_pipe;
 	    break;
@@ -5559,7 +5559,7 @@ Perl_keyword(pTHX_ register char *d, I32 len)
 	case 'h':
 	    switch (len) {
 	    case 5:
-		if (strEQ(d,"shift"))		return KEY_shift;
+               if (strEQ(d,"shift"))           return -KEY_shift;
 		break;
 	    case 6:
 		if (strEQ(d,"shmctl"))		return -KEY_shmctl;
@@ -5588,7 +5588,7 @@ Perl_keyword(pTHX_ register char *d, I32 len)
 	case 'p':
 	    if (strEQ(d,"split"))		return KEY_split;
 	    if (strEQ(d,"sprintf"))		return -KEY_sprintf;
-	    if (strEQ(d,"splice"))		return KEY_splice;
+           if (strEQ(d,"splice"))              return -KEY_splice;
 	    break;
 	case 'q':
 	    if (strEQ(d,"sqrt"))		return -KEY_sqrt;
@@ -5668,7 +5668,7 @@ Perl_keyword(pTHX_ register char *d, I32 len)
 	    if (strEQ(d,"unlink"))		return -KEY_unlink;
 	    break;
 	case 7:
-	    if (strEQ(d,"unshift"))		return KEY_unshift;
+           if (strEQ(d,"unshift"))             return -KEY_unshift;
 	    if (strEQ(d,"ucfirst"))		return -KEY_ucfirst;
 	    break;
 	}
