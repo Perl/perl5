@@ -332,12 +332,16 @@ utils4 = [.utils]enc2xs.com [.utils]piconv.com [.utils]cpan.com
 
 .ifdef NOX2P
 all : base extras archcorefiles preplibrary perlpods
+	@ QUALIFIERS := $(MMSQUALIFIERS)
+	@ QUALIFIERS = QUALIFIERS - """" - """"
 	@ write sys$output " "
-	@ write sys$output " Everything is up to date. '$(MMS)$(MMSQUALIFIERS) test' to run test suite."
+	@ write sys$output " Everything is up to date. '$(MMS)''QUALIFIERS' test' to run test suite."
 .else
 all : base extras x2p archcorefiles preplibrary perlpods
+	@ QUALIFIERS := $(MMSQUALIFIERS)
+	@ QUALIFIERS = QUALIFIERS - """" - """"
 	@ write sys$output " "
-	@ write sys$output " Everything is up to date. '$(MMS)$(MMSQUALIFIERS) test' to run test suite."
+	@ write sys$output " Everything is up to date. '$(MMS)''QUALIFIERS' test' to run test suite."
 .endif
 base : miniperl perl
 	@ $(NOOP)
@@ -1241,9 +1245,11 @@ archify : all
 	Delete/Log/NoConfirm [.lib]Config.pm;*
 	Copy/Log/NoConfirm *$(E);,[.x2p]$(DBG)a2p$(E); $(ARCHDIR)
 	Delete/Log/NoConfirm Perl*$(E);*,[.x2p]$(DBG)a2p$(E);*
+	@ QUALIFIERS := $(MMSQUALIFIERS)
+	@ QUALIFIERS = QUALIFIERS - """" - """"
 	@ Write Sys$Output "Architecture-specific setup completed."
 	@ Write Sys$Output "Before building for another architecture, be sure to"
-	@ Write Sys$Output "    1. $(MMS)$(MMSQUALIFIERS) clean"
+	@ Write Sys$Output "    1. $(MMS)''QUALIFIERS' clean"
 	@ Write Sys$Output "    2. Delete Miniperl$(E)"
 
 # CORE subset for MakeMaker, so we can build Perl without sources
