@@ -139,7 +139,7 @@ splice(@a, 0, 17);
 check_contents("");
 
 # (89-92) In the past, splicing past the end was not correctly detected
-# (1.14)
+# (0.14)
 splice(@a, 89, 3);
 check_contents("");
 splice(@a, @a, 3);
@@ -164,7 +164,7 @@ if ($] > 5.008) {
   print "ok $N \# skipped (5.6.0 through 5.8 dump core here.)\n";
 }
 $N++;
-       
+
 # (98-101) Test default arguments
 splice @a, 0, 0, (0..11);
 splice @a, 4;

@@ -770,7 +770,7 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 	    if (checksum) {
 		while (len-- > 0 && s < strend) {
 		    STRLEN alen;
-		    auint = NATIVE_TO_UNI(utf8n_to_uvchr((U8*)s, strend - s, &alen, 0));
+		    auint = NATIVE_TO_UNI(utf8n_to_uvchr((U8*)s, strend - s, &alen, ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANYUV));
 		    along = alen;
 		    s += along;
 		    if (checksum > bits_in_uv)
@@ -784,7 +784,7 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 		EXTEND_MORTAL(len);
 		while (len-- > 0 && s < strend) {
 		    STRLEN alen;
-		    auint = NATIVE_TO_UNI(utf8n_to_uvchr((U8*)s, strend - s, &alen, 0));
+		    auint = NATIVE_TO_UNI(utf8n_to_uvchr((U8*)s, strend - s, &alen, ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANYUV));
 		    along = alen;
 		    s += along;
 		    sv = NEWSV(37, 0);

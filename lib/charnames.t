@@ -12,7 +12,7 @@ BEGIN {
 
 $| = 1;
 
-print "1..38\n";
+print "1..39\n";
 
 use charnames ':full';
 
@@ -219,4 +219,10 @@ print "ok 33\n";
 
 print "not " unless charnames::viacode(0xFEFF) eq "ZERO WIDTH NO-BREAK SPACE";
 print "ok 38\n";
+
+{
+    use warnings;
+    print "not " unless ord("\N{BOM}") == 0xFEFF;
+    print "ok 39\n";
+}
 

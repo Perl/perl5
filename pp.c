@@ -3241,7 +3241,9 @@ PP(pp_ord)
         argsv = tmpsv;
     }
 
-    XPUSHu(DO_UTF8(argsv) ? utf8_to_uvchr(s, 0) : (*s & 0xff));
+    XPUSHu(DO_UTF8(argsv) ?
+	   utf8n_to_uvchr(s, UTF8_MAXLEN, 0, UTF8_ALLOW_ANYUV) :
+	   (*s & 0xff));
 
     RETURN;
 }

@@ -1,6 +1,17 @@
 CHANGES
 -------
 
+2.14  Apr 01 14:00 2002
+	- Added reverse lookup feature.
+	  e@arix.com (Erick Calder)
+
+2.13  Apr 01 14:00 2002
+	- Added ping time measuring feature.
+	  e@arix.com (Erick Calder)
+	- Optionally allow for high resolution
+	  precision for timeouts and measuring
+	  using the Time::HiRes module (Erick).
+
 2.12  Feb 17 19:00 2002
 	- More general error determination for
 	  better cross platform consistency and

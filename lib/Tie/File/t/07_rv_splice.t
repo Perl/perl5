@@ -9,7 +9,7 @@ my $file = "tf$$.txt";
 $: = Tie::File::_default_recsep();
 my $data = "rec0$:rec1$:rec2$:";
 
-print "1..50\n";
+print "1..56\n";
 
 my $N = 1;
 use Tie::File;
@@ -153,6 +153,27 @@ splice @a, 0, 0, (0..11);
 check_result(4..11);
 @r = splice @a;
 check_result(0..3);
+
+# (51-56) splice with negative length was treated wrong
+# 20020402 Reported by Juerd Waalboer
+@a = (0..8) ;
+@r = splice @a, 0, -3;
+check_result(0..5);
+@a = (0..8) ;
+@r = splice @a, 1, -3;
+check_result(1..5);
+@a = (0..8) ;
+@r = splice @a, 7, -3;
+check_result();
+@a = (0..2) ;
+@r = splice @a, 0, -3;
+check_result();
+@a = (0..2) ;
+@r = splice @a, 1, -3;
+check_result();
+@a = (0..2) ;
+@r = splice @a, 7, -3;
+check_result();
 
 sub init_file {
   my $data = shift;

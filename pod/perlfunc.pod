@@ -4649,7 +4649,8 @@ returns the last element removed, or C<undef> if no elements are
 removed.  The array grows or shrinks as necessary.
 If OFFSET is negative then it starts that far from the end of the array.
 If LENGTH is omitted, removes everything from OFFSET onward.
-If LENGTH is negative, leaves that many elements off the end of the array.
+If LENGTH is negative, removes the elements from OFFSET onward
+except for -LENGTH elements at the end of the array.
 If both OFFSET and LENGTH are omitted, removes everything. If OFFSET is
 past the end of the array, perl issues a warning, and splices at the
 end of the array.

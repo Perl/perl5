@@ -563,7 +563,7 @@ elicits a new warning: C<Use of /c modifier is meaningless without /g>.
 Use of C</c> in substitutions, even with C</g>, elicits 
 C<Use of /c modifier is meaningless in s///>.  
 
-Use of C</g> with C<split> elicits <Use of /g modifier is meaningless
+Use of C</g> with C<split> elicits C<Use of /g modifier is meaningless
 in split>.
 
 =back
@@ -726,7 +726,8 @@ Ilya Zakharevich.
 
 L<libnet> is a collection of perl5 modules related to network
 programming, from Graham Barr.  See L<Net::FTP>, L<Net::NNTP>,
-L<Net::Ping>, L<Net::POP3>, L<Net::SMTP>, and L<Net::Time>.
+L<Net::Ping> (not part of libnet, but related), L<Net::POP3>,
+L<Net::SMTP>, and L<Net::Time>.
 
 Perl installation leaves libnet unconfigured, use F<libnetcfg> to configure.
 
@@ -1115,10 +1116,19 @@ Math::Complex handles inf, NaN etc., better.
 
 =item *
 
-Net::Ping has been muchly enhanced.  Multihoming is now supported.
-There is now "external" protocol which uses Net::Ping::External module
-which runs external ping(1) and parses the output.  A version of
-Net::Ping::External is available in CPAN.
+Net::Ping has been muchly enhanced: multihoming is now supported,
+Win32 functionality is better, there is now time measuring
+functionality (optionally high-resolution using Time::HiRes),
+and there is now "external" protocol which uses Net::Ping::External
+module which runs your external ping utility and parses the output.
+A version of Net::Ping::External is available in CPAN.
+
+Note that some of the Net::Ping tests are disabled when running
+under the Perl distribution since one cannot assume one or more
+of the following: enabled echo port at localhost, full Internet
+connectivity, or sympathetic firewalls.  You can set the environment
+variable PERL_TEST_Net_Ping to "1" (one) before running the Perl test
+suite to enable all the Net::Ping tests.
 
 =item *
 
@@ -2796,6 +2806,10 @@ as of 5.7.3:
  -------------------------------------------------------------------------
   ..\ext/threads/t/end.t                6    4  66.67%  3-6
 
+=head2 XML::Parser not working
+
+Use XML::Parser 2.31 or later.
+
 =head2 Localising a Tied Variable Leaks Memory
 
     use Tie::Hash;
@@ -2828,9 +2842,8 @@ tests have been added.
                                                               785 832-834 845
  op/sprintf.t                               224    3   1.34%  98 100 136
  op/tr.t                                     97    5   5.15%  63 71-74
- uni/fold.t                                 767    8   1.04%  25-26 62 169 196
-                                                              648 697-698
- 60 tests and 384 subtests skipped.
+ uni/fold.t                                 780    6   0.77%  61 169 196 661
+                                                              710-711
 
 =head2 Localising Tied Arrays and Hashes Is Broken
 

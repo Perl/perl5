@@ -254,7 +254,7 @@ sub check_caches {
 
   # Copy the contents of the cache into a regular hash
   my %cache;
-  for my $k ($o->{cache}->keys) {
+  for my $k ($o->{cache}->ckeys) {
     $cache{$k} = $o->{cache}->_produce($k);
   }
 

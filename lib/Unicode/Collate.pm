@@ -137,24 +137,26 @@ sub parseEntry
   # get element
   my($e, $k) = split /;/, $line;
   my @e = _getHexArray($e);
-  $ele = pack('U*', @e);
+  { no warnings 'utf8'; $ele = pack('U*', @e); }
   return if defined $self->{undefChar} && $ele =~ /$self->{undefChar}/;
 
   # get sort key
-  if(
+  { no warnings 'utf8';
+    if(
      defined $self->{ignoreName} && $name =~ /$self->{ignoreName}/ ||
      defined $self->{ignoreChar} && $ele  =~ /$self->{ignoreChar}/
-  )
-  {
-     $self->{entries}{$ele} = $self->{ignored}{$ele} = 1;
-  }
-  else
-  {
-    foreach my $arr ($k =~ /\[(\S+)\]/g) {
-      my $var = $arr =~ /\*/;
-      push @key, $self->altCE( $var, _getHexArray($arr) );
+       )
+    {
+	$self->{entries}{$ele} = $self->{ignored}{$ele} = 1;
     }
-    $self->{entries}{$ele} = \@key;
+    else
+    {
+	foreach my $arr ($k =~ /\[(\S+)\]/g) {
+	    my $var = $arr =~ /\*/;
+	    push @key, $self->altCE( $var, _getHexArray($arr) );
+	}
+	$self->{entries}{$ele} = \@key;
+    }
   }
   $self->{maxlength}{ord $ele} = scalar @e if @e > 1;
 }
