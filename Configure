@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Nov 21 19:00:54 EET 2001 [metaconfig 3.0 PL70]
+# Generated on Thu Nov 22 01:31:19 EET 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -2267,12 +2267,14 @@ case "$lns" in
 			issymlink="test -h"
 		fi		
 	fi
-	if $test "X$issymlink" = X; then
-		if  $test -h >/dev/null 2>&1; then
-			issymlink="$test -h"
-			echo "Your builtin 'test -h' may be broken, I'm using external '$test -h'." >&4
-		fi		
-	fi
+	case "$issymlink" in
+	"test -h")
+		if $test -h >/dev/null 2>&1; then
+			issymlink="/bin/test -h"
+			echo "Your builtin 'test -h' may be broken, I'm using external '/bin/test -h'." >&4
+		fi
+		;;
+	esac
 	if $test "X$issymlink" = X; then
 		if $test -L sym 2>/dev/null; then
 			issymlink="$test -L"
