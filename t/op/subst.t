@@ -7,7 +7,7 @@ BEGIN {
 }
 
 require './test.pl';
-plan( tests => 92 );
+plan( tests => 108 );
 
 $x = 'foo';
 $_ = "x";
@@ -381,6 +381,7 @@ substr($pv2,0,1) = "\x{100}";
 is($pv1, $pv2);
 
 {   
+    # Gregor Chrupala <gregor.chrupala@star-group.net>
     use utf8;
     $a = 'Espa&ntilde;a';
     $a =~ s/&ntilde;/ñ/;
@@ -401,3 +402,46 @@ is($pv1, $pv2);
     like($a, qr/ñ/, "use utf8 LHS and RHS");
 }
 
+{
+    # SADAHIRO Tomoyuki <bqw10602@nifty.com>
+
+    $a = "\x{100}\x{101}";
+    $a =~ s/\x{101}/\xFF/;
+    like($a, qr/\xFF/);
+    is(length($a), 2);
+
+    $a = "\x{100}\x{101}";
+    $a =~ s/\x{101}/"\xFF"/e;
+    like($a, qr/\xFF/);
+    is(length($a), 2);
+
+    $a = "\x{100}\x{101}";
+    $a =~ s/\x{101}/\xFF\xFF\xFF/;
+    like($a, qr/\xFF\xFF\xFF/);
+    is(length($a), 4);
+
+    $a = "\x{100}\x{101}";
+    $a =~ s/\x{101}/"\xFF\xFF\xFF"/e;
+    like($a, qr/\xFF\xFF\xFF/);
+    is(length($a), 4);
+
+    $a = "\xFF\x{101}";
+    $a =~ s/\xFF/\x{100}/;
+    like($a, qr/\x{100}/);
+    is(length($a), 2);
+
+    $a = "\xFF\x{101}";
+    $a =~ s/\xFF/"\x{100}"/e;
+    like($a, qr/\x{100}/);
+    is(length($a), 2);
+
+    $a = "\xFF";
+    $a =~ s/\xFF/\x{100}/;
+    like($a, qr/\x{100}/);
+    is(length($a), 1);
+
+    $a = "\xFF";
+    $a =~ s/\xFF/"\x{100}"/e;
+    like($a, qr/\x{100}/);
+    is(length($a), 1);
+}
