@@ -2226,21 +2226,21 @@ Locale::Maketext, Locale::Maketext::TPJ13, Math::BigFloat, Math::BigInt,
 Math::Complex, Math::Trig, Memoize, Memoize::AnyDBM_File, Memoize::Expire,
 Memoize::ExpireFile, Memoize::ExpireTest, Memoize::NDBM_File,
 Memoize::SDBM_File, Memoize::Saves, Memoize::Storable, NDBM_File, NEXT,
-Net::Cmd, Net::Config, Net::Domain, Net::DummyInetd, Net::FTP, Net::NNTP,
-Net::Netrc, Net::PH, Net::POP3, Net::Ping, Net::SMTP, Net::SNPP, Net::Time,
-Net::hostent, Net::libnetFAQ, Net::netent, Net::protoent, Net::servent, O,
-ODBM_File, Opcode, POSIX, PerlIO, Pod::Checker, Pod::Find, Pod::Html,
-Pod::InputObjects, Pod::LaTeX, Pod::Man, Pod::ParseUtils, Pod::Parser,
-Pod::Plainer, Pod::Select, Pod::Text, Pod::Text::Color,
-Pod::Text::Overstrike, Pod::Text::Termcap, Pod::Usage, SDBM_File, Safe,
-Search::Dict, SelectSaver, SelfLoader, Shell, Socket, Storable, Switch,
-Symbol, Term::ANSIColor, Term::Cap, Term::Complete, Term::ReadLine, Test,
-Test::Harness, Test::More, Test::Simple, Text::Abbrev, Text::Balanced,
-Text::ParseWords, Text::Soundex, Text::Tabs, Text::Wrap, Thread,
-Thread::Queue, Thread::Semaphore, Thread::Signal, Thread::Specific,
-Tie::Array, Tie::Handle, Tie::Hash, Tie::RefHash, Tie::Scalar,
-Tie::SubstrHash, Time::Local, Time::gmtime, Time::localtime, Time::tm,
-UNIVERSAL, User::grent, User::pwent, Win32
+Net::Cmd, Net::Config, Net::Domain, Net::FTP, Net::NNTP, Net::Netrc,
+Net::POP3, Net::Ping, Net::SMTP, Net::Time, Net::hostent, Net::libnetFAQ,
+Net::netent, Net::protoent, Net::servent, O, ODBM_File, Opcode, POSIX,
+PerlIO, Pod::Checker, Pod::Find, Pod::Html, Pod::InputObjects, Pod::LaTeX,
+Pod::Man, Pod::ParseUtils, Pod::Parser, Pod::Plainer, Pod::Select,
+Pod::Text, Pod::Text::Color, Pod::Text::Overstrike, Pod::Text::Termcap,
+Pod::Usage, SDBM_File, Safe, Search::Dict, SelectSaver, SelfLoader, Shell,
+Socket, Storable, Switch, Symbol, Term::ANSIColor, Term::Cap,
+Term::Complete, Term::ReadLine, Test, Test::Harness, Test::More,
+Test::Simple, Text::Abbrev, Text::Balanced, Text::ParseWords,
+Text::Soundex, Text::Tabs, Text::Wrap, Thread, Thread::Queue,
+Thread::Semaphore, Thread::Signal, Thread::Specific, Tie::Array,
+Tie::Handle, Tie::Hash, Tie::RefHash, Tie::Scalar, Tie::SubstrHash,
+Time::Local, Time::gmtime, Time::localtime, Time::tm, UNIVERSAL,
+Unicode::UCD, User::grent, User::pwent, Win32
 
 =item Extension Modules
 
@@ -2649,7 +2649,8 @@ the tag
 
 a), b), c), d), e)
 
-=item How can I tell whether a list or array contains a certain element?
+=item How can I tell whether a certain element is contained in a list or
+array?
 
 =item How do I compute the difference of two arrays?  How do I compute the
 intersection of two arrays?
@@ -4603,7 +4604,7 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =over 4
 
-=item New Modules and Distribution
+=item New Modules and Distributions
 
 =item Updated And Improved Modules and Pragmata
 
@@ -10233,10 +10234,10 @@ INSTALLSCRIPT, INSTALLSITEARCH, INSTALLSITELIB, INST_ARCHLIB, INST_BIN,
 INST_EXE, INST_HTMLLIBDIR, INST_HTMLSCRIPTDIR, INST_LIB, INST_MAN1DIR,
 INST_MAN3DIR, INST_SCRIPT, LDFROM, LIB, LIBPERL_A, LIBS, LINKTYPE,
 MAKEAPERL, MAKEFILE, MAN1PODS, MAN3PODS, MAP_TARGET, MYEXTLIB, NAME,
-NEEDS_LINKING, NOECHO, NORECURS, NO_VC, OBJECT, OPTIMIZE, PERL, PERLMAINCC,
-PERL_ARCHLIB, PERL_LIB, PERL_MALLOC_OK, PERL_SRC, PERM_RW, PERM_RWX,
-PL_FILES, PM, PMLIBDIRS, PM_FILTER, POLLUTE, PPM_INSTALL_EXEC,
-PPM_INSTALL_SCRIPT, PREFIX, PREREQ_PM, SKIP, TYPEMAPS, VERSION,
+NEEDS_LINKING, NOECHO, NORECURS, NO_VC, OBJECT, OPTIMIZE, PERL, PERL_CORE,
+PERLMAINCC, PERL_ARCHLIB, PERL_LIB, PERL_MALLOC_OK, PERLRUN, PERM_RW,
+PERM_RWX, PL_FILES, PM, PMLIBDIRS, PM_FILTER, POLLUTE, PPM_INSTALL_EXEC,
+PPM_INSTALL_SCRIPT, PREFIX, PREREQ_PM, SKIP, TEST_LIBS, VERSION,
 VERSION_FROM, XS, XSOPT, XSPROTOARG, XS_VERSION
 
 =item Additional lowercase attributes
@@ -15696,13 +15697,39 @@ VAL, TYPE ), UNIVERSAL::can ( VAL, METHOD )
 
 =over 4
 
-=item charblock versus charscript
+=item charblocks
 
 =back
 
 =over 4
 
-=item IMPLEMENTATION NOTE
+=item charscripts
+
+=back
+
+=over 4
+
+=item Blocks versus Scripts
+
+=item Matching Scripts and Blocks
+
+=item charinrange
+
+=back
+
+=over 4
+
+=item Unicode::UCD::UnicodeVersion
+
+=back
+
+=over 4
+
+=item Implementation Note
+
+=back
+
+=over 4
 
 =item AUTHOR
 
