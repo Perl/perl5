@@ -403,7 +403,7 @@ Perl_magic_len(pTHX_ SV *sv, MAGIC *mg)
 		    char *s    = rx->subbeg + s1;
 		    char *send = rx->subbeg + t1;
 
-		    i = Perl_utf8_length((U8*)s, (U8*)send);
+		    i = Perl_utf8_length(aTHX_ (U8*)s, (U8*)send);
 		}
 		if (i < 0)
 		    Perl_croak(aTHX_ "panic: magic_len: %d", i);
