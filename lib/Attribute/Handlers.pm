@@ -137,7 +137,8 @@ sub _gen_handler_AH_() {
 			%lastattr=(pkg=>$pkg,ref=>$ref,type=>$data);
 		}
 		else {
-			my $handler = $pkg->can($attr);
+			my $type = ref $ref;
+			my $handler = $pkg->can("_ATTR_${type}_${attr}");
 			next unless $handler;
 		        my $decl = [$pkg, $ref, $attr, $data,
 				    $raw{$handler}, $phase{$handler}];
