@@ -4,6 +4,11 @@ use Encode qw(find_encoding);
 use base 'Encode::Encoding';
 use Carp;
 
+=head1 NAME
+
+Encode::Tcl - Tcl encodings
+
+=cut
 
 sub INC_search
 {

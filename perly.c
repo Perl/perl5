@@ -1566,7 +1566,7 @@ case 1:
 #line 125 "perly.y"
 {
 #if defined(YYDEBUG) && defined(DEBUGGING)
-		    yydebug = (PL_debug & 1);
+		    yydebug = (DEBUG_p_TEST);
 #endif
 		    PL_expect = XSTATE;
 		}

@@ -479,9 +479,9 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	break;
 
     case '\004':		/* ^D */
-	sv_setiv(sv, (IV)(PL_debug & 32767));
+	sv_setiv(sv, (IV)(PL_debug & DEBUG_MASK));
 #if defined(YYDEBUG) && defined(DEBUGGING)
-	PL_yydebug = (PL_debug & 1);
+	PL_yydebug = DEBUG_p_TEST;
 #endif
 	break;
     case '\005':  /* ^E */
@@ -1711,7 +1711,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	break;
 
     case '\004':	/* ^D */
-	PL_debug = (SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv)) | 0x80000000;
+	PL_debug = (SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv)) | DEBUG_TOP_FLAG;
 	DEBUG_x(dump_all());
 	break;
     case '\005':  /* ^E */

@@ -6,7 +6,7 @@ use AutoLoader;
 
 use XSLoader ();
 
-our $VERSION = "1.03" ;
+our $VERSION = "1.04" ;
 
 # Grandfather old foo_h form to new :foo_h form
 my $loaded;

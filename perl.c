@@ -253,9 +253,9 @@ perl_construct(pTHXx)
 	if (PERL_REVISION > 127 || PERL_VERSION > 127 || PERL_SUBVERSION > 127)
 	    SvGROW(PL_patchlevel, UTF8_MAXLEN*3+1);
 	s = (U8*)SvPVX(PL_patchlevel);
-	s = uv_to_utf8(s, (UV)PERL_REVISION);
-	s = uv_to_utf8(s, (UV)PERL_VERSION);
-	s = uv_to_utf8(s, (UV)PERL_SUBVERSION);
+	s = uv_to_utf8(s, (UV)(ASCII_TO_NATIVE(PERL_REVISION)));
+	s = uv_to_utf8(s, (UV)(ASCII_TO_NATIVE(PERL_VERSION)));
+	s = uv_to_utf8(s, (UV)(ASCII_TO_NATIVE(PERL_SUBVERSION)));
 	*s = '\0';
 	SvCUR_set(PL_patchlevel, s - (U8*)SvPVX(PL_patchlevel));
 	SvPOK_on(PL_patchlevel);
@@ -2126,7 +2126,8 @@ Perl_moreswitches(pTHX_ char *s)
 #ifdef DEBUGGING
 	forbid_setid("-D");
 	if (isALPHA(s[1])) {
-	    static char debopts[] = "psltocPmfrxuLHXDST";
+	    /* if adding extra options, remember to update DEBUG_MASK */
+	    static char debopts[] = "psltocPmfrxuLHXDSTR";
 	    char *d;
 
 	    for (s++; *s && (d = strchr(debopts,*s)); s++)
@@ -2136,7 +2137,7 @@ Perl_moreswitches(pTHX_ char *s)
 	    PL_debug = atoi(s+1);
 	    for (s++; isDIGIT(*s); s++) ;
 	}
-	PL_debug |= 0x80000000;
+	PL_debug |= DEBUG_TOP_FLAG;
 #else
 	if (ckWARN_d(WARN_DEBUGGING))
 	    Perl_warner(aTHX_ WARN_DEBUGGING,

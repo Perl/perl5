@@ -323,6 +323,7 @@ equivalent to B<-Dtls>):
     32768  D  Cleaning up
     65536  S  Thread synchronization
    131072  T  Tokenising
+   262144  R  Include reference counts of dumped variables (eg when using -Ds)
 
 All these flags require B<-DDEBUGGING> when you compile the Perl
 executable.  See the F<INSTALL> file in the Perl source distribution 

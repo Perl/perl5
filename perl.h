@@ -2131,64 +2131,142 @@ Gid_t getegid (void);
 				 : PerlIO_stderr())
 #endif
 
+
+#define DEBUG_p_FLAG		0x00000001 /*      1 */
+#define DEBUG_s_FLAG		0x00000002 /*      2 */
+#define DEBUG_l_FLAG		0x00000004 /*      4 */
+#define DEBUG_t_FLAG		0x00000008 /*      8 */
+#define DEBUG_o_FLAG		0x00000010 /*     16 */
+#define DEBUG_c_FLAG		0x00000020 /*     32 */
+#define DEBUG_P_FLAG		0x00000040 /*     64 */
+#define DEBUG_m_FLAG		0x00000080 /*    128 */
+#define DEBUG_f_FLAG		0x00000100 /*    256 */
+#define DEBUG_r_FLAG		0x00000200 /*    512 */
+#define DEBUG_x_FLAG		0x00000400 /*   1024 */
+#define DEBUG_u_FLAG		0x00000800 /*   2048 */
+#define DEBUG_L_FLAG		0x00001000 /*   4096 */
+#define DEBUG_H_FLAG		0x00002000 /*   8192 */
+#define DEBUG_X_FLAG		0x00004000 /*  16384 */
+#define DEBUG_D_FLAG		0x00008000 /*  32768 */
+#define DEBUG_S_FLAG		0x00010000 /*  65536 */
+#define DEBUG_T_FLAG		0x00020000 /* 131072 */
+#define DEBUG_R_FLAG		0x00040000 /* 262144 */
+#define DEBUG_MASK		0x0007FFFF /* mask of all the standard flags */
+
+#define DEBUG_DB_RECURSE_FLAG	0x40000000
+#define DEBUG_TOP_FLAG		0x80000000 /* XXX what's this for ??? */
+
+
 #ifdef DEBUGGING
-#undef  YYDEBUG
-#define YYDEBUG 1
-#define DEB(a)     			a
-#define DEBUG(a)   if (PL_debug)		a
-#define DEBUG_p(a) if (PL_debug & 1)	a
-#define DEBUG_s(a) if (PL_debug & 2)	a
-#define DEBUG_l(a) if (PL_debug & 4)	a
-#define DEBUG_t(a) if (PL_debug & 8)	a
-#define DEBUG_o(a) if (PL_debug & 16)	a
-#define DEBUG_c(a) if (PL_debug & 32)	a
-#define DEBUG_P(a) if (PL_debug & 64)	a
+
+#  undef  YYDEBUG
+#  define YYDEBUG 1
+
+#  define DEBUG_p_TEST (PL_debug & DEBUG_p_FLAG)
+#  define DEBUG_s_TEST (PL_debug & DEBUG_s_FLAG)
+#  define DEBUG_l_TEST (PL_debug & DEBUG_l_FLAG)
+#  define DEBUG_t_TEST (PL_debug & DEBUG_t_FLAG)
+#  define DEBUG_o_TEST (PL_debug & DEBUG_o_FLAG)
+#  define DEBUG_c_TEST (PL_debug & DEBUG_c_FLAG)
+#  define DEBUG_P_TEST (PL_debug & DEBUG_P_FLAG)
+#  define DEBUG_m_TEST (PL_debug & DEBUG_m_FLAG)
+#  define DEBUG_f_TEST (PL_debug & DEBUG_f_FLAG)
+#  define DEBUG_r_TEST (PL_debug & DEBUG_r_FLAG)
+#  define DEBUG_x_TEST (PL_debug & DEBUG_x_FLAG)
+#  define DEBUG_u_TEST (PL_debug & DEBUG_u_FLAG)
+#  define DEBUG_L_TEST (PL_debug & DEBUG_L_FLAG)
+#  define DEBUG_H_TEST (PL_debug & DEBUG_H_FLAG)
+#  define DEBUG_X_TEST (PL_debug & DEBUG_X_FLAG)
+#  define DEBUG_D_TEST (PL_debug & DEBUG_D_FLAG)
+#  define DEBUG_S_TEST (PL_debug & DEBUG_S_FLAG)
+#  define DEBUG_T_TEST (PL_debug & DEBUG_T_FLAG)
+#  define DEBUG_R_TEST (PL_debug & DEBUG_R_FLAG)
+
+#  define DEB(a)     a
+#  define DEBUG(a)   if (PL_debug)   a
+#  define DEBUG_p(a) if (DEBUG_p_TEST) a
+#  define DEBUG_s(a) if (DEBUG_s_TEST) a
+#  define DEBUG_l(a) if (DEBUG_l_TEST) a
+#  define DEBUG_t(a) if (DEBUG_t_TEST) a
+#  define DEBUG_o(a) if (DEBUG_o_TEST) a
+#  define DEBUG_c(a) if (DEBUG_c_TEST) a
+#  define DEBUG_P(a) if (DEBUG_P_TEST) a
+
 #  if defined(PERL_OBJECT)
-#    define DEBUG_m(a) if (PL_debug & 128)	a
+#    define DEBUG_m(a) if (DEBUG_m_TEST) a
 #  else
      /* Temporarily turn off memory debugging in case the a
       * does memory allocation, either directly or indirectly. */
 #    define DEBUG_m(a)  \
     STMT_START {							\
-        if (PERL_GET_INTERP) { dTHX; if (PL_debug & 128) {PL_debug&=~128; a; PL_debug|=128;} } \
+        if (PERL_GET_INTERP) { dTHX; if (DEBUG_m_TEST) {PL_debug&=~DEBUG_m_FLAG; a; PL_debug|=DEBUG_m_FLAG;} } \
     } STMT_END
 #  endif
-#define DEBUG_f(a) if (PL_debug & 256)	a
-#define DEBUG_r(a) if (PL_debug & 512)	a
-#define DEBUG_x(a) if (PL_debug & 1024)	a
-#define DEBUG_u(a) if (PL_debug & 2048)	a
-#define DEBUG_L(a) if (PL_debug & 4096)	a
-#define DEBUG_H(a) if (PL_debug & 8192)	a
-#define DEBUG_X(a) if (PL_debug & 16384)	a
-#define DEBUG_D(a) if (PL_debug & 32768)	a
+
+#  define DEBUG_f(a) if (DEBUG_f_TEST) a
+#  define DEBUG_r(a) if (DEBUG_r_TEST) a
+#  define DEBUG_x(a) if (DEBUG_x_TEST) a
+#  define DEBUG_u(a) if (DEBUG_u_TEST) a
+#  define DEBUG_L(a) if (DEBUG_L_TEST) a
+#  define DEBUG_H(a) if (DEBUG_H_TEST) a
+#  define DEBUG_X(a) if (DEBUG_X_TEST) a
+#  define DEBUG_D(a) if (DEBUG_D_TEST) a
+
 #  ifdef USE_THREADS
-#    define DEBUG_S(a) if (PL_debug & (1<<16))	a
+#    define DEBUG_S(a) if (DEBUG_S_TEST) a
 #  else
 #    define DEBUG_S(a)
 #  endif
-#define DEBUG_T(a) if (PL_debug & (1<<17))	a
-#else
-#define DEB(a)
-#define DEBUG(a)
-#define DEBUG_p(a)
-#define DEBUG_s(a)
-#define DEBUG_l(a)
-#define DEBUG_t(a)
-#define DEBUG_o(a)
-#define DEBUG_c(a)
-#define DEBUG_P(a)
-#define DEBUG_m(a)
-#define DEBUG_f(a)
-#define DEBUG_r(a)
-#define DEBUG_x(a)
-#define DEBUG_u(a)
-#define DEBUG_S(a)
-#define DEBUG_H(a)
-#define DEBUG_X(a)
-#define DEBUG_D(a)
-#define DEBUG_S(a)
-#define DEBUG_T(a)
-#endif
+
+#  define DEBUG_T(a) if (DEBUG_T_TEST) a
+#  define DEBUG_R(a) if (DEBUG_R_TEST) a
+
+#else /* DEBUGGING */
+
+#  define DEBUG_p_TEST (0)
+#  define DEBUG_s_TEST (0)
+#  define DEBUG_l_TEST (0)
+#  define DEBUG_t_TEST (0)
+#  define DEBUG_o_TEST (0)
+#  define DEBUG_c_TEST (0)
+#  define DEBUG_P_TEST (0)
+#  define DEBUG_m_TEST (0)
+#  define DEBUG_f_TEST (0)
+#  define DEBUG_r_TEST (0)
+#  define DEBUG_x_TEST (0)
+#  define DEBUG_u_TEST (0)
+#  define DEBUG_L_TEST (0)
+#  define DEBUG_H_TEST (0)
+#  define DEBUG_X_TEST (0)
+#  define DEBUG_D_TEST (0)
+#  define DEBUG_S_TEST (0)
+#  define DEBUG_T_TEST (0)
+#  define DEBUG_R_TEST (0)
+
+#  define DEB(a)
+#  define DEBUG(a)
+#  define DEBUG_p(a)
+#  define DEBUG_s(a)
+#  define DEBUG_l(a)
+#  define DEBUG_t(a)
+#  define DEBUG_o(a)
+#  define DEBUG_c(a)
+#  define DEBUG_P(a)
+#  define DEBUG_m(a)
+#  define DEBUG_f(a)
+#  define DEBUG_r(a)
+#  define DEBUG_x(a)
+#  define DEBUG_u(a)
+#  define DEBUG_L(a)
+#  define DEBUG_H(a)
+#  define DEBUG_X(a)
+#  define DEBUG_D(a)
+#  define DEBUG_S(a)
+#  define DEBUG_T(a)
+#  define DEBUG_R(a)
+#endif /* DEBUGGING */
+
+
 #define YYMAXDEPTH 300
 
 #ifndef assert  /* <assert.h> might have been included somehow */
@@ -2436,10 +2514,220 @@ EXT char *PL_sig_name[];
 EXT int   PL_sig_num[];
 #endif
 
-/* fast case folding tables */
+/* fast conversion and case folding tables */
 
 #ifdef DOINIT
 #ifdef EBCDIC
+#if '^' == 106  /* if defined(_OSD_POSIX) POSIX-BC */
+EXT unsigned char PL_e2a[] = { /* ASCII (ISO8859-1) to EBCDIC (POSIX-BC) */
+      0,      1,      2,      3,     55,     45,     46,     47,
+     22,      5,     21,     11,     12,     13,     14,     15,
+     16,     17,     18,     19,     60,     61,     50,     38,
+     24,     25,     63,     39,     28,     29,     30,     31,
+     64,     90,    127,    123,     91,    108,     80,    125,
+     77,     93,     92,     78,    107,     96,     75,     97,
+    240,    241,    242,    243,    244,    245,    246,    247,
+    248,    249,    122,     94,     76,    126,    110,    111,
+    124,    193,    194,    195,    196,    197,    198,    199,
+    200,    201,    209,    210,    211,    212,    213,    214,
+    215,    216,    217,    226,    227,    228,    229,    230,
+    231,    232,    233,    187,    188,    189,    106,    109,
+     74,    129,    130,    131,    132,    133,    134,    135,
+    136,    137,    145,    146,    147,    148,    149,    150,
+    151,    152,    153,    162,    163,    164,    165,    166,
+    167,    168,    169,    251,     79,    253,    255,      7,
+     32,     33,     34,     35,     36,     37,      6,     23,
+     40,     41,     42,     43,     44,      9,     10,     27,
+     48,     49,     26,     51,     52,     53,     54,      8,
+     56,     57,     58,     59,      4,     20,     62,     95,
+     65,    170,    176,    177,    159,    178,    208,    181,
+    121,    180,    154,    138,    186,    202,    175,    161,
+    144,    143,    234,    250,    190,    160,    182,    179,
+    157,    218,    155,    139,    183,    184,    185,    171,
+    100,    101,     98,    102,     99,    103,    158,    104,
+    116,    113,    114,    115,    120,    117,    118,    119,
+    172,    105,    237,    238,    235,    239,    236,    191,
+    128,    224,    254,    221,    252,    173,    174,     89,
+     68,     69,     66,     70,     67,     71,    156,     72,
+     84,     81,     82,     83,     88,     85,     86,     87,
+    140,     73,    205,    206,    203,    207,    204,    225,
+    112,    192,    222,    219,    220,    141,    142,    223
+};
+EXT unsigned char PL_a2e[] = { /* EBCDIC (POSIX-BC) to ASCII (ISO8859-1) */
+      0,      1,      2,      3,    156,      9,    134,    127,
+    151,    141,    142,     11,     12,     13,     14,     15,
+     16,     17,     18,     19,    157,     10,      8,    135,
+     24,     25,    146,    143,     28,     29,     30,     31,
+    128,    129,    130,    131,    132,    133,     23,     27,
+    136,    137,    138,    139,    140,      5,      6,      7,
+    144,    145,     22,    147,    148,    149,    150,      4,
+    152,    153,    154,    155,     20,     21,    158,     26,
+     32,    160,    226,    228,    224,    225,    227,    229,
+    231,    241,     96,     46,     60,     40,     43,    124,
+     38,    233,    234,    235,    232,    237,    238,    239,
+    236,    223,     33,     36,     42,     41,     59,    159,
+     45,     47,    194,    196,    192,    193,    195,    197,
+    199,    209,     94,     44,     37,     95,     62,     63,
+    248,    201,    202,    203,    200,    205,    206,    207,
+    204,    168,     58,     35,     64,     39,     61,     34,
+    216,     97,     98,     99,    100,    101,    102,    103,
+    104,    105,    171,    187,    240,    253,    254,    177,
+    176,    106,    107,    108,    109,    110,    111,    112,
+    113,    114,    170,    186,    230,    184,    198,    164,
+    181,    175,    115,    116,    117,    118,    119,    120,
+    121,    122,    161,    191,    208,    221,    222,    174,
+    162,    163,    165,    183,    169,    167,    182,    188,
+    189,    190,    172,     91,     92,     93,    180,    215,
+    249,     65,     66,     67,     68,     69,     70,     71,
+     72,     73,    173,    244,    246,    242,    243,    245,
+    166,     74,     75,     76,     77,     78,     79,     80,
+     81,     82,    185,    251,    252,    219,    250,    255,
+    217,    247,     83,     84,     85,     86,     87,     88,
+     89,     90,    178,    212,    214,    210,    211,    213,
+     48,     49,     50,     51,     52,     53,     54,     55,
+     56,     57,    179,    123,    220,    125,    218,    126
+};
+#endif          /* POSIX-BC */
+#if '^' == 176  /* if defined(??) (OS/400?) 037 */
+EXT unsigned char PL_e2a[] = { /* ASCII (ISO8859-1) to EBCDIC (IBM-037) */
+      0,      1,      2,      3,     55,     45,     46,     47,
+     22,      5,     37,     11,     12,     13,     14,     15,
+     16,     17,     18,     19,     60,     61,     50,     38,
+     24,     25,     63,     39,     28,     29,     30,     31,
+     64,     90,    127,    123,     91,    108,     80,    125,
+     77,     93,     92,     78,    107,     96,     75,     97,
+    240,    241,    242,    243,    244,    245,    246,    247,
+    248,    249,    122,     94,     76,    126,    110,    111,
+    124,    193,    194,    195,    196,    197,    198,    199,
+    200,    201,    209,    210,    211,    212,    213,    214,
+    215,    216,    217,    226,    227,    228,    229,    230,
+    231,    232,    233,    186,    224,    187,    176,    109,
+    121,    129,    130,    131,    132,    133,    134,    135,
+    136,    137,    145,    146,    147,    148,    149,    150,
+    151,    152,    153,    162,    163,    164,    165,    166,
+    167,    168,    169,    192,     79,    208,    161,      7,
+     32,     33,     34,     35,     36,     21,      6,     23,
+     40,     41,     42,     43,     44,      9,     10,     27,
+     48,     49,     26,     51,     52,     53,     54,      8,
+     56,     57,     58,     59,      4,     20,     62,    255,
+     65,    170,     74,    177,    159,    178,    106,    181,
+    189,    180,    154,    138,     95,    202,    175,    188,
+    144,    143,    234,    250,    190,    160,    182,    179,
+    157,    218,    155,    139,    183,    184,    185,    171,
+    100,    101,     98,    102,     99,    103,    158,    104,
+    116,    113,    114,    115,    120,    117,    118,    119,
+    172,    105,    237,    238,    235,    239,    236,    191,
+    128,    253,    254,    251,    252,    173,    174,     89,
+     68,     69,     66,     70,     67,     71,    156,     72,
+     84,     81,     82,     83,     88,     85,     86,     87,
+    140,     73,    205,    206,    203,    207,    204,    225,
+    112,    221,    222,    219,    220,    141,    142,    223
+};
+EXT unsigned char PL_a2e[] = { /* EBCDIC (IBM-037) to ASCII (ISO8859-1) */
+      0,      1,      2,      3,    156,      9,    134,    127,
+    151,    141,    142,     11,     12,     13,     14,     15,
+     16,     17,     18,     19,    157,    133,      8,    135,
+     24,     25,    146,    143,     28,     29,     30,     31,
+    128,    129,    130,    131,    132,     10,     23,     27,
+    136,    137,    138,    139,    140,      5,      6,      7,
+    144,    145,     22,    147,    148,    149,    150,      4,
+    152,    153,    154,    155,     20,     21,    158,     26,
+     32,    160,    226,    228,    224,    225,    227,    229,
+    231,    241,    162,     46,     60,     40,     43,    124,
+     38,    233,    234,    235,    232,    237,    238,    239,
+    236,    223,     33,     36,     42,     41,     59,    172,
+     45,     47,    194,    196,    192,    193,    195,    197,
+    199,    209,    166,     44,     37,     95,     62,     63,
+    248,    201,    202,    203,    200,    205,    206,    207,
+    204,     96,     58,     35,     64,     39,     61,     34,
+    216,     97,     98,     99,    100,    101,    102,    103,
+    104,    105,    171,    187,    240,    253,    254,    177,
+    176,    106,    107,    108,    109,    110,    111,    112,
+    113,    114,    170,    186,    230,    184,    198,    164,
+    181,    126,    115,    116,    117,    118,    119,    120,
+    121,    122,    161,    191,    208,    221,    222,    174,
+     94,    163,    165,    183,    169,    167,    182,    188,
+    189,    190,     91,     93,    175,    168,    180,    215,
+    123,     65,     66,     67,     68,     69,     70,     71,
+     72,     73,    173,    244,    246,    242,    243,    245,
+    125,     74,     75,     76,     77,     78,     79,     80,
+     81,     82,    185,    251,    252,    249,    250,    255,
+     92,    247,     83,     84,     85,     86,     87,     88,
+     89,     90,    178,    212,    214,    210,    211,    213,
+     48,     49,     50,     51,     52,     53,     54,     55,
+     56,     57,    179,    219,    220,    217,    218,    159
+};
+#endif          /* 037 */
+#if '^' == 95   /* if defined(__MVS__) || defined(??) (VM/ESA?) 1047 */
+EXT unsigned char PL_e2a[] = { /* ASCII (ISO8859-1) to EBCDIC (IBM-1047) */
+    0,      1,      2,      3,      55,     45,     46,     47,
+    22,     5,      21,     11,     12,     13,     14,     15,
+    16,     17,     18,     19,     60,     61,     50,     38,
+    24,     25,     63,     39,     28,     29,     30,     31,
+    64,     90,     127,    123,    91,     108,    80,     125,
+    77,     93,     92,     78,     107,    96,     75,     97,
+    240,    241,    242,    243,    244,    245,    246,    247,
+    248,    249,    122,    94,     76,     126,    110,    111,
+    124,    193,    194,    195,    196,    197,    198,    199,
+    200,    201,    209,    210,    211,    212,    213,    214,
+    215,    216,    217,    226,    227,    228,    229,    230,
+    231,    232,    233,    173,    224,    189,    95,     109,
+    121,    129,    130,    131,    132,    133,    134,    135,
+    136,    137,    145,    146,    147,    148,    149,    150,
+    151,    152,    153,    162,    163,    164,    165,    166,
+    167,    168,    169,    192,    79,     208,    161,    7,
+    32,     33,     34,     35,     36,     37,     6,      23,
+    40,     41,     42,     43,     44,     9,      10,     27,
+    48,     49,     26,     51,     52,     53,     54,     8,
+    56,     57,     58,     59,     4,      20,     62,     255,
+    65,     170,    74,     177,    159,    178,    106,    181,
+    187,    180,    154,    138,    176,    202,    175,    188,
+    144,    143,    234,    250,    190,    160,    182,    179,
+    157,    218,    155,    139,    183,    184,    185,    171,
+    100,    101,    98,     102,    99,     103,    158,    104,
+    116,    113,    114,    115,    120,    117,    118,    119,
+    172,    105,    237,    238,    235,    239,    236,    191,
+    128,    253,    254,    251,    252,    186,    174,    89,
+    68,     69,     66,     70,     67,     71,     156,    72,
+    84,     81,     82,     83,     88,     85,     86,     87,
+    140,    73,     205,    206,    203,    207,    204,    225,
+    112,    221,    222,    219,    220,    141,    142,    223
+};
+EXT unsigned char PL_a2e[] = { /* EBCDIC (IBM-1047) to ASCII (ISO8859-1) */
+    0,      1,      2,      3,      156,    9,      134,    127,
+    151,    141,    142,    11,     12,     13,     14,     15,
+    16,     17,     18,     19,     157,    10,     8,      135,
+    24,     25,     146,    143,    28,     29,     30,     31,
+    128,    129,    130,    131,    132,    133,    23,     27,
+    136,    137,    138,    139,    140,    5,      6,      7,
+    144,    145,    22,     147,    148,    149,    150,    4,
+    152,    153,    154,    155,    20,     21,     158,    26,
+    32,     160,    226,    228,    224,    225,    227,    229,
+    231,    241,    162,    46,     60,     40,     43,     124,
+    38,     233,    234,    235,    232,    237,    238,    239,
+    236,    223,    33,     36,     42,     41,     59,     94,
+    45,     47,     194,    196,    192,    193,    195,    197,
+    199,    209,    166,    44,     37,     95,     62,     63,
+    248,    201,    202,    203,    200,    205,    206,    207,
+    204,    96,     58,     35,     64,     39,     61,     34,
+    216,    97,     98,     99,     100,    101,    102,    103,
+    104,    105,    171,    187,    240,    253,    254,    177,
+    176,    106,    107,    108,    109,    110,    111,    112,
+    113,    114,    170,    186,    230,    184,    198,    164,
+    181,    126,    115,    116,    117,    118,    119,    120,
+    121,    122,    161,    191,    208,    91,     222,    174,
+    172,    163,    165,    183,    169,    167,    182,    188,
+    189,    190,    221,    168,    175,    93,     180,    215,
+    123,    65,     66,     67,     68,     69,     70,     71,
+    72,     73,     173,    244,    246,    242,    243,    245,
+    125,    74,     75,     76,     77,     78,     79,     80,
+    81,     82,     185,    251,    252,    249,    250,    255,
+    92,     247,    83,     84,     85,     86,     87,     88,
+    89,     90,     178,    212,    214,    210,    211,    213,
+    48,     49,    50,      51,     52,     53,     54,     55,
+    56,     57,    179,     219,    220,    217,    218,    159
+};
+#endif          /* 1047 */
 EXT unsigned char PL_fold[] = { /* fast EBCDIC case folding table */
     0,      1,      2,      3,      4,      5,      6,      7,
     8,      9,      10,     11,     12,     13,     14,     15,
@@ -2512,6 +2800,10 @@ EXTCONST  unsigned char PL_fold[] = {
 #endif  /* !EBCDIC */
 #else
 EXTCONST unsigned char PL_fold[];
+#ifdef EBCDIC
+EXTCONST unsigned char PL_e2a[];
+EXTCONST unsigned char PL_a2e[];
+#endif /* EBCDIC */
 #endif
 
 #ifdef DOINIT

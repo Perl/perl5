@@ -1533,5 +1533,7 @@ print "ok 247\n";
 
 	print "not " unless $1 eq "\x{200}\x{300}" && length($1) == 2;
 	print "ok 580\n"; 
+    } else {
+	for (576..580) { print "not ok $_\n" }
     }
 }

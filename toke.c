@@ -7273,6 +7273,10 @@ vstring:
 					    "Integer overflow in decimal number");
 			}
 		    }
+		    /* THIS IS EVIL */
+		    if (rev < 256) 
+			rev = ASCII_TO_NATIVE(rev);
+
 		    tmpend = uv_to_utf8(tmpbuf, rev);
 		    if (rev > revmax)
 			revmax = rev;
@@ -7289,11 +7293,11 @@ vstring:
 
 		SvPOK_on(sv);
 		SvREADONLY_on(sv);
-		if (revmax > 127) {
-		    SvUTF8_on(sv);
+		/* if (revmax > 127) { */
+		    SvUTF8_on(sv); /*
 		    if (revmax < 256)
 		      sv_utf8_downgrade(sv, TRUE);
-		}
+		} */
 	    }
 	}
 	break;

@@ -108,7 +108,11 @@ for file in `$cat .clist`; do
 			if [ "$archname" = cygwin ]; then
 				uwinfix="-e s,\\\\\\\\,/,g"
 			else
-				uwinfix=
+				if [ "$osname" = posix-bc ]; then
+					uwinfix="-e s/\\*POSIX(\\(.*\\))/\\1/"
+				else
+					uwinfix=
+				fi
 			fi
 		fi
 	fi

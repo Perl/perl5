@@ -3867,19 +3867,19 @@ newSVpvn, newSVpvn_share, newSVrv, newSVsv, newSVuv, newXS, newXSproto,
 Newz, Nullav, Nullch, Nullcv, Nullhv, Nullsv, ORIGMARK, perl_alloc,
 perl_construct, perl_destruct, perl_free, perl_parse, perl_run,
 PL_modglobal, PL_na, PL_sv_no, PL_sv_undef, PL_sv_yes, POPi, POPl, POPn,
-POPp, POPs, PUSHi, PUSHMARK, PUSHn, PUSHp, PUSHs, PUSHu, PUTBACK, Renew,
-Renewc, require_pv, RETVAL, Safefree, savepv, savepvn, SAVETMPS, SP,
-SPAGAIN, ST, strEQ, strGE, strGT, strLE, strLT, strNE, strnEQ, strnNE,
-StructCopy, SvCUR, SvCUR_set, SvEND, SvGETMAGIC, SvGROW, SvIOK, SvIOKp,
-SvIOK_notUV, SvIOK_off, SvIOK_on, SvIOK_only, SvIOK_only_UV, SvIOK_UV,
-SvIV, SvIVX, SvLEN, SvNIOK, SvNIOKp, SvNIOK_off, SvNOK, SvNOKp, SvNOK_off,
-SvNOK_on, SvNOK_only, SvNV, SvNVX, SvOK, SvOOK, SvPOK, SvPOKp, SvPOK_off,
-SvPOK_on, SvPOK_only, SvPOK_only_UTF8, SvPV, SvPVX, SvPV_force, SvPV_nolen,
-SvREFCNT, SvREFCNT_dec, SvREFCNT_inc, SvROK, SvROK_off, SvROK_on, SvRV,
-SvSETMAGIC, SvSetSV, SvSetSV_nosteal, SvSTASH, SvTAINT, SvTAINTED,
-SvTAINTED_off, SvTAINTED_on, SvTRUE, svtype, SvTYPE, SVt_IV, SVt_NV,
-SVt_PV, SVt_PVAV, SVt_PVCV, SVt_PVHV, SVt_PVMG, SvUOK, SvUPGRADE, SvUTF8,
-SvUTF8_off, SvUTF8_on, SvUV, SvUVX, sv_2mortal, sv_bless, sv_catpv,
+POPp, POPpbytex, POPpx, POPs, PUSHi, PUSHMARK, PUSHn, PUSHp, PUSHs, PUSHu,
+PUTBACK, Renew, Renewc, require_pv, RETVAL, Safefree, savepv, savepvn,
+SAVETMPS, SP, SPAGAIN, ST, strEQ, strGE, strGT, strLE, strLT, strNE,
+strnEQ, strnNE, StructCopy, SvCUR, SvCUR_set, SvEND, SvGETMAGIC, SvGROW,
+SvIOK, SvIOKp, SvIOK_notUV, SvIOK_off, SvIOK_on, SvIOK_only, SvIOK_only_UV,
+SvIOK_UV, SvIV, SvIVX, SvLEN, SvNIOK, SvNIOKp, SvNIOK_off, SvNOK, SvNOKp,
+SvNOK_off, SvNOK_on, SvNOK_only, SvNV, SvNVX, SvOK, SvOOK, SvPOK, SvPOKp,
+SvPOK_off, SvPOK_on, SvPOK_only, SvPOK_only_UTF8, SvPV, SvPVX, SvPV_force,
+SvPV_nolen, SvREFCNT, SvREFCNT_dec, SvREFCNT_inc, SvROK, SvROK_off,
+SvROK_on, SvRV, SvSETMAGIC, SvSetSV, SvSetSV_nosteal, SvSTASH, SvTAINT,
+SvTAINTED, SvTAINTED_off, SvTAINTED_on, SvTRUE, svtype, SvTYPE, SVt_IV,
+SVt_NV, SVt_PV, SVt_PVAV, SVt_PVCV, SVt_PVHV, SVt_PVMG, SvUOK, SvUPGRADE,
+SvUTF8, SvUTF8_off, SvUTF8_on, SvUV, SvUVX, sv_2mortal, sv_bless, sv_catpv,
 sv_catpvf, sv_catpvf_mg, sv_catpvn, sv_catpvn_mg, sv_catpv_mg, sv_catsv,
 sv_catsv_mg, sv_chop, sv_clear, sv_cmp, sv_cmp_locale, sv_dec,
 sv_derived_from, sv_eq, sv_free, sv_gets, sv_grow, sv_inc, sv_insert,
@@ -8213,6 +8213,10 @@ C<vendorprefixexp>, C<version>, C<versiononly>, C<vi>, C<voidflags>
 
 C<xlibpth>, C<xs_apiversion>
 
+=item y
+
+C<yacc>, C<yaccflags>
+
 =item z
 
 C<zcat>, C<zip>
@@ -8655,6 +8659,15 @@ Scheme 1, Scheme 2, Other Schemes
 
 =item Other Encodings of Unicode
 
+=item Listing available encodings
+
+=item Defining Aliases
+
+As a simple string, As a qr// compiled regular expression, e.g.:, As a code
+reference, e.g.:
+
+=item Defining Encodings
+
 =back
 
 =item Encoding and IO
@@ -8701,6 +8714,8 @@ of the Encode extension
 =item COPYRIGHT
 
 =back
+
+=head2 Encode::Tcl - Tcl encodings
 
 =head2 EncodeFormat - the format of encoding tables of the Encode extension
 
@@ -8940,6 +8955,8 @@ canonpath, cflags, manifypods, perl_archive
 
 =back
 
+perl_archive_after
+
 =head2 ExtUtils::MM_OS2 - methods to override UN*X behaviour in
 ExtUtils::MakeMaker
 
@@ -9148,6 +9165,8 @@ xs_cpp (o)
 xs_o (o)
 
 perl_archive
+
+perl_archive_after
 
 export_list
 

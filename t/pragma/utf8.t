@@ -3,11 +3,6 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
-    $ENV{PERL5LIB} = '../lib';
-    if ( ord("\t") != 9 ) { # skip on ebcdic platforms
-        print "1..0 # Skip utf8 tests on ebcdic platform.\n";
-        exit;
-    }
 }
 
 # NOTE!

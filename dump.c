@@ -194,6 +194,11 @@ Perl_sv_peek(pTHX_ SV *sv)
 	sv_catpv(t, "(");
 	unref++;
     }
+    else if (DEBUG_R_TEST && SvREFCNT(sv) > 1) {
+	sv_catpvf(t, "<%u>", SvREFCNT(sv));
+    }
+
+
     if (SvROK(sv)) {
 	sv_catpv(t, "\\");
 	if (SvCUR(t) + unref > 10) {

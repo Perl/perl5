@@ -1,7 +1,14 @@
 @@@	The Unicode Standard 3.1
-@@@+	Draft U31M001129.lst
-	Fix misc. typos.
-	Add annotation for 030D.
+@@@+	Draft U31M010208.lst
+	Punctuation correction in math alphanumerics notice.
+	Add annotation for FB1E and 05BF.
+	Add tentative English translations for Byzantine musical subheads.
+	Extend annotations for 0598 ZARQA and 05AE ZINOR.
+	Correct placement of Dependent Vowels header in Devanagari.
+	Update subheads for mensural notation in musical symbols.
+	Add bra/ket aliases for 3008, 3009.
+	Add noncharacters for Planes 3..13, 15, 16.
+	Added alias for 25BD.
 @@	0000	C0 Controls and Basic Latin (Basic Latin)	007F
 @		C0 controls
 @+		Alias names are those for ISO 6429.
@@ -2991,7 +2998,9 @@
 	= tarha
 0597	HEBREW ACCENT REVIA
 0598	HEBREW ACCENT ZARQA *
-	= zinorit
+	= tsinorit, zinorit; tsinor, zinor
+	* This character is to be used when Zarqa or Tsinor are placed above, and also for Tsinorit.
+	x (05AE - hebrew accent zinor)
 0599	HEBREW ACCENT PASHTA
 059A	HEBREW ACCENT YETIV
 059B	HEBREW ACCENT TEVIR
@@ -3016,6 +3025,9 @@
 05AC	HEBREW ACCENT ILUY
 05AD	HEBREW ACCENT DEHI
 05AE	HEBREW ACCENT ZINOR
+	= tsinor; zarqa
+	* This character is to be used when Zarqa or Tsinor are placed above left.
+	x (0598 - hebrew accent zarqa)
 05AF	HEBREW MARK MASORA CIRCLE
 @		Points and punctuation
 05B0	HEBREW POINT SHEVA
@@ -3038,6 +3050,7 @@
 	* may be used as a Hebrew accent sof pasuq
 05BE	HEBREW PUNCTUATION MAQAF
 05BF	HEBREW POINT RAFE
+	x (hebrew point judeo-spanish varika - FB1E)
 05C0	HEBREW PUNCTUATION PASEQ *
 	= legarmeh
 	* may be treated as spacing punctuation, not as a point
@@ -3688,8 +3701,8 @@
 093C	DEVANAGARI SIGN NUKTA
 	* for extending the alphabet to new letters
 093D	DEVANAGARI SIGN AVAGRAHA
-093E	DEVANAGARI VOWEL SIGN AA
 @		Dependent vowel signs
+093E	DEVANAGARI VOWEL SIGN AA
 093F	DEVANAGARI VOWEL SIGN I
 	* stands to the left of the consonant
 0940	DEVANAGARI VOWEL SIGN II
@@ -10229,6 +10242,7 @@
 	x (contains as normal subgroup - 22B3)
 25BC	BLACK DOWN-POINTING TRIANGLE
 25BD	WHITE DOWN-POINTING TRIANGLE
+	= Hamilton operator
 	x (nabla - 2207)
 25BE	BLACK DOWN-POINTING SMALL TRIANGLE
 25BF	WHITE DOWN-POINTING SMALL TRIANGLE
@@ -11566,10 +11580,14 @@
 	x (white circle - 25CB)
 	x (large circle - 25EF)
 3008	LEFT ANGLE BRACKET
+	= bra
+	= z notation left sequence bracket
 	x (less-than sign - 003C)
 	x (single left-pointing angle quotation mark - 2039)
 	x (left-pointing angle bracket - 2329)
 3009	RIGHT ANGLE BRACKET
+	= ket
+	= z notation right sequence bracket
 	x (greater-than sign - 003E)
 	x (single right-pointing angle quotation mark - 203A)
 	x (right-pointing angle bracket - 232A)
@@ -11599,9 +11617,9 @@
 3018	LEFT WHITE TORTOISE SHELL BRACKET
 3019	RIGHT WHITE TORTOISE SHELL BRACKET
 301A	LEFT WHITE SQUARE BRACKET
-	= z notation left bag bracket
+	= left abstract syntax bracket
 301B	RIGHT WHITE SQUARE BRACKET
-	= z notation right bag bracket
+	= right abstract syntax bracket
 301C	WAVE DASH
 @+		* This character was encoded to match JIS C 6226-1978 1-33 "wave dash". Subsequent revisions of the JIS standard and industry practice have settled on JIS 1-33 as being the fullwidth tilde character.
 	x (wavy dash - 3030)
@@ -15131,10 +15149,11 @@ FB16	ARMENIAN SMALL LIGATURE VEW NOW
 FB17	ARMENIAN SMALL LIGATURE MEN XEH
 	# 0574 056D
 @		Hebrew presentation forms
-@+		See the Hebrew block starting at 0590
 FB1D	HEBREW LETTER YOD WITH HIRIQ
 	: 05D9 05B4
 FB1E	HEBREW POINT JUDEO-SPANISH VARIKA
+	* a glyph variant of 05BF
+@+		See the Hebrew block starting at 0590
 FB1F	HEBREW LIGATURE YIDDISH YOD YOD PATAH
 	: 05F2 05B7
 FB20	HEBREW LETTER ALTERNATIVE AYIN
@@ -17481,7 +17500,7 @@ FFFF	<not a character>
 1044C	DESERET SMALL LETTER EN
 1044D	DESERET SMALL LETTER ENG
 @@	1D000	Byzantine Musical Symbols	1D0FF
-@		Prosodies
+@		Prosodies (Prosodics)
 1D000	BYZANTINE MUSICAL SYMBOL PSILI
 1D001	BYZANTINE MUSICAL SYMBOL DASEIA
 1D002	BYZANTINE MUSICAL SYMBOL PERISPOMENI
@@ -17504,7 +17523,7 @@ FFFF	<not a character>
 1D012	BYZANTINE MUSICAL SYMBOL APOSTROFOS DIPLI
 1D013	BYZANTINE MUSICAL SYMBOL SYNEVMA
 1D014	BYZANTINE MUSICAL SYMBOL THITA
-@		Melodimata
+@		Melodimata (Melodics)
 1D015	BYZANTINE MUSICAL SYMBOL OLIGON ARCHAION
 1D016	BYZANTINE MUSICAL SYMBOL GORGON ARCHAION
 1D017	BYZANTINE MUSICAL SYMBOL PSILON
@@ -17554,7 +17573,7 @@ FFFF	<not a character>
 1D043	BYZANTINE MUSICAL SYMBOL TROMIKON ALLO
 1D044	BYZANTINE MUSICAL SYMBOL STRAGGISMATA
 1D045	BYZANTINE MUSICAL SYMBOL GRONTHISMATA
-@		Fonitika
+@		Fonitika (Vocals)
 1D046	BYZANTINE MUSICAL SYMBOL ISON NEO
 1D047	BYZANTINE MUSICAL SYMBOL OLIGON NEO
 1D048	BYZANTINE MUSICAL SYMBOL OXEIA NEO
@@ -17572,7 +17591,7 @@ FFFF	<not a character>
 1D054	BYZANTINE MUSICAL SYMBOL KRATIMOYPORROON
 1D055	BYZANTINE MUSICAL SYMBOL ELAFRON
 1D056	BYZANTINE MUSICAL SYMBOL CHAMILI
-@		Afona or Ypistaseis
+@		Afona or Ypostaseis (Mutes or Hypostases)
 1D057	BYZANTINE MUSICAL SYMBOL MIKRON ISON
 1D058	BYZANTINE MUSICAL SYMBOL VAREIA NEO
 1D059	BYZANTINE MUSICAL SYMBOL PIASMA NEO
@@ -17613,7 +17632,7 @@ FFFF	<not a character>
 1D07C	BYZANTINE MUSICAL SYMBOL YFEN KATO
 1D07D	BYZANTINE MUSICAL SYMBOL YFEN ANO
 1D07E	BYZANTINE MUSICAL SYMBOL STAVROS
-@		Argies
+@		Argies (Retards)
 1D07F	BYZANTINE MUSICAL SYMBOL KLASMA ANO
 1D080	BYZANTINE MUSICAL SYMBOL DIPLI ARCHAION
 1D081	BYZANTINE MUSICAL SYMBOL KRATIMA ARCHAION
@@ -17625,13 +17644,13 @@ FFFF	<not a character>
 1D087	BYZANTINE MUSICAL SYMBOL TRIPLI
 1D088	BYZANTINE MUSICAL SYMBOL TETRAPLI
 1D089	BYZANTINE MUSICAL SYMBOL KORONIS
-@		Leimmata or Siopes
+@		Leimmata or Siopes (Leimmas or Silencers)
 1D08A	BYZANTINE MUSICAL SYMBOL LEIMMA ENOS CHRONOU
 1D08B	BYZANTINE MUSICAL SYMBOL LEIMMA DYO CHRONON
 1D08C	BYZANTINE MUSICAL SYMBOL LEIMMA TRION CHRONON
 1D08D	BYZANTINE MUSICAL SYMBOL LEIMMA TESSARON CHRONON
 1D08E	BYZANTINE MUSICAL SYMBOL LEIMMA IMISEOS CHRONOU
-@		Synagmata or Gorgotites
+@		Synagmata or Gorgotites (Synagmas or Quickeners)
 1D08F	BYZANTINE MUSICAL SYMBOL GORGON NEO ANO
 1D090	BYZANTINE MUSICAL SYMBOL GORGON PARESTIGMENON ARISTERA
 1D091	BYZANTINE MUSICAL SYMBOL GORGON PARESTIGMENON DEXIA
@@ -17643,7 +17662,7 @@ FFFF	<not a character>
 1D097	BYZANTINE MUSICAL SYMBOL ARGON
 1D098	BYZANTINE MUSICAL SYMBOL IMIDIARGON
 1D099	BYZANTINE MUSICAL SYMBOL DIARGON
-@		Agogika
+@		Agogika (Conduits)
 1D09A	BYZANTINE MUSICAL SYMBOL AGOGI POLI ARGI
 1D09B	BYZANTINE MUSICAL SYMBOL AGOGI ARGOTERI
 1D09C	BYZANTINE MUSICAL SYMBOL AGOGI ARGI
@@ -17652,7 +17671,7 @@ FFFF	<not a character>
 1D09F	BYZANTINE MUSICAL SYMBOL AGOGI GORGI
 1D0A0	BYZANTINE MUSICAL SYMBOL AGOGI GORGOTERI
 1D0A1	BYZANTINE MUSICAL SYMBOL AGOGI POLI GORGI
-@		Ichimata and Martyrika
+@		Ichimata and Martyrika (Ichimas and Evidentials)
 1D0A2	BYZANTINE MUSICAL SYMBOL MARTYRIA PROTOS ICHOS
 1D0A3	BYZANTINE MUSICAL SYMBOL MARTYRIA ALLI PROTOS ICHOS
 1D0A4	BYZANTINE MUSICAL SYMBOL MARTYRIA DEYTEROS ICHOS
@@ -17672,7 +17691,7 @@ FFFF	<not a character>
 1D0B2	BYZANTINE MUSICAL SYMBOL MARTYRIA PROTOVARYS ICHOS
 1D0B3	BYZANTINE MUSICAL SYMBOL MARTYRIA PLAGIOS TETARTOS ICHOS
 1D0B4	BYZANTINE MUSICAL SYMBOL GORTHMIKON N APLOUN
-@		Fthores
+@		Fthores (Destroyers)
 1D0B5	BYZANTINE MUSICAL SYMBOL GORTHMIKON N DIPLOUN
 1D0B6	BYZANTINE MUSICAL SYMBOL ENARXIS KAI FTHORA VOU
 1D0B7	BYZANTINE MUSICAL SYMBOL IMIFONON
@@ -17694,7 +17713,7 @@ FFFF	<not a character>
 1D0C7	BYZANTINE MUSICAL SYMBOL FTHORA NENANO
 1D0C8	BYZANTINE MUSICAL SYMBOL CHROA ZYGOS
 1D0C9	BYZANTINE MUSICAL SYMBOL CHROA KLITON
-@		Alloioseis
+@		Alloioseis (Differentiators)
 1D0CA	BYZANTINE MUSICAL SYMBOL CHROA SPATHI
 1D0CB	BYZANTINE MUSICAL SYMBOL FTHORA I YFESIS TETARTIMORION
 1D0CC	BYZANTINE MUSICAL SYMBOL FTHORA ENARMONIOS ANTIFONIA
@@ -17710,7 +17729,7 @@ FFFF	<not a character>
 1D0D6	BYZANTINE MUSICAL SYMBOL YFESIS DIGRAMMOS EX DODEKATA
 1D0D7	BYZANTINE MUSICAL SYMBOL YFESIS TRIGRAMMOS OKTO DODEKATA
 1D0D8	BYZANTINE MUSICAL SYMBOL GENIKI DIESIS
-@		Rythmika
+@		Rythmika (Rhythmics)
 1D0D9	BYZANTINE MUSICAL SYMBOL GENIKI YFESIS
 1D0DA	BYZANTINE MUSICAL SYMBOL DIASTOLI APLI MIKRI
 1D0DB	BYZANTINE MUSICAL SYMBOL DIASTOLI APLI MEGALI
@@ -17723,7 +17742,7 @@ FFFF	<not a character>
 1D0E2	BYZANTINE MUSICAL SYMBOL SIMANSIS ARSEOS
 1D0E3	BYZANTINE MUSICAL SYMBOL SIMANSIS ARSEOS DISIMOU
 1D0E4	BYZANTINE MUSICAL SYMBOL SIMANSIS ARSEOS TRISIMOU
-@		Grammata
+@		Grammata (Letters)
 1D0E5	BYZANTINE MUSICAL SYMBOL SIMANSIS ARSEOS TETRASIMOU
 1D0E6	BYZANTINE MUSICAL SYMBOL DIGRAMMA GG
 1D0E7	BYZANTINE MUSICAL SYMBOL DIFTOGGOS OU
@@ -17957,27 +17976,32 @@ FFFF	<not a character>
 1D1B3	MUSICAL SYMBOL WITH FINGERNAILS
 1D1B4	MUSICAL SYMBOL DAMP
 1D1B5	MUSICAL SYMBOL DAMP ALL
+@		Mensural Notation
 1D1B6	MUSICAL SYMBOL MAXIMA
 1D1B7	MUSICAL SYMBOL LONGA
 1D1B8	MUSICAL SYMBOL BREVIS
-@		Noteheads
 1D1B9	MUSICAL SYMBOL SEMIBREVIS WHITE
 1D1BA	MUSICAL SYMBOL SEMIBREVIS BLACK
-@		Notes
 1D1BB	MUSICAL SYMBOL MINIMA
+	: 1D1B9 1D165
 1D1BC	MUSICAL SYMBOL MINIMA BLACK
+	: 1D1BA 1D165
 1D1BD	MUSICAL SYMBOL SEMIMINIMA WHITE
+	: 1D1BB 1D16E
 1D1BE	MUSICAL SYMBOL SEMIMINIMA BLACK
+	: 1D1BC 1D16E
 1D1BF	MUSICAL SYMBOL FUSA WHITE
+	: 1D1BB 1D16F
 1D1C0	MUSICAL SYMBOL FUSA BLACK
-@		Rests
+	: 1D1BC 1D16F
+@		Mensural Rests
 1D1C1	MUSICAL SYMBOL LONGA PERFECTA REST
 1D1C2	MUSICAL SYMBOL LONGA IMPERFECTA REST
 1D1C3	MUSICAL SYMBOL BREVIS REST
 1D1C4	MUSICAL SYMBOL SEMIBREVIS REST
 1D1C5	MUSICAL SYMBOL MINIMA REST
 1D1C6	MUSICAL SYMBOL SEMIMINIMA REST
-@		Tempi
+@		Mensural Prolations
 1D1C7	MUSICAL SYMBOL TEMPUS PERFECTUM CUM PROLATIONE PERFECTA
 1D1C8	MUSICAL SYMBOL TEMPUS PERFECTUM CUM PROLATIONE IMPERFECTA
 1D1C9	MUSICAL SYMBOL TEMPUS PERFECTUM CUM PROLATIONE PERFECTA DIMINUTION-1
@@ -18004,7 +18028,7 @@ FFFF	<not a character>
 1D1DC	MUSICAL SYMBOL TORCULUS RESUPINUS
 1D1DD	MUSICAL SYMBOL PES SUBPUNCTIS
 @@	1D400	Mathematical Alphanumeric Symbols	1D7FF
-@+		To be used for mathematical variables where style variations are important semantically. For general text use standard Latin and Greek letters with markup.
+@+		To be used for mathematical variables where style variations are important semantically. For general text, use standard Latin and Greek letters with markup.
 @		Bold symbols
 1D400	MATHEMATICAL BOLD CAPITAL A
 	# <font> 0041 latin capital letter a
@@ -20074,6 +20098,7 @@ FFFF	<not a character>
 	* the value 1FFFE is guaranteed not to be a Unicode character at all
 1FFFF	<not a character>
 	* the value 1FFFF is guaranteed not to be a Unicode character at all
+@@	20000	CJK Unified Ideographs Extension B	2A6D6
 @@	2F800	CJK Compatibility Ideographs Supplement	2FA1F
 2F800	CJK COMPATIBILITY IDEOGRAPH-2F800
 	: 4E3D
@@ -21165,6 +21190,72 @@ FFFF	<not a character>
 	* the value 2FFFE is guaranteed not to be a Unicode character at all
 2FFFF	<not a character>
 	* the value 2FFFF is guaranteed not to be a Unicode character at all
+@@	3FF80	Unassigned	3FFFF
+@		Not character codes
+3FFFE	<not a character>
+	* the value 3FFFE is guaranteed not to be a Unicode character at all
+3FFFF	<not a character>
+	* the value 3FFFF is guaranteed not to be a Unicode character at all
+@@	4FF80	Unassigned	4FFFF
+@		Not character codes
+4FFFE	<not a character>
+	* the value 4FFFE is guaranteed not to be a Unicode character at all
+4FFFF	<not a character>
+	* the value 4FFFF is guaranteed not to be a Unicode character at all
+@@	5FF80	Unassigned	5FFFF
+@		Not character codes
+5FFFE	<not a character>
+	* the value 5FFFE is guaranteed not to be a Unicode character at all
+5FFFF	<not a character>
+	* the value 5FFFF is guaranteed not to be a Unicode character at all
+@@	6FF80	Unassigned	6FFFF
+@		Not character codes
+6FFFE	<not a character>
+	* the value 6FFFE is guaranteed not to be a Unicode character at all
+6FFFF	<not a character>
+	* the value 6FFFF is guaranteed not to be a Unicode character at all
+@@	7FF80	Unassigned	7FFFF
+@		Not character codes
+7FFFE	<not a character>
+	* the value 7FFFE is guaranteed not to be a Unicode character at all
+7FFFF	<not a character>
+	* the value 7FFFF is guaranteed not to be a Unicode character at all
+@@	8FF80	Unassigned	8FFFF
+@		Not character codes
+8FFFE	<not a character>
+	* the value 8FFFE is guaranteed not to be a Unicode character at all
+8FFFF	<not a character>
+	* the value 8FFFF is guaranteed not to be a Unicode character at all
+@@	9FF80	Unassigned	9FFFF
+@		Not character codes
+9FFFE	<not a character>
+	* the value 9FFFE is guaranteed not to be a Unicode character at all
+9FFFF	<not a character>
+	* the value 9FFFF is guaranteed not to be a Unicode character at all
+@@	AFF80	Unassigned	AFFFF
+@		Not character codes
+AFFFE	<not a character>
+	* the value AFFFE is guaranteed not to be a Unicode character at all
+AFFFF	<not a character>
+	* the value AFFFF is guaranteed not to be a Unicode character at all
+@@	BFF80	Unassigned	BFFFF
+@		Not character codes
+BFFFE	<not a character>
+	* the value BFFFE is guaranteed not to be a Unicode character at all
+BFFFF	<not a character>
+	* the value BFFFF is guaranteed not to be a Unicode character at all
+@@	CFF80	Unassigned	CFFFF
+@		Not character codes
+CFFFE	<not a character>
+	* the value CFFFE is guaranteed not to be a Unicode character at all
+CFFFF	<not a character>
+	* the value CFFFF is guaranteed not to be a Unicode character at all
+@@	DFF80	Unassigned	DFFFF
+@		Not character codes
+DFFFE	<not a character>
+	* the value DFFFE is guaranteed not to be a Unicode character at all
+DFFFF	<not a character>
+	* the value DFFFF is guaranteed not to be a Unicode character at all
 @@	E0000	Tags	E007F
 @		Tag identifiers
 E0001	LANGUAGE TAG
@@ -21271,3 +21362,15 @@ EFFFE	<not a character>
 	* the value EFFFE is guaranteed not to be a Unicode character at all
 EFFFF	<not a character>
 	* the value EFFFF is guaranteed not to be a Unicode character at all
+@@	FFF80	Private Use	FFFFF
+@		Not character codes
+FFFFE	<not a character>
+	* the value FFFFE is guaranteed not to be a Unicode character at all
+FFFFF	<not a character>
+	* the value FFFFF is guaranteed not to be a Unicode character at all
+@@	10FF80	Private Use	10FFFF
+@		Not character codes
+10FFFE	<not a character>
+	* the value 10FFFE is guaranteed not to be a Unicode character at all
+10FFFF	<not a character>
+	* the value 10FFFF is guaranteed not to be a Unicode character at all

@@ -131,3 +131,22 @@ END_EXTERN_C
 #endif
 #define isIDFIRST_lazy(p)	isIDFIRST_lazy_if(p,1)
 #define isALNUM_lazy(p)		isALNUM_lazy_if(p,1)
+
+/* EBCDIC-happy ways of converting native code to UTF8; the reverse
+   process is taken care of in utf8_to_uv */
+
+#ifdef EBCDIC
+#define NATIVE_TO_ASCII(ch)                  PL_e2a[(ch)]
+#define ASCII_TO_NATIVE(ch)                  PL_a2e[(ch)]
+#else
+#define NATIVE_TO_ASCII(ch)                  (ch)
+#define ASCII_TO_NATIVE(ch)                  (ch)
+#endif
+
+#define UTF8_NEEDS_UPGRADE(ch)        (NATIVE_TO_ASCII(ch) & 0x80)
+#define NATIVE_TO_UTF8(ch, string)    STMT_START { \
+                                        if (!UTF8_NEEDS_UPGRADE(ch)) \
+                                            *(string)++ = NATIVE_TO_ASCII(ch); \
+                                        else /*  uv_to_utf8 is EBCDIC-aware */ \
+					    string = uv_to_utf8(string, ch); \
+                                      } STMT_END

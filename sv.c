@@ -63,7 +63,7 @@ static void do_clean_all(pTHXo_ SV *sv);
 #define del_SV(p) \
     STMT_START {					\
 	LOCK_SV_MUTEX;					\
-	if (PL_debug & 32768)				\
+	if (DEBUG_D_TEST)				\
 	    del_sv(p);					\
 	else						\
 	    plant_SV(p);				\
@@ -73,7 +73,7 @@ static void do_clean_all(pTHXo_ SV *sv);
 STATIC void
 S_del_sv(pTHX_ SV *p)
 {
-    if (PL_debug & 32768) {
+    if (DEBUG_D_TEST) {
 	SV* sva;
 	SV* sv;
 	SV* svend;
@@ -7188,6 +7188,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		    iv = *vecstr;
 		    ulen = 1;
 		}
+		if (iv <256) 
+		iv = NATIVE_TO_ASCII(iv); /* v-strings are codepoints */
 		vecstr += ulen;
 		veclen -= ulen;
 	    }
@@ -7268,6 +7270,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		    uv = *vecstr;
 		    ulen = 1;
 		}
+		if (uv <256) 
+		uv = NATIVE_TO_ASCII(uv); /* v-strings are codepoints */
 		vecstr += ulen;
 		veclen -= ulen;
 	    }

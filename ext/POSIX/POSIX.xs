@@ -2777,6 +2777,17 @@ not_there:
     return 0;
 }
 
+static void
+restore_sigmask(sigset_t *ossetp)
+{
+	    /* Fortunately, restoring the signal mask can't fail, because
+	     * there's nothing we can do about it if it does -- we're not
+	     * supposed to return -1 from sigaction unless the disposition
+	     * was unaffected.
+	     */
+	    (void)sigprocmask(SIG_SETMASK, ossetp, (sigset_t *)0);
+}
+
 MODULE = SigSet		PACKAGE = POSIX::SigSet		PREFIX = sig
 
 POSIX::SigSet
@@ -3374,9 +3385,9 @@ tanh(x)
 	NV		x
 
 SysRet
-sigaction(sig, action, oldaction = 0)
+sigaction(sig, optaction, oldaction = 0)
 	int			sig
-	POSIX::SigAction	action
+	SV *			optaction
 	POSIX::SigAction	oldaction
     CODE:
 #ifdef WIN32
@@ -3386,9 +3397,12 @@ sigaction(sig, action, oldaction = 0)
 # interface look beautiful, which is hard.
 
 	{
+	    POSIX__SigAction action;
 	    GV *siggv = gv_fetchpv("SIG", TRUE, SVt_PVHV);
 	    struct sigaction act;
 	    struct sigaction oact;
+	    sigset_t sset;
+	    sigset_t osset;
 	    POSIX__SigSet sigset;
 	    SV** svp;
 	    SV** sigsvp = hv_fetch(GvHVn(siggv),
@@ -3397,49 +3411,46 @@ sigaction(sig, action, oldaction = 0)
 				 TRUE);
 	    STRLEN n_a;
 
-	    /* Remember old handler name if desired. */
-	    if (oldaction) {
-		char *hand = SvPVx(*sigsvp, n_a);
-		svp = hv_fetch(oldaction, "HANDLER", 7, TRUE);
-		sv_setpv(*svp, *hand ? hand : "DEFAULT");
-	    }
-
-	    if (action) {
-		/* Vector new handler through %SIG.  (We always use sighandler
-		   for the C signal handler, which reads %SIG to dispatch.) */
-		svp = hv_fetch(action, "HANDLER", 7, FALSE);
-		if (!svp)
-		    croak("Can't supply an action without a HANDLER");
-		sv_setpv(*sigsvp, SvPV(*svp, n_a));
-		mg_set(*sigsvp);	/* handles DEFAULT and IGNORE */
-		act.sa_handler = PL_sighandlerp;
-
-		/* Set up any desired mask. */
-		svp = hv_fetch(action, "MASK", 4, FALSE);
-		if (svp && sv_isa(*svp, "POSIX::SigSet")) {
-		    IV tmp = SvIV((SV*)SvRV(*svp));
-		    sigset =  INT2PTR(sigset_t*, tmp);
-		    act.sa_mask = *sigset;
-		}
+	    /* Check optaction and set action */
+	    if(SvTRUE(optaction)) {
+		if(sv_isa(optaction, "POSIX::SigAction"))
+			action = (HV*)SvRV(optaction);
 		else
-		    sigemptyset(& act.sa_mask);
-
-		/* Set up any desired flags. */
-		svp = hv_fetch(action, "FLAGS", 5, FALSE);
-		act.sa_flags = svp ? SvIV(*svp) : 0;
+			croak("action is not of type POSIX::SigAction");
+	    }
+	    else {
+		action=0;
 	    }
 
-	    /* Now work around sigaction oddities */
-	    if (action && oldaction)
-		RETVAL = sigaction(sig, & act, & oact);
-	    else if (action)
-		RETVAL = sigaction(sig, & act, (struct sigaction *)0);
-	    else if (oldaction)
-		RETVAL = sigaction(sig, (struct sigaction *)0, & oact);
-	    else
-		RETVAL = -1;
+	    /* sigaction() is supposed to look atomic. In particular, any
+	     * signal handler invoked during a sigaction() call should
+	     * see either the old or the new disposition, and not something
+	     * in between. We use sigprocmask() to make it so.
+	     */
+	    sigfillset(&sset);
+	    RETVAL=sigprocmask(SIG_BLOCK, &sset, &osset);
+	    if(RETVAL == -1)
+		XSRETURN(1);
+	    ENTER;
+	    /* Restore signal mask no matter how we exit this block. */
+	    SAVEDESTRUCTOR(restore_sigmask, &osset);
 
+	    RETVAL=-1; /* In case both oldaction and action are 0. */
+
+	    /* Remember old disposition if desired. */
 	    if (oldaction) {
+		svp = hv_fetch(oldaction, "HANDLER", 7, TRUE);
+		if(!svp)
+		    croak("Can't supply an oldaction without a HANDLER");
+		if(SvTRUE(*sigsvp)) { /* TBD: what if "0"? */
+			sv_setsv(*svp, *sigsvp);
+		}
+		else {
+			sv_setpv(*svp, "DEFAULT");
+		}
+		RETVAL = sigaction(sig, (struct sigaction *)0, & oact);
+		if(RETVAL == -1)
+		    XSRETURN(1);
 		/* Get back the mask. */
 		svp = hv_fetch(oldaction, "MASK", 4, TRUE);
 		if (sv_isa(*svp, "POSIX::SigSet")) {
@@ -3456,6 +3467,54 @@ sigaction(sig, action, oldaction = 0)
 		svp = hv_fetch(oldaction, "FLAGS", 5, TRUE);
 		sv_setiv(*svp, oact.sa_flags);
 	    }
+
+	    if (action) {
+		/* Vector new handler through %SIG.  (We always use sighandler
+		   for the C signal handler, which reads %SIG to dispatch.) */
+		svp = hv_fetch(action, "HANDLER", 7, FALSE);
+		if (!svp)
+		    croak("Can't supply an action without a HANDLER");
+		sv_setsv(*sigsvp, *svp);
+		mg_set(*sigsvp);	/* handles DEFAULT and IGNORE */
+		if(SvPOK(*svp)) {
+			char *s=SvPVX(*svp);
+			if(strEQ(s,"IGNORE")) {
+				act.sa_handler = SIG_IGN;
+			}
+			else if(strEQ(s,"DEFAULT")) {
+				act.sa_handler = SIG_DFL;
+			}
+			else {
+				act.sa_handler = PL_sighandlerp;
+			}
+		}
+		else {
+			act.sa_handler = PL_sighandlerp;
+		}
+
+		/* Set up any desired mask. */
+		svp = hv_fetch(action, "MASK", 4, FALSE);
+		if (svp && sv_isa(*svp, "POSIX::SigSet")) {
+		    IV tmp = SvIV((SV*)SvRV(*svp));
+		    sigset = INT2PTR(sigset_t*, tmp);
+		    act.sa_mask = *sigset;
+		}
+		else
+		    sigemptyset(& act.sa_mask);
+
+		/* Set up any desired flags. */
+		svp = hv_fetch(action, "FLAGS", 5, FALSE);
+		act.sa_flags = svp ? SvIV(*svp) : 0;
+
+		/* Don't worry about cleaning up *sigsvp if this fails,
+		 * because that means we tried to disposition a
+		 * nonblockable signal, in which case *sigsvp is
+		 * essentially meaningless anyway.
+		 */
+		RETVAL = sigaction(sig, & act, (struct sigaction *)0);
+	    }
+
+	    LEAVE;
 	}
 #endif
     OUTPUT:

@@ -2,4 +2,18 @@
 # This file is built by mktables.PL from e.g. Unicode.txt.
 # Any changes made here will be lost!
 return <<'END';
+0009	
+007c	
+00ad	
+00b4	
+058a	
+0f0b	
+1361	
+1680	
+17d5	
+2000	2006
+2008	200a
+2010	
+2012	2013
+2027	
 END
