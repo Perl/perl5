@@ -1857,10 +1857,6 @@ typedef I32 (*regexec_t) _((regexp* prog, char* stringarg, char* strend, char*
 			    strbeg, I32 minend, SV* screamer, void* data, 
 			    U32 flags));
 
-EXT regexp*	pregcomp _((char* exp, char* xend, PMOP* pm));
-EXT I32		regexec_flags _((regexp* prog, char* stringarg, char* strend,
-			 char* strbeg, I32 minend, SV* screamer,
-			 void* data, U32 flags));
 #endif
 
 /* Set up PERLVAR macros for populating structs */

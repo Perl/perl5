@@ -10,6 +10,23 @@ WriteMakefile(
 );
 
 sub MY::postamble {
+  if ($^O eq 'VMS') {
+    return <<'VMS_EOF';
+re_comp.c : [--]regcomp.c
+	- $(RM_F) $(MMS$TARGET_NAME)
+	$(CP) [--]regcomp.c $(MMS$TARGET_NAME)
+
+re_comp$(OBJ_EXT) : re_comp.c
+
+re_exec.c : [--]regexec.c
+	- $(RM_F) $(MMS$TARGET_NAME)
+	$(CP) [--]regexec.c $(MMS$TARGET_NAME)
+
+re_exec$(OBJ_EXT) : re_exec.c
+
+
+VMS_EOF
+  } else {
     return <<'EOF';
 re_comp.c: ../../regcomp.c
 	-$(RM_F) $@
@@ -20,4 +37,5 @@ re_exec.c: ../../regexec.c
 	$(CP) ../../regexec.c $@
 
 EOF
+  }
 }
