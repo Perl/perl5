@@ -4,10 +4,12 @@
 
 #ifdef NETWARE
 	#define _POSIX_
-	//Ideally this should be somewhere down in the includes
-	//but putting it in other places is giving compiler errors.
-	//Also here I am unable to check for HAS_UNAME since it wouldn't have yet
-	//come into the file at this stage - sgp 18th Oct 2000
+	/*
+	 * Ideally this should be somewhere down in the includes
+	 * but putting it in other places is giving compiler errors.
+	 * Also here I am unable to check for HAS_UNAME since it wouldn't have
+	 * yet come into the file at this stage - sgp 18th Oct 2000
+	 */
 	#include <sys/utsname.h>
 #endif	/* NETWARE */
 
