@@ -10,7 +10,7 @@ BEGIN {
     }
 }
 
-print "1..72\n";
+print "1..75\n";
 
 my $test = 1;
 
@@ -342,5 +342,35 @@ sub nok_bytes {
 	$latin =~ s/stra\337e/straße/; # \303\237 after the 2nd a
 	use utf8;
 	$latin =~ s!(s)tr(?:aß|s+e)!$1tr.!; # \303\237 after the a
+    }
+}
+
+{
+    $_ = $dx = "\x{10f2}";
+    s/($dx)/$dx$1/;
+    {
+	use bytes;
+	print "not " unless $_ eq "$dx$dx";
+	print "ok $test\n";
+	$test++;
+    }
+
+    $_ = $dx = "\x{10f2}";
+    s/($dx)/$1$dx/;
+    {
+	use bytes;
+	print "not " unless $_ eq "$dx$dx";
+	print "ok $test\n";
+	$test++;
+    }
+
+    $dx = "\x{10f2}";
+    $_  = "\x{10f2}\x{10f2}";
+    s/($dx)($dx)/$1$2/;
+    {
+	use bytes;
+	print "not " unless $_ eq "$dx$dx";
+	print "ok $test\n";
+	$test++;
     }
 }

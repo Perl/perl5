@@ -167,13 +167,15 @@ PP(pp_concat)
             U8 *l, *c, *olds = NULL;
             STRLEN targlen;
 	    s = (U8*)SvPV(right,len);
+	    right_utf |= DO_UTF8(right);
             if (TARG == right) {
 		/* Take a copy since we're about to overwrite TARG */
-	        olds = s = (U8*)savepvn((char*)s, len);
+		olds = s = (U8*)savepvn((char*)s, len);
 	    }
 	    if (!SvOK(left) && SvTYPE(left) <= SVt_PVMG)
 		sv_setpv(left, "");	/* Suppress warning. */
             l = (U8*)SvPV(left, targlen);
+	    left_utf |= DO_UTF8(left);
             if (TARG != left)
                 sv_setpvn(TARG, (char*)l, targlen);
             if (!left_utf)
