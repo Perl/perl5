@@ -83,11 +83,22 @@
 
 /* Use the reentrant APIs like localtime_r and getpwent_r */
 /* Win32 has naturally threadsafe libraries, no need to use any _r variants. */
-#if defined(USE_ITHREADS) && !defined(USE_REENTRANT_API) && !defined(NETWARE) && !defined(WIN32) && !defined(__APPLE__)
+#if defined(USE_ITHREADS) && !defined(USE_REENTRANT_API) && !defined(NETWARE) && !defined(WIN32) && !defined(DARWIN)
 #   define USE_REENTRANT_API
 #endif
 
 /* <--- here ends the logic shared by perl.h and makedef.pl */
+
+/*
+ * DARWIN for MacOSX (__APPLE__ exists but is not officially sanctioned)
+ * (The -DDARWIN comes from the hints/darwin.sh.)
+ * __bsdi__ for BSD/OS
+ */
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(DARWIN) || defined(__bsdi__) || defined(BSD41) || defined(BSD42) || defined(BSD43) || defined(BSD44)
+#   ifndef BSDish
+#       define BSDish
+#   endif
+#endif
 
 #ifdef PERL_IMPLICIT_CONTEXT
 #  ifdef USE_5005THREADS
@@ -2960,13 +2971,13 @@ typedef OP* (CPERLscope(*PPADDR_t)[]) (pTHX);
 
 /* NeXT has problems with crt0.o globals */
 #if defined(__DYNAMIC__) && \
-    (defined(NeXT) || defined(__NeXT__) || defined(__APPLE__))
+    (defined(NeXT) || defined(__NeXT__) || defined(DARWIN))
 #  if defined(NeXT) || defined(__NeXT)
 #    include <mach-o/dyld.h>
 #    define environ (*environ_pointer)
 EXT char *** environ_pointer;
 #  else
-#    if defined(__APPLE__) && defined(PERL_CORE)
+#    if defined(DARWIN) && defined(PERL_CORE)
 #      include <crt_externs.h>	/* for the env array */
 #      define environ (*_NSGetEnviron())
 #    endif
