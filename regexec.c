@@ -177,7 +177,9 @@ I32 base;
 static I32 regmatch _((char *prog));
 static I32 regrepeat _((char *p, I32 max));
 static I32 regtry _((regexp *prog, char *startpos));
+
 static bool reginclass _((char *p, I32 c));
+#define REGINCLASS(p,c)  (*(p) ? reginclass(p,c) : ANYOF_TEST(p,c))
 
 static bool regtainted;		/* tainted information used? */
 
@@ -354,7 +356,7 @@ I32 savematch;	/* no need to remember string in subbase */
 	case ANYOF:
 	    c = OPERAND(c);
 	    while (s < strend) {
-		if (reginclass(c, *s)) {
+		if (REGINCLASS(c, *s)) {
 		    if (tmp && regtry(prog, s))
 			goto got_it;
 		    else
@@ -789,7 +791,7 @@ char *prog;
 	    s = OPERAND(scan);
 	    if (nextchar < 0)
 		nextchar = UCHARAT(locinput);
-	    if (!reginclass(s, nextchar))
+	    if (!REGINCLASS(s, nextchar))
 		sayNO;
 	    if (!nextchar && locinput >= regeol)
 		sayNO;
@@ -1237,7 +1239,7 @@ I32 max;
 	    scan++;
 	break;
     case ANYOF:
-	while (scan < loceol && reginclass(opnd, *scan))
+	while (scan < loceol && REGINCLASS(opnd, *scan))
 	    scan++;
 	break;
     case ALNUM:
@@ -1307,7 +1309,7 @@ register I32 c;
     bool match = FALSE;
 
     c &= 0xFF;
-    if (p[1 + (c >> 3)] & (1 << (c & 7)))
+    if (ANYOF_TEST(p, c))
 	match = TRUE;
     else if (flags & ANYOF_FOLD) {
 	I32 cf;
@@ -1317,7 +1319,7 @@ register I32 c;
 	}
 	else
 	    cf = fold[c];
-	if (p[1 + (cf >> 3)] & (1 << (cf & 7)))
+	if (ANYOF_TEST(p, cf))
 	    match = TRUE;
     }
 
@@ -1333,7 +1335,7 @@ register I32 c;
 	}
     }
 
-    return match ^ ((flags & ANYOF_INVERT) != 0);
+    return (flags & ANYOF_INVERT) ? !match : match;
 }
 
 /*
