@@ -1,4 +1,4 @@
-There used to be a directory called lib/unicore but everything that
+There used to be a directory called lib/unicode but everything that
 used to be here is now in the lib/unicore directory.
 
 The renaming was done to avoid naming conflicts with the Perl core
