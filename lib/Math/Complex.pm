@@ -13,7 +13,7 @@ our($VERSION, @ISA, @EXPORT, %EXPORT_TAGS, $Inf);
 
 BEGIN {
     eval { require POSIX; import POSIX 'HUGE_VAL' };
-    if (defined &HUGE_VAL) {
+    if (exists &HUGE_VAL) {
 	$Inf = sprintf "%g", &HUGE_VAL;
     } else {	
 	my $e = $!;
