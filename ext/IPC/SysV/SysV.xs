@@ -15,6 +15,9 @@
 #include <sys/sem.h>
 #endif
 #ifdef HAS_SHM
+#ifdef PERL_SCO5
+#include <sys/sysmacros.h>
+#endif
 #include <sys/shm.h>
 # ifndef HAS_SHMAT_PROTOTYPE
     extern Shmat_t shmat _((int, char *, int));
