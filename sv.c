@@ -9346,6 +9346,18 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
     if (dstr)
 	return dstr;
 
+    if(param->flags & CLONEf_JOIN_IN) {
+        /** We are joining here so we don't want do clone
+	    something that is bad **/
+
+        if(SvTYPE(sstr) == SVt_PVHV &&
+	   HvNAME(sstr)) {
+	    /** don't clone stashes if they already exist **/
+	    HV* old_stash = gv_stashpv(HvNAME(sstr),0);
+	    return (SV*) old_stash;
+        }
+    }
+
     /* create anew and remember what it is */
     new_SV(dstr);
     ptr_table_store(PL_ptr_table, sstr, dstr);

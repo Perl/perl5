@@ -1186,6 +1186,7 @@ Returns a pointer to the character buffer.
 #define CLONEf_COPY_STACKS 1
 #define CLONEf_KEEP_PTR_TABLE 2
 #define CLONEf_CLONE_HOST 4
+#define CLONEf_JOIN_IN 8
 
 struct clone_params {
   AV* stashes;

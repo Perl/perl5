@@ -282,12 +282,12 @@ Perl_ithread_run(void * arg) {
 		}
 		PUTBACK;
 		len = call_sv(thread->init_function, thread->gimme|G_EVAL);
+
 		SPAGAIN;
 		for (i=len-1; i >= 0; i--) {
 		  SV *sv = POPs;
 		  av_store(params, i, SvREFCNT_inc(sv));
 		}
-		PUTBACK;
 		if (SvTRUE(ERRSV)) {
 		    Perl_warn(aTHX_ "thread failed to start: %" SVf, ERRSV);
 		}
@@ -517,10 +517,27 @@ Perl_ithread_join(pTHX_ SV *obj)
 	  AV* params = (AV*) SvRV(thread->params);	
 	  CLONE_PARAMS clone_params;
 	  clone_params.stashes = newAV();
+	  clone_params.flags |= CLONEf_JOIN_IN;
 	  PL_ptr_table = ptr_table_new();
 	  PERL_THREAD_GETSPECIFIC(self_key,current_thread);
 	  PERL_THREAD_SETSPECIFIC(self_key,thread);
+
+	  {
+	    I32 len = av_len(params)+1;
+	    I32 i;
+	    for(i = 0; i < len; i++) {
+	      //	      sv_dump(SvRV(AvARRAY(params)[i]));
+	    }
+	  }
+
 	  retparam = (AV*) sv_dup((SV*)params, &clone_params);
+	  {
+	    I32 len = av_len(retparam)+1;
+	    I32 i;
+	    for(i = 0; i < len; i++) {
+	      //sv_dump(SvRV(AvARRAY(retparam)[i]));
+	    }
+	  }
 	  PERL_THREAD_SETSPECIFIC(self_key,current_thread);
 	  SvREFCNT_dec(clone_params.stashes);
 	  SvREFCNT_inc(retparam);
