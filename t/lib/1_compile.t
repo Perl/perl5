@@ -75,6 +75,10 @@ unless (using_feature('threads') && has_extension('Thread')) {
     delete_by_prefix('Thread::');
 }
 
+unless (has_extension('NDBM_File')) {
+    delete_by_name('Memoize::NDBM_File');
+}
+
 delete_by_prefix('unicode::');
 add_by_name('unicode::distinct');	# put this back
 

@@ -848,6 +848,35 @@ lib/Math/BigFloat.pm	An arbitrary precision floating-point arithmetic package
 lib/Math/BigInt.pm	An arbitrary precision integer arithmetic package
 lib/Math/Complex.pm	A Complex package
 lib/Math/Trig.pm	A simple interface to complex trigonometry
+lib/Memoize.pm	Memoize
+lib/Memoize/AnyDBM_File.pm	Memoize
+lib/Memoize/Expire.pm	Memoize
+lib/Memoize/ExpireFile.pm	Memoize
+lib/Memoize/ExpireTest.pm	Memoize
+lib/Memoize/NDBM_File.pm	Memoize
+lib/Memoize/README	Memoize
+lib/Memoize/SDBM_File.pm	Memoize
+lib/Memoize/Saves.pm	Memoize
+lib/Memoize/Storable.pm	Memoize
+lib/Memoize/TODO	Memoize
+lib/Memoize/t/array.t	Memoize
+lib/Memoize/t/correctness.t	Memoize
+lib/Memoize/t/errors.t	Memoize
+lib/Memoize/t/expire.t	Memoize
+lib/Memoize/t/expire_file.t	Memoize
+lib/Memoize/t/expire_module_n.t	Memoize
+lib/Memoize/t/expire_module_t.t	Memoize
+lib/Memoize/t/flush.t	Memoize
+lib/Memoize/t/normalize.t	Memoize
+lib/Memoize/t/prototype.t	Memoize
+lib/Memoize/t/speed.t	Memoize
+lib/Memoize/t/tie.t	Memoize
+lib/Memoize/t/tie_gdbm.t	Memoize
+lib/Memoize/t/tie_ndbm.t	Memoize
+lib/Memoize/t/tie_sdbm.t	Memoize
+lib/Memoize/t/tie_storable.t	Memoize
+lib/Memoize/t/tiefeatures.t	Memoize
+lib/Memoize/t/unmemoize.t	Memoize
 lib/NEXT.pm		Pseudo-class NEXT for method redispatch
 lib/Net/Ping.pm		Hello, anybody home?
 lib/Net/hostent.pm	By-name interface to Perl's builtin gethost*
