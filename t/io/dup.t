@@ -5,6 +5,8 @@ BEGIN {
     @INC = '../lib';
 }
 
+use Config;
+
 my $test = 1;
 print "1..12\n";
 print "ok 1\n";
@@ -59,21 +61,25 @@ unlink 'Io.dup';
 
 print STDOUT "ok 8\n";
 
-open(F,">&",1) or die "Cannot dup to numeric 1:$!";
+open(F,">&",1) or die "Cannot dup to numeric 1: $!";
 print F "ok 9\n";
 close(F);
 
-open(F,">&",'1') or die "Cannot dup to string '1':$!";
+open(F,">&",'1') or die "Cannot dup to string '1': $!";
 print F "ok 10\n";
 close(F);
 
-
-open(F,">&=",1) or die "Cannot dup to numeric 1:$!";
+open(F,">&=",1) or die "Cannot dup to numeric 1: $!";
 print F "ok 11\n";
 close(F);
 
-open(F,">&=",'1') or die "Cannot dup to string '1':$!";
-print F "ok 12\n";
-close(F);
-
+if ($Config{useperlio}) {
+    open(F,">&=",'1') or die "Cannot dup to string '1': $!";
+    print F "ok 12\n";
+    close(F);
+} else {
+    open(F, ">&DUPOUT") or die "Cannot dup stdout back: $!";
+    print F "ok 12\n";
+    close(F);
+}
 
