@@ -1029,7 +1029,7 @@ calling sv_upgrade.
 
 =item Can't use anonymous symbol table for method lookup
 
-(P) The internal routine that does method lookup was handed a symbol
+(F) The internal routine that does method lookup was handed a symbol
 table that doesn't have a name.  Symbol tables can become anonymous
 for example by undefining stashes: C<undef %Some::Package::>.
 

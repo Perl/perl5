@@ -279,6 +279,8 @@ S_hv_fetch_flags(pTHX_ HV *hv, const char *key, I32 klen, I32 lval, int flags)
     /* entry = (HvARRAY(hv))[hash & (I32) HvMAX(hv)]; */
     entry = ((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
     for (; entry; entry = HeNEXT(entry)) {
+	if (!HeKEY_hek(entry))
+	    continue;
 	if (HeHASH(entry) != hash)		/* strings can't be equal */
 	    continue;
 	if (HeKLEN(entry) != (I32)klen)

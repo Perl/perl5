@@ -3080,7 +3080,10 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 		}
 		tsv = NEWSV(0,0);
 		if (SvOBJECT(sv))
-		    Perl_sv_setpvf(aTHX_ tsv, "%s=%s", HvNAME(SvSTASH(sv)), s);
+		    if (HvNAME(SvSTASH(sv)))
+			Perl_sv_setpvf(aTHX_ tsv, "%s=%s", HvNAME(SvSTASH(sv)), s);
+		    else
+			Perl_sv_setpvf(aTHX_ tsv, "__ANON__=%s", s);
 		else
 		    sv_setpv(tsv, s);
 		Perl_sv_catpvf(aTHX_ tsv, "(0x%"UVxf")", PTR2UV(sv));
@@ -7773,7 +7776,10 @@ char *
 Perl_sv_reftype(pTHX_ SV *sv, int ob)
 {
     if (ob && SvOBJECT(sv)) {
-	return HvNAME(SvSTASH(sv));
+	if (HvNAME(SvSTASH(sv)))
+	    return HvNAME(SvSTASH(sv));
+	else
+	    return "__ANON__";
     }
     else {
 	switch (SvTYPE(sv)) {
@@ -7850,6 +7856,8 @@ Perl_sv_isa(pTHX_ SV *sv, const char *name)
 	return 0;
     sv = (SV*)SvRV(sv);
     if (!SvOBJECT(sv))
+	return 0;
+    if (!HvNAME(SvSTASH(sv)))
 	return 0;
 
     return strEQ(HvNAME(SvSTASH(sv)), name);

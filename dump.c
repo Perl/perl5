@@ -944,7 +944,7 @@ Perl_do_gvgv_dump(pTHX_ I32 level, PerlIO *file, char *name, GV *sv)
     Perl_dump_indent(aTHX_ level, file, "%s = 0x%"UVxf, name, PTR2UV(sv));
     if (sv && GvNAME(sv)) {
 	PerlIO_printf(file, "\t\"");
-	if (GvSTASH(sv))
+	if (GvSTASH(sv) && HvNAME(GvSTASH(sv)))
 	    PerlIO_printf(file, "%s\" :: \"", HvNAME(GvSTASH(sv)));
 	PerlIO_printf(file, "%s\"\n", GvNAME(sv));
     }
