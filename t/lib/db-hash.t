@@ -1,4 +1,4 @@
-#!./perl -w 
+#!./perl -w
 
 BEGIN {
     @INC = '../lib' if -d '../lib' ;
