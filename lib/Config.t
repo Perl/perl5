@@ -236,8 +236,12 @@ foreach my $pain ($first, @virtual) {
 
 # Check that config entries appear correctly in @INC
 # TestInit.pm has probably already messed with our @INC
+# This little bit of evil is to avoid a @ in the program, in case it confuses
+# shell 1 liners. Perl 1 rules.
 my ($path, $ver, @orig_inc)
-  = split /\n/, runperl (nolib=>1, prog=>'print qq{$_\n} for $^X, $], @INC');
+  = split /\n/,
+    runperl (nolib=>1,
+	     prog=>'print qq{$^X\n$]\n}; print qq{$_\n} while $_ = shift INC');
 
 die "This perl is $] at $^X; other perl is $ver (at $path) "
   . '- failed to find this perl' unless $] eq $ver;
