@@ -3313,7 +3313,9 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
 	}
     }
 
-    return prepend_elem(OP_LINESEQ, (OP*)cop, o);
+    o = prepend_elem(OP_LINESEQ, (OP*)cop, o);
+    CHECKOP(cop->op_type, cop);
+    return o;
 }
 
 
@@ -5970,6 +5972,42 @@ Perl_ck_join(pTHX_ OP *o)
     }
     return ck_fun(o);
 }
+
+OP *
+Perl_ck_state(pTHX_ OP *o)
+{
+    /* warn on C<my $x=1 if foo;> , C<$a && my $x=1;> style statements */
+    OP *kid;
+    o = o->op_sibling;
+    if (!o || o->op_type != OP_NULL || !(o->op_flags & OPf_KIDS))
+	return o;
+    kid = cUNOPo->op_first;
+    if (!(kid->op_type == OP_AND || kid->op_type == OP_OR))
+	return o;
+    kid = kUNOP->op_first->op_sibling;
+    if (kid->op_type == OP_SASSIGN)
+	kid = kBINOP->op_first->op_sibling;
+    else if (kid->op_type == OP_AASSIGN)
+	kid = kBINOP->op_first->op_sibling;
+
+    if (kid->op_type == OP_LIST
+	    || (kid->op_type == OP_NULL && kid->op_targ == OP_LIST))
+    {
+	kid = kUNOP->op_first;
+	if (kid->op_type == OP_PUSHMARK)
+	    kid = kid->op_sibling;
+    }
+    if ((kid->op_type == OP_PADSV || kid->op_type == OP_PADAV
+	    || kid->op_type == OP_PADHV)
+	&& (kid->op_private & OPpLVAL_INTRO)
+	&& (ckWARN(WARN_DEPRECATED)))
+    {
+	Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
+			    "Use of my in conditional deprecated");
+    }
+    return o;
+}
+
 
 OP *
 Perl_ck_subr(pTHX_ OP *o)

@@ -4282,6 +4282,24 @@ old way has bad side effects.
 it already went past any symlink you are presumably trying to look for.
 The operation returned C<undef>.  Use a filename instead.
 
+=item Use of my in conditional deprecated
+
+(D deprecated) You used a C<my> declaration within a conditional
+expression of some sort, such as C<my $x=1 if foo> or C<foo && (my $x = 1)>.
+Perl's run-time behaviour in such constructs is currently undefined, but
+typically causes the variable not be be cleared at the end of scope and
+to retain its old value the next time the scope is entered. Some people
+have been making use of this "feature" to implement a type of static
+variable. We intend to change this behaviour in a future release, so
+don't rely on it.
+
+To work around this warning, move the declaration outside the expression,
+eg
+
+    my $x;
+    $x = 1 if foo;
+
+
 =item Use of "package" with no arguments is deprecated
 
 (D deprecated) You used the C<package> keyword without specifying a package
