@@ -3882,6 +3882,9 @@ C<main>.)  Here is a typical code layout:
     # In the main program
     push @INC, new Foo(...);
 
+Note that these hooks are also permitted to set the %INC entry
+corresponding to the files they have loaded. See L<perlvar/%INC>.
+
 For a yet-more-powerful import facility, see L</use> and L<perlmod>.
 
 =item reset EXPR
