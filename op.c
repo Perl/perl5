@@ -3011,6 +3011,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
     PL_hints |= HINT_BLOCK_SCOPE;
     PL_copline = NOLINE;
     PL_expect = XSTATE;
+    PL_cop_seqmax++; /* Purely for B::*'s benefit */
 }
 
 /*
@@ -4775,9 +4776,10 @@ Perl_ck_bitop(pTHX_ OP *o)
 	 (op) == OP_NE   || (op) == OP_I_NE || \
 	 (op) == OP_NCMP || (op) == OP_I_NCMP)
     o->op_private = (U8)(PL_hints & HINT_PRIVATE_MASK);
-    if (o->op_type == OP_BIT_OR
-	    || o->op_type == OP_BIT_AND
-	    || o->op_type == OP_BIT_XOR)
+    if (!(o->op_flags & OPf_STACKED) /* Not an assignment */
+	    && (o->op_type == OP_BIT_OR
+	     || o->op_type == OP_BIT_AND
+	     || o->op_type == OP_BIT_XOR))
     {
 	OP * left = cBINOPo->op_first;
 	OP * right = left->op_sibling;

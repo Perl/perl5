@@ -4,23 +4,27 @@ perlsyn - Perl syntax
 
 =head1 DESCRIPTION
 
-A Perl script consists of a sequence of declarations and statements.
-The sequence of statements is executed just once, unlike in B<sed>
-and B<awk> scripts, where the sequence of statements is executed
-for each input line.  While this means that you must explicitly
-loop over the lines of your input file (or files), it also means
-you have much more control over which files and which lines you look at.
-(Actually, I'm lying--it is possible to do an implicit loop with
-either the B<-n> or B<-p> switch.  It's just not the mandatory
-default like it is in B<sed> and B<awk>.)
+A Perl program consists of a sequence of declarations and statements
+which run from the top to the bottom.  Loops, subroutines and other
+control structures allow you to jump around within the code.
 
-Perl is, for the most part, a free-form language.  (The only exception
-to this is format declarations, for obvious reasons.)  Text from a
-C<"#"> character until the end of the line is a comment, and is
-ignored.  If you attempt to use C</* */> C-style comments, it will be
-interpreted either as division or pattern matching, depending on the
-context, and C++ C<//> comments just look like a null regular
-expression, so don't do that.
+Perl is a B<free-form> language, you can format and indent it however
+you like.  Whitespace mostly serves to separate tokens, unlike
+languages like Python where it is an important part of the syntax.
+
+Many of Perl's syntactic elements are B<optional>.  Rather than
+requiring you to put parentheses around every function call and
+declare every variable, you can often leave such explicit elements off
+and Perl will figure out what you meant.  This is known as B<Do What I
+Mean>, abbreviated B<DWIM>.  It allows programmers to be B<lazy> and to
+code in a style with which they are comfortable.
+
+Perl B<borrows syntax> and concepts from many languages: awk, sed, C,
+Bourne Shell, Smalltalk, Lisp and even English.  Other
+languages have borrowed syntax from Perl, particularly its regular
+expression extensions.  So if you have programmed in another language
+you will see familiar pieces in Perl.  They often work the same, but
+see L<perltrap> for information about how they differ.
 
 =head2 Declarations
 
@@ -78,6 +82,12 @@ variables, but apart from declaring a variable name, the declaration acts
 like an ordinary statement, and is elaborated within the sequence of
 statements as if it were an ordinary statement.  That means it actually
 has both compile-time and run-time effects.
+
+=head2 Comments
+
+Text from a C<"#"> character until the end of the line is a comment,
+and is ignored.  Exceptions include C<"#"> inside a string or regular
+expression.
 
 =head2 Simple Statements
 

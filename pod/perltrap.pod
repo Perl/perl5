@@ -18,6 +18,11 @@ Accustomed B<awk> users should take special note of the following:
 
 =item *
 
+A Perl program executes only once, not once for each input line.  You can
+do an implicit loop with C<-n> or C<-p>.
+
+=item *
+
 The English module, loaded via
 
     use English;
@@ -174,7 +179,9 @@ Variables begin with "$", "@" or "%" in Perl.
 
 =item *
 
-Comments begin with "#", not "/*".
+Comments begin with "#", not "/*" or "//".  Perl may interpret C/C++
+comments as division operators, unterminated regular expressions or
+the defined-or operator.
 
 =item *
 
@@ -203,6 +210,11 @@ to find their names on your system.
 Seasoned B<sed> programmers should take note of the following:
 
 =over 4
+
+=item *
+
+A Perl program executes only once, not once for each input line.  You can
+do an implicit loop with C<-n> or C<-p>.
 
 =item *
 

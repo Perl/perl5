@@ -3810,12 +3810,19 @@ with the wrong number of RANDBITS.)
 Attempts to read LENGTH I<characters> of data into variable SCALAR
 from the specified FILEHANDLE.  Returns the number of characters
 actually read, C<0> at end of file, or undef if there was an error (in
-the latter case C<$!> is also set).  SCALAR will be grown or shrunk to
-the length actually read.  If SCALAR needs growing, the new bytes will
-be zero bytes.  An OFFSET may be specified to place the read data into
-some other place in SCALAR than the beginning.  The call is actually
-implemented in terms of either Perl's or system's fread() call.  To
-get a true read(2) system call, see C<sysread>.
+the latter case C<$!> is also set).  SCALAR will be grown or shrunk 
+so that the last character actually read is the last character of the
+scalar after the read.
+
+An OFFSET may be specified to place the read data at some place in the
+string other than the beginning.  A negative OFFSET specifies
+placement at that many characters counting backwards from the end of
+the string.  A positive OFFSET greater than the length of SCALAR
+results in the string being padded to the required size with C<"\0">
+bytes before the result of the read is appended.
+
+The call is actually implemented in terms of either Perl's or system's
+fread() call.  To get a true read(2) system call, see C<sysread>.
 
 Note the I<characters>: depending on the status of the filehandle,
 either (8-bit) bytes or characters are read.  By default all
@@ -4754,6 +4761,15 @@ inconsistent results (sometimes saying C<$x[1]> is less than C<$x[2]> and
 sometimes saying the opposite, for example) the results are not
 well-defined.
 
+Because C<< <=> >> returns C<undef> when either operand is C<NaN>
+(not-a-number), and because C<sort> will trigger a fatal error unless the
+result of a comparison is defined, when sorting with a comparison function
+like C<< $a <=> $b >>, be careful about lists that might contain a C<NaN>.
+The following example takes advantage of the fact that C<NaN != NaN> to
+eliminate any C<NaN>s from the input.
+
+    @result = sort { $a <=> $b } grep { $_ == $_ } @input;
+
 =item splice ARRAY,OFFSET,LENGTH,LIST
 
 =item splice ARRAY,OFFSET,LENGTH
@@ -4852,8 +4868,8 @@ The LIMIT parameter can be used to split a line partially
 
     ($login, $passwd, $remainder) = split(/:/, $_, 3);
 
-When assigning to a list, if LIMIT is omitted, Perl supplies a LIMIT
-one larger than the number of variables in the list, to avoid
+When assigning to a list, if LIMIT is omitted, or zero, Perl supplies
+a LIMIT one larger than the number of variables in the list, to avoid
 unnecessary work.  For the list above LIMIT would have been 4 by
 default.  In time critical applications it behooves you not to split
 into more fields than you really need.

@@ -854,7 +854,7 @@ p	|void	|vivify_ref	|SV* sv|U32 to_what
 p	|I32	|wait4pid	|Pid_t pid|int* statusp|int flags
 p	|U32	|parse_unicode_opts|char **popt
 p	|U32	|seed
-p	|UV	|get_seed
+p	|UV	|get_hash_seed
 p	|void	|report_evil_fh	|GV *gv|IO *io|I32 op
 pd	|void	|report_uninit
 Afpd	|void	|warn		|const char* pat|...

@@ -649,6 +649,7 @@ PP(pp_formline)
 		    s++;
 	    }
 	    sv_chop(sv,s);
+	    SvSETMAGIC(sv);
 	    break;
 
 	case FF_LINEGLOB:

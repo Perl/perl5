@@ -11188,6 +11188,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_regstartp	= (I32*)NULL;
     PL_regendp		= (I32*)NULL;
     PL_reglastparen	= (U32*)NULL;
+    PL_reglastcloseparen	= (U32*)NULL;
     PL_regtill		= Nullch;
     PL_reg_start_tmp	= (char**)NULL;
     PL_reg_start_tmpl	= 0;

@@ -425,7 +425,7 @@ sub calloc {
 }
 
 sub div {
-    unimpl "div() is C-specific, stopped";
+    unimpl "div() is C-specific, use /, % and int instead";
 }
 
 sub exit {
@@ -447,7 +447,7 @@ sub labs {
 }
 
 sub ldiv {
-    unimpl "ldiv() is C-specific, use / and int instead";
+    unimpl "ldiv() is C-specific, use /, % and int instead";
 }
 
 sub malloc {

@@ -102,7 +102,8 @@ my (@scripts, @tolink);
 open SCRIPTS, "utils.lst" or die "Can't open utils.lst: $!";
 while (<SCRIPTS>) {
     next if /^#/;
-    next if /#\s*pod\s*=/; # Binary programs need separate treatment
+    s/\s*#\s*pod\s*=.*//; # install script regardless of pod location
+    next if /a2p/; # a2p is binary, to be installed separately
     chomp;
     if (/(\S*)\s*#\s*link\s*=\s*(\S*)/) {
 	push @scripts, $1;

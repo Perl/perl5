@@ -814,7 +814,7 @@ PERL_CALLCONV void	Perl_vivify_ref(pTHX_ SV* sv, U32 to_what);
 PERL_CALLCONV I32	Perl_wait4pid(pTHX_ Pid_t pid, int* statusp, int flags);
 PERL_CALLCONV U32	Perl_parse_unicode_opts(pTHX_ char **popt);
 PERL_CALLCONV U32	Perl_seed(pTHX);
-PERL_CALLCONV UV	Perl_get_seed(pTHX);
+PERL_CALLCONV UV	Perl_get_hash_seed(pTHX);
 PERL_CALLCONV void	Perl_report_evil_fh(pTHX_ GV *gv, IO *io, I32 op);
 PERL_CALLCONV void	Perl_report_uninit(pTHX);
 PERL_CALLCONV void	Perl_warn(pTHX_ const char* pat, ...)

@@ -10,7 +10,7 @@ BEGIN {
     END;
 }
 END{
-  unlink @files;
+  1 while unlink @files;
 }
 
 

@@ -792,8 +792,8 @@ For OS/2 just use
 
 as the first line in C<*.cmd> file (C<-S> due to a bug in cmd.exe's
 `extproc' handling).  For DOS one should first invent a corresponding
-batch file and codify it in C<ALTERNATIVE_SHEBANG> (see the
-F<INSTALL> file in the source distribution for more information).
+batch file and codify it in C<ALTERNATE_SHEBANG> (see the
+F<dosish.h> file in the source distribution for more information).
 
 The Win95/NT installation, when using the ActiveState port of Perl,
 will modify the Registry to associate the C<.pl> extension with the

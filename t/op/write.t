@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..48\n";
+print "1..49\n";
 
 my $CAT = ($^O eq 'MSWin32' || $^O eq 'NetWare' || $^O eq 'VMS') ? 'type'
 	: ($^O eq 'MacOS') ? 'catenate'
@@ -283,17 +283,41 @@ $el
     }
 }
 
-# 13..48: scary format testing from Merijn H. Brand
+{
+    # Bug report and testcase by Alexey Tourbin
+    use Tie::Scalar;
+    my $v;
+    tie $v, 'Tie::StdScalar';
+    $v = 13;
+    format OUT13 =
+ok ^<<<<<<<<< ~~
+$v
+.
+    open(OUT13, '>Op_write.tmp') || die "Can't create Op_write.tmp";
+    write(OUT13);
+    close OUT13 or die "Could not close: $!";
+    print `$CAT Op_write.tmp`;
+}
+
+#######################################
+# Easiest to add new tests above here #
+#######################################
+
+# 14..49: scary format testing from Merijn H. Brand
+
+my $test = 14;
+my $tests = 35;
 
 if ($^O eq 'VMS' || $^O eq 'MSWin32' || $^O eq 'dos' || $^O eq 'MacOS' ||
     ($^O eq 'os2' and not eval '$OS2::can_fork')) {
-  foreach (13..48) { print "ok $_ # skipped: '|-' and '-|' not supported\n"; }
+  foreach ($test..$tests) {
+      print "ok $_ # skipped: '|-' and '-|' not supported\n";
+  }
   exit(0);
 }
 
-use strict;	# Amazed that this hackery can be made strict ...
 
-my $test = 13;
+use strict;	# Amazed that this hackery can be made strict ...
 
 # Just a complete test for format, including top-, left- and bottom marging
 # and format detection through glob entries
@@ -411,7 +435,7 @@ if (has_format ("EOF")) {
 
 close STDOUT;
 
-# That was test 47.
+# That was test 48.
 
 __END__
     

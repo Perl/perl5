@@ -1,20 +1,20 @@
 package B::Terse;
 
-our $VERSION = '1.01';
+our $VERSION = '1.02';
 
 use strict;
 use B qw(class);
 use B::Asmdata qw(@specialsv_name);
-use B::Concise qw(concise_cv set_style_standard);
+use B::Concise qw(concise_subref set_style_standard);
 use Carp;
 
 sub terse {
-    my ($order, $cvref) = @_;
+    my ($order, $subref) = @_;
     set_style_standard("terse");
     if ($order eq "exec") {
-	concise_cv('exec', $cvref);
+	concise_subref('exec', $subref);
     } else {
-	concise_cv('basic', $cvref);
+	concise_subref('basic', $subref);
     }
 
 }
