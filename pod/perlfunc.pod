@@ -334,6 +334,23 @@ syscall() interface to access setitimer(2) if your system supports it,
 or else see L</select()> below.  It is not advised to intermix alarm() 
 and sleep() calls.
 
+If you want to use alarm() to time out a system call you need to use an
+eval/die pair. You can't rely on the alarm causing the system call to
+fail with $! set to EINTR because Perl sets up signal handlers to
+restart system calls on some systems.  Using eval/die always works.
+
+    eval {
+    	local $SIG{ALRM} = sub { die "alarm\n" };	# NB \n required
+	$nread = sysread SOCKET, $buffer, $size;
+    };
+    die if $@ && $@ ne "alarm\n";	# propagate errors
+    if ($@) {
+    	# timed out
+    }
+    else {
+    	# didn't
+    }
+
 =item atan2 Y,X
 
 Returns the arctangent of Y/X in the range -PI to PI.
@@ -2474,7 +2491,7 @@ in seconds, which may be fractional.  Note: not all implementations are
 capable of returning the $timeleft.  If not, they always return
 $timeleft equal to the supplied $timeout.
 
-You can effect a 250-millisecond sleep this way:
+You can effect a sleep of 250 milliseconds this way:
 
     select(undef, undef, undef, 0.25);
 
@@ -3066,12 +3083,15 @@ Attempts to read LENGTH bytes of data into variable SCALAR from the
 specified FILEHANDLE, using the system call read(2).  It bypasses
 stdio, so mixing this with other kinds of reads may cause confusion.
 Returns the number of bytes actually read, or undef if there was an
-error.  SCALAR will be grown or shrunk to the length actually read.
-In the case of growing the new data area will be padded with "\0" bytes.
-An OFFSET may be specified to place the read data at some other
-place than the beginning of the string. A negative OFFSET means
-placing the read data at that many bytes counting backwards from the end
-of the string.
+error.  SCALAR will be grown or shrunk so that the last byte actually
+read is the last byte of the scalar after the read.
+
+An OFFSET may be specified to place the read data at some place in the
+string other than the beginning.  A negative OFFSET specifies
+placement at that many bytes counting backwards from the end of the
+string.  A positive OFFSET greater than the length of SCALAR results
+in the string being padded to the required size with "\0" bytes before
+the result of the read is appended.
 
 =item system LIST
 
@@ -3093,10 +3113,11 @@ specified FILEHANDLE, using the system call write(2).  It bypasses
 stdio, so mixing this with prints may cause confusion.  Returns the
 number of bytes actually written, or undef if there was an error.
 If the length is greater than the available data, only as much data as
-is available will be written.  An OFFSET may be specified to write the
-data from some other place than the beginning of the string.
-A negative OFFSET means starting the writing from that many bytes
-counting backwards from the end of the string.
+is available will be written.
+
+An OFFSET may be specified to write the data from some part of the
+string other than the beginning.  A negative OFFSET specifies writing
+from that many bytes counting backwards from the end of the string.
 
 =item tell FILEHANDLE
 

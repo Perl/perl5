@@ -211,7 +211,7 @@
 /* Use all the "standard" definitions? */
 #if defined(STANDARD_C) && defined(I_STDLIB)
 #   include <stdlib.h>
-#endif /* STANDARD_C */
+#endif
 
 /* This comes after <stdlib.h> so we don't try to change the standard
  * library prototypes; we'll use our own in proto.h instead. */
@@ -243,6 +243,13 @@
 #endif /* MYMALLOC */
 
 #define MEM_SIZE Size_t
+
+#if defined(STANDARD_C) && defined(I_STDDEF)
+#   include <stddef.h>
+#   define OFFSETOF(s,m)  offsetof(s,m)
+#else
+#   define OFFSETOF(s,m)  (Size_t)(&(((s *)0)->m))
+#endif
 
 #if defined(I_STRING) || defined(__cplusplus)
 #   include <string.h>
@@ -832,6 +839,7 @@ typedef struct magic MAGIC;
 typedef struct xrv XRV;
 typedef struct xpv XPV;
 typedef struct xpviv XPVIV;
+typedef struct xpvuv XPVUV;
 typedef struct xpvnv XPVNV;
 typedef struct xpvmg XPVMG;
 typedef struct xpvlv XPVLV;
@@ -1157,6 +1165,14 @@ I32 unlnk _((char*));
 #  endif
 #endif
 
+typedef Signal_t (*Sighandler_t) _((int));
+
+#ifdef HAS_SIGACTION
+typedef struct sigaction Sigsave_t;
+#else
+typedef Sighandler_t Sigsave_t;
+#endif
+
 #define SCAN_DEF 0
 #define SCAN_TR 1
 #define SCAN_REPL 2
@@ -1208,6 +1224,7 @@ EXT U32		origalen;
 EXT U32 *	profiledata;
 EXT int		maxo INIT(MAXO);/* Number of ops */
 EXT char *	osname;		/* operating system */
+EXT char *	sh_path INIT(SH_PATH); /* full path of shell */
 
 EXT XPV*	xiv_arenaroot;	/* list of allocated xiv areas */
 EXT IV **	xiv_root;	/* free xiv list--shared by interpreters */
@@ -1480,7 +1497,6 @@ EXT I32		lex_formbrack;	/* bracket count at outer format level */
 EXT I32		lex_fakebrack;	/* outer bracket is mere delimiter */
 EXT I32		lex_casemods;	/* casemod count */
 EXT I32		lex_dojoin;	/* doing an array interpolation */
-EXT I32		lex_endscope;	/* maybe end of scope; defer lexical vars */
 EXT I32		lex_starts;	/* how many interps done on level */
 EXT SV *	lex_stuff;	/* runtime pattern from m// or s/// */
 EXT SV *	lex_repl;	/* runtime replacement from s/// */

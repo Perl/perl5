@@ -1027,7 +1027,7 @@ char *cmd;
 		break;
 	    }
 	  doshell:
-	    execl(SH_PATH, "sh", "-c", cmd, (char*)0);
+	    execl(sh_path, "sh", "-c", cmd, (char*)0);
 	    return FALSE;
 	}
     }

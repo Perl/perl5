@@ -61,8 +61,10 @@ print getcwd() =~ m#/t$# ? "ok 13\n" : "not ok 13\n";
 # Check string conversion functions.
 
 if ($Config{d_strtod}) {
+    $lc = &POSIX::setlocale(&POSIX::LC_NUMERIC, 'C') if $Config{d_setlocale};
     ($n, $x) = &POSIX::strtod('3.14159_OR_SO');
     print (($n == 3.14159) && ($x == 6) ? "ok 14\n" : "not ok 14\n");
+    &POSIX::setlocale(&POSIX::LC_NUMERIC, $lc) if $Config{d_setlocale};
 } else { print "# strtod not present\n", "ok 14\n"; }
 
 if ($Config{d_strtol}) {

@@ -42,6 +42,10 @@
 #  include <sys/file.h>
 #endif
 
+#ifdef I_SYS_WAIT
+#  include <sys/wait.h>
+#endif
+
 #define FLUSH
 
 #ifdef LEAKTEST
@@ -446,7 +450,7 @@ perl_new_collate(newcoll)
 	++collation_ix;
 	Safefree(collation_name);
 	collation_name = savepv(newcoll);
-	collation_standard = strEQ(newcoll, "C");
+	collation_standard = (strEQ(newcoll, "C") || strEQ(newcoll, "POSIX"));
 
 #ifdef HAS_STRXFRM
 	{
@@ -490,7 +494,7 @@ perl_new_numeric(newnum)
     if (! numeric_name || strNE(numeric_name, newnum)) {
 	Safefree(numeric_name);
 	numeric_name = savepv(newnum);
-	numeric_standard = strEQ(newnum, "C");
+	numeric_standard = (strEQ(newnum, "C") || strEQ(newnum, "POSIX"));
 	numeric_local = TRUE;
     }
 }
@@ -1778,13 +1782,127 @@ int newfd;
 }
 #endif
 
+
+#ifdef HAS_SIGACTION
+
+Sighandler_t
+rsignal(signo, handler)
+int signo;
+Sighandler_t handler;
+{
+    struct sigaction act, oact;
+
+    act.sa_handler = handler;
+    sigemptyset(&act.sa_mask);
+    act.sa_flags = 0;
+#ifdef SA_RESTART
+    act.sa_flags |= SA_RESTART;	/* SVR4, 4.3+BSD */
+#endif
+    if (sigaction(signo, &act, &oact) == -1)
+    	return(SIG_ERR);
+    else
+    	return(oact.sa_handler);
+}
+
+Sighandler_t
+rsignal_state(signo)
+int signo;
+{
+    struct sigaction oact;
+
+    if (sigaction(signo, (struct sigaction *)NULL, &oact) == -1)
+        return SIG_ERR;
+    else
+        return oact.sa_handler;
+}
+
+int
+rsignal_save(signo, handler, save)
+int signo;
+Sighandler_t handler;
+Sigsave_t *save;
+{
+    struct sigaction act;
+
+    act.sa_handler = handler;
+    sigemptyset(&act.sa_mask);
+    act.sa_flags = 0;
+#ifdef SA_RESTART
+    act.sa_flags |= SA_RESTART;	/* SVR4, 4.3+BSD */
+#endif
+    return sigaction(signo, &act, save);
+}
+
+int
+rsignal_restore(signo, save)
+int signo;
+Sigsave_t *save;
+{
+    return sigaction(signo, save, (struct sigaction *)NULL);
+}
+
+#else /* !HAS_SIGACTION */
+
+Sighandler_t
+rsignal(signo, handler)
+int signo;
+Sighandler_t handler;
+{
+    return signal(signo, handler);
+}
+
+static int sig_trapped;
+
+static
+Signal_t
+sig_trap(signo)
+int signo;
+{
+    sig_trapped++;
+}
+
+Sighandler_t
+rsignal_state(signo)
+int signo;
+{
+    Sighandler_t oldsig;
+
+    sig_trapped = 0;
+    oldsig = signal(signo, sig_trap);
+    signal(signo, oldsig);
+    if (sig_trapped)
+        kill(getpid(), signo);
+    return oldsig;
+}
+
+int
+rsignal_save(signo, handler, save)
+int signo;
+Sighandler_t handler;
+Sigsave_t *save;
+{
+    *save = signal(signo, handler);
+    return (*save == SIG_ERR) ? -1 : 0;
+}
+
+int
+rsignalrestore(signo, save)
+int signo;
+Sigsave_t *save;
+{
+    return (signal(signo, *save) == SIG_ERR) ? -1 : 0;
+}
+
+#endif /* !HAS_SIGACTION */
+
+
 #if  (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) \
      && !defined(VMS)  /* VMS' my_popen() is in VMS.c */
 I32
 my_pclose(ptr)
 PerlIO *ptr;
 {
-    Signal_t (*hstat)(), (*istat)(), (*qstat)();
+    Sigsave_t hstat, istat, qstat;
     int status;
     SV **svp;
     int pid;
@@ -1802,15 +1920,15 @@ PerlIO *ptr;
 #ifdef UTS
     if(kill(pid, 0) < 0) { return(pid); }   /* HOM 12/23/91 */
 #endif
-    hstat = signal(SIGHUP, SIG_IGN);
-    istat = signal(SIGINT, SIG_IGN);
-    qstat = signal(SIGQUIT, SIG_IGN);
+    rsignal_save(SIGHUP, SIG_IGN, &hstat);
+    rsignal_save(SIGINT, SIG_IGN, &istat);
+    rsignal_save(SIGQUIT, SIG_IGN, &qstat);
     do {
 	pid = wait4pid(pid, &status, 0);
     } while (pid == -1 && errno == EINTR);
-    signal(SIGHUP, hstat);
-    signal(SIGINT, istat);
-    signal(SIGQUIT, qstat);
+    rsignal_restore(SIGHUP, &hstat);
+    rsignal_restore(SIGINT, &istat);
+    rsignal_restore(SIGQUIT, &qstat);
     return(pid < 0 ? pid : status);
 }
 #endif /* !DOSISH */

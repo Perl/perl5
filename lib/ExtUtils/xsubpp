@@ -76,7 +76,7 @@ perl(1), perlxs(1), perlxstut(1), perlxs(1)
 =cut
 
 # Global Constants
-$XSUBPP_version = "1.939";
+$XSUBPP_version = "1.940";
 require 5.002;
 use vars '$cplusplus';
 
@@ -95,7 +95,7 @@ $ProtoUsed = 0 ;
 SWITCH: while (@ARGV and $ARGV[0] =~ /^-./) {
     $flag = shift @ARGV;
     $flag =~ s/^-// ;
-    $spat = shift,	next SWITCH	if $flag eq 's';
+    $spat = quotemeta shift,	next SWITCH	if $flag eq 's';
     $cplusplus = 1,	next SWITCH	if $flag eq 'C++';
     $WantPrototypes = 0, next SWITCH	if $flag eq 'noprototypes';
     $WantPrototypes = 1, next SWITCH	if $flag eq 'prototypes';
@@ -661,6 +661,7 @@ sub fetch_para {
 	$Module = $1;
 	$Package = defined($2) ? $2 : '';	# keep -w happy
 	$Prefix  = defined($3) ? $3 : '';	# keep -w happy
+	$Prefix = quotemeta $Prefix ;
 	($Module_cname = $Module) =~ s/\W/_/g;
 	($Packid = $Package) =~ tr/:/_/;
 	$Packprefix = $Package;
@@ -791,12 +792,13 @@ while (fetch_para()) {
 
     ($class, $func_name, $orig_args) =  ($1, $2, $3) ;
     ($pname = $func_name) =~ s/^($Prefix)?/$Packprefix/;
-    $Full_func_name = "${Packid}_$func_name";
+    ($clean_func_name = $func_name) =~ s/^$Prefix//;
+    $Full_func_name = "${Packid}_$clean_func_name";
 
     # Check for duplicate function definition
     for $tmp (@XSStack) {
 	next unless defined $tmp->{functions}{$Full_func_name};
-	Warn("Warning: duplicate function definition '$func_name' detected");
+	Warn("Warning: duplicate function definition '$clean_func_name' detected");
 	last;
     }
     $XSStack[$XSS_work_idx]{functions}{$Full_func_name} ++ ;
@@ -840,7 +842,7 @@ while (fetch_para()) {
 
     # print function header
     print Q<<"EOF";
-#XS(XS_${Packid}_$func_name)
+#XS(XS_${Full_func_name})
 #[[
 #    dXSARGS;
 EOF

@@ -98,10 +98,42 @@ static int dooneliner _((char *cmd, char *filename));
 # define my_chsize chsize
 #endif
 
-#if !defined(HAS_FLOCK) && defined(HAS_LOCKF)
-  static int lockf_emulate_flock _((int fd, int operation));
-# define flock lockf_emulate_flock
-#endif
+#ifdef HAS_FLOCK
+#  define FLOCK flock
+#else /* no flock() */
+
+#  if defined(HAS_FCNTL) && defined(F_SETLK) && defined (F_SETLKW)
+#    define FLOCK fcntl_emulate_flock
+#    define FCNTL_EMULATE_FLOCK
+#  else /* no flock() or fcntl(F_SETLK,...) */
+#    ifdef HAS_LOCKF
+#      define FLOCK lockf_emulate_flock
+#      define LOCKF_EMULATE_FLOCK
+#    endif /* lockf */
+#  endif /* no flock() or fcntl(F_SETLK,...) */
+
+#  ifdef FLOCK
+     static int FLOCK(int, int);
+
+    /*
+     * These are the flock() constants.  Since this sytems doesn't have
+     * flock(), the values of the constants are probably not available.
+     */
+#    ifndef LOCK_SH
+#      define LOCK_SH 1
+#    endif
+#    ifndef LOCK_EX
+#      define LOCK_EX 2
+#    endif
+#    ifndef LOCK_NB
+#      define LOCK_NB 4
+#    endif
+#    ifndef LOCK_UN
+#      define LOCK_UN 8
+#    endif
+#  endif /* emulating flock() */
+
+#endif /* no flock() */
 
 
 /* Pushy I/O. */
@@ -1077,6 +1109,8 @@ PP(pp_sysread)
     if (!gv)
 	goto say_undef;
     bufsv = *++MARK;
+    if (! SvOK(bufsv))
+	sv_setpvn(bufsv, "", 0);
     buffer = SvPV_force(bufsv, blen);
     length = SvIVx(*++MARK);
     if (length < 0)
@@ -1418,7 +1452,7 @@ PP(pp_flock)
     GV *gv;
     PerlIO *fp;
 
-#if defined(HAS_FLOCK) || defined(flock)
+#ifdef FLOCK
     argtype = POPi;
     if (MAXARG <= 0)
 	gv = last_in_gv;
@@ -1429,7 +1463,7 @@ PP(pp_flock)
     else
 	fp = Nullfp;
     if (fp) {
-	value = (I32)(flock(PerlIO_fileno(fp), argtype) >= 0);
+	value = (I32)(FLOCK(PerlIO_fileno(fp), argtype) >= 0);
     }
     else
 	value = 0;
@@ -2856,8 +2890,7 @@ PP(pp_system)
     int childpid;
     int result;
     int status;
-    Signal_t (*ihand)();     /* place to save signal during system() */
-    Signal_t (*qhand)();     /* place to save signal during system() */
+    Sigsave_t ihand,qhand;     /* place to save signals during system() */
 
 #if (defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(OS2)
     if (SP - MARK == 1) {
@@ -2877,13 +2910,13 @@ PP(pp_system)
 	sleep(5);
     }
     if (childpid > 0) {
-	ihand = signal(SIGINT, SIG_IGN);
-	qhand = signal(SIGQUIT, SIG_IGN);
+	rsignal_save(SIGINT, SIG_IGN, &ihand);
+	rsignal_save(SIGQUIT, SIG_IGN, &qhand);
 	do {
 	    result = wait4pid(childpid, &status, 0);
 	} while (result == -1 && errno == EINTR);
-	(void)signal(SIGINT, ihand);
-	(void)signal(SIGQUIT, qhand);
+	(void)rsignal_restore(SIGINT, &ihand);
+	(void)rsignal_restore(SIGQUIT, &qhand);
 	statusvalue = FIXSTATUS(status);
 	if (result < 0)
 	    value = -1;
@@ -4079,7 +4112,42 @@ PP(pp_syscall)
 #endif
 }
 
-#if !defined(HAS_FLOCK) && defined(HAS_LOCKF)
+#ifdef FCNTL_EMULATE_FLOCK
+ 
+/*  XXX Emulate flock() with fcntl().
+    What's really needed is a good file locking module.
+*/
+
+static int
+fcntl_emulate_flock(fd, operation)
+int fd;
+int operation;
+{
+    struct flock flock;
+ 
+    switch (operation & ~LOCK_NB) {
+    case LOCK_SH:
+	flock.l_type = F_RDLCK;
+	break;
+    case LOCK_EX:
+	flock.l_type = F_WRLCK;
+	break;
+    case LOCK_UN:
+	flock.l_type = F_UNLCK;
+	break;
+    default:
+	errno = EINVAL;
+	return -1;
+    }
+    flock.l_whence = SEEK_SET;
+    flock.l_start = flock.l_len = 0L;
+ 
+    return fcntl(fd, (operation & LOCK_NB) ? F_SETLK : F_SETLKW, &flock);
+}
+
+#endif /* FCNTL_EMULATE_FLOCK */
+
+#ifdef LOCKF_EMULATE_FLOCK
 
 /*  XXX Emulate flock() with lockf().  This is just to increase
     portability of scripts.  The calls are not completely
@@ -4109,22 +4177,6 @@ PP(pp_syscall)
 #  define F_TEST	3	/* Test a region for other processes locks */
 # endif
 
-/* These are the flock() constants.  Since this sytems doesn't have
-   flock(), the values of the constants are probably not available.
-*/
-# ifndef LOCK_SH
-#  define LOCK_SH 1
-# endif
-# ifndef LOCK_EX
-#  define LOCK_EX 2
-# endif
-# ifndef LOCK_NB
-#  define LOCK_NB 4
-# endif
-# ifndef LOCK_UN
-#  define LOCK_UN 8
-# endif
-
 static int
 lockf_emulate_flock (fd, operation)
 int fd;
@@ -4150,8 +4202,9 @@ int operation;
 		    errno = EWOULDBLOCK;
 	    break;
 
-	/* LOCK_UN - unlock */
+	/* LOCK_UN - unlock (non-blocking is a no-op) */
 	case LOCK_UN:
+	case LOCK_UN|LOCK_NB:
 	    i = lockf (fd, F_ULOCK, 0);
 	    break;
 
@@ -4163,4 +4216,5 @@ int operation;
     }
     return (i);
 }
-#endif
+
+#endif /* LOCKF_EMULATE_FLOCK */

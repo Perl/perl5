@@ -401,7 +401,16 @@ clean:
 	done
 	rm -f perl suidperl miniperl $(LIBPERL)
 
-realclean: clean
+realclean: clean _cleaner
+	@echo "Note that make realclean does not delete config.sh"
+
+clobber:	clean _cleaner
+	rm -f config.sh cppstdin
+
+distclean:	clobber
+
+# Do not 'make _cleaner' directly.
+_cleaner:
 	-cd os2; rm -f Makefile
 	-cd pod; $(MAKE) realclean
 	-cd utils; $(MAKE) realclean
@@ -417,12 +426,6 @@ realclean: clean
 	rm -f lib/.exists
 	rm -f h2ph.man pstruct
 	rm -rf .config
-	@echo "Note that make realclean does not delete config.sh"
-
-clobber:	realclean
-	rm -f config.sh cppstdin
-
-distclean:	clobber
 
 # The following lint has practically everything turned on.  Unfortunately,
 # you have to wade through a lot of mumbo jumbo that can't be suppressed.

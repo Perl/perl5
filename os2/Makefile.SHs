@@ -64,15 +64,11 @@ $spitshell >>Makefile <<'!NO!SUBS!'
 #	grep -v '"\(malloc\|realloc\|free\)"' perl.linkexp	>>$@
 
 
-# We assume here that perl is available somewhere ...
-
 perl.exports: perl.exp EXTERN.h perl.h
-	(echo '#include "EXTERN.h"'; echo '#include "perl.h"' ; \
-			echo '#include "perl.exp"') | \
+	(echo "#include \"EXTERN.h\" \n#include \"perl.h\" \n#include \"perl.exp\"";	\
+	 echo "malloc\nrealloc\ncalloc\nfree") | \
 		$(CC) -DEMBED  -E - | \
 		awk '{if ($$2 == "") print $$1}' | sort | uniq > $@
-
-#		perl -ne 'print if (/^#!/ .. /^#\s/) && s/^(\w+) *$$/$$1/' > $@
 
 perl.linkexp: perl.exports perl.map
 	cat perl.exports perl.map | sort | uniq -d | sed -e 's/\w\+/  "\0"/' > perl.linkexp

@@ -3,8 +3,8 @@
  DB_File.xs -- Perl 5 interface to Berkeley DB 
 
  written by Paul Marquess (pmarquess@bfsec.bt.co.uk)
- last modified 10th Nov 1996
- version 1.05
+ last modified 27th Nov 1996
+ version 1.06
 
  All comments/suggestions/problems are welcome
 
@@ -27,6 +27,7 @@
 		Dave Hammen, hammen@gothamcity.jsc.nasa.gov
 	1.05 -  Added logic to allow prefix & hash types to be specified via
 		Makefile.PL
+	1.06 -  Minor namespace cleanup: Localized PrintBtree.
 
 */
 
@@ -273,6 +274,7 @@ RECNOINFO * recno ;
     printf ("  bfname    = %d [%s]\n", recno->bfname, recno->bfname) ;
 }
 
+static void
 PrintBtree(btree)
 BTREEINFO * btree ;
 {

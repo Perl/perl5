@@ -4,6 +4,7 @@ use ExtUtils::MakeMaker;
 WriteMakefile(
     'NAME'	=> 'OS2::Process',
     'VERSION'	=> '0.1',
+    MAN3PODS 	=> ' ', 	# Pods will be built by installman.
     'LIBS'	=> [''],   # e.g., '-lm' 
     'DEFINE'	=> '',     # e.g., '-DHAVE_SOMETHING' 
     'INC'	=> '',     # e.g., '-I/usr/include/other' 

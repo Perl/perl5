@@ -274,10 +274,14 @@ register SV **sarg;
 		(void)sprintf(xs,f,SvNV(arg));
 		xlen = strlen(xs);
 #ifdef LC_NUMERIC
-		/* User-defined locales may include arbitrary characters */
-		if (! numeric_standard)
+		/*
+		 * User-defined locales may include arbitrary characters.
+		 * And, unfortunately, some system may alloc the "C" locale
+		 * to be overridden by a malicious user.
+		 */
+		if (op->op_type == OP_SPRINTF)
 		    SvTAINTED_on(sv);
-#endif
+#endif /* LC_NUMERIC */
 		break;
 	    case 's':
 		ch = *(++t);
@@ -539,12 +543,21 @@ SV *right;
     char *lsave = lc;
     char *rsave = rc;
 
-    dc = SvPV_force(sv,na);
     len = leftlen < rightlen ? leftlen : rightlen;
     lensave = len;
-    if (SvCUR(sv) < len) {
-	dc = SvGROW(sv,len + 1);
-	(void)memzero(dc + SvCUR(sv), len - SvCUR(sv) + 1);
+    if (SvOK(sv)) {
+	dc = SvPV_force(sv, na);
+	if (SvCUR(sv) < len) {
+	    dc = SvGROW(sv, len + 1);
+	    (void)memzero(dc + SvCUR(sv), len - SvCUR(sv) + 1);
+	}
+    }
+    else {
+	I32 needlen = ((optype == OP_BIT_AND)
+			? len : (leftlen > rightlen ? leftlen : rightlen));
+	Newz(801, dc, needlen + 1, char);
+	(void)sv_usepvn(sv, dc, needlen);
+	dc = SvPVX(sv);		/* sv_usepvn() calls Renew() */
     }
     SvCUR_set(sv, len);
     (void)SvPOK_only(sv);

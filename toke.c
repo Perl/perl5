@@ -1856,7 +1856,7 @@ yylex()
 	case XOPERATOR:
 	    while (s < bufend && (*s == ' ' || *s == '\t'))
 		s++;
-	    if (s < bufend && (isALPHA(*s) || *s == '_')) {
+	    if (s < bufend && isIDFIRST(*s)) {
 		d = scan_word(s, tokenbuf, FALSE, &len);
 		while (d < bufend && (*d == ' ' || *d == '\t'))
 		    d++;
@@ -2104,6 +2104,10 @@ yylex()
 	    TERM(THING);
 	}
 
+	d = s;
+	if (lex_state == LEX_NORMAL)
+	    s = skipspace(s);
+
 	if ((expect != XREF || oldoldbufptr == last_lop) && intuit_more(s)) {
 	    char *t;
 	    if (*s == '[') {
@@ -2139,9 +2143,8 @@ yylex()
 	}
 
 	expect = XOPERATOR;
-	if (lex_state == LEX_NORMAL && isSPACE(*s)) {
+	if (lex_state == LEX_NORMAL && isSPACE(*d)) {
 	    bool islop = (last_lop == oldoldbufptr);
-	    s = skipspace(s);
 	    if (!islop || last_lop_op == OP_GREPSTART)
 		expect = XOPERATOR;
 	    else if (strchr("$@\"'`q", *s))
@@ -2170,6 +2173,8 @@ yylex()
 		yyerror("Final @ should be \\@ or @name");
 	    PREREF('@');
 	}
+	if (lex_state == LEX_NORMAL)
+	    s = skipspace(s);
 	if ((expect != XREF || oldoldbufptr == last_lop) && intuit_more(s)) {
 	    if (*s == '{')
 		tokenbuf[0] = '%';
@@ -2842,10 +2847,10 @@ yylex()
 	    FUN0(OP_GPWENT);
 
 	case KEY_getpwnam:
-	    FUN1(OP_GPWNAM);
+	    UNI(OP_GPWNAM);
 
 	case KEY_getpwuid:
-	    FUN1(OP_GPWUID);
+	    UNI(OP_GPWUID);
 
 	case KEY_getpeername:
 	    UNI(OP_GETPEERNAME);
@@ -2887,10 +2892,10 @@ yylex()
 	    FUN0(OP_GGRENT);
 
 	case KEY_getgrnam:
-	    FUN1(OP_GGRNAM);
+	    UNI(OP_GGRNAM);
 
 	case KEY_getgrgid:
-	    FUN1(OP_GGRGID);
+	    UNI(OP_GGRGID);
 
 	case KEY_getlogin:
 	    FUN0(OP_GETLOGIN);
@@ -3218,16 +3223,16 @@ yylex()
 	    LOP(OP_SETPRIORITY,XTERM);
 
 	case KEY_sethostent:
-	    FUN1(OP_SHOSTENT);
+	    UNI(OP_SHOSTENT);
 
 	case KEY_setnetent:
-	    FUN1(OP_SNETENT);
+	    UNI(OP_SNETENT);
 
 	case KEY_setservent:
-	    FUN1(OP_SSERVENT);
+	    UNI(OP_SSERVENT);
 
 	case KEY_setprotoent:
-	    FUN1(OP_SPROTOENT);
+	    UNI(OP_SPROTOENT);
 
 	case KEY_setpwent:
 	    FUN0(OP_SPWENT);
@@ -4261,13 +4266,13 @@ I32 ck_uni;
 	    while (s < send && (*s == ' ' || *s == '\t')) s++;
 	    *d = *s;
 	}
-	if (isALPHA(*d) || *d == '_') {
+	if (isIDFIRST(*d)) {
 	    d++;
 	    while (isALNUM(*s) || *s == ':')
 		*d++ = *s++;
 	    *d = '\0';
 	    while (s < send && (*s == ' ' || *s == '\t')) s++;
-	    if ((*s == '[' || *s == '{')) {
+	    if ((*s == '[' || (*s == '{' && strNE(dest, "sub")))) {
 		if (dowarn && keyword(dest, d - dest)) {
 		    char *brack = *s == '[' ? "[...]" : "{...}";
 		    warn("Ambiguous use of %c{%s%s} resolved to %c%s%s",
@@ -4978,11 +4983,9 @@ start_subparse()
     CV* outsidecv = compcv;
     AV* comppadlist;
 
-#ifndef __QNX__
     if (compcv) {
 	assert(SvTYPE(compcv) == SVt_PVCV);
     }
-#endif
     save_I32(&subline);
     save_item(subname);
     SAVEI32(padix);

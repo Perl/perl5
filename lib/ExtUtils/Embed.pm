@@ -222,7 +222,7 @@ sub ccdlflags {
 }
 
 sub perl_inc {
-   print " -I$Config{archlib}/CORE ";
+   print " -I$Config{archlibexp}/CORE ";
 }
 
 sub ccopts {

@@ -244,7 +244,7 @@ register SV **sp;
 	if (flag == P_WAIT)
 		flag = P_NOWAIT;
 
-	if (strEQ(Argv[0],"/bin/sh")) Argv[0] = SH_PATH;
+	if (strEQ(Argv[0],"/bin/sh")) Argv[0] = sh_path;
 
 	if (Argv[0][0] != '/' && Argv[0][0] != '\\'
 	    && !(Argv[0][0] && Argv[0][1] == ':' 
@@ -296,7 +296,7 @@ int execf;
        have a shell which will not change between computers with the
        same architecture, to avoid "action on a distance". 
        And to have simple build, this shell should be sh. */
-    shell = SH_PATH;
+    shell = sh_path;
     copt = "-c";
 #endif 
 
@@ -304,10 +304,10 @@ int execf;
 	cmd++;
 
     if (strnEQ(cmd,"/bin/sh",7) && isSPACE(cmd[7])) {
-	STRLEN l = strlen(SH_PATH);
+	STRLEN l = strlen(sh_path);
 	
 	New(4545, news, strlen(cmd) - 7 + l, char);
-	strcpy(news, SH_PATH);
+	strcpy(news, sh_path);
 	strcpy(news + l, cmd + 7);
 	cmd = news;
     }
@@ -474,7 +474,7 @@ char	*mode;
 #  else
     char *shell = getenv("EMXSHELL");
 
-    my_setenv("EMXSHELL", SH_PATH);
+    my_setenv("EMXSHELL", sh_path);
     res = popen(cmd, mode);
     my_setenv("EMXSHELL", shell);
 #  endif 
@@ -724,8 +724,6 @@ os2error(int rc)
 	return buf;
 }
 
-char sh_path[STATIC_FILE_LENGTH+1] = SH_PATH_INI;
-
 char *
 perllib_mangle(char *s, unsigned int l)
 {
@@ -736,6 +734,8 @@ perllib_mangle(char *s, unsigned int l)
     if (!newp && !notfound) {
 	newp = getenv("PERLLIB_PREFIX");
 	if (newp) {
+	    char *s;
+	    
 	    oldp = newp;
 	    while (*newp && !isSPACE(*newp) && *newp != ';') {
 		newp++; oldl++;		/* Skip digits. */
@@ -746,6 +746,12 @@ perllib_mangle(char *s, unsigned int l)
 	    newl = strlen(newp);
 	    if (newl == 0 || oldl == 0) {
 		die("Malformed PERLLIB_PREFIX");
+	    }
+	    strcpy(ret, newp);
+	    s = ret;
+	    while (*s) {
+		if (*s == '\\') *s = '/';
+		s++;
 	    }
 	} else {
 	    notfound = 1;
@@ -763,7 +769,6 @@ perllib_mangle(char *s, unsigned int l)
     if (l + newl - oldl > STATIC_FILE_LENGTH || newl > STATIC_FILE_LENGTH) {
 	die("Malformed PERLLIB_PREFIX");
     }
-    strncpy(ret, newp, newl);
     strcpy(ret + newl, s + oldl);
     return ret;
 }
@@ -1102,17 +1107,20 @@ Perl_OS2_init()
     settmppath();
     OS2_Perl_data.xs_init = &Xs_OS2_init;
     if ( (shell = getenv("PERL_SH_DRIVE")) ) {
+	New(404, sh_path, strlen(SH_PATH) + 1, char);
+	strcpy(sh_path, SH_PATH);
 	sh_path[0] = shell[0];
     } else if ( (shell = getenv("PERL_SH_DIR")) ) {
-	int l = strlen(shell);
+	int l = strlen(shell), i;
 	if (shell[l-1] == '/' || shell[l-1] == '\\') {
 	    l--;
 	}
-	if (l > STATIC_FILE_LENGTH - 7) {
-	    die("PERL_SH_DIR too long");
-	}
+	New(404, sh_path, l + 8, char);
 	strncpy(sh_path, shell, l);
 	strcpy(sh_path + l, "/sh.exe");
+	for (i = 0; i < l; i++) {
+	    if (sh_path[i] == '\\') sh_path[i] = '/';
+	}
     }
 }
 

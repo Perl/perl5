@@ -8,18 +8,18 @@
  */
 
 typedef struct he HE;
-typedef struct he_key HEK;
+typedef struct hek HEK;
 
 struct he {
     HE		*hent_next;
-    HEK		*hent_hk;
+    HEK		*hent_hek;
     SV		*hent_val;
 };
 
-struct he_key {
-    U32		hk_hash;
-    I32		hk_len;
-    char	hk_key[1];
+struct hek {
+    U32		hek_hash;
+    I32		hek_len;
+    char	hek_key[1];
 };
 
 struct xpvhv {
@@ -89,12 +89,12 @@ struct xpvhv {
 
 #define Nullhe Null(HE*)
 #define HeNEXT(he)		(he)->hent_next
-#define HeKEY_hk(he)		(he)->hent_hk
-#define HeKEY(he)		HK_KEY(HeKEY_hk(he))
+#define HeKEY_hek(he)		(he)->hent_hek
+#define HeKEY(he)		HEK_KEY(HeKEY_hek(he))
 #define HeKEY_sv(he)		(*(SV**)HeKEY(he))
-#define HeKLEN(he)		HK_LEN(HeKEY_hk(he))
+#define HeKLEN(he)		HEK_LEN(HeKEY_hek(he))
 #define HeVAL(he)		(he)->hent_val
-#define HeHASH(he)		HK_HASH(HeKEY_hk(he))
+#define HeHASH(he)		HEK_HASH(HeKEY_hek(he))
 #define HePV(he)		((HeKLEN(he) == HEf_SVKEY) ?		\
 				 SvPV(HeKEY_sv(he),na) :		\
 				 HeKEY(he))
@@ -110,6 +110,8 @@ struct xpvhv {
 				 &sv_undef)
 #define HeSVKEY_set(he,sv)	(HeKEY_sv(he) = sv)
 
-#define HK_LEN(hk)		(hk)->hk_len
-#define HK_KEY(hk)		(hk)->hk_key
-#define HK_HASH(hk)		(hk)->hk_hash
+#define Nullhek Null(HEK*)
+#define HEK_BASESIZE		OFFSETOF(HEK, hek_key)
+#define HEK_HASH(hek)		(hek)->hek_hash
+#define HEK_LEN(hek)		(hek)->hek_len
+#define HEK_KEY(hek)		(hek)->hek_key

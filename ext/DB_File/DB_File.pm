@@ -1,8 +1,8 @@
 # DB_File.pm -- Perl 5 interface to Berkeley DB 
 #
 # written by Paul Marquess (pmarquess@bfsec.bt.co.uk)
-# last modified 10th Nov 1996
-# version 1.05
+# last modified 27th Nov 1996
+# version 1.06
 
 package DB_File::HASHINFO ;
 
@@ -149,7 +149,7 @@ use vars qw($VERSION @ISA @EXPORT $AUTOLOAD $DB_BTREE $DB_HASH $DB_RECNO) ;
 use Carp;
 
 
-$VERSION = "1.05" ;
+$VERSION = "1.06" ;
 
 #typedef enum { DB_BTREE, DB_HASH, DB_RECNO } DBTYPE;
 $DB_BTREE = new DB_File::BTREEINFO ;
@@ -1517,6 +1517,10 @@ Made all scripts in the documentation C<strict> and C<-w> clean.
 
 Added logic to F<DB_File.xs> to allow the module to be built after Perl
 is installed.
+
+=item 1.06
+
+Minor namespace cleanup: Localized C<PrintBtree>.
 
 =back
 

@@ -112,8 +112,8 @@ static int findbucket _((union overhead *freep, int srchlen));
 #  define MAX_PACKED 6
 #  define MAX_2_POT_ALGO ((1<<(MAX_PACKED + 1)) - M_OVERHEAD)
 #  define TWOK_MASK ((1<<11) - 1)
-#  define TWOK_MASKED(x) ((int)x & ~TWOK_MASK)
-#  define TWOK_SHIFT(x) ((int)x & TWOK_MASK)
+#  define TWOK_MASKED(x) ((u_int)(x) & ~TWOK_MASK)
+#  define TWOK_SHIFT(x) ((u_int)(x) & TWOK_MASK)
 #  define OV_INDEXp(block) ((u_char*)(TWOK_MASKED(block)))
 #  define OV_INDEX(block) (*OV_INDEXp(block))
 #  define OV_MAGIC(block,bucket) (*(OV_INDEXp(block) +			\
@@ -195,7 +195,7 @@ emergency_sbrk(size)
 	/* Got it, now detach SvPV: */
 	pv = SvPV(sv, na);
 	/* Check alignment: */
-	if ((pv - M_OVERHEAD) & (1<<11 - 1)) {
+	if (((u_int)(pv - M_OVERHEAD)) & ((1<<11) - 1)) {
 	    PerlIO_puts(PerlIO_stderr(),"Bad alignment of $^M!\n");
 	    return (char *)-1;		/* die die die */
 	}
@@ -205,7 +205,8 @@ emergency_sbrk(size)
 	SvPOK_off(sv);
 	SvREADONLY_on(sv);
 	die("Out of memory!");		/* croak may eat too much memory. */
-    } else if (emergency_buffer_size >= size) {
+    }
+    else if (emergency_buffer_size >= size) {
 	emergency_buffer_size -= size;
 	return emergency_buffer + emergency_buffer_size;
     }
@@ -379,11 +380,11 @@ morecore(bucket)
   	op = (union overhead *)sbrk(0);
 #  ifndef I286
 #    ifdef PACK_MALLOC
-  	if ((int)op & 0x7ff)
-  		(void)sbrk(slack = 2048 - ((int)op & 0x7ff));
+  	if ((u_int)op & 0x7ff)
+  		(void)sbrk(slack = 2048 - ((u_int)op & 0x7ff));
 #    else
-  	if ((int)op & 0x3ff)
-  		(void)sbrk(slack = 1024 - ((int)op & 0x3ff));
+  	if ((u_int)op & 0x3ff)
+  		(void)sbrk(slack = 1024 - ((u_int)op & 0x3ff));
 #    endif
 #    if defined(DEBUGGING_MSTATS) && defined(PACK_MALLOC)
 	sbrk_slack += slack;
@@ -408,19 +409,21 @@ morecore(bucket)
 #endif 
 	op = (union overhead *)sbrk(needed);
 	/* no more room! */
-  	if ((int)op == -1 &&
-	    (int)(op = (union overhead *)emergency_sbrk(size)) == -1)
+  	if (op == (union overhead *)-1) {
+	    op = (union overhead *)emergency_sbrk(needed);
+	    if (op == (union overhead *)-1)
   		return;
+	}
 	/*
 	 * Round up to minimum allocation size boundary
 	 * and deduct from block count to reflect.
 	 */
 #ifndef I286
 #  ifdef PACK_MALLOC
-	if ((int)op & 0x7ff)
+	if ((u_int)op & 0x7ff)
 		croak("panic: Off-page sbrk");
 #  endif
-  	if ((int)op & 7) {
+  	if ((u_int)op & 7) {
   		op = (union overhead *)(((MEM_SIZE)op + 8) &~ 7);
   		nblks--;
   	}

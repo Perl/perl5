@@ -355,6 +355,10 @@ char*	regnext _((char* p));
 char*	regprop _((char* op));
 void	repeatcpy _((char* to, char* from, I32 len, I32 count));
 char*	rninstr _((char* big, char* bigend, char* little, char* lend));
+Sighandler_t rsignal _((int, Sighandler_t));
+int	rsignal_restore _((int, Sigsave_t*));
+int	rsignal_save _((int, Sighandler_t, Sigsave_t*));
+Sighandler_t rsignal_state _((int));
 int	runops _((void));
 #ifndef HAS_RENAME
 I32	same_dirent _((char* a, char* b));
@@ -414,6 +418,7 @@ IV	sv_2iv _((SV* sv));
 SV*	sv_2mortal _((SV* sv));
 double	sv_2nv _((SV* sv));
 char*	sv_2pv _((SV* sv, STRLEN* lp));
+UV	sv_2uv _((SV* sv));
 void	sv_add_arena _((char* ptr, U32 size, U32 flags));
 int	sv_backoff _((SV* sv));
 SV*	sv_bless _((SV* sv, HV* stash));

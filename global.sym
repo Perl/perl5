@@ -221,6 +221,7 @@ scrgv
 seq_amg
 sge_amg
 sgt_amg
+sh_path
 sig_name
 sig_num
 sighandler
@@ -299,6 +300,10 @@ yyval
 # Functions
 
 Gv_AMupdate
+SvTRUE
+SvIV
+SvUV
+SvNV
 amagic_call
 append_elem
 append_list
@@ -979,6 +984,10 @@ regnext
 regprop
 repeatcpy
 rninstr
+rsignal
+rsignal_save
+rsignal_state
+rsignal_restore
 runops
 safecalloc
 safemalloc
@@ -1036,6 +1045,7 @@ scope
 screaminstr
 setdefout
 setenv_getix
+share_hek
 sharepvn
 sighandler
 skipspace
@@ -1050,6 +1060,7 @@ sv_2iv
 sv_2mortal
 sv_2nv
 sv_2pv
+sv_2uv
 sv_add_arena
 sv_backoff
 sv_bless
@@ -1081,6 +1092,7 @@ sv_mortalcopy
 sv_newmortal
 sv_newref
 sv_peek
+sv_pvn
 sv_pvn_force
 sv_ref
 sv_reftype
@@ -1110,6 +1122,7 @@ taint_proper
 too_few_arguments
 too_many_arguments
 unlnk
+unshare_hek
 unsharepvn
 utilize
 wait4pid

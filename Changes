@@ -8,6 +8,336 @@ or in the .../src/5/0/unsupported directory for sub-version
 releases.)
 
 ----------------
+Version 5.003_10
+----------------
+
+This patch is closing in on 5.004.  It contains lots of small and
+valuable changes, but nothing dramatic.
+
+ CORE LANGUAGE CHANGES
+
+  Title:  "Allow &{sub {...}} without warning"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  toke.c
+
+  Title:  "Make parens optional on [gs]ethost and [gs]et{pw,gr} function
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  toke.c
+
+  Title:  "Fix syntax error with "$x [0]" and "$x {y}" and "@x {y}""
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  toke.c
+
+ OTHER CORE CHANGES
+
+  Title:  "Fix regex matching of chars with high bit set"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  regexec.c
+
+  Title:  "Hash key memory corruption fix and naming cleanup"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  hv.c hv.h perl.h
+
+  Title:  "Undo broken perf. patch (PADTMP stealing)"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  sv.c
+
+  Title:  "Make SV unstudied in sv_gets()"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  sv.c
+
+  Title:  "Better support for UVs"
+   From:  Paul Marquess
+  Files:  global.sym old_global.sym perl.h pp.c pp.h proto.h sv.c sv.h
+
+  Title:  "Minor locale cleanups"
+          (Accept "POSIX" locale as standard like "C". Reset locale to
+          'C' when testing strtod() in t/lib/posix.t.)
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  t/lib/posix.t util.c
+
+  Title:  "Always taint result of sprintf() on float"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  doop.c
+
+  Title:  "Fix spurious warning from bitwise string ops"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  doop.c
+
+  Title:  "Eliminate warning on {,sys}read(,$newvar,)"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  doop.c pp_sys.c
+
+  Title:  "Don't call fcntl(fileno(rsfp)) if !rsfp"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  perl.c
+
+  Title:  "Save message when calling __DIE__ hook"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  pp_ctl.c
+
+  Title:  "Namespace cleanup"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  global.sym old_global.sym perl.h
+
+  Title:  "Modify perl_exp.SH; create old_perl_exp.SH; document old_*"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  Configure INSTALL MANIFEST old_perl_exp.SH perl_exp.SH
+
+ PORTABILITY
+
+  Title:  "Reliable signal patch"
+   From:  Kenneth Albanowski <kjahds@kjahds.com>
+ Msg-ID:  <Pine.LNX.3.93.961126053209.294J-100000@kjahds.com>
+   Date:  Tue, 26 Nov 1996 05:40:50 -0500 (EST)
+  Files:  global.sym mg.c old_global.sym perl.h pp_sys.c proto.h util.c
+
+  Title:  "Emulate missing flock() with either fcntl() or lockf()"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  pp_sys.c
+
+  Title:  "3_09: minor patches for OS/2"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199611270830.DAA04985@monk.mps.ohio-state.edu>
+   Date:  Wed, 27 Nov 1996 03:30:05 -0500 (EST)
+  Files:  doio.c global.sym malloc.c old_global.sym os2/Makefile.SHs
+          os2/OS2/ExtAttr/Makefile.PL os2/OS2/PrfDB/Makefile.PL
+          os2/OS2/Process/Makefile.PL os2/OS2/REXX/Makefile.PL
+          os2/os2.c os2/os2ish.h perl.h
+
+  Title:  "Re: 5.003_09 and QNX"
+   From:  nort@bottesini.harvard.edu (Norton Allen)
+ Msg-ID:  <9611271836.AA14460@bottesini.harvard.edu>
+   Date:  Wed, 27 Nov 96 13:36:06 est
+  Files:  Configure MANIFEST README.qnx hints/qnx.sh qnx/ar qnx/cpp
+          t/TEST toke.c util.c x2p/proto.h
+
+  Title:  "Re: updated patch on the sysread, syswrite for VMS"
+   From:  Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>
+ Msg-ID:  <01ICB648K2XG001A1D@hmivax.humgen.upenn.edu>
+   Date:  Tue, 26 Nov 1996 17:28:23 -0500 (EST)
+  Files:  t/op/sysio.t
+
+ LIBRARY AND EXTENSIONS
+
+  Title:  "Minor patch to debugger"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199611290533.AAA08053@monk.mps.ohio-state.edu>
+   Date:  Fri, 29 Nov 1996 00:33:49 -0500 (EST)
+  Files:  lib/perl5db.pl
+
+  Title:  "AutoLoader::AUTOLOAD optimization"
+   From:  nick@ni-s.u-net.com (Nick Ing-Simmons)
+ Msg-ID:  <199611231954.TAA09921@ni-s.u-net.com>
+   Date:  Sat, 23 Nov 1996 19:54:52 GMT
+  Files:  lib/AutoLoader.pm
+
+  Title:  "Diagnostic cleanup"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  lib/diagnostics.pm pod/perldiag.pod
+
+ DOCUMENTATION
+
+  Title:  "Improve documentation for sysread() and syswrite()"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  pod/perlfunc.pod
+
+  Title:  "Document how to use $SIG{ALRM} and alarm()"
+   From:  Roderick Schertler <roderick@ibcinc.com>
+ Msg-ID:  <5898.849026569@eeyore.ibcinc.com>
+   Date:  Tue, 26 Nov 1996 11:42:49 -0500
+  Files:  pod/perlfunc.pod
+
+
+----------------
+Version 5.003_09
+----------------
+
+This patch was a compendium of various fixes and enhancements from
+many people, including some serious improvement in lexical variable
+scoping and locale handling.
+
+ CORE LANGUAGE CHANGES
+
+  Title:  "Lexical locales"
+          (make effectiveness of locales depend on C<use locale>)
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  too many to list
+
+  Title:  "Lexical scoping cleanup"
+          (tighten scoping of lexical variables, somewhat on the
+          new constructs and somewhat on the old)
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  many... but mostly perly.y and toke.c
+
+  Title:  "Re: memory corruption / security bug in sysread,syswrite + pa
+   From:  Jarkko Hietaniemi <jhi@cc.hut.fi>
+ Msg-ID:  <199611251946.VAA30459@alpha.hut.fi>
+   Date:  Mon, 25 Nov 1996 21:46:31 +0200 (EET)
+  Files:  MANIFEST pod/perldiag.pod pod/perlfunc.pod pp_sys.c
+          t/op/sysio.t
+
+ OTHER CORE CHANGES
+
+  Title:  "Configure fix for handling DynaLoader"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  Configure
+
+  Title:  "Properly prototype safe{malloc,calloc,realloc,free}."
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  proto.h
+
+  Title:  "UnixWare 2.1 fix for perl5.003_08 - cope with fp->_cnt < -1,
+   From:  John Hughes <john@AtlanTech.COM>
+ Msg-ID:  <01BBD6EE.E915C860@malvinas.AtlanTech.COM>
+   Date:  Wed, 20 Nov 1996 14:27:06 +0100
+  Files:  sv.c
+
+  Title:  ""static" call to UNIVERSAL::can"
+   From:  Nick.Ing-Simmons@tiuk.ti.com
+ Msg-ID:  <199611211547.PAA15878@pluto>
+   Date:  Thu, 21 Nov 1996 15:47:46 GMT
+  Files:  universal.c
+
+  Title:  "die -> croak"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199611212111.QAA17070@aatma.engin.umich.edu>
+   Date:  Thu, 21 Nov 1996 16:11:21 -0500
+  Files:  pp_ctl.c
+
+  Title:  "Patch for embed.pl when !EMBED && !MULTIPLICITY"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  embed.pl
+
+  Title:  "Add new symbols to old_global.sym, too."
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  global.sym old_global.sym
+
+  Title:  "Cleanup of {,un}pack('w')."
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  pp.c
+
+  Title:  "Cleanups from Ilya."
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  gv.c malloc.c pod/perlguts.pod pp_ctl.c
+
+  Title:  "Fix for unpack('w') on 64-bit systems."
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  pp.c
+
+  Title:  "Re: LC_NUMERIC support is ready + performance"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199611260308.WAA02677@monk.mps.ohio-state.edu>
+   Date:  Mon, 25 Nov 1996 22:08:27 -0500 (EST)
+  Files:  sv.c
+
+  Title:  "Hash key sharing improvements from Ilya."
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  hv.c hv.h proto.h
+
+  Title:  "Mortal stack pre-allocation from Ilya."
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  pp.c pp.h pp_ctl.c pp_hot.c pp_sys.c
+
+ PORTABILITY
+
+  Title:  "VMS patches post-5.003_08"
+   From:  bailey@hmivax.humgen.upenn.edu (Charles Bailey)
+ Msg-ID:  <1996Nov22.181631.1603238@hmivax.humgen.upenn.edu>
+   Date:  Fri, 22 Nov 1996 18:16:31 -0500 (EST)
+  Files:  lib/ExtUtils/MM_Unix.pm lib/ExtUtils/MM_VMS.pm
+          lib/ExtUtils/MakeMaker.pm lib/File/Path.pm mg.c pp_ctl.c
+          utils/h2xs.PL vms/config.vms vms/descrip.mms
+          vms/gen_shrfls.pl vms/genconfig.pl vms/perlvms.pod vms/vms.c
+          vms/vmsish.h
+
+  Title:  "5.003_08: OS/2-specific bugs/enhancements"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199611241147.GAA00490@monk.mps.ohio-state.edu>
+   Date:  Sun, 24 Nov 1996 06:47:25 -0500 (EST)
+  Files:  README.os2 hints/os2.sh os2/Changes os2/Makefile.SHs
+          os2/OS2/PrfDB/PrfDB.pm os2/os2.c
+
+  Title:  "HP patches didn't make it into _08 (fwd)"
+   From:  Jeff Okamoto <okamoto@hpcc123.corp.hp.com>
+ Msg-ID:  <199611260215.AA100414526@hpcc123.corp.hp.com>
+   Date:  Mon, 25 Nov 96 18:15:26 PST
+  Files:  ext/DynaLoader/dl_hpux.xs
+
+  Title:  "Another HP "patch" that didn't make it (new hints file)"
+   From:  Jeff Okamoto <okamoto@hpcc123.corp.hp.com>
+ Msg-ID:  <199611252116.AA245766577@hpcc123.corp.hp.com>
+   Date:  Mon, 25 Nov 1996 13:16:17 -0800
+  Files:  hints/hpux.sh
+
+ LIBRARY AND EXTENSIONS
+
+  Title:  "Elide spurious space in db-hash.t"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  t/lib/db-hash.t
+
+  Title:  "Update documentation and warning in I18N::Collate."
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  lib/I18N/Collate.pm
+
+  Title:  "Fix bitwise op test; clean up a couple of others"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  t/lib/bigintpm.t t/op/bop.t t/op/overload.t
+
+  Title:  "minimal timelocal.pl for _09"
+   From:  Achim Bohnet <ach@rosat.mpe-garching.mpg.de>
+ Msg-ID:  <9611191854.AA19586@o09.rosat.mpe-garching.mpg.de>
+   Date:  Tue, 19 Nov 1996 19:54:23 +0100
+  Files:  lib/Time/Local.pm
+
+  Title:  "Socket test improvement from Ilya."
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  t/lib/io_sock.t
+
+  Title:  "Re: blib"
+   From:  nick@ni-s.u-net.com (Nick Ing-Simmons)
+ Msg-ID:  <199611230917.JAA00471@ni-s.u-net.com>
+   Date:  Sat, 23 Nov 1996 09:17:40 GMT
+  Files:  lib/blib.pm
+
+ DOCUMENTATION
+
+  Title:  "perldiag documentation patch."
+   From:  pmarquess@bfsec.bt.co.uk (Paul Marquess)
+ Msg-ID:  <9611201607.AA12729@claudius.bfsec.bt.co.uk>
+   Date:  Wed, 20 Nov 96 16:07:28 GMT
+  Files:  pod/perldiag.pod
+
+  Title:  "a missing perldiag entry"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199611212024.PAA15758@aatma.engin.umich.edu>
+   Date:  Thu, 21 Nov 1996 15:24:02 -0500
+  Files:  pod/perldiag.pod
+
+  Title:  "perlfunc patch"
+   From:  pmarquess@bfsec.bt.co.uk (Paul Marquess)
+ Msg-ID:  <9611201404.AA12477@claudius.bfsec.bt.co.uk>
+   Date:  Wed, 20 Nov 96 14:04:08 GMT
+  Files:  pod/perlfunc.pod
+
+  Title:  "Patch for pod/perlpod.pod"
+   From:  "Joseph S. Myers" <jsm28@cam.ac.uk>
+ Msg-ID:  <Pine.LNX.3.95.961120235016.6666A-100000@hammer.chu.cam.ac.uk
+   Date:  Wed, 20 Nov 1996 23:54:41 +0000 (GMT)
+  Files:  pod/perlpod.pod
+
+  Title:  "Update locale documentation."
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  pod/perli18n.pod
+
+ BUNDLED UTILITIES
+
+  Title:  "Fix type mismatches in x2p's safe{alloc,realloc,free}."
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  x2p/util.c
+
+
+----------------
 Version 5.003_08
 ----------------
 

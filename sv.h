@@ -155,6 +155,13 @@ struct xpviv {
     IV		xiv_iv;		/* integer value or pv offset */
 };
 
+struct xpvuv {
+    char *	xpv_pv;		/* pointer to malloced string */
+    STRLEN	xpv_cur;	/* length of xpv_pv as a C string */
+    STRLEN	xpv_len;	/* allocated size */
+    UV		xuv_uv;		/* unsigned value or pv offset */
+};
+
 struct xpvnv {
     char *	xpv_pv;		/* pointer to malloced string */
     STRLEN	xpv_cur;	/* length of xpv_pv as a C string */
@@ -412,6 +419,8 @@ struct xpvio {
 
 #define SvIVX(sv) ((XPVIV*)  SvANY(sv))->xiv_iv
 #define SvIVXx(sv) SvIVX(sv)
+#define SvUVX(sv) ((XPVUV*)  SvANY(sv))->xuv_uv
+#define SvUVXx(sv) SvUVX(sv)
 #define SvNVX(sv)  ((XPVNV*)SvANY(sv))->xnv_nv
 #define SvNVXx(sv) SvNVX(sv)
 #define SvPVX(sv)  ((XPV*)  SvANY(sv))->xpv_pv
@@ -480,6 +489,7 @@ struct xpvio {
 #ifdef CRIPPLED_CC
 
 IV SvIV _((SV* sv));
+UV SvUV _((SV* sv));
 double SvNV _((SV* sv));
 #define SvPV_force(sv, lp) sv_pvn_force(sv, &lp)
 #define SvPV(sv, lp) sv_pvn(sv, &lp)
@@ -487,6 +497,7 @@ char *sv_pvn _((SV *, STRLEN *));
 I32 SvTRUE _((SV *));
 
 #define SvIVx(sv) SvIV(sv)
+#define SvUVx(sv) SvUV(sv)
 #define SvNVx(sv) SvNV(sv)
 #define SvPVx(sv, lp) sv_pvn(sv, &lp)
 #define SvPVx_force(sv, lp) sv_pvn_force(sv, &lp)
@@ -494,14 +505,25 @@ I32 SvTRUE _((SV *));
 
 #else /* !CRIPPLED_CC */
 
+#undef SvIV
 #define SvIV(sv) (SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv))
 
+#undef SvUV
+#define SvUV(sv) (SvIOK(sv) ? SvUVX(sv) : sv_2uv(sv))
+
+#undef SvNV
 #define SvNV(sv) (SvNOK(sv) ? SvNVX(sv) : sv_2nv(sv))
 
-#define SvPV(sv, lp) (SvPOK(sv) ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_2pv(sv, &lp))
+#undef SvPV
+#define SvPV(sv, lp) \
+    (SvPOK(sv) ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_2pv(sv, &lp))
 
-#define SvPV_force(sv, lp) ((SvFLAGS(sv) & (SVf_POK|SVf_THINKFIRST)) == SVf_POK ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_pvn_force(sv, &lp))
+#undef SvPV_force
+#define SvPV_force(sv, lp) \
+    ((SvFLAGS(sv) & (SVf_POK|SVf_THINKFIRST)) == SVf_POK \
+     ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_pvn_force(sv, &lp))
 
+#undef SvTRUE
 #define SvTRUE(sv) (						\
     !sv								\
     ? 0								\
@@ -520,6 +542,7 @@ I32 SvTRUE _((SV *));
 		: sv_2bool(sv) )
 
 #define SvIVx(sv) ((Sv = (sv)), SvIV(Sv))
+#define SvUVx(sv) ((Sv = (sv)), SvUV(Sv))
 #define SvNVx(sv) ((Sv = (sv)), SvNV(Sv))
 #define SvPVx(sv, lp) ((Sv = (sv)), SvPV(Sv, lp))
 #define SvTRUEx(sv) ((Sv = (sv)), SvTRUE(Sv))

@@ -34,7 +34,6 @@ compcv
 comppad
 comppad_name
 comppad_name_fill
-comppad_name_floor
 concat_amg
 concat_ass_amg
 cop_seqmax
@@ -48,12 +47,10 @@ curinterp
 curpad
 cv_const_sv
 dc
-debug
 dec_amg
 di
 div_amg
 div_ass_amg
-do_undump
 ds
 egid
 envgv
@@ -213,6 +210,7 @@ scrgv
 seq_amg
 sge_amg
 sgt_amg
+sh_path
 sig_name
 sig_num
 siggv
@@ -250,10 +248,12 @@ vtbl_collxfrm
 vtbl_dbline
 vtbl_env
 vtbl_envelem
+vtbl_fm
 vtbl_glob
 vtbl_isa
 vtbl_isaelem
 vtbl_mglob
+vtbl_nkeys
 vtbl_pack
 vtbl_packelem
 vtbl_pos
@@ -317,6 +317,7 @@ cast_ulong
 check_uni
 checkcomma
 ck_aelem
+ck_bitop
 ck_concat
 ck_delete
 ck_eof
@@ -425,11 +426,13 @@ gv_HVadd
 gv_IOadd
 gv_check
 gv_efullname
+gv_efullname3
 gv_fetchfile
 gv_fetchmeth
 gv_fetchmethod
 gv_fetchpv
 gv_fullname
+gv_fullname3
 gv_init
 gv_stashpv
 gv_stashpvn
@@ -451,6 +454,7 @@ hv_iterkeysv
 hv_iternext
 hv_iternextsv
 hv_iterval
+hv_ksplit
 hv_magic
 hv_stashpv
 hv_store
@@ -491,12 +495,14 @@ magic_set
 magic_setamagic
 magic_setarylen
 magic_setbm
+magic_setfm
 magic_setcollxfrm
 magic_setdbline
 magic_setenv
 magic_setglob
 magic_setisa
 magic_setmglob
+magic_setnkeys
 magic_setpack
 magic_setpos
 magic_setsig
@@ -507,6 +513,7 @@ magic_setvec
 magic_wipepack
 magicname
 markstack_grow
+mem_collxfrm
 mess
 mg_clear
 mg_copy
@@ -962,8 +969,13 @@ regnext
 regprop
 repeatcpy
 rninstr
+rsignal
+rsignal_save
+rsignal_state
+rsignal_restore
 runops
 same_dirent
+save_I16
 save_I32
 save_aptr
 save_ary
@@ -1010,6 +1022,7 @@ scope
 screaminstr
 setdefout
 setenv_getix
+share_hek
 sharepvn
 sighandler
 skipspace
@@ -1024,6 +1037,7 @@ sv_2iv
 sv_2mortal
 sv_2nv
 sv_2pv
+sv_2uv
 sv_add_arena
 sv_backoff
 sv_bless
@@ -1038,6 +1052,7 @@ sv_cmp
 sv_cmp_locale
 sv_collxfrm
 sv_dec
+sv_derived_from
 sv_dump
 sv_eq
 sv_free
@@ -1070,6 +1085,7 @@ sv_setref_nv
 sv_setref_pv
 sv_setref_pvn
 sv_setsv
+sv_setuv
 sv_taint
 sv_tainted
 sv_unmagic
@@ -1082,6 +1098,7 @@ taint_proper
 too_few_arguments
 too_many_arguments
 unlnk
+unshare_hek
 unsharepvn
 utilize
 wait4pid

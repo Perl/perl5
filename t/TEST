@@ -24,14 +24,20 @@ if ($ARGV[0] eq '') {
       `echo base/*.t comp/*.t cmd/*.t io/*.t; echo op/*.t lib/*.t`);
 }
 
-open(CONFIG,"../config.sh");
-while (<CONFIG>) {
-    if (/sharpbang='(.*)'/) {
-	$sharpbang = ($1 eq '#!');
-	last;
-    }
+if ($^O eq 'os2' || $^O eq 'qnx') {
+    $sharpbang = 0;
 }
-$sharpbang = 0 if $ENV{OS2_SHELL};		# OS/2
+else {
+    open(CONFIG, "../config.sh");
+    while (<CONFIG>) {
+	if (/sharpbang='(.*)'/) {
+	    $sharpbang = ($1 eq '#!');
+	    last;
+	}
+    }
+    close(CONFIG);
+}
+
 $bad = 0;
 $good = 0;
 $total = @ARGV;

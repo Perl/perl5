@@ -33,7 +33,6 @@
 #if defined(I_TERMIOS)
 #include <termios.h>
 #endif
-#include <stdio.h>
 #ifdef I_STDLIB
 #include <stdlib.h>
 #endif

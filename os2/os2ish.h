@@ -47,12 +47,6 @@
 
 #define BIT_BUCKET "/dev/nul"  /* Will this work? */
 
-/* SH_PATH_INI:
- *	Duplicate for SH_PATH. This symbol allows redefinition of SH_PATH,
- *	which may be needed to make a binary distribution.
- */
-#define SH_PATH_INI SH_PATH  /**/
-
 #if defined(I_SYS_UN) && !defined(TCPIPV4)
 /* It is not working without TCPIPV4 defined. */
 # undef I_SYS_UN
@@ -197,9 +191,7 @@ extern OS2_Perl_data_t OS2_Perl_data;
 	}
 
 #define STATIC_FILE_LENGTH 127
-extern char sh_path[STATIC_FILE_LENGTH+1];
-#undef SH_PATH
-#define SH_PATH sh_path
+
 #define PERLLIB_MANGLE(s, n) perllib_mangle((s), (n))
 char *perllib_mangle(char *, unsigned int);
 

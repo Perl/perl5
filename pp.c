@@ -758,11 +758,15 @@ PP(pp_left_shift)
 {
     dSP; dATARGET; tryAMAGICbin(lshift,opASSIGN); 
     {
-      dPOPTOPiirl;
-      if (op->op_private & HINT_INTEGER)
-	SETi( left << right );
-      else
-	SETu( (UV)left << right );
+      IV shift = POPi;
+      if (op->op_private & HINT_INTEGER) {
+	IV i = TOPi;
+	SETi( i << shift );
+      }
+      else {
+	UV u = TOPu;
+	SETu( u << shift );
+      }
       RETURN;
     }
 }
@@ -771,11 +775,15 @@ PP(pp_right_shift)
 {
     dSP; dATARGET; tryAMAGICbin(rshift,opASSIGN); 
     {
-      dPOPTOPiirl;
-      if (op->op_private & HINT_INTEGER)
-	SETi( left >> right );
-      else
-	SETu( (UV)left >> right );
+      IV shift = POPi;
+      if (op->op_private & HINT_INTEGER) {
+	IV i = TOPi;
+	SETi( i >> shift );
+      }
+      else {
+	UV u = TOPu;
+	SETu( u >> shift );
+      }
       RETURN;
     }
 }
@@ -932,7 +940,7 @@ PP(pp_bit_and)
     {
       dPOPTOPssrl;
       if (SvNIOKp(left) || SvNIOKp(right)) {
-	UV value = SvIV(left) & SvIV(right);
+	UV value = SvUV(left) & SvUV(right); 
 	if (op->op_private & HINT_INTEGER)
 	  SETi( (IV)value );
 	else
@@ -952,7 +960,7 @@ PP(pp_bit_xor)
     {
       dPOPTOPssrl;
       if (SvNIOKp(left) || SvNIOKp(right)) {
-	UV value = SvIV(left) ^ SvIV(right);
+	UV value = SvUV(left) ^ SvUV(right);
 	if (op->op_private & HINT_INTEGER)
 	  SETi( (IV)value );
 	else
@@ -972,7 +980,7 @@ PP(pp_bit_or)
     {
       dPOPTOPssrl;
       if (SvNIOKp(left) || SvNIOKp(right)) {
-	UV value = SvIV(left) | SvIV(right);
+	UV value = SvUV(left) | SvUV(right);
 	if (op->op_private & HINT_INTEGER)
 	  SETi( (IV)value );
 	else
@@ -1033,7 +1041,7 @@ PP(pp_complement)
     {
       dTOPss;
       if (SvNIOKp(sv)) {
-	UV value = ~(UV)SvIV(sv);
+	UV value = ~SvUV(sv);
 	if (op->op_private & HINT_INTEGER)
 	  SETi( (IV)value );
 	else

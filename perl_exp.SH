@@ -5,6 +5,9 @@
 # Create the export list for perl.
 # Needed by AIX to do dynamic linking.
 
+# NOTE: If you're using 'old_embed.pl', don't use this script!
+#       Use 'old_perl_exp.SH' instead.
+
 # This simple program relys on 'global.sym' being up to date
 # with all of the global symbols that a dynamicly link library
 # might want to access.
@@ -19,10 +22,11 @@ echo "#!" > perl.exp
 
 sed -n '/^[A-Za-z]/ s/^/Perl_/p' global.sym >> perl.exp
 
+#
 # also add symbols from interp.sym
 # They are only needed if -DMULTIPLICITY is not set but it
 # doesn't hurt to include them anyway.
-sed -n '/^[A-Za-z]/ p' interp.sym >> perl.exp
+sed -n '/^[A-Za-z]/ s/^/Perl_/p' interp.sym >> perl.exp
 
 # extra globals not included above.
 cat <<END >> perl.exp
@@ -30,6 +34,9 @@ perl_init_i18nl10n
 perl_init_i18nl14n
 perl_new_collate
 perl_new_ctype
+perl_new_numeric
+perl_numeric_local
+perl_numeric_standard
 perl_alloc
 perl_construct
 perl_destruct

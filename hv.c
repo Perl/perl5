@@ -64,12 +64,12 @@ U32 hash;
     char *k;
     register HEK *hek;
     
-    New(54, k, sizeof(U32) + sizeof(I32) + len + 1, char);
+    New(54, k, HEK_BASESIZE + len + 1, char);
     hek = (HEK*)k;
-    Copy(str, HK_KEY(hek), len, char);
-    (HK_KEY(hek))[len] = '\0';
-    HK_LEN(hek) = len;
-    HK_HASH(hek) = hash;
+    Copy(str, HEK_KEY(hek), len, char);
+    *(HEK_KEY(hek) + len) = '\0';
+    HEK_LEN(hek) = len;
+    HEK_HASH(hek) = hash;
     return hek;
 }
 
@@ -77,7 +77,7 @@ void
 unshare_hek(hek)
 HEK *hek;
 {
-    unsharepvn(HK_KEY(hek),HK_LEN(hek),HK_HASH(hek));
+    unsharepvn(HEK_KEY(hek),HEK_LEN(hek),HEK_HASH(hek));
 }
 
 /* (klen == HEf_SVKEY) is special for MAGICAL hv entries, meaning key slot
@@ -168,14 +168,17 @@ register U32 hash;
 	return 0;
 
     if (SvRMAGICAL(hv) && mg_find((SV*)hv,'P')) {
+	char *k;
 	HEK *hek;
-	Newz(74, hek, 1, HEK);
+
+	New(54, k, HEK_BASESIZE + sizeof(SV*), char);
+	hek = (HEK*)k;
 	sv = sv_newmortal();
 	keysv = sv_2mortal(newSVsv(keysv));
 	mg_copy((SV*)hv, sv, (char*)keysv, HEf_SVKEY);
 	entry = &He;
 	HeVAL(entry) = sv;
-	HeKEY_hk(entry) = hek;
+	HeKEY_hek(entry) = hek;
 	HeSVKEY_set(entry, keysv);
 	HeKLEN(entry) = HEf_SVKEY;	/* hent_key is holding an SV* */
 	return entry;
@@ -277,9 +280,9 @@ register U32 hash;
 
     entry = new_he();
     if (HvSHAREKEYS(hv))
-	HeKEY_hk(entry) = share_hek(key, klen, hash);
+	HeKEY_hek(entry) = share_hek(key, klen, hash);
     else                                       /* gotta do the real thing */
-	HeKEY_hk(entry) = save_hek(key, klen, hash);
+	HeKEY_hek(entry) = save_hek(key, klen, hash);
     HeVAL(entry) = val;
     HeNEXT(entry) = *oentry;
     *oentry = entry;
@@ -350,9 +353,9 @@ register U32 hash;
 
     entry = new_he();
     if (HvSHAREKEYS(hv))
-	HeKEY_hk(entry) = share_hek(key, klen, hash);
+	HeKEY_hek(entry) = share_hek(key, klen, hash);
     else                                       /* gotta do the real thing */
-	HeKEY_hk(entry) = save_hek(key, klen, hash);
+	HeKEY_hek(entry) = save_hek(key, klen, hash);
     HeVAL(entry) = val;
     HeNEXT(entry) = *oentry;
     *oentry = entry;
@@ -752,11 +755,11 @@ I32 shared;
     SvREFCNT_dec(HeVAL(hent));
     if (HeKLEN(hent) == HEf_SVKEY) {
 	SvREFCNT_dec(HeKEY_sv(hent));
-        Safefree(HeKEY_hk(hent));
+        Safefree(HeKEY_hek(hent));
     } else if (shared)
-	unshare_hek(HeKEY_hk(hent));
+	unshare_hek(HeKEY_hek(hent));
     else
-	Safefree(HeKEY_hk(hent));
+	Safefree(HeKEY_hek(hent));
     del_he(hent);
 }
 
@@ -770,11 +773,11 @@ I32 shared;
     sv_2mortal(HeVAL(hent));	/* free between statements */
     if (HeKLEN(hent) == HEf_SVKEY) {
 	sv_2mortal(HeKEY_sv(hent));
-	Safefree(HeKEY_hk(hent));
+	Safefree(HeKEY_hek(hent));
     } else if (shared)
-	unshare_hek(HeKEY_hk(hent));
+	unshare_hek(HeKEY_hek(hent));
     else
-	Safefree(HeKEY_hk(hent));
+	Safefree(HeKEY_hek(hent));
     del_he(hent);
 }
 
@@ -894,11 +897,14 @@ HV *hv;
 	    SvREFCNT_dec(HeSVKEY(entry));	/* get rid of previous key */
 	}
 	else {
+	    char *k;
 	    HEK *hek;
-	    xhv->xhv_eiter = entry = new_he();	/* only one HE per MAGICAL hash */
+
+	    xhv->xhv_eiter = entry = new_he();  /* one HE per MAGICAL hash */
 	    Zero(entry, 1, HE);
-	    Newz(74, hek, 1, HEK);
-	    HeKEY_hk(entry) = hek;
+	    Newz(54, k, HEK_BASESIZE + sizeof(SV*), char);
+	    hek = (HEK*)k;
+	    HeKEY_hek(entry) = hek;
 	    HeKLEN(entry) = HEf_SVKEY;
 	}
 	magic_nextpack((SV*) hv,mg,key);
@@ -909,7 +915,7 @@ HV *hv;
         }
 	if (HeVAL(entry))
 	    SvREFCNT_dec(HeVAL(entry));
-	Safefree(HeKEY_hk(entry));
+	Safefree(HeKEY_hek(entry));
 	del_he(entry);
 	xhv->xhv_eiter = Null(HE*);
 	return Null(HE*);
@@ -1008,7 +1014,7 @@ char* sv;
 I32 len;
 U32 hash;
 {
-    return share_hek(sv, len, hash)->hk_key;
+    return HEK_KEY(share_hek(sv, len, hash));
 }
 
 /* possibly free a shared string if no one has access to it
@@ -1046,7 +1052,7 @@ U32 hash;
 	    *oentry = HeNEXT(entry);
 	    if (i && !*oentry)
 		xhv->xhv_fill--;
-	    Safefree(HeKEY_hk(entry));
+	    Safefree(HeKEY_hek(entry));
 	    del_he(entry);
 	    --xhv->xhv_keys;
 	}
@@ -1093,7 +1099,7 @@ register U32 hash;
     }
     if (!found) {
 	entry = new_he();
-	HeKEY_hk(entry) = save_hek(str, len, hash);
+	HeKEY_hek(entry) = save_hek(str, len, hash);
 	HeVAL(entry) = Nullsv;
 	HeNEXT(entry) = *oentry;
 	*oentry = entry;
@@ -1106,7 +1112,7 @@ register U32 hash;
     }
 
     ++HeVAL(entry);				/* use value slot as REFCNT */
-    return HeKEY_hk(entry);
+    return HeKEY_hek(entry);
 }
 
 

@@ -16,6 +16,7 @@ Porting/Glossary	Glossary of config.sh variables.
 README			The Instructions
 README.os2		Notes about OS/2 port
 README.plan9		Notes about Plan9 port
+README.qnx		Notes about QNX port
 README.vms		Notes about VMS port
 Todo			The Wishlist
 XSUB.h			Include file for extension subroutines
@@ -239,6 +240,7 @@ hints/next_3_0.sh	Hints for named architecture
 hints/next_4.sh		Hints for named architecture
 hints/opus.sh		Hints for named architecture
 hints/os2.sh		Hints for named architecture
+hints/qnx.sh		Hints for named architecture
 hints/powerux.sh	Hints for named architecture
 hints/sco.sh		Hints for named architecture
 hints/sco_2_3_0.sh	Hints for named architecture
@@ -391,6 +393,7 @@ myconfig		Prints summary of the current configuration
 nostdio.h		Cause compile error on stdio calls
 old_embed.pl		Produces embed.h using old_global.sym
 old_global.sym		Old list of symbols to hide when embedded
+old_perl_exp.SH		Creates old list of exported symbols for AIX.
 op.c			Opcode syntax tree code
 op.h			Opcode syntax tree header
 opcode.h		Automatically generated opcode header
@@ -516,6 +519,8 @@ pp_ctl.c		Push/Pop code for control flow
 pp_hot.c		Push/Pop code for heavily used opcodes
 pp_sys.c		Push/Pop code for system interaction
 proto.h			Prototypes
+qnx/ar			QNX implementation of "ar" utility
+qnx/cpp			QNX implementation of preprocessor filter
 regcomp.c		Regular expression compiler
 regcomp.h		Private declarations for above
 regexec.c		Regular expression evaluator
@@ -668,7 +673,7 @@ toke.c			The tokener
 universal.c		The default UNIVERSAL package methods
 unixish.h		Defines that are assumed on Unix
 util.c			Utility routines
-util.h			Public declarations for the above
+util.h			Dummy header
 utils/Makefile		Extract the utility scripts.
 utils/c2ph.PL		program to translate dbx stabs to perl
 utils/h2ph.PL		A thing to turn C .h files into perl .ph files
@@ -716,6 +721,7 @@ x2p/cflags.SH		A script that emits C compilation flags per file
 x2p/find2perl.PL	A find to perl translator
 x2p/hash.c		Associative arrays again
 x2p/hash.h		Public declarations for the above
+x2p/proto.h		Dummy header
 x2p/s2p.PL		Sed to perl translator
 x2p/str.c		String handling package
 x2p/str.h		Public declarations for the above

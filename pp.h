@@ -55,14 +55,14 @@
 #define POPp		(SvPVx(POPs, na))
 #define POPn		(SvNVx(POPs))
 #define POPi		((IV)SvIVx(POPs))
-#define POPu		((UV)SvIVx(POPs))
+#define POPu		((UV)SvUVx(POPs))
 #define POPl		((long)SvIVx(POPs))
 
 #define TOPs		(*sp)
 #define TOPp		(SvPV(TOPs, na))
 #define TOPn		(SvNV(TOPs))
 #define TOPi		((IV)SvIV(TOPs))
-#define TOPu		((UV)SvIV(TOPs))
+#define TOPu		((UV)SvUV(TOPs))
 #define TOPl		((long)SvIV(TOPs))
 
 /* Go to some pains in the rare event that we must extend the stack. */
@@ -110,12 +110,10 @@
 #define dPOPPOPssrl	SV *right = POPs; SV *left = POPs
 #define dPOPPOPnnrl	double right = POPn; double left = POPn
 #define dPOPPOPiirl	IV right = POPi; IV left = POPi
-#define dPOPPOPuurl	UV right = POPu; UV left = POPu
 
 #define dPOPTOPssrl	SV *right = POPs; SV *left = TOPs
 #define dPOPTOPnnrl	double right = POPn; double left = TOPn
 #define dPOPTOPiirl	IV right = POPi; IV left = TOPi
-#define dPOPTOPuurl	UV right = POPu; UV left = TOPu
 
 #define RETPUSHYES	RETURNX(PUSHs(&sv_yes))
 #define RETPUSHNO	RETURNX(PUSHs(&sv_no))

@@ -237,6 +237,7 @@
 #define seq_amg		Perl_seq_amg
 #define sge_amg		Perl_sge_amg
 #define sgt_amg		Perl_sgt_amg
+#define sh_path		Perl_sh_path
 #define sig_name	Perl_sig_name
 #define sig_num		Perl_sig_num
 #define sighandler	Perl_sighandler
@@ -312,6 +313,10 @@
 #define yytable		Perl_yytable
 #define yyval		Perl_yyval
 #define Gv_AMupdate	Perl_Gv_AMupdate
+#define SvTRUE		Perl_SvTRUE
+#define SvIV		Perl_SvIV
+#define SvUV		Perl_SvUV
+#define SvNV		Perl_SvNV
 #define amagic_call	Perl_amagic_call
 #define append_elem	Perl_append_elem
 #define append_list	Perl_append_list
@@ -992,6 +997,10 @@
 #define regprop		Perl_regprop
 #define repeatcpy	Perl_repeatcpy
 #define rninstr		Perl_rninstr
+#define rsignal		Perl_rsignal
+#define rsignal_save	Perl_rsignal_save
+#define rsignal_state	Perl_rsignal_state
+#define rsignal_restore	Perl_rsignal_restore
 #define runops		Perl_runops
 #define safecalloc	Perl_safecalloc
 #define safemalloc	Perl_safemalloc
@@ -1049,6 +1058,7 @@
 #define screaminstr	Perl_screaminstr
 #define setdefout	Perl_setdefout
 #define setenv_getix	Perl_setenv_getix
+#define share_hek	Perl_share_hek
 #define sharepvn	Perl_sharepvn
 #define sighandler	Perl_sighandler
 #define skipspace	Perl_skipspace
@@ -1063,6 +1073,7 @@
 #define sv_2mortal	Perl_sv_2mortal
 #define sv_2nv		Perl_sv_2nv
 #define sv_2pv		Perl_sv_2pv
+#define sv_2uv		Perl_sv_2uv
 #define sv_add_arena	Perl_sv_add_arena
 #define sv_backoff	Perl_sv_backoff
 #define sv_bless	Perl_sv_bless
@@ -1094,6 +1105,7 @@
 #define sv_newmortal	Perl_sv_newmortal
 #define sv_newref	Perl_sv_newref
 #define sv_peek		Perl_sv_peek
+#define sv_pvn		Perl_sv_pvn
 #define sv_pvn_force	Perl_sv_pvn_force
 #define sv_ref		Perl_sv_ref
 #define sv_reftype	Perl_sv_reftype
@@ -1123,6 +1135,7 @@
 #define too_few_arguments	Perl_too_few_arguments
 #define too_many_arguments	Perl_too_many_arguments
 #define unlnk		Perl_unlnk
+#define unshare_hek	Perl_unshare_hek
 #define unsharepvn	Perl_unsharepvn
 #define utilize		Perl_utilize
 #define wait4pid	Perl_wait4pid

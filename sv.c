@@ -1299,7 +1299,7 @@ register SV *sv;
 	if (SvNVX(sv) < 0.0)
 	    SvIVX(sv) = I_V(SvNVX(sv));
 	else
-	    SvIVX(sv) = (IV) U_V(SvNVX(sv));
+	    SvUVX(sv) = U_V(SvNVX(sv));
     }
     else if (SvPOKp(sv) && SvLEN(sv)) {
 	if (dowarn && !looks_like_number(sv))
@@ -1315,6 +1315,81 @@ register SV *sv;
     DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2iv(%ld)\n",
 	(unsigned long)sv,(long)SvIVX(sv)));
     return SvIVX(sv);
+}
+
+UV
+sv_2uv(sv)
+register SV *sv;
+{
+    if (!sv)
+	return 0;
+    if (SvGMAGICAL(sv)) {
+	mg_get(sv);
+	if (SvIOKp(sv))
+	    return SvUVX(sv);
+	if (SvNOKp(sv))
+	    return U_V(SvNVX(sv));
+	if (SvPOKp(sv) && SvLEN(sv)) {
+	    if (dowarn && !looks_like_number(sv))
+		not_a_number(sv);
+	    return (UV)atol(SvPVX(sv));
+	}
+        if (!SvROK(sv)) {
+            return 0;
+        }
+    }
+    if (SvTHINKFIRST(sv)) {
+	if (SvROK(sv)) {
+#ifdef OVERLOAD
+	  SV* tmpstr;
+	  if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv, numer)))
+	    return SvUV(tmpstr);
+#endif /* OVERLOAD */
+	  return (UV)SvRV(sv);
+	}
+	if (SvREADONLY(sv)) {
+	    if (SvNOKp(sv)) {
+		return U_V(SvNVX(sv));
+	    }
+	    if (SvPOKp(sv) && SvLEN(sv)) {
+		if (dowarn && !looks_like_number(sv))
+		    not_a_number(sv);
+		return (UV)atol(SvPVX(sv));
+	    }
+	    if (dowarn)
+		warn(warn_uninit);
+	    return 0;
+	}
+    }
+    switch (SvTYPE(sv)) {
+    case SVt_NULL:
+	sv_upgrade(sv, SVt_IV);
+	return SvUVX(sv);
+    case SVt_PV:
+	sv_upgrade(sv, SVt_PVIV);
+	break;
+    case SVt_NV:
+	sv_upgrade(sv, SVt_PVNV);
+	break;
+    }
+    if (SvNOKp(sv)) {
+	(void)SvIOK_on(sv);
+	SvUVX(sv) = U_V(SvNVX(sv));
+    }
+    else if (SvPOKp(sv) && SvLEN(sv)) {
+	if (dowarn && !looks_like_number(sv))
+	    not_a_number(sv);
+	(void)SvIOK_on(sv);
+	SvUVX(sv) = (UV)atol(SvPVX(sv));
+    }
+    else  {
+	if (dowarn && !localizing && !(SvFLAGS(sv) & SVs_PADTMP))
+	    warn(warn_uninit);
+	return 0;
+    }
+    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2uv(%lu)\n",
+	(unsigned long)sv,SvUVX(sv)));
+    return SvUVX(sv);
 }
 
 double
@@ -1648,22 +1723,20 @@ register SV *sstr;
 	(void)SvOK_off(dstr);
 	return;
     case SVt_IV:
-	if (dtype <= SVt_PV) {
+	if (dtype != SVt_IV && dtype < SVt_PVIV) {
 	    if (dtype < SVt_IV)
 		sv_upgrade(dstr, SVt_IV);
 	    else if (dtype == SVt_NV)
 		sv_upgrade(dstr, SVt_PVNV);
-	    else if (dtype <= SVt_PV)
+	    else
 		sv_upgrade(dstr, SVt_PVIV);
 	}
 	break;
     case SVt_NV:
-	if (dtype <= SVt_PVIV) {
+	if (dtype != SVt_NV && dtype < SVt_PVNV) {
 	    if (dtype < SVt_NV)
 		sv_upgrade(dstr, SVt_NV);
-	    else if (dtype == SVt_PVIV)
-		sv_upgrade(dstr, SVt_PVNV);
-	    else if (dtype <= SVt_PV)
+	    else
 		sv_upgrade(dstr, SVt_PVNV);
 	}
 	break;
@@ -1860,7 +1933,7 @@ register SV *sstr;
 	 * has to be allocated and SvPVX(sstr) has to be freed.
 	 */
 
-	if ((SvTEMP(sstr) || SvPADTMP(sstr)) && /* slated for free anyway? */
+	if (SvTEMP(sstr) &&		/* slated for free anyway? */
 	    !(sflags & SVf_OOK)) 	/* and not involved in OOK hack? */
 	{
 	    if (SvPVX(dstr)) {		/* we know that dtype >= SVt_PV */
@@ -2796,6 +2869,7 @@ I32 append;
     }
     if (!SvUPGRADE(sv, SVt_PV))
 	return 0;
+    SvSCREAM_off(sv);
 
     if (RsSNARF(rs)) {
 	rsptr = NULL;
@@ -3264,7 +3338,6 @@ newSVsv(old)
 register SV *old;
 {
     register SV *sv;
-    U32 oflags;
 
     if (!old)
 	return Nullsv;
@@ -3276,11 +3349,10 @@ register SV *old;
     SvANY(sv) = 0;
     SvREFCNT(sv) = 1;
     SvFLAGS(sv) = 0;
-    oflags = SvFLAGS(old) & (SVs_TEMP|SVs_PADTMP);
-    if (oflags) {
-	SvFLAGS(old) &= ~(SVs_TEMP|SVs_PADTMP);
+    if (SvTEMP(old)) {
+	SvTEMP_off(old);
 	sv_setsv(sv,old);
-	SvFLAGS(old) |= oflags;
+	SvTEMP_on(old);
     }
     else
 	sv_setsv(sv,old);
@@ -3448,30 +3520,40 @@ register SV *sv;
 	}
     }
 }
-#endif /* SvTRUE */
+#endif /* !SvTRUE */
 
 #ifndef SvIV
-IV SvIV(Sv)
-register SV *Sv;
+IV
+SvIV(sv)
+register SV *sv;
 {
-    if (SvIOK(Sv))
-	return SvIVX(Sv);
-    return sv_2iv(Sv);
+    if (SvIOK(sv))
+	return SvIVX(sv);
+    return sv_2iv(sv);
 }
-#endif /* SvIV */
+#endif /* !SvIV */
 
+#ifndef SvUV
+UV
+SvUV(sv)
+register SV *sv;
+{
+    if (SvIOK(sv))
+	return SvUVX(sv);
+    return sv_2uv(sv);
+}
+#endif /* !SvUV */
 
 #ifndef SvNV
-double SvNV(Sv)
-register SV *Sv;
+double
+SvNV(sv)
+register SV *sv;
 {
-    if (SvNOK(Sv))
-	return SvNVX(Sv);
-    if (SvIOK(Sv))
-	return (double)SvIVX(Sv);
-    return sv_2nv(Sv);
+    if (SvNOK(sv))
+	return SvNVX(sv);
+    return sv_2nv(sv);
 }
-#endif /* SvNV */
+#endif /* !SvNV */
 
 #ifdef CRIPPLED_CC
 char *

@@ -634,46 +634,6 @@ MAGIC* mg;
     return 0;
 }
 
-#ifdef HAS_SIGACTION
-/* set up reliable signal() clone */
-
-typedef void (*Sigfunc) _((int));
-
-static
-Sigfunc rsignal(signo,handler)
-int signo;
-Sigfunc handler;
-{
-    struct sigaction act,oact;
-    
-    act.sa_handler = handler;
-    sigemptyset(&act.sa_mask);
-    act.sa_flags = 0;
-#ifdef SA_RESTART
-    act.sa_flags |= SA_RESTART;	/* SVR4, 4.3+BSD */
-#endif
-    if (sigaction(signo, &act, &oact) < 0)
-    	return(SIG_ERR);
-    else
-    	return(oact.sa_handler);
-}
-
-#else
-
-/* ah well, so much for reliability */
-
-#define rsignal(x,y) signal(x,y)
-
-#endif
-
-static sig_trapped;
-static
-Signal_t
-sig_trap(signo)
-int signo;
-{
-    sig_trapped++;
-}
 int
 magic_getsig(sv,mg)
 SV* sv;
@@ -686,15 +646,10 @@ MAGIC* mg;
     	if(psig_ptr[i])
     	    sv_setsv(sv,psig_ptr[i]);
     	else {
-    	    void (*origsig) _((int));
-    	    /* get signal state without losing signals */
-    	    sig_trapped=0;
-    	    origsig = rsignal(i,sig_trap);
-    	    rsignal(i,origsig);
-    	    if(sig_trapped)
-    	    	kill(getpid(),i);
+    	    Sighandler_t sigstate = rsignal_state(i);
+
     	    /* cache state so we don't fetch it again */
-    	    if(origsig == SIG_IGN)
+    	    if(sigstate == SIG_IGN)
     	    	sv_setpv(sv,"IGNORE");
     	    else
     	    	sv_setsv(sv,&sv_undef);
@@ -768,7 +723,7 @@ MAGIC* mg;
     }
     if (SvTYPE(sv) == SVt_PVGV || SvROK(sv)) {
 	if (i)
-	    (void)rsignal(i,sighandler);
+	    (void)rsignal(i, sighandler);
 	else
 	    *svp = SvREFCNT_inc(sv);
 	return 0;
@@ -776,13 +731,13 @@ MAGIC* mg;
     s = SvPV_force(sv,na);
     if (strEQ(s,"IGNORE")) {
 	if (i)
-	    (void)rsignal(i,SIG_IGN);
+	    (void)rsignal(i, SIG_IGN);
 	else
 	    *svp = 0;
     }
     else if (strEQ(s,"DEFAULT") || !*s) {
 	if (i)
-	    (void)rsignal(i,SIG_DFL);
+	    (void)rsignal(i, SIG_DFL);
 	else
 	    *svp = 0;
     }
@@ -794,7 +749,7 @@ MAGIC* mg;
 	    sv_setpv(sv,tokenbuf);
 	}
 	if (i)
-	    (void)rsignal(i,sighandler);
+	    (void)rsignal(i, sighandler);
 	else
 	    *svp = SvREFCNT_inc(sv);
     }

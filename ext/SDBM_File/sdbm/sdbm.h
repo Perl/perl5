@@ -79,15 +79,15 @@ extern DBM *sdbm_prep proto((char *, char *, int, int));
 extern long sdbm_hash proto((char *, int));
 
 #ifndef SDBM_ONLY
-#define dbm_open sdbm_open;
-#define dbm_close sdbm_close;
-#define dbm_fetch sdbm_fetch;
-#define dbm_store sdbm_store;
-#define dbm_delete sdbm_delete;
-#define dbm_firstkey sdbm_firstkey;
-#define dbm_nextkey sdbm_nextkey;
-#define dbm_error sdbm_error;
-#define dbm_clearerr sdbm_clearerr;
+#define dbm_open sdbm_open
+#define dbm_close sdbm_close
+#define dbm_fetch sdbm_fetch
+#define dbm_store sdbm_store
+#define dbm_delete sdbm_delete
+#define dbm_firstkey sdbm_firstkey
+#define dbm_nextkey sdbm_nextkey
+#define dbm_error sdbm_error
+#define dbm_clearerr sdbm_clearerr
 #endif
 
 /* Most of the following is stolen from perl.h. */
