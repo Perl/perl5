@@ -1315,7 +1315,7 @@ mod2fname(sv)
 #ifdef USE_THREADS
     sum++;				/* Avoid conflict of DLLs in memory. */
 #endif 
-    sum += PATCHLEVEL * 200 + SUBVERSION * 2;  /*  */
+    sum += PERL_VERSION * 200 + PERL_SUBVERSION * 2;  /*  */
     fname[pos] = 'A' + (sum % 26);
     fname[pos + 1] = 'A' + (sum / 26 % 26);
     fname[pos + 2] = '\0';

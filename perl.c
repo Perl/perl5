@@ -13,7 +13,6 @@
 
 #include "EXTERN.h"
 #include "perl.h"
-#include "patchlevel.h"
 
 /* XXX If this causes problems, set i_unistd=undef in the hint file.  */
 #ifdef I_UNISTD
@@ -210,13 +209,13 @@ perl_construct(register PerlInterpreter *sv_interp)
     STATUS_ALL_SUCCESS;
 
     SET_NUMERIC_STANDARD();
-#if defined(SUBVERSION) && SUBVERSION > 0
-    sprintf(PL_patchlevel, "%7.5f",   (double) 5 
-				+ ((double) PATCHLEVEL / (double) 1000)
-				+ ((double) SUBVERSION / (double) 100000));
+#if defined(PERL_SUBVERSION) && PERL_SUBVERSION > 0
+    sprintf(PL_patchlevel, "%7.5f",   (double) PERL_REVISION
+				+ ((double) PERL_VERSION / (double) 1000)
+				+ ((double) PERL_SUBVERSION / (double) 100000));
 #else
-    sprintf(PL_patchlevel, "%5.3f", (double) 5 +
-				((double) PATCHLEVEL / (double) 1000));
+    sprintf(PL_patchlevel, "%5.3f", (double) PERL_REVISION +
+				((double) PERL_VERSION / (double) 1000));
 #endif
 
 #if defined(LOCAL_PATCH_COUNT)
@@ -1719,9 +1718,9 @@ moreswitches(char *s)
 	s++;
 	return s;
     case 'v':
-#if defined(SUBVERSION) && SUBVERSION > 0
-	printf("\nThis is perl, version 5.%03d_%02d built for %s",
-	    PATCHLEVEL, SUBVERSION, ARCHNAME);
+#if defined(PERL_SUBVERSION) && PERL_SUBVERSION > 0
+	printf("\nThis is perl, version %d.%03d_%02d built for %s",
+	    PERL_REVISION, PERL_VERSION, PERL_SUBVERSION, ARCHNAME);
 #else
 	printf("\nThis is perl, version %s built for %s",
 		PL_patchlevel, ARCHNAME);

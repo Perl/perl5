@@ -2927,6 +2927,10 @@ $ WC "voidflags='" + perl_voidflags + "'"
 $ WC "d_eunice='" + perl_d_eunice + "'"
 $ WC "libs='" + perl_libs + "'"
 $ WC "libc='" + perl_libc + "'"
+$ tempstring = "PERL_VERSION='" + "''perl_patchlevel'" + "'"
+$ WC tempstring
+$ tempstring = "PERL_SUBVERSION='" + "''perl_patchlevel'" + "'"
+$ WC tempstring
 $ tempstring = "PATCHLEVEL='" + "''perl_patchlevel'" + "'"
 $ WC tempstring
 $ tempstring = "SUBVERSION='" + "''perl_SUBVERSION'" + "'"

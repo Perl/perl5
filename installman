@@ -17,8 +17,8 @@ $ver = $];
 $release = substr($ver,0,3);   # Not used presently.
 $patchlevel = substr($ver,3,2);
 die "Patchlevel of perl ($patchlevel)",
-    "and patchlevel of config.sh ($Config{'PATCHLEVEL'}) don't match\n"
-	if $patchlevel != $Config{'PATCHLEVEL'};
+    "and patchlevel of config.sh ($Config{'PERL_VERSION'}) don't match\n"
+	if $patchlevel != $Config{'PERL_VERSION'};
 
 $usage =
 "Usage:  installman --man1dir=/usr/wherever --man1ext=1

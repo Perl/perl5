@@ -969,13 +969,13 @@ $   got_sub   = "false"
 $   OPEN/READONLY CONFIG 'patchlevel_h' 
 $Patchlevel_h_loop:
 $   READ/END_Of_File=Close_patch CONFIG line
-$   IF ((F$LOCATE("#define PATCHLEVEL",line).NE.F$LENGTH(line)).AND.(.NOT.got_patch))
+$   IF ((F$LOCATE("#define PERL_VERSION",line).NE.F$LENGTH(line)).AND.(.NOT.got_patch))
 $   THEN
 $     line = F$EDIT(line,"COMPRESS, TRIM")
 $     patchlevel = F$EXTRACT(18,F$LENGTH(line)-18,line)
 $     got_patch = "true"
 $   ENDIF
-$   IF ((F$LOCATE("#define SUBVERSION",line).NE.F$LENGTH(line)).AND.(.NOT.got_sub))
+$   IF ((F$LOCATE("#define PERL_SUBVERSION",line).NE.F$LENGTH(line)).AND.(.NOT.got_sub))
 $   THEN
 $     line = F$EDIT(line,"COMPRESS, TRIM")
 $     subversion = F$EXTRACT(18,F$LENGTH(line)-18,line)

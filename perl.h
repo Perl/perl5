@@ -2796,6 +2796,8 @@ typedef struct am_table_short AMTS;
 #endif /* IAMSUID */
 
 /* and finally... */
+#define PERL_PATCHLEVEL_H_IMPLICIT
 #include "patchlevel.h"
+#undef PERL_PATCHLEVEL_H_IMPLICIT
 
 #endif /* Include guard */

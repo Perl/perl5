@@ -1027,9 +1027,6 @@ sub output_boilerplate {
     print <<'EOT';
 #include "EXTERN.h"
 #include "perl.h"
-#ifndef PATCHLEVEL
-#include "patchlevel.h"
-#endif
 
 /* Workaround for mapstart: the only op which needs a different ppaddr */
 #undef pp_mapstart

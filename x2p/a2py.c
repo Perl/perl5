@@ -35,7 +35,7 @@ static void usage(void);
 static void
 usage()
 {
-    printf("\nThis is the AWK to PERL translator, version 5.0, patchlevel %d\n", PATCHLEVEL);
+    printf("\nThis is the AWK to PERL translator, revision %d.0, version %d\n", PERL_REVISION, PERL_VERSION);
     printf("\nUsage: %s [-D<number>] [-F<char>] [-n<fieldlist>] [-<number>] filename\n", myname);
     printf("\n  -D<number>      sets debugging flags."
            "\n  -F<character>   the awk script to translate is always invoked with"

@@ -70,6 +70,11 @@
 #include "perl.h"
 #include "XSUB.h"
 
+#ifndef PERL_VERSION
+#include "patchlevel.h"
+#define PERL_VERSION PATCHLEVEL
+#endif
+
 /* Being the Berkeley DB we prefer the <sys/cdefs.h> (which will be
  * shortly #included by the <db.h>) __attribute__ to the possibly
  * already defined __attribute__, for example by GNUC or by Perl. */
@@ -335,7 +340,7 @@ GetVersionInfo()
 	croak("DB_File needs Berkeley DB 2.0.5 or greater, you have %d.%d.%d\n",
 		 Major, Minor, Patch) ;
  
-#if PATCHLEVEL > 3
+#if PERL_VERSION > 3
     sv_setpvf(ver_sv, "%d.%d", Major, Minor) ;
 #else
     {
