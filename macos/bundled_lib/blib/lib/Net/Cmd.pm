@@ -166,7 +166,7 @@ sub command
 
  if (scalar(@_))
   {
-   local $SIG{PIPE} = 'IGNORE';
+   local $SIG{PIPE} = 'IGNORE' unless $^O eq 'MacOS';
 
    my $str =  join(" ", map { /\n/ ? do { my $n = $_; $n =~ tr/\n/ /; $n } : $_; } @_) . "\015\012";
    my $len = length $str;
