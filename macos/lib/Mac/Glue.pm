@@ -30,14 +30,16 @@ use vars qw(
 	$GENPKG $GENSEQ %OPENGLUES %MERGEDCLASSES @OTHEREVENT
 	@OTHERCLASS %SPECIALEVENT %SPECIALCLASS %DESCS
 	%MERGEDENUM @OTHERENUM %INSL %DESC_TYPE %COMP %LOGI
+	$RESERVED
 );
 
 #=============================================================================#
-# $Id: Glue.pm,v 1.1 2001/10/03 19:31:55 pudge Exp $
-($REVISION)	= ' $Revision: 1.1 $ ' =~ /\$Revision:\s+([^\s]+)/;
-$VERSION	= '1.00';
+# $Id: Glue.pm,v 1.3 2001/10/22 19:41:58 pudge Exp $
+($REVISION) 	= ' $Revision: 1.3 $ ' =~ /\$Revision:\s+([^\s]+)/;
+$VERSION	= '1.01';
 @ISA		= 'Exporter';
 @EXPORT		= ();
+$RESERVED	= 'REPLY|SWITCH|MODE|PRIORITY|TIMEOUT|RETOBJ|ERRORS|CALLBACK|CLBK_ARG|ADDRESS';
 @SYMS		= qw(
 			obj_form  param_type enum whose range location
 			glueTrue  glueFalse  glueNext gluePrevious
@@ -45,7 +47,7 @@ $VERSION	= '1.00';
 			gTrue     gFalse     gNext    gPrevious
 			gFirst    gMiddle    gLast    gAny    gAll
 		);
-@METHS		= qw(	AUTOLOAD can launch obj prop	);
+@METHS		= qw(	ADDRESS AUTOLOAD can launch obj prop	);
 
 @EXPORT_OK	= ( @Mac::AppleEvents::EXPORT, @SYMS );
 %EXPORT_TAGS	= (
@@ -164,28 +166,37 @@ sub new {
 
 	$self = { _DB => $db, ID => $db->{ID}, SWITCH => 0, GLUENAME => $app };
 
-	$self->{ADDRESS} = defined $addtype
-			? $addtype eq 'ppc'  || $addtype eq typeTargetID
-				? { typeTargetID() => pack_ppc($db->{ID}, @add) }
-
-			: $addtype eq 'eppc' || $addtype eq typeTargetID
-				? { typeTargetID() => pack_eppc($db->{ID}, @add) }
-
-			: $addtype eq 'psn'  || $addtype eq typeProcessSerialNumber
-				? { typeProcessSerialNumber() => pack_psn($add[0]) } 
-
-			: $addtype eq 'path'
-				? { typeProcessSerialNumber() => _path_to_psn($add[0]) }
-
-			: { $addtype => $add[0] }
-
-		: { typeApplSignature() => $self->{ID} };
+	ADDRESS($self, $addtype, @add);
 
 	@{$self}{qw(CLASS NAMES IDS)} = _merge_classes($db);
 	_merge_enums($db, $self);
 
 	bless($self, $class);
 }
+
+#=============================================================================#
+# set target address
+sub ADDRESS {
+	my($self, $addtype, @add) = @_;
+
+	$self->{ADDRESS} = defined $addtype
+		? $addtype eq 'ppc'	 || $addtype eq typeTargetID
+			? { typeTargetID() => pack_ppc($self->{ID}, @add) }
+
+		: $addtype eq 'eppc' || $addtype eq typeTargetID
+			? { typeTargetID() => pack_eppc($self->{ID}, @add) }
+
+		: $addtype eq 'psn'	 || $addtype eq typeProcessSerialNumber
+			? { typeProcessSerialNumber() => pack_psn($add[0]) } 
+
+		: $addtype eq 'path'
+			? { typeProcessSerialNumber() => _path_to_psn($add[0]) }
+
+		: { $addtype => $add[0] }
+
+	: { typeApplSignature() => $self->{ID} };
+}
+
 
 #=============================================================================#
 # help UNIVERSAL::can out
@@ -212,7 +223,7 @@ sub AUTOLOAD {
 
 	if ($name eq 'DESTROY') {
 		return;
-	} elsif ($name =~ /^(?:REPLY|SWITCH|MODE|PRIORITY|TIMEOUT|RETOBJ|ERRORS)$/) {
+	} elsif ($name =~ /^(?:$RESERVED)$/) {
 		$sub = sub { $_[0]->{$name} = $_[1] if $_[1]; $_[0]->{$name} };
 	}
 
@@ -286,7 +297,7 @@ sub _primary {
 	my $hash = {@args};
 	if ($hash) {
 		for my $p (keys %$hash) {
-			next if $p =~ /^(?:REPLY|SWITCH|MODE|PRIORITY|TIMEOUT|RETOBJ|ERRORS|CALLBACK|CLBK_ARG)$/;
+			next if $p =~ /^(?:$RESERVED)$/;
 			my $pp = $p eq 'DOBJ' ? keyDirectObject : lc $p;
 			croak "'$p' parameter not available" unless exists $params->{$pp};
 			_params($self, $evt, $params->{$pp}, $hash->{$p});
@@ -2103,7 +2114,7 @@ Whole bunches of changes.  Note that glues made under 0.05 no longer work.
 
 Chris Nandor E<lt>pudge@pobox.comE<gt>, http://pudge.net/
 
-Copyright (c) 1998-2000 Chris Nandor.  All rights reserved.  This program
+Copyright (c) 1998-2001 Chris Nandor.  All rights reserved.  This program
 is free software; you can redistribute it and/or modify it under the terms
 of the Artistic License, distributed with Perl.
 
