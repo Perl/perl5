@@ -199,15 +199,8 @@ LIB32		= $(LINK32) -lib
 #
 # Options
 #
-.IF "$(OBJECT)" == "-DPERL_OBJECT"
-RUNTIME		= -MT
-# XXX building with -MD fails many tests, but cannot investigate
-# because building with debug crashes compiler :-( GSAR )-:
-#RUNTIME	= -MD
-.ELSE
-RUNTIME		= -MD
-.ENDIF
 
+RUNTIME		= -MD
 INCLUDES	= -I.\include -I. -I..
 #PCHFLAGS	= -Fpc:\temp\vcmoduls.pch -YX 
 DEFINES		= -DWIN32 -D_CONSOLE $(BUILDOPT) $(CRYPT_FLAG)
@@ -230,9 +223,9 @@ OPTIMIZE	= -Od $(RUNTIME)d -Zi -D_DEBUG -DDEBUGGING
 LINK_DBG	= -debug -pdb:none
 .ELSE
 .IF "$(CCTYPE)" == "MSVC20"
-OPTIMIZE	= -O2 $(RUNTIME) -DNDEBUG
+OPTIMIZE	= -Od $(RUNTIME) -DNDEBUG
 .ELSE
-OPTIMIZE	= -O2 $(RUNTIME) -DNDEBUG
+OPTIMIZE	= -Od $(RUNTIME) -DNDEBUG
 .ENDIF
 LINK_DBG	= -release
 .ENDIF
@@ -467,7 +460,7 @@ WIN32_OBJ	= $(WIN32_SRC:db:+$(o))
 MINICORE_OBJ	= $(MINIDIR)\{$(CORE_OBJ:f) miniperlmain$(o)}
 MINIWIN32_OBJ	= $(MINIDIR)\{$(WIN32_OBJ:f)}
 MINI_OBJ	= $(MINICORE_OBJ) $(MINIWIN32_OBJ)
-PERL95_OBJ	= $(PERL95_SRC:db:+$(o)) DynaLoadmt$(o)
+PERL95_OBJ	= $(PERL95_SRC:db:+$(o))
 DLL_OBJ		= $(DLL_SRC:db:+$(o))
 X2P_OBJ		= $(X2P_SRC:db:+$(o))
 
@@ -482,6 +475,7 @@ PERLEXE_OBJ	= perlmain$(o)
 PERLDLL_OBJ	+= $(WIN32_OBJ) $(DLL_OBJ)
 .ELSE
 PERLEXE_OBJ	+= $(WIN32_OBJ) $(DLL_OBJ)
+PERL95_OBJ	+= DynaLoadmt$(o)
 .ENDIF
 
 DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attrs Thread B
