@@ -83,9 +83,9 @@ MEM_SIZE size;
 #endif
     ptr = malloc(size?size:1);	/* malloc(0) is NASTY on our system */
 #if !(defined(I286) || defined(atarist))
-    DEBUG_m(fprintf(stderr,"0x%x: (%05d) malloc %ld bytes\n",ptr,an++,(long)size));
+    DEBUG_m(fprintf(Perl_debug_log,"0x%x: (%05d) malloc %ld bytes\n",ptr,an++,(long)size));
 #else
-    DEBUG_m(fprintf(stderr,"0x%lx: (%05d) malloc %ld bytes\n",ptr,an++,(long)size));
+    DEBUG_m(fprintf(Perl_debug_log,"0x%lx: (%05d) malloc %ld bytes\n",ptr,an++,(long)size));
 #endif
     if (ptr != Nullch)
 	return ptr;
@@ -130,13 +130,13 @@ unsigned long size;
 
 #if !(defined(I286) || defined(atarist))
     DEBUG_m( {
-	fprintf(stderr,"0x%x: (%05d) rfree\n",where,an++);
-	fprintf(stderr,"0x%x: (%05d) realloc %ld bytes\n",ptr,an++,(long)size);
+	fprintf(Perl_debug_log,"0x%x: (%05d) rfree\n",where,an++);
+	fprintf(Perl_debug_log,"0x%x: (%05d) realloc %ld bytes\n",ptr,an++,(long)size);
     } )
 #else
     DEBUG_m( {
-	fprintf(stderr,"0x%lx: (%05d) rfree\n",where,an++);
-	fprintf(stderr,"0x%lx: (%05d) realloc %ld bytes\n",ptr,an++,(long)size);
+	fprintf(Perl_debug_log,"0x%lx: (%05d) rfree\n",where,an++);
+	fprintf(Perl_debug_log,"0x%lx: (%05d) realloc %ld bytes\n",ptr,an++,(long)size);
     } )
 #endif
 
@@ -158,14 +158,53 @@ safefree(where)
 char *where;
 {
 #if !(defined(I286) || defined(atarist))
-    DEBUG_m( fprintf(stderr,"0x%x: (%05d) free\n",where,an++));
+    DEBUG_m( fprintf(Perl_debug_log,"0x%x: (%05d) free\n",where,an++));
 #else
-    DEBUG_m( fprintf(stderr,"0x%lx: (%05d) free\n",where,an++));
+    DEBUG_m( fprintf(Perl_debug_log,"0x%lx: (%05d) free\n",where,an++));
 #endif
     if (where) {
 	/*SUPPRESS 701*/
 	free(where);
     }
+}
+
+/* safe version of calloc */
+
+char *
+safecalloc(count, size)
+MEM_SIZE count;
+MEM_SIZE size;
+{
+    char  *ptr;
+
+#ifdef MSDOS
+	if (size * count > 0xffff) {
+		fprintf(stderr, "Allocation too large: %lx\n", size * count) FLUSH;
+		my_exit(1);
+	}
+#endif /* MSDOS */
+#ifdef DEBUGGING
+    if ((long)size < 0 || (long)count < 0)
+	croak("panic: calloc");
+#endif
+#if !(defined(I286) || defined(atarist))
+    DEBUG_m(fprintf(stderr,"0x%x: (%05d) calloc %ld  x %ld bytes\n",ptr,an++,(long)count,(long)size));
+#else
+    DEBUG_m(fprintf(stderr,"0x%lx: (%05d) calloc %ld x %ld bytes\n",ptr,an++,(long)count,(long)size));
+#endif
+    size *= count;
+    ptr = malloc(size?size:1);	/* malloc(0) is NASTY on our system */
+    if (ptr != Nullch) {
+	memset((void*)ptr, 0, size);
+	return ptr;
+    }
+    else if (nomemok)
+	return Nullch;
+    else {
+	fputs(no_mem,stderr) FLUSH;
+	my_exit(1);
+    }
+    /*NOTREACHED*/
 }
 
 #endif /* !safemalloc */
@@ -209,6 +248,22 @@ char *where;
     x = where[0] + 100 * where[1];
     xcount[x]--;
     safefree(where);
+}
+
+char *
+safexcalloc(x,count,size)
+I32 x;
+MEM_SIZE count;
+MEM_SIZE size;
+{
+    register char *where;
+
+    where = safexmalloc(x, size * count + ALIGN);
+    xcount[x]++;
+    memset((void*)where + ALIGN, 0, size * count);
+    where[0] = x % 100;
+    where[1] = x / 100;
+    return where + ALIGN;
 }
 
 static void
@@ -355,7 +410,7 @@ char *lend;
 
 /* Initialize locale (and the fold[] array).*/
 int
-perl_init_i18nl14n(printwarn)	
+perl_init_i18nl10n(printwarn)	
     int printwarn;
 {
     int ok = 1;
@@ -463,7 +518,7 @@ I32 iflag;
     }
     BmRARE(sv) = s[rarest];
     BmPREVIOUS(sv) = rarest;
-    DEBUG_r(fprintf(stderr,"rarest char %c at %d\n",BmRARE(sv),BmPREVIOUS(sv)));
+    DEBUG_r(fprintf(Perl_debug_log,"rarest char %c at %d\n",BmRARE(sv),BmPREVIOUS(sv)));
 }
 
 char *
@@ -1364,7 +1419,7 @@ VTOH(vtohs,short)
 VTOH(vtohl,long)
 #endif
 
-#if  !defined(DOSISH) && !defined(VMS)  /* VMS' my_popen() is in
+#if  (!defined(DOSISH) || defined(HAS_FORK)) && !defined(VMS)  /* VMS' my_popen() is in
 					   VMS.c, same with OS/2. */
 FILE *
 my_popen(cmd,mode)
@@ -1499,7 +1554,7 @@ int newfd;
 }
 #endif
 
-#if  !defined(DOSISH) && !defined(VMS)  /* VMS' my_popen() is in VMS.c */
+#if  (!defined(DOSISH) || defined(HAS_FORK)) && !defined(VMS)  /* VMS' my_popen() is in VMS.c */
 I32
 my_pclose(ptr)
 FILE *ptr;
@@ -1604,7 +1659,7 @@ int status;
     return;
 }
 
-#if defined(atarist) || defined(OS2)
+#if defined(atarist) || (defined(OS2) && !defined(HAS_FORK))
 int pclose();
 I32
 my_pclose(ptr)
