@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Dec 19 03:25:46 EET 2001 [metaconfig 3.0 PL70]
+# Generated on Fri Dec 21 17:46:40 EET 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -1153,11 +1153,11 @@ if `$sh -c '#' >/dev/null 2>&1`; then
 	shsharp=true
 	spitshell=cat
 	xcat=/bin/cat
-	test -f $xcat || xcat=/usr/bin/cat
-	if test ! -f $xcat; then
+	test -f $xcat$_exe || xcat=/usr/bin/cat
+	if test ! -f $xcat$_exe; then
 		for p in $paths; do
-			if test -f $p/cat; then
-				xcat=$p/cat
+			if test -f $p/cat$_exe; then
+				xcat=$p/cat$_exe
 				break
 			fi
 		done
