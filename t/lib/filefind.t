@@ -18,7 +18,7 @@ BEGIN {
     $SIG{'__WARN__'} = sub { $warn_msg = $_[0]; warn "# Warn: $_[0]"; }
 }
 
-if ( $symlink_exists ) { print "1..184\n"; }
+if ( $symlink_exists ) { print "1..193\n"; }
 else                   { print "1..75\n";  }
 
 use File::Find;
