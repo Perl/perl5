@@ -22,7 +22,7 @@ unless(-e '../utils/h2ph') {
     # i'll probably get in trouble for this :)
 } else {
     # does it run?
-    $ok = system("./perl -I../lib ../utils/h2ph -d. lib/h2ph.h");
+    $ok = system("./perl -I../lib ../utils/h2ph -d. -Q lib/h2ph.h");
     print(($ok == 0 ? "" : "not "), "ok 1\n");
     
     # does it work? well, does it do what we expect? :-)

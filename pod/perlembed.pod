@@ -668,6 +668,7 @@ with my() whenever possible.
 
  use strict;
  use vars '%Cache';
+ use Symbol qw(delete_package);
 
  sub valid_package_name {
      my($string) = @_;
@@ -678,23 +679,6 @@ with my() whenever possible.
      # Dress it up as a real package name
      $string =~ s|/|::|g;
      return "Embed" . $string;
- }
-
- #borrowed from Safe.pm
- sub delete_package {
-     my $pkg = shift;
-     my ($stem, $leaf);
-
-     no strict 'refs';
-     $pkg = "main::$pkg\::";    # expand to full symbol table name
-     ($stem, $leaf) = $pkg =~ m/(.*::)(\w+::)$/;
-
-     my $stem_symtab = *{$stem}{HASH};
-     my $leaf_glob   = $stem_symtab->{$leaf};
-     my $leaf_symtab = *{$leaf_glob}{HASH};
-
-     %$leaf_symtab = ();
-     delete $stem_symtab->{$leaf};
  }
 
  sub eval_file {

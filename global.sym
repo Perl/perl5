@@ -81,7 +81,6 @@ psig_name
 psig_ptr
 rcsid
 reall_srchlen
-regexec_flags
 regkind
 repeat_amg
 repeat_ass_amg
@@ -181,18 +180,11 @@ av_shift
 av_store
 av_undef
 av_unshift
-avhv_delete
-avhv_delete_ent
-avhv_exists
 avhv_exists_ent
-avhv_fetch
 avhv_fetch_ent
 avhv_iternext
-avhv_iternextsv
 avhv_iterval
 avhv_keys
-avhv_store
-avhv_store_ent
 bind_match
 block_end
 block_gimme
@@ -690,7 +682,6 @@ pp_i_ne
 pp_i_negate
 pp_i_subtract
 pp_index
-pp_indread
 pp_int
 pp_interp
 pp_ioctl
@@ -891,6 +882,7 @@ q
 ref
 refkids
 regdump
+regexec_flags
 regnext
 regprop
 repeatcpy

@@ -264,11 +264,13 @@ PP(pp_glob)
     return result;
 }
 
+#if 0		/* XXX never used! */
 PP(pp_indread)
 {
     last_in_gv = gv_fetchpv(SvPVx(GvSV((GV*)(*stack_sp--)), na), TRUE,SVt_PVIO);
     return do_readline();
 }
+#endif
 
 PP(pp_rcatline)
 {
@@ -554,7 +556,7 @@ PP(pp_tie)
     items = SP - MARK++;
     if (sv_isobject(*MARK)) {
 	ENTER;
-	PUSHSTACKi(SI_MAGIC);
+	PUSHSTACKi(PERLSI_MAGIC);
 	PUSHMARK(SP);
 	EXTEND(SP,items);
 	while (items--)
@@ -572,7 +574,7 @@ PP(pp_tie)
 		 methname, SvPV(*MARK,na));                   
 	}
 	ENTER;
-	PUSHSTACKi(SI_MAGIC);
+	PUSHSTACKi(PERLSI_MAGIC);
 	PUSHMARK(SP);
 	EXTEND(SP,items);
 	while (items--)
@@ -1315,7 +1317,12 @@ PP(pp_sysread)
     }
     else
 #endif
+    {
 	length = PerlIO_read(IoIFP(io), buffer+offset, length);
+	/* fread() returns 0 on both error and EOF */
+	if (PerlIO_error(IoIFP(io)))
+	    length = -1;
+    }
     if (length < 0)
 	goto say_undef;
     SvCUR_set(bufsv, length+offset);

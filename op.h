@@ -189,8 +189,9 @@ struct pmop {
 };
 
 #define PMdf_USED	0x01		/* pm has been used once already */
+#define PMdf_TAINTED	0x02		/* pm compiled from tainted pattern */
 
-#define PMf_TAINTMEM	0x0001		/* taint $1 etc. if target tainted */
+#define PMf_RETAINT	0x0001		/* taint $1 etc. if target tainted */
 #define PMf_ONCE	0x0002		/* use pattern only once per reset */
 #define PMf_REVERSED	0x0004		/* Should be matched right->left */
 #define PMf_MAYBE_CONST	0x0008		/* replacement contains variables */

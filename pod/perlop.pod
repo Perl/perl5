@@ -399,7 +399,7 @@ encountered.  The final sequence number in a range has the string "E0"
 appended to it, which doesn't affect its numeric value, but gives you
 something to search for if you want to exclude the endpoint.  You can
 exclude the beginning point by waiting for the sequence number to be
-greater than 1.  If either operand of scalar ".." is a numeric literal,
+greater than 1.  If either operand of scalar ".." is a constant expression,
 that operand is implicitly compared to the C<$.> variable, the current
 line number.  Examples:
 
@@ -750,7 +750,6 @@ Options are:
     m	Treat string as multiple lines.
     o	Compile pattern only once.
     s	Treat string as single line.
-    t	Taint $1 etc. if target string is tainted.
     x	Use extended regular expressions.
 
 If "/" is the delimiter then the initial C<m> is optional.  With the C<m>
@@ -812,15 +811,13 @@ substrings matched by all the parentheses in the regular expression.
 If there are no parentheses, it returns a list of all the matched
 strings, as if there were parentheses around the whole pattern.
 
-In scalar context, C<m//g> iterates through the string, returning TRUE
-each time it matches, and FALSE when it eventually runs out of matches.
-(In other words, it remembers where it left off last time and restarts
-the search at that point.  You can actually find the current match
-position of a string or set it using the pos() function; see
-L<perlfunc/pos>.)  A failed match normally resets the search position to
-the beginning of the string, but you can avoid that by adding the C</c>
-modifier (e.g. C<m//gc>).  Modifying the target string also resets the
-search position.
+In scalar context, each execution of C<m//g> finds the next match,
+returning TRUE if it matches, and FALSE if there is no further match.
+The position after the last match can be read or set using the pos()
+function; see L<perlfunc/pos>.   A failed match normally resets the
+search position to the beginning of the string, but you can avoid that
+by adding the C</c> modifier (e.g. C<m//gc>).  Modifying the target
+string also resets the search position.
 
 You can intermix C<m//g> matches with C<m/\G.../g>, where C<\G> is a
 zero-width assertion that matches the exact position where the previous

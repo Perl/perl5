@@ -3,8 +3,9 @@ Originally by Charles Bailey <bailey@newman.upenn.edu>
 
 * Important safety tip
 
-The build procedure has changed significantly from the 5.004 releases! Make
-sure you read the "Building Perl" section before you build.
+The build and install procedures have changed significantly from the 5.004
+releases! Make sure you read the "Building Perl" and "Installing Perl"
+sections before you build or install.
 
 * Intro
 
@@ -151,47 +152,37 @@ so it's best to be sure and do it.
 * Installing Perl
 
 There are several steps you need to take to get Perl installed and
-running. At some point we'll have a working install in DESCRIP.MMS, but for
-right now the procedure's manual, and goes like this.
+running.
 
 1) Create a directory somewhere and define the concealed logical PERL_ROOT
 to point to it. For example, DEFINE/TRANS=(CONC,TERM) PERL_ROOT dka200:[perl.]
 
-2) Copy perl.exe into PERL_ROOT:[000000]
+2) Run the install script via:
 
-3) Copy everything in [.LIB] and [.UTILS] (including all the
-subdirectories!) to PERL_ROOT:[LIB] and PERL_ROOT:[UTILS].
+MMS install
 
-4) Either copy PERLSHR.EXE to SYS$SHARE, or to somewhere globally accessble
-and define the logical PERLSHR to point to it (DEFINE PERLSHR
-PERL_ROOT:[000000]PERLSHR.EXE or something like that). The PerlShr image
-should have W:RE protections on it. (Just W:E triggers increased security in
-the image activator. Not a huge problem, but Perl will need to have any
-other shared image it accesses INSTALLed. It's a huge pain, so don't unless
-you know what you're doing)
+or
 
-5) Either define the symbol PERL somewhere, such as
+MMK install
+
+If for some reason it complains about target INSTALL being up to date,
+throw a /FORCE switch on the MMS or MMK command.
+
+3) Either define the symbol PERL somewhere, such as
 SYS$MANAGER:SYLOGIN.COM, to be "PERL :== $PERL_ROOT:[000000]PERL.EXE", or
-install Perl into DCLTABLES.EXE )Check out the section "Installing Perl
+install Perl into DCLTABLES.EXE (Check out the section "Installing Perl
 into DCLTABLES" for more info), or put the image in a directory that's in
 your DCL$PATH (if you're using VMS 6.2 or higher).
 
-6) Optionally define the command PERLDOC as 
+4) Optionally define the command PERLDOC as 
 PERLDOC :== $PERL_ROOT:[000000]PERL PERL_ROOT:[LIB.POD]PERLDOC.COM -T
 Note that if you wish to use most as a pager please see
 ftp://space.mit.edu/pub/davis/ for both most and slang.
 
-7) Optionally define the command PERLBUG (the Perl bug report generator) as
+5) Optionally define the command PERLBUG (the Perl bug report generator) as
 PERLBUG :== $PERL_ROOT:[000000]PERL PERL_ROOT:[LIB]PERLBUG.COM"
 
-8) Optionally define the command POD2MAN (Converts POD files to nroff
-source suitable for converting to man pages. Also quiets complaints during
-module builds) as
-
-DEFINE/NOLOG POD2MAN PERL_ROOT:[LIB.POD]POD2MAN.COM
-POD2MAN :== $PERL_ROOT:[000000]PERL POD2MAN
-
-8) Optionally define the command POD2MAN (Converts POD files to nroff
+6) Optionally define the command POD2MAN (Converts POD files to nroff
 source suitable for converting to man pages. Also quiets complaints during
 module builds) as
 

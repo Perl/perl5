@@ -143,7 +143,7 @@ sub _doit
                                                                 if ($errcode);
 
         _print("Compiling C($obj) for $file!\n", 36 ) if (!$options->{'gen'});
-        my $errcode = _compileCode($file, $objfile, $obj) 
+        $errcode = _compileCode($file, $objfile, $obj) 
                                             if (!$options->{'gen'});
 
         if ($errcode)
@@ -163,9 +163,10 @@ sub _doit
 
         _removeCode($file) if ($options->{'e'}); 
 
-        _removeCode($obj) if (($options->{'e'} && 
-                                ((!$options->{'sav'}) || !$options->{'o'})) || 
-                                ($options->{'run'} && (!$options->{'sav'})));
+        _removeCode($obj) if (($options->{'e'}
+			       && !$options->{'sav'}
+			       && !$options->{'o'})
+			      || ($options->{'run'} && !$options->{'sav'}));
     }
     else
     {
@@ -357,7 +358,7 @@ EOF
     _print("$ -I@INC $tmpfile\n", 36);
     _run("$ -I@INC $tmpfile", 9 );
 
-    my $fd = new FileHandle ("$incfile"); 
+    $fd = new FileHandle ("$incfile"); 
     my @lines = <$fd>;    
 
     unlink($tmpfile);
@@ -458,9 +459,9 @@ sub _mungeRegexp
 {
     my ($regexp) = @_;
 
-    grep(s"(^|[^\\])\."$1\x0\\."g, @$regexp);
-    grep(s"(^|[^\x0])\\\."$1\."g,  @$regexp);
-    grep(s"\x0""g,                 @$regexp);
+    grep(s:(^|[^\\])\.:$1\x00\\.:g, @$regexp);
+    grep(s:(^|[^\x00])\\\.:$1\.:g,  @$regexp);
+    grep(s:\x00::g,                 @$regexp);
 }
 
 

@@ -544,7 +544,7 @@ force_ident(register char *s, int kind)
 	    /* XXX see note in pp_entereval() for why we forgo typo
 	       warnings if the symbol must be introduced in an eval.
 	       GSAR 96-10-12 */
-	    gv_fetchpv(s, in_eval ? (GV_ADDMULTI | 8) : TRUE,
+	    gv_fetchpv(s, in_eval ? (GV_ADDMULTI | GV_ADDINEVAL) : TRUE,
 		kind == '$' ? SVt_PV :
 		kind == '@' ? SVt_PVAV :
 		kind == '%' ? SVt_PVHV :
@@ -1522,7 +1522,7 @@ yylex(void)
 	/* build ops for a bareword */
 	yylval.opval = (OP*)newSVOP(OP_CONST, 0, newSVpv(tokenbuf+1, 0));
 	yylval.opval->op_private = OPpCONST_ENTERED;
-	gv_fetchpv(tokenbuf+1, in_eval ? (GV_ADDMULTI | 8) : TRUE,
+	gv_fetchpv(tokenbuf+1, in_eval ? (GV_ADDMULTI | GV_ADDINEVAL) : TRUE,
 		   ((tokenbuf[0] == '$') ? SVt_PV
 		    : (tokenbuf[0] == '@') ? SVt_PVAV
 		    : SVt_PVHV));
@@ -2821,14 +2821,28 @@ yylex(void)
 	}
 
 	if (tmp < 0) {			/* second-class keyword? */
-	    if (expect != XOPERATOR && (*s != ':' || s[1] != ':') &&
-		(((gv = gv_fetchpv(tokenbuf, FALSE, SVt_PVCV)) &&
-		  GvCVu(gv) && GvIMPORTED_CV(gv)) ||
-		 ((gvp = (GV**)hv_fetch(globalstash,tokenbuf,len,FALSE)) &&
-		  (gv = *gvp) != (GV*)&sv_undef &&
-		  GvCVu(gv) && GvIMPORTED_CV(gv))))
-	    {
-		tmp = 0;		/* overridden by importation */
+	    GV *ogv = Nullgv;	/* override (winner) */
+	    GV *hgv = Nullgv;	/* hidden (loser) */
+	    if (expect != XOPERATOR && (*s != ':' || s[1] != ':')) {
+		CV *cv;
+		if ((gv = gv_fetchpv(tokenbuf, FALSE, SVt_PVCV)) &&
+		    (cv = GvCVu(gv)))
+		{
+		    if (GvIMPORTED_CV(gv))
+			ogv = gv;
+		    else if (! CvMETHOD(cv))
+			hgv = gv;
+		}
+		if (!ogv &&
+		    (gvp = (GV**)hv_fetch(globalstash,tokenbuf,len,FALSE)) &&
+		    (gv = *gvp) != (GV*)&sv_undef &&
+		    GvCVu(gv) && GvIMPORTED_CV(gv))
+		{
+		    ogv = gv;
+		}
+	    }
+	    if (ogv) {
+		tmp = 0;		/* overridden by import or by GLOBAL */
 	    }
 	    else if (gv && !gvp
 		     && -tmp==KEY_lock	/* XXX generalizable kludge */
@@ -2836,8 +2850,13 @@ yylex(void)
 	    {
 		tmp = 0;		/* any sub overrides "weak" keyword */
 	    }
-	    else {
-		tmp = -tmp; gv = Nullgv; gvp = 0;
+	    else {			/* no override */
+		tmp = -tmp;
+		gv = Nullgv;
+		gvp = 0;
+		if (dowarn && hgv)
+		    warn("Ambiguous call resolved as CORE::%s(), "
+			 "qualify as such or use &", GvENAME(hgv));
 	    }
 	}
 
@@ -4399,6 +4418,8 @@ keyword(register char *d, I32 len)
 	case 3:
 	    if (strEQ(d,"ord"))			return -KEY_ord;
 	    if (strEQ(d,"oct"))			return -KEY_oct;
+	    if (strEQ(d,"our")) { deprecate("reserved word \"our\"");
+						return 0;}
 	    break;
 	case 4:
 	    if (strEQ(d,"open"))		return -KEY_open;
@@ -4748,7 +4769,7 @@ new_constant(char *s, STRLEN len, char *key, SV *sv, SV *pv, char *type)
     myop.op_next = Nullop;
     myop.op_flags = OPf_WANT_SCALAR | OPf_STACKED;
 
-    PUSHSTACKi(SI_OVERLOAD);
+    PUSHSTACKi(PERLSI_OVERLOAD);
     ENTER;
     SAVEOP();
     op = (OP *) &myop;
@@ -4939,8 +4960,6 @@ void pmflag(U16 *pmfl, int ch)
 	*pmfl |= PMf_MULTILINE;
     else if (ch == 's')
 	*pmfl |= PMf_SINGLELINE;
-    else if (ch == 't')
-	*pmfl |= PMf_TAINTMEM;
     else if (ch == 'x')
 	*pmfl |= PMf_EXTENDED;
 }
@@ -4962,7 +4981,7 @@ scan_pat(char *start)
     pm = (PMOP*)newPMOP(OP_MATCH, 0);
     if (multi_open == '?')
 	pm->op_pmflags |= PMf_ONCE;
-    while (*s && strchr("iogcmstx", *s))
+    while (*s && strchr("iogcmsx", *s))
 	pmflag(&pm->op_pmflags,*s++);
     pm->op_pmpermflags = pm->op_pmflags;
 
@@ -5012,7 +5031,7 @@ scan_subst(char *start)
 	    s++;
 	    es++;
 	}
-	else if (strchr("iogcmstx", *s))
+	else if (strchr("iogcmsx", *s))
 	    pmflag(&pm->op_pmflags,*s++);
 	else
 	    break;

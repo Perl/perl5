@@ -135,12 +135,12 @@ cc_opclass(OP *o)
     case OA_BASEOP_OR_UNOP:
 	/*
 	 * UNI(OP_foo) in toke.c returns token UNI or FUNC1 depending on
-	 * whether bare parens were seen. perly.y uses OPf_SPECIAL to
-	 * signal whether an OP or an UNOP was chosen.
-	 * Frederic.Chauveau@pasteur.fr says we need to check for OPf_KIDS too.
+	 * whether parens were seen. perly.y uses OPf_SPECIAL to
+	 * signal whether a BASEOP had empty parens or none.
+	 * Some other UNOPs are created later, though, so the best
+	 * test is OPf_KIDS, which is set in newUNOP.
 	 */
-	return ((o->op_flags & OPf_SPECIAL) ? OPc_BASEOP :
-		(o->op_flags & OPf_KIDS) ? OPc_UNOP : OPc_BASEOP);
+	return (o->op_flags & OPf_KIDS) ? OPc_UNOP : OPc_BASEOP;
 
     case OA_FILESTATOP:
 	/*

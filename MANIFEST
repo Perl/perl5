@@ -50,8 +50,8 @@ cflags.SH		A script that emits C compilation flags per file
 compat3.sym		List of symbols for binary-compatibility with 5.003
 config_h.SH		Produces config.h
 configpm		Produces lib/Config.pm
+configure.com		Configure-equivalent for VMS
 configure.gnu		Crude emulation of GNU configure
-configure.com   Configure-equivalent for VMS
 cop.h			Control operator header
 cv.h			Code value header
 cygwin32/cw32imp.h	Cygwin32 port
@@ -180,6 +180,11 @@ ext/DB_File/DB_File_BS		Berkeley DB extension mkbootstrap fodder
 ext/DB_File/Makefile.PL		Berkeley DB extension makefile writer
 ext/DB_File/dbinfo		Berkeley DB database version checker
 ext/DB_File/typemap		Berkeley DB extension interface types
+ext/Data/Dumper/Changes		Data pretty printer, changelog
+ext/Data/Dumper/Dumper.pm	Data pretty printer, module
+ext/Data/Dumper/Dumper.xs	Data pretty printer, externals
+ext/Data/Dumper/Makefile.PL	Data pretty printer, makefile writer
+ext/Data/Dumper/Todo		Data pretty printer, futures
 ext/DynaLoader/DynaLoader_pm.PL	Dynamic Loader perl module
 ext/DynaLoader/Makefile.PL	Dynamic Loader makefile writer
 ext/DynaLoader/README		Dynamic Loader notes and intro
@@ -212,6 +217,16 @@ ext/IO/lib/IO/Pipe.pm		IO::Pipe extension Perl module
 ext/IO/lib/IO/Seekable.pm	IO::Seekable extension Perl module
 ext/IO/lib/IO/Select.pm		IO::Select extension Perl module
 ext/IO/lib/IO/Socket.pm		IO::Socket extension Perl module
+ext/IPC/SysV/ChangeLog		IPC::SysV extension Perl module
+ext/IPC/SysV/MANIFEST		IPC::SysV extension Perl module
+ext/IPC/SysV/Makefile.PL	IPC::SysV extension Perl module
+ext/IPC/SysV/README		IPC::SysV extension Perl module
+ext/IPC/SysV/SysV.pm		IPC::SysV extension Perl module
+ext/IPC/SysV/SysV.xs		IPC::SysV extension Perl module
+ext/IPC/SysV/Msg.pm		IPC::SysV extension Perl module
+ext/IPC/SysV/Semaphore.pm	IPC::SysV extension Perl module
+ext/IPC/SysV/t/msg.t		IPC::SysV extension Perl module
+ext/IPC/SysV/t/sem.t		IPC::SysV extension Perl module
 ext/NDBM_File/Makefile.PL	NDBM extension makefile writer
 ext/NDBM_File/NDBM_File.pm	NDBM extension Perl module
 ext/NDBM_File/NDBM_File.xs	NDBM extension external subroutines
@@ -308,6 +323,9 @@ ext/Thread/unsync4.t	Test thread implicit synchronisation
 ext/attrs/Makefile.PL	attrs extension makefile writer
 ext/attrs/attrs.pm	attrs extension Perl module
 ext/attrs/attrs.xs	attrs extension external subroutines
+ext/re/Makefile.PL	re extension makefile writer
+ext/re/re.pm		re extension Perl module
+ext/re/re.xs		re extension external subroutines
 ext/util/make_ext	Used by Makefile to execute extension Makefiles
 ext/util/mkbootstrap	Turns ext/*/*_BS into bootstrap info
 fakethr.h		Fake threads header
@@ -723,6 +741,7 @@ pp.c			Push/Pop code
 pp.h			Push/Pop code defs
 pp_ctl.c		Push/Pop code for control flow
 pp_hot.c		Push/Pop code for heavily used opcodes
+pp_proto.h		C++ definitions for Push/Pop code
 pp_sys.c		Push/Pop code for system interaction
 proto.h			Prototypes
 qnx/ar			QNX implementation of "ar" utility
@@ -771,6 +790,7 @@ t/io/argv.t		See if ARGV stuff works
 t/io/dup.t		See if >& works right
 t/io/fs.t		See if directory manipulations work
 t/io/inplace.t		See if inplace editing works
+t/io/iprefix.t		See if inplace editing works with prefixes
 t/io/pipe.t		See if secure pipes work
 t/io/print.t		See if print commands work
 t/io/read.t		See if read works
@@ -787,6 +807,8 @@ t/lib/cgi-html.t	See if CGI.pm works
 t/lib/cgi-request.t	See if CGI.pm works
 t/lib/checktree.t	See if File::CheckTree works
 t/lib/complex.t		See if Math::Complex works
+t/lib/dumper.t		See if Data::Dumper works
+t/lib/dumper-ovl.t	See if Data::Dumper works for overloaded data
 t/lib/db-btree.t	See if DB_File works
 t/lib/db-hash.t		See if DB_File works
 t/lib/db-recno.t	See if DB_File works

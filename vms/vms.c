@@ -4043,6 +4043,9 @@ cando_by_name(I32 bit, I32 effective, char *fname)
     if ((privused & CHP$M_READALL) && !curprv.prv$v_readall) return FALSE;
     return TRUE;
   }
+  if (retsts == SS$_ACCONFLICT) {
+    return TRUE;
+  }
   _ckvmssts(retsts);
 
   return FALSE;  /* Should never get here */

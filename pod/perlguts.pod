@@ -1647,7 +1647,7 @@ Used to extend the argument stack for an XSUB's return values.
 Analyses the string in order to make fast searches on it using fbm_instr() --
 the Boyer-Moore algorithm.
 
-	void	fbm_compile(SV* sv)
+	void	fbm_compile(SV* sv, U32 flags)
 
 =item fbm_instr
 
@@ -1656,7 +1656,7 @@ C<strend>.  It returns C<Nullch> if the string can't be found.  The
 C<sv> does not have to be fbm_compiled, but the search will not be as
 fast then.
 
-	char*	fbm_instr(char *str, char *strend, SV *sv)
+	char*	fbm_instr(char *str, char *strend, SV *sv, U32 flags)
 
 =item FREETMPS
 

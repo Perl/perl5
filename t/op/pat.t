@@ -6,11 +6,14 @@
 
 # $RCSfile: pat.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:12 $
 
-print "1..123\n";
+print "1..124\n";
 
-chdir 't' if -d 't';
-@INC = "../lib";
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = "../lib" if -d "../lib";
+}
 eval 'use Config';          #  Defaults assumed if this fails
+use re 'eval';
 
 $x = "abc\ndef\n";
 
@@ -379,7 +382,14 @@ $test++;
 
 $code = '{$blah = 45}';
 $blah = 12;
-/(?$code)/;			
+eval { /(?$code)/ };			
+print "not " unless $@ and $@ =~ /not allowed at run time/ and $blah == 12;
+print "ok $test\n";
+$test++;
+
+$code = '{$blah = 45}';
+$blah = 12;
+eval "/(?$code)/";			
 print "not " if $blah != 45;
 print "ok $test\n";
 $test++;
@@ -430,7 +440,7 @@ print "ok $test\n";
 $test++;
 
 # This should be changed to qr/\b\v$/ ASAP
-print "not " unless study(/\b\v$/) eq '\bv$';
+print "not " unless study(/\b\v$/) eq '(?:\bv$)';
 print "ok $test\n";
 $test++;
 

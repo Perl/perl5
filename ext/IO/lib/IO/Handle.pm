@@ -207,7 +207,7 @@ use SelectSaver;
 require Exporter;
 @ISA = qw(Exporter);
 
-$VERSION = "1.1504";
+$VERSION = "1.1505";
 $XS_VERSION = "1.15";
 
 @EXPORT_OK = qw(
@@ -520,10 +520,10 @@ sub format_write {
     if (@_ == 2) {
 	my ($fh, $fmt) = @_;
 	my $oldfmt = $fh->format_name($fmt);
-	write($fh);
+	CORE::write($fh);
 	$fh->format_name($oldfmt);
     } else {
-	write($_[0]);
+	CORE::write($_[0]);
     }
 }
 

@@ -250,9 +250,13 @@ PP(pp_aelemfast)
 {
     djSP;
     AV *av = GvAV((GV*)cSVOP->op_sv);
-    SV** svp = av_fetch(av, op->op_private, op->op_flags & OPf_MOD);
+    U32 lval = op->op_flags & OPf_MOD;
+    SV** svp = av_fetch(av, op->op_private, lval);
+    SV *sv = (svp ? *svp : &sv_undef);
     EXTEND(SP, 1);
-    PUSHs(svp ? *svp : &sv_undef);
+    if (!lval && SvGMAGICAL(sv))	/* see note in pp_helem() */
+	sv = sv_mortalcopy(sv);
+    PUSHs(sv);
     RETURN;
 }
 
@@ -540,7 +544,8 @@ PP(pp_rv2hv)
     }
     else {
 	dTARGET;
-	/* This bit is OK even when hv is really an AV */
+	if (SvTYPE(hv) == SVt_PVAV)
+	    hv = avhv_keys((AV*)hv);
 	if (HvFILL(hv))
 	    sv_setpvf(TARG, "%ld/%ld",
 		      (long)HvFILL(hv), (long)HvMAX(hv) + 1);
@@ -673,7 +678,7 @@ PP(pp_aassign)
 	default:
 	    if (SvTHINKFIRST(sv)) {
 		if (SvREADONLY(sv) && curcop != &compiling) {
-		    if (sv != &sv_undef && sv != &sv_yes && sv != &sv_no)
+		    if (!SvIMMORTAL(sv))
 			DIE(no_modify);
 		    if (relem <= lastrelem)
 			relem++;
@@ -786,6 +791,7 @@ PP(pp_match)
     I32 safebase;
     char *truebase;
     register REGEXP *rx = pm->op_pmregexp;
+    bool rxtainted;
     I32 gimme = GIMME;
     STRLEN len;
     I32 minmatch = 0;
@@ -804,6 +810,8 @@ PP(pp_match)
     strend = s + len;
     if (!s)
 	DIE("panic: do_match");
+    rxtainted = ((pm->op_pmdynflags & PMdf_TAINTED) ||
+		 (tainted && (pm->op_pmflags & PMf_RETAINT)));
     TAINT_NOT;
 
     if (pm->op_pmdynflags & PMdf_USED) {
@@ -869,11 +877,11 @@ play_it_again:
 	    }
 	    else if (!(s = fbm_instr((unsigned char*)s + rx->check_offset_min,
 				     (unsigned char*)strend, 
-				     rx->check_substr)))
+				     rx->check_substr, 0)))
 		goto nope;
 	    else if ((rx->reganch & ROPT_CHECK_ALL) && !sawampersand)
 		goto yup;
-	    if (s && rx->check_offset_max < t - s) {
+	    if (s && rx->check_offset_max < s - t) {
 		++BmUSEFUL(rx->check_substr);
 		s -= rx->check_offset_max;
 	    }
@@ -897,7 +905,7 @@ play_it_again:
 	    rx->float_substr = Nullsv;
 	}
     }
-    if (regexec_flags(rx, s, strend, truebase, minmatch,
+    if (CALLREGEXEC(rx, s, strend, truebase, minmatch,
 		      screamer, NULL, safebase))
     {
 	curpm = pm;
@@ -910,6 +918,8 @@ play_it_again:
     /*NOTREACHED*/
 
   gotcha:
+    if (rxtainted)
+	RX_MATCH_TAINTED_on(rx);
     TAINT_IF(RX_MATCH_TAINTED(rx));
     if (gimme == G_ARRAY) {
 	I32 iters, i, len;
@@ -963,6 +973,8 @@ play_it_again:
     }
 
 yup:					/* Confirmed by check_substr */
+    if (rxtainted)
+	RX_MATCH_TAINTED_on(rx);
     TAINT_IF(RX_MATCH_TAINTED(rx));
     ++BmUSEFUL(rx->check_substr);
     curpm = pm;
@@ -1308,6 +1320,7 @@ PP(pp_helem)
     HV *hv = (HV*)POPs;
     U32 lval = op->op_flags & OPf_MOD;
     U32 defer = op->op_private & OPpLVAL_DEFER;
+    SV *sv;
 
     if (SvTYPE(hv) == SVt_PVHV) {
 	he = hv_fetch_ent(hv, keysv, lval && !defer, 0);
@@ -1344,7 +1357,16 @@ PP(pp_helem)
 	else if (op->op_private & OPpDEREF)
 	    vivify_ref(*svp, op->op_private & OPpDEREF);
     }
-    PUSHs(svp ? *svp : &sv_undef);
+    sv = (svp ? *svp : &sv_undef);
+    /* This makes C<local $tied{foo} = $tied{foo}> possible.
+     * Pushing the magical RHS on to the stack is useless, since
+     * that magic is soon destined to be misled by the local(),
+     * and thus the later pp_sassign() will fail to mg_get() the
+     * old value.  This should also cure problems with delayed
+     * mg_get()s.  GSAR 98-07-03 */
+    if (!lval && SvGMAGICAL(sv))
+	sv = sv_mortalcopy(sv);
+    PUSHs(sv);
     RETURN;
 }
 
@@ -1520,7 +1542,10 @@ PP(pp_subst)
     s = SvPV(TARG, len);
     if (!SvPOKp(TARG) || SvTYPE(TARG) == SVt_PVGV)
 	force_on_match = 1;
-    rxtainted = tainted << 1;
+    rxtainted = ((pm->op_pmdynflags & PMdf_TAINTED) ||
+		 (tainted && (pm->op_pmflags & PMf_RETAINT)));
+    if (tainted)
+	rxtainted |= 2;
     TAINT_NOT;
 
   force_it:
@@ -1556,7 +1581,7 @@ PP(pp_subst)
 	    }
 	    else if (!(s = fbm_instr((unsigned char*)s + rx->check_offset_min, 
 				     (unsigned char*)strend,
-				     rx->check_substr)))
+				     rx->check_substr, 0)))
 		goto nope;
 	    if (s && rx->check_offset_max < s - m) {
 		++BmUSEFUL(rx->check_substr);
@@ -1592,7 +1617,7 @@ PP(pp_subst)
     /* can do inplace substitution? */
     if (c && clen <= rx->minlen && (once || !(safebase & REXEC_COPY_STR))
 	&& !(rx->reganch & ROPT_LOOKBEHIND_SEEN)) {
-	if (!regexec_flags(rx, s, strend, orig, 0, screamer, NULL, safebase)) {
+	if (!CALLREGEXEC(rx, s, strend, orig, 0, screamer, NULL, safebase)) {
 	    SPAGAIN;
 	    PUSHs(&sv_no);
 	    LEAVE_SCOPE(oldsave);
@@ -1669,7 +1694,7 @@ PP(pp_subst)
 		    d += clen;
 		}
 		s = rx->endp[0];
-	    } while (regexec_flags(rx, s, strend, orig, s == m,
+	    } while (CALLREGEXEC(rx, s, strend, orig, s == m,
 			      Nullsv, NULL, 0)); /* don't match same null twice */
 	    if (s != d) {
 		i = strend - s;
@@ -1692,7 +1717,7 @@ PP(pp_subst)
 	RETURN;
     }
 
-    if (regexec_flags(rx, s, strend, orig, 0, screamer, NULL, safebase)) {
+    if (CALLREGEXEC(rx, s, strend, orig, 0, screamer, NULL, safebase)) {
 	if (force_on_match) {
 	    force_on_match = 0;
 	    s = SvPV_force(TARG, len);
@@ -1726,7 +1751,7 @@ PP(pp_subst)
 		sv_catpvn(dstr, c, clen);
 	    if (once)
 		break;
-	} while (regexec_flags(rx, s, strend, orig, s == m, Nullsv, NULL, safebase));
+	} while (CALLREGEXEC(rx, s, strend, orig, s == m, Nullsv, NULL, safebase));
 	sv_catpvn(dstr, s, strend - s);
 
 	(void)SvOOK_off(TARG);
@@ -2314,6 +2339,7 @@ PP(pp_aelem)
     AV* av = (AV*)POPs;
     U32 lval = op->op_flags & OPf_MOD;
     U32 defer = (op->op_private & OPpLVAL_DEFER) && (elem > AvFILL(av));
+    SV *sv;
 
     if (elem > 0)
 	elem -= curcop->cop_arybase;
@@ -2340,7 +2366,10 @@ PP(pp_aelem)
 	else if (op->op_private & OPpDEREF)
 	    vivify_ref(*svp, op->op_private & OPpDEREF);
     }
-    PUSHs(svp ? *svp : &sv_undef);
+    sv = (svp ? *svp : &sv_undef);
+    if (!lval && SvGMAGICAL(sv))	/* see note in pp_helem() */
+	sv = sv_mortalcopy(sv);
+    PUSHs(sv);
     RETURN;
 }
 
@@ -2411,7 +2440,9 @@ PP(pp_method)
 	    !(ob=(SV*)GvIO(iogv)))
 	{
 	    if (!packname || !isIDFIRST(*packname))
-  DIE("Can't call method \"%s\" without a package or object reference", name);
+		DIE("Can't call method \"%s\" %s", name,
+		    SvOK(sv)? "without a package or object reference"
+			    : "on an undefined value");
 	    stash = gv_stashpvn(packname, packlen, TRUE);
 	    goto fetch;
 	}

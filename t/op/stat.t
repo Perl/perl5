@@ -48,7 +48,7 @@ if ($Is_MSWin32 || $Is_Dos || $Config{dont_use_nlink} || $nlink == 2)
 if (   ($mtime && $mtime != $ctime)
 	|| $Is_MSWin32
 	|| $Is_Dos
-	|| ($cwd eq '/tmp' and $mtime && $mtime==$ctime) # Solaris tmpfs bug
+	|| ($cwd =~ m#^/tmp# and $mtime && $mtime==$ctime) # Solaris tmpfs bug
 	|| $cwd =~ m#/afs/#
 	|| $^O eq 'amigaos') {
     print "ok 4\n";

@@ -143,7 +143,7 @@ EXT I32 obj_list_fill INIT(-1);
 #define BSET_pv_free(pv)	Safefree(pv.xpv_pv)
 #define BSET_pregcomp(o, arg) \
 	((PMOP*)o)->op_pmregexp = arg ? \
-		pregcomp(arg, arg + pv.xpv_cur, ((PMOP*)o)) : 0
+		CALLREGCOMP(arg, arg + pv.xpv_cur, ((PMOP*)o)) : 0
 #define BSET_newsv(sv, arg)	sv = NEWSV(666,0); SvUPGRADE(sv, arg)
 #define BSET_newop(o, arg)	o = (OP*)safemalloc(optype_size[arg])
 #define BSET_newopn(o, arg) STMT_START {	\

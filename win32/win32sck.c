@@ -310,8 +310,11 @@ win32_select(int nfds, Perl_fd_set* rd, Perl_fd_set* wr, Perl_fd_set* ex, const 
      * so do the (millisecond) sleep as a special case
      */
     if (!(rd || wr || ex)) {
-	Sleep(timeout->tv_sec  * 1000 +
-	      timeout->tv_usec / 1000);		/* do the best we can */
+	if (timeout)
+	    Sleep(timeout->tv_sec  * 1000 +
+		  timeout->tv_usec / 1000);	/* do the best we can */
+	else
+	    Sleep(UINT_MAX);
 	return 0;
     }
     StartSockets();

@@ -21,6 +21,13 @@ static void hfreeentries _((HV *hv));
 static HE* more_he _((void));
 #endif
 
+#if defined(STRANGE_MALLOC) || defined(MYMALLOC)
+#  define ARRAY_ALLOC_BYTES(size) ( (size)*sizeof(HE*) )
+#else
+#  define MALLOC_OVERHEAD 16
+#  define ARRAY_ALLOC_BYTES(size) ( (size)*sizeof(HE*)*2 - MALLOC_OVERHEAD )
+#endif
+
 STATIC HE*
 new_he(void)
 {
@@ -121,7 +128,7 @@ hv_fetch(HV *hv, char *key, U32 klen, I32 lval)
 	         || (HvNAME(hv) && strEQ(HvNAME(hv),ENV_HV_NAME))
 #endif
 	                                                          )
-	    Newz(503,xhv->xhv_array, sizeof(HE*) * (xhv->xhv_max + 1), char);
+	    Newz(503,xhv->xhv_array, ARRAY_ALLOC_BYTES(xhv->xhv_max + 1), char);
 	else
 	    return 0;
     }
@@ -209,7 +216,7 @@ hv_fetch_ent(HV *hv, SV *keysv, I32 lval, register U32 hash)
 	         || (HvNAME(hv) && strEQ(HvNAME(hv),ENV_HV_NAME))
 #endif
 	                                                          )
-	    Newz(503,xhv->xhv_array, sizeof(HE*) * (xhv->xhv_max + 1), char);
+	    Newz(503,xhv->xhv_array, ARRAY_ALLOC_BYTES(xhv->xhv_max + 1), char);
 	else
 	    return 0;
     }
@@ -299,7 +306,7 @@ hv_store(HV *hv, char *key, U32 klen, SV *val, register U32 hash)
 	PERL_HASH(hash, key, klen);
 
     if (!xhv->xhv_array)
-	Newz(505, xhv->xhv_array, sizeof(HE**) * (xhv->xhv_max + 1), char);
+	Newz(505, xhv->xhv_array, ARRAY_ALLOC_BYTES(xhv->xhv_max + 1), char);
 
     oentry = &((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
     i = 1;
@@ -380,7 +387,7 @@ hv_store_ent(HV *hv, SV *keysv, SV *val, register U32 hash)
 	PERL_HASH(hash, key, klen);
 
     if (!xhv->xhv_array)
-	Newz(505, xhv->xhv_array, sizeof(HE**) * (xhv->xhv_max + 1), char);
+	Newz(505, xhv->xhv_array, ARRAY_ALLOC_BYTES(xhv->xhv_max + 1), char);
 
     oentry = &((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
     i = 1;
@@ -665,66 +672,57 @@ hsplit(HV *hv)
     I32 oldsize = (I32) xhv->xhv_max + 1; /* sic(k) */
     register I32 newsize = oldsize * 2;
     register I32 i;
-    register HE **a = (HE**)xhv->xhv_array;
-    register HE **b;
+    register char *a = xhv->xhv_array;
+    register HE **aep;
+    register HE **bep;
     register HE *entry;
     register HE **oentry;
-#ifndef STRANGE_MALLOC
-    I32 tmp;
-#endif
 
     nomemok = TRUE;
 #if defined(STRANGE_MALLOC) || defined(MYMALLOC)
-    Renew(a, newsize, HE*);
+    Renew(a, ARRAY_ALLOC_BYTES(newsize), char);
     if (!a) {
       nomemok = FALSE;
       return;
     }
 #else
-    i = newsize * sizeof(HE*);
 #define MALLOC_OVERHEAD 16
-    tmp = MALLOC_OVERHEAD;
-    while (tmp - MALLOC_OVERHEAD < i)
-	tmp += tmp;
-    tmp -= MALLOC_OVERHEAD;
-    tmp /= sizeof(HE*);
-    assert(tmp >= newsize);
-    New(2,a, tmp, HE*);
+    New(2, a, ARRAY_ALLOC_BYTES(newsize), char);
     if (!a) {
       nomemok = FALSE;
       return;
     }
-    Copy(xhv->xhv_array, a, oldsize, HE*);
+    Copy(xhv->xhv_array, a, oldsize * sizeof(HE*), char);
     if (oldsize >= 64) {
-	offer_nice_chunk(xhv->xhv_array,
-			 oldsize * sizeof(HE*) * 2 - MALLOC_OVERHEAD);
+	offer_nice_chunk(xhv->xhv_array, ARRAY_ALLOC_BYTES(oldsize));
     }
     else
 	Safefree(xhv->xhv_array);
 #endif
 
     nomemok = FALSE;
-    Zero(&a[oldsize], oldsize, HE*);		/* zero 2nd half*/
+    Zero(&a[oldsize * sizeof(HE*)], (newsize-oldsize) * sizeof(HE*), char);	/* zero 2nd half*/
     xhv->xhv_max = --newsize;
-    xhv->xhv_array = (char*)a;
+    xhv->xhv_array = a;
+    aep = (HE**)a;
 
-    for (i=0; i<oldsize; i++,a++) {
-	if (!*a)				/* non-existent */
+    for (i=0; i<oldsize; i++,aep++) {
+	if (!*aep)				/* non-existent */
 	    continue;
-	b = a+oldsize;
-	for (oentry = a, entry = *a; entry; entry = *oentry) {
+	bep = aep+oldsize;
+	for (oentry = aep, entry = *aep; entry; entry = *oentry) {
 	    if ((HeHASH(entry) & newsize) != i) {
 		*oentry = HeNEXT(entry);
-		HeNEXT(entry) = *b;
-		if (!*b)
+		HeNEXT(entry) = *bep;
+		if (!*bep)
 		    xhv->xhv_fill++;
-		*b = entry;
+		*bep = entry;
 		continue;
 	    }
 	    else
 		oentry = &HeNEXT(entry);
 	}
-	if (!*a)				/* everything moved */
+	if (!*aep)				/* everything moved */
 	    xhv->xhv_fill--;
     }
 }
@@ -737,7 +735,8 @@ hv_ksplit(HV *hv, IV newmax)
     register I32 newsize;
     register I32 i;
     register I32 j;
-    register HE **a;
+    register char *a;
+    register HE **aep;
     register HE *entry;
     register HE **oentry;
 
@@ -752,63 +751,56 @@ hv_ksplit(HV *hv, IV newmax)
     if (newsize < newmax)
 	return;					/* overflow detection */
 
-    a = (HE**)xhv->xhv_array;
+    a = xhv->xhv_array;
     if (a) {
 	nomemok = TRUE;
 #if defined(STRANGE_MALLOC) || defined(MYMALLOC)
-	Renew(a, newsize, HE*);
+	Renew(a, ARRAY_ALLOC_BYTES(newsize), char);
         if (!a) {
 	  nomemok = FALSE;
 	  return;
 	}
 #else
-	i = newsize * sizeof(HE*);
-	j = MALLOC_OVERHEAD;
-	while (j - MALLOC_OVERHEAD < i)
-	    j += j;
-	j -= MALLOC_OVERHEAD;
-	j /= sizeof(HE*);
-	assert(j >= newsize);
-	New(2, a, j, HE*);
+	New(2, a, ARRAY_ALLOC_BYTES(newsize), char);
         if (!a) {
 	  nomemok = FALSE;
 	  return;
 	}
-	Copy(xhv->xhv_array, a, oldsize, HE*);
+	Copy(xhv->xhv_array, a, oldsize * sizeof(HE*), char);
 	if (oldsize >= 64) {
-	    offer_nice_chunk(xhv->xhv_array,
-			     oldsize * sizeof(HE*) * 2 - MALLOC_OVERHEAD);
+	    offer_nice_chunk(xhv->xhv_array, ARRAY_ALLOC_BYTES(oldsize));
 	}
 	else
 	    Safefree(xhv->xhv_array);
 #endif
 	nomemok = FALSE;
-	Zero(&a[oldsize], newsize-oldsize, HE*); /* zero 2nd half*/
+	Zero(&a[oldsize * sizeof(HE*)], (newsize-oldsize) * sizeof(HE*), char); /* zero 2nd half*/
     }
     else {
-	Newz(0, a, newsize, HE*);
+	Newz(0, a, ARRAY_ALLOC_BYTES(newsize), char);
     }
     xhv->xhv_max = --newsize;
-    xhv->xhv_array = (char*)a;
+    xhv->xhv_array = a;
     if (!xhv->xhv_fill)				/* skip rest if no entries */
 	return;
 
-    for (i=0; i<oldsize; i++,a++) {
-	if (!*a)				/* non-existent */
+    aep = (HE**)a;
+    for (i=0; i<oldsize; i++,aep++) {
+	if (!*aep)				/* non-existent */
 	    continue;
-	for (oentry = a, entry = *a; entry; entry = *oentry) {
+	for (oentry = aep, entry = *aep; entry; entry = *oentry) {
 	    if ((j = (HeHASH(entry) & newsize)) != i) {
 		j -= i;
 		*oentry = HeNEXT(entry);
-		if (!(HeNEXT(entry) = a[j]))
+		if (!(HeNEXT(entry) = aep[j]))
 		    xhv->xhv_fill++;
-		a[j] = entry;
+		aep[j] = entry;
 		continue;
 	    }
 	    else
 		oentry = &HeNEXT(entry);
 	}
-	if (!*a)				/* everything moved */
+	if (!*aep)				/* everything moved */
 	    xhv->xhv_fill--;
     }
 }
@@ -1054,7 +1046,7 @@ hv_iternext(HV *hv)
     }
 
     if (!xhv->xhv_array)
-	Newz(506,xhv->xhv_array, sizeof(HE*) * (xhv->xhv_max + 1), char);
+	Newz(506,xhv->xhv_array, ARRAY_ALLOC_BYTES(xhv->xhv_max + 1), char);
     if (entry)
 	entry = HeNEXT(entry);
     while (!entry) {

@@ -502,8 +502,7 @@ do_kv(ARGSproto)
 	RETURN;
     }
 
-    /* Guess how much room we need.  hv_max may be a few too many.  Oh well. */
-    EXTEND(SP, HvMAX(keys) * (dokeys + dovalues));
+    EXTEND(SP, HvKEYS(keys) * (dokeys + dovalues));
 
     PUTBACK;	/* hv_iternext and hv_iterval might clobber stack_sp */
     while (entry = hv_iternext(keys)) {

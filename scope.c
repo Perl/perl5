@@ -57,7 +57,7 @@ new_stackinfo(I32 stitems, I32 cxitems)
     si->si_next = 0;
     si->si_cxmax = cxitems - 1;
     si->si_cxix = -1;
-    si->si_type = SI_UNDEF;
+    si->si_type = PERLSI_UNDEF;
     New(56, si->si_cxstack, cxitems, PERL_CONTEXT);
     return si;
 }

@@ -9,7 +9,7 @@
 package B::Deparse;
 use Carp 'cluck';
 use B qw(class main_root main_start main_cv svref_2object);
-$VERSION = 0.51;
+$VERSION = 0.52;
 use strict;
 
 # Changes between 0.50 and 0.51:
@@ -23,11 +23,13 @@ use strict;
 # - added `-u', like B::C
 # - package declarations using cop_stash
 # - subs, formats and code sorted by cop_seq
+# Changes between 0.51 and 0.52:
+# - added pp_threadsv (special variables under USE_THREADS)
+# - added documentation
 
 # Todo:
 # - eliminate superfluous parentheses
 # - 'EXPR1 && EXPR2;' => 'EXPR2 if EXPR1;'
-# - pp_threadsv (incl. in foreach)
 # - style options
 # - '&&' => 'and'?
 # - ',' => '=>' (auto-unquote?)
@@ -35,11 +37,8 @@ use strict;
 # - version using op_next instead of op_first/sibling?
 # - avoid string copies (pass arrays, one big join?)
 # - auto-apply `-u'?
-# - documentation
 
 # The following OPs don't have functions:
-
-# pp_threadsv -- see Todo
 
 # pp_padany -- does not exist after parsing
 # pp_rcatline -- does not exist
@@ -53,6 +52,7 @@ use strict;
 # pp_mapstart -- see mapwhile
 # pp_flip -- see flop
 # pp_iter -- see leaveloop
+# pp_enteriter -- see leaveloop
 # pp_enterloop -- see leaveloop
 # pp_leaveeval -- see entereval
 # pp_entertry -- see leavetry
@@ -1163,13 +1163,18 @@ sub pp_leaveloop {
 	my $var = $ary->sibling;
 	$ary = $self->deparse($ary);
 	if (null $var) {
-	    $var = $self->pp_padsv($enter);
-	    if ($self->padname_sv($enter->targ)->IVX ==
-		$kid->first->first->sibling->last->cop_seq)
-	    {
-		# If the scope of this variable closes at the last
-		# statement of the loop, it must have been declared here.
-		$var = "my " . $var;
+	    if ($enter->flags & OPf_SPECIAL) { # thread special var
+		$var = $self->pp_threadsv($enter);
+	    } else { # regular my() variable
+		$var = $self->pp_padsv($enter);
+		if ($self->padname_sv($enter->targ)->IVX ==
+		    $kid->first->first->sibling->last->cop_seq)
+		{
+		    # If the scope of this variable closes at the last
+		    # statement of the loop, it must have been
+		    # declared here.
+		    $var = "my " . $var;
+		}
 	    }
 	} elsif ($var->ppaddr eq "pp_rv2gv") {
 	    $var = $self->pp_rv2sv($var);
@@ -1278,6 +1283,16 @@ sub pp_padsv {
 
 sub pp_padav { pp_padsv(@_) }
 sub pp_padhv { pp_padsv(@_) }
+
+my @threadsv_names = ("_", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+		      "&", "`", "'", "+", "/", ".", ",", "\\", '"', ";",
+		      "^", "-", "%", "=", "|", "~", ":", "^A", "^E", "!", "@");
+
+sub pp_threadsv {
+    my $self = shift;
+    my $op = shift;
+    return $self->maybe_local($op, "\$" .  $threadsv_names[$op->targ]);
+}    
 
 sub pp_gvsv {
     my $self = shift;
@@ -1998,3 +2013,63 @@ sub pp_subst {
 }
 
 1;
+__END__
+
+=head1 NAME
+
+B::Deparse - Perl compiler backend to produce perl code
+
+=head1 SYNOPSIS
+
+  perl -MO=Deparse[,-uPACKAGE] prog.pl >prog2.pl
+
+=head1 DESCRIPTION
+
+B::Deparse is a backend module for the Perl compiler that generates
+perl source code, based on the internal compiled structure that perl
+itself creates after parsing a program. The output of B::Deparse won't
+be exactly the same as the original source, since perl doesn't keep
+track of comments or whitespace, and there isn't a one-to-one
+correspondence between perl's syntactical constructions and their
+compiled form, but it will often be close. One feature of the output
+is that it includes parentheses even when they are not required for
+by precedence, which can make it easy to see if perl is parsing your
+expressions the way you intended.
+
+Please note that this module is mainly new and untested code and is
+still under development, so it may change in the future.
+
+=head1 OPTIONS
+
+There is currently only one option; as with all compiler options, it
+must follow directly after the '-MO=Deparse', separated by a comma but
+not any white space.
+
+=over 4
+
+=item B<-uPACKAGE>
+
+Normally, B::Deparse deparses the main code of a program, all the subs
+called by the main program (and all the subs called by them,
+recursively), and any other subs in the main:: package. To include
+subs in other packages that aren't called directly, such as AUTOLOAD,
+DESTROY, other subs called automatically by perl, and methods, which
+aren't resolved to subs until runtime, use the B<-u> option. The
+argument to B<-u> is the name of a package, and should follow directly
+after the 'u'. Multiple B<-u> options may be given, separated by
+commas.  Note that unlike some other backends, B::Deparse doesn't
+(yet) try to guess automatically when B<-u> is needed -- you must
+invoke it yourself.
+
+=back
+
+=head1 BUGS
+
+See the 'to do' list at the beginning of the module file.
+
+=head1 AUTHOR
+
+Stephen McCamant <alias@mcs.com>, based on an earlier version by
+Malcolm Beattie <mbeattie@sable.ox.ac.uk>.
+
+=cut

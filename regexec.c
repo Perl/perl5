@@ -19,6 +19,15 @@
  * with the POSIX routines of the same names.
 */
 
+#ifdef IN_XSUB_RE
+/* We *really* need to overwrite these symbols: */
+#  define Perl_regexec_flags my_regexec
+#  define Perl_regdump my_regdump
+#  define Perl_regprop my_regprop
+/* *These* symbols are masked to allow static link. */
+#  define Perl_pregexec my_pregexec
+#endif 
+
 /*SUPPRESS 112*/
 /*
  * pregcomp and pregexec -- regsub and regerror are not used in perl
@@ -258,7 +267,7 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend, cha
 	else
 	    s = fbm_instr((unsigned char*)s + start_shift,
 			  (unsigned char*)strend - end_shift,
-		prog->check_substr);
+		prog->check_substr, 0);
 	if (!s) {
 	    ++BmUSEFUL(prog->check_substr);	/* hooray */
 	    goto phooey;	/* not present */
@@ -359,7 +368,7 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend, cha
 		 ? (s = screaminstr(screamer, must, s + back_min - strbeg,
 				    end_shift, &scream_pos, 0))
 		 : (s = fbm_instr((unsigned char*)s + back_min,
-				  (unsigned char*)strend, must))) ) {
+				  (unsigned char*)strend, must, 0))) ) {
 	    if (s - back_max > last1) {
 		last1 = s - back_min;
 		s = s - back_max;
@@ -610,7 +619,7 @@ got_it:
     strend += dontbother;	/* uncheat */
     prog->subbeg = strbeg;
     prog->subend = strend;
-    RX_MATCH_TAINTED_SET(prog, reg_flags & RF_tainted);
+    RX_MATCH_TAINTED_set(prog, reg_flags & RF_tainted);
 
     /* make sure $`, $&, $', and $digit will work later */
     if (strbeg != prog->subbase) {	/* second+ //g match.  */
@@ -782,7 +791,7 @@ regmatch(regnode *prog)
 
 	switch (OP(scan)) {
 	case BOL:
-	    if (locinput == regbol
+	    if (locinput == bostr
 		? regprev == '\n'
 		: (multiline && 
 		   (nextchr || locinput < regeol) && locinput[-1] == '\n') )
@@ -792,7 +801,7 @@ regmatch(regnode *prog)
 	    }
 	    sayNO;
 	case MBOL:
-	    if (locinput == regbol
+	    if (locinput == bostr
 		? regprev == '\n'
 		: ((nextchr || locinput < regeol) && locinput[-1] == '\n') )
 	    {

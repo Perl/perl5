@@ -417,8 +417,12 @@ $name =~ s-//+-/-g;
 if ($name =~ s-^.*?/lib/[^/]*perl[^/]*/--i
 	or $name =~ s-^.*?/[^/]*perl[^/]*/lib/--i
 	or $name =~ s-^.*?/[^/]*perl[^/]*/--i) {
-    # Lose ^arch/version/.
-    $name =~ s-^[^/]+/\d+\.\d+/--;
+    # Lose ^site(_perl)?/.
+    $name =~ s-^site(_perl)?/--;
+    # Lose ^arch/.	(XXX should we use Config? Just for archname?)
+    $name =~ s~^(.*-$^O|$^O-.*)/~~o;
+    # Lose ^version/.
+    $name =~ s-^\d+\.\d+/--;
 }
 
 # Translate Getopt/Long to Getopt::Long, etc.

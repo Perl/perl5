@@ -1996,7 +1996,7 @@ PP(pp_index)
     else if (offset > biglen)
 	offset = biglen;
     if (!(tmps2 = fbm_instr((unsigned char*)tmps + offset,
-      (unsigned char*)tmps + biglen, little)))
+      (unsigned char*)tmps + biglen, little, 0)))
 	retval = -1 + arybase;
     else
 	retval = tmps2 - tmps + arybase;
@@ -2358,8 +2358,6 @@ PP(pp_delete)
 	while (++MARK <= SP) {
 	    if (hvtype == SVt_PVHV)
 		sv = hv_delete_ent(hv, *MARK, discard, 0);
-	    else if (hvtype == SVt_PVAV)
-		sv = avhv_delete_ent((AV*)hv, *MARK, discard, 0);
 	    else
 		DIE("Not a HASH reference");
 	    *MARK = sv ? sv : &sv_undef;
@@ -2377,8 +2375,6 @@ PP(pp_delete)
 	hv = (HV*)POPs;
 	if (SvTYPE(hv) == SVt_PVHV)
 	    sv = hv_delete_ent(hv, keysv, discard, 0);
-	else if (SvTYPE(hv) == SVt_PVAV)
-	    sv = avhv_delete_ent((AV*)hv, keysv, discard, 0);
 	else
 	    DIE("Not a HASH reference");
 	if (!sv)
@@ -2627,8 +2623,7 @@ PP(pp_splice)
 	    if (AvREAL(ary)) {
 		EXTEND_MORTAL(length);
 		for (i = length, dst = MARK; i; i--) {
-		    if (!SvIMMORTAL(*dst))
-			sv_2mortal(*dst);	/* free them eventualy */
+		    sv_2mortal(*dst);	/* free them eventualy */
 		    dst++;
 		}
 	    }
@@ -2637,8 +2632,7 @@ PP(pp_splice)
 	else {
 	    *MARK = AvARRAY(ary)[offset+length-1];
 	    if (AvREAL(ary)) {
-		if (!SvIMMORTAL(*MARK))
-		    sv_2mortal(*MARK);
+		sv_2mortal(*MARK);
 		for (i = length - 1, dst = &AvARRAY(ary)[offset]; i > 0; i--)
 		    SvREFCNT_dec(*dst++);	/* free them now */
 	    }
@@ -2726,8 +2720,7 @@ PP(pp_splice)
 		if (AvREAL(ary)) {
 		    EXTEND_MORTAL(length);
 		    for (i = length, dst = MARK; i; i--) {
-			if (!SvIMMORTAL(*dst))
-			    sv_2mortal(*dst);	/* free them eventualy */
+			sv_2mortal(*dst);	/* free them eventualy */
 			dst++;
 		    }
 		}
@@ -2738,8 +2731,7 @@ PP(pp_splice)
 	else if (length--) {
 	    *MARK = tmparyval[length];
 	    if (AvREAL(ary)) {
-		if (!SvIMMORTAL(*MARK))
-		    sv_2mortal(*MARK);
+		sv_2mortal(*MARK);
 		while (length-- > 0)
 		    SvREFCNT_dec(tmparyval[length]);
 	    }
@@ -2787,7 +2779,7 @@ PP(pp_pop)
     djSP;
     AV *av = (AV*)POPs;
     SV *sv = av_pop(av);
-    if (!SvIMMORTAL(sv) && AvREAL(av))
+    if (AvREAL(av))
 	(void)sv_2mortal(sv);
     PUSHs(sv);
     RETURN;
@@ -2801,7 +2793,7 @@ PP(pp_shift)
     EXTEND(SP, 1);
     if (!sv)
 	RETPUSHUNDEF;
-    if (!SvIMMORTAL(sv) && AvREAL(av))
+    if (AvREAL(av))
 	(void)sv_2mortal(sv);
     PUSHs(sv);
     RETURN;
@@ -3476,7 +3468,7 @@ PP(pp_unpack)
 		    s += sizeof(unsigned Quad_t);
 		}
 		sv = NEWSV(43, 0);
-		if (aquad <= UV_MAX)
+		if (auquad <= UV_MAX)
 		    sv_setuv(sv, (UV)auquad);
 		else
 		    sv_setnv(sv, (double)auquad);
@@ -4331,7 +4323,7 @@ PP(pp_split)
 #ifndef lint
 	    while (s < strend && --limit &&
 	      (m=fbm_instr((unsigned char*)s, (unsigned char*)strend,
-		    rx->check_substr)) )
+		    rx->check_substr, 0)) )
 #endif
 	    {
 		dstr = NEWSV(31, m-s);
@@ -4346,7 +4338,7 @@ PP(pp_split)
     else {
 	maxiters += (strend - s) * rx->nparens;
 	while (s < strend && --limit &&
-	       regexec_flags(rx, s, strend, orig, 1, Nullsv, NULL, 0))
+	       CALLREGEXEC(rx, s, strend, orig, 1, Nullsv, NULL, 0))
 	{
 	    TAINT_IF(RX_MATCH_TAINTED(rx));
 	    if (rx->subbase

@@ -41,6 +41,7 @@ sub init {
     $CPAN::Config ||= {};
     local($/) = "\n";
     local($\) = "";
+    local($|) = 1;
 
     my($ans,$default,$local,$cont,$url,$expected_size);
     
@@ -152,6 +153,7 @@ those.
 	$path = "";
     }
     $path ||= $ENV{SHELL};
+    $path =~ s,\\,/,g if $^O eq 'os2';	# Cosmetic only
     $ans = prompt("What is your favorite shell?",$path);
     $CPAN::Config->{'shell'} = $ans;
 
@@ -210,7 +212,7 @@ the default and recommended setting.
     if (@{$CPAN::Config->{urllist}||[]}) {
 	print qq{
 I found a list of URLs in CPAN::Config and will use this.
-You can change it later with the 'o conf urllist' command.
+You can change it later from CPAN shell with the 'o conf urllist' command.
 
 }
     } elsif (
@@ -221,11 +223,18 @@ You can change it later with the 'o conf urllist' command.
 	read_mirrored_by($local);
     } else {
 	$CPAN::Config->{urllist} ||= [];
+	my $val = 'http://this.field.should.be.inserted/';
+	my $cnt = 0;
 	while (! @{$CPAN::Config->{urllist}}) {
 	    my($input) = prompt(qq{
-We need to know the URL of your favorite CPAN site.
-Please enter it here:});
+We need to know the URL of your favorite CPAN site.  Any one will go,
+you can change it later from CPAN shell with the 'o conf urllist' command.
+A short list is available in 'perlmodlib', as in
+	perldoc perlmodlib
+Please enter it here:}, $val);
 	    $input =~ s/\s//g;
+	    die "Did not obtain required field" if $cnt > 10;
+	    $cnt++, next if $input eq $val;
 	    next unless $input;
 	    my($wanted) = "MIRRORED.BY";
 	    print qq{
@@ -285,7 +294,7 @@ sub find_exe {
     #warn "in find_exe exe[$exe] path[@$path]";
     for $dir (@$path) {
 	my $abs = MM->catfile($dir,$exe);
-	if (MM->maybe_command($abs)) {
+	if (($abs = MM->maybe_command($abs))) {
 	    return $abs;
 	}
     }

@@ -460,7 +460,7 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
 		gv = gvp ? *gvp : Nullgv;
 		if (gv && gv != (GV*)&sv_undef) {
 		    if (SvTYPE(gv) != SVt_PVGV)
-			gv_init(gv, stash, tmpbuf, len, (add & 2));
+			gv_init(gv, stash, tmpbuf, len, (add & GV_ADDMULTI));
 		    else
 			GvMULTI_on(gv);
 		}
@@ -563,7 +563,7 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
     if (!stash) {
 	if (!add)
 	    return Nullgv;
-	if (add & ~2) {
+	if (add & ~GV_ADDMULTI) {
 	    char sv_type_char = ((sv_type == SVt_PV) ? '$'
 				 : (sv_type == SVt_PVAV) ? '@'
 				 : (sv_type == SVt_PVHV) ? '%'
@@ -1356,7 +1356,7 @@ amagic_call(SV *left, SV *right, int method, int flags)
     myop.op_next = Nullop;
     myop.op_flags = OPf_WANT_SCALAR | OPf_STACKED;
 
-    PUSHSTACKi(SI_OVERLOAD);
+    PUSHSTACKi(PERLSI_OVERLOAD);
     ENTER;
     SAVEOP();
     op = (OP *) &myop;

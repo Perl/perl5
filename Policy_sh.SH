@@ -19,13 +19,6 @@ $startsh
 #  platform-specific hints file.
 #
 
-#Credits:
-#   The original design for this Policy.sh file came from Wayne Davison,
-#   maintainer of trn.
-#   This version for Perl5.004_61 originally written by
-#   Andy Dougherty <doughera@lafcol.lafayette.edu>.
-#   This file may be distributed under the same terms as Perl itself.
-
 #  Allow Configure command-line overrides; usually these won't be
 #  needed, but something like -Dprefix=/test/location can be quite
 #  useful for testing out new versions.
@@ -57,21 +50,11 @@ esac
 # out.  That way, if you override prefix, all of these will be
 # automatically adjusted.
 #
-# NOTE:  Be especially careful about architecture-dependent and
+# WARNING:  Be especially careful about architecture-dependent and
 # version-dependent names, particularly if you reuse this file for
 # different versions of perl.
 
 !GROK!THIS!
-
-if test 0 -eq "$subversion"; then
-    version=`LC_ALL=C; export LC_ALL; \
-    echo $baserev $patchlevel |
-	$awk '{ printf "%.3f\n", $1 + $2/1000.0 }'`
-else
-    version=`LC_ALL=C; export LC_ALL; \
-	echo $baserev $patchlevel $subversion | \
-	$awk '{ printf "%.5f\n", $1 + $2/1000.0 + $3/100000.0 }'`
-fi
 
 for var in bin scriptdir privlib archlib \
 	man1dir man3dir sitelib sitearch \
@@ -91,13 +74,28 @@ for var in bin scriptdir privlib archlib \
 	;;
     privlib)
 	case "$prefix" in
-	*perl*)	dflt=$prefix/lib ;;
-	*)	dflt=$prefix/lib/$package ;;
+	*perl*)	dflt=$prefix/lib/$version ;;
+	*)	dflt=$prefix/lib/$package/$version ;;
 	esac
 	;;
-    archlib)	dflt="$privlib/$archname/$version" ;;
-    sitelib)	dflt="$privlib/site_perl" ;;
-    sitearch)	dflt="$sitelib/$archname" ;;
+    archlib)	
+	case "$prefix" in
+	*perl*)	dflt=$prefix/lib/$version/$archname ;;
+	*)	dflt=$prefix/lib/$package/$version/$archname ;;
+	esac
+	;;
+    sitelib)
+	case "$prefix" in
+	*perl*)	dflt=$prefix/lib/site_perl/$apiversion ;;
+	*)	dflt=$prefix/lib/$package/site_perl/$apiversion ;;
+	esac
+	;;
+    sitearch)	
+	case "$prefix" in
+	*perl*)	dflt=$prefix/lib/site_perl/$apiversion/$archname ;;
+	*)	dflt=$prefix/lib/$package/site_perl/$apiversion/$archname ;;
+	esac
+	;;
     man1dir)	dflt="$prefix/man/man1" ;;
     man3dir)
 	case "$prefix" in
@@ -145,3 +143,11 @@ $spitshell <<!GROK!THIS! >>Policy.sh
 #  Porting/Glossary.
 
 !GROK!THIS!
+
+#Credits:
+#   The original design for this Policy.sh file came from Wayne Davison,
+#   maintainer of trn.
+#   This version for Perl5.004_61 originally written by
+#   Andy Dougherty <doughera@lafcol.lafayette.edu>.
+#   This file may be distributed under the same terms as Perl itself.
+

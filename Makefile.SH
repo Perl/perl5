@@ -238,7 +238,8 @@ lintflags = -hbvxac
 	$(CCCMD) $(PLDLFLAGS) $*.c
 
 all: $(FIRSTMAKEFILE) miniperl $(private) $(plextract) $(public) $(dynamic_ext) $(nonxs_ext)
-	@echo " "; echo "	Everything is up to date."
+	@echo " ";
+	@echo "	Everything is up to date. 'make test' to run test suite."
 
 compile: all
 	echo "testing compilation" > testcompile;
@@ -380,7 +381,10 @@ lib/Config.pm: config.sh miniperl configpm
 lib/ExtUtils/Miniperl.pm: miniperlmain.c miniperl minimod.pl lib/Config.pm
 	$(LDLIBPTH) ./miniperl minimod.pl > tmp && mv tmp $@
 
-$(plextract):	miniperl lib/Config.pm
+lib/re.pm: ext/re/re.pm
+	cat ext/re/re.pm > $@
+
+$(plextract):	miniperl lib/Config.pm lib/re.pm
 	$(LDLIBPTH) ./miniperl -Ilib $@.PL
 	
 install: all install.perl install.man
@@ -589,6 +593,9 @@ minitest: miniperl
 ok:	utilities
 	$(LBLIBPTH) ./perl -Ilib utils/perlbug -ok -s '(UNINSTALLED)'
 
+okfile:	utilities
+	$(LBLIBPTH) ./perl -Ilib utils/perlbug -ok -s '(UNINSTALLED)' -F perl.ok
+
 nok:	utilities
 	$(LBLIBPTH) ./perl -Ilib utils/perlbug -nok -s '(UNINSTALLED)'
 
@@ -610,7 +617,12 @@ Makefile: Makefile.SH ./config.sh
 distcheck: FORCE
 	perl '-MExtUtils::Manifest=&fullcheck' -e 'fullcheck()'
 
-etags:
+elc:	emacs/cperl-mode.elc
+
+emacs/cperl-mode.elc: emacs/cperl-mode.el
+	-cd emacs; emacs -batch -q -no-site-file -f batch-byte-compile cperl-mode.el
+
+etags:	emacs/cperl-mode.elc
 	sh emacs/ptags
 
 # AUTOMATICALLY GENERATED MAKE DEPENDENCIES--PUT NOTHING BELOW THIS LINE

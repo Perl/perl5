@@ -19,6 +19,16 @@
  * with the POSIX routines of the same names.
 */
 
+#ifdef IN_XSUB_RE
+/* We *really* need to overwrite these symbols: */
+#  define Perl_pregcomp my_regcomp
+#  define Perl_regdump my_regdump
+#  define Perl_regprop my_regprop
+/* *These* symbols are masked to allow static link. */
+#  define Perl_pregfree my_regfree
+#  define Perl_regnext my_regnext
+#endif 
+
 /*SUPPRESS 112*/
 /*
  * pregcomp and pregexec -- regsub and regerror are not used in perl
@@ -55,7 +65,10 @@
  */
 #include "EXTERN.h"
 #include "perl.h"
-#include "INTERN.h"
+
+#ifndef IN_XSUB_RE
+#  include "INTERN.h"
+#endif
 
 #define REG_COMP_C
 #include "regcomp.h"
@@ -765,6 +778,7 @@ pregcomp(char *exp, char *xend, PMOP *pm)
     r->prelen = xend - exp;
     r->precomp = regprecomp;
     r->subbeg = r->subbase = NULL;
+    r->nparens = regnpar - 1;		/* set early to validate backrefs */
     regcomp_rx = r;
 
     /* Second pass: emit code. */
@@ -936,7 +950,6 @@ pregcomp(char *exp, char *xend, PMOP *pm)
 	r->check_substr = r->anchored_substr = r->float_substr = Nullsv;
     }
 
-    r->nparens = regnpar - 1;
     r->minlen = minlen;
     if (regseen & REG_SEEN_GPOS) 
 	r->reganch |= ROPT_GPOS_SEEN;
@@ -976,6 +989,9 @@ reg(I32 paren, I32 *flagp)
     /* Make an OPEN node, if parenthesized. */
     if (paren) {
 	if (*regcomp_parse == '?') {
+	    U16 posflags = 0, negflags = 0;
+	    U16 *flagsp = &posflags;
+
 	    regcomp_parse++;
 	    paren = *regcomp_parse++;
 	    ret = NULL;			/* For look-ahead/behind. */
@@ -1043,6 +1059,13 @@ reg(I32 paren, I32 *flagp)
 		    regcomp_rx->data->data[n+2] = (void*)sop;
 		    SvREFCNT_dec(sv);
 		} else {		/* First pass */
+		    if (curcop == &compiling) {
+			if (!(hints & HINT_RE_EVAL))
+			    FAIL("Eval-group not allowed, use re 'eval'");
+		    }
+		    else {
+			FAIL("Eval-group not allowed at run time");
+		    }
 		    if (tainted)
 			FAIL("Eval-group in insecure regular expression");
 		}
@@ -1104,11 +1127,24 @@ reg(I32 paren, I32 *flagp)
                 break;
 	    default:
 		--regcomp_parse;
+	      parse_flags:
 		while (*regcomp_parse && strchr("iogcmsx", *regcomp_parse)) {
 		    if (*regcomp_parse != 'o')
-			pmflag(&regflags, *regcomp_parse);
+			pmflag(flagsp, *regcomp_parse);
 		    ++regcomp_parse;
 		}
+		if (*regcomp_parse == '-') {
+		    flagsp = &negflags;
+		    ++regcomp_parse;
+		    goto parse_flags;
+		}
+		regflags |= posflags;
+		regflags &= ~negflags;
+		if (*regcomp_parse == ':') {
+		    regcomp_parse++;
+		    paren = ':';
+		    break;
+		}		
 	      unknown:
 		if (*regcomp_parse != ')')
 		    FAIL2("Sequence (?%c...) not recognized", *regcomp_parse);
@@ -1609,6 +1645,8 @@ tryagain:
 		if (num > 9 && num >= regnpar)
 		    goto defchar;
 		else {
+		    if (!SIZE_ONLY && num > regcomp_rx->nparens)
+			FAIL("reference to nonexistent group");
 		    regsawback = 1;
 		    ret = reganode((regflags & PMf_FOLD)
 				   ? ((regflags & PMf_LOCALE) ? REFFL : REFF)

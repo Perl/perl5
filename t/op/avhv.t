@@ -17,7 +17,7 @@ sub STORESIZE { $#{$_[0]} = $_[1]+1 }
 
 package main;
 
-print "1..6\n";
+print "1..10\n";
 
 $sch = {
     'abc' => 1,
@@ -32,12 +32,11 @@ $a->[0] = $sch;
 $a->{'abc'} = 'ABC';
 $a->{'def'} = 'DEF';
 $a->{'jkl'} = 'JKL';
-$a->{'a'} = 'A';     #should extend schema
 
 @keys = keys %$a;
 @values = values %$a;
 
-if ($#keys == 3 && $#values == 3) {print "ok 1\n";} else {print "not ok 1\n";}
+if ($#keys == 2 && $#values == 2) {print "ok 1\n";} else {print "not ok 1\n";}
 
 $i = 0;		# stop -w complaints
 
@@ -48,7 +47,7 @@ while (($key,$value) = each %$a) {
     }
 }
 
-if ($i == 4) {print "ok 2\n";} else {print "not ok 2\n";}
+if ($i == 3) {print "ok 2\n";} else {print "not ok 2\n";}
 
 # quick check with tied array
 tie @fake, 'Tie::StdArray';
@@ -79,3 +78,21 @@ if ($a->{'abc'} eq 'ABC') {print "ok 5\n";} else {print "not ok 5\n";}
 my $slice = join('', 'x',@$a{'abc','def'},'x');
 print "not " if $slice ne 'xABCx';
 print "ok 6\n";
+
+# evaluation in scalar context
+my $avhv = [{}];
+print "not " if %$avhv;
+print "ok 7\n";
+
+push @$avhv, "a";
+print "not " if %$avhv;
+print "ok 8\n";
+
+$avhv = [];
+eval { $a = %$avhv };
+print "not " unless $@ and $@ =~ /^Can't coerce array into hash/;
+print "ok 9\n";
+
+$avhv = [{foo=>1, bar=>2}];
+print "not " unless %$avhv =~ m,^\d+/\d+,;
+print "ok 10\n";

@@ -381,7 +381,7 @@ points on a sphere.  The distance is in C<$rho> units.  The C<$rho> is
 optional, it defaults to 1 (the unit sphere), therefore the distance
 defaults to radians.
 
-=head EXAMPLES
+=head1 EXAMPLES
 
 To calculate the distance between London (51.3N 0.5W) and Tokyo (35.7N
 139.8E) in kilometers:

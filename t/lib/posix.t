@@ -53,13 +53,16 @@ print "ok 11\n";
 
 sub SigHUP {
     print "ok 8\n";
+    $n = 8;
     kill 'INT', $$;
     sleep 2;
-    print "ok 9\n";
+    ++$n;
+    print "ok $n\n";
 }
 
 sub SigINT {
-    print "ok 10\n";
+    ++$n;
+    print "ok $n\n";
 }
 }
 

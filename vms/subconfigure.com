@@ -209,7 +209,7 @@ $ perl_i_termios="undef"
 $ perl_i_time="define"
 $ perl_i_systime="undef"
 $ perl_i_systimek="undef"
-$ perl_i_unistd="undef"
+$! perl_i_unistd="undef"
 $ perl_i_utime="undef"
 $ perl_i_varargs="undef"
 $ perl_i_vfork="undef"
@@ -712,7 +712,7 @@ $     perl_gidtype = "gid_t"
 $   ENDIF
 $ WRITE_RESULT "Gid_t is ''perl_gidtype'"
 $!
-$! Check the prototype for getgid
+$! Check to see if we've got dev_t
 $!
 $ OS
 $ WS "#ifdef __DECC
@@ -743,6 +743,36 @@ $   ELSE
 $     perl_devtype = "dev_t"
 $   ENDIF
 $ WRITE_RESULT "Dev_t is ''perl_devtype'"
+$!
+$! Check to see if we've got unistd.h (which we ought to, but you never know)
+$!
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <unistd.h>
+$ WS "int main()
+$ WS "{"
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$   DEFINE SYS$ERROR _NLA0:
+$   DEFINE SYS$OUTPUT _NLA0:
+$   on error then continue
+$   on warning then continue
+$   'Checkcc' temp
+$   teststatus = f$extract(9,1,$status)
+$   DEASSIGN SYS$OUTPUT
+$   DEASSIGN SYS$ERROR
+$   if (teststatus.nes."1")
+$   THEN
+$!   Okay, failed. Must not have it
+$     perl_i_unistd = "undef"
+$   ELSE
+$     perl_i_unistd = "define"
+
+$   ENDIF
+$ WRITE_RESULT "i_unistd is ''perl_i_unistd'"
 $!
 $! Check the prototype for select
 $!
@@ -1918,7 +1948,7 @@ $ WC "installarchlib='" + perl_installarchlib + "'"
 $ WC "installsitelib='" + perl_installsitelib + "'"
 $ WC "installsitearch='" + perl_installsitearch + "'"
 $ WC "path_sep='" + perl_path_sep + "'"
-$ WC "startperl='$ perl 'f$env(\""procedure\"")' 'p1' 'p2' 'p3' 'p4' 'p5' 'p6' 'p7' 'p8'  !\n$ exit++ perl_ + ++$status != 0 and $exit = $status = undef;'"
+$ WC "startperl=""$ perl 'f$env(\""procedure\"")' 'p1' 'p2' 'p3' 'p4' 'p5' 'p6' 'p7' 'p8'  !\n$ exit++ perl_ + ++$status != 0 and $exit = $status = undef;"""
 $ WC "vms_cc_type='" + perl_vms_cc_type + "'"
 $ WC "d_attribut='" + perl_d_attribut + "'"
 $ WC "cc='" + perl_cc + "'"

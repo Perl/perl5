@@ -133,6 +133,8 @@ reg_start_tmpl
 regbol
 regcc
 regcode
+regcompp
+regexecp
 regdata
 regdummy
 regendp

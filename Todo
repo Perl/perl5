@@ -46,7 +46,6 @@ Optimizations
 
 Vague possibilities
 	ref function in list context
-	data prettyprint function?  (or is it, as I suspect, a lib routine?)
 	make tr/// return histogram in list context?
 	Loop control on do{} et al
 	Explicit switch statements

@@ -1304,6 +1304,9 @@ scalar_mod_type(OP *o, I32 type)
     case OP_CONCAT:
     case OP_SUBST:
     case OP_TRANS:
+    case OP_READ:
+    case OP_SYSREAD:
+    case OP_RECV:
     case OP_ANDASSIGN:	/* may work later */
     case OP_ORASSIGN:	/* may work later */
 	return TRUE;
@@ -2100,8 +2103,11 @@ newPMOP(I32 type, I32 flags)
     pmop->op_flags = flags;
     pmop->op_private = 0 | (flags >> 8);
 
+    if (hints & HINT_RE_TAINT)
+	pmop->op_pmpermflags |= PMf_RETAINT;
     if (hints & HINT_LOCALE)
-	pmop->op_pmpermflags = (pmop->op_pmflags |= PMf_LOCALE);
+	pmop->op_pmpermflags |= PMf_LOCALE;
+    pmop->op_pmflags = pmop->op_pmpermflags;
 
     /* link into pm list */
     if (type != OP_TRANS && curstash) {
@@ -2134,7 +2140,7 @@ pmruntime(OP *o, OP *expr, OP *repl)
 	    p = SvPV(pat, plen);
 	    pm->op_pmflags |= PMf_SKIPWHITE;
 	}
-	pm->op_pmregexp = pregcomp(p, p + plen, pm);
+	pm->op_pmregexp = CALLREGCOMP(p, p + plen, pm);
 	if (strEQ("\\s+", pm->op_pmregexp->precomp))
 	    pm->op_pmflags |= PMf_WHITE;
 	op_free(expr);
@@ -3472,7 +3478,7 @@ newSUB(I32 floor, OP *o, OP *proto, OP *block)
 		goto done;
 	    }
 	    /* ahem, death to those who redefine active sort subs */
-	    if (curstackinfo->si_type == SI_SORT && sortcop == CvSTART(cv))
+	    if (curstackinfo->si_type == PERLSI_SORT && sortcop == CvSTART(cv))
 		croak("Can't redefine active sort subroutine %s", name);
 	    if(const_sv = cv_const_sv(cv))
 		const_changed = sv_cmp(const_sv, op_const_sv(block, Nullcv));
@@ -4971,7 +4977,7 @@ peep(register OP *o)
 
 	case OP_PADAV:
 	    if (o->op_next->op_type == OP_RV2AV
-		&& (o->op_next->op_flags && OPf_REF))
+		&& (o->op_next->op_flags & OPf_REF))
 	    {
 		null(o->op_next);
 	       	o->op_next = o->op_next->op_next;
@@ -4980,7 +4986,7 @@ peep(register OP *o)
 	
 	case OP_PADHV:
 	    if (o->op_next->op_type == OP_RV2HV
-		&& (o->op_next->op_flags && OPf_REF))
+		&& (o->op_next->op_flags & OPf_REF))
 	    {
 		null(o->op_next);
 	       	o->op_next = o->op_next->op_next;

@@ -412,6 +412,14 @@ environment variable to determine the application's notions on collation
 alphabets, but where do 'E<aacute>' and 'E<aring>' belong?  And while
 'color' follows 'chocolate' in English, what about in Spanish?
 
+The following collations all make sense and you may meet any of them
+if you "use locale".
+
+	A B C D E a b c d e
+	A a B b C c D d D e
+	a A b B c C d D e E
+	a b c d e A B C D E
+
 Here is a code snippet to tell what alphanumeric
 characters are in the current locale, in that locale's order:
 

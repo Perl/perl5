@@ -26,6 +26,13 @@
 # If you want to add a regular expression test that can't be expressed
 # in this format, don't add it here: put it in op/pat.t instead.
 
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib' if -d '../lib';
+}
+
+use re 'eval';
+
 $iters = shift || 1;		# Poor man performance suite, 10000 is OK.
 
 open(TESTS,'op/re_tests') || open(TESTS,'t/op/re_tests') ||

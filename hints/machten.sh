@@ -13,6 +13,8 @@
 #	Martijn Koster <m.koster@webcrawler.com>
 #	Richard Yeh <rcyeh@cco.caltech.edu>
 #
+# Use vfork and perl's malloc by default
+#                      -- Dominic Dunlop <domo@computer.org> 980630
 # Raise perl's stack size again; cut down reg_infty; document
 #                      -- Dominic Dunlop <domo@computer.org> 980619
 # Use of semctl() can crash system: disable -- Dominic Dunlop 980506
@@ -33,8 +35,35 @@
 
 # Power MachTen is a real memory system and its standard malloc
 # has been optimized for this. Using this malloc instead of Perl's
-# malloc may result in significant memory savings.
-usemymalloc='false'
+# malloc may result in significant memory savings.  In particular,
+# unlike most UNIX memory allocation subsystems, MachTen's free()
+# really does return unneeded process data memory to the system.
+# However, MachTen's malloc() is woefully slow -- maybe 100 times
+# slower than perl's own, so perl's own is usually the better
+# choice.  In order to use perl's malloc(), the sbrk() system call
+# must be simulated using MachTen's malloc().  See malloc.c for
+# precise details of how this is achieved.  Recent improvements
+# to perl's malloc() currently crash MachTen, and so are disabled
+# by -DPLAIN_MALLOC and -DNO_FANCY_MALLOC.
+usemymalloc=${usemymalloc:-y}
+
+# Do not wrap the following long line
+malloc_cflags='ccflags="$ccflags -DPLAIN_MALLOC -DNO_FANCY_MALLOC -DUSE_PERL_SBRK"'
+
+# Note that an empty malloc_cflags appears in config.sh if perl's
+# malloc() is not used.  his is harmless.
+case "$usemymalloc" in
+n) unset malloc_cflags;;
+*) ccflags="$ccflags  -DHIDEMYMALLOC"
+esac
+
+# When MachTen does a fork(), it immediately copies the whole of
+# the parent process' data space for the child.  This can be
+# expensive.  Using vfork() where appropriate avoids this cost.
+d_vfork=${d_vfork:-define}
+
+# Specify a high level of optimization (-O3 wouldn't do much more)
+optimize=${optimize:--O2 -fomit-frame-pointer}
 
 # Make symbol table listings les voluminous
 nmopts=-gp
@@ -89,9 +118,9 @@ then
 	X=`expr $X / 2`
 	stack_size=`expr $stack_size \* 2`
     done
+    X=`expr $stack_size \* 1024`
 fi
 
-X=`expr $stack_size \* 1024`
 ldflags="$ldflags -Xlstack=$X"
 ccflags="$ccflags -DREG_INFTY=$reg_infty"
 
@@ -141,11 +170,21 @@ During Configure, you may see the message
 Select the default answer: semctl() is buggy, and perl should be built
 without it.
 
+Similarly, when you see
+
+*** WHOA THERE!!! ***
+    The recommended value for \$d_vfork on this machine was "define"!
+    Keep the recommended value? [y]
+
+select the default answer: vfork() works, and avoids expensive data
+copying.
+
 At the end of Configure, you will see a harmless message
 
 Hmm...You had some extra variables I don't know about...I'll try to keep 'em.
 	Propagating recommended variable dont_use_nlink
         Propagating recommended variable nmopts
+        Propagating recommended variable malloc_cflags...
         Propagating recommended variable reg_infty
 Read the File::Find documentation for more information about dont_use_nlink
 

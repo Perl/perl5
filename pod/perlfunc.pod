@@ -1029,7 +1029,8 @@ I<EACH> file in a while (E<lt>E<gt>) loop.  Examples:
     }
 
 Practical hint: you almost never need to use C<eof> in Perl, because the
-input operators return C<undef> when they run out of data.
+input operators return false values when they run out of data, or if there
+was an error.
 
 =item eval EXPR
 
@@ -1253,7 +1254,7 @@ Implements the fcntl(2) function.  You'll probably have to say
 
     use Fcntl;
 
-first to get the correct function definitions.  Argument processing and
+first to get the correct constant definitions.  Argument processing and
 value return works just like ioctl() below.  
 For example:
 
@@ -1427,9 +1428,10 @@ formline() always returns TRUE.  See L<perlform> for other examples.
 =item getc
 
 Returns the next character from the input file attached to FILEHANDLE,
-or a null string at end of file.  If FILEHANDLE is omitted, reads from STDIN.
-This is not particularly efficient.  It cannot be used to get unbuffered
-single-characters, however.  For that, try something more like:
+or the undefined value at end of file, or if there was an error.  If
+FILEHANDLE is omitted, reads from STDIN.  This is not particularly
+efficient.  It cannot be used to get unbuffered single-characters,
+however.  For that, try something more like:
 
     if ($BSD_STYLE) {
 	system "stty cbreak </dev/tty >/dev/tty 2>&1";
@@ -2044,31 +2046,38 @@ it returns FALSE and sets C<$!> (errno).
 
 =item msgctl ID,CMD,ARG
 
-Calls the System V IPC function msgctl(2).  If CMD is &IPC_STAT, then ARG
-must be a variable that will hold the returned msqid_ds structure.
-Returns like ioctl: the undefined value for error, "0 but true" for
-zero, or the actual return value otherwise.
+Calls the System V IPC function msgctl(2).  You'll probably have to say
+
+    use IPC::SysV;
+
+first to get the correct constant definitions.  If CMD is IPC_STAT,
+then ARG must be a variable which will hold the returned msqid_ds
+structure.  Returns like ioctl: the undefined value for error, "0 but
+true" for zero, or the actual return value otherwise.  See also
+IPC::SysV and IPC::Semaphore::Msg documentation.
 
 =item msgget KEY,FLAGS
 
-Calls the System V IPC function msgget(2).  Returns the message queue id,
-or the undefined value if there is an error.
+Calls the System V IPC function msgget(2).  Returns the message queue
+id, or the undefined value if there is an error.  See also IPC::SysV
+and IPC::SysV::Msg documentation.
 
 =item msgsnd ID,MSG,FLAGS
 
 Calls the System V IPC function msgsnd to send the message MSG to the
 message queue ID.  MSG must begin with the long integer message type,
 which may be created with C<pack("l", $type)>.  Returns TRUE if
-successful, or FALSE if there is an error.
+successful, or FALSE if there is an error.  See also IPC::SysV
+and IPC::SysV::Msg documentation.
 
 =item msgrcv ID,VAR,SIZE,TYPE,FLAGS
 
 Calls the System V IPC function msgrcv to receive a message from
 message queue ID into variable VAR with a maximum message size of
-SIZE.  Note that if a message is received, the message type will be the
-first thing in VAR, and the maximum length of VAR is SIZE plus the size
-of the message type.  Returns TRUE if successful, or FALSE if there is
-an error.
+SIZE.  Note that if a message is received, the message type will be
+the first thing in VAR, and the maximum length of VAR is SIZE plus the
+size of the message type.  Returns TRUE if successful, or FALSE if
+there is an error.  See also IPC::SysV and IPC::SysV::Msg documentation.
 
 =item my EXPR
 
@@ -2624,12 +2633,12 @@ with the wrong number of RANDBITS.)
 =item read FILEHANDLE,SCALAR,LENGTH
 
 Attempts to read LENGTH bytes of data into variable SCALAR from the
-specified FILEHANDLE.  Returns the number of bytes actually read, or
-undef if there was an error.  SCALAR will be grown or shrunk to the
-length actually read.  An OFFSET may be specified to place the read
-data at some other place than the beginning of the string.  This call
-is actually implemented in terms of stdio's fread(3) call.  To get a true
-read(2) system call, see sysread().
+specified FILEHANDLE.  Returns the number of bytes actually read,
+C<0> at end of file, or undef if there was an error.  SCALAR will be grown
+or shrunk to the length actually read.  An OFFSET may be specified to
+place the read data at some other place than the beginning of the
+string.  This call is actually implemented in terms of stdio's fread(3)
+call.  To get a true read(2) system call, see sysread().
 
 =item readdir DIRHANDLE
 
@@ -3035,16 +3044,21 @@ then only on POSIX systems.  You have to use sysread() instead.
 
 =item semctl ID,SEMNUM,CMD,ARG
 
-Calls the System V IPC function semctl.  If CMD is &IPC_STAT or
-&GETALL, then ARG must be a variable that will hold the returned
+Calls the System V IPC function semctl.  You'll probably have to say
+
+    use IPC::SysV;
+
+first to get the correct constant definitions.  If CMD is IPC_STAT or
+GETALL, then ARG must be a variable which will hold the returned
 semid_ds structure or semaphore value array.  Returns like ioctl: the
 undefined value for error, "0 but true" for zero, or the actual return
-value otherwise.
+value otherwise.  See also IPC::SysV and IPC::Semaphore documentation.
 
 =item semget KEY,NSEMS,FLAGS
 
 Calls the System V IPC function semget.  Returns the semaphore id, or
-the undefined value if there is an error.
+the undefined value if there is an error.  See also IPC::SysV and
+IPC::SysV::Semaphore documentation.
 
 =item semop KEY,OPSTRING
 
@@ -3059,7 +3073,8 @@ following code waits on semaphore $semnum of semaphore id $semid:
     $semop = pack("sss", $semnum, -1, 0);
     die "Semaphore trouble: $!\n" unless semop($semid, $semop);
 
-To signal the semaphore, replace "-1" with "1".
+To signal the semaphore, replace "-1" with "1".  See also IPC::SysV
+and IPC::SysV::Semaphore documentation.
 
 =item send SOCKET,MSG,FLAGS,TO
 
@@ -3108,15 +3123,21 @@ right end.
 
 =item shmctl ID,CMD,ARG
 
-Calls the System V IPC function shmctl.  If CMD is &IPC_STAT, then ARG
-must be a variable that will hold the returned shmid_ds structure.
-Returns like ioctl: the undefined value for error, "0 but true" for
-zero, or the actual return value otherwise.
+Calls the System V IPC function shmctl.  You'll probably have to say
+
+    use IPC::SysV;
+
+first to get the correct constant definitions.  If CMD is IPC_STAT,
+then ARG must be a variable which will hold the returned shmid_ds
+structure.  Returns like ioctl: the undefined value for error, "0 but
+true" for zero, or the actual return value otherwise.
+See also IPC::SysV documentation.
 
 =item shmget KEY,SIZE,FLAGS
 
 Calls the System V IPC function shmget.  Returns the shared memory
 segment id, or the undefined value if there is an error.
+See also IPC::SysV documentation.
 
 =item shmread ID,VAR,POS,SIZE
 
@@ -3128,6 +3149,7 @@ detaching from it.  When reading, VAR must be a variable that will
 hold the data read.  When writing, if STRING is too long, only SIZE
 bytes are used; if STRING is too short, nulls are written to fill out
 SIZE bytes.  Return TRUE if successful, or FALSE if there is an error.
+See also IPC::SysV documentation.
 
 =item shutdown SOCKET,HOW
 
@@ -3804,9 +3826,9 @@ Attempts to read LENGTH bytes of data into variable SCALAR from the
 specified FILEHANDLE, using the system call read(2).  It bypasses
 stdio, so mixing this with other kinds of reads, print(), write(),
 seek(), or tell() can cause confusion because stdio usually buffers
-data.  Returns the number of bytes actually read, or undef if there
-was an error.  SCALAR will be grown or shrunk so that the last byte
-actually read is the last byte of the scalar after the read.
+data.  Returns the number of bytes actually read, C<0> at end of file,
+or undef if there was an error.  SCALAR will be grown or shrunk so that
+the last byte actually read is the last byte of the scalar after the read.
 
 An OFFSET may be specified to place the read data at some place in the
 string other than the beginning.  A negative OFFSET specifies
@@ -3872,9 +3894,9 @@ C<$?> like this:
     $signal_num  = $? & 127;
     $dumped_core = $? & 128;
 
-When the arguments get executed via the system shell, results will
-be subject to its quirks and capabilities.  See L<perlop/"`STRING`">
-and L</exec> for details.
+When the arguments get executed via the system shell, results
+and return codes will be subject to its quirks and capabilities.
+See L<perlop/"`STRING`"> and L</exec> for details.
 
 =item syswrite FILEHANDLE,SCALAR,LENGTH,OFFSET
 
