@@ -7,12 +7,7 @@ BEGIN {
     @INC = '../lib';
     require Config; import Config;
     require Test::More; import Test::More;
-    if (($Config{'extensions'} !~ /\b(DB|[A-Z]DBM)_File\b/) ){
-	plan(skip_all, "1..0 # Skipping (no DB_File or [A-Z]DBM_File)\n");
-    }
-    else {
-	plan(tests, 12);
-    }
+    plan(tests, 12);
 }
 
 require AnyDBM_File;
