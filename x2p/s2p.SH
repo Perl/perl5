@@ -11,7 +11,7 @@ case $CONFIG in
 	ln ../../../config.sh . || \
 	(echo "Can't find config.sh."; exit 1)
     fi
-    . config.sh
+    . ./config.sh
     ;;
 esac
 echo "Extracting s2p (with variable substitutions)"
@@ -28,9 +28,12 @@ $spitshell >s2p <<!GROK!THIS!
 : In the following dollars and backticks do not need the extra backslash.
 $spitshell >>s2p <<'!NO!SUBS!'
 
-# $Header: s2p.SH,v 3.0.1.5 90/10/16 11:32:40 lwall Locked $
+# $Header: s2p.SH,v 3.0.1.6 90/10/20 02:21:43 lwall Locked $
 #
 # $Log:	s2p.SH,v $
+# Revision 3.0.1.6  90/10/20  02:21:43  lwall
+# patch37: changed some ". config.sh" to ". ./config.sh"
+# 
 # Revision 3.0.1.5  90/10/16  11:32:40  lwall
 # patch29: s2p modernized
 # 

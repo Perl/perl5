@@ -1,4 +1,4 @@
-/* $Header: hash.c,v 3.0.1.6 90/10/15 17:32:52 lwall Locked $
+/* $Header: hash.c,v 3.0.1.7 90/10/20 02:10:00 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	hash.c,v $
+ * Revision 3.0.1.7  90/10/20  02:10:00  lwall
+ * patch37: hash.c called ndbm function on dbm system
+ * 
  * Revision 3.0.1.6  90/10/15  17:32:52  lwall
  * patch29: non-existent array values no longer cause core dumps
  * patch29: %foo = () will now clear dbm files
@@ -402,7 +405,15 @@ int dodbm;
     if ((old_dbm = tb->tbl_dbm) && dodbm) {
 	while (dkey = dbm_firstkey(tb->tbl_dbm), dkey.dptr) {
 	    do {
+#ifdef NDBM
+#ifdef _CX_UX
 		nextdkey = dbm_nextkey(tb->tbl_dbm, dkey);
+#else
+		nextdkey = dbm_nextkey(tb->tbl_dbm);
+#endif
+#else
+		nextdkey = nextkey(dkey);
+#endif
 		dbm_delete(tb->tbl_dbm,dkey);
 		dkey = nextdkey;
 	    } while (dkey.dptr);	/* one way or another, this works */

@@ -95,8 +95,10 @@ Installation
     absence of a specific rule.
 
     The 3b2 needs to turn off -O.
+    Domain/OS 10.3 (at least) native C 6.7 may need -opt 2 for eval.c
     AIX/RT may need a -a switch and -DCRIPPLED_CC.
     SUNOS 4.0.[12] needs #define fputs(str,fp) fprintf(fp,"%s",str) in perl.h
+    SUNOS 3.[45] should use the system malloc.
     SGI machines may need -Ddouble="long float".
     Ultrix (2.3) may need to hand assemble teval.s with a -J switch.
     Ultrix on MIPS machines may need -DLANGUAGE_C.

@@ -424,7 +424,23 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
 /* SYSVIPC:
  *	This symbol, if defined, indicates that System V IPC exists.
  */
+/* IPCMSG:
+ *	This symbol, if defined, indicates that System V IPC messages exist.
+ */
+/* IPCSEM:
+ *	This symbol, if defined, indicates that System V IPC semaphores exist.
+ */
+/* IPCSHM:
+ *	This symbol, if defined, indicates that System V IPC shared memory
+ *	exists.
+ */
 #$d_sysvipc	SYSVIPC	/**/
+
+#$d_ipcmsg	IPCMSG	/**/
+
+#$d_ipcsem	IPCSEM	/**/
+
+#$d_ipcshm	IPCSHM	/**/
 
 /* TRUNCATE:
  *	This symbol, if defined, indicates that the truncate routine is

@@ -1,4 +1,4 @@
-/* $Header: doio.c,v 3.0.1.11 90/10/15 16:16:11 lwall Locked $
+/* $Header: doio.c,v 3.0.1.12 90/10/20 02:04:18 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	doio.c,v $
+ * Revision 3.0.1.12  90/10/20  02:04:18  lwall
+ * patch37: split out separate Sys V IPC features
+ * 
  * Revision 3.0.1.11  90/10/15  16:16:11  lwall
  * patch29: added SysV IPC
  * patch29: file - didn't auto-close cleanly
@@ -85,9 +88,15 @@
 
 #ifdef SYSVIPC
 #include <sys/ipc.h>
+#ifdef IPCMSG
 #include <sys/msg.h>
+#endif
+#ifdef IPCSEM
 #include <sys/sem.h>
+#endif
+#ifdef IPCSHM
 #include <sys/shm.h>
+#endif
 #endif
 
 #ifdef I_PWD
@@ -2341,12 +2350,22 @@ int *arglast;
     errno = 0;
     switch (optype)
     {
+#ifdef IPCMSG
     case O_MSGGET:
 	return msgget(key, flags);
+#endif
+#ifdef IPCSEM
     case O_SEMGET:
 	return semget(key, n, flags);
+#endif
+#ifdef IPCSHM
     case O_SHMGET:
 	return shmget(key, n, flags);
+#endif
+#if !defined(IPCMSG) || !defined(IPCSEM) || !defined(IPCSHM)
+    default:
+	fatal("%s not implemented", opname[optype]);
+#endif
     }
     return -1;			/* should never happen */
 }
@@ -2372,14 +2391,19 @@ int *arglast;
 
     switch (optype)
     {
+#ifdef IPCMSG
     case O_MSGCTL:
 	if (cmd == IPC_STAT || cmd == IPC_SET)
 	    infosize = sizeof(struct msqid_ds);
 	break;
+#endif
+#ifdef IPCSHM
     case O_SHMCTL:
 	if (cmd == IPC_STAT || cmd == IPC_SET)
 	    infosize = sizeof(struct shmid_ds);
 	break;
+#endif
+#ifdef IPCSEM
     case O_SEMCTL:
 	if (cmd == IPC_STAT || cmd == IPC_SET)
 	    infosize = sizeof(struct semid_ds);
@@ -2392,6 +2416,11 @@ int *arglast;
 	    infosize = semds.sem_nsems * sizeof(ushort);
 	}
 	break;
+#endif
+#if !defined(IPCMSG) || !defined(IPCSEM) || !defined(IPCSHM)
+    default:
+	fatal("%s not implemented", opname[optype]);
+#endif
     }
 
     if (infosize)
@@ -2419,15 +2448,21 @@ int *arglast;
     errno = 0;
     switch (optype)
     {
+#ifdef IPCMSG
     case O_MSGCTL:
 	ret = msgctl(id, cmd, a);
 	break;
+#endif
+#ifdef IPCSEM
     case O_SEMCTL:
 	ret = semctl(id, n, cmd, a);
 	break;
+#endif
+#ifdef IPCSHM
     case O_SHMCTL:
 	ret = shmctl(id, cmd, a);
 	break;
+#endif
     }
     if (getinfo && ret >= 0) {
 	astr->str_cur = infosize;
@@ -2440,6 +2475,7 @@ int
 do_msgsnd(arglast)
 int *arglast;
 {
+#ifdef IPCMSG
     register STR **st = stack->ary_array;
     register int sp = arglast[0];
     STR *mstr;
@@ -2456,12 +2492,16 @@ int *arglast;
     }
     errno = 0;
     return msgsnd(id, mbuf, msize, flags);
+#else
+    fatal("msgsnd not implemented");
+#endif
 }
 
 int
 do_msgrcv(arglast)
 int *arglast;
 {
+#ifdef IPCMSG
     register STR **st = stack->ary_array;
     register int sp = arglast[0];
     STR *mstr;
@@ -2486,12 +2526,16 @@ int *arglast;
 	mstr->str_ptr[sizeof(long)+ret] = '\0';
     }
     return ret;
+#else
+    fatal("msgrcv not implemented");
+#endif
 }
 
 int
 do_semop(arglast)
 int *arglast;
 {
+#ifdef IPCSEM
     register STR **st = stack->ary_array;
     register int sp = arglast[0];
     STR *opstr;
@@ -2509,6 +2553,9 @@ int *arglast;
     }
     errno = 0;
     return semop(id, opbuf, opsize/sizeof(struct sembuf));
+#else
+    fatal("semop not implemented");
+#endif
 }
 
 int
@@ -2516,6 +2563,7 @@ do_shmio(optype, arglast)
 int optype;
 int *arglast;
 {
+#ifdef IPCSHM
     register STR **st = stack->ary_array;
     register int sp = arglast[0];
     STR *mstr;
@@ -2558,6 +2606,9 @@ int *arglast;
 	    bzero(shm + mpos + n, msize - n);
     }
     return shmdt(shm);
+#else
+    fatal("shm I/O not implemented");
+#endif
 }
 
 #endif /* SYSVIPC */

@@ -1,7 +1,10 @@
 ''' Beginning of part 3
-''' $Header: perl_man.3,v 3.0.1.9 90/10/16 10:02:43 lwall Locked $
+''' $Header: perl_man.3,v 3.0.1.10 90/10/20 02:15:17 lwall Locked $
 '''
 ''' $Log:	perl.man.3,v $
+''' Revision 3.0.1.10  90/10/20  02:15:17  lwall
+''' patch37: patch37: fixed various typos in man page
+''' 
 ''' Revision 3.0.1.9  90/10/16  10:02:43  lwall
 ''' patch29: you can now read into the middle string
 ''' patch29: index and substr now have optional 3rd args
@@ -727,14 +730,14 @@ the undefined value if there is an error.
 Calls the System V IPC function semop to perform semaphore operations
 such as signaling and waiting.  OPSTRING must be a packed array of
 semop structures.  Each semop structure can be generated with
-'pack("sss", $semnum, $semop, $semflag)'.  The number of semaphore
+\&'pack("sss", $semnum, $semop, $semflag)'.  The number of semaphore
 operations is implied by the length of OPSTRING.  Returns true if
 successful, or false if there is an error.  As an example, the
 following code waits on semaphore $semnum of semaphore id $semid:
 .nf
 
 	$semop = pack("sss", $semnum, -1, 0);
-	die "Semaphore trouble: $!\n" unless semop($semid, $semop);
+	die "Semaphore trouble: $!\en" unless semop($semid, $semop);
 
 .fi
 To signal the semaphore, replace "-1" with "1".

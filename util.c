@@ -1,4 +1,4 @@
-/* $Header: util.c,v 3.0.1.8 90/10/16 11:26:57 lwall Locked $
+/* $Header: util.c,v 3.0.1.9 90/10/20 02:21:01 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	util.c,v $
+ * Revision 3.0.1.9  90/10/20  02:21:01  lwall
+ * patch37: tried to take strlen of integer on systems without wait4 or waitpid
+ * patch37: unreachable return eliminated
+ * 
  * Revision 3.0.1.8  90/10/16  11:26:57  lwall
  * patch29: added waitpid
  * patch29: various portability fixes
@@ -1341,10 +1345,10 @@ int flags;
 #else
     if (pid > 0) {
 	sprintf(spid, "%d", pid);
-	str = hfetch(pidstatus,spid,strlen(pid),FALSE);
+	str = hfetch(pidstatus,spid,strlen(spid),FALSE);
 	if (str != &str_undef) {
 	    *statusp = (int)str->str_u.str_useful;
-	    hdelete(pidstatus,spid,strlen(pid));
+	    hdelete(pidstatus,spid,strlen(spid));
 	    return pid;
 	}
     }
@@ -1357,7 +1361,7 @@ int flags;
 	    str = hiterval(entry);
 	    *statusp = (int)str->str_u.str_useful;
 	    sprintf(spid, "%d", pid);
-	    hdelete(pidstatus,spid,strlen(pid));
+	    hdelete(pidstatus,spid,strlen(spid));
 	    return pid;
 	}
     }
@@ -1373,9 +1377,9 @@ int flags;
 	if (result < 0)
 	    *statusp = -1;
     }
-#endif
-#endif
     return result;
+#endif
+#endif
 }
 #endif /* !MSDOS */
 
@@ -1389,7 +1393,7 @@ int status;
     char spid[16];
 
     sprintf(spid, "%d", pid);
-    str = hfetch(pidstatus,pid,strlen(pid),TRUE);
+    str = hfetch(pidstatus,spid,strlen(spid),TRUE);
     str->str_u.str_useful = status;
 #endif
     return;

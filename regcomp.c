@@ -7,9 +7,12 @@
  * blame Henry for some of the lack of readability.
  */
 
-/* $Header: regcomp.c,v 3.0.1.6 90/10/16 10:17:33 lwall Locked $
+/* $Header: regcomp.c,v 3.0.1.7 90/10/20 02:18:32 lwall Locked $
  *
  * $Log:	regcomp.c,v $
+ * Revision 3.0.1.7  90/10/20  02:18:32  lwall
+ * patch37: /foo.*bar$/ wrongly optimized to do tail matching on "foo"
+ * 
  * Revision 3.0.1.6  90/10/16  10:17:33  lwall
  * patch29: patterns with multiple short literal strings sometimes failed
  * 
@@ -250,7 +253,7 @@ int fold;
 		len = 0;
 		curback = 0;
 		back = 0;
-		while (scan != NULL) {
+		while (OP(scan) != END) {
 			if (OP(scan) == BRANCH) {
 			    if (OP(regnext(scan)) == BRANCH) {
 				curback = -30000;
@@ -288,13 +291,22 @@ int fold;
 				str_sset(longest,longish);
 			    str_nset(longish,"",0);
 			}
-			else if (index(simple,OP(scan)))
+			else if (index(simple,OP(scan))) {
 			    curback++;
+			    len = 0;
+			    if (longish->str_cur > longest->str_cur)
+				str_sset(longest,longish);
+			    str_nset(longish,"",0);
+			}
 			scan = regnext(scan);
 		}
-		if (longish->str_cur > longest->str_cur)
+
+		/* Prefer earlier on tie, unless we can tail match latter */
+
+		if (longish->str_cur + (OP(first) == EOL) > longest->str_cur)
 		    str_sset(longest,longish);
-		str_free(longish);
+		else
+		    str_nset(longish,"",0);
 		if (longest->str_cur) {
 			r->regmust = longest;
 			if (back < 0)
@@ -304,11 +316,12 @@ int fold;
 			  > !(sawstudy || fold || OP(first) == EOL) )
 				fbmcompile(r->regmust,fold);
 			r->regmust->str_u.str_useful = 100;
-			if (OP(first) == EOL) /* is match anchored to EOL? */
+			if (OP(first) == EOL && longish->str_cur)
 			    r->regmust->str_pok |= SP_TAIL;
 		}
 		else
 			str_free(longest);
+		str_free(longish);
 	}
 
 	r->do_folding = fold;

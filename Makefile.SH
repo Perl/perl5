@@ -25,9 +25,12 @@ esac
 
 echo "Extracting Makefile (with variable substitutions)"
 cat >Makefile <<!GROK!THIS!
-# $Header: Makefile.SH,v 3.0.1.9 90/10/15 14:41:34 lwall Locked $
+# $Header: Makefile.SH,v 3.0.1.10 90/10/20 01:59:21 lwall Locked $
 #
 # $Log:	Makefile.SH,v $
+# Revision 3.0.1.10  90/10/20  01:59:21  lwall
+# patch37: added cryptlib support to Makefile
+# 
 # Revision 3.0.1.9  90/10/15  14:41:34  lwall
 # patch29: various portability fixes
 # 
@@ -79,7 +82,7 @@ mallocsrc = $mallocsrc
 mallocobj = $mallocobj
 SLN = $sln
 
-libs = $libs
+libs = $libs $cryptlib
 
 public = perl taintperl $suidperl
 

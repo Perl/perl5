@@ -1,4 +1,4 @@
-/* $Header: cmd.c,v 3.0.1.9 90/10/15 15:32:39 lwall Locked $
+/* $Header: cmd.c,v 3.0.1.10 90/10/20 02:01:56 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	cmd.c,v $
+ * Revision 3.0.1.10  90/10/20  02:01:56  lwall
+ * patch37: cray has weird restrictions on setjmp locations
+ * 
  * Revision 3.0.1.9  90/10/15  15:32:39  lwall
  * patch29: non-existent array values no longer cause core dumps
  * patch29: scripts now run at almost full speed under the debugger
@@ -205,7 +208,8 @@ tail_recursion_entry:
 #ifdef JMPCLOBBER
 		cmdparm = cmd;
 #endif
-		if (match = setjmp(loop_stack[loop_ptr].loop_env)) {
+		match = setjmp(loop_stack[loop_ptr].loop_env);
+		if (match) {
 		    st = stack->ary_array;	/* possibly reallocated */
 #ifdef JMPCLOBBER
 		    cmd = cmdparm;
@@ -808,7 +812,8 @@ until_loop:
 #ifdef JMPCLOBBER
 	cmdparm = cmd;
 #endif
-	if (match = setjmp(loop_stack[loop_ptr].loop_env)) {
+	match = setjmp(loop_stack[loop_ptr].loop_env);
+	if (match) {
 	    st = stack->ary_array;	/* possibly reallocated */
 #ifdef JMPCLOBBER
 	    cmd = cmdparm;

@@ -6,7 +6,7 @@ case $CONFIG in
 	ln ../../../config.sh . || \
 	(echo "Can't find config.sh."; exit 1)
     fi
-    . config.sh
+    . ./config.sh
     ;;
 esac
 : This forces SH files to create target in same directory as SH file.
@@ -177,7 +177,7 @@ sub expr {
 		$new .= 'defined';
 	    }
 	    elsif (/^\(/) {
-		s/^\((\w),/("$1",/ if $id =~ /^_IO[WR]*$/;	# cheat
+		s/^\((\w),/("$1",/ if $id =~ /^_IO[WR]*$/i;	# cheat
 		$new .= " &$id";
 	    }
 	    elsif ($isatype{$id}) {

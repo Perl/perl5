@@ -8,7 +8,7 @@
 # and edit it to reflect your system.  Some packages may include samples
 # of config.h for certain machines, so you might look for one of those.)
 #
-# $Header: Configure,v 3.0.1.10 90/10/15 14:37:52 lwall Locked $
+# $Header: Configure,v 3.0.1.11 90/10/20 01:55:30 lwall Locked $
 #
 # Yes, you may rip this off to use in other distribution packages.
 # (Note: this Configure script was generated automatically.  Rather than
@@ -155,6 +155,9 @@ d_strerror=''
 d_symlink=''
 d_syscall=''
 d_sysvipc=''
+d_ipcmsg=''
+d_ipcsem=''
+d_ipcshm=''
 d_truncate=''
 d_varargs=''
 d_vfork=''
@@ -513,7 +516,7 @@ egrep
 test
 "
 for file in $loclist; do
-    xxx=`loc $file $file $pth`
+    xxx=`./loc $file $file $pth`
     eval $file=$xxx
     eval _$file=$xxx
     case "$xxx" in
@@ -529,7 +532,7 @@ echo " "
 echo "Don't worry if any of the following aren't found..."
 ans=offhand
 for file in $trylist; do
-    xxx=`loc $file $file $pth`
+    xxx=`./loc $file $file $pth`
     eval $file=$xxx
     eval _$file=$xxx
     case "$xxx" in
@@ -639,7 +642,7 @@ $eunicefix filexp
 : determine where public executables go
 case "$bin" in
 '')
-    dflt=`loc . /bin /usr/local/bin /usr/lbin /usr/local /usr/bin`
+    dflt=`./loc . /bin /usr/local/bin /usr/lbin /usr/local /usr/bin`
     ;;
 *)  dflt="$bin"
     ;;
@@ -676,7 +679,7 @@ $package has manual pages that need to be installed in source form.
 EOM
 case "$mansrc" in
 '')
-    dflt=`loc . /usr/man/man1 /usr/man/mann /usr/man/manl /usr/man/local/man1 /usr/man/u_man/man1 /usr/man/man1 /usr/man/man.L`
+    dflt=`./loc . /usr/man/man1 /usr/man/mann /usr/man/manl /usr/man/local/man1 /usr/man/u_man/man1 /usr/man/man1 /usr/man/man.L`
     ;;
 *)  dflt="$mansrc"
     ;;
@@ -810,7 +813,7 @@ EOP
     if pdp11 2>/dev/null; then
 	dflt='unsplit split'
     else
-	ans=`loc . X /lib/small /lib/large /usr/lib/small /usr/lib/large /lib/medium /usr/lib/medium /lib/huge`
+	ans=`./loc . X /lib/small /lib/large /usr/lib/small /usr/lib/large /lib/medium /usr/lib/medium /lib/huge`
 	case "$ans" in
 	X) dflt='none';;
 	*)  if $test -d /lib/small || $test -d /usr/lib/small; then
@@ -999,7 +1002,7 @@ else
     cc="$ans"
 fi
 case "$cc" in
-gcc*) cpp=`loc gcc-cpp $cpp $pth`;;
+gcc*) cpp=`./loc gcc-cpp $cpp $pth`;;
 esac
 
 : determine optimize, if desired, or use for debug flag also
@@ -1130,7 +1133,7 @@ for thislib in $libswanted; do
     *) thatlib="${thislib}_s";;
     *) thatlib=NONE;;
     esac
-    xxx=`loc lib$thislib.a X /usr/ccs/lib /usr/lib /usr/local/lib /lib`
+    xxx=`./loc lib$thislib.a X /usr/ccs/lib /usr/lib /usr/local/lib /lib`
     if test -f $xxx; then
 	echo "Found -l$thislib."
 	case "$dflt" in
@@ -1138,7 +1141,7 @@ for thislib in $libswanted; do
 	*) dflt="$dflt -l$thislib";;
 	esac
     else
-	xxx=`loc lib$thislib.a X $libpth`
+	xxx=`./loc lib$thislib.a X $libpth`
 	if test -f $xxx; then
 	    echo "Found $xxx."
 	    case "$dflt" in
@@ -1146,7 +1149,7 @@ for thislib in $libswanted; do
 	    *) dflt="$dflt $xxx";;
 	    esac
 	else
-	    xxx=`loc Slib$thislib.a X $xlibpth`
+	    xxx=`./loc Slib$thislib.a X $xlibpth`
 	    if test -f $xxx; then
 		echo "Found -l$thislib."
 		case "$dflt" in
@@ -1364,7 +1367,7 @@ case "$libpth" in
 '') libpth='/usr/ccs/lib /lib /usr/lib /usr/local/lib';;
 esac
 case "$libs" in
-*-lc_s*) libc=`loc libc_s.a $libc $libpth`
+*-lc_s*) libc=`./loc libc_s.a $libc $libpth`
 esac
 libnames='';
 case "$libs" in
@@ -1372,13 +1375,13 @@ case "$libs" in
 *)  for thislib in $libs; do
 	case "$thislib" in
 	-l*) thislib=`expr X$thislib : 'X-l\(.*\)'`
-	    try=`loc lib$thislib.a blurfl/dyick $libpth`
+	    try=`./loc lib$thislib.a blurfl/dyick $libpth`
 	    if test ! -f $try; then
-		try=`loc lib$thislib blurfl/dyick $libpth`
+		try=`./loc lib$thislib blurfl/dyick $libpth`
 		if test ! -f $try; then
-		    try=`loc $thislib blurfl/dyick $libpth`
+		    try=`./loc $thislib blurfl/dyick $libpth`
 		    if test ! -f $try; then
-			try=`loc Slib$thislib.a blurfl/dyick $xlibpth`
+			try=`./loc Slib$thislib.a blurfl/dyick $xlibpth`
 			if test ! -f $try; then
 			    try=''
 			fi
@@ -1405,23 +1408,23 @@ elif test -f /lib/libc.a; then
     echo "Your C library is in /lib/libc.a.  You're normal."
     libc=/lib/libc.a
 else
-    ans=`loc libc.a blurfl/dyick $libpth`
+    ans=`./loc libc.a blurfl/dyick $libpth`
     if test ! -f "$ans"; then
-	ans=`loc Slibc.a blurfl/dyick $xlibpth`
+	ans=`./loc Slibc.a blurfl/dyick $xlibpth`
     fi
     if test ! -f "$ans"; then
-	ans=`loc Mlibc.a blurfl/dyick $xlibpth`
+	ans=`./loc Mlibc.a blurfl/dyick $xlibpth`
     fi
     if test ! -f "$ans"; then
-	ans=`loc Llibc.a blurfl/dyick $xlibpth`
+	ans=`./loc Llibc.a blurfl/dyick $xlibpth`
     fi
     if test ! -f "$ans"; then
-	ans=`loc libc blurfl/dyick $libpth`
+	ans=`./loc libc blurfl/dyick $libpth`
     fi
     if test ! -f "$ans"; then
-	ans=`loc clib blurfl/dyick $libpth`
+	ans=`./loc clib blurfl/dyick $libpth`
     else
-	libnames="$libnames "`loc clib blurfl/dyick $libpth`
+	libnames="$libnames "`./loc clib blurfl/dyick $libpth`
     fi
     if test -f "$ans"; then
 	echo "Your C library is in $ans, of all places."
@@ -1599,19 +1602,19 @@ if $contains '^crypt$' libc.list >/dev/null 2>&1; then
     d_crypt="$define"
     cryptlib=''
 else
-    cryptlib=`loc Slibcrypt.a "" $xlibpth`
+    cryptlib=`./loc Slibcrypt.a "" $xlibpth`
     if $test -z "$cryptlib"; then
-	cryptlib=`loc Mlibcrypt.a "" $xlibpth`
+	cryptlib=`./loc Mlibcrypt.a "" $xlibpth`
     else
 	cryptlib=-lcrypt
     fi
     if $test -z "$cryptlib"; then
-	cryptlib=`loc Llibcrypt.a "" $xlibpth`
+	cryptlib=`./loc Llibcrypt.a "" $xlibpth`
     else
 	cryptlib=-lcrypt
     fi
     if $test -z "$cryptlib"; then
-	cryptlib=`loc libcrypt.a "" $libpth`
+	cryptlib=`./loc libcrypt.a "" $libpth`
     else
 	cryptlib=-lcrypt
     fi
@@ -1765,6 +1768,21 @@ else
     echo "sys/ioctl.h not found, assuming ioctl args are defined in sgtty.h."
 fi
 
+: see if there is System V IPC
+set msgget d_ipcmsg
+eval $inlibc
+
+set semget d_ipcsem
+eval $inlibc
+
+set shmget d_ipcshm
+eval $inlibc
+
+case "$d_ipcmsg$d_ipcsem$d_ipcshm" in
+*define*) d_sysvipc="$define";;
+*) d_sysvipc="$undef";;
+esac
+
 : see if killpg exists
 set killpg d_killpg
 eval $inlibc
@@ -1787,7 +1805,7 @@ eval $inlibc
 
 : see if ndbm is available
 echo " "
-xxx=`loc ndbm.h x /usr/include /usr/local/include $inclwanted`
+xxx=`./loc ndbm.h x /usr/include /usr/local/include $inclwanted`
 if test -f $xxx; then
     d_ndbm="$define"
     echo "ndbm.h found."
@@ -1798,7 +1816,7 @@ fi
 
 : see if we have the old dbm
 echo " "
-xxx=`loc dbm.h x /usr/include /usr/local/include $inclwanted`
+xxx=`./loc dbm.h x /usr/include /usr/local/include $inclwanted`
 if test -f $xxx; then
     d_odbm="$define"
     echo "dbm.h found."
@@ -2096,10 +2114,6 @@ case "$flags" in
 esac
 $rm -f try.c try
 
-: see if there is System V IPC
-set msgget d_sysvipc
-eval $inlibc
-
 : see if truncate exists
 set truncate d_truncate
 eval $inlibc
@@ -2280,7 +2294,7 @@ fi
 
 : see if this is a netinet/in.h system
 echo " "
-xxx=`loc netinet/in.h x /usr/include /usr/local/include $inclwanted`
+xxx=`./loc netinet/in.h x /usr/include /usr/local/include $inclwanted`
 if test -f $xxx; then
     i_niin="$define"
     echo "netinet/in.h found."
@@ -2311,7 +2325,7 @@ fi
 
 : see if this is a sys/ndir.h system
 echo " "
-xxx=`loc sys/ndir.h x /usr/include /usr/local/include $inclwanted`
+xxx=`./loc sys/ndir.h x /usr/include /usr/local/include $inclwanted`
 if test -f $xxx; then
     i_sysndir="$define"
     echo "sys/ndir.h found."
@@ -2514,6 +2528,7 @@ uidtype="$ans"
 : preserve RCS keywords in files with variable substitution, grrr
 Log='$Log'
 Header='$Header'
+
 
 : determine which malloc to compile in
 echo " "
@@ -2730,6 +2745,9 @@ d_strerror='$d_strerror'
 d_symlink='$d_symlink'
 d_syscall='$d_syscall'
 d_sysvipc='$d_sysvipc'
+d_ipcmsg='$d_ipcmsg'
+d_ipcsem='$d_ipcsem'
+d_ipcshm='$d_ipcshm'
 d_truncate='$d_truncate'
 d_varargs='$d_varargs'
 d_vfork='$d_vfork'

@@ -1,7 +1,10 @@
 ''' Beginning of part 4
-''' $Header: perl_man.4,v 3.0.1.11 90/10/16 10:04:28 lwall Locked $
+''' $Header: perl_man.4,v 3.0.1.12 90/10/20 02:15:43 lwall Locked $
 '''
 ''' $Log:	perl.man.4,v $
+''' Revision 3.0.1.12  90/10/20  02:15:43  lwall
+''' patch37: patch37: fixed various typos in man page
+''' 
 ''' Revision 3.0.1.11  90/10/16  10:04:28  lwall
 ''' patch29: added @###.## fields to format
 ''' 
@@ -808,7 +811,7 @@ Example:
 
 or, used numerically,
 
-	warn "No checksumming!\n" if $] < 3.019;
+	warn "No checksumming!\en" if $] < 3.019;
 
 .fi
 (Mnemonic: Is this version of perl in the right bracket?)
@@ -905,7 +908,7 @@ See $0 for the command name.
 The array INC contains the list of places to look for
 .I perl
 scripts to be
-evaluated by the \*(L"do EXPR\*(R" command or the \*(L"require\*(r" command.
+evaluated by the \*(L"do EXPR\*(R" command or the \*(L"require\*(R" command.
 It initially consists of the arguments to any
 .B \-I
 command line switches, followed

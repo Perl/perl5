@@ -13,8 +13,8 @@ $send = ($mode eq "s");
 
 $SIZE = 32;
 $id = shmget(0x1234, $SIZE, ($send ? 0 : &IPC_CREAT) | 0644);
-die "Can't get message queue: $!\n" unless defined($id);
-print "message queue id: $id\n";
+die "Can't get shared memory: $!\n" unless defined($id);
+print "shared memory id: $id\n";
 
 if ($send) {
 	while (<STDIN>) {
