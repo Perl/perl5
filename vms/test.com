@@ -115,13 +115,7 @@ use Config;
 use File::Spec;
 
 @compexcl=('cpp.t');
-@libexcl=('io_pipe.t', 'io_poll.t', 'io_sel.t',
-          'io_sock.t', 'io_unix.t');
-
-# io_xs.t tests the new_tmpfile routine, which doesn't work with the
-# VAXCRTL, since the file can't be stat()d, an Perl's do_open()
-# insists on stat()ing a file descriptor before it'll use it.
-push(@libexcl,'io_xs.t') if $Config{'vms_cc_type'} ne 'decc';
+@libexcl=('io_sel.t');
 
 @opexcl=('die_exit.t','exec.t','groups.t','magic.t','stat.t');
 @exclist=(@compexcl,@ioexcl,@libexcl,@opexcl);

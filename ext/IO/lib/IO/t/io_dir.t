@@ -7,7 +7,7 @@ BEGIN {
     }
     require Config; import Config;
     if ($] < 5.00326 || not $Config{'d_readdir'}) {
-	print "1..0\n";
+	print "1..0 # Skip: readdir() not available\n";
 	exit 0;
     }
 }

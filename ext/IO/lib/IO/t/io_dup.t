@@ -10,9 +10,9 @@ BEGIN {
 use Config;
 
 BEGIN {
-    if(-d "lib" && -f "TEST") {
-        if ($Config{'extensions'} !~ /\bIO\b/ && $^O ne 'VMS') {
-	    print "1..0\n";
+    if($ENV{PERL_CORE}) {
+        if ($Config{'extensions'} !~ /\bIO\b/) {
+	    print "1..0 # Skip: IO extension not compiled\n";
 	    exit 0;
         }
     }
