@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Aug 25 21:05:22 EET DST 2000 [metaconfig 3.0 PL70]
+# Generated on Fri Aug 25 21:43:24 EET DST 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -11256,10 +11256,19 @@ $define)
 	*) dflt='n';;
 	esac
 	echo "$package can use the sfio library, but it is experimental."
+	case "$useperlio" in
+	"$undef")
+	    echo "For sfio also the PerlIO abstraction layer is needed."
+	    echo "Earlier you said you wouldn't want that."
+	    ;;
+	esac
 	rp="You seem to have sfio available, do you want to try using it?"
 	. ./myread
 	case "$ans" in
-	y|Y) ;;
+	y|Y)	echo "Ok, turning on both sfio and PerlIO, then."
+		useperlio="$define"
+		val="$define"
+		;;
 	*)	echo "Ok, avoiding sfio this time.  I'll use stdio instead."
 		val="$undef"
 		: Remove sfio from list of libraries to use
@@ -11272,8 +11281,9 @@ $define)
 	;;
 *)	case "$usesfio" in
 	true|$define|[yY]*)
-		echo "Sorry, cannot find sfio on this machine" >&4
-		echo "Ignoring your setting of usesfio=$usesfio" >&4
+		echo "Sorry, cannot find sfio on this machine." >&4
+		echo "Ignoring your setting of usesfio=$usesfio." >&4
+		val="$undef"
 		;;
 	esac
 	;;
