@@ -334,20 +334,6 @@ END
 	fi
 fi
 
-# Check to see if the selected compiler and linker
-# support the -z ignore, -z lazyload and -z combreloc flags.
-echo "int main() { return(0); } " > try.c
-	zflgs=''
-for zf in ignore lazyload combreloc; do
-	if ${cc:-cc} -o try try.c -z $zf > /dev/null 2>&1; then
-		zflgs="$zflgs -z $zf"
-	fi
-done
-if test -n "$zflgs"; then
-	ccdlflags="$ccdlflags $zflgs"
-	lddlflags="$lddlflags -G $zflgs"
-fi
-
 # as --version or ld --version might dump core.
 rm -f try try.c core
 EOCBU
