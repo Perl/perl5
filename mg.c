@@ -520,7 +520,6 @@ magic_get(SV *sv, MAGIC *mg)
 	break;
     case '?':
 	{
-	    dTHR;
 	    sv_setiv(sv, (IV)STATUS_CURRENT);
 #ifdef COMPLEX_STATUS
 	    LvTARGOFF(sv) = PL_statusvalue;
