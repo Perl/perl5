@@ -1567,7 +1567,7 @@ EXT U32 PL_opargs[] = {
 	0x0022281c,	/* vec */
 	0x0122291c,	/* index */
 	0x0122291c,	/* rindex */
-	0x0004290f,	/* sprintf */
+	0x0004280f,	/* sprintf */
 	0x00042805,	/* formline */
 	0x0001379e,	/* ord */
 	0x0001378e,	/* chr */
