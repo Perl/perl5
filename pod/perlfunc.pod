@@ -5456,9 +5456,8 @@ otherwise.
 Returns an uppercased version of EXPR.  This is the internal function
 implementing the C<\U> escape in double-quoted strings.  Respects
 current LC_CTYPE locale if C<use locale> in force.  See L<perllocale>
-and L<perlunicode>.  Under Unicode it uses the standard Unicode
-uppercase mappings.  (It does not attempt to do titlecase mapping on
-initial letters.  See C<ucfirst> for that.)
+and L<perlunicode>.  It does not attempt to do titlecase mapping on
+initial letters.  See C<ucfirst> for that.
 
 If EXPR is omitted, uses C<$_>.
 

@@ -476,8 +476,13 @@ wide bit complement.
 
 lc(), uc(), lcfirst(), and ucfirst() work only for some of the
 simplest cases, where the mapping goes from a single Unicode character
-to another single Unicode character.  More complex cases, where for
-example one character maps into several, are not yet implemented.
+to another single Unicode character, and where the mapping does not
+depend on surrounding characters, or on locales.  More complex cases,
+where for example one character maps into several, are not yet
+implemented.  See the Unicode Technical Report #21, Case Mappings,
+for more details.  The Unicode::UCD module (part of Perl since 5.8.0)
+casespec() and casefold() interfaces supply information about the more
+complex cases.
 
 =item *
 
