@@ -1003,7 +1003,8 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
     if (flags & SVf_FAKE)	sv_catpv(d, "FAKE,");
     if (flags & SVf_READONLY)	sv_catpv(d, "READONLY,");
 
-    if (flags & SVf_AMAGIC)	sv_catpv(d, "OVERLOAD,");
+    if (flags & SVf_AMAGIC && type != SVt_PVHV)
+				sv_catpv(d, "OVERLOAD,");
     if (flags & SVp_IOK)	sv_catpv(d, "pIOK,");
     if (flags & SVp_NOK)	sv_catpv(d, "pNOK,");
     if (flags & SVp_POK)	sv_catpv(d, "pPOK,");
@@ -1029,6 +1030,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	if (HvSHAREKEYS(sv))	sv_catpv(d, "SHAREKEYS,");
 	if (HvLAZYDEL(sv))	sv_catpv(d, "LAZYDEL,");
 	if (HvHASKFLAGS(sv))	sv_catpv(d, "HASKFLAGS,");
+	if (HvREHASH(sv))	sv_catpv(d, "REHASH,");
 	break;
     case SVt_PVGV:
 	if (GvINTRO(sv))	sv_catpv(d, "INTRO,");
@@ -1308,6 +1310,8 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 		Perl_dump_indent(aTHX_ level+1, file, "Elt %s ", pv_display(d, keypv, len, 0, pvlim));
 		if (SvUTF8(keysv))
 		    PerlIO_printf(file, "[UTF8 \"%s\"] ", sv_uni_display(d, keysv, 8 * sv_len_utf8(keysv), UNI_DISPLAY_QQ));
+		if (HeKREHASH(he))
+		    PerlIO_printf(file, "[REHASH] ");
 		PerlIO_printf(file, "HASH = 0x%"UVxf"\n", (UV)hash);
 		do_sv_dump(level+1, file, elt, nest+1, maxnest, dumpops, pvlim);
 	    }
