@@ -1611,6 +1611,7 @@ PerlProcSignal(struct IPerlProc* piPerl, int sig, Sighandler_t subcode)
     return 0;
 }
 
+#ifdef USE_ITHREADS
 static DWORD WINAPI
 win32_start_child(LPVOID arg)
 {
@@ -1697,11 +1698,13 @@ restart:
     return (DWORD)status;
 #endif
 }
+#endif /* USE_ITHREADS */
 
 int
 PerlProcFork(struct IPerlProc* piPerl)
 {
     dTHXo;
+#ifdef USE_ITHREADS
     DWORD id;
     HANDLE handle;
     CPerlHost *h = new CPerlHost();
@@ -1716,10 +1719,10 @@ PerlProcFork(struct IPerlProc* piPerl)
 						 h->m_pHostperlSock,
 						 h->m_pHostperlProc
 						 );
-#ifdef PERL_SYNC_FORK
+#  ifdef PERL_SYNC_FORK
     id = win32_start_child((LPVOID)new_perl);
     PERL_SET_INTERP(aTHXo);
-#else
+#  else
     handle = CreateThread(NULL, 0, win32_start_child,
 			  (LPVOID)new_perl, 0, &id);
     PERL_SET_INTERP(aTHXo);
@@ -1728,8 +1731,12 @@ PerlProcFork(struct IPerlProc* piPerl)
     w32_pseudo_child_handles[w32_num_pseudo_children] = handle;
     w32_pseudo_child_pids[w32_num_pseudo_children] = id;
     ++w32_num_pseudo_children;
-#endif
+#  endif
     return -(int)id;
+#else
+    Perl_croak(aTHX_ "fork() not implemented!\n");
+    return -1;
+#endif /* USE_ITHREADS */
 }
 
 int
