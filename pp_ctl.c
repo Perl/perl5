@@ -47,7 +47,7 @@ static I32 sv_cmp_locale_static(pTHXo_ SV *a, SV *b);
 
 PP(pp_wantarray)
 {
-    djSP;
+    dSP;
     I32 cxix;
     EXTEND(SP, 1);
 
@@ -80,7 +80,7 @@ PP(pp_regcreset)
 
 PP(pp_regcomp)
 {
-    djSP;
+    dSP;
     register PMOP *pm = (PMOP*)cLOGOP->op_other;
     register char *t;
     SV *tmpstr;
@@ -149,7 +149,7 @@ PP(pp_regcomp)
 
 PP(pp_substcont)
 {
-    djSP;
+    dSP;
     register PMOP *pm = (PMOP*) cLOGOP->op_other;
     register PERL_CONTEXT *cx = &cxstack[cxstack_ix];
     register SV *dstr = cx->sb_dstr;
@@ -298,7 +298,7 @@ Perl_rxres_free(pTHX_ void **rsp)
 
 PP(pp_formline)
 {
-    djSP; dMARK; dORIGMARK;
+    dSP; dMARK; dORIGMARK;
     register SV *tmpForm = *++MARK;
     register U16 *fpc;
     register char *t;
@@ -706,7 +706,7 @@ PP(pp_formline)
 
 PP(pp_grepstart)
 {
-    djSP;
+    dSP;
     SV *src;
 
     if (PL_stack_base + *PL_markstack_ptr == SP) {
@@ -743,7 +743,7 @@ PP(pp_mapstart)
 
 PP(pp_mapwhile)
 {
-    djSP;
+    dSP;
     I32 items = (SP - PL_stack_base) - *PL_markstack_ptr; /* how many new items */
     I32 count;
     I32 shift;
@@ -831,7 +831,7 @@ PP(pp_mapwhile)
 
 PP(pp_sort)
 {
-    djSP; dMARK; dORIGMARK;
+    dSP; dMARK; dORIGMARK;
     register SV **up;
     SV **myorigmark = ORIGMARK;
     register I32 max;
@@ -1016,7 +1016,7 @@ PP(pp_range)
 
 PP(pp_flip)
 {
-    djSP;
+    dSP;
 
     if (GIMME == G_ARRAY) {
 	RETURNOP(((LOGOP*)cUNOP->op_first)->op_other);
@@ -1055,7 +1055,7 @@ PP(pp_flip)
 
 PP(pp_flop)
 {
-    djSP;
+    dSP;
 
     if (GIMME == G_ARRAY) {
 	dPOPPOPssrl;
@@ -1450,7 +1450,7 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 
 PP(pp_xor)
 {
-    djSP; dPOPTOPssrl;
+    dSP; dPOPTOPssrl;
     if (SvTRUE(left) != SvTRUE(right))
 	RETSETYES;
     else
@@ -1459,7 +1459,7 @@ PP(pp_xor)
 
 PP(pp_andassign)
 {
-    djSP;
+    dSP;
     if (!SvTRUE(TOPs))
 	RETURN;
     else
@@ -1468,7 +1468,7 @@ PP(pp_andassign)
 
 PP(pp_orassign)
 {
-    djSP;
+    dSP;
     if (SvTRUE(TOPs))
 	RETURN;
     else
@@ -1477,7 +1477,7 @@ PP(pp_orassign)
 	
 PP(pp_caller)
 {
-    djSP;
+    dSP;
     register I32 cxix = dopoptosub(cxstack_ix);
     register PERL_CONTEXT *cx;
     register PERL_CONTEXT *ccstack = cxstack;
@@ -1620,7 +1620,7 @@ PP(pp_caller)
 
 PP(pp_reset)
 {
-    djSP;
+    dSP;
     char *tmps;
     STRLEN n_a;
 
@@ -1647,7 +1647,7 @@ PP(pp_dbstate)
 
     if (PL_op->op_private || SvIV(PL_DBsingle) || SvIV(PL_DBsignal) || SvIV(PL_DBtrace))
     {
-	djSP;
+	dSP;
 	register CV *cv;
 	register PERL_CONTEXT *cx;
 	I32 gimme = G_ARRAY;
@@ -1691,7 +1691,7 @@ PP(pp_scope)
 
 PP(pp_enteriter)
 {
-    djSP; dMARK;
+    dSP; dMARK;
     register PERL_CONTEXT *cx;
     I32 gimme = GIMME_V;
     SV **svp;
@@ -1770,7 +1770,7 @@ PP(pp_enteriter)
 
 PP(pp_enterloop)
 {
-    djSP;
+    dSP;
     register PERL_CONTEXT *cx;
     I32 gimme = GIMME_V;
 
@@ -1786,7 +1786,7 @@ PP(pp_enterloop)
 
 PP(pp_leaveloop)
 {
-    djSP;
+    dSP;
     register PERL_CONTEXT *cx;
     I32 gimme;
     SV **newsp;
@@ -1826,7 +1826,7 @@ PP(pp_leaveloop)
 
 PP(pp_return)
 {
-    djSP; dMARK;
+    dSP; dMARK;
     I32 cxix;
     register PERL_CONTEXT *cx;
     bool popsub2 = FALSE;
@@ -1935,7 +1935,7 @@ PP(pp_return)
 
 PP(pp_last)
 {
-    djSP;
+    dSP;
     I32 cxix;
     register PERL_CONTEXT *cx;
     I32 pop2 = 0;
@@ -2122,7 +2122,7 @@ PP(pp_dump)
 
 PP(pp_goto)
 {
-    djSP;
+    dSP;
     OP *retop = 0;
     I32 ix;
     register PERL_CONTEXT *cx;
@@ -2499,7 +2499,7 @@ PP(pp_goto)
 
 PP(pp_exit)
 {
-    djSP;
+    dSP;
     I32 anum;
 
     if (MAXARG < 1)
@@ -2520,7 +2520,7 @@ PP(pp_exit)
 #ifdef NOTYET
 PP(pp_nswitch)
 {
-    djSP;
+    dSP;
     NV value = SvNVx(GvSV(cCOP->cop_gv));
     register I32 match = I_32(value);
 
@@ -2539,7 +2539,7 @@ PP(pp_nswitch)
 
 PP(pp_cswitch)
 {
-    djSP;
+    dSP;
     register I32 match;
 
     if (PL_multiline)
@@ -2938,7 +2938,7 @@ S_doopen_pmc(pTHX_ const char *name, const char *mode)
 
 PP(pp_require)
 {
-    djSP;
+    dSP;
     register PERL_CONTEXT *cx;
     SV *sv;
     char *name;
@@ -3080,7 +3080,10 @@ trylocal: {
 		    PUSHs(dirsv);
 		    PUSHs(sv);
 		    PUTBACK;
-		    count = call_sv(loader, G_ARRAY);
+		    if (sv_isobject(loader))
+			count = call_method("INC", G_ARRAY);
+		    else
+			count = call_sv(loader, G_ARRAY);
 		    SPAGAIN;
 
 		    if (count > 0) {
@@ -3289,7 +3292,7 @@ PP(pp_dofile)
 
 PP(pp_entereval)
 {
-    djSP;
+    dSP;
     register PERL_CONTEXT *cx;
     dPOPss;
     I32 gimme = GIMME_V, was = PL_sub_generation;
@@ -3366,7 +3369,7 @@ PP(pp_entereval)
 
 PP(pp_leaveeval)
 {
-    djSP;
+    dSP;
     register SV **mark;
     SV **newsp;
     PMOP *newpm;
@@ -3434,7 +3437,7 @@ PP(pp_leaveeval)
 
 PP(pp_entertry)
 {
-    djSP;
+    dSP;
     register PERL_CONTEXT *cx;
     I32 gimme = GIMME_V;
 
@@ -3454,7 +3457,7 @@ PP(pp_entertry)
 
 PP(pp_leavetry)
 {
-    djSP;
+    dSP;
     register SV **mark;
     SV **newsp;
     PMOP *newpm;
@@ -4595,7 +4598,7 @@ run_user_filter(pTHXo_ int idx, SV *buf_sv, int maxlen)
     }
 
     if (filter_sub && len >= 0) {
-	djSP;
+	dSP;
 	int count;
 
 	ENTER;

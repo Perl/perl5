@@ -1169,7 +1169,7 @@ Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
 I32
 Perl_my_stat(pTHX)
 {
-    djSP;
+    dSP;
     IO *io;
     GV* gv;
 
@@ -1222,7 +1222,7 @@ Perl_my_stat(pTHX)
 I32
 Perl_my_lstat(pTHX)
 {
-    djSP;
+    dSP;
     SV *sv;
     STRLEN n_a;
     if (PL_op->op_flags & OPf_REF) {

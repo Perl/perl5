@@ -1096,3 +1096,6 @@ Returns a pointer to the character buffer.
 #define SvGROW(sv,len) (SvLEN(sv) < (len) ? sv_grow(sv,len) : SvPVX(sv))
 #define Sv_Grow sv_grow
 
+#define CLONEf_COPY_STACKS 1
+#define CLONEf_KEEP_PTR_TABLE 2
+
