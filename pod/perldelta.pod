@@ -1435,6 +1435,9 @@ change#4052
 A C<Maxdepth> setting can be specified to avoid venturing
 too deeply into deep data structures.  See L<Data::Dumper>.
 
+The XSUB implementation of Dump() is now automatically called if the
+C<Useqq> setting is not in use.
+
 Dumping C<qr//> objects works correctly.
 
 =item DB
