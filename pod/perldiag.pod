@@ -1873,9 +1873,9 @@ ended earlier on the current line.
 =item Misplaced _ in number
 
 (W syntax) An underscore (underbar) in a numeric constant either
-immediately followed earlier underscore, or an underscore began or
+immediately followed an earlier underscore, or an underscore began or
 ended a numeric constant, or its fractional part (in the case of
-decimal constants) began or ended a numeric constant.
+decimal constants) began or ended with an underscore.
 
 =item Missing %sbrace%s on \N{}
 
