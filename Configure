@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sat Jul 14 05:31:33 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Mon Jul 23 21:06:18 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -2313,8 +2313,8 @@ $define|true|[yY]*)
 				fi
 			done
 			# Sanity check 2.
-			if test ! -f t/base/commonsense.t; then
-				echo "Failed to create the symlinks.  Aborting." >&4
+			if test ! -f t/base/lex.t; then
+				echo "Failed to create the symlinks (t/base/lex.t missing).  Aborting." >&4
 				exit 1
 			fi
 			cd UU
