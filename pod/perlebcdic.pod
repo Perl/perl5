@@ -17,15 +17,19 @@ Portions that are still incomplete are marked with XXX.
 The American Standard Code for Information Interchange is a set of
 integers running from 0 to 127 (decimal) that imply character 
 interpretation by the display and other system(s) of computers.  
-The range 0..127 is covered by setting the bits in a 7-bit binary 
+The range 0..127 can be covered by setting the bits in a 7-bit binary 
 digit, hence the set is sometimes referred to as a "7-bit ASCII".  
-ASCII was described by the American National Standards Instute 
+ASCII was described by the American National Standards Institute 
 document ANSI X3.4-1986.  It was also described by ISO 646:1991 
 (with localization for currency symbols).  The full ASCII set is 
 given in the table below as the first 128 elements.  Languages that 
 can be written adequately with the characters in ASCII include 
 English, Hawaiian, Indonesian, Swahili and some Native American 
 languages.
+
+There are many character sets that extend the range of integers
+from 0..2**7-1 up to 2**8-1, or 8 bit bytes (octets if you prefer).
+One common one is the ISO 8859-1 character set.
 
 =head2 ISO 8859
 
@@ -46,33 +50,39 @@ German can use ISO 8859-1 but must do so without German-style
 quotation marks.  This set is based on Western European extensions 
 to ASCII and is commonly encountered in world wide web work.
 In IBM character code set identification terminology ISO 8859-1 is
-known as CCSID 819 (or sometimes 0819 or even 00819).
+also known as CCSID 819 (or sometimes 0819 or even 00819).
 
 =head2 EBCDIC
 
-Extended Binary Coded Decimal Interchange Code.  The EBCDIC acronym 
-refers to a large collection of slightly different single and
-multi byte coded character sets that are different from ASCII or 
-ISO 8859-1 and typically run on host computers.  The
-EBCDIC encodings derive from Hollerith punched card encodings.
+The Extended Binary Coded Decimal Interchange Code  refers to a 
+large collection of slightly different single and multi byte 
+coded character sets that are different from ASCII or ISO 8859-1 
+and typically run on host computers.  The EBCDIC encodings derive 
+from 8 bit byte extensions of Hollerith punched card encodings.
 The layout on the cards was such that high bits were set for the
 upper and lower case alphabet characters [a-z] and [A-Z], but there
 were gaps within each latin alphabet range.
 
 =head2 13 variant characters
 
-XXX.
+Some IBM EBCDIC character sets may be known by character code set 
+identification numbers (CCSID numbers) or code page numbers.  Leading
+zero digits in CCSID numbers within this document are insignificant.
+E.g. CCSID 0037 may be referred to as 37 in places.
 
-EBCDIC character sets may be known by character code set identification
-numbers (CCSID numbers) or code page numbers.
+Among IBM EBCDIC character code sets there are 13 characters that
+are often mapped to different integer values.  Those characters
+are known as the 13 "variant" characters and are:
+
+    \ [ ] { } ^ ~ ! # | $ @ ` 
 
 =head2 0037
 
 Character code set ID 0037 is a mapping of the ASCII plus Latin-1 
 characters (i.e. ISO 8859-1) to an EBCDIC set.  0037 is used 
-on the OS/400 operating system that runs on AS/400 computers.
-CCSID 37 differs from ISO 8859-1 in 237 places, in other words
-they agree on only 19 code point values.
+in North American English locales on the OS/400 operating system 
+that runs on AS/400 computers.  CCSID 37 differs from ISO 8859-1 
+in 237 places, in other words they agree on only 19 code point values.
 
 =head2 1047
 
@@ -103,7 +113,7 @@ between the 1047 and POSIX-BC sets are flagged with ###.
 All ord() numbers listed are decimal.  If you would rather see this 
 table listing octal values then run the table (that is, the pod 
 version of this document since this recipe may not work with 
-a pod2XXX translation to another format) through:
+a pod2_other_format translation) through:
 
 =over 4
 
@@ -396,7 +406,7 @@ ASCII + Latin-1 order then run the table through:
 
 =back
 
-    perl -ne 'if(/.{33}\d{1,3}\s{6,8}\d{1,3}\s{6,8}\d{1,3}\s{6,8}\s{1,3}/)'\
+    perl -ne 'if(/.{33}\d{1,3}\s{6,8}\d{1,3}\s{6,8}\d{1,3}\s{6,8}\d{1,3}/)'\
      -e '{push(@l,$_)}' \
      -e 'END{print map{$_->[0]}' \
      -e '          sort{$a->[1] <=> $b->[1]}' \ 
@@ -411,7 +421,7 @@ If you would rather see it in CCSID 1047 order then change the digit
 
 =back
 
-    perl -ne 'if(/.{33}\d{1,3}\s{6,8}\d{1,3}\s{6,8}\d{1,3}\s{6,8}\s{1,3}/)'\
+    perl -ne 'if(/.{33}\d{1,3}\s{6,8}\d{1,3}\s{6,8}\d{1,3}\s{6,8}\d{1,3}/)'\
      -e '{push(@l,$_)}' \
      -e 'END{print map{$_->[0]}' \
      -e '          sort{$a->[1] <=> $b->[1]}' \ 
@@ -426,7 +436,7 @@ If you would rather see it in POSIX-BC order then change the digit
 
 =back
 
-    perl -ne 'if(/.{33}\d{1,3}\s{6,8}\d{1,3}\s{6,8}\d{1,3}\s{6,8}\s{1,3}/)'\
+    perl -ne 'if(/.{33}\d{1,3}\s{6,8}\d{1,3}\s{6,8}\d{1,3}\s{6,8}\d{1,3}/)'\
      -e '{push(@l,$_)}' \
      -e 'END{print map{$_->[0]}' \
      -e '          sort{$a->[1] <=> $b->[1]}' \ 
@@ -442,7 +452,7 @@ character values.  For example:
     $is_ascii  = "A" eq chr(65);
     $is_ebcdic = "A" eq chr(193);
 
-"\t" is a <HORIZONTAL TABULATION>.  So that:
+Also, "\t" is a C<HORIZONTAL TABULATION> character so that:
 
     $is_ascii  = ord("\t") == 9;
     $is_ebcdic = ord("\t") == 5;
@@ -476,7 +486,7 @@ To determine whether or not perl was built under an EBCDIC
 code page you can use the Config module like so:
 
     use Config;
-    $is_ebcdic = $Config{ebcdic} eq 'define';
+    $is_ebcdic = $Config{'ebcdic'} eq 'define';
 
 =head1 CONVERSIONS
 
@@ -517,22 +527,20 @@ arguments like so:
     my $ascii_string = $ebcdic_string;
     $ascii_string = tr/$code_page_chrs/\000-\037/;
 
-XPG4 interoperability often implies the presence of an I<iconv> utility
+XPG4 operability often implies the presence of an I<iconv> utility
 available from the shell or from the C library.  Consult your system's
 documentation for information on iconv.
 
 On OS/390 see the iconv(1) man page.  One way to invoke the iconv 
 shell utility from within perl would be to:
 
+    # OS/390 example
     $ascii_data = `echo '$ebcdic_data'| iconv -f IBM-1047 -t ISO8859-1`
 
 or the inverse map:
 
+    # OS/390 example
     $ebcdic_data = `echo '$ascii_data'| iconv -f ISO8859-1 -t IBM-1047`
-
-XXX iconv under qsh on OS/400?
-XXX iconv on VM?
-XXX iconv on BS2k? 
 
 For other perl based conversion options see the Convert::* modules on CPAN.
 
@@ -558,17 +566,20 @@ an example adapted from the one in L<perlop>:
 
 An interesting property of the 32 C0 control characters
 in the ASCII table is that they can "literally" be constructed
-as control characters in perl, e.g. (chr(0) eq "\c@"), 
-(chr(1) eq "\cA"), and so on.  Perl on EBCDIC machines has been 
-ported to take "\c@" -> chr(0) and "\cA" -> chr(1) as well, but the
+as control characters in perl, e.g. C<(chr(0) eq "\c@")> 
+C<(chr(1) eq "\cA")>, and so on.  Perl on EBCDIC machines has been 
+ported to take "\c@" to chr(0) and "\cA" to chr(1) as well, but the
 thirty three characters that result depend on which code page you are
 using.  The table below uses the character names from the previous table 
-but with substitions such as s/START OF/S.O./; s/END OF /E.O./; 
+but with substitutions such as s/START OF/S.O./; s/END OF /E.O./; 
 s/TRANSMISSION/TRANS./; s/TABULATION/TAB./; s/VERTICAL/VERT./; 
 s/HORIZONTAL/HORIZ./; s/DEVICE CONTROL/D.C./; s/SEPARATOR/SEP./; 
 s/NEGATIVE ACKNOWLEDGE/NEG. ACK./;.  The POSIX-BC and 1047 sets are
 identical throughout this range and differ from the 0037 set at only 
-one spot (21 decimal).   Note that "\c\\" maps to two characters
+one spot (21 decimal).  Note that the C<LINE FEED> character
+may be generated by "\cJ" on ASCII machines but by "\cU" on 1047 or POSIX-BC 
+machines and cannot be generated as a C<"\c.letter."> control character on 
+0037 machines.  Note also that "\c\\" maps to two characters
 not one.
 
     chr   ord  8859-1               0037                1047 && POSIX-BC     
@@ -690,14 +701,16 @@ See the discussion of pack() above.
 
 As of perl 5.005_03 the letter range regular expression such as 
 [A-Z] and [a-z] have been especially coded to not pick up gap 
-characters.  For example characters such as <o WITH CIRCUMFLEX> 
-that lie between I and J would not be matched by C</[H-K]/>.  
-If you do want to match such characters in a single octet 
+characters.  For example, characters such as 'Ù' C<o WITH CIRCUMFLEX> 
+(or E<ocirc>) that lie between I and J would not be matched by the 
+regular expression range C</[H-K]/>.  
+
+If you do want to match the alphabet gap characters in a single octet 
 regular expression try matching the hex or octal code such 
 as C</\313/> on EBCDIC or C</\364/> on ASCII machines to 
-have your regular expression match <o WITH CIRCUMFLEX>.
+have your regular expression match C<o WITH CIRCUMFLEX>.
 
-Another place to be wary of is the inappropriate use of hex or
+Another construct to be wary of is the inappropriate use of hex or
 octal constants in regular expressions.  Consider the following
 set of subs:
 
@@ -726,9 +739,9 @@ set of subs:
         $char =~ /[\240-\377]/;
     }
 
-The above would be adequate if the concern was only with numeric codepoints.
-However, we may actually be concerned with characters rather than codepoints 
-and on an EBCDIC machine would like for constructs such as 
+The above would be adequate if the concern was only with numeric code points.
+However, the concern may be with characters rather than code points 
+and on an EBCDIC machine it may be desirable for constructs such as 
 C<if (is_print_ascii("A")) {print "A is a printable character\n";}> to print
 out the expected message.  One way to represent the above collection
 of character classification subs that is capable of working across the
@@ -809,7 +822,6 @@ to use the characters in the range explicitly:
 
 Although that form may run into trouble in network transit (due to the 
 presence of 8 bit characters) or on non ISO-Latin character sets.
- 
 
 =head1 SOCKETS
 
@@ -827,41 +839,53 @@ letters compared to the digits.  If sorted on an ASCII based machine the
 two letter abbreviation for a physician comes before the two letter
 for drive, that is:
 
-    @sorted = sort(qw(Dr. dr.));  # @sorted holds qw(Dr. dr.) on ASCII,
-                                  # qw(dr. Dr.) on EBCDIC
+    @sorted = sort(qw(Dr. dr.));  # @sorted holds ('Dr.','dr.') on ASCII,
+                                  # but ('dr.','Dr.') on EBCDIC
 
 The property of lower case before uppercase letters in EBCDIC is
 even carried to the Latin 1 EBCDIC pages such as 0037 and 1047.
-An example would be that <E WITH DIAERESIS> (203) comes before
-<e WITH DIAERESIS> (235) on and ASCII machine, but the latter (83) 
-comes before the former (115) on an EBCDIC machine.  (Astute readers will 
-note that the upper case version of <SMALL LETTER SHARP S> is 
-simply "SS" and that the upper case version of <y WITH DIAERESIS> 
-is not in the 0..255 range but it is at U+x0178 in Unicode).
+An example would be that 'À' (or E<Euml>) C<E WITH DIAERESIS> (203) comes 
+before 'Î' (or E<euml>) C<e WITH DIAERESIS> (235) on and ASCII machine, but 
+the latter (83) comes before the former (115) on an EBCDIC machine.  
+(Astute readers will note that the upper case version of 'ﬂ' (or E<szlig>) 
+C<SMALL LETTER SHARP S> is simply "SS" and that the upper case version of 
+'^?' (or E<yuml>) C<y WITH DIAERESIS> is not in the 0..255 range but it is 
+at U+x0178 in Unicode, or C<"\x{178}"> in a Unicode enabled Perl).
 
 The sort order will cause differences between results obtained on
 ASCII machines versus EBCDIC machines.  What follows are some suggestions
 on how to deal with these differences.
 
-=head2 Ignore ASCII vs EBCDIC sort differences.
+=head2 Ignore ASCII vs. EBCDIC sort differences.
 
 This is the least computationally expensive strategy.  It may require
 some user education.
 
-=head2 MONOCASE then sort data.
+=head2 MONO CASE then sort data.
 
-In order to minimize the expense of monocasing mixed test try to
+In order to minimize the expense of mono casing mixed test try to
 C<tr///> towards the character set case most employed within the data.
 If the data are primarily UPPERCASE non Latin 1 then apply tr/[a-z]/[A-Z]/
 then sort().  If the data are primarily lowercase non Latin 1 then
 apply tr/[A-Z]/[a-z]/ before sorting.  If the data are primarily UPPERCASE
-and include Latin-1 characters then apply:  tr/[a-z]/[A-Z]/; 
-XXX
+and include Latin-1 characters then apply:  
 
-This strategy does not preserve the case of the data and may not be
-acceptable.
+    tr/[a-z]/[A-Z]/; 
+    tr/[‡·‚„‰ÂÊÁËÈÍÎÏÌÓÔÒÚÛÙıˆ¯˘˙˚¸˝˛]/[¿¡¬√ƒ≈∆«»… ÀÃÕŒœ–—“”‘’÷ÿŸ⁄€‹›ﬁ]/;
+    s/ﬂ/SS/g; 
 
-=head2 Convert, sort data, then reconvert.
+then sort().  Do note however that such Latin-1 manipulation does not 
+address the '^?' (or E<yuml>) C<y WITH DIAERESIS> character that will 
+remain at code point 255 on ASCII machines, but 223 on most EBCDIC machines 
+where it will sort to a place less than the EBCDIC numerals.  With a 
+Unicode enabled Perl you might try:
+
+    tr/^?/\x{178}/;
+
+The strategy of mono casing data before sorting does not preserve the case 
+of the data and may not be acceptable for that reason.
+
+=head2 Convert, sort data, then re convert.
 
 This is the most expensive proposition that does not employ a network
 connection.
@@ -873,7 +897,7 @@ it would be computationally expensive.
 
 =head1 URL ENCODING and DECODING
 
-Note that some URLs have hexadecimal ASCII codepoints in them in an
+Note that some URLs have hexadecimal ASCII code points in them in an
 attempt to overcome character limitation issues.  For example the
 tilde character is not on every keyboard hence a URL of the form:
 
@@ -885,7 +909,7 @@ may also be expressed as either of:
 
     http://www.pvhp.com/%7epvhp/
 
-where 7E is the hexadecimal ASCII codepoint for '~'.  Here is an example
+where 7E is the hexadecimal ASCII code point for '~'.  Here is an example
 of decoding such a URL under CCSID 1047:
 
     $url = 'http://www.pvhp.com/%7Epvhp/';
@@ -918,9 +942,7 @@ and discussed under the L<perlebcdic/OS ISSUES> section below.
 
 =head1 MULTI OCTET CHARACTER SETS
 
-Double byte EBCDIC code pages (?) XXX.
-
-UTF-8, UTF-EBCDIC, (?) XXX.
+Multi byte EBCDIC code pages; Unicode, UTF-8, UTF-EBCDIC, XXX.
 
 =head1 OS ISSUES
 
@@ -928,6 +950,8 @@ There may be a few system dependent issues
 of concern to EBCDIC Perl programmers.
 
 =head2 OS/400 
+
+The PASE environment.
 
 =over 8
 
@@ -939,7 +963,14 @@ XXX.
 
 =head2 OS/390 
 
+Perl runs under Unix Systems Services or USS.
+
 =over 8
+
+=item chcp
+
+L<chcp> is supported as a shell utility for displaying and changing 
+one's code page.
 
 =item dataset access
 
@@ -952,6 +983,10 @@ or:
     my @ds_records = `cat //'HLQ.DSNAME'`;
 
 See also the OS390::Stdio module on CPAN.
+
+=item iconv
+
+L<iconv> is supported as both a shell utility and a C RTL routine.
 
 =item locales
 
@@ -968,18 +1003,40 @@ XXX.
 
 XXX.
 
+=head1 BUGS
+
+This pod document contains literal Latin 1 characters and may encounter 
+translation difficulties.  In particular one populer nroff implementation 
+was known to strip accented characters to their unaccented counterparts 
+while attempting to view this document through the B<pod2man> program 
+(for example, you may see a plain C<y> rather than one with a diaeresis 
+as in C<^?> or E<yuml> ).
+
+Not all shells will allow multiple C<-e> string arguments to perl to
+be concatenated together properly as recipes 2, 3, and 4 might seem
+to imply.
+
+Perl does not yet work with any Unicode features on EBCDIC platforms.
+
 =head1 REFERENCES
 
 http://anubis.dkuug.dk/i18n/charmaps
 
-L<perllocale>.
+L<perllocale>, L<perlfunc>.
 
 http://www.unicode.org/
 
 http://www.unicode.org/unicode/reports/tr16/
 
+http://www.wps.com/texts/codes/
+B<ASCII: American Standard Code for Information Infiltration> Tom Jennings,
+September 1999.
+
 B<The Unicode Standard Version 2.0> The Unicode Consortium, 
 ISBN 0-201-48345-9, Addison Wesley Developers Press, July 1996. 
+
+B<The Unicode Standard Version 3.0> The Unicode Consortium, Lisa Moore ed., 
+ISBN 0-201-61633-5, Addison Wesley Developers Press, February 2000. 
 
 B<CDRA: IBM - Character Data Representation Architecture - 
 Reference and Registry>, IBM SC09-2190-00, December 1996. 
