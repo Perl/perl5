@@ -71,10 +71,10 @@ if(exists $Opts{v} ){
                 for sort keys %{$Module::CoreList::version{$Opts{v}}};
             print "\n";
         } else {
-            print "\nModue::CoreList has no info on perl v$Opts{v}\n\n";
+            print "\nModule::CoreList has no info on perl v$Opts{v}\n\n";
         }
     } else {
-        print "\nModue::CoreList has info on the following perl versions:\n";
+        print "\nModule::CoreList has info on the following perl versions:\n";
         print "$_\n" for sort keys %Module::CoreList::version;
         print "\n";
     }
