@@ -22,6 +22,10 @@
 #ifdef __GNUC__
 typedef long long __int64;
 #define Win32_Winsock
+#  ifdef __cplusplus
+#undef __attribute__		/* seems broken in 2.8.0 */
+#define __attribute__(p)
+#  endif
 /* GCC does not do __declspec() - render it a nop 
  * and turn on options to avoid importing data 
  */
@@ -133,6 +137,11 @@ struct tms {
 #pragma warn -csu	/* "comparing signed and unsigned values" */
 #pragma warn -pro	/* "call to function with no prototype" */
 
+/* Borland is picky about a bare member function name used as its ptr */
+#ifdef PERL_OBJECT
+#define FUNC_NAME_TO_PTR(name)	&(name)
+#endif
+
 #endif
 
 #ifdef _MSC_VER			/* Microsoft Visual C++ */
@@ -150,6 +159,13 @@ typedef long		gid_t;
 #define _environ	environ
 #define flushall	_flushall
 #define fcloseall	_fcloseall
+
+#ifndef _O_NOINHERIT
+#  define _O_NOINHERIT	0x0080
+#  ifndef _NO_OLDNAMES
+#    define O_NOINHERIT	_O_NOINHERIT
+#  endif
+#endif
 
 #endif /* __MINGW32__ */
 

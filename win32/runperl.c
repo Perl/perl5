@@ -8,13 +8,9 @@
 #include "XSUB.H"
 #include "Win32iop.h"
 
-#undef errno
-#if defined(_MT)
-_CRTIMP int * __cdecl _errno(void);
-#define errno (*_errno())
-#else
-_CRTIMP extern int errno;
-#endif
+#define errno (*win32_errno())
+#define stdout (win32_stdout())
+#define stderr (win32_stderr())
 
 CPerlObj *pPerl;
 
@@ -94,7 +90,7 @@ public:
     };
     virtual int Putenv(const char *envstring, int &err)
     {
-	return _putenv(envstring);
+	return putenv(envstring);
     };
     virtual char* LibPath(char *sfx, ...)
     {
@@ -493,7 +489,7 @@ public:
     };
     virtual int Unlink(const char *filename, int &err)
     {
-	chmod(filename, _S_IREAD | _S_IWRITE);
+	chmod(filename, S_IREAD | S_IWRITE);
 	CALLFUNCRET(unlink(filename))
     };
     virtual int Utime(char *filename, struct utimbuf *times, int &err)
@@ -593,6 +589,10 @@ public:
     };
     virtual PerlIO* Popen(const char *command, const char *mode)
     {
+#ifdef __BORLANDC__
+	win32_fflush(stdout);
+	win32_fflush(stderr);
+#endif
 	return (PerlIO*)win32_popen(command, mode);
     };
     virtual int Pclose(PerlIO *stream)
@@ -601,7 +601,7 @@ public:
     };
     virtual int Pipe(int *phandles)
     {
-	return win32_pipe(phandles, 512, _O_BINARY);
+	return win32_pipe(phandles, 512, O_BINARY);
     };
     virtual int Setuid(uid_t u)
     {
@@ -716,19 +716,23 @@ public:
     };
     virtual char* GetBase(PerlIO* pf, int &err)
     {
-	return ((FILE*)pf)->_base;
+	FILE *f = (FILE*)pf;
+	return FILE_base(f);
     };
     virtual int GetBufsiz(PerlIO* pf, int &err)
     {
-	return ((FILE*)pf)->_bufsiz;
+	FILE *f = (FILE*)pf;
+	return FILE_bufsiz(f);
     };
     virtual int GetCnt(PerlIO* pf, int &err)
     {
-	return ((FILE*)pf)->_cnt;
+	FILE *f = (FILE*)pf;
+	return FILE_cnt(f);
     };
     virtual char* GetPtr(PerlIO* pf, int &err)
     {
-	return ((FILE*)pf)->_ptr;
+	FILE *f = (FILE*)pf;
+	return FILE_ptr(f);
     };
     virtual int Putc(PerlIO* pf, int c, int &err)
     {
@@ -791,12 +795,14 @@ public:
     };
     virtual void SetCnt(PerlIO* pf, int n, int &err)
     {
-	((FILE*)pf)->_cnt = n;
+	FILE *f = (FILE*)pf;
+	FILE_cnt(f) = n;
     };
     virtual void SetPtrCnt(PerlIO* pf, char * ptr, int n, int& err)
     {
-	((FILE*)pf)->_ptr = ptr;
-	((FILE*)pf)->_cnt = n;
+	FILE *f = (FILE*)pf;
+	FILE_ptr(f) = ptr;
+	FILE_cnt(f) = n;
     };
     virtual void Setlinebuf(PerlIO* pf, int &err)
     {
@@ -876,9 +882,6 @@ public:
 
 
 static void xs_init _((CPERLarg));
-#define stderr (&_iob[2])
-#undef fprintf
-#undef environ
 
 class CPerlHost
 {
@@ -897,7 +900,7 @@ public:
 		}
 		catch(...)
 		{
-		    fprintf(stderr, "%s\n", "Error: Unable to construct data structures");
+		    win32_fprintf(stderr, "%s\n", "Error: Unable to construct data structures");
 		    pPerl->perl_free();
 		    pPerl = NULL;
 		}
@@ -905,7 +908,7 @@ public:
 	}
 	catch(...)
 	{
-	    fprintf(stderr, "%s\n", "Error: Unable to allocate memory");
+	    win32_fprintf(stderr, "%s\n", "Error: Unable to allocate memory");
 	    pPerl = NULL;
 	}
 	return (pPerl != NULL);
@@ -925,7 +928,7 @@ public:
 	}
 	catch(...)
 	{
-	    fprintf(stderr, "Error: Parse exception\n");
+	    win32_fprintf(stderr, "Error: Parse exception\n");
 	    retVal = -1;
 	}
 	return retVal;
@@ -944,7 +947,7 @@ public:
 	}
 	catch(...)
 	{
-	    fprintf(stderr, "Error: Runtime exception\n");
+	    win32_fprintf(stderr, "Error: Runtime exception\n");
 	    retVal = -1;
 	}
 	return retVal;

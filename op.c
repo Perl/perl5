@@ -582,7 +582,8 @@ op_free(OP *o)
 	break;
 #endif /* USE_THREADS */
     default:
-	if (!(o->op_flags & OPf_REF) || (check[o->op_type] != ck_ftst))
+	if (!(o->op_flags & OPf_REF)
+	    || (check[o->op_type] != FUNC_NAME_TO_PTR(ck_ftst)))
 	    break;
 	/* FALL THROUGH */
     case OP_GVSV:

@@ -88,14 +88,14 @@ VIRTUAL I32	filter_read _((int idx, SV* buffer, int maxlen));
 VIRTUAL char **	get_op_descs _((void));
 VIRTUAL char **	get_op_names _((void));
 VIRTUAL I32	cxinc _((void));
-void	deb _((const char* pat,...)) __attribute__((format(printf,1,2)));
-void	deb_growlevel _((void));
-I32	debstackptrs _((void));
 #ifdef DEBUGGING
-void	debprofdump _((void));
-I32	debop _((OP* o));
+VIRTUAL void	deb _((const char* pat,...)) __attribute__((format(printf,1,2)));
+VIRTUAL void	deb_growlevel _((void));
+VIRTUAL void	debprofdump _((void));
+VIRTUAL I32	debop _((OP* o));
+VIRTUAL I32	debstack _((void));
+VIRTUAL I32	debstackptrs _((void));
 #endif
-I32	debstack _((void));
 VIRTUAL char*	delimcpy _((char* to, char* toend, char* from, char* fromend,
 		    int delim, I32* retlen));
 VIRTUAL void	deprecate _((char* s));

@@ -497,7 +497,7 @@ PP(pp_binmode)
 	 * document this anywhere). GSAR 97-5-24
 	 */
 	PerlIO_seek(fp,0L,0);
-	fp->flags |= _F_BIN;
+	((FILE*)fp)->flags |= _F_BIN;
 #endif
 	RETPUSHYES;
     }

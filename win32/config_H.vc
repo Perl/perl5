@@ -1157,7 +1157,7 @@
 /* MYMALLOC:
  *	This symbol, if defined, indicates that we're using our own malloc.
  */
-#define MYMALLOC			/**/
+/*#define MYMALLOC			/**/
 
 /* Mode_t:
  *	This symbol holds the type used to declare file modes 

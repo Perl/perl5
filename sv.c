@@ -323,7 +323,7 @@ do_report_used(SV *sv)
 void
 sv_report_used(void)
 {
-    visit(do_report_used);
+    visit(FUNC_NAME_TO_PTR(do_report_used));
 }
 
 STATIC void
@@ -355,9 +355,9 @@ sv_clean_objs(void)
 {
     in_clean_objs = TRUE;
 #ifndef DISABLE_DESTRUCTOR_KLUDGE
-    visit(do_clean_named_objs);
+    visit(FUNC_NAME_TO_PTR(do_clean_named_objs));
 #endif
-    visit(do_clean_objs);
+    visit(FUNC_NAME_TO_PTR(do_clean_objs));
     in_clean_objs = FALSE;
 }
 
@@ -373,7 +373,7 @@ void
 sv_clean_all(void)
 {
     in_clean_all = TRUE;
-    visit(do_clean_all);
+    visit(FUNC_NAME_TO_PTR(do_clean_all));
     in_clean_all = FALSE;
 }
 

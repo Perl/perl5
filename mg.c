@@ -289,18 +289,18 @@ magic_len(SV *sv, MAGIC *mg)
     register I32 paren;
     register char *s;
     register I32 i;
-    register REGEXP *rx;
+    register REGEXP *prx;
     char *t;
 
     switch (*mg->mg_ptr) {
     case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9': case '&':
-	if (curpm && (rx = curpm->op_pmregexp)) {
+	if (curpm && (prx = curpm->op_pmregexp)) {
 	    paren = atoi(mg->mg_ptr);
 	  getparen:
-	    if (paren <= rx->nparens &&
-		(s = rx->startp[paren]) &&
-		(t = rx->endp[paren]))
+	    if (paren <= prx->nparens &&
+		(s = prx->startp[paren]) &&
+		(t = prx->endp[paren]))
 	    {
 		i = t - s;
 		if (i >= 0)
@@ -309,25 +309,25 @@ magic_len(SV *sv, MAGIC *mg)
 	}
 	return 0;
     case '+':
-	if (curpm && (rx = curpm->op_pmregexp)) {
-	    paren = rx->lastparen;
+	if (curpm && (prx = curpm->op_pmregexp)) {
+	    paren = prx->lastparen;
 	    if (paren)
 		goto getparen;
 	}
 	return 0;
     case '`':
-	if (curpm && (rx = curpm->op_pmregexp)) {
-	    if ((s = rx->subbeg) && rx->startp[0]) {
-		i = rx->startp[0] - s;
+	if (curpm && (prx = curpm->op_pmregexp)) {
+	    if ((s = prx->subbeg) && prx->startp[0]) {
+		i = prx->startp[0] - s;
 		if (i >= 0)
 		    return i;
 	    }
 	}
 	return 0;
     case '\'':
-	if (curpm && (rx = curpm->op_pmregexp)) {
-	    if (rx->subend && (s = rx->endp[0])) {
-		i = rx->subend - s;
+	if (curpm && (prx = curpm->op_pmregexp)) {
+	    if (prx->subend && (s = prx->endp[0])) {
+		i = prx->subend - s;
 		if (i >= 0)
 		    return i;
 	    }
@@ -353,7 +353,7 @@ magic_get(SV *sv, MAGIC *mg)
     register I32 paren;
     register char *s;
     register I32 i;
-    register REGEXP *rx;
+    register REGEXP *prx;
     char *t;
 
     switch (*mg->mg_ptr) {
@@ -457,16 +457,16 @@ magic_get(SV *sv, MAGIC *mg)
 	break;
     case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9': case '&':
-	if (curpm && (rx = curpm->op_pmregexp)) {
+	if (curpm && (prx = curpm->op_pmregexp)) {
 	    /*
 	     * Pre-threads, this was paren = atoi(GvENAME((GV*)mg->mg_obj));
 	     * XXX Does the new way break anything?
 	     */
 	    paren = atoi(mg->mg_ptr);
 	  getparen:
-	    if (paren <= rx->nparens &&
-		(s = rx->startp[paren]) &&
-		(t = rx->endp[paren]))
+	    if (paren <= prx->nparens &&
+		(s = prx->startp[paren]) &&
+		(t = prx->endp[paren]))
 	    {
 		i = t - s;
 	      getrx:
@@ -478,7 +478,7 @@ magic_get(SV *sv, MAGIC *mg)
 		    }
 		    sv_setpvn(sv,s,i);
 		    if (tainting)
-			tainted = was_tainted || RX_MATCH_TAINTED(rx);
+			tainted = was_tainted || RX_MATCH_TAINTED(prx);
 		    break;
 		}
 	    }
@@ -486,26 +486,26 @@ magic_get(SV *sv, MAGIC *mg)
 	sv_setsv(sv,&sv_undef);
 	break;
     case '+':
-	if (curpm && (rx = curpm->op_pmregexp)) {
-	    paren = rx->lastparen;
+	if (curpm && (prx = curpm->op_pmregexp)) {
+	    paren = prx->lastparen;
 	    if (paren)
 		goto getparen;
 	}
 	sv_setsv(sv,&sv_undef);
 	break;
     case '`':
-	if (curpm && (rx = curpm->op_pmregexp)) {
-	    if ((s = rx->subbeg) && rx->startp[0]) {
-		i = rx->startp[0] - s;
+	if (curpm && (prx = curpm->op_pmregexp)) {
+	    if ((s = prx->subbeg) && prx->startp[0]) {
+		i = prx->startp[0] - s;
 		goto getrx;
 	    }
 	}
 	sv_setsv(sv,&sv_undef);
 	break;
     case '\'':
-	if (curpm && (rx = curpm->op_pmregexp)) {
-	    if (rx->subend && (s = rx->endp[0])) {
-		i = rx->subend - s;
+	if (curpm && (prx = curpm->op_pmregexp)) {
+	    if (prx->subend && (s = prx->endp[0])) {
+		i = prx->subend - s;
 		goto getrx;
 	    }
 	}

@@ -1428,7 +1428,7 @@
 #define more_he           CPerlObj::more_he
 #define del_he            CPerlObj::del_he
 
-#ifdef WIN32
+#if defined(WIN32) && !defined(WIN32IO_IS_STDIO)
 #undef errno
 #define errno             CPerlObj::ErrorNo()
 

@@ -126,9 +126,9 @@ PP(pp_substcont)
     register char *s = cx->sb_s;
     register char *m = cx->sb_m;
     char *orig = cx->sb_orig;
-    register REGEXP *rx = cx->sb_rx;
+    register REGEXP *prx = cx->sb_rx;
 
-    rxres_restore(&cx->sb_rxres, rx);
+    rxres_restore(&cx->sb_rxres, prx);
 
     if (cx->sb_iters++) {
 	if (cx->sb_iters > cx->sb_maxiters)
@@ -139,14 +139,14 @@ PP(pp_substcont)
 	sv_catsv(dstr, POPs);
 
 	/* Are we done */
-	if (cx->sb_once || !regexec_flags(rx, s, cx->sb_strend, orig,
+	if (cx->sb_once || !regexec_flags(prx, s, cx->sb_strend, orig,
 				     s == m, Nullsv, NULL,
 				     cx->sb_safebase ? 0 : REXEC_COPY_STR))
 	{
 	    SV *targ = cx->sb_targ;
 	    sv_catpvn(dstr, s, cx->sb_strend - s);
 
-	    TAINT_IF(cx->sb_rxtainted || RX_MATCH_TAINTED(rx));
+	    TAINT_IF(cx->sb_rxtainted || RX_MATCH_TAINTED(prx));
 
 	    (void)SvOOK_off(targ);
 	    Safefree(SvPVX(targ));
@@ -165,29 +165,29 @@ PP(pp_substcont)
 	    RETURNOP(pm->op_next);
 	}
     }
-    if (rx->subbase && rx->subbase != orig) {
+    if (prx->subbase && prx->subbase != orig) {
 	m = s;
 	s = orig;
-	cx->sb_orig = orig = rx->subbase;
+	cx->sb_orig = orig = prx->subbase;
 	s = orig + (m - s);
 	cx->sb_strend = s + (cx->sb_strend - m);
     }
-    cx->sb_m = m = rx->startp[0];
+    cx->sb_m = m = prx->startp[0];
     sv_catpvn(dstr, s, m-s);
-    cx->sb_s = rx->endp[0];
-    cx->sb_rxtainted |= RX_MATCH_TAINTED(rx);
-    rxres_save(&cx->sb_rxres, rx);
+    cx->sb_s = prx->endp[0];
+    cx->sb_rxtainted |= RX_MATCH_TAINTED(prx);
+    rxres_save(&cx->sb_rxres, prx);
     RETURNOP(pm->op_pmreplstart);
 }
 
 void
-rxres_save(void **rsp, REGEXP *rx)
+rxres_save(void **rsp, REGEXP *prx)
 {
     UV *p = (UV*)*rsp;
     U32 i;
 
-    if (!p || p[1] < rx->nparens) {
-	i = 6 + rx->nparens * 2;
+    if (!p || p[1] < prx->nparens) {
+	i = 6 + prx->nparens * 2;
 	if (!p)
 	    New(501, p, i, UV);
 	else
@@ -195,36 +195,36 @@ rxres_save(void **rsp, REGEXP *rx)
 	*rsp = (void*)p;
     }
 
-    *p++ = (UV)rx->subbase;
-    rx->subbase = Nullch;
+    *p++ = (UV)prx->subbase;
+    prx->subbase = Nullch;
 
-    *p++ = rx->nparens;
+    *p++ = prx->nparens;
 
-    *p++ = (UV)rx->subbeg;
-    *p++ = (UV)rx->subend;
-    for (i = 0; i <= rx->nparens; ++i) {
-	*p++ = (UV)rx->startp[i];
-	*p++ = (UV)rx->endp[i];
+    *p++ = (UV)prx->subbeg;
+    *p++ = (UV)prx->subend;
+    for (i = 0; i <= prx->nparens; ++i) {
+	*p++ = (UV)prx->startp[i];
+	*p++ = (UV)prx->endp[i];
     }
 }
 
 void
-rxres_restore(void **rsp, REGEXP *rx)
+rxres_restore(void **rsp, REGEXP *prx)
 {
     UV *p = (UV*)*rsp;
     U32 i;
 
-    Safefree(rx->subbase);
-    rx->subbase = (char*)(*p);
+    Safefree(prx->subbase);
+    prx->subbase = (char*)(*p);
     *p++ = 0;
 
-    rx->nparens = *p++;
+    prx->nparens = *p++;
 
-    rx->subbeg = (char*)(*p++);
-    rx->subend = (char*)(*p++);
-    for (i = 0; i <= rx->nparens; ++i) {
-	rx->startp[i] = (char*)(*p++);
-	rx->endp[i] = (char*)(*p++);
+    prx->subbeg = (char*)(*p++);
+    prx->subend = (char*)(*p++);
+    for (i = 0; i <= prx->nparens; ++i) {
+	prx->startp[i] = (char*)(*p++);
+	prx->endp[i] = (char*)(*p++);
     }
 }
 
@@ -742,7 +742,7 @@ PP(pp_sort)
 		    (void)SvREFCNT_inc(cv); /* in preparation for POPSUB */
 	    }
 	    sortcxix = cxstack_ix;
-	    qsortsv((myorigmark+1), max, sortcv);
+	    qsortsv((myorigmark+1), max, FUNC_NAME_TO_PTR(sortcv));
 
 	    POPBLOCK(cx,curpm);
 	    SWITCHSTACK(sortstack, oldstack);
@@ -754,7 +754,9 @@ PP(pp_sort)
 	if (max > 1) {
 	    MEXTEND(SP, 20);	/* Can't afford stack realloc on signal. */
 	    qsortsv(ORIGMARK+1, max,
-		  (op->op_private & OPpLOCALE) ? sv_cmp_locale : sv_cmp);
+		    (op->op_private & OPpLOCALE)
+		    ? FUNC_NAME_TO_PTR(sv_cmp_locale)
+		    : FUNC_NAME_TO_PTR(sv_cmp));
 	}
     }
     stack_sp = ORIGMARK + max;

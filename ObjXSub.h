@@ -828,6 +828,8 @@
 #define cv_undef            pPerl->Perl_cv_undef
 #undef  cxinc
 #define cxinc               pPerl->Perl_cxinc
+#undef  deb
+#define deb                 pPerl->Perl_deb
 #undef  delimcpy
 #define delimcpy            pPerl->Perl_delimcpy
 #undef  deprecate
@@ -1804,6 +1806,9 @@
 #undef ioctl
 #undef getlogin
 #undef setjmp
+#undef getc
+#undef ungetc
+#undef fileno
 
 #define mkdir PerlDir_mkdir
 #define chdir PerlDir_chdir
@@ -1946,11 +1951,16 @@
 #define THIS_ pPerl,
 
 #undef  SAVEDESTRUCTOR
-#define SAVEDESTRUCTOR(f,p) pPerl->Perl_save_destructor((f),(p))
+#define SAVEDESTRUCTOR(f,p) \
+	pPerl->Perl_save_destructor((FUNC_NAME_TO_PTR(f)),(p))
 
 #ifdef WIN32
-#undef errno
-#define errno				ErrorNo()
+
+#ifndef WIN32IO_IS_STDIO
+#undef	errno
+#define errno                 ErrorNo()
+#endif
+
 #undef  ErrorNo
 #define ErrorNo				pPerl->ErrorNo
 #undef  NtCrypt

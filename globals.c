@@ -1443,7 +1443,7 @@ CPerlObj::Init(void)
 #endif
     maxo = MAXO;
     sh_path = SH_PATH;
-    runops = RUNOPS_DEFAULT;
+    runops = FUNC_NAME_TO_PTR(RUNOPS_DEFAULT);
 #ifdef CSH
     cshname = CSH;
 #endif

@@ -1014,6 +1014,10 @@ typedef I32 (*filter_t) _((int, SV *, int));
 # endif
 #endif         
 
+#ifndef FUNC_NAME_TO_PTR
+#define FUNC_NAME_TO_PTR(name)		name
+#endif
+
 /* 
  * USE_THREADS needs to be after unixish.h as <pthread.h> includes
  * <sys/signal.h> which defines NSIG - which will stop inclusion of <signal.h>
@@ -1840,9 +1844,6 @@ typedef void *Thread;
 #endif
 
 #ifdef PERL_OBJECT
-#if defined(WIN32)
-char** environ;
-#endif
 };
 
 #include "objpp.h"

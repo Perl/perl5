@@ -201,8 +201,13 @@ opmask_addlocal(SV *opset, char *op_mask_buf) /* Localise op_mask then opmask_ad
 {
     char *orig_op_mask = op_mask;
     SAVEPPTR(op_mask);
+#if !(defined(PERL_OBJECT) && defined(__BORLANDC__))
+    /* XXX casting to an ordinary function ptr from a member function ptr
+     * is disallowed by Borland
+     */
     if (opcode_debug >= 2)
 	SAVEDESTRUCTOR((void(CPERLscope(*))_((void*)))warn,"op_mask restored");
+#endif
     op_mask = &op_mask_buf[0];
     if (orig_op_mask)
 	Copy(orig_op_mask, op_mask, maxo, char);

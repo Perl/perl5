@@ -876,23 +876,23 @@ scan_const(char *start)
 		    *d++ = *s++;
 	    } else if (s[2] == '{') {	/* This should march regcomp.c */
 		I32 count = 1;
-		char *regparse = s + 3;
+		char *pregparse = s + 3;
 		char c;
 
-		while (count && (c = *regparse)) {
-		    if (c == '\\' && regparse[1])
-			regparse++;
+		while (count && (c = *pregparse)) {
+		    if (c == '\\' && pregparse[1])
+			pregparse++;
 		    else if (c == '{') 
 			count++;
 		    else if (c == '}') 
 			count--;
-		    regparse++;
+		    pregparse++;
 		}
-		if (*regparse == ')')
-		    regparse++;
+		if (*pregparse == ')')
+		    pregparse++;
 		else
 		    yyerror("Sequence (?{...}) not terminated or not {}-balanced");
-		while (s < regparse && *s != ')')
+		while (s < pregparse && *s != ')')
 		    *d++ = *s++;
 	    }
 	}

@@ -33,6 +33,14 @@ close(CFG);
 
 warn join(' ',keys %define)."\n";
 
+if ($define{PERL_OBJECT}) {
+    print "LIBRARY PerlCore\n";
+    print "DESCRIPTION 'Perl interpreter'\n";
+    print "EXPORTS\n";
+    output_symbol("perl_alloc");
+    exit(0);
+}
+
 if ($CCTYPE ne 'GCC') 
  {
   print "LIBRARY Perl\n";
@@ -386,31 +394,36 @@ while (<DATA>) {
 
 foreach my $symbol (sort keys %export)
  {
-	if ($CCTYPE eq "BORLAND") {
-		# workaround Borland quirk by exporting both the straight
-		# name and a name with leading underscore.  Note the
-		# alias *must* come after the symbol itself, if both
-		# are to be exported. (Linker bug?)
-		print "\t_$symbol\n";
-		print "\t$symbol = _$symbol\n";
-	}
-        elsif ($CCTYPE eq 'GCC') {
-                # Symbols have leading _ whole process is $%£"% slow
-                # so skip aliases for now
-		print "\t$symbol\n";
-        }
-	else {
-		# for binary coexistence, export both the symbol and
-		# alias with leading underscore
-		print "\t$symbol\n";
-		print "\t_$symbol = $symbol\n";
-	}
+   output_symbol($symbol);
  }
 
 sub emit_symbol {
 	my $symbol = shift;
         chomp($symbol); 
 	$export{$symbol} = 1;
+}
+
+sub output_symbol {
+    my $symbol = shift;
+    if ($CCTYPE eq "BORLAND") {
+	    # workaround Borland quirk by exporting both the straight
+	    # name and a name with leading underscore.  Note the
+	    # alias *must* come after the symbol itself, if both
+	    # are to be exported. (Linker bug?)
+	    print "\t_$symbol\n";
+	    print "\t$symbol = _$symbol\n";
+    }
+    elsif ($CCTYPE eq 'GCC') {
+	    # Symbols have leading _ whole process is $%£"% slow
+	    # so skip aliases for now
+	    print "\t$symbol\n";
+    }
+    else {
+	    # for binary coexistence, export both the symbol and
+	    # alias with leading underscore
+	    print "\t$symbol\n";
+	    print "\t_$symbol = $symbol\n";
+    }
 }
 
 1;
