@@ -1093,7 +1093,7 @@ utils: $(PERLEXE) $(X2P)
 	copy ..\README.mpeix ..\pod\perlmpeix.pod
 	copy ..\README.os2 ..\pod\perlos2.pod
 	copy ..\README.os390 ..\pod\perlos390.pod
-	copy ..\README.solaris .\perlsolaris.pod
+	copy ..\README.solaris ..\pod\perlsolaris.pod
 	copy ..\README.vmesa ..\pod\perlvmesa.pod
 	copy ..\vms\perlvms.pod ..\pod\perlvms.pod
 	copy ..\README.vos ..\pod\perlvos.pod
