@@ -10,7 +10,7 @@ BEGIN {
     }
 }
 
-print "1..106\n";
+print "1..107\n";
 
 my $test = 1;
 
@@ -564,3 +564,16 @@ sub nok_bytes {
     print "ok $test\n";
     $test++;					# 106
 }
+
+{
+    use utf8;
+
+    my $w = 0;
+    local $SIG{__WARN__} = sub { print "#($_[0])\n"; $w++ };
+    my $x = eval q/"\\/ . "\x{100}" . q/"/;;
+   
+    print "not " unless $w == 0 && $x eq "\x{100}";
+    print "ok $test\n";
+    $test++;					# 107
+}
+

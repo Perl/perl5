@@ -4690,30 +4690,24 @@ Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2)
 
     /* do not utf8ize the comparands as a side-effect */
     if (cur1 && cur2 && SvUTF8(sv1) != SvUTF8(sv2) && !IN_BYTE) {
+	bool is_utf8 = TRUE;
+
 	if (PL_hints & HINT_UTF8_DISTINCT)
 	    return FALSE;
 
 	if (SvUTF8(sv1)) {
-	    (void)utf8_to_bytes((U8*)(pv1 = savepvn(pv1, cur1)), &cur1);
-	    {
-		IV scur1 = cur1;
-		if (scur1 < 0) {
-		    Safefree(pv1);
-		    return 0;
-		}
-	    }
-	    pv1tmp = TRUE;
+	    char *pv = bytes_from_utf8((U8*)pv1, &cur1, &is_utf8);
+	    if (is_utf8)
+		return 0;
+	    pv1tmp = (pv != pv1);
+	    pv1 = pv;
 	}
 	else {
-	    (void)utf8_to_bytes((U8*)(pv2 = savepvn(pv2, cur2)), &cur2);
-	    {
-		IV scur2 = cur2;
-		if (scur2 < 0) {
-		    Safefree(pv2);
-		    return 0;
-		}
-	    }
-	    pv2tmp = TRUE;
+	    char *pv = bytes_from_utf8((U8*)pv2, &cur2, &is_utf8);
+	    if (is_utf8)
+		return 0;
+	    pv2tmp = (pv != pv2);
+	    pv2 = pv;
 	}
     }
 
@@ -5601,6 +5595,8 @@ Perl_newSVpvn_share(pTHX_ const char *src, I32 len, U32 hash)
         len = -len;
         is_utf8 = TRUE;
     }
+    if (is_utf8 && !(PL_hints & HINT_UTF8_DISTINCT))
+	src = (char*)bytes_from_utf8((U8*)src, (STRLEN*)&len, &is_utf8);
     if (!hash)
 	PERL_HASH(hash, src, len);
     new_SV(sv);

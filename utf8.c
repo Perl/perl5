@@ -583,6 +583,63 @@ Perl_utf8_to_bytes(pTHX_ U8* s, STRLEN *len)
 }
 
 /*
+=for apidoc A|U8 *|bytes_from_utf8|U8 *s|STRLEN *len|bool *is_utf8
+
+Converts a string C<s> of length C<len> from UTF8 into byte encoding.
+Unlike <utf8_to_bytes> but like C<bytes_to_utf8>, returns a pointer to
+the newly-created string, and updates C<len> to contain the new length.
+Returns the original string if no conversion occurs, C<len> and
+C<is_utf8> are unchanged. Do nothing if C<is_utf8> points to 0. Sets
+C<is_utf8> to 0 if C<s> is converted or malformed .
+
+=cut */
+
+U8 *
+Perl_bytes_from_utf8(pTHX_ U8* s, STRLEN *len, bool *is_utf8)
+{
+    U8 *send;
+    U8 *d;
+    U8 *start = s;
+    I32 count = 0;
+
+    if (!*is_utf8)
+	return start;
+
+    /* ensure valid UTF8 and chars < 256 before updating string */
+    for (send = s + *len; s < send;) {
+	U8 c = *s++;
+        if (!UTF8_IS_ASCII(c)) {
+	    if (UTF8_IS_CONTINUATION(c) || s >= send ||
+		!UTF8_IS_CONTINUATION(*s)) {
+		*is_utf8 = 0;		
+		return start;
+	    }
+	    if ((c & 0xfc) != 0xc0)
+		return start;
+	    s++, count++;
+        }
+    }
+
+    *is_utf8 = 0;		
+
+    if (!count)
+	return start;
+
+    Newz(801, d, (*len) - count + 1, U8);
+    d = s = start;
+    while (s < send) {
+	U8 c = *s++;
+	if (UTF8_IS_ASCII(c))
+	    *d++ = c;
+	else
+	    *d++ = UTF8_ACCUMULATE(c&3, *s++);
+    }
+    *d = '\0';
+    *len = d - start;
+    return start;
+}
+
+/*
 =for apidoc A|U8 *|bytes_to_utf8|U8 *s|STRLEN *len
 
 Converts a string C<s> of length C<len> from ASCII into UTF8 encoding.
