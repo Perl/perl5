@@ -539,7 +539,7 @@ mini_mktime(struct tm *ptm)
 }
 
 #ifdef HAS_LONG_DOUBLE
-#  if LONG_DOUBLESIZE > DOUBLESIZE
+#  if LONG_DOUBLESIZE > NVSIZE
 #    undef HAS_LONG_DOUBLE  /* XXX until we figure out how to use them */
 #  endif
 #endif
