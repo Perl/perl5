@@ -1,132 +1,668 @@
 #ifndef __ObjXSub_h__
 #define __ObjXSub_h__
 
-// variables
-#undef  uid
-#define uid					pPerl->Perl_uid
-#undef  euid
-#define euid				pPerl->Perl_euid
-#undef  gid
-#define gid					pPerl->Perl_gid
-#undef  egid
-#define egid				pPerl->Perl_egid
-#undef  endav
-#define endav               pPerl->Perl_endav
+
+/* Varibles */ 
+#undef  Argv
+#define Argv			pPerl->Perl_Argv
+#undef  Cmd
+#define Cmd			pPerl->Perl_Cmd
+#undef  DBcv
+#define DBcv			pPerl->Perl_DBcv
+#undef  DBgv
+#define DBgv			pPerl->Perl_DBgv
+#undef  DBline
+#define DBline			pPerl->Perl_DBline
+#undef  DBsignal
+#define DBsignal		pPerl->Perl_DBsignal
+#undef  DBsingle
+#define DBsingle		pPerl->Perl_DBsingle
+#undef  DBsub
+#define DBsub			pPerl->Perl_DBsub
+#undef  DBtrace
+#define DBtrace			pPerl->Perl_DBtrace
+#undef  No
+#define No			pPerl->Perl_No
+#undef  Sv
+#define Sv			pPerl->Perl_Sv
+#undef  Xpv
+#define Xpv			pPerl->Perl_Xpv
+#undef  Yes
+#define Yes			pPerl->Perl_Yes
+#undef  amagic_generation
+#define amagic_generation	pPerl->Perl_amagic_generation
+#undef  ampergv
+#define ampergv			pPerl->Perl_ampergv
 #undef  an
-#define an					pPerl->Perl_an
+#define an			pPerl->Perl_an
+#undef  archpat_auto
+#define archpat_auto		pPerl->Perl_archpat_auto
+#undef  argvgv
+#define argvgv			pPerl->Perl_argvgv
+#undef  argvoutgv
+#define argvoutgv		pPerl->Perl_argvoutgv
+#undef  basetime
+#define basetime		pPerl->Perl_basetime
+#undef  beginav
+#define beginav			pPerl->Perl_beginav
+#undef  bodytarget
+#define bodytarget		pPerl->Perl_bodytarget
+#undef  bostr
+#define bostr			pPerl->Perl_bostr
+#undef  bufend
+#define bufend			pPerl->Perl_bufend
+#undef  bufptr
+#define bufptr			pPerl->Perl_bufptr
+#undef  cddir
+#define cddir			pPerl->Perl_cddir
+#undef  chopset
+#define chopset			pPerl->Perl_chopset
+#undef  collation_ix
+#define collation_ix		pPerl->Perl_collation_ix
+#undef  collation_name
+#define collation_name		pPerl->Perl_collation_name
+#undef  collation_standard
+#define collation_standard	pPerl->Perl_collation_standard
+#undef  collxfrm_base
+#define collxfrm_base		pPerl->Perl_collxfrm_base
+#undef  collxfrm_mult
+#define collxfrm_mult		pPerl->Perl_collxfrm_mult
+#undef  colors
+#define colors			pPerl->Perl_colors
+#undef  colorset
+#define colorset		pPerl->Perl_colorset
 #undef  compcv
-#define compcv              pPerl->Perl_compcv
+#define compcv			pPerl->Perl_compcv
+#undef  compiling
+#define compiling		pPerl->Perl_compiling
+#undef  comppad
+#define comppad			pPerl->Perl_comppad
+#undef  comppad_name
+#define comppad_name		pPerl->Perl_comppad_name
+#undef  comppad_name_fill
+#define comppad_name_fill	pPerl->Perl_comppad_name_fill
+#undef  comppad_name_floor
+#define comppad_name_floor	pPerl->Perl_comppad_name_floor
 #undef  cop_seqmax
-#define cop_seqmax			pPerl->Perl_cop_seqmax
+#define cop_seqmax		pPerl->Perl_cop_seqmax
+#undef  copline
+#define copline			pPerl->Perl_copline
+#undef  cryptseen
+#define cryptseen		pPerl->Perl_cryptseen
+#undef  cshlen
+#define cshlen			pPerl->Perl_cshlen
+#undef  cshname
+#define cshname			pPerl->Perl_cshname
+#undef  curcop
+#define curcop			pPerl->Perl_curcop
+#undef  curcopdb
+#define curcopdb		pPerl->Perl_curcopdb
+#undef  curinterp
+#define curinterp		pPerl->Perl_curinterp
+#undef  curpad
+#define curpad			pPerl->Perl_curpad
+#undef  curpm
+#define curpm			pPerl->Perl_curpm
+#undef  curstack
+#define curstack		pPerl->Perl_curstack
+#undef  curstash
+#define curstash		pPerl->Perl_curstash
+#undef  curstname
+#define curstname		pPerl->Perl_curstname
+#undef  curthr
+#define curthr			pPerl->Perl_curthr
+#undef  cxstack
+#define cxstack			pPerl->Perl_cxstack
+#undef  cxstack_ix
+#define cxstack_ix		pPerl->Perl_cxstack_ix
+#undef  cxstack_max
+#define cxstack_max		pPerl->Perl_cxstack_max
+#undef  dbargs
+#define dbargs			pPerl->Perl_dbargs
+#undef  debdelim
+#define debdelim		pPerl->Perl_debdelim
+#undef  debname
+#define debname			pPerl->Perl_debname
+#undef  debstash
+#define debstash		pPerl->Perl_debstash
+#undef  debug
+#define debug			pPerl->Perl_debug
+#undef  defgv
+#define defgv			pPerl->Perl_defgv
+#undef  defoutgv
+#define defoutgv		pPerl->Perl_defoutgv
 #undef  defstash
-#define defstash            pPerl->Perl_defstash
+#define defstash		pPerl->Perl_defstash
+#undef  delaymagic
+#define delaymagic		pPerl->Perl_delaymagic
+#undef  diehook
+#define diehook			pPerl->Perl_diehook
+#undef  dirty
+#define dirty			pPerl->Perl_dirty
+#undef  dlevel
+#define dlevel			pPerl->Perl_dlevel
+#undef  dlmax
+#define dlmax			pPerl->Perl_dlmax
+#undef  do_undump
+#define do_undump		pPerl->Perl_do_undump
+#undef  doextract
+#define doextract		pPerl->Perl_doextract
+#undef  doswitches
+#define doswitches		pPerl->Perl_doswitches
 #undef  dowarn
-#define dowarn              pPerl->Perl_dowarn
+#define dowarn			pPerl->Perl_dowarn
+#undef  dumplvl
+#define dumplvl			pPerl->Perl_dumplvl
+#undef  e_fp
+#define e_fp			pPerl->Perl_e_fp
+#undef  e_tmpname
+#define e_tmpname		pPerl->Perl_e_tmpname
+#undef  egid
+#define egid			pPerl->Perl_egid
+#undef  endav
+#define endav			pPerl->Perl_endav
+#undef  envgv
+#define envgv			pPerl->Perl_envgv
+#undef  errgv
+#define errgv			pPerl->Perl_errgv
+#undef  error_count
+#define error_count		pPerl->Perl_error_count
+#undef  euid
+#define euid			pPerl->Perl_euid
+#undef  eval_cond
+#define eval_cond		pPerl->Perl_eval_cond
+#undef  eval_mutex
+#define eval_mutex		pPerl->Perl_eval_mutex
+#undef  eval_owner
+#define eval_owner		pPerl->Perl_eval_owner
+#undef  eval_root
+#define eval_root		pPerl->Perl_eval_root
+#undef  eval_start
+#define eval_start		pPerl->Perl_eval_start
 #undef  evalseq
-#define evalseq				pPerl->Perl_evalseq
+#define evalseq			pPerl->Perl_evalseq
+#undef  expect
+#define expect			pPerl->Perl_expect
+#undef  extralen
+#define extralen		pPerl->Perl_extralen
+#undef  fdpid
+#define fdpid			pPerl->Perl_fdpid
+#undef  filemode
+#define filemode		pPerl->Perl_filemode
+#undef  firstgv
+#define firstgv			pPerl->Perl_firstgv
+#undef  forkprocess
+#define forkprocess		pPerl->Perl_forkprocess
+#undef  formfeed
+#define formfeed		pPerl->Perl_formfeed
+#undef  formtarget
+#define formtarget		pPerl->Perl_formtarget
+#undef  generation
+#define generation		pPerl->Perl_generation
+#undef  gensym
+#define gensym			pPerl->Perl_gensym
+#undef  gid
+#define gid			pPerl->Perl_gid
+#undef  globalstash
+#define globalstash		pPerl->Perl_globalstash
+#undef  he_root
+#define he_root			pPerl->Perl_he_root
 #undef  hexdigit
-#define hexdigit            pPerl->Perl_hexdigit
-#undef  sub_generation
-#define sub_generation		pPerl->Perl_sub_generation
-#undef  origenviron
-#define origenviron			pPerl->Perl_origenviron
-#undef  environ
-#define environ				pPerl->Perl_environ
-#undef  origalen
-#define origalen			pPerl->Perl_origalen
-#undef  profiledata
-#define profiledata			pPerl->Perl_profiledata
-#undef  xiv_arenaroot
-#define xiv_arenaroot		pPerl->Perl_xiv_arenaroot
-#undef  xiv_root
-#define xiv_root			pPerl->Perl_xiv_root
-#undef  xnv_root
-#define xnv_root			pPerl->Perl_xnv_root
-#undef  xrv_root
-#define xrv_root			pPerl->Perl_xrv_root
-#undef  xpv_root
-#define xpv_root			pPerl->Perl_xpv_root
-#undef  stack_base
-#define stack_base			pPerl->Perl_stack_base
-#undef  stack_sp
-#define stack_sp			pPerl->Perl_stack_sp
-#undef  stack_max
-#define stack_max			pPerl->Perl_stack_max
+#define hexdigit		pPerl->Perl_hexdigit
+#undef  hints
+#define hints			pPerl->Perl_hints
+#undef  in_clean_all
+#define in_clean_all		pPerl->Perl_in_clean_all
+#undef  in_clean_objs
+#define in_clean_objs		pPerl->Perl_in_clean_objs
+#undef  in_eval
+#define in_eval			pPerl->Perl_in_eval
+#undef  in_my
+#define in_my			pPerl->Perl_in_my
+#undef  in_my_stash
+#define in_my_stash		pPerl->Perl_in_my_stash
+#undef  incgv
+#define incgv			pPerl->Perl_incgv
+#undef  initav
+#define initav			pPerl->Perl_initav
+#undef  inplace
+#define inplace			pPerl->Perl_inplace
+#undef  last_in_gv
+#define last_in_gv		pPerl->Perl_last_in_gv
+#undef  last_lop
+#define last_lop		pPerl->Perl_last_lop
+#undef  last_lop_op
+#define last_lop_op		pPerl->Perl_last_lop_op
+#undef  last_uni
+#define last_uni		pPerl->Perl_last_uni
+#undef  lastfd
+#define lastfd			pPerl->Perl_lastfd
+#undef  lastgotoprobe
+#define lastgotoprobe		pPerl->Perl_lastgotoprobe
+#undef  lastscream
+#define lastscream		pPerl->Perl_lastscream
+#undef  lastsize
+#define lastsize		pPerl->Perl_lastsize
+#undef  lastspbase
+#define lastspbase		pPerl->Perl_lastspbase
+#undef  laststatval
+#define laststatval		pPerl->Perl_laststatval
+#undef  laststype
+#define laststype		pPerl->Perl_laststype
+#undef  leftgv
+#define leftgv			pPerl->Perl_leftgv
+#undef  lex_brackets
+#define lex_brackets		pPerl->Perl_lex_brackets
+#undef  lex_brackstack
+#define lex_brackstack		pPerl->Perl_lex_brackstack
+#undef  lex_casemods
+#define lex_casemods		pPerl->Perl_lex_casemods
+#undef  lex_casestack
+#define lex_casestack		pPerl->Perl_lex_casestack
+#undef  lex_defer
+#define lex_defer		pPerl->Perl_lex_defer
+#undef  lex_dojoin
+#define lex_dojoin		pPerl->Perl_lex_dojoin
+#undef  lex_expect
+#define lex_expect		pPerl->Perl_lex_expect
+#undef  lex_fakebrack
+#define lex_fakebrack		pPerl->Perl_lex_fakebrack
+#undef  lex_formbrack
+#define lex_formbrack		pPerl->Perl_lex_formbrack
+#undef  lex_inpat
+#define lex_inpat		pPerl->Perl_lex_inpat
+#undef  lex_inwhat
+#define lex_inwhat		pPerl->Perl_lex_inwhat
+#undef  lex_op
+#define lex_op			pPerl->Perl_lex_op
+#undef  lex_repl
+#define lex_repl		pPerl->Perl_lex_repl
+#undef  lex_starts
+#define lex_starts		pPerl->Perl_lex_starts
+#undef  lex_state
+#define lex_state		pPerl->Perl_lex_state
+#undef  lex_stuff
+#define lex_stuff		pPerl->Perl_lex_stuff
+#undef  lineary
+#define lineary			pPerl->Perl_lineary
+#undef  linestart
+#define linestart		pPerl->Perl_linestart
+#undef  linestr
+#define linestr			pPerl->Perl_linestr
+#undef  localizing
+#define localizing		pPerl->Perl_localizing
+#undef  localpatches
+#define localpatches		pPerl->Perl_localpatches
+#undef  main_cv
+#define main_cv			pPerl->Perl_main_cv
+#undef  main_root
+#define main_root		pPerl->Perl_main_root
+#undef  main_start
+#define main_start		pPerl->Perl_main_start
+#undef  mainstack
+#define mainstack		pPerl->Perl_mainstack
+#undef  malloc_mutex
+#define malloc_mutex		pPerl->Perl_malloc_mutex
+#undef  markstack
+#define markstack		pPerl->Perl_markstack
+#undef  markstack_max
+#define markstack_max		pPerl->Perl_markstack_max
+#undef  markstack_ptr
+#define markstack_ptr		pPerl->Perl_markstack_ptr
+#undef  max_intro_pending
+#define max_intro_pending	pPerl->Perl_max_intro_pending
+#undef  maxo
+#define maxo			pPerl->Perl_maxo
+#undef  maxscream
+#define maxscream		pPerl->Perl_maxscream
+#undef  maxsysfd
+#define maxsysfd		pPerl->Perl_maxsysfd
+#undef  mess_sv
+#define mess_sv			pPerl->Perl_mess_sv
+#undef  mh
+#define mh			pPerl->Perl_mh
+#undef  min_intro_pending
+#define min_intro_pending	pPerl->Perl_min_intro_pending
+#undef  minus_F
+#define minus_F			pPerl->Perl_minus_F
+#undef  minus_a
+#define minus_a			pPerl->Perl_minus_a
+#undef  minus_c
+#define minus_c			pPerl->Perl_minus_c
+#undef  minus_l
+#define minus_l			pPerl->Perl_minus_l
+#undef  minus_n
+#define minus_n			pPerl->Perl_minus_n
+#undef  minus_p
+#define minus_p			pPerl->Perl_minus_p
+#undef  modcount
+#define modcount		pPerl->Perl_modcount
+#undef  multi_close
+#define multi_close		pPerl->Perl_multi_close
+#undef  multi_end
+#define multi_end		pPerl->Perl_multi_end
+#undef  multi_open
+#define multi_open		pPerl->Perl_multi_open
+#undef  multi_start
+#define multi_start		pPerl->Perl_multi_start
+#undef  multiline
+#define multiline		pPerl->Perl_multiline
+#undef  mystrk
+#define mystrk			pPerl->Perl_mystrk
+#undef  na
+#define na			pPerl->Perl_na
+#undef  nexttoke
+#define nexttoke		pPerl->Perl_nexttoke
+#undef  nexttype
+#define nexttype		pPerl->Perl_nexttype
+#undef  nextval
+#define nextval			pPerl->Perl_nextval
+#undef  nice_chunk
+#define nice_chunk		pPerl->Perl_nice_chunk
+#undef  nice_chunk_size
+#define nice_chunk_size		pPerl->Perl_nice_chunk_size
+#undef  nomemok
+#define nomemok			pPerl->Perl_nomemok
+#undef  nrs
+#define nrs			pPerl->Perl_nrs
+#undef  nthreads
+#define nthreads		pPerl->Perl_nthreads
+#undef  nthreads_cond
+#define nthreads_cond		pPerl->Perl_nthreads_cond
+#undef  numeric_local
+#define numeric_local		pPerl->Perl_numeric_local
+#undef  numeric_name
+#define numeric_name		pPerl->Perl_numeric_name
+#undef  numeric_standard
+#define numeric_standard	pPerl->Perl_numeric_standard
+#undef  ofmt
+#define ofmt			pPerl->Perl_ofmt
+#undef  ofs
+#define ofs			pPerl->Perl_ofs
+#undef  ofslen
+#define ofslen			pPerl->Perl_ofslen
+#undef  oldbufptr
+#define oldbufptr		pPerl->Perl_oldbufptr
+#undef  oldlastpm
+#define oldlastpm		pPerl->Perl_oldlastpm
+#undef  oldname
+#define oldname			pPerl->Perl_oldname
+#undef  oldoldbufptr
+#define oldoldbufptr		pPerl->Perl_oldoldbufptr
 #undef  op
-#define op		 			pPerl->Perl_op
-#undef  scopestack
-#define scopestack			pPerl->Perl_scopestack
-#undef  scopestack_ix
-#define scopestack_ix		pPerl->Perl_scopestack_ix
-#undef  scopestack_max
-#define scopestack_max		pPerl->Perl_scopestack_max
+#define op			pPerl->Perl_op
+#undef  op_mask
+#define op_mask			pPerl->Perl_op_mask
+#undef  op_seqmax
+#define op_seqmax		pPerl->Perl_op_seqmax
+#undef  opsave
+#define opsave			pPerl->Perl_opsave
+#undef  origalen
+#define origalen		pPerl->Perl_origalen
+#undef  origargc
+#define origargc		pPerl->Perl_origargc
+#undef  origargv
+#define origargv		pPerl->Perl_origargv
+#undef  origenviron
+#define origenviron		pPerl->Perl_origenviron
+#undef  origfilename
+#define origfilename		pPerl->Perl_origfilename
+#undef  ors
+#define ors			pPerl->Perl_ors
+#undef  orslen
+#define orslen			pPerl->Perl_orslen
+#undef  osname
+#define osname			pPerl->Perl_osname
+#undef  pad_reset_pending
+#define pad_reset_pending	pPerl->Perl_pad_reset_pending
+#undef  padix
+#define padix			pPerl->Perl_padix
+#undef  padix_floor
+#define padix_floor		pPerl->Perl_padix_floor
+#undef  parsehook
+#define parsehook		pPerl->Perl_parsehook
+#undef  patchlevel
+#define patchlevel		pPerl->Perl_patchlevel
+#undef  patleave
+#define patleave		pPerl->Perl_patleave
+#undef  pending_ident
+#define pending_ident		pPerl->Perl_pending_ident
+#undef  perl_destruct_level
+#define perl_destruct_level	pPerl->Perl_perl_destruct_level
+#undef  perldb
+#define perldb			pPerl->Perl_perldb
+#undef  pidstatus
+#define pidstatus		pPerl->Perl_pidstatus
+#undef  preambleav
+#define preambleav		pPerl->Perl_preambleav
+#undef  preambled
+#define preambled		pPerl->Perl_preambled
+#undef  preprocess
+#define preprocess		pPerl->Perl_preprocess
+#undef  profiledata
+#define profiledata		pPerl->Perl_profiledata
+#undef  reg_eval_set
+#define reg_eval_set		pPerl->Perl_reg_eval_set
+#undef  reg_flags
+#define reg_flags		pPerl->Perl_reg_flags
+#undef  reg_start_tmp
+#define reg_start_tmp		pPerl->Perl_reg_start_tmp
+#undef  reg_start_tmpl
+#define reg_start_tmpl		pPerl->Perl_reg_start_tmpl
+#undef  regbol
+#define regbol			pPerl->Perl_regbol
+#undef  regcc
+#define regcc			pPerl->Perl_regcc
+#undef  regcode
+#define regcode			pPerl->Perl_regcode
+#undef  regdata
+#define regdata			pPerl->Perl_regdata
+#undef  regdummy
+#define regdummy		pPerl->Perl_regdummy
+#undef  regendp
+#define regendp			pPerl->Perl_regendp
+#undef  regeol
+#define regeol			pPerl->Perl_regeol
+#undef  regflags
+#define regflags		pPerl->Perl_regflags
+#undef  regindent
+#define regindent		pPerl->Perl_regindent
+#undef  reginput
+#define reginput		pPerl->Perl_reginput
+#undef  reglastparen
+#define reglastparen		pPerl->Perl_reglastparen
+#undef  regnarrate
+#define regnarrate		pPerl->Perl_regnarrate
+#undef  regnaughty
+#define regnaughty		pPerl->Perl_regnaughty
+#undef  regnpar
+#define regnpar			pPerl->Perl_regnpar
+#undef  regparse
+#define regparse		pPerl->Perl_regparse
+#undef  regprecomp
+#define regprecomp		pPerl->Perl_regprecomp
+#undef  regprev
+#define regprev			pPerl->Perl_regprev
+#undef  regprogram
+#define regprogram		pPerl->Perl_regprogram
+#undef  regsawback
+#define regsawback		pPerl->Perl_regsawback
+#undef  regseen
+#define regseen			pPerl->Perl_regseen
+#undef  regsize
+#define regsize			pPerl->Perl_regsize
+#undef  regstartp
+#define regstartp		pPerl->Perl_regstartp
+#undef  regtill
+#define regtill			pPerl->Perl_regtill
+#undef  regxend
+#define regxend			pPerl->Perl_regxend
+#undef  restartop
+#define restartop		pPerl->Perl_restartop
+#undef  retstack
+#define retstack		pPerl->Perl_retstack
+#undef  retstack_ix
+#define retstack_ix		pPerl->Perl_retstack_ix
+#undef  retstack_max
+#define retstack_max		pPerl->Perl_retstack_max
+#undef  rightgv
+#define rightgv			pPerl->Perl_rightgv
+#undef  rs
+#define rs			pPerl->Perl_rs
+#undef  rsfp
+#define rsfp			pPerl->Perl_rsfp
+#undef  rsfp_filters
+#define rsfp_filters		pPerl->Perl_rsfp_filters
+#undef  runops
+#define runops			pPerl->Perl_runops
+#undef  rx
+#define rx			pPerl->Perl_rx
 #undef  savestack
-#define savestack			pPerl->Perl_savestack
+#define savestack		pPerl->Perl_savestack
 #undef  savestack_ix
 #define savestack_ix		pPerl->Perl_savestack_ix
 #undef  savestack_max
 #define savestack_max		pPerl->Perl_savestack_max
-#undef  tmps_floor
-#define tmps_floor          pPerl->Perl_tmps_floor
-#undef  tmps_ix
-#define tmps_ix             pPerl->Perl_tmps_ix
-#undef  retstack
-#define retstack			pPerl->Perl_retstack
-#undef  retstack_ix
-#define retstack_ix			pPerl->Perl_retstack_ix
-#undef  retstack_max
-#define retstack_max		pPerl->Perl_retstack_max
-#undef  markstack
-#define markstack			pPerl->Perl_markstack
-#undef  markstack_ptr
-#define markstack_ptr		pPerl->Perl_markstack_ptr
-#undef  markstack_max
-#define markstack_max		pPerl->Perl_markstack_max
-#undef  maxo
-#define maxo                pPerl->Perl_maxo
-#undef  op_mask
-#define op_mask             pPerl->Perl_op_mask
-#undef  curpad
-#define curpad				pPerl->Perl_curpad
-#undef  Sv
-#define Sv					pPerl->Perl_Sv
-#undef  Xpv
-#define Xpv					pPerl->Perl_Xpv
-#undef  tokenbuf
-#define tokenbuf			pPerl->Perl_tokenbuf
+#undef  sawampersand
+#define sawampersand		pPerl->Perl_sawampersand
+#undef  sawstudy
+#define sawstudy		pPerl->Perl_sawstudy
+#undef  sawvec
+#define sawvec			pPerl->Perl_sawvec
+#undef  scopestack
+#define scopestack		pPerl->Perl_scopestack
+#undef  scopestack_ix
+#define scopestack_ix		pPerl->Perl_scopestack_ix
+#undef  scopestack_max
+#define scopestack_max		pPerl->Perl_scopestack_max
+#undef  screamfirst
+#define screamfirst		pPerl->Perl_screamfirst
+#undef  screamnext
+#define screamnext		pPerl->Perl_screamnext
+#undef  scrgv
+#define scrgv			pPerl->Perl_scrgv
+#undef  secondgv
+#define secondgv		pPerl->Perl_secondgv
+#undef  seen_zerolen
+#define seen_zerolen		pPerl->Perl_seen_zerolen
+#undef  sh_path
+#define sh_path			pPerl->Perl_sh_path
+#undef  siggv
+#define siggv			pPerl->Perl_siggv
+#undef  sighandlerp
+#define sighandlerp		pPerl->Perl_sighandlerp
+#undef  signalstack
+#define signalstack		pPerl->Perl_signalstack
+#undef  sortcop
+#define sortcop			pPerl->Perl_sortcop
+#undef  sortcxix
+#define sortcxix		pPerl->Perl_sortcxix
+#undef  sortstack
+#define sortstack		pPerl->Perl_sortstack
+#undef  sortstash
+#define sortstash		pPerl->Perl_sortstash
+#undef  splitstr
+#define splitstr		pPerl->Perl_splitstr
+#undef  stack_base
+#define stack_base		pPerl->Perl_stack_base
+#undef  stack_max
+#define stack_max		pPerl->Perl_stack_max
+#undef  stack_sp
+#define stack_sp		pPerl->Perl_stack_sp
+#undef  start_env
+#define start_env		pPerl->Perl_start_env
 #undef  statbuf
-#define statbuf				pPerl->Perl_statbuf
-#undef  timesbuf
-#define timesbuf			pPerl->Perl_timesbuf
-#undef  di
-#define di					pPerl->Perl_di
-#undef  ds
-#define ds					pPerl->Perl_ds
-#undef  dc
-#define dc					pPerl->Perl_dc
-#undef  sv_undef
-#define sv_undef			pPerl->Perl_sv_undef
+#define statbuf			pPerl->Perl_statbuf
+#undef  statcache
+#define statcache		pPerl->Perl_statcache
+#undef  statgv
+#define statgv			pPerl->Perl_statgv
+#undef  statname
+#define statname		pPerl->Perl_statname
+#undef  statusvalue
+#define statusvalue		pPerl->Perl_statusvalue
+#undef  statusvalue_vms
+#define statusvalue_vms		pPerl->Perl_statusvalue_vms
+#undef  stdingv
+#define stdingv			pPerl->Perl_stdingv
+#undef  strchop
+#define strchop			pPerl->Perl_strchop
+#undef  strtab
+#define strtab			pPerl->Perl_strtab
+#undef  sub_generation
+#define sub_generation		pPerl->Perl_sub_generation
+#undef  sublex_info
+#define sublex_info		pPerl->Perl_sublex_info
+#undef  subline
+#define subline			pPerl->Perl_subline
+#undef  subname
+#define subname			pPerl->Perl_subname
+#undef  sv_arenaroot
+#define sv_arenaroot		pPerl->Perl_sv_arenaroot
+#undef  sv_count
+#define sv_count		pPerl->Perl_sv_count
+#undef  sv_mutex
+#define sv_mutex		pPerl->Perl_sv_mutex
 #undef  sv_no
-#define sv_no				pPerl->Perl_sv_no
+#define sv_no			pPerl->Perl_sv_no
+#undef  sv_objcount
+#define sv_objcount		pPerl->Perl_sv_objcount
+#undef  sv_root
+#define sv_root			pPerl->Perl_sv_root
+#undef  sv_undef
+#define sv_undef		pPerl->Perl_sv_undef
 #undef  sv_yes
-#define sv_yes				pPerl->Perl_sv_yes
-#undef  na
-#define na					pPerl->Perl_na
+#define sv_yes			pPerl->Perl_sv_yes
+#undef  tainted
+#define tainted			pPerl->Perl_tainted
+#undef  tainting
+#define tainting		pPerl->Perl_tainting
+#undef  thisexpr
+#define thisexpr		pPerl->Perl_thisexpr
+#undef  thr_key
+#define thr_key			pPerl->Perl_thr_key
+#undef  threadnum
+#define threadnum		pPerl->Perl_threadnum
+#undef  threads_mutex
+#define threads_mutex		pPerl->Perl_threads_mutex
+#undef  threadsv_names
+#define threadsv_names		pPerl->Perl_threadsv_names
+#undef  thrsv
+#define thrsv			pPerl->Perl_thrsv
+#undef  timesbuf
+#define timesbuf		pPerl->Perl_timesbuf
+#undef  tmps_floor
+#define tmps_floor		pPerl->Perl_tmps_floor
+#undef  tmps_ix
+#define tmps_ix			pPerl->Perl_tmps_ix
+#undef  tmps_max
+#define tmps_max		pPerl->Perl_tmps_max
+#undef  tmps_stack
+#define tmps_stack		pPerl->Perl_tmps_stack
+#undef  tokenbuf
+#define tokenbuf		pPerl->Perl_tokenbuf
+#undef  top_env
+#define top_env			pPerl->Perl_top_env
+#undef  toptarget
+#define toptarget		pPerl->Perl_toptarget
+#undef  uid
+#define uid			pPerl->Perl_uid
+#undef  unsafe
+#define unsafe			pPerl->Perl_unsafe
+#undef  warnhook
+#define warnhook		pPerl->Perl_warnhook
+#undef  xiv_arenaroot
+#define xiv_arenaroot		pPerl->Perl_xiv_arenaroot
+#undef  xiv_root
+#define xiv_root		pPerl->Perl_xiv_root
+#undef  xnv_root
+#define xnv_root		pPerl->Perl_xnv_root
+#undef  xpv_root
+#define xpv_root		pPerl->Perl_xpv_root
+#undef  xrv_root
+#define xrv_root		pPerl->Perl_xrv_root
 
-#undef  yydebug
-#define yydebug				pPerl->Perl_yydebug
-#undef  yynerrs
-#define yynerrs				pPerl->Perl_yynerrs
-#undef  yyerrflag
-#define yyerrflag			pPerl->Perl_yyerrflag
-#undef  yychar
-#define yychar				pPerl->Perl_yychar
-#undef  yyval
-#define yyval				pPerl->Perl_yyval
-#undef  yylval
-#define yylval				pPerl->Perl_yylval
-
-// functions
+/* Functions */
 
 #undef  amagic_call
 #define amagic_call         pPerl->Perl_amagic_call
@@ -952,123 +1488,147 @@
 #undef  sublex_start
 #define sublex_start          pPerl->Perl_sublex_start
 #undef  sv_2bool
-#define sv_2bool              pPerl->Perl_sv_2bool
+#define sv_2bool		pPerl->Perl_sv_2bool
 #undef  sv_2cv
-#define sv_2cv                pPerl->Perl_sv_2cv
+#define sv_2cv			pPerl->Perl_sv_2cv
 #undef  sv_2io
-#define sv_2io                pPerl->Perl_sv_2io
+#define sv_2io			pPerl->Perl_sv_2io
 #undef  sv_2iv
-#define sv_2iv                pPerl->Perl_sv_2iv
+#define sv_2iv			pPerl->Perl_sv_2iv
 #undef  sv_2mortal
-#define sv_2mortal            pPerl->Perl_sv_2mortal
+#define sv_2mortal		pPerl->Perl_sv_2mortal
 #undef  sv_2nv
-#define sv_2nv                pPerl->Perl_sv_2nv
+#define sv_2nv			pPerl->Perl_sv_2nv
 #undef  sv_2pv
-#define sv_2pv                pPerl->Perl_sv_2pv
+#define sv_2pv			pPerl->Perl_sv_2pv
+#undef  sv_2uv
+#define sv_2uv			pPerl->Perl_sv_2uv
 #undef  sv_add_arena
-#define sv_add_arena          pPerl->Perl_sv_add_arena
+#define sv_add_arena		pPerl->Perl_sv_add_arena
 #undef  sv_backoff
-#define sv_backoff            pPerl->Perl_sv_backoff
+#define sv_backoff		pPerl->Perl_sv_backoff
 #undef  sv_bless
-#define sv_bless              pPerl->Perl_sv_bless
+#define sv_bless		pPerl->Perl_sv_bless
 #undef  sv_catpv
-#define sv_catpv              pPerl->Perl_sv_catpv
+#define sv_catpv		pPerl->Perl_sv_catpv
 #undef  sv_catpvf
-#define sv_catpvf             pPerl->Perl_sv_catpvf
+#define sv_catpvf		pPerl->Perl_sv_catpvf
 #undef  sv_catpvn
-#define sv_catpvn             pPerl->Perl_sv_catpvn
+#define sv_catpvn		pPerl->Perl_sv_catpvn
 #undef  sv_catsv
-#define sv_catsv              pPerl->Perl_sv_catsv
+#define sv_catsv		pPerl->Perl_sv_catsv
 #undef  sv_chop
-#define sv_chop               pPerl->Perl_sv_chop
+#define sv_chop			pPerl->Perl_sv_chop
 #undef  sv_clean_all
-#define sv_clean_all          pPerl->Perl_sv_clean_all
+#define sv_clean_all		pPerl->Perl_sv_clean_all
 #undef  sv_clean_objs
-#define sv_clean_objs         pPerl->Perl_sv_clean_objs
+#define sv_clean_objs		pPerl->Perl_sv_clean_objs
 #undef  sv_clear
-#define sv_clear              pPerl->Perl_sv_clear
+#define sv_clear		pPerl->Perl_sv_clear
 #undef  sv_cmp
-#define sv_cmp                pPerl->Perl_sv_cmp
+#define sv_cmp			pPerl->Perl_sv_cmp
+#undef  sv_cmp_locale
+#define sv_cmp_locale		pPerl->Perl_sv_cmp_locale
+#undef  sv_collxfrm
+#define sv_collxfrm		pPerl->Perl_sv_collxfrm
+#undef  sv_compile_2op
+#define sv_compile_2op		pPerl->Perl_sv_compile_2op
 #undef  sv_dec
-#define sv_dec                pPerl->Perl_sv_dec
+#define sv_dec			pPerl->Perl_sv_dec
 #undef  sv_derived_from
-#define sv_derived_from       pPerl->Perl_sv_derived_from
+#define sv_derived_from		pPerl->Perl_sv_derived_from
 #undef  sv_dump
-#define sv_dump               pPerl->Perl_sv_dump
+#define sv_dump			pPerl->Perl_sv_dump
 #undef  sv_eq
-#define sv_eq                 pPerl->Perl_sv_eq
+#define sv_eq			pPerl->Perl_sv_eq
 #undef  sv_free
-#define sv_free               pPerl->Perl_sv_free
+#define sv_free			pPerl->Perl_sv_free
 #undef  sv_free_arenas
-#define sv_free_arenas        pPerl->Perl_sv_free_arenas
+#define sv_free_arenas		pPerl->Perl_sv_free_arenas
 #undef  sv_gets
-#define sv_gets               pPerl->Perl_sv_gets
+#define sv_gets			pPerl->Perl_sv_gets
 #undef  sv_grow
-#define sv_grow               pPerl->Perl_sv_grow
+#define sv_grow			pPerl->Perl_sv_grow
 #undef  sv_inc
-#define sv_inc                pPerl->Perl_sv_inc
+#define sv_inc			pPerl->Perl_sv_inc
 #undef  sv_insert
-#define sv_insert             pPerl->Perl_sv_insert
+#define sv_insert		pPerl->Perl_sv_insert
 #undef  sv_isa
-#define sv_isa                pPerl->Perl_sv_isa
+#define sv_isa			pPerl->Perl_sv_isa
 #undef  sv_isobject
-#define sv_isobject           pPerl->Perl_sv_isobject
+#define sv_isobject		pPerl->Perl_sv_isobject
+#undef  sv_iv
+#define sv_iv			pPerl->Perl_sv_iv
 #undef  sv_len
-#define sv_len                pPerl->Perl_sv_len
+#define sv_len			pPerl->Perl_sv_len
 #undef  sv_magic
-#define sv_magic              pPerl->Perl_sv_magic
+#define sv_magic		pPerl->Perl_sv_magic
 #undef  sv_mortalcopy
-#define sv_mortalcopy         pPerl->Perl_sv_mortalcopy
-#undef  sv_mortalgrow
-#define sv_mortalgrow         pPerl->sv_mortalgrow
+#define sv_mortalcopy		pPerl->Perl_sv_mortalcopy
 #undef  sv_newmortal
-#define sv_newmortal          pPerl->Perl_sv_newmortal
+#define sv_newmortal		pPerl->Perl_sv_newmortal
 #undef  sv_newref
-#define sv_newref             pPerl->Perl_sv_newref
+#define sv_newref		pPerl->Perl_sv_newref
+#undef  sv_nv
+#define sv_nv			pPerl->Perl_sv_nv
 #undef  sv_pvn
-#define sv_pvn                pPerl->Perl_sv_pvn
+#define sv_pvn			pPerl->Perl_sv_pvn
 #undef  sv_pvn_force
-#define sv_pvn_force          pPerl->Perl_sv_pvn_force
+#define sv_pvn_force		pPerl->Perl_sv_pvn_force
 #undef  sv_reftype
-#define sv_reftype            pPerl->Perl_sv_reftype
+#define sv_reftype		pPerl->Perl_sv_reftype
 #undef  sv_replace
-#define sv_replace            pPerl->Perl_sv_replace
+#define sv_replace		pPerl->Perl_sv_replace
 #undef  sv_report_used
-#define sv_report_used        pPerl->Perl_sv_report_used
+#define sv_report_used		pPerl->Perl_sv_report_used
 #undef  sv_reset
-#define sv_reset              pPerl->Perl_sv_reset
+#define sv_reset		pPerl->Perl_sv_reset
 #undef  sv_setiv
-#define sv_setiv              pPerl->Perl_sv_setiv
+#define sv_setiv		pPerl->Perl_sv_setiv
 #undef  sv_setnv
-#define sv_setnv              pPerl->Perl_sv_setnv
-#undef  sv_setref_iv
-#define sv_setref_iv          pPerl->Perl_sv_setref_iv
-#undef  sv_setref_nv
-#define sv_setref_nv          pPerl->Perl_sv_setref_nv
-#undef  sv_setref_pv
-#define sv_setref_pv          pPerl->Perl_sv_setref_pv
-#undef  sv_setref_pvn
-#define sv_setref_pvn         pPerl->Perl_sv_setref_pvn
+#define sv_setnv		pPerl->Perl_sv_setnv
 #undef  sv_setpv
-#define sv_setpv              pPerl->Perl_sv_setpv
+#define sv_setpv		pPerl->Perl_sv_setpv
 #undef  sv_setpvf
-#define sv_setpvf             pPerl->Perl_sv_setpvf
+#define sv_setpvf		pPerl->Perl_sv_setpvf
+#undef  sv_setpviv
+#define sv_setpviv		pPerl->Perl_sv_setpviv
 #undef  sv_setpvn
-#define sv_setpvn             pPerl->Perl_sv_setpvn
+#define sv_setpvn		pPerl->Perl_sv_setpvn
+#undef  sv_setref_iv
+#define sv_setref_iv		pPerl->Perl_sv_setref_iv
+#undef  sv_setref_nv
+#define sv_setref_nv		pPerl->Perl_sv_setref_nv
+#undef  sv_setref_pv
+#define sv_setref_pv		pPerl->Perl_sv_setref_pv
+#undef  sv_setref_pvn
+#define sv_setref_pvn		pPerl->Perl_sv_setref_pvn
 #undef  sv_setsv
-#define sv_setsv              pPerl->Perl_sv_setsv
-#undef  sv_unglob
-#define sv_unglob             pPerl->sv_unglob
+#define sv_setsv		pPerl->Perl_sv_setsv
+#undef  sv_setuv
+#define sv_setuv		pPerl->Perl_sv_setuv
+#undef  sv_taint
+#define sv_taint		pPerl->Perl_sv_taint
+#undef  sv_tainted
+#define sv_tainted		pPerl->Perl_sv_tainted
+#undef  sv_true
+#define sv_true			pPerl->Perl_sv_true
 #undef  sv_unmagic
-#define sv_unmagic            pPerl->Perl_sv_unmagic
+#define sv_unmagic		pPerl->Perl_sv_unmagic
 #undef  sv_unref
-#define sv_unref              pPerl->Perl_sv_unref
+#define sv_unref		pPerl->Perl_sv_unref
+#undef  sv_untaint
+#define sv_untaint		pPerl->Perl_sv_untaint
 #undef  sv_upgrade
-#define sv_upgrade            pPerl->Perl_sv_upgrade
+#define sv_upgrade		pPerl->Perl_sv_upgrade
 #undef  sv_usepvn
-#define sv_usepvn             pPerl->Perl_sv_usepvn
+#define sv_usepvn		pPerl->Perl_sv_usepvn
+#undef  sv_uv
+#define sv_uv			pPerl->Perl_sv_uv
+#undef  sv_vcatpvfn
+#define sv_vcatpvfn		pPerl->Perl_sv_vcatpvfn
 #undef  sv_vsetpvfn
-#define sv_vsetpvfn           pPerl->Perl_sv_vsetpvfn
+#define sv_vsetpvfn		pPerl->Perl_sv_vsetpvfn
 #undef  taint_env
 #define taint_env			pPerl->Perl_taint_env
 #undef  taint_not

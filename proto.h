@@ -827,7 +827,6 @@ char * regcppop _((void));
 void dump _((char *pat,...));
 #ifdef WIN32
 int do_aspawn _((void *vreally, void **vmark, void **vsp));
-void BootDynaLoader(void);
 #endif
 
 #ifdef DEBUGGING

@@ -940,9 +940,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
     CvPADLIST(compcv) = comppadlist;
 
     boot_core_UNIVERSAL();
-#if defined(WIN32) && defined(PERL_OBJECT)
-	BootDynaLoader();
-#endif
+
     if (xsinit)
 	(*xsinit)(THIS);	/* in case linked C routines want magical variables */
 #if defined(VMS) || defined(WIN32) || defined(DJGPP)

@@ -1432,53 +1432,53 @@ CPerlObj::ErrorNo(void)
 void
 CPerlObj::Init(void)
 {
-	curcop = &compiling;
-	cxstack_ix = -1;
-	cxstack_max = 128;
-	chopset = " \n-";
+    curcop = &compiling;
+    cxstack_ix = -1;
+    cxstack_max = 128;
+    chopset = " \n-";
 #ifdef USE_THREADS
-	threadsv_names = THREADSV_NAMES;
-	tmps_ix = -1;
-	tmps_floor = -1;
+    threadsv_names = THREADSV_NAMES;
+    tmps_ix = -1;
+    tmps_floor = -1;
 #endif
-	maxo = MAXO;
-	sh_path = SH_PATH;
-	runops = RUNOPS_DEFAULT;
+    maxo = MAXO;
+    sh_path = SH_PATH;
+    runops = RUNOPS_DEFAULT;
 #ifdef CSH
-	cshname = CSH;
+    cshname = CSH;
 #endif
-	rsfp = Nullfp;
-	expect = XSTATE;
+    rsfp = Nullfp;
+    expect = XSTATE;
 #ifdef USE_LOCALE_COLLATE
-	collation_standard = TRUE;
-	collxfrm_mult = 2;
+    collation_standard = TRUE;
+    collxfrm_mult = 2;
 #endif
 #ifdef USE_LOCALE_NUMERIC
-	numeric_standard = TRUE;
-	numeric_local = TRUE;
+    numeric_standard = TRUE;
+    numeric_local = TRUE;
 #endif /* !USE_LOCALE_NUMERIC */
 
 /* constants (these are not literals to facilitate pointer comparisons) */
-	Yes = "1";
-	No = "";
-	hexdigit = "0123456789abcdef0123456789ABCDEFx";
-	patleave = "\\.^$@dDwWsSbB+*?|()-nrtfeaxc0123456789[{]}";
-	splitstr = " ";
-	perl_destruct_level = 0;
-	maxsysfd = MAXSYSFD;
-	statname = Nullsv;
-	maxscream = -1;
-	op_mask = NULL;
-	dlmax = 128;
-	curcopdb = NULL;
-	copline = NOLINE;
-	laststatval = -1;
-	laststype = OP_STAT;
-	generation = 100;
+    Yes = "1";
+    No = "";
+    hexdigit = "0123456789abcdef0123456789ABCDEFx";
+    patleave = "\\.^$@dDwWsSbB+*?|()-nrtfeaxc0123456789[{]}";
+    splitstr = " ";
+    perl_destruct_level = 0;
+    maxsysfd = MAXSYSFD;
+    statname = Nullsv;
+    maxscream = -1;
+    op_mask = NULL;
+    dlmax = 128;
+    curcopdb = NULL;
+    copline = NOLINE;
+    laststatval = -1;
+    laststype = OP_STAT;
+    generation = 100;
 
 #ifdef WIN32
-	New(2904, environ, 1, char*);
-	*environ = NULL;
+    New(2904, environ, 1, char*);
+    *environ = NULL;
 #endif
 }
 
@@ -1486,24 +1486,14 @@ CPerlObj::Init(void)
 bool
 do_exec(char *cmd)
 {
-	return PerlProc_Cmd(cmd);
+    return PerlProc_Cmd(cmd);
 }
 
 int
 do_aspawn(void *vreally, void **vmark, void **vsp)
 {
-	return PerlProc_aspawn(vreally, vmark, vsp);
+    return PerlProc_aspawn(vreally, vmark, vsp);
 }
-
-EXTERN_C void boot_DynaLoader _((CPERLarg_ CV* cv));
-
-void CPerlObj::BootDynaLoader(void)
-{
-    char *file = __FILE__;
-    dXSUB_SYS;
-    newXS("DynaLoader::boot_DynaLoader", boot_DynaLoader, file);
-}
-
 #endif  /* WIN32 */
 
 #endif   /* PERL_OBJECT */

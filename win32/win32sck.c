@@ -17,6 +17,13 @@
 #include <windows.h>
 #include "EXTERN.h"
 #include "perl.h"
+
+#if defined(PERL_OBJECT)
+#define NO_XSLOCKS
+extern CPerlObj* pPerl;
+#include "XSUB.h"
+#endif
+
 #include <sys/socket.h>
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -613,7 +620,7 @@ win32_savecopyservent(struct servent*d, struct servent*s, const char *proto)
 	d->s_proto = s->s_proto;
     else
 #endif
-	if (proto && strlen(proto))
+    if (proto && strlen(proto))
 	d->s_proto = (char *)proto;
     else
 	d->s_proto = "tcp";

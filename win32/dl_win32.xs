@@ -41,9 +41,6 @@ dl_private_init(CPERLarg)
     (void)dl_generic_private_init(THIS);
 }
 
-#ifdef PERL_OBJECT
-#define dl_static_linked(x) 0
-#else
 static int
 dl_static_linked(char *filename)
 {
@@ -53,7 +50,6 @@ dl_static_linked(char *filename)
     };
     return 0;
 }
-#endif
 
 MODULE = DynaLoader	PACKAGE = DynaLoader
 

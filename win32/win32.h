@@ -39,10 +39,14 @@ typedef long long __int64;
  * otherwise import it.
  */
 
+#if defined(PERL_OBJECT)
+#define DllExport
+#else
 #if defined(PERLDLL) || defined(WIN95FIX)
 #define DllExport __declspec(dllexport)
 #else 
 #define DllExport __declspec(dllimport)
+#endif
 #endif
 
 #define  WIN32_LEAN_AND_MEAN

@@ -1,4 +1,0 @@
-LIBRARY PerlCore
-DESCRIPTION 'Perl interpreter'
-EXPORTS
-	perl_alloc
