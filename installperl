@@ -573,13 +573,15 @@ sub installlib {
 
     my $name = $_;
 
-    if ($name eq 'CVS' && -d $name) {
+    # Ignore RCS and CVS directories.
+    if (($name eq 'CVS' or $name eq 'RCS') and -d $name) {
 	$File::Find::prune = 1;
 	return;
     }
     
-    # ignore patch backups and the .exists files.
-    return if $name =~ m{\.orig$|~$|^\.exists};
+    # ignore patch backups, RCS files, emacs backup & temp files and the
+    # .exists files.
+    return if $name =~ m{\.orig$|~$|^#.+#$|,v$|^\.exists};
 
     $name = "$dir/$name" if $dir ne '';
 
