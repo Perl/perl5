@@ -129,7 +129,9 @@ sub try_compile_and_link {
         $cccmd = "$Config{'cc'} -o $tmp $ccflags $tmp.c @$LIBS $errornull"
 	    unless defined $cccmd;
 
-	if ($^O eq 'VMS') {
+       if ($^O eq 'mpeix') {
+           $cccmd = 'MPEAUTOCONF=1 '.$cccmd;
+       } elsif ($^O eq 'VMS') {                                                
 	    open( CMDFILE, ">$tmp.com" );
 	    print CMDFILE "\$ SET MESSAGE/NOFACILITY/NOSEVERITY/NOIDENT/NOTEXT\n";
 	    print CMDFILE "\$ $cccmd\n";
