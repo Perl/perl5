@@ -5233,7 +5233,7 @@ S_pending_ident(pTHX)
                 gv_fetchpv(SvPVX(sym),
                     (PL_in_eval
                         ? (GV_ADDMULTI | GV_ADDINEVAL)
-                        : TRUE
+                        : GV_ADDMULTI
                     ),
                     ((PL_tokenbuf[0] == '$') ? SVt_PV
                      : (PL_tokenbuf[0] == '@') ? SVt_PVAV
