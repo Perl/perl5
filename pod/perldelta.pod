@@ -517,7 +517,7 @@ Several Unicode fixes (but still not perfect).
 
 BOMs (byte order marks) in the beginning of Perl files
 (scripts, modules) should now be transparently skipped.
-UTF-16 (UCS-2)encoded Perl files should now be read correctly.
+UTF-16 (UCS-2) encoded Perl files should now be read correctly.
 
 =item *
 
