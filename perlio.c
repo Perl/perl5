@@ -385,7 +385,7 @@ PerlIO_default_layer(I32 n)
            av_push(PerlIO_layer_av,SvREFCNT_inc(layer));
           }
          else
-          Perl_warn(aTHX_ "Unknown layer %.*s",(e-s),s);
+          Perl_warn(aTHX_ "perlio: unknown layer \"%.*s\"",(e-s),s);
          s = e;
         }
       }

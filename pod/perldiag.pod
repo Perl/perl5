@@ -2584,6 +2584,15 @@ the problem, however, you will get the same error message each time
 you run Perl.  How to really fix the problem can be found in
 L<perllocale> section B<LOCALE PROBLEMS>.
 
+=item perlio: unknown layer "%s"
+
+(S) An attempt was made to push an unknown layer onto the Perl I/O
+system.  (Layers take care of transforming data between external and
+internal representations.)  Note that some layers, such as C<mmap>,
+are not supported in all environments.  If your program didn't
+explicitly request the failing operation, it may be the result of the
+value of the environment variable PERLIO.
+
 =item Permission denied
 
 (F) The setuid emulator in suidperl decided you were up to no good.
