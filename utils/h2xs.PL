@@ -13,9 +13,9 @@ use Cwd;
 
 # This forces PL files to create target in same directory as PL file.
 # This is so that make depend always knows where to find PL derivatives.
-$origdir = cwd;
+my $origdir = cwd;
 chdir dirname($0);
-$file = basename($0, '.PL');
+my $file = basename($0, '.PL');
 $file .= '.com' if $^O eq 'VMS';
 
 open OUT,">$file" or die "Can't create $file: $!";
@@ -41,7 +41,7 @@ h2xs - convert .h C header files to Perl extensions
 
 =head1 SYNOPSIS
 
-B<h2xs> [B<-ACOPXcdf>] [B<-v> version] [B<-n> module_name] [B<-p> prefix] [B<-s> sub] [headerfile ... [extra_libraries]]
+B<h2xs> [B<-ACOPXacdfkmx>] [B<-F> addflags] [B<-M> fmask] [B<-n> module_name] [B<-o> tmask] [B<-p> prefix] [B<-s> subs] [B<-v> version] [headerfile ... [extra_libraries]]
 
 B<h2xs> B<-h>
 
@@ -78,7 +78,7 @@ S<C<use AutoLoader>> statement from the .pm file.
 Omits creation of the F<Changes> file, and adds a HISTORY section to
 the POD template.
 
-=item B<-F>
+=item B<-F> I<addflags>
 
 Additional flags to specify to C preprocessor when scanning header for
 function declarations.  Should not be used without B<-x>.
@@ -350,7 +350,7 @@ use Getopt::Std;
 
 sub usage{
 	warn "@_\n" if @_;
-    die "h2xs [-ACOPXcdfh] [-v version] [-n module_name] [-p prefix] [-s subs] [headerfile [extra_libraries]]
+    die "h2xs [-ACOPXacdfhkmx] [-F addflags] [-M fmask] [-n module_name] [-o tmask] [-p prefix] [-s subs] [-v version] [headerfile [extra_libraries]]
 version: $H2XS_VERSION
     -A   Omit all autoloading facilities (implies -c).
     -C   Omit creating the Changes file, add HISTORY heading to stub POD.
