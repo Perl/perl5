@@ -1923,8 +1923,11 @@ PP(pp_entersub)
      */
     MUTEX_LOCK(CvMUTEXP(cv));
     if (CvFLAGS(cv) & CVf_LOCKED) {
-	MAGIC *mg;	
-	if (CvFLAGS(cv) & CVf_METHOD) {
+	MAGIC *mg;	  
+	if (CvFLAGS(cv) & CVf_PACKAGE) {
+	    sv = (SV *) CvGV(cv);
+	}
+	else if (CvFLAGS(cv) & CVf_METHOD) {
 	    if (SP > stack_base + TOPMARK)
 		sv = *(stack_base + TOPMARK + 1);
 	    else {

@@ -34,17 +34,27 @@ Valid attributes are as follows.
 
 Indicates that the invoking subroutine is a method.
 
+=item package
+
+If the subroutine is locked, lock the package in which it is
+defined.
+
 =item locked
 
 Setting this attribute is only meaningful when the subroutine or
-method is to be called by multiple threads. When set on a method
-subroutine (i.e. one marked with the B<method> attribute above),
-perl ensures that any invocation of it implicitly locks its first
-argument before execution. When set on a non-method subroutine,
-perl ensures that a lock is taken on the subroutine itself before
-execution. The semantics of the lock are exactly those of one
-explicitly taken with the C<lock> operator immediately after the
-subroutine is entered.
+method is to be called by multiple threads. When the B<package>
+attribute is set then before executing the subroutine or method
+perl acquires a lock on the package in which the subroutine is
+defined. 
+
+Otherwise, when set on a method subroutine (i.e. one
+marked with the B<method> attribute above), perl ensures that any
+invocation of it implicitly locks its first argument before
+execution. When set on a non-method subroutine,
+(without a B<package> attribute) perl ensures that a lock is taken 
+on the subroutine itself before execution. The semantics of the
+lock are exactly those of one explicitly taken with the C<lock> 
+operator immediately after the subroutine is entered.
 
 =back
 
