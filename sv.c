@@ -2103,6 +2103,7 @@ register SV *sstr;
 	 */
 
 	if (SvTEMP(sstr) &&		/* slated for free anyway? */
+	    SvREFCNT(sstr) == 1 && 	/* and no other references to it? */
 	    !(sflags & SVf_OOK)) 	/* and not involved in OOK hack? */
 	{
 	    if (SvPVX(dstr)) {		/* we know that dtype >= SVt_PV */
