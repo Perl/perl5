@@ -4557,7 +4557,7 @@ sub cmd_l {
     if ($line =~ /^(\$.*)/s) {
 
         # Set up for DB::eval() - evaluate in *user* context.
-        $evalarg = $2;
+        $evalarg = $1;
         my ($s) = &eval;
 
         # Ooops. Bad scalar.
