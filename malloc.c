@@ -441,8 +441,8 @@ union	overhead {
 	double	strut;			/* alignment problems */
 #endif
 	struct {
-		u_char	ovu_magic;	/* magic number */
 		u_char	ovu_index;	/* bucket # */
+		u_char	ovu_magic;	/* magic number */
 #ifdef RCHECK
 		u_short	ovu_size;	/* actual block size */
 		u_int	ovu_rmagic;	/* range magic number */

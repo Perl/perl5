@@ -95,7 +95,7 @@ as well as L<"I/O Operators">.
 
 =head2 The Arrow Operator
 
-"C<-E<gt>>" is an infix dereference operator, just as it is in C
+"C<< -> >>" is an infix dereference operator, just as it is in C
 and C++.  If the right side is either a C<[...]>, C<{...}>, or a
 C<(...)> subscript, then the left side must be either a hard or
 symbolic reference to an array, a hash, or a subroutine respectively.
@@ -262,16 +262,16 @@ See also L<"Terms and List Operators (Leftward)">.
 
 =head2 Relational Operators
 
-Binary "E<lt>" returns true if the left argument is numerically less than
+Binary "<" returns true if the left argument is numerically less than
 the right argument.
 
-Binary "E<gt>" returns true if the left argument is numerically greater
+Binary ">" returns true if the left argument is numerically greater
 than the right argument.
 
-Binary "E<lt>=" returns true if the left argument is numerically less than
+Binary "<=" returns true if the left argument is numerically less than
 or equal to the right argument.
 
-Binary "E<gt>=" returns true if the left argument is numerically greater
+Binary ">=" returns true if the left argument is numerically greater
 than or equal to the right argument.
 
 Binary "lt" returns true if the left argument is stringwise less than
@@ -294,7 +294,7 @@ the right argument.
 Binary "!=" returns true if the left argument is numerically not equal
 to the right argument.
 
-Binary "E<lt>=E<gt>" returns -1, 0, or 1 depending on whether the left
+Binary "<=>" returns -1, 0, or 1 depending on whether the left
 argument is numerically less than, equal to, or greater than the right
 argument.
 
@@ -544,7 +544,7 @@ argument and returns that value.  This is just like C's comma operator.
 In list context, it's just the list argument separator, and inserts
 both its arguments into the list.
 
-The =E<gt> digraph is mostly just a synonym for the comma operator.  It's useful for
+The => digraph is mostly just a synonym for the comma operator.  It's useful for
 documenting arguments that come in pairs.  As of release 5.001, it also forces
 any word to the left of it to be interpreted as a string.
 
@@ -646,7 +646,7 @@ sorts of brackets (round, angle, square, curly) will all nest, which means
 that 
 
 	q{foo{bar}baz} 
-	
+
 is the same as 
 
 	'foo{bar}baz'
@@ -1130,7 +1130,7 @@ Perl 4, Perl 5 treats backticks as normal delimiters; the replacement
 text is not evaluated as a command.  If the
 PATTERN is delimited by bracketing quotes, the REPLACEMENT has its own
 pair of quotes, which may or may not be bracketing quotes, e.g.,
-C<s(foo)(bar)> or C<sE<lt>fooE<gt>/bar/>.  A C</e> will cause the
+C<s(foo)(bar)> or C<< s<foo>/bar/ >>.  A C</e> will cause the
 replacement portion to be interpreted as a full-fledged Perl expression
 and eval()ed right then and there.  It is, however, syntax checked at
 compile-time.
@@ -1181,8 +1181,8 @@ Examples:
     s/([^ ]*) *([^ ]*)/$2 $1/;	# reverse 1st two fields
 
 Note the use of $ instead of \ in the last example.  Unlike
-B<sed>, we use the \E<lt>I<digit>E<gt> form in only the left hand side.
-Anywhere else it's $E<lt>I<digit>E<gt>.
+B<sed>, we use the \<I<digit>> form in only the left hand side.
+Anywhere else it's $<I<digit>>.
 
 Occasionally, you can't use just a C</g> to get all the changes
 to occur that you might want.  Here are two common cases:
@@ -1320,8 +1320,8 @@ one to five, but these passes are always performed in the same order.
 The first pass is finding the end of the quoted construct, whether
 it be a multicharacter delimiter C<"\nEOF\n"> in the C<<<EOF>
 construct, a C</> that terminates a C<qq//> construct, a C<]> which
-terminates C<qq[]> construct, or a C<E<gt>> which terminates a
-fileglob started with C<E<lt>>.
+terminates C<qq[]> construct, or a C<< > >> which terminates a
+fileglob started with C<< < >>.
 
 When searching for single-character non-pairing delimiters, such
 as C</>, combinations of C<\\> and C<\/> are skipped.  However,
@@ -1377,7 +1377,7 @@ No interpolation is performed.
 
 The only interpolation is removal of C<\> from pairs C<\\>.
 
-=item C<"">, C<``>, C<qq//>, C<qx//>, C<<file*globE<gt>>
+=item C<"">, C<``>, C<qq//>, C<qx//>, C<< <file*glob> >>
 
 C<\Q>, C<\U>, C<\u>, C<\L>, C<\l> (possibly paired with C<\E>) are
 converted to corresponding Perl constructs.  Thus, C<"$foo\Qbaz$bar">
@@ -1412,7 +1412,7 @@ scalar.
 
 Note also that the interpolation code needs to make a decision on
 where the interpolated scalar ends.  For instance, whether 
-C<"a $b -E<gt> {c}"> really means:
+C<< "a $b -> {c}" >> really means:
 
   "a " . $b . " -> {c}";
 
@@ -1587,7 +1587,7 @@ to terminate the loop, they should be tested for explicitly:
     while (($_ = <STDIN>) ne '0') { ... }
     while (<STDIN>) { last unless $_; ... }
 
-In other boolean contexts, C<E<lt>I<filehandle>E<gt>> without an
+In other boolean contexts, C<< <I<filehandle>> >> without an
 explicit C<defined> test or comparison elicit a warning if the B<-w>
 command-line switch (the C<$^W> variable) is in effect.
 
@@ -1598,18 +1598,18 @@ rather than global.)  Additional filehandles may be created with
 the open() function, amongst others.  See L<perlopentut> and
 L<perlfunc/open> for details on this.
 
-If a E<lt>FILEHANDLEE<gt> is used in a context that is looking for
+If a <FILEHANDLE> is used in a context that is looking for
 a list, a list comprising all input lines is returned, one line per
 list element.  It's easy to grow to a rather large data space this
 way, so use with care.
 
-E<lt>FILEHANDLEE<gt> may also be spelled C<readline(*FILEHANDLE)>.
+<FILEHANDLE> may also be spelled C<readline(*FILEHANDLE)>.
 See L<perlfunc/readline>.
 
-The null filehandle E<lt>E<gt> is special: it can be used to emulate the
-behavior of B<sed> and B<awk>.  Input from E<lt>E<gt> comes either from
+The null filehandle <> is special: it can be used to emulate the
+behavior of B<sed> and B<awk>.  Input from <> comes either from
 standard input, or from each file listed on the command line.  Here's
-how it works: the first time E<lt>E<gt> is evaluated, the @ARGV array is
+how it works: the first time <> is evaluated, the @ARGV array is
 checked, and if it is empty, C<$ARGV[0]> is set to "-", which when opened
 gives you standard input.  The @ARGV array is then processed as a list
 of filenames.  The loop
@@ -1631,11 +1631,11 @@ is equivalent to the following Perl-like pseudo code:
 except that it isn't so cumbersome to say, and will actually work.
 It really does shift the @ARGV array and put the current filename
 into the $ARGV variable.  It also uses filehandle I<ARGV>
-internally--E<lt>E<gt> is just a synonym for E<lt>ARGVE<gt>, which
+internally--<> is just a synonym for <ARGV>, which
 is magical.  (The pseudo code above doesn't work because it treats
-E<lt>ARGVE<gt> as non-magical.)
+<ARGV> as non-magical.)
 
-You can modify @ARGV before the first E<lt>E<gt> as long as the array ends up
+You can modify @ARGV before the first <> as long as the array ends up
 containing the list of filenames you really want.  Line numbers (C<$.>)
 continue as though the input were one big happy file.  See the example
 in L<perlfunc/eof> for how to reset line numbers on each file.
@@ -1665,12 +1665,12 @@ Getopts modules or put a loop on the front like this:
 	# ...		# code for each line
     }
 
-The E<lt>E<gt> symbol will return C<undef> for end-of-file only once.  
+The <> symbol will return C<undef> for end-of-file only once.  
 If you call it again after this, it will assume you are processing another 
 @ARGV list, and if you haven't set @ARGV, will read input from STDIN.
 
 If angle brackets contain is a simple scalar variable (e.g.,
-E<lt>$fooE<gt>), then that variable contains the name of the
+<$foo>), then that variable contains the name of the
 filehandle to input from, or its typeglob, or a reference to the
 same.  For example:
 
@@ -1682,16 +1682,16 @@ scalar variable containing a filehandle name, typeglob, or typeglob
 reference, it is interpreted as a filename pattern to be globbed, and
 either a list of filenames or the next filename in the list is returned,
 depending on context.  This distinction is determined on syntactic
-grounds alone.  That means C<E<lt>$xE<gt>> is always a readline() from
-an indirect handle, but C<E<lt>$hash{key}E<gt>> is always a glob().
+grounds alone.  That means C<< <$x> >> is always a readline() from
+an indirect handle, but C<< <$hash{key}> >> is always a glob().
 That's because $x is a simple scalar variable, but C<$hash{key}> is
 not--it's a hash element.
 
 One level of double-quote interpretation is done first, but you can't
-say C<E<lt>$fooE<gt>> because that's an indirect filehandle as explained
+say C<< <$foo> >> because that's an indirect filehandle as explained
 in the previous paragraph.  (In older versions of Perl, programmers
 would insert curly brackets to force interpretation as a filename glob:
-C<E<lt>${foo}E<gt>>.  These days, it's considered cleaner to call the
+C<< <${foo}> >>.  These days, it's considered cleaner to call the
 internal function directly as C<glob($foo)>, which is probably the right
 way to have done it in the first place.)  For example:
 
