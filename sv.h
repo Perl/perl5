@@ -505,7 +505,8 @@ string.
 Returns the length of the string which is in the SV.  See C<SvLEN>.
 
 =for apidoc Am|STRLEN|SvLEN|SV* sv
-Returns the size of the string buffer in the SV.  See C<SvCUR>.
+Returns the size of the string buffer in the SV, not including any part
+attributable to C<SvOOK>.  See C<SvCUR>.
 
 =for apidoc Am|char*|SvEND|SV* sv
 Returns a pointer to the last character in the string which is in the SV.
