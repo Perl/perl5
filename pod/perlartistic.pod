@@ -1,7 +1,7 @@
 
 =head1 NAME
 
-perlartistic -- the Perl Artistic License
+perlartistic - the Perl Artistic License
 
 =head1 SYNOPSIS
 
