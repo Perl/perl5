@@ -28,6 +28,401 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 20759] By: jhi                                   on 2003/08/18  09:53:18
+        Log: Integrate:
+             [ 20758]
+             Subject: [PATCH] Uppercase globals in Pod::Html
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 18 Aug 2003 03:29:09 -0700
+             Message-ID: <20030818102909.GJ823@windhund.schwern.org>
+     Branch: maint-5.8/perl
+	  !> lib/Pod/Html.pm
+____________________________________________________________________________
+[ 20757] By: jhi                                   on 2003/08/18  09:30:25
+        Log: Integrate:
+             [ 20749]
+             Subject: [PATCH] Taint safe Cwd::_qnx_abs_path()
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sat, 16 Aug 2003 14:58:25 -0700
+             Message-ID: <20030816215824.GF5859@windhund.schwern.org>
+             
+             (plus local *REALPATH)
+             
+             [ 20750]
+             Subject: [PATCH] Pod::Html test clean-up (was Re: maint @ 20617 (on VMS))
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Sun, 17 Aug 2003 23:28:21 -0500
+             Message-ID: <3F4055E5.2070407@mac.com>
+             
+             [ 20751]
+             utf8::is_utf8() wasn't there in 5.8.0.
+             
+             [ 20752]
+             I could have sworn the base class method was there.
+             
+             [ 20753]
+             Subject: Re: [PATCH] Pod::Html test clean-up (was Re: maint @ 20617 (on VMS))
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 18 Aug 2003 01:34:34 -0700
+             Message-ID: <20030818083433.GB823@windhund.schwern.org>
+             
+             [ 20754]
+             Upgrade to ExtUtils::MakeMaker 6.16.
+             
+             [ 20755]
+             Warn about the slowness of memory debuggers.
+             
+             [ 20756]
+             Subject: [PATCH] Pod::Html  unifying global variable declaration and initialization
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 18 Aug 2003 02:44:31 -0700
+             Message-ID: <20030818094431.GG823@windhund.schwern.org>
+     Branch: maint-5.8/perl
+	  +> lib/ExtUtils/t/prereq_print.t
+	  !> MANIFEST lib/Cwd.pm lib/ExtUtils/Changes
+	  !> lib/ExtUtils/Installed.pm lib/ExtUtils/MANIFEST.SKIP
+	  !> lib/ExtUtils/META.yml lib/ExtUtils/MM_Win32.pm
+	  !> lib/ExtUtils/MM_Win95.pm lib/ExtUtils/MakeMaker.pm
+	  !> lib/ExtUtils/Manifest.pm lib/ExtUtils/t/00setup_dummy.t
+	  !> lib/ExtUtils/t/Manifest.t lib/File/Spec/Unix.pm
+	  !> lib/Pod/Html.pm lib/Pod/t/pod2html-lib.pl lib/utf8.pm
+	  !> pod/perlhack.pod
+____________________________________________________________________________
+[ 20748] By: jhi                                   on 2003/08/17  08:46:49
+        Log: Integrate:
+             [ 20747]
+             Subject: [PATCH] Re: [BUG] string loses its utf8 flag on die
+             From: Enache Adrian <enache@rdslink.ro>
+             Date: Sat, 16 Aug 2003 16:03:16 +0300
+             Message-ID: <20030816130316.GA1654@ratsnest.hole>
+             
+             Subject: Re: [PATCH] Re: [BUG] string loses its utf8 flag on die
+             From: Enache Adrian <enache@rdslink.ro>
+             Date: Sun, 17 Aug 2003 04:42:22 +0300
+             Message-ID: <20030817014222.GA1287@ratsnest.hole>
+             
+             (I need a Romanian dictionary)
+     Branch: maint-5.8/perl
+	  !> t/op/die.t util.c
+____________________________________________________________________________
+[ 20746] By: jhi                                   on 2003/08/17  07:59:42
+        Log: Integrate:
+             [ 20744]
+             The "reduce memory footprint and increase speed by not
+             unconditionally pulling in Cwd"	part of
+             
+             Subject: [PATCH] File::Spec on diet
+             From: Tels <perl_dummy@bloodgate.com>
+             Date: Mon, 7 Jul 2003 22:41:42 +0200
+             Message-Id: <200307072235.03364@bloodgate.com>
+             
+             was still valid.
+             
+             [ 20745]
+             The lib/Cwd.pm diet part of
+             
+             Subject: [PATCH] File::Spec on diet
+             From: Tels <perl_dummy@bloodgate.com>
+             Date: Mon, 7 Jul 2003 22:41:42 +0200
+             Message-Id: <200307072235.03364@bloodgate.com>
+     Branch: maint-5.8/perl
+	  !> lib/Cwd.pm lib/File/Spec/Cygwin.pm lib/File/Spec/Epoc.pm
+	  !> lib/File/Spec/Mac.pm lib/File/Spec/OS2.pm
+	  !> lib/File/Spec/Unix.pm lib/File/Spec/VMS.pm
+	  !> lib/File/Spec/Win32.pm
+____________________________________________________________________________
+[ 20743] By: jhi                                   on 2003/08/17  07:10:24
+        Log: Subject: Re: [PATCH] Taint problems in Cwd::abs_path
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sat, 16 Aug 2003 14:45:26 -0700
+             Message-ID: <20030816214526.GE5859@windhund.schwern.org>
+     Branch: maint-5.8/perl
+	   ! ext/Cwd/t/taint.t
+____________________________________________________________________________
+[ 20742] By: jhi                                   on 2003/08/17  07:09:33
+        Log: Integrate:
+             [ 20734]
+             Subject: [PATCH] Taint problems in Cwd::abs_path
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Fri, 15 Aug 2003 18:43:45 -0700
+             Message-ID: <20030816014345.GE4023@windhund.schwern.org>
+             
+             [ 20736]
+             Avoid a "Subroutine Cwd::fastcwd redefined" warning when
+             loading Cwd. Undefing &Cwd::fastcwd beforehand is inconvenient
+             because loading the XS part of Cwd might fail.
+             
+             (but not the ext/Cwd/t/taint.t bits)
+     Branch: maint-5.8/perl
+	  !> lib/Cwd.pm
+____________________________________________________________________________
+[ 20740] By: jhi                                   on 2003/08/16  21:13:53
+        Log: Integrate:
+             [ 20726]
+             Clarify the E flag.
+             
+             [ 20727]
+             Upgrade to File::Temp 0.13 from CPAN--
+             but since we had a '0.13' already in 5.8.0, make this
+             still a '0.131'.
+             
+             [ 20728]
+             Subject: [PATCH] Small test tweak for Memoize/t/error.t
+             From: Andreas J Koenig <andreas.koenig@anima.de>
+             Date: Fri, 15 Aug 2003 11:55:22 +0200
+             Message-ID: <87smo39red.fsf@franz.ak.mind.de>
+             
+             [ 20729]
+             README.macosx updates about known problems.
+             
+             [ 20730]
+             Remove a useless vstring reference in perlnumber.pod.
+             
+             [ 20731]
+             More networking negativity.
+             
+             [ 20732]
+             Add valgrind testing target.
+             
+             [ 20733]
+             No ODBM for Mac OS X, even if we have Fink GDBM libraries.
+             
+             [ 20735]
+             Subject: [patch lib/utf8.pm] doc tweaks
+             From: Stas Bekman <stas@stason.org>
+             Date: Sat, 16 Aug 2003 13:30:28 -0700
+             Message-ID: <3F3E9464.3030202@stason.org>
+             
+             [ 20737]
+             valgrind --help didn't return a happy exit status.
+             
+             [ 20738]
+             Update to Filter::Util::Call 1.6 from CPAN, but keep our
+             $VERSION at 1.601 so that we are different in version
+             than 5.8.0 since the module is different (one doc tweak).
+             
+             [ 20739]
+             Subject: [PATCH: perl@20724] fixes for installperl and the vmsdebug build on VMS
+             From: PPrymmer@factset.com
+             Date: Sat, 16 Aug 2003 11:55:58 -0400
+             Message-ID: <OFA82C9B0A.6463DD81-ON85256D84.0056DF1B-85256D84.005784F2@factset.com>
+     Branch: maint-5.8/perl
+	  !> Makefile.SH README.macosx embed.fnc
+	  !> ext/Filter/Util/Call/Call.pm hints/darwin.sh installperl
+	  !> lib/File/Temp.pm lib/File/Temp/t/mktemp.t
+	  !> lib/File/Temp/t/posix.t lib/File/Temp/t/security.t
+	  !> lib/File/Temp/t/tempfile.t lib/Memoize/t/errors.t lib/utf8.pm
+	  !> pod/perlhack.pod pod/perlnumber.pod pod/perlport.pod t/TEST
+____________________________________________________________________________
+[ 20724] By: jhi                                   on 2003/08/15  15:32:39
+        Log: No peeking before the buffer.
+             (This was probably the random failure showing up
+             in Solaris with t/uni/tr_7jis.t)
+     Branch: maint-5.8/perl
+	   ! toke.c
+____________________________________________________________________________
+[ 20723] By: jhi                                   on 2003/08/15  15:03:35
+        Log: Lingering nanosleep.
+     Branch: maint-5.8/perl
+	   ! Configure config_h.SH vos/config.alpha.def vos/config.alpha.h
+	   ! vos/config.ga.def vos/config.ga.h
+____________________________________________________________________________
+[ 20722] By: jhi                                   on 2003/08/15  08:46:15
+        Log: Integrate:
+             [ 20721]
+             Subject: [PATCH] TEST script (Was: Not ok 20712ff)
+             From: Andreas J Koenig <andreas.koenig@anima.de>
+             Date: Fri, 15 Aug 2003 11:37:29 +0200
+             Message-ID: <87wudf9s86.fsf_-_@franz.ak.mind.de>
+     Branch: maint-5.8/perl
+	  !> t/TEST
+____________________________________________________________________________
+[ 20719] By: jhi                                   on 2003/08/15  08:38:50
+        Log: no_plan is not a good plan until TEST is fixed.
+     Branch: maint-5.8/perl
+	   ! lib/NEXT/t/actual.t lib/NEXT/t/actuns.t lib/NEXT/t/unseen.t
+____________________________________________________________________________
+[ 20718] By: jhi                                   on 2003/08/15  05:16:34
+        Log: Integrate:
+             [ 20710]
+             Subject: PATCH RC4 IO::Dir
+             From: Mark Jason Dominus <mjd@plover.com>
+             Date: Thu, 14 Aug 2003 12:02:59 -0400
+             Message-ID: <20030814160259.27586.qmail@plover.com>
+             
+             [ 20711]
+             perlcheat is a reference, not tutorial.
+             
+             [ 20712]
+             Upgrade to NEXT 0.60.
+             
+             [ 20713]
+             Upgrade to PerlIO::via::Quoted 0.05.
+             
+             [ 20714]
+             Add PerlIO::via::QuotedPrint to Maintainers.
+             
+             [ 20715]
+             Damian replied that he'll make a CPAN Switch 2.10
+             out of 5.8.1 Switch 2.10.
+             
+             [ 20716]
+             Upgrade to Test::Harness 2.30.
+             
+             [ 20717]
+             Up the F::S subpackage versions; up the JPL JNI.pm version
+             (the JPL cvs seems to be out of order), the only real change
+             (in JNI.xs) seems to have been CRLF->LF conversion.
+     Branch: maint-5.8/perl
+	  !> Porting/Maintainers.pl ext/IO/lib/IO/Dir.pm jpl/JNI/JNI.pm
+	  !> lib/File/Spec/Cygwin.pm lib/File/Spec/Unix.pm lib/NEXT.pm
+	  !> lib/NEXT/Changes lib/NEXT/README lib/NEXT/t/actual.t
+	  !> lib/NEXT/t/actuns.t lib/NEXT/t/unseen.t
+	  !> lib/PerlIO/via/QuotedPrint.pm lib/PerlIO/via/t/QuotedPrint.t
+	  !> lib/Switch.pm lib/Test/Harness.pm lib/Test/Harness/Changes
+	  !> lib/Test/Harness/Straps.pm lib/Test/Harness/t/pod.t
+	  !> pod/perl.pod
+____________________________________________________________________________
+[ 20709] By: jhi                                   on 2003/08/14  14:47:24
+        Log: Integrate:
+             [ 20708]
+             win32/fcrypt.c was forgotten.
+     Branch: maint-5.8/perl
+	  !> MANIFEST
+____________________________________________________________________________
+[ 20707] By: jhi                                   on 2003/08/14  14:41:47
+        Log: Integrate:
+             [ 20704]
+             XS contents changes versus VERSION non-changes.
+             
+             [ 20705]
+             One more XS change versus no VERSION change.
+             (Remaining in JNI.pm/xs, don't know what to about that
+             since JNI is kind of "stable".)
+             
+             [ 20706]
+             Not so great a version bump, let Paul release 0.17.
+     Branch: maint-5.8/perl
+	  !> ext/Filter/Util/Call/Call.pm ext/NDBM_File/NDBM_File.pm
+	  !> ext/ODBM_File/ODBM_File.pm ext/PerlIO/scalar/scalar.pm
+	  !> ext/SDBM_File/SDBM_File.pm ext/Socket/Socket.pm
+____________________________________________________________________________
+[ 20703] By: jhi                                   on 2003/08/14  14:31:11
+        Log: Integrate:
+             [ 20694]
+             Regen warnings.
+             
+             [ 20696]
+             Tweak from Slaven to catch also changed .xs files
+             (.pm -> .xs name equivalence is assumed)
+             
+             [ 20699]
+             All the authors of these modules have now been contacted;
+             but assuming no CPAN updates are upcoming, here are 'fake'
+             version updates to make us different from 5.8.0.
+             (List::Util+Scalar::Util will soon be updated;
+             File::Spec CPAN release will be made based on 5.8.1.)
+             
+             [ 20700]
+             Update to Scalar-List-Utils 1.12
+             
+             [ 20701]
+             Subject: [DOC PATCH] warnings.pl
+             From: Elizabeth Mattijsen <liz@dijkmat.nl>
+             Date: Thu, 14 Aug 2003 13:12:55 +0200
+             Message-id: <p05111b00bb611e8835e0@[192.168.56.3]>
+             
+             (some rewording)
+             
+             [ 20702]
+             Subject: [PATCH perl@20684] Include fcrypt.c for crypt() on Windows
+             From: Steve Hay <steve.hay@uk.radan.com>
+             Date: Thu, 14 Aug 2003 15:39:16 +0100
+             Message-ID: <3F3B9F14.4040609@uk.radan.com>
+             
+             (Sarathy okayed the idea.)
+     Branch: maint-5.8/perl
+	  +> win32/fcrypt.c
+	   - win32/des_fcrypt.patch
+	  !> MANIFEST Porting/cmpVERSION.pl README.win32
+	  !> ext/Data/Dumper/Dumper.pm ext/List/Util/ChangeLog
+	  !> ext/List/Util/Util.xs ext/List/Util/lib/List/Util.pm
+	  !> ext/List/Util/lib/Scalar/Util.pm ext/List/Util/t/reduce.t
+	  !> lib/CGI/Fast.pm lib/CGI/Util.pm lib/File/Temp.pm
+	  !> lib/Locale/Country.pm lib/Locale/Currency.pm
+	  !> lib/Locale/Language.pm lib/Locale/Script.pm lib/Switch.pm
+	  !> lib/Test/Harness/Straps.pm lib/Text/Wrap.pm lib/warnings.pm
+	  !> warnings.pl win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[ 20698] By: jhi                                   on 2003/08/14  07:06:03
+        Log: ...than the maint versions.
+     Branch: maint-5.8/perl
+	   ! bytecode.pl ext/B/B/Assembler.pm ext/B/B/Disassembler.pm
+____________________________________________________________________________
+[ 20694] By: jhi                                   on 2003/08/14  05:36:20
+        Log: Regen warnings.
+     Branch: maint-5.8/perl
+	   ! lib/warnings.pm
+____________________________________________________________________________
+[ 20693] By: jhi                                   on 2003/08/14  05:35:13
+        Log: Integrate:
+             [ 20685]
+             Subject: Re: script wanted
+             From: Enache Adrian <enache@rdslink.ro>
+             Date: Wed, 13 Aug 2003 22:31:18 +0300
+             Message-ID: <20030813193118.GA1273@ratsnest.hole>
+             
+             [ 20686]
+             Subject: Re: script wanted
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Wed, 13 Aug 2003 20:46:09 +0100
+             Message-ID: <20030813204609.G20130@plum.flirble.org>
+             
+             [ 20687]
+             Alpha version numbers noticed by Schwern.
+             (These hacks are no more needed since the PAUSE indexer no
+             more indexes the insides of Perl distributions, says Andreas.)
+             
+             [ 20688]
+             A swath of VERSION patches from Nick Clark.
+             
+             [ 20691]
+             Add a known exception.
+             
+             [ 20692]
+             One more VERSION bump.
+     Branch: maint-5.8/perl
+	  !> (integrate 61 files)
+____________________________________________________________________________
+[ 20690] By: jhi                                   on 2003/08/14  05:18:30
+        Log: Integrate:
+             [ 20578]
+             Fix from Dave Mitchell to the recent from lib/Devel/SelfStubber.t:
+             Variable "$nested" is not available at (re_eval 4) line 2, <DATA> line 8.
+             which was on old bug unearthed by the change #20559.
+             Basically, qr// + (??{$lexical}) combination is very, VERY broken.
+             Workaround is not to use lexicals.
+             
+             [ 20583]
+             Change #20578 to SelfLoader is probably also useful to AutoSplit.
+             
+             (Strictly speaking these would no be necessary (yet) for maint
+             since the more recent lexical patches have not yet been merged,
+             but since the qr// + (??{$lexical}) combination is dubious in
+             any case, let's.)
+     Branch: maint-5.8/perl
+	  !> lib/AutoSplit.pm lib/SelfLoader.pm
+____________________________________________________________________________
+[ 20684] By: jhi                                   on 2003/08/13  17:28:40
+        Log: Even my scripts rebel.
+     Branch: maint-5.8/perl
+	   ! patchlevel.h
+____________________________________________________________________________
+[ 20683] By: jhi                                   on 2003/08/13  17:28:00
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 20682] By: jhi                                   on 2003/08/13  17:19:03
         Log: Integrate:
              [ 20680]
