@@ -126,8 +126,11 @@ For ease of access, the Perl manual has been split up into several sections.
     perlbook		Perl book information
     perltodo		Perl things to do
 
+    perldoc		Look up Perl documentation in Pod format
+
     perlhist		Perl history records
     perldelta		Perl changes since previous version
+    perl58delta		Perl changes in version 5.8.0
     perl573delta	Perl changes in version 5.7.3
     perl572delta	Perl changes in version 5.7.2
     perl571delta	Perl changes in version 5.7.1
@@ -136,6 +139,9 @@ For ease of access, the Perl manual has been split up into several sections.
     perl56delta		Perl changes in version 5.6
     perl5005delta	Perl changes in version 5.005
     perl5004delta	Perl changes in version 5.004
+
+    perlartistic	Perl Artistic License
+    perlgpl		GNU General Public License
 
 =head2 Language-Specific
 

@@ -705,6 +705,7 @@ of the license don't require you to include it).
 
 If you don't know what license to use, dual licensing under the GPL
 and Artistic licenses (the same as Perl itself) is a good idea.
+See L<perlgpl> and L<perlartistic>.
 
 =head1 COMMON PITFALLS
 
