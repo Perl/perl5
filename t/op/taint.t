@@ -17,7 +17,7 @@ use Config;
 use File::Spec::Functions;
 
 BEGIN { require './test.pl'; }
-plan tests => 236;
+plan tests => 238;
 
 
 $| = 1;
@@ -1067,4 +1067,25 @@ TERNARY_CONDITIONALS: {
     $result = $tainted_false ? $tainted_whatever : $untainted_whatever;
     test $result eq "The Fabulous Johnny Cash";
     test !tainted( $result );
+}
+
+{
+    # rt.perl.org 5900  $1 remains tainted if...
+    # 1) The regular expression contains a scalar variable AND
+    # 2) The regular expression appears in an elsif clause
+
+    my $foo = "abcdefghi" . $TAINT;
+
+    my $valid_chars = 'a-z';
+    if ( $foo eq '' ) {
+    }
+    elsif ( $foo =~ /([$valid_chars]+)/o ) {
+        test not tainted $1;
+    }
+
+    if ( $foo eq '' ) {
+    }
+    elsif ( my @bar = $foo =~ /([$valid_chars]+)/o ) {
+        test not any_tainted @bar;
+    }
 }
