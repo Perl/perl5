@@ -78,6 +78,26 @@ pp_ctl_cflags='optimize=-O'
 	     ;;
 	esac
 
+# this is to accommodate the 'modules' capability of the 
+# 7.2 MIPSPro compilers, which allows for the compilers to be installed
+# in a nondefault location.  Almost everything works as expected, but
+# /usr/include isn't caught properly.  Hence see the /usr/include/pthread.h
+# change below to include TOOLROOT (a modules environment variable),
+# and the following code.  Additional
+# code to accommodate the 'modules' environment should probably be added
+# here if possible, or be inserted as a ${TOOLROOT} reference before
+# absolute paths (again, see the pthread.h change below). 
+# -- krishna@sgi.com, 8/23/98
+
+if [ "X${TOOLROOT}" != "X" ]; then
+# we cant set cppflags because it gets overwritten
+# we dont actually need $TOOLROOT/usr/include on the cc line cuz the 
+# modules functionality already includes it but
+# XXX - how do I change cppflags in the hints file?
+	ccflags="$ccflags -I${TOOLROOT}/usr/include"
+	usrinc="${TOOLROOT}/usr/include"
+fi
+
 	ld=$cc
 	# perl's malloc can return improperly aligned buffer
 	# usemymalloc='undef'
@@ -140,7 +160,7 @@ shift
 libswanted="$*"
 
 if [ "X$usethreads" = "X$define" -o "X$usethreads" = "Xy" ]; then
-    if test ! -f /usr/include/pthread.h -o ! -f /usr/lib/libpthread.so; then
+    if test ! -f ${TOOLROOT}/usr/include/pthread.h -o ! -f /usr/lib/libpthread.so; then
 	uname_r=`uname -r`
 	case "`uname -r`" in
 	5*|6.0|6.1)
