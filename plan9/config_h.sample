@@ -3872,6 +3872,13 @@
 #define PROCSELFEXE_PATH		/**/
 #endif
 
+/* HAS_PTHREAD_ATTR_SETSCOPE:
+ *	This symbol, if defined, indicates that the pthread_attr_setscope
+ *	system call is available to set the contention scope attribute of
+ *	a thread attribute object.
+ */
+/*#define HAS_PTHREAD_ATTR_SETSCOPE		/ **/
+
 /* HAS_SIGPROCMASK:
  *	This symbol, if defined, indicates that the sigprocmask
  *	system call is available to examine or change the signal mask
