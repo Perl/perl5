@@ -1827,10 +1827,20 @@ pause()
 SysRet
 setgid(gid)
 	Gid_t		gid
+    CLEANUP:
+	if (RETVAL >= 0) {
+	    PL_gid  = getgid();
+	    PL_egid = getegid();
+	}
 
 SysRet
 setuid(uid)
 	Uid_t		uid
+    CLEANUP:
+	if (RETVAL >= 0) {
+	    PL_uid  = getuid();
+	    PL_euid = geteuid();
+	}
 
 SysRetLong
 sysconf(name)
