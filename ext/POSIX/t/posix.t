@@ -75,15 +75,22 @@ SKIP: {
 	my $action = new POSIX::SigAction 'main::SigHUP', $mask, 0;
 	sigaction(&SIGHUP, $action);
 	$SIG{'INT'} = 'SigINT';
-	kill 'HUP', $$;
+
+	# At least OpenBSD/i386 3.3 is okay, as is NetBSD 1.5.
+	# But not NetBSD 1.6 & 1.6.1: the test makes perl crash.
+	# So the kill() must not be done with this config in order to
+	# finish the test.
+	# For others (darwin & freebsd), let the test fail without crashing.
+	my $todo = $^O eq 'netbsd' && $Config{osvers}=~/^1\.6/;
+	kill 'HUP', $$ if !$todo;
 	sleep 1;
 
-        printf "%s 11 -   masked SIGINT received %s\n",
-          $sigint_called ? "ok" : "not ok",
-          # At least OpenBSD/i386 3.3 is okay, as is NetBSD 1.5.
-          $^O =~ /^(?:darwin|freebsd)$/ ?
-	      "# TODO $^O seems to loose blocked signals" 
-	      : '';
+	$todo = 1 if ($^O eq 'freebsd')
+		  || ($^O eq 'darwin' && $Config{osvers} lt '6.6');
+	printf "%s 11 -   masked SIGINT received %s\n",
+	    $sigint_called ? "ok" : "not ok",
+	    $todo ? "# TODO $^O $Config{osvers} seems to loose blocked signals"
+	    : '';
 
 	print "ok 12 - signal masks successful\n";
 	
