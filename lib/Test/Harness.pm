@@ -765,6 +765,7 @@ ignore them.
   not ok 2
   # got 'Bush' expected 'Gore'
 
+=back
 
 =head1 EXPORT
 

@@ -446,7 +446,7 @@ possible values it easily fits in perl's much larger "logical character".
 
 =head2 TERMINOLOGY
 
-=over
+=over 4
 
 =item *
 
