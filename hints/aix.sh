@@ -535,4 +535,28 @@ else
 	esac
 fi
 
+case "$PASE" in
+define)
+	case "$prefix" in
+	'') prefix=/QOpenSys/perl ;;
+	esac
+	cat >&4 <<EOF
+
+***
+*** You seem to be compiling in AIX for the OS/400 PASE environment.
+*** I'm not going to use the AIX bind, nsl, and possible util libraries, then.
+*** I'm also not going to install perl as /usr/bin/perl.
+*** Perl will be installed under $prefix.
+*** For instructions how to install this build from AIX to PASE,
+*** see the file README.os400.  Accept the "aix" for the question
+*** about "Operating system name".
+***
+EOF
+	set `echo " $libswanted " | sed -e 's@ bind @ @' -e 's@ nsl @ @' -e 's@ util @ @'`
+	shift
+	libswanted="$*"
+	installusrbinperl="$undef"
+	;;
+esac
+
 # EOF

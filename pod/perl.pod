@@ -166,6 +166,7 @@ For ease of access, the Perl manual has been split up into several sections.
     perlnetware		Perl notes for NetWare
     perlos2		Perl notes for OS/2
     perlos390		Perl notes for OS/390
+    perlos400		Perl notes for OS/400
     perlplan9		Perl notes for Plan 9
     perlqnx		Perl notes for QNX
     perlsolaris 	Perl notes for Solaris

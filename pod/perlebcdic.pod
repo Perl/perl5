@@ -1248,11 +1248,15 @@ Legacy multi byte EBCDIC code pages XXX.
 There may be a few system dependent issues 
 of concern to EBCDIC Perl programmers.
 
-=head2 OS/400 
-
-The PASE environment.
+=head2 OS/400
 
 =over 8
+
+=item PASE
+
+The PASE environment is runtime environment for OS/400 that can run
+executables built for PowerPC AIX in OS/400, see L<perlos400>.  PASE
+is ASCII-based, not EBCDIC-based as the ILE.
 
 =item IFS access
 
