@@ -3206,6 +3206,10 @@ detailed in here: http://sources.redhat.com/ml/cygwin/2001-12/msg00894.html
 One can build but not install (or test the build of) the NDBM_File
 on FAT filesystems.  Installation (or build) on NTFS works fine.
 
+=head2 DJGPP does not build
+
+Unfortunately DJGPP build broke somewhere after 5.7.1.
+
 =head2 ext/threads/t/libc
 
 If this test fails, it indicates that your libc (C library) is not
