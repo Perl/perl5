@@ -425,9 +425,9 @@ do_test(21,
   MAGIC = $ADDR
     MG_VIRTUAL = &PL_vtbl_envelem
     MG_TYPE = PERL_MAGIC_envelem\\(e\\)
-    MG_FLAGS = 0x01
+(?:    MG_FLAGS = 0x01
       TAINTEDDIR
-    MG_LEN = 4
+)?    MG_LEN = 4
     MG_PTR = $ADDR "PATH"
   MAGIC = $ADDR
     MG_VIRTUAL = &PL_vtbl_taint
