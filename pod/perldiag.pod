@@ -2370,6 +2370,11 @@ See also L<perlport> for writing portable code.
 (W) The call to overload::constant contained an odd number of arguments.
 The arguments should come in pairs.
 
+=item Odd number of elements in anonymous hash
+
+(W misc) You specified an odd number of elements to initialize a hash,
+which is odd, because hashes come in key/value pairs.
+
 =item Odd number of elements in hash assignment
 
 (W misc) You specified an odd number of elements to initialize a hash,

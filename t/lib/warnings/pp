@@ -67,7 +67,7 @@ my $a = { 1,2,3};
 no warnings 'misc' ;
 my $b = { 1,2,3};
 EXPECT
-Odd number of elements in hash assignment at - line 3.
+Odd number of elements in anonymous hash at - line 3.
 ########
 # pp.c
 use warnings 'misc' ;
