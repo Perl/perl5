@@ -689,6 +689,24 @@ you should use defined() only when you're questioning the integrity
 of what you're trying to do.  At other times, a simple comparison to
 0 or "" is what you want.
 
+Another surprise is that using defined() on an entire array or 
+hash reports whether memory for that aggregate has ever been
+allocated.  So an array you set to the empty list appears undefined
+initially, and one that once was full and that you then set to 
+the empty list still appears defined.  You should instead use a 
+simple test for size:
+
+    if (@an_array) { print "has array elements\n" }
+    if (%a_hash)   { print "has hash members\n"   }
+
+Using undef() on these, however, does clear their memory and then report
+them as not defined anymore, but you shoudln't do that unless you don't
+plan to use them again, because it saves time when you load them up
+again to have memory already ready to be filled.
+
+This counter-intuitive behaviour of defined() on aggregates may be
+changed, fixed, or broken in a future release of Perl.
+
 =item delete EXPR
 
 Deletes the specified key(s) and their associated values from a hash
