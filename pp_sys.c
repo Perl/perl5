@@ -492,7 +492,9 @@ PP(pp_die)
 
 PP(pp_open)
 {
-    djSP; dTARGET;
+    djSP;
+    dMARK; dORIGMARK;
+    dTARGET;
     GV *gv;
     SV *sv;
     SV *name = Nullsv;
@@ -500,29 +502,19 @@ PP(pp_open)
     char *tmps;
     STRLEN len;
     MAGIC *mg;
+    bool  ok;
 
-    if (MAXARG > 2) {
-	name = POPs;
-	have_name = 1;
-    }
-    if (MAXARG > 1)
-	sv = POPs;
-    if (!isGV(TOPs))
-	DIE(aTHX_ PL_no_usym, "filehandle");
-    if (MAXARG <= 1)
-	sv = GvSV(TOPs);
-    gv = (GV*)POPs;
+    gv = (GV *)*++MARK;
     if (!isGV(gv))
 	DIE(aTHX_ PL_no_usym, "filehandle");
     if (GvIOp(gv))
 	IoFLAGS(GvIOp(gv)) &= ~IOf_UNTAINT;
 
     if ((mg = SvTIED_mg((SV*)gv, 'q'))) {
-	PUSHMARK(SP);
-	XPUSHs(SvTIED_obj((SV*)gv, mg));
-	XPUSHs(sv);
-	if (have_name)
-	    XPUSHs(name);
+	/* Method's args are same as ours ... */
+	/* ... except handle is replaced by the object */
+	*MARK-- = SvTIED_obj((SV*)gv, mg);
+	PUSHMARK(MARK);
 	PUTBACK;
 	ENTER;
 	call_method("OPEN", G_SCALAR);
@@ -531,8 +523,17 @@ PP(pp_open)
 	RETURN;
     }
 
+    if (MARK < SP) {
+	sv = *++MARK;
+    }
+    else {
+	sv = GvSV(gv);
+    }
+
     tmps = SvPV(sv, len);
-    if (do_open9(gv, tmps, len, FALSE, O_RDONLY, 0, Nullfp, name, have_name))
+    ok = do_openn(gv, tmps, len, FALSE, O_RDONLY, 0, Nullfp, MARK+1, (SP-MARK));
+    SP = ORIGMARK;
+    if (ok)
 	PUSHi( (I32)PL_forkprocess );
     else if (PL_forkprocess == 0)		/* we are a new child */
 	PUSHi(0);
@@ -3602,7 +3603,7 @@ PP(pp_mkdir)
      * trailing slashes.  To err on the side of portability, we
      * snip away one trailing slash. */
     if (tmps[len-1] == '/') {
-	tmps = savepvn(tmps, len - 1); 
+	tmps = savepvn(tmps, len - 1);
 	copy = TRUE;
     }
 

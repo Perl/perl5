@@ -6705,7 +6705,7 @@ Perl_sv_vsetpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 }
 
 I32
-S_expect_number(char** pattern)
+S_expect_number(pTHX_ char** pattern)
 {
     I32 var = 0;
     switch (**pattern) {
@@ -6717,7 +6717,7 @@ S_expect_number(char** pattern)
     }
     return var;
 }
-#define EXPECT_NUMBER(pattern, var) (var = S_expect_number(&pattern))
+#define EXPECT_NUMBER(pattern, var) (var = S_expect_number(aTHX_ &pattern))
 
 /*
 =for apidoc sv_vcatpvfn
@@ -7367,7 +7367,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 #endif
 		}
 	    }
-	    else 
+	    else
 		sv_setuv_mg(argsv, (UV)i);
 	    continue;	/* not "break" */
 
@@ -8876,7 +8876,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     if (proto_perl->Ipsig_pend) {
 	Newz(0, PL_psig_pend, SIG_SIZE, int);
-    } 
+    }
     else {
 	PL_psig_pend	= (int*)NULL;
     }

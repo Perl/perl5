@@ -1494,6 +1494,9 @@ Ap	|bool	|do_open	|GV* gv|char* name|I32 len|int as_raw \
 Ap	|bool	|do_open9	|GV *gv|char *name|I32 len|int as_raw \
 				|int rawmode|int rawperm|PerlIO *supplied_fp \
 				|SV *svs|I32 num
+Ap	|bool	|do_openn	|GV *gv|char *name|I32 len|int as_raw \
+				|int rawmode|int rawperm|PerlIO *supplied_fp \
+				|SV **svp|I32 num
 p	|void	|do_pipe	|SV* sv|GV* rgv|GV* wgv
 p	|bool	|do_print	|SV* sv|PerlIO* fp
 p	|OP*	|do_readline
