@@ -5430,35 +5430,25 @@ Perl_keyword (pTHX_ char *name, I32 len)
             return KEY_m;
           }
 
-          goto unknown;
-
         case 'q':
           {                                       /* q          */
             return KEY_q;
           }
-
-          goto unknown;
 
         case 's':
           {                                       /* s          */
             return KEY_s;
           }
 
-          goto unknown;
-
         case 'x':
           {                                       /* x          */
             return -KEY_x;
           }
 
-          goto unknown;
-
         case 'y':
           {                                       /* y          */
             return KEY_y;
           }
-
-          goto unknown;
 
         default:
           goto unknown;
@@ -5491,14 +5481,10 @@ Perl_keyword (pTHX_ char *name, I32 len)
                 return -KEY_ge;
               }
 
-              goto unknown;
-
             case 't':
               {                                   /* gt         */
                 return -KEY_gt;
               }
-
-              goto unknown;
 
             default:
               goto unknown;
@@ -5520,21 +5506,15 @@ Perl_keyword (pTHX_ char *name, I32 len)
                 return -KEY_lc;
               }
 
-              goto unknown;
-
             case 'e':
               {                                   /* le         */
                 return -KEY_le;
               }
 
-              goto unknown;
-
             case 't':
               {                                   /* lt         */
                 return -KEY_lt;
               }
-
-              goto unknown;
 
             default:
               goto unknown;
@@ -5556,14 +5536,10 @@ Perl_keyword (pTHX_ char *name, I32 len)
                 return -KEY_ne;
               }
 
-              goto unknown;
-
             case 'o':
               {                                   /* no         */
                 return KEY_no;
               }
-
-              goto unknown;
 
             default:
               goto unknown;
@@ -5585,28 +5561,20 @@ Perl_keyword (pTHX_ char *name, I32 len)
                 return KEY_qq;
               }
 
-              goto unknown;
-
             case 'r':
               {                                   /* qr         */
                 return KEY_qr;
               }
-
-              goto unknown;
 
             case 'w':
               {                                   /* qw         */
                 return KEY_qw;
               }
 
-              goto unknown;
-
             case 'x':
               {                                   /* qx         */
                 return KEY_qx;
               }
-
-              goto unknown;
 
             default:
               goto unknown;
@@ -5825,14 +5793,10 @@ Perl_keyword (pTHX_ char *name, I32 len)
                   return -KEY_pop;
                 }
 
-                goto unknown;
-
               case 's':
                 {                                 /* pos        */
                   return KEY_pos;
                 }
-
-                goto unknown;
 
               default:
                 goto unknown;
@@ -6766,14 +6730,10 @@ Perl_keyword (pTHX_ char *name, I32 len)
                           return KEY_untie;
                         }
 
-                        goto unknown;
-
                       case 'l':
                         {                         /* until      */
                           return KEY_until;
                         }
-
-                        goto unknown;
 
                       default:
                         goto unknown;
@@ -7972,14 +7932,10 @@ Perl_keyword (pTHX_ char *name, I32 len)
                         return -KEY_readline;
                       }
 
-                      goto unknown;
-
                     case 'k':
                       {                           /* readlink   */
                         return -KEY_readlink;
                       }
-
-                      goto unknown;
 
                     default:
                       goto unknown;
