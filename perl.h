@@ -373,7 +373,7 @@ register struct op *op asm(stringify(OP_IN_REGISTER));
 #   ifdef HIDEMYMALLOC
 #	define malloc  Mymalloc
 #	define calloc  Mycalloc
-#	define realloc Myremalloc
+#	define realloc Myrealloc
 #	define free    Myfree
 Malloc_t Mymalloc _((MEM_SIZE nbytes));
 Malloc_t Mycalloc _((MEM_SIZE elements, MEM_SIZE size));
@@ -384,11 +384,21 @@ Free_t   Myfree _((Malloc_t where));
 #	define malloc  Perl_malloc
 #	define calloc  Perl_calloc
 #	define realloc Perl_realloc
+/* VMS' external symbols are case-insensitive, and there's already a */
+/* perl_free in perl.h */
+#ifdef VMS
+#	define free    Perl_myfree
+#else
 #	define free    Perl_free
+#endif
 Malloc_t Perl_malloc _((MEM_SIZE nbytes));
 Malloc_t Perl_calloc _((MEM_SIZE elements, MEM_SIZE size));
 Malloc_t Perl_realloc _((Malloc_t where, MEM_SIZE nbytes));
+#ifdef VMS
+Free_t   Perl_myfree _((Malloc_t where));
+#else
 Free_t   Perl_free _((Malloc_t where));
+#endif
 #   endif
 
 #   undef safemalloc

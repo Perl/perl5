@@ -64,11 +64,24 @@ $docc = ($cc_cmd !~ /^~~/);
 print "\$docc = $docc\n" if $debug;
 
 if ($docc) {
+  if (-f 'perl.h') { $dir = '[]'; }
+  elsif (-f '[-]perl.h') { $dir = '[-]'; }
+  else { die "$0: Can't find perl.h\n"; }
+
+  # Go see if debugging is enabled in config.h
+  $config = $dir . "config.h";
+  open CONFIG, "< $config";
+  while(<CONFIG>) {
+    $debugging_enabled++ if /define\s+DEBUGGING/;
+    $hide_mymalloc++ if /define\s+EMBEDMYMALLOC/;
+    $use_mymalloc++ if /define\s+MYMALLOC/;
+  }
+  
   # put quotes back onto defines - they were removed by DCL on the way in
   if (($prefix,$defines,$suffix) =
          ($cc_cmd =~ m#(.*)/Define=(.*?)([/\s].*)#i)) {
     $defines =~ s/^\((.*)\)$/$1/;
-    $debugging_enabled = $defines =~ /\bDEBUGGING\b/;
+    $debugging_enabled ||= $defines =~ /\bDEBUGGING\b/;
     @defines = split(/,/,$defines);
     $cc_cmd = "$prefix/Define=(" . join(',',grep($_ = "\"$_\"",@defines)) 
               . ')' . $suffix;
@@ -88,9 +101,6 @@ if ($docc) {
   print "\$isvaxc: $isvaxc\n" if $debug;
   print "\$debugging_enabled: $debugging_enabled\n" if $debug;
 
-  if (-f 'perl.h') { $dir = '[]'; }
-  elsif (-f '[-]perl.h') { $dir = '[-]'; }
-  else { die "$0: Can't find perl.h\n"; }
 }
 else { 
   ($junk,$junk,$cpp_file,$cc_cmd) = split(/~~/,$cc_cmd,4);
@@ -186,6 +196,14 @@ sub scan_func {
     }
     else { $fcns{$1}++ }
   }
+}
+
+# Go add some right up front if we need 'em
+if ($use_mymalloc) {
+  $fcns{'Perl_malloc'}++;
+  $fcns{'Perl_calloc'}++;
+  $fcns{'Perl_realloc'}++;
+  $fcns{'Perl_myfree'}++;
 }
 
 $used_expectation_enum = $used_opcode_enum = 0; # avoid warnings

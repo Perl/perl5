@@ -852,16 +852,17 @@ sub cflags {
     }
 
     $libperl or $libperl = $self->{LIBPERL_A} || "libperl.olb";
-    if ($libperl =~ s/^$Config{'dbgprefix'}//) { $libperl =~ s/perl([^Dd]*)\./perld$1./; }
-    if ($libperl =~ /libperl(\w+)\./i) {
-	my($type) = uc $1;
-	my(%map) = ( 'D'  => 'DEBUGGING', 'E' => 'EMBED', 'M' => 'MULTIPLICITY',
-	             'DE' => 'DEBUGGING,EMBED', 'DM' => 'DEBUGGING,MULTIPLICITY',
-	             'EM' => 'EMBED,MULTIPLICITY', 'DEM' => 'DEBUGGING,EMBED,MULTIPLICITY' );
-	my($add) = join(',', grep { $quals !~ /\b$_\b/ } split(/,/,$map{$type}));
-	$quals =~ s:/define=\(([^\)]+)\):/Define=($1,$add):i if $add;
-	$self->{PERLTYPE} ||= $type;
-    }
+# This whole section is commented out, since I don't think it's necessary (or applicable)
+#    if ($libperl =~ s/^$Config{'dbgprefix'}//) { $libperl =~ s/perl([^Dd]*)\./perld$1./; }
+#    if ($libperl =~ /libperl(\w+)\./i) {
+#	my($type) = uc $1;
+#	my(%map) = ( 'D'  => 'DEBUGGING', 'E' => 'EMBED', 'M' => 'MULTIPLICITY',
+#	             'DE' => 'DEBUGGING,EMBED', 'DM' => 'DEBUGGING,MULTIPLICITY',
+#	             'EM' => 'EMBED,MULTIPLICITY', 'DEM' => 'DEBUGGING,EMBED,MULTIPLICITY' );
+#	my($add) = join(',', grep { $quals !~ /\b$_\b/ } split(/,/,$map{$type}));
+#	$quals =~ s:/define=\(([^\)]+)\):/Define=($1,$add):i if $add;
+#	$self->{PERLTYPE} ||= $type;
+#    }
 
     # Likewise with $self->{INC} and /Include
     if ($self->{'INC'}) {
