@@ -938,6 +938,7 @@ public:
 	    win32_fprintf(stderr, "Error: Parse exception\n");
 	    retVal = -1;
 	}
+	*win32_errno() = 0;
 	return retVal;
     };
     inline int PerlRun(void)
