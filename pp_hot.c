@@ -1570,10 +1570,12 @@ Perl_do_readline(pTHX)
 	    RETURN;
 	}
 	if (SvUTF8(sv)) {
+	     U8 *s = (U8*)SvPVX(sv) + offset;
+	     STRLEN len = SvCUR(sv) - offset;
 	     U8 *f;
 
 	     if (ckWARN(WARN_UTF8) &&
-		 !Perl_is_utf8_string_loc(aTHX_ (U8*)SvPVX(sv), SvCUR(sv), &f))
+		 !Perl_is_utf8_string_loc(aTHX_ s, len, &f))
 		  /* Emulate :encoding(utf8) warning in the same case. */
 		  Perl_warner(aTHX_ packWARN(WARN_UTF8),
 			      "utf8 \"\\x%02X\" does not map to Unicode",
