@@ -22,13 +22,6 @@
 #ifdef I_UNISTD
 #include <unistd.h>
 #endif
-#ifdef I_FCNTL
-#include <fcntl.h>
-#endif
-#ifdef I_SYS_FILE
-#include <sys/file.h>
-#endif
-
 
 /* Hot code. */
 

@@ -27,13 +27,6 @@ char *getenv (char *); /* Usually in <stdlib.h> */
 
 static I32 read_e_script(pTHXo_ int idx, SV *buf_sv, int maxlen);
 
-#ifdef I_FCNTL
-#include <fcntl.h>
-#endif
-#ifdef I_SYS_FILE
-#include <sys/file.h>
-#endif
-
 #ifdef IAMSUID
 #ifndef DOSUID
 #define DOSUID
@@ -1155,7 +1148,9 @@ print \"  \\@INC:\\n    @INC\\n\";");
     CvPADLIST(PL_compcv) = comppadlist;
 
     boot_core_UNIVERSAL();
+#ifndef PERL_MICRO
     boot_core_xsutils();
+#endif
 
     if (xsinit)
 	(*xsinit)(aTHXo);	/* in case linked C routines want magical variables */

@@ -58,13 +58,6 @@ static void restore_rsfp(pTHXo_ void *f);
 #define LEX_FORMLINE		 1
 #define LEX_KNOWNEXT		 0
 
-#ifdef I_FCNTL
-#include <fcntl.h>
-#endif
-#ifdef I_SYS_FILE
-#include <sys/file.h>
-#endif
-
 /* XXX If this causes problems, set i_unistd=undef in the hint file.  */
 #ifdef I_UNISTD
 #  include <unistd.h> /* Needed for execv() */

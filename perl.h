@@ -489,6 +489,10 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #   include <stdlib.h>
 #endif
 
+#ifdef PERL_MICRO /* Last chance to export Perl_my_swap */
+#  define MYSWAP
+#endif
+
 #if !defined(PERL_FOR_X2P) && !defined(WIN32)
 #  include "embed.h"
 #endif
@@ -3135,6 +3139,23 @@ typedef struct am_table_short AMTS;
 #       endif
 #   endif
 #endif
+
+#ifdef I_FCNTL
+#  include <fcntl.h>
+#else
+#  ifndef O_RDONLY
+/* Assume UNIX defaults */
+#    define O_RDONLY	0000
+#    define O_WRONLY	0001
+#    define O_RDWR	0002
+#    define O_CREAT	0100
+#  endif
+#endif
+
+#ifdef I_SYS_FILE
+#  include <sys/file.h>
+#endif
+
 
 #ifdef IAMSUID
 

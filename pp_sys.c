@@ -112,12 +112,6 @@ extern int h_errno;
 #    include <utime.h>
 #  endif
 #endif
-#ifdef I_FCNTL
-#include <fcntl.h>
-#endif
-#ifdef I_SYS_FILE
-#include <sys/file.h>
-#endif
 
 /* Put this after #includes because fork and vfork prototypes may conflict. */
 #ifndef HAS_VFORK

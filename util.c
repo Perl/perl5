@@ -40,13 +40,6 @@
 #   define vfork fork
 #endif
 
-#ifdef I_FCNTL
-#  include <fcntl.h>
-#endif
-#ifdef I_SYS_FILE
-#  include <sys/file.h>
-#endif
-
 #ifdef I_SYS_WAIT
 #  include <sys/wait.h>
 #endif
@@ -116,7 +109,7 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 {
     dTHX;
     Malloc_t ptr;
-#if !defined(STANDARD_C) && !defined(HAS_REALLOC_PROTOTYPE)
+#if !defined(STANDARD_C) && !defined(HAS_REALLOC_PROTOTYPE) && !defined(PERL_MICRO)
     Malloc_t PerlMem_realloc();
 #endif /* !defined(STANDARD_C) && !defined(HAS_REALLOC_PROTOTYPE) */
 
