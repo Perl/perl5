@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Nov 23 21:08:41 EET 2001 [metaconfig 3.0 PL70]
+# Generated on Fri Nov 23 21:31:36 EET 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -490,6 +490,7 @@ d_pipe=''
 d_poll=''
 d_portable=''
 d_procselfexe=''
+procselfexe=''
 d_old_pthread_create_joinable=''
 old_pthread_create_joinable=''
 d_pthread_atfork=''
@@ -11512,20 +11513,31 @@ set readlink d_readlink
 eval $inlibc
 
 echo " "
-echo "Checking for /proc/self/exe..." >&4
+procselfexe=''
 val="$undef"
 case "$d_readlink" in
 "$define")
 	if $issymlink /proc/self/exe ; then
 		$ls -l /proc/self/exe > reflect
 		if $contains /`basename $ls` reflect >/dev/null 2>&1; then
-			val="$define"
 			echo "You have Linux-like /proc/self/exe."
+			procselfexe=/proc/self/exe
+			val="$define"
+			break
 		fi
-		$rm reflect
+	fi
+	if $issymlink /proc/curproc/file ; then
+		$ls -l /proc/curproc/file > reflect
+		if $contains /`basename $ls` reflect >/dev/null 2>&1; then
+			echo "You have BSD-like /proc/curproc/file."
+			procselfexe=/proc/curproc/file
+			val="$define"
+			break
+		fi
 	fi
 	;;
 esac
+$rm reflect
 set d_procselfexe
 eval $setvar
 
@@ -17453,6 +17465,7 @@ prefix='$prefix'
 prefixexp='$prefixexp'
 privlib='$privlib'
 privlibexp='$privlibexp'
+procselfexe='$procselfexe'
 prototype='$prototype'
 ptrsize='$ptrsize'
 quadkind='$quadkind'
