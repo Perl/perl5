@@ -3,7 +3,7 @@
 #
 package Encode;
 use strict;
-our $VERSION = do { my @r = (q$Revision: 1.98 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.9801 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 sub DEBUG () { 0 }
 use XSLoader ();
 XSLoader::load(__PACKAGE__, $VERSION);
