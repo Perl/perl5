@@ -4088,8 +4088,13 @@ OP *op;
     GV *gv = gv_fetchpv("glob", FALSE, SVt_PVCV);
 
     if (gv && GvIMPORTED_CV(gv)) {
+	static int cnt;
+
+	append_elem(OP_GLOB, op, newSVOP(OP_CONST, 0, newSViv(cnt++)));
 	op->op_type = OP_LIST;
 	op->op_ppaddr = ppaddr[OP_LIST];
+	((LISTOP*)op)->op_first->op_type = OP_PUSHMARK;
+	((LISTOP*)op)->op_first->op_ppaddr = ppaddr[OP_PUSHMARK];
 	op = newUNOP(OP_ENTERSUB, OPf_STACKED,
 		     append_elem(OP_LIST, op, 
 				 scalar(newUNOP(OP_RV2CV, 0,
