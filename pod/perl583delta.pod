@@ -9,7 +9,7 @@ the 5.8.3 release.
 
 If you are upgrading from an earlier release such as 5.6.1, first read
 the L<perl58delta>, which describes differences between 5.6.0 and
-5.8.0, and the L<perl581delta> and <perl582delta>, which describe differences
+5.8.0, and the L<perl581delta> and L<perl582delta>, which describe differences
 between 5.8.0, 5.8.1 and 5.8.2
 
 =head1 Incompatible Changes
@@ -95,8 +95,6 @@ The documentation has been revised in places to produce more standard manpages.
 The documentation for the special code blocks (BEGIN, CHECK, INIT, END)
 has been improved.
 
-=head1 Performance Enhancements
-
 =head1 Installation and Configuration Improvements
 
 Perl now builds on OpenVMS I64
@@ -120,6 +118,9 @@ which accidentally broke the compilation of Perl extensions written in C++
 
 =head1 New or Changed Diagnostics
 
+The fatal error "DESTROY created new reference to dead object" is now
+documented in L<perldiag>.
+
 =head1 Changed Internals
 
 The hash code has been refactored to reduce source duplication. The
@@ -141,8 +142,6 @@ they are called for. Previously callbacks were only invoked in the
 C<case $variable $define)> branch. This change should only affect platform
 maintainers writing configuration hints files.
 
-=head1 New Tests
-
 =head1 Known Problems
 
 We have a backlog of unresolved bugs. Dealing with bugs and bug reports
@@ -151,8 +150,6 @@ but that is all that we have.
 
 The perl5 development team are implementing changes to help address this
 problem, which should go live in early 2004.
-
-=head1 Platform Specific Problems
 
 =head1 Reporting Bugs
 
