@@ -103,8 +103,7 @@ sub loadEncoding
 	}
 	my $subclass =
 	    ($type eq 'X') ? 'Extended' :
-		($type eq 'H') ? 'HanZi'    :
-		    ($type eq 'E') ? 'Escape'   : 'Table';
+		($type eq 'E') ? 'Escape'   : 'Table';
 	my $class = ref($obj) . '::' . $subclass;
 	# carp "Loading $file";
 	bless $obj,$class;
@@ -132,7 +131,6 @@ sub INC_find
 require Encode::Tcl::Table;
 require Encode::Tcl::Escape;
 require Encode::Tcl::Extended;
-require Encode::Tcl::HanZi;
 
 1;
 __END__

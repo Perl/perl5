@@ -212,7 +212,6 @@ ext/Encode/Encode/2022.enc		Encode table
 ext/Encode/Encode/7bit-greek.enc	Encode table
 ext/Encode/Encode/7bit-jis.enc		Encode table
 ext/Encode/Encode/7bit-kana.enc		Encode table
-ext/Encode/Encode/7bit-kr.enc		Encode table
 ext/Encode/Encode/7bit-latin1.enc	Encode table
 ext/Encode/Encode/8859-1.enc		Encode table
 ext/Encode/Encode/8859-1.ucm		Encode table
@@ -349,7 +348,6 @@ ext/Encode/lib/Encode/JP/Tr.pm	Encode extension
 ext/Encode/lib/Encode/Tcl.pm		Encode extension
 ext/Encode/lib/Encode/Tcl/Escape.pm	Encode extension
 ext/Encode/lib/Encode/Tcl/Extended.pm	Encode extension
-ext/Encode/lib/Encode/Tcl/HanZi.pm	Encode extension
 ext/Encode/lib/Encode/Tcl/Table.pm	Encode extension
 ext/Encode/lib/Encode/ucs2_le.pm	Encode extension
 ext/Encode/lib/Encode/Unicode.pm	Encode extension
