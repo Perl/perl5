@@ -47,7 +47,7 @@ indexed by name to get the number:
 	$i++;
     }   
 
-So to check whether signal 17 and SIGALRM were the same, just do this:
+So to check whether signal 17 and SIGALRM were the same, do just this:
 
     print "signal #17 = $signame[17]\n";
     if ($signo{ALRM}) { 
@@ -103,21 +103,23 @@ reasonable BSD and POSIX fashion.  So you'll see defensive people writing
 signal handlers like this:
 
     sub REAPER { 
-	$SIG{CHLD} = \&REAPER;  # loathe sysV
 	$waitedpid = wait;
+	# loathe sysV: it makes us not only reinstate
+	# the handler, but place it after the wait
+	$SIG{CHLD} = \&REAPER;  
     }
     $SIG{CHLD} = \&REAPER;
     # now do something that forks...
 
 or even the more elaborate:
 
-    use POSIX ":wait_h";
+    use POSIX ":sys_wait_h";
     sub REAPER { 
 	my $child;
-	$SIG{CHLD} = \&REAPER;  # loathe sysV
         while ($child = waitpid(-1,WNOHANG)) {
 	    $Kid_Status{$child} = $?;
 	} 
+	$SIG{CHLD} = \&REAPER;  # still loathe sysV
     }
     $SIG{CHLD} = \&REAPER;
     # do something that forks...
@@ -171,9 +173,9 @@ on the other end.
 
 For example, let's say you'd like to have your F<.signature> file be a
 named pipe that has a Perl program on the other end.  Now every time any
-program (like a mailer, newsreader, finger program, etc.) tries to read
+program (like a mailer, news reader, finger program, etc.) tries to read
 from that file, the reading program will block and your program will
-supply the the new signature.  We'll use the pipe-checking file test B<-p>
+supply the new signature.  We'll use the pipe-checking file test B<-p>
 to find out whether anyone (or anything) has accidentally removed our fifo.
 
     chdir; # go home
@@ -191,7 +193,7 @@ to find out whether anyone (or anything) has accidentally removed our fifo.
 	open (FIFO, "> $FIFO") || die "can't write $FIFO: $!";
 	print FIFO "John Smith (smith\@host.org)\n", `fortune -s`;
 	close FIFO;
-	sleep 2;    # to avoid dup sigs
+	sleep 2;    # to avoid dup signals
     }
 
 
@@ -229,7 +231,7 @@ read from the file F<f1>, the process F<cmd1>, standard input (F<tmpfile>
 in this case), the F<f2> file, the F<cmd2> command, and finally the F<f3>
 file.  Pretty nifty, eh?
 
-You might notice that you could use backticks for much the
+You might notice that you could use back-ticks for much the
 same effect as opening a pipe for reading:
 
     print grep { !/^(tcp|udp)/ } `netstat -an 2>&1`;
@@ -248,7 +250,7 @@ exist: the open() will in all likelihood succeed (it only reflects the
 fork()'s success), but then your output will fail--spectacularly.  Perl
 can't know whether the command worked because your command is actually
 running in a separate process whose exec() might have failed.  Therefore,
-while readers of bogus commands just return a quick end of file, writers
+while readers of bogus commands return just a quick end of file, writers
 to bogus command will trigger a signal they'd better be prepared to
 handle.  Consider:
 
@@ -296,11 +298,11 @@ you opened whatever your kid writes to his STDOUT.
 
 Another common use for this construct is when you need to execute
 something without the shell's interference.  With system(), it's
-straightforward, but you can't use a pipe open or backticks safely.
+straightforward, but you can't use a pipe open or back-ticks safely.
 That's because there's no way to stop the shell from getting its hands on
 your arguments.   Instead, use lower-level control to call exec() directly.
 
-Here's a safe backtick or pipe open for read:
+Here's a safe back-tick or pipe open for read:
 
     # add error processing as above
     $pid = open(KID_TO_READ, "-|");
@@ -340,7 +342,7 @@ And here's a safe pipe open for writing:
 
 Note that these operations are full Unix forks, which means they may not be
 correctly implemented on alien systems.  Additionally, these are not true
-multithreading.  If you'd like to learn more about threading, see the
+multi-threading.  If you'd like to learn more about threading, see the
 F<modules> file mentioned below in the SEE ALSO section.
 
 =head2 Bidirectional Communication
@@ -357,7 +359,7 @@ entirely on the diagnostic message:
     Can't do bidirectional pipe at -e line 1.
 
 If you really want to, you can use the standard open2() library function
-to catch both ends.  There's also an open3() for tridirectional I/O so you
+to catch both ends.  There's also an open3() for tri-directional I/O so you
 can also catch your child's STDERR, but doing so would then require an
 awkward select() loop and wouldn't allow you to use normal Perl input
 operations.
@@ -378,10 +380,10 @@ Here's an example of using open2():
     print Writer "stuff\n";
     $got = <Reader>;
 
-The problem with this is that Unix buffering is going to really
-ruin your day.  Even though your C<Writer> filehandle is autoflushed,
+The problem with this is that Unix buffering is really going to
+ruin your day.  Even though your C<Writer> filehandle is auto-flushed,
 and the process on the other end will get your data in a timely manner,
-you can't usually do anything to force it to actually give it back to you
+you can't usually do anything to force it to give it back to you
 in a similarly quick fashion.  In this case, we could, because we 
 gave I<cat> a B<-u> flag to make it unbuffered.  But very few Unix
 commands are designed to operate over pipes, so this seldom works
@@ -400,17 +402,17 @@ pseudo-ttys to make your program behave more reasonably:
 
 This way you don't have to have control over the source code of the
 program you're using.  The F<Comm> library also has expect() 
-and interact() functions.  Find the library (and hopefully its 
+and interact() functions.  Find the library (and we hope its 
 successor F<IPC::Chat>) at your nearest CPAN archive as detailed
 in the SEE ALSO section below.
 
 =head1 Sockets: Client/Server Communication
 
-While not limited to Unix-derived operating systems (e.g. WinSock on PCs
+While not limited to Unix-derived operating systems (e.g., WinSock on PCs
 provides socket support, as do some VMS libraries), you may not have
 sockets on your system, in which case this section probably isn't going to do
-you much good.  With sockets, you can do both virtual circuits (i.e. TCP
-streams) and datagrams (i.e. UDP packets).  You may be able to do even more
+you much good.  With sockets, you can do both virtual circuits (i.e., TCP
+streams) and datagrams (i.e., UDP packets).  You may be able to do even more
 depending on your system.
 
 The Perl function calls for dealing with sockets have the same names as
@@ -458,7 +460,7 @@ Here's a sample TCP client using Internet-domain sockets:
 
 And here's a corresponding server to go along with it.  We'll
 leave the address as INADDR_ANY so that the kernel can choose
-the appropriate interface on multihomed hosts.  If you want sit
+the appropriate interface on multi-homed hosts.  If you want sit
 on a particular interface (like the external side of a gateway
 or firewall machine), you should fill this in with your real address
 instead.
@@ -474,6 +476,8 @@ instead.
 
     my $port = shift || 2345;
     my $proto = getprotobyname('tcp');
+    $port = $1 if $port =~ /(\d+)/; # untaint port number
+
     socket(Server, PF_INET, SOCK_STREAM, $proto)	|| die "socket: $!";
     setsockopt(Server, SOL_SOCKET, SO_REUSEADDR, 
 					pack("l", 1)) 	|| die "setsockopt: $!";
@@ -498,7 +502,7 @@ instead.
 			scalar localtime, "\n";
     } 
 
-And here's a multithreaded version.  It's multithreaded in that
+And here's a multi-threaded version.  It's multi-threaded in that
 like most typical servers, it spawns (forks) a slave server to 
 handle the client request so that the master server can quickly
 go back to service a new client.
@@ -529,8 +533,8 @@ go back to service a new client.
     my $paddr;
 
     sub REAPER { 
-	$SIG{CHLD} = \&REAPER;  # loathe sysV
 	$waitedpid = wait;
+	$SIG{CHLD} = \&REAPER;  # loathe sysV
 	logmsg "reaped $waitedpid" . ($? ? " with exit $?" : '');
     }
 
@@ -540,7 +544,7 @@ go back to service a new client.
 	  ($paddr = accept(Client,Server)) || $waitedpid; 
 	  $waitedpid = 0, close Client) 
     {
-	next if $waitedpid;
+	next if $waitedpid and not $paddr;
 	my($port,$iaddr) = sockaddr_in($paddr);
 	my $name = gethostbyaddr($iaddr,AF_INET);
 
@@ -569,9 +573,9 @@ go back to service a new client.
 	    return;
 	} elsif ($pid) {
 	    logmsg "begat $pid";
-	    return; # i'm the parent
+	    return; # I'm the parent
 	}
-	# else i'm the child -- go spawn
+	# else I'm the child -- go spawn
 
 	open(STDIN,  "<&Client")   || die "can't dup client to stdin";
 	open(STDOUT, ">&Client")   || die "can't dup client to stdout";
@@ -721,7 +725,7 @@ all, let alone in order and unmangled.  Still, UDP offers some advantages
 over TCP, including being able to "broadcast" or "multicast" to a whole
 bunch of destination hosts at once (usually on your local subnet).  If you
 find yourself overly concerned about reliability and start building checks
-into your message system, then you probably should just use TCP to start
+into your message system, then you probably should use just TCP to start
 with.
 
 Here's a UDP program similar to the sample Internet TCP client given
@@ -894,7 +898,7 @@ B<-T> taint checking flag to the pound-bang line for servers:
 All these routines create system-specific portability problems.  As noted
 elsewhere, Perl is at the mercy of your C libraries for much of its system
 behaviour.  It's probably safest to assume broken SysV semantics for
-signals and to stick with simple TCP and UDP socket operations; e.g. don't
+signals and to stick with simple TCP and UDP socket operations; e.g., don't
 try to pass open file descriptors over a local UDP datagram socket if you
 want your code to stand a chance of being portable.
 
@@ -913,7 +917,7 @@ Besides the obvious functions in L<perlfunc>, you should also check out
 the F<modules> file at your nearest CPAN site.  (See L<perlmod> or best
 yet, the F<Perl FAQ> for a description of what CPAN is and where to get it.)
 Section 5 of the F<modules> file is devoted to "Networking, Device Control
-(modems) and Interprocess Communication", and contains numerous unbundled
+(modems), and Interprocess Communication", and contains numerous unbundled
 modules numerous networking modules, Chat and Expect operations, CGI
 programming, DCE, FTP, IPC, NNTP, Proxy, Ptty, RPC, SNMP, SMTP, Telnet,
 Threads, and ToolTalk--just to name a few.
