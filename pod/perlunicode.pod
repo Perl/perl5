@@ -645,11 +645,21 @@ Level 1 - Basic Unicode Support
         [10] should do ^ and $ also on \x{85}, \x{2028} and \x{2029})
              (should also affect <>, $., and script line numbers)
   
-(*) Instead of [\u0370-\u03FF-[{UNASSIGNED}]] as suggested by the TR
-18 you can use negated lookahead: to match currently assigned modern
-Greek characters use for example
+(*) You can mimic class subtraction using lookahead.
+For example, what TR18 might write as
 
-		/(?!\p{Cn})[\x{0370}-\x{03ff}]/
+    [{Greek}-[{UNASSIGNED}]]
+
+in Perl can be written as:
+
+    (?!\p{UNASSIGNED})\p{GreekBlock}
+    (?=\p{ASSIGNED})\p{GreekBlock}
+
+But in this particular example, you probably really want
+
+    \p{Greek}
+
+which will match assigned characters known to be part of the Greek script.
 
 In other words: the matched character must not be a non-assigned
 character, but it must be in the block of modern Greek characters.
@@ -724,11 +734,18 @@ As you can see, the continuation bytes all begin with C<10>, and the
 leading bits of the start byte tells how many bytes the are in the
 encoded character.
 
+=item UTF-EBDIC
+
+Like UTF-8, but EBDCIC-safe, as UTF-8 is ASCII-safe.
+
 =item UTF-16, UTF-16BE, UTF16-LE, Surrogates, and BOMs (Byte Order Marks)
+
+(The followings items are mostly for reference, Perl doesn't
+use them internally.)
 
 UTF-16 is a 2 or 4 byte encoding.  The Unicode code points
 0x0000..0xFFFF are stored in two 16-bit units, and the code points
-0x010000..0x10FFFF in four 16-bit units.  The latter case is
+0x010000..0x10FFFF in two 16-bit units.  The latter case is
 using I<surrogates>, the first 16-bit unit being the I<high
 surrogate>, and the second being the I<low surrogate>.
 
@@ -745,10 +762,9 @@ and the decoding is
 	$uni = 0x10000 + ($hi - 0xD8000) * 0x400 + ($lo - 0xDC00);
 
 If you try to generate surrogates (for example by using chr()), you
-will get an error because firstly a surrogate on its own is
-meaningless, and secondly because Perl encodes its Unicode characters
-in UTF-8 (not 16-bit numbers), which makes the encoded character doubly
-illegal.
+will get an error because firstly a surrogate on its own is meaningless,
+and secondly because Perl encodes its Unicode characters in UTF-8
+(not 16-bit numbers), which makes the encoded character doubly illegal.
 
 Because of the 16-bitness, UTF-16 is byteorder dependent.  UTF-16
 itself can be used for in-memory computations, but if storage or
