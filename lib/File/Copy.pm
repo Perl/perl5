@@ -37,7 +37,7 @@ my $macfiles;
 if ($^O eq 'MacOS') {
 	$macfiles = eval { require Mac::MoreFiles };
 	warn 'Mac::MoreFiles could not be loaded; using non-native syscopy'
-		if $^W;
+		if $@ && $^W;
 }
 
 sub _catname {
