@@ -99,7 +99,7 @@ Perl_unshare_hek(pTHX_ HEK *hek)
 
 #if defined(USE_ITHREADS)
 HE *
-Perl_he_dup(pTHX_ HE *e, bool shared, clone_params* param)
+Perl_he_dup(pTHX_ HE *e, bool shared, CLONE_PARAMS* param)
 {
     HE *ret;
 

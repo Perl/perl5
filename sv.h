@@ -13,7 +13,7 @@
 
 /*
 =for apidoc AmU||svtype
-An enum of flags for Perl types.  These are found in the file B<sv.h> 
+An enum of flags for Perl types.  These are found in the file B<sv.h>
 in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
 
 =for apidoc AmU||SVt_PV
@@ -646,7 +646,7 @@ and leaves the UTF8 status as it was.
 #define SvAMAGIC_on(sv)		(SvFLAGS(sv) |= SVf_AMAGIC)
 #define SvAMAGIC_off(sv)	(SvFLAGS(sv) &= ~SVf_AMAGIC)
 
-#define SvGAMAGIC(sv)           (SvFLAGS(sv) & (SVs_GMG|SVf_AMAGIC)) 
+#define SvGAMAGIC(sv)           (SvFLAGS(sv) & (SVs_GMG|SVf_AMAGIC))
 
 /*
 #define Gv_AMG(stash) \
@@ -1178,7 +1178,7 @@ Like C<SvSetMagicSV>, but does any set magic required afterwards.
 =for apidoc Am|char *|SvGROW|SV* sv|STRLEN len
 Expands the character buffer in the SV so that it has room for the
 indicated number of bytes (remember to reserve space for an extra trailing
-NUL character).  Calls C<sv_grow> to perform the expansion if necessary. 
+NUL character).  Calls C<sv_grow> to perform the expansion if necessary.
 Returns a pointer to the character buffer.
 
 =cut
@@ -1234,7 +1234,7 @@ Returns a pointer to the character buffer.
 #define CLONEf_KEEP_PTR_TABLE 2
 #define CLONEf_CLONE_HOST 4
 
-typedef struct {
+struct clone_params {
   AV* stashes;
   UV  flags;
-} clone_params;
+};

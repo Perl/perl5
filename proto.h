@@ -937,17 +937,17 @@ PERL_CALLCONV void	Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, O
 PERL_CALLCONV OP *	Perl_my_attrs(pTHX_ OP *o, OP *attrs);
 PERL_CALLCONV void	Perl_boot_core_xsutils(pTHX);
 #if defined(USE_ITHREADS)
-PERL_CALLCONV PERL_CONTEXT*	Perl_cx_dup(pTHX_ PERL_CONTEXT* cx, I32 ix, I32 max, clone_params* param);
-PERL_CALLCONV PERL_SI*	Perl_si_dup(pTHX_ PERL_SI* si, clone_params* param);
-PERL_CALLCONV ANY*	Perl_ss_dup(pTHX_ PerlInterpreter* proto_perl, clone_params* param);
+PERL_CALLCONV PERL_CONTEXT*	Perl_cx_dup(pTHX_ PERL_CONTEXT* cx, I32 ix, I32 max, CLONE_PARAMS* param);
+PERL_CALLCONV PERL_SI*	Perl_si_dup(pTHX_ PERL_SI* si, CLONE_PARAMS* param);
+PERL_CALLCONV ANY*	Perl_ss_dup(pTHX_ PerlInterpreter* proto_perl, CLONE_PARAMS* param);
 PERL_CALLCONV void*	Perl_any_dup(pTHX_ void* v, PerlInterpreter* proto_perl);
-PERL_CALLCONV HE*	Perl_he_dup(pTHX_ HE* e, bool shared, clone_params* param);
-PERL_CALLCONV REGEXP*	Perl_re_dup(pTHX_ REGEXP* r, clone_params* param);
-PERL_CALLCONV PerlIO*	Perl_fp_dup(pTHX_ PerlIO* fp, char type);
+PERL_CALLCONV HE*	Perl_he_dup(pTHX_ HE* e, bool shared, CLONE_PARAMS* param);
+PERL_CALLCONV REGEXP*	Perl_re_dup(pTHX_ REGEXP* r, CLONE_PARAMS* param);
+PERL_CALLCONV PerlIO*	Perl_fp_dup(pTHX_ PerlIO* fp, char type, CLONE_PARAMS* param);
 PERL_CALLCONV DIR*	Perl_dirp_dup(pTHX_ DIR* dp);
-PERL_CALLCONV GP*	Perl_gp_dup(pTHX_ GP* gp, clone_params* param);
-PERL_CALLCONV MAGIC*	Perl_mg_dup(pTHX_ MAGIC* mg, clone_params* param);
-PERL_CALLCONV SV*	Perl_sv_dup(pTHX_ SV* sstr, clone_params* param);
+PERL_CALLCONV GP*	Perl_gp_dup(pTHX_ GP* gp, CLONE_PARAMS* param);
+PERL_CALLCONV MAGIC*	Perl_mg_dup(pTHX_ MAGIC* mg, CLONE_PARAMS* param);
+PERL_CALLCONV SV*	Perl_sv_dup(pTHX_ SV* sstr, CLONE_PARAMS* param);
 #if defined(HAVE_INTERP_INTERN)
 PERL_CALLCONV void	Perl_sys_intern_dup(pTHX_ struct interp_intern* src, struct interp_intern* dst);
 #endif

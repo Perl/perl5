@@ -324,7 +324,7 @@ extern int PerlIO_getpos(PerlIO *, SV *);
 extern int PerlIO_setpos(PerlIO *, SV *);
 #endif
 #ifndef PerlIO_fdupopen
-extern PerlIO *PerlIO_fdupopen(pTHX_ PerlIO *);
+extern PerlIO *PerlIO_fdupopen(pTHX_ PerlIO *, CLONE_PARAMS *);
 #endif
 #if !defined(PerlIO_modestr) && !defined(PERLIO_IS_STDIO)
 extern char *PerlIO_modestr(PerlIO *, char *buf);

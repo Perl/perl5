@@ -123,7 +123,7 @@ Private API to rest of sv.c
 
 Public API:
 
-    sv_report_used(), sv_clean_objs(), sv_clean_all(), sv_free_arenas() 
+    sv_report_used(), sv_clean_objs(), sv_clean_all(), sv_free_arenas()
 
 
 =cut
@@ -3198,7 +3198,7 @@ Perl_sv_2pvutf8(pTHX_ register SV *sv, STRLEN *lp)
 =for apidoc sv_2bool
 
 This function is only called on magical items, and is only used by
-sv_true() or its macro equivalent. 
+sv_true() or its macro equivalent.
 
 =cut
 */
@@ -4280,8 +4280,8 @@ Perl_sv_catsv_flags(pTHX_ SV *dsv, register SV *ssv, I32 flags)
     if ((spv = SvPV(ssv, slen))) {
 	/*  sutf8 and dutf8 were type bool, but under USE_ITHREADS,
 	    gcc version 2.95.2 20000220 (Debian GNU/Linux) for
-	    Linux xxx 2.2.17 on sparc64 with gcc -O2, we erroneously 
-	    get dutf8 = 0x20000000, (i.e.  SVf_UTF8) even though 
+	    Linux xxx 2.2.17 on sparc64 with gcc -O2, we erroneously
+	    get dutf8 = 0x20000000, (i.e.  SVf_UTF8) even though
 	    dsv->sv_flags doesn't have that bit set.
 		Andy Dougherty  12 Oct 2001
 	*/
@@ -8376,13 +8376,13 @@ ptr_table_* functions.
 #define gv_dup_inc(s,t)	(GV*)SvREFCNT_inc(sv_dup((SV*)s,t))
 #define SAVEPV(p)	(p ? savepv(p) : Nullch)
 #define SAVEPVN(p,n)	(p ? savepvn(p,n) : Nullch)
- 
+
 
 /* Duplicate a regexp. Required reading: pregcomp() and pregfree() in
    regcomp.c. AMS 20010712 */
 
 REGEXP *
-Perl_re_dup(pTHX_ REGEXP *r, clone_params *param)
+Perl_re_dup(pTHX_ REGEXP *r, CLONE_PARAMS *param)
 {
     REGEXP *ret;
     int i, len, npar;
@@ -8480,7 +8480,7 @@ Perl_re_dup(pTHX_ REGEXP *r, clone_params *param)
 /* duplicate a file handle */
 
 PerlIO *
-Perl_fp_dup(pTHX_ PerlIO *fp, char type)
+Perl_fp_dup(pTHX_ PerlIO *fp, char type, CLONE_PARAMS *param)
 {
     PerlIO *ret;
     if (!fp)
@@ -8492,7 +8492,7 @@ Perl_fp_dup(pTHX_ PerlIO *fp, char type)
 	return ret;
 
     /* create anew and remember what it is */
-    ret = PerlIO_fdupopen(aTHX_ fp);
+    ret = PerlIO_fdupopen(aTHX_ fp, param);
     ptr_table_store(PL_ptr_table, fp, ret);
     return ret;
 }
@@ -8511,7 +8511,7 @@ Perl_dirp_dup(pTHX_ DIR *dp)
 /* duplicate a typeglob */
 
 GP *
-Perl_gp_dup(pTHX_ GP *gp, clone_params* param)
+Perl_gp_dup(pTHX_ GP *gp, CLONE_PARAMS* param)
 {
     GP *ret;
     if (!gp)
@@ -8544,7 +8544,7 @@ Perl_gp_dup(pTHX_ GP *gp, clone_params* param)
 /* duplicate a chain of magic */
 
 MAGIC *
-Perl_mg_dup(pTHX_ MAGIC *mg, clone_params* param)
+Perl_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS* param)
 {
     MAGIC *mgprev = (MAGIC*)NULL;
     MAGIC *mgret;
@@ -8815,7 +8815,7 @@ S_gv_share(pTHX_ SV *sstr)
 /* duplicate an SV of any type (including AV, HV etc) */
 
 SV *
-Perl_sv_dup(pTHX_ SV *sstr, clone_params* param)
+Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 {
     SV *dstr;
 
@@ -9010,11 +9010,11 @@ Perl_sv_dup(pTHX_ SV *sstr, clone_params* param)
 	    SvPVX(dstr)	= SAVEPVN(SvPVX(sstr), SvLEN(sstr)-1);
 	else
 	    SvPVX(dstr)	= SvPVX(sstr);		/* XXX shared string/random ptr? */
-	IoIFP(dstr)	= fp_dup(IoIFP(sstr), IoTYPE(sstr));
+	IoIFP(dstr)	= fp_dup(IoIFP(sstr), IoTYPE(sstr), param);
 	if (IoOFP(sstr) == IoIFP(sstr))
 	    IoOFP(dstr) = IoIFP(dstr);
 	else
-	    IoOFP(dstr)	= fp_dup(IoOFP(sstr), IoTYPE(sstr));
+	    IoOFP(dstr)	= fp_dup(IoOFP(sstr), IoTYPE(sstr), param);
 	/* PL_rsfp_filters entries have fake IoDIRP() */
 	if (IoDIRP(sstr) && !(IoFLAGS(sstr) & IOf_FAKE_DIRP))
 	    IoDIRP(dstr)	= dirp_dup(IoDIRP(sstr));
@@ -9167,7 +9167,7 @@ Perl_sv_dup(pTHX_ SV *sstr, clone_params* param)
 /* duplicate a context */
 
 PERL_CONTEXT *
-Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, clone_params* param)
+Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 {
     PERL_CONTEXT *ncxs;
 
@@ -9255,7 +9255,7 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, clone_params* param)
 /* duplicate a stack info structure */
 
 PERL_SI *
-Perl_si_dup(pTHX_ PERL_SI *si, clone_params* param)
+Perl_si_dup(pTHX_ PERL_SI *si, CLONE_PARAMS* param)
 {
     PERL_SI *nsi;
 
@@ -9330,7 +9330,7 @@ Perl_any_dup(pTHX_ void *v, PerlInterpreter *proto_perl)
 /* duplicate the save stack */
 
 ANY *
-Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, clone_params* param)
+Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 {
     ANY *ss	= proto_perl->Tsavestack;
     I32 ix	= proto_perl->Tsavestack_ix;
@@ -9625,7 +9625,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
      * their pointers copied. */
 
     IV i;
-    clone_params* param = (clone_params*) malloc(sizeof(clone_params));
+    CLONE_PARAMS* param = (CLONE_PARAMS*) MALLOC(SIZEOF(CLONE_PARAMS));
 
     PerlInterpreter *my_perl = (PerlInterpreter*)(*ipM->pMalloc)(ipM, sizeof(PerlInterpreter));
     PERL_SET_THX(my_perl);
@@ -9653,7 +9653,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_Proc		= ipP;
 #else		/* !PERL_IMPLICIT_SYS */
     IV i;
-    clone_params* param = (clone_params*) malloc(sizeof(clone_params));
+    CLONE_PARAMS* param = (CLONE_PARAMS*) malloc(sizeof(CLONE_PARAMS));
     PerlInterpreter *my_perl = (PerlInterpreter*)PerlMem_malloc(sizeof(PerlInterpreter));
     PERL_SET_THX(my_perl);
 
@@ -9820,10 +9820,10 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	for(i = 1; i <= len; i++) {
             if(SvREPADTMP(regexen[i])) {
 	      av_push(PL_regex_padav, sv_dup_inc(regexen[i], param));
-            } else { 
+            } else {
 	        av_push(PL_regex_padav,
                     SvREFCNT_inc(
-                        newSViv(PTR2IV(re_dup(INT2PTR(REGEXP *, 
+                        newSViv(PTR2IV(re_dup(INT2PTR(REGEXP *,
                              SvIVX(regexen[i])), param)))
                        ));
 	    }
@@ -9924,7 +9924,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_custom_op_descs  = hv_dup_inc(proto_perl->Icustom_op_descs,param);
 
     PL_profiledata	= NULL;
-    PL_rsfp		= fp_dup(proto_perl->Irsfp, '<');
+    PL_rsfp		= fp_dup(proto_perl->Irsfp, '<', param);
     /* PL_rsfp_filters entries have fake IoDIRP() */
     PL_rsfp_filters	= av_dup_inc(proto_perl->Irsfp_filters, param);
 
@@ -10308,7 +10308,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
         ptr_table_free(PL_ptr_table);
         PL_ptr_table = NULL;
     }
-    
+
     /* Call the ->CLONE method, if it exists, for each of the stashes
        identified by sv_dup() above.
     */

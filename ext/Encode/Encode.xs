@@ -325,6 +325,21 @@ PerlIOEncode_tell(PerlIO *f)
  return b->posn;
 }
 
+PerlIO *
+PerlIOEncode_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *params)
+{
+ if ((f = PerlIOBase_dup(aTHX_ f, o, params)))
+  {
+   PerlIOEncode *fe = PerlIOSelf(f,PerlIOEncode);
+   PerlIOEncode *oe = PerlIOSelf(o,PerlIOEncode);
+   if (oe->enc)
+    {
+     fe->enc = PerlIO_sv_dup(aTHX_ oe->enc, params);
+    }
+  }
+ return f;
+}
+
 PerlIO_funcs PerlIO_encode = {
  "encoding",
  sizeof(PerlIOEncode),
@@ -334,6 +349,7 @@ PerlIO_funcs PerlIO_encode = {
  PerlIOBuf_open,
  PerlIOEncode_getarg,
  PerlIOBase_fileno,
+ PerlIOEncode_dup,
  PerlIOBuf_read,
  PerlIOBuf_unread,
  PerlIOBuf_write,

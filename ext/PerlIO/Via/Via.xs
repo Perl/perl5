@@ -13,7 +13,6 @@ typedef struct
  SV *		obj;
  SV *		var;
  SSize_t	cnt;
- Off_t		posn;
  IO *		io;
  SV *		fh;
  CV *PUSHED;
@@ -54,7 +53,6 @@ PerlIOVia_fetchmethod(pTHX_ PerlIOVia *s,char *method,CV **save)
   {
    return *save = (CV *) -1;
   }
-
 }
 
 SV *
@@ -271,7 +269,7 @@ PerlIOVia_seek(PerlIO *f, Off_t offset, int whence)
  dTHX;
  PerlIOVia *s = PerlIOSelf(f,PerlIOVia);
  SV *offsv  = sv_2mortal(newSViv(offset));
- SV *whsv   = sv_2mortal(newSViv(offset));
+ SV *whsv   = sv_2mortal(newSViv(whence));
  SV *result = PerlIOVia_method(aTHX_ f,MYMethod(SEEK),G_SCALAR,offsv,whsv,Nullsv);
  return (result) ? SvIV(result) : -1;
 }
@@ -282,7 +280,7 @@ PerlIOVia_tell(PerlIO *f)
  dTHX;
  PerlIOVia *s = PerlIOSelf(f,PerlIOVia);
  SV *result = PerlIOVia_method(aTHX_ f,MYMethod(TELL),G_SCALAR,Nullsv);
- return (result) ? (Off_t) SvIV(result) : s->posn;
+ return (result) ? (Off_t) SvIV(result) : (Off_t) -1;
 }
 
 SSize_t
@@ -492,6 +490,18 @@ PerlIOVia_eof(PerlIO *f)
  return (result) ? SvIV(result) : PerlIOBase_eof(f);
 }
 
+PerlIO *
+PerlIOVia_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param)
+{
+ if ((f = PerlIOBase_dup(aTHX_ f, o, param)))
+  {
+   /* Most of the fields will lazily set them selves up as needed
+      stash and obj have been set up by the implied push
+    */
+  }
+ return f;
+}
+
 PerlIO_funcs PerlIO_object = {
  "Via",
  sizeof(PerlIOVia),
@@ -501,6 +511,7 @@ PerlIO_funcs PerlIO_object = {
  NULL, /* PerlIOVia_open, */
  PerlIOVia_getarg,
  PerlIOVia_fileno,
+ PerlIOVia_dup,
  PerlIOVia_read,
  PerlIOVia_unread,
  PerlIOVia_write,
