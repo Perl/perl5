@@ -39,19 +39,19 @@ sub post_initialize
  foreach my $f (@{$self->{'O_FILES'}})
   {
    $o{$f} = 1;
-  } 
+  }
  my $x = $self->{'OBJ_EXT'};
  # Add the table O_FILES
  foreach my $e (keys %tables)
   {
    $o{$e.$x} = 1;
-  }  
- # Reset the variable 
+  }
+ # Reset the variable
  $self->{'O_FILES'} = [sort keys %o];
  my @files;
  foreach my $table (keys %tables)
   {
-   foreach my $ext (qw($(OBJ_EXT) .c .h .def))
+   foreach my $ext (qw($(OBJ_EXT) .c .h .def .fnm))
     {
      push (@files,$table.$ext);
     }
@@ -64,9 +64,8 @@ sub postamble
 {
  my $self = shift;
  my $dir  = $self->catdir($self->curdir,'Encode');
- my $str  = "# Encode$(OBJ_EXT) depends on .h and .def files not .c files - but all written by compile\n";
+ my $str  = "# Encode\$(OBJ_EXT) depends on .h and .def files not .c files - but all written by compile\n";
  $str  .= 'Encode$(OBJ_EXT) :';
- my @rules;
  foreach my $table (keys %tables)
   {
    $str .= " $table.c";
@@ -89,22 +88,14 @@ sub postamble
        $continuator = '';
       }
     }
-   $numlines = 1;
-   $lengthsofar = length($str);
-   $continuator = '';
-   $str .= "\n\t\$(PERL) compile \$\@";
+   $str .= "\n\t\$(PERL) compile \$\@ $table.fnm\n\n";
+   open (FILELIST, ">$table.fnm")
+       || die "Could not open $table.fnm: $!";
    foreach my $file (@{$tables{$table}})
     {
-     $str .= $continuator.' '.$self->catfile($dir,$file);
-     if ( length($str)-$lengthsofar > 128*$numlines )
-      {
-       $continuator .= "\n\t\$(PERL) compile \$\@";
-       $numlines++;
-      } else {
-       $continuator = '';
-      }
+     print FILELIST $self->catfile($dir,$file) . "\n";
     }
-   $str .= "\n\n";
+   close(FILELIST);
   }
  return $str;
 }
