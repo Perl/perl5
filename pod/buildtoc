@@ -512,8 +512,8 @@ sub generate_descrip_mms_1 {
 }
 
 sub generate_descrip_mms_2 {
-  map {sprintf <<'SNIP', $_, $_}
-[.lib.pod]%s.pod : [.pod]%s.pod
+  map {sprintf <<'SNIP', $_, $_ eq 'perlvms' ? 'vms' : 'pod', $_}
+[.lib.pod]%s.pod : [.%s]%s.pod
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	Copy/NoConfirm/Log $(MMS$SOURCE) [.lib.pod]
 SNIP
