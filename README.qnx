@@ -98,9 +98,7 @@ A script that emulates the standard unix archive (aka library)
 utility.  Under Watcom 10.6, ar is linked to wlib and provides the
 expected interface. With Watcom 9.5, a cover function is
 required. This one is fairly crude but has proved adequate for
-compiling perl.  A more thorough version is available at:
-
-	http://www.fdma.com/pub/qnx/porting/ar
+compiling perl.
 
 =item qnx/cpp
 

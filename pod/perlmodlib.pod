@@ -776,7 +776,7 @@ Convert POD data to formatted *roff input
 
 =item Pod::ParseLink
 
-Parse an L<> formatting code in POD text
+Parse an LE<lt>E<gt> formatting code in POD text
 
 =item Pod::ParseUtils
 
@@ -1133,8 +1133,8 @@ You should try to choose one close to you:
 South Africa
 
     ftp://ftp.is.co.za/programming/perl/CPAN/
+    ftp://ftp.mweb.co.za/pub/mirrors/cpan/
     ftp://ftp.saix.net/pub/CPAN/
-    ftp://ftpza.co.za/pub/mirrors/cpan/
     ftp://ftp.sun.ac.za/CPAN/
 
 =back
@@ -1149,21 +1149,23 @@ China
 
     ftp://freesoft.cei.gov.cn/pub/languages/perl/CPAN/
     http://www2.linuxforum.net/mirror/CPAN/
+    http://CPAN.pacific.net.hk/
+    ftp://ftp.pacific.net.hk/pub/mirror/CPAN/
     http://cpan.shellhung.org/
     ftp://ftp.shellhung.org/pub/CPAN
 
 =item *
 
-Hong Kong
+India
 
-    http://CPAN.pacific.net.hk/
-    ftp://ftp.pacific.net.hk/pub/mirror/CPAN/
+    http://cpan.in.freeos.com
+    ftp://cpan.in.freeos.com/pub/CPAN/
 
 =item *
 
 Indonesia
 
-    http://piksi.itb.ac.id/CPAN/
+    http://cpan.itb.web.id/
     ftp://mirrors.piksi.itb.ac.id/CPAN/
     http://CPAN.mweb.co.id/
     ftp://ftp.mweb.co.id/pub/languages/perl/CPAN/
@@ -1174,6 +1176,7 @@ Israel
 
     http://www.iglu.org.il:/pub/CPAN/
     ftp://ftp.iglu.org.il/pub/CPAN/
+    http://cpan.lerner.co.il/
     http://bioinfo.weizmann.ac.il/pub/software/perl/CPAN/
     ftp://bioinfo.weizmann.ac.il/pub/software/perl/CPAN/
 
@@ -1181,7 +1184,7 @@ Israel
 
 Japan
 
-    ftp://ftp.u-aizu.ac.jp/pub/lang/perl/CPAN/
+    ftp://ftp.u-aizu.ac.jp/pub/CPAN
     ftp://ftp.kddlabs.co.jp/CPAN/
     http://mirror.nucba.ac.jp/mirror/Perl/
     ftp://mirror.nucba.ac.jp/mirror/Perl/
@@ -1189,6 +1192,26 @@ Japan
     ftp://ftp.jaist.ac.jp/pub/lang/perl/CPAN/
     ftp://ftp.dti.ad.jp/pub/lang/CPAN/
     ftp://ftp.ring.gr.jp/pub/lang/perl/CPAN/
+
+=item *
+
+Korea
+
+    http://mirror.Mazic.org/pub/CPAN
+    ftp://mirror.Mazic.org/pub/CPAN
+
+=item *
+
+Philippines
+
+    http://www.adzu.edu.ph/CPAN
+
+=item *
+
+Russian Federation
+
+    http://cpan.tomsk.ru
+    ftp://cpan.tomsk.ru/pub/CPAN
 
 =item *
 
@@ -1201,8 +1224,6 @@ Saudi Arabia
 Singapore
 
     http://cpan.hjc.edu.sg
-    http://ftp.nus.edu.sg/unix/perl/CPAN/
-    ftp://ftp.nus.edu.sg/pub/unix/perl/CPAN/
 
 =item *
 
@@ -1210,7 +1231,7 @@ South Korea
 
     http://CPAN.bora.net/
     ftp://ftp.bora.net/pub/CPAN/
-    http://ftp.kornet.net/CPAN/
+    http://ftp.kornet.net/pub/CPAN/
     ftp://ftp.kornet.net/pub/CPAN/
     ftp://ftp.nuri.net/pub/CPAN/
 
@@ -1221,6 +1242,8 @@ Taiwan
     ftp://coda.nctu.edu.tw/UNIX/perl/CPAN
     ftp://ftp.ee.ncku.edu.tw/pub/perl/CPAN/
     ftp://ftp1.sinica.edu.tw/pub1/perl/CPAN/
+    http://ftp.tku.edu.tw/pub/CPAN/
+    ftp://ftp.tku.edu.tw/pub/CPAN/
 
 =item *
 
@@ -1254,14 +1277,16 @@ Costa Rica
 
 Austria
 
-    ftp://ftp.tuwien.ac.at/pub/languages/perl/CPAN/
+    ftp://ftp.tuwien.ac.at/pub/CPAN/
 
 =item *
 
 Belgium
 
-    http://ftp.easynet.be/CPAN/
-    ftp://ftp.easynet.be/CPAN/
+    http://ftp.easynet.be/pub/CPAN/
+    ftp://ftp.easynet.be/pub/CPAN/
+    http://cpan.skynet.be
+    ftp://ftp.skynet.be/pub/CPAN
     ftp://ftp.kulnet.kuleuven.ac.be/pub/mirror/CPAN/
 
 =item *
@@ -1280,15 +1305,16 @@ Croatia
 
 Czech Republic
 
-    http://www.fi.muni.cz/pub/perl/
-    ftp://ftp.fi.muni.cz/pub/perl/
+    http://ftp.fi.muni.cz/pub/CPAN/
+    ftp://ftp.fi.muni.cz/pub/CPAN/
     ftp://sunsite.mff.cuni.cz/MIRRORS/ftp.funet.fi/pub/languages/perl/CPAN/
 
 =item *
 
 Denmark
 
-    ftp://sunsite.auc.dk/pub/languages/perl/CPAN/
+    http://mirrors.sunsite.dk/cpan/
+    ftp://sunsite.dk/mirrors/cpan/
     http://www.cpan.dk/CPAN/
     ftp://www.cpan.dk/ftp.cpan.org/CPAN/
 
@@ -1298,7 +1324,8 @@ England
 
     http://www.mirror.ac.uk/sites/ftp.funet.fi/pub/languages/perl/CPAN
     ftp://ftp.mirror.ac.uk/sites/ftp.funet.fi/pub/languages/perl/CPAN/
-    ftp://ftp.demon.co.uk/pub/mirrors/perl/CPAN/
+    http://cpan.crazygreek.co.uk
+    ftp://ftp.demon.co.uk/pub/CPAN/
     ftp://ftp.flirble.org/pub/languages/perl/CPAN/
     ftp://ftp.plig.org/pub/CPAN/
     ftp://sunsite.doc.ic.ac.uk/packages/CPAN/
@@ -1317,16 +1344,21 @@ Estonia
 Finland
 
     ftp://ftp.funet.fi/pub/languages/perl/CPAN/
+    http://cpan.kpnqwest.fi/
 
 =item *
 
 France
 
     ftp://cpan.ftp.worldonline.fr/pub/CPAN/
+    http://cpan.mirrors.easynet.fr/
+    ftp://cpan.mirrors.easynet.fr/pub/ftp.cpan.org/
     ftp://ftp.club-internet.fr/pub/perl/CPAN/
+    http://fr.cpan.org/
     ftp://ftp.lip6.fr/pub/perl/CPAN/
     ftp://ftp.oleane.net/pub/mirrors/CPAN/
     ftp://ftp.pasteur.fr/pub/computing/CPAN/
+    http://cpan.cict.fr/
     ftp://cpan.cict.fr/pub/CPAN/
     ftp://ftp.uvsq.fr/pub/perl/CPAN/
 
@@ -1342,7 +1374,9 @@ Germany
     http://ftp.gwdg.de/pub/languages/perl/CPAN/
     ftp://ftp.gwdg.de/pub/languages/perl/CPAN/
     ftp://ftp.uni-hamburg.de/pub/soft/lang/perl/CPAN/
-    ftp://ftp.leo.org/pub/comp/general/programming/languages/script/perl/CPAN/
+    ftp://ftp.leo.org/pub/CPAN/
+    http://cpan.noris.de/
+    ftp://cpan.noris.de/pub/CPAN/
     ftp://ftp.mpi-sb.mpg.de/pub/perl/CPAN/
     ftp://ftp.gmd.de/mirrors/CPAN/
 
@@ -1359,14 +1393,15 @@ Hungary
 
     http://cpan.artifact.hu/
     ftp://cpan.artifact.hu/CPAN/
-    ftp://ftp.kfki.hu/pub/packages/perl/CPAN/
+    http://ftp.kfki.hu/pub/CPAN/
+    ftp://ftp.kfki.hu/pub/CPAN/
 
 =item *
 
 Iceland
 
-    http://cpan.gm.is/
-    ftp://ftp.gm.is/pub/CPAN/
+    http://ftp.rhnet.is/pub/CPAN/
+    ftp://ftp.rhnet.is/pub/CPAN/
 
 =item *
 
@@ -1400,11 +1435,19 @@ Latvia
 
 =item *
 
+Lithuania
+
+    ftp://ftp.unix.lt/pub/CPAN/
+
+=item *
+
 Netherlands
 
     ftp://download.xs4all.nl/pub/mirror/CPAN/
     ftp://ftp.nl.uu.net/pub/CPAN/
     ftp://ftp.nluug.nl/pub/languages/perl/CPAN/
+    http://cpan.cybercomm.nl/
+    ftp://mirror.cybercomm.nl/pub/cpan/
     ftp://ftp.cpan.nl/pub/CPAN/
     http://www.cs.uu.nl/mirror/CPAN/
     ftp://ftp.cs.uu.nl/mirror/CPAN/
@@ -1413,7 +1456,7 @@ Netherlands
 
 Norway
 
-    ftp://sunsite.uio.no/pub/languages/perl/CPAN/
+    ftp://ftp.uninett.no/pub/languages/perl/CPAN
     ftp://ftp.uit.no/pub/languages/perl/cpan/
 
 =item *
@@ -1421,6 +1464,8 @@ Norway
 Poland
 
     ftp://ftp.pk.edu.pl/pub/lang/perl/CPAN/
+    http://www.fic.uni.lodz.pl/pub/CPAN
+    ftp://ftp.fic.uni.lodz.pl/pub/CPAN
     ftp://ftp.mega.net.pl/pub/mirrors/ftp.perl.com/
     ftp://ftp.man.torun.pl/pub/doc/CPAN/
     ftp://sunsite.icm.edu.pl/pub/CPAN/
@@ -1431,8 +1476,13 @@ Portugal
 
     ftp://ftp.ua.pt/pub/CPAN/
     ftp://perl.di.uminho.pt/pub/CPAN/
+    http://cpan.ip.pt/
+    ftp://cpan.ip.pt/pub/perl/
     ftp://ftp.ist.utl.pt/pub/CPAN/
+    http://cpan.ip.pt/
+    ftp://cpan.ip.pt/pub/cpan/
     ftp://ftp.netc.pt/pub/CPAN/
+    ftp://ftp.up.pt/pub/CPAN
 
 =item *
 
@@ -1443,6 +1493,7 @@ Romania
     ftp://ftp.dntis.ro/pub/cpan/
     ftp://ftp.opsynet.com/cpan/
     ftp://ftp.dnttm.ro/pub/CPAN/
+    ftp://ftp.lasting.ro/pub/CPAN
     ftp://ftp.timisoara.roedu.net/mirrors/CPAN/
 
 =item *
@@ -1453,6 +1504,7 @@ Russia
     http://cpan.rinet.ru/
     ftp://cpan.rinet.ru/pub/mirror/CPAN/
     ftp://ftp.aha.ru/pub/CPAN/
+    http://cpan.sai.msu.ru/
     ftp://ftp.sai.msu.su/pub/lang/perl/CPAN/
 
 =item *
@@ -1480,6 +1532,7 @@ Sweden
 
     http://ftp.du.se/CPAN/
     ftp://ftp.du.se/pub/CPAN/
+    ftp://mirror.dataphone.se/pub/CPAN
     ftp://ftp.sunet.se/pub/lang/perl/CPAN/
 
 =item *
@@ -1494,6 +1547,14 @@ Switzerland
 Turkey
 
     ftp://sunsite.bilkent.edu.tr/pub/languages/CPAN/
+
+=item *
+
+Ukraine
+
+    http://cpan.org.ua/
+    ftp://cpan.org.ua/
+    ftp://ftp.perl.org.ua/pub/CPAN/
 
 =back
 
@@ -1531,16 +1592,27 @@ Nova Scotia
 
 Ontario
 
-    ftp://ftp.crc.ca/pub/packages/lang/perl/CPAN/
+    ftp://ftp.crc.ca/pub/CPAN/
+
+=item *
+
+Quebec
+
+    http://cpan.mirror.smartworker.org/
+    ftp://cpan.mirror.smartworker.org/pub/CPAN
+
+=back
 
 =item *
 
 Mexico
 
+    http://cpan.azc.uam.mx
+    ftp://cpan.azc.uam.mx/mirrors/CPAN
+    http://cpan.unam.mx/
+    ftp://cpan.unam.mx/pub/CPAN
     http://www.msg.com.mx/CPAN/
     ftp://ftp.msg.com.mx/pub/CPAN/
-
-=back
 
 =item *
 
@@ -1560,11 +1632,16 @@ Alabama
 California
 
     http://www.cpan.org/
-    ftp://ftp.cpan.org/CPAN/
+    ftp://cpan.valueclick.com/pub/CPAN/
+    http://mirrors.gossamer-threads.com/CPAN
     ftp://cpan.nas.nasa.gov/pub/perl/CPAN/
     ftp://ftp.digital.com/pub/plan/perl/CPAN/
-    http://www.kernel.org/pub/mirrors/cpan/
-    ftp://ftp.kernel.org/pub/mirrors/cpan/
+    http://mirrors.kernel.org/cpan/
+    ftp://mirrors.kernel.org/pub/CPAN
+    http://cpan.digisle.net/
+    ftp://cpan.digisle.net/pub/CPAN
+    http://www.linuxjar.com/CPAN
+    ftp://linuxjar.com/pub/CPAN
     http://www.perl.com/CPAN/
     http://download.sourceforge.net/mirrors/CPAN/
 
@@ -1576,23 +1653,24 @@ Colorado
 
 =item *
 
-Florida
+District of Columbia
 
-    ftp://ftp.cise.ufl.edu/pub/perl/CPAN/
+    ftp://ftp.dc.us.telia.net/pub/cpan/
 
 =item *
 
-Georgia
+Florida
 
-    ftp://ftp.twoguys.org/CPAN/
+    ftp://ftp.cise.ufl.edu/pub/mirrors/CPAN/
+    http://mirror.csit.fsu.edu/pub/CPAN/
+    ftp://mirror.csit.fsu.edu/pub/CPAN/
 
 =item *
 
 Illinois
 
-    http://www.neurogames.com/mirrors/CPAN
-    http://uiarchive.uiuc.edu/mirrors/ftp/ftp.cpan.org/pub/CPAN/
-    ftp://uiarchive.uiuc.edu/mirrors/ftp/ftp.cpan.org/pub/CPAN/
+    http://uiarchive.uiuc.edu/mirrors/ftp/cpan.cse.msu.edu/
+    ftp://uiarchive.uiuc.edu/mirrors/ftp/cpan.cse.msu.edu/
 
 =item *
 
@@ -1601,6 +1679,8 @@ Indiana
     ftp://ftp.uwsg.indiana.edu/pub/perl/CPAN/
     http://cpan.nitco.com/
     ftp://cpan.nitco.com/pub/CPAN/
+    http://archive.progeny.com/CPAN/
+    ftp://archive.progeny.com/CPAN/
     ftp://cpan.in-span.net/
     http://csociety-ftp.ecn.purdue.edu/pub/CPAN
     ftp://csociety-ftp.ecn.purdue.edu/pub/CPAN
@@ -1617,7 +1697,15 @@ Kentucky
 Massachusetts
 
     ftp://ftp.ccs.neu.edu/net/mirrors/ftp.funet.fi/pub/languages/perl/CPAN/
+    http://cpan.mirrors.netnumina.com/
+    ftp://mirrors.netnumina.com/cpan/
     ftp://ftp.iguide.com/pub/mirrors/packages/perl/CPAN/
+
+=item *
+
+Michigan
+
+    ftp://cpan.cse.msu.edu/
 
 =item *
 
@@ -1630,11 +1718,7 @@ New Jersey
 New York
 
     ftp://ftp.freesoftware.com/pub/perl/CPAN/
-    http://www.deao.net/mirrors/CPAN/
-    ftp://ftp.deao.net/pub/CPAN/
-    ftp://ftp.stealth.net/pub/mirrors/ftp.cpan.org/pub/CPAN/
-    http://mirror.nyc.anidea.com/CPAN/
-    ftp://mirror.nyc.anidea.com/pub/CPAN/
+    ftp://ftp.stealth.net/pub/CPAN/
     http://www.rge.com/pub/languages/perl/
     ftp://ftp.rge.com/pub/languages/perl/
     ftp://mirrors.cloud9.net/pub/mirrors/CPAN/
@@ -1661,7 +1745,7 @@ Oklahoma
 
 Oregon
 
-    ftp://ftp.orst.edu/pub/packages/CPAN/
+    ftp://ftp.orst.edu/pub/CPAN
 
 =item *
 
@@ -1669,6 +1753,8 @@ Pennsylvania
 
     http://ftp.epix.net/CPAN/
     ftp://ftp.epix.net/pub/languages/perl/
+    http://mirrors.phenominet.com/pub/CPAN/
+    ftp://mirrors.phenominet.com/pub/CPAN/
     ftp://carroll.cac.psu.edu/pub/CPAN/
 
 =item *
@@ -1682,8 +1768,6 @@ Tennessee
 Texas
 
     http://ftp.sedl.org/pub/mirrors/CPAN/
-    http://jhcloos.com/pub/mirror/CPAN/
-    ftp://jhcloos.com/pub/mirror/CPAN/
 
 =item *
 
@@ -1706,8 +1790,9 @@ Washington
 
     http://cpan.llarian.net/
     ftp://cpan.llarian.net/pub/CPAN/
+    http://cpan.mirrorcentral.com/
+    ftp://ftp.mirrorcentral.com/pub/CPAN/
     ftp://ftp-mirror.internap.com/pub/CPAN/
-    ftp://ftp.spu.edu/pub/CPAN/
 
 =back
 
@@ -1729,7 +1814,6 @@ Australia
 =item *
 
 New Zealand
-
     ftp://ftp.auckland.ac.nz/pub/perl/CPAN/
 
 =back
@@ -1749,8 +1833,7 @@ Argentina
 Brazil
 
     ftp://cpan.pop-mg.com.br/pub/CPAN/
-    ftp://ftp.matrix.com.br/pub/perl/
-    ftp://cpan.if.usp.br/pub/mirror/CPAN/
+    ftp://ftp.matrix.com.br/pub/perl/CPAN/
 
 =item *
 
@@ -1760,6 +1843,7 @@ Chile
     ftp://sunsite.dcc.uchile.cl/pub/lang/perl/
 
 =back
+
 
 For an up-to-date listing of CPAN sites,
 see http://www.cpan.org/SITES or ftp://www.cpan.org/SITES .
@@ -2037,8 +2121,9 @@ Copying, ToDo etc.
 
 =over 4
 
-=item Adding a Copyright Notice.
+=item *
 
+Adding a Copyright Notice.
 
 How you choose to license your work is a personal decision.
 The general mechanism is to assert your Copyright and then make

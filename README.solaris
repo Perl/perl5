@@ -42,7 +42,7 @@ number as reported by uname.  Here's a partial translation table:
     SunOS    5.8       Solaris 8       solaris    2.8
 
 The complete table can be found in the Sun Managers' FAQ
-L<ftp://ftp.cs.toronto.edu/pub/jdd/sun-managers/faq> under
+L<ftp://ftp.cs.toronto.edu/pub/jdd/sunmanagers/faq> under
 "9.1) Which Sun models run which versions of SunOS?".
 
 =head1 RESOURCES
@@ -58,7 +58,7 @@ The Solaris FAQ is available at
 L<http://www.science.uva.nl/pub/solaris/solaris2.html>.
 
 The Sun Managers' FAQ is available at
-L<ftp://ftp.cs.toronto.edu/pub/jdd/sun-managers/faq>
+L<ftp://ftp.cs.toronto.edu/pub/jdd/sunmanagers/faq>
 
 =item Precompiled Binaries
 

@@ -5,12 +5,12 @@ about pod in pod/perlpod.pod or the short summary in the INSTALL file.
 
 =head1 NAME
 
-README.os390 - building and installing Perl for OS/390.
+README.os390 - building and installing Perl for OS/390 and z/OS
 
 =head1 SYNOPSIS
 
 This document will help you Configure, build, test and install Perl
-on OS/390 Unix System Services.
+on OS/390 (aka z/OS) Unix System Services.
 
 =head1 DESCRIPTION
 
@@ -21,11 +21,19 @@ the ones we've tested it on.
 You may need to carry out some system configuration tasks before
 running the Configure script for Perl.
 
+
+=head2 Tools
+
+The z/OS Unix Tools and Toys list may prove helpful and contains links
+to ports of much of the software required to build Perl.
+http://www-1.ibm.com/servers/eserver/zseries/zos/unix/bpxa1toy.html
+
+
 =head2 Unpacking Perl distribution on OS/390
 
 Gunzip/gzip for OS/390 is discussed at:
 
-   http://www.s390.ibm.com/products/oe/bpxqp1.html
+  http://www-1.ibm.com/servers/eserver/zseries/zos/unix/faq/bpxqp1.html
 
 to extract an ASCII tar archive on OS/390, try this:
 
@@ -44,10 +52,9 @@ The IBM document that described such USS system setup issues was
 SC28-1890-07 "OS/390 UNIX System Services Planning", in particular
 Chapter 6 on customizing the OE shell.
 
-GNU make for OS/390, which is recommended for the build of perl (as well as
-building CPAN modules and extensions), is available from:
-
-  http://www.mks.com/s390/gnu/index.htm
+GNU make for OS/390, which is recommended for the build of perl (as
+well as building CPAN modules and extensions), is available from the
+L</Tools>.
 
 Some people have reported encountering "Out of memory!" errors while
 trying to build Perl using GNU make binaries.  If you encounter such
@@ -386,7 +393,7 @@ Thanks to John Goodyear for dynamic loading help.
 
 L<INSTALL>, L<perlport>, L<perlebcdic>, L<ExtUtils::MakeMaker>.
 
-    http://www.mks.com/s390/gnu/index.htm
+    http://www-1.ibm.com/servers/eserver/zseries/zos/unix/bpxa1toy.html
 
     http://www.redbooks.ibm.com/abstracts/sg245944.html
 
@@ -422,6 +429,8 @@ This document was originally written by David Fiander for the 5.005
 release of Perl.
 
 This document was podified for the 5.005_03 release of Perl 11 March 1999.
+
+Updated 28 November 2001 for broken URLs.
 
 Updated 12 November 2000 for the 5.7.1 release of Perl.
 
