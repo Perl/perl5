@@ -133,19 +133,15 @@ STRLEN len;
 	SV** svp = AvARRAY(av);
 	I32 items = AvFILL(av) + 1;
 	while (items--) {
-	    char tmpbuf[512];
 	    SV* sv = *svp++;
-	    *tmpbuf = '_';
-	    SvUPGRADE(sv, SVt_PV);
-	    strcpy(tmpbuf+1, SvPV(sv, na));
-	    gv = gv_fetchpv(tmpbuf,FALSE);
-	    if (!gv || !(stash = GvHV(gv))) {
+	    HV* basestash = fetch_stash(sv, FALSE);
+	    if (!basestash) {
 		if (dowarn)
 		    warn("Can't locate package %s for @%s'ISA",
 			SvPVX(sv), HvNAME(stash));
 		continue;
 	    }
-	    gv = gv_fetchmeth(stash, name, len);
+	    gv = gv_fetchmeth(basestash, name, len);
 	    if (gv) {
 		GvCV(topgv) = GvCV(gv);			/* cache the CV */
 		GvCVGEN(topgv) = sub_generation;	/* valid for now */
