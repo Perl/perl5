@@ -1488,8 +1488,19 @@ union any {
 #endif /* USE_THREADS */
 
 /* Work around some cygwin32 problems with importing global symbols */
-#if defined(CYGWIN32) && defined(DLLIMPORT) 
+#if defined(CYGWIN32)
+#  if defined(DLLIMPORT) 
 #   include "cw32imp.h"
+#  endif
+/* USEMYBINMODE
+ *   This symbol, if defined, indicates that the program should
+ *   use the routine my_binmode(FILE *fp, char iotype) to insure
+ *   that a file is in "binary" mode -- that is, that no translation
+ *   of bytes occurs on read or write operations.
+ */
+#  define USEMYBINMODE / **/
+#  define my_binmode(fp, iotype) \
+            (PerlLIO_setmode(PerlIO_fileno(fp), O_BINARY) != -1 ? TRUE : NULL)
 #endif
 
 #include "regexp.h"
