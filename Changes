@@ -31,6 +31,155 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 10537] By: jhi                                   on 2001/06/12  14:11:26
+        Log: One less -Wall whine (found under DEBUGGING).
+     Branch: perl
+	   ! x2p/Makefile.SH x2p/a2p.c
+____________________________________________________________________________
+[ 10536] By: jhi                                   on 2001/06/12  13:32:09
+        Log: s/case-independent/case-insensitive/g
+     Branch: perl
+	   ! pod/perldebug.pod
+____________________________________________________________________________
+[ 10535] By: jhi                                   on 2001/06/12  13:27:28
+        Log: As suggested in	
+             
+             Subject: Re: ext/ + -Wall
+             From: Gurusamy Sarathy <gsar@ActiveState.com>
+             Date: Mon, 11 Jun 2001 23:34:31 -0700
+             Message-Id: <200106120634.f5C6YVM07246@smtp3.ActiveState.com>
+     Branch: perl
+	   ! ext/PerlIO/Scalar/Scalar.xs ext/PerlIO/Via/Via.xs globals.c
+	   ! perl.h
+____________________________________________________________________________
+[ 10534] By: jhi                                   on 2001/06/12  13:13:27
+        Log: Subject: ext/ + -Wall
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Mon, 11 Jun 2001 22:19:45 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.21.0106112212261.24181-100000@mako.covalent.net>
+     Branch: perl
+	   ! ext/ByteLoader/ByteLoader.xs ext/DB_File/DB_File.xs
+	   ! ext/DB_File/version.c ext/Devel/DProf/DProf.xs
+	   ! ext/DynaLoader/dl_dlopen.xs ext/DynaLoader/dlutils.c
+	   ! ext/Encode/Encode.xs ext/File/Glob/bsd_glob.c
+	   ! ext/Filter/Util/Call/Call.xs ext/GDBM_File/GDBM_File.xs
+	   ! ext/List/Util/Util.xs ext/MIME/Base64/Base64.xs
+	   ! ext/POSIX/POSIX.xs ext/PerlIO/Scalar/Scalar.xs
+	   ! ext/PerlIO/Via/Via.xs ext/Time/HiRes/HiRes.xs
+	   ! ext/Time/Piece/Piece.xs ext/attrs/attrs.xs globals.c
+	   ! lib/ExtUtils/xsubpp
+____________________________________________________________________________
+[ 10533] By: jhi                                   on 2001/06/12  12:52:57
+        Log: Subject: [PATCH] anonymous stashes
+             From: Abhijit Menon-Sen <ams@wiw.org>
+             Date: Tue, 12 Jun 2001 12:47:04 +0530
+             Message-ID: <20010612124704.A29029@lustre.linux.in>
+     Branch: perl
+	   ! dump.c gv.c sv.c xsutils.c
+____________________________________________________________________________
+[ 10532] By: jhi                                   on 2001/06/12  12:37:36
+        Log: One more test for $^S.
+     Branch: perl
+	   ! t/op/magic.t
+____________________________________________________________________________
+[ 10531] By: jhi                                   on 2001/06/12  12:35:02
+        Log: Subject: [PATCH 20010612.002] $^S almost entirely broken with 5.6.1
+             From: Abhijit Menon-Sen <ams@wiw.org>
+             Date: Tue, 12 Jun 2001 17:35:55 +0530
+             Message-ID: <20010612173555.A32426@lustre.linux.in>
+     Branch: perl
+	   ! mg.c t/op/magic.t
+____________________________________________________________________________
+[ 10530] By: jhi                                   on 2001/06/12  12:31:11
+        Log: Subject: Re: [ID 20010612.001] out of memory during regex compilation
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Tue, 12 Jun 2001 13:14:15 +0100
+             Message-Id: <E159n3n-0000xa-00@draco.cus.cam.ac.uk>
+     Branch: perl
+	   ! pod/perlop.pod
+____________________________________________________________________________
+[ 10529] By: jhi                                   on 2001/06/12  12:21:06
+        Log: AUTHORS updates.
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[ 10528] By: jhi                                   on 2001/06/12  12:19:47
+        Log: Subject: [PATCH] rhapsody/darwin minor cleanup
+             From: Wilfredo Sanchez <wsanchez@MIT.EDU>
+             Content-Transfer-Encoding: 7bit
+             Message-Id: <200106121009.GAA01968@melbourne-city-street.mit.edu>
+     Branch: perl
+	   ! Makefile.SH hints/darwin.sh hints/rhapsody.sh
+____________________________________________________________________________
+[ 10527] By: jhi                                   on 2001/06/12  11:58:53
+        Log: Subject: [MacPerl-Porters] Re: [PATCH] Mac OS Compatability for bleadperl
+             From: "Philip Newton" <Philip.Newton@gmx.net>
+             Date: Mon, 11 Jun 2001 07:08:03 +0200
+             Message-Id: <200106120802.LAA08992@taas.iki.fi>
+     Branch: perl
+	   ! t/base/term.t
+____________________________________________________________________________
+[ 10526] By: jhi                                   on 2001/06/12  01:35:34
+        Log: Cleanup the a2p.c for -Wall.
+     Branch: perl
+	   ! x2p/Makefile.SH x2p/a2p.c
+____________________________________________________________________________
+[ 10525] By: jhi                                   on 2001/06/12  01:10:56
+        Log: File::Find update for MacOS from Chris Nandor.
+     Branch: perl
+	   ! lib/File/Find.pm t/lib/filefind.t
+____________________________________________________________________________
+[ 10524] By: jhi                                   on 2001/06/12  00:29:20
+        Log: gcc -Wall nits picked out by a non-UNIX system
+             (courtesy of Mark Bixby)
+     Branch: perl
+	   ! doio.c ext/Devel/Peek/Peek.xs ext/DynaLoader/dl_mpeix.xs
+	   ! ext/IO/IO.xs ext/PerlIO/Via/Via.xs ext/Socket/Socket.xs
+	   ! pp_sys.c util.c
+____________________________________________________________________________
+[ 10523] By: jhi                                   on 2001/06/11  22:34:03
+        Log: Metaconfig unit change for #10522.  (The d_modfl changes
+             placate metalint.)
+     Branch: metaconfig/U/perl
+	   ! d_modfl.U d_u32align.U
+____________________________________________________________________________
+[ 10522] By: jhi                                   on 2001/06/11  22:33:00
+        Log: Buglet found by Mark Bixby: "./try >&2 >/dev/null" should
+             be "./try 2>&1 >/dev/null".
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 10521] By: jhi                                   on 2001/06/11  19:49:54
+        Log: Subject: [PATCH perl@10517] DCL quoting syntax drives pumpking mad
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Mon, 11 Jun 2001 14:00:32 -0500
+             Message-Id: <5.1.0.14.0.20010611134750.03985cb8@exchi01>
+     Branch: perl
+	   ! configure.com
+____________________________________________________________________________
+[ 10520] By: jhi                                   on 2001/06/11  17:55:47
+        Log: Move the full \p\P lists to perlunicode.
+     Branch: perl
+	   ! pod/perlretut.pod pod/perlunicode.pod
+____________________________________________________________________________
+[ 10519] By: jhi                                   on 2001/06/11  17:10:00
+        Log: VOS build tweak for 5.6.1 from Paul Green.
+     Branch: maint-5.6/perl
+	   ! vos/build.cm
+____________________________________________________________________________
+[ 10518] By: jhi                                   on 2001/06/11  17:07:03
+        Log: Subject: [PATCH perl@10476] no PerlIO at startup time on VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Fri, 8 Jun 2001 18:08:18 -0500
+             Message-Id: <a05101000b746f9dd4fca@[192.168.56.145]>
+     Branch: perl
+	   ! vms/vms.c
+____________________________________________________________________________
+[ 10517] By: jhi                                   on 2001/06/11  14:52:01
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 10516] By: jhi                                   on 2001/06/11  14:46:33
         Log: Add the modfl_pow32_bug (anti)definition also to VOS headers.
      Branch: perl
