@@ -43,6 +43,10 @@ If you're building Perl on a non-Unix system, you should also read
 the README file specific to your operating system, since this may
 provide additional or different instructions for building Perl.
 
+If there is a hint file for your system (in the hints/ directory) you
+should also read that hint file for specific information for your
+system.  (Unixware users should use the svr4.sh hint file.)
+
 =head1 Space Requirements
 
 The complete perl5 source tree takes up about 7 MB of disk space.  The
@@ -88,7 +92,8 @@ Configure interactively rather than blindly accepting the defaults.
 Configure will figure out various things about your system.  Some
 things Configure will figure out for itself, other things it will ask
 you about.  To accept the default, just press RETURN.   The default
-is almost always ok.
+is almost always ok.  At any Configure prompt, you can type  &-d
+and Configure will use the defaults from then on.
 
 After it runs, Configure will perform variable substitution on all the
 *.SH files and offer to run make depend.
@@ -103,11 +108,6 @@ compiler) so that the hints files can set appropriate defaults.
 
 If you want to use your old config.sh but override some of the items
 with command line options, you need to use B<Configure -O>.
-
-If you are willing to accept all the defaults, and you want terse
-output, you can run
-
-	sh Configure -des
 
 By default, for most systems, perl will be installed in
 /usr/local/{bin, lib, man}.  You can specify a different 'prefix' for
@@ -126,6 +126,15 @@ By default, Configure will compile perl to use dynamic loading if
 your system supports it.  If you want to force perl to be compiled
 statically, you can either choose this when Configure prompts you or
 you can use the Configure command line option -Uusedl.
+
+If you are willing to accept all the defaults, and you want terse
+output, you can run
+
+	sh Configure -des
+
+For my Solaris system, I usually use
+
+	sh Configure -Dprefix=/opt/perl -Doptimize='-xpentium -xO4' -des
 
 =head2 GNU-style configure
 
@@ -702,15 +711,20 @@ you probably want to do
 
 	sh Configure -Doptimize='-g'
 
-This will do two things:  First, it will force compilation to use
-cc -g so that you can use your system's debugger on the executable.
-Second, it will add a -DDEBUGGING to your ccflags variable in
+This will do two independent things:  First, it will force compilation
+to use cc -g so that you can use your system's debugger on the
+executable.  (Note:  Your system may actually require something like
+cc -g2.  Check you man pages for cc(1) and also any hint file for your
+system.)  Second, it will add -DDEBUGGING to your ccflags variable in
 config.sh so that you can use B<perl -D> to access perl's internal
-state.  Note, however, that Configure will only add -DDEBUGGING by
+state.  (Note: Configure will only add -DDEBUGGING by
 default if you are not reusing your old config.sh.  If you want to
 reuse your old config.sh, then you can just edit it and change the
 optimize and ccflags variables by hand and then propagate your changes
-as shown in L<"Propagating your changes to config.sh"> below.
+as shown in L<"Propagating your changes to config.sh"> below.)
+
+You can actually specify -g and -DDEBUGGING independently, but usually
+it's convenient to have both.
 
 If you are using a shared libperl, see the warnings about multiple
 versions of perl under L<Building a shared libperl.so Perl library>.
@@ -728,9 +742,14 @@ following:
 
 	sh Configure -Dccflags='-Drand=random -Dsrand=srandom'
 
-or by adding -Drand=random and -Dsrandom=srandom to your ccflags
-at the appropriate Configure prompt.  (You may also have to adjust
-Configure's guess for 'randbits' as well.)
+or by adding -Drand=random and -Dsrand=srandom to your ccflags
+at the appropriate Configure prompt.  (Note:  Although this worked for
+me, it might not work for you if your system's header files give
+different prototypes for rand() and random() or srand() and srandom().)
+
+You should also run Configure interactively to verify that a hint file
+doesn't inadvertently override your ccflags setting.  (Hints files
+shouldn't do that, but some might.)
 
 =head2 What if it doesn't work?
 
@@ -1359,4 +1378,4 @@ feedback from the perl5-porters@perl.org folks.
 
 =head1 LAST MODIFIED
 
-$Id: INSTALL,v 1.11 1997/03/26 19:08:06 doughera Released $
+$Id: INSTALL,v 1.13 1997/04/03 18:29:14 doughera Released $
