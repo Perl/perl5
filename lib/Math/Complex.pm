@@ -272,6 +272,21 @@ sub divbyzero {
 }
 
 #
+# zerotozero
+#
+# Die on zero raised to the zeroth.
+#
+sub zerotozero {
+    my $mess = "The zero raised to the zeroth power is not defined.\n";
+
+    my @up = caller(1);
+    
+    $mess .= "Died at $up[1] line $up[2].\n";
+
+    die $mess;
+}
+
+#
 # (divide)
 #
 # Computes z1/z2.
@@ -302,6 +317,7 @@ sub divide {
 #
 sub power {
 	my ($z1, $z2, $inverted) = @_;
+	zerotozero if ($z1 == 0 and $z2 == 0);
 	return exp($z1 * log $z2) if defined $inverted && $inverted;
 	return exp($z2 * log $z1);
 }
