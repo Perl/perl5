@@ -559,6 +559,44 @@ information displyed is customizable. Its function is similar to that of
 perl's B<-Dx> debugging flag or the B<B::Terse> module, but it is more
 sophisticated and flexible.
 
+=head1 EXAMPLE
+
+Here's is a short example of output, using the default formatting
+conventions :
+
+    % perl -MO=Concise -e '$a = $b + 42'
+    8  <@> leave[t1] vKP/REFC ->(end)
+    1     <0> enter ->2
+    2     <;> nextstate(main 1 -e:1) v ->3
+    7     <2> sassign vKS/2 ->8
+    5        <2> add[t1] sK/2 ->6
+    -           <1> ex-rv2sv sK/1 ->4
+    3              <$> gvsv(*b) s ->4
+    4           <$> const(IV 42) s ->5
+    -        <1> ex-rv2sv sKRM*/1 ->7
+    6           <$> gvsv(*a) s ->7
+
+Each line corresponds to an operator. Null ops appear as C<ex-opname>,
+where I<opname> is the op that has been optimized away by perl.
+
+The number on the first row indicates the op's sequence number. It's
+given in base 36 by default.
+
+The symbol between angle brackets indicates the op's type : for example,
+<2> is a BINOP, <@> a LISTOP, etc. (see L</"OP class abbreviations">).
+
+The opname may be followed by op-specific information in parentheses
+(e.g. C<gvsv(*b)>), and by targ information in brackets (e.g.
+C<leave[t1]>).
+
+Next come the op flags. The common flags are listed below
+(L</"OP flags abbreviations">). The private flags follow, separated
+by a slash. For example, C<vKP/REFC> means that the leave op has
+public flags OPf_WANT_VOID, OPf_KIDS, and OPf_PARENS, and the private
+flag OPpREFCOUNTED.
+
+Finally an arrow points to the sequence number of the next op.
+
 =head1 OPTIONS
 
 Arguments that don't start with a hyphen are taken to be the names of
@@ -730,7 +768,7 @@ non-local exit pointers for a LOOP, etc.) enclosed in paretheses.
 
 The B-determined class of the OP, in all caps.
 
-=item B<#classym>
+=item B<#classsym>
 
 A single symbol abbreviating the class of the OP.
 
@@ -758,7 +796,7 @@ The OP's flags, abbreviated as a series of symbols.
 
 The numeric value of the OP's flags.
 
-=item B<#hyphenseq>
+=item B<#hyphseq>
 
 The sequence number of the OP, or a hyphen if it doesn't have one.
 
