@@ -191,6 +191,14 @@ only has knowledge about the Perl interpreter's own data structures and
 knows nothing about the containing application's state.  For example, any
 state carried on the application's own call stack is out of reach.
 
+=item Thread-safety of extensions
+
+Since the fork() emulation runs code in multiple threads, extensions
+calling into non-thread-safe libraries may not work reliably when
+calling fork().  As Perl's threading support gradually becomes more
+widely adopted even on platforms with a native fork(), such extensions
+are expected to be fixed for thread-safety.
+
 =back
 
 =head1 BUGS
@@ -211,8 +219,8 @@ This document may be incomplete in some respects.
 
 =head1 AUTHOR
 
-Support for the fork() emulation was implemented by ActiveState, supported
-by funding from Microsoft Corporation.
+Support for concurrent interpreters and the fork() emulation was implemented
+by ActiveState, with funding from Microsoft Corporation.
 
 This document is authored and maintained by Gurusamy Sarathy
 E<lt>gsar@activestate.comE<gt>.
