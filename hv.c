@@ -1101,7 +1101,7 @@ Perl_newHVhv(pTHX_ HV *ohv)
 	hv_iterinit(ohv);
 	while ((entry = hv_iternext(ohv))) {
 	    hv_store(hv, HeKEY(entry), HeKLEN_UTF8(entry),
-		     SvREFCNT_inc(HeVAL(entry)), HeHASH(entry));
+		     newSVsv(HeVAL(entry)), HeHASH(entry));
 	}
 	HvRITER(ohv) = hv_riter;
 	HvEITER(ohv) = hv_eiter;
