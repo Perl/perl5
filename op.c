@@ -3483,7 +3483,6 @@ newSUB(I32 floor, OP *o, OP *proto, OP *block)
 	    ENTER;
 	    SAVESPTR(compiling.cop_filegv);
 	    SAVEI16(compiling.cop_line);
-	    SAVEI32(perldb);
 	    save_svref(&rs);
 	    sv_setsv(rs, nrs);
 

@@ -361,6 +361,7 @@ if ($Is_MSWin32) {
 	if ($^O eq 'os2') {
 	  require POSIX;
 	  $tmp = POSIX::tmpnam();
+	  unshift @pagers, 'less', 'cmd /c more <';
 	} else {
 	  $tmp = "/tmp/perldoc1.$$";	  
 	}

@@ -1800,27 +1800,35 @@ static CV *
 get_db_sub(SV **svp, CV *cv)
 {
     dTHR;
-    SV *oldsv = *svp;
-    GV *gv;
+    SV *dbsv = GvSV(DBsub);
 
-    *svp = GvSV(DBsub);
-    save_item(*svp);
-    gv = CvGV(cv);
-    if ( (CvFLAGS(cv) & (CVf_ANON | CVf_CLONED))
-	 || strEQ(GvNAME(gv), "END") 
-	 || ((GvCV(gv) != cv) && /* Could be imported, and old sub redefined. */
-	     !( (SvTYPE(oldsv) == SVt_PVGV) && (GvCV((GV*)oldsv) == cv)
-    		&& (gv = (GV*)oldsv) ))) {
-	/* Use GV from the stack as a fallback. */
-	/* GV is potentially non-unique, or contain different CV. */
-	sv_setsv(*svp, newRV((SV*)cv));
+    if (!PERLDB_SUB_NN) {
+	GV *gv = CvGV(cv);
+
+	save_item(dbsv);
+	if ( (CvFLAGS(cv) & (CVf_ANON | CVf_CLONED))
+	     || strEQ(GvNAME(gv), "END") 
+	     || ((GvCV(gv) != cv) && /* Could be imported, and old sub redefined. */
+		 !( (SvTYPE(*svp) == SVt_PVGV) && (GvCV((GV*)*svp) == cv)
+		    && (gv = (GV*)*svp) ))) {
+	    /* Use GV from the stack as a fallback. */
+	    /* GV is potentially non-unique, or contain different CV. */
+	    sv_setsv(dbsv, newRV((SV*)cv));
+	}
+	else {
+	    gv_efullname3(dbsv, gv, Nullch);
+	}
     }
     else {
-	gv_efullname3(*svp, gv, Nullch);
+	SvUPGRADE(dbsv, SVt_PVIV);
+	SvIOK_on(dbsv);
+	SAVEIV(SvIVX(dbsv));
+	SvIVX(dbsv) = (IV)cv;		/* Do it the quickest way  */
     }
-    cv = GvCV(DBsub);
+
     if (CvXSUB(cv))
 	curcopdb = curcop;
+    cv = GvCV(DBsub);
     return cv;
 }
 

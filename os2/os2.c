@@ -347,6 +347,172 @@ result(int flag, int pid)
 #endif
 }
 
+#define EXECF_SPAWN 0
+#define EXECF_EXEC 1
+#define EXECF_TRUEEXEC 2
+#define EXECF_SPAWN_NOWAIT 3
+
+/* Spawn/exec a program, revert to shell if needed. */
+/* global Argv[] contains arguments. */
+
+int
+do_aspawn(really, flag, execf)
+SV *really;
+U32 flag;
+U32 execf;
+{
+    dTHR;
+	int trueflag = flag;
+	int rc, secondtry = 0, err;
+	char *tmps;
+	char buf[256], *s = 0;
+	char *args[4];
+	static char * fargs[4] 
+	    = { "/bin/sh", "-c", "\"$@\"", "spawn-via-shell", };
+	char **argsp = fargs;
+	char nargs = 4;
+	
+	if (flag == P_WAIT)
+		flag = P_NOWAIT;
+
+      retry:
+	if (strEQ(Argv[0],"/bin/sh")) 
+	    Argv[0] = sh_path;
+
+	if (Argv[0][0] != '/' && Argv[0][0] != '\\'
+	    && !(Argv[0][0] && Argv[0][1] == ':' 
+		 && (Argv[0][2] == '/' || Argv[0][2] != '\\'))
+	    ) /* will swawnvp use PATH? */
+	    TAINT_ENV();	/* testing IFS here is overkill, probably */
+	/* We should check PERL_SH* and PERLLIB_* as well? */
+	if (!really || !*(tmps = SvPV(really, na)))
+	    tmps = Argv[0];
+#if 0
+	rc = result(trueflag, spawnvp(flag,tmps,Argv));
+#else
+	if (execf == EXECF_TRUEEXEC)
+	    rc = execvp(tmps,Argv);
+	else if (execf == EXECF_EXEC)
+	    rc = spawnvp(trueflag | P_OVERLAY,tmps,Argv);
+	else if (execf == EXECF_SPAWN_NOWAIT)
+	    rc = spawnvp(trueflag | P_NOWAIT,tmps,Argv);
+        else				/* EXECF_SPAWN */
+	    rc = result(trueflag, 
+			spawnvp(trueflag | P_NOWAIT,tmps,Argv));
+#endif 
+	if (rc < 0 && secondtry == 0 
+	    && (tmps == Argv[0])) { /* Cannot transfer `really' via shell. */
+	    err = errno;
+	    if (err == ENOENT) {	/* No such file. */
+		/* One reason may be that EMX added .exe. We suppose
+		   that .exe-less files are automatically shellable.
+		   It might have also been .cmd file without
+		   extension. */
+		char *no_dir;
+		(no_dir = strrchr(Argv[0], '/')) 
+		    || (no_dir = strrchr(Argv[0], '\\'))
+		    || (no_dir = Argv[0]);
+		if (!strchr(no_dir, '.')) {
+		    struct stat buffer;
+		    if (stat(Argv[0], &buffer) != -1) { /* File exists. */
+			/* Maybe we need to specify the full name here? */
+			goto doshell;
+		    } else {
+			/* Try adding script extensions to the file name */
+			char *scr;
+			if ((scr = find_script(Argv[0], TRUE, NULL, 0))) {
+			    FILE *file = fopen(scr, "r");
+			    char *s = 0, *s1;
+
+			    Argv[0] = scr;
+			    if (!file)
+				goto panic_file;
+			    if (!fgets(buf, sizeof buf, file)) {
+				fclose(file);
+				goto panic_file;
+			    }
+			    if (fclose(file) != 0) { /* Failure */
+			      panic_file:
+				warn("Error reading \"%s\": %s", 
+				     scr, Strerror(errno));
+				goto doshell;
+			    }
+			    if (buf[0] == '#') {
+				if (buf[1] == '!')
+				    s = buf + 2;
+			    } else if (buf[0] == 'e') {
+				if (strnEQ(buf, "extproc", 7) 
+				    && isSPACE(buf[7]))
+				    s = buf + 8;
+			    } else if (buf[0] == 'E') {
+				if (strnEQ(buf, "EXTPROC", 7)
+				    && isSPACE(buf[7]))
+				    s = buf + 8;
+			    }
+			    if (!s)
+				goto doshell;
+			    s1 = s;
+			    nargs = 0;
+			    argsp = args;
+			    while (1) {
+				while (isSPACE(*s))
+				    s++;
+				if (*s == 0) 
+				    break;
+				if (nargs == 4) {
+				    nargs = -1;
+				    break;
+				}
+				args[nargs++] = s;
+				while (*s && !isSPACE(*s))
+				    s++;
+				if (*s == 0) 
+				    break;
+				*s++ = 0;
+			    }
+			    if (nargs == -1) {
+				warn("Too many args on %.*s line of \"%s\"",
+				     s1 - buf, buf, scr);
+				nargs = 4;
+				argsp = fargs;
+			    }
+			    goto doshell;
+			}
+		    }
+		}
+		/* Restore errno */
+		errno = err;
+	    } else if (err == ENOEXEC) { /* Need to send to shell. */
+	      doshell:
+		{
+		char **a = Argv;
+
+		while (a[1])		/* Get to the end */
+		    a++;
+		while (a >= Argv) {
+		    *(a + nargs) = *a;	/* Argv was preallocated to be
+					   long enough. */
+		    a--;
+		}
+		while (nargs-- >= 0)
+		    Argv[nargs] = argsp[nargs];
+		secondtry = 1;
+		goto retry;
+		}
+	    }
+	}
+	if (rc < 0 && dowarn)
+	    warn("Can't %s \"%s\": %s\n", 
+		 ((execf != EXECF_EXEC && execf != EXECF_TRUEEXEC) 
+		  ? "spawn" : "exec"),
+		 Argv[0], Strerror(err));
+	if (rc < 0 && (execf != EXECF_SPAWN_NOWAIT) 
+	    && ((trueflag & 0xFF) == P_WAIT)) 
+	    rc = 255 << 8; /* Emulate the fork(). */
+
+    return rc;
+}
+
 int
 do_aspawn(really,mark,sp)
 SV *really;
@@ -376,67 +542,14 @@ register SV **sp;
 	}
 	*a = Nullch;
 
-	trueflag = flag;
-	if (flag == P_WAIT)
-		flag = P_NOWAIT;
-
-	if (strEQ(Argv[0],"/bin/sh")) Argv[0] = sh_path;
-
-	if (Argv[0][0] != '/' && Argv[0][0] != '\\'
-	    && !(Argv[0][0] && Argv[0][1] == ':' 
-		 && (Argv[0][2] == '/' || Argv[0][2] != '\\'))
-	    ) /* will swawnvp use PATH? */
-	    TAINT_ENV();	/* testing IFS here is overkill, probably */
-	/* We should check PERL_SH* and PERLLIB_* as well? */
-      retry:
-	if (really && *(tmps = SvPV(really, na)))
-	    rc = result(trueflag, spawnvp(flag,tmps,Argv));
-	else
-	    rc = result(trueflag, spawnvp(flag,Argv[0],Argv));
-
-	if (rc < 0 && secondtry == 0 
-	    && (!tmps || !*tmps)) { /* Cannot transfer `really' via shell. */
-	    err = errno;
-	    if (err == ENOENT) {	/* No such file. */
-		/* One reason may be that EMX added .exe. We suppose
-		   that .exe-less files are automatically shellable. */
-		char *no_dir;
-		(no_dir = strrchr(Argv[0], '/')) 
-		    || (no_dir = strrchr(Argv[0], '\\'))
-		    || (no_dir = Argv[0]);
-		if (!strchr(no_dir, '.')) {
-		    struct stat buffer;
-		    if (stat(Argv[0], &buffer) != -1) { /* File exists. */
-			/* Maybe we need to specify the full name here? */
-			goto doshell;
-		    }
-		}
-	    } else if (err == ENOEXEC) { /* Need to send to shell. */
-	      doshell:
-		while (a >= Argv) {
-		    *(a + 2) = *a;
-		    a--;
-		}
-		*Argv = sh_path;
-		*(Argv + 1) = "-c";
-		secondtry = 1;
-		goto retry;
-	    }
-	}
-	if (rc < 0 && dowarn)
-	    warn("Can't spawn \"%s\": %s", Argv[0], Strerror(errno));
-	if (rc < 0) rc = 255 << 8; /* Emulate the fork(). */
+	rc = do_spawn_ve(really, flag, EXECF_SPAWN);
     } else
     	rc = -1;
     do_execfree();
     return rc;
 }
 
-#define EXECF_SPAWN 0
-#define EXECF_EXEC 1
-#define EXECF_TRUEEXEC 2
-#define EXECF_SPAWN_NOWAIT 3
-
+/* Try converting 1-arg form to (usually shell-less) multi-arg form. */
 int
 do_spawn2(cmd, execf)
 char *cmd;
@@ -501,6 +614,8 @@ int execf;
 	    } else if (*s == '\\' && !seenspace) {
 		continue;		/* Allow backslashes in names */
 	    }
+	    /* We do not convert this to do_spawn_ve since shell
+	       should be smart enough to start itself gloriously. */
 	  doshell:
 	    if (execf == EXECF_TRUEEXEC)
                 return execl(shell,shell,copt,cmd,(char*)0);
@@ -523,7 +638,8 @@ int execf;
 	}
     }
 
-    New(1303,Argv, (s - cmd) / 2 + 2, char*);
+    /* cmd="a" may lead to "sh", "-c", "\"$@\"", "a", "a.cmd", NULL */
+    New(1303,Argv, (s - cmd + 11) / 2, char*);
     Cmd = savepvn(cmd, s-cmd);
     a = Argv;
     for (s = Cmd; *s;) {
@@ -535,44 +651,9 @@ int execf;
 	    *s++ = '\0';
     }
     *a = Nullch;
-    if (Argv[0]) {
-	int err;
-	
-	if (execf == EXECF_TRUEEXEC)
-	    rc = execvp(Argv[0],Argv);
-	else if (execf == EXECF_EXEC)
-	    rc = spawnvp(P_OVERLAY,Argv[0],Argv);
-	else if (execf == EXECF_SPAWN_NOWAIT)
-	    rc = spawnvp(P_NOWAIT,Argv[0],Argv);
-        else
-	    rc = result(P_WAIT, spawnvp(P_NOWAIT,Argv[0],Argv));
-	if (rc < 0) {
-	    err = errno;
-	    if (err == ENOENT) {	/* No such file. */
-		/* One reason may be that EMX added .exe. We suppose
-		   that .exe-less files are automatically shellable. */
-		char *no_dir;
-		(no_dir = strrchr(Argv[0], '/')) 
-		    || (no_dir = strrchr(Argv[0], '\\'))
-		    || (no_dir = Argv[0]);
-		if (!strchr(no_dir, '.')) {
-		    struct stat buffer;
-		    if (stat(Argv[0], &buffer) != -1) { /* File exists. */
-			/* Maybe we need to specify the full name here? */
-			goto doshell;
-		    }
-		}
-	    } else if (err == ENOEXEC) { /* Need to send to shell. */
-		goto doshell;
-	    }
-	}
-	if (rc < 0 && dowarn)
-	    warn("Can't %s \"%s\": %s", 
-		 ((execf != EXECF_EXEC && execf != EXECF_TRUEEXEC) 
-		  ? "spawn" : "exec"),
-		 Argv[0], Strerror(err));
-	if (rc < 0) rc = 255 << 8; /* Emulate the fork(). */
-    } else
+    if (Argv[0])
+	rc = do_spawn_ve(NULL, 0, execf);
+    else
     	rc = -1;
     if (news) Safefree(news);
     do_execfree();
@@ -643,7 +724,8 @@ char	*mode;
 	dup2(newfd, *mode == 'r');	/* Return std* back. */
 	close(newfd);
     }
-    close(p[that]);
+    if (p[that] == (*mode == 'r'))
+	close(p[that]);
     if (pid == -1) {
 	close(p[this]);
 	return NULL;

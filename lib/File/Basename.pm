@@ -177,6 +177,10 @@ sub fileparse {
   }
   elsif ($fstype !~ /^VMS/i) {  # default to Unix
     ($dirpath,$basename) = ($fullname =~ m#^(.*/)?(.*)#);
+    if ($^O eq 'VMS' and $fullname =~ m:/[^/]+/000000/?:) {
+      # dev:[000000] is top of VMS tree, similar to Unix '/'
+      ($basename,$dirpath) = ('',$fullname);
+    }
     $dirpath = './' unless $dirpath;
   }
 

@@ -96,6 +96,7 @@ some/where/...	vmsify	[.some.where...]
 ..	vmsify	[-]
 ../..	vmsify	[--]
 .../	vmsify	[...]
+/	vmsify	sys$disk:[000000]
 
 # Fileifying directory specs
 down:[the.garden.path]	fileify	down:[the.garden]path.dir;1
@@ -135,6 +136,7 @@ down:[the.garden.path...]	unixpath	/down/the/garden/path/.../
 [.down.the.garden]path.dir	unixpath	down/the/garden/path/
 down/the/garden/path	vmspath	[.down.the.garden.path]
 path	vmspath	[.path]
+/	vmspath	sys$disk:[000000]
 
 # Redundant characters in Unix paths
 //some/where//over/../the.rainbow	vmsify	some:[where]the.rainbow
