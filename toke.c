@@ -4133,7 +4133,7 @@ Perl_yylex(pTHX)
 	case KEY___PACKAGE__:
 	    yylval.opval = (OP*)newSVOP(OP_CONST, 0,
 					(PL_curstash
-					 ? newSVsv(PL_curstname)
+					 ? newSVpv(HvNAME(PL_curstash), 0)
 					 : &PL_sv_undef));
 	    TERM(THING);
 

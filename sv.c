@@ -3126,15 +3126,11 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 		default:	s = "UNKNOWN";			break;
 		}
 		tsv = NEWSV(0,0);
-		if (SvOBJECT(sv)) {
-                    HV *svs = SvSTASH(sv);
-		    Perl_sv_setpvf(
-                        aTHX_ tsv, "%s=%s",
-                        /* [20011101.072] This bandaid for C<package;>
-                           should eventually be removed. AMS 20011103 */
-                        (svs ? HvNAME(svs) : "<none>"), s
-                    );
-                }
+		if (SvOBJECT(sv))
+		    if (HvNAME(SvSTASH(sv)))
+			Perl_sv_setpvf(aTHX_ tsv, "%s=%s", HvNAME(SvSTASH(sv)), s);
+		    else
+			Perl_sv_setpvf(aTHX_ tsv, "__ANON__=%s", s);
 		else
 		    sv_setpv(tsv, s);
 		Perl_sv_catpvf(aTHX_ tsv, "(0x%"UVxf")", PTR2UV(sv));
@@ -7617,10 +7613,10 @@ char *
 Perl_sv_reftype(pTHX_ SV *sv, int ob)
 {
     if (ob && SvOBJECT(sv)) {
-        HV *svs = SvSTASH(sv);
-        /* [20011101.072] This bandaid for C<package;> should eventually
-           be removed. AMS 20011103 */
-        return (svs ? HvNAME(svs) : "<none>");
+	if (HvNAME(SvSTASH(sv)))
+	    return HvNAME(SvSTASH(sv));
+	else
+	    return "__ANON__";
     }
     else {
 	switch (SvTYPE(sv)) {
@@ -7700,6 +7696,8 @@ Perl_sv_isa(pTHX_ SV *sv, const char *name)
 	return 0;
     sv = (SV*)SvRV(sv);
     if (!SvOBJECT(sv))
+	return 0;
+    if (!HvNAME(SvSTASH(sv)))
 	return 0;
 
     return strEQ(HvNAME(SvSTASH(sv)), name);

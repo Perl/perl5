@@ -640,6 +640,8 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	entry = ((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
     }
     for (; entry; ++n_links, entry = HeNEXT(entry)) {
+	if (!HeKEY_hek(entry))
+	    continue;
 	if (HeHASH(entry) != hash)		/* strings can't be equal */
 	    continue;
 	if (HeKLEN(entry) != (I32)klen)
