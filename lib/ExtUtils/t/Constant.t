@@ -56,7 +56,12 @@ N => 0, 'NE' => 45, E => 90, SE => 135, S => 180, SW => 225, W => 270, NW => 315
 my $parent_rfc1149 =
   'A Standard for the Transmission of IP Datagrams on Avian Carriers';
 # Check that 8 bit and unicode names don't cause problems.
-my $pound = chr 163; # A pound sign. (Currency)
+my $pound; 
+if (ord('A') == 193) {  # EBCDIC platform
+    $pound = chr 177; # A pound sign. (Currency)
+} else { # ASCII platform
+    $pound = chr 163; # A pound sign. (Currency)
+}
 my $inf = chr 0x221E;
 # Check that we can distiguish the pathological case of a string, and the
 # utf8 representation of that string.
