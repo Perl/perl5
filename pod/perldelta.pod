@@ -12,8 +12,8 @@ maintenance release since the two releases were kept closely
 coordinated (while 5.8.0 was still called 5.7.something).
 
 Changes that were integrated into the 5.6.1 release are marked C<[561]>.
-Changes that also appear in 5.6.1 but have been improved since are marked
-C<[561+]>.
+Many of these changes have been further developed since 5.6.1 was released,
+those are marked C<[561+]>.
 
 You can see the list of changes in the 5.6.1 release (both from the
 5.005_03 release and the 5.6.0 release) by reading L<perl561delta>.
