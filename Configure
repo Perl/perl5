@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Jun  4 18:28:57 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Tue Jun  5 04:50:23 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -1514,8 +1514,8 @@ esac
 cat >extract <<'EOS'
 PERL_CONFIG_SH=true
 echo "Doing variable substitutions on .SH files..."
-if test -f $src/MANIFEST; then
-	set x `awk '{print $1}' <$src/MANIFEST | grep '\.SH$'`
+if test -f MANIFEST; then
+	set x `awk '{print $1}' < MANIFEST | grep '\.SH$'`
 else
 	echo "(Looking for .SH files under the source directory.)"
 	set x `(cd $src; find . -name "*.SH" -print)`
@@ -1598,7 +1598,7 @@ true)
 	echo " "
 	. UU/extract
 	rm -rf UU
-	echo "Done."
+	echo "Extraction done."
 	exit 0
 	;;
 esac
@@ -17028,7 +17028,7 @@ fi
 case "$alldone" in
 exit)
 	$rm -rf UU
-	echo "Done."
+	echo "Extraction done."
 	exit 0
 	;;
 cont)
@@ -17088,7 +17088,7 @@ elif test -f [Mm]akefile; then
 	echo " "
 	echo "Now you must run a $make."
 else
-	echo "Done."
+	echo "Configure done."
 fi
 
 if $test -f Policy.sh; then
