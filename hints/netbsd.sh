@@ -18,6 +18,8 @@ case "$osvers" in
 	usedl="$undef"
 	;;
 *)
+	# Note that we use the value of $prefix in this block.  The user
+	# should specify -Dprefix=... to the Configure script.
 	if [ -f /usr/libexec/ld.elf_so ]; then
 		d_dlopen=$define
 		d_dlerror=$define
@@ -25,7 +27,7 @@ case "$osvers" in
 		# needs __eh_alloc, __pure_virtual, and others.
 		# XXX This should be obsoleted by gcc-3.0.
 		ccdlflags="-Wl,-whole-archive -lgcc -Wl,-no-whole-archive \
-			-Wl,-E -Wl,-R${PREFIX}/lib $ccdlflags"
+			-Wl,-E -Wl,-R$prefix/lib $ccdlflags"
 		cccdlflags="-DPIC -fPIC $cccdlflags"
 		lddlflags="--whole-archive -shared $lddlflags"
 	elif [ "`uname -m`" = "pmax" ]; then
@@ -38,7 +40,7 @@ case "$osvers" in
 	elif [ -f /usr/libexec/ld.so ]; then
 		d_dlopen=$define
 		d_dlerror=$define
-		ccdlflags="-Wl,-R${PREFIX}/lib $ccdlflags"
+		ccdlflags="-Wl,-R$prefix/lib $ccdlflags"
 # we use -fPIC here because -fpic is *NOT* enough for some of the
 # extensions like Tk on some netbsd platforms (the sparc is one)
 		cccdlflags="-DPIC -fPIC $cccdlflags"
@@ -68,12 +70,6 @@ d_setruid="$undef"
 
 # there's no problem with vfork.
 usevfork=true
-
-# Using perl's malloc leads to trouble on some toolchain versions.
-usemymalloc="$undef"
-
-# Pre-empt the /usr/bin/perl question of installperl.
-installusrbinperl="$undef"
 
 # This is there but in machine/ieeefp_h.
 ieeefp_h="define"
