@@ -153,11 +153,13 @@ Perl_hv_iterkey
 Perl_hv_iterkeysv
 Perl_hv_iternext
 Perl_hv_iternextsv
+Perl_hv_iternext_flags
 Perl_hv_iterval
 Perl_hv_ksplit
 Perl_hv_magic
 Perl_hv_store
 Perl_hv_store_ent
+Perl_hv_store_flags
 Perl_hv_undef
 Perl_ibcmp
 Perl_ibcmp_locale

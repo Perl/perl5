@@ -58,7 +58,7 @@
 #include <patchlevel.h>		/* Perl's one, needed since 5.6 */
 #include <XSUB.h>
 
-#if 0
+#if 1
 #define DEBUGME /* Debug mode, turns assertions on as well */
 #define DASSERT /* Assertion mode */
 #endif
@@ -184,7 +184,8 @@ typedef double NV;			/* Older perls lack the NV type */
 #define SX_TIED_IDX C(22)   /* Tied magic index forthcoming */
 #define SX_UTF8STR	C(23)   /* UTF-8 string forthcoming (small) */
 #define SX_LUTF8STR	C(24)   /* UTF-8 string forthcoming (large) */
-#define SX_ERROR	C(25)	/* Error */
+#define SX_FLAG_HASH	C(25)   /* Hash with flags forthcoming (size, flags, key/flags/value triplet list) */
+#define SX_ERROR	C(26)	/* Error */
 
 /*
  * Those are only used to retrieve "old" pre-0.6 binary images.
@@ -316,8 +317,8 @@ typedef struct stcxt {
 #endif	/* < perl5.004_68 */
 
 #define dSTCXT_PTR(T,name)							\
-	T name = (perinterp_sv && SvIOK(perinterp_sv)	\
-				? INT2PTR(T, SvIVX(perinterp_sv)) : (T) 0)
+	T name = ((perinterp_sv && SvIOK(perinterp_sv)	\
+				? INT2PTR(T, SvIVX(perinterp_sv)) : (T) 0))
 #define dSTCXT										\
 	dSTCXT_SV;										\
 	dSTCXT_PTR(stcxt_t *, cxt)
@@ -623,6 +624,22 @@ static stcxt_t *Context_ptr = &Context;
 #define SHT_THASH			6		/* 4 + 2 -- tied hash */
 
 /*
+ * per hash flags for flagged hashes
+ */
+
+#define SHV_RESTRICTED		0x01
+
+/*
+ * per key flags for flagged hashes
+ */
+
+#define SHV_K_UTF8		0x01
+#define SHV_K_WASUTF8		0x02
+#define SHV_K_LOCKED		0x04
+#define SHV_K_ISSV		0x08
+#define SHV_K_PLACEHOLDER	0x10
+
+/*
  * Before 0.6, the magic string was "perl-store" (binary version number 0).
  *
  * Since 0.6 introduced many binary incompatibilities, the magic string has
@@ -641,8 +658,16 @@ static stcxt_t *Context_ptr = &Context;
 static char old_magicstr[] = "perl-store";	/* Magic number before 0.6 */
 static char magicstr[] = "pst0";			/* Used as a magic number */
 
-#define STORABLE_BIN_MAJOR	2				/* Binary major "version" */
-#define STORABLE_BIN_MINOR	4				/* Binary minor "version" */
+#define STORABLE_BIN_MAJOR	2		/* Binary major "version" */
+#if (PATCHLEVEL <= 6)
+#define STORABLE_BIN_MINOR	4		/* Binary minor "version" */
+#else 
+/* 
+ * As of perl 5.7.3, utf8 hash key is introduced.
+ * So this must change -- dankogai
+*/
+#define STORABLE_BIN_MINOR	5		/* Binary minor "version" */
+#endif /* (PATCHLEVEL <= 6) */
 
 /*
  * Useful store shortcuts...
@@ -897,6 +922,7 @@ static SV *(*sv_old_retrieve[])(stcxt_t *cxt, char *cname) = {
 	retrieve_other,			/* SX_TIED_IDX not supported */
 	retrieve_other,			/* SX_UTF8STR not supported */
 	retrieve_other,			/* SX_LUTF8STR not supported */
+	retrieve_other,			/* SX_FLAG_HASH not supported */
 	retrieve_other,			/* SX_ERROR */
 };
 
@@ -911,6 +937,7 @@ static SV *retrieve_hook(stcxt_t *cxt, char *cname);
 static SV *retrieve_overloaded(stcxt_t *cxt, char *cname);
 static SV *retrieve_tied_key(stcxt_t *cxt, char *cname);
 static SV *retrieve_tied_idx(stcxt_t *cxt, char *cname);
+static SV *retrieve_flag_hash(stcxt_t *cxt, char *cname);
 
 static SV *(*sv_retrieve[])(stcxt_t *cxt, char *cname) = {
 	0,			/* SX_OBJECT -- entry unused dynamically */
@@ -938,6 +965,7 @@ static SV *(*sv_retrieve[])(stcxt_t *cxt, char *cname) = {
 	retrieve_tied_idx,		/* SX_TIED_IDX */
 	retrieve_utf8str,		/* SX_UTF8STR  */
 	retrieve_lutf8str,		/* SX_LUTF8STR */
+	retrieve_flag_hash,		/* SX_HASH */
 	retrieve_other,			/* SX_ERROR */
 };
 
@@ -1165,7 +1193,7 @@ static void init_retrieve_context(stcxt_t *cxt, int optype, int is_tainted)
 	 * new retrieve routines.
 	 */
 
-	cxt->hseen = (cxt->retrieve_vtbl == sv_old_retrieve) ? newHV() : 0;
+	cxt->hseen = ((cxt->retrieve_vtbl == sv_old_retrieve) ? newHV() : 0);
 
 	cxt->aseen = newAV();			/* Where retrieved objects are kept */
 	cxt->aclass = newAV();			/* Where seen classnames are kept */
@@ -1632,7 +1660,7 @@ static int store_ref(stcxt_t *cxt, SV *sv)
  *
  * Store a scalar.
  *
- * Layout is SX_LSCALAR <length> <data>, SX_SCALAR <lenght> <data> or SX_UNDEF.
+ * Layout is SX_LSCALAR <length> <data>, SX_SCALAR <length> <data> or SX_UNDEF.
  * The <data> section is omitted if <length> is 0.
  *
  * If integer or double, the layout is SX_INTEGER <data> or SX_DOUBLE <data>.
@@ -1855,26 +1883,49 @@ sortcmp(const void *a, const void *b)
  *
  * Store a hash table.
  *
+ * For a "normal" hash (not restricted, no utf8 keys):
+ *
  * Layout is SX_HASH <size> followed by each key/value pair, in random order.
  * Values are stored as <object>.
  * Keys are stored as <length> <data>, the <data> section being omitted
  * if length is 0.
+
+ * Layout is SX_HASH <size> <hash flags> followed by each key/value pair,
+ * in random order.
+ * Values are stored as <object>.
+ * Keys are stored as <flags> <length> <data>, the <data> section being omitted
+ * if length is 0.
+ * Currently the only hash flag is "restriced"
+ * Key flags are as for hv.h
  */
 static int store_hash(stcxt_t *cxt, HV *hv)
 {
-	I32 len = HvKEYS(hv);
+	I32 len = HvTOTALKEYS(hv);
 	I32 i;
 	int ret = 0;
 	I32 riter;
 	HE *eiter;
+        int flagged_hash = ((SvREADONLY(hv) || HvHASKFLAGS(hv)) ? 1 : 0);
+        unsigned char hash_flags = (SvREADONLY(hv) ? SHV_RESTRICTED : 0);
 
-	TRACEME(("store_hash (0x%"UVxf")", PTR2UV(hv)));
+        if (flagged_hash) {
+            /* needs int cast for C++ compilers, doesn't it?  */
+            TRACEME(("store_hash (0x%"UVxf") (flags %x)", PTR2UV(hv),
+                     (int) hash_flags));
+        } else {
+            TRACEME(("store_hash (0x%"UVxf")", PTR2UV(hv)));
+        }
 
 	/* 
 	 * Signal hash by emitting SX_HASH, followed by the table length.
 	 */
 
-	PUTMARK(SX_HASH);
+        if (flagged_hash) {
+            PUTMARK(SX_FLAG_HASH);
+            PUTMARK(hash_flags);
+        } else {
+            PUTMARK(SX_HASH);
+        }
 	WLEN(len);
 	TRACEME(("size = %d", len));
 
@@ -1900,7 +1951,7 @@ static int store_hash(stcxt_t *cxt, HV *hv)
 	if (
 		!(cxt->optype & ST_CLONE) && (cxt->canonical == 1 ||
 		(cxt->canonical < 0 && (cxt->canonical =
-			SvTRUE(perl_get_sv("Storable::canonical", TRUE)) ? 1 : 0)))
+			(SvTRUE(perl_get_sv("Storable::canonical", TRUE)) ? 1 : 0))))
 	) {
 		/*
 		 * Storing in order, sorted by key.
@@ -1911,10 +1962,12 @@ static int store_hash(stcxt_t *cxt, HV *hv)
 
 		AV *av = newAV();
 
+                /*av_extend (av, len);*/
+
 		TRACEME(("using canonical order"));
 
 		for (i = 0; i < len; i++) {
-			HE *he = hv_iternext(hv);
+			HE *he = hv_iternext_flags(hv, HV_ITERNEXT_WANTPLACEHOLDERS);
 			SV *key = hv_iterkeysv(he);
 			av_store(av, AvFILLp(av)+1, key);	/* av_push(), really */
 		}
@@ -1922,8 +1975,10 @@ static int store_hash(stcxt_t *cxt, HV *hv)
 		qsort((char *) AvARRAY(av), len, sizeof(SV *), sortcmp);
 
 		for (i = 0; i < len; i++) {
+                        unsigned char flags;
 			char *keyval;
-			I32 keylen;
+			STRLEN keylen_tmp;
+                        I32 keylen;
 			SV *key = av_shift(av);
 			HE *he  = hv_fetch_ent(hv, key, 0, 0);
 			SV *val = HeVAL(he);
@@ -1947,11 +2002,54 @@ static int store_hash(stcxt_t *cxt, HV *hv)
 			 * See retrieve_hash() for details.
 			 */
 			 
-			keyval = hv_iterkey(he, &keylen);
-			TRACEME(("(#%d) key '%s'", i, keyval));
+                        /* Implementation of restricted hashes isn't nicely
+                           abstracted:  */
+                        flags
+                            = (((hash_flags & SHV_RESTRICTED)
+                                && SvREADONLY(val))
+                               ? SHV_K_LOCKED : 0);
+                        if (val == &PL_sv_undef)
+                            flags |= SHV_K_PLACEHOLDER;
+
+			keyval = SvPV(key, keylen_tmp);
+                        keylen = keylen_tmp;
+			if (SvUTF8(key)) {
+                            const char *keysave = keyval;
+                            bool is_utf8 = TRUE;
+
+                            /* Just casting the &klen to (STRLEN) won't work
+                               well if STRLEN and I32 are of different widths.
+                               --jhi */
+                            keyval = (char*)bytes_from_utf8((U8*)keyval,
+                                                            &keylen_tmp,
+                                                            &is_utf8);
+
+                            /* If we were able to downgrade here, then than
+                               means that we have  a key which only had chars
+                               0-255, but was utf8 encoded.  */
+
+                            if (keyval != keysave) {
+                                keylen = keylen_tmp;
+                                flags |= SHV_K_WASUTF8;
+                            } else {
+                                /* keylen_tmp can't have changed, so no need
+                                   to assign back to keylen.  */
+                                flags |= SHV_K_UTF8;
+                            }
+                        }
+
+                        if (flagged_hash) {
+                            PUTMARK(flags);
+                            TRACEME(("(#%d) key '%s' flags %x %u", i, keyval, flags, *keyval));
+                        } else {
+                            assert (flags == 0);
+                            TRACEME(("(#%d) key '%s'", i, keyval));
+                        }
 			WLEN(keylen);
 			if (keylen)
 				WRITE(keyval, keylen);
+                        if (flags & SHV_K_WASUTF8)
+                            Safefree (keyval);
 		}
 
 		/* 
@@ -1971,7 +2069,11 @@ static int store_hash(stcxt_t *cxt, HV *hv)
 		for (i = 0; i < len; i++) {
 			char *key;
 			I32 len;
-			SV *val = hv_iternextsv(hv, &key, &len);
+                        unsigned char flags;
+                        HE *he = hv_iternext_flags(hv, HV_ITERNEXT_WANTPLACEHOLDERS);
+			SV *val = (he ? hv_iterval(hv, he) : 0);
+                        SV *key_sv = NULL;
+                        HEK *hek;
 
 			if (val == 0)
 				return 1;		/* Internal error, not I/O error */
@@ -1985,6 +2087,34 @@ static int store_hash(stcxt_t *cxt, HV *hv)
 			if ((ret = store(cxt, val)))	/* Extra () for -Wall, grr... */
 				goto out;
 
+                        /* Implementation of restricted hashes isn't nicely
+                           abstracted:  */
+                        flags
+                            = (((hash_flags & SHV_RESTRICTED)
+                                && SvREADONLY(val))
+                                             ? SHV_K_LOCKED : 0);
+                        if (val == &PL_sv_undef)
+                            flags |= SHV_K_PLACEHOLDER;
+
+                        hek = HeKEY_hek(he);
+                        len = HEK_LEN(hek);
+                        if (len == HEf_SVKEY) {
+                            /* This is somewhat sick, but the internal APIs are
+                             * such that XS code could put one of these in in
+                             * a regular hash.
+                             * Maybe we should be capable of storing one if
+                             * found.
+                             */
+                            key_sv = HeKEY_sv(he);
+                            flags |= SHV_K_ISSV;
+                        } else {
+                            /* Regular string key. */
+                            if (HEK_UTF8(hek))
+                                flags |= SHV_K_UTF8;
+                            if (HEK_WASUTF8(hek))
+                                flags |= SHV_K_WASUTF8;
+                            key = HEK_KEY(hek);
+                        }
 			/*
 			 * Write key string.
 			 * Keys are written after values to make sure retrieval
@@ -1993,10 +2123,20 @@ static int store_hash(stcxt_t *cxt, HV *hv)
 			 * See retrieve_hash() for details.
 			 */
 
-			TRACEME(("(#%d) key '%s'", i, key));
-			WLEN(len);
-			if (len)
+                        if (flagged_hash) {
+                            PUTMARK(flags);
+                            TRACEME(("(#%d) key '%s' flags %x", i, key, flags));
+                        } else {
+                            assert (flags == 0);
+                            TRACEME(("(#%d) key '%s'", i, key));
+                        }
+                        if (flags & SHV_K_ISSV) {
+                            store(cxt, key_sv);
+                        } else {
+                            WLEN(len);
+                            if (len)
 				WRITE(key, len);
+                        }
 		}
     }
 
@@ -2847,7 +2987,8 @@ static int magic_write(stcxt_t *cxt)
 	unsigned char c;
 	int use_network_order = cxt->netorder;
 
-	TRACEME(("magic_write on fd=%d", cxt->fio ? fileno(cxt->fio) : -1));
+	TRACEME(("magic_write on fd=%d", cxt->fio ? PerlIO_fileno(cxt->fio)
+                 : -1));
 
 	if (cxt->fio)
 		WRITE(magicstr, strlen(magicstr));	/* Don't write final \0 */
@@ -4268,6 +4409,115 @@ static SV *retrieve_hash(stcxt_t *cxt, char *cname)
 	TRACEME(("ok (retrieve_hash at 0x%"UVxf")", PTR2UV(hv)));
 
 	return (SV *) hv;
+}
+
+/*
+ * retrieve_hash
+ *
+ * Retrieve a whole hash table.
+ * Layout is SX_HASH <size> followed by each key/value pair, in random order.
+ * Keys are stored as <length> <data>, the <data> section being omitted
+ * if length is 0.
+ * Values are stored as <object>.
+ *
+ * When we come here, SX_HASH has been read already.
+ */
+static SV *retrieve_flag_hash(stcxt_t *cxt, char *cname)
+{
+    I32 len;
+    I32 size;
+    I32 i;
+    HV *hv;
+    SV *sv;
+    int hash_flags;
+
+    GETMARK(hash_flags);
+	TRACEME(("retrieve_flag_hash (#%d)", cxt->tagnum));
+    /*
+     * Read length, allocate table.
+     */
+
+    RLEN(len);
+    TRACEME(("size = %d, flags = %d", len, hash_flags));
+    hv = newHV();
+    SEEN(hv, cname);		/* Will return if table not allocated properly */
+    if (len == 0)
+        return (SV *) hv;	/* No data follow if table empty */
+    hv_ksplit(hv, len);		/* pre-extend hash to save multiple splits */
+
+    /*
+     * Now get each key/value pair in turn...
+     */
+
+    for (i = 0; i < len; i++) {
+        int flags;
+        int store_flags = 0;
+        /*
+         * Get value first.
+         */
+
+        TRACEME(("(#%d) value", i));
+        sv = retrieve(cxt, 0);
+        if (!sv)
+            return (SV *) 0;
+
+        GETMARK(flags);
+        if ((hash_flags & SHV_RESTRICTED) && (flags & SHV_K_LOCKED))
+            SvREADONLY_on(sv);
+
+        if (flags & SHV_K_ISSV) {
+            /* XXX you can't set a placeholder with an SV key.
+               Then again, you can't get an SV key.
+               Without messing around beyond what the API is supposed to do.
+            */
+            SV *keysv;
+            TRACEME(("(#%d) keysv, flags=%d", i, flags));
+            keysv = retrieve(cxt, 0);
+            if (!keysv)
+                return (SV *) 0;
+
+            if (!hv_store_ent(hv, keysv, sv, 0))
+                return (SV *) 0;
+        } else {
+            /*
+             * Get key.
+             * Since we're reading into kbuf, we must ensure we're not
+             * recursing between the read and the hv_store() where it's used.
+             * Hence the key comes after the value.
+             */
+
+            if (flags & SHV_K_PLACEHOLDER) {
+                SvREFCNT_dec (sv);
+                sv = &PL_sv_undef;
+		store_flags |= HVhek_PLACEHOLD;
+	    }
+            if (flags & SHV_K_UTF8)
+                store_flags |= HVhek_UTF8;
+            if (flags & SHV_K_WASUTF8)
+		store_flags |= HVhek_WASUTF8;
+
+            RLEN(size);						/* Get key size */
+            KBUFCHK(size);					/* Grow hash key read pool if needed */
+            if (size)
+                READ(kbuf, size);
+            kbuf[size] = '\0';				/* Mark string end, just in case */
+            TRACEME(("(#%d) key '%s' flags %X store_flags %X", i, kbuf,
+		     flags, store_flags));
+
+            /*
+             * Enter key/value pair into hash table.
+             */
+
+            if (hv_store_flags(hv, kbuf, size, sv, 0, flags) == 0)
+                return (SV *) 0;
+	}
+    }
+    if (hash_flags & SHV_RESTRICTED)
+        SvREADONLY_on(hv);
+
+    TRACEME(("ok (retrieve_hash at 0x%"UVxf")", PTR2UV(hv)));
+
+    return (SV *) hv;
 }
 
 /*

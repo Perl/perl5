@@ -516,6 +516,11 @@ Perl_hv_store(pTHX_ HV *hv, const char *key, I32 klen, SV *val, U32 hash)
     const char *keysave = key;
     int flags = 0;
 
+    if (klen < 0) {
+      klen = -klen;
+      is_utf8 = TRUE;
+    }
+
     if (is_utf8) {
 	STRLEN tmplen = klen;
 	/* Just casting the &klen to (STRLEN) won't work well
@@ -536,7 +541,7 @@ Perl_hv_store(pTHX_ HV *hv, const char *key, I32 klen, SV *val, U32 hash)
 }
 
 SV**
-S_hv_store_flags(pTHX_ HV *hv, const char *key, I32 klen, SV *val,
+Perl_hv_store_flags(pTHX_ HV *hv, const char *key, I32 klen, SV *val,
                  register U32 hash, int flags)
 {
     register XPVHV* xhv;
@@ -597,7 +602,13 @@ S_hv_store_flags(pTHX_ HV *hv, const char *key, I32 klen, SV *val,
 	    xhv->xhv_placeholders--; /* yes, can store into placeholder slot */
 	else
 	    SvREFCNT_dec(HeVAL(entry));
-	HeVAL(entry) = val;
+        if (flags & HVhek_PLACEHOLD) {
+            /* We have been requested to insert a placeholder. Currently
+               only Storable is allowed to do this.  */
+            xhv->xhv_placeholders++;
+            HeVAL(entry) = &PL_sv_undef;
+        } else
+            HeVAL(entry) = val;
 
         if (HeKFLAGS(entry) != flags) {
             /* We match if HVhek_UTF8 bit in our flags and hash key's match.
@@ -634,7 +645,13 @@ S_hv_store_flags(pTHX_ HV *hv, const char *key, I32 klen, SV *val,
 	HeKEY_hek(entry) = share_hek_flags(key, klen, hash, flags);
     else                                       /* gotta do the real thing */
 	HeKEY_hek(entry) = save_hek_flags(key, klen, hash, flags);
-    HeVAL(entry) = val;
+    if (flags & HVhek_PLACEHOLD) {
+        /* We have been requested to insert a placeholder. Currently
+           only Storable is allowed to do this.  */
+        xhv->xhv_placeholders++;
+        HeVAL(entry) = &PL_sv_undef;
+    } else
+        HeVAL(entry) = val;
     HeNEXT(entry) = *oentry;
     *oentry = entry;
 
@@ -1551,7 +1568,7 @@ Perl_newHVhv(pTHX_ HV *ohv)
 	HvMAX(hv) = hv_max;
 
 	hv_iterinit(ohv);
-	while ((entry = hv_iternext(ohv))) {
+	while ((entry = hv_iternext_flags(ohv, 0))) {
 	    hv_store_flags(hv, HeKEY(entry), HeKLEN(entry),
                            newSVsv(HeVAL(entry)), HeHASH(entry),
                            HeKFLAGS(entry));
@@ -1713,6 +1730,7 @@ NOTE: Before version 5.004_65, C<hv_iterinit> used to return the number of
 hash buckets that happen to be in use.  If you still need that esoteric
 value, you can get it through the macro C<HvFILL(tb)>.
 
+
 =cut
 */
 
@@ -1735,7 +1753,6 @@ Perl_hv_iterinit(pTHX_ HV *hv)
     /* used to be xhv->xhv_fill before 5.004_65 */
     return XHvTOTALKEYS(xhv);
 }
-
 /*
 =for apidoc hv_iternext
 
@@ -1746,6 +1763,20 @@ Returns entries from a hash iterator.  See C<hv_iterinit>.
 
 HE *
 Perl_hv_iternext(pTHX_ HV *hv)
+{
+    return hv_iternext_flags(hv, 0);
+}
+
+/*
+XXX=for apidoc hv_iternext
+
+Returns entries from a hash iterator.  See C<hv_iterinit>.
+
+XXX=cut
+*/
+
+HE *
+Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
 {
     register XPVHV* xhv;
     register HE *entry;
@@ -1800,12 +1831,14 @@ Perl_hv_iternext(pTHX_ HV *hv)
     if (entry)
     {
 	entry = HeNEXT(entry);
-	/*
-	 * Skip past any placeholders -- don't want to include them in
-	 * any iteration.
-	 */
-	while (entry && HeVAL(entry) == &PL_sv_undef) {
-	    entry = HeNEXT(entry);
+        if (!(flags & HV_ITERNEXT_WANTPLACEHOLDERS)) {
+            /*
+             * Skip past any placeholders -- don't want to include them in
+             * any iteration.
+             */
+            while (entry && HeVAL(entry) == &PL_sv_undef) {
+                entry = HeNEXT(entry);
+            }
 	}
     }
     while (!entry) {
@@ -1817,10 +1850,11 @@ Perl_hv_iternext(pTHX_ HV *hv)
 	/* entry = (HvARRAY(hv))[HvRITER(hv)]; */
 	entry = ((HE**)xhv->xhv_array)[xhv->xhv_riter];
 
-	/* if we have an entry, but it's a placeholder, don't count it */
-	if (entry && HeVAL(entry) == &PL_sv_undef)
-	    entry = 0;
-
+        if (!(flags & HV_ITERNEXT_WANTPLACEHOLDERS)) {
+            /* if we have an entry, but it's a placeholder, don't count it */
+            if (entry && HeVAL(entry) == &PL_sv_undef)
+                entry = 0;
+        }
     }
 
     if (oldentry && HvLAZYDEL(hv)) {		/* was deleted earlier? */
@@ -1931,7 +1965,7 @@ SV *
 Perl_hv_iternextsv(pTHX_ HV *hv, char **key, I32 *retlen)
 {
     HE *he;
-    if ( (he = hv_iternext(hv)) == NULL)
+    if ( (he = hv_iternext_flags(hv, 0)) == NULL)
 	return NULL;
     *key = hv_iterkey(he, retlen);
     return hv_iterval(hv, he);

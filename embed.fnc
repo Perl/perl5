@@ -278,12 +278,15 @@ Apd	|char*	|hv_iterkey	|HE* entry|I32* retlen
 Apd	|SV*	|hv_iterkeysv	|HE* entry
 Apd	|HE*	|hv_iternext	|HV* tb
 Apd	|SV*	|hv_iternextsv	|HV* hv|char** key|I32* retlen
+ApM	|HE*	|hv_iternext_flags|HV* tb|I32 flags
 Apd	|SV*	|hv_iterval	|HV* tb|HE* entry
 Ap	|void	|hv_ksplit	|HV* hv|IV newmax
 Apd	|void	|hv_magic	|HV* hv|GV* gv|int how
 Apd	|SV**	|hv_store	|HV* tb|const char* key|I32 klen|SV* val \
 				|U32 hash
 Apd	|HE*	|hv_store_ent	|HV* tb|SV* key|SV* val|U32 hash
+ApM	|SV**	|hv_store_flags	|HV* tb|const char* key|I32 klen|SV* val \
+				|U32 hash|int flags
 Apd	|void	|hv_undef	|HV* tb
 Ap	|I32	|ibcmp		|const char* a|const char* b|I32 len
 Ap	|I32	|ibcmp_locale	|const char* a|const char* b|I32 len
@@ -990,8 +993,6 @@ s	|HEK*	|save_hek_flags	|const char *str|I32 len|U32 hash|int flags
 s	|void	|hv_magic_check	|HV *hv|bool *needs_copy|bool *needs_store
 s	|void	|unshare_hek_or_pvn|HEK* hek|const char* sv|I32 len|U32 hash
 s	|HEK*	|share_hek_flags|const char* sv|I32 len|U32 hash|int flags
-s	|SV**	|hv_store_flags	|HV* tb|const char* key|I32 klen|SV* val \
-				|U32 hash|int flags
 s	|SV**	|hv_fetch_flags	|HV* tb|const char* key|I32 klen|I32 lval \
                                 |int flags
 s	|void	|hv_notallowed	|int flags|const char *key|I32 klen|const char *msg

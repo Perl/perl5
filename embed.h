@@ -263,11 +263,13 @@
 #define hv_iterkeysv		Perl_hv_iterkeysv
 #define hv_iternext		Perl_hv_iternext
 #define hv_iternextsv		Perl_hv_iternextsv
+#define hv_iternext_flags	Perl_hv_iternext_flags
 #define hv_iterval		Perl_hv_iterval
 #define hv_ksplit		Perl_hv_ksplit
 #define hv_magic		Perl_hv_magic
 #define hv_store		Perl_hv_store
 #define hv_store_ent		Perl_hv_store_ent
+#define hv_store_flags		Perl_hv_store_flags
 #define hv_undef		Perl_hv_undef
 #define ibcmp			Perl_ibcmp
 #define ibcmp_locale		Perl_ibcmp_locale
@@ -926,7 +928,6 @@
 #define hv_magic_check		S_hv_magic_check
 #define unshare_hek_or_pvn	S_unshare_hek_or_pvn
 #define share_hek_flags		S_share_hek_flags
-#define hv_store_flags		S_hv_store_flags
 #define hv_fetch_flags		S_hv_fetch_flags
 #define hv_notallowed		S_hv_notallowed
 #endif
@@ -1829,11 +1830,13 @@
 #define hv_iterkeysv(a)		Perl_hv_iterkeysv(aTHX_ a)
 #define hv_iternext(a)		Perl_hv_iternext(aTHX_ a)
 #define hv_iternextsv(a,b,c)	Perl_hv_iternextsv(aTHX_ a,b,c)
+#define hv_iternext_flags(a,b)	Perl_hv_iternext_flags(aTHX_ a,b)
 #define hv_iterval(a,b)		Perl_hv_iterval(aTHX_ a,b)
 #define hv_ksplit(a,b)		Perl_hv_ksplit(aTHX_ a,b)
 #define hv_magic(a,b,c)		Perl_hv_magic(aTHX_ a,b,c)
 #define hv_store(a,b,c,d,e)	Perl_hv_store(aTHX_ a,b,c,d,e)
 #define hv_store_ent(a,b,c,d)	Perl_hv_store_ent(aTHX_ a,b,c,d)
+#define hv_store_flags(a,b,c,d,e,f)	Perl_hv_store_flags(aTHX_ a,b,c,d,e,f)
 #define hv_undef(a)		Perl_hv_undef(aTHX_ a)
 #define ibcmp(a,b,c)		Perl_ibcmp(aTHX_ a,b,c)
 #define ibcmp_locale(a,b,c)	Perl_ibcmp_locale(aTHX_ a,b,c)
@@ -2480,7 +2483,6 @@
 #define hv_magic_check(a,b,c)	S_hv_magic_check(aTHX_ a,b,c)
 #define unshare_hek_or_pvn(a,b,c,d)	S_unshare_hek_or_pvn(aTHX_ a,b,c,d)
 #define share_hek_flags(a,b,c,d)	S_share_hek_flags(aTHX_ a,b,c,d)
-#define hv_store_flags(a,b,c,d,e,f)	S_hv_store_flags(aTHX_ a,b,c,d,e,f)
 #define hv_fetch_flags(a,b,c,d,e)	S_hv_fetch_flags(aTHX_ a,b,c,d,e)
 #define hv_notallowed(a,b,c,d)	S_hv_notallowed(aTHX_ a,b,c,d)
 #endif

@@ -1238,7 +1238,8 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	    int count = maxnest - nest;
 
 	    hv_iterinit(hv);
-	    while ((he = hv_iternext(hv)) && count--) {
+	    while ((he = hv_iternext_flags(hv, HV_ITERNEXT_WANTPLACEHOLDERS))
+                   && count--) {
 		SV *elt, *keysv;
 		char *keypv;
 		STRLEN len;
