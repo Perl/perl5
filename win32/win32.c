@@ -3927,6 +3927,9 @@ XS(w32_GetShortPathName)
 
     shortpath = sv_mortalcopy(ST(0));
     SvUPGRADE(shortpath, SVt_PV);
+    if (!SvPVX(shortpath) || !SvLEN(shortpath))
+        XSRETURN_UNDEF;
+
     /* src == target is allowed */
     do {
 	len = GetShortPathName(SvPVX(shortpath),
@@ -3956,6 +3959,9 @@ XS(w32_GetFullPathName)
     filename = ST(0);
     fullpath = sv_mortalcopy(filename);
     SvUPGRADE(fullpath, SVt_PV);
+    if (!SvPVX(fullpath) || !SvLEN(fullpath))
+        XSRETURN_UNDEF;
+
     do {
 	len = GetFullPathName(SvPVX(filename),
 			      SvLEN(fullpath),
