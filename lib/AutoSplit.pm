@@ -238,6 +238,7 @@ sub autosplit_file {
 	$in_pod = 1 if /^=\w/;
 	$in_pod = 0 if /^=cut/;
 	next if ($in_pod || /^=cut/);
+        next if /^\s*#/;
 
 	# record last package name seen
 	$def_package = $1 if (m/^\s*package\s+([\w:]+)\s*;/);
