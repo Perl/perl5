@@ -2596,12 +2596,18 @@ S_regmatch(pTHX_ regnode *prog)
 	case CURLYX: {
 		CURCUR cc;
 		CHECKPOINT cp = PL_savestack_ix;
+		/* No need to save/restore up to this paren */
+		I32 parenfloor = scan->flags;
 
 		if (OP(PREVOPER(next)) == NOTHING) /* LONGJMP */
 		    next += ARG(next);
 		cc.oldcc = PL_regcc;
 		PL_regcc = &cc;
-		cc.parenfloor = *PL_reglastparen;
+		/* XXXX Probably it is better to teach regpush to support
+		   parenfloor > PL_regsize... */
+		if (parenfloor > *PL_reglastparen)
+		    parenfloor = *PL_reglastparen; /* Pessimization... */
+		cc.parenfloor = parenfloor;
 		cc.cur = -1;
 		cc.min = ARG1(scan);
 		cc.max  = ARG2(scan);
