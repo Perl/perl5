@@ -1,5 +1,8 @@
 # tr.t
 
+chdir 't' if -d 't';
+@INC = "../lib";
+
 print "1..4\n";
 
 $_ = "abcdefghijklmnopqrstuvwxyz";
