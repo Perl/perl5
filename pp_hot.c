@@ -2288,7 +2288,7 @@ vivify_ref(SV *sv, U32 to_what)
 	}
 	switch (to_what) {
 	case OPpDEREF_SV:
-	    SvRV(sv) = newSV(0);
+	    SvRV(sv) = NEWSV(355,0);
 	    break;
 	case OPpDEREF_AV:
 	    SvRV(sv) = (SV*)newAV();

@@ -2,7 +2,7 @@
 
 # $RCSfile: pat.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:12 $
 
-print "1..100\n";
+print "1..101\n";
 
 $x = "abc\ndef\n";
 
@@ -274,7 +274,7 @@ $_ = " a (bla()) and x(y b((l)u((e))) and b(l(e)e)e";
 $expect = "(bla()) ((l)u((e))) (l(e)e)";
 
 sub matchit { 
-  m'
+  m/
      (
        \( 
        (?{ $c = 1 })		# Initialize
@@ -301,7 +301,7 @@ sub matchit {
        (?!
        )			# Fail
      )				# Otherwise the chunk 1 may succeed with $c>0
-   'xg;
+   /xg;
 }
 
 push @ans, $res while $res = matchit;
@@ -321,9 +321,15 @@ print "not " if "@ans" ne 'a/ b';
 print "ok $test\n";
 $test++;
 
-$code = '$blah = 45';
+$code = '{$blah = 45}';
 $blah = 12;
-/(?{$code})/;			
+/(?$code)/;			
+print "not " if $blah != 45;
+print "ok $test\n";
+$test++;
+
+$blah = 12;
+/(?{$blah = 45})/;			
 print "not " if $blah != 45;
 print "ok $test\n";
 $test++;

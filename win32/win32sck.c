@@ -269,6 +269,15 @@ win32_select(int nfds, Perl_fd_set* rd, Perl_fd_set* wr, Perl_fd_set* ex, const 
     int i, fd, bit, offset;
     FD_SET nrd, nwr, nex, *prd, *pwr, *pex;
 
+    /* winsock seems incapable of dealing with all three null fd_sets,
+     * so do the (millisecond) sleep as a special case
+     */
+    if (!(rd || wr || ex)) {
+	Sleep(timeout->tv_sec  * 1000 +
+	      timeout->tv_usec / 1000);		/* do the best we can */
+	return 0;
+    }
+    StartSockets();
     PERL_FD_ZERO(&dummy);
     if (!rd)
 	rd = &dummy, prd = NULL;

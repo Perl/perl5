@@ -401,7 +401,8 @@ pad_alloc(I32 optype, U32 tmptype)
 			  (unsigned long) thr, (unsigned long) curpad,
 			  (long) retval, op_name[optype]));
 #else
-    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad alloc %ld for %s\n",
+    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad 0x%lx alloc %ld for %s\n",
+			  (unsigned long) curpad,
 			  (long) retval, op_name[optype]));
 #endif /* USE_THREADS */
     return (PADOFFSET)retval;
@@ -422,7 +423,8 @@ pad_sv(PADOFFSET po)
 #else
     if (!po)
 	croak("panic: pad_sv po");
-    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad sv %d\n", po));
+    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad 0x%lx sv %d\n",
+			  (unsigned long) curpad, po));
 #endif /* USE_THREADS */
     return curpad[po];		/* eventually we'll turn this into a macro */
 }
@@ -446,7 +448,8 @@ pad_free(PADOFFSET po)
     DEBUG_X(PerlIO_printf(Perl_debug_log, "0x%lx Pad 0x%lx free %d\n",
 			  (unsigned long) thr, (unsigned long) curpad, po));
 #else
-    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad free %d\n", po));
+    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad 0x%lx free %d\n",
+			  (unsigned long) curpad, po));
 #endif /* USE_THREADS */
     if (curpad[po] && curpad[po] != &sv_undef)
 	SvPADTMP_off(curpad[po]);
@@ -471,7 +474,8 @@ pad_swipe(PADOFFSET po)
     DEBUG_X(PerlIO_printf(Perl_debug_log, "0x%lx Pad 0x%lx swipe %d\n",
 			  (unsigned long) thr, (unsigned long) curpad, po));
 #else
-    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad swipe %d\n", po));
+    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad 0x%lx swipe %d\n",
+			  (unsigned long) curpad, po));
 #endif /* USE_THREADS */
     SvPADTMP_off(curpad[po]);
     curpad[po] = NEWSV(1107,0);
@@ -480,9 +484,16 @@ pad_swipe(PADOFFSET po)
 	padix = po - 1;
 }
 
+/* XXX pad_reset() is currently disabled because it results in serious bugs.
+ * It causes pad temp TARGs to be shared between OPs. Since TARGs are pushed
+ * on the stack by OPs that use them, there are several ways to get an alias
+ * to  a shared TARG.  Such an alias will change randomly and unpredictably.
+ * We avoid doing this until we can think of a Better Way.
+ * GSAR 97-10-29 */
 void
 pad_reset(void)
 {
+#ifdef USE_BROKEN_PAD_RESET
     dTHR;
     register I32 po;
 
@@ -492,7 +503,8 @@ pad_reset(void)
     DEBUG_X(PerlIO_printf(Perl_debug_log, "0x%lx Pad 0x%lx reset\n",
 			  (unsigned long) thr, (unsigned long) curpad));
 #else
-    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad reset\n"));
+    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad 0x%lx reset\n",
+			  (unsigned long) curpad));
 #endif /* USE_THREADS */
     if (!tainting) {	/* Can't mix tainted and non-tainted temporaries. */
 	for (po = AvMAX(comppad); po > padix_floor; po--) {
@@ -501,6 +513,7 @@ pad_reset(void)
 	}
 	padix = padix_floor;
     }
+#endif
     pad_reset_pending = FALSE;
 }
 
@@ -522,6 +535,7 @@ find_threadsv(char *name)
     if (!svp) {
 	SV *sv = NEWSV(0, 0);
 	av_store(thr->threadsv, key, sv);
+	thr->threadsvp = AvARRAY(thr->threadsv);
 	/*
 	 * Some magic variables used to be automagically initialised
 	 * in gv_fetchpv. Those which are now per-thread magicals get
@@ -1169,6 +1183,7 @@ mod(OP *o, I32 type)
 	/* FALL THROUGH */
     case OP_GV:
     case OP_AV2ARYLEN:
+	hints |= HINT_BLOCK_SCOPE;
     case OP_SASSIGN:
     case OP_AELEMFAST:
 	modcount++;
@@ -1594,7 +1609,6 @@ localize(OP *o, I32 lex)
     if (o->op_flags & OPf_PARENS)
 	list(o);
     else {
-	scalar(o);
 	if (dowarn && bufptr > oldbufptr && bufptr[-1] == ',') {
 	    char *s;
 	    for (s = bufptr; *s && (isALNUM(*s) || strchr("@$%, ",*s)); s++) ;
@@ -1651,6 +1665,12 @@ fold_constants(register OP *o)
     case OP_LCFIRST:
     case OP_UC:
     case OP_LC:
+    case OP_SLT:
+    case OP_SGT:
+    case OP_SLE:
+    case OP_SGE:
+    case OP_SCMP:
+
 	if (o->op_private & OPpLOCALE)
 	    goto nope;
     }
@@ -2980,10 +3000,14 @@ newLOOPEX(I32 type, OP *label)
     dTHR;
     OP *o;
     if (type != OP_GOTO || label->op_type == OP_CONST) {
-	o = newPVOP(type, 0, savepv(
-		label->op_type == OP_CONST
-		    ? SvPVx(((SVOP*)label)->op_sv, na)
-		    : "" ));
+	/* "last()" means "last" */
+	if (label->op_type == OP_STUB && (label->op_flags & OPf_PARENS))
+	    o = newOP(type, OPf_SPECIAL);
+	else {
+	    o = newPVOP(type, 0, savepv(label->op_type == OP_CONST
+					? SvPVx(((SVOP*)label)->op_sv, na)
+					: ""));
+	}
 	op_free(label);
     }
     else {
@@ -4605,10 +4629,11 @@ ck_subr(OP *o)
 		    goto wrapref;
 		{
 		    OP* kid = o2;
-		    o2 = newUNOP(OP_RV2GV, 0, kid);
-		    o2->op_sibling = kid->op_sibling;
+		    OP* sib = kid->op_sibling;
 		    kid->op_sibling = 0;
-		    prev->op_sibling = o;
+		    o2 = newUNOP(OP_RV2GV, 0, kid);
+		    o2->op_sibling = sib;
+		    prev->op_sibling = o2;
 		}
 		goto wrapref;
 	    case '\\':
@@ -4637,9 +4662,10 @@ ck_subr(OP *o)
 		  wrapref:
 		    {
 			OP* kid = o2;
-			o2 = newUNOP(OP_REFGEN, 0, kid);
-			o2->op_sibling = kid->op_sibling;
+			OP* sib = kid->op_sibling;
 			kid->op_sibling = 0;
+			o2 = newUNOP(OP_REFGEN, 0, kid);
+			o2->op_sibling = sib;
 			prev->op_sibling = o2;
 		    }
 		    break;

@@ -611,7 +611,7 @@ struct xpvio {
 #  endif
 #endif /* __GNUC__ */
 
-/* the following macros updates any magic values this sv is associated with */
+/* the following macros update any magic values this sv is associated with */
 
 #define SvGETMAGIC(x) STMT_START { if (SvGMAGICAL(x)) mg_get(x); } STMT_END
 #define SvSETMAGIC(x) STMT_START { if (SvSMAGICAL(x)) mg_set(x); } STMT_END
@@ -643,27 +643,6 @@ struct xpvio {
 		SvSetSV_and(dst,src,SvSETMAGIC(dst))
 #define SvSetMagicSV_nosteal(dst,src) \
 		SvSetSV_nosteal_and(dst,src,SvSETMAGIC(dst))
-
-#define SvSetMagicPV(dst,s)	\
-	STMT_START { sv_setpv(dst,s); SvSETMAGIC(dst); } STMT_END
-#define SvSetMagicPVN(dst,s,l)	\
-	STMT_START { sv_setpvn(dst,s,l); SvSETMAGIC(dst); } STMT_END
-#define SvSetMagicIV(dst,i)	\
-	STMT_START { sv_setiv(dst,i); SvSETMAGIC(dst); } STMT_END
-#define SvSetMagicPVIV(dst,i)	\
-	STMT_START { sv_setpviv(dst,i); SvSETMAGIC(dst); } STMT_END
-#define SvSetMagicUV(dst,u)	\
-	STMT_START { sv_setuv(dst,u); SvSETMAGIC(dst); } STMT_END
-#define SvSetMagicNV(dst,n)	\
-	STMT_START { sv_setnv(dst,n); SvSETMAGIC(dst); } STMT_END
-#define SvCatMagicPV(dst,s)	\
-	STMT_START { sv_catpv(dst,s); SvSETMAGIC(dst); } STMT_END
-#define SvCatMagicPVN(dst,s,l)	\
-	STMT_START { sv_catpvn(dst,s,l); SvSETMAGIC(dst); } STMT_END
-#define SvCatMagicSV(dst,src)	\
-	STMT_START { sv_catsv(dst,src); SvSETMAGIC(dst); } STMT_END
-#define SvUseMagicPVN(dst,s,l)	\
-	STMT_START { sv_usepvn(dst,s,l); SvSETMAGIC(dst); } STMT_END
 
 #define SvPEEK(sv) sv_peek(sv)
 

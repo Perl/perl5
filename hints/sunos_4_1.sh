@@ -37,10 +37,6 @@ d_tzname and i_unistd.  Keep the recommended values.  See
 hints/sunos_4_1.sh for more information.
 EOM
 
-# SunOS 4.1.3 has two extra fields in struct tm.  This works around
-# the problem.  Other BSD platforms may have similar problems.
-POSIX_cflags='ccflags="$ccflags -DSTRUCT_TM_HASZONE"'
-
 # The correct setting of groupstype depends on which version of the C
 # library is used.  If you are in the 'System V environment'
 # (i.e. you have /usr/5bin ahead of /usr/bin in your PATH), and

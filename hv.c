@@ -45,7 +45,7 @@ more_he(void)
 {
     register HE* he;
     register HE* heend;
-    he_root = (HE*)safemalloc(1008);
+    New(54, he_root, 1008/sizeof(HE), HE);
     he = he_root;
     heend = &he[1008 / sizeof(HE) - 1];
     while (he < heend) {
@@ -678,6 +678,10 @@ hsplit(HV *hv)
     nomemok = TRUE;
 #ifdef STRANGE_MALLOC
     Renew(a, newsize, HE*);
+    if (!a) {
+      nomemok = FALSE;
+      return;
+    }
 #else
     i = newsize * sizeof(HE*);
 #define MALLOC_OVERHEAD 16
@@ -688,6 +692,10 @@ hsplit(HV *hv)
     tmp /= sizeof(HE*);
     assert(tmp >= newsize);
     New(2,a, tmp, HE*);
+    if (!a) {
+      nomemok = FALSE;
+      return;
+    }
     Copy(xhv->xhv_array, a, oldsize, HE*);
     if (oldsize >= 64) {
 	offer_nice_chunk(xhv->xhv_array,
@@ -751,6 +759,10 @@ hv_ksplit(HV *hv, IV newmax)
 	nomemok = TRUE;
 #ifdef STRANGE_MALLOC
 	Renew(a, newsize, HE*);
+        if (!a) {
+	  nomemok = FALSE;
+	  return;
+	}
 #else
 	i = newsize * sizeof(HE*);
 	j = MALLOC_OVERHEAD;
@@ -760,6 +772,10 @@ hv_ksplit(HV *hv, IV newmax)
 	j /= sizeof(HE*);
 	assert(j >= newsize);
 	New(2, a, j, HE*);
+        if (!a) {
+	  nomemok = FALSE;
+	  return;
+	}
 	Copy(xhv->xhv_array, a, oldsize, HE*);
 	if (oldsize >= 64) {
 	    offer_nice_chunk(xhv->xhv_array,

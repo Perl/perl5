@@ -91,10 +91,12 @@ PP(pp_regcomp) {
     else {
 	t = SvPV(tmpstr, len);
 
-	/* JMR: Check against the last compiled regexp */
-	if ( ! pm->op_pmregexp  || ! pm->op_pmregexp->precomp
-	    || strnNE(pm->op_pmregexp->precomp, t, len) 
-	    || pm->op_pmregexp->precomp[len]) {
+	/* JMR: Check against the last compiled regexp
+	   To know for sure, we'd need the length of precomp.
+	   But we don't have it, so we must ... take a guess. */
+	if (!pm->op_pmregexp || !pm->op_pmregexp->precomp ||
+	    memNE(pm->op_pmregexp->precomp, t, len + 1))
+	{
 	    if (pm->op_pmregexp) {
 		ReREFCNT_dec(pm->op_pmregexp);
 		pm->op_pmregexp = Null(REGEXP*);	/* crucial if regcomp aborts */
@@ -552,7 +554,7 @@ PP(pp_grepstart)
     SAVETMPS;
 #ifdef USE_THREADS
     /* SAVE_DEFSV does *not* suffice here */
-    save_sptr(av_fetch(thr->threadsv, find_threadsv("_"), FALSE));
+    save_sptr(&THREADSV(0));
 #else
     SAVESPTR(GvSV(defgv));
 #endif /* USE_THREADS */
@@ -1135,6 +1137,7 @@ PP(pp_caller)
     register PERL_CONTEXT *cx;
     I32 dbcxix;
     I32 gimme;
+    HV *hv;
     SV *sv;
     I32 count = 0;
 
@@ -1164,14 +1167,22 @@ PP(pp_caller)
     }
 
     if (GIMME != G_ARRAY) {
-	dTARGET;
-
-	sv_setpv(TARG, HvNAME(cx->blk_oldcop->cop_stash));
-	PUSHs(TARG);
+	hv = cx->blk_oldcop->cop_stash;
+	if (!hv)
+	    PUSHs(&sv_undef);
+	else {
+	    dTARGET;
+	    sv_setpv(TARG, HvNAME(hv));
+	    PUSHs(TARG);
+	}
 	RETURN;
     }
 
-    PUSHs(sv_2mortal(newSVpv(HvNAME(cx->blk_oldcop->cop_stash), 0)));
+    hv = cx->blk_oldcop->cop_stash;
+    if (!hv)
+	PUSHs(&sv_undef);
+    else
+	PUSHs(sv_2mortal(newSVpv(HvNAME(hv), 0)));
     PUSHs(sv_2mortal(newSVpv(SvPVX(GvSV(cx->blk_oldcop->cop_filegv)), 0)));
     PUSHs(sv_2mortal(newSViv((I32)cx->blk_oldcop->cop_line)));
     if (!MAXARG)

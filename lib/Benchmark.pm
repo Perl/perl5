@@ -367,7 +367,9 @@ sub timethese{
 
     # we could save the results in an array and produce a summary here
     # sum, min, max, avg etc etc
-    map timethis($n, $alt->{$_}, $_, $style), @names;
+    foreach my $name (@names) {
+        timethis ($n, $alt -> {$name}, $name, $style);
+    }
 }
 
 1;

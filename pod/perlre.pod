@@ -251,12 +251,12 @@ function of the extension.  Several extensions are already supported:
 
 =over 10
 
-=item (?#text)
+=item C<(?#text)>
 
 A comment.  The text is ignored.  If the C</x> switch is used to enable
 whitespace formatting, a simple C<#> will suffice.
 
-=item (?:regexp)
+=item C<(?:regexp)>
 
 This groups things like "()" but doesn't make backreferences like "()" does.  So
 
@@ -268,12 +268,12 @@ is like
 
 but doesn't spit out extra fields.
 
-=item (?=regexp)
+=item C<(?=regexp)>
 
 A zero-width positive lookahead assertion.  For example, C</\w+(?=\t)/>
 matches a word followed by a tab, without including the tab in C<$&>.
 
-=item (?!regexp)
+=item C<(?!regexp)>
 
 A zero-width negative lookahead assertion.  For example C</foo(?!bar)/>
 matches any occurrence of "foo" that isn't followed by "bar".  Note
@@ -291,24 +291,23 @@ easier just to say:
 
 For lookbehind see below.
 
-=item (?<=regexp)
+=item C<(?<=regexp)>
 
 A zero-width positive lookbehind assertion.  For example, C</(?=\t)\w+/>
 matches a word following a tab, without including the tab in C<$&>.
 Works only for fixed-width lookbehind.
 
-=item (?<!regexp)
+=item C<(?<!regexp)>
 
 A zero-width negative lookbehind assertion.  For example C</(?<!bar)foo/>
 matches any occurrence of "foo" that isn't following "bar".  
 Works only for fixed-width lookbehind.
 
-=item (?{ code })
+=item C<(?{ code })>
 
 Experimental "evaluate any Perl code" zero-width assertion.  Always
-succeeds.  Currently the quoting rules are somewhat convoluted, as is the
-determination where the C<code> ends.
-
+succeeds.  C<code> is not interpolated.  Currently the rules to
+determine where the C<code> ends are somewhat convoluted.
 
 =item C<(?E<gt>regexp)>
 
@@ -371,9 +370,9 @@ Note that on simple groups like the above C<(?> [^()]+ )> a similar
 effect may be achieved by negative lookahead, as in C<[^()]+ (?! [^()] )>.
 This was only 4 times slower on a string with 1000000 C<a>s.
 
-=item (?(condition)yes-regexp|no-regexp)
+=item C<(?(condition)yes-regexp|no-regexp)>
 
-=item (?(condition)yes-regexp)
+=item C<(?(condition)yes-regexp)>
 
 Conditional expression.  C<(condition)> should be either an integer in
 parentheses (which is valid if the corresponding pair of parentheses
@@ -388,7 +387,7 @@ Say,
 matches a chunk of non-parentheses, possibly included in parentheses
 themselves.
 
-=item (?imsx)
+=item C<(?imsx)>
 
 One or more embedded pattern-match modifiers.  This is particularly
 useful for patterns that are specified in a table somewhere, some of

@@ -100,7 +100,7 @@ static void TranslateError
 		     path, number, type);
 	break;
     }
-    safefree(dl_last_error);
+    Safefree(dl_last_error);
     dl_last_error = savepv(error);
 }
 
@@ -151,10 +151,10 @@ static void TransferError(NXStream *s)
     int len, maxlen;
 
     if ( dl_last_error ) {
-        safefree(dl_last_error);
+        Safefree(dl_last_error);
     }
     NXGetMemoryBuffer(s, &buffer, &len, &maxlen);
-    dl_last_error = safemalloc(len);
+    New(1097, dl_last_error, len, char);
     strcpy(dl_last_error, buffer);
 }
 

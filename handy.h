@@ -244,7 +244,10 @@ typedef U16 line_t;
 #define NOLINE ((line_t) 65535)
 #endif
 
-/* XXX LEAKTEST doesn't really work in perl5.  There are direct calls to
+
+/* This looks obsolete (IZ):
+
+   XXX LEAKTEST doesn't really work in perl5.  There are direct calls to
    safemalloc() in the source, so LEAKTEST won't pick them up.
    Further, if you try LEAKTEST, you'll also end up calling
    Safefree, which might call safexfree() on some things that weren't
@@ -278,12 +281,16 @@ typedef U16 line_t;
 	  (v = (t*)safexrealloc((Malloc_t)(v),(MEM_SIZE)((n)*sizeof(t))))
 #define Renewc(v,n,t,c) \
 	  (v = (c*)safexrealloc((Malloc_t)(v),(MEM_SIZE)((n)*sizeof(t))))
-#define Safefree(d)	safexfree((Malloc_t)d)
+#define Safefree(d)	safexfree((Malloc_t)(d))
 #define NEWSV(x,len)	newSV(x,len)
 
 #define MAXXCOUNT 1400
-long xcount[MAXXCOUNT];
-long lastxcount[MAXXCOUNT];
+#define MAXY_SIZE 80
+#define MAXYCOUNT 16			/* (MAXY_SIZE/4 + 1) */
+extern long xcount[MAXXCOUNT];
+extern long lastxcount[MAXXCOUNT];
+extern long xycount[MAXXCOUNT][MAXYCOUNT];
+extern long lastxycount[MAXXCOUNT][MAXYCOUNT];
 
 #endif /* LEAKTEST */
 

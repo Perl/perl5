@@ -26,7 +26,7 @@ sub POP
  if ($newsize >= 0) 
   {
    $val = $obj->FETCH($newsize);
-   $obj->SETSIZE($newsize);
+   $obj->STORESIZE($newsize);
   }
  $val;
 }          
@@ -155,10 +155,10 @@ and C<EXTEND> methods, and implementations of C<PUSH>, C<POP>, C<SHIFT>,
 C<UNSHIFT>, C<SPLICE> and C<CLEAR> in terms of basic C<FETCH>, C<STORE>, 
 C<FETCHSIZE>, C<STORESIZE>.
 
-The B<Tie::StdHash> package provides efficient methods required for tied arrays 
+The B<Tie::StdArray> package provides efficient methods required for tied arrays 
 which are implemented as blessed references to an "inner" perl array.
 It inherits from B<Tie::Array>, and should cause tied arrays to behave exactly 
-like standard hashes, allowing for selective overloading of methods. 
+like standard arrays, allowing for selective overloading of methods. 
 
 For developers wishing to write their own tied arrays, the required methods
 are briefly defined below. See the L<perltie> section for more detailed

@@ -221,6 +221,7 @@ Perl_nthreads
 Perl_nthreads_cond
 Perl_per_thread_magicals
 Perl_thread_create
+Perl_threadnum
 Perl_find_threadsv
 Perl_threadsv_names
 Perl_thrsv
@@ -510,6 +511,7 @@ win32_alarm
 win32_open_osfhandle
 win32_get_osfhandle
 win32_ioctl
+win32_utime
 win32_wait
 win32_str_os_error
 Perl_win32_init

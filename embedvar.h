@@ -189,6 +189,7 @@
 #define sv_objcount		(curinterp->Isv_objcount)
 #define sv_root			(curinterp->Isv_root)
 #define tainting		(curinterp->Itainting)
+#define threadnum		(curinterp->Ithreadnum)
 #define thrsv			(curinterp->Ithrsv)
 #define unsafe			(curinterp->Iunsafe)
 #define warnhook		(curinterp->Iwarnhook)
@@ -306,6 +307,7 @@
 #define Isv_objcount		sv_objcount
 #define Isv_root		sv_root
 #define Itainting		tainting
+#define Ithreadnum		threadnum
 #define Ithrsv			thrsv
 #define Iunsafe			unsafe
 #define Iwarnhook		warnhook
@@ -483,6 +485,7 @@
 #define sv_objcount		Perl_sv_objcount
 #define sv_root			Perl_sv_root
 #define tainting		Perl_tainting
+#define threadnum		Perl_threadnum
 #define thrsv			Perl_thrsv
 #define unsafe			Perl_unsafe
 #define warnhook		Perl_warnhook

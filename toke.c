@@ -50,6 +50,8 @@ static int uni _((I32 f, char *s));
 #endif
 static char * filter_gets _((SV *sv, PerlIO *fp, STRLEN append));
 static void restore_rsfp _((void *f));
+static void restore_expect _((void *e));
+static void restore_lex_expect _((void *e));
 #endif /* PERL_OBJECT */
 
 static char ident_too_long[] = "Identifier too long";
@@ -259,6 +261,11 @@ lex_start(SV *line)
     SAVEPPTR(lex_brackstack);
     SAVEPPTR(lex_casestack);
     SAVEDESTRUCTOR(restore_rsfp, rsfp);
+    SAVESPTR(lex_stuff);
+    SAVEI32(lex_defer);
+    SAVESPTR(lex_repl);
+    SAVEDESTRUCTOR(restore_expect, tokenbuf + expect); /* encode as pointer */
+    SAVEDESTRUCTOR(restore_lex_expect, tokenbuf + expect);
 
     lex_state = LEX_NORMAL;
     lex_defer = 0;
@@ -273,11 +280,7 @@ lex_start(SV *line)
     *lex_casestack = '\0';
     lex_dojoin = 0;
     lex_starts = 0;
-    if (lex_stuff)
-	SvREFCNT_dec(lex_stuff);
     lex_stuff = Nullsv;
-    if (lex_repl)
-	SvREFCNT_dec(lex_repl);
     lex_repl = Nullsv;
     lex_inpat = 0;
     lex_inwhat = 0;
@@ -314,6 +317,22 @@ restore_rsfp(void *f)
     else if (rsfp && (rsfp != fp))
 	PerlIO_close(rsfp);
     rsfp = fp;
+}
+
+STATIC void
+restore_expect(e)
+void *e;
+{
+    /* a safe way to store a small integer in a pointer */
+    expect = (expectation)((char *)e - tokenbuf);
+}
+
+STATIC void
+restore_lex_expect(e)
+void *e;
+{
+    /* a safe way to store a small integer in a pointer */
+    lex_expect = (expectation)((char *)e - tokenbuf);
 }
 
 STATIC void
@@ -785,9 +804,31 @@ scan_const(char *start)
 		s++;
 	    }
 	}
-	else if (*s == '(' && lex_inpat && s[1] == '?' && s[2] == '#') {
-	    while (s < send && *s != ')')
-		*d++ = *s++;
+	else if (*s == '(' && lex_inpat && s[1] == '?') {
+	    if (s[2] == '#') {
+		while (s < send && *s != ')')
+		    *d++ = *s++;
+	    } else if (s[2] == '{') {	/* This should march regcomp.c */
+		I32 count = 1;
+		char *regparse = s + 3;
+		char c;
+
+		while (count && (c = *regparse)) {
+		    if (c == '\\' && regparse[1])
+			regparse++;
+		    else if (c == '{') 
+			count++;
+		    else if (c == '}') 
+			count--;
+		    regparse++;
+		}
+		if (*regparse == ')')
+		    regparse++;
+		else
+		    yyerror("Sequence (?{...}) not terminated or not {}-balanced");
+		while (s < regparse && *s != ')')
+		    *d++ = *s++;
+	    }
 	}
 	else if (*s == '#' && lex_inpat &&
 	  ((PMOP*)lex_inpat)->op_pmflags & PMf_EXTENDED) {
@@ -1025,9 +1066,18 @@ intuit_method(char *start, GV *gv)
     GV* indirgv;
 
     if (gv) {
+	CV *cv;
 	if (GvIO(gv))
 	    return 0;
-	if (!GvCVu(gv))
+	if ((cv = GvCVu(gv))) {
+	    char *proto = SvPVX(cv);
+	    if (proto) {
+		if (*proto == ';')
+		    proto++;
+		if (*proto == '*')
+		    return 0;
+	    }
+	} else
 	    gv = 0;
     }
     s = scan_word(s, tmpbuf, sizeof tmpbuf, TRUE, &len);
@@ -1104,7 +1154,7 @@ filter_add(filter_t funcp, SV *datasv)
     if (!rsfp_filters)
 	rsfp_filters = newAV();
     if (!datasv)
-	datasv = newSV(0);
+	datasv = NEWSV(255,0);
     if (!SvUPGRADE(datasv, SVt_PVIO))
         die("Can't upgrade filter_add data to SVt_PVIO");
     IoDIRP(datasv) = (DIR*)funcp; /* stash funcp into spare field */
@@ -2016,8 +2066,13 @@ yylex(void)
 		else
 		    lex_brackstack[lex_brackets++] = XOPERATOR;
 		s = skipspace(s);
-		if (*s == '}')
+		if (*s == '}') {
+		    if (expect == XSTATE) {
+			lex_brackstack[lex_brackets-1] = XSTATE;
+			break;
+		    }
 		    OPERATOR(HASHBRACK);
+		}
 		/* This hack serves to disambiguate a pair of curlies
 		 * as being a block or an anon hash.  Normally, expectation
 		 * determines that, but in cases where we're not in a
@@ -4838,6 +4893,8 @@ scan_heredoc(register char *s)
 	}
 	sv_setpvn(tmpstr,d+1,s-d);
 	s += len - 1;
+	curcop->cop_line++;     /* the preceding stmt passes a newline */
+
 	sv_catpvn(herewas,s,bufend-s);
 	sv_setsv(linestr,herewas);
 	oldoldbufptr = oldbufptr = bufptr = s = linestart = SvPVX(linestr);

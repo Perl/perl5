@@ -65,6 +65,10 @@ static void sv_mortalgrow _((void));
 static void sv_unglob _((SV* sv));
 static void sv_check_thinkfirst _((SV *sv));
 
+#ifndef PURIFY
+static void *my_safemalloc(MEM_SIZE size);
+#endif
+
 typedef void (*SVFUNC) _((SV*));
 #define VTBL *vtbl
 #define FCALL *f
@@ -75,18 +79,18 @@ typedef void (*SVFUNC) _((SV*));
 
 #define new_SV(p)			\
     do {				\
-	MUTEX_LOCK(&sv_mutex);		\
+	LOCK_SV_MUTEX;			\
 	(p) = (SV*)safemalloc(sizeof(SV)); \
 	reg_add(p);			\
-	MUTEX_UNLOCK(&sv_mutex);	\
+	UNLOCK_SV_MUTEX;		\
     } while (0)
 
 #define del_SV(p)			\
     do {				\
-	MUTEX_LOCK(&sv_mutex);		\
+	LOCK_SV_MUTEX;			\
 	reg_remove(p);			\
         Safefree((char*)(p));		\
-	MUTEX_UNLOCK(&sv_mutex);	\
+	UNLOCK_SV_MUTEX;		\
     } while (0)
 
 static SV **registry;
@@ -121,8 +125,7 @@ SV* sv;
 	I32 oldsize = regsize;
 
 	regsize = regsize ? ((regsize << 2) + 1) : 2037;
-	registry = (SV**)safemalloc(regsize * sizeof(SV*));
-	memzero(registry, regsize * sizeof(SV*));
+	Newz(707, registry, regsize, SV*);
 
 	if (oldreg) {
 	    I32 i;
@@ -193,24 +196,24 @@ U32 flags;
 	++sv_count;			\
     } while (0)
 
-#define new_SV(p)	do {		\
-	MUTEX_LOCK(&sv_mutex);		\
-	if (sv_root)			\
-	    uproot_SV(p);		\
-	else				\
-	    (p) = more_sv();		\
-	MUTEX_UNLOCK(&sv_mutex);	\
+#define new_SV(p)	do {	\
+	LOCK_SV_MUTEX;		\
+	if (sv_root)		\
+	    uproot_SV(p);	\
+	else			\
+	    (p) = more_sv();	\
+	UNLOCK_SV_MUTEX;	\
     } while (0)
 
 #ifdef DEBUGGING
 
-#define del_SV(p)	do {		\
-	MUTEX_LOCK(&sv_mutex);		\
-	if (debug & 32768)		\
-	    del_sv(p);			\
-	else				\
-	    plant_SV(p);		\
-	MUTEX_UNLOCK(&sv_mutex);	\
+#define del_SV(p)	do {	\
+	LOCK_SV_MUTEX;		\
+	if (debug & 32768)	\
+	    del_sv(p);		\
+	else			\
+	    plant_SV(p);	\
+	UNLOCK_SV_MUTEX;	\
     } while (0)
 
 STATIC void
@@ -426,7 +429,8 @@ more_xiv(void)
 {
     register IV** xiv;
     register IV** xivend;
-    XPV* ptr = (XPV*)safemalloc(1008);
+    XPV* ptr;
+    New(705, ptr, 1008/sizeof(XPV), XPV);
     ptr->xpv_pv = (char*)xiv_arenaroot;		/* linked list of xiv arenas */
     xiv_arenaroot = ptr;			/* to keep Purify happy */
 
@@ -467,7 +471,7 @@ more_xnv(void)
 {
     register double* xnv;
     register double* xnvend;
-    xnv = (double*)safemalloc(1008);
+    New(711, xnv, 1008/sizeof(double), double);
     xnvend = &xnv[1008 / sizeof(double) - 1];
     xnv += (sizeof(XPVIV) - 1) / sizeof(double) + 1; /* fudge by sizeof XPVIV */
     xnv_root = xnv;
@@ -503,7 +507,7 @@ more_xrv(void)
 {
     register XRV* xrv;
     register XRV* xrvend;
-    xrv_root = (XRV*)safemalloc(1008);
+    New(712, xrv_root, 1008/sizeof(XRV), XRV);
     xrv = xrv_root;
     xrvend = &xrv[1008 / sizeof(XRV) - 1];
     while (xrv < xrvend) {
@@ -538,7 +542,7 @@ more_xpv(void)
 {
     register XPV* xpv;
     register XPV* xpvend;
-    xpv_root = (XPV*)safemalloc(1008);
+    New(713, xpv_root, 1008/sizeof(XPV), XPV);
     xpv = xpv_root;
     xpvend = &xpv[1008 / sizeof(XPV) - 1];
     while (xpv < xpvend) {
@@ -581,38 +585,52 @@ more_xpv(void)
 #define del_XPV(p) del_xpv((XPV *)p)
 #endif
 
-#define new_XPVIV() (void*)safemalloc(sizeof(XPVIV))
-#define del_XPVIV(p) Safefree((char*)p)
+#ifdef PURIFY
+#  define my_safemalloc(s) safemalloc(s)
+#  define my_safefree(s) free(s)
+#else
+static void* 
+my_safemalloc(MEM_SIZE size)
+{
+    char *p;
+    New(717, p, size, char);
+    return (void*)p;
+}
+#  define my_safefree(s) Safefree(s)
+#endif 
 
-#define new_XPVNV() (void*)safemalloc(sizeof(XPVNV))
-#define del_XPVNV(p) Safefree((char*)p)
-
-#define new_XPVMG() (void*)safemalloc(sizeof(XPVMG))
-#define del_XPVMG(p) Safefree((char*)p)
-
-#define new_XPVLV() (void*)safemalloc(sizeof(XPVLV))
-#define del_XPVLV(p) Safefree((char*)p)
-
-#define new_XPVAV() (void*)safemalloc(sizeof(XPVAV))
-#define del_XPVAV(p) Safefree((char*)p)
-
-#define new_XPVHV() (void*)safemalloc(sizeof(XPVHV))
-#define del_XPVHV(p) Safefree((char*)p)
-
-#define new_XPVCV() (void*)safemalloc(sizeof(XPVCV))
-#define del_XPVCV(p) Safefree((char*)p)
-
-#define new_XPVGV() (void*)safemalloc(sizeof(XPVGV))
-#define del_XPVGV(p) Safefree((char*)p)
-
-#define new_XPVBM() (void*)safemalloc(sizeof(XPVBM))
-#define del_XPVBM(p) Safefree((char*)p)
-
-#define new_XPVFM() (void*)safemalloc(sizeof(XPVFM))
-#define del_XPVFM(p) Safefree((char*)p)
-
-#define new_XPVIO() (void*)safemalloc(sizeof(XPVIO))
-#define del_XPVIO(p) Safefree((char*)p)
+#define new_XPVIV() (void*)my_safemalloc(sizeof(XPVIV))
+#define del_XPVIV(p) my_safefree((char*)p)
+  
+#define new_XPVNV() (void*)my_safemalloc(sizeof(XPVNV))
+#define del_XPVNV(p) my_safefree((char*)p)
+  
+#define new_XPVMG() (void*)my_safemalloc(sizeof(XPVMG))
+#define del_XPVMG(p) my_safefree((char*)p)
+  
+#define new_XPVLV() (void*)my_safemalloc(sizeof(XPVLV))
+#define del_XPVLV(p) my_safefree((char*)p)
+  
+#define new_XPVAV() (void*)my_safemalloc(sizeof(XPVAV))
+#define del_XPVAV(p) my_safefree((char*)p)
+  
+#define new_XPVHV() (void*)my_safemalloc(sizeof(XPVHV))
+#define del_XPVHV(p) my_safefree((char*)p)
+  
+#define new_XPVCV() (void*)my_safemalloc(sizeof(XPVCV))
+#define del_XPVCV(p) my_safefree((char*)p)
+  
+#define new_XPVGV() (void*)my_safemalloc(sizeof(XPVGV))
+#define del_XPVGV(p) my_safefree((char*)p)
+  
+#define new_XPVBM() (void*)my_safemalloc(sizeof(XPVBM))
+#define del_XPVBM(p) my_safefree((char*)p)
+  
+#define new_XPVFM() (void*)my_safemalloc(sizeof(XPVFM))
+#define del_XPVFM(p) my_safefree((char*)p)
+  
+#define new_XPVIO() (void*)my_safemalloc(sizeof(XPVIO))
+#define del_XPVIO(p) my_safefree((char*)p)
 
 bool
 sv_upgrade(register SV *sv, U32 mt)
@@ -1130,12 +1148,26 @@ sv_setiv(register SV *sv, IV i)
 }
 
 void
+sv_setiv_mg(register SV *sv, IV i)
+{
+    sv_setiv(sv,i);
+    SvSETMAGIC(sv);
+}
+
+void
 sv_setuv(register SV *sv, UV u)
 {
     if (u <= IV_MAX)
 	sv_setiv(sv, u);
     else
 	sv_setnv(sv, (double)u);
+}
+
+void
+sv_setuv_mg(register SV *sv, UV u)
+{
+    sv_setuv(sv,u);
+    SvSETMAGIC(sv);
 }
 
 void
@@ -1180,6 +1212,13 @@ sv_setnv(register SV *sv, double num)
     SvNVX(sv) = num;
     (void)SvNOK_only(sv);			/* validate number */
     SvTAINT(sv);
+}
+
+void
+sv_setnv_mg(register SV *sv, double num)
+{
+    sv_setnv(sv,num);
+    SvSETMAGIC(sv);
 }
 
 STATIC void
@@ -1654,7 +1693,7 @@ sv_2pv(register SV *sv, STRLEN *lp)
 		case SVt_PVHV:	s = "HASH";			break;
 		case SVt_PVCV:	s = "CODE";			break;
 		case SVt_PVGV:	s = "GLOB";			break;
-		case SVt_PVFM:	s = "FORMATLINE";		break;
+		case SVt_PVFM:	s = "FORMLINE";			break;
 		case SVt_PVIO:	s = "IO";			break;
 		default:	s = "UNKNOWN";			break;
 		}
@@ -1926,7 +1965,7 @@ sv_setsv(SV *dstr, register SV *sstr)
 		STRLEN len = GvNAMELEN(sstr);
 		sv_upgrade(dstr, SVt_PVGV);
 		sv_magic(dstr, dstr, '*', name, len);
-		GvSTASH(dstr) = GvSTASH(sstr);
+		GvSTASH(dstr) = (HV*)SvREFCNT_inc(GvSTASH(sstr));
 		GvNAME(dstr) = savepvn(name, len);
 		GvNAMELEN(dstr) = len;
 		SvFAKE_on(dstr);	/* can coerce to non-glob */
@@ -2161,6 +2200,13 @@ sv_setsv(SV *dstr, register SV *sstr)
 }
 
 void
+sv_setsv_mg(SV *dstr, register SV *sstr)
+{
+    sv_setsv(dstr,sstr);
+    SvSETMAGIC(dstr);
+}
+
+void
 sv_setpvn(register SV *sv, register const char *ptr, register STRLEN len)
 {
     assert(len >= 0);  /* STRLEN is probably unsigned, so this may
@@ -2182,6 +2228,13 @@ sv_setpvn(register SV *sv, register const char *ptr, register STRLEN len)
     *SvEND(sv) = '\0';
     (void)SvPOK_only(sv);		/* validate pointer */
     SvTAINT(sv);
+}
+
+void
+sv_setpvn_mg(register SV *sv, register const char *ptr, register STRLEN len)
+{
+    sv_setpvn(sv,ptr,len);
+    SvSETMAGIC(sv);
 }
 
 void
@@ -2209,6 +2262,13 @@ sv_setpv(register SV *sv, register const char *ptr)
 }
 
 void
+sv_setpv_mg(register SV *sv, register const char *ptr)
+{
+    sv_setpv(sv,ptr);
+    SvSETMAGIC(sv);
+}
+
+void
 sv_usepvn(register SV *sv, register char *ptr, register STRLEN len)
 {
     sv_check_thinkfirst(sv);
@@ -2227,6 +2287,13 @@ sv_usepvn(register SV *sv, register char *ptr, register STRLEN len)
     *SvEND(sv) = '\0';
     (void)SvPOK_only(sv);		/* validate pointer */
     SvTAINT(sv);
+}
+
+void
+sv_usepvn_mg(register SV *sv, register char *ptr, register STRLEN len)
+{
+    sv_usepvn_mg(sv,ptr,len);
+    SvSETMAGIC(sv);
 }
 
 STATIC void
@@ -2286,6 +2353,13 @@ sv_catpvn(register SV *sv, register char *ptr, register STRLEN len)
 }
 
 void
+sv_catpvn_mg(register SV *sv, register char *ptr, register STRLEN len)
+{
+    sv_catpvn(sv,ptr,len);
+    SvSETMAGIC(sv);
+}
+
+void
 sv_catsv(SV *dstr, register SV *sstr)
 {
     char *s;
@@ -2294,6 +2368,13 @@ sv_catsv(SV *dstr, register SV *sstr)
 	return;
     if (s = SvPV(sstr, len))
 	sv_catpvn(dstr,s,len);
+}
+
+void
+sv_catsv_mg(SV *dstr, register SV *sstr)
+{
+    sv_catsv(dstr,sstr);
+    SvSETMAGIC(dstr);
 }
 
 void
@@ -2316,14 +2397,19 @@ sv_catpv(register SV *sv, register char *ptr)
     SvTAINT(sv);
 }
 
+void
+sv_catpv_mg(register SV *sv, register char *ptr)
+{
+    sv_catpv_mg(sv,ptr);
+    SvSETMAGIC(sv);
+}
+
 SV *
 #ifdef LEAKTEST
-newSV(x,len)
-I32 x;
+newSV(I32 x, STRLEN len)
 #else
 newSV(STRLEN len)
 #endif
-           
 {
     register SV *sv;
     
@@ -2640,37 +2726,37 @@ sv_clear(register SV *sv)
 	if (defstash) {		/* Still have a symbol table? */
 	    djSP;
 	    GV* destructor;
+	    HV* stash;
+	    SV tmpref;
 
-	    ENTER;
-	    SAVEFREESV(SvSTASH(sv));
+	    Zero(&tmpref, 1, SV);
+	    sv_upgrade(&tmpref, SVt_RV);
+	    SvROK_on(&tmpref);
+	    SvREADONLY_on(&tmpref);	/* DESTROY() could be naughty */
+	    SvREFCNT(&tmpref) = 1;
 
-	    destructor = gv_fetchmethod(SvSTASH(sv), "DESTROY");
-	    if (destructor) {
-		SV tmpRef;
+	    do {
+		stash = SvSTASH(sv);
+		destructor = gv_fetchmethod(SvSTASH(sv), "DESTROY");
+		if (destructor) {
+		    ENTER;
+		    SvRV(&tmpref) = SvREFCNT_inc(sv);
+		    EXTEND(SP, 2);
+		    PUSHMARK(SP);
+		    PUSHs(&tmpref);
+		    PUTBACK;
+		    perl_call_sv((SV*)GvCV(destructor),
+				 G_DISCARD|G_EVAL|G_KEEPERR);
+		    SvREFCNT(sv)--;
+		    LEAVE;
+		}
+	    } while (SvOBJECT(sv) && SvSTASH(sv) != stash);
 
-		Zero(&tmpRef, 1, SV);
-		sv_upgrade(&tmpRef, SVt_RV);
-		SvRV(&tmpRef) = SvREFCNT_inc(sv);
-		SvROK_on(&tmpRef);
-		SvREFCNT(&tmpRef) = 1;	/* Fake, but otherwise
-					   creating+destructing a ref
-					   leads to disaster. */
-
-		EXTEND(SP, 2);
-		PUSHMARK(SP);
-		PUSHs(&tmpRef);
-		PUTBACK;
-		perl_call_sv((SV*)GvCV(destructor),
-			     G_DISCARD|G_EVAL|G_KEEPERR);
-		del_XRV(SvANY(&tmpRef));
-		SvREFCNT(sv)--;
-	    }
-
-	    LEAVE;
+	    del_XRV(SvANY(&tmpref));
 	}
-	else
-	    SvREFCNT_dec(SvSTASH(sv));
+
 	if (SvOBJECT(sv)) {
+	    SvREFCNT_dec(SvSTASH(sv));	/* possibly of changed persuasion */
 	    SvOBJECT_off(sv);	/* Curse the object. */
 	    if (SvTYPE(sv) != SVt_PVIO)
 		--sv_objcount;	/* XXX Might want something more general */
@@ -2709,6 +2795,7 @@ sv_clear(register SV *sv)
     case SVt_PVGV:
 	gp_free((GV*)sv);
 	Safefree(GvNAME(sv));
+	SvREFCNT_dec(GvSTASH(sv));
 	/* FALL THROUGH */
     case SVt_PVLV:
     case SVt_PVMG:
@@ -3440,6 +3527,21 @@ newSVpv(char *s, STRLEN len)
     return sv;
 }
 
+SV *
+newSVpvn(s,len)
+char *s;
+STRLEN len;
+{
+    register SV *sv;
+
+    new_SV(sv);
+    SvANY(sv) = 0;
+    SvREFCNT(sv) = 1;
+    SvFLAGS(sv) = 0;
+    sv_setpvn(sv,s,len);
+    return sv;
+}
+
 #ifdef I_STDARG
 SV *
 newSVpvf(const char* pat, ...)
@@ -3561,6 +3663,9 @@ sv_reset(register char *s, HV *stash)
     register PMOP *pm;
     register I32 max;
     char todo[256];
+
+    if (!stash)
+	return;
 
     if (!*s) {		/* reset ?? searches */
 	for (pm = HvPMROOT(stash); pm; pm = pm->op_pmnext) {
@@ -4064,6 +4169,14 @@ sv_setpviv(SV *sv, IV iv)
     SvCUR(sv) = p - SvPVX(sv);
 }
 
+
+void
+sv_setpviv_mg(SV *sv, IV iv)
+{
+    sv_setpviv(sv,iv);
+    SvSETMAGIC(sv);
+}
+
 #ifdef I_STDARG
 void
 sv_setpvf(SV *sv, const char* pat, ...)
@@ -4086,6 +4199,30 @@ sv_setpvf(sv, pat, va_alist)
     va_end(args);
 }
 
+
+#ifdef I_STDARG
+void
+sv_setpvf_mg(SV *sv, const char* pat, ...)
+#else
+/*VARARGS0*/
+void
+sv_setpvf_mg(sv, pat, va_alist)
+    SV *sv;
+    const char *pat;
+    va_dcl
+#endif
+{
+    va_list args;
+#ifdef I_STDARG
+    va_start(args, pat);
+#else
+    va_start(args);
+#endif
+    sv_vsetpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
+    va_end(args);
+    SvSETMAGIC(sv);
+}
+
 #ifdef I_STDARG
 void
 sv_catpvf(SV *sv, const char* pat, ...)
@@ -4106,6 +4243,29 @@ sv_catpvf(sv, pat, va_alist)
 #endif
     sv_vcatpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
     va_end(args);
+}
+
+#ifdef I_STDARG
+void
+sv_catpvf_mg(SV *sv, const char* pat, ...)
+#else
+/*VARARGS0*/
+void
+sv_catpvf_mg(sv, pat, va_alist)
+    SV *sv;
+    const char *pat;
+    va_dcl
+#endif
+{
+    va_list args;
+#ifdef I_STDARG
+    va_start(args, pat);
+#else
+    va_start(args);
+#endif
+    sv_vcatpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
+    va_end(args);
+    SvSETMAGIC(sv);
 }
 
 void

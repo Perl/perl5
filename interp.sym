@@ -134,6 +134,7 @@ sv_root
 sv_arenaroot
 tainted
 tainting
+threadnum
 thrsv
 tmps_floor
 tmps_ix
