@@ -617,7 +617,7 @@ EOP
 			    next CMD;
 			} 
 		    }
-		    $cmd =~ /^q$/ && ($exiting = 1) && exit 0;
+		    $cmd =~ /^q$/ && ($exiting = 1) && exit $?;
 		    $cmd =~ /^h$/ && do {
 			print_help($help);
 			next CMD; };
