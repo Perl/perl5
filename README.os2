@@ -733,7 +733,7 @@ Users of Emacs would appreciate it very much, especially with
 C<CPerl> mode loaded. You need to get latest C<pod2info> from C<CPAN>,
 or, alternately, prebuilt info pages.
 
-=head2 F<.PDF> files
+=head2 F<PDF> files
 
 for C<Acrobat> are available on CPAN (for slightly old version of
 perl).

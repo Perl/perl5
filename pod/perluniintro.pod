@@ -559,7 +559,9 @@ than ASCII 0 to 9 (and ASCII a to f for hexadecimal).
 
 =over 4
 
-=item Will My Old Scripts Break?
+=item 
+
+Will My Old Scripts Break?
 
 Very probably not.  Unless you are generating Unicode characters
 somehow, any old behaviour should be preserved.  About the only
@@ -568,13 +570,17 @@ is the old behaviour of C<chr()> where supplying an argument more
 than 255 produced a character modulo 255 (for example, C<chr(300)>
 was equal to C<chr(45)>).
 
-=item How Do I Make My Scripts Work With Unicode?
+=item 
+
+How Do I Make My Scripts Work With Unicode?
 
 Very little work should be needed since nothing changes until you
 somehow generate Unicode data.  The greatest trick will be getting
 input as Unicode, and for that see the earlier I/O discussion.
 
-=item How Do I Know Whether My String Is In Unicode?
+=item 
+
+How Do I Know Whether My String Is In Unicode?
 
 You shouldn't care.  No, you really shouldn't.  If you have
 to care (beyond the cases described above), it means that we
@@ -603,7 +609,9 @@ and its only defined function C<length()>:
     use bytes;
     print length($unicode), "\n"; # will print 2 (the 0xC4 0x80 of the UTF-8)
 
-=item How Do I Detect Data That's Not Valid In a Particular Encoding
+=item 
+
+How Do I Detect Data That's Not Valid In a Particular Encoding?
 
 Use the C<Encode> package to try converting it.
 For example,
@@ -626,7 +634,9 @@ encoded Unicode".  Without that the C<unpack("U*", ...)>
 would accept also data like C<chr(0xFF>), similarly to the
 C<pack> as we saw earlier.
 
-=item How Do I Convert Binary Data Into a Particular Encoding, Or Vice Versa?
+=item 
+
+How Do I Convert Binary Data Into a Particular Encoding, Or Vice Versa?
 
 This probably isn't as useful as you might think.
 Normally, you shouldn't need to.
@@ -679,12 +689,16 @@ Any random collection of bytes isn't well-formed UTF-8.  You can
 use C<unpack("C*", $string)> for the former, and you can create
 well-formed Unicode data by C<pack("U*", 0xff, ...)>.
 
-=item How Do I Display Unicode?  How Do I Input Unicode?
+=item 
+
+How Do I Display Unicode?  How Do I Input Unicode?
 
 See http://www.hclrss.demon.co.uk/unicode/ and
 http://www.cl.cam.ac.uk/~mgk25/unicode.html
 
-=item How Does Unicode Work With Traditional Locales?
+=item 
+
+How Does Unicode Work With Traditional Locales?
 
 In Perl, not very well.  Avoid using locales through the C<locale>
 pragma.  Use only one or the other.

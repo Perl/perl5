@@ -199,7 +199,8 @@ your Cygwin installation is up to date.
 
 I<gcc> supports long doubles (12 bytes).  However, several additional
 long double math functions are necessary to use them within Perl
-(I<{atan2,cos,exp,floor,fmod,frexp,isnan,log,modf,pow,sin,sqrt}l,strtold>).
+(I<{atan2, cos, exp, floor, fmod, frexp, isnan, log, modf, pow, sin, sqrt}l, 
+strtold>).
 These are B<not> yet available with Cygwin.
 
 =item * C<-Dusethreads>

@@ -692,7 +692,9 @@ numbers.  To use these numbers various encodings are needed.
 
 =over 4
 
-=item UTF-8
+=item
+
+UTF-8
 
 UTF-8 is a variable-length (1 to 6 bytes, current character allocations
 require 4 bytes), byteorder independent encoding. For ASCII, UTF-8 is
@@ -723,11 +725,15 @@ As you can see, the continuation bytes all begin with C<10>, and the
 leading bits of the start byte tells how many bytes the are in the
 encoded character.
 
-=item UTF-EBCDIC
+=item
+
+UTF-EBCDIC
 
 Like UTF-8, but EBCDIC-safe, as UTF-8 is ASCII-safe.
 
-=item UTF-16, UTF-16BE, UTF16-LE, Surrogates, and BOMs (Byte Order Marks)
+=item
+
+UTF-16, UTF-16BE, UTF16-LE, Surrogates, and BOMs (Byte Order Marks)
 
 (The followings items are mostly for reference, Perl doesn't
 use them internally.)
@@ -778,20 +784,26 @@ sequence of bytes 0xFF 0xFE is unambiguously "BOM, represented in
 little-endian format" and cannot be "0xFFFE, represented in big-endian
 format".
 
-=item UTF-32, UTF-32BE, UTF32-LE
+=item
+
+UTF-32, UTF-32BE, UTF32-LE
 
 The UTF-32 family is pretty much like the UTF-16 family, expect that
 the units are 32-bit, and therefore the surrogate scheme is not
 needed.  The BOM signatures will be 0x00 0x00 0xFE 0xFF for BE and
 0xFF 0xFE 0x00 0x00 for LE.
 
-=item UCS-2, UCS-4
+=item
+
+UCS-2, UCS-4
 
 Encodings defined by the ISO 10646 standard.  UCS-2 is a 16-bit
 encoding, UCS-4 is a 32-bit encoding.  Unlike UTF-16, UCS-2
 is not extensible beyond 0xFFFF, because it does not use surrogates.
 
-=item UTF-7
+=item
+
+UTF-7
 
 A seven-bit safe (non-eight-bit) encoding, useful if the
 transport/storage is not eight-bit safe.  Defined by RFC 2152.

@@ -2655,7 +2655,8 @@ If used on an object, it will set it to one:
 	$x->bone();		# +1
 	$x->bone('-');		# -1
 
-=head2 is_one()/is_zero()/is_nan()/is_positive()/is_negative()/is_inf()/is_odd()/is_even()/is_int()
+=head2 is_one() / is_zero() / is_nan() / is_positive() / is_negative() /
+is_inf() / is_odd() / is_even() / is_int()
   
 	$x->is_zero();			# true if arg is +0
 	$x->is_nan();			# true if arg is NaN
