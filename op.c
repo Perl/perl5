@@ -5929,8 +5929,6 @@ Perl_ck_fun(pTHX_ OP *o)
 		}
 		break;
 	    case OA_FILEREF:
-                       if(kid==cLISTOPo->op_last)
-                           cLISTOPo->op_last = newop;
 		if (kid->op_type != OP_GV && kid->op_type != OP_RV2GV) {
 		    if (kid->op_type == OP_CONST &&
 			(kid->op_private & OPpCONST_BARE))
@@ -5938,6 +5936,8 @@ Perl_ck_fun(pTHX_ OP *o)
 			OP *newop = newGVOP(OP_GV, 0,
 			    gv_fetchpv(SvPVx(((SVOP*)kid)->op_sv, n_a), TRUE,
 					SVt_PVIO) );
+			if (kid == cLISTOPo->op_last)
+			    cLISTOPo->op_last = newop;
 			op_free(kid);
 			kid = newop;
 		    }
