@@ -247,7 +247,7 @@ sub readvar
   {
    # All symbols have a Perl_ prefix because that's what embed.h
    # sticks in front of them.
-   push(@syms,"Perl_".$1) if (/\bPERLVARI?\([IGT](\w+)/);
+   push(@syms,"Perl_".$1) if (/\bPERLVARI?C?\([IGT](\w+)/);
   } 
  close(VARS); 
  return \@syms;
