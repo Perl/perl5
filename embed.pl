@@ -2031,7 +2031,7 @@ Apd	|I32	|sv_cmp_locale	|SV* sv1|SV* sv2
 Apd	|char*	|sv_collxfrm	|SV* sv|STRLEN* nxp
 #endif
 Ap	|OP*	|sv_compile_2op	|SV* sv|OP** startp|char* code|AV** avp
-Apd	|int	|sv_getcwd	|SV* sv
+Apd	|int	|getcwd_sv	|SV* sv
 Apd	|void	|sv_dec		|SV* sv
 Ap	|void	|sv_dump	|SV* sv
 Apd	|bool	|sv_derived_from|SV* sv|const char* name

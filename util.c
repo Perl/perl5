@@ -3614,7 +3614,7 @@ return FALSE
         (dp->d_name[1] == '.' && dp->d_name[2] == '\0')))
 
 /*
-=for apidoc sv_getcwd
+=for apidoc getcwd_sv
 
 Fill the sv with current working directory
 
@@ -3630,7 +3630,7 @@ Fill the sv with current working directory
  *     back into. */
 
 int
-Perl_sv_getcwd(pTHX_ register SV *sv)
+Perl_getcwd_sv(pTHX_ register SV *sv)
 {
 #ifndef PERL_MICRO
 

@@ -79,7 +79,7 @@ if ($Is_MPE) {
     print &_POSIX_OPEN_MAX > $fds[1] ? "ok 12\n" : "not ok 12\n"
 }
 
-print getcwd() =~ m#/t$# ? "ok 13\n" : "not ok 13\n";
+print getcwd() =~ m#[/\\]t$# ? "ok 13\n" : "not ok 13\n";
 
 # Check string conversion functions.
 

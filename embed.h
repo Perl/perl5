@@ -671,7 +671,7 @@
 #define sv_collxfrm		Perl_sv_collxfrm
 #endif
 #define sv_compile_2op		Perl_sv_compile_2op
-#define sv_getcwd		Perl_sv_getcwd
+#define getcwd_sv		Perl_getcwd_sv
 #define sv_dec			Perl_sv_dec
 #define sv_dump			Perl_sv_dump
 #define sv_derived_from		Perl_sv_derived_from
@@ -2178,7 +2178,7 @@
 #define sv_collxfrm(a,b)	Perl_sv_collxfrm(aTHX_ a,b)
 #endif
 #define sv_compile_2op(a,b,c,d)	Perl_sv_compile_2op(aTHX_ a,b,c,d)
-#define sv_getcwd(a)		Perl_sv_getcwd(aTHX_ a)
+#define getcwd_sv(a)		Perl_getcwd_sv(aTHX_ a)
 #define sv_dec(a)		Perl_sv_dec(aTHX_ a)
 #define sv_dump(a)		Perl_sv_dump(aTHX_ a)
 #define sv_derived_from(a,b)	Perl_sv_derived_from(aTHX_ a,b)
@@ -4279,8 +4279,8 @@
 #endif
 #define Perl_sv_compile_2op	CPerlObj::Perl_sv_compile_2op
 #define sv_compile_2op		Perl_sv_compile_2op
-#define Perl_sv_getcwd		CPerlObj::Perl_sv_getcwd
-#define sv_getcwd		Perl_sv_getcwd
+#define Perl_getcwd_sv		CPerlObj::Perl_getcwd_sv
+#define getcwd_sv		Perl_getcwd_sv
 #define Perl_sv_dec		CPerlObj::Perl_sv_dec
 #define sv_dec			Perl_sv_dec
 #define Perl_sv_dump		CPerlObj::Perl_sv_dump

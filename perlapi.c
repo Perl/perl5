@@ -3002,11 +3002,11 @@ Perl_sv_compile_2op(pTHXo_ SV* sv, OP** startp, char* code, AV** avp)
     return ((CPerlObj*)pPerl)->Perl_sv_compile_2op(sv, startp, code, avp);
 }
 
-#undef  Perl_sv_getcwd
+#undef  Perl_getcwd_sv
 int
-Perl_sv_getcwd(pTHXo_ SV* sv)
+Perl_getcwd_sv(pTHXo_ SV* sv)
 {
-    return ((CPerlObj*)pPerl)->Perl_sv_getcwd(sv);
+    return ((CPerlObj*)pPerl)->Perl_getcwd_sv(sv);
 }
 
 #undef  Perl_sv_dec

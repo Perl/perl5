@@ -413,7 +413,7 @@ Perl_sv_cmp
 Perl_sv_cmp_locale
 Perl_sv_collxfrm
 Perl_sv_compile_2op
-Perl_sv_getcwd
+Perl_getcwd_sv
 Perl_sv_dec
 Perl_sv_dump
 Perl_sv_derived_from
