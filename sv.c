@@ -5309,7 +5309,7 @@ Perl_sv_len_utf8(pTHX_ register SV *sv)
  *
  */
 STATIC bool
-S_utf8_mg_pos_init(SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 *offsetp, U8 *s, U8 *start)
+S_utf8_mg_pos_init(pTHX_ SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 *offsetp, U8 *s, U8 *start)
 {
     bool found = FALSE; 
 
@@ -5344,7 +5344,7 @@ S_utf8_mg_pos_init(SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 *offsetp, U8
  *
  */
 STATIC bool
-S_utf8_mg_pos(SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 *offsetp, I32 uoff, U8 **sp, U8 *start, U8 *send)
+S_utf8_mg_pos(pTHX_ SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 *offsetp, I32 uoff, U8 **sp, U8 *start, U8 *send)
 {
     bool found = FALSE;
 
@@ -5353,7 +5353,7 @@ S_utf8_mg_pos(SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 *offsetp, I32 uof
             *mgp = mg_find(sv, PERL_MAGIC_utf8);
         if (*mgp && (*mgp)->mg_ptr) {
             *cachep = (STRLEN *) (*mgp)->mg_ptr;
-            if ((*cachep)[i] == uoff)	/* An exact match. */
+            if ((*cachep)[i] == (STRLEN)uoff)	/* An exact match. */
 		 found = TRUE;
 	    else {			/* We will skip to the right spot. */
 		 STRLEN forw  = 0;
@@ -5365,9 +5365,9 @@ S_utf8_mg_pos(SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 *offsetp, I32 uof
 		  * 2 * backw in the below comes from).  (The real
 		  * figure of course depends on the UTF-8 data.) */
 
-		 if ((*cachep)[i] > uoff) {
+		 if ((*cachep)[i] > (STRLEN)uoff) {
 		      forw  = uoff;
-		      backw = (*cachep)[i] - uoff;
+		      backw = (*cachep)[i] - (STRLEN)uoff;
 
 		      if (forw < 2 * backw)
 			   p = start;
@@ -5379,9 +5379,9 @@ S_utf8_mg_pos(SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 *offsetp, I32 uof
 		 else if (i == 0) { /* (*cachep)[i] < uoff */
 		      STRLEN ulen = sv_len_utf8(sv);
 
-		      if (uoff < ulen) {
-			   forw  = uoff - (*cachep)[i];
-			   backw = ulen - uoff;
+		      if ((STRLEN)uoff < ulen) {
+			   forw  = (STRLEN)uoff - (*cachep)[i];
+			   backw = ulen - (STRLEN)uoff;
 
 			   if (forw < 2 * backw)
 				p = start + (*cachep)[i+1];
@@ -5407,7 +5407,7 @@ S_utf8_mg_pos(SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 *offsetp, I32 uof
 		      }
 
 		      /* Update the cache. */
-		      (*cachep)[i]   = uoff;
+		      (*cachep)[i]   = (STRLEN)uoff;
 		      (*cachep)[i+1] = p - start;
 
 		      found = TRUE;
@@ -5469,21 +5469,21 @@ Perl_sv_pos_u2b(pTHX_ register SV *sv, I32* offsetp, I32* lenp)
 	 MAGIC *mg = 0;
 	 bool found = FALSE;
 
-         if (S_utf8_mg_pos(sv, &mg, &cache, 0, offsetp, *offsetp, &s, start, send))
+         if (S_utf8_mg_pos(aTHX_ sv, &mg, &cache, 0, offsetp, *offsetp, &s, start, send))
              found = TRUE;
 	 if (!found && uoffset > 0) {
 	      while (s < send && uoffset--)
 		   s += UTF8SKIP(s);
 	      if (s >= send)
 		   s = send;
-              if (S_utf8_mg_pos_init(sv, &mg, &cache, 0, offsetp, s, start))
+              if (S_utf8_mg_pos_init(aTHX_ sv, &mg, &cache, 0, offsetp, s, start))
                   boffset = cache[1];
 	      *offsetp = s - start;
 	 }
 	 if (lenp) {
 	      found = FALSE;
 	      start = s;
-              if (S_utf8_mg_pos(sv, &mg, &cache, 2, lenp, *lenp + *offsetp, &s, start, send)) {
+              if (S_utf8_mg_pos(aTHX_ sv, &mg, &cache, 2, lenp, *lenp + *offsetp, &s, start, send)) {
                   *lenp -= boffset;
                   found = TRUE;
               }
@@ -5494,7 +5494,7 @@ Perl_sv_pos_u2b(pTHX_ register SV *sv, I32* offsetp, I32* lenp)
 			     s += UTF8SKIP(s);
 		   if (s >= send)
 			s = send;
-                   if (S_utf8_mg_pos_init(sv, &mg, &cache, 2, lenp, s, start))
+                   if (S_utf8_mg_pos_init(aTHX_ sv, &mg, &cache, 2, lenp, s, start))
 			cache[2] += *offsetp;
 	      }
 	      *lenp = s - start;
