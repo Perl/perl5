@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq4 - Data Manipulation ($Revision: 1.5 $, $Date: 2001/10/12 15:20:13 $)
+perlfaq4 - Data Manipulation ($Revision: 1.6 $, $Date: 2001/10/23 04:39:28 $)
 
 =head1 DESCRIPTION
 
@@ -123,24 +123,130 @@ Perl numbers whose absolute values are integers under 2**31 (on 32 bit
 machines) will work pretty much like mathematical integers.  Other numbers
 are not guaranteed.
 
-=head2 How do I convert bits into ints?
+=head2 How do I convert between numeric representations:
 
-To turn a string of 1s and 0s like C<10110110> into a scalar containing
-its binary value, use the pack() and unpack() functions (documented in
-L<perlfunc/"pack"> and L<perlfunc/"unpack">):
+As always with Perl there is more than one way to do it.  Below
+are a few examples of approaches to making common conversions
+between number representations.  This is intended to be representational
+rather than exhaustive.
 
-    $decimal = unpack('c', pack('B8', '10110110'));
+Some of the examples below use the Bit::Vector module from CPAN.
+The reason you might choose Bit::Vector over the perl built in
+functions is that it works with numbers of ANY size, that it is
+optimized for speed on some operations, and for at least some
+programmers the notation might be familiar.
 
-This packs the string C<10110110> into an eight bit binary structure.
-This is then unpacked as a character, which returns its ordinal value.
+=item B<How do I convert Hexadecimal into decimal:>
 
-This does the same thing:
+Using perl's built in conversion of 0x notation:
+
+    $int = 0xDEADBEEF;
+    $dec = sprintf("%d", $int);
+ 
+Using the hex function:
+
+    $int = hex("DEADBEEF");
+    $dec = sprintf("%d", $int);
+
+Using pack:
+
+    $int = unpack("N", pack("H8", substr("0" x 8 . "DEADBEEF", -8)));
+    $dec = sprintf("%d", $int);
+
+Using the CPAN module Bit::Vector:
+
+    use Bit::Vector;
+    $vec = Bit::Vector->new_Hex(32, "DEADBEEF");
+    $dec = $vec->to_Dec();
+
+=item B<How do I convert from decimal to hexadecimal:>
+
+Using sprint:
+
+    $hex = sprintf("%X", 3735928559);
+
+Using unpack
+
+    $hex = unpack("H*", pack("N", 3735928559));
+
+Using Bit::Vector
+
+    use Bit::Vector;
+    $vec = Bit::Vector->new_Dec(32, -559038737);
+    $hex = $vec->to_Hex();
+
+And Bit::Vector supports odd bit counts:
+
+    use Bit::Vector;
+    $vec = Bit::Vector->new_Dec(33, 3735928559);
+    $vec->Resize(32); # suppress leading 0 if unwanted
+    $hex = $vec->to_Hex();
+
+=item B<How do I convert from octal to decimal:>
+
+Using Perl's built in conversion of numbers with leading zeros:
+
+    $int = 033653337357; # note the leading 0!
+    $dec = sprintf("%d", $int);
+
+Using the oct function:
+
+    $int = oct("33653337357");
+    $dec = sprintf("%d", $int);
+
+Using Bit::Vector:
+
+    use Bit::Vector;
+    $vec = Bit::Vector->new(32);
+    $vec->Chunk_List_Store(3, split(//, reverse "33653337357"));
+    $dec = $vec->to_Dec();
+
+=item B<How do I convert from decimal to octal:>
+
+Using sprintf:
+
+    $oct = sprintf("%o", 3735928559);
+
+Using Bit::Vector
+
+    use Bit::Vector;
+    $vec = Bit::Vector->new_Dec(32, -559038737);
+    $oct = reverse join('', $vec->Chunk_List_Read(3));
+
+=item B<How do I convert from binary to decimal:>
+
+Using pack and ord
 
     $decimal = ord(pack('B8', '10110110'));
 
-Here's an example of going the other way:
+Using pack and unpack for larger strings
 
-    $binary_string = unpack('B*', "\x29");
+    $int = unpack("N", pack("B32",
+	substr("0" x 32 . "11110101011011011111011101111", -32)));
+    $dec = sprintf("%d", $int);
+
+    Substr() is used to left pad a 32 character string with zeros.
+
+Using Bit::Vector:
+
+    $vec = Bit::Vector->new_Bin(32, "11011110101011011011111011101111");
+    $dec = $vec->to_Dec();
+
+=item B<How do I convert from decimal to binary:>
+
+Using unpack;
+
+    $bin = unpack("B*", pack("N", 3735928559));
+
+Using Bit::Vector:
+
+    use Bit::Vector;
+    $vec = Bit::Vector->new_Dec(32, -559038737);
+    $bin = $vec->to_Bin();
+
+The remaining transformations (e.g. hex -> oct, bin -> hex, etc.)
+are left as an exercise to the inclined reader.
+
 
 =head2 Why doesn't & work the way I want it to?
 

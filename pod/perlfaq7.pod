@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq7 - Perl Language Issues ($Revision: 1.2 $, $Date: 2001/10/16 13:27:22 $)
+perlfaq7 - Perl Language Issues ($Revision: 1.3 $, $Date: 2001/10/19 14:39:24 $)
 
 =head1 DESCRIPTION
 
@@ -167,80 +167,14 @@ details, read L<perlmod>.  You'll also find L<Exporter> helpful.  If
 you're writing a C or mixed-language module with both C and Perl, then
 you should study L<perlxstut>.
 
-Here's a convenient template you might wish you use when starting your
-own module.  Make sure to change the names appropriately.
-
-    package Some::Module;  # assumes Some/Module.pm
-
-    use strict;
-    use warnings;
-
-    BEGIN {
-	use Exporter   ();
-	our ($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
-
-	## set the version for version checking; uncomment to use
-	## $VERSION     = 1.00;
-
-	# if using RCS/CVS, this next line may be preferred,
-	# but beware two-digit versions.
-	$VERSION = do{my@r=q$Revision: 1.2 $=~/\d+/g;sprintf '%d.'.'%02d'x$#r,@r};
-
-	@ISA         = qw(Exporter);
-	@EXPORT      = qw(&func1 &func2 &func3);
-	%EXPORT_TAGS = ( );  	# eg: TAG => [ qw!name1 name2! ],
-
-	# your exported package globals go here,
-	# as well as any optionally exported functions
-	@EXPORT_OK   = qw($Var1 %Hashit);
-    }
-    our @EXPORT_OK;
-
-    # exported package globals go here
-    our $Var1;
-    our %Hashit;
-
-    # non-exported package globals go here
-    our @more;
-    our $stuff;
-
-    # initialize package globals, first exported ones
-    $Var1   = '';
-    %Hashit = ();
-
-    # then the others (which are still accessible as $Some::Module::stuff)
-    $stuff  = '';
-    @more   = ();
-
-    # all file-scoped lexicals must be created before
-    # the functions below that use them.
-
-    # file-private lexicals go here
-    my $priv_var    = '';
-    my %secret_hash = ();
-
-    # here's a file-private function as a closure,
-    # callable as &$priv_func;  it cannot be prototyped.
-    my $priv_func = sub {
-        # stuff goes here.
-    };
-
-    # make all your functions, whether exported or not;
-    # remember to put something interesting in the {} stubs
-    sub func1      {}	 # no prototype
-    sub func2()    {}	 # proto'd void
-    sub func3($$)  {}	 # proto'd to 2 scalars
-
-    # this one isn't exported, but could be called!
-    sub func4(\%)  {}    # proto'd to 1 hash ref
-
-    END { }       # module clean-up code here (global destructor)
-
-    1;            # modules must return true
-
-The h2xs program will create stubs for all the important stuff for you:
+The C<h2xs> program will create stubs for all the important stuff for you:
 
   % h2xs -XA -n My::Module
+  
+The C<-X> switch tells C<h2xs> that you are not using C<XS> extension
+code.  The C<-A> switch tells C<h2xs> that you are not using the
+AutoLoader, and the C<-n> switch specifies the name of the module.
+See L<h2xs> for more details.
 
 =head2 How do I create a class?
 
