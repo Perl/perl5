@@ -77,6 +77,7 @@ know_next
 last_lop
 last_lop_op
 last_uni
+lc_collate_active
 le_amg
 lex_state
 lex_defer
@@ -245,6 +246,7 @@ vtbl_glob
 vtbl_isa
 vtbl_isaelem
 vtbl_mglob
+vtbl_nkeys
 vtbl_pack
 vtbl_packelem
 vtbl_pos
@@ -415,11 +417,13 @@ gv_HVadd
 gv_IOadd
 gv_check
 gv_efullname
+gv_efullname3
 gv_fetchfile
 gv_fetchmeth
 gv_fetchmethod
 gv_fetchpv
 gv_fullname
+gv_fullname3
 gv_init
 gv_stashpv
 gv_stashpvn
@@ -441,6 +445,7 @@ hv_iterkeysv
 hv_iternext
 hv_iternextsv
 hv_iterval
+hv_ksplit
 hv_magic
 hv_stashpv
 hv_store
@@ -484,6 +489,7 @@ magic_setenv
 magic_setglob
 magic_setisa
 magic_setmglob
+magic_setnkeys
 magic_setpack
 magic_setpos
 magic_setsig
@@ -494,6 +500,7 @@ magic_setvec
 magic_wipepack
 magicname
 markstack_grow
+mem_collxfrm
 mess
 mg_clear
 mg_copy
