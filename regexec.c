@@ -966,7 +966,11 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 		e = s;			/* Due to minlen logic of intuit() */
 
 	    if (do_utf8) {
-		STRLEN len;
+	        UV c, f;
+	        U8 tmpbuf [UTF8_MAXLEN+1];
+		U8 foldbuf[UTF8_MAXLEN_FOLD+1];
+		STRLEN len, foldlen;
+
 		/* The ibcmp_utf8() uses to_uni_fold() which is more
 		 * correct folding for Unicode than using lowercase.
 		 * However, it doesn't work quite fully since the folding
@@ -977,10 +981,15 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 		 * only one-to-one matching is required. --jhi */
 		if (c1 == c2) {
 		    while (s <= e) {
-			if ( utf8_to_uvchr((U8*)s, &len) == c1
-			     && (ln == len ||
-				 !ibcmp_utf8(s, do_utf8, (I32)(strend - s),
-					     m, UTF, (I32)ln))
+		        c = utf8_to_uvchr((U8*)s, &len);
+			uvchr_to_utf8(tmpbuf, c);
+			to_utf8_fold(tmpbuf, foldbuf, &foldlen);
+			f = utf8_to_uvchr(foldbuf, 0);
+			
+			if ( (c == c1 && ln == len) ||
+			     (f == c1 && ln == foldlen)
+			     || !ibcmp_utf8(s, do_utf8, (I32)(strend - s),
+					    m, UTF, (I32)ln)
 			     && (norun || regtry(prog, s)) )
 			    goto got_it;
 			s += len;
@@ -988,12 +997,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 		}
 		else {
 		    while (s <= e) {
-			U8 tmpbuf [UTF8_MAXLEN+1];
-			U8 foldbuf[UTF8_MAXLEN_FOLD+1];
-			STRLEN foldlen;
-			UV c = utf8_to_uvchr((U8*)s, &len);
-			UV f;
-
+		        c = utf8_to_uvchr((U8*)s, &len);
 			uvchr_to_utf8(tmpbuf, c);
 			to_utf8_fold(tmpbuf, foldbuf, &foldlen);
 			f = utf8_to_uvchr(foldbuf, 0);
@@ -1001,10 +1005,10 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 			if (c == (UV)UNICODE_GREEK_CAPITAL_LETTER_SIGMA ||
 			    c == (UV)UNICODE_GREEK_SMALL_LETTER_FINAL_SIGMA)
 			    c = (UV)UNICODE_GREEK_SMALL_LETTER_SIGMA;
-			if ( (c == c1 || c == c2 || f == c1 || f == c2)
-			     && (ln == len || ln == foldlen ||
-				 !ibcmp_utf8(s, do_utf8, (I32)(strend - s),
-					     m, UTF, (I32)ln))
+			if ( ((c == c1 || c == c2) && ln == len) ||
+			     ((f == c1 || f == c2) && ln == foldlen)
+			     || !ibcmp_utf8(s, do_utf8, (I32)(strend - s),
+					    m, UTF, (I32)ln)
 			     && (norun || regtry(prog, s)) )
 			    goto got_it;
 			s += len;
