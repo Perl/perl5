@@ -9,15 +9,11 @@ sub PRINT {
 	$$self .= join('', @_);
 }
 
-sub PRINTF {
-	my $self = shift;
-    my $fmt  = shift;
-	$$self .= sprintf $fmt, @_;
-}
-
 sub read {
 	my $self = shift;
-	return substr($$self, 0, length($$self), '');
+    my $out = $$self;
+    $$self = '';
+	return $out;
 }
 
 1;
