@@ -257,7 +257,8 @@ This also has implications for the use of the SUPER:: qualifier
 
 Four special subroutines act as package constructors and destructors.
 These are the C<BEGIN>, C<CHECK>, C<INIT>, and C<END> routines.  The
-C<sub> is optional for these routines.
+C<sub> is optional for these routines. See the B<begincheck> program, at
+the end of this section, to see them in action.
 
 A C<BEGIN> subroutine is executed as soon as possible, that is, the moment
 it is completely defined, even before the rest of the containing file
@@ -300,6 +301,35 @@ C<END> work just as they do in B<awk>, as a degenerate case.
 Both C<BEGIN> and C<CHECK> blocks are run when you use the B<-c>
 switch for a compile-only syntax check, although your main code
 is not.
+
+The B<begincheck> program makes it all clear, eventually:
+
+  #!/usr/bin/perl
+
+  # begincheck
+
+  print         " 8. Ordinary code runs at runtime.\n";
+
+  END { print   "14.   So this is the end of the tale.\n" }
+  INIT { print  " 5. INIT blocks run FIFO just before runtime.\n" }
+  CHECK { print " 4.   So this is the fourth line.\n" }
+
+  print         " 9.   It runs in order, of course.\n";
+
+  BEGIN { print " 1. BEGIN blocks run FIFO during compilation.\n" }
+  END { print   "13.   Read perlmod for the rest of the story.\n" }
+  CHECK { print " 3. CHECK blocks run LIFO at compilation's end.\n" }
+  INIT { print  " 6.   Run this again, using Perl's -c switch.\n" }
+
+  print         "10.   This is anti-obfuscated code.\n";
+
+  END { print   "12. END blocks run LIFO at quitting time.\n" }
+  BEGIN { print " 2.   So this line comes out second.\n" }
+  INIT { print  " 7.   You'll see the difference right away.\n" }
+
+  print         "11.   It merely _looks_ like it should be confusing.\n";
+
+  __END__
 
 =head2 Perl Classes
 
