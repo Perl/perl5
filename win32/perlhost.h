@@ -1436,9 +1436,7 @@ PerlSockSocket(struct IPerlSock* piPerl, int af, int type, int protocol)
 int
 PerlSockSocketpair(struct IPerlSock* piPerl, int domain, int type, int protocol, int* fds)
 {
-    dTHX;
-    Perl_croak(aTHX_ "socketpair not implemented!\n");
-    return 0;
+    return Perl_my_socketpair(domain, type, protocol, fds);
 }
 
 int
@@ -1695,8 +1693,12 @@ win32_start_child(LPVOID arg)
 	    w32_pseudo_id = -pid;
     }
 #endif
-    if (tmpgv = gv_fetchpv("$", TRUE, SVt_PV))
-	sv_setiv(GvSV(tmpgv), -(IV)w32_pseudo_id);
+    if (tmpgv = gv_fetchpv("$", TRUE, SVt_PV)) {
+	SV *sv = GvSV(tmpgv);
+	SvREADONLY_off(sv);
+	sv_setiv(sv, -(IV)w32_pseudo_id);
+	SvREADONLY_on(sv);
+    }
     hv_clear(PL_pidstatus);
 
     /* push a zero on the stack (we are the child) */

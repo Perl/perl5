@@ -3995,6 +3995,7 @@ Perl_new_vstring(pTHX_ char *s, SV *sv)
 #if !defined(HAS_SOCKETPAIR) && defined(HAS_SOCKET)
 static int
 S_socketpair_udp (int fd[2]) {
+    dTHX;
     /* Fake a datagram socketpair using UDP to localhost.  */
     int sockets[2] = {-1, -1};
     struct sockaddr_in addresses[2];
@@ -4006,14 +4007,14 @@ S_socketpair_udp (int fd[2]) {
     memset (&addresses, 0, sizeof (addresses));
     i = 1;
     do {
-        sockets[i] = socket (AF_INET, SOCK_DGRAM, 0);
+        sockets[i] = PerlSock_socket (AF_INET, SOCK_DGRAM, PF_INET);
         if (sockets[i] == -1)
             goto tidy_up_and_fail;
 
         addresses[i].sin_family = AF_INET;
         addresses[i].sin_addr.s_addr = htonl (INADDR_LOOPBACK);
         addresses[i].sin_port = 0;	/* kernel choses port.  */
-        if (bind (sockets[i], (struct sockaddr *) &addresses[i],
+        if (PerlSock_bind (sockets[i], (struct sockaddr *) &addresses[i],
                   sizeof (struct sockaddr_in))
             == -1)
             goto tidy_up_and_fail;
@@ -4023,13 +4024,13 @@ S_socketpair_udp (int fd[2]) {
        for each connect the other socket to it.  */
     i = 1;
     do {
-        if (getsockname (sockets[i], (struct sockaddr *) &addresses[i], &size)
+        if (PerlSock_getsockname (sockets[i], (struct sockaddr *) &addresses[i], &size)
             == -1)
             goto tidy_up_and_fail;
         if (size != sizeof (struct sockaddr_in))
             goto abort_tidy_up_and_fail;
         /* !1 is 0, !0 is 1 */
-        if (connect(sockets[!i], (struct sockaddr *) &addresses[i],
+        if (PerlSock_connect(sockets[!i], (struct sockaddr *) &addresses[i],
                     sizeof (struct sockaddr_in)) == -1)
             goto tidy_up_and_fail;
     } while (i--);
@@ -4043,7 +4044,7 @@ S_socketpair_udp (int fd[2]) {
            (Who knows if someone somewhere has sin_port as a bitfield and needs
            this routine. (I'm assuming crays have socketpair)) */
         port = addresses[i].sin_port;
-        got = write (sockets[i], &port, sizeof(port));
+        got = PerlLIO_write (sockets[i], &port, sizeof(port));
         if (got != sizeof(port)) {
             if (got == -1)
                 goto tidy_up_and_fail;
@@ -4070,7 +4071,7 @@ S_socketpair_udp (int fd[2]) {
         FD_SET (sockets[0], &rset);
         FD_SET (sockets[1], &rset);
 
-        got = select (max + 1, &rset, NULL, NULL, &waitfor);
+        got = PerlSock_select (max + 1, &rset, NULL, NULL, &waitfor);
         if (got != 2 || !FD_ISSET (sockets[0], &rset)
             || !FD_ISSET (sockets[1], &rset)) {
              /* I hope this is portable and appropriate.  */
@@ -4088,13 +4089,15 @@ S_socketpair_udp (int fd[2]) {
 
         i = 1;
         do {
-            got = recvfrom (sockets[i], (char *) &buffer, sizeof(buffer),
 #ifdef MSG_DONTWAIT
+            got = PerlSock_recvfrom (sockets[i], (char *) &buffer, sizeof(buffer),
                             MSG_DONTWAIT,
-#else
-                            0,
-#endif
                             (struct sockaddr *) &readfrom, &size);
+#else
+            got = PerlSock_recvfrom (sockets[i], (char *) &buffer, sizeof(buffer),
+                            0,
+                            (struct sockaddr *) &readfrom, &size);
+#endif
 
             if (got == -1)
                     goto tidy_up_and_fail;
@@ -4122,9 +4125,9 @@ S_socketpair_udp (int fd[2]) {
     {
         int save_errno = errno;
         if (sockets[0] != -1)
-            close (sockets[0]);
+            PerlLIO_close (sockets[0]);
         if (sockets[1] != -1)
-            close (sockets[1]);
+            PerlLIO_close (sockets[1]);
         errno = save_errno;
         return -1;
     }
@@ -4134,6 +4137,7 @@ int
 Perl_my_socketpair (int family, int type, int protocol, int fd[2]) {
     /* Stevens says that family must be AF_LOCAL, protocol 0.
        I'm going to enforce that, then ignore it, and use TCP (or UDP).  */
+    dTHX;
     int listener = -1;
     int connector = -1;
     int acceptor = -1;
@@ -4157,42 +4161,42 @@ Perl_my_socketpair (int family, int type, int protocol, int fd[2]) {
     if (type == SOCK_DGRAM)
         return S_socketpair_udp (fd);
 
-    listener = socket (AF_INET, type, 0);
+    listener = PerlSock_socket (AF_INET, type, 0);
     if (listener == -1)
         return -1;
     memset (&listen_addr, 0, sizeof (listen_addr));
     listen_addr.sin_family = AF_INET;
     listen_addr.sin_addr.s_addr = htonl (INADDR_LOOPBACK);
     listen_addr.sin_port = 0;	/* kernel choses port.  */
-    if (bind (listener, (struct sockaddr *) &listen_addr, sizeof (listen_addr))
+    if (PerlSock_bind (listener, (struct sockaddr *) &listen_addr, sizeof (listen_addr))
         == -1)
         goto tidy_up_and_fail;
-    if (listen(listener, 1) == -1)
+    if (PerlSock_listen(listener, 1) == -1)
         goto tidy_up_and_fail;
 
-    connector = socket (AF_INET, type, 0);
+    connector = PerlSock_socket (AF_INET, type, 0);
     if (connector == -1)
         goto tidy_up_and_fail;
     /* We want to find out the port number to connect to.  */
     size = sizeof (connect_addr);
-    if (getsockname (listener, (struct sockaddr *) &connect_addr, &size) == -1)
+    if (PerlSock_getsockname (listener, (struct sockaddr *) &connect_addr, &size) == -1)
         goto tidy_up_and_fail;
     if (size != sizeof (connect_addr))
         goto abort_tidy_up_and_fail;
-    if (connect(connector, (struct sockaddr *) &connect_addr,
+    if (PerlSock_connect(connector, (struct sockaddr *) &connect_addr,
                 sizeof (connect_addr)) == -1)
         goto tidy_up_and_fail;
 
     size = sizeof (listen_addr);
-    acceptor = accept (listener, (struct sockaddr *) &listen_addr, &size);
+    acceptor = PerlSock_accept (listener, (struct sockaddr *) &listen_addr, &size);
     if (acceptor == -1)
         goto tidy_up_and_fail;
     if (size != sizeof (listen_addr))
         goto abort_tidy_up_and_fail;
-    close (listener);
+    PerlLIO_close (listener);
     /* Now check we are talking to ourself by matching port and host on the
        two sockets.  */
-    if (getsockname (connector, (struct sockaddr *) &connect_addr, &size) == -1)
+    if (PerlSock_getsockname (connector, (struct sockaddr *) &connect_addr, &size) == -1)
         goto tidy_up_and_fail;
     if (size != sizeof (connect_addr)
         || listen_addr.sin_family != connect_addr.sin_family
@@ -4210,11 +4214,11 @@ Perl_my_socketpair (int family, int type, int protocol, int fd[2]) {
     {
         int save_errno = errno;
         if (listener != -1)
-            close (listener);
+            PerlLIO_close (listener);
         if (connector != -1)
-            close (connector);
+            PerlLIO_close (connector);
         if (acceptor != -1)
-            close (acceptor);
+            PerlLIO_close (acceptor);
         errno = save_errno;
         return -1;
     }
