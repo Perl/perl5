@@ -2066,7 +2066,7 @@ PP(pp_truncate)
 	else {
 	    SV *sv = POPs;
 	    char *name;
-	  
+	
 	    if (SvTYPE(sv) == SVt_PVGV) {
 	        tmpgv = (GV*)sv;		/* *main::FRED for example */
 		goto do_ftruncate;
@@ -2469,6 +2469,7 @@ PP(pp_accept)
     struct sockaddr saddr;	/* use a struct to avoid alignment problems */
     Sock_size_t len = sizeof saddr;
     int fd;
+    int fd2;
 
     ggv = (GV*)POPs;
     ngv = (GV*)POPs;
@@ -2489,7 +2490,11 @@ PP(pp_accept)
     if (IoIFP(nstio))
 	do_close(ngv, FALSE);
     IoIFP(nstio) = PerlIO_fdopen(fd, "r");
-    IoOFP(nstio) = PerlIO_fdopen(fd, "w");
+    /* FIXME: we dup(fd) here so that refcounting of fd's does not inhibit
+       fclose of IoOFP's FILE * - and hence leak memory.
+       Special treatment of _this_ case of IoIFP != IoOFP seems wrong.
+     */
+    IoOFP(nstio) = PerlIO_fdopen(fd2 = PerlLIO_dup(fd), "w");
     IoTYPE(nstio) = IoTYPE_SOCKET;
     if (!IoIFP(nstio) || !IoOFP(nstio)) {
 	if (IoIFP(nstio)) PerlIO_close(IoIFP(nstio));
@@ -2499,6 +2504,7 @@ PP(pp_accept)
     }
 #if defined(HAS_FCNTL) && defined(F_SETFD)
     fcntl(fd, F_SETFD, fd > PL_maxsysfd);	/* ensure close-on-exec */
+    fcntl(fd2, F_SETFD, fd2 > PL_maxsysfd);	/* ensure close-on-exec */
 #endif
 
 #ifdef EPOC
@@ -3410,7 +3416,7 @@ PP(pp_chdir)
                 deprecate("chdir('') or chdir(undef) as chdir()");
             tmps = SvPV(*svp, n_a);
         }
-        else {            
+        else {
             PUSHi(0);
             TAINT_PROPER("chdir");
             RETURN;
@@ -4029,7 +4035,7 @@ PP(pp_system)
 	 Pid_t childpid;
 	 int status;
 	 Sigsave_t ihand,qhand;     /* place to save signals during system() */
-	 
+	
 	 if (PL_tainting) {
 	     SV *cmd = NULL;
 	     if (PL_op->op_flags & OPf_STACKED)
@@ -4075,7 +4081,7 @@ PP(pp_system)
 	      if (did_pipes) {
 		   int errkid;
 		   int n = 0, n1;
-		   
+		
 		   while (n < sizeof(int)) {
 			n1 = PerlLIO_read(pp[0],
 					  (void*)(((char*)&errkid)+n),
