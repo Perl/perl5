@@ -429,6 +429,8 @@ modulo the caveats given in L<perlipc/"Signals">.
     	# didn't
     }
 
+For more information see L<perlipc>.
+
 =item atan2 Y,X
 
 Returns the arctangent of Y/X in the range -PI to PI.
@@ -971,7 +973,7 @@ element to return happens to be C<undef>.
 
 You may also use C<defined(&func)> to check whether subroutine C<&func>
 has ever been defined.  The return value is unaffected by any forward
-declarations of C<&foo>.  Note that a subroutine which is not defined
+declarations of C<&func>.  Note that a subroutine which is not defined
 may still be callable: its package may have an C<AUTOLOAD> method that
 makes it spring into existence the first time that it is called -- see
 L<perlsub>.
@@ -2854,7 +2856,12 @@ argument being C<undef>:
 
     open(TMP, "+>", undef) or die ...
 
-opens a filehandle to an anonymous temporary file.
+opens a filehandle to an anonymous temporary file.  Also using "+<"
+works for symmetry, but you really should consider writing something
+to the temporary file first.  You will need to seek() to do the
+reading.  Starting from Perl 5.8.1 the temporary files are created
+using the File::Temp module for greater portability, in Perl 5.8.0 the
+mkstemp() system call (which has known bugs in some platforms) was used.
 
 File handles can be opened to "in memory" files held in Perl scalars via:
 

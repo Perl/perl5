@@ -2465,9 +2465,10 @@ How you choose to license your work is a personal decision.
 The general mechanism is to assert your Copyright and then make
 a declaration of how others may copy/use/modify your work.
 
-Perl, for example, is supplied with two types of licence: The GNU
-GPL and The Artistic Licence (see the files README, Copying, and
-Artistic).  Larry has good reasons for NOT just using the GNU GPL.
+Perl, for example, is supplied with two types of licence: The GNU GPL
+and The Artistic Licence (see the files README, Copying, and Artistic,
+or L<perlgpl> and L<perlartistic>).  Larry has good reasons for NOT
+just using the GNU GPL.
 
 My personal recommendation, out of respect for Larry, Perl, and the
 Perl community at large is to state something simply like:

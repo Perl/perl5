@@ -703,8 +703,8 @@ Perl_hv_store_flags(pTHX_ HV *hv, const char *key, I32 klen, SV *val,
     xhv->xhv_keys++; /* HvKEYS(hv)++ */
     if (i) {				/* initial entry? */
 	xhv->xhv_fill++; /* HvFILL(hv)++ */
-	if (xhv->xhv_keys > (IV)xhv->xhv_max /* HvKEYS(hv) > HvMAX(hv) */)
-	    hsplit(hv);
+    } else if (xhv->xhv_keys > (IV)xhv->xhv_max /* HvKEYS(hv) > HvMAX(hv) */) {
+        hsplit(hv);
     }
 
     return &HeVAL(entry);
@@ -1728,8 +1728,6 @@ Perl_hv_clear(pTHX_ HV *hv)
     }
 
     hfreeentries(hv);
-    xhv->xhv_fill = 0; /* HvFILL(hv) = 0 */
-    xhv->xhv_keys = 0; /* HvKEYS(hv) = 0 */
     xhv->xhv_placeholders = 0; /* HvPLACEHOLDERS(hv) = 0 */
     if (xhv->xhv_array /* HvARRAY(hv) */)
 	(void)memzero(xhv->xhv_array /* HvARRAY(hv) */,
@@ -1758,6 +1756,12 @@ S_hfreeentries(pTHX_ HV *hv)
     riter = 0;
     max = HvMAX(hv);
     array = HvARRAY(hv);
+    /* make everyone else think the array is empty, so that the destructors
+     * called for freed entries can't recusively mess with us */
+    HvARRAY(hv) = Null(HE**); 
+    HvFILL(hv) = 0;
+    ((XPVHV*) SvANY(hv))->xhv_keys = 0;
+
     entry = array[0];
     for (;;) {
 	if (entry) {
@@ -1771,6 +1775,7 @@ S_hfreeentries(pTHX_ HV *hv)
 	    entry = array[riter];
 	}
     }
+    HvARRAY(hv) = array;
     (void)hv_iterinit(hv);
 }
 
@@ -1799,8 +1804,6 @@ Perl_hv_undef(pTHX_ HV *hv)
     }
     xhv->xhv_max   = 7;	/* HvMAX(hv) = 7 (it's a normal hash) */
     xhv->xhv_array = 0;	/* HvARRAY(hv) = 0 */
-    xhv->xhv_fill  = 0;	/* HvFILL(hv) = 0 */
-    xhv->xhv_keys  = 0;	/* HvKEYS(hv) = 0 */
     xhv->xhv_placeholders = 0; /* HvPLACEHOLDERS(hv) = 0 */
 
     if (SvRMAGICAL(hv))

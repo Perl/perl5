@@ -533,6 +533,7 @@ EOM
 	    esac
 
 	    use64bitall_done=yes
+	    archname64=64
 	    ;;
 esac
 EOCBU

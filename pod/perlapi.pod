@@ -704,18 +704,38 @@ Found in file perl.c
 
 =over 8
 
-=item pack_cat
+=item packlist
 
 The engine implementing pack() Perl function.
+
+	void	packlist(SV *cat, char *pat, char *patend, SV **beglist, SV **endlist)
+
+=for hackers
+Found in file pp_pack.c
+
+=item pack_cat
+
+The engine implementing pack() Perl function. Note: parameters next_in_list and
+flags are not used. This call should not be used; use packlist instead.
 
 	void	pack_cat(SV *cat, char *pat, char *patend, SV **beglist, SV **endlist, SV ***next_in_list, U32 flags)
 
 =for hackers
 Found in file pp_pack.c
 
-=item unpack_str
+=item unpackstring
 
 The engine implementing unpack() Perl function.
+
+	I32	unpackstring(char *pat, char *patend, char *s, char *strend, U32 flags)
+
+=for hackers
+Found in file pp_pack.c
+
+=item unpack_str
+
+The engine implementing unpack() Perl function. Note: parameters strbeg, new_s
+and ocnt are not used. This call should not be used, use unpackstring instead.
 
 	I32	unpack_str(char *pat, char *patend, char *s, char *strbeg, char *strend, char **new_s, I32 ocnt, U32 flags)
 

@@ -155,6 +155,13 @@ Perl_savestack_grow(pTHX)
     Renew(PL_savestack, PL_savestack_max, ANY);
 }
 
+void
+Perl_savestack_grow_cnt(pTHX_ I32 need)
+{
+    PL_savestack_max = PL_savestack_ix + need;
+    Renew(PL_savestack, PL_savestack_max, ANY);
+}
+
 #undef GROW
 
 void
@@ -277,7 +284,7 @@ Perl_save_shared_pvref(pTHX_ char **str)
 void
 Perl_save_gp(pTHX_ GV *gv, I32 empty)
 {
-    SSCHECK(6);
+    SSGROW(6);
     SSPUSHIV((IV)SvLEN(gv));
     SvLEN(gv) = 0; /* forget that anything was allocated here */
     SSPUSHIV((IV)SvCUR(gv));

@@ -32,7 +32,7 @@ __SWDTEST__
     push @tmpfiles, $filename;
     $| = 1; # Unbufferize.
     $r = runperl(
-		 switches => [ '-Ilib', '-d:DevelTest' ],
+		 switches => [ '-Ilib', '-d:switchd' ],
 		 progfile => $filename,
 		);
     like($r, qr/^main,swdtest.tmp,9;Foo,swdtest.tmp,5;Foo,swdtest.tmp,6;Foo,swdtest.tmp,6;Bar,swdtest.tmp,2;Foo,swdtest.tmp,6;Bar,swdtest.tmp,2;Foo,swdtest.tmp,6;Bar,swdtest.tmp,2;Foo,swdtest.tmp,6;$/i);

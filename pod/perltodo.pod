@@ -695,10 +695,13 @@ and so on, varies.  Finding the right level of interfacing to Perl
 requires some thought.  Remember that an OS does not implicate a
 filesystem.
 
-Note that in Windows the -C command line flag already does quite
-a bit of the above (but even there the support is not complete:
-for example the exec/spawn are not Unicode-aware) by turning on
-the so-called "wide API support". 
+(The Windows -C command flag "wide API support" has been at least
+temporarily retired in 5.8.1, and the -C has been repurposed, see
+L<perlrun>.)
+
+=head1 Unicode in %ENV
+
+Currently the %ENV entries are always byte strings.
 
 =head1 Recently done things
 

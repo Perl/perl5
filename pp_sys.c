@@ -2516,6 +2516,9 @@ PP(pp_accept)
     len = sizeof saddr;          /* EPOC somehow truncates info */
     setbuf( IoIFP(nstio), NULL); /* EPOC gets confused about sockets */
 #endif
+#ifdef __SCO_VERSION__
+    len = sizeof saddr;          /* OpenUNIX 8 somehow truncates info */
+#endif
 
     PUSHp((char *)&saddr, len);
     RETURN;
@@ -2847,8 +2850,8 @@ PP(pp_ftrread)
     dSP;
 #if defined(HAS_ACCESS) && defined(R_OK)
     STRLEN n_a;
-    if ((PL_hints & HINT_FILETEST_ACCESS) && SvPOK(TOPs)) {
-	result = access(TOPpx, R_OK);
+    if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
+	result = access(POPpx, R_OK);
 	if (result == 0)
 	    RETPUSHYES;
 	if (result < 0)
@@ -2874,8 +2877,8 @@ PP(pp_ftrwrite)
     dSP;
 #if defined(HAS_ACCESS) && defined(W_OK)
     STRLEN n_a;
-    if ((PL_hints & HINT_FILETEST_ACCESS) && SvPOK(TOPs)) {
-	result = access(TOPpx, W_OK);
+    if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
+	result = access(POPpx, W_OK);
 	if (result == 0)
 	    RETPUSHYES;
 	if (result < 0)
@@ -2901,8 +2904,8 @@ PP(pp_ftrexec)
     dSP;
 #if defined(HAS_ACCESS) && defined(X_OK)
     STRLEN n_a;
-    if ((PL_hints & HINT_FILETEST_ACCESS) && SvPOK(TOPs)) {
-	result = access(TOPpx, X_OK);
+    if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
+	result = access(POPpx, X_OK);
 	if (result == 0)
 	    RETPUSHYES;
 	if (result < 0)
@@ -2928,8 +2931,8 @@ PP(pp_fteread)
     dSP;
 #ifdef PERL_EFF_ACCESS_R_OK
     STRLEN n_a;
-    if ((PL_hints & HINT_FILETEST_ACCESS) && SvPOK(TOPs)) {
-	result = PERL_EFF_ACCESS_R_OK(TOPpx);
+    if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
+	result = PERL_EFF_ACCESS_R_OK(POPpx);
 	if (result == 0)
 	    RETPUSHYES;
 	if (result < 0)
@@ -2955,8 +2958,8 @@ PP(pp_ftewrite)
     dSP;
 #ifdef PERL_EFF_ACCESS_W_OK
     STRLEN n_a;
-    if ((PL_hints & HINT_FILETEST_ACCESS) && SvPOK(TOPs)) {
-	result = PERL_EFF_ACCESS_W_OK(TOPpx);
+    if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
+	result = PERL_EFF_ACCESS_W_OK(POPpx);
 	if (result == 0)
 	    RETPUSHYES;
 	if (result < 0)
@@ -2982,8 +2985,8 @@ PP(pp_fteexec)
     dSP;
 #ifdef PERL_EFF_ACCESS_X_OK
     STRLEN n_a;
-    if ((PL_hints & HINT_FILETEST_ACCESS) && SvPOK(TOPs)) {
-	result = PERL_EFF_ACCESS_X_OK(TOPpx);
+    if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
+	result = PERL_EFF_ACCESS_X_OK(POPpx);
 	if (result == 0)
 	    RETPUSHYES;
 	if (result < 0)

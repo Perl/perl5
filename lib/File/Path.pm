@@ -90,7 +90,7 @@ were not deleted may be left with permissions reset to allow world
 read and write access.  Note also that the occurrence of errors in
 rmtree can be determined I<only> by trapping diagnostic messages
 using C<$SIG{__WARN__}>; it is not apparent from the return value.
-Therefore, you must be extremely careful about using C<rmtree($foo,$bar,0>
+Therefore, you must be extremely careful about using C<rmtree($foo,$bar,0)>
 in situations where security is an issue.
 
 =head1 AUTHORS

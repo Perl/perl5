@@ -114,7 +114,8 @@ is ($buffer, $expect, "content what we expected?");
 ok (shutdown(LEFT, SHUT_WR), "shutdown left for writing");
 # This will hang forever if eof is buggy, and alarm doesn't interrupt system
 # Calls. Hence the child process minder.
-{
+SKIP: {
+  skip "SCO OpenUNIX has a bug with shutdown", 2 if $^O =~ /^svr/;
   local $SIG{ALRM} = sub { warn "EOF on right took over 3 seconds" };
   local $TODO = "Known problems with unix sockets on $^O"
       if $^O eq 'hpux'   || $^O eq 'super-ux';

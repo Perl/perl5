@@ -585,6 +585,7 @@ Ap	|void	|set_numeric_radix
 Ap	|void	|set_numeric_standard
 Apd	|void	|require_pv	|const char* pv
 Apd	|void	|pack_cat	|SV *cat|char *pat|char *patend|SV **beglist|SV **endlist|SV ***next_in_list|U32 flags
+Apd	|void	|packlist 	|SV *cat|char *pat|char *patend|SV **beglist|SV **endlist
 p	|void	|pidgone	|Pid_t pid|int status
 Ap	|void	|pmflag		|U32* pmfl|int ch
 p	|OP*	|pmruntime	|OP* pm|OP* expr|OP* repl
@@ -629,6 +630,7 @@ Apd	|char*	|savepv		|const char* pv
 Apd	|char*	|savesharedpv	|const char* pv
 Apd	|char*	|savepvn	|const char* pv|I32 len
 Ap	|void	|savestack_grow
+Ap	|void	|savestack_grow_cnt	|I32 need
 Ap	|void	|save_aelem	|AV* av|I32 idx|SV **sptr
 Ap	|I32	|save_alloc	|I32 size|I32 pad
 Ap	|void	|save_aptr	|AV** aptr
@@ -807,6 +809,7 @@ Apd	|UV	|to_utf8_fold	|U8 *p|U8* ustrp|STRLEN *lenp
 Ap	|I32	|unlnk		|char* f
 #endif
 Apd	|I32	|unpack_str	|char *pat|char *patend|char *s|char *strbeg|char *strend|char **new_s|I32 ocnt|U32 flags
+Apd	|I32	|unpackstring	|char *pat|char *patend|char *s|char *strend|U32 flags
 Ap	|void	|unsharepvn	|const char* sv|I32 len|U32 hash
 p	|void	|unshare_hek	|HEK* hek
 p	|void	|utilize	|int aver|I32 floor|OP* version|OP* idop|OP* arg
