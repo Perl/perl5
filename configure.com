@@ -1275,6 +1275,12 @@ $ revision = baserev - ".0"
 $!: get the patchlevel
 $ echo ""
 $ echo4 "Getting the current patchlevel..."
+$ patchlevel="0"
+$ subversion="0"
+$ api_revision="0"
+$ api_version="0"
+$ api_subversion="0"
+$ perl_patchlevel="0"
 $ patchlevel_h = F$SEARCH("[-]patchlevel.h")
 $ IF (patchlevel_h.NES."")
 $ THEN
@@ -1333,13 +1339,6 @@ $   IF (.NOT. got_patch) .OR. -
       THEN GOTO Patchlevel_h_loop
 $Close_patch:
 $   CLOSE CONFIG
-$ ELSE
-$   patchlevel="0"
-$   subversion="0"
-$   api_revision="0"
-$   api_version="0"
-$   api_subversion="0"
-$   perl_patchlevel="0"
 $ ENDIF
 $ version_patchlevel_string = "version ''patchlevel' subversion ''subversion'"
 $ IF got_perl_patchlevel .AND. perl_patchlevel .NES. "0"
@@ -2519,7 +2518,10 @@ $   IF F$EXTRACT(0,4,line) .EQS. "ext/" THEN -
 $   IF xxx .EQS. "DynaLoader" THEN goto ext_loop     ! omit
 $   IF xxx .EQS. "SDBM_File/sdbm" THEN goto ext_loop ! sub extension - omit
 $   IF xxx .EQS. "Devel/PPPort/harness" THEN goto ext_loop ! sub extension - omit
-$   IF xxx .EQS. "Encode/EUC_JP" THEN goto ext_loop  ! sub extension - omit
+$   IF xxx .EQS. "Encode/CN" THEN goto ext_loop  ! sub extension - omit
+$   IF xxx .EQS. "Encode/JP" THEN goto ext_loop  ! sub extension - omit
+$   IF xxx .EQS. "Encode/KR" THEN goto ext_loop  ! sub extension - omit
+$   IF xxx .EQS. "Encode/TW" THEN goto ext_loop  ! sub extension - omit
 $   IF F$EXTRACT(0,8,line) .EQS. "vms/ext/" THEN -
       xxx = "VMS/" + F$EXTRACT(8,line_len - 20,line)
 $   known_extensions = known_extensions + " ''xxx'"
@@ -4954,9 +4956,9 @@ $ WS "}"
 $ CS
 $ ON ERROR THEN CONTINUE
 $ GOSUB compile
-$ IF tmp .NES. "01"
+$ IF tmp .NES. "0"
 $ THEN 
-$   echo "Yes, it does." 
+$   echo4 "Yes, it does." 
 $   echo4 "Checking whether we can use SYS$SIGPRC instead"
 $   OS
 $   WS "#include <stdio.h>"
@@ -4977,7 +4979,7 @@ $   CS
 $   GOSUB compile
 $   IF tmp .EQS. "1"
 $   THEN
-$       echo "looks like we can"
+$       echo4 "Yep, we can."
 $       kill_by_sigprc = "define"
 $!
 $!      since SIGBUS and SIGSEGV indistinguishable, make them the same here.
@@ -5001,7 +5003,11 @@ $           sig_num="0 1 2 3 4 5 6 7 8 9 10 10 12 13 14 15 6"",0"
 $           sig_num_init="0,1,2,3,4,5,6,7,8,9,10,10,12,13,14,15,6,0"
 $           sig_size="17"
 $       endif
+$   ELSE
+$       echo4 "Nope, we can't."
 $   ENDIF
+$ ELSE
+$   echo4 "Nope, it doesn't."
 $ ENDIF
 $ DELETE/SYMBOL tmp
 $!
