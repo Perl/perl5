@@ -123,7 +123,7 @@ print PROG 'print "@ARGV\n"', "\n";
 close PROG;
 my $echo = "$Invoke_Perl $ECHO";
 
-print "1..182\n";
+print "1..183\n";
 
 # First, let's make sure that Perl is checking the dangerous
 # environment variables. Maybe they aren't set yet, so we'll
@@ -917,4 +917,12 @@ ok( $@ =~ /^Modification of a read-only value attempted/,
     
     my $re3 = "$re2";
     test 182, tainted $re3;
+}
+
+
+{
+    # bug 20010221.005
+    local $ENV{PATH} .= $TAINT;
+    eval { system { "echo" } "/arg0", "arg1" };
+    test 183, $@ =~ /^Insecure \$ENV/;
 }

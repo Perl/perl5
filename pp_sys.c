@@ -4030,6 +4030,16 @@ PP(pp_system)
 	 int status;
 	 Sigsave_t ihand,qhand;     /* place to save signals during system() */
 	 
+	 if (PL_tainting) {
+	     SV *cmd = NULL;
+	     if (PL_op->op_flags & OPf_STACKED)
+		cmd = *(MARK + 1);
+	     else if (SP - MARK != 1)
+		cmd = *SP;
+	     if (cmd && *(SvPV_nolen(cmd)) != '/')
+		TAINT_ENV();
+	 }
+
 	 if (PerlProc_pipe(pp) >= 0)
 	      did_pipes = 1;
 	 while ((childpid = PerlProc_fork()) == -1) {
