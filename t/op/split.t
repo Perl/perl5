@@ -1,8 +1,6 @@
 #!./perl
 
-# $RCSfile: split.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:26 $
-
-print "1..27\n";
+print "1..28\n";
 
 $FS = ':';
 
@@ -118,3 +116,9 @@ print "ok 26\n";
 $_ = join ':', split /^/, "ab\ncd\nef\n";
 print "not " if $_ ne "ab\n:cd\n:ef\n";
 print "ok 27\n";
+
+# see if @a = @b = split(...) optimization works
+@list1 = @list2 = split ('p',"a p b c p");
+print "not " if @list1 != @list2 or "@list1" ne "@list2"
+             or @list1 != 2 or "@list1" ne "a   b c ";
+print "ok 28\n";

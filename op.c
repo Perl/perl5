@@ -3416,7 +3416,11 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 		    }
 		    else if (curop->op_type == OP_PUSHRE) {
 			if (((PMOP*)curop)->op_pmreplroot) {
+#ifdef USE_ITHREADS
+			    GV *gv = (GV*)PL_curpad[(PADOFFSET)((PMOP*)curop)->op_pmreplroot];
+#else
 			    GV *gv = (GV*)((PMOP*)curop)->op_pmreplroot;
+#endif
 			    if (gv == PL_defgv || SvCUR(gv) == PL_generation)
 				break;
 			    SvCUR(gv) = PL_generation;
