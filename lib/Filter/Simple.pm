@@ -2,7 +2,7 @@ package Filter::Simple;
 
 use vars qw{ $VERSION };
 
-$VERSION = '0.01';
+$VERSION = '0.50';
 
 use Filter::Util::Call;
 use Carp;
@@ -170,13 +170,13 @@ C<use BANG;> statement (until the next C<no BANG;> statement, if any):
 
         1 ;
 
-Given this level of complexity, it's perhaps not surprising that source
-code filtering is still a mystery to most users.
+This level of sophistication puts filtering out of the reach of
+many programmers.
 
 
 =head2 A Solution
 
-The Filter::Simple module provides a vastly simplified interface to
+The Filter::Simple module provides a simplified interface to
 Filter::Util::Call; one that is sufficient for most common cases.
 
 Instead of the above process, with Filter::Simple the task of setting up
