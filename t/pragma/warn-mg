@@ -16,6 +16,7 @@ No such signal: SIGFRED at - line 3.
 ########
 # mg.c
 use warning 'signal' ;
+$|=1;
 $SIG{"INT"} = "fred"; kill "INT",$$;
 EXPECT
 SIGINT handler "fred" not defined.

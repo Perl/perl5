@@ -212,6 +212,7 @@ missingterm(char *s)
 void
 deprecate(char *s)
 {
+    dTHR;
     if (ckWARN(WARN_DEPRECATED))
 	warner(WARN_DEPRECATED, "Use of %s is deprecated", s);
 }
@@ -981,12 +982,15 @@ scan_const(char *start)
 
 	/* (now in tr/// code again) */
 
-	if (*s & 0x80 && ckWARN(WARN_UTF8) && thisutf) {
-	    (void)utf8_to_uv(s, &len);	/* could cvt latin-1 to utf8 here... */
-	    if (len) {
-		while (len--)
-		    *d++ = *s++;
-		continue;
+	if (*s & 0x80 && thisutf) {
+	    dTHR;			/* only for ckWARN */
+	    if (ckWARN(WARN_UTF8)) {
+		(void)utf8_to_uv(s, &len);	/* could cvt latin-1 to utf8 here... */
+		if (len) {
+		    while (len--)
+			*d++ = *s++;
+		    continue;
+		}
 	    }
 	}
 
@@ -1005,6 +1009,7 @@ scan_const(char *start)
 	    if (PL_lex_inwhat == OP_SUBST && !PL_lex_inpat &&
 		isDIGIT(*s) && *s != '0' && !isDIGIT(s[1]))
 	    {
+		dTHR;			/* only for ckWARN */
 		if (ckWARN(WARN_SYNTAX))
 		    warner(WARN_SYNTAX, "\\%c better written as $%c", *s, *s);
 		*--s = '$';
@@ -1047,8 +1052,12 @@ scan_const(char *start)
 
 		    if (!e)
 			yyerror("Missing right brace on \\x{}");
-		    if (ckWARN(WARN_UTF8) && !utf)
-			warner(WARN_UTF8,"Use of \\x{} without utf8 declaration");
+		    if (!utf) {
+			dTHR;
+			if (ckWARN(WARN_UTF8))
+			    warner(WARN_UTF8,
+				   "Use of \\x{} without utf8 declaration");
+		    }
 		    /* note: utf always shorter than hex */
 		    d = uv_to_utf8(d, scan_hex(s + 1, e - s - 1, &len));
 		    s = e + 1;
@@ -1062,10 +1071,13 @@ scan_const(char *start)
 			d = uv_to_utf8(d, uv);		/* doing a CU or UC */
 		    }
 		    else {
-			if (ckWARN(WARN_UTF8) && uv >= 127 && UTF)
-			    warner(WARN_UTF8,
-				"\\x%.*s will produce malformed UTF-8 character; use \\x{%.*s} for that",
-				len,s,len,s);
+			if (uv >= 127 && UTF) {
+			    dTHR;
+			    if (ckWARN(WARN_UTF8))
+				warner(WARN_UTF8,
+				    "\\x%.*s will produce malformed UTF-8 character; use \\x{%.*s} for that",
+				    len,s,len,s);
+			}
 			*d++ = (char)uv;
 		    }
 		    s += len;
@@ -4823,18 +4835,21 @@ checkcomma(register char *s, char *name, char *what)
 {
     char *w;
 
-    if (ckWARN(WARN_SYNTAX) && *s == ' ' && s[1] == '(') {	/* XXX gotta be a better way */
-	int level = 1;
-	for (w = s+2; *w && level; w++) {
-	    if (*w == '(')
-		++level;
-	    else if (*w == ')')
-		--level;
+    if (*s == ' ' && s[1] == '(') {	/* XXX gotta be a better way */
+	dTHR;				/* only for ckWARN */
+	if (ckWARN(WARN_SYNTAX)) {
+	    int level = 1;
+	    for (w = s+2; *w && level; w++) {
+		if (*w == '(')
+		    ++level;
+		else if (*w == ')')
+		    --level;
+	    }
+	    if (*w)
+		for (; *w && isSPACE(*w); w++) ;
+	    if (!*w || !strchr(";|})]oaiuw!=", *w))	/* an advisory hack only... */
+		warner(WARN_SYNTAX, "%s (...) interpreted as function",name);
 	}
-	if (*w)
-	    for (; *w && isSPACE(*w); w++) ;
-	if (!*w || !strchr(";|})]oaiuw!=", *w))	/* an advisory hack only... */
-	    warner(WARN_SYNTAX, "%s (...) interpreted as function",name);
     }
     while (s < PL_bufend && isSPACE(*s))
 	s++;
@@ -5074,6 +5089,7 @@ scan_ident(register char *s, register char *send, char *dest, STRLEN destlen, I3
 	    *d = '\0';
 	    while (s < send && (*s == ' ' || *s == '\t')) s++;
 	    if ((*s == '[' || (*s == '{' && strNE(dest, "sub")))) {
+		dTHR;			/* only for ckWARN */
 		if (ckWARN(WARN_AMBIGUOUS) && keyword(dest, d - dest)) {
 		    char *brack = *s == '[' ? "[...]" : "{...}";
 		    warner(WARN_AMBIGUOUS,
@@ -5092,11 +5108,16 @@ scan_ident(register char *s, register char *send, char *dest, STRLEN destlen, I3
 		PL_lex_state = LEX_INTERPEND;
 	    if (funny == '#')
 		funny = '@';
-	    if (ckWARN(WARN_AMBIGUOUS) && PL_lex_state == LEX_NORMAL &&
-	      (keyword(dest, d - dest) || perl_get_cv(dest, FALSE)))
-		warner(WARN_AMBIGUOUS,
-		    "Ambiguous use of %c{%s} resolved to %c%s",
-		    funny, dest, funny, dest);
+	    if (PL_lex_state == LEX_NORMAL) {
+		dTHR;			/* only for ckWARN */
+		if (ckWARN(WARN_AMBIGUOUS) &&
+		    (keyword(dest, d - dest) || perl_get_cv(dest, FALSE)))
+		{
+		    warner(WARN_AMBIGUOUS,
+			"Ambiguous use of %c{%s} resolved to %c%s",
+			funny, dest, funny, dest);
+		}
+	    }
 	}
 	else {
 	    s = bracket;		/* let the parser handle it */
@@ -5941,6 +5962,7 @@ scan_num(char *start)
 	       if -w is on
 	    */
 	    if (*s == '_') {
+		dTHR;			/* only for ckWARN */
 		if (ckWARN(WARN_SYNTAX) && lastub && s - lastub != 3)
 		    warner(WARN_SYNTAX, "Misplaced _ in number");
 		lastub = ++s;
@@ -5955,8 +5977,11 @@ scan_num(char *start)
 	}
 
 	/* final misplaced underbar check */
-	if (ckWARN(WARN_SYNTAX) && lastub && s - lastub != 3)
-	    warner(WARN_SYNTAX, "Misplaced _ in number");
+	if (lastub && s - lastub != 3) {
+	    dTHR;
+	    if (ckWARN(WARN_SYNTAX))
+		warner(WARN_SYNTAX, "Misplaced _ in number");
+	}
 
 	/* read a decimal portion if there is one.  avoid
 	   3..5 being interpreted as the number 3. followed

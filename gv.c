@@ -221,6 +221,7 @@ gv_fetchmeth(HV *stash, char *name, STRLEN len, I32 level)
 	    SV* sv = *svp++;
 	    HV* basestash = gv_stashsv(sv, FALSE);
 	    if (!basestash) {
+		dTHR;		/* just for ckWARN */
 		if (ckWARN(WARN_MISC))
 		    warner(WARN_MISC, "Can't locate package %s for @%s::ISA",
 			SvPVX(sv), HvNAME(stash));
@@ -339,6 +340,7 @@ gv_fetchmethod_autoload(HV *stash, char *name, I32 autoload)
 GV*
 gv_autoload4(HV *stash, char *name, STRLEN len, I32 method)
 {
+    dTHR;
     static char autoload[] = "AUTOLOAD";
     static STRLEN autolen = 8;
     GV* gv;

@@ -187,6 +187,7 @@ do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawpe
 		TAINT_ENV();
 	    TAINT_PROPER("piped open");
 	    if (name[strlen(name)-1] == '|') {
+		dTHR;
 		name[strlen(name)-1] = '\0' ;
 		if (ckWARN(WARN_PIPE))
 		    warner(WARN_PIPE, "Can't do bidirectional pipe");
@@ -298,6 +299,7 @@ do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawpe
 	}
     }
     if (!fp) {
+	dTHR;
 	if (ckWARN(WARN_NEWLINE) && IoTYPE(io) == '<' && strchr(name, '\n'))
 	    warner(WARN_NEWLINE, warn_nl, "open");
 	goto say_false;
@@ -616,6 +618,7 @@ do_close(GV *gv, bool not_implicit)
     io = GvIO(gv);
     if (!io) {		/* never opened */
 	if (not_implicit) {
+	    dTHR;
 	    if (ckWARN(WARN_UNOPENED))
 		warner(WARN_UNOPENED, 
 		       "Close on unopened file <%s>",GvENAME(gv));
@@ -715,8 +718,11 @@ do_tell(GV *gv)
 #endif
 	return PerlIO_tell(fp);
     }
-    if (ckWARN(WARN_UNOPENED))
-	warner(WARN_UNOPENED, "tell() on unopened file");
+    {
+	dTHR;
+	if (ckWARN(WARN_UNOPENED))
+	    warner(WARN_UNOPENED, "tell() on unopened file");
+    }
     SETERRNO(EBADF,RMS$_IFI);
     return -1L;
 }
@@ -734,8 +740,11 @@ do_seek(GV *gv, long int pos, int whence)
 #endif
 	return PerlIO_seek(fp, pos, whence) >= 0;
     }
-    if (ckWARN(WARN_UNOPENED))
-	warner(WARN_UNOPENED, "seek() on unopened file");
+    {
+	dTHR;
+	if (ckWARN(WARN_UNOPENED))
+	    warner(WARN_UNOPENED, "seek() on unopened file");
+    }
     SETERRNO(EBADF,RMS$_IFI);
     return FALSE;
 }
@@ -748,8 +757,11 @@ do_sysseek(GV *gv, long int pos, int whence)
 
     if (gv && (io = GvIO(gv)) && (fp = IoIFP(io)))
 	return PerlLIO_lseek(PerlIO_fileno(fp), pos, whence);
-    if (ckWARN(WARN_UNOPENED))
-	warner(WARN_UNOPENED, "sysseek() on unopened file");
+    {
+	dTHR;
+	if (ckWARN(WARN_UNOPENED))
+	    warner(WARN_UNOPENED, "sysseek() on unopened file");
+    }
     SETERRNO(EBADF,RMS$_IFI);
     return -1L;
 }
@@ -869,8 +881,11 @@ do_print(register SV *sv, PerlIO *fp)
     }
     switch (SvTYPE(sv)) {
     case SVt_NULL:
-	if (ckWARN(WARN_UNINITIALIZED))
-	    warner(WARN_UNINITIALIZED, warn_uninit);
+	{
+	    dTHR;
+	    if (ckWARN(WARN_UNINITIALIZED))
+		warner(WARN_UNINITIALIZED, warn_uninit);
+	}
 	return TRUE;
     case SVt_IV:
 	if (SvIOK(sv)) {
@@ -1099,9 +1114,12 @@ do_exec(char *cmd)
 	    do_execfree();
 	    goto doshell;
 	}
-	if (ckWARN(WARN_EXEC))
-	    warner(WARN_EXEC, "Can't exec \"%s\": %s", 
-		PL_Argv[0], Strerror(errno));
+	{
+	    dTHR;
+	    if (ckWARN(WARN_EXEC))
+		warner(WARN_EXEC, "Can't exec \"%s\": %s", 
+		    PL_Argv[0], Strerror(errno));
+	}
     }
     do_execfree();
     return FALSE;

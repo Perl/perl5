@@ -694,15 +694,16 @@ scalarkids(OP *o)
 STATIC OP *
 scalarboolean(OP *o)
 {
-    if (ckWARN(WARN_SYNTAX) &&
-	o->op_type == OP_SASSIGN && cBINOPo->op_first->op_type == OP_CONST) {
+    if (o->op_type == OP_SASSIGN && cBINOPo->op_first->op_type == OP_CONST) {
 	dTHR;
-	line_t oldline = PL_curcop->cop_line;
+	if (ckWARN(WARN_SYNTAX)) {
+	    line_t oldline = PL_curcop->cop_line;
 
-	if (PL_copline != NOLINE)
-	    PL_curcop->cop_line = PL_copline;
-	warner(WARN_SYNTAX, "Found = in conditional, should be ==");
-	PL_curcop->cop_line = oldline;
+	    if (PL_copline != NOLINE)
+		PL_curcop->cop_line = PL_copline;
+	    warner(WARN_SYNTAX, "Found = in conditional, should be ==");
+	    PL_curcop->cop_line = oldline;
+	}
     }
     return scalar(o);
 }
@@ -889,15 +890,18 @@ scalarvoid(OP *o)
 
     case OP_CONST:
 	sv = cSVOPo->op_sv;
-	if (ckWARN(WARN_VOID)) {
-	    useless = "a constant";
-	    if (SvNIOK(sv) && (SvNV(sv) == 0.0 || SvNV(sv) == 1.0))
-		useless = 0;
-	    else if (SvPOK(sv)) {
-		if (strnEQ(SvPVX(sv), "di", 2) ||
-		    strnEQ(SvPVX(sv), "ds", 2) ||
-		    strnEQ(SvPVX(sv), "ig", 2))
-			useless = 0;
+	{
+	    dTHR;
+	    if (ckWARN(WARN_VOID)) {
+		useless = "a constant";
+		if (SvNIOK(sv) && (SvNV(sv) == 0.0 || SvNV(sv) == 1.0))
+		    useless = 0;
+		else if (SvPOK(sv)) {
+		    if (strnEQ(SvPVX(sv), "di", 2) ||
+			strnEQ(SvPVX(sv), "ds", 2) ||
+			strnEQ(SvPVX(sv), "ig", 2))
+			    useless = 0;
+		}
 	    }
 	}
 	null(o);		/* don't execute a constant */
@@ -956,8 +960,11 @@ scalarvoid(OP *o)
 	}
 	break;
     }
-    if (useless && ckWARN(WARN_VOID))
-	warner(WARN_VOID, "Useless use of %s in void context", useless);
+    if (useless) {
+	dTHR;
+	if (ckWARN(WARN_VOID))
+	    warner(WARN_VOID, "Useless use of %s in void context", useless);
+    }
     return o;
 }
 
@@ -1465,6 +1472,7 @@ sawparens(OP *o)
 OP *
 bind_match(I32 type, OP *left, OP *right)
 {
+    dTHR;
     OP *o;
 
     if (ckWARN(WARN_UNSAFE) &&
@@ -1648,6 +1656,7 @@ localize(OP *o, I32 lex)
     if (o->op_flags & OPf_PARENS)
 	list(o);
     else {
+	dTHR;
 	if (ckWARN(WARN_PARENTHESIS) && PL_bufptr > PL_oldbufptr && PL_bufptr[-1] == ',') {
 	    char *s;
 	    for (s = PL_bufptr; *s && (isALNUM(*s) || strchr("@$%, ",*s)); s++) ;

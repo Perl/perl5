@@ -1410,6 +1410,7 @@ warn(const char* pat,...)
 void
 warner(U32  err, const char* pat,...)
 {
+    dTHR;
     va_list args;
     char *message;
     HV *stash;
@@ -1422,7 +1423,7 @@ warner(U32  err, const char* pat,...)
 
     if (ckDEAD(err)) {
 #ifdef USE_THREADS
-        DEBUG_L(PerlIO_printf(PerlIO_stderr(), "croak: 0x%lx %s", (unsigned long) thr, message));
+        DEBUG_S(PerlIO_printf(PerlIO_stderr(), "croak: 0x%lx %s", (unsigned long) thr, message));
 #endif /* USE_THREADS */
         if (PL_diehook) {
             /* sv_2cv might call croak() */
@@ -2428,8 +2429,11 @@ scan_oct(char *start, I32 len, I32 *retlen)
 	retval = n | (*s++ - '0');
 	len--;
     }
-    if (len && (*s == '8' || *s == '9') && ckWARN(WARN_OCTAL))
-	warner(WARN_OCTAL, "Illegal octal digit ignored");
+    if (len && (*s == '8' || *s == '9')) {
+	dTHR;
+	if (ckWARN(WARN_OCTAL))
+	    warner(WARN_OCTAL, "Illegal octal digit ignored");
+    }
     *retlen = s - start;
     return retval;
 }
@@ -2449,6 +2453,7 @@ scan_hex(char *start, I32 len, I32 *retlen)
 	    if (*s == '_')
 		continue;
 	    else {
+		dTHR;
 		--s;
 		if (ckWARN(WARN_UNSAFE))
 		    warner(WARN_UNSAFE,"Illegal hex digit ignored");

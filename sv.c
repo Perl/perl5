@@ -1313,9 +1313,9 @@ sv_2iv(register SV *sv)
 	if (SvPOKp(sv) && SvLEN(sv))
 	    return asIV(sv);
 	if (!SvROK(sv)) {
-	    if (ckWARN(WARN_UNINITIALIZED) && !(SvFLAGS(sv) & SVs_PADTMP)) {
+	    if (!(SvFLAGS(sv) & SVs_PADTMP)) {
 		dTHR;
-		if (!PL_localizing)
+		if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing)
 		    warner(WARN_UNINITIALIZED, warn_uninit);
 	    }
 	    return 0;
@@ -1339,8 +1339,11 @@ sv_2iv(register SV *sv)
 	    }
 	    if (SvPOKp(sv) && SvLEN(sv))
 		return asIV(sv);
-	    if (ckWARN(WARN_UNINITIALIZED))
-		warner(WARN_UNINITIALIZED, warn_uninit);
+	    {
+		dTHR;
+		if (ckWARN(WARN_UNINITIALIZED))
+		    warner(WARN_UNINITIALIZED, warn_uninit);
+	    }
 	    return 0;
 	}
     }
@@ -1391,9 +1394,9 @@ sv_2uv(register SV *sv)
 	if (SvPOKp(sv) && SvLEN(sv))
 	    return asUV(sv);
 	if (!SvROK(sv)) {
-	    if (ckWARN(WARN_UNINITIALIZED) && !(SvFLAGS(sv) & SVs_PADTMP)) {
+	    if (!(SvFLAGS(sv) & SVs_PADTMP)) {
 		dTHR;
-		if (!PL_localizing)
+		if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing)
 		    warner(WARN_UNINITIALIZED, warn_uninit);
 	    }
 	    return 0;
@@ -1414,8 +1417,11 @@ sv_2uv(register SV *sv)
 	    }
 	    if (SvPOKp(sv) && SvLEN(sv))
 		return asUV(sv);
-	    if (ckWARN(WARN_UNINITIALIZED))
-		warner(WARN_UNINITIALIZED, warn_uninit);
+	    {
+		dTHR;
+		if (ckWARN(WARN_UNINITIALIZED))
+		    warner(WARN_UNINITIALIZED, warn_uninit);
+	    }
 	    return 0;
 	}
     }
@@ -1439,9 +1445,9 @@ sv_2uv(register SV *sv)
 	SvUVX(sv) = asUV(sv);
     }
     else  {
-	if (ckWARN(WARN_UNINITIALIZED) && !(SvFLAGS(sv) & SVs_PADTMP)) {
+	if (!(SvFLAGS(sv) & SVs_PADTMP)) {
 	    dTHR;
-	    if (!PL_localizing)
+	    if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing)
 		warner(WARN_UNINITIALIZED, warn_uninit);
 	}
 	return 0;
@@ -1461,6 +1467,7 @@ sv_2nv(register SV *sv)
 	if (SvNOKp(sv))
 	    return SvNVX(sv);
 	if (SvPOKp(sv) && SvLEN(sv)) {
+	    dTHR;
 	    if (ckWARN(WARN_NUMERIC) && !SvIOKp(sv) && !looks_like_number(sv))
 		not_a_number(sv);
 	    SET_NUMERIC_STANDARD();
@@ -1469,9 +1476,9 @@ sv_2nv(register SV *sv)
 	if (SvIOKp(sv))
 	    return (double)SvIVX(sv);
         if (!SvROK(sv)) {
-	    if (ckWARN(WARN_UNINITIALIZED) && !(SvFLAGS(sv) & SVs_PADTMP)) {
+	    if (!(SvFLAGS(sv) & SVs_PADTMP)) {
 		dTHR;
-		if (!PL_localizing)
+		if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing)
 		    warner(WARN_UNINITIALIZED, warn_uninit);
 	    }
             return 0;
@@ -1487,6 +1494,7 @@ sv_2nv(register SV *sv)
 	  return (double)(unsigned long)SvRV(sv);
 	}
 	if (SvREADONLY(sv)) {
+	    dTHR;
 	    if (SvPOKp(sv) && SvLEN(sv)) {
 		if (ckWARN(WARN_NUMERIC) && !SvIOKp(sv) && !looks_like_number(sv))
 		    not_a_number(sv);
@@ -1517,6 +1525,7 @@ sv_2nv(register SV *sv)
 	SvNVX(sv) = (double)SvIVX(sv);
     }
     else if (SvPOKp(sv) && SvLEN(sv)) {
+	dTHR;
 	if (ckWARN(WARN_NUMERIC) && !SvIOKp(sv) && !looks_like_number(sv))
 	    not_a_number(sv);
 	SET_NUMERIC_STANDARD();
@@ -1543,8 +1552,11 @@ asIV(SV *sv)
 
     if (numtype == 1)
 	return atol(SvPVX(sv));
-    if (!numtype && ckWARN(WARN_NUMERIC))
-	not_a_number(sv);
+    if (!numtype) {
+	dTHR;
+	if (ckWARN(WARN_NUMERIC))
+	    not_a_number(sv);
+    }
     SET_NUMERIC_STANDARD();
     d = atof(SvPVX(sv));
     if (d < 0.0)
@@ -1562,8 +1574,11 @@ asUV(SV *sv)
     if (numtype == 1)
 	return strtoul(SvPVX(sv), Null(char**), 10);
 #endif
-    if (!numtype && ckWARN(WARN_NUMERIC))
-	not_a_number(sv);
+    if (!numtype) {
+	dTHR;
+	if (ckWARN(WARN_NUMERIC))
+	    not_a_number(sv);
+    }
     SET_NUMERIC_STANDARD();
     return U_V(atof(SvPVX(sv)));
 }
@@ -1677,9 +1692,9 @@ sv_2pv(register SV *sv, STRLEN *lp)
 	    goto tokensave;
 	}
         if (!SvROK(sv)) {
-	    if (ckWARN(WARN_UNINITIALIZED) && !(SvFLAGS(sv) & SVs_PADTMP)) {
+	    if (!(SvFLAGS(sv) & SVs_PADTMP)) {
 		dTHR;
-		if (!PL_localizing)
+		if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing)
 		    warner(WARN_UNINITIALIZED, warn_uninit);
 	    }
             *lp = 0;
@@ -1785,8 +1800,11 @@ sv_2pv(register SV *sv, STRLEN *lp)
 		tsv = Nullsv;
 		goto tokensave;
 	    }
-	    if (ckWARN(WARN_UNINITIALIZED))
-		warner(WARN_UNINITIALIZED, warn_uninit);
+	    {
+		dTHR;
+		if (ckWARN(WARN_UNINITIALIZED))
+		    warner(WARN_UNINITIALIZED, warn_uninit);
+	    }
 	    *lp = 0;
 	    return "";
 	}
