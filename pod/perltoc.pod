@@ -1035,6 +1035,8 @@ my C program; what am I doing wrong?
 =item Why am I getting long decimals (eg, 19.9499999999999) instead of the
 numbers I should be getting (eg, 19.95)?
 
+=item Why is int() broken?
+
 =item Why isn't my octal data interpreted correctly?
 
 =item Does Perl have a round() function?  What about ceil() and floor()? 
@@ -2376,7 +2378,7 @@ listing
 =item Predefined Names
 
 $ARG, $_, $a, $b, $<I<digits>>, $MATCH, $&, $PREMATCH, $`, $POSTMATCH, $',
-$LAST_PAREN_MATCH, $+, $^N, @LAST_MATCH_END, @+, $MULTILINE_MATCHING, $*,
+$LAST_PAREN_MATCH, $+, $^N, @LAST_MATCH_END, @+, $*,
 HANDLE->input_line_number(EXPR), $INPUT_LINE_NUMBER, $NR, $,
 IO::Handle->input_record_separator(EXPR), $INPUT_RECORD_SEPARATOR, $RS, $/,
 HANDLE->autoflush(EXPR), $OUTPUT_AUTOFLUSH, $|,
@@ -3587,23 +3589,23 @@ threads, threads::shared, utf8, vars, vmsish, warnings, warnings::register
 AnyDBM_File, Attribute::Handlers, AutoLoader, AutoSplit, B, B::Asmdata,
 B::Assembler, B::Bblock, B::Bytecode, B::C, B::CC, B::Concise, B::Debug,
 B::Deparse, B::Disassembler, B::Lint, B::Showlex, B::Stackobj, B::Stash,
-B::Terse, B::Xref, Benchmark, CGI, CGI::Apache, CGI::Carp, CGI::Cookie,
-CGI::Fast, CGI::Pretty, CGI::Push, CGI::Switch, CGI::Util, CPAN,
-CPAN::FirstTime, CPAN::Nox, Carp, Carp::Heavy, Class::ISA, Class::Struct,
-Config, Cwd, DB, DB_File, Data::Dumper, Devel::DProf, Devel::PPPort,
-Devel::Peek, Devel::SelfStubber, Digest, Digest::MD5, DirHandle, Dumpvalue,
-DynaLoader, Encode, Encode::Alias, Encode::Byte, Encode::CJKConstants,
-Encode::CN, Encode::CN::HZ, Encode::Config, Encode::EBCDIC,
-Encode::Encoder, Encode::Encoding, Encode::Guess, Encode::JP,
-Encode::JP::H2Z, Encode::JP::JIS7, Encode::KR, Encode::KR::2022_KR,
-Encode::MIME::Header, Encode::PerlIO, Encode::Supported, Encode::Symbol,
-Encode::TW, Encode::Unicode, Encode::Unicode::UTF7, English, Env, Errno,
-Exporter, Exporter::Heavy, ExtUtils::Command, ExtUtils::Command::MM,
-ExtUtils::Constant, ExtUtils::Embed, ExtUtils::Install,
-ExtUtils::Installed, ExtUtils::Liblist, ExtUtils::MM, ExtUtils::MM_Any,
-ExtUtils::MM_BeOS, ExtUtils::MM_Cygwin, ExtUtils::MM_DOS,
-ExtUtils::MM_MacOS, ExtUtils::MM_NW5, ExtUtils::MM_OS2, ExtUtils::MM_UWIN,
-ExtUtils::MM_Unix, ExtUtils::MM_VMS, ExtUtils::MM_Win32,
+B::Terse, B::Xref, Benchmark, ByteLoader, CGI, CGI::Apache, CGI::Carp,
+CGI::Cookie, CGI::Fast, CGI::Pretty, CGI::Push, CGI::Switch, CGI::Util,
+CPAN, CPAN::FirstTime, CPAN::Nox, Carp, Carp::Heavy, Class::ISA,
+Class::Struct, Config, Cwd, DB, DB_File, Data::Dumper, Devel::DProf,
+Devel::PPPort, Devel::Peek, Devel::SelfStubber, Digest, Digest::MD5,
+DirHandle, Dumpvalue, DynaLoader, Encode, Encode::Alias, Encode::Byte,
+Encode::CJKConstants, Encode::CN, Encode::CN::HZ, Encode::Config,
+Encode::EBCDIC, Encode::Encoder, Encode::Encoding, Encode::Guess,
+Encode::JP, Encode::JP::H2Z, Encode::JP::JIS7, Encode::KR,
+Encode::KR::2022_KR, Encode::MIME::Header, Encode::PerlIO,
+Encode::Supported, Encode::Symbol, Encode::TW, Encode::Unicode,
+Encode::Unicode::UTF7, English, Env, Errno, Exporter, Exporter::Heavy,
+ExtUtils::Command, ExtUtils::Command::MM, ExtUtils::Constant,
+ExtUtils::Embed, ExtUtils::Install, ExtUtils::Installed, ExtUtils::Liblist,
+ExtUtils::MM, ExtUtils::MM_Any, ExtUtils::MM_BeOS, ExtUtils::MM_Cygwin,
+ExtUtils::MM_DOS, ExtUtils::MM_MacOS, ExtUtils::MM_NW5, ExtUtils::MM_OS2,
+ExtUtils::MM_UWIN, ExtUtils::MM_Unix, ExtUtils::MM_VMS, ExtUtils::MM_Win32,
 ExtUtils::MM_Win95, ExtUtils::MY, ExtUtils::MakeMaker,
 ExtUtils::MakeMaker::FAQ, ExtUtils::MakeMaker::Tutorial,
 ExtUtils::MakeMaker::bytes, ExtUtils::MakeMaker::vmsish,
@@ -5516,7 +5518,7 @@ B<-V>
 
 =over 4
 
-=item Updated Modules
+=item Updated Modules And Pragmata
 
 =back
 
@@ -5540,7 +5542,9 @@ B<-V>
 
 =item Generic fixes
 
-=item Module-specific fixes
+=item Module and pragma specific fixes
+
+Encode, PerlIO::scalar, strict
 
 =item Platform-specific fixes
 
@@ -5590,6 +5594,8 @@ iterated array within the loop?)"
 =item tied hashes in scalar context
 
 =item lib/Net/Ping/t/510_ping_udp.t subtest 2
+
+=item B::C
 
 =back
 
@@ -13812,6 +13818,18 @@ B<PERL_MM_MANIFEST_DEBUG>
 =item SEE ALSO
 
 =item AUTHOR
+
+=back
+
+=head2 ExtUtils::Miniperl, writemain - write the C code for perlmain.c
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item SEE ALSO
 
 =back
 

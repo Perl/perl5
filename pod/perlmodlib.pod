@@ -1043,7 +1043,7 @@ Encoding layer
 
 =item PerlIO::scalar
 
-Support module for in-memory IO.
+In-memory IO, scalar IO
 
 =item PerlIO::via
 
