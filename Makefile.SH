@@ -209,7 +209,7 @@ FIRSTMAKEFILE = $firstmakefile
 # Any special object files needed by this architecture, e.g. os2/os2.obj
 ARCHOBJS = $archobjs
 
-.SUFFIXES: .c \$(OBJ_EXT)
+.SUFFIXES: .c \$(OBJ_EXT) .i .s
 
 # grrr
 SHELL = $sh
@@ -227,7 +227,9 @@ TRNL = '$trnl'
 ## In the following dollars and backticks do not need the extra backslash.
 $spitshell >>Makefile <<'!NO!SUBS!'
 
-CCCMD = `sh $(shellflags) cflags $(LIBPERL) $@`
+CCCMD    = `sh $(shellflags) cflags $(LIBPERL) $@`
+
+CCCMDSRC = `sh $(shellflags) cflags $(LIBPERL) $<`
 
 private = preplibrary lib/ExtUtils/Miniperl.pm lib/Config.pm
 
@@ -287,6 +289,12 @@ lintflags = -hbvxac
 
 .c$(OBJ_EXT):
 	$(CCCMD) $(PLDLFLAGS) $*.c
+
+.c.i:
+	$(CCCMDSRC) -E $*.c > $*.i
+
+.c.s:
+	$(CCCMDSRC) -S $*.c
 
 .PHONY: all compile translators utilities
 
