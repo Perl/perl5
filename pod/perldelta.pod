@@ -761,6 +761,13 @@ get many warnings like this:
 
 This warning, however, is not serious and can be ignored.
 
+=head2 IRIX: t/uni/tr_7jis.t falsely failing
+
+The test t/uni/tr_7jis.t is known to report failure under 'make test'
+or the test harness with certain releases of IRIX (at least IRIX 6.5
+and MIPSpro Compilers Version 7.3.1.1m), but if run manually the test
+fully passes.
+
 =head2 Tru64: No threaded builds with GNU cc (gcc)
 
 In the latest Tru64 releases (e.g. v5.1B) the gcc (3.3) cannot be
