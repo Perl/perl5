@@ -2,5 +2,5 @@
 # This file is built by mktables from e.g. Unicode.txt.
 # Any changes made here will be lost!
 return <<'END';
-4E00	9FA5	Lo
+4E00	9FA5	CJK Ideograph
 END
