@@ -24,6 +24,7 @@ WriteMakefile(
 	      MAN3PODS	=> {},
 	      # OS 390 winges about line numbers > 64K ???
 	      XSOPT => '-nolinenumbers',
+              XSPROTOARG => '-noprototypes',
 	      );
 
 package MY;
@@ -87,6 +88,7 @@ Encode_XSEncoding(pTHX_ encode_t *enc)
 }
 
 MODULE = Encode::$name	PACKAGE = Encode::$name
+PROTOTYPES: DISABLE
 BOOT:
 {
 END

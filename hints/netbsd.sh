@@ -98,7 +98,7 @@ $define|true|[yY]*)
         fi 
         ;; 
 esac 
-EOCBU 
+EOCBU
 
 # Recognize the NetBSD packages collection.
 # GDBM might be here.

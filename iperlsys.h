@@ -1083,6 +1083,8 @@ struct IPerlProcInfo
 	win32_dynaload((f))
 #define PerlProc_GetOSError(s,e)					\
 	win32_str_os_error((s), (e))
+#undef PerlProc_signal
+#define PerlProc_signal(n, h) win32_signal((n), (h))
 #endif
 #endif	/* PERL_IMPLICIT_SYS */
 

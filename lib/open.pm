@@ -6,7 +6,7 @@ our $VERSION = '1.01';
 
 my $locale_encoding;
 
-sub in_locale { $^H & $locale::hint_bits }
+sub in_locale { $^H & ($locale::hint_bits || 0)}
 
 sub _get_locale_encoding {
     unless (defined $locale_encoding) {
@@ -16,10 +16,10 @@ sub _get_locale_encoding {
 	    I18N::Langinfo->import(qw(langinfo CODESET));
 	    $locale_encoding = langinfo(CODESET());
 	};
-	unless ($@) {
-	    print "# locale_encoding = $locale_encoding\n";
-	}
 	my $country_language;
+
+	no warnings 'uninitialized';
+
         if (not $locale_encoding && in_locale()) {
 	    if ($ENV{LC_ALL} =~ /^([^.]+)\.([^.]+)$/) {
 		($country_language, $locale_encoding) = ($1, $2);
@@ -45,8 +45,10 @@ sub _get_locale_encoding {
 		$locale_encoding = 'euc-jp';
 	    } elsif ($country_language =~ /^ko_KR|korean?$/i) {
 		$locale_encoding = 'euc-kr';
+	    } elsif ($country_language =~ /^zh_CN|chin(?:a|ese)?$/i) {
+		$locale_encoding = 'euc-cn';
 	    } elsif ($country_language =~ /^zh_TW|taiwan(?:ese)?$/i) {
-		$locale_encoding = 'euc-tw';
+		$locale_encoding = 'big5';
 	    }
 	    croak "Locale encoding 'euc' too ambiguous"
 		if $locale_encoding eq 'euc';
@@ -57,6 +59,7 @@ sub _get_locale_encoding {
 sub import {
     my ($class,@args) = @_;
     croak("`use open' needs explicit list of disciplines") unless @args;
+    my $std;
     $^H |= $open::hint_bits;
     my ($in,$out) = split(/\0/,(${^OPEN} || "\0"), -1);
     while (@args) {
@@ -65,6 +68,9 @@ sub import {
 	if ($type =~ /^:?(utf8|locale|encoding\(.+\))$/) {
 	    $type = 'IO';
 	    $dscp = ":$1";
+	} elsif ($type eq ':std') {
+	    $std = 1;
+	    next;
 	} else {
 	    $dscp = shift(@args) || '';
 	}
@@ -75,13 +81,14 @@ sub import {
 		use Encode;
 		_get_locale_encoding()
 		    unless defined $locale_encoding;
-		croak "Cannot figure out an encoding to use"
+		(carp("Cannot figure out an encoding to use"), last)
 		    unless defined $locale_encoding;
 		if ($locale_encoding =~ /^utf-?8$/i) {
 		    $layer = "utf8";
 		} else {
 		    $layer = "encoding($locale_encoding)";
 		}
+		$std = 1;
 	    } else {
 		unless(PerlIO::Layer::->find($layer)) {
 		    carp("Unknown discipline layer '$layer'");
@@ -92,7 +99,6 @@ sub import {
 		$^H{"open_$type"} = $layer;
 	    }
 	}
-	# print "# type = $type, val = @val\n";
 	if ($type eq 'IN') {
 	    $in  = join(' ',@val);
 	}
@@ -106,7 +112,25 @@ sub import {
 	    croak "Unknown discipline class '$type'";
 	}
     }
-    ${^OPEN} = join("\0",$in,$out);
+    ${^OPEN} = join("\0",$in,$out) if $in or $out;
+    if ($std) {
+	if ($in) {
+	    if ($in =~ /:utf8\b/) {
+		    binmode(STDIN,  ":utf8");
+		} elsif ($in =~ /(\w+\(.+\))/) {
+		    binmode(STDIN,  ":$1");
+		}
+	}
+	if ($out) {
+	    if ($out =~ /:utf8\b/) {
+		binmode(STDOUT,  ":utf8");
+		binmode(STDERR,  ":utf8");
+	    } elsif ($out =~ /(\w+\(.+\))/) {
+		binmode(STDOUT,  ":$1");
+		binmode(STDERR,  ":$1");
+	    }
+	}
+    }
 }
 
 1;
@@ -127,6 +151,8 @@ open - perl pragma to set default disciplines for input and output
     use open ':utf8';
     use open ':locale';
     use open ':encoding(iso-8859-7)';
+
+    use open ':std';
 
 =head1 DESCRIPTION
 
@@ -180,6 +206,41 @@ and these
 
 When open() is given an explicit list of layers they are appended to
 the list declared using this pragma.
+
+The C<:std> subpragma on its own has no effect, but if combined with
+the C<:utf8> or C<:encoding> subpragmas, it converts the standard
+filehandles (STDIN, STDOUT, STDERR) to comply with encoding selected
+for input/output handles.  For example, if both input and out are
+chosen to be C<:utf8>, a C<:std> will mean that STDIN, STDOUT, and
+STDERR are also in C<:utf8>.  On the other hand, if only output is
+chosen to be in C<:encoding(koi8r)', a C<:std> will cause only the
+STDOUT and STDERR to be in C<koi8r>.  The C<:locale> subpragma
+implicitly turns on C<:std>.
+
+The logic of C<:locale> is as follows:
+
+=over 4
+
+=item 1.
+
+If the platform supports the langinfo(CODESET) interface, the codeset
+returned is used as the default encoding for the open pragma.
+
+=item 2.
+
+If 1. didn't work but we are under the locale pragma, the environment
+variables LC_ALL and LANG (in that order) are matched for encodings
+(the part after C<.>, if any), and if any found, that is used 
+as the default encoding for the open pragma.
+
+=item 3.
+
+If 1. and 2. didn't work, the environment variables LC_ALL and LANG
+(in that order) are matched for anything looking like UTF-8, and if
+any found, C<:utf8> is used as the default encoding for the open
+pragma.
+
+=back
 
 Directory handles may also support disciplines in future.
 

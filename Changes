@@ -28,6 +28,489 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.7.X		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 15172] By: jhi                                   on 2002/03/11  13:54:49
+        Log: Regen toc.
+     Branch: perl
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[ 15171] By: jhi                                   on 2002/03/11  13:48:09
+        Log: Add t/CN.t and t/TW.t; re-sort.
+     Branch: perl
+	   ! ext/Encode/MANIFEST
+____________________________________________________________________________
+[ 15170] By: jhi                                   on 2002/03/11  13:04:25
+        Log: Document what to do if one yearns back to
+             the old legacy encoding.
+     Branch: perl
+	   ! lib/encoding.pm
+____________________________________________________________________________
+[ 15169] By: jhi                                   on 2002/03/11  12:57:45
+        Log: Undocument the use of .*utf8.*{upgrade,downgrade,encode,decode}
+             as general purpose encoding transformation interfaces
+             since that's not what they are.
+     Branch: perl
+	   ! lib/utf8.pm pod/perlunicode.pod sv.c
+____________________________________________________________________________
+[ 15168] By: ams                                   on 2002/03/11  12:54:16
+        Log: Subject: [PATCH] Re: Smoke 15089 Tru64/OSF  Problems: numconvert, lstat
+             warnings
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Mon, 11 Mar 2002 14:35:22 +0100
+             Message-Id: <20020311143522.A7431@rafael>
+     Branch: perl
+	   ! t/lib/warnings/pp_sys
+____________________________________________________________________________
+[ 15167] By: ams                                   on 2002/03/11  04:57:20
+        Log: A little commonsense is better than 1_compile.
+     Branch: perl
+	   ! lib/File/Find/t/find.t lib/File/Find/t/taint.t
+____________________________________________________________________________
+[ 15166] By: ams                                   on 2002/03/11  04:53:50
+        Log: Subject: [PATCH] Hash::Util & restricted hash touch up, part 1
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sun, 10 Mar 2002 13:27:12 -0500
+             Message-Id: <20020310182712.GC693@blackrider>
+             
+             Subject: [PATCH] Hash::Util part 2
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sun, 10 Mar 2002 15:09:34 -0500
+             Message-Id: <20020310200934.GB27112@blackrider>
+             
+             Subject: [PATCH] Hash::Util MANIFEST correction
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sun, 10 Mar 2002 16:27:07 -0500
+             Message-Id: <20020310212707.GF27112@blackrider>
+             
+             (Also changes find.t and taint.t, which were looking for access.t)
+     Branch: perl
+	   + ext/Data/Util/Changes ext/Data/Util/Makefile.PL
+	   + ext/Data/Util/Util.xs ext/Data/Util/lib/Data/Util.pm
+	   + ext/Data/Util/lib/Hash/Util.pm ext/Data/Util/t/Data.t
+	   + ext/Data/Util/t/Hash.t
+	   - t/lib/access.t
+	   ! MANIFEST hv.c lib/File/Find/t/find.t lib/File/Find/t/taint.t
+	   ! pod/perldiag.pod pod/perltodo.pod universal.c
+____________________________________________________________________________
+[ 15165] By: jhi                                   on 2002/03/11  04:52:56
+        Log: metaconfig: more thready fixes.
+     Branch: metaconfig
+	   ! U/threads/d_asctime_r.U U/threads/d_ctime_r.U
+	   ! U/threads/d_endgrent_r.U U/threads/d_endpwent_r.U
+	   ! U/threads/d_getgrent_r.U U/threads/d_getgrgid_r.U
+	   ! U/threads/d_getgrnam_r.U U/threads/d_getpwent_r.U
+	   ! U/threads/d_getpwnam_r.U U/threads/d_getpwuid_r.U
+	   ! U/threads/d_gmtime_r.U U/threads/d_localtime_r.U
+	   ! U/threads/d_readdir64_r.U U/threads/d_readdir_r.U
+	   ! U/threads/d_setgrent_r.U U/threads/d_setpwent_r.U
+	   ! U/threads/d_strerror_r.U U/threads/d_ttyname_r.U
+____________________________________________________________________________
+[ 15163] By: jhi                                   on 2002/03/11  04:39:54
+        Log: Skip obsoleted interfaces.
+     Branch: perl
+	   ! Porting/findrfuncs
+____________________________________________________________________________
+[ 15162] By: ams                                   on 2002/03/11  03:48:14
+        Log: Typo fixes.
+     Branch: perl
+	   ! perl.c
+____________________________________________________________________________
+[ 15161] By: jhi                                   on 2002/03/11  03:36:51
+        Log: Upgrade to Locale::Codes 2.02.
+     Branch: perl
+	   + lib/Locale/Codes/t/rename.t
+	   ! MANIFEST lib/Locale/Codes/ChangeLog lib/Locale/Codes/README
+	   ! lib/Locale/Codes/t/uk.t lib/Locale/Country.pm
+	   ! lib/Locale/Country.pod
+____________________________________________________________________________
+[ 15160] By: jhi                                   on 2002/03/11  03:36:32
+        Log: Subject: Re: [PATCH] for broken /proc/curproc/file on FreeBSD
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Sun, 10 Mar 2002 18:17:50 +0000
+             Message-ID: <20020310181749.GC317@Bagpuss.unfortu.net>
+             
+             Subject: Re: [PATCH] for broken /proc/curproc/file on FreeBSD
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Sun, 10 Mar 2002 13:53:34 -0800
+             Message-ID: <eX9i8gzkg26G092yn@efn.org>
+             
+             (and reenable the feature in freebsd,
+             and move the freebsd pr url to perl.c)
+     Branch: perl
+	   ! hints/freebsd.sh perl.c pod/perldelta.pod
+____________________________________________________________________________
+[ 15159] By: ams                                   on 2002/03/11  03:34:13
+        Log: Subject: [PATCH stash.t] access::readonly is gone
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sun, 10 Mar 2002 16:18:14 -0500
+             Message-Id: <20020310211813.GE27112@blackrider>
+     Branch: perl
+	   ! ext/B/t/stash.t
+____________________________________________________________________________
+[ 15158] By: ams                                   on 2002/03/11  03:28:04
+        Log: Subject: [PATCH] Raw socket require privileged user on Win2k
+             From: "Mattia Barbon" <mbarbon@dsi.unive.it>
+             Date: Sun, 10 Mar 2002 22:10:15 +0100
+             Message-Id: <3C8BD9C7.610.7398DD@localhost>
+     Branch: perl
+	   ! lib/Net/Ping/t/110_icmp_inst.t
+____________________________________________________________________________
+[ 15157] By: jhi                                   on 2002/03/11  03:12:01
+        Log: Subject: [PATCH] Test::Simple/More/Builder 0.42
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sun, 10 Mar 2002 19:22:33 -0500
+             Message-ID: <20020311002233.GE4927@blackrider>
+     Branch: perl
+	   ! lib/Test/Builder.pm lib/Test/More.pm lib/Test/Simple.pm
+	   ! lib/Test/Simple/Changes lib/Test/Simple/t/Builder.t
+	   ! lib/Test/Simple/t/fail-more.t
+____________________________________________________________________________
+[ 15156] By: jhi                                   on 2002/03/11  03:10:55
+        Log: Subject: [PATCH] Test.pm 1.18 -> 1.20
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sun, 10 Mar 2002 17:14:10 -0500
+             Message-ID: <20020310221410.GA4915@blackrider>
+     Branch: perl
+	   ! lib/Test.pm lib/Test/t/fail.t lib/Test/t/mix.t
+	   ! lib/Test/t/onfail.t lib/Test/t/skip.t lib/Test/t/todo.t
+____________________________________________________________________________
+[ 15155] By: jhi                                   on 2002/03/11  03:09:16
+        Log: Subject: [PATCH] more warnings tidyup
+             From: "Paul Marquess" <paul_marquess@yahoo.co.uk>
+             Date: Sun, 10 Mar 2002 21:01:39 -0000
+             Message-ID: <AIEAJICLCBDNAAOLLOKLMEEGDPAA.paul_marquess@yahoo.co.uk>
+     Branch: perl
+	   ! av.c doio.c doop.c dump.c gv.c hv.c malloc.c mg.c numeric.c
+	   ! op.c perl.c pp.c pp_ctl.c pp_hot.c pp_pack.c pp_sys.c
+	   ! regcomp.c regexec.c sv.c taint.c toke.c universal.c utf8.c
+	   ! util.c
+____________________________________________________________________________
+[ 15154] By: jhi                                   on 2002/03/11  03:07:03
+        Log: Subject: Re: [PATCH] xsubpp prototypes warnings
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Sun, 10 Mar 2002 23:21:07 +0000
+             Message-ID: <20020310232107.GI317@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! ext/B/C/C.xs ext/Encode/CN/Makefile.PL
+	   ! ext/Encode/JP/Makefile.PL ext/Encode/KR/Makefile.PL
+	   ! ext/Encode/TW/Makefile.PL
+____________________________________________________________________________
+[ 15153] By: ams                                   on 2002/03/11  03:06:59
+        Log: Subject: Re: [patch] IO::Socket::INET Broadcast patch
+             From: Max Baker <max@warped.org>
+             Date: Fri, 8 Mar 2002 10:56:19 -0800
+             Message-Id: <20020308105619.A15039@warped.org>
+     Branch: perl
+	   ! ext/IO/lib/IO/Socket/INET.pm
+____________________________________________________________________________
+[ 15152] By: jhi                                   on 2002/03/11  03:05:54
+        Log: Subject: [PATCH] spelling correction
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Sun, 10 Mar 2002 18:34:42 +0000
+             Message-ID: <20020310183441.GE317@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! pp.c pp_hot.c
+____________________________________________________________________________
+[ 15151] By: jhi                                   on 2002/03/11  03:04:33
+        Log: DG/UX updates from Takis Psarogiannakopoulos.
+     Branch: perl
+	   ! README.dgux hints/dgux.sh perl.h t/op/stat.t thread.h
+____________________________________________________________________________
+[ 15150] By: ams                                   on 2002/03/11  03:02:47
+        Log: Subject: [PATCH] debugger filenames for Mac OS - db.patch (1/1)
+             From: Chris Nandor <pudge@pobox.com>
+             Date: Mon, 04 Mar 2002 17:48:12 -0500
+             Message-Id: <pudge-3FDB8F.17481204032002@onion.valueclick.com>
+     Branch: perl
+	   ! lib/DB.pm lib/perl5db.pl
+____________________________________________________________________________
+[ 15149] By: jhi                                   on 2002/03/11  03:01:26
+        Log: metaconfig unit changes in preparation of reentrancy changes.
+     Branch: metaconfig
+	   + U/threads/d_ctermid_r.U U/threads/d_readdir64_r.U
+	   + U/threads/d_ttyname_r.U
+	   ! U/threads/d_asctime_r.U U/threads/d_ctime_r.U
+	   ! U/threads/d_endgrent_r.U U/threads/d_endhent_r.U
+	   ! U/threads/d_endnent_r.U U/threads/d_endpent_r.U
+	   ! U/threads/d_endpwent_r.U U/threads/d_getgrent_r.U
+	   ! U/threads/d_getgrgid_r.U U/threads/d_getgrnam_r.U
+	   ! U/threads/d_gethent_r.U U/threads/d_getnent_r.U
+	   ! U/threads/d_getpwent_r.U U/threads/d_getpwnam_r.U
+	   ! U/threads/d_getpwuid_r.U U/threads/d_gmtime_r.U
+	   ! U/threads/d_localtime_r.U U/threads/d_readdir_r.U
+	   ! U/threads/d_setgrent_r.U U/threads/d_setpwent_r.U
+	   ! U/threads/d_strerror_r.U
+____________________________________________________________________________
+[ 15148] By: jhi                                   on 2002/03/10  22:32:33
+        Log: Mysterious characters.
+     Branch: perl
+	   ! utf8.h
+____________________________________________________________________________
+[ 15147] By: jhi                                   on 2002/03/10  17:58:43
+        Log: Unused.
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[ 15146] By: jhi                                   on 2002/03/10  16:35:55
+        Log: Implement :std subpragma of the open pragma
+             that makes the standard filehandles to talk in
+             encodings.  This change set off a weird warning
+             from op.c, though: disabled it now until someone
+             who knows what it is about comes along.
+     Branch: perl
+	   ! lib/open.pm op.c
+____________________________________________________________________________
+[ 15145] By: jhi                                   on 2002/03/10  16:00:46
+        Log: Document the logic of :locale better.
+     Branch: perl
+	   ! lib/open.pm
+____________________________________________________________________________
+[ 15144] By: jhi                                   on 2002/03/10  15:53:57
+        Log: Subject: [PATCH] for broken /proc/curproc/file on FreeBSD
+             From: Slaven Rezic <slaven.rezic@berlin.de>
+             Date: 10 Mar 2002 02:49:17 +0100
+             Message-ID: <87lmd1qjj6.fsf@vran.herceg.de>
+     Branch: perl
+	   ! hints/freebsd.sh
+____________________________________________________________________________
+[ 15143] By: jhi                                   on 2002/03/10  15:46:22
+        Log: Subject: Encode::Tcl docs (was Re: UTF-16 and other missing(?) encodings)    
+             From: SADAHIRO Tomoyuki <bqw10602@nifty.com>
+             Date: Sun, 10 Mar 2002 17:08:54 +0900
+             Message-Id: <20020310170748.1F29.BQW10602@nifty.com>
+     Branch: perl
+	   ! ext/Encode/lib/Encode/Tcl.pm
+	   ! ext/Encode/lib/Encode/Tcl/Escape.pm
+	   ! ext/Encode/lib/Encode/Tcl/Extended.pm
+	   ! ext/Encode/lib/Encode/Tcl/Table.pm
+____________________________________________________________________________
+[ 15142] By: jhi                                   on 2002/03/10  15:43:54
+        Log: The patch does the following:
+             - Nix the unneccessary diagnostics line
+             - Quell -w warnings if the first ENV doesn't exist
+             - While zh_CN means euc-cn, zh_TW almost invariably mean big5, as euc-tw
+             is too baroque and bloated for daily use (and for perl core inclusion).
+             - "Cannot figure out an encoding to use" when locale is 'C' is rendered
+             non-fatal.
+             - Consequently, the ^OPEN bits is set only when needed.
+     Branch: perl
+	   ! lib/open.pm
+____________________________________________________________________________
+[ 15141] By: jhi                                   on 2002/03/10  05:15:26
+        Log: Misc tiny tweaks from Sarathy, good for threaded builds.
+     Branch: perl
+	   ! ext/Socket/Socket.xs hints/linux.sh pp_sys.c
+____________________________________________________________________________
+[ 15140] By: jhi                                   on 2002/03/10  05:12:08
+        Log: Precedence problem.
+     Branch: perl
+	   ! ext/Socket/socketpair.t
+____________________________________________________________________________
+[ 15139] By: jhi                                   on 2002/03/10  04:57:07
+        Log: Renaming tweaks, and split off the reentrant "superbuffer"
+             init routine.
+     Branch: perl
+	   ! embed.fnc embed.h global.sym intrpvar.h op.h perl.c proto.h
+	   ! sv.c util.c
+____________________________________________________________________________
+[ 15138] By: jhi                                   on 2002/03/10  00:59:50
+        Log: The 7-bit jis seems to be the hanging one.
+     Branch: perl
+	   ! ext/Encode/t/Tcl.t
+____________________________________________________________________________
+[ 15137] By: jhi                                   on 2002/03/10  00:39:18
+        Log: Begone.
+     Branch: perl
+	   ! ext/Encode/MANIFEST
+____________________________________________________________________________
+[ 15136] By: jhi                                   on 2002/03/09  23:56:42
+        Log: Better fix from Autrijus.
+     Branch: perl
+	   ! ext/Encode/CN/CN.pm ext/Encode/Encode.pm ext/Encode/JP/JP.pm
+	   ! ext/Encode/KR/KR.pm ext/Encode/TW/TW.pm
+____________________________________________________________________________
+[ 15135] By: jhi                                   on 2002/03/09  18:49:55
+        Log: Not everybody has Encode::HanExtra.
+     Branch: perl
+	   ! ext/Encode/Encode.pm
+____________________________________________________________________________
+[ 15134] By: jhi                                   on 2002/03/09  18:30:18
+        Log: Decutandpasto.
+     Branch: perl
+	   ! ext/Encode/lib/Encode/Tcl.pm
+____________________________________________________________________________
+[ 15133] By: jhi                                   on 2002/03/09  18:19:38
+        Log: Subject: [PATCH] Data::Dumper
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Sat, 9 Mar 2002 19:03:54 +0000
+             Message-ID: <20020309190353.GE307@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! ext/Data/Dumper/Dumper.pm ext/Data/Dumper/Dumper.xs
+	   ! ext/Data/Dumper/t/dumper.t
+____________________________________________________________________________
+[ 15132] By: jhi                                   on 2002/03/09  16:55:40
+        Log: Subject: [PATCH] socketpair.t w/o fork
+             From: "Mattia Barbon" <mbarbon@dsi.unive.it>
+             Date: Sat, 9 Mar 2002 14:55:11 +0100
+             Message-ID: <3C8A224F.29578.13691BA@localhost>
+             
+             (modified as suggested by Sarathy)
+     Branch: perl
+	   ! ext/Socket/socketpair.t
+____________________________________________________________________________
+[ 15131] By: jhi                                   on 2002/03/09  16:05:00
+        Log: Subject: [PATCH perldelta] Mention Change 14727
+             From: Autrijus Tang <autrijus@autrijus.org>
+             Date: Sat, 9 Mar 2002 23:31:40 +0800
+             Message-ID: <20020309153140.GA4224@not.autrijus.org>
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 15130] By: jhi                                   on 2002/03/09  16:02:58
+        Log: Make Encode.pm implicitly load external CJK tables the first
+             time they're needed (instead of immediately), from Autrijus
+             Tang.
+     Branch: perl
+	   ! ext/Encode/Encode.pm
+____________________________________________________________________________
+[ 15129] By: jhi                                   on 2002/03/09  16:01:00
+        Log: Subject: Re: Two questions
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Sat, 9 Mar 2002 12:42:40 +0000
+             Message-ID: <20020309124239.GC307@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! Porting/pumpkin.pod
+____________________________________________________________________________
+[ 15128] By: jhi                                   on 2002/03/09  04:19:22
+        Log: Subject: [PATCH] pp_sys.c (pp_sselect to not clobber storage on BigEndian
+             From: Paul_GreenVOS@vos.stratus.com
+             Date: Fri, 8 Mar 02 22:34 est
+             Message-Id: <200203090336.WAA11215@mailhub1.stratus.com>
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[ 15127] By: jhi                                   on 2002/03/09  01:34:41
+        Log: Subject: [PATCH @15084] perl -Dt doesnt output newlines
+             From: davem@fdgroup.co.uk
+             Date: Sat, 9 Mar 2002 00:13:27 GMT
+             Message-Id: <200203090013.AAA01000@gizmo.fdgroup.co.uk>
+     Branch: perl
+	   ! dump.c
+____________________________________________________________________________
+[ 15126] By: jhi                                   on 2002/03/09  01:23:16
+        Log: Deglitch from Rafael.
+     Branch: perl
+	   ! ext/B/t/lint.t
+____________________________________________________________________________
+[ 15125] By: jhi                                   on 2002/03/08  23:49:00
+        Log: Still more portability.
+     Branch: perl
+	   ! Porting/findrfuncs
+____________________________________________________________________________
+[ 15124] By: jhi                                   on 2002/03/08  22:54:50
+        Log: More portability.
+     Branch: perl
+	   ! Porting/findrfuncs
+____________________________________________________________________________
+[ 15123] By: jhi                                   on 2002/03/08  22:14:37
+        Log: Shared library paths; running tests manually.
+     Branch: perl
+	   ! INSTALL
+____________________________________________________________________________
+[ 15122] By: jhi                                   on 2002/03/08  22:02:37
+        Log: Subject: RE: Two questions
+             From: "Green, Paul" <Paul.Green@stratus.com>
+             Date: Fri, 8 Mar 2002 17:55:19 -0500
+             Message-ID: <A2A34F15EE916148BC4C4748223E67A4014E231C@EXNA4.stratus.com>
+     Branch: perl
+	   ! Porting/pumpkin.pod
+____________________________________________________________________________
+[ 15121] By: jhi                                   on 2002/03/08  21:52:51
+        Log: New shinier lint.t (and Lint.pm) from Rafael Garcia-Suarez.
+             (Lint.pm nit noticed by Michael Cook <michael@waxrat.com>)
+     Branch: perl
+	   + ext/B/t/lint.t
+	   ! MANIFEST ext/B/B/Lint.pm
+____________________________________________________________________________
+[ 15120] By: jhi                                   on 2002/03/08  20:27:42
+        Log: metaconfig unit change for #15119.
+     Branch: metaconfig
+	   ! U/threads/d_pthread_atfork.U
+____________________________________________________________________________
+[ 15119] By: jhi                                   on 2002/03/08  20:27:17
+        Log: In DG/UX finding pthread_atfork requires a true compile,
+             from Takis Psarogiannakopoulos.
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[ 15118] By: jhi                                   on 2002/03/08  20:07:07
+        Log: Subject: [PATCH] Forgot an OVERLOAD character in xsubpp
+             From: John Peacock <jpeacock@rowman.com>
+             Date: Fri, 08 Mar 2002 15:52:41 -0500
+             Message-ID: <3C892499.4050502@rowman.com>
+     Branch: perl
+	   ! lib/ExtUtils/xsubpp
+____________________________________________________________________________
+[ 15117] By: jhi                                   on 2002/03/08  20:05:41
+        Log: Subject: [PATCH @15109] test numbers for t/op/write.t
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Fri, 08 Mar 2002 15:02:51 -0600
+             Message-Id: <5.1.0.14.2.20020308145949.030c8c90@exchi01>
+     Branch: perl
+	   ! t/op/write.t
+____________________________________________________________________________
+[ 15116] By: jhi                                   on 2002/03/08  18:53:42
+        Log: Subject: [PATCH] *BETTER* installperl script patch for VOS
+             From: Paul_GreenVOS@vos.stratus.com
+             Date: Fri, 8 Mar 02 14:45 est
+             Message-Id: <200203081947.OAA29065@mailhub1.stratus.com>
+     Branch: perl
+	   ! installperl
+____________________________________________________________________________
+[ 15115] By: jhi                                   on 2002/03/08  18:52:30
+        Log: Subject: [PATCH @15109] tm_tm_* for VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Fri, 08 Mar 2002 13:07:52 -0600
+             Message-Id: <5.1.0.14.2.20020308123619.01ae5230@exchi01>
+     Branch: perl
+	   ! configure.com
+____________________________________________________________________________
+[ 15114] By: jhi                                   on 2002/03/08  18:51:27
+        Log: Detypo.
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
+[ 15113] By: jhi                                   on 2002/03/08  18:49:56
+        Log: Better test for #14795 (bug id 20020124.005) from Andreas.
+     Branch: perl
+	   ! t/op/pat.t
+____________________________________________________________________________
+[ 15112] By: jhi                                   on 2002/03/08  17:56:36
+        Log: HP-UX nm seems to repeat itself.
+     Branch: perl
+	   ! Porting/findrfuncs
+____________________________________________________________________________
+[ 15111] By: jhi                                   on 2002/03/08  17:50:21
+        Log: Nice porting script from Sarathy.  Well, less nice
+             in the sense that it shows the looong road ahead.
+     Branch: perl
+	   + Porting/findrfuncs
+	   ! MANIFEST Porting/makerel
+____________________________________________________________________________
+[ 15110] By: jhi                                   on 2002/03/08  15:58:25
+        Log: Subject: Re: Performance considerations for UTF-8
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Fri, 8 Mar 2002 18:53:28 +0200
+             Message-ID: <20020308185328.D640@alpha.hut.fi>
+             
+             (put all in perlunicode)
+     Branch: perl
+	   ! pod/perlunicode.pod
+____________________________________________________________________________
+[ 15109] By: jhi                                   on 2002/03/08  15:09:38
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 15108] By: jhi                                   on 2002/03/08  14:59:50
         Log: Subject: Cygwin cygipc support skipped
              From: "Gerrit P. Haase" <gerrit@familiehaase.de>

@@ -10,7 +10,7 @@ BEGIN {
 
 use Locale::Country;
 
-Locale::Country::_alias_code('uk' => 'gb');
+Locale::Country::alias_code('uk' => 'gb');
 
 #-----------------------------------------------------------------------
 # This is an array of tests. Each test is eval'd as an expression.

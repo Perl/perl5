@@ -1,7 +1,7 @@
 #
 # Locale::Country - ISO codes for country identification (ISO 3166)
 #
-# $Id: Country.pm,v 2.1 2002/02/06 04:07:09 neilb Exp $
+# $Id: Country.pm,v 2.2 2002/03/06 10:45:38 neilb Exp $
 #
 
 package Locale::Country;
@@ -17,7 +17,7 @@ use Locale::Constants;
 #	Public Global Variables
 #-----------------------------------------------------------------------
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
-$VERSION   = sprintf("%d.%02d", q$Revision: 2.1 $ =~ /(\d+)\.(\d+)/);
+$VERSION   = sprintf("%d.%02d", q$Revision: 2.2 $ =~ /(\d+)\.(\d+)/);
 @ISA       = qw(Exporter);
 @EXPORT    = qw(code2country country2code
                 all_country_codes all_country_names
@@ -153,15 +153,15 @@ sub all_country_names
 
 #=======================================================================
 #
-# _alias_code ( ALIAS => CODE [ , CODESET ] )
+# alias_code ( ALIAS => CODE [ , CODESET ] )
 #
 # Add an alias for an existing code. If the CODESET isn't specified,
 # then we use the default (currently the alpha-2 codeset).
 #
-#   Locale::Country::_alias_code('uk' => 'gb');
+#   Locale::Country::alias_code('uk' => 'gb');
 #
 #=======================================================================
-sub _alias_code
+sub alias_code
 {
     my $alias = shift;
     my $real  = shift;
@@ -180,6 +180,81 @@ sub _alias_code
     $COUNTRIES->[$codeset]->{"\L$country"} = $alias;
 
     return $alias;
+}
+
+# old name of function for backwards compatibility
+*_alias_code = *alias_code;
+
+
+#=======================================================================
+#
+# rename_country
+#
+# change the official name for a country, eg:
+#	gb => 'Great Britain'
+# rather than the standard 'United Kingdom'. The original is retained
+# as an alias, but the new name will be returned if you lookup the
+# name from code.
+#
+#=======================================================================
+sub rename_country
+{
+    my $code     = shift;
+    my $new_name = shift;
+    my $codeset = @_ > 0 ? shift : _code2codeset($code);
+    my $country;
+    my $c;
+
+
+    if (not defined $codeset)
+    {
+        carp "rename_country(): unknown country code \"$code\"\n";
+        return 0;
+    }
+
+    $country = $CODES->[$codeset]->{$code};
+
+    foreach my $cset (LOCALE_CODE_ALPHA_2,
+			LOCALE_CODE_ALPHA_3,
+			LOCALE_CODE_NUMERIC)
+    {
+	if ($cset == $codeset)
+	{
+	    $c = $code;
+	}
+	else
+	{
+	    $c = country_code2code($code, $codeset, $cset);
+	}
+
+	$CODES->[$cset]->{$c} = $new_name;
+	$COUNTRIES->[$cset]->{"\L$new_name"} = $c;
+    }
+
+    return 1;
+}
+
+
+#=======================================================================
+#
+# _code2codeset
+#
+# given a country code in an unknown codeset, return the codeset
+# it is from, or undef.
+#
+#=======================================================================
+sub _code2codeset
+{
+    my $code = shift;
+
+
+    foreach my $codeset (LOCALE_CODE_ALPHA_2, LOCALE_CODE_ALPHA_3,
+			LOCALE_CODE_NUMERIC)
+    {
+	return $codeset if (exists $CODES->[$codeset]->{$code})
+    }
+
+    return undef;
 }
 
 

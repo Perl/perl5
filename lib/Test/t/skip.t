@@ -1,9 +1,11 @@
 # -*-perl-*-
 use strict;
-use Test qw($TESTOUT $ntest plan ok skip); plan tests => 6;
+use Test qw($TESTOUT $TESTERR $ntest plan ok skip); 
+plan tests => 6;
 
 open F, ">skips" or die "open skips: $!";
 $TESTOUT = *F{IO};
+$TESTERR = *F{IO};
 
 skip(1, 0);  #should skip
 
@@ -15,6 +17,7 @@ skip('skipping stones is more fun', sub { $skipped = 0 });
 close F;
 
 $TESTOUT = *STDOUT{IO};
+$TESTERR = *STDERR{IO};
 $ntest = 1;
 open F, "skips" or die "open skips: $!";
 

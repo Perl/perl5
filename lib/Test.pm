@@ -6,20 +6,30 @@ use strict;
 
 use Carp;
 use vars (qw($VERSION @ISA @EXPORT @EXPORT_OK $ntest $TestLevel), #public-ish
-	  qw($TESTOUT $ONFAIL %todo %history $planned @FAILDETAIL)#private-ish
+          qw($TESTOUT $TESTERR
+             $ONFAIL %todo %history $planned @FAILDETAIL) #private-ish
          );
 
-$VERSION = '1.18';
+# In case a test is run in a persistent environment.
+sub _reset_globals {
+    %todo       = ();
+    %history    = ();
+    @FAILDETAIL = ();
+    $ntest      = 1;
+    $TestLevel  = 0;		# how many extra stack frames to skip
+    $planned    = 0;
+}
+
+$VERSION = '1.20';
 require Exporter;
 @ISA=('Exporter');
 
 @EXPORT    = qw(&plan &ok &skip);
-@EXPORT_OK = qw($ntest $TESTOUT);
+@EXPORT_OK = qw($ntest $TESTOUT $TESTERR);
 
-$TestLevel = 0;		# how many extra stack frames to skip
 $|=1;
-$ntest=1;
 $TESTOUT = *STDOUT{IO};
+$TESTERR = *STDERR{IO};
 
 # Use of this variable is strongly discouraged.  It is set mainly to
 # help test coverage analyzers know which test is running.
@@ -111,6 +121,8 @@ sub plan {
 
     local($\, $,);   # guard against -l and other things that screw with
                      # print
+
+    _reset_globals();
 
     my $max=0;
     for (my $x=0; $x < @_; $x+=2) {
@@ -275,13 +287,13 @@ sub ok ($;$$) {
 	    $context .= ' *TODO*' if $todo;
 	    if (!defined $expected) {
 		if (!$diag) {
-		    print $TESTOUT "# Failed test $ntest in $context\n";
+		    print $TESTERR "# Failed test $ntest in $context\n";
 		} else {
-		    print $TESTOUT "# Failed test $ntest in $context: $diag\n";
+		    print $TESTERR "# Failed test $ntest in $context: $diag\n";
 		}
 	    } else {
 		my $prefix = "Test $ntest";
-		print $TESTOUT "# $prefix got: ".
+		print $TESTERR "# $prefix got: ".
 		    (defined $result? "'$result'":'<UNDEF>')." ($context)\n";
 		$prefix = ' ' x (length($prefix) - 5);
 		if (defined $regex) {
@@ -291,9 +303,9 @@ sub ok ($;$$) {
 		    $expected = "'$expected'";
 		}
 		if (!$diag) {
-		    print $TESTOUT "# $prefix Expected: $expected\n";
+		    print $TESTERR "# $prefix Expected: $expected\n";
 		} else {
-		    print $TESTOUT "# $prefix Expected: $expected ($diag)\n";
+		    print $TESTERR "# $prefix Expected: $expected ($diag)\n";
 		}
 	    }
 	    push @FAILDETAIL, $detail;
@@ -424,34 +436,33 @@ Again, best bet is to use the single argument form:
     ok( $fileglob eq '/path/to/some/*stuff/' );
 
 
-=head1 TODO
+=head1 NOTE
 
-Add todo().
-
-Allow named tests.
-
-Implement noplan().
+This module is no longer actively being developed, only bug fixes and
+small tweaks (I'll still accept patches).  If you desire additional
+functionality, consider L<Test::More> or L<Test::Unit>.
 
 
 =head1 SEE ALSO
 
 L<Test::Simple>, L<Test::More>, L<Test::Harness>, L<Devel::Cover>
 
-L<Test::Unit> is an interesting alternative testing library.
+L<Test::Builder> for building your own testing library.
 
-L<Pod::Tests> and L<SelfTest> let you embed tests in code.
+L<Test::Unit> is an interesting XUnit-style testing library.
+
+L<Test::Inline> and L<SelfTest> let you embed tests in code.
 
 
 =head1 AUTHOR
 
 Copyright (c) 1998-2000 Joshua Nathaniel Pritikin.  All rights reserved.
-Copyright (c) 2001      Michael G Schwern.
+Copyright (c) 2001-2002 Michael G Schwern.
 
 Current maintainer, Michael G Schwern <schwern@pobox.com>
 
 This package is free software and is provided "as is" without express
 or implied warranty.  It may be used, redistributed and/or modified
-under the terms of the Perl Artistic License (see
-http://www.perl.com/perl/misc/Artistic.html)
+under the same terms as Perl itself.
 
 =cut

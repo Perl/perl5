@@ -10,13 +10,7 @@ use Encode qw(find_encoding);
 use base 'Encode::Encoding';
 use Carp;
 
-=head1 NAME
-
-Encode::Tcl - Tcl encodings
-
-=cut
-
-    sub INC_search
+sub INC_search
 {
     foreach my $dir (@INC)
     {
@@ -27,7 +21,7 @@ Encode::Tcl - Tcl encodings
 		if ($name =~ /^(.*)\.enc$/)
 		{
 		    my $canon = $1;
-		    my $obj = find_encoding($canon);
+		    my $obj = find_encoding($canon, 1); # skip external tables
 		    if (!defined($obj))
 		    {
 			my $obj = bless { Name => $canon, File => "$dir/Encode/$name"},__PACKAGE__;
@@ -134,3 +128,36 @@ require Encode::Tcl::Extended;
 
 1;
 __END__
+
+=head1 NAME
+
+Encode::Tcl - Tcl encodings
+
+=head1 SYNOPSIS
+
+    use Encode;
+    use Encode::Tcl;
+    $unicode  = decode('shiftjis', $shiftjis);
+    $shiftjis = encode('shiftjis', $unicode);
+
+=head1 DESCRIPTION
+
+This module provides the interface to encodings
+defined by the format of encoding tables borrowed from Tcl
+and not compiled in other Encode:: modules.
+
+See also F<Encode/EncodeFormat.pod> and F<Encode/*.enc> files.
+
+To find how to use this module in detail, see L<Encode>.
+
+=head1 SEE ALSO
+
+L<Encode>
+
+L<Encode::Tcl::Table>
+
+L<Encode::Tcl::Escape>
+
+L<Encode::Tcl::Extended>
+
+=cut

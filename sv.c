@@ -199,7 +199,7 @@ S_del_sv(pTHX_ SV *p)
 	}
 	if (!ok) {
 	    if (ckWARN_d(WARN_INTERNAL))	
-	        Perl_warner(aTHX_ WARN_INTERNAL,
+	        Perl_warner(aTHX_ packWARN(WARN_INTERNAL),
 			    "Attempt to free non-arena SV: 0x%"UVxf,
 			    PTR2UV(p));
 	    return;
@@ -546,10 +546,10 @@ void
 Perl_report_uninit(pTHX)
 {
     if (PL_op)
-	Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit,
+	Perl_warner(aTHX_ packWARN(WARN_UNINITIALIZED), PL_warn_uninit,
 		    " in ", OP_DESC(PL_op));
     else
-	Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit, "", "");
+	Perl_warner(aTHX_ packWARN(WARN_UNINITIALIZED), PL_warn_uninit, "", "");
 }
 
 /* grab a new IV body from the free list, allocating more if necessary */
@@ -1824,11 +1824,11 @@ S_not_a_number(pTHX_ SV *sv)
     }
 
     if (PL_op)
-	Perl_warner(aTHX_ WARN_NUMERIC,
+	Perl_warner(aTHX_ packWARN(WARN_NUMERIC),
 		    "Argument \"%s\" isn't numeric in %s", pv,
 		    OP_DESC(PL_op));
     else
-	Perl_warner(aTHX_ WARN_NUMERIC,
+	Perl_warner(aTHX_ packWARN(WARN_NUMERIC),
 		    "Argument \"%s\" isn't numeric", pv);
 }
 
@@ -3313,6 +3313,9 @@ Forces the SV to string form if it is not already.
 Always sets the SvUTF8 flag to avoid future validity checks even
 if all the bytes have hibit clear.
 
+This is not as a general purpose byte encoding to Unicode interface:
+use the Encode extension for that.
+
 =cut
 */
 
@@ -3331,6 +3334,9 @@ Always sets the SvUTF8 flag to avoid future validity checks even
 if all the bytes have hibit clear. If C<flags> has C<SV_GMAGIC> bit set,
 will C<mg_get> on C<sv> if appropriate, else not. C<sv_utf8_upgrade> and
 C<sv_utf8_upgrade_nomg> are implemented in terms of this function.
+
+This is not as a general purpose byte encoding to Unicode interface:
+use the Encode extension for that.
 
 =cut
 */
@@ -3396,6 +3402,9 @@ Attempt to convert the PV of an SV from UTF8-encoded to byte encoding.
 This may not be possible if the PV contains non-byte encoding characters;
 if this is the case, either returns false or, if C<fail_ok> is not
 true, croaks.
+
+This is not as a general purpose Unicode to byte encoding interface:
+use the Encode extension for that.
 
 =cut
 */
@@ -3784,7 +3793,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
  					    || sv_cmp(cv_const_sv(cv),
  						      cv_const_sv((CV*)sref)))))
  				{
- 				    Perl_warner(aTHX_ WARN_REDEFINE,
+ 				    Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
  					CvCONST(cv)
  					? "Constant subroutine %s redefined"
  					: "Subroutine %s redefined",
@@ -3964,7 +3973,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
     else {
 	if (dtype == SVt_PVGV) {
 	    if (ckWARN(WARN_MISC))
-		Perl_warner(aTHX_ WARN_MISC, "Undefined value assigned to typeglob");
+		Perl_warner(aTHX_ packWARN(WARN_MISC), "Undefined value assigned to typeglob");
 	}
 	else
 	    (void)SvOK_off(dstr);
@@ -4731,7 +4740,7 @@ Perl_sv_rvweaken(pTHX_ SV *sv)
 	Perl_croak(aTHX_ "Can't weaken a nonreference");
     else if (SvWEAKREF(sv)) {
 	if (ckWARN(WARN_MISC))
-	    Perl_warner(aTHX_ WARN_MISC, "Reference is already weak");
+	    Perl_warner(aTHX_ packWARN(WARN_MISC), "Reference is already weak");
 	return sv;
     }
     tsv = SvRV(sv);
@@ -4898,7 +4907,7 @@ Perl_sv_replace(pTHX_ register SV *sv, register SV *nsv)
     U32 refcnt = SvREFCNT(sv);
     SV_CHECK_THINKFIRST(sv);
     if (SvREFCNT(nsv) != 1 && ckWARN_d(WARN_INTERNAL))
-	Perl_warner(aTHX_ WARN_INTERNAL, "Reference miscount in sv_replace()");
+	Perl_warner(aTHX_ packWARN(WARN_INTERNAL), "Reference miscount in sv_replace()");
     if (SvMAGICAL(sv)) {
 	if (SvMAGICAL(nsv))
 	    mg_free(nsv);
@@ -5173,7 +5182,7 @@ Perl_sv_free(pTHX_ SV *sv)
 	    return;
 	}
 	if (ckWARN_d(WARN_INTERNAL))
-	    Perl_warner(aTHX_ WARN_INTERNAL, "Attempt to free unreferenced scalar");
+	    Perl_warner(aTHX_ packWARN(WARN_INTERNAL), "Attempt to free unreferenced scalar");
 	return;
     }
     ATOMIC_DEC_AND_TEST(refcount_is_zero, SvREFCNT(sv));
@@ -5182,7 +5191,7 @@ Perl_sv_free(pTHX_ SV *sv)
 #ifdef DEBUGGING
     if (SvTEMP(sv)) {
 	if (ckWARN_d(WARN_DEBUGGING))
-	    Perl_warner(aTHX_ WARN_DEBUGGING,
+	    Perl_warner(aTHX_ packWARN(WARN_DEBUGGING),
 			"Attempt to free temp prematurely: SV 0x%"UVxf,
 			PTR2UV(sv));
 	return;
@@ -6520,7 +6529,7 @@ Perl_newSVsv(pTHX_ register SV *old)
 	return Nullsv;
     if (SvTYPE(old) == SVTYPEMASK) {
         if (ckWARN_d(WARN_INTERNAL))
-	    Perl_warner(aTHX_ WARN_INTERNAL, "semi-panic: attempt to dup freed string");
+	    Perl_warner(aTHX_ packWARN(WARN_INTERNAL), "semi-panic: attempt to dup freed string");
 	return Nullsv;
     }
     new_SV(sv);
@@ -8283,7 +8292,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		    if (n >= 2 && s[n-2] == '1' && s[n-1] == '9'
 			&& (n == 2 || !isDIGIT(s[n-3])))
 		    {
-			Perl_warner(aTHX_ WARN_Y2K,
+			Perl_warner(aTHX_ packWARN(WARN_Y2K),
 				    "Possible Y2K bug: %%%c %s",
 				    c, "format string following '19'");
 		    }
@@ -8420,7 +8429,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 				       (UV)c & 0xFF);
 		} else
 		    sv_catpv(msg, "end of string");
-		Perl_warner(aTHX_ WARN_PRINTF, "%"SVf, msg); /* yes, this is reentrant */
+		Perl_warner(aTHX_ packWARN(WARN_PRINTF), "%"SVf, msg); /* yes, this is reentrant */
 	    }
 
 	    /* output mangled stuff ... */

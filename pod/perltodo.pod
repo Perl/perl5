@@ -525,6 +525,16 @@ Instead of having to guess whether a string is a v-string and thus
 needs to be displayed with %vd, make v-strings (readonly) objects
 (class "vstring"?) with a stringify overload.
 
+=head2 Allow restricted hash assignment
+
+Currently you're not allowed to assign to a restricted hash at all,
+even with the same keys.
+
+    %restricted = (foo => 42);  # error
+
+This should be allowed if the new keyset is a subset of the old
+keyset.  May require more extra code than we'd like in pp_aassign.
+
 =head1 Vague ideas
 
 Ideas which have been discussed, and which may or may not happen.

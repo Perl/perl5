@@ -866,16 +866,18 @@ argument is not a HASH or ARRAY element, %s argument is not a HASH or ARRAY
 element or slice, %s argument is not a subroutine name, Argument "%s" isn't
 numeric%s, Array @%s missing the @ in argument %d of %s(), assertion
 botched: %s, Assertion failed: file "%s", Assignment to both a list and a
-scalar, Attempt to access key '%_' in fixed hash, Attempt to bless into a
-reference, Attempt to free non-arena SV: 0x%lx, Attempt to free nonexistent
-shared string, Attempt to free temp prematurely, Attempt to free
-unreferenced glob pointers, Attempt to free unreferenced scalar, Attempt to
-join self, Attempt to pack pointer to temporary value, Attempt to use
-reference as lvalue in substr, Bad arg length for %s, is %d, should be %s,
-Bad evalled substitution pattern, Bad filehandle: %s, Bad free() ignored,
-Bad hash, Bad index while coercing array into hash, Badly placed ()'s, Bad
-name after %s::, Bad realloc() ignored, Bad symbol for array, Bad symbol
-for filehandle, Bad symbol for hash, Bareword found in conditional,
+scalar, Attempt to access disallowed key '%s' in a fixed hash, Attempt to
+clear a fixed hash, Attempt to delete readonly key '%s' from a fixed hash,
+Attempt to delete disallowed key '%s' from a fixed hash, Attempt to bless
+into a reference, Attempt to free non-arena SV: 0x%lx, Attempt to free
+nonexistent shared string, Attempt to free temp prematurely, Attempt to
+free unreferenced glob pointers, Attempt to free unreferenced scalar,
+Attempt to join self, Attempt to pack pointer to temporary value, Attempt
+to use reference as lvalue in substr, Bad arg length for %s, is %d, should
+be %s, Bad evalled substitution pattern, Bad filehandle: %s, Bad free()
+ignored, Bad hash, Bad index while coercing array into hash, Badly placed
+()'s, Bad name after %s::, Bad realloc() ignored, Bad symbol for array, Bad
+symbol for filehandle, Bad symbol for hash, Bareword found in conditional,
 Bareword "%s" not allowed while "strict subs" in use, Bareword "%s" refers
 to nonexistent package, BEGIN failed--compilation aborted, BEGIN not safe
 after errors--compilation aborted, \1 better written as $1, Binary number >
@@ -2382,8 +2384,6 @@ v1.30, 03 August 1998, v1.23, 10 July 1998
 
 =item AUTHORS / CONTRIBUTORS
 
-=item VERSION
-
 =back
 
 =head2 perllocale - Perl locale handling (internationalization and
@@ -2553,13 +2553,7 @@ to enable UTF-8/UTF-EBCDIC in scripts
 
 =item Character encodings for input and output
 
-=back
-
-=item CAVEATS
-
-=item UNICODE REGULAR EXPRESSION SUPPORT LEVEL
-
-=over 4
+=item Unicode Regular Expression Support Level
 
 =item Unicode Encodings
 
@@ -2571,7 +2565,7 @@ to enable UTF-8/UTF-EBCDIC in scripts
 
 =back
 
-=item SEE ALSO
+=item BUGS
 
 =back
 
@@ -4615,8 +4609,8 @@ PL_modglobal, PL_na, PL_sv_no, PL_sv_undef, PL_sv_yes
 
 =item GV Functions
 
-GvSV, gv_fetchmeth, gv_fetchmethod, gv_fetchmethod_autoload, gv_stashpv,
-gv_stashsv
+GvSV, gv_fetchmeth, gv_fetchmethod, gv_fetchmethod_autoload,
+gv_fetchmeth_autoload, gv_stashpv, gv_stashsv
 
 =item Handy Values
 
@@ -4669,22 +4663,22 @@ svtype, SVt_IV, SVt_NV, SVt_PV, SVt_PVAV, SVt_PVCV, SVt_PVHV, SVt_PVMG
 
 =item SV Manipulation Functions
 
-get_sv, looks_like_number, newRV_inc, newRV_noinc, newSV, newSViv, newSVnv,
-newSVpv, newSVpvf, newSVpvn, newSVpvn_share, newSVrv, newSVsv, newSVuv,
-new_vstring, SvCUR, SvCUR_set, SvEND, SvGROW, SvIOK, SvIOKp, SvIOK_notUV,
-SvIOK_off, SvIOK_on, SvIOK_only, SvIOK_only_UV, SvIOK_UV, SvIV, SvIVX,
-SvIVx, SvLEN, SvNIOK, SvNIOKp, SvNIOK_off, SvNOK, SvNOKp, SvNOK_off,
-SvNOK_on, SvNOK_only, SvNV, SvNVx, SvNVX, SvOK, SvOOK, SvPOK, SvPOKp,
-SvPOK_off, SvPOK_on, SvPOK_only, SvPOK_only_UTF8, SvPV, SvPVbyte,
-SvPVbytex, SvPVbytex_force, SvPVbyte_force, SvPVbyte_nolen, SvPVutf8,
-SvPVutf8x, SvPVutf8x_force, SvPVutf8_force, SvPVutf8_nolen, SvPVx, SvPVX,
-SvPV_force, SvPV_force_nomg, SvPV_nolen, SvREFCNT, SvREFCNT_dec,
-SvREFCNT_inc, SvROK, SvROK_off, SvROK_on, SvRV, SvSTASH, SvTAINT,
-SvTAINTED, SvTAINTED_off, SvTAINTED_on, SvTRUE, SvTYPE, SvUNLOCK, SvUOK,
-SvUPGRADE, SvUTF8, SvUTF8_off, SvUTF8_on, SvUV, SvUVX, SvUVx, sv_2bool,
-sv_2cv, sv_2io, sv_2iv, sv_2mortal, sv_2nv, sv_2pvbyte, sv_2pvbyte_nolen,
-sv_2pvutf8, sv_2pvutf8_nolen, sv_2pv_flags, sv_2pv_nolen, sv_2uv,
-sv_backoff, sv_bless, sv_catpv, sv_catpvf, sv_catpvf_mg, sv_catpvn,
+get_sv, looks_like_number, memcmp_byte_utf8, newRV_inc, newRV_noinc, newSV,
+newSViv, newSVnv, newSVpv, newSVpvf, newSVpvn, newSVpvn_share, newSVrv,
+newSVsv, newSVuv, new_vstring, SvCUR, SvCUR_set, SvEND, SvGROW, SvIOK,
+SvIOKp, SvIOK_notUV, SvIOK_off, SvIOK_on, SvIOK_only, SvIOK_only_UV,
+SvIOK_UV, SvIV, SvIVx, SvIVX, SvLEN, SvNIOK, SvNIOKp, SvNIOK_off, SvNOK,
+SvNOKp, SvNOK_off, SvNOK_on, SvNOK_only, SvNV, SvNVx, SvNVX, SvOK, SvOOK,
+SvPOK, SvPOKp, SvPOK_off, SvPOK_on, SvPOK_only, SvPOK_only_UTF8, SvPV,
+SvPVbyte, SvPVbytex, SvPVbytex_force, SvPVbyte_force, SvPVbyte_nolen,
+SvPVutf8, SvPVutf8x, SvPVutf8x_force, SvPVutf8_force, SvPVutf8_nolen,
+SvPVx, SvPVX, SvPV_force, SvPV_force_nomg, SvPV_nolen, SvREFCNT,
+SvREFCNT_dec, SvREFCNT_inc, SvROK, SvROK_off, SvROK_on, SvRV, SvSTASH,
+SvTAINT, SvTAINTED, SvTAINTED_off, SvTAINTED_on, SvTRUE, SvTYPE, SvUNLOCK,
+SvUOK, SvUPGRADE, SvUTF8, SvUTF8_off, SvUTF8_on, SvUV, SvUVx, SvUVX,
+sv_2bool, sv_2cv, sv_2io, sv_2iv, sv_2mortal, sv_2nv, sv_2pvbyte,
+sv_2pvbyte_nolen, sv_2pvutf8, sv_2pvutf8_nolen, sv_2pv_flags, sv_2pv_nolen,
+sv_2uv, sv_backoff, sv_bless, sv_catpv, sv_catpvf, sv_catpvf_mg, sv_catpvn,
 sv_catpvn_flags, sv_catpvn_mg, sv_catpv_mg, sv_catsv, sv_catsv_flags,
 sv_catsv_mg, sv_chop, sv_clear, sv_cmp, sv_cmp_locale, sv_collxfrm,
 sv_copypv, sv_dec, sv_derived_from, sv_eq, sv_force_normal,
@@ -5037,6 +5031,8 @@ PerlIO_apply_layers(f,mode,layers), PerlIO_binmode(f,ptype,imode,layers),
 
 =item Make v-strings overloaded objects
 
+=item Allow restricted hash assignment
+
 =back
 
 =item Vague ideas
@@ -5384,8 +5380,6 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item New Unicode Properties
 
-=item Perl Parser Stress Tested
-
 =item REF(...) Instead Of SCALAR(...)
 
 =item pack/unpack D/F recycled
@@ -5461,12 +5455,6 @@ I<The Road goes ever on and on, down from the door where it began.>
 =item Amiga Perl Invoking Mystery
 
 =item lib/ftmp-security tests warn 'system possibly insecure'
-
-=item Cygwin intermittent failures of lib/Memoize/t/expire_file 11 and 12
-
-=item FreeBSD 4.5 fails lib/File/Spec/t/rel2abs2rel.t
-
-=item HP-UX lib/io_multihomed Fails When LP64-Configured
 
 =item  HP-UX lib/posix Subtest 9 Fails When LP64-Configured
 
@@ -7337,50 +7325,6 @@ Source, Compiled Module Source, Perl Modules/Scripts
 
 =back
 
-=head2 perldos - Perl under DOS, W31, W95.
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=over 4
-
-=item Prerequisites for Compiling Perl on DOS
-
-DJGPP, Pthreads
-
-=item Shortcomings of Perl under DOS
-
-=item Building Perl on DOS
-
-=item Testing Perl on DOS
-
-=item Installation of Perl on DOS
-
-=back
-
-=item BUILDING AND INSTALLING MODULES ON DOS
-
-=over 4
-
-=item Building Prerequisites for Perl on DOS
-
-=item Unpacking CPAN Modules on DOS
-
-=item Building Non-XS Modules on DOS
-
-=item Building XS Modules on DOS
-
-=back
-
-=item AUTHOR
-
-=item SEE ALSO
-
-=back
-
 =head2 perlepoc, README.epoc - Perl for EPOC
 
 =over 4
@@ -8961,7 +8905,7 @@ code
 =item Utility functions
 
 $num_octets = utf8::upgrade($string);, utf8::downgrade($string[, CHECK]),
-utf8::encode($string), $flag = utf8::decode($string)
+utf8::encode($string)
 
 =back
 
@@ -10458,13 +10402,13 @@ C<d_strtoll>, C<d_strtoq>, C<d_strtoul>, C<d_strtoull>, C<d_strtouq>,
 C<d_strxfrm>, C<d_suidsafe>, C<d_symlink>, C<d_syscall>, C<d_syscallproto>,
 C<d_sysconf>, C<d_sysernlst>, C<d_syserrlst>, C<d_system>, C<d_tcgetpgrp>,
 C<d_tcsetpgrp>, C<d_telldir>, C<d_telldirproto>, C<d_time>, C<d_times>,
-C<d_truncate>, C<d_tzname>, C<d_u32align>, C<d_ualarm>, C<d_umask>,
-C<d_uname>, C<d_union_semun>, C<d_unordered>, C<d_usleep>,
-C<d_usleepproto>, C<d_ustat>, C<d_vendorarch>, C<d_vendorbin>,
-C<d_vendorlib>, C<d_vfork>, C<d_void_closedir>, C<d_voidsig>, C<d_voidtty>,
-C<d_volatile>, C<d_vprintf>, C<d_wait4>, C<d_waitpid>, C<d_wcstombs>,
-C<d_wctomb>, C<d_writev>, C<d_xenix>, C<date>, C<db_hashtype>,
-C<db_prefixtype>, C<db_version_major>, C<db_version_minor>,
+C<d_tm_tm_gmtoff>, C<d_tm_tm_zone>, C<d_truncate>, C<d_tzname>,
+C<d_u32align>, C<d_ualarm>, C<d_umask>, C<d_uname>, C<d_union_semun>,
+C<d_unordered>, C<d_usleep>, C<d_usleepproto>, C<d_ustat>, C<d_vendorarch>,
+C<d_vendorbin>, C<d_vendorlib>, C<d_vfork>, C<d_void_closedir>,
+C<d_voidsig>, C<d_voidtty>, C<d_volatile>, C<d_vprintf>, C<d_wait4>,
+C<d_waitpid>, C<d_wcstombs>, C<d_wctomb>, C<d_writev>, C<d_xenix>, C<date>,
+C<db_hashtype>, C<db_prefixtype>, C<db_version_major>, C<db_version_minor>,
 C<db_version_patch>, C<defvoidused>, C<direntrytype>, C<dlext>, C<dlsrc>,
 C<doublesize>, C<drand01>, C<dynamic_ext>
 
@@ -10891,6 +10835,70 @@ Dumper
 
 =back
 
+=head2 Data::Util - A selection of general-utility data subroutines
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+sv_readonly_flag
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
+=head2 Data::Utilib::Data::Util, Data::Util - A selection of
+general-utility data subroutines
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+sv_readonly_flag
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
+=head2 Data::Utilib::Hash::Util, Hash::Util - A selection of
+general-utility hash subroutines
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Restricted hashes
+
+lock_keys, unlock_keys
+
+=back
+
+=back
+
+lock_value, unlock_value
+
+B<lock_hash>, B<unlock_hash>
+
+=over 4
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
 =head2 Devel::DProf - a Perl code profiler
 
 =over 4
@@ -11203,7 +11211,102 @@ variants of EBCDIC, symbol and dingbats as used by Tk on X11
 
 =head2 Encode::Tcl - Tcl encodings
 
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item SEE ALSO
+
+=back
+
+=head2 Encode::Tcl::Escape - Tcl Escape encodings
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item SEE ALSO
+
+=back
+
+=head2 Encode::Tcl::Extended - Tcl EUC encodings
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item SEE ALSO
+
+=back
+
+=head2 Encode::Tcl::Table - Tcl Table encodings
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item SEE ALSO
+
+=back
+
 =head2 Encode::lib::Encode::Tcl, Encode::Tcl - Tcl encodings
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item SEE ALSO
+
+=back
+
+=head2 Encode::lib::Encode::Tcl::Escape, Encode::Tcl::Escape - Tcl Escape
+encodings
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item SEE ALSO
+
+=back
+
+=head2 Encode::lib::Encode::Tcl::Extended, Encode::Tcl::Extended - Tcl EUC
+encodings
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item SEE ALSO
+
+=back
+
+=head2 Encode::lib::Encode::Tcl::Table, Encode::Tcl::Table - Tcl Table
+encodings
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item SEE ALSO
+
+=back
 
 =head2 Encode::lib::EncodeFormat, EncodeFormat - the format of encoding
 tables of the Encode extension
@@ -12988,6 +13091,36 @@ clustering
 
 =back
 
+=head2 Hash::Util - A selection of general-utility hash subroutines
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Restricted hashes
+
+lock_keys, unlock_keys
+
+=back
+
+=back
+
+lock_value, unlock_value
+
+B<lock_hash>, B<unlock_hash>
+
+=over 4
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
 =head2 I18N::Collate - compare 8-bit scalar data according to the current
 locale
 
@@ -13931,7 +14064,15 @@ country_code2code( CODE, CODESET, CODESET )
 
 C<all_country_codes( [ CODESET ] )>, C<all_country_names( [ CODESET ] )>
 
-=item CODE ALIASING
+=item SEMI-PRIVATE ROUTINES
+
+=over 4
+
+=item alias_code
+
+=item rename_country
+
+=back
 
 =item EXAMPLES
 
@@ -13941,8 +14082,8 @@ C<all_country_codes( [ CODESET ] )>, C<all_country_names( [ CODESET ] )>
 
 =item SEE ALSO
 
-Locale::Language, Locale::Script, Locale::Currency, ISO 3166,
-http://www.din.de/gremien/nas/nabd/iso3166ma/,
+Locale::Language, Locale::Script, Locale::Currency, Locale::SubCountry, ISO
+3166-1, http://www.iso.org/iso/en/prods-services/iso3166ma/index.html,
 http://www.egt.ie/standards/iso3166/iso3166-1-en.html,
 http://www.cia.gov/cia/publications/factbook/docs/app-f.html
 
@@ -17148,7 +17289,7 @@ NORMAL TESTS, SKIPPED TESTS, TODO TESTS
 
 =item BUGS and CAVEATS
 
-=item TODO
+=item NOTE
 
 =item SEE ALSO
 

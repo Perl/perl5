@@ -228,7 +228,7 @@ sub define_encoding
 
 sub getEncoding
 {
-    my ($class,$name) = @_;
+    my ($class,$name,$skip_external) = @_;
     my $enc;
     if (ref($name) && $name->can('new_sequence'))
     {
@@ -243,23 +243,26 @@ sub getEncoding
     {
 	return $encoding{$lc};
     }
-    if (exists $external_tables{$lc})
+
+    my $oc = $class->findAlias($name);
+    return $oc if defined $oc;
+
+    $oc = $class->findAlias($lc) if $lc ne $name;
+    return $oc if defined $oc;
+
+    if (!$skip_external and exists $external_tables{$lc})
     {
 	require $external_tables{$lc};
 	return $encoding{$name} if exists $encoding{$name};
     }
-
-    my $oc = $class->findAlias($name);
-    return $oc if defined $oc;
-    return $class->findAlias($lc) if $lc ne $name;
 
     return;
 }
 
 sub find_encoding
 {
-    my ($name) = @_;
-    return __PACKAGE__->getEncoding($name);
+    my ($name,$skip_external) = @_;
+    return __PACKAGE__->getEncoding($name,$skip_external);
 }
 
 sub encode
@@ -455,7 +458,9 @@ repertoire.  See L</"Encoding Names">.
 
 =item 2. As an object
 
-Encoding objects are returned by C<find_encoding($name)>.
+Encoding objects are returned by C<find_encoding($name, [$skip_external])>.
+If the second parameter is true, Encode will refrain from loading external
+modules for CJK encodings.
 
 =back
 

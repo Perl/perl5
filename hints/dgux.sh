@@ -29,61 +29,61 @@
 # Department of Pure Mathematics
 # Wilberforce road
 # Cambridge CB3 0WB , UK
-# e-mail <takis@xfree86.org>
+# e-mail <takis@XFree86.Org>
 # Use GCC-2.95.2/3 rev (DG/UX) for threads
 # This compiler supports the -pthread switch
 # to link correctly DG/UX 's -lthread.
+# March 2002
 ###########################################
 
 cc=gcc
 ccflags="-DDGUX -D_DGUX_SOURCE"
-# Debug build with GNU as,ld and -gstabs+
-# ccflags="-DDGUX -D_DGUX_SOURCE -gstabs+"
+# Debug build. If using GNU as,ld use the flag -gstabs+
+# ccflags="-g -mstandard -DDGUX -D_DGUX_SOURCE -DDEBUGGING"
 # Dummy ; always compile with -O2 on GCC 2.95.2/3 rev (DG/UX)
+# even if you debugging the program!
 optimize="-mno-legend -O2"
 
 archname="ix86-dgux"
 libpth="/usr/lib"
 
 #####################################
-# <takis@xfree86.org>
+# <takis@XFree86.Org>
 # Change this if you want.
 # prefix =/usr/local
 #####################################
 
 prefix=/usr/local
-perlpath="$prefix/bin/perl57"
-startperl="#! $prefix/bin/perl57"
-privlib="$prefix/lib/perl57"
+perlpath="$prefix/bin/perl58"
+startperl="#! $prefix/bin/perl58"
+privlib="$prefix/lib/perl58"
 man1dir="$prefix/man/man1"
 man3dir="$prefix/man/man3"
 
-sitearch="$prefix/lib/perl57/$archname"
-sitelib="$prefix/lib/perl57"
+sitearch="$prefix/lib/perl58/$archname"
+sitelib="$prefix/lib/perl58"
 
 #Do not overwrite by default /usr/bin/perl of DG/UX
 installusrbinperl="$undef"
 
 # Configure may fail to find lstat()
 # function in <sys/stat.h>.
-d_lstat=define
+d_lstat='define'
 
-# Internal malloc is needed for correct operation
-# of perl-5.7.x
-# DG/UX native malloc is causing problems.
-# Some perl tests they failing badly.
+# Internal (perl) malloc is causing serious problems and
+# test failures in DG/UX. Most notable Embed.t 
+# So for perl-5.7.3 and on do NOT use. 
 # I have no time to investigate more.
-# <takis@xfree86.org>
+# <takis@XFree86.Org>
 
 case "$usemymalloc" in
-'') usemymalloc='y' ;;
+'') usemymalloc='n' ;;
 esac
 
 case "$uselongdouble" in
 '') uselongdouble='y' ;;
 esac
 
-#### No for threads ???? #####
 #usevfork=true
 usevfork=false
 
@@ -137,10 +137,10 @@ plibpth="$plibpth $sde_path/$sde/usr/lib"
 unset sde_path default_sde sde
 
 #####################################
-# <takis@xfree86.org>
+# <takis@XFree86.Org>
 #####################################
 
-libperl="libperl57.so"
+libperl="libperl58.so"
 
 # Many functions (eg, gethostent(), killpg(), getpriority(), setruid()
 # dbm_*(), and plenty more) are defined in -ldgc.  Usually you don't
@@ -149,16 +149,17 @@ libperl="libperl57.so"
 # those functions as missing.
 
 #####################################
-# <takis@xfree86.org>
+# <takis@XFree86.Org>
 #####################################
 
 # libswanted="dgc gdbm $libswanted"
 #libswanted="dbm posix $libswanted"
-# Remove malloc since we use the internal perl one.
+# Do *NOT* add there the malloc native 
+# DG/UX library!
 libswanted="dbm posix resolv socket nsl dl m"
 
 #####################################
-# <takis@xfree86.org>
+# <takis@XFree86.Org>
 #####################################
 
 mydomain='.localhost'
@@ -178,7 +179,7 @@ usedl=false
 # -G for loading.  I haven't tested this.
 
 #####################################
-# <takis@xfree86.org>
+# <takis@XFree86.Org>
 # Use -fPIC instead -fpic 
 #####################################
 
@@ -189,7 +190,7 @@ lddlflags="-shared"
 
 ############################################################################
 # DGUX Posix 4A Draft 10 Thread support
-# <takis@xfree86.org>
+# <takis@XFree86.Org>
 # use Configure -Dusethreads to enable
 ############################################################################
 
@@ -197,13 +198,17 @@ cat > UU/usethreads.cbu <<'EOCBU'
 case "$usethreads" in
 $define|true|[yY]*)
 	ccflags="$ccflags"
+	# DG/UX has this for sure! Main Configure fails to
+	# detect it but it is needed!
+	d_pthread_atfork='define'
 	shift
 	# DG/UX's sched_yield is in -lrte
-	# Remove malloc since we use the internal perl one.
+	# Do *NOT* add there the malloc native 
+	# DG/UX library!
 	libswanted="dbm posix resolv socket nsl dl m rte"
 	archname="ix86-dgux-thread"
-	sitearch="$prefix/lib/perl57/$archname"
-	sitelib="$prefix/lib/perl57"
+	sitearch="$prefix/lib/perl58/$archname"
+	sitelib="$prefix/lib/perl58"
   case "$cc" in
 	*gcc*)
 	   #### Use GCC -2.95.2/3 rev (DG/UX) and -pthread
@@ -212,7 +217,7 @@ $define|true|[yY]*)
 	   ld="gcc"
 	   ccflags="$ccflags -D_POSIX4A_DRAFT10_SOURCE"
 	   # Debug build : use -DS flag on command line perl
-	   # ccflags="$ccflags -DDEBUGGING -D_POSIX4A_DRAFT10_SOURCE -pthread"
+	   # ccflags="$ccflags -g -mstandard -DDEBUGGING -D_POSIX4A_DRAFT10_SOURCE -pthread"
 	   cccdlflags='-fPIC'
 	   lddlflags="-shared"
 	   #### Use GCC -2.95.2/3 rev (DG/UX) and -pthread

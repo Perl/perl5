@@ -873,6 +873,10 @@ sv_utf8_upgrade(sv) converts the string of the scalar to its UTF-8
 encoded form.  sv_utf8_downgrade(sv) does the opposite (if possible).
 sv_utf8_encode(sv) is like sv_utf8_upgrade but the UTF8 flag does not
 get turned on.  sv_utf8_decode() does the opposite of sv_utf8_encode().
+Note that none of these are to be used as general purpose encoding/decoding
+interfaces: use Encode for that.  sv_utf8_upgrade() is affected by the
+encoding pragma, but sv_utf8_downgrade() is not (since the encoding
+pragma is designed to be a one-way street).
 
 =item *
 

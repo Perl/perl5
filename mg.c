@@ -1171,7 +1171,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 	i = whichsig(s);	/* ...no, a brick */
 	if (!i) {
 	    if (ckWARN(WARN_SIGNAL))
-		Perl_warner(aTHX_ WARN_SIGNAL, "No such signal: SIG%s", s);
+		Perl_warner(aTHX_ packWARN(WARN_SIGNAL), "No such signal: SIG%s", s);
 	    return 0;
 	}
 #if defined(FAKE_PERSISTENT_SIGNAL_HANDLERS) || defined(FAKE_DEFAULT_SIGNAL_HANDLERS)
@@ -2374,7 +2374,7 @@ Perl_sighandler(int sig)
 
     if (!cv || !CvROOT(cv)) {
 	if (ckWARN(WARN_SIGNAL))
-	    Perl_warner(aTHX_ WARN_SIGNAL, "SIG%s handler \"%s\" not defined.\n",
+	    Perl_warner(aTHX_ packWARN(WARN_SIGNAL), "SIG%s handler \"%s\" not defined.\n",
 		PL_sig_name[sig], (gv ? GvENAME(gv)
 				: ((cv && CvGV(cv))
 				   ? GvENAME(CvGV(cv))

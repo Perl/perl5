@@ -49,16 +49,16 @@ use Cwd;
 cleanup();
 
 my $found;
-find({wanted => sub { $found = 1 if ($_ eq 'access.t') },
+find({wanted => sub { $found = 1 if ($_ eq 'commonsense.t') },
 		untaint => 1, untaint_pattern => qr|^(.+)$|}, File::Spec->curdir);
 
-ok($found, 'access.t found');
+ok($found, 'commonsense.t found');
 $found = 0;
 
-finddepth({wanted => sub { $found = 1 if $_ eq 'access.t'; },
+finddepth({wanted => sub { $found = 1 if $_ eq 'commonsense.t'; },
            untaint => 1, untaint_pattern => qr|^(.+)$|}, File::Spec->curdir);
 
-ok($found, 'access.t found again');
+ok($found, 'commonsense.t found again');
 
 my $case = 2;
 my $FastFileTests_OK = 0;

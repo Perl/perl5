@@ -13,14 +13,15 @@ Locale::Country - ISO codes for country identification (ISO 3166)
     @codes   = all_country_codes();
     @names   = all_country_names();
     
-    # add "uk" as a pseudo country code for United Kingdom
-    Locale::Country::_alias_code('uk' => 'gb');
+    # semi-private routines
+    Locale::Country::alias_code('uk' => 'gb');
+    Locale::Country::rename_country('gb' => 'Great Britain');
 
 
 =head1 DESCRIPTION
 
 The C<Locale::Country> module provides access to the ISO
-codes for identifying countries, as defined in ISO 3166.
+codes for identifying countries, as defined in ISO 3166-1.
 You can either access the codes via the L<conversion routines>
 (described below), or with the two functions which return lists
 of all country codes or all country names.
@@ -141,12 +142,19 @@ depending on which code set you specify.
 =back
 
 
-=head1 CODE ALIASING
+=head1 SEMI-PRIVATE ROUTINES
 
-This module supports a semi-private routine for specifying two letter
-code aliases.
+Locale::Country provides two semi-private routines for modifying
+the internal data.
+Given their status, they aren't exported by default,
+and so need to be called by prefixing the function name with the
+package name.
 
-    Locale::Country::_alias_code( ALIAS => CODE [, CODESET ] )
+=head2 alias_code
+
+Define a new code as an alias for an existing code:
+
+    Locale::Country::alias_code( ALIAS => CODE [, CODESET ] )
 
 This feature was added as a mechanism for handling
 a "uk" code. The ISO standard says that the two-letter code for
@@ -156,12 +164,30 @@ By default the module does not understand "uk", since it is implementing
 an ISO standard. If you would like 'uk' to work as the two-letter
 code for United Kingdom, use the following:
 
-    use Locale::Country;
-    
-    Locale::Country::_alias_code('uk' => 'gb');
+    Locale::Country::alias_code('uk' => 'gb');
 
 With this code, both "uk" and "gb" are valid codes for United Kingdom,
 with the reverse lookup returning "uk" rather than the usual "gb".
+
+B<Note:> this function was previously called _alias_code,
+but the leading underscore has been dropped.
+The old name will be supported for all 2.X releases for
+backwards compatibility.
+
+=head2 rename_country
+
+If the official country name just isn't good enough for you,
+you can rename a country. For example, the official country
+name for code 'gb' is 'United Kingdom'.
+If you want to change that, you might call:
+
+    Locale::Country::rename_country('gb' => 'Great Britain');
+
+This means that calling code2country('gb') will now return
+'Great Britain' instead of 'United Kingdom'.
+The original country name is retained as an alias,
+so for the above example, country2code('United Kingdom')
+will still return 'gb'.
 
 
 =head1 EXAMPLES
@@ -236,13 +262,20 @@ ISO codes for identification of scripts (ISO 15924).
 ISO three letter codes for identification of currencies
 and funds (ISO 4217).
 
-=item ISO 3166
+=item Locale::SubCountry
+
+ISO codes for country sub-divisions (states, counties, provinces, etc),
+as defined in ISO 3166-2.
+This module is not part of the Locale-Codes distribution,
+but is available from CPAN in CPAN/modules/by-module/Locale/
+
+=item ISO 3166-1
 
 The ISO standard which defines these codes.
 
-=item http://www.din.de/gremien/nas/nabd/iso3166ma/
+=item http://www.iso.org/iso/en/prods-services/iso3166ma/index.html
 
-Official home page for ISO 3166
+Official home page for the ISO 3166 maintenance agency.
 
 =item http://www.egt.ie/standards/iso3166/iso3166-1-en.html
 

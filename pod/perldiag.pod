@@ -183,12 +183,26 @@ spots.  This is now heavily deprecated.
 must either both be scalars or both be lists.  Otherwise Perl won't
 know which context to supply to the right side.
 
-=item Attempt to access key '%_' in fixed hash
+=item Attempt to access disallowed key '%s' in a fixed hash
 
-(F) A hash has been marked as READONLY at the C level to turn it
-into a "record" with a fixed set of keys. The failing code
-has attempted to get or set the value of a key which does not
-exist or to delete a key.
+(F) The failing code has attempted to get or set a key which is not in
+the current set of allowed keys of a fixed hash.
+
+=item Attempt to clear a fixed hash
+
+(F) It is currently not allowed to clear a fixed hash, even if the
+new hash would contain the same keys as before.  This may change in
+the future.
+
+=item Attempt to delete readonly key '%s' from a fixed hash
+
+(F) The failing code attempted to delete a key whose value has been
+declared readonly from a fixed hash.
+
+=item Attempt to delete disallowed key '%s' from a fixed hash
+
+(F) The failing code attempted to delete from a fixed hash a key which
+is not in its key set.
 
 =item Attempt to bless into a reference
 

@@ -140,3 +140,31 @@ sub encode
 }
 1;
 __END__
+
+=head1 NAME
+
+Encode::Tcl::Extended - Tcl EUC encodings
+
+=head1 SYNOPSIS
+
+none
+
+=head1 DESCRIPTION
+
+This module is used internally by Encode::Tcl
+and handles type X of Tcl encodings (a Perl extenstion).
+
+Only F<euc-jp-0212.enc> belongs to type X.
+This is a variant of EUC-JP with JIS X 0212 in G3.
+If another Encode:: module would support the above encoding,
+this module should be removed.
+
+=head1 SEE ALSO
+
+L<Encode>
+
+L<Encode::Tcl>
+
+L<Encode::JP>
+
+=cut

@@ -1,0 +1,27 @@
+0.04  Sun Mar 10 13:37:08 EST 2002
+  * Bugs in the restricted hash implementation have been fixed.  All
+    tests should pass on a perl sometime after about 15160
+  * Minimum version is now 5.7.3
+  - Changed diagnostic expecations to match new restricted hash 
+    diagnostics.
+
+0.03  Sat Mar  9 20:11:00 EST 2002
+  *** NOTE *** There are known failures in t/Hash.t.  These are
+  due to bugs in perl's restricted hash implementation.  They have
+  been left failing so Those That Know How To Fix It know where
+  the bugs are.
+
+  * Data::Util::readonly() is now sv_readonly_flag() to make its
+    function less ambiguous.
+  * Hash::Util::lock_key/unlock_key is now lock_value/unlock_value
+    to make its functionality less ambiguous.  It also takes
+    somewhat different arguments.
+  * Added lock_hash(), unlock_hash().
+
+0.02  Wed Feb 27 23:35:58 EST 2002
+  * lock_keys(%hash, @keys) implemented
+  * tarball name changed to the somewhat more proper Data-Hash-Utils
+
+0.01  Tue Feb 26 23:18:03 EST 2002
+  - First released version
+  - There are some failures at the end of Hash.t

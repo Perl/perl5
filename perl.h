@@ -21,6 +21,10 @@
 #define USE_STDIO
 #endif /* PERL_FOR_X2P */
 
+#if defined(DGUX)
+#include <sys/fcntl.h>
+#endif
+
 #define VOIDUSED 1
 #ifdef PERL_MICRO
 #   include "uconfig.h"

@@ -207,7 +207,7 @@ S_measure_struct(pTHX_ char *pat, register char *patend)
 	    Perl_croak(aTHX_ "%s not allowed in length fields", buf);
 	case ',': /* grandfather in commas but with a warning */
 	    if (commas++ == 0 && ckWARN(WARN_UNPACK))
-		Perl_warner(aTHX_ WARN_UNPACK,
+		Perl_warner(aTHX_ packWARN(WARN_UNPACK),
 			    "Invalid type in unpack: '%c'", (int)datumtype);
 	    /* FALL THROUGH */
 	case '%':
@@ -500,7 +500,7 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 	    Perl_croak(aTHX_ "Invalid type in unpack: '%c'", (int)datumtype);
 	case ',': /* grandfather in commas but with a warning */
 	    if (commas++ == 0 && ckWARN(WARN_UNPACK))
-		Perl_warner(aTHX_ WARN_UNPACK,
+		Perl_warner(aTHX_ packWARN(WARN_UNPACK),
 			    "Invalid type in unpack: '%c'", (int)datumtype);
 	    break;
 	case '%':
@@ -1794,7 +1794,7 @@ Perl_pack_cat(pTHX_ SV *cat, char *pat, register char *patend, register SV **beg
 	    Perl_croak(aTHX_ "Invalid type in pack: '%c'", (int)datumtype);
 	case ',': /* grandfather in commas but with a warning */
 	    if (commas++ == 0 && ckWARN(WARN_PACK))
-		Perl_warner(aTHX_ WARN_PACK,
+		Perl_warner(aTHX_ packWARN(WARN_PACK),
 			    "Invalid type in pack: '%c'", (int)datumtype);
 	    break;
 	case '%':
@@ -2016,7 +2016,7 @@ Perl_pack_cat(pTHX_ SV *cat, char *pat, register char *patend, register SV **beg
 		    aint = SvIV(fromstr);
 		    if ((aint < 0 || aint > 255) &&
 			ckWARN(WARN_PACK))
-		        Perl_warner(aTHX_ WARN_PACK,
+		        Perl_warner(aTHX_ packWARN(WARN_PACK),
 				    "Character in \"C\" format wrapped");
 		    achar = aint & 255;
 		    sv_catpvn(cat, &achar, sizeof(char));
@@ -2025,7 +2025,7 @@ Perl_pack_cat(pTHX_ SV *cat, char *pat, register char *patend, register SV **beg
 		    aint = SvIV(fromstr);
 		    if ((aint < -128 || aint > 127) &&
 			ckWARN(WARN_PACK))
-		        Perl_warner(aTHX_ WARN_PACK,
+		        Perl_warner(aTHX_ packWARN(WARN_PACK),
 				    "Character in \"c\" format wrapped");
 		    achar = aint & 255;
 		    sv_catpvn(cat, &achar, sizeof(char));
@@ -2353,7 +2353,7 @@ Perl_pack_cat(pTHX_ SV *cat, char *pat, register char *patend, register SV **beg
 						|| (SvPADTMP(fromstr)
 						    && !SvREADONLY(fromstr))))
 		    {
-			Perl_warner(aTHX_ WARN_PACK,
+			Perl_warner(aTHX_ packWARN(WARN_PACK),
 				"Attempt to pack pointer to temporary value");
 		    }
 		    if (SvPOK(fromstr) || SvNIOK(fromstr))

@@ -137,3 +137,27 @@ sub encode
 }
 1;
 __END__
+
+=head1 NAME
+
+Encode::Tcl::Table - Tcl Table encodings
+
+=head1 SYNOPSIS
+
+none
+
+=head1 DESCRIPTION
+
+This module is used internally by Encode::Tcl
+and handles types S, D, and M of Tcl encodings.
+
+Implementation for type M is restricted to encodings
+in which bytes per a character is up to 2.
+
+=head1 SEE ALSO
+
+L<Encode>
+
+L<Encode::Tcl>
+
+=cut
