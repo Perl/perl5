@@ -220,7 +220,6 @@
 #define sortcop			(curinterp->Isortcop)
 #define sortcxix		(curinterp->Isortcxix)
 #define sortstash		(curinterp->Isortstash)
-#define specialsv_list	(curinterp->Ispecialsv_list)
 #define splitstr		(curinterp->Isplitstr)
 #define statcache		(curinterp->Istatcache)
 #define statgv			(curinterp->Istatgv)
@@ -384,7 +383,6 @@
 #define Isortcop		sortcop
 #define Isortcxix		sortcxix
 #define Isortstash		sortstash
-#define Ispecialsv_list	specialsv_list
 #define Isplitstr		splitstr
 #define Istatcache		statcache
 #define Istatgv			statgv
@@ -610,7 +608,6 @@
 #define sortcop			Perl_sortcop
 #define sortcxix		Perl_sortcxix
 #define sortstash		Perl_sortstash
-#define specialsv_list	Perl_specialsv_list
 #define splitstr		Perl_splitstr
 #define statcache		Perl_statcache
 #define statgv			Perl_statgv
@@ -855,6 +852,7 @@
 #define scrgv			(Perl_Vars.Gscrgv)
 #define sh_path			(Perl_Vars.Gsh_path)
 #define sighandlerp		(Perl_Vars.Gsighandlerp)
+#define specialsv_list		(Perl_Vars.Gspecialsv_list)
 #define sub_generation		(Perl_Vars.Gsub_generation)
 #define subline			(Perl_Vars.Gsubline)
 #define subname			(Perl_Vars.Gsubname)
@@ -974,6 +972,7 @@
 #define Gscrgv			scrgv
 #define Gsh_path		sh_path
 #define Gsighandlerp		sighandlerp
+#define Gspecialsv_list		specialsv_list
 #define Gsub_generation		sub_generation
 #define Gsubline		subline
 #define Gsubname		subname
@@ -1093,6 +1092,7 @@
 #define scrgv			Perl_scrgv
 #define sh_path			Perl_sh_path
 #define sighandlerp		Perl_sighandlerp
+#define specialsv_list		Perl_specialsv_list
 #define sub_generation		Perl_sub_generation
 #define subline			Perl_subline
 #define subname			Perl_subname

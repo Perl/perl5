@@ -269,6 +269,7 @@ VIRTUAL int	magic_setuvar	_((SV* sv, MAGIC* mg));
 VIRTUAL int	magic_setvec	_((SV* sv, MAGIC* mg));
 VIRTUAL int	magic_set_all_env _((SV* sv, MAGIC* mg));
 VIRTUAL U32	magic_sizepack	_((SV* sv, MAGIC* mg));
+VIRTUAL int	magic_unchain	_((SV* sv, MAGIC* mg));
 VIRTUAL int	magic_wipepack	_((SV* sv, MAGIC* mg));
 VIRTUAL void	magicname _((char* sym, char* name, I32 namlen));
 int	main _((int argc, char** argv, char** env));

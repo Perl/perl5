@@ -34,10 +34,6 @@ fold
 fold_locale
 freq
 ge_amg
-get_op_descs
-get_op_names
-get_no_modify
-get_opargs
 gt_amg
 inc_amg
 init_thread_intern
@@ -105,7 +101,6 @@ sin_amg
 sle_amg
 slt_amg
 sne_amg
-specialsv_list
 sqrt_amg
 string_amg
 subtr_amg
@@ -322,6 +317,11 @@ force_word
 form
 free_tmps
 gen_constant_list
+get_op_descs
+get_op_names
+get_no_modify
+get_opargs
+get_specialsv_list
 gp_free
 gp_ref
 gv_AVadd
@@ -425,6 +425,7 @@ magic_settaint
 magic_setuvar
 magic_setvec
 magic_sizepack
+magic_unchain
 magic_wipepack
 magicname
 markstack_grow

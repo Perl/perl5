@@ -2041,7 +2041,7 @@ EXT MGVTBL vtbl_mutex =	{0,	0,	0,	0,	magic_mutexfree};
 EXT MGVTBL vtbl_defelem = {magic_getdefelem,magic_setdefelem,
 					0,	0,	magic_freedefelem};
 
-EXT MGVTBL vtbl_regexp = {0,0,0,0, magic_freeregexp};
+EXT MGVTBL vtbl_regexp = {0,magic_unchain,0,0, magic_freeregexp};
 
 #ifdef USE_LOCALE_COLLATE
 EXT MGVTBL vtbl_collxfrm = {0,

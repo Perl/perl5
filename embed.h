@@ -211,7 +211,7 @@
 #define get_op_descs		Perl_get_op_descs
 #define get_op_names		Perl_get_op_names
 #define get_opargs		Perl_get_opargs
-#define get_specialsv_list  Perl_get_specialsv_list
+#define get_specialsv_list	Perl_get_specialsv_list
 #define gp_free			Perl_gp_free
 #define gp_ref			Perl_gp_ref
 #define gt_amg			Perl_gt_amg
@@ -325,6 +325,7 @@
 #define magic_setuvar		Perl_magic_setuvar
 #define magic_setvec		Perl_magic_setvec
 #define magic_sizepack		Perl_magic_sizepack
+#define magic_unchain		Perl_magic_unchain
 #define magic_wipepack		Perl_magic_wipepack
 #define magicname		Perl_magicname
 #define markstack_grow		Perl_markstack_grow
@@ -924,7 +925,6 @@
 #define sle_amg			Perl_sle_amg
 #define slt_amg			Perl_slt_amg
 #define sne_amg			Perl_sne_amg
-#define specialsv_list		Perl_specialsv_list
 #define sqrt_amg		Perl_sqrt_amg
 #define stack_grow		Perl_stack_grow
 #define start_subparse		Perl_start_subparse

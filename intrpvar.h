@@ -232,5 +232,3 @@ PERLVARI(piDir,		IPerlDir*,  NULL)
 PERLVARI(piSock,	IPerlSock*, NULL)
 PERLVARI(piProc,	IPerlProc*, NULL)
 #endif
-
-PERLVAR(Ispecialsv_list[4], SV *)	/* from byterun.h */

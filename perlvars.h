@@ -168,3 +168,5 @@ PERLVARIC(GNo,		char *, "")
 PERLVARIC(Ghexdigit,	char *, "0123456789abcdef0123456789ABCDEFx")
 PERLVARIC(Gpatleave,	char *, "\\.^$@dDwWsSbB+*?|()-nrtfeaxc0123456789[{]}")
 
+PERLVAR(Gspecialsv_list[4], SV *)		/* from byterun.h */
+

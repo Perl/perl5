@@ -2562,6 +2562,7 @@ sv_magic(register SV *sv, SV *obj, int how, char *name, I32 namlen)
 	mg->mg_virtual = &vtbl_packelem;
 	break;
     case 'r':
+	SvRMAGICAL_on(sv);
 	mg->mg_virtual = &vtbl_regexp;
 	break;
     case 'S':
