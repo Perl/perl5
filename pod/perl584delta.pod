@@ -1,6 +1,3 @@
-?? Detached threads aren't supported on Windows yet, as they may lead to 
-memory access violation problems.
-
 =head1 NAME
 
 perldelta - what is new for perl v5.8.4
@@ -66,7 +63,7 @@ In addition to bug fixes, C<format>'s features have been enhanced. See XXX
 The (mis)use of C</tmp> in core modules and documentation has been tidied up.
 Some modules available both within the perl core and independently from CPAN
 ("dual-life modules") have not yet had these changes applied; the changes
-will be intergrated into future stable perl releases as the modules are
+will be integrated into future stable perl releases as the modules are
 updated on CPAN.
 
 =head2 Updated modules
@@ -142,7 +139,7 @@ Win32.pm/Win32.xs has moved from the libwin32 module to core Perl
 
 =item threads
 
-XXX Win32 detached threads?
+Detached threads are now also supported on Windows.
 
 =item utf8
 
@@ -177,11 +174,16 @@ Optimised C<map> in scalar context
 =head1 Installation and Configuration Improvements
 
 The build process on both VMS and Windows has had several minor improvements
-made. Perl should now build on Windows 95. C<perl.exe> on Windows now has a
-"Camel" logo icon. The use of a camel with Perl is a trademark of O'Reilly
-and Associates, and is used in the Perl core distribution with their
-permission. On Windows Borland's C compiler can now compile perl with PerlIO
-and/or USE_LARGE_FILES enabled.
+made. Perl should now build on Windows 95. On Windows Borland's C compiler can
+now compile perl with PerlIO and/or USE_LARGE_FILES enabled.
+
+C<perl.exe> on Windows now has a "Camel" logo icon. The use of a camel with
+the topic of Perl is a trademark of O'Reilly and Associates Inc., and is used
+with their permission (ie distribution of the source, compiling a Windows
+executable from it, and using that executable locally). Use of the supplied
+camel for anything other than a perl executable's icon is specifically not
+covered, and anyone wishing to redistribute perl binaries I<with> the icon
+should check directly with O'Reilly beforehand.
 
 Perl should build cleanly on Stratus VOS once more.
 
