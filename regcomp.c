@@ -1963,7 +1963,10 @@ S_reg(pTHX_ I32 paren, I32 *flagp)
 		    else
 			sv = newSVpvn("", 0);
 
+		    ENTER;
+		    Perl_save_re_context(aTHX);
 		    rop = sv_compile_2op(sv, &sop, "re", &av);
+		    LEAVE;
 
 		    n = add_data(3, "nop");
 		    PL_regcomp_rx->data->data[n] = (void*)rop;
