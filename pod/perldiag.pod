@@ -868,7 +868,7 @@ the command line for writing.
 redirection, and couldn't open the pipe into which to send data destined
 for stdout.
 
-=item Can't open perl script "%s": %s
+=item Can't open perl script%s: %s
 
 (F) The script you specified can't be opened for the indicated reason.
 
