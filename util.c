@@ -4018,19 +4018,86 @@ Perl_my_atof(pTHX_ const char* s)
     if ((PL_hints & HINT_LOCALE) && PL_numeric_local) {
 	NV y;
 
-	Perl_atof2(s, x);
+	Perl_atof2(aTHX_ s, &x);
 	SET_NUMERIC_STANDARD();
-	Perl_atof2(s, y);
+	Perl_atof2(aTHX_ s, &y);
 	SET_NUMERIC_LOCAL();
 	if ((y < 0.0 && y < x) || (y > 0.0 && y > x))
 	    return y;
     }
     else
-	Perl_atof2(s, x);
+	Perl_atof2(aTHX_ s, &x);
 #else
-    Perl_atof2(s, x);
+    Perl_atof2(aTHX_ s, &x);
 #endif
     return x;
+}
+
+char*
+Perl_my_atof2(pTHX_ const char* orig, NV* value)
+{
+    NV result = 0.0;
+    bool negative = 0;
+    char* s = (char*)orig;
+    char* point = ".";	/* locale-dependent decimal point equivalent */
+    STRLEN pointlen = 1;
+    bool seendigit = 0;
+
+    if (PL_numeric_radix_sv)
+	point = SvPV(PL_numeric_radix_sv, pointlen);
+
+    switch (*s) {
+	case '-':
+	    negative = 1;
+	    /* fall through */
+	case '+':
+	    ++s;
+    }
+    while (isDIGIT(*s)) {
+	result = result * 10 + (*s++ - '0');
+	seendigit = 1;
+    }
+    if (memEQ(s, point, pointlen)) {
+	NV decimal = 0.1;
+
+	s += pointlen;
+	while (isDIGIT(*s)) {
+	    result += (*s++ - '0') * decimal;
+	    decimal *= 0.1;
+	    seendigit = 1;
+	}
+    }
+    if (seendigit && (*s == 'e' || *s == 'E')) {
+	I32 exponent = 0;
+	I32 expnegative = 0;
+	I32 bit;
+	NV power;
+
+	++s;
+	switch (*s) {
+	    case '-':
+		expnegative = 1;
+		/* fall through */
+	    case '+':
+		++s;
+	}
+	while (isDIGIT(*s))
+	    exponent = exponent * 10 + (*s++ - '0');
+
+	/* now apply the exponent */
+	power = (expnegative) ? 0.1 : 10.0;
+	for (bit = 1; exponent; bit <<= 1) {
+	    if (exponent & bit) {
+		exponent ^= bit;
+		result *= power;
+	    }
+	    power *= power;
+	}
+    }
+    if (negative)
+	result = -result;
+    *value = result;
+    return s;
 }
 
 void
@@ -4380,7 +4447,7 @@ Perl_my_strftime(pTHX_ char *fmt, int sec, int min, int hour, int mday, int mon,
   New(0, buf, buflen, char);
   len = strftime(buf, buflen, fmt, &mytm);
   /*
-  ** The following is needed to handle to the situation where 
+  ** The following is needed to handle to the situation where
   ** tmpbuf overflows.  Basically we want to allocate a buffer
   ** and try repeatedly.  The reason why it is so complicated
   ** is that getting a return value of 0 from strftime can indicate
@@ -4399,7 +4466,7 @@ Perl_my_strftime(pTHX_ char *fmt, int sec, int min, int hour, int mday, int mon,
     /* Possibly buf overflowed - try again with a bigger buf */
     int     fmtlen = strlen(fmt);
     int	    bufsize = fmtlen + buflen;
-    
+
     New(0, buf, bufsize, char);
     while (buf) {
       buflen = strftime(buf, bufsize, fmt, &mytm);
@@ -4421,3 +4488,316 @@ Perl_my_strftime(pTHX_ char *fmt, int sec, int min, int hour, int mday, int mon,
 #endif
 }
 
+
+#define SV_CWD_RETURN_UNDEF \
+sv_setsv(sv, &PL_sv_undef); \
+return FALSE
+
+#define SV_CWD_ISDOT(dp) \
+    (dp->d_name[0] == '.' && (dp->d_name[1] == '\0' || \
+        (dp->d_name[1] == '.' && dp->d_name[2] == '\0')))
+
+/*
+=for apidoc sv_getcwd
+
+Fill the sv with current working directory
+
+=cut
+*/
+
+/* Originally written in Perl by John Bazik; rewritten in C by Ben Sugars.
+ * rewritten again by dougm, optimized for use with xs TARG, and to prefer
+ * getcwd(3) if available
+ * Comments from the orignal:
+ *     This is a faster version of getcwd.  It's also more dangerous
+ *     because you might chdir out of a directory that you can't chdir
+ *     back into. */
+
+/* XXX: this needs more porting #ifndef HAS_GETCWD */
+int
+Perl_sv_getcwd(pTHX_ register SV *sv)
+{
+#ifndef PERL_MICRO
+
+#ifndef HAS_GETCWD
+    struct stat statbuf;
+    int orig_cdev, orig_cino, cdev, cino, odev, oino, tdev, tino;
+    int namelen, pathlen=0;
+    DIR *dir;
+    Direntry_t *dp;
+#endif
+
+    (void)SvUPGRADE(sv, SVt_PV);
+
+#ifdef HAS_GETCWD
+
+    SvGROW(sv, 128);
+    while ((getcwd(SvPVX(sv), SvLEN(sv)-1) == NULL) && errno == ERANGE) {
+        SvGROW(sv, SvLEN(sv) + 128);
+    }
+    SvCUR_set(sv, strlen(SvPVX(sv)));
+    SvPOK_only(sv);
+
+#else
+
+    if (PerlLIO_lstat(".", &statbuf) < 0) {
+        CWDXS_RETURN_SVUNDEF(sv);
+    }
+
+    orig_cdev = statbuf.st_dev;
+    orig_cino = statbuf.st_ino;
+    cdev = orig_cdev;
+    cino = orig_cino;
+
+    for (;;) {
+        odev = cdev;
+        oino = cino;
+
+        if (PerlDir_chdir("..") < 0) {
+            SV_CWD_RETURN_UNDEF;
+        }
+        if (PerlLIO_stat(".", &statbuf) < 0) {
+            SV_CWD_RETURN_UNDEF;
+        }
+
+        cdev = statbuf.st_dev;
+        cino = statbuf.st_ino;
+
+        if (odev == cdev && oino == cino) {
+            break;
+        }
+        if (!(dir = PerlDir_open("."))) {
+            SV_CWD_RETURN_UNDEF;
+        }
+
+        while ((dp = PerlDir_read(dir)) != NULL) {
+#ifdef DIRNAMLEN
+            namelen = dp->d_namlen;
+#else
+            namelen = strlen(dp->d_name);
+#endif
+            /* skip . and .. */
+            if (SV_CWD_ISDOT(dp)) {dp->d_name[0] == '.'
+                continue;
+            }
+
+            if (PerlLIO_lstat(dp->d_name, &statbuf) < 0) {
+                SV_CWD_RETURN_UNDEF;
+            }
+
+            tdev = statbuf.st_dev;
+            tino = statbuf.st_ino;
+            if (tino == oino && tdev == odev) {
+                break;
+            }
+        }
+
+        if (!dp) {
+            SV_CWD_RETURN_UNDEF;
+        }
+
+        SvGROW(sv, pathlen + namelen + 1);
+
+        if (pathlen) {
+            /* shift down */
+            Move(SvPVX(sv), SvPVX(sv) + namelen + 1, pathlen, char);
+        }
+
+        /* prepend current directory to the front */
+        *SvPVX(sv) = '/';
+        Move(dp->d_name, SvPVX(sv)+1, namelen, char);
+        pathlen += (namelen + 1);
+
+#ifdef VOID_CLOSEDIR
+        PerlDir_close(dir);
+#else
+        if (PerlDir_close(dir) < 0) {
+            SV_CWD_RETURN_UNDEF;
+        }
+#endif
+    }
+
+    SvCUR_set(sv, pathlen);
+    *SvEND(sv) = '\0';
+    SvPOK_only(sv);
+
+    if (PerlDir_chdir(SvPVX(sv)) < 0) {
+        SV_CWD_RETURN_UNDEF;
+    }
+    if (PerlLIO_stat(".", &statbuf) < 0) {
+        SV_CWD_RETURN_UNDEF;
+    }
+
+    cdev = statbuf.st_dev;
+    cino = statbuf.st_ino;
+
+    if (cdev != orig_cdev || cino != orig_cino) {
+        Perl_croak(aTHX_ "Unstable directory path, "
+                   "current directory changed unexpectedly");
+    }
+#endif
+
+    return TRUE;
+#else
+    return FALSE;
+#endif
+}
+
+/*
+=for apidoc sv_realpath
+
+Wrap or emulate realpath(3).
+
+=cut
+ */
+int
+Perl_sv_realpath(pTHX_ SV *sv, char *path, STRLEN len)
+{
+#ifndef PERL_MICRO
+    char name[MAXPATHLEN] = { 0 }, *s;
+    STRLEN pathlen, namelen;
+
+#ifdef HAS_REALPATH
+    /* Be paranoid about the use of realpath(),
+     * it is an infamous source of buffer overruns. */
+
+    /* Is the source buffer too long?
+     * Don't use strlen() to avoid running off the end. */
+    s = memchr(path, '\0', MAXPATHLEN);
+    pathlen = s ? s - path : MAXPATHLEN;
+    if (pathlen == MAXPATHLEN) {
+        Perl_warn(aTHX_ "sv_realpath: realpath(\"%s\"): %c= (MAXPATHLEN = %d)",
+                  path, s ? '=' : '>', MAXPATHLEN);
+        SV_CWD_RETURN_UNDEF;
+    }
+
+    /* Here goes nothing. */
+    if (realpath(path, name) == NULL) {
+        Perl_warn(aTHX_ "sv_realpath: realpath(\"%s\"): %s",
+                  path, Strerror(errno));
+        SV_CWD_RETURN_UNDEF;
+    }
+
+    /* Is the destination buffer too long?
+     * Don't use strlen() to avoid running off the end. */
+    s = memchr(name, '\0', MAXPATHLEN);
+    namelen = s ? s - name : MAXPATHLEN;
+    if (namelen == MAXPATHLEN) {
+        Perl_warn(aTHX_ "sv_realpath: realpath(\"%s\"): %c= (MAXPATHLEN = %d)",
+                  path, s ? '=' : '>', MAXPATHLEN);
+        SV_CWD_RETURN_UNDEF;
+    }
+
+    /* The coast is clear? */
+    sv_setpvn(sv, name, namelen);
+    SvPOK_only(sv);
+
+    return TRUE;
+#else
+    DIR *parent;
+    Direntry_t *dp;
+    char dotdots[MAXPATHLEN] = { 0 };
+    struct stat cst, pst, tst;
+
+    if (PerlLIO_stat(path, &cst) < 0) {
+        Perl_warn(aTHX_ "sv_realpath: stat(\"%s\"): %s",
+                  path, Strerror(errno));
+        SV_CWD_RETURN_UNDEF;
+    }
+
+    (void)SvUPGRADE(sv, SVt_PV);
+
+    if (!len) {
+        len = strlen(path);
+    }
+    Copy(path, dotdots, len, char);
+
+    for (;;) {
+        strcat(dotdots, "/..");
+        StructCopy(&cst, &pst, struct stat);
+
+        if (PerlLIO_stat(dotdots, &cst) < 0) {
+            Perl_warn(aTHX_ "sv_realpath: stat(\"%s\"): %s",
+                      dotdots, Strerror(errno));
+            SV_CWD_RETURN_UNDEF;
+        }
+
+        if (pst.st_dev == cst.st_dev && pst.st_ino == cst.st_ino) {
+            /* We've reached the root: previous is same as current */
+            break;
+        } else {
+            STRLEN dotdotslen = strlen(dotdots);
+
+            /* Scan through the dir looking for name of previous */
+            if (!(parent = PerlDir_open(dotdots))) {
+                Perl_warn(aTHX_ "sv_realpath: opendir(\"%s\"): %s",
+                          dotdots, Strerror(errno));
+                SV_CWD_RETURN_UNDEF;
+            }
+
+            SETERRNO(0,SS$_NORMAL); /* for readdir() */
+            while ((dp = PerlDir_read(parent)) != NULL) {
+                if (SV_CWD_ISDOT(dp)) {
+                    continue;
+                }
+
+                Copy(dotdots, name, dotdotslen, char);
+                name[dotdotslen] = '/';
+#ifdef DIRNAMLEN
+                namelen = dp->d_namlen;
+#else
+                namelen = strlen(dp->d_name);
+#endif
+                Copy(dp->d_name, name + dotdotslen + 1, namelen, char);
+                name[dotdotslen + 1 + namelen] = 0;
+
+                if (PerlLIO_lstat(name, &tst) < 0) {
+                    PerlDir_close(parent);
+                    Perl_warn(aTHX_ "sv_realpath: lstat(\"%s\"): %s",
+                              name, Strerror(errno));
+                    SV_CWD_RETURN_UNDEF;
+                }
+
+                if (tst.st_dev == pst.st_dev && tst.st_ino == pst.st_ino)
+                    break;
+
+                SETERRNO(0,SS$_NORMAL); /* for readdir() */
+            }
+
+            if (!dp && errno) {
+                Perl_warn(aTHX_ "sv_realpath: readdir(\"%s\"): %s",
+                          dotdots, Strerror(errno));
+                SV_CWD_RETURN_UNDEF;
+            }
+
+            SvGROW(sv, pathlen + namelen + 1);
+            if (pathlen) {
+                /* shift down */
+                Move(SvPVX(sv), SvPVX(sv) + namelen + 1, pathlen, char);
+            }
+
+            *SvPVX(sv) = '/';
+            Move(dp->d_name, SvPVX(sv)+1, namelen, char);
+            pathlen += (namelen + 1);
+
+#ifdef VOID_CLOSEDIR
+            PerlDir_close(parent);
+#else
+            if (PerlDir_close(parent) < 0) {
+                Perl_warn(aTHX_ "sv_realpath: closedir(\"%s\"): %s",
+                          dotdots, Strerror(errno));
+                SV_CWD_RETURN_UNDEF;
+            }
+#endif
+        }
+    }
+
+    SvCUR_set(sv, pathlen);
+    SvPOK_only(sv);
+
+    return TRUE;
+#endif
+#else
+    return FALSE;
+#endif
+}
