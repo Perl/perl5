@@ -182,6 +182,17 @@ must then use C<av_store> to assign values to these new elements.
 =for hackers
 Found in file av.c
 
+=item ax
+
+Variable which is setup by C<xsubpp> to indicate the stack base offset,
+used by the C<ST>, C<XSprePUSH> and C<XSRETURN> macros.  The C<dMARK> macro
+must be called prior to setup the C<MARK> variable.
+
+	I32	ax
+
+=for hackers
+Found in file XSUB.h
+
 =item bytes_from_utf8
 
 Converts a string C<s> of length C<len> from UTF8 into byte encoding.
@@ -320,6 +331,26 @@ L<perlsub/"Constant Functions">.
 =for hackers
 Found in file op.c
 
+=item dAX
+
+Sets up the C<ax> variable.
+This is usually handled automatically by C<xsubpp> by calling C<dXSARGS>.
+
+		dAX;
+
+=for hackers
+Found in file XSUB.h
+
+=item dITEMS
+
+Sets up the C<items> variable.
+This is usually handled automatically by C<xsubpp> by calling C<dXSARGS>.
+
+		dITEMS;
+
+=for hackers
+Found in file XSUB.h
+
 =item dMARK
 
 Declare a stack marker variable, C<mark>, for the XSUB.  See C<MARK> and
@@ -351,9 +382,9 @@ Found in file pp.h
 
 =item dXSARGS
 
-Sets up stack and mark pointers for an XSUB, calling dSP and dMARK.  This
-is usually handled automatically by C<xsubpp>.  Declares the C<items>
-variable to indicate the number of items on the stack.
+Sets up stack and mark pointers for an XSUB, calling dSP and dMARK.
+Sets up the C<ax> and C<items> variables by calling C<dAX> and C<dITEMS>.
+This is usually handled automatically by C<xsubpp>.
 
 		dXSARGS;
 
@@ -2430,19 +2461,19 @@ false, defined or undefined.  Does not handle 'get' magic.
 =for hackers
 Found in file sv.h
 
+=item svtype
+
+An enum of flags for Perl types.  These are found in the file B<sv.h> 
+in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
+
+=for hackers
+Found in file sv.h
+
 =item SvTYPE
 
 Returns the type of the SV.  See C<svtype>.
 
 	svtype	SvTYPE(SV* sv)
-
-=for hackers
-Found in file sv.h
-
-=item svtype
-
-An enum of flags for Perl types.  These are found in the file B<sv.h> 
-in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
 
 =for hackers
 Found in file sv.h

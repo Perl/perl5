@@ -18,6 +18,11 @@ Variable which is setup by C<xsubpp> to designate the object in a C++
 XSUB.  This is always the proper type for the C++ object.  See C<CLASS> and 
 L<perlxs/"Using XS With C++">.
 
+=for apidoc Amn|I32|ax
+Variable which is setup by C<xsubpp> to indicate the stack base offset,
+used by the C<ST>, C<XSprePUSH> and C<XSRETURN> macros.  The C<dMARK> macro
+must be called prior to setup the C<MARK> variable.
+
 =for apidoc Amn|I32|items
 Variable which is setup by C<xsubpp> to indicate the number of 
 items on the stack.  See L<perlxs/"Variable-length Parameter Lists">.
@@ -33,10 +38,18 @@ Used to access elements on the XSUB's stack.
 Macro to declare an XSUB and its C parameter list.  This is handled by
 C<xsubpp>.
 
+=for apidoc Ams||dAX
+Sets up the C<ax> variable.
+This is usually handled automatically by C<xsubpp> by calling C<dXSARGS>.
+
+=for apidoc Ams||dITEMS
+Sets up the C<items> variable.
+This is usually handled automatically by C<xsubpp> by calling C<dXSARGS>.
+
 =for apidoc Ams||dXSARGS
-Sets up stack and mark pointers for an XSUB, calling dSP and dMARK.  This
-is usually handled automatically by C<xsubpp>.  Declares the C<items>
-variable to indicate the number of items on the stack.
+Sets up stack and mark pointers for an XSUB, calling dSP and dMARK.
+Sets up the C<ax> and C<items> variables by calling C<dAX> and C<dITEMS>.
+This is usually handled automatically by C<xsubpp>.
 
 =for apidoc Ams||dXSI32
 Sets up the C<ix> variable for an XSUB which has aliases.  This is usually
@@ -56,10 +69,13 @@ handled automatically by C<xsubpp>.
 /* gcc -Wall: if an xsub has no arguments and PPCODE is used
  * and none of ST, XSRETURN or XSprePUSH macros are used
  * then `ax' (setup by dXSARGS) is unused. */
+#define dAX I32 ax __attribute__((unused)) = MARK - PL_stack_base + 1
+
+#define dITEMS I32 items = SP - MARK
+
 #define dXSARGS				\
 	dSP; dMARK;			\
-	I32 ax __attribute__((unused)) = mark - PL_stack_base + 1;	\
-	I32 items = sp - mark
+	dAX; dITEMS
 
 #define dXSTARG SV * targ = ((PL_op->op_private & OPpENTERSUB_HASTARG) \
 			     ? PAD_SV(PL_op->op_targ) : sv_newmortal())
