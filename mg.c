@@ -2403,7 +2403,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	if (len >= (STRLEN)PL_origalen) {
 	    /* Longer than original, will be truncated. */
 	    Copy(s, PL_origargv[0], PL_origalen, char);
-	    PL_origargv[0][PL_origalen - 1] = 0;
+	    PL_origargv[0][PL_origalen] = 0;
 	}
 	else {
 	    /* Shorter than original, will be padded. */
