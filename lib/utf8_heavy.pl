@@ -28,7 +28,7 @@ sub SWASHNEW {
 
         $type = 'Lampersand' if $type =~ /^(?:Is)?L&$/;
 
-	my $inprefix = substr(lc($type), 0, 3);
+	my $inprefix = substr(lc($type), 0, 2);
 	if (exists $utf8::InPat{$inprefix}) {
 	    my $In = $type;
 	    for my $k (keys %{$utf8::InPat{$inprefix}}) {

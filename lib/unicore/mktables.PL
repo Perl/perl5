@@ -380,12 +380,12 @@ close OUT;
 
 my $first;
 
-sub flushzerorange {
-    my ($scriptname, $scriptid, $i) = @_;
+sub flush_zero_range {
+    my ($i) = @_;
     if (defined $first) {
 	my $last = $i - 1;
 	$last = $last == $first ? "" : sprintf("%04x", $last);
-	printf SCRIPT "%04x\t$last\t$scriptname\t# In/$scriptid.pl\n", $first;
+	printf SCRIPT "%04x\t$last\n", $first;
 	printf "\t\t%04x..$last\n", $first;
 	undef $first;
     }
@@ -404,12 +404,12 @@ EOH
 undef $first;
 for my $i (0..$lastlast) {
     if (vec($ScriptsVec, $i, 1)) {
-	defined $first && flushzerorange('Common', $CommonId, $i);
+	defined $first && flush_zero_range($i);
     } else {
 	$first = $i unless defined $first;
     }
 }
-flushzerorange('Common', $CommonId, $lastlast+1);
+flush_zero_range($lastlast+1);
 print SCRIPT "END\n";
 close(SCRIPT);
 
@@ -459,18 +459,16 @@ EOH
 	}
 	$id = $InIdScript{$InName};
 	print PROP "\L$code\t\L$last\n";
-	if ($InName eq 'Cn') {
+	if ($InName eq 'Noncharacter_Code_Point') {
 	    my $firsti = hex($code);
 	    my $lasti  = $last ? hex($last) : $firsti;
-	    for my $I ($firsti..$hexi) {
+	    for my $i ($firsti..$lasti) {
 		vec($CnVec, $i, 1) = 1;
 	    }
 	}
     }
 }
-print PROP <<EOH;
-END
-EOH
+print PROP "END\n";
 
 print "\tAssigned\n";
 my $AssignedId = $Scripts{Assigned} = $InIdScript{Assigned} = $InId++;
@@ -485,14 +483,13 @@ EOH
 undef $first;
 for my $i (0..hex($UnicodeLastHex)) {
     if (vec($CnVec, $i, 1)) {
-	defined $first && flushzerorange('Assigned', $AssignedId, $i);
+	defined $first && flush_zero_range($i);
     } else {
 	$first = $i unless defined $first;
     }
 }
-flushzerorange('Common', $CommonId, hex($UnicodeLastHex)+1);
+flush_zero_range(hex($UnicodeLastHex)+1);
 print SCRIPT "END\n";
-close(SCRIPT);
 
 #
 # \p{Alphabetic} is \pL and \p{Other_Alphabetic}
@@ -706,7 +703,8 @@ my %InIdPrefix;
 foreach my $in (@InId) {
     my $inpat = $in;
     $inpat =~ s/([- _])/(?:[-_]|\\s+)?/g;
-    push @{$InIdPrefix{lc(substr($in, 0, 3))}}, [ $in, $inpat ];
+    my $inprefix = lc(substr($in, 0, 2));
+    push @{$InIdPrefix{$inprefix}}, [ $in, $inpat ];
     printf INID "%-45s => %3d,\n", "'$in'", $InId{$in};
 }
 
