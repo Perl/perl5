@@ -1667,6 +1667,23 @@ additional complications for conditionals).  These optimizations are
 done in the subroutine peep().  Optimizations performed at this stage
 are subject to the same restrictions as in the pass 2.
 
+=head2 Pluggable runops
+
+The compile tree is executed in a runops function.  There are two runops
+functions in F<run.c>.  C<Perl_runops_debug> is used with DEBUGGING and
+C<Perl_runops_standard> is used otherwise.  For fine control over the
+execution of the compile tree it is possible to provide your own runops
+function.
+
+It's probably best to copy one of the existing runops functions and
+change it to suit your needs.  Then, in the BOOT section of your XS
+file, add the line:
+
+  PL_runops = my_runops;
+
+This function should be as efficient as possible to keep your programs
+running as fast as possible.
+
 =head1 Examining internal data structures with the C<dump> functions
 
 To aid debugging, the source file F<dump.c> contains a number of
