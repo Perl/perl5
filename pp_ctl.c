@@ -1434,10 +1434,6 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 	    }
 	    else {
 		sv_setpvn(ERRSV, message, msglen);
-		if (PL_hints & HINT_UTF8)
-		    SvUTF8_on(ERRSV);
-		else
-		    SvUTF8_off(ERRSV);
 	    }
 	}
 	else
