@@ -2008,12 +2008,11 @@ Perl_block_start(pTHX_ int full)
     int retval = PL_savestack_ix;
 
     SAVEI32(PL_comppad_name_floor);
-    if (full) {
-	if ((PL_comppad_name_fill = AvFILLp(PL_comppad_name)) > 0)
-	    PL_comppad_name_floor = PL_comppad_name_fill;
-	else
-	    PL_comppad_name_floor = 0;
-    }
+    PL_comppad_name_floor = AvFILLp(PL_comppad_name);
+    if (full)
+	PL_comppad_name_fill = PL_comppad_name_floor;
+    if (PL_comppad_name_floor < 0)
+	PL_comppad_name_floor = 0;
     SAVEI32(PL_min_intro_pending);
     SAVEI32(PL_max_intro_pending);
     PL_min_intro_pending = 0;
@@ -2028,8 +2027,6 @@ Perl_block_start(pTHX_ int full)
         PL_compiling.cop_warnings = newSVsv(PL_compiling.cop_warnings) ;
         SAVEFREESV(PL_compiling.cop_warnings) ;
     }
-
-
     return retval;
 }
 
