@@ -563,7 +563,7 @@ elicits a new warning: C<Use of /c modifier is meaningless without /g>.
 Use of C</c> in substitutions, even with C</g>, elicits 
 C<Use of /c modifier is meaningless in s///>.  
 
-Use of C</g> with C<split> elicits <Use of /g modifier is meaningless
+Use of C</g> with C<split> elicits C<Use of /g modifier is meaningless
 in split>.
 
 =back
