@@ -34,7 +34,20 @@ package MY;
 sub post_initialize
 {
  my ($self) = @_;
- push(@{$self->{'O_FILES'}},map("$_\$(OBJ_EXT)",keys %tables));
+ my %o;
+ # Find existing O_FILES
+ foreach my $f (@{$self->{'O_FILES'}})
+  {
+   $o{$f} = 1;
+  } 
+ my $x = $self->{'OBJ_EXT'};
+ # Add the table O_FILES
+ foreach my $e (keys %tables)
+  {
+   $o{$e.$x} = 1;
+  }  
+ # Reset the variable 
+ $self->{'O_FILES'} = [sort keys %o];
  my @files;
  foreach my $table (keys %tables)
   {
@@ -61,7 +74,7 @@ sub postamble
  $str .= "\n\n";
  foreach my $table (keys %tables)
   {
-   $str .= "$table.c : compile \$(MAKEFILE)";
+   $str .= "$table.c : compile Makefile.PL";
    foreach my $file (@{$tables{$table}})
     {
      $str .= ' '.$self->catfile($dir,$file);
