@@ -2693,7 +2693,7 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    while (t < tend) {
 		cp[i++] = t;
 		t += UTF8SKIP(t);
-		if (*t == 0xff) {
+		if (t < tend && *t == 0xff) {
 		    t++;
 		    t += UTF8SKIP(t);
 		}
@@ -2701,7 +2701,7 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    qsort(cp, i, sizeof(U8*), utf8compare);
 	    for (j = 0; j < i; j++) {
 		U8 *s = cp[j];
-		I32 cur = j < i ? cp[j+1] - s : tend - s;
+		I32 cur = j < i - 1 ? cp[j+1] - s : tend - s;
 		UV  val = utf8_to_uv(s, cur, &ulen, 0);
 		s += ulen;
 		diff = val - nextmin;
@@ -2714,7 +2714,7 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 			sv_catpvn(transv, (char*)tmpbuf, t - tmpbuf);
 		    }
 	        }
-		if (*s == 0xff)
+		if (s < tend && *s == 0xff)
 		    val = utf8_to_uv(s+1, cur - 1, &ulen, 0);
 		if (val >= nextmin)
 		    nextmin = val + 1;
@@ -2727,6 +2727,7 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    t = (U8*)SvPVX(transv);
 	    tlen = SvCUR(transv);
 	    tend = t + tlen;
+	    Safefree(cp);
 	}
 	else if (!rlen && !del) {
 	    r = t; rlen = tlen; rend = tend;
@@ -2819,6 +2820,7 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	else
 	    bits = 8;
 
+	Safefree(cPVOPo->op_pv);
 	cSVOPo->op_sv = (SV*)swash_init("utf8", "", listsv, bits, none);
 	SvREFCNT_dec(listsv);
 	if (transv)
