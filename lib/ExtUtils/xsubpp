@@ -842,7 +842,10 @@ while (fetch_para()) {
 
     $PPCODE = grep(/^\s*PPCODE\s*:/, @line);
     $CODE = grep(/^\s*CODE\s*:/, @line);
-    $EXPLICIT_RETURN = $CODE && ("@line" =~ /\bST\s*\([^;]*=/ );
+    # Detect CODE: blocks which use ST(n)= or XST_m*(n,v)
+    #   to set explicit return values.
+    $EXPLICIT_RETURN = ($CODE &&
+		("@line" =~ /(\bST\s*\([^;]*=) | (\bXST_m\w+\s*\()/x ));
     $ALIAS  = grep(/^\s*ALIAS\s*:/,  @line);
 
     # print function header
