@@ -3351,6 +3351,7 @@ S_regmatch(pTHX_ regnode *prog)
 	{
 	    I32 l = 0;
 	    CHECKPOINT lastcp;
+	    I32 lparen = *PL_reglastparen;
 	
 	    /* We suppose that the next guy does not need
 	       backtracking: in particular, it is of constant length,
@@ -3435,6 +3436,8 @@ S_regmatch(pTHX_ regnode *prog)
 			}
 			if (regmatch(next))
 			    sayYES;
+			/* t/op/regexp.t test 885 fails if this is performed */
+			/* *PL_reglastparen = lparen; */
 			REGCP_UNWIND(lastcp);
 		    }
 		    /* Couldn't or didn't -- move forward. */
@@ -3522,6 +3525,7 @@ S_regmatch(pTHX_ regnode *prog)
 			}
 			if (regmatch(next))
 			    sayYES;
+			*PL_reglastparen = lparen;
 			REGCP_UNWIND(lastcp);
 		    }
 		    /* Couldn't or didn't -- back up. */
@@ -3634,6 +3638,7 @@ S_regmatch(pTHX_ regnode *prog)
 	    PL_reginput = locinput;
 	    if (minmod) {
 		CHECKPOINT lastcp;
+		I32 lparen = *PL_reglastparen;
 		minmod = 0;
 		if (ln && regrepeat(scan, ln) < ln)
 		    sayNO;
@@ -3740,6 +3745,7 @@ S_regmatch(pTHX_ regnode *prog)
 		        if (c == (UV)c1 || c == (UV)c2)
 		        {
 			    TRYPAREN(paren, ln, PL_reginput);
+			    *PL_reglastparen = lparen;
 			    REGCP_UNWIND(lastcp);
 		        }
 		    }
@@ -3747,6 +3753,7 @@ S_regmatch(pTHX_ regnode *prog)
 		    else if (c1 == -1000)
 		    {
 			TRYPAREN(paren, ln, PL_reginput);
+			*PL_reglastparen = lparen;
 			REGCP_UNWIND(lastcp);
 		    }
 		    /* Couldn't or didn't -- move forward. */
@@ -3761,6 +3768,7 @@ S_regmatch(pTHX_ regnode *prog)
 	    }
 	    else {
 		CHECKPOINT lastcp;
+		I32 lparen = *PL_reglastparen;
 		n = regrepeat(scan, n);
 		locinput = PL_reginput;
 		if (ln < n && PL_regkind[(U8)OP(next)] == EOL &&
@@ -3791,6 +3799,7 @@ S_regmatch(pTHX_ regnode *prog)
 			if (c1 == -1000 || c == (UV)c1 || c == (UV)c2)
 			    {
 				TRYPAREN(paren, n, PL_reginput);
+				*PL_reglastparen = lparen;
 				REGCP_UNWIND(lastcp);
 			    }
 			/* Couldn't or didn't -- back up. */
@@ -3814,6 +3823,7 @@ S_regmatch(pTHX_ regnode *prog)
 			if (c1 == -1000 || c == (UV)c1 || c == (UV)c2)
 			    {
 				TRYPAREN(paren, n, PL_reginput);
+				*PL_reglastparen = lparen;
 				REGCP_UNWIND(lastcp);
 			    }
 			/* Couldn't or didn't -- back up. */
