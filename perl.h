@@ -151,6 +151,14 @@ functions are now member functions of the PERL_OBJECT.
 
 */
 
+#ifndef NEXT30_NO_ATTRIBUTE
+#  ifndef HASATTRIBUTE       /* disable GNU-cc attribute checking? */
+#    ifdef  __attribute__      /* Avoid possible redefinition errors */
+#      undef  __attribute__
+#    endif
+#    define __attribute__(attr)
+#  endif
+#endif
 
 class CPerlObj;
 
@@ -221,7 +229,7 @@ struct perl_thread;
 #endif
 
 #define NOOP (void)0
-#define dNOOP extern int Perl___notused
+#define dNOOP extern int __attribute__ ((unused)) Perl___notused
 
 #ifndef pTHX
 #  define pTHX		void
@@ -2663,15 +2671,6 @@ typedef void *Thread;
 #ifndef PERL_CALLCONV
 #  define PERL_CALLCONV
 #endif 
-
-#ifndef NEXT30_NO_ATTRIBUTE
-#  ifndef HASATTRIBUTE       /* disable GNU-cc attribute checking? */
-#    ifdef  __attribute__      /* Avoid possible redefinition errors */
-#      undef  __attribute__
-#    endif
-#    define __attribute__(attr)
-#  endif
-#endif
 
 #ifdef PERL_OBJECT
 #  define PERL_DECL_PROT
