@@ -169,7 +169,7 @@ EOF
 EOF
 	exit 1
 	;;
-     5.0.[12].0)
+     5.0.1.0)
 	cat >&4 <<EOF
 ***
 *** This C compiler ($ccversion) is known to have optimizer problems
