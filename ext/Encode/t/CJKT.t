@@ -44,7 +44,7 @@ my %Charset =
 my $dir = dirname(__FILE__);
 my $seq = 1;
 
-for my $charset (sort keys %Charset){
+for my $charset (sort keys %Charset) {
     my ($src, $uni, $dst, $txt);
 
     my $transcoder = find_encoding($Charset{$charset}[0]) or die;
@@ -70,7 +70,7 @@ for my $charset (sort keys %Charset){
     if (PerlIO::Layer->find('perlio')){
 	binmode($dst, ":utf8");
 	print $dst $uni;
-    }else{ # ugh!
+    } else { # ugh!
 	binmode($dst);
 	my $raw = $uni; Encode::_utf8_off($raw);
 	print $dst $raw;
@@ -85,7 +85,7 @@ for my $charset (sort keys %Charset){
     if (PerlIO::Layer->find('perlio')){
 	binmode($src, ":utf8");
 	$uni = join('', <$src>);
-    }else{ # ugh!
+    } else { # ugh!
 	binmode($src);
 	$uni = join('', <$src>);
 	Encode::_utf8_on($uni);
@@ -99,6 +99,7 @@ for my $charset (sort keys %Charset){
 
     open $dst,">$dst_enc" or die "$dst_utf : $!";
     binmode($dst);
+    binmode($dst, ":bytes"); # in case LC_ALL is UTF8ish
     print $dst $txt;
     close($dst); 
     is(compare_text($src_enc, $dst_enc), 0 => "$dst_enc eq $src_enc")
