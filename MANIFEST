@@ -2474,6 +2474,7 @@ Porting/check83.pl	Check whether we are 8.3-friendly
 Porting/checkURL.pl	Check whether we have working URLs
 Porting/checkVERSION.pl	Check whether we have $VERSIONs
 Porting/cmpVERSION.pl	Compare whether two trees have changed modules
+Porting/corecpan.pl	Reports outdated dual-lived modules
 Porting/config_H	Sample config.h
 Porting/config.sh	Sample config.sh
 Porting/Contract	Social contract for contributed modules in Perl core
