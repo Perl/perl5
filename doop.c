@@ -615,7 +615,9 @@ Perl_do_trans(pTHX_ SV *sv)
 
     DEBUG_t( Perl_deb(aTHX_ "2.TBL\n"));
 
-    switch (PL_op->op_private & ~hasutf & 63) {
+    switch (PL_op->op_private & ~hasutf & (
+		OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF|OPpTRANS_IDENTICAL|
+		OPpTRANS_SQUASH|OPpTRANS_DELETE|OPpTRANS_COMPLEMENT)) {
     case 0:
 	if (hasutf)
 	    return do_trans_simple_utf8(sv);
