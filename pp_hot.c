@@ -1447,7 +1447,11 @@ PP(pp_iter)
 	    STRLEN maxlen;
 	    char *max = SvPV((SV*)av, maxlen);
 	    if (!SvNIOK(cur) && SvCUR(cur) <= maxlen) {
-		sv_setsv(*cx->blk_loop.itervar, cur);
+	        /* we need a fresh SV every time so that loop body sees a
+		 * completely new SV for closures/references to work as they
+		 * used to */
+		SvREFCNT_dec(*cx->blk_loop.itervar);
+		*cx->blk_loop.itervar = newSVsv(cur);
 		if (strEQ(SvPVX(cur), max))
 		    sv_setiv(cur, 0); /* terminate next time */
 		else
@@ -1459,7 +1463,12 @@ PP(pp_iter)
 	/* integer increment */
 	if (cx->blk_loop.iterix > cx->blk_loop.itermax)
 	    RETPUSHNO;
-	sv_setiv(*cx->blk_loop.itervar, cx->blk_loop.iterix++);
+
+	/* we need a fresh SV every time so that loop body sees a
+	 * completely new SV for closures/references to work as they
+	 * used to */
+	SvREFCNT_dec(*cx->blk_loop.itervar);
+	*cx->blk_loop.itervar = newSViv(cx->blk_loop.iterix++);
 	RETPUSHYES;
     }
 
