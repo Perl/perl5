@@ -2179,6 +2179,11 @@ dup2(int oldfd, int newfd)
 #ifndef PERL_MICRO
 #ifdef HAS_SIGACTION
 
+#ifdef MACOS_TRADITIONAL
+/* We don't want restart behavior on MacOS */
+#undef SA_RESTART
+#endif
+
 Sighandler_t
 Perl_rsignal(pTHX_ int signo, Sighandler_t handler)
 {
