@@ -1276,6 +1276,15 @@ Perl_hv_exists(pTHX_ HV *hv, const char *key, I32 klen)
     if (SvRMAGICAL(hv)) {
 	if (mg_find((SV*)hv, PERL_MAGIC_tied) || SvGMAGICAL((SV*)hv)) {
 	    sv = sv_newmortal();
+	    if (is_utf8) {
+		/* This hack based on the code in hv_exists_ent seems to be
+		   the easiest way to pass the utf8 flag through and fix
+		   the bug in hv_exists for tied hashes with utf8 keys.  */
+		SV *keysv = sv_2mortal(newSVpvn(key, klen));
+		SvUTF8_on(keysv);
+		key = (char *)keysv;
+		klen = HEf_SVKEY;
+	    }
 	    mg_copy((SV*)hv, sv, key, klen);
 	    magic_existspack(sv, mg_find(sv, PERL_MAGIC_tiedelem));
 	    return (bool)SvTRUE(sv);
