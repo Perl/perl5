@@ -3886,14 +3886,18 @@ $rm -f try try.* core
 echo " "
 echo "Checking for GNU C Library..." >&4
 cat >gnulibc.c <<EOM
-int
-main()
+#include <stdio.h>
+int main()
 {
-  return __libc_main();
+#ifdef __GLIBC__
+    exit(0);
+#else
+    exit(1);
+#endif
 }
 EOM
 if $cc $ccflags $ldflags -o gnulibc gnulibc.c $libs >/dev/null 2>&1 && \
-    ./gnulibc | $contains '^GNU C Library' >/dev/null 2>&1; then
+    ./gnulibc ; then
 	val="$define"
 	echo "You are using the GNU C Library"
 else
