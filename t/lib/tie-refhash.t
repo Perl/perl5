@@ -30,6 +30,7 @@ my $ref = []; my $ref1 = [];
 # buggy :-)
 # 
 my @tests = standard_hash_tests();
+
 my @ordinary_results = runtests(\@tests, undef);
 foreach my $class ('Tie::RefHash', 'Tie::RefHash::Nestable') {
     my @tied_results = runtests(\@tests, $class);
@@ -66,7 +67,7 @@ foreach my $class ('Tie::RefHash', 'Tie::RefHash::Nestable') {
 
 # Now test Tie::RefHash's special powers
 my (%h, $h);
-eval { $h = tie %h, 'Tie::RefHash' };
+$h = eval { tie %h, 'Tie::RefHash' };
 warn $@ if $@;
 test(not $@);
 test(ref($h) eq 'Tie::RefHash');
@@ -96,7 +97,7 @@ undef $h;
 untie %h;
 
 # And now Tie::RefHash::Nestable's differences from Tie::RefHash.
-eval { $h = tie %h, 'Tie::RefHash::Nestable' };
+$h = eval { tie %h, 'Tie::RefHash::Nestable' };
 warn $@ if $@;
 test(not $@);
 test(ref($h) eq 'Tie::RefHash::Nestable');
@@ -113,8 +114,14 @@ test((keys %h)[0] eq $ref);
 test((keys %{$h{$ref}}) == 1);
 test((keys %{$h{$ref}})[0] eq $ref1);
 
+
 die "expected to run $numtests tests, but ran ", $currtest - 1
   if $currtest - 1 != $numtests;
+
+@tests = ();
+undef $ref;
+undef $ref1;
+
 exit();
 
 
@@ -169,7 +176,7 @@ sub runtests {
 
     my (%h, $h);
     if (defined $class) {
-        eval { $h = tie %h, $class };
+        $h = eval { tie %h, $class };
         warn $@ if $@;
         test(not $@);
         test(ref($h) eq $class);
@@ -180,7 +187,11 @@ sub runtests {
         my ($result, $warning, $exception);
         local $SIG{__WARN__} = sub { $warning .= $_[0] };
         $result = scalar(eval $_);
-        $exception = $@ if $@;
+        if ($@)
+         {
+          die "$@:$_" unless defined $class;
+          $exception = $@;
+         }
 
         foreach ($warning, $exception) {
             next if not defined;
@@ -219,9 +230,8 @@ sub standard_hash_tests {
     my $STD_TESTS = <<'END'
     join $;, sort keys %h;
     join $;, sort values %h;
-    { my ($v, %tmp); %tmp{$v}++ while (defined($v = each %h)); dumph(\%tmp) }
-    { my ($k, $v, %tmp); $tmp{"$k$;$v"}++ while (($k, $v) = each %h); dumph(\%t
-mp) }
+    { my ($v, %tmp); $tmp{$v}++ while (defined($v = each %h)); dumph(\%tmp) }
+    { my ($k, $v, %tmp); $tmp{"$k$;$v"}++ while (($k, $v) = each %h); dumph(\%tmp) }
 END
   ;
     
@@ -272,8 +282,6 @@ END
     # Test hash slices
     my @slicetests;
     @slicetests = split /\n/, <<'END'
-    @h{} = ();
-    @h{} = ('a');
     @h{'b'} = ();
     @h{'c'} = ('d');
     @h{'e'} = ('f', 'g');
@@ -290,7 +298,7 @@ END
     }
 
     # Test CLEAR
-    push @r, 'clear %h', split(/\n/, $STD_TESTS);
+    push @r, '%h = ();', split(/\n/, $STD_TESTS);
 
     return @r;
 }
