@@ -23,6 +23,7 @@ sub eval {
     local $saved[0];		# Preserve the old value of $@
     eval { &DB::save };
     if ($at) {
+	local $\ = '';
 	print $OUT $at;
     } elsif ($onetimeDump) {
       if ($onetimeDump eq 'dump')  {
@@ -617,6 +618,8 @@ if ($notty) {
 
   $header =~ s/.Header: ([^,]+),v(\s+\S+\s+\S+).*$/$1$2/;
   unless ($runnonstop) {
+    local $\ = '';
+    local $, = '';
     if ($term_pid eq '-1') {
       print $OUT "\nDaughter DB session started...\n";
     } else {
@@ -750,7 +753,7 @@ EOP
 	    &eval;
 	  }
 	  print $OUT $stack_depth . " levels deep in subroutine calls!\n"
-	  if $single & 4;
+              if $single & 4;
 		$start = $line;
 		$incr = -1;		# for backward motion.
 		@typeahead = (@$pretype, @typeahead);
@@ -778,6 +781,7 @@ EOP
 					local $SIG{__WARN__};
 					eval "\$cmd =~ $alias{$i}";
 					if ($@) {
+                                                local $\ = '';
 						print $OUT "Couldn't evaluate `$i' alias: $@";
 						next CMD;
 					} 
@@ -785,11 +789,14 @@ EOP
         $cmd =~ /^q$/ && ($fall_off_end = 1) && clean_ENV() && exit $?;
 		    $cmd =~ /^t$/ && do {
 			$trace ^= 1;
+			local $\ = '';
 			print $OUT "Trace = " .
 			    (($trace & 1) ? "on" : "off" ) . "\n";
 			next CMD; };
 		    $cmd =~ /^S(\s+(!)?(.+))?$/ && do {
 			$Srev = defined $2; $Spatt = $3; $Snocheck = ! defined $1;
+			local $\ = '';
+			local $, = '';
 			foreach $subname (sort(keys %sub)) {
 			    if ($Snocheck or $Srev^($subname =~ /$Spatt/)) {
 				print $OUT $subname,"\n";
@@ -1349,6 +1356,7 @@ sub sub {
 	     print_trace($LINEINFO, -1, 1, 1, "$sub$al") )
 	 : print_lineinfo(' ' x $stack_depth, "exited $sub$al\n")) if $frame & 2;
 	if ($doret eq $stack_depth or $frame & 16) {
+	    local $\ = '';
             my $fh = ($doret eq $stack_depth ? $OUT : $LINEINFO);
 	    print $fh ' ' x $stack_depth if $frame & 16;
 	    print $fh "list context return from $sub:\n"; 
@@ -1368,6 +1376,7 @@ sub sub {
 	      print_trace($LINEINFO, -1, 1, 1, "$sub$al") )
 	 : print_lineinfo(' ' x $stack_depth, "exited $sub$al\n")) if $frame & 2;
 	if ($doret eq $stack_depth or $frame & 16 and defined wantarray) {
+	    local $\ = '';
             my $fh = ($doret eq $stack_depth ? $OUT : $LINEINFO);
 	    print $fh (' ' x $stack_depth) if $frame & 16;
 	    print $fh (defined wantarray 
@@ -1526,6 +1535,8 @@ sub cmd_b_load {
   }
   break_on_load($_) for @files;
   @files = report_break_on_load;
+  local $\ = '';
+  local $" = ' ';
   print $OUT "Will stop on load of `@files'.\n";
 }
 
@@ -1566,7 +1577,10 @@ sub break_on_line {
 }
 
 sub cmd_b_line {
-  eval { break_on_line(@_); 1 } or print $OUT $@ and return;
+  eval { break_on_line(@_); 1 } or do {
+    local $\ = '';
+    print $OUT $@ and return;
+  };
 }
 
 sub break_on_filename_line {
@@ -1611,7 +1625,10 @@ sub cmd_b_sub {
       if not defined &$subname and $s !~ /::/ and defined &{"CORE::GLOBAL::$s"};
     $subname = "main".$subname if substr($subname,0,2) eq "::";
   }
-  eval { break_subroutine($subname,$cond); 1 } or print $OUT $@ and return;
+  eval { break_subroutine($subname,$cond); 1 } or do {
+    local $\ = '';
+    print $OUT $@ and return;
+  }
 }
 
 sub cmd_B {
@@ -1620,7 +1637,10 @@ sub cmd_B {
 	if ($line eq '*') {
 		eval { &delete_breakpoint(); 1 } or print $OUT $@ and return;
 	} elsif ($line =~ /^(\S.*)/) {
-		eval { &delete_breakpoint($line || $dbline); 1 } or print $OUT $@ and return;
+		eval { &delete_breakpoint($line || $dbline); 1 } or do {
+                    local $\ = '';
+                    print $OUT $@ and return;
+                };
 	} else {
 		print $OUT "Deleting a breakpoint requires a line number, or '*' for all\n"; # hint
 	}
@@ -1905,6 +1925,8 @@ sub save {
 
 sub print_lineinfo {
   resetterm(1) if $LINEINFO eq $OUT and $term_pid != $$;
+  local $\ = '';
+  local $, = '';
   print $LINEINFO @_;
 }
 
@@ -1925,6 +1947,7 @@ sub postponed_sub {
       ++$i until $dbline[$i] != 0 or $i >= $max;
       $dbline{$i} = delete $postponed{$subname};
     } else {
+      local $\ = '';
       print $OUT "Subroutine $subname not found.\n";
     }
     return;
@@ -1944,6 +1967,7 @@ sub postponed {
   local *dbline = shift;
   my $filename = $dbline;
   $filename =~ s/^_<//;
+  local $\ = '';
   $signal = 1, print $OUT "'$filename' loaded...\n"
     if $break_on_load{$filename};
   print_lineinfo(' ' x $stack_depth, "Package $filename.\n") if $frame;
@@ -1968,11 +1992,15 @@ sub dumpit {
 	do 'dumpvar.pl';
     }
     if (defined &main::dumpValue) {
+        local $\ = '';
+        local $, = '';
+        local $" = ' ';
         my $v = shift;
         my $maxdepth = shift || $option{dumpDepth};
         $maxdepth = -1 unless defined $maxdepth;   # -1 means infinite depth
 	&main::dumpValue($v, $maxdepth);
     } else {
+        local $\ = '';
 	print $OUT "dumpvar.pl not available.\n";
     }
     $single = $osingle;
@@ -1983,6 +2011,7 @@ sub dumpit {
 # Tied method do not create a context, so may get wrong message:
 
 sub print_trace {
+  local $\ = '';
   my $fh = shift;
   resetterm(1) if $fh eq $LINEINFO and $LINEINFO eq $OUT and $term_pid != $$;
   my @sub = dump_trace($_[0] + 1, $_[1]);
@@ -2181,6 +2210,7 @@ sub xterm_get_fork_TTY {
 # This example function resets $IN, $OUT itself
 sub os2_get_fork_TTY {
   local $^F = 40;			# XXXX Fixme!
+  local $\ = '';
   my ($in1, $out1, $in2, $out2);
   # Having -d in PERL5OPT would lead to a disaster...
   local $ENV{PERL5OPT} = $ENV{PERL5OPT}    if $ENV{PERL5OPT};
@@ -2273,6 +2303,7 @@ sub readline {
   if (@typeahead) {
     my $left = @typeahead;
     my $got = shift @typeahead;
+    local $\ = '';
     print $OUT "auto(-$left)", shift, $got, "\n";
     $term->AddHistory($got) 
       if length($got) > 1 and defined $term->Features->{addHistory};
@@ -2326,6 +2357,7 @@ sub option_val {
 
 sub parse_options {
     local($_)= @_;
+    local $\ = '';
     # too dangerous to let intuitive usage overwrite important things
     # defaultion should never be the default
     my %opt_needs_val = map { ( $_ => 1 ) } qw{
@@ -2434,6 +2466,7 @@ sub catch {
 sub warn {
     my($msg)= join("",@_);
     $msg .= ": $!\n" unless $msg =~ /\n$/;
+    local $\ = '';
     print $OUT $msg;
 }
 
@@ -2500,6 +2533,7 @@ sub tkRunning {
     if (${$term->Features}{tkRunning}) {
         return $term->tkRunning(@_);
     } else {
+	local $\ = '';
 	print $OUT "tkRunning not supported by current ReadLine package.\n";
 	0;
     }
@@ -2978,6 +3012,7 @@ sub print_help {
 	. $Term::ReadLine::TermCap::rl_term_set[1]
     }gex;
 
+    local $\ = '';
     print $OUT $_;
 }
 
@@ -3006,6 +3041,7 @@ sub diesignal {
 	&warn(Carp::longmess("Signal @_"));
     }
     else {
+	local $\ = '';
 	print $DB::OUT "Got signal @_\n";
     }
     kill 'ABRT', $$;
@@ -3077,6 +3113,7 @@ sub warnLevel {
 }
 
 sub dieLevel {
+  local $\ = '';
   if (@_) {
     $prevdie = $SIG{__DIE__} unless $dieLevel;
     $dieLevel = shift;
@@ -3164,6 +3201,8 @@ sub methods_via {
   for $name (grep {defined &{${"${class}::"}{$_}}} 
 	     sort keys %{"${class}::"}) {
     next if $seen{ $name }++;
+    local $\ = '';
+    local $, = '';
     print $DB::OUT "$prepend$name\n";
   }
   return unless shift;		# Recurse?
@@ -3350,6 +3389,7 @@ sub db_complete {
 }
 
 sub end_report {
+  local $\ = '';
   print $OUT "Use `q' to quit or `R' to restart.  `h q' for details.\n"
 }
 
