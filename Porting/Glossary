@@ -1048,6 +1048,10 @@ d_pwquota (i_pwd.U):
 	This variable conditionally defines PWQUOTA, which indicates
 	that struct passwd contains pw_quota.
 
+d_quad (quadtype.U):
+	This variable, if defined, tells that there's a 64-bit integer type,
+	quadtype.
+
 d_readdir (d_readdir.U):
 	This variable conditionally defines HAS_READDIR if readdir() is
 	available to read directory entries.

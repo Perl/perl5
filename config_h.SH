@@ -998,6 +998,10 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #define STDCHAR $stdchar	/**/
 
+/* HAS_QUAD:
+ *	This symbol, if defined, tells that there's a 64-bit integer type,
+ *	Quad_t.
+ */
 /* Quad_t:
  *	This symbol holds the type used for 64-bit integers.
  *	It can be int, long, long long, int64_t etc...
@@ -1011,9 +1015,10 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	It can be unsigned int, unsigned long, unsigned long long,
  *	uint64_t etc...
  */
-#define Quad_t $quadtype
-#define Uquad_t $uquadtype
-#define QUADCASE $quadcase
+#$d_quad HAS_QUAD	/**/
+#$d_quad Quad_t $quadtype	/**/
+#$d_quad Uquad_t $uquadtype	/**/
+#$d_quad QUADCASE $quadcase	/**/
 
 /* HAS_ACCESSX:
  *	This symbol, if defined, indicates that the accessx routine is
@@ -2476,7 +2481,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #define	U16TYPE		$u16type	/**/
 #define	I32TYPE		$i32type	/**/
 #define	U32TYPE		$u32type	/**/
-#ifdef Quad_t
+#ifdef HAS_QUAD
 #define	I64TYPE		$i64type	/**/
 #define	U64TYPE		$u64type	/**/
 #endif
@@ -2489,7 +2494,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #define	U16SIZE		$u16size	/**/
 #define	I32SIZE		$i32size	/**/
 #define	U32SIZE		$u32size	/**/
-#ifdef Quad_t
+#ifdef HAS_QUAD
 #define	I64SIZE		$i64size	/**/
 #define	U64SIZE		$u64size	/**/
 #endif

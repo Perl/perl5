@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Sat Oct 30 02:40:27 EET DST 1999
+ * Configuration time: Sat Oct 30 15:31:32 EET DST 1999
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -984,6 +984,10 @@
  */
 #define STDCHAR unsigned char	/**/
 
+/* HAS_QUAD:
+ *	This symbol, if defined, tells that there's a 64-bit integer type,
+ *	Quad_t.
+ */
 /* Quad_t:
  *	This symbol holds the type used for 64-bit integers.
  *	It can be int, long, long long, int64_t etc...
@@ -997,9 +1001,10 @@
  *	It can be unsigned int, unsigned long, unsigned long long,
  *	uint64_t etc...
  */
-#define Quad_t long
-#define Uquad_t unsigned long
-#define QUADCASE 2
+#define HAS_QUAD	/**/
+#define Quad_t long	/**/
+#define Uquad_t unsigned long	/**/
+#define QUADCASE 2	/**/
 
 /* HAS_ACCESSX:
  *	This symbol, if defined, indicates that the accessx routine is
@@ -2462,7 +2467,7 @@
 #define	U16TYPE		unsigned short	/**/
 #define	I32TYPE		int	/**/
 #define	U32TYPE		unsigned int	/**/
-#ifdef Quad_t
+#ifdef HAS_QUAD
 #define	I64TYPE		long	/**/
 #define	U64TYPE		unsigned long	/**/
 #endif
@@ -2475,7 +2480,7 @@
 #define	U16SIZE		2	/**/
 #define	I32SIZE		4	/**/
 #define	U32SIZE		4	/**/
-#ifdef Quad_t
+#ifdef HAS_QUAD
 #define	I64SIZE		8	/**/
 #define	U64SIZE		8	/**/
 #endif

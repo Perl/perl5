@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sat Oct 30 02:37:12 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Sat Oct 30 14:59:39 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -798,6 +798,7 @@ sPRIi64=''
 sPRIo64=''
 sPRIu64=''
 sPRIx64=''
+d_quad=''
 quadcase=''
 quadtype=''
 uquadtype=''
@@ -9534,6 +9535,65 @@ $define)
 	;;
 esac
 
+
+echo " "
+echo "Checking which 64-bit integer type to use..." >&4
+
+case "$intsize" in
+8) val=int
+   set quadtype
+   eval $setvar
+   val='"unsigned int"'
+   set uquadtype
+   eval $setvar
+   quadcase=1
+   ;;
+*) case "$longsize" in
+   8) val=long
+      set quadtype
+      eval $setvar
+      val='"unsigned long"'
+      set uquadtype
+      eval $setvar
+      quadcase=2
+      ;;
+   *) case "$uselonglong:$d_longlong:$longlongsize" in
+      define:define:8)
+        val='"long long"'
+        set quadtype
+        eval $setvar
+        val='"unsigned long long"'
+        set uquadtype
+        eval $setvar
+        quadcase=3
+        ;;
+      *) case "$d_int64t" in
+         define)
+           val=int64_t
+           set quadtype
+           eval $setvar
+           val=uint64_t
+           set uquadtype
+           eval $setvar
+           quadcase=4
+           ;;
+         esac
+         ;;
+      esac
+      ;;
+   esac
+   ;;
+esac
+
+case "$quadtype" in
+'')	echo "Alas, no 64-bit integer types in sight." >&4
+	d_quad="$undef"
+	;;
+*)	echo "Using '$quadtype' for 64-bit integers." >&4
+	d_quad="$define"
+	;;
+esac
+
 : see if readdir and friends exist
 set readdir d_readdir
 eval $inlibc
@@ -11739,66 +11799,11 @@ else
 fi
 
 
-
-echo " "
-echo "Checking which 64-bit integer type to use..." >&4
-
-case "$intsize" in
-8) val=int
-   set quadtype
-   eval $setvar
-   val='"unsigned int"'
-   set uquadtype
-   eval $setvar
-   quadcase=1
-   ;;
-*) case "$longsize" in
-   8) val=long
-      set quadtype
-      eval $setvar
-      val='"unsigned long"'
-      set uquadtype
-      eval $setvar
-      quadcase=2
-      ;;
-   *) case "$uselonglong:$d_longlong:$longlongsize" in
-      define:define:8)
-        val='"long long"'
-        set quadtype
-        eval $setvar
-        val='"unsigned long long"'
-        set uquadtype
-        eval $setvar
-        quadcase=3
-        ;;
-      *) case "$d_int64t" in
-         define)
-           val=int64_t
-           set quadtype
-           eval $setvar
-           val=uint64_t
-           set uquadtype
-           eval $setvar
-           quadcase=4
-           ;;
-         esac
-         ;;
-      esac
-      ;;
-   esac
-   ;;
-esac
-
-case "$quadtype" in
-'') echo "Alas, no 64-bit integer types in sight."    >&4 ;;
-*)  echo "Using '$quadtype' for 64-bit integers." >&4 ;;
-esac
-
 : check for length of character
 echo " "
 case "$charsize" in
 '')
-	echo "Checking to see how big your characters are..." >&4
+	echo "Checking to see how big your characters are (hey, you never know)..." >&4
 	$cat >try.c <<'EOCP'
 #include <stdio.h>
 int main()
@@ -11827,8 +11832,8 @@ $rm -f try.c try
 echo " "
 $echo "Choosing the C types to be used for Perl's internal types..." >&4
 
-case "$use64bits:$quadtype" in
-define:?*)
+case "$use64bits:$d_quad:$quadtype" in
+define:define:?*)
 	ivtype="$quadtype"
 	uvtype="$uquadtype"
 	ivsize=8
@@ -11990,9 +11995,9 @@ case "$i32type" in
 esac
 
 case "$i64type" in
-'')	case "$quadtype" in
-	'')	;;
-	*)	i64type="$quadtype"
+'')	case "$d_quad:$quadtype" in
+	define:?*)
+		i64type="$quadtype"
 		u64type="$uquadtype"
 		i64size=8
 		u64size=8
@@ -14256,6 +14261,7 @@ d_pwexpire='$d_pwexpire'
 d_pwgecos='$d_pwgecos'
 d_pwpasswd='$d_pwpasswd'
 d_pwquota='$d_pwquota'
+d_quad='$d_quad'
 d_readdir='$d_readdir'
 d_readlink='$d_readlink'
 d_rename='$d_rename'
