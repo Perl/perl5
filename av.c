@@ -179,10 +179,13 @@ SV *val;
 
     if (!av)
 	return 0;
+    if (!val)
+	val = &sv_undef;
 
     if (SvRMAGICAL(av)) {
 	if (mg_find((SV*)av,'P')) {
-	    mg_copy((SV*)av, val, 0, key);
+	    if (val != &sv_undef)
+		mg_copy((SV*)av, val, 0, key);
 	    return 0;
 	}
     }
@@ -192,9 +195,8 @@ SV *val;
 	if (key < 0)
 	    return 0;
     }
-    if (!val)
-	val = &sv_undef;
-
+    if (SvREADONLY(av) && key >= AvFILL(av))
+	croak(no_modify);
     if (key > AvMAX(av))
 	av_extend(av,key);
     if (AvREIFY(av))
@@ -362,6 +364,8 @@ register AV *av;
 
     if (!av || AvFILL(av) < 0)
 	return &sv_undef;
+    if (SvREADONLY(av))
+	croak(no_modify);
     retval = AvARRAY(av)[AvFILL(av)];
     AvARRAY(av)[AvFILL(av)--] = &sv_undef;
     if (SvSMAGICAL(av))
@@ -379,6 +383,8 @@ register I32 num;
 
     if (!av || num <= 0)
 	return;
+    if (SvREADONLY(av))
+	croak(no_modify);
     if (!AvREAL(av)) {
 	if (AvREIFY(av))
 	    av_reify(av);
@@ -422,6 +428,8 @@ register AV *av;
 
     if (!av || AvFILL(av) < 0)
 	return &sv_undef;
+    if (SvREADONLY(av))
+	croak(no_modify);
     retval = *AvARRAY(av);
     if (AvREAL(av))
 	*AvARRAY(av) = &sv_undef;
