@@ -1,30 +1,22 @@
 package ExtUtils::MM_Cygwin;
 
 use strict;
-
-our $VERSION = '1.00';
+use vars qw($VERSION @ISA);
 
 use Config;
-#use Cwd;
-#use File::Basename;
-require Exporter;
-
-require ExtUtils::MakeMaker;
-ExtUtils::MakeMaker->import(qw( $Verbose &neatvalue));
-
 use File::Spec;
 
-unshift @MM::ISA, 'ExtUtils::MM_Cygwin';
+require ExtUtils::MM_Any;
+require ExtUtils::MM_Unix;
+@ISA = qw( ExtUtils::MM_Any ExtUtils::MM_Unix );
 
-sub canonpath {
-    shift;
-    return File::Spec->canonpath(@_);
-}
+$VERSION = 1.01_01;
 
 sub cflags {
     my($self,$libperl)=@_;
     return $self->{CFLAGS} if $self->{CFLAGS};
-    my $base =$self->ExtUtils::MM_Unix::cflags($libperl);
+
+    my $base = $self->SUPER::cflags($libperl);
     foreach (split /\n/, $base) {
       / *= */ and $self->{$`} = $';
     };
@@ -61,7 +53,7 @@ Warning: I could not locate your pod2man program. Please make sure,
 END
         $pod2man_exe = "-S pod2man";
     }
-    my(@m);
+    my(@m) = ();
     push @m,
 qq[POD2MAN_EXE = $pod2man_exe\n],
 qq[POD2MAN = \$(PERL) -we '%m=\@ARGV;for (keys %m){' \\\n],
@@ -72,7 +64,8 @@ q[-e 'next if -e $$m{$$_} && -M $$m{$$_} < -M $$_ && -M $$m{$$_} < -M "],
 -e 'chmod(oct($(PERM_RW))), $$m{$$_} or warn "chmod $(PERM_RW) $$m{$$_}: $$!\n";}'
 ];
     push @m, "\nmanifypods : pure_all ";
-    push @m, join " \\\n\t", keys %{$self->{MAN1PODS}}, keys %{$self->{MAN3PODS}};
+    push @m, join " \\\n\t", keys %{$self->{MAN1PODS}},
+                             keys %{$self->{MAN3PODS}};
 
     push(@m,"\n");
     if (%{$self->{MAN1PODS}} || %{$self->{MAN3PODS}}) {
@@ -84,16 +77,14 @@ q[-e 'next if -e $$m{$$_} && -M $$m{$$_} < -M $$_ && -M $$m{$$_} < -M "],
     join('', @m);
 }
 
-sub perl_archive
-{
- if ($Config{useshrplib} eq 'true')
- {
-   my $libperl = '$(PERL_INC)' .'/'. "$Config{libperl}";
-   $libperl =~ s/a$/dll.a/;
-   return $libperl;
- } else {
- return '$(PERL_INC)' .'/'. ("$Config{libperl}" or "libperl.a");
- }
+sub perl_archive {
+    if ($Config{useshrplib} eq 'true') {
+        my $libperl = '$(PERL_INC)' .'/'. "$Config{libperl}";
+        $libperl =~ s/a$/dll.a/;
+        return $libperl;
+    } else {
+        return '$(PERL_INC)' .'/'. ("$Config{libperl}" or "libperl.a");
+    }
 }
 
 1;

@@ -1,3 +1,159 @@
+5.53_01 Fri Mar 29 00:13:02 EST 2002
+    [[ Bug Fixes ]]
+    - Removed duplicate NAME macro definition
+    - Fixed makemakerdflt target for VMS
+    * bleadperl@11460 introduced a bug with recursive Makefile.PL's not
+      having '.' in @INC.  PDL should build now.
+    * MANIFEST.SKIP only working on file names, not full relative paths.
+      Only since 5.51_01  (RT 413)
+    * make test TEST_VERBOSE=1 was busted by 5.50_01 (RT 423)
+    * Error messages from dying Makefile.PL's and hint files were
+      accidentally supressed in 5.48_04.  Fixed.
+    * Makefile.PL's are supposed to be run in package main.  5.48_04
+      broke this.  Fixed.
+    * Fixing installing on VMS.
+
+5.52_01 Tue Mar 26 00:24:26 EST 2002
+    [[ Bug Fixes ]]
+    * ActivePerl 5.6.1/build 631 now 100%
+    - Fixed some SelfLoader warnings
+    * ExtUtils::MM_Win32 not subclassed off of ExtUtils::MM_Any properly
+    - Bug in local $ENV{FOO} was causing failures in MM_Win32 tests.
+      Compensating for the bug.
+    - $Config{prefixexp} is sometimes bad on ActivePerl, compensating
+    - Accidentally left htmlifypods tests in MM_Win32 tests
+
+    [[ Doc Changes ]]
+    - Expanding Known Good list
+    - Adding Known Programs to README
+
+5.51_01 Mon Mar 18 01:37:02 EST 2002
+    [[ API Changes ]]
+    - Removing xsubpp and typemap from the distribution.  These are not
+      Perl version independent files and should not be upgraded.
+    - Removing ExtUtils::Embed.  Version specific module and should
+      not be updated.
+    - Removing ExtUtils::Constant.  Not directly tied to MakeMaker.
+      Will be distributed seperately by Nick Clark.
+
+    [[ New Features ]]
+    * realclean now deletes 'dist' directory.
+
+    [[ Bug Fixes ]]
+    * Fixing ExtUtils::Installed for VMS
+    * Fixed it so MakeMaker can build itself without needing an eariler
+      version installed
+    * Fixed ExtUtils::Installed so packlists work on VMS
+    * ExtUtils::MM_VMS test had a stupid typo that prevented most
+      of the tests from running.
+    - Fixing VMS so 'mmk' is always 'mmk all' (bleadperl 15218)
+    - ExtUtils::MM_Any->catfile was calling catdir
+    - Added Ken William's "speed up ExtUtils::Manifest" patch.
+    - Added Nick Clark's return value of manifest routines patch
+      (bleadperl@14978)
+    - Merging in bleadperl changes (14438, 14453, 14611, 14612, 14622,
+      14655, 14677, 14688, 14902, 15023, 15187, 15367)
+    - bleadperl change 15325 (VMS 'mmk all' hack) rejected.
+    - ExtUtils::MM_Any->test_via_harness() now using -MExtUtils::testlib
+      instead of -I's.  This keeps the command line shorter on VMS, but
+      it means TEST_LIB doesn't work anymore.  May prove problematic.
+    - PERLRUN now uses FULLPERL instead of PERL.  This avoids 
+      accidental use of miniperl.  May cause problems in the core.
+    - Fixed test_via_harness() on VMS so it uses PERLRUN.
+    - ExtUtils::Manifest wrongly handling MANIFEST on VMS.
+    - ExtUtils::Manifest::maniskip broken due to misuse of /o on a regex.
+
+5.50_01 Mon Mar  4 23:44:48 EST 2002
+    [[ API Changes ]]
+      htmlifypods and all HTML targets have been removed.  It didn't
+      work properly.  A target for HTMLifying of docs will be
+      added sometime in the future (read: send a patch).
+    - Deprecated ROOTEXT variable removed (its been deprecated for
+      more than five years).
+    - Removed ExtUtils::Miniperl from the CPAN distribution.  Can't
+      see how its useful outside the core.
+
+    [[ New Features ]]
+    * Emacs backup files (ie. *~) are no longer copied into blib
+      (this means you won't get Foo.pm~ accidentally installed anymore).
+    - prefixify() now returns if the prefixification worked or not.
+    - added the Perl patchlevel info to the description embedded in DLLs
+      (Ilya Zakharevich perl change 14810)
+
+    [[ Bug Fixes ]]
+    * 5.49_01 broke anything that depended on the MM class to be loaded
+      with ExtUtils::MakeMaker, like CPAN.  Temporarily fixed.
+    * Many places wrongfully assume MM methods can be called as class
+      methods!  Inside and outside of MakeMaker.
+    * DOS now acts like Win32 instead of Unix.  This should be less wrong.
+    - Netware tweak from Ananth Kesari (perl change 14780)
+
+    [[ Doc Changes ]]
+    * made the docs about the behavior of PREFIX a bit more vague
+      reflecting its odd behavior.    
+    - Replaced references to %Config with things people are more likely
+      to understand in PREFIX & LIB docs.
+    - Put PREFIX before LIB in the docs.
+
+    [[ Internal Refactorings ]]
+    - File::Spec wrappers consolidated in MM_Any
+    - test_via_harness/script consolidated in MM_Any
+    * Added ExtUtils::Command::MM to replace large -e "one-liners"
+    * Added ExtUtils::MM_UWIN, took UWIN specific code out of MM_Unix.
+    * Added ExtUtils::MM_DOS, took some DOS specific code out of MM_Unix
+    - Added a dist() override to MM_OS2.
+    - Took the OS/2 specific code out of MM_Unix's dist()
+    - Starting to quote as many command line switches as possible
+      to make VMS have to override less of MM_Unix.
+
+5.49_01 Mon Feb  4 00:42:40 EST 2002
+    - Default TEST_LIBS now contains absolute paths, so tests can
+      chdir without breaking @INC.
+    - Some bug fixes in MM_Win32 were missing in MM_NW5.
+    - LLIBPERL was not being set.
+    - Gisle Aas fixed a warning in prompt when the user hits ctrl-D
+      or pipes STDIN to /dev/null.
+    - VMS's test is now a proper ->can check.
+    - Stray newline in Command.t causing havoc (bleadperl 14441)
+
+    * Lots of internal changes.  Everything from here on is an internal
+      change.
+    - Broke ExtUtils::Liblist::Kid out into its own .pm.  Temporary.
+    - Broke MM and MY out into their own .pm's.  Possibly temporary.
+    - Broke ExtUtils::MM_Win95 out of ExtUtils::MM_Win32.  MM_Win95
+      is now an MM_Win32 subclass.
+    - Removed wrapper methods from ExtUtils::Liblist that were
+      defering File::Spec loading.  Almost everything uses File::Spec
+    - Changed most of the 'our's to 'use vars' in prep for 5.005_03
+      backporting
+    - Changed ExtUtils::MakeMaker->import(...) cargo-cultery in MM_* 
+      modules to proper "use ExtUtils::MakeMaker qw(...)"
+    - All non-Unix MM_* modules now directly inherit from MM_Unix.
+      They did this before, but in a round-about way.
+    - MM_* modules no longer directly muck with @MM::ISA.  Instead
+      @MM::ISA does that itself.
+    - Removed unnecessary require of Exporter in many MM_* modules.
+    - MM_Cygwin was using an MM_Unix function directly without have
+      explicitly required MM_Unix.
+    - Most of MM_NW5 was redundant with MM_Win32.  So MM_NW5 is now
+      a subclass of Win32 and the reduendant code has been deleted.
+    - Replaced lots of calls to File::Spec->updir, curdir and rootdir
+      with a global in MM_Unix.  Should make things a bit faster.
+    - Untabified ExtUtils::MakeMaker.  I hate tabs.
+    - "Which MM subclass should I use" logic moved from EU::MakeMaker
+      to EU::MM.
+    - Deprecated EU::MakeMaker::Version_check deleted.
+
+5.48_04 Mon Jan 21 19:28:38 EST 2002
+    - No longer requiring Test::More
+    - Now tested to work with a clean 5.6.1
+    - Stripped out $Revision: 1.25 $ based $VERSIONs.
+    - Rolled in patches from p5p, vmsperl & VOS (14325, 14338, 14360, 14364)
+    * hint files now run in a safer context.  Only $self is available.
+    - ExtUtils::testlib now provides absolute paths into @INC.
+      No longer obsolete
+    - Little test fixes
+
 5.48_03 Thu Jan 17 23:44:38 EST 2002
     * moved bin/inst to bin/instmodsh
     * Some Win32 backporting fixes.  The -x switch doesn't seem to

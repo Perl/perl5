@@ -5,6 +5,9 @@ BEGIN {
         chdir 't' if -d 't';
         @INC = '../lib';
     }
+    else {
+        unshift @INC, 't/lib/';
+    }
 }
 chdir 't';
 
@@ -12,17 +15,13 @@ chdir 't';
 use strict;
 use warnings;
 
-# for _is_type() tests
 use Config;
-
-# for new() tests
 use Cwd;
 use File::Path;
-
-# for directories() tests
 use File::Basename;
+use File::Spec;
 
-use Test::More tests => 43;
+use Test::More tests => 42;
 
 BEGIN { use_ok( 'ExtUtils::Installed' ) }
 
@@ -32,13 +31,13 @@ my $mandirs =  !!$Config{man1direxp} + !!$Config{man3direxp};
 my $ei = bless( {}, 'ExtUtils::Installed' );
 
 # _is_prefix
-is( $ei->_is_prefix('foo/bar', 'foo'), 1, 
+ok( $ei->_is_prefix('foo/bar', 'foo'),
 	'_is_prefix() should match valid path prefix' );
-is( $ei->_is_prefix('\foo\bar', '\bar'), 0, 
+ok( !$ei->_is_prefix('\foo\bar', '\bar'),
 	'... should not match wrong prefix' );
 
 # _is_type
-is( $ei->_is_type(0, 'all'), 1, '_is_type() should be true for type of "all"' );
+ok( $ei->_is_type(0, 'all'), '_is_type() should be true for type of "all"' );
 
 foreach my $path (qw( man1dir man3dir )) {
 SKIP: {
@@ -46,13 +45,23 @@ SKIP: {
         skip("no man directory $path on this system", 2 ) unless $dir;
 
 	my $file = $dir . '/foo';
-	is( $ei->_is_type($file, 'doc'), 1, "... should find doc file in $path" );
-	is( $ei->_is_type($file, 'prog'), 0, "... but not prog file in $path" );
+	ok( $ei->_is_type($file, 'doc'),   "... should find doc file in $path" );
+	ok( !$ei->_is_type($file, 'prog'), "... but not prog file in $path" );
     }
 }
 
-is( $ei->_is_type($Config{prefixexp} . '/bar', 'prog'), 1, 
-	"... should find prog file under $Config{prefixexp}" );
+# VMS 5.6.1 doesn't seem to have $Config{prefixexp}
+my $prefix = $Config{prefix} || $Config{prefixexp};
+
+# You can concatenate /foo but not foo:, which defaults in the current 
+# directory
+$prefix = VMS::Filespec::unixify($prefix) if $^O eq 'VMS';
+
+# ActivePerl 5.6.1/631 has $Config{prefixexp} as 'p:' for some reason
+$prefix = $Config{prefix} if $prefix eq 'p:' && $^O eq 'MSWin32';
+
+ok( $ei->_is_type( File::Spec->catfile($prefix, 'bar'), 'prog'),
+	"... should find prog file under $prefix" );
 
 SKIP: {
 	skip('no man directories on this system', 1) unless $mandirs;
@@ -60,27 +69,19 @@ SKIP: {
 		'... should not find doc file outside path' );
 }
 
-is( $ei->_is_type('bar', 'prog'), 0, 
+ok( !$ei->_is_type('bar', 'prog'),
 	'... nor prog file outside path' );
-is( $ei->_is_type('whocares', 'someother'), 0, '... nor other type anywhere' );
+ok( !$ei->_is_type('whocares', 'someother'), '... nor other type anywhere' );
 
 # _is_under
 ok( $ei->_is_under('foo'), '_is_under() should return true with no dirs' );
 
 my @under = qw( boo bar baz );
-is( $ei->_is_under('foo', @under), 0, '... should find no file not under dirs');
-is( $ei->_is_under('baz', @under), 1, '... should find file under dir' );
+ok( !$ei->_is_under('foo', @under), '... should find no file not under dirs');
+ok( $ei->_is_under('baz', @under),  '... should find file under dir' );
 
 # new
-my $realei;
-{
-    # We're going to get warnings about not being able to find install
-    # directories if we're not installed.
-    local $SIG{__WARN__} = sub {
-        warn @_ unless $ENV{PERL_CORE} && $_[0] =~ /^Can't stat/;
-    };
-    $realei = ExtUtils::Installed->new();
-}
+my $realei = ExtUtils::Installed->new();
 
 isa_ok( $realei, 'ExtUtils::Installed' );
 isa_ok( $realei->{Perl}{packlist}, 'ExtUtils::Packlist' );
@@ -108,11 +109,7 @@ FAKE
 
 
 SKIP: {
-    TODO: {
 	skip("could not write packlist: $!", 3 ) unless $wrotelist;
-
-       local $TODO = "new() attempts to derive package name from filename"
-           if $^O eq 'VMS';
 
 	# avoid warning and death by localizing glob
 	local *ExtUtils::Installed::Config;
@@ -130,7 +127,6 @@ SKIP: {
 	isa_ok( $realei->{FakeMod}{packlist}, 'ExtUtils::Packlist' );
 	is( $realei->{FakeMod}{version}, '1.1.1', 
 		'... should find version in modules' );
-    }
 }
 
 # modules
@@ -147,7 +143,7 @@ $ei->{goodmod} = {
                 ($Config{man3direxp} ? 
                     (File::Spec->catdir($Config{man3direxp}, 'bar') => 1) : 
                         ()),
-                File::Spec->catdir($Config{prefixexp}, 'foobar') => 1,
+                File::Spec->catdir($prefix, 'foobar') => 1,
 		foobaz	=> 1,
 	},
 };
@@ -159,7 +155,8 @@ like( $@, qr/type must be/,'files() should croak given bad type' );
 
 my @files;
 SKIP: {
-    skip('no man directory man1dir on this system', 2) unless $Config{man1direxp}; 
+    skip('no man directory man1dir on this system', 2) 
+      unless $Config{man1direxp}; 
     @files = $ei->files('goodmod', 'doc', $Config{man1direxp});
     is( scalar @files, 1, '... should find doc file under given dir' );
     is( grep({ /foo$/ } @files), 1, '... checking file name' );
@@ -232,9 +229,6 @@ is( ${ $ei->packlist('yesmod') }, 102,
 # version
 is( $ei->version('yesmod'), 101, 
 	'version() should report installed mod version' );
-
-# needs a DESTROY, for some reason
-can_ok( $ei, 'DESTROY' );
 
 END {
 	if ($wrotelist) {

@@ -5,6 +5,9 @@ BEGIN {
         chdir 't' if -d 't';
         @INC = '../lib';
     }
+    else {
+        unshift @INC, 't/lib';
+    }
 }
 chdir 't';
 

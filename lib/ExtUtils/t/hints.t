@@ -9,9 +9,9 @@ BEGIN {
         unshift @INC, 't/lib/';
     }
 }
-chdir 't';
+$ENV{PERL_CORE} ? chdir '../lib/ExtUtils/t' : chdir 't';
 
-use Test::More tests => 2;
+use Test::More tests => 3;
 
 mkdir 'hints';
 my $hint_file = "hints/$^O.pl";
@@ -30,8 +30,17 @@ $mm->check_hints;
 is( $mm->{CCFLAGS}, 'basset hounds got long ears' );
 is( $out->read, "Processing hints file $hint_file\n" );
 
-package Catch;
+open(HINT, ">$hint_file") || die "Can't write dummy hints file $hint_file: $!";
+print HINT <<'CLOO';
+die "Argh!\n";
+CLOO
+close HINT;
 
+$mm->check_hints;
+is( $out->read, <<OUT, 'hint files produce errors' );
+Processing hints file $hint_file
+Argh!
+OUT
 
 END {
     use File::Path;

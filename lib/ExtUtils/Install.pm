@@ -1,6 +1,6 @@
 package ExtUtils::Install;
 
-use 5.006_001;
+use 5.006;
 our(@ISA, @EXPORT, $VERSION);
 $VERSION = 1.29;
 

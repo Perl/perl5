@@ -933,29 +933,41 @@ lib/Exporter.t			See if Exporter works
 lib/Exporter/Heavy.pm		Complicated routines for Exporter
 lib/ExtUtils/Changes            MakeMaker change log
 lib/ExtUtils/Command.pm		Utilities for Make on non-UNIX platforms
+lib/ExtUtils/Command/MM.pm      Calling MM functions from the cmd line
 lib/ExtUtils/Constant.pm	generate XS code to import C header constants
 lib/ExtUtils/Embed.pm		Utilities for embedding Perl in C programs
 lib/ExtUtils/Install.pm		Handles 'make install' on extensions
 lib/ExtUtils/Installed.pm	Information on installed extensions
 lib/ExtUtils/instmodsh		Give information about installed extensions
 lib/ExtUtils/Liblist.pm		Locates libraries
+lib/ExtUtils/Liblist/Kid.pm     Does the real work of the above
 lib/ExtUtils/MakeMaker.pm	Write Makefiles for extensions
 lib/ExtUtils/Manifest.pm	Utilities to write MANIFEST files
 lib/ExtUtils/MANIFEST.SKIP	The default MANIFEST.SKIP
 lib/ExtUtils/Mkbootstrap.pm	Writes a bootstrap file (see MakeMaker)
 lib/ExtUtils/Mksymlists.pm	Writes a linker options file for extensions
+lib/ExtUtils/MM.pm              MakeMaker adaptor class
+lib/ExtUtils/MM_Any.pm          MakeMaker methods for Any OS
 lib/ExtUtils/MM_BeOS.pm		MakeMaker methods for BeOS
 lib/ExtUtils/MM_Cygwin.pm	MakeMaker methods for Cygwin
+lib/ExtUtils/MM_DOS.pm          MakeMaker methods for DOS
 lib/ExtUtils/MM_NW5.pm		MakeMaker methods for NetWare
 lib/ExtUtils/MM_OS2.pm		MakeMaker methods for OS/2
-lib/ExtUtils/MM_Unix.pm		MakeMaker base class for Unix
+lib/ExtUtils/MM_UWIN.pm         MakeMaker methods for U/WIN
+lib/ExtUtils/MM_Unix.pm		MakeMaker methods for Unix
 lib/ExtUtils/MM_VMS.pm		MakeMaker methods for VMS
 lib/ExtUtils/MM_Win32.pm	MakeMaker methods for Win32
+lib/ExtUtils/MM_Win95.pm        MakeMaker methods for Win95
+lib/ExtUtils/MY.pm              MakeMaker user override class
 lib/ExtUtils/Packlist.pm	Manipulates .packlist files
+lib/ExtUtils/t/Big-Fat-Dummy/Makefile.PL              MakeMaker dummy module
+lib/ExtUtils/t/Big-Fat-Dummy/lib/Big/Fat/Dummy.pm     MakeMaker dummy module
+lib/ExtUtils/t/Big-Fat-Dummy/t/compile.t              MakeMaker dummy module
+lib/ExtUtils/t/basic.t          See if MakeMaker can build a module
 lib/ExtUtils/t/Command.t	See if ExtUtils::Command works (Win32 only)
 lib/ExtUtils/t/Constant.t	See if ExtUtils::Constant works
 lib/ExtUtils/t/Embed.t		See if ExtUtils::Embed and embedding works
-lib/ExtUtils/t/hints.t      See if hint files are honored.
+lib/ExtUtils/t/hints.t          See if hint files are honored.
 lib/ExtUtils/t/Installed.t	See if ExtUtils::Installed works
 lib/ExtUtils/t/Manifest.t	See if ExtUtils::Manifest works
 lib/ExtUtils/t/Mkbootstrap.t	See if ExtUtils::Mkbootstrap works
@@ -966,7 +978,10 @@ lib/ExtUtils/t/MM_Unix.t	See if ExtUtils::MM_UNIX works
 lib/ExtUtils/t/MM_VMS.t		See if ExtUtils::MM_VMS works
 lib/ExtUtils/t/MM_Win32.t	See if ExtUtils::MM_Win32 works
 lib/ExtUtils/t/Packlist.t	See if Packlist works
-lib/ExtUtils/t/testlib.t	Fixes up @INC to use just-built extension
+lib/ExtUtils/t/Problem-Module/Makefile.PL           MakeMaker dummy module
+lib/ExtUtils/t/Problem-Module/subdir/Makefile.PL    MakeMaker dummy module
+lib/ExtUtils/t/problems.t       How MakeMaker reacts to build problems
+lib/ExtUtils/t/testlib.t	See if ExtUtils::testlib works
 lib/ExtUtils/testlib.pm		Fixes up @INC to use just-built extension
 lib/ExtUtils/typemap		Extension interface types
 lib/ExtUtils/xsubpp		External subroutine preprocessor
@@ -2230,6 +2245,7 @@ t/lib/Math/BigFloat/Subclass.pm	Empty subclass of BigFloat for test
 t/lib/Math/BigInt/BareCalc.pm	Bigint's simulation of Calc
 t/lib/Math/BigInt/Subclass.pm	Empty subclass of BigInt for test
 t/lib/Math/BigRat/Test.pm		Math::BigRat test helper
+t/lib/MakeMaker/Test/Utils.pm           MakeMaker test utilities
 t/lib/sample-tests/bailout		Test data for Test::Harness
 t/lib/sample-tests/combined		Test data for Test::Harness
 t/lib/sample-tests/descriptive		Test data for Test::Harness

@@ -1,20 +1,16 @@
 package ExtUtils::MM_OS2;
 
 use strict;
+use vars qw($VERSION @ISA);
 
-our $VERSION = '1.00';
-
-#use Config;
-#use Cwd;
-#use File::Basename;
-require Exporter;
-
-require ExtUtils::MakeMaker;
-ExtUtils::MakeMaker->import(qw( $Verbose &neatvalue));
-
+use ExtUtils::MakeMaker qw(neatvalue);
 use File::Spec;
 
-unshift @MM::ISA, 'ExtUtils::MM_OS2';
+$VERSION = '1.02_01';
+
+require ExtUtils::MM_Any;
+require ExtUtils::MM_Unix;
+@ISA = qw(ExtUtils::MM_Any ExtUtils::MM_Unix);
 
 =pod
 
@@ -37,6 +33,17 @@ the semantics.
 =over 4
 
 =cut
+
+sub dist {
+    my($self, %attribs) = @_;
+
+    $attribs{TO_UNIX} ||= sprintf <<'MAKE_TEXT', $self->{NOECHO};
+%s$(TEST_F) tmp.zip && $(RM) tmp.zip; \\
+$(ZIP) -ll -mr tmp.zip $(DISTVNAME) && unzip -o tmp.zip && $(RM) tmp.zip
+MAKE_TEXT
+
+    return $self->SUPER::dist(%attribs);
+}
 
 sub dlsyms {
     my($self,%attribs) = @_;
@@ -111,14 +118,8 @@ sub maybe_command {
     return;
 }
 
-sub file_name_is_absolute {
-    shift;
-    return File::Spec->file_name_is_absolute(@_);
-}
-
-sub perl_archive
-{
- return "\$(PERL_INC)/libperl\$(LIB_EXT)";
+sub perl_archive {
+    return "\$(PERL_INC)/libperl\$(LIB_EXT)";
 }
 
 =item perl_archive_after
