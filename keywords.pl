@@ -39,6 +39,7 @@ GT
 LE
 LT
 NE
+RESTART
 abs
 accept
 alarm

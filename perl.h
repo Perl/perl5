@@ -1160,6 +1160,7 @@ EXT char *	last_uni;	/* position of last named-unary operator */
 EXT char *	last_lop;	/* position of last list operator */
 EXT OPCODE	last_lop_op;	/* last list operator */
 EXT bool	in_my;		/* we're compiling a "my" declaration */
+EXT HV *	in_my_stash;	/* declared class of this "my" declaration */
 #ifdef FCRYPT
 EXT I32		cryptseen;	/* has fast crypt() been initialized? */
 #endif
@@ -1313,6 +1314,7 @@ IEXT HV *	Idebstash;	/* symbol table for perldb package */
 IEXT SV *	Icurstname;	/* name of current package */
 IEXT AV *	Ibeginav;	/* names of BEGIN subroutines */
 IEXT AV *	Iendav;		/* names of END subroutines */
+IEXT AV *	Irestartav;	/* names of RESTART subroutines */
 IEXT AV *	Ipad;		/* storage for lexically scoped temporaries */
 IEXT AV *	Ipadname;	/* variable names for "my" variables */
 

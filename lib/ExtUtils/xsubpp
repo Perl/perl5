@@ -767,8 +767,9 @@ while (fetch_para()) {
 	unless $func_header =~ /^(?:([\w:]*)::)?(\w+)\s*\(\s*(.*?)\s*\)\s*$/s;
 
     ($class, $func_name, $orig_args) =  ($1, $2, $3) ;
-    ($pname = $func_name) =~ s/^($Prefix)?/$Packprefix/;
-    $Full_func_name = "${Packid}_$func_name";
+    ($fname = $func_name) =~ s/^($Prefix)?//;
+    $pname = $Packprefix . $fname;
+    $Full_func_name = "${Packid}_$fname";
 
     # Check for duplicate function definition
     for $tmp (@XSStack) {
@@ -816,7 +817,7 @@ while (fetch_para()) {
 
     # print function header
     print Q<<"EOF";
-#XS(XS_${Packid}_$func_name)
+#XS(XS_$Full_func_name)
 #[[
 #    dXSARGS;
 EOF

@@ -78,6 +78,7 @@
 #define hexdigit	Perl_hexdigit
 #define hints		Perl_hints
 #define in_my		Perl_in_my
+#define in_my_stash	Perl_in_my_stash
 #define inc_amg		Perl_inc_amg
 #define io_close	Perl_io_close
 #define know_next	Perl_know_next
@@ -172,7 +173,7 @@
 #define regeol		Perl_regeol
 #define regfold		Perl_regfold
 #define reginput	Perl_reginput
-#define regkind	Perl_regkind
+#define regkind		Perl_regkind
 #define reglastparen	Perl_reglastparen
 #define regmyendp	Perl_regmyendp
 #define regmyp_size	Perl_regmyp_size
@@ -289,6 +290,14 @@
 #define append_list	Perl_append_list
 #define apply		Perl_apply
 #define assertref	Perl_assertref
+#define avhv_delete	Perl_avhv_delete
+#define avhv_exists	Perl_avhv_exists
+#define avhv_fetch	Perl_avhv_fetch
+#define avhv_iterinit	Perl_avhv_iterinit
+#define avhv_iternext	Perl_avhv_iternext
+#define avhv_iternextsv	Perl_avhv_iternextsv
+#define avhv_iterval	Perl_avhv_iterval
+#define avhv_store	Perl_avhv_store
 #define av_clear	Perl_av_clear
 #define av_extend	Perl_av_extend
 #define av_fake		Perl_av_fake
@@ -1193,6 +1202,7 @@
 #define preambled	(curinterp->Ipreambled)
 #define preambleav	(curinterp->Ipreambleav)
 #define preprocess	(curinterp->Ipreprocess)
+#define restartav	(curinterp->Irestartav)
 #define restartop	(curinterp->Irestartop)
 #define rightgv		(curinterp->Irightgv)
 #define rs		(curinterp->Irs)
@@ -1347,6 +1357,7 @@
 #define Ipreambled	preambled
 #define Ipreambleav	preambleav
 #define Ipreprocess	preprocess
+#define Irestartav	restartav
 #define Irestartop	restartop
 #define Irightgv	rightgv
 #define Irs		rs

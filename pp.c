@@ -1791,20 +1791,24 @@ PP(pp_each)
     HE *entry;
     I32 i;
     char *tmps;
+    I32 realhv = (SvTYPE(hash) == SVt_PVHV);
     
     PUTBACK;
-    entry = hv_iternext(hash);                        /* might clobber stack_sp */
+    /* might clobber stack_sp */
+    entry = realhv ? hv_iternext(hash) : avhv_iternext((AV*)hash);
     SPAGAIN;
 
     EXTEND(SP, 2);
     if (entry) {
-	tmps = hv_iterkey(entry, &i);	              /* won't clobber stack_sp */
+	tmps = hv_iterkey(entry, &i);              /* won't clobber stack_sp */
 	if (!i)
 	    tmps = "";
 	PUSHs(sv_2mortal(newSVpv(tmps, i)));
 	if (GIMME == G_ARRAY) {
 	    PUTBACK;
-	    sv_setsv(TARG, hv_iterval(hash, entry));  /* might clobber stack_sp */
+	    /* might clobber stack_sp */
+	    sv_setsv(TARG, realhv ?
+		     hv_iterval(hash, entry) : avhv_iterval((AV*)hash, entry));
 	    SPAGAIN;
 	    PUSHs(TARG);
 	}
@@ -1833,12 +1837,16 @@ PP(pp_delete)
     HV *hv = (HV*)POPs;
     char *tmps;
     STRLEN len;
-    if (SvTYPE(hv) != SVt_PVHV) {
+    I32 flags = op->op_private & OPpLEAVE_VOID ? G_DISCARD : 0;
+    
+    tmps = SvPV(tmpsv, len);
+    if (SvTYPE(hv) == SVt_PVHV)
+	sv = hv_delete(hv, tmps, len, flags);
+    else if (SvTYPE(hv) == SVt_PVAV) {
+	sv = avhv_delete((AV*)hv, tmps, len, flags);
+    } else {
 	DIE("Not a HASH reference");
     }
-    tmps = SvPV(tmpsv, len);
-    sv = hv_delete(hv, tmps, len,
-	op->op_private & OPpLEAVE_VOID ? G_DISCARD : 0);
     if (!sv)
 	RETPUSHUNDEF;
     PUSHs(sv);
@@ -1852,12 +1860,16 @@ PP(pp_exists)
     HV *hv = (HV*)POPs;
     char *tmps;
     STRLEN len;
-    if (SvTYPE(hv) != SVt_PVHV) {
+    tmps = SvPV(tmpsv, len);
+    if (SvTYPE(hv) == SVt_PVHV) {
+	if (hv_exists(hv, tmps, len))
+	    RETPUSHYES;
+    } else if (SvTYPE(hv) == SVt_PVAV) {
+	if (avhv_exists((AV*)hv, tmps, len))
+	    RETPUSHYES;
+    } else {
 	DIE("Not a HASH reference");
     }
-    tmps = SvPV(tmpsv, len);
-    if (hv_exists(hv, tmps, len))
-	RETPUSHYES;
     RETPUSHNO;
 }
 
@@ -1867,13 +1879,15 @@ PP(pp_hslice)
     register SV **svp;
     register HV *hv = (HV*)POPs;
     register I32 lval = op->op_flags & OPf_MOD;
+    I32 realhv = (SvTYPE(hv) == SVt_PVHV);
 
-    if (SvTYPE(hv) == SVt_PVHV) {
+    if (realhv || SvTYPE(hv) == SVt_PVAV) {
 	while (++MARK <= SP) {
 	    STRLEN keylen;
 	    char *key = SvPV(*MARK, keylen);
 
-	    svp = hv_fetch(hv, key, keylen, lval);
+	    svp = realhv ? hv_fetch(hv, key, keylen, lval)
+		: avhv_fetch((AV*)hv, key, keylen, lval);
 	    if (lval) {
 		if (!svp || *svp == &sv_undef)
 		    DIE(no_helem, key);

@@ -128,6 +128,14 @@ char *name;
     sv = NEWSV(1102,0);
     sv_upgrade(sv, SVt_PVNV);
     sv_setpv(sv, name);
+    if (in_my_stash) {
+	if (*name != '$')
+	    croak("Can't declare class for non-scalar %s in \"my\"",name);
+	SvOBJECT_on(sv);
+	(void)SvUPGRADE(sv, SVt_PVMG);
+	SvSTASH(sv) = (HV*)SvREFCNT_inc(in_my_stash);
+	sv_objcount++;
+    }
     av_store(comppad_name, off, sv);
     SvNVX(sv) = (double)999999999;
     SvIVX(sv) = 0;			/* Not yet introduced--see newSTATEOP */
@@ -1324,6 +1332,7 @@ I32 lex;
 	}
     }
     in_my = FALSE;
+    in_my_stash = Nullhv;
     if (lex)
 	return my(o);
     else
@@ -2893,6 +2902,11 @@ OP *block;
 	av_unshift(endav, 1);
 	av_store(endav, 0, SvREFCNT_inc(cv));
     }
+    else if (strEQ(s, "RESTART") && !error_count) {
+	if (!restartav)
+	    restartav = newAV();
+	av_push(restartav, SvREFCNT_inc(cv));
+    }
     if (perldb && curstash != debstash) {
 	SV *sv;
 	SV *tmpstr = sv_newmortal();
@@ -2986,6 +3000,11 @@ char *filename;
 	    endav = newAV();
 	av_unshift(endav, 1);
 	av_store(endav, 0, SvREFCNT_inc(gv));
+    }
+    else if (strEQ(s, "RESTART")) {
+	if (!restartav)
+	    restartav = newAV();
+	av_push(restartav, SvREFCNT_inc(gv));
     }
     if (!name) {
 	GvCV(gv) = 0;	/* Will remember elsewhere instead. */
@@ -4130,6 +4149,47 @@ register OP* o;
 		}
 	    }
 	    break;
+	    
+	case OP_HELEM: {
+	    UNOP *rop;
+	    SV *lexname;
+	    GV **fields;
+	    SV **svp, **indsvp;
+	    I32 ind;
+	    char *key;
+	    STRLEN keylen;
+	    
+	    if (o->op_private & (OPpDEREF_HV|OPpDEREF_AV|OPpLVAL_INTRO)
+		|| ((BINOP*)o)->op_last->op_type != OP_CONST)
+		break;
+	    rop = (UNOP*)((BINOP*)o)->op_first;
+	    if (rop->op_type != OP_RV2HV || rop->op_first->op_type != OP_PADSV)
+		break;
+	    lexname = *av_fetch(comppad_name, rop->op_first->op_targ, TRUE);
+	    if (!SvOBJECT(lexname))
+		break;
+	    fields = hv_fetch(SvSTASH(lexname), "FIELDS", 6, FALSE);
+	    if (!fields || !GvHV(*fields))
+		break;
+	    svp = &((SVOP*)((BINOP*)o)->op_last)->op_sv;
+	    key = SvPV(*svp, keylen);
+	    indsvp = hv_fetch(GvHV(*fields), key, keylen, FALSE);
+	    if (!indsvp) {
+		croak("No such field \"%s\" in variable %s of type %s",
+		      key, SvPV(lexname, na), HvNAME(SvSTASH(lexname)));
+	    }
+	    ind = SvIV(*indsvp);
+	    if (ind < 1)
+		croak("Bad index while coercing array into hash");
+	    rop->op_type = OP_RV2AV;
+	    rop->op_ppaddr = ppaddr[OP_RV2AV];
+	    o->op_type = OP_AELEM;
+	    o->op_ppaddr = ppaddr[OP_AELEM];
+	    SvREFCNT_dec(*svp);
+	    *svp = newSViv(ind);
+	    break;
+	}
+
 	default:
 	    o->op_seq = op_seqmax++;
 	    break;

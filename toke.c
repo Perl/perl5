@@ -2546,6 +2546,7 @@ yylex()
 	case KEY_DESTROY:
 	case KEY_BEGIN:
 	case KEY_END:
+	case KEY_RESTART:
 	    if (expect == XSTATE) {
 		s = bufptr;
 		goto really_sub;
@@ -2931,6 +2932,17 @@ yylex()
 	case KEY_my:
 	    in_my = TRUE;
 	    yylval.ival = 1;
+	    s = skipspace(s);
+	    if (isIDFIRST(*s)) {
+		s = scan_word(s, tokenbuf, TRUE, &len);
+		in_my_stash = gv_stashpv(tokenbuf, FALSE);
+		if (!in_my_stash) {
+		    char tmpbuf[1024];
+		    bufptr = s;
+		    sprintf(tmpbuf, "No such class %.1000s", tokenbuf);
+		    yyerror(tmpbuf);
+		}
+	    }
 	    OPERATOR(LOCAL);
 
 	case KEY_next:
@@ -3815,6 +3827,9 @@ I32 len;
 	    if (strEQ(d,"qx"))			return KEY_qx;
 	}
 	else if (strEQ(d,"quotemeta"))		return -KEY_quotemeta;
+	break;
+    case 'R':
+	if (strEQ(d,"RESTART"))			return KEY_RESTART;
 	break;
     case 'r':
 	switch (len) {
@@ -4997,5 +5012,6 @@ char *s;
 	croak("%s has too many errors.\n",
 	SvPVX(GvSV(curcop->cop_filegv)));
     in_my = 0;
+    in_my_stash = Nullhv;
     return 0;
 }

@@ -551,7 +551,9 @@ PerlInterpreter *sv_interp;
 	    my_exit(0);
 	}
 	if (perldb && DBsingle)
-	   sv_setiv(DBsingle, 1); 
+	    sv_setiv(DBsingle, 1); 
+	if (restartav)
+	    calllist(restartav);
     }
 
     /* do it */

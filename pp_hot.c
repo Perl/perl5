@@ -469,7 +469,7 @@ PP(pp_rv2hv)
     if (SvROK(sv)) {
       wasref:
 	hv = (HV*)SvRV(sv);
-	if (SvTYPE(hv) != SVt_PVHV)
+	if (SvTYPE(hv) != SVt_PVHV && SvTYPE(hv) != SVt_PVAV)
 	    DIE("Not a HASH reference");
 	if (op->op_private & OPpLVAL_INTRO)
 	    hv = (HV*)save_svref((SV**)sv);
@@ -479,7 +479,7 @@ PP(pp_rv2hv)
 	}
     }
     else {
-	if (SvTYPE(sv) == SVt_PVHV) {
+	if (SvTYPE(sv) == SVt_PVHV || SvTYPE(sv) == SVt_PVAV) {
 	    hv = (HV*)sv;
 	    if (op->op_flags & OPf_REF) {
 		SETs((SV*)hv);
@@ -526,12 +526,14 @@ PP(pp_rv2hv)
     }
     else {
 	dTARGET;
+	/* This bit is OK even when hv is really an AV */
 	if (HvFILL(hv)) {
 	    sprintf(buf, "%d/%d", HvFILL(hv), HvMAX(hv)+1);
 	    sv_setpv(TARG, buf);
 	}
 	else
 	    sv_setiv(TARG, 0);
+	
 	SETTARG;
 	RETURN;
     }
@@ -1198,9 +1200,13 @@ PP(pp_helem)
     HV *hv = (HV*)POPs;
     I32 lval = op->op_flags & OPf_MOD;
 
-    if (SvTYPE(hv) != SVt_PVHV)
+    if (SvTYPE(hv) == SVt_PVHV)
+	svp = hv_fetch(hv, key, keylen, lval);
+    else if (SvTYPE(hv) == SVt_PVAV)
+	svp = avhv_fetch((AV*)hv, key, keylen, lval);
+    else {
 	RETPUSHUNDEF;
-    svp = hv_fetch(hv, key, keylen, lval);
+    }
     if (lval) {
 	if (!svp || *svp == &sv_undef)
 	    DIE(no_helem, key);

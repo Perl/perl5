@@ -718,7 +718,7 @@ db_TIEHASH(dbtype, name=undef, flags=O_RDWR, mode=0640, type=DB_HASH)
 	    RETVAL
 
 BOOT:
-    newXS("DB_File::TIEARRAY", XS_DB_File_db_TIEHASH, file);
+    newXS("DB_File::TIEARRAY", XS_DB_File_TIEHASH, file);
 
 int
 db_DESTROY(db)
