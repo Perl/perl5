@@ -561,7 +561,7 @@ magic_get(SV *sv, MAGIC *mg)
 	break;
 #ifdef USE_THREADS
     case '@':
-	sv_setsv(sv, errsv);
+	sv_setsv(sv, thr->errsv);
 	break;
 #endif /* USE_THREADS */
     }
@@ -1617,7 +1617,7 @@ magic_set(SV *sv, MAGIC *mg)
 	break;
 #ifdef USE_THREADS
     case '@':
-	sv_setsv(errsv, sv);
+	sv_setsv(thr->errsv, sv);
 	break;
 #endif /* USE_THREADS */
     }

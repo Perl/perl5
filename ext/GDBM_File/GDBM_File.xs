@@ -20,7 +20,7 @@ typedef GDBM_FILE GDBM_File;
 
 typedef datum gdatum;
 
-typedef void (*FATALFUNC)(...);
+typedef void (*FATALFUNC)();
 
 static int
 not_here(char *s)

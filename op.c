@@ -523,7 +523,7 @@ find_thread_magical(char *name)
 	    sv_setpv(sv, "\034");
 	    break;
 	}
-	sv_magic(sv, 0, 0, name, 1);
+	sv_magic(sv, 0, 0, name, 1); 
 	DEBUG_L(PerlIO_printf(PerlIO_stderr(),
 			      "find_thread_magical: new SV %p for $%s%c\n",
 			      sv, (*name < 32) ? "^" : "",
@@ -558,7 +558,7 @@ op_free(OP *o)
 	o->op_targ = 0;	/* Was holding hints. */
 	break;
 #ifdef USE_THREADS
-    case OP_SPECIFIC:
+    case OP_THREADSV:
 	o->op_targ = 0;	/* Was holding index into thr->magicals AV. */
 	break;
 #endif /* USE_THREADS */
@@ -1172,12 +1172,8 @@ mod(OP *o, I32 type)
 	break;
 
 #ifdef USE_THREADS
-    case OP_SPECIFIC:
+    case OP_THREADSV:
 	modcount++;	/* XXX ??? */
-#if 0
-	if (!type)
-	    croak("Can't localize thread-specific variable");
-#endif
 	break;
 #endif /* USE_THREADS */
 
@@ -1330,8 +1326,8 @@ ref(OP *o, I32 type)
 	    o->op_flags |= OPf_MOD;
 	}
 	break;
-
-    case OP_SPECIFIC:
+      
+    case OP_THREADSV:
 	o->op_flags |= OPf_MOD;		/* XXX ??? */
 	break;
 
@@ -1590,7 +1586,7 @@ jmaybe(OP *o)
     if (o->op_type == OP_LIST) {
 	OP *o2;
 #ifdef USE_THREADS
-	o2 = newOP(OP_SPECIFIC, 0);
+	o2 = newOP(OP_THREADSV, 0);
 	o2->op_targ = find_thread_magical(";");
 #else
 	o2 = newSVREF(newGVOP(OP_GV, 0, gv_fetchpv(";", TRUE, SVt_PV))),
@@ -2103,7 +2099,7 @@ pmruntime(OP *o, OP *expr, OP *repl)
 	if (pm->op_pmflags & PMf_EVAL)
 	    curop = 0;
 #ifdef USE_THREADS
-	else if (repl->op_type == OP_SPECIFIC
+	else if (repl->op_type == OP_THREADSV
 		 && strchr("&`'123456789+",
 			   per_thread_magicals[repl->op_targ]))
 	{
@@ -2117,7 +2113,7 @@ pmruntime(OP *o, OP *expr, OP *repl)
 	    for (curop = LINKLIST(repl); curop!=repl; curop = LINKLIST(curop)) {
 		if (opargs[curop->op_type] & OA_DANGEROUS) {
 #ifdef USE_THREADS
-		    if (curop->op_type == OP_SPECIFIC
+		    if (curop->op_type == OP_THREADSV
 			&& strchr("&`'123456789+", curop->op_private)) {
 			break;
 		    }
@@ -3338,8 +3334,8 @@ newSUB(I32 floor, OP *o, OP *proto, OP *block)
 		    croak(not_safe);
 		else {
 		    /* force display of errors found but not reported */
-		    sv_catpv(errsv, not_safe);
-		    croak("%s", SvPV(errsv, na));
+		    sv_catpv(ERRSV, not_safe);
+		    croak("%s", SvPVx(ERRSV, na));
 		}
 	    }
 	}
@@ -3706,7 +3702,7 @@ newSVREF(OP *o)
 	o->op_ppaddr = ppaddr[OP_PADSV];
 	return o;
     }
-    else if (o->op_type == OP_SPECIFIC)
+    else if (o->op_type == OP_THREADSV)
 	return o;
     return newUNOP(OP_RV2SV, 0, scalar(o));
 }

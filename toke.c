@@ -1232,7 +1232,7 @@ yylex(void)
 		&& !isALPHA(tokenbuf[1]) /* Rule out obvious non-magicals */
 		&& (tmp = find_thread_magical(&tokenbuf[1])) != NOT_IN_PAD)
 	    {
-		yylval.opval = newOP(OP_SPECIFIC, 0);
+		yylval.opval = newOP(OP_THREADSV, 0);
 		yylval.opval->op_targ = tmp;
 		return PRIVATEREF;
 	    }
@@ -1373,7 +1373,7 @@ yylex(void)
 	    nextval[nexttoke].ival = 0;
 	    force_next(',');
 #ifdef USE_THREADS
-	    nextval[nexttoke].opval = newOP(OP_SPECIFIC, 0);
+	    nextval[nexttoke].opval = newOP(OP_THREADSV, 0);
 	    nextval[nexttoke].opval->op_targ = find_thread_magical("\"");
 	    force_next(PRIVATEREF);
 #else
@@ -5370,7 +5370,7 @@ yyerror(char *s)
     if (in_eval & 2)
 	warn("%_", msg);
     else if (in_eval)
-	sv_catsv(errsv, msg);
+	sv_catsv(ERRSV, msg);
     else
 	PerlIO_write(PerlIO_stderr(), SvPVX(msg), SvCUR(msg));
     if (++error_count >= 10)

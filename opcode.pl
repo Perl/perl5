@@ -681,4 +681,4 @@ syscall		syscall			ck_fun		imst@	S L
 
 # For multi-threading
 lock		lock			ck_rfun		s%	S
-specific	thread-specific		ck_null		ds0
+threadsv	per-thread variable	ck_null		ds0

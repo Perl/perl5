@@ -140,7 +140,6 @@ btree_compare(key1, key2)
 const DBT * key1 ;
 const DBT * key2 ;
 {
-    dTHR ;
     dSP ;
     void * data1, * data2 ;
     int retval ;
@@ -188,7 +187,6 @@ btree_prefix(key1, key2)
 const DBT * key1 ;
 const DBT * key2 ;
 {
-    dTHR ;
     dSP ;
     void * data1, * data2 ;
     int retval ;
@@ -236,7 +234,6 @@ hash_cb(data, size)
 const void * data ;
 size_t size ;
 {
-    dTHR ;
     dSP ;
     int retval ;
     int count ;

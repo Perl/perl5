@@ -284,10 +284,10 @@ PP(pp_warn)
 	tmps = SvPV(TOPs, na);
     }
     if (!tmps || !*tmps) {
-	(void)SvUPGRADE(errsv, SVt_PV);
-	if (SvPOK(errsv) && SvCUR(errsv))
-	    sv_catpv(errsv, "\t...caught");
-	tmps = SvPV(errsv, na);
+	(void)SvUPGRADE(ERRSV, SVt_PV);
+	if (SvPOK(ERRSV) && SvCUR(ERRSV))
+	    sv_catpv(ERRSV, "\t...caught");
+	tmps = SvPV(ERRSV, na);
     }
     if (!tmps || !*tmps)
 	tmps = "Warning: something's wrong";
@@ -309,10 +309,10 @@ PP(pp_die)
 	tmps = SvPV(TOPs, na);
     }
     if (!tmps || !*tmps) {
-	(void)SvUPGRADE(errsv, SVt_PV);
-	if (SvPOK(errsv) && SvCUR(errsv))
-	    sv_catpv(errsv, "\t...propagated");
-	tmps = SvPV(errsv, na);
+	(void)SvUPGRADE(ERRSV, SVt_PV);
+	if (SvPOK(ERRSV) && SvCUR(ERRSV))
+	    sv_catpv(ERRSV, "\t...propagated");
+	tmps = SvPV(ERRSV, na);
     }
     if (!tmps || !*tmps)
 	tmps = "Died";
@@ -687,7 +687,7 @@ PP(pp_dbmopen)
         runops();
 #else
     PUTBACK;
-    perl_call_sv((SV*)gv, G_SCALAR);
+    perl_call_sv((SV*)GvCV(gv), G_SCALAR);
 #endif	
     SPAGAIN;
 
@@ -714,7 +714,7 @@ PP(pp_dbmopen)
 	if (op = pp_entersub(ARGS))
 	    runops();
 #else
-	perl_call_sv((SV*)gv, G_SCALAR);
+	perl_call_sv((SV*)GvCV(gv), G_SCALAR);
 #endif	
 	SPAGAIN;
     }

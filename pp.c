@@ -4295,22 +4295,20 @@ PP(pp_lock)
     RETURN;
 }
 
-PP(pp_specific)
+PP(pp_threadsv)
 {
     djSP;
 #ifdef USE_THREADS
     SV **svp = av_fetch(thr->magicals, op->op_targ, FALSE);
     if (!svp)
-	croak("panic: pp_specific");
+	croak("panic: pp_threadsv");
     EXTEND(sp, 1);
     if (op->op_private & OPpLVAL_INTRO)
 	PUSHs(save_svref(svp));
     else
 	PUSHs(*svp);
 #else
-    DIE("tried to access thread-specific data in non-threaded perl");
+    DIE("tried to access per-thread data in non-threaded perl");
 #endif /* USE_THREADS */
     RETURN;
 }
-
-
