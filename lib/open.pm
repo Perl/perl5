@@ -48,7 +48,7 @@ sub _get_locale_encoding {
 	    } elsif ($country_language =~ /^zh_CN|chin(?:a|ese)?$/i) {
 		$locale_encoding = 'euc-cn';
 	    } elsif ($country_language =~ /^zh_TW|taiwan(?:ese)?$/i) {
-		$locale_encoding = 'big5';
+		$locale_encoding = 'euc-tw';
 	    }
 	    croak "Locale encoding 'euc' too ambiguous"
 		if $locale_encoding eq 'euc';
@@ -90,7 +90,10 @@ sub import {
 		}
 		$std = 1;
 	    } else {
-		unless(PerlIO::Layer::->find($layer)) {
+		my $target = $layer;		# the layer name itself
+		$target =~ s/^(\w+)\(.+\)$/$1/;	# strip parameters
+
+		unless(PerlIO::Layer::->find($target)) {
 		    carp("Unknown discipline layer '$layer'");
 		}
 	    }
