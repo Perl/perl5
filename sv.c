@@ -8,14 +8,12 @@
  * "I wonder what the Entish is for 'yes' and 'no'," he thought.
  *
  *
- * Manipulation of scalar values (SVs).  This file contains the code that
- * creates, manipulates and destroys SVs. (Opcode-level functions on SVs
- * can be found in the various pp*.c files.) Note that the basic structure
- * of an SV is also used to hold the other major Perl data types - AVs,
- * HVs, GVs, IO etc. Low-level functions on these other types - such as
- * memory allocation and destruction - are handled within this file, while
- * higher-level stuff can be found in the individual files av.c, hv.c,
- * etc.
+ * This file contains the code that creates, manipulates and destroys
+ * scalar values (SVs). The other types (AV, HV, GV, etc.) reuse the
+ * structure of an SV, so their creation and destruction is handled
+ * here; higher-level functions are in av.c, hv.c, and so on. Opcode
+ * level functions (eg. substr, split, join) for each of the types are
+ * in the pp*.c files.
  */
 
 #include "EXTERN.h"
@@ -30,16 +28,19 @@
 
 =head1 Allocation and deallocation of SVs.
 
-An SV (or AV, HV etc) is in 2 parts: the head and the body.  There is only
-one type of head, but around 13 body types.  Head and body are each
-separately allocated. Normally, this allocation is done using arenas,
-which are approximately 1K chunks of memory parcelled up into N heads or
-bodies. The first slot in each arena is reserved, and is used to hold a
-link to the next arena. In the case of heads, the unused first slot
-also contains some flags and a note of the number of slots.  Snaked through
-each arena chain is a linked list of free items; when this becomes empty,
-an extra arena is allocated and divided up into N items which are threaded
-into the free list.
+An SV (or AV, HV, etc.) is allocated in two parts: the head (struct sv,
+av, hv...) contains type and reference count information, as well as a
+pointer to the body (struct xrv, xpv, xpviv...), which contains fields
+specific to each type.
+
+Normally, this allocation is done using arenas, which are approximately
+1K chunks of memory parcelled up into N heads or bodies. The first slot
+in each arena is reserved, and is used to hold a link to the next arena.
+In the case of heads, the unused first slot also contains some flags and
+a note of the number of slots.  Snaked through each arena chain is a
+linked list of free items; when this becomes empty, an extra arena is
+allocated and divided up into N items which are threaded into the free
+list.
 
 The following global variables are associated with arenas:
 
@@ -2112,7 +2113,7 @@ Perl_sv_2iv(pTHX_ register SV *sv)
 	/* SVt_PVNV is one higher than SVt_PVIV, hence this order  */
 	if ((numtype & (IS_NUMBER_IN_UV | IS_NUMBER_NOT_INT))
 	     == IS_NUMBER_IN_UV) {
-	    /* It's defintately an integer, only upgrade to PVIV */
+	    /* It's definitely an integer, only upgrade to PVIV */
 	    if (SvTYPE(sv) < SVt_PVIV)
 		sv_upgrade(sv, SVt_PVIV);
 	    (void)SvIOK_on(sv);
@@ -2402,7 +2403,7 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 	/* SVt_PVNV is one higher than SVt_PVIV, hence this order  */
 	if ((numtype & (IS_NUMBER_IN_UV | IS_NUMBER_NOT_INT))
 	     == IS_NUMBER_IN_UV) {
-	    /* It's defintately an integer, only upgrade to PVIV */
+	    /* It's definitely an integer, only upgrade to PVIV */
 	    if (SvTYPE(sv) < SVt_PVIV)
 		sv_upgrade(sv, SVt_PVIV);
 	    (void)SvIOK_on(sv);
@@ -2644,7 +2645,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 #ifdef NV_PRESERVES_UV
 	if ((numtype & (IS_NUMBER_IN_UV | IS_NUMBER_NOT_INT))
 	    == IS_NUMBER_IN_UV) {
-	    /* It's defintately an integer */
+	    /* It's definitely an integer */
 	    SvNVX(sv) = (numtype & IS_NUMBER_NEG) ? -(NV)value : (NV)value;
 	} else
 	    SvNVX(sv) = Atof(SvPVX(sv));
@@ -10184,8 +10185,3 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 #endif
 
 #endif /* USE_ITHREADS */
-
-
-
-
-
