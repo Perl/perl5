@@ -1329,12 +1329,11 @@ last file.  Examples:
 
     # insert dashes just before last line of last file
     while (<>) {
-	if (eof()) {		# check for end of current file
+	if (eof()) {		# check for end of last file
 	    print "--------------\n";
-	    close(ARGV);	# close or last; is needed if we
-				# are reading from the terminal
 	}
 	print;
+	last if eof();          # needed if we're reading from a terminal
     }
 
 Practical hint: you almost never need to use C<eof> in Perl, because the
