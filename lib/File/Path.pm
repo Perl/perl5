@@ -92,7 +92,7 @@ Charles Bailey <F<bailey@genetics.upenn.edu>>
 
 =head1 REVISION
 
-Current $VERSION is 1.03.
+Current $VERSION is 1.04.
 
 =cut
 
@@ -103,7 +103,7 @@ use Exporter ();
 use strict;
 
 use vars qw( $VERSION @ISA @EXPORT );
-$VERSION = "1.03";
+$VERSION = "1.04";
 @ISA = qw( Exporter );
 @EXPORT = qw( mkpath rmtree );
 
@@ -147,13 +147,13 @@ sub rmtree {
     my($root);
     foreach $root (@{$roots}) {
 	$root =~ s#/$##;
-	next unless -e $root;
-	if (not -l $root and -d _) {
+	(undef, undef, my $rp) = lstat $root or next;
+	$rp &= 07777;	# don't forget setuid, setgid, sticky bits
+	if ( -d _ ) {
 	    # notabene: 0777 is for making readable in the first place,
 	    # it's also intended to change it to writable in case we have
 	    # to recurse in which case we are better than rm -rf for 
 	    # subtrees with strange permissions
-	    my $rp = (stat(_))[2] & 0777;  #Is this portable???
 	    chmod(0777, ($Is_VMS ? VMS::Filespec::fileify($root) : $root))
 	      or carp "Can't make directory $root read+writeable: $!"
 		unless $safe;
@@ -194,7 +194,6 @@ sub rmtree {
 		print "skipped $root\n" if $verbose;
 		next;
 	    }
-	    my $rp = (stat(_))[2] & 0777;  #Is this portable???
 	    chmod 0666, $root
 	      or carp "Can't make file $root writeable: $!"
 		if $force_writeable;
