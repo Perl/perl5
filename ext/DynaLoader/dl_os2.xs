@@ -27,6 +27,8 @@ dlopen(char *path, int mode)
 	if ((rc = DosLoadModule(fail, sizeof fail, path, &handle)) == 0)
 		return (void *)handle;
 
+	retcode = rc;
+
 	/* Not found. Check for non-FAT name and try truncated name. */
 	/* Don't know if this helps though... */
 	for (beg = dot = path + strlen(path);
@@ -42,7 +44,6 @@ dlopen(char *path, int mode)
 			return (void *)handle;
 	}
 
-	retcode = rc;
 	return NULL;
 }
 
