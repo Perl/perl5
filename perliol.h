@@ -40,6 +40,7 @@ struct _PerlIO_funcs
 #define PERLIO_K_BUFFERED	0x00000002
 #define PERLIO_K_CANCRLF	0x00000004
 #define PERLIO_K_FASTGETS	0x00000008
+#define PERLIO_K_DUMMY		0x00000010
 
 /*--------------------------------------------------------------------------------------*/
 struct _PerlIO
@@ -78,6 +79,8 @@ extern PerlIO_funcs PerlIO_unix;
 extern PerlIO_funcs PerlIO_perlio;
 extern PerlIO_funcs PerlIO_stdio;
 extern PerlIO_funcs PerlIO_crlf;
+extern PerlIO_funcs PerlIO_utf8;
+extern PerlIO_funcs PerlIO_raw;
 /* The EXT is need for Cygwin -- but why only for _pending? --jhi */
 EXT PerlIO_funcs PerlIO_pending;
 #ifdef HAS_MMAP
