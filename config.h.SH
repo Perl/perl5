@@ -51,6 +51,12 @@ cat <<!GROK!THIS! >config.h
 #define CPP "$cpp"
 #define CPPMINUS "$cppminus"
 
+/* BCOPY:
+ *	This symbol, if defined, indicates that the bcopy routine is available
+ *	to copy blocks of memory.  Otherwise you should probably use memcpy().
+ */
+#$d_bcopy	BCOPY		/**/
+
 /* CHARSPRINTF:
  *	This symbol is defined if this system declares "char *sprintf()" in
  *	stdio.h.  The trend seems to be to declare it as "int sprintf()".  It
@@ -70,6 +76,12 @@ cat <<!GROK!THIS! >config.h
 #$d_index	index strchr	/* cultural */
 #$d_index	rindex strrchr	/*  differences? */
 
+/* STATBLOCKS:
+ *	This symbol is defined if this system has a stat structure declaring
+ *	st_blksize and st_blocks.
+ */
+#$d_statblks	STATBLOCKS 	/**/
+
 /* STDSTDIO:
  *	This symbol is defined if this system has a FILE structure declaring
  *	_ptr and _cnt in stdio.h.
@@ -82,6 +94,14 @@ cat <<!GROK!THIS! >config.h
  *	routine of some sort instead.
  */
 #$d_strctcpy	STRUCTCOPY	/**/
+
+/* TMINSYS:
+ *	This symbol is defined if this system declares "struct tm" in
+ *	in <sys/time.h> rather than <time.h>.  We can't just say
+ *	-I/usr/include/sys because some systems have both time files, and
+ *	the -I trick gets the wrong one.
+ */
+#$d_tminsys	TMINSYS 	/**/
 
 /* vfork:
  *	This symbol, if defined, remaps the vfork routine to fork if the
