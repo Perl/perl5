@@ -250,7 +250,7 @@ sub c_o {
     my(@m);
     push @m, '
 .c$(OBJ_EXT):
-	$(CCCMD) $(MAB) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) $*.c
+	$(CCCMD) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) $*.c
 
 .C$(OBJ_EXT):
 	$(CCCMD) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) $*.C
@@ -989,7 +989,7 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)/.exists 
     }
     $ldfrom = "-all $ldfrom -none" if ($^O eq 'dec_osf');
     push(@m,'	LD_RUN_PATH="$(LD_RUN_PATH)" $(LD) -o $@ $(LDDLFLAGS) '.$ldfrom.
-		' $(OTHERLDFLAGS) $(MAB) $(MYEXTLIB) $(PERL_ARCHIVE) $(LDLOADLIBS) $(EXPORT_LIST)');
+		' $(OTHERLDFLAGS) $(MYEXTLIB) $(PERL_ARCHIVE) $(LDLOADLIBS) $(EXPORT_LIST)');
     push @m, '
 	$(CHMOD) 755 $@
 ';
@@ -1960,7 +1960,8 @@ $(MAKE_APERL_FILE) : $(FIRST_MAKEFILE)
     $cccmd = $self->const_cccmd($libperl);
     $cccmd =~ s/^CCCMD\s*=\s*//;
     $cccmd =~ s/\$\(INC\)/ -I$self->{PERL_INC} /;
-    $cccmd .= " $Config::Config{cccdlflags}" if ($Config::Config{d_shrplib});
+    $cccmd .= " $Config::Config{cccdlflags}" 
+	if ($Config::Config{useshrplib} eq 'true');
     $cccmd =~ s/\(CC\)/\(PERLMAINCC\)/;
 
     # The front matter of the linkcommand...
@@ -3107,7 +3108,7 @@ sub xs_o {	# many makes are too dumb to use xs_c then c_o
     '
 .xs$(OBJ_EXT):
 	$(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) $(XSUBPP) $(XSPROTOARG) $(XSUBPPARGS) $*.xs >xstmp.c && mv xstmp.c $*.c
-	$(CCCMD) $(MAB) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) $*.c
+	$(CCCMD) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) $*.c
 ';
 }
 
