@@ -55,6 +55,8 @@ sub SWASHNEW {
 	    unless (defined $file) {
 		defined %utf8::In || do "unicore/In.pl";
 		$type = 'Lampersand' if $type =~ /^(?:Is)?L&$/;
+		$type = 'Assigned'   if $type =~ /^(?:Is)?Assigned$/i;
+		$type = 'Unassigned' if $type =~ /^(?:Is)?Unassigned$/i;
 		if ($type =~ /^(In|(?:Script|Block)\s*=\s*)?[- _]?(?!herited$)(.+)/i) {
 		    my $incat  = $1;
 		    my $intype = $2;

@@ -3,9 +3,10 @@
 # Any changes made here will be lost!
 %utf8::In =
 (
-'Alphabetic'                                  => '164',
+'All'                                         => '173',
+'Alphabetic'                                  => '165',
 'Alphabetic Presentation Forms'               => '129',
-'Any'                                         => '171',
+'Any'                                         => '172',
 'ARABIC'                                      => '16',
 'Arabic Block'                                => '62',
 'Arabic Presentation Forms-A'                 => '130',
@@ -89,8 +90,8 @@
 'HIRAGANA'                                    => '43',
 'Hiragana Block'                              => '112',
 'Hyphen'                                      => '150',
-'ID_Continue'                                 => '170',
-'ID_Start'                                    => '169',
+'ID_Continue'                                 => '171',
+'ID_Start'                                    => '170',
 'Ideographic'                                 => '161',
 'Ideographic Description Characters'          => '110',
 'INHERITED'                                   => '12',
@@ -104,7 +105,7 @@
 'Katakana Block'                              => '113',
 'KHMER'                                       => '40',
 'Khmer Block'                                 => '86',
-'Lampersand'                                  => '168',
+'Lampersand'                                  => '169',
 'LAO'                                         => '30',
 'Lao Block'                                   => '76',
 'LATIN'                                       => '10',
@@ -115,10 +116,10 @@
 'Letterlike Symbols'                          => '94',
 'Low Surrogate'                               => '5',
 'Low Surrogates'                              => '127',
-'Lowercase'                                   => '165',
+'Lowercase'                                   => '166',
 'MALAYALAM'                                   => '27',
 'Malayalam Block'                             => '73',
-'Math'                                        => '167',
+'Math'                                        => '168',
 'Mathematical Alphanumeric Symbols'           => '142',
 'Mathematical Operators'                      => '97',
 'Miscellaneous Symbols'                       => '105',
@@ -169,8 +170,9 @@
 'Thai Block'                                  => '75',
 'TIBETAN'                                     => '31',
 'Tibetan Block'                               => '77',
+'Unassigned'                                  => '164',
 'Unified Canadian Aboriginal Syllabics'       => '83',
-'Uppercase'                                   => '166',
+'Uppercase'                                   => '167',
 'White_space'                                 => '146',
 'YI'                                          => '46',
 'Yi Radicals'                                 => '123',
@@ -179,11 +181,12 @@
 %utf8::InPat =
 (
 'al' => {
-	'Alphabetic' => '164',
+	'All' => '173',
+	'Alphabetic' => '165',
 	'Alphabetic(?:[-_]|\s+)?Presentation(?:[-_]|\s+)?Forms' => '129',
 },
 'an' => {
-	'Any' => '171',
+	'Any' => '172',
 },
 'ar' => {
 	'ARABIC' => '16',
@@ -327,8 +330,8 @@
 	'Hyphen' => '150',
 },
 'id' => {
-	'ID(?:[-_]|\s+)?Continue' => '170',
-	'ID(?:[-_]|\s+)?Start' => '169',
+	'ID(?:[-_]|\s+)?Continue' => '171',
+	'ID(?:[-_]|\s+)?Start' => '170',
 	'Ideographic' => '161',
 	'Ideographic(?:[-_]|\s+)?Description(?:[-_]|\s+)?Characters' => '110',
 },
@@ -354,7 +357,7 @@
 	'Khmer(?:[-_]|\s+)?Block' => '86',
 },
 'la' => {
-	'Lampersand' => '168',
+	'Lampersand' => '169',
 	'LAO' => '30',
 	'Lao(?:[-_]|\s+)?Block' => '76',
 	'LATIN' => '10',
@@ -369,12 +372,12 @@
 'lo' => {
 	'Low(?:[-_]|\s+)?Surrogate' => '5',
 	'Low(?:[-_]|\s+)?Surrogates' => '127',
-	'Lowercase' => '165',
+	'Lowercase' => '166',
 },
 'ma' => {
 	'MALAYALAM' => '27',
 	'Malayalam(?:[-_]|\s+)?Block' => '73',
-	'Math' => '167',
+	'Math' => '168',
 	'Mathematical(?:[-_]|\s+)?Alphanumeric(?:[-_]|\s+)?Symbols' => '142',
 	'Mathematical(?:[-_]|\s+)?Operators' => '97',
 },
@@ -475,10 +478,11 @@
 	'Tibetan(?:[-_]|\s+)?Block' => '77',
 },
 'un' => {
+	'Unassigned' => '164',
 	'Unified(?:[-_]|\s+)?Canadian(?:[-_]|\s+)?Aboriginal(?:[-_]|\s+)?Syllabics' => '83',
 },
 'up' => {
-	'Uppercase' => '166',
+	'Uppercase' => '167',
 },
 'wh' => {
 	'White(?:[-_]|\s+)?space' => '146',
