@@ -79,6 +79,14 @@ Version v5.5.640        Development release working toward 5.6
 ----------------
 
 ____________________________________________________________________________
+[  4753] By: gsar                                  on 2000/01/05  06:48:22
+        Log: From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 03 Jan 2000 21:56:02 +0100
+             Message-ID: <sfcvh5azxgd.fsf@hohenstaufen.in-berlin.de>
+             Subject: Reloading File::Copy
+     Branch: perl
+	   ! Changes lib/File/Copy.pm t/lib/filecopy.t
+____________________________________________________________________________
 [  4752] By: gsar                                  on 2000/01/04  01:19:20
         Log: s/USE_TEXTMODE_SCRIPTS/PERL_TEXTMODE_SCRIPTS/g
      Branch: perl
@@ -264,11 +272,6 @@ ____________________________________________________________________________
      Branch: perl
 	   ! Changes lib/bigfloat.pl t/lib/charnames.t t/lib/dumper.t
 	   ! t/pragma/overload.t t/pragma/utf8.t
-____________________________________________________________________________
-[  4722] By: gsar                                  on 1999/12/28  03:14:48
-        Log: avoid "used once" warning
-     Branch: perl
-	   ! lib/diagnostics.pm
 ____________________________________________________________________________
 [  4722] By: gsar                                  on 1999/12/28  03:14:48
         Log: avoid "used once" warning

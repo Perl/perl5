@@ -1106,13 +1106,6 @@ config :: $(INST_AUTODIR).exists
 	$(NOECHO) $(NOOP)
 ';
 
-    push @m, q{
-config :: Version_check
-	$(NOECHO) $(NOOP)
-
-} unless $self->{PARENT} or ($self->{PERL_SRC} && $self->{INSTALLDIRS} eq "perl") or $self->{NO_VC};
-
-
     push @m, $self->dir_target(qw[$(INST_AUTODIR) $(INST_LIBDIR) $(INST_ARCHAUTODIR)]);
     if (%{$self->{MAN1PODS}}) {
 	push @m, q[

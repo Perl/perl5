@@ -91,19 +91,11 @@ if ($Is_Cygwin) {
     require ExtUtils::MM_Cygwin;
 }
 
-# The SelfLoader would bring a lot of overhead for MakeMaker, because
-# we know for sure we will use most of the autoloaded functions once
-# we have to use one of them. So we write our own loader
-
 full_setup();
 
-# The only subroutine we do not SelfLoad is Version_Check because it's
-# called so often. Loading this minimum still requires 1.2 secs on my
-# Indy :-(
-
-# 3 years later we can say, Version_check takes 0.2 secs on my Linux
-# and MakeMaker has become so stable that we could drop the use of
-# Version_check altogether
+# The use of the Version_check target has been dropped between perl
+# 5.5.63 and 5.5.64. We must keep the subroutine for a while so that
+# old Makefiles can satisfy the Version_check target.
 
 sub Version_check {
     my($checkversion) = @_;

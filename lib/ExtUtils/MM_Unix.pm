@@ -3611,12 +3611,6 @@ config :: $(INST_AUTODIR)/.exists
 	'.$self->{NOECHO}.'$(NOOP)
 ';
 
-    push @m, qq{
-config :: Version_check
-	$self->{NOECHO}\$(NOOP)
-
-} unless $self->{PARENT} or ($self->{PERL_SRC} && $self->{INSTALLDIRS} eq "perl") or $self->{NO_VC};
-
     push @m, $self->dir_target(qw[$(INST_AUTODIR) $(INST_LIBDIR) $(INST_ARCHAUTODIR)]);
 
     if (%{$self->{HTMLLIBPODS}}) {
