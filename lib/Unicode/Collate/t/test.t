@@ -15,7 +15,7 @@ BEGIN {
 }
 
 use Test;
-BEGIN { plan tests => 200 };
+BEGIN { plan tests => 203 };
 
 use strict;
 use warnings;
@@ -23,14 +23,9 @@ use Unicode::Collate;
 
 our $IsEBCDIC = ord("A") != 0x41;
 
-#########################
+ok(1);
 
-ok(1); # If we made it this far, we're ok.
-
-my $UCA_Version = "9";
-
-ok(Unicode::Collate::UCA_Version, $UCA_Version);
-ok(Unicode::Collate->UCA_Version, $UCA_Version);
+##### 2..6
 
 my $Collator = Unicode::Collate->new(
   table => 'keys.txt',
@@ -39,8 +34,6 @@ my $Collator = Unicode::Collate->new(
 
 ok(ref $Collator, "Unicode::Collate");
 
-ok($Collator->UCA_Version,   $UCA_Version);
-ok($Collator->UCA_Version(), $UCA_Version);
 
 ok(
   join(':', $Collator->sort( 
@@ -55,7 +48,7 @@ ok($Collator->cmp("", ""), 0);
 ok($Collator->eq("", ""));
 ok($Collator->cmp("", "perl"), -1);
 
-##############
+##### 7..17
 
 sub _pack_U   { Unicode::Collate::pack_U(@_) }
 sub _unpack_U { Unicode::Collate::unpack_U(@_) }
@@ -80,7 +73,7 @@ ok($Collator->lt("A", $A_acute));
 ok($Collator->lt("A", $a_acute));
 ok($Collator->lt($a_acute, $A_acute));
 
-##############
+##### 17..20
 
 eval { require Unicode::Normalize };
 
@@ -109,7 +102,7 @@ else {
   ok(1);
 }
 
-##############
+##### 21..30
 
 my $trad = Unicode::Collate->new(
   table => 'keys.txt',
@@ -148,7 +141,7 @@ ok($trad->eq("", $katakana));
 ok($trad->eq($hiragana, $katakana));
 ok($trad->eq($katakana, $hiragana));
 
-##############
+##### 31..37
 
 $Collator->change(level => 2);
 
@@ -161,6 +154,8 @@ ok( $Collator->cmp($hiragana, $katakana), 0);
 ok( $Collator->eq($hiragana, $katakana) );
 ok( $Collator->ge($hiragana, $katakana) );
 
+##### 38..43
+
 # hangul
 ok( $Collator->eq("a\x{AC00}b", "a\x{1100}\x{1161}b") );
 ok( $Collator->eq("a\x{AE00}b", "a\x{1100}\x{1173}\x{11AF}b") );
@@ -168,6 +163,8 @@ ok( $Collator->gt("a\x{AE00}b", "a\x{1100}\x{1173}b\x{11AF}") );
 ok( $Collator->lt("a\x{AC00}b", "a\x{AE00}b") );
 ok( $Collator->gt("a\x{D7A3}b", "a\x{C544}b") );
 ok( $Collator->lt("a\x{C544}b", "a\x{30A2}b") ); # hangul < hiragana
+
+##### 44..52
 
 $Collator->change(%old_level, katakana_before_hiragana => 1);
 
@@ -182,6 +179,8 @@ ok( $Collator->ne($hiragana, $katakana) );
 ok( $Collator->gt($hiragana, $katakana) );
 ok( $Collator->ge($hiragana, $katakana) );
 
+##### 53..58
+
 $Collator->change(upper_before_lower => 1);
 
 ok( $Collator->cmp("abc", "ABC"), 1);
@@ -190,6 +189,8 @@ ok( $Collator->gt("abc", "ABC"), 1);
 ok( $Collator->cmp($hiragana, $katakana), 1);
 ok( $Collator->ge($hiragana, $katakana), 1);
 ok( $Collator->gt($hiragana, $katakana), 1);
+
+##### 59..64
 
 $Collator->change(katakana_before_hiragana => 0);
 
@@ -203,7 +204,7 @@ ok( $Collator->le("abc", "ABC") );
 ok( $Collator->cmp($hiragana, $katakana), -1);
 ok( $Collator->lt($hiragana, $katakana) );
 
-##############
+##### 65..66
 
 my $ignoreAE = Unicode::Collate->new(
   table => 'keys.txt',
@@ -214,7 +215,7 @@ my $ignoreAE = Unicode::Collate->new(
 ok($ignoreAE->eq("element","lament"));
 ok($ignoreAE->eq("Perl","ePrl"));
 
-##############
+##### 67
 
 my $onlyABC = Unicode::Collate->new(
     table => undef,
@@ -234,7 +235,7 @@ ok(
   join(':',                 qw/ A aB Ab ABA BAC cAc cc / ),
 );
 
-##############
+##### 68..71
 
 my $undefAE = Unicode::Collate->new(
   table => 'keys.txt',
@@ -247,7 +248,7 @@ ok($Collator->lt("edge","fog"));
 ok($undefAE ->gt("lake","like"));
 ok($Collator->lt("lake","like"));
 
-##############
+##### 72..81
 
 # Table is undefined, then no entry is defined.
 
@@ -281,7 +282,7 @@ ok($undef_table->lt("\x{4E00}","\x{4E8C}"));
   # U+4E8C: Ideograph "TWO"
 
 
-##############
+##### 82..86
 
 my $few_entries = Unicode::Collate->new(
   entry => <<'ENTRIES',
@@ -312,7 +313,7 @@ ok($few_entries->lt("\x{AE30}", "\x{AC00}"));
 
 ok($few_entries->eq("\x{AC00}", "\x{1100}\x{1161}"));
 
-##############
+##### 87..91
 
 my $all_undef_8 = Unicode::Collate->new(
   table => undef,
@@ -331,7 +332,7 @@ ok($all_undef_8->lt("\x{4E00}", "\x{AC00}"));
 ok($all_undef_8->gt("\x{AC00}", "\x{1100}\x{1161}"));
 ok($all_undef_8->gt("\x{AC00}", "\x{ABFF}"));
 
-##############
+##### 92..96
 
 my $all_undef_9 = Unicode::Collate->new(
   table => undef,
@@ -350,7 +351,7 @@ ok($all_undef_9->lt("\x{20000}", "\x{AC00}"));
 ok($all_undef_9->gt("\x{AC00}", "\x{1100}\x{1161}"));
 ok($all_undef_9->gt("\x{AC00}", "\x{ABFF}")); # U+ABFF: not assigned
 
-##############
+##### 97..101
 
 my $ignoreCJK = Unicode::Collate->new(
   table => undef,
@@ -369,7 +370,7 @@ ok($ignoreCJK->eq("Pe\x{4E00}rl", "Perl")); # U+4E00 is a CJK.
 ok($ignoreCJK->gt("\x{4DFF}", "\x{4E00}")); # U+4DFF is not CJK.
 ok($ignoreCJK->lt("Pe\x{5B57}rl", "Perl")); # 'r' is unassigned.
 
-##############
+##### 102..106
 
 my $ignoreHangul = Unicode::Collate->new(
   table => undef,
@@ -388,7 +389,7 @@ ok($ignoreHangul->lt("\x{AC00}", "\x{AE00}"));
 ok($ignoreHangul->lt("\x{AC00}", "\x{1100}\x{1161}")); # Jamo are not ignored.
 ok($ignoreHangul->lt("Pe\x{AE00}rl", "Perl")); # 'r' is unassigned.
 
-##############
+##### 107..127
 
 my %origAlter = $Collator->change(alternate => 'Blanked');
 
@@ -426,7 +427,7 @@ $Collator->change(%origAlter);
 
 ok($Collator->{alternate}, 'shifted');
 
-##############
+##### 128..132
 
 my $overCJK = Unicode::Collate->new(
   table => undef,
@@ -448,7 +449,7 @@ ok($overCJK->lt("A\x{4E03}", "A\x{4E00}"));
 ok($overCJK->lt("A\x{4E03}", "a\x{4E00}"));
 ok($overCJK->lt("a\x{4E03}", "A\x{4E00}"));
 
-##############
+##### 133..144
 
 # rearrange : 0x0E40..0x0E44, 0x0EC0..0x0EC4 (default)
 
@@ -475,7 +476,7 @@ ok($all_undef_8->lt("\x{0E40}A", "\x{0E41}B"));
 ok($all_undef_8->lt("\x{0E41}A", "\x{0E40}B"));
 ok($all_undef_8->lt("A\x{0E41}A", "A\x{0E40}B"));
 
-##############
+##### 145..149
 
 my $no_rearrange = Unicode::Collate->new(
   table => undef,
@@ -489,7 +490,7 @@ ok($no_rearrange->lt("\x{0E40}A", "\x{0E41}B"));
 ok($no_rearrange->gt("\x{0E41}A", "\x{0E40}B"));
 ok($no_rearrange->gt("A\x{0E41}A", "A\x{0E40}B"));
 
-##############
+##### 150..154
 
 my $undef_rearrange = Unicode::Collate->new(
   table => undef,
@@ -503,7 +504,7 @@ ok($undef_rearrange->lt("\x{0E40}A", "\x{0E41}B"));
 ok($undef_rearrange->gt("\x{0E41}A", "\x{0E40}B"));
 ok($undef_rearrange->gt("A\x{0E41}A", "A\x{0E40}B"));
 
-##############
+##### 155..159
 
 my $dropArticles = Unicode::Collate->new(
   table => "keys.txt",
@@ -521,7 +522,7 @@ ok($dropArticles->lt("the pen", "a pencil"));
 ok($Collator->lt("Perl", "The Perl"));
 ok($Collator->gt("the pen", "a pencil"));
 
-##############
+##### 160..161
 
 my $backLevel1 = Unicode::Collate->new(
   table => undef,
@@ -534,7 +535,7 @@ my $backLevel1 = Unicode::Collate->new(
 ok($backLevel1->gt("AB", "BA"));
 ok($backLevel1->gt("\x{3042}\x{3044}", "\x{3044}\x{3042}"));
 
-##############
+##### 162..169
 
 my $backLevel2 = Unicode::Collate->new(
   table => "keys.txt",
@@ -556,7 +557,7 @@ ok($backLevel2->lt("\x{4E03}", $katakana));
 ok($Collator  ->gt("\x{4E00}", $hiragana));
 ok($Collator  ->gt("\x{4E03}", $katakana));
 
-##############
+##### 170..184
 
 # ignorable after variable
 
@@ -590,7 +591,7 @@ ok($Collator->lt("\cA", "?"));
 
 $Collator->change(alternate => 'Shifted', level => 4);
 
-##############
+##### 185..196
 
 # According to Conformance Test,
 # a L3-ignorable is treated as a completely ignorable.
@@ -629,3 +630,39 @@ ok($L3ignorable->eq("\x{1D1BB}", "\x{1D1B9}"));
 ok($L3ignorable->eq("\x{1D1BC}", "\x{1D1BA}"));
 ok($L3ignorable->eq("\x{1D1BB}", "\x{1D1B9}\x{1D165}"));
 ok($L3ignorable->eq("\x{1D1BC}", "\x{1D1BA}\x{1D165}"));
+
+##### 197..203
+
+my $O_str = Unicode::Collate->new(
+  table => "keys.txt",
+  normalization => undef,
+  entry => <<'ENTRIES',
+0008  ; [*0008.0000.0000.0000] # BACKSPACE (need to be non-ignorable)
+004F 0337 ; [.0B53.0020.0008.004F] # capital O WITH SHORT SOLIDUS OVERLAY
+006F 0008 002F ; [.0B53.0020.0002.006F] # LATIN SMALL LETTER O WITH STROKE
+004F 0008 002F ; [.0B53.0020.0008.004F] # LATIN CAPITAL LETTER O WITH STROKE
+006F 0337 ; [.0B53.0020.0002.004F] # small O WITH SHORT SOLIDUS OVERLAY
+200B  ; [.2000.0000.0000.0000] # ZERO WIDTH SPACE (may be non-sense but ...)
+#00F8 ; [.0B53.0020.0002.00F8] # LATIN SMALL LETTER O WITH STROKE
+#00D8 ; [.0B53.0020.0008.00D8] # LATIN CAPITAL LETTER O WITH STROKE
+ENTRIES
+);
+
+my $o_BS_slash = _pack_U(0x006F, 0x0008, 0x002F);
+my $O_BS_slash = _pack_U(0x004F, 0x0008, 0x002F);
+my $o_sol    = _pack_U(0x006F, 0x0337);
+my $O_sol    = _pack_U(0x004F, 0x0337);
+my $o_stroke = _pack_U(0x00F8);
+my $O_stroke = _pack_U(0x00D8);
+
+ok($O_str->eq($o_stroke, $o_BS_slash));
+ok($O_str->eq($O_stroke, $O_BS_slash));
+
+ok($O_str->eq($o_stroke, $o_sol));
+ok($O_str->eq($O_stroke, $O_sol));
+
+ok($Collator->eq("\x{200B}", "\0"));
+ok($O_str   ->gt("\x{200B}", "\0"));
+ok($O_str   ->gt("\x{200B}", "A"));
+
+#####

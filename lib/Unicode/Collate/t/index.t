@@ -25,7 +25,7 @@ our $IsEBCDIC = ord("A") != 0x41;
 
 #########################
 
-ok(1); # If we made it this far, we're ok.
+ok(1);
 
 my $Collator = Unicode::Collate->new(
   table => 'keys.txt',

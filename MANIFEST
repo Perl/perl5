@@ -758,8 +758,12 @@ ext/Unicode/Normalize/mkheader	Unicode::Normalize
 ext/Unicode/Normalize/Normalize.pm	Unicode::Normalize
 ext/Unicode/Normalize/Normalize.xs	Unicode::Normalize
 ext/Unicode/Normalize/README	Unicode::Normalize
+ext/Unicode/Normalize/t/fcdc.t	Unicode::Normalize
+ext/Unicode/Normalize/t/form.t	Unicode::Normalize
 ext/Unicode/Normalize/t/func.t	Unicode::Normalize
 ext/Unicode/Normalize/t/norm.t	Unicode::Normalize
+ext/Unicode/Normalize/t/proto.t	Unicode::Normalize
+ext/Unicode/Normalize/t/split.t	Unicode::Normalize
 ext/Unicode/Normalize/t/test.t	Unicode::Normalize
 ext/util/make_ext		Used by Makefile to execute extension Makefiles
 ext/XS/APItest/APItest.pm	XS::APItest extension
@@ -1736,9 +1740,14 @@ lib/Unicode/Collate/keys.txt	Unicode::Collate
 lib/Unicode/Collate.pm		Unicode::Collate
 lib/Unicode/Collate/README	Unicode::Collate
 lib/Unicode/Collate/t/contract.t	Unicode::Collate
+lib/Unicode/Collate/t/hangtype.t	Unicode::Collate
 lib/Unicode/Collate/t/hangul.t	Unicode::Collate
 lib/Unicode/Collate/t/index.t	Unicode::Collate
+lib/Unicode/Collate/t/normal.t	Unicode::Collate
 lib/Unicode/Collate/t/test.t	Unicode::Collate
+lib/Unicode/Collate/t/trailwt.t	Unicode::Collate
+lib/Unicode/Collate/t/variable.t	Unicode::Collate
+lib/Unicode/Collate/t/version.t	Unicode::Collate
 lib/Unicode/README		Explanation what happened to lib/unicode.
 lib/Unicode/UCD.pm		Unicode character database
 lib/Unicode/UCD.t		See if Unicode character database works

@@ -51,7 +51,7 @@ ENTRIES
 
 #########################
 
-ok(1); # If we made it this far, we're ok.
+ok(1);
 
 my $kjeNoN = Unicode::Collate->new(
     level => 1,

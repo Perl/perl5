@@ -1,4 +1,4 @@
-Unicode/Normalize version 0.22
+Unicode/Normalize version 0.25
 ===================================
 
 Unicode::Normalize - Unicode Normalization Forms
@@ -24,35 +24,37 @@ SYNOPSIS
 
 INSTALLATION
 
-Perl 5.6.1 or later
+Perl 5.6.1 or later (Caution: Perl 5.6.0 is not recommended.)
 
-To install this module type the following:
+To install this module (XSUB: needs a C compiler), type the following:
 
    perl Makefile.PL
    make
    make test
    make install
 
-If you have a C compiler and want to use the XS version,
-type the following:
+If you want to install pure Perl (i.e. no-XSUB),
+type the following (!! "disableXS" must run before "Makefile.PL" !!):
 
-   perl Makefile.PL xs
+   perl disableXS
+   perl Makefile.PL
    make
    make test
    make install
 
-If you decide to install the NoXS version after trying to build the XS,
-type the following:
+After building no-XSUB, if you decide to install XSUB,
+type the following (!! "enableXS" must run before "Makefile.PL" !!):
 
    make clean
-   perl Makefile.PL noxs
+   perl enableXS
+   perl Makefile.PL
    make
    make test
    make install
 
 DEPENDENCIES
 
-This module requires these other modules and libraries:
+This module requires other modules and libraries following:
 
 Carp
 Exporter
@@ -70,13 +72,16 @@ CAVEAT
 
 (2) After these unicore/*.* files are updated.
 
-  In the case of an XS version:
+  In the case of an XS edition:
     You must rebuild the module,
     as the data will be compiled on building.
 
-  In the case of a NoXS version:
+  In the case of a pure Perl edition:
     Rebuilding is not necessary,
     as the data will be read on requirement.
+
+(3) Pure Perl edition, Normalize.pmN, may work without any other file
+    in this distribution (it must be renamed Normalize.pm, though)
 
 COPYRIGHT AND LICENCE
 
