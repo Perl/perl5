@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Nov 19 22:50:26 GMT 2001 [metaconfig 3.0 PL70]
+# Generated on Wed Nov 21 19:00:54 EET 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -487,6 +487,7 @@ d_pause=''
 d_pipe=''
 d_poll=''
 d_portable=''
+d_procselfexe=''
 d_old_pthread_create_joinable=''
 old_pthread_create_joinable=''
 d_pthread_atfork=''
@@ -899,7 +900,6 @@ prefixexp=''
 installprivlib=''
 privlib=''
 privlibexp=''
-d_procselfexe=''
 prototype=''
 ptrsize=''
 d_PRIXU64=''
@@ -1031,6 +1031,18 @@ if test -f /etc/unixtovms.exe; then
 fi
 
 i_whoami=''
+ccname=''
+ccversion=''
+perllibs=''
+: set useposix=false in your hint file to disable the POSIX extension.
+useposix=true
+: set useopcode=false in your hint file to disable the Opcode extension.
+useopcode=true
+: Trailing extension.  Override this in a hint file, if needed.
+_exe=''
+: Extra object files, if any, needed on this platform.
+archobjs=''
+archname=''
 : Possible local include directories to search.
 : Set locincpth to "" in a hint file to defeat local include searches.
 locincpth="/usr/local/include /opt/local/include /usr/gnu/include"
@@ -1039,10 +1051,6 @@ locincpth="$locincpth /opt/gnu/include /usr/GNU/include /opt/GNU/include"
 : no include file wanted by default
 inclwanted=''
 
-: Trailing extension.  Override this in a hint file, if needed.
-_exe=''
-: Extra object files, if any, needed on this platform.
-archobjs=''
 groupstype=''
 libnames=''
 : change the next line if compiling for Xenix/286 on Xenix/386
@@ -1066,25 +1074,17 @@ plibpth=''
 libswanted=''
 : some systems want to use only the non-versioned libso:s
 ignore_versioned_solibs=''
-: full support for void wanted by default
-defvoidused=15
-
-ccname=''
-ccversion=''
-perllibs=''
-: set useposix=false in your hint file to disable the POSIX extension.
-useposix=true
-: set useopcode=false in your hint file to disable the Opcode extension.
-useopcode=true
 archname64=''
 ccflags_uselargefiles=''
 ldflags_uselargefiles=''
 libswanted_uselargefiles=''
 : set usemultiplicity on the Configure command line to enable multiplicity.
 : set usesocks on the Configure command line to enable socks.
-archname=''
 : set usethreads on the Configure command line to enable threads.
 usereentrant='undef'
+: full support for void wanted by default
+defvoidused=15
+
 : List of libraries we want.
 : If anyone needs -lnet, put it in a hint file.
 libswanted='sfio socket bind inet nsl nm ndbm gdbm dbm db malloc dl'
@@ -1129,7 +1129,7 @@ case "$sh" in
 esac
 
 case "$sh" in
-'')	cat <<EOM >&2
+'')	cat >&2 <<EOM
 $me:  Fatal Error:  I can't find a Bourne Shell anywhere.  
 
 Usually it's in /bin/sh.  How did you even get this far?
@@ -11430,21 +11430,22 @@ set readlink d_readlink
 eval $inlibc
 
 echo " "
-echo "Checking for /proc/self/exe ..." >&4
+echo "Checking for /proc/self/exe..." >&4
 val="$undef"
-if $test "$d_readlink" = "$define" ; then
+case "$d_readlink" in
+"$define")
 	if $issymlink /proc/self/exe ; then
 		$ls -l /proc/self/exe > reflect
-		if $contains $ls reflect >/dev/null; then
+		if $contains $ls reflect >/dev/null 2>&1; then
 			val="$define"
-			echo "You have linux-like /proc/self/exe"
+			echo "You have Linux-like /proc/self/exe."
 		fi
 		$rm reflect
 	fi
-fi
+	;;
+esac
 set d_procselfexe
 eval $setvar
-
 
 : see if pthread_atfork exists
 set pthread_atfork d_pthread_atfork
