@@ -161,7 +161,7 @@ require DynaLoader;
 use strict;
 use vars qw( $VERSION @ISA @EXPORT @EXPORT_OK $data );
 
-$VERSION = "2.011_01";
+$VERSION = "2.011_02";
 
 @ISA = qw(Exporter DynaLoader);
 @EXPORT =  qw();
@@ -827,7 +827,7 @@ SV *sv;
 #endif
 
 #ifndef grok_hex
-static UV _grok_hex (char *string, STRLEN *len, I32 *flags, NV *result) {
+static UV _grok_hex (pTHX_ char *string, STRLEN *len, I32 *flags, NV *result) {
     NV r = scan_hex(string, *len, I32_CAST len);
     if (r > UV_MAX) {
         *flags |= PERL_SCAN_GREATER_THAN_UV_MAX;
@@ -838,11 +838,11 @@ static UV _grok_hex (char *string, STRLEN *len, I32 *flags, NV *result) {
 }
         
 #   define grok_hex(string, len, flags, result)     \
-        _grok_hex((string), (len), (flags), (result))
+        _grok_hex(pTHX_ (string), (len), (flags), (result))
 #endif 
 
 #ifndef grok_oct
-static UV _grok_oct (char *string, STRLEN *len, I32 *flags, NV *result) {
+static UV _grok_oct (pTHX_ char *string, STRLEN *len, I32 *flags, NV *result) {
     NV r = scan_oct(string, *len, I32_CAST len);
     if (r > UV_MAX) {
         *flags |= PERL_SCAN_GREATER_THAN_UV_MAX;
@@ -853,11 +853,11 @@ static UV _grok_oct (char *string, STRLEN *len, I32 *flags, NV *result) {
 }
 
 #   define grok_oct(string, len, flags, result)     \
-        _grok_oct((string), (len), (flags), (result))
+        _grok_oct(pTHX_ (string), (len), (flags), (result))
 #endif
 
 #if !defined(grok_bin) && defined(scan_bin)
-static UV _grok_bin (char *string, STRLEN *len, I32 *flags, NV *result) {
+static UV _grok_bin (pTHX_ char *string, STRLEN *len, I32 *flags, NV *result) {
     NV r = scan_bin(string, *len, I32_CAST len);
     if (r > UV_MAX) {
         *flags |= PERL_SCAN_GREATER_THAN_UV_MAX;
@@ -868,7 +868,7 @@ static UV _grok_bin (char *string, STRLEN *len, I32 *flags, NV *result) {
 }
 
 #   define grok_bin(string, len, flags, result)     \
-        _grok_bin((string), (len), (flags), (result))
+        _grok_bin(pTHX_ (string), (len), (flags), (result))
 #endif
 
 #ifndef IN_LOCALE
@@ -899,6 +899,7 @@ static UV _grok_bin (char *string, STRLEN *len, I32 *flags, NV *result) {
 
 #define grok_numeric_radix Perl_grok_numeric_radix
     
+static
 bool
 Perl_grok_numeric_radix(pTHX_ const char **sp, const char *send)
 {
@@ -941,6 +942,7 @@ Perl_grok_numeric_radix(pTHX_ const char **sp, const char *send)
 
 #define grok_number Perl_grok_number
 
+static
 int
 Perl_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep)
 {
