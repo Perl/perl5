@@ -147,9 +147,16 @@ results are not particularly satisfying for sophisticated code.
 The a2ps at http://www.infres.enst.fr/~demaille/a2ps/ does lots of things
 related to generating nicely printed output of documents.
 
-=head2 Is there a ctags for Perl?
+=head2 Is there a etags/ctags for perl?
 
-There's a simple one at
+With respect to the source code for the Perl interpreter, yes.
+There has been support for etags in the source for a long time.
+Ctags was introduced in v5.005_54 (and probably 5.005_03).
+After building perl, type 'make etags' or 'make ctags' and both
+sets of tag files will be built.
+
+Now, if you're looking to build a tag file for perl code, then there's
+a simple one at
 http://www.perl.com/CPAN/authors/id/TOMC/scripts/ptags.gz which may do
 the trick.  And if not, it's easy to hack into what you want.
 
