@@ -902,6 +902,7 @@ lib/ExtUtils/MM_Unix.pm		MakeMaker base class for Unix
 lib/ExtUtils/MM_VMS.pm		MakeMaker methods for VMS
 lib/ExtUtils/MM_Win32.pm	MakeMaker methods for Win32
 lib/ExtUtils/Packlist.pm	Manipulates .packlist files
+lib/ExtUtils/Packlist.t		See if Packlist works
 lib/ExtUtils/testlib.pm		Fixes up @INC to use just-built extension
 lib/ExtUtils/testlib.t		Fixes up @INC to use just-built extension
 lib/ExtUtils/typemap		Extension interface types
