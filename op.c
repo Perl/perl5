@@ -3532,7 +3532,8 @@ newSUB(I32 floor, OP *o, OP *proto, OP *block)
     CvSTASH(cv) = curstash;
 #ifdef USE_THREADS
     CvOWNER(cv) = 0;
-    New(666, CvMUTEXP(cv), 1, perl_mutex);
+    if (!CvMUTEXP(cv))
+	New(666, CvMUTEXP(cv), 1, perl_mutex);
     MUTEX_INIT(CvMUTEXP(cv));
 #endif /* USE_THREADS */
 
