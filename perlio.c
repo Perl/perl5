@@ -28,12 +28,6 @@
 #define PERL_IN_PERLIO_C
 #include "perl.h"
 
-#undef PerlMemShared_calloc
-#define PerlMemShared_calloc(x,y) calloc(x,y)
-#undef PerlMemShared_free
-#define PerlMemShared_free(x) free(x)
-
-
 #ifndef PERLIO_LAYERS
 int
 PerlIO_apply_layers(pTHX_ PerlIO *f, const char *mode, const char *names)
