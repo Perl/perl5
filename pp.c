@@ -4342,7 +4342,7 @@ PP(pp_reverse)
 	else
 	    sv_setsv(TARG, (SP > MARK)
 		    ? *SP
-		    : (padoff_du = Perl_find_rundefsvoffset(),
+		    : (padoff_du = find_rundefsvoffset(),
 			(padoff_du == NOT_IN_PAD || PAD_COMPNAME_FLAGS(padoff_du) & SVpad_OUR)
 			? DEFSV : PAD_SVl(padoff_du)));
 	up = SvPV_force(TARG, len);

@@ -588,7 +588,7 @@ Perl_pad_findmy(pTHX_ char *name)
  */
 
 PADOFFSET
-Perl_find_rundefsvoffset()
+Perl_find_rundefsvoffset(pTHX)
 {
     SV *out_sv;
     int out_flags;
