@@ -10,6 +10,29 @@ avoid new features.  If you want to add something to MakeMaker,
 consider instead working on Module::Build, MakeMaker's heir apparent.
 
 
+Reporting bugs
+
+- Often the only information we have for fixing a bug is contained in your
+  report.  So...
+
+- Please report your bugs via http://rt.cpan.org or by mailing to
+  makemaker@perl.org.  RT is preferred.
+
+- Please report your bug immediately upon encountering it.  Do not wait
+  until you have a patch to fix the bug.  Patches are good, but not at
+  the expense of timely bug reports.
+
+- Please be as verbose as possible.  Include the complete output of
+  your 'make test' or even 'make test TEST_VERBOSE=1' and a copy of the 
+  generated Makefile.  Err on the side of verbosity.  The more data we
+  have to work with, the faster we can diagnose the problem.
+
+- If you find an undocumented feature, or if a feature has changed/been
+  added which causes a problem, report it.  Do not assume it was done
+  deliberately.  Even if it was done deliberately, we still want to hear
+  if it caused problems.
+
+
 Patching details
 
 - Please use unified diffs.  (diff -u)
@@ -109,12 +132,10 @@ Cross-Platform Compatibility
   creating one.  Its ok to have an MM_* module with only one method.
 
 - Some shells have very small buffers.  This means command lines must
-  be as small as possible.  20K is the upper limit for Unixen, and 256
-  for VMS.  Not sure what Windows and DOS are limited to, probably 1K.
-  This limit *includes* any files passed into it.  Some modules (such as
-  bioperl) generate enourmous commands because of their large number of
-  files.  If your command is just too long, consider making it an
-  ExtUtils::Command::MM function.
+  be as small as possible.  If your command is just too long, consider
+  making it an ExtUtils::Command::MM function.  If your command might
+  receive many arguments (such as pod2man or pm_to_blib) consider
+  using split_command() to split it into several, shorter calls.
 
 - Most shells quote differently.  If you need to put a perl one-liner
   in the Makefile, please use oneliner() to generate it.

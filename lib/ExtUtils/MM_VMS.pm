@@ -20,8 +20,8 @@ BEGIN {
 
 use File::Basename;
 use vars qw($Revision @ISA $VERSION);
-($VERSION) = '5.66';
-($Revision = substr(q$Revision: 1.82 $, 10)) =~ s/\s+$//;
+($VERSION) = '5.67';
+($Revision = substr(q$Revision: 1.89 $, 10)) =~ s/\s+$//;
 
 require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
@@ -707,11 +707,17 @@ Use VMS-style quoting on xsubpp command line.
 sub tool_xsubpp {
     my($self) = @_;
     return '' unless $self->needs_linking;
-    my($xsdir) = $self->catdir($self->{PERL_LIB},'ExtUtils');
-    # drop back to old location if xsubpp is not in new location yet
-    $xsdir = $self->catdir($self->{PERL_SRC},'ext') 
-      unless (-f $self->catfile($xsdir,'xsubpp'));
-    my(@tmdeps) = '$(XSUBPPDIR)typemap';
+
+    my $xsdir;
+    foreach my $dir (@INC) {
+        $xsdir = $self->catdir($dir, 'ExtUtils');
+        if( -r $self->catfile($xsdir, "xsubpp") ) {
+            last;
+        }
+    }
+
+    my $tmdir   = File::Spec->catdir($self->{PERL_LIB},"ExtUtils");
+    my(@tmdeps) = $self->catfile($tmdir,'typemap');
     if( $self->{TYPEMAPS} ){
 	my $typemap;
 	foreach $typemap (@{$self->{TYPEMAPS}}){
@@ -840,7 +846,7 @@ sub tools_other {
     # than just typing the literal string.
     my $extra_tools = <<'EXTRA_TOOLS';
 
-# Assumes \$(MMS) invokes MMS or MMK
+# Assumes $(MMS) invokes MMS or MMK
 # (It is assumed in some cases later that the default makefile name
 # (Descrip.MMS for MM[SK]) is used.)
 USEMAKEFILE = /Descrip=
@@ -848,7 +854,7 @@ USEMACROS = /Macro=(
 MACROEND = )
 
 # Just in case anyone is using the old macro.
-SAY = $ECHO
+SAY = $(ECHO)
 
 EXTRA_TOOLS
 
@@ -2161,8 +2167,8 @@ sub oneliner {
 
 =item B<echo> (o)
 
-perl trips up on "<foo>" thinking its an input redirect.  So we use the
-native Write sys$output instead.
+perl trips up on "<foo>" thinking it's an input redirect.  So we use the
+native Write command instead.  Besides, its faster.
 
 =cut
 
@@ -2170,12 +2176,12 @@ sub echo {
     my($self, $text, $file, $appending) = @_;
     $appending ||= 0;
 
-    die "The VMS version of echo() cannot currently append" if $appending;
+    my $opencmd = $appending ? 'Open/Append' : 'Open/Write';
 
-    my @cmds = ("\$(NOECHO) Assign $file Sys\$Output");
-    push @cmds, map { '$(NOECHO) Write Sys$Output '.$self->quote_literal($_) } 
+    my @cmds = ("\$(NOECHO) $opencmd MMECHOFILE $file ");
+    push @cmds, map { '$(NOECHO) Write MMECHOFILE '.$self->quote_literal($_) } 
                 split /\n/, $text;
-    push @cmds, '$(NOECHO) Deassign Sys$Output';
+    push @cmds, '$(NOECHO) Close MMECHOFILE';
     return @cmds;
 }
 
@@ -2226,7 +2232,7 @@ sub init_linker {
     $self->{EXPORT_LIST} ||= '$(BASEEXT).opt';
 
     my $shr = $Config{dbgprefix} . 'PERLSHR';
-    $self->{PERL_ARCHIVE} ||= $self->catfile($self->{PERL_SRC},"$shr.$Config{'dlext'}");
+    $self->{PERL_ARCHIVE} ||=  $self->catfile($self->{PERL_SRC}, "$shr.$Config{'dlext'}");
 
     $self->{PERL_ARCHIVE_AFTER} ||= '';
 }
@@ -2237,7 +2243,7 @@ Expands MM[KS]/Make macros in a text string, using the contents of
 identically named elements of C<%$self>, and returns the result
 as a file specification in Unix syntax.
 
-NOTE:  This is the cannonical version of the method.  The version in
+NOTE:  This is the canonical version of the method.  The version in
 File::Spec::VMS is deprecated.
 
 =cut
@@ -2295,7 +2301,7 @@ is a VMS-syntax file specification, and if it is not specified, fixpath()
 checks to see whether it matches the name of a directory in the current
 default directory, and returns a directory or file specification accordingly.
 
-NOTE:  This is the cannonical version of the method.  The version in
+NOTE:  This is the canonical version of the method.  The version in
 File::Spec::VMS is deprecated.
 
 =cut
@@ -2347,6 +2353,16 @@ sub fixpath {
     return $fixedpath;
 }
 
+
+=item os_flavor
+
+VMS is VMS.
+
+=cut
+
+sub os_flavor {
+    return('VMS');
+}
 
 =back
 

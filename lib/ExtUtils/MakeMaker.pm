@@ -2,21 +2,20 @@ package ExtUtils::MakeMaker;
 
 BEGIN {require 5.005_03;}
 
-$VERSION = "6.03";
-$Version_OK = "5.49";   # Makefiles older than $Version_OK will die
-                        # (Will be checked from MakeMaker version 4.13 onwards)
-($Revision = substr(q$Revision: 1.63 $, 10)) =~ s/\s+$//;
+$VERSION = '6.10_02';
+($Revision = substr(q$Revision: 1.108 $, 10)) =~ s/\s+$//;
 
 require Exporter;
 use Config;
 use Carp ();
+use File::Path;
 
 use vars qw(
             @ISA @EXPORT @EXPORT_OK
-            $ISA_TTY $Revision $VERSION $Verbose $Version_OK %Config 
-            %Keep_after_flush %MM_Sections @Prepend_parent
+            $Revision $VERSION $Verbose %Config 
+            @Prepend_parent @Parent
             %Recognized_Att_Keys @Get_from_Config @MM_Sections @Overridable 
-            @Parent $PACKNAME
+            $Filename
            );
 use strict;
 
@@ -28,6 +27,10 @@ use strict;
 # purged.
 my $Is_VMS     = $^O eq 'VMS';
 my $Is_Win32   = $^O eq 'MSWin32';
+
+# Our filename for diagnostic and debugging purposes.  More reliable
+# than %INC (think caseless filesystems)
+$Filename = __FILE__;
 
 full_setup();
 
@@ -604,12 +607,12 @@ sub WriteEmptyMakefile {
     my %att = @_;
     my $self = MM->new(\%att);
     if (-f $self->{MAKEFILE_OLD}) {
-      chmod 0666, $self->{MAKEFILE_OLD};
-      unlink $self->{MAKEFILE_OLD} or warn "unlink $self->{MAKEFILE_OLD}: $!";
+      _unlink($self->{MAKEFILE_OLD}) or 
+        warn "unlink $self->{MAKEFILE_OLD}: $!";
     }
     if ( -f $self->{MAKEFILE} ) {
-        _rename($self->{MAKEFILE}, $self->{MAKEFILE_OLD})
-          or warn "rename $self->{MAKEFILE} => $self->{MAKEFILE_OLD}: $!"
+        _rename($self->{MAKEFILE}, $self->{MAKEFILE_OLD}) or
+          warn "rename $self->{MAKEFILE} => $self->{MAKEFILE_OLD}: $!"
     }
     open MF, '>'.$self->{MAKEFILE} or die "open $self->{MAKEFILE} for write: $!";
     print MF <<'EOP';
@@ -883,6 +886,13 @@ sub _rename {
     chmod 0666, $dest;
     unlink $dest;
     return rename $src, $dest;
+}
+
+# This is an unlink for OS's where the target must be writable first.
+sub _unlink {
+    my @files = @_;
+    chmod 0666, @files;
+    return unlink @files;
 }
 
 
@@ -2006,7 +2016,7 @@ MakeMaker object. The following lines will be parsed o.k.:
 
     $VERSION = '1.00';
     *VERSION = \'1.01';
-    ( $VERSION ) = '$Revision: 1.63 $ ' =~ /\$Revision:\s+([^\s]+)/;
+    ( $VERSION ) = '$Revision: 1.108 $ ' =~ /\$Revision:\s+([^\s]+)/;
     $FOO::VERSION = '1.10';
     *FOO::VERSION = \'1.11';
     our $VERSION = 1.2.3;       # new for perl5.6.0 
