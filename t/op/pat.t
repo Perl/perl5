@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..1006\n";
+print "1..1007\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -3189,4 +3189,9 @@ $_ = "x"; s/x/func "in multiline subst"/em;
 #$_ = "x"; /x(?{func "in regexp"})/;
 #$_ = "x"; /x(?{func "in multiline regexp"})/m;
 
-# last test 1004
+# bug #19049
+$_="abcdef\n";
+@x = m/./g;
+ok("abcde" eq "$`", '# TODO #19049 - global match not setting $`');
+
+# last test 1007
