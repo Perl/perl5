@@ -352,8 +352,10 @@ EOT
 	}
 	$last_package = $this_package if defined $this_package;
     }
-    print OUT @cache,"1;\n# end of $last_package\::$subname\n";
-    close(OUT);
+    if ($subname) {
+	print OUT @cache,"1;\n# end of $last_package\::$subname\n";
+	close(OUT);
+    }
     close(IN);
     
     if (!$keep){  # don't keep any obsolete *.al files in the directory
