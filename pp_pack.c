@@ -2232,9 +2232,9 @@ Perl_pack_cat(pTHX_ SV *cat, char *pat, register char *patend, register SV **beg
 	case 'w':
             while (len-- > 0) {
 		fromstr = NEXTFROM;
-		adouble = SvNV(fromstr);
+		anv = SvNV(fromstr);
 
-		if (adouble < 0)
+		if (anv < 0)
 		    Perl_croak(aTHX_ "Cannot compress negative numbers");
 
                 /* 0xFFFFFFFFFFFFFFFF may cast to 18446744073709551616.0,
@@ -2242,7 +2242,7 @@ Perl_pack_cat(pTHX_ SV *cat, char *pat, register char *patend, register SV **beg
                    any negative IVs will have already been got by the croak()
                    above. IOK is untrue for fractions, so we test them
                    against UV_MAX_P1.  */
-		if (SvIOK(fromstr) || adouble < UV_MAX_P1)
+		if (SvIOK(fromstr) || anv < UV_MAX_P1)
 		{
 		    char   buf[(sizeof(UV)*8)/7+1];
 		    char  *in = buf + sizeof(buf);
@@ -2277,17 +2277,17 @@ Perl_pack_cat(pTHX_ SV *cat, char *pat, register char *patend, register SV **beg
 		    SvREFCNT_dec(norm);	/* free norm */
                 }
 		else if (SvNOKp(fromstr)) {
-		    char   buf[sizeof(double) * 2];	/* 8/7 <= 2 */
+		    char   buf[sizeof(NV) * 2];	/* 8/7 <= 2 */
 		    char  *in = buf + sizeof(buf);
 
-                    adouble = Perl_floor(adouble);
+                    anv = Perl_floor(anv);
 		    do {
-			double next = floor(adouble / 128);
-			*--in = (unsigned char)(adouble - (next * 128)) | 0x80;
+			NV next = Perl_floor(anv / 128);
+			*--in = (unsigned char)(anv - (next * 128)) | 0x80;
 			if (in <= buf)  /* this cannot happen ;-) */
 			    Perl_croak(aTHX_ "Cannot compress integer");
-			adouble = next;
-		    } while (adouble > 0);
+			anv = next;
+		    } while (anv > 0);
 		    buf[sizeof(buf) - 1] &= 0x7f; /* clear continue bit */
 		    sv_catpvn(cat, in, (buf + sizeof(buf)) - in);
 		}
