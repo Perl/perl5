@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Mar  6 08:25:05 EET 2003 [metaconfig 3.0 PL70]
+# Generated on Tue Mar 11 22:13:14 EET 2003 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -3846,7 +3846,7 @@ int main() {
 	printf("%s\n", "1");
 #endif
 #endif
-	exit(0);
+	(int)exit(0);
 }
 EOM
 if $cc -o try $ccflags $ldflags try.c; then
@@ -4939,100 +4939,6 @@ mc_file=$1;
 shift;
 $cc -o ${mc_file} $optimize $ccflags $ldflags $* ${mc_file}.c $libs;'
 
-: check for lengths of integral types
-echo " "
-case "$intsize" in
-'')
-	echo "Checking to see how big your integers are..." >&4
-	$cat >try.c <<'EOCP'
-#include <stdio.h>
-int main()
-{
-	printf("intsize=%d;\n", (int)sizeof(int));
-	printf("longsize=%d;\n", (int)sizeof(long));
-	printf("shortsize=%d;\n", (int)sizeof(short));
-	exit(0);
-}
-EOCP
-	set try
-	if eval $compile_ok && $run ./try > /dev/null; then
-		eval `$run ./try`
-		echo "Your integers are $intsize bytes long."
-		echo "Your long integers are $longsize bytes long."
-		echo "Your short integers are $shortsize bytes long."
-	else
-		$cat >&4 <<EOM
-!
-Help! I can't compile and run the intsize test program: please enlighten me!
-(This is probably a misconfiguration in your system or libraries, and
-you really ought to fix it.  Still, I'll try anyway.)
-!
-EOM
-		dflt=4
-		rp="What is the size of an integer (in bytes)?"
-		. ./myread
-		intsize="$ans"
-		dflt=$intsize
-		rp="What is the size of a long integer (in bytes)?"
-		. ./myread
-		longsize="$ans"
-		dflt=2
-		rp="What is the size of a short integer (in bytes)?"
-		. ./myread
-		shortsize="$ans"
-	fi
-	;;
-esac
-$rm -f try try.*
-
-: check for long long
-echo " "
-echo "Checking to see if you have long long..." >&4
-echo 'int main() { long long x = 7; return 0; }' > try.c
-set try
-if eval $compile; then
-	val="$define"
-	echo "You have long long."
-else
-	val="$undef"
-	echo "You do not have long long."
-fi
-$rm try.*
-set d_longlong
-eval $setvar
-
-: check for length of long long
-case "${d_longlong}${longlongsize}" in
-$define)
-	echo " "
-	echo "Checking to see how big your long longs are..." >&4
-	$cat >try.c <<'EOCP'
-#include <stdio.h>
-int main()
-{
-    printf("%d\n", (int)sizeof(long long));
-    return(0);
-}
-EOCP
-	set try
-	if eval $compile_ok; then
-		longlongsize=`$run ./try`
-		echo "Your long longs are $longlongsize bytes long."
-	else
-		dflt='8'
-		echo " "
-		echo "(I can't seem to compile the test program.  Guessing...)"
-		rp="What is the size of a long long (in bytes)?"
-		. ./myread
-		longlongsize="$ans"
-	fi
-	if $test "X$longsize" = "X$longlongsize"; then
-		echo "(That isn't any different from an ordinary long.)"
-	fi	
-	;;
-esac
-$rm -f try.* try
-
 : determine filename position in cpp output
 echo " "
 echo "Computing filename position in cpp output for #include directives..." >&4
@@ -5141,6 +5047,108 @@ do set $yyy; var=$2; eval "was=\$$2";
 	eval "case \"\$$var\" in $define) . ./whoa; esac"; eval "$var=\$tu";
 	set $yyy; shift; shift; yyy=$@;
 done'
+
+: see if stdlib is available
+set stdlib.h i_stdlib
+eval $inhdr
+
+: check for lengths of integral types
+echo " "
+case "$intsize" in
+'')
+	echo "Checking to see how big your integers are..." >&4
+	$cat >try.c <<'EOCP'
+#include <stdio.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
+int main()
+{
+	printf("intsize=%d;\n", (int)sizeof(int));
+	printf("longsize=%d;\n", (int)sizeof(long));
+	printf("shortsize=%d;\n", (int)sizeof(short));
+	exit(0);
+}
+EOCP
+	set try
+	if eval $compile_ok && $run ./try > /dev/null; then
+		eval `$run ./try`
+		echo "Your integers are $intsize bytes long."
+		echo "Your long integers are $longsize bytes long."
+		echo "Your short integers are $shortsize bytes long."
+	else
+		$cat >&4 <<EOM
+!
+Help! I can't compile and run the intsize test program: please enlighten me!
+(This is probably a misconfiguration in your system or libraries, and
+you really ought to fix it.  Still, I'll try anyway.)
+!
+EOM
+		dflt=4
+		rp="What is the size of an integer (in bytes)?"
+		. ./myread
+		intsize="$ans"
+		dflt=$intsize
+		rp="What is the size of a long integer (in bytes)?"
+		. ./myread
+		longsize="$ans"
+		dflt=2
+		rp="What is the size of a short integer (in bytes)?"
+		. ./myread
+		shortsize="$ans"
+	fi
+	;;
+esac
+$rm -f try try.*
+
+: check for long long
+echo " "
+echo "Checking to see if you have long long..." >&4
+echo 'int main() { long long x = 7; return 0; }' > try.c
+set try
+if eval $compile; then
+	val="$define"
+	echo "You have long long."
+else
+	val="$undef"
+	echo "You do not have long long."
+fi
+$rm try.*
+set d_longlong
+eval $setvar
+
+: check for length of long long
+case "${d_longlong}${longlongsize}" in
+$define)
+	echo " "
+	echo "Checking to see how big your long longs are..." >&4
+	$cat >try.c <<'EOCP'
+#include <stdio.h>
+int main()
+{
+    printf("%d\n", (int)sizeof(long long));
+    return(0);
+}
+EOCP
+	set try
+	if eval $compile_ok; then
+		longlongsize=`$run ./try`
+		echo "Your long longs are $longlongsize bytes long."
+	else
+		dflt='8'
+		echo " "
+		echo "(I can't seem to compile the test program.  Guessing...)"
+		rp="What is the size of a long long (in bytes)?"
+		. ./myread
+		longlongsize="$ans"
+	fi
+	if $test "X$longsize" = "X$longlongsize"; then
+		echo "(That isn't any different from an ordinary long.)"
+	fi	
+	;;
+esac
+$rm -f try.* try
 
 : see if inttypes.h is available
 : we want a real compile instead of Inhdr because some systems
@@ -5932,6 +5940,10 @@ case "$doublesize" in
 	echo "Checking to see how big your double precision numbers are..." >&4
 	$cat >try.c <<'EOCP'
 #include <stdio.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
 int main()
 {
     printf("%d\n", (int)sizeof(double));
@@ -6774,16 +6786,16 @@ $rm -f try.c try
 set i_malloc
 eval $setvar
 
-: see if stdlib is available
-set stdlib.h i_stdlib
-eval $inhdr
-
 : check for void type
 echo " "
 echo "Checking to see how well your C compiler groks the void type..." >&4
 case "$voidflags" in
 '')
 	$cat >try.c <<'EOCP'
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
 #if TRY & 1
 void sub() {
 #else
@@ -6882,6 +6894,10 @@ case "$ptrsize" in
 	fi
 	$cat >>try.c <<'EOCP'
 #include <stdio.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
 int main()
 {
     printf("%d\n", (int)sizeof(VOID_PTR));
@@ -8943,6 +8959,10 @@ echo "Checking the size of $zzz..." >&4
 cat > try.c <<EOCP
 #include <sys/types.h>
 #include <stdio.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
 int main() {
     printf("%d\n", (int)sizeof($fpostype));
     exit(0);
@@ -10028,6 +10048,10 @@ else
 fi
 $cat >try.c <<EOCP
 #include <stdio.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
 #include <sys/types.h>
 #include <signal.h>
 $signal_t blech(s) int s; { exit(3); }
@@ -10082,6 +10106,10 @@ echo " "
 echo 'Checking whether your C compiler can cast negative float to unsigned.' >&4
 $cat >try.c <<EOCP
 #include <stdio.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
 #include <sys/types.h>
 #include <signal.h>
 $signal_t blech(s) int s; { exit(7); }
@@ -13801,6 +13829,10 @@ case "$charsize" in
 	echo "Checking to see how big your characters are (hey, you never know)..." >&4
 	$cat >try.c <<'EOCP'
 #include <stdio.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
 int main()
 {
     printf("%d\n", (int)sizeof(char));
@@ -15557,6 +15589,10 @@ case "$d_sigsetjmp" in
 '')
 	$cat >try.c <<'EOP'
 #include <setjmp.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
 sigjmp_buf env;
 int set = 1;
 int main()
@@ -16699,6 +16735,10 @@ EOM
 case "$d_u32align" in
 '')   $cat >try.c <<EOCP
 #include <stdio.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
 #define U32 $u32type
 #define BYTEORDER 0x$byteorder
 #define U8 $u8type
@@ -17704,6 +17744,10 @@ echo "Checking the size of $zzz..." >&4
 cat > try.c <<EOCP
 #include <sys/types.h>
 #include <stdio.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
 int main() {
     printf("%d\n", (int)sizeof($gidtype));
     exit(0);
@@ -18536,6 +18580,10 @@ EOM
 #   include <sys/socket.h> /* Might include <sys/bsdtypes.h> */
 #endif
 #include <stdio.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
 $selecttype b;
 #define S sizeof(*(b))
 #define MINBITS	64
@@ -18871,6 +18919,10 @@ echo "Checking the size of $zzz..." >&4
 cat > try.c <<EOCP
 #include <sys/types.h>
 #include <stdio.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
 int main() {
     printf("%d\n", (int)sizeof($sizetype));
     exit(0);
@@ -18974,6 +19026,10 @@ eval $typedef
 dflt="$ssizetype"
 $cat > try.c <<EOM
 #include <stdio.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
 #include <sys/types.h>
 #define Size_t $sizetype
 #define SSize_t $dflt
@@ -19056,6 +19112,10 @@ echo "Checking the size of $zzz..." >&4
 cat > try.c <<EOCP
 #include <sys/types.h>
 #include <stdio.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
 int main() {
     printf("%d\n", (int)sizeof($uidtype));
     exit(0);
