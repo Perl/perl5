@@ -147,15 +147,21 @@ perl_construct(register PerlInterpreter *sv_interp)
 	sv_upgrade(linestr,SVt_PVIV);
 
 	if (!SvREADONLY(&sv_undef)) {
+	    /* set read-only and try to insure than we wont see REFCNT==0
+	       very often */
+
 	    SvREADONLY_on(&sv_undef);
+	    SvREFCNT(&sv_undef) = (~(U32)0)/2;
 
 	    sv_setpv(&sv_no,No);
 	    SvNV(&sv_no);
 	    SvREADONLY_on(&sv_no);
+	    SvREFCNT(&sv_no) = (~(U32)0)/2;
 
 	    sv_setpv(&sv_yes,Yes);
 	    SvNV(&sv_yes);
 	    SvREADONLY_on(&sv_yes);
+	    SvREFCNT(&sv_yes) = (~(U32)0)/2;
 	}
 
 	nrs = newSVpv("\n", 1);

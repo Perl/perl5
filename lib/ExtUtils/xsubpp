@@ -1450,13 +1450,9 @@ sub generate_output {
 		}
 		elsif ($expr =~ /^\s*\$arg\s*=/) {
 		    # We expect that $arg has refcnt >=1, so we need
-		    # to mortalize it. However, the extension may have
-		    # returned the built-in perl value, which is
-		    # read-only, thus not mortalizable. However, it is
-		    # safe to leave it as it is, since it would be
-		    # ignored by REFCNT_dec. Builtin values have REFCNT==0.
+		    # to mortalize it!
 		    eval "print qq\a$expr\a";
-		    print "\tif (SvREFCNT(ST(0))) sv_2mortal(ST(0));\n";
+		    print "\tsv_2mortal(ST(0));\n";
 		    print "\tSvSETMAGIC(ST(0));\n" if $do_setmagic;
 		}
 		else {

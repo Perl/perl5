@@ -673,7 +673,7 @@ PP(pp_aassign)
 	default:
 	    if (SvTHINKFIRST(sv)) {
 		if (SvREADONLY(sv) && curcop != &compiling) {
-		    if (sv != &sv_undef && sv != &sv_yes && sv != &sv_no)
+		    if (!SvIMMORTAL(sv))
 			DIE(no_modify);
 		    if (relem <= lastrelem)
 			relem++;

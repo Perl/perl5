@@ -338,9 +338,7 @@ VIRTUAL OP*	newLISTOP _((I32 type, I32 flags, OP* first, OP* last));
 VIRTUAL OP*	newPMOP _((I32 type, I32 flags));
 VIRTUAL OP*	newPVOP _((I32 type, I32 flags, char* pv));
 VIRTUAL SV*	newRV _((SV* pref));
-#if !defined(__GNUC__) && (defined(CRIPPLED_CC) || defined(USE_THREADS) || defined(PERL_OBJECT))
 VIRTUAL SV*	newRV_noinc _((SV *sv));
-#endif
 VIRTUAL SV*	newSV _((STRLEN len));
 VIRTUAL OP*	newSVREF _((OP* o));
 VIRTUAL OP*	newSVOP _((I32 type, I32 flags, SV* sv));

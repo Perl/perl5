@@ -2623,8 +2623,7 @@ PP(pp_splice)
 	    if (AvREAL(ary)) {
 		EXTEND_MORTAL(length);
 		for (i = length, dst = MARK; i; i--) {
-		    if (!SvIMMORTAL(*dst))
-			sv_2mortal(*dst);	/* free them eventualy */
+		    sv_2mortal(*dst);	/* free them eventualy */
 		    dst++;
 		}
 	    }
@@ -2633,8 +2632,7 @@ PP(pp_splice)
 	else {
 	    *MARK = AvARRAY(ary)[offset+length-1];
 	    if (AvREAL(ary)) {
-		if (!SvIMMORTAL(*MARK))
-		    sv_2mortal(*MARK);
+		sv_2mortal(*MARK);
 		for (i = length - 1, dst = &AvARRAY(ary)[offset]; i > 0; i--)
 		    SvREFCNT_dec(*dst++);	/* free them now */
 	    }
@@ -2722,8 +2720,7 @@ PP(pp_splice)
 		if (AvREAL(ary)) {
 		    EXTEND_MORTAL(length);
 		    for (i = length, dst = MARK; i; i--) {
-			if (!SvIMMORTAL(*dst))
-			    sv_2mortal(*dst);	/* free them eventualy */
+			sv_2mortal(*dst);	/* free them eventualy */
 			dst++;
 		    }
 		}
@@ -2734,8 +2731,7 @@ PP(pp_splice)
 	else if (length--) {
 	    *MARK = tmparyval[length];
 	    if (AvREAL(ary)) {
-		if (!SvIMMORTAL(*MARK))
-		    sv_2mortal(*MARK);
+		sv_2mortal(*MARK);
 		while (length-- > 0)
 		    SvREFCNT_dec(tmparyval[length]);
 	    }
@@ -2783,7 +2779,7 @@ PP(pp_pop)
     djSP;
     AV *av = (AV*)POPs;
     SV *sv = av_pop(av);
-    if (!SvIMMORTAL(sv) && AvREAL(av))
+    if (AvREAL(av))
 	(void)sv_2mortal(sv);
     PUSHs(sv);
     RETURN;
@@ -2797,7 +2793,7 @@ PP(pp_shift)
     EXTEND(SP, 1);
     if (!sv)
 	RETPUSHUNDEF;
-    if (!SvIMMORTAL(sv) && AvREAL(av))
+    if (AvREAL(av))
 	(void)sv_2mortal(sv);
     PUSHs(sv);
     RETURN;

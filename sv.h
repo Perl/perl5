@@ -630,16 +630,6 @@ struct xpvio {
 #endif /* !CRIPPLED_CC */
 
 #define newRV_inc(sv)	newRV(sv)
-#ifdef __GNUC__
-#  undef newRV_noinc
-#  define newRV_noinc(sv) ({SV *nsv=newRV((sv)); --SvREFCNT(SvRV(nsv)); nsv;})
-#else
-#  if defined(CRIPPLED_CC) || defined(USE_THREADS) || defined(PERL_OBJECT)
-#  else
-#    undef newRV_noinc
-#    define newRV_noinc(sv)	((Sv = newRV(sv)), --SvREFCNT(SvRV(Sv)), Sv)
-#  endif
-#endif /* __GNUC__ */
 
 /* the following macros update any magic values this sv is associated with */
 
