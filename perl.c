@@ -1434,11 +1434,17 @@ perl_eval_pv(char *p, I32 croak_on_error)
 void
 perl_require_pv(char *pv)
 {
-    SV* sv = sv_newmortal();
+    SV* sv;
+    dSP;
+    PUSHSTACKi(SI_REQUIRE);
+    PUTBACK;
+    sv = sv_newmortal();
     sv_setpv(sv, "require '");
     sv_catpv(sv, pv);
     sv_catpv(sv, "'");
     perl_eval_sv(sv, G_DISCARD);
+    SPAGAIN;
+    POPSTACK;
 }
 
 void

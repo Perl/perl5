@@ -1356,7 +1356,7 @@ amagic_call(SV *left, SV *right, int method, int flags)
     myop.op_next = Nullop;
     myop.op_flags = OPf_WANT_SCALAR | OPf_STACKED;
 
-    PUSHSTACK(SI_OVERLOAD);
+    PUSHSTACKi(SI_OVERLOAD);
     ENTER;
     SAVEOP();
     op = (OP *) &myop;
@@ -1381,7 +1381,7 @@ amagic_call(SV *left, SV *right, int method, int flags)
     SPAGAIN;
 
     res=POPs;
-    POPSTACK();
+    POPSTACK;
     CATCH_SET(oldcatch);
 
     if (postpr) {

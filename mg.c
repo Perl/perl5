@@ -1030,13 +1030,13 @@ magic_methpack(SV *sv, MAGIC *mg, char *meth)
 
     ENTER;
     SAVETMPS;
-    PUSHSTACK(SI_MAGIC);
+    PUSHSTACKi(SI_MAGIC);
 
     if (magic_methcall(mg, meth, G_SCALAR, 2, NULL)) {
 	sv_setsv(sv, *stack_sp--);
     }
 
-    POPSTACK();
+    POPSTACK;
     FREETMPS;
     LEAVE;
     return 0;
@@ -1056,9 +1056,9 @@ magic_setpack(SV *sv, MAGIC *mg)
 {
     dSP;
     ENTER;
-    PUSHSTACK(SI_MAGIC);
+    PUSHSTACKi(SI_MAGIC);
     magic_methcall(mg, "STORE", G_SCALAR|G_DISCARD, 3, sv);
-    POPSTACK();
+    POPSTACK;
     LEAVE;
     return 0;
 }
@@ -1078,12 +1078,12 @@ magic_sizepack(SV *sv, MAGIC *mg)
 
     ENTER;
     SAVETMPS;
-    PUSHSTACK(SI_MAGIC);
+    PUSHSTACKi(SI_MAGIC);
     if (magic_methcall(mg, "FETCHSIZE", G_SCALAR, 2, NULL)) {
 	sv = *stack_sp--;
 	retval = (U32) SvIV(sv)-1;
     }
-    POPSTACK();
+    POPSTACK;
     FREETMPS;
     LEAVE;
     return retval;
@@ -1094,12 +1094,12 @@ int magic_wipepack(SV *sv, MAGIC *mg)
     dSP;
 
     ENTER;
-    PUSHSTACK(SI_MAGIC);
+    PUSHSTACKi(SI_MAGIC);
     PUSHMARK(SP);
     XPUSHs(mg->mg_obj);
     PUTBACK;
     perl_call_method("CLEAR", G_SCALAR|G_DISCARD);
-    POPSTACK();
+    POPSTACK;
     LEAVE;
     return 0;
 }
@@ -1112,7 +1112,7 @@ magic_nextpack(SV *sv, MAGIC *mg, SV *key)
 
     ENTER;
     SAVETMPS;
-    PUSHSTACK(SI_MAGIC);
+    PUSHSTACKi(SI_MAGIC);
     PUSHMARK(SP);
     EXTEND(SP, 2);
     PUSHs(mg->mg_obj);
@@ -1123,7 +1123,7 @@ magic_nextpack(SV *sv, MAGIC *mg, SV *key)
     if (perl_call_method(meth, G_SCALAR))
 	sv_setsv(key, *stack_sp--);
 
-    POPSTACK();
+    POPSTACK;
     FREETMPS;
     LEAVE;
     return 0;
@@ -1996,14 +1996,14 @@ sighandler(int sig)
 	sv_setpv(sv,sig_name[sig]);
     }
 
-    PUSHSTACK(SI_SIGNAL);
+    PUSHSTACKi(SI_SIGNAL);
     PUSHMARK(SP);
     PUSHs(sv);
     PUTBACK;
 
     perl_call_sv((SV*)cv, G_DISCARD);
 
-    POPSTACK();
+    POPSTACK;
 cleanup:
     if (flags & 1)
 	savestack_ix -= 8; /* Unprotect save in progress. */

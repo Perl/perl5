@@ -2799,7 +2799,7 @@ sv_clear(register SV *sv)
 		destructor = gv_fetchmethod(SvSTASH(sv), "DESTROY");
 		if (destructor) {
 		    ENTER;
-		    PUSHSTACK(SI_DESTROY);
+		    PUSHSTACKi(SI_DESTROY);
 		    SvRV(&tmpref) = SvREFCNT_inc(sv);
 		    EXTEND(SP, 2);
 		    PUSHMARK(SP);
@@ -2808,7 +2808,7 @@ sv_clear(register SV *sv)
 		    perl_call_sv((SV*)GvCV(destructor),
 				 G_DISCARD|G_EVAL|G_KEEPERR);
 		    SvREFCNT(sv)--;
-		    POPSTACK();
+		    POPSTACK;
 		    LEAVE;
 		}
 	    } while (SvOBJECT(sv) && SvSTASH(sv) != stash);

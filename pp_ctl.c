@@ -720,7 +720,7 @@ PP(pp_sort)
 	    SAVEOP();
 
 	    CATCH_SET(TRUE);
-	    PUSHSTACK(SI_SORT);
+	    PUSHSTACKi(SI_SORT);
 	    if (sortstash != stash) {
 		firstgv = gv_fetchpv("a", TRUE, SVt_PV);
 		secondgv = gv_fetchpv("b", TRUE, SVt_PV);
@@ -743,7 +743,7 @@ PP(pp_sort)
 	    qsortsv((myorigmark+1), max, FUNC_NAME_TO_PTR(sortcv));
 
 	    POPBLOCK(cx,curpm);
-	    POPSTACK();
+	    POPSTACK;
 	    CATCH_SET(oldcatch);
 	}
     }
@@ -1076,7 +1076,7 @@ die_where(char *message)
 
 	while ((cxix = dopoptoeval(cxstack_ix)) < 0 && curstackinfo->si_prev) {
 	    dounwind(-1);
-	    POPSTACK();
+	    POPSTACK;
 	}
 
 	if (cxix >= 0) {

@@ -554,7 +554,7 @@ PP(pp_tie)
     items = SP - MARK++;
     if (sv_isobject(*MARK)) {
 	ENTER;
-	PUSHSTACK(SI_MAGIC);
+	PUSHSTACKi(SI_MAGIC);
 	PUSHMARK(SP);
 	EXTEND(SP,items);
 	while (items--)
@@ -572,7 +572,7 @@ PP(pp_tie)
 		 methname, SvPV(*MARK,na));                   
 	}
 	ENTER;
-	PUSHSTACK(SI_MAGIC);
+	PUSHSTACKi(SI_MAGIC);
 	PUSHMARK(SP);
 	EXTEND(SP,items);
 	while (items--)
@@ -583,7 +583,7 @@ PP(pp_tie)
     SPAGAIN;
 
     sv = TOPs;
-    POPSTACK();
+    POPSTACK;
     if (sv_isobject(sv)) {
 	sv_unmagic(varsv, how);            
 	sv_magic(varsv, sv, how, Nullch, 0);

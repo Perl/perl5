@@ -292,6 +292,7 @@ struct context {
  * This ensures magic doesn't invalidate local stack and cx pointers.
  */
 
+#define SI_UNKNOWN	-1
 #define SI_UNDEF	0
 #define SI_MAIN		1
 #define SI_MAGIC	2
@@ -301,6 +302,7 @@ struct context {
 #define SI_DESTROY	6
 #define SI_WARNHOOK	7
 #define SI_DIEHOOK	8
+#define SI_REQUIRE	9
 
 struct stackinfo {
     AV *		si_stack;	/* stack for current runlevel */
@@ -327,7 +329,7 @@ typedef struct stackinfo PERL_SI;
 #  define	SET_MARKBASE NOOP
 #endif
 
-#define PUSHSTACK(type) \
+#define PUSHSTACKi(type) \
     STMT_START {							\
 	PERL_SI *next = curstackinfo->si_next;				\
 	if (!next) {							\
@@ -343,7 +345,9 @@ typedef struct stackinfo PERL_SI;
 	SET_MARKBASE;							\
     } STMT_END
 
-#define POPSTACK() \
+#define PUSHSTACK PUSHSTACKi(SI_UNKNOWN)
+
+#define POPSTACK \
     STMT_START {							\
 	PERL_SI *prev = curstackinfo->si_prev;				\
 	if (!prev) {							\
@@ -359,6 +363,6 @@ typedef struct stackinfo PERL_SI;
     STMT_START {							\
 	while (curstack != s) {						\
 	    dounwind(-1);						\
-	    POPSTACK();							\
+	    POPSTACK;							\
 	}								\
     } STMT_END
