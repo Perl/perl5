@@ -36,9 +36,9 @@ $Shell::capture_stderr = 0; #
 
 if ( $Is_VMS )
 {
-   skip "Please implement VMS test", 2;
-   ok(1);
-   ok(1);
+    ok(directory(),'Execute command');
+    my @files = directory('*.*');
+    ok(@files,'Quoted arguments');
 }
 elsif( $Is_MSWin32 )
 {
