@@ -1828,6 +1828,12 @@ See L<perldata>.
 
 =over 4
 
+=item (perhaps you forgot to load "%s"?)
+
+(F) This is an educated guess made in conjunction with the message
+"Can't locate object method \"%s\" via package \"%s\"".  It often means
+that a method requires a package that has not been loaded.
+
 =item "%s" variable %s masks earlier declaration in same %s
 
 (W misc) A "my" or "our" variable has been redeclared in the current scope or statement,

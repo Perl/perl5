@@ -2915,6 +2915,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	char* leaf = name;
 	char* sep = Nullch;
 	char* p;
+	GV* gv;
 
 	for (p = name; *p; p++) {
 	    if (*p == '\'')
@@ -2930,9 +2931,18 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	    packname = name;
 	    packlen = sep - name;
 	}
-	Perl_croak(aTHX_
-		   "Can't locate object method \"%s\" via package \"%s\"",
-		   leaf, packname);
+	gv = gv_fetchpv(packname, 0, SVt_PVHV);
+	if (gv && isGV(gv)) {
+	    Perl_croak(aTHX_
+		       "Can't locate object method \"%s\" via package \"%s\"",
+		       leaf, packname);
+	}
+	else {
+	    Perl_croak(aTHX_
+		       "Can't locate object method \"%s\" via package \"%s\"
+		       " (perhaps you forgot to load \"%s\"?)",
+		       leaf, packname, packname);
+	}
     }
     return isGV(gv) ? (SV*)GvCV(gv) : (SV*)gv;
 }
