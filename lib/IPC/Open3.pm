@@ -28,7 +28,7 @@ IPC::Open3, open3 - open a process for reading, writing, and error handling
 Extremely similar to open2(), open3() spawns the given $cmd and
 connects RDRFH for reading, WTRFH for writing, and ERRFH for errors.  If
 ERRFH is '', or the same as RDRFH, then STDOUT and STDERR of the child are
-on the same file handle.
+on the same file handle.  The WTRFH will have autoflush turned on.
 
 If WTRFH begins with "E<lt>&", then WTRFH will be closed in the parent, and
 the child will read from it directly.  If RDRFH or ERRFH begins with

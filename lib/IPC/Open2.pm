@@ -29,6 +29,8 @@ when you try
 
     open(HANDLE, "|cmd args|");
 
+The write filehandle will have autoflush turned on.
+
 If $rdr is a string (that is, a bareword filehandle rather than a glob
 or a reference) and it begins with ">&", then the child will send output
 directly to that file handle.  If $wtr is a string that begins with
