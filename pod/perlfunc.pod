@@ -694,6 +694,11 @@ also waits for the process executing on the pipe to complete, in case you
 want to look at the output of the pipe afterwards, and 
 implicitly puts the exit status value of that command into C<$?>.
 
+Prematurely closing the read end of a pipe (i.e. before the process
+writing to it at the other end has closed it) will result in a
+SIGPIPE being delivered to the writer.  If the other end can't
+handle that, be sure to read all the data before closing the pipe.
+
 Example:
 
     open(OUTPUT, '|sort >foo')  # pipe to sort
