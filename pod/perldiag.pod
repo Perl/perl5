@@ -317,6 +317,12 @@ could indicate that SvREFCNT_dec() was called too many times, or that
 SvREFCNT_inc() was called too few times, or that the SV was mortalized
 when it shouldn't have been, or that memory has been corrupted.
 
+=item Attempt to join self
+
+(F) You tried to join a thread from within itself, which is an
+impossible task.  You may be joining the wrong thread, or you may
+need to move the join() to some other thread.
+
 =item Attempt to pack pointer to temporary value
 
 (W) You tried to pass a temporary value (like the result of a
