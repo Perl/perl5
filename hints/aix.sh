@@ -197,7 +197,7 @@ esac
 # library (getprotobyname and getprotobynumber are outversioned by
 # the same calls in libc, at least for xlc version 3...
 case "`oslevel`" in
-    4.2.1.*)  # Test for xlc version too, should we?
+    4.2.1.*)
       case "$ccversion" in    # Don't know if needed for gcc
           3.1.4.*)    # libswanted "bind ... c ..." => "... c bind ..."
               set `echo X "$libswanted "| sed -e 's/ bind\( .*\) \([cC]\) / \1 \2 bind /'`
@@ -305,9 +305,9 @@ EOM
         ldflags="`echo $ldflags | sed -e 's@ -b@ -Wl,-b@g'`"
         ld='gcc'
         lddlflags="`echo $lddlflags | sed -e 's@ -b@ -Wl,-b@g'`"
-       echo >&4 "(using ccflags   $ccflags)"
-       echo >&4 "(using ldflags   $ldflags)"
-       echo >&4 "(using lddlflags $lddlflags)"
+        echo >&4 "(using ccflags   $ccflags)"
+        echo >&4 "(using ldflags   $ldflags)"
+        echo >&4 "(using lddlflags $lddlflags)"
         ;; 
         esac
         ;;
