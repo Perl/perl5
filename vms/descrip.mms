@@ -935,6 +935,10 @@ $(ARCHAUTO)time.stamp :
 
 .ifdef LINK_ONLY
 .else
+# We need an action line here for broken older versions of MMS which
+# otherwise conclude that they should be compiling [.x2p]utils.c :-(
+util$(O) : util.c
+	$(CC) $(CFLAGS) util.c
 # AUTOMATICALLY GENERATED MAKE DEPENDENCIES--PUT NOTHING BELOW THIS LINE
 av$(O) : EXTERN.h
 av$(O) : av.c
@@ -1628,9 +1632,7 @@ globals$(O) : util.h
 [.x2p]str$(O) : [.x2p]str.h
 [.x2p]str$(O) : handy.h
 [.x2p]str$(O) : [.x2p]util.h
-.ifdef __MMK__
 [.x2p]util$(O) : [.x2p]util.c
-.endif
 [.x2p]util$(O) : [.x2p]EXTERN.h
 [.x2p]util$(O) : [.x2p]a2p.h
 [.x2p]util$(O) : [.x2p]hash.h

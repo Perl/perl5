@@ -1051,7 +1051,10 @@ EOM
     $command = "$self->{PERL} $xsubpp $file";
     print "Running: $command\n" if $Verbose;
     my $text = `$command` ;
-    warn "Running '$command' exits with status " . $? unless ($? & 1);
+    if ($?) {
+	use vmsish 'status';
+	warn "Running '$command' exits with status $?";
+    }
     unlink $file ;
 
     # gets 1.2 -> 1.92 and 2.000a1
