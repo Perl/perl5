@@ -1183,7 +1183,10 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	      uchar_checksum:
 		while (len-- > 0) {
 		    auint = *s++ & 255;
-		    cuv += auint;
+		    if (checksum > bits_in_uv)
+			cdouble += (NV)auint;
+		    else
+			cuv += auint;
 		}
 	    }
 	    else {
@@ -1703,7 +1706,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	if (checksum) {
 	    if (strchr("fFdD", TYPE_NO_MODIFIERS(datumtype)) ||
 	      (checksum > bits_in_uv &&
-	       strchr("csSiIlLnNUvVqQjJ", TYPE_NO_MODIFIERS(datumtype))) ) {
+	       strchr("cCsSiIlLnNUvVqQjJ", TYPE_NO_MODIFIERS(datumtype))) ) {
 		NV trouble;
 
                 adouble = (NV) (1 << (checksum & 15));
