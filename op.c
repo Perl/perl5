@@ -784,6 +784,7 @@ S_op_clear(pTHX_ OP *o)
 	cSVOPo->op_sv = Nullsv;
 #endif
 	break;
+    case OP_METHOD_NAMED:
     case OP_CONST:
 	SvREFCNT_dec(cSVOPo->op_sv);
 	cSVOPo->op_sv = Nullsv;
