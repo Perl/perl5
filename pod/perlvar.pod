@@ -111,6 +111,19 @@ test.  Outside a C<while> test, this will not happen.
 
 =over 8
 
+=item $a
+
+=item $b
+
+Special package variables when using sort(), see L<perlfunc/sort>.
+Because of this specialness $a and $b don't need to be declared
+(using local(), use vars, or our()) even when using the strict
+vars pragma.
+
+=back
+
+=over 8
+
 =item $<I<digits>>
 
 Contains the subpattern from the corresponding set of capturing
