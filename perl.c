@@ -682,7 +682,7 @@ setuid perl scripts securely.\n");
 	    if (euid != uid || egid != gid)
 		croak("No -e allowed in setuid scripts");
 	    if (!e_fp) {
-#ifdef HAS_UMASK
+#if defined(HAS_UMASK) && !defined(VMS)
 		int oldumask = PerlLIO_umask(0177);
 #endif
 	        e_tmpname = savepv(TMPPATH);
@@ -709,7 +709,7 @@ setuid perl scripts securely.\n");
 #endif
   		if (!e_fp)
  		    croak("Cannot create temporary file \"%s\"", e_tmpname);
-#ifdef HAS_UMASK
+#if defined(HAS_UMASK) && !defined(VMS)
 		(void)PerlLIO_umask(oldumask);
 #endif
 	    }

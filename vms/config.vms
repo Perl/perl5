@@ -11,7 +11,7 @@
  * Version: 5.005
  */                 
 
-/* Configuration time:  7-Mar-1998 16:30
+/* Configuration time:  4-Apr-1998 21:30
  * Configured by: Charles Bailey  bailey@newman.upenn.edu
  * Target system: VMS
  */
@@ -76,7 +76,7 @@
  * when Perl is built.  Please do not change it by hand; make
  * any changes to FndVers.Com instead.
  */
-#define ARCHLIB_EXP "/perl_root/lib/VMS_VAX/5_00463"  /**/
+#define ARCHLIB_EXP "/perl_root/lib/VMS_VAX/5_00464"  /**/
 
 
 #define ARCHLIB ARCHLIB_EXP	/*config-skip*/
@@ -255,6 +255,16 @@
 #undef HAS_LONG_DOUBLE		/**/
 #ifdef HAS_LONG_DOUBLE
 #  define LONG_DOUBLESIZE 8		/**/
+#endif
+
+/* LONGLONGSIZE:
+ *	This symbol contains the size of a long long, so that the 
+ *	C preprocessor can make decisions based on it.  It is only
+ *	defined if the system supports long long.
+ */
+#undef HAS_LONG_LONG		/**/
+#ifdef HAS_LONG_LONG
+#define LONGLONGSIZE 8		/**/
 #endif
 
 /* HAS_MKSTEMP:
@@ -2106,6 +2116,38 @@
  */
 #define HAS_ENDSERVENT		/*config-skip*/
 
+/* HAS_GETHOST_PROTOS:
+ *	This symbol, if defined, indicates that <netdb.h> includes
+ *	prototypes for gethostent(), gethostbyname(), and
+ *	gethostbyaddr().  Otherwise, it is up to the program to guess
+ *	them.  See netdbtype.U for probing for various Netdb_xxx_t types.
+ */
+#define	HAS_GETHOST_PROTOS	/*config-skip*/
+
+/* HAS_GETNET_PROTOS:
+ *	This symbol, if defined, indicates that <netdb.h> includes
+ *	prototypes for getnetent(), getnetbyname(), and
+ *	getnetbyaddr().  Otherwise, it is up to the program to guess
+ *	them.  See netdbtype.U for probing for various Netdb_xxx_t types.
+ */
+#define	HAS_GETNET_PROTOS	/*config-skip*/
+
+/* HAS_GETPROTO_PROTOS:
+ *	This symbol, if defined, indicates that <netdb.h> includes
+ *	prototypes for getprotoent(), getprotobyname(), and
+ *	getprotobyaddr().  Otherwise, it is up to the program to guess
+ *	them.  See netdbtype.U for probing for various Netdb_xxx_t types.
+ */
+#define	HAS_GETPROTO_PROTOS	/*config-skip*/
+
+/* HAS_GETSERV_PROTOS:
+ *	This symbol, if defined, indicates that <netdb.h> includes
+ *	prototypes for getservent(), getservbyname(), and
+ *	getservbyaddr().  Otherwise, it is up to the program to guess
+ *	them.  See netdbtype.U for probing for various Netdb_xxx_t types.
+ */
+#define	HAS_GETSERV_PROTOS	/*config-skip*/
+
 #else /* VMS_DO_SOCKETS */
 
 #undef HAS_SOCKET				/*config-skip*/
@@ -2134,6 +2176,10 @@
 #undef HAS_GETSERVENT			/*config-skip*/
 #undef HAS_SETSERVENT			/*config-skip*/
 #undef HAS_ENDSERVENT			/*config-skip*/
+#undef HAS_GETHOST_PROTOS		/*config-skip*/
+#undef HAS_GETNET_PROTOS		/*config-skip*/
+#undef HAS_GETPROTO_PROTOS		/*config-skip*/
+#undef HAS_GETSERV_PROTOS		/*config-skip*/
 
 #endif /* !VMS_DO_SOCKETS */
 

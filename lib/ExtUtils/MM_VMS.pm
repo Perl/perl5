@@ -14,7 +14,7 @@ use VMS::Filespec;
 use File::Basename;
 
 use vars qw($Revision);
-$Revision = '5.3901 (6-Mar-1997)';
+$Revision = '5.42 (31-Mar-1997)';
 
 unshift @MM::ISA, 'ExtUtils::MM_VMS';
 
@@ -90,8 +90,10 @@ are all macro, so that we can tell how long the expansion is, and avoid
 overrunning DCL's command buffer when MM[KS] is running.
 
 If optional second argument has a TRUE value, then the return string is
-a VMS-syntax directory specification, otherwise it is a VMS-syntax file
-specification.
+a VMS-syntax directory specification, if it is FALSE, the return string
+is a VMS-syntax file specification, and if it is not specified, fixpath()
+checks to see whether it matches the name of a directory in the current
+default directory, and returns a directory or file specification accordingly.
 
 =cut
 
@@ -122,8 +124,10 @@ sub fixpath {
         $fixedpath = $path;
         $fixedpath = vmspath($fixedpath) if $force_path;
     }
-    # Convert names without directory or type to paths
-    if (!$force_path and $fixedpath !~ /[:>(.\]]/) { $fixedpath = vmspath($fixedpath); }
+    # No hints, so we try to guess
+    if (!defined($force_path) and $fixedpath !~ /[:>(.\]]/) {
+        $fixedpath = vmspath($fixedpath) if -d $fixedpath;
+    }
     # Trim off root dirname if it's had other dirs inserted in front of it.
     $fixedpath =~ s/\.000000([\]>])/$1/;
     print "fixpath($path) = |$fixedpath|\n" if $Verbose >= 3;
@@ -436,7 +440,7 @@ sub find_perl {
 	}
 	foreach $name (@snames){
 	    if ($name !~ m![/:>\]]!) { push(@cand,$self->catfile($dir,$name)); }
-	    else                     { push(@cand,$self->fixpath($name));      }
+	    else                     { push(@cand,$self->fixpath($name,0));    }
 	}
     }
     foreach $name (@cand) {
@@ -639,9 +643,9 @@ sub constants {
 
     if ($self->{OBJECT} =~ /\s/) {
 	$self->{OBJECT} =~ s/(\\)?\n+\s+/ /g;
-	$self->{OBJECT} = $self->wraplist(map($self->fixpath($_),split(/,?\s+/,$self->{OBJECT})));
+	$self->{OBJECT} = $self->wraplist(map($self->fixpath($_,0),split(/,?\s+/,$self->{OBJECT})));
     }
-    $self->{LDFROM} = $self->wraplist(map($self->fixpath($_),split(/,?\s+/,$self->{LDFROM})));
+    $self->{LDFROM} = $self->wraplist(map($self->fixpath($_,0),split(/,?\s+/,$self->{LDFROM})));
 
 
     # Fix up directory specs
@@ -664,7 +668,7 @@ sub constants {
     # Fix up file specs
     foreach $macro ( qw[LIBPERL_A FIRST_MAKEFILE MAKE_APERL_FILE MYEXTLIB] ) {
 	next unless defined $self->{$macro};
-	$self->{$macro} = $self->fixpath($self->{$macro});
+	$self->{$macro} = $self->fixpath($self->{$macro},0);
     }
 
     foreach $macro (qw/
@@ -702,7 +706,7 @@ MM_VMS_REVISION = $ExtUtils::MM_VMS::Revision
 	      FULLEXT VERSION_FROM OBJECT LDFROM
 	      /	) {
 	next unless defined $self->{$tmp};
-	push @m, "$tmp = ",$self->fixpath($self->{$tmp}),"\n";
+	push @m, "$tmp = ",$self->fixpath($self->{$tmp},0),"\n";
     }
 
     for $tmp (qw/
@@ -716,7 +720,7 @@ MM_VMS_REVISION = $ExtUtils::MM_VMS::Revision
 	next unless defined $self->{$tmp};
 	my(%tmp,$key);
 	for $key (keys %{$self->{$tmp}}) {
-	    $tmp{$self->fixpath($key)} = $self->fixpath($self->{$tmp}{$key});
+	    $tmp{$self->fixpath($key,0)} = $self->fixpath($self->{$tmp}{$key},0);
 	}
 	$self->{$tmp} = \%tmp;
     }
@@ -725,7 +729,7 @@ MM_VMS_REVISION = $ExtUtils::MM_VMS::Revision
 	next unless defined $self->{$tmp};
 	my(@tmp,$val);
 	for $val (@{$self->{$tmp}}) {
-	    push(@tmp,$self->fixpath($val));
+	    push(@tmp,$self->fixpath($val,0));
 	}
 	$self->{$tmp} = \@tmp;
     }
@@ -1011,7 +1015,7 @@ sub tool_xsubpp {
 			warn "Typemap $typemap not found.\n";
 		}
 		else{
-			push(@tmdeps, $self->fixpath($typemap));
+			push(@tmdeps, $self->fixpath($typemap,0));
 		}
 	}
     }
@@ -1464,31 +1468,6 @@ $(INST_STATIC) : $(OBJECT) $(MYEXTLIB)
 }
 
 
-# sub installpm_x { # called by installpm perl file
-#     my($self, $dist, $inst, $splitlib) = @_;
-#     if ($inst =~ m!#!) {
-# 	warn "Warning: MM[SK] would have problems processing this file: $inst, SKIPPED\n";
-# 	return '';
-#     }
-#     $inst = $self->fixpath($inst);
-#     $dist = $self->fixpath($dist);
-#     my($instdir) = $inst =~ /([^\)]+\))[^\)]*$/ ? $1 : dirname($inst);
-#     my(@m);
-# 
-#     push(@m, "
-# $inst : $dist \$(MAKEFILE) ${instdir}.exists \$(INST_ARCHAUTODIR).exists
-# ",'	$(NOECHO) $(RM_F) $(MMS$TARGET)
-# 	$(NOECHO) $(CP) ',"$dist $inst",'
-# 	$(CHMOD) 644 $(MMS$TARGET)
-# ');
-#     push(@m, '	$(AUTOSPLITFILE) $(MMS$TARGET) ',
-#               $self->catdir($splitlib,'auto')."\n\n")
-#         if ($splitlib and $inst =~ /\.pm$/);
-#     push(@m,$self->dir_target($instdir));
-# 
-#     join('',@m);
-# }
-
 =item manifypods (override)
 
 Use VMS-style quoting on command line, and VMS logical name
@@ -1674,7 +1653,7 @@ clean ::
 	    if (($key) = $word =~ m#^\$\((.*)\)$# and ref $self->{$key} eq 'ARRAY') {
 		push(@otherfiles, @{$self->{$key}});
 	    }
-	    else { push(@otherfiles, $attribs{FILES}); }
+	    else { push(@otherfiles, $word); }
 	}
     }
     push(@otherfiles, qw[ blib $(MAKE_APERL_FILE) extralibs.ld perlmain.c pm_to_blib.ts ]);
@@ -1748,7 +1727,7 @@ realclean :: clean
 	    if (($key) = $word =~ m#^\$\((.*)\)$# and ref $self->{$key} eq 'ARRAY') {
 		push(@allfiles, @{$self->{$key}});
 	    }
-	    else { push(@allfiles, $attribs{FILES}); }
+	    else { push(@allfiles, $word); }
 	}
 	$line = '';
 	# Occasionally files are repeated several times from different sources
@@ -2037,7 +2016,7 @@ $(PERL_ARCHLIB)Config.pm : $(PERL_VMS)config.vms $(PERL_VMS)genconfig.pl
 	Set Default $(PERL_SRC)
 	$(MMS)],$mmsquals,);
 	if ($self->{PERL_ARCHLIB} =~ m|\[-| && $self->{PERL_SRC} =~ m|(\[-+)|) {
-	    my($prefix,$target) = ($1,$self->fixpath('$(PERL_ARCHLIB)Config.pm'));
+	    my($prefix,$target) = ($1,$self->fixpath('$(PERL_ARCHLIB)Config.pm',0));
 	    $target =~ s/\Q$prefix/[/;
 	    push(@m," $target");
 	}
@@ -2047,7 +2026,7 @@ $(PERL_ARCHLIB)Config.pm : $(PERL_VMS)config.vms $(PERL_VMS)genconfig.pl
 ]);
     }
 
-    push(@m, join(" ", map($self->fixpath($_),values %{$self->{XS}}))." : \$(XSUBPPDEPS)\n")
+    push(@m, join(" ", map($self->fixpath($_,0),values %{$self->{XS}}))." : \$(XSUBPPDEPS)\n")
       if %{$self->{XS}};
 
     join('',@m);
@@ -2330,8 +2309,8 @@ $(MAP_TARGET) :: $(MAKE_APERL_FILE)
 
     push @m, '
 # Fill in the target you want to produce if it\'s not perl
-MAP_TARGET    = ',$self->fixpath($target),'
-MAP_SHRTARGET = ',$self->fixpath($shrtarget),"
+MAP_TARGET    = ',$self->fixpath($target,0),'
+MAP_SHRTARGET = ',$self->fixpath($shrtarget,0),"
 MAP_LINKCMD   = $linkcmd
 MAP_PERLINC   = ", $perlinc ? map('"$_" ',@{$perlinc}) : '','
 # We use the linker options files created with each extension, rather than
@@ -2339,7 +2318,7 @@ MAP_PERLINC   = ", $perlinc ? map('"$_" ',@{$perlinc}) : '','
 MAP_STATIC    = ',@staticopts ? join(' ', @staticopts) : '','
 MAP_OPTS    = ',@staticopts ? ','.join(',', map($_.'/Option', @staticopts)) : '',"
 MAP_EXTRA     = $extralist
-MAP_LIBPERL = ",$self->fixpath($libperl),'
+MAP_LIBPERL = ",$self->fixpath($libperl,0),'
 ';
 
 

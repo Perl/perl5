@@ -1264,7 +1264,7 @@ sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
     my($self) = @_;
     my($name, %dir, %xs, %c, %h, %ignore, %pl_files, %manifypods);
     local(%pm); #the sub in find() has to see this hash
-    $ignore{'test.pl'} = 1;
+    @ignore{qw(Makefile.PL test.pl)} = (1,1);
     $ignore{'makefile.pl'} = 1 if $Is_VMS;
     foreach $name ($self->lsdir($self->curdir)){
 	next if $name =~ /\#/;
@@ -1282,13 +1282,16 @@ sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
 		unless $name =~ m/perlmain\.c/; # See MAP_TARGET
 	} elsif ($name =~ /\.h$/i){
 	    $h{$name} = 1;
+	} elsif ($name =~ /\.PL$/) {
+	    ($pl_files{$name} = $name) =~ s/\.PL$// ;
+	} elsif ($Is_VMS && $name =~ /\.pl$/) {  # case-insensitive filesystem
+	    local($/); open(PL,$name); my $txt = <PL>; close PL;
+	    if ($txt =~ /Extracting \S+ \(with variable substitutions/) {
+		($pl_files{$name} = $name) =~ s/\.pl$// ;
+	    }
+	    else { $pm{$name} = $self->catfile('$(INST_LIBDIR)',$name); }
 	} elsif ($name =~ /\.(p[ml]|pod)$/){
 	    $pm{$name} = $self->catfile('$(INST_LIBDIR)',$name);
-	} elsif ($name =~ /\.PL$/ && $name ne "Makefile.PL") {
-	    ($pl_files{$name} = $name) =~ s/\.PL$// ;
-	} elsif ($Is_VMS && $name =~ /\.pl$/ && $name ne 'makefile.pl' &&
-	         $name ne 'test.pl') {  # case-insensitive filesystem
-	    ($pl_files{$name} = $name) =~ s/\.pl$// ;
 	}
     }
 
@@ -1492,7 +1495,7 @@ sub init_main {
         $modfname = &DynaLoader::mod2fname(\@modparts);
     }
 
-    ($self->{PARENT_NAME}, $self->{BASEEXT}) = $self->{NAME} =~ m!([\w:]+::)?(\w+)$! ;
+    ($self->{PARENT_NAME}, $self->{BASEEXT}) = $self->{NAME} =~ m!(?:([\w:]+)::)?(\w+)$! ;
 
     if (defined &DynaLoader::mod2fname) {
 	# As of 5.001m, dl_os2 appends '_'

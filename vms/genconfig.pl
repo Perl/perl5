@@ -190,6 +190,10 @@ foreach (@ARGV) {
     print OUT "netdb_name_type=",$dosock ? "'char *'\n" : "'undef'\n";
     print OUT "netdb_host_type=",$dosock ? "'char *'\n" : "'undef'\n";
     print OUT "netdb_hlen_type=",$dosock ? "'int'\n" : "'undef'\n";
+    print OUT "d_gethostprotos=",$dosock ? "'define'\n" : "'undef'\n";
+    print OUT "d_getnetprotos=",$dosock ? "'define'\n" : "'undef'\n";
+    print OUT "d_getservprotos=",$dosock ? "'define'\n" : "'undef'\n";
+    print OUT "d_getprotoprotos=",$dosock ? "'define'\n" : "'undef'\n";
 
     if ($dosock and $cctype eq 'decc' and $ccflags =~ /DECCRTL_SOCKETS/) {
       print OUT "selecttype='fd_set'\n";
