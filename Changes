@@ -24,12 +24,8 @@ The Message-Ids in the change entries refer to the email messages sent
 to the perl5-porters mailing list.  You can retrieve the messages for
 example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 
-This file contains only changes that affect the mainline branch,
-not those that affect the (now decommissioned) cfgperl, or vmsperl,
-or any other branch.
-
 --------------
-Version v5.7.2		Development release working toward v5.8
+Version v5.7.X		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
 [ 15046] By: jhi                                   on 2002/03/05  14:56:19
