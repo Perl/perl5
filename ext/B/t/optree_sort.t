@@ -20,8 +20,8 @@ checkOptree ( name	=> 'sub {sort @a}',
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # 1  <;> nextstate(main 424 optree_sort.t:14) v
 # 2  <0> pushmark s
-# 3  <#> gv(*a) s
-# 4  <1> rv2av[t1] lK/1
+# 3  <#> gv[*a] s
+# 4  <1> rv2av[t2] lK/1
 # 5  <@> sort K
 # 6  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
@@ -58,12 +58,11 @@ checkOptree ( name	=> 'sub {@a = sort @a}',
 	      code	=> sub {@a = sort @a},
 	      bcopts	=> '-exec',
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-           goto -
 1  <;> nextstate(main -438 optree.t:244) v
 2  <0> pushmark s
 3  <0> pushmark s
 4  <#> gv[*a] s
-5  <1> rv2av[t2] lK/1
+5  <1> rv2av[t4] lK/1
 6  <@> sort lK
 7  <0> pushmark s
 8  <#> gv[*a] s
@@ -111,7 +110,6 @@ checkOptree ( name	=> 'sub {@a = sort @a; reverse @a}',
 	      code	=> sub {@a = sort @a; reverse @a},
 	      bcopts	=> '-exec',
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-           goto -
 1  <;> nextstate(main -438 optree.t:286) v
 2  <0> pushmark s
 3  <0> pushmark s
@@ -176,7 +174,6 @@ checkOptree ( name	=> 'sub {my @a; @a = sort @a}',
 	      code	=> sub {my @a; @a = sort @a},
 	      bcopts	=> '-exec',
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-           goto -
 1  <;> nextstate(main -437 optree.t:254) v
 2  <0> padav[@a:-437,-436] vM/LVINTRO
 3  <;> nextstate(main -436 optree.t:256) v
@@ -232,7 +229,6 @@ checkOptree ( name	=> 'sub {my @a; @a = sort @a; push @a, 1}',
 	      bcopts	=> '-exec',
 	      debug	=> 0,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-           goto -
 1  <;> nextstate(main -437 optree.t:325) v
 2  <0> padav[@a:-437,-436] vM/LVINTRO
 3  <;> nextstate(main -436 optree.t:325) v
@@ -267,7 +263,6 @@ checkOptree ( name	=> 'sub {my @a; @a = sort @a; 1}',
 	      bcopts	=> '-exec',
 	      debug	=> 0,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-           goto -
 1  <;> nextstate(main -437 optree.t:325) v
 2  <0> padav[@a:-437,-436] vM/LVINTRO
 3  <;> nextstate(main -436 optree.t:325) v

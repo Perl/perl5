@@ -20,7 +20,7 @@ cmdline args in 'standard' way across all clients of OptreeCheck.
 =cut
 
 use Config;
-plan tests => 5 + 19 + 14 * $gOpts{selftest};	# fudged
+plan tests => 5 + 18 + 14 * $gOpts{selftest};	# fudged
 
 SKIP: {
     skip "no perlio in this build", 5 + 19 + 14 * $gOpts{selftest}
@@ -32,12 +32,14 @@ pass("REGEX TEST HARNESS SELFTEST");
 checkOptree ( name	=> "bare minimum opcode search",
 	      bcopts	=> '-exec',
 	      code	=> sub {my $a},
+	      noanchors	=> 1, # unanchored match
 	      expect	=> 'leavesub',
 	      expect_nt	=> 'leavesub');
 
 checkOptree ( name	=> "found print opcode",
 	      bcopts	=> '-exec',
 	      code	=> sub {print 1},
+	      noanchors	=> 1, # unanchored match
 	      expect	=> 'print',
 	      expect_nt	=> 'leavesub');
 
@@ -52,6 +54,7 @@ checkOptree ( name	=> 'test todo itself',
 	      todo	=> "your excuse here ;-)",
 	      bcopts	=> '-exec',
 	      code	=> sub {print 1},
+	      noanchors	=> 1, # unanchored match
 	      expect	=> 'print',
 	      expect_nt	=> 'print');
 
@@ -103,26 +106,31 @@ pass ("TEST -e \$srcCode");
 
 checkOptree ( name	=> '-w errors seen',
 	      prog	=> 'sort our @a',
+	      noanchors	=> 1, # unanchored match
 	      expect	=> 'Useless use of sort in void context',
 	      expect_nt	=> 'Useless use of sort in void context');
 
 checkOptree ( name	=> "self strict, catch err",
 	      prog	=> 'use strict; bogus',
+	      noanchors	=> 1,
 	      expect	=> 'strict subs',
 	      expect_nt	=> 'strict subs');
 
 checkOptree ( name	=> "sort vK - flag specific search",
 	      prog	=> 'sort our @a',
+	      noanchors	=> 1,
 	      expect	=> '<@> sort vK ',
 	      expect_nt	=> '<@> sort vK ');
 
 checkOptree ( name	=> "'prog' => 'sort our \@a'",
 	      prog	=> 'sort our @a',
+	      noanchors	=> 1,
 	      expect	=> '<@> sort vK',
 	      expect_nt	=> '<@> sort vK');
 
 checkOptree ( name	=> "'code' => 'sort our \@a'",
 	      code	=> 'sort our @a',
+	      noanchors	=> 1,
 	      expect	=> '<@> sort K',
 	      expect_nt	=> '<@> sort K');
 
@@ -132,12 +140,10 @@ checkOptree ( name	=> 'fixup nextstate (in reftext)',
 	      bcopts	=> '-exec',
 	      code	=> sub {my $a},
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-#            goto -
 # 1  <;> nextstate( NOTE THAT THIS CAN BE ANYTHING ) v
 # 2  <0> padsv[$a:54,55] M/LVINTRO
 # 3  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-#            goto -
 # 1  <;> nextstate(main 54 optree_concise.t:84) v
 # 2  <0> padsv[$a:54,55] M/LVINTRO
 # 3  <1> leavesub[1 ref] K/REFC,1
@@ -149,28 +155,12 @@ checkOptree ( name	=> 'fixup square-bracket args',
 	      code	=> sub {my $a},
 	      #skip	=> 1,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-#            goto -
 # 1  <;> nextstate(main 56 optree_concise.t:96) v
 # 2  <0> padsv[$a:56,57] M/LVINTRO
 # 3  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-#            goto -
 # 1  <;> nextstate(main 56 optree_concise.t:96) v
 # 2  <0> padsv[$a:56,57] M/LVINTRO
-# 3  <1> leavesub[1 ref] K/REFC,1
-EONT_EONT
-
-checkOptree ( name	=> 'unneeded manual rex-ify by test author',
-	      # args in 1,2 are manually edited, unnecessarily
-	      bcopts	=> '-exec',
-	      code	=> sub {my $a},
-	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# 1  <;> nextstate(.*?) v
-# 2  <0> padsv[.*?] M/LVINTRO
-# 3  <1> leavesub[1 ref] K/REFC,1
-EOT_EOT
-# 1  <;> nextstate(main 57 optree_concise.t:108) v
-# 2  <0> padsv[$a:57,58] M/LVINTRO
 # 3  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
 
@@ -214,7 +204,6 @@ checkOptree ( name	=> 'canonical example w -exec',
 	      debug	=> 1,
 	      xtestfail	=> 1,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-#            goto -
 # 1  <;> nextstate(main 61 optree_concise.t:139) v
 # 2  <#> gvsv[*b] s
 # 3  <$> const[IV 42] s
@@ -223,7 +212,6 @@ checkOptree ( name	=> 'canonical example w -exec',
 # 6  <2> sassign sKS/2
 # 7  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-#            goto -
 # 1  <;> nextstate(main 61 optree_concise.t:139) v
 # 2  <$> gvsv(*b) s
 # 3  <$> const(IV 42) s

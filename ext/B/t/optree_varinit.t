@@ -30,12 +30,10 @@ checkOptree ( name	=> '-exec sub {my $a}',
 	      bcopts	=> '-exec',
 	      code	=> sub {my $a},
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-#            goto -
 # 1  <;> nextstate(main 49 optree.t:52) v
 # 2  <0> padsv[$a:49,50] M/LVINTRO
 # 3  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-#            goto -
 # 1  <;> nextstate(main 49 optree.t:45) v
 # 2  <0> padsv[$a:49,50] M/LVINTRO
 # 3  <1> leavesub[1 ref] K/REFC,1
@@ -45,12 +43,10 @@ checkOptree ( name	=> 'sub {our $a}',
 	      bcopts	=> '-exec',
 	      code	=> sub {our $a},
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-           goto -
 1  <;> nextstate(main 21 optree.t:47) v
 2  <#> gvsv[*a] s/OURINTR
 3  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-#            goto -
 # 1  <;> nextstate(main 51 optree.t:56) v
 # 2  <$> gvsv(*a) s/OURINTR
 # 3  <1> leavesub[1 ref] K/REFC,1
@@ -60,12 +56,10 @@ checkOptree ( name	=> 'sub {local $a}',
 	      bcopts	=> '-exec',
 	      code	=> sub {local $a},
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-           goto -
 1  <;> nextstate(main 23 optree.t:57) v
 2  <#> gvsv[*a] s/LVINTRO
 3  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-#            goto -
 # 1  <;> nextstate(main 53 optree.t:67) v
 # 2  <$> gvsv(*a) s/LVINTRO
 # 3  <1> leavesub[1 ref] K/REFC,1
@@ -242,10 +236,9 @@ EONT_EONT
 
 checkOptree ( name	=> 'sub {my $a=()}',
 	      code	=> sub {my $a=()},
-              todo	=> 'optimize',
+              todo	=> 'apparently done, by patch #?',
 	      bcopts	=> '-exec',
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-           goto -
 1  <;> nextstate(main -439 optree.t:105) v
 2  <0> stub sP
 3  <0> padsv[$a:-439,-438] sRM*/LVINTRO
@@ -282,14 +275,12 @@ checkOptree ( name	=> 'sub {local $a=()}',
               #todo	=> 'probly not worth doing',
 	      bcopts	=> '-exec',
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-           goto -
 1  <;> nextstate(main 33 optree.t:190) v
 2  <0> stub sP
 3  <#> gvsv[*a] s/LVINTRO
 4  <2> sassign sKS/2
 5  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-#            goto -
 # 1  <;> nextstate(main 63 optree.t:225) v
 # 2  <0> stub sP
 # 3  <$> gvsv(*a) s/LVINTRO
@@ -299,7 +290,7 @@ EONT_EONT
 
 checkOptree ( name	=> 'my $a=()',
 	      prog	=> 'my $a=()',
-              todo	=> 'optimize ? its one of the idioms',
+              todo	=> 'apparently done, by patch #?',
 	      bcopts	=> '-exec',
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 1  <0> enter 
