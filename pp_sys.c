@@ -687,11 +687,14 @@ PP(pp_binmode)
     PerlIO *fp;
     MAGIC *mg;
     SV *discp = Nullsv;
+    STRLEN len  = 0;
+    char *names = NULL;
 
     if (MAXARG < 1)
 	RETPUSHUNDEF;
-    if (MAXARG > 1)
+    if (MAXARG > 1) {
 	discp = POPs;
+    }
 
     gv = (GV*)POPs;
 
@@ -712,7 +715,12 @@ PP(pp_binmode)
     if (!(io = GvIO(gv)) || !(fp = IoIFP(io)))
 	RETPUSHUNDEF;
 
-    if (do_binmode(fp,IoTYPE(io),mode_from_discipline(discp)))
+    if (discp) {
+	names = SvPV(discp,len);
+    }
+
+    if (PerlIO_binmode(aTHX_ fp,IoTYPE(io),mode_from_discipline(discp),
+                       (discp) ? SvPV_nolen(discp) : Nullch))
 	RETPUSHYES;
     else
 	RETPUSHUNDEF;
@@ -3137,7 +3145,7 @@ PP(pp_fttext)
 	    (void)PerlIO_close(fp);
 	    RETPUSHUNDEF;
 	}
-	do_binmode(fp, '<', O_BINARY);
+	PerlIO_binmode(aTHX_ fp, '<', O_BINARY, Nullch);
 	len = PerlIO_read(fp, tbuf, sizeof(tbuf));
 	(void)PerlIO_close(fp);
 	if (len <= 0) {

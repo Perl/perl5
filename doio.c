@@ -517,7 +517,7 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		}
 	    }
 	}
-	else if (O_BINARY != O_TEXT) {
+	else if (O_BINARY != O_TEXT && IoTYPE(io) != IoTYPE_STD && !saveifp) {
 	    type = ":crlf";
 	}
     }
@@ -1055,7 +1055,11 @@ fail_discipline:
 		end = strchr(s+1, ':');
 		if (!end)
 		    end = s+len;
+#ifndef PERLIO_LAYERS
 		Perl_croak(aTHX_ "Unknown discipline '%.*s'", end-s, s);
+#else
+		s = end;
+#endif
 	    }
 	}
     }
@@ -1065,46 +1069,11 @@ fail_discipline:
 int
 Perl_do_binmode(pTHX_ PerlIO *fp, int iotype, int mode)
 {
-#ifdef DOSISH
-#  if defined(atarist) || defined(__MINT__)
-    if (!PerlIO_flush(fp)) {
-	if (mode & O_BINARY)
-	    ((FILE*)fp)->_flag |= _IOBIN;
-	else
-	    ((FILE*)fp)->_flag &= ~ _IOBIN;
-	return 1;
-    }
-    return 0;
-#  else
-    if (PerlLIO_setmode(PerlIO_fileno(fp), mode) != -1) {
-#    if defined(WIN32) && defined(__BORLANDC__)
-	/* The translation mode of the stream is maintained independent
-	 * of the translation mode of the fd in the Borland RTL (heavy
-	 * digging through their runtime sources reveal).  User has to
-	 * set the mode explicitly for the stream (though they don't
-	 * document this anywhere). GSAR 97-5-24
-	 */
-	PerlIO_seek(fp,0L,0);
-	if (mode & O_BINARY)
-	    ((FILE*)fp)->flags |= _F_BIN;
-	else
-	    ((FILE*)fp)->flags &= ~ _F_BIN;
-#    endif
-	return 1;
-    }
-    else
-	return 0;
-#  endif
-#else
-#  if defined(USEMYBINMODE)
-    if (my_binmode(fp, iotype, mode) != FALSE)
-	return 1;
-    else
-	return 0;
-#  else
-    return 1;
-#  endif
-#endif
+ /* The old body of this is now in non-LAYER part of perlio.c
+  * This is a stub for any XS code which might have been calling it.
+  */
+ char *name = (O_BINARY != O_TEXT && !(mode & O_BINARY)) ? ":crlf" : ":raw";
+ return PerlIO_binmode(aTHX_ fp, iotype, mode, name);
 }
 
 #if !defined(HAS_TRUNCATE) && !defined(HAS_CHSIZE) && defined(F_FREESP)
@@ -2078,16 +2047,21 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
  ** without checking the ungetc buffer.
  **/
 
+/* Not threadsafe? */
 static S64_IOB *s64_buffer = (S64_IOB *) NULL;
 
 /* initialize the buffer area */
 /* required after a fork(2) call in order to remove side effects */
-void Perl_do_s64_init_buffer() {
+void
+Perl_do_s64_init_buffer(void)
+{
     s64_buffer = (S64_IOB *) NULL;
 }
 
 /* get a buffered stream pointer */
-static S64_IOB *S_s64_get_buffer(pTHX_ PerlIO *fp) {
+STATIC S64_IOB*
+S_s64_get_buffer(pTHX_ PerlIO *fp)
+{
     S64_IOB *ptr = s64_buffer;
     while( ptr && ptr->fp != fp)
 	ptr = ptr->next;
@@ -2095,7 +2069,9 @@ static S64_IOB *S_s64_get_buffer(pTHX_ PerlIO *fp) {
 }
 
 /* create a buffered stream pointer */
-static S64_IOB *S_s64_create_buffer(pTHX_ PerlIO *f) {
+STATIC S64_IOB*
+S_s64_create_buffer(pTHX_ PerlIO *f)
+{
     S64_IOB *ptr = malloc( sizeof( S64_IOB));
     if( ptr) {
 	ptr->fp = f;
@@ -2110,7 +2086,9 @@ static S64_IOB *S_s64_create_buffer(pTHX_ PerlIO *f) {
 }
 
 /* delete a buffered stream pointer */
-void Perl_do_s64_delete_buffer(pTHX_ PerlIO *f) {
+void
+Perl_do_s64_delete_buffer(pTHX_ PerlIO *f)
+{
     S64_IOB *ptr = S_s64_get_buffer(aTHX_ f);
     if( ptr) {
 	/* fix the stream pointer according to the bytes buffered */
@@ -2126,21 +2104,26 @@ void Perl_do_s64_delete_buffer(pTHX_ PerlIO *f) {
 }
 
 /* internal buffer management */
-#define _S64_BUFFER_SIZE 32
-static int S_s64_malloc(pTHX_ S64_IOB *ptr) {
+
+#define S64_BUFFER_SIZE 32
+
+STATIC int
+S_s64_malloc(pTHX_ S64_IOB *ptr)
+{
     if( ptr) {
 	if( !ptr->buffer) {
-	    ptr->buffer = (int *) calloc( _S64_BUFFER_SIZE, sizeof( int));
+	    ptr->buffer = (int *) calloc( S64_BUFFER_SIZE, sizeof( int));
 	    ptr->size = ptr->cnt = 0;
 	} else {
-	    ptr->buffer = (int *) realloc( ptr->buffer, ptr->size + _S64_BUFFER_SIZE);
+	    ptr->buffer = (int *) realloc( ptr->buffer,
+					   ptr->size + S64_BUFFER_SIZE);
 	}
 	
 	if( !ptr->buffer)
 	    return( 0);
 	
-	ptr->size += _S64_BUFFER_SIZE;
-	 
+	ptr->size += S64_BUFFER_SIZE;
+	
 	return( 1);
     }
 
@@ -2148,22 +2131,26 @@ static int S_s64_malloc(pTHX_ S64_IOB *ptr) {
 }
 
 /* SOCKS 64 bit getc replacement */
-int Perl_do_s64_getc(pTHX_ PerlIO *f) {
+int
+Perl_do_s64_getc(pTHX_ PerlIO *f)
+{
     S64_IOB *ptr = S_s64_get_buffer(aTHX_ f);
     if( ptr) {
-	if( ptr->cnt) 
+	if( ptr->cnt)
 	    return( ptr->buffer[--ptr->cnt]);
     }
     return( getc(f));
 }
 
 /* SOCKS 64 bit ungetc replacement */
-int Perl_do_s64_ungetc(pTHX_ int ch, PerlIO *f) {
+int
+Perl_do_s64_ungetc(pTHX_ int ch, PerlIO *f)
+{
     S64_IOB *ptr = S_s64_get_buffer(aTHX_ f);
 
     if( !ptr) ptr = S_s64_create_buffer(aTHX_ f);
     if( !ptr) return( EOF);
-    if( !ptr->buffer || (ptr->buffer && ptr->cnt >= ptr->size)) 
+    if( !ptr->buffer || (ptr->buffer && ptr->cnt >= ptr->size))
 	if( !S_s64_malloc(aTHX_ ptr)) return( EOF);
     ptr->buffer[ptr->cnt++] = ch;
 
@@ -2171,7 +2158,9 @@ int Perl_do_s64_ungetc(pTHX_ int ch, PerlIO *f) {
 }
 
 /* SOCKS 64 bit fread replacement */
-SSize_t	Perl_do_s64_fread(pTHX_ void *buf, SSize_t count, PerlIO* f) {
+SSize_t
+Perl_do_s64_fread(pTHX_ void *buf, SSize_t count, PerlIO* f)
+{
     SSize_t len = 0;
     char *bufptr = (char *) buf;
     S64_IOB *ptr = S_s64_get_buffer(aTHX_ f);
@@ -2188,7 +2177,9 @@ SSize_t	Perl_do_s64_fread(pTHX_ void *buf, SSize_t count, PerlIO* f) {
 }
 
 /* SOCKS 64 bit fseek replacement */
-int	Perl_do_s64_seek(pTHX_ PerlIO* f, Off_t offset, int whence) {
+int
+Perl_do_s64_seek(pTHX_ PerlIO* f, Off_t offset, int whence)
+{
     S64_IOB *ptr = S_s64_get_buffer(aTHX_ f);
 
     /* Simply clear the buffer and seek if the position is absolute */
@@ -2210,7 +2201,9 @@ int	Perl_do_s64_seek(pTHX_ PerlIO* f, Off_t offset, int whence) {
 }
 
 /* SOCKS 64 bit ftell replacement */
-Off_t	Perl_do_s64_tell(pTHX_ PerlIO* f) {
+Off_t
+Perl_do_s64_tell(pTHX_ PerlIO* f)
+{
     Off_t offset = 0;
     S64_IOB *ptr = S_s64_get_buffer(aTHX_ f);
     if( ptr)
@@ -2218,4 +2211,5 @@ Off_t	Perl_do_s64_tell(pTHX_ PerlIO* f) {
     return( ftello(f) - offset);
 }
 
-#endif
+#endif /* SOCKS_64BIT_BUG */
+

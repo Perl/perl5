@@ -371,7 +371,7 @@ a = .a
 # Options
 #
 
-INCLUDES	= -I$(COREDIR) -I.\include -I. -I..
+INCLUDES	= -I.\include -I. -I.. -I$(COREDIR) 
 DEFINES		= -DWIN32 $(CRYPT_FLAG)
 LOCDEFS		= -DPERLDLL -DPERL_CORE
 SUBSYS		= console
@@ -387,11 +387,11 @@ LIBFILES	= $(CRYPT_LIB) $(LIBC) \
 		  -lwinmm -lversion -lodbc32
 
 .IF  "$(CFG)" == "Debug"
-OPTIMIZE	= -g -DDEBUGGING
+OPTIMIZE	= -g -O2 -DDEBUGGING
 LINK_DBG	= -g
 .ELSE
 OPTIMIZE	= -g -O2
-LINK_DBG	= 
+LINK_DBG	= -g 
 .ENDIF
 
 CFLAGS		= $(INCLUDES) $(DEFINES) $(LOCDEFS) $(OPTIMIZE)
