@@ -28,6 +28,145 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.4		Maintenance release working toward v5.8.4
 --------------
 ____________________________________________________________________________
+[ 22701] By: nicholas                              on 2004/04/15  18:19:57
+        Log: Integrate:
+             [ 22691]
+             Subject: re: [PATCH] for bug 28525: Buffer overflow issue in the Win32 distribution of 5.8.3
+             From: Jan Dubois <jand@ActiveState.com>
+             Date: Tue, 13 Apr 2004 19:49:32 -0700
+             Message-ID: <vm7p70h7au8unrnq4jp85oich7n71ar5ab@4ax.com
+             
+             [ 22697]
+             d_getservbyname_r undef up to at least OpenBSD 3.5
+             Thanks to Campo Weijerman and Gerard Gerritsen off-list
+     Branch: maint-5.8/perl
+	  !> hints/openbsd.sh win32/win32.c
+____________________________________________________________________________
+[ 22700] By: nicholas                              on 2004/04/15  18:16:44
+        Log: The set uid perl is now called setuidperl. Not suidperl.
+             Which I discover is hardlinked from sperl by ./installperl
+             elsewhere. Helpfully confusing installperl script.
+     Branch: maint-5.8/perl
+	   ! INSTALL installperl perl.c pod/perl584delta.pod
+	   ! pod/perldiag.pod pod/perlsec.pod
+____________________________________________________________________________
+[ 22699] By: nicholas                              on 2004/04/15  16:08:44
+        Log: Integrate:
+             [ 22673]
+             Upgrade to Time::HiRes 1.57.
+             
+             [ 22675]
+             Upgrade to Digest 1.06.
+             
+             [ 22680]
+             Upgrade to Time::HiRes 1.59.
+     Branch: maint-5.8/perl
+	  !> ext/Time/HiRes/Changes ext/Time/HiRes/HiRes.pm
+	  !> ext/Time/HiRes/HiRes.xs lib/Digest.pm
+____________________________________________________________________________
+[ 22698] By: nicholas                              on 2004/04/15  14:44:12
+        Log: Clarify AIX and win32's malloc wrapping
+     Branch: maint-5.8/perl
+	   ! pod/perl584delta.pod
+____________________________________________________________________________
+[ 22694] By: nicholas                              on 2004/04/14  13:47:19
+        Log: For maint, I don't think that we can have sperl go sulky if invoked
+             from a #! line. So keep .../sperl functional, and have the /dev/fd/...
+             only set ID exectuable reside under a different name (suidperl)
+     Branch: maint-5.8/perl
+	   ! installperl perl.c
+____________________________________________________________________________
+[ 22690] By: nicholas                              on 2004/04/13  12:42:07
+        Log: Integrate:
+             [ 22689]
+             Borland C doesn't like PERL_MALLOC_WRAP.
+             Until I know why, the fix is to disable it.
+     Branch: maint-5.8/perl
+	  !> win32/config_H.bc
+____________________________________________________________________________
+[ 22684] By: nicholas                              on 2004/04/09  22:02:53
+        Log: Integrate:
+             [ 22665]
+             AIX-4 with xlc does not like malloc wrap
+             
+             [ 22666]
+             Test drives are fun. Implement ccversion for Itanium HP-UX 11.23
+     Branch: maint-5.8/perl
+	  !> hints/aix_4.sh hints/hpux.sh
+____________________________________________________________________________
+[ 22683] By: nicholas                              on 2004/04/09  15:50:37
+        Log: Subject: [PATCH RC1] install reentr.(inc|h) on VMS with non-threaded Perl
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Message-ID: <4076007C.3040708@mac.com>
+             Date: Thu, 08 Apr 2004 20:46:36 -0500
+     Branch: maint-5.8/perl
+	   ! vms/descrip_mms.template
+____________________________________________________________________________
+[ 22679] By: nicholas                              on 2004/04/08  15:22:02
+        Log: Subject: [PATCH] Re: 5.8.4 RC1
+             From: Steve Hay <steve.hay@uk.radan.com>
+             Message-ID: <407508ED.7070400@uk.radan.com>
+             Date: Thu, 08 Apr 2004 09:10:21 +0100
+     Branch: maint-5.8/perl
+	   ! win32/makefile.mk
+____________________________________________________________________________
+[ 22678] By: nicholas                              on 2004/04/08  15:19:46
+        Log: Integrate:
+             [ 22651]
+             [perl #28171] wantarray docs should mention effect of eval { wantarray }
+             as reported by Tim Bunce. Add a note to this effect in perlfunc,
+             and regression tests for it.
+             
+             [ 22654]
+             Subject: ref ($proto) || $proto patch
+             From: Ovid <publiustemp-p5p@yahoo.com>
+             Date: Sat, 03 Apr 2004 18:59:22 -0800
+             Message-ID: <406F7A0A.50702@yahoo.com>
+             (with minor reformatting)
+             
+             [ 22672]
+             Make gmtime and localtime cross reference each other.
+             Suggested by Dan Jacobson
+     Branch: maint-5.8/perl
+	  !> pod/perlfunc.pod pod/perlobj.pod pod/perltoot.pod
+	  !> t/op/wantarray.t
+____________________________________________________________________________
+[ 22677] By: nicholas                              on 2004/04/08  15:03:36
+        Log: Improvements from Jarkko
+     Branch: maint-5.8/perl
+	   ! pod/perl584delta.pod
+____________________________________________________________________________
+[ 22676] By: nicholas                              on 2004/04/08  15:03:21
+        Log: Undo RC1
+     Branch: maint-5.8/perl
+	   ! patchlevel.h
+____________________________________________________________________________
+[ 22661] By: nicholas                              on 2004/04/05  17:30:22
+        Log: This is RC1
+     Branch: maint-5.8/perl
+	   ! patchlevel.h pod/perlhist.pod
+____________________________________________________________________________
+[ 22660] By: nicholas                              on 2004/04/05  17:13:22
+        Log: Rebuild perltoc.pod and MANIFEST
+     Branch: maint-5.8/perl
+	   ! MANIFEST pod/perltoc.pod
+____________________________________________________________________________
+[ 22659] By: nicholas                              on 2004/04/05  17:09:33
+        Log: Cargo cult 5.8.4 upgrade
+     Branch: maint-5.8/perl
+	   ! Cross/config.sh-arm-linux NetWare/Makefile README.os2
+	   ! README.vms epoc/createpkg.pl patchlevel.h plan9/config.plan9
+	   ! vos/build.cm vos/config.alpha.def vos/config.alpha.h
+	   ! vos/config.ga.def vos/config.ga.h vos/install_perl.cm
+	   ! win32/Makefile win32/config_H.bc win32/config_H.gc
+	   ! win32/config_H.vc win32/config_H.vc64 win32/makefile.mk
+	   ! wince/Makefile.ce
+____________________________________________________________________________
+[ 22658] By: nicholas                              on 2004/04/05  16:27:34
+        Log: Update changes
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 22657] By: nicholas                              on 2004/04/05  16:15:56
         Log: Integrate:
              [ 22656]
