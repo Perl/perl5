@@ -42,7 +42,7 @@
 #  define EXTERN_C
 #endif
 
-ifdef OP_IN_REGISTER
+#ifdef OP_IN_REGISTER
 #  ifdef __GNUC__
 #    define stringify_immed(s) #s
 #    define stringify(s) stringify_immed(s)
