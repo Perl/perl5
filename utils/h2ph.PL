@@ -133,9 +133,9 @@ while (defined (my $file = next_file())) {
 		s/\(\w+\s*\(\*\)\s*\(\w*\)\)\s*(-?\d+)/$1/; # (int (*)(foo_t))0
 		if (s/^\(([\w,\s]*)\)//) {
 		    $args = $1;
-    	    	    my $proto = '() ';
+		    my $proto = '() ';
 		    if ($args ne '') {
-    	    	    	$proto = '';
+			$proto = '';
 			foreach my $arg (split(/,\s*/,$args)) {
 			    $arg =~ s/^\s*([^\s].*[^\s])\s*$/$1/;
 			    $curargs{$arg} = 1;
@@ -268,7 +268,7 @@ while (defined (my $file = next_file())) {
 	    } elsif(/^ident\s+(.*)/) {
 		print OUT $t, "# $1\n";
 	    }
-	} elsif(/^\s*(typedef\s*)?enum\s*(\s+[a-zA-Z_]\w*\s*)?/) {
+	} elsif (/^\s*(typedef\s*)?enum\s*(\s+[a-zA-Z_]\w*\s*)?/) { # { for vi
 	    until(/\{[^}]*\}.*;/ || /;/) {
 		last unless defined ($next = next_line($file));
 		chomp $next;
@@ -300,6 +300,60 @@ while (defined (my $file = next_file())) {
 			       "unless defined(\&$enum_name);\n");
 		}
 	    }
+	} elsif (/^(?:__extension__\s+)?extern\s+__inline(?:__)?\s+/) { # { for vi
+	    # This is a hack to parse the inline functions in the glibc headers.
+	    # Warning: massive kludge ahead. We suppose inline functions are mainly
+	    # constructed like macros.
+	    while (1) {
+		last unless defined ($next = next_line($file));
+		chomp $next;
+		undef $_, last if $next =~ /__THROW\s*;/;
+		$_ .= " $next";
+		print OUT "# $next\n" if $opt_D;
+		last if $next =~ /^}|^{.*}\s*$/;
+	    }
+	    next if not defined; # because it's only a prototype
+	    s/\b(__extension__|extern|__inline(?:__)?)\b//g;
+	    if (s/^(?:\w|\s|\*)*\s(\w+)\s*//) {
+		$name = $1;
+	    } else {
+		warn "name not found"; next; # shouldn't occur...
+	    }
+	    my @args;
+	    if (s/^\(([^()]*)\)\s*(\w+\s*)*//) {
+		for my $arg (split /,/, $1) {
+		    if ($arg =~ /(\w+)\s*$/) {
+			$curargs{$1} = 1;
+			push @args, $1;
+		    }
+		}
+	    }
+	    $args = (
+		@args
+		? "local(" . (join ',', map "\$$_", @args) . ") = \@_;\n$t    "
+		: ""
+	    );
+	    my $proto = @args ? '' : '() ';
+	    $new = '';
+	    s/\breturn\b//g; # "return" doesn't occur in macros usually...
+	    expr();
+	    $new =~ s/(["\\])/\\$1/g;       #"]);
+	    $new = reindent($new);
+	    $args = reindent($args);
+	    if ($t ne '') {
+		$new =~ s/(['\\])/\\$1/g;   #']);
+		if ($opt_h) {
+		    print OUT $t,
+		    "eval \"\\n#line $eval_index $outfile\\n\" . 'sub $name $proto\{\n$t    ${args}eval q($new);\n$t}' unless defined(\&$name);\n";
+		    $eval_index++;
+		} else {
+		    print OUT $t,
+		    "eval 'sub $name $proto\{\n$t    ${args}eval q($new);\n$t}' unless defined(\&$name);\n";
+		}
+	    } else {
+		print OUT "unless(defined(\&$name)) {\n    sub $name $proto\{\n\t${args}eval q($new);\n    }\n}\n";
+	    }
+	    %curargs = ();
 	}
     }
     $Is_converted{$file} = 1;
@@ -308,7 +362,7 @@ while (defined (my $file = next_file())) {
         $next = '';
     } else {
         print OUT "1;\n";
-    queue_includes_from($file) if ($opt_a);
+	queue_includes_from($file) if $opt_a;
     }
 }
 
