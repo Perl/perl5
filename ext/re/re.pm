@@ -115,7 +115,7 @@ sub bits {
 	  $bits |= $bitmask{$s};
       } else {
 	  require Carp;
-	  Carp::carp("Unknown \"re\" subpragma '$s' (known ones are: @{[join(', ', map {qq('$_')} sort keys %bitmask)]})");
+	  Carp::carp("Unknown \"re\" subpragma '$s' (known ones are: @{[join(', ', map {qq('$_')} 'debug', 'debugcolor', sort keys %bitmask)]})");
       }
     }
     $bits;
