@@ -1490,6 +1490,8 @@ $ IF F$TYPE(oldarchlibexp) .EQS. "" THEN -
     oldarchlibexp="''vms_prefix':[lib.''archname']"
 $ IF F$TYPE(privlibexp) .EQS. "" THEN -
     privlibexp ="''vms_prefix':[lib]"
+$ IF F$TYPE(scriptdir) .EQS. "" THEN -
+    scriptdir ="''vms_prefix':[utils]"
 $ IF F$TYPE(sitearchexp) .EQS. "" THEN -
     sitearchexp ="''vms_prefix':[lib.site_perl.''archname']"
 $ IF F$TYPE(sitelib_stem) .EQS. "" THEN -
@@ -5552,6 +5554,7 @@ $ WC "sPRIu64='" + sPRIu64 + "'"
 $ WC "sPRIx64='" + sPRIx64 + "'"
 $ WC "sSCNfldbl='" + sSCNfldbl + "'"
 $ WC "sched_yield='" + sched_yield + "'"
+$ WC "scriptdir='" + scriptdir + "'"
 $ WC "seedfunc='" + seedfunc + "'"
 $ WC "selectminbits='32'"
 $ WC "selecttype='" + selecttype + "'"
