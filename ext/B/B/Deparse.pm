@@ -3041,7 +3041,7 @@ sub re_uninterp_extended {
           | \\[uUlLQE]
           )
 
-	/length($4) ? "$1$2$4" : "$1$2\\$3"/xeg;
+	/defined($4) && length($4) ? "$1$2$4" : "$1$2\\$3"/xeg;
 
     return $str;
 }
