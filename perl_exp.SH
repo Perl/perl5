@@ -84,7 +84,9 @@ perl_call_argv
 perl_call_pv
 perl_call_method
 perl_call_sv
-perl_requirepv
+perl_eval_pv
+perl_eval_sv
+perl_require_pv
 Mymalloc
 Mycalloc
 Myremalloc
