@@ -65,6 +65,13 @@ statically built in.  This may or may not be a problem with ancient
 TCP/IP stacks of VMS: we do not know since we weren't able to test
 Perl in such configurations.
 
+=head2 IEEE-format Floating Point Default on OpenVMS Alpha
+
+Perl now uses IEEE format (T_FLOAT) as the default internal floating
+point format on OpenVMS Alpha, potentially breaking binary compatibility
+with external libraries or existing data.  G_FLOAT is still available as
+a configuration option.  The default on VAX (D_FLOAT) has not changed.
+
 =head2 Different Definition of the Unicode Character Classes \p{In...}
 
 As suggested by the Unicode consortium, the Unicode character classes
@@ -1874,6 +1881,20 @@ VMS
 chdir() now works better despite a CRT bug; now works with MULTIPLICITY
 (see INSTALL); now works with Perl's malloc.
 
+The tainting of C<%ENV> elements via C<keys> or C<values> was previously
+unimplemented.  It now works as documented.
+
+The C<waitpid> emulation has been improved.  The worst bug (now fixed)
+was that a pid of -1 would cause a wildcard search of all processes on
+the system.  The most significant enhancement is that we can now
+usually get the completion status of a terminated process.
+
+POSIX-style signals are now emulated much better on VMS versions prior
+to 7.0.
+
+The C<system> function and backticks operator have improved
+functionality and better error handling.
+
 =item *
 
 Windows
@@ -2300,20 +2321,9 @@ There are a few known test failures, see L<perluts>.
 
 =head2 VMS
 
-Rather a lot of tests are failing in VMS, but actually more tests
-succeed in VMS than they used to; it's just that there are many,
-many more tests than there used to be.
-
-Here are the known failures from some compiler/platform combinations.
-
-Compaq C V6.2-009 on OpenVMS Alpha V7.3
+There is one known test failure with a default configuration:
  
   [.run]switches..........................FAILED on test 1
-  [-.ext.posix.t]posix....................FAILED on test 10
-  [-.ext.time.hires]hires.................FAILED on test 17
-  [-.lib]db...............................FAILED on test 24
-  [-.lib.net]hostent......................FAILED on test 5
-  [-.lib.pod.t]basic......................FAILED on test 10
   
 =head2 Win32
 
