@@ -48,7 +48,8 @@ uninteresting, but may still be what you want.
 
 =head2 How do I debug my Perl programs?
 
-Have you used C<-w>?  It enables warnings for dubious practices.
+Have you tried C<use warnings> or used C<-w>?  They enable warnings 
+for dubious practices.
 
 Have you tried C<use strict>?  It prevents you from using symbolic
 references, makes you predeclare any subroutines that you call as bare

@@ -392,7 +392,8 @@ Perl developers, please write to perl-thanks@perl.org .
 
 =head1 DIAGNOSTICS
 
-The B<-w> switch produces some lovely diagnostics.
+The C<use warnings> pragma (and the B<-w> switch) produces some 
+lovely diagnostics.
 
 See L<perldiag> for explanations of all Perl's diagnostics.  The C<use
 diagnostics> pragma automatically turns Perl's normally terse warnings

@@ -283,6 +283,7 @@ create a file called F<Some/Module.pm> and start with this template:
     package Some::Module;  # assumes Some/Module.pm
 
     use strict;
+    use warnings;
 
     BEGIN {
         use Exporter   ();

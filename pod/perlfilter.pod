@@ -410,6 +410,7 @@ Here is the complete Debug filter:
     package Debug;
 
     use strict;
+    use warnings;
     use Filter::Util::Call ;
 
     use constant TRUE => 1 ;

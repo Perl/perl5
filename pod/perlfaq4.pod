@@ -940,7 +940,8 @@ with
 
     @bad[0]  = `same program that outputs several lines`;
 
-The B<-w> flag will warn you about these matters.
+The C<use warnings> pragma and the B<-w> flag will warn you about these 
+matters.
 
 =head2 How can I remove duplicate elements from a list or array?
 
@@ -1070,7 +1071,7 @@ strings.  Modify if you have other needs.
 
     sub compare_arrays {
 	my ($first, $second) = @_;
-	local $^W = 0;  # silence spurious -w undef complaints
+	no warnings;  # silence spurious -w undef complaints
 	return 0 unless @$first == @$second;
 	for (my $i = 0; $i < @$first; $i++) {
 	    return 0 if $first->[$i] ne $second->[$i];

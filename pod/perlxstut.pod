@@ -114,6 +114,7 @@ The file Mytest.pm should start with something like this:
 	package Mytest;
 
 	use strict;
+        use warnings;
 
 	require Exporter;
 	require DynaLoader;

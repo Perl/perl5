@@ -12,8 +12,8 @@ BEGIN {
 }
 
 use strict;
+use warnings;
 
-$^W = 1;
 my $warn = "";
 $SIG{q(__WARN__)} = sub { print $warn; $warn .= join("",@_) };
 

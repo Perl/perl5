@@ -2,9 +2,14 @@
 
 # $RCSfile: sprintf.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:27 $
 
+BEGIN {
+    chdir 't' if -d 't';
+    unshift @INC, '../lib';
+}   
+use warnings;
+
 print "1..4\n";
 
-$^W = 1;
 $SIG{__WARN__} = sub {
     if ($_[0] =~ /^Invalid conversion/) {
 	$w++;

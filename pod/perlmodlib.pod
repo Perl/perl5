@@ -1120,7 +1120,9 @@ scheme as the original author.
 
 =item Try to design the new module to be easy to extend and reuse.
 
-Always use B<-w>.  
+Try to C<use warnings;> (or C<use warnings qw(...);>).
+Remember that you can add C<no warnings qw(...);> to individual blocks
+of code that need less warnings.  
 
 Use blessed references.  Use the two argument form of bless to bless
 into the class name given as the first parameter of the constructor,
