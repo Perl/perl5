@@ -2,6 +2,13 @@
 
 # $RCSfile: fs.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:28 $
 
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+}
+
+use Config;
+
 print "1..26\n";
 
 $wd = `pwd`;
@@ -26,7 +33,9 @@ if (eval {link('b','c')}) {print "ok 3\n";} else {print "not ok 3\n";}
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
     $blksize,$blocks) = stat('c');
 
-if ($nlink == 3) {print "ok 4\n";} else {print "not ok 4\n";}
+if ($Config{dont_use_nlink} || $nlink == 3)
+    {print "ok 4\n";} else {print "not ok 4\n";}
+
 if (($mode & 0777) == 0666) {print "ok 5\n";} else {print "not ok 5\n";}
 
 if ((chmod 0777,'a') == 1) {print "ok 6\n";} else {print "not ok 6\n";}

@@ -3,6 +3,14 @@
 # $RCSfile: stat.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:28 $
 # 950521 DFD    This version hacked to make test 39 succeed on MachTen
 #               though the O.S. wrongly thinks /dev/null is a terminal
+
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+}
+
+use Config;
+
 print "1..56\n";
 
 chop($cwd = `pwd`);
@@ -29,7 +37,9 @@ sleep 2;
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
     $blksize,$blocks) = stat('Op.stat.tmp');
 
-if ($nlink == 2) {print "ok 3\n";} else {print "not ok 3\n";}
+if ($Config{dont_use_nlink} || $nlink == 2)
+    {print "ok 3\n";} else {print "not ok 3\n";}
+
 if (($mtime && $mtime != $ctime) || $cwd =~ m#/afs/#) {
     print "ok 4\n";
 }
