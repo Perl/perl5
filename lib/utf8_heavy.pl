@@ -36,8 +36,6 @@ sub SWASHNEW {
     }
 
     {
-	local $@;
-
 	$list ||= ($caller ne 'main' && eval { $caller->$type(); })
 	    || do "$file.pl"
 	    || do "$encoding/$file.pl"
