@@ -1347,6 +1347,8 @@ sub test_splice {
 	   . Dumper(\@array) . ' vs ' . Dumper(\@h))
       if list_diff(\@array, \@h);
 
+    unlink $tmp;
+
     return undef; # success
 }
 

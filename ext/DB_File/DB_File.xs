@@ -3,8 +3,8 @@
  DB_File.xs -- Perl 5 interface to Berkeley DB 
 
  written by Paul Marquess <Paul.Marquess@btinternet.com>
- last modified 1st September 2002
- version 1.805
+ last modified 22nd October 2002
+ version 1.806
 
  All comments/suggestions/problems are welcome
 
@@ -105,6 +105,7 @@
         1.805 - recursion detection added to the callbacks
                 Support for 4.1.X added.
                 Filter code can now cope with read-only $_
+        1.806 - recursion detection beefed up.
 
 */
 
@@ -505,7 +506,6 @@ u_int		flags ;
 static void
 tidyUp(DB_File db)
 {
-    /* db_DESTROY(db); */
     db->aborted = TRUE ;
 }
 
@@ -543,7 +543,6 @@ const DBT * key2 ;
     void * data1, * data2 ;
     int retval ;
     int count ;
-    DB_File	keep_CurrentDB = CurrentDB;
     
 
     if (CurrentDB->in_compare) {
@@ -567,6 +566,10 @@ const DBT * key2 ;
 
     ENTER ;
     SAVETMPS;
+    SAVESPTR(CurrentDB);
+    CurrentDB->in_compare = FALSE;
+    SAVEINT(CurrentDB->in_compare);
+    CurrentDB->in_compare = TRUE;
 
     PUSHMARK(SP) ;
     EXTEND(SP,2) ;
@@ -574,12 +577,7 @@ const DBT * key2 ;
     PUSHs(sv_2mortal(newSVpvn(data2,key2->size)));
     PUTBACK ;
 
-    CurrentDB->in_compare = TRUE;
-
     count = perl_call_sv(CurrentDB->compare, G_SCALAR); 
-
-    CurrentDB = keep_CurrentDB;
-    CurrentDB->in_compare = FALSE;
 
     SPAGAIN ;
 
@@ -630,7 +628,6 @@ const DBT * key2 ;
     char * data1, * data2 ;
     int retval ;
     int count ;
-    DB_File	keep_CurrentDB = CurrentDB;
     
     if (CurrentDB->in_prefix){
         tidyUp(CurrentDB);
@@ -653,6 +650,10 @@ const DBT * key2 ;
 
     ENTER ;
     SAVETMPS;
+    SAVESPTR(CurrentDB);
+    CurrentDB->in_prefix = FALSE;
+    SAVEINT(CurrentDB->in_prefix);
+    CurrentDB->in_prefix = TRUE;
 
     PUSHMARK(SP) ;
     EXTEND(SP,2) ;
@@ -660,12 +661,7 @@ const DBT * key2 ;
     PUSHs(sv_2mortal(newSVpvn(data2,key2->size)));
     PUTBACK ;
 
-    CurrentDB->in_prefix = TRUE;
-
     count = perl_call_sv(CurrentDB->prefix, G_SCALAR); 
-
-    CurrentDB = keep_CurrentDB;
-    CurrentDB->in_prefix = FALSE;
 
     SPAGAIN ;
 
@@ -719,9 +715,8 @@ HASH_CB_SIZE_TYPE size ;
 #endif    
     dSP ;
     dMY_CXT;
-    int retval ;
+    int retval = 0;
     int count ;
-    DB_File	keep_CurrentDB = CurrentDB;
 
     if (CurrentDB->in_hash){
         tidyUp(CurrentDB);
@@ -736,18 +731,18 @@ HASH_CB_SIZE_TYPE size ;
      /* DGH - Next two lines added to fix corrupted stack problem */
     ENTER ;
     SAVETMPS;
+    SAVESPTR(CurrentDB);
+    CurrentDB->in_hash = FALSE;
+    SAVEINT(CurrentDB->in_hash);
+    CurrentDB->in_hash = TRUE;
 
     PUSHMARK(SP) ;
+
 
     XPUSHs(sv_2mortal(newSVpvn((char*)data,size)));
     PUTBACK ;
 
-    keep_CurrentDB->in_hash = TRUE;
-
     count = perl_call_sv(CurrentDB->hash, G_SCALAR); 
-
-    CurrentDB = keep_CurrentDB;
-    CurrentDB->in_hash = FALSE;
 
     SPAGAIN ;
 
@@ -765,6 +760,7 @@ HASH_CB_SIZE_TYPE size ;
     return (retval) ;
 }
 
+#if 0
 static void
 #ifdef CAN_PROTOTYPE
 db_errcall_cb(const char * db_errpfx, char * buffer)
@@ -774,7 +770,9 @@ const char * db_errpfx;
 char * buffer;
 #endif
 {
+#ifdef dTHX
     dTHX;
+#endif    
     SV * sv = perl_get_sv(ERR_BUFF, FALSE) ;
     if (sv) {
         if (db_errpfx)
@@ -783,6 +781,7 @@ char * buffer;
             sv_setpv(sv, buffer) ;
     }
 } 
+#endif
 
 #if defined(TRACE) && defined(BERKELEY_DB_1_OR_2)
 
@@ -1429,7 +1428,7 @@ SV *   sv ;
 	/* printf("open returned %d %s\n", status, db_strerror(status)) ; */
 
         if (status == 0) {
-	    RETVAL->dbp->set_errcall(RETVAL->dbp, db_errcall_cb) ;
+	    /* RETVAL->dbp->set_errcall(RETVAL->dbp, db_errcall_cb) ;*/
 
             status = (RETVAL->dbp->cursor)(RETVAL->dbp, NULL, &RETVAL->cursor,
 			0) ;
@@ -1456,8 +1455,10 @@ INCLUDE: constants.xs
 
 BOOT:
   {
+#ifdef dTHX
     dTHX;
-    SV * sv_err = perl_get_sv(ERR_BUFF, GV_ADD|GV_ADDMULTI) ;    
+#endif    
+    /* SV * sv_err = perl_get_sv(ERR_BUFF, GV_ADD|GV_ADDMULTI) ;  */
     MY_CXT_INIT;
     __getBerkeleyDBInfo() ;
  
