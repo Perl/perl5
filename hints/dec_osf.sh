@@ -22,8 +22,17 @@
 #	executable code simply do not agree any more while in
 #	mid-execution, the optimiser only cares about the results.
 #
-#	Note: Configure will automatically
-#       add the often quoted -DDEBUGGING for you)
+#	Note 3: Configure will automatically add the often quoted
+#	-DDEBUGGING for you if the -g is specified.
+#
+#	Note 4: There is even more optimisation available in the new
+#	(GEM) DEC cc: -O5 and -fast. "man cc" will tell more about them.
+#	The jury is still out whether either or neither help for Perl
+#	and how much. Based on very quick testing, -fast boosts
+#	raw data copy by about 5-15% (-fast brings in, among other
+#	things, inlined, ahem, fast memcpy()), while on the other
+#	hand searching things (index, m//, s///), seems to get slower.
+#	Your mileage will vary.
 #
 
 case "$optimize" in
@@ -83,6 +92,15 @@ esac
 
 #
 # History:
+#
+# perl5.003_24:
+#
+#	30-Jan-1997 Jarkko Hietaniemi <jhi@iki.fi>
+#
+#	* Fixing the note on -DDEBUGGING.
+#
+#	* Note on -O5 -fast.
+#
 #
 # perl5.003_23:
 #
