@@ -608,7 +608,7 @@ SETARGV_OBJ	= setargv$(o)
 
 DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attrs Thread B re \
 		Data/Dumper Devel/Peek ByteLoader Devel/DProf File/Glob \
-		Sys/Hostname Storable Filter/Util/Call Encode
+		Sys/Hostname Storable Filter/Util/Call Encode Digest/MD5
 STATIC_EXT	= DynaLoader
 NONXS_EXT	= Errno
 
@@ -633,6 +633,7 @@ HOSTNAME	= $(EXTDIR)\Sys\Hostname\Hostname
 STORABLE	= $(EXTDIR)\Storable\Storable
 FILTER		= $(EXTDIR)\Filter\Util\Call\Call
 ENCODE		= $(EXTDIR)\Encode\Encode
+MD5		= $(EXTDIR)\Digest\MD5\MD5
 
 SOCKET_DLL	= $(AUTODIR)\Socket\Socket.dll
 FCNTL_DLL	= $(AUTODIR)\Fcntl\Fcntl.dll
@@ -653,6 +654,7 @@ HOSTNAME_DLL	= $(AUTODIR)\Sys\Hostname\Hostname.dll
 STORABLE_DLL	= $(AUTODIR)\Storable\Storable.dll
 FILTER_DLL	= $(AUTODIR)\Filter\Util\Call\Call.dll
 ENCODE_DLL	= $(AUTODIR)\Encode\Encode.dll
+MD5_DLL		= $(AUTODIR)\Digest\MD5\MD5.dll
 
 ERRNO_PM	= $(LIBDIR)\Errno.pm
 
@@ -675,7 +677,8 @@ EXTENSION_C	= 		\
 		$(HOSTNAME).c	\
 		$(STORABLE).c	\
 		$(FILTER).c	\
-		$(ENCODE).c	
+		$(ENCODE).c	\
+		$(MD5).c	
 
 EXTENSION_DLL	= 		\
 		$(SOCKET_DLL)	\
@@ -696,7 +699,8 @@ EXTENSION_DLL	= 		\
 		$(HOSTNAME_DLL)	\
 		$(STORABLE_DLL)	\
 		$(FILTER_DLL)   \
-		$(ENCODE_DLL)
+		$(ENCODE_DLL)   \
+		$(MD5_DLL)
 
 EXTENSION_PM	=		\
 		$(ERRNO_PM)
@@ -980,12 +984,6 @@ $(BYTELOADER_DLL): $(PERLEXE) $(BYTELOADER).xs
 	$(MAKE)
 	cd ..\..\win32
 
-$(ENCODE_DLL): $(PERLEXE) $(ENCODE).xs
-	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
-	$(MAKE)
-	cd ..\..\win32
-
 $(STORABLE_DLL): $(PERLEXE) $(STORABLE).xs
 	cd $(EXTDIR)\$(*B)
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
@@ -999,6 +997,12 @@ $(FILTER_DLL): $(PERLEXE) $(FILTER).xs
 	cd ..\..\..\..\win32
 
 $(ENCODE_DLL): $(PERLEXE) $(ENCODE).xs
+	cd $(EXTDIR)\$(*B)
+	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	$(MAKE)
+	cd ..\..\win32
+
+$(MD5_DLL): $(PERLEXE) $(MD5).xs
 	cd $(EXTDIR)\$(*B)
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	$(MAKE)
@@ -1058,6 +1062,7 @@ distclean: clean
 	-del /f $(LIBDIR)\File\Glob.pm
 	-del /f $(LIBDIR)\Storable.pm
 	-del /f $(LIBDIR)\Filter\Util\Call\Call.pm
+	-del /f $(LIBDIR)\Digest\MD5.pm
 	-if exist $(LIBDIR)\IO rmdir /s /q $(LIBDIR)\IO
 	-rmdir /s $(LIBDIR)\IO
 	-if exist $(LIBDIR)\Thread rmdir /s /q $(LIBDIR)\Thread
@@ -1068,6 +1073,8 @@ distclean: clean
 	-rmdir /s $(LIBDIR)\Data
 	-if exist $(LIBDIR)\Filter\Util\Call rmdir /s /q $(LIBDIR)\Filter\Util\Call
 	-if exist $(LIBDIR)\Filter\Util rmdir /s /q $(LIBDIR)\Filter\Util
+	-if exist $(LIBDIR)\Digest rmdir /s /q $(LIBDIR)\Digest
+	-rmdir /s $(LIBDIR)\Digest
 	-del /f $(PODDIR)\*.html
 	-del /f $(PODDIR)\*.bat
 	cd ..\utils

@@ -2,7 +2,7 @@
 
 # $RCSfile: repeat.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:21 $
 
-print "1..20\n";
+print "1..23\n";
 
 # compile time
 
@@ -96,3 +96,16 @@ print join('', (split(//,"123")) x 2) eq '123123' ? "ok 19\n" : "not ok 19\n";
 # jhi@iki.fi
 #
 print "\xdd" x 24 eq "\xdd\xdd\xdd\xdd\xdd\xdd\xdd\xdd\xdd\xdd\xdd\xdd\xdd\xdd\xdd\xdd\xdd\xdd\xdd\xdd\xdd\xdd\xdd\xdd" ? "ok 20\n" : "not ok 20\n";
+
+# When we use a list repeat in a scalar context, it behaves like
+# a scalar repeat. Make sure that works properly, and doesn't leave
+# extraneous values on the stack.
+#  -- robin@kitsite.com
+
+my ($x, $y) = scalar ((1,2)x2);
+print $x eq "22"  ? "ok 21\n" : "not ok 21\n";
+print !defined $y ? "ok 22\n" : "not ok 22\n";
+
+# Make sure the stack doesn't get truncated too much - the left
+# operand of the eq binop needs to remain!
+print (77 eq scalar ((1,7)x2) ? "ok 23\n" : "not ok 23\n");

@@ -146,6 +146,18 @@ case "$cc" in
 ***
 EOF
 	;;
+     5.0.0.0)
+	cat >&4 <<EOF
+***
+*** This C compiler ($ccversion) is known to have optimizer problems
+*** when compiling perl.c.
+***
+*** Disabling optimization for that file but consider upgrading
+*** your C compiler.
+***
+EOF
+perl_cflags='optimize='
+	;;
      5.0.1.0)
 	cat >&4 <<EOF
 ***

@@ -15,7 +15,7 @@ use warnings;
 use strict;
 use Config;
 
-print "1..17\n";
+print "1..18\n";
 
 my $test = 1;
 
@@ -35,6 +35,11 @@ ok;
 print "not " if "{\n    \$test /= 2 if ++\$test;\n}" ne
                     $deparse->coderef2text(sub {++$test and $test/=2;});
 ok;
+
+print "not " if "{\n    -((1, 2) x 2);\n}" ne
+                    $deparse->coderef2text(sub {-((1,2)x2)});
+ok;
+
 {
 my $a = <<'EOF';
 {

@@ -451,7 +451,7 @@ LINK_DBG	= -debug -pdb:none
 .ELSE
 # -Zi requires .pdb file(s)
 #OPTIMIZE	= -Od -MD -Zi -DDEBUGGING
-#LINK_DBG	= -debug 
+#LINK_DBG	= -debug
 OPTIMIZE	= -O1 -MD -Z7 -DDEBUGGING
 LINK_DBG	= -debug -debugtype:both -pdb:none
 .ENDIF
@@ -522,7 +522,7 @@ LKPOST		= )
 	$(CC) -c $(null,$(<:d) $(NULL) -I$(<:d)) $(CFLAGS_O) $(OBJOUT_FLAG)$@ $<
 
 .c.i:
-	$(CC) -c $(null,$(<:d) $(NULL) -I$(<:d)) $(CFLAGS_O) -E $< >$@ 
+	$(CC) -c $(null,$(<:d) $(NULL) -I$(<:d)) $(CFLAGS_O) -E $< >$@
 
 .y.c:
 	$(NOOP)
@@ -743,7 +743,8 @@ SETARGV_OBJ	= setargv$(o)
 
 DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attrs Thread B re \
 		Data/Dumper Devel/Peek ByteLoader Devel/DProf File/Glob \
-		Sys/Hostname Storable Filter/Util/Call Encode PerlIO/Scalar
+		Sys/Hostname Storable Filter/Util/Call Encode \
+		Digest/MD5 PerlIO/Scalar
 STATIC_EXT	= DynaLoader
 NONXS_EXT	= Errno
 
@@ -769,6 +770,7 @@ HOSTNAME	= $(EXTDIR)\Sys\Hostname\Hostname
 STORABLE	= $(EXTDIR)\Storable\Storable
 FILTER		= $(EXTDIR)\Filter\Util\Call\Call
 ENCODE          = $(EXTDIR)\Encode\Encode
+MD5		= $(EXTDIR)\Digest\MD5\MD5
 
 SOCKET_DLL	= $(AUTODIR)\Socket\Socket.dll
 FCNTL_DLL	= $(AUTODIR)\Fcntl\Fcntl.dll
@@ -790,6 +792,7 @@ HOSTNAME_DLL	= $(AUTODIR)\Sys\Hostname\Hostname.dll
 STORABLE_DLL	= $(AUTODIR)\Storable\Storable.dll
 FILTER_DLL	= $(AUTODIR)\Filter\Util\Call\Call.dll
 ENCODE_DLL	= $(AUTODIR)\Encode\Encode.dll
+MD5_DLL		= $(AUTODIR)\Digest\MD5\MD5.dll
 
 ERRNO_PM	= $(LIBDIR)\Errno.pm
 
@@ -813,7 +816,8 @@ EXTENSION_C	=		\
 		$(HOSTNAME).c	\
 		$(STORABLE).c	\
 		$(FILTER).c     \
-		$(ENCODE).c
+		$(ENCODE).c     \
+		$(MD5).c
 
 EXTENSION_DLL	=		\
 		$(SOCKET_DLL)	\
@@ -835,7 +839,8 @@ EXTENSION_DLL	=		\
 		$(HOSTNAME_DLL)	\
 		$(STORABLE_DLL)	\
 		$(FILTER_DLL)   \
-		$(ENCODE_DLL)
+		$(ENCODE_DLL)   \
+		$(MD5_DLL)
 
 EXTENSION_PM	=		\
 		$(ERRNO_PM)
@@ -1239,6 +1244,11 @@ $(FILTER_DLL): $(PERLDEP) $(FILTER).xs
 	..\..\..\..\miniperl -I..\..\..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\Filter\Util\Call && $(MAKE)
 
+$(MD5_DLL): $(PERLDEP) $(FILTER).xs
+	cd $(EXTDIR)\Digest\MD5 && \
+	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
+	cd $(EXTDIR)\Digest\MD5 && $(MAKE)
+
 $(ERRNO_PM): $(PERLDEP) $(ERRNO)_pm.PL
 	cd $(EXTDIR)\$(*B) && \
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
@@ -1289,12 +1299,14 @@ distclean: clean
 	-del /f $(LIBDIR)\File\Glob.pm
 	-del /f $(LIBDIR)\Storable.pm
 	-del /f $(LIBDIR)\Filter\Util\Call\Call.pm
+	-del /f $(LIBDIR)\Digest\MD5.pm
 	-if exist $(LIBDIR)\IO rmdir /s /q $(LIBDIR)\IO || rmdir /s $(LIBDIR)\IO
 	-if exist $(LIBDIR)\Thread rmdir /s /q $(LIBDIR)\Thread || rmdir /s $(LIBDIR)\Thread
 	-if exist $(LIBDIR)\B rmdir /s /q $(LIBDIR)\B || rmdir /s $(LIBDIR)\B
 	-if exist $(LIBDIR)\Data rmdir /s /q $(LIBDIR)\Data || rmdir /s $(LIBDIR)\Data
 	-if exist $(LIBDIR)\Filter\Util\Call rmdir /s /q $(LIBDIR)\Filter\Util\Call || rmdir /s $(LIBDIR)\Filter
 	-if exist $(LIBDIR)\Filter\Util rmdir /s /q $(LIBDIR)\Filter\Util || rmdir /s $(LIBDIR)\Filter
+	-if exist $(LIBDIR)\Digest rmdir /s /q $(LIBDIR)\Digest || rmdir /s $(LIBDIR)\Digest
 	-del /f $(PODDIR)\*.html
 	-del /f $(PODDIR)\*.bat
 	-cd ..\utils && del /f h2ph splain perlbug pl2pm c2ph h2xs perldoc \
