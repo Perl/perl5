@@ -6207,7 +6207,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    need = 0;
 	    if (c != 'e' && c != 'E') {
 		i = PERL_INT_MIN;
-		(void)frexp(nv, &i);
+		(void)Perl_frexp(nv, &i);
 		if (i == PERL_INT_MIN)
 		    Perl_die(aTHX_ "panic: frexp");
 		if (i > 0)

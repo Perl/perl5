@@ -368,6 +368,17 @@ cat > UU/use64bitall.cbu <<'EOCBU'
 # after it has prompted the user for whether to be maximally 64 bitty.
 case "$use64bitall" in
 "$define"|true|[yY]*)
+	    libc='/usr/lib/sparcv9/libc.so'
+	    if test ! -f $libc; then
+		cat <<EOM
+
+I do not see the 64-bit libc, $libc.
+Cannot continue, aborting.
+
+EOM
+		exit 1
+	    fi 
+	    loclibpth="$loclibpth /usr/lib/sparcv9"
 	    case "$cc -v 2>/dev/null" in
 	    *gcc*)
 		# I don't know what are the flags to make gcc sparcv9-aware,
@@ -380,18 +391,9 @@ case "$use64bitall" in
 		ccflags="$ccflags `getconf XBS5_LP64_OFF64_CFLAGS 2>/dev/null`"
 		ldflags="$ldflags `getconf XBS5_LP64_OFF64_LDFLAGS 2>/dev/null`"
 		lddlflags="$lddlflags -G `getconf XBS5_LP64_OFF64_LDFLAGS 2>/dev/null`"
+		test -d /opt/SUNWspro/lib && loclibpth="$loclibpth /opt/SUNWspro/lib"
 		;;
 	    esac	
-	    libc='/usr/lib/sparcv9/libc.so'
-	    if test ! -f $libc; then
-		cat <<EOM
-
-I do not see the 64-bit libc, $libc.
-Cannot continue, aborting.
-
-EOM
-		exit 1
-	    fi 
 	    libscheck='case "`/usr/bin/file $xxx`" in
 *64-bit*|*SPARCV9*) ;;
 *) xxx=/no/64-bit$xxx ;;
