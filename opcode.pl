@@ -519,7 +519,7 @@ print		print			ck_listiob	ims@	F? L
 sysopen		sysopen			ck_fun		s@	F S S S?
 sysseek		sysseek			ck_fun		s@	F S S
 sysread		sysread			ck_fun		imst@	F R S S?
-syswrite	syswrite		ck_fun		imst@	F S S S?
+syswrite	syswrite		ck_fun		imst@	F S S? S?
 
 send		send			ck_fun		imst@	F S S S?
 recv		recv			ck_fun		imst@	F R S S

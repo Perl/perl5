@@ -1467,6 +1467,13 @@ PP(pp_sysread)
 
 PP(pp_syswrite)
 {
+    djSP;
+    int items = (SP - PL_stack_base) - TOPMARK;
+    if (items == 2) {
+        EXTEND(SP, 1);
+        PUSHs(sv_2mortal(newSViv(sv_len(*SP))));
+        PUTBACK;
+    }
     return pp_send(ARGS);
 }
 
