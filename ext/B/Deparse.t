@@ -102,13 +102,11 @@ $a =~ s/-e syntax OK\n//g;
 $a =~ s{\\340\\242}{\\s} if (ord("\\") == 224); # EBCDIC, cp 1047 or 037
 $a =~ s{\\274\\242}{\\s} if (ord("\\") == 188); # $^O eq 'posix-bc'
 $b = <<'EOF';
-
 LINE: while (defined($_ = <ARGV>)) {
     chomp $_;
     our(@F) = split(" ", $_, 0);
     '???';
 }
-
 EOF
 print "# [$a]\n\# vs expected\n# [$b]\nnot " if $a ne $b;
 print "ok " . $i++ . "\n";
