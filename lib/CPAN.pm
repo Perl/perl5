@@ -1,6 +1,6 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 package CPAN;
-$VERSION = '1.59_57';
+$VERSION = '1.59_58';
 # $Id: CPAN.pm,v 1.385 2001/02/09 21:37:57 k Exp $
 
 # only used during development:
@@ -784,6 +784,28 @@ sub cleanup {
   # require Carp;
   # Carp::cluck("DEBUGGING");
   $CPAN::Frontend->mywarn("Lockfile removed.\n");
+}
+
+sub is_tested {
+    my($self,$what) = @_;
+    $self->{is_tested}{$what} = 1;
+}
+
+sub is_installed {
+    my($self,$what) = @_;
+    delete $self->{is_tested}{$what};
+}
+
+sub set_perl5lib {
+    my($self) = @_;
+    return unless %{$self->{is_tested}};
+    my $env = $ENV{PERL5LIB};
+    $env = $ENV{PERLLIB} unless defined $env;
+    my @env;
+    push @env, $env if defined $env and length $env;
+    my @dirs = map {("$_/blib/arch", "$_/blib/lib")} keys %{$self->{is_tested}};
+    $CPAN::Frontend->myprint("Prepending @dirs to PERL5LIB.\n");
+    $ENV{PERL5LIB} = join $Config::Config{path_sep}, @dirs, @env;
 }
 
 package CPAN::CacheMgr;
@@ -4633,9 +4655,12 @@ sub test {
         return;
     }
 
+    local $ENV{PERL5LIB} = $ENV{PERL5LIB};
+    $CPAN::META->set_perl5lib;
     my $system = join " ", $CPAN::Config->{'make'}, "test";
     if (system($system) == 0) {
 	 $CPAN::Frontend->myprint("  $system -- OK\n");
+	 $CPAN::META->is_tested($self->{'build_dir'});
 	 $self->{make_test} = "YES";
     } else {
 	 $self->{make_test} = "NO";
@@ -4751,6 +4776,7 @@ sub install {
     $pipe->close;
     if ($?==0) {
 	 $CPAN::Frontend->myprint("  $system -- OK\n");
+	 $CPAN::META->is_installed($self->{'build_dir'});
 	 return $self->{'install'} = "YES";
     } else {
 	 $self->{'install'} = "NO";

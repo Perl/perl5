@@ -370,6 +370,16 @@ void *emx_realloc (void *, size_t);
 	 ? (--FILE_ptr(fp), ++FILE_cnt(fp), (int)c) : ungetc(c,fp))
 #endif
 
+#define PERLIO_IS_BINMODE_FD(fd) _PERLIO_IS_BINMODE_FD(fd)
+
+static inline bool
+_PERLIO_IS_BINMODE_FD(int fd)
+{
+    int *pflags = _fd_flags(fd);
+
+    return pflags && (*pflags) & O_BINARY;
+}
+
 /* ctermid is missing from emx0.9d */
 char *ctermid(char *s);
 

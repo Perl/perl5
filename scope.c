@@ -673,7 +673,11 @@ Perl_leave_scope(pTHX_ I32 base)
 	    str = (char*)SSPOPPTR;
 	    ptr = SSPOPPTR;
 	    if (*(char**)ptr != str) {
+		#ifdef NETWARE
+		PerlMem_free(*(char**)ptr);
+		#else
 		PerlMemShared_free(*(char**)ptr);
+		#endif
 		*(char**)ptr = str;
 	    }
 	    break;

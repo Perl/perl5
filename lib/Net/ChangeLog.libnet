@@ -1,3 +1,16 @@
+Change 716 on 2002/04/02 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::FTP::dataconn
+	- Fix for select to avoid occasional hangups
+
+Change 715 on 2002/04/02 by <gbarr@pobox.com> (Graham Barr)
+
+	Tweak parsing of hello response
+
+Change 706 on 2002/02/28 by <gbarr@pobox.com> (Graham Barr)
+
+	Release 1.10
+
 Change 705 on 2002/02/28 by <gbarr@pobox.com> (Graham Barr)
 
 	Net::FTP::I

@@ -2891,18 +2891,23 @@ PerlIOBuf_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 		return NULL;
 	    } else {
 		fd = PerlIO_fileno(f);
-#ifdef PERLIO_USING_CRLF
-		/*
-		 * do something about failing setmode()? --jhi
-		 */
-		PerlLIO_setmode(fd, O_BINARY);
-#endif
 		if (init && fd == 2) {
 		    /*
 		     * Initial stderr is unbuffered
 		     */
 		    PerlIOBase(f)->flags |= PERLIO_F_UNBUF;
 		}
+#ifdef PERLIO_USING_CRLF
+#  ifdef PERLIO_IS_BINMODE_FD
+		if (PERLIO_IS_BINMODE_FD(fd))
+		    PerlIO_binmode(f,  '<'/*not used*/, O_BINARY, Nullch);
+		else
+#  endif
+		/*
+		 * do something about failing setmode()? --jhi
+		 */
+		PerlLIO_setmode(fd, O_BINARY);
+#endif
 	    }
 	}
     }
