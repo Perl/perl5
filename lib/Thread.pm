@@ -2,15 +2,20 @@ package Thread;
 
 $VERSION = '2.00';
 
+use strict;
+
+our $ithreads;
+our $othreads;
+
 BEGIN {
     use Config;
-    our $ithreads = $Config{useithreads};
-    our $othreads = $Config{use5005threads};
+    $ithreads = $Config{useithreads};
+    $othreads = $Config{use5005threads};
 }
 
 require Exporter;
 use XSLoader ();
-our($VERSION, @ISA, @EXPORT);
+our($VERSION, @ISA, @EXPORT, @EXPORT_OK);
 
 @ISA = qw(Exporter);
 
@@ -294,6 +299,7 @@ sub unimplemented {
 
 sub unimplement {
     for my $m (@_) {
+	no strict 'refs';
 	*{"Thread::$m"} = sub { unimplemented $m };
     }
 }
@@ -302,10 +308,12 @@ BEGIN {
     if ($ithreads) {
 	XSLoader::load 'threads';
 	for my $m (qw(new join detach yield self tid equal)) {
+	    no strict 'refs';
 	    *{"Thread::$m"} = \&{"threads::$m"};
 	}
 	XSLoader::load 'threads::shared';
 	for my $m (qw(cond_signal cond_broadcast cond_wait unlock share)) {
+	    no strict 'refs';
 	    *{"Thread::$m"} = \&{"threads::shared::${m}_enabled"};
 	}
 	unimplement(qw(list done eval flags));
