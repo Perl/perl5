@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sat May 22 00:54:37 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Wed May 26 01:56:24 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -9836,7 +9836,7 @@ eval $hasfield
 
 : see if _ptr and _cnt from stdio act std
 echo " "
-if $contains '_IO_fpos_t' `./findhdr stdio.h` >/dev/null 2>&1 ; then
+if $contains '_IO_fpos_t' `./findhdr stdio.h` `./findhdr libio.h` >/dev/null 2>&1 ; then
 	echo "(Looks like you have stdio.h from Linux.)"
 	case "$stdio_ptr" in
 	'') stdio_ptr='((fp)->_IO_read_ptr)'
