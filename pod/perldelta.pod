@@ -21,29 +21,29 @@ None known at this time.
 Release 5.005 grandfathered old global symbol names by providing preprocessor
 macros for extension source compatibility.  As of release 5.006, these
 preprocessor definitions are not available by default.  You need to explicitly
-compile perl with C<-DPERL_POLLUTE> in order to get these definitions. For
-extensions that are still using the old symbols, this option can be
+compile perl with C<-DPERL_POLLUTE> to get these definitions.  For
+extensions still using the old symbols, this option can be
 specified via MakeMaker:
 
-	perl Makefile.PL POLLUTE=1
+    perl Makefile.PL POLLUTE=1
 
 =item C<PERL_POLLUTE_MALLOC>
 
-Enabling the use of Perl's malloc in release 5.005 and earlier caused
+Enabling Perl's malloc in release 5.005 and earlier caused
 the namespace of system versions of the malloc family of functions to
-be usurped by the Perl versions of these functions, since they used the
-same names by default.
+be usurped by the Perl versions, since by default they used the
+same names.
 
 Besides causing problems on platforms that do not allow these functions to
 be cleanly replaced, this also meant that the system versions could not
 be called in programs that used Perl's malloc.  Previous versions of Perl
-have allowed this behavior to be suppressed with the HIDEMYMALLOC and
+have allowed this behaviour to be suppressed with the HIDEMYMALLOC and
 EMBEDMYMALLOC preprocessor definitions.
 
 As of release 5.006, Perl's malloc family of functions have default names
 distinct from the system versions.  You need to explicitly compile perl with
-C<-DPERL_POLLUTE_MALLOC> in order to get the older behavior.  HIDEMYMALLOC
-and EMBEDMYMALLOC have no effect, since the behavior they enabled is now
+C<-DPERL_POLLUTE_MALLOC> to get the older behaviour.  HIDEMYMALLOC
+and EMBEDMYMALLOC have no effect, since the behaviour they enabled is now
 the default.
 
 Note that these functions do B<not> constitute Perl's memory allocation API.
@@ -52,7 +52,7 @@ See L<perlguts/"Memory Allocation"> for further information about that.
 =item C<PL_na> and C<dTHR> Issues
 
 The C<PL_na> global is now thread local, so a C<dTHR> declaration is needed
-in the scope in which it appears.  XSUBs should handle this automatically,
+in the scope in which the global appears.  XSUBs should handle this automatically,
 but if you have used C<PL_na> in support functions, you either need to
 change the C<PL_na> to a local variable (which is recommended), or put in
 a C<dTHR>.
@@ -65,23 +65,23 @@ a C<dTHR>.
 
 =item C<PATCHLEVEL> is now C<PERL_VERSION>
 
-The cpp macros C<PERL_REVISION>, C<PERL_VERSION> and C<PERL_SUBVERSION>
+The cpp macros C<PERL_REVISION>, C<PERL_VERSION>, and C<PERL_SUBVERSION>
 are now available by default from perl.h, and reflect the base revision,
-patchlevel and subversion respectively.  C<PERL_REVISION> had no
+patchlevel, and subversion respectively.  C<PERL_REVISION> had no
 prior equivalent, while C<PERL_VERSION> and C<PERL_SUBVERSION> were
 previously available as C<PATCHLEVEL> and C<SUBVERSION>.
 
-The new names cause less pollution of the cpp namespace, and reflect what
+The new names cause less pollution of the B<cpp> namespace and reflect what
 the numbers have come to stand for in common practice.  For compatibility,
-the old names are still supported when patchlevel.h is explicitly
+the old names are still supported when F<patchlevel.h> is explicitly
 included (as required before), so there is no source incompatibility
-due to the change.
+from the change.
 
 =back
 
 =head2 Binary Incompatibilities
 
-This release is not binary compatible with the 5.005 release and its
+This release is not binary compatible with the 5.005 release or its
 maintenance versions.
 
 =head1 Core Changes
@@ -102,8 +102,8 @@ level using the C<use warning> pragma.  See L<warning> for details.
 Binary numbers are now supported as literals, in s?printf formats, and
 C<oct()>:
 
-	$answer = 0b101010;
-	printf "The answer is: %b\n", oct("0b101010");
+    $answer = 0b101010;
+    printf "The answer is: %b\n", oct("0b101010");
 
 =head2 syswrite() ease-of-use
 
@@ -123,22 +123,22 @@ Unix and UNICOS also have 64-bit support.
 
 Expressions such as:
 
-	print defined(&foo,&bar,&baz);
-	print uc("foo","bar","baz");
-	undef($foo,&bar);
+    print defined(&foo,&bar,&baz);
+    print uc("foo","bar","baz");
+    undef($foo,&bar);
 
 used to be accidentally allowed in earlier versions, and produced
-unpredictable behavior.  Some of them produced ancillary warnings
-when used in this way, while others silently did the wrong thing.
+unpredictable behaviour.  Some produced ancillary warnings
+when used in this way; others silently did the wrong thing.
 
 The parenthesized forms of most unary operators that expect a single
-argument will now ensure that they are not called with more than one
-argument, making the above cases syntax errors.  Note that the usual
-behavior of:
+argument now ensure that they are not called with more than one
+argument, making the cases shown above syntax errors.  The usual
+behaviour of:
 
-	print defined &foo, &bar, &baz;
-	print uc "foo", "bar", "baz";
-	undef $foo, &bar;
+    print defined &foo, &bar, &baz;
+    print uc "foo", "bar", "baz";
+    undef $foo, &bar;
 
 remains unchanged.  See L<perlop>.
 
@@ -146,8 +146,8 @@ remains unchanged.  See L<perlop>.
 
 The C<qw//> operator is now evaluated at compile time into a true list
 instead of being replaced with a run time call to C<split()>.  This
-removes the confusing behavior of C<qw//> in scalar context stemming from
-the older implementation, which inherited the behavior from split().
+removes the confusing misbehaviour of C<qw//> in scalar context, which
+had inherited that behaviour from split().
 
 Thus:
 
@@ -162,7 +162,7 @@ strings.  See L<perlfunc/"pack">.
 
 =head2 pack() format modifier '!' supported
 
-The new format type modifer '!' is useful for packing and unpacking
+The new format type modifier '!' is useful for packing and unpacking
 native shorts, ints, and longs.  See L<perlfunc/"pack">.
 
 =head2 $^X variables may now have names longer than one character
@@ -171,36 +171,36 @@ Formerly, $^X was synonymous with ${"\cX"}, but $^XY was a syntax
 error.  Now variable names that begin with a control character may be
 arbitrarily long.  However, for compatibility reasons, these variables
 I<must> be written with explicit braces, as C<${^XY}> for example.
-C<${^XYZ}> is synonymous with ${"\cXYZ"}. Variable names with more
+C<${^XYZ}> is synonymous with ${"\cXYZ"}.  Variable names with more
 than one control character, such as C<${^XY^Z}>, are illegal.
 
-The old syntax has not changed.  As before, the `^X' may either be a
-literal control-X character or the two character sequence `caret' plus
-`X'.  When the braces are omitted, the variable name stops after the
+The old syntax has not changed.  As before, `^X' may be either a
+literal control-X character or the two-character sequence `caret' plus
+`X'.  When braces are omitted, the variable name stops after the
 control character.  Thus C<"$^XYZ"> continues to be synonymous with
 C<$^X . "YZ"> as before.
 
 As before, lexical variables may not have names beginning with control
 characters.  As before, variables whose names begin with a control
-character are always forced to be in package `main'.  These variables
-are all reserved for future extensions, except the ones that begin
-with C<^_>, which may be used by user programs and will not acquire a
-special meaning in any future version of Perl.
+character are always forced to be in package `main'.  All such variables
+are reserved for future extensions, except those that begin with
+C<^_>, which may be used by user programs and is guaranteed not to
+acquire special meaning in any future version of Perl.
 
 =head1 Significant bug fixes
 
 =head2 E<lt>HANDLEE<gt> on empty files
 
 With C<$/> set to C<undef>, slurping an empty file returns a string of
-zero length (instead of C<undef>, as it used to) for the first time the
-HANDLE is read.  Subsequent reads yield C<undef>.
+zero length (instead of C<undef>, as it used to) the first time the
+HANDLE is read.  Further reads yield C<undef>.
 
 This means that the following will append "foo" to an empty file (it used
-to not do anything before):
+to do nothing):
 
     perl -0777 -pi -e 's/^/foo/' empty_file
 
-Note that the behavior of:
+The behaviour of:
 
     perl -pi -e 's/^/foo/' empty_file
 
@@ -214,8 +214,8 @@ This has been corrected.
 
 Lexical lookups for variables appearing in C<eval '...'> within
 functions that were themselves called within an C<eval '...'> were
-searching the wrong place for lexicals.  They now correctly terminate
-the lexical search at the subroutine call boundary.
+searching the wrong place for lexicals.  The lexical search now
+correctly ends at the subroutine's block boundary.
 
 Parsing of here documents used to be flawed when they appeared as
 the replacement expression in C<eval 's/.../.../e'>.  This has
@@ -223,11 +223,11 @@ been fixed.
 
 =head2 Automatic flushing of output buffers
 
-fork(), exec(), system(), qx// and pipe open()s now flush the buffers
-of all files that were opened for output at the time the operation
-was attempted.  This mostly eliminates the often confusing effects of
+fork(), exec(), system(), qx//, and pipe open()s now flush buffers
+of all files opened for output when the operation
+was attempted.  This mostly eliminates confusing 
 buffering mishaps suffered by users unaware of how Perl internally
-handled I/O.
+handles I/O.
 
 =head1 Supported Platforms
 
@@ -263,7 +263,7 @@ Rhapsody is now supported.
 =item	op/io_const
 
 IO constants (SEEK_*, _IO*).
-	
+
 =item	op/io_dir
 
 Directory-related IO methods (new, read, close, rewind, tied delete).
@@ -303,10 +303,10 @@ Added Dumpvalue module provides screen dumps of Perl data.
 =item Benchmark
 
 You can now run tests for I<n> seconds instead of guessing the right
-number of tests to run: e.g. timethese(-5, ...) will run each of the
-codes for at least 5 CPU seconds.  Zero as the "number of repetitions"
+number of tests to run: e.g. timethese(-5, ...) will run each 
+code for at least 5 CPU seconds.  Zero as the "number of repetitions"
 means "for at least 3 CPU seconds".  The output format has also
-changed.  For example: 
+changed.  For example:
 
 use Benchmark;$x=3;timethese(-5,{a=>sub{$x*$x},b=>sub{$x**2}})
 
@@ -322,12 +322,12 @@ and the "@ operations/CPU second (n=operations)".
 =item Devel::Peek
 
 The Devel::Peek module provides access to the internal representation
-of Perl variables. It is a data debugging tool for the XS programmer.
+of Perl variables and data.  It is a data debugging tool for the XS programmer.
 
 =item Fcntl
 
 More Fcntl constants added: F_SETLK64, F_SETLKW64, O_LARGEFILE for
-large (more than 4G) file access (the 64-bit support is not yet
+large (more than 4G) file access (64-bit support is not yet
 working, though, so no need to get overly excited), Free/Net/OpenBSD
 locking behaviour flags F_FLOCK, F_POSIX, Linux F_SHLCK, and
 O_ACCMODE: the mask of O_RDONLY, O_WRONLY, and O_RDWR.
@@ -336,61 +336,61 @@ O_ACCMODE: the mask of O_RDONLY, O_WRONLY, and O_RDWR.
 
 New methods have been added to the File::Spec module: devnull() returns
 the name of the null device (/dev/null on Unix) and tmpdir() the name of
-the temp directory (normally /tmp on Unix). There are now also methods
+the temp directory (normally /tmp on Unix).  There are now also methods
 to convert between absolute and relative filenames: abs2rel() and
-rel2abs(). For compatibility with operating systems that specify volume
-names in file paths, the splitpath(), splitdir() and catdir() methods
+rel2abs().  For compatibility with operating systems that specify volume
+names in file paths, the splitpath(), splitdir(), and catdir() methods
 have been added.
 
 =item File::Spec::Functions
 
 The new File::Spec::Functions modules provides a function interface
-to the File::Spec module. Allows shorthand
+to the File::Spec module.  Allows shorthand
 
-	$fullname = catfile($dir1, $dir2, $file);
+    $fullname = catfile($dir1, $dir2, $file);
 
 instead of
 
-	$fullname = File::Spec->catfile($dir1, $dir2, $file);
+    $fullname = File::Spec->catfile($dir1, $dir2, $file);
 
 =item Math::BigInt
 
-The logical operations C<E<lt>E<lt>>, C<E<gt>E<gt>>, C<&>, C<|>
+The logical operations C<E<lt>E<lt>>, C<E<gt>E<gt>>, C<&>, C<|>,
 and C<~> are now supported on bigints.
 
 =item Math::Complex
 
-The accessor methods Re, Im, arg, abs, rho, and theta, can now also
+The accessor methods Re, Im, arg, abs, rho, and theta can now also
 act as mutators (accessor $z->Re(), mutator $z->Re(3)).
 
 =item Math::Trig
 
-A little bit of radial trigonometry (cylindrical and spherical) added,
-radial coordinate conversions and the great circle distance.
+A little bit of radial trigonometry (cylindrical and spherical),
+radial coordinate conversions, and the great circle distance were added.
 
 =item SDBM_File
 
 An EXISTS method has been added to this module (and sdbm_exists() has
 been added to the underlying sdbm library), so one can now call exists
-on an SDBM_File tied hash and get the correct result rather than a
+on an SDBM_File tied hash and get the correct result, rather than a
 runtime error.
 
 =item Time::Local
 
 The timelocal() and timegm() functions used to silently return bogus
 results when the date exceeded the machine's integer range.  They
-consistently croak() if the date falls in an unsupported range.
+now consistently croak() if the date falls in an unsupported range.
 
 =item Win32
 
 The error return value in list context has been changed for all functions
-that return a list of values. Previously these functions returned a list
-with a single element C<undef> in case an error occurred. Now these functions
-return the empty list in these situations. This applies to the following
+that return a list of values.  Previously these functions returned a list
+with a single element C<undef> if an error occurred.  Now these functions
+return the empty list in these situations.  This applies to the following
 functions:
 
-	Win32::FsType
-	Win32::GetOSVersion
+    Win32::FsType
+    Win32::GetOSVersion
 
 The remaining functions are unchanged and continue to return C<undef> on
 error even in list context.
@@ -399,22 +399,22 @@ The Win32::SetLastError(ERROR) function has been added as a complement
 to the Win32::GetLastError() function.
 
 The new Win32::GetFullPathName(FILENAME) returns the full absolute
-pathname for FILENAME in scalar context. In list context it returns
-a two element list containing the fully qualified directory name and
+pathname for FILENAME in scalar context.  In list context it returns
+a two-element list containing the fully qualified directory name and
 the filename.
 
 =item DBM Filters
 
 A new feature called "DBM Filters" has been added to all the
-DBM modules -- DB_File, GDBM_File, NDBM_File, ODBM_File and SDBM_File.
-DBM Filters add four new methods to each of the DBM modules 
+DBM modules--DB_File, GDBM_File, NDBM_File, ODBM_File, and SDBM_File.
+DBM Filters add four new methods to each DBM module:
 
     filter_store_key
     filter_store_value
     filter_fetch_key
     filter_fetch_value
 
-These can be used to filter the contents of keys/values before they are
+These can be used to filter key-value pairs before the pairs are
 written to the database or just after they are read from the database.
 See L<perldbmfilter> for further information.
 
@@ -422,16 +422,16 @@ See L<perldbmfilter> for further information.
 
 =head2 Pragmata
 
-C<use utf8;>, to enable UTF-8 and Unicode support.
+C<use utf8> to enable UTF-8 and Unicode support.
 
 Lexical warnings pragma, C<use warning;>, to control optional warnings.
 
-C<use filetest;>, to control the behaviour of filetests (C<-r> C<-w> ...).
+C<use filetest> to control the behaviour of filetests (C<-r> C<-w> ...).
 Currently only one subpragma implemented, "use filetest 'access';",
-that enables the use of access(2) or equivalent to check the
+that enables the use of access(2) or equivalent to check
 permissions instead of using stat(2) as usual.  This matters
-in filesystems where there are ACLs (access control lists), the
-stat(2) might lie, while access(2) knows better.
+in filesystems where there are ACLs (access control lists): the
+stat(2) might lie, but access(2) knows better.
 
 =head1 Utility Changes
 
@@ -448,6 +448,10 @@ A tutorial on using open() effectively.
 =item perlreftut.pod
 
 A tutorial that introduces the essentials of references.
+
+=item perltootc.pod
+
+A tutorial on managing class data for object modules.
 
 =back
 
@@ -483,14 +487,14 @@ because many scripts assume to find Perl in /usr/bin/perl.
 =head1 BUGS
 
 If you find what you think is a bug, you might check the headers of
-recently posted articles in the comp.lang.perl.misc newsgroup.
+articles recently posted to the comp.lang.perl.misc newsgroup.
 There may also be information at http://www.perl.com/perl/, the Perl
 Home Page.
 
 If you believe you have an unreported bug, please run the B<perlbug>
-program included with your release.  Make sure you trim your bug down
+program included with your release.  Make sure to trim your bug down
 to a tiny but sufficient test case.  Your bug report, along with the
-output of C<perl -V>, will be sent off to <F<perlbug@perl.com>> to be
+output of C<perl -V>, will be sent off to perlbug@perl.com to be
 analysed by the Perl porting team.
 
 =head1 SEE ALSO

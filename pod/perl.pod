@@ -12,8 +12,8 @@ B<perl>	S<[ B<-sTuU> ]> S<[ B<-hv> ] [ B<-V>[:I<configvar>] ]>
     S<[ B<-i>[I<extension>] ]> S<[ B<-e> I<'command'> ] 
     [ B<--> ] [ I<programfile> ] [ I<argument> ]...>
 
-For ease of access, the Perl manual has been split up into a number
-of sections:
+For ease of access, the Perl manual has been split up into several
+sections:
 
     perl		Perl overview (this section)
     perldelta		Perl changes since previous version
@@ -117,17 +117,17 @@ Perl combines (in the author's opinion, anyway) some of the best
 features of C, B<sed>, B<awk>, and B<sh>, so people familiar with
 those languages should have little difficulty with it.  (Language
 historians will also note some vestiges of B<csh>, Pascal, and even
-BASIC-PLUS.)  Expression syntax corresponds quite closely to C
+BASIC-PLUS.)  Expression syntax corresponds closely to C
 expression syntax.  Unlike most Unix utilities, Perl does not
 arbitrarily limit the size of your data--if you've got the memory,
 Perl can slurp in your whole file as a single string.  Recursion is of
 unlimited depth.  And the tables used by hashes (sometimes called
 "associative arrays") grow as necessary to prevent degraded
 performance.  Perl can use sophisticated pattern matching techniques to
-scan large amounts of data very quickly.  Although optimized for
+scan large amounts of data quickly.  Although optimized for
 scanning text, Perl can also deal with binary data, and can make dbm
 files look like hashes.  Setuid Perl scripts are safer than C programs
-through a dataflow tracing mechanism which prevents many stupid
+through a dataflow tracing mechanism that prevents many stupid
 security holes.
 
 If you have a problem that would ordinarily use B<sed> or B<awk> or
@@ -188,7 +188,7 @@ Described in L<perlsub>.
 
 Described in L<perlre>, with additional examples in L<perlop>.
 
-=item * enhanced debugger and interactive Perl environment, with intregrated editor support
+=item * enhanced debugger and interactive Perl environment, with integrated editor support
 
 Described in L<perldebug>.
 
@@ -202,12 +202,11 @@ Okay, that's I<definitely> enough hype.
 
 =head1 AVAILABILITY
 
-Perl is available for the vast majority of operating system platforms,
-including most Unix-like platforms. The following situation is as of
-February 1999 and Perl 5.005_03.
+Perl is available for most operating systems, including virtually
+all Unix-like platforms.
 
-The following platforms are able to build Perl from the standard
-source code distribution available at
+As of May 1999, the following platforms are able to build Perl
+from the standard source code distribution available at
 http://www.perl.com/CPAN/src/index.html
 
         AIX             Linux           SCO ODT/OSR
@@ -229,9 +228,9 @@ http://www.perl.com/CPAN/src/index.html
         3) formerly known as Digital UNIX and before that DEC OSF/1     
         4) compilers: Borland, Cygwin32, Mingw32 EGCS/GCC, VC++
                                         
-The following platforms have been known to build Perl from the source
-but for the Perl release 5.005_03 we haven't been able to verify them,
-either because the hardware/software platforms are rather rare or
+The following platforms have been known to build Perl from source,
+but we haven't been able to verify their status for the current release,
+either because the hardware/software platforms are rare or
 because we don't have an active champion on these platforms--or both.
 					
         3b1             FPS             Plan 9
@@ -245,9 +244,8 @@ because we don't have an active champion on these platforms--or both.
         EP/IX           Opus            Unisys Dynix    
         ESIX    			Unixware        
 
-The following platforms are planned to be supported in the standard
-source code distribution of the Perl release 5.006 but are not
-supported in the Perl release 5.005_03:
+Support for the following platforms is planned for the next major
+Perl release.
 
         BS2000
 	Netware
@@ -308,7 +306,7 @@ and errors into these longer forms.
 
 Compilation errors will tell you the line number of the error, with an
 indication of the next token or token type that was to be examined.
-(In the case of a script passed to Perl via B<-e> switches, each
+(In a script passed to Perl via B<-e> switches, each
 B<-e> is counted as one line.)
 
 Setuid scripts have additional constraints that can produce error

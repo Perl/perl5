@@ -212,7 +212,7 @@ This also has implications for the use of the SUPER:: qualifier
 
 =head2 Package Constructors and Destructors
 
-There are two special subroutine definitions that function as package
+Three special subroutines act as package
 constructors and destructors.  These are the C<BEGIN>, C<INIT>, and
 C<END> routines.  The C<sub> is optional for these routines.
 
@@ -224,6 +224,11 @@ immediately, it can pull in definitions of subroutines and such from other
 files in time to be visible to the rest of the file.  Once a C<BEGIN>
 has run, it is immediately undefined and any code it used is returned to
 Perl's memory pool.  This means you can't ever explicitly call a C<BEGIN>.
+
+Similar to C<BEGIN> blocks, C<INIT> blocks are run just before the
+Perl runtime begins execution.  For example, the code generators
+documented in L<perlcc> make use of C<INIT> blocks to initialize
+and resolve pointers to XSUBs.
 
 An C<END> subroutine is executed as late as possible, that is, when
 the interpreter is being exited, even if it is exiting as a result of
@@ -243,11 +248,6 @@ C<END> work just as they do in B<awk>, as a degenerate case.  As currently
 implemented (and subject to change, since its inconvenient at best),
 both C<BEGIN> and<END> blocks are run when you use the B<-c> switch
 for a compile-only syntax check, although your main code is not.
-
-Similar to C<BEGIN> blocks, C<INIT> blocks are run just before the
-Perl runtime begins execution.  For example, the code generators
-documented in L<perlcc> make use of C<INIT> blocks to initialize
-and resolve pointers to XSUBs.
 
 =head2 Perl Classes
 
