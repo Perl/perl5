@@ -2010,6 +2010,7 @@ Perl_looks_like_number(pTHX_ SV *sv)
 	    s++; if (*s != 'I' && *s != 'i') return 0;
 	    s++; if (*s != 'T' && *s != 't') return 0;
 	    s++; if (*s != 'Y' && *s != 'y') return 0;
+	    s++;
 	}
 	sawinf = 1;
     }
