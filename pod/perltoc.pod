@@ -7307,19 +7307,6 @@ C<strict refs>, C<strict vars>, C<strict subs>
 
 =back
 
-=head2 unicode::distinct - Perl pragma to strictly distinguish UTF8 data
-and non-UTF data.
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item SEE ALSO
-
-=back
-
 =head2 utf8 - Perl pragma to enable/disable UTF-8 (or UTF-EBCDIC) in source
 code
 
@@ -8754,32 +8741,32 @@ C<d_oldpthreads>, C<d_oldsock>, C<d_open3>, C<d_pathconf>, C<d_pause>,
 C<d_perl_otherlibdirs>, C<d_phostname>, C<d_pipe>, C<d_poll>,
 C<d_portable>, C<d_PRId64>, C<d_PRIeldbl>, C<d_PRIEUldbl>, C<d_PRIfldbl>,
 C<d_PRIFUldbl>, C<d_PRIgldbl>, C<d_PRIGUldbl>, C<d_PRIi64>, C<d_PRIo64>,
-C<d_PRIu64>, C<d_PRIx64>, C<d_PRIXU64>, C<d_pthread_yield>, C<d_pwage>,
-C<d_pwchange>, C<d_pwclass>, C<d_pwcomment>, C<d_pwexpire>, C<d_pwgecos>,
-C<d_pwpasswd>, C<d_pwquota>, C<d_qgcvt>, C<d_quad>, C<d_readdir>,
-C<d_readlink>, C<d_readv>, C<d_recvmsg>, C<d_rename>, C<d_rewinddir>,
-C<d_rmdir>, C<d_safebcpy>, C<d_safemcpy>, C<d_sanemcmp>, C<d_sbrkproto>,
-C<d_sched_yield>, C<d_scm_rights>, C<d_SCNfldbl>, C<d_seekdir>,
-C<d_select>, C<d_sem>, C<d_semctl>, C<d_semctl_semid_ds>,
-C<d_semctl_semun>, C<d_semget>, C<d_semop>, C<d_sendmsg>, C<d_setegid>,
-C<d_seteuid>, C<d_setgrent>, C<d_setgrps>, C<d_sethent>, C<d_setitimer>,
-C<d_setlinebuf>, C<d_setlocale>, C<d_setnent>, C<d_setpent>, C<d_setpgid>,
-C<d_setpgrp2>, C<d_setpgrp>, C<d_setprior>, C<d_setproctitle>,
-C<d_setpwent>, C<d_setregid>, C<d_setresgid>, C<d_setresuid>,
-C<d_setreuid>, C<d_setrgid>, C<d_setruid>, C<d_setsent>, C<d_setsid>,
-C<d_setvbuf>, C<d_sfio>, C<d_shm>, C<d_shmat>, C<d_shmatprototype>,
-C<d_shmctl>, C<d_shmdt>, C<d_shmget>, C<d_sigaction>, C<d_sigprocmask>,
-C<d_sigsetjmp>, C<d_sockatmark>, C<d_sockatmarkproto>, C<d_socket>,
-C<d_socklen_t>, C<d_sockpair>, C<d_socks5_init>, C<d_sqrtl>,
-C<d_sresgproto>, C<d_sresuproto>, C<d_statblks>, C<d_statfs_f_flags>,
-C<d_statfs_s>, C<d_statvfs>, C<d_stdio_cnt_lval>, C<d_stdio_ptr_lval>,
-C<d_stdio_ptr_lval_nochange_cnt>, C<d_stdio_ptr_lval_sets_cnt>,
-C<d_stdio_stream_array>, C<d_stdiobase>, C<d_stdstdio>, C<d_strchr>,
-C<d_strcoll>, C<d_strctcpy>, C<d_strerrm>, C<d_strerror>, C<d_strftime>,
-C<d_strtod>, C<d_strtol>, C<d_strtold>, C<d_strtoll>, C<d_strtoq>,
-C<d_strtoul>, C<d_strtoull>, C<d_strtouq>, C<d_strxfrm>, C<d_suidsafe>,
-C<d_symlink>, C<d_syscall>, C<d_syscallproto>, C<d_sysconf>,
-C<d_sysernlst>, C<d_syserrlst>, C<d_system>, C<d_tcgetpgrp>,
+C<d_PRIu64>, C<d_PRIx64>, C<d_PRIXU64>, C<d_pthread_atfork>,
+C<d_pthread_yield>, C<d_pwage>, C<d_pwchange>, C<d_pwclass>,
+C<d_pwcomment>, C<d_pwexpire>, C<d_pwgecos>, C<d_pwpasswd>, C<d_pwquota>,
+C<d_qgcvt>, C<d_quad>, C<d_readdir>, C<d_readlink>, C<d_readv>,
+C<d_recvmsg>, C<d_rename>, C<d_rewinddir>, C<d_rmdir>, C<d_safebcpy>,
+C<d_safemcpy>, C<d_sanemcmp>, C<d_sbrkproto>, C<d_sched_yield>,
+C<d_scm_rights>, C<d_SCNfldbl>, C<d_seekdir>, C<d_select>, C<d_sem>,
+C<d_semctl>, C<d_semctl_semid_ds>, C<d_semctl_semun>, C<d_semget>,
+C<d_semop>, C<d_sendmsg>, C<d_setegid>, C<d_seteuid>, C<d_setgrent>,
+C<d_setgrps>, C<d_sethent>, C<d_setitimer>, C<d_setlinebuf>,
+C<d_setlocale>, C<d_setnent>, C<d_setpent>, C<d_setpgid>, C<d_setpgrp2>,
+C<d_setpgrp>, C<d_setprior>, C<d_setproctitle>, C<d_setpwent>,
+C<d_setregid>, C<d_setresgid>, C<d_setresuid>, C<d_setreuid>, C<d_setrgid>,
+C<d_setruid>, C<d_setsent>, C<d_setsid>, C<d_setvbuf>, C<d_sfio>, C<d_shm>,
+C<d_shmat>, C<d_shmatprototype>, C<d_shmctl>, C<d_shmdt>, C<d_shmget>,
+C<d_sigaction>, C<d_sigprocmask>, C<d_sigsetjmp>, C<d_sockatmark>,
+C<d_sockatmarkproto>, C<d_socket>, C<d_socklen_t>, C<d_sockpair>,
+C<d_socks5_init>, C<d_sqrtl>, C<d_sresgproto>, C<d_sresuproto>,
+C<d_statblks>, C<d_statfs_f_flags>, C<d_statfs_s>, C<d_statvfs>,
+C<d_stdio_cnt_lval>, C<d_stdio_ptr_lval>, C<d_stdio_ptr_lval_nochange_cnt>,
+C<d_stdio_ptr_lval_sets_cnt>, C<d_stdio_stream_array>, C<d_stdiobase>,
+C<d_stdstdio>, C<d_strchr>, C<d_strcoll>, C<d_strctcpy>, C<d_strerrm>,
+C<d_strerror>, C<d_strftime>, C<d_strtod>, C<d_strtol>, C<d_strtold>,
+C<d_strtoll>, C<d_strtoq>, C<d_strtoul>, C<d_strtoull>, C<d_strtouq>,
+C<d_strxfrm>, C<d_suidsafe>, C<d_symlink>, C<d_syscall>, C<d_syscallproto>,
+C<d_sysconf>, C<d_sysernlst>, C<d_syserrlst>, C<d_system>, C<d_tcgetpgrp>,
 C<d_tcsetpgrp>, C<d_telldir>, C<d_telldirproto>, C<d_time>, C<d_times>,
 C<d_truncate>, C<d_tzname>, C<d_u32align>, C<d_ualarm>, C<d_umask>,
 C<d_uname>, C<d_union_semun>, C<d_usleep>, C<d_usleepproto>, C<d_ustat>,

@@ -1179,7 +1179,6 @@ lib/unicode/Category.pl		Unicode character database
 lib/unicode/CombiningClass.pl	Unicode character database
 lib/unicode/CompExcl.txt	Unicode character database
 lib/unicode/Decomposition.pl	Unicode character database
-lib/unicode/distinct.pm		Perl pragma to strictly distinguish UTF8 data and non-UTF data
 lib/unicode/EAWidth.txt		Unicode character database
 lib/unicode/In.pl		Unicode character database
 lib/unicode/In/0.pl		Unicode character database

@@ -5274,8 +5274,6 @@ Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2)
     if (cur1 && cur2 && SvUTF8(sv1) != SvUTF8(sv2) && !IN_BYTES) {
 	bool is_utf8 = TRUE;
         /* UTF-8ness differs */
-	if (PL_hints & HINT_UTF8_DISTINCT)
-	    return FALSE;
 
 	if (SvUTF8(sv1)) {
 	    /* sv1 is the UTF-8 one , If is equal it must be downgrade-able */
@@ -5340,9 +5338,6 @@ Perl_sv_cmp(pTHX_ register SV *sv1, register SV *sv2)
 
     /* do not utf8ize the comparands as a side-effect */
     if (cur1 && cur2 && SvUTF8(sv1) != SvUTF8(sv2) && !IN_BYTES) {
-	if (PL_hints & HINT_UTF8_DISTINCT)
-	    return SvUTF8(sv1) ? 1 : -1;
-
 	if (SvUTF8(sv1)) {
 	    pv2 = (char*)bytes_to_utf8((U8*)pv2, &cur2);
 	    pv2tmp = TRUE;
@@ -6189,11 +6184,8 @@ Perl_newSVpvn_share(pTHX_ const char *src, I32 len, U32 hash)
     register SV *sv;
     bool is_utf8 = FALSE;
     if (len < 0) {
-        len = -len;
+	STRLEN tmplen = -len;
         is_utf8 = TRUE;
-    }
-    if (is_utf8 && !(PL_hints & HINT_UTF8_DISTINCT)) {
-	STRLEN tmplen = len;
 	/* See the note in hv.c:hv_fetch() --jhi */
 	src = (char*)bytes_from_utf8((U8*)src, &tmplen, &is_utf8);
 	len = tmplen;
