@@ -1728,10 +1728,10 @@ sighandler(sig)
 int sig;
 {
     dSP;
-    GV *gv;
+    GV *gv = Nullgv;
     HV *st;
     SV *sv, *tSv = Sv;
-    CV *cv;
+    CV *cv = Nullcv;
     AV *oldstack;
     OP *myop = op;
     U32 flags = 0;
@@ -1783,8 +1783,11 @@ int sig;
     if (!cv || !CvROOT(cv)) {
 	if (dowarn)
 	    warn("SIG%s handler \"%s\" not defined.\n",
-		sig_name[sig], GvENAME(gv) );
-	return;
+		sig_name[sig], (gv ? GvENAME(gv)
+				: ((cv && CvGV(cv))
+				   ? GvENAME(CvGV(cv))
+				   : "__ANON__")));
+	goto cleanup;
     }
 
     oldstack = curstack;
@@ -1807,6 +1810,7 @@ int sig;
     perl_call_sv((SV*)cv, G_DISCARD);
 
     SWITCHSTACK(signalstack, oldstack);
+cleanup:
     if (flags & 1)
 	savestack_ix -= 8; /* Unprotect save in progress. */
     if (flags & 2) {
