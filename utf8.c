@@ -868,8 +868,14 @@ Perl_utf16_to_utf8(pTHX_ U8* p, U8* d, I32 bytelen, I32 *newlen)
     U8* pend;
     U8* dstart = d;
 
+    if (bytelen == 1 && p[0] == 0) { /* Be understanding. */
+	 d[0] = 0;
+	 *newlen = 1;
+	 return d;
+    }
+
     if (bytelen & 1)
-	Perl_croak(aTHX_ "panic: utf16_to_utf8: odd bytelen");
+	Perl_croak(aTHX_ "panic: utf16_to_utf8: odd bytelen %d", bytelen);
 
     pend = p + bytelen;
 
