@@ -474,8 +474,11 @@ EOCBU
 
 if test $usenativedlopen = 'true'
 then
-        ccflags="$ccflags -DUSE_NATIVE_DLOPEN"
-	ldflags="$ldflags -brtl"
+    ccflags="$ccflags -DUSE_NATIVE_DLOPEN"
+    case "$cc" in
+      *gcc*) ldflags="$ldflags -Wl,-brtl" ;;
+      *)     ldflags="$ldflags -brtl" ;;
+      esac
 else
     # If the C++ libraries, libC and libC_r, are available we will prefer them
     # over the vanilla libc, because the libC contain loadAndInit() and
