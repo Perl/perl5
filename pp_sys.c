@@ -1309,7 +1309,15 @@ PP(pp_sysread)
     	Zero(buffer+bufsize, offset-bufsize, char);
     }
     if (op->op_type == OP_SYSREAD) {
-	length = read(PerlIO_fileno(IoIFP(io)), buffer+offset, length);
+#ifdef PERL_SOCK_SYSREAD_IS_RECV
+	if (IoTYPE(io) == 's') {
+	    length = recv(PerlIO_fileno(IoIFP(io)), buffer+offset, length, 0);
+	}
+	else
+#endif
+	{
+	    length = read(PerlIO_fileno(IoIFP(io)), buffer+offset, length);
+	}
     }
     else
 #ifdef HAS_SOCKET__bad_code_maybe
@@ -1414,7 +1422,15 @@ PP(pp_send)
 	    offset = 0;
 	if (length > blen - offset)
 	    length = blen - offset;
-	length = write(PerlIO_fileno(IoIFP(io)), buffer+offset, length);
+#ifdef PERL_SOCK_SYSWRITE_IS_SEND
+	if (IoTYPE(io) == 's') {
+	    length = send(PerlIO_fileno(IoIFP(io)), buffer+offset, length, 0);
+	}
+	else
+#endif
+	{
+	    length = write(PerlIO_fileno(IoIFP(io)), buffer+offset, length);
+	}
     }
 #ifdef HAS_SOCKET
     else if (SP > MARK) {
