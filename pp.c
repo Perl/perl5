@@ -3597,9 +3597,9 @@ PP(pp_uc)
 
 		    /* If someone uppercases one million U+03B0s we
 		     * SvGROW() one million times.  Or we could try
-		     * guess how much to allocate without overdoing.
-		     * Such is life. */
-		    SvGROW(TARG, SvCUR(TARG) + ulen - u);
+		     * guessing how much to allocate without allocating
+		     * too much. Such is life. */
+		    SvGROW(TARG, SvLEN(TARG) + ulen - u);
 		    d = (U8*)SvPVX(TARG) + o;
 		}
 		Copy(tmpbuf, d, ulen, U8);
@@ -3695,9 +3695,9 @@ PP(pp_lc)
 
 		    /* If someone lowercases one million U+0130s we
 		     * SvGROW() one million times.  Or we could try
-		     * guess how much to allocate without overdoing.
-		     Such is life. */
-		    SvGROW(TARG, SvCUR(TARG) + ulen - u);
+		     * guessing how much to allocate without allocating.
+		     * too much.  Such is life. */
+		    SvGROW(TARG, SvLEN(TARG) + ulen - u);
 		    d = (U8*)SvPVX(TARG) + o;
 		}
 		Copy(tmpbuf, d, ulen, U8);
