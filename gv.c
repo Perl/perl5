@@ -609,11 +609,14 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 
     /* Adding a new symbol */
 
-    if (add & GV_ADDWARN)
-	Perl_warn(aTHX_ "Had to create %s unexpectedly", nambeg);
+    if (add & GV_ADDWARN && ckWARN_d(WARN_INTERNAL))
+	Perl_warner(aTHX_ WARN_INTERNAL, "Had to create %s unexpectedly", nambeg);
     gv_init(gv, stash, name, len, add & GV_ADDMULTI);
     gv_init_sv(gv, sv_type);
     GvFLAGS(gv) |= add_gvflags;
+
+    if (isLEXWARN_on && isALPHA(name[0]) && ! ckWARN(WARN_ONCE))
+        GvMULTI_on(gv) ;
 
     /* set up magic where warranted */
     switch (*name) {
@@ -946,11 +949,12 @@ Perl_gp_free(pTHX_ GV *gv)
 {
     GP* gp;
     CV* cv;
+    dTHR;  
 
     if (!gv || !(gp = GvGP(gv)))
 	return;
-    if (gp->gp_refcnt == 0) {
-        Perl_warn(aTHX_ "Attempt to free unreferenced glob pointers");
+    if (gp->gp_refcnt == 0 && ckWARN_d(WARN_INTERNAL)) {
+        Perl_warner(aTHX_ WARN_INTERNAL, "Attempt to free unreferenced glob pointers");
         return;
     }
     if (gp->gp_cv) {

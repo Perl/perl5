@@ -260,14 +260,6 @@ sub B::BINOP::bytecode {
     }
 }
 
-sub B::CONDOP::bytecode {
-    my $op = shift;
-    my $trueix = $op->true->objix;
-    my $falseix = $op->false->objix;
-    $op->B::UNOP::bytecode;
-    print "op_true $trueix\nop_false $falseix\n";
-}
-
 sub B::LISTOP::bytecode {
     my $op = shift;
     my $children = $op->children;

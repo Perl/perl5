@@ -471,7 +471,11 @@ public class JPL_Rolo extends Frame {
         } else {
             $op = ">=";
         }
-        my @data = $rdb->sql("select name, address, city, state, zip, id from cardfile where id $op $nextid");
+        my $sql = "select name, address, city, "  .
+                  "state, zip, id from cardfile " .
+                  "where id $op $nextid";
+	
+        my @data = $rdb->sql($sql);
         $rdb->close("cardfile");
 
         my $status = shift @data;
@@ -493,7 +497,7 @@ public class JPL_Rolo extends Frame {
         } else {
             $index = 0;
         }
-        my($name, $address, $city, $state, $zip, $id) = split (/\0/, $data[$index], 6);
+        my($name, $address, $city, $state, $zip, $id) = @{$data[$index]};
         $self->setCols__ssssss($name, $address, $city, $state, $zip, $id);
 
     }}

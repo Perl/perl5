@@ -38,7 +38,6 @@ use strict;
 @B::UNOP::ISA = 'B::OP';
 @B::BINOP::ISA = 'B::UNOP';
 @B::LOGOP::ISA = 'B::UNOP';
-@B::CONDOP::ISA = 'B::UNOP';
 @B::LISTOP::ISA = 'B::BINOP';
 @B::SVOP::ISA = 'B::OP';
 @B::GVOP::ISA = 'B::OP';
@@ -132,7 +131,9 @@ sub walkoptree_exec {
 	savesym($op, sprintf("%s (0x%lx)", class($op), $$op));
 	$op->$method($level);
 	$ppname = $op->ppaddr;
-	if ($ppname =~ /^pp_(or|and|mapwhile|grepwhile|entertry)$/) {
+	if ($ppname =~
+	    /^pp_(or|and|mapwhile|grepwhile|entertry|range|cond_expr)$/)
+	{
 	    print $prefix, uc($1), " => {\n";
 	    walkoptree_exec($op->other, $method, $level + 1);
 	    print $prefix, "}\n";
@@ -148,19 +149,6 @@ sub walkoptree_exec {
 	    walkoptree_exec($op->other->pmreplstart, $method, $level + 1);
 	    print $prefix, "}\n";
 	    $op = $op->other;
-	} elsif ($ppname eq "pp_cond_expr") {
-	    # pp_cond_expr never returns op_next
-	    print $prefix, "TRUE => {\n";
-	    walkoptree_exec($op->true, $method, $level + 1);
-	    print $prefix, "}\n";
-	    $op = $op->false;
-	    redo;
-	} elsif ($ppname eq "pp_range") {
-	    print $prefix, "TRUE => {\n";
-	    walkoptree_exec($op->true, $method, $level + 1);
-	    print $prefix, "}\n", $prefix, "FALSE => {\n";
-	    walkoptree_exec($op->false, $method, $level + 1);
-	    print $prefix, "}\n";
 	} elsif ($ppname eq "pp_enterloop") {
 	    print $prefix, "REDO => {\n";
 	    walkoptree_exec($op->redoop, $method, $level + 1);
@@ -555,7 +543,7 @@ C<REFCNT> (corresponding to the C function C<SvREFCNT>).
 
 =head2 OP-RELATED CLASSES
 
-B::OP, B::UNOP, B::BINOP, B::LOGOP, B::CONDOP, B::LISTOP, B::PMOP,
+B::OP, B::UNOP, B::BINOP, B::LOGOP, B::LISTOP, B::PMOP,
 B::SVOP, B::GVOP, B::PVOP, B::CVOP, B::LOOP, B::COP.
 These classes correspond in
 the obvious way to the underlying C structures of similar names. The
@@ -613,16 +601,6 @@ This returns the op description from the global C PL_op_desc array
 =over 4
 
 =item other
-
-=back
-
-=head2 B::CONDOP METHODS
-
-=over 4
-
-=item true
-
-=item false
 
 =back
 

@@ -166,17 +166,16 @@ END
     '1',  1,		# unop
     '2',  2,		# binop
     '|',  3,		# logop
-    '?',  4,		# condop
-    '@',  5,		# listop
-    '/',  6,		# pmop
-    '$',  7,		# svop
-    '*',  8,		# gvop
-    '"',  9,		# pvop_or_svop
-    '{',  10,		# loop
-    ';',  11,		# cop
-    '%',  12,		# baseop_or_unop
-    '-',  13,		# filestatop
-    '}',  14,		# loopexop
+    '@',  4,		# listop
+    '/',  5,		# pmop
+    '$',  6,		# svop
+    '*',  7,		# gvop
+    '"',  8,		# pvop_or_svop
+    '{',  9,		# loop
+    ';',  10,		# cop
+    '%',  11,		# baseop_or_unop
+    '-',  12,		# filestatop
+    '}',  13,		# loopexop
 );
 
 for (@ops) {
@@ -521,7 +520,7 @@ mapwhile	map iterator		ck_null		dt|
 
 # Range stuff.
 
-range		flipflop		ck_null		?	S S
+range		flipflop		ck_null		|	S S
 flip		range (or flip)		ck_null		1	S S
 flop		range (or flop)		ck_null		1
 
@@ -530,7 +529,7 @@ flop		range (or flop)		ck_null		1
 and		logical and		ck_null		|	
 or		logical or		ck_null		|	
 xor		logical xor		ck_null		fs|	S S	
-cond_expr	conditional expression	ck_null		d?	
+cond_expr	conditional expression	ck_null		d|	
 andassign	logical and assignment	ck_null		s|	
 orassign	logical or assignment	ck_null		s|	
 

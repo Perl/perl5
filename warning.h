@@ -4,97 +4,100 @@
 */
 
 
-#define Off(x)                  ((x) / 8)
-#define Bit(x)                  (1 << ((x) % 8))
+#define Off(x)			((x) / 8)
+#define Bit(x)			(1 << ((x) % 8))
 #define IsSet(a, x)		((a)[Off(x)] & Bit(x))
 
+
 #define G_WARN_OFF		0 	/* $^W == 0 */
-#define G_WARN_ON		1	/* $^W != 0 */
+#define G_WARN_ON		1	/* -w flag and $^W != 0 */
 #define G_WARN_ALL_ON		2	/* -W flag */
 #define G_WARN_ALL_OFF		4	/* -X flag */
+#define G_WARN_ONCE		8	/* set if 'once' ever enabled */
 #define G_WARN_ALL_MASK		(G_WARN_ALL_ON|G_WARN_ALL_OFF)
 
-#if 1
+#define WARN_STD		Nullsv
+#define WARN_ALL		(&PL_sv_yes)	/* use warning 'all' */
+#define WARN_NONE		(&PL_sv_no)	/* no  warning 'all' */
 
-/* Part of the logic below assumes that WARN_NONE is NULL */
+#define specialWARN(x)		((x) == WARN_STD || (x) == WARN_ALL ||	\
+				 (x) == WARN_NONE)
 
 #define ckDEAD(x)							\
-	   (PL_curcop->cop_warnings != WARN_ALL &&			\
-	    PL_curcop->cop_warnings != WARN_NONE &&			\
+	   ( ! specialWARN(PL_curcop->cop_warnings) &&			\
 	    IsSet(SvPVX(PL_curcop->cop_warnings), 2*x+1))
 
 #define ckWARN(x)							\
-	( (PL_curcop->cop_warnings &&					\
+	( (PL_curcop->cop_warnings != WARN_STD &&			\
+	   PL_curcop->cop_warnings != WARN_NONE &&			\
 	      (PL_curcop->cop_warnings == WARN_ALL ||			\
 	       IsSet(SvPVX(PL_curcop->cop_warnings), 2*x) ) )		\
-	  || (PL_dowarn & G_WARN_ON) )
+	  || (PL_curcop->cop_warnings == WARN_STD && PL_dowarn & G_WARN_ON) )
 
 #define ckWARN2(x,y)							\
-	  ( (PL_curcop->cop_warnings &&					\
+	  ( (PL_curcop->cop_warnings != WARN_STD  &&			\
+	     PL_curcop->cop_warnings != WARN_NONE &&			\
 	      (PL_curcop->cop_warnings == WARN_ALL ||			\
 	        IsSet(SvPVX(PL_curcop->cop_warnings), 2*x)  ||		\
 	        IsSet(SvPVX(PL_curcop->cop_warnings), 2*y) ) ) 		\
-	    ||	(PL_dowarn & G_WARN_ON) )
+	    ||	(PL_curcop->cop_warnings == WARN_STD && PL_dowarn & G_WARN_ON) )
 
-#else
+#define ckWARN_d(x)							\
+	  (PL_curcop->cop_warnings == WARN_STD ||			\
+	   PL_curcop->cop_warnings == WARN_ALL ||			\
+	     (PL_curcop->cop_warnings != WARN_NONE &&			\
+	      IsSet(SvPVX(PL_curcop->cop_warnings), 2*x) ) )
 
-#define ckDEAD(x)							\
-	   (PL_curcop->cop_warnings != WARN_ALL &&			\
-	    PL_curcop->cop_warnings != WARN_NONE &&			\
-	    SvPVX(PL_curcop->cop_warnings)[Off(2*x+1)] & Bit(2*x+1) )
+#define ckWARN2_d(x,y)							\
+	  (PL_curcop->cop_warnings == WARN_STD ||			\
+	   PL_curcop->cop_warnings == WARN_ALL ||			\
+	     (PL_curcop->cop_warnings != WARN_NONE &&			\
+	        (IsSet(SvPVX(PL_curcop->cop_warnings), 2*x)  ||		\
+	         IsSet(SvPVX(PL_curcop->cop_warnings), 2*y) ) ) )
 
-#define ckWARN(x)							\
-	( (PL_dowarn & G_WARN_ON) || ( (PL_dowarn & G_WARN_DISABLE) && 	\
-	  PL_curcop->cop_warnings &&					\
-	  ( PL_curcop->cop_warnings == WARN_ALL ||			\
-	    SvPVX(PL_curcop->cop_warnings)[Off(2*x)] & Bit(2*x)  ) ) )
 
-#define ckWARN2(x,y)							\
-	( (PL_dowarn & G_WARN_ON) || ( (PL_dowarn & G_WARN_DISABLE) && 	\
-	  PL_curcop->cop_warnings &&					\
-	  ( PL_curcop->cop_warnings == WARN_ALL ||			\
-	    SvPVX(PL_curcop->cop_warnings)[Off(2*x)] & Bit(2*x) || 	\
-	    SvPVX(PL_curcop->cop_warnings)[Off(2*y)] & Bit(2*y) ) ) ) 
+#define isLEXWARN_on 	(PL_curcop->cop_warnings != WARN_STD)
+#define isLEXWARN_off	(PL_curcop->cop_warnings == WARN_STD)
+#define isWARN_ONCE	(PL_dowarn & (G_WARN_ON|G_WARN_ONCE))
+#define isWARN_on(c,x)	(IsSet(SvPVX(c), 2*(x)))
 
-#endif
+#define WARN_IO			0
+#define WARN_CLOSED		1
+#define WARN_EXEC		2
+#define WARN_NEWLINE		3
+#define WARN_PIPE		4
+#define WARN_UNOPENED		5
+#define WARN_MISC		6
+#define WARN_NUMERIC		7
+#define WARN_ONCE		8
+#define WARN_RECURSION		9
+#define WARN_REDEFINE		10
+#define WARN_SEVERE		11
+#define WARN_DEBUGGING		12
+#define WARN_INPLACE		13
+#define WARN_INTERNAL		14
+#define WARN_SYNTAX		15
+#define WARN_AMBIGUOUS		16
+#define WARN_DEPRECATED		17
+#define WARN_OCTAL		18
+#define WARN_PARENTHESIS	19
+#define WARN_PRECEDENCE		20
+#define WARN_PRINTF		21
+#define WARN_RESERVED		22
+#define WARN_SEMICOLON		23
+#define WARN_UNINITIALIZED	24
+#define WARN_UNSAFE		25
+#define WARN_CLOSURE		26
+#define WARN_SIGNAL		27
+#define WARN_SUBSTR		28
+#define WARN_TAINT		29
+#define WARN_UNTIE		30
+#define WARN_UTF8		31
+#define WARN_VOID		32
 
-#define WARN_NONE		NULL
-#define WARN_ALL		(&PL_sv_yes)
-
-#define WARN_DEFAULT		0
-#define WARN_IO			1
-#define WARN_CLOSED		2
-#define WARN_EXEC		3
-#define WARN_NEWLINE		4
-#define WARN_PIPE		5
-#define WARN_UNOPENED		6
-#define WARN_MISC		7
-#define WARN_NUMERIC		8
-#define WARN_ONCE		9
-#define WARN_RECURSION		10
-#define WARN_REDEFINE		11
-#define WARN_SYNTAX		12
-#define WARN_AMBIGUOUS		13
-#define WARN_DEPRECATED		14
-#define WARN_OCTAL		15
-#define WARN_PARENTHESIS	16
-#define WARN_PRECEDENCE		17
-#define WARN_PRINTF		18
-#define WARN_RESERVED		19
-#define WARN_SEMICOLON		20
-#define WARN_UNINITIALIZED	21
-#define WARN_UNSAFE		22
-#define WARN_CLOSURE		23
-#define WARN_SIGNAL		24
-#define WARN_SUBSTR		25
-#define WARN_TAINT		26
-#define WARN_UNTIE		27
-#define WARN_UTF8		28
-#define WARN_VOID		29
-
-#define WARNsize		8
-#define WARN_ALLstring		"\125\125\125\125\125\125\125\125"
-#define WARN_NONEstring		"\0\0\0\0\0\0\0\0"
+#define WARNsize		9
+#define WARN_ALLstring		"\125\125\125\125\125\125\125\125\125"
+#define WARN_NONEstring		"\0\0\0\0\0\0\0\0\0"
 
 /* end of file warning.h */
 

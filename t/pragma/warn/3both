@@ -18,6 +18,20 @@ Use of uninitialized value at - line 6.
 
 # Check interaction of $^W and use warning
 sub fred { 
+    use warning ;
+    my $b ; 
+    chop $b ;
+}
+{ $^W = 0 ;
+  fred() ;
+}
+
+EXPECT
+Use of uninitialized value at - line 6.
+########
+
+# Check interaction of $^W and use warning
+sub fred { 
     no warning ;
     my $b ; 
     chop $b ;
@@ -27,7 +41,21 @@ sub fred {
 }
 
 EXPECT
-Use of uninitialized value at - line 6.
+
+########
+
+# Check interaction of $^W and use warning
+sub fred { 
+    no warning ;
+    my $b ; 
+    chop $b ;
+}
+{ $^W = 1 ;
+  fred() ;
+}
+
+EXPECT
+
 ########
 
 # Check interaction of $^W and use warning
@@ -54,7 +82,7 @@ no warning ;
 my $b ; 
 chop $b ;
 EXPECT
-Use of uninitialized value at - line 6.
+
 ########
 
 # Check interaction of $^W and use warning
@@ -63,4 +91,107 @@ $^W = 1 ;
 my $b ; 
 chop $b ;
 EXPECT
+
+########
+-w
+# Check interaction of $^W and use warning
+no warning ;
+my $b ; 
+chop $b ;
+EXPECT
+
+########
+-w
+# Check interaction of $^W and use warning
+use warning ;
+my $b ; 
+chop $b ;
+EXPECT
+Use of uninitialized value at - line 5.
+########
+
+# Check interaction of $^W and use warning
+sub fred { 
+    use warning ;
+    my $b ; 
+    chop $b ;
+}
+BEGIN {  $^W = 0 }
+fred() ;
+EXPECT
 Use of uninitialized value at - line 6.
+########
+
+# Check interaction of $^W and use warning
+sub fred { 
+    no warning ;
+    my $b ; 
+    chop $b ;
+}
+BEGIN {  $^W = 1 }
+fred() ;
+
+EXPECT
+
+########
+
+# Check interaction of $^W and use warning
+use warning ;
+BEGIN {  $^W = 1 }
+my $b ; 
+chop $b ;
+EXPECT
+Use of uninitialized value at - line 6.
+########
+
+# Check interaction of $^W and use warning
+BEGIN {  $^W = 1 }
+use warning ;
+my $b ; 
+chop $b ;
+EXPECT
+Use of uninitialized value at - line 6.
+########
+
+# Check interaction of $^W and use warning
+BEGIN {  $^W = 1 }
+no warning ;
+my $b ; 
+chop $b ;
+EXPECT
+
+########
+
+# Check interaction of $^W and use warning
+no warning ;
+BEGIN {  $^W = 1 }
+my $b ; 
+chop $b ;
+EXPECT
+
+########
+
+# Check interaction of $^W and use warning
+BEGIN {  $^W = 1 }
+{
+    no warning ;
+    my $b ; 
+    chop $b ;
+}
+my $b ;
+chop $b ;
+EXPECT
+Use of uninitialized value at - line 10.
+########
+
+# Check interaction of $^W and use warning
+BEGIN {  $^W = 0 }
+{
+    use warning ;
+    my $b ; 
+    chop $b ;
+}
+my $b ;
+chop $b ;
+EXPECT
+Use of uninitialized value at - line 7.

@@ -109,34 +109,32 @@ enum {
     INSN_OP_FIRST,			/* 90 */
     INSN_OP_LAST,			/* 91 */
     INSN_OP_OTHER,			/* 92 */
-    INSN_OP_TRUE,			/* 93 */
-    INSN_OP_FALSE,			/* 94 */
-    INSN_OP_CHILDREN,			/* 95 */
-    INSN_OP_PMREPLROOT,			/* 96 */
-    INSN_OP_PMREPLROOTGV,			/* 97 */
-    INSN_OP_PMREPLSTART,			/* 98 */
-    INSN_OP_PMNEXT,			/* 99 */
-    INSN_PREGCOMP,			/* 100 */
-    INSN_OP_PMFLAGS,			/* 101 */
-    INSN_OP_PMPERMFLAGS,			/* 102 */
-    INSN_OP_SV,			/* 103 */
-    INSN_OP_GV,			/* 104 */
-    INSN_OP_PV,			/* 105 */
-    INSN_OP_PV_TR,			/* 106 */
-    INSN_OP_REDOOP,			/* 107 */
-    INSN_OP_NEXTOP,			/* 108 */
-    INSN_OP_LASTOP,			/* 109 */
-    INSN_COP_LABEL,			/* 110 */
-    INSN_COP_STASH,			/* 111 */
-    INSN_COP_FILEGV,			/* 112 */
-    INSN_COP_SEQ,			/* 113 */
-    INSN_COP_ARYBASE,			/* 114 */
-    INSN_COP_LINE,			/* 115 */
-    INSN_COP_WARNINGS,			/* 116 */
-    INSN_MAIN_START,			/* 117 */
-    INSN_MAIN_ROOT,			/* 118 */
-    INSN_CURPAD,			/* 119 */
-    MAX_INSN = 119
+    INSN_OP_CHILDREN,			/* 93 */
+    INSN_OP_PMREPLROOT,			/* 94 */
+    INSN_OP_PMREPLROOTGV,			/* 95 */
+    INSN_OP_PMREPLSTART,			/* 96 */
+    INSN_OP_PMNEXT,			/* 97 */
+    INSN_PREGCOMP,			/* 98 */
+    INSN_OP_PMFLAGS,			/* 99 */
+    INSN_OP_PMPERMFLAGS,			/* 100 */
+    INSN_OP_SV,			/* 101 */
+    INSN_OP_GV,			/* 102 */
+    INSN_OP_PV,			/* 103 */
+    INSN_OP_PV_TR,			/* 104 */
+    INSN_OP_REDOOP,			/* 105 */
+    INSN_OP_NEXTOP,			/* 106 */
+    INSN_OP_LASTOP,			/* 107 */
+    INSN_COP_LABEL,			/* 108 */
+    INSN_COP_STASH,			/* 109 */
+    INSN_COP_FILEGV,			/* 110 */
+    INSN_COP_SEQ,			/* 111 */
+    INSN_COP_ARYBASE,			/* 112 */
+    INSN_COP_LINE,			/* 113 */
+    INSN_COP_WARNINGS,			/* 114 */
+    INSN_MAIN_START,			/* 115 */
+    INSN_MAIN_ROOT,			/* 116 */
+    INSN_CURPAD,			/* 117 */
+    MAX_INSN = 117
 };
 
 enum {
@@ -144,14 +142,13 @@ enum {
     OPt_UNOP,		/* 1 */
     OPt_BINOP,		/* 2 */
     OPt_LOGOP,		/* 3 */
-    OPt_CONDOP,		/* 4 */
-    OPt_LISTOP,		/* 5 */
-    OPt_PMOP,		/* 6 */
-    OPt_SVOP,		/* 7 */
-    OPt_GVOP,		/* 8 */
-    OPt_PVOP,		/* 9 */
-    OPt_LOOP,		/* 10 */
-    OPt_COP		/* 11 */
+    OPt_LISTOP,		/* 4 */
+    OPt_PMOP,		/* 5 */
+    OPt_SVOP,		/* 6 */
+    OPt_GVOP,		/* 7 */
+    OPt_PVOP,		/* 8 */
+    OPt_LOOP,		/* 9 */
+    OPt_COP		/* 10 */
 };
 
 EXT void byterun(pTHXo_ struct bytestream bs);

@@ -1204,8 +1204,11 @@ Perl_unsharepvn(pTHX_ const char *str, I32 len, U32 hash)
     }
     UNLOCK_STRTAB_MUTEX;
     
-    if (!found)
-	Perl_warn(aTHX_ "Attempt to free non-existent shared string");    
+    {
+        dTHR;
+        if (!found && ckWARN_d(WARN_INTERNAL))
+	    Perl_warner(aTHX_ WARN_INTERNAL, "Attempt to free non-existent shared string");    
+    }
 }
 
 /* get a (constant) string ptr from the global string table

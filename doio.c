@@ -460,8 +460,10 @@ Perl_nextargv(pTHX_ register GV *gv)
 		fileuid = PL_statbuf.st_uid;
 		filegid = PL_statbuf.st_gid;
 		if (!S_ISREG(PL_filemode)) {
-		    Perl_warn(aTHX_ "Can't do inplace edit: %s is not a regular file",
-		      PL_oldname );
+		    if (ckWARN_d(WARN_INPLACE))	
+		        Perl_warner(aTHX_ WARN_INPLACE,
+			    "Can't do inplace edit: %s is not a regular file",
+		            PL_oldname );
 		    do_close(gv,FALSE);
 		    continue;
 		}
@@ -489,7 +491,9 @@ Perl_nextargv(pTHX_ register GV *gv)
                       || (_djstat_fail_bits & _STFAIL_TRUENAME)!=0
 #endif
                       ) {
-			Perl_warn(aTHX_ "Can't do inplace edit: %s would not be unique",
+		    if (ckWARN_d(WARN_INPLACE))	
+			Perl_warner(aTHX_ WARN_INPLACE,
+			  "Can't do inplace edit: %s would not be unique",
 			  SvPVX(sv) );
 			do_close(gv,FALSE);
 			continue;
@@ -498,8 +502,10 @@ Perl_nextargv(pTHX_ register GV *gv)
 #ifdef HAS_RENAME
 #ifndef DOSISH
 		    if (PerlLIO_rename(PL_oldname,SvPVX(sv)) < 0) {
-			Perl_warn(aTHX_ "Can't rename %s to %s: %s, skipping file",
-			  PL_oldname, SvPVX(sv), Strerror(errno) );
+		        if (ckWARN_d(WARN_INPLACE))	
+			    Perl_warner(aTHX_ WARN_INPLACE, 
+			      "Can't rename %s to %s: %s, skipping file",
+			      PL_oldname, SvPVX(sv), Strerror(errno) );
 			do_close(gv,FALSE);
 			continue;
 		    }
@@ -512,8 +518,10 @@ Perl_nextargv(pTHX_ register GV *gv)
 #else
 		    (void)UNLINK(SvPVX(sv));
 		    if (link(PL_oldname,SvPVX(sv)) < 0) {
-			Perl_warn(aTHX_ "Can't rename %s to %s: %s, skipping file",
-			  PL_oldname, SvPVX(sv), Strerror(errno) );
+		        if (ckWARN_d(WARN_INPLACE))	
+			    Perl_warner(aTHX_ WARN_INPLACE,
+			      "Can't rename %s to %s: %s, skipping file",
+			      PL_oldname, SvPVX(sv), Strerror(errno) );
 			do_close(gv,FALSE);
 			continue;
 		    }
@@ -524,8 +532,10 @@ Perl_nextargv(pTHX_ register GV *gv)
 #if !defined(DOSISH) && !defined(AMIGAOS)
 #  ifndef VMS  /* Don't delete; use automatic file versioning */
 		    if (UNLINK(PL_oldname) < 0) {
-			Perl_warn(aTHX_ "Can't remove %s: %s, skipping file",
-			  PL_oldname, Strerror(errno) );
+		        if (ckWARN_d(WARN_INPLACE))	
+			    Perl_warner(aTHX_ WARN_INPLACE,
+			      "Can't remove %s: %s, skipping file",
+			      PL_oldname, Strerror(errno) );
 			do_close(gv,FALSE);
 			continue;
 		    }
@@ -545,8 +555,9 @@ Perl_nextargv(pTHX_ register GV *gv)
 		if (!do_open(PL_argvoutgv,SvPVX(sv),SvCUR(sv),PL_inplace!=0,
 			     O_WRONLY|O_CREAT|OPEN_EXCL,0666,Nullfp)) {
 #endif
-		    Perl_warn(aTHX_ "Can't do inplace edit on %s: %s",
-		      PL_oldname, Strerror(errno) );
+		    if (ckWARN_d(WARN_INPLACE))	
+		        Perl_warner(aTHX_ WARN_INPLACE, "Can't do inplace edit on %s: %s",
+		          PL_oldname, Strerror(errno) );
 		    do_close(gv,FALSE);
 		    continue;
 		}

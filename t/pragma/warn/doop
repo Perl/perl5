@@ -1,0 +1,25 @@
+  doop.c	AOK
+
+  Malformed UTF-8 character
+
+
+__END__
+# doop.c
+use utf8 ;
+$_ = "\x80  \xff" ;
+chop ;
+EXPECT
+Malformed UTF-8 character at - line 4.
+########
+# doop.c
+use warning 'utf8'  ;
+use utf8 ;
+$_ = "\x80  \xff" ;
+chop ;
+no warning 'utf8'  ;
+$_ = "\x80  \xff" ;
+chop ;
+EXPECT
+\x80 will produce malformed UTF-8 character; use \x{80} for that at - line 4.
+\xff will produce malformed UTF-8 character; use \x{ff} for that at - line 4.
+Malformed UTF-8 character at - line 5.

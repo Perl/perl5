@@ -688,6 +688,13 @@ of perl in the right bracket?)  Example:
 See also the documentation of C<use VERSION> and C<require VERSION>
 for a convenient way to fail if the running Perl interpreter is too old.
 
+=item $^B
+
+The current set of warning checks enabled by C<use warning>.
+See the documentation of C<warning> for more details.
+
+Used by lexical warnings to store the 
+
 =item $COMPILING
 
 =item $^C

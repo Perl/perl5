@@ -119,8 +119,9 @@ pclose (FILE *pp)
 static int
 convretcode (pTHX_ int rc,char *prog,int fl)
 {
-    if (rc < 0 && PL_dowarn)
-        Perl_warn (aTHX_ "Can't %s \"%s\": %s",fl ? "exec" : "spawn",prog,Strerror (errno));
+    if (rc < 0 && ckWARN(WARN_EXEC))
+        Perl_warner(aTHX_ WARN_EXEC,"Can't %s \"%s\": %s",
+		    fl ? "exec" : "spawn",prog,Strerror (errno));
     if (rc > 0)
         return rc <<= 8;
     if (rc < 0)

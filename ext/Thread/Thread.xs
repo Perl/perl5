@@ -353,6 +353,8 @@ join(t)
 	int	i = NO_INIT
     PPCODE:
 #ifdef USE_THREADS
+	if (t == thr)
+	    croak("Attempt to join self");
 	DEBUG_S(PerlIO_printf(PerlIO_stderr(), "%p: joining %p (state %u)\n",
 			      thr, t, ThrSTATE(t)););
     	MUTEX_LOCK(&t->mutex);

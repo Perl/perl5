@@ -414,13 +414,14 @@ Perl_pad_findmy(pTHX_ char *name)
 void
 Perl_pad_leavemy(pTHX_ I32 fill)
 {
+    dTHR;
     I32 off;
     SV **svp = AvARRAY(PL_comppad_name);
     SV *sv;
     if (PL_min_intro_pending && fill < PL_min_intro_pending) {
 	for (off = PL_max_intro_pending; off >= PL_min_intro_pending; off--) {
-	    if ((sv = svp[off]) && sv != &PL_sv_undef)
-		Perl_warn(aTHX_ "%s never introduced", SvPVX(sv));
+	    if ((sv = svp[off]) && sv != &PL_sv_undef && ckWARN_d(WARN_INTERNAL))
+		Perl_warner(aTHX_ WARN_INTERNAL, "%s never introduced", SvPVX(sv));
 	}
     }
     /* "Deintroduce" my variables that are leaving with this scope. */
@@ -731,7 +732,7 @@ S_cop_free(pTHX_ COP* cop)
 {
     Safefree(cop->cop_label);
     SvREFCNT_dec(cop->cop_filegv);
-    if (cop->cop_warnings != WARN_NONE && cop->cop_warnings != WARN_ALL)
+    if (! specialWARN(cop->cop_warnings))
 	SvREFCNT_dec(cop->cop_warnings);
 }
 
@@ -1727,8 +1728,7 @@ Perl_block_start(pTHX_ int full)
     SAVEHINTS();
     PL_hints &= ~HINT_BLOCK_SCOPE;
     SAVEPPTR(PL_compiling.cop_warnings); 
-    if (PL_compiling.cop_warnings != WARN_ALL && 
-       PL_compiling.cop_warnings != WARN_NONE) {
+    if (! specialWARN(PL_compiling.cop_warnings)) {
         PL_compiling.cop_warnings = newSVsv(PL_compiling.cop_warnings) ;
         SAVEFREESV(PL_compiling.cop_warnings) ;
     }
@@ -2871,8 +2871,8 @@ S_list_assignment(pTHX_ register OP *o)
 	o = cUNOPo->op_first;
 
     if (o->op_type == OP_COND_EXPR) {
-	I32 t = list_assignment(cCONDOPo->op_first->op_sibling);
-	I32 f = list_assignment(cCONDOPo->op_first->op_sibling->op_sibling);
+	I32 t = list_assignment(cLOGOPo->op_first->op_sibling);
+	I32 f = list_assignment(cLOGOPo->op_first->op_sibling->op_sibling);
 
 	if (t && f)
 	    return TRUE;
@@ -3062,8 +3062,7 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
     }
     cop->cop_seq = seq;
     cop->cop_arybase = PL_curcop->cop_arybase;
-    if (PL_curcop->cop_warnings == WARN_NONE 
-	|| PL_curcop->cop_warnings == WARN_ALL)
+    if (specialWARN(PL_curcop->cop_warnings))
         cop->cop_warnings = PL_curcop->cop_warnings ;
     else 
         cop->cop_warnings = newSVsv(PL_curcop->cop_warnings) ;
@@ -3230,7 +3229,8 @@ OP *
 Perl_newCONDOP(pTHX_ I32 flags, OP *first, OP *trueop, OP *falseop)
 {
     dTHR;
-    CONDOP *condop;
+    LOGOP *logop;
+    OP *start;
     OP *o;
 
     if (!falseop)
@@ -3255,27 +3255,27 @@ Perl_newCONDOP(pTHX_ I32 flags, OP *first, OP *trueop, OP *falseop)
 	list(trueop);
 	scalar(falseop);
     }
-    NewOp(1101, condop, 1, CONDOP);
+    NewOp(1101, logop, 1, LOGOP);
+    logop->op_type = OP_COND_EXPR;
+    logop->op_ppaddr = PL_ppaddr[OP_COND_EXPR];
+    logop->op_first = first;
+    logop->op_flags = flags | OPf_KIDS;
+    logop->op_private = 1 | (flags >> 8);
+    logop->op_other = LINKLIST(trueop);
+    logop->op_next = LINKLIST(falseop);
 
-    condop->op_type = OP_COND_EXPR;
-    condop->op_ppaddr = PL_ppaddr[OP_COND_EXPR];
-    condop->op_first = first;
-    condop->op_flags = flags | OPf_KIDS;
-    condop->op_true = LINKLIST(trueop);
-    condop->op_false = LINKLIST(falseop);
-    condop->op_private = 1 | (flags >> 8);
 
     /* establish postfix order */
-    condop->op_next = LINKLIST(first);
-    first->op_next = (OP*)condop;
+    start = LINKLIST(first);
+    first->op_next = (OP*)logop;
 
     first->op_sibling = trueop;
     trueop->op_sibling = falseop;
-    o = newUNOP(OP_NULL, 0, (OP*)condop);
+    o = newUNOP(OP_NULL, 0, (OP*)logop);
 
-    trueop->op_next = o;
-    falseop->op_next = o;
+    trueop->op_next = falseop->op_next = o;
 
+    o->op_next = start;
     return o;
 }
 
@@ -3283,34 +3283,36 @@ OP *
 Perl_newRANGE(pTHX_ I32 flags, OP *left, OP *right)
 {
     dTHR;
-    CONDOP *condop;
+    LOGOP *range;
     OP *flip;
     OP *flop;
+    OP *leftstart;
     OP *o;
 
-    NewOp(1101, condop, 1, CONDOP);
+    NewOp(1101, range, 1, LOGOP);
 
-    condop->op_type = OP_RANGE;
-    condop->op_ppaddr = PL_ppaddr[OP_RANGE];
-    condop->op_first = left;
-    condop->op_flags = OPf_KIDS;
-    condop->op_true = LINKLIST(left);
-    condop->op_false = LINKLIST(right);
-    condop->op_private = 1 | (flags >> 8);
+    range->op_type = OP_RANGE;
+    range->op_ppaddr = PL_ppaddr[OP_RANGE];
+    range->op_first = left;
+    range->op_flags = OPf_KIDS;
+    leftstart = LINKLIST(left);
+    range->op_other = LINKLIST(right);
+    range->op_private = 1 | (flags >> 8);
 
     left->op_sibling = right;
 
-    condop->op_next = (OP*)condop;
-    flip = newUNOP(OP_FLIP, flags, (OP*)condop);
+    range->op_next = (OP*)range;
+    flip = newUNOP(OP_FLIP, flags, (OP*)range);
     flop = newUNOP(OP_FLOP, 0, flip);
     o = newUNOP(OP_NULL, 0, flop);
     linklist(flop);
+    range->op_next = leftstart;
 
     left->op_next = flip;
     right->op_next = flop;
 
-    condop->op_targ = pad_alloc(OP_RANGE, SVs_PADMY);
-    sv_upgrade(PAD_SV(condop->op_targ), SVt_PVNV);
+    range->op_targ = pad_alloc(OP_RANGE, SVs_PADMY);
+    sv_upgrade(PAD_SV(range->op_targ), SVt_PVNV);
     flip->op_targ = pad_alloc(OP_RANGE, SVs_PADMY);
     sv_upgrade(PAD_SV(flip->op_targ), SVt_PVNV);
 
@@ -3520,7 +3522,7 @@ Perl_newFOROP(pTHX_ I32 flags,char *label,line_t forline,OP *sv,OP *expr,OP *blo
 	 * treated as min/max values by 'pp_iterinit'.
 	 */
 	UNOP* flip = (UNOP*)((UNOP*)((BINOP*)expr)->op_first)->op_first;
-	CONDOP* range = (CONDOP*) flip->op_first;
+	LOGOP* range = (LOGOP*) flip->op_first;
 	OP* left  = range->op_first;
 	OP* right = left->op_sibling;
 	LISTOP* listop;
@@ -3529,8 +3531,8 @@ Perl_newFOROP(pTHX_ I32 flags,char *label,line_t forline,OP *sv,OP *expr,OP *blo
 	range->op_first = Nullop;
 
 	listop = (LISTOP*)newLISTOP(OP_LIST, 0, left, right);
-	listop->op_first->op_next = range->op_true;
-	left->op_next = range->op_false;
+	listop->op_first->op_next = range->op_next;
+	left->op_next = range->op_other;
 	right->op_next = (OP*)listop;
 	listop->op_next = listop->op_first;
 
@@ -3836,7 +3838,10 @@ Perl_cv_clone(pTHX_ CV *proto)
 void
 Perl_cv_ckproto(pTHX_ CV *cv, GV *gv, char *p)
 {
-    if ((!p != !SvPOK(cv)) || (p && strNE(p, SvPVX(cv)))) {
+    dTHR;
+
+    if (((!p != !SvPOK(cv)) || (p && strNE(p, SvPVX(cv)))) &&
+		    ckWARN_d(WARN_UNSAFE) ) {
 	SV* msg = sv_newmortal();
 	SV* name = Nullsv;
 
@@ -3852,7 +3857,7 @@ Perl_cv_ckproto(pTHX_ CV *cv, GV *gv, char *p)
 	    Perl_sv_catpvf(aTHX_ msg, "(%s)", p);
 	else
 	    sv_catpv(msg, "none");
-	Perl_warn(aTHX_ "%_", msg);
+	Perl_warner(aTHX_ WARN_UNSAFE, "%_", msg);
     }
 }
 
@@ -3922,8 +3927,9 @@ Perl_newSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *block)
     if (SvTYPE(gv) != SVt_PVGV) {	/* Prototype now, and had
 					   maximum a prototype before. */
 	if (SvTYPE(gv) > SVt_NULL) {
-	    if (!SvPOK((SV*)gv) && !(SvIOK((SV*)gv) && SvIVX((SV*)gv) == -1))
-		Perl_warn(aTHX_ "Runaway prototype");
+	    if (!SvPOK((SV*)gv) && !(SvIOK((SV*)gv) && SvIVX((SV*)gv) == -1)
+			    && ckWARN_d(WARN_UNSAFE))
+		Perl_warner(aTHX_ WARN_UNSAFE, "Runaway prototype");
 	    cv_ckproto((CV*)gv, NULL, ps);
 	}
 	if (ps)
@@ -4334,7 +4340,8 @@ Perl_oopsAV(pTHX_ OP *o)
 	break;
 
     default:
-	Perl_warn(aTHX_ "oops: oopsAV");
+	if (ckWARN_d(WARN_INTERNAL))
+	    Perl_warner(aTHX_ WARN_INTERNAL, "oops: oopsAV");
 	break;
     }
     return o;
@@ -4343,6 +4350,10 @@ Perl_oopsAV(pTHX_ OP *o)
 OP *
 Perl_oopsHV(pTHX_ OP *o)
 {
+    dTHR;
+
+    dTHR;
+    
     switch (o->op_type) {
     case OP_PADSV:
     case OP_PADAV:
@@ -4358,7 +4369,8 @@ Perl_oopsHV(pTHX_ OP *o)
 	break;
 
     default:
-	Perl_warn(aTHX_ "oops: oopsHV");
+	if (ckWARN_d(WARN_INTERNAL))
+	    Perl_warner(aTHX_ WARN_INTERNAL, "oops: oopsHV");
 	break;
     }
     return o;
@@ -5728,16 +5740,12 @@ Perl_peep(pTHX_ register OP *o)
 	case OP_GREPWHILE:
 	case OP_AND:
 	case OP_OR:
+	case OP_COND_EXPR:
+	case OP_RANGE:
 	    o->op_seq = PL_op_seqmax++;
 	    while (cLOGOP->op_other->op_type == OP_NULL)
 		cLOGOP->op_other = cLOGOP->op_other->op_next;
 	    peep(cLOGOP->op_other);
-	    break;
-
-	case OP_COND_EXPR:
-	    o->op_seq = PL_op_seqmax++;
-	    peep(cCONDOP->op_true);
-	    peep(cCONDOP->op_false);
 	    break;
 
 	case OP_ENTERLOOP:

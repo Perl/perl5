@@ -182,13 +182,6 @@ struct logop {
     OP *	op_other;
 };
 
-struct condop {
-    BASEOP
-    OP *	op_first;
-    OP *	op_true;
-    OP *	op_false;
-};
-
 struct listop {
     BASEOP
     OP *	op_first;
@@ -262,7 +255,6 @@ struct loop {
 #define cBINOP ((BINOP*)PL_op)
 #define cLISTOP ((LISTOP*)PL_op)
 #define cLOGOP ((LOGOP*)PL_op)
-#define cCONDOP ((CONDOP*)PL_op)
 #define cPMOP ((PMOP*)PL_op)
 #define cSVOP ((SVOP*)PL_op)
 #define cGVOP ((GVOP*)PL_op)
@@ -274,7 +266,6 @@ struct loop {
 #define cBINOPo ((BINOP*)o)
 #define cLISTOPo ((LISTOP*)o)
 #define cLOGOPo ((LOGOP*)o)
-#define cCONDOPo ((CONDOP*)o)
 #define cPMOPo ((PMOP*)o)
 #define cSVOPo ((SVOP*)o)
 #define cGVOPo ((GVOP*)o)
@@ -287,7 +278,6 @@ struct loop {
 #define kBINOP ((BINOP*)kid)
 #define kLISTOP ((LISTOP*)kid)
 #define kLOGOP ((LOGOP*)kid)
-#define kCONDOP ((CONDOP*)kid)
 #define kPMOP ((PMOP*)kid)
 #define kSVOP ((SVOP*)kid)
 #define kGVOP ((GVOP*)kid)
@@ -317,17 +307,16 @@ struct loop {
 #define OA_UNOP (1 << OCSHIFT)
 #define OA_BINOP (2 << OCSHIFT)
 #define OA_LOGOP (3 << OCSHIFT)
-#define OA_CONDOP (4 << OCSHIFT)
-#define OA_LISTOP (5 << OCSHIFT)
-#define OA_PMOP (6 << OCSHIFT)
-#define OA_SVOP (7 << OCSHIFT)
-#define OA_GVOP (8 << OCSHIFT)
-#define OA_PVOP_OR_SVOP (9 << OCSHIFT)
-#define OA_LOOP (10 << OCSHIFT)
-#define OA_COP (11 << OCSHIFT)
-#define OA_BASEOP_OR_UNOP (12 << OCSHIFT)
-#define OA_FILESTATOP (13 << OCSHIFT)
-#define OA_LOOPEXOP (14 << OCSHIFT)
+#define OA_LISTOP (4 << OCSHIFT)
+#define OA_PMOP (5 << OCSHIFT)
+#define OA_SVOP (6 << OCSHIFT)
+#define OA_GVOP (7 << OCSHIFT)
+#define OA_PVOP_OR_SVOP (8 << OCSHIFT)
+#define OA_LOOP (9 << OCSHIFT)
+#define OA_COP (10 << OCSHIFT)
+#define OA_BASEOP_OR_UNOP (11 << OCSHIFT)
+#define OA_FILESTATOP (12 << OCSHIFT)
+#define OA_LOOPEXOP (13 << OCSHIFT)
 
 #define OASHIFT 13
 

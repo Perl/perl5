@@ -142,9 +142,9 @@ PP(pp_cond_expr)
 {
     djSP;
     if (SvTRUEx(POPs))
-	RETURNOP(cCONDOP->op_true);
+	RETURNOP(cLOGOP->op_other);
     else
-	RETURNOP(cCONDOP->op_false);
+	RETURNOP(cLOGOP->op_next);
 }
 
 PP(pp_unstack)

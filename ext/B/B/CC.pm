@@ -524,13 +524,13 @@ sub pp_or {
 	    
 sub pp_cond_expr {
     my $op = shift;
-    my $false = $op->false;
+    my $false = $op->next;
     unshift(@bblock_todo, $false);
     reload_lexicals();
     my $bool = pop_bool();
     write_back_stack();
     runtime(sprintf("if (!$bool) goto %s;", label($false)));
-    return $op->true;
+    return $op->other;
 }
 
 sub pp_padsv {
@@ -1238,10 +1238,10 @@ sub pp_range {
 	# it to find and adjust out targ. We don't need it ourselves.
 	$op->save;
 	runtime sprintf("if (SvTRUE(PL_curpad[%d])) goto %s;",
-			$op->targ, label($op->false));
-	unshift(@bblock_todo, $op->false);
+			$op->targ, label($op->other));
+	unshift(@bblock_todo, $op->other);
     }
-    return $op->true;
+    return $op->next;
 }
 
 sub pp_flip {
@@ -1251,7 +1251,7 @@ sub pp_flip {
 	error("context of flip unknown at compile-time");
     }
     if (($flags & OPf_WANT)==OPf_WANT_LIST) {
-	return $op->first->false;
+	return $op->first->other;
     }
     write_back_lexicals();
     write_back_stack();
@@ -1269,7 +1269,7 @@ sub pp_flip {
     } else {
 	runtime("\tsv_setiv(PL_curpad[$ix], 0);",
 		"\tsp--;",
-		sprintf("\tgoto %s;", label($op->first->false)));
+		sprintf("\tgoto %s;", label($op->first->other)));
     }
     runtime("}",
 	  qq{sv_setpv(PL_curpad[$ix], "");},

@@ -2886,8 +2886,8 @@ SetBooleanArrayRegion(array,start,len,buf)
 	{
 	    if (buf_len_ < len)
 		Perl_croak(aTHX_ "string is too short");
-	    else if (buf_len_ > len && PL_dowarn)
-		Perl_warn(aTHX_ "string is too long");
+	    else if (buf_len_ > len && ckWARN(WARN_UNSAFE))
+		Perl_warner(aTHX_ WARN_UNSAFE, "string is too long");
 	    (*env)->SetBooleanArrayRegion(env, array,start,len,buf);
 	    RESTOREENV;
 	}
@@ -2905,8 +2905,8 @@ SetByteArrayRegion(array,start,len,buf)
 	{
 	    if (buf_len_ < len)
 		Perl_croak(aTHX_ "string is too short");
-	    else if (buf_len_ > len && PL_dowarn)
-		Perl_warn(aTHX_ "string is too long");
+	    else if (buf_len_ > len && ckWARN(WARN_UNSAFE))
+		Perl_warner(aTHX_ WARN_UNSAFE, "string is too long");
 	    (*env)->SetByteArrayRegion(env, array,start,len,buf);
 	    RESTOREENV;
 	}
@@ -2924,8 +2924,8 @@ SetCharArrayRegion(array,start,len,buf)
 	{
 	    if (buf_len_ < len)
 		Perl_croak(aTHX_ "string is too short");
-	    else if (buf_len_ > len && PL_dowarn)
-		Perl_warn(aTHX_ "string is too long");
+	    else if (buf_len_ > len && ckWARN(WARN_UNSAFE))
+		Perl_warner(aTHX_ WARN_UNSAFE, "string is too long");
 	    (*env)->SetCharArrayRegion(env, array,start,len,buf);
 	    RESTOREENV;
 	}
@@ -2943,8 +2943,8 @@ SetShortArrayRegion(array,start,len,buf)
 	{
 	    if (buf_len_ < len)
 		Perl_croak(aTHX_ "string is too short");
-	    else if (buf_len_ > len && PL_dowarn)
-		Perl_warn(aTHX_ "string is too long");
+	    else if (buf_len_ > len && ckWARN(WARN_UNSAFE))
+		Perl_warner(aTHX_ WARN_UNSAFE, "string is too long");
 	    (*env)->SetShortArrayRegion(env, array,start,len,buf);
 	    RESTOREENV;
 	}
@@ -2962,8 +2962,8 @@ SetIntArrayRegion(array,start,len,buf)
 	{
 	    if (buf_len_ < len)
 		Perl_croak(aTHX_ "string is too short");
-	    else if (buf_len_ > len && PL_dowarn)
-		Perl_warn(aTHX_ "string is too long");
+	    else if (buf_len_ > len && ckWARN(WARN_UNSAFE))
+		Perl_warner(aTHX_ WARN_UNSAFE, "string is too long");
 	    (*env)->SetIntArrayRegion(env, array,start,len,buf);
 	    RESTOREENV;
 	}
@@ -2981,8 +2981,8 @@ SetLongArrayRegion(array,start,len,buf)
 	{
 	    if (buf_len_ < len)
 		Perl_croak(aTHX_ "string is too short");
-	    else if (buf_len_ > len && PL_dowarn)
-		Perl_warn(aTHX_ "string is too long");
+	    else if (buf_len_ > len && ckWARN(WARN_UNSAFE))
+		Perl_warner(aTHX_ WARN_UNSAFE, "string is too long");
 	    (*env)->SetLongArrayRegion(env, array,start,len,buf);
 	    RESTOREENV;
 	}
@@ -3000,8 +3000,8 @@ SetFloatArrayRegion(array,start,len,buf)
 	{
 	    if (buf_len_ < len)
 		Perl_croak(aTHX_ "string is too short");
-	    else if (buf_len_ > len && PL_dowarn)
-		Perl_warn(aTHX_ "string is too long");
+	    else if (buf_len_ > len && ckWARN(WARN_UNSAFE))
+		Perl_warner(aTHX_ WARN_UNSAFE, "string is too long");
 	    (*env)->SetFloatArrayRegion(env, array,start,len,buf);
 	    RESTOREENV;
 	}
@@ -3019,8 +3019,8 @@ SetDoubleArrayRegion(array,start,len,buf)
 	{
 	    if (buf_len_ < len)
 		Perl_croak(aTHX_ "string is too short");
-	    else if (buf_len_ > len && PL_dowarn)
-		Perl_warn(aTHX_ "string is too long");
+	    else if (buf_len_ > len && ckWARN(WARN_UNSAFE))
+		Perl_warner(aTHX_ WARN_UNSAFE, "string is too long");
 	    (*env)->SetDoubleArrayRegion(env, array,start,len,buf);
 	    RESTOREENV;
 	}

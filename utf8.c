@@ -107,7 +107,9 @@ Perl_utf8_to_uv(pTHX_ U8* s, I32* retlen)
 	return *s;
     }
     if (!(uv & 0x40)) {
-	Perl_warn(aTHX_ "Malformed UTF-8 character");
+        dTHR;
+	if (ckWARN_d(WARN_UTF8))     
+	    Perl_warner(aTHX_ WARN_UTF8, "Malformed UTF-8 character");
 	if (retlen)
 	    *retlen = 1;
 	return *s;
@@ -127,7 +129,9 @@ Perl_utf8_to_uv(pTHX_ U8* s, I32* retlen)
     s++;
     while (len--) {
 	if ((*s & 0xc0) != 0x80) {
-	    Perl_warn(aTHX_ "Malformed UTF-8 character");
+            dTHR;
+	    if (ckWARN_d(WARN_UTF8))     
+	        Perl_warner(aTHX_ WARN_UTF8, "Malformed UTF-8 character");
 	    if (retlen)
 		*retlen -= len + 1;
 	    return 0xfffd;
@@ -203,9 +207,11 @@ Perl_utf16_to_utf8(pTHX_ U16* p, U8* d, I32 bytelen)
 	    continue;
 	}
 	if (uv >= 0xd800 && uv < 0xdbff) {	/* surrogates */
+            dTHR;
 	    int low = *p++;
 	    if (low < 0xdc00 || low >= 0xdfff) {
-		Perl_warn(aTHX_ "Malformed UTF-16 surrogate");
+		if (ckWARN_d(WARN_UTF8))     
+	    	    Perl_warner(aTHX_ WARN_UTF8, "Malformed UTF-16 surrogate");
 		p--;
 		uv = 0xfffd;
 	    }

@@ -95,7 +95,8 @@ scope.  See L<utf8> for more information.
 =head2 Lexically scoped warning categories
 
 You can now control the granularity of warnings emitted by perl at a finer
-level using the C<use warning> pragma.  See L<warning> for details.
+level using the C<use warning> pragma.  See L<warning> and L<perllexwarn>
+for details.
 
 =head2 Binary numbers supported
 

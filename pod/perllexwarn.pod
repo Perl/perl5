@@ -1,0 +1,322 @@
+=head1 NAME
+
+perllexwarn - Perl Lexical Warnings
+
+=head1 DESCRIPTION
+ 
+The C<use warning> pragma is a replacement for both the command line
+flag B<-w> and the equivalent Perl variable, C<$^W>.
+
+The pragma works just like the existing "strict" pragma.
+This means that the scope of the warning pragma is limited to the
+enclosing block. It also means that that the pragma setting will not
+leak across files (via C<use>, C<require> or C<do>). This allows
+authors to independently define the degree of warning checks that will
+be applied to their module.
+
+By default, optional warnings are disabled, so any legacy code that
+doesn't attempt to control the warnings will work unchanged.
+
+All warnings are enabled in a block by either of these:
+ 
+    use warning ;
+    use warning 'all' ;
+ 
+Similarly all warnings are disabled in a block by either of these:
+
+    no warning ;
+    no warning 'all' ;
+
+For example, consider the code below:
+
+    use warning ;
+    my $a ;
+    my $b ;
+    {
+        no warning ;
+	$b = 2 if $a EQ 3 ;
+    }
+    $b = 1 if $a NE 3 ;
+
+The code in the enclosing block has warnings enabled, but the inner
+block has them disabled. In this case that means that the use of the C<EQ>
+operator won't trip a C<"Use of EQ is deprecated"> warning, but the use of
+C<NE> will produce a C<"Use of NE is deprecated"> warning.
+
+=head2 Default Warnings and Optional Warnings
+
+Before the introduction of lexical warnings, Perl had two classes of
+warnings: mandatory and optional. 
+
+As its name suggests, if your code tripped a mandatory warning, you
+would get a warning whether you wanted it or not.
+For example, the code below would always produce an C<"integer overflow">
+warning.
+
+    my $a = oct "777777777777777777777777777777777777" ;
+
+
+With the introduction of lexical warnings, mandatory warnings now become
+I<default> warnings. The difference is that although the previously
+mandatory warnings are still enabled by default, they can then be
+subsequently enabled or disabled with the lexical warning pragma. For
+example, in the code below, an C<"integer overflow"> warning will only
+be reported for the C<$a> variable.
+
+    my $a = oct "777777777777777777777777777777777777" ;
+    no warning ;
+    my $b = oct "777777777777777777777777777777777777" ;
+
+Note that neither the B<-w> flag or the C<$^W> can be used to
+disable/enable default warnings. They are still mandatory in this case.
+
+=head2 What's wrong with B<-w> and C<$^W>
+
+Although very useful, the big problem with using B<-w> on the command
+line to enable warnings is that it is all or nothing. Take the typical
+scenario when you are writing a Perl program. Parts of the code you
+will write yourself, but it's very likely that you will make use of
+pre-written Perl modules. If you use the B<-w> flag in this case, you
+end up enabling warnings in pieces of code that you haven't written.
+
+Similarly, using C<$^W> to either disable or enable blocks of code is
+fundamentally flawed. For a start, say you want to disable warnings in
+a block of code. You might expect this to be enough to do the trick:
+
+     {
+         local ($^W) = 0 ;
+	 my $a =+ 2 ;
+	 my $b ; chop $b ;
+     }
+
+When this code is run with the B<-w> flag, a warning will be produced
+for the C<$a> line -- C<"Reversed += operator">.
+
+The problem is that Perl has both compile-time and run-time warnings. To
+disable compile-time warnings you need to rewrite the code like this:
+
+     {
+         BEGIN { $^W = 0 }
+	 my $a =+ 2 ;
+	 my $b ; chop $b ;
+     }
+
+The other big problem with C<$^W> is that way you can inadvertently
+change the warning setting in unexpected places in your code. For example,
+when the code below is run (without the B<-w> flag), the second call
+to C<doit> will trip a C<"Use of uninitialized value"> warning, whereas
+the first will not.
+
+    sub doit
+    {
+        my $b ; chop $b ;
+    }
+
+    doit() ;
+
+    {
+        local ($^W) = 1 ;
+        doit()
+    }
+
+This is a side-effect of C<$^W> being dynamically scoped.
+
+Lexical warnings get around these limitations by allowing finer control
+over where warnings can or can't be tripped.
+
+=head2 Controlling Warnings from the Command Line
+
+There are three Command Line flags that can be used to control when
+warnings are (or aren't) produced:
+
+=over 5
+
+=item B<-w>
+
+This is  the existing flag. If the lexical warnings pragma is B<not>
+used in any of you code, or any of the modules that you use, this flag
+will enable warnings everywhere. See L<Backward Compatibility> for
+details of how this flag interacts with lexical warnings.
+
+=item B<-W>
+ 
+If the B<-W> flag is used on the command line, it will enable all warnings
+throughout the program regardless of whether warnings were disabled
+locally using C<no warning> or C<$^W =0>. This includes all files that get
+included via C<use>, C<require> or C<do>.
+Think of it as the Perl equivalent of the "lint" command.
+
+=item B<-X>
+
+Does the exact opposite to the B<-W> flag, i.e. it disables all warnings.
+
+=back
+
+=head2 Backward Compatibility
+
+If you are used with working with a version of Perl prior to the
+introduction of lexically scoped warnings, or have code that uses both
+lexical warnings and C<$^W>, this section will describe how they interact.
+
+How Lexical Warnings interact with B<-w>/C<$^W>:
+ 
+=over 5
+
+=item 1.
+
+If none of the three command line flags (B<-w>, B<-W> or B<-X>) that
+control warnings is used and neither C<$^W> or lexical warnings are used,
+then default warnings will be enabled and optional warnings disabled.
+This means that legacy code that doesn't attempt to control the warnings
+will work unchanged.
+
+=item 2.
+
+The B<-w> flag just sets the global C<$^W> variable as in 5.005 -- this
+means that any legacy code that currently relies on manipulating C<$^W>
+to control warning behavior will still work as is. 
+
+=item 3.
+ 
+Apart from now being a boolean, the C<$^W> variable operates in exactly
+the same horrible uncontrolled global way, except that it cannot
+disable/enable default warnings.
+
+=item 4.
+ 
+If a piece of code is under the control of the lexical warning pragma,
+both the C<$^W> variable and the B<-w> flag will be ignored for the
+scope of the lexical warning.
+
+=item 5.
+ 
+The only way to override a lexical warnings setting is with the B<-W>
+or B<-X> command line flags.
+
+=back
+
+The combined effect of 3 & 4 is that it will will allow code which uses
+the lexical warning pragma to control the warning behavior of $^W-type
+code (using a C<local $^W=0>) if it really wants to, but not vice-versa.
+
+=head1 EXPERIMENTAL FEATURES
+
+The features described in this section are experimental, and so subject
+to change.
+
+=head2 Category Hierarchy
+ 
+A tentative hierarchy of "categories" have been defined to allow groups
+of warnings to be enabled/disabled in isolation.  The current
+hierarchy is:
+
+    all - +--- unsafe -------+--- taint
+          |                  |
+          |                  +--- substr
+          |                  |
+          |                  +--- signal
+          |                  |
+          |                  +--- closure
+          |                  |
+          |                  +--- untie
+          |                  |
+          |                  +--- utf8
+          |                  
+          +--- io   ---------+--- pipe
+          |                  |
+          |                  +--- unopened
+          |                  |
+          |                  +--- closed
+          |                  |
+          |                  +--- newline
+          |                  |
+          |                  +--- exec
+          |
+          +--- syntax    ----+--- ambiguous
+          |                  |
+          |                  +--- semicolon
+          |                  |
+          |                  +--- precedence
+          |                  |
+          |                  +--- reserved
+          |                  |
+          |                  +--- octal
+          |                  |
+          |                  +--- parenthesis
+          |                  |
+          |                  +--- deprecated
+          |                  |
+          |                  +--- printf
+          |
+          +--- severe    ----+--- inplace
+          |                  |
+          |                  +--- internal
+          |                  |
+          |                  +--- debugging
+          |
+          |--- uninitialized
+          |
+          +--- void
+          |
+          +--- recursion
+          |
+          +--- redefine
+          |
+          +--- numeric
+          |
+          +--- once
+          |
+          +--- misc
+
+ 
+Just like the "strict" pragma any of these categories can be
+combined
+
+    use warning qw(void redefine) ;
+    no warning qw(io syntax untie) ;
+
+=head2 Fatal Warnings
+ 
+This feature is B<very> experimental.
+ 
+The presence of the word "FATAL" in the category list will escalate any
+warnings from the category specified that are detected in the lexical
+scope into fatal errors. In the code below, there are 3 places where
+a deprecated warning will be detected, the middle one will produce a
+fatal error.
+ 
+ 
+    use warning ;
+ 
+    $a = 1 if $a EQ $b ;
+ 
+    {
+        use warning qw(FATAL deprecated) ;
+        $a = 1 if $a EQ $b ;
+    }
+ 
+    $a = 1 if $a EQ $b ;
+ 
+=head1 TODO
+ 
+The experimental features need bottomed out.
+
+  perl5db.pl
+    The debugger saves and restores C<$^W> at runtime. I haven't checked
+    whether the debugger will still work with the lexical warnings
+    patch applied.
+
+  diagnostics.pm
+    I *think* I've got diagnostics to work with the lexical warnings
+    patch, but there were design decisions made in diagnostics to work
+    around the limitations of C<$^W>. Now that those limitations are gone,
+    the module should be revisited.
+
+
+=head1 SEE ALSO
+
+L<warning>.
+ 
+=head1 AUTHOR
+ 
+Paul Marquess

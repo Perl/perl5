@@ -154,18 +154,13 @@ sub xref {
 	warn sprintf("top = [%s, %s, %s]\n", @$top) if $debug_top;
 	warn peekop($op), "\n" if $debug_op;
 	my $ppname = $op->ppaddr;
-	if ($ppname =~ /^pp_(or|and|mapwhile|grepwhile)$/) {
+	if ($ppname =~ /^pp_(or|and|mapwhile|grepwhile|range|cond_expr)$/) {
 	    xref($op->other);
 	} elsif ($ppname eq "pp_match" || $ppname eq "pp_subst") {
 	    xref($op->pmreplstart);
 	} elsif ($ppname eq "pp_substcont") {
 	    xref($op->other->pmreplstart);
 	    $op = $op->other;
-	    redo;
-	} elsif ($ppname eq "pp_cond_expr") {
-	    # pp_cond_expr never returns op_next
-	    xref($op->true);
-	    $op = $op->false;
 	    redo;
 	} elsif ($ppname eq "pp_enterloop") {
 	    xref($op->redoop);

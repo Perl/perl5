@@ -1526,9 +1526,10 @@ constant(char *name, int arg)
 #else
 		goto not_there;
 #endif
-	    if (strEQ(name, "L_tmpname"))
-#ifdef L_tmpname
-		return L_tmpname;
+	    /* L_tmpnam[e] was a typo--retained for compatibility */
+	    if (strEQ(name, "L_tmpname") || strEQ(name, "L_tmpnam"))
+#ifdef L_tmpnam
+		return L_tmpnam;
 #else
 		goto not_there;
 #endif
@@ -3374,9 +3375,18 @@ write(fd, buffer, nbytes)
 	char *		buffer
 	size_t		nbytes
 
-char *
-tmpnam(s = 0)
-	char *		s = 0;
+SV *
+tmpnam()
+    PREINIT:
+	STRLEN i;
+	int len;
+    CODE:
+	RETVAL = newSVpvn("", 0);
+	SvGROW(RETVAL, L_tmpnam);
+	len = strlen(tmpnam(SvPV(RETVAL, i)));
+	SvCUR_set(RETVAL, len);
+    OUTPUT:
+	RETVAL
 
 void
 abort()

@@ -431,33 +431,6 @@ Perl_magic_len(pTHX_ SV *sv, MAGIC *mg)
     return 0;
 }
 
-#if 0
-static char * 
-printW(SV *sv)
-{
-#if 1
-    return "" ;
-
-#else
-    int i ;
-    static char buffer[50] ;
-    char buf1[20] ;
-    char * p ;
-
-
-    sprintf(buffer, "Buffer %d, Length = %d - ", sv, SvCUR(sv)) ;
-    p = SvPVX(sv) ;
-    for (i = 0; i < SvCUR(sv) ; ++ i) {
-        sprintf (buf1, " %x [%x]", (p+i), *(p+i)) ;
-	strcat(buffer, buf1) ;
-    } 
-
-    return buffer ;
-
-#endif
-}
-#endif
-
 int
 Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 {
@@ -473,16 +446,17 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	sv_setsv(sv, PL_bodytarget);
 	break;
     case '\002':		/* ^B */
-	/* printf("magic_get $^B: ") ; */
-	if (PL_curcop->cop_warnings == WARN_NONE)
-	    /* printf("WARN_NONE\n"), */
+	if (PL_curcop->cop_warnings == WARN_NONE ||
+	    PL_curcop->cop_warnings == WARN_STD)
+	{
 	    sv_setpvn(sv, WARN_NONEstring, WARNsize) ;
-        else if (PL_curcop->cop_warnings == WARN_ALL)
-	    /* printf("WARN_ALL\n"), */
+        }
+        else if (PL_curcop->cop_warnings == WARN_ALL) {
 	    sv_setpvn(sv, WARN_ALLstring, WARNsize) ;
-        else 
-	    /* printf("some %s\n", printW(PL_curcop->cop_warnings)), */
+	}    
+        else {
 	    sv_setsv(sv, PL_curcop->cop_warnings);
+	}    
 	break;
     case '\003':		/* ^C */
 	sv_setiv(sv, (IV)PL_minus_c);
@@ -576,7 +550,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 #endif
 	break;
     case '\027':		/* ^W */
-	sv_setiv(sv, (IV)((PL_dowarn & G_WARN_ON) == G_WARN_ON));
+	sv_setiv(sv, (IV)((PL_dowarn & G_WARN_ON) ? TRUE : FALSE));
 	break;
     case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9': case '&':
@@ -1234,8 +1208,8 @@ Perl_magic_setdbline(pTHX_ SV *sv, MAGIC *mg)
 		     atoi(MgPV(mg,n_a)), FALSE);
     if (svp && SvIOKp(*svp) && (o = (OP*)SvSTASH(*svp)))
 	o->op_private = i;
-    else
-	Perl_warn(aTHX_ "Can't break at that line\n");
+    else if (ckWARN_d(WARN_INTERNAL))
+	Perl_warner(aTHX_ WARN_INTERNAL, "Can't break at that line\n");
     return 0;
 }
 
@@ -1678,16 +1652,19 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	break;
     case '\002':	/* ^B */
 	if ( ! (PL_dowarn & G_WARN_ALL_MASK)) {
-            if (memEQ(SvPVX(sv), WARN_ALLstring, WARNsize))
+            if (memEQ(SvPVX(sv), WARN_ALLstring, WARNsize)) {
 	        PL_compiling.cop_warnings = WARN_ALL;
+	        PL_dowarn |= G_WARN_ONCE ;
+	    }	
 	    else if (memEQ(SvPVX(sv), WARN_NONEstring, WARNsize))
 	        PL_compiling.cop_warnings = WARN_NONE;
             else {
-	        if (PL_compiling.cop_warnings != WARN_NONE && 
-		    PL_compiling.cop_warnings != WARN_ALL)
-	            sv_setsv(PL_compiling.cop_warnings, sv);
-	        else
+	        if (specialWARN(PL_compiling.cop_warnings))
 		    PL_compiling.cop_warnings = newSVsv(sv) ;
+	        else
+	            sv_setsv(PL_compiling.cop_warnings, sv);
+	        if (isWARN_on(PL_compiling.cop_warnings, WARN_ONCE))
+	            PL_dowarn |= G_WARN_ONCE ;
 	    }
 	}
 	break;
@@ -1749,7 +1726,8 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
     case '\027':	/* ^W */
 	if ( ! (PL_dowarn & G_WARN_ALL_MASK)) {
 	    i = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
-	    PL_dowarn = (i ? G_WARN_ON : G_WARN_OFF) ;
+	    PL_dowarn = (PL_dowarn & ~G_WARN_ON) 
+		    		| (i ? G_WARN_ON : G_WARN_OFF) ;
 	}
 	break;
     case '.':

@@ -97,9 +97,31 @@ toke.c	AOK
         use utf8 ; 
 	$_ = "\xffe"
      
+    Mandatory Warnings
+    ------------------
+    Use of "%s" without parentheses is ambiguous	[check_uni]
+        rand + 4 
+
+    Ambiguous use of -%s resolved as -&%s() 		[yylex]
+        sub fred {} ; - fred ;
+
+    Precedence problem: open %.*s should be open(%.*s)	[yylex]
+    	open FOO || die;
+
+    Operator or semicolon missing before %c%s		[yylex]
+    Ambiguous use of %c resolved as operator %c
+        *foo *foo
+
 __END__
 # toke.c 
 use warning 'deprecated' ;
+1 if $a EQ $b ;
+1 if $a NE $b ;
+1 if $a GT $b ;
+1 if $a LT $b ;
+1 if $a GE $b ;
+1 if $a LE $b ;
+no warning 'deprecated' ;
 1 if $a EQ $b ;
 1 if $a NE $b ;
 1 if $a GT $b ;
@@ -120,16 +142,21 @@ format STDOUT =
 @<<<  @|||  @>>>  @>>>
 $a    $b    "abc" 'def'
 .
-($a, $b) = (1,2,3);
-write;
+no warning 'deprecated' ;
+format STDOUT =
+@<<<  @|||  @>>>  @>>>
+$a    $b    "abc" 'def'
+.
 EXPECT
 Use of comma-less variable list is deprecated at - line 5.
 Use of comma-less variable list is deprecated at - line 5.
 Use of comma-less variable list is deprecated at - line 5.
-1      2     abc   def
 ########
 # toke.c
 use warning 'deprecated' ;
+$a = <<;
+
+no warning 'deprecated' ;
 $a = <<;
 
 EXPECT
@@ -138,11 +165,16 @@ Use of bare << to mean <<"" is deprecated at - line 3.
 # toke.c
 use warning 'syntax' ;
 s/(abc)/\1/;
+no warning 'syntax' ;
+s/(abc)/\1/;
 EXPECT
 \1 better written as $1 at - line 3.
 ########
 # toke.c
 use warning 'semicolon' ;
+$a = 1
+&time ;
+no warning 'semicolon' ;
 $a = 1
 &time ;
 EXPECT
@@ -180,7 +212,31 @@ Reversed <= operator at - line 15.
 Unterminated <> operator at - line 15.
 ########
 # toke.c
+BEGIN {
+    # Scalars leaked: due to syntax errors
+    $ENV{PERL_DESTRUCT_LEVEL} = 0 unless $ENV{PERL_DESTRUCT_LEVEL} > 3;
+}
+no warning 'syntax' ;
+my $a =+ 2 ;
+$a =- 2 ;
+$a =* 2 ;
+$a =% 2 ;
+$a =& 2 ;
+$a =. 2 ;
+$a =^ 2 ;
+$a =| 2 ;
+$a =< 2 ;
+$a =/ 2 ;
+EXPECT
+syntax error at - line 12, near "=."
+syntax error at - line 13, near "=^"
+syntax error at - line 14, near "=|"
+Unterminated <> operator at - line 15.
+########
+# toke.c
 use warning 'syntax' ;
+my $a = $a[1,2] ;
+no warning 'syntax' ;
 my $a = $a[1,2] ;
 EXPECT
 Multidimensional syntax $a[1,2] not supported at - line 3.
@@ -188,11 +244,16 @@ Multidimensional syntax $a[1,2] not supported at - line 3.
 # toke.c
 use warning 'syntax' ;
 sub fred {} ; $SIG{TERM} = fred;
+no warning 'syntax' ;
+$SIG{TERM} = fred;
 EXPECT
 You need to quote "fred" at - line 3.
 ########
 # toke.c
 use warning 'syntax' ;
+@a[3] = 2;
+@a{3} = 2;
+no warning 'syntax' ;
 @a[3] = 2;
 @a{3} = 2;
 EXPECT
@@ -203,11 +264,16 @@ Scalar value @a{3} better written as $a{3} at - line 4.
 use warning 'syntax' ;
 $_ = "ab" ; 
 s/(ab)/\1/e;
+no warning 'syntax' ;
+$_ = "ab" ; 
+s/(ab)/\1/e;
 EXPECT
 Can't use \1 to mean $1 in expression at - line 4.
 ########
 # toke.c
 use warning 'reserved' ;
+$a = abc;
+no warning 'reserved' ;
 $a = abc;
 EXPECT
 Unquoted string "abc" may clash with future reserved word at - line 3.
@@ -215,11 +281,15 @@ Unquoted string "abc" may clash with future reserved word at - line 3.
 # toke.c
 use warning 'octal' ;
 chmod 3;
+no warning 'octal' ;
+chmod 3;
 EXPECT
 chmod: mode argument is missing initial 0 at - line 3, at end of line
 ########
 # toke.c
 use warning 'syntax' ;
+@a = qw(a, b, c) ;
+no warning 'syntax' ;
 @a = qw(a, b, c) ;
 EXPECT
 Possible attempt to separate words with commas at - line 3.
@@ -227,11 +297,15 @@ Possible attempt to separate words with commas at - line 3.
 # toke.c
 use warning 'syntax' ;
 @a = qw(a b #) ;
+no warning 'syntax' ;
+@a = qw(a b #) ;
 EXPECT
 Possible attempt to put comments in qw() list at - line 3.
 ########
 # toke.c
 use warning 'octal' ;
+umask 3;
+no warning 'octal' ;
 umask 3;
 EXPECT
 umask: argument is missing initial 0 at - line 3, at end of line
@@ -243,10 +317,22 @@ EXPECT
 print (...) interpreted as function at - line 3.
 ########
 # toke.c
+no warning 'syntax' ;
+print ("")
+EXPECT
+
+########
+# toke.c
 use warning 'syntax' ;
 printf ("")
 EXPECT
 printf (...) interpreted as function at - line 3.
+########
+# toke.c
+no warning 'syntax' ;
+printf ("")
+EXPECT
+
 ########
 # toke.c
 use warning 'syntax' ;
@@ -255,7 +341,15 @@ EXPECT
 sort (...) interpreted as function at - line 3.
 ########
 # toke.c
+no warning 'syntax' ;
+sort ("")
+EXPECT
+
+########
+# toke.c
 use warning 'ambiguous' ;
+$a = ${time[2]};
+no warning 'ambiguous' ;
 $a = ${time[2]};
 EXPECT
 Ambiguous use of ${time[...]} resolved to $time[...] at - line 3.
@@ -267,7 +361,15 @@ EXPECT
 Ambiguous use of ${time{...}} resolved to $time{...} at - line 3.
 ########
 # toke.c
+no warning 'ambiguous' ;
+$a = ${time{2}};
+EXPECT
+
+########
+# toke.c
 use warning 'ambiguous' ;
+$a = ${time} ;
+no warning 'ambiguous' ;
 $a = ${time} ;
 EXPECT
 Ambiguous use of ${time} resolved to $time at - line 3.
@@ -276,11 +378,16 @@ Ambiguous use of ${time} resolved to $time at - line 3.
 use warning 'ambiguous' ;
 sub fred {}
 $a = ${fred} ;
+no warning 'ambiguous' ;
+$a = ${fred} ;
 EXPECT
 Ambiguous use of ${fred} resolved to $fred at - line 4.
 ########
 # toke.c
 use warning 'syntax' ;
+$a = 1_2;
+$a = 1_2345_6;
+no warning 'syntax' ;
 $a = 1_2;
 $a = 1_2345_6;
 EXPECT
@@ -292,13 +399,18 @@ Misplaced _ in number at - line 4.
 use warning 'unsafe' ;
 #line 25 "bar"
 $a = FRED:: ;
+no warning 'unsafe' ;
+#line 25 "bar"
+$a = FRED:: ;
 EXPECT
 Bareword "FRED::" refers to nonexistent package at bar line 25.
 ########
 # toke.c
 use warning 'ambiguous' ;
 sub time {}
-my $a = time() 
+my $a = time() ;
+no warning 'ambiguous' ;
+my $b = time() ;
 EXPECT
 Ambiguous call resolved as CORE::time(), qualify as such or use & at - line 4.
 ########
@@ -314,8 +426,101 @@ EXPECT
 Use of \x{} without utf8 declaration at foo line 30.
 ########
 # toke.c
+no warning 'utf8' ;
+eval <<'EOE';
+{
+#line 30 "foo"
+  $_ = " \x{123} " ;
+}
+EOE
+EXPECT
+
+########
+# toke.c
 use warning 'utf8' ;
 use utf8 ;
 $_ = " \xffe " ;
+no warning 'utf8' ;
+$_ = " \xffe " ;
 EXPECT
 \xff will produce malformed UTF-8 character; use \x{ff} for that at - line 4.
+########
+# toke.c
+my $a = rand + 4 ;
+EXPECT
+Warning: Use of "rand" without parens is ambiguous at - line 2.
+########
+# toke.c
+$^W = 0 ;
+my $a = rand + 4 ;
+{
+    no warning 'ambiguous' ;
+    $a = rand + 4 ;
+    use warning 'ambiguous' ;
+    $a = rand + 4 ;
+}
+$a = rand + 4 ;
+EXPECT
+Warning: Use of "rand" without parens is ambiguous at - line 3.
+Warning: Use of "rand" without parens is ambiguous at - line 8.
+Warning: Use of "rand" without parens is ambiguous at - line 10.
+########
+# toke.c
+sub fred {};
+-fred ;
+EXPECT
+Ambiguous use of -fred resolved as -&fred() at - line 3.
+########
+# toke.c
+$^W = 0 ;
+sub fred {} ;
+-fred ;
+{
+    no warning 'ambiguous' ;
+    -fred ;
+    use warning 'ambiguous' ;
+    -fred ;
+}
+-fred ;
+EXPECT
+Ambiguous use of -fred resolved as -&fred() at - line 4.
+Ambiguous use of -fred resolved as -&fred() at - line 9.
+Ambiguous use of -fred resolved as -&fred() at - line 11.
+########
+# toke.c
+open FOO || time;
+EXPECT
+Precedence problem: open FOO should be open(FOO) at - line 2.
+########
+# toke.c
+$^W = 0 ;
+open FOO || time;
+{
+    no warning 'ambiguous' ;
+    open FOO || time;
+    use warning 'ambiguous' ;
+    open FOO || time;
+}
+open FOO || time;
+EXPECT
+Precedence problem: open FOO should be open(FOO) at - line 3.
+Precedence problem: open FOO should be open(FOO) at - line 8.
+Precedence problem: open FOO should be open(FOO) at - line 10.
+########
+# toke.c
+$^W = 0 ;
+*foo *foo ;
+{
+    no warning 'ambiguous' ;
+    *foo *foo ;
+    use warning 'ambiguous' ;
+    *foo *foo ;
+}
+*foo *foo ;
+EXPECT
+Operator or semicolon missing before *foo at - line 3.
+Ambiguous use of * resolved as operator * at - line 3.
+Operator or semicolon missing before *foo at - line 8.
+Ambiguous use of * resolved as operator * at - line 8.
+Operator or semicolon missing before *foo at - line 10.
+Ambiguous use of * resolved as operator * at - line 10.

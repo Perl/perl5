@@ -3643,10 +3643,6 @@ last
 
 other
 
-=item B::CONDOP METHODS
-
-true, false
-
 =item B::LISTOP METHOD
 
 children

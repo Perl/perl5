@@ -134,6 +134,7 @@ The following compound statements may be used to control flow:
     LABEL while (EXPR) BLOCK continue BLOCK
     LABEL for (EXPR; EXPR; EXPR) BLOCK
     LABEL foreach VAR (LIST) BLOCK
+    LABEL foreach VAR (LIST) BLOCK continue BLOCK
     LABEL BLOCK continue BLOCK
 
 Note that, unlike C and Pascal, these are defined in terms of BLOCKs,

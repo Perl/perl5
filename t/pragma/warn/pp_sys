@@ -82,6 +82,9 @@ use warning 'untie' ;
 sub TIESCALAR { bless [] } ; 
 $b = tie $a, 'main'; 
 untie $a ;
+no warning 'untie' ;
+$c = tie $d, 'main'; 
+untie $d ;
 EXPECT
 untie attempted while 1 inner references still exist at - line 5.
 ########
@@ -89,6 +92,8 @@ untie attempted while 1 inner references still exist at - line 5.
 use warning 'io' ;
 format STDIN =
 .
+write STDIN;
+no warning 'io' ;
 write STDIN;
 EXPECT
 Filehandle main::STDIN opened only for input at - line 5.
@@ -98,6 +103,8 @@ use warning 'closed' ;
 format STDIN =
 .
 close STDIN;
+write STDIN;
+no warning 'closed' ;
 write STDIN;
 EXPECT
 Write on closed filehandle main::STDIN at - line 6.
@@ -115,32 +122,42 @@ $= = 1 ;
 $- =1 ;
 open STDOUT, ">".($^O eq 'VMS'? 'NL:' : '/dev/null') ;
 write ;
+no warning 'io' ;
+write ;
 EXPECT
 page overflow at - line 13.
 ########
 # pp_sys.c
 use warning 'unopened' ;
 $a = "abc"; 
-printf $a "fred"
+printf $a "fred";
+no warning 'unopened' ;
+printf $a "fred";
 EXPECT
 Filehandle main::abc never opened at - line 4.
 ########
 # pp_sys.c
 use warning 'closed' ;
 close STDIN ;
-printf STDIN "fred"
+printf STDIN "fred";
+no warning 'closed' ;
+printf STDIN "fred";
 EXPECT
 printf on closed filehandle main::STDIN at - line 4.
 ########
 # pp_sys.c
 use warning 'io' ;
-printf STDIN "fred"
+printf STDIN "fred";
+no warning 'io' ;
+printf STDIN "fred";
 EXPECT
 Filehandle main::STDIN opened only for input at - line 3.
 ########
 # pp_sys.c
 use warning 'closed' ;
 close STDIN; 
+syswrite STDIN, "fred", 1;
+no warning 'closed' ;
 syswrite STDIN, "fred", 1;
 EXPECT
 Syswrite on closed filehandle at - line 4.
@@ -176,6 +193,17 @@ setsockopt STDIN, 1,2,3;
 getsockopt STDIN, 1,2;
 getsockname STDIN;
 getpeername STDIN;
+no warning 'io' ;
+send STDIN, "fred", 1;
+bind STDIN, "fred" ;
+connect STDIN, "fred" ;
+listen STDIN, 2;
+accept STDIN, "fred" ;
+shutdown STDIN, 0;
+setsockopt STDIN, 1,2,3;
+getsockopt STDIN, 1,2;
+getsockname STDIN;
+getpeername STDIN;
 EXPECT
 Send on closed socket at - line 22.
 bind() on closed fd at - line 23.
@@ -191,6 +219,8 @@ get{sock, peer}name() on closed fd at - line 31.
 # pp_sys.c
 use warning 'newline' ;
 stat "abc\ndef";
+no warning 'newline' ;
+stat "abc\ndef";
 EXPECT
 Unsuccessful stat on filename containing newline at - line 3.
 ########
@@ -198,11 +228,15 @@ Unsuccessful stat on filename containing newline at - line 3.
 use warning 'unopened' ;
 close STDIN ; 
 -T STDIN ;
+no warning 'unopened' ;
+-T STDIN ;
 EXPECT
 Test on unopened file <STDIN> at - line 4.
 ########
 # pp_sys.c
 use warning 'newline' ;
+-T "abc\ndef" ;
+no warning 'newline' ;
 -T "abc\ndef" ;
 EXPECT
 Unsuccessful open on filename containing newline at - line 3.

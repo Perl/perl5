@@ -25,14 +25,21 @@
   Explicit blessing to '' (assuming package main)
 	bless \[], "";
 
-  Constant subroutine %s undefined			<<<
-  Constant subroutine (anonymous) undefined		<<<
+  Constant subroutine %s undefined			<<<TODO
+  Constant subroutine (anonymous) undefined		<<<TODO
+
+  Mandatory Warnings
+  ------------------
+  Malformed UTF-8 character
 
 __END__
 # pp.c
 use warning 'substr' ;
 $a = "ab" ; 
-$a = substr($a, 4,5)
+$a = substr($a, 4,5);
+no warning 'substr' ;
+$a = "ab" ; 
+$a = substr($a, 4,5);
 EXPECT
 substr outside of string at - line 4.
 ########
@@ -40,6 +47,8 @@ substr outside of string at - line 4.
 use warning 'substr' ;
 $a = "ab" ; 
 $b = \$a ;  
+substr($b, 1,1) = "ab" ;
+no warning 'substr' ;
 substr($b, 1,1) = "ab" ;
 EXPECT
 Attempt to use reference as lvalue in substr at - line 5.
@@ -53,6 +62,8 @@ EXPECT
 # pp.c
 use warning 'unsafe' ;
 my $a = { 1,2,3};
+no warning 'unsafe' ;
+my $b = { 1,2,3};
 EXPECT
 Odd number of elements in hash assignment at - line 3.
 ########
@@ -60,6 +71,9 @@ Odd number of elements in hash assignment at - line 3.
 use warning 'unsafe' ;
 my @a = unpack ("A,A", "22") ;
 my $a = pack ("A,A", 1,2) ;
+no warning 'unsafe' ;
+my @b = unpack ("A,A", "22") ;
+my $b = pack ("A,A", 1,2) ;
 EXPECT
 Invalid type in unpack: ',' at - line 3.
 Invalid type in pack: ',' at - line 4.
@@ -67,7 +81,9 @@ Invalid type in pack: ',' at - line 4.
 # pp.c
 use warning 'uninitialized' ;
 my $a = undef ; 
-my $b = $$a
+my $b = $$a;
+no warning 'uninitialized' ;
+my $c = $$a;
 EXPECT
 Use of uninitialized value at - line 4.
 ########
@@ -75,11 +91,35 @@ Use of uninitialized value at - line 4.
 use warning 'unsafe' ;
 sub foo { my $a = "a"; return $a . $a++ . $a++ }
 my $a = pack("p", &foo) ;
+no warning 'unsafe' ;
+my $b = pack("p", &foo) ;
 EXPECT
 Attempt to pack pointer to temporary value at - line 4.
 ########
 # pp.c
 use warning 'unsafe' ;
 bless \[], "" ;
+no warning 'unsafe' ;
+bless \[], "" ;
 EXPECT
 Explicit blessing to '' (assuming package main) at - line 3.
+########
+# pp.c
+use utf8 ;
+$_ = "\x80  \xff" ;
+reverse ;
+EXPECT
+Malformed UTF-8 character at - line 4.
+########
+# pp.c
+use warning 'utf8'  ;
+use utf8 ;
+$_ = "\x80  \xff" ;
+reverse ;
+no warning 'utf8'  ;
+$_ = "\x80  \xff" ;
+reverse ;
+EXPECT
+\x80 will produce malformed UTF-8 character; use \x{80} for that at - line 4.
+\xff will produce malformed UTF-8 character; use \x{ff} for that at - line 4.
+Malformed UTF-8 character at - line 5.

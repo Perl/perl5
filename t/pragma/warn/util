@@ -9,9 +9,18 @@
      Illegal binary digit ignored
       my $a = oct "0b9" ;
 
+     
+     Mandatory Warnings
+     ------------------
+     Integer overflow in binary number
+     Integer overflow in octal number
+     Integer overflow in hex number
+
 __END__
 # util.c
 use warning 'octal' ;
+my $a = oct "029" ;
+no warning 'octal' ;
 my $a = oct "029" ;
 EXPECT
 Illegal octal digit '9' ignored at - line 3.
@@ -19,11 +28,55 @@ Illegal octal digit '9' ignored at - line 3.
 # util.c
 use warning 'unsafe' ;
 *a =  hex "0xv9" ;
+no warning 'unsafe' ;
+*a =  hex "0xv9" ;
 EXPECT
 Illegal hex digit 'v' ignored at - line 3.
 ########
 # util.c
 use warning 'unsafe' ;
 *a =  oct "0b9" ;
+no warning 'unsafe' ;
+*a =  oct "0b9" ;
 EXPECT
 Illegal binary digit '9' ignored at - line 3.
+########
+# util.c
+$^W =1 ;
+{
+  use warning 'unsafe' ;
+  my $a = oct "0b111111111111111111111111111111111" ;
+  no warning 'unsafe' ;
+  $a = oct "0b111111111111111111111111111111111" ;
+}
+my $a = oct "0b111111111111111111111111111111111" ;
+EXPECT
+Integer overflow in binary number at - line 5.
+Integer overflow in binary number at - line 9.
+########
+# util.c
+$^W =1 ;
+{
+  use warning 'unsafe' ;
+  my $a = oct "777777777777777777777777777777777777" ;
+  no warning 'unsafe' ;
+  $a = oct "777777777777777777777777777777777777" ;
+}
+my $a = oct "777777777777777777777777777777777777" ;
+EXPECT
+Integer overflow in octal number at - line 5.
+Integer overflow in octal number at - line 9.
+########
+# util.c
+$^W =1 ;
+{
+  use warning 'unsafe' ;
+  my $a = hex "ffffffffffffffffffffffffffffffff" ;
+  no warning 'unsafe' ;
+  $a = hex "ffffffffffffffffffffffffffffffff" ;
+}
+my $a = hex "ffffffffffffffffffffffffffffffff" ;
+EXPECT
+Integer overflow in hex number at - line 5.
+Integer overflow in hex number at - line 9.
+

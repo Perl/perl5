@@ -30,6 +30,7 @@ by saying:
 
     no integer;
     no strict 'refs';
+    no warning;
 
 which lasts until the end of that BLOCK.
 
@@ -124,6 +125,10 @@ turn on UTF-8 and Unicode support
 =item vars
 
 predeclare global variable names
+
+=item warning
+
+control optional warnings
 
 =item vmsish
 
