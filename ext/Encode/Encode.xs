@@ -107,7 +107,7 @@ PerlIOEncode_get_base(PerlIO *f)
    e->bufsv = newSV(e->base.bufsiz);
    sv_setpvn(e->bufsv,"",0);
   }
- e->base.buf = SvPVX(e->bufsv);
+ e->base.buf = (STDCHAR *)SvPVX(e->bufsv);
  if (!e->base.ptr)
   e->base.ptr = e->base.buf;
  if (!e->base.end)
@@ -122,7 +122,7 @@ PerlIOEncode_get_base(PerlIO *f)
   {
    SSize_t poff = e->base.ptr - e->base.buf;
    SSize_t eoff = e->base.end - e->base.buf;
-   e->base.buf  = SvGROW(e->bufsv,e->base.bufsiz);
+   e->base.buf  = (STDCHAR *)SvGROW(e->bufsv,e->base.bufsiz);
    e->base.ptr  = e->base.buf + poff;
    e->base.end  = e->base.buf + eoff;
   }
@@ -171,7 +171,7 @@ PerlIOEncode_fill(PerlIO *f)
    s = SvPVutf8(uni,len);
    if (s != SvPVX(e->bufsv))
     {
-     e->base.buf = SvGROW(e->bufsv,len);
+     e->base.buf = (STDCHAR *)SvGROW(e->bufsv,len);
      Move(s,e->base.buf,len,char);
      SvCUR_set(e->bufsv,len);
     }
@@ -222,7 +222,7 @@ PerlIOEncode_flush(PerlIO *f)
    s = SvPV(str,len);
    if (s != SvPVX(e->bufsv))
     {
-     e->base.buf = SvGROW(e->bufsv,len);
+     e->base.buf = (STDCHAR *)SvGROW(e->bufsv,len);
      Move(s,e->base.buf,len,char);
      SvCUR_set(e->bufsv,len);
     }

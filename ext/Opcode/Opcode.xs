@@ -253,6 +253,12 @@ PPCODE:
     save_hptr(&PL_defstash);		/* save current default stash	*/
     /* the assignment to global defstash changes our sense of 'main'	*/
     PL_defstash = gv_stashpv(Package, GV_ADDWARN); /* should exist already	*/
+    if (strNE(HvNAME(PL_defstash),"main")) {
+        Safefree(HvNAME(PL_defstash));         
+        HvNAME(PL_defstash) = savepv("main"); /* make it think it's in main:: */
+        hv_store(PL_defstash,"_",1,(SV *)PL_defgv,0);  /* connect _ to global */
+        SvREFCNT_inc((SV *)PL_defgv);  /* want to keep _ around! */
+    }
     save_hptr(&PL_curstash);
     PL_curstash = PL_defstash;
 

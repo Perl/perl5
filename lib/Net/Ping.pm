@@ -460,6 +460,11 @@ received from the remote host and the received packet contains the
 same data as the packet that was sent, the remote host is considered
 reachable.  This protocol does not require any special privileges.
 
+It should be borne in mind that, for both tcp and udp ping, a host
+will be reported as unreachable if if not is not running the
+appropriate echo service.  For Unix-like systems see L<inetd(8)> for
+more information.
+
 If the "icmp" protocol is specified, the ping() method sends an icmp
 echo message to the remote host, which is what the UNIX ping program
 does.  If the echoed message is received from the remote host and

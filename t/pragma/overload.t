@@ -133,6 +133,7 @@ test ( $a eq "087");		# 29
 test ( $b eq "88");		# 30
 test (ref $a eq "Oscalar");	# 31
 
+undef $b;			# Destroying updates tables too...
 
 eval q[package Oscalar; use overload ('++' => sub { $ {$_[0]} += 2; $_[0] } ) ];
 

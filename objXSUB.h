@@ -35,6 +35,10 @@
 #define Perl_Gv_AMupdate	pPerl->Perl_Gv_AMupdate
 #undef  Gv_AMupdate
 #define Gv_AMupdate		Perl_Gv_AMupdate
+#undef  Perl_gv_handler
+#define Perl_gv_handler		pPerl->Perl_gv_handler
+#undef  gv_handler
+#define gv_handler		Perl_gv_handler
 #undef  Perl_apply_attrs_string
 #define Perl_apply_attrs_string	pPerl->Perl_apply_attrs_string
 #undef  apply_attrs_string
@@ -2291,6 +2295,8 @@
 #endif
 #if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 #  if defined(DEBUGGING)
+#  endif
+#  if !defined(NV_PRESERVES_UV)
 #  endif
 #endif
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)

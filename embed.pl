@@ -1376,6 +1376,7 @@ START_EXTERN_C
 #  include "pp_proto.h"
 Ap	|SV*	|amagic_call	|SV* left|SV* right|int method|int dir
 Ap	|bool	|Gv_AMupdate	|HV* stash
+Ap	|CV*	|gv_handler	|HV* stash|I32 id
 p	|OP*	|append_elem	|I32 optype|OP* head|OP* tail
 p	|OP*	|append_list	|I32 optype|LISTOP* first|LISTOP* last
 p	|I32	|apply		|I32 type|SV** mark|SV** sp
@@ -2466,6 +2467,10 @@ s	|void	|sv_add_backref	|SV *tsv|SV *sv
 s	|void	|sv_del_backref	|SV *sv
 #  if defined(DEBUGGING)
 s	|void	|del_sv	|SV *p
+#  endif
+#  if !defined(NV_PRESERVES_UV)
+s      |int    |sv_2inuv_non_preserve  |SV *sv|I32 numtype
+s      |int    |sv_2iuv_non_preserve   |SV *sv|I32 numtype
 #  endif
 #endif
 

@@ -279,6 +279,69 @@ PP(pp_readline)
 PP(pp_eq)
 {
     djSP; tryAMAGICbinSET(eq,0);
+#ifdef PERL_PRESERVE_IVUV
+    SvIV_please(TOPs);
+    if (SvIOK(TOPs)) {
+	/* Unless the left argument is integer in range we are going to have to
+	   use NV maths. Hence only attempt to coerce the right argument if
+	   we know the left is integer.  */
+      SvIV_please(TOPm1s);
+	if (SvIOK(TOPm1s)) {
+	    bool auvok = SvUOK(TOPm1s);
+	    bool buvok = SvUOK(TOPs);
+	    
+	    if (!auvok && !buvok) { /* ## IV == IV ## */
+		IV aiv = SvIVX(TOPm1s);
+		IV biv = SvIVX(TOPs);
+		
+		SP--;
+		SETs(boolSV(aiv == biv));
+		RETURN;
+	    }
+	    if (auvok && buvok) { /* ## UV == UV ## */
+		UV auv = SvUVX(TOPm1s);
+		UV buv = SvUVX(TOPs);
+		
+		SP--;
+		SETs(boolSV(auv == buv));
+		RETURN;
+	    }
+	    {			/* ## Mixed IV,UV ## */
+		IV iv;
+		UV uv;
+		
+		/* == is commutative so swap if needed (save code) */
+		if (auvok) {
+		    /* swap. top of stack (b) is the iv */
+		    iv = SvIVX(TOPs);
+		    SP--;
+		    if (iv < 0) {
+			/* As (a) is a UV, it's >0, so it cannot be == */
+			SETs(&PL_sv_no);
+			RETURN;
+		    }
+		    uv = SvUVX(TOPs);
+		} else {
+		    iv = SvIVX(TOPm1s);
+		    SP--;
+		    if (iv < 0) {
+			/* As (b) is a UV, it's >0, so it cannot be == */
+			SETs(&PL_sv_no);
+			RETURN;
+		    }
+		    uv = SvUVX(*(SP+1)); /* Do I want TOPp1s() ? */
+		}
+		/* we know iv is >= 0 */
+		if (uv > (UV) IV_MAX) {
+		    SETs(&PL_sv_no);
+		    RETURN;
+		}
+		SETs(boolSV((UV)iv == uv));
+		RETURN;
+	    }
+	}
+    }
+#endif
     {
       dPOPnv;
       SETs(boolSV(TOPn == value));
@@ -297,7 +360,7 @@ PP(pp_preinc)
 	++SvIVX(TOPs);
 	SvFLAGS(TOPs) &= ~(SVp_NOK|SVp_POK);
     }
-    else
+    else /* Do all the PERL_PRESERVE_IVUV conditionals in sv_inc */
 	sv_inc(TOPs);
     SvSETMAGIC(TOPs);
     return NORMAL;
@@ -316,11 +379,125 @@ PP(pp_or)
 
 PP(pp_add)
 {
-    djSP; dATARGET; tryAMAGICbin(add,opASSIGN);
+    djSP; dATARGET; bool useleft; tryAMAGICbin(add,opASSIGN);
+    useleft = USE_LEFT(TOPm1s);
+#ifdef PERL_PRESERVE_IVUV
+    /* We must see if we can perform the addition with integers if possible,
+       as the integer code detects overflow while the NV code doesn't.
+       If either argument hasn't had a numeric conversion yet attempt to get
+       the IV. It's important to do this now, rather than just assuming that
+       it's not IOK as a PV of "9223372036854775806" may not take well to NV
+       addition, and an SV which is NOK, NV=6.0 ought to be coerced to
+       integer in case the second argument is IV=9223372036854775806
+       We can (now) rely on sv_2iv to do the right thing, only setting the
+       public IOK flag if the value in the NV (or PV) slot is truly integer.
+
+       A side effect is that this also aggressively prefers integer maths over
+       fp maths for integer values.  */
+    SvIV_please(TOPs);
+    if (SvIOK(TOPs)) {
+	/* Unless the left argument is integer in range we are going to have to
+	   use NV maths. Hence only attempt to coerce the right argument if
+	   we know the left is integer.  */
+	if (!useleft) {
+	    /* left operand is undef, treat as zero. + 0 is identity. */
+	    if (SvUOK(TOPs)) {
+		dPOPuv; /* Scary macros. Lets put a sequence point (;) here */
+		SETu(value);
+		RETURN;
+	    } else {
+		dPOPiv;
+		SETi(value);
+		RETURN;
+	    }
+	}
+	/* Left operand is defined, so is it IV? */
+	SvIV_please(TOPm1s);
+	if (SvIOK(TOPm1s)) {
+	    bool auvok = SvUOK(TOPm1s);
+	    bool buvok = SvUOK(TOPs);
+	    
+	    if (!auvok && !buvok) { /* ## IV + IV ## */
+		IV aiv = SvIVX(TOPm1s);
+		IV biv = SvIVX(TOPs);
+		IV result = aiv + biv;
+		
+		if (biv >= 0 ? (result >= aiv) : (result < aiv)) {
+		    SP--;
+		    SETi( result );
+		    RETURN;
+		}
+		if (biv >=0 && aiv >= 0) {
+		    UV result = (UV)aiv + (UV)biv;
+		    /* UV + UV can only get bigger... */
+		    if (result >= (UV) aiv) {
+			SP--;
+			SETu( result );
+			RETURN;
+		    }
+		}
+		/* Overflow, drop through to NVs (beyond next if () else ) */
+	    } else if (auvok && buvok) {	/* ## UV + UV ## */
+		UV auv = SvUVX(TOPm1s);
+		UV buv = SvUVX(TOPs);
+		UV result = auv + buv;
+		if (result >= auv) {
+		    SP--;
+		    SETu( result );
+		    RETURN;
+		}
+		/* Overflow, drop through to NVs (beyond next if () else ) */
+	    } else {			/* ## Mixed IV,UV ## */
+		IV aiv;
+		UV buv;
+		
+		/* addition is commutative so swap if needed (save code) */
+		if (buvok) {
+		    aiv = SvIVX(TOPm1s);
+		    buv = SvUVX(TOPs);
+		} else {
+		    aiv = SvIVX(TOPs);
+		    buv = SvUVX(TOPm1s);
+		}
+	    
+		if (aiv >= 0) {
+		    UV result = (UV)aiv + buv;
+		    if (result >= buv) {
+			SP--;
+			SETu( result );
+			RETURN;
+		    }
+		} else if (buv > (UV) IV_MAX) {
+		    /* assuming 2s complement means that IV_MIN == -IV_MIN,
+		       and (UV)-IV_MIN *is* the value -IV_MIN (or IV_MAX + 1)
+		       as buv > IV_MAX, it is >= (IV_MAX + 1), and therefore
+		       as the value we can be subtracting from it only lies in
+		       the range (-IV_MIN to -1) it can't overflow a UV */
+		    SP--;
+		    SETu( buv - (UV)-aiv );
+		    RETURN;
+		} else {
+		    IV result = (IV) buv + aiv;
+		    /* aiv < 0 so it must get smaller.  */
+		    if (result < (IV) buv) {
+			SP--;
+			SETi( result );
+			RETURN;
+		    }
+		}
+	    } /* end of IV+IV / UV+UV / mixed */
+	}
+    }
+#endif
     {
-      dPOPTOPnnrl_ul;
-      SETn( left + right );
-      RETURN;
+	dPOPnv;
+	if (!useleft) {
+	    /* left operand is undef, treat as zero. + 0.0 is identity. */
+	    SETn(value);
+	    RETURN;
+	}
+	SETn( value + TOPn );
+	RETURN;
     }
 }
 

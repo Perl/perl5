@@ -3,7 +3,7 @@ package File::Spec::Functions;
 use File::Spec;
 use strict;
 
-use vars qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $VERSION);
+our (@ISA,@EXPORT,@EXPORT_OK,%EXPORT_TAGS,$VERSION);
 
 $VERSION = '1.1';
 
