@@ -299,6 +299,9 @@ perl_construct(pTHXx)
 #endif /* RANDBITS < (UVSIZE * 8) */
        }
 #endif /* USE_HASH_SEED_EXPLICIT */
+       if ((s = PerlEnv_getenv("PERL_HASH_SEED_DEBUG")))
+	   PerlIO_printf(Perl_debug_log, "HASH_SEED = %"UVuf"\n",
+			 PL_hash_seed);
     }
 #endif /* #if defined(USE_HASH_SEED) || defined(USE_HASH_SEED_EXPLICIT) */
 

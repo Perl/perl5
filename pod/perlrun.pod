@@ -1126,6 +1126,10 @@ the outputs of keys(), values, and each().
 
 See L<perlsec/"Algorithmic Complexity Attacks"> for more information.
 
+=item PERL_HASH_SEED_DEBUG
+
+Set to (anything) to display the value of the hash seed.
+
 =item PERL_ROOT (specific to the VMS port)
 
 A translation concealed rooted logical name that contains perl and the
