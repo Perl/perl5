@@ -1,11 +1,727 @@
 Please note: This file provides a summary of significant changes
-between versions and sub-versions of Perl, not a complete list
-of each modification.  If you'd like more detailed information,
+between versions and sub-versions of Perl, not necessarily a complete
+list of each modification.  If you'd like more detailed information,
 please consult the comments in the patches on which the relevant
 release of Perl is based.  (Patches can be found on any CPAN
 site, in the .../src/5.0 directory for full version releases,
 or in the .../src/5/0/unsupported directory for sub-version
 releases.)
+
+----------------
+Version 5.003_05
+----------------
+
+This patch was primarily to fix bugs and to clean up some of
+the remaining issues from in 5.003_04.  The details are described below.
+A very brief summary is:
+
+o Visible Changes to Core Functionality
+
+   -Add support for a READLINE method to tied filehandles.
+    
+   -times function now uses CLK_TCK if HZ is not available, rather
+    than just defaulting to 60.  times output might change on some
+    systems, but should be correct now.
+
+   -AnyDBM_File (modifying ISA does not work as expected)
+    Now behaves as documented:  Modifying ISA works to select
+    order in which *DB* modules are tried.  The default is still
+    the same.
+
+o Configure and build enhancements
+
+   -Enhance detection of [gs]etpgrp() variants.  Some systems have
+    BSD-style behavior for one and POSIX for the other.  Use
+    [gs]etpgid() instead, whenever possible.
+  
+   -You can now build a shared libperl.so without running through
+    the LD_RUN_PATH hoops, if your system supports appropriate
+    ld command-line options.  Solaris, NetBSD, and Linux are currently
+    supported.  Others are easy to add.  (This makes like a lot easier
+    for embedders.)
+
+   -VMS updates.
+    
+   -Fix installperl and installman so that the -n option really only
+    prints commands.  (previously, it would still do the mkdirs.)
+
+o Bug fixes
+
+   -debugger ought to work.
+
+   -A new heredoc tag in Makefile.SH is now quoted.  This prevented
+    5.003_04 from working most places.
+
+   -numerous smaller ones, detailed below.
+
+o Specific Changes
+
+Here are the specific file-by-file changes.
+
+# This is my patch perl5.003_05.pat to perl5.003_04
+# The full description is below.
+# Please execute the following commands before applying this patch.
+# (You can feed this patch to 'sh' to do so.)
+#  Andy Dougherty		<doughera@lafcol.lafayette.edu>
+
+# We'll create a new test, but patch won't automatically make it
+# executable.
+touch t/io/read.t
+chmod +x t/io/read.t
+
+exit 0
+
+
+This is patch perl5.003_05.pat to perl version 5.003_04.
+This takes you from 5.003_04 to 5.003_05.
+
+To apply this patch, run the above commands,
+cd to your perl source directory and then type
+
+	patch -p1 -N < perl5.003_05.pat
+
+The changes are described after each /^Index/ line below.  This is
+designed so you can examine each change with a command such as
+
+	csplit -k perl5.003_05.pat '/^Index:/' '{99}'
+
+Patch and enjoy,
+
+    Andy Dougherty		doughera@lafcol.lafayette.edu
+    Dept. of Physics
+    Lafayette College, Easton PA 18042
+
+Index: Changes
+
+    Updated for 5.003_05.
+
+Index: Configure
+
+    Allow command line or hint-file overrides of $afs.
+
+    Allow trailing spaces in nm output for HPUX10.
+
+    Check for newer BIND 'search' directives in /etc/resolv.conf as well
+    as older 'domain' directive.
+
+    Enhance detection of [gs]etpgrp() variants.  Some systems have
+    BSD-style behavior for one and POSIX for the other.  Use
+    [gs]etpgid() instead, whenever possible.
+
+    Include -s in the -h summary of available options.
+
+    Allow command-line override of $afs.
+
+    Handle trailing spaces in nm-output on HPUX10.
+
+    Set shrpenv for handling LD_RUN_PATH, if needed. (This used to
+    be in Makefile.SH.  Now it's available for other modules too.)
+
+    When using shared libperl, avoid LD_RUN_PATH if possible by adding
+    correct ld flags.  Currently, Solaris and NetBSD get the correct
+    -R $archlibexp/CORE, and Linux gets its
+    -Wl,-rpath,$archlibexp/CORE flag.  Other contributions are
+    welcome.
+
+Index: INSTALL
+
+    Correct libperl5 -> libperl typo.
+
+    Describe MakeMaker's Warning (will try anyway) messages.
+
+    More info on where and how to send reports.
+
+    Add info on non-Unix ports.
+
+
+Index: MANIFEST
+
+    Add new test t/io/read.t.
+
+    Add new hints files for ODBM_File for ultrix and hpux.
+
+    Add new pod checker script.
+
+Index: Makefile.SH
+
+    A new heredoc tag in Makefile.SH needs to be quoted.
+
+    shrpenv stuff moved to Configure.
+
+Index: Porting/Glossary
+
+    Updated to match Configure.
+
+Index: README.vms
+
+    VMS 5.003_05 Update.
+
+Index: av.h
+
+    Subject: turbidity in av.[ch]
+    Date: Sun, 10 Dec 1995 00:21:31 -0500
+    From: Gurusamy Sarathy <gsar@engin.umich.edu>
+
+    Some unclean code that I noticed today.
+
+Index: config_H
+
+    Updated to match newest config_h.SH.
+
+Index: config_h.SH
+
+    Updated to match Configure.
+
+    Changed the DLSYM_NEEDS_UNDERSCORE comment to 
+    /**/ to conform to metaconfig style.
+
+Index: emacs/cperl-mode.el
+
+    From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+    Subject: Newer CPerl-mode
+
+Index: ext/DB_File/DB_File.pm
+
+    Update to DB_File 1.03.
+
+Index: ext/DB_File/DB_File.xs
+
+    Update to DB_File 1.03.
+
+Index: ext/Fcntl/Fcntl.pm
+
+    Date: Thu, 5 Sep 1996 18:19:14 -0400 (EDT)
+    From: Chip Salzenberg <salzench@nielsenmedia.com>
+    Subject: No AutoLoader for Fcntl
+
+    Just like Socket, Fcntl doesn't need splitting and AutoLoading.
+
+Index: ext/FileHandle/FileHandle.pm
+
+    From: Roderick Schertler <roderick@gate.net>
+    Subject: FileHandle::DESTROY for fd 0
+
+    This fixes FileHandle::DESTROY when called on stdin.
+
+Index: ext/ODBM_File/ODBM_File.xs
+
+    Attempt to correct for "Bad free" in Ultrix and HPUX versions of
+    odbm.
+
+Index: ext/ODBM_File/hints/hpux.pl
+
+    Try to work around "bad free" in dbmclose().
+
+Index: ext/ODBM_File/hints/ultrix.pl
+
+    Try to work around "bad free" in dbmclose().
+
+Index: ext/Socket/Socket.pm
+
+    Date: Thu, 5 Sep 1996 09:58:08 +0200
+    From: Andreas Koenig <k@anna.in-berlin.de>
+    Subject: Patch to inhibit autosplit on Socket.pm
+
+    This patch inhibits production and use of a completely useless
+    auto/Socket/autosplit.ix.
+
+Index: handy.h
+
+    Make a little more C++-friendly for IBM's CSET++ compiler.
+
+Index: hints/convexos.sh
+
+    Remove [gs]etpgrp workaround.  Configure & perl.h should handle
+    this now.
+
+Index: hints/hpux.sh
+
+    Add note about possible gcc GR3 warning message.
+
+    Remove [gs]etpgrp workaround.  Configure & perl.h should handle
+    this now.
+
+Index: hints/sco.sh
+
+    Turn off optimization for stock cc.  This appears to
+    prevent miniperl core dumps.
+
+Index: hints/solaris_2.sh
+
+    Catch GNU ld even though it doesn't identify itself as a GNU tool.
+    Thanks to Tim Pierce <twpierce@midway.uchicago.edu>.
+
+Index: hints/sunos_4_1.sh
+
+    Describe solution for the __lib_version problem with acc on
+    SunOS.
+
+Index: hv.c
+
+    Date: Thu, 05 Sep 1996 00:25:28 -0400
+    From: Gurusamy Sarathy <gsar@engin.umich.edu>
+    Subject: minor misc. cleanup
+
+    This patch makes some minor cleanups to the sources.  No change
+    in functionality whatsoever.
+
+    Date: Thu, 05 Sep 1996 02:52:21 -0400
+    From: Gurusamy Sarathy <gsar@engin.umich.edu>
+
+    Subject: debugger problems--another patch (was Re: 5.003_04)
+
+    I have tried to avoid copying of hash keys that are passed to
+    magical hashes, but it seems that copying may be unavoidable
+    since the hv_*_ent() functions could be PADTMPs (and other
+    SVs that may get reused) as keys.
+
+    VMS dynamic %ENV fix
+
+Index: installman
+
+    From: scotth@sgi.com
+    Subject: Re: installperl feature request (was: Re: Upgrade 4.0x to 5.001m)
+
+    Fix installperl so that the -n option really only prints commands.
+    (previously, it would still do the mkdirs.)
+
+    an "ignore installed" option, so that it doesn't bother to check
+    to see if the target already exists (an optimization that I
+    *don't* want it to do when I do #1 above)
+
+Index: installperl
+
+    From: scotth@sgi.com
+    Subject: Re: installperl feature request (was: Re: Upgrade 4.0x to 5.001m)
+
+    Fix installperl so that the -n option really only prints commands.
+    (previously, it would still do the mkdirs.)
+
+    an "ignore installed" option, so that it doesn't bother to check
+    to see if the target already exists (an optimization that I
+    *don't* want it to do when I do #1 above)
+
+Index: lib/AnyDBM_File.pm
+
+    AnyDBM_File (modifying ISA does not work as expected)
+    Now behaves as documented:  Modifying ISA works to select
+    order in which *DB* modules are tried.  The default is still
+    the same.
+
+
+    Add helpful "die" message to end of AnyDBM_File.  Previously
+    it would return a 0, and the failure would eventually show up
+    somewhere else in the script and be hard to track down.  It is
+    a failure if perl can't open AnyDBM_File.  The test regression
+    suite is supposed to indicate this as a failure too.
+
+Index: lib/ExtUtils/Install.pm
+
+    Updated to MakeMaker-5.38.
+
+    Fix for VMS utime.
+
+Index: lib/ExtUtils/Liblist.pm
+
+    Updated to MakeMaker-5.38.
+
+Index: lib/ExtUtils/MM_Unix.pm
+    Updated to MakeMaker-5.38.
+
+Index: lib/ExtUtils/MakeMaker.pm
+
+    Updated to MakeMaker-5.38.
+
+    Updated to MakeMaker-5.39 to allow CFLAGS in hint files.
+
+Index: lib/ExtUtils/Manifest.pm
+
+    Updated to MakeMaker-5.38.
+
+Index: lib/ExtUtils/Mkbootstrap.pm
+
+    Updated to MakeMaker-5.38.
+
+Index: lib/ExtUtils/Mksymlists.pm
+
+    Updated to MakeMaker-5.38.
+
+Index: lib/File/Find.pm
+
+    From: Michael Mahan <mahanm@nextwork.rose-hulman.edu>
+    Subject: Cwd::fastcwd in File::Find
+
+    Is there a good reason why File::Find uses Cwd::fastcwd instead of
+    Cwd:cwd when fastcwd isn't as portable?
+    [In particular, fastcwd() doesn't work on AFS.]
+
+Index: lib/Math/Complex.pm
+
+    There was a mistake in the sqrt routine in lib/Math/Complex.pm that
+    gave wrong answers when the magnitude of the imaginary part of the
+    argument exceeded the magnitude of the real part.  Line 69 had too
+    many sqrt($y)'s.  Further, expressions were re-arranged so that
+    calls to the expensive real sqrt() routine were reduced from 4 to 2
+    in this case.
+
+Index: lib/open3.pl
+
+    The I/O directions on the dad_wtr and kid_rdr were backwards.
+    IO/Open3.pm didn't have this error.
+
+Index: lib/syslog.pl
+
+    Date: Tue, 03 Sep 1996 20:33:54 -0400
+    From: Roderick Schertler <roderick@gate.net>
+    Subject: syslog.pl `use Socket' lossage
+
+    syslog.pl tries but fails to use
+    Socket.pm, the problem is that use doesn't return a true value.  This
+    module should be recast in terms of Sys::Syslog, of course.
+
+Index: makedepend.SH
+
+    This patch eliminates "\|" in sed patterns in makedepend.SH, since
+    they're not really needed anyway in this one case.
+
+Index: mg.c
+
+    Ok, here's a tested patch for the debugger problem.
+    I was missing the fact that DB::dbline magic is actually
+    uppercase (which means hv_store_ent() etc., will pass SV keys
+    to the vtbl_dbline handlers).
+
+    Replace the oft-repeated mg_ptr incantation with
+    the simple MgPVKEY macro.
+
+    Rename MgPVKEY to MgPV (to match with HePV elsewhere).  Add
+    additional parens around the "mg".
+
+    (lines near 584) Part of VMS changes.  I don't know what this did.
+
+    Date: Fri, 23 Aug 1996 17:20:22 -0400 (EDT)
+    From: Chip Salzenberg <salzench@nielsenmedia.com>
+    Subject: Integerize mg.c; eliminate warning on C< local($)) >
+
+    This patch converts magic variables ($!, $^E, etc.) to use integers
+    (C<sv_setiv>) instead of floats.  It also eliminates a warning from
+    C< local($)) >, via a hack similar to $!.
+
+Index: mg.h
+
+    Replace the oft-repeated mg_ptr incantation with
+    the simple MgPVKEY macro.
+
+    Rename MgPVKEY to MgPV (to match with HePV elsewhere).  Add
+    additional parens around the "mg".
+
+Index: nostdio.h
+
+    Add _STDIO_LOADED (VMS) to list of guard symbols.
+
+Index: op.c
+
+    From: Gurusamy Sarathy <gsar@engin.umich.edu>
+    Subject: Re: \ ( @array ) busted for lexical @array (once more)
+
+Index: patchlevel.h
+
+    Change to subversion 5.
+
+Index: perl.c
+
+    Make floating point constants Locale-friendly.
+
+Index: perl.h
+
+    One last LONG & co. fix (yet another cut'n'paste error) and a few
+    minor cleanups. Nothing crucial.
+
+    Make a little more C++-friendly for IBM's CSET++ compiler.
+
+    Enhance detection of [gs]etpgrp() variants.  Some systems have
+    BSD-style behavior for one and POSIX for the other.  Use
+    [gs]etpgid() instead, whenever possible.
+
+Index: perlio.c
+
+    Eliminate potential "signed vs. unsigned" warning
+
+    Add PerlIO_reopen and PerlIO_cgetname functions.
+
+Index: perlsdio.h
+
+    Don't supply redundant parameters for PerlIO_open and PerlIO_fdopen.
+
+    Include PerlIO_reopen and PerlIO_getname.
+
+    s/FILE_(CNT|PTR)_LVALUE/STDIO_(CNT|PTR)_LVALUE to fix a typo.
+    This had prevented SV_FAST_FGETS from working anywhere.
+
+    Include PerlIO_canset_cnt.  I'm not sure how this is supposed to
+    differ from STDIO_CNT_LVALUE.
+
+Index: pod/Makefile
+
+    Remove trailing spaces in pods.
+    Include a call to the checkpods script in the Makefile (though it's
+    not ordinarily used by users).
+
+Index: pod/checkpods.PL
+
+    New script to check for common errors in pods.  This is not
+    normally called during the perl build process, but you can
+    use it with  B<make check>.
+
+Index: pod/perlfunc.pod
+
+    Document correct C<use POSIX ":wait_h";> usage.
+
+    Add notes about POSIX [gs]etpgrp.
+
+Index: pod/perlipc.pod
+
+    Document correct C<use POSIX ":wait_h";> usage.
+
+Index: pod/perlref.pod
+
+    From: Gurusamy Sarathy <gsar@engin.umich.edu>
+    Subject: Re: \ ( @array ) busted for lexical @array (once more)
+
+Index: pod/perltie.pod
+
+    Date: Thu, 29 Aug 1996 15:14:51 +0200
+    From: Sven Verdoolaege <skimo@breughel.ufsia.ac.be>
+    Subject: more TIEHANDLE
+
+    This adds support for a READLINE method.
+
+Index: pod/perltrap.pod
+
+    Here's documentation on the change in split's behavior between Perl 4
+    and Perl 5.
+
+    Subject: More (and less!) 425traps
+
+    Large integer traps
+
+    Precedence
+
+    warn STDERR
+
+    Change blank lines to empty lines.
+
+Index: pod/perlvar.pod
+
+    Be explicit about $/="" matching empty lines, that is, lines
+    with no spaces or tabs.
+
+    Change blank lines to empty lines.
+
+Index: pp.c
+
+    Date: Fri, 23 Aug 1996 17:22:40 -0400 (EDT)
+    From: Chip Salzenberg <salzench@nielsenmedia.com>
+    Subject: Minor integer speedups in mathematics
+
+    This patch provides minor speedups by using integer math and SVt_IV
+    values when performing bitwise operations and modulus.
+
+    Date: Tue, 3 Sep 1996 17:49:22 -0400 (EDT)
+    From: Kenneth Albanowski <kjahds@kjahds.com>
+    Subject: Pack Patch (was Re: 5.002 - pack/unpack does not do "I" right)
+
+    (double)auint cast added for call to sv_setnv().
+
+Index: pp_hot.c
+
+    Date: Thu, 05 Sep 1996 00:25:28 -0400
+    From: Gurusamy Sarathy <gsar@engin.umich.edu>
+    Subject: minor misc. cleanup
+
+    This patch makes some minor cleanups to the sources.  No change
+    in functionality whatsoever.
+
+    Date: Thu, 29 Aug 1996 15:14:51 +0200
+    From: Sven Verdoolaege <skimo@breughel.ufsia.ac.be>
+    Subject: more TIEHANDLE
+
+    This adds support for a READLINE method.
+
+Index: pp_sys.c
+
+    Clear any buffer space exposed by by read().
+    This is almost certainly a bug-fix.
+
+    Undef and then re-define my_chsize from Perl_my_chsize to
+    just plain chsize if this system HAS_CHSIZE.  This probably only
+    applies to SCO.  This shows the perils of having internal
+    functions with the same name as external library functions :-).
+
+    Use CLK_TCK if HZ is not available.
+
+Index: sv.c
+
+    Fix more spots where we had PerlIO_stderr() and should have had
+    Perl_debug_log instead.
+
+    Date: Fri, 23 Aug 1996 17:26:42 -0400 (EDT)
+    From: Chip Salzenberg <salzench@nielsenmedia.com>
+    Subject: Minor potential bug in AV creation
+
+    I wasn't the one who originated this patch.  But it looks like it
+    would improve the safety of AV creation.
+
+    Remove potentially incorrect casts on PerlIO_set_ptrcnt.
+    'ptr' is already STDCHAR, which is supposed to be the type of
+    char used in stdio.h, so we shouldn't have to cast it.
+
+Index: t/io/read.t
+
+    Clear any buffer space exposed by by read().
+    This is almost certainly a bug-fix.
+
+Index: t/lib/db-btree.t
+
+    Update to DB_File 1.03.
+
+Index: t/lib/db-hash.t
+
+    Update to DB_File 1.03.
+
+Index: t/lib/db-recno.t
+
+    Update to DB_File 1.03.
+
+Index: t/lib/io_sock.t
+
+    From: Lupe Christoph <lupe@alanya.m.isar.de>
+    Subject: Perl 5.003.03: race condition in t/lib/io_sock.t
+
+    io_sock.t works by forking a subprocess it can communicate with.
+    It has the subprocess wait for the main process by sleeping 10
+    seconds or until an alarm arrives.
+
+    With my setup, the alarm signal arrives *before* the child
+    has a chance to ignore the alarm signal.
+
+    I fixed this by moving the "$SIG{ALRM} = sub {};" up before the
+    fork. It does not hurt to have the parent ignore alarms, too.
+
+Index: t/op/inc.t
+
+    One last LONG & co. fix (yet another cut'n'paste error) and a few
+    minor cleanups. Nothing crucial.
+
+Index: t/op/misc.t
+
+    Date: Thu, 29 Aug 1996 15:14:51 +0200
+    From: Sven Verdoolaege <skimo@breughel.ufsia.ac.be>
+    Subject: more TIEHANDLE
+
+    This adds support for a READLINE method.
+
+Index: t/op/pack.t
+
+    Date: Tue, 3 Sep 1996 17:49:22 -0400 (EDT)
+    From: Kenneth Albanowski <kjahds@kjahds.com>
+    Subject: Pack Patch (was Re: 5.002 - pack/unpack does not do "I" right)
+
+Index: t/op/ref.t
+
+    From: Gurusamy Sarathy <gsar@engin.umich.edu>
+    Subject: Re: \ ( @array ) busted for lexical @array (once more)
+
+Index: universal.c
+
+    Date: Thu, 29 Aug 96 07:05:10 BST
+    From: Graham Barr <bodg@tiuk.ti.com>
+    Subject: Re: UNIVERSAL::class busted
+
+    yes, but I also noticed that this does not check that the reference
+    is an object, so the patch should be
+
+Index: unixish.h
+
+    Change comment style so that IBM's picky xlc compiler doesn't
+    think we've mistakenly tried to nest comments.
+
+Index: util.c
+
+    One last LONG & co. fix (yet another cut'n'paste error) and a few
+    minor cleanups. Nothing crucial.
+
+Index: utils/h2xs.PL
+
+    Date: Fri, 6 Sep 1996 06:09:20 -0400 (EDT)
+    From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+    Subject: updated h2xs
+
+    Changes:
+	a) Docs and examples for -x updated;
+	b) Path to xxxx.h would not be changed to /usr/include/xxxx.h
+    unless this file exists (outside of VMS, I'm afraid to make an error
+    there). - Useful with -x option, when the file may be eaten via -I
+    inside -F.
+	c) .h file would be scanned only if needed.
+	d) typemap would be generated (with T_PTROBJ).
+	e) Documentation (=list) for autogenerated guys would be
+    included into POD.
+	f) duplicated XSUBs would not be generated;
+	g) arguments to XSUBs being arrays are recognized (note that
+    xsubpp would probably choke on such guys).
+
+    -x option requires C-Scan-0.3 (releases a couple of minutes ago to
+	    ftp://ftp.math.ohio-state.edu/pub/users/ilya/perl
+    should propagate to CPAN soon).
+
+Index: utils/perlbug.PL
+
+    Fix typo $Config{'has_sockets'} ought to be $Config{'d_socket'};
+
+Index: utils/perldoc.PL
+
+    More choices in the pager war.  Unfortunately, we can't rely on
+    all users agreeing with the Sysadmin's choice, nor can we
+    assign a default preference order, since opinions vary.  If the
+    user doesn't have $ENV{PAGER} set, we do want to pick up one that
+    at least works, so we'll try whatever Configure found.
+
+Index: vms/Makefile
+
+    VMS 5.003_05 Update.
+
+Index: vms/config.vms
+
+    VMS 5.003_05 Update.
+
+Index: vms/descrip.mms
+
+    VMS 5.003_05 Update.
+
+Index: vms/ext/Stdio/Stdio.pm
+
+    VMS 5.003_05 Update.
+
+Index: vms/ext/filespec.t
+
+    VMS 5.003_05 Update.
+
+Index: vms/gen_shrfls.pl
+
+    VMS 5.003_05 Update.
+
+Index: vms/perlvms.pod
+
+    VMS 5.003_05 Update.
+
+Index: vms/vms.c
+
+    VMS 5.003_05 Update.
+
+Index: vms/vmsish.h
+
+    VMS 5.003_05 Update.
 
 ----------------
 Version 5.003_04
