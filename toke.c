@@ -28,6 +28,10 @@
 static char ident_too_long[] = "Identifier too long";
 
 static void restore_rsfp(pTHXo_ void *f);
+#ifndef PERL_NO_UTF16_FILTER
+static I32 utf16_textfilter(pTHXo_ int idx, SV *sv, int maxlen);
+static I32 utf16rev_textfilter(pTHXo_ int idx, SV *sv, int maxlen);
+#endif
 
 #define XFAKEBRACK 128
 #define XENUMMASK 127
@@ -322,36 +326,6 @@ S_cr_textfilter(pTHX_ int idx, SV *sv, int maxlen)
     I32 count = FILTER_READ(idx+1, sv, maxlen);
     if (count > 0 && !maxlen)
 	strip_return(sv);
-    return count;
-}
-#endif
-
-#ifndef PERL_NO_UTF16_FILTER
-STATIC I32
-S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
-{
-    I32 count = FILTER_READ(idx+1, sv, maxlen);
-    if (count) {
-	U8* tmps;
-	U8* tend;
-	New(898, tmps, SvCUR(sv) * 3 / 2 + 1, U8);
-	tend = utf16_to_utf8((U16*)SvPVX(sv), tmps, SvCUR(sv));
-	sv_usepvn(sv, (char*)tmps, tend - tmps);
-    }
-    return count;
-}
-
-STATIC I32
-S_utf16rev_textfilter(pTHX_ int idx, SV *sv, int maxlen)
-{
-    I32 count = FILTER_READ(idx+1, sv, maxlen);
-    if (count) {
-	U8* tmps;
-	U8* tend;
-	New(898, tmps, SvCUR(sv) * 3 / 2 + 1, U8);
-	tend = utf16_to_utf8_reversed((U16*)SvPVX(sv), tmps, SvCUR(sv));
-	sv_usepvn(sv, (char*)tmps, tend - tmps);
-    }
     return count;
 }
 #endif
@@ -7422,7 +7396,7 @@ S_swallow_bom(pTHX_ U8 *s)
 		Perl_croak(aTHX_ "Unsupported script encoding");
 #ifndef PERL_NO_UTF16_FILTER
 	    s += 2;
-	    filter_add(S_utf16rev_textfilter, NULL);
+	    filter_add(utf16rev_textfilter, NULL);
 	    New(898, news, (PL_bufend - (char*)s) * 3 / 2 + 1, U8);
 	    PL_bufend = (char*)utf16_to_utf8((U16*)s, news,
 					     PL_bufend - (char*)s);
@@ -7436,7 +7410,7 @@ S_swallow_bom(pTHX_ U8 *s)
 	if (s[1] == 0xFF) {   /* UTF-16 big-endian */
 #ifndef PERL_NO_UTF16_FILTER
 	    U8 *news;
-	    filter_add(S_utf16_textfilter, NULL);
+	    filter_add(utf16_textfilter, NULL);
 	    New(898, news, (PL_bufend - (char*)s) * 3 / 2 + 1, U8);
 	    PL_bufend = (char*)utf16_to_utf8((U16*)s, news,
 					     PL_bufend - (char*)s);
@@ -7481,3 +7455,33 @@ restore_rsfp(pTHXo_ void *f)
 	PerlIO_close(PL_rsfp);
     PL_rsfp = fp;
 }
+
+#ifndef PERL_NO_UTF16_FILTER
+static I32
+utf16_textfilter(pTHXo_ int idx, SV *sv, int maxlen)
+{
+    I32 count = FILTER_READ(idx+1, sv, maxlen);
+    if (count) {
+	U8* tmps;
+	U8* tend;
+	New(898, tmps, SvCUR(sv) * 3 / 2 + 1, U8);
+	tend = utf16_to_utf8((U16*)SvPVX(sv), tmps, SvCUR(sv));
+	sv_usepvn(sv, (char*)tmps, tend - tmps);
+    }
+    return count;
+}
+
+static I32
+utf16rev_textfilter(pTHXo_ int idx, SV *sv, int maxlen)
+{
+    I32 count = FILTER_READ(idx+1, sv, maxlen);
+    if (count) {
+	U8* tmps;
+	U8* tend;
+	New(898, tmps, SvCUR(sv) * 3 / 2 + 1, U8);
+	tend = utf16_to_utf8_reversed((U16*)SvPVX(sv), tmps, SvCUR(sv));
+	sv_usepvn(sv, (char*)tmps, tend - tmps);
+    }
+    return count;
+}
+#endif
