@@ -788,3 +788,8 @@ EXPECT
 EXPECT
 Can't modify constant item in list assignment at - line 1, near ");"
 Execution of - aborted due to compilation errors.
+######## tying a bareword causes a segfault in 5.6.1
+tie FOO, "Foo";
+EXPECT
+Can't modify constant item in tie at - line 1, near ""Foo";"
+Execution of - aborted due to compilation errors.
