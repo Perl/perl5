@@ -1237,11 +1237,11 @@ cond_signal_enabled(SV *ref)
 	if(SvROK(ref))
 	    ref = SvRV(ref);
 	shared = Perl_sharedsv_find(aTHX_ ref);
+	if(!shared)
+	    croak("cond_signal can only be used on shared values");
 	if (ckWARN(WARN_THREADS) && shared->lock.owner != aTHX)
 	    Perl_warner(aTHX_ packWARN(WARN_THREADS),
 			    "cond_signal() called on unlocked variable");
-	if(!shared)
-	    croak("cond_signal can only be used on shared values");
 	COND_SIGNAL(&shared->user_cond);
 
 void
