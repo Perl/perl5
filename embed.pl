@@ -2534,6 +2534,7 @@ s	|char*	|force_version	|char *start
 s	|char*	|force_word	|char *start|int token|int check_keyword \
 				|int allow_pack|int allow_tick
 s	|SV*	|tokeq		|SV *sv
+s	|int	|pending_ident
 s	|char*	|scan_const	|char *start
 s	|char*	|scan_formline	|char *s
 s	|char*	|scan_heredoc	|char *s

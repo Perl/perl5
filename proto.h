@@ -1258,6 +1258,7 @@ STATIC void	S_force_next(pTHX_ I32 type);
 STATIC char*	S_force_version(pTHX_ char *start);
 STATIC char*	S_force_word(pTHX_ char *start, int token, int check_keyword, int allow_pack, int allow_tick);
 STATIC SV*	S_tokeq(pTHX_ SV *sv);
+STATIC int	S_pending_ident(pTHX);
 STATIC char*	S_scan_const(pTHX_ char *start);
 STATIC char*	S_scan_formline(pTHX_ char *s);
 STATIC char*	S_scan_heredoc(pTHX_ char *s);

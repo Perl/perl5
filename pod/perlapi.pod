@@ -1344,17 +1344,6 @@ SV is B<not> incremented.
 =for hackers
 Found in file sv.c
 
-=item newSV
-
-Create a new null SV, or if len > 0, create a new empty SVt_PV type SV
-with an initial PV allocation of len+1. Normally accessed via the C<NEWSV>
-macro.
-
-	SV*	newSV(STRLEN len)
-
-=for hackers
-Found in file sv.c
-
 =item NEWSV
 
 Creates a new SV.  A non-zero C<len> parameter indicates the number of
@@ -1367,6 +1356,17 @@ C<id> is an integer id between 0 and 1299 (used to identify leaks).
 
 =for hackers
 Found in file handy.h
+
+=item newSV
+
+Create a new null SV, or if len > 0, create a new empty SVt_PV type SV
+with an initial PV allocation of len+1. Normally accessed via the C<NEWSV>
+macro.
+
+	SV*	newSV(STRLEN len)
+
+=for hackers
+Found in file sv.c
 
 =item newSViv
 
@@ -2234,22 +2234,22 @@ which guarantees to evaluate sv only once.
 =for hackers
 Found in file sv.h
 
-=item SvNVX
-
-Returns the raw value in the SV's NV slot, without checks or conversions.
-Only use when you are sure SvNOK is true. See also C<SvNV()>.
-
-	NV	SvNVX(SV* sv)
-
-=for hackers
-Found in file sv.h
-
 =item SvNVx
 
 Coerces the given SV to a double and returns it. Guarantees to evaluate
 sv only once. Use the more efficent C<SvNV> otherwise.
 
 	NV	SvNVx(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvNVX
+
+Returns the raw value in the SV's NV slot, without checks or conversions.
+Only use when you are sure SvNOK is true. See also C<SvNV()>.
+
+	NV	SvNVX(SV* sv)
 
 =for hackers
 Found in file sv.h
