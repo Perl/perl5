@@ -45,19 +45,30 @@ case "$archname" in
     ;;
 esac
 
-######################################################
-# General sanity testing.  See below for excerpts from the Solaris FAQ.
-
-# From roehrich@ironwood-fddi.cray.com Wed Sep 27 12:51:46 1995
-# Date: Thu, 7 Sep 1995 16:31:40 -0500
-# From: Dean Roehrich <roehrich@ironwood-fddi.cray.com>
-# To: perl5-porters@africa.nicoh.com
-# Subject: Re: On perl5/solaris/gcc
-
-# Here's another draft of the perl5/solaris/gcc sanity-checker. 
-
 test -z "`${cc:-cc} -V 2>&1|grep -i workshop`" || ccisworkshop="$define"
 test -z "`${cc:-cc} -v 2>&1|grep -i gcc`"      || ccisgcc="$define"
+
+cat >UU/workshoplibpth.cbu<<EOCBU
+case "$workshoplibpth_done" in
+'')	case "$use64bitall" in
+	"$define"|true|[yY]*)
+            loclibpth="$loclibpth /usr/lib/sparcv9"
+            if test -n "$workshoplibs"; then
+                loclibpth=`echo $loclibpth | sed -e "s% $workshoplibs%%" `
+                for lib in $workshoplibs; do
+                    # Logically, it should be sparcv9.
+                    # But the reality fights back, it's v9.
+                    loclibpth="$loclibpth $lib/sparcv9 $lib/v9"
+                done
+            fi 
+	    ;;
+	*)  loclibpth="$loclibpth $workshoplibs"  
+	    ;;
+	esac
+	workshoplibpth_done="$define"
+	;;
+esac
+EOCBU
 
 case "$ccisworkshop" in
 "$define")
@@ -65,10 +76,21 @@ case "$ccisworkshop" in
 #include <sunmath.h>
 int main() { return(0); }
 EOF
-	workshoplibs=`cc -### try.c -lsunmath -o try 2>&1|grep " -Y "|sed 's%.* -Y "P,\(.*\)".*%\1%'|tr ':' '\n'|grep '/SUNWspro/'|sort -u`
-	loclibpth="$loclibpth $workshoplibs"
+	workshoplibs=`cc -### try.c -lsunmath -o try 2>&1|grep " -Y "|sed 's%.* -Y "P,\(.*\)".*%\1%'|tr ':' '\n'|grep '/SUNWspro/'`
+	. ./UU/workshoplibpth.cbu
 	;;
 esac
+
+######################################################
+# General sanity testing.  See below for excerpts from the Solaris FAQ.
+#
+# From roehrich@ironwood-fddi.cray.com Wed Sep 27 12:51:46 1995
+# Date: Thu, 7 Sep 1995 16:31:40 -0500
+# From: Dean Roehrich <roehrich@ironwood-fddi.cray.com>
+# To: perl5-porters@africa.nicoh.com
+# Subject: Re: On perl5/solaris/gcc
+#
+# Here's another draft of the perl5/solaris/gcc sanity-checker. 
 
 case `type ${cc:-cc}` in
 */usr/ucb/cc*) cat <<END >&4
@@ -392,16 +414,7 @@ Cannot continue, aborting.
 EOM
 		exit 1
 	    fi 
-	    if test -n "$workshoplibs"; then
-		loclibpth=`echo $loclibpth | sed -e "s% $workshoplibs%%" `
-		for lib in $workshoplibs; do
-		    # Logically, it should be sparcv9.
-		    # But the reality fights back, it's v9.
-		    loclibpth="$loclibpth $lib/sparcv9 $lib/v9"
-		done
-		loclibpth="$loclibpth $workshoplibs"
-	    fi 
-	    loclibpth="$loclibpth /usr/lib/sparcv9"
+	    . ./UU/workshoplibpth.cbu
 	    case "$cc -v 2>/dev/null" in
 	    *gcc*)
 		echo 'main() { return 0; }' > try.c
