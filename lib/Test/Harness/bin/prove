@@ -14,6 +14,7 @@ my @ext = ();
 my $shuffle = 0;
 my $dry = 0;
 my $blib = 0;
+my $lib = 0;
 my $recurse = 0;
 my @includes = ();
 my @switches = ();
@@ -34,6 +35,7 @@ GetOptions(
     'h|help|?'      => sub {pod2usage({-verbose => 1, -input => \*DATA}); exit},
     'H|man'         => sub {pod2usage({-verbose => 2, -input => \*DATA}); exit},
     'I=s@'          => \@includes,
+    'l|lib'	    => \$lib,
     'r|recurse'     => \$recurse,
     's|shuffle'     => \$shuffle,
     't'		    => sub { unshift @switches, "-t" }, # Always want -t up front
@@ -58,6 +60,11 @@ if ( $blib ) {
     } else {
 	warn "No blib directories found.\n";
     }
+}
+
+# Handle lib includes
+if ( $lib ) {
+    unshift @includes, "lib";
 }
 
 # Build up TH switches
@@ -165,6 +172,7 @@ Options:
     -h, --help      Display this help
     -H, --man       Longer manpage for prove
     -I              Add libraries to @INC, as Perl's -I
+    -l, --lib	    Add lib to the path for your tests.
     -r, --recurse   Recursively descend into directories.
     -s, --shuffle   Run the tests in a random order.
     -T	 	    Enable tainting checks
@@ -255,7 +263,11 @@ The --ext is repeatable.
 
 =head2 -I
 
-Add libraries to @INC, as Perl's -I
+Add libraries to @INC, as Perl's -I.
+
+=head2 -l, --lib
+
+Add C<lib> to @INC.  Equivalent to C<-Ilib>.
 
 =head2 -r, --recurse
 
@@ -299,10 +311,6 @@ C<< <bug-test-harness@rt.cpan.org> >>.
 =item *
 
 Shuffled tests must be recreatable
-
-=item *
-
-Add a flag to run prove under Devel::Cover
 
 =back
 

@@ -1,5 +1,5 @@
 # -*- Mode: cperl; cperl-indent-level: 4 -*-
-# $Id: Harness.pm,v 1.76 2003/11/25 04:41:03 andy Exp $
+# $Id: Harness.pm,v 1.80 2003/12/31 02:39:21 andy Exp $
 
 package Test::Harness;
 
@@ -29,13 +29,13 @@ Test::Harness - Run Perl standard test scripts with statistics
 
 =head1 VERSION
 
-Version 2.38
+Version 2.40
 
-    $Header: /home/cvs/test-harness/lib/Test/Harness.pm,v 1.76 2003/11/25 04:41:03 andy Exp $
+    $Header: /home/cvs/test-harness/lib/Test/Harness.pm,v 1.80 2003/12/31 02:39:21 andy Exp $
 
 =cut
 
-$VERSION = '2.38';
+$VERSION = '2.40';
 
 # Backwards compatibility for exportable variable names.
 *verbose  = *Verbose;
@@ -548,7 +548,7 @@ sub _run_all_tests {
             }
             elsif($results{seen}) {
                 if (@{$test{failed}} and $test{max}) {
-                    my ($txt, $canon) = canonfailed($test{max},$test{skipped},
+                    my ($txt, $canon) = _canonfailed($test{max},$test{skipped},
                                                     @{$test{failed}});
                     print "$test{ml}$txt";
                     $failedtests{$tfile} = { canon   => $canon,
@@ -811,7 +811,7 @@ sub _dubious_return {
            $wstatus,$wstatus;
     print "\t\t(VMS status is $estatus)\n" if $^O eq 'VMS';
 
-    if (corestatus($wstatus)) { # until we have a wait module
+    if (_corestatus($wstatus)) { # until we have a wait module
         if ($Have_Devel_Corestack) {
             Devel::CoreStack::stack($^X);
         } else {
@@ -830,7 +830,7 @@ sub _dubious_return {
         else {
             push @{$test->{failed}}, $test->{'next'}..$test->{max};
             $failed = @{$test->{failed}};
-            (my $txt, $canon) = canonfailed($test->{max},$test->{skipped},@{$test->{failed}});
+            (my $txt, $canon) = _canonfailed($test->{max},$test->{skipped},@{$test->{failed}});
             $percent = 100*(scalar @{$test->{failed}})/$test->{max};
             print "DIED. ",$txt;
         }
@@ -900,7 +900,7 @@ sub _create_fmts {
 {
     my $tried_devel_corestack;
 
-    sub corestatus {
+    sub _corestatus {
         my($st) = @_;
 
         my $did_core;
@@ -920,7 +920,7 @@ sub _create_fmts {
     }
 }
 
-sub canonfailed ($$@) {
+sub _canonfailed ($$@) {
     my($max,$skipped,@failed) = @_;
     my %seen;
     @failed = sort {$a <=> $b} grep !$seen{$_}++, @failed;

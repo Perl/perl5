@@ -2,8 +2,7 @@ package Test::Harness::Iterator;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = 0.01;
-
+$VERSION = 0.02;
 
 =head1 NAME
 
@@ -22,6 +21,14 @@ Test::Harness::Iterator - Internal Test::Harness Iterator
 B<FOR INTERNAL USE ONLY!>
 
 This is a simple iterator wrapper for arrays and filehandles.
+
+=head2 new()
+
+Create an iterator.
+
+=head2 next()
+
+Iterate through it, of course.
 
 =cut
 

@@ -460,9 +460,9 @@ my %samples = (
                        },
 );
 
-plan tests => (keys(%samples) * 5) + 4;
+plan tests => (keys(%samples) * 5) + 3;
 
-use_ok('Test::Harness::Straps');
+use Test::Harness::Straps;
 
 $SIG{__WARN__} = sub { 
     warn @_ unless $_[0] =~ /^Enormous test number/ ||
@@ -507,10 +507,11 @@ for my $test ( sort keys %samples ) {
     }
 
     is_deeply(\%results, $expect, "  the rest $test" );
+} # for %samples
+
+NON_EXISTENT_FILE: {
+    my $strap = Test::Harness::Straps->new;
+    isa_ok( $strap, 'Test::Harness::Straps' );
+    ok( !$strap->analyze_file('I_dont_exist') );
+    is( $strap->{error}, "I_dont_exist does not exist" );
 }
-
-
-my $strap = Test::Harness::Straps->new;
-isa_ok( $strap, 'Test::Harness::Straps' );
-ok( !$strap->analyze_file('I_dont_exist') );
-is( $strap->{error}, "I_dont_exist does not exist" );
