@@ -216,23 +216,23 @@ for (@a) {
 close F;
 print "ok 26\n";
 
-# Set to 0 to fail on Linux as of 13096.
-my $skiptell = 1;
+sub systell { sysseek($_[0], 0, 1) }
 
 # sysread() should work on characters, not bytes
 open F, "<:utf8", "a";
 $a = 0;
 for (@a) {
-    unless (($c = sysread(F, $b, 1)) == 1  &&
+    unless (
+	    ($c = sysread(F, $b, 1)) == 1  &&
             length($b)               == 1  &&
             ord($b)                  == ord($_) &&
-	    ($skiptell || tell(F)    == ($a += bytes::length($b)))
+	    systell(F)               == ($a += bytes::length($b))
 	    ) {
         print '# ord($_)           == ', ord($_), "\n";
         print '# ord($b)           == ', ord($b), "\n";
         print '# length($b)        == ', length($b), "\n";
         print '# bytes::length($b) == ', bytes::length($b), "\n";
-        print '# tell(F)           == ', tell(F), "\n";
+        print '# systell(F)        == ', systell(F), "\n";
         print '# $a                == ', $a, "\n";
         print '# $c                == ', $c, "\n";
         print "not ";
@@ -246,12 +246,13 @@ print "ok 27\n";
 open G, ">:utf8", "b";
 $a = 0;
 for (@a) {
-    unless (($c = syswrite(G, $_, 1)) == 1 &&
-            ($skiptell || tell(G)     == ($a += bytes::length($_)))
+    unless (
+	    ($c = syswrite(G, $_, 1)) == 1 &&
+            systell(G)                == ($a += bytes::length($_))
 	    ) {
         print '# ord($_)           == ', ord($_), "\n";
         print '# bytes::length($_) == ', bytes::length($_), "\n";
-        print '# tell(G)           == ', tell(G), "\n";
+        print '# systell(G)        == ', systell(G), "\n";
         print '# $a                == ', $a, "\n";
         print '# $c                == ', $c, "\n";
         print "not ";
@@ -265,16 +266,17 @@ print "ok 28\n";
 open G, "<:utf8", "b";
 $a = 0;
 for (@a) {
-    unless (($c = sysread(G, $b, 1)) == 1 &&
+    unless (
+	    ($c = sysread(G, $b, 1)) == 1 &&
 	    length($b)               == 1 &&
 	    ord($b)                  == ord($_) &&
-	    ($skiptell || tell(G)    == ($a += bytes::length($_)))
+	    systell(G)               == ($a += bytes::length($_))
 	    ) {
         print '# ord($_)           == ', ord($_), "\n";
         print '# ord($b)           == ', ord($b), "\n";
         print '# length($b)        == ', length($b), "\n";
         print '# bytes::length($b) == ', bytes::length($b), "\n";
-        print '# tell(G)           == ', tell(G), "\n";
+        print '# systell(G)        == ', systell(G), "\n";
         print '# $a                == ', $a, "\n";
         print '# $c                == ', $c, "\n";
         print "not ";
