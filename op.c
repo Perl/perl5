@@ -2146,10 +2146,16 @@ Perl_my_attrs(pTHX_ OP *o, OP *attrs)
     OP *rops = Nullop;
     int maybe_scalar = 0;
 
+/* [perl #17376]: this appears to be premature, and results in code such as
+   C< my(%x); > executing in list mode rather than void mode */
+#if 0
     if (o->op_flags & OPf_PARENS)
 	list(o);
     else
 	maybe_scalar = 1;
+#else
+    maybe_scalar = 1;
+#endif
     if (attrs)
 	SAVEFREEOP(attrs);
     o = my_kid(o, attrs, &rops);
@@ -2381,7 +2387,13 @@ OP *
 Perl_localize(pTHX_ OP *o, I32 lex)
 {
     if (o->op_flags & OPf_PARENS)
+/* [perl #17376]: this appears to be premature, and results in code such as
+   C< our(%x); > executing in list mode rather than void mode */
+#if 0
 	list(o);
+#else
+	;
+#endif
     else {
 	if (ckWARN(WARN_PARENTHESIS)
 	    && PL_bufptr > PL_oldbufptr && PL_bufptr[-1] == ',')
