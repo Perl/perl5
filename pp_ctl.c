@@ -3166,6 +3166,8 @@ trylocal: {
         PL_compiling.cop_warnings = pWARN_ALL ;
     else if (PL_dowarn & G_WARN_ALL_OFF)
         PL_compiling.cop_warnings = pWARN_NONE ;
+    else if (PL_taint_warn)
+        PL_compiling.cop_warnings = newSVpvn(WARN_TAINTstring, WARNsize);
     else
         PL_compiling.cop_warnings = pWARN_STD ;
     SAVESPTR(PL_compiling.cop_io);

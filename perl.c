@@ -1100,11 +1100,15 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	    break;
 
 	case 't':
-	    PL_taint_warn = TRUE;
-	    if (! (PL_dowarn & G_WARN_ALL_MASK))
-	        PL_dowarn |= G_WARN_ON;
+	    if( !PL_tainting ) {
+	         PL_taint_warn = TRUE;
+	         PL_tainting = TRUE;
+	    }
+	    s++;
+	    goto reswitch;
 	case 'T':
 	    PL_tainting = TRUE;
+	    PL_taint_warn = FALSE;
 	    s++;
 	    goto reswitch;
 
@@ -1283,8 +1287,10 @@ print \"  \\@INC:\\n    @INC\\n\";");
     	char *popt = s;
 	while (isSPACE(*s))
 	    s++;
-	if (*s == '-' && *(s+1) == 'T')
+	if (*s == '-' && *(s+1) == 'T') {
 	    PL_tainting = TRUE;
+            PL_taint_warn = FALSE;
+	}
 	else {
 	    char *popt_copy = Nullch;
 	    while (s && *s) {
@@ -1313,13 +1319,19 @@ print \"  \\@INC:\\n    @INC\\n\";");
 		    }
 		}
 		if (*d == 't') {
-		    PL_tainting = TRUE;
-		    PL_taint_warn = TRUE;
+		    if( !PL_tainting ) {
+		        PL_taint_warn = TRUE;
+		        PL_tainting = TRUE;
+		    }
 		} else {
 		    moreswitches(d);
 		}
 	    }
 	}
+    }
+
+    if (PL_taint_warn && PL_dowarn != G_WARN_ALL_OFF) {
+       PL_compiling.cop_warnings = newSVpvn(WARN_TAINTstring, WARNsize);
     }
 
     if (!scriptname)
@@ -2509,11 +2521,15 @@ Internet, point your browser at http://www.perl.com/, the Perl Home Page.\n\n");
 	return s;
     case 'W':
 	PL_dowarn = G_WARN_ALL_ON|G_WARN_ON;
+        if (!specialWARN(PL_compiling.cop_warnings))
+            SvREFCNT_dec(PL_compiling.cop_warnings);
 	PL_compiling.cop_warnings = pWARN_ALL ;
 	s++;
 	return s;
     case 'X':
 	PL_dowarn = G_WARN_ALL_OFF;
+        if (!specialWARN(PL_compiling.cop_warnings))
+            SvREFCNT_dec(PL_compiling.cop_warnings);
 	PL_compiling.cop_warnings = pWARN_NONE ;
 	s++;
 	return s;

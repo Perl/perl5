@@ -1,4 +1,4 @@
-#!./perl -tw
+#!./perl -t
 
 BEGIN {
     chdir 't';
@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 10;
+plan tests => 11;
 
 my $Perl = which_perl();
 
@@ -41,3 +41,5 @@ unlink($file);
 like( $warning, qr/^Insecure dependency in unlink $Tmsg/,
                                                   'unlink() taint warn' );
 ok( !-e $file,  'unlink worked' );
+
+ok( !$^W,   "-t doesn't enable regular warnings" );

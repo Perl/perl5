@@ -700,8 +700,8 @@ program will be searched for strictly on the PATH.
 =item B<-t>
 
 Like B<-T>, but taint checks will issue warnings rather than fatal
-errors.  Also, all warnings are turned on as if you had used also
-a B<-w>.
+errors.  These warnings can be controlled normally with C<no warnings
+qw(taint)>.
 
 B<NOTE: this is not a substitute for -T.> This is meant only to be
 used as a temporary development aid while securing legacy code:

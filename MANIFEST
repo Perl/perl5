@@ -152,8 +152,9 @@ ext/Devel/PPPort/module2.c	Devel::PPPort test file
 ext/Devel/PPPort/module3.c	Devel::PPPort test file
 ext/Devel/PPPort/PPPort.pm	Devel::PPPort
 ext/Devel/PPPort/PPPort.xs	Devel::PPPort
+ext/Devel/PPPort/ppport_h.PL	Devel::PPPort
 ext/Devel/PPPort/README		Devel::PPPort Readme
-ext/Devel/PPPort/soak			Test Harness to run Devel::PPPort other Perls
+ext/Devel/PPPort/soak		Test Harness to run Devel::PPPort other Perls
 ext/Devel/PPPort/t/test.t	See if Devel::PPPort works
 ext/Devel/PPPort/TODO		Devel::PPPort Todo
 ext/Digest/MD5/Changes		Digest::MD5 extension changes
@@ -980,10 +981,10 @@ lib/File/Find/t/taint.t		See if File::Find works with taint
 lib/File/Path.pm		Do things like `mkdir -p' and `rm -r'
 lib/File/Path.t			See if File::Path works
 lib/File/Spec.pm		portable operations on file names
+lib/File/Spec/Cygwin.pm		portable operations on Cygwin file names
 lib/File/Spec/Epoc.pm		portable operations on EPOC file names
 lib/File/Spec/Functions.pm	Function interface to File::Spec object methods
 lib/File/Spec/Mac.pm		portable operations on Mac file names
-lib/File/Spec/Cygwin.pm		portable operations on Cygwin file names
 lib/File/Spec/NW5.pm		portable operations on NetWare file names
 lib/File/Spec/OS2.pm		portable operations on OS2 file names
 lib/File/Spec/t/Functions.t     See if File::Spec::Functions works
@@ -1051,8 +1052,8 @@ lib/IPC/Open3.t			See if IPC::Open3 works
 lib/IPC/SysV.t			See if IPC::SysV works
 lib/less.pm			For "use less"
 lib/less.t			See if less support works
-lib/lib_pm.PL			For "use lib", produces lib/lib.pm
 lib/lib.t			For "use lib" testing
+lib/lib_pm.PL			For "use lib", produces lib/lib.pm
 lib/locale.pm			For "use locale"
 lib/locale.t			See if locale support works
 lib/Locale/Codes/t/all.t	See if Locale::Codes work

@@ -254,12 +254,13 @@ unlink "${script_name}$script_ext" if -f "${script_name}$script_ext";
         
     my $bin_sh = ( $Config{make} =~ /^dmake/i 
                ? "" : ($Config{sh} || 'cmd /c') . "\n" );
+    $bin_sh = "SHELL = $bin_sh" if $bin_sh;
 
     my $tools = join "\n", map "$_ = $mm_w32->{ $_ }"
     	=> qw(CHMOD CP LD MV NOOP RM_F RM_RF TEST_F TOUCH UMASK_NULL DEV_NULL);
 
     like( $mm_w32->tools_other(),
-          qr/^SHELL = \Q$bin_sh$tools/m,
+          qr/^\Q$bin_sh$tools/m,
           'tools_other()' );
 };
 
@@ -275,8 +276,11 @@ unlink "${script_name}$script_ext" if -f "${script_name}$script_ext";
     }, 'MM';
     my $pods = join " \\\n\t", keys %{$mm_w32->{HTMLLIBPODS}}, 
                                keys %{$mm_w32->{HTMLSCRIPTPODS}};
+
     my $pod2html_exe = $mm_w32->catfile($Config{scriptdirexp},'pod2html');
-    $pod2html_exe = $mm_w32->perl_script( $pod2html_exe );
+    unless ( $pod2html_exe = $mm_w32->perl_script( $pod2html_exe ) ) {
+        $pod2html_exe = '-S pod2html';
+    }
 
     like( $mm_w32->htmlifypods(),
           qr/^POD2HTML_EXE\ =\ \Q$pod2html_exe\E\n

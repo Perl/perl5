@@ -2986,7 +2986,8 @@ tryagain:
 	    char *oldp, *s;
 	    STRLEN numlen;
 	    STRLEN ulen;
-	    U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
+	    STRLEN foldlen;
+	    U8 tmpbuf[UTF8_MAXLEN_UCLC+1], *foldbuf;
 
             parse_start = RExC_parse - 1;
 
@@ -3130,17 +3131,28 @@ tryagain:
 		}
 		if (RExC_flags16 & PMf_EXTENDED)
 		    p = regwhite(p, RExC_end);
-		if (UTF && FOLD) {
-		    toFOLD_uni(ender, tmpbuf, &ulen);
-		    ender = utf8_to_uvchr(tmpbuf, 0);
-		}
+		if (UTF && FOLD)
+		    toFOLD_uni(ender, tmpbuf, &foldlen);
 		if (ISMULT2(p)) { /* Back off on ?+*. */
 		    if (len)
 			p = oldp;
 		    else if (!UNI_IS_INVARIANT(NATIVE_TO_UNI(ender)) && UTF) {
-			reguni(pRExC_state, ender, s, &numlen);
-			s += numlen;
-			len += numlen;
+			 if (FOLD) {
+			      for (foldbuf = tmpbuf;
+				   foldlen;
+				   foldlen -= numlen) {
+				   ender = utf8_to_uvchr(foldbuf, &numlen);
+				   reguni(pRExC_state, ender, s, &numlen);
+				   s       += numlen;
+				   len     += numlen;
+				   foldbuf += numlen;
+			      }
+			 }
+			 else {
+			      reguni(pRExC_state, ender, s, &numlen);
+			      s   += numlen;
+			      len += numlen;
+			 }
 		    }
 		    else {
 			len++;
@@ -3149,9 +3161,23 @@ tryagain:
 		    break;
 		}
 		if (!UNI_IS_INVARIANT(NATIVE_TO_UNI(ender)) && UTF) {
-		    reguni(pRExC_state, ender, s, &numlen);
-		    s += numlen;
-		    len += numlen - 1;
+		     if (FOLD) {
+			  for (foldbuf = tmpbuf;
+			       foldlen;
+			       foldlen -= numlen) {
+			       ender = utf8_to_uvchr(foldbuf, &numlen);
+			       reguni(pRExC_state, ender, s, &numlen);
+			       s       += numlen;
+			       len     += numlen;
+			       foldbuf += numlen;
+			  }
+		     }
+		     else {
+			  reguni(pRExC_state, ender, s, &numlen);
+			  s   += numlen;
+			  len += numlen;
+		     }
+		     len--;
 		}
 		else
 		    REGC(ender, s++);
@@ -3985,6 +4011,18 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 		    Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\n",
 				   (UV)value);
 		    if (FOLD) {
+			 U8 tmpbuf [UTF8_MAXLEN+1];
+			 U8 foldbuf[UTF8_MAXLEN_FOLD+1];
+			 STRLEN foldlen;
+			 UV f;
+
+			 uvchr_to_utf8(tmpbuf, value);
+			 to_utf8_fold(tmpbuf, foldbuf, &foldlen);
+			 f = utf8_to_uvchr(foldbuf, 0);
+
+			 if (f != value)
+			      Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\n", f);
+
 			 if (value == UNICODE_GREEK_SMALL_LETTER_FINAL_SIGMA) {
 			      Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\n",
 					     (UV)UNICODE_GREEK_CAPITAL_LETTER_SIGMA);

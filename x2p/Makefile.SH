@@ -69,7 +69,7 @@ cat >>Makefile <<'!NO!SUBS!'
 REALPERL = ../perl
 CCCMD = `sh $(shellflags) cflags "optimize='$(OPTIMIZE)'" $@`
 
-public = a2p s2p find2perl
+public = a2p$(EXE_EXT) s2p find2perl
 
 private = 
 
@@ -106,7 +106,7 @@ all: $(public) $(private) $(util)
 compile: all
 	$(REALPERL) -I../lib ../utils/perlcc -I .. -L .. $(plextract) -v -log ../compilelog;  
 
-a2p: $(obj) a2p$(OBJ_EXT)
+a2p$(EXE_EXT): $(obj) a2p$(OBJ_EXT)
 	$(CC) -o a2p $(LDFLAGS) $(obj) a2p$(OBJ_EXT) $(libs)
 
 # I now supply a2p.c with the kits, so the following section is

@@ -10,17 +10,11 @@ my %module = (MacOS   => 'Mac',
 	      os2     => 'OS2',
 	      VMS     => 'VMS',
 	      epoc    => 'Epoc',
+	      NetWare => 'NW5',
 	      cygwin  => 'Cygwin');
 
 
 my $module = $module{$^O} || 'Unix';
-
-if ($^O eq 'MSWin32') {
-    require Config;
-    if ($Config::Config{osname} eq 'NetWare') {
-	$module = 'NW5';
-    }
-}
 
 require "File/Spec/$module.pm";
 @ISA = ("File::Spec::$module");
