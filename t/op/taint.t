@@ -82,7 +82,7 @@ print PROG 'print "@ARGV\n"', "\n";
 close PROG;
 my $echo = "$Invoke_Perl $ECHO";
 
-print "1..140\n";
+print "1..143\n";
 
 # First, let's make sure that Perl is checking the dangerous
 # environment variables. Maybe they aren't set yet, so we'll
@@ -576,3 +576,16 @@ else {
     test 142,     tainted $j;
 }
 
+# test target of substitution (regression bug)
+{
+    my $why = $TAINT."y";
+    $why =~ s/y/z/;
+    test 141,     tainted $why;
+
+    my $z = "[z]";
+    $why =~ s/$z/zee/;
+    test 142,     tainted $why;
+
+    $why =~ s/e/'-'.$$/ge;
+    test 143,     tainted $why;
+}

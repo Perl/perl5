@@ -1401,6 +1401,7 @@ PP(pp_subst)
     s = SvPV(TARG, len);
     if (!SvPOKp(TARG) || SvTYPE(TARG) == SVt_PVGV)
 	force_on_match = 1;
+    rxtainted = tainted << 1;
     TAINT_NOT;
 
   force_it:
@@ -1480,7 +1481,7 @@ PP(pp_subst)
 	curpm = pm;
 	SvSCREAM_off(TARG);	/* disable possible screamer */
 	if (once) {
-	    rxtainted = rx->exec_tainted;
+	    rxtainted |= rx->exec_tainted;
 	    m = rx->startp[0];
 	    d = rx->endp[0];
 	    s = orig;
@@ -1516,11 +1517,10 @@ PP(pp_subst)
 	    else {
 		sv_chop(TARG, d);
 	    }
-	    TAINT_IF(rxtainted);
+	    TAINT_IF(rxtainted & 1);
 	    PUSHs(&sv_yes);
 	}
 	else {
-	    rxtainted = 0;
 	    do {
 		if (iters++ > maxiters)
 		    DIE("Substitution loop");
@@ -1544,10 +1544,11 @@ PP(pp_subst)
 		SvCUR_set(TARG, d - SvPVX(TARG) + i);
 		Move(s, d, i+1, char);		/* include the NUL */
 	    }
-	    TAINT_IF(rxtainted);
+	    TAINT_IF(rxtainted & 1);
 	    PUSHs(sv_2mortal(newSViv((I32)iters)));
 	}
 	(void)SvPOK_only(TARG);
+	TAINT_IF(rxtainted);
 	SvSETMAGIC(TARG);
 	SvTAINT(TARG);
 	LEAVE_SCOPE(oldsave);
@@ -1561,7 +1562,7 @@ PP(pp_subst)
 	    s = SvPV_force(TARG, len);
 	    goto force_it;
 	}
-	rxtainted = rx->exec_tainted;
+	rxtainted |= rx->exec_tainted;
 	dstr = NEWSV(25, sv_len(TARG));
 	sv_setpvn(dstr, m, s-m);
 	curpm = pm;
@@ -1592,8 +1593,6 @@ PP(pp_subst)
 	} while (pregexec(rx, s, strend, orig, s == m, Nullsv, savematch));
 	sv_catpvn(dstr, s, strend - s);
 
-	TAINT_IF(rxtainted);
-
 	(void)SvOOK_off(TARG);
 	Safefree(SvPVX(TARG));
 	SvPVX(TARG) = SvPVX(dstr);
@@ -1602,10 +1601,13 @@ PP(pp_subst)
 	SvPVX(dstr) = 0;
 	sv_free(dstr);
 
+	TAINT_IF(rxtainted & 1);
+	PUSHs(sv_2mortal(newSViv((I32)iters)));
+
 	(void)SvPOK_only(TARG);
+	TAINT_IF(rxtainted);
 	SvSETMAGIC(TARG);
 	SvTAINT(TARG);
-	PUSHs(sv_2mortal(newSViv((I32)iters)));
 	LEAVE_SCOPE(oldsave);
 	RETURN;
     }
