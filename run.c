@@ -117,7 +117,7 @@ debprof(OP *o)
 {
 #ifdef DEBUGGING
     if (!profiledata)
-	New(000, profiledata, MAXO, U32);
+	Newz(000, profiledata, MAXO, U32);
     ++profiledata[o->op_type];
 #endif /* DEBUGGING */
 }
@@ -132,7 +132,8 @@ debprofdump(void)
     for (i = 0; i < MAXO; i++) {
 	if (profiledata[i])
 	    PerlIO_printf(Perl_debug_log,
-			  "%u\t%lu\n", i, (unsigned long)profiledata[i]);
+			  "%5lu %s\n", (unsigned long)profiledata[i],
+                                       op_name[i]);
     }
 #endif	/* DEBUGGING */
 }
