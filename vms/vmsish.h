@@ -777,4 +777,6 @@ typedef char __VMS_SEPYTOTORP__;
 #  undef fileno 
 #endif 
 
+#define NO_ENVIRON_ARRAY
+
 #endif  /* __vmsish_h_included */

@@ -1628,7 +1628,11 @@ typedef struct ptr_tbl PTR_TBL_t;
 #     endif
 #   endif
 # endif
-#endif         
+#endif
+
+#ifndef NO_ENVIRON_ARRAY
+#  define USE_ENVIRON_ARRAY
+#endif
 
 #ifndef PERL_SYS_INIT3
 #  define PERL_SYS_INIT3(argvp,argcp,envp) PERL_SYS_INIT(argvp,argcp)
@@ -2279,7 +2283,7 @@ EXT char *** environ_pointer;
 #  endif
 #else
    /* VMS and some other platforms don't use the environ array */
-#  if !defined(VMS)
+#  ifdef USE_ENVIRON_ARRAY
 #    if !defined(DONT_DECLARE_STD) || \
         (defined(__svr4__) && defined(__GNUC__) && defined(sun)) || \
         defined(__sgi) || \
