@@ -31,6 +31,165 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 13363] By: jhi                                   on 2001/11/29  14:26:48
+        Log: The changes to the curliffed files didn't stick in #13348.
+     Branch: perl
+	   ! README.dos README.win32
+____________________________________________________________________________
+[ 13362] By: jhi                                   on 2001/11/29  14:13:03
+        Log: Subject: Re: Found the rev where File::Glob broke
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Thu, 29 Nov 2001 10:14:05 -0500 (EST)
+             Message-ID: <Pine.SOL.4.10.10111291013060.23886-100000@maxwell.phys.lafayette.edu>
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 13361] By: jhi                                   on 2001/11/29  14:08:30
+        Log: Use __DATA__ instead of __END__.
+     Branch: perl
+	   ! lib/Term/Cap.pm
+____________________________________________________________________________
+[ 13360] By: jhi                                   on 2001/11/29  14:03:28
+        Log: Subject: [PATCH toke.c] autosplit into @F fix
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Thu, 29 Nov 2001 14:52:23 +0100
+             Message-ID: <20011129145223.A25817@rafael>         
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[ 13359] By: jhi                                   on 2001/11/29  13:47:07
+        Log: Subject: [PATCH B::Deparse] deparse -wl0 -i.bak
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Thu, 29 Nov 2001 15:48:15 +0100
+             Message-ID: <20011129154815.C25817@rafael>         
+     Branch: perl
+	   ! ext/B/B/Deparse.pm ext/B/O.pm ext/B/t/deparse.t
+____________________________________________________________________________
+[ 13358] By: jhi                                   on 2001/11/29  13:43:40
+        Log: Subject: DRAFT perlpacktut.pod - minor diffs to v0.1
+             From: "Wolfgang Laun" <wolfgang.laun@chello.at>
+             Date: Wed, 28 Nov 2001 20:35:29 +0100
+             Message-ID: <200111282035290250.0067732D@smtp.chello.at>
+     Branch: perl
+	   ! pod/perlpacktut.pod
+____________________________________________________________________________
+[ 13357] By: jhi                                   on 2001/11/29  13:42:18
+        Log: Subject: [patch pod/perlapio.pod] csh temp env setting
+             From: Stas Bekman <stas@stason.org>
+             Date: Thu, 29 Nov 2001 13:17:57 +0800 (SGT) 
+             Message-ID: <Pine.LNX.4.40.0111291314570.17584-100000@hope.stason.org>
+             
+             (with tweaks)
+     Branch: perl
+	   ! pod/perlapio.pod
+____________________________________________________________________________
+[ 13356] By: jhi                                   on 2001/11/29  13:39:06
+        Log: Subject: Re: [PATCH Exporter.pm] Explain dangers & workaround for AUTOLOADed constant subs
+             From: Tels <perl_dummy@bloodgate.com>
+             Date: Thu, 29 Nov 2001 07:28:10 +0100 (CET) 
+             Message-Id: <200111290630.IAA08631@tiku.hut.fi>
+             
+             (plus paragraph rewrapping)
+     Branch: perl
+	   ! lib/Exporter.pm
+____________________________________________________________________________
+[ 13355] By: jhi                                   on 2001/11/29  04:43:54
+        Log: Subject: Re: More h2ph problems [was Re: h2ph confused by comments in an enum.
+             From: Hugo van der Sanden <hv@crypt.compulink.co.uk>                 
+             Date: Wed, 28 Nov 2001 21:47:59 +0000
+             Message-Id: <200111282147.fASLlxD04163@crypt.compulink.co.uk>
+     Branch: perl
+	   ! t/lib/h2ph.h t/lib/h2ph.pht utils/h2ph.PL
+____________________________________________________________________________
+[ 13354] By: jhi                                   on 2001/11/29  04:28:29
+        Log: Subject: Re: Fw: Smoke 13285 /pro/3gl/CPAN/perl-current        
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Wed, 28 Nov 2001 15:33:00 -0500 (EST) 
+             Message-ID: <Pine.SOL.4.10.10111281524560.22100-100000@maxwell.phys.lafayette.edu>         
+     Branch: perl
+	   ! INSTALL ext/Time/HiRes/HiRes.t
+____________________________________________________________________________
+[ 13353] By: jhi                                   on 2001/11/29  04:19:40
+        Log: Subject: [PATCH t/run/kill_perl.t] (was Re: [ID 20011128.159] Segmentation faulton bad regexp)
+             From: Michael G Schwern <schwern@pobox.com> 
+             Date: Wed, 28 Nov 2001 16:37:01 -0500
+             Message-ID: <20011128163701.H676@blackrider>
+     Branch: perl
+	   ! t/run/kill_perl.t
+____________________________________________________________________________
+[ 13352] By: jhi                                   on 2001/11/29  04:18:08
+        Log: @INC tweak.
+     Branch: perl
+	   ! t/op/ref.t
+____________________________________________________________________________
+[ 13351] By: jhi                                   on 2001/11/29  02:28:06
+        Log: Subject: [PATCH] Re: [ID 20011127.153] installman error
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Wed, 28 Nov 2001 23:38:43 +0000
+             Message-ID: <20011128233843.N37621@plum.flirble.org>  
+     Branch: perl
+	   ! installman
+____________________________________________________________________________
+[ 13350] By: jhi                                   on 2001/11/29  02:18:30
+        Log: Tweak the forking logic.
+     Branch: perl
+	   ! Porting/checkURL.pl
+____________________________________________________________________________
+[ 13349] By: jhi                                   on 2001/11/29  01:37:48
+        Log: Update perlmodlib.PL as per #13348.  The L<> got
+             changed back because that is coming from ParseLink.pm.
+     Branch: perl
+	   ! pod/perlmodlib.PL pod/perlmodlib.pod
+____________________________________________________________________________
+[ 13348] By: jhi                                   on 2001/11/29  01:31:48
+        Log: URL fixups from Michael Schwern.
+     Branch: perl
+	   ! README.cygwin README.dos README.hpux README.mint README.mpeix
+	   ! README.os390 README.qnx README.solaris README.vos README.win32
+	   ! pod/perlmodlib.pod
+____________________________________________________________________________
+[ 13347] By: jhi                                   on 2001/11/29  01:23:08
+        Log: Subject: [PATCH Exporter.pm] Explain dangers & workaround for AUTOLOADed constant subs
+             From: Barrie Slaymaker <barries@slaysys.com>
+             Date: Wed, 28 Nov 2001 14:10:01 -0500                 
+             Message-ID: <20011128140957.D5236@sizzle.whoville.com>
+     Branch: perl
+	   ! lib/Exporter.pm
+____________________________________________________________________________
+[ 13346] By: jhi                                   on 2001/11/29  01:22:02
+        Log: Change $=, $., $*, $%, and $- to be IVs instead of longs.
+     Branch: perl
+	   ! bytecode.pl ext/B/B/Asmdata.pm ext/ByteLoader/byterun.c sv.h
+____________________________________________________________________________
+[ 13345] By: jhi                                   on 2001/11/29  00:11:56
+        Log: Subject: [PATCH] Re: $\ very broken
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Wed, 28 Nov 2001 22:33:08 +0100                 
+             Message-ID: <20011128223308.E732@rafael>   
+             
+             Subject: Re: [PATCH] Re: $\ very broken     
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Wed, 28 Nov 2001 22:29:00 +0000                 
+             Message-ID: <20011128222859.K37621@plum.flirble.org>
+     Branch: perl
+	   ! mg.c t/op/ref.t
+____________________________________________________________________________
+[ 13344] By: jhi                                   on 2001/11/29  00:05:19
+        Log: Add Abigail's link checker with the following tweaks:
+             - known dummy URLs (Peter Prymmer)
+             - do also READMEs and INSTALL (Michael Schwern)
+             - do also ftp URLs
+             - add fork retry loop in case the allowed number
+             of processes per user is low
+     Branch: perl
+	   + Porting/checkURL.pl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 13343] By: jhi                                   on 2001/11/28  14:56:50
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 13342] By: jhi                                   on 2001/11/28  14:15:25
         Log: In Linux if we have modern enough gcc and supported
              enough CPU, crank up the optimization level to -O3.
