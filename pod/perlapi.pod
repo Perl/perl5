@@ -2368,19 +2368,19 @@ false, defined or undefined.  Does not handle 'get' magic.
 =for hackers
 Found in file sv.h
 
+=item svtype
+
+An enum of flags for Perl types.  These are found in the file B<sv.h> 
+in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
+
+=for hackers
+Found in file sv.h
+
 =item SvTYPE
 
 Returns the type of the SV.  See C<svtype>.
 
 	svtype	SvTYPE(SV* sv)
-
-=for hackers
-Found in file sv.h
-
-=item svtype
-
-An enum of flags for Perl types.  These are found in the file B<sv.h> 
-in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
 
 =for hackers
 Found in file sv.h
@@ -3143,6 +3143,20 @@ Like C<sv_usepvn>, but also handles 'set' magic.
 =for hackers
 Found in file sv.c
 
+=item sv_utf8_decode
+
+Convert the octets in the PV from UTF-8 to chars. Scan for validity and then
+turn of SvUTF8 if needed so that we see characters. Used as a building block
+for decode_utf8 in Encode.xs
+
+NOTE: this function is experimental and may change or be
+removed without notice.
+
+	bool	sv_utf8_decode(SV *sv)
+
+=for hackers
+Found in file sv.c
+
 =item sv_utf8_downgrade
 
 Attempt to convert the PV of an SV from UTF8-encoded to byte encoding.
@@ -3161,10 +3175,8 @@ Found in file sv.c
 =item sv_utf8_encode
 
 Convert the PV of an SV to UTF8-encoded, but then turn off the C<SvUTF8>
-flag so that it looks like bytes again. Nothing calls this.
-
-NOTE: this function is experimental and may change or be
-removed without notice.
+flag so that it looks like octets again. Used as a building block
+for encode_utf8 in Encode.xs
 
 	void	sv_utf8_encode(SV *sv)
 
@@ -3174,8 +3186,11 @@ Found in file sv.c
 =item sv_utf8_upgrade
 
 Convert the PV of an SV to its UTF8-encoded form.
+Forces the SV to string form it it is not already.
+Always sets the SvUTF8 flag to avoid future validity checks even
+if all the bytes have hibit clear.
 
-	void	sv_utf8_upgrade(SV *sv)
+	STRLEN	sv_utf8_upgrade(SV *sv)
 
 =for hackers
 Found in file sv.c
