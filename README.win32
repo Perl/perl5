@@ -200,7 +200,7 @@ bundled with the distribution due to US Government restrictions
 on the export of cryptographic software.  Nevertheless, this routine
 is part of the "libdes" library (written by Eric Young) which is widely
 available worldwide, usually along with SSLeay (for example, 
-"ftp://fractal.mta.ca/pub/crypto/SSLeay/DES/").  Set CRYPT_SRC to the
+"ftp://ftp.funet.fi/pub/crypt/mirrors/dsi/libdes/").  Set CRYPT_SRC to the
 name of the file that implements des_fcrypt().  Alternatively, if
 you have built a library that contains des_fcrypt(), you can set
 CRYPT_LIB to point to the library name.  The location above contains
@@ -209,6 +209,12 @@ implementations of des_fcrypt().  Older versions have a single,
 self-contained file (fcrypt.c) that implements crypt(), so they may be
 easier to use.  A patch against the fcrypt.c found in libdes-3.06 is
 in des_fcrypt.patch.
+
+An easier alternative may be to get the pre-patched and ready-to-use
+fcrypt.c that can be found here:
+
+    http://downloads.ActiveState.com/pub/staff/gsar/fcrypt.c
+    ftp://ftp.ActiveState.com/pub/staff/gsar/fcrypt.c
 
 Perl will also build without des_fcrypt(), but the crypt() builtin will
 fail at run time.
