@@ -48,7 +48,13 @@ case "$cc" in
     *) test -f /usr/lib32/libm.so && cc='cc -n32' ;;
     esac    	
 esac
+
 test -z "$cc" && cc=cc
+
+case "$cc" in
+*gcc*) ;;
+*) ccversion=`cc -version` ;;
+esac
 
 case "$use64bitint" in
 $define|true|[yY]*)

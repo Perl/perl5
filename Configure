@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Sep  1 17:46:55 EET DST 2000 [metaconfig 3.0 PL70]
+# Generated on Fri Sep  1 21:10:02 EET DST 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >/tmp/c1$$ <<EOF
@@ -160,6 +160,8 @@ esac
 test -d UU || mkdir UU
 cd UU && rm -f ./*
 
+ccname=''
+ccversion=''
 ccsymbols=''
 cppccsymbols=''
 cppsymbols=''
@@ -598,7 +600,6 @@ fflushNULL=''
 fflushall=''
 fpossize=''
 fpostype=''
-ccname=''
 gccosandvers=''
 gccversion=''
 gidformat=''
@@ -729,16 +730,16 @@ libsfiles=''
 libsfound=''
 libspath=''
 lns=''
-d_PRIEldbl=''
-d_PRIFldbl=''
-d_PRIGldbl=''
+d_PRIEUldbl=''
+d_PRIFUldbl=''
+d_PRIGUldbl=''
 d_PRIeldbl=''
 d_PRIfldbl=''
 d_PRIgldbl=''
 d_SCNfldbl=''
-sPRIEldbl=''
-sPRIFldbl=''
-sPRIGldbl=''
+sPRIEUldbl=''
+sPRIFUldbl=''
+sPRIGUldbl=''
 sPRIeldbl=''
 sPRIfldbl=''
 sPRIgldbl=''
@@ -827,13 +828,13 @@ u8type=''
 uvsize=''
 uvtype=''
 ivdformat=''
-nvEformat=''
-nvFformat=''
-nvGformat=''
+nvEUformat=''
+nvFUformat=''
+nvGUformat=''
 nveformat=''
 nvfformat=''
 nvgformat=''
-uvXformat=''
+uvXUformat=''
 uvoformat=''
 uvuformat=''
 uvxformat=''
@@ -845,13 +846,13 @@ privlib=''
 privlibexp=''
 prototype=''
 ptrsize=''
-d_PRIX64=''
+d_PRIXU64=''
 d_PRId64=''
 d_PRIi64=''
 d_PRIo64=''
 d_PRIu64=''
 d_PRIx64=''
-sPRIX64=''
+sPRIXU64=''
 sPRId64=''
 sPRIi64=''
 sPRIo64=''
@@ -969,6 +970,8 @@ if test -f /etc/unixtovms.exe; then
 fi
 
 i_whoami=''
+ccname=''
+ccversion=''
 : set useposix=false in your hint file to disable the POSIX extension.
 useposix=true
 : set useopcode=false in your hint file to disable the Opcode extension.
@@ -7646,7 +7649,7 @@ EOCP
 		case "$yyy" in
 		123.456)
 			sPRIfldbl='"f"'; sPRIgldbl='"g"'; sPRIeldbl='"e"';
-                	sPRIFldbl='"F"'; sPRIGldbl='"G"'; sPRIEldbl='"E"';
+                	sPRIFUldbl='"F"'; sPRIGUldbl='"G"'; sPRIEUldbl='"E"';
 			echo "We will use %f."
 			;;
 		esac
@@ -7668,7 +7671,7 @@ EOCP
 		case "$yyy" in
 		123.456)
 			sPRIfldbl='"llf"'; sPRIgldbl='"llg"'; sPRIeldbl='"lle"';
-                	sPRIFldbl='"llF"'; sPRIGldbl='"llG"'; sPRIEldbl='"llE"';
+                	sPRIFUldbl='"llF"'; sPRIGUldbl='"llG"'; sPRIEUldbl='"llE"';
 			echo "We will use %llf."
 			;;
 		esac
@@ -7690,7 +7693,7 @@ EOCP
 		case "$yyy" in
 		123.456)
 			sPRIfldbl='"Lf"'; sPRIgldbl='"Lg"'; sPRIeldbl='"Le"';
-                	sPRIFldbl='"LF"'; sPRIGldbl='"LG"'; sPRIEldbl='"LE"';
+                	sPRIFUldbl='"LF"'; sPRIGUldbl='"LG"'; sPRIEUldbl='"LE"';
 			echo "We will use %Lf."
 			;;
 		esac
@@ -7712,7 +7715,7 @@ EOCP
 		case "$yyy" in
 		123.456)
 			sPRIfldbl='"lf"'; sPRIgldbl='"lg"'; sPRIeldbl='"le"';
-                	sPRIFldbl='"lF"'; sPRIGldbl='"lG"'; sPRIEldbl='"lE"';
+                	sPRIFUldbl='"lF"'; sPRIGUldbl='"lG"'; sPRIEUldbl='"lE"';
 			echo "We will use %lf."
 			;;
 		esac
@@ -7731,11 +7734,11 @@ fi # d_longdbl
 
 case "$sPRIfldbl" in
 '')	d_PRIfldbl="$undef"; d_PRIgldbl="$undef"; d_PRIeldbl="$undef"; 
-	d_PRIFldbl="$undef"; d_PRIGldbl="$undef"; d_PRIEldbl="$undef"; 
+	d_PRIFUldbl="$undef"; d_PRIGUldbl="$undef"; d_PRIEUldbl="$undef"; 
 	d_SCNfldbl="$undef";
 	;;
 *)	d_PRIfldbl="$define"; d_PRIgldbl="$define"; d_PRIeldbl="$define"; 
-	d_PRIFldbl="$define"; d_PRIGldbl="$define"; d_PRIEldbl="$define"; 
+	d_PRIFUldbl="$define"; d_PRIGUldbl="$define"; d_PRIEUldbl="$define"; 
 	d_SCNfldbl="$define";
 	;;
 esac
@@ -13137,7 +13140,7 @@ EOCP
 		case "$yyy" in
 		12345678901)
 			sPRId64='"d"'; sPRIi64='"i"'; sPRIu64='"u"';
-                	sPRIo64='"o"'; sPRIx64='"x"'; sPRIX64='"X"';
+                	sPRIo64='"o"'; sPRIx64='"x"'; sPRIXU64='"X"';
 			echo "We will use %d."
 			;;
 		esac
@@ -13159,7 +13162,7 @@ EOCP
 		case "$yyy" in
 		12345678901)
 			sPRId64='"ld"'; sPRIi64='"li"'; sPRIu64='"lu"';
-                	sPRIo64='"lo"'; sPRIx64='"lx"'; sPRIX64='"lX"';
+                	sPRIo64='"lo"'; sPRIx64='"lx"'; sPRIXU64='"lX"';
 			echo "We will use %ld."
 			;;
 		esac
@@ -13182,7 +13185,7 @@ EOCP
 		case "$yyy" in
 		12345678901)
 			sPRId64=PRId64; sPRIi64=PRIi64; sPRIu64=PRIu64;
-                	sPRIo64=PRIo64; sPRIx64=PRIx64; sPRIX64=PRIX64;
+                	sPRIo64=PRIo64; sPRIx64=PRIx64; sPRIXU64=PRIXU64;
 			echo "We will use the C9X style."
 			;;
 		esac
@@ -13204,7 +13207,7 @@ EOCP
 		case "$yyy" in
 		12345678901)
 			sPRId64='"lld"'; sPRIi64='"lli"'; sPRIu64='"llu"';
-                	sPRIo64='"llo"'; sPRIx64='"llx"'; sPRIX64='"llX"';
+                	sPRIo64='"llo"'; sPRIx64='"llx"'; sPRIXU64='"llX"';
 			echo "We will use the %lld style."
 			;;
 		esac
@@ -13226,7 +13229,7 @@ EOCP
 		case "$yyy" in
 		12345678901)
 			sPRId64='"Ld"'; sPRIi64='"Li"'; sPRIu64='"Lu"';
-                	sPRIo64='"Lo"'; sPRIx64='"Lx"'; sPRIX64='"LX"';
+                	sPRIo64='"Lo"'; sPRIx64='"Lx"'; sPRIXU64='"LX"';
 			echo "We will use %Ld."
 			;;
 		esac
@@ -13248,7 +13251,7 @@ EOCP
 		case "$yyy" in
 		12345678901)
 			sPRId64='"qd"'; sPRIi64='"qi"'; sPRIu64='"qu"';
-                	sPRIo64='"qo"'; sPRIx64='"qx"'; sPRIX64='"qX"';
+                	sPRIo64='"qo"'; sPRIx64='"qx"'; sPRIXU64='"qX"';
 			echo "We will use %qd."
 			;;
 		esac
@@ -13265,10 +13268,10 @@ fi
 
 case "$sPRId64" in
 '')	d_PRId64="$undef"; d_PRIi64="$undef"; d_PRIu64="$undef"; 
-	d_PRIo64="$undef"; d_PRIx64="$undef"; d_PRIX64="$undef"; 
+	d_PRIo64="$undef"; d_PRIx64="$undef"; d_PRIXU64="$undef"; 
 	;;
 *)	d_PRId64="$define"; d_PRIi64="$define"; d_PRIu64="$define"; 
-	d_PRIo64="$define"; d_PRIx64="$define"; d_PRIX64="$define"; 
+	d_PRIo64="$define"; d_PRIx64="$define"; d_PRIXU64="$define"; 
 	;;
 esac
 
@@ -13281,21 +13284,21 @@ if $test X"$ivsize" = X8; then
 	uvuformat="$sPRIu64"
 	uvoformat="$sPRIo64"
 	uvxformat="$sPRIx64"
-	uvXformat="$sPRIX64"
+	uvXUformat="$sPRIXU64"
 else
 	if $test X"$ivsize" = X"$longsize"; then
 		ivdformat='"ld"'
 		uvuformat='"lu"'
 		uvoformat='"lo"'
 		uvxformat='"lx"'
-		uvXformat='"lX"'
+		uvXUformat='"lX"'
 	else
 		if $test X"$ivsize" = X"$intsize"; then
 			ivdformat='"d"'
 			uvuformat='"u"'
 			uvoformat='"o"'
 			uvxformat='"x"'
-			uvXformat='"X"'
+			uvXUformat='"X"'
 		else
 			: far out
 			if $test X"$ivsize" = X"$shortsize"; then
@@ -13303,7 +13306,7 @@ else
 				uvuformat='"hu"'
 				uvoformat='"ho"'
 				uvxformat='"hx"'
-				uvXformat='"hX"'
+				uvXUformat='"hX"'
 			fi
 		fi
 	fi
@@ -13313,16 +13316,16 @@ if $test X"$uselongdouble" = X"$define" -a X"$d_longdbl" = X"$define" -a X"$d_PR
 	nveformat="$sPRIeldbl"
 	nvfformat="$sPRIfldbl"
 	nvgformat="$sPRIgldbl"
-	nvEformat="$sPRIEldbl"
-	nvFformat="$sPRIFldbl"
-	nvGformat="$sPRIGldbl"
+	nvEUformat="$sPRIEUldbl"
+	nvFUformat="$sPRIFUldbl"
+	nvGUformat="$sPRIGUldbl"
 else
 	nveformat='"e"'
 	nvfformat='"f"'
 	nvgformat='"g"'
-	nvEformat='"E"'
-	nvFformat='"F"'
-	nvGformat='"G"'
+	nvEUformat='"E"'
+	nvFUformat='"F"'
+	nvGUformat='"G"'
 fi
 
 case "$ivdformat" in
@@ -15431,6 +15434,7 @@ ccflags='$ccflags'
 ccflags_uselargefiles='$ccflags_uselargefiles'
 ccname='$ccname'
 ccsymbols='$ccsymbols'
+ccversion='$ccversion'
 cf_by='$cf_by'
 cf_email='$cf_email'
 cf_time='$cf_time'
@@ -15457,10 +15461,10 @@ crosscompile='$crosscompile'
 cryptlib='$cryptlib'
 csh='$csh'
 d_Gconvert='$d_Gconvert'
-d_PRIEldbl='$d_PRIEldbl'
-d_PRIFldbl='$d_PRIFldbl'
-d_PRIGldbl='$d_PRIGldbl'
-d_PRIX64='$d_PRIX64'
+d_PRIEUldbl='$d_PRIEUldbl'
+d_PRIFUldbl='$d_PRIFUldbl'
+d_PRIGUldbl='$d_PRIGUldbl'
+d_PRIXU64='$d_PRIXU64'
 d_PRId64='$d_PRId64'
 d_PRIeldbl='$d_PRIeldbl'
 d_PRIfldbl='$d_PRIfldbl'
@@ -15985,9 +15989,9 @@ nm_opt='$nm_opt'
 nm_so_opt='$nm_so_opt'
 nonxs_ext='$nonxs_ext'
 nroff='$nroff'
-nvEformat='$nvEformat'
-nvFformat='$nvFformat'
-nvGformat='$nvGformat'
+nvEUformat='$nvEUformat'
+nvFUformat='$nvFUformat'
+nvGUformat='$nvGUformat'
 nveformat='$nveformat'
 nvfformat='$nvfformat'
 nvgformat='$nvgformat'
@@ -16034,10 +16038,10 @@ revision='$revision'
 rm='$rm'
 rmail='$rmail'
 runnm='$runnm'
-sPRIEldbl='$sPRIEldbl'
-sPRIFldbl='$sPRIFldbl'
-sPRIGldbl='$sPRIGldbl'
-sPRIX64='$sPRIX64'
+sPRIEUldbl='$sPRIEUldbl'
+sPRIFUldbl='$sPRIFUldbl'
+sPRIGUldbl='$sPRIGUldbl'
+sPRIXU64='$sPRIXU64'
 sPRId64='$sPRId64'
 sPRIeldbl='$sPRIeldbl'
 sPRIfldbl='$sPRIfldbl'
@@ -16154,7 +16158,7 @@ usevendorprefix='$usevendorprefix'
 usevfork='$usevfork'
 usrinc='$usrinc'
 uuname='$uuname'
-uvXformat='$uvXformat'
+uvXUformat='$uvXUformat'
 uvoformat='$uvoformat'
 uvsize='$uvsize'
 uvtype='$uvtype'

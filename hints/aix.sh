@@ -128,6 +128,13 @@ d_setreuid='undef'
 # Tell perl which symbols to export for dynamic linking.
 case "$cc" in
 *gcc*) ccdlflags='-Xlinker' ;;
+*) ccversion=`lslpp -L | grep 'C for AIX Compiler$' | awk '{print $2}'`
+   case "$ccversion" in
+     4.4.0.0|4.4.0.1|4.4.0.2)
+	echo >&4 "*** This C compiler ($ccversion) is outdated."
+	echo >&4 "*** Please upgrade to at least 4.4.0.3."
+	;;
+     esac
 esac
 # the required -bE:$installarchlib/CORE/perl.exp is added by
 # libperl.U (Configure) later.
@@ -171,9 +178,9 @@ $define|true|[yY]*)
 	    ;;
 	*)
 	    cat >&4 <<EOM
-For pthreads you should use the AIX C compiler cc_r.
-(now your compiler was set to '$cc')
-Cannot continue, aborting.
+*** For pthreads you should use the AIX C compiler cc_r.
+*** (now your compiler was set to '$cc')
+*** Cannot continue, aborting.
 EOM
 	    exit 1
 	    ;;

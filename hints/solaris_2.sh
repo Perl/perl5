@@ -45,7 +45,11 @@ case "$archname" in
     ;;
 esac
 
-test -z "`${cc:-cc} -V 2>&1|grep -i workshop`" || ccname=workshop
+ccversion="`${cc:-cc} -V 2>&1|sed 's/^cc: //'`"
+case "$ccversion" in
+*WorkShop*) ccname=workshop ;;
+*) ccversion='' ;;
+esac
 
 cat >UU/workshoplibpth.cbu<<'EOCBU'
 case "$workshoplibpth_done" in

@@ -197,11 +197,23 @@ ccflags_uselargefiles (uselfs.U):
 	This variable contains the compiler flags needed by large file builds
 	and added to ccflags by hints files.
 
+ccname (Checkcc.U):
+	This can set either by hints files or by Configure.  If using
+	gcc, this is gcc, and if not, usually equal to cc, unimpressive, no?
+	Some platforms, however, make good use of this by storing the
+	flavor of the C compiler being used here.  For example if using
+	the Sun WorkShop suite, ccname will be 'workshop'.
+
 ccsymbols (Cppsym.U):
 	The variable contains the symbols defined by the C compiler alone.
 	The symbols defined by cpp or by cc when it calls cpp are not in
 	this list, see cppsymbols and cppccsymbols.
 	The list is a space-separated list of symbol=value tokens.
+
+ccversion (Checkcc.U):
+	This can set either by hints files or by Configure.  If using
+	a (non-gcc) vendor cc, this variable may contain a version for
+	the compiler.
 
 cf_by (cf_who.U):
 	Login name of the person who ran the Configure script and answered the
@@ -1091,28 +1103,34 @@ d_PRId64 (quadfio.U):
 	indiciates that stdio has a symbol to print 64-bit decimal numbers.
 
 d_PRIeldbl (longdblfio.U):
-	This variable conditionally defines the PERL_PRIfldlbl symbol, which
+	This variable conditionally defines the PERL_PRIfldbl symbol, which
 	indiciates that stdio has a symbol to print long doubles.
 
-d_PRIEldbl (longdblfio.U):
-	This variable conditionally defines the PERL_PRIfldlbl symbol, which
+d_PRIEUldbl (longdblfio.U):
+	This variable conditionally defines the PERL_PRIfldbl symbol, which
 	indiciates that stdio has a symbol to print long doubles.
+	The 'U' in the name is to separate this from d_PRIeldbl so that even
+	case-blind systems can see the difference.
 
 d_PRIfldbl (longdblfio.U):
-	This variable conditionally defines the PERL_PRIfldlbl symbol, which
+	This variable conditionally defines the PERL_PRIfldbl symbol, which
 	indiciates that stdio has a symbol to print long doubles.
 
-d_PRIFldbl (longdblfio.U):
-	This variable conditionally defines the PERL_PRIfldlbl symbol, which
+d_PRIFUldbl (longdblfio.U):
+	This variable conditionally defines the PERL_PRIfldbl symbol, which
 	indiciates that stdio has a symbol to print long doubles.
+	The 'U' in the name is to separate this from d_PRIfldbl so that even
+	case-blind systems can see the difference.
 
 d_PRIgldbl (longdblfio.U):
-	This variable conditionally defines the PERL_PRIfldlbl symbol, which
+	This variable conditionally defines the PERL_PRIfldbl symbol, which
 	indiciates that stdio has a symbol to print long doubles.
 
-d_PRIGldbl (longdblfio.U):
-	This variable conditionally defines the PERL_PRIfldlbl symbol, which
+d_PRIGUldbl (longdblfio.U):
+	This variable conditionally defines the PERL_PRIfldbl symbol, which
 	indiciates that stdio has a symbol to print long doubles.
+	The 'U' in the name is to separate this from d_PRIgldbl so that even
+	case-blind systems can see the difference.
 
 d_PRIi64 (quadfio.U):
 	This variable conditionally defines the PERL_PRIi64 symbol, which
@@ -1131,9 +1149,11 @@ d_PRIx64 (quadfio.U):
 	This variable conditionally defines the PERL_PRIx64 symbol, which
 	indiciates that stdio has a symbol to print 64-bit hexadecimal numbers.
 
-d_PRIX64 (quadfio.U):
-	This variable conditionally defines the PERL_PRIX64 symbol, which
+d_PRIXU64 (quadfio.U):
+	This variable conditionally defines the PERL_PRIXU64 symbol, which
 	indiciates that stdio has a symbol to print 64-bit hExADECimAl numbers.
+	The 'U' in the name is to separate this from d_PRIx64 so that even
+	case-blind systems can see the difference.
 
 d_pthread_yield (d_pthread_y.U):
 	This variable conditionally defines the HAS_PTHREAD_YIELD
@@ -1224,6 +1244,10 @@ d_scm_rights (d_socket.U):
 	This variable conditionally defines the HAS_SCM_RIGHTS symbol,
 	which indicates that the SCM_RIGHTS is available.  #ifdef is
 	not enough because it may be an enum, glibc has been known to do this.
+
+d_SCNfldbl (longdblfio.U):
+	This variable conditionally defines the PERL_PRIfldbl symbol, which
+	indiciates that stdio has a symbol to scan long doubles.
 
 d_seekdir (d_readdir.U):
 	This variable conditionally defines HAS_SEEKDIR if seekdir() is
@@ -1418,6 +1442,10 @@ d_socklen_t (d_socklen_t.U):
 d_sockpair (d_socket.U):
 	This variable conditionally defines the HAS_SOCKETPAIR symbol, which
 	indicates that the BSD socketpair() is supported.
+
+d_socks5_init (d_socks5_init.U):
+	This variable conditionally defines the HAS_SOCKS5_INIT symbol, which
+	indicates to the C program that the socks5_init() routine is available.
 
 d_sqrtl (d_sqrtl.U):
 	This variable conditionally defines the HAS_SQRTL symbol, which
@@ -2753,7 +2781,7 @@ nveformat (perlxvf.U):
 	This variable contains the format string used for printing
 	a Perl NV using %e-ish floating point format.
 
-nvEformat (perlxvf.U):
+nvEUformat (perlxvf.U):
 	This variable contains the format string used for printing
 	a Perl NV using %E-ish floating point format.
 
@@ -2761,7 +2789,7 @@ nvfformat (perlxvf.U):
 	This variable confains the format string used for printing
 	a Perl NV using %f-ish floating point format.
 
-nvFformat (perlxvf.U):
+nvFUformat (perlxvf.U):
 	This variable confains the format string used for printing
 	a Perl NV using %F-ish floating point format.
 
@@ -2769,7 +2797,7 @@ nvgformat (perlxvf.U):
 	This variable contains the format string used for printing
 	a Perl NV using %g-ish floating point format.
 
-nvGformat (perlxvf.U):
+nvGUformat (perlxvf.U):
 	This variable contains the format string used for printing
 	a Perl NV using %G-ish floating point format.
 
@@ -3250,25 +3278,31 @@ sPRIeldbl (longdblfio.U):
 	This variable, if defined, contains the string used by stdio to
 	format long doubles (format 'e') for output.
 
-sPRIEldbl (longdblfio.U):
+sPRIEUldbl (longdblfio.U):
 	This variable, if defined, contains the string used by stdio to
 	format long doubles (format 'E') for output.
+	The 'U' in the name is to separate this from sPRIeldbl so that even
+	case-blind systems can see the difference.
 
 sPRIfldbl (longdblfio.U):
 	This variable, if defined, contains the string used by stdio to
 	format long doubles (format 'f') for output.
 
-sPRIFldbl (longdblfio.U):
+sPRIFUldbl (longdblfio.U):
 	This variable, if defined, contains the string used by stdio to
 	format long doubles (format 'F') for output.
+	The 'U' in the name is to separate this from sPRIfldbl so that even
+	case-blind systems can see the difference.
 
 sPRIgldbl (longdblfio.U):
 	This variable, if defined, contains the string used by stdio to
 	format long doubles (format 'g') for output.
 
-sPRIGldbl (longdblfio.U):
+sPRIGUldbl (longdblfio.U):
 	This variable, if defined, contains the string used by stdio to
 	format long doubles (format 'G') for output.
+	The 'U' in the name is to separate this from sPRIgldbl so that even
+	case-blind systems can see the difference.
 
 sPRIi64 (quadfio.U):
 	This variable, if defined, contains the string used by stdio to
@@ -3286,14 +3320,20 @@ sPRIx64 (quadfio.U):
 	This variable, if defined, contains the string used by stdio to
 	format 64-bit hexadecimal numbers (format 'x') for output.
 
-sPRIX64 (quadfio.U):
+sPRIXU64 (quadfio.U):
 	This variable, if defined, contains the string used by stdio to
 	format 64-bit hExADECimAl numbers (format 'X') for output.
+	The 'U' in the name is to separate this from sPRIx64 so that even
+	case-blind systems can see the difference.
 
 src (src.U):
 	This variable holds the path to the package source. It is up to
 	the Makefile to use this variable and set VPATH accordingly to
 	find the sources remotely.
+
+sSCNfldbl (longdblfio.U):
+	This variable, if defined, contains the string used by stdio to
+	format long doubles (format 'f') for input.
 
 ssizetype (ssizetype.U):
 	This variable defines ssizetype to be something like ssize_t, 
@@ -3611,7 +3651,7 @@ uvxformat (perlxvf.U):
 	This variable contains the format string used for printing
 	a Perl UV as an unsigned hexadecimal integer in lowercase abcdef.
 
-uvXformat (perlxvf.U):
+uvXUformat (perlxvf.U):
 	This variable contains the format string used for printing
 	a Perl UV as an unsigned hexadecimal integer in uppercase ABCDEF.
 
