@@ -4068,12 +4068,12 @@ documentation.
 Calls the System V IPC function semop to perform semaphore operations
 such as signalling and waiting.  OPSTRING must be a packed array of
 semop structures.  Each semop structure can be generated with
-C<pack("sss", $semnum, $semop, $semflag)>.  The number of semaphore
+C<pack("s!3", $semnum, $semop, $semflag)>.  The number of semaphore
 operations is implied by the length of OPSTRING.  Returns true if
 successful, or false if there is an error.  As an example, the
 following code waits on semaphore $semnum of semaphore id $semid:
 
-    $semop = pack("sss", $semnum, -1, 0);
+    $semop = pack("s!3", $semnum, -1, 0);
     die "Semaphore trouble: $!\n" unless semop($semid, $semop);
 
 To signal the semaphore, replace C<-1> with C<1>.  See also
