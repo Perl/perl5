@@ -16,7 +16,7 @@ our($VERSION, $PACKAGE, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 
 @ISA = qw(Exporter);
 
-$VERSION = 1.01;
+$VERSION = 1.02;
 
 my @angcnv = qw(rad2deg rad2grad
 	     deg2rad deg2grad
@@ -144,6 +144,9 @@ sub great_circle_direction {
     return rad2rad($direction);
 }
 
+1;
+
+__END__
 =pod
 
 =head1 NAME
