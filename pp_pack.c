@@ -145,7 +145,7 @@ S_group_end(pTHX_ register char *pat, register char *patend, char ender)
 	else if (c == '[')
 	    pat = group_end(pat, patend, ']') + 1;
     }
-    croak("No group ending character `%c' found", ender);
+    Perl_croak(aTHX_ "No group ending character `%c' found", ender);
 }
 
 /* Returns the sizeof() struct described by pat */
@@ -179,17 +179,17 @@ S_measure_struct(pTHX_ char *pat, register char *patend)
 		pat++;
 	    }
 	    else
-		croak("'!' allowed only after types %s", natstr);
+		Perl_croak(aTHX_ "'!' allowed only after types %s", natstr);
 	}
 	len = find_count(&pat, patend, &star);
 	if (star > 0)			/*  */
-		croak("%s not allowed in length fields", "count *");
+		Perl_croak(aTHX_ "%s not allowed in length fields", "count *");
 	else if (star < 0)		/* No explicit len */
 		len = datumtype != '@';
 
 	switch(datumtype) {
 	default:
-	    croak("Invalid type in unpack: '%c'", (int)datumtype);
+	    Perl_croak(aTHX_ "Invalid type in unpack: '%c'", (int)datumtype);
 	case '@':
 	case '/':
 	case 'U':			/* XXXX Is it correct? */
@@ -197,7 +197,7 @@ S_measure_struct(pTHX_ char *pat, register char *patend)
 	case 'u':
 	    buf[0] = datumtype;
 	    buf[1] = 0;
-	    croak("%s not allowed in length fields", buf);
+	    Perl_croak(aTHX_ "%s not allowed in length fields", buf);
 	case ',': /* grandfather in commas but with a warning */
 	    if (commas++ == 0 && ckWARN(WARN_UNPACK))
 		Perl_warner(aTHX_ WARN_UNPACK,
@@ -211,21 +211,21 @@ S_measure_struct(pTHX_ char *pat, register char *patend)
 	    char *beg = pat, *end;
 
 	    if (star >= 0)
-		croak("()-group starts with a count");
+		Perl_croak(aTHX_ "()-group starts with a count");
 	    end = group_end(beg, patend, ')');
 	    pat = end + 1;
 	    len = find_count(&pat, patend, &star);
 	    if (star < 0)		/* No count */
 		len = 1;
 	    else if (star > 0)	/* Star */
-		croak("%s not allowed in length fields", "count *");
+		Perl_croak(aTHX_ "%s not allowed in length fields", "count *");
 	    size = measure_struct(beg, end);
 	    break;
 	}
 	case 'X':
 	    size = -1;
 	    if (total < len)
-		croak("X outside of string");
+		Perl_croak(aTHX_ "X outside of string");
 	    break;
 	case 'x':
 	case 'A':
@@ -345,10 +345,10 @@ S_find_count(pTHX_ char **ppat, register char *patend, int *star)
 	while (isDIGIT(*pat)) {
 	    len = (len * 10) + (*pat++ - '0');
 	    if (len < 0)
-		croak("Repeat count in unpack overflows");
+		Perl_croak(aTHX_ "Repeat count in unpack overflows");
 	}
 	if (brackets && *pat++ != ']')
-	    croak("No repeat count ender ] found after digits");
+	    Perl_croak(aTHX_ "No repeat count ender ] found after digits");
     }
     else
 	len = *star = -1;
@@ -443,7 +443,7 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 		pat++;
 	    }
 	    else
-		croak("'!' allowed only after types %s", natstr);
+		Perl_croak(aTHX_ "'!' allowed only after types %s", natstr);
 	}
 	len = find_count(&pat, patend, &star);
 	if (star > 0)
@@ -454,7 +454,7 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
       redo_switch:
 	switch(datumtype) {
 	default:
-	    croak("Invalid type in unpack: '%c'", (int)datumtype);
+	    Perl_croak(aTHX_ "Invalid type in unpack: '%c'", (int)datumtype);
 	case ',': /* grandfather in commas but with a warning */
 	    if (commas++ == 0 && ckWARN(WARN_UNPACK))
 		Perl_warner(aTHX_ WARN_UNPACK,
@@ -474,7 +474,7 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 	    char *ss = s;		/* Move from register */
 
 	    if (star >= 0)
-		croak("()-group starts with a count");
+		Perl_croak(aTHX_ "()-group starts with a count");
 	    aptr = group_end(beg, patend, ')');
 	    pat = aptr + 1;
 	    if (star != -2) {
@@ -497,27 +497,27 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 	}
 	case '@':
 	    if (len > strend - strbeg)
-		croak("@ outside of string");
+		Perl_croak(aTHX_ "@ outside of string");
 	    s = strbeg + len;
 	    break;
 	case 'X':
 	    if (len > s - strbeg)
-		croak("X outside of string");
+		Perl_croak(aTHX_ "X outside of string");
 	    s -= len;
 	    break;
 	case 'x':
 	    if (len > strend - s)
-		croak("x outside of string");
+		Perl_croak(aTHX_ "x outside of string");
 	    s += len;
 	    break;
 	case '/':
 	    if (ocnt + SP - PL_stack_base - start_sp_offset <= 0)
-		croak("/ must follow a numeric type");
+		Perl_croak(aTHX_ "/ must follow a numeric type");
 	    datumtype = *pat++;
 	    if (*pat == '*')
 		pat++;		/* ignore '*' for compatibility with pack */
 	    if (isDIGIT(*pat))
-		croak("/ cannot take a count" );
+		Perl_croak(aTHX_ "/ cannot take a count" );
 	    len = POPi;
 	    star = -2;
 	    goto redo_switch;
@@ -1182,12 +1182,12 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 		    }
 		}
 		if ((s >= strend) && bytes)
-		    croak("Unterminated compressed integer");
+		    Perl_croak(aTHX_ "Unterminated compressed integer");
 	    }
 	    break;
 	case 'P':
 	    if (star > 0)
-	        croak("P must have an explicit size");
+	        Perl_croak(aTHX_ "P must have an explicit size");
 	    EXTEND(SP, 1);
 	    if (sizeof(char*) > strend - s)
 		break;
@@ -1607,7 +1607,7 @@ Perl_pack_cat(pTHX_ SV *cat, char *pat, register char *patend, register SV **beg
 		pat++;
 	    }
 	    else
-		croak("'!' allowed only after types %s", natstr);
+		Perl_croak(aTHX_ "'!' allowed only after types %s", natstr);
 	}
 	len = find_count(&pat, patend, &star);
 	if (star > 0)			/* Count is '*' */
@@ -1617,21 +1617,21 @@ Perl_pack_cat(pTHX_ SV *cat, char *pat, register char *patend, register SV **beg
 	if (*pat == '/') {		/* doing lookahead how... */
 	    ++pat;
 	    if ((*pat != 'a' && *pat != 'A' && *pat != 'Z') || pat[1] != '*')
-		croak("/ must be followed by a*, A* or Z*");
+		Perl_croak(aTHX_ "/ must be followed by a*, A* or Z*");
 	    lengthcode = sv_2mortal(newSViv(sv_len(items > 0
 						   ? *beglist : &PL_sv_no)
                                             + (*pat == 'Z' ? 1 : 0)));
 	}
 	switch(datumtype) {
 	default:
-	    croak("Invalid type in pack: '%c'", (int)datumtype);
+	    Perl_croak(aTHX_ "Invalid type in pack: '%c'", (int)datumtype);
 	case ',': /* grandfather in commas but with a warning */
 	    if (commas++ == 0 && ckWARN(WARN_PACK))
 		Perl_warner(aTHX_ WARN_PACK,
 			    "Invalid type in pack: '%c'", (int)datumtype);
 	    break;
 	case '%':
-	    croak("%% may only be used in unpack");
+	    Perl_croak(aTHX_ "%% may only be used in unpack");
 	case '@':
 	    len -= SvCUR(cat);
 	    if (len > 0)
@@ -1646,7 +1646,7 @@ Perl_pack_cat(pTHX_ SV *cat, char *pat, register char *patend, register SV **beg
 	    SV **savebeglist = beglist;	/* beglist de-register-ed */
 
 	    if (star >= 0)
-		croak("()-group starts with a count");
+		Perl_croak(aTHX_ "()-group starts with a count");
 	    aptr = group_end(beg, patend, ')');
 	    pat = aptr + 1;
 	    if (star != -2) {
@@ -1668,7 +1668,7 @@ Perl_pack_cat(pTHX_ SV *cat, char *pat, register char *patend, register SV **beg
 	case 'X':
 	  shrink:
 	    if (SvCUR(cat) < len)
-		croak("X outside of string");
+		Perl_croak(aTHX_ "X outside of string");
 	    SvCUR(cat) -= len;
 	    *SvEND(cat) = '\0';
 	    break;
@@ -1957,7 +1957,7 @@ Perl_pack_cat(pTHX_ SV *cat, char *pat, register char *patend, register SV **beg
 		adouble = Perl_floor(SvNV(fromstr));
 
 		if (adouble < 0)
-		    croak("Cannot compress negative numbers");
+		    Perl_croak(aTHX_ "Cannot compress negative numbers");
 
 		if (
 #if UVSIZE > 4 && UVSIZE >= NVSIZE
@@ -1991,7 +1991,7 @@ Perl_pack_cat(pTHX_ SV *cat, char *pat, register char *patend, register SV **beg
 		    /* Copy string and check for compliance */
 		    from = SvPV(fromstr, len);
 		    if ((norm = is_an_int(from, len)) == NULL)
-			croak("can compress only unsigned integer");
+			Perl_croak(aTHX_ "can compress only unsigned integer");
 
 		    New('w', result, len, char);
 		    in = result + len;
@@ -2011,7 +2011,7 @@ Perl_pack_cat(pTHX_ SV *cat, char *pat, register char *patend, register SV **beg
 			double next = floor(adouble / 128);
 			*--in = (unsigned char)(adouble - (next * 128)) | 0x80;
 			if (in <= buf)  /* this cannot happen ;-) */
-			    croak("Cannot compress integer");
+			    Perl_croak(aTHX_ "Cannot compress integer");
 			adouble = next;
 		    } while (adouble > 0);
 		    buf[sizeof(buf) - 1] &= 0x7f; /* clear continue bit */
@@ -2026,7 +2026,7 @@ Perl_pack_cat(pTHX_ SV *cat, char *pat, register char *patend, register SV **beg
 		    /* Copy string and check for compliance */
 		    from = SvPV(fromstr, len);
 		    if ((norm = is_an_int(from, len)) == NULL)
-			croak("can compress only unsigned integer");
+			Perl_croak(aTHX_ "can compress only unsigned integer");
 
 		    New('w', result, len, char);
 		    in = result + len;
