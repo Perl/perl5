@@ -12,15 +12,16 @@ package Math::BigFloat;
 #   _p: precision
 #   _f: flags, used to signal MBI not to touch our private parts
 
-$VERSION = '1.30';
+$VERSION = '1.31';
 require 5.005;
 use Exporter;
-use Math::BigInt qw/objectify/;
+use File::Spec;
+# use Math::BigInt;
 @ISA =       qw( Exporter Math::BigInt);
 
 use strict;
 use vars qw/$AUTOLOAD $accuracy $precision $div_scale $round_mode $rnd_mode/;
-use vars qw/$upgrade $downgrade/;
+use vars qw/$upgrade $downgrade $MBI/;
 my $class = "Math::BigFloat";
 
 use overload
@@ -48,16 +49,21 @@ $div_scale  = 40;
 
 $upgrade = undef;
 $downgrade = undef;
+$MBI = 'Math::BigInt';	# the package we are using for our private parts
+			# changable by use Math::BigFloat with => 'package'
 
 ##############################################################################
 # the old code had $rnd_mode, so we need to support it, too
 
-$rnd_mode   = 'even';
 sub TIESCALAR   { my ($class) = @_; bless \$round_mode, $class; }
 sub FETCH       { return $round_mode; }
 sub STORE       { $rnd_mode = $_[0]->round_mode($_[1]); }
 
-BEGIN { tie $rnd_mode, 'Math::BigFloat'; }
+BEGIN
+  { 
+  $rnd_mode   = 'even';
+  tie $rnd_mode, 'Math::BigFloat'; 
+  }
  
 ##############################################################################
 
@@ -104,7 +110,7 @@ sub new
   if ((ref($wanted)) && (ref($wanted) ne $class))
     {
     $self->{_m} = $wanted->as_number();		# get us a bigint copy
-    $self->{_e} = Math::BigInt->bzero();
+    $self->{_e} = $MBI->bzero();
     $self->{_m}->babs();
     $self->{sign} = $wanted->sign();
     return $self->bnorm();
@@ -115,8 +121,8 @@ sub new
     {
     return $downgrade->new($wanted) if $downgrade;
 
-    $self->{_e} = Math::BigInt->bzero();
-    $self->{_m} = Math::BigInt->bzero();
+    $self->{_e} = $MBI->bzero();
+    $self->{_m} = $MBI->bzero();
     $self->{sign} = $wanted;
     $self->{sign} = '+inf' if $self->{sign} eq 'inf';
     return $self->bnorm();
@@ -129,16 +135,16 @@ sub new
     
     return $downgrade->bnan() if $downgrade;
     
-    $self->{_e} = Math::BigInt->bzero();
-    $self->{_m} = Math::BigInt->bzero();
+    $self->{_e} = $MBI->bzero();
+    $self->{_m} = $MBI->bzero();
     $self->{sign} = $nan;
     }
   else
     {
     # make integer from mantissa by adjusting exp, then convert to bigint
     # undef,undef to signal MBI that we don't need no bloody rounding
-    $self->{_e} = Math::BigInt->new("$$es$$ev",undef,undef);	# exponent
-    $self->{_m} = Math::BigInt->new("$$miv$$mfv",undef,undef); 	# create mant.
+    $self->{_e} = $MBI->new("$$es$$ev",undef,undef);	# exponent
+    $self->{_m} = $MBI->new("$$miv$$mfv",undef,undef); 	# create mant.
     # 3.123E0 = 3123E-3, and 3.123E-2 => 3123E-5
     $self->{_e} -= CORE::length($$mfv) if CORE::length($$mfv) != 0; 		
     $self->{sign} = $$mis;
@@ -163,39 +169,39 @@ sub _bnan
   {
   # used by parent class bone() to initialize number to 1
   my $self = shift;
-  $self->{_m} = Math::BigInt->bzero();
-  $self->{_e} = Math::BigInt->bzero();
+  $self->{_m} = $MBI->bzero();
+  $self->{_e} = $MBI->bzero();
   }
 
 sub _binf
   {
   # used by parent class bone() to initialize number to 1
   my $self = shift;
-  $self->{_m} = Math::BigInt->bzero();
-  $self->{_e} = Math::BigInt->bzero();
+  $self->{_m} = $MBI->bzero();
+  $self->{_e} = $MBI->bzero();
   }
 
 sub _bone
   {
   # used by parent class bone() to initialize number to 1
   my $self = shift;
-  $self->{_m} = Math::BigInt->bone();
-  $self->{_e} = Math::BigInt->bzero();
+  $self->{_m} = $MBI->bone();
+  $self->{_e} = $MBI->bzero();
   }
 
 sub _bzero
   {
   # used by parent class bone() to initialize number to 1
   my $self = shift;
-  $self->{_m} = Math::BigInt->bzero();
-  $self->{_e} = Math::BigInt->bone();
+  $self->{_m} = $MBI->bzero();
+  $self->{_e} = $MBI->bone();
   }
 
 sub isa
   {
   my ($self,$class) = @_;
-  return if $class eq 'Math::BigInt';		# we aren't
-  return UNIVERSAL::isa($self,$class);
+  return if $class =~ /^Math::BigInt/;		# we aren't one of these
+  UNIVERSAL::isa($self,$class);
   }
 
 ##############################################################################
@@ -264,7 +270,7 @@ sub bstr
     my $zeros = -$x->{_p} + $cad;
     $es .= $dot.'0' x $zeros if $zeros > 0;
     }
-  return $es;
+  $es;
   }
 
 sub bsstr
@@ -285,7 +291,7 @@ sub bsstr
     }
   my $sign = $x->{_e}->{sign}; $sign = '' if $sign eq '-';
   my $sep = 'e'.$sign;
-  return $x->{_m}->bstr().$sep.$x->{_e}->bstr();
+  $x->{_m}->bstr().$sep.$x->{_e}->bstr();
   }
     
 sub numify 
@@ -293,7 +299,7 @@ sub numify
   # Make a number from a BigFloat object
   # simple return string and let Perl's atoi()/atof() handle the rest
   my ($self,$x) = ref($_[0]) ? (ref($_[0]),$_[0]) : objectify(1,@_);
-  return $x->bsstr(); 
+  $x->bsstr(); 
   }
 
 ##############################################################################
@@ -429,8 +435,7 @@ sub badd
       return $x if $x->{sign} eq $y->{sign};
       return $x->bnan();
       }
-    # +-inf + something => +inf
-    # something +-inf => +-inf
+    # +-inf + something => +inf; something +-inf => +-inf
     $x->{sign} = $y->{sign}, return $x if $y->{sign} =~ /^[+-]inf$/;
     return $x;
     }
@@ -448,11 +453,10 @@ sub badd
  
   # take lower of the two e's and adapt m1 to it to match m2
   my $e = $y->{_e};
-  $e = Math::BigInt::bzero() if !defined $e;	# if no BFLOAT ?
-  $e = $e->copy();				# make copy (didn't do it yet)
+  $e = $MBI->bzero() if !defined $e;	# if no BFLOAT ?
+  $e = $e->copy();			# make copy (didn't do it yet)
   $e->bsub($x->{_e});
   my $add = $y->{_m}->copy();
-#  if ($e < 0)				# < 0
   if ($e->{sign} eq '-')		# < 0
     {
     my $e1 = $e->copy()->babs();
@@ -460,7 +464,6 @@ sub badd
     $x->{_m}->blsft($e1,10);
     $x->{_e} += $e;			# need the sign of e
     }
-#  if ($e > 0)				# > 0
   elsif (!$e->is_zero())		# > 0
     {
     #$add *= (10 ** $e);
@@ -947,13 +950,12 @@ sub bmod
     {
     $x->{_m}->blsft($x->{_e},10);
     }
-  $x->{_e} = Math::BigInt->bzero() unless $x->{_e}->is_zero();
+  $x->{_e} = $MBI->bzero() unless $x->{_e}->is_zero();
   
   $x->{_e}->bsub($shiftx) if $shiftx != 0;
   $x->{_e}->bsub($shifty) if $shifty != 0;
   
   # now mantissas are equalized, exponent of $x is adjusted, so calc result
-#  $ym->{sign} = '-' if $neg; # bmod() will make the correction for us
 
   $x->{_m}->bmod($ym);
 
@@ -1023,7 +1025,7 @@ sub bsqrt
    && ($xas->bacmp($gs * $gs) == 0))	# guess hit the nail on the head?
     {
     # exact result
-    $x->{_m} = $gs; $x->{_e} = Math::BigInt->bzero(); $x->bnorm();
+    $x->{_m} = $gs; $x->{_e} = $MBI->bzero(); $x->bnorm();
     # shortcut to not run trough _find_round_parameters again
     if (defined $params[1])
       {
@@ -1102,6 +1104,108 @@ sub bfac
   $x->{_e}->bzero();			# norm $x again
   $x->{_m}->bfac();			# factorial
   $x->bnorm()->round(@r);
+  }
+
+sub _pow2
+  {
+  # Calculate a power where $y is a non-integer, like 2 ** 0.5
+  my ($x,$y,$a,$p,$r) = @_;
+  my $self = ref($x);
+  
+  # we need to limit the accuracy to protect against overflow
+  my $fallback = 0;
+  my $scale = 0;
+  my @params = $x->_find_round_parameters($a,$p,$r);
+
+  # no rounding at all, so must use fallback
+  if (scalar @params == 1)
+    {
+    # simulate old behaviour
+    $params[1] = $self->div_scale();	# and round to it as accuracy
+    $scale = $params[1]+4; 		# at least four more for proper round
+    $params[3] = $r;			# round mode by caller or undef
+    $fallback = 1;			# to clear a/p afterwards
+    }
+  else
+    {
+    # the 4 below is empirical, and there might be cases where it is not
+    # enough...
+    $scale = abs($params[1] || $params[2]) + 4;	# take whatever is defined
+    }
+
+  # when user set globals, they would interfere with our calculation, so
+  # disable then and later re-enable them
+  no strict 'refs';
+  my $abr = "$self\::accuracy"; my $ab = $$abr; $$abr = undef;
+  my $pbr = "$self\::precision"; my $pb = $$pbr; $$pbr = undef;
+  # we also need to disable any set A or P on $x (_find_round_parameters took
+  # them already into account), since these would interfere, too
+  delete $x->{_a}; delete $x->{_p};
+  # need to disable $upgrade in BigInt, to avoid deep recursion
+  local $Math::BigInt::upgrade = undef;
+ 
+  # split the second argument into its integer and fraction part
+  # we calculate the result then from these two parts, like in
+  # 2 ** 2.4 == (2 ** 2) * (2 ** 0.4)
+  my $c = $self->new($y->as_number());	# integer part
+  my $d = $y-$c;			# fractional part
+  my $xc = $x->copy();			# a temp. copy
+  
+  # now calculate binary fraction from the decimal fraction on the fly
+  # f.i. 0.654:
+  # 0.654 * 2 = 1.308 > 1 => 0.1	( 1.308 - 1 = 0.308)
+  # 0.308 * 2 = 0.616 < 1 => 0.10
+  # 0.616 * 2 = 1.232 > 1 => 0.101	( 1.232 - 1 = 0.232)
+  # and so on...
+  # The process stops when the result is exactly one, or when we have
+  # enough accuracy
+
+  # From the binary fraction we calculate the result as follows:
+  # we assume the fraction ends in 1, and we remove this one first.
+  # For each digit after the dot, assume 1 eq R and 0 eq XR, where R means
+  # take square root and X multiply with the original X. 
+  
+  my $i = 0;
+  while ($i++ < 50)
+    {
+    $d->badd($d);						# * 2
+    last if $d->is_one();					# == 1
+    $x->bsqrt();						# 0
+    if ($d > 1)
+      {
+      $x->bsqrt(); $x->bmul($xc); $d->bdec();			# 1
+      }
+    print "at $x\n";
+    }
+  # assume fraction ends in 1
+  $x->bsqrt();							# 1
+  if (!$c->is_one())
+    {
+    $x->bmul( $xc->bpow($c) );
+    }
+  elsif (!$c->is_zero())
+    {
+    $x->bmul( $xc );
+    }
+  # done
+
+  # shortcut to not run trough _find_round_parameters again
+  if (defined $params[1])
+    {
+    $x->bround($params[1],$params[3]);		# then round accordingly
+    }
+  else
+    {
+    $x->bfround($params[2],$params[3]);		# then round accordingly
+    }
+  if ($fallback)
+    {
+    # clear a/p after round, since user did not request it
+    $x->{_a} = undef; $x->{_p} = undef;
+    }
+  # restore globals
+  $$abr = $ab; $$pbr = $pb;
+  $x;
   }
 
 sub _pow
@@ -1209,7 +1313,7 @@ sub bpow
   return $x->bone() if $y->is_zero();
   return $x         if $x->is_one() || $y->is_one();
 
-  return $x->_pow($y,$a,$p,$r) if !$y->is_int();	# non-integer power
+  return $x->_pow2($y,$a,$p,$r) if !$y->is_int();	# non-integer power
 
   my $y1 = $y->as_number();		# make bigint
   # if ($x == -1)
@@ -1494,7 +1598,7 @@ sub AUTOLOAD
       }
     # try one level up, but subst. bxxx() for fxxx() since MBI only got bxxx()
     $name =~ s/^f/b/;
-    return &{'Math::BigInt'."::$name"}(@_);
+    return &{"$MBI"."::$name"}(@_);
     }
   my $bname = $name; $bname =~ s/^f/b/;
   *{$class."::$name"} = \&$bname;
@@ -1552,6 +1656,7 @@ sub import
   {
   my $self = shift;
   my $l = scalar @_; my $j = 0; my @a = @_;
+  my $lib = '';
   for ( my $i = 0; $i < $l ; $i++, $j++)
     {
     if ( $_[$i] eq ':constant' )
@@ -1575,7 +1680,28 @@ sub import
       my $s = 2; $s = 1 if @a-$j < 2;   # avoid "can not modify non-existant..."
       splice @a, $j, $s; $j -= $s;
       }
+    elsif ($_[$i] eq 'lib')
+      {
+      $lib = $_[$i+1] || '';		# default Calc
+      my $s = 2; $s = 1 if @a-$j < 2;   # avoid "can not modify non-existant..."
+      splice @a, $j, $s; $j -= $s;
+      }
+    elsif ($_[$i] eq 'with')
+      {
+      $MBI = $_[$i+1] || 'Math::BigInt';	# default Math::BigInt
+      my $s = 2; $s = 1 if @a-$j < 2;   # avoid "can not modify non-existant..."
+      splice @a, $j, $s; $j -= $s;
+      }
     }
+  my @parts = split /::/, $MBI;			# Math::BigInt => Math BigInt
+  my $file = pop @parts; $file .= '.pm';	# BigInt => BigInt.pm
+  $file = File::Spec->catdir (@parts, $file);
+  # let use Math::BigInt lib => 'GMP'; use Math::BigFloat; still work
+  my $mbilib = eval { Math::BigInt->config()->{lib} };
+  $lib .= ",$mbilib" if defined $mbilib;
+  require $file;
+  $MBI->import ( lib => $lib, 'objectify' );
+
   # any non :constant stuff is handled by our parent, Exporter
   # even if @_ is empty, to give it a chance
   $self->SUPER::import(@a);      	# for subclasses
@@ -1643,7 +1769,7 @@ sub length
   $len += $x->{_e} if $x->{_e}->sign() eq '+';
   if (wantarray())
     {
-    my $t = Math::BigInt::bzero();
+    my $t = $MBI->bzero();
     $t = $x->{_e}->copy()->babs() if $x->{_e}->sign() eq '-';
     return ($len,$t);
     }
@@ -1922,9 +2048,99 @@ In particular
 
   perl -MMath::BigFloat=:constant -e 'print 2E-100,"\n"'
 
-prints the value of C<2E-100>.  Note that without conversion of 
+prints the value of C<2E-100>. Note that without conversion of 
 constants the expression 2E-100 will be calculated as normal floating point 
 number.
+
+Please note that ':constant' does not affect integer constants, nor binary 
+nor hexadecimal constants. Use L<bignum> or L<Math::BigInt> to get this to
+work.
+
+=head2 Math library
+
+Math with the numbers is done (by default) by a module called
+Math::BigInt::Calc. This is equivalent to saying:
+
+	use Math::BigFloat lib => 'Calc';
+
+You can change this by using:
+
+	use Math::BigFloat lib => 'BitVect';
+
+The following would first try to find Math::BigInt::Foo, then
+Math::BigInt::Bar, and when this also fails, revert to Math::BigInt::Calc:
+
+	use Math::BigFloat lib => 'Foo,Math::BigInt::Bar';
+
+Calc.pm uses as internal format an array of elements of some decimal base
+(usually 1e7, but this might be differen for some systems) with the least
+significant digit first, while BitVect.pm uses a bit vector of base 2, most
+significant bit first. Other modules might use even different means of
+representing the numbers. See the respective module documentation for further
+details.
+
+Please note that Math::BigFloat does B<not> use the denoted library itself,
+but it merely passes the lib argument to Math::BigInt. So, instead of the need
+to do:
+
+	use Math::BigInt lib => 'GMP';
+	use Math::BigFloat;
+
+you can roll it all into one line:
+
+	use Math::BigFloat lib => 'GMP';
+
+Use the lib, Luke! And see L<Using Math::BigInt::Lite> for more details.
+
+=head2 Using Math::BigInt::Lite
+
+It is possible to use L<Math::BigInt::Lite> with Math::BigFloat:
+
+        # 1
+        use Math::BigFloat with => 'Math::BigInt::Lite';
+
+There is no need to "use Math::BigInt" or "use Math::BigInt::Lite", but you
+can combine these if you want. For instance, you may want to use
+Math::BigInt objects in your main script, too.
+
+        # 2
+        use Math::BigInt;
+        use Math::BigFloat with => 'Math::BigInt::Lite';
+
+Of course, you can combine this with the C<lib> parameter.
+
+        # 3
+        use Math::BigFloat with => 'Math::BigInt::Lite', lib => 'GMP,Pari';
+
+If you want to use Math::BigInt's, too, simple add a Math::BigInt B<before>:
+
+        # 4
+        use Math::BigInt;
+        use Math::BigFloat with => 'Math::BigInt::Lite', lib => 'GMP,Pari';
+
+Notice that the module with the last C<lib> will "win" and thus
+it's lib will be used if the lib is available:
+
+        # 5
+        use Math::BigInt lib => 'Bar,Baz';
+        use Math::BigFloat with => 'Math::BigInt::Lite', lib => 'Foo';
+
+That would try to load Foo, Bar, Baz and Calc (in that order). Or in other
+words, Math::BigFloat will try to retain previously loaded libs when you
+don't specify it one.
+
+Actually, the lib loading order would be "Bar,Baz,Calc", and then
+"Foo,Bar,Baz,Calc", but independend of which lib exists, the result is the
+same as trying the latter load alone, except for the fact that Bar or Baz
+might be loaded needlessly in an intermidiate step
+
+The old way still works though:
+
+        # 6
+        use Math::BigInt lib => 'Bar,Baz';
+        use Math::BigFloat;
+
+But B<examples #3 and #4 are recommended> for usage.
 
 =head1 BUGS
 

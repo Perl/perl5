@@ -18,7 +18,7 @@ package Math::BigInt;
 my $class = "Math::BigInt";
 require 5.005;
 
-$VERSION = '1.54';
+$VERSION = '1.55';
 use Exporter;
 @ISA =       qw( Exporter );
 @EXPORT_OK = qw( objectify _swap bgcd blcm); 
@@ -535,7 +535,7 @@ sub binf
   # create a bigint '+-inf', if given a BigInt, set it to '+-inf'
   # the sign is either '+', or if given, used from there
   my $self = shift;
-  my $sign = shift; $sign = '+' if !defined $sign || $sign ne '-';
+  my $sign = shift; $sign = '+' if !defined $sign || $sign !~ /^-(inf)?$/;
   $self = $class if !defined $self;
   if (!ref($self))
     {
@@ -554,7 +554,8 @@ sub binf
     # otherwise do our own thing
     $self->{value} = $CALC->_zero();
     }
-  $self->{sign} = $sign.'inf';
+  $sign = $sign . 'inf' if $sign !~ /inf$/;	# - => -inf
+  $self->{sign} = $sign;
   ($self->{_a},$self->{_p}) = @_;		# take over requested rounding
   return $self;
   }
@@ -657,7 +658,7 @@ sub bstr
   # make a string from bigint object
   my $x = shift; $class = ref($x) || $x; $x = $class->new(shift) if !ref($x); 
   # my ($self,$x) = ref($_[0]) ? (ref($_[0]),$_[0]) : objectify(1,@_); 
- 
+
   if ($x->{sign} !~ /^[+-]$/)
     {
     return $x->{sign} unless $x->{sign} eq '+inf';	# -inf, NaN
@@ -870,12 +871,11 @@ sub bcmp
   # post-normalized compare for internal use (honors signs)
   if ($x->{sign} eq '+') 
     {
-    return 1 if $y->{sign} eq '-'; # 0 check handled above
+    # $x and $y both > 0
     return $CALC->_acmp($x->{value},$y->{value});
     }
 
-  # $x->{sign} eq '-'
-  return -1 if $y->{sign} eq '+';
+  # $x && $y both < 0
   $CALC->_acmp($y->{value},$x->{value});	# swaped (lib does only 0,1,-1)
   }
 
@@ -906,8 +906,8 @@ sub badd
 #  print "mbi badd ",join(' ',caller()),"\n";
 #  print "upgrade => ",$upgrade||'undef',
 #    " \$x (",ref($x),") \$y (",ref($y),")\n";
-#  return $upgrade->badd($x,$y,@r) if defined $upgrade &&
-#    ((ref($x) eq $upgrade) || (ref($y) eq $upgrade));
+  return $upgrade->badd($x,$y,@r) if defined $upgrade &&
+    ((ref($x) eq $upgrade) || (ref($y) eq $upgrade));
 #  print "still badd\n";
 
   $r[3] = $y;				# no push!
@@ -1487,7 +1487,7 @@ sub bpow
     $x->bmul($x);
     }
   $x->bmul($pow2) unless $pow2->is_one();
-  return $x->round(@r);
+  $x->round(@r);
   }
 
 sub blsft 
@@ -1716,10 +1716,10 @@ sub length
 sub digit
   {
   # return the nth decimal digit, negative values count backward, 0 is right
-  my $x = shift;
-  my $n = shift || 0; 
+  my ($self,$x,$n) = ref($_[0]) ? (ref($_[0]),@_) : objectify(1,@_);
+  $n = 0 if !defined $n;
 
-  return $CALC->_digit($x->{value},$n);
+  $CALC->_digit($x->{value},$n);
   }
 
 sub _trailing_zeros
@@ -1789,7 +1789,7 @@ sub exponent
   my $e = $class->bzero();
   return $e->binc() if $x->is_zero();
   $e += $x->_trailing_zeros();
-  return $e;
+  $e;
   }
 
 sub mantissa
@@ -1804,8 +1804,9 @@ sub mantissa
   my $m = $x->copy();
   # that's inefficient
   my $zeros = $m->_trailing_zeros();
-  $m /= 10 ** $zeros if $zeros != 0;
-  return $m;
+  $m->brsft($zeros,10) if $zeros != 0;
+#  $m /= 10 ** $zeros if $zeros != 0;
+  $m;
   }
 
 sub parts
@@ -2153,6 +2154,7 @@ sub import
       {
       # this causes overlord er load to step in
       overload::constant integer => sub { $self->new(shift) };
+      overload::constant binary => sub { $self->new(shift) };
       splice @a, $j, 1; $j --;
       }
     elsif ($_[$i] eq 'upgrade')
@@ -2711,35 +2713,60 @@ If used on an object, it will set it to one:
 	$x->bone();		# +1
 	$x->bone('-');		# -1
 
-=head2 is_one() / is_zero() / is_nan() / is_positive() / is_negative() /
-is_inf() / is_odd() / is_even() / is_int()
+=head2 is_one()/is_zero()/is_nan()/is_inf()
+
   
 	$x->is_zero();			# true if arg is +0
 	$x->is_nan();			# true if arg is NaN
 	$x->is_one();			# true if arg is +1
 	$x->is_one('-');		# true if arg is -1
-	$x->is_odd();			# true if odd, false for even
-	$x->is_even();			# true if even, false for odd
-	$x->is_positive();		# true if >= 0
-	$x->is_negative();		# true if <  0
 	$x->is_inf();			# true if +inf
 	$x->is_inf('-');		# true if -inf (sign is default '+')
+
+These methods all test the BigInt for beeing one specific value and return
+true or false depending on the input. These are faster than doing something
+like:
+
+	if ($x == 0)
+
+=head2 is_positive()/is_negative()
+	
+	$x->is_positive();		# true if >= 0
+	$x->is_negative();		# true if <  0
+
+The methods return true if the argument is positive or negative, respectively.
+C<NaN> is neither positive nor negative, while C<+inf> counts as positive, and
+C<-inf> is negative. A C<zero> is positive.
+
+These methods are only testing the sign, and not the value.
+
+=head2 is_odd()/is_even()/is_int()
+
+	$x->is_odd();			# true if odd, false for even
+	$x->is_even();			# true if even, false for odd
 	$x->is_int();			# true if $x is an integer
 
-These methods all test the BigInt for one condition and return true or false
-depending on the input.
+The return true when the argument satisfies the condition. C<NaN>, C<+inf>,
+C<-inf> are not integers and are neither odd nor even.
 
 =head2 bcmp
 
-  $x->bcmp($y);			# compare numbers (undef,<0,=0,>0)
+	$x->bcmp($y);
+
+Compares $x with $y and takes the sign into account.
+Returns -1, 0, 1 or undef.
 
 =head2 bacmp
 
-  $x->bacmp($y);		# compare absolutely (undef,<0,=0,>0)
+	$x->bacmp($y);
+
+Compares $x with $y while ignoring their. Returns -1, 0, 1 or undef.
 
 =head2 sign
 
-  $x->sign();			# return the sign, either +,- or NaN
+	$x->sign();
+
+Return the sign, of $x, meaning either C<+>, C<->, C<-inf>, C<+inf> or NaN.
 
 =head2 bcmp
 
@@ -3381,15 +3408,15 @@ Examples for converting:
 
 =head1 Autocreating constants
 
-After C<use Math::BigInt ':constant'> all the B<integer> decimal constants
-in the given scope are converted to C<Math::BigInt>. This conversion
-happens at compile time.
+After C<use Math::BigInt ':constant'> all the B<integer> decimal, hexadecimal
+and binary constants in the given scope are converted to C<Math::BigInt>.
+This conversion happens at compile time. 
 
 In particular,
 
   perl -MMath::BigInt=:constant -e 'print 2**100,"\n"'
 
-prints the integer value of C<2**100>.  Note that without conversion of 
+prints the integer value of C<2**100>. Note that without conversion of 
 constants the expression 2**100 will be calculated as perl scalar.
 
 Please note that strings and floating point constants are not affected,
@@ -3412,6 +3439,16 @@ operands. You should also quote large constants to protect loss of precision:
 Without the quotes Perl would convert the large number to a floating point
 constant at compile time and then hand the result to BigInt, which results in
 an truncated result or a NaN.
+
+This also applies to integers that look like floating point constants:
+
+	use Math::BigInt ':constant';
+
+	print ref(123e2),"\n";
+	print ref(123.2e2),"\n";
+
+will print nothing but newlines. Use either L<bignum> or L<Math::BigFloat>
+to get this to work.
 
 =head1 PERFORMANCE
 
