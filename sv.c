@@ -1889,10 +1889,6 @@ sv_setsv(SV *dstr, register SV *sstr)
 	    sv_upgrade(dstr, SVt_PVNV);
 	break;
 
-    case SVt_PVLV:
-	sv_upgrade(dstr, SVt_PVLV);
-	break;
-
     case SVt_PVAV:
     case SVt_PVHV:
     case SVt_PVCV:
