@@ -16,7 +16,7 @@ Unicode support
     autoload utf8_heavy.pl's swash routines in swash_init()
     autoload byte.pm when byte:: is seen by the parser
     check uv_to_utf8() calls for buffer overflow
-    (see also "Locales", "Regexen", and "Miscellaneous" )
+    (see also "Locales", "Regexen", and "Miscellaneous")
 
 Multi-threading
     support "use Thread;" under useithreads
@@ -51,6 +51,11 @@ Configure
 	timers, signals (the metaconfig units mostly already exist for these)
     UNIX98 support: reader-writer locks, realtime/asynchronous IO
 
+Long doubles
+    figure out where the PV->NV->PV conversion gets it wrong at least
+    in AIX and Tru64 (V5.0 and onwards) when using long doubles: see the
+    regexp tricks we had to insert to t/comp/use.t and t/lib/bigfltpm.t.
+
 Locales
     deprecate traditional/legacy locales?
     figure out how to support Unicode locales
@@ -58,7 +63,10 @@ Locales
 	http://www10.software.ibm.com/developerworks/opensource/icu/index.html
 	and check out also the Locale Converter:
 	http://alphaworks.ibm.com/tech/localeconverter
-    locales across packages?
+    ICU has it all: locales and character sets, the 'iconv' seems to have
+    'only' the character sets.  Either would be valuable to get integrated
+    into Perl, Configure already probes for libiconv and <iconv.h>. 
+    How do locales work across packages?
 
 Regexen
    make RE engine thread-safe
@@ -74,6 +82,8 @@ Regexen
 Security
     use fchown, fchmod (and futimes?) internally when possible
     use fchdir(how portable?)
+    create secure reliable portable temporary file modules
+    audit the standard utilities for security problems and fix them
 
 Reliable Signals
     custom opcodes
@@ -87,11 +97,23 @@ Win32 stuff
 
 Miscellaneous
     add new modules (Archive::Tar, Compress::Zlib, CPAN::FTP?)
-    sub-second sleep? alarm? time? (integrate Time::HiRes?)
-    floating point handling: nans, infinities, fp exception masks, etc
+    sub-second sleep()? alarm()? time()? (integrate Time::HiRes?
+	Configure doesn't yet probe for usleep/nanosleep/ualarm but
+	the units exist)
+    floating point handling: nans, infinities, fp exception masks, etc.
+	at least the following interfaces exist: fp_classify(), fp_class(),
+	class(), isnan(), isinf(), isfinite(), finite(), isnormal(),
+	fp_setmask(), fp_getmask(), fp_setround(), fp_getround(), 
+	ieeefp.h, fp_class.h.  There are metaconfig units for all of these.
+    fix the basic arithmetics (+ - * / %) to preserve IVness/UVness if
+	both arguments are IVs/UVs
     replace pod2html with new PodtoHtml? (requires other modules from CPAN)
     automate testing with large parts of CPAN
-    Unicode collation?
+    Unicode collation? http://www.unicode.org/unicode/reports/tr10/
+    turn Cwd into an XS module?  (Configure already probes for getcwd())
+    mmap for speeding up input? (Configure already probes for the mmap family)
+    sendmsg, recvmsg? (Configure doesn't probe for these but the units exist)
+    setitimer, getitimer? (the units exist)
 
 Ongoing
     keep filenames 8.3 friendly, where feasible
