@@ -42,6 +42,12 @@ sub import {
       $exports{$sym} = 1;
     }
   }
+  for (@_) {
+      #need to match first to avoid "Modification of a read-only value attempted"
+      if (/^\+/ and s/^\+//) {
+          (\&{"$pkg\::$_"})->(); #try AUTOLOAD now so calls are inlined
+      }
+  }
   if ($Verbose or $Debug 
       or grep {/\W/ or $args and not exists $exports{$_}
 	       or @fail and $_ eq $fail[0]
