@@ -78,6 +78,16 @@ Version 5.005_53        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  2163] By: gsar                                  on 1998/10/31  11:31:12
+        Log: bump patchlevel; other minor fixes for clean build and test on
+             Solaris and win32
+     Branch: perl
+	   ! Changes ext/Data/Dumper/Dumper.xs patchlevel.h pp.h sv.c
+	   ! t/lib/dumper.t t/op/groups.t t/op/lex_assign.t
+	   ! t/pragma/warn/regexec win32/Makefile win32/config_H.bc
+	   ! win32/config_H.gc win32/config_H.vc win32/makefile.mk
+           ! x2p/a2p.c
+____________________________________________________________________________
 [  2162] By: gsar                                  on 1998/10/31  09:40:31
         Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
              Date: Fri, 30 Oct 1998 18:36:20 -0500 (EST)

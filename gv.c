@@ -712,7 +712,7 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
 	if (len > 1)
 	    break;
 #ifdef COMPLEX_STATUS
-	sv_upgrade(GvSV(gv), SVt_PVLV);
+	(void)SvUPGRADE(GvSV(gv), SVt_PVLV);
 #endif
 	goto magicalize;
 
@@ -815,7 +815,7 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
     case ']':
 	if (len == 1) {
 	    SV *sv = GvSV(gv);
-	    sv_upgrade(sv, SVt_PVNV);
+	    (void)SvUPGRADE(sv, SVt_PVNV);
 	    sv_setpv(sv, PL_patchlevel);
 	    (void)sv_2nv(sv);
 	    SvREADONLY_on(sv);
