@@ -547,6 +547,8 @@ perl_destruct(register PerlInterpreter *sv_interp)
     Safefree(PL_origfilename);
     Safefree(PL_archpat_auto);
     Safefree(PL_reg_start_tmp);
+    if (PL_reg_curpm)
+	Safefree(PL_reg_curpm);
     Safefree(HeKEY_hek(&PL_hv_fetch_ent_mh));
     Safefree(PL_op_mask);
     nuke_stacks();

@@ -37,6 +37,7 @@
 #  define Perl_regprop my_regprop
 /* *These* symbols are masked to allow static link. */
 #  define Perl_pregexec my_pregexec
+#  define Perl_reginitcolors my_reginitcolors 
 #endif 
 
 /*SUPPRESS 112*/
@@ -108,6 +109,7 @@ static CHECKPOINT regcppush _((I32 parenfloor));
 static char * regcppop _((void));
 static char * regcp_set_to _((I32 ss));
 static void cache_re _((regexp *prog));
+static void restore_pos _((void *arg));
 #endif
 
 #define REGINCLASS(p,c)  (*(p) ? reginclass(p,c) : ANYOF_TEST(p,c))
@@ -259,13 +261,25 @@ cache_re(regexp *prog)
     PL_regdata = prog->data;    
     PL_reg_re = prog;    
 }
-  
+
+STATIC void
+restore_pos(void *arg)
+{
+    dTHR;
+    if (PL_reg_eval_set) {    
+	PL_reg_magic->mg_len = PL_reg_oldpos;
+	PL_reg_eval_set = 0;
+	PL_curpm = PL_reg_oldcurpm;
+    }	
+}
+
+
 /*
  - regexec_flags - match a regexp against a string
  */
 I32
 regexec_flags(register regexp *prog, char *stringarg, register char *strend,
-	      char *strbeg, I32 minend, SV *screamer, void *data, U32 flags)
+	      char *strbeg, I32 minend, SV *sv, void *data, U32 flags)
 /* strend: pointer to null at end of string */
 /* strbeg: real beginning of string */
 /* minend: end of match must be >=minend after stringarg. */
@@ -327,6 +341,7 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
     /* Mark beginning of line for ^ and lookbehind. */
     PL_regbol = startpos;
     PL_bostr  = strbeg;
+    PL_reg_sv = sv;
 
     /* Mark end of line for $ (and such) */
     PL_regeol = strend;
@@ -349,9 +364,9 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 	start_shift = prog->check_offset_min;	/* okay to underestimate on CC */
 	/* Should be nonnegative! */
 	end_shift = minlen - start_shift - CHR_SVLEN(prog->check_substr);
-	if (screamer) {
+	if (flags & REXEC_SCREAM) {
 	    if (PL_screamfirst[BmRARE(prog->check_substr)] >= 0)
-		    s = screaminstr(screamer, prog->check_substr, 
+		    s = screaminstr(sv, prog->check_substr, 
 				    start_shift + (stringarg - strbeg),
 				    end_shift, &scream_pos, 0);
 	    else
@@ -388,8 +403,8 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 	    s = startpos;
     }
 
-    DEBUG_r(
-	PerlIO_printf(Perl_debug_log, 
+    DEBUG_r(if (!PL_colorset) reginitcolors());
+    DEBUG_r(PerlIO_printf(Perl_debug_log, 
 		      "%sMatching%s `%s%.60s%s%s' against `%s%.*s%s%s'\n",
 		      PL_colors[4],PL_colors[5],PL_colors[0],
 		      prog->precomp,
@@ -401,14 +416,23 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 		      (strend - startpos > 60 ? "..." : ""))
 	);
 
+    if (prog->reganch & ROPT_GPOS_SEEN) {
+	MAGIC *mg;
+	int pos = 0;
+
+	if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv) 
+	    && (mg = mg_find(sv, 'g')) && mg->mg_len >= 0)
+	    pos = mg->mg_len;
+	PL_reg_ganch = startpos + pos;
+    }
+
     /* Simplest case:  anchored match need be tried only once. */
     /*  [unless only anchor is BOL and multiline is set] */
-    if (prog->reganch & ROPT_ANCH) {
+    if (prog->reganch & (ROPT_ANCH & ~ROPT_ANCH_GPOS)) {
 	if (regtry(prog, startpos))
 	    goto got_it;
-	else if (!(prog->reganch & ROPT_ANCH_GPOS) &&
-		 (PL_multiline || (prog->reganch & ROPT_IMPLICIT)
-		  || (prog->reganch & ROPT_ANCH_MBOL)))
+	else if (PL_multiline || (prog->reganch & ROPT_IMPLICIT)
+		 || (prog->reganch & ROPT_ANCH_MBOL)) /* XXXX SBOL? */
 	{
 	    if (minlen)
 		dontbother = minlen - 1;
@@ -423,6 +447,10 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 		}
 	    }
 	}
+	goto phooey;
+    } else if (prog->reganch & ROPT_ANCH_GPOS) {
+	if (regtry(prog, PL_reg_ganch))
+	    goto got_it;
 	goto phooey;
     }
 
@@ -479,8 +507,8 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 	dontbother = end_shift;
 	strend = HOPc(strend, -dontbother);
 	while ( (s <= last) &&
-		(screamer 
-		 ? (s = screaminstr(screamer, must, HOPc(s, back_min) - strbeg,
+		((flags & REXEC_SCREAM) 
+		 ? (s = screaminstr(sv, must, HOPc(s, back_min) - strbeg,
 				    end_shift, &scream_pos, 0))
 		 : (s = fbm_instr((unsigned char*)HOP(s, back_min),
 				  (unsigned char*)strend, must, 0))) ) {
@@ -912,8 +940,8 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 	    char *last;
 	    I32 oldpos = scream_pos;
 
-	    if (screamer) {
-		last = screaminstr(screamer, prog->float_substr, s - strbeg,
+	    if (flags & REXEC_SCREAM) {
+		last = screaminstr(sv, prog->float_substr, s - strbeg,
 				   end_shift, &scream_pos, 1); /* last one */
 		if (!last) {
 		    last = scream_olds; /* Only one occurence. */
@@ -983,15 +1011,20 @@ got_it:
 	    }
 	}
     }
-    /* Preserve the current value of $^R */
-    if (oreplsv != GvSV(PL_replgv)) {
-	sv_setsv(oreplsv, GvSV(PL_replgv));/* So that when GvSV(replgv) is
-					   restored, the value remains
-					   the same. */
+    if (PL_reg_eval_set) {
+	/* Preserve the current value of $^R */
+	if (oreplsv != GvSV(PL_replgv))
+	    sv_setsv(oreplsv, GvSV(PL_replgv));/* So that when GvSV(replgv) is
+						  restored, the value remains
+						  the same. */
+	restore_pos(0);
     }
+    
     return 1;
 
 phooey:
+    if (PL_reg_eval_set)
+	restore_pos(0);
     return 0;
 }
 
@@ -1008,6 +1041,8 @@ regtry(regexp *prog, char *startpos)
     CHECKPOINT lastcp;
 
     if ((prog->reganch & ROPT_EVAL_SEEN) && !PL_reg_eval_set) {
+	MAGIC *mg;
+
 	PL_reg_eval_set = RS_init;
 	DEBUG_r(DEBUG_s(
 	    PerlIO_printf(Perl_debug_log, "  setting stack tmpbase at %i\n",
@@ -1020,13 +1055,42 @@ regtry(regexp *prog, char *startpos)
 	/* Apparently this is not needed, judging by wantarray. */
 	/* SAVEINT(cxstack[cxstack_ix].blk_gimme);
 	   cxstack[cxstack_ix].blk_gimme = G_SCALAR; */
+
+	if (PL_reg_sv) {
+	    /* Make $_ available to executed code. */
+	    if (PL_reg_sv != DEFSV) {
+		/* SAVE_DEFSV does *not* suffice here for USE_THREADS */
+		SAVESPTR(DEFSV);
+		DEFSV = PL_reg_sv;
+	    }
+	
+	    if (!(SvTYPE(PL_reg_sv) >= SVt_PVMG && SvMAGIC(PL_reg_sv) 
+		  && (mg = mg_find(PL_reg_sv, 'g')))) {
+		/* prepare for quick setting of pos */
+		sv_magic(PL_reg_sv, (SV*)0, 'g', Nullch, 0);
+		mg = mg_find(PL_reg_sv, 'g');
+		mg->mg_len = -1;
+	    }
+	    PL_reg_magic    = mg;
+	    PL_reg_oldpos   = mg->mg_len;
+	    SAVEDESTRUCTOR(restore_pos, 0);
+        }
+	if (!PL_reg_curpm)
+	    New(22,PL_reg_curpm, 1, PMOP);
+	PL_reg_curpm->op_pmregexp = prog;
+	PL_reg_oldcurpm = PL_curpm;
+	PL_curpm = PL_reg_curpm;
+	prog->subbeg = PL_bostr;
+	prog->subend = PL_regeol;	/* strend may have been modified */
     }
+    prog->startp[0] = startpos;
     PL_reginput = startpos;
     PL_regstartp = prog->startp;
     PL_regendp = prog->endp;
     PL_reglastparen = &prog->lastparen;
     prog->lastparen = 0;
     PL_regsize = 0;
+    DEBUG_r(PL_reg_starttry = startpos);
     if (PL_reg_start_tmpl <= prog->nparens) {
 	PL_reg_start_tmpl = prog->nparens*3/2 + 3;
         if(PL_reg_start_tmp)
@@ -1035,17 +1099,19 @@ regtry(regexp *prog, char *startpos)
             New(22,PL_reg_start_tmp, PL_reg_start_tmpl, char*);
     }
 
+    /* XXXX What this code is doing here?!!!  There should be no need
+       to do this again and again, PL_reglastparen should take care of
+       this!  */
     sp = prog->startp;
     ep = prog->endp;
     if (prog->nparens) {
-	for (i = prog->nparens; i >= 0; i--) {
-	    *sp++ = NULL;
-	    *ep++ = NULL;
+	for (i = prog->nparens; i >= 1; i--) {
+	    *++sp = NULL;
+	    *++ep = NULL;
 	}
     }
     REGCP_SET;
     if (regmatch(prog->program + 1)) {
-	prog->startp[0] = startpos;
 	prog->endp[0] = PL_reginput;
 	return 1;
     }
@@ -1108,7 +1174,7 @@ regmatch(regnode *prog)
 	    int l = (PL_regeol - locinput > taill ? taill : PL_regeol - locinput);
 	    int pref_len = (locinput - PL_bostr > (5 + taill) - l 
 			    ? (5 + taill) - l : locinput - PL_bostr);
-	    int pref0_len = pref_len  - (locinput - PL_reginput);
+	    int pref0_len = pref_len  - (locinput - PL_reg_starttry);
 
 	    if (l + pref_len < (5 + taill) && l < PL_regeol - locinput)
 		l = ( PL_regeol - locinput > (5 + taill) - pref_len 
@@ -1159,7 +1225,7 @@ regmatch(regnode *prog)
 		break;
 	    sayNO;
 	case GPOS:
-	    if (locinput == PL_regbol)
+	    if (locinput == PL_reg_ganch)
 		break;
 	    sayNO;
 	case EOL:
@@ -1591,6 +1657,8 @@ regmatch(regnode *prog)
 	    PL_op = (OP_4tree*)PL_regdata->data[n];
 	    DEBUG_r( PerlIO_printf(Perl_debug_log, "  re_eval 0x%x\n", PL_op) );
 	    PL_curpad = AvARRAY((AV*)PL_regdata->data[n + 1]);
+	    PL_reg_magic->mg_len = locinput - PL_bostr;
+	    PL_regendp[0] = locinput;
 
 	    CALLRUNOPS();			/* Scalar context. */
 	    SPAGAIN;

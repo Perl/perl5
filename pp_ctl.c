@@ -164,8 +164,9 @@ PP(pp_substcont)
 
 	/* Are we done */
 	if (cx->sb_once || !CALLREGEXEC(rx, s, cx->sb_strend, orig,
-				     s == m, Nullsv, NULL,
-				     cx->sb_safebase ? 0 : REXEC_COPY_STR))
+				     s == m, cx->sb_targ, NULL,
+				     ((cx->sb_rflags & REXEC_COPY_STR)
+				      ? 0 : REXEC_COPY_STR)))
 	{
 	    SV *targ = cx->sb_targ;
 	    sv_catpvn(dstr, s, cx->sb_strend - s);
@@ -668,12 +669,8 @@ PP(pp_grepstart)
     ENTER;					/* enter outer scope */
 
     SAVETMPS;
-#ifdef USE_THREADS
-    /* SAVE_DEFSV does *not* suffice here */
-    save_sptr(&THREADSV(0));
-#else
-    SAVESPTR(GvSV(PL_defgv));
-#endif /* USE_THREADS */
+    /* SAVE_DEFSV does *not* suffice here for USE_THREADS */
+    SAVESPTR(DEFSV);
     ENTER;					/* enter inner scope */
     SAVESPTR(PL_curpm);
 

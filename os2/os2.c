@@ -580,21 +580,24 @@ char *inicmd;
 		/* Try adding script extensions to the file name, and
 		   search on PATH. */
 		char *scr = find_script(PL_Argv[0], TRUE, NULL, 0);
-		int l = strlen(scr);
-		
-		if (l >= sizeof scrbuf) {
-		   Safefree(scr);
-		 longbuf:
-		   croak("Size of scriptname too big: %d", l);
-		}
-		strcpy(scrbuf, scr);
-		Safefree(scr);
-		scr = scrbuf;
 
 		if (scr) {
-		    FILE *file = fopen(scr, "r");
+		    FILE *file;
 		    char *s = 0, *s1;
+		    int l;
 
+                    l = strlen(scr);
+		
+                    if (l >= sizeof scrbuf) {
+                       Safefree(scr);
+                     longbuf:
+                       croak("Size of scriptname too big: %d", l);
+                    }
+                    strcpy(scrbuf, scr);
+                    Safefree(scr);
+                    scr = scrbuf;
+
+		    file = fopen(scr, "r");
 		    PL_Argv[0] = scr;
 		    if (!file)
 			goto panic_file;

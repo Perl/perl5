@@ -774,6 +774,7 @@
 #define refkids			Perl_refkids
 #define regdump			Perl_regdump
 #define regexec_flags		Perl_regexec_flags
+#define reginitcolors		Perl_reginitcolors
 #define regnext			Perl_regnext
 #define regprop			Perl_regprop
 #define repeatcpy		Perl_repeatcpy
@@ -1909,6 +1910,7 @@
 #define reghopmaybe		CPerlObj::Perl_reghopmaybe
 #define reginclass		CPerlObj::Perl_reginclass
 #define reginclassutf8		CPerlObj::Perl_reginclassutf8
+#define reginitcolors		CPerlObj::Perl_reginitcolors
 #define reginsert		CPerlObj::Perl_reginsert
 #define regmatch		CPerlObj::Perl_regmatch
 #define regnext			CPerlObj::Perl_regnext
@@ -1926,6 +1928,7 @@
 #define restore_expect		CPerlObj::Perl_restore_expect
 #define restore_lex_expect	CPerlObj::Perl_restore_lex_expect
 #define restore_magic		CPerlObj::Perl_restore_magic
+#define restore_pos		CPerlObj::Perl_restore_pos
 #define restore_rsfp		CPerlObj::Perl_restore_rsfp
 #define rninstr			CPerlObj::Perl_rninstr
 #define rsignal			CPerlObj::Perl_rsignal

@@ -5,7 +5,7 @@ require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(Complete);
 
-#      @(#)complete.pl,v1.1            (me@anywhere.EBay.Sun.COM) 09/23/91
+#      @(#)complete.pl,v1.2            (me@anywhere.EBay.Sun.COM) 09/23/91
 
 =head1 NAME
 
@@ -72,7 +72,8 @@ CONFIG: {
 }
 
 sub Complete {
-    my($prompt, @cmp_list, $return, @match, $l, $test, $cmp, $r);
+    my($prompt, @cmp_list, $cmp, $test, $l, @match);
+    my ($return, $r) = ("", 0);
 
     $return = "";
     $r      = 0;
@@ -93,17 +94,17 @@ sub Complete {
                 # (TAB) attempt completion
                 $_ eq "\t" && do {
                     @match = grep(/^$return/, @cmp_lst);
-                    $l = length($test = shift(@match));
                     unless ($#match < 0) {
+                        $l = length($test = shift(@match));
                         foreach $cmp (@match) {
                             until (substr($cmp, 0, $l) eq substr($test, 0, $l)) {
                                 $l--;
                             }
                         }
                         print("\a");
+                        print($test = substr($test, $r, $l - $r));
+                        $r = length($return .= $test);
                     }
-                    print($test = substr($test, $r, $l - $r));
-                    $r = length($return .= $test);
                     last CASE;
                 };
 

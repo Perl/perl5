@@ -4,7 +4,7 @@
 # the format supported by op/regexp.t.  If you want to add a test
 # that does fit that format, add it to op/re_tests, not here.
 
-print "1..162\n";
+print "1..177\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -689,6 +689,110 @@ $test++;
 
 print "not " 
    if defined $+[2] or defined $-[2] or defined $+[3] or defined $-[3];
+print "ok $test\n";
+$test++;
+
+/.(a)(ba*)?/;
+print "#$#-..$#+\nnot " if $#+ != 2 or $#- != 1;
+print "ok $test\n";
+$test++;
+
+$str = 'abcde';
+pos $str = 2;
+
+print "not " if $str =~ /^\G/;
+print "ok $test\n";
+$test++;
+
+print "not " if $str =~ /^.\G/;
+print "ok $test\n";
+$test++;
+
+print "not " unless $str =~ /^..\G/;
+print "ok $test\n";
+$test++;
+
+print "not " if $str =~ /^...\G/;
+print "ok $test\n";
+$test++;
+
+print "not " unless $str =~ /.\G./ and $& eq 'bc';
+print "ok $test\n";
+$test++;
+
+print "not " unless $str =~ /\G../ and $& eq 'cd';
+print "ok $test\n";
+$test++;
+
+undef $foo; undef $bar;
+print "#'$str','$foo','$bar'\nnot "
+    unless $str =~ /b(?{$foo = $_; $bar = pos})c/ 
+	and $foo eq 'abcde' and $bar eq 2;
+print "ok $test\n";
+$test++;
+
+undef $foo; undef $bar;
+pos $str = undef;
+print "#'$str','$foo','$bar'\nnot "
+    unless $str =~ /b(?{$foo = $_; $bar = pos})c/g 
+	and $foo eq 'abcde' and $bar eq 2 and pos $str eq 3;
+print "ok $test\n";
+$test++;
+
+$_ = $str;
+
+undef $foo; undef $bar;
+print "#'$str','$foo','$bar'\nnot "
+    unless /b(?{$foo = $_; $bar = pos})c/ 
+	and $foo eq 'abcde' and $bar eq 2;
+print "ok $test\n";
+$test++;
+
+undef $foo; undef $bar;
+print "#'$str','$foo','$bar'\nnot "
+    unless /b(?{$foo = $_; $bar = pos})c/g 
+	and $foo eq 'abcde' and $bar eq 2 and pos eq 3;
+print "ok $test\n";
+$test++;
+
+undef $foo; undef $bar;
+pos = undef;
+1 while /b(?{$foo = $_; $bar = pos})c/g;
+print "#'$str','$foo','$bar'\nnot "
+    unless $foo eq 'abcde' and $bar eq 2 and not defined pos;
+print "ok $test\n";
+$test++;
+
+undef $foo; undef $bar;
+$_ = 'abcde|abcde';
+print "#'$str','$foo','$bar','$_'\nnot "
+    unless s/b(?{$foo = $_; $bar = pos})c/x/g and $foo eq 'abcde|abcde' 
+	and $bar eq 8 and $_ eq 'axde|axde';
+print "ok $test\n";
+$test++;
+
+@res = ();
+# List context:
+$_ = 'abcde|abcde';
+@dummy = /([ace]).(?{push @res, $1,$2})([ce])(?{push @res, $1,$2})/g;
+@res = map {defined $_ ? "'$_'" : 'undef'} @res;
+$res = "@res";
+print "#'@res' '$_'\nnot "
+    unless "@res" eq "'a' undef 'a' 'c' 'e' undef 'a' undef 'a' 'c'";
+print "ok $test\n";
+$test++;
+
+@res = ();
+@dummy = /([ace]).(?{push @res, $`,$&,$'})([ce])(?{push @res, $`,$&,$'})/g;
+@res = map {defined $_ ? "'$_'" : 'undef'} @res;
+$res = "@res";
+print "#'@res' '$_'\nnot "
+    unless "@res" eq
+  "'' 'ab' 'cde|abcde' " .
+  "'' 'abc' 'de|abcde' " .
+  "'abcd' 'e|' 'abcde' " .
+  "'abcde|' 'ab' 'cde' " .
+  "'abcde|' 'abc' 'de'" ;
 print "ok $test\n";
 $test++;
 

@@ -494,16 +494,30 @@
 #define PL_profiledata		pPerl->PL_profiledata
 #undef  PL_reg_call_cc
 #define PL_reg_call_cc		pPerl->PL_reg_call_cc
+#undef  PL_reg_curpm
+#define PL_reg_curpm		pPerl->PL_reg_curpm
 #undef  PL_reg_eval_set
 #define PL_reg_eval_set		pPerl->PL_reg_eval_set
 #undef  PL_reg_flags
 #define PL_reg_flags		pPerl->PL_reg_flags
+#undef  PL_reg_ganch
+#define PL_reg_ganch		pPerl->PL_reg_ganch
+#undef  PL_reg_magic
+#define PL_reg_magic		pPerl->PL_reg_magic
+#undef  PL_reg_oldcurpm
+#define PL_reg_oldcurpm		pPerl->PL_reg_oldcurpm
+#undef  PL_reg_oldpos
+#define PL_reg_oldpos		pPerl->PL_reg_oldpos
 #undef  PL_reg_re
 #define PL_reg_re		pPerl->PL_reg_re
 #undef  PL_reg_start_tmp
 #define PL_reg_start_tmp	pPerl->PL_reg_start_tmp
 #undef  PL_reg_start_tmpl
 #define PL_reg_start_tmpl	pPerl->PL_reg_start_tmpl
+#undef  PL_reg_starttry
+#define PL_reg_starttry		pPerl->PL_reg_starttry
+#undef  PL_reg_sv
+#define PL_reg_sv		pPerl->PL_reg_sv
 #undef  PL_regbol
 #define PL_regbol		pPerl->PL_regbol
 #undef  PL_regcc
@@ -2605,6 +2619,8 @@
 #define reginclass		pPerl->Perl_reginclass
 #undef  reginclassutf8
 #define reginclassutf8		pPerl->Perl_reginclassutf8
+#undef  reginitcolors
+#define reginitcolors		pPerl->Perl_reginitcolors
 #undef  reginsert
 #define reginsert		pPerl->Perl_reginsert
 #undef  regmatch
@@ -2639,6 +2655,8 @@
 #define restore_lex_expect	pPerl->Perl_restore_lex_expect
 #undef  restore_magic
 #define restore_magic		pPerl->Perl_restore_magic
+#undef  restore_pos
+#define restore_pos		pPerl->Perl_restore_pos
 #undef  restore_rsfp
 #define restore_rsfp		pPerl->Perl_restore_rsfp
 #undef  rninstr

@@ -296,7 +296,7 @@ Useless use of times in void context at - line 13.
 use warning 'void' ;
 use Config ;
 BEGIN {
-    if ( ! $Config{d_getprior}) {
+    if ( ! $Config{d_getprior} or $^O eq 'os2') { # Locks before fixpak22
         print <<EOM ;
 SKIPPED
 # getpriority not present

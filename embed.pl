@@ -360,6 +360,7 @@ my @staticfuncs = qw(
     regcppop
     regcp_set_to
     cache_re
+    restore_pos
     reghop
     reghopmaybe
     dump

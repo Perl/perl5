@@ -17,6 +17,15 @@ at the top of your program.  This will alias all the short names to the
 long names in the current package.  Some even have medium names,
 generally borrowed from B<awk>.
 
+Due to an unfortunate accident of Perl's implementation, "C<use English>"
+imposes a considerable performance penalty on all regular expression
+matches in a program, regardless of whether they occur in the scope of
+"C<use English>".  For that reason, saying "C<use English>" in
+libraries is strongly discouraged.  See the Devel::SawAmpersand module
+documentation from CPAN
+(http://www.perl.com/CPAN/modules/by-module/Devel/Devel-SawAmpersand-0.10.readme)
+for more information.
+
 To go a step further, those variables that depend on the currently
 selected filehandle may instead (and preferably) be set by calling an
 object method on the FileHandle object.  (Summary lines below for this
@@ -127,6 +136,10 @@ The string matched by the last successful pattern match (not counting
 any matches hidden within a BLOCK or eval() enclosed by the current
 BLOCK).  (Mnemonic: like & in some editors.)  This variable is read-only.
 
+The use of this variable anywhere in a program imposes a considerable
+performance penalty on all regular expression matches.  See the
+Devel::SawAmpersand module from CPAN for more information.
+
 =item $PREMATCH
 
 =item $`
@@ -135,6 +148,10 @@ The string preceding whatever was matched by the last successful
 pattern match (not counting any matches hidden within a BLOCK or eval
 enclosed by the current BLOCK).  (Mnemonic: C<`> often precedes a quoted
 string.)  This variable is read-only.
+
+The use of this variable anywhere in a program imposes a considerable
+performance penalty on all regular expression matches.  See the
+Devel::SawAmpersand module from CPAN for more information.
 
 =item $POSTMATCH
 
@@ -150,6 +167,10 @@ string.)  Example:
     print "$`:$&:$'\n";  	# prints abc:def:ghi
 
 This variable is read-only.
+
+The use of this variable anywhere in a program imposes a considerable
+performance penalty on all regular expression matches.  See the
+Devel::SawAmpersand module from CPAN for more information.
 
 =item $LAST_PAREN_MATCH
 
@@ -168,13 +189,14 @@ This variable is read-only.
 
 $+[0] is the offset of the end of the last successfull match.
 C<$+[>I<n>C<]> is the offset of the end of the substring matched by
-I<n>-th subpattern.  
+I<n>-th subpattern, or undef if the subpattern did not match.
 
 Thus after a match against $_, $& coincides with C<substr $_, $-[0],
-$+[0]>.  Similarly, C<$>I<n> coincides with C<substr $_, $-[>I<n>C<],
-$+[>I<0>C<]> if C<$-[>I<n>C<]> is defined, and $+ conincides with
-C<substr $_, $-[-1], $+[-1]>.  One can use C<$#+> to find the last
-matched subgroup in the last successful match.  Compare with L<"@-">.
+$+[0] - $-[0]>.  Similarly, C<$>I<n> coincides with C<substr $_, $-[>I<n>C<],
+$+[>I<n>C<] - $-[>I<n>C<]> if C<$-[>I<n>C<]> is defined, and $+ coincides with
+C<substr $_, $-[$#-], $+[$#-]>.  One can use C<$#+> to find the number
+of subgroups in the last successful match.  Note the difference with
+C<$#->, which is the last I<matched> subgroup.  Compare with L<"@-">.
 
 =item $MULTILINE_MATCHING
 
@@ -389,13 +411,15 @@ channel.  (Mnemonic: lines_on_page - lines_printed.)
 
 $-[0] is the offset of the start of the last successfull match.
 C<$-[>I<n>C<]> is the offset of the start of the substring matched by
-I<n>-th subpattern.  
+I<n>-th subpattern, or undef if the subpattern did not match.
 
 Thus after a match against $_, $& coincides with C<substr $_, $-[0],
-$+[0]>.  Similarly, C<$>I<n> coincides with C<substr $_, $-[>I<n>C<],
-$+[>I<0>C<]> if C<$-[>I<n>C<]> is defined, and $+ conincides with
-C<substr $_, $-[-1], $+[-1]>.  One can use C<$#-> to find the last
-matched subgroup in the last successful match.  Compare with L<"@+">.
+$+[0] - $-[0]>.  Similarly, C<$>I<n> coincides with C<substr $_, $-[>I<n>C<],
+$+[>I<n>C<] - $-[>I<n>C<]> if C<$-[>I<n>C<]> is defined, and $+ coincides with
+C<substr $_, $-[$#-], $+[$#-]>.  One can use C<$#-> to find the last
+matched subgroup in the last successful match.  Note the difference with
+C<$#+>, which is the number of subgroups in the regular expression.  Compare
+with L<"@+">.
 
 =item format_name HANDLE EXPR
 

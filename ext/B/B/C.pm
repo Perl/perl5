@@ -1052,17 +1052,22 @@ sub save_object {
     foreach $sv (@_) {
 	svref_2object($sv)->save;
     }
-}                    
+}       
+
+sub Dummy_BootStrap { }            
 
 sub B::GV::savecv {
     my $gv = shift;
     my $cv = $gv->CV;
     my $name = $gv->NAME;
-    if ($$cv && !objsym($cv)) {
+    if ($$cv) {
 	if ($name eq "bootstrap" && $cv->XSUB) {
 	    my $file = $cv->FILEGV->SV->PV;
 	    $bootstrap->add($file);
-	    return;
+	    my $name = $gv->STASH->NAME.'::'.$name;
+	    no strict 'refs';
+            *{$name} = \&Dummy_BootStrap;   
+	    $cv = $gv->CV;
 	}
 	if ($debug_cv) {
 	    warn sprintf("saving extra CV &%s::%s (0x%x) from GV 0x%x\n",
@@ -1084,6 +1089,8 @@ sub B::GV::savecv {
      }
 
 }
+
+
 
 sub save_unused_subs {
     my %search_pack;
@@ -1132,9 +1139,12 @@ sub save_unused_subs {
 }
 
 sub save_main {
+    warn "Walking tree\n";
     my $curpad_nam = (comppadlist->ARRAY)[0]->save;
     my $curpad_sym = (comppadlist->ARRAY)[1]->save;
     my $init_av    = init_av->save;
+    my $inc_hv     = svref_2object(\%INC)->save;
+    my $inc_av     = svref_2object(\@INC)->save;
     walkoptree(main_root, "save");
     warn "done main optree, walking symtable for extras\n" if $debug_cv;
     save_unused_subs(@unused_sub_packages);
@@ -1143,6 +1153,8 @@ sub save_main {
 	       sprintf("PL_main_start = s\\_%x;", ${main_start()}),
 	       "PL_curpad = AvARRAY($curpad_sym);",
 	       "PL_initav = $init_av;",
+	       "GvHV(PL_incgv) = $inc_hv;",
+	       "GvAV(PL_incgv) = $inc_av;",
                "av_store(CvPADLIST(PL_main_cv),0,SvREFCNT_inc($curpad_nam));",
                "av_store(CvPADLIST(PL_main_cv),1,SvREFCNT_inc($curpad_sym));");
     warn "Writing output\n";

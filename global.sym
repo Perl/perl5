@@ -419,6 +419,7 @@ push_return
 push_scope
 ref
 refkids
+reginitcolors
 regdump
 regexec_flags
 regnext

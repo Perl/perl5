@@ -30,6 +30,7 @@ POD = \
 	perlform.pod	\
 	perllocale.pod	\
 	perlref.pod	\
+	perlreftut.pod	\
 	perldsc.pod	\
 	perllol.pod	\
 	perltoot.pod	\
@@ -80,6 +81,7 @@ MAN = \
 	perlform.man	\
 	perllocale.man	\
 	perlref.man	\
+	perlreftut.man	\
 	perldsc.man	\
 	perllol.man	\
 	perltoot.man	\
@@ -130,6 +132,7 @@ HTML = \
 	perlform.html	\
 	perllocale.html	\
 	perlref.html	\
+	perlreftut.html	\
 	perldsc.html	\
 	perllol.html	\
 	perltoot.html	\
@@ -180,6 +183,7 @@ TEX = \
 	perlform.tex	\
 	perllocale.tex	\
 	perlref.tex	\
+	perlreftut.tex	\
 	perldsc.tex	\
 	perllol.tex	\
 	perltoot.tex	\

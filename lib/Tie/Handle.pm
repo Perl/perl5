@@ -65,6 +65,10 @@ Read a single line
 
 Get a single character
 
+=item CLOSE this
+
+Close the handle
+
 =item DESTROY this
 
 Free the storage associated with the tied handle referenced by I<this>.

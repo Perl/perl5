@@ -363,8 +363,8 @@ pod1 = [.lib.pod]perl.pod [.lib.pod]perlapio.pod [.lib.pod]perlbook.pod [.lib.po
 pod2 = [.lib.pod]perldata.pod [.lib.pod]perldebug.pod [.lib.pod]perldelta.pod [.lib.pod]perldiag.pod [.lib.pod]perldsc.pod
 pod3 = [.lib.pod]perlembed.pod [.lib.pod]perlform.pod [.lib.pod]perlfunc.pod [.lib.pod]perlguts.pod
 pod4 = [.lib.pod]perlipc.pod [.lib.pod]perllocale.pod [.lib.pod]perllol.pod [.lib.pod]perlmod.pod [.lib.pod]perlobj.pod
-pod5 = [.lib.pod]perlop.pod [.lib.pod]perlpod.pod [.lib.pod]perlre.pod [.lib.pod]perlref.pod [.lib.pod]perlrun.pod
-pod6 = [.lib.pod]perlsec.pod [.lib.pod]perlstyle.pod [.lib.pod]perlsub.pod [.lib.pod]perlsyn.pod
+pod5 = [.lib.pod]perlop.pod [.lib.pod]perlpod.pod [.lib.pod]perlre.pod [.lib.pod]perlref.pod [.lib.pod]perlreftut.pod
+pod6 = [.lib.pod]perlrun.pod [.lib.pod]perlsec.pod [.lib.pod]perlstyle.pod [.lib.pod]perlsub.pod [.lib.pod]perlsyn.pod
 pod7 = [.lib.pod]perltie.pod [.lib.pod]perltoc.pod [.lib.pod]perltoot.pod
 pod8 = [.lib.pod]perltrap.pod [.lib.pod]perlvar.pod [.lib.pod]perlxs.pod [.lib.pod]perlxstut.pod
 

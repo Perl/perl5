@@ -910,12 +910,47 @@ A double-quoted, interpolated string.
 
 =item qr/STRING/imosx
 
-A string which is (possibly) interpolated and then compiled as a
-regular expression. The result may be used as a pattern in a match
+Quote-as-a-regular-expression operator.  I<STRING> is interpolated the
+same way as I<PATTERN> in C<m/PATTERN/>.  Returns a Perl value which
+may be used instead of the corresponding C</STRING/imosx> expression.
+
+For example,
+
+    $rex = qr/my.STRING/is;
+    s/$rex/foo/;
+
+is equivalent to
+
+    s/my.STRING/foo/is;
+
+The result may be used as a subpattern in a match:
 
     $re = qr/$pattern/;
     $string =~ /foo${re}bar/;	# can be interpolated in other patterns
     $string =~ $re;		# or used standalone
+    $string =~ /$re/;		# or this way
+
+Since Perl may compile the pattern at the moment of execution of qr()
+operator, using qr() may have speed advantages in I<some> situations,
+notably if the result of qr() is used standalone:
+
+    sub match {
+	my $patterns = shift;
+	my @compiled = map qr/$_/i, @$patterns;
+	grep {
+	    my $success = 0;
+	    foreach my $pat @compiled {
+		$success = 1, last if /$pat/;
+	    }
+	    $success;
+	} @_;
+    }
+
+Precompilation of the pattern into an internal representation at the
+moment of qr() avoids a need to recompile the pattern every time a
+match C</$pat/> is attempted.  (Note that Perl has many other
+internal optimizations, but none would be triggered in the above
+example if we did not use qr() operator.)
 
 Options are:
 
@@ -924,19 +959,6 @@ Options are:
     o	Compile pattern only once.
     s	Treat string as single line.
     x	Use extended regular expressions.
-
-The benefit from this is that the pattern is precompiled into an internal
-representation, and does not need to be recompiled every time a match
-is attempted.  This makes it very efficient to do something like:
-
-    foreach $pattern (@pattern_list) {
-	my $re = qr/$pattern/;
-	foreach $line (@lines) {
-	    if($line =~ /$re/) {
-		do_something($line);
-	    }
-	}
-    }
 
 See L<perlre> for additional information on valid syntax for STRING, and
 for a detailed look at the semantics of regular expressions.

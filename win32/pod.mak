@@ -30,6 +30,7 @@ POD = \
 	perlform.pod	\
 	perllocale.pod	\
 	perlref.pod	\
+	perlreftut.pod	\
 	perldsc.pod	\
 	perllol.pod	\
 	perltoot.pod	\

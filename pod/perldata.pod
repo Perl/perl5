@@ -471,7 +471,7 @@ is legal to assign to:
 
     ($map{'red'}, $map{'blue'}, $map{'green'}) = (0x00f, 0x0f0, 0xf00);
 
-Array assignment in a scalar context returns the number of elements
+List assignment in a scalar context returns the number of elements
 produced by the expression on the right side of the assignment:
 
     $x = (($foo,$bar) = (3,2,1));	# set $x to 3, not 2

@@ -326,8 +326,13 @@ magic_regdata_cnt(SV *sv, MAGIC *mg)
     register REGEXP *rx;
     char *t;
 
-    if (PL_curpm && (rx = PL_curpm->op_pmregexp))
-	return rx->lastparen;
+    if (PL_curpm && (rx = PL_curpm->op_pmregexp)) {
+	if (mg->mg_obj)		/* @+ */
+	    return rx->nparens;
+	else			/* @- */
+	    return rx->lastparen;
+    }
+    
     return (U32)-1;
 }
 
@@ -350,9 +355,9 @@ magic_regdatum_get(SV *sv, MAGIC *mg)
 	    (t = rx->endp[paren]))
 	    {
 		if (mg->mg_obj)		/* @+ */
-		    i = t - rx->subbase;
+		    i = t - rx->subbeg;
 		else			/* @- */
-		    i = s - rx->subbase;
+		    i = s - rx->subbeg;
 		sv_setiv(sv,i);
 	    }
     }
@@ -477,6 +482,10 @@ magic_get(SV *sv, MAGIC *mg)
 	    /* printf("some %s\n", printW(PL_curcop->cop_warnings)), */
 	    sv_setsv(sv, PL_curcop->cop_warnings);
 	break;
+    case '\003':		/* ^C */
+	sv_setiv(sv, (IV)PL_minus_c);
+	break;
+
     case '\004':		/* ^D */
 	sv_setiv(sv, (IV)(PL_debug & 32767));
 	break;
@@ -1655,6 +1664,11 @@ magic_set(SV *sv, MAGIC *mg)
 	    }
 	}
 	break;
+
+    case '\003':	/* ^C */
+	PL_minus_c = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
+	break;
+
     case '\004':	/* ^D */
 	PL_debug = (SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv)) | 0x80000000;
 	DEBUG_x(dump_all());

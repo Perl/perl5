@@ -4672,7 +4672,7 @@ PP(pp_split)
     else {
 	maxiters += (strend - s) * rx->nparens;
 	while (s < strend && --limit &&
-	       CALLREGEXEC(rx, s, strend, orig, 1, Nullsv, NULL, 0))
+	       CALLREGEXEC(rx, s, strend, orig, 1, sv, NULL, 0))
 	{
 	    TAINT_IF(RX_MATCH_TAINTED(rx));
 	    if (rx->subbase

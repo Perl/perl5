@@ -40,6 +40,7 @@ of sections:
     perllocale		Perl locale support
 
     perlref		Perl references
+    perlreftut		Perl references short introduction
     perldsc		Perl data structures intro
     perllol		Perl data structures: lists of lists
     perltoot		Perl OO tutorial

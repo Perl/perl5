@@ -86,6 +86,7 @@ typedef struct regexp {
 #define ROPT_LOOKBEHIND_SEEN	0x00100
 #define ROPT_EVAL_SEEN		0x00200
 #define ROPT_TAINTED_SEEN	0x00400
+#define ROPT_ANCH_SBOL	 	0x00800
 
 /* 0xf800 of reganch is used by PMf_COMPILETIME */
 
@@ -101,6 +102,7 @@ typedef struct regexp {
 
 #define REXEC_COPY_STR	1		/* Need to copy the string. */
 #define REXEC_CHECKED	2		/* check_substr already checked. */
+#define REXEC_SCREAM	4		/* use scream table. */
 
 #define ReREFCNT_inc(re) ((re && re->refcnt++), re)
 #define ReREFCNT_dec(re) pregfree(re)
