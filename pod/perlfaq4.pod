@@ -333,10 +333,11 @@ call C<srand> more than once--you make your numbers less random, rather
 than more.
 
 Computers are good at being predictable and bad at being random
-(despite appearances caused by bugs in your programs :-).
-http://www.cpan.org/doc/FMTEYEWTK/random , courtesy of Tom
-Phoenix, talks more about this.  John von Neumann said, ``Anyone who
-attempts to generate random numbers by deterministic means is, of
+(despite appearances caused by bugs in your programs :-).  see the
+F<random> artitcle in the "Far More Than You Ever Wanted To Know"
+collection in http://www.cpan.org/olddoc/FMTEYEWTK.tgz , courtesy of
+Tom Phoenix, talks more about this.  John von Neumann said, ``Anyone
+who attempts to generate random numbers by deterministic means is, of
 course, living in a state of sin.''
 
 If you want numbers that are more random than C<rand> with C<srand>
@@ -1473,8 +1474,9 @@ If you need to sort on several fields, the following paradigm is useful.
 This can be conveniently combined with precalculation of keys as given
 above.
 
-See http://www.cpan.org/doc/FMTEYEWTK/sort.html for more about
-this approach.
+See the F<sort> artitcle article in the "Far More Than You Ever Wanted
+To Know" collection in http://www.cpan.org/olddoc/FMTEYEWTK.tgz for
+more about this approach.
 
 See also the question below on sorting hashes.
 

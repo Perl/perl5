@@ -129,6 +129,7 @@ miscellaneous modules.
 See http://www.cpan.org/modules/00modlist.long.html or
 http://search.cpan.org/ for a more complete list of modules by category.
 
+CPAN is not affiliated with O'Reilly and Associates.
 
 =head2 Is there an ISO or ANSI certified version of Perl?
 
@@ -493,7 +494,7 @@ bugs.
 
 Read the perlbug(1) man page (perl5.004 or later) for more information.
 
-=head2 What is perl.com? Perl Mongers? pm.org? perl.org?
+=head2 What is perl.com? Perl Mongers? pm.org? perl.org? cpan.org?
 
 The Perl Home Page at http://www.perl.com/ is currently hosted by
 The O'Reilly Network, a subsidiary of O'Reilly and Associates.
@@ -518,6 +519,10 @@ and there are many other sub-domains for special topics, such as
     http://lists.perl.org/
     http://news.perl.org/
     http://use.perl.org/
+
+http://www.cpan.org/ is the Comprehensive Perl Archive Network,
+a replicated worlwide repository of Perl software, see
+the I<What is CPAN?> question earlier in this document.
 
 =head1 AUTHOR AND COPYRIGHT
 

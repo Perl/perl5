@@ -22,8 +22,9 @@ Have you read the appropriate manpages?  Here's a brief index:
 	Regexes		perlre, perlfunc, perlop, perllocale
 	Moving to perl5	perltrap, perl
 	Linking w/C	perlxstut, perlxs, perlcall, perlguts, perlembed
-	Various 	http://www.cpan.org/doc/FMTEYEWTK/index.html
-			(not a man-page but still useful)
+	Various 	http://www.cpan.org/misc/olddoc/FMTEYEWTK.tgz
+			(not a man-page but still useful, a collection
+			 of various essays on Perl techniques)
 
 A crude table of contents for the Perl manpage set is found in L<perltoc>.
 
@@ -154,13 +155,9 @@ for indenting, ^D is for undenting, and ^O is for blockdenting--
 as it were.  A more complete example, with comments, can be found at
 http://www.cpan.org/authors/id/TOMC/scripts/toms.exrc.gz
 
-If you are used to using the I<vgrind> program for printing out nice code
-to a laser printer, you can take a stab at this using
-http://www.cpan.org/doc/misc/tips/working.vgrind.entry, but the
-results are not particularly satisfying for sophisticated code.
-
-The a2ps at http://www.infres.enst.fr/%7Edemaille/a2ps/ does lots of things
-related to generating nicely printed output of documents.
+The a2ps http://www-inf.enst.fr/%7Edemaille/a2ps/black+white.ps does
+lots of things related to generating nicely printed output of
+documents, as does enscript at http://people.ssh.fi/mtr/genscript/.
 
 =head2 Is there a ctags for Perl?
 
@@ -873,9 +870,13 @@ guides and references in L<perlfaq9> or in the CGI MetaFAQ:
 =head2 Where can I learn about object-oriented Perl programming?
 
 A good place to start is L<perltoot>, and you can use L<perlobj>,
-L<perlboot>, and L<perlbot> for reference.  Perltoot didn't come out
-until the 5.004 release; you can get a copy (in pod, html, or
-postscript) from http://www.cpan.org/doc/FMTEYEWTK/ .
+L<perlboot>, L<perltoot>, L<perltooc>, and L<perlbot> for reference.
+(If you are using really old Perl, you may not have all of these,
+try http://www.perldoc.com/ , but consider upgrading your perl.)
+
+A good book on OO on Perl is the "Object-Oriented Perl"
+by Damian Conway from Manning Publications, 
+http://www.manning.com/Conway/index.html
 
 =head2 Where can I learn about linking C with Perl? [h2xs, xsubpp]
 

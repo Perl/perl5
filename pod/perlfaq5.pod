@@ -1128,9 +1128,9 @@ documentation for details.
 
 =head2 Why does Perl let me delete read-only files?  Why does C<-i> clobber protected files?  Isn't this a bug in Perl?
 
-This is elaborately and painstakingly described in the "Far More Than
-You Ever Wanted To Know" in
-http://www.cpan.org/doc/FMTEYEWTK/file-dir-perms .
+This is elaborately and painstakingly described in the
+F<file-dir-perms> article in the "Far More Than You Ever Wanted To
+Know" collection in http://www.cpan.org/olddoc/FMTEYEWTK.tgz .
 
 The executive summary: learn how your filesystem works.  The
 permissions on a file say what can happen to the data in that file.
