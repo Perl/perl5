@@ -1539,6 +1539,12 @@ tryagain:
 	    *flagp |= SIMPLE;
 	    nextchar();
 	    break;
+	case 'z':
+	    ret = reg_node(EOS);
+	    *flagp |= SIMPLE;
+	    seen_zerolen++;		/* Do not optimize RE away */
+	    nextchar();
+	    break;
 	case 'w':
 	    ret = reg_node((regflags & PMf_LOCALE) ? ALNUML : ALNUM);
 	    *flagp |= HASWIDTH|SIMPLE;
@@ -1665,6 +1671,7 @@ tryagain:
 		    case 'A':
 		    case 'G':
 		    case 'Z':
+		    case 'z':
 		    case 'w':
 		    case 'W':
 		    case 'b':
@@ -2328,6 +2335,9 @@ regprop(SV *sv, regnode *o)
 	break;
     case EOL:
 	p = "EOL";
+	break;
+    case EOS:
+	p = "EOS";
 	break;
     case MEOL:
 	p = "MEOL";

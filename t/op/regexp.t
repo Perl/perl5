@@ -21,7 +21,7 @@
 # Column 5 contains the expected result of double-quote
 # interpolating that string after the match, or start of error message.
 #
-# Columns 1, 2 and 5 are \n-interpolated.
+# \n in the tests are interpolated.
 #
 # If you want to add a regular expression test that can't be expressed
 # in this format, don't add it here: put it in op/pat.t instead.
@@ -40,7 +40,9 @@ $| = 1;
 print "1..$numtests\n# $iters iterations\n";
 TEST:
 while (<TESTS>) {
-    ($pat, $subject, $result, $repl, $expect) = split(/[\t\n]/,$_);
+    chomp;
+    s/\\n/\n/g;
+    ($pat, $subject, $result, $repl, $expect) = split(/\t/,$_);
     $input = join(':',$pat,$subject,$result,$repl,$expect);
     infty_subst(\$pat);
     infty_subst(\$expect);

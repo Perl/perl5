@@ -824,6 +824,10 @@ regmatch(regnode *prog)
 	    if (regeol - locinput > 1)
 		sayNO;
 	    break;
+	case EOS:
+	    if (regeol != locinput)
+		sayNO;
+	    break;
 	case SANY:
 	    if (!nextchr && locinput >= regeol)
 		sayNO;

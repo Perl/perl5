@@ -439,3 +439,8 @@ $(?<=^(a))	a	y	$1	a
 ((?>[^()]+)|\([^()]*\))+	((abc(ade)ufh()()x	y	$&	abc(ade)ufh()()x
 (?<=x+)y	-	c	-	/(?<=x+)y/: variable length lookbehind not implemented
 a{37,17}	-	c	-	/a{37,17}/: Can't do {n,m} with n > m
+a\Z	a\nb\n	n	-	-
+b\Z	a\nb\n	y	-	-
+b\z	a\nb\n	n	-	-
+b\Z	a\nb	y	-	-
+b\z	a\nb	y	-	-

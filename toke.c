@@ -832,7 +832,7 @@ scan_const(char *start)
     /* leaveit is the set of acceptably-backslashed characters */
     char *leaveit =
 	lex_inpat
-	    ? "\\.^$@AGZdDwWsSbB+*?|()-nrtfeaxc0123456789[{]} \t\n\r\f\v#"
+	    ? "\\.^$@AGZdDwWsSbB+*?|()-nrtfeaxcz0123456789[{]} \t\n\r\f\v#"
 	    : "";
 
     while (s < send || dorange) {
