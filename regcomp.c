@@ -1746,6 +1746,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     RExC_rx = r;
 
     /* Second pass: emit code. */
+    RExC_flags16 = pm->op_pmflags;	/* don't let top level (?i) bleed */
     RExC_parse = exp;
     RExC_end = xend;
     RExC_naughty = 0;
