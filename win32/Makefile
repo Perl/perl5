@@ -34,7 +34,7 @@ INST_TOP=$(INST_DRV)\perl
 # set this if you wish to use perl's malloc
 # WARNING: Turning this on WILL break binary compatibility with extensions
 # you may have compiled without it.  Be prepared to recompile all extensions.
-#PERL_MALLOC	*= define
+#PERL_MALLOC	= define
 
 #
 # set the install locations of the compiler include/libraries
