@@ -3,8 +3,8 @@
  DB_File.xs -- Perl 5 interface to Berkeley DB 
 
  written by Paul Marquess <Paul.Marquess@btinternet.com>
- last modified 23rd Nov 2001
- version 1.800
+ last modified 26th Nov 2001
+ version 1.801
 
  All comments/suggestions/problems are welcome
 
@@ -97,6 +97,7 @@
                 Added lots of casts
         1.800 - Moved backward compatability code into ppport.h.
                 Use the new constants code.
+        1.801 - No change to DB_File.xs
 
 */
 

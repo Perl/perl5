@@ -22,7 +22,8 @@ WriteMakefile(
 	XSPROTOARG	=> '-noprototypes',
 	DEFINE		=> $OS2 || "",
 	INC		=> ($^O eq "MacOS" ? "-i ::::db:include" : ""),
-	'depend'	=> {"version$(OBJ_EXT)" => 'version.c'},
+	'depend'	=> {'version$(OBJ_EXT)' => 'version.c'},
+	'clean'		=> {FILES => 'constants.h constants.xs'},
 	);
 
 my @names = qw(

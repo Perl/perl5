@@ -388,3 +388,10 @@
 
    * upgrade Makefile.PL upgrade/downgrade code to toggle "our" with
      "use vars"
+
+1.801 26th November 2001
+
+   * Fixed typo in Makefile.PL
+
+   * Added "clean" attribute to Makefile.PL
+ 
