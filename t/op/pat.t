@@ -369,6 +369,10 @@ print "# ans='@ans'\n# expect='$expect'\nnot " if "@ans" ne $expect;
 print "ok $test\n";
 $test++;
 
+print "not " unless "abc" =~ /^(??{"a"})b/;
+print "ok $test\n";
+$test++;
+
 my $matched;
 $matched = qr/\((?:(?>[^()]+)|(??{$matched}))*\)/;
 

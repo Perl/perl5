@@ -1222,7 +1222,7 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		if (data)
 		    data->flags |= SF_HAS_EVAL;
 	}
-	else if (OP(scan) == LOGICAL && scan->flags == 2) { /* Embedded */
+	else if (OP(scan) == LOGICAL && scan->flags == 2) { /* Embedded follows */
 		if (flags & SCF_DO_SUBSTR) {
 		    scan_commit(data);
 		    data->longest = &(data->longest_float);
@@ -1230,6 +1230,7 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		is_inf = is_inf_internal = 1;
 		if (flags & SCF_DO_STCLASS_OR) /* Allow everything */
 		    cl_anything(data->start_class);
+		flags &= ~SCF_DO_STCLASS;
 	}
 	/* Else: zero-length, ignore. */
 	scan = regnext(scan);
