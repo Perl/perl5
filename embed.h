@@ -362,6 +362,7 @@
 #define magic_settaint		Perl_magic_settaint
 #define magic_setuvar		Perl_magic_setuvar
 #define magic_setvec		Perl_magic_setvec
+#define magic_setutf8		Perl_magic_setutf8
 #define magic_set_all_env	Perl_magic_set_all_env
 #define magic_sizepack		Perl_magic_sizepack
 #define magic_wipepack		Perl_magic_wipepack
@@ -1093,6 +1094,8 @@
 #  if defined(USE_ITHREADS)
 #define gv_share		S_gv_share
 #  endif
+#define utf8_mg_pos		S_utf8_mg_pos
+#define utf8_mg_pos_init	S_utf8_mg_pos_init
 #if defined(PERL_COPY_ON_WRITE)
 #define sv_release_COW		S_sv_release_COW
 #endif
@@ -1924,6 +1927,7 @@
 #define magic_settaint(a,b)	Perl_magic_settaint(aTHX_ a,b)
 #define magic_setuvar(a,b)	Perl_magic_setuvar(aTHX_ a,b)
 #define magic_setvec(a,b)	Perl_magic_setvec(aTHX_ a,b)
+#define magic_setutf8(a,b)	Perl_magic_setutf8(aTHX_ a,b)
 #define magic_set_all_env(a,b)	Perl_magic_set_all_env(aTHX_ a,b)
 #define magic_sizepack(a,b)	Perl_magic_sizepack(aTHX_ a,b)
 #define magic_wipepack(a,b)	Perl_magic_wipepack(aTHX_ a,b)
@@ -2643,6 +2647,8 @@
 #  if defined(USE_ITHREADS)
 #define gv_share(a,b)		S_gv_share(aTHX_ a,b)
 #  endif
+#define utf8_mg_pos(a,b,c,d,e,f,g,h,i)	S_utf8_mg_pos(aTHX_ a,b,c,d,e,f,g,h,i)
+#define utf8_mg_pos_init(a,b,c,d,e,f,g)	S_utf8_mg_pos_init(aTHX_ a,b,c,d,e,f,g)
 #if defined(PERL_COPY_ON_WRITE)
 #define sv_release_COW(a,b,c,d,e,f)	S_sv_release_COW(aTHX_ a,b,c,d,e,f)
 #endif

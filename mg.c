@@ -1835,6 +1835,16 @@ Perl_magic_setcollxfrm(pTHX_ SV *sv, MAGIC *mg)
 }
 #endif /* USE_LOCALE_COLLATE */
 
+/* Just clear the UTF-8 cache data. */
+int
+Perl_magic_setutf8(pTHX_ SV *sv, MAGIC *mg)
+{
+    Safefree(mg->mg_ptr);	/* The mg_ptr holds the pos cache. */
+    mg->mg_ptr = 0;
+    mg->mg_len = -1;		/* The mg_len holds the len cache. */
+    return 0;
+}
+
 int
 Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 {

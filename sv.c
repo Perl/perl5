@@ -4824,6 +4824,9 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
     case PERL_MAGIC_vstring:
 	vtable = 0;
 	break;
+    case PERL_MAGIC_utf8:
+	vtable = &PL_vtbl_utf8;
+	break;
     case PERL_MAGIC_substr:
 	vtable = &PL_vtbl_substr;
 	break;
@@ -4893,6 +4896,8 @@ Perl_sv_unmagic(pTHX_ SV *sv, int type)
 		    Safefree(mg->mg_ptr);
 		else if (mg->mg_len == HEf_SVKEY)
 		    SvREFCNT_dec((SV*)mg->mg_ptr);
+		else if (mg->mg_type == PERL_MAGIC_utf8 && mg->mg_ptr)
+		    Safefree(mg->mg_ptr);
             }
 	    if (mg->mg_flags & MGf_REFCOUNTED)
 		SvREFCNT_dec(mg->mg_obj);
@@ -5471,6 +5476,13 @@ UTF8 bytes as a single character. Handles magic and type coercion.
 =cut
 */
 
+/*
+ * The length is cached in PERL_UTF8_magic, in the mg_len field.  Also the
+ * mg_ptr is used, by sv_pos_u2b(), see the comments of S_utf8_mg_pos_init().
+ * (Note that the mg_len is not the length of the mg_ptr field.)
+ * 
+ */
+
 STRLEN
 Perl_sv_len_utf8(pTHX_ register SV *sv)
 {
@@ -5481,13 +5493,158 @@ Perl_sv_len_utf8(pTHX_ register SV *sv)
 	return mg_length(sv);
     else
     {
-	STRLEN len;
+	STRLEN len, ulen;
 	U8 *s = (U8*)SvPV(sv, len);
+	MAGIC *mg = SvMAGICAL(sv) ? mg_find(sv, PERL_MAGIC_utf8) : 0;
 
-	return Perl_utf8_length(aTHX_ s, s + len);
+	if (mg && mg->mg_len != -1 && (mg->mg_len > 0 || len == 0))
+	    ulen = mg->mg_len;
+	else {
+	    ulen = Perl_utf8_length(aTHX_ s, s + len);
+	    if (!mg && !SvREADONLY(sv)) {
+		sv_magic(sv, 0, PERL_MAGIC_utf8, 0, 0);
+		mg = mg_find(sv, PERL_MAGIC_utf8);
+		assert(mg);
+	    }
+	    if (mg)
+		mg->mg_len = ulen;
+	}
+	return ulen;
     }
 }
 
+/* S_utf8_mg_pos_init() is used to initialize the mg_ptr field of
+ * a PERL_UTF8_magic.  The mg_ptr is used to store the mapping
+ * between UTF-8 and byte offsets.  There are two (substr offset and substr
+ * length, the i offset, PERL_MAGIC_UTF8_CACHESIZE) times two (UTF-8 offset
+ * and byte offset) cache positions.
+ *
+ * The mg_len field is used by sv_len_utf8(), see its comments.
+ * Note that the mg_len is not the length of the mg_ptr field.
+ *
+ */
+STATIC bool
+S_utf8_mg_pos_init(SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 *offsetp, U8 *s, U8 *start)
+{
+    bool found = FALSE; 
+
+    if (SvMAGICAL(sv) && !SvREADONLY(sv)) {
+	if (!*mgp) {
+	    sv_magic(sv, 0, PERL_MAGIC_utf8, 0, 0);
+	    *mgp = mg_find(sv, PERL_MAGIC_utf8);
+	}
+	assert(*mgp);
+
+	if ((*mgp)->mg_ptr)
+	    *cachep = (STRLEN *) (*mgp)->mg_ptr;
+	else {
+	    Newz(0, *cachep, PERL_MAGIC_UTF8_CACHESIZE * 2, STRLEN);
+	    (*mgp)->mg_ptr = (char *) *cachep;
+	}
+	assert(*cachep);
+
+	(*cachep)[i]   = *offsetp;
+	(*cachep)[i+1] = s - start;
+	found = TRUE;
+    }
+
+    return found;
+}
+
+/*
+ * S_utf8_mg_pos() is used to query and update mg_ptr field of
+ * a PERL_UTF8_magic.  The mg_ptr is used to store the mapping
+ * between UTF-8 and byte offsets.  See also the comments of
+ * S_utf8_mg_pos_init().
+ *
+ */
+STATIC bool
+S_utf8_mg_pos(SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 *offsetp, I32 uoff, U8 **sp, U8 *start, U8 *send)
+{
+    bool found = FALSE;
+
+    if (SvMAGICAL(sv) && !SvREADONLY(sv)) {
+	if (!*mgp)
+	    *mgp = mg_find(sv, PERL_MAGIC_utf8);
+	if (*mgp && (*mgp)->mg_ptr) {
+	    *cachep = (STRLEN *) (*mgp)->mg_ptr;
+	    if ((*cachep)[i] == uoff)	/* An exact match. */
+		 found = TRUE;
+	    else {			/* We will skip to the right spot. */
+		 STRLEN forw  = 0;
+		 STRLEN backw = 0;
+		 U8* p = NULL;
+
+		 /* The assumption is that going backward is half
+		  * the speed of going forward (that's where the
+		  * 2 * backw in the below comes from).  (The real
+		  * figure of course depends on the UTF-8 data.) */
+
+		 if ((*cachep)[i] > uoff) {
+		      forw  = uoff;
+		      backw = (*cachep)[i] - uoff;
+
+		      if (forw < 2 * backw)
+			   p = start;
+		      else
+			   p = start + (*cachep)[i+1];
+		 }
+		 /* Try this only for the substr offset (i == 0),
+		  * not for the substr length (i == 2). */
+		 else if (i == 0) { /* (*cachep)[i] < uoff */
+		      STRLEN ulen = sv_len_utf8(sv);
+
+		      if (uoff < ulen) {
+			   forw  = uoff - (*cachep)[i];
+			   backw = ulen - uoff;
+
+			   if (forw < 2 * backw)
+				p = start + (*cachep)[i+1];
+			   else
+				p = send;
+		      }
+
+		      /* If the string is not long enough for uoff,
+		       * we could extend it, but not at this low a level. */
+		 }
+
+		 if (p) {
+		      if (forw < 2 * backw) {
+			   while (forw--)
+				p += UTF8SKIP(p);
+		      }
+		      else {
+			   while (backw--) {
+				p--;
+				while (UTF8_IS_CONTINUATION(*p))
+				     p--;
+			   }
+		      }
+
+		      /* Update the cache. */
+		      (*cachep)[i]   = uoff;
+		      (*cachep)[i+1] = p - start;
+ 
+		      found = TRUE;
+		 }
+	    }
+	    if (found) {	/* Setup the return values. */
+		 *offsetp = (*cachep)[i+1];
+		 *sp = start + *offsetp;
+		 if (*sp >= send) {
+		      *sp = send;
+		      *offsetp = send - start;
+		 }
+		 else if (*sp < start) {
+		      *sp = start;
+		      *offsetp = 0;
+		 }
+	    }
+	}
+    }
+    return found;
+}
+ 
 /*
 =for apidoc sv_pos_u2b
 
@@ -5500,33 +5657,67 @@ type coercion.
 =cut
 */
 
+/*
+ * sv_pos_u2b() uses, like sv_pos_b2u(), the mg_ptr of the potential
+ * PERL_UTF8_magic of the sv to store the mapping between UTF-8 and
+ * byte offsets.  See also the comments of S_utf8_mg_pos().
+ *
+ */
+
 void
 Perl_sv_pos_u2b(pTHX_ register SV *sv, I32* offsetp, I32* lenp)
 {
     U8 *start;
     U8 *s;
-    U8 *send;
-    I32 uoffset = *offsetp;
     STRLEN len;
+    STRLEN *cache = 0;
+    STRLEN boffset = 0;
 
     if (!sv)
 	return;
 
     start = s = (U8*)SvPV(sv, len);
-    send = s + len;
-    while (s < send && uoffset--)
-	s += UTF8SKIP(s);
-    if (s >= send)
-	s = send;
-    *offsetp = s - start;
-    if (lenp) {
-	I32 ulen = *lenp;
-	start = s;
-	while (s < send && ulen--)
-	    s += UTF8SKIP(s);
-	if (s >= send)
-	    s = send;
-	*lenp = s - start;
+    if (len) {
+	 I32 uoffset = *offsetp;
+	 U8 *send = s + len;
+	 MAGIC *mg = 0;
+	 bool found = FALSE;
+
+         if (S_utf8_mg_pos(sv, &mg, &cache, 0, offsetp, *offsetp, &s, start, send))
+             found = TRUE;
+	 if (!found && uoffset > 0) {
+	      while (s < send && uoffset--)
+		   s += UTF8SKIP(s);
+	      if (s >= send)
+		   s = send;
+              if (S_utf8_mg_pos_init(sv, &mg, &cache, 0, offsetp, s, start))
+                  boffset = cache[1];
+	      *offsetp = s - start;
+	 }
+	 if (lenp) {
+	      found = FALSE;
+	      start = s;
+              if (S_utf8_mg_pos(sv, &mg, &cache, 2, lenp, *lenp + *offsetp, &s, start, send)) {
+                  *lenp -= boffset;
+                  found = TRUE;
+              }
+	      if (!found && *lenp > 0) {
+		   I32 ulen = *lenp;
+		   if (ulen > 0)
+			while (s < send && ulen--)
+			     s += UTF8SKIP(s);
+		   if (s >= send)
+			s = send;
+                   if (S_utf8_mg_pos_init(sv, &mg, &cache, 2, lenp, s, start))
+			cache[2] += *offsetp;
+	      }
+	      *lenp = s - start;
+	 }
+    }
+    else {
+	 *offsetp = 0;
+	 if (lenp)
+	      *lenp = 0;
     }
     return;
 }
@@ -5541,11 +5732,17 @@ Handles magic and type coercion.
 =cut
 */
 
+/*
+ * sv_pos_b2u() uses, like sv_pos_u2b(), the mg_ptr of the potential
+ * PERL_UTF8_magic of the sv to store the mapping between UTF-8 and
+ * byte offsets.  See also the comments of S_utf8_mg_pos().
+ *
+ */
+
 void
-Perl_sv_pos_b2u(pTHX_ register SV *sv, I32* offsetp)
+Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
 {
-    U8 *s;
-    U8 *send;
+    U8* s;
     STRLEN len;
 
     if (!sv)
@@ -5554,22 +5751,92 @@ Perl_sv_pos_b2u(pTHX_ register SV *sv, I32* offsetp)
     s = (U8*)SvPV(sv, len);
     if ((I32)len < *offsetp)
 	Perl_croak(aTHX_ "panic: sv_pos_b2u: bad byte offset");
-    send = s + *offsetp;
-    len = 0;
-    while (s < send) {
-	STRLEN n = 1;
-	/* Call utf8n_to_uvchr() to validate the sequence
-	 * (unless a simple non-UTF character) */
-	if (!UTF8_IS_INVARIANT(*s))
-	    utf8n_to_uvchr(s, UTF8SKIP(s), &n, 0);
-	if (n > 0) {
-	    s += n;
-	    len++;
+    else {
+	U8* send = s + *offsetp;
+	MAGIC* mg = NULL;
+	STRLEN *cache = NULL;
+
+	len = 0;
+
+	if (SvMAGICAL(sv) && !SvREADONLY(sv)) {
+	    mg = mg_find(sv, PERL_MAGIC_utf8);
+	    if (mg && mg->mg_ptr) {
+		cache = (STRLEN *) mg->mg_ptr;
+		if (cache[1] == *offsetp) {
+                    /* An exact match. */
+                    *offsetp = cache[0];
+
+		    return;
+		}
+		else if (cache[1] < *offsetp) {
+		    /* We already know part of the way. */
+		    len = cache[0];
+		    s  += cache[1];
+		    /* Let the below loop do the rest. */ 
+		}
+		else { /* cache[1] > *offsetp */
+		    /* We already know all of the way, now we may
+		     * be able to walk back.  The same assumption
+		     * is made as in S_utf8_mg_pos(), namely that
+		     * walking backward is twice slower than
+		     * walking forward. */
+		    STRLEN forw  = *offsetp;
+		    STRLEN backw = cache[1] - *offsetp;
+
+		    if (!(forw < 2 * backw)) {
+			U8 *p = s + cache[1];
+			STRLEN ubackw = 0;
+			     
+			while (backw--) {
+			    p--;
+			    while (UTF8_IS_CONTINUATION(*p))
+				p--;
+			    ubackw++;
+			}
+
+			cache[0] -= ubackw;
+			cache[1] -= backw;
+
+			return;
+		    }
+		}
+	    }
 	}
-	else
-	    break;
+
+	while (s < send) {
+	    STRLEN n = 1;
+
+	    /* Call utf8n_to_uvchr() to validate the sequence
+	     * (unless a simple non-UTF character) */
+	    if (!UTF8_IS_INVARIANT(*s))
+		utf8n_to_uvchr(s, UTF8SKIP(s), &n, 0);
+	    if (n > 0) {
+		s += n;
+		len++;
+	    }
+	    else
+		break;
+	}
+
+	if (!SvREADONLY(sv)) {
+	    if (!mg) {
+		sv_magic(sv, 0, PERL_MAGIC_utf8, 0, 0);
+		mg = mg_find(sv, PERL_MAGIC_utf8);
+	    }
+	    assert(mg);
+
+	    if (!mg->mg_ptr) {
+		Newz(0, cache, PERL_MAGIC_UTF8_CACHESIZE * 2, STRLEN);
+		mg->mg_ptr = (char *) cache;
+	    }
+	    assert(cache);
+
+	    cache[0] = len;
+	    cache[1] = *offsetp;
+	}
+
+	*offsetp = len;
     }
-    *offsetp = len;
     return;
 }
 
