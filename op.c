@@ -3487,8 +3487,8 @@ OP *block;
 		    croak(not_safe);
 		else {
 		    /* force display of errors found but not reported */
-		    sv_catpv(errsv, not_safe);
-		    croak("%s", SvPV(errsv, na));
+		    sv_catpv(ERRSV, not_safe);
+		    croak("%s", SvPVx(ERRSV, na));
 		}
 	    }
 	}

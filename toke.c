@@ -5431,7 +5431,7 @@ char *s;
     if (in_eval & 2)
 	warn("%_", msg);
     else if (in_eval)
-	sv_catsv(errsv, msg);
+	sv_catsv(ERRSV, msg);
     else
 	PerlIO_write(PerlIO_stderr(), SvPVX(msg), SvCUR(msg));
     if (++error_count >= 10)

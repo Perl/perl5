@@ -461,6 +461,14 @@ typedef pthread_key_t perl_key;
 #   define SETERRNO(errcode,vmserrcode) errno = (errcode)
 #endif
 
+#ifdef USE_THREADS
+#  define ERRSV (thr->errsv)
+#  define ERRHV (thr->errhv)
+#else
+#  define ERRSV GvSV(errgv)
+#  define ERRHV GvHV(errgv)
+#endif /* USE_THREADS */
+
 #ifndef errno
 	extern int errno;     /* ANSI allows errno to be an lvalue expr */
 #endif
@@ -1859,8 +1867,7 @@ IEXT I32	Imaxscream IINIT(-1);
 IEXT SV *	Ilastscream;
 
 /* shortcuts to misc objects */
-IEXT HV *	Ierrhv;
-IEXT SV *	Ierrsv;
+IEXT GV *	Ierrgv;
 
 /* shortcuts to debugging objects */
 IEXT GV *	IDBgv;

@@ -470,8 +470,7 @@ register PerlInterpreter *sv_interp;
     envgv = Nullgv;
     siggv = Nullgv;
     incgv = Nullgv;
-    errhv = Nullhv;
-    errsv = Nullsv;
+    errgv = Nullgv;
     argvgv = Nullgv;
     argvoutgv = Nullgv;
     stdingv = Nullgv;
@@ -1087,6 +1086,13 @@ perl_get_sv(name, create)
 char* name;
 I32 create;
 {
+#ifdef USE_THREADS
+    PADOFFSET tmp;
+    if (name[1] == '\0' && !isALPHA(name[0])
+	&& (tmp = find_thread_magical(name)) != NOT_IN_PAD) {
+	return *av_fetch(thr->magicals, tmp, FALSE);
+    }
+#endif /* USE_THREADS */
     GV* gv = gv_fetchpv(name, create, SVt_PV);
     if (gv)
 	return GvSV(gv);
@@ -1247,7 +1253,7 @@ I32 flags;		/* See G_* flags in cop.h */
 	    if (flags & G_KEEPERR)
 		in_eval |= 4;
 	    else
-		sv_setpv(errsv,"");
+		sv_setpv(ERRSV,"");
 	}
 	markstack_ptr++;
 
@@ -1292,7 +1298,7 @@ I32 flags;		/* See G_* flags in cop.h */
 	runops();
     retval = stack_sp - (stack_base + oldmark);
     if ((flags & G_EVAL) && !(flags & G_KEEPERR))
-	sv_setpv(errsv,"");
+	sv_setpv(ERRSV,"");
 
   cleanup:
     if (flags & G_EVAL) {
@@ -1401,7 +1407,7 @@ I32 flags;		/* See G_* flags in cop.h */
 	runops();
     retval = stack_sp - (stack_base + oldmark);
     if (!(flags & G_KEEPERR))
-	sv_setpv(errsv,"");
+	sv_setpv(ERRSV,"");
 
   cleanup:
     JMPENV_POP;
@@ -1432,8 +1438,8 @@ I32 croak_on_error;
     sv = POPs;
     PUTBACK;
 
-    if (croak_on_error && SvTRUE(errsv))
-	croak(SvPV(errsv, na));
+    if (croak_on_error && SvTRUE(ERRSV))
+	croak(SvPVx(ERRSV, na));
 
     return sv;
 }
@@ -1804,11 +1810,11 @@ init_main_stash()
     incgv = gv_HVadd(gv_AVadd(gv_fetchpv("INC",TRUE, SVt_PVAV)));
     GvMULTI_on(incgv);
     defgv = gv_fetchpv("_",TRUE, SVt_PVAV);
-    errsv = newSVpv("", 0);
-    errhv = newHV();
+    errgv = gv_HVadd(gv_fetchpv("@", TRUE, SVt_PV));
+    GvMULTI_on(errgv);
     (void)form("%240s","");	/* Preallocate temp - for immediate signals. */
-    sv_grow(errsv, 240);	/* Preallocate - for immediate signals. */
-    sv_setpvn(errsv, "", 0);
+    sv_grow(ERRSV, 240);	/* Preallocate - for immediate signals. */
+    sv_setpvn(ERRSV, "", 0);
     curstash = defstash;
     compiling.cop_stash = defstash;
     debstash = GvHV(gv_fetchpv("DB::", GV_ADDMULTI, SVt_PVHV));
@@ -2840,6 +2846,8 @@ init_main_thread()
     thr->cvcache = newHV();
     thr->magicals = newAV();
     thr->specific = newAV();
+    thr->errsv = newSVpv("", 0);
+    thr->errhv = newHV();
     thr->flags = THRf_R_JOINABLE;
     MUTEX_INIT(&thr->mutex);
     /* Handcraft thrsv similarly to mess_sv */
@@ -2904,20 +2912,21 @@ AV* list;
 	JMPENV_PUSH(ret);
 	switch (ret) {
 	case 0: {
+		SV* atsv = ERRSV;
 		PUSHMARK(stack_sp);
 		perl_call_sv((SV*)cv, G_EVAL|G_DISCARD);
-		(void)SvPV(errsv, len);
+		(void)SvPV(atsv, len);
 		if (len) {
 		    JMPENV_POP;
 		    curcop = &compiling;
 		    curcop->cop_line = oldline;
 		    if (list == beginav)
-			sv_catpv(errsv, "BEGIN failed--compilation aborted");
+			sv_catpv(atsv, "BEGIN failed--compilation aborted");
 		    else
-			sv_catpv(errsv, "END failed--cleanup aborted");
+			sv_catpv(atsv, "END failed--cleanup aborted");
 		    while (scopestack_ix > oldscope)
 			LEAVE;
-		    croak("%s", SvPVX(errsv));
+		    croak("%s", SvPVX(atsv));
 		}
 	    }
 	    break;

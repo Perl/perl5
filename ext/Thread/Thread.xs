@@ -147,6 +147,8 @@ void *arg;
     SvREFCNT_dec(thr->cvcache);
     SvREFCNT_dec(thr->magicals);
     SvREFCNT_dec(thr->specific);
+    SvREFCNT_dec(thr->errsv);
+    SvREFCNT_dec(thr->errhv);
     Safefree(markstack);
     Safefree(scopestack);
     Safefree(savestack);

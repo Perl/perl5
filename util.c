@@ -2530,6 +2530,8 @@ struct thread *t;
     thr->cvcache = newHV();
     thr->magicals = newAV();
     thr->specific = newAV();
+    thr->errsv = newSVpv("", 0);
+    thr->errhv = newHV();
     thr->flags = THRf_R_JOINABLE;
     MUTEX_INIT(&thr->mutex);
 
