@@ -228,7 +228,7 @@ sub unwrap {
       if ($#$v >= 0) {
 	$short = $sp . "0..$#{$v}  " .
 	  join(" ", 
-	       map {exists $v->[$_] ? $self->stringify $v->[$_] : "empty"} ($[..$tArrayDepth)
+	       map {exists $v->[$_] ? $self->stringify($v->[$_]) : "empty"} ($[..$tArrayDepth)
 	      ) . "$shortmore";
       } else {
 	$short = $sp . "empty array";
