@@ -4140,7 +4140,8 @@ Perl_cv_undef(pTHX_ CV *cv)
 		for (ix = AvFILLp(comppad_name); ix > 0; ix--) {
 		    SV *namesv = namepad[ix];
 		    if (namesv && namesv != &PL_sv_undef
-			&& *SvPVX(namesv) == '&')
+			&& *SvPVX(namesv) == '&'
+			&& ix <= AvFILLp(comppad))
 		    {
 			CV *innercv = (CV*)curpad[ix];
 			if (innercv && SvTYPE(innercv) == SVt_PVCV
