@@ -7,7 +7,7 @@ BEGIN {
     $| = 1;
     chdir 't' if -d 't';
     @INC = '../lib';
-    $SIG{__WARN__} = sub { die @_ };
+    $SIG{__WARN__} = sub { die "dying on warning: ", @_ };
 }
 
 sub ok {
@@ -107,9 +107,11 @@ ok 21, close(SCRIPT), $!;
 ok 22, chmod(0755, $script), $!;
 $s = "\$^X is ./perl, \$0 is $script\n";
 $_ = `$script`;
-ok 23, $_ eq $s, ":$_:";
+ok 23, $_ eq $s, ":$_:!=:$s:"				     if $^O ne 'os2';
+# Started by ksh, which sets adds suffixes '.exe' and '.' to perl and script :
+ok 23, $_ eq "\$^X is ./perl.exe, \$0 is $script.\n", ":$_:" if $^O eq 'os2';
 $_ = `./perl $script`;
-ok 24, $_ eq $s, ":$_:";
+ok 24, $_ eq $s, ":$_:!=:$s:";
 ok 25, unlink($script), $!;
 
 # $], $^O, $^T

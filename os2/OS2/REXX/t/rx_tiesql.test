@@ -2,7 +2,7 @@ BEGIN {
     chdir 't' if -d 't/lib';
     @INC = '../lib';
     require Config; import Config;
-    if ($Config{'extensions'} !~ /\bOS2::REXX\b/) {
+    if ($Config{'extensions'} !~ /\bOS2(::|\/)REXX\b/) {
 	print "1..0\n";
 	exit 0;
     }

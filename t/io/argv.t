@@ -34,3 +34,4 @@ else
     {print "not ok 5\n";}
 
 `/bin/rm -f Io.argv.tmp` if -x '/bin/rm';
+unlink 'Io.argv.tmp';

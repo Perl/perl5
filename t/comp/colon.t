@@ -110,7 +110,7 @@ ok 18, (not eval "qw:1" and
 	not eval "qw:echo:ohce: >= 0");
 
 ok 19, (not eval "qx:1" and
-	eval "qx:echo: eq qx|echo|" and
+	eval "qx:echo 1: eq qx|echo 1|" and	# echo without args may warn
 	not eval "qx:echo:ohce: >= 0");
 
 ok 20, (not eval "s:1" and
