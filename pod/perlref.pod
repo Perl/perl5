@@ -62,7 +62,7 @@ brackets:
 Here we've constructed a reference to an anonymous array of three elements
 whose final element is itself reference to another anonymous array of three
 elements.  (The multidimensional syntax described later can be used to
-access this.  For example, after the above, $arrayref->[2][1] would have
+access this.  For example, after the above, $arrayref-E<gt>[2][1] would have
 the value "b".)
 
 Note that taking a reference to an enumerated list is not the same
