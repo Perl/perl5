@@ -7,7 +7,7 @@ BEGIN {
 }
 
 require './test.pl';
-plan( tests => 126 );
+plan( tests => 127 );
 
 $x = 'foo';
 $_ = "x";
@@ -516,3 +516,8 @@ is("<$_> <$s>", "<> <4>", "[perl #7806]");
     $f =~ s/x/y/g;
     is($f, "yy", "[perl #17757]");
 }
+
+# [perl #20684] returned a zero count
+$_ = "1111";
+is(s/(??{1})/2/eg, 4, '#20684 s/// with (??{..}) inside');
+

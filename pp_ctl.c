@@ -204,7 +204,7 @@ PP(pp_substcont)
 	    sv_free(dstr);
 
 	    TAINT_IF(cx->sb_rxtainted & 1);
-	    PUSHs(sv_2mortal(newSViv((I32)cx->sb_iters - 1)));
+	    PUSHs(sv_2mortal(newSViv(saviters - 1)));
 
 	    (void)SvPOK_only_UTF8(targ);
 	    TAINT_IF(cx->sb_rxtainted);
