@@ -6,6 +6,8 @@ chdir('op') || die "sysio.t: cannot look for myself: $!";
 
 open(I, 'sysio.t') || die "sysio.t: cannot find myself: $!";
 
+$reopen = ($^O eq 'VMS' || $^O eq 'os2');
+
 $x = 'abc';
 
 # should not be able to do negative lengths
@@ -81,6 +83,9 @@ print 'not ' unless ($x eq 'abc');
 print "ok 15\n";
 
 # $outfile still intact
+if ($reopen) {  # must close file to update EOF marker for stat
+  close O; open(O, ">>$outfile") || die "sysio.t: cannot write $outfile: $!";
+}
 print 'not ' if (-s $outfile);
 print "ok 16\n";
 
@@ -95,6 +100,9 @@ print 'not ' unless ($x eq 'abc');
 print "ok 18\n";
 
 # $outfile still intact
+if ($reopen) {  # must close file to update EOF marker for stat
+  close O; open(O, ">>$outfile") || die "sysio.t: cannot write $outfile: $!";
+}
 print 'not ' if (-s $outfile);
 print "ok 19\n";
 
@@ -107,6 +115,9 @@ print 'not ' unless ($a eq "#!.\0\0erl");
 print "ok 21\n";
 
 # $outfile should have grown now
+if ($reopen) {  # must close file to update EOF marker for stat
+  close O; open(O, ">>$outfile") || die "sysio.t: cannot write $outfile: $!";
+}
 print 'not ' unless (-s $outfile == 2);
 print "ok 22\n";
 
@@ -119,6 +130,9 @@ print 'not ' unless ($a eq "#!.\0\0erl");
 print "ok 24\n";
 
 # $outfile should have grown now
+if ($reopen) {  # must close file to update EOF marker for stat
+  close O; open(O, ">>$outfile") || die "sysio.t: cannot write $outfile: $!";
+}
 print 'not ' unless (-s $outfile == 4);
 print "ok 25\n";
 
@@ -131,6 +145,9 @@ print 'not ' unless ($a eq "#!.\0\0erl");
 print "ok 27\n";
 
 # $outfile should have grown now
+if ($reopen) {  # must close file to update EOF marker for stat
+  close O; open(O, ">>$outfile") || die "sysio.t: cannot write $outfile: $!";
+}
 print 'not ' unless (-s $outfile == 7);
 print "ok 28\n";
 
