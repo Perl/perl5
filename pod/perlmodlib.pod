@@ -138,7 +138,7 @@ Strictly distinguish UTF8 data and non-UTF data.
 
 =item utf8
 
-Enable/disable UTF-8 in source code
+Enable/disable UTF-8 (or UTF-EBCDIC) in source code
 
 =item vars
 
@@ -585,6 +585,10 @@ Trigonometric functions
 =item NDBM_File
 
 Tied access to ndbm files
+
+=item NEXT
+
+Provide a pseudo-class NEXT that allows method redispatch
 
 =item Net::Ping
 
