@@ -62,8 +62,8 @@ ok(exists $Config{ccflags_nolargefiles}, "has ccflags_nolargefiles");
     }
 }
 
-like(Config::myconfig(),       qr/osname=$Config{osname}/,   "myconfig");
-like(Config::config_sh(),      qr/osname='$Config{osname}'/, "config_sh");
+like(Config::myconfig(),       qr/osname=\Q$Config{osname}\E/,   "myconfig");
+like(Config::config_sh(),      qr/osname='\Q$Config{osname}\E'/, "config_sh");
 like(join("\n", Config::config_re('c.*')),
 			       qr/^c.*?=/,                   'config_re' );
 
@@ -79,7 +79,7 @@ $out->clear;
 
 untie *STDOUT;
 
-like($out1, qr/^cc='$Config{cc}';/, "config_vars cc");
+like($out1, qr/^cc='\Q$Config{cc}\E';/, "config_vars cc");
 like($out2, qr/^d_bork='UNKNOWN';/, "config_vars d_bork is UNKNOWN");
 
 # Read-only.
