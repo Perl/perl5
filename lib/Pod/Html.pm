@@ -1399,7 +1399,9 @@ sub process_puretext {
 # converted to html commands.
 #
 
-sub process_text1($$;$);
+sub process_text1($$;$$);
+sub pattern ($) { $_[0] ? '[^\S\n]+'.('>' x ($_[0] + 1)) : '>' }
+sub closing ($) { local($_) = shift; (defined && s/\s+$//) ? length : 0 }
 
 sub process_text {
     return if $ignore;
@@ -1408,12 +1410,15 @@ sub process_text {
     $$tref = $res;
 }
 
-sub process_text1($$;$){
-    my( $lev, $rstr, $func ) = @_;
-    $lev++ unless defined $func;
+sub process_text1($$;$$){
+    my( $lev, $rstr, $func, $closing ) = @_;
     my $res = '';
 
-    $func ||= '';
+    unless (defined $func) {
+	$func = '';
+	$lev++;
+    }
+
     if( $func eq 'B' ){
 	# B<text> - boldface
 	$res = '<STRONG>' . process_text1( $lev, $rstr ) . '</STRONG>';
@@ -1421,7 +1426,7 @@ sub process_text1($$;$){
     } elsif( $func eq 'C' ){
 	# C<code> - can be a ref or <CODE></CODE>
 	# need to extract text
-	my $par = go_ahead( $rstr, 'C' );
+	my $par = go_ahead( $rstr, 'C', $closing );
 
 	## clean-up of the link target
         my $text = depod( $par );
@@ -1449,7 +1454,7 @@ sub process_text1($$;$){
 	## L<text|cross-ref> => produce text, use cross-ref for linking 
 	## L<cross-ref> => make text from cross-ref
 	## need to extract text
-	my $par = go_ahead( $rstr, 'L' );
+	my $par = go_ahead( $rstr, 'L', $closing );
 
         # some L<>'s that shouldn't be:
 	# a) full-blown URL's are emitted as-is
@@ -1574,17 +1579,17 @@ sub process_text1($$;$){
 	    unless $$rstr =~ s/^>//;
 
     } else {
-	while( $$rstr =~ s/\A(.*?)([BCEFILSXZ]<|>)//s ){
+        my $term = pattern $closing;
+	while( $$rstr =~ s/\A(.*?)(([BCEFILSXZ])<(<+[^\S\n]+)?|$term)//s ){
 	    # all others: either recurse into new function or
-	    # terminate at closing angle bracket
+	    # terminate at closing angle bracket(s)
 	    my $pt = $1;
-            $pt .= '>' if $2 eq '>' &&  $lev == 1;
+            $pt .= $2 if !$3 &&  $lev == 1;
 	    $res .= $lev == 1 ? pure_text( $pt ) : inIS_text( $pt );
-	    return $res if $2 eq '>' && $lev > 1;
-            if( $2 ne '>' ){
-		$res .= process_text1( $lev, $rstr, substr($2,0,1) );
-	    }
-
+	    return $res if !$3 && $lev > 1;
+            if( $3 ){
+		$res .= process_text1( $lev, $rstr, $3, closing $4 );
+ 	    }
 	}
 	if( $lev == 1 ){
 	    $res .= pure_text( $$rstr );
@@ -1598,16 +1603,18 @@ sub process_text1($$;$){
 #
 # go_ahead: extract text of an IS (can be nested)
 #
-sub go_ahead($$){
-    my( $rstr, $func ) = @_;
+sub go_ahead($$$){
+    my( $rstr, $func, $closing ) = @_;
     my $res = '';
-    my $level = 1;
-    while( $$rstr =~ s/\A(.*?)([BCEFILSXZ]<|>)//s ){
+    my @closing = ($closing);
+    while( $$rstr =~
+      s/\A(.*?)(([BCEFILSXZ])<(<+[^\S\n]+)?|@{[pattern $closing[0]]})//s ){
 	$res .= $1;
-	if( $2 eq '>' ){
-	    return $res if --$level == 0;
+	unless( $3 ){
+	    shift @closing;
+	    return $res unless @closing;
 	} else {
-	    ++$level;
+	    unshift @closing, closing $4;
 	}
 	$res .= $2;
     }
@@ -1621,7 +1628,7 @@ sub go_ahead($$){
 #
 sub emit_C($;$$){
     my( $text, $nocode, $args ) = @_;
-    $args ||= '';
+    $args = '' unless defined $args;
     my $res;
     my( $url, $fid ) = coderef( undef(), $text );
 
@@ -1907,7 +1914,7 @@ $E2c{sol}    = '/';
 $E2c{verbar} = '|';
 $E2c{amp}    = '&'; # in Tk's pods
 
-sub depod1($;$);
+sub depod1($;$$);
 
 sub depod($){
     my $string;
@@ -1920,15 +1927,15 @@ sub depod($){
     }    
 }
 
-sub depod1($;$){
-  my( $rstr, $func ) = @_;
+sub depod1($;$$){
+  my( $rstr, $func, $closing ) = @_;
   my $res = '';
   return $res unless defined $$rstr;
   if( ! defined( $func ) ){
       # skip to next begin of an interior sequence
-      while( $$rstr =~ s/\A(.*?)([BCEFILSXZ])<// ){
+      while( $$rstr =~ s/\A(.*?)([BCEFILSXZ])<(<+[^\S\n]+)?// ){
          # recurse into its text
-         $res .= $1 . depod1( $rstr, $2 );
+	  $res .= $1 . depod1( $rstr, $2, closing $3);
       }
       $res .= $$rstr;
   } elsif( $func eq 'E' ){
@@ -1944,10 +1951,11 @@ sub depod1($;$){
   } else {
       # all others: either recurse into new function or
       # terminate at closing angle bracket
-      while( $$rstr =~ s/\A(.*?)([BCEFILSXZ]<|>)// ){
+      my $term = pattern $closing;
+      while( $$rstr =~ s/\A(.*?)(([BCEFILSXZ])<(<+[^\S\n]+)?|$term)// ){
 	  $res .= $1;
-	  last if $2 eq '>';
-          $res .= depod1( $rstr, substr($2,0,1) );
+	  last unless $3;
+          $res .= depod1( $rstr, $3, closing $4 );
       }
       ## If we're here and $2 ne '>': undelimited interior sequence.
       ## Ignored, as this is called without proper indication of where we are.

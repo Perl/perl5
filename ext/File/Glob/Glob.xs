@@ -170,7 +170,7 @@ MODULE = File::Glob		PACKAGE = File::Glob
 void
 doglob(pattern,...)
     char *pattern
-PROTOTYPE:
+PROTOTYPE: $;$
 PREINIT:
     glob_t pglob;
     int i;
@@ -206,4 +206,4 @@ double
 constant(name,arg)
     char *name
     int   arg
-PROTOTYPE:
+PROTOTYPE: $$

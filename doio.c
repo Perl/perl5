@@ -93,8 +93,18 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
     int fd;
     int result;
     bool was_fdopen = FALSE;
+    bool in_raw = 0, in_crlf = 0, out_raw = 0, out_crlf = 0;
 
     PL_forkprocess = 1;		/* assume true if no fork */
+
+    if (PL_op && PL_op->op_type == OP_OPEN) {
+	/* set up disciplines */
+	U8 flags = PL_op->op_private;
+	in_raw = (flags & OPpOPEN_IN_RAW);
+	in_crlf = (flags & OPpOPEN_IN_CRLF);
+	out_raw = (flags & OPpOPEN_OUT_RAW);
+	out_crlf = (flags & OPpOPEN_OUT_CRLF);
+    }
 
     if (IoIFP(io)) {
 	fd = PerlIO_fileno(IoIFP(io));
@@ -153,15 +163,28 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	if (fd == -1)
 	    fp = NULL;
 	else {
-	    char *fpmode;
+	    char fpmode[4];
+	    STRLEN ix = 0;
 	    if (result == O_RDONLY)
-		fpmode = "r";
+		fpmode[ix++] = 'r';
 #ifdef O_APPEND
-	    else if (rawmode & O_APPEND)
-		fpmode = (result == O_WRONLY) ? "a" : "a+";
+	    else if (rawmode & O_APPEND) {
+		fpmode[ix++] = 'a';
+		if (result != O_WRONLY)
+		    fpmode[ix++] = '+';
+	    }
 #endif
-	    else
-		fpmode = (result == O_WRONLY) ? "w" : "r+";
+	    else {
+		if (result == O_WRONLY)
+		    fpmode[ix++] = 'w';
+		else {
+		    fpmode[ix++] = 'r';
+		    fpmode[ix++] = '+';
+		}
+	    }
+	    if (rawmode & O_BINARY)
+		fpmode[ix++] = 'b';
+	    fpmode[ix] = '\0';
 	    fp = PerlIO_fdopen(fd, fpmode);
 	    if (!fp)
 		PerlLIO_close(fd);
@@ -172,7 +195,7 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	char *oname = name;
 	STRLEN tlen;
 	STRLEN olen = len;
-	char mode[3];		/* stdio file mode ("r\0" or "r+\0") */
+	char mode[4];		/* stdio file mode ("r\0", "rb\0", "r+b\0" etc.) */
 	int dodup;
 
 	type = savepvn(name, len);
@@ -191,7 +214,7 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    name = type;
 	    len = tlen;
 	}
-	mode[0] = mode[1] = mode[2] = '\0';
+	mode[0] = mode[1] = mode[2] = mode[3] = '\0';
 	IoTYPE(io) = *type;
 	if (*type == '+' && tlen > 1 && type[tlen-1] != '|') { /* scary */
 	    mode[1] = *type++;
@@ -226,7 +249,16 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		if (ckWARN(WARN_PIPE))
 		    Perl_warner(aTHX_ WARN_PIPE, "Can't open bidirectional pipe");
 	    }
-	    fp = PerlProc_popen(name,"w");
+	    {
+		char *mode;
+		if (out_raw)
+		    mode = "wb";
+		else if (out_crlf)
+		    mode = "wt";
+		else
+		    mode = "w";
+		fp = PerlProc_popen(name,mode);
+	    }
 	    writing = 1;
 	}
 	else if (*type == '>') {
@@ -240,6 +272,11 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    else
 		mode[0] = 'w';
 	    writing = 1;
+
+	    if (out_raw)
+		strcat(mode, "b");
+	    else if (out_crlf)
+		strcat(mode, "t");
 
 	    if (num_svs && tlen != 1)
 	        goto unknown_desr;
@@ -317,6 +354,11 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    /*SUPPRESS 530*/
 	    for (type++; isSPACE(*type); type++) ;
 	    mode[0] = 'r';
+	    if (in_raw)
+		strcat(mode, "b");
+	    else if (in_crlf)
+		strcat(mode, "t");
+
 	    if (*type == '&') {
 		name = type;
 		goto duplicity;
@@ -351,7 +393,16 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    if (strNE(name,"-") || num_svs)
 		TAINT_ENV();
 	    TAINT_PROPER("piped open");
-	    fp = PerlProc_popen(name,"r");
+	    {
+		char *mode;
+		if (in_raw)
+		    mode = "rb";
+		else if (in_crlf)
+		    mode = "rt";
+		else
+		    mode = "r";
+		fp = PerlProc_popen(name,mode);
+	    }
 	    IoTYPE(io) = '|';
 	}
 	else {
@@ -365,8 +416,16 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		fp = PerlIO_stdin();
 		IoTYPE(io) = '-';
 	    }
-	    else
-		fp = PerlIO_open(name,"r");
+	    else {
+		char *mode;
+		if (in_raw)
+		    mode = "rb";
+		else if (in_crlf)
+		    mode = "rt";
+		else
+		    mode = "r";
+		fp = PerlIO_open(name,mode);
+	    }
 	}
     }
     if (!fp) {
@@ -444,8 +503,17 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
     if (writing) {
 	dTHR;
 	if (IoTYPE(io) == 's'
-	  || (IoTYPE(io) == '>' && S_ISCHR(PL_statbuf.st_mode)) ) {
-	    if (!(IoOFP(io) = PerlIO_fdopen(PerlIO_fileno(fp),"w"))) {
+	    || (IoTYPE(io) == '>' && S_ISCHR(PL_statbuf.st_mode)) )
+	{
+	    char *mode;
+	    if (out_raw)
+		mode = "wb";
+	    else if (out_crlf)
+		mode = "wt";
+	    else
+		mode = "w";
+
+	    if (!(IoOFP(io) = PerlIO_fdopen(PerlIO_fileno(fp),mode))) {
 		PerlIO_close(fp);
 		IoIFP(io) = Nullfp;
 		goto say_false;
@@ -902,19 +970,72 @@ Perl_do_sysseek(pTHX_ GV *gv, Off_t pos, int whence)
 }
 
 int
-Perl_do_binmode(pTHX_ PerlIO *fp, int iotype, int flag)
+Perl_mode_from_discipline(pTHX_ SV *discp)
 {
-    if (flag != TRUE)
-	Perl_croak(aTHX_ "panic: unsetting binmode"); /* Not implemented yet */
+    int mode = O_BINARY;
+    if (discp) {
+	STRLEN len;
+	char *s = SvPV(discp,len);
+	while (*s) {
+	    if (*s == ':') {
+		switch (s[1]) {
+		case 'r':
+		    if (len > 3 && strnEQ(s+1, "raw", 3)
+			&& (!s[4] || s[4] == ':' || isSPACE(s[4])))
+		    {
+			mode = O_BINARY;
+			s += 4;
+			len -= 4;
+			break;
+		    }
+		    /* FALL THROUGH */
+		case 'c':
+		    if (len > 4 && strnEQ(s+1, "crlf", 4)
+			&& (!s[5] || s[5] == ':' || isSPACE(s[5])))
+		    {
+			mode = O_TEXT;
+			s += 5;
+			len -= 5;
+			break;
+		    }
+		    /* FALL THROUGH */
+		default:
+		    goto fail_discipline;
+		}
+	    }
+	    else if (isSPACE(*s)) {
+		++s;
+		--len;
+	    }
+	    else {
+		char *end;
+fail_discipline:
+		end = strchr(s+1, ':');
+		if (!end)
+		    end = s+len;
+		Perl_croak(aTHX_ "Unknown discipline '%.*s'", end-s, s);
+	    }
+	}
+    }
+    return mode;
+}
+
+int
+Perl_do_binmode(pTHX_ PerlIO *fp, int iotype, int mode)
+{
 #ifdef DOSISH
-#if defined(atarist) || defined(__MINT__)
-    if (!PerlIO_flush(fp) && (fp->_flag |= _IOBIN))
+#  if defined(atarist) || defined(__MINT__)
+    if (!PerlIO_flush(fp)) {
+	if (mode & O_BINARY)
+	    ((FILE*)fp)->_flag |= _IOBIN;
+	else
+	    ((FILE*)fp)->_flag &= ~ _IOBIN;
 	return 1;
-    else
-	return 0;
-#else
-    if (PerlLIO_setmode(PerlIO_fileno(fp), OP_BINARY) != -1) {
-#if defined(WIN32) && defined(__BORLANDC__)
+    }
+    return 0;
+#  else
+    if (PerlLIO_setmode(PerlIO_fileno(fp), mode) != -1) {
+#    if defined(WIN32) && defined(__BORLANDC__)
 	/* The translation mode of the stream is maintained independent
 	 * of the translation mode of the fd in the Borland RTL (heavy
 	 * digging through their runtime sources reveal).  User has to
@@ -922,22 +1043,25 @@ Perl_do_binmode(pTHX_ PerlIO *fp, int iotype, int flag)
 	 * document this anywhere). GSAR 97-5-24
 	 */
 	PerlIO_seek(fp,0L,0);
-	((FILE*)fp)->flags |= _F_BIN;
-#endif
+	if (mode & O_BINARY)
+	    ((FILE*)fp)->flags |= _F_BIN;
+	else
+	    ((FILE*)fp)->flags &= ~ _F_BIN;
+#    endif
 	return 1;
     }
     else
 	return 0;
-#endif
+#  endif
 #else
-#if defined(USEMYBINMODE)
-    if (my_binmode(fp,iotype) != FALSE)
+#  if defined(USEMYBINMODE)
+    if (my_binmode(fp, iotype, mode) != FALSE)
 	return 1;
     else
 	return 0;
-#else
+#  else
     return 1;
-#endif
+#  endif
 #endif
 }
 
@@ -1670,8 +1794,11 @@ Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
 	{
 	    struct semid_ds semds;
 	    union semun semun;
-
+#ifdef EXTRA_F_IN_SEMUN_BUF
+            semun.buff = &semds;
+#else
             semun.buf = &semds;
+#endif
 	    getinfo = (cmd == GETALL);
 	    if (Semctl(id, 0, IPC_STAT, semun) == -1)
 		return -1;
@@ -1726,7 +1853,11 @@ Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
 #ifdef Semctl
             union semun unsemds;
 
+#ifdef EXTRA_F_IN_SEMUN_BUF
+            unsemds.buff = (struct semid_ds *)a;
+#else
             unsemds.buf = (struct semid_ds *)a;
+#endif
 	    ret = Semctl(id, n, cmd, unsemds);
 #else
 	    Perl_croak(aTHX_ "%s not implemented", PL_op_desc[optype]);

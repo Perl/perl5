@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sun Mar  5 02:50:05 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Sat Mar 11 20:26:09 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -864,6 +864,7 @@ sitebin=''
 sitebinexp=''
 installsitelib=''
 sitelib=''
+sitelib_stem=''
 sitelibexp=''
 siteprefix=''
 siteprefixexp=''
@@ -906,6 +907,10 @@ usethreads=''
 incpath=''
 mips_type=''
 usrinc=''
+d_vendorarch=''
+installvendorarch=''
+vendorarch=''
+vendorarchexp=''
 d_vendorbin=''
 installvendorbin=''
 vendorbin=''
@@ -913,6 +918,7 @@ vendorbinexp=''
 d_vendorlib=''
 installvendorlib=''
 vendorlib=''
+vendorlib_stem=''
 vendorlibexp=''
 usevendorprefix=''
 vendorprefix=''
@@ -4506,6 +4512,14 @@ esac
 set use64bitint
 eval $setvar
 
+case "$use64bitall" in
+"$define"|true|[yY]*) dflt='y' ;;
+*) case "$longsize" in
+   8) dflt='y' ;;
+   *) dflt='n' ;;
+   esac
+   ;;
+esac	
 cat <<EOM
 
 You may also choose to try maximal 64-bitness.  It means using as much
@@ -4516,14 +4530,6 @@ have any more 64-bitness available than what you already have chosen.
 If this doesn't make any sense to you, just accept the default '$dflt'.
 EOM
 rp='Try to use maximal 64-bit support, if available?'
-case "$use64bitall" in
-"$define"|true|[yY]*) dflt='y' ;;
-*) case "$longsize" in
-   8) dflt='y' ;;
-   *) dflt='n' ;;
-   esac
-   ;;
-esac	
 . ./myread
 case "$ans" in
 [yY]*) val="$define" ;;
@@ -5314,11 +5320,42 @@ case "$vendorprefix" in
 	vendorlibexp="$ansexp"
 	;;
 esac
+vendorlib_stem=`echo "$vendorlibexp" | sed "s,/$version$,,"`
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
 	installvendorlib=`echo $vendorlibexp | $sed "s#^$prefix#$installprefix#"`
 else
 	installvendorlib="$vendorlibexp"
+fi
+
+case "$vendorprefix" in
+'')	d_vendorarch="$undef"
+	vendorarch=''
+	vendorarchexp=''
+	;;
+*)	d_vendorarch="$define"
+	: determine where vendor-supplied architecture-dependent libraries go.
+	: vendorlib  default is /usr/local/lib/perl5/vendor_perl/$version
+	: vendorarch default is /usr/local/lib/perl5/vendor_perl/$version/$archname
+	: vendorlib may have an optional trailing /share.
+	case "$vendorarch" in
+	'')	dflt=`echo $vendorlib | $sed 's,/share$,,'`
+		dflt="$dflt/$archname"
+		;;
+	*)	dflt="$vendorarch" ;;
+	esac
+	fn=d~+
+	rp='Pathname for vendor-supplied architecture-dependent files?'
+	. ./getfile
+	vendorarch="$ans"
+	vendorarchexp="$ansexp"
+	;;
+esac
+: Change installation prefix, if necessary.
+if $test X"$prefix" != X"$installprefix"; then
+	installvendorarch=`echo $vendorarchexp | sed "s#^$prefix#$installprefix#"`
+else
+	installvendorarch="$vendorarchexp"
 fi
 
 : Cruising for prototypes
@@ -5467,6 +5504,7 @@ rp='Pathname for the site-specific library files?'
 . ./getfile
 sitelib="$ans"
 sitelibexp="$ansexp"
+sitelib_stem=`echo "$sitelibexp" | sed "s,/$version$,,"`
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
 	installsitelib=`echo $sitelibexp | $sed "s#^$prefix#$installprefix#"`
@@ -5573,7 +5611,7 @@ $rm -f getverlist
 echo " "
 if $test -d /usr/bin -a "X$installbin" != X/usr/bin; then
 	$cat <<EOM
-Many scripts expect to perl to be installed as /usr/bin/perl.
+Many scripts expect perl to be installed as /usr/bin/perl.
 I can install the perl you are about to compile also as /usr/bin/perl
 (in addition to $installbin/perl).
 EOM
@@ -8598,7 +8636,8 @@ extern int errno;
 #ifdef I_UNISTD
 #include <unistd.h>
 #endif
-#ifdef $i_string
+#$i_string I_STRING
+#ifdef I_STRING
 #include <string.h>
 #else
 #include <strings.h>
@@ -12515,9 +12554,52 @@ EOM
 	$rm -f core try.core core.try.*
 	case "$fflushNULL" in
 	x)	$cat >&4 <<EOM
-Your fflush(NULL) works okay.
+Your fflush(NULL) works okay for output streams.
+Let's see if it clobbers input pipes...
 EOM
-		fflushNULL="$define"
+# As of mid-March 2000 all versions of Solaris appear to have a stdio
+# bug that improperly flushes the input end of pipes.  So we avoid the
+# autoflush on fork/system/exec support for now. :-(
+$cat >tryp.c <<EOCP
+#include <stdio.h>
+int
+main(int argc, char **argv)
+{
+    char buf[1024];
+    int i;
+    char *bp = buf;
+    while (1) {
+        while ((i = getc(stdin)) != -1
+               && (*bp++ = i) != '\n'
+               && bp < &buf[1024])
+    	/* DO NOTHING */ ;
+        *bp = '\0';
+        fprintf(stdout, "%s", buf);
+        fflush(NULL);
+        if (i == -1)
+	    return 0;
+        bp = buf;
+    }
+}
+EOCP
+                fflushNULL="$define"
+                set tryp
+                if eval $compile; then
+                    $rm -f tryp.out
+                    $cat tryp.c | ./tryp$exe_ext 2>/dev/null > tryp.out
+                    if cmp tryp.c tryp.out >/dev/null 2>&1; then
+                       $cat >&4 <<EOM
+fflush(NULL) seems to behave okay with input streams.
+EOM
+			fflushNULL="$define"
+                    else
+			$cat >&4 <<EOM
+Ouch, fflush(NULL) clobbers input pipes!  We will not use it.
+EOM
+                        fflushNULL="$undef"
+                    fi
+                fi
+	        $rm -f core tryp.c tryp.core core.tryp.*
 		;;
 	'')	$cat >&4 <<EOM
 Your fflush(NULL) isn't working (contrary to ANSI C).
@@ -12539,57 +12621,100 @@ $define|true|[yY]*)
 	fflushNULL="$undef"
 	;;
 esac
-: check explicit looping only if NULL did not work
+: check explicit looping only if NULL did not work, and if the pipe
+: bug does not show up on an explicit flush too
 case "$fflushNULL" in
 "$undef")
-	: check for fflush all behaviour
-	case "$fflushall" in
-	'') 	set try -DTRY_FFLUSH_ALL $output
-		if eval $compile; then
-		        $cat >&4 <<EOM
-(Now testing the other method--but note that also this may fail.)
+	$cat >tryp.c <<EOCP
+#include <stdio.h>
+int
+main(int argc, char **argv)
+{
+    char buf[1024];
+    int i;
+    char *bp = buf;
+    while (1) {
+	while ((i = getc(stdin)) != -1
+	       && (*bp++ = i) != '\n'
+	       && bp < &buf[1024])
+	/* DO NOTHING */ ;
+	*bp = '\0';
+	fprintf(stdout, "%s", buf);
+	fflush(stdin);
+	if (i == -1)
+	    return 0;
+	bp = buf;
+    }
+}
+EOCP
+	set tryp
+	if eval $compile; then
+	    $rm -f tryp.out
+	    $cat tryp.c | ./tryp$exe_ext 2>/dev/null > tryp.out
+	    if cmp tryp.c tryp.out >/dev/null 2>&1; then
+	       $cat >&4 <<EOM
+Good, at least fflush(stdin) seems to behave okay when stdin is a pipe.
 EOM
-			$rm -f try.out
-		    	./try$exe_ext 2>/dev/null
-			if $test -s try.out -a "X$?" = X42; then
-				fflushall="`$cat try.out`"
-			fi
-		fi
-		$rm -f core try.core core.try.*
+		: now check for fflushall behaviour
 		case "$fflushall" in
-		x)	$cat >&4 <<EOM
+		'') 	set try -DTRY_FFLUSH_ALL $output
+			if eval $compile; then
+				$cat >&4 <<EOM
+(Now testing the other method--but note that this also may fail.)
+EOM
+				$rm -f try.out
+				./try$exe_ext 2>/dev/null
+				if $test -s try.out -a "X$?" = X42; then
+					fflushall="`$cat try.out`"
+				fi
+			fi
+			$rm -f core try.core core.try.*
+			case "$fflushall" in
+			x)	$cat >&4 <<EOM
 Whew. Flushing explicitly all the stdio streams works.
 EOM
-			fflushall="$define"
-			;;
-		'')	$cat >&4 <<EOM
+				fflushall="$define"
+				;;
+			'')	$cat >&4 <<EOM
 Sigh. Flushing explicitly all the stdio streams doesn't work.
 EOM
-			fflushall="$undef"
-			;;
-		*)	$cat >&4 <<EOM
+				fflushall="$undef"
+				;;
+			*)	$cat >&4 <<EOM
 Cannot figure out whether flushing stdio streams explicitly works or not.
 I'm assuming it doesn't.
 EOM
+				fflushall="$undef"
+				;;
+			esac
+			;;
+		"$define"|true|[yY]*)
+			fflushall="$define"
+			;;
+		*)
 			fflushall="$undef"
 			;;
 		esac
-		;;
-	"$define"|true|[yY]*)
-		fflushall="$define"
-		;;
-	*)
+	    else
+		$cat >&4 <<EOM
+All is futile.  Even fflush(stdin) clobbers input pipes!
+EOM
 		fflushall="$undef"
-		;;
-	esac
+	    fi
+	else
+	    fflushall="$undef"
+	fi
+	$rm -f core tryp.c tryp.core core.tryp.*
 	;;
-*)	fflushall="$undef"	
+*)	fflushall="$undef"
 	;;
 esac
+
 case "$fflushNULL$fflushall" in
 undefundef)
 	$cat <<EOM
-I cannot figure out how to flush pending stdio output.
+OK, I give up.  I cannot figure out how to flush pending stdio output.
+We won't be flushing handles at all before fork/exec/popen.
 EOM
 	;;
 esac
@@ -15245,6 +15370,7 @@ d_umask='$d_umask'
 d_uname='$d_uname'
 d_union_semun='$d_union_semun'
 d_ustat='$d_ustat'
+d_vendorarch='$d_vendorarch'
 d_vendorbin='$d_vendorbin'
 d_vendorlib='$d_vendorlib'
 d_vfork='$d_vfork'
@@ -15406,6 +15532,7 @@ installsitebin='$installsitebin'
 installsitelib='$installsitelib'
 installstyle='$installstyle'
 installusrbinperl='$installusrbinperl'
+installvendorarch='$installvendorarch'
 installvendorbin='$installvendorbin'
 installvendorlib='$installvendorlib'
 intsize='$intsize'
@@ -15561,6 +15688,7 @@ sitearchexp='$sitearchexp'
 sitebin='$sitebin'
 sitebinexp='$sitebinexp'
 sitelib='$sitelib'
+sitelib_stem='$sitelib_stem'
 sitelibexp='$sitelibexp'
 siteprefix='$siteprefix'
 siteprefixexp='$siteprefixexp'
@@ -15645,9 +15773,12 @@ uvsize='$uvsize'
 uvtype='$uvtype'
 uvuformat='$uvuformat'
 uvxformat='$uvxformat'
+vendorarch='$vendorarch'
+vendorarchexp='$vendorarchexp'
 vendorbin='$vendorbin'
 vendorbinexp='$vendorbinexp'
 vendorlib='$vendorlib'
+vendorlib_stem='$vendorlib_stem'
 vendorlibexp='$vendorlibexp'
 vendorprefix='$vendorprefix'
 vendorprefixexp='$vendorprefixexp'

@@ -129,6 +129,11 @@ PERL_CALLCONV char*	Perl_form_nocontext(const char* pat, ...)
  __attribute__((format(printf,1,2)))
 #endif
 ;
+PERL_CALLCONV void	Perl_load_module_nocontext(U32 flags, SV* name, SV* ver, ...)
+#ifdef CHECK_FORMAT
+ __attribute__((format(printf,3,4)))
+#endif
+;
 PERL_CALLCONV SV*	Perl_mess_nocontext(const char* pat, ...)
 #ifdef CHECK_FORMAT
  __attribute__((format(printf,1,2)))
@@ -383,6 +388,12 @@ PERL_CALLCONV void	Perl_lex_start(pTHX_ SV* line);
 PERL_CALLCONV OP*	Perl_linklist(pTHX_ OP* o);
 PERL_CALLCONV OP*	Perl_list(pTHX_ OP* o);
 PERL_CALLCONV OP*	Perl_listkids(pTHX_ OP* o);
+PERL_CALLCONV void	Perl_load_module(pTHX_ U32 flags, SV* name, SV* ver, ...)
+#ifdef CHECK_FORMAT
+ __attribute__((format(printf,pTHX_3,pTHX_4)))
+#endif
+;
+PERL_CALLCONV void	Perl_vload_module(pTHX_ U32 flags, SV* name, SV* ver, va_list* args);
 PERL_CALLCONV OP*	Perl_localize(pTHX_ OP* arg, I32 lexical);
 PERL_CALLCONV I32	Perl_looks_like_number(pTHX_ SV* sv);
 PERL_CALLCONV int	Perl_magic_clearenv(pTHX_ SV* sv, MAGIC* mg);
@@ -457,6 +468,7 @@ PERL_CALLCONV void	Perl_mg_magical(pTHX_ SV* sv);
 PERL_CALLCONV int	Perl_mg_set(pTHX_ SV* sv);
 PERL_CALLCONV I32	Perl_mg_size(pTHX_ SV* sv);
 PERL_CALLCONV OP*	Perl_mod(pTHX_ OP* o, I32 type);
+PERL_CALLCONV int	Perl_mode_from_discipline(pTHX_ SV* discp);
 PERL_CALLCONV char*	Perl_moreswitches(pTHX_ char* s);
 PERL_CALLCONV OP*	Perl_my(pTHX_ OP* o);
 PERL_CALLCONV NV	Perl_my_atof(pTHX_ const char *s);
@@ -1002,7 +1014,7 @@ STATIC void*	S_Slab_Alloc(pTHX_ int m, size_t sz);
 #if defined(PERL_IN_PERL_C) || defined(PERL_DECL_PROT)
 STATIC void	S_find_beginning(pTHX);
 STATIC void	S_forbid_setid(pTHX_ char *);
-STATIC void	S_incpush(pTHX_ char *, int);
+STATIC void	S_incpush(pTHX_ char *, int, int);
 STATIC void	S_init_interp(pTHX);
 STATIC void	S_init_ids(pTHX);
 STATIC void	S_init_lexer(pTHX);

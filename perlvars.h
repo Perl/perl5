@@ -34,3 +34,7 @@ PERLVARI(Gdo_undump,	bool,	FALSE)	/* -u or dump seen? */
 #if defined(MYMALLOC) && (defined(USE_THREADS) || defined(USE_ITHREADS))
 PERLVAR(Gmalloc_mutex,	perl_mutex)	/* Mutex for malloc */
 #endif
+
+#if defined(USE_ITHREADS)
+PERLVAR(Gop_mutex,	perl_mutex)	/* Mutex for op refcounting */
+#endif

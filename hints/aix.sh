@@ -360,6 +360,7 @@ $define|true|[yY]*)
 	ccflags="$ccflags -qlongdouble"
 	# The explicit cc128, xlc128, xlC128 are not needed,
 	# the -qlongdouble should do the trick. --jhi
+	d_Gconvert='sprintf((b),"%.*llg",(n),(x))'
 	;;
 esac
 EOCBU

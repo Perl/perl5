@@ -1068,7 +1068,7 @@ typedef struct {
     perl_mutex *xcv_mutexp;
     struct perl_thread *xcv_owner;	/* current owner thread */
 #endif /* USE_THREADS */
-    U8		xcv_flags;
+    cv_flags_t	xcv_flags;
 } XPVCV_or_similar;
 #define ANYINIT(i) i
 #else

@@ -443,20 +443,27 @@ L<perlipc/"Sockets: Client/Server Communication">.
 
 =item binmode FILEHANDLE
 
-Arranges for FILEHANDLE to be read or written in "binary" mode on
-systems where the run-time libraries distinguish between binary and
+Arranges for FILEHANDLE to be read or written in "binary" or "text" mode
+on systems where the run-time libraries distinguish between binary and
 text files.  If FILEHANDLE is an expression, the value is taken as the
-name of the filehandle.  binmode() should be called after open() but
-before any I/O is done on the filehandle.  The only way to reset
-binary mode on a filehandle is to reopen the file.
+name of the filehandle.  DISCIPLINE can be either of C<":raw"> for
+binary mode or C<":crlf"> for "text" mode.  If the DISCIPLINE is
+omitted, it defaults to C<":raw">.
 
-On many systems binmode() has no effect, and on some systems it is
-necessary when you're not working with a text file.  For the sake of
-portability it is a good idea to always use it when appropriate, and
-to never use it when it isn't appropriate.
+binmode() should be called after open() but before any I/O is done on
+the filehandle.
+
+On many systems binmode() currently has no effect, but in future, it
+will be extended to support user-defined input and output disciplines.
+On some systems binmode() is necessary when you're not working with a
+text file.  For the sake of portability it is a good idea to always use
+it when appropriate, and to never use it when it isn't appropriate.
 
 In other words:  Regardless of platform, use binmode() on binary
 files, and do not use binmode() on text files.
+
+The C<open> pragma can be used to establish default disciplines.
+See L<open>.
 
 The operating system, device drivers, C libraries, and Perl run-time
 system all work together to let the programmer treat a single
@@ -1944,21 +1951,26 @@ C<File::Glob> extension.  See L<File::Glob> for details.
 
 =item gmtime EXPR
 
-Converts a time as returned by the time function to a 9-element list
+Converts a time as returned by the time function to a 8-element list
 with the time localized for the standard Greenwich time zone.
 Typically used as follows:
 
-    #  0    1    2     3     4    5     6     7     8
-    ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
+    #  0    1    2     3     4    5     6     7  
+    ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday) =
 					    gmtime(time);
 
-All list elements are numeric, and come straight out of a struct tm.
-In particular this means that $mon has the range C<0..11> and $wday
-has the range C<0..6> with sunday as day C<0>.  Also, $year is the
-number of years since 1900, that is, $year is C<123> in year 2023,
-I<not> simply the last two digits of the year.  If you assume it is,
-then you create non-Y2K-compliant programs--and you wouldn't want to do
-that, would you?
+All list elements are numeric, and come straight out of the C `struct
+tm'.  $sec, $min, and $hour are the seconds, minutes, and hours of the
+specified time.  $mday is the day of the month, and $mon is the month
+itself, in the range C<0..11> with 0 indicating January and 11
+indicating December.  $year is the number of years since 1900.  That
+is, $year is C<123> in year 2023.  $wday is the day of the week, with
+0 indicating Sunday and 3 indicating Wednesday.  $yday is the day of
+the year, in the range C<1..365> (or C<1..366> in leap years.)  
+
+Note that the $year element is I<not> simply the last two digits of
+the year.  If you assume it is, then you create non-Y2K-compliant
+programs--and you wouldn't want to do that, would you?
 
 The proper way to get a complete 4-digit year is simply:
 
@@ -1968,9 +1980,9 @@ And to get the last two digits of the year (e.g., '01' in 2001) do:
 
 	$year = sprintf("%02d", $year % 100);
 
-If EXPR is omitted, does C<gmtime(time())>.
+If EXPR is omitted, C<gmtime()> uses the current time (C<gmtime(time)>).
 
-In scalar context, returns the ctime(3) value:
+In scalar context, C<gmtime()> returns the ctime(3) value:
 
     $now_string = gmtime;  # e.g., "Thu Oct 13 04:54:34 1994"
 
@@ -2315,13 +2327,20 @@ follows:
     ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
 						localtime(time);
 
-All list elements are numeric, and come straight out of a struct tm.
-In particular this means that $mon has the range C<0..11> and $wday
-has the range C<0..6> with sunday as day C<0>.  Also, $year is the
-number of years since 1900, that is, $year is C<123> in year 2023,
-and I<not> simply the last two digits of the year.  If you assume it is,
-then you create non-Y2K-compliant programs--and you wouldn't want to do
-that, would you?
+All list elements are numeric, and come straight out of the C `struct
+tm'.  $sec, $min, and $hour are the seconds, minutes, and hours of the
+specified time.  $mday is the day of the month, and $mon is the month
+itself, in the range C<0..11> with 0 indicating January and 11
+indicating December.  $year is the number of years since 1900.  That
+is, $year is C<123> in year 2023.  $wday is the day of the week, with
+0 indicating Sunday and 3 indicating Wednesday.  $yday is the day of
+the year, in the range C<1..365> (or C<1..366> in leap years.)  $isdst
+is true if the specified time occurs during daylight savings time,
+false otherwise.
+
+Note that the $year element is I<not> simply the last two digits of
+the year.  If you assume it is, then you create non-Y2K-compliant
+programs--and you wouldn't want to do that, would you?
 
 The proper way to get a complete 4-digit year is simply:
 
@@ -2331,9 +2350,9 @@ And to get the last two digits of the year (e.g., '01' in 2001) do:
 
 	$year = sprintf("%02d", $year % 100);
 
-If EXPR is omitted, uses the current time (C<localtime(time)>).
+If EXPR is omitted, C<localtime()> uses the current time (C<localtime(time)>).
 
-In scalar context, returns the ctime(3) value:
+In scalar context, C<localtime()> returns the ctime(3) value:
 
     $now_string = localtime;  # e.g., "Thu Oct 13 04:54:34 1994"
 

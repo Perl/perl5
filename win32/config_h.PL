@@ -49,12 +49,12 @@ while (<SH>)
   munge();
   s/\\\$/\$/g;
   s#/[ *\*]*\*/#/**/#;
-  if (/^\s*#define\s+(PRIVLIB|SITELIB)_EXP/)
+  if (/^\s*#define\s+(PRIVLIB|SITELIB|VENDORLIB)_EXP/)
    {
      $_ = "#define ". $1 . "_EXP (win32_get_". lc($1) . "($patchlevel))\t/**/\n";
    }
   # incpush() handles archlibs, so disable them
-  elsif (/^\s*#define\s+(ARCHLIB|SITEARCH)_EXP/)
+  elsif (/^\s*#define\s+(ARCHLIB|SITEARCH|VENDORARCH)_EXP/)
    {
      $_ = "/*#define ". $1 . "_EXP \"\"\t/**/\n";
    }

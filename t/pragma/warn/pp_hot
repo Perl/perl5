@@ -63,10 +63,9 @@ open(FOO, ">&STDOUT") and print <FOO>;
 print getc(STDERR);
 print getc(FOO);
 ####################################################################
-# The next test is known to fail on some systems (Linux/BSD+glibc, #
-# NeXT among others.  glibc should be fixed in the next version,   #
-# but it appears other platforms have little hope.  We skip it for #
-# now (on the grounds that it is "just" a warning).                #
+# The next test is known to fail on some systems (Linux+old glibc, #
+# old *BSDs, and NeXT, among others.                               #
+# We skip it for now (on the grounds that it is "just" a warning). #
 ####################################################################
 #read(FOO,$_,1);
 no warnings 'io' ;

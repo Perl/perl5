@@ -25,6 +25,7 @@
 #  endif
 #  define win32_get_privlib PerlEnv_lib_path
 #  define win32_get_sitelib PerlEnv_sitelib_path
+#  define win32_get_vendorlib PerlEnv_vendorlib_path
 #endif
 
 #ifdef __GNUC__
@@ -301,6 +302,23 @@ typedef struct {
     HANDLE	childStdIn;
     HANDLE	childStdOut;
     HANDLE	childStdErr;
+    /*
+     * the following correspond to the fields of the same name
+     * in the STARTUPINFO structure. Embedders can use these to
+     * control the spawning process' look.
+     * Example - to hide the window of the spawned process:
+     *    dwFlags = STARTF_USESHOWWINDOW;
+     *	  wShowWindow = SW_HIDE;
+     */
+    DWORD	dwFlags;
+    DWORD	dwX; 
+    DWORD	dwY; 
+    DWORD	dwXSize; 
+    DWORD	dwYSize; 
+    DWORD	dwXCountChars; 
+    DWORD	dwYCountChars; 
+    DWORD	dwFillAttribute;
+    WORD	wShowWindow; 
 } child_IO_table;
 
 DllExport void		win32_get_child_IO(child_IO_table* ptr);
@@ -312,8 +330,9 @@ extern int		my_fclose(FILE *);
 extern int		do_aspawn(void *really, void **mark, void **sp);
 extern int		do_spawn(char *cmd);
 extern int		do_spawn_nowait(char *cmd);
-extern char *		win32_get_privlib(char *pl);
-extern char *		win32_get_sitelib(char *pl);
+extern char *		win32_get_privlib(const char *pl);
+extern char *		win32_get_sitelib(const char *pl);
+extern char *		win32_get_vendorlib(const char *pl);
 extern int		IsWin95(void);
 extern int		IsWinNT(void);
 extern void		win32_argv2utf8(int argc, char** argv);

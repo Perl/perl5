@@ -500,6 +500,7 @@ print EM <<'END';
 #  define deb				Perl_deb_nocontext
 #  define die				Perl_die_nocontext
 #  define form				Perl_form_nocontext
+#  define load_module			Perl_load_module_nocontext
 #  define mess				Perl_mess_nocontext
 #  define newSVpvf			Perl_newSVpvf_nocontext
 #  define sv_catpvf			Perl_sv_catpvf_nocontext
@@ -518,6 +519,7 @@ print EM <<'END';
 #  define Perl_die_nocontext		Perl_die
 #  define Perl_deb_nocontext		Perl_deb
 #  define Perl_form_nocontext		Perl_form
+#  define Perl_load_module_nocontext	Perl_load_module
 #  define Perl_mess_nocontext		Perl_mess
 #  define Perl_newSVpvf_nocontext	Perl_newSVpvf
 #  define Perl_sv_catpvf_nocontext	Perl_sv_catpvf
@@ -931,6 +933,7 @@ my %vfuncs = qw(
     Perl_warner			Perl_vwarner
     Perl_die			Perl_vdie
     Perl_form			Perl_vform
+    Perl_load_module		Perl_vload_module
     Perl_mess			Perl_vmess
     Perl_deb			Perl_vdeb
     Perl_newSVpvf		Perl_vnewSVpvf
@@ -1399,6 +1402,7 @@ Afnrp	|void	|croak_nocontext|const char* pat|...
 Afnp	|OP*	|die_nocontext	|const char* pat|...
 Afnp	|void	|deb_nocontext	|const char* pat|...
 Afnp	|char*	|form_nocontext	|const char* pat|...
+Afnp	|void	|load_module_nocontext|U32 flags|SV* name|SV* ver|...
 Afnp	|SV*	|mess_nocontext	|const char* pat|...
 Afnp	|void	|warn_nocontext	|const char* pat|...
 Afnp	|void	|warner_nocontext|U32 err|const char* pat|...
@@ -1616,6 +1620,8 @@ p	|void	|lex_start	|SV* line
 p	|OP*	|linklist	|OP* o
 p	|OP*	|list		|OP* o
 p	|OP*	|listkids	|OP* o
+Afp	|void	|load_module|U32 flags|SV* name|SV* ver|...
+Ap	|void	|vload_module|U32 flags|SV* name|SV* ver|va_list* args
 p	|OP*	|localize	|OP* arg|I32 lexical
 Apd	|I32	|looks_like_number|SV* sv
 p	|int	|magic_clearenv	|SV* sv|MAGIC* mg
@@ -1686,6 +1692,7 @@ Apd	|void	|mg_magical	|SV* sv
 Apd	|int	|mg_set		|SV* sv
 Ap	|I32	|mg_size	|SV* sv
 p	|OP*	|mod		|OP* o|I32 type
+p	|int	|mode_from_discipline|SV* discp
 Ap	|char*	|moreswitches	|char* s
 p	|OP*	|my		|OP* o
 Ap	|NV	|my_atof	|const char *s
@@ -2228,7 +2235,7 @@ s	|void*	|Slab_Alloc	|int m|size_t sz
 #if defined(PERL_IN_PERL_C) || defined(PERL_DECL_PROT)
 s	|void	|find_beginning
 s	|void	|forbid_setid	|char *
-s	|void	|incpush	|char *|int
+s	|void	|incpush	|char *|int|int
 s	|void	|init_interp
 s	|void	|init_ids
 s	|void	|init_lexer

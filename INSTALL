@@ -128,6 +128,9 @@ If you succeed in automatically converting the sources to a K&R compatible
 form, be sure to email perlbug@perl.com to let us know the steps you
 followed.  This will enable us to officially support this option.
 
+Although Perl can be compiled using a C++ compiler, the Configure script
+does not work with some C++ compilers.
+
 =head1 Space Requirements
 
 The complete perl5 source tree takes up about 20 MB of disk space.

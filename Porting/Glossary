@@ -1573,6 +1573,9 @@ d_ustat (d_ustat.U):
 	This variable conditionally defines HAS_USTAT if ustat() is
 	available to query file system statistics by dev_t.
 
+d_vendorarch (vendorarch.U):
+	This variable conditionally defined PERL_VENDORARCH.
+
 d_vendorbin (vendorbin.U):
 	This variable conditionally defines PERL_VENDORBIN.
 
@@ -2315,6 +2318,11 @@ installusrbinperl (instubperl.U):
 	This variable tells whether Perl should be installed also as
 	/usr/bin/perl in addition to
 	$installbin/perl
+
+installvendorarch (vendorarch.U):
+	This variable is really the same as vendorarchexp but may differ on
+	those systems using AFS. For extra portability, only this variable
+	should be used in makefiles.
 
 installvendorbin (vendorbin.U):
 	This variable is really the same as vendorbinexp but may differ on
@@ -3068,6 +3076,11 @@ sitelib (sitelib.U):
 	MakeMaker Makefile.PL
 	or equivalent.  See INSTALL for details.
 
+sitelib_stem (sitelib.U):
+	This variable is $sitelibexp with any trailing version-specific component
+	removed.  The elements in inc_version_list (inc_version_list.U) can
+	be tacked onto this variable to generate a list of directories to search.
+
 sitelibexp (sitelib.U):
 	This variable is the ~name expanded version of sitelib, so that you
 	may use it directly in Makefiles or shell scripts.
@@ -3503,6 +3516,19 @@ uvxformat (perlxvf.U):
 	This variable contains the format string used for printing
 	a Perl UV as an unsigned hexadecimal integer. 
 
+vendorarch (vendorarch.U):
+	This variable contains the value of the PERL_VENDORARCH symbol.
+	It may have a ~ on the front. 
+	The standard distribution will put nothing in this directory.
+	Vendors who distribute perl may wish to place their own
+	architecture-dependent modules and extensions in this directory with
+	MakeMaker Makefile.PL INSTALLDIRS=vendor 
+	or equivalent.  See INSTALL for details.
+
+vendorarchexp (vendorarch.U):
+	This variable is the ~name expanded version of vendorarch, so that you
+	may use it directly in Makefiles or shell scripts.
+
 vendorbin (vendorbin.U):
 	This variable contains the eventual value of the VENDORBIN symbol.
 	It may have a ~ on the front.
@@ -3524,6 +3550,11 @@ vendorlib (vendorlib.U):
 	modules in this directory with
 	MakeMaker Makefile.PL INSTALLDIRS=vendor 
 	or equivalent.  See INSTALL for details.
+
+vendorlib_stem (vendorlib.U):
+	This variable is $vendorlibexp with any trailing version-specific component
+	removed.  The elements in inc_version_list (inc_version_list.U) can
+	be tacked onto this variable to generate a list of directories to search.
 
 vendorlibexp (vendorlib.U):
 	This variable is the ~name expanded version of vendorlib, so that you

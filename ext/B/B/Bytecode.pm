@@ -463,20 +463,23 @@ sub B::GV::bytecode {
     return if saved($gv);
     my $ix = $gv->objix;
     mark_saved($gv);
-    my $gvname = $gv->NAME;
-    my $name = cstring($gv->STASH->NAME . "::" . $gvname);
-    my $egv = $gv->EGV;
-    my $egvix = $egv->objix;
     ldsv($ix);
-    printf <<"EOT", $gv->FLAGS, $gv->GvFLAGS, $gv->LINE, pvstring($gv->FILE);
+    printf <<"EOT", $gv->FLAGS, $gv->GvFLAGS;
 sv_flags 0x%x
 xgv_flags 0x%x
+EOT
+    my $refcnt = $gv->REFCNT;
+    printf("sv_refcnt_add %d\n", $refcnt - 1) if $refcnt > 1;
+    return if $gv->is_empty;
+    printf <<"EOT", $gv->LINE, pvstring($gv->FILE);
 gp_line %d
 newpv %s
 gp_file
 EOT
-    my $refcnt = $gv->REFCNT;
-    printf("sv_refcnt_add %d\n", $refcnt - 1) if $refcnt > 1;
+    my $gvname = $gv->NAME;
+    my $name = cstring($gv->STASH->NAME . "::" . $gvname);
+    my $egv = $gv->EGV;
+    my $egvix = $egv->objix;
     my $gvrefcnt = $gv->GvREFCNT;
     printf("gp_refcnt_add %d\n", $gvrefcnt - 1) if $gvrefcnt > 1;
     if ($gvrefcnt > 1 &&  $ix != $egvix) {
@@ -580,7 +583,7 @@ sub B::CV::bytecode {
     for ($i = 0; $i < @ixes; $i++) {
 	printf "xcv_%s %d\n", lc($subfield_names[$i]), $ixes[$i];
     }
-    printf "xcv_depth %d\nxcv_flags 0x%x\n", $cv->DEPTH, $cv->FLAGS;
+    printf "xcv_depth %d\nxcv_flags 0x%x\n", $cv->DEPTH, $cv->CvFLAGS;
     printf "newpv %s\nxcv_file\n", pvstring($cv->FILE);
     # Now save all the subfields (except for CvROOT which was handled
     # above) and CvSTART (now the initial element of @subfields).
@@ -650,7 +653,7 @@ sub bytecompile_main {
     walkoptree(main_root, "bytecode");
     warn "done main program, now walking symbol table\n" if $debug_bc;
     my ($pack, %exclude);
-    foreach $pack (qw(B O AutoLoader DynaLoader Config DB VMS strict vars
+    foreach $pack (qw(B O AutoLoader DynaLoader XSLoader Config DB VMS strict vars
 		      FileHandle Exporter Carp UNIVERSAL IO Fcntl Symbol
 		      SelectSaver blib Cwd))
     {

@@ -1398,7 +1398,7 @@ PP(pp_negate)
 		    RETURN;
 		}
 		else if (SvUVX(sv) <= IV_MAX) {
-		    SETi(-SvUVX(sv));
+		    SETi(-SvIVX(sv));
 		    RETURN;
 		}
 	    }

@@ -343,7 +343,7 @@ xcv_file	CvFILE(bytecode_sv)			pvcontents
 xcv_depth	CvDEPTH(bytecode_sv)			long
 xcv_padlist	*(SV**)&CvPADLIST(bytecode_sv)		svindex
 xcv_outside	*(SV**)&CvOUTSIDE(bytecode_sv)		svindex
-xcv_flags	CvFLAGS(bytecode_sv)			U8
+xcv_flags	CvFLAGS(bytecode_sv)			U16
 av_extend	bytecode_sv				SSize_t		x
 av_push		bytecode_sv				svindex		x
 xav_fill	AvFILLp(bytecode_sv)			SSize_t

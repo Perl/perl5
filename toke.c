@@ -3958,7 +3958,8 @@ Perl_yylex(pTHX)
 		s += 2;
 		d = s;
 		s = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE, &len);
-		tmp = keyword(PL_tokenbuf, len);
+		if (!(tmp = keyword(PL_tokenbuf, len)))
+		    Perl_croak(aTHX_ "CORE::%s is not a keyword", PL_tokenbuf);
 		if (tmp < 0)
 		    tmp = -tmp;
 		goto reserved_word;
@@ -6938,10 +6939,9 @@ Perl_scan_num(pTHX_ char *start)
 	/* make an sv from the string */
 	sv = NEWSV(92,0);
 
-#if ( defined(USE_64_BIT_INT) && \
-	(!defined(HAS_STRTOLL)|| !defined(HAS_STRTOULL))) || \
-    (!defined(USE_64_BIT_INT) && \
-	(!defined(HAS_STRTOL) || !defined(HAS_STRTOUL)))
+	/* unfortunately this monster needs to be on one line or
+	   makedepend will be confused. */
+#if (defined(USE_64_BIT_INT) && (!defined(HAS_STRTOLL)|| !defined(HAS_STRTOULL))) || (!defined(USE_64_BIT_INT) && (!defined(HAS_STRTOL) || !defined(HAS_STRTOUL)))
 
 	/*
 	   No working strto[u]l[l]. Since atoi() doesn't do range checks,
@@ -6979,22 +6979,14 @@ Perl_scan_num(pTHX_ char *start)
 	 */
 
 	if (!floatit) {
-	    char *tp;
     	    IV iv;
     	    UV uv;
 	    errno = 0;
-#ifdef USE_64_BIT_INT
 	    if (*PL_tokenbuf == '-')
-		iv = strtoll(PL_tokenbuf,&tp,10);
+		iv = Atol(PL_tokenbuf);
 	    else
-		uv = strtoull(PL_tokenbuf,&tp,10);
-#else
-	    if (*PL_tokenbuf == '-')
-		iv = strtol(PL_tokenbuf,&tp,10);
-	    else
-		uv = strtoul(PL_tokenbuf,&tp,10);
-#endif
-	    if (*tp || errno)
+		uv = Atoul(PL_tokenbuf);
+	    if (errno)
 	    	floatit = TRUE; /* probably just too large */
 	    else if (*PL_tokenbuf == '-')
 	    	sv_setiv(sv, iv);
@@ -7004,12 +6996,8 @@ Perl_scan_num(pTHX_ char *start)
 	if (floatit) {
 	    char *tp;
 	    errno = 0;
-#ifdef USE_LONG_DOUBLE
-	    value = strtold(PL_tokenbuf,&tp);
-#else
-	    value = strtod(PL_tokenbuf,&tp);
-#endif
-	    if (*tp || errno)
+	    value = Atof(PL_tokenbuf);
+	    if (errno)
 		Perl_die(aTHX_ "unparseable float");
 	    else
 	    	sv_setnv(sv, value);

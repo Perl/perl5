@@ -371,6 +371,17 @@ Perl_form_nocontext(const char* pat, ...)
 
 }
 
+#undef  Perl_load_module_nocontext
+void
+Perl_load_module_nocontext(U32 flags, SV* name, SV* ver, ...)
+{
+    dTHXo;
+    va_list args;
+    va_start(args, ver);
+    ((CPerlObj*)pPerl)->Perl_vload_module(flags, name, ver, &args);
+    va_end(args);
+}
+
 #undef  Perl_mess_nocontext
 SV*
 Perl_mess_nocontext(const char* pat, ...)
@@ -1387,6 +1398,23 @@ void
 Perl_leave_scope(pTHXo_ I32 base)
 {
     ((CPerlObj*)pPerl)->Perl_leave_scope(base);
+}
+
+#undef  Perl_load_module
+void
+Perl_load_module(pTHXo_ U32 flags, SV* name, SV* ver, ...)
+{
+    va_list args;
+    va_start(args, ver);
+    ((CPerlObj*)pPerl)->Perl_vload_module(flags, name, ver, &args);
+    va_end(args);
+}
+
+#undef  Perl_vload_module
+void
+Perl_vload_module(pTHXo_ U32 flags, SV* name, SV* ver, va_list* args)
+{
+    ((CPerlObj*)pPerl)->Perl_vload_module(flags, name, ver, args);
 }
 
 #undef  Perl_looks_like_number

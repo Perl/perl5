@@ -3,9 +3,10 @@ package lib;
 use 5.005_64;
 use Config;
 
-my $archname = $Config{'archname'};
-my $ver = $Config{'version'};
-my @inc_version_list = reverse split / /, $Config{'inc_version_list'};
+my $archname = defined($Config{'archname'}) ? $Config{'archname'} : '';
+my $ver = defined($Config{'version'}) ? $Config{'version'} : '';
+my @inc_version_list = defined($Config{'inc_version_list'}) ?
+   reverse split / /, $Config{'inc_version_list'} : ();
 
 our @ORIG_INC = @INC;	# take a handy copy of 'original' value
 our $VERSION = '0.5564';

@@ -197,6 +197,12 @@ Deprecated.  Use C<GIMME_V> instead.
 /* Private for OP_THREADSV */
 #define OPpDONE_SVREF		64	/* Been through newSVREF once */
 
+/* Private for OP_OPEN and OP_BACKTICK */
+#define OPpOPEN_IN_RAW		16	/* binmode(F,":raw") on input fh */
+#define OPpOPEN_IN_CRLF		32	/* binmode(F,":crlf") on input fh */
+#define OPpOPEN_OUT_RAW		64	/* binmode(F,":raw") on output fh */
+#define OPpOPEN_OUT_CRLF	128	/* binmode(F,":crlf") on output fh */
+
 struct op {
     BASEOP
 };
@@ -401,3 +407,25 @@ struct loop {
 #define OA_SCALARREF 7
 #define OA_OPTIONAL 8
 
+#ifdef USE_ITHREADS
+#  define OP_REFCNT_INIT		MUTEX_INIT(&PL_op_mutex)
+#  define OP_REFCNT_LOCK		MUTEX_LOCK(&PL_op_mutex)
+#  define OP_REFCNT_UNLOCK		MUTEX_UNLOCK(&PL_op_mutex)
+#  define OP_REFCNT_TERM		MUTEX_DESTROY(&PL_op_mutex)
+#  define OpREFCNT_set(o,n)		((o)->op_targ = (n))
+#  define OpREFCNT_inc(o)		((o) ? (++(o)->op_targ, (o)) : Nullop)
+#  define OpREFCNT_dec(o)		(--(o)->op_targ)
+#else
+#  define OP_REFCNT_INIT		NOOP
+#  define OP_REFCNT_LOCK		NOOP
+#  define OP_REFCNT_UNLOCK		NOOP
+#  define OP_REFCNT_TERM		NOOP
+#  define OpREFCNT_set(o,n)		NOOP
+#  define OpREFCNT_inc(o)		(o)
+#  define OpREFCNT_dec(o)		0
+#endif
+
+/* flags used by Perl_load_module() */
+#define PERL_LOADMOD_DENY		0x1
+#define PERL_LOADMOD_NOIMPORT		0x2
+#define PERL_LOADMOD_IMPORT_OPS		0x4

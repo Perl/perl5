@@ -1784,6 +1784,7 @@ PP(pp_return)
     I32 cxix;
     register PERL_CONTEXT *cx;
     bool popsub2 = FALSE;
+    bool clear_errsv = FALSE;
     I32 gimme;
     SV **newsp;
     PMOP *newpm;
@@ -1814,7 +1815,11 @@ PP(pp_return)
 	popsub2 = TRUE;
 	break;
     case CXt_EVAL:
+	if (!(PL_in_eval & EVAL_KEEPERR))
+	    clear_errsv = TRUE;
 	POPEVAL(cx);
+	if (CxTRYBLOCK(cx))
+	    break;
 	if (AvFILLp(PL_comppad_name) >= 0)
 	    free_closures();
 	lex_end();
@@ -1873,6 +1878,8 @@ PP(pp_return)
 
     LEAVE;
     LEAVESUB(sv);
+    if (clear_errsv)
+	sv_setpv(ERRSV,"");
     return pop_return();
 }
 
@@ -2385,10 +2392,12 @@ PP(pp_goto)
 		gotoprobe = PL_main_root;
 		break;
 	    }
-	    retop = dofindlabel(gotoprobe, label,
-				enterops, enterops + GOTO_DEPTH);
-	    if (retop)
-		break;
+	    if (gotoprobe) {
+		retop = dofindlabel(gotoprobe, label,
+				    enterops, enterops + GOTO_DEPTH);
+		if (retop)
+		    break;
+	    }
 	    PL_lastgotoprobe = gotoprobe;
 	}
 	if (!retop)
@@ -2725,8 +2734,11 @@ S_doeval(pTHX_ int gimme, OP** startop)
     av_store(comppadlist, 1, (SV*)PL_comppad);
     CvPADLIST(PL_compcv) = comppadlist;
 
-    if (!saveop || saveop->op_type != OP_REQUIRE)
+    if (!saveop ||
+	(saveop->op_type != OP_REQUIRE && saveop->op_type != OP_DOFILE))
+    {
 	CvOUTSIDE(PL_compcv) = (CV*)SvREFCNT_inc(caller);
+    }
 
     SAVEFREESV(PL_compcv);
 
@@ -3343,7 +3355,7 @@ PP(pp_entertry)
     SAVETMPS;
 
     push_return(cLOGOP->op_other->op_next);
-    PUSHBLOCK(cx, CXt_EVAL, SP);
+    PUSHBLOCK(cx, (CXt_EVAL|CXp_TRYBLOCK), SP);
     PUSHEVAL(cx, 0, 0);
     PL_eval_root = PL_op;		/* Only needed so that goto works right. */
 

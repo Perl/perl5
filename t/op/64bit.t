@@ -11,9 +11,6 @@ BEGIN {
 }
 
 # This could use a lot of more tests.
-#
-# Nota bene: bit operations (&, |, ^, ~, <<, >>) are not 64-bit clean.
-# See the beginning of pp.c and the explanation next to IBW/UBW.
 
 # so that using > 0xfffffff constants and
 # 32+ bit integers don't cause noise

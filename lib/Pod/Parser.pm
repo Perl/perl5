@@ -956,8 +956,7 @@ sub parse_paragraph {
         ## and whatever sequence of characters was used to separate them
         $pfx = $1;
         $_ = substr($text, length $pfx);
-        $sep = /(\s+)(?=\S)/ ? $1 : '';
-        ($cmd, $text) = split(" ", $_, 2);
+        ($cmd, $sep, $text) = split /(\s+)/, $_, 2; 
         ## If this is a "cut" directive then we dont need to do anything
         ## except return to "cutting" mode.
         if ($cmd eq 'cut') {

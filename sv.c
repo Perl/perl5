@@ -5809,6 +5809,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		    vecsv = va_arg(*args, SV*);
 		else if (svix < svmax)
 		    vecsv = svargs[svix++];
+		else
+		    continue;
 		dotstr = SvPVx(vecsv,dotstrlen);
 		if (DO_UTF8(vecsv))
 		    is_utf = TRUE;
@@ -5821,6 +5823,11 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		    vecsv = va_arg(*args, SV*);
 		else if (svix < svmax)
 		    vecsv = svargs[svix++];
+		else {
+		    vecstr = (U8*)"";
+		    veclen = 0;
+		    continue;
+		}
 		vecstr = (U8*)SvPVx(vecsv,veclen);
 		utf = DO_UTF8(vecsv);
 		continue;
@@ -6373,10 +6380,6 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 
 #if defined(USE_THREADS)
 #  include "error: USE_THREADS and USE_ITHREADS are incompatible"
-#endif
-
-#ifndef OpREFCNT_inc
-#  define OpREFCNT_inc(o)	((o) ? (++(o)->op_targ, (o)) : Nullop)
 #endif
 
 #ifndef GpREFCNT_inc

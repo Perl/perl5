@@ -103,14 +103,14 @@ close(CFG);
 # perl.h logic duplication begins
 
 if ($define{USE_ITHREADS}) {
-    if (!$define{MULTIPLICITY} && !defined{PERL_OBJECT}) {
+    if (!$define{MULTIPLICITY} && !$define{PERL_OBJECT}) {
         $define{MULTIPLICITY} = 1;
     }
 }
 
 $define{PERL_IMPLICIT_CONTEXT} ||=
     $define{USE_ITHREADS} ||
-    $define{USE_THREADS}  ||
+    $define{USE_5005THREADS}  ||
     $define{MULTIPLICITY} ;
 
 if ($define{PERL_CAPI}) {
@@ -413,6 +413,7 @@ unless ($define{'USE_5005THREADS'}) {
 unless ($define{'USE_ITHREADS'}) {
     skip_symbols [qw(
 		    PL_ptr_table
+		    PL_op_mutex
 		    Perl_dirp_dup
 		    Perl_cx_dup
 		    Perl_si_dup
@@ -440,6 +441,7 @@ unless ($define{'PERL_IMPLICIT_CONTEXT'}) {
 		    Perl_die_nocontext
 		    Perl_deb_nocontext
 		    Perl_form_nocontext
+		    Perl_load_module_nocontext
 		    Perl_mess_nocontext
 		    Perl_warn_nocontext
 		    Perl_warner_nocontext

@@ -799,10 +799,10 @@ preplibrary : $(MINIPERL_EXE) $(LIBPREREQ) $(SOCKPM)
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 
-install.html : []perl_setup.com installhtml. install $(perlpods)
-	@ @perl_setup
-	@ If F$Search("[.lib]html.dir").eqs."" Then Create/Directory [.lib.html]
-	$(MINIPERL) installhtml. "--podroot=/perl_root --recurse --htmldir=lib/html --htmlroot=lib/html --splithead=pod/perlipc --splititem=pod/perlfunc --libpods=perlfunc:perlguts:perlvar:perlrun:perlop --verbose"
+install.html : $(perlpods)
+	@ @perl_setup.com
+	@ If F$Search("perl_root:[lib]html.dir").eqs."" Then Create/Directory perl_root:[lib.html]
+	$(MINIPERL) installhtml. "--podroot=. --recurse --htmldir=/perl_root/lib/html --htmlroot=.. --verbose"
 
 printconfig :
         @ @[.vms]make_command $(MMS) $(MMSQUALIFIERS) $(MMSTARGETS)
@@ -882,6 +882,7 @@ test : all [.t.lib]vmsfspec.t [.t.lib]vmsish.t
 # install ought not need a source, but it doesn't work if one's not
 # there. Go figure...
 install : $(MINIPERL_EXE)
+	@ @perl_setup.com
 	If F$TrnLnm("Sys") .nes. "" Then Deass SYS
 	$(MINIPERL) installperl
 

@@ -304,9 +304,14 @@ PP(pp_backtick)
     STRLEN n_a;
     char *tmps = POPpx;
     I32 gimme = GIMME_V;
+    char *mode = "r";
 
     TAINT_PROPER("``");
-    fp = PerlProc_popen(tmps, "r");
+    if (PL_op->op_private & OPpOPEN_IN_RAW)
+	mode = "rb";
+    else if (PL_op->op_private & OPpOPEN_IN_CRLF)
+	mode = "rt";
+    fp = PerlProc_popen(tmps, mode);
     if (fp) {
 	if (gimme == G_VOID) {
 	    char tmpbuf[256];
@@ -687,15 +692,20 @@ PP(pp_binmode)
     IO *io;
     PerlIO *fp;
     MAGIC *mg;
+    SV *discp = Nullsv;
 
     if (MAXARG < 1)
 	RETPUSHUNDEF;
+    if (MAXARG > 1)
+	discp = POPs;
 
     gv = (GV*)POPs; 
 
     if (gv && (mg = SvTIED_mg((SV*)gv, 'q'))) {
 	PUSHMARK(SP);
 	XPUSHs(SvTIED_obj((SV*)gv, mg));
+	if (discp)
+	    XPUSHs(discp);
 	PUTBACK;
 	ENTER;
 	call_method("BINMODE", G_SCALAR);
@@ -708,12 +718,11 @@ PP(pp_binmode)
     if (!(io = GvIO(gv)) || !(fp = IoIFP(io)))
 	RETPUSHUNDEF;
 
-    if (do_binmode(fp,IoTYPE(io),TRUE)) 
+    if (do_binmode(fp,IoTYPE(io),mode_from_discipline(discp))) 
 	RETPUSHYES;
     else
 	RETPUSHUNDEF;
 }
-
 
 PP(pp_tie)
 {
@@ -3078,9 +3087,26 @@ PP(pp_fttext)
 #else
 	else if (*s & 128) {
 #ifdef USE_LOCALE
-	    if (!(PL_op->op_private & OPpLOCALE) || !isALPHA_LC(*s))
+	    if ((PL_op->op_private & OPpLOCALE) && isALPHA_LC(*s))
+		continue;
 #endif
-		odd++;
+	    /* utf8 characters don't count as odd */
+	    if (*s & 0x40) {
+		int ulen = UTF8SKIP(s);
+		if (ulen < len - i) {
+		    int j;
+		    for (j = 1; j < ulen; j++) {
+			if ((s[j] & 0xc0) != 0x80)
+			    goto not_utf8;
+		    }
+		    --ulen;	/* loop does extra increment */
+		    s += ulen;
+		    i += ulen;
+		    continue;
+		}
+	    }
+	  not_utf8:
+	    odd++;
 	}
 	else if (*s < 32 &&
 	  *s != '\n' && *s != '\r' && *s != '\b' &&

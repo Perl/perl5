@@ -73,7 +73,7 @@ than VMS is settled.  (defaults to FALSE)
 =back
 
 It returns the number of files successfully deleted.  Symlinks are
-treated as ordinary files.
+simply deleted and not followed.
 
 B<NOTE:> If the third parameter is not TRUE, C<rmtree> is B<unsecure>
 in the face of failure or interruption.  Files and directories which
@@ -205,7 +205,9 @@ sub rmtree {
 	}
 	else { 
 	    if ($safe &&
-		($Is_VMS ? !&VMS::Filespec::candelete($root) : !-w $root)) {
+		($Is_VMS ? !&VMS::Filespec::candelete($root)
+		         : !(-l $root || -w $root)))
+	    {
 		print "skipped $root\n" if $verbose;
 		next;
 	    }

@@ -4,14 +4,48 @@ perlunicode - Unicode support in Perl
 
 =head1 DESCRIPTION
 
+=head2 Important Caveat
+
 WARNING: The implementation of Unicode support in Perl is incomplete.
-Expect sudden and unannounced changes!
+
+The following areas need further work.
+
+=over
+
+=item Input and Output Disciplines
+
+There is currently no easy way to mark data read from a file or other
+external source as being utf8.  This will be one of the major areas of
+focus in the near future.
+
+=item Regular Expressions
+
+The existing regular expression compiler does not produce polymorphic
+opcodes.  This means that the determination on whether to match Unicode
+characters is made when the pattern is compiled, based on whether the
+pattern contains Unicode characters, and not when the matching happens
+at run time.  This needs to be changed to adaptively match Unicode if
+the string to be matched is Unicode.
+
+=item C<use utf8> still needed to enable a few features
+
+The C<utf8> pragma implements the tables used for Unicode support.  These
+tables are automatically loaded on demand, so the C<utf8> pragma need not
+normally be used.
+
+However, as a compatibility measure, this pragma must be explicitly used
+to enable recognition of UTF-8 encoded literals and identifiers in the
+source text.
+
+=back
+
+=head2 Byte and Character semantics
 
 Beginning with version 5.6, Perl uses logically wide characters to
 represent strings internally.  This internal representation of strings
 uses the UTF-8 encoding.
 
-In future, Perl-level operations will expect to work with characters
+In future, Perl-level operations can be expected to work with characters
 rather than bytes, in general.
 
 However, as strictly an interim compatibility measure, Perl v5.6 aims to
@@ -27,9 +61,7 @@ which allowed byte semantics in Perl operations, but only as long as
 none of the program's inputs are marked as being as source of Unicode
 character data.  Such data may come from filehandles, from calls to
 external programs, from information provided by the system (such as %ENV),
-or from literals and constants in the source text.  Later, in
-L</Character encodings for input and output>, we'll see how such
-inputs may be marked as being Unicode character data sources.
+or from literals and constants in the source text.
 
 If the C<-C> command line switch is used, (or the ${^WIDE_SYSTEM_CALLS}
 global flag is set to C<1>), all system calls will use the
@@ -40,8 +72,8 @@ Regardless of the above, the C<bytes> pragma can always be used to force
 byte semantics in a particular lexical scope.  See L<bytes>.
 
 The C<utf8> pragma is primarily a compatibility device that enables
-recognition of UTF-8 in literals encountered by the parser.  It is also
-used for enabling some of the more experimental Unicode support features.
+recognition of UTF-8 in literals encountered by the parser.  It may also
+be used for enabling some of the more experimental Unicode support features.
 Note that this pragma is only required until a future version of Perl
 in which character semantics will become the default.  This pragma may
 then become a no-op.  See L<utf8>.
@@ -58,7 +90,7 @@ on Unicode data, the C<bytes> pragma should be used.
 Under character semantics, many operations that formerly operated on
 bytes change to operating on characters.  For ASCII data this makes
 no difference, because UTF-8 stores ASCII in single bytes, but for
-any character greater than C<chr(127)>, the character is stored in
+any character greater than C<chr(127)>, the character may be stored in
 a sequence of two or more bytes, all of which have the high bit set.
 But by and large, the user need not worry about this, because Perl
 hides it from the user.  A character in Perl is logically just a number
@@ -75,9 +107,7 @@ Character semantics have the following effects:
 =item *
 
 Strings and patterns may contain characters that have an ordinal value
-larger than 255.  In Perl v5.6, this is only enabled if the lexical
-scope has a C<use utf8> declaration (due to compatibility needs) but
-future versions may enable this by default.
+larger than 255.
 
 Presuming you use a Unicode editor to edit your program, such characters
 will typically occur directly within the literal strings as UTF-8
@@ -98,10 +128,6 @@ characters, including ideographs.  (You are currently on your own when
 it comes to using the canonical forms of characters--Perl doesn't (yet)
 attempt to canonicalize variable names for you.)
 
-This also needs C<use utf8> currently.  [XXX: Why?!?  High-bit chars were
-syntax errors when they occurred within identifiers in previous versions,
-so this should probably be enabled by default.]
-
 =item *
 
 Regular expressions match characters instead of bytes.  For instance,
@@ -109,19 +135,12 @@ Regular expressions match characters instead of bytes.  For instance,
 is provided to force a match a single byte ("C<char>" in C, hence
 C<\C>).)
 
-Unicode support in regular expressions needs C<use utf8> currently.
-[XXX: Because the SWASH routines need to be loaded.  And the RE engine
-appears to need an overhaul to dynamically match Unicode anyway--the
-current RE compiler creates different nodes with and without C<use utf8>.]
-
 =item *
 
 Character classes in regular expressions match characters instead of
 bytes, and match against the character properties specified in the
 Unicode properties database.  So C<\w> can be used to match an ideograph,
 for instance.
-
-C<use utf8> is needed to enable this.  See above.
 
 =item *
 
@@ -133,8 +152,6 @@ any mark character.  Single letter properties may omit the brackets, so
 that can be written C<\pM> also.  Many predefined character classes are
 available, such as C<\p{IsMirrored}> and  C<\p{InTibetan}>.
 
-C<use utf8> is needed to enable this.  See above.
-
 =item *
 
 The special pattern C<\X> match matches any extended Unicode sequence
@@ -143,16 +160,12 @@ character is a base character and subsequent characters are mark
 characters that apply to the base character.  It is equivalent to
 C<(?:\PM\pM*)>.
 
-C<use utf8> is needed to enable this.  See above.
-
 =item *
 
 The C<tr///> operator translates characters instead of bytes.  It can also
-be forced to translate between 8-bit codes and UTF-8 regardless of the
-surrounding utf8 state.  For instance, if you know your input in Latin-1,
-you can say:
+be forced to translate between 8-bit codes and UTF-8.  For instance, if you
+know your input in Latin-1, you can say:
 
-    use utf8;
     while (<>) {
 	tr/\0-\xff//CU;		# latin1 char to utf8
 	...
@@ -163,8 +176,6 @@ Similarly you could translate your output with
     tr/\0-\x{ff}//UC;		# utf8 to latin1 char
 
 No, C<s///> doesn't take /U or /C (yet?).
-
-C<use utf8> is needed to enable this.  See above.
 
 =item *
 

@@ -91,10 +91,10 @@ $ perl_i_ustat = "undef"
 $ perl_d_llseek="undef"
 $ perl_d_iconv="undef"
 $ perl_d_madvise="undef"
-$ perl_selectminbits=32
-$ perl_d_msync="undef"
-$ perl_d_vendorarch="define"
+$ perl_selectminbits="32"
+$ perl_d_vendorarch="undef"
 $ perl_vendorarchexp=""
+$ perl_d_msync="undef"
 $ perl_d_mprotect="undef"
 $ perl_d_munmap="undef"
 $ perl_crosscompile="undef"
@@ -1052,6 +1052,53 @@ $       perl_i_inttypes="define"
 $     ENDIF
 $   ENDIF
 $ WRITE_RESULT "i_inttypes is ''perl_i_inttypes'"
+$!
+$! Check for h_errno
+$!
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <stdio.h>
+$ WS "#include <unistd.h>
+$ WS "#include <netdb.h>
+$ WS "int main()
+$ WS "{"
+$ WS "h_errno = 3;
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$   DEFINE SYS$ERROR _NLA0:
+$   DEFINE SYS$OUTPUT _NLA0:
+$   on error then continue
+$   on warning then continue
+$   'Checkcc' temp.c
+$   savedstatus = $status
+$   teststatus = f$extract(9,1,savedstatus)
+$   if (teststatus.nes."1")
+$   THEN
+$     perl_d_herrno="undef"
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$   ELSE
+$     If (Needs_Opt)
+$     THEN
+$       link temp.obj,temp.opt/opt
+$     else
+$       link temp.obj
+$     endif
+$     savedstatus = $status
+$     teststatus = f$extract(9,1,savedstatus)
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$     if (teststatus.nes."1")
+$     THEN
+$       perl_d_herrno="undef"
+$     ELSE
+$       perl_d_herrno="define"
+$     ENDIF
+$   ENDIF
+$ WRITE_RESULT "d_herrno is ''perl_d_herrno'"
 $!
 $! Check to see if int64_t exists
 $!
@@ -3561,11 +3608,14 @@ $   type = "''perl_i64type'"
 $   size_name = "i64size"
 $   gosub type_size_check
 $   perl_i64size="''line'"
+$   perl_ivtype="''perl_i64type'"
 $
 $   type = "''perl_u64type'"
 $   size_name = "u64size"
 $   gosub type_size_check
 $   perl_u64size="''line'"
+$   perl_uvtype="''perl_u64type'"
+$   perl_nvtype="long double"
 $ Else
 $   perl_i64size="undef"
 $   perl_u64size="undef"
@@ -4138,6 +4188,7 @@ $ WC "sPRIx64='" + perl_sPRIx64 + "'"
 $ WC "d_llseek='" + perl_d_llseek + "'"
 $ WC "d_iconv='" + perl_d_iconv +"'"
 $ WC "i_iconv='" + perl_i_iconv +"'"
+$ WC "inc_version_list='0'"
 $ WC "inc_version_list_init='0'"
 $ WC "uselargefiles='" + perl_uselargefiles + "'"
 $ WC "uselongdouble='" + perl_uselongdouble + "'"
@@ -4276,6 +4327,10 @@ $ if be_case_sensitive
 $ then
 $    write config "#define VMS_WE_ARE_CASE_SENSITIVE"
 $ endif
+$ if perl_d_herrno .eqs. "undef"
+$ THEN
+$    write config "#define NEED_AN_H_ERRNO"
+$ ENDIF
 $ WRITE CONFIG "#define HAS_ENVGETENV"
 $ WRITE CONFIG "#define PERL_EXTERNAL_GLOB"
 $ CLOSE CONFIG

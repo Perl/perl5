@@ -22,19 +22,6 @@
 
 /* #define PL_OP_SLAB_ALLOC */
 
-/* XXXXXX testing */
-#ifdef USE_ITHREADS
-#  define OP_REFCNT_LOCK		NOOP
-#  define OP_REFCNT_UNLOCK		NOOP
-#  define OpREFCNT_set(o,n)		((o)->op_targ = (n))
-#  define OpREFCNT_dec(o)		(--(o)->op_targ)
-#else
-#  define OP_REFCNT_LOCK		NOOP
-#  define OP_REFCNT_UNLOCK		NOOP
-#  define OpREFCNT_set(o,n)		NOOP
-#  define OpREFCNT_dec(o)		0
-#endif
-
 #ifdef PL_OP_SLAB_ALLOC 
 #define SLAB_SIZE 8192
 static char    *PL_OpPtr  = NULL;
@@ -369,8 +356,9 @@ S_pad_findlex(pTHX_ char *name, PADOFFSET newoff, U32 seq, CV* startcv,
 		if (CxREALEVAL(cx))
 		    saweval = i;
 		break;
+	    case OP_DOFILE:
 	    case OP_REQUIRE:
-		/* require must have its own scope */
+		/* require/do must have their own scope */
 		return 0;
 	    }
 	    break;
@@ -1834,7 +1822,6 @@ S_dup_attrlist(pTHX_ OP *o)
 STATIC void
 S_apply_attrs(pTHX_ HV *stash, SV *target, OP *attrs)
 {
-    OP *modname;	/* for 'use' */
     SV *stashsv;
 
     /* fake up C<use attributes $pkg,$rv,@attrs> */
@@ -1844,19 +1831,18 @@ S_apply_attrs(pTHX_ HV *stash, SV *target, OP *attrs)
 	stashsv = newSVpv(HvNAME(stash), 0);
     else
 	stashsv = &PL_sv_no;
+
 #define ATTRSMODULE "attributes"
-    modname = newSVOP(OP_CONST, 0,
-		      newSVpvn(ATTRSMODULE, sizeof(ATTRSMODULE)-1));
-    modname->op_private |= OPpCONST_BARE;
-    /* that flag is required to make 'use' work right */
-    utilize(1, start_subparse(FALSE, 0),
-	    Nullop, /* version */
-	    modname,
-	    prepend_elem(OP_LIST,
-			 newSVOP(OP_CONST, 0, stashsv),
-			 prepend_elem(OP_LIST,
-				      newSVOP(OP_CONST, 0, newRV(target)),
-				      dup_attrlist(attrs))));
+
+    Perl_load_module(aTHX_ PERL_LOADMOD_IMPORT_OPS,
+		     newSVpvn(ATTRSMODULE, sizeof(ATTRSMODULE)-1),
+		     Nullsv,
+		     prepend_elem(OP_LIST,
+				  newSVOP(OP_CONST, 0, stashsv),
+				  prepend_elem(OP_LIST,
+					       newSVOP(OP_CONST, 0,
+						       newRV(target)),
+					       dup_attrlist(attrs))));
     LEAVE;
 }
 
@@ -3186,6 +3172,58 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *id, OP *arg)
     PL_hints |= HINT_BLOCK_SCOPE;
     PL_copline = NOLINE;
     PL_expect = XSTATE;
+}
+
+void
+Perl_load_module(pTHX_ U32 flags, SV *name, SV *ver, ...)
+{
+    va_list args;
+    va_start(args, ver);
+    vload_module(flags, name, ver, &args);
+    va_end(args);
+}
+
+#ifdef PERL_IMPLICIT_CONTEXT
+void
+Perl_load_module_nocontext(U32 flags, SV *name, SV *ver, ...)
+{
+    dTHX;
+    va_list args;
+    va_start(args, ver);
+    vload_module(flags, name, ver, &args);
+    va_end(args);
+}
+#endif
+
+void
+Perl_vload_module(pTHX_ U32 flags, SV *name, SV *ver, va_list *args)
+{
+    OP *modname, *veop, *imop;
+
+    modname = newSVOP(OP_CONST, 0, name);
+    modname->op_private |= OPpCONST_BARE;
+    if (ver) {
+	veop = newSVOP(OP_CONST, 0, ver);
+    }
+    else
+	veop = Nullop;
+    if (flags & PERL_LOADMOD_NOIMPORT) {
+	imop = sawparens(newNULLLIST());
+    }
+    else if (flags & PERL_LOADMOD_IMPORT_OPS) {
+	imop = va_arg(*args, OP*);
+    }
+    else {
+	SV *sv;
+	imop = Nullop;
+	sv = va_arg(*args, SV*);
+	while (sv) {
+	    imop = append_elem(OP_LIST, imop, newSVOP(OP_CONST, 0, sv));
+	    sv = va_arg(*args, SV*);
+	}
+    }
+    utilize(!(flags & PERL_LOADMOD_DENY), start_subparse(FALSE, 0),
+	    veop, modname, imop);
 }
 
 OP *
@@ -5523,11 +5561,10 @@ Perl_ck_glob(pTHX_ OP *o)
 #if !defined(PERL_EXTERNAL_GLOB)
     /* XXX this can be tightened up and made more failsafe. */
     if (!gv) {
-	OP *modname = newSVOP(OP_CONST, 0, newSVpvn("File::Glob", 10));
-	modname->op_private |= OPpCONST_BARE;
 	ENTER;
-	utilize(1, start_subparse(FALSE, 0), Nullop, modname,
-		newSVOP(OP_CONST, 0, newSVpvn(":globally", 9)));
+	Perl_load_module(aTHX_ 0, newSVpvn("File::Glob", 10), Nullsv,
+			 /* null-terminated import list */
+			 newSVpvn(":globally", 9), Nullsv);
 	gv = gv_fetchpv("CORE::GLOBAL::glob", FALSE, SVt_PVCV);
 	LEAVE;
     }
@@ -5799,6 +5836,36 @@ Perl_ck_null(pTHX_ OP *o)
 }
 
 OP *
+Perl_ck_open(pTHX_ OP *o)
+{
+    HV *table = GvHV(PL_hintgv);
+    if (table) {
+	SV **svp;
+	I32 mode;
+	svp = hv_fetch(table, "open_IN", 7, FALSE);
+	if (svp && *svp) {
+	    mode = mode_from_discipline(*svp);
+	    if (mode & O_BINARY)
+		o->op_private |= OPpOPEN_IN_RAW;
+	    else if (mode & O_TEXT)
+		o->op_private |= OPpOPEN_IN_CRLF;
+	}
+
+	svp = hv_fetch(table, "open_OUT", 8, FALSE);
+	if (svp && *svp) {
+	    mode = mode_from_discipline(*svp);
+	    if (mode & O_BINARY)
+		o->op_private |= OPpOPEN_OUT_RAW;
+	    else if (mode & O_TEXT)
+		o->op_private |= OPpOPEN_OUT_CRLF;
+	}
+    }
+    if (o->op_type == OP_BACKTICK)
+	return o;
+    return ck_fun(o);
+}
+
+OP *
 Perl_ck_repeat(pTHX_ OP *o)
 {
     if (cBINOPo->op_first->op_flags & OPf_PARENS) {
@@ -5825,7 +5892,13 @@ Perl_ck_require(pTHX_ OP *o)
 		    --SvCUR(kid->op_sv);
 		}
 	    }
-	    sv_catpvn(kid->op_sv, ".pm", 3);
+	    if (SvREADONLY(kid->op_sv)) {
+		SvREADONLY_off(kid->op_sv);
+		sv_catpvn(kid->op_sv, ".pm", 3);
+		SvREADONLY_on(kid->op_sv);
+	    }
+	    else
+		sv_catpvn(kid->op_sv, ".pm", 3);
 	}
     }
     return ck_fun(o);
@@ -6317,19 +6390,16 @@ Perl_peep(pTHX_ register OP *o)
 		o->op_targ = ix;
 	    }
 #endif
-	    /* FALL THROUGH */
-	case OP_UC:
-	case OP_UCFIRST:
-	case OP_LC:
-	case OP_LCFIRST:
+	    o->op_seq = PL_op_seqmax++;
+	    break;
+
 	case OP_CONCAT:
-	case OP_JOIN:
-	case OP_QUOTEMETA:
 	    if (o->op_next && o->op_next->op_type == OP_STRINGIFY) {
 		if (o->op_next->op_private & OPpTARGET_MY) {
 		    if (o->op_flags & OPf_STACKED) /* chained concats */
 			goto ignore_optimization;
 		    else {
+			/* assert(PL_opargs[o->op_type] & OA_TARGLEX); */
 			o->op_targ = o->op_next->op_targ;
 			o->op_next->op_targ = 0;
 			o->op_private |= OPpTARGET_MY;

@@ -58,6 +58,7 @@ Perl_croak_nocontext
 Perl_die_nocontext
 Perl_deb_nocontext
 Perl_form_nocontext
+Perl_load_module_nocontext
 Perl_mess_nocontext
 Perl_warn_nocontext
 Perl_warner_nocontext
@@ -195,6 +196,8 @@ Perl_is_utf8_punct
 Perl_is_utf8_xdigit
 Perl_is_utf8_mark
 Perl_leave_scope
+Perl_load_module
+Perl_vload_module
 Perl_looks_like_number
 Perl_markstack_grow
 Perl_mess

@@ -30,7 +30,7 @@
 #  endif
 #endif	/* DJGPP */
 
-#define PERL_SYS_TERM() MALLOC_TERM
+#define PERL_SYS_TERM() OP_REFCNT_TERM; MALLOC_TERM
 #define dXSUB_SYS
 
 /*
@@ -52,7 +52,7 @@
 
 /* USEMYBINMODE
  *	This symbol, if defined, indicates that the program should
- *	use the routine my_binmode(FILE *fp, char iotype) to insure
+ *	use the routine my_binmode(FILE *fp, char iotype, int mode) to insure
  *	that a file is in "binary" mode -- that is, that no translation
  *	of bytes occurs on read or write operations.
  */

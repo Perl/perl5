@@ -4,7 +4,7 @@
 # the format supported by op/regexp.t.  If you want to add a test
 # that does fit that format, add it to op/re_tests, not here.
 
-print "1..210\n";
+print "1..211\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -366,6 +366,10 @@ $test++;
 @ans = matchit;
 
 print "# ans='@ans'\n# expect='$expect'\nnot " if "@ans" ne $expect;
+print "ok $test\n";
+$test++;
+
+print "not " unless "abc" =~ /^(??{"a"})b/;
 print "ok $test\n";
 $test++;
 
