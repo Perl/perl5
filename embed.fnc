@@ -1073,14 +1073,14 @@ s	|OP*	|dofindlabel	|OP *o|const char *label|OP **opstack|OP **oplimit
 s	|OP*	|doparseform	|SV *sv
 sn	|bool	|num_overflow	|NV value|I32 fldsize|I32 frcsize
 s	|I32	|dopoptoeval	|I32 startingblock
-s	|I32	|dopoptolabel	|char *label
+s	|I32	|dopoptolabel	|const char *label
 s	|I32	|dopoptoloop	|I32 startingblock
 s	|I32	|dopoptosub	|I32 startingblock
 s	|I32	|dopoptosub_at	|PERL_CONTEXT* cxstk|I32 startingblock
 s	|void	|save_lines	|AV *array|SV *sv
 s	|OP*	|doeval		|int gimme|OP** startop|CV* outside|U32 seq
 s	|PerlIO *|doopen_pm	|const char *name|const char *mode
-s	|bool	|path_is_absolute|char *name
+s	|bool	|path_is_absolute|const char *name
 #endif
 
 #if defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
@@ -1153,7 +1153,7 @@ Es	|U8*	|reghop		|U8 *pos|I32 off
 Es	|U8*	|reghop3	|U8 *pos|I32 off|U8 *lim
 Es	|U8*	|reghopmaybe	|U8 *pos|I32 off
 Es	|U8*	|reghopmaybe3	|U8 *pos|I32 off|U8 *lim
-Es	|char*	|find_byclass	|regexp * prog|regnode *c|char *s|char *strend|char *startpos|I32 norun
+Es	|char*	|find_byclass	|regexp * prog|regnode *c|char *s|char *strend|I32 norun
 Es	|void	|to_utf8_substr	|regexp * prog
 Es	|void	|to_byte_substr	|regexp * prog
 #endif

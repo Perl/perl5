@@ -1068,7 +1068,7 @@ Perl_write_to_stderr(pTHX_ const char* message, int msglen)
 
 void S_vdie_common(pTHX_ const char *message, STRLEN msglen, I32 utf8);
 
-char *
+STATIC char *
 S_vdie_croak_common(pTHX_ const char* pat, va_list* args, STRLEN* msglen,
 		    I32* utf8)
 {

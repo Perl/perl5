@@ -1032,14 +1032,14 @@ STATIC OP*	S_dofindlabel(pTHX_ OP *o, const char *label, OP **opstack, OP **opli
 STATIC OP*	S_doparseform(pTHX_ SV *sv);
 STATIC bool	S_num_overflow(NV value, I32 fldsize, I32 frcsize);
 STATIC I32	S_dopoptoeval(pTHX_ I32 startingblock);
-STATIC I32	S_dopoptolabel(pTHX_ char *label);
+STATIC I32	S_dopoptolabel(pTHX_ const char *label);
 STATIC I32	S_dopoptoloop(pTHX_ I32 startingblock);
 STATIC I32	S_dopoptosub(pTHX_ I32 startingblock);
 STATIC I32	S_dopoptosub_at(pTHX_ PERL_CONTEXT* cxstk, I32 startingblock);
 STATIC void	S_save_lines(pTHX_ AV *array, SV *sv);
 STATIC OP*	S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq);
 STATIC PerlIO *	S_doopen_pm(pTHX_ const char *name, const char *mode);
-STATIC bool	S_path_is_absolute(pTHX_ char *name);
+STATIC bool	S_path_is_absolute(pTHX_ const char *name);
 #endif
 
 #if defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
@@ -1105,7 +1105,7 @@ STATIC U8*	S_reghop(pTHX_ U8 *pos, I32 off);
 STATIC U8*	S_reghop3(pTHX_ U8 *pos, I32 off, U8 *lim);
 STATIC U8*	S_reghopmaybe(pTHX_ U8 *pos, I32 off);
 STATIC U8*	S_reghopmaybe3(pTHX_ U8 *pos, I32 off, U8 *lim);
-STATIC char*	S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *startpos, I32 norun);
+STATIC char*	S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, I32 norun);
 STATIC void	S_to_utf8_substr(pTHX_ regexp * prog);
 STATIC void	S_to_byte_substr(pTHX_ regexp * prog);
 #endif

@@ -857,8 +857,8 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	   regstclass does not come from lookahead...  */
 	/* If regstclass takes bytelength more than 1: If charlength==1, OK.
 	   This leaves EXACTF only, which is dealt with in find_byclass().  */
-	U8* str = (U8*)STRING(prog->regstclass);
-	int cl_l = (PL_regkind[(U8)OP(prog->regstclass)] == EXACT
+        const U8* str = (U8*)STRING(prog->regstclass);
+        const int cl_l = (PL_regkind[(U8)OP(prog->regstclass)] == EXACT
 		    ? CHR_DIST(str+STR_LEN(prog->regstclass), str)
 		    : 1);
 	char *endpos = (prog->anchored_substr || prog->anchored_utf8 || ml_anch)
@@ -867,11 +867,10 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		   ? HOP3c(HOP3c(check_at, -start_shift, strbeg),
 			   cl_l, strend)
 		   : strend);
-	char *startpos = strbeg;
 
 	t = s;
 	cache_re(prog);
-	s = find_byclass(prog, prog->regstclass, s, endpos, startpos, 1);
+        s = find_byclass(prog, prog->regstclass, s, endpos, 1);
 	if (!s) {
 #ifdef DEBUGGING
 	    const char *what = 0;
@@ -964,7 +963,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 
 /* We know what class REx starts with.  Try to find this position... */
 STATIC char *
-S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *startpos, I32 norun)
+S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, I32 norun)
 {
 	I32 doevery = (prog->reganch & ROPT_SKIP) == 0;
 	char *m;
@@ -1963,7 +1962,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 			  len0, len0, s0,
 			  len1, len1, s1);
 	});
-  	if (find_byclass(prog, c, s, strend, startpos, 0))
+        if (find_byclass(prog, c, s, strend, 0))
 	    goto got_it;
 	DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "Contradicts stclass...\n"));
     }
@@ -1989,7 +1988,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	    }
 	    else {
 		STRLEN len;
-		char *little = SvPV(float_real, len);
+                const char * const little = SvPV(float_real, len);
 
 		if (SvTAIL(float_real)) {
 		    if (memEQ(strend - len + 1, little, len - 1))
@@ -4892,6 +4891,7 @@ S_reghopmaybe3(pTHX_ U8* s, I32 off, U8* lim)
 static void
 restore_pos(pTHX_ void *arg)
 {
+    (void)arg; /* unused */
     if (PL_reg_eval_set) {
 	if (PL_reg_oldsaved) {
 	    PL_reg_re->subbeg = PL_reg_oldsaved;

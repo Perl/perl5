@@ -2795,7 +2795,7 @@ Perl_reginitcolors(pTHX)
 	}
     } else {
 	while (i < 6)
-	    PL_colors[i++] = "";
+	    PL_colors[i++] = (char *)"";
     }
     PL_colorset = 1;
 }

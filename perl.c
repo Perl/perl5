@@ -2569,7 +2569,7 @@ Perl_moreswitches(pTHX_ char *s)
 	/* The following permits -d:Mod to accepts arguments following an =
 	   in the fashion that -MSome::Mod does. */
 	if (*s == ':' || *s == '=') {
-	    char *start;
+            const char *start;
 	    SV *sv;
 	    sv = newSVpv("use Devel::", 0);
 	    start = ++s;
