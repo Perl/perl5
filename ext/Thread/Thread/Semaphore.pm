@@ -69,14 +69,14 @@ sub new {
     bless \$val, $class;
 }
 
-sub down : locked, method {
+sub down : locked : method {
     my $s = shift;
     my $inc = @_ ? shift : 1;
     cond_wait $s until $$s >= $inc;
     $$s -= $inc;
 }
 
-sub up : locked, method {
+sub up : locked : method {
     my $s = shift;
     my $inc = @_ ? shift : 1;
     ($$s += $inc) > 0 and cond_broadcast $s;
