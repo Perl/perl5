@@ -3278,7 +3278,7 @@ Perl_yylex(pTHX)
 	/* This kludge not intended to be bulletproof. */
 	if (PL_tokenbuf[1] == '[' && !PL_tokenbuf[2]) {
 	    yylval.opval = newSVOP(OP_CONST, 0,
-				   newSViv((IV)PL_compiling.cop_arybase));
+				   newSViv(PL_compiling.cop_arybase));
 	    yylval.opval->op_private = OPpCONST_ARYBASE;
 	    TERM(THING);
 	}

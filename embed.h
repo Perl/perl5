@@ -471,6 +471,7 @@
 #define newSVREF		Perl_newSVREF
 #define newSVOP			Perl_newSVOP
 #define newSViv			Perl_newSViv
+#define newSVuv			Perl_newSVuv
 #define newSVnv			Perl_newSVnv
 #define newSVpv			Perl_newSVpv
 #define newSVpvn		Perl_newSVpvn
@@ -1914,6 +1915,7 @@
 #define newSVREF(a)		Perl_newSVREF(aTHX_ a)
 #define newSVOP(a,b,c)		Perl_newSVOP(aTHX_ a,b,c)
 #define newSViv(a)		Perl_newSViv(aTHX_ a)
+#define newSVuv(a)		Perl_newSVuv(aTHX_ a)
 #define newSVnv(a)		Perl_newSVnv(aTHX_ a)
 #define newSVpv(a,b)		Perl_newSVpv(aTHX_ a,b)
 #define newSVpvn(a,b)		Perl_newSVpvn(aTHX_ a,b)
@@ -3743,6 +3745,8 @@
 #define newSVOP			Perl_newSVOP
 #define Perl_newSViv		CPerlObj::Perl_newSViv
 #define newSViv			Perl_newSViv
+#define Perl_newSVuv		CPerlObj::Perl_newSVuv
+#define newSVuv			Perl_newSVuv
 #define Perl_newSVnv		CPerlObj::Perl_newSVnv
 #define newSVnv			Perl_newSVnv
 #define Perl_newSVpv		CPerlObj::Perl_newSVpv

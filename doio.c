@@ -1926,6 +1926,10 @@ Perl_do_msgrcv(pTHX_ SV **mark, SV **sp)
     if (ret >= 0) {
 	SvCUR_set(mstr, sizeof(long)+ret);
 	*SvEND(mstr) = '\0';
+#ifndef INCOMPLETE_TAINTS
+	/* who knows who has been playing with this message? */
+	SvTAINTED_on(mstr);
+#endif
     }
     return ret;
 #else
@@ -1994,6 +1998,10 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
 	SvCUR_set(mstr, msize);
 	*SvEND(mstr) = '\0';
 	SvSETMAGIC(mstr);
+#ifndef INCOMPLETE_TAINTS
+	/* who knows who has been playing with this shared memory? */
+	SvTAINTED_on(mstr);
+#endif
     }
     else {
 	I32 n;

@@ -2746,7 +2746,8 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    SvREFCNT_dec(transv);
 
 	if (!del && havefinal)
-	    (void)hv_store((HV*)SvRV((cSVOPo->op_sv)), "FINAL", 5, newSViv((IV)final), 0);
+	    (void)hv_store((HV*)SvRV((cSVOPo->op_sv)), "FINAL", 5,
+			   newSVuv((UV)final), 0);
 
 	if (grows && to_utf)
 	    o->op_private |= OPpTRANS_GROWS;

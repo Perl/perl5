@@ -1141,7 +1141,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #define BIN_EXP "$binexp"	/**/
 
 /* PERL_BINCOMPAT_5005:
- *	This symbol, if defined, indicates that Perl 5.006 should be
+ *	This symbol, if defined, indicates that this version of Perl should be
  *	binary-compatible with Perl 5.005.  This is impossible for builds
  *	that use features like threads and multiplicity it is always $undef
  *	for those versions.
@@ -2218,6 +2218,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #define	Gid_t_f		$gidformat		/**/
 
+/* Gid_t_sign:
+ *	This symbol holds the signedess of a Gid_t.
+ *	1 for unsigned, -1 for signed.
+ */
+#define Gid_t_sign	$gidsign		/* GID sign */
+
 /* Gid_t_size:
  *	This symbol holds the size of a Gid_t in bytes.
  */
@@ -2227,16 +2233,16 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	This symbol holds the return type of getgid() and the type of
  *	argument to setrgid() and related functions.  Typically,
  *	it is the type of group ids in the kernel. It can be int, ushort,
- *	uid_t, etc... It may be necessary to include <sys/types.h> to get
+ *	gid_t, etc... It may be necessary to include <sys/types.h> to get
  *	any typedef'ed information.
  */
 #define Gid_t $gidtype		/* Type for getgid(), etc... */
 
 /* Groups_t:
  *	This symbol holds the type used for the second argument to
- *	getgroups() and setgropus().  Usually, this is the same as
+ *	getgroups() and setgroups().  Usually, this is the same as
  *	gidtype (gid_t) , but sometimes it isn't.
- *	It can be int, ushort, uid_t, etc... 
+ *	It can be int, ushort, gid_t, etc... 
  *	It may be necessary to include <sys/types.h> to get any 
  *	typedef'ed information.  This is only required if you have
  *	getgroups() or setgropus()..
@@ -2877,6 +2883,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	This symbol defines the format string used for printing a Uid_t.
  */
 #define	Uid_t_f		$uidformat		/**/
+
+/* Uid_t_sign:
+ *	This symbol holds the signedess of a Uid_t.
+ *	1 for unsigned, -1 for signed.
+ */
+#define Uid_t_sign	$uidsign		/* UID sign */
 
 /* Uid_t_size:
  *	This symbol holds the size of a Uid_t in bytes.

@@ -470,7 +470,7 @@ PP(pp_die)
 		GV *gv = gv_fetchmethod(stash, "PROPAGATE");
 		if (gv) {
 		    SV *file = sv_2mortal(newSVpv(CopFILE(PL_curcop),0));
-		    SV *line = sv_2mortal(newSViv(CopLINE(PL_curcop)));
+		    SV *line = sv_2mortal(newSVuv(CopLINE(PL_curcop)));
 		    EXTEND(SP, 3);
 		    PUSHMARK(SP);
 		    PUSHs(error);
@@ -864,9 +864,9 @@ PP(pp_dbmopen)
     PUSHs(sv);
     PUSHs(left);
     if (SvIV(right))
-	PUSHs(sv_2mortal(newSViv(O_RDWR|O_CREAT)));
+	PUSHs(sv_2mortal(newSVuv(O_RDWR|O_CREAT)));
     else
-	PUSHs(sv_2mortal(newSViv(O_RDWR)));
+	PUSHs(sv_2mortal(newSVuv(O_RDWR)));
     PUSHs(right);
     PUTBACK;
     call_sv((SV*)GvCV(gv), G_SCALAR);
@@ -877,7 +877,7 @@ PP(pp_dbmopen)
 	PUSHMARK(SP);
 	PUSHs(sv);
 	PUSHs(left);
-	PUSHs(sv_2mortal(newSViv(O_RDONLY)));
+	PUSHs(sv_2mortal(newSVuv(O_RDONLY)));
 	PUSHs(right);
 	PUTBACK;
 	call_sv((SV*)GvCV(gv), G_SCALAR);
@@ -1793,9 +1793,9 @@ PP(pp_sysseek)
 #if LSEEKSIZE > IVSIZE
 	XPUSHs(sv_2mortal(newSVnv((NV) offset)));
 #else
-	XPUSHs(sv_2mortal(newSViv((IV) offset)));
+	XPUSHs(sv_2mortal(newSViv(offset)));
 #endif
-	XPUSHs(sv_2mortal(newSViv((IV) whence)));
+	XPUSHs(sv_2mortal(newSViv(whence)));
 	PUTBACK;
 	ENTER;
 	call_method("SEEK", G_SCALAR);
@@ -1807,15 +1807,15 @@ PP(pp_sysseek)
     if (PL_op->op_type == OP_SEEK)
 	PUSHs(boolSV(do_seek(gv, offset, whence)));
     else {
-	Off_t n = do_sysseek(gv, offset, whence);
-        if (n < 0)
+	Off_t sought = do_sysseek(gv, offset, whence);
+        if (sought < 0)
             PUSHs(&PL_sv_undef);
         else {
-            SV* sv = n ?
+            SV* sv = sought ?
 #if LSEEKSIZE > IVSIZE
-                newSVnv((NV)n)
+                newSVnv((NV)sought)
 #else
-                newSViv((IV)n)
+                newSViv(sought)
 #endif
                 : newSVpvn(zero_but_true, ZBTLEN);
             PUSHs(sv_2mortal(sv));
@@ -2541,17 +2541,25 @@ PP(pp_stat)
 	EXTEND_MORTAL(max);
 	PUSHs(sv_2mortal(newSViv(PL_statcache.st_dev)));
 	PUSHs(sv_2mortal(newSViv(PL_statcache.st_ino)));
-	PUSHs(sv_2mortal(newSViv(PL_statcache.st_mode)));
-	PUSHs(sv_2mortal(newSViv(PL_statcache.st_nlink)));
+	PUSHs(sv_2mortal(newSVuv(PL_statcache.st_mode)));
+	PUSHs(sv_2mortal(newSVuv(PL_statcache.st_nlink)));
 #if Uid_t_size > IVSIZE
 	PUSHs(sv_2mortal(newSVnv(PL_statcache.st_uid)));
 #else
+#   if Uid_t_sign <= 0
 	PUSHs(sv_2mortal(newSViv(PL_statcache.st_uid)));
+#   else
+	PUSHs(sv_2mortal(newSVuv(PL_statcache.st_uid)));
+#   endif
 #endif
 #if Gid_t_size > IVSIZE 
 	PUSHs(sv_2mortal(newSVnv(PL_statcache.st_gid)));
 #else
+#   if Gid_t_sign <= 0
 	PUSHs(sv_2mortal(newSViv(PL_statcache.st_gid)));
+#   else
+	PUSHs(sv_2mortal(newSVuv(PL_statcache.st_gid)));
+#   endif
 #endif
 #ifdef USE_STAT_RDEV
 	PUSHs(sv_2mortal(newSViv(PL_statcache.st_rdev)));
@@ -2573,8 +2581,8 @@ PP(pp_stat)
 	PUSHs(sv_2mortal(newSViv(PL_statcache.st_ctime)));
 #endif
 #ifdef USE_STAT_BLOCKS
-	PUSHs(sv_2mortal(newSViv(PL_statcache.st_blksize)));
-	PUSHs(sv_2mortal(newSViv(PL_statcache.st_blocks)));
+	PUSHs(sv_2mortal(newSVuv(PL_statcache.st_blksize)));
+	PUSHs(sv_2mortal(newSVuv(PL_statcache.st_blocks)));
 #else
 	PUSHs(sv_2mortal(newSVpvn("", 0)));
 	PUSHs(sv_2mortal(newSVpvn("", 0)));
@@ -4801,7 +4809,11 @@ PP(pp_gpwent)
 	PUSHs(sv = sv_newmortal());
 	if (pwent) {
 	    if (which == OP_GPWNAM)
+#if Uid_t_sign <= 0
 		sv_setiv(sv, (IV)pwent->pw_uid);
+#else
+		sv_setuv(sv, (UV)pwent->pw_uid);
+#endif
 	    else
 		sv_setpv(sv, pwent->pw_name);
 	}
@@ -4823,13 +4835,24 @@ PP(pp_gpwent)
 	sv_setpv(sv, pwent->pw_passwd);
 #   endif
 #endif
+#ifndef INCOMPLETE_TAINTS
+	/* passwd is tainted because user himself can diddle with it. */
+	SvTAINTED_on(sv);
+#endif
 
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
+#if Uid_t_sign <= 0
 	sv_setiv(sv, (IV)pwent->pw_uid);
+#else
+	sv_setuv(sv, (UV)pwent->pw_uid);
+#endif
 
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
+#if Uid_t_sign <= 0
 	sv_setiv(sv, (IV)pwent->pw_gid);
-
+#else
+	sv_setuv(sv, (UV)pwent->pw_gid);
+#endif
 	/* pw_change, pw_quota, and pw_age are mutually exclusive. */
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 #ifdef PWCHANGE
@@ -4868,6 +4891,10 @@ PP(pp_gpwent)
 
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setpv(sv, pwent->pw_shell);
+#ifndef INCOMPLETE_TAINTS
+	/* pw_shell is tainted because user himself can diddle with it. */
+	SvTAINTED_on(sv);
+#endif
 
 #ifdef PWEXPIRE
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));

@@ -1859,6 +1859,14 @@ various get routines are as follows:
 
 (If the entry doesn't exist you get a null list.)
 
+The exact meaning of the $gcos field varies but it usually contains
+the real name of the user (as opposed to the login name) and other
+information pertaining to the user.  Beware, however, that in many
+system users are able to change this information and therefore it
+cannot be trusted and therefore the $gcos is is tainted (see
+L<perlsec>).  The $passwd and $shell, user's encrypted password and
+login shell, are also tainted, because of the same reason.
+
 In scalar context, you get the name, unless the function was a
 lookup by name, in which case you get the other thing, whatever it is.
 (If the entry doesn't exist you get the undefined value.)  For example:
@@ -1871,26 +1879,25 @@ lookup by name, in which case you get the other thing, whatever it is.
     $name  = getgrent();
     #etc.
 
-In I<getpw*()> the fields $quota, $comment, and $expire are
-special cases in the sense that in many systems they are unsupported.
-If the $quota is unsupported, it is an empty scalar.  If it is
-supported, it usually encodes the disk quota.  If the $comment
-field is unsupported, it is an empty scalar.  If it is supported it
-usually encodes some administrative comment about the user.  In some
-systems the $quota field may be $change or $age, fields that have
-to do with password aging.  In some systems the $comment field may
-be $class.  The $expire field, if present, encodes the expiration
-period of the account or the password.  For the availability and the
-exact meaning of these fields in your system, please consult your
-getpwnam(3) documentation and your F<pwd.h> file.  You can also find
-out from within Perl what your $quota and $comment fields mean
-and whether you have the $expire field by using the C<Config> module
-and the values C<d_pwquota>, C<d_pwage>, C<d_pwchange>, C<d_pwcomment>,
-and C<d_pwexpire>.  Shadow password files are only supported if your
-vendor has implemented them in the intuitive fashion that calling the
-regular C library routines gets the shadow versions if you're running
-under privilege.  Those that incorrectly implement a separate library
-call are not supported.
+In I<getpw*()> the fields $quota, $comment, and $expire are special
+cases in the sense that in many systems they are unsupported.  If the
+$quota is unsupported, it is an empty scalar.  If it is supported, it
+usually encodes the disk quota.  If the $comment field is unsupported,
+it is an empty scalar.  If it is supported it usually encodes some
+administrative comment about the user.  In some systems the $quota
+field may be $change or $age, fields that have to do with password
+aging.  In some systems the $comment field may be $class.  The $expire
+field, if present, encodes the expiration period of the account or the
+password.  For the availability and the exact meaning of these fields
+in your system, please consult your getpwnam(3) documentation and your
+F<pwd.h> file.  You can also find out from within Perl what your
+$quota and $comment fields mean and whether you have the $expire field
+by using the C<Config> module and the values C<d_pwquota>, C<d_pwage>,
+C<d_pwchange>, C<d_pwcomment>, and C<d_pwexpire>.  Shadow password
+files are only supported if your vendor has implemented them in the
+intuitive fashion that calling the regular C library routines gets the
+shadow versions if you're running under privilege.  Those that
+incorrectly implement a separate library call are not supported.
 
 The $members value returned by I<getgr*()> is a space separated list of
 the login names of the members of the group.
@@ -2490,22 +2497,25 @@ Calls the System V IPC function msgget(2).  Returns the message queue
 id, or the undefined value if there is an error.  See also C<IPC::SysV>
 and C<IPC::Msg> documentation.
 
-=item msgsnd ID,MSG,FLAGS
-
-Calls the System V IPC function msgsnd to send the message MSG to the
-message queue ID.  MSG must begin with the native long integer message
-type, which may be created with C<pack("l!", $type)>.  Returns true if
-successful, or false if there is an error.  See also C<IPC::SysV> and
-C<IPC::SysV::Msg> documentation.
-
 =item msgrcv ID,VAR,SIZE,TYPE,FLAGS
 
 Calls the System V IPC function msgrcv to receive a message from
 message queue ID into variable VAR with a maximum message size of
-SIZE.  Note that if a message is received, the message type will be
-the first thing in VAR, and the maximum length of VAR is SIZE plus the
-size of the message type.  Returns true if successful, or false if
-there is an error.  See also C<IPC::SysV> and C<IPC::SysV::Msg> documentation.
+SIZE.  Note that when a message is received, the message type as a
+native long integer will be the first thing in VAR, followed by the
+actual message.  This packing may be opened with C<unpack("l! a*")>.
+Taints the variable.  Returns true if successful, or false if there is
+an error.  See also C<IPC::SysV> and C<IPC::SysV::Msg> documentation.
+
+=item msgsnd ID,MSG,FLAGS
+
+Calls the System V IPC function msgsnd to send the message MSG to the
+message queue ID.  MSG must begin with the native long integer message
+type, and be followed by the length of the actual message, and finally
+the message itself.  This kind of packing can be achieved with
+C<pack("l! a*", $type, $message)>.  Returns true if successful,
+or false if there is an error.  See also C<IPC::SysV>
+and C<IPC::SysV::Msg> documentation.
 
 =item my EXPR
 
@@ -4015,8 +4025,8 @@ detaching from it.  When reading, VAR must be a variable that will
 hold the data read.  When writing, if STRING is too long, only SIZE
 bytes are used; if STRING is too short, nulls are written to fill out
 SIZE bytes.  Return true if successful, or false if there is an error.
-See also C<IPC::SysV> documentation and the C<IPC::Shareable> module
-from CPAN.
+shmread() taints the variable. See also C<IPC::SysV> documentation and
+the C<IPC::Shareable> module from CPAN.
 
 =item shutdown SOCKET,HOW
 

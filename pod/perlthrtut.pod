@@ -4,6 +4,14 @@ perlthrtut - tutorial on threads in Perl
 
 =head1 DESCRIPTION
 
+    WARNING: Threading is an experimental feature.  Both the interface
+    and implementation are subject to change drastically.  In fact, this
+    documentation describes the flavor of threads that was in version
+    5.005.  Perl 5.6.0 and later have the beginnings of support for
+    interpreter threads, which (when finished) is expected to be
+    significantly different from what is described here.  The information
+    contained here may therefore soon be obsolete.  Use at your own risk!
+
 One of the most prominent new features of Perl 5.005 is the inclusion
 of threads.  Threads make a number of things a lot easier, and are a
 very useful addition to your bag of programming tricks.

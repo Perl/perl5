@@ -541,6 +541,7 @@ PERL_CALLCONV SV*	Perl_newSV(pTHX_ STRLEN len);
 PERL_CALLCONV OP*	Perl_newSVREF(pTHX_ OP* o);
 PERL_CALLCONV OP*	Perl_newSVOP(pTHX_ I32 type, I32 flags, SV* sv);
 PERL_CALLCONV SV*	Perl_newSViv(pTHX_ IV i);
+PERL_CALLCONV SV*	Perl_newSVuv(pTHX_ UV u);
 PERL_CALLCONV SV*	Perl_newSVnv(pTHX_ NV n);
 PERL_CALLCONV SV*	Perl_newSVpv(pTHX_ const char* s, STRLEN len);
 PERL_CALLCONV SV*	Perl_newSVpvn(pTHX_ const char* s, STRLEN len);
