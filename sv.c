@@ -3902,14 +3902,19 @@ sv_2cv(SV *sv, HV **st, GV **gvp, I32 lref)
 	    SV **sp = &sv;		/* Used in tryAMAGICunDEREF macro. */
 	    tryAMAGICunDEREF(to_cv);
 
-	    cv = (CV*)SvRV(sv);
-	    if (SvTYPE(cv) != SVt_PVCV)
+	    sv = SvRV(sv);
+	    if (SvTYPE(sv) == SVt_PVCV) {
+		cv = (CV*)sv;
+		*gvp = Nullgv;
+		*st = CvSTASH(cv);
+		return cv;
+	    }
+	    else if(isGV(sv))
+		gv = (GV*)sv;
+	    else
 		croak("Not a subroutine reference");
-	    *gvp = Nullgv;
-	    *st = CvSTASH(cv);
-	    return cv;
 	}
-	if (isGV(sv))
+	else if (isGV(sv))
 	    gv = (GV*)sv;
 	else
 	    gv = gv_fetchpv(SvPV(sv, PL_na), lref, SVt_PVCV);
