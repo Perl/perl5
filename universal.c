@@ -174,6 +174,7 @@ XS(XS_version_vcmp);
 XS(XS_version_boolean);
 XS(XS_version_noop);
 XS(XS_version_is_alpha);
+XS(XS_version_qv);
 XS(XS_utf8_is_utf8);
 XS(XS_utf8_valid);
 XS(XS_utf8_encode);
@@ -217,6 +218,7 @@ Perl_boot_core_UNIVERSAL(pTHX)
 	newXS("version::(nomethod", XS_version_noop, file);
 	newXS("version::noop", XS_version_noop, file);
 	newXS("version::is_alpha", XS_version_is_alpha, file);
+	newXS("version::qv", XS_version_qv, file);
     }
     newXS("utf8::is_utf8", XS_utf8_is_utf8, file);
     newXS("utf8::valid", XS_utf8_valid, file);
@@ -332,6 +334,8 @@ XS(XS_UNIVERSAL_VERSION)
         SV *nsv = sv_newmortal();
         sv_setsv(nsv, sv);
         sv = nsv;
+	if ( !sv_derived_from(sv, "version"))
+	    upg_version(sv);
         undef = Nullch;
     }
     else {
@@ -355,13 +359,16 @@ XS(XS_UNIVERSAL_VERSION)
 			     "%s defines neither package nor VERSION--version check failed", str);
 	     }
 	}
-	if ( !sv_derived_from(sv, "version"))
-	    sv = new_version(sv);
 
-	if ( !sv_derived_from(req, "version"))
-	    req = new_version(req);
+	if ( !sv_derived_from(req, "version")) {
+	    /* req may very well be R/O, so create a new object */
+	    SV *nsv = sv_newmortal();
+	    sv_setsv(nsv, req);
+	    req = nsv;
+	    upg_version(req);
+	}
 
-	if ( vcmp( SvRV(req), SvRV(sv) ) > 0 )
+	if ( vcmp( req, sv ) > 0 )
 	    Perl_croak(aTHX_
 		"%s version %"SVf" required--this is only version %"SVf,
 		HvNAME(pkg), req, sv);
@@ -379,15 +386,20 @@ XS(XS_version_new)
 	Perl_croak(aTHX_ "Usage: version::new(class, version)");
     SP -= items;
     {
-/*	char *	class = (char *)SvPV_nolen(ST(0)); */
-        SV *version = ST(1);
+	char *	class = (char *)SvPV_nolen(ST(0));
+        SV *vs = ST(1);
+	SV *rv;
 	if (items == 3 )
 	{
-	    char *vs = savepvn(SvPVX(ST(2)),SvCUR(ST(2)));
-	    version = Perl_newSVpvf(aTHX_ "v%s",vs);
+	    vs = sv_newmortal(); 
+	    Perl_sv_setpvf(aTHX_ vs,"v%s",SvPV_nolen(ST(2)));
 	}
 
-	PUSHs(new_version(version));
+	rv = new_version(vs);
+	if ( strcmp(class,"version") != 0 ) /* inherited new() */
+	    sv_bless(rv, gv_stashpv(class,TRUE));
+
+	PUSHs(sv_2mortal(rv));
 	PUTBACK;
 	return;
     }
@@ -409,9 +421,7 @@ XS(XS_version_stringify)
 	  else
 	       Perl_croak(aTHX_ "lobj is not of type version");
 
-	  {
-	       PUSHs(vstringify(lobj));
-	  }
+	  PUSHs(sv_2mortal(vstringify(lobj)));
 
 	  PUTBACK;
 	  return;
@@ -434,9 +444,7 @@ XS(XS_version_numify)
 	  else
 	       Perl_croak(aTHX_ "lobj is not of type version");
 
-	  {
-	       PUSHs(vnumify(lobj));
-	  }
+	  PUSHs(sv_2mortal(vnumify(lobj)));
 
 	  PUTBACK;
 	  return;
@@ -480,7 +488,7 @@ XS(XS_version_vcmp)
 		    rs = newSViv(vcmp(lobj,rvs));
 	       }
 
-	       PUSHs(rs);
+	       PUSHs(sv_2mortal(rs));
 	  }
 
 	  PUTBACK;
@@ -507,7 +515,7 @@ XS(XS_version_boolean)
 	  {
 	       SV	*rs;
 	       rs = newSViv( vcmp(lobj,new_version(newSVpvn("0",1))) );
-	       PUSHs(rs);
+	       PUSHs(sv_2mortal(rs));
 	  }
 
 	  PUTBACK;
@@ -561,6 +569,43 @@ XS(XS_version_is_alpha)
     else
 	XSRETURN_NO;
 }
+	PUTBACK;
+	return;
+    }
+}
+
+XS(XS_version_qv)
+{
+    dXSARGS;
+    if (items != 1)
+	Perl_croak(aTHX_ "Usage: version::qv(ver)");
+    SP -= items;
+    {
+	SV *	ver = ST(0);
+	if ( !SvVOK(ver) ) /* only need to do with if not already v-string */
+	{
+	    SV *vs = sv_newmortal();
+	    char *version;
+	    if ( SvNOK(ver) ) /* may get too much accuracy */
+	    {
+		char tbuf[64];
+		sprintf(tbuf,"%.9"NVgf, SvNVX(ver));
+		version = savepv(tbuf);
+	    }
+	    else
+	    {
+		version = savepv(SvPV_nolen(ver));
+	    }
+	    (void)scan_version(version,vs,TRUE);
+	    Safefree(version);
+
+	    PUSHs(vs);
+	}
+	else
+	{
+	    PUSHs(sv_2mortal(new_version(ver)));
+	}
+
 	PUTBACK;
 	return;
     }

@@ -1772,15 +1772,17 @@ an RV.
 
 Function must be called with an already existing SV like
 
-    sv = NEWSV(92,0);
-    s = scan_version(s,sv);
+    sv = newSV(0);
+    s = scan_version(s,SV *sv, bool qv);
 
 Performs some preprocessing to the string to ensure that
 it has the correct characteristics of a version.  Flags the
 object if it contains an underscore (which denotes this
-is a beta version).
+is a alpha version).  The boolean qv denotes that the version
+should be interpreted as if it had multiple decimals, even if
+it doesn't.
 
-	char*	scan_version(char *vstr, SV *sv)
+	char*	scan_version(char *vstr, SV *sv, bool qv)
 
 =for hackers
 Found in file util.c

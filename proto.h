@@ -514,7 +514,7 @@ PERL_CALLCONV OP*	Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP* loop, I
 
 PERL_CALLCONV PERL_SI*	Perl_new_stackinfo(pTHX_ I32 stitems, I32 cxitems);
 PERL_CALLCONV char*	Perl_scan_vstring(pTHX_ char *vstr, SV *sv);
-PERL_CALLCONV char*	Perl_scan_version(pTHX_ char *vstr, SV *sv);
+PERL_CALLCONV char*	Perl_scan_version(pTHX_ char *vstr, SV *sv, bool qv);
 PERL_CALLCONV SV*	Perl_new_version(pTHX_ SV *ver);
 PERL_CALLCONV SV*	Perl_upg_version(pTHX_ SV *ver);
 PERL_CALLCONV SV*	Perl_vnumify(pTHX_ SV *vs);

@@ -121,7 +121,7 @@ test ! $a->can("export_tags");	# a method in Exporter
 test (eval { $a->VERSION }) == 2.718;
 
 test ! (eval { $a->VERSION(2.719) }) &&
-         $@ =~ /^Alice version 2.71(?:9|8999\d+) required--this is only version 2.718 at /;
+         $@ =~ /^Alice version 2\.719\.0 required--this is only version 2\.718\.0 at /;
 
 test (eval { $a->VERSION(2.718) }) && ! $@;
 
