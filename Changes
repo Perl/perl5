@@ -31,6 +31,49 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 11358] By: jhi                                   on 2001/07/13  14:26:36
+        Log: Subject: [PATCH @11328] Encode::Tcl.pm for iso-2022-(?:jp-[12]|cn)
+             From: SADAHIRO Tomoyuki <BQW10602@nifty.com> 
+             Date: Sat, 14 Jul 2001 00:06:30 +0900
+             Message-Id: <20010713235522.8406.BQW10602@nifty.com>
+     Branch: perl
+	   + ext/Encode/Encode/7bit-greek.enc
+	   + ext/Encode/Encode/7bit-latin1.enc
+	   + ext/Encode/Encode/cns11643-1.enc
+	   + ext/Encode/Encode/cns11643-2.enc
+	   + ext/Encode/Encode/iso2022-cn.enc
+	   + ext/Encode/Encode/iso2022-jp1.enc
+	   + ext/Encode/Encode/iso2022-jp2.enc
+	   ! MANIFEST ext/Encode/Encode/Tcl.pm
+	   ! ext/Encode/Encode/iso2022-kr.enc
+____________________________________________________________________________
+[ 11357] By: nick                                  on 2001/07/13  14:24:06
+        Log: Blind integrate mainline (as of 5.7.2?)
+     Branch: perlio
+	  !> AUTHORS Changes Porting/config.sh Porting/config_H
+	  !> README.netware ext/PerlIO/t/encoding.t makedef.pl patchlevel.h
+	  !> pod/perlhist.pod utils/libnetcfg.PL win32/Makefile
+	  !> win32/config_H.bc win32/config_H.gc win32/config_H.vc
+	  !> win32/makefile.mk
+____________________________________________________________________________
+[ 11355] By: jhi                                   on 2001/07/13  13:13:46
+        Log: Snip away the devel patchlevel.
+     Branch: perl
+	   ! patchlevel.h
+____________________________________________________________________________
+[ 11354] By: jhi                                   on 2001/07/13  13:12:01
+        Log: Bump the version to 5.7.2.
+     Branch: perl
+	   ! Porting/config.sh Porting/config_H patchlevel.h
+	   ! pod/perlhist.pod utils/libnetcfg.PL win32/Makefile
+	   ! win32/config_H.bc win32/config_H.gc win32/config_H.vc
+	   ! win32/makefile.mk
+____________________________________________________________________________
+[ 11353] By: jhi                                   on 2001/07/13  13:00:00
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
 [ 11352] By: jhi                                   on 2001/07/13  12:54:49
         Log: Reword.
      Branch: perl
