@@ -6871,7 +6871,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_lex_defer	= proto_perl->Ilex_defer;
     PL_lex_expect	= proto_perl->Ilex_expect;
     PL_lex_formbrack	= proto_perl->Ilex_formbrack;
-    PL_lex_fakebrack	= proto_perl->Ilex_fakebrack;
     PL_lex_dojoin	= proto_perl->Ilex_dojoin;
     PL_lex_starts	= proto_perl->Ilex_starts;
     PL_lex_stuff	= sv_dup_inc(proto_perl->Ilex_stuff);

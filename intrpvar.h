@@ -237,7 +237,6 @@ PERLVAR(Ilex_defer,	U32)		/* state after determined token */
 PERLVAR(Ilex_expect,	expectation)	/* expect after determined token */
 PERLVAR(Ilex_brackets,	I32)		/* bracket count */
 PERLVAR(Ilex_formbrack,	I32)		/* bracket count at outer format level */
-PERLVAR(Ilex_fakebrack,	I32)		/* outer bracket is mere delimiter */
 PERLVAR(Ilex_casemods,	I32)		/* casemod count */
 PERLVAR(Ilex_dojoin,	I32)		/* doing an array interpolation */
 PERLVAR(Ilex_starts,	I32)		/* how many interps done on level */

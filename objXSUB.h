@@ -230,8 +230,6 @@
 #define PL_lex_dojoin		(*Perl_Ilex_dojoin_ptr(aTHXo))
 #undef  PL_lex_expect
 #define PL_lex_expect		(*Perl_Ilex_expect_ptr(aTHXo))
-#undef  PL_lex_fakebrack
-#define PL_lex_fakebrack	(*Perl_Ilex_fakebrack_ptr(aTHXo))
 #undef  PL_lex_formbrack
 #define PL_lex_formbrack	(*Perl_Ilex_formbrack_ptr(aTHXo))
 #undef  PL_lex_inpat

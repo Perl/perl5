@@ -29,6 +29,9 @@ static char ident_too_long[] = "Identifier too long";
 
 static void restore_rsfp(pTHXo_ void *f);
 
+#define XFAKEBRACK 128
+#define XENUMMASK 127
+
 #define UTF (PL_hints & HINT_UTF8)
 /*
  * Note: we try to be careful never to call the isXXX_utf8() functions
@@ -358,7 +361,6 @@ Perl_lex_start(pTHX_ SV *line)
 
     SAVEI32(PL_lex_dojoin);
     SAVEI32(PL_lex_brackets);
-    SAVEI32(PL_lex_fakebrack);
     SAVEI32(PL_lex_casemods);
     SAVEI32(PL_lex_starts);
     SAVEI32(PL_lex_state);
@@ -385,7 +387,6 @@ Perl_lex_start(pTHX_ SV *line)
     PL_lex_defer = 0;
     PL_expect = XSTATE;
     PL_lex_brackets = 0;
-    PL_lex_fakebrack = 0;
     New(899, PL_lex_brackstack, 120, char);
     New(899, PL_lex_casestack, 12, char);
     SAVEFREEPV(PL_lex_brackstack);
@@ -961,7 +962,6 @@ S_sublex_push(pTHX)
     PL_lex_state = PL_sublex_info.super_state;
     SAVEI32(PL_lex_dojoin);
     SAVEI32(PL_lex_brackets);
-    SAVEI32(PL_lex_fakebrack);
     SAVEI32(PL_lex_casemods);
     SAVEI32(PL_lex_starts);
     SAVEI32(PL_lex_state);
@@ -986,7 +986,6 @@ S_sublex_push(pTHX)
 
     PL_lex_dojoin = FALSE;
     PL_lex_brackets = 0;
-    PL_lex_fakebrack = 0;
     New(899, PL_lex_brackstack, 120, char);
     New(899, PL_lex_casestack, 12, char);
     SAVEFREEPV(PL_lex_brackstack);
@@ -1034,7 +1033,6 @@ S_sublex_done(pTHX)
 	SAVEFREESV(PL_linestr);
 	PL_lex_dojoin = FALSE;
 	PL_lex_brackets = 0;
-	PL_lex_fakebrack = 0;
 	PL_lex_casemods = 0;
 	*PL_lex_casestack = '\0';
 	PL_lex_starts = 0;
@@ -2976,7 +2974,8 @@ Perl_yylex(pTHX)
 	    PL_lex_formbrack = 0;
 	if (PL_lex_state == LEX_INTERPNORMAL) {
 	    if (PL_lex_brackets == 0) {
-		if (PL_lex_fakebrack) {
+		if (PL_expect & XFAKEBRACK) {
+		    PL_expect &= XENUMMASK;
 		    PL_lex_state = LEX_INTERPEND;
 		    PL_bufptr = s;
 		    return yylex();	/* ignore fake brackets */
@@ -2987,9 +2986,9 @@ Perl_yylex(pTHX)
 		    PL_lex_state = LEX_INTERPEND;
 	    }
 	}
-	if (PL_lex_brackets < PL_lex_fakebrack) {
+	if (PL_expect & XFAKEBRACK) {
+	    PL_expect &= XENUMMASK;
 	    PL_bufptr = s;
-	    PL_lex_fakebrack = 0;
 	    return yylex();		/* ignore fake brackets */
 	}
 	force_next('}');
@@ -5603,8 +5602,6 @@ S_scan_ident(pTHX_ register char *s, register char *send, char *dest, STRLEN des
     char *bracket = 0;
     char funny = *s++;
 
-    if (PL_lex_brackets == 0)
-	PL_lex_fakebrack = 0;
     if (isSPACE(*s))
 	s = skipspace(s);
     d = dest;
@@ -5709,9 +5706,8 @@ S_scan_ident(pTHX_ register char *s, register char *send, char *dest, STRLEN des
 			"Ambiguous use of %c{%s%s} resolved to %c%s%s",
 			funny, dest, brack, funny, dest, brack);
 		}
-		PL_lex_fakebrack = PL_lex_brackets+1;
 		bracket++;
-		PL_lex_brackstack[PL_lex_brackets++] = XOPERATOR;
+		PL_lex_brackstack[PL_lex_brackets++] = XOPERATOR | XFAKEBRACK;
 		return s;
 	    }
 	} 

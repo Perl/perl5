@@ -282,7 +282,6 @@
 #define PL_lex_defer		(PERL_GET_INTERP->Ilex_defer)
 #define PL_lex_dojoin		(PERL_GET_INTERP->Ilex_dojoin)
 #define PL_lex_expect		(PERL_GET_INTERP->Ilex_expect)
-#define PL_lex_fakebrack	(PERL_GET_INTERP->Ilex_fakebrack)
 #define PL_lex_formbrack	(PERL_GET_INTERP->Ilex_formbrack)
 #define PL_lex_inpat		(PERL_GET_INTERP->Ilex_inpat)
 #define PL_lex_inwhat		(PERL_GET_INTERP->Ilex_inwhat)
@@ -548,7 +547,6 @@
 #define PL_lex_defer		(vTHX->Ilex_defer)
 #define PL_lex_dojoin		(vTHX->Ilex_dojoin)
 #define PL_lex_expect		(vTHX->Ilex_expect)
-#define PL_lex_fakebrack	(vTHX->Ilex_fakebrack)
 #define PL_lex_formbrack	(vTHX->Ilex_formbrack)
 #define PL_lex_inpat		(vTHX->Ilex_inpat)
 #define PL_lex_inwhat		(vTHX->Ilex_inwhat)
@@ -951,7 +949,6 @@
 #define PL_lex_defer		(aTHXo->interp.Ilex_defer)
 #define PL_lex_dojoin		(aTHXo->interp.Ilex_dojoin)
 #define PL_lex_expect		(aTHXo->interp.Ilex_expect)
-#define PL_lex_fakebrack	(aTHXo->interp.Ilex_fakebrack)
 #define PL_lex_formbrack	(aTHXo->interp.Ilex_formbrack)
 #define PL_lex_inpat		(aTHXo->interp.Ilex_inpat)
 #define PL_lex_inwhat		(aTHXo->interp.Ilex_inwhat)
@@ -1218,7 +1215,6 @@
 #define PL_Ilex_defer		PL_lex_defer
 #define PL_Ilex_dojoin		PL_lex_dojoin
 #define PL_Ilex_expect		PL_lex_expect
-#define PL_Ilex_fakebrack	PL_lex_fakebrack
 #define PL_Ilex_formbrack	PL_lex_formbrack
 #define PL_Ilex_inpat		PL_lex_inpat
 #define PL_Ilex_inwhat		PL_lex_inwhat
