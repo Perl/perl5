@@ -665,7 +665,22 @@ $define)
         echo "perly.y -> perly.c" >&2
         mv -f y.tab.c perly.c
         chmod u+w perly.c
-        sed -e 's/fprintf *( *stderr *,/PerlIO_printf(Perl_debug_log,/g' \
+        sed -e '/^#include "perl\.h"/a\
+\
+#define yydebug    PL_yydebug\
+#define yynerrs    PL_yynerrs\
+#define yyerrflag  PL_yyerrflag\
+#define yychar     PL_yychar\
+#define yyssp      PL_yyssp\
+#define yyvsp      PL_yyvsp\
+#define yyval      PL_yyval\
+#define yylval     PL_yylval'				\
+            -e '/YYSTYPE *yyval;/D'			\
+            -e '/YYSTYPE *yylval;/D'			\
+            -e '/int  yychar,/,/yynerrs;/D'		\
+            -e 's/int yydebug = 0;/yydebug = 0;/'	\
+            -e 's/[^_]realloc(/PerlMem_realloc(/g'	\
+            -e 's/fprintf *( *stderr *,/PerlIO_printf(Perl_debug_log,/g' \
             -e 's/y\.tab/perly/g' perly.c >perly.tmp && mv perly.tmp perly.c
         xxx="$xxx perly.c"
     fi

@@ -2270,7 +2270,9 @@ regclass(void)
 	if (!SIZE_ONLY) {
 #ifndef ASCIIish
 	    if ((isLOWER(lastvalue) && isLOWER(value)) ||
-		(isUPPER(lastvalue) && isUPPER(value))) {
+		(isUPPER(lastvalue) && isUPPER(value)))
+	    {
+		I32 i;
  		if (isLOWER(lastvalue)) {
  		    for (i = lastvalue; i <= value; i++)
 			if (isLOWER(i))
