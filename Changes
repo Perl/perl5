@@ -31,6 +31,104 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 11372] By: jhi                                   on 2001/07/14  09:19:18
+        Log: Subject: [PATCH h2xs.PL] use Getopt::Long (was Re: [PATCH] h2xs)
+             From: Jonathan Stowe <gellyfish@gellyfish.com>
+             Date: Sat, 14 Jul 2001 10:14:34 +0100 (BST)
+             Message-ID: <Pine.LNX.4.33.0107141008350.9915-100000@orpheus.gellyfish.com>
+     Branch: perl
+	   ! utils/h2xs.PL
+____________________________________________________________________________
+[ 11371] By: jhi                                   on 2001/07/14  09:18:09
+        Log: Subject: patch to add DEL to [:cntrl:]
+             From: Jeffrey Friedl <jfriedl@yahoo-inc.com>
+             Date: Fri, 13 Jul 2001 23:25:12 -0700 (PDT)
+             Message-Id: <200107140625.XAA01517@ventrue.corp.yahoo.com>
+     Branch: perl
+	   ! handy.h pod/perlre.pod regcomp.c t/op/pat.t
+____________________________________________________________________________
+[ 11370] By: jhi                                   on 2001/07/14  01:33:17
+        Log: Metaconfig unit change for #11369; plus a dependency nit.
+     Branch: metaconfig
+	   ! U/compline/nblock_io.U
+     Branch: metaconfig/U/perl
+	   ! Extensions.U
+____________________________________________________________________________
+[ 11369] By: jhi                                   on 2001/07/14  01:32:33
+        Log: #include <stdlib.h> so that exit() is prototyped,
+             noticed by Hugo.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 11368] By: jhi                                   on 2001/07/14  01:18:28
+        Log: Subject: [PATCH: perl@11359] possible fix for sprintf.t on VAX that loads %Config
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Fri, 13 Jul 2001 19:15:45 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10107131908370.270775-100000@aspara.forte.com>
+     Branch: perl
+	   ! t/op/sprintf.t
+____________________________________________________________________________
+[ 11367] By: jhi                                   on 2001/07/14  01:07:03
+        Log: Subject: [PATCH: perl@11359] fixup for Encode/Tcl.t on ruthless filesystems
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Fri, 13 Jul 2001 19:00:20 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10107131856280.270775-100000@aspara.forte.com>
+     Branch: perl
+	   ! ext/Encode/Encode/Tcl.t
+____________________________________________________________________________
+[ 11366] By: jhi                                   on 2001/07/13  22:48:47
+        Log: Add information about gcc 3.0 basic block profiling.
+     Branch: perl
+	   ! Makefile.SH pod/perlhack.pod pod/perltoc.pod
+____________________________________________________________________________
+[ 11365] By: jhi                                   on 2001/07/13  21:22:20
+        Log: Subject: Error in lib/PerlIO/Via.pm ?
+             From: Mark-Jason Dominus <mjd@plover.com>
+             Date: Fri, 13 Jul 2001 15:55:41 -0400
+             Message-ID: <20010713195541.26751.qmail@plover.com>
+     Branch: perl
+	   ! ext/PerlIO/Via/Via.pm
+____________________________________________________________________________
+[ 11364] By: jhi                                   on 2001/07/13  21:21:23
+        Log: Move both usemymalloc and d_bincompat5005 to the Platfom
+             section from the Compiler section.
+     Branch: perl
+	   ! myconfig.SH
+____________________________________________________________________________
+[ 11363] By: jhi                                   on 2001/07/13  21:19:34
+        Log: Handle glibc style of constant definitions using enum
+             with intervening #defines; from Brendan O'Dea.
+     Branch: perl
+	   ! utils/h2ph.PL
+____________________________________________________________________________
+[ 11362] By: jhi                                   on 2001/07/13  21:17:40
+        Log: Add LC_MESSAGES to the locale_h export tag (it already is
+             in the Makefile.PL and thusly eligible for an XS constant)
+             (see also maintperl #10543)
+     Branch: perl
+	   ! ext/POSIX/POSIX.pm
+____________________________________________________________________________
+[ 11361] By: jhi                                   on 2001/07/13  15:12:37
+        Log: Subject: Re: [patch] re_dup
+             From: Abhijit Menon-Sen <ams@wiw.org>
+             Date: Fri, 13 Jul 2001 21:41:09 +0530
+             Message-ID: <20010713214109.A3328@lustre.dyn.wiw.org>
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 11360] By: jhi                                   on 2001/07/13  15:11:45
+        Log: Subject: [patch] re_dup
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Fri, 13 Jul 2001 08:51:24 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.21.0107130848530.28844-100000@mako.covalent.net>
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 11359] By: jhi                                   on 2001/07/13  14:30:32
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 11358] By: jhi                                   on 2001/07/13  14:26:36
         Log: Subject: [PATCH @11328] Encode::Tcl.pm for iso-2022-(?:jp-[12]|cn)
              From: SADAHIRO Tomoyuki <BQW10602@nifty.com> 
