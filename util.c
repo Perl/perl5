@@ -185,13 +185,13 @@ MEM_SIZE size;
     if ((long)size < 0 || (long)count < 0)
 	croak("panic: calloc");
 #endif
+    size *= count;
+    ptr = malloc(size?size:1);	/* malloc(0) is NASTY on our system */
 #if !(defined(I286) || defined(atarist))
     DEBUG_m(PerlIO_printf(PerlIO_stderr(), "0x%x: (%05d) calloc %ld  x %ld bytes\n",ptr,an++,(long)count,(long)size));
 #else
     DEBUG_m(PerlIO_printf(PerlIO_stderr(), "0x%lx: (%05d) calloc %ld x %ld bytes\n",ptr,an++,(long)count,(long)size));
 #endif
-    size *= count;
-    ptr = malloc(size?size:1);	/* malloc(0) is NASTY on our system */
     if (ptr != Nullch) {
 	memset((void*)ptr, 0, size);
 	return ptr;
