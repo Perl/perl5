@@ -126,7 +126,7 @@ sub ExtUtils::MM_VMS::makeaperl;
 sub ExtUtils::MM_VMS::ext;
 sub ExtUtils::MM_VMS::nicetext;
 
-#use SelfLoader;
+our $AUTOLOAD;
 sub AUTOLOAD {
     my $code;
     if (defined fileno(DATA)) {
@@ -562,21 +562,21 @@ MM_VMS_REVISION = $ExtUtils::MM_VMS::Revision
 # DLBASE  = Basename part of dynamic library. May be just equal BASEEXT.
 ];
 
-    for $tmp (qw/
+    for my $tmp (qw/
 	      FULLEXT VERSION_FROM OBJECT LDFROM
 	      /	) {
 	next unless defined $self->{$tmp};
 	push @m, "$tmp = ",$self->fixpath($self->{$tmp},0),"\n";
     }
 
-    for $tmp (qw/
+    for my $tmp (qw/
 	      BASEEXT PARENT_NAME DLBASE INC DEFINE LINKTYPE
 	      /	) {
 	next unless defined $self->{$tmp};
 	push @m, "$tmp = $self->{$tmp}\n";
     }
 
-    for $tmp (qw/ XS MAN1PODS MAN3PODS PM /) {
+    for my $tmp (qw/ XS MAN1PODS MAN3PODS PM /) {
 	next unless defined $self->{$tmp};
 	my(%tmp,$key);
 	for $key (keys %{$self->{$tmp}}) {
@@ -585,7 +585,7 @@ MM_VMS_REVISION = $ExtUtils::MM_VMS::Revision
 	$self->{$tmp} = \%tmp;
     }
 
-    for $tmp (qw/ C O_FILES H /) {
+    for my $tmp (qw/ C O_FILES H /) {
 	next unless defined $self->{$tmp};
 	my(@tmp,$val);
 	for $val (@{$self->{$tmp}}) {
@@ -606,7 +606,7 @@ MAN3PODS = ',$self->wraplist(sort keys %{$self->{MAN3PODS}}),'
 
 ';
 
-    for $tmp (qw/
+    for my $tmp (qw/
 	      INST_MAN1DIR INSTALLMAN1DIR MAN1EXT INST_MAN3DIR INSTALLMAN3DIR MAN3EXT
 	      /) {
 	next unless defined $self->{$tmp};
@@ -705,7 +705,7 @@ sub cflags {
     # conflate the ones from $Config{'ccflags'} and $self->{DEFINE}
     # ($self->{DEFINE} has already been VMSified in constants() above)
     if ($self->{DEFINE}) { $quals .= $self->{DEFINE}; }
-    for $type (qw(Def Undef)) {
+    for my $type (qw(Def Undef)) {
 	my(@terms);
 	while ($quals =~ m:/${type}i?n?e?=([^/]+):ig) {
 		my $term = $1;
@@ -1419,7 +1419,7 @@ sub processPL {
         my $list = ref($self->{PL_FILES}->{$plfile})
 		? $self->{PL_FILES}->{$plfile}
 		: [$self->{PL_FILES}->{$plfile}];
-	foreach $target (@$list) {
+	foreach my $target (@$list) {
 	    my $vmsplfile = vmsify($plfile);
 	    my $vmsfile = vmsify($target);
 	    push @m, "
@@ -2051,6 +2051,8 @@ Consequently, it hasn't really been tested, and may well be incomplete.
 
 =cut
 
+our %olbs;
+
 sub makeaperl {
     my($self, %attribs) = @_;
     my($makefilename, $searchdirs, $static, $extra, $perlinc, $target, $tmp, $libperl) = 
@@ -2093,7 +2095,7 @@ $(MAP_TARGET) :: $(MAKE_APERL_FILE)
     $linkcmd =~ s/\s+/ /g;
 
     # Which *.olb files could we make use of...
-    local(%olbs);
+    local(%olbs);       # XXX can this be lexical?
     $olbs{$self->{INST_ARCHAUTODIR}} = "$self->{BASEEXT}\$(LIB_EXT)";
     require File::Find;
     File::Find::find(sub {
@@ -2190,6 +2192,7 @@ $(MAP_TARGET) :: $(MAKE_APERL_FILE)
     push @optlibs, @$extra;
 
     $target = "Perl$Config{'exe_ext'}" unless $target;
+    my $shrtarget;
     ($shrtarget,$targdir) = fileparse($target);
     $shrtarget =~ s/^([^.]*)/$1Shr/;
     $shrtarget = $targdir . $shrtarget;
