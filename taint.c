@@ -14,8 +14,10 @@ Perl_taint_proper(pTHX_ const char *f, const char *s)
     dTHR;	/* just for taint */
     char *ug;
 
+#ifdef HAS_SETEUID
     DEBUG_u(PerlIO_printf(Perl_debug_log,
             "%s %d %"Uid_t_f" %"Uid_t_f"\n", s, PL_tainted, PL_uid, PL_euid));
+#endif
 
     if (PL_tainted) {
 	if (!f)
