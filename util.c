@@ -19,11 +19,10 @@
 #include <signal.h>
 #endif
 
-/* Omit this -- it causes too much grief on mixed systems.
+/* XXX If this causes problems, set i_unistd=undef in the hint file.  */
 #ifdef I_UNISTD
 #  include <unistd.h>
 #endif
-*/
 
 #ifdef I_VFORK
 #  include <vfork.h>
@@ -58,7 +57,7 @@ static void xstat _((void));
  * allocated hunks back to the original New to track down any memory leaks.
  */
 
-char *
+Malloc_t
 safemalloc(size)
 #ifdef MSDOS
 unsigned long size;
@@ -66,7 +65,7 @@ unsigned long size;
 MEM_SIZE size;
 #endif /* MSDOS */
 {
-    char  *ptr;
+    Malloc_t ptr;
 #ifdef MSDOS
 	if (size > 0xffff) {
 		PerlIO_printf(PerlIO_stderr(), "Allocation too large: %lx\n", size) FLUSH;
@@ -96,18 +95,18 @@ MEM_SIZE size;
 
 /* paranoid version of realloc */
 
-char *
+Malloc_t
 saferealloc(where,size)
-char *where;
+Malloc_t where;
 #ifndef MSDOS
 MEM_SIZE size;
 #else
 unsigned long size;
 #endif /* MSDOS */
 {
-    char *ptr;
+    Malloc_t ptr;
 #if !defined(STANDARD_C) && !defined(HAS_REALLOC_PROTOTYPE)
-    char *realloc();
+    Malloc_t realloc();
 #endif /* !defined(STANDARD_C) && !defined(HAS_REALLOC_PROTOTYPE) */
 
 #ifdef MSDOS
@@ -151,7 +150,7 @@ unsigned long size;
 
 void
 safefree(where)
-char *where;
+Malloc_t where;
 {
 #if !(defined(I286) || defined(atarist))
     DEBUG_m( PerlIO_printf(Perl_debug_log, "0x%x: (%05d) free\n",where,an++));
@@ -166,12 +165,12 @@ char *where;
 
 /* safe version of calloc */
 
-char *
+Malloc_t
 safecalloc(count, size)
 MEM_SIZE count;
 MEM_SIZE size;
 {
-    char  *ptr;
+    Malloc_t ptr;
 
 #ifdef MSDOS
 	if (size * count > 0xffff) {
@@ -209,12 +208,12 @@ MEM_SIZE size;
 
 #define ALIGN sizeof(long)
 
-char *
+Malloc_t
 safexmalloc(x,size)
 I32 x;
 MEM_SIZE size;
 {
-    register char *where;
+    register Malloc_t where;
 
     where = safemalloc(size + ALIGN);
     xcount[x]++;
@@ -223,18 +222,18 @@ MEM_SIZE size;
     return where + ALIGN;
 }
 
-char *
+Malloc_t
 safexrealloc(where,size)
-char *where;
+Malloc_t where;
 MEM_SIZE size;
 {
-    register char *new = saferealloc(where - ALIGN, size + ALIGN);
+    register Malloc_t new = saferealloc(where - ALIGN, size + ALIGN);
     return new + ALIGN;
 }
 
 void
 safexfree(where)
-char *where;
+Malloc_t where;
 {
     I32 x;
 
@@ -246,13 +245,13 @@ char *where;
     safefree(where);
 }
 
-char *
+Malloc_t
 safexcalloc(x,count,size)
 I32 x;
 MEM_SIZE count;
 MEM_SIZE size;
 {
-    register char *where;
+    register Malloc_t where;
 
     where = safexmalloc(x, size * count + ALIGN);
     xcount[x]++;
@@ -551,12 +550,12 @@ SV *littlestr;
 	}
 	else {
 	    s = bigend - littlelen;
-	    if (*s == *little && bcmp((char*)s,(char*)little,littlelen)==0)
+	    if (*s == *little && memcmp((char*)s,(char*)little,littlelen)==0)
 		return (char*)s;		/* how sweet it is */
 	    else if (bigend[-1] == '\n' && little[littlelen-1] != '\n'
 	      && s > big) {
 		    s--;
-		if (*s == *little && bcmp((char*)s,(char*)little,littlelen)==0)
+		if (*s == *little && memcmp((char*)s,(char*)little,littlelen)==0)
 		    return (char*)s;
 	    }
 	    return Nullch;
