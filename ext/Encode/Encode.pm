@@ -1,9 +1,9 @@
 #
-# $Id: Encode.pm,v 1.83 2002/11/18 17:28:29 dankogai Exp $
+# $Id: Encode.pm,v 1.84 2003/01/10 12:00:16 dankogai Exp dankogai $
 #
 package Encode;
 use strict;
-our $VERSION = do { my @r = (q$Revision: 1.83 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.84 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG = 0;
 use XSLoader ();
 XSLoader::load(__PACKAGE__, $VERSION);
@@ -131,6 +131,7 @@ sub resolve_alias {
 sub encode($$;$)
 {
     my ($name, $string, $check) = @_;
+    return undef unless defined $string;
     $check ||=0;
     my $enc = find_encoding($name);
     unless(defined $enc){
@@ -145,6 +146,7 @@ sub encode($$;$)
 sub decode($$;$)
 {
     my ($name,$octets,$check) = @_;
+    return undef unless defined $octets;
     $check ||=0;
     my $enc = find_encoding($name);
     unless(defined $enc){
@@ -159,6 +161,7 @@ sub decode($$;$)
 sub from_to($$$;$)
 {
     my ($string,$from,$to,$check) = @_;
+    return undef unless defined $string;
     $check ||=0;
     my $f = find_encoding($from);
     unless (defined $f){
