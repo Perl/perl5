@@ -559,10 +559,10 @@ that make the distinction.
 
 Most operators that deal with positions or lengths in a string will
 automatically switch to using character positions, including
-C<chop()>, C<substr()>, C<pos()>, C<index()>, C<rindex()>,
+C<chop()>, C<chomp()>, C<substr()>, C<pos()>, C<index()>, C<rindex()>,
 C<sprintf()>, C<write()>, and C<length()>.  Operators that
 specifically do not switch include C<vec()>, C<pack()>, and
-C<unpack()>.  Operators that really don't care include C<chomp()>,
+C<unpack()>.  Operators that really don't care include
 operators that treats strings as a bucket of bits such as C<sort()>,
 and operators dealing with filenames.
 
