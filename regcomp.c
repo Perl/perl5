@@ -3132,9 +3132,7 @@ tryagain:
 		    p = regwhite(p, RExC_end);
 		if (UTF && FOLD) {
 		    /* Prime the casefolded buffer. */
-		    toFOLD_uni(ender, tmpbuf, &foldlen);
-		    /* Need to peek at the first character. */
-		    ender = utf8_to_uvchr(tmpbuf, 0);
+		    ender = toFOLD_uni(ender, tmpbuf, &foldlen);
 		}
 		if (ISMULT2(p)) { /* Back off on ?+*. */
 		    if (len)

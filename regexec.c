@@ -1002,8 +1002,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 			    goto got_it;
 			else {
 			     uvchr_to_utf8(tmpbuf, c);
-			     to_utf8_fold(tmpbuf, foldbuf, &foldlen);
-			     f = utf8_to_uvchr(foldbuf, 0);
+			     f = to_utf8_fold(tmpbuf, foldbuf, &foldlen);
 			     if ( f != c
 				  && (f == c1 || f == c2)
 				  && (ln == foldlen ||
@@ -1041,8 +1040,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 			    goto got_it;
 			else {
 			     uvchr_to_utf8(tmpbuf, c);
-			     to_utf8_fold(tmpbuf, foldbuf, &foldlen);
-			     f = utf8_to_uvchr(foldbuf, 0);
+			     f = to_utf8_fold(tmpbuf, foldbuf, &foldlen);
 			     if ( f != c
 				  && (f == c1 || f == c2)
 				  && (ln == foldlen ||
