@@ -29,6 +29,19 @@ Version v5.8.3		Maintenance release working toward v5.8.3
 --------------
 ____________________________________________________________________________
 ____________________________________________________________________________
+[ 21829] By: nicholas                              on 2003/11/30  21:35:03
+        Log: Integrate:
+             [ 21827]
+             Keep installing xsubpp in lib/ExtUtils,
+             so MakeMaker can find it.
+     Branch: maint-5.8/perl
+	   ! installperl
+____________________________________________________________________________
+[ 21825] By: nicholas                              on 2003/11/30  20:19:43
+        Log: Update Changes
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 21824] By: nicholas                              on 2003/11/30  19:00:33
         Log: Integrate:
              [ 21802]
