@@ -105,9 +105,9 @@ or has changed its UID.
 When directed at a process whose UID is not identical to that
 of the sending process, signal number zero may fail because
 you lack permission to send the signal, even though the process is alive.
-You may be able to determine the cause of failure using C<$!>.
+You may be able to determine the cause of failure using C<%!>.
 
-    unless (kill 0 => $pid or $! == $!{EPERM}) {
+    unless (kill 0 => $pid or $!{EPERM}) {
 	warn "$pid looks dead";
     }
 
