@@ -84,24 +84,19 @@ if [ "X$usethreads" != "X" ]; then
     xlc_r | cc_r)
 	;;
     cc | '') 
-	cc=xlc_r
+	cc=xlc_r # Let us be stricter.
         ;;
     *)
-	case "$cc" in
-	gcc)
-	    echo >&4 "You cannot use POSIX threads from GNU cc in AIX."
-	    ;;
-	*)
-	    echo >&4 "Unknown C compiler."
-	    ;;
-	esac
-	echo >&4 "You should use the AIX C compilers called xlc_r or cc_r."
-	echo >&4 "Cannot continue, aborting."
+	cat >&4 <<EOM
+Unknown C compiler '$cc'.
+For pthreads you should use the AIX C compilers xlc_r or cc_r.
+Cannot continue, aborting.
+EOM
 	exit 1
 	;;
     esac
 
-    # Add the POSIX threads library and use the re-entrant libc.
+    # Add the POSIX threads library and the re-entrant libc.
 
-    lddlflags=`echo $lddlflags | sed 's/ -lc$/ -lpthreads -lc_r/'`
+    lddlflags=`echo $lddlflags | sed 's/ -lc$/ -lpthreads -lc_r -lc/'`
 fi

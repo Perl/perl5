@@ -81,11 +81,8 @@ psig_name
 psig_ptr
 rcsid
 reall_srchlen
-regdump
 regexec_flags
 regkind
-regnext
-regprop
 repeat_amg
 repeat_ass_amg
 rshift_amg
@@ -881,7 +878,6 @@ q
 ref
 refkids
 regdump
-regexec_flags
 regnext
 regprop
 repeatcpy
