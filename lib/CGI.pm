@@ -18,16 +18,19 @@ use Carp 'croak';
 # The most recent version and complete docs are available at:
 #   http://stein.cshl.org/WWW/software/CGI/
 
-$CGI::revision = '$Id: CGI.pm,v 1.55 2001/09/26 02:15:52 lstein Exp $';
-$CGI::VERSION='2.78';
+$CGI::revision = '$Id: CGI.pm,v 1.56 2001/12/09 21:36:23 lstein Exp $';
+$CGI::VERSION='2.79';
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
 # $CGITempFile::TMPDIRECTORY = '/usr/tmp';
 use CGI::Util qw(rearrange make_attributes unescape escape expires);
 
-use constant XHTML_DTD => ['-//W3C//DTD XHTML Basic 1.0//EN',
-                           'http://www.w3.org/TR/xhtml-basic/xhtml-basic10.dtd'];
+#use constant XHTML_DTD => ['-//W3C//DTD XHTML Basic 1.0//EN',
+#                           'http://www.w3.org/TR/xhtml-basic/xhtml-basic10.dtd'];
+
+use constant XHTML_DTD => ['-//W3C//DTD XHTML 1.0 Transitional//EN',
+                           'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'];
 
 # >>>>> Here are some globals that you might want to adjust <<<<<<
 sub initialize_globals {
@@ -188,6 +191,9 @@ if ($needs_binmode) {
 			   input Select option comment charset escapeHTML/],
 		':html3'=>[qw/div table caption th td TR Tr sup Sub strike applet Param 
 			   embed basefont style span layer ilayer font frameset frame script small big/],
+                ':html4'=>[qw/abbr acronym bdo col colgroup del fieldset iframe
+                            ins label legend noframes noscript object optgroup Q 
+                            thead tbody tfoot/], 
 		':netscape'=>[qw/blink fontsize center/],
 		':form'=>[qw/textfield textarea filefield password_field hidden checkbox checkbox_group 
 			  submit reset defaults radio_group popup_menu button autoEscape
@@ -203,10 +209,10 @@ if ($needs_binmode) {
 		':ssl' => [qw/https/],
 		':imagemap' => [qw/Area Map/],
 		':cgi-lib' => [qw/ReadParse PrintHeader HtmlTop HtmlBot SplitParam Vars/],
-		':html' => [qw/:html2 :html3 :netscape/],
-		':standard' => [qw/:html2 :html3 :form :cgi/],
+		':html' => [qw/:html2 :html3 :html4 :netscape/],
+		':standard' => [qw/:html2 :html3 :html4 :form :cgi/],
 		':push' => [qw/multipart_init multipart_start multipart_end multipart_final/],
-		':all' => [qw/:html2 :html3 :netscape :form :cgi :internal/]
+		':all' => [qw/:html2 :html3 :netscape :form :cgi :internal :html4/]
 		);
 
 # to import symbols into caller
@@ -652,6 +658,20 @@ sub _compile {
     return "$pack\:\:$func_name";
 }
 
+sub _selected {
+  my $self = shift;
+  my $value = shift;
+  return '' unless $value;
+  return $XHTML ? qq( selected="1") : qq( selected);
+}
+
+sub _checked {
+  my $self = shift;
+  my $value = shift;
+  return '' unless $value;
+  return $XHTML ? qq( checked="1") : qq( checked);
+}
+
 sub _reset_globals { initialize_globals(); }
 
 sub _setup_symbols {
@@ -1021,20 +1041,20 @@ END_OF_FUNC
 sub Dump {
     my($self) = self_or_default(@_);
     my($param,$value,@result);
-    return '<UL></UL>' unless $self->param;
-    push(@result,"<UL>");
+    return '<ul></ul>' unless $self->param;
+    push(@result,"<ul>");
     foreach $param ($self->param) {
 	my($name)=$self->escapeHTML($param);
-	push(@result,"<LI><STRONG>$param</STRONG>");
-	push(@result,"<UL>");
+	push(@result,"<li><strong>$param</strong>");
+	push(@result,"<ul>");
 	foreach $value ($self->param($param)) {
 	    $value = $self->escapeHTML($value);
-            $value =~ s/\n/<BR>\n/g;
-	    push(@result,"<LI>$value");
+            $value =~ s/\n/<br>\n/g;
+	    push(@result,"<li>$value");
 	}
-	push(@result,"</UL>");
+	push(@result,"</ul>");
     }
-    push(@result,"</UL>");
+    push(@result,"</ul>");
     return join("\n",@result);
 }
 END_OF_FUNC
@@ -1298,11 +1318,11 @@ END_OF_FUNC
 # $script -> (option) Javascript code (-script)
 # $no_script -> (option) Javascript <noscript> tag (-noscript)
 # $meta -> (optional) Meta information tags
-# $head -> (optional) any other elements you'd like to incorporate into the <HEAD> tag
+# $head -> (optional) any other elements you'd like to incorporate into the <head> tag
 #           (a scalar or array ref)
 # $style -> (optional) reference to an external style sheet
 # @other -> (optional) any other named parameters you'd like to incorporate into
-#           the <BODY> tag.
+#           the <body> tag.
 ####
 'start_html' => <<'END_OF_FUNC',
 sub start_html {
@@ -1334,7 +1354,7 @@ sub start_html {
     push @result,qq(<?xml version="1.0" encoding="$encoding"?>) if $xml_dtd; 
 
     if (ref($dtd) && ref($dtd) eq 'ARRAY') {
-        push(@result,qq(<!DOCTYPE html\n\tPUBLIC "$dtd->[0]"\n\t"$dtd->[1]">));
+        push(@result,qq(<!DOCTYPE html\n\tPUBLIC "$dtd->[0]"\n\tSYSTEM "$dtd->[1]">));
     } else {
         push(@result,qq(<!DOCTYPE html\n\tPUBLIC "$dtd">));
     }
@@ -1461,7 +1481,7 @@ END_OF_FUNC
 
 #### Method: end_html
 # End an HTML document.
-# Trivial method for completeness.  Just returns "</BODY>"
+# Trivial method for completeness.  Just returns "</body>"
 ####
 'end_html' => <<'END_OF_FUNC',
 sub end_html {
@@ -1656,7 +1676,7 @@ END_OF_FUNC
 #   $rows ->  Optional number of rows in text area
 #   $columns -> Optional number of columns in text area
 # Returns:
-#   A string containing a <TEXTAREA></TEXTAREA> tag
+#   A string containing a <textarea></textarea> tag
 #
 'textarea' => <<'END_OF_FUNC',
 sub textarea {
@@ -1670,8 +1690,8 @@ sub textarea {
 
     $name = defined($name) ? $self->escapeHTML($name) : '';
     $current = defined($current) ? $self->escapeHTML($current) : '';
-    my($r) = $rows ? " rows=$rows" : '';
-    my($c) = $cols ? " cols=$cols" : '';
+    my($r) = $rows ? qq/ rows="$rows"/ : '';
+    my($c) = $cols ? qq/ cols="$cols"/ : '';
     my($other) = @other ? " @other" : '';
     return qq{<textarea name="$name"$r$c$other>$current</textarea>};
 }
@@ -1822,9 +1842,9 @@ sub checkbox {
 
     if (!$override && ($self->{'.fieldnames'}->{$name} || 
 		       defined $self->param($name))) {
-	$checked = grep($_ eq $value,$self->param($name)) ? ' checked="1"' : '';
+	$checked = grep($_ eq $value,$self->param($name)) ? $self->_checked(1) : '';
     } else {
-	$checked = $checked ? qq/ checked="1"/ : '';
+	$checked = $self->_checked($checked);
     }
     my($the_label) = defined $label ? $label : $name;
     $name = $self->escapeHTML($name);
@@ -1889,7 +1909,7 @@ sub checkbox_group {
 
     my($other) = @other ? " @other" : '';
     foreach (@values) {
-	$checked = $checked{$_} ? qq/ checked="1"/ : '';
+	$checked = $self->_checked($checked{$_});
 	$label = '';
 	unless (defined($nolabels) && $nolabels) {
 	    $label = $_;
@@ -2098,7 +2118,7 @@ sub popup_menu {
 
     $result = qq/<select name="$name"$other>\n/;
     foreach (@values) {
-	my($selectit) = defined($selected) ? ($selected eq $_ ? qq/selected="1"/ : '' ) : '';
+	my($selectit) = defined($selected) ? $self->_selected($selected eq $_) : '';
 	my($label) = $_;
 	$label = $labels->{$_} if defined($labels) && defined($labels->{$_});
 	my($value) = $self->escapeHTML($_);
@@ -2152,7 +2172,7 @@ sub scrolling_list {
     $name=$self->escapeHTML($name);
     $result = qq/<select name="$name"$has_size$is_multiple$other>\n/;
     foreach (@values) {
-	my($selectit) = $selected{$_} ? qq/selected="1"/ : '';
+	my($selectit) = $self->_selected($selected{$_});
 	my($label) = $_;
 	$label = $labels->{$_} if defined($labels) && defined($labels->{$_});
 	$label=$self->escapeHTML($label);
@@ -3552,10 +3572,10 @@ this:
 
    Code                           Generated HTML
    ----                           --------------
-   h1()                           <H1>
-   h1('some','contents');         <H1>some contents</H1>
-   h1({-align=>left});            <H1 ALIGN="LEFT">
-   h1({-align=>left},'contents'); <H1 ALIGN="LEFT">contents</H1>
+   h1()                           <h1>
+   h1('some','contents');         <h1>some contents</h1>
+   h1({-align=>left});            <h1 ALIGN="LEFT">
+   h1({-align=>left},'contents'); <h1 ALIGN="LEFT">contents</h1>
 
 HTML tags are described in more detail later.  
 
@@ -3944,8 +3964,13 @@ Import all methods that generate HTML 2.0 standard elements.
 
 =item B<:html3>
 
-Import all methods that generate HTML 3.0 proposed elements (such as
+Import all methods that generate HTML 3.0 elements (such as
 <table>, <super> and <sub>).
+
+=item B<:html4>
+
+Import all methods that generate HTML 4 elements (such as
+<abbrev>, <acronym> and <thead>).
 
 =item B<:netscape>
 
@@ -3958,7 +3983,7 @@ Import all HTML-generating shortcuts (i.e. 'html2' + 'html3' +
 
 =item B<:standard>
 
-Import "standard" features, 'html2', 'html3', 'form' and 'cgi'.
+Import "standard" features, 'html2', 'html3', 'html4', 'form' and 'cgi'.
 
 =item B<:all>
 
@@ -3971,7 +3996,7 @@ If you import a function name that is not part of CGI.pm, the module
 will treat it as a new HTML tag and generate the appropriate
 subroutine.  You can then use it like any other HTML tag.  This is to
 provide for the rapidly-evolving HTML "standard."  For example, say
-Microsoft comes out with a new tag called <GRADIENT> (which causes the
+Microsoft comes out with a new tag called <gradient> (which causes the
 user's desktop to be flooded with a rotating gradient fill until his
 machine reboots).  You don't need to wait for a new version of CGI.pm
 to start using it immediately:
@@ -4185,7 +4210,7 @@ For example:
 
 produces
 
-  <H1>Level 1 Header</H1>
+  <h1>Level 1 Header</h1>
 
 There will be some times when you want to produce the start and end
 tags yourself.  In this case, you can use the form start_I<tag_name>
@@ -4209,13 +4234,13 @@ the standard ones:
 
 =over 4
 
-=item 1. start_table() (generates a <TABLE> tag)
+=item 1. start_table() (generates a <table> tag)
 
-=item 2. end_table() (generates a </TABLE> tag)
+=item 2. end_table() (generates a </table> tag)
 
-=item 3. start_ul() (generates a <UL> tag)
+=item 3. start_ul() (generates a <ul> tag)
 
-=item 4. end_ul() (generates a </UL> tag)
+=item 4. end_ul() (generates a </ul> tag)
 
 =back
 
@@ -4357,15 +4382,15 @@ out an HTML document.  The start_html() routine creates the top of the
 page, along with a lot of optional information that controls the
 page's appearance and behavior.
 
-This method returns a canned HTML header and the opening <BODY> tag.
+This method returns a canned HTML header and the opening <body> tag.
 All parameters are optional.  In the named parameter form, recognized
 parameters are -title, -author, -base, -xbase, -dtd, -lang and -target
 (see below for the explanation).  Any additional parameters you
 provide, such as the Netscape unofficial BGCOLOR attribute, are added
-to the <BODY> tag.  Additional parameters must be proceeded by a
+to the <body> tag.  Additional parameters must be proceeded by a
 hyphen.
 
-The argument B<-xbase> allows you to provide an HREF for the <BASE> tag
+The argument B<-xbase> allows you to provide an HREF for the <base> tag
 different from the current location, as in
 
     -xbase=>"http://home.mcom.com/"
@@ -4384,12 +4409,12 @@ All relative links will be interpreted relative to this tag.
 You add arbitrary meta information to the header with the B<-meta>
 argument.  This argument expects a reference to an associative array
 containing name/value pairs of meta information.  These will be turned
-into a series of header <META> tags that look something like this:
+into a series of header <meta> tags that look something like this:
 
-    <META NAME="keywords" CONTENT="pharaoh secret mummy">
-    <META NAME="description" CONTENT="copyright 1996 King Tut">
+    <meta name="keywords" content="pharaoh secret mummy">
+    <meta name="description" content="copyright 1996 King Tut">
 
-To create an HTTP-EQUIV type of <META> tag, use B<-head>, described
+To create an HTTP-EQUIV type of <meta> tag, use B<-head>, described
 below.
 
 The B<-style> argument is used to incorporate cascading stylesheets
@@ -4397,7 +4422,7 @@ into your code.  See the section on CASCADING STYLESHEETS for more
 information.
 
 The B<-lang> argument is used to incorporate a language attribute into
-the <HTML> tag.  The default if not specified is "en-US" for US
+the <html> tag.  The default if not specified is "en-US" for US
 English.  For example:
 
     print $q->start_html(-lang=>'fr-CA');
@@ -4405,14 +4430,14 @@ English.  For example:
 The B<-encoding> argument can be used to specify the character set for
 XHTML.  It defaults to UTF-8 if not specified.
 
-You can place other arbitrary HTML elements to the <HEAD> section with the
-B<-head> tag.  For example, to place the rarely-used <LINK> element in the
+You can place other arbitrary HTML elements to the <head> section with the
+B<-head> tag.  For example, to place the rarely-used <link> element in the
 head section, use this:
 
     print start_html(-head=>Link({-rel=>'next',
 		                  -href=>'http://www.capricorn.com/s2.html'}));
 
-To incorporate multiple HTML elements into the <HEAD> section, just pass an
+To incorporate multiple HTML elements into the <head> section, just pass an
 array reference:
 
     print start_html(-head=>[ 
@@ -4423,7 +4448,7 @@ array reference:
 			     ]
 		     );
 
-And here's how to create an HTTP-EQUIV <META> tag:
+And here's how to create an HTTP-EQUIV <meta> tag:
 
       print start_html(-head=>meta({-http_equiv => 'Content-Type',
                                     -content    => 'text/html'}))
@@ -4433,7 +4458,7 @@ JAVASCRIPTING: The B<-script>, B<-noScript>, B<-onLoad>,
 B<-onMouseOver>, B<-onMouseOut> and B<-onUnload> parameters are used
 to add Netscape JavaScript calls to your pages.  B<-script> should
 point to a block of text containing JavaScript function definitions.
-This block will be placed within a <SCRIPT> block inside the HTML (not
+This block will be placed within a <script> block inside the HTML (not
 HTTP) header.  The block is placed in the header in order to give your
 page a fighting chance of having all its JavaScript functions in place
 even if the user presses the stop button before the page has loaded
@@ -4472,7 +4497,7 @@ Use the B<-noScript> parameter to pass some HTML text that will be displayed on
 browsers that do not have JavaScript (or browsers where JavaScript is turned
 off).
 
-Netscape 3.0 recognizes several attributes of the <SCRIPT> tag,
+Netscape 3.0 recognizes several attributes of the <script> tag,
 including LANGUAGE and SRC.  The latter is particularly interesting,
 as it allows you to keep the JavaScript code in a file or CGI script
 rather than cluttering up each page with the source.  To use these
@@ -4490,7 +4515,7 @@ one or more of -language, -src, or -code:
 	       );
 
 
-A final feature allows you to incorporate multiple <SCRIPT> sections into the
+A final feature allows you to incorporate multiple <script> sections into the
 header.  Just pass the list of script sections as an array reference.
 this allows you to specify different source files for different dialects
 of JavaScript.  Example:     
@@ -4511,7 +4536,6 @@ of JavaScript.  Example:
                                     }
                                  ]
                              );
-     </pre>
 
 If this looks a bit extreme, take my advice and stick with straight CGI scripting.  
 
@@ -4533,17 +4557,17 @@ The title
 
 =item 2.
 
-The author's e-mail address (will create a <LINK REV="MADE"> tag if present
+The author's e-mail address (will create a <link rev="MADE"> tag if present
 
 =item 3.
 
-A 'true' flag if you want to include a <BASE> tag in the header.  This
+A 'true' flag if you want to include a <base> tag in the header.  This
 helps resolve relative addresses to absolute ones when the document is moved, 
 but makes the document hierarchy non-portable.  Use with care!
 
 =item 4, 5, 6...
 
-Any other parameters you want to include in the <BODY> tag.  This is a good
+Any other parameters you want to include in the <body> tag.  This is a good
 place to put Netscape extensions, such as colors and wallpaper patterns.
 
 =back
@@ -4552,12 +4576,12 @@ place to put Netscape extensions, such as colors and wallpaper patterns.
 
 	print $query->end_html
 
-This ends an HTML document by printing the </BODY></HTML> tags.
+This ends an HTML document by printing the </body></html> tags.
 
 =head2 CREATING A SELF-REFERENCING URL THAT PRESERVES STATE INFORMATION:
 
     $myself = $query->self_url;
-    print q(<A HREF="$myself">I'm talking to myself.</A>);
+    print q(<a href="$myself">I'm talking to myself.</a>);
 
 self_url() will return a URL, that, when selected, will reinvoke
 this script with all its state information intact.  This is most
@@ -4566,9 +4590,9 @@ internal anchors but you don't want to disrupt the current contents
 of the form(s).  Something like this will do the trick.
 
      $myself = $query->self_url;
-     print "<A HREF=$myself#table1>See table 1</A>";
-     print "<A HREF=$myself#table2>See table 2</A>";
-     print "<A HREF=$myself#yourself>See for yourself</A>";
+     print "<a href=$myself#table1>See table 1</a>";
+     print "<a href=$myself#table2>See table 2</a>";
+     print "<a href=$myself#yourself>See for yourself</a>";
 
 If you want more control over what's returned, using the B<url()>
 method instead.
@@ -4677,7 +4701,7 @@ added for readability):
 
    <blockquote>
    Many years ago on the island of
-   <a HREF="http://crete.org/">Crete</a> there lived
+   <a href="http://crete.org/">Crete</a> there lived
    a minotaur named <strong>Fred.</strong> 
    </blockquote>
    <hr>
@@ -4700,12 +4724,12 @@ completely (see the next section for more details):
 The HTML methods will accept zero, one or multiple arguments.  If you
 provide no arguments, you get a single tag:
 
-   print hr;  	#  <HR>
+   print hr;  	#  <hr>
 
 If you provide one or more string arguments, they are concatenated
 together with spaces and placed between opening and closing tags:
 
-   print h1("Chapter","1"); # <H1>Chapter 1</H1>"
+   print h1("Chapter","1"); # <h1>Chapter 1</h1>"
 
 If the first argument is an associative array reference, then the keys
 and values of the associative array become the HTML tag's attributes:
@@ -4713,14 +4737,14 @@ and values of the associative array become the HTML tag's attributes:
    print a({-href=>'fred.html',-target=>'_new'},
       "Open a new frame");
 
-	    <A HREF="fred.html",TARGET="_new">Open a new frame</A>
+	    <a href="fred.html",target="_new">Open a new frame</a>
 
 You may dispense with the dashes in front of the attribute names if
 you prefer:
 
    print img {src=>'fred.gif',align=>'LEFT'};
 
-	   <IMG ALIGN="LEFT" SRC="fred.gif">
+	   <img align="LEFT" src="fred.gif">
 
 Sometimes an HTML tag attribute has no argument.  For example, ordered
 lists can be marked as COMPACT.  The syntax for this is an argument
@@ -4731,11 +4755,11 @@ that points to an undef string:
 Prior to CGI.pm version 2.41, providing an empty ('') string as an
 attribute argument was the same as providing undef.  However, this has
 changed in order to accommodate those who want to create tags of the form
-<IMG ALT="">.  The difference is shown in these two pieces of code:
+<img alt="">.  The difference is shown in these two pieces of code:
 
-   CODE                   RESULT
-   img({alt=>undef})      <IMG ALT>
-   img({alt=>''})         <IMT ALT="">
+     CODE                   RESULT
+     img({alt=>undef})      <img alt>
+     img({alt=>''})         <img alt="">
 
 =head2 THE DISTRIBUTIVE PROPERTY OF HTML SHORTCUTS
 
@@ -4751,12 +4775,12 @@ list:
 
 This example will result in HTML output that looks like this:
 
-   <UL>
-     <LI TYPE="disc">Sneezy</LI>
-     <LI TYPE="disc">Doc</LI>
-     <LI TYPE="disc">Sleepy</LI>
-     <LI TYPE="disc">Happy</LI>
-   </UL>
+   <ul>
+     <li type="disc">Sneezy</li>
+     <li type="disc">Doc</li>
+     <li type="disc">Sleepy</li>
+     <li type="disc">Happy</li>
+   </ul>
 
 This is extremely useful for creating tables.  For example:
 
@@ -4780,7 +4804,7 @@ Consider this bit of code:
 
 It will ordinarily return the string that you probably expect, namely:
 
-   <BLOCKQUOTE><EM>Hi</EM> mom!</BLOCKQUOTE>
+   <blockquote><em>Hi</em> mom!</blockquote>
 
 Note the space between the element "Hi" and the element "mom!".
 CGI.pm puts the extra space there using array interpolation, which is
@@ -4918,7 +4942,7 @@ autoEscape() method with a false value immediately after creating the CGI object
 
    print $query->isindex($action);
 
-Prints out an <ISINDEX> tag.  Not very exciting.  The parameter
+Prints out an <isindex> tag.  Not very exciting.  The parameter
 -action specifies the URL of the script to process the query.  The
 default is to process the query with the current script.
 
@@ -4936,14 +4960,14 @@ default is to process the query with the current script.
       <... various form stuff ...>
     print $query->endform;
 
-start_form() will return a <FORM> tag with the optional method,
+start_form() will return a <form> tag with the optional method,
 action and form encoding that you specify.  The defaults are:
 
     method: POST
     action: this script
     enctype: application/x-www-form-urlencoded
 
-endform() returns the closing </FORM> tag.  
+endform() returns the closing </form> tag.  
 
 Start_form()'s enctype argument tells the browser how to package the various
 fields of the form before sending the form to the server.  Two
@@ -4992,7 +5016,7 @@ for consistency and completeness.  If you find something wrong, you
 can put up an alert box or maybe fix things up yourself.  You can 
 abort the submission by returning false from this function.  
 
-Usually the bulk of JavaScript functions are defined in a <SCRIPT>
+Usually the bulk of JavaScript functions are defined in a <script>
 block in the HTML header and -onSubmit points to one of these function
 call.  See start_html() for details.
 
@@ -5924,11 +5948,11 @@ techniques for defining new frames programmatically:
 =item 1. Create a <Frameset> document
 
 After writing out the HTTP header, instead of creating a standard
-HTML document using the start_html() call, create a <FRAMESET> 
+HTML document using the start_html() call, create a <frameset> 
 document that defines the frames on the page.  Specify your script(s)
 (with appropriate parameters) as the SRC for each of the frames.
 
-There is no specific support for creating <FRAMESET> sections 
+There is no specific support for creating <frameset> sections 
 in CGI.pm, but the HTML is very simple to write.  See the frame
 documentation in Netscape's home pages for details 
 
@@ -5947,7 +5971,7 @@ document into that.  There are a number of magic names that you can
 use for targets.  See the frame documents on Netscape's home pages for
 details.
 
-=item 3. Specify the destination for the document in the <FORM> tag
+=item 3. Specify the destination for the document in the <form> tag
 
 You can specify the frame to load in the FORM tag itself.  With
 CGI.pm it looks like this:
@@ -5970,11 +5994,11 @@ CGI.pm has limited support for HTML3's cascading style sheets (css).
 To incorporate a stylesheet into your document, pass the
 start_html() method a B<-style> parameter.  The value of this
 parameter may be a scalar, in which case it is incorporated directly
-into a <STYLE> section, or it may be a hash reference.  In the latter
+into a <style> section, or it may be a hash reference.  In the latter
 case you should provide the hash with one or more of B<-src> or
 B<-code>.  B<-src> points to a URL where an externally-defined
 stylesheet can be found.  B<-code> points to a scalar value to be
-incorporated into a <STYLE> section.  Style definitions in B<-code>
+incorporated into a <style> section.  Style definitions in B<-code>
 override similarly-named ones in B<-src>, hence the name "cascading."
 
 You may also specify the type of the stylesheet by adding the optional
@@ -6084,23 +6108,23 @@ for debugging purposes:
 
 Produces something that looks like:
 
-    <UL>
-    <LI>name1
-	<UL>
-	<LI>value1
-	<LI>value2
-	</UL>
-    <LI>name2
-	<UL>
-	<LI>value1
-	</UL>
-    </UL>
+    <ul>
+    <li>name1
+	<ul>
+	<li>value1
+	<li>value2
+	</ul>
+    <li>name2
+	<ul>
+	<li>value1
+	</ul>
+    </ul>
 
 As a shortcut, you can interpolate the entire CGI object into a string
 and it will be replaced with the a nice HTML dump shown above:
 
     $query=new CGI;
-    print "<H2>Current Values</H2> $query\n";
+    print "<h2>Current Values</h2> $query\n";
 
 =head1 FETCHING ENVIRONMENT VARIABLES
 
@@ -6576,7 +6600,7 @@ for suggestions and bug fixes.
 
 	print $query->header;
 	print $query->start_html("Example CGI.pm Form");
-	print "<H1> Example CGI.pm Form</H1>\n";
+	print "<h1> Example CGI.pm Form</h1>\n";
 	&print_prompt($query);
 	&do_work($query);
 	&print_tail;
@@ -6586,31 +6610,31 @@ for suggestions and bug fixes.
 	   my($query) = @_;
 
 	   print $query->start_form;
-	   print "<EM>What's your name?</EM><BR>";
+	   print "<em>What's your name?</em><br>";
 	   print $query->textfield('name');
 	   print $query->checkbox('Not my real name');
 
-	   print "<P><EM>Where can you find English Sparrows?</EM><BR>";
+	   print "<p><em>Where can you find English Sparrows?</em><br>";
 	   print $query->checkbox_group(
 				 -name=>'Sparrow locations',
 				 -values=>[England,France,Spain,Asia,Hoboken],
 				 -linebreak=>'yes',
 				 -defaults=>[England,Asia]);
 
-	   print "<P><EM>How far can they fly?</EM><BR>",
+	   print "<p><em>How far can they fly?</em><br>",
 		$query->radio_group(
 			-name=>'how far',
 			-values=>['10 ft','1 mile','10 miles','real far'],
 			-default=>'1 mile');
 
-	   print "<P><EM>What's your favorite color?</EM>  ";
+	   print "<p><em>What's your favorite color?</em>  ";
 	   print $query->popup_menu(-name=>'Color',
 				    -values=>['black','brown','red','yellow'],
 				    -default=>'red');
 
 	   print $query->hidden('Reference','Monty Python and the Holy Grail');
 
-	   print "<P><EM>What have you got there?</EM><BR>";
+	   print "<p><em>What have you got there?</em><br>";
 	   print $query->scrolling_list(
 			 -name=>'possessions',
 			 -values=>['A Coconut','A Grail','An Icon',
@@ -6618,36 +6642,36 @@ for suggestions and bug fixes.
 			 -size=>5,
 			 -multiple=>'true');
 
-	   print "<P><EM>Any parting comments?</EM><BR>";
+	   print "<p><em>Any parting comments?</em><br>";
 	   print $query->textarea(-name=>'Comments',
 				  -rows=>10,
 				  -columns=>50);
 
-	   print "<P>",$query->reset;
+	   print "<p>",$query->reset;
 	   print $query->submit('Action','Shout');
 	   print $query->submit('Action','Scream');
 	   print $query->endform;
-	   print "<HR>\n";
+	   print "<hr>\n";
 	}
 
 	sub do_work {
 	   my($query) = @_;
 	   my(@values,$key);
 
-	   print "<H2>Here are the current settings in this form</H2>";
+	   print "<h2>Here are the current settings in this form</h2>";
 
 	   foreach $key ($query->param) {
-	      print "<STRONG>$key</STRONG> -> ";
+	      print "<strong>$key</strong> -> ";
 	      @values = $query->param($key);
-	      print join(", ",@values),"<BR>\n";
+	      print join(", ",@values),"<br>\n";
 	  }
 	}
 
 	sub print_tail {
 	   print <<END;
-	<HR>
-	<ADDRESS>Lincoln D. Stein</ADDRESS><BR>
-	<A HREF="/">Home Page</A>
+	<hr>
+	<address>Lincoln D. Stein</address><br>
+	<a href="/">Home Page</a>
 	END
 	}
 

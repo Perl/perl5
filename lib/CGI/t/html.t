@@ -5,7 +5,10 @@ BEGIN {
 	if ($ENV{PERL_CORE}) {
 		@INC = '../lib';
 	} else {
-		unshift @INC, qw( ../blib/lib ../blib/arch lib );
+		# Due to a bug in older versions of MakeMaker & Test::Harness,
+	        # we must ensure the blib's are in @INC, else we might use
+	        # the core CGI.pm
+		unshift @INC, qw( ../blib/lib ../blib/arch ../lib );
 	}
 }
 # Test ability to retrieve HTTP request info
@@ -62,8 +65,8 @@ test(12,header(-nph=>1) =~ m!HTTP/1.0 200 OK${CRLF}Server: cmdline${CRLF}Date:.+
 test(13,start_html() ."\n" eq <<END,"start_html()");
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html
-	PUBLIC "-//W3C//DTD XHTML Basic 1.0//EN"
-	"http://www.w3.org/TR/xhtml-basic/xhtml-basic10.dtd">
+	PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	SYSTEM "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en-US"><head><title>Untitled Document</title>
 </head><body>
 END
@@ -78,8 +81,8 @@ END
 test(15,start_html(-Title=>'The world of foo') ."\n" eq <<END,"start_html()");
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html
-	PUBLIC "-//W3C//DTD XHTML Basic 1.0//EN"
-	"http://www.w3.org/TR/xhtml-basic/xhtml-basic10.dtd">
+	PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	SYSTEM "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en-US"><head><title>The world of foo</title>
 </head><body>
 END
