@@ -28,6 +28,46 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 20141] By: jhi                                   on 2003/07/11  00:27:41
+        Log: Integrate:
+             [ 20137]
+             Retract the statements.
+             
+             [ 20138]
+             More retraction.
+             
+             [ 20139]
+             New order of seed.
+     Branch: maint-5.8/perl
+	  !> INSTALL pod/perlfunc.pod pod/perlrun.pod pod/perlsec.pod
+____________________________________________________________________________
+[ 20140] By: jhi                                   on 2003/07/11  00:25:36
+        Log: Refashion the perldelta.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 20136] By: jhi                                   on 2003/07/11  00:05:20
+        Log: Integrate:
+             [ 20134]
+             Check PERL_HASH_SEED even when tainted.
+             
+             [ 20135]
+             Chicken out: the hash randomisation is not on by default.
+             We switch over to the explicit mode: in other words, if
+             the $ENV{PERL_HASH_SEED} is on, we randomise.  Also, we
+             randomise only if PL_hash_seed_set is FALSE (this means
+             one can use PERL_HASH() before perl_run.)  Also, since
+             now PERL_HASH_SEED is okay even under -T, all should be fine.
+             (Ha!)
+     Branch: maint-5.8/perl
+	  !> embed.fnc embed.h embedvar.h intrpvar.h perl.c perl.h
+	  !> perlapi.h pod/perldiag.pod pod/perlrun.pod proto.h util.c
+____________________________________________________________________________
+[ 20133] By: jhi                                   on 2003/07/10  22:51:40
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 20132] By: jhi                                   on 2003/07/10  22:46:30
         Log: Integrate:
              [ 20129]
