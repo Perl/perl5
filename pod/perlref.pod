@@ -546,51 +546,58 @@ For this to work, the array must contain extra information.  The first
 element of the array has to be a hash reference that maps field names
 to array indices.  Here is an example:
 
-   $struct = [{foo => 1, bar => 2}, "FOO", "BAR"];
+    $struct = [{foo => 1, bar => 2}, "FOO", "BAR"];
 
-   $struct->{foo};  # same as $struct->[1], i.e. "FOO"
-   $struct->{bar};  # same as $struct->[2], i.e. "BAR"
+    $struct->{foo};  # same as $struct->[1], i.e. "FOO"
+    $struct->{bar};  # same as $struct->[2], i.e. "BAR"
 
-   keys %$struct;   # will return ("foo", "bar") in some order
-   values %$struct; # will return ("FOO", "BAR") in same some order
+    keys %$struct;   # will return ("foo", "bar") in some order
+    values %$struct; # will return ("FOO", "BAR") in same some order
 
-   while (my($k,$v) = each %$struct) {
+    while (my($k,$v) = each %$struct) {
        print "$k => $v\n";
-   }
+    }
 
 Perl will raise an exception if you try to access nonexistent fields.
-For better performance, Perl can also
-do the translation from field names to array indices at compile time for
-typed object references.  See L<fields>.
+To avoid inconsistencies, always use the fields::phash() function
+provided by the C<fields> pragma.
+
+    use fields;
+    $pseudohash = fields::phash(foo => "FOO", bar => "BAR");
+
+For better performance, Perl can also do the translation from field
+names to array indices at compile time for typed object references.
+See L<fields>.
 
 There are two ways to check for the existence of a key in a
 pseudo-hash.  The first is to use exists().  This checks to see if the
 given field has ever been set.  It acts this way to match the behavior
 of a regular hash.  For instance:
 
-	$phash = [{foo =>1, bar => 2, pants => 3}, 'FOO'];
-	$phash->{pants} = undef;
+    use fields;
+    $phash = fields::phash([qw(foo bar pants)], ['FOO']);
+    $phash->{pants} = undef;
 
-	print exists $phash->{foo};    # true, 'foo' was set in the declaration
-	print exists $phash->{bar};    # false, 'bar' has not been used.
-	print exists $phash->{pants};  # true, your 'pants' have been touched
+    print exists $phash->{foo};    # true, 'foo' was set in the declaration
+    print exists $phash->{bar};    # false, 'bar' has not been used.
+    print exists $phash->{pants};  # true, your 'pants' have been touched
 
 The second is to use exists() on the hash reference sitting in the
 first array element.  This checks to see if the given key is a valid
 field in the pseudo-hash.
 
-	print exists $phash->[0]{bar};	# true, 'bar' is a valid field
-	print exists $phash->[0]{shoes};# false, 'shoes' can't be used
+    print exists $phash->[0]{bar};	# true, 'bar' is a valid field
+    print exists $phash->[0]{shoes};# false, 'shoes' can't be used
 
 delete() on a pseudo-hash element only deletes the value corresponding
 to the key, not the key itself.  To delete the key, you'll have to
 explicitly delete it from the first hash element.
 
-	print delete $phash->{foo};     # prints $phash->[1], "FOO"
-	print exists $phash->{foo};     # false
-	print exists $phash->[0]{foo};  # true, key still exists
-	print delete $phash->[0]{foo};  # now key is gone
-	print $phash->{foo};            # runtime exception
+    print delete $phash->{foo};     # prints $phash->[1], "FOO"
+    print exists $phash->{foo};     # false
+    print exists $phash->[0]{foo};  # true, key still exists
+    print delete $phash->[0]{foo};  # now key is gone
+    print $phash->{foo};            # runtime exception
 
 =head2 Function Templates
 

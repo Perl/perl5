@@ -66,8 +66,7 @@ use fields qw(b1 d1 _b1 _d1);  # hide b1
 
 package main;
 
-sub fstr
-{
+sub fstr {
    my $h = shift;
    my @tmp;
    for my $k (sort {$h->{$a} <=> $h->{$b}} keys %$h) {
@@ -90,7 +89,7 @@ my %expect = (
     'Foo::Bar::Baz' => 'b1:1,b2:2,b3:3,foo:4,bar:5,baz:6',
 );
 
-print "1..", int(keys %expect)+7, "\n";
+print "1..", int(keys %expect)+13, "\n";
 my $testno = 0;
 while (my($class, $exp) = each %expect) {
    no strict 'refs';
@@ -125,9 +124,25 @@ print "ok ", ++$testno, "\n";
 print "not " unless "@$obj1{'b1','_b1','b1'}" eq "28 44 28";
 print "ok ", ++$testno, "\n";
 
+my $ph = fields::phash(a => 1, b => 2, c => 3);
+print "not " unless fstr($ph) eq 'a:1,b:2,c:3';
+print "ok ", ++$testno, "\n";
+
+$ph = fields::phash([qw/a b c/], [1, 2, 3]);
+print "not " unless fstr($ph) eq 'a:1,b:2,c:3';
+print "ok ", ++$testno, "\n";
+
+$ph = fields::phash([qw/a b c/], [1]);
+print "not " if exists $ph->{b} or exists $ph->{c} or !exists $ph->{a};
+print "ok ", ++$testno, "\n";
+
+eval '$ph = fields::phash("odd")';
+print "not " unless $@ && $@ =~ /^Odd number of/;
+print "ok ", ++$testno, "\n";
+
 #fields::_dump();
 
-# check if 
+# check if fields autovivify
 {
     package Foo;
     use fields qw(foo bar);
@@ -135,6 +150,20 @@ print "ok ", ++$testno, "\n";
 
     package main;
     my Foo $a = Foo->new();
+    $a->{foo} = ['a', 'ok ' . ++$testno, 'c'];
+    $a->{bar} = { A => 'ok ' . ++$testno };
+    print $a->{foo}[1], "\n";
+    print $a->{bar}->{A}, "\n";
+}
+
+# check if fields autovivify
+{
+    package Bar;
+    use fields qw(foo bar);
+    sub new { return fields::new($_[0]) }
+
+    package main;
+    my Bar $a = Bar::->new();
     $a->{foo} = ['a', 'ok ' . ++$testno, 'c'];
     $a->{bar} = { A => 'ok ' . ++$testno };
     print $a->{foo}[1], "\n";

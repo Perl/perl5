@@ -1477,8 +1477,8 @@ This surprising autovivification in what does not at first--or even
 second--glance appear to be an lvalue context may be fixed in a future
 release.
 
-See L<perlref/"Pseudo-hashes"> for specifics on how exists() acts when
-used on a pseudo-hash.
+See L<perlref/"Pseudo-hashes: Using an array as a hash"> for specifics
+on how exists() acts when used on a pseudo-hash.
 
 Use of a subroutine call, rather than a subroutine name, as an argument
 to exists() is an error.
@@ -1936,6 +1936,9 @@ standard Unix shell F</bin/csh> would do.  This is the internal function
 implementing the C<E<lt>*.cE<gt>> operator, but you can use it directly.
 If EXPR is omitted, C<$_> is used.  The C<E<lt>*.cE<gt>> operator is
 discussed in more detail in L<perlop/"I/O Operators">.
+
+Beginning with v5.6.0, this operator is implemented using the standard
+C<File::Glob> extension.  See L<File::Glob> for details.
 
 =item gmtime EXPR
 

@@ -34,7 +34,7 @@ eval {
 # and mingw32 uses said silly CRT
 $have_setlocale = 0 if $^O eq 'MSWin32' && $Config{cc} =~ /^(cl|gcc)/i;
 
-print "1..", ($have_setlocale ? 115 : 98), "\n";
+print "1..", ($have_setlocale ? 116 : 98), "\n";
 
 use vars qw(&LC_ALL);
 
@@ -388,6 +388,7 @@ my %Problem;
 my %Okay;
 my %Testing;
 my @Neoalpha;
+my %Neoalpha;
 
 sub tryneoalpha {
     my ($Locale, $i, $test) = @_;
@@ -451,6 +452,7 @@ foreach $Locale (@Locale) {
 	@Neoalpha = ();
 	for (keys %UPPER, keys %lower) {
 	    push(@Neoalpha, $_) if (/\W/);
+	    $Neoalpha{$_} = $_;
 	}
     }
 
@@ -642,11 +644,31 @@ foreach $Locale (@Locale) {
 		    lcA($x, $y) == 1 && lcB($x, $y) == 1 ||
 		    lcA($x, $z) == 0 && lcB($x, $z) == 0);
     }
+
+    debug "# testing 116 with locale '$Locale'\n";
+    {
+	use locale;
+
+	my @f = ();
+	foreach my $x (keys %UPPER) {
+	    my $y = lc $x;
+	    next unless uc $y eq $x;
+	    push @f, $x unless $x =~ /$y/i && $y =~ /$x/i;
+	}
+	foreach my $x (keys %lower) {
+	    my $y = uc $x;
+	    next unless lc $y eq $x;
+	    push @f, $x unless $x =~ /$y/i && $y =~ /$x/i;
+	}
+	tryneoalpha($Locale, 116, @f == 0);
+	print "# testing 116 failed for locale '$Locale' for characters @f\n"
+            if @f;
+    }
 }
 
 # Recount the errors.
 
-foreach (99..115) {
+foreach (99..116) {
     if ($Problem{$_} || !defined $Okay{$_} || !@{$Okay{$_}}) {
 	if ($_ == 102) {
 	    print "# The failure of test 102 is not necessarily fatal.\n";
@@ -662,7 +684,7 @@ foreach (99..115) {
 
 my $didwarn = 0;
 
-foreach (99..115) {
+foreach (99..116) {
     if ($Problem{$_}) {
 	my @f = sort keys %{ $Problem{$_} };
 	my $f = join(" ", @f);
