@@ -1437,6 +1437,7 @@ amagic_call(SV *left, SV *right, int method, int flags)
     SPAGAIN;
 
     res=POPs;
+    PUTBACK;
     POPSTACK;
     CATCH_SET(oldcatch);
 

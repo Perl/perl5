@@ -911,6 +911,7 @@ PP(pp_sort)
 	    qsortsv((myorigmark+1), max, FUNC_NAME_TO_PTR(sortcv));
 
 	    POPBLOCK(cx,PL_curpm);
+	    PL_stack_sp = newsp;
 	    POPSTACK;
 	    CATCH_SET(oldcatch);
 	}
