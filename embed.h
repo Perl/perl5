@@ -2195,6 +2195,7 @@
 #define ck_substr		Perl_ck_substr
 #define ck_svconst		Perl_ck_svconst
 #define ck_trunc		Perl_ck_trunc
+#define ck_unpack		Perl_ck_unpack
 #define pp_aassign		Perl_pp_aassign
 #define pp_abs			Perl_pp_abs
 #define pp_accept		Perl_pp_accept
@@ -4687,6 +4688,7 @@
 #define ck_substr(a)		Perl_ck_substr(aTHX_ a)
 #define ck_svconst(a)		Perl_ck_svconst(aTHX_ a)
 #define ck_trunc(a)		Perl_ck_trunc(aTHX_ a)
+#define ck_unpack(a)		Perl_ck_unpack(aTHX_ a)
 #define pp_aassign()		Perl_pp_aassign(aTHX)
 #define pp_abs()		Perl_pp_abs(aTHX)
 #define pp_accept()		Perl_pp_accept(aTHX)

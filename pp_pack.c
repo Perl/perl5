@@ -1707,8 +1707,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 PP(pp_unpack)
 {
     dSP;
-    SV *right = (MAXARG > 1) ? POPs : GvSV(PL_defgv);
-    SV *left = POPs;
+    dPOPPOPssrl;
     I32 gimme = GIMME_V;
     STRLEN llen;
     STRLEN rlen;

@@ -6191,6 +6191,18 @@ Perl_ck_trunc(pTHX_ OP *o)
 }
 
 OP *
+Perl_ck_unpack(pTHX_ OP *o)
+{
+    OP *kid = cLISTOPo->op_first;
+    if (kid->op_sibling) {
+	kid = kid->op_sibling;
+	if (!kid->op_sibling)
+	    kid->op_sibling = newDEFSVOP();
+    }
+    return ck_fun(o);
+}
+
+OP *
 Perl_ck_substr(pTHX_ OP *o)
 {
     o = ck_fun(o);

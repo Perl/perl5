@@ -1254,7 +1254,7 @@ EXT OP * (CPERLscope(*PL_check)[]) (pTHX_ OP *op) = {
 	MEMBER_TO_FPTR(Perl_ck_rvconst),	/* rv2hv */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* helem */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* hslice */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* unpack */
+	MEMBER_TO_FPTR(Perl_ck_unpack),	/* unpack */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* pack */
 	MEMBER_TO_FPTR(Perl_ck_split),	/* split */
 	MEMBER_TO_FPTR(Perl_ck_join),	/* join */
