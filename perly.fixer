@@ -21,8 +21,8 @@ tmp=/tmp/f$$
 
 if grep 'yaccpar 1.8 (Berkeley)' $input >/dev/null 2>&1; then
     cp $input $output
-    if test -f perly.c.diff; then
-	patch -F3 $output <perly.c.diff
+    if test -f perly_c.diff; then
+	patch -F3 $output <perly_c.diff
 	rm -rf $input
     fi
     exit
@@ -50,7 +50,7 @@ echo "Warning: the yacc you have used is not directly supported by perl."
 echo "The perly.fixer script will attempt to make some changes to the generated"
 echo "file. The changes may be incomplete and that might lead to problems later"
 echo "(especially with complex scripts). You may need to apply the changes"
-echo "embedded in perl.fixer (and/or perly.c.dif*) by hand."
+echo "embedded in perl.fixer (and/or perly_c.dif*) by hand."
 echo ""
 
 # Below, we check for various characteristic yaccpar outputs.

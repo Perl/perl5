@@ -37,7 +37,7 @@ README.threads		Notes about multithreading
 README.vms		Notes about VMS port
 README.win32		Notes about Win32 port
 Todo			The Wishlist
-Todo.5.005		What needs doing before 5.005 release
+Todo-5.005		What needs doing before 5.005 release
 XSLock.h		Include file for extensions built with PERL_OBJECT defined
 XSUB.h			Include file for extension subroutines
 av.c			Array value code
@@ -665,7 +665,7 @@ perlsfio.h		Prototype sfio mapping for PerlIO
 perlsh			A poor man's perl shell
 perlvars.h		Global variables
 perly.c			A byacc'ed perly.y
-perly.c.diff		Fixup perly.c to allow recursion
+perly_c.diff		Fixup perly.c to allow recursion
 perly.fixer		A program to remove yacc stack limitations
 perly.h			The header file for perly.c
 perly.y			Yacc grammar for perl
@@ -695,7 +695,7 @@ pod/perlcall.pod	Callback info
 pod/perldata.pod	Data structure info
 pod/perldebug.pod	Debugger info
 pod/perldelta.pod	Changes since last version
-pod/perldelta4.pod	Changes from 5.003 to 5.004
+pod/perld4.pod		Changes from 5.003 to 5.004
 pod/perldiag.pod	Diagnostic info
 pod/perldsc.pod		Data Structures Cookbook
 pod/perlembed.pod	Embedding info

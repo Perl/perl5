@@ -410,13 +410,13 @@ task.
 
 Some additional notes from Larry on this:
 
-Don't forget to regenerate perly.c.diff.
+Don't forget to regenerate perly_c.diff.
 
     byacc -d perly.y
     mv y.tab.c perly.c
-    patch perly.c <perly.c.diff
+    patch perly.c <perly_c.diff
     # manually apply any failed hunks
-    diff -c2 perly.c.orig perly.c >perly.c.diff
+    diff -c2 perly.c.orig perly.c >perly_c.diff
 
 One chunk of lines that often fails begins with
 
