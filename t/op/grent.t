@@ -80,7 +80,7 @@ foreach (sort keys %seen) {
     if ($times > 1) {
 	# Multiply defined groups are rarely intentional.
 	local $" = ", ";
-	warn "# Group '$_' defined multiple times in $where, lines: @{$seen{$_}}.\n";
+	print "# Group '$_' defined multiple times in $where, lines: @{$seen{$_}}.\n";
 	delete $suspect{$_};
     }
 }

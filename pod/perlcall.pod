@@ -971,7 +971,8 @@ and some C to call it
         /* Check the eval first */
         if (SvTRUE(ERRSV))
         {
-            printf ("Uh oh - %s\n", SvPV(ERRSV, PL_na)) ;
+	    STRLEN n_a;
+            printf ("Uh oh - %s\n", SvPV(ERRSV, n_a)) ;
             POPs ;
         }
         else
@@ -1013,7 +1014,8 @@ The code
 
     if (SvTRUE(ERRSV))
     {
-        printf ("Uh oh - %s\n", SvPV(ERRSV, PL_na)) ;
+	STRLEN n_a;
+        printf ("Uh oh - %s\n", SvPV(ERRSV, n_a)) ;
         POPs ;
     }
 

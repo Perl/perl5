@@ -3179,10 +3179,11 @@ sigaction(sig, action, oldaction = 0)
 				 PL_sig_name[sig],
 				 strlen(PL_sig_name[sig]),
 				 TRUE);
+	    STRLEN n_a;
 
 	    /* Remember old handler name if desired. */
 	    if (oldaction) {
-		char *hand = SvPVx(*sigsvp, PL_na);
+		char *hand = SvPVx(*sigsvp, n_a);
 		svp = hv_fetch(oldaction, "HANDLER", 7, TRUE);
 		sv_setpv(*svp, *hand ? hand : "DEFAULT");
 	    }
@@ -3193,7 +3194,7 @@ sigaction(sig, action, oldaction = 0)
 		svp = hv_fetch(action, "HANDLER", 7, FALSE);
 		if (!svp)
 		    croak("Can't supply an action without a HANDLER");
-		sv_setpv(*sigsvp, SvPV(*svp, PL_na));
+		sv_setpv(*sigsvp, SvPV(*svp, n_a));
 		mg_set(*sigsvp);	/* handles DEFAULT and IGNORE */
 		act.sa_handler = sighandler;
 

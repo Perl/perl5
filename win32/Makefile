@@ -29,7 +29,7 @@ INST_TOP	= $(INST_DRV)\perl
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-INST_VER	= \5.00553
+INST_VER	= \5.00554
 
 #
 # uncomment to enable threads-capabilities
@@ -113,10 +113,26 @@ INST_VER	= \5.00553
 # Some versions of Visual C don't define MSVCDIR in the environment,
 # so you may have to set CCHOME explicitly.
 #
+# If the path contains spaces, you can try putting it in double
+# quotes, but support for this is not well-tested, and various
+# other things may break, so you're kinda on your own if you are
+# into specious paths. :-)
+#
 #CCHOME		= f:\msvc20
 CCHOME		= $(MSVCDIR)
 CCINCDIR	= $(CCHOME)\include
 CCLIBDIR	= $(CCHOME)\lib
+
+#
+# additional compiler flags can be specified here.
+#
+# Adding -DPERL_POLLUTE enables support for old symbols, at the expense of
+# extreme pollution. You most probably want this if you're compiling modules
+# from CPAN, or other such serious uses of this experimental perl release.
+# We don't enable this by default because we want the modules to get fixed
+# instead of clinging to shortcuts like this one.
+#
+#BUILDOPT	= -DPERL_POLLUTE
 
 #
 # specify space-separated list of extra directories to look for libraries
@@ -159,9 +175,6 @@ USE_THREADS	= undef
 !IF "$(USE_MULTI)" == ""
 USE_MULTI	= undef
 !ENDIF
-
-#BUILDOPT	= -DPERL_GLOBAL_STRUCT
-# -DUSE_PERLIO -D__STDC__=1 -DUSE_SFIO -DI_SFIO -I\sfio97\include
 
 !IF "$(PROCESSOR_ARCHITECTURE)" == ""
 PROCESSOR_ARCHITECTURE	= x86

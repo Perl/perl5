@@ -168,6 +168,7 @@ sub import {
 
 	*PERL_VERSION				= *]	;
 	*ACCUMULATOR				= *^A	;
+	*COMPILING				= *^C	;
 	*DEBUGGING				= *^D	;
 	*SYSTEM_FD_MAX				= *^F	;
 	*INPLACE_EDIT				= *^I	;

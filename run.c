@@ -73,6 +73,7 @@ debop(OP *o)
 {
 #ifdef DEBUGGING
     SV *sv;
+    STRLEN n_a;
     deb("%s", PL_op_name[o->op_type]);
     switch (o->op_type) {
     case OP_CONST:
@@ -83,7 +84,7 @@ debop(OP *o)
 	if (cGVOPo->op_gv) {
 	    sv = NEWSV(0,0);
 	    gv_fullname3(sv, cGVOPo->op_gv, Nullch);
-	    PerlIO_printf(Perl_debug_log, "(%s)", SvPV(sv, PL_na));
+	    PerlIO_printf(Perl_debug_log, "(%s)", SvPV(sv, n_a));
 	    SvREFCNT_dec(sv);
 	}
 	else

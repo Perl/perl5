@@ -31,7 +31,7 @@ my %tests = (
 	15 => [ 255,   1],
 	16 => [ 255, 256],
 	# see if implicit close preserves $?
-	17 => [  0,  512, '{ local *F; open F, q[TEST]; close F } die;'],
+	17 => [  0,  512, '{ local *F; open F, q[TEST]; close F; $!=0 } die;'],
 );
 
 my $max = keys %tests;

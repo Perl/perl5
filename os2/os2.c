@@ -162,7 +162,8 @@ int
 os2_cond_wait(perl_cond *c, perl_mutex *m)
 {						
     int rc;
-    if ((rc = DosResetEventSem(*c,&PL_na)) && (rc != ERROR_ALREADY_RESET))
+    STRLEN n_a;
+    if ((rc = DosResetEventSem(*c,&n_a)) && (rc != ERROR_ALREADY_RESET))
 	croak("panic: COND_WAIT-reset: rc=%i", rc);		
     if (m) MUTEX_UNLOCK(m);					
     if (CheckOSError(DosWaitEventSem(*c,SEM_INDEFINITE_WAIT))
@@ -475,6 +476,7 @@ char *inicmd;
 	char **argsp = fargs;
 	char nargs = 4;
 	int force_shell;
+	STRLEN n_a;
 	
 	if (flag == P_WAIT)
 		flag = P_NOWAIT;
@@ -489,7 +491,7 @@ char *inicmd;
 	    ) /* will spawnvp use PATH? */
 	    TAINT_ENV();	/* testing IFS here is overkill, probably */
 	/* We should check PERL_SH* and PERLLIB_* as well? */
-	if (!really || !*(tmps = SvPV(really, PL_na)))
+	if (!really || !*(tmps = SvPV(really, n_a)))
 	    tmps = PL_Argv[0];
 
       reread:
@@ -794,6 +796,7 @@ register SV **sp;
     char *tmps = NULL;
     int rc;
     int flag = P_WAIT, trueflag, err, secondtry = 0;
+    STRLEN n_a;
 
     if (sp > mark) {
 	New(1301,PL_Argv, sp - mark + 3, char*);
@@ -806,7 +809,7 @@ register SV **sp;
 
 	while (++mark <= sp) {
 	    if (*mark)
-		*a++ = SvPVx(*mark, PL_na);
+		*a++ = SvPVx(*mark, n_a);
 	    else
 		*a++ = "";
 	}
@@ -1184,8 +1187,9 @@ XS(XS_File__Copy_syscopy)
     if (items < 2 || items > 3)
 	croak("Usage: File::Copy::syscopy(src,dst,flag=0)");
     {
-	char *	src = (char *)SvPV(ST(0),PL_na);
-	char *	dst = (char *)SvPV(ST(1),PL_na);
+	STRLEN n_a;
+	char *	src = (char *)SvPV(ST(0),n_a);
+	char *	dst = (char *)SvPV(ST(1),n_a);
 	U32	flag;
 	int	RETVAL, rc;
 
@@ -1214,6 +1218,7 @@ mod2fname(sv)
     AV  *av;
     SV  *svp;
     char *s;
+    STRLEN n_a;
 
     if (!SvROK(sv)) croak("Not a reference given to mod2fname");
     sv = SvRV(sv);
@@ -1224,7 +1229,7 @@ mod2fname(sv)
     if (avlen < 0) 
       croak("Empty array reference given to mod2fname");
 
-    s = SvPV(*av_fetch((AV*)sv, avlen, FALSE), PL_na);
+    s = SvPV(*av_fetch((AV*)sv, avlen, FALSE), n_a);
     strncpy(fname, s, 8);
     len = strlen(s);
     if (len < 6) pos = len;
@@ -1234,7 +1239,7 @@ mod2fname(sv)
     }
     avlen --;
     while (avlen >= 0) {
-	s = SvPV(*av_fetch((AV*)sv, avlen, FALSE), PL_na);
+	s = SvPV(*av_fetch((AV*)sv, avlen, FALSE), n_a);
 	while (*s) {
 	    sum = 33 * sum + *(s++);	/* 7 is primitive mod 13. */
 	}
@@ -1473,9 +1478,10 @@ XS(XS_OS2_Errors2Drive)
     if (items != 1)
 	croak("Usage: OS2::Errors2Drive(drive)");
     {
+	STRLEN n_a;
 	SV  *sv = ST(0);
 	int	suppress = SvOK(sv);
-	char	*s = suppress ? SvPV(sv, PL_na) : NULL;
+	char	*s = suppress ? SvPV(sv, n_a) : NULL;
 	char	drive = (s ? *s : 0);
 	unsigned long rc;
 
@@ -1660,7 +1666,8 @@ XS(XS_Cwd_sys_chdir)
     if (items != 1)
 	croak("Usage: Cwd::sys_chdir(path)");
     {
-	char *	path = (char *)SvPV(ST(0),PL_na);
+	STRLEN n_a;
+	char *	path = (char *)SvPV(ST(0),n_a);
 	bool	RETVAL;
 
 	RETVAL = sys_chdir(path);
@@ -1676,7 +1683,8 @@ XS(XS_Cwd_change_drive)
     if (items != 1)
 	croak("Usage: Cwd::change_drive(d)");
     {
-	char	d = (char)*SvPV(ST(0),PL_na);
+	STRLEN n_a;
+	char	d = (char)*SvPV(ST(0),n_a);
 	bool	RETVAL;
 
 	RETVAL = change_drive(d);
@@ -1692,7 +1700,8 @@ XS(XS_Cwd_sys_is_absolute)
     if (items != 1)
 	croak("Usage: Cwd::sys_is_absolute(path)");
     {
-	char *	path = (char *)SvPV(ST(0),PL_na);
+	STRLEN n_a;
+	char *	path = (char *)SvPV(ST(0),n_a);
 	bool	RETVAL;
 
 	RETVAL = sys_is_absolute(path);
@@ -1708,7 +1717,8 @@ XS(XS_Cwd_sys_is_rooted)
     if (items != 1)
 	croak("Usage: Cwd::sys_is_rooted(path)");
     {
-	char *	path = (char *)SvPV(ST(0),PL_na);
+	STRLEN n_a;
+	char *	path = (char *)SvPV(ST(0),n_a);
 	bool	RETVAL;
 
 	RETVAL = sys_is_rooted(path);
@@ -1724,7 +1734,8 @@ XS(XS_Cwd_sys_is_relative)
     if (items != 1)
 	croak("Usage: Cwd::sys_is_relative(path)");
     {
-	char *	path = (char *)SvPV(ST(0),PL_na);
+	STRLEN n_a;
+	char *	path = (char *)SvPV(ST(0),n_a);
 	bool	RETVAL;
 
 	RETVAL = sys_is_relative(path);
@@ -1755,7 +1766,8 @@ XS(XS_Cwd_sys_abspath)
     if (items < 1 || items > 2)
 	croak("Usage: Cwd::sys_abspath(path, dir = NULL)");
     {
-	char *	path = (char *)SvPV(ST(0),PL_na);
+	STRLEN n_a;
+	char *	path = (char *)SvPV(ST(0),n_a);
 	char *	dir;
 	char p[MAXPATHLEN];
 	char *	RETVAL;
@@ -1763,7 +1775,7 @@ XS(XS_Cwd_sys_abspath)
 	if (items < 2)
 	    dir = NULL;
 	else {
-	    dir = (char *)SvPV(ST(1),PL_na);
+	    dir = (char *)SvPV(ST(1),n_a);
 	}
 	if (path[0] == '.' && (path[1] == '/' || path[1] == '\\')) {
 	    path += 2;
@@ -1903,7 +1915,8 @@ XS(XS_Cwd_extLibpath_set)
     if (items < 1 || items > 2)
 	croak("Usage: Cwd::extLibpath_set(s, type = 0)");
     {
-	char *	s = (char *)SvPV(ST(0),PL_na);
+	STRLEN n_a;
+	char *	s = (char *)SvPV(ST(0),n_a);
 	bool	type;
 	U32	rc;
 	bool	RETVAL;

@@ -26,6 +26,13 @@ For information on what's new in this release, see the
 pod/perldelta.pod file.  For more detailed information about specific
 changes, see the Changes file.
 
+IMPORTANT NOTE:  5.005_53 and later releases do not export unadorned
+global symbols anymore.  This means most CPAN modules probably won't
+build under this release without adding '-DPERL_POLLUTE' to ccflags
+in config.sh.  This is not the default because we want the modules
+to get fixed *before* the 5.006 release.  pod/perldelta.pod contains
+additional notes about this.
+
 =head1 DESCRIPTION
 
 This document is written in pod format as an easy way to indicate its
@@ -62,7 +69,8 @@ The standard extensions supplied with Perl will be handled automatically.
 
 In a related issue, old extensions may possibly be affected by the
 changes in the Perl language in the current release.  Please see
-pod/perldelta.pod for a description of what's changed.
+pod/perldelta.pod (and pod/perl500Xdelta.pod) for a description of
+what's changed.
 
 =head1 WARNING:  This version requires a compiler that supports ANSI C.
 

@@ -63,7 +63,7 @@ sub ok ($;$$) {
     } else {
 	$expected = to_value(shift);
 	my ($regex,$ignore);
-	if ((ref($expected)||'') eq 're') {
+	if ((ref($expected)||'') eq 'Regexp') {
 	    $ok = $result =~ /$expected/;
 	} elsif (($regex) = ($expected =~ m,^ / (.+) / $,sx) or
 	    ($ignore, $regex) = ($expected =~ m,^ m([^\w\s]) (.+) \1 $,sx)) {
@@ -96,7 +96,7 @@ sub ok ($;$$) {
 		my $prefix = "Test $ntest";
 		print $TESTOUT "# $prefix got: '$result' ($context)\n";
 		$prefix = ' ' x (length($prefix) - 5);
-		if ((ref($expected)||'') eq 're') {
+		if ((ref($expected)||'') eq 'Regexp') {
 		    $expected = 'qr/'.$expected.'/'
 		} else {
 		    $expected = "'$expected'";

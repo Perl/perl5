@@ -1569,7 +1569,7 @@ sv_2pv(register SV *sv, STRLEN *lp)
 		    if ( ((SvFLAGS(sv) &
 			   (SVs_OBJECT|SVf_OK|SVs_GMG|SVs_SMG|SVs_RMG)) 
 			  == (SVs_OBJECT|SVs_RMG))
-			 && strEQ(s=HvNAME(SvSTASH(sv)), "re")
+			 && strEQ(s=HvNAME(SvSTASH(sv)), "Regexp")
 			 && (mg = mg_find(sv, 'r'))) {
 			dTHR;
 			regexp *re = (regexp *)mg->mg_obj;
@@ -3843,6 +3843,7 @@ sv_2io(SV *sv)
 {
     IO* io;
     GV* gv;
+    STRLEN n_a;
 
     switch (SvTYPE(sv)) {
     case SVt_PVIO:
@@ -3859,13 +3860,13 @@ sv_2io(SV *sv)
 	    croak(PL_no_usym, "filehandle");
 	if (SvROK(sv))
 	    return sv_2io(SvRV(sv));
-	gv = gv_fetchpv(SvPV(sv,PL_na), FALSE, SVt_PVIO);
+	gv = gv_fetchpv(SvPV(sv,n_a), FALSE, SVt_PVIO);
 	if (gv)
 	    io = GvIO(gv);
 	else
 	    io = 0;
 	if (!io)
-	    croak("Bad filehandle: %s", SvPV(sv,PL_na));
+	    croak("Bad filehandle: %s", SvPV(sv,n_a));
 	break;
     }
     return io;
@@ -3876,6 +3877,7 @@ sv_2cv(SV *sv, HV **st, GV **gvp, I32 lref)
 {
     GV *gv;
     CV *cv;
+    STRLEN n_a;
 
     if (!sv)
 	return *gvp = Nullgv, Nullcv;
@@ -3917,7 +3919,7 @@ sv_2cv(SV *sv, HV **st, GV **gvp, I32 lref)
 	else if (isGV(sv))
 	    gv = (GV*)sv;
 	else
-	    gv = gv_fetchpv(SvPV(sv, PL_na), lref, SVt_PVCV);
+	    gv = gv_fetchpv(SvPV(sv, n_a), lref, SVt_PVCV);
 	*gvp = gv;
 	if (!gv)
 	    return Nullcv;
@@ -3934,7 +3936,7 @@ sv_2cv(SV *sv, HV **st, GV **gvp, I32 lref)
 		   Nullop);
 	    LEAVE;
 	    if (!GvCVu(gv))
-		croak("Unable to create sub named \"%s\"", SvPV(sv,PL_na));
+		croak("Unable to create sub named \"%s\"", SvPV(sv,n_a));
 	}
 	return GvCVu(gv);
     }

@@ -593,6 +593,7 @@ SV *   sv ;
     DB_File	RETVAL = (DB_File)safemalloc(sizeof(DB_File_type)) ;
     void *	openinfo = NULL ;
     INFO	* info  = &RETVAL->info ;
+    STRLEN	n_a;
 
 /* printf("In ParseOpenInfo name=[%s] flags=[%d] mode = [%d]\n", name, flags, mode) ;  */
     Zero(RETVAL, 1, DB_File_type) ;
@@ -734,11 +735,11 @@ SV *   sv ;
 #endif
             svp = hv_fetch(action, "bfname", 6, FALSE); 
             if (svp && SvOK(*svp)) {
-		char * ptr = SvPV(*svp,PL_na) ;
+		char * ptr = SvPV(*svp,n_a) ;
 #ifdef DB_VERSION_MAJOR
-		name = (char*) PL_na ? ptr : NULL ;
+		name = (char*) n_a ? ptr : NULL ;
 #else
-                info->db_RE_bfname = (char*) (PL_na ? ptr : NULL) ;
+                info->db_RE_bfname = (char*) (n_a ? ptr : NULL) ;
 #endif
 	    }
 	    else
@@ -754,7 +755,7 @@ SV *   sv ;
             {
 		int value ;
                 if (SvPOK(*svp))
-		    value = (int)*SvPV(*svp, PL_na) ;
+		    value = (int)*SvPV(*svp, n_a) ;
 		else
 		    value = SvIV(*svp) ;
 
@@ -772,7 +773,7 @@ SV *   sv ;
             if (svp && SvOK(*svp))
             {
                 if (SvPOK(*svp))
-		    info->db_RE_bval = (u_char)*SvPV(*svp, PL_na) ;
+		    info->db_RE_bval = (u_char)*SvPV(*svp, n_a) ;
 		else
 		    info->db_RE_bval = (u_char)(unsigned long) SvIV(*svp) ;
 		DB_flags(info->flags, DB_DELIMITER) ;
@@ -1116,9 +1117,10 @@ db_DoTie_(isHASH, dbtype, name=undef, flags=O_CREAT|O_RDWR, mode=0666, type=DB_H
 	{
 	    char *	name = (char *) NULL ; 
 	    SV *	sv = (SV *) NULL ; 
+	    STRLEN	n_a;
 
 	    if (items >= 3 && SvOK(ST(2))) 
-	        name = (char*) SvPV(ST(2), PL_na) ; 
+	        name = (char*) SvPV(ST(2), n_a) ; 
 
             if (items == 6)
 	        sv = ST(5) ;
@@ -1248,6 +1250,7 @@ unshift(db, ...)
 	    int		i ;
 	    int		One ;
 	    DB *	Db = db->dbp ;
+	    STRLEN	n_a;
 
 	    DBT_flags(key) ; 
 	    DBT_flags(value) ; 
@@ -1261,8 +1264,8 @@ unshift(db, ...)
 #endif
 	    for (i = items-1 ; i > 0 ; --i)
 	    {
-	        value.data = SvPV(ST(i), PL_na) ;
-	        value.size = PL_na ;
+	        value.data = SvPV(ST(i), n_a) ;
+	        value.size = n_a ;
 	        One = 1 ;
 	        key.data = &One ;
 	        key.size = sizeof(int) ;
@@ -1345,6 +1348,7 @@ push(db, ...)
 	    DBT		value ;
 	    DB *	Db = db->dbp ;
 	    int		i ;
+	    STRLEN	n_a;
 
 	    DBT_flags(key) ; 
 	    DBT_flags(value) ; 
@@ -1360,8 +1364,8 @@ push(db, ...)
 	        {
 		    
 		    ++ (* (int*)key.data) ;
-	            value.data = SvPV(ST(i), PL_na) ;
-	            value.size = PL_na ;
+	            value.data = SvPV(ST(i), n_a) ;
+	            value.size = n_a ;
 	            RETVAL = (Db->put)(Db, NULL, &key, &value, 0) ;
 	            if (RETVAL != 0)
 	                break;
@@ -1369,8 +1373,8 @@ push(db, ...)
 #else
 	        for (i = items - 1 ; i > 0 ; --i)
 	        {
-	            value.data = SvPV(ST(i), PL_na) ;
-	            value.size = PL_na ;
+	            value.data = SvPV(ST(i), n_a) ;
+	            value.size = n_a ;
 	            RETVAL = (Db->put)(Db, keyptr, &value, R_IAFTER) ;
 	            if (RETVAL != 0)
 	                break;

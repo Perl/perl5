@@ -47,6 +47,7 @@
 #define PL_markstack_ptr	(PL_curinterp->Tmarkstack_ptr)
 #define PL_maxscream		(PL_curinterp->Tmaxscream)
 #define PL_modcount		(PL_curinterp->Tmodcount)
+#define PL_na			(PL_curinterp->Tna)
 #define PL_nrs			(PL_curinterp->Tnrs)
 #define PL_ofs			(PL_curinterp->Tofs)
 #define PL_ofslen		(PL_curinterp->Tofslen)
@@ -438,6 +439,7 @@
 #define PL_Tmarkstack_ptr	PL_markstack_ptr
 #define PL_Tmaxscream		PL_maxscream
 #define PL_Tmodcount		PL_modcount
+#define PL_Tna			PL_na
 #define PL_Tnrs			PL_nrs
 #define PL_Tofs			PL_ofs
 #define PL_Tofslen		PL_ofslen
@@ -572,6 +574,7 @@
 #define PL_markstack_ptr	(thr->Tmarkstack_ptr)
 #define PL_maxscream		(thr->Tmaxscream)
 #define PL_modcount		(thr->Tmodcount)
+#define PL_na			(thr->Tna)
 #define PL_nrs			(thr->Tnrs)
 #define PL_ofs			(thr->Tofs)
 #define PL_ofslen		(thr->Tofslen)
@@ -727,7 +730,6 @@
 #define PL_multi_end		(PL_Vars.Gmulti_end)
 #define PL_multi_open		(PL_Vars.Gmulti_open)
 #define PL_multi_start		(PL_Vars.Gmulti_start)
-#define PL_na			(PL_Vars.Gna)
 #define PL_nexttoke		(PL_Vars.Gnexttoke)
 #define PL_nexttype		(PL_Vars.Gnexttype)
 #define PL_nextval		(PL_Vars.Gnextval)
@@ -860,7 +862,6 @@
 #define PL_Gmulti_end		PL_multi_end
 #define PL_Gmulti_open		PL_multi_open
 #define PL_Gmulti_start		PL_multi_start
-#define PL_Gna			PL_na
 #define PL_Gnexttoke		PL_nexttoke
 #define PL_Gnexttype		PL_nexttype
 #define PL_Gnextval		PL_nextval

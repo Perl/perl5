@@ -2,6 +2,9 @@
 
 print "1..29\n";
 
+# XXX known to leak scalars
+$ENV{PERL_DESTRUCT_LEVEL} = 0 unless $ENV{PERL_DESTRUCT_LEVEL} > 3;
+
 sub backwards { $a lt $b ? 1 : $a gt $b ? -1 : 0 }
 
 my $upperfirst = 'A' lt 'a';

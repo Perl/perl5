@@ -164,11 +164,12 @@ setdef(...)
 	    struct FAB deffab = cc$rms_fab;
 	    struct NAM defnam = cc$rms_nam;
 	    struct dsc$descriptor_s dirdsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
+	    STRLEN n_a;
 	    if (items) {
 		SV *defsv = ST(items-1);  /* mimic chdir() */
 		ST(0) = &PL_sv_undef;
 		if (!SvPOK(defsv)) { SETERRNO(EINVAL,LIB$_INVARG); XSRETURN(1); }
-		if (tovmsspec(SvPV(defsv,PL_na),vmsdef) == NULL) { XSRETURN(1); }
+		if (tovmsspec(SvPV(defsv,n_a),vmsdef) == NULL) { XSRETURN(1); }
 		deffab.fab$l_fna = vmsdef; deffab.fab$b_fns = strlen(vmsdef);
 	    }
 	    else {
@@ -232,6 +233,7 @@ vmsopen(spec,...)
 	    char *args[8],mode[3] = {'r','\0','\0'}, type = '<';
 	    register int i, myargc;
 	    FILE *fp;
+	    STRLEN n_a;
 	
 	    if (!spec || !*spec) {
 	       SETERRNO(EINVAL,LIB$_INVARG);
@@ -250,7 +252,7 @@ vmsopen(spec,...)
 	    }
 	    else if (*spec == '<') spec++;
 	    myargc = items - 1;
-	    for (i = 0; i < myargc; i++) args[i] = SvPV(ST(i+1),PL_na);
+	    for (i = 0; i < myargc; i++) args[i] = SvPV(ST(i+1),n_a);
 	    /* This hack brought to you by C's opaque arglist management */
 	    switch (myargc) {
 	      case 0:
@@ -298,13 +300,14 @@ vmssysopen(spec,mode,perm,...)
 	    int i, myargc, fd;
 	    FILE *fp;
 	    SV *fh;
+	    STRLEN n_a;
 	    if (!spec || !*spec) {
 	       SETERRNO(EINVAL,LIB$_INVARG);
 	       XSRETURN_UNDEF;
 	    }
 	    if (items > 11) croak("too many args");
 	    myargc = items - 3;
-	    for (i = 0; i < myargc; i++) args[i] = SvPV(ST(i+3),PL_na);
+	    for (i = 0; i < myargc; i++) args[i] = SvPV(ST(i+3),n_a);
 	    /* More fun with C calls; can't combine with above because
 	       args 2,3 of different types in fopen() and open() */
 	    switch (myargc) {

@@ -1,6 +1,6 @@
 =head1 NAME
 
-perldelta - what's new for perl5.006
+perldelta - what's new for perl5.006 (as of 5.005_54)
 
 =head1 DESCRIPTION
 
@@ -8,19 +8,63 @@ This document describes differences between the 5.005 release and this one.
 
 =head1 Incompatible Changes
 
+=head2 Perl Source Incompatibilities
+
+None known at this time.
+
+=head2 C Source Incompatibilities
+
+=over 4
+
+=item C<PERL_POLLUTE>
+
+Release 5.005 grandfathered old global symbol names by providing preprocessor
+macros for extension source compatibility.  As of release 5.006, these
+preprocessor definitions are not available by default.  You need to explicitly
+compile perl with C<-DPERL_POLLUTE> in order to get these definitions.
+
+=item C<PL_na> and C<dTHR> Issues
+
+The C<PL_na> global is now thread local, so a C<dTHR> declaration is needed
+in the scope in which it appears.  XSUBs should handle this automatically,
+but if you have used C<PL_na> in support functions, you either need to
+change the C<PL_na> to a local variable (which is recommended), or put in
+a C<dTHR>.
+
+=back
+
+=head2 Binary Incompatibilities
+
+This release is not binary compatible with the 5.005 release and its
+maintenance versions.
+
 =head1 Core Changes
+
+Todo.
 
 =head1 Supported Platforms
 
+Todo.
+
 =head1 Modules and Pragmata
+
+Todo.
 
 =head1 Utility Changes
 
+Todo.
+
 =head1 Documentation Changes
+
+Todo.
 
 =head1 New Diagnostics
 
+Todo.
+
 =head1 Obsolete Diagnostics
+
+Todo.
 
 =head1 BUGS
 

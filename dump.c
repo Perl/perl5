@@ -146,7 +146,7 @@ char *
 sv_peek(SV *sv)
 {
     SV *t = sv_newmortal();
-    STRLEN prevlen;
+    STRLEN n_a;
     int unref = 0;
 
     sv_setpvn(t, "", 0);
@@ -289,7 +289,7 @@ sv_peek(SV *sv)
 	while (unref--)
 	    sv_catpv(t, ")");
     }
-    return SvPV(t, PL_na);
+    return SvPV(t, n_a);
 }
 
 void
@@ -362,6 +362,7 @@ void
 do_op_dump(I32 level, PerlIO *file, OP *o)
 {
     dTHR;
+    STRLEN n_a;
     dump_indent(level, file, "{\n");
     level++;
     if (o->op_seq)
@@ -500,7 +501,7 @@ do_op_dump(I32 level, PerlIO *file, OP *o)
 	    ENTER;
 	    SAVEFREESV(tmpsv);
 	    gv_fullname3(tmpsv, cGVOPo->op_gv, Nullch);
-	    dump_indent(level, file, "GV = %s\n", SvPV(tmpsv, PL_na));
+	    dump_indent(level, file, "GV = %s\n", SvPV(tmpsv, n_a));
 	    LEAVE;
 	}
 	else
@@ -736,6 +737,7 @@ do_sv_dump(I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bool dumpops,
     char *s;
     U32 flags;
     U32 type;
+    STRLEN n_a;
 
     if (!sv) {
 	dump_indent(level, file, "SV = 0\n");
@@ -1020,7 +1022,7 @@ do_sv_dump(I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bool dumpops,
 	break;
     case SVt_PVCV:
 	if (SvPOK(sv))
-	    dump_indent(level, file, "  PROTOTYPE = \"%s\"\n", SvPV(sv,PL_na));
+	    dump_indent(level, file, "  PROTOTYPE = \"%s\"\n", SvPV(sv,n_a));
 	/* FALL THROUGH */
     case SVt_PVFM:
 	do_hv_dump(level, file, "  COMP_STASH", CvSTASH(sv));

@@ -116,6 +116,7 @@ do_aspawn(SV* really, SV **mark, SV **sp)
         fdMap[3];
  SV     *sv,
         **p_sv;
+ STRLEN	n_a;
 
     status = FAIL;
     if (sp > mark)
@@ -126,7 +127,7 @@ do_aspawn(SV* really, SV **mark, SV **sp)
        while (++mark <= sp)
        {
            if (*mark)
-              *a++ = SvPVx(*mark, PL_na);
+              *a++ = SvPVx(*mark, n_a);
            else
               *a++ = "";
        }
@@ -142,7 +143,7 @@ do_aspawn(SV* really, SV **mark, SV **sp)
        /*-----------------------------------------------------*/
        if (*PL_Argv[0] != '/')
            TAINT_ENV();
-       if (really && *(tmps = SvPV(really, PL_na)))
+       if (really && *(tmps = SvPV(really, n_a)))
            pid = spawnp(tmps, nFd, fdMap, &inherit,
                         (const char **) PL_Argv,
                         (const char **) environ);

@@ -25,6 +25,7 @@ Porting/fixvars		Find undeclared variables with C compiler and fix em
 Porting/genlog		Generate formatted changelogs by querying p4d
 Porting/makerel		Release making utility
 Porting/p4d2p		Generate standard patches from p4 diffs
+Porting/p4desc		Smarter 'p4 describe', outputs diffs for new files
 Porting/patching.pod	How to report changes made to Perl
 Porting/patchls		Flexible patch file listing utility
 Porting/pumpkin.pod	Guidelines and hints for Perl maintainers
@@ -456,6 +457,34 @@ installman		Perl script to install man pages for pods
 installperl		Perl script to do "make install" dirty work
 intrpvar.h		Variables held in each interpreter instance
 iperlsys.h		Perl's interface to the system
+jpl/JNI/Changes		Java Native Interface changes
+jpl/JNI/JNI.pm		Java Native Interface module
+jpl/JNI/JNI.xs		Java Native Interface external subroutines
+jpl/JNI/Makefile.PL	Java Native Interface makefile generator
+jpl/JNI/test.pl		Java Native Interface tests
+jpl/JNI/typemap		Java/Perl interface typemap
+jpl/JPL/AutoLoader.pm	Java/Perl compiler module
+jpl/JPL/Class.pm	Java/Perl compiler module
+jpl/JPL/Compile.pm	Java/Perl compiler module
+jpl/JPL/Makefile.PL	Java/Perl makefile generator
+jpl/JPL_Rolo/JPL_Rolo.jpl			Rolodex sample application
+jpl/JPL_Rolo/Makefile.PL			Makefile generator
+jpl/JPL_Rolo/README				Instructions
+jpl/JPL_Rolo/cardfile				Rolodex sample application
+jpl/PerlInterpreter/Makefile.PL			Makefile generator
+jpl/PerlInterpreter/PerlInterpreter.c		Perl interpreter abstraction
+jpl/PerlInterpreter/PerlInterpreter.h		Perl interpreter abstraction
+jpl/PerlInterpreter/PerlInterpreter.java	Perl interpreter abstraction
+jpl/README					JPL instructions
+jpl/Sample/Makefile.PL				JPL sample makefile generator
+jpl/Sample/Sample.jpl				JPL sample
+jpl/Test/Makefile.PL				JPL tests makefile generator
+jpl/Test/Test.jpl				JPL tests
+jpl/bin/jpl					JPL compiler
+jpl/get_jdk/README	Instructions for using get_jdk.pl
+jpl/get_jdk/get_jdk.pl	JDK download tool
+jpl/get_jdk/jdk_hosts	JDK availability list
+jpl/install-jpl		JPL install utility
 keywords.h		The keyword numbers
 keywords.pl		Program to write keywords.h
 lib/AnyDBM_File.pm	Perl module to emulate dbmopen
@@ -1058,7 +1087,8 @@ t/lib/socket.t		See if Socket works
 t/lib/soundex.t		See if Soundex works
 t/lib/symbol.t		See if Symbol works
 t/lib/texttabs.t	See if Text::Tabs works
-t/lib/textwrap.t	See if Text::Wrap works
+t/lib/textfill.t	See if Text::Wrap::fill works
+t/lib/textwrap.t	See if Text::Wrap::wrap works
 t/lib/thread.t		Basic test of threading (skipped if no threads) 
 t/lib/tie-push.t	Test for Tie::Array
 t/lib/tie-stdarray.t	Test for Tie::StdArray
