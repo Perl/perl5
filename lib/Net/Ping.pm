@@ -269,13 +269,13 @@ sub checksum
         );
 
     $len_msg = length($msg);
-    $num_short = $len_msg / 2;
+    $num_short = int($len_msg / 2);
     $chk = 0;
     foreach $short (unpack("S$num_short", $msg))
     {
         $chk += $short;
     }                                           # Add the odd byte in
-    $chk += unpack("C", substr($msg, $len_msg - 1, 1)) if $len_msg % 2;
+    $chk += (unpack("C", substr($msg, $len_msg - 1, 1)) << 8) if $len_msg % 2;
     $chk = ($chk >> 16) + ($chk & 0xffff);      # Fold high into low
     return(~(($chk >> 16) + $chk) & 0xffff);    # Again and complement
 }
