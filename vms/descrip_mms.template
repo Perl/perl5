@@ -1519,9 +1519,6 @@ clean : tidy
 	- $(MMS) clean
 	Set Default [--]
 .endif
-    Set Default [.ext.re]
-    - $(MMS) clean
-    Set Default [--]
 	Set Default [.ext.SDBM_File]
 	- $(MMS) clean
 	Set Default [--]
@@ -1531,6 +1528,12 @@ clean : tidy
 	Set Default [.vms.ext.DCLsym]
 	- $(MMS) clean
 	Set Default [---]
+    Set Default [.ext.re]
+    - $(MMS) clean
+    Set Default [--]
+    Set Default [.ext.dumper]
+    - $(MMS) clean
+    Set Default [--]
 	- If F$Search("*.Opt").nes."" Then Delete/NoConfirm/Log *.Opt;*/Exclude=PerlShr_*.Opt
 	- If F$Search("[...]*$(O);*") .nes."" Then Delete/NoConfirm/Log [...]*$(O);*
 	- If F$Search(F$Parse("Sys$Disk:[]","$(SOCKH)")).nes."" Then Delete/NoConfirm/Log $(SOCKH);*
@@ -1551,7 +1554,7 @@ clean : tidy
 	- If F$Search("[.VMS.Ext...]*$(O)").nes."" Then Delete/NoConfirm/Log [.VMS.Ext...]*$(O);*
 	- If F$Search("[.pod]*.com").nes."" Then Delete/NoConfirm/Log [.pod]*.com;*
 
-realclean : clean
+realclean : tidy
 	Set Default [.ext.Fcntl]
 	- $(MMS) realclean
 	Set Default [--]
@@ -1580,9 +1583,6 @@ realclean : clean
 	- $(MMS) realclean
 	Set Default [--]
 .endif
-	Set Default [.ext.re]
-	- $(MMS) realclean
-	Set Default [--]
 	Set Default [.ext.SDBM_File]
 	- $(MMS) realclean
 	Set Default [--]
@@ -1592,6 +1592,12 @@ realclean : clean
 	Set Default [.vms.ext.DCLsym]
 	- $(MMS) realclean
 	Set Default [---]
+	Set Default [.ext.dumper]
+	- $(MMS) realclean
+	Set Default [--]
+	Set Default [.ext.re]
+	- $(MMS) realclean
+	Set Default [--]
 	- If F$Search("*$(OLB)").nes."" Then Delete/NoConfirm/Log *$(OLB);*
 	- If F$Search("*.Opt").nes."" Then Delete/NoConfirm/Log *.Opt;*
 	- If F$Search("Config.H").nes."" Then Delete/NoConfirm/Log Config.H;*

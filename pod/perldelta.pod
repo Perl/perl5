@@ -295,6 +295,11 @@ magic lvalue too. For instance, this code now acts differently:
 
 In previous versions, this would print "hello", but it now prints "g'bye".
 
+=head2 E<lt>E<gt> now reads in records
+
+If C<$/> is a referenence to an integer, or a scalar that holds an integer,
+E<lt>E<gt> will read in records instead of lines. For more info, see
+L<perlvar/$/>.
 
 =head1 Supported Platforms
 

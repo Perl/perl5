@@ -1,4 +1,4 @@
-Last Revised 02-June-1998 by Dan Sugalski <sugalskd@ous.edu>
+Last Revised 21-July-1998 by Dan Sugalski <sugalskd@ous.edu>
 Originally by Charles Bailey <bailey@newman.upenn.edu>
 
 * Important safety tip
@@ -6,6 +6,15 @@ Originally by Charles Bailey <bailey@newman.upenn.edu>
 The build and install procedures have changed significantly from the 5.004
 releases! Make sure you read the "Building Perl" and "Installing Perl"
 sections before you build or install.
+
+Also note that, as of 5.005, an ANSI C compliant compiler is required to
+build Perl. Vax C is *not* ANSI compliant, as it died a natural death some
+time before the standard was set. Therefore Vax C will not compile perl
+5.005. Sorry about that.
+
+If you're stuck without Dec C (the Vax C license should be good for Dec C,
+but the media charges might prohibit an upgrade), consider getting Gnu C
+instead.
 
 * Intro
 
@@ -32,8 +41,7 @@ document.
 * Other required software
 
 In addition to VMS, you'll need:
-        1) A C compiler. Dec C for AXP, or VAX C, Dec C, or gcc for the
-           VAX.
+        1) A C compiler. Dec C for AXP, or Dec C, or gcc for the VAX.
         2) A make tool. Dec's MMS (v2.6 or later), or MadGoat's free MMS
            analog MMK (available from ftp.madgoat.com/madgoat) both work
            just fine. Gnu Make might work, but it's been so long since
@@ -57,14 +65,8 @@ questions, and the answers to them (along with the capabilities of your C
 compiler and network stack) will determine how perl's built.
 
 If you've got multiple C compilers installed, you'll have your choice of
-which one to use. Using Dec C is recommended over Vax C--the compiler is
-newer, and supported. (Vax C was decommisioned around 1993) Various older
-versions had some gotchas, so if you're using a version older than 5.2,
-check the Dec C Issues section.
-
-We'll also point out that Dec C will get you at least a ten-fold increase
-in line-oriented IO over Vax C. The optimizer is amazingly better, too. If
-you can use Dec C, then you *really*, *really* should.
+which one to use. Various older versions of Dec C had some gotchas, so if
+you're using a version older than 5.2, check the Dec C Issues section.
 
 The configuration script will print out, at the very end, the MMS or MMK
 command you need to compile perl. Issue it (exactly as printed) to start
@@ -80,7 +82,7 @@ As a handy shortcut, the command:
 @CONFIGURE "-des"
 
 (note the quotes and case) will choose reasonable defaults. (It takes Dec C
-over Vax C, Dec C sockets over SOCKETSHR sockets, and either over no sockets)
+over Gnu C, Dec C sockets over SOCKETSHR sockets, and either over no sockets)
 
 * Testing Perl
 
