@@ -1291,8 +1291,8 @@ EXT OP * (CPERLscope(*PL_check)[]) (pTHX_ OP *op) = {
 	MEMBER_TO_FPTR(Perl_ck_die),	/* die */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* reset */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* lineseq */
-	MEMBER_TO_FPTR(Perl_ck_state),	/* nextstate */
-	MEMBER_TO_FPTR(Perl_ck_state),	/* dbstate */
+	MEMBER_TO_FPTR(Perl_ck_null),	/* nextstate */
+	MEMBER_TO_FPTR(Perl_ck_null),	/* dbstate */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* unstack */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* enter */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* leave */
