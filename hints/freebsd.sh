@@ -167,7 +167,7 @@ EOM
 	 *)   cat <<EOM >&4
 I did not know that FreeBSD $osvers supports POSIX threads.
 
-Feel free to tell me (jhi@iki.fi) otherwise.
+Feel free to tell me (perlbug@perl.com) otherwise.
 EOM
 	      exit 1
 	      ;;
