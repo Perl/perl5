@@ -679,9 +679,12 @@ lib/ExtUtils/Miniperl.pm: miniperlmain.c miniperl$(EXE_EXT) minimod.pl lib/Confi
 lib/re.pm: ext/re/re.pm
 	cp ext/re/re.pm ext/re/re.tmp && sh mv-if-diff ext/re/re.tmp lib/re.pm
 
-$(plextract):	miniperl$(EXE_EXT) lib/Config.pm
+$(plextract):	miniperl$(EXE_EXT) lib/Config.pm x2p/s2p
 	@-rm -f $@
 	$(LDLIBPTH) ./miniperl -Ilib $@.PL
+
+x2p/s2p: x2p/s2p.PL
+	cd x2p; $(MAKE) s2p
 
 lib/lib.pm:	miniperl$(EXE_EXT) lib/Config.pm
 	@-rm -f $@
