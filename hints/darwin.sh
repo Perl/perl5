@@ -9,23 +9,33 @@
 
 # BSD paths
 case "$prefix" in
-'')	
+'')
+	# Default install; use non-system directories
 	prefix='/usr/local'; # Built-in perl uses /usr
 	siteprefix='/usr/local';
 	vendorprefix='/usr/local'; usevendorprefix='define';
 
-	# 4BSD uses ${prefix}/share/man, not ${prefix}/man.
-	# Don't put man pages in ${prefix}/lib; that's goofy.
-	man1dir="${prefix}/share/man/man1";
-	man3dir="${prefix}/share/man/man3";
+	# Where to put modules.
+	privlib='/Library/Perl'; # Built-in perl uses /System/Library/Perl
+	sitelib='/Library/Perl';
+	vendorlib='/Network/Library/Perl';
+	;;
+'/usr')
+	# We are building/replacing the built-in perl
+	siteprefix='/usr/local';
+	vendorprefix='/usr/local'; usevendorprefix='define';
 
 	# Where to put modules.
-	# Built-in perl uses /System/Library/Perl
-	privlib='/Library/Perl';
+	privlib='/System/Library/Perl';
 	sitelib='/Library/Perl';
 	vendorlib='/Network/Library/Perl';
 	;;
 esac
+
+# 4BSD uses ${prefix}/share/man, not ${prefix}/man.
+# Don't put man pages in ${prefix}/lib; that's goofy.
+man1dir="${prefix}/share/man/man1";
+man3dir="${prefix}/share/man/man3";
 
 ##
 # Tool chain settings
@@ -37,15 +47,13 @@ archname='darwin';
 # nm works.
 usenm='true';
 
-# Libc is in libsystem.
-#libc='/usr/lib/libSystem.dylib';
-
 # Optimize.
 if [ "x$optimize" = 'x' ]; then
     optimize='-O3'
 fi
 
-# XXX Unclear why we require -pipe and -fno-common here.
+# XXX Unclear why we require -pipe and -fno-common here. --Andy Dougherty
+# We don't like commons. --Fred Sánchez
 ccflags="${ccflags} -pipe -fno-common"
 
 # At least on Darwin 1.3.x:
