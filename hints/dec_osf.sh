@@ -216,7 +216,7 @@ unset _DEC_uname_r
 #
 #	19-Dec-1997 Spider Boardman <spider@Orb.Nashua.NH.US>
 #
-#	* Newer Digial UNIX compilers enforce signaling for NaN without
+#	* Newer Digital UNIX compilers enforce signaling for NaN without
 #	  -ieee.  Added -fprm d at the same time since it's friendlier for
 #	  embedding.
 #
