@@ -371,9 +371,15 @@ extern int PerlIO_intmode2str(int rawmode, char *mode, int *writing);
 #ifdef PERLIO_LAYERS
 extern void PerlIO_cleanup(pTHX);
 
-extern void PerlIO_debug(const char *fmt, ...);
+extern void PerlIO_debug(const char *fmt, ...)
+#ifdef CHECK_FORMAT
+    __attribute__ ((__format__(__printf__, 1, 2)))
+#endif
+;
+
 typedef struct PerlIO_list_s PerlIO_list_t;
 
+extern PerlIO *PerlIO_syslayer(pTHX_ PerlIO *);
 
 #endif
 

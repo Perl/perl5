@@ -1527,6 +1527,7 @@ PP(pp_sysread)
     bool charstart = FALSE;
     STRLEN charskip = 0;
     STRLEN skip = 0;
+    PerlIO *pio;
 
     gv = (GV*)*++MARK;
     if ((PL_op->op_type == OP_READ || PL_op->op_type == OP_SYSREAD)
@@ -1565,7 +1566,19 @@ PP(pp_sysread)
 	SETERRNO(EBADF,RMS_IFI);
 	goto say_undef;
     }
-    if ((fp_utf8 = PerlIO_isutf8(IoIFP(io))) && !IN_BYTES) {
+    pio = IoIFP(io);
+#ifdef PERLIO_LAYERS
+    if (PL_op->op_type == OP_SYSREAD) {
+	/* sysread happens further down the stack
+	   and we need isutf8 of that layer
+	 */
+	pio = PerlIO_syslayer(aTHX_ pio);
+	if (!pio) {
+	    goto say_undef;
+	}
+    }
+#endif
+    if ((fp_utf8 = PerlIO_isutf8(pio)) && !IN_BYTES) {
 	buffer = SvPVutf8_force(bufsv, blen);
 	/* UTF8 may not have been set if they are all low bytes */
 	SvUTF8_on(bufsv);
@@ -1595,7 +1608,7 @@ PP(pp_sysread)
 #endif
 	buffer = SvGROW(bufsv, (STRLEN)(length+1));
 	/* 'offset' means 'flags' here */
-	count = PerlSock_recvfrom(PerlIO_fileno(IoIFP(io)), buffer, length, offset,
+	count = PerlSock_recvfrom(PerlIO_fileno(pio), buffer, length, offset,
 			  (struct sockaddr *)namebuf, &bufsize);
 	if (count < 0)
 	    RETPUSHUNDEF;
@@ -1642,20 +1655,22 @@ PP(pp_sysread)
     }
     buffer = buffer + offset;
 
+#ifndef PERLIO_LAYERS
     if (PL_op->op_type == OP_SYSREAD) {
 #ifdef PERL_SOCK_SYSREAD_IS_RECV
 	if (IoTYPE(io) == IoTYPE_SOCKET) {
-	    count = PerlSock_recv(PerlIO_fileno(IoIFP(io)),
+	    count = PerlSock_recv(PerlIO_fileno(pio),
 				   buffer, length, 0);
 	}
 	else
 #endif
 	{
-	    count = PerlLIO_read(PerlIO_fileno(IoIFP(io)),
+	    count = PerlLIO_read(PerlIO_fileno(pio),
 				  buffer, length);
 	}
     }
     else
+#endif
 #ifdef HAS_SOCKET__bad_code_maybe
     if (IoTYPE(io) == IoTYPE_SOCKET) {
 	char namebuf[MAXPATHLEN];
@@ -1664,15 +1679,15 @@ PP(pp_sysread)
 #else
 	bufsize = sizeof namebuf;
 #endif
-	count = PerlSock_recvfrom(PerlIO_fileno(IoIFP(io)), buffer, length, 0,
+	count = PerlSock_recvfrom(PerlIO_fileno(pio), buffer, length, 0,
 			  (struct sockaddr *)namebuf, &bufsize);
     }
     else
 #endif
     {
-	count = PerlIO_read(IoIFP(io), buffer, length);
+	count = PerlIO_read(pio, buffer, length);
 	/* PerlIO_read() - like fread() returns 0 on both error and EOF */
-	if (count == 0 && PerlIO_error(IoIFP(io)))
+	if (count == 0 && PerlIO_error(pio))
 	    count = -1;
     }
     if (count < 0) {

@@ -430,14 +430,6 @@ PerlIO_findFILE(PerlIO *pio)
 #include <sys/mman.h>
 #endif
 
-/*
- * Why is this here - not in perlio.h?  RMB
- */
-void PerlIO_debug(const char *fmt, ...)
-#ifdef CHECK_FORMAT
-    __attribute__ ((__format__(__printf__, 1, 2)))
-#endif
-;
 
 void
 PerlIO_debug(const char *fmt, ...)
@@ -1024,6 +1016,27 @@ PerlIO_layer_fetch(pTHX_ PerlIO_list_t *av, IV n, PerlIO_funcs *def)
 	Perl_croak(aTHX_ "panic: PerlIO layer array corrupt");
     return def;
 }
+
+PerlIO *
+PerlIO_syslayer(pTHX_ PerlIO *f)
+{
+     if (PerlIOValid(f)) {
+	PerlIOl *l;
+	while (*PerlIONext(f)) {
+	   f = PerlIONext(f);
+	}
+	l = *f;
+#if 0
+	Perl_warn(aTHX_ "syslayer %s",l->tab->name);
+#endif
+	return f;
+     }
+     else {
+	SETERRNO(EBADF, SS_IVCHAN);
+	return NULL;
+     }
+}
+
 
 IV
 PerlIOPop_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
@@ -2008,6 +2021,10 @@ PerlIOBase_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
 		 f, PerlIOBase(f)->tab->name, (omode) ? omode : "(Null)",
 		 l->flags, PerlIO_modestr(f, temp));
 #endif
+    if (l->next) {
+	l->flags |= l->next->flags &
+		(PERLIO_F_TTY | PERLIO_F_NOTREG | PERLIO_F_SOCKET);
+    }
     return 0;
 }
 
@@ -2338,9 +2355,16 @@ static void
 PerlIOUnix_setfd(pTHX_ PerlIO *f, int fd, int imode)
 {
     PerlIOUnix *s = PerlIOSelf(f, PerlIOUnix);
-#if defined(WIN32)
+
+#if 1 || defined(WIN32) || defined(HAS_SOCKET) && \
+    (defined(PERL_SOCK_SYSREAD_IS_RECV) || \
+     defined(PERL_SOCK_SYSWRITE_IS_SEND))
     Stat_t st;
     if (PerlLIO_fstat(fd, &st) == 0) {
+#if defined(WIN32)
+	/* WIN32 needs to know about non-regular files
+	   as only regular files can be lseek()ed
+         */
 	if (!S_ISREG(st.st_mode)) {
 	    PerlIO_debug("%d is not regular file\n",fd);
     	    PerlIOBase(f)->flags |= PERLIO_F_NOTREG;
@@ -2348,8 +2372,32 @@ PerlIOUnix_setfd(pTHX_ PerlIO *f, int fd, int imode)
 	else {
 	    PerlIO_debug("%d _is_ a regular file\n",fd);
 	}
-    }
 #endif
+	/* If read/write are to be mapped to recv/send we need
+	   to know this is a socket.
+	   Lifted from code in doio.c that handles socket detection on dup
+	 */
+#ifndef PERL_MICRO
+	if (S_ISSOCK(st.st_mode))
+	    PerlIOBase(f)->flags |= PERLIO_F_SOCKET;
+	else if (
+#ifdef S_IFMT
+	    !(st.st_mode & S_IFMT)
+#else
+	    !st.st_mode
+#endif
+	) {
+	     char tmpbuf[256];
+	     Sock_size_t buflen = sizeof tmpbuf;
+	     if (PerlSock_getsockname(fd, (struct sockaddr *)tmpbuf, &buflen) >= 0
+		      || errno != ENOTSOCK)
+		    PerlIOBase(f)->flags |= PERLIO_F_SOCKET; /* some OS's return 0 on fstat()ed socket */
+				                /* but some return 0 for streams too, sigh */
+	}
+#endif /* !PERL_MICRO */
+    }
+#endif /* HAS_SOCKET ... */
+
     s->fd = fd;
     s->oflags = imode;
     PerlIOUnix_refcnt_inc(fd);
@@ -2450,7 +2498,16 @@ PerlIOUnix_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 	return 0;
     }
     while (1) {
-	SSize_t len = PerlLIO_read(fd, vbuf, count);
+	SSize_t len;
+#ifdef PERL_SOCK_SYSREAD_IS_RECV
+	if (PerlIOBase(f)->flags & PERLIO_F_SOCKET) {
+	    len = PerlSock_recv(fd, vbuf, count, 0);
+	}
+	else
+#endif
+	{
+	    len = PerlLIO_read(fd, vbuf, count);
+	}
 	if (len >= 0 || errno != EINTR) {
 	    if (len < 0) {
 		if (errno != EAGAIN) {
