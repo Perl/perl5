@@ -141,7 +141,7 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
        			goto ENCODE_SET_SRC;
 		    }else if (check & ENCODE_PERLQQ){
 			SV* perlqq = 
-			    sv_2mortal(newSVpvf("\\x{%04x}", ch));
+			    sv_2mortal(newSVpvf("\\x{%04"UVxf"}", ch));
 			sdone += slen + clen;
 			ddone += dlen + SvCUR(perlqq);
 			sv_catsv(dst, perlqq);
