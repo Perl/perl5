@@ -53,8 +53,8 @@ subroutine without defining it by saying C<sub name>, thus:
     sub myname;
     $me = myname $0 		or die "can't get myname";
 
-Note that my() functions as a list operator, not as a unary operator; so
-be careful to use C<or> instead of C<||> in this case.  However, if
+Note that myname() functions as a list operator, not as a unary operator;
+so be careful to use C<or> instead of C<||> in this case.  However, if
 you were to declare the subroutine as C<sub myname ($)>, then
 C<myname> would function as a unary operator, so either C<or> or
 C<||> would work.
