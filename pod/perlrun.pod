@@ -918,6 +918,8 @@ emphasise their similarity to variable "attributes". But the code that parses
 layer specification strings (which is also used to decode the PERLIO
 environment variable) treats the colon as a separator.
 
+An unset or empty PERLIO is equivalent to C<:stdio>.
+
 The list becomes the default for I<all> perl's IO. Consequently only built-in
 layers can appear in this list, as external layers (such as :encoding()) need
 IO in  order to load them!. See L<"open pragma"|open> for how to add external

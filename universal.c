@@ -195,7 +195,8 @@ Perl_boot_core_UNIVERSAL(pTHX)
     newXSproto("Internals::SvREFCNT",XS_Internals_SvREFCNT, file, "\\[$%@];$");
     newXSproto("Internals::hv_clear_placeholders",
                XS_Internals_hv_clear_placehold, file, "\\%");
-    newXS("PerlIO::get_layers", XS_PerlIO_get_layers, file);
+    newXSproto("PerlIO::get_layers",
+               XS_PerlIO_get_layers, file, "*;@");
 }
 
 
@@ -566,6 +567,7 @@ XS(XS_PerlIO_get_layers)
     dXSARGS;
     if (items < 1 || items % 2 == 0)
 	Perl_croak(aTHX_ "Usage: PerlIO_get_layers(filehandle[,args])");
+#ifdef USE_PERLIO
     {
 	SV *	sv;
 	GV *	gv;
@@ -681,6 +683,7 @@ XS(XS_PerlIO_get_layers)
 	     XSRETURN(nitem);
 	}
     }
+#endif
 
     XSRETURN(0);
 }

@@ -1,6 +1,6 @@
 package PerlIO;
 
-our $VERSION = '1.01';
+our $VERSION = '1.02';
 
 # Map layer name to package that defines it
 our %alias;
@@ -165,8 +165,9 @@ in Perl using the latter) come with the Perl distribution.
 
 Use C<:encoding(ENCODING)> either in open() or binmode() to install
 a layer that does transparently character set and encoding transformations,
-for example from Shift-JIS to Unicode.  Note that an C<:encoding> also
-enables C<:utf8>.  See L<PerlIO::encoding> for more information.
+for example from Shift-JIS to Unicode.  Note that under C<stdio>
+an C<:encoding> also enables C<:utf8>.  See L<PerlIO::encoding>
+for more information.
 
 =item :via
 
@@ -203,7 +204,7 @@ translation for text files then the default layers are :
 level layer.)
 
 Otherwise if C<Configure> found out how to do "fast" IO using system's
-stdio, then the default layers are :
+stdio, then the default layers are:
 
   unix stdio
 
@@ -223,23 +224,47 @@ This can be used to see the effect of/bugs in the various layers e.g.
   PERLIO=stdio  ./perl harness
   PERLIO=perlio ./perl harness
 
+For the various value of PERLIO see L<perlrun/PERLIO>.
+
 =head2 Querying the layers of filehandle
 
 The following returns the B<names> of the PerlIO layers on a filehandle.
 
-   my @layers = PerlIO::get_layers(FH);
+   my @layers = PerlIO::get_layers($fh); # Or FH, *FH, "FH".
 
 The layers are returned in the order an open() or binmode() call would
-use them.  Note that the stack begings (normally) from C<stdio>, the
-platform specific low-level I/O (like C<unix>) is not part of the stack.
+use them.  Note that the stack begins (normally) from C<stdio> or from
+C<perlio>.  Under C<stdio> the platform specific low-level I/O (like
+C<unix>) is not part of the stack, but under C<perlio> (and the
+experimental C<mmap>) it is.
+
+The following table summarizes the default layers on UNIX-like and
+DOS-like platforms and depending on the setting of the C<$ENV{PERLIO}>:
+
+ PERLIO     UNIX-like       DOS-like
+ 
+ none or "" stdio [1]       unix crlf
+ stdio      stdio [1]       stdio
+ perlio     unix perlio     unix perlio
+ mmap       unix mmap       unix mmap
+
+ # [1] If Configure found how to do "fast stdio",
+ # otherwise it will be "unix perlio".
 
 By default the layers from the input side of the filehandle is
 returned, to get the output side use the optional C<output> argument:
 
-   my @layers = PerlIO::get_layers(FH, output => 1);
+   my @layers = PerlIO::get_layers($fh, output => 1);
 
 (Usually the layers are identical on either side of a filehandle but
-for example with sockets there may be differences.)
+for example with sockets there may be differences, or if you have
+been using the C<open> pragma.)
+
+There is no set_layers(), nor does get_layers() return a tied array
+mirroring the stack, or anything fancy like that.  This is not
+accidental or unintentional.  The PerlIO layer stack is a bit more
+complicated than just a stack (see for example the behaviour of C<:raw>).
+You are supposed to use open() and binmode() to manipulate the stack.
 
 B<Implementation details follow, please close your eyes.>
 
@@ -248,7 +273,7 @@ the name of the layer, and certain layers (like C<utf8>) are not real
 layers but instead flags on real layers: to get all of these returned
 separately use the optional C<separate> argument:
 
-   my @layer_and_args_and_flags = PerlIO::get_layers(FH, details => 1);
+   my @layer_and_args_and_flags = PerlIO::get_layers($fh, details => 1);
 
 The result will be up to be three times the number of layers:
 the first element will be a name, the second element the arguments

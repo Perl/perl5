@@ -1,30 +1,93 @@
 #!./perl
 
+my $PERLIO;
+
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
+    unless (find PerlIO::Layer 'perlio') {
+	print "1..0 # Skip: not perlio\n";
+	exit 0;
+    }
+    # Makes testing easier.
+    $ENV{PERLIO} = 'stdio' if exists $ENV{PERLIO} && $ENV{PERLIO} eq '';
+    if (exists $ENV{PERLIO} && $ENV{PERLIO} !~ /^(stdio|perlio|mmap)$/) {
+	# We are not prepared for anything else.
+	print "1..0 # PERLIO='$ENV{PERLIO}' unknown\n";
+	exit 0;
+    }
+    $PERLIO = exists $ENV{PERLIO} ? $ENV{PERLIO} : "(undef)";
 }
 
 plan tests => 43;
 
 use Config;
 
-{
-    skip("This perl does not have perlio and Encode", 43)
-	unless $Config{useperlio} && " $Config{extensions} " =~ / Encode /;
+my $DOSISH    = $^O =~ /^(?:MSWin32|cygwin|os2|dos|NetWare|mint)$/ ? 1 : 0;
+my $NONSTDIO  = exists $ENV{PERLIO} && $ENV{PERLIO} ne 'stdio' ? 1 : 0;
+my $FASTSTDIO =
+    $Config{d_stdstdio} &&
+    $Config{d_stdio_ptr_lval} &&
+    ($Config{d_stdio_cnt_lval} ||
+     $Config{d_stdio_ptr_lval_sets_cnt}) ? 1 : 0;
+
+print <<__EOH__;
+# PERLIO    = $PERLIO
+# DOSISH    = $DOSISH
+# NONSTDIO  = $NONSTDIO
+# FASTSTDIO = $FASTSTDIO
+__EOH__
+
+SKIP: {
+    skip("This perl does not have Encode", 43)
+	unless " $Config{extensions} " =~ / Encode /;
 
     sub check {
 	my ($result, $expected, $id) = @_;
+	# An interesting dance follows where we try to make the following
+	# IO layer stack setups to compare equal:
+	#
+	# PERLIO     UNIX-like       DOS-like
+	#
+	# none or "" stdio [1]       unix crlf
+	# stdio      stdio [1]       stdio
+	# perlio     unix perlio     unix perlio
+	# mmap       unix mmap       unix mmap
+	#
+	# [1] If Configure found how to do "fast stdio",
+	# otherwise it will be "unix perlio".
+	#
+	if ($NONSTDIO) {
+	    # Get rid of "unix".
+	    shift @$result if $result->[0] eq "unix";
+	    # Change expectations.
+	    if ($FASTSTDIO) {
+		$expected->[0] = $ENV{PERLIO};
+	    } else {
+		$expected->[0] = $ENV{PERLIO} if $expected->[0] eq "stdio";
+	    }
+	} elsif (!$FASTSTDIO) {
+	    splice(@$result, 0, 2, "stdio")
+		if @$result >= 2 &&
+		   $result->[0] eq "unix" &&
+		   $result->[1] eq "perlio";
+	} elsif ($DOSISH) {
+	    splice(@$result, 0, 2, "stdio")
+		if @$result >= 2 &&
+		   $result->[0] eq "unix" &&
+		   $result->[1] eq "crlf";
+	}
 	my $n = scalar @$expected;
-	is($n, scalar @$expected, "$id layers = $n");
+	is($n, scalar @$expected, "$id - layers = $n");
 	for (my $i = 0; $i < $n; $i++) {
 	    my $j = $expected->[$i];
 	    if (ref $j eq 'CODE') {
-		ok($j->($result->[$i]), "$id $i is ok");
+		ok($j->($result->[$i]), "$id - $i is ok");
 	    } else {
 		is($result->[$i], $j,
-		   sprintf("$id $i is %s", defined $j ? $j : "undef"));
+		   sprintf("$id - $i is %s",
+			   defined $j ? $j : "undef"));
 	    }
 	}
     }
@@ -57,6 +120,7 @@ use Config;
 	  [ "stdio" ],
 	  ":raw");
 
+    binmode(F, ":pop") if $DOSISH; # Drop one extra :crlf.
     binmode(F, ":utf8");
 
     check([ PerlIO::get_layers(F) ],
@@ -83,10 +147,19 @@ use Config;
 
     binmode(F, ":raw :encoding(latin1)"); # "latin1" will be canonized
 
-    check([ PerlIO::get_layers(F, details => 1) ],
-	  [ "stdio",    undef,        sub { $_[0] > 0 },
-	    "encoding", "iso-8859-1", sub { $_[0] & PerlIO::F_UTF8() } ],
-	  ":raw:encoding(latin1)");
+    SKIP: {
+	skip("too complex layer coreography", 7) if $DOSISH || !$FASTSTDIO;
+
+	my @results = PerlIO::get_layers(F, details => 1);
+
+	# Get rid of the args and the flags.
+	splice(@results, 1, 2) if $NONSTDIO;
+
+	check([ @results ],
+	      [ "stdio",    undef,        sub { $_[0] > 0 },
+		"encoding", "iso-8859-1", sub { $_[0] & PerlIO::F_UTF8() } ],
+	      ":raw:encoding(latin1)");
+    }
 
     binmode(F);
 
@@ -98,6 +171,7 @@ use Config;
 
     {
 	use open(IN => ":crlf", OUT => ":encoding(cp1252)");
+
 	open F, "<afile";
 	open G, ">afile";
 
