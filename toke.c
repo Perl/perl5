@@ -4347,7 +4347,7 @@ char *what;
 	}
 	if (*w)
 	    for (; *w && isSPACE(*w); w++) ;
-	if (!*w || !strchr(";|})]oa!=", *w))	/* an advisory hack only... */
+	if (!*w || !strchr(";|})]oaiuw!=", *w))	/* an advisory hack only... */
 	    warn("%s (...) interpreted as function",name);
     }
     while (s < bufend && isSPACE(*s))
