@@ -233,7 +233,23 @@ The following returns the B<names> of the PerlIO layers on a filehandle.
 The layers are returned in the order an open() or binmode() call would
 use them.  Note that the stack begins (normally) from C<stdio> or from
 C<perlio>.  Under C<stdio> the platform specific low-level I/O (like
-C<unix>) is not part of the stack, but under C<perlio> it is.
+C<unix>) is not part of the stack, but under C<perlio> (and the
+experimental C<mmap>) it is.
+
+In platforms of DOS progeny (Win32 being the most prominent) the
+lowest level layers are C<unix crlf>, meaning that Perl first uses the
+UNIX-style low-level fd layer, and then on top of that a layer that
+handles the CRLF translation.
+
+The following table summarizes the default layers on UNIX-like and
+DOS-like platforms and depending on the setting of the C<$ENV{PERLIO}>:
+
+ PERLIO   UNIX-like       DOS-like
+ 
+ none     stdio           unix crlf
+ stdio    stdio           stdio
+ perlio   unix perlio     unix perlio
+ mmap     unix mmap       unix mmap
 
 By default the layers from the input side of the filehandle is
 returned, to get the output side use the optional C<output> argument:
