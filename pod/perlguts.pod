@@ -247,6 +247,15 @@ portion of the string between the "real" and the "fake" beginnings is
 shown in parentheses, and the values of C<SvCUR> and C<SvLEN> reflect
 the fake beginning, not the real one.
 
+Something similar to the offset hack is perfomed on AVs to enable
+efficient shifting and splicing off the beginning of the array; while
+C<AvARRAY> points to the first element in the array that is visible from
+Perl, C<AvALLOC> points to the real start of the C array. These are
+usually the same, but a C<shift> operation can be carried out by
+increasing C<AvARRAY> by one and decreasing C<AvFILL> and C<AvLEN>.
+Again, the location of the real start of the C array only comes into
+play when freeing the array. See C<av_shift> in F<av.c>.
+
 =head2 What's Really Stored in an SV?
 
 Recall that the usual method of determining the type of scalar you have is
