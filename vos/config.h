@@ -171,12 +171,6 @@
  */
 #define HAS_FGETPOS	/**/
 
-/* FLEXFILENAMES:
- *	This symbol, if defined, indicates that the system supports filenames
- *	longer than 14 characters.
- */
-#define	FLEXFILENAMES		/**/
-
 /* HAS_FLOCK:
  *	This symbol, if defined, indicates that the flock routine is
  *	available to do file locking.
@@ -1200,7 +1194,7 @@
 #  define STRINGIFY(a)	PeRl_StGiFy(a)
 #endif
 #if 42 != 1 && 42 != 42
-#include "Bletch: How does this C preprocessor catenate tokens?"
+#   include "Bletch: How does this C preprocessor catenate tokens?"
 #endif
 
 /* CPPSTDIN:
@@ -1342,10 +1336,23 @@
  */
 /*#define HAS_FD_SET	/**/
 
+/* FLEXFILENAMES:
+ *	This symbol, if defined, indicates that the system supports filenames
+ *	longer than 14 characters.
+ */
+#define	FLEXFILENAMES		/**/
+
 /* HAS_FPOS64_T:
  *	This symbol will be defined if the C compiler supports fpos64_t.
  */
 /*#define	HAS_FPOS64_T    	/**/
+
+/* HAS_FREXPL:
+ *	This symbol, if defined, indicates that the frexpl routine is
+ *	available to break a long double floating-point number into
+ *	a normalized fraction and an integral power of 2.
+ */
+/*#define HAS_FREXPL		/**/
 
 /* HAS_STRUCT_FS_DATA:
  *	This symbol, if defined, indicates that the struct fs_data
@@ -1393,6 +1400,12 @@
  *	available to get the current working directory.
  */
 #define HAS_GETCWD		/**/
+
+/* HAS_GETFSSTAT:
+ *	This symbol, if defined, indicates that the getfsstat routine is
+ *	available to stat filesystems in bulk.
+ */
+/*#define HAS_GETFSSTAT		/**/
 
 /* HAS_GETGRENT:
  *	This symbol, if defined, indicates that the getgrent routine is
@@ -1620,6 +1633,18 @@
  */
 #define HAS_ISASCII		/**/
 
+/* HAS_ISNAN:
+ *	This symbol, if defined, indicates that the isnan routine is
+ *	available to check whether a double is a NaN.
+ */
+#define HAS_ISNAN		/**/
+
+/* HAS_ISNANL:
+ *	This symbol, if defined, indicates that the isnanl routine is
+ *	available to check whether a long double is a NaN.
+ */
+/*#define HAS_ISNANL		/**/
+
 /* HAS_LCHOWN:
  *	This symbol, if defined, indicates that the lchown routine is
  *	available to operate on a symbolic link (instead of following the
@@ -1661,6 +1686,14 @@
 #ifdef HAS_LONG_LONG
 #define LONGLONGSIZE _error_		/**/
 #endif
+
+/* HAS_LSEEK_PROTO:
+ *	This symbol, if defined, indicates that the system provides
+ *	a prototype for the lseek() function.  Otherwise, it is up
+ *	to the program to supply one.  A good guess is
+ *		extern off_t lseek(int, off_t, int);
+ */
+#define	HAS_LSEEK_PROTO	/**/
 
 /* HAS_MADVISE:
  *	This symbol, if defined, indicates that the madvise system call is
@@ -2262,6 +2295,12 @@
  */
 /*#define	I_ICONV		/**/
 
+/* I_IEEEFP:
+ *	This symbol, if defined, indicates that <ieeefp.h> exists and
+ *	should be included.
+ */
+/*#define	I_IEEEFP		/**/
+
 /* I_INTTYPES:
  *     This symbol, if defined, indicates to the C program that it should
  *     include <inttypes.h>.
@@ -2612,6 +2651,9 @@
 /* U64SIZE:
  *	This symbol contains the sizeof(U64).
  */
+/* NVSIZE:
+ *	This symbol contains the sizeof(NV).
+ */
 /* NV_PRESERVES_UV:
  *	This symbol, if defined, indicates that a variable of type NVTYPE
  *	can preserve all the bit of a variable of type UVSIZE.
@@ -2641,6 +2683,7 @@
 #define	I64SIZE		_error_	/**/
 #define	U64SIZE		_error_	/**/
 #endif
+#define	NVSIZE		$nvsize		/**/
 #define	NV_PRESERVES_UV
 
 /* IVdf:
@@ -2780,8 +2823,8 @@
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-/*#define SITEARCH ""		/**/
-/*#define SITEARCH_EXP ""		/**/
+#define SITEARCH ""		/**/
+#define SITEARCH_EXP ""		/**/
 
 /* SITELIB:
  *	This symbol contains the name of the private library for this package.
@@ -2819,6 +2862,12 @@
  *	<sys/types.h> to get any typedef'ed information.
  */
 #define Size_t size_t	 /* length paramater for string functions */
+
+/* Sock_size_t:
+ *	This symbol holds the type used for the size argument of
+ *	various socket calls (just the base type, not the pointer-to).
+ */
+#define Sock_size_t		int /**/
 
 /* SSize_t:
  *	This symbol holds the type used by functions that return
@@ -2965,10 +3014,22 @@
 #endif
 /*#define	OLD_PTHREADS_API		/**/
 
+/* PERL_VENDORARCH:
+ *	If defined, this symbol contains the name of a private library.
+ *	The library is private in the sense that it needn't be in anyone's
+ *	execution path, but it should be accessible by the world.
+ *	It may have a ~ on the front. 
+ *	The standard distribution will put nothing in this directory.
+ *	Vendors who distribute perl may wish to place their own
+ *	architecture-dependent modules and extensions in this directory with
+ *		MakeMaker Makefile.PL INSTALLDIRS=vendor 
+ *	or equivalent.  See INSTALL for details.
+ */
 /* PERL_VENDORARCH_EXP:
  *	This symbol contains the ~name expanded version of PERL_VENDORARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
+#define PERL_VENDORARCH ""		/**/
 #define PERL_VENDORARCH_EXP ""		/**/
 
 /* PERL_VENDORLIB_EXP:
@@ -3043,30 +3104,11 @@
 #define PERL_XS_APIVERSION "5.00563"
 #define PERL_PM_APIVERSION "5.00563"
 
-/* HAS_GETFSSTAT:
- *	This symbol, if defined, indicates that the getfsstat routine is
- *	available to stat filesystems in bulk.
+/* HAS_MODFL:
+ *	This symbol, if defined, indicates that the modfl routine is
+ *	available to split a long double x into a fractional part f and
+ *	an integer part i such that |f| < 1.0 and (f + i) = x.
  */
-/*#define HAS_GETFSSTAT		/**/
-
-/* I_IEEEFP:
- *	This symbol, if defined, indicates that <ieeefp.h> exists and
- *	should be included.
- */
-/*#define	I_IEEEFP		/**/
-
-/* HAS_LSEEK_PROTO:
- *	This symbol, if defined, indicates that the system provides
- *	a prototype for the lseek() function.  Otherwise, it is up
- *	to the program to supply one.  A good guess is
- *		extern off_t lseek(int, off_t, int);
- */
-#define	HAS_LSEEK_PROTO	/**/
-
-/* Sock_size_t:
- *	This symbol holds the type used for the size argument of
- *	various socket calls (just the base type, not the pointer-to).
- */
-#define Sock_size_t		int /**/
+/*#define HAS_MODFL		/**/
 
 #endif

@@ -8,7 +8,7 @@
 
 # Package name      : perl5
 # Source directory  : .
-# Configuration time: Mon Apr 24 22:38:56 EET DST 2000
+# Configuration time: Tue Apr 25 00:14:34 EET DST 2000
 # Configured by     : jhi
 # Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
 
@@ -59,7 +59,7 @@ ccflags='-pthread -std -DLANGUAGE_C'
 ccsymbols='__alpha=1 __LANGUAGE_C__=1 __osf__=1 __unix__=1 _LONGLONG=1 _SYSTYPE_BSD=1 SYSTYPE_BSD=1 unix=1'
 cf_by='jhi'
 cf_email='yourname@yourhost.yourplace.com'
-cf_time='Mon Apr 24 22:38:56 EET DST 2000'
+cf_time='Tue Apr 25 00:14:34 EET DST 2000'
 charsize='1'
 chgrp=''
 chmod=''
@@ -151,6 +151,7 @@ d_flock='define'
 d_fork='define'
 d_fpathconf='define'
 d_fpos64_t='undef'
+d_frexpl='define'
 d_fs_data_s='undef'
 d_fseeko='undef'
 d_fsetpos='define'
@@ -200,6 +201,8 @@ d_index='undef'
 d_inetaton='define'
 d_int64_t='undef'
 d_isascii='define'
+d_isnan='define'
+d_isnanl='define'
 d_killpg='define'
 d_lchown='define'
 d_ldbl_dig='define'
@@ -226,6 +229,7 @@ d_mkstemp='define'
 d_mkstemps='undef'
 d_mktime='define'
 d_mmap='define'
+d_modfl='define'
 d_mprotect='define'
 d_msg='define'
 d_msg_ctrunc='define'

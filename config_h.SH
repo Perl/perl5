@@ -1365,6 +1365,13 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_fpos64_t	HAS_FPOS64_T    	/**/
 
+/* HAS_FREXPL:
+ *	This symbol, if defined, indicates that the frexpl routine is
+ *	available to break a long double floating-point number into
+ *	a normalized fraction and an integral power of 2.
+ */
+#$d_frexpl HAS_FREXPL		/**/
+
 /* HAS_STRUCT_FS_DATA:
  *	This symbol, if defined, indicates that the struct fs_data
  *	to do statfs() is supported.
@@ -1643,6 +1650,18 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	is available.
  */
 #$d_isascii HAS_ISASCII		/**/
+
+/* HAS_ISNAN:
+ *	This symbol, if defined, indicates that the isnan routine is
+ *	available to check whether a double is a NaN.
+ */
+#$d_isnan HAS_ISNAN		/**/
+
+/* HAS_ISNANL:
+ *	This symbol, if defined, indicates that the isnanl routine is
+ *	available to check whether a long double is a NaN.
+ */
+#$d_isnanl HAS_ISNANL		/**/
 
 /* HAS_LCHOWN:
  *	This symbol, if defined, indicates that the lchown routine is
@@ -3102,6 +3121,13 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #define PERL_XS_APIVERSION "$xs_apiversion"
 #define PERL_PM_APIVERSION "$pm_apiversion"
+
+/* HAS_MODFL:
+ *	This symbol, if defined, indicates that the modfl routine is
+ *	available to split a long double x into a fractional part f and
+ *	an integer part i such that |f| < 1.0 and (f + i) = x.
+ */
+#$d_modfl HAS_MODFL		/**/
 
 #endif
 !GROK!THIS!

@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Apr 24 22:34:53 EET DST 2000 [metaconfig 3.0 PL70]
+# Generated on Mon Apr 24 23:59:43 EET DST 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -355,6 +355,7 @@ d_flexfnam=''
 d_flock=''
 d_fork=''
 d_fpos64_t=''
+d_frexpl=''
 d_fs_data_s=''
 d_fseeko=''
 d_fsetpos=''
@@ -406,6 +407,8 @@ d_iconv=''
 d_inetaton=''
 d_int64_t=''
 d_isascii=''
+d_isnan=''
+d_isnanl=''
 d_killpg=''
 d_lchown=''
 d_ldbl_dig=''
@@ -435,6 +438,7 @@ d_mkstemps=''
 d_mktime=''
 d_mmap=''
 mmaptype=''
+d_modfl=''
 d_mprotect=''
 d_msg=''
 d_msgctl=''
@@ -9061,6 +9065,10 @@ $rm -f try.* try
 set d_fpos64_t
 eval $setvar
 
+: see if frexpl exists
+set frexpl d_frexpl
+eval $inlibc
+
 hasstruct='varname=$1; struct=$2; shift; shift;
 while $test $# -ge 2; do
 	case "$1" in
@@ -9551,6 +9559,14 @@ set d_isascii
 eval $setvar
 $rm -f isascii*
 
+: see if isnan exists
+set isnan d_isnan
+eval $inlibc
+
+: see if isnanl exists
+set isnanl d_isnanl
+eval $inlibc
+
 : see if killpg exists
 set killpg d_killpg
 eval $inlibc
@@ -9769,6 +9785,10 @@ END
 esac
 
 
+
+: see if modfl exists
+set modfl d_modfl
+eval $inlibc
 
 : see if mprotect exists
 set mprotect d_mprotect
@@ -15176,6 +15196,7 @@ d_flock='$d_flock'
 d_fork='$d_fork'
 d_fpathconf='$d_fpathconf'
 d_fpos64_t='$d_fpos64_t'
+d_frexpl='$d_frexpl'
 d_fs_data_s='$d_fs_data_s'
 d_fseeko='$d_fseeko'
 d_fsetpos='$d_fsetpos'
@@ -15225,6 +15246,8 @@ d_index='$d_index'
 d_inetaton='$d_inetaton'
 d_int64_t='$d_int64_t'
 d_isascii='$d_isascii'
+d_isnan='$d_isnan'
+d_isnanl='$d_isnanl'
 d_killpg='$d_killpg'
 d_lchown='$d_lchown'
 d_ldbl_dig='$d_ldbl_dig'
@@ -15251,6 +15274,7 @@ d_mkstemp='$d_mkstemp'
 d_mkstemps='$d_mkstemps'
 d_mktime='$d_mktime'
 d_mmap='$d_mmap'
+d_modfl='$d_modfl'
 d_mprotect='$d_mprotect'
 d_msg='$d_msg'
 d_msg_ctrunc='$d_msg_ctrunc'

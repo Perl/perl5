@@ -1199,15 +1199,8 @@ PP(pp_ncmp)
     {
       dPOPTOPnnrl;
       I32 value;
-#ifdef __osf__ /* XXX Configure probe for isnan and isnanl needed XXX */
-#if defined(USE_LONG_DOUBLE) && defined(HAS_LONG_DOUBLE)
-#define Perl_isnan isnanl
-#else
-#define Perl_isnan isnan
-#endif
-#endif
 
-#ifdef __osf__ /* XXX fix in 5.6.1 --jhi */
+#ifdef Perl_isnan
       if (Perl_isnan(left) || Perl_isnan(right)) {
 	  SETs(&PL_sv_undef);
 	  RETURN;
