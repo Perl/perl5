@@ -3145,6 +3145,14 @@ In case you are still using Solaris 2.5 (aka SunOS 5.5), you may
 experience failures (the test core dumping) in lib/locale.t.
 The suggested cure is to upgrade your Solaris.
 
+=head2 Solaris x86 Fails Tests With -Duse64bitint
+
+The following tests are known to fail in Solaris x86 with Perl
+configured to use 64 bit integers:
+
+ ext/Data/Dumper/t/dumper.............FAILED at test 268
+ ext/Devel/Peek/Peek..................FAILED at test 7
+
 =head2 SUPER-UX (NEC SX)
 
 The following tests are known to fail on SUPER-UX:
