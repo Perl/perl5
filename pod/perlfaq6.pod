@@ -115,7 +115,7 @@ Here's code that finds everything between START and END in a paragraph:
 
     undef $/;  		# read in whole file, not just one line or paragraph
     while ( <> ) {
-	while ( /START(.*?)END/sm ) { # /s makes . cross line boundaries
+	while ( /START(.*?)END/sgm ) { # /s makes . cross line boundaries
 	    print "$1\n";
 	}
     }
