@@ -75,18 +75,20 @@
 
 #ifndef PERL_VERSION		/* For perls < 5.6 */
 #include <patchlevel.h>
-#define PERL_VERSION PATCHLEVEL
+#define PERL_REVISION   5
+#define PERL_VERSION    PATCHLEVEL
+#define PERL_SUBVERSION SUBVERSION
 #ifndef newRV_noinc
 #define newRV_noinc(sv)		((Sv = newRV(sv)), --SvREFCNT(SvRV(Sv)), Sv)
 #endif
-#if (PATCHLEVEL <= 4)		/* Older perls (<= 5.004) lack PL_ namespace */
+#if (PERL_VERSION <= 4)		/* Older perls (<= 5.004) lack PL_ namespace */
 #define PL_sv_yes	sv_yes
 #define PL_sv_no	sv_no
 #define PL_sv_undef	sv_undef
-#if (SUBVERSION <= 4)		/* 5.004_04 has been reported to lack newSVpvn */
+#if (PERL_SUBVERSION <= 4)		/* 5.004_04 has been reported to lack newSVpvn */
 #define newSVpvn newSVpv
 #endif
-#endif						/* PATCHLEVEL <= 4 */
+#endif						/* PERL_VERSION <= 4 */
 #ifndef HvSHAREKEYS_off
 #define HvSHAREKEYS_off(hv)	/* Ignore */
 #endif
@@ -296,7 +298,7 @@ typedef struct stcxt {
 
 #if defined(MULTIPLICITY) || defined(PERL_OBJECT) || defined(PERL_CAPI)
 
-#if (PATCHLEVEL <= 4) && (SUBVERSION < 68)
+#if (PERL_VERSION <= 4) && (PERL_SUBVERSION < 68)
 #define dSTCXT_SV 									\
 	SV *perinterp_sv = perl_get_sv(MY_VERSION, FALSE)
 #else	/* >= perl5.004_68 */
