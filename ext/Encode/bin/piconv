@@ -40,7 +40,7 @@ my $to   = $Opt{to}   || $locale or help("to_encoding unspecified");
 $Opt{string} and Encode::from_to($Opt{string}, $from, $to) and print $Opt{string} and exit;
 my $scheme = exists $Scheme{$Opt{Scheme}} ? $Opt{Scheme} :  'from_to';
 $Opt{check} ||= $Opt{c};
-$Opt{p} and $Opt{check} = Encode::FB_PERLQQ;
+$Opt{perlqq} and $Opt{check} = Encode::FB_PERLQQ;
 
 if ($Opt{debug}){
     my $cfrom = Encode->getEncoding($from)->name;

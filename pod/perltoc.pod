@@ -185,9 +185,9 @@ Interaction, perlfaq9 - Networking
 
 =item Declarations
 
-=item Simple statements
+=item Simple Statements
 
-=item Compound statements
+=item Compound Statements
 
 =item Loop Control
 
@@ -224,6 +224,8 @@ Interaction, perlfaq9 - Networking
 =item Scalar value constructors
 
 =item List value constructors
+
+=item Subscripts
 
 =item Slices
 
@@ -753,7 +755,7 @@ First:, Second:, Third:, Fourth:, Fifth:, Sixth:
 
 =item Awk Traps
 
-=item C Traps
+=item C/C++ Traps
 
 =item Sed Traps
 
@@ -2418,6 +2420,14 @@ enable UTF-8/UTF-EBCDIC in scripts
 
 =item Locales
 
+=item When Unicode Does Not Happen
+
+chmod, chmod, chown, chroot, exec, link, mkdir, rename, rmdir, stat,
+symlink, truncate, unlink, utime, %ENV, glob (aka the <*>), open, opendir,
+sysopen, qx (aka the backtick operator), system, readdir, readlink
+
+=item Forcing Unicode in Perl (Or Unforcing Unicode in Perl)
+
 =item Using Unicode in XS
 
 =back
@@ -2676,29 +2686,30 @@ Encode::CJKConstants, Encode::CN, Encode::CN::HZ, Encode::Config,
 Encode::EBCDIC, Encode::Encoder, Encode::Encoding, Encode::Guess,
 Encode::JP, Encode::JP::H2Z, Encode::JP::JIS7, Encode::KR,
 Encode::KR::2022_KR, Encode::MIME::Header, Encode::PerlIO,
-Encode::Supported, Encode::Symbol, Encode::TW, Encode::Unicode, English,
-Env, Errno, Exporter, Exporter::Heavy, ExtUtils::Command,
-ExtUtils::Command::MM, ExtUtils::Constant, ExtUtils::Embed,
-ExtUtils::Install, ExtUtils::Installed, ExtUtils::Liblist, ExtUtils::MM,
-ExtUtils::MM_Any, ExtUtils::MM_BeOS, ExtUtils::MM_Cygwin, ExtUtils::MM_DOS,
-ExtUtils::MM_MacOS, ExtUtils::MM_NW5, ExtUtils::MM_OS2, ExtUtils::MM_UWIN,
-ExtUtils::MM_Unix, ExtUtils::MM_VMS, ExtUtils::MM_Win32,
+Encode::Supported, Encode::Symbol, Encode::TW, Encode::Unicode,
+Encode::Unicode::UTF7, English, Env, Errno, Exporter, Exporter::Heavy,
+ExtUtils::Command, ExtUtils::Command::MM, ExtUtils::Constant,
+ExtUtils::Embed, ExtUtils::Install, ExtUtils::Installed, ExtUtils::Liblist,
+ExtUtils::MM, ExtUtils::MM_Any, ExtUtils::MM_BeOS, ExtUtils::MM_Cygwin,
+ExtUtils::MM_DOS, ExtUtils::MM_MacOS, ExtUtils::MM_NW5, ExtUtils::MM_OS2,
+ExtUtils::MM_UWIN, ExtUtils::MM_Unix, ExtUtils::MM_VMS, ExtUtils::MM_Win32,
 ExtUtils::MM_Win95, ExtUtils::MY, ExtUtils::MakeMaker,
 ExtUtils::MakeMaker::FAQ, ExtUtils::MakeMaker::Tutorial,
-ExtUtils::MakeMaker::vmsish, ExtUtils::Manifest, ExtUtils::Mkbootstrap,
-ExtUtils::Mksymlists, ExtUtils::Packlist, ExtUtils::testlib, Fatal, Fcntl,
-File::Basename, File::CheckTree, File::Compare, File::Copy, File::DosGlob,
-File::Find, File::Glob, File::Path, File::Spec, File::Spec::Cygwin,
-File::Spec::Epoc, File::Spec::Functions, File::Spec::Mac, File::Spec::OS2,
-File::Spec::Unix, File::Spec::VMS, File::Spec::Win32, File::Temp,
-File::stat, FileCache, FileHandle, Filter::Simple, Filter::Util::Call,
-FindBin, GDBM_File, Getopt::Long, Getopt::Std, Hash::Util, I18N::Collate,
-I18N::LangTags, I18N::LangTags::List, I18N::Langinfo, IO, IO::Dir,
-IO::File, IO::Handle, IO::Pipe, IO::Poll, IO::Seekable, IO::Select,
-IO::Socket, IO::Socket::INET, IO::Socket::UNIX, IPC::Open2, IPC::Open3,
-IPC::SysV, IPC::SysV::Msg, IPC::SysV::Semaphore, List::Util,
-Locale::Constants, Locale::Country, Locale::Currency, Locale::Language,
-Locale::Maketext, Locale::Maketext::TPJ13, Locale::Script, MIME::Base64,
+ExtUtils::MakeMaker::bytes, ExtUtils::MakeMaker::vmsish,
+ExtUtils::Manifest, ExtUtils::Mkbootstrap, ExtUtils::Mksymlists,
+ExtUtils::Packlist, ExtUtils::testlib, Fatal, Fcntl, File::Basename,
+File::CheckTree, File::Compare, File::Copy, File::DosGlob, File::Find,
+File::Glob, File::Path, File::Spec, File::Spec::Cygwin, File::Spec::Epoc,
+File::Spec::Functions, File::Spec::Mac, File::Spec::OS2, File::Spec::Unix,
+File::Spec::VMS, File::Spec::Win32, File::Temp, File::stat, FileCache,
+FileHandle, Filter::Simple, Filter::Util::Call, FindBin, GDBM_File,
+Getopt::Long, Getopt::Std, Hash::Util, I18N::Collate, I18N::LangTags,
+I18N::LangTags::List, I18N::Langinfo, IO, IO::Dir, IO::File, IO::Handle,
+IO::Pipe, IO::Poll, IO::Seekable, IO::Select, IO::Socket, IO::Socket::INET,
+IO::Socket::UNIX, IPC::Open2, IPC::Open3, IPC::SysV, IPC::SysV::Msg,
+IPC::SysV::Semaphore, List::Util, Locale::Constants, Locale::Country,
+Locale::Currency, Locale::Language, Locale::Maketext,
+Locale::Maketext::TPJ13, Locale::Script, MIME::Base64,
 MIME::Base64::QuotedPrint, Math::BigFloat, Math::BigInt,
 Math::BigInt::Calc, Math::BigInt::Scalar, Math::BigRat, Math::Complex,
 Math::Trig, Memoize, Memoize::AnyDBM_File, Memoize::Expire,
@@ -4478,6 +4489,10 @@ B<Decryption Filters>
 
 =item CONCLUSION
 
+=item THINGS TO LOOK OUT FOR
+
+Some Filters Clobber the C<DATA> Handle
+
 =item REQUIREMENTS
 
 =item AUTHOR
@@ -4553,7 +4568,7 @@ perl_destruct, perl_free, perl_parse, perl_run, require_pv
 
 =item Functions in file pp_pack.c
 
-pack_cat, unpack_str
+packlist, pack_cat, unpackstring, unpack_str
 
 =item Global Variables
 
@@ -4771,6 +4786,8 @@ PERLIO_K_FASTGETS, PERLIO_K_MULTIARG, Pushed, Popped, Open, Binmode,
 Getarg, Fileno, Dup, Read, Write, Seek, Tell, Close, Flush, Fill, Eof,
 Error,	Clearerr, Setlinebuf, Get_base, Get_bufsiz, Get_ptr, Get_cnt,
 Set_ptrcnt
+
+=item Implementing PerlIO Layers
 
 =item Core Layers
 
@@ -5060,6 +5077,8 @@ PerlIO_apply_layers(f,mode,layers), PerlIO_binmode(f,ptype,imode,layers),
 =item Unicode in Filenames
 
 =back
+
+=item Unicode in %ENV
 
 =item Recently done things
 
@@ -7158,28 +7177,58 @@ long, Process terminated by SIG%s
 
 =item HISTORY
 
+=back
+
+=head2 perlartistic -- the Perl Artistic License
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
 =item The "Artistic License"
 
 =over 4
 
 =item Preamble
 
-Package, Standard Version, Copyright Holder, You, Reasonable copying fee,
-Freely Available
+=item Definitions
+
+"Package" refers to the collection of files distributed by the Copyright
+Holder, and derivatives of that collection of files created through textual
+modification, "Standard Version" refers to such a Package if it has not
+been modified, or has been modified in accordance with the wishes of the
+Copyright Holder as specified below, "Copyright Holder" is whoever is named
+in the copyright or copyrights for the package, "You" is you, if you're
+thinking about copying or distributing this Package, "Reasonable copying
+fee" is whatever you can justify on the basis of media cost, duplication
+charges, time of people involved, and so on. (You will not be required to
+justify it to the Copyright Holder, but only to the computing community at
+large as a market that must bear the fee.), "Freely Available" means that
+no fee is charged for the item itself, though there may be fees involved in
+handling the item. It also means that recipients of the item may
+redistribute it under the same conditions they received it
+
+=item Conditions
 
 =back
+
+=back
+
+=head2 perlgpl -- the GNU Public General Public License, version 2
+
+=over 4
+
+=item SYNOPSIS
 
 =back
 
 =over 4
+
+=item DESCRIPTION
 
 =item GNU GENERAL PUBLIC LICENSE
-
-=over 4
-
-=item The License Text
-
-=back
 
 =back
 
@@ -11001,46 +11050,47 @@ C<d_perl_otherlibdirs>, C<d_phostname>, C<d_pipe>, C<d_poll>,
 C<d_portable>, C<d_PRId64>, C<d_PRIeldbl>, C<d_PRIEUldbl>, C<d_PRIfldbl>,
 C<d_PRIFUldbl>, C<d_PRIgldbl>, C<d_PRIGUldbl>, C<d_PRIi64>, C<d_PRIo64>,
 C<d_PRIu64>, C<d_PRIx64>, C<d_PRIXU64>, C<d_procselfexe>,
-C<d_pthread_atfork>, C<d_pthread_yield>, C<d_pwage>, C<d_pwchange>,
-C<d_pwclass>, C<d_pwcomment>, C<d_pwexpire>, C<d_pwgecos>, C<d_pwpasswd>,
-C<d_pwquota>, C<d_qgcvt>, C<d_quad>, C<d_random_r>, C<d_readdir64_r>,
-C<d_readdir>, C<d_readdir_r>, C<d_readlink>, C<d_readv>, C<d_recvmsg>,
-C<d_rename>, C<d_rewinddir>, C<d_rmdir>, C<d_safebcpy>, C<d_safemcpy>,
-C<d_sanemcmp>, C<d_sbrkproto>, C<d_scalbnl>, C<d_sched_yield>,
-C<d_scm_rights>, C<d_SCNfldbl>, C<d_seekdir>, C<d_select>, C<d_sem>,
-C<d_semctl>, C<d_semctl_semid_ds>, C<d_semctl_semun>, C<d_semget>,
-C<d_semop>, C<d_sendmsg>, C<d_setegid>, C<d_seteuid>, C<d_setgrent>,
-C<d_setgrent_r>, C<d_setgrps>, C<d_sethent>, C<d_sethostent_r>,
-C<d_setitimer>, C<d_setlinebuf>, C<d_setlocale>, C<d_setlocale_r>,
-C<d_setnent>, C<d_setnetent_r>, C<d_setpent>, C<d_setpgid>, C<d_setpgrp2>,
-C<d_setpgrp>, C<d_setprior>, C<d_setproctitle>, C<d_setprotoent_r>,
-C<d_setpwent>, C<d_setpwent_r>, C<d_setregid>, C<d_setresgid>,
-C<d_setresuid>, C<d_setreuid>, C<d_setrgid>, C<d_setruid>, C<d_setsent>,
-C<d_setservent_r>, C<d_setsid>, C<d_setvbuf>, C<d_sfio>, C<d_shm>,
-C<d_shmat>, C<d_shmatprototype>, C<d_shmctl>, C<d_shmdt>, C<d_shmget>,
-C<d_sigaction>, C<d_sigprocmask>, C<d_sigsetjmp>, C<d_sockatmark>,
-C<d_sockatmarkproto>, C<d_socket>, C<d_socklen_t>, C<d_sockpair>,
-C<d_socks5_init>, C<d_sqrtl>, C<d_srand48_r>, C<d_srandom_r>,
-C<d_sresgproto>, C<d_sresuproto>, C<d_statblks>, C<d_statfs_f_flags>,
-C<d_statfs_s>, C<d_statvfs>, C<d_stdio_cnt_lval>, C<d_stdio_ptr_lval>,
-C<d_stdio_ptr_lval_nochange_cnt>, C<d_stdio_ptr_lval_sets_cnt>,
-C<d_stdio_stream_array>, C<d_stdiobase>, C<d_stdstdio>, C<d_strchr>,
-C<d_strcoll>, C<d_strctcpy>, C<d_strerrm>, C<d_strerror>, C<d_strerror_r>,
-C<d_strftime>, C<d_strtod>, C<d_strtol>, C<d_strtold>, C<d_strtoll>,
-C<d_strtoq>, C<d_strtoul>, C<d_strtoull>, C<d_strtouq>, C<d_strxfrm>,
-C<d_suidsafe>, C<d_symlink>, C<d_syscall>, C<d_syscallproto>, C<d_sysconf>,
-C<d_sysernlst>, C<d_syserrlst>, C<d_system>, C<d_tcgetpgrp>,
-C<d_tcsetpgrp>, C<d_telldir>, C<d_telldirproto>, C<d_time>, C<d_times>,
-C<d_tm_tm_gmtoff>, C<d_tm_tm_zone>, C<d_tmpnam_r>, C<d_truncate>,
-C<d_ttyname_r>, C<d_tzname>, C<d_u32align>, C<d_ualarm>, C<d_umask>,
-C<d_uname>, C<d_union_semun>, C<d_unordered>, C<d_usleep>,
-C<d_usleepproto>, C<d_ustat>, C<d_vendorarch>, C<d_vendorbin>,
-C<d_vendorlib>, C<d_vendorscript>, C<d_vfork>, C<d_void_closedir>,
-C<d_voidsig>, C<d_voidtty>, C<d_volatile>, C<d_vprintf>, C<d_wait4>,
-C<d_waitpid>, C<d_wcstombs>, C<d_wctomb>, C<d_writev>, C<d_xenix>, C<date>,
-C<db_hashtype>, C<db_prefixtype>, C<db_version_major>, C<db_version_minor>,
-C<db_version_patch>, C<defvoidused>, C<direntrytype>, C<dlext>, C<dlsrc>,
-C<doublesize>, C<drand01>, C<drand48_r_proto>, C<dynamic_ext>
+C<d_pthread_atfork>, C<d_pthread_attr_setscope>, C<d_pthread_yield>,
+C<d_pwage>, C<d_pwchange>, C<d_pwclass>, C<d_pwcomment>, C<d_pwexpire>,
+C<d_pwgecos>, C<d_pwpasswd>, C<d_pwquota>, C<d_qgcvt>, C<d_quad>,
+C<d_random_r>, C<d_readdir64_r>, C<d_readdir>, C<d_readdir_r>,
+C<d_readlink>, C<d_readv>, C<d_recvmsg>, C<d_rename>, C<d_rewinddir>,
+C<d_rmdir>, C<d_safebcpy>, C<d_safemcpy>, C<d_sanemcmp>, C<d_sbrkproto>,
+C<d_scalbnl>, C<d_sched_yield>, C<d_scm_rights>, C<d_SCNfldbl>,
+C<d_seekdir>, C<d_select>, C<d_sem>, C<d_semctl>, C<d_semctl_semid_ds>,
+C<d_semctl_semun>, C<d_semget>, C<d_semop>, C<d_sendmsg>, C<d_setegid>,
+C<d_seteuid>, C<d_setgrent>, C<d_setgrent_r>, C<d_setgrps>, C<d_sethent>,
+C<d_sethostent_r>, C<d_setitimer>, C<d_setlinebuf>, C<d_setlocale>,
+C<d_setlocale_r>, C<d_setnent>, C<d_setnetent_r>, C<d_setpent>,
+C<d_setpgid>, C<d_setpgrp2>, C<d_setpgrp>, C<d_setprior>,
+C<d_setproctitle>, C<d_setprotoent_r>, C<d_setpwent>, C<d_setpwent_r>,
+C<d_setregid>, C<d_setresgid>, C<d_setresuid>, C<d_setreuid>, C<d_setrgid>,
+C<d_setruid>, C<d_setsent>, C<d_setservent_r>, C<d_setsid>, C<d_setvbuf>,
+C<d_sfio>, C<d_shm>, C<d_shmat>, C<d_shmatprototype>, C<d_shmctl>,
+C<d_shmdt>, C<d_shmget>, C<d_sigaction>, C<d_sigprocmask>, C<d_sigsetjmp>,
+C<d_sockatmark>, C<d_sockatmarkproto>, C<d_socket>, C<d_socklen_t>,
+C<d_sockpair>, C<d_socks5_init>, C<d_sqrtl>, C<d_srand48_r>,
+C<d_srandom_r>, C<d_sresgproto>, C<d_sresuproto>, C<d_statblks>,
+C<d_statfs_f_flags>, C<d_statfs_s>, C<d_statvfs>, C<d_stdio_cnt_lval>,
+C<d_stdio_ptr_lval>, C<d_stdio_ptr_lval_nochange_cnt>,
+C<d_stdio_ptr_lval_sets_cnt>, C<d_stdio_stream_array>, C<d_stdiobase>,
+C<d_stdstdio>, C<d_strchr>, C<d_strcoll>, C<d_strctcpy>, C<d_strerrm>,
+C<d_strerror>, C<d_strerror_r>, C<d_strftime>, C<d_strtod>, C<d_strtol>,
+C<d_strtold>, C<d_strtoll>, C<d_strtoq>, C<d_strtoul>, C<d_strtoull>,
+C<d_strtouq>, C<d_strxfrm>, C<d_suidsafe>, C<d_symlink>, C<d_syscall>,
+C<d_syscallproto>, C<d_sysconf>, C<d_sysernlst>, C<d_syserrlst>,
+C<d_system>, C<d_tcgetpgrp>, C<d_tcsetpgrp>, C<d_telldir>,
+C<d_telldirproto>, C<d_time>, C<d_times>, C<d_tm_tm_gmtoff>,
+C<d_tm_tm_zone>, C<d_tmpnam_r>, C<d_truncate>, C<d_ttyname_r>, C<d_tzname>,
+C<d_u32align>, C<d_ualarm>, C<d_umask>, C<d_uname>, C<d_union_semun>,
+C<d_unordered>, C<d_usleep>, C<d_usleepproto>, C<d_ustat>, C<d_vendorarch>,
+C<d_vendorbin>, C<d_vendorlib>, C<d_vendorscript>, C<d_vfork>,
+C<d_void_closedir>, C<d_voidsig>, C<d_voidtty>, C<d_volatile>,
+C<d_vprintf>, C<d_wait4>, C<d_waitpid>, C<d_wcstombs>, C<d_wctomb>,
+C<d_writev>, C<d_xenix>, C<date>, C<db_hashtype>, C<db_prefixtype>,
+C<db_version_major>, C<db_version_minor>, C<db_version_patch>,
+C<defvoidused>, C<direntrytype>, C<dlext>, C<dlsrc>, C<doublesize>,
+C<drand01>, C<drand48_r_proto>, C<dynamic_ext>
 
 =item e
 
@@ -11856,7 +11906,7 @@ reference, e.g.:
 
 =item Other methods defined in Encode::Encodings
 
--E<gt>name, -E<gt>new_sequence, -E<gt>perlio_ok(), -E<gt>needs_lines()
+-E<gt>name, -E<gt>renew, -E<gt>perlio_ok(), -E<gt>needs_lines()
 
 =item Example: Encode::ROT13
 
@@ -12114,6 +12164,20 @@ BOM as integer when fetched in network byte order
 
 =back
 
+=head2 Encode::Unicode::UTF7 -- UTF-7 encoding
+
+=over 4
+
+=item SYNOPSIS
+
+=item ABSTRACT
+
+=item In Practice
+
+=item SEE ALSO
+
+=back
+
 =head2 Encode::lib::Encode::Alias, Encode::Alias - alias definitions to
 encodings
 
@@ -12163,7 +12227,7 @@ Implementation Base Class
 
 =item Other methods defined in Encode::Encodings
 
--E<gt>name, -E<gt>new_sequence, -E<gt>perlio_ok(), -E<gt>needs_lines()
+-E<gt>name, -E<gt>renew, -E<gt>perlio_ok(), -E<gt>needs_lines()
 
 =item Example: Encode::ROT13
 
@@ -12335,6 +12399,21 @@ czyborra.com, CJK.inf, Jungshik Shin's Hangul FAQ, debian.org:
 C<CJKV Information Processing> by Ken Lunde
 
 =back
+
+=back
+
+=head2 Encode::lib::Encode::Unicode::UTF7, Encode::Unicode::UTF7 -- UTF-7
+encoding
+
+=over 4
+
+=item SYNOPSIS
+
+=item ABSTRACT
+
+=item In Practice
+
+=item SEE ALSO
 
 =back
 
@@ -13610,6 +13689,10 @@ Why not just use <insert other build config tool here>?, What's
 Module::Build and how does it relate to MakeMaker?, pure perl.	no make, no
 shell commands, easier to customize, cleaner internals, less cruft
 
+=item Module Writing
+
+How do I keep my $VERSION up to date without resetting it manually?
+
 =item XS
 
 How to I prevent "object version X.XX does not match bootstrap parameter
@@ -13646,6 +13729,16 @@ bin/
 =back
 
 =item SEE ALSO
+
+=back
+
+=head2 ExtUtils::MakeMaker::bytes - Version agnostic bytes.pm
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
 
 =back
 
@@ -13719,6 +13812,18 @@ B<PERL_MM_MANIFEST_DEBUG>
 =item SEE ALSO
 
 =item AUTHOR
+
+=back
+
+=head2 ExtUtils::Miniperl, writemain - write the C code for perlmain.c
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item SEE ALSO
 
 =back
 
@@ -13962,6 +14067,8 @@ C<GLOB_NOSPACE>, C<GLOB_ABEND>
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+=item DIAGNOSTICS
 
 =item AUTHORS
 
@@ -14581,8 +14688,13 @@ B<$_>, B<$status>, B<filter_read> and B<filter_read_exact>, B<filter_del>
 default, posix_default, auto_abbrev, getopt_compat, gnu_compat, gnu_getopt,
 require_order, permute, bundling (default: disabled), bundling_override
 (default: disabled), ignore_case  (default: enabled), ignore_case_always
-(default: disabled), pass_through (default: disabled), prefix,
+(default: disabled), auto_version (default:disabled), auto_help
+(default:disabled), pass_through (default: disabled), prefix,
 prefix_pattern, debug (default: disabled)
+
+=item Exportable Methods
+
+VersionMessage, C<-message>, C<-msg>, C<-exitval>, C<-output>, HelpMessage
 
 =item Return values and Errors
 
@@ -14608,6 +14720,8 @@ prefix_pattern, debug (default: disabled)
 supplied
 
 =item GetOptions does not split the command line correctly
+
+=item Undefined subroutine &main::GetOptions called
 
 =item How do I put a "-?" option into a Getopt::Long?
 
@@ -19898,6 +20012,8 @@ SHIFT this, UNSHIFT this, LIST, SPLICE this, offset, length, LIST
 
 =item C<defer>, C<flush>, C<discard>, and C<autodefer>
 
+=item C<offset>
+
 =back
 
 =item Tying to an already-opened filehandle
@@ -19909,6 +20025,8 @@ SHIFT this, UNSHIFT this, LIST, SPLICE this, offset, length, LIST
 =item Autodeferring
 
 =back
+
+=item CONCURRENT ACCESS TO FILES
 
 =item CAVEATS
 
@@ -20050,6 +20168,16 @@ getitimer ( $which )
 =item EXAMPLES
 
 =item C API
+
+=item DIAGNOSTICS
+
+=over 4
+
+=item negative time not invented yet
+
+=item internal error: useconds < 0 (unsigned ... signed ...)
+
+=back
 
 =item CAVEATS
 

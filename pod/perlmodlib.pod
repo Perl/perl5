@@ -513,6 +513,10 @@ Taiwan-based Chinese Encodings
 
 Various Unicode Transformation Formats
 
+=item Encode::Unicode::UTF7
+
+UTF-7 encoding
+
 =item English
 
 Use nice English (or awk) names for ugly punctuation variables
@@ -628,6 +632,10 @@ Frequently Asked Questions About MakeMaker
 =item ExtUtils::MakeMaker::Tutorial
 
 Writing a module with MakeMaker
+
+=item ExtUtils::MakeMaker::bytes
+
+Version agnostic bytes.pm
 
 =item ExtUtils::MakeMaker::vmsish
 

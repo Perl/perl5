@@ -47,7 +47,7 @@ if ($args !~ /\-o (\S+)/) {
   }
   if ($dllname =~ /\./) { $libname =$`; } else { $libname =$dllname; };
   my $v_e_r_s = '5_9_0';
-  if ( $dllname =~ /.*perl.*/) { 
+  if ( $dllname =~ /libperl.*/) { 
     $dllname ="cygperl$v_e_r_s.dll";
   } else {
   $dllname ="$libname.dll";

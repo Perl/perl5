@@ -72,6 +72,8 @@ sub hostname {
   else {  # Unix
     # is anyone going to make it here?
 
+    local $ENV{PATH} = '/usr/bin:/bin:/usr/sbin:/sbin'; # Paranoia.
+
     # method 2 - syscall is preferred since it avoids tainting problems
     # XXX: is it such a good idea to return hostname untainted?
     eval {
