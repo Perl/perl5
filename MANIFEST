@@ -227,6 +227,7 @@ ext/Encode/Encode/gb12345.enc	Encoding tables
 ext/Encode/Encode/gb1988.enc	Encoding tables
 ext/Encode/Encode/gb2312.enc	Encoding tables
 ext/Encode/Encode/gsm0338.enc	Encoding tables
+ext/Encode/Encode/HZ.enc	Encoding tables
 ext/Encode/Encode/iso2022-jp.enc	Encoding tables
 ext/Encode/Encode/iso2022-kr.enc	Encoding tables
 ext/Encode/Encode/iso2022.enc	Encoding tables

@@ -1,0 +1,7 @@
+# Encoding file: HZ, HanZi
+H
+name		HZ
+init		{}
+final		{}
+ascii		\x7e\x7d
+gb2312		\x7e\x7b
