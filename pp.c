@@ -1714,6 +1714,12 @@ PP(pp_ge)
 PP(pp_ne)
 {
     dSP; tryAMAGICbinSET(ne,0);
+#ifndef NV_PRESERVES_UV
+    if (SvROK(TOPs) && SvROK(TOPm1s)) {
+	SETi(PTR2UV(SvRV(TOPs)) - PTR2UV(SvRV(TOPm1s)));
+	RETURN;
+    }
+#endif
 #ifdef PERL_PRESERVE_IVUV
     SvIV_please(TOPs);
     if (SvIOK(TOPs)) {
