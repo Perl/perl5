@@ -7682,7 +7682,7 @@ optionE<gt> [shift|pop]>, C<o conf E<lt>list optionE<gt>
 
 http firewall, ftp firewall, One way visibility, SOCKS, IP Masquerade
 
-=item Configuring lynx or ncftp for going throught the firewall
+=item Configuring lynx or ncftp for going through the firewall
 
 =back
 
@@ -11002,7 +11002,7 @@ after =back
 
 =item Warnings
 
-multiple occurence of link target I<name>, line containing nothing but
+multiple occurrence of link target I<name>, line containing nothing but
 whitespace in paragraph, file does not start with =head, No numeric
 argument for =over, previous =item has no contents, preceding non-item
 paragraph(s), =item type mismatch (I<one> vs. I<two>), I<N> unescaped

@@ -45,8 +45,7 @@ case "$archname" in
     ;;
 esac
 
-test -z "`${cc:-cc} -V 2>&1|grep -i workshop`" || ccisworkshop="$define"
-test -z "`${cc:-cc} -v 2>&1|grep -i gcc`"      || ccisgcc="$define"
+test -z "`${cc:-cc} -V 2>&1|grep -i workshop`" || ccname=workshop
 
 cat >UU/workshoplibpth.cbu<<'EOCBU'
 case "$workshoplibpth_done" in
@@ -70,8 +69,8 @@ case "$workshoplibpth_done" in
 esac
 EOCBU
 
-case "$ccisworkshop" in
-"$define")
+case "$ccname" in
+workshop)
 	cat >try.c <<EOF
 #include <sunmath.h>
 int main() { return(0); }
@@ -380,16 +379,24 @@ case "$uselargefiles" in
 ''|$define|true|[yY]*)
 
 # Keep these in the left margin.
-ccflags_largefiles="`getconf LFS_CFLAGS 2>/dev/null`"
-ldflags_largefiles="`getconf LFS_LDFLAGS 2>/dev/null`"
-libswanted_largefiles="`getconf LFS_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g`"
+ccflags_uselargefiles="`getconf LFS_CFLAGS 2>/dev/null`"
+ldflags_uselargefiles="`getconf LFS_LDFLAGS 2>/dev/null`"
+libswanted_uselargefiles="`getconf LFS_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g`"
 
-    ccflags="$ccflags $ccflags_largefiles"
-    ldflags="$ldflags $ldflags_largefiles"
-    libswanted="$libswanted $libswanted_largefiles"
+    ccflags="$ccflags $ccflags_uselargefiles"
+    ldflags="$ldflags $ldflags_uselargefiles"
+    libswanted="$libswanted $libswanted_uselargefiles"
     ;;
 esac
 EOCBU
+
+# This is truly a mess.
+case "$usemorebits" in
+"$define"|true|[yY]*)
+	use64bitint="$define"    
+	uselongdouble="$define"    
+	;;
+esac
 
 cat > UU/use64bitint.cbu <<'EOCBU'
 # This script UU/use64bitint.cbu will get 'called-back' by Configure 
@@ -478,17 +485,18 @@ cat > UU/uselongdouble.cbu <<'EOCBU'
 # after it has prompted the user for whether to use long doubles.
 case "$uselongdouble-$uselongdouble_done" in
 "$define-"|true-|[yY]*-)
-	case "$ccisworkshop" in
-	'')	cat >&4 <<EOM
+	case "$ccname" in
+	workshop)
+		libswanted="$libswanted sunmath"
+		loclibpth="$loclibpth /opt/SUNWspro/lib"
+		;;
+	*)	cat >&4 <<EOM
 
-I do not see the Sun Workshop compiler; therefore I do not see
+The Sun Workshop compiler is not being used; therefore I do not see
 the libsunmath; therefore I do not know how to do long doubles, sorry.
 I'm disabling the use of long doubles.
 EOM
 		uselongdouble="$undef"
-		;;
-	*)	libswanted="$libswanted sunmath"
-		loclibpth="$loclibpth /opt/SUNWspro/lib"
 		;;
 	esac
 	uselongdouble_done=yes
@@ -505,9 +513,6 @@ case "$uselongdouble" in
 esac
 
 rm -f try.c try.o try
-# keep that leading tab
-	ccisworkshop=''
-	ccisgcc=''
 
 # This is just a trick to include some useful notes.
 cat > /dev/null <<'End_of_Solaris_Notes'

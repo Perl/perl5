@@ -2,9 +2,9 @@
 
 use bytes;
 
-$UnicodeData = "Unicode.300";
+$UnicodeData = "Unicode.301";
 $SyllableData = "syllables.txt";
-$PropData = "Props.txt";
+$PropData = "PropList.txt";
 
 
 # Note: we try to keep filenames unique within first 8 chars.  Using

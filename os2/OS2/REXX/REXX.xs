@@ -29,7 +29,7 @@ static RXSTRING   rxcommand    = {  9, "RXCOMMAND" };
 static RXSTRING   rxsubroutine = { 12, "RXSUBROUTINE" };
 static RXSTRING   rxfunction   = { 11, "RXFUNCTION" };
 
-static ULONG PERLCALL(PSZ name, ULONG argc, PRXSTRING argv, PSZ queue, PRXSTRING ret);
+static ULONG PERLCALL(PCSZ name, ULONG argc, PRXSTRING argv, PCSZ queue, PRXSTRING ret);
 
 #if 1
  #define Set	RXSHV_SET
@@ -109,7 +109,7 @@ exec_in_REXX(pTHX_ char *cmd, char * handlerName, RexxFunctionHandler *handler)
 static SV* exec_cv;
 
 static ULONG
-PERLSTART(PSZ name, ULONG argc, PRXSTRING argv, PSZ queue, PRXSTRING ret)
+PERLSTART(PCSZ name, ULONG argc, PRXSTRING argv, PCSZ queue, PRXSTRING ret)
 {
     return PERLCALL(NULL, argc, argv, queue, ret);
 }
@@ -122,7 +122,7 @@ PERLSTART(PSZ name, ULONG argc, PRXSTRING argv, PSZ queue, PRXSTRING ret)
 #define REXX_eval(cmd) REXX_eval_with(cmd,NULL,NULL)
 
 static ULONG
-PERLCALL(PSZ name, ULONG argc, PRXSTRING argv, PSZ queue, PRXSTRING ret)
+PERLCALL(PCSZ name, ULONG argc, PRXSTRING argv, PCSZ queue, PRXSTRING ret)
 {
     dTHX;
     EXCEPTIONREGISTRATIONRECORD xreg = { NULL, _emx_exception };

@@ -26,7 +26,8 @@ if ($^O eq 'unicos') { # See lib/Math/Complex.pm and t/lib/complex.t.
 }
 
 sub near ($$;$) {
-    abs($_[0] - $_[1]) < (defined $_[2] ? $_[2] : $eps);
+    my $e = defined $_[2] ? $_[2] : $eps;
+    $_[1] ? (abs($_[0]/$_[1] - 1) < $e) : abs($_[0]) < $e;
 }
 
 print "1..23\n";

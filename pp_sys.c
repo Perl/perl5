@@ -808,16 +808,28 @@ PP(pp_untie)
     SV *sv = POPs;
     char how = (SvTYPE(sv) == SVt_PVHV || SvTYPE(sv) == SVt_PVAV) ? 'P' : 'q';
 
-    if (ckWARN(WARN_UNTIE)) {
         MAGIC * mg ;
         if ((mg = SvTIED_mg(sv, how))) {
-            if (mg && SvREFCNT(SvRV(mg->mg_obj)) > 1)  
+	SV *obj = SvRV(mg->mg_obj);
+	GV *gv;
+	CV *cv = NULL;
+        if (ckWARN(WARN_UNTIE)) {
+	    if (mg && SvREFCNT(obj) > 1)
 		Perl_warner(aTHX_ WARN_UNTIE,
 		    "untie attempted while %"UVuf" inner references still exist",
-		    (UV)SvREFCNT(SvRV(mg->mg_obj)) - 1 ) ;
+		    (UV)SvREFCNT(obj) - 1 ) ;
+        }
+	if ((gv = gv_fetchmethod_autoload(SvSTASH(obj), "UNTIE", FALSE)) &&
+            isGV(gv) && (cv = GvCV(gv))) {
+	    PUSHMARK(SP);
+	    XPUSHs(SvTIED_obj((SV*)gv, mg));
+	    PUTBACK;
+	    ENTER;
+	    call_sv((SV *)cv, G_VOID);
+	    LEAVE;
+	    SPAGAIN;
         }
     }
- 
     sv_unmagic(sv, how);
     RETPUSHYES;
 }

@@ -1123,9 +1123,9 @@ fork(void)
 #endif
 
 /*******************************************************************/
-/* not implemented in EMX 0.9a */
+/* not implemented in EMX 0.9d */
 
-void *	ctermid(x)	{ return 0; }
+char *	ctermid(char *s)	{ return 0; }
 
 #ifdef MYTTYNAME /* was not in emx0.9a */
 void *	ttyname(x)	{ return 0; }

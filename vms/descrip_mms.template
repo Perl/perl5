@@ -327,7 +327,7 @@ CRTLOPTS =,$(CRTL)/Options
 .endif
 
 # Modules which must be installed before we can build extensions
-LIBPREREQ = $(ARCHDIR)Config.pm [.lib.VMS]Filespec.pm [.lib]DynaLoader.pm [.lib]XSLoader.pm [.lib]lib.pm [.lib]vmsish.pm [.lib.ExtUtils]XSSymSet.pm
+LIBPREREQ = $(ARCHDIR)Config.pm [.lib.VMS]Filespec.pm [.lib]DynaLoader.pm [.lib]XSLoader.pm [.lib]lib.pm [.lib]vmsish.pm [.lib.ExtUtils]XSSymSet.pm $(ARCHDIR)vmspipe.com
 
 utils1 = [.lib.pod]perldoc.com [.lib.ExtUtils]Miniperl.pm [.utils]c2ph.com [.utils]h2ph.com [.utils]h2xs.com [.lib]perlbug.com [.lib]perlcc.com [.utils]dprofpp.com
 utils2 = [.lib]splain.com [.utils]pl2pm.com
@@ -382,7 +382,10 @@ perlpods : $(pod)
 archcorefiles : $(ac) $(acth) $(ARCHAUTO)time.stamp
 	@ $(NOOP)
 
-miniperl : $(DBG)miniperl$(E)
+vmspipe.com : [.vms]vmspipe.com
+    copy/log $(MMS$SOURCE) $(MMS$TARGET)
+
+miniperl : $(DBG)miniperl$(E)  vmspipe.com
 	@ Continue
 $(MINIPERL_EXE) :  miniperlmain$(O), $(DBG)libperl$(OLB) $(CRTL)
 	Link $(LINKFLAGS)/NoDebug/Trace/NoMap/NoFull/NoCross/Exe=$(MMS$TARGET) miniperlmain$(O), $(DBG)libperl$(OLB)/Library/Include=globals $(CRTLOPTS)
@@ -448,6 +451,9 @@ $(ARCHDIR)config.pm : [.lib]config.pm
 
 [.lib]config.pm : config.h $(MINIPERL_EXE)
 	$(MINIPERL) ConfigPM.
+
+$(ARCHDIR)vmspipe.com : vmspipe.com
+        Copy $(MMS$SOURCE) $(MMS$TARGET)
 
 [.ext.dynaloader]dl_vms.c : [.ext.dynaloader]dl_vms.xs $(ARCHDIR)Config.pm [.lib.ExtUtils]XSSymSet.pm $(MINIPERL_EXE)
 	$(XSUBPP) $(MMS$SOURCE) >$(MMS$TARGET)

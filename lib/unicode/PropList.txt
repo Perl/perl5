@@ -1,4 +1,4 @@
-Property dump: UnicodeData-3.0.0.txt
+Property dump: UnicodeData-3.0.1.txt
 
 *******************************************
 
@@ -189,89 +189,6 @@ FF3F
 FF5B
 FF5D
 FF61..FF65  (5 chars)
-
-*******************************************
-
-Property dump for: 0x00800000 (Delimiter)
-
-0000
-0009..000D  (5 chars)
-001C..0023  (8 chars)
-0028..0029  (2 chars)
-002C
-002E..002F  (2 chars)
-003A..003B  (2 chars)
-003F
-005B..005D  (3 chars)
-007B..007D  (3 chars)
-0085
-00A0..00A1  (2 chars)
-00A6..00A7  (2 chars)
-00AB
-00B6
-00BB
-00BF
-037E
-0387
-055C..055E  (3 chars)
-0589
-060C
-061B
-061F
-066B..066C  (2 chars)
-06D4
-0700..0709  (10 chars)
-070B..070D  (3 chars)
-0964..0965  (2 chars)
-0DF4
-0E5A..0E5B  (2 chars)
-0F0B
-0F0D..0F12  (6 chars)
-0F3A..0F3D  (4 chars)
-104A..104B  (2 chars)
-10FB
-1361..1368  (8 chars)
-166D..166E  (2 chars)
-1680
-169B..169C  (2 chars)
-16EB..16ED  (3 chars)
-17D4..17D6  (3 chars)
-17DA
-1802..1805  (4 chars)
-1808..1809  (2 chars)
-2000..200B  (12 chars)
-2016
-2018..201F  (8 chars)
-2028..2029  (2 chars)
-202F
-2039..203A  (2 chars)
-203C..203D  (2 chars)
-2045..2046  (2 chars)
-2048..2049  (2 chars)
-207D..207E  (2 chars)
-208D..208E  (2 chars)
-2329..232A  (2 chars)
-3000..3002  (3 chars)
-3008..3011  (10 chars)
-3014..301B  (8 chars)
-301D..301F  (3 chars)
-30FB
-FD3E..FD3F  (2 chars)
-FE35..FE44  (16 chars)
-FE50..FE52  (3 chars)
-FE54..FE57  (4 chars)
-FE59..FE5F  (7 chars)
-FE68
-FF01..FF03  (3 chars)
-FF08..FF09  (2 chars)
-FF0C
-FF0E..FF0F  (2 chars)
-FF1A..FF1B  (2 chars)
-FF1F
-FF3B..FF3D  (3 chars)
-FF5B..FF5D  (3 chars)
-FF61..FF65  (5 chars)
-FFE4
 
 *******************************************
 
@@ -591,7 +508,6 @@ Property dump for: 0x20000004 (Combining)
 20D0..20E3  (20 chars)
 302A..302F  (6 chars)
 3099..309A  (2 chars)
-F8F0..F8FF  (16 chars)
 FB1E
 FE20..FE23  (4 chars)
 
@@ -689,7 +605,6 @@ Property dump for: 0x20040000 (Non-spacing)
 20D0..20E3  (20 chars)
 302A..302F  (6 chars)
 3099..309A  (2 chars)
-F8F0..F8FF  (16 chars)
 FB1E
 FE20..FE23  (4 chars)
 
@@ -1161,7 +1076,6 @@ Property dump for: 0x20000001 (Alphabetic)
 0DF2..0DF3  (2 chars)
 0E01..0E3A  (58 chars)
 0E40..0E45  (6 chars)
-0E47
 0E4D
 0E81..0E82  (2 chars)
 0E84
@@ -1355,7 +1269,7 @@ Property dump for: 0x20010000 (Diacritic)
 0CCD
 0D4D
 0DCA
-0E48..0E4C  (5 chars)
+0E47..0E4C  (6 chars)
 0E4E
 0EC8..0ECC  (5 chars)
 0F18..0F19  (2 chars)
@@ -2077,8 +1991,7 @@ Property dump for: 0x01000000 (Bidi: Left-to-Right)
 4E00..9FA5  (20902 chars)
 A000..A48C  (1165 chars)
 AC00..D7A3  (11172 chars)
-D800..F7FF  (8192 chars)
-F900..FA2D  (302 chars)
+D800..FA2D  (8750 chars)
 FB00..FB06  (7 chars)
 FB13..FB17  (5 chars)
 FF21..FF3A  (26 chars)
@@ -2088,6 +2001,8 @@ FFC2..FFC7  (6 chars)
 FFCA..FFCF  (6 chars)
 FFD2..FFD7  (6 chars)
 FFDA..FFDC  (3 chars)
+F0000..FFFFD  (65534 chars)
+100000..10FFFD  (65534 chars)
 
 *******************************************
 
@@ -2331,7 +2246,6 @@ Property dump for: 0x0C000000 (Bidi: Non-spacing Mark)
 20D0..20E3  (20 chars)
 302A..302F  (6 chars)
 3099..309A  (2 chars)
-F8F0..F8FF  (16 chars)
 FB1E
 FE20..FE23  (4 chars)
 
@@ -2483,6 +2397,8 @@ FFFC..FFFD  (2 chars)
 Property dump for: 0x80000005 (Private Use)
 
 E000..F8FF  (6400 chars)
+F0000..FFFFD  (65534 chars)
+100000..10FFFD  (65534 chars)
 
 *******************************************
 
@@ -3281,6 +3197,28 @@ DB80..DBFF  (128 chars)
 
 *******************************************
 
+Property dump for: 0x8000000A (Not a Character)
+
+FFFE..FFFF  (2 chars)
+1FFFE..1FFFF  (2 chars)
+2FFFE..2FFFF  (2 chars)
+3FFFE..3FFFF  (2 chars)
+4FFFE..4FFFF  (2 chars)
+5FFFE..5FFFF  (2 chars)
+6FFFE..6FFFF  (2 chars)
+7FFFE..7FFFF  (2 chars)
+8FFFE..8FFFF  (2 chars)
+9FFFE..9FFFF  (2 chars)
+AFFFE..AFFFF  (2 chars)
+BFFFE..BFFFF  (2 chars)
+CFFFE..CFFFF  (2 chars)
+DFFFE..DFFFF  (2 chars)
+EFFFE..EFFFF  (2 chars)
+FFFFE..FFFFF  (2 chars)
+10FFFE..10FFFF  (2 chars)
+
+*******************************************
+
 Property dump for: 0x00000000 (Unassigned Code Value)
 
 0220..0221  (2 chars)
@@ -3637,4 +3575,18 @@ FFD8..FFD9  (2 chars)
 FFDD..FFDF  (3 chars)
 FFE7
 FFEF..FFF8  (10 chars)
+10000..1FFFD  (65534 chars)
+20000..2FFFD  (65534 chars)
+30000..3FFFD  (65534 chars)
+40000..4FFFD  (65534 chars)
+50000..5FFFD  (65534 chars)
+60000..6FFFD  (65534 chars)
+70000..7FFFD  (65534 chars)
+80000..8FFFD  (65534 chars)
+90000..9FFFD  (65534 chars)
+A0000..AFFFD  (65534 chars)
+B0000..BFFFD  (65534 chars)
+C0000..CFFFD  (65534 chars)
+D0000..DFFFD  (65534 chars)
+E0000..EFFFD  (65534 chars)
 

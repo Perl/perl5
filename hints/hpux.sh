@@ -388,9 +388,9 @@ case "$uselargefiles" in
 ''|$define|true|[yY]*)
 	# there are largefile flags available via getconf(1)
 	# but we cheat for now.  (Keep that in the left margin.)
-ccflags_largefiles="-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
+ccflags_uselargefiles="-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
 
-	ccflags="$ccflags $ccflags_largefiles"
+	ccflags="$ccflags $ccflags_uselargefiles"
 
         if test -z "$ccisgcc" -a -z "$gccversion"; then
            # The strict ANSI mode (-Aa) doesn't like large files.

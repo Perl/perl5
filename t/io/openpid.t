@@ -78,7 +78,6 @@ print "ok 8\n";
 # send one expected line of text to child process and then wait for it
 autoflush FH4 1;
 print FH4 "ok 9\n";
-print "ok 9 # skip VMS\n" if $^O eq 'VMS';
 print "# waiting for process $pid4 to exit\n";
 $reap_pid = waitpid $pid4, 0;
 print "# reaped pid $reap_pid != $pid4\nnot "

@@ -210,11 +210,11 @@ Selective parts are also visible via the rsync protocol.  To get all
 the individual changes to the mainline since the last development
 release, use the following command:
 
-    rsync -avuz rsync://ftp.linux.activestate.com/perl-diffs perl-diffs
+    rsync -avz rsync://ftp.linux.activestate.com/perl-diffs perl-diffs
 
 Use this to get the latest source tree in full:
 
-    rsync -avuz rsync://ftp.linux.activestate.com/perl-current perl-current
+    rsync -avz rsync://ftp.linux.activestate.com/perl-current perl-current
 
 Needless to say, the source code in perl-current is usually in a perpetual
 state of evolution.  You should expect it to be very buggy.  Do B<not> use
@@ -568,7 +568,7 @@ make sure that the SV B<has> a valid PV, by calling the C<SvPV_force>
 macro to force a PV. As a side effect, C<tlen> gets set to the current
 value of the PV, and the PV itself is returned to C<junk>.
 
-In line 7, we make sure that the SV will have enough room to accomodate
+In line 7, we make sure that the SV will have enough room to accommodate
 the old string, the new string and the null terminator. If C<LEN> isn't
 big enough, C<SvGROW> will reallocate space for us.
 
@@ -1230,7 +1230,7 @@ the first active format:
                      sprintf "%vd", pack("C0U*",1,20,300,4000);
  print "ok $test\n"; $test++;
 
-Musn't forget to change the number of tests which appears at the top, or
+Mustn't forget to change the number of tests which appears at the top, or
 else the automated tester will get confused:
 
  -print "1..156\n";

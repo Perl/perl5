@@ -342,7 +342,7 @@ missing, all actions are wiped out!
 
 Adds an action (Perl command) to happen after the prompt when you've
 just given a command to return to executing the script.  A multi-line
-command may be entered by slackbashing the newlines.
+command may be entered by backslashing the newlines.
 
 =item { ?
 

@@ -294,7 +294,7 @@ Well, this isn't very easy to read, and using the helpful manual (B<h h>), the
 	8  'this'
 	9  'that'     
 
-That's not much help, a couple of welcome's in there, but no indication of
+That's not much help, a couple of welcomes in there, but no indication of
 which are keys, and which are values, it's just a listed array dump and, in
 this case, not particularly helpful.  The trick here, is to use a B<reference>
 to the data structure:

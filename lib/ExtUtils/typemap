@@ -225,13 +225,13 @@ T_U_CHAR
 T_FLOAT
 	sv_setnv($arg, (double)$var);
 T_NV
-	sv_setnv($arg, (double)$var);
+	sv_setnv($arg, (NV)$var);
 T_DOUBLE
 	sv_setnv($arg, (double)$var);
 T_PV
 	sv_setpv((SV*)$arg, $var);
 T_PTR
-	sv_setiv($arg, (IV)$var);
+	sv_setiv($arg, PTR2IV($var));
 T_PTRREF
 	sv_setref_pv($arg, Nullch, (void*)$var);
 T_REF_IV_REF
