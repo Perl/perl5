@@ -1,6 +1,4 @@
 #!./perl
-
-# $Id: recurse.t,v 1.0.1.3 2001/02/17 12:28:33 ram Exp $
 #
 #  Copyright (c) 1995-2000, Raphael Manfredi
 #  

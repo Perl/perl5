@@ -1,6 +1,4 @@
 #!./perl -w
-
-# $Id: utf8.t,v 1.0.1.2 2000/09/28 21:44:17 ram Exp $
 #
 #  Copyright (c) 1995-2000, Raphael Manfredi
 #  

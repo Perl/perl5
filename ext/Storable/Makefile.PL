@@ -1,4 +1,3 @@
-# $Id: Makefile.PL,v 1.0.1.1 2001/01/03 09:38:39 ram Exp $
 #
 #  Copyright (c) 1995-2000, Raphael Manfredi
 #  

@@ -1,6 +1,4 @@
 #!./perl
-
-# $Id: forgive.t,v 1.0.1.1 2000/09/01 19:40:42 ram Exp $
 #
 #  Copyright (c) 1995-2000, Raphael Manfredi
 #  

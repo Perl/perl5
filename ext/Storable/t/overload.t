@@ -1,6 +1,4 @@
 #!./perl
-
-# $Id: overload.t,v 1.0.1.1 2001/02/17 12:27:22 ram Exp $
 #
 #  Copyright (c) 1995-2000, Raphael Manfredi
 #  
