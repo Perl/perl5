@@ -43,7 +43,7 @@ print "1..23\n";
 
 { my $x; $x &= 1;   ok 13,  uninitialized; }
 { my $x; $x |= 1;   ok 14, ! uninitialized; }
-{ my $x; $x ^= 1;   ok 15,  uninitialized; }
+{ my $x; $x ^= 1;   ok 15, ! uninitialized; }
 
 { my $x; $x &&= 1;  ok 16, ! uninitialized; }
 { my $x; $x ||= 1;  ok 17, ! uninitialized; }
@@ -53,7 +53,7 @@ print "1..23\n";
 
 { my $x; $x &= "x"; ok 20,  uninitialized; }
 { my $x; $x |= "x"; ok 21, ! uninitialized; }
-{ my $x; $x ^= "x"; ok 22,  uninitialized; }
+{ my $x; $x ^= "x"; ok 22, ! uninitialized; }
 
 ok 23, $warn eq '';
 

@@ -977,11 +977,11 @@ PP(pp_bit_xor)
       dPOPTOPssrl;
       if (SvNIOKp(left) || SvNIOKp(right)) {
 	if (op->op_private & HINT_INTEGER) {
-	  IBW value = SvIV(left) ^ SvIV(right); 
+	  IBW value = (USE_LEFT(left) ? SvIV(left) : 0) ^ SvIV(right); 
 	  SETi( value );
 	}
 	else {
-	  UBW value = SvUV(left) ^ SvUV(right); 
+	  UBW value = (USE_LEFT(left) ? SvUV(left) : 0) ^ SvUV(right); 
 	  SETu( value );
 	}
       }

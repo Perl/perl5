@@ -535,8 +535,8 @@ SV *right;
     char *lsave;
     char *rsave;
 
-    if (optype == OP_BIT_OR && sv == left && !SvOK(sv) && !SvGMAGICAL(sv))
-	sv_setpvn(sv, "", 0);	/* avoid undef warning on |= */
+    if (sv != left || (optype != OP_BIT_AND && !SvOK(sv) && !SvGMAGICAL(sv)))
+	sv_setpvn(sv, "", 0);	/* avoid undef warning on |= and ^= */
     lsave = lc = SvPV(left, leftlen);
     rsave = rc = SvPV(right, rightlen);
     len = leftlen < rightlen ? leftlen : rightlen;
