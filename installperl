@@ -142,7 +142,7 @@ if ($^O eq 'os390') {
         my $pwd;
         chomp($pwd=`pwd`);
         my $archlibexp = $Config{archlibexp};
-        `./$^X -pibak -e 's{$pwd\/libperl.x}{$archlibexp/CORE/libperl.x}' lib/Config.pm`;
+        `./$^X -p -e 's{$pwd\/libperl.x}{$archlibexp/CORE/libperl.x}' lib/Config.pm`;
     }
 }
 

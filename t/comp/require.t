@@ -8,7 +8,15 @@ BEGIN {
 
 # don't make this lexical
 $i = 1;
-print "1..23\n";
+# Tests 21 .. 23 work only with non broken UTF16-as-code implementations,
+# i.e. not EBCDIC Perls.
+my $Is_EBCDIC = ord('A') == 193 ? 1 : 0;
+if ($Is_EBCDIC) {
+   print "1..20\n";
+}
+else {
+   print "1..23\n";
+}
 
 sub do_require {
     %INC = ();
@@ -125,6 +133,8 @@ do "bleah.do";
 dofile();
 sub dofile { do "bleah.do"; };
 print $x;
+
+exit if $Is_EBCDIC;
 
 # UTF-encoded things
 my $utf8 = chr(0xFEFF);

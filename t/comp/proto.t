@@ -492,6 +492,7 @@ for my $p ( "", qw{ () ($) ($@) ($%) ($;$) (&) (&\@) (&@) (%) (\%) (\@) } ) {
   no warnings 'redefine';
   my $eval = "sub evaled_subroutine $p { &void *; }";
   eval $eval;
-  print "# eval[$eval]\nnot " unless $@ && $@ =~ /syntax error/;
+  # The /Syntax error/ is seen on OS/390.  It's /syntax error/ elsewhere
+  print "# eval[$eval]\nnot " unless $@ && $@ =~ /[Ss]yntax error/;
   print "ok ", $i++, "\n";
 }
