@@ -901,23 +901,3 @@ EXPECT
 ok1
 ok2
 ok3
-########
-
---FILE-- abc.pm
-package abc ;
-no warnings ;
-use warnings::register ;
-sub check { 
-  local $^W = 1 ;
-  print "ok1\n" if !warnings::enabled() ;
-  print "ok2\n" if !warnings::enabled("io") ;
-  print "ok3\n" if !warnings::enabled("all") ;
-}
-1;
---FILE-- 
-use abc ;
-abc::check() ;
-EXPECT
-ok1
-ok2
-ok3
