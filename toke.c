@@ -1494,16 +1494,19 @@ yylex()
 		sv_catpv(linestr, "LINE: while (<>) {");
 		if (minus_l)
 		    sv_catpv(linestr,"chomp;");
-		if (minus_a){
-		    if (minus_F){
-		      char tmpbuf1[50];
-		      if ( splitstr[0] == '/' || 
-		           splitstr[0] == '\'' || 
-		           splitstr[0] == '"' )
+		if (minus_a) {
+		    GV* gv = gv_fetchpv("::F", TRUE, SVt_PVAV);
+		    if (gv)
+			GvIMPORTED_AV_on(gv);
+		    if (minus_F) {
+			char tmpbuf1[50];
+			if ( splitstr[0] == '/' || 
+			     splitstr[0] == '\'' || 
+			     splitstr[0] == '"' )
 			    sprintf( tmpbuf1, "@F=split(%s);", splitstr );
-		        else
+			else
 			    sprintf( tmpbuf1, "@F=split('%s');", splitstr );
-		        sv_catpv(linestr,tmpbuf1);
+			sv_catpv(linestr,tmpbuf1);
 		    }
 		    else
 		        sv_catpv(linestr,"@F=split(' ');");
