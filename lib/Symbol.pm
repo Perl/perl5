@@ -15,11 +15,8 @@ Symbol - manipulate Perl symbols and their names
 
     ungensym $sym;      # no effect
 
-    # localize *FOO IO handle but not $FOO, %FOO, etc.
-    my $save_fooio = *FOO{IO} || geniosym;
+    # replace *FOO{IO} handle but not $FOO, %FOO, etc.
     *FOO = geniosym;
-    use_foo();
-    *FOO{IO} = $save_fooio;
 
     print qualify("x"), "\n";              # "Test::x"
     print qualify("x", "FOO"), "\n"        # "FOO::x"
