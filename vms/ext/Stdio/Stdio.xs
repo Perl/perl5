@@ -348,7 +348,7 @@ vmsopen(spec,...)
 	        break;
 	    }
            if (fp != Null(FILE*)) {
-             pio_fp = PerlIO_importFILE(fp,0);
+             pio_fp = PerlIO_importFILE(fp,mode);
              fh = newFH(pio_fp,(mode[1] ? '+' : (mode[0] == 'r' ? '<' : (mode[0] == 'a' ? 'a' : '>'))));
 	     ST(0) = (fh ? sv_2mortal(fh) : &PL_sv_undef);
 	    }
@@ -408,7 +408,7 @@ vmssysopen(spec,mode,perm,...)
 	    i = mode & 3;
 	    if (fd >= 0 &&
               ((fp = fdopen(fd, &("r\000w\000r+"[2*i]))) != Null(FILE*))) {
-             pio_fp = PerlIO_importFILE(fp,0);
+             pio_fp = PerlIO_importFILE(fp,&("r\000w\000r+"[2*i]));
              fh = newFH(pio_fp,"<>++"[i]);
 	     ST(0) = (fh ? sv_2mortal(fh) : &PL_sv_undef);
 	    }
