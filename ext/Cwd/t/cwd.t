@@ -18,6 +18,9 @@ use Test::More;
 
 my $tests = 24;
 my $EXTRA_ABSPATH_TESTS = $ENV{PERL_CORE} || $ENV{TEST_PERL_CWD_CODE};
+# _perl_abs_path() currently only works when the directory separator
+# is '/', so don't test it when it won't work.
+$EXTRA_ABSPATH_TESTS &= $Config{prefix} =~ m/\//;
 $tests += 3 if $EXTRA_ABSPATH_TESTS;
 plan tests => $tests;
 
