@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..29\n";
+print "1..36\n";
 
 eval 'print "ok 1\n";';
 
@@ -90,15 +90,46 @@ my $X = sub {
 
 my $x = 25;
 eval <<'EOT'; die if $@;
-  sub do_eval {
+  print "# $x\n";	# clone into eval's pad
+  sub do_eval1 {
      eval $_[0]; die if $@;
   }
 EOT
-do_eval('print "ok $x\n"');
+do_eval1('print "ok $x\n"');
 $x++;
-do_eval('eval q[print "ok $x\n"]');
+do_eval1('eval q[print "ok $x\n"]');
 $x++;
-do_eval('sub { eval q[print "ok $x\n"] }->()');
+do_eval1('sub { eval q[print "ok $x\n"] }->()');
+$x++;
+
+# calls from within eval'' should clone outer lexicals
+
+eval <<'EOT'; die if $@;
+  sub do_eval2 {
+     eval $_[0]; die if $@;
+  }
+do_eval2('print "ok $x\n"');
+$x++;
+do_eval2('eval q[print "ok $x\n"]');
+$x++;
+do_eval2('sub { eval q[print "ok $x\n"] }->()');
+$x++;
+EOT
+
+# calls outside eval'' should NOT clone lexicals from called context
+
+$main::x = 'ok';
+eval <<'EOT'; die if $@;
+  # $x unbound here
+  sub do_eval3 {
+     eval $_[0]; die if $@;
+  }
+EOT
+do_eval3('print "$x ' . $x . '\n"');
+$x++;
+do_eval3('eval q[print "$x ' . $x . '\n"]');
+$x++;
+do_eval3('sub { eval q[print "$x ' . $x . '\n"] }->()');
 $x++;
 
 # can recursive subroutine-call inside eval'' see its own lexicals?
@@ -129,3 +160,14 @@ eval <<'EOT';
   }
 EOT
 create_closure("ok $x\n")->();
+$x++;
+
+# does lexical search terminate correctly at subroutine boundary?
+$main::r = "ok $x\n";
+sub terminal { eval 'print $r' }
+{
+   my $r = "not ok $x\n";
+   eval 'terminal($r)';
+}
+$x++;
+
