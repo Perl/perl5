@@ -1,6 +1,11 @@
 #!./perl -w
 
-print "1..133\n";
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+}
+
+print "1..134\n";
 
 sub try ($$) {
    print +($_[1] ? "ok" : "not ok"), " $_[0]\n";
@@ -268,4 +273,26 @@ tryeq 130, 18446744073709551616/9223372036854775808, 2;
   my $t = time;
   my $t1000 = time() * 1000;
   try 133, abs($t1000 -1000 * $t) <= 2000;
+}
+
+if ($^O eq 'vos') {
+  print "not ok 134 # TODO VOS raises SIGFPE instead of producing infinity.\n";
+} else {
+  # The computation of $v should overflow and produce "infinity"
+  # on any system whose max exponent is less than 10**1506.
+  # The exact string used to represent infinity varies by OS,
+  # so we don't test for it; all we care is that we don't die.
+  #
+  # Perl considers it to be an error if SIGFPE is raised.
+  # Chances are the interpreter will die, since it doesn't set
+  # up a handler for SIGFPE.  That's why this test is last; to
+  # minimize the number of test failures.  --PG
+
+  my $n = 5000;
+  my $v = 2;
+  while (--$n)
+  {
+    $v *= 2;
+  }
+  print "ok 134\n";
 }

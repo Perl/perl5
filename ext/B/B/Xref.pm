@@ -1,6 +1,6 @@
 package B::Xref;
 
-our $VERSION = '1.00';
+our $VERSION = '1.01';
 
 =head1 NAME
 
@@ -21,8 +21,8 @@ The report generated is in the following format:
     File filename1
       Subroutine subname1
 	Package package1
-	  object1        C<line numbers>
-	  object2        C<line numbers>
+	  object1        line numbers
+	  object2        line numbers
 	  ...
 	Package package2
 	...
@@ -64,6 +64,10 @@ Directs output to C<FILENAME> instead of standard output.
 Raw output. Instead of producing a human-readable report, outputs a line
 in machine-readable form for each definition/use of a variable/sub/format.
 
+=item C<-d>
+
+Don't output the "(definitions)" sections.
+
 =item C<-D[tO]>
 
 (Internal) debug options, probably only useful if C<-r> included.
@@ -89,7 +93,7 @@ Malcolm Beattie, mbeattie@sable.ox.ac.uk.
 use strict;
 use Config;
 use B qw(peekop class comppadlist main_start svref_2object walksymtable
-         OPpLVAL_INTRO SVf_POK OPpOUR_INTRO
+         OPpLVAL_INTRO SVf_POK OPpOUR_INTRO cstring
         );
 
 sub UNKNOWN { ["?", "?", "?"] }
@@ -145,7 +149,7 @@ sub load_pad {
 	my $namesv = $namelist[$ix];
 	next if class($namesv) eq "SPECIAL";
 	my ($type, $name) = $namesv->PV =~ /^(.)([^\0]*)(\0.*)?$/;
-	$pad[$ix] = ["(lexical)", $type, $name];
+	$pad[$ix] = ["(lexical)", $type || '?', $name || '?'];
     }
     if ($Config{useithreads}) {
 	my (@vallist);
@@ -278,7 +282,8 @@ sub pp_const {
     # constant could be in the pad (under useithreads)
     if ($$sv) {
 	$top = ["?", "",
-		(class($sv) ne "SPECIAL" && $sv->FLAGS & SVf_POK) ? $sv->PV : "?"];
+		(class($sv) ne "SPECIAL" && $sv->FLAGS & SVf_POK)
+		? cstring($sv->PV) : "?"];
     }
     else {
 	$top = $pad[$op->targ];

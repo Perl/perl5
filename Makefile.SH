@@ -100,7 +100,7 @@ true)
 	;;
 esac
 
-case "`pwd`" in
+case "$ldlibpth" in
 # Protect any spaces
 *" "*) ldlibpth=`echo $ldlibpth|sed 's/ /\\\\ /g'` ;;
 esac
