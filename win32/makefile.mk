@@ -338,7 +338,6 @@ RSC		= rc
 #
 # Options
 #
-RUNTIME		= -D_RTLDLL
 INCLUDES	= -I$(COREDIR) -I.\include -I. -I.. -I"$(CCINCDIR)"
 #PCHFLAGS	= -H -Hc -H=c:\temp\bcmoduls.pch 
 DEFINES		= -DWIN32 $(CRYPT_FLAG)
@@ -350,10 +349,10 @@ LIBC		= cw32mti.lib
 LIBFILES	= $(CRYPT_LIB) import32.lib $(LIBC) odbc32.lib odbccp32.lib
 
 .IF  "$(CFG)" == "Debug"
-OPTIMIZE	= -v $(RUNTIME) -DDEBUGGING
+OPTIMIZE	= -v -D_RTLDLL -DDEBUGGING
 LINK_DBG	= -v
 .ELSE
-OPTIMIZE	= -O2 $(RUNTIME)
+OPTIMIZE	= -O2 -D_RTLDLL
 LINK_DBG	= 
 .ENDIF
 
@@ -379,7 +378,6 @@ a = .a
 # Options
 #
 
-RUNTIME		=
 INCLUDES	= -I$(COREDIR) -I.\include -I. -I..
 DEFINES		= -DWIN32 $(CRYPT_FLAG)
 LOCDEFS		= -DPERLDLL -DPERL_CORE
@@ -396,10 +394,10 @@ LIBFILES	= $(CRYPT_LIB) $(LIBC) \
 		  -lwinmm -lversion -lodbc32
 
 .IF  "$(CFG)" == "Debug"
-OPTIMIZE	= -g $(RUNTIME) -DDEBUGGING
+OPTIMIZE	= -g -DDEBUGGING
 LINK_DBG	= -g
 .ELSE
-OPTIMIZE	= -g -O2 $(RUNTIME)
+OPTIMIZE	= -g -O2
 LINK_DBG	= 
 .ENDIF
 
@@ -423,7 +421,6 @@ RSC		= rc
 # Options
 #
 
-RUNTIME		= -MD
 INCLUDES	= -I$(COREDIR) -I.\include -I. -I..
 #PCHFLAGS	= -Fpc:\temp\vcmoduls.pch -YX 
 DEFINES		= -DWIN32 -D_CONSOLE -DNO_STRICT $(CRYPT_FLAG)
@@ -432,47 +429,33 @@ SUBSYS		= console
 CXX_FLAG	= -TP -GX
 
 .IF "$(USE_PERLCRT)" != "define"
-.IF  "$(CFG)" == "Debug"
-PERLCRTLIBC	= msvcrtd.lib
+LIBC	= msvcrt.lib
 .ELSE
-PERLCRTLIBC	= msvcrt.lib
-.ENDIF
-.ELSE
-.IF  "$(CFG)" == "Debug"
-PERLCRTLIBC	= PerlCRTD.lib
-.ELSE
-PERLCRTLIBC	= PerlCRT.lib
-.ENDIF
+LIBC	= PerlCRT.lib
 .ENDIF
 
 PERLEXE_RES	=
 PERLDLL_RES	=
 
-.IF "$(RUNTIME)" == "-MD"
-LIBC		= $(PERLCRTLIBC)
-.ELSE
-LIBC		= libcmt.lib
-.ENDIF
-
 .IF  "$(CFG)" == "Debug"
 .IF "$(CCTYPE)" == "MSVC20"
-OPTIMIZE	= -Od $(RUNTIME) -Z7 -D_DEBUG -DDEBUGGING
+OPTIMIZE	= -Od -MD -Z7 -DDEBUGGING
 .ELSE
-OPTIMIZE	= -Od $(RUNTIME)d -Zi -D_DEBUG -DDEBUGGING
+OPTIMIZE	= -Od -MD -Zi -DDEBUGGING
 .ENDIF
 LINK_DBG	= -debug -pdb:none
 .ELSE
 .IF "$(CFG)" == "Optimize"
 # -O1 yields smaller code, which turns out to be faster than -O2
-#OPTIMIZE	= -O2 $(RUNTIME) -DNDEBUG
-OPTIMIZE	= -O1 $(RUNTIME) -DNDEBUG
+#OPTIMIZE	= -O2 -MD -DNDEBUG
+OPTIMIZE	= -O1 -MD -DNDEBUG
 .ELSE
-OPTIMIZE	= -Od $(RUNTIME) -DNDEBUG
+OPTIMIZE	= -Od -MD -DNDEBUG
 .ENDIF
 LINK_DBG	= -release
 .ENDIF
 
-LIBBASEFILES	= $(DELAYLOAD) $(CRYPT_LIB) \
+LIBBASEFILES	= $(CRYPT_LIB) \
 		oldnames.lib kernel32.lib user32.lib gdi32.lib winspool.lib \
 		comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib \
 		netapi32.lib uuid.lib wsock32.lib mpr.lib winmm.lib \
@@ -1041,7 +1024,8 @@ $(PERLDLL): perldll.def $(PERLDLL_OBJ) $(PERLDLL_RES)
 		perl.exp $(LKPOST))
 .ELSE
 	$(LINK32) -dll -def:perldll.def -out:$@ \
-	    @$(mktmp $(BLINK_FLAGS) $(LIBFILES) /base:0x28000000 $(PERLDLL_RES) $(PERLDLL_OBJ:s,\,\\))
+	    @$(mktmp -base:0x28000000 $(BLINK_FLAGS) $(DELAYLOAD) $(LIBFILES) \
+	        $(PERLDLL_RES) $(PERLDLL_OBJ:s,\,\\))
 .ENDIF
 	$(XCOPY) $(PERLIMPLIB) $(COREDIR)
 
@@ -1093,8 +1077,8 @@ $(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ) $(PERLEXE_RES)
 	$(LINK32) -mconsole -o $@ $(BLINK_FLAGS)  \
 	    $(PERLEXE_OBJ) $(PERLIMPLIB) $(LIBFILES)
 .ELSE
-	$(LINK32) -subsystem:console -out:$@ $(BLINK_FLAGS) $(LIBFILES) \
-	    $(PERLEXE_OBJ) $(SETARGV_OBJ) $(PERLIMPLIB) $(PERLEXE_RES)
+	$(LINK32) -subsystem:console -out:$@ -stack:0x8000000 $(BLINK_FLAGS) \
+	    $(LIBFILES) $(PERLEXE_OBJ) $(SETARGV_OBJ) $(PERLIMPLIB) $(PERLEXE_RES)
 .ENDIF
 	copy $(PERLEXE) $(WPERLEXE)
 	$(MINIPERL) -I..\lib bin\exetype.pl $(WPERLEXE) WINDOWS

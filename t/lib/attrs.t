@@ -117,6 +117,19 @@ unless ($@ && $@ =~ m/Invalid separator character '[+]' in attribute list at/) {
 print "ok ",++$test,"\n";
 BEGIN {++$ntests}
 
+{
+    my $w = "" ;
+    local $SIG{__WARN__} = sub {$w = @_[0]} ;
+    eval 'sub w1 ($) { use warnings "deprecated"; use attrs "locked"; $_[0]++ }';
+    (print "not "), $failed=1 if $@;
+    print "ok ",++$test,"\n";
+    BEGIN {++$ntests}
+    (print "not "), $failed=1 
+	if $w !~ /^pragma "attrs" is deprecated, use "sub NAME : ATTRS" instead at/;
+    print "ok ",++$test,"\n";
+    BEGIN {++$ntests}
+}
+
 
 # Other tests should be added above this line
 

@@ -8,7 +8,7 @@ BEGIN {
     unshift @INC, '../lib' if -d '../lib';
 }
 
-print "1..72\n";
+print "1..73\n";
 
 $a = {};
 bless $a, "Bob";
@@ -102,3 +102,5 @@ test $a->can("sleep");
 test ! UNIVERSAL::can($b, "can");
 
 test ! $a->can("export_tags");	# a method in Exporter
+
+test ! UNIVERSAL::isa("\xff\xff\xff\0", 'HASH');

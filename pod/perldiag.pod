@@ -2529,6 +2529,24 @@ Perl guesses a reasonable buffer size, but puts a sentinel byte at the
 end of the buffer just in case.  This sentinel byte got clobbered, and
 Perl assumes that memory is now corrupted.  See L<perlfunc/ioctl>.
 
+=item pragma "attrs" is deprecated, use "sub NAME : ATTRS" instead
+
+(W deprecated) You have written somehing like this:
+
+    sub doit
+    {
+        use attrs qw(locked);
+    }
+
+You should use the new declaration syntax instead.
+
+    sub doit : locked
+    {
+        ...
+
+The C<use attrs> pragma is now obsolete, and is only provided for
+backward-compatibility. See L<perlsub/"Subroutine Attributes">.
+
 =item Precedence problem: open %s should be open(%s)
 
 (S precedence) The old irregular construct

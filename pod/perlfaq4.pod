@@ -444,11 +444,9 @@ nested patterns, nor can they.  For that you'll have to write a
 parser.
 
 If you are serious about writing a parser, there are a number of
-modules or oddities that will make your life a lot easier.  There is
-the CPAN module Parse::RecDescent, the standard module Text::Balanced,
-the byacc program, the CPAN module Parse::Yapp, and Mark-Jason
-Dominus's excellent I<py> tool at http://www.plover.com/%7Emjd/perl/py/
-.
+modules or oddities that will make your life a lot easier.  There are
+the CPAN modules Parse::RecDescent, Parse::Yapp, and Text::Balanced;
+and the byacc program.
 
 One simple destructive, inside-out approach that you might try is to
 pull out the smallest nesting parts one at a time:
