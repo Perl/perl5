@@ -435,7 +435,7 @@ perl_destruct(pTHXx)
 
     if (CALL_FPTR(PL_threadhook)(aTHX)) {
         /* Threads hook has vetoed further cleanup */
-        return STATUS_NATIVE_EXPORT;;
+        return STATUS_NATIVE_EXPORT;
     }
 
     /* We must account for everything.  */
@@ -491,7 +491,7 @@ perl_destruct(pTHXx)
 #endif
 
 	/* The exit() function will do everything that needs doing. */
-        return STATUS_NATIVE_EXPORT;;
+        return STATUS_NATIVE_EXPORT;
     }
 
     /* jettison our possibly duplicated environment */
