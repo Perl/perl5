@@ -3664,14 +3664,18 @@ Found in file sv.c
 
 =item sv_recode_to_utf8
 
-If PL_encoding is set you can call this to recode the pv of the sv.
-The PL_encoding is assumed to be an Encode object, on entry the pv is assumed
-to be octets in that encoding, and the sv will be converted into Unicode
-(and UTF-8).
+The encoding is assumed to be an Encode object, on entry the PV
+of the sv is assumed to be octets in that encoding, and the sv
+will be converted into Unicode (and UTF-8).
 
-If PL_encoding is not an Encode object, things will go boom.
+If the sv already is UTF-8 (or if it is not POK), or if the encoding
+is not an object, nothing is done to the sv.
 
-	void	sv_recode_to_utf8(SV*)
+If the encoding is not Encode object, bad things happen.
+
+The PV of the sv is returned.
+
+	void	sv_recode_to_utf8(SV* sv, SV *encoding)
 
 =for hackers
 Found in file sv.c

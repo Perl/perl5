@@ -3303,7 +3303,7 @@ Perl_sv_utf8_upgrade_flags(pTHX_ register SV *sv, I32 flags)
     }
 
     if (PL_encoding)
-        Perl_sv_recode_to_utf8(aTHX_ sv);
+        Perl_sv_recode_to_utf8(aTHX_ sv, PL_encoding);
     else { /* Assume Latin-1/EBCDIC */
 	 /* This function could be much more efficient if we
 	  * had a FLAG in SVs to signal if there are any hibit
@@ -10362,43 +10362,48 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 /*
 =for apidoc sv_recode_to_utf8
 
-If PL_encoding is set you can call this to recode the pv of the sv.
-The PL_encoding is assumed to be an Encode object, on entry the pv is assumed
-to be octets in that encoding, and the sv will be converted into Unicode
-(and UTF-8).
+The encoding is assumed to be an Encode object, on entry the PV
+of the sv is assumed to be octets in that encoding, and the sv
+will be converted into Unicode (and UTF-8).
 
-If PL_encoding is not an Encode object, things will go boom.
+If the sv already is UTF-8 (or if it is not POK), or if the encoding
+is not a reference, nothing is done to the sv.  If the encoding is not
+Encode object, bad things happen.
 
-=cut
-*/
+The PV of the sv is returned.
 
-void
-Perl_sv_recode_to_utf8(pTHX_ SV *sv)
+=cut */
+
+char *
+Perl_sv_recode_to_utf8(pTHX_ SV *sv, SV *encoding)
 {
-     SV *uni;
-     STRLEN len;
-     char *s;
-     dSP;
-     ENTER;
-     SAVETMPS;
-     PUSHMARK(sp);
-     EXTEND(SP, 3);
-     XPUSHs(PL_encoding);
-     XPUSHs(sv);
-     XPUSHs(&PL_sv_yes);
-     PUTBACK;
-     call_method("decode", G_SCALAR);
-     SPAGAIN;
-     uni = POPs;
-     PUTBACK;
-     s = SvPVutf8(uni, len);
-     if (s != SvPVX(sv)) {
-	  SvGROW(sv, len);
-	  Move(s, SvPVX(sv), len, char);
-	  SvCUR_set(sv, len);
+     if (SvPOK(sv) && !SvUTF8(sv) && !SvROK(sv)) {
+	  SV *uni;
+	  STRLEN len;
+	  char *s;
+	  dSP;
+	  ENTER;
+	  SAVETMPS;
+	  PUSHMARK(sp);
+	  EXTEND(SP, 3);
+	  XPUSHs(encoding);
+	  XPUSHs(sv);
+	  XPUSHs(&PL_sv_yes);
+	  PUTBACK;
+	  call_method("decode", G_SCALAR);
+	  SPAGAIN;
+	  uni = POPs;
+	  PUTBACK;
+	  s = SvPVutf8(uni, len);
+	  if (s != SvPVX(sv)) {
+	       SvGROW(sv, len);
+	       Move(s, SvPVX(sv), len, char);
+	       SvCUR_set(sv, len);
+	  }
+	  FREETMPS;
+	  LEAVE;
+	  SvUTF8_on(sv);
      }
-     FREETMPS;
-     LEAVE;
-     SvUTF8_on(sv);
+     return SvPVX(sv);
 }
 

@@ -1654,7 +1654,7 @@ S_scan_const(pTHX_ char *start)
 
     SvPOK_on(sv);
     if (PL_encoding && !has_utf8) {
-        Perl_sv_recode_to_utf8(aTHX_ sv);
+        Perl_sv_recode_to_utf8(aTHX_ sv, PL_encoding);
         has_utf8 = TRUE;
     }
     if (has_utf8) {
