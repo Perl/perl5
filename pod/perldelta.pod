@@ -18,6 +18,13 @@ This document describes differences between the 5.6 release and this one.
 
 =head1 Installation and Configuration Improvements
 
+=head2 gcc automatically tried if 'cc' does not seem to be working
+
+In many platforms the vendor-supplied 'cc' is too stripped-down to
+build Perl (basically, the 'cc' doesn't do ANSI C).  If this seems
+to be the case and the 'cc' does not seem to be the GNU C compiler
+'gcc', an automatic attempt is made to find and use 'gcc' instead.
+
 =head1 Platform specific changes
 
 =head1 Significant bug fixes
@@ -31,6 +38,13 @@ This document describes differences between the 5.6 release and this one.
 (F) This is an educated guess made in conjunction with the message
 "Can't locate object method \"%s\" via package \"%s\"".  It often means
 that a method requires a package that has not been loaded.
+
+=item Ambiguous range in transliteration operator
+
+(F) You wrote something like C<tr/a-z-0//> which doesn't mean anything at
+all.  To include a C<-> character in a transliteration, put it either
+first or last.  (In the past, C<tr/a-z-0//> was synonymous with
+C<tr/a-y//>, which was probably not what you would have expected.)
 
 =back
 
