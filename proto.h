@@ -1268,6 +1268,10 @@ STATIC void	S_xstat(pTHX_ int);
 #  endif
 #endif
 
+#if defined(PERL_IN_DOIO_C) || defined(PERL_DECL_PROT)
+PERL_CALLCONV PerlIO*	Perl_start_glob(pTHX_ SV* pattern, IO *io);
+#endif
+
 #if defined(PERL_OBJECT)
 };
 #endif

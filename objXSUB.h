@@ -2307,6 +2307,8 @@
 #  if defined(LEAKTEST)
 #  endif
 #endif
+#if defined(PERL_IN_DOIO_C) || defined(PERL_DECL_PROT)
+#endif
 #if defined(PERL_OBJECT)
 #endif
 

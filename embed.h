@@ -1145,6 +1145,8 @@
 #define xstat			S_xstat
 #  endif
 #endif
+#if defined(PERL_IN_DOIO_C) || defined(PERL_DECL_PROT)
+#endif
 #if defined(PERL_OBJECT)
 #endif
 #define ck_anoncode		Perl_ck_anoncode
@@ -2602,6 +2604,8 @@
 #  if defined(LEAKTEST)
 #define xstat(a)		S_xstat(aTHX_ a)
 #  endif
+#endif
+#if defined(PERL_IN_DOIO_C) || defined(PERL_DECL_PROT)
 #endif
 #if defined(PERL_OBJECT)
 #endif
@@ -5049,6 +5053,10 @@
 #define S_xstat			CPerlObj::S_xstat
 #define xstat			S_xstat
 #  endif
+#endif
+#if defined(PERL_IN_DOIO_C) || defined(PERL_DECL_PROT)
+#define Perl_start_glob		CPerlObj::Perl_start_glob
+#define start_glob		Perl_start_glob
 #endif
 #if defined(PERL_OBJECT)
 #endif

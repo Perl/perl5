@@ -2532,6 +2532,10 @@ s	|void	|xstat		|int
 #  endif
 #endif
 
+#if defined(PERL_IN_DOIO_C) || defined(PERL_DECL_PROT)
+dopM	|PerlIO*|start_glob	|SV* pattern|IO *io
+#endif
+
 #if defined(PERL_OBJECT)
 };
 #endif
