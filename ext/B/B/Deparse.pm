@@ -3238,7 +3238,7 @@ sub collapse {
 sub tr_decode_byte {
     my($table, $flags) = @_;
     my(@table) = unpack("s*", $table);
-    splice @table, 0x100, 1;   # Just flags presence of element 0x101
+    splice @table, 0x100, 1;   # Number of subsequent elements
     my($c, $tr, @from, @to, @delfrom, $delhyphen);
     if ($table[ord "-"] != -1 and 
 	$table[ord("-") - 1] == -1 || $table[ord("-") + 1] == -1)

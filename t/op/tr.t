@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..69\n";
+print "1..70\n";
 
 $_ = "abcdefghijklmnopqrstuvwxyz";
 
@@ -384,4 +384,10 @@ print "ok 68\n";
 @a = (1,2); map { y/1/./ for $_.'' } @a;
 print "not " if "@a" ne "1 2";
 print "ok 69\n";
+
+# Additional test for Inaba Hiroto patch (robin@kitsite.com)
+($a = "\x{100}\x{102}\x{101}") =~ tr/\x00-\377/XYZ/c;
+print "not " unless $a eq "XZY";
+print "ok 70\n";
+
 

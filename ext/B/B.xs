@@ -756,13 +756,22 @@ PVOP_pv(o)
 	B::PVOP	o
     CODE:
 	/*
-	 * OP_TRANS uses op_pv to point to a table of 256 or 258 shorts
+	 * OP_TRANS uses op_pv to point to a table of 256 or >=258 shorts
 	 * whereas other PVOPs point to a null terminated string.
 	 */
-	ST(0) = sv_2mortal(newSVpv(o->op_pv, (o->op_type == OP_TRANS) ?
-			   ((o->op_private & OPpTRANS_COMPLEMENT) &&
-			   !(o->op_private & OPpTRANS_DELETE) ? 258 : 256)
-			    * sizeof(short) : 0));
+	if (o->op_type == OP_TRANS &&
+		(o->op_private & OPpTRANS_COMPLEMENT) &&
+		!(o->op_private & OPpTRANS_DELETE))
+	{
+	    short* tbl = (short*)o->op_pv;
+	    short entries = 257 + tbl[256];
+	    ST(0) = sv_2mortal(newSVpv(o->op_pv, entries * sizeof(short)));
+	}
+	else if (o->op_type == OP_TRANS) {
+	    ST(0) = sv_2mortal(newSVpv(o->op_pv, 256 * sizeof(short)));
+	}
+	else
+	    ST(0) = sv_2mortal(newSVpv(o->op_pv, 0));
 
 #define LOOP_redoop(o)	o->op_redoop
 #define LOOP_nextop(o)	o->op_nextop
