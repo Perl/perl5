@@ -355,7 +355,7 @@ The element is an array, initialized by default to C<()>.
 
 With no argument, the accessor returns a reference to the
 element's whole array (whether or not the element was
-specified as C<'@'> or C<'*@').
+specified as C<'@'> or C<'*@'>).
 
 With one or two arguments, the first argument is an index
 specifying one element of the array; the second argument, if
@@ -370,7 +370,7 @@ The element is a hash, initialized by default to C<()>.
 
 With no argument, the accessor returns a reference to the
 element's whole hash (whether or not the element was
-specified as C<'%'> or C<'*%').
+specified as C<'%'> or C<'*%'>).
 
 With one or two arguments, the first argument is a key specifying
 one element of the hash; the second argument, if present, is

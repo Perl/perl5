@@ -177,7 +177,7 @@ If you have either the source or a library that contains des_fcrypt(),
 enable the appropriate option in the makefile.  des_fcrypt() is not
 bundled with the distribution due to US Government restrictions
 on the export of cryptographic software.  Nevertheless, this routine
-is part of the "libdes" library (written by Ed Young) which is widely
+is part of the "libdes" library (written by Eric Young) which is widely
 available worldwide, usually along with SSLeay (for example:
 "ftp://fractal.mta.ca/pub/crypto/SSLeay/DES/").  Set CRYPT_SRC to the
 name of the file that implements des_fcrypt().  Alternatively, if
