@@ -2390,36 +2390,37 @@ Convert the PV of an SV to its UTF8-encoded form.
 void
 Perl_sv_utf8_upgrade(pTHX_ register SV *sv)
 {
-    char *s, *t;
-    int hibit = FALSE;
+    char *s, *t, *e;
+    int  hibit = 0;
 
     if (!sv || !SvPOK(sv) || SvUTF8(sv))
 	return;
 
     /* This function could be much more efficient if we had a FLAG in SVs
      * to signal if there are any hibit chars in the PV.
+     * Given that there isn't make loop fast as possible
      */
-    for (s = t = SvPVX(sv); t < SvEND(sv) && !hibit; t++) {
-	if (*t & 0x80) {
-	    hibit = TRUE;
+    s = SvPVX(sv);
+    e = SvEND(sv);
+    t = s;
+    while (t < e) {
+	if ((hibit = *t++ & 0x80))
 	    break;
-	}
     }
 
     if (hibit) {
 	STRLEN len;
 	if (SvREADONLY(sv) && SvFAKE(sv)) {
-	    Perl_warn(aTHX_ "%d s=%p t=%p e=%p",(int)hibit,s,t,SvEND(sv));
-	    sv_dump(sv);
 	    sv_force_normal(sv);
 	    s = SvPVX(sv);
 	}
 	len = SvCUR(sv) + 1; /* Plus the \0 */
 	SvPVX(sv) = (char*)bytes_to_utf8((U8*)s, &len);
 	SvCUR(sv) = len - 1;
+	if (SvLEN(sv) != 0)
+	    Safefree(s); /* No longer using what was there before. */
 	SvLEN(sv) = len; /* No longer know the real size. */
 	SvUTF8_on(sv);
-	Safefree(s); /* No longer using what was there before. */
     }
 }
 
@@ -2482,6 +2483,7 @@ Perl_sv_utf8_decode(pTHX_ register SV *sv)
 {
     if (SvPOK(sv)) {
         char *c;
+        char *e;
         bool has_utf = FALSE;
         if (!sv_utf8_downgrade(sv, TRUE))
 	    return FALSE;
@@ -2492,8 +2494,8 @@ Perl_sv_utf8_decode(pTHX_ register SV *sv)
         c = SvPVX(sv);
 	if (!is_utf8_string((U8*)c, SvCUR(sv)+1))
 	    return FALSE;
-
-        while (c < SvEND(sv)) {
+        e = SvEND(sv);
+        while (c < e) {
             if (*c++ & 0x80) {
 		SvUTF8_on(sv);
 		break;
