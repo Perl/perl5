@@ -3202,7 +3202,7 @@ not support long longs.)
 The integer formats C<s>, C<S>, C<i>, C<I>, C<l>, and C<L>
 are inherently non-portable between processors and operating systems
 because they obey the native byteorder and endianness.  For example a
-4-byte integer 0x12345678 (305419896 decimal) be ordered natively
+4-byte integer 0x12345678 (305419896 decimal) would be ordered natively
 (arranged in and handled by the CPU registers) into bytes as
 
  	0x12 0x34 0x56 0x78	# big-endian
@@ -3211,7 +3211,8 @@ because they obey the native byteorder and endianness.  For example a
 Basically, the Intel and VAX CPUs are little-endian, while everybody
 else, for example Motorola m68k/88k, PPC, Sparc, HP PA, Power, and
 Cray are big-endian.  Alpha and MIPS can be either: Digital/Compaq
-used/uses them in little-endian mode; SGI/Cray uses them in big-endian mode.
+used/uses them in little-endian mode; SGI/Cray uses them in big-endian
+mode.
 
 The names `big-endian' and `little-endian' are comic references to
 the classic "Gulliver's Travels" (via the paper "On Holy Wars and a
@@ -3238,7 +3239,7 @@ Byteorders C<'1234'> and C<'12345678'> are little-endian, C<'4321'>
 and C<'87654321'> are big-endian.
 
 If you want portable packed integers use the formats C<n>, C<N>,
-C<v>, and C<V>, their byte endianness and size is known.
+C<v>, and C<V>, their byte endianness and size are known.
 See also L<perlport>.
 
 =item *
