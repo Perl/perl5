@@ -78,8 +78,9 @@ ccflags="${ccflags} -pipe -fno-common"
 #
 ccflags="${ccflags} -DINT32_MIN_BROKEN -DINT64_MIN_BROKEN"
 
-# cpp-precomp is problematic.
-cppflags='-traditional-cpp';
+# cppflags='-traditional-cpp';
+# avoid Apple's cpp precompiler, better for extensions
+cppflags="${cppflags} -no-cpp-precomp"
 
 # Shared library extension is .dylib.
 # Bundle extension is .bundle.
