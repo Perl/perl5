@@ -249,23 +249,21 @@ esac
 cat > UU/usethreads.cbu <<'EOCBU'
 case "$usethreads" in
 $define|true|[yY]*)
-        ccflags="-D_REENTRANT $ccflags"
+        ccflags="-D_REENTRANT -D_GNU_SOURCE $ccflags"
         set `echo X "$libswanted "| sed -e 's/ c / pthread c /'`
         shift
         libswanted="$*"
 
 	# Somehow at least in Debian 2.2 these manage to escape
 	# the #define forest of <features.h> and <time.h> so that
-	# the hasproto macro of Configure doesn't see these protos.
-	# -D_GNU_SOURCE has been suggested but it breaks other software
-	# (like Apache).
+	# the hasproto macro of Configure doesn't see these protos,
+	# even with the -D_GNU_SOURCE.
 
 	d_asctime_r_proto="$define"
 	d_crypt_r_proto="$define"
 	d_ctime_r_proto="$define"
 	d_gmtime_r_proto="$define"
 	d_localtime_r_proto="$define"
-	d_readdir64_r_proto="$define"
 
 	;;
 esac
