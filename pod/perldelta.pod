@@ -2744,6 +2744,12 @@ be exact.  (They produce something other than "1" and "-1" when
 formatting 0.6 and -0.6 using the printf format "%.0f", most often
 they produce "0" and "-0".)
 
+=head2 Solaris 2.5
+
+In case you are still using Solaris 2.5 (aka SunOS 5.5), you may
+experience failures (the test core dumping) in lib/locale.t.
+The suggested cure is to upgrade your Solaris.
+
 =head2 Failure of Thread (5.005-style) tests
 
 B<Note that support for 5.005-style threading remains experimental
