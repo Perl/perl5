@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Oct 20 11:18:44 EET DST 1998 [metaconfig 3.0 PL70]
+# Generated on Wed Oct 21 12:24:45 EET DST 1998 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by jhi@iki.fi)
 
 cat >/tmp/c1$$ <<EOF
@@ -701,7 +701,6 @@ installprivlib=''
 privlib=''
 privlibexp=''
 prototype=''
-pthread_setdetachstate_pointer=''
 ptrsize=''
 drand01=''
 randbits=''
@@ -10528,37 +10527,6 @@ rp="What is the type of process ids on this system?"
 set pid_t pidtype int stdio.h sys/types.h
 eval $typedef_ask
 
-
-: see whether the state of pthread_attr_setdetachstate is an int pointer
-$cat >try.c <<EOP
-#include <pthread.h>
-main() {
-    pthread_attr_t attr;
-    int state = 0;	
-    pthread_attr_init(&attr);
-#ifdef POINTER
-    pthread_attr_setdetachstate(&attr, &state);
-#else
-    pthread_attr_setdetachstate(&attr, state);
-#endif
-}
-EOP
-set try
-if eval $compile; then
-    val="$undef"
-else
-    set try -DPOINTER
-    if eval $compile; then
-        val="$define"
-    else
-        val="$undef"
-    fi
-fi
-set pthread_setdetachstate_pointer
-eval $setvar
-
-$rm -f try try.*
-
 : check for length of pointer
 echo " "
 case "$ptrsize" in
@@ -12648,7 +12616,6 @@ prefixexp='$prefixexp'
 privlib='$privlib'
 privlibexp='$privlibexp'
 prototype='$prototype'
-pthread_setdetachstate_pointer='$pthread_setdetachstate_pointer'
 ptrsize='$ptrsize'
 randbits='$randbits'
 randfunc='$randfunc'

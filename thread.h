@@ -11,7 +11,7 @@
 	    croak("panic: DETACH");		\
 	}					\
     } STMT_END
-#    define THR getTHR
+#    define THR getTHR()
 struct perl_thread *getTHR _((void));
 #    define PTHREAD_GETSPECIFIC_INT
 #    ifdef DJGPP
@@ -27,6 +27,7 @@ struct perl_thread *getTHR _((void));
 #      define PTHREAD_ATTR_SETDETACHSTATE(a,s) pthread_setdetach_np(a,s)
 #      define pthread_key_create(k,d) pthread_keycreate(k,(pthread_destructor_t)(d))
 #      define pthread_mutexattr_init(a) pthread_mutexattr_create(a)
+#      define pthread_mutexattr_settype(a,t) pthread_mutexattr_setkind_np(a,t)
 #    endif
 #    if defined(DJGPP) || defined(__OPEN_VM)
 #      define PTHREAD_ATTR_SETDETACHSTATE(a,s) pthread_attr_setdetachstate(a,&(s))
@@ -34,9 +35,6 @@ struct perl_thread *getTHR _((void));
 #    endif
 #    if defined(DJGPP) || defined(VMS)
 #      define PTHREAD_CREATE(t,a,s,d) pthread_create(t,a,s,d)
-#    endif
-#    if defined(__OPEN_VM) || defined(VMS)
-#      define pthread_mutexattr_settype(a,t) pthread_mutexattr_setkind_np(a,t)
 #    endif
 #  endif
 #  ifndef VMS

@@ -2280,13 +2280,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_pthreads_created_joinable PTHREADS_CREATED_JOINABLE /**/
 
-/* PTHREAD_SETDETACHSTATE_POINTER:
- *	This symbol, if defined, indicates that the second argument of
- *	pthread_attr_setdetachstate is a pointer to an int, as opposed
- *	to an int.
- */
-#$pthread_setdetachstate_pointer	PTHREAD_SETDETACHSTATE_POINTER	/**/
-
 /* MULTIPLICITY:
  *	This symbol, if defined, indicates that Perl should
  *	be built to use multiplicity.
