@@ -462,7 +462,7 @@ PP(pp_rv2av)
 	    
 	    if (SvTYPE(sv) != SVt_PVGV) {
 		char *sym;
-		STRLEN n_a;
+		STRLEN len;
 
 		if (SvGMAGICAL(sv)) {
 		    mg_get(sv);
@@ -481,13 +481,17 @@ PP(pp_rv2av)
 		    }
 		    RETSETUNDEF;
 		}
-		sym = SvPV(sv,n_a);
+		sym = SvPV(sv,len);
 		if ((PL_op->op_flags & OPf_SPECIAL) &&
 		    !(PL_op->op_flags & OPf_MOD))
 		{
 		    gv = (GV*)gv_fetchpv(sym, FALSE, SVt_PVAV);
-		    if (!gv)
+		    if (!gv
+			&& (!is_gv_magical(sym,len,0)
+			    || !(gv = (GV*)gv_fetchpv(sym, TRUE, SVt_PVAV))))
+		    {
 			RETSETUNDEF;
+		    }
 		}
 		else {
 		    if (PL_op->op_private & HINT_STRICT_REFS)
@@ -562,7 +566,7 @@ PP(pp_rv2hv)
 	    
 	    if (SvTYPE(sv) != SVt_PVGV) {
 		char *sym;
-		STRLEN n_a;
+		STRLEN len;
 
 		if (SvGMAGICAL(sv)) {
 		    mg_get(sv);
@@ -581,13 +585,17 @@ PP(pp_rv2hv)
 		    }
 		    RETSETUNDEF;
 		}
-		sym = SvPV(sv,n_a);
+		sym = SvPV(sv,len);
 		if ((PL_op->op_flags & OPf_SPECIAL) &&
 		    !(PL_op->op_flags & OPf_MOD))
 		{
 		    gv = (GV*)gv_fetchpv(sym, FALSE, SVt_PVHV);
-		    if (!gv)
+		    if (!gv
+			&& (!is_gv_magical(sym,len,0)
+			    || !(gv = (GV*)gv_fetchpv(sym, TRUE, SVt_PVHV))))
+		    {
 			RETSETUNDEF;
+		    }
 		}
 		else {
 		    if (PL_op->op_private & HINT_STRICT_REFS)
