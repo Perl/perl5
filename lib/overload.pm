@@ -169,13 +169,6 @@ overload - Package for overloading perl operations
     ...
     $strval = overload::StrVal $b;
 
-=head1 CAVEAT SCRIPTOR
-
-Overloading of operators is a subject not to be taken lightly.
-Neither its precise implementation, syntax, nor semantics are
-100% endorsed by Larry Wall.  So any of these may be changed 
-at some point in the future.
-
 =head1 DESCRIPTION
 
 =head2 Declaration of overloaded functions
