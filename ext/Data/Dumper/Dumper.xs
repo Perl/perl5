@@ -22,7 +22,7 @@
 
 static I32 num_q (char *s, STRLEN slen);
 static I32 esc_q (char *dest, char *src, STRLEN slen);
-static I32 esc_q_utf8 (SV *sv, char *src, STRLEN slen);
+static I32 esc_q_utf8 (pTHX_ SV *sv, char *src, STRLEN slen);
 static SV *sv_x (pTHX_ SV *sv, char *str, STRLEN len, I32 n);
 static I32 DD_dump (pTHX_ SV *val, char *name, STRLEN namelen, SV *retval,
 		    HV *seenhv, AV *postav, I32 *levelp, I32 indent,
@@ -53,7 +53,7 @@ TOP:
 		    return 1;
 	    }
     }
-    else 
+    else
 	return 1;
     return 0;
 }
@@ -81,7 +81,7 @@ static I32
 esc_q(register char *d, register char *s, register STRLEN slen)
 {
     register I32 ret = 0;
-    
+
     while (slen > 0) {
 	switch (*s) {
 	case '\'':
@@ -98,16 +98,16 @@ esc_q(register char *d, register char *s, register STRLEN slen)
 }
 
 static I32
-esc_q_utf8(SV* sv, register char *src, register STRLEN slen)
+esc_q_utf8(pTHX_ SV* sv, register char *src, register STRLEN slen)
 {
     char *s, *send, *r;
     STRLEN grow = 0, j = 1, l;
     bool dquote = FALSE;
-    
+
     /* this will need EBCDICification */
     for (s = src, send = src + slen; s < send; s += UTF8SKIP(s)) {
         UV k = utf8_to_uvchr((U8*)s, &l);
-      
+
 	grow +=
 	  (*s == '"' || *s == '\\') ? 2 :
 	  (k < 0x80 ? 1 : UNISKIP(k) + 1 + 4); /* 4: \x{} */
@@ -198,7 +198,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 
     flags = SvFLAGS(val);
     realtype = SvTYPE(val);
-    
+
     if (SvGMAGICAL(val))
         mg_get(val);
     if (SvROK(val)) {
@@ -322,7 +322,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	/* If purity is not set and maxdepth is set, then check depth:
 	 * if we have reached maximum depth, return the string
 	 * representation of the thing we are currently examining
-	 * at this depth (i.e., 'Foo=ARRAY(0xdeadbeef)'). 
+	 * at this depth (i.e., 'Foo=ARRAY(0xdeadbeef)').
 	 */
 	if (!purity && maxdepth > 0 && *levelp >= maxdepth) {
 	    STRLEN vallen;
@@ -352,7 +352,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    SV *namesv = newSVpvn("${", 2);
 	    sv_catpvn(namesv, name, namelen);
 	    sv_catpvn(namesv, "}", 1);
-	    if (realpack) {				     /* blessed */ 
+	    if (realpack) {				     /* blessed */
 		sv_catpvn(retval, "do{\\(my $o = ", 13);
 		DD_dump(aTHX_ ival, SvPVX(namesv), SvCUR(namesv), retval, seenhv,
 			postav, levelp,	indent, pad, xpad, apad, sep,
@@ -384,7 +384,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    SV *totpad;
 	    I32 ix = 0;
 	    I32 ixmax = av_len((AV *)ival);
-	    
+	
 	    SV *ixsv = newSViv(0);
 	    /* allowing for a 24 char wide array index */
 	    New(0, iname, namelen+28, char);
@@ -471,7 +471,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    char *key;
 	    I32 klen;
 	    SV *hval;
-	    
+	
 	    iname = newSVpvn(name, namelen);
 	    if (name[0] == '%') {
 		sv_catpvn(retval, "(", 1);
@@ -499,7 +499,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    totpad = newSVsv(sep);
 	    sv_catsv(totpad, pad);
 	    sv_catsv(totpad, apad);
-	    
+	
 	    (void)hv_iterinit((HV*)ival);
 	    i = 0;
 	    while ((entry = hv_iternext((HV*)ival)))  {
@@ -525,7 +525,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 
 		    sv_catsv(retval, totpad);
 		    sv_catsv(retval, ipad);
-		    nlen = esc_q_utf8(retval, key, klen);
+		    nlen = esc_q_utf8(aTHX_ retval, key, klen);
 
 		    sname = newSVsv(iname);
 		    sv_catpvn(sname, okey, nlen);
@@ -731,7 +731,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	else {
 	    c = SvPV(val, i);
 	    if (DO_UTF8(val))
-	        i += esc_q_utf8(retval, c, i);
+	        i += esc_q_utf8(aTHX_ retval, c, i);
 	    else {
 		sv_grow(retval, SvCUR(retval)+3+2*i); /* 3: ""\0 */
 		r = SvPVX(retval) + SvCUR(retval);
@@ -817,7 +817,7 @@ Data_Dumper_Dumpxs(href, ...)
 	    indent = 2;
 	    terse = useqq = purity = deepcopy = 0;
 	    quotekeys = 1;
-	    
+	
 	    retval = newSVpvn("", 0);
 	    if (SvROK(href)
 		&& (hv = (HV*)SvRV((SV*)href))
@@ -868,7 +868,7 @@ Data_Dumper_Dumpxs(href, ...)
 		valstr = newSVpvn("",0);
 		for (i = 0; i <= imax; ++i) {
 		    SV *newapad;
-		    
+		
 		    av_clear(postav);
 		    if ((svp = av_fetch(todumpav, i, FALSE)))
 			val = *svp;
@@ -878,7 +878,7 @@ Data_Dumper_Dumpxs(href, ...)
 			sv_setsv(name, *svp);
 		    else
 			(void)SvOK_off(name);
-		    
+		
 		    if (SvOK(name)) {
 			if ((SvPVX(name))[0] == '*') {
 			    if (SvROK(val)) {
@@ -911,7 +911,7 @@ Data_Dumper_Dumpxs(href, ...)
 			nchars = strlen(tmpbuf);
 			sv_catpvn(name, tmpbuf, nchars);
 		    }
-		    
+		
 		    if (indent >= 2) {
 			SV *tmpsv = sv_x(aTHX_ Nullsv, " ", 1, SvCUR(name)+3);
 			newapad = newSVsv(apad);
@@ -920,12 +920,12 @@ Data_Dumper_Dumpxs(href, ...)
 		    }
 		    else
 			newapad = apad;
-		    
+		
 		    DD_dump(aTHX_ val, SvPVX(name), SvCUR(name), valstr, seenhv,
 			    postav, &level, indent, pad, xpad, newapad, sep,
 			    freezer, toaster, purity, deepcopy, quotekeys,
 			    bless, maxdepth);
-		    
+		
 		    if (indent >= 2)
 			SvREFCNT_dec(newapad);
 
