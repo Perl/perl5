@@ -404,7 +404,6 @@ ext/ODBM_File/Makefile.PL	ODBM extension makefile writer
 ext/ODBM_File/odbm.t		See if ODBM_File works
 ext/ODBM_File/ODBM_File.pm	ODBM extension Perl module
 ext/ODBM_File/ODBM_File.xs	ODBM extension external subroutines
-ext/ODBM_File/sdbm.t		See if SDBM_File works
 ext/ODBM_File/typemap		ODBM extension interface types
 ext/Opcode/Makefile.PL		Opcode extension makefile writer
 ext/Opcode/Opcode.pm		Opcode extension Perl module
@@ -446,6 +445,7 @@ ext/re/re.xs			re extension external subroutines
 ext/Safe/safe1.t		See if Safe works
 ext/Safe/safe2.t		See if Safe works
 ext/SDBM_File/Makefile.PL	SDBM extension makefile writer
+ext/SDBM_File/sdbm.t		See if SDBM_File works
 ext/SDBM_File/sdbm/biblio	SDBM kit
 ext/SDBM_File/sdbm/CHANGES	SDBM kit
 ext/SDBM_File/sdbm/COMPARE	SDBM kit
@@ -508,7 +508,7 @@ ext/Sys/Syslog/Syslog.xs	Sys::Syslog extension external subroutines
 ext/Thread/create.tx		Test thread creation
 ext/Thread/die.tx		Test thread die()
 ext/Thread/die2.tx		Test thread die() differently
-ext/Thread/io.tx			Test threads doing simple I/O
+ext/Thread/io.tx		Test threads doing simple I/O
 ext/Thread/join.tx		Test thread joining
 ext/Thread/join2.tx		Test thread joining differently
 ext/Thread/list.tx		Test getting list of all threads
