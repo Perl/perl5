@@ -539,7 +539,7 @@ This is also a way to create a local filehandle.  For example:
 	my $path = shift;
 	local *FH;  # not my!
 	open (FH, $path) || return undef;
-	return \*FH;
+	return *FH;
     }
     $fh = newopen('/etc/passwd');
 

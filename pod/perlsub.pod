@@ -608,7 +608,7 @@ If you're planning on generating new filehandles, you could do this:
     sub openit {
 	my $name = shift;
 	local *FH;
-	return open (FH, $path) ? \*FH : undef;
+	return open (FH, $path) ? *FH : undef;
     } 
 
 Although that will actually produce a small memory leak.  See the bottom
