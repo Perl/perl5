@@ -4422,7 +4422,10 @@ EOM
 			sunos)	dflt='-pic' ;;
 			*)	dflt='none' ;;
 		    esac ;;
-		*)	dflt='-fpic' ;;
+		*)  case "$osname/$ccflags" in
+			solaris/*-DDEBUGGING*)	dflt='-fPIC' ;;
+			*)			dflt='-fpic' ;;
+		    esac ;;
 	    esac ;;
     *)	dflt="$cccdlflags" ;;
     esac
