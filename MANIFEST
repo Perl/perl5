@@ -604,6 +604,7 @@ ext/threads/shared/shared.xs    thread shared variables
 ext/threads/shared/t/av_simple.t	Tests for basic shared array functionality.
 ext/threads/shared/t/hv_refs.t	Test shared hashes containing references
 ext/threads/shared/t/hv_simple.t	Tests for basic shared hash functionality.
+ext/threads/shared/t/no_share.t	Tests for disabled share on variables.
 ext/threads/shared/t/sv_refs.t	thread shared variables
 ext/threads/shared/t/sv_simple.t	thread shared variables
 ext/threads/t/basic.t		ithreads
