@@ -820,7 +820,9 @@ get many warnings like this:
 
     cc: "/usr/include/sys/socket.h", line 504: warning 562: Redeclaration of "sendfile" with a different storage class specifier: "sendfile" will have internal linkage.
 
-This warning, however, is not serious and can be ignored.
+The warnings show up both during the build of Perl and during certain
+lib/ExtUtils tests that invoke the compiler.  The warning, however, is
+not serious and can be ignored.
 
 =head2 IRIX: t/uni/tr_7jis.t falsely failing
 
