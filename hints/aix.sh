@@ -194,7 +194,10 @@ EOM
 		exit 1
 		;;
 	    esac
-	    ccflags="$ccflags -DUSE_LONG_LONG"
+	    case "$ccflags" in
+	    *-DUSE_LONG_LONG*) ;;
+	    *) ccflags="$ccflags -DUSE_LONG_LONG" ;;
+	    esac
 	    ccflags="$ccflags `getconf XBS5_ILP32_OFFBIG_CFLAGS 2>/dev/null`"
 
 	    ldflags="$ldflags `getconf XBS5_ILP32_OFFBIG_LDFLAGS 2>/dev/null`"

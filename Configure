@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Oct 29 00:58:35 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Fri Oct 29 17:37:33 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -771,6 +771,9 @@ sPRIi64=''
 sPRIo64=''
 sPRIu64=''
 sPRIx64=''
+quadcase=''
+quadtype=''
+uquadtype=''
 drand01=''
 randbits=''
 randfunc=''
@@ -820,6 +823,7 @@ archname64=''
 use64bits=''
 uselargefiles=''
 uselongdouble=''
+uselonglong=''
 usemorebits=''
 usemultiplicity=''
 nm_opt=''
@@ -6559,11 +6563,15 @@ fi
 cat <<EOM
 
 Perl can be built to take advantage of long doubles which
-(if available) may give more accuracy and range for floating point
-numbers.  To do so, Configure must be run with -Duselongdouble.
+(if available) may give more accuracy and range for floating point numbers.
 
 If this doesn't make any sense to you, just accept the default 'n'.
 EOM
+
+case "$ccflags" in
+*-DUSE_LONG_DOUBLE*|*-DUSE_MORE_BITS*) uselongdouble="$define" ;;
+esac
+
 case "$uselongdouble" in
 $define|true|[yY]*)	dflt='y';;
 *) dflt='n';;
@@ -6578,7 +6586,11 @@ set uselongdouble
 eval $setvar
 
 case "$uselongdouble" in
-"$define"|true|[yY]*)
+true|[yY]*) uselongdouble="$define" ;;
+esac
+
+case "$uselongdouble" in
+$define)
 : Look for a hint-file generated 'call-back-unit'.  If the
 : user has specified that long doubles should be used,
 : we may need to set or change some other defaults.
@@ -6588,6 +6600,51 @@ case "$uselongdouble" in
 	else
 		$cat <<EOM
 (Your platform doesn't have any specific hints for long doubles.)
+EOM
+	fi
+	;;
+esac
+
+cat <<EOM
+
+Perl can be built to take advantage of long longs which
+(if available) may give more range for integer numbers.
+
+If this doesn't make any sense to you, just accept the default 'n'.
+EOM
+
+case "$ccflags" in
+*-DUSE_LONG_LONG*) uselonglong="$define" ;;
+esac
+
+case "$uselonglong" in
+$define|true|[yY]*)	dflt='y';;
+*) dflt='n';;
+esac
+rp='Try to use long longs if available?'
+. ./myread
+case "$ans" in
+y|Y) 	val="$define"	;;
+*)      val="$undef"	;;
+esac
+set uselonglong
+eval $setvar
+
+case "$uselonglong" in
+true|[yY]*) uselonglong="$define" ;;
+esac
+
+case "$uselonglong" in
+$define)
+: Look for a hint-file generated 'call-back-unit'.  If the
+: user has specified that long longs should be used,
+: we may need to set or change some other defaults.
+	if $test -f uselonglong.cbu; then
+		echo "Your platform has some specific hints for long longs, using them..."
+		. ./uselonglong.cbu
+	else
+		$cat <<EOM
+(Your platform doesn't have any specific hints for long longs.)
 EOM
 	fi
 	;;
@@ -6738,57 +6795,6 @@ EOP
 	esac
 fi
 
-: see if inttypes.h is available
-: we want a real compile instead of Inhdr because some systems
-: have an inttypes.h which includes non-existent headers
-echo " "
-$cat >try.c <<EOCP
-#include <inttypes.h>
-int main() {
-	static int32_t foo32 = 0x12345678;
-}
-EOCP
-set try
-if eval $compile; then
-	echo "<inttypes.h> found." >&4
-	val="$define"
-else
-	echo "<inttypes.h> NOT found." >&4
-	val="$undef"
-fi
-$rm -f try.c try
-set i_inttypes
-eval $setvar
-
-: check for int64_t
-case "$use64bits" in
-"$define" )
-	echo " "
-	$echo $n "Checking to see if your system supports int64_t...$c" >&4
-	$cat >try.c <<EOCP
-#include <sys/types.h>
-#$i_inttypes I_INTTYPES
-#ifdef I_INTTYPES
-#include <inttypes.h>
-#endif
-int64_t foo() { int64_t x; x = 7; return x; }
-EOCP
-	if $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
-		val="$define"
-		echo " Yup, it does." >&4
-	else
-		val="$undef"
-		echo " Nope, it doesn't." >&4
-	fi
-	$rm -f try.*
-	;;
-*)	val="$undef"
-	;;
-esac
-set d_int64t
-eval $setvar
-
-
 : check for lengths of integral types
 echo " "
 case "$intsize" in
@@ -6837,14 +6843,15 @@ $rm -f intsize intsize.*
 
 : check for long long
 echo " "
-$echo $n "Checking to see if your system supports long long...$c" >&4
-echo 'long long foo() { long long x; x = 7; return x; }' > try.c
-if $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
+$echo $n "Checking to see if your system supports long long..." $c >&4
+echo 'int main() { long long x = 7; }' > try.c
+set try
+if eval $compile; then
 	val="$define"
-	echo " Yup, it does." >&4
+	echo " Yes, it does." >&4
 else
 	val="$undef"
-	echo " Nope, it doesn't." >&4
+	echo " No, it doesn't." >&4
 fi
 $rm try.*
 set d_longlong
@@ -6854,7 +6861,7 @@ eval $setvar
 case "${d_longlong}${longlongsize}" in
 $define)
 	echo " "
-	$echo $n "Checking to see how big your long longs are...$c" >&4
+	$echo $n "Checking to see how big your long longs are..." $c >&4
 	$cat >try.c <<'EOCP'
 #include <stdio.h>
 int main()
@@ -6864,7 +6871,7 @@ int main()
 EOCP
 	set try
 	if eval $compile_ok; then
-		longlongsize=`./try`
+		longlongsize=`./try$exe_ext`
 		$echo " $longlongsize bytes." >&4
 	else
 		dflt='8'
@@ -6879,16 +6886,122 @@ EOCP
 	fi	
 	;;
 esac
+$rm -f try.* try
+
+: see if inttypes.h is available
+: we want a real compile instead of Inhdr because some systems
+: have an inttypes.h which includes non-existent headers
+echo " "
+$cat >try.c <<EOCP
+#include <inttypes.h>
+int main() {
+	static int32_t foo32 = 0x12345678;
+}
+EOCP
+set try
+if eval $compile; then
+	echo "<inttypes.h> found." >&4
+	val="$define"
+else
+	echo "<inttypes.h> NOT found." >&4
+	val="$undef"
+fi
 $rm -f try.c try
+set i_inttypes
+eval $setvar
+
+: check for int64_t
+case "$use64bits" in
+"$define" )
+	echo " "
+	$echo $n "Checking to see if your system supports int64_t...$c" >&4
+	$cat >try.c <<EOCP
+#include <sys/types.h>
+#$i_inttypes I_INTTYPES
+#ifdef I_INTTYPES
+#include <inttypes.h>
+#endif
+int main() { int64_t x = 7; }
+EOCP
+	set try
+	if eval $compile; then
+		val="$define"
+		echo " Yes, it does." >&4
+	else
+		val="$undef"
+		echo " No, it doesn't." >&4
+	fi
+	$rm -f try try.*
+	;;
+*)	val="$undef"
+	;;
+esac
+set d_int64t
+eval $setvar
+
+
+
+echo " "
+echo "Checking which 64-bit integer type to use..." >&4
+
+case "$intsize" in
+8) val=int
+   set quadtype
+   eval $setvar
+   val='"unsigned int"'
+   set uquadtype
+   eval $setvar
+   quadcase=1
+   ;;
+*) case "$longsize" in
+   8) val=long
+      set quadtype
+      eval $setvar
+      val='"unsigned long"'
+      set uquadtype
+      eval $setvar
+      quadcase=2
+      ;;
+   *) case "$uselonglong:$d_longlong:$longlongsize" in
+      define:define:8)
+        val='"long long"'
+        set quadtype
+        eval $setvar
+        val='"unsigned long long"'
+        set uquadtype
+        eval $setvar
+        quadcase=3
+        ;;
+      *) case "$d_int64t" in
+         define)
+           val=int64_t
+           set quadtype
+           eval $setvar
+           val=uint64_t
+           set uquadtype
+           eval $setvar
+           quadcase=4
+           ;;
+         esac
+         ;;
+      esac
+      ;;
+   esac
+   ;;
+esac
+
+case "$quadtype" in
+'') echo "Alas, no 64-bit integer types in sight."    >&4 ;;
+*)  echo "Using '$quadtype' for 64-bit integers." >&4 ;;
+esac
 
 echo " "
 
-if $test X"$intsize" = X8 -o X"$longsize" = X8 -o X"$d_int64t" = X"$define" -o X"$d_longlong" = X"$define"; then
+if $test X"$quadtype" != X; then
 
 echo "Checking how to print 64-bit integers..." >&4
 
-if $test X"$sPRId64" = X -a X"$intsize" = X8; then
-        quad=int
+if $test X"$sPRId64" = X -a X"$quadtype" = Xint; then
 	$cat >try.c <<'EOCP'
 #include <sys/types.h>
 #include <stdio.h>
@@ -6910,8 +7023,7 @@ EOCP
 	fi
 fi
 
-if $test X"$sPRId64" = X -a X"$longsize" = X8; then
-        quad=long
+if $test X"$sPRId64" = X -a X"$quadtype" = Xlong; then
 	$cat >try.c <<'EOCP'
 #include <sys/types.h>
 #include <stdio.h>
@@ -6933,8 +7045,7 @@ EOCP
 	fi
 fi
 
-if $test X"$sPRId64" = X -a X"$i_inttypes.h" = X"$define" -a X"$d_int64t" = X"$define"; then
-        quad=int64_t
+if $test X"$sPRId64" = X -a X"$i_inttypes.h" = X"$define" -a X"$quadtype" = Xint64_t; then
 	$cat >try.c <<'EOCP'
 #include <sys/types.h>
 #include <inttypes.h>
@@ -6957,8 +7068,7 @@ EOCP
 	fi
 fi
 
-if $test X"$sPRId64" = X -a X"$d_longlong" = X"$define" -a X"$longlongsize" = X8; then
-        quad="long long"
+if $test X"$sPRId64" = X -a X"$quadtype" = X"long long"; then
 	$cat >try.c <<'EOCP'
 #include <sys/types.h>
 #include <stdio.h>
@@ -6980,12 +7090,12 @@ EOCP
 	fi
 fi
 
-if $test X"$sPRId64" = X -a X"$quad" != X; then
+if $test X"$sPRId64" = X -a X"$quadtype" != X; then
 	$cat >try.c <<EOCP
 #include <sys/types.h>
 #include <stdio.h>
 int main() {
-  $quad q = 12345678901;
+  $quadtype q = 12345678901;
   printf("%Ld\n", q);
 }
 EOCP
@@ -6996,18 +7106,18 @@ EOCP
 		12345678901)
 			sPRId64='"Ld"'; sPRIi64='"Li"'; sPRIu64='"Lu"';
                 	sPRIo64='"Lo"'; sPRIx64='"Lx"'; sPRIX64='"LX"';
-			echo "We will use %lld."
+			echo "We will use %Ld."
 			;;
 		esac
 	fi
 fi
 
-if $test X"$sPRId64" = X -a X"$quad" != X; then
+if $test X"$sPRId64" = X -a X"$quadtype" != X; then
 	$cat >try.c <<EOCP
 #include <sys/types.h>
 #include <stdio.h>
 int main() {
-  $quad q = 12345678901;
+  $quadtype q = 12345678901;
   printf("%qd\n", q);
 }
 EOCP
@@ -7030,7 +7140,7 @@ fi
 
 $rm -f try try.*
 
-fi # intsize -o longsize -o d_int64t -o d_longlong
+fi
 
 case "$sPRId64" in
 '')	d_PRId64="$undef"; d_PRIi64="$undef"; d_PRIu64="$undef"; 
@@ -7070,14 +7180,15 @@ $rm -f try.c try
 
 : check for long doubles
 echo " "
-$echo $n "Checking to see if your system supports long double...$c" >&4
-echo 'long double foo() { long double x; x = 7.0; return x; }' > try.c
-if $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
+$echo $n "Checking to see if your system supports long double..." $c >&4
+echo 'int main() { long double x = 7.0; }' > try.c
+set try
+if eval $compile; then
 	val="$define"
-	echo " Yup, it does." >&4
+	echo " Yes, it does." >&4
 else
 	val="$undef"
-	echo " Nope, it doesn't." >&4
+	echo " No, it doesn't." >&4
 fi
 $rm try.*
 set d_longdbl
@@ -7087,7 +7198,7 @@ eval $setvar
 case "${d_longdbl}${longdblsize}" in
 $define)
 	echo " "
-	$echo $n "Checking to see how big your long doubles are...$c" >&4
+	$echo $n "Checking to see how big your long doubles are..." $c >&4
 	$cat >try.c <<'EOCP'
 #include <stdio.h>
 int main()
@@ -7096,8 +7207,9 @@ int main()
 }
 EOCP
 	set try
+	set try
 	if eval $compile; then
-		longdblsize=`./try`
+		longdblsize=`./try$exe_ext`
 		$echo " $longdblsize bytes." >&4
 	else
 		dflt='8'
@@ -7112,7 +7224,7 @@ EOCP
 	fi	
 	;;
 esac
-$rm -f try.c try
+$rm -f try.* try
 
 echo " "
 
@@ -8651,7 +8763,7 @@ eval $inhdr
 
 
 echo " "
-echo "Checking to see if your system supports struct fs_data..." >&4
+$echo $n "Checking to see if your system supports struct fs_data..." $c >&4
 set d_fs_data_s fs_data $i_systypes sys/types.h $i_sysparam sys/param.h $i_sysmount sys/mount.h
 eval $hasstruct
 case "$d_fs_data_s" in
@@ -10291,7 +10403,7 @@ eval $inhdr
 
 
 echo " "
-echo "Checking to see if your system supports struct statfs..." >&4
+$echo $n "Checking to see if your system supports struct statfs..." $c >&4
 set d_statfs_s statfs $i_systypes sys/types.h $i_sysparam sys/param.h $i_sysmount sys/mount.h $i_sysvfs sys/vfs.h $i_sysstatfs sys/statfs.h
 eval $hasstruct
 case "$d_statfs_s" in
@@ -10305,7 +10417,7 @@ esac
 case "$d_statfs_s" in
 define)	
 	echo " "
-	echo "Checking to see if your struct statfs has f_flags field..." >&4
+	$echo $n "Checking to see if your struct statfs has f_flags field..." $c >&4
 	set d_statfs_f_flags statfs f_flags $i_systypes sys/types.h $i_sysparam sys/param.h $i_sysmount sys/mount.h $i_sysvfs sys/vfs.h $i_sysstatfs sys/statfs.h
 	eval $hasfield
 	;;
@@ -14096,6 +14208,8 @@ privlib='$privlib'
 privlibexp='$privlibexp'
 prototype='$prototype'
 ptrsize='$ptrsize'
+quadcase='$quadcase'
+quadtype='$quadtype'
 randbits='$randbits'
 randfunc='$randfunc'
 randseedtype='$randseedtype'
@@ -14188,10 +14302,12 @@ uidsize='$uidsize'
 uidtype='$uidtype'
 uname='$uname'
 uniq='$uniq'
+uquadtype='$uquadtype'
 use64bits='$use64bits'
 usedl='$usedl'
 uselargefiles='$uselargefiles'
 uselongdouble='$uselongdouble'
+uselonglong='$uselonglong'
 usemorebits='$usemorebits'
 usemultiplicity='$usemultiplicity'
 usemymalloc='$usemymalloc'

@@ -1900,7 +1900,9 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	This symbol is defined if this system has a stat structure declaring
  *	st_blksize and st_blocks.
  */
+#ifndef USE_STAT_BLOCKS
 #$d_statblks USE_STAT_BLOCKS 	/**/
+#endif
 
 /* HAS_STRERROR:
  *	This symbol, if defined, indicates that the strerror routine is
@@ -2442,39 +2444,63 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	be used when available.  If not defined, the native default interfaces
  *	will be used (be they 32 or 64 bits).
  */
+#ifndef USE_64_BITS
 #$use64bits	USE_64_BITS		/**/
+#endif
 
 /* USE_LARGE_FILES:
  *	This symbol, if defined, indicates that large file support
  *	should be used when available.  The USE_64_BITS symbol will
  *	also be turned on if necessary.
  */
+#ifndef USE_LARGE_FILES
 #$uselargefiles	USE_LARGE_FILES		/**/
+#endif
 
 /* USE_LONG_DOUBLE:
  *	This symbol, if defined, indicates that long doubles should
  *	be used when available.
  */
+#ifndef USE_LONG_DOUBLE
 #$uselongdouble	USE_LONG_DOUBLE		/**/
+#endif
+
+/* USE_LONG_LONG:
+ *	This symbol, if defined, indicates that long longs should
+ *	be used when available.
+ */
+#ifndef USE_LONG_LONG
+#$uselonglong	USE_LONG_LONG		/**/
+#endif
+
+#ifndef USE_MORE_BITS
+#$usemorebits	USE_MORE_BITS		/**/
+#endif
 
 /* MULTIPLICITY:
  *	This symbol, if defined, indicates that Perl should
  *	be built to use multiplicity.
  */
+#ifndef MULTIPLICTY
 #$usemultiplicity	MULTIPLICITY		/**/
+#endif
 
 /* USE_PERLIO:
  *	This symbol, if defined, indicates that the PerlIO abstraction should
  *	be used throughout.  If not defined, stdio should be
  *	used in a fully backward compatible manner.
  */
+#ifndef USE_PERLIO
 #$useperlio	USE_PERLIO		/**/
+#endif
 
 /* USE_SOCKS:
  *	This symbol, if defined, indicates that Perl should
  *	be built to use socks.
  */
+#ifndef USE_SOCKS
 #$usesocks	USE_SOCKS		/**/
+#endif
 
 /* PERL_XS_APIVERSION:
  *	This variable contains the version of the oldest perl binary
@@ -2637,7 +2663,9 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	This symbol, if defined, indicates that Perl should
  *	be built to use the old draft POSIX threads API.
  */
+#ifndef USE_TTHREADS
 #$usethreads	USE_THREADS		/**/
+#endif
 #$d_oldpthreads	OLD_PTHREADS_API		/**/
 
 /* Time_t:
@@ -2706,6 +2734,23 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	<sys/types.h> to get any typedef'ed information.
  */
 #define Pid_t $pidtype		/* PID type */
+
+/* Quad_t:
+ *	This symbol holds the type used for 64-bit integers.
+ *	It can be int, long, long long, int64_t etc...
+ */
+/* QUADCASE:
+ *	This symbol, if defined, encodes the type of a quad:
+ *	1 = int, 2 = long, 3 = long long, 4 = int64_t.
+ */
+/* Uquad_t:
+ *	This symbol holds the type used for unsigned 64-bit integers.
+ *	It can be unsigned int, unsigned long, unsigned long long,
+ *	uint64_t etc...
+ */
+#define Quad_t $quadtype
+#define Uquad_t $uquadtype
+#define QUADCASE $quadcase
 
 /* Size_t:
  *	This symbol holds the type used to declare length parameters

@@ -243,7 +243,10 @@ EOM
 	    esac
 	    case "$ccflags" in
 	    *-n32*)
-		ccflags="$ccflags -DUSE_LONG_LONG"
+		case "$ccflags" in
+		*-DUSE_LONG_LONG) ;;
+		*) ccflags="$ccflags -DUSE_LONG_LONG" ;;
+		esac
 		archname64="-n32"
 		;;
 	    esac
