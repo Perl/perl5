@@ -353,7 +353,7 @@ all : base extras x2p archcorefiles preplibrary perlpods
 .endif
 base : miniperl perl
 	@ $(NOOP)
-extras : dynext libmods utils podxform
+extras : dynext libmods utils podxform extra.pods
 	@ $(NOOP)
 libmods : $(LIBPREREQ)
 	@ $(NOOP)
@@ -363,6 +363,8 @@ podxform : [.lib.pod]pod2text.com [.lib.pod]pod2html.com [.lib.pod]pod2latex.com
 	@ $(NOOP)
 x2p : [.x2p]a2p$(E) [.x2p]s2p.com [.x2p]find2perl.com 
 	@ $(NOOP)
+extra.pods : miniperl
+	@ @extra_pods.com
 
 pod0 = [.lib.pod]perl.pod [.lib.pod]perl5004delta.pod [.lib.pod]perl5005delta.pod
 pod1 = [.lib.pod]perlapi.pod [.lib.pod]perlapio.pod [.lib.pod]perlbook.pod
@@ -1276,6 +1278,7 @@ clean : tidy cleantest
 	- If F$Search("[.VMS.Ext...]*.C").nes."" Then Delete/NoConfirm/Log [.VMS.Ext...]*.C;*
 	- If F$Search("[.VMS.Ext...]*$(O)").nes."" Then Delete/NoConfirm/Log [.VMS.Ext...]*$(O);*
 	- If F$Search("[.pod]*.com").nes."" Then Delete/NoConfirm/Log [.pod]*.com;*
+	- @extra_pods CLEAN
 
 realclean : clean
 	- @make_ext "$(dynamic_ext)" "$(MINIPERL_EXE)" "$(MMS)" realclean
@@ -1286,6 +1289,7 @@ realclean : clean
 	- $(MINIPERL) -e "use File::Path; rmtree(\@ARGV,1,0);" config
 	- If F$Search("Descrip.MMS").nes."" Then Delete/NoConfirm/Log Descrip.MMS;*
 	- If F$Search("make_ext.Com").nes."" Then Delete/NoConfirm/Log make_ext.Com;*
+	- If F$Search("extra_pods.Com").nes."" Then Delete/NoConfirm/Log extra_pods.Com;*
 	- $(MINIPERL) -e "use File::Path; rmtree(['lib/auto','lib/VMS','lib/$(ARCH)'],1,0);"
 	- If F$Search("*.TS").nes."" Then Delete/NoConfirm/Log *.TS;*
 	- If F$Search("[.Lib]DynaLoader.pm").nes."" Then Delete/NoConfirm/Log [.Lib]DynaLoader.pm;*
