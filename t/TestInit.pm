@@ -13,6 +13,8 @@
 # PS this is not POD because this should be a very minimalist module in
 # case of funaemental perl breakage.
 
+package TestInit;
+
 chdir 't' if -d 't';
 @INC = '../lib';
 $0 =~ s/\.dp$//; # for the test.deparse make target

@@ -3217,6 +3217,9 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *id, OP *arg)
     OP *pack;
     OP *imop;
     OP *veop;
+    char *packname = Nullch;
+    STRLEN packlen;
+    SV *packsv;
 
     if (id->op_type != OP_CONST)
 	Perl_croak(aTHX_ "Module name must be constant");
@@ -3274,6 +3277,12 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *id, OP *arg)
 				   newSVOP(OP_METHOD_NAMED, 0, meth)));
     }
 
+    if (ckWARN(WARN_MISC) && imop && SvPOK(packsv = ((SVOP*)id)->op_sv)) {
+        /* BEGIN will free the ops, so we need to make a copy */
+        packlen = SvCUR(packsv);
+        packname = savepvn(SvPVX(packsv), packlen);
+    }
+
     /* Fake up the BEGIN {}, which does its thing immediately. */
     newATTRSUB(floor,
 	newSVOP(OP_CONST, 0, newSVpvn("BEGIN", 5)),
@@ -3284,6 +3293,15 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *id, OP *arg)
 	        newSTATEOP(0, Nullch, newUNOP(OP_REQUIRE, 0, id)),
 	        newSTATEOP(0, Nullch, veop)),
 	    newSTATEOP(0, Nullch, imop) ));
+
+    if (packname) {
+        if (ckWARN(WARN_MISC) && !gv_stashpvn(packname, packlen, FALSE)) {
+            Perl_warner(aTHX_ WARN_MISC,
+                        "Package `%s' not found "
+                        "(did you use the incorrect case?)", packname);
+        }
+        safefree(packname);
+    }
 
     PL_hints |= HINT_BLOCK_SCOPE;
     PL_copline = NOLINE;
