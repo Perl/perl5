@@ -470,7 +470,7 @@ platform-independent way, you would have to write:
 
    my @data = unpack 's*', pack 'S*', unpack 'n*', $buf;
 
-This is ugly. As of Perl 5.8.5, there's a much nicer way to express your
+This is ugly. As of Perl 5.9.2, there's a much nicer way to express your
 desire for a certain byte-order: the C<E<gt>> and C<E<lt>> modifiers.
 C<E<gt>> is the big-endian modifier, while C<E<lt>> is the little-endian
 modifier. Using them, we could rewrite the above code as:
