@@ -602,7 +602,7 @@ Various pragmata to control behavior of regular expressions.
 
 =item Benchmark
 
-You can now run tests for I<x> seconds instead of guessing the right
+You can now run tests for I<n> seconds instead of guessing the right
 number of tests to run.
 
 =item Carp
@@ -624,13 +624,13 @@ O_ACCMODE: the mask of O_RDONLY, O_WRONLY, and O_RDWR.
 
 =item Math::Complex
 
-The accessors methods Re, Im, arg, abs, rho, theta, methods can
-($z->Re()) now also act as mutators ($z->Re(3)).
+The accessor methods Re, Im, arg, abs, rho, and theta, can now also
+act as mutators (accessor $z->Re(), mutator $z->Re(3)).
 
 =item Math::Trig
 
-A little bit of radial trigonometry (cylindrical and spherical) added,
-for example the great circle distance.
+A little bit of radial trigonometry (cylindrical and spherical) added:
+radial coordinate conversions and the great circle distance.
 
 =item POSIX
 
