@@ -235,8 +235,19 @@ sub vianame
 
     $txt = do "unicore/Name.pl" unless $txt;
 
-    if ($txt =~ m/^([0-9A-F]+)\t\t($arg)$/m) {
-        return $vianame{$arg} = hex $1;
+    my $pos = index $txt, "\t\t$arg\n";
+    if ($[ <= $pos) {
+	my $posLF = rindex $txt, "\n", $pos;
+	(my $code = substr $txt, $posLF + 1, 6) =~ tr/\t//d;
+	return $vianame{$arg} = hex $code;
+
+	# If $pos is at the 1st line, $posLF must be $[ - 1 (not found);
+	# then $posLF + 1 equals to $[ (at the beginning of $txt).
+	# Otherwise $posLF is the position of "\n";
+	# then $posLF + 1 must be the position of the next to "\n"
+	# (the beginning of the line).
+	# substr($txt, $posLF + 1, 6) may be "0000\t\t", "00A1\t\t",
+	# "10300\t", "100000", etc. So we can get the code via removing TAB.
     } else {
         return;
     }
