@@ -34,7 +34,7 @@ PERLVAR(Iminus_F,	bool)
 PERLVAR(Idoswitches,	bool)
 
 /*
-=for apidoc Amn|bool|PL_dowarn
+=for apidoc mn|bool|PL_dowarn
 
 The C variable which corresponds to Perl's $^W warning variable.
 
@@ -89,20 +89,20 @@ PERLVAR(IDBgv,		GV *)
 PERLVAR(IDBline,	GV *)
 
 /*
-=for apidoc Amn|GV *|PL_DBsub
+=for apidoc mn|GV *|PL_DBsub
 When Perl is run in debugging mode, with the B<-d> switch, this GV contains
 the SV which holds the name of the sub being debugged.  This is the C
 variable which corresponds to Perl's $DB::sub variable.  See
 C<PL_DBsingle>.
 
-=for apidoc Amn|SV *|PL_DBsingle
+=for apidoc mn|SV *|PL_DBsingle
 When Perl is run in debugging mode, with the B<-d> switch, this SV is a
 boolean which indicates whether subs are being single-stepped.
 Single-stepping is automatically turned on after every step.  This is the C
 variable which corresponds to Perl's $DB::single variable.  See
 C<PL_DBsub>.
 
-=for apidoc Amn|SV *|PL_DBtrace
+=for apidoc mn|SV *|PL_DBtrace
 Trace variable used when Perl is run in debugging mode, with the B<-d>
 switch.  This is the C variable which corresponds to Perl's $DB::trace
 variable.  See C<PL_DBsingle>.

@@ -9,7 +9,7 @@ $TST = 'tst';
 $Is_Dosish = ($^O eq 'MSWin32' or $^O eq 'dos' or
 	      $^O eq 'os2' or $^O eq 'mint' or $^O eq 'cygwin');
 
-open($TST, '../Configure') || (die "Can't open ../Configure");
+open($TST, 'harness') || (die "Can't open harness");
 binmode $TST if $Is_Dosish;
 if (eof(tst)) { print "not ok 1\n"; } else { print "ok 1\n"; }
 
@@ -49,7 +49,7 @@ unless (eof) { print "not ok 13\n"; } else { print "ok 13\n"; }
 if ($. == 0) { print "not ok 14\n"; } else { print "ok 14\n"; }
 
 $curline = $.;
-open(other, '../Configure') || (die "Can't open ../Configure");
+open(other, 'harness') || (die "Can't open harness: $!");
 binmode other if $^O eq 'MSWin32';
 
 {

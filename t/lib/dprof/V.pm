@@ -17,7 +17,10 @@ $dpp .= '.com' if $^O eq 'VMS';
 
 print "\nperl: $perl\n" if $opt_v;
 if( ! -f $perl ){ die "Where's Perl?" }
-if( ! -f $dpp ){ die "Where's dprofpp?" }
+if( ! -f $dpp ) { 
+    ($dpp = $^X) =~ s@(^.*)[/|\\].*@$1/dprofpp@;
+    die "Where's dprofpp?" if( ! -f $dpp );
+}
 
 sub dprofpp {
 	my $switches = shift;
