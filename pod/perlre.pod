@@ -329,6 +329,36 @@ Experimental "evaluate any Perl code" zero-width assertion.  Always
 succeeds.  C<code> is not interpolated.  Currently the rules to
 determine where the C<code> ends are somewhat convoluted.
 
+The C<code> is properly scoped in the following sense: if the assertion
+is backtracked (compare L<"Backtracking">), all the changes introduced after
+C<local>isation are undone, so
+
+  $_ = 'a' x 8;
+  m< 
+     (?{ $cnt = 0 })			# Initialize $cnt.
+     (
+       a 
+       (?{
+           local $cnt = $cnt + 1;	# Update $cnt, backtracking-safe.
+       })
+     )*  
+     aaaa
+     (?{ $res = $cnt })			# On success copy to non-localized
+					# location.
+   >x;
+
+will set C<$res = 4>.  Note that after the match $cnt returns to the globally
+introduced value 0, since the scopes which restrict C<local> statements
+are unwound.
+
+This assertion may be used as L<C<(?(condition)yes-pattern|no-pattern)>>
+switch.  If I<not> used in this way, the result of evaluation of C<code>
+is put into variable $^R.  This happens immediately, so $^R can be used from
+other C<(?{ code })> assertions inside the same regular expression.
+
+The above assignment to $^R is properly localized, thus the old value of $^R
+is restored if the assertion is backtracked (compare L<"Backtracking">).
+
 B<WARNING>: This is a grave security risk for arbitrarily interpolated
 patterns.  It introduces security holes in previously safe programs.
 A fix to Perl, and to this documentation, will be forthcoming prior
