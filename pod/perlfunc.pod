@@ -1442,7 +1442,7 @@ system library.  Within a list context, the return values from the
 various get routines are as follows:
 
     ($name,$passwd,$uid,$gid,
-       $quota,$comment,$gcos,$dir,$shell) = getpw*
+       $quota,$comment,$gcos,$dir,$shell,$expire) = getpw*
     ($name,$passwd,$gid,$members) = getgr*
     ($name,$aliases,$addrtype,$length,@addrs) = gethost*
     ($name,$aliases,$addrtype,$net) = getnet*
