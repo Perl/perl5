@@ -780,7 +780,7 @@ PP(pp_rv2av)
 	}
 	SP += maxarg;
     }
-    else {
+    else if (GIMME_V == G_SCALAR) {
 	dTARGET;
 	I32 maxarg = AvFILL(av) + 1;
 	SETi(maxarg);

@@ -33,17 +33,18 @@ tie %x, 'TieAll';
 
 {our $x;}
 is(TieAll->calls, '', 'our $x has no runtime effect');
+
 {our ($x);}
 is(TieAll->calls, '', 'our ($x) has no runtime effect');
+
 {our %x;}
 is(TieAll->calls, '', 'our %x has no runtime effect');
 
-{
-    local $TODO = 'perl #17376';
-    {our (%x);}
-    is(TieAll->calls, '', 'our (%x) has no runtime effect');
-    {our @x;}
-    is(TieAll->calls, '', 'our @x has no runtime effect');
-    {our (@x);}
-    is(TieAll->calls, '', 'our (@x) has no runtime effect');
-}
+{our (%x);}
+is(TieAll->calls, '', 'our (%x) has no runtime effect');
+
+{our @x;}
+is(TieAll->calls, '', 'our @x has no runtime effect');
+
+{our (@x);}
+is(TieAll->calls, '', 'our (@x) has no runtime effect');
