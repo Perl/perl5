@@ -9,7 +9,6 @@ require Exporter;
 $VERSION = 96.041801;
 
 use vars qw($VERSION $columns $debug);
-use strict;
 
 BEGIN	{
 	$columns = 76;  # <= screen width
