@@ -3154,11 +3154,8 @@ int yylex(PERL_YYLEX_PARAM_DECL)
 		    PL_oldoldbufptr < PL_bufptr &&
 		    (PL_oldoldbufptr == PL_last_lop || PL_oldoldbufptr == PL_last_uni) &&
 		    /* NO SKIPSPACE BEFORE HERE! */
-		    (PL_expect == XREF 
-		     || ((PL_opargs[PL_last_lop_op] >> OASHIFT)& 7) == OA_FILEREF
-		     || (PL_last_lop_op == OP_ENTERSUB 
-			 && PL_last_proto 
-			 && PL_last_proto[PL_last_proto[0] == ';' ? 1 : 0] == '*')) )
+		    (PL_expect == XREF ||
+		     ((PL_opargs[PL_last_lop_op] >> OASHIFT)& 7) == OA_FILEREF))
 		{
 		    bool immediate_paren = *s == '(';
 
@@ -3174,8 +3171,10 @@ int yylex(PERL_YYLEX_PARAM_DECL)
 		    /* (But it's an indir obj regardless for sort.) */
 
 		    if ((PL_last_lop_op == OP_SORT ||
-                         (!immediate_paren && (!gv || !GvCVu(gv))) ) &&
-                        (PL_last_lop_op != OP_MAPSTART && PL_last_lop_op != OP_GREPSTART)){
+                         (!immediate_paren && (!gv || !GvCVu(gv)))) &&
+                        (PL_last_lop_op != OP_MAPSTART &&
+			 PL_last_lop_op != OP_GREPSTART))
+		    {
 			PL_expect = (PL_last_lop == PL_oldoldbufptr) ? XTERM : XOPERATOR;
 			goto bareword;
 		    }
@@ -3187,6 +3186,7 @@ int yylex(PERL_YYLEX_PARAM_DECL)
 		s = skipspace(s);
 		if (*s == '(') {
 		    CLINE;
+		    PL_last_proto = Nullch;
 		    if (gv && GvCVu(gv)) {
 			CV *cv;
 			if ((cv = GvCV(gv)) && SvPOK(cv))
@@ -3227,6 +3227,7 @@ int yylex(PERL_YYLEX_PARAM_DECL)
 				PL_tokenbuf, PL_tokenbuf);
 		    PL_last_lop = PL_oldbufptr;
 		    PL_last_lop_op = OP_ENTERSUB;
+		    PL_last_proto = Nullch;
 		    /* Check for a constant sub */
 		    cv = GvCV(gv);
 		    if ((sv = cv_const_sv(cv))) {
@@ -3253,12 +3254,19 @@ int yylex(PERL_YYLEX_PARAM_DECL)
 			    sv_setpv(PL_subname,"__ANON__");
 			    PREBLOCK(LSTOPSUB);
 			}
-		    } else
-			PL_last_proto = NULL;
+		    }
 		    PL_nextval[PL_nexttoke].opval = yylval.opval;
 		    PL_expect = XTERM;
 		    force_next(WORD);
 		    TOKEN(NOAMP);
+		}
+
+		/* It could be a prototypical bearword. */
+		if (PL_last_lop_op == OP_ENTERSUB && PL_last_proto &&
+		    PL_last_proto[PL_last_proto[0] == ';' ? 1 : 0] == '*')
+		{
+		    PL_last_proto = Nullch;
+		    TOKEN(WORD);
 		}
 
 		if (PL_hints & HINT_STRICT_SUBS &&
@@ -3267,10 +3275,7 @@ int yylex(PERL_YYLEX_PARAM_DECL)
 		    PL_last_lop_op != OP_TRUNCATE &&  /* S/F prototype in opcode.pl */
 		    PL_last_lop_op != OP_ACCEPT &&
 		    PL_last_lop_op != OP_PIPE_OP &&
-		    PL_last_lop_op != OP_SOCKPAIR &&
-		    !(PL_last_lop_op == OP_ENTERSUB 
-			 && PL_last_proto 
-			 && PL_last_proto[PL_last_proto[0] == ';' ? 1 : 0] == '*'))
+		    PL_last_lop_op != OP_SOCKPAIR)
 		{
 		    warn(
 		     "Bareword \"%s\" not allowed while \"strict subs\" in use",
