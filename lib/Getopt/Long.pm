@@ -2,12 +2,12 @@
 
 package Getopt::Long;
 
-# RCS Status      : $Id: GetoptLong.pl,v 2.25 2000-08-28 21:45:17+02 jv Exp $
+# RCS Status      : $Id: GetoptLong.pl,v 2.25 2000-08-28 21:45:17+02 jv Exp jv $
 # Author          : Johan Vromans
 # Created On      : Tue Sep 11 15:00:12 1990
 # Last Modified By: Johan Vromans
-# Last Modified On: Mon Jul 31 21:21:13 2000
-# Update Count    : 739
+# Last Modified On: Wed Nov  8 21:36:20 2000
+# Update Count    : 740
 # Status          : Released
 
 ################ Copyright ################
@@ -36,7 +36,7 @@ BEGIN {
     require 5.004;
     use Exporter ();
     use vars     qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
-    $VERSION     = 2.24;
+    $VERSION     = "2.24_01";
 
     @ISA         = qw(Exporter);
     @EXPORT      = qw(&GetOptions $REQUIRE_ORDER $PERMUTE $RETURN_IN_ORDER);
@@ -143,7 +143,7 @@ sub new {
     my %atts = @_;
 
     # Register the callers package.
-    my $self = { caller => (caller)[0] };
+    my $self = { caller_pkg => (caller)[0] };
 
     bless ($self, $class);
 
@@ -189,7 +189,7 @@ sub getoptions {
 
     # Call main routine.
     my $ret = 0;
-    $Getopt::Long::caller = $self->{caller};
+    $Getopt::Long::caller = $self->{caller_pkg};
     eval { $ret = Getopt::Long::GetOptions (@_); };
 
     # Restore saved settings.
@@ -210,12 +210,12 @@ __END__
 
 ################ AutoLoading subroutines ################
 
-# RCS Status      : $Id: GetoptLongAl.pl,v 2.29 2000-08-28 21:56:18+02 jv Exp $
+# RCS Status      : $Id: GetoptLongAl.pl,v 2.29 2000-08-28 21:56:18+02 jv Exp jv $
 # Author          : Johan Vromans
 # Created On      : Fri Mar 27 11:50:30 1998
 # Last Modified By: Johan Vromans
-# Last Modified On: Fri Jul 28 19:12:29 2000
-# Update Count    : 97
+# Last Modified On: Tue Dec 26 18:01:16 2000
+# Update Count    : 98
 # Status          : Released
 
 sub GetOptions {
@@ -321,7 +321,9 @@ sub GetOptions {
 
 	if ( ! defined $o ) {
 	    # empty -> '-' option
-	    $opctl{$linko = $o = ''} = $c;
+	    $linko = $o = '';
+	    $opctl{''} = $c;
+	    $bopctl{''} = $c if $bundling;
 	}
 	else {
 	    # Handle alias names
@@ -658,7 +660,8 @@ sub FindOption ($$$$$$$) {
 
     print STDERR ("=> find \"$opt\", prefix=\"$prefix\"\n") if $debug;
 
-    return (0) unless $opt =~ /^$prefix(.*)$/s;
+    return 0 unless $opt =~ /^$prefix(.*)$/s;
+    return 0 if $opt eq "-" && !defined $opctl->{""};
 
     $opt = $+;
     my ($starter) = $1;
@@ -687,7 +690,7 @@ sub FindOption ($$$$$$$) {
 
     if ( $bundling && $starter eq '-' ) {
 	# Unbundle single letter option.
-	$rest = substr ($tryopt, 1);
+	$rest = length ($tryopt) > 0 ? substr ($tryopt, 1) : "";
 	$tryopt = substr ($tryopt, 0, 1);
 	$tryopt = lc ($tryopt) if $ignorecase > 1;
 	print STDERR ("=> $starter$tryopt unbundled from ",
@@ -1553,13 +1556,18 @@ It goes without saying that bundling can be quite confusing.
 
 =head2 The lonesome dash
 
-Some applications require the option C<-> (that's a lone dash). This
-can be achieved by adding an option specification with an empty name:
+Normally, a lone dash C<-> on the command line will not be considered
+an option. Option processing will terminate (unless "permute" is
+configured) and the dash will be left in C<@ARGV>.
+
+It is possible to get special treatment for a lone dash. This can be
+achieved by adding an option specification with an empty name, for
+example:
 
     GetOptions ('' => \$stdio);
 
-A lone dash on the command line will now be legal, and set options
-variable C<$stdio>.
+A lone dash on the command line will now be a legal option, and using
+it will set variable C<$stdio>.
 
 =head2 Argument call-back
 
