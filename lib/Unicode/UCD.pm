@@ -3,7 +3,7 @@ package Unicode::UCD;
 use strict;
 use warnings;
 
-our $VERSION = v3.1.0;
+our $VERSION = '3.1.0';
 
 require Exporter;
 
