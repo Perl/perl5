@@ -1,11 +1,8 @@
 package File::Spec::OS2;
 
 use strict;
-use vars qw(@ISA $VERSION);
+use vars qw(@ISA);
 require File::Spec::Unix;
-
-$VERSION = '1.1';
-
 @ISA = qw(File::Spec::Unix);
 
 sub devnull {

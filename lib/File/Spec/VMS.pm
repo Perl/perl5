@@ -1,11 +1,8 @@
 package File::Spec::VMS;
 
 use strict;
-use vars qw(@ISA $VERSION);
+use vars qw(@ISA);
 require File::Spec::Unix;
-
-$VERSION = '1.1';
-
 @ISA = qw(File::Spec::Unix);
 
 use Cwd;
@@ -40,11 +37,6 @@ sub eliminate_macros {
     my($self,$path) = @_;
     return '' unless $path;
     $self = {} unless ref $self;
-
-    if ($path =~ /\s/) {
-      return join ' ', map { $self->eliminate_macros($_) } split /\s+/, $path;
-    }
-
     my($npath) = unixify($path);
     my($complex) = 0;
     my($head,$macro,$tail);
@@ -93,12 +85,6 @@ sub fixpath {
     return '' unless $path;
     $self = bless {} unless ref $self;
     my($fixedpath,$prefix,$name);
-
-    if ($path =~ /\s/) {
-      return join ' ',
-             map { $self->fixpath($_,$force_path) }
-	     split /\s+/, $path;
-    }
 
     if ($path =~ m#^\$\([^\)]+\)\Z(?!\n)#s || $path =~ m#[/:>\]]#) { 
         if ($force_path or $path =~ /(?:DIR\)|\])\Z(?!\n)/) {

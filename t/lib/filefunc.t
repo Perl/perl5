@@ -2,8 +2,8 @@
 
 BEGIN {
     $^O = '';
-    chdir 't' if -d 't';
-    unshift @INC, '../lib';
+#chdir 't' if -d 't';
+#unshift @INC, '../lib';
 }
 
 print "1..1\n";

@@ -1,9 +1,6 @@
 package File::Spec::Unix;
 
 use strict;
-use vars qw($VERSION);
-
-$VERSION = '1.1';
 
 use Cwd;
 
