@@ -1222,22 +1222,18 @@ mess(const char *pat, va_list *args)
     sv_vsetpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*));
     if (!SvCUR(sv) || *(SvEND(sv) - 1) != '\n') {
 	dTHR;
-	if (PL_dirty)
-	    sv_catpv(sv, dgd);
-	else {
-	    if (PL_curcop->cop_line)
-		sv_catpvf(sv, " at %_ line %ld",
-			  GvSV(PL_curcop->cop_filegv), (long)PL_curcop->cop_line);
-	    if (GvIO(PL_last_in_gv) && IoLINES(GvIOp(PL_last_in_gv))) {
-		bool line_mode = (RsSIMPLE(PL_rs) &&
-				  SvLEN(PL_rs) == 1 && *SvPVX(PL_rs) == '\n');
-		sv_catpvf(sv, ", <%s> %s %ld",
-			  PL_last_in_gv == PL_argvgv ? "" : GvNAME(PL_last_in_gv),
-			  line_mode ? "line" : "chunk", 
-			  (long)IoLINES(GvIOp(PL_last_in_gv)));
-	    }
-	    sv_catpv(sv, ".\n");
+	if (PL_curcop->cop_line)
+	    sv_catpvf(sv, " at %_ line %ld",
+		      GvSV(PL_curcop->cop_filegv), (long)PL_curcop->cop_line);
+	if (GvIO(PL_last_in_gv) && IoLINES(GvIOp(PL_last_in_gv))) {
+	    bool line_mode = (RsSIMPLE(PL_rs) &&
+			      SvLEN(PL_rs) == 1 && *SvPVX(PL_rs) == '\n');
+	    sv_catpvf(sv, ", <%s> %s %ld",
+		      PL_last_in_gv == PL_argvgv ? "" : GvNAME(PL_last_in_gv),
+		      line_mode ? "line" : "chunk", 
+		      (long)IoLINES(GvIOp(PL_last_in_gv)));
 	}
+	sv_catpv(sv, PL_dirty ? dgd : ".\n");
     }
     return sv;
 }
