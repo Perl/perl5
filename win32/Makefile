@@ -43,42 +43,47 @@ INST_VER	= \5.5.640
 INST_ARCH	= \$(ARCHNAME)
 
 #
-# XXX WARNING! This option currently undergoing changes.  May be broken.
-#
-# uncomment to enable threads-capabilities
-#
-#USE_5005THREADS= define
-
-#
-# XXX WARNING! This option currently undergoing changes.  May be broken.
-#
-# uncomment to enable multiple interpreters
+# uncomment to enable multiple interpreters.  This is need for fork()
+# emulation.
 #
 #USE_MULTI	= define
 
 #
-# XXX WARNING! This option currently undergoing changes.  May be broken.
+# XXX WARNING! This option is still very experimental.  May be broken.
 #
-# uncomment next line if you want to use the perl object
-# Currently, this cannot be enabled if you ask for threads above
-#
-#USE_OBJECT	= define
-
-#
-# XXX WARNING! This option currently undergoing changes.  May be broken.
-#
-# Beginnings of interpreter cloning/threads: still rather rough, fails
-# tests.  This should be enabled to get the fork() emulation.  This needs
-# one of USE_MULTI or USE_OBJECT enabled as well.
+# Beginnings of interpreter cloning/threads; still very incomplete.
+# This should be enabled to get the fork() emulation.  This needs
+# USE_MULTI as well.
 #
 #USE_ITHREADS	= define
 
 #
 # uncomment to enable the implicit "host" layer for all system calls
-# made by perl.  This needs one of USE_MULTI or USE_OBJECT above.
-# This is also needed to get fork().
+# made by perl.  This needs USE_MULTI above.  This is also needed to
+# get fork().
 #
 #USE_IMP_SYS	= define
+
+#
+# WARNING! This option is deprecated and will eventually go away (enable
+# USE_ITHREADS instead).
+#
+# uncomment to enable threads-capabilities.  This is incompatible with
+# USE_ITHREADS, and is only here for people who may have come to rely
+# on the experimental Thread support that was in 5.005.
+#
+#USE_5005THREADS= define
+
+#
+# WARNING! This option is deprecated and will eventually go away (enable
+# USE_MULTI instead).
+#
+# uncomment next line if you want to use the PERL_OBJECT build option.
+# DO NOT ENABLE unless you have legacy code that relies on the C++
+# CPerlObj class that was available in 5.005.  This cannot be enabled
+# if you ask for USE_5005THREADS above.
+#
+#USE_OBJECT	= define
 
 #
 # uncomment one of the following lines if you are using either
@@ -132,7 +137,7 @@ INST_ARCH	= \$(ARCHNAME)
 # WARNING: Turning this on/off WILL break binary compatibility with extensions
 # you may have compiled with/without it.  Be prepared to recompile all
 # extensions if you change the default.  Currently, this cannot be enabled
-# if you ask for USE_OBJECT above.
+# if you ask for USE_IMP_SYS above.
 #
 #PERL_MALLOC	= define
 
@@ -220,6 +225,10 @@ USE_5005THREADS	= undef
 
 !IF "$(USE_5005THREADS)" == "define"
 USE_ITHREADS	= undef
+!ENDIF
+
+!IF "$(USE_IMP_SYS)" == "define"
+PERL_MALLOC	= undef
 !ENDIF
 
 !IF "$(USE_MULTI)" == ""
