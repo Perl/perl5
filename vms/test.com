@@ -102,7 +102,7 @@ $   PerlShr_filespec = f$parse("Sys$Disk:[-]''dbg'PerlShr''exe'")
 $   Define 'dbg'Perlshr 'PerlShr_filespec'
 $   MCR Sys$Disk:[]Perl. "-I[-.lib]" - "''p3'" "''p4'" "''p5'" "''p6'"
 $   Deck/Dollar=$$END-OF-TEST$$
-# $RCSfile: test.com,v $$Revision: 1.1 $$Date: 2001/11/07 06:58:50 $
+# $RCSfile: test.com,v $$Revision: 1.1 $$Date: 2001/11/13 00:26:19 $
 # Modified for VMS 30-Sep-1994  Charles Bailey  bailey@newman.upenn.edu
 #
 # This is written in a peculiar style, since we're trying to avoid
@@ -115,8 +115,7 @@ use Config;
 use File::Spec;
 
 @compexcl=('cpp.t');
-@ioexcl=('dup.t');
-@libexcl=('io_dup.t', 'io_pipe.t', 'io_poll.t', 'io_sel.t',
+@libexcl=('io_pipe.t', 'io_poll.t', 'io_sel.t',
           'io_sock.t', 'io_unix.t');
 
 # io_xs.t tests the new_tmpfile routine, which doesn't work with the

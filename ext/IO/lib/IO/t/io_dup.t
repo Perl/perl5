@@ -39,14 +39,15 @@ $stderr->fdopen($stdout,"w");
 
 print $stdout "ok 2\n";
 print $stderr "ok 3\n";
-if ($^O eq 'MSWin32' || $^O eq 'NetWare') {
-    print `echo ok 4`;
-    print `echo ok 5 1>&2`; # does this *really* work?
-}
-else {
-    system 'echo ok 4';
-    system 'echo ok 5 1>&2';
-}
+
+# Since some systems don't have echo, we use Perl.
+$echo = qq{$^X -le "print q{ok %d}"};
+
+$cmd = sprintf $echo, 4;
+print `$cmd`;
+
+$cmd = sprintf "$echo 1>&2", 5;     
+print `$cmd`;
 
 $stderr->close;
 $stdout->close;
