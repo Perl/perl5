@@ -549,6 +549,7 @@
 #define PL_cryptseen		(vTHX->Icryptseen)
 #define PL_cshlen		(vTHX->Icshlen)
 #define PL_cshname		(vTHX->Icshname)
+#define PL_csighandlerp		(vTHX->Icsighandlerp)
 #define PL_curcopdb		(vTHX->Icurcopdb)
 #define PL_curstname		(vTHX->Icurstname)
 #define PL_curthr		(vTHX->Icurthr)
@@ -869,6 +870,7 @@
 #define PL_Icryptseen		PL_cryptseen
 #define PL_Icshlen		PL_cshlen
 #define PL_Icshname		PL_cshname
+#define PL_Icsighandlerp	PL_csighandlerp
 #define PL_Icurcopdb		PL_curcopdb
 #define PL_Icurstname		PL_curstname
 #define PL_Icurthr		PL_curthr
