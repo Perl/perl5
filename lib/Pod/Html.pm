@@ -1694,7 +1694,8 @@ sub html_escape {
     $rest   =~ s/</&lt;/g;
     $rest   =~ s/>/&gt;/g;
     $rest   =~ s/"/&quot;/g;
-    $rest   =~ s/'/&apos;/g;
+    # &apos; is only in XHTML, not HTML4.  Be conservative
+    #$rest   =~ s/'/&apos;/g;
     return $rest;
 }
 
