@@ -123,6 +123,9 @@ sub get_files {
 	# hidden in a special place
 	$file{'/boot/develop/headers/posix/errno.h'} = 1;
 
+    } elsif ($^O eq 'vos') {
+	# avoid problem where cpp returns non-POSIX pathnames
+	$file{'/system/include_library/errno.h'} = 1;
     } else {
 	open(CPPI,"> errno.c") or
 	    die "Cannot open errno.c";

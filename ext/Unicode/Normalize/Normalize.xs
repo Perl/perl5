@@ -328,7 +328,7 @@ compose(arg)
 	    }
 	}
 	d = uvuni_to_utf8(d, uvS); /* starter (composed or not) */
-	if(tmplen = t - tmp_start) { /* uncomposed combining char */
+	if((tmplen = t - tmp_start)) { /* uncomposed combining char */
 	    t = (U8*)SvPVX(tmp);
 	    while(tmplen--) *d++ = *t++;
 	}

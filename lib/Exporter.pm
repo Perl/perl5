@@ -95,28 +95,25 @@ Exporter - Implements default import method for modules
 
 =head1 SYNOPSIS
 
-In module ModuleName.pm:
+In module YourModule.pm:
 
-  package ModuleName;
+  package YourModule;
   require Exporter;
   @ISA = qw(Exporter);
+  @EXPORT_OK = qw(munge frobnicate);  # symbols to export on request
 
-  @EXPORT = qw(...);            # symbols to export by default
-  @EXPORT_OK = qw(...);         # symbols to export on request
-  %EXPORT_TAGS = tag => [...];  # define names for sets of symbols
+In other files which wish to use YourModule:
 
-In other files which wish to use ModuleName:
-
-  use ModuleName;               # import default symbols into my package
-
-  use ModuleName qw(...);       # import listed symbols into my package
-
-  use ModuleName ();            # do not import any symbols
+  use ModuleName qw(frobnicate);      # import listed symbols
+  frobnicate ($left, $right)          # calls YourModule::frobnicate
 
 =head1 DESCRIPTION
 
-The Exporter module implements a default C<import> method which
-many modules choose to inherit rather than implement their own.
+The Exporter module implements an C<import> method which allows a module
+to export functions and variables to its users' namespaces. Many modules
+use Exporter rather than implementing their own C<import> method because
+Exporter provides a highly flexible interface, with an implementation optimised
+for the common case.
 
 Perl automatically calls the C<import> method when processing a
 C<use> statement for a module. Modules and C<use> are documented
@@ -135,6 +132,9 @@ ampersand in front of a function is optional, e.g.
 
     @EXPORT    = qw(afunc $scalar @array);   # afunc is a function
     @EXPORT_OK = qw(&bfunc %hash *typeglob); # explicit prefix on &bfunc
+
+If you are only exporting function names it is recommended to omit the
+ampersand, as the implementation is faster this way.
 
 =head2 Selecting What To Export
 
@@ -162,9 +162,41 @@ how to make inheritance work.)
 
 As a general rule, if the module is trying to be object oriented
 then export nothing. If it's just a collection of functions then
-@EXPORT_OK anything but use @EXPORT with caution.
+@EXPORT_OK anything but use @EXPORT with caution. For function and
+method names use barewords in preference to names prefixed with
+ampersands for the export lists.
 
 Other module design guidelines can be found in L<perlmod>.
+
+=head2 How to Import
+
+In other files which wish to use your module there are three basic ways for
+them to load your module and import its symbols:
+
+=over 4
+
+=item C<use ModuleName;>
+
+This imports all the symbols from ModuleName's @EXPORT into the namespace
+of the C<use> statement.
+
+=item C<use ModuleName ();>
+
+This causes perl to load your module but does not import any symbols.
+
+=item C<use ModuleName qw(...);>
+
+This imports only the symbols listed by the caller into their namespace.
+All listed symbols must be in your @EXPORT or @EXPORT_OK, else an error
+occurs. The advanced export features of Exporter are accessed like this,
+but with list entries that are syntactically distinct from symbol names.
+
+=back
+
+Unless you want to use its advanced features, this is probably all you
+need to know to use Exporter.
+
+=head1 Advanced features
 
 =head2 Specialised Import Lists
 
@@ -209,10 +241,10 @@ You can say C<BEGIN { $Exporter::Verbose=1 }> to see how the
 specifications are being processed and what is actually being imported
 into modules.
 
-=head2 Exporting without using Export's import method
+=head2 Exporting without using Exporter's import method
 
 Exporter has a special method, 'export_to_level' which is used in situations
-where you can't directly call Export's import method. The export_to_level
+where you can't directly call Exporter's import method. The export_to_level
 method looks like:
 
 MyPackage->export_to_level($where_to_export, $package, @what_to_export);

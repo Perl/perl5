@@ -30,7 +30,7 @@ if ($#ARGV >= 0) {
 chdir 't' if -f 't/TEST';
 
 die "You need to run \"make test\" first to set things up.\n"
-  unless -e 'perl' or -e 'perl.exe';
+  unless -e 'perl' or -e 'perl.exe' or -e 'perl.pm';
 
 if ($ENV{PERL_3LOG}) { # Tru64 third(1) tool, see perlhack
     unless (-x 'perl.third') {

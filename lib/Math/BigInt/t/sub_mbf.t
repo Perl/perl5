@@ -26,7 +26,8 @@ BEGIN
     }
   print "# INC = @INC\n"; 
   
-  plan tests => 1367 + 4;	# + 4 own tests
+  plan tests => 1528
+    + 4;	# + 4 own tests
   }
 
 use Math::BigFloat::Subclass;

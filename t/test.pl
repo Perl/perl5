@@ -368,11 +368,13 @@ sub which_perl {
 		$Perl = File::Spec->catfile(File::Spec->curdir(), $perl);
 	    }
 	}
-	
-        # Its like this.  stat on Cygwin treats 'perl' to mean 'perl.exe'
-        # but open does not.  This can get confusing, so to be safe we
-        # always put the .exe on the end on Cygwin.
-        $Perl .= $exe if $^O eq 'cygwin' && $Perl !~ /\Q$exe\E$/;
+
+	# Build up the name of the executable file from the name of
+	# the command.
+
+	if ($Perl !~ /\Q$exe\E$/i) {
+	    $Perl .= $exe;
+	}
 
 	warn "which_perl: cannot find $Perl from $^X" unless -f $Perl;
 	

@@ -7,7 +7,7 @@ BEGIN {
 }
 
 require './test.pl';
-plan( tests => 87 );
+plan( tests => 88 );
 
 $x = 'foo';
 $_ = "x";
@@ -365,3 +365,12 @@ ok( !s/^([a-z]:)/\u$1/ );
 $_ = "Charles Bronson";
 $snum = s/\B\w//g;
 ok( $_ eq "C B" && $snum == 12 );
+
+{
+    use utf8;
+    my $s = "H\303\266he";
+    my $l = my $r = $s;
+    $l =~ s/[^\w]//g;
+    $r =~ s/[^\w\.]//g;
+    is($l, $r, "use utf8");
+}

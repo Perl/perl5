@@ -503,7 +503,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		if (sortkeys == &PL_sv_yes) {
 		    keys = newAV();
 		    (void)hv_iterinit((HV*)ival);
-		    while (entry = hv_iternext((HV*)ival)) {
+		    while ((entry = hv_iternext((HV*)ival))) {
 			sv = hv_iterkeysv(entry);
 			SvREFCNT_inc(sv);
 			av_push(keys, sv);

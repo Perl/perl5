@@ -34,7 +34,7 @@ sub NFKC ($) { compose(reorder(decompose($_[0], COMPAT))) }
 sub normalize($$)
 {
   my $form = shift;
-  $form =~ s/NF//;
+  $form =~ s/^NF//;
   $form eq 'D'  ? NFD ($_[0]) :
   $form eq 'C'  ? NFC ($_[0]) :
   $form eq 'KD' ? NFKD($_[0]) :

@@ -8,13 +8,19 @@ BEGIN
   $| = 1;
   chdir 't' if -d 't';
   unshift @INC, '../lib'; # for running manually
-  plan tests => 63;
+  }
+
+use Math::BigInt::Calc;
+
+BEGIN
+  {
+  my $additional = 0;
+  $additional = 27 if $Math::BigInt::Calc::VERSION > 0.18;
+  plan tests => 71 + $additional;
   }
 
 # testing of Math::BigInt::Calc, primarily for interface/api and not for the
 # math functionality
-
-use Math::BigInt::Calc;
 
 my $C = 'Math::BigInt::Calc';	# pass classname to sub's
 
@@ -22,15 +28,32 @@ my $C = 'Math::BigInt::Calc';	# pass classname to sub's
 my $x = $C->_new(\"123"); my $y = $C->_new(\"321");
 ok (ref($x),'ARRAY'); ok (${$C->_str($x)},123); ok (${$C->_str($y)},321);
 
+###############################################################################
 # _add, _sub, _mul, _div
 ok (${$C->_str($C->_add($x,$y))},444);
 ok (${$C->_str($C->_sub($x,$y))},123);
 ok (${$C->_str($C->_mul($x,$y))},39483);
 ok (${$C->_str($C->_div($x,$y))},123);
 
+###############################################################################
+# check that mul/div doesn't change $y
+# and returns the same reference, not something new
 ok (${$C->_str($C->_mul($x,$y))},39483);
-ok (${$C->_str($x)},39483);
-ok (${$C->_str($y)},321);
+ok (${$C->_str($x)},39483); ok (${$C->_str($y)},321);
+
+ok (${$C->_str($C->_div($x,$y))},123);
+ok (${$C->_str($x)},123); ok (${$C->_str($y)},321);
+
+$x = $C->_new(\"39483");
+my ($x1,$r1) = $C->_div($x,$y);
+ok ("$x1","$x");
+$C->_inc($x1);
+ok ("$x1","$x");
+ok (${$C->_str($r1)},'0');
+
+$x = $C->_new(\"39483");	# reset
+
+###############################################################################
 my $z = $C->_new(\"2");
 ok (${$C->_str($C->_add($x,$z))},39485);
 my ($re,$rr) = $C->_div($x,$y);
@@ -71,28 +94,16 @@ $x = $C->_new(\"10"); $y = $C->_new(\"3");
 ok (${$C->_str($C->_lsft($x,$y,10))},10000);
 $x = $C->_new(\"20"); $y = $C->_new(\"3"); 
 ok (${$C->_str($C->_lsft($x,$y,10))},20000);
+
 $x = $C->_new(\"128"); $y = $C->_new(\"4");
-if (!defined $C->_lsft($x,$y,2)) 
-  {
-  ok (1,1) 
-  }
-else
-  {
-  ok ('_lsft','undef');
-  }
+ok (${$C->_str($C->_lsft($x,$y,2))}, 128 << 4);
+
 $x = $C->_new(\"1000"); $y = $C->_new(\"3"); 
 ok (${$C->_str($C->_rsft($x,$y,10))},1);
 $x = $C->_new(\"20000"); $y = $C->_new(\"3"); 
 ok (${$C->_str($C->_rsft($x,$y,10))},20);
 $x = $C->_new(\"256"); $y = $C->_new(\"4");
-if (!defined $C->_rsft($x,$y,2)) 
-  {
-  ok (1,1) 
-  }
-else
-  {
-  ok ('_rsft','undef');
-  }
+ok (${$C->_str($C->_rsft($x,$y,2))},256 >> 4);
 
 # _acmp
 $x = $C->_new(\"123456789");
@@ -146,10 +157,47 @@ ok (${$C->_str(scalar $C->_and($x,$y))},1);
 ok (${$C->_str(scalar $C->_from_hex(\"0xFf"))},255);
 ok (${$C->_str(scalar $C->_from_bin(\"0b10101011"))},160+11);
 
+# _as_hex, _as_bin
+ok (${$C->_str(scalar $C->_from_hex( $C->_as_hex( $C->_new(\"128"))))}, 128);
+ok (${$C->_str(scalar $C->_from_bin( $C->_as_bin( $C->_new(\"128"))))}, 128);
+
 # _check
 $x = $C->_new(\"123456789");
 ok ($C->_check($x),0);
 ok ($C->_check(123),'123 is not a reference');
+
+###############################################################################
+# _to_large and _to_small (last since they toy with BASE_LEN etc)
+
+exit if $Math::BigInt::Calc::VERSION < 0.19;
+
+$C->_base_len(5,7); $x = [ qw/67890 12345 67890 12345/ ]; $C->_to_large($x);
+ok (@$x,3);
+ok ($x->[0], '4567890'); ok ($x->[1], '7890123'); ok ($x->[2], '123456');
+
+$C->_base_len(5,7); $x = [ qw/54321 54321 54321 54321/ ]; $C->_to_large($x);
+ok (@$x,3);
+ok ($x->[0], '2154321'); ok ($x->[1], '4321543'); ok ($x->[2], '543215');
+
+$C->_base_len(6,7); $x = [ qw/654321 654321 654321 654321/ ];
+$C->_to_large($x); ok (@$x,4);
+ok ($x->[0], '1654321'); ok ($x->[1], '2165432');
+ok ($x->[2], '3216543'); ok ($x->[3], '654');
+
+$C->_base_len(5,7); $C->_to_small($x); ok (@$x,5);
+ok ($x->[0], '54321'); ok ($x->[1], '43216');
+ok ($x->[2], '32165'); ok ($x->[3], '21654');
+ok ($x->[4], '6543');
+
+$C->_base_len(7,10); $x = [ qw/0000000 0000000 9999990 9999999/ ];
+$C->_to_large($x); ok (@$x,3);
+ok ($x->[0], '0000000000'); ok ($x->[1], '9999900000');
+ok ($x->[2], '99999999');
+
+$C->_base_len(7,10); $x = [ qw/0000000 0000000 9999990 9999999 99/ ];
+$C->_to_large($x); ok (@$x,3);
+ok ($x->[0], '0000000000'); ok ($x->[1], '9999900000');
+ok ($x->[2], '9999999999');
 
 # done
 
