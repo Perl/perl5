@@ -609,7 +609,7 @@ SETARGV_OBJ	= setargv$(o)
 DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attrs Thread B re \
 		Data/Dumper Devel/Peek ByteLoader Devel/DProf File/Glob \
 		Sys/Hostname Storable Filter/Util/Call Encode Digest/MD5 \
-		PerlIO/Scalar
+		PerlIO/Scalar MIME/Base64
 STATIC_EXT	= DynaLoader
 NONXS_EXT	= Errno
 
@@ -636,6 +636,7 @@ FILTER		= $(EXTDIR)\Filter\Util\Call\Call
 ENCODE		= $(EXTDIR)\Encode\Encode
 MD5		= $(EXTDIR)\Digest\MD5\MD5
 PERLIOSCALAR	= $(EXTDIR)\PerlIO\Scalar\Scalar
+MIMEBASE64	= $(EXTDIR)\MIME\Base64\Base64
 
 SOCKET_DLL	= $(AUTODIR)\Socket\Socket.dll
 FCNTL_DLL	= $(AUTODIR)\Fcntl\Fcntl.dll
@@ -658,6 +659,7 @@ FILTER_DLL	= $(AUTODIR)\Filter\Util\Call\Call.dll
 ENCODE_DLL	= $(AUTODIR)\Encode\Encode.dll
 MD5_DLL		= $(AUTODIR)\Digest\MD5\MD5.dll
 PERLIOSCALAR_DLL= $(AUTODIR)\PerlIO\Scalar\Scalar.dll
+MIMEBASE64_DLL	= $(AUTODIR)\MIME\Base64\Base64.dll
 
 ERRNO_PM	= $(LIBDIR)\Errno.pm
 
@@ -1075,6 +1077,8 @@ distclean: clean
 	-del /f $(LIBDIR)\Filter\Util\Call\Call.pm
 	-del /f $(LIBDIR)\Digest\MD5.pm
 	-del /f $(LIBDIR)\PerlIO\Scalar\Scalar.pm
+	-del /f $(LIBDIR)\MIME\Base64\Base64.pm
+	-del /f $(LIBDIR)\MIME\Base64\QuotedPrint.pm
 	-if exist $(LIBDIR)\IO rmdir /s /q $(LIBDIR)\IO
 	-rmdir /s $(LIBDIR)\IO
 	-if exist $(LIBDIR)\Thread rmdir /s /q $(LIBDIR)\Thread
@@ -1085,8 +1089,14 @@ distclean: clean
 	-rmdir /s $(LIBDIR)\Data
 	-if exist $(LIBDIR)\Filter\Util\Call rmdir /s /q $(LIBDIR)\Filter\Util\Call
 	-if exist $(LIBDIR)\Filter\Util rmdir /s /q $(LIBDIR)\Filter\Util
+	-if exist $(LIBDIR)\Digest\MD5 rmdir /s /q $(LIBDIR)\Digest\MD5
+	-rmdir /s $(LIBDIR)\Digest\MD5
 	-if exist $(LIBDIR)\Digest rmdir /s /q $(LIBDIR)\Digest
 	-rmdir /s $(LIBDIR)\Digest
+	-if exist $(LIBDIR)\MIME\Base64 rmdir /s /q $(LIBDIR)\MIME\Base64
+	-rmdir /s $(LIBDIR)\MIME\Base64
+	-if exist $(LIBDIR)\MIME rmdir /s /q $(LIBDIR)\MIME
+	-rmdir /s $(LIBDIR)\MIME
 	-del /f $(PODDIR)\*.html
 	-del /f $(PODDIR)\*.bat
 	cd ..\utils
