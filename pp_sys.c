@@ -2485,9 +2485,9 @@ PP(pp_stat)
 #endif
 	PUSHs(sv_2mortal(newSViv(PL_statcache.st_size)));
 #ifdef BIG_TIME
-	PUSHs(sv_2mortal(newSVnv((U32)PL_statcache.st_atime)));
-	PUSHs(sv_2mortal(newSVnv((U32)PL_statcache.st_mtime)));
-	PUSHs(sv_2mortal(newSVnv((U32)PL_statcache.st_ctime)));
+	PUSHs(sv_2mortal(newSVnv(PL_statcache.st_atime)));
+	PUSHs(sv_2mortal(newSVnv(PL_statcache.st_mtime)));
+	PUSHs(sv_2mortal(newSVnv(PL_statcache.st_ctime)));
 #else
 	PUSHs(sv_2mortal(newSViv(PL_statcache.st_atime)));
 	PUSHs(sv_2mortal(newSViv(PL_statcache.st_mtime)));
