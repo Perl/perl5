@@ -2004,8 +2004,8 @@ EOM
 		[23]100) osname=mips ;;
 		next*) osname=next ;;
 		i386*)
-			tmp=`/bin/uname -X 2>/dev/null|awk -e '/3\.2v[45]/{ print $(NF) }'`
-			if $test "$tmp" != "" -a "$3" = "3.2" -a test -e '/etc/systemid'; then
+			tmp=`/bin/uname -X 2>/dev/null|awk '/3\.2v[45]/{ print $(NF) }'`
+			if $test "$tmp" != "" -a "$3" = "3.2" -a -f '/etc/systemid'; then
 				osname='sco'
 				osvers=$tmp
 			elif $test -f /etc/kconfig; then
