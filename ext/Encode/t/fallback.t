@@ -17,7 +17,7 @@ BEGIN {
 
 use strict;
 #use Test::More qw(no_plan);
-use Test::More tests => 36;
+use Test::More tests => 40;
 use Encode q(:all);
 
 my $uo = '';
@@ -137,17 +137,17 @@ $dst = $ascii->encode($src, FB_HTMLCREF);
 is($dst, $ah,   "FB_HTMLCREF ascii");
 is($src, '', "FB_HTMLCREF residue ascii");
 
-#$src = $ao;
-#$dst = $utf8->decode($src, FB_HTMLCREF);
-#is($dst, $uh,   "FB_HTMLCREF utf8");
-#is($src, '', "FB_HTMLCREF residue utf8");
+$src = $ao;
+$dst = $utf8->decode($src, FB_HTMLCREF);
+is($dst, $uh,   "FB_HTMLCREF utf8");
+is($src, '', "FB_HTMLCREF residue utf8");
 
 $src = $uo;
 $dst = $ascii->encode($src, FB_XMLCREF);
 is($dst, $ax,   "FB_XMLCREF ascii");
 is($src, '', "FB_XMLCREF residue ascii");
 
-#$src = $ao;
-#$dst = $utf8->decode($src, FB_XMLCREF);
-#is($dst, $ax,   "FB_XMLCREF utf8");
-#is($src, '', "FB_XMLCREF residue utf8");
+$src = $ao;
+$dst = $utf8->decode($src, FB_XMLCREF);
+is($dst, $ax,   "FB_XMLCREF utf8");
+is($src, '', "FB_XMLCREF residue utf8");

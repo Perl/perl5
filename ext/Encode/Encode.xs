@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 2.2 2004/10/24 13:00:29 dankogai Exp dankogai $
+ $Id: Encode.xs,v 2.3 2004/12/03 19:16:53 dankogai Exp dankogai $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -279,7 +279,6 @@ CODE:
 #if 0
 	fprintf(stderr, "renewed == %d\n", renewed);
 #endif
-	if (renewed){ check |= ENCODE_RETURN_ON_ERR; }
     }
     FREETMPS; LEAVE;
     /* end PerlIO check */
@@ -302,6 +301,8 @@ CODE:
 	    U8 skip = UTF8SKIP(s);
 	    if ((s + skip) > e) {
 	    	/* Partial character - done */
+	        if (renewed)
+		    break;
 	    	goto decode_utf8_fallback;
 	    }
 	    else if (is_utf8_char(s)) {
@@ -331,7 +332,9 @@ CODE:
 		break;
     	}
         if (check & (ENCODE_PERLQQ|ENCODE_HTMLCREF|ENCODE_XMLCREF)){
-	    SV* subchar = newSVpvf("\\x%02" UVXf, (UV)*s);
+	    SV* subchar = newSVpvf(check & ENCODE_PERLQQ ? "\\x%02" UVXf :
+				   check & ENCODE_HTMLCREF ? "&#%" UVuf ";" :
+				   "&#x%" UVxf ";", (UV)*s);
     	    sv_catsv(dst, subchar);
 	    SvREFCNT_dec(subchar);
 	} else {

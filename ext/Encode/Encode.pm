@@ -1,9 +1,9 @@
 #
-# $Id: Encode.pm,v 2.8 2004/10/24 12:32:06 dankogai Exp $
+# $Id: Encode.pm,v 2.9 2004/12/03 19:16:40 dankogai Exp $
 #
 package Encode;
 use strict;
-our $VERSION = do { my @r = (q$Revision: 2.8 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 2.9 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 sub DEBUG () { 0 }
 use XSLoader ();
 XSLoader::load(__PACKAGE__, $VERSION);
@@ -140,7 +140,7 @@ sub encode($$;$)
 {
     my ($name, $string, $check) = @_;
     return undef unless defined $string;
-    return undef if ref $string;
+    $string .= '' if ref $string; # stringify;
     $check ||=0;
     my $enc = find_encoding($name);
     unless(defined $enc){
@@ -156,7 +156,7 @@ sub decode($$;$)
 {
     my ($name,$octets,$check) = @_;
     return undef unless defined $octets;
-    return undef if ref $octets;
+    $octets .= '' if ref $octets;
     $check ||=0;
     my $enc = find_encoding($name);
     unless(defined $enc){
@@ -401,9 +401,7 @@ for $octets is B<always> off.  When you encode anything, utf8 flag of
 the result is always off, even when it contains completely valid utf8
 string. See L</"The UTF-8 flag"> below.
 
-encode($valid_encoding, undef) is harmless but warns you for 
-C<Use of uninitialized value in subroutine entry>. 
-encode($valid_encoding, '') is harmless and warnless.
+If the $string is C<undef> or a reference then C<undef> is returned.
 
 =item $string = decode(ENCODING, $octets [, CHECK])
 
@@ -423,9 +421,7 @@ the utf8 flag for $string is on unless $octets entirely consists of
 ASCII data (or EBCDIC on EBCDIC machines).  See L</"The UTF-8 flag">
 below.
 
-decode($valid_encoding, undef) is harmless but warns you for 
-C<Use of uninitialized value in subroutine entry>. 
-decode($valid_encoding, '') is harmless and warnless.
+If the $string is C<undef> or a reference then C<undef> is returned.
 
 =item [$length =] from_to($octets, FROM_ENC, TO_ENC [, CHECK])
 
@@ -578,10 +574,10 @@ Now here is the list of I<CHECK> values available
 =item I<CHECK> = Encode::FB_DEFAULT ( == 0)
 
 If I<CHECK> is 0, (en|de)code will put a I<substitution character> in
-place of a malformed character.  When you encode to UCM-based encodings,
-E<lt>subcharE<gt> will be used.  When you decode from UCM-based
-encodings, the code point C<0xFFFD> is used.  If the data is supposed
-to be UTF-8, an optional lexical warning (category utf8) is given.
+place of a malformed character.  When you encode, E<lt>subcharE<gt>
+will be used.  When you decode the code point C<0xFFFD> is used.  If
+the data is supposed to be UTF-8, an optional lexical warning
+(category utf8) is given.
 
 =item I<CHECK> = Encode::FB_CROAK ( == 1)
 
@@ -600,12 +596,10 @@ source data may contain partial multi-byte character sequences,
 (i.e. you are reading with a fixed-width buffer). Here is a sample
 code that does exactly this:
 
-  my $data = ''; my $utf8 = '';
-  while(defined(read $fh, $buffer, 256)){
-    # buffer may end in a partial character so we append
-    $data .= $buffer;
-    $utf8 .= decode($encoding, $data, Encode::FB_QUIET);
-    # $data now contains the unprocessed partial character
+  my $buffer = ''; my $string = '';
+  while(read $fh, $buffer, 256, length($buffer)){
+    $string .= decode($encoding, $buffer, Encode::FB_QUIET);
+    # $buffer now contains the unprocessed partial character
   }
 
 =item I<CHECK> = Encode::FB_WARN
@@ -629,8 +623,8 @@ where I<HHHH> is the Unicode ID of the character that cannot be found
 in the character repertoire of the encoding.
 
 HTML/XML character reference modes are about the same, in place of
-C<\x{I<HHHH>}>, HTML uses C<&#I<NNNN>;> where I<NNNN> is a decimal digit and
-XML uses C<&#xI<HHHH>;> where I<HHHH> is the hexadecimal digit.
+C<\x{I<HHHH>}>, HTML uses C<&#I<NNN>;> where I<NNN> is a decimal number and
+XML uses C<&#xI<HHHH>;> where I<HHHH> is the hexadecimal number.
 
 =item The bitmask
 
