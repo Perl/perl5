@@ -4952,6 +4952,9 @@ PP(pp_gservent)
 	char *proto = POPpbytex;
 	unsigned short port = (unsigned short)POPu;
 
+	if (proto && !*proto)
+	    proto = Nullch;
+
 #ifdef HAS_HTONS
 	port = PerlSock_htons(port);
 #endif
