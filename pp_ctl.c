@@ -1069,6 +1069,11 @@ PP(pp_flop)
 	register SV *sv;
 	I32 max;
 
+	if (SvGMAGICAL(left))
+	    mg_get(left);
+	if (SvGMAGICAL(right))
+	    mg_get(right);
+
 	if (SvNIOKp(left) || !SvPOKp(left) ||
 	  (looks_like_number(left) && *SvPVX(left) != '0') )
 	{
