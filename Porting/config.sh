@@ -8,7 +8,7 @@
 
 # Package name      : perl5
 # Source directory  : .
-# Configuration time: Sat Oct 30 15:31:32 EET DST 1999
+# Configuration time: Thu Nov 11 21:42:49 EET 1999
 # Configured by     : jhi
 # Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
 
@@ -53,10 +53,10 @@ cc='cc'
 cccdlflags=' '
 ccdlflags='  -Wl,-rpath,/opt/perl/lib/5.00563/alpha-dec_osf-thread/CORE'
 ccflags='-pthread -std -DLANGUAGE_C'
-ccsymbols='__LANGUAGE_C__=1 _LONGLONG=1 LANGUAGE_C=1 SYSTYPE_BSD=1'
+ccsymbols='LANGUAGE_C=1 SYSTYPE_BSD=1 _LONGLONG=1 __LANGUAGE_C__=1'
 cf_by='jhi'
 cf_email='yourname@yourhost.yourplace.com'
-cf_time='Sat Oct 30 15:31:32 EET DST 1999'
+cf_time='Thu Nov 11 21:42:49 EET 1999'
 charsize='1'
 chgrp=''
 chmod=''
@@ -69,7 +69,7 @@ cp='cp'
 cpio=''
 cpp='cpp'
 cpp_stuff='42'
-cppccsymbols='__alpha=1 __osf__=1 __unix__=1 _SYSTYPE_BSD=1 unix=1'
+cppccsymbols='_SYSTYPE_BSD=1 __alpha=1 __osf__=1 __unix__=1 unix=1'
 cppflags='-pthread -std -DLANGUAGE_C'
 cpplast=''
 cppminus=''
@@ -642,6 +642,7 @@ sitelib='/opt/perl/lib/site_perl'
 sitelibexp='/opt/perl/lib/site_perl'
 siteprefix='/opt/perl'
 siteprefixexp='/opt/perl'
+sizesize='8'
 sizetype='size_t'
 sleep=''
 smail=''
