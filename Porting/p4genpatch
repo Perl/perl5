@@ -15,10 +15,10 @@ use Time::Local;
 sub correctmtime ($$$);
 sub Usage ();
 
-my $VERSION = '0.03';
+my $VERSION = '0.04';
 $0 =~ s|^.*/||;
 our(%OPT, @P4opt);
-%OPT = ( "d" => "u", b => "//depot/perl/", "D" => "diff" );
+%OPT = ( "d" => "u", b => "//depot/perl", "D" => "diff" );
 use Getopt::Long;
 Getopt::Long::Configure("no_ignore_case");
 GetOptions(\%OPT, "b=s", "p=s", "d=s", "D=s", "h", "v", "V") or die Usage;
@@ -35,10 +35,12 @@ open my $p4, $system or die "Could not run $system";
 my @action;
 while (<$p4>) {
   print;
-  next unless m|$OPT{b}|;
+  next unless m|($OPT{b})|;
+  my($prefix) = $1;
+  $prefix =~ s|/[^/]+$||; # up to the last "/" in the match is to be stripped
   if (my($file,$action) = m|^\.\.\. (//depot.*)\s(\w+)$|) {
     next if $action eq "delete";
-    push @action, [$action, $file];
+    push @action, [$action, $file, $prefix];
   }
 }
 close $p4;
@@ -47,8 +49,9 @@ my $tempdir;
 print "Differences ...\n";
 for my $a (@action) {
   $tempdir ||= tempdir( "tmp-XXXX", CLEANUP => 1 );
-  my($action,$file) = @$a;
-  my($path,$basename,$number) = $file =~ m|//depot/(.+/)?([^/]+)#(\d+)|;
+  my($action,$file,$prefix) = @$a;
+  my($path,$basename,$number) = $file =~ m|\Q$prefix\E/(.+/)?([^/]+)#(\d+)|;
+  die "Panic: Could not parse file[$file]" unless $number;
   $path = "" unless defined $path;
   my($d1,$d2,$prev);
   $prev = $number-1;
@@ -125,14 +128,15 @@ sub correctmtime ($$$) {
 sub Usage () {
     qq{Usage: $0 [OPTIONS] patchnumber
 
-          -p host:port       p4 port (e.g. myhost:1666)
-          -d diffopt         option to pass to diff(1)
-          -D diff            diff(1) to use
-	  -b branch(es)      which branches to include (regex)
-		             (default: //depot/perl/)
-          -v                 verbose
-          -h                 print this help and exit
-          -V                 print version number and exit
+      -p host:port    p4 port (e.g. myhost:1666)
+      -d diffopt      option to pass to diff(1)
+      -D diff         diff(1) to use
+      -b branch(es)   which branches to include (regex); everything up
+                      to the last slash of matched portion of path is
+                      stripped on local copy (default: //depot/perl)
+      -v              verbose
+      -h              print this help and exit
+      -V              print version number and exit
 
 Fetches all required files from the repository, puts them into a
 temporary directory with sensible names and sensible modification
@@ -142,5 +146,6 @@ Requires repository access.
 Examples:
           perl $0 12345 | gzip -c > 12345.gz
           perl $0 -dc 12345 > change-12345.patch
+          perl $0 -b //depot/maint-5.6/perl -v 8571 > 8571
 };
 }
