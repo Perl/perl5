@@ -65,17 +65,28 @@ bsd_realpath(path, resolved)
 	const char *path;
 	char *resolved;
 {
-#ifndef VMS
+#ifdef VMS
+       return Perl_rmsexpand((char*)path, resolved, NULL, 0);
+#else
 	struct stat sb;
 	int fd, n, rootd, serrno;
 	char *p, *q, wbuf[MAXPATHLEN];
 	int symlinks = 0;
 
 	/* Save the starting point. */
+#ifdef HAS_FCHDIR
 	if ((fd = open(".", O_RDONLY)) < 0) {
 		(void)strcpy(resolved, ".");
 		return (NULL);
 	}
+#else
+	char wd[MAXPATHLEN];
+
+	if (getcwd(wd, MAXPATHLEN - 1) == NULL) {
+		(void)strcpy(resolved, ".");
+		return (NULL);
+	}
+#endif
 
 	/*
 	 * Find the dirname and basename from the path to be resolved.
@@ -105,6 +116,7 @@ loop:
 	} else
 		p = resolved;
 
+#ifdef HAS_LSTAT
 	/* Deal with the last component. */
 	if (lstat(p, &sb) == 0) {
 		if (S_ISLNK(sb.st_mode)) {
@@ -124,6 +136,7 @@ loop:
 			p = "";
 		}
 	}
+#endif
 
 	/*
 	 * Save the last component name and get the full pathname of
@@ -153,10 +166,17 @@ loop:
 	}
 
 	/* Go back to where we came from. */
+#ifdef HAS_FCHDIR
 	if (fchdir(fd) < 0) {
 		serrno = errno;
 		goto err2;
 	}
+#else
+	if (chdir(wd) < 0) {
+		serrno = errno;
+		goto err2;
+	}
+#endif
 
 	/* It's okay if the close fails, what's an fd more or less? */
 	(void)close(fd);
@@ -167,12 +187,7 @@ err1:	serrno = errno;
 err2:	(void)close(fd);
 	errno = serrno;
 	return (NULL);
-
-#else /* it's VMS */
-
-       return Perl_rmsexpand((char*)path, resolved, NULL, 0);
-
-#endif /* ifndef VMS */
+#endif
 }
 
 MODULE = Cwd		PACKAGE = Cwd
