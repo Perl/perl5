@@ -288,13 +288,19 @@ PerlIOWin32_close(pTHX_ PerlIO *f)
  PerlIOWin32 *s = PerlIOSelf(f,PerlIOWin32);
  if (s->refcnt == 1)
   {
-   if (CloseHandle(s->h))
+   IV code = 0;	  
+#if 0
+   /* This does not do pipes etc. correctly */	  
+   if (!CloseHandle(s->h))
     {
      s->h = INVALID_HANDLE_VALUE;
      return -1;
     }
+#else
+    PerlIOBase(f)->flags &= ~PERLIO_F_OPEN;
+    return win32_close(s->fd);
+#endif
   }
- PerlIOBase(f)->flags &= ~PERLIO_F_OPEN;
  return 0;
 }
 
