@@ -547,7 +547,7 @@ int
 Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 {
     register I32 paren;
-    register char *s;
+    register char *s = NULL;
     register I32 i;
     register REGEXP *rx;
 
