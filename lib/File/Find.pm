@@ -42,6 +42,22 @@ Reports the name of a directory only AFTER all its entries
 have been reported.  Entry point finddepth() is a shortcut for
 specifying C<{ bydepth => 1 }> in the first argument of find().
 
+=item C<preprocess>
+
+The value should be a code reference.  This code reference is used to
+preprocess a directory; it is called after readdir() but before the loop that
+calls the wanted() function.  It is called with a list of strings and is
+expected to return a list of strings.  The code can be used to sort the
+strings alphabetically, numerically, or to filter out directory entries based
+on their name alone.
+
+=item C<postprocess>
+
+The value should be a code reference.  It is invoked just before leaving the
+current directory.  It is called in void context with no arguments.  The name
+of the current directory is in $File::Find::dir.  This hook is handy for
+summarizing a directory, such as calculating its disk usage.
+
 =item C<follow>
 
 Causes symbolic links to be followed. Since directory trees with symbolic
@@ -183,7 +199,8 @@ require File::Basename;
 
 my %SLnkSeen;
 my ($wanted_callback, $avoid_nlink, $bydepth, $no_chdir, $follow,
-    $follow_skip, $full_check, $untaint, $untaint_skip, $untaint_pat);
+    $follow_skip, $full_check, $untaint, $untaint_skip, $untaint_pat,
+    $pre_process, $post_process);
 
 sub contract_name {
     my ($cdir,$fn) = @_;
@@ -282,6 +299,8 @@ sub _find_opt {
     my $cwd_untainted = $cwd;
     $wanted_callback  = $wanted->{wanted};
     $bydepth          = $wanted->{bydepth};
+    $pre_process      = $wanted->{preprocess};
+    $post_process     = $wanted->{postprocess};
     $no_chdir         = $wanted->{no_chdir};
     $full_check       = $wanted->{follow};
     $follow           = $full_check || $wanted->{follow_fast};
@@ -464,6 +483,8 @@ sub _find_dir($$$) {
 	}
 	@filenames = readdir DIR;
 	closedir(DIR);
+	@filenames = &$pre_process(@filenames) if $pre_process;
+	push @Stack,[$CdLvl,$dir_name,"",-2]   if $post_process;
 
 	if ($nlink == 2 && !$avoid_nlink) {
 	    # This dir has no subdirectories.
@@ -518,7 +539,11 @@ sub _find_dir($$$) {
 	    }
 	    $dir_name = ($p_dir eq '/' ? "/$dir_rel" : "$p_dir/$dir_rel");
 	    $dir_pref = "$dir_name/";
-            if ( $nlink < 0 ) {  # must be finddepth, report dirname now
+	    if ( $nlink == -2 ) {
+		$name = $dir = $p_dir;
+		$_ = ".";
+		&$post_process;		# End-of-directory processing
+            } elsif ( $nlink < 0 ) {  # must be finddepth, report dirname now
                 $name = $dir_name;
                 if ( substr($name,-2) eq '/.' ) {
                   $name =~ s|/\.$||;
