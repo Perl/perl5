@@ -34,9 +34,13 @@ print "ok 1\n";
 my $pwent = getpwuid $uid; # This is the OO getpwuid.
 
 my $uid_expect = $uid;
-if ( $^O eq 'cygwin' ) { $uid_expect = 500; } # go figure
-
-print "not " unless $pwent->uid    == $uid_expect ;
+if ( $^O eq 'cygwin' ) {
+    print "not " unless (   $pwent->uid == $uid_expect
+                         || $pwent->uid == 500         );  # go figure
+}
+else {
+    print "not " unless $pwent->uid    == $uid_expect ;
+}
 print "ok 2\n";
 
 print "not " unless $pwent->name   eq $pwent[0];
