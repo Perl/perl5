@@ -738,12 +738,17 @@ The plan is to bring them back.
 
 Certain extensions like mod_perl and BSD::Resource are known to have
 issues with `largefiles', a change brought by Perl 5.6.0 in which file
-offsets default to 64 bits wide where supported.  Modules may fail to
+offsets default to 64 bits wide, where supported.  Modules may fail to
 compile at all or compile and work incorrectly.  Currently there is no
-good solution for the problem, but Configure now stores the relevant
-flags and libraries in the %Config hash so the extensions that are having
-problems can try configuring themselves without the largefileness.
-This is admittedly not a clean solution.
+good solution for the problem, but Configure now provides appropriate
+non-largefile ccflags, ldflags, libswanted, and libs in the %Config
+hash (e.g., $Config{ccflags_nolargefiles}) so the extensions that are
+having problems can try configuring themselves without the
+largefileness.  This is admittedly not a clean solution, and the
+solution may not even work at all.  One potential failure is whether
+one can (or, if one can, whether it's a good idea) link together at
+all binaries with different ideas about file offsets, all this is
+platform-dependent.
 
 =over 4
 

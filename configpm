@@ -130,7 +130,10 @@ sub FETCH {
     my($value, $start, $marker, $quote_type);
 
     $quote_type = "'";
+    # Virtual entries.
     if ($_[1] eq 'byteorder') {
+	# byteorder does exist on its own but we overlay a virtual
+	# dynamically recomputed value. 
         my $t = $Config{ivtype};
         my $s = $Config{ivsize};
         my $f = $t eq 'long' ? 'L!' : $s == 8 ? 'Q': 'I';
@@ -142,6 +145,31 @@ sub FETCH {
         } else {
             $value = '?'x$s;
         }
+    } elsif ($_[1] =~ /^((?:cc|ld)flags|libs(?:wanted)?)_nolargefiles/) {
+	# These are purely virtual, they do not exist, but need to
+	# be computed on demand for largefile-incapable extensions.
+	my $key = "${1}_largefiles";
+	$value = $Config{$1};
+	my $withlargefiles = $Config{$key};
+	if ($key =~ /^(?:cc|ld)flags_/) {
+	    $value =~ s/\Q$withlargefiles\E\b//;
+	} elsif ($key =~ /^libs/) {
+	    my @lflibswanted = split(' ', $Config{libswanted_largefiles});
+	    if (@lflibswanted) {
+		my %lflibswanted;
+		@lflibswanted{@lflibswanted} = ();
+		if ($key =~ /^libs_/) {
+		    my @libs = grep { /^-l(.+)/ &&
+                                      not exists $lflibswanted{$1} }
+		                    split(' ', $Config{libs});
+		    $Config{libs} = join(' ', @libs);
+		} elsif ($key =~ /^libswanted_/) {
+		    my @libswanted = grep { not exists $lflibswanted{$_} }
+		                          split(' ', $Config{libswanted});
+		    $Config{libswanted} = join(' ', @libswanted);
+		}
+	    }
+	}
     } else {
 	$marker = "$_[1]=";
 	# return undef unless (($value) = $config_sh =~ m/^$_[1]='(.*)'\s*$/m);
@@ -206,7 +234,8 @@ sub EXISTS {
     index($config_sh, "\n$_[1]='") != -1 or
     substr($config_sh, 0, length($_[1])+2) eq "$_[1]='" or
     index($config_sh, "\n$_[1]=\"") != -1 or
-    substr($config_sh, 0, length($_[1])+2) eq "$_[1]=\"";
+    substr($config_sh, 0, length($_[1])+2) eq "$_[1]=\"" or
+    $_[1] =~ /^(?:(?:cc|ld)flags|libs(?:wanted)?)_nolargefiles$/;
 }
 
 sub STORE  { die "\%Config::Config is read-only\n" }
