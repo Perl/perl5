@@ -16,6 +16,7 @@
 
 static void check_uni _((void));
 static void  force_next _((I32 type));
+static char *force_version _((char *start));
 static char *force_word _((char *start, int token, int check_keyword, int allow_pack, int allow_tick));
 static SV *q _((SV *sv));
 static char *scan_const _((char *start));
@@ -45,6 +46,7 @@ static int uni _((I32 f, char *s));
 #endif
 static char * filter_gets _((SV *sv, FILE *fp));
 static void restore_rsfp _((void *f));
+static SV * sub_const _((CV *cv));
 
 /* The following are arranged oddly so that the guard on the switch statement
  * can get by with a single comparison (if the compiler is smart enough).
@@ -515,6 +517,34 @@ int kind;
     }
 }
 
+static char *
+force_version(s)
+char *s;
+{
+    OP *version = Nullop;
+
+    s = skipspace(s);
+
+    /* default VERSION number -- GBARR */
+
+    if(isDIGIT(*s)) {
+        char *d;
+        int c;
+        for( d=s, c = 1; isDIGIT(*d) || (*d == '.' && c--); d++);
+        if((*d == ';' || isSPACE(*d)) && *(skipspace(d)) != ',') {
+            s = scan_num(s);
+            /* real VERSION number -- GBARR */
+            version = yylval.opval;
+        }
+    }
+
+    /* NOTE: The parser sees the package name and the VERSION swapped */
+    nextval[nexttoke].opval = version;
+    force_next(WORD); 
+
+    return (s);
+}
+
 static SV *
 q(sv)
 SV *sv;
@@ -965,7 +995,7 @@ GV *gv;
 	if (indirgv && GvCV(indirgv))
 	    return 0;
 	/* filehandle or package name makes it a method */
-	if (!gv || GvIO(indirgv) || gv_stashpv(tmpbuf, FALSE)) {
+	if (!gv || GvIO(indirgv) || gv_stashpvn(tmpbuf, len, FALSE)) {
 	    s = skipspace(s);
 	    nextval[nexttoke].opval =
 		(OP*)newSVOP(OP_CONST, 0,
@@ -1199,7 +1229,7 @@ yylex()
 		return ')';
 	    }
 	    if (lex_casemods > 10) {
-		char* newlb = (char*)realloc(lex_casestack, lex_casemods + 2);
+		char* newlb = Renew(lex_casestack, lex_casemods + 2, char);
 		if (newlb != lex_casestack) {
 		    SAVEFREEPV(newlb);
 		    lex_casestack = newlb;
@@ -1480,7 +1510,7 @@ yylex()
 		    int oldp = minus_p;
 
 		    while (*d && !isSPACE(*d)) d++;
-		    while (*d == ' ') d++;
+		    while (*d == ' ' || *d == '\t') d++;
 
 		    if (*d++ == '-') {
 			while (d = moreswitches(d)) ;
@@ -1725,7 +1755,7 @@ yylex()
       leftbracket:
 	s++;
 	if (lex_brackets > 100) {
-	    char* newlb = (char*)realloc(lex_brackstack, lex_brackets + 1);
+	    char* newlb = Renew(lex_brackstack, lex_brackets + 1, char);
 	    if (newlb != lex_brackstack) {
 		SAVEFREEPV(newlb);
 		lex_brackstack = newlb;
@@ -1746,7 +1776,7 @@ yylex()
 	case XOPERATOR:
 	    while (s < bufend && (*s == ' ' || *s == '\t'))
 		s++;
-	    if (s < bufend && isALPHA(*s)) {
+	    if (s < bufend && (isALPHA(*s) || *s == '_')) {
 		d = scan_word(s, tokenbuf, FALSE, &len);
 		while (d < bufend && (*d == ' ' || *d == '\t'))
 		    d++;
@@ -2445,6 +2475,17 @@ yylex()
 				tokenbuf, tokenbuf);
 		    last_lop = oldbufptr;
 		    last_lop_op = OP_ENTERSUB;
+		    /* Check for a constant sub */
+		    if (SvPOK(cv) && !SvCUR(cv)) {
+			SV *sv = sub_const(cv);
+			if (sv) {
+			    SvREFCNT_dec(((SVOP*)yylval.opval)->op_sv);
+			    ((SVOP*)yylval.opval)->op_sv = SvREFCNT_inc(sv);
+			    yylval.opval->op_private = 0;
+			    TOKEN(WORD);
+			}
+		    }
+
 		    /* Resolve to GV now. */
 		    op_free(yylval.opval);
 		    yylval.opval = newCVREF(0, newGVOP(OP_GV, 0, gv));
@@ -2944,6 +2985,7 @@ yylex()
 	    if (expect != XSTATE)
 		yyerror("\"no\" not allowed in expression");
 	    s = force_word(s,WORD,FALSE,TRUE,FALSE);
+	    s = force_version(s);
 	    yylval.ival = 0;
 	    OPERATOR(USE);
 
@@ -3059,7 +3101,7 @@ yylex()
 	    *tokenbuf = '\0';
 	    s = force_word(s,WORD,TRUE,TRUE,FALSE);
 	    if (isIDFIRST(*tokenbuf))
-		gv_stashpv(tokenbuf, TRUE);
+		gv_stashpvn(tokenbuf, strlen(tokenbuf), TRUE);
 	    else if (*s == '<')
 		yyerror("<> should be quotes");
 	    UNI(OP_REQUIRE);
@@ -3383,7 +3425,18 @@ yylex()
 	case KEY_use:
 	    if (expect != XSTATE)
 		yyerror("\"use\" not allowed in expression");
-	    s = force_word(s,WORD,FALSE,TRUE,FALSE);
+	    s = skipspace(s);
+	    if(isDIGIT(*s)) {
+		s = force_version(s);
+		if(*s == ';' || (s = skipspace(s), *s == ';')) {
+		    nextval[nexttoke].opval = Nullop;
+		    force_next(WORD);
+		}
+	    }
+	    else {
+		s = force_word(s,WORD,FALSE,TRUE,FALSE);
+		s = force_version(s);
+	    }
 	    yylval.ival = 1;
 	    OPERATOR(USE);
 
@@ -4894,9 +4947,11 @@ start_subparse()
     CV* outsidecv = compcv;
     AV* comppadlist;
 
+#ifndef __QNX__
     if (compcv) {
 	assert(SvTYPE(compcv) == SVt_PVCV);
     }
+#endif
     save_I32(&subline);
     save_item(subname);
     SAVEINT(padix);
@@ -4930,6 +4985,27 @@ start_subparse()
     CvOUTSIDE(compcv) = (CV*)SvREFCNT_inc((SV*)outsidecv);
 
     return oldsavestack_ix;
+}
+
+SV *
+sub_const(cv)
+CV *cv;
+{
+    OP *o;
+    SV *sv = Nullsv;
+    
+    for (o = CvSTART(cv); o; o = o->op_next) {
+	OPCODE type = o->op_type;
+	
+	if (type == OP_NEXTSTATE || type == OP_NULL || type == OP_PUSHMARK)
+	    continue;
+	if (type == OP_LEAVESUB || type == OP_RETURN)
+	    break;
+	if (type != OP_CONST || sv)
+	    return Nullsv;
+	sv = ((SVOP*)o)->op_sv;
+    }
+    return sv;
 }
 
 int
