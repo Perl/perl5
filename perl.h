@@ -2042,7 +2042,7 @@ char *crypt (const char*, const char*);
 #    ifndef getenv
 char *getenv (const char*);
 #    endif /* !getenv */
-#ifndef EPOC
+#if !defined(EPOC) && !(defined(__hpux) && defined(_FILE_OFFSET_BITS) && _FILE_OFFSET_BITS == 64)
 Off_t lseek (int,Off_t,int);
 #endif
 #  endif /* !DONT_DECLARE_STD */
@@ -3025,8 +3025,7 @@ typedef struct am_table_short AMTS;
 #   define Atol atol /* we assume atol being available anywhere */
 #endif
 
-#if !defined(Strtoul) && defined(USE_LONG_LONG) && defined(HAS_LONG_LONG) \
-	&& defined(HAS_STRTOULL)
+#if !defined(Strtoul) && defined(HAS_LONG_LONG) && defined(HAS_STRTOULL)
 #   define Strtoul strtoull
 #endif
 /* is there atouq() anywhere? */
