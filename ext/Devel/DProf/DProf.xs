@@ -285,6 +285,7 @@ prof_mark( opcode ptype )
 
 #ifdef PERLDBf_NONAME
 	{
+	    dTHX;
 	    SV **svp;
 	    char *gname, *pname;
 	    static U32 lastid;
@@ -419,6 +420,7 @@ static void
 test_time(clock_t *r, clock_t *u, clock_t *s)
 {
     dTHR;
+    dTHX;
     CV *cv = perl_get_cv("Devel::DProf::NONESUCH_noxs", FALSE);
     int i, j, k = 0;
     HV *oldstash = curstash;
