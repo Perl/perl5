@@ -2609,8 +2609,13 @@ certain type.  Arrays must be @NAME or C<@{EXPR}>.  Hashes must be
 
 =item umask: argument is missing initial 0
 
-(W) A umask of 222 is incorrect.  It should be 0222, because octal literals
-always start with 0 in Perl, as in C.
+(W) A umask of 222 is incorrect.  It should be 0222, because octal
+literals always start with 0 in Perl, as in C.
+
+=item umask not implemented
+
+(F) Your machine doesn't implement the umask function and you tried
+to use it to restrict permissions for yourself (EXPR & 0700).
 
 =item Unable to create sub named "%s"
 

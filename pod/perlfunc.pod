@@ -4068,10 +4068,15 @@ If EXPR is omitted, uses C<$_>.
 =item umask
 
 Sets the umask for the process to EXPR and returns the previous value.
-If EXPR is omitted, merely returns the current umask.  If C<umask(2)> is
-not implemented on your system, returns C<undef>.  Remember that a
-umask is a number, usually given in octal; it is I<not> a string of octal
-digits.  See also L</oct>, if all you have is a string.
+If EXPR is omitted, merely returns the current umask.
+
+If C<umask(2)> is not implemented on your system and you are trying to
+restrict access for I<yourself> (i.e., (EXPR & 0700) > 0), produces a
+fatal error at run time.  If C<umask(2)> is not implemented and you are
+not trying to restrict access for yourself, returns C<undef>.
+
+Remember that a umask is a number, usually given in octal; it is I<not> a
+string of octal digits.  See also L</oct>, if all you have is a string.
 
 =item undef EXPR
 

@@ -14,6 +14,8 @@ BEGIN {
 }
 eval 'use Config';          #  Defaults assumed if this fails
 
+$ENV{PERL_DESTRUCT_LEVEL} = 0; # XXX known to leaks scalars
+
 $x = "abc\ndef\n";
 
 if ($x =~ /^abc/) {print "ok 1\n";} else {print "not ok 1\n";}
