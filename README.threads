@@ -1,5 +1,16 @@
 Building
 
+If you want to build with multi-threading support and you are
+running Linux 2.x (with the LinuxThreads library installed:
+that's the linuxthreads and linuxthreads-devel RPMs for RedHat)
+or Digital UNIX 4.x or Solaris 2.x for recentish x (2.5 is OK)
+then you should be able to use
+    ./Configure -Dusethreads -Doptimize=-g -ders
+    make
+and ignore the rest of this "Building" section. If it doesn't
+work or you are using another platform which you believe supports
+POSIX.1c threads then read on.
+
 Omit the -e from your ./Configure arguments. For example, use
     ./Configure -drs
 When it offers to let you change config.sh, do so. If you already
@@ -23,33 +34,18 @@ For Digital Unix 4.x:
     Add -DUSE_THREADS -DDEBUGGING to cppflags
     Add -pthread to ldflags
     Change optimize to -g
-    Maybe add -lpthread -lc_r to lddlflags
+    Add -lpthread -lc_r to lddlflags
     For some reason, the extra includes for pthreads make Digital UNIX
     complain fatally about the sbrk() delcaration in perl's malloc.c
     so use the native malloc as follows:
     Change usemymalloc to n
     Zap mallocobj and mallocsrc (foo='')
     Change d_mymalloc to undef
-
+For Solaris, do the same as for Linux above.
 
 Now you can do a
-    make perl
-For Digital UNIX, it will get as far as building miniperl and then
-bomb out buidling DynaLoader when MakeMaker tries to find where
-perl is. This seems to be a problem with backticks/system when
-threading is in. A minimal failing example is
-    perl -e 'eval q($foo = 0); system("echo foo")'
-which doesn't echo anything. The resulting ext/DynaLoader/Makefile
-will have lines
-    PERL = 0
-    FULLPERL = 0
-Change them to be the pathnames of miniperl and perl respectively
-(the ones in your perl build directory). The resume the make with
-    make perl
-This time it should manage to build perl. If not, try some cutting
-and pasting to compile and link things manually. Be careful when
-building extensions that your ordinary perl doesn't end up making
-a Makefile without the correct pthreads compiler options.
+    make
+
 
 Building the Thread extension
 
@@ -60,8 +56,6 @@ I had problems where the config information from the ordinary perl
 on the system would end up in the Makefile). Then
     perl Makefile.PL PERL_SRC=/your/perl/build/directory
     make
-On Digital UNIX, you'll probably have to fix the "PERL = 0" and
-"FULLPERL = 0" lines in the generated Makefile as for DynaLoader.
 
 Then you can try some of the tests with
     perl -Mblib create.t
@@ -71,23 +65,19 @@ Then you can try some of the tests with
     perl -Mblib unsync2.t
     perl -Mblib unsync3.t
     perl -Mblib io.t
+    perl -Mblib queue.t
 The io one leaves a thread reading from the keyboard on stdin so
 as the ping messages appear you can type lines and see them echoed.
 
 Try running the main perl test suite too. There are known
 failures for po/misc test 45 (tries to do local(@_) but @_ is
 now lexical) and some tests involving backticks/system/fork
-may or may not work. Under Linux, many tests appear to fail
+may or may not work. Under Linux, many tests may appear to fail
 when run under the test harness but work fine when invoked
 manually.
 
 
 Bugs
-
-* Thread states (DETACHED, JOINED etc.) and perl's idea of what's
-  in scope and out of scope aren't properly integrated. Expect
-  segaults and hangs when thread objects whose threads have ended
-  go out of scope (e.g. at program exit).
 
 * cond.t hasn't been redone since condition variable changed.
 
@@ -178,4 +168,4 @@ that function zeroes out the owner field, releasing the lock.
 
 Malcolm Beattie
 mbeattie@sable.ox.ac.uk
-9 September 1997
+2 October 1997
