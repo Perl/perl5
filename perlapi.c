@@ -3380,9 +3380,9 @@ Perl_bytes_to_utf8(pTHXo_ U8 *s, STRLEN *len)
 
 #undef  Perl_utf8_to_uv
 UV
-Perl_utf8_to_uv(pTHXo_ U8 *s, I32* retlen)
+Perl_utf8_to_uv(pTHXo_ U8 *s, I32* retlen, bool checking)
 {
-    return ((CPerlObj*)pPerl)->Perl_utf8_to_uv(s, retlen);
+    return ((CPerlObj*)pPerl)->Perl_utf8_to_uv(s, retlen, checking);
 }
 
 #undef  Perl_uv_to_utf8

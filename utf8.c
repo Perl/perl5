@@ -159,7 +159,7 @@ Perl_is_utf8_string(pTHX_ U8 *s, STRLEN len)
 }
 
 /*
-=for apidoc Am|utf8_to_uv|U8 *s|I32 *retlen|I32 checking
+=for apidoc Am|U8* s|utf8_to_uv|I32 *retlen|I32 checking
 
 Returns the character value of the first character in the string C<s>
 which is assumed to be in UTF8 encoding; C<retlen> will be set to the

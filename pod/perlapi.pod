@@ -2355,19 +2355,19 @@ false, defined or undefined.  Does not handle 'get' magic.
 =for hackers
 Found in file sv.h
 
+=item svtype
+
+An enum of flags for Perl types.  These are found in the file B<sv.h> 
+in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
+
+=for hackers
+Found in file sv.h
+
 =item SvTYPE
 
 Returns the type of the SV.  See C<svtype>.
 
 	svtype	SvTYPE(SV* sv)
-
-=for hackers
-Found in file sv.h
-
-=item svtype
-
-An enum of flags for Perl types.  These are found in the file B<sv.h> 
-in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
 
 =for hackers
 Found in file sv.h
@@ -3182,18 +3182,10 @@ Found in file handy.h
 
 =item U8 *s
 
-Returns the character value of the first character in the string C<s>
-which is assumed to be in UTF8 encoding; C<retlen> will be set to the
-length, in bytes, of that character, and the pointer C<s> will be
-advanced to the end of the character.
+Returns true if first C<len> bytes of the given string form valid a UTF8
+string, false otherwise.
 
-If C<s> does not point to a well-formed UTF8 character, the behaviour
-is dependent on the value of C<checking>: if this is true, it is
-assumed that the caller will raise a warning, and this function will
-set C<retlen> to C<-1> and return. If C<checking> is not true, an optional UTF8
-warning is produced.
-
-	utf8_to_uv	U8 *s(I32 *retlen, I32 checking)
+	is_utf8_string	U8 *s(STRLEN len)
 
 =for hackers
 Found in file utf8.c
@@ -3206,6 +3198,24 @@ updates len to contain the new length.
 Returns zero on failure, setting C<len> to -1.
 
 	U8 *	utf8_to_bytes(U8 *s, STRLEN *len)
+
+=for hackers
+Found in file utf8.c
+
+=item utf8_to_uv
+
+Returns the character value of the first character in the string C<s>
+which is assumed to be in UTF8 encoding; C<retlen> will be set to the
+length, in bytes, of that character, and the pointer C<s> will be
+advanced to the end of the character.
+
+If C<s> does not point to a well-formed UTF8 character, the behaviour
+is dependent on the value of C<checking>: if this is true, it is
+assumed that the caller will raise a warning, and this function will
+set C<retlen> to C<-1> and return. If C<checking> is not true, an optional UTF8
+warning is produced.
+
+	U8* s	utf8_to_uv(I32 *retlen, I32 checking)
 
 =for hackers
 Found in file utf8.c
