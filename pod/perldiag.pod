@@ -2336,12 +2336,6 @@ See L<perlfunc/open> for details.
 (W syntax) Multidimensional arrays aren't written like C<$foo[1,2,3]>.
 They're written like C<$foo[1][2][3]>, as in C.
 
-=item '/' must be followed by 'a*', 'A*' or 'Z*'
-
-(F) You had a pack template indicating a counted-length string,
-Currently the only things that can have their length counted are a*, A*
-or Z*.  See L<perlfunc/pack>.
-
 =item '/' must follow a numeric type in unpack
 
 (F) You had an unpack template that contained a '/', but this did not

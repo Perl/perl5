@@ -2471,13 +2471,26 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
         /* Look ahead for next symbol. Do we have code/code? */
         lookahead = *symptr;
         found = next_symbol(&lookahead);
-	if ( symptr->flags & FLAG_SLASH ) {
+	if (symptr->flags & FLAG_SLASH) {
+	    IV count;
 	    if (!found) Perl_croak(aTHX_ "Code missing after '/' in pack");
- 	        if ( 0 == strchr( "aAZ", lookahead.code ) ||
-                     e_star != lookahead.howlen )
- 		    Perl_croak(aTHX_ "'/' must be followed by 'a*', 'A*' or 'Z*' in pack");
-	    lengthcode =
-		sv_2mortal(newSViv((items > 0 ? DO_UTF8(*beglist) ? sv_len_utf8(*beglist) : sv_len(*beglist) : 0) + (lookahead.code == 'Z' ? 1 : 0)));
+	    if (strchr("aAZ", lookahead.code)) {
+		if (lookahead.howlen == e_number) count = lookahead.length;
+		else {
+		    if (items > 0)
+			count = DO_UTF8(*beglist) ?
+			    sv_len_utf8(*beglist) : sv_len(*beglist);
+		    else count = 0;
+		    if (lookahead.code == 'Z') count++;
+		}
+	    } else {
+		if (lookahead.howlen == e_number && lookahead.length < items)
+		    count = lookahead.length;
+		else count = items;
+	    }
+	    lookahead.howlen = e_number;
+	    lookahead.length = count;
+	    lengthcode = sv_2mortal(newSViv(count));
 	}
 
 	/* Code inside the switch must take care to properly update

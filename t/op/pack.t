@@ -12,7 +12,7 @@ my $no_endianness = $] > 5.009 ? '' :
 my $no_signedness = $] > 5.009 ? '' :
   "Signed/unsigned pack modifiers not available on this perl";
 
-plan tests => 14606;
+plan tests => 14621;
 
 use strict;
 use warnings;
@@ -1781,4 +1781,29 @@ is(unpack('c'), 65, "one-arg unpack (change #18751)"); # defaulting to $_
     is(pack("U0a*", $high), "\xfeb");
     is(pack("U0A*", $high), "\xfeb");
     is(pack("U0Z*", $high), "\xfeb\x00");
+}
+{
+    # pack /
+    my @array = 1..14;
+    my @out = unpack("N/S", pack("N/S", @array) . "abcd");
+    is("@out", "@array", "pack N/S works");
+    @out = unpack("N/S*", pack("N/S*", @array) . "abcd");
+    is("@out", "@array", "pack N/S* works");
+    @out = unpack("N/S*", pack("N/S14", @array) . "abcd");
+    is("@out", "@array", "pack N/S14 works");
+    @out = unpack("N/S*", pack("N/S15", @array) . "abcd");
+    is("@out", "@array", "pack N/S15 works");
+    @out = unpack("N/S*", pack("N/S13", @array) . "abcd");
+    is("@out", "@array[0..12]", "pack N/S13 works");
+    @out = unpack("N/S*", pack("N/S0", @array) . "abcd");
+    is("@out", "", "pack N/S0 works");
+    is(pack("Z*/a0", "abc"), "0\0", "pack Z*/a0 makes a short string");
+    is(pack("Z*/Z0", "abc"), "0\0", "pack Z*/Z0 makes a short string");
+    is(pack("Z*/a3", "abc"), "3\0abc", "pack Z*/a3 makes a full string");
+    is(pack("Z*/Z3", "abc"), "3\0ab\0", "pack Z*/Z3 makes a short string");
+    is(pack("Z*/a5", "abc"), "5\0abc\0\0", "pack Z*/a5 makes a long string");
+    is(pack("Z*/Z5", "abc"), "5\0abc\0\0", "pack Z*/Z5 makes a long string");
+    is(pack("Z*/Z"), "1\0\0", "pack Z*/Z makes an extended string");
+    is(pack("Z*/Z", ""), "1\0\0", "pack Z*/Z makes an extended string");
+    is(pack("Z*/a", ""), "0\0", "pack Z*/a makes an extended string");
 }
