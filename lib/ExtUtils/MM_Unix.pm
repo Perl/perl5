@@ -3288,8 +3288,9 @@ sub subdir_x {
     my($self, $subdir) = @_;
     my(@m);
     if ($Is_Win32 && Win32::IsWin95()) {
-	# XXX: dmake-specific, like rest of Win95 port
-	return <<EOT;
+	if ($Config{'make'} =~ /dmake/i) {
+	    # dmake-specific
+	    return <<EOT;
 subdirs ::
 @[
 	cd $subdir
@@ -3297,8 +3298,16 @@ subdirs ::
 	cd ..
 ]
 EOT
-    }
-    else {
+        } elsif ($Config{'make'} =~ /nmake/i) {
+	    # nmake-specific
+	    return <<EOT;
+subdirs ::
+	cd $subdir
+	\$(MAKE) all \$(PASTHRU)
+	cd ..
+EOT
+	}
+    } else {
 	return <<EOT;
 
 subdirs ::

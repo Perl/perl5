@@ -1723,6 +1723,7 @@ warnings.h		The warning numbers
 warnings.pl		Program to write warnings.h and lib/warnings.pm
 win32/Makefile		Win32 makefile for NMAKE (Visual C++ build)
 win32/bin/exetype.pl	Set executable type to CONSOLE or WINDOWS
+win32/bin/mdelete.bat	multifile delete
 win32/bin/perlglob.pl	Win32 globbing
 win32/bin/pl2bat.pl	wrap perl scripts into batch files
 win32/bin/runperl.pl	run perl script via batch file namesake

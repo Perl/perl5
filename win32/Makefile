@@ -63,6 +63,12 @@ INST_ARCH	= \$(ARCHNAME)
 #USE_IMP_SYS	= define
 
 #
+# uncomment to enable the experimental PerlIO I/O subsystem.
+# This is currently incompatible with USE_MULTI, USE_ITHREADS,
+# and USE_IMP_SYS
+#USE_PERLIO	= define
+
+#
 # WARNING! This option is deprecated and will eventually go away (enable
 # USE_ITHREADS instead).
 #
@@ -273,9 +279,17 @@ ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)-thread
 !IF "$(USE_MULTI)" == "define"
 ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)-multi
 !ELSE
+!IF "$(USE_PERLIO)" == "define"
+ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)-perlio
+!ELSE
 ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)
 !ENDIF
 !ENDIF
+!ENDIF
+!ENDIF
+
+!IF "$(USE_PERLIO)" == "define"
+BUILDOPT	= $(BUILDOPT) -DUSE_PERLIO
 !ENDIF
 
 !IF "$(USE_ITHREADS)" == "define"
@@ -464,6 +478,8 @@ XCOPY		= xcopy /f /r /i /d
 RCOPY		= xcopy /f /r /i /e /d
 NOOP		= @echo
 NULL		=
+
+DEL		= bin\mdelete.bat
 
 #
 # filenames given to xsubpp must have forward slashes (since it puts
@@ -691,8 +707,8 @@ CFG_VARS	=					\
 		"INST_ARCH=$(INST_ARCH)"		\
 		"archname=$(ARCHNAME)"			\
 		"cc=$(CC)"				\
-		"ccflags=$(OPTIMIZE:"=\") $(DEFINES) $(BUILDOPT)"	\
-		"cf_email=$(EMAIL)"			\
+		"ccflags=-nologo -Gf -W3 $(OPTIMIZE:"=\") $(DEFINES) $(BUILDOPT)"	\
+		"cf_email=$(EMAIL)"	 		\
 		"d_crypt=$(D_CRYPT)"			\
 		"d_mymalloc=$(PERL_MALLOC)"		\
 		"libs=$(LIBFILES)"			\
@@ -753,14 +769,16 @@ regen_config_h:
 	rename config.h $(CFGH_TMPL)
 
 $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
-	cd .. && miniperl configpm
+	cd .. 
+	miniperl configpm
+	cd win32
 	if exist lib\* $(RCOPY) lib\*.* ..\lib\$(NULL)
 	$(XCOPY) ..\*.h $(COREDIR)\*.*
 	$(XCOPY) *.h $(COREDIR)\*.*
 	$(XCOPY) ..\ext\re\re.pm $(LIBDIR)\*.*
 	$(RCOPY) include $(COREDIR)\*.*
-	$(MINIPERL) -I..\lib config_h.PL "INST_VER=$(INST_VER)" \
-	    || $(MAKE) /$(MAKEFLAGS) $(CONFIGPM)
+	-$(MINIPERL) -I..\lib config_h.PL "INST_VER=$(INST_VER)"
+	if errorlevel 1 $(MAKE) /$(MAKEFLAGS) $(CONFIGPM)
 
 $(MINIPERL) : $(MINIDIR) $(MINI_OBJ)
 	$(LINK32) -subsystem:console -out:$@ @<<
@@ -803,7 +821,9 @@ $(PERLDLL): perldll.def $(PERLDLL_OBJ) $(PERLDLL_RES)
 	$(XCOPY) $(PERLIMPLIB) $(COREDIR)
 
 $(MINIMOD) : $(MINIPERL) ..\minimod.pl
-	cd .. && miniperl minimod.pl > lib\ExtUtils\Miniperl.pm
+	cd .. 
+	miniperl minimod.pl > lib\ExtUtils\Miniperl.pm
+	cd win32
 
 ..\x2p\a2p$(o) : ..\x2p\a2p.c
 	$(CC) -I..\x2p $(CFLAGS) $(OBJOUT_FLAG)$@ -c ..\x2p\a2p.c
@@ -1004,10 +1024,14 @@ distclean: clean
 	-del /f $(LIBDIR)\Devel\Peek.pm $(LIBDIR)\Devel\DProf.pm
 	-del /f $(LIBDIR)\File\Glob.pm
 	-del /f $(LIBDIR)\Storable.pm
-	-if exist $(LIBDIR)\IO rmdir /s /q $(LIBDIR)\IO || rmdir /s $(LIBDIR)\IO
-	-if exist $(LIBDIR)\Thread rmdir /s /q $(LIBDIR)\Thread || rmdir /s $(LIBDIR)\Thread
-	-if exist $(LIBDIR)\B rmdir /s /q $(LIBDIR)\B || rmdir /s $(LIBDIR)\B
-	-if exist $(LIBDIR)\Data rmdir /s /q $(LIBDIR)\Data || rmdir /s $(LIBDIR)\Data
+	-if exist $(LIBDIR)\IO rmdir /s /q $(LIBDIR)\IO 
+	-rmdir /s $(LIBDIR)\IO
+	-if exist $(LIBDIR)\Thread rmdir /s /q $(LIBDIR)\Thread 
+	-rmdir /s $(LIBDIR)\Thread
+	-if exist $(LIBDIR)\B rmdir /s /q $(LIBDIR)\B
+	-rmdir /s $(LIBDIR)\B
+	-if exist $(LIBDIR)\Data rmdir /s /q $(LIBDIR)\Data 
+	-rmdir /s $(LIBDIR)\Data
 	-del /f $(PODDIR)\*.html
 	-del /f $(PODDIR)\*.bat
 	cd ..\utils
@@ -1024,8 +1048,10 @@ distclean: clean
 	cd $(EXTDIR)
 	-del /s *.lib *.def *.map *.pdb *.bs Makefile *$(o) pm_to_blib
 	cd ..\win32
-	-if exist $(AUTODIR) rmdir /s /q $(AUTODIR) || rmdir /s $(AUTODIR)
-	-if exist $(COREDIR) rmdir /s /q $(COREDIR) || rmdir /s $(COREDIR)
+	-if exist $(AUTODIR) rmdir /s /q $(AUTODIR) 
+	-rmdir /s $(AUTODIR)
+	-if exist $(COREDIR) rmdir /s /q $(COREDIR) 
+	-rmdir /s $(COREDIR)
 
 install : all installbare installhtml
 
@@ -1082,26 +1108,26 @@ test-wide-notty : test-prep
 	cd ..\win32
 
 clean : 
-	-@erase miniperlmain$(o)
-	-@erase $(MINIPERL)
-	-@erase perlglob$(o)
-	-@erase perlmain$(o)
-	-@erase config.w32
-	-@erase /f config.h
-	-@erase $(GLOBEXE)
-	-@erase $(PERLEXE)
-	-@erase $(WPERLEXE)
-	-@erase $(PERLDLL)
-	-@erase $(CORE_OBJ)
-	-if exist $(MINIDIR) rmdir /s /q $(MINIDIR) || rmdir /s $(MINIDIR)
-	-@erase $(WIN32_OBJ)
-	-@erase $(DLL_OBJ)
-	-@erase $(X2P_OBJ)
-	-@erase ..\*$(o) ..\*.lib ..\*.exp *$(o) *.lib *.exp *.res
-	-@erase ..\t\*.exe ..\t\*.dll ..\t\*.bat
-	-@erase ..\x2p\*.exe ..\x2p\*.bat
-	-@erase *.ilk
-	-@erase *.pdb
+	-@$(DEL) miniperlmain$(o)
+	-@$(DEL) $(MINIPERL)
+	-@$(DEL) perlglob$(o)
+	-@$(DEL) perlmain$(o)
+	-@$(DEL) config.w32
+	-@$(DEL) /f config.h
+	-@$(DEL) $(GLOBEXE)
+	-@$(DEL) $(PERLEXE)
+	-@$(DEL) $(WPERLEXE)
+	-@$(DEL) $(PERLDLL)
+	-@$(DEL) $(CORE_OBJ)
+	-if exist $(MINIDIR) deltree /y $(MINIDIR) 
+	-@$(DEL) $(WIN32_OBJ)
+	-@$(DEL) $(DLL_OBJ)
+	-@$(DEL) $(X2P_OBJ)
+	-@$(DEL) ..\*$(o) ..\*.lib ..\*.exp *$(o) *.lib *.exp *.res
+	-@$(DEL) ..\t\*.exe ..\t\*.dll ..\t\*.bat
+	-@$(DEL) ..\x2p\*.exe ..\x2p\*.bat
+	-@$(DEL) *.ilk
+	-@$(DEL) *.pdb
  
 # Handy way to run perlbug -ok without having to install and run the
 # installed perlbug. We don't re-run the tests here - we trust the user.
