@@ -54,11 +54,7 @@ DONE
 
 $| = 1;
 
-print "1..";
-print @tests/2;
-print "\n";
-
-use Text::Wrap;
+print "1..", @tests/2, "\n";
 
 $rerun = $ENV{'PERL_DL_NONLAZY'} ? 0 : 1;
 

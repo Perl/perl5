@@ -282,21 +282,21 @@ h4 = regexp.h, scope.h, sv.h, vmsish.h, util.h, perlsdio.h, perlio.h
 h5 = embedvar.h, intrpvar.h, perlvars.h, thrdvar.h, iperlsys.h
 h = $(h1), $(h2), $(h3), $(h4), $(h5) $(SOCKHLIS) $(THREADH)
 
-c1 = av.c, scope.c, op.c, doop.c, doio.c, dump.c, hv.c, mg.c, universal.c, perlio.c
+c1 = av.c, scope.c, op.c, doop.c, doio.c, dump.c, hv.c, mg.c, universal.c, perlio.c, utf8.c
 c2 = perl.c, perly.c, pp.c, pp_hot.c, pp_ctl.c, pp_sys.c, regcomp.c, regexec.c $(MALLOC_C)
 c3 = gv.c, sv.c, taint.c, toke.c, util.c, deb.c, run.c, globals.c, vms.c, byterun.c $(SOCKCLIS)
 
 c = $(c1), $(c2), $(c3), miniperlmain.c, perlmain.c, byteperl.c
 
 obj1 = perl$(O), gv$(O), toke$(O), perly$(O), op$(O), regcomp$(O), dump$(O), util$(O), mg$(O), perlio$(O) $(MALLOC_O)
-obj2 = hv$(O), av$(O), run$(O), pp_hot$(O), sv$(O), pp$(O), scope$(O), pp_ctl$(O), pp_sys$(O)
+obj2 = hv$(O), av$(O), run$(O), pp_hot$(O), sv$(O), pp$(O), scope$(O), pp_ctl$(O), pp_sys$(O), utf8$(O)
 obj3 = doop$(O), doio$(O), regexec$(O), taint$(O), deb$(O), universal$(O), globals$(O), vms$(O), byterun$(O) $(SOCKOBJ)
 
 obj = $(obj1), $(obj2), $(obj3)
 
 ac1 = $(ARCHCORE)EXTERN.h $(ARCHCORE)INTERN.h  $(ARCHCORE)XSUB.h $(ARCHCORE)av.h
 ac2 = $(ARCHCORE)config.h $(ARCHCORE)cop.h $(ARCHCORE)cv.h $(ARCHCORE)embed.h
-ac3 = $(ARCHCORE)form.h $(ARCHCORE)gv.h $(ARCHCORE)handy.h $(ARCHCORE)hv.h
+ac3 = $(ARCHCORE)form.h $(ARCHCORE)gv.h $(ARCHCORE)handy.h $(ARCHCORE)hv.h $(ARCHCORE)utf8.h
 ac4 = $(ARCHCORE)keywords.h $(ARCHCORE)mg.h $(ARCHCORE)op.h $(ARCHCORE)opcode.h
 ac5 = $(ARCHCORE)patchlevel.h $(ARCHCORE)perl.h $(ARCHCORE)perly.h $(ARCHCORE)thread.h $(ARCHCORE)iperlsys.h
 ac6 = $(ARCHCORE)pp.h $(ARCHCORE)proto.h $(ARCHCORE)regcomp.h $(ARCHCORE)perlsdio.h $(ARCHCORE)perlio.h
@@ -1075,6 +1075,10 @@ preplibrary : $(MINIPERL_EXE) $(LIBPREREQ) $(SOCKPM)
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	@ Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 
+[.lib.pod]perlreftut.pod : [.pod]perlreftut.pod
+	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
+	@ Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+
 [.lib.pod]perltrap.pod : [.pod]perltrap.pod
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	@ Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
@@ -1301,6 +1305,9 @@ $(ARCHCORE)thread.h : thread.h
 $(ARCHCORE)util.h : util.h
 	@ If F$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+$(ARCHCORE)utf8.h : utf8.h
+	@ If F$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 $(ARCHCORE)vmsish.h : vmsish.h
 	@ If F$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
@@ -1414,6 +1421,9 @@ taint$(O) : taint.c EXTERN.h perl.h bytecode.h byterun.h config.h embed.h perlsd
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 
 toke$(O) : toke.c EXTERN.h perl.h bytecode.h byterun.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h keywords.h iperlsys.h
+	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
+
+utf8$(O) : utf8.c EXTERN.h perl.h bytecode.h byterun.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h keywords.h iperlsys.h utf8.h
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 
 universal$(O) : universal.c EXTERN.h perl.h bytecode.h byterun.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h XSUB.h iperlsys.h

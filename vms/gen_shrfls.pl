@@ -262,18 +262,23 @@ LINE: while (<CPP>) {
 }
 close CPP;
 
-
+# This was:
 # Kluge to determine whether we need to add EMBED prefix to
 # symbols read from local list.  vmsreaddirversions() is a VMS-
 # specific function whose Perl_ prefix is added in vmsish.h
 # if EMBED is #defined.
-$embed = exists($fcns{'Perl_vmsreaddirversions'}) ? 'Perl_' : '';
+#
+# but now we always define EMBED, so it's not a big deal any more
 while (<DATA>) {
   next if /^#/;
   s/\s+#.*\n//;
   next if /^\s*$/;
   ($key,$array) = split('=',$_);
-  $key = "$embed$key";
+  if ($array eq 'vars') {
+      $key = "PL_$key";
+  } else {
+      $key = "Perl_$key";
+  }
   print "Adding $key to \%$array list\n" if $debug > 1;
   ${$array}{$key}++;
 }
