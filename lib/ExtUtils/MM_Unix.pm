@@ -812,7 +812,7 @@ DIST_DEFAULT = $dist_default
 
 =item dist_basics (o)
 
-Defines the targets distclean, distcheck, skipcheck, manifest.
+Defines the targets distclean, distcheck, skipcheck, manifest, veryclean.
 
 =cut
 
@@ -839,6 +839,11 @@ skipcheck :
 manifest :
 	$(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) -MExtUtils::Manifest=mkmanifest \\
 		-e mkmanifest
+};
+
+    push @m, q{
+veryclean : realclean
+	$(RM_F) *~ *.orig */*~ */*.orig
 };
     join "", @m;
 }

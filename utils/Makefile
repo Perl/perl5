@@ -44,3 +44,6 @@ realclean:
 clobber:	realclean
 
 distclean:	clobber
+
+veryclean:	distclean
+	-rm -f *~ *.org
