@@ -90,7 +90,7 @@ while (@ARGV) {
         $out .= &tab . "!";
         next;
     } elsif ($_ eq 'name') {
-        $out .= &tab . '/' . &fileglob_to_re(shift) . "/";
+        $out .= &tab . '/' . &fileglob_to_re(shift) . "/s";
     } elsif ($_ eq 'perm') {
         my $onum = shift;
         $onum =~ /^-?[0-7]+$/
@@ -139,9 +139,9 @@ while (@ARGV) {
     } elsif ($_ eq 'size') {
         $_ = shift;
         my $n = 'int(((-s _) + 511) / 512)';
-        if (s/c$//) {
+        if (s/c\z//) {
             $n = 'int(-s _)';
-        } elsif (s/k$//) {
+        } elsif (s/k\z//) {
             $n = 'int(((-s _) + 1023) / 1024)';
         }
         $out .= &tab . &n($n, $_);
@@ -215,7 +215,7 @@ while (@ARGV) {
         $initfile .= "open($fh, " . &quote('> ' . $file) .
                      qq{) || die "Can't open $fh: \$!\\n";\n};
         $init{tar} = 1;
-    } elsif (/^(n?)cpio$/) {
+    } elsif (/^(n?)cpio\z/) {
         die "-$_ must have a filename argument\n" unless @ARGV;
         my $file = shift;
         my $fh = 'FH' . $file;
@@ -662,7 +662,7 @@ sub fileglob_to_re {
     my $x = shift;
     $x =~ s#([./^\$()])#\\$1#g;
     $x =~ s#([?*])#.$1#g;
-    "^$x\$";
+    "^$x\\z";
 }
 
 sub n {
