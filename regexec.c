@@ -105,13 +105,6 @@
  * Forwards.
  */
 
-#define REGINCLASS(p,c)  (ANYOF_FLAGS(p) ? reginclass(p,c) : ANYOF_BITMAP_TEST(p,c))
-#ifdef DEBUGGING
-#   define REGINCLASSUTF8(f,p)  (ARG1(f) ? reginclassutf8(f,p) : swash_fetch(*av_fetch((AV*)SvRV((SV*)PL_regdata->data[ARG2(f)]),0,FALSE),p))
-#else
-#   define REGINCLASSUTF8(f,p)  (ARG1(f) ? reginclassutf8(f,p) : swash_fetch((SV*)PL_regdata->data[ARG2(f)],p))
-#endif
-
 #define CHR_SVLEN(sv) (UTF ? sv_len_utf8(sv) : SvCUR(sv))
 #define CHR_DIST(a,b) (UTF ? utf8_distance(a,b) : a - b)
 
@@ -738,7 +731,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 
 	t = s;
 	if (prog->reganch & ROPT_UTF8) {	
-	    PL_regdata = prog->data;	/* Used by REGINCLASS UTF logic */
+	    PL_regdata = prog->data;
 	    PL_bostr = startpos;
 	}
         s = find_byclass(prog, prog->regstclass, s, endpos, startpos, 1);
@@ -840,25 +833,13 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 	unsigned int c2;
 	char *e;
 	register I32 tmp = 1;	/* Scratch variable? */
+	register bool do_utf8 = DO_UTF8(PL_reg_sv);
 
 	/* We know what class it must start with. */
 	switch (OP(c)) {
-	case ANYOFUTF8:
-	    while (s < strend) {
-		if (REGINCLASSUTF8(c, (U8*)s)) {
-		    if (tmp && (norun || regtry(prog, s)))
-			goto got_it;
-		    else
-			tmp = doevery;
-		}
-		else
-		    tmp = 1;
-		s += UTF8SKIP(s);
-	    }
-	    break;
 	case ANYOF:
 	    while (s < strend) {
-		if (REGINCLASS(c, *(U8*)s)) {
+		if (reginclass(c, (U8*)s, do_utf8)) {
 		    if (tmp && (norun || regtry(prog, s)))
 			goto got_it;
 		    else
@@ -866,7 +847,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 		}
 		else
 		    tmp = 1;
-		s++;
+		s += do_utf8 ? UTF8SKIP(s) : 1;
 	    }
 	    break;
 	case EXACTF:
@@ -912,42 +893,40 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 	    PL_reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
 	case BOUND:
-	    tmp = (s != startpos) ? UCHARAT(s - 1) : '\n';
-	    tmp = ((OP(c) == BOUND ? isALNUM(tmp) : isALNUM_LC(tmp)) != 0);
-	    while (s < strend) {
-		if (tmp == !(OP(c) == BOUND ? isALNUM(*s) : isALNUM_LC(*s))) {
-		    tmp = !tmp;
-		    if ((norun || regtry(prog, s)))
-			goto got_it;
+	    if (do_utf8) {
+		if (s == startpos)
+		    tmp = '\n';
+		else {
+		    U8 *r = reghop((U8*)s, -1);
+		    
+		    tmp = (I32)utf8_to_uv(r, s - (char*)r, 0, 0);
 		}
-		s++;
+		tmp = ((OP(c) == BOUND ?
+			isALNUM_uni(tmp) : isALNUM_LC_uni(tmp)) != 0);
+		while (s < strend) {
+		    if (tmp == !(OP(c) == BOUND ?
+				 swash_fetch(PL_utf8_alnum, (U8*)s) :
+				 isALNUM_LC_utf8((U8*)s)))
+		    {
+			tmp = !tmp;
+			if ((norun || regtry(prog, s)))
+			    goto got_it;
+		    }
+		    s += UTF8SKIP(s);
+		}
 	    }
-	    if ((!prog->minlen && tmp) && (norun || regtry(prog, s)))
-		goto got_it;
-	    break;
-	case BOUNDLUTF8:
-	    PL_reg_flags |= RF_tainted;
-	    /* FALL THROUGH */
-	case BOUNDUTF8:
-	    if (s == startpos)
-		tmp = '\n';
 	    else {
-		U8 *r = reghop((U8*)s, -1);
-
-		tmp = (I32)utf8_to_uv(r, s - (char*)r, 0, 0);
-	    }
-	    tmp = ((OP(c) == BOUNDUTF8 ?
-		    isALNUM_uni(tmp) : isALNUM_LC_uni(tmp)) != 0);
-	    while (s < strend) {
-		if (tmp == !(OP(c) == BOUNDUTF8 ?
-			     swash_fetch(PL_utf8_alnum, (U8*)s) :
-			     isALNUM_LC_utf8((U8*)s)))
-		{
-		    tmp = !tmp;
-		    if ((norun || regtry(prog, s)))
-			goto got_it;
+		tmp = (s != startpos) ? UCHARAT(s - 1) : '\n';
+		tmp = ((OP(c) == BOUND ? isALNUM(tmp) : isALNUM_LC(tmp)) != 0);
+		while (s < strend) {
+		    if (tmp ==
+			!(OP(c) == BOUND ? isALNUM(*s) : isALNUM_LC(*s))) {
+			tmp = !tmp;
+			if ((norun || regtry(prog, s)))
+			    goto got_it;
+		    }
+		    s++;
 		}
-		s += UTF8SKIP(s);
 	    }
 	    if ((!prog->minlen && tmp) && (norun || regtry(prog, s)))
 		goto got_it;
@@ -956,365 +935,382 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 	    PL_reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
 	case NBOUND:
-	    tmp = (s != startpos) ? UCHARAT(s - 1) : '\n';
-	    tmp = ((OP(c) == NBOUND ? isALNUM(tmp) : isALNUM_LC(tmp)) != 0);
-	    while (s < strend) {
-		if (tmp == !(OP(c) == NBOUND ? isALNUM(*s) : isALNUM_LC(*s)))
-		    tmp = !tmp;
-		else if ((norun || regtry(prog, s)))
-		    goto got_it;
-		s++;
+	    if (do_utf8) {
+		if (s == startpos)
+		    tmp = '\n';
+		else {
+		    U8 *r = reghop((U8*)s, -1);
+		    
+		    tmp = (I32)utf8_to_uv(r, s - (char*)r, 0, 0);
+		}
+		tmp = ((OP(c) == NBOUND ?
+			isALNUM_uni(tmp) : isALNUM_LC_uni(tmp)) != 0);
+		while (s < strend) {
+		    if (tmp == !(OP(c) == NBOUND ?
+				 swash_fetch(PL_utf8_alnum, (U8*)s) :
+				 isALNUM_LC_utf8((U8*)s)))
+			tmp = !tmp;
+		    else if ((norun || regtry(prog, s)))
+			goto got_it;
+		    s += UTF8SKIP(s);
+		}
 	    }
-	    if ((!prog->minlen && !tmp) && (norun || regtry(prog, s)))
-		goto got_it;
-	    break;
-	case NBOUNDLUTF8:
-	    PL_reg_flags |= RF_tainted;
-	    /* FALL THROUGH */
-	case NBOUNDUTF8:
-	    if (s == startpos)
-		tmp = '\n';
 	    else {
-		U8 *r = reghop((U8*)s, -1);
-
-		tmp = (I32)utf8_to_uv(r, s - (char*)r, 0, 0);
-	    }
-	    tmp = ((OP(c) == NBOUNDUTF8 ?
-		    isALNUM_uni(tmp) : isALNUM_LC_uni(tmp)) != 0);
-	    while (s < strend) {
-		if (tmp == !(OP(c) == NBOUNDUTF8 ?
-			     swash_fetch(PL_utf8_alnum, (U8*)s) :
-			     isALNUM_LC_utf8((U8*)s)))
-		    tmp = !tmp;
-		else if ((norun || regtry(prog, s)))
-		    goto got_it;
-		s += UTF8SKIP(s);
+		tmp = (s != startpos) ? UCHARAT(s - 1) : '\n';
+		tmp = ((OP(c) == NBOUND ?
+			isALNUM(tmp) : isALNUM_LC(tmp)) != 0);
+		while (s < strend) {
+		    if (tmp ==
+			!(OP(c) == NBOUND ? isALNUM(*s) : isALNUM_LC(*s)))
+			tmp = !tmp;
+		    else if ((norun || regtry(prog, s)))
+			goto got_it;
+		    s++;
+		}
 	    }
 	    if ((!prog->minlen && !tmp) && (norun || regtry(prog, s)))
 		goto got_it;
 	    break;
 	case ALNUM:
-	    while (s < strend) {
-		if (isALNUM(*s)) {
-		    if (tmp && (norun || regtry(prog, s)))
-			goto got_it;
+	    if (do_utf8) {
+		while (s < strend) {
+		    if (swash_fetch(PL_utf8_alnum, (U8*)s)) {
+			if (tmp && (norun || regtry(prog, s)))
+			    goto got_it;
+			else
+			    tmp = doevery;
+		    }
 		    else
-			tmp = doevery;
+			tmp = 1;
+		    s += UTF8SKIP(s);
 		}
-		else
-		    tmp = 1;
-		s++;
 	    }
-	    break;
-	case ALNUMUTF8:
-	    while (s < strend) {
-		if (swash_fetch(PL_utf8_alnum, (U8*)s)) {
-		    if (tmp && (norun || regtry(prog, s)))
-			goto got_it;
+	    else {
+		while (s < strend) {
+		    if (isALNUM(*s)) {
+			if (tmp && (norun || regtry(prog, s)))
+			    goto got_it;
+			else
+			    tmp = doevery;
+		    }
 		    else
-			tmp = doevery;
+			tmp = 1;
+		    s++;
 		}
-		else
-		    tmp = 1;
-		s += UTF8SKIP(s);
 	    }
 	    break;
 	case ALNUML:
 	    PL_reg_flags |= RF_tainted;
-	    while (s < strend) {
-		if (isALNUM_LC(*s)) {
-		    if (tmp && (norun || regtry(prog, s)))
-			goto got_it;
+	    if (do_utf8) {
+		while (s < strend) {
+		    if (isALNUM_LC_utf8((U8*)s)) {
+			if (tmp && (norun || regtry(prog, s)))
+			    goto got_it;
+			else
+			    tmp = doevery;
+		    }
 		    else
-			tmp = doevery;
+			tmp = 1;
+		    s += UTF8SKIP(s);
 		}
-		else
-		    tmp = 1;
-		s++;
 	    }
-	    break;
-	case ALNUMLUTF8:
-	    PL_reg_flags |= RF_tainted;
-	    while (s < strend) {
-		if (isALNUM_LC_utf8((U8*)s)) {
-		    if (tmp && (norun || regtry(prog, s)))
-			goto got_it;
+	    else {
+		while (s < strend) {
+		    if (isALNUM_LC(*s)) {
+			if (tmp && (norun || regtry(prog, s)))
+			    goto got_it;
+			else
+			    tmp = doevery;
+		    }
 		    else
-			tmp = doevery;
+			tmp = 1;
+		    s++;
 		}
-		else
-		    tmp = 1;
-		s += UTF8SKIP(s);
 	    }
 	    break;
 	case NALNUM:
-	    while (s < strend) {
-		if (!isALNUM(*s)) {
-		    if (tmp && (norun || regtry(prog, s)))
-			goto got_it;
+	    if (do_utf8) {
+		while (s < strend) {
+		    if (!swash_fetch(PL_utf8_alnum, (U8*)s)) {
+			if (tmp && (norun || regtry(prog, s)))
+			    goto got_it;
+			else
+			    tmp = doevery;
+		    }
 		    else
-			tmp = doevery;
+			tmp = 1;
+		    s += UTF8SKIP(s);
 		}
-		else
-		    tmp = 1;
-		s++;
 	    }
-	    break;
-	case NALNUMUTF8:
-	    while (s < strend) {
-		if (!swash_fetch(PL_utf8_alnum, (U8*)s)) {
-		    if (tmp && (norun || regtry(prog, s)))
-			goto got_it;
+	    else {
+		while (s < strend) {
+		    if (!isALNUM(*s)) {
+			if (tmp && (norun || regtry(prog, s)))
+			    goto got_it;
+			else
+			    tmp = doevery;
+		    }
 		    else
-			tmp = doevery;
+			tmp = 1;
+		    s++;
 		}
-		else
-		    tmp = 1;
-		s += UTF8SKIP(s);
 	    }
 	    break;
 	case NALNUML:
 	    PL_reg_flags |= RF_tainted;
-	    while (s < strend) {
-		if (!isALNUM_LC(*s)) {
-		    if (tmp && (norun || regtry(prog, s)))
-			goto got_it;
+	    if (do_utf8) {
+		while (s < strend) {
+		    if (!isALNUM_LC_utf8((U8*)s)) {
+			if (tmp && (norun || regtry(prog, s)))
+			    goto got_it;
+			else
+			    tmp = doevery;
+		    }
 		    else
-			tmp = doevery;
+			tmp = 1;
+		    s += UTF8SKIP(s);
 		}
-		else
-		    tmp = 1;
-		s++;
 	    }
-	    break;
-	case NALNUMLUTF8:
-	    PL_reg_flags |= RF_tainted;
-	    while (s < strend) {
-		if (!isALNUM_LC_utf8((U8*)s)) {
-		    if (tmp && (norun || regtry(prog, s)))
-			goto got_it;
+	    else {
+		while (s < strend) {
+		    if (!isALNUM_LC(*s)) {
+			if (tmp && (norun || regtry(prog, s)))
+			    goto got_it;
+			else
+			    tmp = doevery;
+		    }
 		    else
-			tmp = doevery;
+			tmp = 1;
+		    s++;
 		}
-		else
-		    tmp = 1;
-		s += UTF8SKIP(s);
 	    }
 	    break;
 	case SPACE:
-	    while (s < strend) {
-		if (isSPACE(*s)) {
-		    if (tmp && (norun || regtry(prog, s)))
-			goto got_it;
+	    if (do_utf8) {
+		while (s < strend) {
+		    if (*s == ' ' || swash_fetch(PL_utf8_space,(U8*)s)) {
+			if (tmp && (norun || regtry(prog, s)))
+			    goto got_it;
+			else
+			    tmp = doevery;
+		    }
 		    else
-			tmp = doevery;
+			tmp = 1;
+		    s += UTF8SKIP(s);
 		}
-		else
-		    tmp = 1;
-		s++;
 	    }
-	    break;
-	case SPACEUTF8:
-	    while (s < strend) {
-		if (*s == ' ' || swash_fetch(PL_utf8_space,(U8*)s)) {
-		    if (tmp && (norun || regtry(prog, s)))
-			goto got_it;
+	    else {
+		while (s < strend) {
+		    if (isSPACE(*s)) {
+			if (tmp && (norun || regtry(prog, s)))
+			    goto got_it;
+			else
+			    tmp = doevery;
+		    }
 		    else
-			tmp = doevery;
+			tmp = 1;
+		    s++;
 		}
-		else
-		    tmp = 1;
-		s += UTF8SKIP(s);
 	    }
 	    break;
 	case SPACEL:
 	    PL_reg_flags |= RF_tainted;
-	    while (s < strend) {
-		if (isSPACE_LC(*s)) {
-		    if (tmp && (norun || regtry(prog, s)))
-			goto got_it;
+	    if (do_utf8) {
+		while (s < strend) {
+		    if (*s == ' ' || isSPACE_LC_utf8((U8*)s)) {
+			if (tmp && (norun || regtry(prog, s)))
+			    goto got_it;
+			else
+			    tmp = doevery;
+		    }
 		    else
-			tmp = doevery;
+			tmp = 1;
+		    s += UTF8SKIP(s);
 		}
-		else
-		    tmp = 1;
-		s++;
 	    }
-	    break;
-	case SPACELUTF8:
-	    PL_reg_flags |= RF_tainted;
-	    while (s < strend) {
-		if (*s == ' ' || isSPACE_LC_utf8((U8*)s)) {
-		    if (tmp && (norun || regtry(prog, s)))
-			goto got_it;
+	    else {
+		while (s < strend) {
+		    if (isSPACE_LC(*s)) {
+			if (tmp && (norun || regtry(prog, s)))
+			    goto got_it;
+			else
+			    tmp = doevery;
+		    }
 		    else
-			tmp = doevery;
+			tmp = 1;
+		    s++;
 		}
-		else
-		    tmp = 1;
-		s += UTF8SKIP(s);
 	    }
 	    break;
 	case NSPACE:
-	    while (s < strend) {
-		if (!isSPACE(*s)) {
-		    if (tmp && (norun || regtry(prog, s)))
-			goto got_it;
+	    if (do_utf8) {
+		while (s < strend) {
+		    if (!(*s == ' ' || swash_fetch(PL_utf8_space,(U8*)s))) {
+			if (tmp && (norun || regtry(prog, s)))
+			    goto got_it;
+			else
+			    tmp = doevery;
+		    }
 		    else
-			tmp = doevery;
+			tmp = 1;
+		    s += UTF8SKIP(s);
 		}
-		else
-		    tmp = 1;
-		s++;
 	    }
-	    break;
-	case NSPACEUTF8:
-	    while (s < strend) {
-		if (!(*s == ' ' || swash_fetch(PL_utf8_space,(U8*)s))) {
-		    if (tmp && (norun || regtry(prog, s)))
-			goto got_it;
+	    else {
+		while (s < strend) {
+		    if (!isSPACE(*s)) {
+			if (tmp && (norun || regtry(prog, s)))
+			    goto got_it;
+			else
+			    tmp = doevery;
+		    }
 		    else
-			tmp = doevery;
+			tmp = 1;
+		    s++;
 		}
-		else
-		    tmp = 1;
-		s += UTF8SKIP(s);
 	    }
 	    break;
 	case NSPACEL:
 	    PL_reg_flags |= RF_tainted;
-	    while (s < strend) {
-		if (!isSPACE_LC(*s)) {
-		    if (tmp && (norun || regtry(prog, s)))
-			goto got_it;
+	    if (do_utf8) {
+		while (s < strend) {
+		    if (!(*s == ' ' || isSPACE_LC_utf8((U8*)s))) {
+			if (tmp && (norun || regtry(prog, s)))
+			    goto got_it;
+			else
+			    tmp = doevery;
+		    }
 		    else
-			tmp = doevery;
+			tmp = 1;
+		    s += UTF8SKIP(s);
 		}
-		else
-		    tmp = 1;
-		s++;
 	    }
-	    break;
-	case NSPACELUTF8:
-	    PL_reg_flags |= RF_tainted;
-	    while (s < strend) {
-		if (!(*s == ' ' || isSPACE_LC_utf8((U8*)s))) {
-		    if (tmp && (norun || regtry(prog, s)))
-			goto got_it;
+	    else {
+		while (s < strend) {
+		    if (!isSPACE_LC(*s)) {
+			if (tmp && (norun || regtry(prog, s)))
+			    goto got_it;
+			else
+			    tmp = doevery;
+		    }
 		    else
-			tmp = doevery;
+			tmp = 1;
+		    s++;
 		}
-		else
-		    tmp = 1;
-		s += UTF8SKIP(s);
 	    }
 	    break;
 	case DIGIT:
-	    while (s < strend) {
-		if (isDIGIT(*s)) {
-		    if (tmp && (norun || regtry(prog, s)))
-			goto got_it;
+	    if (do_utf8) {
+		while (s < strend) {
+		    if (swash_fetch(PL_utf8_digit,(U8*)s)) {
+			if (tmp && (norun || regtry(prog, s)))
+			    goto got_it;
+			else
+			    tmp = doevery;
+		    }
 		    else
-			tmp = doevery;
+			tmp = 1;
+		    s += UTF8SKIP(s);
 		}
-		else
-		    tmp = 1;
-		s++;
 	    }
-	    break;
-	case DIGITUTF8:
-	    while (s < strend) {
-		if (swash_fetch(PL_utf8_digit,(U8*)s)) {
-		    if (tmp && (norun || regtry(prog, s)))
-			goto got_it;
+	    else {
+		while (s < strend) {
+		    if (isDIGIT(*s)) {
+			if (tmp && (norun || regtry(prog, s)))
+			    goto got_it;
+			else
+			    tmp = doevery;
+		    }
 		    else
-			tmp = doevery;
+			tmp = 1;
+		    s++;
 		}
-		else
-		    tmp = 1;
-		s += UTF8SKIP(s);
 	    }
 	    break;
 	case DIGITL:
 	    PL_reg_flags |= RF_tainted;
-	    while (s < strend) {
-		if (isDIGIT_LC(*s)) {
-		    if (tmp && (norun || regtry(prog, s)))
-			goto got_it;
+	    if (do_utf8) {
+		while (s < strend) {
+		    if (isDIGIT_LC_utf8((U8*)s)) {
+			if (tmp && (norun || regtry(prog, s)))
+			    goto got_it;
+			else
+			    tmp = doevery;
+		    }
 		    else
-			tmp = doevery;
+			tmp = 1;
+		    s += UTF8SKIP(s);
 		}
-		else
-		    tmp = 1;
-		s++;
 	    }
-	    break;
-	case DIGITLUTF8:
-	    PL_reg_flags |= RF_tainted;
-	    while (s < strend) {
-		if (isDIGIT_LC_utf8((U8*)s)) {
-		    if (tmp && (norun || regtry(prog, s)))
-			goto got_it;
+	    else {
+		while (s < strend) {
+		    if (isDIGIT_LC(*s)) {
+			if (tmp && (norun || regtry(prog, s)))
+			    goto got_it;
+			else
+			    tmp = doevery;
+		    }
 		    else
-			tmp = doevery;
+			tmp = 1;
+		    s++;
 		}
-		else
-		    tmp = 1;
-		s += UTF8SKIP(s);
 	    }
 	    break;
 	case NDIGIT:
-	    while (s < strend) {
-		if (!isDIGIT(*s)) {
-		    if (tmp && (norun || regtry(prog, s)))
-			goto got_it;
+	    if (do_utf8) {
+		while (s < strend) {
+		    if (!swash_fetch(PL_utf8_digit,(U8*)s)) {
+			if (tmp && (norun || regtry(prog, s)))
+			    goto got_it;
+			else
+			    tmp = doevery;
+		    }
 		    else
-			tmp = doevery;
+			tmp = 1;
+		    s += UTF8SKIP(s);
 		}
-		else
-		    tmp = 1;
-		s++;
 	    }
-	    break;
-	case NDIGITUTF8:
-	    while (s < strend) {
-		if (!swash_fetch(PL_utf8_digit,(U8*)s)) {
-		    if (tmp && (norun || regtry(prog, s)))
-			goto got_it;
+	    else {
+		while (s < strend) {
+		    if (!isDIGIT(*s)) {
+			if (tmp && (norun || regtry(prog, s)))
+			    goto got_it;
+			else
+			    tmp = doevery;
+		    }
 		    else
-			tmp = doevery;
+			tmp = 1;
+		    s++;
 		}
-		else
-		    tmp = 1;
-		s += UTF8SKIP(s);
 	    }
 	    break;
 	case NDIGITL:
 	    PL_reg_flags |= RF_tainted;
-	    while (s < strend) {
-		if (!isDIGIT_LC(*s)) {
-		    if (tmp && (norun || regtry(prog, s)))
-			goto got_it;
+	    if (do_utf8) {
+		while (s < strend) {
+		    if (!isDIGIT_LC_utf8((U8*)s)) {
+			if (tmp && (norun || regtry(prog, s)))
+			    goto got_it;
+			else
+			    tmp = doevery;
+		    }
 		    else
-			tmp = doevery;
+			tmp = 1;
+		    s += UTF8SKIP(s);
 		}
-		else
-		    tmp = 1;
-		s++;
 	    }
-	    break;
-	case NDIGITLUTF8:
-	    PL_reg_flags |= RF_tainted;
-	    while (s < strend) {
-		if (!isDIGIT_LC_utf8((U8*)s)) {
-		    if (tmp && (norun || regtry(prog, s)))
-			goto got_it;
+	    else {
+		while (s < strend) {
+		    if (!isDIGIT_LC(*s)) {
+			if (tmp && (norun || regtry(prog, s)))
+			    goto got_it;
+			else
+			    tmp = doevery;
+		    }
 		    else
-			tmp = doevery;
+			tmp = 1;
+		    s++;
 		}
-		else
-		    tmp = 1;
-		s += UTF8SKIP(s);
 	    }
 	    break;
 	default:
@@ -1606,6 +1602,11 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	if (minlen && PL_regkind[(U8)OP(prog->regstclass)] != EXACT)
 	    /* don't bother with what can't match */
 	    strend = HOPc(strend, -(minlen - 1));
+	DEBUG_r({
+	    SV *prop = sv_newmortal();
+	    regprop(prop, c);
+	    PerlIO_printf(Perl_debug_log, "Matching stclass `%s' against `%s'\n", SvPVX(prop), s);
+	});
   	if (find_byclass(prog, c, s, strend, startpos, 0))
 	    goto got_it;
 	DEBUG_r(PerlIO_printf(Perl_debug_log, "Contradicts stclass...\n"));
@@ -1619,7 +1620,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 		last = screaminstr(sv, prog->float_substr, s - strbeg,
 				   end_shift, &scream_pos, 1); /* last one */
 		if (!last)
-		    last = scream_olds; /* Only one occurence. */
+		    last = scream_olds; /* Only one occurrence. */
 	    }
 	    else {
 		STRLEN len;
@@ -1891,6 +1892,7 @@ S_regmatch(pTHX_ regnode *prog)
     int minmod = 0, sw = 0, logical = 0;
     I32 unwind = 0;
     I32 firstcp = PL_savestack_ix;
+    register bool do_utf8 = DO_UTF8(PL_reg_sv);
 
 #ifdef DEBUGGING
     PL_regindent++;
@@ -2009,36 +2011,26 @@ S_regmatch(pTHX_ regnode *prog)
 	    if (PL_regeol != locinput)
 		sayNO;
 	    break;
-	case SANYUTF8:
-	    if (nextchr & 0x80) {
-		locinput += PL_utf8skip[nextchr];
-		if (locinput > PL_regeol)
-		    sayNO;
-		nextchr = UCHARAT(locinput);
-		break;
-	    }
-	    if (!nextchr && locinput >= PL_regeol)
-		sayNO;
-	    nextchr = UCHARAT(++locinput);
-	    break;
 	case SANY:
-	    if (!nextchr && locinput >= PL_regeol)
-		sayNO;
-	    nextchr = UCHARAT(++locinput);
-	    break;
-	case ANYUTF8:
-	    if (nextchr & 0x80) {
+	    if (DO_UTF8(PL_reg_sv)) {
 		locinput += PL_utf8skip[nextchr];
 		if (locinput > PL_regeol)
 		    sayNO;
 		nextchr = UCHARAT(locinput);
 		break;
 	    }
-	    if ((!nextchr && locinput >= PL_regeol) || nextchr == '\n')
+	    if (!nextchr && locinput >= PL_regeol)
 		sayNO;
 	    nextchr = UCHARAT(++locinput);
 	    break;
 	case REG_ANY:
+	    if (DO_UTF8(PL_reg_sv)) {
+		locinput += PL_utf8skip[nextchr];
+		if (locinput > PL_regeol)
+		    sayNO;
+		nextchr = UCHARAT(locinput);
+		break;
+	    }
 	    if ((!nextchr && locinput >= PL_regeol) || nextchr == '\n')
 		sayNO;
 	    nextchr = UCHARAT(++locinput);
@@ -2099,22 +2091,24 @@ S_regmatch(pTHX_ regnode *prog)
 	    locinput += ln;
 	    nextchr = UCHARAT(locinput);
 	    break;
-	case ANYOFUTF8:
-	    if (!REGINCLASSUTF8(scan, (U8*)locinput))
-		sayNO;
-	    if (locinput >= PL_regeol)
-		sayNO;
-	    locinput += PL_utf8skip[nextchr];
-	    nextchr = UCHARAT(locinput);
-	    break;
 	case ANYOF:
-	    if (nextchr < 0)
+	    if (do_utf8) {
+		if (!reginclass(scan, (U8*)locinput, do_utf8))
+		    sayNO;
+		if (locinput >= PL_regeol)
+		    sayNO;
+		locinput += PL_utf8skip[nextchr];
 		nextchr = UCHARAT(locinput);
-	    if (!REGINCLASS(scan, nextchr))
-		sayNO;
-	    if (!nextchr && locinput >= PL_regeol)
-		sayNO;
-	    nextchr = UCHARAT(++locinput);
+	    }
+	    else {
+		if (nextchr < 0)
+		    nextchr = UCHARAT(locinput);
+		if (!reginclass(scan, (U8*)locinput, do_utf8))
+		    sayNO;
+		if (!nextchr && locinput >= PL_regeol)
+		    sayNO;
+		nextchr = UCHARAT(++locinput);
+	    }
 	    break;
 	case ALNUML:
 	    PL_reg_flags |= RF_tainted;
@@ -2122,19 +2116,8 @@ S_regmatch(pTHX_ regnode *prog)
 	case ALNUM:
 	    if (!nextchr)
 		sayNO;
-	    if (!(OP(scan) == ALNUM
-		  ? isALNUM(nextchr) : isALNUM_LC(nextchr)))
-		sayNO;
-	    nextchr = UCHARAT(++locinput);
-	    break;
-	case ALNUMLUTF8:
-	    PL_reg_flags |= RF_tainted;
-	    /* FALL THROUGH */
-	case ALNUMUTF8:
-	    if (!nextchr)
-		sayNO;
-	    if (nextchr & 0x80) {
-		if (!(OP(scan) == ALNUMUTF8
+	    if (do_utf8) {
+		if (!(OP(scan) == ALNUM
 		      ? swash_fetch(PL_utf8_alnum, (U8*)locinput)
 		      : isALNUM_LC_utf8((U8*)locinput)))
 		{
@@ -2144,7 +2127,7 @@ S_regmatch(pTHX_ regnode *prog)
 		nextchr = UCHARAT(locinput);
 		break;
 	    }
-	    if (!(OP(scan) == ALNUMUTF8
+	    if (!(OP(scan) == ALNUM
 		  ? isALNUM(nextchr) : isALNUM_LC(nextchr)))
 		sayNO;
 	    nextchr = UCHARAT(++locinput);
@@ -2155,19 +2138,8 @@ S_regmatch(pTHX_ regnode *prog)
 	case NALNUM:
 	    if (!nextchr && locinput >= PL_regeol)
 		sayNO;
-	    if (OP(scan) == NALNUM
-		? isALNUM(nextchr) : isALNUM_LC(nextchr))
-		sayNO;
-	    nextchr = UCHARAT(++locinput);
-	    break;
-	case NALNUMLUTF8:
-	    PL_reg_flags |= RF_tainted;
-	    /* FALL THROUGH */
-	case NALNUMUTF8:
-	    if (!nextchr && locinput >= PL_regeol)
-		sayNO;
-	    if (nextchr & 0x80) {
-		if (OP(scan) == NALNUMUTF8
+	    if (do_utf8) {
+		if (OP(scan) == NALNUM
 		    ? swash_fetch(PL_utf8_alnum, (U8*)locinput)
 		    : isALNUM_LC_utf8((U8*)locinput))
 		{
@@ -2177,7 +2149,7 @@ S_regmatch(pTHX_ regnode *prog)
 		nextchr = UCHARAT(locinput);
 		break;
 	    }
-	    if (OP(scan) == NALNUMUTF8
+	    if (OP(scan) == NALNUM
 		? isALNUM(nextchr) : isALNUM_LC(nextchr))
 		sayNO;
 	    nextchr = UCHARAT(++locinput);
@@ -2189,42 +2161,38 @@ S_regmatch(pTHX_ regnode *prog)
 	case BOUND:
 	case NBOUND:
 	    /* was last char in word? */
-	    ln = (locinput != PL_regbol) ? UCHARAT(locinput - 1) : PL_regprev;
-	    if (OP(scan) == BOUND || OP(scan) == NBOUND) {
-		ln = isALNUM(ln);
-		n = isALNUM(nextchr);
+	    if (do_utf8) {
+		if (locinput == PL_regbol)
+		    ln = PL_regprev;
+		else {
+		    U8 *r = reghop((U8*)locinput, -1);
+		    
+		    ln = utf8_to_uv(r, s - (char*)r, 0, 0);
+		}
+		if (OP(scan) == BOUND || OP(scan) == NBOUND) {
+		    ln = isALNUM_uni(ln);
+		    n = swash_fetch(PL_utf8_alnum, (U8*)locinput);
+		}
+		else {
+		    ln = isALNUM_LC_uni(ln);
+		    n = isALNUM_LC_utf8((U8*)locinput);
+		}
 	    }
 	    else {
-		ln = isALNUM_LC(ln);
-		n = isALNUM_LC(nextchr);
+		ln = (locinput != PL_regbol) ?
+		    UCHARAT(locinput - 1) : PL_regprev;
+		if (OP(scan) == BOUND || OP(scan) == NBOUND) {
+		    ln = isALNUM(ln);
+		    n = isALNUM(nextchr);
+		}
+		else {
+		    ln = isALNUM_LC(ln);
+		    n = isALNUM_LC(nextchr);
+		}
 	    }
-	    if (((!ln) == (!n)) == (OP(scan) == BOUND || OP(scan) == BOUNDL))
-		sayNO;
-	    break;
-	case BOUNDLUTF8:
-	case NBOUNDLUTF8:
-	    PL_reg_flags |= RF_tainted;
-	    /* FALL THROUGH */
-	case BOUNDUTF8:
-	case NBOUNDUTF8:
-	    /* was last char in word? */
-	    if (locinput == PL_regbol)
-		ln = PL_regprev;
-	    else {
-		U8 *r = reghop((U8*)locinput, -1);
-
-		ln = utf8_to_uv(r, s - (char*)r, 0, 0);
-	    }
-	    if (OP(scan) == BOUNDUTF8 || OP(scan) == NBOUNDUTF8) {
-		ln = isALNUM_uni(ln);
-		n = swash_fetch(PL_utf8_alnum, (U8*)locinput);
-	    }
-	    else {
-		ln = isALNUM_LC_uni(ln);
-		n = isALNUM_LC_utf8((U8*)locinput);
-	    }
-	    if (((!ln) == (!n)) == (OP(scan) == BOUNDUTF8 || OP(scan) == BOUNDLUTF8))
-		sayNO;
+	    if (((!ln) == (!n)) == (OP(scan) == BOUND ||
+				    OP(scan) == BOUNDL))
+		    sayNO;
 	    break;
 	case SPACEL:
 	    PL_reg_flags |= RF_tainted;
@@ -2232,32 +2200,29 @@ S_regmatch(pTHX_ regnode *prog)
 	case SPACE:
 	    if (!nextchr)
 		sayNO;
-	    if (!(OP(scan) == SPACE
-		  ? isSPACE(nextchr) : isSPACE_LC(nextchr)))
-		sayNO;
-	    nextchr = UCHARAT(++locinput);
-	    break;
-	case SPACELUTF8:
-	    PL_reg_flags |= RF_tainted;
-	    /* FALL THROUGH */
-	case SPACEUTF8:
-	    if (!nextchr)
-		sayNO;
-	    if (nextchr & 0x80) {
-		if (!(OP(scan) == SPACEUTF8
-		      ? swash_fetch(PL_utf8_space, (U8*)locinput)
-		      : isSPACE_LC_utf8((U8*)locinput)))
-		{
-		    sayNO;
+	    if (DO_UTF8(PL_reg_sv)) {
+		if (nextchr & 0x80) {
+		    if (!(OP(scan) == SPACE
+			  ? swash_fetch(PL_utf8_space, (U8*)locinput)
+			  : isSPACE_LC_utf8((U8*)locinput)))
+		    {
+			sayNO;
+		    }
+		    locinput += PL_utf8skip[nextchr];
+		    nextchr = UCHARAT(locinput);
+		    break;
 		}
-		locinput += PL_utf8skip[nextchr];
-		nextchr = UCHARAT(locinput);
-		break;
+		if (!(OP(scan) == SPACE
+		      ? isSPACE(nextchr) : isSPACE_LC(nextchr)))
+		    sayNO;
+		nextchr = UCHARAT(++locinput);
 	    }
-	    if (!(OP(scan) == SPACEUTF8
-		  ? isSPACE(nextchr) : isSPACE_LC(nextchr)))
-		sayNO;
-	    nextchr = UCHARAT(++locinput);
+	    else {
+		if (!(OP(scan) == SPACE
+		      ? isSPACE(nextchr) : isSPACE_LC(nextchr)))
+		    sayNO;
+		nextchr = UCHARAT(++locinput);
+	    }
 	    break;
 	case NSPACEL:
 	    PL_reg_flags |= RF_tainted;
@@ -2265,19 +2230,8 @@ S_regmatch(pTHX_ regnode *prog)
 	case NSPACE:
 	    if (!nextchr && locinput >= PL_regeol)
 		sayNO;
-	    if (OP(scan) == NSPACE
-		? isSPACE(nextchr) : isSPACE_LC(nextchr))
-		sayNO;
-	    nextchr = UCHARAT(++locinput);
-	    break;
-	case NSPACELUTF8:
-	    PL_reg_flags |= RF_tainted;
-	    /* FALL THROUGH */
-	case NSPACEUTF8:
-	    if (!nextchr && locinput >= PL_regeol)
-		sayNO;
-	    if (nextchr & 0x80) {
-		if (OP(scan) == NSPACEUTF8
+	    if (DO_UTF8(PL_reg_sv)) {
+		if (OP(scan) == NSPACE
 		    ? swash_fetch(PL_utf8_space, (U8*)locinput)
 		    : isSPACE_LC_utf8((U8*)locinput))
 		{
@@ -2287,7 +2241,7 @@ S_regmatch(pTHX_ regnode *prog)
 		nextchr = UCHARAT(locinput);
 		break;
 	    }
-	    if (OP(scan) == NSPACEUTF8
+	    if (OP(scan) == NSPACE
 		? isSPACE(nextchr) : isSPACE_LC(nextchr))
 		sayNO;
 	    nextchr = UCHARAT(++locinput);
@@ -2298,19 +2252,8 @@ S_regmatch(pTHX_ regnode *prog)
 	case DIGIT:
 	    if (!nextchr)
 		sayNO;
-	    if (!(OP(scan) == DIGIT
-		  ? isDIGIT(nextchr) : isDIGIT_LC(nextchr)))
-		sayNO;
-	    nextchr = UCHARAT(++locinput);
-	    break;
-	case DIGITLUTF8:
-	    PL_reg_flags |= RF_tainted;
-	    /* FALL THROUGH */
-	case DIGITUTF8:
-	    if (!nextchr)
-		sayNO;
-	    if (nextchr & 0x80) {
-		if (!(OP(scan) == DIGITUTF8
+	    if (DO_UTF8(PL_reg_sv)) {
+		if (!(OP(scan) == DIGIT
 		      ? swash_fetch(PL_utf8_digit, (U8*)locinput)
 		      : isDIGIT_LC_utf8((U8*)locinput)))
 		{
@@ -2320,7 +2263,7 @@ S_regmatch(pTHX_ regnode *prog)
 		nextchr = UCHARAT(locinput);
 		break;
 	    }
-	    if (!(OP(scan) == DIGITUTF8
+	    if (!(OP(scan) == DIGIT
 		  ? isDIGIT(nextchr) : isDIGIT_LC(nextchr)))
 		sayNO;
 	    nextchr = UCHARAT(++locinput);
@@ -2331,19 +2274,8 @@ S_regmatch(pTHX_ regnode *prog)
 	case NDIGIT:
 	    if (!nextchr && locinput >= PL_regeol)
 		sayNO;
-	    if (OP(scan) == NDIGIT
-		? isDIGIT(nextchr) : isDIGIT_LC(nextchr))
-		sayNO;
-	    nextchr = UCHARAT(++locinput);
-	    break;
-	case NDIGITLUTF8:
-	    PL_reg_flags |= RF_tainted;
-	    /* FALL THROUGH */
-	case NDIGITUTF8:
-	    if (!nextchr && locinput >= PL_regeol)
-		sayNO;
-	    if (nextchr & 0x80) {
-		if (OP(scan) == NDIGITUTF8
+	    if (DO_UTF8(PL_reg_sv)) {
+		if (OP(scan) == NDIGIT
 		    ? swash_fetch(PL_utf8_digit, (U8*)locinput)
 		    : isDIGIT_LC_utf8((U8*)locinput))
 		{
@@ -2353,7 +2285,7 @@ S_regmatch(pTHX_ regnode *prog)
 		nextchr = UCHARAT(locinput);
 		break;
 	    }
-	    if (OP(scan) == NDIGITUTF8
+	    if (OP(scan) == NDIGIT
 		? isDIGIT(nextchr) : isDIGIT_LC(nextchr))
 		sayNO;
 	    nextchr = UCHARAT(++locinput);
@@ -3461,30 +3393,33 @@ S_regrepeat(pTHX_ regnode *p, I32 max)
     register I32 c;
     register char *loceol = PL_regeol;
     register I32 hardcount = 0;
+    register bool do_utf8 = DO_UTF8(PL_reg_sv);
 
     scan = PL_reginput;
     if (max != REG_INFTY && max < loceol - scan)
       loceol = scan + max;
     switch (OP(p)) {
     case REG_ANY:
-	while (scan < loceol && *scan != '\n')
-	    scan++;
-	break;
-    case SANY:
-	scan = loceol;
-	break;
-    case ANYUTF8:
-	loceol = PL_regeol;
-	while (scan < loceol && *scan != '\n') {
-	    scan += UTF8SKIP(scan);
-	    hardcount++;
+	if (DO_UTF8(PL_reg_sv)) {
+	    loceol = PL_regeol;
+	    while (scan < loceol && *scan != '\n') {
+		scan += UTF8SKIP(scan);
+		hardcount++;
+	    }
+	} else {
+	    while (scan < loceol && *scan != '\n')
+		scan++;
 	}
 	break;
-    case SANYUTF8:
-	loceol = PL_regeol;
-	while (scan < loceol) {
-	    scan += UTF8SKIP(scan);
-	    hardcount++;
+    case SANY:
+	if (DO_UTF8(PL_reg_sv)) {
+	    loceol = PL_regeol;
+	    while (scan < loceol) {
+		scan += UTF8SKIP(scan);
+		hardcount++;
+	    }
+	} else {
+	    scan = loceol;
 	}
 	break;
     case EXACT:		/* length of string is 1 */
@@ -3505,135 +3440,144 @@ S_regrepeat(pTHX_ regnode *p, I32 max)
 	       (UCHARAT(scan) == c || UCHARAT(scan) == PL_fold_locale[c]))
 	    scan++;
 	break;
-    case ANYOFUTF8:
-	loceol = PL_regeol;
-	while (scan < loceol && REGINCLASSUTF8(p, (U8*)scan)) {
-	    scan += UTF8SKIP(scan);
-	    hardcount++;
+    case ANYOF:
+	if (do_utf8) {
+	    loceol = PL_regeol;
+	    while (scan < loceol && reginclass(p, (U8*)scan, do_utf8)) {
+		scan += UTF8SKIP(scan);
+		hardcount++;
+	    }
+	} else {
+	    while (scan < loceol && reginclass(p, (U8*)scan, do_utf8))
+		scan++;
 	}
 	break;
-    case ANYOF:
-	while (scan < loceol && REGINCLASS(p, *scan))
-	    scan++;
-	break;
     case ALNUM:
-	while (scan < loceol && isALNUM(*scan))
-	    scan++;
-	break;
-    case ALNUMUTF8:
-	loceol = PL_regeol;
-	while (scan < loceol && swash_fetch(PL_utf8_alnum, (U8*)scan)) {
-	    scan += UTF8SKIP(scan);
-	    hardcount++;
+	if (DO_UTF8(PL_reg_sv)) {
+	    loceol = PL_regeol;
+	    while (scan < loceol && swash_fetch(PL_utf8_alnum, (U8*)scan)) {
+		scan += UTF8SKIP(scan);
+		hardcount++;
+	    }
+	} else {
+	    while (scan < loceol && isALNUM(*scan))
+		scan++;
 	}
 	break;
     case ALNUML:
 	PL_reg_flags |= RF_tainted;
-	while (scan < loceol && isALNUM_LC(*scan))
-	    scan++;
-	break;
-    case ALNUMLUTF8:
-	PL_reg_flags |= RF_tainted;
-	loceol = PL_regeol;
-	while (scan < loceol && isALNUM_LC_utf8((U8*)scan)) {
-	    scan += UTF8SKIP(scan);
-	    hardcount++;
+	if (DO_UTF8(PL_reg_sv)) {
+	    loceol = PL_regeol;
+	    while (scan < loceol && isALNUM_LC_utf8((U8*)scan)) {
+		scan += UTF8SKIP(scan);
+		hardcount++;
+	    }
+	} else {
+	    while (scan < loceol && isALNUM_LC(*scan))
+		scan++;
 	}
 	break;
-	break;
     case NALNUM:
-	while (scan < loceol && !isALNUM(*scan))
-	    scan++;
-	break;
-    case NALNUMUTF8:
-	loceol = PL_regeol;
-	while (scan < loceol && !swash_fetch(PL_utf8_alnum, (U8*)scan)) {
-	    scan += UTF8SKIP(scan);
-	    hardcount++;
+	if (DO_UTF8(PL_reg_sv)) {
+	    loceol = PL_regeol;
+	    while (scan < loceol && !swash_fetch(PL_utf8_alnum, (U8*)scan)) {
+		scan += UTF8SKIP(scan);
+		hardcount++;
+	    }
+	} else {
+	    while (scan < loceol && !isALNUM(*scan))
+		scan++;
 	}
 	break;
     case NALNUML:
 	PL_reg_flags |= RF_tainted;
-	while (scan < loceol && !isALNUM_LC(*scan))
-	    scan++;
-	break;
-    case NALNUMLUTF8:
-	PL_reg_flags |= RF_tainted;
-	loceol = PL_regeol;
-	while (scan < loceol && !isALNUM_LC_utf8((U8*)scan)) {
-	    scan += UTF8SKIP(scan);
-	    hardcount++;
+	if (DO_UTF8(PL_reg_sv)) {
+	    loceol = PL_regeol;
+	    while (scan < loceol && !isALNUM_LC_utf8((U8*)scan)) {
+		scan += UTF8SKIP(scan);
+		hardcount++;
+	    }
+	} else {
+	    while (scan < loceol && !isALNUM_LC(*scan))
+		scan++;
 	}
 	break;
     case SPACE:
-	while (scan < loceol && isSPACE(*scan))
-	    scan++;
-	break;
-    case SPACEUTF8:
-	loceol = PL_regeol;
-	while (scan < loceol && (*scan == ' ' || swash_fetch(PL_utf8_space,(U8*)scan))) {
-	    scan += UTF8SKIP(scan);
-	    hardcount++;
+	if (DO_UTF8(PL_reg_sv)) {
+	    loceol = PL_regeol;
+	    while (scan < loceol &&
+		   (*scan == ' ' || swash_fetch(PL_utf8_space,(U8*)scan))) {
+		scan += UTF8SKIP(scan);
+		hardcount++;
+	    }
+	} else {
+	    while (scan < loceol && isSPACE(*scan))
+		scan++;
 	}
 	break;
     case SPACEL:
 	PL_reg_flags |= RF_tainted;
-	while (scan < loceol && isSPACE_LC(*scan))
-	    scan++;
-	break;
-    case SPACELUTF8:
-	PL_reg_flags |= RF_tainted;
-	loceol = PL_regeol;
-	while (scan < loceol && (*scan == ' ' || isSPACE_LC_utf8((U8*)scan))) {
-	    scan += UTF8SKIP(scan);
-	    hardcount++;
+	if (DO_UTF8(PL_reg_sv)) {
+	    loceol = PL_regeol;
+	    while (scan < loceol &&
+		   (*scan == ' ' || isSPACE_LC_utf8((U8*)scan))) {
+		scan += UTF8SKIP(scan);
+		hardcount++;
+	    }
+	} else {
+	    while (scan < loceol && isSPACE_LC(*scan))
+		scan++;
 	}
 	break;
     case NSPACE:
-	while (scan < loceol && !isSPACE(*scan))
-	    scan++;
-	break;
-    case NSPACEUTF8:
-	loceol = PL_regeol;
-	while (scan < loceol && !(*scan == ' ' || swash_fetch(PL_utf8_space,(U8*)scan))) {
-	    scan += UTF8SKIP(scan);
-	    hardcount++;
+	if (DO_UTF8(PL_reg_sv)) {
+	    loceol = PL_regeol;
+	    while (scan < loceol &&
+		   !(*scan == ' ' || swash_fetch(PL_utf8_space,(U8*)scan))) {
+		scan += UTF8SKIP(scan);
+		hardcount++;
+	    }
+	} else {
+	    while (scan < loceol && !isSPACE(*scan))
+		scan++;
+	    break;
 	}
-	break;
     case NSPACEL:
 	PL_reg_flags |= RF_tainted;
-	while (scan < loceol && !isSPACE_LC(*scan))
-	    scan++;
-	break;
-    case NSPACELUTF8:
-	PL_reg_flags |= RF_tainted;
-	loceol = PL_regeol;
-	while (scan < loceol && !(*scan == ' ' || isSPACE_LC_utf8((U8*)scan))) {
-	    scan += UTF8SKIP(scan);
-	    hardcount++;
+	if (DO_UTF8(PL_reg_sv)) {
+	    loceol = PL_regeol;
+	    while (scan < loceol &&
+		   !(*scan == ' ' || isSPACE_LC_utf8((U8*)scan))) {
+		scan += UTF8SKIP(scan);
+		hardcount++;
+	    }
+	} else {
+	    while (scan < loceol && !isSPACE_LC(*scan))
+		scan++;
 	}
 	break;
     case DIGIT:
-	while (scan < loceol && isDIGIT(*scan))
-	    scan++;
-	break;
-    case DIGITUTF8:
-	loceol = PL_regeol;
-	while (scan < loceol && swash_fetch(PL_utf8_digit,(U8*)scan)) {
-	    scan += UTF8SKIP(scan);
-	    hardcount++;
+	if (DO_UTF8(PL_reg_sv)) {
+	    loceol = PL_regeol;
+	    while (scan < loceol && swash_fetch(PL_utf8_digit,(U8*)scan)) {
+		scan += UTF8SKIP(scan);
+		hardcount++;
+	    }
+	} else {
+	    while (scan < loceol && isDIGIT(*scan))
+		scan++;
 	}
 	break;
-	break;
     case NDIGIT:
-	while (scan < loceol && !isDIGIT(*scan))
-	    scan++;
-	break;
-    case NDIGITUTF8:
-	loceol = PL_regeol;
-	while (scan < loceol && !swash_fetch(PL_utf8_digit,(U8*)scan)) {
-	    scan += UTF8SKIP(scan);
-	    hardcount++;
+	if (DO_UTF8(PL_reg_sv)) {
+	    loceol = PL_regeol;
+	    while (scan < loceol && !swash_fetch(PL_utf8_digit,(U8*)scan)) {
+		scan += UTF8SKIP(scan);
+		hardcount++;
+	    }
+	} else {
+	    while (scan < loceol && !isDIGIT(*scan))
+		scan++;
 	}
 	break;
     default:		/* Called on something of 0 width. */
@@ -3712,101 +3656,138 @@ S_regrepeat_hard(pTHX_ regnode *p, I32 max, I32 *lp)
 }
 
 /*
+- regclass_swash - prepare the utf8 swash
+*/
+
+SV *
+Perl_regclass_swash(pTHX_ register regnode* node, bool doinit, SV** initsvp)
+{
+    SV *sw = NULL;
+    SV *si = NULL;
+
+    if (PL_regdata && PL_regdata->count) {
+	U32 n = ARG(node);
+
+	if (PL_regdata->what[n] == 's') {
+	    SV *rv = (SV*)PL_regdata->data[n];
+	    AV *av = (AV*)SvRV((SV*)rv);
+	    SV **a;
+	    
+	    si = *av_fetch(av, 0, FALSE);
+	    a  =  av_fetch(av, 1, FALSE);
+	    
+	    if (a)
+		sw = *a;
+	    else if (si && doinit) {
+		sw = swash_init("utf8", "", si, 1, 0);
+		(void)av_store(av, 1, sw);
+	    }
+	}
+    }
+	
+    if (initsvp)
+	*initsvp = si;
+
+    return sw;
+}
+
+/*
  - reginclass - determine if a character falls into a character class
  */
 
 STATIC bool
-S_reginclass(pTHX_ register regnode *p, register I32 c)
+S_reginclass(pTHX_ register regnode *n, register U8* p, register bool do_utf8)
 {
-    char flags = ANYOF_FLAGS(p);
+    char flags = ANYOF_FLAGS(n);
     bool match = FALSE;
 
-    c &= 0xFF;
-    if (ANYOF_BITMAP_TEST(p, c))
-	match = TRUE;
-    else if (flags & ANYOF_FOLD) {
-	I32 cf;
-	if (flags & ANYOF_LOCALE) {
+    if (do_utf8 || (flags & ANYOF_UNICODE)) {
+	if (do_utf8 && !ANYOF_RUNTIME(n)) {
+	    STRLEN len;
+	    UV c = utf8_to_uv_simple(p, &len);
+
+	    if (len != (STRLEN)-1 && c < 256 && ANYOF_BITMAP_TEST(n, c))
+		match = TRUE;
+	}
+
+	if (!match) {
+	    SV *sw = regclass_swash(n, TRUE, 0);
+	
+	    if (sw) {
+		if (swash_fetch(sw, p))
+		    match = TRUE;
+		else if (flags & ANYOF_FOLD) {
+		    U8 tmpbuf[UTF8_MAXLEN+1];
+		    
+		    if (flags & ANYOF_LOCALE) {
+			PL_reg_flags |= RF_tainted;
+			uv_to_utf8(tmpbuf, toLOWER_LC_utf8(p));
+		    }
+		else
+		    uv_to_utf8(tmpbuf, toLOWER_utf8(p));
+		    if (swash_fetch(sw, tmpbuf))
+			match = TRUE;
+		}
+	    }
+	}
+    }
+    else {
+	U8 c = *p;
+
+	if (ANYOF_BITMAP_TEST(n, c))
+	    match = TRUE;
+	else if (flags & ANYOF_FOLD) {
+	    I32 f;
+
+	    if (flags & ANYOF_LOCALE) {
+		PL_reg_flags |= RF_tainted;
+		f = PL_fold_locale[c];
+	    }
+	    else
+		f = PL_fold[c];
+	    if (f != c && ANYOF_BITMAP_TEST(n, f))
+		match = TRUE;
+	}
+	
+	if (!match && (flags & ANYOF_CLASS)) {
 	    PL_reg_flags |= RF_tainted;
-	    cf = PL_fold_locale[c];
-	}
-	else
-	    cf = PL_fold[c];
-	if (ANYOF_BITMAP_TEST(p, cf))
-	    match = TRUE;
-    }
-
-    if (!match && (flags & ANYOF_CLASS)) {
-	PL_reg_flags |= RF_tainted;
-	if (
-	    (ANYOF_CLASS_TEST(p, ANYOF_ALNUM)   &&  isALNUM_LC(c))  ||
-	    (ANYOF_CLASS_TEST(p, ANYOF_NALNUM)  && !isALNUM_LC(c))  ||
-	    (ANYOF_CLASS_TEST(p, ANYOF_SPACE)   &&  isSPACE_LC(c))  ||
-	    (ANYOF_CLASS_TEST(p, ANYOF_NSPACE)  && !isSPACE_LC(c))  ||
-	    (ANYOF_CLASS_TEST(p, ANYOF_DIGIT)   &&  isDIGIT_LC(c))  ||
-	    (ANYOF_CLASS_TEST(p, ANYOF_NDIGIT)  && !isDIGIT_LC(c))  ||
-	    (ANYOF_CLASS_TEST(p, ANYOF_ALNUMC)  &&  isALNUMC_LC(c)) ||
-	    (ANYOF_CLASS_TEST(p, ANYOF_NALNUMC) && !isALNUMC_LC(c)) ||
-	    (ANYOF_CLASS_TEST(p, ANYOF_ALPHA)   &&  isALPHA_LC(c))  ||
-	    (ANYOF_CLASS_TEST(p, ANYOF_NALPHA)  && !isALPHA_LC(c))  ||
-	    (ANYOF_CLASS_TEST(p, ANYOF_ASCII)   &&  isASCII(c))     ||
-	    (ANYOF_CLASS_TEST(p, ANYOF_NASCII)  && !isASCII(c))     ||
-	    (ANYOF_CLASS_TEST(p, ANYOF_CNTRL)   &&  isCNTRL_LC(c))  ||
-	    (ANYOF_CLASS_TEST(p, ANYOF_NCNTRL)  && !isCNTRL_LC(c))  ||
-	    (ANYOF_CLASS_TEST(p, ANYOF_GRAPH)   &&  isGRAPH_LC(c))  ||
-	    (ANYOF_CLASS_TEST(p, ANYOF_NGRAPH)  && !isGRAPH_LC(c))  ||
-	    (ANYOF_CLASS_TEST(p, ANYOF_LOWER)   &&  isLOWER_LC(c))  ||
-	    (ANYOF_CLASS_TEST(p, ANYOF_NLOWER)  && !isLOWER_LC(c))  ||
-	    (ANYOF_CLASS_TEST(p, ANYOF_PRINT)   &&  isPRINT_LC(c))  ||
-	    (ANYOF_CLASS_TEST(p, ANYOF_NPRINT)  && !isPRINT_LC(c))  ||
-	    (ANYOF_CLASS_TEST(p, ANYOF_PUNCT)   &&  isPUNCT_LC(c))  ||
-	    (ANYOF_CLASS_TEST(p, ANYOF_NPUNCT)  && !isPUNCT_LC(c))  ||
-	    (ANYOF_CLASS_TEST(p, ANYOF_UPPER)   &&  isUPPER_LC(c))  ||
-	    (ANYOF_CLASS_TEST(p, ANYOF_NUPPER)  && !isUPPER_LC(c))  ||
-	    (ANYOF_CLASS_TEST(p, ANYOF_XDIGIT)  &&  isXDIGIT(c))    ||
-	    (ANYOF_CLASS_TEST(p, ANYOF_NXDIGIT) && !isXDIGIT(c))    ||
-	    (ANYOF_CLASS_TEST(p, ANYOF_PSXSPC)  &&  isPSXSPC(c))    ||
-	    (ANYOF_CLASS_TEST(p, ANYOF_NPSXSPC) && !isPSXSPC(c))    ||
-	    (ANYOF_CLASS_TEST(p, ANYOF_BLANK)   &&  isBLANK(c))     ||
-	    (ANYOF_CLASS_TEST(p, ANYOF_NBLANK)  && !isBLANK(c))
-	    ) /* How's that for a conditional? */
-	{
-	    match = TRUE;
+	    if (
+		(ANYOF_CLASS_TEST(n, ANYOF_ALNUM)   &&  isALNUM_LC(c))  ||
+		(ANYOF_CLASS_TEST(n, ANYOF_NALNUM)  && !isALNUM_LC(c))  ||
+		(ANYOF_CLASS_TEST(n, ANYOF_SPACE)   &&  isSPACE_LC(c))  ||
+		(ANYOF_CLASS_TEST(n, ANYOF_NSPACE)  && !isSPACE_LC(c))  ||
+		(ANYOF_CLASS_TEST(n, ANYOF_DIGIT)   &&  isDIGIT_LC(c))  ||
+		(ANYOF_CLASS_TEST(n, ANYOF_NDIGIT)  && !isDIGIT_LC(c))  ||
+		(ANYOF_CLASS_TEST(n, ANYOF_ALNUMC)  &&  isALNUMC_LC(c)) ||
+		(ANYOF_CLASS_TEST(n, ANYOF_NALNUMC) && !isALNUMC_LC(c)) ||
+		(ANYOF_CLASS_TEST(n, ANYOF_ALPHA)   &&  isALPHA_LC(c))  ||
+		(ANYOF_CLASS_TEST(n, ANYOF_NALPHA)  && !isALPHA_LC(c))  ||
+		(ANYOF_CLASS_TEST(n, ANYOF_ASCII)   &&  isASCII(c))     ||
+		(ANYOF_CLASS_TEST(n, ANYOF_NASCII)  && !isASCII(c))     ||
+		(ANYOF_CLASS_TEST(n, ANYOF_CNTRL)   &&  isCNTRL_LC(c))  ||
+		(ANYOF_CLASS_TEST(n, ANYOF_NCNTRL)  && !isCNTRL_LC(c))  ||
+		(ANYOF_CLASS_TEST(n, ANYOF_GRAPH)   &&  isGRAPH_LC(c))  ||
+		(ANYOF_CLASS_TEST(n, ANYOF_NGRAPH)  && !isGRAPH_LC(c))  ||
+		(ANYOF_CLASS_TEST(n, ANYOF_LOWER)   &&  isLOWER_LC(c))  ||
+		(ANYOF_CLASS_TEST(n, ANYOF_NLOWER)  && !isLOWER_LC(c))  ||
+		(ANYOF_CLASS_TEST(n, ANYOF_PRINT)   &&  isPRINT_LC(c))  ||
+		(ANYOF_CLASS_TEST(n, ANYOF_NPRINT)  && !isPRINT_LC(c))  ||
+		(ANYOF_CLASS_TEST(n, ANYOF_PUNCT)   &&  isPUNCT_LC(c))  ||
+		(ANYOF_CLASS_TEST(n, ANYOF_NPUNCT)  && !isPUNCT_LC(c))  ||
+		(ANYOF_CLASS_TEST(n, ANYOF_UPPER)   &&  isUPPER_LC(c))  ||
+		(ANYOF_CLASS_TEST(n, ANYOF_NUPPER)  && !isUPPER_LC(c))  ||
+		(ANYOF_CLASS_TEST(n, ANYOF_XDIGIT)  &&  isXDIGIT(c))    ||
+		(ANYOF_CLASS_TEST(n, ANYOF_NXDIGIT) && !isXDIGIT(c))    ||
+		(ANYOF_CLASS_TEST(n, ANYOF_PSXSPC)  &&  isPSXSPC(c))    ||
+		(ANYOF_CLASS_TEST(n, ANYOF_NPSXSPC) && !isPSXSPC(c))    ||
+		(ANYOF_CLASS_TEST(n, ANYOF_BLANK)   &&  isBLANK(c))     ||
+		(ANYOF_CLASS_TEST(n, ANYOF_NBLANK)  && !isBLANK(c))
+		) /* How's that for a conditional? */
+	    {
+		match = TRUE;
+	    }
 	}
     }
-
-    return (flags & ANYOF_INVERT) ? !match : match;
-}
-
-STATIC bool
-S_reginclassutf8(pTHX_ regnode *f, U8 *p)
-{                                           
-    char flags = ARG1(f);
-    bool match = FALSE;
-#ifdef DEBUGGING
-    SV *rv = (SV*)PL_regdata->data[ARG2(f)];
-    AV *av = (AV*)SvRV((SV*)rv);
-    SV *sw = *av_fetch(av, 0, FALSE);
-    SV *lv = *av_fetch(av, 1, FALSE);
-#else
-    SV *sw = (SV*)PL_regdata->data[ARG2(f)];
-#endif
-
-    if (swash_fetch(sw, p))
-	match = TRUE;
-    else if (flags & ANYOF_FOLD) {
-	U8 tmpbuf[UTF8_MAXLEN+1];
-	if (flags & ANYOF_LOCALE) {
-	    PL_reg_flags |= RF_tainted;
-	    uv_to_utf8(tmpbuf, toLOWER_LC_utf8(p));
-	}
-	else
-	    uv_to_utf8(tmpbuf, toLOWER_utf8(p));
-	if (swash_fetch(sw, tmpbuf))
-	    match = TRUE;
-    }
-
-    /* UTF8 combined with ANYOF_CLASS is ill-defined. */
 
     return (flags & ANYOF_INVERT) ? !match : match;
 }
@@ -3815,17 +3796,20 @@ STATIC U8 *
 S_reghop(pTHX_ U8 *s, I32 off)
 {                               
     if (off >= 0) {
-	while (off-- && s < (U8*)PL_regeol)
+	while (off-- && s < (U8*)PL_regeol) {
+	    /* XXX could check well-formedness here */
 	    s += UTF8SKIP(s);
+	}
     }
     else {
 	while (off++) {
 	    if (s > (U8*)PL_bostr) {
 		s--;
-		if (*s & 0x80) {
-		    while (s > (U8*)PL_bostr && (*s & 0xc0) == 0x80)
+		if (UTF8_IS_CONTINUED(*s)) {
+		    while (s > (U8*)PL_bostr && UTF8_IS_CONTINUATION(*s))
 			s--;
-		}		/* XXX could check well-formedness here */
+		}
+		/* XXX could check well-formedness here */
 	    }
 	}
     }
@@ -3836,8 +3820,10 @@ STATIC U8 *
 S_reghopmaybe(pTHX_ U8* s, I32 off)
 {
     if (off >= 0) {
-	while (off-- && s < (U8*)PL_regeol)
+	while (off-- && s < (U8*)PL_regeol) {
+	    /* XXX could check well-formedness here */
 	    s += UTF8SKIP(s);
+	}
 	if (off >= 0)
 	    return 0;
     }
@@ -3845,10 +3831,11 @@ S_reghopmaybe(pTHX_ U8* s, I32 off)
 	while (off++) {
 	    if (s > (U8*)PL_bostr) {
 		s--;
-		if (*s & 0x80) {
-		    while (s > (U8*)PL_bostr && (*s & 0xc0) == 0x80)
+		if (UTF8_IS_CONTINUED(*s)) {
+		    while (s > (U8*)PL_bostr && UTF8_IS_CONTINUATION(*s))
 			s--;
-		}		/* XXX could check well-formedness here */
+		}
+		/* XXX could check well-formedness here */
 	    }
 	    else
 		break;

@@ -4522,11 +4522,9 @@ Perl_sv_len_utf8(pTHX_ register SV *sv)
     if (!sv)
 	return 0;
 
-#ifdef NOTYET
     if (SvGMAGICAL(sv))
 	return mg_length(sv);
     else
-#endif
     {
 	STRLEN len;
 	U8 *s = (U8*)SvPV(sv, len);

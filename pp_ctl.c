@@ -157,7 +157,7 @@ PP(pp_substcont)
     register char *m = cx->sb_m;
     char *orig = cx->sb_orig;
     register REGEXP *rx = cx->sb_rx;
-
+    
     rxres_restore(&cx->sb_rxres, rx);
 
     if (cx->sb_iters++) {
@@ -176,8 +176,8 @@ PP(pp_substcont)
 				      : (REXEC_COPY_STR|REXEC_IGNOREPOS|REXEC_NOT_FIRST))))
 	{
 	    SV *targ = cx->sb_targ;
-	    sv_catpvn(dstr, s, cx->sb_strend - s);
 
+	    sv_catpvn(dstr, s, cx->sb_strend - s);
 	    cx->sb_rxtainted |= RX_MATCH_TAINTED(rx);
 
 	    (void)SvOOK_off(targ);
@@ -189,9 +189,11 @@ PP(pp_substcont)
 	    sv_free(dstr);
 
 	    TAINT_IF(cx->sb_rxtainted & 1);
+	    if (pm->op_pmdynflags & PMdf_UTF8)
+		SvUTF8_on(targ); /* could also copy SvUTF8(dstr)? */
 	    PUSHs(sv_2mortal(newSViv((I32)cx->sb_iters - 1)));
 
-	    (void)SvPOK_only(targ);
+	    (void)SvPOK_only_UTF8(targ);
 	    TAINT_IF(cx->sb_rxtainted);
 	    SvSETMAGIC(targ);
 	    SvTAINT(targ);
@@ -209,7 +211,8 @@ PP(pp_substcont)
 	cx->sb_strend = s + (cx->sb_strend - m);
     }
     cx->sb_m = m = rx->startp[0] + orig;
-    sv_catpvn(dstr, s, m-s);
+    if (m > s)
+	sv_catpvn(dstr, s, m-s);
     cx->sb_s = rx->endp[0] + orig;
     { /* Update the pos() information. */
 	SV *sv = cx->sb_targ;

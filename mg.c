@@ -391,7 +391,7 @@ Perl_magic_len(pTHX_ SV *sv, MAGIC *mg)
     case '5': case '6': case '7': case '8': case '9': case '&':
 	if (PL_curpm && (rx = PL_curpm->op_pmregexp)) {
 
-	    paren = atoi(mg->mg_ptr);
+	    paren = atoi(mg->mg_ptr); /* $& is in [0] */
 	  getparen:
 	    if (paren <= rx->nparens &&
 		(s1 = rx->startp[paren]) != -1 &&
@@ -399,17 +399,15 @@ Perl_magic_len(pTHX_ SV *sv, MAGIC *mg)
 	    {
 		i = t1 - s1;
 	      getlen:
-		if (i > 0 && (PL_curpm->op_pmdynflags & PMdf_UTF8) && !IN_BYTE) {
-		    char *s = rx->subbeg + s1;
+		if (i > 0 && DO_UTF8(PL_reg_sv)) {
+		    char *s    = rx->subbeg + s1;
 		    char *send = rx->subbeg + t1;
-		    i = 0;
-		    while (s < send) {
-			s += UTF8SKIP(s);
-			i++;
-		    }
+
+		    i = Perl_utf8_length((U8*)s, (U8*)send);
 		}
-		if (i >= 0)
-		    return i;
+		if (i < 0)
+		    Perl_croak(aTHX_ "panic: magic_len: %d", i);
+		return i;
 	    }
 	}
 	return 0;
@@ -604,7 +602,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	     * Pre-threads, this was paren = atoi(GvENAME((GV*)mg->mg_obj));
 	     * XXX Does the new way break anything?
 	     */
-	    paren = atoi(mg->mg_ptr);
+	    paren = atoi(mg->mg_ptr); /* $& is in [0] */
 	  getparen:
 	    if (paren <= rx->nparens &&
 		(s1 = rx->startp[paren]) != -1 &&
@@ -623,7 +621,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 			PL_tainted = FALSE;
 		    }
 		    sv_setpvn(sv, s, i);
-		    if ((PL_curpm->op_pmdynflags & PMdf_UTF8) && !IN_BYTE)
+		    if (DO_UTF8(PL_reg_sv))
 			SvUTF8_on(sv);
 		    else
 			SvUTF8_off(sv);
