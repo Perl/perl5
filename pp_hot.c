@@ -593,6 +593,7 @@ PP(pp_aassign)
      * clobber a value on the right that's used later in the list.
      */
     if (PL_op->op_private & OPpASSIGN_COMMON) {
+	EXTEND_MORTAL(lastrelem - firstrelem + 1);
         for (relem = firstrelem; relem <= lastrelem; relem++) {
             /*SUPPRESS 560*/
             if (sv = *relem) {
