@@ -389,7 +389,7 @@ sub _dump {
     elsif (!defined($val)) {
       $out .= "undef";
     }
-    elsif ($val =~ /^-?[1-9]\d{0,8}$/) { # safe decimal number
+    elsif ($val =~ /^(?:0|-?[1-9]\d{0,8})$/) { # safe decimal number
       $out .= $val;
     }
     else {				 # string
