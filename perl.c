@@ -1339,6 +1339,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
 	}
     }
   switch_end:
+    sv_setsv(get_sv("/", TRUE), PL_rs);
 
     if (
 #ifndef SECURE_INTERNAL_GETENV
@@ -1537,12 +1538,6 @@ print \"  \\@INC:\\n    @INC\\n\";");
 	SvREFCNT_dec(PL_e_script);
 	PL_e_script = Nullsv;
     }
-
-/*
-   Not sure that this is still the right place to do this now that we
-   no longer use PL_nrs. HVDS 2001/09/09
-*/
-    sv_setsv(get_sv("/", TRUE), PL_rs);
 
     if (PL_do_undump)
 	my_unexec();

@@ -9,7 +9,7 @@ BEGIN {
 
 require "./test.pl";
 
-plan(tests => 19);
+plan(tests => 20);
 
 # due to a bug in VMS's piping which makes it impossible for runperl()
 # to emulate echo -n (ie. stdin always winds up with a newline), these 
@@ -63,6 +63,12 @@ $r = runperl(
     prog	=> 's/\n/-/g;$_.=q(/)',
 );
 is( $r, 'abc-def--ghi-jkl-mno--pq-/', '-0777 (slurp mode)' );
+
+$r = runperl(
+    switches	=> [ '-066' ],
+    prog	=> 'BEGIN { print "($/)" } print "[$/]"',
+);
+is( $r, "(\066)[\066]", '$/ set at compile-time' );
 
 # Tests for -c
 
