@@ -184,7 +184,7 @@ sub name { 'utf8' }
 sub toUnicode
 {
  my ($obj,$octets,$chk) = @_;
- my $str = decode_utf8($octets);
+ my $str = Encode::decode_utf8($octets);
  if (defined $str)
   {
    $_[1] = '' if $chk;
@@ -196,13 +196,10 @@ sub toUnicode
 sub fromUnicode
 {
  my ($obj,$string,$chk) = @_;
- my $octets = encode_utf8($string);
+ my $octets = Encode::encode_utf8($string);
  $_[1] = '' if $chk;
  return $octets;
-
 }
-
-*fromUnicode = \&toUnicode;
 
 package Encode::Table;
 
@@ -394,6 +391,8 @@ sub fromUnicode
 package Encode;
 
 1;
+
+__END__
 
 =head1 NAME
 
@@ -801,4 +800,4 @@ L<perlunicode>, L<perlebcdic>, L<perlfunc/open>
 =cut
 
 
-__END__
+
