@@ -96,31 +96,33 @@ be v-strings in Perl 5.8.
 
 =head2 strict only allows refs, subs, vars
 
-Earlier versions of Perl did not check the parameters implicitely passed
-to its "import" and "unimport" routine.  This caused idiom such as:
+Earlier versions of the strict pragma did not check the parameters
+implicitly passed to its "import" (use) and "unimport" (no) routine.
+This caused the false idiom such as:
 
- use strict qw(@ISA);
- @ISA = qw(Foo);
+        use strict qw(@ISA);
+        @ISA = qw(Foo);
 
-to B<not> cause any error condition to be raised.  This idiom however raised
-the false expectation that strict refs, vars and subs were being enforced.
-They are B<not> when using this idiom.
+This however (probably) raised the false expectation that (also) the
+strict refs, vars and subs were being enforced.  They are B<not> enforced
+when using this false idiom.
 
-Starting from 5.8.1, the above idiom B<will> cause an error to be raised.
-This may cause programs which used to execute seemingly correctly without
-warnings and errors, to fail when run under 5.8.1.  This happens because
+Starting from Perl 5.8.1, the above B<will> cause an error to be
+raised.  This may cause programs which used to execute seemingly
+correctly without warnings and errors to fail when run under 5.8.1.
+This happens because
 
- use strict qw(@ISA);
+        use strict qw(@ISA);
 
 will now fail with the error:
 
- Unknown 'strict' tag(s) '@ISA'
+        Unknown 'strict' tag(s) '@ISA'
 
 The remedy to this problem is to replace this code with the correct idiom:
 
- use strict;
- use vars qw(@ISA);
- @ISA = qw(Foo);
+        use strict;
+        use vars qw(@ISA);
+        @ISA = qw(Foo);
 
 =head2 (Win32) The -C Switch Has Been Repurposed
 
