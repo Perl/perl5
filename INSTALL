@@ -2279,6 +2279,13 @@ The following section is meant for people worrying about squeezing the
 Perl installation into minimal systems (for example when installing
 operating systems, or in really small filesystems).
 
+Leaving out as many extensions as possible is an obvious way:
+especially the Encode with its big conversion tables consumes a lot of
+space.  On the other hand, you cannot throw away everything, espcially
+the Fcntl module is pretty essential.  If you need to do network
+programming, you'll appreciate the Socket module, and so forth: it all
+depends on what do you need to do.
+
 In the following we offer two different slimmed down installation
 recipes.  They are informative, not normative: the choice of files
 depends on what you need.
