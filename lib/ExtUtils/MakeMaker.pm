@@ -163,20 +163,9 @@ sub eval_in_subdirs {
 sub eval_in_x {
     my($self,$dir) = @_;
     package main;
-    chdir $dir or
-	Carp::carp("Couldn't change to directory $dir: $!");
+    chdir $dir or Carp::carp("Couldn't change to directory $dir: $!");
 
-    {
-	local *FH;
-	open(FH,"Makefile.PL") or
-	    Carp::carp("Couldn't open Makefile.PL in $dir");
-	local $/; # Sluuurp.
-	my $eval = join "", <FH>;
-	close FH;
-	# eval, not do, since we need lexical variables
-	eval $eval;
-    }
-
+    eval { do './Makefile.PL' };
     if ($@) {
 # 	  if ($@ =~ /prerequisites/) {
 # 	      die "MakeMaker WARNING: $@";
@@ -687,11 +676,18 @@ sub check_hints {
     } continue {
 	last unless $hint =~ s/_[^_]*$//; # nothing to cut off
     }
-    return unless -f "hints/$hint.pl";    # really there
+    my $hint_file = "hints/$hint.pl";
+
+    return unless -f $hint_file;    # really there
 
     # execute the hintsfile:
-    print STDOUT "Processing hints file hints/$hint.pl\n";
-    eval { do "hints/$hint.pl" };
+    print STDOUT "Processing hints file $hint_file\n";
+    {
+        local *HINT;
+        open(HINT, $hint_file) || die "Can't open $hint_file: $!";
+        eval join '', <HINT>;
+        close HINT;
+    }
     print STDOUT $@ if $@;
 }
 
