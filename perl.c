@@ -2269,7 +2269,7 @@ Perl_moreswitches(pTHX_ char *s)
 		      "\n\nCopyright 1987-2001, Larry Wall\n");
 #ifdef MACOS_TRADITIONAL
 	PerlIO_printf(PerlIO_stdout(),
-		      "\nMacOS port Copyright (c) 1991-2000, Matthias Neeracher\n");
+		      "\nMac OS port Copyright (c) 1991-2001, Matthias Neeracher\n");
 #endif
 #ifdef MSDOS
 	PerlIO_printf(PerlIO_stdout(),
@@ -3045,7 +3045,7 @@ S_find_beginning(pTHX)
 
     forbid_setid("-x");
 #ifdef MACOS_TRADITIONAL
-    /* Since the Mac OS does not honor !# arguments for us, we do it ourselves */
+    /* Since the Mac OS does not honor #! arguments for us, we do it ourselves */
 
     while (PL_doextract || gMacPerl_AlwaysExtract) {
 	if ((s = sv_gets(PL_linestr, PL_rsfp, 0)) == Nullch) {
@@ -3549,13 +3549,15 @@ S_incpush(pTHX_ char *p, int addsubdirs, int addoldvers)
 	    if (addsubdirs) {
 #ifdef MACOS_TRADITIONAL
 #define PERL_AV_SUFFIX_FMT	""
-#define PERL_ARCH_FMT 		":%s"
+#define PERL_ARCH_FMT 		"%s:"
+#define PERL_ARCH_FMT_PATH	PERL_FS_VER_FMT PERL_AV_SUFFIX_FMT
 #else
 #define PERL_AV_SUFFIX_FMT 	"/"
 #define PERL_ARCH_FMT 		"/%s"
+#define PERL_ARCH_FMT_PATH	PERL_AV_SUFFIX_FMT PERL_FS_VER_FMT
 #endif
 		/* .../version/archname if -d .../version/archname */
-		Perl_sv_setpvf(aTHX_ subdir, "%"SVf PERL_AV_SUFFIX_FMT PERL_FS_VER_FMT PERL_ARCH_FMT,
+		Perl_sv_setpvf(aTHX_ subdir, "%"SVf PERL_ARCH_FMT_PATH PERL_ARCH_FMT,
 				libdir,
 			       (int)PERL_REVISION, (int)PERL_VERSION,
 			       (int)PERL_SUBVERSION, ARCHNAME);
@@ -3564,7 +3566,7 @@ S_incpush(pTHX_ char *p, int addsubdirs, int addoldvers)
 		    av_push(GvAVn(PL_incgv), newSVsv(subdir));
 
 		/* .../version if -d .../version */
-		Perl_sv_setpvf(aTHX_ subdir, "%"SVf PERL_AV_SUFFIX_FMT PERL_FS_VER_FMT, libdir,
+		Perl_sv_setpvf(aTHX_ subdir, "%"SVf PERL_ARCH_FMT_PATH, libdir,
 			       (int)PERL_REVISION, (int)PERL_VERSION,
 			       (int)PERL_SUBVERSION);
 		if (PerlLIO_stat(SvPVX(subdir), &tmpstatbuf) >= 0 &&

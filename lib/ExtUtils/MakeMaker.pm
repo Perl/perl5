@@ -205,6 +205,9 @@ sub full_setup {
     PREREQ_PM SKIP TYPEMAPS VERSION VERSION_FROM XS XSOPT XSPROTOARG
     XS_VERSION clean depend dist dynamic_lib linkext macro realclean
     tool_autosplit
+
+    MACPERL_SRC MACPERL_LIB MACLIBS_68K MACLIBS_PPC MACLIBS_SC MACLIBS_MRC
+    MACLIBS_ALL_68K MACLIBS_ALL_PPC MACLIBS_SHARED
 	/;
 
     # IMPORTS is used under OS/2 and Win32

@@ -3110,22 +3110,27 @@ PP(pp_require)
 
     /* prepare to compile file */
 
+#ifdef MACOS_TRADITIONAL
+    if (PERL_FILE_IS_ABSOLUTE(name)
+	|| (*name == ':' && name[1] != ':' && strchr(name+2, ':')))
+    {
+	tryname = name;
+	tryrsfp = doopen_pmc(name,PERL_SCRIPT_MODE);
+	/* We consider paths of the form :a:b ambiguous and interpret them first
+	   as global then as local
+	*/
+    	if (!tryrsfp && *name == ':' && name[1] != ':' && strchr(name+2, ':'))
+	    goto trylocal;
+    }
+    else
+trylocal: {
+#else
     if (PERL_FILE_IS_ABSOLUTE(name)
 	|| (*name == '.' && (name[1] == '/' ||
 			     (name[1] == '.' && name[2] == '/'))))
     {
 	tryname = name;
 	tryrsfp = doopen_pmc(name,PERL_SCRIPT_MODE);
-#ifdef MACOS_TRADITIONAL
-	/* We consider paths of the form :a:b ambiguous and interpret them first
-	   as global then as local
-	*/
-    	if (!tryrsfp && name[0] == ':' && name[1] != ':' && strchr(name+2, ':'))
-	    goto trylocal;
-    }
-    else
-trylocal: {
-#else
     }
     else {
 #endif
