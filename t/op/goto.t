@@ -4,7 +4,7 @@
 
 # "This IS structured code.  It's just randomly structured."
 
-print "1..9\n";
+print "1..10\n";
 
 while ($?) {
     $foo = 1;
@@ -56,7 +56,7 @@ sub bar {
 exit;
 
 FINALE:
-print "ok 9\n";
+print "ok 10\n";
 exit;
 
 bypass:
@@ -85,6 +85,14 @@ $LINE = __LINE__ + 1;
 $wherever = NOWHERE;
 eval { goto $wherever };
 print $@ =~ /Can't find label NOWHERE/ ? "ok 8\n" : "not ok 8\n";
+
+sub auto {
+    goto &loadit;
+}
+
+sub AUTOLOAD { print @_ }
+
+auto("ok 9\n");
 
 $wherever = FINALE;
 goto $wherever;
