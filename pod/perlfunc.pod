@@ -56,9 +56,7 @@ Remember the following rule:
 
 =over 8
 
-=item  
-
-I<THERE IS NO GENERAL RULE FOR CONVERTING A LIST INTO A SCALAR!>
+=item  I<THERE IS NO GENERAL RULE FOR CONVERTING A LIST INTO A SCALAR!>
 
 =back
 
@@ -1029,14 +1027,35 @@ value is taken as the name of the filehandle.
 
 =item flock FILEHANDLE,OPERATION
 
-Calls flock(2) on FILEHANDLE.  See L<flock(2)> for definition of
-OPERATION.  Returns TRUE for success, FALSE on failure.  Will produce a
-fatal error if used on a machine that doesn't implement either flock(2) or
-fcntl(2). The fcntl(2) system call will be automatically used if flock(2)
-is missing from your system.  This makes flock() the portable file locking
-strategy, although it will lock only entire files, not records.  Note also
-that some versions of flock() cannot lock things over the network; you
-would need to use the more system-specific fcntl() for that.
+Calls flock(2), or an emulation of it, on FILEHANDLE.  Returns TRUE for
+success, FALSE on failure.  Will produce a fatal error if used on a
+machine that doesn't implement flock(2), fcntl(2) locking, or lockf(3).
+flock() is Perl's portable file locking interface, although it will lock
+only entire files, not records.
+
+OPERATION is one of LOCK_SH, LOCK_EX, or LOCK_UN, possibly combined with
+LOCK_NB.  These constants are traditionally valued 1, 2, 8 and 4, but
+you can use the symbolic names if you pull them in with an explicit
+request to the Fcntl module.  The names can be requested as a group with
+the :flock tag (or they can be requested individually, of course).
+LOCK_SH requests a shared lock, LOCK_EX requests an exclusive lock, and
+LOCK_UN releases a previously requested lock.  If LOCK_NB is added to
+LOCK_SH or LOCK_EX then flock() will return immediately rather than
+blocking waiting for the lock (check the return status to see if you got
+it).
+
+Note that the emulation built with lockf(3) doesn't provide shared
+locks, and it requires that FILEHANDLE be open with write intent.  These
+are the semantics that lockf(3) implements.  Most (all?) systems
+implement lockf(3) in terms of fcntl(2) locking, though, so the
+differing semantics shouldn't bite too many people.
+
+Note also that some versions of flock() cannot lock things over the
+network; you would need to use the more system-specific fcntl() for
+that.  If you like you can force Perl to ignore your system's flock(2)
+function, and so provide its own fcntl(2)-based emulation, by passing
+the switch C<-Ud_flock> to the F<Configure> program when you configure
+perl.
 
 Here's a mailbox appender for BSD systems.
 

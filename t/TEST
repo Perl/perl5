@@ -21,7 +21,7 @@ $ENV{EMXSHELL} = 'sh';        # For OS/2
 
 if ($ARGV[0] eq '') {
     @ARGV = split(/[ \n]/,
-      `echo base/*.t comp/*.t cmd/*.t io/*.t; echo op/*.t lib/*.t`);
+      `echo base/*.t comp/*.t cmd/*.t pragma/*.t io/*.t; echo op/*.t lib/*.t`);
 }
 
 if ($^O eq 'os2' || $^O eq 'qnx') {

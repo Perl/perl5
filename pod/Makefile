@@ -3,157 +3,153 @@ CONVERTERS = pod2html pod2latex pod2man pod2text checkpods
 all: $(CONVERTERS) man
 PERL = ../miniperl
 
-POD = 	\
+POD = \
 	perl.pod	\
-	perlapio.pod	\
-	perlbook.pod	\
-	perlbot.pod	\
-	perlcall.pod	\
+	perlnews.pod	\
 	perldata.pod	\
+	perlsyn.pod	\
+	perlop.pod	\
+	perlre.pod	\
+	perlrun.pod	\
+	perlfunc.pod	\
+	perlvar.pod	\
+	perlsub.pod	\
+	perlmod.pod	\
+	perlform.pod	\
+	perllocale.pod	\
+	perlref.pod	\
+	perldsc.pod	\
+	perllol.pod	\
+	perltoot.pod	\
+	perlobj.pod	\
+	perltie.pod	\
+	perlbot.pod	\
+	perlipc.pod	\
 	perldebug.pod	\
 	perldiag.pod	\
-	perldsc.pod	\
-	perlembed.pod	\
-	perlform.pod	\
-	perlfunc.pod	\
-	perlguts.pod	\
-	perlipc.pod	\
-	perllocale.pod	\
-	perllol.pod	\
-	perlmod.pod	\
-	perlnews.pod	\
-	perlobj.pod	\
-	perlop.pod	\
-	perlovl.pod	\
-	perlpod.pod	\
-	perlre.pod	\
-	perlref.pod	\
-	perlrun.pod	\
 	perlsec.pod	\
-	perlstyle.pod	\
-	perlsub.pod	\
-	perlsyn.pod	\
-	perltie.pod	\
-	perltoc.pod	\
-	perltoot.pod	\
 	perltrap.pod	\
-	perlvar.pod	\
+	perlstyle.pod	\
+	perlpod.pod	\
+	perlbook.pod	\
+	perlembed.pod	\
+	perlapio.pod	\
 	perlxs.pod	\
-	perlxstut.pod
+	perlxstut.pod	\
+	perlguts.pod	\
+	perlcall.pod	\
+	perltoc.pod
 
-MAN = 	\
+MAN = \
 	perl.man	\
-	perlapio.man	\
-	perlbook.man	\
-	perlbot.man	\
-	perlcall.man	\
+	perlnews.man	\
 	perldata.man	\
+	perlsyn.man	\
+	perlop.man	\
+	perlre.man	\
+	perlrun.man	\
+	perlfunc.man	\
+	perlvar.man	\
+	perlsub.man	\
+	perlmod.man	\
+	perlform.man	\
+	perllocale.man	\
+	perlref.man	\
+	perldsc.man	\
+	perllol.man	\
+	perltoot.man	\
+	perlobj.man	\
+	perltie.man	\
+	perlbot.man	\
+	perlipc.man	\
 	perldebug.man	\
 	perldiag.man	\
-	perldsc.man	\
-	perlembed.man	\
-	perlform.man	\
-	perlfunc.man	\
-	perlguts.man	\
-	perlipc.man	\
-	perllocale.man	\
-	perllol.man	\
-	perlmod.man	\
-	perlnews.man	\
-	perlobj.man	\
-	perlop.man	\
-	perlovl.man	\
-	perlpod.man	\
-	perlre.man	\
-	perlref.man	\
-	perlrun.man	\
 	perlsec.man	\
-	perlstyle.man	\
-	perlsub.man	\
-	perlsyn.man	\
-	perltie.man	\
-	perltoc.man	\
-	perltoot.man	\
 	perltrap.man	\
-	perlvar.man	\
+	perlstyle.man	\
+	perlpod.man	\
+	perlbook.man	\
+	perlembed.man	\
+	perlapio.man	\
 	perlxs.man	\
-	perlxstut.man
+	perlxstut.man	\
+	perlguts.man	\
+	perlcall.man	\
+	perltoc.man
 
-HTML = 	\
+HTML = \
 	perl.html	\
-	perlapio.html	\
-	perlbook.html	\
-	perlbot.html	\
-	perlcall.html	\
+	perlnews.html	\
 	perldata.html	\
+	perlsyn.html	\
+	perlop.html	\
+	perlre.html	\
+	perlrun.html	\
+	perlfunc.html	\
+	perlvar.html	\
+	perlsub.html	\
+	perlmod.html	\
+	perlform.html	\
+	perllocale.html	\
+	perlref.html	\
+	perldsc.html	\
+	perllol.html	\
+	perltoot.html	\
+	perlobj.html	\
+	perltie.html	\
+	perlbot.html	\
+	perlipc.html	\
 	perldebug.html	\
 	perldiag.html	\
-	perldsc.html	\
-	perlembed.html	\
-	perlform.html	\
-	perlfunc.html	\
-	perlguts.html	\
-	perlipc.html	\
-	perllocale.html	\
-	perllol.html	\
-	perlmod.html	\
-	perlnews.html	\
-	perlobj.html	\
-	perlop.html	\
-	perlovl.html	\
-	perlpod.html	\
-	perlre.html	\
-	perlref.html	\
-	perlrun.html	\
 	perlsec.html	\
-	perlstyle.html	\
-	perlsub.html	\
-	perlsyn.html	\
-	perltie.html	\
-	perltoc.html	\
-	perltoot.html	\
 	perltrap.html	\
-	perlvar.html	\
+	perlstyle.html	\
+	perlpod.html	\
+	perlbook.html	\
+	perlembed.html	\
+	perlapio.html	\
 	perlxs.html	\
-	perlxstut.html
+	perlxstut.html	\
+	perlguts.html	\
+	perlcall.html	\
+	perltoc.html
 
-TEX = 	\
+TEX = \
 	perl.tex	\
-	perlapio.tex	\
-	perlbook.tex	\
-	perlbot.tex	\
-	perlcall.tex	\
+	perlnews.tex	\
 	perldata.tex	\
+	perlsyn.tex	\
+	perlop.tex	\
+	perlre.tex	\
+	perlrun.tex	\
+	perlfunc.tex	\
+	perlvar.tex	\
+	perlsub.tex	\
+	perlmod.tex	\
+	perlform.tex	\
+	perllocale.tex	\
+	perlref.tex	\
+	perldsc.tex	\
+	perllol.tex	\
+	perltoot.tex	\
+	perlobj.tex	\
+	perltie.tex	\
+	perlbot.tex	\
+	perlipc.tex	\
 	perldebug.tex	\
 	perldiag.tex	\
-	perldsc.tex	\
-	perlembed.tex	\
-	perlform.tex	\
-	perlfunc.tex	\
-	perlguts.tex	\
-	perlipc.tex	\
-	perllocale.tex	\
-	perllol.tex	\
-	perlmod.tex	\
-	perlnews.tex	\
-	perlobj.tex	\
-	perlop.tex	\
-	perlovl.tex	\
-	perlpod.tex	\
-	perlre.tex	\
-	perlref.tex	\
-	perlrun.tex	\
 	perlsec.tex	\
-	perlstyle.tex	\
-	perlsub.tex	\
-	perlsyn.tex	\
-	perltie.tex	\
-	perltoc.tex	\
-	perltoot.tex	\
 	perltrap.tex	\
-	perlvar.tex	\
+	perlstyle.tex	\
+	perlpod.tex	\
+	perlbook.tex	\
+	perlembed.tex	\
+	perlapio.tex	\
 	perlxs.tex	\
-	perlxstut.tex
+	perlxstut.tex	\
+	perlguts.tex	\
+	perlcall.tex	\
+	perltoc.tex
 
 man:  pod2man $(MAN)
 
@@ -163,6 +159,9 @@ html: pod2html
 	$(PERL) -I../lib pod2html $(POD)
 
 tex:	pod2latex $(TEX)
+
+toc:
+	$(PERL) -I../lib buildtoc >perltoc.pod
 
 .SUFFIXES: .pm .pod .man
 
@@ -190,6 +189,7 @@ tex:	pod2latex $(TEX)
 
 clean:
 	rm -f $(MAN) $(HTML) $(TEX)
+	rm -f *.aux *.log
 
 realclean:	clean
 	rm -f $(CONVERTERS)

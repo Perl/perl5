@@ -44,6 +44,9 @@ For example:
     $arg = shift;		# $arg is tainted
     $hid = $arg, 'bar';		# $hid is also tainted
     $line = <>;			# Tainted
+    $line = <STDIN>;		# Also tainted
+    open FOO, "/home/me/bar" or die $!;
+    $line = <FOO>;		# Still tainted
     $path = $ENV{'PATH'};	# Tainted, but see below
     $data = 'abc';		# Not tainted
 

@@ -1013,7 +1013,7 @@ GV *gv;
     if (gv) {
 	if (GvIO(gv))
 	    return 0;
-	if (!GvCV(gv))
+	if (!GvCVu(gv))
 	    gv = 0;
     }
     s = scan_word(s, tmpbuf, TRUE, &len);
@@ -1027,7 +1027,7 @@ GV *gv;
     }
     if (!keyword(tmpbuf, len)) {
 	indirgv = gv_fetchpv(tmpbuf,FALSE, SVt_PVCV);
-	if (indirgv && GvCV(indirgv))
+	if (indirgv && GvCVu(indirgv))
 	    return 0;
 	/* filehandle or package name makes it a method */
 	if (!gv || GvIO(indirgv) || gv_stashpvn(tmpbuf, len, FALSE)) {
@@ -1567,6 +1567,23 @@ yylex()
 	    if (*s == ':' && s[1] != ':') /* for csh execing sh scripts */
 		s++;
 	    if (!in_eval && *s == '#' && s[1] == '!') {
+#ifdef ARG_ZERO_IS_SCRIPT
+		/*
+		 * HP-UX (at least) sets argv[0] to the script
+		 * name, which makes $^X incorrect.
+		 * So, having found "#!", we'll set it right.
+		 */
+		GV *x = gv_fetchpv("\030", TRUE, SVt_PV);
+		if (sv_eq(GvSV(x), GvSV(curcop->cop_filegv))) {
+		    char *a = s + 2;
+		    while (*a == ' ' || *a == '\t')
+			a++;
+		    d = a;
+		    while (*d && !isSPACE(*d))
+			d++;
+		    sv_setpvn(GvSV(x), a, d - a);
+		}
+#endif /* ARG_ZERO_IS_SCRIPT */
 		d = instr(s,"perl -");
 		if (!d)
 		    d = instr(s,"perl");
@@ -2335,8 +2352,15 @@ yylex()
       keylookup:
 	bufptr = s;
 	s = scan_word(s, tokenbuf, FALSE, &len);
-	
-	if (*s == ':' && s[1] == ':' && strNE(tokenbuf, "CORE"))
+
+	/* Some keywords can be followed by any delimiter, including ':' */
+	tmp = (len == 1 && strchr("msyq", tokenbuf[0]) ||
+	       len == 2 && ((tokenbuf[0] == 't' && tokenbuf[1] == 'r') ||
+			    (tokenbuf[0] == 'q' &&
+			     strchr("qwx", tokenbuf[1]))));
+
+	/* x::* is just a word, unless x is "CORE" */
+	if (!tmp && *s == ':' && s[1] == ':' && strNE(tokenbuf, "CORE"))
 	    goto just_a_word;
 
 	d = s;
@@ -2344,18 +2368,12 @@ yylex()
 		d++;	/* no comments skipped here, or s### is misparsed */
 
 	/* Is this a label? */
-	if (expect == XSTATE && d < bufend && *d == ':' && *(d + 1) != ':') {
-	    if (len == 1 && strchr("syq", tokenbuf[0]) ||
-		len == 2 && ((tokenbuf[0] == 't' && tokenbuf[1] == 'r') ||
-			     (tokenbuf[0] == 'q' &&
-			      strchr("qwx", tokenbuf[1]))))
-		; /* no */
-	    else {
-		s = d + 1;
-		yylval.pval = savepv(tokenbuf);
-		CLINE;
-		TOKEN(LABEL);
-	    }
+	if (!tmp && expect == XSTATE
+	      && d < bufend && *d == ':' && *(d + 1) != ':') {
+	    s = d + 1;
+	    yylval.pval = savepv(tokenbuf);
+	    CLINE;
+	    TOKEN(LABEL);
 	}
 
 	/* Check for keywords */
@@ -2444,7 +2462,7 @@ yylex()
 		    /* (But it's an indir obj regardless for sort.) */
 
 		    if ((last_lop_op == OP_SORT ||
-                         (!immediate_paren && (!gv || !GvCV(gv))) ) &&
+                         (!immediate_paren && (!gv || !GvCVu(gv))) ) &&
                         (last_lop_op != OP_MAPSTART && last_lop_op != OP_GREPSTART)){
 			expect = (last_lop == oldoldbufptr) ? XTERM : XOPERATOR;
 			goto bareword;
@@ -2466,7 +2484,7 @@ yylex()
 
 		/* If followed by var or block, call it a method (unless sub) */
 
-		if ((*s == '$' || *s == '{') && (!gv || !GvCV(gv))) {
+		if ((*s == '$' || *s == '{') && (!gv || !GvCVu(gv))) {
 		    last_lop = oldbufptr;
 		    last_lop_op = OP_METHOD;
 		    PREBLOCK(METHOD);
@@ -2479,7 +2497,7 @@ yylex()
 
 		/* Not a method, so call it a subroutine (if defined) */
 
-		if (gv && GvCV(gv)) {
+		if (gv && GvCVu(gv)) {
 		    CV* cv = GvCV(gv);
 		    if (*s == '(') {
 			nextval[nexttoke].opval = yylval.opval;

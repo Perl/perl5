@@ -9,6 +9,139 @@ releases.)
 
 
 ----------------
+Version 5.003_19
+----------------
+
+Lots of internal cleanup in this patch, especially plugged memory
+leaks when embedded Perl interpreters shut down and restart.  The
+method cache is now invisible to user code.  And there is a new test
+directory, "t/pragma".
+
+IMHO, this is Beta quality code.
+
+Here's a list of the more significant changes...
+
+ CORE LANGUAGE CHANGES
+
+  Title:  "Make method cache invisible to user code"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  dump.c gv.c gv.h hv.c op.c perl.c pp_hot.c pp_sys.c sv.c
+          toke.c
+
+  Title:  "Never parse "{m,s,y,tr,q{,q,w,x}}:{,:}" as package or label"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  toke.c
+
+ CORE PORTABILITY
+
+  Title:  "Fix $^X under HP-UX"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  hints/hpux.sh toke.c
+
+  Title:  "New hints/hpux.sh"
+   From:  Jeff Okamoto <okamoto@hpcc123.corp.hp.com>
+ Msg-ID:  <199612312309.AA283393772@hpcc123.corp.hp.com>
+   Date:  Tue, 31 Dec 1996 15:09:32 -0800
+  Files:  hints/hpux.sh
+
+ OTHER CORE CHANGES
+
+  Title:  "Fix segv when calling named closures"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  pp_hot.c
+
+  Title:  "Finish rationalizing "undef value" warnings"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  doop.c pp.c sv.c t/op/assignwarn.t
+
+  Title:  "Arrange for all "_<file" entries to be in %main::"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  gv.c lib/perl5db.pl
+
+  Title:  "Introduce CVf_NODEBUG flag"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199701012042.PAA25994@aatma.engin.umich.edu>
+   Date:  Wed, 01 Jan 1997 15:42:05 -0500
+  Files:  cv.h pp_hot.c
+
+  Title:  "Reword 'may be "0"' warning per Larry; fix its line number"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  op.c pod/perldiag.pod
+
+  Title:  "5.003_18: perl_{con,des}truct fixes"
+   From:  Doug MacEachern <dougm@osf.org>
+ Msg-ID:  <199701032042.PAA06766@postman.osf.org>
+   Date:  Fri, 03 Jan 1997 15:42:04 -0500
+  Files:  perl.c perl.h pod/perlembed.pod pod/perltoc.pod t/op/sysio.t
+
+  Title:  "Fix lost value from READLINE after TIEHANDLE"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+  Files:  pp_hot.c sv.h
+
+  Title:  "Free memory of large lexical variables when leaving scope"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  scope.c
+
+ TESTS
+
+  Title:  "Create t/pragma directory; populate with new and old"
+   From:  pmarquess@bfsec.bt.co.uk (Paul Marquess)
+  Files:  MANIFEST Makefile.SH t/TEST t/comp/use.t t/lib/locale.t
+          t/op/overload.t t/op/use.t t/pragma/locale.t t/pragma/overload.t
+          t/pragma/strict-refs t/pragma/strict-subs t/pragma/strict-vars
+          t/pragma/strict.t t/pragma/subs.t t/pragma/warn-global
+          t/pragma/warning.t
+
+  Title:  "New tests: comp/colon.t and op/assignwarn.t"
+   From:  Robin Barker <rmb@cise.npl.co.uk>
+  Files:  MANIFEST t/comp/colon.t t/op/assignwarn.t
+
+ LIBRARY AND EXTENSIONS
+
+  Title:  "Make libs clean under '-w'"
+   From:  Jarkko Hietaniemi <jhi@cc.hut.fi>
+  Files:  lib/AutoSplit.pm lib/Devel/SelfStubber.pm lib/Env.pm
+          lib/Math/Complex.pm lib/Pod/Functions.pm lib/Search/Dict.pm
+          lib/SelfLoader.pm lib/Term/Complete.pm lib/chat2.pl
+          lib/complete.pl lib/diagnostics.pm lib/ftp.pl lib/termcap.pl
+          lib/validate.pl
+
+ DOCUMENTATION
+
+  Title:  "Perlguts, version 28"
+   From:  Jeff Okamoto <okamoto@hpcc123.corp.hp.com>
+ Msg-ID:  <199701032110.AA102535846@hpcc123.corp.hp.com>
+   Date:  Fri, 3 Jan 1997 13:10:46 -0800
+  Files:  pod/perlguts.pod
+
+  Title:  "Re: perldelta, take 3"
+   From:  Tim Bunce <Tim.Bunce@ig.co.uk>
+ Msg-ID:  <9701031748.AA15335@toad.ig.co.uk>
+   Date:  Fri, 3 Jan 1997 17:48:46 +0000
+  Files:  pod/perlnews.pod
+
+  Title:  "Miscellaneous pod patches"
+   From:  Ralf S. Engelschall <rse@engelschall.com>
+  Files:  pod/Makefile pod/perldebug.pod pod/perlfunc.pod
+          pod/perlguts.pod
+
+  Title:  "expanded flock() docs"
+   From:  Roderick Schertler <roderick@gate.net>
+ Msg-ID:  <4481.852337871@eeyore.ibcinc.com>
+   Date:  Fri, 03 Jan 1997 19:31:11 -0500
+  Files:  pod/perlfunc.pod
+
+  Title:  "Use Text::Wrap in buildtoc; run buildtoc"
+   From:  Ulrich Pfeifer <pfeifer@charly.informatik.uni-dortmund.de>
+  Files:  pod/buildtoc pod/perltoc.pod
+
+  Title:  "Remove obsolete perlovl.pod"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  MANIFEST plan9/mkfile pod/perlovl.pod vms/Makefile
+          vms/descrip.mms
+
+
+----------------
 Version 5.003_18
 ----------------
 

@@ -157,27 +157,30 @@ sub _open3 {
 	}
 
 	if ($dup_wtr) {
-	    open(STDIN,  "<&$dad_wtr") if (fileno(STDIN) != fileno($dad_wtr));
+	    xopen \*STDIN,  "<&$dad_wtr" if fileno(STDIN) != fileno($dad_wtr);
 	} else {
-	    close($dad_wtr);
-	    open(STDIN,  "<&$kid_rdr");
+	    xclose $dad_wtr;
+	    xopen \*STDIN,  "<&$kid_rdr";
+	    xclose $kid_rdr;
 	}
 	if ($dup_rdr) {
-	    open(STDOUT, ">&$dad_rdr") if (fileno(STDOUT) != fileno($dad_rdr));
+	    xopen \*STDOUT, ">&$dad_rdr" if fileno(STDOUT) != fileno($dad_rdr);
 	} else {
-	    close($dad_rdr);
-	    open(STDOUT, ">&$kid_wtr");
+	    xclose $dad_rdr;
+	    xopen \*STDOUT, ">&$kid_wtr";
+	    xclose $kid_wtr;
 	}
 	if ($dad_rdr ne $dad_err) {
 	    if ($dup_err) {
-		open(STDERR, ">&$dad_err")
-		    if (fileno(STDERR) != fileno($dad_err));
+		xopen \*STDERR, ">&$dad_err"
+		    if fileno(STDERR) != fileno($dad_err);
 	    } else {
-		close($dad_err);
-		open(STDERR, ">&$kid_err");
+		xclose $dad_err;
+		xopen \*STDERR, ">&$kid_err";
+		xclose $kid_err;
 	    }
 	} else {
-	    open(STDERR, ">&STDOUT") if (fileno(STDERR) != fileno(STDOUT));
+	    xopen \*STDERR, ">&STDOUT" if fileno(STDERR) != fileno(STDOUT);
 	}
 	local($")=(" ");
 	exec @cmd

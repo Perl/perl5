@@ -97,7 +97,7 @@ PP(pp_gelem)
 	break;
     case 'C':
 	if (strEQ(elem, "CODE"))
-	    ref = (SV*)GvCV(gv);
+	    ref = (SV*)GvCVu(gv);
 	break;
     case 'F':
 	if (strEQ(elem, "FILEHANDLE")) /* XXX deprecate in 5.005 */
@@ -957,7 +957,8 @@ do_readline()
 	perl_call_method("READLINE", GIMME);
 	LEAVE;
 	SPAGAIN;
-	if (GIMME == G_SCALAR) sv_setsv(TARG, TOPs);
+	if (GIMME == G_SCALAR)
+	    SvSetSV_nosteal(TARG, TOPs);
 	RETURN;
     }
     fp = Nullfp;
@@ -1717,16 +1718,16 @@ PP(pp_entersub)
 	may_clone = FALSE;
 	break;
     case SVt_PVGV:
-	if (!(cv = GvCV((GV*)sv)))
+	if (!(cv = GvCVu((GV*)sv)))
 	    cv = sv_2cv(sv, &stash, &gv, TRUE);
 	break;
     }
 
-    ENTER;
-    SAVETMPS;
-
     if (may_clone && cv && CvCLONE(cv))
 	cv = (CV*)sv_2mortal((SV*)cv_clone(cv));
+
+    ENTER;
+    SAVETMPS;
 
   retry:
     if (!cv)
@@ -1736,12 +1737,8 @@ PP(pp_entersub)
 	if (gv = CvGV(cv)) {
 	    SV *tmpstr;
 	    GV *ngv;
-	    if (SvFAKE(cv) && GvCV(gv) != cv) {	/* autoloaded stub? */
+	    if (cv != GvCV(gv)) {	/* autoloaded stub? */
 		cv = GvCV(gv);
-		if (SvTYPE(sv) == SVt_PVGV) {
-		    SvREFCNT_dec(GvCV((GV*)sv));
-		    GvCV((GV*)sv) = (CV*)SvREFCNT_inc((SV*)cv);
-		}
 		goto retry;
 	    }
 	    tmpstr = sv_newmortal();
@@ -1760,7 +1757,7 @@ PP(pp_entersub)
     }
 
     gimme = GIMME;
-    if ((op->op_private & OPpENTERSUB_DB)) {
+    if ((op->op_private & OPpENTERSUB_DB) && !CvNODEBUG(cv)) {
 	SV *oldsv = sv;
 	sv = GvSV(DBsub);
 	save_item(sv);
@@ -2035,7 +2032,7 @@ DIE("Can't call method \"%s\" without a package or object reference", name);
 	    if (!gv)
 		DIE("Can't locate object method \"%s\" via package \"%s\"",
 		    name, packname);
-	    SETs((SV*)gv);
+	    SETs(isGV(gv) ? (SV*)GvCV(gv) : (SV*)gv);
 	    RETURN;
 	}
 	*(stack_base + TOPMARK + 1) = sv_2mortal(newRV((SV*)iogv));
@@ -2054,7 +2051,7 @@ DIE("Can't call method \"%s\" without a package or object reference", name);
 		name, HvNAME(SvSTASH(ob)));
     }
 
-    SETs((SV*)gv);
+    SETs(isGV(gv) ? (SV*)GvCV(gv) : (SV*)gv);
     RETURN;
 }
 

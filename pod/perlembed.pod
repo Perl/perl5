@@ -51,6 +51,8 @@ L<Fiddling with the Perl stack from your C program>
 
 L<Maintaining a persistent interpreter>
 
+L<Maintaining multiple interpreter instances>
+
 L<Using Perl modules, which themselves use C libraries, from your C program>
 
 This documentation is UNIX specific.
@@ -126,7 +128,6 @@ In a sense, perl (the C program) is a good example of embedding Perl
 from the source distribution.  Here's a bastardized, non-portable version of
 I<miniperlmain.c> containing the essentials of embedding:
 
-    #include <stdio.h>
     #include <EXTERN.h>               /* from the Perl distribution     */
     #include <perl.h>                 /* from the Perl distribution     */
 
@@ -173,12 +174,12 @@ calling I<perl_run()>.
 
 =head2 Calling a Perl subroutine from your C program
 
-To call individual Perl subroutines, you'll need to remove the call to
-I<perl_run()> and replace it with a call to I<perl_call_argv()>.
+To call individual Perl subroutines, you can use any of the B<perl_call_*>
+functions documented in the L<perlcall> man page.
+In this example we'll use I<perl_call_argv>.
 
 That's shown below, in a program I'll call I<showtime.c>.
 
-    #include <stdio.h>
     #include <EXTERN.h>
     #include <perl.h>
 
@@ -186,13 +187,16 @@ That's shown below, in a program I'll call I<showtime.c>.
 
     int main(int argc, char **argv, char **env)
     {
+        char *args[] = { NULL };
         my_perl = perl_alloc();
         perl_construct(my_perl);
 
         perl_parse(my_perl, NULL, argc, argv, NULL);
 
-                                     /*** This replaces perl_run() ***/
-        perl_call_argv("showtime", G_DISCARD | G_NOARGS, argv);
+        /*** skipping perl_run() ***/
+
+        perl_call_argv("showtime", G_DISCARD | G_NOARGS, args);
+
         perl_destruct(my_perl);
         perl_free(my_perl);
     }
@@ -220,8 +224,15 @@ yielding the number of seconds that elapsed between January 1, 1970
 (the beginning of the UNIX epoch), and the moment I began writing this
 sentence.
 
-If you want to pass some arguments to the Perl subroutine, or
-you want to access the return value, you'll need to manipulate the
+Note that in this particular case we are not required to call I<perl_run>,
+however, in general it's considered good practice to ensure proper 
+initialization of library code including execution of all object C<DESTROY>
+methods and package C<END {}> blocks.
+
+If you want to pass some arguments to the Perl subroutine, you may add
+strings to the C<NULL> terminated C<args> list passed to I<perl_call_argv>.
+In order to pass arguments of another data type and/or examine return values
+of the subroutine you'll need to manipulate the
 Perl stack, demonstrated in the last section of this document:
 L<Fiddling with the Perl stack from your C program>
 
@@ -235,15 +246,14 @@ flag to L<perlguts/perl_eval_sv>.
 Arguably, this is the only routine you'll ever need to execute
 snippets of Perl code from within your C program.  Your string can be
 as long as you wish; it can contain multiple statements; it can
-use L<perlfunc/require> or L<perlfunc/do> to include external Perl
-files.
+include L<perlfunc/use>, L<perlfunc/require> and L<perlfunc/do> to
+include external Perl files.
 
 Our I<perl_eval()> lets us evaluate individual Perl strings, and then
 extract variables for coercion into C types.  The following program,
 I<string.c>, executes three Perl strings, extracting an C<int> from
 the first, a C<float> from the second, and a C<char *> from the third.
 
-   #include <stdio.h>
    #include <EXTERN.h>
    #include <perl.h>
 
@@ -263,7 +273,7 @@ the first, a C<float> from the second, and a C<char *> from the third.
      perl_construct( my_perl );
 
      perl_parse(my_perl, NULL, 3, embedding, NULL);
-
+     perl_run(my_perl);
                                        /** Treat $a as an integer **/
      perl_eval("$a = 3; $a **= 2");
      printf("a = %d\n", SvIV(perl_get_sv("a", FALSE)));
@@ -320,7 +330,6 @@ returning the number of matches found.
 Here's a sample program, I<match.c>, that uses all three (long lines have
 been wrapped here):
 
-   #include <stdio.h>
    #include <EXTERN.h>
    #include <perl.h>
    static PerlInterpreter *my_perl;
@@ -339,7 +348,7 @@ been wrapped here):
      char *command;
      command = malloc(sizeof(char) * strlen(string) + strlen(pattern) + 37);
      sprintf(command, "$string = '%s'; $return = $string =~ %s",
-   	  string, pattern);
+                      string, pattern);
      perl_eval(command);
      free(command);
      return SvIV(perl_get_sv("return", FALSE));
@@ -357,11 +366,11 @@ been wrapped here):
      STRLEN length;
      command = malloc(sizeof(char) * strlen(*string) + strlen(pattern) + 35);
      sprintf(command, "$string = '%s'; $ret = ($string =~ %s)",
-   	  *string, pattern);
-        perl_eval(command);
-        free(command);
-        *string = SvPV(perl_get_sv("string", FALSE), length);
-        return SvIV(perl_get_sv("ret", FALSE));
+                      *string, pattern);
+     perl_eval(command);
+     free(command);
+     *string = SvPV(perl_get_sv("string", FALSE), length);
+     return SvIV(perl_get_sv("ret", FALSE));
    }
    /** matches(string, pattern, matches)
    **
@@ -380,7 +389,7 @@ been wrapped here):
      int i;
      command = malloc(sizeof(char) * strlen(string) + strlen(pattern) + 38);
      sprintf(command, "$string = '%s'; @array = ($string =~ %s)",
-   	  string, pattern);
+                      string, pattern);
      perl_eval(command);
      free(command);
      array = perl_get_av("array", FALSE);
@@ -401,6 +410,8 @@ been wrapped here):
      my_perl = perl_alloc();
      perl_construct( my_perl );
      perl_parse(my_perl, NULL, 3, embedding, NULL);
+     perl_run(my_perl);
+
      text = (char *) malloc(sizeof(char) * 486); /** A long string follows! **/
      sprintf(text, "%s", "When he is at a convenience store and the bill \
      comes to some amount like 76 cents, Maynard is aware that there is \
@@ -432,7 +443,7 @@ been wrapped here):
      num_matches = substitute(&text, "s/[aeiou]//gi");
      if (num_matches) {
        printf("substitute: s/[aeiou]//gi...%d substitutions made.\n",
-   	   num_matches);
+              num_matches);
        printf("Now text is: %s\n\n", text);
      }
      /** Attempt a substitution **/
@@ -496,7 +507,6 @@ I<PerlPower()> that contains all the perlguts necessary to push the
 two arguments into I<expo()> and to pop the return value out.  Take a
 deep breath...
 
-    #include <stdio.h>
     #include <EXTERN.h>
     #include <perl.h>
 
@@ -532,6 +542,7 @@ deep breath...
       sprintf(my_argv[1], "power.pl");
 
       perl_parse(my_perl, NULL, argc, my_argv, NULL);
+      perl_run(my_perl);
 
       PerlPower(3, 4);                      /*** Compute 3 ** 4 ***/
 
@@ -613,7 +624,7 @@ reduce symbol table growth.
      my ($stem, $leaf);
  
      no strict 'refs';
-     $pkg = "main::$pkg\::";	# expand to full symbol table name
+     $pkg = "main::$pkg\::";    # expand to full symbol table name
      ($stem, $leaf) = $pkg =~ m/(.*::)(\w+::)$/;
  
      my $stem_symtab = *{$stem}{HASH};
@@ -629,28 +640,28 @@ reduce symbol table growth.
         &&
         $Cache{$package}{mtime} <= $mtime) 
      {
- 	# we have compiled this subroutine already, 
- 	# it has not been updated on disk, nothing left to do
-   	print STDERR "already compiled $package->handler\n";
+        # we have compiled this subroutine already, 
+        # it has not been updated on disk, nothing left to do
+        print STDERR "already compiled $package->handler\n";
      }
      else {
- 	local *FH;
- 	open FH, $filename or die "open '$filename' $!";
- 	local($/) = undef;
- 	my $sub = <FH>;
- 	close FH;
+        local *FH;
+        open FH, $filename or die "open '$filename' $!";
+        local($/) = undef;
+        my $sub = <FH>;
+        close FH;
  
- 	#wrap the code into a subroutine inside our unique package
- 	my $eval = qq{package $package; sub handler { $sub; }};
- 	{
- 	    # hide our variables within this block
- 	    my($r,$filename,$mtime,$package,$sub);
- 	    eval $eval;
- 	}
- 	die $@ if $@;
+        #wrap the code into a subroutine inside our unique package
+        my $eval = qq{package $package; sub handler { $sub; }};
+        {
+            # hide our variables within this block
+            my($filename,$mtime,$package,$sub);
+            eval $eval;
+        }
+        die $@ if $@;
  
- 	#cache it unless we're cleaning out each time
- 	$Cache{$package}{mtime} = $mtime unless $delete;
+        #cache it unless we're cleaning out each time
+        $Cache{$package}{mtime} = $mtime unless $delete;
      }
  
      eval {$package->handler;};
@@ -686,27 +697,27 @@ reduce symbol table growth.
      int exitstatus = 0;
  
      if((perl = perl_alloc()) == NULL) {
- 	fprintf(stderr, "no memory!");
- 	exit(1);
+        fprintf(stderr, "no memory!");
+        exit(1);
      }
      perl_construct(perl); 
      
      exitstatus = perl_parse(perl, NULL, 2, embedding, NULL);
  
      if(!exitstatus) { 
- 	exitstatus = perl_run(perl);
+        exitstatus = perl_run(perl);
    
- 	while(printf("Enter file name: ") && gets(filename)) {
+        while(printf("Enter file name: ") && gets(filename)) {
  
- 	    /* call the subroutine, passing it the filename as an argument */
- 	    args[0] = filename;
- 	    perl_call_argv("Embed::Persistent::eval_file", 
- 			   G_DISCARD | G_EVAL, args);
+            /* call the subroutine, passing it the filename as an argument */
+            args[0] = filename;
+            perl_call_argv("Embed::Persistent::eval_file", 
+                           G_DISCARD | G_EVAL, args);
  
- 	    /* check $@ */
- 	    if(SvTRUE(GvSV(errgv))) 
- 		fprintf(stderr, "eval error: %s\n", SvPV(GvSV(errgv),na));
- 	}
+            /* check $@ */
+            if(SvTRUE(GvSV(errgv))) 
+                fprintf(stderr, "eval error: %s\n", SvPV(GvSV(errgv),na));
+        }
      }
      
      perl_destruct_level = 0;
@@ -739,6 +750,104 @@ Now run:
  already compiled Embed::test_2epl->handler
  foo says: hello
  Enter file name: ^C
+
+=head2 Maintaining multiple interpreter instances
+
+The previous examples have gone through several steps to startup, use and
+shutdown an embedded Perl interpreter.  Certain applications may require
+more than one instance of an interpreter to be created during the lifespan
+of a single process.  Such an application may take different approaches in
+it's use of interpreter objects.  For example, a particular transaction may
+want to create an interpreter instance, then release any resources associated
+with the object once the transaction is completed.  When a single process 
+does this once, resources are released upon exit of the program and the next
+time it starts, the interpreter's global state is fresh.
+
+In the same process, the program must take care to ensure that these
+actions take place before constructing a new interpreter.  By default, the 
+global variable C<perl_destruct_level> is set to C<0> since extra cleaning
+is not needed when a program constructs a single interpreter, such as the 
+perl executable itself in C</usr/bin/perl> or some such.
+
+You can tell Perl to make everything squeeky clean by setting 
+C<perl_destruct_level> to C<1>.
+
+ perl_destruct_level = 1; /* perl global variable */
+ while(1) {
+     ...
+     /* reset global variables here with perl_destruct_level = 1 */
+     perl_contruct(my_perl); 
+     ...
+     /* clean and reset _everything_ during perl_destruct */
+     perl_destruct(my_perl); /* ah, nice and fresh */
+     perl_free(my_perl);      
+     ...
+     /* let's go do it again! */
+ }
+
+Now, when I<perl_destruct()> is called, the interpreter's syntax parsetree 
+and symbol tables are cleaned out, along with reseting global variables.  
+
+So, we've seen how to startup and shutdown an interpreter more than once
+in the same process, but there was only one instance in existance at any
+one time.  Hmm, wonder if we can have more than one interpreter instance 
+running at the _same_ time?  
+Indeed this is possible, however when you build Perl, you must compile with
+C<-DMULTIPLICITY>.  
+
+It's a little tricky for the Perl runtime to handle multiple interpreters, 
+introducing some overhead that most programs with a single interpreter don't
+get burdened with.  When you compile with C<-DMULTIPLICITY>, by default, 
+C<perl_destruct_level> is set to C<1> for each interpreter.
+
+Let's give it a try:
+
+
+ #include <EXTERN.h>
+ #include <perl.h>     
+
+
+ /* we're going to embed two interpreters */
+ /* we're going to embed two interpreters */
+
+
+ #define SAY_HELLO "-e", "print qq(Hi, I'm $^X\n)"
+
+
+ int main(int argc, char **argv, char **env)
+ {
+     PerlInterpreter 
+         *one_perl = perl_alloc(),
+         *two_perl = perl_alloc();  
+     char *one_args[] = { "one_perl", SAY_HELLO };
+     char *two_args[] = { "two_perl", SAY_HELLO };
+
+     perl_construct(one_perl);
+     perl_construct(two_perl);
+
+     perl_parse(one_perl, NULL, 3, one_args, (char **)NULL);
+     perl_parse(two_perl, NULL, 3, two_args, (char **)NULL);
+
+     perl_run(one_perl);
+     perl_run(two_perl);
+
+     perl_destruct(one_perl);
+     perl_destruct(two_perl);
+
+     perl_free(one_perl);
+     perl_free(two_perl);
+ }
+
+
+Compile as usual:
+
+ % cc -o multiplicity multiplicity.c `perl -MExtUtils::Embed -e ccopts -e ldopts`
+
+Run it, Run it:
+
+ % multiplicity
+ Hi, I'm one_perl
+ Hi, I'm two_perl
 
 =head2 Using Perl modules, which themselves use C libraries, from your C program
 

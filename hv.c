@@ -752,7 +752,7 @@ I32 shared;
 {
     if (!hent)
 	return;
-    if (SvTYPE(HeVAL(hent)) == SVt_PVGV && GvCV(HeVAL(hent)))
+    if (SvTYPE(HeVAL(hent)) == SVt_PVGV && GvCVu(HeVAL(hent)))
 	sub_generation++;		/* May be deletion of method? */
     SvREFCNT_dec(HeVAL(hent));
     if (HeKLEN(hent) == HEf_SVKEY) {

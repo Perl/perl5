@@ -59,12 +59,16 @@ gv_fetchfile(name)
 char *name;
 {
     char tmpbuf[1200];
+    STRLEN tmplen;
     GV *gv;
 
-    sprintf(tmpbuf,"::_<%s", name);
-    gv = gv_fetchpv(tmpbuf, TRUE, SVt_PVGV);
+    sprintf(tmpbuf, "_<%s", name);
+    tmplen = strlen(tmpbuf);
+    gv = *(GV**)hv_fetch(defstash, tmpbuf, tmplen, TRUE);
+    if (!isGV(gv))
+	gv_init(gv, defstash, tmpbuf, tmplen, FALSE);
     sv_setpv(GvSV(gv), name);
-    if (*name == '/' && (instr(name,"/lib/") || instr(name,".pm")))
+    if (*name == '/' && (instr(name, "/lib/") || instr(name, ".pm")))
 	GvMULTI_on(gv);
     if (perldb)
 	hv_magic(GvHVn(gv_AVadd(gv)), gv, 'L');
@@ -272,11 +276,12 @@ char* name;
 	if (strEQ(name,"import"))
 	    gv = (GV*)&sv_yes;
 	else if (strNE(name, "AUTOLOAD")) {
-	    gv = gv_fetchmeth(stash, "AUTOLOAD", 8, 0);
-	    if (gv && (cv = GvCV(gv))) { /* One more chance... */
+	    if (gv = gv_fetchmeth(stash, "AUTOLOAD", 8, 0)) {
+		/* One more chance... */
 		SV *tmpstr = sv_2mortal(newSVpv(HvNAME(stash),0));
 		sv_catpvn(tmpstr,"::", 2);
 		sv_catpvn(tmpstr, name, nend - name);
+		cv = GvCV(gv);
 		sv_setsv(GvSV(CvGV(cv)), tmpstr);
 		SvTAINTED_off(GvSV(CvGV(cv)));
 	    }
@@ -458,7 +463,7 @@ I32 sv_type;
 			    sv_type == SVt_PVAV ? '@' :
 			    sv_type == SVt_PVHV ? '%' : '$',
 			    name);
-			if (GvCV(*gvp))
+			if (GvCVu(*gvp))
 			    warn("(Did you mean &%s instead?)\n", name);
 			stash = 0;
 		    }
@@ -923,12 +928,12 @@ HV* stash;
 	      croak("Not a subroutine reference in overload table");
 	      return FALSE;
             case SVt_PVCV:
-                cv = (CV*)sv;
-                break;
+              cv = (CV*)sv;
+              break;
             case SVt_PVGV:
-                if (!(cv = GvCV((GV*)sv)))
-                    cv = sv_2cv(sv, &stash, &gv, TRUE);
-                break;
+              if (!(cv = GvCVu((GV*)sv)))
+                cv = sv_2cv(sv, &stash, &gv, TRUE);
+              break;
           }
           if (cv) filled=1;
 	  else {

@@ -90,7 +90,7 @@ which will determine if more memory needs to be allocated.  If so, it will
 call the function C<sv_grow>.  Note that C<SvGROW> can only increase, not
 decrease, the allocated memory of an SV and that it does not automatically
 add a byte for the a trailing NUL (perl's own string functions typically do
-SvGROW(sv, len + 1)).
+C<SvGROW(sv, len + 1)>).
 
 If you have an SV and want to know what kind of data Perl thinks is stored
 in it, you can use the following macros to check the type of SV you have.
@@ -312,7 +312,7 @@ by using the following:
 
 This returns NULL if the variable does not exist.
 
-The hash algorithm is defined in the PERL_HASH(hash, key, klen) macro:
+The hash algorithm is defined in the C<PERL_HASH(hash, key, klen)> macro:
 
     i = klen;
     hash = 0;
@@ -384,26 +384,24 @@ for information on converting class names into stashes.
 /* Still under construction */
 
 Upgrades rv to reference if not already one.  Creates new SV for rv to
-point to.
-If classname is non-null, the SV is blessed into the specified class.
-SV is returned.
+point to.  If C<classname> is non-null, the SV is blessed into the specified
+class.  SV is returned.
 
 	SV* newSVrv(SV* rv, char* classname);
 
-Copies integer or double into an SV whose reference is rv.  SV is blessed
-if classname is non-null.
+Copies integer or double into an SV whose reference is C<rv>.  SV is blessed
+if C<classname> is non-null.
 
 	SV* sv_setref_iv(SV* rv, char* classname, IV iv);
 	SV* sv_setref_nv(SV* rv, char* classname, NV iv);
 
 Copies the pointer value (I<the address, not the string!>) into an SV whose
-reference is rv.  SV is blessed if classname is non-null.
+reference is rv.  SV is blessed if C<classname> is non-null.
 
 	SV* sv_setref_pv(SV* rv, char* classname, PV iv);
 
-Copies string into an SV whose reference is rv.
-Set length to 0 to let Perl calculate the string length.
-SV is blessed if classname is non-null.
+Copies string into an SV whose reference is C<rv>.  Set length to 0 to let
+Perl calculate the string length.  SV is blessed if C<classname> is non-null.
 
 	SV* sv_setref_pvn(SV* rv, char* classname, PV iv, int length);
 
@@ -917,7 +915,7 @@ For a complete description of the PerlIO abstraction, consult L<perlapio>.
 
 =head2 Scratchpads
 
-=head3 Putting a C value on Perl stack
+=head2 Putting a C value on Perl stack
 
 A lot of opcodes (this is an elementary operation in the internal perl
 stack machine) put an SV* on the stack. However, as an optimization
@@ -934,7 +932,7 @@ The macro to put this target on stack is C<PUSHTARG>, and it is
 directly used in some opcodes, as well as indirectly in zillions of
 others, which use it via C<(X)PUSH[pni]>.
 
-=head3 Scratchpads
+=head2 Scratchpads
 
 The question remains on when the SV's which are I<target>s for opcodes
 are created. The answer is that they are created when the current unit --
@@ -952,7 +950,7 @@ The correspondence between OP's and I<target>s is not 1-to-1. Different
 OP's in the compile tree of the unit can use the same target, if this
 would not conflict with the expected life of the temporary.
 
-=head3 Scratchpads and recursions
+=head2 Scratchpads and recursions
 
 In fact it is not 100% true that a compiled unit contains a pointer to
 the scratchpad AV. In fact it contains a pointer to an AV of
@@ -1535,6 +1533,7 @@ Creates a new SV for the RV, C<rv>, to point to.  If C<rv> is not an RV then
 it will be upgraded to one.  If C<classname> is non-null then the new SV will
 be blessed in the specified package.  The new SV is returned and its
 reference count is 1.
+
 	SV*	newSVrv _((SV* rv, char* classname));
 
 =item newSVsv
@@ -2590,4 +2589,4 @@ API Listing by Dean Roehrich <roehrich@cray.com>.
 
 =head1 DATE
 
-Version 27: 1996/12/24
+Version 28: 1996/12/27

@@ -1099,7 +1099,7 @@ mess(pat, args)
     if (usermess) {
 	tmpstr = sv_newmortal();
 	sv_setpv(tmpstr, va_arg(*args, char *));
-	*s++ = SvPVX(tmpstr)[SvCUR(tmpstr)-1];
+	*s++ = SvCUR(tmpstr) ? SvPVX(tmpstr)[SvCUR(tmpstr)-1] : ' ';
     }
     else {
 	(void) vsprintf(s,pat,*args);

@@ -2363,12 +2363,12 @@ L<perlref> for more on this.
 (W) A copy of the object returned from C<tie> (or C<tied>) was still
 valid when C<untie> was called.
 
-=item Value of %s may be "0"; use "defined"
+=item Value of %s construct can be "0"; test with defined()
 
 (W) In a conditional expression, you used <HANDLE>, <*> (glob), or
-C<readdir> as a boolean value.  Each of these operators may return a
+C<readdir> as a boolean value.  Each of these constructs can return a
 value of "0"; that would make the conditional expression false, which
-is probably not what you intended.  So, when using these operators in
+is probably not what you intended.  When using these constructs in
 conditional expressions, test their values with the C<defined> operator.
 
 =item Variable "%s" is not exported

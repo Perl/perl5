@@ -54,10 +54,11 @@ sub abbrev {
 	my $abbrev = shift(@extra);
 	my $len = 1;
         my $cmp;
-	foreach $cmp (@cmp) {
+	WORD: foreach $cmp (@cmp) {
 	    next if $cmp eq $name;
 	    while (substr($cmp,0,$len) eq $abbrev) {
-		$abbrev .= shift(@extra);
+                last WORD unless @extra;
+                $abbrev .= shift(@extra);
 		++$len;
 	    }
 	}

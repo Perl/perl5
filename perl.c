@@ -34,6 +34,29 @@ dEXTCONST char rcsid[] = "perl.c\nPatch level: ###\n";
 #endif
 #endif
 
+#define I_REINIT \
+  STMT_START {			\
+    chopset	= " \n-";	\
+    copline	= NOLINE;	\
+    curcop	= &compiling;	\
+    curcopdb    = NULL;		\
+    cxstack_ix  = -1;		\
+    cxstack_max = 128;		\
+    dbargs	= 0;		\
+    dlmax	= 128;		\
+    laststatval	= -1;		\
+    laststype	= OP_STAT;	\
+    maxscream	= -1;		\
+    maxsysfd	= MAXSYSFD;	\
+    statname	= Nullsv;	\
+    tmps_floor	= -1;		\
+    tmps_ix     = -1;		\
+    op_mask     = NULL;		\
+    dlmax       = 128;		\
+    laststatval = -1;		\
+    laststype   = OP_STAT;	\
+  } STMT_END
+
 static void find_beginning _((void));
 static void forbid_setid _((char *));
 static void incpush _((char *));
@@ -105,19 +128,11 @@ register PerlInterpreter *sv_interp;
     }
 
 #ifdef MULTIPLICITY
-    chopset	= " \n-";
-    copline	= NOLINE;
-    curcop	= &compiling;
-    dbargs	= 0;
-    dlmax	= 128;
-    laststatval	= -1;
-    laststype	= OP_STAT;
-    maxscream	= -1;
-    maxsysfd	= MAXSYSFD;
-    rsfp	= Nullfp;
-    statname	= Nullsv;
-    tmps_floor	= -1;
-    perl_destruct_level = 1;
+    I_REINIT;
+    perl_destruct_level = 1; 
+#else
+   if(perl_destruct_level > 0)
+       I_REINIT;
 #endif
 
     init_ids();
@@ -206,23 +221,124 @@ register PerlInterpreter *sv_interp;
 
     /* loosen bonds of global variables */
 
-    setdefout(Nullgv);
+    if(rsfp) {
+	(void)PerlIO_close(rsfp);
+	rsfp = Nullfp;
+    }
 
-    sv_free(nrs);
+    /* Filters for program text */
+    SvREFCNT_dec(rsfp_filters);
+    rsfp_filters = Nullav;
+
+    /* switches */
+    preprocess   = FALSE;
+    minus_n      = FALSE;
+    minus_p      = FALSE;
+    minus_l      = FALSE;
+    minus_a      = FALSE;
+    minus_F      = FALSE;
+    doswitches   = FALSE;
+    dowarn       = FALSE;
+    doextract    = FALSE;
+    sawampersand = FALSE;	/* must save all match strings */
+    sawstudy     = FALSE;	/* do fbm_instr on all strings */
+    sawvec       = FALSE;
+    unsafe       = FALSE;
+
+    Safefree(inplace);
+    inplace = Nullch;
+
+    Safefree(e_tmpname);
+    e_tmpname = Nullch;
+
+    if (e_fp) {
+	PerlIO_close(e_fp);
+	e_fp = Nullfp;
+    }
+
+    /* magical thingies */
+
+    Safefree(ofs);	/* $, */
+    ofs = Nullch;
+
+    Safefree(ors);	/* $\ */
+    ors = Nullch;
+
+    SvREFCNT_dec(nrs);	/* $\ helper */
     nrs = Nullsv;
 
-    sv_free(lastscream);
-    lastscream = Nullsv;
+    multiline = 0;	/* $* */
 
-    sv_free(statname);
+    SvREFCNT_dec(statname);
     statname = Nullsv;
     statgv = Nullgv;
-    laststatval = -1;
 
-    sv_free((SV*)beginav);
+    /* defgv, aka *_ should be taken care of elsewhere */
+
+#if 0  /* just about all regexp stuff, seems to be ok */
+
+    /* shortcuts to regexp stuff */
+    leftgv = Nullgv;
+    ampergv = Nullgv;
+
+    SAVEFREEOP(curpm);
+    SAVEFREEOP(oldlastpm); /* for saving regexp context during debugger */
+
+    regprecomp = NULL;	/* uncompiled string. */
+    regparse = NULL;	/* Input-scan pointer. */
+    regxend = NULL;	/* End of input for compile */
+    regnpar = 0;	/* () count. */
+    regcode = NULL;	/* Code-emit pointer; &regdummy = don't. */
+    regsize = 0;	/* Code size. */
+    regnaughty = 0;	/* How bad is this pattern? */
+    regsawback = 0;	/* Did we see \1, ...? */
+
+    reginput = NULL;		/* String-input pointer. */
+    regbol = NULL;		/* Beginning of input, for ^ check. */
+    regeol = NULL;		/* End of input, for $ check. */
+    regstartp = (char **)NULL;	/* Pointer to startp array. */
+    regendp = (char **)NULL;	/* Ditto for endp. */
+    reglastparen = 0;		/* Similarly for lastparen. */
+    regtill = NULL;		/* How far we are required to go. */
+    regflags = 0;		/* are we folding, multilining? */
+    regprev = (char)NULL;	/* char before regbol, \n if none */
+
+#endif /* if 0 */
+
+    /* clean up after study() */
+    SvREFCNT_dec(lastscream);
+    lastscream = Nullsv;
+    Safefree(screamfirst);
+    screamfirst = 0;
+    Safefree(screamnext);
+    screamnext  = 0;
+
+    /* startup and shutdown function lists */
+    SvREFCNT_dec(beginav);
+    SvREFCNT_dec(endav);
     beginav = Nullav;
-    sv_free((SV*)endav);
     endav = Nullav;
+
+    /* pid-to-status mappings for waitpid */
+    SvREFCNT_dec(pidstatus);
+    pidstatus = Nullhv;
+
+    /* temp stack during pp_sort() */
+    SvREFCNT_dec(sortstack);
+    sortstack = Nullav;
+
+    /* shortcuts just get cleared */
+    envgv = Nullgv;
+    siggv = Nullgv;
+    incgv = Nullgv;
+    errgv = Nullgv;
+    argvgv = Nullgv;
+    argvoutgv = Nullgv;
+    stdingv = Nullgv;
+    last_in_gv = Nullgv;
+
+    /* reset so print() ends up where we expect */
+    setdefout(Nullgv);
 
     /* Prepare to destruct main symbol table.  */
 
@@ -765,13 +881,13 @@ char* name;
 I32 create;
 {
     GV* gv = gv_fetchpv(name, create, SVt_PVCV);
-    if (create && !GvCV(gv))
+    if (create && !GvCVu(gv))
     	return newSUB(start_subparse(),
 		      newSVOP(OP_CONST, 0, newSVpv(name,0)),
 		      Nullop,
 		      Nullop);
     if (gv)
-	return GvCV(gv);
+	return GvCVu(gv);
     return Nullcv;
 }
 

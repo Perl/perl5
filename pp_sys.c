@@ -468,7 +468,7 @@ PP(pp_tie)
 	methname = "TIESCALAR";
 
     stash = gv_stashsv(mark[1], FALSE);
-    if (!stash || !(gv = gv_fetchmethod(stash, methname)) || !GvCV(gv))
+    if (!stash || !(gv = gv_fetchmethod(stash, methname)))
 	DIE("Can't locate object method \"%s\" via package \"%s\"",
 		methname, SvPV(mark[1],na));
 
@@ -483,7 +483,7 @@ PP(pp_tie)
     if (perldb && curstash != debstash)
 	op->op_private |= OPpENTERSUB_DB;
 
-    XPUSHs((SV*)gv);
+    XPUSHs((SV*)GvCV(gv));
     PUTBACK;
 
     if (op = pp_entersub())
@@ -572,11 +572,11 @@ PP(pp_dbmopen)
     sv = sv_mortalcopy(&sv_no);
     sv_setpv(sv, "AnyDBM_File");
     stash = gv_stashsv(sv, FALSE);
-    if (!stash || !(gv = gv_fetchmethod(stash, "TIEHASH")) || !GvCV(gv)) {
+    if (!stash || !(gv = gv_fetchmethod(stash, "TIEHASH"))) {
 	PUTBACK;
 	perl_require_pv("AnyDBM_File.pm");
 	SPAGAIN;
-	if (!(gv = gv_fetchmethod(stash, "TIEHASH")) || !GvCV(gv))
+	if (!(gv = gv_fetchmethod(stash, "TIEHASH")))
 	    DIE("No dbm on this machine");
     }
 
@@ -601,7 +601,7 @@ PP(pp_dbmopen)
     else
 	PUSHs(sv_2mortal(newSViv(O_RDWR)));
     PUSHs(right);
-    PUSHs((SV*)gv);
+    PUSHs((SV*)GvCV(gv));
     PUTBACK;
 
     if (op = pp_entersub())
@@ -618,7 +618,7 @@ PP(pp_dbmopen)
 	PUSHs(left);
 	PUSHs(sv_2mortal(newSViv(O_RDONLY)));
 	PUSHs(right);
-	PUSHs((SV*)gv);
+	PUSHs((SV*)GvCV(gv));
 	PUTBACK;
 
 	if (op = pp_entersub())

@@ -2,7 +2,7 @@ package DB;
 
 # Debugger for Perl 5.00x; perl5db.pl patch level:
 
-$VERSION = 0.98;
+$VERSION = 0.9801;
 $header = "perl5db.pl patch level $VERSION";
 
 # Enhanced by ilya@math.ohio-state.edu (Ilya Zakharevich)
@@ -354,7 +354,7 @@ sub DB {
     $filename_ini = $filename;
     $usercontext = '($@, $!, $,, $/, $\, $^W) = @saved;' .
       "package $package;";	# this won't let them modify, alas
-    local(*dbline) = "::_<$filename";
+    local(*dbline) = $main::{'_<' . $filename};
     $max = $#dbline;
     if (($stop,$action) = split(/\0/,$dbline{$line})) {
 	if ($stop eq '1') {
@@ -499,7 +499,7 @@ sub DB {
 			    print $OUT "No file matching `$file' is loaded.\n";
 			    next CMD;
 			} elsif ($file ne $filename) {
-			    *dbline = "::_<$file";
+			    *dbline = $main::{'_<' . $file};
 			    $max = $#dbline;
 			    $filename = $file;
 			    $start = 1;
@@ -515,7 +515,7 @@ sub DB {
 			$subrange = pop @pieces;
 			$file = join(':', @pieces);
 			if ($file ne $filename) {
-			    *dbline = "::_<$file";
+			    *dbline = $main::{'_<' . $file};
 			    $max = $#dbline;
 			    $filename = $file;
 			}
@@ -532,7 +532,7 @@ sub DB {
 			$incr = -1;		# for backward motion.
 			$start = $line;
 			$filename = $filename_ini;
-			*dbline = "::_<$filename";
+			*dbline = $main::{'_<' . $filename};
 			$max = $#dbline;
 			print $LINEINFO $position;
 			next CMD };
@@ -585,7 +585,7 @@ sub DB {
 		      print $OUT "Deleting all breakpoints...\n";
 		      my $file;
 		      for $file (keys %had_breakpoints) {
-			local *dbline = "::_<$file";
+			local *dbline = $main::{'_<' . $file};
 			my $max = $#dbline;
 			my $was;
 			
@@ -606,7 +606,7 @@ sub DB {
 		    $cmd =~ /^L$/ && do {
 		      my $file;
 		      for $file (keys %had_breakpoints) {
-			local *dbline = "::_<$file";
+			local *dbline = $main::{'_<' . $file};
 			my $max = $#dbline;
 			my $was;
 			
@@ -694,7 +694,7 @@ sub DB {
 			$i += 0;
 			if ($i) {
 			    $filename = $file;
-			    *dbline = "::_<$filename";
+			    *dbline = $main::{'_<' . $filename};
 			    $had_breakpoints{$filename} = 1;
 			    $max = $#dbline;
 			    ++$i while $dbline[$i] == 0 && $i < $max;
@@ -721,7 +721,7 @@ sub DB {
 		    $cmd =~ /^A$/ && do {
 		      my $file;
 		      for $file (keys %had_breakpoints) {
-			local *dbline = "::_<$file";
+			local *dbline = $main::{'_<' . $file};
 			my $max = $#dbline;
 			my $was;
 			
@@ -789,7 +789,7 @@ sub DB {
 			    $i += 0;
 			    if ($i) {
 			        $filename = $file;
-				*dbline = "::_<$filename";
+				*dbline = $main::{'_<' . $filename};
 				$had_breakpoints{$filename}++;
 				$max = $#dbline;
 				++$i while $dbline[$i] == 0 && $i < $max;
@@ -843,7 +843,7 @@ sub DB {
 			my @hard;
 			for (0 .. $#had_breakpoints) {
 			  my $file = $had_breakpoints[$_];
-			  *dbline = "::_<$file";
+			  *dbline = $main::{'_<' . $file};
 			  next unless %dbline or %{$postponed_file{$file}};
 			  (push @hard, $file), next 
 			    if $file =~ /^\(eval \d+\)$/;
@@ -854,7 +854,7 @@ sub DB {
 			}
 			for (@hard) { # Yes, really-really...
 			  # Find the subroutines in this eval
-			  *dbline = "::_<$_";
+			  *dbline = $main::{'_<' . $_};
 			  my ($quoted, $sub, %subs, $line) = quotemeta $_;
 			  for $sub (keys %sub) {
 			    next unless $sub{$sub} =~ /^$quoted:(\d+)-(\d+)$/;
@@ -1147,7 +1147,7 @@ sub postponed_sub {
     my ($file,$i) = (find_sub($subname) =~ /^(.*):(\d+)-.*$/);
     $i += $offset;
     if ($i) {
-      local *dbline = "::_<$file";
+      local *dbline = $main::{'_<' . $file};
       local $^W = 0;		# != 0 is magical below
       $had_breakpoints{$file}++;
       my $max = $#dbline;

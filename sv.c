@@ -1288,7 +1288,7 @@ register SV *sv;
     switch (SvTYPE(sv)) {
     case SVt_NULL:
 	sv_upgrade(sv, SVt_IV);
-	return SvIVX(sv);
+	break;
     case SVt_PV:
 	sv_upgrade(sv, SVt_PVIV);
 	break;
@@ -1357,7 +1357,7 @@ register SV *sv;
     switch (SvTYPE(sv)) {
     case SVt_NULL:
 	sv_upgrade(sv, SVt_IV);
-	return SvUVX(sv);
+	break;
     case SVt_PV:
 	sv_upgrade(sv, SVt_PVIV);
 	break;
@@ -1938,8 +1938,14 @@ register SV *sstr;
 			GvIMPORTED_HV_on(dstr);
 		    break;
 		case SVt_PVCV:
-		    if (intro)
+		    if (intro) {
+			if (GvCVGEN(dstr) && GvCV(dstr) != (CV*)sref) {
+			    SvREFCNT_dec(GvCV(dstr));
+			    GvCV(dstr) = Nullcv;
+			    GvCVGEN(dstr) = 0;
+			}
 			SAVESPTR(GvCV(dstr));
+		    }
 		    else {
 			CV* cv = GvCV(dstr);
 			if (cv) {
@@ -1949,15 +1955,13 @@ register SV *sstr;
 				    (CvROOT(cv) || CvXSUB(cv)) )
 				warn("Subroutine %s redefined",
 				    GvENAME((GV*)dstr));
-			    if (SvREFCNT(cv) == 1)
-				SvFAKE_on(cv);
 			}
 		    }
-		    sub_generation++;
 		    if (GvCV(dstr) != (CV*)sref) {
 			GvCV(dstr) = (CV*)sref;
 			GvCVGEN(dstr) = 0; /* Switch off cacheness. */
 			GvASSUMECV_on(dstr);
+			sub_generation++;
 		    }
 		    if (curcop->cop_stash != GvSTASH(dstr))
 			GvIMPORTED_CV_on(dstr);
@@ -2582,15 +2586,15 @@ register SV *sv;
     assert(SvREFCNT(sv) == 0);
 
     if (SvOBJECT(sv)) {
-	dSP;
-	GV* destructor;
-
 	if (defstash) {		/* Still have a symbol table? */
-	    destructor = gv_fetchmethod(SvSTASH(sv), "DESTROY");
+	    dSP;
+	    GV* destructor;
 
 	    ENTER;
 	    SAVEFREESV(SvSTASH(sv));
-	    if (destructor && GvCV(destructor)) {
+
+	    destructor = gv_fetchmethod(SvSTASH(sv), "DESTROY");
+	    if (destructor) {
 		SV ref;
 
 		Zero(&ref, 1, SV);
@@ -2602,10 +2606,12 @@ register SV *sv;
 		PUSHMARK(SP);
 		PUSHs(&ref);
 		PUTBACK;
-		perl_call_sv((SV*)destructor, G_DISCARD|G_EVAL|G_KEEPERR);
+		perl_call_sv((SV*)GvCV(destructor),
+			     G_DISCARD|G_EVAL|G_KEEPERR);
 		del_XRV(SvANY(&ref));
 		SvREFCNT(sv)--;
 	    }
+
 	    LEAVE;
 	}
 	else
@@ -3585,7 +3591,7 @@ I32 lref;
 	    return Nullcv;
 	*st = GvESTASH(gv);
     fix_gv:
-	if (lref && !GvCV(gv)) {
+	if (lref && !GvCVu(gv)) {
 	    SV *tmpsv;
 	    ENTER;
 	    tmpsv = NEWSV(704,0);
@@ -3595,10 +3601,10 @@ I32 lref;
 		   Nullop,
 		   Nullop);
 	    LEAVE;
-	    if (!GvCV(gv))
+	    if (!GvCVu(gv))
 		croak("Unable to create sub named \"%s\"", SvPV(sv,na));
 	}
-	return GvCV(gv);
+	return GvCVu(gv);
     }
 }
 

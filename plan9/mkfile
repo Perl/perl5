@@ -20,7 +20,7 @@ perlshr = $archlib/CORE/libperlshr.a
 installman1dir = /sys/man/1
 installman3dir = /sys/man/2
 
-podnames = perl perlbook perlbot perlcall perldata perldebug perldiag perldsc perlembed perlform perlfunc perlguts perlipc perllol perlmod perlobj perlop perlovl perlpod perlre perlref perlrun perlsec perlstyle perlsub perlsyn perltie perltoc perltrap perlvar perlxs perlxstut
+podnames = perl perlbook perlbot perlcall perldata perldebug perldiag perldsc perlembed perlform perlfunc perlguts perlipc perllol perlmod perlobj perlop perlpod perlre perlref perlrun perlsec perlstyle perlsub perlsyn perltie perltoc perltrap perlvar perlxs perlxstut
 
 libpods = ${podnames:%=pod/%.pod}
 

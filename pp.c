@@ -731,23 +731,19 @@ PP(pp_repeat)
 	    if (SvROK(tmpstr))
 		sv_unref(tmpstr);
 	}
-	if (USE_LEFT(tmpstr) || SvTYPE(tmpstr) > SVt_PVMG) {
-	    SvSetSV(TARG, tmpstr);
-	    SvPV_force(TARG, len);
-	    if (count != 1) {
-		if (count < 1)
-		    SvCUR_set(TARG, 0);
-		else {
-		    SvGROW(TARG, (count * len) + 1);
-		    repeatcpy(SvPVX(TARG) + len, SvPVX(TARG), len, count - 1);
-		    SvCUR(TARG) *= count;
-		}
-		*SvEND(TARG) = '\0';
+	SvSetSV(TARG, tmpstr);
+	SvPV_force(TARG, len);
+	if (count != 1) {
+	    if (count < 1)
+		SvCUR_set(TARG, 0);
+	    else {
+		SvGROW(TARG, (count * len) + 1);
+		repeatcpy(SvPVX(TARG) + len, SvPVX(TARG), len, count - 1);
+		SvCUR(TARG) *= count;
 	    }
-	    (void)SvPOK_only(TARG);
+	    *SvEND(TARG) = '\0';
 	}
-	else
-	    sv_setsv(TARG, &sv_no);
+	(void)SvPOK_only(TARG);
 	PUSHTARG;
     }
     RETURN;
@@ -1004,11 +1000,11 @@ PP(pp_bit_or)
       dPOPTOPssrl;
       if (SvNIOKp(left) || SvNIOKp(right)) {
 	if (op->op_private & HINT_INTEGER) {
-	  IBW value = SvIV(left) | SvIV(right); 
+	  IBW value = (USE_LEFT(left) ? SvIV(left) : 0) | SvIV(right); 
 	  SETi( value );
 	}
 	else {
-	  UBW value = SvUV(left) | SvUV(right); 
+	  UBW value = (USE_LEFT(left) ? SvUV(left) : 0) | SvUV(right); 
 	  SETu( value );
 	}
       }

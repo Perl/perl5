@@ -50,7 +50,7 @@ HV* stash;
 	for (entry = HvARRAY(stash)[i]; entry; entry = HeNEXT(entry)) {
 	    GV *gv = (GV*)HeVAL(entry);
 	    HV *hv;
-	    if (GvCV(gv))
+	    if (GvCVu(gv))
 		dump_sub(gv);
 	    if (GvFORM(gv))
 		dump_form(gv);

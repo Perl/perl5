@@ -1663,7 +1663,7 @@ IEXT char *	Ie_tmpname;
 IEXT PerlIO *	Ie_fp;
 IEXT U32	Iperldb;
 	/* This value may be raised by extensions for testing purposes */
-IEXT int	Iperl_destruct_level IINIT(1);	/* 0=none, 1=full, 2=full with checks */
+IEXT int	Iperl_destruct_level IINIT(0);	/* 0=none, 1=full, 2=full with checks */
 
 /* magical thingies */
 IEXT Time_t	Ibasetime;		/* $^T */

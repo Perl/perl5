@@ -553,7 +553,15 @@ SV *newRV_noinc _((SV *));
 
 #define SvSETMAGIC(x) if (SvSMAGICAL(x)) mg_set(x)
 
-#define SvSetSV(dst,src) if (dst != src) sv_setsv(dst,src)
+#define SvSetSV(dst,src) if ((dst) != (src)) sv_setsv(dst,src)
+
+#define SvSetSV_nosteal(dst,src) \
+	    if ((dst) != (src)) {			\
+		U32 tMpF = SvFLAGS(src) & SVs_TEMP;	\
+		SvTEMP_off(src);			\
+		sv_setsv(dst, src);			\
+		SvFLAGS(src) |= tMpF;			\
+	    }
 
 #define SvPEEK(sv) sv_peek(sv)
 

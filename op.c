@@ -104,9 +104,9 @@ OP *op;
     if (type != OP_AELEM && type != OP_HELEM) {
 	sprintf(tokenbuf, "Can't use subscript on %s", op_desc[type]);
 	yyerror(tokenbuf);
-	if (type == OP_RV2HV || type == OP_ENTERSUB)
+	if (type == OP_ENTERSUB || type == OP_RV2HV || type == OP_PADHV)
 	    warn("(Did you mean $ or @ instead of %c?)\n",
-		type == OP_RV2HV ? '%' : '&');
+		 type == OP_ENTERSUB ? '&' : '%');
     }
 }
 
@@ -2463,8 +2463,13 @@ OP* other;
 		warnop = k1->op_type;
 	    break;
 	}
-	if (warnop)
-	    warn("Value of %s may be \"0\"; use \"defined\"", op_desc[warnop]);
+	if (warnop) {
+	    line_t oldline = curcop->cop_line;
+	    curcop->cop_line = copline;
+	    warn("Value of %s construct can be \"0\"; test with defined()",
+		 op_desc[warnop]);
+		curcop->cop_line = oldline;
+	}
     }
 
     if (!other)
@@ -2794,13 +2799,16 @@ CV *cv;
     SvREFCNT_dec(CvOUTSIDE(cv));
     CvOUTSIDE(cv) = Nullcv;
     if (CvPADLIST(cv)) {
-	I32 i = AvFILL(CvPADLIST(cv));
-	while (i >= 0) {
-	    SV** svp = av_fetch(CvPADLIST(cv), i--, FALSE);
-	    if (svp)
-		SvREFCNT_dec(*svp);
+	/* may be during global destruction */
+	if (SvREFCNT(CvPADLIST(cv))) {
+	    I32 i = AvFILL(CvPADLIST(cv));
+	    while (i >= 0) {
+		SV** svp = av_fetch(CvPADLIST(cv), i--, FALSE);
+		if (svp)
+		    SvREFCNT_dec(*svp);
+	    }
+	    SvREFCNT_dec((SV*)CvPADLIST(cv));
 	}
-	SvREFCNT_dec((SV*)CvPADLIST(cv));
 	CvPADLIST(cv) = Nullav;
     }
 }
@@ -3001,8 +3009,10 @@ OP *block;
     char *s;
     I32 ix;
 
-    if (op)
+    if (op) {
+	SAVEFREEOP(op);
 	sub_generation++;
+    }
     if (cv = GvCV(gv)) {
 	if (GvCVGEN(gv)) {
 	    /* just a cached method */
@@ -3064,7 +3074,6 @@ OP *block;
     }
     if (!block) {
 	CvROOT(cv) = 0;
-	op_free(op);
 	copline = NOLINE;
 	LEAVE_SCOPE(floor);
 	return cv;
@@ -3154,7 +3163,6 @@ OP *block;
 	GvCV(gv) = 0;	/* Will remember in SVOP instead. */
 	CvANON_on(cv);
     }
-    op_free(op);
     copline = NOLINE;
     LEAVE_SCOPE(floor);
     return cv;
@@ -3470,7 +3478,8 @@ OP *op;
     if (op->op_flags & OPf_KIDS) {
 	OP* newop;
 	OP* kid;
-	op = modkids(ck_fun(op), op->op_type);
+	OPCODE type = op->op_type;
+	op = modkids(ck_fun(op), type);
 	kid = cUNOP->op_first;
 	newop = kUNOP->op_first->op_sibling;
 	if (newop &&
@@ -3909,14 +3918,16 @@ OP *
 ck_lfun(op)
 OP *op;
 {
-    return modkids(ck_fun(op), op->op_type);
+    OPCODE type = op->op_type;
+    return modkids(ck_fun(op), type);
 }
 
 OP *
 ck_rfun(op)
 OP *op;
 {
-    return refkids(ck_fun(op), op->op_type);
+    OPCODE type = op->op_type;
+    return refkids(ck_fun(op), type);
 }
 
 OP *
@@ -4212,7 +4223,7 @@ OP *op;
 	null(cvop);		/* disable rv2cv */
 	tmpop = (SVOP*)((UNOP*)cvop)->op_first;
 	if (tmpop->op_type == OP_GV) {
-	    cv = GvCV(tmpop->op_sv);
+	    cv = GvCVu(tmpop->op_sv);
 	    if (cv && SvPOK(cv) && !(op->op_private & OPpENTERSUB_AMPER))
 		proto = SvPV((SV*)cv,na);
 	}

@@ -251,29 +251,11 @@ Delete all installed breakpoints.
 Set an action to be done before the line is executed.
 The sequence of steps taken by the debugger is
 
-=over 3
-
-=item 1
-
-check for a breakpoint at this line
-
-=item 2
-
-print the line if necessary (tracing)
-
-=item 3
-
-do any actions associated with that line
-
-=item 4
-
-prompt user if at a breakpoint or in single-step
-
-=item 5
-
-evaluate line
-
-=back
+  1. check for a breakpoint at this line
+  2. print the line if necessary (tracing)
+  3. do any actions associated with that line
+  4. prompt user if at a breakpoint or in single-step
+  5. evaluate line
 
 For example, this will print out C<$foo> every time line
 53 is passed:
@@ -451,6 +433,8 @@ corresponds to F</dev/ttyc>, say, by issuing a command like
 	$ sleep 1000000
 
 See L<"Debugger Internals"> below for more details.
+
+=over 12
 
 =item E<lt> [ command ]
 

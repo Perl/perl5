@@ -506,7 +506,6 @@ pod/perlmod.pod		Module info
 pod/perlnews.pod	News of changes since last version
 pod/perlobj.pod		Object info
 pod/perlop.pod		Operator info
-pod/perlovl.pod		Overloading info
 pod/perlpod.pod		Pod info
 pod/perlre.pod		Regular expression info
 pod/perlref.pod		References info
@@ -560,6 +559,7 @@ t/cmd/subval.t		See if subroutine values work
 t/cmd/switch.t		See if switch optimizations work
 t/cmd/while.t		See if while loops work
 t/comp/cmdopt.t		See if command optimization works
+t/comp/colon.t		See if colons are parsed correctly
 t/comp/cpp.aux		main file for cpp.t
 t/comp/cpp.t		See if C preprocessor works
 t/comp/decl.t		See if declarations work
@@ -568,6 +568,7 @@ t/comp/package.t	See if packages work
 t/comp/redef.t		See if we get correct warnings on redefined subs
 t/comp/script.t		See if script invokation works
 t/comp/term.t		See if more terms work
+t/comp/use.t		See if pragmas work
 t/harness		Finer diagnostics from test suite
 t/io/argv.t		See if ARGV stuff works
 t/io/dup.t		See if >& works right
@@ -609,7 +610,6 @@ t/lib/io_taint.t	See if the untaint method from IO works
 t/lib/io_tell.t		See if seek()/tell()-related methods from IO work
 t/lib/io_udp.t		See if UDP socket-related methods from IO work
 t/lib/io_xs.t		See if XSUB methods from IO work
-t/lib/locale.t		See if locale support (i18n and l10n) works
 t/lib/ndbm.t		See if NDBM_File works
 t/lib/odbm.t		See if ODBM_File works
 t/lib/opcode.t		See if Opcode works
@@ -631,6 +631,7 @@ t/lib/textwrap.t	See if Text::Wrap works
 t/lib/timelocal.t	See if Time::Local works
 t/op/append.t		See if . works
 t/op/array.t		See if array operations work
+t/op/assignwarn.t	See if OP= operators warn correctly for undef targets
 t/op/auto.t		See if autoincrement et all work
 t/op/bop.t		See if bitops work
 t/op/chop.t		See if chop works
@@ -660,7 +661,6 @@ t/op/mkdir.t		See if mkdir works
 t/op/my.t		See if lexical scoping works
 t/op/oct.t		See if oct and hex work
 t/op/ord.t		See if ord works
-t/op/overload.t		See if operator overload works
 t/op/pack.t		See if pack and unpack work
 t/op/pat.t		See if esoteric patterns work
 t/op/push.t		See if push and pop work
@@ -687,9 +687,17 @@ t/op/tie.t		See if tie/untie functions work
 t/op/time.t		See if time functions work
 t/op/undef.t		See if undef works
 t/op/unshift.t		See if unshift works
-t/op/use.t		See if use works
 t/op/vec.t		See if vectors work
 t/op/write.t		See if write works
+t/pragma/locale.t	See if locale support (i18n and l10n) works
+t/pragma/overload.t	See if operator overloading works
+t/pragma/strict-refs	Tests of "use strict 'refs'" for strict.t
+t/pragma/strict-subs	Tests of "use strict 'subs'" for strict.t
+t/pragma/strict-vars	Tests of "use strict 'vars'" for strict.t
+t/pragma/strict.t	See if strictures work
+t/pragma/subs.t		See if subroutine pseudo-importation works
+t/pragma/warn-global	Tests of global warnings for warning.t
+t/pragma/warning.t	See if warning controls work
 taint.c			Tainting code
 toke.c			The tokener
 universal.c		The default UNIVERSAL package methods

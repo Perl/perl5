@@ -63,6 +63,7 @@ HV *GvHVn();
 
 #define GvCV(gv)	(GvGP(gv)->gp_cv)
 #define GvCVGEN(gv)	(GvGP(gv)->gp_cvgen)
+#define GvCVu(gv)	(GvGP(gv)->gp_cvgen ? Nullcv : GvGP(gv)->gp_cv)
 
 #define GvLASTEXPR(gv)	(GvGP(gv)->gp_lastexpr)
 
