@@ -870,6 +870,11 @@ int          _win32_stat(const char *name,struct stat *sbufptr)
     return pPerl->piLIO->NameStat(name, sbufptr, ErrorNo());
 }
 
+int          _win32_rename(const char *oldname, const char *newname)
+{
+    return pPerl->piLIO->Rename(oldname, newname, ErrorNo());
+}
+
 int          _win32_setmode(int fd, int mode)
 {
     return pPerl->piLIO->Setmode(fd, mode, ErrorNo());
@@ -1220,6 +1225,7 @@ U32 * _Perl_opargs ();
 #undef win32_pipe
 #undef win32_popen
 #undef win32_pclose
+#undef win32_rename
 #undef win32_setmode
 #undef win32_lseek
 #undef win32_tell
@@ -1335,6 +1341,7 @@ U32 * _Perl_opargs ();
 #define win32_pipe     _win32_pipe
 #define win32_popen    _win32_popen
 #define win32_pclose   _win32_pclose
+#define win32_rename   _win32_rename
 #define win32_setmode  _win32_setmode
 #define win32_lseek    _win32_lseek
 #define win32_tell     _win32_tell
@@ -1453,6 +1460,7 @@ int  	_win32_stat(const char *name,struct stat *sbufptr);
 int	_win32_pipe( int *phandles, unsigned int psize, int textmode );
 FILE*	_win32_popen( const char *command, const char *mode );
 int	_win32_pclose( FILE *pf);
+int	_win32_rename( const char *oldname, const char *newname);
 int	_win32_setmode( int fd, int mode);
 long	_win32_lseek( int fd, long offset, int origin);
 long	_win32_tell( int fd);

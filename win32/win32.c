@@ -181,7 +181,7 @@ static char *
 get_emd_part(char *prev_path, char *trailing_path, ...)
 {
     va_list ap;
-    char mod_name[MAX_PATH];
+    char mod_name[MAX_PATH+1];
     char *ptr;
     char *optr;
     char *strip;
@@ -252,7 +252,7 @@ win32_get_sitelib(char *pl)
 {
     char *sitelib = "sitelib";
     char regstr[40];
-    char pathstr[MAX_PATH];
+    char pathstr[MAX_PATH+1];
     DWORD datalen;
     char *path1 = Nullch;
     char *path2 = Nullch;
@@ -885,7 +885,7 @@ win32_sleep(unsigned int t)
 DllExport int
 win32_stat(const char *path, struct stat *buffer)
 {
-    char		t[MAX_PATH]; 
+    char		t[MAX_PATH+1]; 
     const char	*p = path;
     int		l = strlen(path);
     int		res;
@@ -1729,6 +1729,56 @@ win32_pclose(FILE *pf)
 #endif
 
 #endif /* USE_RTL_POPEN */
+}
+
+DllExport int
+win32_rename(const char *oldname, const char *newname)
+{
+    char szNewWorkName[MAX_PATH+1];
+    WIN32_FIND_DATA fdOldFile, fdNewFile;
+    HANDLE handle;
+    char *ptr;
+
+    if ((strchr(oldname, '\\') || strchr(oldname, '/'))
+	&& strchr(newname, '\\') == NULL
+	&& strchr(newname, '/') == NULL)
+    {
+	strcpy(szNewWorkName, oldname);
+	if ((ptr = strrchr(szNewWorkName, '\\')) == NULL)
+	    ptr = strrchr(szNewWorkName, '/');
+	strcpy(++ptr, newname);
+    }
+    else
+	strcpy(szNewWorkName, newname);
+
+    if (stricmp(oldname, szNewWorkName) != 0) {
+	// check that we're not being fooled by relative paths
+	// and only delete the new file
+	//  1) if it exists
+	//  2) it is not the same file as the old file
+	//  3) old file exist
+	// GetFullPathName does not return the long file name on some systems
+	handle = FindFirstFile(oldname, &fdOldFile);
+	if (handle != INVALID_HANDLE_VALUE) {
+	    FindClose(handle);
+    
+	    handle = FindFirstFile(szNewWorkName, &fdNewFile);
+    
+	    if (handle != INVALID_HANDLE_VALUE)
+		FindClose(handle);
+	    else
+		fdNewFile.cFileName[0] = '\0';
+
+	    if (strcmp(fdOldFile.cAlternateFileName,
+		       fdNewFile.cAlternateFileName) != 0
+		&& strcmp(fdOldFile.cFileName, fdNewFile.cFileName) != 0)
+	    {
+		// file exists and not same file
+		DeleteFile(szNewWorkName);
+	    }
+	}
+    }
+    return rename(oldname, newname);
 }
 
 DllExport int

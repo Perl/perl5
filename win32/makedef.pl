@@ -455,6 +455,7 @@ win32_stat
 win32_pipe
 win32_popen
 win32_pclose
+win32_rename
 win32_setmode
 win32_lseek
 win32_tell

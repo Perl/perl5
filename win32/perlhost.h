@@ -402,54 +402,7 @@ public:
     };
     virtual int Rename(const char *OldFileName, const char *newname, int &err)
     {
-	char szNewWorkName[MAX_PATH+1];
-	WIN32_FIND_DATA fdOldFile, fdNewFile;
-	HANDLE handle;
-	char *ptr;
-
-	if((strchr(OldFileName, '\\') || strchr(OldFileName, '/'))
-		&& strchr(newname, '\\') == NULL
-			&& strchr(newname, '/') == NULL)
-	{
-	    strcpy(szNewWorkName, OldFileName);
-	    if((ptr = strrchr(szNewWorkName, '\\')) == NULL)
-		ptr = strrchr(szNewWorkName, '/');
-	    strcpy(++ptr, newname);
-	}
-	else
-	    strcpy(szNewWorkName, newname);
-
-	if(stricmp(OldFileName, szNewWorkName) != 0)
-	{   // check that we're not being fooled by relative paths
-	    // and only delete the new file
-	    //  1) if it exists
-	    //  2) it is not the same file as the old file
-	    //  3) old file exist
-	    // GetFullPathName does not return the long file name on some systems
-	    handle = FindFirstFile(OldFileName, &fdOldFile);
-	    if(handle != INVALID_HANDLE_VALUE)
-	    {
-		FindClose(handle);
-        
-		handle = FindFirstFile(szNewWorkName, &fdNewFile);
-        
-		if(handle != INVALID_HANDLE_VALUE)
-		    FindClose(handle);
-		else
-		    fdNewFile.cFileName[0] = '\0';
-
-		if(strcmp(fdOldFile.cAlternateFileName, fdNewFile.cAlternateFileName) != 0
-		    	&& strcmp(fdOldFile.cFileName, fdNewFile.cFileName) != 0)
-		{   // file exists and not same file
-		    DeleteFile(szNewWorkName);
-		}
-	    }
-	}
-	int ret = rename(OldFileName, szNewWorkName);
-	if(ret)
-	    err = errno;
-
-	return ret;
+	CALLFUNCRET(win32_rename(OldFileName, newname))
     };
     virtual int Setmode(int handle, int mode, int &err)
     {

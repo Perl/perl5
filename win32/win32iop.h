@@ -74,6 +74,7 @@ DllExport  int  	win32_stat(const char *name,struct stat *sbufptr);
 DllExport  int		win32_pipe( int *phandles, unsigned int psize, int textmode );
 DllExport  FILE*	win32_popen( const char *command, const char *mode );
 DllExport  int		win32_pclose( FILE *pf);
+DllExport  int		win32_rename( const char *oldname, const char *newname);
 DllExport  int		win32_setmode( int fd, int mode);
 DllExport  long		win32_lseek( int fd, long offset, int origin);
 DllExport  long		win32_tell( int fd);
@@ -203,6 +204,7 @@ END_EXTERN_C
 #define abort()			win32_abort()
 #define fstat(fd,bufptr)   	win32_fstat(fd,bufptr)
 #define stat(pth,bufptr)   	win32_stat(pth,bufptr)
+#define rename(old,new)		win32_rename(old,new)
 #define setmode(fd,mode)	win32_setmode(fd,mode)
 #define lseek(fd,offset,orig)	win32_lseek(fd,offset,orig)
 #define tell(fd)		win32_tell(fd)
