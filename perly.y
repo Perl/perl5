@@ -174,8 +174,7 @@ else	:	/* NULL */
 			{ $$ = scope($2); }
 	|	ELSIF '(' mexpr ')' mblock else
 			{ PL_copline = $1;
-			    $$ = newSTATEOP(0, Nullch,
-				   newCONDOP(0, $3, scope($5), $6));
+			    $$ = newCONDOP(0, $3, scope($5), $6);
 			    PL_hints |= HINT_BLOCK_SCOPE; }
 	;
 

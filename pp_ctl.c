@@ -1916,29 +1916,32 @@ S_dofindlabel(pTHX_ OP *o, char *label, OP **opstack, OP **oplimit)
 	*ops++ = cUNOPo->op_first;
 	if (ops >= oplimit)
 	    Perl_croak(aTHX_ too_deep);
+	*ops = 0;
     }
-    *ops = 0;
     if (o->op_flags & OPf_KIDS) {
 	dTHR;
 	/* First try all the kids at this level, since that's likeliest. */
 	for (kid = cUNOPo->op_first; kid; kid = kid->op_sibling) {
-	    if ((kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE) &&
-		    kCOP->cop_label && strEQ(kCOP->cop_label, label))
+	    if ((kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE)
+		&& kCOP->cop_label && strEQ(kCOP->cop_label, label))
+	    {
 		return kid;
+	    }
 	}
 	for (kid = cUNOPo->op_first; kid; kid = kid->op_sibling) {
 	    if (kid == PL_lastgotoprobe)
 		continue;
-	    if ((kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE) &&
-		(ops == opstack ||
-		 (ops[-1]->op_type != OP_NEXTSTATE &&
-		  ops[-1]->op_type != OP_DBSTATE)))
+	    if ((kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE)
+		&& (ops == opstack || (ops[-1]->op_type != OP_NEXTSTATE
+				       && ops[-1]->op_type != OP_DBSTATE)))
+	    {
 		*ops++ = kid;
+		*ops = 0;
+	    }
 	    if (o = dofindlabel(kid, label, ops, oplimit))
 		return o;
 	}
     }
-    *ops = 0;
     return 0;
 }
 
