@@ -2980,10 +2980,10 @@ PerlIOStdio_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 	}
 	else
 	    got = PerlSIO_fread(vbuf, 1, count, s);
-	if (got || errno != EINTR)
+	if (got >= 0 || errno != EINTR)
 	    break;
 	PERL_ASYNC_CHECK();
-	errno = 0;	/* just in case */
+	SETERRNO(0,0);	/* just in case */
     }
     return got;
 }
@@ -3053,10 +3053,10 @@ PerlIOStdio_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
     for (;;) {
 	got = PerlSIO_fwrite(vbuf, 1, count,
 			      PerlIOSelf(f, PerlIOStdio)->stdio);
-	if (got || errno != EINTR)
+	if (got >= 0 || errno != EINTR)
 	    break;
 	PERL_ASYNC_CHECK();
-	errno = 0;	/* just in case */
+	SETERRNO(0,0);	/* just in case */
     }
     return got;
 }
