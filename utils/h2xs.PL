@@ -33,14 +33,13 @@ $Config{'startperl'}
 # In the following, perl variables are not expanded during extraction.
 
 print OUT <<'!NO!SUBS!';
-
 =head1 NAME
 
 h2xs - convert .h C header files to Perl extensions
 
 =head1 SYNOPSIS
 
-B<h2xs> [B<-AOPXcf>] [B<-v> version] [B<-n> module_name] [headerfile [extra_libraries]]
+B<h2xs> [B<-AOPXcf>] [B<-v> version] [B<-n> module_name] [B<-p> prefix] [B<-s> sub] [headerfile [extra_libraries]]
 
 B<h2xs> B<-h>
 
@@ -98,6 +97,17 @@ Print the usage, help and version for this h2xs and exit.
 
 Specifies a name to be used for the extension, e.g., S<-n RPC::DCE>
 
+=item B<-p> I<prefix>
+
+Specify a prefix which should be removed from the Perl function names, e.g., S<-p sec_rgy_> 
+This sets up the XS B<PREFIX> keyword and removes the prefix from functions that are
+autoloaded via the C<constant()> mechansim.
+
+=item B<-s> I<sub1,sub2>
+
+Create a perl subroutine for the specified macros rather than autoload with the constant() subroutine.
+These macros are assumed to have a return type of B<char *>, e.g., S<-s sec_rgy_wildcard_name,sec_rgy_wildcard_sid>.
+
 =item B<-v> I<version>
 
 Specify a version number for this extension.  This version number is added
@@ -138,6 +148,15 @@ XS-based.
 	# additional directory /opt/net/lib
 	h2xs rpcsvc/rusers -L/opt/net/lib -lrpc
 
+        # Extension is DCE::rgynbase
+        # prefix "sec_rgy_" is dropped from perl function names
+        h2xs -n DCE::rgynbase -p sec_rgy_ dce/rgynbase
+
+        # Extension is DCE::rgynbase
+        # prefix "sec_rgy_" is dropped from perl function names
+        # subroutines are created for sec_rgy_wildcard_name and sec_rgy_wildcard_sid
+        h2xs -n DCE::rgynbase -p sec_rgy_ \
+        -s sec_rgy_wildcard_name,sec_rgy_wildcard_sid dce/rgynbase
 
 =head1 ENVIRONMENT
 
@@ -164,11 +183,13 @@ use Getopt::Std;
 
 sub usage{
 	warn "@_\n" if @_;
-    die "h2xs [-AOPXcfh] [-v version] [-n module_name] [headerfile [extra_libraries]]
+    die "h2xs [-AOPXcfh] [-v version] [-n module_name] [-p prefix] [-s subs] [headerfile [extra_libraries]]
 version: $H2XS_VERSION
     -f   Force creation of the extension even if the C header does not exist.
     -n   Specify a name to use for the extension (recommended).
     -c   Omit the constant() function and specialised AUTOLOAD from the XS file.
+    -p   Specify a prefix which should be removed from the Perl function names.
+    -s   Create subroutines for specified macros.
     -A   Omit all autoloading facilities (implies -c).
     -O   Allow overwriting of a pre-existing extension directory.
     -P   Omit the stub POD section.
@@ -182,7 +203,7 @@ extra_libraries
 }
 
 
-getopts("AOPXcfhv:n:") || usage;
+getopts("AOPXcfhxv:n:p:s:") || usage;
 
 usage if $opt_h;
 
@@ -190,6 +211,7 @@ if( $opt_v ){
 	$TEMPLATE_VERSION = $opt_v;
 }
 $opt_c = 1 if $opt_A;
+%const_xsub = map { $_,1 } split(/,+/, $opt_s) if $opt_s;
 
 $path_h    = shift;
 $extralibs = "@ARGV";
@@ -204,7 +226,21 @@ if( $path_h ){
 	warn "Nesting of headerfile ignored with -n\n";
     }
     $path_h .= ".h" unless $path_h =~ /\.h$/;
-    $path_h = "/usr/include/$path_h" unless $path_h =~ m#^[./]#;
+    if ($^O eq 'VMS') {  # Consider overrides of default location
+	if ($path_h !~ m![:>\[]!) {
+	    my($hadsys) = ($path_h =~ s!^sys/!!i);
+	    if ($ENV{'DECC$System_Include'})     { $path_h = "DECC\$System_Include:$path_h";    }
+	    elsif ($ENV{'DECC$Library_Include'}) { $path_h = "DECC\$Library_Include:$path_h";   }
+	    elsif ($ENV{'GNU_CC_Include'})       { $path_h = 'GNU_CC_Include:' .
+	                                            ($hadsys ? '[vms]' : '[000000]') . $path_h; }
+	    elsif ($ENV{'VAXC$Include'})         { $path_h = "VAXC\$_Include:$path_h";          }
+	    else                                 { $path_h = "Sys\$Library:$path_h";            }
+	}
+    }
+    elsif ($^O eq 'os2') {
+	$path_h = "/usr/include/$path_h" unless $path_h =~ m#^([a-z]:)?[./]#i; 
+    }
+    else { $path_h = "/usr/include/$path_h" unless $path_h =~ m#^[./]#; }
     die "Can't find $path_h\n" if ( ! $opt_f && ! -f $path_h );
 
     # Scan the header file (we should deal with nested header files)
@@ -212,9 +248,18 @@ if( $path_h ){
     # Function prototypes are not (currently) processed.
     open(CH, "<$path_h") || die "Can't open $path_h: $!\n";
     while (<CH>) {
-	if (/^#[ \t]*define\s+(\w+)\b\s*[^("]/) {
+	if (/^#[ \t]*define\s+([\$\w]+)\b\s*[^("]/) {
+	    print "Matched $_ ($1)\n";
 	    $_ = $1;
 	    next if /^_.*_h_*$/i; # special case, but for what?
+	    if (defined $opt_p)
+		if (!/^$opt_p(\d)/) {
+		    ++$prefix{$_} if s/^$opt_p//;
+		}
+		else {
+		    warn "can't remove $opt_p prefix from '$_'!\n";
+		}
+	    }
 	    $const_names{$_}++;
 	}
     }
@@ -457,6 +502,7 @@ END
 if( $path_h ){
 	my($h) = $path_h;
 	$h =~ s#^/usr/include/##;
+	if ($^O eq 'VMS') { $h =~ s#.*vms\]#sys/# or $h =~ s#.*[:>\]]##; }
 print XS <<"END";
 #include <$h>
 
@@ -498,10 +544,12 @@ foreach $letter (@AZ, @az, @under) {
     my($name);
     while (substr($const_names[0],0,1) eq $letter) {
 	$name = shift(@const_names);
+	$macro = $prefix{$name} ? "$opt_p$name" : $name;
+	next if $const_xsub{$macro};
 	print XS <<"END";
 	if (strEQ(name, "$name"))
-#ifdef $name
-	    return $name;
+#ifdef $macro
+	    return $macro;
 #else
 	    goto not_there;
 #endif
@@ -524,12 +572,31 @@ not_there:
 END
 }
 
+$prefix = "PREFIX = $opt_p" if defined $opt_p;
 # Now switch from C to XS by issuing the first MODULE declaration:
 print XS <<"END";
 
-MODULE = $module		PACKAGE = $module
+MODULE = $module		PACKAGE = $module		$prefix
 
 END
+
+foreach (sort keys %const_xsub) {
+    print XS <<"END";
+char *
+$_()
+
+    CODE:
+#ifdef $_
+    RETVAL = $_;
+#else
+    croak("Your vendor has not defined the $module macro $_");
+#endif
+
+    OUTPUT:
+    RETVAL
+
+END
+}
 
 # If a constant() function was written then output a corresponding
 # XS declaration:
@@ -541,6 +608,58 @@ constant(name,arg)
 	int		arg
 
 END
+
+sub print_decl {
+  my $fh = shift;
+  my $decl = shift;
+  my ($type, $name, $args) = @$decl;
+  my @argnames = map {$_->[1]} @$args;
+  my @argtypes = map { normalize_type( $_->[0] ) } @$args;
+  my $numargs = @$args;
+  if ($numargs and $argtypes[-1] eq '...') {
+    $numargs--;
+    $argnames[-1] = '...';
+  }
+  local $" = ', ';
+  $type = normalize_type($type);
+  
+  print $fh <<"EOP";
+
+$type
+$name(@argnames)
+EOP
+
+  for $arg (0 .. $numargs - 1) {
+    print $fh <<"EOP";
+	$argtypes[$arg]	$argnames[$arg]
+EOP
+  }
+}
+
+my $ignore_mods = '(?:\b(?:__const__|static|inline|__inline__)\b\s*)*';
+
+sub normalize_type {
+  my $type = shift;
+  $type =~ s/$ignore_mods//go;
+  $type =~ s/\s+/ /g;
+  $type =~ s/\s+$//;
+  $type =~ s/^\s+//;
+  $type =~ s/\b\*/ */g;
+  $type =~ s/\*\b/* /g;
+  $type =~ s/\*\s+(?=\*)/*/g;
+  $type;
+}
+
+if ($opt_x) {
+  require C::Scan;		# Run-time directive
+  require Config;		# Run-time directive
+  my $c = new C::Scan 'filename' => $path_h;
+  $c->set('includeDirs' => [$Config::Config{shrpdir}]);
+  
+  my $fdec = $c->get('parsed_fdecls');
+  
+  for $decl (@$fdec) { print_decl(\*XS, $decl) }
+}
 
 close XS;
 } # if( ! $opt_X )
