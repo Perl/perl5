@@ -680,6 +680,10 @@ new pods are included in section 1:
 
 =over
 
+=item L<perlbug>
+
+A "howto" on reporting perl bugs.
+
 =item L<perldelta>
 
 This document.

@@ -42,6 +42,7 @@ of sections:
     perlbot	Perl OO tricks and examples
     perlipc	Perl interprocess communication
 
+    perlbug	Perl bug reports howto
     perldebug	Perl debugging
     perldiag	Perl diagnostic messages
     perlsec	Perl security

@@ -696,7 +696,7 @@ sub Send {
 			
 I am terribly sorry, but I cannot find sendmail, or a close equivalent, and
 the perl package Mail::Send has not been installed, so I can't send your bug
-report. We apologize for the inconveniencence.
+report. We apologize for the inconvenience.
 
 So you may attempt to find some way of sending your message, it has
 been left in the file `$filename'.
@@ -733,7 +733,7 @@ be needed.
 	
 Usage:
 $0  [-v] [-a address] [-s subject] [-b body | -f file ]
-    [-r returnaddress] [-e editor] [-c adminaddress | -C] [-S] [-t]
+    [-r returnaddress] [-e editor] [-c adminaddress | -C] [-S] [-t] [-h]
     
 Simplest usage:  run "$0", and follow the prompts.
 
@@ -757,6 +757,7 @@ Options:
   -d	Data mode (the default if you redirect or pipe output.) 
         This prints out your configuration data, without mailing
         anything. You can use this with -v to get more complete data.
+  -h    Print this help message. 
   
 EOF
 }
@@ -777,8 +778,217 @@ format STDOUT =
 ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< ~~
 $_
 .
+
+__END__
+
+=head1 NAME
+
+perlbug - how to submit bug reports on Perl
+
+=head1 SYNOPSIS
+
+B<perlbug> S<[ B<-v> ]> S<[ B<-a> I<address> ]> S<[ B<-s> I<subject> ]>
+S<[ B<-b> I<body> | B<-f> I<file> ]> S<[ B<-r> I<returnaddress> ]>
+S<[ B<-e> I<editor> ]> S<[ B<-c> I<adminaddress> | B<-C> ]>
+S<[ B<-S> ]> S<[ B<-t> ]>  S<[ B<-d> ]>  S<[ B<-h> ]>
+
+=head1 DESCRIPTION
+
+A program to help generate bug reports about perl or the modules that
+come with it, and mail them. 
+
+If you have found a bug with a non-standard port (one that was not part
+of the I<standard distribution>), a binary distribution, or a
+non-standard module (such as Tk, CGI, etc), then please see the
+documentation that came with that distribution to determine the correct
+place to report bugs.
+
+C<perlbug> is designed to be used interactively. Normally no arguments
+will be needed.  Simply run it, and follow the prompts.
+
+If you are unable to run B<perlbug> (most likely because you don't have
+a working setup to send mail that perlbug recognizes), you may have to
+compose your own report, and email it to B<perlbug@perl.com>.  You might
+find the B<-d> option useful to get summary information in that case.
+
+In any case, when reporting a bug, please make sure you have run through
+this checklist:
+
+=over 4
+
+=item What version of perl you are running?
+
+Type C<perl -v> at the command line to find out.
+
+=item Are you running the latest released version of perl?
+
+Look at http://www.perl.com/ to find out.  If it is not the latest
+released version, get that one and see whether your bug has been
+fixed.  Note that bug reports about old versions of perl, especially
+those prior to the 5.0 release, are likely to fall upon deaf ears.
+You are on your own if you continue to use perl1 .. perl4.
+
+=item Are you sure what you have is a bug?
+
+A significant number of the bug reports we get turn out to be documented
+features in perl.  Make sure the behavior you are witnessing doesn't fall
+under that category, by glancing through the documentation that comes
+with perl (we'll admit this is no mean task, given the sheer volume of
+it all, but at least have a look at the sections that I<seem> relevant).
+
+Be aware of the familiar traps that perl programmers of various hues
+fall into.  See L<perltrap>.
+
+Try to study the problem under the perl debugger, if necessary.
+See L<perldebug>.
+
+=item Do you have a proper test case?
+
+The easier it is to reproduce your bug, the more likely it will be
+fixed, because if no one can duplicate the problem, no one can fix it.
+A good test case has most of these attributes: fewest possible number
+of lines; few dependencies on external commands, modules, or
+libraries; runs on most platforms unimpeded; and is self-documenting.
+
+A good test case is almost always a good candidate to be on the perl
+test suite.  If you have the time, consider making your test case so
+that it will readily fit into the standard test suite.
+
+=item Can you describe the bug in plain English?
+
+The easier it is to understand a reproducible bug, the more likely it
+will be fixed.  Anything you can provide by way of insight into the
+problem helps a great deal.  In other words, try to analyse the
+problem to the extent you feel qualified and report your discoveries.
+
+=item Can you fix the bug yourself?
+
+A bug report which I<includes a patch to fix it> will almost
+definitely be fixed.  Use the C<diff> program to generate your patches
+(C<diff> is being maintained by the GNU folks as part of the B<diffutils>
+package, so you should be able to get it from any of the GNU software
+repositories).  If you do submit a patch, the cool-dude counter at
+perlbug@perl.com will register you as a savior of the world.  Your
+patch may be returned with requests for changes, or requests for more
+detailed explanations about your fix.
+
+Here are some clues for creating quality patches: Use the B<-c> or
+B<-u> switches to the diff program (to create a so-called context or
+unified diff).  Make sure the patch is not reversed (the first
+argument to diff is typically the original file, the second argument
+your changed file).  Make sure you test your patch by applying it with
+the C<patch> program before you send it on its way.  Try to follow the
+same style as the code you are trying to patch.  Make sure your patch
+really does work (C<make test>, if the thing you're patching supports
+it).
+
+=item Can you use C<perlbug> to submit the report?
+
+B<perlbug> will, amongst other things, ensure your report includes
+crucial information about your version of perl.  If C<perlbug> is unable
+to mail your report after you have typed it in, you may have to compose
+the message yourself, add the output produced by C<perlbug -d> and email
+it to B<perlbug@perl.com>.  If, for some reason, you cannot run
+C<perlbug> at all on your system, be sure to include the entire output
+produced by running C<perl -V> (note the uppercase V).
+
+=back
+
+Having done your bit, please be prepared to wait, to be told the bug
+is in your code, or even to get no reply at all.  The perl maintainers
+are busy folks, so if your problem is a small one or if it is
+difficult to understand, they may not respond with a personal reply.
+If it is important to you that your bug be fixed, do monitor the
+C<Changes> file in any development releases since the time you submitted
+the bug, and encourage the maintainers with kind words (but never any
+flames!).  Feel free to resend your bug report if the next released
+version of perl comes out and your bug is still present.
+
+=head1 OPTIONS
+
+=over 8
+
+=item B<-a>
+
+Address to send the report to.  Defaults to `perlbug@perl.com'.
+
+=item B<-b>
+
+Body of the report.  If not included on the command line, or
+in a file with B<-f>, you will get a chance to edit the message.
+
+=item B<-C>
+
+Don't send copy to administrator.
+
+=item B<-c>
+
+Address to send copy of report to.  Defaults to the address of the
+local perl administrator (recorded when perl was built).
+
+=item B<-d>
+
+Data mode (the default if you redirect or pipe output).  This prints out
+your configuration data, without mailing anything.  You can use this
+with B<-v> to get more complete data.
+
+=item B<-e>
+
+Editor to use. 
+
+=item B<-f>
+
+File containing the body of the report.  Use this to quickly send a
+prepared message.
+
+=item B<-h>
+
+Prints a brief summary of the options.
+
+=item B<-r>
+
+Your return address.  The program will ask you to confirm its default
+if you don't use this option.
+
+=item B<-S>
+
+Send without asking for confirmation.
+
+=item B<-s>
+
+Subject to include with the message.  You will be prompted if you don't
+supply one on the command line.
+
+=item B<-t>
+
+Test mode.  The target address defaults to `perlbug-test@perl.com'.
+
+=item B<-v>
+
+Include verbose configuration data in the report.
+
+=back
+
+=head1 AUTHORS
+
+Kenneth Albanowski (E<lt>kjahds@kjahds.comE<gt>), subsequently I<doc>tored
+by Gurusamy Sarathy (E<lt>gsar@umich.eduE<gt>), Tom Christiansen
+(E<lt>tchrist@perl.comE<gt>), and Nathan Torkington
+(E<lt>gnat@frii.comE<gt>).
+
+=head1 SEE ALSO
+
+perl(1), perldebug(1), perltrap(1), diff(1), patch(1)
+
+=head1 BUGS
+
+None known (guess what must have been used to report them?)
+
+=cut
+
 !NO!SUBS!
 
 close OUT or die "Can't close $file: $!";
 chmod 0755, $file or die "Can't reset permissions for $file: $!\n";
 exec("$Config{'eunicefix'} $file") if $Config{'eunicefix'} ne ':';
+

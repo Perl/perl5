@@ -61,6 +61,7 @@ runpod2man('utils', $man1dir, $man1ext, 'c2ph');
 runpod2man('utils', $man1dir, $man1ext, 'h2ph');
 runpod2man('utils', $man1dir, $man1ext, 'h2xs');
 runpod2man('utils', $man1dir, $man1ext, 'perldoc');
+runpod2man('utils', $man1dir, $man1ext, 'perlbug');
 runpod2man('utils', $man1dir, $man1ext, 'pl2pm');
 runpod2man('x2p', $man1dir, $man1ext, 's2p');
 runpod2man('x2p', $man1dir, $man1ext, 'a2p.pod');
