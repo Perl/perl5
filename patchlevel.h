@@ -5,7 +5,7 @@
 
 #define PERL_REVISION	5		/* age */
 #define PERL_VERSION	6		/* epoch */
-#define PERL_SUBVERSION	0		/* generation */
+#define PERL_SUBVERSION	1		/* generation */
 
 /* The following numbers describe the earliest compatible version of
    Perl ("compatibility" here being defined as sufficient binary/API
@@ -70,6 +70,7 @@
 #if !defined(PERL_PATCHLEVEL_H_IMPLICIT) && !defined(LOCAL_PATCH_COUNT)
 static	char	*local_patches[] = {
 	NULL
+	, "v5.6.1-TRIAL1"
 	,NULL
 };
 
