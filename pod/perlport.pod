@@ -2048,22 +2048,22 @@ L<perlwin32>, L<perlvms>, L<perlvos>, and L<Win32>.
 
 =head1 AUTHORS / CONTRIBUTORS
 
-Abigail <abigail@fnx.com>,
+Abigail <abigail@foad.org>,
 Charles Bailey <bailey@newman.upenn.edu>,
 Graham Barr <gbarr@pobox.com>,
 Tom Christiansen <tchrist@perl.com>,
-Nicholas Clark <Nicholas.Clark@liverpool.ac.uk>,
+Nicholas Clark <nick@ccl4.org>,
 Thomas Dorner <Thomas.Dorner@start.de>,
-Andy Dougherty <doughera@lafcol.lafayette.edu>,
-Dominic Dunlop <domo@vo.lu>,
-Neale Ferguson <neale@mailbox.tabnsw.com.au>,
+Andy Dougherty <doughera@lafayette.edu>,
+Dominic Dunlop <domo@computer.org>,
+Neale Ferguson <neale@vma.tabnsw.com.au>,
 David J. Fiander <davidf@mks.com>,
 Paul Green <Paul_Green@stratus.com>,
-M.J.T. Guy <mjtg@cus.cam.ac.uk>,
+M.J.T. Guy <mjtg@cam.ac.uk>,
 Jarkko Hietaniemi <jhi@iki.fi>,
 Luther Huffman <lutherh@stratcom.com>,
-Nick Ing-Simmons <nick@ni-s.u-net.com>,
-Andreas J. KE<ouml>nig <koenig@kulturbox.de>,
+Nick Ing-Simmons <nick@ing-simmons.net>,
+Andreas J. KE<ouml>nig <a.koenig@mind.de>,
 Markus Laker <mlaker@contax.co.uk>,
 Andrew M. Langmead <aml@world.std.com>,
 Larry Moore <ljmoore@freespace.net>,
@@ -2078,7 +2078,7 @@ Hugo van der Sanden <hv@crypt0.demon.co.uk>,
 Gurusamy Sarathy <gsar@activestate.com>,
 Paul J. Schinder <schinder@pobox.com>,
 Michael G Schwern <schwern@pobox.com>,
-Dan Sugalski <sugalskd@ous.edu>,
+Dan Sugalski <dan@sidhe.org>,
 Nathan Torkington <gnat@frii.com>.
 
 This document is maintained by Chris Nandor
@@ -2086,4 +2086,4 @@ This document is maintained by Chris Nandor
 
 =head1 VERSION
 
-Version 1.47, last modified 22 March 2000
+Version 1.48, last modified 24 April 2001
