@@ -149,3 +149,8 @@ Use of uninitialized value at - line 5.
 -e undef
 EXPECT
 Use of uninitialized value at - line 2.
+########
+BEGIN { $^W = 1 }
+for (@{[0]}) { "$_" }		# check warning isn't duplicated
+EXPECT
+Useless use of string in void context at - line 2.
