@@ -1,5 +1,10 @@
 #!./perl
 
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+}
+
 use Test::More tests => 4;
 
 BEGIN { use_ok('Shell'); }
@@ -19,7 +24,7 @@ while ( -f $tmpfile )
   $tmpfile++;
 }
 
-END { -f $tmpfile && unlink $tmpfile };
+END { -f $tmpfile && (open STDERR, '>&SAVERR' and unlink $tmpfile) };
 
 
 
@@ -28,7 +33,8 @@ open(STDERR, ">$tmpfile");
 
 xXx();  # Ok someone could have a program called this :(
 
-ok( !(-s $tmpfile) ,'$Shell::capture_stderr');
+# On os2 the warning is on by default...
+ok( ($^O eq 'os2' xor !(-s $tmpfile)) ,'$Shell::capture_stderr');
 
 $Shell::capture_stderr = 0; #
 

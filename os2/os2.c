@@ -618,14 +618,14 @@ do_spawn_ve(pTHX_ SV *really, U32 flag, U32 execf, char *inicmd, U32 addflag)
 	if (strEQ(PL_Argv[0],"/bin/sh")) 
 	    PL_Argv[0] = PL_sh_path;
 
-	if (PL_Argv[0][0] != '/' && PL_Argv[0][0] != '\\'
-	    && !(PL_Argv[0][0] && PL_Argv[0][1] == ':' 
-		 && (PL_Argv[0][2] == '/' || PL_Argv[0][2] != '\\'))
-	    ) /* will spawnvp use PATH? */
-	    TAINT_ENV();	/* testing IFS here is overkill, probably */
 	/* We should check PERL_SH* and PERLLIB_* as well? */
 	if (!really || !*(tmps = SvPV(really, n_a)))
 	    tmps = PL_Argv[0];
+	if (tmps[0] != '/' && tmps[0] != '\\'
+	    && !(tmps[0] && tmps[1] == ':' 
+		 && (tmps[2] == '/' || tmps[2] != '\\'))
+	    ) /* will spawnvp use PATH? */
+	    TAINT_ENV();	/* testing IFS here is overkill, probably */
 
       reread:
 	force_shell = 0;

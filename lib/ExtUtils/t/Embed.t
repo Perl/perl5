@@ -16,7 +16,9 @@ $| = 1;
 print "1..9\n";
 my $cc = $Config{'cc'};
 my $cl  = ($^O eq 'MSWin32' && $cc eq 'cl');
-my $exe = 'embed_test' . $Config{'exe_ext'};
+my $skip_exe = $^O eq 'os2' && $Config{ldflags} =~ /(?<!\S)-Zexe\b/;
+my $exe = 'embed_test';
+$exe .= $Config{'exe_ext'} unless $skip_exe;	# Linker will auto-append it
 my $obj = 'embed_test' . $Config{'obj_ext'};
 my $inc = File::Spec->updir;
 my $lib = File::Spec->updir;
@@ -70,6 +72,8 @@ if ($^O eq 'VMS') {
     local $SIG{__WARN__} = sub {
 	warn $_[0] unless $_[0] =~ /No library found for -lperl/
     };
+    push(@cmd, '-Zlinker', '/PM:VIO')	# Otherwise puts a warning to STDOUT!
+	if $^O eq 'os2' and $Config{ldflags} =~ /(?<!\S)-Zomf\b/;
     push(@cmd,ldopts());
    }
 
@@ -118,6 +122,7 @@ print "# embed_test = $embed_test\n";
 $status = system($embed_test);
 print (($status? 'not ':'')."ok 9 # $status\n");
 unlink($exe,"embed_test.c",$obj);
+unlink("$exe$Config{exe_ext}") if $skip_exe;
 unlink("embed_test.map","embed_test.lis") if $^O eq 'VMS';
 unlink(glob("./libperl*.dll")) if $^O eq 'cygwin';
 unlink("../libperl.a")         if $^O eq 'cygwin';

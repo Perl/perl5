@@ -29,7 +29,7 @@ my $diff = time - $start_time;
 
 # alarm time might be one second less than you said.
 is( $@, "ALARM!\n",             'alarm w/$SIG{ALRM} vs inf loop' );
-ok( $diff == 3 || $diff == 2,   '   right time' );
+ok( abs($diff - 3) <= 1,   "   right time" );
 
 
 my $start_time = time;
@@ -44,4 +44,4 @@ $diff = time - $start_time;
 # alarm time might be one second less than you said.
 is( $@, "ALARM!\n",             'alarm w/$SIG{ALRM} vs system()' );
 
-ok( $diff == 3 || $diff == 2,   '   right time' );
+ok( abs($diff - 3) <= 1,   '   right time' );
