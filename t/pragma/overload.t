@@ -494,7 +494,7 @@ test($c, "bareword");	# 135
   sub STORE { 
     my $obj = shift; 
     $#$obj = 1; 
-    @$obj->[0,1] = ('=', shift);
+    $obj->[1] = shift;
   }
 }
 
@@ -615,7 +615,7 @@ test($c, "bareword");	# 135
   sub STORE { 
     my $obj = shift; 
     $#$obj = 1; 
-    @$obj->[0,1] = ('=', shift);
+    $obj->[1] = shift;
   }
 }
 

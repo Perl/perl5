@@ -205,6 +205,36 @@ EXPECT
 Use of implicit split to @_ is deprecated at - line 3.
 ########
 # op.c
+use warnings 'deprecated';
+my (@foo, %foo);
+%main::foo->{"bar"};
+%foo->{"bar"};
+@main::foo->[23];
+@foo->[23];
+$main::foo = {}; %$main::foo->{"bar"};
+$foo = {}; %$foo->{"bar"};
+$main::foo = []; @$main::foo->[34];
+$foo = []; @$foo->[34];
+no warnings 'deprecated';
+%main::foo->{"bar"};
+%foo->{"bar"};
+@main::foo->[23];
+@foo->[23];
+$main::foo = {}; %$main::foo->{"bar"};
+$foo = {}; %$foo->{"bar"};
+$main::foo = []; @$main::foo->[34];
+$foo = []; @$foo->[34];
+EXPECT
+Using a hash as a reference is deprecated at - line 4.
+Using a hash as a reference is deprecated at - line 5.
+Using an array as a reference is deprecated at - line 6.
+Using an array as a reference is deprecated at - line 7.
+Using a hash as a reference is deprecated at - line 8.
+Using a hash as a reference is deprecated at - line 9.
+Using an array as a reference is deprecated at - line 10.
+Using an array as a reference is deprecated at - line 11.
+########
+# op.c
 use warnings 'void' ; close STDIN ;
 1 x 3 ;			# OP_REPEAT
 			# OP_GVSV
