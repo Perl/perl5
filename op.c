@@ -5017,10 +5017,10 @@ Perl_ck_ftst(pTHX_ OP *o)
     dTHR;
     I32 type = o->op_type;
 
-    if (o->op_flags & OPf_REF)
-	return o;
-
-    if (o->op_flags & OPf_KIDS && cUNOPo->op_first->op_type != OP_STUB) {
+    if (o->op_flags & OPf_REF) {
+	/* nothing */
+    }
+    else if (o->op_flags & OPf_KIDS && cUNOPo->op_first->op_type != OP_STUB) {
 	SVOP *kid = (SVOP*)cUNOPo->op_first;
 
 	if (kid->op_type == OP_CONST && (kid->op_private & OPpCONST_BARE)) {
@@ -5028,17 +5028,24 @@ Perl_ck_ftst(pTHX_ OP *o)
 	    OP *newop = newGVOP(type, OPf_REF,
 		gv_fetchpv(SvPVx(kid->op_sv, n_a), TRUE, SVt_PVIO));
 	    op_free(o);
-	    return newop;
+	    o = newop;
 	}
     }
     else {
 	op_free(o);
 	if (type == OP_FTTTY)
-           return newGVOP(type, OPf_REF, gv_fetchpv("main::STDIN", TRUE,
+           o =  newGVOP(type, OPf_REF, gv_fetchpv("main::STDIN", TRUE,
 				SVt_PVIO));
 	else
-	    return newUNOP(type, 0, newDEFSVOP());
+	    o = newUNOP(type, 0, newDEFSVOP());
     }
+#ifdef USE_LOCALE
+    if (type == OP_FTTEXT || type == OP_FTBINARY) {
+	o->op_private = 0;
+	if (PL_hints & HINT_LOCALE)
+	    o->op_private |= OPpLOCALE;
+    }
+#endif
     return o;
 }
 
