@@ -1716,7 +1716,7 @@ PP(pp_ne)
     dSP; tryAMAGICbinSET(ne,0);
 #ifndef NV_PRESERVES_UV
     if (SvROK(TOPs) && SvROK(TOPm1s)) {
-	SETs(boolSV(SvRV(TOPs) == SvRV(TOPm1s)));
+	SETs(boolSV(SvRV(TOPs) != SvRV(TOPm1s)));
 	RETURN;
     }
 #endif
