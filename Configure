@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Nov 23 21:46:25 EET 2001 [metaconfig 3.0 PL70]
+# Generated on Fri Nov 23 21:55:36 EET 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -11537,7 +11537,7 @@ case "$d_readlink" in
 	fi
 	;;
 esac
-$rm reflect
+$rm -f reflect
 set d_procselfexe
 eval $setvar
 

@@ -477,6 +477,11 @@ d_difftime (d_difftime.U):
 	This variable conditionally defines the HAS_DIFFTIME symbol, which
 	indicates to the C program that the difftime() routine is available.
 
+d_dirfd (d_dirfd.U):
+	This variable conditionally defines the HAS_DIRFD constant,
+	which indicates to the C program that dirfd() is available
+	to return the file descriptor of a directory stream.
+
 d_dirnamlen (i_dirent.U):
 	This variable conditionally defines DIRNAMLEN, which indicates
 	to the C program that the length of directory entry names is
@@ -1240,6 +1245,10 @@ d_PRIXU64 (quadfio.U):
 	indiciates that stdio has a symbol to print 64-bit hExADECimAl numbers.
 	The 'U' in the name is to separate this from d_PRIx64 so that even
 	case-blind systems can see the difference.
+
+d_procselfexe (d_procselfexe.U):
+	Defined if $procselfexe is symlink to the absolute
+	pathname of the executing program.
 
 d_pthread_atfork (d_pthread_atfork.U):
 	This variable conditionally defines the HAS_PTHREAD_ATFORK symbol,
@@ -3202,6 +3211,11 @@ privlib (privlib.U):
 privlibexp (privlib.U):
 	This variable is the ~name expanded version of privlib, so that you
 	may use it directly in Makefiles or shell scripts.
+
+procselfexe (d_procselfexe.U):
+	If d_procselfexe is defined, $procselfexe is the filename
+	of the symbolic link pointing to the absolute pathname of
+	the executing program.
 
 prototype (prototype.U):
 	This variable holds the eventual value of CAN_PROTOTYPE, which

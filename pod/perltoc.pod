@@ -101,8 +101,8 @@ Parentheses for capturing, Other regexp features
 
 =back
 
-=head2 perlfaq - frequently asked questions about Perl ($Date: 2001/10/16
-13:27:22 $)
+=head2 perlfaq - frequently asked questions about Perl ($Date: 2001/11/19
+17:09:37 $)
 
 =over 4
 
@@ -421,9 +421,9 @@ EXPR,LIST, hex EXPR, hex, import, index STR,SUBSTR,POSITION, index
 STR,SUBSTR, int EXPR, int, ioctl FILEHANDLE,FUNCTION,SCALAR, join
 EXPR,LIST, keys HASH, kill SIGNAL, LIST, last LABEL, last, lc EXPR, lc,
 lcfirst EXPR, lcfirst, length EXPR, length, link OLDFILE,NEWFILE, listen
-SOCKET,QUEUESIZE, local EXPR, localtime EXPR, lock, log EXPR, log, lstat
-EXPR, lstat, m//, map BLOCK LIST, map EXPR,LIST, mkdir FILENAME,MASK, mkdir
-FILENAME, msgctl ID,CMD,ARG, msgget KEY,FLAGS, msgrcv
+SOCKET,QUEUESIZE, local EXPR, localtime EXPR, lock THING, log EXPR, log,
+lstat EXPR, lstat, m//, map BLOCK LIST, map EXPR,LIST, mkdir FILENAME,MASK,
+mkdir FILENAME, msgctl ID,CMD,ARG, msgget KEY,FLAGS, msgrcv
 ID,VAR,SIZE,TYPE,FLAGS, msgsnd ID,MSG,FLAGS, my EXPR, my EXPR : ATTRIBUTES,
 next LABEL, next, no Module LIST, oct EXPR, oct, open FILEHANDLE,EXPR, open
 FILEHANDLE,MODE,EXPR, open FILEHANDLE,MODE,EXPR,LIST, open FILEHANDLE,
@@ -1026,11 +1026,11 @@ $PROCESS_ID, $PID, $$, $REAL_USER_ID, $UID, $<, $EFFECTIVE_USER_ID, $EUID,
 $>, $REAL_GROUP_ID, $GID, $(, $EFFECTIVE_GROUP_ID, $EGID, $),
 $PROGRAM_NAME, $0, $[, $], $COMPILING, $^C, $DEBUGGING, $^D,
 $SYSTEM_FD_MAX, $^F, $^H, %^H, $INPLACE_EDIT, $^I, $^M, $OSNAME, $^O,
-$PERLDB, $^P, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x100, 0x200,
-$LAST_REGEXP_CODE_RESULT, $^R, $EXCEPTIONS_BEING_CAUGHT, $^S, $BASETIME,
-$^T, ${^TAINT}, $PERL_VERSION, $^V, $WARNING, $^W, ${^WARNING_BITS},
-${^WIDE_SYSTEM_CALLS}, $EXECUTABLE_NAME, $^X, ARGV, $ARGV, @ARGV, @F, @INC,
-@_, %INC, %ENV, $ENV{expr}, %SIG, $SIG{expr}
+${^OPEN}, $PERLDB, $^P, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80,
+0x100, 0x200, $LAST_REGEXP_CODE_RESULT, $^R, $EXCEPTIONS_BEING_CAUGHT, $^S,
+$BASETIME, $^T, ${^TAINT}, $PERL_VERSION, $^V, $WARNING, $^W,
+${^WARNING_BITS}, ${^WIDE_SYSTEM_CALLS}, $EXECUTABLE_NAME, $^X, ARGV,
+$ARGV, @ARGV, @F, @INC, @_, %INC, %ENV, $ENV{expr}, %SIG, $SIG{expr}
 
 =item Error Indicators
 
@@ -1210,7 +1210,7 @@ i, m, s, x
 
 =item Regular Expressions
 
-cntrl, graph, print, punct, xdigit
+[1], [2], [3], cntrl, graph, print, punct, xdigit
 
 =item Extended Patterns
 
@@ -2746,8 +2746,8 @@ References, Tutorials, Task-Oriented, Special Topics
 
 =back
 
-=head2 perlfaq3 - Programming Tools ($Revision: 1.9 $, $Date: 2001/11/09
-08:06:04 $)
+=head2 perlfaq3 - Programming Tools ($Revision: 1.10 $, $Date: 2001/11/19
+17:09:37 $)
 
 =over 4
 
@@ -2786,8 +2786,6 @@ MultiEdit, SlickEdit, Bash, Ksh, Tcsh, Zsh, BBEdit and BBEdit Lite, Alpha
 =item How can I use X or Tk with Perl?
 
 =item How can I generate simple menus without using CGI or Tk?
-
-=item What is undump?
 
 =item How can I make my Perl program run faster?
 
@@ -4762,9 +4760,9 @@ Does concept match the general goals of Perl?, Where is the
 implementation?, Backwards compatibility, Could it be a module instead?, Is
 the feature generic enough?, Does it potentially introduce new bugs?, Does
 it preclude other desirable features?, Is the implementation robust?, Is
-the implementation generic enough to be portable?, Is there enough
-documentation?, Is there another way to do it?, Does it create too much
-work?, Patches speak louder than words
+the implementation generic enough to be portable?, Is the implementation
+tested?, Is there enough documentation?, Is there another way to do it?,
+Does it create too much work?, Patches speak louder than words
 
 =over 4
 
@@ -4903,11 +4901,131 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =back
 
-=head2 perldelta - what will be new for perl v5.8.0
+=head2 perldelta - what is new for perl v5.8.0
 
 =over 4
 
 =item DESCRIPTION
+
+=item Incompatible Changes
+
+=over 4
+
+=item 64-bit platforms and malloc
+
+=item AIX Dynaloading
+
+=item Socket Extension Dynamic in VMS
+
+=item Different Definition of the Unicode Character Classes \p{In...}
+
+=item Perl Parser Stress Tested
+
+=item Deprecations
+
+=back
+
+=item Core Enhancements
+
+=over 4
+
+=item AUTOLOAD Is Now Lvaluable
+
+=item PerlIO is Now The Default
+
+=item Signals Are Now Safe
+
+=item Understanding of Numbers
+
+=back
+
+=item Modules and Pragmata
+
+=over 4
+
+=item New Modules
+
+=item Updated And Improved Modules and Pragmata
+
+=back
+
+=item Utility Changes
+
+=item New Documentation
+
+=item Performance Enhancements
+
+=item Installation and Configuration Improvements
+
+=over 4
+
+=item Generic Improvements
+
+=item New Or Improved Platforms
+
+=back
+
+=item Selected Bug Fixes
+
+=over 4
+
+=item Platform Specific Changes and Fixes
+
+=back
+
+=item New or Changed Diagnostics
+
+=item Changed Internals
+
+=item Security Vulnerability Closed
+
+=item New Tests
+
+=item Known Problems
+
+=over 4
+
+=item AIX
+
+=item Amiga Perl Invoking Mystery
+
+=item lib/ftmp-security tests warn 'system possibly insecure'
+
+=item Cygwin intermittent failures of lib/Memoize/t/expire_file 11 and 12
+
+=item HP-UX lib/io_multihomed Fails When LP64-Configured
+
+=item  HP-UX lib/posix Subtest 9 Fails When LP64-Configured
+
+=item Linux With Sfio Fails op/misc Test 48
+
+=item OS/390
+
+=item op/sprintf tests 129 and 130
+
+=item  Failure of Thread tests
+
+=item UNICOS
+
+=item UTS
+
+=item VMS
+
+=item Win32
+
+=item Localising a Tied Variable Leaks Memory
+
+=item Self-tying of Arrays and Hashes Is Forbidden
+
+=item Variable Attributes are not Currently Usable for Tieing
+
+=item Building Extensions Can Fail Because Of Largefiles
+
+=item The Compiler Suite Is Still Experimental
+
+=item The Long Double Support is Still Experimental
+
+=back
 
 =item Reporting Bugs
 
@@ -7819,6 +7937,16 @@ B<untrapped>, B<any>, I<signal>, I<number>
 
 =back
 
+=head2 sort - perl pragma to control sort() behaviour
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=back
+
 =head2 strict - Perl pragma to restrict unsafe constructs
 
 =over 4
@@ -9829,6 +9957,26 @@ Dumper
 =item ENVIRONMENT
 
 =item BUGS
+
+=item SEE ALSO
+
+=back
+
+=head2 Devel::PPPort, Perl/Pollution/Portability
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item WriteFile
+
+=back
+
+=item AUTHOR
 
 =item SEE ALSO
 
@@ -13436,6 +13584,14 @@ C<O_RDONLY>, C<O_WRONLY>, C<O_RDWR>
 
 =item DESCRIPTION
 
+=over 4
+
+=item Enforcing redispatch
+
+=item Avoiding repetitions
+
+=back
+
 =item AUTHOR
 
 =item BUGS AND IRRITATIONS
@@ -13688,12 +13844,13 @@ new Net::SMTP [ HOST, ] [ OPTIONS ]
 
 =item METHODS
 
-banner (), domain (), hello ( DOMAIN ), etrn ( DOMAIN ), mail ( ADDRESS [,
-OPTIONS] ), send ( ADDRESS ), send_or_mail ( ADDRESS ), send_and_mail (
-ADDRESS ), reset (), recipient ( ADDRESS [, ADDRESS [ ...]] [, OPTIONS ] ),
-to ( ADDRESS [, ADDRESS [...]] ), cc ( ADDRESS [, ADDRESS [...]] ), bcc (
-ADDRESS [, ADDRESS [...]] ), data ( [ DATA ] ), expand ( ADDRESS ), verify
-( ADDRESS ), help ( [ $subject ] ), quit ()
+banner (), domain (), hello ( DOMAIN ), etrn ( DOMAIN ), auth ( USERNAME,
+PASSWORD ), mail ( ADDRESS [, OPTIONS] ), send ( ADDRESS ), send_or_mail (
+ADDRESS ), send_and_mail ( ADDRESS ), reset (), recipient ( ADDRESS [,
+ADDRESS [ ...]] [, OPTIONS ] ), to ( ADDRESS [, ADDRESS [...]] ), cc (
+ADDRESS [, ADDRESS [...]] ), bcc ( ADDRESS [, ADDRESS [...]] ), data ( [
+DATA ] ), expand ( ADDRESS ), verify ( ADDRESS ), help ( [ $subject ] ),
+quit ()
 
 =item SEE ALSO
 
@@ -14224,6 +14381,12 @@ $obj->CLOSE($fh), $obj->SEEK($posn,$whence,$fh), $obj->TELL($fh),
 $obj->UNREAD($buffer,$fh), $obj->FLUSH($fh), $obj->SETLINEBUF($fh),
 $obj->CLEARERR($fh), $obj->ERROR($fh), $obj->EOF($fh)
 
+=over 4
+
+=item Example - a Hexadecimal Handle
+
+=back
+
 =back
 
 =head2 Pod::Checker, podchecker() - check pod documents for syntax errors
@@ -14707,11 +14870,15 @@ B<_output>
 
 B<_replace_special_chars>
 
+B<_replace_special_chars_late>
+
 B<_create_label>
 
 B<_create_index>
 
 B<_clean_latex_commands>
+
+B<_split_delimited>
 
 =over 4
 
@@ -15351,6 +15518,44 @@ C<-pathlist>
 
 =back
 
+=head2 Pod::t::basic, basic.pod - Test of various basic POD features in
+translators.
+
+=over 4
+
+=item HEADINGS
+
+=item This C<is> a "level 1" heading
+
+=over 4
+
+=item ``Level'' "2 I<heading>
+
+=back
+
+=item This C<is> a "level 1" heading
+
+=over 4
+
+=item ``Level'' 2 I<heading>
+
+=back
+
+=item LINKS
+
+=item OVER AND ITEMS
+
+This  is a test, a, b, a, b, c, d, "foo", B<bar>, C<baz>, Some longer item
+text
+
+=item FORMATTING CODES
+
+E<amp>, E<apos>, E<lt>, E<gt>, E<quot>, E<sol>
+
+=item VERBATIM
+
+=back
+
 =head2 SDBM_File - Tied access to sdbm files
 
 =over 4
@@ -15698,7 +15903,33 @@ ANSI_COLORS_DISABLED
 
 =item DESCRIPTION
 
+=over 4
+
+=item METHODS
+
+=back
+
+=back
+
+B<Tgetent>, OSPEED, TERM
+
+B<Tpad>, B<$string>, B<$cnt>, B<$FH>
+
+B<Tputs>, B<$cap>, B<$cnt>, B<$FH>
+
+B<Tgoto>, B<$cap>, B<$col>, B<$row>, B<$FH>
+
+B<Trequire>
+
+=over 4
+
 =item EXAMPLES
+
+=item COPYRIGHT AND LICENSE
+
+=item AUTHOR
+
+=item SEE ALSO
 
 =back
 
@@ -15884,9 +16115,11 @@ B<_my_exit>
 
 =item EXAMPLES
 
-=item AUTHOR
-
 =item SEE ALSO
+
+=item AUTHORS
+
+=item COPYRIGHT
 
 =back
 
@@ -16014,7 +16247,7 @@ B<TODO: BLOCK>
 
 =over 4
 
-=item Comparision functions
+=item Comparison functions
 
 B<is_deeply>
 
@@ -16035,11 +16268,13 @@ B<eq_set>
 Making your own ok(), The eq_* family have some caveats, Test::Harness
 upgrades
 
-=item AUTHOR
-
 =item HISTORY
 
 =item SEE ALSO
+
+=item AUTHORS
+
+=item COPYRIGHT
 
 =back
 
@@ -16065,12 +16300,14 @@ B<ok>
 
 =item HISTORY
 
-=item AUTHOR
-
 =item SEE ALSO
 
-L<Test::More>, L<Test>, L<Test::Unit>, L<Pod::Tests>, L<SelfTest>,
+L<Test::More>, L<Test>, L<Test::Unit>, L<Test::Inline>, L<SelfTest>,
 L<Test::Harness>
+
+=item AUTHORS
+
+=item COPYRIGHT
 
 =back
 
@@ -16105,6 +16342,10 @@ L<Test::Harness>
 =back
 
 =item FOOTNOTES
+
+=item AUTHORS
+
+=item COPYRIGHT
 
 =back
 

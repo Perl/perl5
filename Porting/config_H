@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Thu Sep 20 17:22:20 EET DST 2001
+ * Configuration time: Fri Nov 23 21:51:58 EET 2001
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -3464,6 +3464,12 @@
  */
 /*#define	HAS_DBMINIT_PROTO	/ **/
 
+/* HAS_DIRFD:
+ *	This manifest constant lets the C program know that dirfd
+ *	is available.
+ */
+#define HAS_DIRFD		/**/
+
 /* HAS_FLOCK_PROTO:
  *	This symbol, if defined, indicates that the system provides
  *	a prototype for the flock() function.  Otherwise, it is up
@@ -3496,6 +3502,20 @@
  *	and therefore I_LANGINFO.
  */
 #define HAS_NL_LANGINFO		/**/
+
+/* HAS_PROCSELFEXE:
+ *	This symbol is defined if PROCSELFEXE_PATH is a symlink
+ *	to the absolute pathname of the executing program.
+ */
+/* PROCSELFEXE_PATH:
+ *	If HAS_PROCSELFEXE is defined this symbol is the filename
+ *	of the symbolic link pointing to the absolute pathname of
+ *	the executing program.
+ */
+/*#define HAS_PROCSELFEXE	/ **/
+#if defined(HAS_PROCSELFEXE) && !defined(PROCSELFEXE_PATH)
+#define PROCSELFEXE_PATH		/**/
+#endif
 
 /* HAS_SIGPROCMASK:
  *	This symbol, if defined, indicates that the sigprocmask

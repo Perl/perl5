@@ -291,6 +291,7 @@ sub getpods {
         return if $file =~ m!lib/Attribute/Handlers/demo/!;
 	return if $file =~ m!lib/Net/FTP/.+\.pm!; # Hi, Graham! :-)
         return if $file =~ m!lib/Math/BigInt/t/!;
+	return if $file =~ m!lib/Devel/Harness.pm|Devel/PPPort/harness/!;
 
 	die "tut $name" if $file =~ /TUT/;
 	unless (open (F, "< $_\0")) {
