@@ -1061,7 +1061,7 @@ The command used to load the debugger code.  The default is:
 =item PERL5SHELL (specific to the Win32 port)
 
 May be set to an alternative shell that perl must use internally for
-executing "backtick" commands or system().  Default is C<cmd.exe /x/c>
+executing "backtick" commands or system().  Default is C<cmd.exe /x/d/c>
 on WindowsNT and C<command.com /c> on Windows95.  The value is considered
 to be space-separated.  Precede any character that needs to be protected
 (like a space or backslash) with a backslash.
