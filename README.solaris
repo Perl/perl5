@@ -671,7 +671,8 @@ but if one patiently waits, one gets these results:
 The alarm() test failure is caused by system() apparently blocking
 alarm().  That is probably a libc bug, and given that SunOS 4.x
 has been end-of-lifed years ago, don't hold your breath for a fix.
-In addition to that, don't try anything Unicodey, and you should be fine.
+In addition to that, don't try anything too Unicode-y, especially
+with Encode, and you should be fine in SunOS 4.x.
 
 =head1 AUTHOR
 
