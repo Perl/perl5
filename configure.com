@@ -2462,6 +2462,9 @@ $   IF F$EXTRACT(0,4,line) .EQS. "ext/" THEN -
       xxx = F$EXTRACT(4,line_len - 16,line)
 $   IF xxx .EQS. "DynaLoader" THEN goto ext_loop     ! omit
 $   IF xxx .EQS. "SDBM_File/sdbm" THEN goto ext_loop ! sub extension - omit
+$   IF xxx .EQS. "Digest/MD5" .AND. -
+       F$GETSYI("HW_MODEL") .LT. 1024 .AND. ccversion .LE. 50390006 -
+       THEN goto ext_loop ! cannot compile MD5.c on VAX
 $   IF F$EXTRACT(0,8,line) .EQS. "vms/ext/" THEN -
       xxx = "VMS/" + F$EXTRACT(8,line_len - 20,line)
 $   known_extensions = known_extensions + " ''xxx'"
