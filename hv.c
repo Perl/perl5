@@ -25,7 +25,7 @@ new_he()
     HE* he;
     if (he_root) {
         he = he_root;
-        he_root = (HE*)he->hent_next;
+        he_root = HeNEXT(he);
         return he;
     }
     return more_he();
@@ -35,7 +35,7 @@ static void
 del_he(p)
 HE* p;
 {
-    p->hent_next = (HE*)he_root;
+    HeNEXT(p) = (HE*)he_root;
     he_root = p;
 }
 
@@ -48,12 +48,15 @@ more_he()
     he = he_root;
     heend = &he[1008 / sizeof(HE) - 1];
     while (he < heend) {
-        he->hent_next = (HE*)(he + 1);
+        HeNEXT(he) = (HE*)(he + 1);
         he++;
     }
-    he->hent_next = 0;
+    HeNEXT(he) = 0;
     return new_he();
 }
+
+/* (klen == HEf_SVKEY) is special for MAGICAL hv entries, meaning key slot
+ * contains an SV* */
 
 SV**
 hv_fetch(hv,key,klen,lval)
@@ -63,9 +66,7 @@ U32 klen;
 I32 lval;
 {
     register XPVHV* xhv;
-    register char *s;
-    register I32 i;
-    register I32 hash;
+    register U32 hash;
     register HE *entry;
     SV *sv;
 
@@ -93,21 +94,17 @@ I32 lval;
 	    return 0;
     }
 
-    i = klen;
-    hash = 0;
-    s = key;
-    while (i--)
-	hash = hash * 33 + *s++;
+    PERL_HASH(hash, key, klen);
 
     entry = ((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
-    for (; entry; entry = entry->hent_next) {
-	if (entry->hent_hash != hash)		/* strings can't be equal */
+    for (; entry; entry = HeNEXT(entry)) {
+	if (HeHASH(entry) != hash)		/* strings can't be equal */
 	    continue;
-	if (entry->hent_klen != klen)
+	if (HeKLEN(entry) != klen)
 	    continue;
-	if (bcmp(entry->hent_key,key,klen))	/* is this it? */
+	if (bcmp(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
-	return &entry->hent_val;
+	return &HeVAL(entry);
     }
 #ifdef DYNAMIC_ENV_FETCH  /* %ENV lookup?  If so, try to fetch the value now */
     if (HvNAME(hv) && strEQ(HvNAME(hv),ENV_HV_NAME)) {
@@ -127,6 +124,85 @@ I32 lval;
     return 0;
 }
 
+/* returns a HE * structure with the all fields set */
+/* note that hent_val will be a mortal sv for MAGICAL hashes */
+HE *
+hv_fetch_ent(hv,keysv,lval,hash)
+HV *hv;
+SV *keysv;
+I32 lval;
+register U32 hash;
+{
+    register XPVHV* xhv;
+    register char *key;
+    STRLEN klen;
+    register HE *entry;
+    SV *sv;
+
+    if (!hv)
+	return 0;
+
+    xhv = (XPVHV*)SvANY(hv);
+
+    if (SvRMAGICAL(hv) && mg_find((SV*)hv,'P')) {
+	if (!(entry = xhv->xhv_eiter)) {
+	    xhv->xhv_eiter = entry = new_he();	/* only one HE per MAGICAL hash */
+	    Zero(entry, 1, HE);
+	    HeKLEN(entry) = HEf_SVKEY;		/* hent_key is holding an SV* */
+	}
+	else if ((sv = HeSVKEY(entry)))
+	    SvREFCNT_dec(sv);
+	sv = sv_newmortal();
+	mg_copy((SV*)hv, sv, (char*)keysv, HEf_SVKEY);
+	HeVAL(entry) = sv;
+	HeKEY(entry) = (char*)SvREFCNT_inc(keysv);
+	return entry;
+    }
+
+    key = SvPV(keysv, klen);
+    
+    if (!hash)
+	PERL_HASH(hash, key, klen);
+
+    if (!xhv->xhv_array) {
+	if (lval 
+#ifdef DYNAMIC_ENV_FETCH  /* if it's an %ENV lookup, we may get it on the fly */
+	         || (HvNAME(hv) && strEQ(HvNAME(hv),ENV_HV_NAME))
+#endif
+	                                                          )
+	    Newz(503,xhv->xhv_array, sizeof(HE*) * (xhv->xhv_max + 1), char);
+	else
+	    return 0;
+    }
+
+    entry = ((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
+    for (; entry; entry = HeNEXT(entry)) {
+	if (HeHASH(entry) != hash)		/* strings can't be equal */
+	    continue;
+	if (HeKLEN(entry) != klen)
+	    continue;
+	if (bcmp(HeKEY(entry),key,klen))	/* is this it? */
+	    continue;
+	return entry;
+    }
+#ifdef DYNAMIC_ENV_FETCH  /* %ENV lookup?  If so, try to fetch the value now */
+    if (HvNAME(hv) && strEQ(HvNAME(hv),ENV_HV_NAME)) {
+      char *gotenv;
+
+      gotenv = my_getenv(key);
+      if (gotenv != NULL) {
+        sv = newSVpv(gotenv,strlen(gotenv));
+        return hv_store_ent(hv,keysv,sv,hash);
+      }
+    }
+#endif
+    if (lval) {		/* gonna assign to this, so it better be there */
+	sv = NEWSV(61,0);
+	return hv_store_ent(hv,keysv,sv,hash);
+    }
+    return 0;
+}
+
 SV**
 hv_store(hv,key,klen,val,hash)
 HV *hv;
@@ -136,7 +212,6 @@ SV *val;
 register U32 hash;
 {
     register XPVHV* xhv;
-    register char *s;
     register I32 i;
     register HE *entry;
     register HE **oentry;
@@ -156,12 +231,8 @@ register U32 hash;
 	  return 0;
 #endif /* OVERLOAD */
     }
-    if (!hash) {
-    i = klen;
-    s = key;
-    while (i--)
-	hash = hash * 33 + *s++;
-    }
+    if (!hash)
+	PERL_HASH(hash, key, klen);
 
     if (!xhv->xhv_array)
 	Newz(505, xhv->xhv_array, sizeof(HE**) * (xhv->xhv_max + 1), char);
@@ -169,24 +240,27 @@ register U32 hash;
     oentry = &((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
     i = 1;
 
-    for (entry = *oentry; entry; i=0, entry = entry->hent_next) {
-	if (entry->hent_hash != hash)		/* strings can't be equal */
+    for (entry = *oentry; entry; i=0, entry = HeNEXT(entry)) {
+	if (HeHASH(entry) != hash)		/* strings can't be equal */
 	    continue;
-	if (entry->hent_klen != klen)
+	if (HeKLEN(entry) != klen)
 	    continue;
-	if (bcmp(entry->hent_key,key,klen))	/* is this it? */
+	if (bcmp(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
-	SvREFCNT_dec(entry->hent_val);
-	entry->hent_val = val;
-	return &entry->hent_val;
+	SvREFCNT_dec(HeVAL(entry));
+	HeVAL(entry) = val;
+	return &HeVAL(entry);
     }
 
     entry = new_he();
-    entry->hent_klen = klen;
-    entry->hent_key = savepvn(key,klen);
-    entry->hent_val = val;
-    entry->hent_hash = hash;
-    entry->hent_next = *oentry;
+    HeKLEN(entry) = klen;
+    if (HvSHAREKEYS(hv))
+	HeKEY(entry) = sharepvn(key, klen, hash);
+    else                                       /* gotta do the real thing */
+	HeKEY(entry) = savepvn(key,klen);
+    HeVAL(entry) = val;
+    HeHASH(entry) = hash;
+    HeNEXT(entry) = *oentry;
     *oentry = entry;
 
     xhv->xhv_keys++;
@@ -196,7 +270,81 @@ register U32 hash;
 	    hsplit(hv);
     }
 
-    return &entry->hent_val;
+    return &HeVAL(entry);
+}
+
+HE *
+hv_store_ent(hv,keysv,val,hash)
+HV *hv;
+SV *keysv;
+SV *val;
+register U32 hash;
+{
+    register XPVHV* xhv;
+    register char *key;
+    STRLEN klen;
+    register I32 i;
+    register HE *entry;
+    register HE **oentry;
+
+    if (!hv)
+	return 0;
+
+    xhv = (XPVHV*)SvANY(hv);
+    if (SvMAGICAL(hv)) {
+	mg_copy((SV*)hv, val, (char*)keysv, HEf_SVKEY);
+#ifndef OVERLOAD
+	if (!xhv->xhv_array)
+	    return Nullhe;
+#else
+	if (!xhv->xhv_array && (SvMAGIC(hv)->mg_type != 'A'
+				|| SvMAGIC(hv)->mg_moremagic))
+	  return Nullhe;
+#endif /* OVERLOAD */
+    }
+
+    key = SvPV(keysv, klen);
+    
+    if (!hash)
+	PERL_HASH(hash, key, klen);
+
+    if (!xhv->xhv_array)
+	Newz(505, xhv->xhv_array, sizeof(HE**) * (xhv->xhv_max + 1), char);
+
+    oentry = &((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
+    i = 1;
+
+    for (entry = *oentry; entry; i=0, entry = HeNEXT(entry)) {
+	if (HeHASH(entry) != hash)		/* strings can't be equal */
+	    continue;
+	if (HeKLEN(entry) != klen)
+	    continue;
+	if (bcmp(HeKEY(entry),key,klen))	/* is this it? */
+	    continue;
+	SvREFCNT_dec(HeVAL(entry));
+	HeVAL(entry) = val;
+	return entry;
+    }
+
+    entry = new_he();
+    HeKLEN(entry) = klen;
+    if (HvSHAREKEYS(hv))
+	HeKEY(entry) = sharepvn(key, klen, hash);
+    else                                       /* gotta do the real thing */
+	HeKEY(entry) = savepvn(key,klen);
+    HeVAL(entry) = val;
+    HeHASH(entry) = hash;
+    HeNEXT(entry) = *oentry;
+    *oentry = entry;
+
+    xhv->xhv_keys++;
+    if (i) {				/* initial entry? */
+	++xhv->xhv_fill;
+	if (xhv->xhv_keys > xhv->xhv_max)
+	    hsplit(hv);
+    }
+
+    return entry;
 }
 
 SV *
@@ -207,9 +355,8 @@ U32 klen;
 I32 flags;
 {
     register XPVHV* xhv;
-    register char *s;
     register I32 i;
-    register I32 hash;
+    register U32 hash;
     register HE *entry;
     register HE **oentry;
     SV *sv;
@@ -219,6 +366,9 @@ I32 flags;
     if (SvRMAGICAL(hv)) {
 	sv = *hv_fetch(hv, key, klen, TRUE);
 	mg_clear(sv);
+	if (mg_find(sv, 's')) {
+	    return Nullsv;		/* %SIG elements cannot be deleted */
+	}
 	if (mg_find(sv, 'p')) {
 	    sv_unmagic(sv, 'p');	/* No longer an element */
 	    return sv;
@@ -227,33 +377,92 @@ I32 flags;
     xhv = (XPVHV*)SvANY(hv);
     if (!xhv->xhv_array)
 	return Nullsv;
-    i = klen;
-    hash = 0;
-    s = key;
-    while (i--)
-	hash = hash * 33 + *s++;
+
+    PERL_HASH(hash, key, klen);
 
     oentry = &((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
     entry = *oentry;
     i = 1;
-    for (; entry; i=0, oentry = &entry->hent_next, entry = *oentry) {
-	if (entry->hent_hash != hash)		/* strings can't be equal */
+    for (; entry; i=0, oentry = &HeNEXT(entry), entry = *oentry) {
+	if (HeHASH(entry) != hash)		/* strings can't be equal */
 	    continue;
-	if (entry->hent_klen != klen)
+	if (HeKLEN(entry) != klen)
 	    continue;
-	if (bcmp(entry->hent_key,key,klen))	/* is this it? */
+	if (bcmp(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
-	*oentry = entry->hent_next;
+	*oentry = HeNEXT(entry);
 	if (i && !*oentry)
 	    xhv->xhv_fill--;
 	if (flags & G_DISCARD)
 	    sv = Nullsv;
 	else
-	    sv = sv_mortalcopy(entry->hent_val);
+	    sv = sv_mortalcopy(HeVAL(entry));
 	if (entry == xhv->xhv_eiter)
-	    entry->hent_klen = -1;
+	    HeKLEN(entry) = HEf_LAZYDEL;
 	else
-	    he_free(entry);
+	    he_free(entry, HvSHAREKEYS(hv));
+	--xhv->xhv_keys;
+	return sv;
+    }
+    return Nullsv;
+}
+
+SV *
+hv_delete_ent(hv,keysv,flags,hash)
+HV *hv;
+SV *keysv;
+I32 flags;
+U32 hash;
+{
+    register XPVHV* xhv;
+    register I32 i;
+    register char *key;
+    STRLEN klen;
+    register HE *entry;
+    register HE **oentry;
+    SV *sv;
+    
+    if (!hv)
+	return Nullsv;
+    if (SvRMAGICAL(hv)) {
+	entry = hv_fetch_ent(hv, keysv, TRUE, hash);
+	sv = HeVAL(entry);
+	mg_clear(sv);
+	if (mg_find(sv, 'p')) {
+	    sv_unmagic(sv, 'p');	/* No longer an element */
+	    return sv;
+	}
+    }
+    xhv = (XPVHV*)SvANY(hv);
+    if (!xhv->xhv_array)
+	return Nullsv;
+
+    key = SvPV(keysv, klen);
+    
+    if (!hash)
+	PERL_HASH(hash, key, klen);
+
+    oentry = &((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
+    entry = *oentry;
+    i = 1;
+    for (; entry; i=0, oentry = &HeNEXT(entry), entry = *oentry) {
+	if (HeHASH(entry) != hash)		/* strings can't be equal */
+	    continue;
+	if (HeKLEN(entry) != klen)
+	    continue;
+	if (bcmp(HeKEY(entry),key,klen))	/* is this it? */
+	    continue;
+	*oentry = HeNEXT(entry);
+	if (i && !*oentry)
+	    xhv->xhv_fill--;
+	if (flags & G_DISCARD)
+	    sv = Nullsv;
+	else
+	    sv = sv_mortalcopy(HeVAL(entry));
+	if (entry == xhv->xhv_eiter)
+	    HeKLEN(entry) = HEf_LAZYDEL;
+	else
+	    he_free(entry, HvSHAREKEYS(hv));
 	--xhv->xhv_keys;
 	return sv;
     }
@@ -267,9 +476,7 @@ char *key;
 U32 klen;
 {
     register XPVHV* xhv;
-    register char *s;
-    register I32 i;
-    register I32 hash;
+    register U32 hash;
     register HE *entry;
     SV *sv;
 
@@ -289,19 +496,61 @@ U32 klen;
     if (!xhv->xhv_array)
 	return 0; 
 
-    i = klen;
-    hash = 0;
-    s = key;
-    while (i--)
-	hash = hash * 33 + *s++;
+    PERL_HASH(hash, key, klen);
 
     entry = ((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
-    for (; entry; entry = entry->hent_next) {
-	if (entry->hent_hash != hash)		/* strings can't be equal */
+    for (; entry; entry = HeNEXT(entry)) {
+	if (HeHASH(entry) != hash)		/* strings can't be equal */
 	    continue;
-	if (entry->hent_klen != klen)
+	if (HeKLEN(entry) != klen)
 	    continue;
-	if (bcmp(entry->hent_key,key,klen))	/* is this it? */
+	if (bcmp(HeKEY(entry),key,klen))	/* is this it? */
+	    continue;
+	return TRUE;
+    }
+    return FALSE;
+}
+
+
+bool
+hv_exists_ent(hv,keysv,hash)
+HV *hv;
+SV *keysv;
+U32 hash;
+{
+    register XPVHV* xhv;
+    register char *key;
+    STRLEN klen;
+    register HE *entry;
+    SV *sv;
+
+    if (!hv)
+	return 0;
+
+    if (SvRMAGICAL(hv)) {
+	if (mg_find((SV*)hv,'P')) {
+	    sv = sv_newmortal();
+	    mg_copy((SV*)hv, sv, (char*)keysv, HEf_SVKEY); 
+	    magic_existspack(sv, mg_find(sv, 'p'));
+	    return SvTRUE(sv);
+	}
+    }
+
+    xhv = (XPVHV*)SvANY(hv);
+    if (!xhv->xhv_array)
+	return 0; 
+
+    key = SvPV(keysv, klen);
+    if (!hash)
+	PERL_HASH(hash, key, klen);
+
+    entry = ((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
+    for (; entry; entry = HeNEXT(entry)) {
+	if (HeHASH(entry) != hash)		/* strings can't be equal */
+	    continue;
+	if (HeKLEN(entry) != klen)
+	    continue;
+	if (bcmp(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
 	return TRUE;
     }
@@ -357,16 +606,16 @@ HV *hv;
 	    continue;
 	b = a+oldsize;
 	for (oentry = a, entry = *a; entry; entry = *oentry) {
-	    if ((entry->hent_hash & newsize) != i) {
-		*oentry = entry->hent_next;
-		entry->hent_next = *b;
+	    if ((HeHASH(entry) & newsize) != i) {
+		*oentry = HeNEXT(entry);
+		HeNEXT(entry) = *b;
 		if (!*b)
 		    xhv->xhv_fill++;
 		*b = entry;
 		continue;
 	    }
 	    else
-		oentry = &entry->hent_next;
+		oentry = &HeNEXT(entry);
 	}
 	if (!*a)				/* everything moved */
 	    xhv->xhv_fill--;
@@ -384,6 +633,9 @@ newHV()
     xhv = (XPVHV*)SvANY(hv);
     SvPOK_off(hv);
     SvNOK_off(hv);
+#ifndef NODEFAULT_SHAREKEYS    
+    HvSHAREKEYS_on(hv);         /* key-sharing on by default */
+#endif    
     xhv->xhv_max = 7;		/* start with 8 buckets */
     xhv->xhv_fill = 0;
     xhv->xhv_pmroot = 0;
@@ -392,24 +644,36 @@ newHV()
 }
 
 void
-he_free(hent)
+he_free(hent, shared)
 register HE *hent;
+I32 shared;
 {
     if (!hent)
 	return;
-    SvREFCNT_dec(hent->hent_val);
-    Safefree(hent->hent_key);
+    SvREFCNT_dec(HeVAL(hent));
+    if (HeKLEN(hent) == HEf_SVKEY)
+	SvREFCNT_dec((SV*)HeKEY(hent));
+    else if (shared)
+	unsharepvn(HeKEY(hent), HeKLEN(hent), HeHASH(hent));
+    else
+	Safefree(HeKEY(hent));
     del_he(hent);
 }
 
 void
-he_delayfree(hent)
+he_delayfree(hent, shared)
 register HE *hent;
+I32 shared;
 {
     if (!hent)
 	return;
-    sv_2mortal(hent->hent_val);	/* free between statements */
-    Safefree(hent->hent_key);
+    sv_2mortal(HeVAL(hent));	/* free between statements */
+    if (HeKLEN(hent) == HEf_SVKEY)
+	sv_2mortal((SV*)HeKEY(hent));
+    else if (shared)
+	unsharepvn(HeKEY(hent), HeKLEN(hent), HeHASH(hent));
+    else
+	Safefree(HeKEY(hent));
     del_he(hent);
 }
 
@@ -440,6 +704,7 @@ HV *hv;
     register HE *ohent = Null(HE*);
     I32 riter;
     I32 max;
+    I32 shared;
 
     if (!hv)
 	return;
@@ -450,11 +715,12 @@ HV *hv;
     max = HvMAX(hv);
     array = HvARRAY(hv);
     hent = array[0];
+    shared = HvSHAREKEYS(hv);
     for (;;) {
 	if (hent) {
 	    ohent = hent;
-	    hent = hent->hent_next;
-	    he_free(ohent);
+	    hent = HeNEXT(hent);
+	    he_free(ohent, shared);
 	}
 	if (!hent) {
 	    if (++riter > max)
@@ -494,8 +760,8 @@ HV *hv;
 {
     register XPVHV* xhv = (XPVHV*)SvANY(hv);
     HE *entry = xhv->xhv_eiter;
-    if (entry && entry->hent_klen < 0)	/* was deleted earlier? */
-	he_free(entry);
+    if (entry && HeKLEN(entry) == HEf_LAZYDEL)	/* was deleted earlier? */
+	he_free(entry, HvSHAREKEYS(hv));
     xhv->xhv_riter = -1;
     xhv->xhv_eiter = Null(HE*);
     return xhv->xhv_fill;
@@ -517,25 +783,21 @@ HV *hv;
 
     if (SvRMAGICAL(hv) && (mg = mg_find((SV*)hv,'P'))) {
 	SV *key = sv_newmortal();
-	if (entry) {
-	    sv_usepvn(key, entry->hent_key, entry->hent_klen);
-	    entry->hent_key = 0;
-	}
+	if (entry)
+	    sv_setsv(key, HeSVKEY_force(entry));
 	else {
-	    xhv->xhv_eiter = entry = new_he();
+	    xhv->xhv_eiter = entry = new_he();   /* only one HE per MAGICAL hash */
 	    Zero(entry, 1, HE);
+	    HeKLEN(entry) = HEf_SVKEY;
 	}
 	magic_nextpack((SV*) hv,mg,key);
         if (SvOK(key)) {
-	    STRLEN len;
-	    entry->hent_key = SvPV_force(key, len);
-	    entry->hent_klen = len;
-	    SvPOK_off(key);
-	    SvPVX(key) = 0;
-	    return entry;
+	    SvREFCNT_dec(HeSVKEY(entry));
+	    HeKEY(entry) = (char*)SvREFCNT_inc(key);
+	    return entry;			/* beware, hent_val is not set */
         }
-	if (entry->hent_val)
-	    SvREFCNT_dec(entry->hent_val);
+	if (HeVAL(entry))
+	    SvREFCNT_dec(HeVAL(entry));
 	del_he(entry);
 	xhv->xhv_eiter = Null(HE*);
 	return Null(HE*);
@@ -543,21 +805,19 @@ HV *hv;
 
     if (!xhv->xhv_array)
 	Newz(506,xhv->xhv_array, sizeof(HE*) * (xhv->xhv_max + 1), char);
-    do {
-	if (entry)
-	    entry = entry->hent_next;
-	if (!entry) {
-	    ++xhv->xhv_riter;
-	    if (xhv->xhv_riter > xhv->xhv_max) {
-		xhv->xhv_riter = -1;
-		break;
-	    }
-	    entry = ((HE**)xhv->xhv_array)[xhv->xhv_riter];
+    if (entry)
+	entry = HeNEXT(entry);
+    while (!entry) {
+	++xhv->xhv_riter;
+	if (xhv->xhv_riter > xhv->xhv_max) {
+	    xhv->xhv_riter = -1;
+	    break;
 	}
-    } while (!entry);
+	entry = ((HE**)xhv->xhv_array)[xhv->xhv_riter];
+    }
 
-    if (oldentry && oldentry->hent_klen < 0)	/* was deleted earlier? */
-	he_free(oldentry);
+    if (oldentry && HeKLEN(oldentry) == HEf_LAZYDEL)	/* was deleted earlier? */
+	he_free(oldentry, HvSHAREKEYS(hv));
 
     xhv->xhv_eiter = entry;
     return entry;
@@ -568,8 +828,25 @@ hv_iterkey(entry,retlen)
 register HE *entry;
 I32 *retlen;
 {
-    *retlen = entry->hent_klen;
-    return entry->hent_key;
+    if (HeKLEN(entry) == HEf_SVKEY) {
+	return SvPV((SV*)HeKEY(entry), *(STRLEN*)retlen);
+    }
+    else {
+	*retlen = HeKLEN(entry);
+	return HeKEY(entry);
+    }
+}
+
+/* unlike hv_iterval(), this always returns a mortal copy of the key */
+SV *
+hv_iterkeysv(entry)
+register HE *entry;
+{
+    if (HeKLEN(entry) == HEf_SVKEY)
+	return sv_mortalcopy((SV*)HeKEY(entry));
+    else
+	return sv_2mortal(newSVpv((HeKLEN(entry) ? HeKEY(entry) : ""),
+				  HeKLEN(entry)));
 }
 
 SV *
@@ -580,11 +857,11 @@ register HE *entry;
     if (SvRMAGICAL(hv)) {
 	if (mg_find((SV*)hv,'P')) {
 	    SV* sv = sv_newmortal();
-	    mg_copy((SV*)hv, sv, entry->hent_key, entry->hent_klen);
+	    mg_copy((SV*)hv, sv, HeKEY(entry), HeKLEN(entry));
 	    return sv;
 	}
     }
-    return entry->hent_val;
+    return HeVAL(entry);
 }
 
 SV *
@@ -608,3 +885,104 @@ int how;
 {
     sv_magic((SV*)hv, (SV*)gv, how, Nullch, 0);
 }
+
+/* get a (constant) string ptr from the global string table
+ * string will get added if it is not already there.
+ * len and hash must both be valid for str.
+ */
+char *
+sharepvn(str, len, hash)
+char *str;
+I32 len;
+register U32 hash;
+{
+    register XPVHV* xhv;
+    register HE *entry;
+    register HE **oentry;
+    register I32 i = 1;
+    I32 found = 0;
+
+    /* what follows is the moral equivalent of:
+       
+    if (!(Svp = hv_fetch(strtab, str, len, FALSE)))
+    	hv_store(strtab, str, len, Nullsv, hash);
+    */
+    xhv = (XPVHV*)SvANY(strtab);
+    /* assert(xhv_array != 0) */
+    oentry = &((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
+    for (entry = *oentry; entry; i=0, entry = HeNEXT(entry)) {
+	if (HeHASH(entry) != hash)		/* strings can't be equal */
+	    continue;
+	if (HeKLEN(entry) != len)
+	    continue;
+	if (bcmp(HeKEY(entry),str,len))		/* is this it? */
+	    continue;
+	found = 1;
+	break;
+    }
+    if (!found) {
+	entry = new_he();
+	HeKLEN(entry) = len;
+	HeKEY(entry) = savepvn(str,len);
+	HeVAL(entry) = Nullsv;
+	HeHASH(entry) = hash;
+	HeNEXT(entry) = *oentry;
+	*oentry = entry;
+	xhv->xhv_keys++;
+	if (i) {				/* initial entry? */
+	    ++xhv->xhv_fill;
+	    if (xhv->xhv_keys > xhv->xhv_max)
+		hsplit(strtab);
+	}
+    }
+
+    ++HeVAL(entry);				/* use value slot as REFCNT */
+    return HeKEY(entry);
+}
+
+/* possibly free a shared string if no one has access to it
+ * len and hash must both be valid for str.
+ */
+void
+unsharepvn(str, len, hash)
+char *str;
+I32 len;
+register U32 hash;
+{
+    register XPVHV* xhv;
+    register HE *entry;
+    register HE **oentry;
+    register I32 i = 1;
+    I32 found = 0;
+    
+    /* what follows is the moral equivalent of:
+    if ((Svp = hv_fetch(strtab, tmpsv, FALSE, hash))) {
+	if (--*Svp == Nullsv)
+	    hv_delete(strtab, str, len, G_DISCARD, hash);
+    } */
+    xhv = (XPVHV*)SvANY(strtab);
+    /* assert(xhv_array != 0) */
+    oentry = &((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
+    for (entry = *oentry; entry; i=0, oentry = &HeNEXT(entry), entry = *oentry) {
+	if (HeHASH(entry) != hash)		/* strings can't be equal */
+	    continue;
+	if (HeKLEN(entry) != len)
+	    continue;
+	if (bcmp(HeKEY(entry),str,len))		/* is this it? */
+	    continue;
+	found = 1;
+	if (--HeVAL(entry) == Nullsv) {
+	    *oentry = HeNEXT(entry);
+	    if (i && !*oentry)
+		xhv->xhv_fill--;
+	    Safefree(HeKEY(entry));
+	    del_he(entry);
+	    --xhv->xhv_keys;
+	}
+	break;
+    }
+    
+    if (!found)
+	warn("Attempt to free non-existent shared string");    
+}
+
