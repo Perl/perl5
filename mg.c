@@ -341,7 +341,7 @@ Perl_magic_regdata_cnt(pTHX_ SV *sv, MAGIC *mg)
 {
     register REGEXP *rx;
 
-    if (PL_curpm && (rx = PL_curpm->op_pmregexp)) {
+    if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
 	if (mg->mg_obj)		/* @+ */
 	    return rx->nparens;
 	else			/* @- */
@@ -360,7 +360,7 @@ Perl_magic_regdatum_get(pTHX_ SV *sv, MAGIC *mg)
     register REGEXP *rx;
     I32 t;
 
-    if (PL_curpm && (rx = PL_curpm->op_pmregexp)) {
+    if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
 	paren = mg->mg_len;
 	if (paren < 0)
 	    return 0;
@@ -404,7 +404,7 @@ Perl_magic_len(pTHX_ SV *sv, MAGIC *mg)
     switch (*mg->mg_ptr) {
     case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9': case '&':
-	if (PL_curpm && (rx = PL_curpm->op_pmregexp)) {
+	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
 
 	    paren = atoi(mg->mg_ptr); /* $& is in [0] */
 	  getparen:
@@ -429,14 +429,14 @@ Perl_magic_len(pTHX_ SV *sv, MAGIC *mg)
 	}
 	return 0;
     case '+':
-	if (PL_curpm && (rx = PL_curpm->op_pmregexp)) {
+	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
 	    paren = rx->lastparen;
 	    if (paren)
 		goto getparen;
 	}
 	return 0;
     case '`':
-	if (PL_curpm && (rx = PL_curpm->op_pmregexp)) {
+	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
 	    if (rx->startp[0] != -1) {
 		i = rx->startp[0];
 		if (i > 0) {
@@ -448,7 +448,7 @@ Perl_magic_len(pTHX_ SV *sv, MAGIC *mg)
 	}
 	return 0;
     case '\'':
-	if (PL_curpm && (rx = PL_curpm->op_pmregexp)) {
+	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
 	    if (rx->endp[0] != -1) {
 		i = rx->sublen - rx->endp[0];
 		if (i > 0) {
@@ -614,7 +614,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	break;
     case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9': case '&':
-	if (PL_curpm && (rx = PL_curpm->op_pmregexp)) {
+	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
 	    I32 s1, t1;
 
 	    /*
@@ -653,7 +653,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	sv_setsv(sv,&PL_sv_undef);
 	break;
     case '+':
-	if (PL_curpm && (rx = PL_curpm->op_pmregexp)) {
+	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
 	    paren = rx->lastparen;
 	    if (paren)
 		goto getparen;
@@ -661,7 +661,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	sv_setsv(sv,&PL_sv_undef);
 	break;
     case '`':
-	if (PL_curpm && (rx = PL_curpm->op_pmregexp)) {
+	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
 	    if ((s = rx->subbeg) && rx->startp[0] != -1) {
 		i = rx->startp[0];
 		goto getrx;
@@ -670,7 +670,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	sv_setsv(sv,&PL_sv_undef);
 	break;
     case '\'':
-	if (PL_curpm && (rx = PL_curpm->op_pmregexp)) {
+	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
 	    if (rx->subbeg && rx->endp[0] != -1) {
 		s = rx->subbeg + rx->endp[0];
 		i = rx->sublen - rx->endp[0];

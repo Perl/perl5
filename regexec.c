@@ -1850,7 +1850,7 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
         }
 	if (!PL_reg_curpm)
 	    Newz(22,PL_reg_curpm, 1, PMOP);
-	PL_reg_curpm->op_pmregexp = prog;
+	PM_SETRE(PL_reg_curpm, prog);
 	PL_reg_oldcurpm = PL_curpm;
 	PL_curpm = PL_reg_curpm;
 	if (RX_MATCH_COPIED(prog)) {

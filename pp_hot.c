@@ -1190,7 +1190,7 @@ PP(pp_qr)
     register PMOP *pm = cPMOP;
     SV *rv = sv_newmortal();
     SV *sv = newSVrv(rv, "Regexp");
-    sv_magic(sv,(SV*)ReREFCNT_inc(pm->op_pmregexp), PERL_MAGIC_qr,0,0);
+    sv_magic(sv,(SV*)ReREFCNT_inc(PM_GETRE(pm)), PERL_MAGIC_qr,0,0);
     RETURNX(PUSHs(rv));
 }
 
@@ -1204,7 +1204,7 @@ PP(pp_match)
     I32 global;
     I32 r_flags = REXEC_CHECKED;
     char *truebase;			/* Start of string  */
-    register REGEXP *rx = pm->op_pmregexp;
+    register REGEXP *rx = PM_GETRE(pm);
     bool rxtainted;
     I32 gimme = GIMME;
     STRLEN len;
@@ -1238,7 +1238,7 @@ PP(pp_match)
 
     if (!rx->prelen && PL_curpm) {
 	pm = PL_curpm;
-	rx = pm->op_pmregexp;
+	rx = PM_GETRE(pm);
     }
     if (rx->minlen > len) goto failure;
 
@@ -1875,7 +1875,7 @@ PP(pp_subst)
     bool rxtainted;
     char *orig;
     I32 r_flags;
-    register REGEXP *rx = pm->op_pmregexp;
+    register REGEXP *rx = PM_GETRE(pm);
     STRLEN len;
     int force_on_match = 0;
     I32 oldsave = PL_savestack_ix;
@@ -1921,7 +1921,7 @@ PP(pp_subst)
 
     if (!rx->prelen && PL_curpm) {
 	pm = PL_curpm;
-	rx = pm->op_pmregexp;
+	rx = PM_GETRE(pm);
     }
     r_flags = (rx->nparens || SvTEMP(TARG) || PL_sawampersand)
 		? REXEC_COPY_STR : 0;
