@@ -2048,7 +2048,6 @@ t/op/loopctl.t			See if next/last/redo work
 t/op/lop.t			See if logical operators work
 t/op/magic.t			See if magic variables work
 t/op/method.t			See if method calls work
-t/op/misc.t			See if miscellaneous bugs have been fixed
 t/op/mkdir.t			See if mkdir works
 t/op/my.t			See if lexical scoping works
 t/op/my_stash.t			See if my Package works
@@ -2139,8 +2138,8 @@ t/pod/testpchk.pl		Module to test Pod::Checker for a given file
 t/pod/testpods/lib/Pod/Stuff.pm			Sample data for find.t
 t/README			Instructions for regression tests
 t/run/exit.t                    Test perl's exit status.
+t/run/kill_perl.t               Tests that kill perl.
 t/run/runenv.t			Test if perl honors its environment variables.
-t/run/segfault.t		Test for old segfaults
 t/TEST				The regression tester
 t/TestInit.pm			Preamble library for core tests
 taint.c				Tainting code

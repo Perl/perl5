@@ -1,66 +1,110 @@
 #!./perl
 
-# NOTE: Please don't add tests to this file unless they *need* to be run in
-# separate executable and can't simply use eval.
+# This is for tests that will normally cause segfaults, and other nasty
+# errors that might kill the interpreter and for some reason you can't
+# use an eval().
+#
+# New tests are added to the bottom.  For example.
+#
+#       ######## perlbug ID 20020831.001
+#       ($a, b) = (1,2)
+#       EXPECT
+#       Can't modify constant item in list assignment - at line 1
+#
+# to test that the code "($a, b) = (1,2)" causes the appropriate syntax
+# error, rather than just segfaulting as reported in perlbug ID
+# 20020831.001
+#
+#
+# NOTE: Please don't add tests to this file unless they *need* to be
+# run in separate executable and can't simply use eval.
 
-chdir 't' if -d 't';
-@INC = '../lib';
-$ENV{PERL5LIB} = "../lib";
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+}
+
+use strict;
 
 $|=1;
 
-undef $/;
-@prgs = split "\n########\n", <DATA>;
+my @prgs = ();
+while(<DATA>) { 
+    if(m/^#{8,}\s*(.*)/) { 
+        push @prgs, ['', $1];
+    }
+    else { 
+        $prgs[-1][0] .= $_;
+    }
+}
 print "1..", scalar @prgs, "\n";
 
-$tmpfile = "misctmp000";
+my $tmpfile = "misctmp000";
 1 while -f ++$tmpfile;
 END { while($tmpfile && unlink $tmpfile){} }
 
-$CAT = (($^O eq 'MSWin32') ? '.\perl -e "print <>"' : (($^O eq 'NetWare') ? 'perl -e "print <>"' : 'cat'));
+my $test = 1;
+foreach my $prog (@prgs) {
+    my($raw_prog, $name) = @$prog;
 
-for (@prgs){
     my $switch;
-    if (s/^\s*(-\w.*)//){
+    if ($raw_prog =~ s/^\s*(-\w.*)//){
 	$switch = $1;
     }
-    my($prog,$expected) = split(/\nEXPECT\n/, $_);
+
+    my($prog,$expected) = split(/\nEXPECT\n/, $raw_prog);
+
     open TEST, ">$tmpfile" or die "Cannot open $tmpfile: $!";
-    $prog =~ s#/dev/null#NL:# if $^O eq 'VMS';     
-    $prog =~ s#if \(-e _ and -f _ and -r _\)#if (-e _ and -f _)# if $^O eq 'VMS';  # VMS file locking 
+
+    # VMS adjustments
+    if( $^O eq 'VMS' ) {
+        $prog =~ s#/dev/null#NL:#;
+
+        # VMS file locking 
+        $prog =~ s{if \(-e _ and -f _ and -r _\)}
+                  {if (-e _ and -f _)}
+    }
 
     print TEST $prog, "\n";
     close TEST or die "Cannot close $tmpfile: $!";
 
+    my $results;
     if ($^O eq 'MSWin32') {
-      $results = `.\\perl -I../lib $switch $tmpfile 2>&1`;
+        $results = `.\\perl -I../lib $switch $tmpfile 2>&1`;
     }
-	elsif ($^O eq 'NetWare') {
-      $results = `perl -I../lib $switch $tmpfile 2>&1`;
+    elsif ($^O eq 'NetWare') {
+        $results = `perl -I../lib $switch $tmpfile 2>&1`;
     }
     else {
-      $results = `./perl $switch $tmpfile 2>&1`;
+      $results = `./perl -I../lib $switch $tmpfile 2>&1`;
     }
-    $status = $?;
+    my $status = $?;
+
+    # Clean up the results into something a bit more predictable.
     $results =~ s/\n+$//;
     $results =~ s/at\s+misctmp\d+\s+line/at - line/g;
     $results =~ s/of\s+misctmp\d+\s+aborted/of - aborted/g;
-# bison says 'parse error' instead of 'syntax error',
-# various yaccs may or may not capitalize 'syntax'.
+
+    # bison says 'parse error' instead of 'syntax error',
+    # various yaccs may or may not capitalize 'syntax'.
     $results =~ s/^(syntax|parse) error/syntax error/mig;
+
     $results =~ s/\n\n/\n/ if $^O eq 'VMS'; # pipes double these sometimes
+
     $expected =~ s/\n+$//;
-    if ( $results ne $expected ) {
-	print STDERR "PROG: $switch\n$prog\n";
-	print STDERR "EXPECTED:\n$expected\n";
-	print STDERR "GOT:\n$results\n";
-	print "not ";
+    my $ok = $results eq $expected;
+
+    unless( $ok ) {
+        print STDERR "# PROG: $switch\n$prog\n";
+        print STDERR "# EXPECTED:\n$expected\n";
+        print STDERR "# GOT:\n$results\n";
     }
-    print "ok ", ++$i, "\n";
+    printf "%sok %d%s\n", ($ok ? '' : "not "), $test, 
+                          length $name ? " - $name" : $name;
+    $test++;
 }
 
 __END__
-()=()
 ########
 $a = ":="; split /($a)/o, "a:=b:=c"; print "@_"
 EXPECT
@@ -739,3 +783,9 @@ EXPECT
 # keep this last - doesn't seem to work otherwise?
 eval "a.b.c.d.e.f;sub"
 EXPECT
+
+######## perlbug ID 20010831.001
+($a, b) = (1, 2);
+EXPECT
+Can't modify constant item in list assignment at - line 1, near ");"
+Execution of - aborted due to compilation errors.
