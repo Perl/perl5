@@ -140,10 +140,6 @@ PERLVAR(Iforkprocess,	int)		/* so do_open |- can return proc# */
 /* subprocess state */
 PERLVAR(Ifdpid,		AV *)		/* keep fd-to-pid mappings for my_popen */
 
-#ifdef USE_THREADS
-PERLVAR(Ifdpid_mutex,	perl_mutex)	/* mutex for fdpid array */
-#endif
-
 /* internal state */
 PERLVAR(Itainting,	bool)		/* doing taint checks */
 PERLVARI(Iop_mask,	char *,	NULL)	/* masked operations for safe evals */
@@ -250,29 +246,17 @@ PERLVAR(Isighandlerp,	Sighandler_t)
 
 PERLVAR(Ixiv_arenaroot,	XPV*)		/* list of allocated xiv areas */
 PERLVAR(Ixiv_root,	IV *)		/* free xiv list */
-PERLVAR(Ixnv_arenaroot,	XPV*)		/* list of allocated xnv areas */
 PERLVAR(Ixnv_root,	NV *)		/* free xnv list */
-PERLVAR(Ixrv_arenaroot,	XPV*)		/* list of allocated xrv areas */
 PERLVAR(Ixrv_root,	XRV *)		/* free xrv list */
-PERLVAR(Ixpv_arenaroot,	XPV*)		/* list of allocated xpv areas */
 PERLVAR(Ixpv_root,	XPV *)		/* free xpv list */
-PERLVAR(Ixpviv_arenaroot,XPVIV*)	/* list of allocated xpviv areas */
 PERLVAR(Ixpviv_root,	XPVIV *)	/* free xpviv list */
-PERLVAR(Ixpvnv_arenaroot,XPVNV*)	/* list of allocated xpvnv areas */
 PERLVAR(Ixpvnv_root,	XPVNV *)	/* free xpvnv list */
-PERLVAR(Ixpvcv_arenaroot,XPVCV*)	/* list of allocated xpvcv areas */
 PERLVAR(Ixpvcv_root,	XPVCV *)	/* free xpvcv list */
-PERLVAR(Ixpvav_arenaroot,XPVAV*)	/* list of allocated xpvav areas */
 PERLVAR(Ixpvav_root,	XPVAV *)	/* free xpvav list */
-PERLVAR(Ixpvhv_arenaroot,XPVHV*)	/* list of allocated xpvhv areas */
 PERLVAR(Ixpvhv_root,	XPVHV *)	/* free xpvhv list */
-PERLVAR(Ixpvmg_arenaroot,XPVMG*)	/* list of allocated xpvmg areas */
 PERLVAR(Ixpvmg_root,	XPVMG *)	/* free xpvmg list */
-PERLVAR(Ixpvlv_arenaroot,XPVLV*)	/* list of allocated xpvlv areas */
 PERLVAR(Ixpvlv_root,	XPVLV *)	/* free xpvlv list */
-PERLVAR(Ixpvbm_arenaroot,XPVBM*)	/* list of allocated xpvbm areas */
 PERLVAR(Ixpvbm_root,	XPVBM *)	/* free xpvbm list */
-PERLVAR(Ihe_arenaroot,	XPV*)		/* list of allocated he areas */
 PERLVAR(Ihe_root,	HE *)		/* free he list */
 PERLVAR(Inice_chunk,	char *)		/* a nice chunk of memory to reuse */
 PERLVAR(Inice_chunk_size,	U32)	/* how nice the chunk of memory is */
@@ -460,8 +444,26 @@ PERLVAR(IProc,		struct IPerlProc*)
 PERLVAR(Iptr_table,	PTR_TBL_t*)
 #endif
 
-#if defined(USE_THREADS)
-PERLVAR(Isv_lock_mutex,	perl_mutex)	/* Mutex for SvLOCK macro */
+#ifdef USE_THREADS
+PERLVAR(Ifdpid_mutex,	perl_mutex)	/* mutex for fdpid array */
+PERLVAR(Isv_lock_mutex,	perl_mutex)	/* mutex for SvLOCK macro */
 #endif
 
 PERLVAR(Inullstash,	HV *)		/* illegal symbols end up here */
+
+PERLVAR(Ixnv_arenaroot,	XPV*)		/* list of allocated xnv areas */
+PERLVAR(Ixrv_arenaroot,	XPV*)		/* list of allocated xrv areas */
+PERLVAR(Ixpv_arenaroot,	XPV*)		/* list of allocated xpv areas */
+PERLVAR(Ixpviv_arenaroot,XPVIV*)	/* list of allocated xpviv areas */
+PERLVAR(Ixpvnv_arenaroot,XPVNV*)	/* list of allocated xpvnv areas */
+PERLVAR(Ixpvcv_arenaroot,XPVCV*)	/* list of allocated xpvcv areas */
+PERLVAR(Ixpvav_arenaroot,XPVAV*)	/* list of allocated xpvav areas */
+PERLVAR(Ixpvhv_arenaroot,XPVHV*)	/* list of allocated xpvhv areas */
+PERLVAR(Ixpvmg_arenaroot,XPVMG*)	/* list of allocated xpvmg areas */
+PERLVAR(Ixpvlv_arenaroot,XPVLV*)	/* list of allocated xpvlv areas */
+PERLVAR(Ixpvbm_arenaroot,XPVBM*)	/* list of allocated xpvbm areas */
+PERLVAR(Ihe_arenaroot,	XPV*)		/* list of allocated he areas */
+
+/* New variables must be added to the very end for binary compatibility.
+ * XSUB.h provides wrapper functions via perlapi.h that make this
+ * irrelevant, but not all code may be expected to #include XSUB.h. */
