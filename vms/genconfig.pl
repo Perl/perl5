@@ -191,12 +191,19 @@ while (<DATA>) {
 print OUT "d_vms_do_sockets=",$dosock ? "'define'\n" : "'undef'\n";
 print OUT "d_has_sockets=",$dosock ? "'define'\n" : "'undef'\n";
 $archlib = &VMS::Filespec::vmspath($privlib);
-$archlib =~ s#\]#.VMS_$archsufx\]#;
 $installarchlib = &VMS::Filespec::vmspath($installprivlib);
-$installarchlib =~ s#\]#.VMS_$archsufx\]#;
+$sitearch = &VMS::Filespec::vmspath($sitelib);
+$archlib =~ s#\]#.VMS_$archsufx\]#;
+print OUT "oldarchlib='$archlib'\n";
+print OUT "oldarchlibexp='$archlib'\n";
+($vers = $]) =~ tr/./_/;
+$archlib =~ s#\]#.$vers\]#;
+$installarchlib =~ s#\]#.VMS_$archsufx.$vers\]#;
 print OUT "archlib='$archlib'\n";
 print OUT "archlibexp='$archlib'\n";
 print OUT "installarchlib='$installarchlib'\n";
+print OUT "sitearch='$sitearch'\n";
+print OUT "sitearchexp='$sitearch'\n";
 
 if (open(OPT,"${outdir}crtl.opt")) {
   while (<OPT>) {
@@ -254,8 +261,9 @@ signal_t=void
 timetype=long
 builddir=perl_root:[000000]
 prefix=perl_root
-installprivlib=perl_root:[lib]
-privlib=perl_root:[lib]
+installprivlib=perl_root:[lib]     # The *lib constants should match the
+privlib=perl_root:[lib]            # equivalent *(?:ARCH)LIB_EXP constants
+sitelib=perl_root:[lib.site_perl]  # in config.h
 installbin=perl_root:[000000]
 installman1dir=perl_root:[man.man1]
 installman3dir=perl_root:[man.man3]

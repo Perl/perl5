@@ -62,9 +62,9 @@
  *	program already searches PRIVLIB_EXP.
  */
 #ifdef __ALPHA
-#define ARCHLIB_EXP "/perl_root/lib/VMS_AXP"  /* config-skip */
+#define ARCHLIB_EXP "/perl_root/lib/VMS_AXP/5_002"  /* config-skip */
 #else
-#define ARCHLIB_EXP "/perl_root/lib/VMS_VAX" /* config-skip */
+#define ARCHLIB_EXP "/perl_root/lib/VMS_VAX/5_002" /* config-skip */
 #endif
 
 /* CPPSTDIN:
@@ -1305,7 +1305,11 @@
  *	used in programs that are not prepared to deal with ~ expansion at 
  *	run-time.
  */
-#define OLDARCHLIB_EXP "/perl_root/lib"		/**/
+#ifdef __ALPHA
+#define OLDARCHLIB_EXP "/perl_root/lib/VMS_AXP"  /* config-skip */
+#else
+#define OLDARCHLIB_EXP "/perl_root/lib/VMS_VAX" /* config-skip */
+#endif
 
 /* PRIVLIB_EXP:
  *	This symbol contains the name of the private library for this package.
@@ -1319,13 +1323,17 @@
  *	This symbol contains the ~name expanded version of SITELIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#undef SITELIB_EXP		/**/
+#define SITELIB_EXP	"/perl_root/lib/site_perl"	/**/
 
 /* SITEARCH_EXP:
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#undef SITEARCH_EXP		/**/
+#ifdef __ALPHA
+#define SITEARCH_EXP "/perl_root/lib/site_perl/VMS_AXP"  /* config-skip */
+#else
+#define SITEARCH_EXP "/perl_root/lib/site_perl/VMS_VAX" /* config-skip */
+#endif
 
 /* SCRIPTDIR:
  *	This symbol holds the name of the directory in which the user wants

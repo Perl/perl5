@@ -68,6 +68,12 @@ ARCHCORE = [.lib.$(ARCH).CORE]
 ARCHAUTO = [.lib.$(ARCH).auto]
 
 
+#: Backwards compatibility
+.ifdef DECC_PIPES_BROKEN
+PIPES_BROKEN = 1
+.endif
+
+
 #: >>>>>Compiler-specific options <<<<<
 .ifdef GNUC
 .first
@@ -99,7 +105,9 @@ XTRACCFLAGS = /Include=[]/Standard=Relaxed_ANSI/Prefix=All/Obj=$(OBJVAL)
 XTRADEF =
 .else # VAXC
 .first
-	@ If F$TrnLnm("Sys").eqs."" Then Define/NoLog SYS Sys$Library
+	@ If F$TrnLnm("Sys").eqs."" .and. F$TrnLnm("VAXC$Include").eqs."" Then Define/NoLog SYS Sys$Library
+	@ If F$TrnLnm("Sys").eqs."" .and. F$TrnLnm("VAXC$Include").nes."" Then Define/NoLog SYS VAXC$Include
+
 XTRACCFLAGS = /Include=[]/Object=$(O)
 XTRADEF =
 LIBS2 = Sys$Share:VAXCRTL/Shareable
@@ -239,7 +247,7 @@ all : base extras archcorefiles preplibrary perlpods
 	@ $(NOOP)
 base : miniperl$(E) perl$(E)
 	@ $(NOOP)
-extras : Safe libmods utils podxform
+extras : FileHandle Safe libmods utils podxform
 	@ $(NOOP)
 libmods : [.lib]Config.pm [.lib.$(ARCH)]Config.pm [.lib]DynaLoader.pm [.lib.VMS]Filespec.pm 
 	@ $(NOOP)
@@ -289,12 +297,12 @@ perlshr$(E) : $(DBG)libperl$(OLB) $(extobj) $(DBG)perlshr_xtras.ts
 # The following files are built in one go by gen_shrfls.pl:
 #  perlshr_attr.opt, $(DBG)perlshr_bld.opt - VAX and AXP
 #  perlshr_gbl*.mar, perlshr_gbl*$(O) - VAX only
-.ifdef DECC_PIPES_BROKEN
+.ifdef PIPES_BROKEN
 # This is a backup target used only with older versions of the DECCRTL which
 # can't deal with pipes properly.  See ReadMe.VMS for details.
 $(DBG)perlshr_xtras.ts : perl.h config.h vmsish.h proto.h [.vms]gen_shrfls.pl $(MINIPERL_EXE) $(MAKEFILE) $(CRTL)
 	$(CC) $(CFLAGS)/NoObject/NoList/PreProcess=perl.i perl.h
-	$(MINIPERL) [.vms]gen_shrfls.pl "~~NOCC~~perl.i" "$(O)" "$(DBG)" "$(OLB)" "$(EXT)" "$(CRTL)"
+	$(MINIPERL) [.vms]gen_shrfls.pl "~~NOCC~~perl.i~~$(CC)$(CFLAGS)" "$(O)" "$(DBG)" "$(OLB)" "$(EXT)" "$(CRTL)"
 	@ Delete/NoLog/NoConfirm perl.i;
 	@ If F$Search("$(DBG)perlshr_xtras.ts").nes."" Then Delete/NoLog/NoConfirm $(DBG)perlshr_xtras.ts;*
 	@ Copy NLA0: $(DBG)perlshr_xtras.ts
@@ -340,6 +348,24 @@ Safe : [.lib]Safe.pm [.lib.auto]Safe$(E)
 # ${@} necessary to distract different versions of MM[SK]/make
 [.ext.Safe]Descrip.MMS : [.ext.Safe]Makefile.PL [.lib.$(ARCH)]Config.pm [.lib.VMS]Filespec.pm [.lib]DynaLoader.pm perlshr$(E)
 	$(MINIPERL) "-I[--.lib]" -e "chdir('[.ext.Safe]') or die $!; do 'Makefile.PL'; print ${@} if ${@};" 2>_nla0:
+
+FileHandle : [.lib]FileHandle.pm [.lib.auto]FileHandle$(E)
+	@ $(NOOP)
+
+[.lib]FileHandle.pm : [.ext.FileHandle]Descrip.MMS
+	@ Set Default [.ext.FileHandle]
+	$(MMS)
+	@ Set Default [--]
+
+[.lib.auto]FileHandle$(E) : [.ext.FileHandle]Descrip.MMS
+	@ Set Default [.ext.FileHandle]
+	$(MMS)
+	@ Set Default [--]
+
+# Add "-I[--.lib]" t $(MINIPERL) so we use this copy of lib after C<chdir>
+# ${@} necessary to distract different versions of MM[SK]/make
+[.ext.FileHandle]Descrip.MMS : [.ext.FileHandle]Makefile.PL [.lib.$(ARCH)]Config.pm [.lib.VMS]Filespec.pm [.lib]DynaLoader.pm perlshr$(E)
+	$(MINIPERL) "-I[--.lib]" -e "chdir('[.ext.FileHandle]') or die $!; do 'Makefile.PL'; print ${@} if ${@};" 2>_nla0:
 
 [.lib.VMS]Filespec.pm : [.vms.ext]Filespec.pm
 	@ If F$Search("[.lib]VMS.Dir").eqs."" Then Create/Directory [.lib.VMS]
@@ -1348,6 +1374,7 @@ tidy : cleanlis
 	- If F$Search("[.Ext.DynaLoader]DL_VMS$(O);-1").nes."" Then Purge/NoConfirm/Log [.Ext.DynaLoader]DL_VMS$(O)
 	- If F$Search("[.Ext.DynaLoader]DL_VMS.C;-1").nes."" Then Purge/NoConfirm/Log [.Ext.DynaLoader]DL_VMS.C
 	- If F$Search("[.Ext.Safe...];-1").nes."" Then Purge/NoConfirm/Log [.Ext.Safe]
+	- If F$Search("[.Ext.FileHandle...];-1").nes."" Then Purge/NoConfirm/Log [.Ext.FileHandle]
 	- If F$Search("[.VMS.Ext...]*.C;-1").nes."" Then Purge/NoConfirm/Log [.VMS.Ext...]*.C
 	- If F$Search("[.VMS.Ext...]*$(O);-1").nes."" Then Purge/NoConfirm/Log [.VMS.Ext...]*$(O)
 	- If F$Search("[.Lib.Auto...]*.al;-1").nes."" Then Purge/NoConfirm/Log [.Lib.Auto...]*.al
@@ -1382,6 +1409,9 @@ clean : tidy
 	- If F$Search("[.Ext.Socket]Socket.C").nes."" Then Delete/NoConfirm/Log [.Ext.Socket]Socket.C;*
 	- If F$Search("[.VMS.Ext...]*.C").nes."" Then Delete/NoConfirm/Log [.VMS.Ext...]*.C;*
 	- If F$Search("[.VMS.Ext...]*$(O)").nes."" Then Delete/NoConfirm/Log [.VMS.Ext...]*$(O);*
+	Set Default [.ext.FileHandle]
+	- $(MMS) clean
+	Set Default [--]
 	Set Default [.ext.Safe]
 	- $(MMS) clean
 	Set Default [--]
@@ -1398,6 +1428,9 @@ realclean : clean
 	- If F$Search("[.lib.pod]*.pod").nes."" Then Delete/NoConfirm/Log [.lib.pod]*.pod;*
 	- If F$Search("[.lib.pod]perldoc.").nes."" Then Delete/NoConfirm/Log [.lib.pod]perldoc.;*
 	- If F$Search("[.lib.pod]pod2*.").nes."" Then Delete/NoConfirm/Log [.lib.pod]pod2*.;*
+	Set Default [.ext.FileHandle]
+	- $(MMS) realclean
+	Set Default [--]
 	Set Default [.ext.Safe]
 	- $(MMS) realclean
 	Set Default [--]

@@ -363,4 +363,6 @@ typedef char __VMS_SEPYTOTORP__;
 #undef HAS_NTOHL
 #endif
 
+#define TMPPATH "sys$scratch:perl-eXXXXXX"
+
 #endif  /* __vmsish_h_included */

@@ -39,9 +39,9 @@
 /* gcc's header files don't #define direct access macros
  * corresponding to VAXC's variant structs */
 #ifdef __GNUC__
-#  define uic$v_format uic$r_uic_form.uiv$v_format
-#  define uic$v_group uic$r_uic_form.uiv$v_group
-#  define uic$v_member uic$r_uic_form.uiv$v_member
+#  define uic$v_format uic$r_uic_form.uic$v_format
+#  define uic$v_group uic$r_uic_form.uic$v_group
+#  define uic$v_member uic$r_uic_form.uic$v_member
 #  define prv$v_bypass  prv$r_prvdef_bits0.prv$v_bypass
 #  define prv$v_grpprv  prv$r_prvdef_bits0.prv$v_grpprv
 #  define prv$v_readall prv$r_prvdef_bits0.prv$v_readall

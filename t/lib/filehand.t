@@ -4,7 +4,8 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require Config; import Config;
-    if ($Config{'extensions'} !~ /\bFileHandle\b/) {
+    if ($Config{'extensions'} !~ /\bFileHandle\b/
+        && $Config{'osname'} ne 'VMS') {
 	print "1..0\n";
 	exit 0;
     }

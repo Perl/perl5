@@ -75,10 +75,10 @@ if ($docc) {
   else { die "$0: Can't find perl.h\n"; }
 }
 else { 
-  ($ccvers,$cpp_file) = ($cc_cmd =~ /^~~(\w+)~~(.*)/);
-  $isgcc = $ccvers =~ /GCC/
+  ($junk,$ccvers,$cpp_file,$cc_cmd) = split(/~~/,$cc_cmd,4);
+  $isgcc = $cc_cmd =~ /case_hack/i
            or 0;  # for nice debug output
-  $isvaxc = (!$isgcc && $ccvers =~ /VAXC/)
+  $isvaxc = (!$isgcc && $cc_cmd !~ /standard=/i)
             or 0;  # again, for nice debug output
   print "\$isgcc: \\$isgcc\\\n" if $debug;
   print "\$isvaxc: \\$isvaxc\\\n" if $debug;
