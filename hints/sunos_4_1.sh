@@ -46,4 +46,12 @@ then # bsd
 else # sys5
       groupstype='gid_t'
 fi
- 
+
+# If you get the message "unresolved symbol '__lib_version' " while
+# linking, your system probably has the optional 'acc' compiler (and
+# libraries) installed, but you are using the bundled 'cc' compiler with
+# the unbundled libraries.  The solution is either to use 'acc' and the
+# unbundled libraries (specifically /lib/libm.a), or 'cc' and the bundled
+# library.
+# 
+# Thanks to William Setzer <William_Setzer@ncsu.edu> for this info.
