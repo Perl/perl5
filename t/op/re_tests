@@ -749,3 +749,4 @@ tt+$	xxxtt	y	-	-
 '(\.c(pp|xx|c)?$)'i	IO.c	y	$1	.c
 ^([a-z]:)	C:/	n	-	-
 '^\S\s+aa$'m	\nx aa	y	-	-
+(^|a)b	ab	y	-	-

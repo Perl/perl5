@@ -545,9 +545,21 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		    }
 		}
 		else if (flags & SCF_DO_STCLASS_AND) {
-		    cl_and(data->start_class, &accum);
-		    if (min1)
+		    if (min1) {
+			cl_and(data->start_class, &accum);
 			flags &= ~SCF_DO_STCLASS;
+		    }
+		    else {
+			/* Switch to OR mode: cache the old value of 
+			 * data->start_class */
+			StructCopy(data->start_class, &and_with,
+				   struct regnode_charclass_class);
+			flags &= ~SCF_DO_STCLASS_AND;
+			StructCopy(&accum, data->start_class,
+				   struct regnode_charclass_class);
+			flags |= SCF_DO_STCLASS_OR;
+			data->start_class->flags |= ANYOF_EOS;
+		    }
 		}
 	    }
 	    else if (code == BRANCHJ)	/* single branch is optimized. */
