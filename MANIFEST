@@ -526,6 +526,7 @@ ext/PerlIO/Scalar/Makefile.PL	PerlIO layer for scalars
 ext/PerlIO/Scalar/Scalar.pm	PerlIO layer for scalars
 ext/PerlIO/Scalar/Scalar.xs	PerlIO layer for scalars
 ext/PerlIO/t/encoding.t		See if PerlIO encoding conversion works
+ext/PerlIO/t/fallback.t		See if PerlIO fallbacks work
 ext/PerlIO/t/scalar.t		See if PerlIO::Scalar works
 ext/PerlIO/t/via.t		See if PerlIO::Via works
 ext/PerlIO/Via/Makefile.PL	PerlIO layer for layers in perl
@@ -1041,7 +1042,7 @@ lib/ExtUtils/t/Command.t	See if ExtUtils::Command works (Win32 only)
 lib/ExtUtils/t/Constant.t	See if ExtUtils::Constant works
 lib/ExtUtils/t/Embed.t		See if ExtUtils::Embed and embedding works
 lib/ExtUtils/t/hints.t          See if hint files are honored.
-lib/ExtUtils/t/INST.t           Check MakeMaker INST_* macros 
+lib/ExtUtils/t/INST.t           Check MakeMaker INST_* macros
 lib/ExtUtils/t/Installed.t	See if ExtUtils::Installed works
 lib/ExtUtils/t/INST_PREFIX.t    See if MakeMaker can apply PREFIXs
 lib/ExtUtils/t/Manifest.t	See if ExtUtils::Manifest works

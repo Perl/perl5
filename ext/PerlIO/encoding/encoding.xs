@@ -49,7 +49,7 @@ typedef struct {
 } PerlIOEncode;
 
 #define NEEDS_LINES	1
-#define OUR_DEFAULT_FB	"Encode::FB_QUIET"
+#define OUR_DEFAULT_FB	"Encode::PERLQQ"
 
 SV *
 PerlIOEncode_getarg(pTHX_ PerlIO * f, CLONE_PARAMS * param, int flags)
@@ -145,7 +145,7 @@ PerlIOEncode_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg)
 	PerlIOBase(f)->flags |= PERLIO_F_UTF8;
     }
 
-    e->chk = newSVsv(get_sv("PerlIO::encoding::check", 0));
+    e->chk = newSVsv(get_sv("PerlIO::encoding::fallback", 0));
 
     FREETMPS;
     LEAVE;
@@ -607,7 +607,7 @@ PROTOTYPES: ENABLE
 
 BOOT:
 {
-    SV *chk = get_sv("PerlIO::encoding::check", GV_ADD|GV_ADDMULTI);
+    SV *chk = get_sv("PerlIO::encoding::fallback", GV_ADD|GV_ADDMULTI);
     /*
      * we now "use Encode ()" here instead of
      * PerlIO/encoding.pm.  This avoids SEGV when ":encoding()"
