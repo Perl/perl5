@@ -365,6 +365,18 @@ EOM
 esac
 EOCBU
 
+case "$uselargefiles-$ccisgcc" in
+"$define-$define"|'-define') 
+    cat <<EOM >&4
+
+*** I'm ignoring large files for this build because
+*** I don't know how to do use large files in HP-UX using gcc.
+
+EOM
+    uselargefiles="$undef"
+    ;;
+esac
+
 cat > UU/uselfs.cbu <<'EOCBU'
 # This script UU/uselfs.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use large files.
@@ -376,16 +388,12 @@ case "$uselargefiles" in
 
         # The strict ANSI mode (-Aa) doesn't like large files.
 	case "$ccflags" in
-	*-Aa*)
+	-Aa*)
 	    echo "(Changing from strict ANSI compilation to extended because of large files)"
 	    ccflags=`echo $ccflags|sed 's@ -Aa @ -Ae @'`
 	    ;;
-	*)  case "$ccisgcc" in
-	    "ccisgcc") ;;
-	    *) ccflags="$ccflags -Ae" ;;
-	    esac
-	    ;; 
-	esac    
+	*)  ccflags="$ccflags -Ae" ;;
+	esac
 	;;
 esac
 EOCBU
