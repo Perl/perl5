@@ -333,7 +333,13 @@ Encode_Define(pTHX_ encode_t *enc)
  HV *hash  = get_hv("Encode::encoding",GV_ADD|GV_ADDMULTI);
  HV *stash = gv_stashpv("Encode::XS", TRUE);
  SV *sv    = sv_bless(newRV_noinc(newSViv(PTR2IV(enc))),stash);
- hv_store(hash,enc->name,strlen(enc->name),sv,0);
+ int i = 0;
+ while (enc->name[i])
+  {
+   const char *name = enc->name[i++];
+   hv_store(hash,name,strlen(name),SvREFCNT_inc(sv),0);
+  }
+ SvREFCNT_dec(sv);
 }
 
 void call_failure (SV *routine, U8* done, U8* dest, U8* orig) {}
@@ -377,7 +383,7 @@ encode_method(pTHX_ encode_t *enc, encpage_t *dir, SV *src, int check)
            {
             STRLEN clen;
             UV ch = utf8_to_uv(s+slen,(SvCUR(src)-slen),&clen,0);
-            Perl_warner(aTHX_ WARN_UTF8, "\"\\x{%"UVxf"}\" does not map to %s", ch, enc->name);
+            Perl_warner(aTHX_ WARN_UTF8, "\"\\x{%"UVxf"}\" does not map to %s", ch, enc->name[0]);
             /* FIXME: Skip over the character, copy in replacement and continue
              * but that is messy so for now just fail.
              */
@@ -392,7 +398,7 @@ encode_method(pTHX_ encode_t *enc, encpage_t *dir, SV *src, int check)
          {
           /* UTF-8 is supposed to be "Universal" so should not happen */
           Perl_croak(aTHX_ "%s '%.*s' does not map to UTF-8",
-                 enc->name, (int)(SvCUR(src)-slen),s+slen);
+                 enc->name[0], (int)(SvCUR(src)-slen),s+slen);
          }
         break;
 
@@ -400,13 +406,13 @@ encode_method(pTHX_ encode_t *enc, encpage_t *dir, SV *src, int check)
          if (!check && ckWARN_d(WARN_UTF8))
           {
            Perl_warner(aTHX_ WARN_UTF8, "Partial %s character",
-                       (dir == enc->f_utf8) ? "UTF-8" : enc->name);
+                       (dir == enc->f_utf8) ? "UTF-8" : enc->name[0]);
           }
          return &PL_sv_undef;
 
        default:
         Perl_croak(aTHX_ "Unexpected code %d converting %s %s",
-                 code, (dir == enc->f_utf8) ? "to" : "from",enc->name);
+                 code, (dir == enc->f_utf8) ? "to" : "from",enc->name[0]);
         return &PL_sv_undef;
       }
     }
