@@ -259,6 +259,7 @@ for my $oflag (qw/ TEMPORARY /) {
 # Optionally a reference to a scalar can be passed into the function
 # On error this will be used to store the reason for the error
 #   "ErrStr"  => \$errstr
+
 # "open" and "mkdir" can not both be true
 # "unlink_on_close" is not used when "mkdir" is true.
 
@@ -283,6 +284,7 @@ sub _gettemp {
   # Need this in case the caller decides not to supply us a value
   # need an anonymous scalar
   my $tempErrStr;
+
   # Default options
   my %options = (
 		 "open" => 0,
@@ -312,6 +314,7 @@ sub _gettemp {
 
   # Make sure the error string is set to undef
   ${$options{ErrStr}} = undef;
+
   # Can not open the file and make a directory in a single call
   if ($options{"open"} && $options{"mkdir"}) {
     ${$options{ErrStr}} = "doopen and domkdir can not both be true\n";
@@ -405,6 +408,7 @@ sub _gettemp {
     ${$options{ErrStr}} = "Parent directory ($parent) is not writable\n";
       return ();
   }
+
 
   # Check the stickiness of the directory and chown giveaway if required
   # If the directory is world writable the sticky bit
@@ -688,6 +692,7 @@ sub _is_safe {
 # directory anyway.
 
 # Takes optional second arg as scalar ref to error reason
+
 sub _is_verysafe {
 
   # Need POSIX - but only want to bother if really necessary due to overhead
@@ -698,6 +703,7 @@ sub _is_verysafe {
   return 1 if $^O eq 'VMS';  # owner delete control at file level
 
   my $err_ref = shift;
+
   # Should Get the value of _PC_CHOWN_RESTRICTED if it is defined
   # and If it is not there do the extensive test
   my $chown_restricted;
@@ -1207,6 +1213,7 @@ sub tempdir  {
     $template =~ m/([\.\]:>]+)$/;
     $suffixlen = length($1);
   }
+
   my $errstr;
   croak "Error in tempdir() using $template: $errstr"
     unless ((undef, $tempdir) = _gettemp($template,
@@ -1458,6 +1465,10 @@ In scalar context, returns the filehandle of a temporary file.
 The file is removed when the filehandle is closed or when the program
 exits. No access to the filename is provided.
 
+If the temporary file can not be created undef is returned.
+Currently this command will probably not work when the temporary
+directory is on an NFS file system.
+
 =cut
 
 sub tmpfile {
@@ -1466,7 +1477,9 @@ sub tmpfile {
   my ($fh, $file) = tmpnam();
 
   # Make sure file is removed when filehandle is closed
-  unlink0($fh, $file) or croak "Unable to unlink temporary file: $!";
+  # This will fail on NFS
+  unlink0($fh, $file)
+    or return undef;
 
   return $fh;
 
@@ -1637,6 +1650,8 @@ sub unlink0 {
     # Make sure that the link count is zero
     # - Cygwin provides deferred unlinking, however,
     #   on Win9x the link count remains 1
+    # On NFS the link count may still be 1 but we cant know that
+    # we are on NFS
     return ( $fh[3] == 0 or $^O eq 'cygwin' ? 1 : 0);
 
   } else {
@@ -1832,7 +1847,7 @@ temporary file handling.
 
 Tim Jenness E<lt>t.jenness@jach.hawaii.eduE<gt>
 
-Copyright (C) 1999, 2000 Tim Jenness and the UK Particle Physics and
+Copyright (C) 1999-2001 Tim Jenness and the UK Particle Physics and
 Astronomy Research Council. All Rights Reserved.  This program is free
 software; you can redistribute it and/or modify it under the same
 terms as Perl itself.
