@@ -788,7 +788,8 @@ perl_destruct(pTHXx)
 	    MAGIC* moremagic;
 	    for (mg = SvMAGIC(PL_mess_sv); mg; mg = moremagic) {
 		moremagic = mg->mg_moremagic;
-		if (mg->mg_ptr && mg->mg_type != 'g' && mg->mg_len >= 0)
+		if (mg->mg_ptr && mg->mg_type != PERL_MAGIC_regex_global
+						&& mg->mg_len >= 0)
 		    Safefree(mg->mg_ptr);
 		Safefree(mg);
 	    }
@@ -2013,7 +2014,7 @@ Perl_magicname(pTHX_ char *sym, char *name, I32 namlen)
     register GV *gv;
 
     if ((gv = gv_fetchpv(sym,TRUE, SVt_PV)))
-	sv_magic(GvSV(gv), (SV*)gv, 0, name, namlen);
+	sv_magic(GvSV(gv), (SV*)gv, PERL_MAGIC_sv, name, namlen);
 }
 
 STATIC void
@@ -3377,7 +3378,7 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	HV *hv;
 	GvMULTI_on(PL_envgv);
 	hv = GvHVn(PL_envgv);
-	hv_magic(hv, Nullgv, 'E');
+	hv_magic(hv, Nullgv, PERL_MAGIC_env);
 #ifdef USE_ENVIRON_ARRAY
 	/* Note that if the supplied env parameter is actually a copy
 	   of the global environ then it may now point to free'd memory

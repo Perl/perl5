@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..37\n";
+print "1..41\n";
 
 # optimized
 
@@ -116,3 +116,13 @@ print chop(@stuff[0, 2]) eq 'f' ? "ok 36\n" : "not ok 36\n";
 
 my %stuff = (1..4);
 print chop(@stuff{1, 3}) eq '4' ? "ok 37\n" : "not ok 37\n";
+
+# chomp should not stringify references unless it decides to modify them
+$_ = [];
+$/ = "\n";
+print chomp() == 0 ? "ok 38\n" : "not ok 38\n";
+print ref($_) eq "ARRAY" ? "ok 39\n" : "not ok 39\n";
+
+$/ = ")";  # the last char of something like "ARRAY(0x80ff6e4)"
+print chomp() == 1 ? "ok 40\n" : "not ok 40\n";
+print !ref($_) ? "ok 41\n" : "not ok 41\n";

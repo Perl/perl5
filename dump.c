@@ -706,6 +706,49 @@ Perl_gv_dump(pTHX_ GV *gv)
     Perl_dump_indent(aTHX_ 0, Perl_debug_log, "}\n");
 }
 
+
+/* map magic types to the symbolic name
+ * (with the PERL_MAGIC_ prefixed stripped)
+ */
+
+static struct { char type; char *name; } magic_names[] = {
+	PERL_MAGIC_sv,             "sv(\\0)",
+	PERL_MAGIC_arylen,         "arylen(#)",
+	PERL_MAGIC_glob,           "glob(*)",
+	PERL_MAGIC_pos,            "pos(.)",
+	PERL_MAGIC_backref,        "backref(<)",
+	PERL_MAGIC_overload,       "overload(A)",
+	PERL_MAGIC_bm,             "bm(B)",
+	PERL_MAGIC_regdata,        "regdata(D)",
+	PERL_MAGIC_env,            "env(E)",
+	PERL_MAGIC_isa,            "isa(I)",
+	PERL_MAGIC_dbfile,         "dbfile(L)",
+	PERL_MAGIC_tied,           "tied(P)",
+	PERL_MAGIC_sig,            "sig(S)",
+	PERL_MAGIC_uvar,           "uvar(U)",
+	PERL_MAGIC_overload_elem,  "overload_elem(a)",
+	PERL_MAGIC_overload_table, "overload_table(c)",
+	PERL_MAGIC_regdatum,       "regdatum(d)",
+	PERL_MAGIC_envelem,        "envelem(e)",
+	PERL_MAGIC_fm,             "fm(f)",
+	PERL_MAGIC_regex_global,   "regex_global(g)",
+	PERL_MAGIC_isaelem,        "isaelem(i)",
+	PERL_MAGIC_nkeys,          "nkeys(k)",
+	PERL_MAGIC_dbline,         "dbline(l)",
+	PERL_MAGIC_mutex,          "mutex(m)",
+	PERL_MAGIC_collxfrm,       "collxfrm(o)",
+	PERL_MAGIC_tiedelem,       "tiedelem(p)",
+	PERL_MAGIC_tiedscalar,     "tiedscalar(q)",
+	PERL_MAGIC_qr,             "qr(r)",
+	PERL_MAGIC_sigelem,        "sigelem(s)",
+	PERL_MAGIC_taint,          "taint(t)",
+	PERL_MAGIC_vec,            "vec(v)",
+	PERL_MAGIC_substr,         "substr(x)",
+	PERL_MAGIC_defelem,        "defelem(y)",
+	PERL_MAGIC_ext,            "ext(~)",
+	0,			   0 /* this null string terminates the list */
+};
+
 void
 Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, MAGIC *mg, I32 nest, I32 maxnest, bool dumpops, STRLEN pvlim)
 {
@@ -753,10 +796,22 @@ Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, MAGIC *mg, I32 nest, I32 maxne
 	if (mg->mg_private)
 	    Perl_dump_indent(aTHX_ level, file, "    MG_PRIVATE = %d\n", mg->mg_private);
 
-	if (isPRINT(mg->mg_type))
-	    Perl_dump_indent(aTHX_ level, file, "    MG_TYPE = '%c'\n", mg->mg_type);
-	else
-	    Perl_dump_indent(aTHX_ level, file, "    MG_TYPE = '\\%o'\n", mg->mg_type);
+	{
+	    int n;
+	    char *name = 0;
+	    for (n=0; magic_names[n].name; n++) {
+		if (mg->mg_type == magic_names[n].type) {
+		    name = magic_names[n].name;
+		    break;
+		}
+	    }
+	    if (name)
+		Perl_dump_indent(aTHX_ level, file,
+				"    MG_TYPE = PERL_MAGIC_%s\n", name);
+	    else
+		Perl_dump_indent(aTHX_ level, file,
+				"    MG_TYPE = UNKNOWN(\\%o)\n", mg->mg_type);
+	}
 
         if (mg->mg_flags) {
             Perl_dump_indent(aTHX_ level, file, "    MG_FLAGS = 0x%02X\n", mg->mg_flags);

@@ -989,6 +989,7 @@ Perl_do_chomp(pTHX_ register SV *sv)
 {
     register I32 count;
     STRLEN len;
+    STRLEN n_a;
     char *s;
 
     if (RsSNARF(PL_rs))
@@ -1020,8 +1021,6 @@ Perl_do_chomp(pTHX_ register SV *sv)
     else if (SvREADONLY(sv))
 	Perl_croak(aTHX_ PL_no_modify);
     s = SvPV(sv, len);
-    if (len && !SvPOKp(sv))
-	s = SvPV_force(sv, len);
     if (s && len) {
 	s += --len;
 	if (RsPARA(PL_rs)) {
@@ -1052,12 +1051,13 @@ Perl_do_chomp(pTHX_ register SV *sv)
 		count += rslen;
 	    }
 	}
-	*s = '\0';
+	s = SvPV_force(sv, n_a);
 	SvCUR_set(sv, len);
+	*SvEND(sv) = '\0';
 	SvNIOK_off(sv);
+	SvSETMAGIC(sv);
     }
   nope:
-    SvSETMAGIC(sv);
     return count;
 }
 
@@ -1291,7 +1291,7 @@ Perl_do_kv(pTHX)
 	if (PL_op->op_flags & OPf_MOD || LVRET) {	/* lvalue */
 	    if (SvTYPE(TARG) < SVt_PVLV) {
 		sv_upgrade(TARG, SVt_PVLV);
-		sv_magic(TARG, Nullsv, 'k', Nullch, 0);
+		sv_magic(TARG, Nullsv, PERL_MAGIC_nkeys, Nullch, 0);
 	    }
 	    LvTYPE(TARG) = 'k';
 	    if (LvTARG(TARG) != (SV*)keys) {
@@ -1303,7 +1303,7 @@ Perl_do_kv(pTHX)
 	    RETURN;
 	}
 
-	if (! SvTIED_mg((SV*)keys, 'P'))
+	if (! SvTIED_mg((SV*)keys, PERL_MAGIC_tied))
 	    i = HvKEYS(keys);
 	else {
 	    i = 0;

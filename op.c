@@ -643,7 +643,7 @@ Perl_find_threadsv(pTHX_ const char *name)
 	    break;
 	case ';':
 	    sv_setpv(sv, "\034");
-	    sv_magic(sv, 0, 0, name, 1);
+	    sv_magic(sv, 0, PERL_MAGIC_sv, name, 1);
 	    break;
 	case '&':
 	case '`':
@@ -667,7 +667,7 @@ Perl_find_threadsv(pTHX_ const char *name)
 	/* case '!': */
 
 	default:
-	    sv_magic(sv, 0, 0, name, 1);
+	    sv_magic(sv, 0, PERL_MAGIC_sv, name, 1);
 	}
 	DEBUG_S(PerlIO_printf(Perl_error_log,
 			      "find_threadsv: new SV %p for $%s%c\n",

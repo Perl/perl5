@@ -39,8 +39,10 @@ if ($Is_VMS) {
     $a =~ s/-uVMS,-uVMS::Filespec,//;
     $a =~ s/-uSocket,//; # Socket is optional/compiler version dependent
 }
-if ($Config{static_ext} eq ' ' ||
-    ($Config{static_ext} eq 'Socket' && $Is_VMS)) {
+if (($Config{static_ext} eq ' ' ||
+     ($Config{static_ext} eq 'Socket' && $Is_VMS))
+    && !($^O eq 'os2' and $OS2::is_aout)
+    ) {
   if (ord('A') == 193) { # EBCDIC sort order is qw(a A) not qw(A a)
       $b = join ',', sort split /,/, $b;
   }

@@ -163,14 +163,14 @@ Perl_hv_fetch(pTHX_ HV *hv, const char *key, I32 klen, I32 lval)
     }
 
     if (SvRMAGICAL(hv)) {
-	if (mg_find((SV*)hv,'P') || SvGMAGICAL((SV*)hv)) {
+	if (mg_find((SV*)hv, PERL_MAGIC_tied) || SvGMAGICAL((SV*)hv)) {
 	    sv = sv_newmortal();
 	    mg_copy((SV*)hv, sv, key, klen);
 	    PL_hv_fetch_sv = sv;
 	    return &PL_hv_fetch_sv;
 	}
 #ifdef ENV_IS_CASELESS
-	else if (mg_find((SV*)hv,'E')) {
+	else if (mg_find((SV*)hv, PERL_MAGIC_env)) {
 	    U32 i;
 	    for (i = 0; i < klen; ++i)
 		if (isLOWER(key[i])) {
@@ -283,7 +283,7 @@ Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
 	return 0;
 
     if (SvRMAGICAL(hv)) {
-	if (mg_find((SV*)hv,'P') || SvGMAGICAL((SV*)hv)) {
+	if (mg_find((SV*)hv, PERL_MAGIC_tied) || SvGMAGICAL((SV*)hv)) {
 	    sv = sv_newmortal();
 	    keysv = sv_2mortal(newSVsv(keysv));
 	    mg_copy((SV*)hv, sv, (char*)keysv, HEf_SVKEY);
@@ -297,7 +297,7 @@ Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
 	    return &PL_hv_fetch_ent_mh;
 	}
 #ifdef ENV_IS_CASELESS
-	else if (mg_find((SV*)hv,'E')) {
+	else if (mg_find((SV*)hv, PERL_MAGIC_env)) {
 	    U32 i;
 	    key = SvPV(keysv, klen);
 	    for (i = 0; i < klen; ++i)
@@ -379,8 +379,8 @@ S_hv_magic_check(pTHX_ HV *hv, bool *needs_copy, bool *needs_store)
 	if (isUPPER(mg->mg_type)) {
 	    *needs_copy = TRUE;
 	    switch (mg->mg_type) {
-	    case 'P':
-	    case 'S':
+	    case PERL_MAGIC_tied:
+	    case PERL_MAGIC_sig:
 		*needs_store = FALSE;
 	    }
 	}
@@ -434,7 +434,7 @@ Perl_hv_store(pTHX_ HV *hv, const char *key, I32 klen, SV *val, register U32 has
 	    if (!xhv->xhv_array && !needs_store)
 		return 0;
 #ifdef ENV_IS_CASELESS
-	    else if (mg_find((SV*)hv,'E')) {
+	    else if (mg_find((SV*)hv, PERL_MAGIC_env)) {
                 key = savepvn(key,klen);
 		key = strupr(key);
 		hash = 0;
@@ -545,7 +545,7 @@ Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, register U32 hash)
  	    if (!xhv->xhv_array && !needs_store)
  		return Nullhe;
 #ifdef ENV_IS_CASELESS
-	    else if (mg_find((SV*)hv,'E')) {
+	    else if (mg_find((SV*)hv, PERL_MAGIC_env)) {
 		key = SvPV(keysv, klen);
 		keysv = sv_2mortal(newSVpvn(key,klen));
 		(void)strupr(SvPVX(keysv));
@@ -647,14 +647,15 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen, I32 flags)
 	    sv = *svp;
 	    mg_clear(sv);
 	    if (!needs_store) {
-		if (mg_find(sv, 'p')) {
-		    sv_unmagic(sv, 'p');        /* No longer an element */
+		if (mg_find(sv, PERL_MAGIC_tiedelem)) {
+		    /* No longer an element */
+		    sv_unmagic(sv, PERL_MAGIC_tiedelem);
 		    return sv;
 		}
 		return Nullsv;          /* element cannot be deleted */
 	    }
 #ifdef ENV_IS_CASELESS
-	    else if (mg_find((SV*)hv,'E')) {
+	    else if (mg_find((SV*)hv, PERL_MAGIC_env)) {
 		sv = sv_2mortal(newSVpvn(key,klen));
 		key = strupr(SvPVX(sv));
 	    }
@@ -744,14 +745,15 @@ Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
 	    sv = HeVAL(entry);
 	    mg_clear(sv);
 	    if (!needs_store) {
-		if (mg_find(sv, 'p')) {
-		    sv_unmagic(sv, 'p');	/* No longer an element */
+		if (mg_find(sv, PERL_MAGIC_tiedelem)) {
+		    /* No longer an element */
+		    sv_unmagic(sv, PERL_MAGIC_tiedelem);
 		    return sv;
 		}		
 		return Nullsv;		/* element cannot be deleted */
 	    }
 #ifdef ENV_IS_CASELESS
-	    else if (mg_find((SV*)hv,'E')) {
+	    else if (mg_find((SV*)hv, PERL_MAGIC_env)) {
 		key = SvPV(keysv, klen);
 		keysv = sv_2mortal(newSVpvn(key,klen));
 		(void)strupr(SvPVX(keysv));
@@ -836,14 +838,14 @@ Perl_hv_exists(pTHX_ HV *hv, const char *key, I32 klen)
     }
 
     if (SvRMAGICAL(hv)) {
-	if (mg_find((SV*)hv,'P') || SvGMAGICAL((SV*)hv)) {
+	if (mg_find((SV*)hv, PERL_MAGIC_tied) || SvGMAGICAL((SV*)hv)) {
 	    sv = sv_newmortal();
 	    mg_copy((SV*)hv, sv, key, klen);
-	    magic_existspack(sv, mg_find(sv, 'p'));
+	    magic_existspack(sv, mg_find(sv, PERL_MAGIC_tiedelem));
 	    return SvTRUE(sv);
 	}
 #ifdef ENV_IS_CASELESS
-	else if (mg_find((SV*)hv,'E')) {
+	else if (mg_find((SV*)hv, PERL_MAGIC_env)) {
 	    sv = sv_2mortal(newSVpvn(key,klen));
 	    key = strupr(SvPVX(sv));
 	}
@@ -926,16 +928,16 @@ Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
 	return 0;
 
     if (SvRMAGICAL(hv)) {
-	if (mg_find((SV*)hv,'P') || SvGMAGICAL((SV*)hv)) {
+	if (mg_find((SV*)hv, PERL_MAGIC_tied) || SvGMAGICAL((SV*)hv)) {
            SV* svret = sv_newmortal();
 	    sv = sv_newmortal();
 	    keysv = sv_2mortal(newSVsv(keysv));
 	    mg_copy((SV*)hv, sv, (char*)keysv, HEf_SVKEY);
-           magic_existspack(svret, mg_find(sv, 'p'));
+           magic_existspack(svret, mg_find(sv, PERL_MAGIC_tiedelem));
            return SvTRUE(svret);
 	}
 #ifdef ENV_IS_CASELESS
-	else if (mg_find((SV*)hv,'E')) {
+	else if (mg_find((SV*)hv, PERL_MAGIC_env)) {
 	    key = SvPV(keysv, klen);
 	    keysv = sv_2mortal(newSVpvn(key,klen));
 	    (void)strupr(SvPVX(keysv));
@@ -1175,7 +1177,7 @@ Perl_newHVhv(pTHX_ HV *ohv)
 	return hv;
 
 #if 0
-    if (! SvTIED_mg((SV*)ohv, 'P')) {
+    if (! SvTIED_mg((SV*)ohv, PERL_MAGIC_tied)) {
 	/* Quick way ???*/
     }
     else
@@ -1381,7 +1383,7 @@ Perl_hv_iternext(pTHX_ HV *hv)
     xhv = (XPVHV*)SvANY(hv);
     oldentry = entry = xhv->xhv_eiter;
 
-    if ((mg = SvTIED_mg((SV*)hv, 'P'))) {
+    if ((mg = SvTIED_mg((SV*)hv, PERL_MAGIC_tied))) {
 	SV *key = sv_newmortal();
 	if (entry) {
 	    sv_setsv(key, HeSVKEY_force(entry));
@@ -1497,7 +1499,7 @@ SV *
 Perl_hv_iterval(pTHX_ HV *hv, register HE *entry)
 {
     if (SvRMAGICAL(hv)) {
-	if (mg_find((SV*)hv,'P')) {
+	if (mg_find((SV*)hv, PERL_MAGIC_tied)) {
 	    SV* sv = sv_newmortal();
 	    if (HeKLEN(entry) == HEf_SVKEY)
 		mg_copy((SV*)hv, sv, (char*)HeKEY_sv(entry), HEf_SVKEY);

@@ -224,7 +224,7 @@ $inhibit_exit = $option{PrintRet} = 1;
 		  TTY noTTY ReadLine NonStop LineInfo maxTraceLen
 		  recallCommand ShellBang pager tkRunning ornaments
 		  signalLevel warnLevel dieLevel inhibit_exit
-		  ImmediateStop bareStringify
+		  ImmediateStop bareStringify CreateTTY
 		  RemotePort);
 
 %optionVars    = (
@@ -236,7 +236,8 @@ $inhibit_exit = $option{PrintRet} = 1;
 		 HighBit	=> \$dumpvar::quoteHighBit,
 		 undefPrint	=> \$dumpvar::printUndef,
 		 globPrint	=> \$dumpvar::globPrint,
-		 UsageOnly	=> \$dumpvar::usageOnly,     
+		 UsageOnly	=> \$dumpvar::usageOnly,
+		 CreateTTY	=> \$CreateTTY,
 		 bareStringify	=> \$dumpvar::bareStringify,
 		 frame          => \$frame,
 		 AutoTrace      => \$trace,
@@ -280,6 +281,7 @@ $signalLevel	= 1	unless defined $signalLevel;
 $pre		= []	unless defined $pre;
 $post		= []	unless defined $post;
 $pretype	= []	unless defined $pretype;
+$CreateTTY	= 3	unless defined $CreateTTY;
 
 warnLevel($warnLevel);
 dieLevel($dieLevel);
@@ -295,6 +297,18 @@ setman();
 &recallCommand("!") unless defined $prc;
 &shellBang("!") unless defined $psh;
 $maxtrace = 400 unless defined $maxtrace;
+$ini_pids = $ENV{PERLDB_PIDS};
+if (defined $ENV{PERLDB_PIDS}) {
+  $pids = "[$ENV{PERLDB_PIDS}]";
+  $ENV{PERLDB_PIDS} .= "->$$";
+  $term_pid = -1;
+} else {
+  $ENV{PERLDB_PIDS} = "$$";
+  $pids = '';
+  $term_pid = $$;
+}
+$pidprompt = '';
+*emacs = $slave_editor;		# May be used in afterinit()...
 
 if (-e "/dev/tty") {  # this is the wrong metric!
   $rcfile=".perldb";
@@ -356,6 +370,13 @@ elsif (defined $ENV{LOGDIR} && -f "$ENV{LOGDIR}/$rcfile") {
 
 if (defined $ENV{PERLDB_OPTS}) {
   parse_options($ENV{PERLDB_OPTS});
+}
+
+if ( not defined &get_fork_TTY and defined $ENV{TERM} and $ENV{TERM} eq 'xterm'
+     and defined $ENV{WINDOWID} and defined $ENV{DISPLAY} ) { # _inside_ XTERM?
+    *get_fork_TTY = \&xterm_get_fork_TTY;
+} elsif ($^O eq 'os2') {
+    *get_fork_TTY = \&os2_get_fork_TTY;
 }
 
 # Here begin the unreadable code.  It needs fixing.
@@ -434,11 +455,14 @@ if ($notty) {
                                );
     if (!$OUT) { die "Unable to connect to remote host: $remoteport\n"; }
     $IN = $OUT;
-  }
-  else {
+  } elsif ($CreateTTY & 4) {
+    create_IN_OUT(4);
+  } else {
     if (defined $console) {
-      open(IN,"+<$console") || open(IN,"<$console") || open(IN,"<&STDIN");
-      open(OUT,"+>$console") || open(OUT,">$console") || open(OUT,">&STDERR")
+      my ($i, $o) = split $console, /,/;
+      $o = $i unless defined $o;
+      open(IN,"+<$i") || open(IN,"<$i") || open(IN,"<&STDIN");
+      open(OUT,"+>$o") || open(OUT,">$o") || open(OUT,">&STDERR")
         || open(OUT,">&STDOUT");	# so we don't dongle stdout
     } else {
       open(IN,"<&STDIN");
@@ -461,11 +485,15 @@ if ($notty) {
 
   $header =~ s/.Header: ([^,]+),v(\s+\S+\s+\S+).*$/$1$2/;
   unless ($runnonstop) {
-    print $OUT "\nLoading DB routines from $header\n";
-    print $OUT ("Editor support ",
-		$slave_editor ? "enabled" : "available",
-		".\n");
-    print $OUT "\nEnter h or `h h' for help, or `$doccmd perldebug' for more help.\n\n";
+    if ($term_pid eq '-1') {
+      print $OUT "\nDaughter DB session started...\n";
+    } else {
+      print $OUT "\nLoading DB routines from $header\n";
+      print $OUT ("Editor support ",
+		  $slave_editor ? "enabled" : "available",
+		  ".\n");
+      print $OUT "\nEnter h or `h h' for help, or `$doccmd perldebug' for more help.\n\n";
+    }
   }
 }
 
@@ -540,7 +568,7 @@ EOP
     if ($single || ($trace & 1) || $was_signal) {
 	if ($slave_editor) {
 	    $position = "\032\032$filename:$line:0\n";
-	    print $LINEINFO $position;
+	    print_lineinfo($position);
 	} elsif ($package eq 'DB::fake') {
 	  $term || &setterm;
 	  print_help(<<EOP);
@@ -565,9 +593,9 @@ EOP
 		$position = "$prefix$line$infix$dbline[$line]$after";
 	    }
 	    if ($frame) {
-		print $LINEINFO ' ' x $stack_depth, "$line:\t$dbline[$line]$after";
+		print_lineinfo(' ' x $stack_depth, "$line:\t$dbline[$line]$after");
 	    } else {
-		print $LINEINFO $position;
+		print_lineinfo($position);
 	    }
 	    for ($i = $line + 1; $i <= $max && $dbline[$i] == 0; ++$i) { #{ vi
 		last if $dbline[$i] =~ /^\s*[\;\}\#\n]/;
@@ -576,9 +604,9 @@ EOP
 		$incr_pos = "$prefix$i$infix$dbline[$i]$after";
 		$position .= $incr_pos;
 		if ($frame) {
-		    print $LINEINFO ' ' x $stack_depth, "$i:\t$dbline[$i]$after";
+		    print_lineinfo(' ' x $stack_depth, "$i:\t$dbline[$i]$after");
 		} else {
-		    print $LINEINFO $incr_pos;
+		    print_lineinfo($incr_pos);
 		}
 	    }
 	}
@@ -596,8 +624,8 @@ EOP
 	@typeahead = (@$pretype, @typeahead);
       CMD:
 	while (($term || &setterm),
-	       ($term_pid == $$ or &resetterm),
-	       defined ($cmd=&readline("  DB" . ('<' x $level) .
+	       ($term_pid == $$ or resetterm(1)),
+	       defined ($cmd=&readline("$pidprompt  DB" . ('<' x $level) .
 				       ($#hist+1) . ('>' x $level) .
 				       " "))) 
         {
@@ -725,10 +753,13 @@ EOP
 			$cmd = "$1 $s";
 		    };
 		    $cmd =~ /^l\b\s*([\':A-Za-z_][\':\w]*(\[.*\])?)/s && do {
-			$subname = $1;
+			my $s = $subname = $1;
 			$subname =~ s/\'/::/;
 			$subname = $package."::".$subname 
 			  unless $subname =~ /::/;
+			$subname = "CORE::GLOBAL::$s"
+			  if not defined &$subname and $s !~ /::/
+			     and defined &{"CORE::GLOBAL::$s"};
 			$subname = "main".$subname if substr($subname,0,2) eq "::";
 			@pieces = split(/:/,find_sub($subname) || $sub{$subname});
 			$subrange = pop @pieces;
@@ -755,7 +786,7 @@ EOP
 			$filename = $filename_ini;
 			*dbline = $main::{'_<' . $filename};
 			$max = $#dbline;
-			print $LINEINFO $position;
+			print_lineinfo($position);
 			next CMD };
 		    $cmd =~ /^w\b\s*(\d*)$/ && do {
 			$incr = $window - 1;
@@ -896,13 +927,7 @@ EOP
 		      next CMD; };
 		    $cmd =~ /^b\b\s*load\b\s*(.*)/ && do {
 			my $file = $1; $file =~ s/\s+$//;
-			{
-			  $break_on_load{$file} = 1;
-			  $break_on_load{$::INC{$file}} = 1 if $::INC{$file};
-			  $file .= '.pm', redo unless $file =~ /\./;
-			}
-			$had_breakpoints{$file} |= 1;
-			print $OUT "Will stop on load of `@{[join '\', `', sort keys %break_on_load]}'.\n";
+			cmd_b_load($file);
 			next CMD; };
 		    $cmd =~ /^b\b\s*(postpone|compile)\b\s*([':A-Za-z_][':\w]*)\s*(.*)/ && do {
 			my $cond = length $3 ? $3 : '1';
@@ -917,42 +942,15 @@ EOP
 		    $cmd =~ /^b\b\s*([':A-Za-z_][':\w]*(?:\[.*\])?)\s*(.*)/ && do {
 			$subname = $1;
 			$cond = length $2 ? $2 : '1';
-			$subname =~ s/\'/::/g;
-			$subname = "${'package'}::" . $subname
-			  unless $subname =~ /::/;
-			$subname = "main".$subname if substr($subname,0,2) eq "::";
-			# Filename below can contain ':'
-			($file,$i) = (find_sub($subname) =~ /^(.*):(.*)$/);
-			$i += 0;
-			if ($i) {
-			    local $filename = $file;
-			    local *dbline = $main::{'_<' . $filename};
-			    $had_breakpoints{$filename} |= 1;
-			    $max = $#dbline;
-			    ++$i while $dbline[$i] == 0 && $i < $max;
-			    $dbline{$i} =~ s/^[^\0]*/$cond/;
-			} else {
-			    print $OUT "Subroutine $subname not found.\n";
-			}
+			cmd_b_sub($subname, $cond);
 			next CMD; };
 		    $cmd =~ /^b\b\s*(\d*)\s*(.*)/ && do {
 			$i = $1 || $line;
 			$cond = length $2 ? $2 : '1';
-			if ($dbline[$i] == 0) {
-			    print $OUT "Line $i not breakable.\n";
-			} else {
-			    $had_breakpoints{$filename} |= 1;
-			    $dbline{$i} =~ s/^[^\0]*/$cond/;
-			}
+			cmd_b_line($i, $cond);
 			next CMD; };
 		    $cmd =~ /^d\b\s*(\d*)/ && do {
-			$i = $1 || $line;
-                        if ($dbline[$i] == 0) {
-                            print $OUT "Line $i not breakable.\n";
-                        } else {
-			    $dbline{$i} =~ s/^[^\0]*//;
-			    delete $dbline{$i} if $dbline{$i} eq '';
-                        }
+			cmd_d($1 || $line);
 			next CMD; };
 		    $cmd =~ /^A$/ && do {
 		      print $OUT "Deleting all actions...\n";
@@ -1201,6 +1199,8 @@ EOP
 			set_list("PERLDB_POST", @$post);
 			set_list("PERLDB_TYPEAHEAD", @typeahead);
 			$ENV{PERLDB_RESTART} = 1;
+			delete $ENV{PERLDB_PIDS}; # Restore ini state
+			$ENV{PERLDB_PIDS} = $ini_pids if defined $ini_pids;
 			#print "$^X, '-d', @flags, @script, ($slave_editor ? '-emacs' : ()), @ARGS";
 			exec $^X, '-d', @flags, @script, ($slave_editor ? '-emacs' : ()), @ARGS;
 			print $OUT "exec failed: $!\n";
@@ -1459,17 +1459,17 @@ sub sub {
     $single &= 1;
     $single |= 4 if $stack_depth == $deep;
     ($frame & 4 
-     ? ( (print $LINEINFO ' ' x ($stack_depth - 1), "in  "), 
+     ? ( print_lineinfo(' ' x ($stack_depth - 1), "in  "),
 	 # Why -1? But it works! :-(
 	 print_trace($LINEINFO, -1, 1, 1, "$sub$al") )
-     : print $LINEINFO ' ' x ($stack_depth - 1), "entering $sub$al\n") if $frame;
+     : print_lineinfo(' ' x ($stack_depth - 1), "entering $sub$al\n")) if $frame;
     if (wantarray) {
 	@ret = &$sub;
 	$single |= $stack[$stack_depth--];
 	($frame & 4 
-	 ? ( (print $LINEINFO ' ' x $stack_depth, "out "), 
+	 ? ( print_lineinfo(' ' x $stack_depth, "out "), 
 	     print_trace($LINEINFO, -1, 1, 1, "$sub$al") )
-	 : print $LINEINFO ' ' x $stack_depth, "exited $sub$al\n") if $frame & 2;
+	 : print_lineinfo(' ' x $stack_depth, "exited $sub$al\n")) if $frame & 2;
 	if ($doret eq $stack_depth or $frame & 16) {
             my $fh = ($doret eq $stack_depth ? $OUT : $LINEINFO);
 	    print $fh ' ' x $stack_depth if $frame & 16;
@@ -1486,9 +1486,9 @@ sub sub {
         };
 	$single |= $stack[$stack_depth--];
 	($frame & 4 
-	 ? ( (print $LINEINFO ' ' x $stack_depth, "out "), 
+	 ? (  print_lineinfo(' ' x $stack_depth, "out "),
 	      print_trace($LINEINFO, -1, 1, 1, "$sub$al") )
-	 : print $LINEINFO ' ' x $stack_depth, "exited $sub$al\n") if $frame & 2;
+	 : print_lineinfo(' ' x $stack_depth, "exited $sub$al\n")) if $frame & 2;
 	if ($doret eq $stack_depth or $frame & 16 and defined wantarray) {
             my $fh = ($doret eq $stack_depth ? $OUT : $LINEINFO);
 	    print $fh (' ' x $stack_depth) if $frame & 16;
@@ -1502,17 +1502,153 @@ sub sub {
     }
 }
 
+### The API section
+
+### Functions with multiple modes of failure die on error, the rest
+### returns FALSE on error.
+### User-interface functions cmd_* output error message.
+
+sub break_on_load {
+  my $file = shift;
+  $break_on_load{$file} = 1;
+  $had_breakpoints{$file} |= 1;
+}
+
+sub report_break_on_load {
+  sort keys %break_on_load;
+}
+
+sub cmd_b_load {
+  my $file = shift;
+  my @files;
+  {
+    push @files, $file;
+    push @files, $::INC{$file} if $::INC{$file};
+    $file .= '.pm', redo unless $file =~ /\./;
+  }
+  break_on_load($_) for @files;
+  my @files = report_break_on_load;
+  print $OUT "Will stop on load of `@files'.\n";
+}
+
+$filename_error = '';
+
+sub breakable_line {
+  my ($from, $to) = @_;
+  my $i = $from;
+  if (@_ >= 2) {
+    my $delta = $from < $to ? +1 : -1;
+    my $limit = $delta > 0 ? $#dbline : 1;
+    $limit = $to if ($limit - $to) * $delta > 0;
+    $i += $delta while $dbline[$i] == 0 and ($limit - $i) * $delta > 0;
+  }
+  return $i unless $dbline[$i] == 0;
+  my ($pl, $upto) = ('', '');
+  ($pl, $upto) = ('s', "..$to") if @_ >=2 and $from != $to;
+  die "Line$pl $from$upto$filename_error not breakable\n";
+}
+
+sub breakable_line_in_filename {
+  my ($f) = shift;
+  local *dbline = $main::{'_<' . $f};
+  local $filename_error = " of `$f'";
+  breakable_line(@_);
+}
+
+sub break_on_line {
+  my ($i, $cond) = @_;
+  $cond = 1 unless @_ >= 2;
+  my $inii = $i;
+  my $after = '';
+  my $pl = '';
+  die "Line $i$filename_error not breakable.\n" if $dbline[$i] == 0;
+  $had_breakpoints{$filename} |= 1;
+  $dbline{$i} =~ s/^[^\0]*/$cond/;
+}
+
+sub cmd_b_line {
+  eval { break_on_line(@_); 1 } or print $OUT $@ and return;
+}
+
+sub break_on_filename_line {
+  my ($f, $i, $cond) = @_;
+  $cond = 1 unless @_ >= 3;
+  local *dbline = $main::{'_<' . $f};
+  local $filename_error = " of `$f'";
+  local $filename = $f;
+  break_on_line($i, $cond);
+}
+
+sub break_on_filename_line_range {
+  my ($f, $from, $to, $cond) = @_;
+  my $i = breakable_line_in_filename($f, $from, $to);
+  $cond = 1 unless @_ >= 3;
+  break_on_filename_line($f,$i,$cond);
+}
+
+sub subroutine_filename_lines {
+  my ($subname,$cond) = @_;
+  # Filename below can contain ':'
+  find_sub($subname) =~ /^(.*):(\d+)-(\d+)$/;
+}
+
+sub break_subroutine {
+  my $subname = shift;
+  my ($file,$s,$e) = subroutine_filename_lines($subname) or
+    die "Subroutine $subname not found.\n";
+  $cond = 1 unless @_ >= 2;
+  break_on_filename_line_range($file,$s,$e,@_);
+}
+
+sub cmd_b_sub {
+  my ($subname,$cond) = @_;
+  $cond = 1 unless @_ >= 2;
+  unless (ref $subname eq 'CODE') {
+    $subname =~ s/\'/::/g;
+    my $s = $subname;
+    $subname = "${'package'}::" . $subname
+      unless $subname =~ /::/;
+    $subname = "CORE::GLOBAL::$s"
+      if not defined &$subname and $s !~ /::/ and defined &{"CORE::GLOBAL::$s"};
+    $subname = "main".$subname if substr($subname,0,2) eq "::";
+  }
+  eval { break_subroutine($subname,$cond); 1 } or print $OUT $@ and return;
+}
+
+sub cmd_stop {			# As on ^C, but not signal-safy.
+  $signal = 1;
+}
+
+sub delete_breakpoint {
+  my $i = shift;
+  die "Line $i not breakable.\n" if $dbline[$i] == 0;
+  $dbline{$i} =~ s/^[^\0]*//;
+  delete $dbline{$i} if $dbline{$i} eq '';
+}
+
+sub cmd_d {
+  my $i = shift;
+  eval { delete_breakpoint $i; 1 } or print $OUT $@ and return;
+}
+
+### END of the API section
+
 sub save {
     @saved = ($@, $!, $^E, $,, $/, $\, $^W);
     $, = ""; $/ = "\n"; $\ = ""; $^W = 0;
+}
+
+sub print_lineinfo {
+  resetterm(1) if $LINEINFO eq $OUT and $term_pid != $$;
+  print $LINEINFO @_;
 }
 
 # The following takes its argument via $evalarg to preserve current @_
 
 sub eval {
     # 'my' would make it visible from user code
-    #    but so does local! --tchrist  
-    local @res;			
+    #    but so does local! --tchrist  [... into @DB::res, not @res. IZ]
+    local @res;
     {
 	local $otrace = $trace;
 	local $osingle = $single;
@@ -1572,7 +1708,7 @@ sub postponed {
   $filename =~ s/^_<//;
   $signal = 1, print $OUT "'$filename' loaded...\n"
     if $break_on_load{$filename};
-  print $LINEINFO ' ' x $stack_depth, "Package $filename.\n" if $frame;
+  print_lineinfo(' ' x $stack_depth, "Package $filename.\n") if $frame;
   return unless $postponed_file{$filename};
   $had_breakpoints{$filename} |= 1;
   #%dbline = %{$postponed_file{$filename}}; # Cannot be done: unsufficient magic
@@ -1607,6 +1743,7 @@ sub dumpit {
 
 sub print_trace {
   my $fh = shift;
+  resetterm(1) if $fh eq $LINEINFO and $LINEINFO eq $OUT and $term_pid != $$;
   my @sub = dump_trace($_[0] + 1, $_[1]);
   my $short = $_[2];		# Print short report, next one for sub name
   my $s;
@@ -1746,8 +1883,10 @@ sub setterm {
     eval { require Term::ReadLine } or die $@;
     if ($notty) {
 	if ($tty) {
-	    open(IN,"<$tty") or die "Cannot open TTY `$TTY' for read: $!";
-	    open(OUT,">$tty") or die "Cannot open TTY `$TTY' for write: $!";
+	    my ($i, $o) = split $tty, /,/;
+	    $o = $i unless defined $o;
+	    open(IN,"<$i") or die "Cannot open TTY `$i' for read: $!";
+	    open(OUT,">$o") or die "Cannot open TTY `$o' for write: $!";
 	    $IN = \*IN;
 	    $OUT = \*OUT;
 	    my $sel = select($OUT);
@@ -1760,6 +1899,9 @@ sub setterm {
 	    $IN = $term_rv->IN;
 	    $OUT = $term_rv->OUT;
 	}
+    }
+    if ($term_pid eq '-1') {		# In a TTY with another debugger
+	resetterm(2);
     }
     if (!$rl) {
 	$term = new Term::ReadLine::Stub 'perldb', $IN, $OUT;
@@ -1784,32 +1926,99 @@ sub setterm {
     $term_pid = $$;
 }
 
-sub resetterm {			# We forked, so we need a different TTY
-    $term_pid = $$;
-    if (defined &get_fork_TTY) {
-      &get_fork_TTY;
-    } elsif (not defined $fork_TTY 
-	     and defined $ENV{TERM} and $ENV{TERM} eq 'xterm' 
-	     and defined $ENV{WINDOWID} and defined $ENV{DISPLAY}) { 
-        # Possibly _inside_ XTERM
-        open XT, q[3>&1 xterm -title 'Forked Perl debugger' -e sh -c 'tty 1>&3;\
+# Example get_fork_TTY functions
+sub xterm_get_fork_TTY {
+  (my $name = $0) =~ s,^.*[/\\],,s;
+  open XT, qq[3>&1 xterm -title "Daughter Perl debugger $pids $name" -e sh -c 'tty 1>&3;\
  sleep 10000000' |];
-        $fork_TTY = <XT>;
-        chomp $fork_TTY;
-    }
-    if (defined $fork_TTY) {
-      TTY($fork_TTY);
-      undef $fork_TTY;
-    } else {
+  my $tty = <XT>;
+  chomp $tty;
+  $pidprompt = '';		# Shown anyway in titlebar
+  return $tty;
+}
+
+# This one resets $IN, $OUT itself
+sub os2_get_fork_TTY {
+  $^F = 40;		# XXXX Fixme!
+  my ($in1, $out1, $in2, $out2);
+  # Having -d in PERL5OPT would lead to a disaster...
+  local $ENV{PERL5OPT} = $ENV{PERL5OPT}    if $ENV{PERL5OPT};
+  $ENV{PERL5OPT} =~ s/(?:^|(?<=\s))-d\b//  if $ENV{PERL5OPT};
+  $ENV{PERL5OPT} =~ s/(?:^|(?<=\s))-d\B/-/ if $ENV{PERL5OPT};
+  print $OUT "Making PERL5OPT->`$ENV{PERL5OPT}'.\n" if $ENV{PERL5OPT};
+  (my $name = $0) =~ s,^.*[/\\],,s;
+  if ( pipe $in1, $out1 and pipe $in2, $out2 and
+       # system P_SESSION will fail if there is another process
+       # in the same session with a "dependent" asyncroneous child session.
+       (($kpid = system 4, $^X, '-we', <<'ES', fileno $in1, fileno $out2, "Daughter Perl debugger $pids $name") >= 0 or warn "system P_SESSION: $!, $^E" and 0) # P_SESSION
+use Term::ReadKey;
+use OS2::Process;
+
+my $in = shift;		# Read from here and pass through
+set_title pop;
+system P_NOWAIT, $^X, '-we', <<EOS or die "Cannot start a grandkid";
+  open IN, '<&=$in' or die "open <&=$in: \$!";
+  \$| = 1; print while sysread IN, \$_, 1<<16;
+EOS
+
+my $out = shift;
+open OUT, ">&=$out" or die "Cannot open &=$out for writing: $!";
+select OUT;    $| = 1;
+ReadMode 4;		# Nodelay on kbd.  Pipe is automatically nodelay...
+print while sysread STDIN, $_, 1<<16;
+ES
+	and close $in1 and close $out2 ) {
+      $pidprompt = '';		# Shown anyway in titlebar
+      reset_IN_OUT($in2, $out1);
+      $tty = '*reset*';
+      return '';			# Indicate that reset_IN_OUT is called
+   }
+   return;
+}
+
+sub create_IN_OUT {	# Create a window with IN/OUT handles redirected there
+    my $in = &get_fork_TTY if defined &get_fork_TTY;
+    $in = $fork_TTY if defined $fork_TTY; # Backward compatibility
+    if (not defined $in) {
+      my $why = shift;
+      print_help(<<EOP) if $why == 1;
+I<#########> Forked, but do not know how to create a new B<TTY>. I<#########>
+EOP
+      print_help(<<EOP) if $why == 2;
+I<#########> Daughter session, do not know how to change a B<TTY>. I<#########>
+  This may be an asyncroneous session, so the parent debugger may be active.
+EOP
+      print_help(<<EOP) if $why != 4;
+  Since two debuggers fight for the same TTY, input is severely entangled.
+
+EOP
       print_help(<<EOP);
-I<#########> Forked, but do not know how to change a B<TTY>. I<#########>
-  Define B<\$DB::fork_TTY> 
-       - or a function B<DB::get_fork_TTY()> which will set B<\$DB::fork_TTY>.
-  The value of B<\$DB::fork_TTY> should be the name of I<TTY> to use.
+  I know how to switch the output to a different window in xterms
+  and OS/2 consoles only.  For a manual switch, put the name of the created I<TTY>
+  in B<\$DB::fork_TTY>, or define a function B<DB::get_fork_TTY()> returning this.
+
   On I<UNIX>-like systems one can get the name of a I<TTY> for the given window
   by typing B<tty>, and disconnect the I<shell> from I<TTY> by B<sleep 1000000>.
+
 EOP
+    } elsif ($in ne '') {
+      TTY($in);
     }
+    undef $fork_TTY;
+}
+
+sub resetterm {			# We forked, so we need a different TTY
+    my $in = shift;
+    my $systemed = $in > 1 ? '-' : '';
+    if ($pids) {
+      $pids =~ s/\]/$systemed->$$]/;
+    } else {
+      $pids = "[$term_pid->$$]";
+    }
+    $pidprompt = $pids;
+    $term_pid = $$;
+    return unless $CreateTTY & $in;
+    create_IN_OUT($in);
 }
 
 sub readline {
@@ -1975,6 +2184,22 @@ sub warn {
     print $OUT $msg;
 }
 
+sub reset_IN_OUT {
+    my $switch_li = $LINEINFO eq $OUT;
+    if ($term and $term->Features->{newTTY}) {
+      ($IN, $OUT) = (shift, shift);
+      $term->newTTY($IN, $OUT);
+    } elsif ($term) {
+	&warn("Too late to set IN/OUT filehandles, enabled on next `R'!\n");
+    } else {
+      ($IN, $OUT) = (shift, shift);
+    }
+    my $o = select $OUT;
+    $| = 1;
+    select $o;
+    $LINEINFO = $OUT if $switch_li;
+}
+
 sub TTY {
     if (@_ and $term and $term->Features->{newTTY}) {
       my ($in, $out) = shift;
@@ -1985,13 +2210,11 @@ sub TTY {
       }
       open IN, $in or die "cannot open `$in' for read: $!";
       open OUT, ">$out" or die "cannot open `$out' for write: $!";
-      $term->newTTY(\*IN, \*OUT);
-      $IN	= \*IN;
-      $OUT	= \*OUT;
+      reset_IN_OUT(\*IN,\*OUT);
       return $tty = $in;
-    } elsif ($term and @_) {
-	&warn("Too late to set TTY, enabled on next `R'!\n");
-    } 
+    }
+    &warn("Too late to set TTY, enabled on next `R'!\n") if $term and @_;
+    # Useful if done through PERLDB_OPTS:
     $tty = shift if @_;
     $tty or $console;
 }
@@ -2233,6 +2456,9 @@ B<O> [I<opt>B<=>I<val>] [I<opt>=B<\">I<val>B<\">] ...
     I<AutoTrace>	affects printing messages on every possible breaking point.
     I<maxTraceLen>	gives maximal length of evals/args listed in stack trace.
     I<ornaments> 	affects screen appearance of the command line.
+    I<CreateTTY> 	bits control attempts to create a new TTY on events:
+			1: on fork()	2: debugger is started inside debugger
+			4: on startup
 	During startup options are initialized from \$ENV{PERLDB_OPTS}.
 	You can put additional initialization options I<TTY>, I<noTTY>,
 	I<ReadLine>, I<NonStop>, and I<RemotePort> there (or use

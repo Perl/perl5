@@ -151,9 +151,11 @@ elsif ($PLATFORM eq 'os2') {
     ($v = $]) =~ s/(\d\.\d\d\d)(\d\d)$/$1_$2/;
     $v .= '-thread' if $ARCHNAME =~ /-thread/;
     ($dll = $define{PERL_DLL}) =~ s/\.dll$//i;
+    $d = "DESCRIPTION '\@#perl5-porters\@perl.org:$v#\@ Perl interpreter, configured as $CONFIG_ARGS'";
+    $d = substr($d, 0, 249) . "...'" if length $d > 253;
     print <<"---EOP---";
 LIBRARY '$dll' INITINSTANCE TERMINSTANCE
-DESCRIPTION '\@#perl5-porters\@perl.org:$v#\@ Perl interpreter'
+$d
 STACKSIZE 32768
 CODE LOADONCALL
 DATA LOADONCALL NONSHARED MULTIPLE

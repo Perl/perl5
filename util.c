@@ -1033,7 +1033,7 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
 	    s--, i++;
 	}
     }
-    sv_magic(sv, Nullsv, 'B', Nullch, 0);	/* deep magic */
+    sv_magic(sv, Nullsv, PERL_MAGIC_bm, Nullch, 0);	/* deep magic */
     SvVALID_on(sv);
 
     s = (unsigned char*)(SvPVX(sv));		/* deeper magic */
@@ -3597,7 +3597,7 @@ Perl_condpair_magic(pTHX_ SV *sv)
     MAGIC *mg;
 
     SvUPGRADE(sv, SVt_PVMG);
-    mg = mg_find(sv, 'm');
+    mg = mg_find(sv, PERL_MAGIC_mutex);
     if (!mg) {
 	condpair_t *cp;
 
@@ -3607,7 +3607,7 @@ Perl_condpair_magic(pTHX_ SV *sv)
 	COND_INIT(&cp->cond);
 	cp->owner = 0;
 	LOCK_CRED_MUTEX;		/* XXX need separate mutex? */
-	mg = mg_find(sv, 'm');
+	mg = mg_find(sv, PERL_MAGIC_mutex);
 	if (mg) {
 	    /* someone else beat us to initialising it */
 	    UNLOCK_CRED_MUTEX;		/* XXX need separate mutex? */
@@ -3617,7 +3617,7 @@ Perl_condpair_magic(pTHX_ SV *sv)
 	    Safefree(cp);
 	}
 	else {
-	    sv_magic(sv, Nullsv, 'm', 0, 0);
+	    sv_magic(sv, Nullsv, PERL_MAGIC_mutex, 0, 0);
 	    mg = SvMAGIC(sv);
 	    mg->mg_ptr = (char *)cp;
 	    mg->mg_len = sizeof(cp);
@@ -3761,7 +3761,7 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
 	if (*svp && *svp != &PL_sv_undef) {
 	    SV *sv = newSVsv(*svp);
 	    av_store(thr->threadsv, i, sv);
-	    sv_magic(sv, 0, 0, &PL_threadsv_names[i], 1);
+	    sv_magic(sv, 0, PERL_MAGIC_sv, &PL_threadsv_names[i], 1);
 	    DEBUG_S(PerlIO_printf(Perl_debug_log,
 		"new_struct_thread: copied threadsv %"IVdf" %p->%p\n",
 				  (IV)i, t, thr));

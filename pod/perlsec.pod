@@ -95,12 +95,17 @@ For example:
     unlink $data, $arg;		# Insecure
     umask $arg;			# Insecure
 
-    exec "echo $arg";		# Insecure
+    exec "echo $arg";		# Insecure (uses the shell)
     exec "echo", $arg;		# Secure (doesn't use the shell)
     exec "sh", '-c', $arg;	# Considered secure, alas!
 
     @files = <*.c>;		# insecure (uses readdir() or similar)
     @files = glob('*.c');	# insecure (uses readdir() or similar)
+
+    # In Perl releases older than 5.6.0 the <*.c> and glob('*.c') would
+    # have used an external program to do the filename expansion; but in
+    # either case the result is tainted since the list of filenames comes
+    # from outside of the program.
 
 If you try to do something insecure, you will get a fatal error saying
 something like "Insecure dependency" or "Insecure $ENV{PATH}".  Note that you
@@ -109,10 +114,11 @@ doing something like the "considered secure" example above.
 
 =head2 Laundering and Detecting Tainted Data
 
-To test whether a variable contains tainted data, and whose use would thus
-trigger an "Insecure dependency" message, check your nearby CPAN mirror
-for the F<Taint.pm> module, which should become available around November
-1997.  Or you may be able to use the following I<is_tainted()> function.
+To test whether a variable contains tainted data, and whose use would
+thus trigger an "Insecure dependency" message, you can use the
+tainted() function of the Scalar::Util module, available in your
+nearby CPAN mirror, and included in Perl starting from the release 5.8.0.
+Or you may be able to use the following I<is_tainted()> function.
 
     sub is_tainted {
 	return ! eval {

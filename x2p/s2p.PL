@@ -29,8 +29,8 @@ print OUT <<"!GROK!THIS!";
 $Config{startperl}
     eval 'exec $Config{perlpath} -S \$0 \${1+"\$@"}'
 	if \$running_under_some_shell;
-my $startperl;
-my $perlpath;
+my \$startperl;
+my \$perlpath;
 (\$startperl = <<'/../') =~ s/\\s*\\z//;
 $Config{startperl}
 /../
