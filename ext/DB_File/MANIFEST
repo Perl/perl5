@@ -23,9 +23,6 @@ patches/5.005_02
 patches/5.005_03
 patches/5.6.0
 ppport.h
-t/db-btree.t
-t/db-hash.t
-t/db-recno.t
 typemap
 version.c
 META.yml                                 Module meta-data (added by MakeMaker)
