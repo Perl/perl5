@@ -1139,7 +1139,7 @@ test ($@ =~ /zap/);
 
 {
     package perl31793;
-    use overload cmp => sub { 0 };
+    use overload cmp => sub { 0 }, fallback => 1;
     package main;
     my $o  = bless [], 'perl31793';
     my $no = bless [], 'no_overload';
