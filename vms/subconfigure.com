@@ -62,6 +62,14 @@ $ myname = myhostname
 $ if "''myname'" .eqs. "" THEN myname = f$trnlnm("SYS$NODE")
 $!
 $! ##ADD NEW CONSTANTS HERE##
+$ perl_i_sysmount="undef"
+$ perl_d_fstatfs="undef"
+$ perl_d_statfsflags="undef"
+$ perl_i_sysstatvfs="undef"
+$ perl_d_fstatfs="undef"
+$ perl_i_mntent="undef"
+$ perl_d_getmntent="undef"
+$ perl_d_hasmntopt="undef"
 $ perl_package="''package'"
 $ perl_baserev = "''baserev'"
 $ cc_defines=""
@@ -3048,6 +3056,14 @@ $ WC "drand01='" + perl_drand01 + "'"
 $ WC "randseedtype='" + perl_randseedtype + "'"
 $ WC "seedfunc='" + perl_seedfunc + "'"
 $ WC "sig_num_init='" + perl_sig_num_with_commas + "'"
+$ WC "i_sysmount='" + perl_i_sysmount + "'"
+$ WC "d_fstatfs='" + perl_d_fstatfs + "'"
+$ WC "d_statfsflags='" + perl_d_statfsflags + "'"
+$ WC "i_sysstatvfs='" + perl_i_sysstatvfs + "'"
+$ WC "d_fstatfs='" + perl_d_fstatfs + "'"
+$ WC "i_mntent='" + perl_i_mntent + "'"
+$ WC "d_getmntent='" + perl_d_getmntent + "'"
+$ WC "d_hasmntopt='" + perl_d_hasmntopt + "'"
 $!
 $! ##WRITE NEW CONSTANTS HERE##
 $!
