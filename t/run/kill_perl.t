@@ -79,7 +79,7 @@ foreach my $prog (@prgs) {
 	$results = `$^X -I::lib -MMac::err=unix $switch $tmpfile`;
     }
     else {
-      $results = `./perl -I../lib $switch $tmpfile 2>&1`;
+      $results = `./perl "-I../lib" $switch $tmpfile 2>&1`;
     }
     my $status = $?;
 
