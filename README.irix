@@ -26,9 +26,30 @@ or later compilers (use cc -version to check).
 
 Use
 	
-	sh Configure -Dcc='cc -64'
+	sh Configure -Dcc='cc -64' -Duse64bitint
 
-to compiler Perl 64-bit.
+This requires require a 64-bit MIPS CPU (R8000, R10000, ...)
+
+You can also use
+
+	sh Configure -Dcc='cc -64' -Duse64bitall
+
+but that makes no difference compared with the -Duse64bitint because
+of the C<cc -64>.
+
+You can also do
+
+	sh Configure -Dcc='cc -n32' -Duse64bitint
+
+to use long longs for the 64-bit integer type, in case you don't
+have a 64-bit CPU.
+
+If you are using gcc, just
+
+	sh Configure -Dcc=gcc -Duse64bitint
+
+should be enough, the Configure should automatically probe for the
+correct 64-bit settings.
 
 =head2 About Compiler Versions of Irix
 
@@ -50,7 +71,7 @@ hints/irix_6.sh for "lddflags" and do the suggested adjustments.
 Do not try to use Perl's malloc, this will lead into very mysterious
 errors (especially with -Duse64bitall).
 
-=head2 Building with threads
+=head2 Building with threads in Irix
 
 Run Configure with -Duseithreads which will configure Perl with
 the new Perl 5.8.0 "interpreter threads", see L<threads>.
@@ -68,7 +89,7 @@ following patches installed:
         2254 Pthread library fixes
         2401 6.2 all platform kernel rollup
 
-IMPORTANT: Without patch 2401, a kernel bug in Irix 6.2 will cause
+B<IMPORTANT>: Without patch 2401, a kernel bug in Irix 6.2 will cause
 your machine to panic and crash when running threaded perl.  Irix 6.3
 and later are okay.
 
