@@ -740,13 +740,28 @@ I32 sv_type;
 #endif
 	goto magicalize;
 
+    case '!':
+	if(len > 1)
+	    break;
+	if(sv_type == SVt_PVHV) {
+	    HV* stash = gv_stashpvn("Errno",5,FALSE);
+	    if(!stash || !(gv_fetchmethod(stash, "TIEHASH"))) {
+		dSP;
+		PUTBACK;
+		perl_require_pv("Errno.pm");
+		SPAGAIN;
+		stash = gv_stashpvn("Errno",5,FALSE);
+		if (!stash || !(gv_fetchmethod(stash, "TIEHASH")))
+		    croak("%! is not avaliable on this machine");
+	    }
+	}
+	goto magicalize;
     case '#':
     case '*':
 	if (dowarn && len == 1 && sv_type == SVt_PV)
 	    warn("Use of $%s is deprecated", name);
 	/* FALL THROUGH */
     case '[':
-    case '!':
     case '^':
     case '~':
     case '=':
