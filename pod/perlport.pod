@@ -2109,7 +2109,7 @@ available at http://www.cpan.org/src/index.html
         VM/ESA
 
         1) in DOS mode either the DOS or OS/2 ports can be used
-        2) compilers: Borland, Cygwin (GCC), MinGW (GCC), VC6
+        2) compilers: Borland, MinGW (GCC), VC6
 
 The following platforms worked with the previous releases (5.6 and
 5.7), but we did not manage either to fix or to test these in time
