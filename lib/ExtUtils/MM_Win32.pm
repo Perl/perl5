@@ -532,6 +532,22 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)\.exists 
     join('',@m);
 }
 
+sub clean
+{
+ my ($self) = @_;
+ my $s = &ExtUtils::MM_Unix::clean;
+ if ($GCC) {
+	$s .= <<'END';
+clean ::
+	-$(RM_F) dll.base dll.exp
+
+END
+ }
+ return $s;
+}
+
+
+
 sub perl_archive
 {
     my ($self) = @_;
