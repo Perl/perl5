@@ -1417,16 +1417,19 @@ and execute the specified command.
 
 (P) Something went badly wrong in the regular expression parser.
 
-=item internal error: glob failed
+=item glob failed (%s)
 
-(P) Something went wrong with the external program(s) used for C<glob>
-and C<E<lt>*.cE<gt>>.  This may mean that your csh (C shell) is
-broken.  If so, you should change all of the csh-related variables in
-config.sh:  If you have tcsh, make the variables refer to it as if it
-were csh (e.g. C<full_csh='/usr/bin/tcsh'>); otherwise, make them all
-empty (except that C<d_csh> should be C<'undef'>) so that Perl will
-think csh is missing.  In either case, after editing config.sh, run
-C<./Configure -S> and rebuild Perl.
+(W) Something went wrong with the external program(s) used for C<glob>
+and C<E<lt>*.cE<gt>>.  Usually, this means that you supplied a C<glob>
+pattern that caused the external program to fail and exit with a nonzero
+status.  If the message indicates that the abnormal exit resulted in a
+coredump, this may also mean that your csh (C shell) is broken.  If so,
+you should change all of the csh-related variables in config.sh:  If you
+have tcsh, make the variables refer to it as if it were csh (e.g.
+C<full_csh='/usr/bin/tcsh'>); otherwise, make them all empty (except that
+C<d_csh> should be C<'undef'>) so that Perl will think csh is missing.
+In either case, after editing config.sh, run C<./Configure -S> and
+rebuild Perl.
 
 =item internal urp in regexp at /%s/
 

@@ -1258,8 +1258,12 @@ do_readline(void)
 		IoFLAGS(io) |= IOf_START;
 	    }
 	    else if (type == OP_GLOB) {
-		if (!do_close(PL_last_in_gv, FALSE))
-		    warn("internal error: glob failed");
+		if (!do_close(PL_last_in_gv, FALSE) && ckWARN(WARN_CLOSED)) {
+		    warner(WARN_CLOSED,
+			   "glob failed (child exited with status %d%s)",
+			   STATUS_CURRENT >> 8,
+			   (STATUS_CURRENT & 0xFF) ? ", core dumped" : "");
+		}
 	    }
 	    if (gimme == G_SCALAR) {
 		(void)SvOK_off(TARG);
