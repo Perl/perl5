@@ -220,7 +220,7 @@ triggered at the end of a test run.  C<onfail> is passed an array ref
 of hash refs that describe each test failure.  Each hash will contain
 at least the following fields: C<package>, C<repetition>, and
 C<result>.  (The file, line, and test number are not included because
-their correspondance to a particular test is tenuous.)  If the test
+their correspondence to a particular test is tenuous.)  If the test
 had an expected value or a diagnostic string, these will also be
 included.
 

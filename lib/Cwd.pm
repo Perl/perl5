@@ -32,7 +32,7 @@ The getcwd() function re-implements the getcwd(3) (or getwd(3)) functions
 in Perl.
 
 The abs_path() function takes a single argument and returns the
-absolute pathname for that argument. It uses the same algoritm as
+absolute pathname for that argument. It uses the same algorithm as
 getcwd(). (actually getcwd() is abs_path("."))
 
 The fastcwd() function looks the same as getcwd(), but runs faster.

@@ -4,7 +4,7 @@ package diagnostics;
 
 diagnostics - Perl compiler pragma to force verbose warning diagnostics
 
-splain - standalone program to do the same thing
+splain - stand-alone program to do the same thing
 
 =head1 SYNOPSIS
 
@@ -27,7 +27,7 @@ Aa a program:
 =head2 The C<diagnostics> Pragma
 
 This module extends the terse diagnostics normally emitted by both the
-perl compiler and the perl interpeter, augmenting them with the more
+perl compiler and the perl interpreter, augmenting them with the more
 explicative and endearing descriptions found in L<perldiag>.  Like the
 other pragmata, it affects the compilation phase of your program rather
 than merely the execution phase.
@@ -41,9 +41,9 @@ that this I<does> enable perl's B<-w> flag.)  Your whole
 compilation will then be subject(ed :-) to the enhanced diagnostics.
 These still go out B<STDERR>.
 
-Due to the interaction between runtime and compiletime issues,
+Due to the interaction between runtime and compile time issues,
 and because it's probably not a very good idea anyway,
-you may not use C<no diagnostics> to turn them off at compiletime.
+you may not use C<no diagnostics> to turn them off at compile time.
 However, you may control there behaviour at runtime using the 
 disable() and enable() methods to turn them off and on respectively.
 
@@ -66,7 +66,7 @@ Output from I<splain> is directed to B<STDOUT>, unlike the pragma.
 =head1 EXAMPLES
 
 The following file is certain to trigger a few errors at both
-runtime and compiletime:
+runtime and compile time:
 
     use diagnostics;
     print NOWHERE "nothing\n";
