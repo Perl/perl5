@@ -1222,7 +1222,7 @@ PP(pp_match)
 	TARG = DEFSV;
 	EXTEND(SP,1);
     }
-    PL_reg_sv = TARG;
+    PL_reg_sv = SvREFCNT_inc(TARG);
     PUTBACK;				/* EVAL blocks need stack_sp. */
     s = SvPV(TARG, len);
     strend = s + len;
@@ -1909,7 +1909,7 @@ PP(pp_subst)
 	TARG = DEFSV;
 	EXTEND(SP,1);
     }
-    PL_reg_sv = TARG;
+    PL_reg_sv = SvREFCNT_inc(TARG);
     do_utf8 = DO_UTF8(PL_reg_sv);
     if (SvFAKE(TARG) && SvREADONLY(TARG))
 	sv_force_normal(TARG);
