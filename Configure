@@ -8115,7 +8115,7 @@ EOCP
 		dflt=`./try`
 	else
 		dflt='8'
-		echo"(I can't seem to compile the test program...)"
+		echo "(I can't seem to compile the test program...)"
 	fi
 	;;
 *) dflt="$alignbytes"
