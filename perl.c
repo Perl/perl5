@@ -2273,7 +2273,7 @@ Perl_moreswitches(pTHX_ char *s)
 	        s++;
 	}
 	return s;
-    case 'I':	/* -I handled both here and in parse_perl() */
+    case 'I':	/* -I handled both here and in parse_body() */
 	forbid_setid("-I");
 	++s;
 	while (*s && isSPACE(*s))
