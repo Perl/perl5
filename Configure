@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Oct  3 16:47:48 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Thu Oct 25 20:32:59 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -16342,6 +16342,10 @@ cd $rsrc/ext
 set X
 shift
 eval $find_extensions
+# Special case:  Add in threads/shared since it is not picked up by the
+# recursive find above (and adding in general recursive finding breaks
+# SDBM_File/sdbm).  A.D.  10/25/2001.
+known_extensions="$known_extensions threads/shared"
 set X $nonxs_extensions
 shift
 nonxs_extensions="$*"
