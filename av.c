@@ -253,17 +253,19 @@ register SV **strp;
 
     av = (AV*)NEWSV(8,0);
     sv_upgrade((SV *) av,SVt_PVAV);
-    New(4,ary,size+1,SV*);
-    AvALLOC(av) = ary;
     AvFLAGS(av) = AVf_REAL;
-    SvPVX(av) = (char*)ary;
-    AvFILL(av) = size - 1;
-    AvMAX(av) = size - 1;
-    for (i = 0; i < size; i++) {
-	assert (*strp);
-	ary[i] = NEWSV(7,0);
-	sv_setsv(ary[i], *strp);
-	strp++;
+    if (size) {		/* `defined' was returning undef for size==0 anyway. */
+	New(4,ary,size,SV*);
+	AvALLOC(av) = ary;
+	SvPVX(av) = (char*)ary;
+	AvFILL(av) = size - 1;
+	AvMAX(av) = size - 1;
+	for (i = 0; i < size; i++) {
+	    assert (*strp);
+	    ary[i] = NEWSV(7,0);
+	    sv_setsv(ary[i], *strp);
+	    strp++;
+	}
     }
     return av;
 }
