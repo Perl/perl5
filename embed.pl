@@ -2292,7 +2292,6 @@ s	|OP*	|no_fh_allowed	|OP *o
 s	|OP*	|scalarboolean	|OP *o
 s	|OP*	|too_few_arguments|OP *o|char* name
 s	|OP*	|too_many_arguments|OP *o|char* name
-s	|U8*	|trlist_upgrade	|U8** sp|U8** ep
 s	|void	|op_clear	|OP* o
 s	|void	|null		|OP* o
 s	|PADOFFSET|pad_addlex	|SV* name

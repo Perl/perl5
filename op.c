@@ -103,30 +103,6 @@ S_no_bareword_allowed(pTHX_ OP *o)
 		     SvPV_nolen(cSVOPo_sv)));
 }
 
-STATIC U8*
-S_trlist_upgrade(pTHX_ U8** sp, U8** ep)
-{
-    U8 *s = *sp;
-    U8 *e = *ep;
-    U8 *d;
-
-    Newz(801, d, (e - s) * 2, U8);
-    *sp = d;
-
-    while (s < e) {
-        if (NATIVE_IS_INVARIANT(*s) || NATIVE_TO_UTF(*s) == 0xff)
-            *d++ = *s++;
-	else {
-	    U8 c = NATIVE_TO_ASCII(*s++);
-	    *d++ = UTF8_EIGHT_BIT_HI(c);
-	    *d++ = UTF8_EIGHT_BIT_LO(c);
-        }
-    }
-    *ep = d;
-    return *sp;
-}
-
-
 /* "register" allocation */
 
 PADOFFSET
@@ -2708,8 +2684,19 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	U32 final;
 	I32 from_utf	= o->op_private & OPpTRANS_FROM_UTF;
 	I32 to_utf	= o->op_private & OPpTRANS_TO_UTF;
-	U8* tsave = from_utf ? NULL : trlist_upgrade(&t, &tend);
-	U8* rsave = (to_utf || !rlen) ? NULL : trlist_upgrade(&r, &rend);
+	U8* tsave = NULL;
+	U8* rsave = NULL;
+
+	if (!from_utf) {
+	    STRLEN len = tlen;
+	    tsave = t = bytes_to_utf8(t, &len);
+	    tend = t + len;
+	}
+	if (!to_utf && rlen) {
+	    STRLEN len = rlen;
+	    rsave = r = bytes_to_utf8(r, &len);
+	    rend = r + len;
+	}
 
 /* There are several snags with this code on EBCDIC:
    1. 0xFF is a legal UTF-EBCDIC byte (there are no illegal bytes).
