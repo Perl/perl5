@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq5 - Files and Formats ($Revision: 1.15 $, $Date: 2002/04/12 02:02:05 $)
+perlfaq5 - Files and Formats ($Revision: 1.17 $, $Date: 2002/05/23 19:33:50 $)
 
 =head1 DESCRIPTION
 
@@ -9,72 +9,56 @@ formats, and footers.
 
 =head2 How do I flush/unbuffer an output filehandle?  Why must I do this?
 
-The C standard I/O library (stdio) normally buffers characters sent to
-devices.  This is done for efficiency reasons so that there isn't a
-system call for each byte.  Any time you use print() or write() in
-Perl, you go though this buffering.  syswrite() circumvents stdio and
-buffering.
+Perl does not support truly unbuffered output (except
+insofar as you can C<syswrite(OUT, $char, 1)>), although it
+does support is "command buffering", in which a physical
+write is performed after every output command.
 
-In most stdio implementations, the type of output buffering and the size of
-the buffer varies according to the type of device.  Disk files are block
-buffered, often with a buffer size of more than 2k.  Pipes and sockets
-are often buffered with a buffer size between 1/2 and 2k.  Serial devices
-(e.g. modems, terminals) are normally line-buffered, and stdio sends
-the entire line when it gets the newline.
+The C standard I/O library (stdio) normally buffers
+characters sent to devices so that there isn't a system call
+for each byte. In most stdio implementations, the type of
+output buffering and the size of the buffer varies according
+to the type of device. Perl's print() and write() functions
+normally buffer output, while syswrite() bypasses buffering
+all together.
 
-Perl does not support truly unbuffered output (except insofar as you can
-C<syswrite(OUT, $char, 1)>).  What it does instead support is "command
-buffering", in which a physical write is performed after every output
-command.  This isn't as hard on your system as unbuffering, but does
-get the output where you want it when you want it.
+If you want your output to be sent immediately when you
+execute print() or write() (for instance, for some network
+protocols), you must set the handle's autoflush flag. This
+flag is the Perl variable $| and when it is set to a true
+value, Perl will flush the handle's buffer after each
+print() or write(). Setting $| affects buffering only for
+the currently selected default file handle. You choose this
+handle with the one argument select() call (see
+L<perlvar/$|> and L<perlfunc/select>).
 
-If you expect characters to get to your device when you print them there,
-you'll want to autoflush its handle.
-Use select() and the C<$|> variable to control autoflushing
-(see L<perlvar/$|> and L<perlfunc/select>):
+Use select() to choose the desired handle, then set its
+per-filehandle variables.
 
     $old_fh = select(OUTPUT_HANDLE);
     $| = 1;
     select($old_fh);
 
-Or using the traditional idiom:
+Some idioms can handle this in a single statement:
 
     select((select(OUTPUT_HANDLE), $| = 1)[0]);
+    
+    $| = 1, select $_ for select OUTPUT_HANDLE;
 
-Or if don't mind slowly loading several thousand lines of module code
-just because you're afraid of the C<$|> variable:
-
-    use FileHandle;
-    open(DEV, "+</dev/tty"); 	  # ceci n'est pas une pipe
-    DEV->autoflush(1);
-
-or the newer IO::* modules:
+Some modules offer object-oriented access to handles and their
+variables, although they may be overkill if this is the only
+thing you do with them.  You can use IO::Handle:
 
     use IO::Handle;
     open(DEV, ">/dev/printer");   # but is this?
     DEV->autoflush(1);
 
-or even this:
+or IO::Socket:
 
     use IO::Socket;		  # this one is kinda a pipe?
-    $sock = IO::Socket::INET->new(PeerAddr => 'www.perl.com',
-				  PeerPort => 'http(80)',
-				  Proto    => 'tcp');
-    die "$!" unless $sock;
+	my $sock = IO::Socket::INET->new( 'www.example.com:80' ) ;
 
     $sock->autoflush();
-    print $sock "GET / HTTP/1.0" . "\015\012" x 2;
-    $document = join('', <$sock>);
-    print "DOC IS: $document\n";
-
-Note the bizarrely hard coded carriage return and newline in their octal
-equivalents.  This is the ONLY way (currently) to assure a proper flush
-on all platforms, including Macintosh.  That's the way things work in
-network programming: you really should specify the exact bit pattern
-on the network line terminator.  In practice, C<"\n\n"> often works,
-but this is not portable.
-
-See L<perlfaq9> for other examples of fetching URLs over the web.
 
 =head2 How do I change one line in a file/delete a line in a file/insert a line in the middle of a file/append to the beginning of a file?
 
@@ -172,74 +156,31 @@ well.   It also only works on global variables, not lexicals.
 
 =head2 How can I make a filehandle local to a subroutine?  How do I pass filehandles between subroutines?  How do I make an array of filehandles?
 
-The fastest, simplest, and most direct way is to localize the typeglob
-of the filehandle in question:
+As of perl5.6, open() autovivifies file and directory handles
+as references if you pass it an uninitialized scalar variable.
+You can then pass these references just like any other scalar,
+and use them in the place of named handles.
 
-    local *TmpHandle;
+	open my    $fh, $file_name;
+	
+	open local $fh, $file_name;
+	
+	print $fh "Hello World!\n";
+	
+	process_file( $fh );
 
-Typeglobs are fast (especially compared with the alternatives) and
-reasonably easy to use, but they also have one subtle drawback.  If you
-had, for example, a function named TmpHandle(), or a variable named
-%TmpHandle, you just hid it from yourself.
+Before perl5.6, you had to deal with various typeglob idioms
+which you may see in older code.
 
-    sub findme {
-        local *HostFile;
-	open(HostFile, "</etc/hosts") or die "no /etc/hosts: $!";
-	local $_;		# <- VERY IMPORTANT
-        while (<HostFile>) {
-	    print if /\b127\.(0\.0\.)?1\b/;
-	}
-	# *HostFile automatically closes/disappears here
-    }
+	open FILE, "> $filename";
+	process_typeglob(   *FILE );
+	process_reference( \*FILE );
+	
+	sub process_typeglob  { local *FH = shift; print FH  "Typeglob!" }
+	sub process_reference { local $fh = shift; print $fh "Reference!" }
 
-Here's how to use typeglobs in a loop to open and store a bunch of
-filehandles.  We'll use as values of the hash an ordered
-pair to make it easy to sort the hash in insertion order.
-
-    @names = qw(motd termcap passwd hosts);
-    my $i = 0;
-    foreach $filename (@names) {
-	local *FH;
-	open(FH, "/etc/$filename") || die "$filename: $!";
-        $file{$filename} = [ $i++, *FH ];
-    }
-
-    # Using the filehandles in the array
-    foreach $name (sort { $file{$a}[0] <=> $file{$b}[0] } keys %file) {
-        my $fh = $file{$name}[1];
-        my $line = <$fh>;
-        print "$name $. $line";
-    }
-
-For passing filehandles to functions, the easiest way is to 
-preface them with a star, as in func(*STDIN).  
-See L<perlfaq7/"Passing Filehandles"> for details.
-
-If you want to create many anonymous handles, you should check out the
-Symbol, FileHandle, or IO::Handle (etc.) modules.  Here's the equivalent
-code with Symbol::gensym, which is reasonably light-weight:
-
-    foreach $filename (@names) {
-	use Symbol;
-	my $fh = gensym();
-	open($fh, "/etc/$filename") || die "open /etc/$filename: $!";
-        $file{$filename} = [ $i++, $fh ];
-    }
-
-Here's using the semi-object-oriented FileHandle module, which certainly
-isn't light-weight:
-
-    use FileHandle;
-
-    foreach $filename (@names) {
-        my $fh = FileHandle->new("/etc/$filename") or die "$filename: $!";
-        $file{$filename} = [ $i++, $fh ];
-    }
-
-Please understand that whether the filehandle happens to be a (probably
-localized) typeglob or an anonymous handle from one of the modules
-in no way affects the bizarre rules for managing indirect handles.
-See the next question.
+If you want to create many anonymous handles, you should
+check out the Symbol or IO::Handle modules.
 
 =head2 How can I use a filehandle indirectly?
 
@@ -253,12 +194,9 @@ to get indirect filehandles:
     $fh = \*SOME_FH;       # ref to typeglob (bless-able)
     $fh =  *SOME_FH{IO};   # blessed IO::Handle from *SOME_FH typeglob
 
-Or, you can use the C<new> method from the FileHandle or IO modules to
+Or, you can use the C<new> method from one of the IO::* modules to
 create an anonymous filehandle, store that in a scalar variable,
 and use it as though it were a normal filehandle.
-
-    use FileHandle;
-    $fh = FileHandle->new();
 
     use IO::Handle;                     # 5.004 or higher
     $fh = IO::Handle->new();
@@ -267,7 +205,7 @@ Then use any of those as you would a normal filehandle.  Anywhere that
 Perl is expecting a filehandle, an indirect filehandle may be used
 instead. An indirect filehandle is just a scalar variable that contains
 a filehandle.  Functions like C<print>, C<open>, C<seek>, or
-the C<< <FH> >> diamond operator will accept either a read filehandle
+the C<< <FH> >> diamond operator will accept either a named filehandle
 or a scalar variable containing one:
 
     ($ifh, $ofh, $efh) = (*STDIN, *STDOUT, *STDERR);
@@ -327,9 +265,9 @@ This approach of treating C<print> and C<printf> like object methods
 calls doesn't work for the diamond operator.  That's because it's a
 real operator, not just a function with a comma-less argument.  Assuming
 you've been storing typeglobs in your structure as we did above, you
-can use the built-in function named C<readline> to reads a record just
+can use the built-in function named C<readline> to read a record just
 as C<< <> >> does.  Given the initialization shown above for @fd, this
-would work, but only because readline() require a typeglob.  It doesn't
+would work, but only because readline() requires a typeglob.  It doesn't
 work with objects or strings, which might be a bug we haven't fixed yet.
 
     $got = readline($fd[0]);

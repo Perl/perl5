@@ -1,4 +1,4 @@
-=head1 NAME
+.=head1 NAME
 
 perldelta - what is new for perl v5.8.0
 
@@ -267,6 +267,12 @@ syntax.  An optional warning is generated ("Illegal character in
 prototype...")  but this may be upgraded to a fatal error in a future
 release.
 
+=item *
+
+The existing behaviour when localising tied arrays and hashes is wrong,
+and will be changed in a future release, so do not rely on the existing
+behaviour. See L<"Localising Tied Arrays and Hashes Is Broken">.
+
 =back
 
 =head1 Core Enhancements
@@ -430,6 +436,18 @@ in its math.)
 
 AUTOLOAD is now lvaluable, meaning that you can add the :lvalue attribute
 to AUTOLOAD subroutines and you can assign to the AUTOLOAD return value.
+
+=item *
+
+The $Config{byteorder} (and corresponding BYTEORDER in config.h) was
+previously wrong in platforms if sizeof(long) was 4, but sizeof(IV)
+was 8.  The byteorder was only sizeof(long) bytes long (1234 or 4321),
+but now it is correctly sizeof(IV) bytes long, (12345678 or 87654321).
+(This problem didn't affect Windows platforms.)
+
+Also, $Config{byteorder} is now computed dynamically--this is more
+robust with "fat binaries" where an executable image contains binaries
+for more than one binary platform, and when cross-compiling.
 
 =item *
 
@@ -1620,12 +1638,6 @@ installperl now outputs everything to STDERR.
 
 =item *
 
-$Config{byteorder} is now computed dynamically (this is more robust
-with "fat binaries" where an executable image contains binaries for
-more than one binary platform.)
-
-=item *
-
 Because PerlIO is now the default on most platforms, "-perlio" doesn't
 get appended to the $Config{archname} (also known as $^O) anymore.
 Instead, if you explicitly choose not to use perlio (Configure command
@@ -1999,8 +2011,8 @@ exist, if that's what they were.
 
     { local $tied_hash{FOO} = 'Bar' }
     
-    # Here the FOO element would have been C<undef>,
-    # but no more so. 
+    # This used to print, but not now.
+    print "exists!\n" if exists $tied_hash{FOO};
 
 As a side effect of this fix, tied hash interfaces B<must> define
 the EXISTS and DELETE methods.
@@ -2517,6 +2529,10 @@ Windows 9x.
 
 =item *
 
+Win64 compilation is now supported.
+
+=item *
+
 winsock handle leak fixed.
 
 =item *
@@ -3016,7 +3032,10 @@ ability to build extensions, and that seems to be working reasonably well.)
     local %tied_array;
 
 doesn't work as one would expect: the old value is restored
-incorrectly.
+incorrectly.  This will be changed in a future release, but we don't
+know yet which the new semantics will exactly be.  In any case the
+change will break existing code that relies on the current
+(ill-defined) semantics, so just avoid doing this in general.
 
 =head2 Self-tying of Arrays and Hashes Is Forbidden
 

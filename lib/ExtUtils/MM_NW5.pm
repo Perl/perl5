@@ -281,13 +281,12 @@ END
 
     $m .= <<'END' if $self->{PERL_SRC};
         $(NOECHO)echo "$(EXTRALIBS)" >> $(PERL_SRC)\ext.libs
-
+    
+    
 END
-
     $m .= $self->dir_target('$(INST_ARCHAUTODIR)');
     return $m;
 }
-
 
 =item dynamic_lib (o)
 

@@ -563,6 +563,13 @@ hash to some other implementation:
     }
     [..%ahash back to its initial tied self again..]
 
+B<WARNING> The code example above does not currently work as described.
+This will be fixed in a future release of Perl; in the meantime, avoid
+code that relies on any particular behaviour of localising tied arrays
+or hashes (localising individual elements is still okay).
+See L<perldelta/"Localising Tied Arrays and Hashes Is Broken"> for more
+details.
+
 As another example, a custom implementation of C<%ENV> might look
 like this:
 
