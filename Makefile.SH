@@ -387,6 +387,7 @@ lib/ExtUtils/Miniperl.pm: miniperlmain.c miniperl minimod.pl lib/Config.pm
 	sh mv-if-diff tmp $@
 
 lib/re.pm: ext/re/re.pm
+	rm -f $@
 	cat ext/re/re.pm > $@
 
 $(plextract):	miniperl lib/Config.pm lib/re.pm
