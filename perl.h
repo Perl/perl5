@@ -2308,7 +2308,12 @@ typedef        struct crypt_data {     /* straight from /usr/include/crypt.h */
 #  include "iperlsys.h"
 #endif
 
-/* [perl #22371] Algorimic Complexity Attack on Perl 5.6.1, 5.8.0 */
+/* [perl #22371] Algorimic Complexity Attack on Perl 5.6.1, 5.8.0.
+ * Note that the USE_HASH_SEED and USE_HASH_SEED_EXPLICIT are *NOT*
+ * defined by Configure, despite their names being similar to the
+ * other defines like USE_ITHREADS.  Configure in fact knows nothing
+ * about the randomised hashes.  Therefore to enable/disable the hash
+ * randomisation defines use the Configure -Accflags=... instead. */
 #if !defined(NO_HASH_SEED) && !defined(USE_HASH_SEED) && !defined(USE_HASH_SEED_EXPLICIT)
 #  define USE_HASH_SEED
 #endif

@@ -18,8 +18,8 @@ use Carp 'croak';
 # The most recent version and complete docs are available at:
 #   http://stein.cshl.org/WWW/software/CGI/
 
-$CGI::revision = '$Id: CGI.pm,v 1.125 2003/06/16 18:54:19 lstein Exp $';
-$CGI::VERSION='2.97';
+$CGI::revision = '$Id: CGI.pm,v 1.127 2003/06/18 19:57:21 lstein Exp $';
+$CGI::VERSION='2.98';
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
@@ -1145,7 +1145,7 @@ sub Dump {
 	push(@result,"<ul>");
 	foreach $value ($self->param($param)) {
 	    $value = $self->escapeHTML($value);
-            $value =~ s/\n/<br />\n/g;
+            $value =~ s/\n/<br \/>\n/g;
 	    push(@result,"<li>$value</li>");
 	}
 	push(@result,"</ul>");
@@ -1571,17 +1571,21 @@ sub _script {
     $comment = '#' if $type=~/perl|tcl/i;
     $comment = "'" if $type=~/vbscript/i;
 
-    my $cdata_start  =  "\n<!-- Hide script\n";
-    $cdata_start    .= "$comment<![CDATA[\n"  if $XHTML; 
-    my $cdata_end    = $XHTML ? "\n$comment]]>" : $comment;
-    $cdata_end      .= " End script hiding -->\n";
-
-	my(@satts);
-	push(@satts,'src'=>$src) if $src;
-	push(@satts,'language'=>$language) unless defined $type;
-        push(@satts,'type'=>$type);
-	$code = "$cdata_start$code$cdata_end" if defined $code;
-	push(@result,script({@satts},$code || ''));
+    my ($cdata_start,$cdata_end);
+    if ($XHTML) {
+       $cdata_start    = "$comment<![CDATA[\n";
+       $cdata_end     .= "\n$comment]]>";
+    } else {
+       $cdata_start  =  "\n<!-- Hide script\n";
+       $cdata_end    = $comment;
+       $cdata_end   .= " End script hiding -->\n";
+   }
+     my(@satts);
+     push(@satts,'src'=>$src) if $src;
+     push(@satts,'language'=>$language) unless defined $type;
+     push(@satts,'type'=>$type);
+     $code = "$cdata_start$code$cdata_end" if defined $code;
+     push(@result,script({@satts},$code || ''));
     }
     @result;
 }
@@ -4638,7 +4642,7 @@ You can also use named arguments:
 
 The B<-nph> parameter, if set to a true value, will issue the correct
 headers to work with a NPH (no-parse-header) script.  This is important
-to use with certain servers, such as Microsoft Internet Explorer, which
+to use with certain servers, such as Microsoft IIS, which
 expect all their scripts to be NPH.
 
 =head2 CREATING THE HTML DOCUMENT HEADER

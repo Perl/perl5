@@ -1057,6 +1057,13 @@ U32
 SvTYPE(sv)
 	B::SV	sv
 
+#define object_2svref(sv)	sv
+#define SVREF SV *
+	
+SVREF
+object_2svref(sv)
+	B::SV	sv
+
 MODULE = B	PACKAGE = B::SV		PREFIX = Sv
 
 U32
@@ -1526,6 +1533,17 @@ AvARRAY(av)
 		XPUSHs(make_sv_object(aTHX_ sv_newmortal(), svp[i]));
 	}
 
+void
+AvARRAYelt(av, idx)
+	B::AV	av
+	int	idx
+    PPCODE:
+    	if (idx >= 0 && AvFILL(av) >= 0 && idx <= AvFILL(av))
+	    XPUSHs(make_sv_object(aTHX_ sv_newmortal(), (AvARRAY(av)[idx])));
+	else
+	    XPUSHs(make_sv_object(aTHX_ sv_newmortal(), NULL));
+
+				   
 MODULE = B	PACKAGE = B::AV
 
 U8

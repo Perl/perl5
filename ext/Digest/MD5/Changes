@@ -1,3 +1,17 @@
+2003-07-21   Gisle Aas <gisle@ActiveState.com>
+
+   Release 2.26
+
+   Don't assume PerlIO_read() works like fread() even though
+   it was documented like that for perl 5.6.  It returns negative
+   on read failure.
+
+   Kill test #3 in t/badfile.t.  I don't know a reliable way
+   to test read failures on a file handle.  Seems better not to
+   test than to make many worry.
+
+
+
 2003-07-04   Gisle Aas <gisle@ActiveState.com>
 
    Release 2.25

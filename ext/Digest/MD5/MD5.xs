@@ -1,4 +1,4 @@
-/* $Id: MD5.xs,v 1.39 2003/07/05 05:25:37 gisle Exp $ */
+/* $Id: MD5.xs,v 1.40 2003/07/22 05:59:27 gisle Exp $ */
 
 /* 
  * This library is free software; you can redistribute it and/or
@@ -630,14 +630,14 @@ addfile(self, fh)
 	         * first.
 	         */
 	        STRLEN missing = 64 - fill;
-	        if ( (n = PerlIO_read(fh, buffer, missing)))
+	        if ( (n = PerlIO_read(fh, buffer, missing)) > 0)
 	 	    MD5Update(context, buffer, n);
 	        else
 		    XSRETURN(1);  /* self */
 	    }
 
 	    /* Process blocks until EOF or error */
-            while ( (n = PerlIO_read(fh, buffer, sizeof(buffer)))) {
+            while ( (n = PerlIO_read(fh, buffer, sizeof(buffer))) > 0) {
 	        MD5Update(context, buffer, n);
 	    }
 
