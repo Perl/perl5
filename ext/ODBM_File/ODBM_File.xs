@@ -73,7 +73,7 @@ odbm_TIEHASH(dbtype, filename, flags, mode)
 	    }
 	    RETVAL = (void*)(dbminit(filename) >= 0 ? &dbmrefcnt : 0);
 	    ST(0) = sv_mortalcopy(&sv_undef);
-	    sv_setptrobj(ST(0), RETVAL, "ODBM_File");
+	    sv_setptrobj(ST(0), RETVAL, dbtype);
 	}
 
 void
