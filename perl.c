@@ -3384,21 +3384,12 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	    *s = '=';
 #if defined(__BORLANDC__) && defined(USE_WIN32_RTL_ENV)
 	    /* Sins of the RTL. See note in my_setenv(). */
-	    { /* Turn this into Perl_my_putenv()? */
-		char *putenvp = savepv(*env);
-
-		if (putenvp) {
-		    char *p = putenvp;
-
-		    while (*p && *p != '=') p++;
-		    if (p == '=') {
-			*p++ = 0;
-			my_setenv(putenvp, p);
-		    }
-		    
-		    Safefree(putenvp);
-		} /* else what? */
-	    }
+	    { 
+		STRLEN len = strlen(*env);
+		char *e = safesysmalloc(len+1);
+		(void)strcpy(e, *env);
+		(void)PerlEnv_putenv(e);  
+	    } 
 #endif
 	}
 #ifdef NEED_ENVIRON_DUP_FOR_MODIFY
