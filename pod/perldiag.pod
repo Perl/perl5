@@ -1926,6 +1926,10 @@ when the function is called.
 
 Perl detected something that didn't comply with UTF-8 encoding rules.
 
+One possible cause is that you read in data that you thought to be in
+UTF-8 but it wasn't (it was for example legacy 8-bit data).  Another
+possibility is careless use of utf8::upgrade().
+
 =item Malformed UTF-16 surrogate
 
 Perl thought it was reading UTF-16 encoded character data but while

@@ -24,6 +24,8 @@
 #define PERL_IN_UTF8_C
 #include "perl.h"
 
+static char unees[] = "Malformed UTF-8 character (unexpected end of string)";
+
 /* 
 =head1 Unicode Support
 
@@ -543,13 +545,29 @@ Perl_utf8_length(pTHX_ U8 *s, U8 *e)
      * the bitops (especially ~) can create illegal UTF-8.
      * In other words: in Perl UTF-8 is not just for Unicode. */
 
-    if (e < s)
-	Perl_croak(aTHX_ "panic: utf8_length: unexpected end");
+    if (e < s) {
+        if (ckWARN_d(WARN_UTF8)) {
+	    if (PL_op)
+	        Perl_warner(aTHX_ packWARN(WARN_UTF8),
+			    "%s in %s", unees, OP_DESC(PL_op));
+	    else
+	        Perl_warner(aTHX_ packWARN(WARN_UTF8), unees);
+	}
+	return 0;
+    }
     while (s < e) {
 	U8 t = UTF8SKIP(s);
 
-	if (e - s < t)
-	    Perl_croak(aTHX_ "panic: utf8_length: unaligned end");
+	if (e - s < t) {
+	    if (ckWARN_d(WARN_UTF8)) {
+	        if (PL_op)
+		    Perl_warner(aTHX_ packWARN(WARN_UTF8),
+				unees, OP_DESC(PL_op));
+		else
+		    Perl_warner(aTHX_ packWARN(WARN_UTF8), unees);
+	    }
+	    return len;
+	}
 	s += t;
 	len++;
     }
@@ -582,8 +600,16 @@ Perl_utf8_distance(pTHX_ U8 *a, U8 *b)
 	while (a < b) {
 	    U8 c = UTF8SKIP(a);
 
-	    if (b - a < c)
-		Perl_croak(aTHX_ "panic: utf8_distance: unaligned end");
+	    if (b - a < c) {
+	        if (ckWARN_d(WARN_UTF8)) {
+		    if (PL_op)
+		        Perl_warner(aTHX_ packWARN(WARN_UTF8),
+				    "%s in %s", unees, OP_DESC(PL_op));
+		    else
+		        Perl_warner(aTHX_ packWARN(WARN_UTF8), unees);
+		}
+		return off;
+	    }
 	    a += c;
 	    off--;
 	}
@@ -592,8 +618,16 @@ Perl_utf8_distance(pTHX_ U8 *a, U8 *b)
 	while (b < a) {
 	    U8 c = UTF8SKIP(b);
 
-	    if (a - b < c)
-		Perl_croak(aTHX_ "panic: utf8_distance: unaligned end");
+	    if (a - b < c) {
+	        if (ckWARN_d(WARN_UTF8)) {
+		    if (PL_op)
+		        Perl_warner(aTHX_ packWARN(WARN_UTF8),
+				    "%s in %s", unees, OP_DESC(PL_op));
+		    else
+		        Perl_warner(aTHX_ packWARN(WARN_UTF8), unees);
+		}
+		return off;
+	    }
 	    b += c;
 	    off++;
 	}
