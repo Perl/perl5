@@ -61,7 +61,10 @@ just as in ordinary Perl code.  This also means that if you want real
 whitespace or C<#> characters in the pattern that you'll have to either
 escape them or encode them using octal or hex escapes.  Taken together,
 these features go a long way towards making Perl's regular expressions
-more readable.  See the C comment deletion code in L<perlop>.
+more readable.  Note that you have to be careful not to include the
+pattern delimiter in the comment--perl has no way of knowing you did
+not intend to close the pattern early.  See the C comment deletion code
+in L<perlop>.
 
 =head2 Regular Expressions
 
