@@ -69,7 +69,12 @@ typedef union {
 } FT_t;
 
 /* Number of 100 nanosecond units from 1/1/1601 to 1/1/1970 */
-#define EPOCH_BIAS  116444736000000000i64
+#ifdef __GNUC__
+#define Const64(x) x##LL
+#else
+#define Const64(x) x##i64
+#endif
+#define EPOCH_BIAS  Const64(116444736000000000)
 
 /* NOTE: This does not compute the timezone info (doing so can be expensive,
  * and appears to be unsupported even by glibc) */
@@ -82,10 +87,10 @@ gettimeofday (struct timeval *tp, void *not_used)
     GetSystemTimeAsFileTime(&ft.ft_val);
 
     /* seconds since epoch */
-    tp->tv_sec = (long)((ft.ft_i64 - EPOCH_BIAS) / 10000000i64);
+    tp->tv_sec = (long)((ft.ft_i64 - EPOCH_BIAS) / Const64(10000000));
 
     /* microseconds remaining */
-    tp->tv_usec = (long)((ft.ft_i64 / 10i64) % 1000000i64);
+    tp->tv_usec = (long)((ft.ft_i64 / Const64(10)) % Const64(1000000));
 
     return 0;
 }
