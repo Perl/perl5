@@ -167,8 +167,8 @@ $     P'i' = P'i' - "f"
 $     config_sh = P'i'
 $     IF (F$SEARCH(config_sh).NES."")
 $     THEN
-$       test = F$FILE_ATTRIBUTES(config_sh,"PRO")
-$       IF (F$LOCATE("R",test).NE.F$LENGTH(test)) 
+$       test_config_sh = F$FILE_ATTRIBUTES(config_sh,"PRO")
+$       IF (F$LOCATE("R",test_config_sh).NE.F$LENGTH(test_config_sh)) 
 $       THEN
 $         CONTINUE !at this point check UIC && if test allows...
 $                  !to be continued ?
@@ -2084,7 +2084,7 @@ $   ENDIF
 $ EXIT
 $ ENDSUBROUTINE ! Bad_environment
 $ echo ""
-$ echo4 "%Config-I-VMS, Checking for dangerous pre extant global symbols and logical names."
+$ echo4 "%Config-I-VMS, Checking for dangerous pre-existing global symbols and logical names."
 $ CALL Bad_environment "TMP"
 $ CALL Bad_environment "LIB"
 $ CALL Bad_environment "T"

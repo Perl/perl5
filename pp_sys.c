@@ -1076,7 +1076,7 @@ PP(pp_getc)
     GV *gv;
     MAGIC *mg;
 
-    if (MAXARG <= 0)
+    if (MAXARG == 0)
 	gv = PL_stdingv;
     else
 	gv = (GV*)POPs;
@@ -1686,7 +1686,7 @@ PP(pp_eof)
     GV *gv;
     MAGIC *mg;
 
-    if (MAXARG <= 0) {
+    if (MAXARG == 0) {
 	if (PL_op->op_flags & OPf_SPECIAL) {	/* eof() */
 	    IO *io;
 	    gv = PL_last_in_gv = PL_argvgv;
@@ -1730,7 +1730,7 @@ PP(pp_tell)
     GV *gv;     
     MAGIC *mg;
 
-    if (MAXARG <= 0)
+    if (MAXARG == 0)
 	gv = PL_last_in_gv;
     else
 	gv = PL_last_in_gv = (GV*)POPs;
@@ -1965,7 +1965,7 @@ PP(pp_flock)
 
 #ifdef FLOCK
     argtype = POPi;
-    if (MAXARG <= 0)
+    if (MAXARG == 0)
 	gv = PL_last_in_gv;
     else
 	gv = (GV*)POPs;
