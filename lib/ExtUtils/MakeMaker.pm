@@ -439,7 +439,10 @@ sub ExtUtils::MakeMaker::new {
 		unless $self->file_name_is_absolute($self->{$key})
 		|| ($^O eq 'VMS' and ($key =~ /PERL$/ && $self->{$key} =~ /^[\w\-\$]+$/));
 	}
-	$self->{PARENT}->{CHILDREN}->{$newclass} = $self if $self->{PARENT};
+	if ($self->{PARENT}) {
+	    $self->{PARENT}->{CHILDREN}->{$newclass} = $self;
+	    $self->{CAPI} = $self->{PARENT}->{CAPI};
+	}
     } else {
 	parse_args($self,split(' ', $ENV{PERL_MM_OPT} || ''),@ARGV);
     }
@@ -1019,7 +1022,7 @@ This will replace the string specified by $Config{prefix} in all
 $Config{install*} values.
 
 Note, that in both cases the tilde expansion is done by MakeMaker, not
-by perl by default, nor by make. Conflicts between parmeters LIB,
+by perl by default, nor by make. Conflicts between parameters LIB,
 PREFIX and the various INSTALL* arguments are resolved so that 
 XXX
 
@@ -1285,7 +1288,7 @@ is ignored if INCLUDE_EXT is present.  Consult INCLUDE_EXT for more
 details.  (e.g.  [ qw( Socket POSIX ) ] )
 
 This attribute may be most useful when specified as a string on the
-commandline:  perl Makefile.PL EXCLUDE_EXT='Socket Safe'
+command line:  perl Makefile.PL EXCLUDE_EXT='Socket Safe'
 
 =item EXE_FILES
 
@@ -1336,7 +1339,7 @@ filling in INCLUDE_EXT.  If the INCLUDE_EXT is mentioned but is empty then
 only DynaLoader and the current extension will be included in the build.
 
 This attribute may be most useful when specified as a string on the
-commandline:  perl Makefile.PL INCLUDE_EXT='POSIX Socket Devel::Peek'
+command line:  perl Makefile.PL INCLUDE_EXT='POSIX Socket Devel::Peek'
 
 =item INSTALLARCHLIB
 
@@ -1560,7 +1563,7 @@ avoided, it may be undefined)
 
 =item PERM_RW
 
-Desired Permission for read/writable files. Defaults to C<644>.
+Desired permission for read/writable files. Defaults to C<644>.
 See also L<MM_Unix/perm_rw>.
 
 =item PERM_RWX

@@ -83,7 +83,6 @@
 #define DONT_DECLARE_STD 1
 
 /* Our own contribution to PerlShr's global symbols . . . */
-#ifdef EMBED
 #  define my_trnlnm		Perl_my_trnlnm
 #  define my_getenv		Perl_my_getenv
 #  define prime_env_iter	Perl_prime_env_iter
@@ -144,7 +143,6 @@
 #  define my_getlogin		Perl_my_getlogin
 #  define rmscopy		Perl_rmscopy
 #  define init_os_extras	Perl_init_os_extras
-#endif
 
 /* Delete if at all possible, changing protections if necessary. */
 #define unlink kill_file

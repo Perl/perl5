@@ -1752,13 +1752,7 @@ sub list_versions {
     } 
     $version{$file} .= $INC{$file};
   }
-  do 'dumpvar.pl' unless defined &main::dumpValue;
-  if (defined &main::dumpValue) {
-    local $frame = 0;
-    &main::dumpValue(\%version);
-  } else {
-    print $OUT "dumpvar.pl not available.\n";
-  }
+  dumpit($OUT,\%version);
 }
 
 sub sethelp {

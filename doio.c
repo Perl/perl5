@@ -470,7 +470,7 @@ nextargv(register GV *gv)
                       || (_djstat_fail_bits & _STFAIL_TRUENAME)!=0
 #endif
                       ) {
-			warn("Can't do inplace edit: %s would not be uniq",
+			warn("Can't do inplace edit: %s would not be unique",
 			  SvPVX(sv) );
 			do_close(gv,FALSE);
 			continue;
@@ -781,7 +781,7 @@ do_binmode(PerlIO *fp, int iotype, int flag)
     if (flag != TRUE)
 	croak("panic: unsetting binmode"); /* Not implemented yet */
 #ifdef DOSISH
-#ifdef atarist
+#if defined(atarist) || defined(__MINT__)
     if (!PerlIO_flush(fp) && (fp->_flag |= _IOBIN))
 	return 1;
     else

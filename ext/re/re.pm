@@ -86,9 +86,10 @@ sub setcolor {
   my $terminal = Tgetent Term::Cap ({OSPEED => 9600}); # Avoid warning.
   my $props = $ENV{PERL_RE_TC} || 'md,me,so,se,us,ue';
   my @props = split /,/, $props;
+  my $colors = join "\t", map {$terminal->Tputs($_,1)} @props;
 
-
-  $ENV{PERL_RE_COLORS} = join "\t", map {$terminal->Tputs($_,1)} @props;
+  $colors =~ s/\0//g;
+  $ENV{PERL_RE_COLORS} = $colors;
  };
 }
 

@@ -620,9 +620,9 @@ the same character fore and aft, but the 4 sorts of brackets
 	""	qq{}	      Literal		  yes
 	``	qx{}	      Command		  yes (unless '' is delimiter)
 		qw{}	     Word list		  no
-	//	 m{}	   Pattern match	  yes
-		qr{}	      Pattern		  yes
-		 s{}{}	    Substitution	  yes
+	//	 m{}	   Pattern match	  yes (unless '' is delimiter)
+		qr{}	      Pattern		  yes (unless '' is delimiter)
+		 s{}{}	    Substitution	  yes (unless '' is delimiter)
 		tr{}{}	  Transliteration	  no (but see below)
 
 Note that there can be whitespace between the operator and the quoting
@@ -753,22 +753,22 @@ Options are:
 
 If "/" is the delimiter then the initial C<m> is optional.  With the C<m>
 you can use any pair of non-alphanumeric, non-whitespace characters 
-as delimiters (if single quotes are used, no interpretation is done
-on the replacement string. Unlike Perl 4, Perl 5 treats backticks as normal
-delimiters; the replacement text is not evaluated as a command).
-This is particularly useful for matching Unix path names
-that contain "/", to avoid LTS (leaning toothpick syndrome).  If "?" is
+as delimiters. This is particularly useful for matching Unix path names
+that contain "/", to avoid LTS (leaning toothpick syndrome). If "?" is
 the delimiter, then the match-only-once rule of C<?PATTERN?> applies.
+If "'" is the delimiter, no variable interpolation is performed on the
+PATTERN.
 
 PATTERN may contain variables, which will be interpolated (and the
-pattern recompiled) every time the pattern search is evaluated.  (Note
-that C<$)> and C<$|> might not be interpolated because they look like
-end-of-string tests.)  If you want such a pattern to be compiled only
-once, add a C</o> after the trailing delimiter.  This avoids expensive
-run-time recompilations, and is useful when the value you are
-interpolating won't change over the life of the script.  However, mentioning
-C</o> constitutes a promise that you won't change the variables in the pattern.
-If you change them, Perl won't even notice.
+pattern recompiled) every time the pattern search is evaluated, except
+for when the delimiter is a single quote.  (Note that C<$)> and C<$|>
+might not be interpolated because they look like end-of-string tests.)
+If you want such a pattern to be compiled only once, add a C</o> after
+the trailing delimiter.  This avoids expensive run-time recompilations,
+and is useful when the value you are interpolating won't change over
+the life of the script.  However, mentioning C</o> constitutes a promise
+that you won't change the variables in the pattern.  If you change them,
+Perl won't even notice.
 
 If the PATTERN evaluates to the empty string, the last
 I<successfully> matched regular expression is used instead.
@@ -911,8 +911,9 @@ A double-quoted, interpolated string.
 =item qr/STRING/imosx
 
 Quote-as-a-regular-expression operator.  I<STRING> is interpolated the
-same way as I<PATTERN> in C<m/PATTERN/>.  Returns a Perl value which
-may be used instead of the corresponding C</STRING/imosx> expression.
+same way as I<PATTERN> in C<m/PATTERN/>.  If "'" is used as the
+delimiter, no variable interpolation is done.  Returns a Perl value
+which may be used instead of the corresponding C</STRING/imosx> expression.
 
 For example,
 
@@ -1057,6 +1058,10 @@ comments into a multi-line C<qw>-string.  For this reason the C<-w>
 switch produce warnings if the STRING contains the "," or the "#"
 character.
 
+Note that under use L<locale> qw() taints because the definition of
+whitespace is tainted.  See L<perlsec> for more information about
+tainting and L<perllocale> for more information about locales.
+
 =item s/PATTERN/REPLACEMENT/egimosx
 
 Searches a string for a pattern, and if found, replaces that pattern
@@ -1068,7 +1073,7 @@ variable is searched and modified.  (The string specified with C<=~> must
 be scalar variable, an array element, a hash element, or an assignment
 to one of those, i.e., an lvalue.)
 
-If the delimiter chosen is single quote, no variable interpolation is
+If the delimiter chosen is a single quote, no variable interpolation is
 done on either the PATTERN or the REPLACEMENT.  Otherwise, if the
 PATTERN contains a $ that looks like a variable rather than an
 end-of-string test, the variable will be interpolated into the pattern

@@ -332,7 +332,7 @@ if (! $versiononly) {
 
 # Install pod pages.  Where? I guess in $installprivlib/pod.
 
-if (! $versiononly || !($installprivlib =~ m/\Q$]/)) {
+unless ( $versiononly && !($installprivlib =~ m/\Q$]/)) {
     mkpath("${installprivlib}/pod", 1, 0777);
 
     # If Perl 5.003's perldiag.pod is there, rename it.

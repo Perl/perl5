@@ -102,9 +102,9 @@ Text::Wrap - line wrapping to form simple paragraphs
 =head1 DESCRIPTION
 
 Text::Wrap::wrap() is a very simple paragraph formatter.  It formats a
-single paragraph at a time by breaking lines at word boundries.
+single paragraph at a time by breaking lines at word boundaries.
 Indentation is controlled for the first line ($initial_tab) and
-all subsquent lines ($subsequent_tab) independently.  
+all subsequent lines ($subsequent_tab) independently.  
 
 Lines are wrapped at $Text::Wrap::columns columns.  
 $Text::Wrap::columns should be set to the full width of your output device.
@@ -116,7 +116,7 @@ To restore the old (dying) behavior, set $Text::Wrap::huge to
 
 Text::Wrap::fill() is a simple multi-paragraph formatter.  It formats
 each paragraph separately and then joins them together when it's done.  It
-will destory any whitespace in the original text.  It breaks text into
+will destroy any whitespace in the original text.  It breaks text into
 paragraphs by looking for whitespace after a newline.  In other respects
 it acts like wrap().
 

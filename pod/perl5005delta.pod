@@ -85,7 +85,7 @@ begin with C<perl> be referenced with a C<Perl_> prefix.  The bare function
 names without the C<Perl_> prefix are supported with macros, but this
 support may cease in a future release.
 
-See L<perlguts/API LISTING>.
+See L<perlguts/"API LISTING">.
 
 =item Enabling threads has source compatibility issues
 
@@ -100,7 +100,7 @@ directly accessing perl globals as C<GvSV(errgv)>.  The API call is
 backward compatible with existing perls and provides source compatibility
 with threading is enabled.
 
-See L<API Changes for more information>.
+See L<"C Source Compatibility"> for more information.
 
 =back
 
@@ -502,7 +502,9 @@ DOS is now supported under the DJGPP tools.  See L<README.dos>.
 
 MPE/iX is now supported.  See L<README.mpeix>.
 
-MVS (OS390) is now supported.  See L<README.os390>.
+MVS (aka OS390, aka Open Edition) is now supported.  See L<README.os390>.
+
+Stratus VOS is now supported.  See L<README.vos>.
 
 =head2 Changes in existing support
 
@@ -587,9 +589,32 @@ Various pragmata to control behavior of regular expressions.
 
 =over
 
+=item Benchmark
+
+You can now run tests for I<x> seconds instead of guessing the right
+number of tests to run.
+
 =item CGI
 
 CGI has been updated to version 2.42.
+
+=item Fcntl
+
+More Fcntl constants added: F_SETLK64, F_SETLKW64, O_LARGEFILE for
+large (more than 4G) file access (the 64-bit support is not yet
+working, though, so no need to get overly excited), Free/Net/OpenBSD
+locking behaviour flags F_FLOCK, F_POSIX, Linux F_SHLCK, and
+O_ACCMODE: the mask of O_RDONLY, O_WRONLY, and O_RDWR.
+
+=item Math::Complex
+
+The accessors methods Re, Im, arg, abs, rho, theta, methods can
+($z->Re()) now also act as mutators ($z->Re(3)).
+
+=item Math::Trig
+
+A little bit of radial trigonometry (cylindrical and spherical) added,
+for example the great circle distance.
 
 =item POSIX
 
@@ -860,7 +885,7 @@ not use those settings.  This was not dead serious, fortunately: there
 is a "default locale" called "C" that Perl can and will use, the
 script will be run.  Before you really fix the problem, however, you
 will get the same error message each time you run Perl.  How to really
-fix the problem can be found in L<perllocale> section B<LOCALE PROBLEMS>.
+fix the problem can be found in L<perllocale/"LOCALE PROBLEMS">.
 
 =back
 
@@ -874,15 +899,29 @@ fix the problem can be found in L<perllocale> section B<LOCALE PROBLEMS>.
 (F) The mktemp() routine failed for some reason while trying to process
 a B<-e> switch.  Maybe your /tmp partition is full, or clobbered.
 
+Removed because B<-e> doesn't use temporary files any more.
+
 =item Can't write to temp file for B<-e>: %s
 
 (F) The write routine failed for some reason while trying to process
 a B<-e> switch.  Maybe your /tmp partition is full, or clobbered.
 
+Removed because B<-e> doesn't use temporary files any more.
+
 =item Cannot open temporary file
 
 (F) The create routine failed for some reason while trying to process
 a B<-e> switch.  Maybe your /tmp partition is full, or clobbered.
+
+Removed because B<-e> doesn't use temporary files any more.
+
+=item regexp too big
+
+(F) The current implementation of regular expressions uses shorts as
+address offsets within a string.  Unfortunately this means that if
+the regular expression compiles to longer than 32767, it'll blow up.
+Usually when you want a regular expression this big, there is a better
+way to do it with multiple statements.  See L<perlre>.
 
 =item regexp too big
 

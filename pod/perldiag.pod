@@ -57,6 +57,12 @@ no useful value.  See L<perlmod>.
 checksumming process loses information, and you can't go the other
 way.  See L<perlfunc/unpack>.
 
+=item /%s/: Unrecognized escape \\%c passed through
+
+(W) You used a backslash-character combination which is not recognized
+by Perl.  This combination appears in an interpolated variable or a 
+C<'>-delimited regular expression.
+
 =item %s (...) interpreted as function
 
 (W) You've run afoul of the rule that says that any list operator followed
@@ -1428,7 +1434,7 @@ architecture. On a 32-bit architecture the largest octal literal is
 (S) A warning peculiar to VMS.  Perl keeps track of the number
 of times you've called C<fork> and C<exec>, to determine
 whether the current call to C<exec> should affect the current
-script or a subprocess (see L<perlvms/exec>).  Somehow, this count
+script or a subprocess (see L<perlvms/"exec LIST">).  Somehow, this count
 has become scrambled, so Perl is making a guess and treating
 this C<exec> as a request to terminate the Perl script
 and execute the specified command.
@@ -2769,6 +2775,11 @@ an underbar into it.  You might also declare it as a subroutine.
 (F) The Perl parser has no idea what to do with the specified character
 in your Perl script (or eval).  Perhaps you tried to run a compressed
 script, a binary program, or a directory as a Perl program.
+
+=item Unrecognized escape \\%c passed through
+
+(W) You used a backslash-character combination which is not recognized
+by Perl.
 
 =item Unrecognized signal name "%s"
 

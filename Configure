@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sun Nov 29 18:15:39 EET 1998 [metaconfig 3.0 PL70]
+# Generated on Sat Jan  9 18:00:39 EET 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by jhi@iki.fi)
 
 cat >/tmp/c1$$ <<EOF
@@ -409,8 +409,8 @@ d_pause=''
 d_pipe=''
 d_poll=''
 d_portable=''
-d_pthread_create_joinable=''
-pthread_create_joinable=''
+d_old_pthread_create_joinable=''
+old_pthread_create_joinable=''
 d_pthread_yield=''
 d_sched_yield=''
 sched_yield=''
@@ -2465,23 +2465,27 @@ To do so, Configure must be run with -Dusethreads.
 (See README.threads for details.)
 EOM
 case "$usethreads" in
-$define|true|[yY]*)	dflt='y';;
+$define|true|[yY]*)     dflt='y';;
 *) dflt='n';;
 esac
 rp='Build a threading Perl?'
 . ./myread
 case "$ans" in
-y|Y)	val="$define" ;;     
+y|Y)    val="$define" ;;     
 *)      val="$undef" ;;
 esac
 set usethreads
 eval $setvar 
-: Look for a hint-file generated 'call-back-unit'.  Now that the
-: user has specified if a threading perl is to be built, we may need 
-: to set or change some other defaults.
-if $test -f usethreads.cbu; then
-    . ./usethreads.cbu
-fi
+: Look for a hint-file generated 'call-back-unit'.  If the
+: user has specified that a threading perl is to be built,
+: we may need to set or change some other defaults.
+case "$usethreads" in
+$define|true|[yY]*)
+	if $test -f usethreads.cbu; then
+		. ./usethreads.cbu
+	fi
+	;;
+esac
 case "$d_oldpthreads" in
 '')	: Configure tests would be welcome here.  For now, assume undef.
 	val="$undef" ;;
@@ -2490,6 +2494,249 @@ esac
 set d_oldpthreads
 eval $setvar
 
+
+case "$usethreads" in
+"$define")
+    case "$osname" in
+    aix)
+        ccflags="$ccflags -DNEED_PTHREAD_INIT"
+        case "$cc" in
+        xlc_r | cc_r) ;;
+        cc) 
+	    echo >&4 "Switching cc to xlc_r because of POSIX threads."
+	    cc=xlc_r
+            ;;
+        '') 
+	    cc=xlc_r
+            ;;
+        *)
+ 	    cat >&4 <<EOM
+For pthreads you should use the AIX C compilers xlc_r or cc_r.
+(now your compiler was '$cc')
+Cannot continue, aborting.
+EOM
+ 	    exit 1
+	    ;;
+        esac
+
+        # Add the POSIX threads library and the re-entrant libc.
+
+        lddlflags=`echo $lddlflags | sed 's/ -lc$/ -lpthreads -lc_r -lc/'`
+
+        # Add the c_r library to the list of wanted libraries.
+        # Make sure the c_r library is before the c library or
+        # make will fail.
+        set `echo X "$libswanted "| sed -e 's/ c / c_r c /'`
+        shift
+        libswanted="$*"
+	;;
+    dec_osf)
+        # Threads interfaces changed with V4.0.
+        case "`uname -r`" in
+        *[123].*)
+	    libswanted="$libswanted pthreads mach exc c_r"
+  	    ccflags="-threads $ccflags"
+	    ;;
+        *)
+	    libswanted="$libswanted pthread exc"
+    	    ccflags="-pthread $ccflags"
+	    ;;
+        esac
+
+        usemymalloc='n'
+	;;
+    dos_djgpp)
+        set `echo X "$libswanted "| sed -e 's/ c / gthreads c /'`
+        shift
+        libswanted="$*"
+	;;
+    freebsd)
+        case "$osvers" in  
+        [34].*) ldflags="-pthread $ldflags"
+              ;;
+        2.2*) if [ ! -r /usr/lib/libc_r ]; then
+              cat <<'EOM' >&4
+POSIX threads are not supported by default on FreeBSD $osvers.  Follow the
+instructions in 'man pthread' to build and install the needed libraries.
+EOM
+                 exit 1
+              fi
+              set `echo X "$libswanted "| sed -e 's/ c / c_r /'`
+              shift
+              libswanted="$*"
+              # Configure will probably pick the wrong libc to use for nm
+              # scan.
+              # The safest quick-fix is just to not use nm at all.
+              usenm=false
+              ;;
+         *)   cat <<'EOM' >&4
+
+It is not known if FreeBSD $osvers supports POSIX threads or not.
+Consider upgrading to the latest STABLE release.
+
+EOM
+              exit 1
+              ;;
+        esac
+	;;
+    hpux)
+        if [ "$xxOsRevMajor" -lt 10 ]; then
+            cat <<EOM >&4
+HP-UX $xxOsRevMajor cannot support POSIX threads.
+Consider upgrading to at least HP-UX 11.
+Cannot continue, aborting.
+EOM
+            exit 1
+        fi
+        case "$xxOsRevMajor" in
+        10)
+            # Under 10.X, a threaded perl can be built, but it needs
+            # libcma and OLD_PTHREADS_API.  Also <pthread.h> needs to
+            # be #included before any other includes (in perl.h)
+            if [ ! -f /usr/include/pthread.h -o ! -f /usr/lib/libcma.sl ]; then
+                cat <<EOM >&4
+In HP-UX 10.X for POSIX threads you need both of the files
+/usr/include/pthread.h and /usr/lib/libcma.sl.
+Either you must install the CMA package or you must upgrade to HP-UX 11.
+Cannot continue, aborting.
+EOM
+     	        exit 1
+            fi
+
+            # HP-UX 10.X uses the old pthreads API
+            case "$d_oldpthreads" in
+            '') d_oldpthreads="$define" ;;
+            esac
+
+            # include libcma before all the others
+            libswanted="cma $libswanted"
+
+            # tell perl.h to include <pthread.h> before other include files
+            ccflags="$ccflags -DPTHREAD_H_FIRST"
+
+            # CMA redefines select to cma_select, and cma_select expects int *
+            # instead of fd_set * (just like 9.X)
+            selecttype='int *'
+            ;;
+        11 | 12) # 12 may want upping the _POSIX_C_SOURCE
+            ccflags="$ccflags -D_POSIX_C_SOURCE=199506L"
+            libswanted="$libswanted pthread"
+	    ;;
+        esac
+	;;
+    irix)
+        if test ! -f ${TOOLROOT}/usr/include/pthread.h -o ! -f /usr/lib/libpthread.so; then
+            case "`uname -r`" in
+            [1-5].*|6.[01]|6.[01])
+ 	        cat >&4 <<EOM
+IRIX `uname -r` does not support POSIX threads.
+You should upgrade to at least IRIX 6.2 with pthread patches.
+EOM
+	        ;;
+	    6.2)
+ 	        cat >&4 <<EOM
+IRIX 6.2 can have the POSIX threads.
+However,the following IRIX patches (or their replacements) MUST be installed:
+        1404 Irix 6.2 Posix 1003.1b man pages
+        1645 IRIX 6.2 & 6.3 POSIX header file updates
+        2000 Irix 6.2 Posix 1003.1b support modules
+        2254 Pthread library fixes
+	2401 6.2 all platform kernel rollup
+IMPORTANT:
+	Without patch 2401, a kernel bug in IRIX 6.2 will
+	cause your machine to panic and crash when running
+	threaded perl. IRIX 6.3 and up should be OK.
+EOM
+	        ;;
+  	    [67].*)
+	        cat >&4 <<EOM
+IRIX `uname -r` should have the POSIX threads.
+But, somehow, you do not seem to have them installed.
+EOM
+	        ;;
+	    esac
+            cat >&4 <<EOM
+Cannot continue, aborting.
+EOM
+            exit 1
+        fi
+        set `echo X "$libswanted "| sed -e 's/ c / pthread /'`
+        ld="${cc:-cc}"
+        shift
+        libswanted="$*"
+
+        usemymalloc='n'
+	;;
+    linux)
+        ccflags="-D_REENTRANT $ccflags"
+
+        set `echo X "$libswanted "| sed -e 's/ c / pthread c /'`
+        shift
+        libswanted="$*"
+	;;
+    os2)
+	ccflags="-Zmt $ccflags"
+        cppflags="-Zmt $cppflags"  # Do we really need to set this?
+        aout_ccflags="-DUSE_THREADS $aout_ccflags"
+        aout_cppflags="-DUSE_THREADS $aout_cppflags"
+        aout_lddlflags="-Zmt $aout_lddlflags"
+        aout_ldflags="-Zmt $aout_ldflags"
+	;;
+    solaris)
+        ccflags="-D_REENTRANT $ccflags"
+
+        # sched_yield is in -lposix4
+        set `echo X "$libswanted "| sed -e 's/ c / posix4 pthread c /'`
+        shift
+        libswanted="$*"
+
+        # On Solaris 2.6 x86 there is a bug with sigsetjmp() and siglongjmp()
+        # when linked with the threads library, such that whatever positive
+        # value you pass to siglongjmp(), sigsetjmp() returns 1.
+        # Thanks to Simon Parsons <S.Parsons@ftel.co.uk> for this report.
+        # Sun BugID is 4117946, "sigsetjmp always returns 1 when called by
+        # siglongjmp in a MT program". As of 19980622, there is no patch
+        # available.
+        cat >try.c <<'EOM'
+	/* Test for sig(set|long)jmp bug. */
+	#include <setjmp.h>
+	 
+	main()
+	{
+	    sigjmp_buf env;
+	    int ret;
+	
+	    ret = sigsetjmp(env, 1);
+	    if (ret) { return ret == 2; }
+	    siglongjmp(env, 2);
+	}
+EOM
+        if test "`arch`" = i86pc -a "$osvers" = 2.6 && \
+           ${cc:-cc} try.c -lpthread >/dev/null 2>&1 && ./a.out; then
+ 	    d_sigsetjmp=$undef
+	    cat << 'EOM' >&2
+
+You will see a *** WHOA THERE!!! ***  message from Configure for
+d_sigsetjmp.  Keep the recommended value.  See hints/solaris_2.sh
+for more information.
+
+EOM
+        fi
+	;;
+    vmesa)
+	;;
+    *)
+        cat >&4 <<EOM
+$osname is not known to support threads.
+Please let me (jhi@iki.fi) know how to do that.
+
+Cannot continue, aborting.
+EOM
+	exit 1
+	;;
+    esac # $osname
+    ;;
+esac # $usethreads
 cat <<EOM
 
 Perl can be built so that multiple Perl interpreters can coexist
@@ -2538,6 +2785,95 @@ eval $setvar
 
 archname64=''
 
+case "$use64bits" in
+"$define")
+	case "$osname" in
+	dec_osf)
+	    # Pretty much everything is 64-bit already.
+	    ;;
+	hpux)
+	    if [ "$xxOsRevMajor" -lt 11 ]; then
+		cat <<EOM >&4
+64-bit compilation is not supported on HP-UX $xxOsRevMajor.
+You need at least HP-UX 11.0.
+Cannot continue, aborting.
+EOM
+		exit 1
+	    fi
+	    if [ ! -d /lib/pa20_64 ]; then
+		cat <<EOM >&4
+You do not seem to have the 64-bit libraries, /lib/pa20_64.
+Cannot continue, aborting.
+EOM
+		exit 1
+	    fi
+	    ccflags="$ccflags +DD64 -D_FILE_OFFSET_BITS=64"
+	    ldflags="$ldflags +DD64"
+	    ld=/usr/bin/ld
+	    set `echo " $libswanted " | sed -e 's@ dl @ @'`
+	    libswanted="$*"
+	    glibpth="/lib/pa20_64"
+	    ;;
+	irix)
+	    case "`uname -r`" in
+	    [1-5]*|6.[01])
+		cat >&4 <<EOM
+IRIX `uname -r` does not support 64-bit types.
+You should upgrade to at least IRIX 6.2.
+Cannot continue, aborting.
+EOM
+		exit 1
+		;;
+	    esac
+	    case "$ccflags" in
+	    *-n32*)
+		ccflags="$ccflags -DUSE_LONG_LONG"
+		archname64="-n32"
+		d_open64="$undef"
+		# In -n32 mode (ILP32LL64) we use the standard open().
+		# In -64 we will use the open64().
+		cat << 'EOM' >&2
+
+You will see a *** WHOA THERE!!! ***  message from Configure for
+d_open64.  Keep the recommended value.  See hints/irix6.sh
+for more information.
+
+EOM
+		;;
+	    esac
+	    ccflags="$ccflags -DUSE_64_BIT_FILES"
+	    ;;
+	solaris)
+	    case "`uname -r`" in
+	    1.*|2.[1-5])
+		cat >&4 <<EOM
+Solaris `uname -r` does not support 64-bit interfaces.
+You should upgrade to at least Solaris 2.6.
+EOM
+		exit 1
+		;;
+	    esac
+	    ccflags="$ccflags `getconf LFS_CFLAGS` -DUSE_LONG_LONG"
+	    ldflags="$ldflags `getconf LFS_LDFLAGS`"
+	    libswanted="$libswanted `getconf LFS_LIBS`"
+	    # When a 64-bit cc becomes available $archname64
+	    # may need setting so that $archname gets it attached.
+	    ;;
+	unicos)
+	    # Pretty much everything is 64-bit already.
+	    ;;
+	*)
+	    cat >&4 <<EOM
+$osname is not known to support 64-bit interfaces.
+Please let me (jhi@iki.fi) know how to do that.
+
+Cannot continue, aborting.
+EOM
+	    exit 1
+	    ;;
+	esac
+	;;
+esac
 : determine the architecture name
 echo " "
 if xxx=`./loc arch blurfl $pth`; $test -f "$xxx"; then
@@ -4149,7 +4485,7 @@ $cat >try.msg <<'EOM'
 I've tried to compile and run the following simple program:
 
 EOM
-$cat try.c
+$cat try.c >> try.msg
 
 $cat >> try.msg <<EOM
 
@@ -4392,7 +4728,7 @@ $rm -f malloc.[co]
 echo " "
 echo "Checking out function prototypes..." >&4
 $cat >prototype.c <<'EOCP'
-main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
 	exit(0);}
 EOCP
 if $cc $ccflags -c prototype.c >prototype.out 2>&1 ; then
@@ -4476,8 +4812,7 @@ echo " "
 echo "Checking for GNU C Library..." >&4
 cat >gnulibc.c <<EOM
 #include <stdio.h>
-int
-main()
+int main()
 {
 #ifdef __GLIBC__
     exit(0);
@@ -4803,6 +5138,10 @@ elif com="$sed -n -e 's/.*\.text n\ \ \ \.//p'";\
 	eval $xscan;\
 	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
 		eval $xrun
+elif com="sed -n -e 's/^__.*//' -e 's/[       ]*D[    ]*[0-9]*.*//p'";\
+	eval $xscan;\
+	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
+		eval $xrun
 else
 	$nm -p $* 2>/dev/null >libc.tmp
 	$grep fprintf libc.tmp > libc.ptf
@@ -5038,7 +5377,7 @@ EOM
 /* Test for whether ELF binaries are produced */
 #include <fcntl.h>
 #include <stdlib.h>
-main() {
+int main() {
 	char b[4];
 	int i = open("a.out",O_RDONLY);
 	if(i == -1) 
@@ -5092,6 +5431,10 @@ EOM
     esac
 
 	: Try to guess additional flags to pick up local libraries.
+	: Be careful not to append to a plain 'none'
+	case "$dflt" in
+	none) dflt='' ;;
+	esac
 	for thisflag in $ldflags; do
 		case "$thisflag" in
 		-L*)
@@ -6173,8 +6516,7 @@ char *got;
 	}
 }
 
-int
-main()
+int main()
 { 
 	char buf[64]; 
 	buf[63] = '\0';
@@ -6340,7 +6682,7 @@ case "$d_getpgrp" in
 #ifdef I_UNISTD
 #  include <unistd.h>
 #endif
-main()
+int main()
 {
 	if (getuid() == 0) {
 		printf("(I see you are running Configure as super-user...)\n");
@@ -6402,7 +6744,7 @@ case "$d_setpgrp" in
 #ifdef I_UNISTD
 #  include <unistd.h>
 #endif
-main()
+int main()
 {
 	if (getuid() == 0) {
 		printf("(I see you are running Configure as super-user...)\n");
@@ -6895,7 +7237,7 @@ echo " "
 echo 'Checking to see if your C compiler knows about "const"...' >&4
 $cat >const.c <<'EOCP'
 typedef struct spug { int drokk; } spug;
-main()
+int main()
 {
 	const char *foo;
 	const spug y;
@@ -7299,7 +7641,7 @@ $cat >fred.c<<EOM
 
 extern int fred() ;
 
-main()
+int main()
 {
     void * handle ;
     void * symbol ;
@@ -8232,7 +8574,7 @@ eval $inlibc
 echo " "
 $cat >try.c <<EOCP
 #include <inttypes.h>
-main() {
+int main() {
 	static int32_t foo32 = 0x12345678;
 }
 EOCP
@@ -8399,7 +8741,7 @@ $define)
 	$echo $n "Checking to see how big your long doubles are...$c" >&4
 	$cat >try.c <<'EOCP'
 #include <stdio.h>
-main()
+int main()
 {
 	printf("%d\n", sizeof(long double));
 }
@@ -8445,7 +8787,7 @@ $define)
 	$echo $n "Checking to see how big your long longs are...$c" >&4
 	$cat >try.c <<'EOCP'
 #include <stdio.h>
-main()
+int main()
 {
 	printf("%d\n", sizeof(long long));
 }
@@ -8569,18 +8911,6 @@ eval $setvar
 set nice d_nice
 eval $inlibc
 
-: see if pause exists
-set pause d_pause
-eval $inlibc
-
-: see if pipe exists
-set pipe d_pipe
-eval $inlibc
-
-: see if poll exists
-set poll d_poll
-eval $inlibc
-
 : how to create joinable pthreads
 if test "X$usethreads" = "X$define"; then
 	echo " "
@@ -8594,55 +8924,67 @@ EOCP
 	set try -DJOINABLE=PTHREAD_CREATE_JOINABLE
 	if eval $compile; then
 		echo "You seem to use PTHREAD_CREATE_JOINABLE." >&2
-		val="$undef"
-		set d_pthread_create_joinable
+		val="$undef" # Yes, undef.
+		set d_old_pthread_create_joinable
 		eval $setvar
-		val=0
-		set pthread_create_joinable
+		val=""
+		set old_pthread_create_joinable
 		eval $setvar
 	else
 		set try -DJOINABLE=PTHREAD_CREATE_UNDETACHED
 		if eval $compile; then
 			echo "You seem to use PTHREAD_CREATE_UNDETACHED." >&2
 			val="$define"
-			set d_pthread_create_joinable
+			set d_old_pthread_create_joinable
 			eval $setvar
 			val=PTHREAD_CREATE_UNDETACHED
-			set pthread_create_joinable
+			set old_pthread_create_joinable
 			eval $setvar
 		else		
 			set try -DJOINABLE=__UNDETACHED
 			if eval $compile; then
 				echo "You seem to use __UNDETACHED." >&2
 				val="$define"
-				set d_pthread_create_joinable
+				set d_old_pthread_create_joinable
 				eval $setvar
 				val=__UNDETACHED
-				set pthread_create_joinable
+				set old_pthread_create_joinable
 				eval $setvar
 			else
 				echo "Egads, nothing obvious found.  Guessing that you use 0." >&2
 				val="$define"
-				set d_pthread_create_joinable
+				set d_old_pthread_create_joinable
 				eval $setvar
 				val=0
-				set pthread_create_joinable
+				set old_pthread_create_joinable
 				eval $setvar
 			fi
 		fi
 	fi
 	$rm -f try try.*
 else
-    d_pthread_create_joinable="$undef"
-    pthread_create_joinable=0
+    d_old_pthread_create_joinable="$undef"
+    old_pthread_create_joinable=""
 fi
+
+: see if pause exists
+set pause d_pause
+eval $inlibc
+
+: see if pipe exists
+set pipe d_pipe
+eval $inlibc
+
+: see if poll exists
+set poll d_poll
+eval $inlibc
 
 
 : see whether the various POSIXish _yields exist
 $cat >try.c <<EOP
 #include <pthread.h>
 #include <stdio.h>
-main() {
+int main() {
 #ifdef SCHED_YIELD
 	sched_yield();
 #else
@@ -9718,7 +10060,7 @@ eval $inlibc
 echo " "
 echo "Checking to see if your C compiler can copy structs..." >&4
 $cat >try.c <<'EOCP'
-main()
+int main()
 {
 	struct blurfl {
 		int dyick;
@@ -10026,7 +10368,7 @@ $rm -f closedir*
 echo " "
 echo 'Checking to see if your C compiler knows about "volatile"...' >&4
 $cat >try.c <<'EOCP'
-main()
+int main()
 {
 	typedef struct _goo_struct goo_struct;
 	goo_struct * volatile goo = ((goo_struct *)0);
@@ -10510,8 +10852,8 @@ while $test "$cont"; do
 	if set $ans val -f; eval $csym; $val; then
 		cont=''
 	else
-		dflt=n
-		rp="Function $ans does not exist. Use that name anyway?"
+		dflt=y
+		rp="I cannot find function $ans. Use that name anyway?"
 		. ./myread
 		dflt=rand
 		case "$ans" in
@@ -10694,7 +11036,7 @@ $echo $n "Checking to see how big your file offsets are...$c" >&4
 $cat >try.c <<EOCP
 #include <sys/types.h>
 #include <stdio.h>
-main()
+int main()
 {
 	printf("%d\n", sizeof($lseektype));
 }
@@ -12512,6 +12854,7 @@ d_mymalloc='$d_mymalloc'
 d_nextkey64='$d_nextkey64'
 d_nice='$d_nice'
 d_off64t='$d_off64t'
+d_old_pthread_create_joinable='$d_old_pthread_create_joinable'
 d_oldpthreads='$d_oldpthreads'
 d_oldsock='$d_oldsock'
 d_open3='$d_open3'
@@ -12523,7 +12866,6 @@ d_phostname='$d_phostname'
 d_pipe='$d_pipe'
 d_poll='$d_poll'
 d_portable='$d_portable'
-d_pthread_create_joinable='$d_pthread_create_joinable'
 d_pthread_yield='$d_pthread_yield'
 d_pwage='$d_pwage'
 d_pwchange='$d_pwchange'
@@ -12813,6 +13155,7 @@ nonxs_ext='$nonxs_ext'
 nroff='$nroff'
 o_nonblock='$o_nonblock'
 obj_ext='$obj_ext'
+old_pthread_create_joinable='$old_pthread_create_joinable'
 optimize='$optimize'
 orderlib='$orderlib'
 osname='$osname'
@@ -12836,7 +13179,6 @@ prefixexp='$prefixexp'
 privlib='$privlib'
 privlibexp='$privlibexp'
 prototype='$prototype'
-pthread_create_joinable='$pthread_create_joinable'
 ptrsize='$ptrsize'
 randbits='$randbits'
 randfunc='$randfunc'

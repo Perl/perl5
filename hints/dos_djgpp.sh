@@ -52,8 +52,3 @@ sitearch=$sitelib
 eagain='EAGAIN'
 rd_nodata='-1'
 
-if [ "X$usethreads" = "X$define" ]; then
-    set `echo X "$libswanted "| sed -e 's/ c / gthreads c /'`
-    shift
-    libswanted="$*"
-fi

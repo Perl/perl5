@@ -46,7 +46,11 @@ taint_env(void)
 	NULL
     };
 
+    if (!PL_envgv)
+	return;
+
 #ifdef VMS
+    {
     int i = 0;
     char name[10 + TYPE_DIGITS(int)] = "DCL$PATH";
 
@@ -68,6 +72,7 @@ taint_env(void)
 	}
 	i++;
     }
+  }
 #endif /* VMS */
 
     svp = hv_fetch(GvHVn(PL_envgv),"PATH",4,FALSE);

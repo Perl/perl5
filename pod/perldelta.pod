@@ -40,13 +40,80 @@ maintenance versions.
 
 =head1 Core Changes
 
-Todo.
+Binary numbers are now supported as literals, in s?printf formats, and
+C<oct()>:
+
+	$answer = 0b101010;
+	printf "The answer is: %b\n", oct("0b101010");
+
+The length argument of C<syswrite()> is now optional.
+
+Better 64-bit support -- but full support still a distant goal.  One
+must Configure with -Duse64bits to get Configure to probe for the
+extent of 64-bit support.  Depending on the platform (hints file) more
+or less 64-awareness becomes available.  As of 5.005_54 at least
+somewhat 64-bit aware platforms are HP-UX 11 or better, Solaris 2.6 or
+better, IRIX 6.2 or better.  Naturally 64-bit platforms like Digital
+UNIX and UNICOS also have 64-bit support.
 
 =head1 Supported Platforms
 
-Todo.
+VM/ESA is now supported.
+
+Siemens BS200 is now supported.
+
+The Mach CThreads (NeXTstep) are now supported by the Thread extension.
+
+=head1 New tests
+
+=over 4
+
+=item	op/io_const
+
+IO constants (SEEK_*, _IO*).
+	
+=item	op/io_dir
+
+Directory-related IO methods (new, read, close, rewind, tied delete).
+
+=item	op/io_multihomed
+
+INET sockets with multi-homed hosts.
+
+=item	op/io_poll
+
+IO poll().
+
+=item	op/io_unix
+
+UNIX sockets.
+
+=item	op/filetest
+
+File test operators.
+
+=item	op/lex_assign
+
+Guard against lexicals leaking (internal stuff).
+
+=back
 
 =head1 Modules and Pragmata
+
+=head2 Modules
+
+Dumpvalue module provides screen dumps of Perl data.
+
+=head2 Pragmata
+
+Lexical warnings pragma, "use warning;", to control optional warnings.
+
+Filetest pragma, to control the behaviour of filetests (C<-r> C<-w> ...).
+Currently only one subpragma implemented, "use filetest 'access';",
+that enables the use of access(2) or equivalent to check the
+permissions instead of using stat(2) as usual.  This matters
+in filesystems where there are ACLs (access control lists), the
+stat(2) might lie, while access(2) knows better.
 
 Todo.
 
@@ -56,11 +123,22 @@ Todo.
 
 =head1 Documentation Changes
 
-Todo.
+perlopentut, tutorial on opening things in Perl, was added.
+
+perlreftut, tutorial on references, was added.
 
 =head1 New Diagnostics
 
-Todo.
+=item /%s/: Unrecognized escape \\%c passed through
+
+(W) You used a backslash-character combination which is not recognized
+by Perl.  This combination appears in an interpolated variable or a 
+C<'>-delimited regular expression.
+
+=item Unrecognized escape \\%c passed through
+
+(W) You used a backslash-character combination which is not recognized
+by Perl.
 
 =head1 Obsolete Diagnostics
 

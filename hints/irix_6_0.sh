@@ -41,11 +41,3 @@ libswanted="$*"
 # set `echo X "$libswanted "|sed -e 's/ socket / /' -e 's/ sun / /' -e 's/ crypt / /' -e 's/ nsl / /' -e 's/ dl / /'`
 # shift
 # libswanted="$*"
-
-if [ "X$usethreads" = "X$define" ]; then
-    echo >&4 "IRIX 6.0 does not have POSIX threads."
-    echo >&4 "You should upgrade to at least IRIX 6.3."
-    echo >&4 "Cannot continue, aborting."
-    exit 1
-fi
-

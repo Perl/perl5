@@ -923,6 +923,7 @@ SvSTASH(sv)
 #define MgTYPE(mg) mg->mg_type
 #define MgFLAGS(mg) mg->mg_flags
 #define MgOBJ(mg) mg->mg_obj
+#define MgLENGTH(mg) mg->mg_len
 
 MODULE = B	PACKAGE = B::MAGIC	PREFIX = Mg	
 
@@ -946,13 +947,23 @@ B::SV
 MgOBJ(mg)
 	B::MAGIC	mg
 
+I32 
+MgLENGTH(mg)
+	B::MAGIC	mg
+ 
 void
 MgPTR(mg)
 	B::MAGIC	mg
     CODE:
 	ST(0) = sv_newmortal();
-	if (mg->mg_ptr)
-	    sv_setpvn(ST(0), mg->mg_ptr, mg->mg_len);
+ 	if (mg->mg_ptr){
+		if (mg->mg_len >= 0){
+	    		sv_setpvn(ST(0), mg->mg_ptr, mg->mg_len);
+		} else {
+			if (mg->mg_len == HEf_SVKEY)	
+				sv_setsv(ST(0),newRV((SV*)mg->mg_ptr));
+		}
+	}
 
 MODULE = B	PACKAGE = B::PVLV	PREFIX = Lv
 

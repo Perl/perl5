@@ -26,6 +26,10 @@
 #include "sockadapt.h"
 #endif
 
+#ifdef I_SYSUIO
+# include <sys/uio.h>
+#endif
+
 #ifndef AF_NBS
 #undef PF_NBS
 #endif
@@ -322,6 +326,12 @@ constant(char *name, int arg)
     case 'H':
 	break;
     case 'I':
+	if (strEQ(name, "IOV_MAX"))
+#ifdef IOV_MAX
+	    return IOV_MAX;
+#else
+	    goto not_there;
+#endif
 	break;
     case 'J':
 	break;
@@ -330,6 +340,12 @@ constant(char *name, int arg)
     case 'L':
 	break;
     case 'M':
+	if (strEQ(name, "MSG_BCAST"))
+#ifdef MSG_BCAST
+	    return MSG_BCAST;
+#else
+	    goto not_there;
+#endif
 	if (strEQ(name, "MSG_CTLFLAGS"))
 #ifdef MSG_CTLFLAGS
 	    return MSG_CTLFLAGS;
@@ -387,6 +403,12 @@ constant(char *name, int arg)
 	if (strEQ(name, "MSG_MAXIOVLEN"))
 #ifdef MSG_MAXIOVLEN
 	    return MSG_MAXIOVLEN;
+#else
+	    goto not_there;
+#endif
+	if (strEQ(name, "MSG_MCAST"))
+#ifdef MSG_MCAST
+	    return MSG_MCAST;
 #else
 	    goto not_there;
 #endif
@@ -602,7 +624,7 @@ constant(char *name, int arg)
 #endif
 	if (strEQ(name, "SCM_CREDENTIALS"))
 #ifdef SCM_CREDENTIALS
-	    return SCM_CREDENTIALSS;
+	    return SCM_CREDENTIALS;
 #else
 	    goto not_there;
 #endif
@@ -784,6 +806,12 @@ constant(char *name, int arg)
     case 'T':
 	break;
     case 'U':
+	if (strEQ(name, "UIO_MAXIOV"))
+#ifdef UIO_MAXIOV
+	    return UIO_MAXIOV;
+#else
+	    goto not_there;
+#endif
 	break;
     case 'V':
 	break;

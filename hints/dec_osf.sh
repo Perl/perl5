@@ -58,15 +58,10 @@
 # and it is called GEM. Many of the options we are going to use depend
 # on the compiler style.
 
-# do NOT, I repeat, *NOT* take away those leading tabs
-	# reset
-	_DEC_uname_r=
-	_DEC_cc_style=
-	# set
-	_DEC_uname_r=`uname -r`
-	# _DEC_cc_style set soon below
+# do NOT, I repeat, *NOT* take away the leading tabs
 # Configure Black Magic (TM)
-
+	# reset
+	_DEC_cc_style=
 case "$cc" in
 *gcc*)	;; # pass
 *)	# compile something small: taint.c is fine for this.
@@ -147,7 +142,7 @@ lddlflags='-shared -expect_unresolved "*"'
 
 # Fancy compiler suites use optimising linker as well as compiler.
 # <spider@Orb.Nashua.NH.US>
-case "$_DEC_uname_r" in
+case "`uname -r`" in
 *[123].*)	# old loader
 		lddlflags="$lddlflags -O3"
 		;;
@@ -165,7 +160,7 @@ esac
 # As noted above the -DDEBUGGING is added automagically by Configure if -g.
 case "$optimize" in
 	*-g*) ;; # left intentionally blank
-*)	case "$_DEC_uname_r" in
+*)	case "`uname -r`" in
 	*[123].*)
 		case "$useshrplib" in
 		false|undef|'')	lddlflags="$lddlflags -s"	;;
@@ -176,19 +171,6 @@ case "$optimize" in
     	esac
     	;;
 esac
-
-if [ "X$usethreads" = "X$define" ]; then
-    # Threads interfaces changed with V4.0.
-    case "$_DEC_uname_r" in
-    *[123].*)	libswanted="$libswanted pthreads mach exc c_r"
-		ccflags="-threads $ccflags"
-		;;
-    *)		libswanted="$libswanted pthread exc"
-    		ccflags="-pthread $ccflags"
-		;;
-    esac
-    usemymalloc='n'
-fi
 
 #
 # Make embedding in things like INN and Apache more memory friendly.
@@ -214,7 +196,6 @@ pp_sys_cflags='ccflags="$ccflags -DNO_EFF_ONLY_OK"'
 #
 
 unset _DEC_cc_style
-unset _DEC_uname_r
     
 #
 # History:

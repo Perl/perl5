@@ -126,6 +126,7 @@ perl_construct(register PerlInterpreter *sv_interp)
 	    croak("panic: pthread_key_create");
 #endif
 	MUTEX_INIT(&PL_sv_mutex);
+	MUTEX_INIT(&PL_cred_mutex);
 	/*
 	 * Safe to use basic SV functions from now on (though
 	 * not things like mortals or tainting yet).
@@ -558,6 +559,7 @@ perl_destruct(register PerlInterpreter *sv_interp)
 #ifdef USE_THREADS
     MUTEX_DESTROY(&PL_strtab_mutex);
     MUTEX_DESTROY(&PL_sv_mutex);
+    MUTEX_DESTROY(&PL_cred_mutex);
     MUTEX_DESTROY(&PL_eval_mutex);
     MUTEX_DESTROY(&PL_cred_mutex);
     COND_DESTROY(&PL_eval_cond);
@@ -1755,6 +1757,9 @@ moreswitches(char *s)
 #endif
 #ifdef POSIX_BC
 	printf("BS2000 (POSIX) port by Start Amadeus GmbH, 1998\n");
+#endif
+#ifdef __MINT__
+	printf("MiNT port by Guido Flohr, 1997\n");
 #endif
 #ifdef BINARY_BUILD_NOTICE
 	BINARY_BUILD_NOTICE;

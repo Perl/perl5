@@ -874,6 +874,8 @@ PP(pp_match)
     if (rx->minlen > len) goto failure;
 
     truebase = t = s;
+
+    /* XXXX What part of this is needed with true \G-support? */
     if (global = pm->op_pmflags & PMf_GLOBAL) {
 	rx->startp[0] = 0;
 	if (SvTYPE(TARG) >= SVt_PVMG && SvMAGIC(TARG)) {
@@ -993,6 +995,7 @@ play_it_again:
 	    if (rx->startp[0] && rx->startp[0] == rx->endp[0])
 		++rx->endp[0];
 	    PUTBACK;			/* EVAL blocks may use stack */
+	    r_flags |= REXEC_IGNOREPOS;
 	    goto play_it_again;
 	}
 	else if (!iters)
@@ -1827,6 +1830,7 @@ PP(pp_subst)
 	    PUSHSUBST(cx);
 	    RETURNOP(cPMOP->op_pmreplroot);
 	}
+	r_flags |= REXEC_IGNOREPOS;
 	do {
 	    if (iters++ > maxiters)
 		DIE("Substitution loop");
@@ -1845,7 +1849,7 @@ PP(pp_subst)
 		sv_catpvn(dstr, c, clen);
 	    if (once)
 		break;
-	} while (CALLREGEXEC(rx, s, strend, orig, s == m, Nullsv, NULL, r_flags));
+	} while (CALLREGEXEC(rx, s, strend, orig, s == m, TARG, NULL, r_flags));
 	sv_catpvn(dstr, s, strend - s);
 
 	(void)SvOOK_off(TARG);

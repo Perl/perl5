@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Sun Nov 29 18:17:40 EET 1998
+ * Configuration time: Thu Dec  3 15:05:16 EET 1998
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -2001,8 +2001,8 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define ARCHLIB "/opt/perl/lib/5.00553/alpha-dec_osf-thread"		/**/
-#define ARCHLIB_EXP "/opt/perl/lib/5.00553/alpha-dec_osf-thread"		/**/
+#define ARCHLIB "/opt/perl/lib/5.00554/alpha-dec_osf-thread"		/**/
+#define ARCHLIB_EXP "/opt/perl/lib/5.00554/alpha-dec_osf-thread"		/**/
 
 /* DLSYM_NEEDS_UNDERSCORE:
  *	This symbol, if defined, indicates that we need to prepend an
@@ -2190,8 +2190,8 @@
  *	This symbol contains the ~name expanded version of PRIVLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define PRIVLIB "/opt/perl/lib/5.00553"		/**/
-#define PRIVLIB_EXP "/opt/perl/lib/5.00553"		/**/
+#define PRIVLIB "/opt/perl/lib/5.00554"		/**/
+#define PRIVLIB_EXP "/opt/perl/lib/5.00554"		/**/
 
 /* SELECT_MIN_BITS:
  *	This symbol holds the minimum number of bits operated by select.
@@ -2215,8 +2215,8 @@
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITEARCH "/opt/perl/lib/site_perl/5.00553/alpha-dec_osf-thread"		/**/
-#define SITEARCH_EXP "/opt/perl/lib/site_perl/5.00553/alpha-dec_osf-thread"		/**/
+#define SITEARCH "/opt/perl/lib/site_perl/5.00554/alpha-dec_osf-thread"		/**/
+#define SITEARCH_EXP "/opt/perl/lib/site_perl/5.00554/alpha-dec_osf-thread"		/**/
 
 /* SITELIB:
  *	This symbol contains the name of the private library for this package.
@@ -2231,8 +2231,8 @@
  *	This symbol contains the ~name expanded version of SITELIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITELIB "/opt/perl/lib/site_perl/5.00553"		/**/
-#define SITELIB_EXP "/opt/perl/lib/site_perl/5.00553"		/**/
+#define SITELIB "/opt/perl/lib/site_perl/5.00554"		/**/
+#define SITELIB_EXP "/opt/perl/lib/site_perl/5.00554"		/**/
 
 /* STARTPERL:
  *	This variable contains the string to put in front of a perl
@@ -2378,14 +2378,15 @@
  */
 #define ARCHNAME "alpha-dec_osf-thread"		/**/
 
-/* PTHREAD_CREATE_JOINABLE:
+/* OLD_PTHREAD_CREATE_JOINABLE:
  *	This symbol, if defined, indicates how to create pthread
- *	in joinable (aka undetached) state.  Not defined here if
- *	pthread.h already has defined PTHREAD_CREATE_JOINABLE.
+ *	in joinable (aka undetached) state.  NOTE: not defined
+ *	if pthread.h already has defined PTHREAD_CREATE_JOINABLE
+ *	(the new version of the constant).
  *	If defined, possible values are PTHREAD_CREATE_UNDETACHED
  *	and __UNDETACHED.
  */
-/*#define PTHREAD_CREATE_JOINABLE 0 / **/
+/*#define OLD_PTHREAD_CREATE_JOINABLE  / **/
 
 /* HAS_PTHREAD_YIELD:
  *	This symbol, if defined, indicates that the pthread_yield 

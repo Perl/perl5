@@ -495,8 +495,8 @@ sub Dump {
     local(*OUT) = @_;
 
     print REP "\n---\n";
-    print REP "This perlbug was built using Perl $config_tag1\n",
-	    "It is being executed now by  Perl $config_tag2.\n\n"
+    print REP "This perlbug was built using Perl $config_tag2\n",
+	    "It is being executed now by  Perl $config_tag1.\n\n"
 	if $config_tag2 ne $config_tag1;
 
     print OUT <<EOF;

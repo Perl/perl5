@@ -211,3 +211,13 @@
    Minor modifications to get the module to build with DB 2.5.x
    Fixed a typo in the definition of O_RDONLY, courtesy of Mark Kettenis.
 
+1.62 30th November 1998
+
+   Added hints/dynixptx.pl.
+   Fixed typemap -- 1.61 used PL_na instead of na
+
+1.63 19th December 1998
+
+   Fix to allow DB 2.6.x to build with DB_File
+   Documentation upadated to use push,pop etc in the RECNO example & to 
+   include the find_dup & del_dup methods.

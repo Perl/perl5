@@ -1349,12 +1349,25 @@ typedef I32 (*filter_t) _((int, SV *, int));
 # endif
 #endif         
 
-/* XXX MAXPATHLEN should be determined by Configure */
 #ifndef MAXPATHLEN
 #  ifdef PATH_MAX
-#    define MAXPATHLEN PATH_MAX
+#    ifdef _POSIX_PATH_MAX
+#       if PATH_MAX > _POSIX_PATH_MAX
+/* MAXPATHLEN is supposed to include the final null character,
+ * as opposed to PATH_MAX and _POSIX_PATH_MAX. */
+#         define MAXPATHLEN (PATH_MAX+1)
+#       else
+#         define MAXPATHLEN (_POSIX_PATH_MAX+1)
+#       endif
+#    else
+#      define MAXPATHLEN (PATH_MAX+1)
+#    endif
 #  else
-#    define MAXPATHLEN 1024
+#    ifdef _POSIX_PATH_MAX
+#       define MAXPATHLEN (_POSIX_PATH_MAX+1)
+#    else
+#       define MAXPATHLEN 1024	/* Err on the large side. */
+#    endif
 #  endif
 #endif
 

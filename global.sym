@@ -4,6 +4,8 @@
 
 Gv_AMupdate
 amagic_call
+amagic_cmp
+amagic_cmp_locale
 append_elem
 append_list
 apply
@@ -483,6 +485,7 @@ scalar
 scalarkids
 scalarseq
 scalarvoid
+scan_bin
 scan_const
 scan_formline
 scan_heredoc
@@ -499,6 +502,7 @@ scan_trans
 scan_word
 scope
 screaminstr
+seed
 setdefout
 setenv_getix
 share_hek

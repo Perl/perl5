@@ -46,6 +46,7 @@ $ use_two_pot_malloc = "N"
 $ use_pack_malloc = "N"
 $ use_debugmalloc = "N"
 $ preload_env = "N"
+$ use_multiplicity = "N"
 $ vms_default_directory_name = F$ENVIRONMENT("DEFAULT")
 $! max_allowed_dir_depth = 3  ! e.g. [A.B.PERL5_00n] not [A.B.C.PERL5_00n]
 $ max_allowed_dir_depth = 2  ! e.g. [FOO.PERL5_00n] not [FOO.BAR.PERL5_00n]
@@ -1669,6 +1670,24 @@ $   IF ans.eqs."socketshr" then has_socketshr = "T"
 $ endif
 $!
 $!
+$! Ask if they want to build with MULTIPLICITY
+$ echo "The perl interpreter engine can be built in a way that makes it
+$ echo "possible for a program that embeds perl into it (and yep, you can
+$ echo "do that--it's pretty keen) to have multiple perl interpreters active
+$ echo "at once. There is some performance overhead, however, so you
+$ echo "probably don't want to choose this unless you're going to be doing
+$ echo "funky perl embedding."
+$ echo ""
+$ dflt = "n"
+$ rp = "Build with MULTIPLICITY? [''dflt'] "
+$ GOSUB myread
+$   if ans.eqs."" then ans = dflt
+$ if (f$extract(0, 1, "''ans'").eqs."Y").or.(f$extract(0, 1, "''ans'").eqs."y")
+$ THEN
+$   use_multiplicity="Y"
+$ ELSE
+$   use_multiplicity="N"
+$ ENDIF
 $! Ask about threads, if appropriate
 $ if (Using_Dec_C.eqs."Yes")
 $ THEN

@@ -1,5 +1,10 @@
 # tr.t
 
+BEGIN {
+    chdir 't' if -d 't';
+    unshift @INC, "../lib";
+}
+
 print "1..4\n";
 
 $_ = "abcdefghijklmnopqrstuvwxyz";

@@ -245,6 +245,7 @@ integer formats:
     .23E-10
     0xffff		# hex
     0377		# octal
+    0b111000		# binary
     4_294_967_296	# underline for legibility
 
 String literals are usually delimited by either single or double
@@ -253,7 +254,7 @@ literals are subject to backslash and variable substitution;
 single-quoted strings are not (except for "C<\'>" and "C<\\>").
 The usual Unix backslash rules apply for making characters such as
 newline, tab, etc., as well as some more exotic forms.  See
-L<perlop/Quote and Quotelike Operators> for a list.
+L<perlop/"Quote and Quotelike Operators"> for a list.
 
 Octal or hex representations in string literals (e.g. '0xffff') are not
 automatically converted to their integer representation.  The hex() and

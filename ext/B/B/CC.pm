@@ -51,6 +51,7 @@ my %skip_stack;		# Hash of PP names which don't need write_back_stack
 my %skip_lexicals;	# Hash of PP names which don't need write_back_lexicals
 my %skip_invalidate;	# Hash of PP names which don't need invalidate_lexicals
 my %ignore_op;		# Hash of ops which do nothing except returning op_next
+my %need_curcop;	# Hash of ops which need PL_curcop
 
 BEGIN {
     foreach (qw(pp_scalar pp_regcmaybe pp_lineseq pp_scope pp_null)) {
@@ -91,6 +92,7 @@ sub init_hash { map { $_ => 1 } @_ }
 #
 %skip_lexicals = init_hash qw(pp_enter pp_enterloop);
 %skip_invalidate = init_hash qw(pp_enter pp_enterloop);
+%need_curcop = init_hash qw(pp_rv2gv  pp_bless pp_repeat pp_sort pp_caller pp_reset pp_rv2cv pp_entereval pp_require pp_dofile pp_entertry pp_enterloop pp_enteriter );
 
 sub debug {
     if ($debug_runtime) {
@@ -565,14 +567,15 @@ sub pp_dbstate {
     return default_pp($op);
 }
 
-sub pp_rv2gv { $curcop->write_back; default_pp(@_) }
-sub pp_bless { $curcop->write_back; default_pp(@_) }
-sub pp_repeat { $curcop->write_back; default_pp(@_) }
+#default_pp will handle this:
+#sub pp_rv2gv { $curcop->write_back; default_pp(@_) }
+#sub pp_bless { $curcop->write_back; default_pp(@_) }
+#sub pp_repeat { $curcop->write_back; default_pp(@_) }
 # The following subs need $curcop->write_back if we decide to support arybase:
 # pp_pos, pp_substr, pp_index, pp_rindex, pp_aslice, pp_lslice, pp_splice
-sub pp_sort { $curcop->write_back; default_pp(@_) }
-sub pp_caller { $curcop->write_back; default_pp(@_) }
-sub pp_reset { $curcop->write_back; default_pp(@_) }
+#sub pp_sort { $curcop->write_back; default_pp(@_) }
+#sub pp_caller { $curcop->write_back; default_pp(@_) }
+#sub pp_reset { $curcop->write_back; default_pp(@_) }
 
 sub pp_gv {
     my $op = shift;
@@ -1263,6 +1266,9 @@ sub pp_substcont {
 sub default_pp {
     my $op = shift;
     my $ppname = $op->ppaddr;
+    if ($curcop and $need_curcop{$ppname}){
+	$curcop->write_back;
+    }
     write_back_lexicals() unless $skip_lexicals{$ppname};
     write_back_stack() unless $skip_stack{$ppname};
     doop($op);

@@ -7,7 +7,7 @@ package warning;
 
 =head1 NAME
 
-warning - Perl pragma to control 
+warning - Perl pragma to control optional warnings
 
 =head1 SYNOPSIS
 

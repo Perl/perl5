@@ -52,7 +52,7 @@ for (@prgs){
     my @temps = () ;
     if (s/^\s*-\w+//){
         $switch = $&;
-        $switch =~ s/(-\S*[A-Z]\S*)/"-$1"/ if $Is_VMS; # protect uc switches
+        $switch =~ s/(-\S*[A-Z]\S*)/"$1"/ if $Is_VMS; # protect uc switches
     }
     my($prog,$expected) = split(/\nEXPECT\n/, $_);
     if ( $prog =~ /--FILE--/) {

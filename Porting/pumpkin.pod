@@ -8,8 +8,8 @@ There is no simple synopsis, yet.
 
 =head1 DESCRIPTION
 
-This document attempts to begin to describe some of the
-considerations involved in patching and maintaining perl.
+This document attempts to begin to describe some of the considerations
+involved in patching, porting, and maintaining perl.
 
 This document is still under construction, and still subject to
 significant changes.  Still, I hope parts of it will be useful,
@@ -155,7 +155,7 @@ No one was allowed to make backups unless they had the "backup pumpkin".
 
 The name has stuck.
 
-=head1 Philosophical Issues in Patching Perl
+=head1 Philosophical Issues in Patching and Porting Perl
 
 There are no absolute rules, but there are some general guidelines I
 have tried to follow as I apply patches to the perl sources.
@@ -173,6 +173,16 @@ than continuing to build a contorted nest of special cases, I
 generalized the process of building libperl so that NeXT and SVR4 users
 could still get their work done, but others could build a shared
 libperl if they wanted to as well.
+
+Contain your changes carefully.  Assume nothing about other operating
+systems, not even closely related ones.  Your changes must not affect
+other platforms.
+
+Spy shamelessly on how similar patching or porting issues have been
+settled elsewhere.
+
+If feasible, try to keep filenames 8.3-compliant to humor those poor
+souls that get joy from running Perl under such dire limitations.
 
 =head2 Seek consensus on major changes
 
@@ -196,6 +206,88 @@ that the machine-specific #ifdef's may not be valid across major
 releases of the operating system.  Further, the feature-specific tests
 may help out folks on another platform who have the same problem.
 
+=head2 Machine-specific files
+
+=over 4
+
+=item source code
+
+If you have many machine-specific #defines or #includes, consider
+creating an "osish.h" (os2ish.h, vmsish.h, and so on) and including
+that in perl.h.  If you have several machine-specific files (function
+emulations, function stubs, build utility wrappers) you may create a
+separate subdirectory (djgpp, win32) and put the files in there.
+Remember to update C<MANIFEST> when you add files.
+
+If your system support dynamic loading but none of the existing
+methods at F<ext/DynaLoader/dl_*.xs> work for you, you must write
+a new one.  Study the existing ones to see what kind of interface
+you must supply.
+
+=item build hints
+
+There are two kinds of hints: hints for building Perl and hints for
+extensions.   The former live in the C<hints> subdirectory, the latter
+in C<ext/*/hints> subdirectories.
+
+The top level hints are Bourne-shell scripts that set, modify and
+unset appropriate Configure variables, based on the Configure command
+line options and possibly existing config.sh and Policy.sh files from
+previous Configure runs.
+
+The extension hints are written Perl (by the time they are used
+miniperl has been built) and control the building of their respective
+extensions.  They can be used to for example manipulate compilation
+and linking flags.
+
+=item build and installation Makefiles, scripts, and so forth
+
+Sometimes you will also need to tweak the Perl build and installation
+procedure itself, like for example F<Makefile.SH> and F<installperl>.
+Tread very carefully, even more than usual.  Contain your changes
+with utmost care.
+
+=item test suite
+
+Many of the tests in C<t> subdirectory assume machine-specific things
+like existence of certain functions, something about filesystem
+semantics, certain external utilities and their error messages.  Use
+the C<$^O> and the C<Config> module (which contains the results of the
+Configure run, in effect the C<config.sh> converted to Perl) to either
+skip (preferably not) or customize (preferable) the tests for your
+platform.
+
+=item modules
+
+Certain standard modules may need updating if your operating system
+sports for example a native filesystem naming.  You may want to update
+some or all of the modules File::Basename, File::Spec, File::Path, and
+File::Copy to become aware of your native filesystem syntax and
+peculiarities.
+
+=item documentation
+
+If your operating system comes from outside UNIX you almost certainly
+will have differences in the available operating system functionality
+(missing system calls, different semantics, whatever).  Please
+document these at F<pod/perlport.pod>.  If your operating system is
+the first B<not> to have a system call also update the list of
+"portability-bewares" at the beginning of F<pod/perlfunc.pod>.
+
+A file called F<README.youros> at the top level that explains things
+like how to install perl at this platform, where to get any possibly
+required additional software, and for example what test suite errors
+to expect, is nice too.
+
+You may also want to write a separate F<.pod> file for your operating
+system to tell about existing mailing lists, os-specific modules,
+documentation, whatever.  Please name these along the lines of
+F<perl>I<youros>.pod.  [unfinished: where to put this file (the pod/
+subdirectory, of course: but more importantly, which/what index files
+should be updated?)]
+
+=back
+
 =head2 Allow for lots of testing
 
 We should never release a main version without testing it as a
@@ -211,7 +303,7 @@ that some of those things will be just plain broken and need to be fixed,
 but, in general, we ought to try to avoid breaking widely-installed
 things.
 
-=head2 Automate generation of derivative files
+=head2 Automated generation of derivative files
 
 The F<embed.h>, F<keywords.h>, F<opcode.h>, and F<perltoc.pod> files
 are all automatically generated by perl scripts.  In general, don't
@@ -219,11 +311,14 @@ patch these directly; patch the data files instead.
 
 F<Configure> and F<config_h.SH> are also automatically generated by
 B<metaconfig>.  In general, you should patch the metaconfig units
-instead of patching these files directly.  However, very minor changes to
-F<Configure> may be made in between major sync-ups with the metaconfig
-units, which tends to be complicated operations.  But be careful, this
-can quickly spiral out of control.  Running metaconfig is not really
-hard.
+instead of patching these files directly.  However, very minor changes
+to F<Configure> may be made in between major sync-ups with the
+metaconfig units, which tends to be complicated operations.  But be
+careful, this can quickly spiral out of control.  Running metaconfig
+is not really hard.
+
+Also F<Makefile> is automatically produced from F<Makefile.SH>.
+In general, look out for all F<*.SH> files.
 
 Finally, the sample files in the F<Porting/> subdirectory are
 generated automatically by the script F<U/mksample> included 

@@ -168,6 +168,7 @@ sub finddir {
 
 		# Get link count and check for directoriness.
 
+		$_ = "" if (!defined($_));
 		($dev,$ino,$mode,$nlink) = ($Is_VMS ? stat($_) : lstat($_));
 		    # unless ($nlink || $dont_use_nlink);
 

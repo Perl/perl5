@@ -19,6 +19,10 @@ alignbytes=8
 
 usemymalloc='n'
 
+# Intuiting the existence of system calls under AIX is difficult,
+# at best; the safest technique is to find them empirically.
+usenm='undef'
+
 so="a"
 dlext="so"
 
@@ -63,40 +67,10 @@ esac
 #                           symbol: boot_$(EXP)  can it be auto-generated?
 case "$osvers" in
 3*) 
-lddlflags='-H512 -T512 -bhalt:4 -bM:SRE -bI:$(PERL_INC)/perl.exp -bE:$(BASEEXT).exp -e _nostart -lc'
+    lddlflags='-H512 -T512 -bhalt:4 -bM:SRE -bI:$(PERL_INC)/perl.exp -bE:$(BASEEXT).exp -e _nostart -lc'
     ;;
 *) 
-lddlflags='-bhalt:4 -bM:SRE -bI:$(PERL_INC)/perl.exp -bE:$(BASEEXT).exp -b noentry -lc'
-
-;;
+    lddlflags='-bhalt:4 -bM:SRE -bI:$(PERL_INC)/perl.exp -bE:$(BASEEXT).exp -b noentry -lc'
+    ;;
 esac
 
-if [ "X$usethreads" = "X$define" ]; then
-    ccflags="$ccflags -DNEED_PTHREAD_INIT"
-    case "$cc" in
-    xlc_r | cc_r)
-	;;
-    cc | '') 
-	cc=xlc_r # Let us be stricter.
-        ;;
-    *)
-	cat >&4 <<EOM
-Unknown C compiler '$cc'.
-For pthreads you should use the AIX C compilers xlc_r or cc_r.
-Cannot continue, aborting.
-EOM
-	exit 1
-	;;
-    esac
-
-    # Add the POSIX threads library and the re-entrant libc.
-
-    lddlflags=`echo $lddlflags | sed 's/ -lc$/ -lpthreads -lc_r -lc/'`
-
-    # Add the c_r library to the list of libraries wanted
-    # Make sure the c_r library is before the c library or
-    # make will fail.
-    set `echo X "$libswanted "| sed -e 's/ c / c_r c /'`
-    shift
-    libswanted="$*"
-fi

@@ -33,6 +33,7 @@ of sections:
     perlfunc		Perl builtin functions
     perlvar		Perl predefined variables
     perlsub		Perl subroutines
+    perlopentut		Perl opening things tutorial
     perlmod		Perl modules: how they work
     perlmodlib		Perl modules: how to write and use
     perlmodinstall	Perl modules: how to install from CPAN

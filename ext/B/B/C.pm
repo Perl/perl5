@@ -103,6 +103,8 @@ sub walk_and_save_optree {
 # to "know" that op_seq is a U16 and use 65535. Ugh.
 my $op_seq = 65535;
 
+sub define HEf_SVKEY   () { -2 }
+
 # Look this up here so we can do just a number compare
 # rather than looking up the name of every BASEOP in B::OP
 my $OP_THREADSV = opnumber('threadsv');
@@ -506,19 +508,26 @@ sub B::PVMG::save_magic {
 	$init->add(sprintf("SvSTASH(s\\_%x) = s\\_%x;", $$sv, $$stash));
     }
     my @mgchain = $sv->MAGIC;
-    my ($mg, $type, $obj, $ptr);
+    my ($mg, $type, $obj, $ptr,$len,$ptrsv);
     foreach $mg (@mgchain) {
 	$type = $mg->TYPE;
 	$obj = $mg->OBJ;
 	$ptr = $mg->PTR;
-	my $len = defined($ptr) ? length($ptr) : 0;
+	$len=$mg->LENGTH;
 	if ($debug_mg) {
 	    warn sprintf("magic %s (0x%x), obj %s (0x%x), type %s, ptr %s\n",
 			 class($sv), $$sv, class($obj), $$obj,
 			 cchar($type), cstring($ptr));
 	}
-	$init->add(sprintf("sv_magic((SV*)s\\_%x, (SV*)s\\_%x, %s, %s, %d);",
+	if ($len == HEf_SVKEY){
+		#The pointer is an SV*
+		$ptrsv=svref_2object($ptr)->save;
+		$init->add(sprintf("sv_magic((SV*)s\\_%x, (SV*)s\\_%x, %s, %s, %d);",
+			   $$sv, $$obj, cchar($type),$ptrsv,$len));
+	}else{
+		$init->add(sprintf("sv_magic((SV*)s\\_%x, (SV*)s\\_%x, %s, %s, %d);",
 			   $$sv, $$obj, cchar($type),cstring($ptr),$len));
+	}
     }
 }
 

@@ -15,8 +15,7 @@
 #include "EXTERN.h"
 #include "perl.h"
 
-/* XXX Configure test needed */
-#if !defined(NSIG) || defined(M_UNIX) || defined(M_XENIX) || defined(__NetBSD__)
+#if !defined(NSIG) || defined(M_UNIX) || defined(M_XENIX)
 #include <signal.h>
 #endif
 
@@ -2280,9 +2279,9 @@ repeatcpy(register char *to, register char *from, I32 len, register I32 count)
     register char *frombase = from;
 
     if (len == 1) {
-	todo = *from;
+	register char c = *from;
 	while (count-- > 0)
-	    *to++ = todo;
+	    *to++ = c;
 	return;
     }
     while (count-- > 0) {
@@ -2395,6 +2394,29 @@ same_dirent(char *a, char *b)
 }
 #endif /* !HAS_RENAME */
 
+UV
+scan_bin(char *start, I32 len, I32 *retlen)
+{
+    register char *s = start;
+    register UV retval = 0;
+    bool overflowed = FALSE;
+    while (len && *s >= '0' && *s <= '1') {
+      register UV n = retval << 1;
+      if (!overflowed && (n >> 1) != retval) {
+          warn("Integer overflow in binary number");
+          overflowed = TRUE;
+      }
+      retval = n | (*s++ - '0');
+      len--;
+    }
+    if (len && (*s >= '2' || *s <= '9')) {
+      dTHR;
+      if (ckWARN(WARN_UNSAFE))
+          warner(WARN_UNSAFE, "Illegal binary digit ignored");
+    }
+    *retlen = s - start;
+    return retval;
+}
 UV
 scan_oct(char *start, I32 len, I32 *retlen)
 {
@@ -2602,7 +2624,7 @@ find_script(char *scriptname, bool dosearch, char **search_ext, I32 flags)
 	    if (len + 1 + strlen(scriptname) + MAX_EXT_LEN >= sizeof tmpbuf)
 		continue;	/* don't search dir with too-long name */
 	    if (len
-#if defined(atarist) || defined(DOSISH)
+#if defined(atarist) || defined(__MINT__) || defined(DOSISH)
 		&& tmpbuf[len - 1] != '/'
 		&& tmpbuf[len - 1] != '\\'
 #endif
@@ -3056,9 +3078,11 @@ get_vtbl(int vtbl_id)
     case want_vtbl_regdatum:
 	result = &PL_vtbl_regdatum;
 	break;
+#ifdef USE_LOCALE_COLLATE
     case want_vtbl_collxfrm:
 	result = &PL_vtbl_collxfrm;
 	break;
+#endif
     case want_vtbl_amagic:
 	result = &PL_vtbl_amagic;
 	break;

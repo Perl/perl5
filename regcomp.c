@@ -776,7 +776,7 @@ reginitcolors(void)
 		PL_colors[i] = ++s;
 	    }
 	    else
-		PL_colors[i] = "";
+		PL_colors[i] = s = "";
 	}
     } else {
 	while (i < 6) 
@@ -1878,6 +1878,8 @@ tryagain:
 		FAIL("trailing \\ in regexp");
 	    /* FALL THROUGH */
 	default:
+	    /* Do not generate `unrecognized' warnings here, we fall
+	       back into the quick-grab loop below */
 	    goto defchar;
 	}
 	break;
@@ -2008,6 +2010,11 @@ tryagain:
 			    FAIL("trailing \\ in regexp");
 			/* FALL THROUGH */
 		    default:
+			if (!SIZE_ONLY && ckWARN(WARN_UNSAFE) && isALPHA(*p))
+			    warner(WARN_UNSAFE, 
+				   "/%.127s/: Unrecognized escape \\%c passed through",
+				   PL_regprecomp,
+				   *p);
 			goto normal_default;
 		    }
 		    break;
@@ -2093,6 +2100,45 @@ regwhite(char *p, char *e)
     return p;
 }
 
+/* parse POSIX character classes like [[:foo:]] */
+STATIC char*
+regpposixcc(I32 value)
+{
+    dTHR;
+    char *posixcc = 0;
+
+    if (value == '[' && PL_regcomp_parse + 1 < PL_regxend &&
+	/* I smell either [: or [= or [. -- POSIX has been here, right? */
+	(*PL_regcomp_parse == ':' ||
+	 *PL_regcomp_parse == '=' ||
+	 *PL_regcomp_parse == '.')) {
+	char  c = *PL_regcomp_parse;
+	char* s = PL_regcomp_parse++;
+	    
+	while (PL_regcomp_parse < PL_regxend && *PL_regcomp_parse != c)
+	    PL_regcomp_parse++;
+	if (PL_regcomp_parse == PL_regxend)
+	    /* Grandfather lone [:, [=, [. */
+	    PL_regcomp_parse = s;
+	else {
+	    PL_regcomp_parse++; /* skip over the c */
+	    if (*PL_regcomp_parse == ']') {
+		/* Not Implemented Yet.
+		 * (POSIX Extended Character Classes, that is)
+		 * The text between e.g. [: and :] would start
+		 * at s + 1 and stop at regcomp_parse - 2. */
+		if (ckWARN(WARN_UNSAFE) && !SIZE_ONLY)
+		    warner(WARN_UNSAFE,
+			   "Character class syntax [%c %c] is reserved for future extensions", c, c);
+		PL_regcomp_parse++; /* skip over the ending ] */
+		posixcc = s + 1;
+	    }
+	}
+    }
+
+    return posixcc;
+}
+
 STATIC regnode *
 regclass(void)
 {
@@ -2130,32 +2176,9 @@ regclass(void)
     while (PL_regcomp_parse < PL_regxend && *PL_regcomp_parse != ']') {
        skipcond:
 	value = UCHARAT(PL_regcomp_parse++);
-	if (value == '[' && PL_regcomp_parse + 1 < PL_regxend &&
-	    /* I smell either [: or [= or [. -- POSIX has been here, right? */
-	    (*PL_regcomp_parse == ':' || *PL_regcomp_parse == '=' || *PL_regcomp_parse == '.')) {
-	    char  posixccc = *PL_regcomp_parse;
-	    char* posixccs = PL_regcomp_parse++;
-	    
-	    while (PL_regcomp_parse < PL_regxend && *PL_regcomp_parse != posixccc)
-		PL_regcomp_parse++;
-	    if (PL_regcomp_parse == PL_regxend)
-		/* Grandfather lone [:, [=, [. */
-		PL_regcomp_parse = posixccs;
-	    else {
-		PL_regcomp_parse++; /* skip over the posixccc */
-		if (*PL_regcomp_parse == ']') {
-		    /* Not Implemented Yet.
-		     * (POSIX Extended Character Classes, that is)
-		     * The text between e.g. [: and :] would start
-		     * at posixccs + 1 and stop at regcomp_parse - 2. */
-		    if (ckWARN(WARN_UNSAFE) && !SIZE_ONLY)
-			warner(WARN_UNSAFE,
-			    "Character class syntax [%c %c] is reserved for future extensions", posixccc, posixccc);
-		    PL_regcomp_parse++; /* skip over the ending ] */
-		}
-	    }
-	}
-	if (value == '\\') {
+	if (value == '[')
+	    (void)regpposixcc(value); /* ignore the return value for now */
+	else if (value == '\\') {
 	    value = UCHARAT(PL_regcomp_parse++);
 	    switch (value) {
 	    case 'w':
@@ -2350,33 +2373,9 @@ regclassutf8(void)
 	value = utf8_to_uv((U8*)PL_regcomp_parse, &numlen);
 	PL_regcomp_parse += numlen;
 
-	if (value == '[' && PL_regcomp_parse + 1 < PL_regxend &&
-	    /* I smell either [: or [= or [. -- POSIX has been here, right? */
-	    (*PL_regcomp_parse == ':' || *PL_regcomp_parse == '=' || *PL_regcomp_parse == '.')) {
-	    char  posixccc = *PL_regcomp_parse;
-	    char* posixccs = PL_regcomp_parse++;
-	    
-	    while (PL_regcomp_parse < PL_regxend && *PL_regcomp_parse != posixccc)
-		PL_regcomp_parse++;
-	    if (PL_regcomp_parse == PL_regxend)
-		/* Grandfather lone [:, [=, [. */
-		PL_regcomp_parse = posixccs;
-	    else {
-		PL_regcomp_parse++; /* skip over the posixccc */
-		if (*PL_regcomp_parse == ']') {
-		    /* Not Implemented Yet.
-		     * (POSIX Extended Character Classes, that is)
-		     * The text between e.g. [: and :] would start
-		     * at posixccs + 1 and stop at regcomp_parse - 2. */
-		    if (ckWARN(WARN_UNSAFE) && !SIZE_ONLY)
-			warner(WARN_UNSAFE,
-			    "Character class syntax [%c %c] is reserved for future extensions", posixccc, posixccc);
-		    PL_regcomp_parse++; /* skip over the ending ] */
-		}
-	    }
-	}
-
-	if (value == '\\') {
+	if (value == '[')
+	    (void)regpposixcc(value); /* ignore the return value for now */
+	else if (value == '\\') {
 	    value = utf8_to_uv((U8*)PL_regcomp_parse, &numlen);
 	    PL_regcomp_parse += numlen;
 	    switch (value) {
@@ -3220,4 +3219,15 @@ save_re_context(void)
     SAVESPTR(PL_regcode);		/* Code-emit pointer; &regdummy = don't */
     SAVEPPTR(PL_regxend);		/* End of input for compile */
     SAVEPPTR(PL_regcomp_parse);		/* Input-scan pointer. */
+    SAVESPTR(PL_reg_call_cc);		/* from regexec.c */
+    SAVESPTR(PL_reg_re);		/* from regexec.c */
+    SAVEPPTR(PL_reg_ganch);		/* from regexec.c */
+    SAVESPTR(PL_reg_sv);		/* from regexec.c */
+    SAVESPTR(PL_reg_magic);		/* from regexec.c */
+    SAVEI32(PL_reg_oldpos);			/* from regexec.c */
+    SAVESPTR(PL_reg_oldcurpm);		/* from regexec.c */
+    SAVESPTR(PL_reg_curpm);		/* from regexec.c */
+#ifdef DEBUGGING
+    SAVEPPTR(PL_reg_starttry);		/* from regexec.c */    
+#endif
 }

@@ -63,6 +63,9 @@
     # Which allocator to use if PERL_SBRK_VIA_MALLOC
     SYSTEM_ALLOC(a) 		malloc(a)
 
+    # Minimal alignment (in bytes, should be a power of 2) of SYSTEM_ALLOC
+    SYSTEM_ALLOC_ALIGNMENT	MEM_ALIGNBYTES
+
     # Disable memory overwrite checking with DEBUGGING.  Memory and speed
     # optimization, error reporting pessimization.
     NO_RCHECK			undef
@@ -134,6 +137,9 @@
      # Type returned by free()
      Free_t				void
 
+     # Very fatal condition reporting function (cannot call any )
+     fatalcroak(arg)			write(2,arg,strlen(arg)) + exit(2)
+  
      # Fatal error reporting function
      croak(format, arg)			warn(idem) + exit(1)
   
@@ -179,7 +185,7 @@
 #define MIN_BUC_POW2 (sizeof(void*) > 4 ? 3 : 2) /* Allow for 4-byte arena. */
 #define MIN_BUCKET (MIN_BUC_POW2 * BUCKETS_PER_POW2)
 
-#if !(defined(I286) || defined(atarist))
+#if !(defined(I286) || defined(atarist) || defined(__MINT__))
 	/* take 2k unless the block is bigger than that */
 #  define LOG_OF_MIN_ARENA 11
 #else
@@ -285,6 +291,10 @@
 #  define MALLOC_UNLOCK		MUTEX_UNLOCK(&PL_malloc_mutex)
 #endif 
 
+#  ifndef fatalcroak				/* make depend */
+#    define fatalcroak(mess)	(write(2, (mess), strlen(mess)), exit(2))
+#  endif 
+
 #ifdef DEBUGGING
 #  undef DEBUG_m
 #  define DEBUG_m(a)  if (PL_debug & 128)   a
@@ -367,7 +377,7 @@
 #define u_short unsigned short
 
 /* 286 and atarist like big chunks, which gives too much overhead. */
-#if (defined(RCHECK) || defined(I286) || defined(atarist)) && defined(PACK_MALLOC)
+#if (defined(RCHECK) || defined(I286) || defined(atarist) || defined(__MINT__)) && defined(PACK_MALLOC)
 #  undef PACK_MALLOC
 #endif 
 
@@ -567,12 +577,18 @@ static u_short blk_shift[LOG_OF_MIN_ARENA * BUCKETS_PER_POW2] =
 #  endif 
   };
 
+#  define NEEDED_ALIGNMENT 0x800	/* 2k boundaries */
+#  define WANTED_ALIGNMENT 0x800	/* 2k boundaries */
+
 #else  /* !PACK_MALLOC */
 
 #  define OV_MAGIC(block,bucket) (block)->ov_magic
 #  define OV_INDEX(block) (block)->ov_index
 #  define CHUNK_SHIFT 1
 #  define MAX_PACKED -1
+#  define NEEDED_ALIGNMENT MEM_ALIGNBYTES
+#  define WANTED_ALIGNMENT 0x400	/* 1k boundaries */
+
 #endif /* !PACK_MALLOC */
 
 #define M_OVERHEAD (sizeof(union overhead) + RSLOP)
@@ -744,7 +760,7 @@ emergency_sbrk(MEM_SIZE size)
 	/* Got it, now detach SvPV: */
 	pv = SvPV(sv, n_a);
 	/* Check alignment: */
-	if (((UV)(pv - sizeof(union overhead))) & ((1<<LOG_OF_MIN_ARENA) - 1)) {
+	if (((UV)(pv - sizeof(union overhead))) & (NEEDED_ALIGNMENT - 1)) {
 	    PerlIO_puts(PerlIO_stderr(),"Bad alignment of $^M!\n");
 	    return (char *)-1;		/* die die die */
 	}
@@ -1077,17 +1093,16 @@ getpages(int needed, int *nblksp, int bucket)
 	/* Second, check alignment. */
 	slack = 0;
 
-#ifndef atarist /* on the atari we dont have to worry about this */
+#if !defined(atarist) && !defined(__MINT__) /* on the atari we dont have to worry about this */
 #  ifndef I286 	/* The sbrk(0) call on the I286 always returns the next segment */
-
-	/* CHUNK_SHIFT is 1 for PACK_MALLOC, 0 otherwise. */
-	if ((UV)cp & (0x7FF >> CHUNK_SHIFT)) { /* Not aligned. */
-	    slack = (0x800 >> CHUNK_SHIFT)
-		- ((UV)cp & (0x7FF >> CHUNK_SHIFT));
+	/* WANTED_ALIGNMENT may be more than NEEDED_ALIGNMENT, but this may
+	   improve performance of memory access. */
+	if ((UV)cp & (WANTED_ALIGNMENT - 1)) { /* Not aligned. */
+	    slack = WANTED_ALIGNMENT - ((UV)cp & (WANTED_ALIGNMENT - 1));
 	    add += slack;
 	}
 #  endif
-#endif /* atarist */
+#endif /* !atarist && !MINT */
 		
 	if (add) {
 	    DEBUG_m(PerlIO_printf(Perl_debug_log, 
@@ -1106,7 +1121,7 @@ getpages(int needed, int *nblksp, int bucket)
 #ifdef PACK_MALLOC
 		if (slack) {
 		    MALLOC_UNLOCK;
-		    croak("%s", "panic: Off-page sbrk");
+		    fatalcroak("panic: Off-page sbrk\n");
 		}
 #endif
 		if (sbrked_remains) {
@@ -1143,19 +1158,26 @@ getpages(int needed, int *nblksp, int bucket)
 	 * and deduct from block count to reflect.
 	 */
 
+#  if NEEDED_ALIGNMENT > MEM_ALIGNBYTES
+	if ((UV)ovp & (NEEDED_ALIGNMENT - 1))
+	    fatalcroak("Misalignment of sbrk()\n");
+	else
+#  endif
 #ifndef I286	/* Again, this should always be ok on an 80286 */
-	if ((UV)ovp & 7) {
-	    ovp = (union overhead *)(((UV)ovp + 8) & ~7);
+	if ((UV)ovp & (MEM_ALIGNBYTES - 1)) {
 	    DEBUG_m(PerlIO_printf(Perl_debug_log, 
 				  "fixing sbrk(): %d bytes off machine alignement\n",
-				  (int)((UV)ovp & 7)));
+				  (int)((UV)ovp & (MEM_ALIGNBYTES - 1))));
+	    ovp = (union overhead *)(((UV)ovp + MEM_ALIGNBYTES) &
+				     (MEM_ALIGNBYTES - 1));
 	    (*nblksp)--;
 # if defined(DEBUGGING_MSTATS)
 	    /* This is only approx. if TWO_POT_OPTIMIZE: */
-	    sbrk_slack += (1 << bucket);
+	    sbrk_slack += (1 << (bucket >> BUCKET_POW2_SHIFT));
 # endif
 	}
 #endif
+	;				/* Finish `else' */
 	sbrked_remains = require - needed;
 	last_op = cp;
     }
@@ -1717,7 +1739,7 @@ dump_mstats(char *s)
  *
  * 980701 Dominic Dunlop <domo@computer.org>
  */
-#      define SYSTEM_ALLOC(a) ((void *)(((unsigned)malloc((a)+6)+6)&~7))
+#      define SYSTEM_ALLOC_ALIGNMENT 2
 #   endif
 
 #   ifdef PERL_SBRK_VIA_MALLOC
@@ -1737,6 +1759,9 @@ dump_mstats(char *s)
 
 #      ifndef SYSTEM_ALLOC
 #         define SYSTEM_ALLOC(a) malloc(a)
+#      endif
+#      ifndef SYSTEM_ALLOC_ALIGNMENT
+#         define SYSTEM_ALLOC_ALIGNMENT MEM_ALIGNBYTES
 #      endif
 
 #   endif  /* PERL_SBRK_VIA_MALLOC */
@@ -1771,10 +1796,13 @@ Perl_sbrk(int size)
 	size = PERLSBRK_64_K;
 	small = 1;
       }
+#  if NEEDED_ALIGNMENT > SYSTEM_ALLOC_ALIGNMENT
+      size += NEEDED_ALIGNMENT - SYSTEM_ALLOC_ALIGNMENT;
+#  endif
       got = (IV)SYSTEM_ALLOC(size);
-#ifdef PACK_MALLOC
-      got = (got + 0x7ff) & ~0x7ff;
-#endif
+#  if NEEDED_ALIGNMENT > SYSTEM_ALLOC_ALIGNMENT
+      got = (got + NEEDED_ALIGNMENT - 1) & (NEEDED_ALIGNMENT - 1);
+#  endif
       if (small) {
 	/* Chunk is small, register the rest for future allocs. */
 	Perl_sbrk_oldchunk = got + reqsize;

@@ -1,7 +1,12 @@
 # hints/vmesa.sh
 #
 # VM/ESA hints by Neale Ferguson (neale@mailbox.tabnsw.com.au)
- 
+#
+# Currently (1999-Jan-09) Configure cannot be used in VM/ESA because
+# too many things are done differently in the C compiler environment.
+# Therefore the hints file is hand-crafted. --jhi@iki.fi
+# 
+
 case "$archname" in
 '') archname="$osname" ;;
 esac

@@ -418,12 +418,12 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 
     if (prog->reganch & ROPT_GPOS_SEEN) {
 	MAGIC *mg;
-	int pos = 0;
 
-	if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv) 
-	    && (mg = mg_find(sv, 'g')) && mg->mg_len >= 0)
-	    pos = mg->mg_len;
-	PL_reg_ganch = startpos + pos;
+	if (!(flags & REXEC_IGNOREPOS) && sv && SvTYPE(sv) >= SVt_PVMG
+	    && SvMAGIC(sv) && (mg = mg_find(sv, 'g')) && mg->mg_len >= 0)
+	    PL_reg_ganch = strbeg + mg->mg_len;
+	else
+	    PL_reg_ganch = startpos;
     }
 
     /* Simplest case:  anchored match need be tried only once. */
@@ -2669,7 +2669,7 @@ regrepeat_hard(regnode *p, I32 max, I32 *lp)
 }
 
 /*
- - regclass - determine if a character falls into a character class
+ - reginclass - determine if a character falls into a character class
  */
 
 STATIC bool

@@ -50,6 +50,14 @@ struct perl_thread *getTHR _((void));
 #  define PTHREAD_ATTR_SETDETACHSTATE(a,s) pthread_attr_setdetachstate(a,s)
 #endif
 
+#ifndef PTHREAD_CREATE_JOINABLE
+#  ifdef OLD_PTHREAD_CREATE_JOINABLE
+#    define PTHREAD_CREATE_JOINABLE OLD_PTHREAD_CREATE_JOINABLE
+#  else
+#    define PTHREAD_CREATE_JOINABLE 0 /* Panic?  No, guess. */
+#  endif
+#endif
+
 #ifdef I_MACH_CTHREADS
 
 /* cthreads interface */

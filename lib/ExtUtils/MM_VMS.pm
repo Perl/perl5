@@ -1466,6 +1466,7 @@ $(INST_STATIC) : $(OBJECT) $(MYEXTLIB)
     }
     
     foreach $lib (split $self->{EXTRALIBS}) {
+      $lib = '""' if $lib eq '"';
       push(@m,"\t",'$(NOECHO) $(PERL) -e "print qq{',$lib,'\n}" >>$(INST_ARCHAUTODIR)extralibs.ld',"\n");
     }
     push @m, $self->dir_target('$(INST_ARCHAUTODIR)');

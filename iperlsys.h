@@ -935,10 +935,10 @@ public:
    HAS_WRITEV
    HAS_STRUCT_MSGHDR
    HAS_STRUCT_CMSGHDR
-   I_SYSUIO
 
    here so that Configure picks them up.  Perl core does not
-   use them but somebody might want to extend IO:: someday.
+   use them but somebody might want to extend Socket:: or IO::
+   someday.
 
    Jarkko Hietaniemi November 1998
 

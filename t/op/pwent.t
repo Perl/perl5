@@ -35,6 +35,7 @@ my %seen;
 
 while (<PW>) {
     chomp;
+    next if /^\+/; # ignore NIS includes
     my @s = split /:/;
     my ($name_s, $passwd_s, $uid_s, $gid_s, $gcos_s, $home_s, $shell_s) = @s;
     if (@s) {

@@ -1025,13 +1025,13 @@ There is a way to achieve a similar task from C via Perl API: create a
 I<pseudo-block>, and arrange for some changes to be automatically
 undone at the end of it, either explicit, or via a non-local exit (via
 die()). A I<block>-like construct is created by a pair of
-C<ENTER>/C<LEAVE> macros (see L<perlcall/EXAMPLE/"Returning a
-Scalar">).  Such a construct may be created specially for some
-important localized task, or an existing one (like boundaries of
-enclosing Perl subroutine/block, or an existing pair for freeing TMPs)
-may be used. (In the second case the overhead of additional
-localization must be almost negligible.) Note that any XSUB is
-automatically enclosed in an C<ENTER>/C<LEAVE> pair.
+C<ENTER>/C<LEAVE> macros (see L<perlcall/"Returning a Scalar">).
+Such a construct may be created specially for some important localized
+task, or an existing one (like boundaries of enclosing Perl
+subroutine/block, or an existing pair for freeing TMPs) may be
+used. (In the second case the overhead of additional localization must
+be almost negligible.) Note that any XSUB is automatically enclosed in
+an C<ENTER>/C<LEAVE> pair.
 
 Inside such a I<pseudo-block> the following service is available:
 
@@ -1503,7 +1503,7 @@ It is strongly recommended that all Perl API functions that don't begin
 with C<perl> be referenced with an explicit C<Perl_> prefix.
 
 The sort order of the listing is case insensitive, with any
-occurrences of '_' ignored for the the purpose of sorting.
+occurrences of '_' ignored for the purpose of sorting.
 
 =over 8
 
@@ -2170,6 +2170,15 @@ Turns on the magical status of an SV.  See C<sv_magic>.
 Do magic after a value is assigned to the SV.  See C<sv_magic>.
 
 	int	mg_set (SV* sv)
+
+=item modglobal
+
+C<modglobal> is a general purpose, interpreter global HV for use by
+extensions.  While it could hold extension specific information, it is
+meant primarily for information that needs to be shared between
+extensions.  Moreover, while it could be used for any kind of
+information, it is meant for information that should be not accessible
+in the usual way from the perl symbol table.
 
 =item Move
 

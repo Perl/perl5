@@ -866,7 +866,7 @@ sub getlogin {
 
 sub getpgrp {
     usage "getpgrp()" if @_ != 0;
-    CORE::getpgrp($_[0]);
+    CORE::getpgrp;
 }
 
 sub getpid {

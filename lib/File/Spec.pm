@@ -91,7 +91,7 @@ but rather as class methods:
 
 	File::Spec->catfile('a','b');
 
-For a reference of available functions, pleaes consult L<File::Spec::Unix>,
+For a reference of available functions, please consult L<File::Spec::Unix>,
 which contains the entire set, and inherited by the modules for other
 platforms. For further information, please see L<File::Spec::Mac>,
 L<File::Spec::OS2>, L<File::Spec::Win32>, or L<File::Spec::VMS>.

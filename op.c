@@ -51,6 +51,7 @@ static PADOFFSET pad_findlex _((char* name, PADOFFSET newoff, U32 seq,
 	CV* startcv, I32 cx_ix, I32 saweval));
 static OP *newDEFSVOP _((void));
 static OP *new_logop _((I32 type, I32 flags, OP **firstp, OP **otherp));
+static void simplify_sort(OP *o);
 #endif
 
 STATIC char*
@@ -827,7 +828,8 @@ scalarvoid(OP *o)
     SV* sv;
 
     /* assumes no premature commitment */
-    if (!o || (o->op_flags & OPf_WANT) == OPf_WANT_LIST || PL_error_count
+    U8 want = o->op_flags & OPf_WANT;
+    if (!o || (want && want != OPf_WANT_SCALAR) || PL_error_count
 	 || o->op_type == OP_RETURN)
 	return o;
 
@@ -1709,7 +1711,7 @@ localize(OP *o, I32 lex)
 	    char *s;
 	    for (s = PL_bufptr; *s && (isALNUM(*s) || (*s & 0x80) || strchr("@$%, ",*s)); s++) ;
 	    if (*s == ';' || *s == '=')
-		warner(WARN_PARENTHESIS, "Parens missing around \"%s\" list",
+		warner(WARN_PARENTHESIS, "Parentheses missing around \"%s\" list",
 				lex ? "my" : "local");
 	}
     }
@@ -5047,7 +5049,9 @@ ck_sort(OP *o)
 	o->op_private |= OPpLOCALE;
 #endif
 
-    if (o->op_flags & OPf_STACKED) {
+    if (o->op_flags & OPf_STACKED)
+	    simplify_sort(o);
+    if (o->op_flags & OPf_STACKED) {		     /* may have been cleared */
 	OP *kid = cLISTOPo->op_first->op_sibling;	/* get past pushmark */
 	OP *k;
 	kid = kUNOP->op_first;				/* get past rv2gv */
@@ -5087,6 +5091,64 @@ ck_sort(OP *o)
     }
 
     return o;
+}
+static void
+simplify_sort(OP *o)
+{
+    register OP *kid = cLISTOPo->op_first->op_sibling;	/* get past pushmark */
+    OP *k;
+    int reversed;
+    if (!(o->op_flags & OPf_STACKED))
+	return;
+    kid = kUNOP->op_first;				/* get past rv2gv */
+    if (kid->op_type != OP_SCOPE)
+	return;
+    kid = kLISTOP->op_last;				/* get past scope */
+    switch(kid->op_type) {
+	case OP_NCMP:
+	case OP_I_NCMP:
+	case OP_SCMP:
+	    break;
+	default:
+	    return;
+    }
+    k = kid;						/* remember this node*/
+    if (kBINOP->op_first->op_type != OP_RV2SV)
+	return;
+    kid = kBINOP->op_first;				/* get past cmp */
+    if (kUNOP->op_first->op_type != OP_GV)
+	return;
+    kid = kUNOP->op_first;				/* get past rv2sv */
+    if (GvSTASH(kGVOP->op_gv) != PL_curstash)
+	return;
+    if (strEQ(GvNAME(kGVOP->op_gv), "a"))
+	reversed = 0;
+    else if(strEQ(GvNAME(kGVOP->op_gv), "b"))
+	reversed = 1;
+    else
+	return;
+    kid = k;						/* back to cmp */
+    if (kBINOP->op_last->op_type != OP_RV2SV)
+	return;
+    kid = kBINOP->op_last;				/* down to 2nd arg */
+    if (kUNOP->op_first->op_type != OP_GV)
+	return;
+    kid = kUNOP->op_first;				/* get past rv2sv */
+    if (GvSTASH(kGVOP->op_gv) != PL_curstash
+	|| ( reversed
+	    ? strNE(GvNAME(kGVOP->op_gv), "a")
+	    : strNE(GvNAME(kGVOP->op_gv), "b")))
+	return;
+    o->op_flags &= ~(OPf_STACKED | OPf_SPECIAL);
+    if (reversed)
+	o->op_private |= OPpSORT_REVERSE;
+    if (k->op_type == OP_NCMP)
+	o->op_private |= OPpSORT_NUMERIC;
+    if (k->op_type == OP_I_NCMP)
+	o->op_private |= OPpSORT_NUMERIC | OPpSORT_INTEGER;
+    op_free(cLISTOPo->op_first->op_sibling);	/* delete comparison block */
+    cLISTOPo->op_first->op_sibling = cLISTOPo->op_last;
+    cLISTOPo->op_children = 1;
 }
 
 OP *

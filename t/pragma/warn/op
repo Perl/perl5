@@ -52,10 +52,10 @@
 	%$c =~ tr/a/b/ ;
 
 
-     Parens missing around "my" list at -e line 1.
+     Parentheses missing around "my" list at -e line 1.
        my $a, $b = (1,2);
  
-     Parens missing around "local" list at -e line 1.
+     Parentheses missing around "local" list at -e line 1.
        local $a, $b = (1,2);
  
      Probable precedence problem on logical or at -e line 1.
@@ -227,6 +227,12 @@ Useless use of getgrnam in void context at - line 50.
 Useless use of getgrgid in void context at - line 51.
 Useless use of getpwnam in void context at - line 52.
 Useless use of getpwuid in void context at - line 53.
+########
+# op.c
+use warning 'void' ;
+for (@{[0]}) { "$_" }		# check warning isn't duplicated
+EXPECT
+Useless use of string in void context at - line 3.
 ########
 # op.c
 use warning 'void' ;
@@ -436,13 +442,13 @@ Execution of - aborted due to compilation errors.
 use warning 'syntax' ;
 my $a, $b = (1,2);
 EXPECT
-Parens missing around "my" list at - line 3.
+Parentheses missing around "my" list at - line 3.
 ########
 # op.c
 use warning 'syntax' ;
 local $a, $b = (1,2);
 EXPECT
-Parens missing around "local" list at - line 3.
+Parentheses missing around "local" list at - line 3.
 ########
 # op.c
 use warning 'syntax' ;

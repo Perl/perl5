@@ -2392,14 +2392,15 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #define ARCHNAME "$archname"		/**/
 
-/* PTHREAD_CREATE_JOINABLE:
+/* OLD_PTHREAD_CREATE_JOINABLE:
  *	This symbol, if defined, indicates how to create pthread
- *	in joinable (aka undetached) state.  Not defined here if
- *	pthread.h already has defined PTHREAD_CREATE_JOINABLE.
+ *	in joinable (aka undetached) state.  NOTE: not defined
+ *	if pthread.h already has defined PTHREAD_CREATE_JOINABLE
+ *	(the new version of the constant).
  *	If defined, possible values are PTHREAD_CREATE_UNDETACHED
  *	and __UNDETACHED.
  */
-#$d_pthread_create_joinable PTHREAD_CREATE_JOINABLE $pthread_create_joinable /**/
+#$d_old_pthread_create_joinable OLD_PTHREAD_CREATE_JOINABLE $old_pthread_create_joinable /**/
 
 /* HAS_PTHREAD_YIELD:
  *	This symbol, if defined, indicates that the pthread_yield 

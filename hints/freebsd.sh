@@ -130,38 +130,13 @@ problem.  Try
 
 EOM
 
-# XXX EXPERIMENTAL  A.D.  03/09/1998
-# XXX This script UU/usethreads.cbu will get 'called-back' by Configure
-# XXX after it has prompted the user for whether to use threads.
-cat > UU/usethreads.cbu <<'EOSH'
-case "$usethreads" in
-$define)
-    case "$osvers" in  
-        3.0*) ldflags="-pthread $ldflags"
-              ;;
-        2.2*) if [ ! -r /usr/lib/libc_r ]; then
-                cat <<'EOM' >&4
-POSIX threads are not supported by default on FreeBSD $uname_r.  Follow the
-instructions in 'man pthread' to build and install the needed libraries.
-EOM
-                 exit 1
-              fi
-              set `echo X "$libswanted "| sed -e 's/ c / c_r /'`
-              shift
-              libswanted="$*"
-              # Configure will probably pick the wrong libc to use for nm
-              # scan.
-              # The safest quick-fix is just to not use nm at all.
-              usenm=false
-              ;;
-         *)   cat <<'EOM' >&4
-It is not known if FreeBSD $uname_r supports POSIX threads or not.  Consider
-upgrading to the latest STABLE release.
-EOM
-              exit 1
-              ;;
-    esac
-    ;;
-esac
-EOSH
-# XXX EXPERIMENTAL  --end of call-back
+# From: Anton Berezin <tobez@plab.ku.dk>
+# To: perl5-porters@perl.org
+# Subject: [PATCH 5.005_54] Configure - hints/freebsd.sh signal handler type
+# Date: 30 Nov 1998 19:46:24 +0100
+# Message-ID: <864srhhvcv.fsf@lion.plab.ku.dk>
+
+signal_t='void'
+d_voidsig='define'
+
+

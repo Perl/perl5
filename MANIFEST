@@ -35,6 +35,7 @@ README.beos		Notes about BeOS port
 README.cygwin32		Notes about Cygwin32 port
 README.dos		Notes about dos/djgpp port
 README.lexwarn		Notes about lexical warnings
+README.mint		Notes about Atari MiNT port
 README.mpeix		Notes about MPE/iX port
 README.os2		Notes about OS/2 port
 README.os390		Notes about OS/390 (nee MVS) port
@@ -216,6 +217,7 @@ ext/DynaLoader/dl_none.xs	Stub implementation
 ext/DynaLoader/dl_vms.xs	VMS implementation
 ext/DynaLoader/dl_vmesa.xs	VM/ESA implementation
 ext/DynaLoader/dlutils.c	Dynamic loader utilities for dl_*.xs files
+ext/DynaLoader/hints/linux.pl	Hint for DynaLoader for named architecture
 ext/Errno/ChangeLog		Errno perl module change log
 ext/Errno/Errno_pm.PL		Errno perl module create script
 ext/Errno/Makefile.PL		Errno extension makefile writer
@@ -283,10 +285,11 @@ ext/POSIX/POSIX.pod		POSIX extension documentation
 ext/POSIX/POSIX.xs		POSIX extension external subroutines
 ext/POSIX/hints/bsdos.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/dynixptx.pl	Hint for POSIX for named architecture
-ext/POSIX/hints/freebsd.pl	Hint for POSIX for named architecture
-ext/POSIX/hints/linux.pl	Hint for POSIX for named architecture
-ext/POSIX/hints/netbsd.pl	Hint for POSIX for named architecture
-ext/POSIX/hints/next_3.pl	Hint for POSIX for named architecture
+ext/POSIX/hints/freebsd.pl      Hint for POSIX for named architecture
+ext/POSIX/hints/linux.pl        Hint for POSIX for named architecture
+ext/POSIX/hints/mint.pl         Hint for POSIX for named architecture
+ext/POSIX/hints/netbsd.pl       Hint for POSIX for named architecture
+ext/POSIX/hints/next_3.pl       Hint for POSIX for named architecture
 ext/POSIX/hints/openbsd.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/sunos_4.pl	Hint for POSIX for named architecture
 ext/POSIX/typemap		POSIX extension interface types
@@ -416,6 +419,7 @@ hints/linux.sh		Hints for named architecture
 hints/lynxos.sh		Hints for named architecture
 hints/machten.sh	Hints for named architecture
 hints/machten_2.sh	Hints for named architecture
+hints/mint.sh		Hints for named architecture
 hints/mips.sh		Hints for named architecture
 hints/mpc.sh		Hints for named architecture
 hints/mpeix.sh		Hints for named architecture
@@ -510,6 +514,7 @@ lib/Class/Struct.pm	Declare struct-like datatypes as Perl classes
 lib/Cwd.pm		Various cwd routines (getcwd, fastcwd, chdir)
 lib/Devel/SelfStubber.pm Generate stubs for SelfLoader.pm
 lib/DirHandle.pm	like FileHandle only for directories
+lib/Dumpvalue.pm	Screen dump of perl values
 lib/English.pm		Readable aliases for short variables
 lib/Env.pm		Map environment into ordinary variables
 lib/Exporter.pm		Exporter base class
@@ -815,6 +820,13 @@ mg.c			Magic code
 mg.h			Magic header
 minimod.pl		Writes lib/ExtUtils/Miniperl.pm
 miniperlmain.c		Basic perl w/o dynamic loading or extensions
+mint/errno.h		MiNT port
+mint/Makefile		MiNT port
+mint/pwd.c		MiNT port
+mint/README		MiNT port
+mint/stdio.h		MiNT port
+mint/sys/time.h		MiNT port
+mint/time.h		MiNT port
 mpeix/mpeixish.h	MPE/iX port
 mpeix/nm		MPE/iX port
 mpeix/relink		MPE/iX port
@@ -938,6 +950,7 @@ pod/perlmodinstall.pod	Installing CPAN Modules
 pod/perlmodlib.pod	Module policy info
 pod/perlobj.pod		Object info
 pod/perlop.pod		Operator info
+pod/perlopentut.pod	Object info
 pod/perlpod.pod		Pod info
 pod/perlport.pod	Portability guide
 pod/perlre.pod		Regular expression info

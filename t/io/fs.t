@@ -9,7 +9,7 @@ BEGIN {
 
 use Config;
 
-$Is_Dosish = ($^O eq 'dos' or $^O eq 'os2');
+$Is_Dosish = ($^O eq 'dos' or $^O eq 'os2' or $^O eq 'mint');
 
 # avoid win32 (for now)
 do { print "1..0\n"; exit(0); } if $^O eq 'MSWin32';

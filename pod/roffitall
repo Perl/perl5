@@ -38,6 +38,7 @@ toroff=`
     $mandir/perlfunc.1	\
     $mandir/perlvar.1	\
     $mandir/perlsub.1	\
+    $mandir/perlopentut.1	\
     $mandir/perlmod.1	\
     $mandir/perlmodlib.1	\
     $mandir/perlmodinstall.1	\

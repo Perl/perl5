@@ -250,15 +250,6 @@ nm_opt='-p'
 d_getprior='define'
 d_setprior='define'
 
-if [ "X$usethreads" = "X$define" ]; then
-    ccflags="-Zmt $ccflags"
-    cppflags="-Zmt $cppflags"  # Do we really need to set this?
-    aout_ccflags="-DUSE_THREADS $aout_ccflags"
-    aout_cppflags="-DUSE_THREADS $aout_cppflags"
-    aout_lddlflags="-Zmt $aout_lddlflags"
-    aout_ldflags="-Zmt $aout_ldflags"
-fi
-
 # The next two are commented. pdksh handles #!, extproc gives no path part.
 # sharpbang='extproc '
 # shsharp='false'

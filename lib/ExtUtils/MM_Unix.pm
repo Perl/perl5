@@ -819,7 +819,7 @@ ci :
 
 =item dist_core (o)
 
-Defeines the targets dist, tardist, zipdist, uutardist, shdist
+Defines the targets dist, tardist, zipdist, uutardist, shdist
 
 =cut
 
@@ -2789,7 +2789,7 @@ Returns the attribute C<PERM_RW> or the string C<644>.
 Used as the string that is passed
 to the C<chmod> command to set the permissions for read/writeable files.
 MakeMaker chooses C<644> because it has turned out in the past that
-relying on the umask provokes hard-to-track bugreports.
+relying on the umask provokes hard-to-track bug reports.
 When the return value is used by the perl function C<chmod>, it is
 interpreted as an octal value.
 
@@ -3469,7 +3469,7 @@ Version_check:
 
 =item writedoc
 
-Obsolete, depecated method. Not used since Version 5.21.
+Obsolete, deprecated method. Not used since Version 5.21.
 
 =cut
 
