@@ -5,10 +5,10 @@ getcwd - get pathname of current working directory
 =head1 SYNOPSIS
 
     require Cwd;
-    $dir = Cwd::getcwd()'
+    $dir = Cwd::getcwd();
 
     use Cwd;
-    $dir = getcwd()'
+    $dir = getcwd();
 
     use Cwd 'chdir';
     chdir "/tmp";

@@ -1,5 +1,5 @@
 # Descrip.MMS for perl5 on VMS
-# Last revised 12-Oct-1994 by Charles Bailey  bailey@genetics.upenn.edu
+# Last revised 10-Mar-1995 by Charles Bailey  bailey@genetics.upenn.edu
 #
 #: This file uses MMS syntax, and can be processed using DEC's MMS product,
 #: or the free MMK clone (available by ftp at ftp.spc.edu).  If you want to
@@ -39,37 +39,43 @@
 
 #### Start of system configuration section. ####
 
+
+#: >>>>> Architecture-specific options <<<<<
 .ifdef AXE
 # File type to use for object files
 O = .abj
+# File type to use for object libraries
+OLB = .alb
 # File type to use for executable images
 E = .axe
 .else
 # File type to use for object files
 O = .obj
+# File type to use for object libraries
+OLB = .olb
 # File type to use for executable images
 E = .exe
 .endif
 
-# used to incorporate 'custom' malloc routines
-mallocsrc =
-mallocobj =
-
-#: Process hardware architecture macros
 .ifdef __AXP__
-SYMOPT =
 DECC = 1
+ARCHCORE = [.lib.VMS_AXP.CORE]
+ARCHAUTO = [.lib.auto.VMS_AXP]
 .else
-# We need separate MACRO files declaring global symbols
-SYMOPT = ,perlshr_gbl.opt/Option
+ARCHCORE = [.lib.VMS_VAX.CORE]
+ARCHAUTO = [.lib.auto.VMS_VAX]
 .endif
 
-#: Process compiler selection macros
+
+#: >>>>>Compiler-specific options <<<<<
 .ifdef GNUC
 .first
 	@ If F$TrnLnm("Sys").eqs."" Then Define/NoLog SYS GNU_CC_Include:[VMS]
 CC = gcc
-XTRACCFLAGS = /Obj=$(MMS$TARGET_NAME)$(O)
+# -fno-builtin avoids bug in gcc up to version 2.6.2 which can destroy
+# data when memcpy() is called on large (>64 kB) blocks of memory
+# (fixed in gcc 2.6.3)
+XTRACCFLAGS = /Obj=$(MMS$TARGET_NAME)$(O)/NoCase_Hack/Optimize=2/CC1="""""-fno-builtin"""""
 DBGSPECFLAGS =
 XTRADEF = ,GNUC_ATTRIBUTE_CHECK
 XTRAOBJS =
@@ -83,7 +89,7 @@ LIBS1 = $(XTRAOBJS)
 DBGSPECFLAGS = /Show=(Source,Include,Expansion)
 .ifdef decc
 LIBS2 = 
-XTRACCFLAGS = /Standard=VAXC/Include=[]/Prefix=All/Obj=$(MMS$TARGET_NAME)$(O)
+XTRACCFLAGS = /Warning=Disable=(ADDRCONSTEXT,MISSINGRETURN)/Include=[]/Prefix=All/Obj=$(MMS$TARGET_NAME)$(O)
 XTRADEF =
 .else # VAXC
 XTRACCFLAGS = /Include=[]/Object=$(O)
@@ -92,6 +98,9 @@ LIBS2 = Sys$Share:VAXCRTL.Exe/Shareable
 .endif
 .endif
 
+
+#: >>>>> Configuration options <<<<<
+#: __DEBUG__: builds images with full VMS debugger support
 .ifdef __DEBUG__
 DBGCCFLAGS = /List/Debug/NoOpt$(DBGSPECFLAGS)
 DBGLINKFLAGS = /Debug/Map/Full/Cross
@@ -102,7 +111,9 @@ DBGLINKFLAGS = /NoMap
 DBG = 
 .endif
 
-# Process option macros
+#: SOCKET: build in support for TCP/IP sockets
+#: By default, used SOCKETSHR library; see ReadMe.VMS
+#: for information on changing socket support
 .ifdef SOCKET
 SOCKDEF = ,VMS_DO_SOCKETS
 SOCKLIB = SocketShr/Share
@@ -124,20 +135,26 @@ SOCKHLIS =
 SOCKOBJ =
 .endif
 
-# DEBUGGING ==> perl -D, not the VMS debugger
+# C preprocessor manifest "DEBUGGING" ==> perl -D, not the VMS debugger
 CFLAGS = /Define=(DEBUGGING$(SOCKDEF)$(XTRADEF))$(XTRACCFLAGS)$(DBGCCFLAGS)
 LINKFLAGS = $(DBGLINKFLAGS)
 
+MAKE = MMK
 MAKEFILE = [.VMS]Descrip.MMS   # this file
 NOOP = continue
 
-XSUBPP = MCR Sys$Disk:[]Miniperl$(E) [.ext]xsubpp -typemap [-]typemap
-# List of extensions to build into perlmain; enclose each in quotes and
-# separate by spaces.
-EXT = "DynaLoader"
-# Source and object files for these extensions; leading comma is required
+# Macros to invoke a copy of miniperl during the build.  Targets which
+# are built using these macros should depend on $(MINIPERL_EXE)
+MINIPERL_EXE = Sys$Disk:[]miniperl$(E)
+MINIPERL = MCR $(MINIPERL_EXE)
+XSUBPP = $(MINIPERL) [.lib.extutils]xsubpp
+
+# Space-separated list of "static" extensions to build into perlshr (case counts).
+EXT = DynaLoader
+# object files for these extensions; the trailing comma is required if
+# there are any object files specified
 # These must be built separately, or you must add rules below to build them
-extobj = , [.ext.dynaloader]dl_vms$(O)
+extobj = [.ext.dynaloader]dl_vms$(O),
 
 #### End of system configuration section. ####
 
@@ -148,96 +165,122 @@ h3 = opcode.h, patchlevel.h, perl.h, perly.h, pp.h, proto.h, regcomp.h
 h4 = regexp.h, scope.h, sv.h, vmsish.h, util.h
 h = $(h1), $(h2), $(h3), $(h4) $(SOCKHLIS)
 
-c1 = av.c, scope.c, op.c, doop.c, doio.c, dump.c, hv.c $(mallocsrc)
-c2 = mg.c, perly.c, pp.c, pp_ctl.c, pp_hot.c, pp_sys.c, regcomp.c, regexec.c
-c3 = gv.c, sv.c, taint.c, toke.c, util.c, deb.c, run.c, vms.c $(SOCKCLIS)
+c1 = av.c, scope.c, op.c, doop.c, doio.c, dump.c, hv.c, mg.c
+c2 = perl.c, perly.c, pp.c, pp_hot.c, pp_ctl.c, pp_sys.c, regcomp.c, regexec.c
+c3 = gv.c, sv.c, taint.c, toke.c, util.c, deb.c, run.c, globals.c, vms.c $(SOCKCLIS)
 
-c = $(c1), $(c2), $(c3), perl.c, miniperlmain.c, perlmain.c
+c = $(c1), $(c2), $(c3), miniperlmain.c, perlmain.c
 
-obj1 = av$(O), scope$(O), op$(O), doop$(O), doio$(O), dump$(O), hv$(O) $(mallocobj)
-obj2 = mg$(O), perly$(O), pp$(O), pp_ctl$(O), pp_hot$(O), pp_sys$(O), regcomp$(O), regexec$(O)
-obj3 = gv$(O), sv$(O), taint$(O), toke$(O), util$(O), deb$(O), run$(O), vms$(O) $(SOCKOBJ)
+obj1 = perl$(O), gv$(O), toke$(O), perly$(O), op$(O), regcomp$(O), dump$(O), util$(O), mg$(O)
+obj2 = hv$(O), av$(O), run$(O), pp_hot$(O), sv$(O), pp$(O), scope$(O), pp_ctl$(O), pp_sys$(O)
+obj3 = doop$(O), doio$(O), regexec$(O), taint$(O), deb$(O), globals$(O), vms$(O) $(SOCKOBJ)
 
 obj = $(obj1), $(obj2), $(obj3)
+
+ac1 = $(ARCHCORE)EXTERN.h $(ARCHCORE)INTERN.h  $(ARCHCORE)XSUB.h $(ARCHCORE)av.h
+ac2 = $(ARCHCORE)config.h $(ARCHCORE)cop.h $(ARCHCORE)cv.h $(ARCHCORE)embed.h
+ac3 = $(ARCHCORE)form.h $(ARCHCORE)gv.h $(ARCHCORE)handy.h $(ARCHCORE)hv.h
+ac4 = $(ARCHCORE)keywords.h $(ARCHCORE)mg.h $(ARCHCORE)op.h $(ARCHCORE)opcode.h
+ac5 = $(ARCHCORE)patchlevel.h $(ARCHCORE)perl.h $(ARCHCORE)perly.h
+ac6 = $(ARCHCORE)pp.h $(ARCHCORE)proto.h $(ARCHCORE)regcomp.h
+ac7 = $(ARCHCORE)regexp.h $(ARCHCORE)scope.h $(ARCHCORE)sv.h $(ARCHCORE)util.h
+ac8 = $(ARCHCORE)vmsish.h $(ARCHCORE)$(DBG)libperl$(OLB) $(ARCHCORE)perlshr_attr.opt
+ac9 = $(ARCHCORE)$(DBG)perlshr_bld.opt
+.ifdef SOCKET
+acs = $(ARCHCORE)$(SOCKH)
+.else
+acs =
+.endif
 
 CRTL = []crtl.opt
 CRTLOPTS =,$(CRTL)/Options
 
 .SUFFIXES
-.SUFFIXES $(O) .c
+.SUFFIXES $(O) .c .xs
+
+.xs.c :
+	$(XSUBPP) $(MMS$SOURCE) >$(MMS$TARGET)
+
 
 .c$(O) :
 	$(CC) $(CFLAGS) $(MMS$SOURCE)
 
-all : base extras
+.xs$(O) :
+	$(XSUBPP) $(MMS$SOURCE) >$(MMS$SOURCE_NAME).c
+	$(CC) $(CFLAGS) $(MMS$SOURCE_NAME).c
+
+all : base extras archcorefiles preplibrary
 	@ $(NOOP)
-base : $(DBG)miniperl$(E) perl$(E) [.lib]Config.pm 
+base : miniperl$(E) perl$(E) [.lib]Config.pm 
 	@ $(NOOP)
-extras : [.lib]DynaLoader.pm
+extras : [.lib]DynaLoader.pm [.lib.VMS]Filespec.pm [.lib.extutils]MM_VMS.pm
+	@ $(NOOP)
+archcorefiles :  $(ac1) $(ac2) $(ac3) $(ac4) $(ac5) $(ac6) $(ac7) $(ac8) $(ac9) $(acs) $(ARCHAUTO)time.stamp
 	@ $(NOOP)
 
-miniperl_objs = miniperlmain$(O), perl$(O), $(obj)
-miniperl$(E) :  $(miniperl_objs) , coreobjs.opt $(CRTL)
-	Link $(LINKFLAGS)/NoDebug/Exe=$(MMS$TARGET) miniperlmain$(O), perl$(O), coreobjs.opt/Option $(CRTLOPTS)
-.ifdef DBG
-$(DBG)miniperl$(E) :  $(miniperl_objs) , coreobjs.opt $(CRTL)
-	Link $(LINKFLAGS)/Exe=$(MMS$TARGET) miniperlmain$(O), perl$(O), coreobjs.opt/Option $(CRTLOPTS)
-.endif
+miniperl_objs = miniperlmain$(O), $(obj)
+$(MINIPERL_EXE) :  miniperlmain$(O), $(DBG)libperl$(OLB) $(CRTL)
+	Link $(LINKFLAGS)/NoDebug/Exe=$(MMS$TARGET) miniperlmain$(O), $(DBG)libperl$(OLB)/Library/Include=globals $(CRTLOPTS)
+miniperl$(E) :  $(miniperl_objs), $(DBG)libperl$(OLB) $(CRTL)
+	Link $(LINKFLAGS)/Exe=$(DBG)$(MMS$TARGET) miniperlmain$(O),$(DBG)libperl$(OLB)/Library/Include=globals  $(CRTLOPTS)
 
-# Use an options file to list object files since some Makes don't feed
-# long lines to DCL properly
-coreobjs.opt : $(MAKEFILE)
-	@ @[.vms]genopt "$(MMS$TARGET)/Write" "|" "$(obj1)"
-	@ @[.vms]genopt "$(MMS$TARGET)/Append" "|" "$(obj2)"
-	@ @[.vms]genopt "$(MMS$TARGET)/Append" "|" "$(obj3)"
+$(DBG)libperl$(OLB) : $(obj)
+	@ If F$Search("$(MMS$TARGET)").eqs."" Then Library/Object/Create $(MMS$TARGET)
+	Library/Object/Replace $(MMS$TARGET) $(obj1)
+	Library/Object/Replace $(MMS$TARGET) $(obj2)
+	Library/Object/Replace $(MMS$TARGET) $(obj3)
 
-perlmain.c : miniperlmain.c miniperl$(E)
-	MCR Sys$Disk:[]Miniperl$(E) [.VMS]Writemain.pl $(EXT)
+perlmain.c : miniperlmain.c $(MINIPERL_EXE) [.vms]writemain.pl
+	$(MINIPERL) [.VMS]Writemain.pl "$(EXT)"
 
-perl$(E) : perlmain$(O) $(extobj), perlshr$(E), perlshr_attr.opt $(CRTL)
+perl$(E) : perlmain$(O), perlshr$(E), perlshr_attr.opt $(MINIPERL_EXE)
 	@ @[.vms]genopt "PerlShr.Opt/Write" "|" "''F$Environment("Default")'$(DBG)PerlShr$(E)/Share"
-	Link $(LINKFLAGS)/Exe=$(DBG)$(MMS$TARGET) perlmain$(O) $(extobj),[]perlshr.opt/Option,perlshr_attr.opt/Option
-shr_objs = perlshr$(O) ,perl$(O), $(obj)
-perlshr$(E) : $(shr_objs) ,perlshr_xtras.ts  ,coreobjs.opt ,$(CRTL)
-	Link $(LINKFLAGS)/Share/Exe=$(DBG)$(MMS$TARGET) perlshr$(O), perl$(O), coreobjs.opt/Option  $(SYMOPT) , perlshr_attr.opt/Option, perlshr_sym.opt/Option $(CRTLOPTS)
-perlshr$(O) : [.vms]perlshr.c
-	$(CC) $(CFLAGS)/NoOptimize/Object=$(MMS$TARGET) $(MMS$SOURCE)
+	Link $(LINKFLAGS)/Exe=$(DBG)$(MMS$TARGET) perlmain$(O), perlshr.opt/Option, perlshr_attr.opt/Option
+perlshr$(E) : $(DBG)libperl$(OLB) $(extobj) $(DBG)perlshr_xtras.ts
+	Link $(LINKFLAGS)/Share=$(DBG)$(MMS$TARGET) $(extobj) []$(DBG)perlshr_bld.opt/Option, perlshr_attr.opt/Option
 # The following files are built in one go by gen_shrfls.pl:
-#  perlshr_attr.opt, perlshr_sym.opt - VAX and AXP
-#  perlshr_gbl*.mar, perlshr_gbl*$(O), perlshr_gbl.opt - VAX only
+#  perlshr_attr.opt, $(DBG)perlshr_bld.opt - VAX and AXP
+#  perlshr_gbl*.mar, perlshr_gbl*$(O) - VAX only
 .ifdef DECC_PIPES_BROKEN
 # This is a backup target used only with older versions of the DECCRTL which
 # can't deal with pipes properly.  See ReadMe.VMS for details.
-perlshr_xtras.ts : perl.h config.h vmsish.h proto.h [.vms]gen_shrfls.pl miniperl$(E) $(MAKEFILE)
+$(DBG)perlshr_xtras.ts : perl.h config.h vmsish.h proto.h [.vms]gen_shrfls.pl $(MINIPERL_EXE) $(MAKEFILE) $(CRTL)
 	$(CC) $(CFLAGS)/NoObject/NoList/PreProcess=perl.i perl.h
-	MCR Sys$Disk:[]Miniperl$(E) [.vms]gen_shrfls.pl "~~NOCC~~perl.i" $(O)
+	$(MINIPERL) [.vms]gen_shrfls.pl "~~NOCC~~perl.i" "$(O)" "$(DBG)" "$(OLB)" "$(EXT)" "$(CRTL)"
 	@ Delete/NoLog/NoConfirm perl.i;
-	@ Copy NLA0: perlshr_xtras.ts
-	@ Purge/NoLog/NoConfirm perlshr_xtras.ts
+	@ If F$Search("$(DBG)perlshr_xtras.ts").nes."" Then Delete/NoLog/NoConfirm $(DBG)perlshr_xtras.ts;*
+	@ Copy NLA0: $(DBG)perlshr_xtras.ts
 .else
-perlshr_xtras.ts : perl.h config.h vmsish.h proto.h [.vms]gen_shrfls.pl miniperl$(E) $(MAKEFILE)
-	MCR Sys$Disk:[]Miniperl$(E) [.vms]gen_shrfls.pl "$(CC)$(CFLAGS)" $(O)
-	@ Copy NLA0: perlshr_xtras.ts
-	@ Purge/NoLog/NoConfirm perlshr_xtras.ts
+$(DBG)perlshr_xtras.ts : perl.h config.h vmsish.h proto.h [.vms]gen_shrfls.pl $(MINIPERL_EXE) $(MAKEFILE) $(CRTL)
+	$(MINIPERL) [.vms]gen_shrfls.pl "$(CC)$(CFLAGS)" "$(O)" "$(DBG)" "$(OLB)" "$(EXT)" "$(CRTL)"
+	@ If F$Search("$(DBG)perlshr_xtras.ts").nes."" Then Delete/NoLog/NoConfirm $(DBG)perlshr_xtras.ts;*
+	@ Copy NLA0: $(DBG)perlshr_xtras.ts
 .endif
 
-[.lib]config.pm : [.vms]config.vms [.vms]genconfig.pl miniperl$(E)
-	MCR Sys$Disk:[]Miniperl$(E) [.VMS]GenConfig.Pl
-	MCR Sys$Disk:[]Miniperl$(E) ConfigPM.
+[.lib]config.pm : [.vms]config.vms [.vms]genconfig.pl $(MINIPERL_EXE)
+	$(MINIPERL) [.VMS]GenConfig.Pl cc=$(CC)$(CFLAGS) ldflags=$(LINKFLAGS)
+	$(MINIPERL) ConfigPM.
 
-[.ext.dynaloader]dl_vms.c : [.ext.dynaloader]dl_vms.xs miniperl$(E)
+[.ext.dynaloader]dl_vms.c : [.ext.dynaloader]dl_vms.xs $(MINIPERL_EXE)
 	$(XSUBPP) $(MMS$SOURCE) >$(MMS$TARGET)
 
 [.ext.dynaloader]dl_vms$(O) : [.ext.dynaloader]dl_vms.c
 	$(CC) $(CFLAGS) /Object=$(MMS$TARGET) $(MMS$SOURCE)
 
-preplibrary : miniperl$(E) [.lib]Config.pm
-	@ Create/Directory [.lib.auto]
-	MCR Sys$Disk:[]Miniperl$(E) "-Ilib" -e "use AutoSplit; autosplit_lib_modules(@ARGV)" [.lib]*.pm [.lib.*]*.pm
-
-[.lib]DynaLoader.pm : [.ext.dynaloader]dynaloader.pm preplibrary
+[.lib]DynaLoader.pm : [.ext.dynaloader]dynaloader.pm
 	Copy/Log/NoConfirm [.ext.dynaloader]dynaloader.pm [.lib]DynaLoader.pm
-	MCR Sys$Disk:[]Miniperl$(E) autosplit DynaLoader
+
+[.lib.VMS]Filespec.pm : [.vms.ext]Filespec.pm
+	@ Create/Directory [.lib.VMS]
+	Copy/Log/NoConfirm $(MMS$SOURCE) $(MMS$TARGET)
+
+[.lib.ExtUtils]MM_VMS.pm : [.vms.ext]MM_VMS.pm
+	Copy/Log/NoConfirm $(MMS$SOURCE) $(MMS$TARGET)
+
+preplibrary : $(MINIPERL_EXE) [.lib]DynaLoader.pm [.lib.VMS]Filespec.pm [.lib.ExtUtils]MM_VMS.pm
+	@ Write Sys$Output "Autosplitting Perl library . . ."
+	@ Create/Directory [.lib.auto]
+	@ $(MINIPERL) "-Ilib" -e "use AutoSplit; autosplit_lib_modules(@ARGV)" [.lib]*.pm [.lib.*]*.pm
 
 .ifdef SOCKET
 $(SOCKOBJ) : $(SOCKC) $(SOCKH)
@@ -251,8 +294,8 @@ $(SOCKH) : [.vms]$(SOCKH)
 	Copy/Log/NoConfirm [.vms]$(SOCKH) []$(SOCKH)
 .endif
 
-#opcode.h : opcode.pl
-#	MCR Sys$Disk:[]Miniperl$(E) opcode.pl
+#opcode.h : opcode.pl $(MINIPERL_EXE)
+#	$(MINIPERL) opcode.pl
 
 perly.h : perly.c                   # Quick and dirty 'touch'
 	Copy/Log/NoConfirm perly.h; ;
@@ -274,8 +317,108 @@ perly$(O) : perly.c, perly.h, $(h)
 test : perl$(E)
 	- @[.VMS]Test.Com
 
+# CORE subset for MakeMaker, so we can build Perl without sources
+# Should move to VMS installperl when we get one
+$(ARCHCORE)EXTERN.h : EXTERN.h
+	@ Create/Directory $(ARCHCORE)
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+$(ARCHCORE)INTERN.h : INTERN.h
+	@ Create/Directory $(ARCHCORE)
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+$(ARCHCORE)XSUB.h : XSUB.h
+	@ Create/Directory $(ARCHCORE)
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+$(ARCHCORE)av.h : av.h
+	@ Create/Directory $(ARCHCORE)
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+$(ARCHCORE)config.h : config.h
+	@ Create/Directory $(ARCHCORE)
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+$(ARCHCORE)cop.h : cop.h
+	@ Create/Directory $(ARCHCORE)
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+$(ARCHCORE)cv.h : cv.h
+	@ Create/Directory $(ARCHCORE)
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+$(ARCHCORE)embed.h : embed.h
+	@ Create/Directory $(ARCHCORE)
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+$(ARCHCORE)form.h : form.h
+	@ Create/Directory $(ARCHCORE)
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+$(ARCHCORE)gv.h : gv.h
+	@ Create/Directory $(ARCHCORE)
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+$(ARCHCORE)handy.h : handy.h
+	@ Create/Directory $(ARCHCORE)
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+$(ARCHCORE)hv.h : hv.h
+	@ Create/Directory $(ARCHCORE)
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+$(ARCHCORE)keywords.h : keywords.h
+	@ Create/Directory $(ARCHCORE)
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+$(ARCHCORE)mg.h : mg.h
+	@ Create/Directory $(ARCHCORE)
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+$(ARCHCORE)op.h : op.h
+	@ Create/Directory $(ARCHCORE)
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+$(ARCHCORE)opcode.h : opcode.h
+	@ Create/Directory $(ARCHCORE)
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+$(ARCHCORE)patchlevel.h : patchlevel.h
+	@ Create/Directory $(ARCHCORE)
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+$(ARCHCORE)perl.h : perl.h
+	@ Create/Directory $(ARCHCORE)
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+$(ARCHCORE)perly.h : perly.h
+	@ Create/Directory $(ARCHCORE)
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+$(ARCHCORE)pp.h : pp.h
+	@ Create/Directory $(ARCHCORE)
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+$(ARCHCORE)proto.h : proto.h
+	@ Create/Directory $(ARCHCORE)
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+$(ARCHCORE)regcomp.h : regcomp.h
+	@ Create/Directory $(ARCHCORE)
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+$(ARCHCORE)regexp.h : regexp.h
+	@ Create/Directory $(ARCHCORE)
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+$(ARCHCORE)scope.h : scope.h
+	@ Create/Directory $(ARCHCORE)
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+$(ARCHCORE)sv.h : sv.h
+	@ Create/Directory $(ARCHCORE)
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+$(ARCHCORE)util.h : util.h
+	@ Create/Directory $(ARCHCORE)
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+$(ARCHCORE)vmsish.h : vmsish.h
+	@ Create/Directory $(ARCHCORE)
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+.ifdef SOCKET
+$(ARCHCORE)$(SOCKH) : $(SOCKH)
+	@ Create/Directory $(ARCHCORE)
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+.endif
+$(ARCHCORE)$(DBG)libperl$(OLB) : $(DBG)libperl$(OLB) $(DBG)perlshr_xtras.ts
+	@ Create/Directory $(ARCHCORE)
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+$(ARCHCORE)perlshr_attr.opt : $(DBG)perlshr_xtras.ts
+	@ Create/Directory $(ARCHCORE)
+	Copy/Log perlshr_attr.opt $(MMS$TARGET)
+$(ARCHCORE)$(DBG)perlshr_bld.opt : $(DBG)perlshr_xtras.ts
+	@ Create/Directory $(ARCHCORE)
+	Copy/Log $(DBG)perlshr_bld.opt $(MMS$TARGET)
+$(ARCHAUTO)time.stamp :
+	@ Create/Directory $(ARCHAUTO)
+	@ If F$Search("$(MMS$TARGET)").eqs."" Then Copy/NoConfirm _NLA0: $(MMS$TARGET)
+
 # AUTOMATICALLY GENERATED MAKE DEPENDENCIES--PUT NOTHING BELOW THIS LINE
-# If this runs make out of memory, delete /usr/include lines.
 av$(O) : EXTERN.h
 av$(O) : av.c
 av$(O) : av.h
@@ -430,28 +573,6 @@ hv$(O) : scope.h
 hv$(O) : sv.h
 hv$(O) : vmsish.h
 hv$(O) : util.h
-malloc$(O) : EXTERN.h
-malloc$(O) : av.h
-malloc$(O) : config.h
-malloc$(O) : cop.h
-malloc$(O) : cv.h
-malloc$(O) : embed.h
-malloc$(O) : form.h
-malloc$(O) : gv.h
-malloc$(O) : handy.h
-malloc$(O) : hv.h
-malloc$(O) : malloc.c
-malloc$(O) : mg.h
-malloc$(O) : op.h
-malloc$(O) : opcode.h
-malloc$(O) : perl.h
-malloc$(O) : pp.h
-malloc$(O) : proto.h
-malloc$(O) : regexp.h
-malloc$(O) : scope.h
-malloc$(O) : sv.h
-malloc$(O) : vmsish.h
-malloc$(O) : util.h
 mg$(O) : EXTERN.h
 mg$(O) : av.h
 mg$(O) : config.h
@@ -474,6 +595,28 @@ mg$(O) : scope.h
 mg$(O) : sv.h
 mg$(O) : vmsish.h
 mg$(O) : util.h
+perl$(O) : EXTERN.h
+perl$(O) : av.h
+perl$(O) : config.h
+perl$(O) : cop.h
+perl$(O) : cv.h
+perl$(O) : embed.h
+perl$(O) : form.h
+perl$(O) : gv.h
+perl$(O) : handy.h
+perl$(O) : hv.h
+perl$(O) : mg.h
+perl$(O) : op.h
+perl$(O) : opcode.h
+perl$(O) : perl.c
+perl$(O) : perl.h
+perl$(O) : pp.h
+perl$(O) : proto.h
+perl$(O) : regexp.h
+perl$(O) : scope.h
+perl$(O) : sv.h
+perl$(O) : vmsish.h
+perl$(O) : util.h
 perly$(O) : EXTERN.h
 perly$(O) : av.h
 perly$(O) : config.h
@@ -518,6 +661,72 @@ pp$(O) : scope.h
 pp$(O) : sv.h
 pp$(O) : vmsish.h
 pp$(O) : util.h
+pp_ctl$(O) : EXTERN.h
+pp_ctl$(O) : av.h
+pp_ctl$(O) : config.h
+pp_ctl$(O) : cop.h
+pp_ctl$(O) : cv.h
+pp_ctl$(O) : embed.h
+pp_ctl$(O) : form.h
+pp_ctl$(O) : gv.h
+pp_ctl$(O) : handy.h
+pp_ctl$(O) : hv.h
+pp_ctl$(O) : mg.h
+pp_ctl$(O) : op.h
+pp_ctl$(O) : opcode.h
+pp_ctl$(O) : perl.h
+pp_ctl$(O) : pp_ctl.c
+pp_ctl$(O) : pp.h
+pp_ctl$(O) : proto.h
+pp_ctl$(O) : regexp.h
+pp_ctl$(O) : scope.h
+pp_ctl$(O) : sv.h
+pp_ctl$(O) : vmsish.h
+pp_ctl$(O) : util.h
+pp_hot$(O) : EXTERN.h
+pp_hot$(O) : av.h
+pp_hot$(O) : config.h
+pp_hot$(O) : cop.h
+pp_hot$(O) : cv.h
+pp_hot$(O) : embed.h
+pp_hot$(O) : form.h
+pp_hot$(O) : gv.h
+pp_hot$(O) : handy.h
+pp_hot$(O) : hv.h
+pp_hot$(O) : mg.h
+pp_hot$(O) : op.h
+pp_hot$(O) : opcode.h
+pp_hot$(O) : perl.h
+pp_hot$(O) : pp_hot.c
+pp_hot$(O) : pp.h
+pp_hot$(O) : proto.h
+pp_hot$(O) : regexp.h
+pp_hot$(O) : scope.h
+pp_hot$(O) : sv.h
+pp_hot$(O) : vmsish.h
+pp_hot$(O) : util.h
+pp_sys$(O) : EXTERN.h
+pp_sys$(O) : av.h
+pp_sys$(O) : config.h
+pp_sys$(O) : cop.h
+pp_sys$(O) : cv.h
+pp_sys$(O) : embed.h
+pp_sys$(O) : form.h
+pp_sys$(O) : gv.h
+pp_sys$(O) : handy.h
+pp_sys$(O) : hv.h
+pp_sys$(O) : mg.h
+pp_sys$(O) : op.h
+pp_sys$(O) : opcode.h
+pp_sys$(O) : perl.h
+pp_sys$(O) : pp_sys.c
+pp_sys$(O) : pp.h
+pp_sys$(O) : proto.h
+pp_sys$(O) : regexp.h
+pp_sys$(O) : scope.h
+pp_sys$(O) : sv.h
+pp_sys$(O) : vmsish.h
+pp_sys$(O) : util.h
 regcomp$(O) : EXTERN.h
 regcomp$(O) : INTERN.h
 regcomp$(O) : av.h
@@ -804,6 +1013,7 @@ $(CRTL) : $(MAKEFILE)
 
 cleanlis :
 	- If F$Search("*.Lis").nes."" Then Delete/NoConfirm/Log *.Lis;*
+	- If F$Search("*.CPP").nes."" Then Delete/NoConfirm/Log *.CPP;*
 	- If F$Search("*.Map").nes."" Then Delete/NoConfirm/Log *.Map;*
 
 tidy : cleanlis
@@ -818,11 +1028,17 @@ tidy : cleanlis
 	- If F$Search("Perlshr_Gbl*.Mar;-1")   .nes."" Then Purge/NoConfirm/Log Perlshr_Gbl*.Mar
 	- If F$Search("[.Ext.DynaLoader]DL_VMS$(O);-1").nes."" Then Purge/NoConfirm/Log [.Ext.DynaLoader]DL_VMS$(O)
 	- If F$Search("[.Ext.DynaLoader]DL_VMS.C;-1").nes."" Then Purge/NoConfirm/Log [.Ext.DynaLoader]DL_VMS.C
+	- If F$Search("[.VMS.Ext...]*.C;-1").nes."" Then Purge/NoConfirm/Log [.VMS.Ext...]*.C
+	- If F$Search("[.VMS.Ext...]*$(O);-1").nes."" Then Purge/NoConfirm/Log [.VMS.Ext...]*$(O)
 	- If F$Search("[.Lib.Auto...]*.al;-1").nes."" Then Purge/NoConfirm/Log [.Lib.Auto...]*.al
-	- If F$Search("[.Lib.Auto...]autosplit.ts;-1").nes."" Then Purge/NoConfirm/Log [.Lib.Auto...]autosplit.ts
+	- If F$Search("[.Lib.Auto...]autosplit.ix;-1").nes."" Then Purge/NoConfirm/Log [.Lib.Auto...]autosplit.ix
+	- If F$Search("[.Lib]DynaLoader.pm;-1").nes."" Then Purge/NoConfirm/Log [.Lib]DynaLoader.pm
+	- If F$Search("[.Lib.VMS]*.*;-1").nes."" Then Purge/NoConfirm/Log [.Lib.VMS]*.*
+	- If F$Search("[.Lib.ExtUtils]MM_VMS.pm;-1").nes."" Then Purge/NoConfirm/Log [.Lib.ExtUtils]MM_VMS.pm
+	- If F$Search("$(ARCHCORE)*.*").nes."" Then Purge/NoConfirm/Log $(ARCHCORE)*.*
 
 clean : tidy
-	- If F$Search("*.Opt").nes."" Then Delete/NoConfirm/Log *.Opt;*/Exclude=PerlShr_Attr.Opt
+	- If F$Search("*.Opt").nes."" Then Delete/NoConfirm/Log *.Opt;*/Exclude=PerlShr_*.Opt
 	- If F$Search("*$(O);*") .nes."" Then Delete/NoConfirm/Log *$(O);*
 	- If F$Search("Config.H").nes."" Then Delete/NoConfirm/Log Config.H;*
 	- If F$Search("Config.SH").nes."" Then Delete/NoConfirm/Log Config.SH;*
@@ -835,24 +1051,31 @@ clean : tidy
 	- If F$Search("*.TS").nes."" Then Delete/NoConfirm/Log *.TS;*
 	- If F$Search("[.Ext.DynaLoader]DL_VMS$(O)").nes."" Then Delete/NoConfirm/Log [.Ext.DynaLoader]DL_VMS$(O);*
 	- If F$Search("[.Ext.DynaLoader]DL_VMS.C").nes."" Then Delete/NoConfirm/Log [.Ext.DynaLoader]DL_VMS.C;*
+	- If F$Search("[.VMS.Ext...]*.C").nes."" Then Delete/NoConfirm/Log [.VMS.Ext...]*.C;*
+	- If F$Search("[.VMS.Ext...]*$(O)").nes."" Then Delete/NoConfirm/Log [.VMS.Ext...]*$(O);*
 
 realclean : clean
 	- If F$Search("*$(E)").nes."" Then Delete/NoConfirm/Log *$(E);*
+	- If F$Search("*$(OLB)").nes."" Then Delete/NoConfirm/Log *$(OLB);*
 	- If F$Search("*.Opt").nes."" Then Delete/NoConfirm/Log *.Opt;*
-	- If F$Search("[.Lib.Auto...]*.al;-1").nes."" Then Delete/NoConfirm/Log [.Lib.Auto...]*.al;*
-	- If F$Search("[.Lib.Auto...]autosplit.ts;-1").nes."" Then Delete/NoConfirm/Log [.Lib.Auto...]autosplit.ts;*
+	- If F$Search("[.Lib.Auto...]*.al").nes."" Then Delete/NoConfirm/Log [.Lib.Auto...]*.al;*
+	- If F$Search("[.Lib.Auto...]autosplit.ix;-1").nes."" Then Delete/NoConfirm/Log [.Lib.Auto...]autosplit.ix;*
+	- If F$Search("[.Lib]DynaLoader.pm").nes."" Then Delete/NoConfirm/Log [.Lib]DynaLoader.pm;*
+	- If F$Search("[.Lib.VMS]*.*").nes."" Then Delete/NoConfirm/Log [.Lib.VMS...]*.*;*
+	- If F$Search("[.Lib.ExtUtils]MM_VMS.pm").nes."" Then Delete/NoConfirm/Log [.Lib.ExtUtils]MM_VMS.pm;*
+	- If F$Search("$(ARCHCORE)*.*").nes."" Then Delete/NoConfirm/Log $(ARCHCORE)*.*;*
 
 cleansrc : clean
-	- If F$Search("*$(E)").nes."" Then Delete/NoConfirm/Log *$(E);*
 	- If F$Search("*.C;-1").nes."" Then Purge/NoConfirm/Log *.C
 	- If F$Search("*.H;-1").nes."" Then Purge/NoConfirm/Log *.H
 	- If F$Search("*.VMS;-1").nes."" Then Purge/NoConfirm/Log *.VMS
-	- If F$Search("$(MAKEFILE);-1").nes."" Then Purge/NoConfirm/Log $(MAKEFILE)
 	- If F$Search("[.VMS]$(MAKEFILE);-1").nes."" Then Purge/NoConfirm/Log [.VMS]$(MAKEFILE)
 	- If F$Search("[.VMS]*.C;-1").nes."" Then Purge/NoConfirm/Log [.VMS]*.C
 	- If F$Search("[.VMS]*.H;-1").nes."" Then Purge/NoConfirm/Log [.VMS]*.H
 	- If F$Search("[.VMS]*.Pl;-1").nes."" Then Purge/NoConfirm/Log [.VMS]*.Pl
 	- If F$Search("[.VMS]*.VMS;-1").nes."" Then Purge/NoConfirm/Log [.VMS]*.VMS
+	- If F$Search("[.VMS...]*.pm;-1").nes."" Then Purge/NoConfirm/Log [.VMS...]*.pm
+	- If F$Search("[.VMS...]*.xs;-1").nes."" Then Purge/NoConfirm/Log [.VMS...]*.xs
 	- If F$Search("[.Lib.Auto...]*.al").nes."" Then Delete/NoConfirm/Log [.Lib.Auto...]*.al;*
-	- If F$Search("[.Lib.Auto...]autosplit.ts;").nes."" Then Delete/NoConfirm/Log [.Lib.Auto...]autosplit.ts;*
-	- If F$Search("[.Lib]Config.pm;").nes."" Then Delete/NoConfirm/Log [.Lib]Config.pm;*
+	- If F$Search("[.Lib.Auto...]autosplit.ts").nes."" Then Delete/NoConfirm/Log [.Lib.Auto...]autosplit.ts;*
+	- If F$Search("[.Lib]Config.pm").nes."" Then Delete/NoConfirm/Log [.Lib]Config.pm;*

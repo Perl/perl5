@@ -16,9 +16,9 @@ strict - Perl pragma to restrict unsafe constructs
 =head1 DESCRIPTION
 
 If no import list is supplied, all possible restrictions are assumed.
-(This the safest mode to operate in, but is sometimes too strict for
-casual programming.) Currently, there are three possible things to be
-strict about:  "subs", "vars", or "refs".
+(This is the safest mode to operate in, but is sometimes too strict for
+casual programming.)  Currently, there are three possible things to be
+strict about:  "subs", "vars", and "refs".
 
 =over 6
 
@@ -53,7 +53,7 @@ name without fully qualifying it.
 
 This disables the poetry optimization,
 generating a compile-time error if you 
-try to use a bareword identifiers that's not a subroutine.
+try to use a bareword identifier that's not a subroutine.
 
     use strict 'subs';
     $SIG{PIPE} = Plumber;   	# blows up

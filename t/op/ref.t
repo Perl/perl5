@@ -177,7 +177,7 @@ print $foo eq foo ? "ok 37\n" : "not ok 37\n";
 sub BASEOBJ'doit {
     local $ref = shift;
     die "Not an OBJ" unless ref $ref eq OBJ;
-    $ref->{shift};
+    $ref->{shift()};
 }
 
 package UNIVERSAL;

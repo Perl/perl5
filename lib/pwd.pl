@@ -34,6 +34,7 @@ sub main'initpwd {
 
 sub main'chdir {
     local($newdir) = shift;
+    $newdir =~ s|/{2,}|/|g;
     if (chdir $newdir) {
 	if ($newdir =~ m#^/#) {
 	    $ENV{'PWD'} = $newdir;

@@ -1,7 +1,3 @@
-Modules needed
-	X/Motif/Tk etc.
-	Curses
-
 Tie Modules
 	VecArray		Implement array using vec()
 	SubstrArray		Implement array using substr()
@@ -24,12 +20,12 @@ Would be nice to have
 	-i rename file only when successfully changed
 	All ARGV input should act like <>
 	Multiple levels of warning
-	.= shouldn't complain about undefined under -w
 	report HANDLE [formats].
 	tie(FILEHANDLE, ...)
 	__DATA__
 	support in perlmain to rerun debugger
 	make 'r' print return value like gdb 'fini'
+	regression tests using __WARN__ and __DIE__ hooks
 
 Possible pragmas
 	debugger
@@ -57,7 +53,6 @@ Vague possibilities
 	Populate %SIG at startup if appropriate
 	sub mysplice(@, $, $, ...)
 	data prettyprint function?  (or is it, as I suspect, a lib routine?)
-	Nested destructors
 	make tr/// return histogram in list context?
 	undef wantarray in void context
 	Loop control on do{} et al
@@ -71,5 +66,4 @@ Vague possibilities
 	autocroak?
 	Modifiable $1 et al
 	substr EXPR,OFFSET,LENGTH,STRING
-	locally capture warnings into an array
 

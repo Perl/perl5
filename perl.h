@@ -259,6 +259,15 @@ EXT char Error[1];
 #     include <net/errno.h>
 #   endif
 #endif
+#ifndef VMS
+#   define FIXSTATUS(sts)  (U_L((sts) & 0xffff))
+#   define SHIFTSTATUS(sts) ((sts) >> 8)
+#   define SETERRNO(errcode,vmserrcode) errno = (errcode)
+#else
+#   define FIXSTATUS(sts)  (U_L(sts))
+#   define SHIFTSTATUS(sts) (sts)
+#   define SETERRNO(errcode,vmserrcode) {set_errno(errcode); set_vaxc_errno(vmserrcode);}
+#endif
 
 #ifndef MSDOS
 #   ifndef errno
@@ -448,6 +457,10 @@ EXT char Error[1];
 #   define HAS_QUAD
 #endif
 
+#ifdef UV
+#undef UV
+#endif
+
 #ifdef HAS_QUAD
 #   ifdef cray
 #	define Quad_t int
@@ -458,30 +471,11 @@ EXT char Error[1];
 #	    define Quad_t long
 #	endif
 #   endif
-#endif
-
-#ifdef DOSISH
-#   include "dosish.h"
+    typedef Quad_t IV;
+    typedef unsigned Quad_t UV;
 #else
-# if defined(VMS)
-#   include "vmsish.h"
-# else
-#   include "unixish.h"
-# endif
-#endif
-
-#ifndef HAS_PAUSE
-#define pause() sleep((32767<<16)+32767)
-#endif
-
-#ifndef IOCPARM_LEN
-#   ifdef IOCPARM_MASK
-	/* on BSDish systes we're safe */
-#	define IOCPARM_LEN(x)  (((x) >> 16) & IOCPARM_MASK)
-#   else
-	/* otherwise guess at what's safe */
-#	define IOCPARM_LEN(x)	256
-#   endif
+    typedef long IV;
+    typedef unsigned long UV;
 #endif
 
 typedef MEM_SIZE STRLEN;
@@ -531,14 +525,32 @@ typedef struct xpvio XPVIO;
 typedef struct mgvtbl MGVTBL;
 typedef union any ANY;
 
-typedef FILE * (*cryptswitch_t) _((FILE *rfp));
+typedef int (*cryptswitch_t) _((void));
 
 #include "handy.h"
 
-#ifdef HAS_QUAD
-typedef Quad_t IV;
+#ifdef DOSISH
+#   include "dosish.h"
 #else
-typedef long IV;
+# if defined(VMS)
+#   include "vmsish.h"
+# else
+#   include "unixish.h"
+# endif
+#endif
+
+#ifndef HAS_PAUSE
+#define pause() sleep((32767<<16)+32767)
+#endif
+
+#ifndef IOCPARM_LEN
+#   ifdef IOCPARM_MASK
+	/* on BSDish systes we're safe */
+#	define IOCPARM_LEN(x)  (((x) >> 16) & IOCPARM_MASK)
+#   else
+	/* otherwise guess at what's safe */
+#	define IOCPARM_LEN(x)	256
+#   endif
 #endif
 
 union any {
@@ -656,7 +668,7 @@ struct Outrec {
 #define TMPPATH "plXXXXXX"
 #else
 #ifdef VMS
-#define TMPPATH "/sys$scratch/perl-eXXXXXX"
+#define TMPPATH "sys$scratch:perl-eXXXXXX"
 #else
 #define TMPPATH "/tmp/perl-eXXXXXX"
 #endif
@@ -898,7 +910,7 @@ EXT char	warn_nl[]
 EXT char	no_wrongref[]
   INIT("Can't use %s ref as %s ref");
 EXT char	no_symref[]
-  INIT("Can't use a string as %s ref while \"strict refs\" in use");
+  INIT("Can't use string (\"%.32s\") as %s ref while \"strict refs\" in use");
 EXT char	no_usym[]
   INIT("Can't use an undefined value as %s reference");
 EXT char	no_aelem[]
@@ -917,6 +929,8 @@ EXT char	no_dir_func[]
   INIT("Unsupported directory function \"%s\" called");
 EXT char	no_func[]
   INIT("The %s function is unimplemented");
+EXT char	no_myglob[]
+  INIT("\"my\" variable %s can't be in a package");
 
 EXT SV		sv_undef;
 EXT SV		sv_no;
@@ -1073,6 +1087,7 @@ EXT char *	oldoldbufptr;
 EXT char *	bufend;
 EXT expectation expect INIT(XSTATE);	/* how to interpret ambiguous tokens */
 EXT char *	autoboot_preamble INIT(Nullch);
+EXT cryptswitch_t cryptswitch_fp;
 
 EXT I32		multi_start;	/* 1st line of multi-line string */
 EXT I32		multi_end;	/* last line of multi-line string */
@@ -1084,6 +1099,7 @@ EXT I32		error_count;	/* how many errors so far, max 10 */
 EXT I32		subline;	/* line this subroutine began on */
 EXT SV *	subname;	/* name of current subroutine */
 
+EXT CV *	compcv;		/* currently compiling subroutine */
 EXT AV *	comppad;	/* storage for lexically scoped temporaries */
 EXT AV *	comppad_name;	/* variable names for "my" variables */
 EXT I32		comppad_name_fill;/* last "introduced" variable offset */
@@ -1091,7 +1107,7 @@ EXT I32		min_intro_pending;/* start of vars to introduce */
 EXT I32		max_intro_pending;/* end of vars to introduce */
 EXT I32		padix;		/* max used index in current "register" pad */
 EXT I32		padix_floor;	/* how low may inner block reset padix */
-EXT bool	pad_reset_pending; /* reset pad on next attempted alloc */
+EXT I32		pad_reset_pending; /* reset pad on next attempted alloc */
 EXT COP		compiling;
 
 EXT I32		thisexpr;	/* name id for nothing_in_common() */
@@ -1157,6 +1173,9 @@ IEXT GV *	Ienvgv;
 IEXT GV *	Isiggv;
 IEXT GV *	Iincgv;
 IEXT char *	Iorigfilename;
+IEXT SV *	Idiehook;
+IEXT SV *	Iwarnhook;
+IEXT SV *	Iparsehook;
 
 /* switches */
 IEXT char *	Icddir;
@@ -1186,6 +1205,8 @@ IEXT char *	Ie_tmpname;
 IEXT FILE *	Ie_fp;
 IEXT VOL U32	Idebug;
 IEXT U32	Iperldb;
+	/* This value may be raised by extensions for testing purposes */
+IEXT int	Iperl_destruct_level;	/* 0=none, 1=full, 2=full with checks */
 
 /* magical thingies */
 IEXT Time_t	Ibasetime;		/* $^T */
@@ -1202,7 +1223,7 @@ IEXT STRLEN	Iorslen;
 IEXT char *	Iofmt;			/* $# */
 IEXT I32	Imaxsysfd IINIT(MAXSYSFD); /* top fd to pass to subprocesses */
 IEXT int	Imultiline;	  /* $*--do strings hold >1 line? */
-IEXT U16	Istatusvalue;	/* $? */
+IEXT U32	Istatusvalue;	/* $? */
 
 IEXT struct stat Istatcache;		/* _ */
 IEXT GV *	Istatgv;
@@ -1270,7 +1291,7 @@ IEXT VOL int	Iin_eval;	/* trap "fatal" errors? */
 IEXT OP *	Irestartop;	/* Are we propagating an error from croak? */
 IEXT int	Idelaymagic;	/* ($<,$>) = ... */
 IEXT bool	Idirty;		/* In the middle of tearing things down? */
-IEXT bool	Ilocalizing;	/* are we processing a local() list? */
+IEXT U8		Ilocalizing;	/* are we processing a local() list? */
 IEXT bool	Itainted;	/* using variables controlled by $< */
 IEXT bool	Itainting;	/* doing taint checks */
 
@@ -1281,6 +1302,7 @@ IEXT char *	Idebname;
 IEXT char *	Idebdelim;
 
 /* current interpreter roots */
+IEXT CV *	Imain_cv;
 IEXT OP *	Imain_root;
 IEXT OP *	Imain_start;
 IEXT OP *	Ieval_root;
@@ -1424,9 +1446,9 @@ MGVTBL vtbl_uvar =	{magic_getuvar,
 
 #ifdef OVERLOAD
 MGVTBL vtbl_amagic =       {0,     magic_setamagic,
-                                        0,      0,      0};
+                                        0,      0,      magic_setamagic};
 MGVTBL vtbl_amagicelem =   {0,     magic_setamagic,
-                                        0,      0,      0};
+                                        0,      0,      magic_setamagic};
 #endif /* OVERLOAD */
 
 #else
@@ -1460,7 +1482,7 @@ EXT MGVTBL vtbl_amagicelem;
 #ifdef OVERLOAD
 EXT long amagic_generation;
 
-#define NofAMmeth 27
+#define NofAMmeth 29
 #ifdef DOINIT
 EXT char * AMG_names[NofAMmeth][2] = {
   {"fallback","abs"},
@@ -1474,6 +1496,9 @@ EXT char * AMG_names[NofAMmeth][2] = {
   {"**", "**="},
   {"<<", "<<="},
   {">>", ">>="},
+  {"&", "&="},
+  {"|", "|="},
+  {"^", "^="},
   {"<", "<="},
   {">", ">="},
   {"==", "!="},
@@ -1481,15 +1506,14 @@ EXT char * AMG_names[NofAMmeth][2] = {
   {"lt", "le"},
   {"gt", "ge"},
   {"eq", "ne"},
-  {"&", "^"},
-  {"|", "neg"},
   {"!", "~"},
   {"++", "--"},
   {"atan2", "cos"},
   {"sin", "exp"},
   {"log", "sqrt"},
   {"x","x="},
-  {".",".="}
+  {".",".="},
+  {"=","neg"}
 };
 #else
 EXT char * AMG_names[NofAMmeth][2];
@@ -1519,6 +1543,9 @@ enum {
   pow_amg,	pow_ass_amg,
   lshift_amg,	lshift_ass_amg,
   rshift_amg,	rshift_ass_amg,
+  band_amg,	band_ass_amg,
+  bor_amg,	bor_ass_amg,
+  bxor_amg,	bxor_ass_amg,
   lt_amg,	le_amg,
   gt_amg,	ge_amg,
   eq_amg,	ne_amg,
@@ -1526,15 +1553,14 @@ enum {
   slt_amg,	sle_amg,
   sgt_amg,	sge_amg,
   seq_amg,	sne_amg,
-  band_amg,	bxor_amg,
-  bor_amg,	neg_amg,
   not_amg,	compl_amg,
   inc_amg,	dec_amg,
   atan2_amg,	cos_amg,
   sin_amg,	exp_amg,
   log_amg,	sqrt_amg,
   repeat_amg,   repeat_ass_amg,
-  concat_amg,	concat_ass_amg
+  concat_amg,	concat_ass_amg,
+  copy_amg,	neg_amg
 };
 #endif /* OVERLOAD */
 

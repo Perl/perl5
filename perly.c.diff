@@ -1,11 +1,11 @@
-*** perly.c.orig	Thu Sep 15 11:18:35 1994
---- perly.c	Thu Sep 15 11:19:31 1994
+*** perly.c.orig	Thu Feb  9 17:56:15 1995
+--- perly.c	Thu Feb  9 17:56:17 1995
 ***************
 *** 12,79 ****
       deprecate("\"do\" to call subroutines");
   }
   
-- #line 30 "perly.y"
+- #line 29 "perly.y"
 - typedef union {
 -     I32	ival;
 -     char *pval;
@@ -83,7 +83,7 @@
 - short yyss[YYSTACKSIZE];
 - YYSTYPE yyvs[YYSTACKSIZE];
 - #define yystacksize YYSTACKSIZE
-  #line 544 "perly.y"
+  #line 545 "perly.y"
    /* PROGRAM */
   #line 1347 "y.tab.c"
 --- 1272,1279 ----
@@ -324,7 +324,7 @@
   #endif
       yym = yylen[yyn];
 ***************
-*** 2161,2168 ****
+*** 2163,2170 ****
       {
   #if YYDEBUG
           if (yydebug)
@@ -333,7 +333,7 @@
   #endif
           yystate = YYFINAL;
           *++yyssp = YYFINAL;
---- 2178,2186 ----
+--- 2180,2188 ----
       {
   #if YYDEBUG
           if (yydebug)
@@ -344,7 +344,7 @@
           yystate = YYFINAL;
           *++yyssp = YYFINAL;
 ***************
-*** 2176,2182 ****
+*** 2178,2184 ****
                   yys = 0;
                   if (yychar <= YYMAXTOKEN) yys = yyname[yychar];
                   if (!yys) yys = "illegal-symbol";
@@ -352,7 +352,7 @@
                           YYFINAL, yychar, yys);
               }
   #endif
---- 2194,2200 ----
+--- 2196,2202 ----
                   yys = 0;
                   if (yychar <= YYMAXTOKEN) yys = yyname[yychar];
                   if (!yys) yys = "illegal-symbol";
@@ -361,7 +361,7 @@
               }
   #endif
 ***************
-*** 2191,2210 ****
+*** 2193,2212 ****
           yystate = yydgoto[yym];
   #if YYDEBUG
       if (yydebug)
@@ -382,7 +382,7 @@
   yyaccept:
 !     return (0);
   }
---- 2209,2243 ----
+--- 2211,2245 ----
           yystate = yydgoto[yym];
   #if YYDEBUG
       if (yydebug)

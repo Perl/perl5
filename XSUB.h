@@ -17,6 +17,18 @@
 
 #define XSRETURN(off) stack_sp = stack_base + ax + ((off) - 1); return
 
-#define XSRETURNNO    ST(0)=sv_mortalcopy(&sv_no); XSRETURN(1)
-#define XSRETURNYES   ST(0)=sv_mortalcopy(&sv_yes); XSRETURN(1)
-#define XSRETURNUNDEF ST(0)=sv_mortalcopy(&sv_undef); XSRETURN(1)
+/* Simple macros to put new mortal values onto the stack.   */
+/* Typically used to return values from XS functions.       */
+#define XST_mIV(i,v)  ST(i)=sv_2mortal(newSViv(v));
+#define XST_mNV(i,v)  ST(i)=sv_2mortal(newSVnv(v));
+#define XST_mPV(i,v)  ST(i)=sv_2mortal(newSVpv(v,0));
+#define XST_mNO(i)    ST(i)=sv_mortalcopy(&sv_no);
+#define XST_mYES(i)   ST(i)=sv_mortalcopy(&sv_yes);
+#define XST_mUNDEF(i) ST(i)=sv_newmortal();
+ 
+#define XSRETURN_IV(v) XST_mIV(0,v);  XSRETURN(1)
+#define XSRETURN_NV(v) XST_mNV(0,v);  XSRETURN(1)
+#define XSRETURN_PV(v) XST_mPV(0,v);  XSRETURN(1)
+#define XSRETURN_NO    XST_mNO(0);    XSRETURN(1)
+#define XSRETURN_YES   XST_mYES(0);   XSRETURN(1)
+#define XSRETURN_UNDEF XST_mUNDEF(0); XSRETURN(1)

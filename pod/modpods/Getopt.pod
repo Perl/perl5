@@ -10,7 +10,8 @@ GetOptions - extended getopt processing
 
     use Getopt::Std;
     getopt('oDI');  # -o, -D & -I take arg.  Sets opt_* as a side effect.
-    getopts('oif:');  # likewise, but all of them
+    getopts('oif:');  # -o & -i are boolean flags, -f takes an argument
+		      # Sets opt_* as a side effect.
 
     use Getopt::Long;
     $result = GetOptions (...option-descriptions...);

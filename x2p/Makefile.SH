@@ -112,7 +112,7 @@ a2p.o: a2p.c a2py.c a2p.h EXTERN.h util.h INTERN.h handy.h ../config.h str.h has
 	$(CCCMD) $(LARGE) a2p.c
 
 clean:
-	rm -f a2p *.o 
+	rm -f a2p *.o
 
 realclean: clean
 	rm -f *.orig core $(addedbyconf) all malloc.c
@@ -139,6 +139,7 @@ shlist:
 	echo $(sh) | tr ' ' '\012' >.shlist
 
 malloc.c: ../malloc.c
+	rm -f malloc.c
 	sed <../malloc.c >malloc.c \
 	    -e 's/"perl.h"/"..\/perl.h"/' \
 	    -e 's/my_exit/exit/'

@@ -21,7 +21,7 @@ F<POSIX.pm> module.
 
 =head1 EXAMPLES
 
-    printf "EENTR is %d\n", EINTR;
+    printf "EINTR is %d\n", EINTR;
 
     POSIX::setsid(0);
 
@@ -39,8 +39,8 @@ source of wisdom.
 
 A few functions are not implemented because they are C specific.  If you
 attempt to call these, they will print a message telling you that they
-aren't implemented because they're, supplying the Perl equivalent if one
-exists.  For example, trying to access the setjmp() call will elicit the
+aren't implemented, and suggest using the Perl equivalent should one
+exist.  For example, trying to access the setjmp() call will elicit the
 message "setjmp() is C-specific: use eval {} instead".
 
 Furthermore, some evil vendors will claim 1003.1 compliance, but in fact

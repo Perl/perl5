@@ -305,6 +305,10 @@ register AV *av;
     AvALLOC(av) = 0;
     SvPVX(av) = 0;
     AvMAX(av) = AvFILL(av) = -1;
+    if (AvARYLEN(av)) {
+	SvREFCNT_dec(AvARYLEN(av));
+	AvARYLEN(av) = 0;
+    }
 }
 
 void

@@ -1,4 +1,3 @@
-[This is an unsupported, pre-release version of Perl 5.0.]
 
 			   Perl Kit, Version 5.0
 
@@ -30,7 +29,7 @@
     my interpretation of the GNU General Public License is that no Perl
     script falls under the terms of the GPL unless you explicitly put
     said script under the terms of the GPL yourself.  Furthermore, any
-    object code linked with uperl.o does not automatically fall under the
+    object code linked with perl does not automatically fall under the
     terms of the GPL, provided such object code only adds definitions
     of subroutines and variables, and does not otherwise impair the
     resulting interpreter from executing any standard Perl script.  I

@@ -126,7 +126,7 @@ register OP *op;
 	else
 	    dump("TARG = %d\n", op->op_targ);
     }
-#ifdef NOTDEF
+#ifdef DUMPADDR
     dump("ADDR = 0x%lx => 0x%lx\n",op, op->op_next);
 #endif
     if (op->op_flags) {

@@ -9,6 +9,10 @@ To declare subroutines:
     sub NAME;	   # A "forward" declaration.
     sub NAME BLOCK # A declaration and a definition.
 
+To define an anonymous subroutine at runtime:
+
+    $subref = sub BLOCK;
+
 To import subroutines:
 
     use PACKAGE qw(NAME1 NAME2 NAME3);
@@ -26,12 +30,12 @@ Any arguments passed to the routine come in as array @_, that is
 ($_[0], $_[1], ...).  The array @_ is a local array, but its values are
 references to the actual scalar parameters.  The return value of the
 subroutine is the value of the last expression evaluated, and can be
-either an array value or a scalar value.  Alternately, a return
+either an array value or a scalar value.  Alternatively, a return
 statement may be used to specify the returned value and exit the
 subroutine.  To create local variables see the local() and my()
 operators.
 
-A subroutine may called using the "&" prefix.  The "&" is optional in Perl
+A subroutine may be called using the "&" prefix.  The "&" is optional in Perl
 5, and so are the parens if the subroutine has been predeclared.
 (Note, however, that the "&" is I<NOT> optional when you're just naming the
 subroutine, such as when it's used as an argument to defined() or
@@ -96,6 +100,17 @@ visible to subroutine instead.
     foo();		# pass a null list
     &foo();		# the same
     &foo;		# pass no arguments--more efficient
+
+If a module wants to create a private subroutine that cannot be called
+from outside the module, it can declare a lexical variable containing
+an anonymous sub reference:
+
+    my $subref = sub { ... }
+    &$subref(1,2,3);
+
+As long as the reference is never returned by any function within the module,
+no outside module can see the subroutine, since its name is not in any
+package's symbol table.
 
 =head2 Passing Symbol Table Entries
 

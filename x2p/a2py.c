@@ -17,6 +17,13 @@ char *filename;
 char *myname;
 
 int checkers = 0;
+
+int oper0();
+int oper1();
+int oper2();
+int oper3();
+int oper4();
+int oper5();
 STR *walk();
 
 #ifdef OS2
@@ -187,6 +194,7 @@ register char **env;
 
 int idtype;
 
+int
 yylex()
 {
     register char *s = bufptr;
@@ -871,8 +879,10 @@ register char *s;
     return s;
 }
 
+int
 string(ptr,len)
 char *ptr;
+int len;
 {
     int retval = mop;
 
@@ -887,6 +897,7 @@ char *ptr;
     return retval;
 }
 
+int
 oper0(type)
 int type;
 {
@@ -900,6 +911,7 @@ int type;
     return retval;
 }
 
+int
 oper1(type,arg1)
 int type;
 int arg1;
@@ -915,6 +927,7 @@ int arg1;
     return retval;
 }
 
+int
 oper2(type,arg1,arg2)
 int type;
 int arg1;
@@ -932,6 +945,7 @@ int arg2;
     return retval;
 }
 
+int
 oper3(type,arg1,arg2,arg3)
 int type;
 int arg1;
@@ -951,6 +965,7 @@ int arg3;
     return retval;
 }
 
+int
 oper4(type,arg1,arg2,arg3,arg4)
 int type;
 int arg1;
@@ -972,6 +987,7 @@ int arg4;
     return retval;
 }
 
+int
 oper5(type,arg1,arg2,arg3,arg4,arg5)
 int type;
 int arg1;
@@ -1025,6 +1041,7 @@ int branch;
     }
 }
 
+int
 bl(arg,maybe)
 int arg;
 int maybe;
@@ -1165,6 +1182,7 @@ putone()
     fputs(tokenbuf,stdout);
 }
 
+int
 numary(arg)
 int arg;
 {
@@ -1179,6 +1197,7 @@ int arg;
     return arg;
 }
 
+int
 rememberargs(arg)
 int arg;
 {
@@ -1201,6 +1220,7 @@ int arg;
     return arg;
 }
 
+int
 aryrefarg(arg)
 int arg;
 {
@@ -1215,6 +1235,7 @@ int arg;
     return arg;
 }
 
+int
 fixfargs(name,arg,prevargs)
 int name;
 int arg;
@@ -1253,6 +1274,7 @@ int prevargs;
     return numargs;
 }
 
+int
 fixrargs(name,arg,prevargs)
 char *name;
 int arg;

@@ -5,7 +5,7 @@ less - Perl pragma to request less of something from the compiler
 =head1 DESCRIPTION
 
 Currently unimplemented, this may someday be a compiler directive
-to make certain trade-off, such as perhaps
+to make certain trade-offs, such as perhaps
 
     use less 'memory';
     use less 'CPU';

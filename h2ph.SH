@@ -43,6 +43,7 @@ chdir '/usr/include' || die "Can't cd /usr/include";
 END
 
 @isatype{@isatype} = (1) x @isatype;
+$inif = 0;
 
 @ARGV = ('-') unless @ARGV;
 
@@ -136,14 +137,18 @@ foreach $file (@ARGV) {
 	    }
 	    elsif (s/^if\s+//) {
 		$new = '';
+		$inif = 1;
 		do expr();
+		$inif = 0;
 		print OUT $t,"if ($new) {\n";
 		$tab += 4;
 		$t = "\t" x ($tab / 8) . ' ' x ($tab % 8);
 	    }
 	    elsif (s/^elif\s+//) {
 		$new = '';
+		$inif = 1;
 		do expr();
+		$inif = 0;
 		$tab -= 4;
 		$t = "\t" x ($tab / 8) . ' ' x ($tab % 8);
 		print OUT $t,"}\n${t}elsif ($new) {\n";
@@ -221,7 +226,11 @@ sub expr {
 		}
 	    }
 	    else {
-		$new .= ' &' . $id;
+		if ($inif && $new !~ /defined\($/) {
+		    $new .= '(defined(&' . $id . ') ? &' . $id . ' : 0)';
+		} else { 
+		    $new .= ' &' . $id;
+		}
 	    }
 	    next;
 	};

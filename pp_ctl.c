@@ -80,15 +80,9 @@ PP(pp_regcomp) {
 	pm->op_pmflags |= PMf_WHITE;
 
     if (pm->op_pmflags & PMf_KEEP) {
-#ifdef NOTDEF
-	if (!(pm->op_pmflags & PMf_FOLD))
-	    scan_prefix(pm, pm->op_pmregexp->precomp,
-		pm->op_pmregexp->prelen);
-#endif
 	pm->op_pmflags &= ~PMf_RUNTIME;	/* no point compiling again */
 	hoistmust(pm);
 	cLOGOP->op_first->op_next = op->op_next;
-	/* XXX delete push code? */
     }
     RETURN;
 }
@@ -119,7 +113,13 @@ PP(pp_substcont)
 	{
 	    SV *targ = cx->sb_targ;
 	    sv_catpvn(dstr, s, cx->sb_strend - s);
-	    sv_replace(targ, dstr);
+
+	    SvPVX(targ) = SvPVX(dstr);
+	    SvCUR_set(targ, SvCUR(dstr));
+	    SvLEN_set(targ, SvLEN(dstr));
+	    SvPVX(dstr) = 0;
+	    sv_free(dstr);
+
 	    (void)SvPOK_only(targ);
 	    SvSETMAGIC(targ);
 	    PUSHs(sv_2mortal(newSViv((I32)cx->sb_iters - 1)));
@@ -161,8 +161,6 @@ PP(pp_formline)
     bool chopspace = (strchr(chopset, ' ') != Nullch);
     char *chophere;
     char *linemark;
-    char *formmark;
-    SV **markmark;
     double value;
     bool gotsome;
     STRLEN len;
@@ -212,8 +210,6 @@ PP(pp_formline)
 	switch (*fpc++) {
 	case FF_LINEMARK:
 	    linemark = t;
-	    formmark = f;
-	    markmark = MARK;
 	    lines++;
 	    gotsome = FALSE;
 	    break;
@@ -895,6 +891,9 @@ die(pat, va_alist)
     char *message;
     int oldrunlevel = runlevel;
     int was_in_eval = in_eval;
+    HV *stash;
+    GV *gv;
+    CV *cv;
 
 #ifdef I_STDARG
     va_start(args, pat);
@@ -903,6 +902,15 @@ die(pat, va_alist)
 #endif
     message = mess(pat, &args);
     va_end(args);
+    if (diehook && (cv = sv_2cv(diehook, &stash, &gv, 0)) && !CvDEPTH(cv)) {
+	dSP;
+
+	PUSHMARK(sp);
+	EXTEND(sp, 1);
+	PUSHs(sv_2mortal(newSVpv(message,0)));
+	PUTBACK;
+	perl_call_sv((SV*)cv, G_DISCARD);
+    }
     restartop = die_where(message);
     if ((!restartop && was_in_eval) || oldrunlevel > 1)
 	longjmp(top_env, 3);
@@ -918,8 +926,12 @@ char *message;
 	register CONTEXT *cx;
 	I32 gimme;
 	SV **newsp;
+	SV *errsv;
 
-	sv_setpv(GvSV(gv_fetchpv("@",TRUE, SVt_PV)),message);
+	errsv = GvSV(gv_fetchpv("@",TRUE, SVt_PV));
+	/* As destructors may produce errors we set $@ at the last moment */
+	sv_setpv(errsv, ""); /* clear $@ before destroying */
+
 	cxix = dopoptoeval(cxstack_ix);
 	if (cxix >= 0) {
 	    I32 optype;
@@ -939,6 +951,8 @@ char *message;
 	    stack_sp = newsp;
 
 	    LEAVE;
+
+	    sv_insert(errsv, 0, 0, message, strlen(message));
 	    if (optype == OP_REQUIRE)
 		DIE("%s", SvPVx(GvSV(gv_fetchpv("@",TRUE, SVt_PV)), na));
 	    return pop_return();
@@ -948,8 +962,12 @@ char *message;
     (void)fflush(stderr);
     if (e_fp)
 	(void)UNLINK(e_tmpname);
-    statusvalue >>= 8;
+    statusvalue = SHIFTSTATUS(statusvalue);
+#ifdef VMS
+    my_exit((U32)vaxc$errno?vaxc$errno:errno?errno:statusvalue?statusvalue:SS$_ABORT);
+#else
     my_exit((I32)((errno&255)?errno:((statusvalue&255)?statusvalue:255)));
+#endif
     return 0;
 }
 
@@ -1048,6 +1066,9 @@ PP(pp_caller)
 	PUSHs(sv_2mortal(newSViv(0)));
     }
     PUSHs(sv_2mortal(newSViv((I32)cx->blk_gimme)));
+    if (cx->cx_type == CXt_EVAL && cx->blk_eval.old_op_type == OP_ENTEREVAL)
+	PUSHs(cx->blk_eval.cur_text);
+
     if (cx->blk_sub.hasargs && curcop->cop_stash == debstash) {
 	AV *ary = cx->blk_sub.argarray;
 	int off = AvARRAY(ary) - AvALLOC(ary);
@@ -1075,6 +1096,7 @@ const void *b;
 {
     SV **str1 = (SV **) a;
     SV **str2 = (SV **) b;
+    I32 oldsaveix = savestack_ix;
     I32 oldscopeix = scopestack_ix;
     I32 result;
     GvSV(firstgv) = *str1;
@@ -1084,12 +1106,13 @@ const void *b;
     run();
     if (stack_sp != stack_base + 1)
 	croak("Sort subroutine didn't return single value");
-    if (!SvNIOK(*stack_sp))
+    if (!SvNIOKp(*stack_sp))
 	croak("Sort subroutine didn't return a numeric value");
     result = SvIV(*stack_sp);
     while (scopestack_ix > oldscopeix) {
 	LEAVE;
     }
+    leave_scope(oldsaveix);
     return result;
 }
 
@@ -1149,28 +1172,29 @@ PP(pp_dbstate)
 	SV **sp;
 	register CV *cv;
 	register CONTEXT *cx;
-	I32 gimme = GIMME;
+	I32 gimme = G_ARRAY;
 	I32 hasargs;
 	GV *gv;
 
 	ENTER;
 	SAVETMPS;
 
-	SAVEI32(debug);
-	debug = 0;
-	hasargs = 0;
 	gv = DBgv;
 	cv = GvCV(gv);
-	sp = stack_sp;
-	*++sp = Nullsv;
-
 	if (!cv)
 	    DIE("No DB::DB routine defined");
 
 	if (CvDEPTH(cv) >= 1)		/* don't do recursive DB::DB call */
 	    return NORMAL;
+
+	SAVEI32(debug);
+	SAVESPTR(stack_sp);
+	debug = 0;
+	hasargs = 0;
+	sp = stack_sp;
+
 	push_return(op->op_next);
-	PUSHBLOCK(cx, CXt_SUB, sp - 1);
+	PUSHBLOCK(cx, CXt_SUB, sp);
 	PUSHSUB(cx);
 	CvDEPTH(cv)++;
 	(void)SvREFCNT_inc(cv);
@@ -1292,6 +1316,13 @@ PP(pp_return)
 	break;
     case CXt_EVAL:
 	POPEVAL(cx);
+	if (optype == OP_REQUIRE &&
+	    (MARK == SP || (gimme == G_SCALAR && !SvTRUE(*SP))) )
+	{
+	    char *name = cx->blk_eval.old_name;
+	    (void)hv_delete(GvHVn(incgv), name, strlen(name), G_DISCARD);
+	    DIE("%s did not return a true value", name);
+	}
 	break;
     default:
 	DIE("panic: return");
@@ -1303,12 +1334,8 @@ PP(pp_return)
 	    *++newsp = sv_mortalcopy(*SP);
 	else
 	    *++newsp = &sv_undef;
-	if (optype == OP_REQUIRE && !SvTRUE(*newsp))
-	    DIE("%s", SvPVx(GvSV(gv_fetchpv("@",TRUE, SVt_PV)), na));
     }
     else {
-	if (optype == OP_REQUIRE && MARK == SP)
-	    DIE("%s", SvPVx(GvSV(gv_fetchpv("@",TRUE, SVt_PV)), na));
 	while (MARK < SP)
 	    *++newsp = sv_mortalcopy(*++MARK);
     }
@@ -1330,7 +1357,6 @@ PP(pp_last)
     SV **newsp;
     PMOP *newpm;
     SV **mark = stack_base + cxstack[cxstack_ix].blk_oldsp;
-    /* XXX The sp is probably not right yet... */
 
     if (op->op_flags & OPf_SPECIAL) {
 	cxix = dopoptoloop(cxstack_ix);
@@ -1562,21 +1588,29 @@ PP(pp_goto)
 			    GvENAME(CvGV(cv)));
 		    if (CvDEPTH(cv) > AvFILL(padlist)) {
 			AV *newpad = newAV();
+			AV *oldpad = (AV*)AvARRAY(svp[CvDEPTH(cv)-1]);
 			I32 ix = AvFILL((AV*)svp[1]);
 			svp = AvARRAY(svp[0]);
-			while (ix > 0) {
+			for ( ;ix > 0; ix--) {
 			    if (svp[ix] != &sv_undef) {
-				char *name = SvPVX(svp[ix]);	/* XXX */
-				if (*name == '@')
-				    av_store(newpad, ix--, sv = (SV*)newAV());
-				else if (*name == '%')
-				    av_store(newpad, ix--, sv = (SV*)newHV());
-				else
-				    av_store(newpad, ix--, sv = NEWSV(0,0));
-				SvPADMY_on(sv);
+				char *name = SvPVX(svp[ix]);
+				if (SvFLAGS(svp[ix]) & SVf_FAKE) {
+				    /* outer lexical? */
+				    av_store(newpad, ix,
+					SvREFCNT_inc(AvARRAY(oldpad)[ix]) );
+				}
+				else {		/* our own lexical */
+				    if (*name == '@')
+					av_store(newpad, ix, sv = (SV*)newAV());
+				    else if (*name == '%')
+					av_store(newpad, ix, sv = (SV*)newHV());
+				    else
+					av_store(newpad, ix, sv = NEWSV(0,0));
+				    SvPADMY_on(sv);
+				}
 			    }
 			    else {
-				av_store(newpad, ix--, sv = NEWSV(0,0));
+				av_store(newpad, ix, sv = NEWSV(0,0));
 				SvPADTMP_on(sv);
 			    }
 			}
@@ -1694,9 +1728,9 @@ PP(pp_goto)
 
 	/* push wanted frames */
 
-	if (*enterops) {
+	if (*enterops && enterops[1]) {
 	    OP *oldop = op;
-	    for (ix = 0 + (gotoprobe == main_root); enterops[ix]; ix++) {
+	    for (ix = 1; enterops[ix]; ix++) {
 		op = enterops[ix];
 		(*op->op_ppaddr)();
 	    }
@@ -1712,6 +1746,11 @@ PP(pp_goto)
 
 	restartop = 0;		/* hmm, must be GNU unexec().. */
 	do_undump = FALSE;
+    }
+
+    if (stack == signalstack) {
+        restartop = retop;
+        longjmp(top_env, 3);
     }
 
     RETURNOP(retop);
@@ -1806,6 +1845,7 @@ int gimme;
     dSP;
     OP *saveop = op;
     HV *newstash;
+    AV* comppadlist;
 
     in_eval = 1;
 
@@ -1818,6 +1858,11 @@ int gimme;
     SAVEINT(comppad_name_fill);
     SAVEINT(min_intro_pending);
     SAVEINT(max_intro_pending);
+
+    SAVESPTR(compcv);
+    compcv = (CV*)NEWSV(1104,0);
+    sv_upgrade((SV *)compcv, SVt_PVCV);
+
     comppad = newAV();
     comppad_name = newAV();
     comppad_name_fill = 0;
@@ -1825,6 +1870,12 @@ int gimme;
     av_push(comppad, Nullsv);
     curpad = AvARRAY(comppad);
     padix = 0;
+
+    comppadlist = newAV();
+    AvREAL_off(comppadlist);
+    av_store(comppadlist, 0, SvREFCNT_inc((SV*)comppad_name));
+    av_store(comppadlist, 1, SvREFCNT_inc((SV*)comppad));
+    CvPADLIST(compcv) = comppadlist;
 
     /* make sure we compile in the right package */
 
@@ -1877,8 +1928,7 @@ int gimme;
     rschar = nrschar;
     rspara = (nrslen == 2);
     compiling.cop_line = 0;
-    SAVEFREESV(comppad);
-    SAVEFREESV(comppad_name);
+    SAVEFREESV(compcv);
     SAVEFREEOP(eval_root);
     if (gimme & G_ARRAY)
 	list(eval_root);
@@ -1924,7 +1974,12 @@ PP(pp_require)
     if (*tmpname == '/' ||
 	(*tmpname == '.' && 
 	    (tmpname[1] == '/' ||
-	     (tmpname[1] == '.' && tmpname[2] == '/'))))
+	     (tmpname[1] == '.' && tmpname[2] == '/')))
+#ifdef VMS
+	|| ((*tmpname == '[' || *tmpname == '<') &&
+	    (tmpname[1] == '-' || tmpname[1] == ']' || tmpname[1] == '>'))
+#endif
+    )
     {
 	tryrsfp = fopen(tmpname,"r");
     }
@@ -1933,8 +1988,15 @@ PP(pp_require)
 	I32 i;
 
 	for (i = 0; i <= AvFILL(ar); i++) {
+#ifdef VMS
+	    if (tounixpath_ts(SvPVx(*av_fetch(ar, i, TRUE), na),buf) == NULL)
+		croak("Error converting file specification %s",
+		      SvPVx(*av_fetch(ar, i, TRUE), na));
+		strcat(buf,name);
+#else
 	    (void)sprintf(buf, "%s/%s",
 		SvPVx(*av_fetch(ar, i, TRUE), na), name);
+#endif
 	    tryrsfp = fopen(buf, "r");
 	    if (tryrsfp) {
 		char *s = buf;
@@ -2005,13 +2067,15 @@ PP(pp_entereval)
 
     if (!SvPV(sv,len) || !len)
 	RETPUSHUNDEF;
+    TAINT_PROPER("eval");
 
     ENTER;
-    SAVETMPS;
     lex_start(sv);
+    SAVETMPS;
  
     /* switch to eval mode */
 
+    SAVESPTR(compiling.cop_filegv);
     sprintf(tmpbuf, "_<(eval %d)", ++evalseq);
     compiling.cop_filegv = gv_fetchfile(tmpbuf+2);
     compiling.cop_line = 1;
@@ -2077,7 +2141,7 @@ PP(pp_leaveeval)
 
 	if (!(gimme == G_SCALAR ? SvTRUE(*sp) : sp > newsp)) {
 	    /* Unassume the success we assumed earlier. */
-	    (void)hv_delete(GvHVn(incgv), name, strlen(name));
+	    (void)hv_delete(GvHVn(incgv), name, strlen(name), G_DISCARD);
 
 	    if (optype == OP_REQUIRE)
 		retop = die("%s did not return a true value", name);
@@ -2090,22 +2154,6 @@ PP(pp_leaveeval)
 
     RETURNOP(retop);
 }
-
-#ifdef NOTYET
-PP(pp_evalonce)
-{
-    dSP;
-    SP = do_eval(st[1], OP_EVAL, curcop->cop_stash, TRUE,
-	GIMME, arglast);
-    if (eval_root) {
-	SvREFCNT_dec(cSVOP->op_sv);
-	op[1].arg_ptr.arg_cmd = eval_root;
-	op[1].op_type = (A_CMD|A_DONT);
-	op[0].op_type = OP_TRY;
-    }
-    RETURN;
-}
-#endif
 
 PP(pp_entertry)
 {

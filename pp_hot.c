@@ -90,12 +90,15 @@ PP(pp_and)
 PP(pp_sassign)
 {
     dSP; dPOPTOPssrl;
+    MAGIC *mg;
+
     if (op->op_private & OPpASSIGN_BACKWARDS) {
 	SV *temp;
 	temp = left; left = right; right = temp;
     }
     if (tainting && tainted && (!SvGMAGICAL(left) || !SvSMAGICAL(left) ||
-				!mg_find(left, 't'))) {
+				!((mg = mg_find(left, 't')) && mg->mg_len & 1)))
+    {
 	TAINT_NOT;
     }
     SvSetSV(right, left);
@@ -136,17 +139,22 @@ PP(pp_seq)
 
 PP(pp_concat)
 {
-    dSP; dATARGET; dPOPTOPssrl;
+  dSP; dATARGET; tryAMAGICbin(concat,opASSIGN);
+  {
+    dPOPTOPssrl;
     STRLEN len;
     char *s;
     if (TARG != left) {
 	s = SvPV(left,len);
 	sv_setpvn(TARG,s,len);
     }
+    else if (!SvOK(TARG))
+	sv_setpv(TARG, "");	/* Suppress warning. */
     s = SvPV(right,len);
     sv_catpvn(TARG,s,len);
     SETTARG;
     RETURN;
+  }
 }
 
 PP(pp_padsv)
@@ -177,7 +185,12 @@ PP(pp_eq)
 PP(pp_preinc)
 {
     dSP;
-    sv_inc(TOPs);
+    if (SvIOK(TOPs)) {
+	++SvIVX(TOPs);
+	SvFLAGS(TOPs) &= ~(SVf_NOK|SVf_POK|SVp_NOK|SVp_POK);
+    }
+    else
+	sv_inc(TOPs);
     SvSETMAGIC(TOPs);
     return NORMAL;
 }
@@ -243,19 +256,25 @@ PP(pp_print)
     else
 	gv = defoutgv;
     if (!(io = GvIO(gv))) {
-	if (dowarn)
-	    warn("Filehandle %s never opened", GvNAME(gv));
-	errno = EBADF;
+	if (dowarn) {
+	    SV* sv = sv_newmortal();
+            gv_fullname(sv,gv);
+            warn("Filehandle %s never opened", SvPV(sv,na));
+        }
+
+	SETERRNO(EBADF,RMS$_IFI);
 	goto just_say_no;
     }
     else if (!(fp = IoOFP(io))) {
 	if (dowarn)  {
+	    SV* sv = sv_newmortal();
+            gv_fullname(sv,gv);
 	    if (IoIFP(io))
-		warn("Filehandle %s opened only for input", GvNAME(gv));
+		warn("Filehandle %s opened only for input", SvPV(sv,na));
 	    else
-		warn("print on closed filehandle %s", GvNAME(gv));
+		warn("print on closed filehandle %s", SvPV(sv,na));
 	}
-	errno = EBADF;
+	SETERRNO(EBADF,IoIFP(io)?RMS$_FAC:RMS$_IFI);
 	goto just_say_no;
     }
     else {
@@ -330,6 +349,8 @@ PP(pp_rv2av)
 	}
 	else {
 	    if (SvTYPE(sv) != SVt_PVGV) {
+		char *sym;
+
 		if (SvGMAGICAL(sv)) {
 		    mg_get(sv);
 		    if (SvROK(sv))
@@ -341,9 +362,10 @@ PP(pp_rv2av)
 			DIE(no_usym, "an ARRAY");
 		    RETPUSHUNDEF;
 		}
+		sym = SvPV(sv,na);
 		if (op->op_private & HINT_STRICT_REFS)
-		    DIE(no_symref, "an ARRAY");
-		sv = (SV*)gv_fetchpv(SvPV(sv, na), TRUE, SVt_PVAV);
+		    DIE(no_symref, sym, "an ARRAY");
+		sv = (SV*)gv_fetchpv(sym, TRUE, SVt_PVAV);
 	    }
 	    av = GvAVn(sv);
 	    if (op->op_private & OPpLVAL_INTRO)
@@ -398,6 +420,8 @@ PP(pp_rv2hv)
 	}
 	else {
 	    if (SvTYPE(sv) != SVt_PVGV) {
+		char *sym;
+
 		if (SvGMAGICAL(sv)) {
 		    mg_get(sv);
 		    if (SvROK(sv))
@@ -409,9 +433,10 @@ PP(pp_rv2hv)
 			DIE(no_usym, "a HASH");
 		    RETSETUNDEF;
 		}
+		sym = SvPV(sv,na);
 		if (op->op_private & HINT_STRICT_REFS)
-		    DIE(no_symref, "a HASH");
-		sv = (SV*)gv_fetchpv(SvPV(sv, na), TRUE, SVt_PVHV);
+		    DIE(no_symref, sym, "a HASH");
+		sv = (SV*)gv_fetchpv(sym, TRUE, SVt_PVHV);
 	    }
 	    hv = GvHVn(sv);
 	    if (op->op_private & OPpLVAL_INTRO)
@@ -481,7 +506,7 @@ PP(pp_aassign)
 	switch (SvTYPE(sv)) {
 	case SVt_PVAV:
 	    ary = (AV*)sv;
-	    magic = SvSMAGICAL(ary) != 0;
+	    magic = SvMAGICAL(ary) != 0;
 	    
 	    av_clear(ary);
 	    i = 0;
@@ -500,7 +525,7 @@ PP(pp_aassign)
 		SV *tmpstr;
 
 		hash = (HV*)sv;
-		magic = SvSMAGICAL(hash) != 0;
+		magic = SvMAGICAL(hash) != 0;
 		hv_clear(hash);
 
 		while (relem < lastrelem) {	/* gobble up all the rest */
@@ -553,14 +578,14 @@ PP(pp_aassign)
 #ifdef HAS_SETRUID
 	    if ((delaymagic & DM_UID) == DM_RUID) {
 		(void)setruid(uid);
-		delaymagic =~ DM_RUID;
+		delaymagic &= ~DM_RUID;
 	    }
 #endif /* HAS_SETRUID */
 #endif /* HAS_SETRESUID */
 #ifdef HAS_SETEUID
 	    if ((delaymagic & DM_UID) == DM_EUID) {
 		(void)seteuid(uid);
-		delaymagic =~ DM_EUID;
+		delaymagic &= ~DM_EUID;
 	    }
 #endif /* HAS_SETEUID */
 	    if (delaymagic & DM_UID) {
@@ -583,7 +608,7 @@ PP(pp_aassign)
 #ifdef HAS_SETRGID
 	    if ((delaymagic & DM_GID) == DM_RGID) {
 		(void)setrgid(gid);
-		delaymagic =~ DM_RGID;
+		delaymagic &= ~DM_RGID;
 	    }
 #endif /* HAS_SETRGID */
 #ifdef HAS_SETRESGID
@@ -592,7 +617,7 @@ PP(pp_aassign)
 #ifdef HAS_SETEGID
 	    if ((delaymagic & DM_GID) == DM_EGID) {
 		(void)setegid(gid);
-		delaymagic =~ DM_EGID;
+		delaymagic &= ~DM_EGID;
 	    }
 #endif /* HAS_SETEGID */
 	    if (delaymagic & DM_GID) {
@@ -642,6 +667,7 @@ PP(pp_match)
     register REGEXP *rx = pm->op_pmregexp;
     I32 gimme = GIMME;
     STRLEN len;
+    I32 minmatch = 0;
 
     if (op->op_flags & OPf_STACKED)
 	TARG = POPs;
@@ -669,10 +695,14 @@ PP(pp_match)
 	rx->startp[0] = 0;
 	if (SvTYPE(TARG) >= SVt_PVMG && SvMAGIC(TARG)) {
 	    MAGIC* mg = mg_find(TARG, 'g');
-	    if (mg && mg->mg_len >= 0)
+	    if (mg && mg->mg_len >= 0) {
 		rx->endp[0] = rx->startp[0] = s + mg->mg_len; 
+		minmatch = (mg->mg_flags & MGf_MINMATCH);
+	    }
 	}
     }
+    if (!rx->nparens && !global)
+	gimme = G_SCALAR;			/* accidental array context? */
     safebase = (gimme == G_ARRAY) || global;
     if (pm->op_pmflags & (PMf_MULTILINE|PMf_SINGLELINE)) {
 	SAVEINT(multiline);
@@ -684,6 +714,7 @@ play_it_again:
 	t = s = rx->endp[0];
 	if (s > strend)
 	    goto nope;
+	minmatch = (s == rx->startp[0]);
     }
     if (pm->op_pmshort) {
 	if (pm->op_pmflags & PMf_SCANFIRST) {
@@ -725,11 +756,7 @@ play_it_again:
 	    pm->op_pmshort = Nullsv;	/* opt is being useless */
 	}
     }
-    if (!rx->nparens && !global) {
-	gimme = G_SCALAR;			/* accidental array context? */
-	safebase = FALSE;
-    }
-    if (regexec(rx, s, strend, truebase, 0,
+    if (regexec(rx, s, strend, truebase, minmatch,
       SvSCREAM(TARG) ? TARG : Nullsv,
       safebase)) {
 	curpm = pm;
@@ -776,7 +803,15 @@ play_it_again:
 		sv_magic(TARG, (SV*)0, 'g', Nullch, 0);
 		mg = mg_find(TARG, 'g');
 	    }
-	    mg->mg_len = rx->startp[0] ? rx->endp[0] - truebase : -1;
+	    if (rx->startp[0]) {
+		mg->mg_len = rx->endp[0] - truebase;
+		if (rx->startp[0] == rx->endp[0])
+		    mg->mg_flags |= MGf_MINMATCH;
+		else
+		    mg->mg_flags &= ~MGf_MINMATCH;
+	    }
+	    else
+		mg->mg_len = -1;
 	}
 	RETPUSHYES;
     }
@@ -894,7 +929,7 @@ do_readline()
 		       if (cp[i] == '/') {
 		          hasdir = isunix = 1;
 		          break;
-               }
+		       }
 		       if (cp[i] == ']' || cp[i] == '>' || cp[i] == ':') {
 		           hasdir = 1;
 		           break;
@@ -921,7 +956,8 @@ do_readline()
 		            ok = (fputs(begin,tmpfp) != EOF);
 		        }
 		        if (cxt) (void)lib$find_file_end(&cxt);
-		        if (ok && sts != RMS$_NMF) ok = 0;
+		        if (ok && sts != RMS$_NMF &&
+		            sts != RMS$_DNF && sts != RMS$_FNF) ok = 0;
 		        if (!ok) {
 		            fp = NULL;
 		        }
@@ -963,7 +999,7 @@ do_readline()
 	    SP--;
     }
     if (!fp) {
-	if (dowarn)
+	if (dowarn && !(IoFLAGS(io) & IOf_START))
 	    warn("Read on closed filehandle <%s>", GvENAME(last_in_gv));
 	if (GIMME == G_SCALAR) {
 	    (void)SvOK_off(TARG);
@@ -1218,7 +1254,7 @@ PP(pp_subst)
 	EXTEND(SP,1);
     }
     s = SvPV(TARG, len);
-    if (!SvPOKp(TARG))
+    if (!SvPOKp(TARG) || SvREADONLY(TARG))
 	force_on_match = 1;
 
   force_it:
@@ -1414,7 +1450,13 @@ PP(pp_subst)
 	} while (regexec(rx, s, strend, orig, s == m, Nullsv,
 	    safebase));
 	sv_catpvn(dstr, s, strend - s);
-	sv_replace(TARG, dstr);
+
+	SvPVX(TARG) = SvPVX(dstr);
+	SvCUR_set(TARG, SvCUR(dstr));
+	SvLEN_set(TARG, SvLEN(dstr));
+	SvPVX(dstr) = 0;
+	sv_free(dstr);
+
 	(void)SvPOK_only(TARG);
 	SvSETMAGIC(TARG);
 	PUSHs(sv_2mortal(newSViv((I32)iters)));
@@ -1527,17 +1569,16 @@ PP(pp_entersub)
     switch (SvTYPE(sv)) {
     default:
 	if (!SvROK(sv)) {
+	    char *sym;
+
 	    if (sv == &sv_yes)		/* unfound import, ignore */
 		RETURN;
 	    if (!SvOK(sv))
 		DIE(no_usym, "a subroutine");
+	    sym = SvPV(sv,na);
 	    if (op->op_private & HINT_STRICT_REFS)
-		DIE(no_symref, "a subroutine");
-	    gv = gv_fetchpv(SvPV(sv, na), FALSE, SVt_PVCV);
-	    if (!gv)
-		cv = 0;
-	    else
-		cv = GvCV(gv);
+		DIE(no_symref, sym, "a subroutine");
+	    cv = perl_get_cv(sym, TRUE);
 	    break;
 	}
 	cv = (CV*)SvRV(sv);
@@ -1583,8 +1624,12 @@ PP(pp_entersub)
     if ((op->op_private & OPpDEREF_DB) && !CvXSUB(cv)) {
 	sv = GvSV(DBsub);
 	save_item(sv);
-	gv = CvGV(cv);
-	gv_efullname(sv,gv);
+	if (SvFLAGS(cv) & SVpcv_ANON)	/* Is GV potentially non-unique? */
+	    sv_setsv(sv, newRV((SV*)cv));
+	else {
+	    gv = CvGV(cv);
+	    gv_efullname(sv,gv);
+	}
 	cv = GvCV(DBsub);
 	if (!cv)
 	    DIE("No DBsub routine");
@@ -1607,8 +1652,19 @@ PP(pp_entersub)
 	    stack_sp = stack_base + items;
 	}
 	else {
+	    I32 markix = TOPMARK;
+
 	    PUTBACK;
 	    (void)(*CvXSUB(cv))(cv);
+
+	    /* Enforce some sanity in scalar context. */
+	    if (GIMME == G_SCALAR && ++markix != stack_sp - stack_base ) {
+		if (markix > stack_sp - stack_base)
+		    *(stack_base + markix) = &sv_undef;
+		else
+		    *(stack_base + markix) = *stack_sp;
+		stack_sp = stack_base + markix;
+	    }
 	}
 	LEAVE;
 	return NORMAL;
@@ -1632,21 +1688,28 @@ PP(pp_entersub)
 	    if (CvDEPTH(cv) > AvFILL(padlist)) {
 		AV *av;
 		AV *newpad = newAV();
+		AV *oldpad = (AV*)AvARRAY(svp[CvDEPTH(cv)-1]);
 		I32 ix = AvFILL((AV*)svp[1]);
 		svp = AvARRAY(svp[0]);
-		while (ix > 0) {
+		for ( ;ix > 0; ix--) {
 		    if (svp[ix] != &sv_undef) {
-			char *name = SvPVX(svp[ix]);	/* XXX */
-			if (*name == '@')
-			    av_store(newpad, ix--, sv = (SV*)newAV());
-			else if (*name == '%')
-			    av_store(newpad, ix--, sv = (SV*)newHV());
-			else
-			    av_store(newpad, ix--, sv = NEWSV(0,0));
-			SvPADMY_on(sv);
+			char *name = SvPVX(svp[ix]);
+			if (SvFLAGS(svp[ix]) & SVf_FAKE) { /* outer lexical? */
+			    av_store(newpad, ix,
+				SvREFCNT_inc(AvARRAY(oldpad)[ix]) );
+			}
+			else {				/* our own lexical */
+			    if (*name == '@')
+				av_store(newpad, ix, sv = (SV*)newAV());
+			    else if (*name == '%')
+				av_store(newpad, ix, sv = (SV*)newHV());
+			    else
+				av_store(newpad, ix, sv = NEWSV(0,0));
+			    SvPADMY_on(sv);
+			}
 		    }
 		    else {
-			av_store(newpad, ix--, sv = NEWSV(0,0));
+			av_store(newpad, ix, sv = NEWSV(0,0));
 			SvPADTMP_on(sv);
 		    }
 		}
@@ -1704,10 +1767,12 @@ PP(pp_aelem)
 {
     dSP;
     SV** svp;
-    I32 elem = POPi - curcop->cop_arybase;
+    I32 elem = POPi;
     AV *av = (AV*)POPs;
     I32 lval = op->op_flags & OPf_MOD;
 
+    if (elem > 0)
+	elem -= curcop->cop_arybase;
     if (SvTYPE(av) != SVt_PVAV)
 	RETPUSHUNDEF;
     svp = av_fetch(av, elem, lval);
@@ -1774,6 +1839,7 @@ DIE("Can't call method \"%s\" without a package or object reference", name);
 	    SETs(gv);
 	    RETURN;
 	}
+	*(stack_base + TOPMARK + 1) = iogv;
     }
 
     if (!ob || !SvOBJECT(ob)) {

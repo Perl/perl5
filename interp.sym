@@ -34,6 +34,7 @@ defgv
 defoutgv
 defstash
 delaymagic
+diehook
 dirty
 dlevel
 dlmax
@@ -69,6 +70,7 @@ laststype
 leftgv
 lineary
 localizing
+main_cv
 main_root
 main_start
 mainstack
@@ -101,8 +103,10 @@ ors
 orslen
 pad
 padname
+parsehook
 patchlevel
 perldb
+perl_destruct_level
 pidstatus
 preambled
 preprocess
@@ -146,3 +150,4 @@ tmps_stack
 top_env
 toptarget
 unsafe
+warnhook

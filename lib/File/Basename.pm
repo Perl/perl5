@@ -4,7 +4,7 @@ require 5.000;
 use Config;
 require Exporter;
 @ISA = qw(Exporter);
-@EXPORT = qw(fileparse set_fileparse_fstype basename dirname);
+@EXPORT = qw(fileparse fileparse_set_fstype basename dirname);
 
 #   fileparse_set_fstype() - specify OS-based rules used in future
 #                            calls to routines in this package
@@ -13,7 +13,9 @@ require Exporter;
 #       Any other name uses Unix-style rules
 
 sub fileparse_set_fstype {
-  $Fileparse_fstype = $_[0];
+  my($old) = $Fileparse_fstype;
+  $Fileparse_fstype = $_[0] if $_[0];
+  $old;
 }
 
 #   fileparse() - parse file specification
@@ -46,7 +48,7 @@ sub fileparse_set_fstype {
 #   ($base,$path,$type) = fileparse('/virgil/aeneid/draft.book7',
 #                                       '\.book\d+');
 #   would yield $base == 'draft',
-#               $path == '/virgil/aeneid', and
+#               $path == '/virgil/aeneid/'  (note trailing slash)
 #               $tail == '.book7'.
 #   Similarly, on a system running VMS,
 #   ($name,$dir,$type) = fileparse('Doc_Root:[Help]Rhetoric.Rnh','\..*');
@@ -66,7 +68,7 @@ sub fileparse {
     if ($fullname =~ m#/#) { $fstype = '' }  # We're doing Unix emulation
     else {
       ($dirpath,$basename) = ($fullname =~ /(.*[:>\]])?(.*)/);
-      $dirpath = $ENV{'PATH'} unless $dirpath;
+      $dirpath = $ENV{'DEFAULT'} unless $dirpath;
     }
   }
   if ($fstype =~ /^MSDOS/i) {
@@ -76,7 +78,7 @@ sub fileparse {
   elsif ($fstype =~ /^MAC/i) {
     ($dirpath,$basename) = ($fullname =~ /(.*:)?(.*)/);
   }
-  else {  # default to Unix
+  elsif ($fstype !~ /^VMS/i) {  # default to Unix
     ($dirpath,$basename) = ($fullname =~ m#(.*/)?(.*)#);
     $dirpath = '.' unless $dirpath;
   }
@@ -90,7 +92,7 @@ sub fileparse {
     }
   }
 
-  ($basename,$dirpath,$tail);
+  wantarray ? ($basename,$dirpath,$tail) : $basename;
 
 }
 
@@ -98,13 +100,15 @@ sub fileparse {
 #   basename() - returns first element of list returned by fileparse()
 
 sub basename {
-  (fileparse(@_))[0];
+  my($name) = shift;
+  (fileparse($name, map("\Q$_\E",@_)))[0];
 }
   
 
 #    dirname() - returns device and directory portion of file specification
 #        Behavior matches that of Unix dirname(1) exactly for Unix and MSDOS
-#        filespecs.  This differs from the second element of the list returned
+#        filespecs except for names ending with a separator, e.g., "/xx/yy/".
+#        This differs from the second element of the list returned
 #        by fileparse() in that the trailing '/' (Unix) or '\' (MSDOS) (and
 #        the last directory name if the filespec ends in a '/' or '\'), is lost.
 
@@ -113,14 +117,14 @@ sub dirname {
     my($fstype) = $Fileparse_fstype;
 
     if ($fstype =~ /VMS/i) { 
-        if (m#/#) { $fstype = '' }
+        if ($_[0] =~ m#/#) { $fstype = '' }
         else { return $dirname }
     }
     if ($fstype =~ /MacOS/i) { return $dirname }
     elsif ($fstype =~ /MSDOS/i) { 
         if ( $dirname =~ /:\\$/) { return $dirname }
         chop $dirname;
-        $dirname =~ s:[^/]+$:: unless $basename;
+        $dirname =~ s:[^\\]+$:: unless $basename;
         $dirname = '.' unless $dirname;
     }
     else { 

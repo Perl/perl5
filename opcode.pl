@@ -21,7 +21,14 @@ while (<DATA>) {
 # Emit defines.
 
 $i = 0;
-print "typedef enum {\n";
+print <<"END";
+#define pp_i_preinc pp_preinc
+#define pp_i_predec pp_predec
+#define pp_i_postinc pp_postinc
+#define pp_i_postdec pp_postdec
+
+typedef enum {
+END
 for (@ops) {
     print "\t", &tab(3,"OP_\U$_,"), "/* ", $i++, " */\n";
 }
@@ -169,10 +176,10 @@ const		constant item		ck_svconst	s
 
 gvsv		scalar variable		ck_null		ds	
 gv		glob value		ck_null		ds	
-padsv		private variable	ck_null		s
-padav		private array		ck_null		0
-padhv		private hash		ck_null		0
-padany		private something	ck_null		0
+padsv		private variable	ck_null		ds
+padav		private array		ck_null		d
+padhv		private hash		ck_null		d
+padany		private something	ck_null		d
 
 pushre		push regexp		ck_null		0
 
@@ -398,7 +405,7 @@ enteriter	foreach loop entry	ck_null		d
 iter		foreach loop iterator	ck_null		0	
 enterloop	loop entry		ck_null		d	
 leaveloop	loop exit		ck_null		0	
-return		return			ck_fun		dm	L
+return		return			ck_null		dm	L
 last		last			ck_null		ds	
 next		next			ck_null		ds	
 redo		redo			ck_null		ds	

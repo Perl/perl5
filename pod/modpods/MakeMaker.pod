@@ -10,7 +10,7 @@ MakeMaker - generate a Makefile for Perl extension
 
 This utility is designed to write a Makefile for an extension module from
 a Makefile.PL.  It splits the task of generating the Makefile into several
-subroutines that can be individually overridden.  Each subroutines returns
+subroutines that can be individually overridden.  Each subroutine returns
 the text it wishes to have written to the Makefile.
 
 The best way to learn to use this is to look at how some of the

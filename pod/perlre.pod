@@ -297,11 +297,9 @@ first alternative includes everything from the last pattern delimiter
 the last alternative contains everything from the last "|" to the next
 pattern delimiter.  For this reason, it's common practice to include
 alternatives in parentheses, to minimize confusion about where they
-start and end.  Note also that the pattern C<(fee|fie|foe)> differs
-from the pattern C<[fee|fie|foe]> in that the former matches "fee",
-"fie", or "foe" in the target string, while the latter matches
-anything matched by the classes C<[fee]>, C<[fie]>, or C<[foe]> (i.e.
-the class C<[feio]>).
+start and end.  Note however that "|" is interpreted as a literal with
+square brackets, so if you write C<[fee|fie|foe]> you're really only
+matching C<[feio|]>.
 
 Within a pattern, you may designate subpatterns for later reference by
 enclosing them in parentheses, and you may refer back to the I<n>th
@@ -309,7 +307,7 @@ subpattern later in the pattern using the metacharacter \I<n>.
 Subpatterns are numbered based on the left to right order of their
 opening parenthesis.  Note that a backreference matches whatever
 actually matched the subpattern in the string being examined, not the
-rules for that subpattern.  Therefore, C<([0|0x])\d*\s\1\d*> will
+rules for that subpattern.  Therefore, C<(0|0x)\d*\s\1\d*> will
 match "0x1234 0x4321",but not "0x1234 01234", since subpattern 1
-actually matched "0x", even though the rule C<[0|0x]> could
+actually matched "0x", even though the rule C<0|0x> could
 potentially match the leading 0 in the second number.

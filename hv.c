@@ -162,10 +162,11 @@ register U32 hash;
 }
 
 SV *
-hv_delete(hv,key,klen)
+hv_delete(hv,key,klen,flags)
 HV *hv;
 char *key;
 U32 klen;
+I32 flags;
 {
     register XPVHV* xhv;
     register char *s;
@@ -207,7 +208,10 @@ U32 klen;
 	*oentry = entry->hent_next;
 	if (i && !*oentry)
 	    xhv->xhv_fill--;
-	sv = sv_mortalcopy(entry->hent_val);
+	if (flags & G_DISCARD)
+	    sv = Nullsv;
+	else
+	    sv = sv_mortalcopy(entry->hent_val);
 	if (entry == xhv->xhv_eiter)
 	    entry->hent_klen = -1;
 	else

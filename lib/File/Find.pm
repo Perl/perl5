@@ -1,9 +1,12 @@
 package File::Find;
 require 5.000;
 require Exporter;
+use Config;
+use Cwd;
+use File::Basename;
 
 @ISA = qw(Exporter);
-@EXPORT = qw(find finddepth);
+@EXPORT = qw(find finddepth $name $dir);
 
 # Usage:
 #	use File::Find;
@@ -38,7 +41,7 @@ require Exporter;
 
 sub find {
     my $wanted = shift;
-    chop($cwd = `pwd`);
+    my $cwd = fastcwd();
     foreach $topdir (@_) {
 	(($topdev,$topino,$topmode,$topnlink) = stat($topdir))
 	  || (warn("Can't stat $topdir: $!\n"), next);
@@ -48,6 +51,7 @@ sub find {
 		$name = $topdir;
 		&$wanted;
 		($fixtopdir = $topdir) =~ s,/$,, ;
+		$fixtopdir =~ s/\.dir$// if $Is_VMS; ;
 		&finddir($wanted,$fixtopdir,$topnlink);
 	    }
 	    else {
@@ -55,7 +59,7 @@ sub find {
 	    }
 	}
 	else {
-	    unless (($dir,$_) = $topdir =~ m#^(.*/)(.*)$#) {
+	    unless (($dir,$_) = fileparse($topdir)) {
 		($dir,$_) = ('.', $topdir);
 	    }
 	    $name = $topdir;
@@ -97,13 +101,15 @@ sub finddir {
 
 		# Get link count and check for directoriness.
 
-		($dev,$ino,$mode,$nlink) = lstat($_) unless $nlink;
+		($dev,$ino,$mode,$nlink) = ($Is_VMS ? stat($_) : lstat($_))
+		    unless ($nlink || $dont_use_nlink);
 		
 		if (-d _) {
 
 		    # It really is a directory, so do it recursively.
 
 		    if (!$prune && chdir $_) {
+			$name =~ s/\.dir$// if $Is_VMS;
 			&finddir($wanted,$name,$nlink);
 			chdir '..';
 		    }
@@ -145,13 +151,14 @@ sub finddir {
 
 sub finddepth {
     my $wanted = shift;
-    chop($cwd = `pwd`);
+    $cwd = fastcwd();;
     foreach $topdir (@_) {
 	(($topdev,$topino,$topmode,$topnlink) = stat($topdir))
 	  || (warn("Can't stat $topdir: $!\n"), next);
 	if (-d _) {
 	    if (chdir($topdir)) {
 		($fixtopdir = $topdir) =~ s,/$,, ;
+		$fixtopdir =~ s/\.dir$// if $Is_VMS;
 		&finddepthdir($wanted,$fixtopdir,$topnlink);
 		($dir,$_) = ($fixtopdir,'.');
 		$name = $fixtopdir;
@@ -162,7 +169,7 @@ sub finddepth {
 	    }
 	}
 	else {
-	    unless (($dir,$_) = $topdir =~ m#^(.*/)(.*)$#) {
+	    unless (($dir,$_) = fileparse($topdir)) {
 		($dir,$_) = ('.', $topdir);
 	    }
 	    chdir $dir && &$wanted;
@@ -182,7 +189,7 @@ sub finddepthdir {
     my(@filenames) = readdir(DIR);
     closedir(DIR);
 
-    if ($nlink == 2) {        # This dir has no subdirectories.
+    if ($nlink == 2 && !$dont_use_nlink) {   # This dir has no subdirectories.
 	for (@filenames) {
 	    next if $_ eq '.';
 	    next if $_ eq '..';
@@ -198,17 +205,18 @@ sub finddepthdir {
 	    next if $_ eq '..';
 	    $nlink = $prune = 0;
 	    $name = "$dir/$_";
-	    if ($subcount > 0) {    # Seen all the subdirs?
+	    if ($subcount > 0 || $dont_use_nlink) {    # Seen all the subdirs?
 
 		# Get link count and check for directoriness.
 
-		($dev,$ino,$mode,$nlink) = lstat($_) unless $nlink;
+		($dev,$ino,$mode,$nlink) = ($Is_VMS ? stat($_) : lstat($_));
 		
 		if (-d _) {
 
 		    # It really is a directory, so do it recursively.
 
 		    if (!$prune && chdir $_) {
+			$name =~ s/\.dir$// if $Is_VMS;
 			&finddepthdir($wanted,$name,$nlink);
 			chdir '..';
 		    }
@@ -218,6 +226,11 @@ sub finddepthdir {
 	    &$wanted;
 	}
     }
+}
+
+if ($Config{'osname'} eq 'VMS') {
+  $Is_VMS = 1;
+  $dont_use_nlink = 1;
 }
 
 1;

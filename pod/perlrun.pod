@@ -123,7 +123,8 @@ An alternate delimiter may be specified using B<-F>.
 =item B<-c>
 
 causes Perl to check the syntax of the script and then exit without
-executing it.
+executing it.  Actually, it will execute C<BEGIN> and C<use> blocks,
+since these are considered part of the compilation.
 
 =item B<-d>
 
@@ -361,8 +362,8 @@ scalar variables that are used before being set.  Also warns about
 redefined subroutines, and references to undefined filehandles or
 filehandles opened readonly that you are attempting to write on.  Also
 warns you if you use values as a number that doesn't look like numbers, using
-a an array as though it were a scalar, if
-your subroutines recurse more than 100 deep, and innumeriable other things.
+an array as though it were a scalar, if
+your subroutines recurse more than 100 deep, and innumerable other things.
 See L<perldiag> and L<perltrap>.
 
 =item B<-x> I<directory>

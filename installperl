@@ -28,9 +28,12 @@ while (<CONFIG>) {
 }
 close CONFIG;
 
-$ver = sprintf("%5.3f", $] + 0);
+$ver = $];
 $release = substr($ver,0,3);
 $patchlevel = substr($ver,3,2);
+die "Patchlevel of perl ($patchlevel)",
+    "and patchlevel of config.sh ($PATCHLEVEL) don't match\n"
+	if $patchlevel != $PATCHLEVEL;
 
 # Do some quick sanity checks.
 
@@ -321,8 +324,12 @@ sub installlib {
 	    }
 	    # HP-UX (at least) needs to maintain execute permissions
 	    # on dynamically-loaded libraries.
-	    &chmod(0644, "$installlib/$name") 
-		unless (/\.$so$/ || /\.$dlext$/);
+	    if ($name =~ /\.(so|$dlext)$/o) {
+		&chmod(0555, "$installlib/$name");
+	    }
+	    else {
+		&chmod(0444, "$installlib/$name");
+	    }
 	}
     } elsif (-d $_) {
 	&makedir("$installlib/$name");

@@ -40,7 +40,7 @@ Every variable type has its own namespace.  You can, without fear of
 conflict, use the same name for a scalar variable, an array, or a hash
 (or, for that matter, a filehandle, a subroutine name, or a label).
 This means that $foo and @foo are two different variables.  It also
-means that $foo[1] is a part of @foo, not a part of $foo.  This may
+means that C<$foo[1]> is a part of @foo, not a part of $foo.  This may
 seem a bit weird, but that's okay, because it is weird.
 
 Since variable and array references always start with '$', '@', or '%',
@@ -203,9 +203,22 @@ price is $100."
     print "The price is $Price.\n";	# interpreted
 
 As in some shells, you can put curly brackets around the identifier to
-delimit it from following alphanumerics.  Also note that a
+delimit it from following alphanumerics.  In fact, an identifier
+within such curlies is forced to be a string, as is any single
+identifier within a hash subscript.  Our earlier example,
+
+    $days{'Feb'}
+
+can be written as
+
+    $days{Feb}
+
+and the quotes will be assumed automatically.  But anything more complicated
+in the subscript will be interpreted as an expression.
+
+Note that a
 single-quoted string must be separated from a preceding word by a
-space, since single quote is a valid (though discouraged) character in
+space, since single quote is a valid (though deprecated) character in
 an identifier (see L<perlmod/Packages>).
 
 Two special literals are __LINE__ and __FILE__, which represent the
@@ -218,7 +231,7 @@ filehandle may read data only from the main script, but not from any
 required file or evaluated string.)  The two control characters ^D and
 ^Z are synonyms for __END__.
 
-A word that doesn't have any other interpretation in the grammar will
+A word that has no other interpretation in the grammar will
 be treated as if it were a quoted string.  These are known as
 "barewords".  As with filehandles and labels, a bareword that consists
 entirely of lowercase letters risks conflict with future reserved
@@ -311,7 +324,7 @@ List values are denoted by separating individual values by commas
 
     (LIST)
 
-In a context not requiring an list value, the value of the list
+In a context not requiring a list value, the value of the list
 literal is the value of the final element, as with the C comma operator.
 For example,
 

@@ -193,7 +193,7 @@ gdbm_STORE(db, key, value, flags = GDBM_REPLACE)
 	if (RETVAL) {
 	    if (RETVAL < 0 && errno == EPERM)
 		croak("No write permission to gdbm file");
-	    warn("gdbm store returned %d, errno %d, key \"%.*s\"",
+	    croak("gdbm store returned %d, errno %d, key \"%.*s\"",
 			RETVAL,errno,key.dsize,key.dptr);
 	    /* gdbm_clearerr(db); */
 	}

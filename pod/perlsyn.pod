@@ -55,7 +55,7 @@ The only kind of simple statement is an expression evaluated for its
 side effects.  Every simple statement must be terminated with a
 semicolon, unless it is the final statement in a block, in which case
 the semicolon is optional.  (A semicolon is still encouraged there if the
-block takes up more than one line, since you may add another line.)
+block takes up more than one line, since you may eventually add another line.)
 Note that there are some operators like C<eval {}> and C<do {}> that look
 like compound statements, but aren't (they're just TERMs in an expression), 
 and thus need an explicit termination
@@ -106,7 +106,7 @@ The following compound statements may be used to control flow:
     LABEL while (EXPR) BLOCK
     LABEL while (EXPR) BLOCK continue BLOCK
     LABEL for (EXPR; EXPR; EXPR) BLOCK
-    LABEL foreach VAR (ARRAY) BLOCK
+    LABEL foreach VAR (LIST) BLOCK
     LABEL BLOCK continue BLOCK
 
 Note that, unlike C and Pascal, these are defined in terms of BLOCKs,
@@ -164,13 +164,15 @@ is the same as
 
 The foreach loop iterates over a normal list value and sets the
 variable VAR to be each element of the list in turn.  The variable is
-implicitly local to the loop (unless declared previously with C<my>),
-and regains its former value upon exiting the loop.  The C<foreach>
-keyword is actually a synonym for the C<for> keyword, so you can use
-C<foreach> for readability or C<for> for brevity.  If VAR is omitted, $_
-is set to each value.  If ARRAY is an actual array (as opposed to an
-expression returning a list value), you can modify each element of the
-array by modifying VAR inside the loop.  Examples:
+implicitly local to the loop and regains its former value upon exiting
+the loop.  (If the variable was previously declared with C<my>, it uses
+that variable instead of the global one, but it's still localized to
+the loop.)  The C<foreach> keyword is actually a synonym for the C<for>
+keyword, so you can use C<foreach> for readability or C<for> for
+brevity.  If VAR is omitted, $_ is set to each value.  If LIST is an
+actual array (as opposed to an expression returning a list value), you
+can modify each element of the array by modifying VAR inside the loop.
+Examples:
 
     for (@ary) { s/foo/bar/; }
 

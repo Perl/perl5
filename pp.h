@@ -181,7 +181,7 @@
 #define RvDEEPCP(rv) do { SV* ref=SvRV(rv);      \
   if (SvREFCNT(ref)>1) {                 \
     SvREFCNT_dec(ref);                   \
-    SvRV(rv)=newSVsv(ref);               \
+    SvRV(rv)=AMG_CALLun(rv,copy);        \
   } } while (0)
 #else
 

@@ -361,6 +361,8 @@ I32 iflag;
     I32 rarest = 0;
     U32 frequency = 256;
 
+    if (len > 255)
+	return;			/* can't have offsets that big */
     Sv_Grow(sv,len+258);
     table = (unsigned char*)(SvPVX(sv) + len + 1);
     s = table - 2;
@@ -746,8 +748,20 @@ long a1, a2, a3, a4;
 {
     char *tmps;
     char *message;
+    HV *stash;
+    GV *gv;
+    CV *cv;
 
     message = mess(pat,a1,a2,a3,a4);
+    if (diehook && (cv = sv_2cv(diehook, &stash, &gv, 0)) && !CvDEPTH(cv)) {
+	dSP;
+
+	PUSHMARK(sp);
+	EXTEND(sp, 1);
+	PUSHs(sv_2mortal(newSVpv(message,0)));
+	PUTBACK;
+	perl_call_sv((SV*)cv, G_DISCARD);
+    }
     if (in_eval) {
 	restartop = die_where(message);
 	longjmp(top_env, 3);
@@ -756,8 +770,12 @@ long a1, a2, a3, a4;
     (void)fflush(stderr);
     if (e_fp)
 	(void)UNLINK(e_tmpname);
-    statusvalue >>= 8;
-    my_exit((I32)((errno&255)?errno:((statusvalue&255)?statusvalue:255)));
+    statusvalue = SHIFTSTATUS(statusvalue);
+#ifdef VMS
+    my_exit((U32)vaxc$errno?vaxc$errno:errno?errno:statusvalue?statusvalue:SS$_ABORT);
+#else
+    my_exit((U32)((errno&255)?errno:((statusvalue&255)?statusvalue:255)));
+#endif
 }
 
 /*VARARGS1*/
@@ -766,13 +784,28 @@ char *pat;
 long a1, a2, a3, a4;
 {
     char *message;
+    SV *sv;
+    HV *stash;
+    GV *gv;
+    CV *cv;
 
     message = mess(pat,a1,a2,a3,a4);
-    fputs(message,stderr);
+    if (warnhook && (cv = sv_2cv(warnhook, &stash, &gv, 0)) && !CvDEPTH(cv)) {
+	dSP;
+
+	PUSHMARK(sp);
+	EXTEND(sp, 1);
+	PUSHs(sv_2mortal(newSVpv(message,0)));
+	PUTBACK;
+	perl_call_sv((SV*)cv, G_DISCARD);
+    }
+    else {
+	fputs(message,stderr);
 #ifdef LEAKTEST
-    DEBUG_L(xstat());
+	DEBUG_L(xstat());
 #endif
-    (void)fflush(stderr);
+	(void)fflush(stderr);
+    }
 }
 
 #else /* !defined(I_STDARG) && !defined(I_VARARGS) */
@@ -854,6 +887,9 @@ croak(pat, va_alist)
 {
     va_list args;
     char *message;
+    HV *stash;
+    GV *gv;
+    CV *cv;
 
 #ifdef I_STDARG
     va_start(args, pat);
@@ -862,6 +898,15 @@ croak(pat, va_alist)
 #endif
     message = mess(pat, &args);
     va_end(args);
+    if (diehook && (cv = sv_2cv(diehook, &stash, &gv, 0)) && !CvDEPTH(cv)) {
+	dSP;
+
+	PUSHMARK(sp);
+	EXTEND(sp, 1);
+	PUSHs(sv_2mortal(newSVpv(message,0)));
+	PUTBACK;
+	perl_call_sv((SV*)cv, G_DISCARD);
+    }
     if (in_eval) {
 	restartop = die_where(message);
 	longjmp(top_env, 3);
@@ -870,8 +915,12 @@ croak(pat, va_alist)
     (void)fflush(stderr);
     if (e_fp)
 	(void)UNLINK(e_tmpname);
-    statusvalue >>= 8;
-    my_exit((I32)((errno&255)?errno:((statusvalue&255)?statusvalue:255)));
+    statusvalue = SHIFTSTATUS(statusvalue);
+#ifdef VMS
+    my_exit((U32)(vaxc$errno?vaxc$errno:(statusvalue?statusvalue:44)));
+#else
+    my_exit((U32)((errno&255)?errno:((statusvalue&255)?statusvalue:255)));
+#endif
 }
 
 void
@@ -886,6 +935,9 @@ warn(pat,va_alist)
 {
     va_list args;
     char *message;
+    HV *stash;
+    GV *gv;
+    CV *cv;
 
 #ifdef I_STDARG
     va_start(args, pat);
@@ -895,11 +947,22 @@ warn(pat,va_alist)
     message = mess(pat, &args);
     va_end(args);
 
-    fputs(message,stderr);
+    if (warnhook && (cv = sv_2cv(warnhook, &stash, &gv, 0)) && !CvDEPTH(cv)) {
+	dSP;
+
+	PUSHMARK(sp);
+	EXTEND(sp, 1);
+	PUSHs(sv_2mortal(newSVpv(message,0)));
+	PUTBACK;
+	perl_call_sv((SV*)cv, G_DISCARD);
+    }
+    else {
+	fputs(message,stderr);
 #ifdef LEAKTEST
-    DEBUG_L(xstat());
+	DEBUG_L(xstat());
 #endif
-    (void)fflush(stderr);
+	(void)fflush(stderr);
+    }
 }
 #endif /* !defined(I_STDARG) && !defined(I_VARARGS) */
 
@@ -1069,19 +1132,15 @@ char *pat, *args;
 #endif /* HAS_VPRINTF */
 #endif /* I_VARARGS */
 
-/*
- * I think my_swap(), htonl() and ntohl() have never been used.
- * perl.h contains last-chance references to my_swap(), my_htonl()
- * and my_ntohl().  I presume these are the intended functions;
- * but htonl() and ntohl() have the wrong names.  There are no
- * functions my_htonl() and my_ntohl() defined anywhere.
- * -DWS
- */
 #ifdef MYSWAP
 #if BYTEORDER != 0x4321
 short
+#ifndef CAN_PROTOTYPE
 my_swap(s)
 short s;
+#else
+my_swap(short s)
+#endif
 {
 #if (BYTEORDER & 1) == 0
     short result;
@@ -1094,8 +1153,12 @@ short s;
 }
 
 long
-htonl(l)
+#ifndef CAN_PROTOTYPE
+my_htonl(l)
 register long l;
+#else
+my_htonl(long l)
+#endif
 {
     union {
 	long result;
@@ -1124,8 +1187,12 @@ register long l;
 }
 
 long
-ntohl(l)
+#ifndef CAN_PROTOTYPE
+my_ntohl(l)
 register long l;
+#else
+my_ntohl(long l)
+#endif
 {
     union {
 	long l;
@@ -1305,7 +1372,7 @@ char	*mode;
 
 #endif /* !DOSISH */
 
-#ifdef NOTDEF
+#ifdef DUMP_FDS
 dump_fds(s)
 char *s;
 {
@@ -1361,7 +1428,7 @@ FILE *ptr;
     int pid;
 
     svp = av_fetch(fdpid,fileno(ptr),TRUE);
-    pid = SvIVX(*svp);
+    pid = (int)SvIVX(*svp);
     SvREFCNT_dec(*svp);
     *svp = &sv_undef;
     fclose(ptr);
@@ -1371,7 +1438,9 @@ FILE *ptr;
     hstat = signal(SIGHUP, SIG_IGN);
     istat = signal(SIGINT, SIG_IGN);
     qstat = signal(SIGQUIT, SIG_IGN);
-    pid = wait4pid(pid, &status, 0);
+    do {
+	pid = wait4pid(pid, &status, 0);
+    } while (pid == -1 && errno == EINTR);
     signal(SIGHUP, hstat);
     signal(SIGINT, istat);
     signal(SIGQUIT, qstat);
@@ -1395,7 +1464,7 @@ int flags;
 	svp = hv_fetch(pidstatus,spid,strlen(spid),FALSE);
 	if (svp && *svp != &sv_undef) {
 	    *statusp = SvIVX(*svp);
-	    hv_delete(pidstatus,spid,strlen(spid));
+	    (void)hv_delete(pidstatus,spid,strlen(spid),G_DISCARD);
 	    return pid;
 	}
     }
@@ -1408,7 +1477,7 @@ int flags;
 	    sv = hv_iterval(pidstatus,entry);
 	    *statusp = SvIVX(sv);
 	    sprintf(spid, "%d", pid);
-	    hv_delete(pidstatus,spid,strlen(spid));
+	    (void)hv_delete(pidstatus,spid,strlen(spid),G_DISCARD);
 	    return pid;
 	}
     }
@@ -1589,10 +1658,13 @@ I32 *retlen;
     register char *s = start;
     register unsigned long retval = 0;
 
-    while (len-- && *s >= '0' && *s <= '7') {
+    while (len && *s >= '0' && *s <= '7') {
 	retval <<= 3;
 	retval |= *s++ - '0';
+	len--;
     }
+    if (dowarn && len && (*s == '8' || *s == '9'))
+	warn("Illegal octal digit ignored");
     *retlen = s - start;
     return retval;
 }

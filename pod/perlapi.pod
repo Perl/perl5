@@ -947,5 +947,5 @@ File C<rpctest.pl>: Perl test program for the RPC extension.
 
 =head1 AUTHOR
 
-Dean Roehrich <roehrich@cray.com>
+Dean Roehrich C<roehrich@cray.com>
 September 27, 1994

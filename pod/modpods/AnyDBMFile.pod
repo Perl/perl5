@@ -10,16 +10,23 @@ NDBM_File, ODBM_File, SDBM_File, GDBM_File - various DBM implementations
 
 =head1 DESCRIPTION
 
-This module is a "pure virtual base class"--it has nothing of us its own.
+This module is a "pure virtual base class"--it has nothing of its own.
 It's just there to inherit from one of the various DBM packages.  It
 prefers ndbm for compatibility reasons with Perl 4, then Berkeley DB (See
-L<DB_File>), GDBM, SDBM (which is always there -- it comes with Perl), and
-finally ODBM.   This way old programs that used to use NDBM via dbmopen() can still 
-do so, but new ones can reorder @ISA:
+L<DB_File>), GDBM, SDBM (which is always there--it comes with Perl), and
+finally ODBM.   This way old programs that used to use NDBM via dbmopen()
+can still do so, but new ones can reorder @ISA:
 
     @AnyDBM_File::ISA = qw(DB_File GDBM_File NDBM_File);
 
-This makes it trivial to copy database formats:
+Note, however, that an explicit use overrides the specified order:
+
+    use GDBM_File;
+    @AnyDBM_File::ISA = qw(DB_File GDBM_File NDBM_File);
+
+will only find GDBM_File.
+
+Having multiple DBM implementations makes it trivial to copy database formats:
 
     use POSIX; use NDBM_File; use DB_File;
     tie %newhash,  DB_File, $new_filename, O_CREAT|O_RDWR;

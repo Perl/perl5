@@ -292,9 +292,19 @@ unary ones.)  See L<perlop>.
 
 =item *
 
-People have a hard type remembering that some functions
+People have a hard time remembering that some functions
 default to $_, or @ARGV, or whatever, but that others which
 you might expect to do not.  
+
+=item * 
+
+The <FH> construct is not the name of the filehandle, it is a readline
+operation on that handle.  The data read is only assigned to $_ if the
+file read is the sole condition in a while loop:
+
+    while (<FH>)      { }
+    while ($_ = <FH>) { }..
+    <FH>;  # data discarded!
 
 =item * 
 
@@ -332,12 +342,13 @@ C<@> now always interpolates an array in double-quotish strings.  Some programs
 may now need to use backslash to protect any C<@> that shouldn't interpolate.
 
 =item *
+
 Barewords that used to look like strings to Perl will now look like subroutine
 calls if a subroutine by that name is defined before the compiler sees them.
 For example:
 
     sub SeeYa { die "Hasta la vista, baby!" }
-    $SIG{QUIT} = SeeYa;
+    $SIG{'QUIT'} = SeeYa;
 
 In Perl 4, that set the signal handler; in Perl 5, it actually calls the
 function!  You may use the B<-w> switch to find such places.
@@ -439,6 +450,12 @@ Setting C<$#array> lower now discards array elements.
 
 delete() is not guaranteed to return the old value for tie()d arrays,
 since this capability may be onerous for some modules to implement.
+
+=item *
+
+The construct "this is $$x" used to interpolate the pid at that
+point, but now tries to dereference $x.  C<$$> by itself still
+works fine, however.
 
 =item *
 

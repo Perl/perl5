@@ -8,9 +8,9 @@ Perl has a mechanism to help you generate simple reports and charts.  To
 facilitate this, Perl helps you lay out your output page in your code in a
 fashion that's close to how it will look when it's printed.  It can keep
 track of things like how many lines on a page, what page you're, when to
-print page headers, etc.  The keywords used are borrowed from FORTRAN:
+print page headers, etc.  Keywords are borrowed from FORTRAN:
 format() to declare and write() to execute; see their entries in
-L<manfunc>.  Fortunately, the layout is much more legible, more like
+L<perlfunc>.  Fortunately, the layout is much more legible, more like
 BASIC's PRINT USING statement.  Think of it as a poor man's nroff(1).
 
 Formats, like packages and subroutines, are declared rather than executed,
@@ -90,7 +90,7 @@ characters are legal to break on by changing the variable C<$:> (that's
 $FORMAT_LINE_BREAK_CHARACTERS if you're using the English module) to a
 list of the desired characters.
 
-Since use of caret fields can produce variable length records.  If the text
+Using caret fields can produce variable length records.  If the text
 to be formatted is short, you can suppress blank lines by putting a
 "~" (tilde) character anywhere in the line.  The tilde will be translated
 to a space upon output.  If you put a second tilde contiguous to the
@@ -156,7 +156,7 @@ The current format name is stored in the variable C<$~> ($FORMAT_NAME),
 and the current top of form format name is in C<$^> ($FORMAT_TOP_NAME).
 The current output page number is stored in C<$%> ($FORMAT_PAGE_NUMBER),
 and the number of lines on the page is in C<$=> ($FORMAT_LINES_PER_PAGE).
-Whether to autoflush output on this handle is stored in $<$|>
+Whether to autoflush output on this handle is stored in C<$|>
 ($OUTPUT_AUTOFLUSH).  The string output before each top of page (except
 the first) is stored in C<$^L> ($FORMAT_FORMFEED).  These variables are
 set on a per-filehandle basis, so you'll need to select() into a different
@@ -198,8 +198,8 @@ Much better!
 
 =head1 NOTES
 
-Since the values line may contain arbitrary expression (for at fields, 
-not caret fields), you can farm out any more sophisticated processing
+Since the values line may contain arbitrary expressions (for at fields, 
+not caret fields), you can farm out more sophisticated processing
 to other functions, like sprintf() or one of your own.  For example:
 
     format Ident = 
@@ -291,13 +291,13 @@ For example:
 Or to make an swrite() subroutine which is to write() what sprintf()
 is to printf(), do this:
 
-    use English;
     use Carp;
     sub swrite {
-	croak "usage: swrite PICTURE ARGS" unless @ARG;
-	local($ACCUMULATOR);
-	formline(@ARG);
-	return $ACCUMULATOR;
+	croak "usage: swrite PICTURE ARGS" unless @_;
+	my $format = shift;
+	$^A = "";
+	formline($format,@_);
+	return $^A;
     } 
 
     $string = swrite(<<'END', 1, 2, 3);
@@ -308,7 +308,6 @@ is to printf(), do this:
 
 =head1 WARNING
 
-During the execution of a format, only global variables are visible, 
-or dynamically-scoped ones declared with local().  Lexically scoped
-variables declared with my() are I<NOT> available, as they are not
-considered to reside in the same lexical scope as the format.
+Lexical variables (declared with "my") are not visible within a
+format unless the format is declared within the scope of the lexical
+variable.  (They weren't visiblie at all before version 5.001.)

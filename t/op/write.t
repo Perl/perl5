@@ -47,6 +47,9 @@ if (`cat Op_write.tmp` eq $right)
 else
     { print "not ok 1\n"; }
 
+$fox = 'wolfishness';
+my $fox = 'foxiness';		# Test a lexical variable.
+
 format OUT2 =
 the quick brown @<<
 $fox
@@ -61,7 +64,6 @@ now @<<the@>>>> for all@|||||men to come @<<<<
 
 open OUT2, '>Op_write.tmp' or die "Can't create Op_write.tmp";
 
-$fox = 'foxiness';
 $good = 'good';
 $multiline = "forescore\nand\nseven years\n";
 $foo = 'when in the course of human events it becomes necessary';

@@ -68,6 +68,8 @@ SWITCH: while ($ARGV[0] =~ s/^-//) {
 }
 @ARGV == 1 or die $usage;
 chop($pwd = `pwd`);
+# Check for error message from VMS
+if ($pwd =~ /unrecognized command verb/) { $Is_VMS = 1; $pwd = $ENV{DEFAULT} }
 ($dir, $filename) = @ARGV[0] =~ m#(.*)/(.*)#
 	or ($dir, $filename) = @ARGV[0] =~ m#(.*[>\]])(.*)#
 	or ($dir, $filename) = ('.', $ARGV[0]);
@@ -77,7 +79,9 @@ $typemap = shift @ARGV;
 foreach $typemap (@tm) {
     die "Can't find $typemap in $pwd\n" unless -r $typemap;
 }
-unshift @tm, qw(../../../typemap ../../typemap ../typemap typemap);
+unshift @tm, qw(../../../../lib/ExtUtils/typemap ../../../lib/ExtUtils/typemap
+                ../../lib/ExtUtils/typemap ../../../typemap ../../typemap
+                ../typemap typemap);
 foreach $typemap (@tm) {
     open(TYPEMAP, $typemap) || next;
     $mode = Typemap;
@@ -321,11 +325,17 @@ EOF
 		$_ = shift(@line);
 		last if /^\s*NOT_IMPLEMENTED_YET/;
 		last if /^\s*(PPCODE|CODE|OUTPUT|CLEANUP|CASE)\s*:/;
-		# Catch common error. Much more error checking required here.
-		blurt("Error: no tab in $pname argument declaration '$_'\n")
-			unless (m/\S+\s*\t\s*\S+/);
 		($var_type, $var_name, $var_init) =
 		    /\s*([^\t]+)\s*([^\s=]+)\s*(=.*)?/;
+		# Catch common errors. More error checking required here.
+		blurt("Error: no tab in $pname argument declaration '$_'\n")
+			unless (m/\S+\s*\t\s*\S+/);
+		# catch C style argument declaration (this could be made alowable syntax)
+		warn("Warning: ignored semicolon in $pname argument declaration '$_'\n")
+			if ($var_name =~ s/;//g); # eg SV *<tab>name;
+		# catch many errors similar to: SV<tab>* name
+		blurt("Error: invalid $pname argument name '$var_name' (type '$var_type')\n")
+			unless ($var_name =~ m/^&?\w+$/);
 		if ($var_name =~ /^&/) {
 			$var_name =~ s/^&//;
 			$var_addr{$var_name} = 1;
@@ -523,7 +533,7 @@ sub generate_init {
     local($ntype);
     local($tk);
 
-    blurt("$type not in typemap"), return unless defined($type_kind{$type});
+    blurt("'$type' not in typemap"), return unless defined($type_kind{$type});
     ($ntype = $type) =~ s/\s*\*/Ptr/g;
     $subtype = $ntype;
     $subtype =~ s/Ptr$//;
@@ -563,7 +573,7 @@ sub generate_output {
     if ($type =~ /^array\(([^,]*),(.*)\)/) {
 	    print "\tsv_setpvn($arg, (char *)$var, $2 * sizeof($1)), XFree((char *)$var);\n";
     } else {
-	    blurt("$type not in typemap"), return
+	    blurt("'$type' not in typemap"), return
 		unless defined($type_kind{$type});
 	    ($ntype = $type) =~ s/\s*\*/Ptr/g;
 	    $ntype =~ s/\(\)//g;
@@ -613,4 +623,7 @@ sub map_type {
     }
 }
 
-exit $errors;
+# If this is VMS, the exit status has meaning to the shell, so we
+# use a predictable value (SS$_Abort) rather than an arbitrary
+# number.
+exit $Is_VMS ? 44 : $errors;

@@ -6,8 +6,10 @@ perlmod - Perl modules (packages)
 
 =head2 Packages
 
-Perl provides a mechanism for alternate namespaces to protect packages
-from stomping on each others variables.  By default, a Perl script starts
+Perl provides a mechanism for alternative namespaces to protect packages
+from stomping on each others variables.  In fact, apart from certain magical
+variables, there's really no such thing as a global variable in Perl.
+By default, a Perl script starts
 compiling into the package known as C<main>.  You can switch namespaces
 using the C<package> declaration.  The scope of the package declaration is
 from the declaration itself to the end of the enclosing block (the same
@@ -34,11 +36,11 @@ It would treat package C<INNER> as a totally separate global package.
 
 Only identifiers starting with letters (or underscore) are stored in a
 package's symbol table.  All other symbols are kept in package C<main>.
-In addition, the identifiers STDIN, STDOUT, STDERR, C<ARGV>,
+In addition, the identifiers STDIN, STDOUT, STDERR, ARGV,
 ARGVOUT, ENV, INC and SIG are forced to be in package C<main>,
 even when used for other purposes than their built-in one.  Note also
 that, if you have a package called C<m>, C<s> or C<y>, then you can't use
-the qualified form of an identifier since it will be interpreted instead
+the qualified form of an identifier because it will be interpreted instead
 as a pattern match, a substitution, or a translation.
 
 (Variables beginning with underscore used to be forced into package
@@ -47,7 +49,7 @@ to use leading underscore to indicate private variables and method names.)
 
 Eval()ed strings are compiled in the package in which the eval() was
 compiled.  (Assignments to C<$SIG{}>, however, assume the signal
-handler specified is in the C<main. package.  Qualify the signal handler
+handler specified is in the C<main> package.  Qualify the signal handler
 name if you wish to have a signal handler in a package.)  For an
 example, examine F<perldb.pl> in the Perl library.  It initially switches
 to the C<DB> package so that the debugger doesn't interfere with variables
@@ -111,7 +113,7 @@ i.e.,
 
     *dick = *richard;
 
-causes variables, subroutines and filehandles accessible via the
+causes variables, subroutines and file handles accessible via the
 identifier C<richard> to also be accessible via the symbol C<dick>.  If
 you only want to alias a particular variable or subroutine, you can
 assign a reference instead:
@@ -139,7 +141,7 @@ An C<END> subroutine is executed as late as possible, that is, when the
 interpreter is being exited, even if it is exiting as a result of a
 die() function.  (But not if it's is being blown out of the water by a
 signal--you have to trap that yourself (if you can).)  You may have
-multiple C<END> blocks within a file--they wil execute in reverse
+multiple C<END> blocks within a file--they will execute in reverse
 order of definition; that is: last in, first out (LIFO).
 
 Note that when you use the B<-n> and B<-p> switches to Perl, C<BEGIN>
@@ -244,7 +246,7 @@ you're redefining the world and willing to take the consequences.
 A number of modules are included the the Perl distribution.  These are
 described below, and all end in F<.pm>.  You may also discover files in 
 the library directory that end in either F<.pl> or F<.ph>.  These are old
-libaries supplied so that old programs that use them still run.  The
+libraries supplied so that old programs that use them still run.  The
 F<.pl> files will all eventually be converted into standard modules, and
 the F<.ph> files made by B<h2ph> will probably end up as extension modules
 made by B<h2xs>.  (Some F<.ph> values may already be available through the
@@ -255,7 +257,7 @@ conversion, but it's just a mechanical process, so is far from bullet proof.
 
 They work somewhat like pragmas in that they tend to affect the compilation of
 your program, and thus will usually only work well when used within a
-C<use>, or C<no>.  These are locally scoped, so if an inner BLOCK
+C<use>, or C<no>.  These are locally scoped, so an inner BLOCK
 may countermand any of these by saying
 
     no integer;
@@ -291,7 +293,7 @@ Perl pragma to predeclare sub names
 
 =head2 Standard Modules
 
-The following modules are all expacted to behave in a well-defined
+The following modules are all expected to behave in a well-defined
 manner with respect to namespace pollution because they use the
 Exporter module.
 See their own documentation for details.
@@ -316,7 +318,7 @@ split a package for autoloading
 
 =item C<Basename>
 
-parse file anme and path from a specification
+parse file name and path from a specification
 
 =item C<Benchmark>
 
@@ -411,11 +413,11 @@ dynamically loaded into Perl if and when you need them.  Supported
 extension modules include the Socket, Fcntl, and POSIX modules.
 
 The following are popular C extension modules, which while available at
-Perl 5.0 release time, do not come not bundled (at least, not completely)
+Perl 5.0 release time, do not come bundled (at least, not completely)
 due to their size, volatility, or simply lack of time for adequate testing
 and configuration across the multitude of platforms on which Perl was
 beta-tested.  You are encouraged to look for them in archie(1L), the Perl
-FAQ or Meta-FAQ, the WWW page, and even their authors before randomly
+FAQ or Meta-FAQ, the WWW page, and even with their authors before randomly
 posting asking for their present condition and disposition.  There's no
 guarantee that the names or addresses below have not changed since printing,
 and in fact, they probably have!
@@ -454,7 +456,7 @@ where.
 =item C<Sx>
 
 This extension module is a front to the Athena and Xlib libraries for Perl
-GUI progamming, originally written by by Dominic Giampaolo
+GUI programming, originally written by by Dominic Giampaolo
 <F<dbg@sgi.com>>, then and rewritten for Sx by FrE<eacute>dE<eacute>ric
 Chauveau <F<fmc@pasteur.fr>>.  It's available for FTP from
 

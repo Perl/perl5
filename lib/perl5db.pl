@@ -50,11 +50,13 @@ print OUT ("Emacs support ",
 	   ".\n");
 print OUT "\nEnter h for help.\n\n";
 
+@ARGS;
+
 sub DB {
     &save;
-    ($package, $filename, $line) = caller;
+    ($pkg, $filename, $line) = caller;
     $usercontext = '($@, $!, $,, $/, $\, $^W) = @saved;' .
-	"package $package;";		# this won't let them modify, alas
+	"package $pkg;";		# this won't let them modify, alas
     local(*dbline) = "::_<$filename";
     $max = $#dbline;
     if (($stop,$action) = split(/\0/,$dbline{$line})) {
@@ -70,7 +72,7 @@ sub DB {
 	if ($emacs) {
 	    print OUT "\032\032$filename:$line:0\n";
 	} else {
-	    $prefix = $sub =~ /'|::/ ? "" : "${package}::";
+	    $prefix = $sub =~ /'|::/ ? "" : "${pkg}::";
 	    $prefix .= "$sub($filename:";
 	    if (length($prefix) > 30) {
 		print OUT "$prefix$line):\n$line:\t",$dbline[$line];
@@ -167,9 +169,9 @@ command		Execute as a perl statement in current package.
 			print OUT $subname,"\n";
 		    }
 		    next CMD; };
-		$cmd =~ s/^X\b/V $package/;
+		$cmd =~ s/^X\b/V $pkg/;
 		$cmd =~ /^V$/ && do {
-		    $cmd = "V $package"; };
+		    $cmd = "V $pkg"; };
 		$cmd =~ /^V\b\s*(\S+)\s*(.*)/ && do {
 		    local ($savout) = select(OUT);
 		    $packname = $1;
@@ -288,7 +290,7 @@ command		Execute as a perl statement in current package.
 		$cmd =~ /^b\b\s*([':A-Za-z_][':\w]*)\s*(.*)/ && do {
 		    $subname = $1;
 		    $cond = $2 || '1';
-		    $subname = "${package}::" . $subname
+		    $subname = "${pkg}::" . $subname
 			unless $subname =~ /'|::/;
 		    $subname = "main" . $subname if substr($subname,0,1) eq "'";
 		    $subname = "main" . $subname if substr($subname,0,2) eq "::";
@@ -492,7 +494,8 @@ command		Execute as a perl statement in current package.
 	    $evalarg = $post; &eval;
 	}
     }
-    ($@, $!, $,, $/, $\) = @saved;
+    ($@, $!, $,, $/, $\, $^W) = @saved;
+    ();
 }
 
 sub save {

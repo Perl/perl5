@@ -14,8 +14,11 @@ desperation):
     (P) An internal error you should never see (trappable).
     (X) A very fatal error (non-trappable).
 
-Optional warnings are enabled by using the B<-w> switch.  Trappable
-errors may be trapped using the eval operator.  See L<perlfunc/eval>.
+Optional warnings are enabled by using the B<-w> switch.  Warnings may
+be captured by setting C<$^Q> to a reference to a routine that will be
+called on each warning instead of printing it.  See L<perlvar>.
+Trappable errors may be trapped using the eval operator.  See
+L<perlfunc/eval>.
 
 Some of these messages are generic.  Spots that vary are denoted with a %s,
 just as in a printf format.  Note that some message start with a %s!
@@ -127,6 +130,12 @@ the return value of your socket() call?  See L<perlfunc/accept>.
 =item Arg too short for msgsnd
 
 (F) msgsnd() requires a string at least as long as sizeof(long).
+
+=item Ambiguous use of %s resolved as %s
+
+(W)(S) You said something that may not be interpreted the way
+you thought.  Normally it's pretty easy to disambiguate it by supplying
+a missing quote, operator, paren pair or declaration.
 
 =item Args must match #! line
 
@@ -343,7 +352,8 @@ but then $foo no longer contains a glob.
 
 =item Can't create pipe mailbox
 
-(F) An error peculiar to VMS.
+(P) An error peculiar to VMS.  The process is suffering from exhausted quotas
+or other plumbing problems.
 
 =item Can't declare %s in my
 
@@ -439,13 +449,32 @@ levels, the following is missing its final parenthesis:
 
 (F) A fatal error occurred while trying to fork while opening a pipeline.
 
+=item Can't get filespec - stale stat buffer?
+
+(S) A warning peculiar to VMS.  This arises because of the difference between
+access checks under VMS and under the Unix model Perl assumes.  Under VMS,
+access checks are done by filename, rather than by bits in the stat buffer, so
+that ACLs and other protections can be taken into account.  Unfortunately, Perl
+assumes that the stat buffer contains all the necessary information, and passes
+it, instead of the filespec, to the access checking routine.  It will try to
+retrieve the filespec using the device name and FID present in the stat buffer,
+but this works only if you haven't made a subsequent call to the CRTL stat()
+routine, since the device name is overwritten with each call.  If this warning
+appears, the name lookup failed, and the access checking routine gave up and
+returned FALSE, just to be conservative.  (Note: The access checking routine
+knows about the Perl C<stat> operator and file tests, so you shouldn't ever
+see this warning in response to a Perl command; it arises only if some internal
+code takes stat buffers lightly.)
+
 =item Can't get pipe mailbox device name
 
-(F) An error peculiar to VMS.
+(P) An error peculiar to VMS.  After creating a mailbox to act as a pipe, Perl
+can't retrieve its name for later use.
 
 =item Can't get SYSGEN parameter value for MAXBUF
 
-(F) An error peculiar to VMS.
+(P) An error peculiar to VMS.  Perl asked $GETSYI how big you want your
+mailbox buffers to be, and didn't get an answer.
 
 =item Can't goto subroutine outside a subroutine
 
@@ -453,6 +482,13 @@ levels, the following is missing its final parenthesis:
 call for another.  It can't manufacture one out of whole cloth.  In general
 you should only be calling it out of an AUTOLOAD routine anyway.  See
 L<perlfunc/goto>.
+
+=item Can't localize lexical variable %s
+
+(F) You used local on a variable name that was previous declared as a
+lexical variable using "my".  This is not allowed.  If you want to
+localize a package variable of the same name, qualify it with the
+package name.
 
 =item Can't locate %s in @INC
 
@@ -505,6 +541,28 @@ try any of several modules in the Perl library to do this, such as
 "open2.pl".  Alternately, direct the pipe's output to a file using ">",
 and then read it in under a different file handle.
 
+=item Can't open error file %s as stderr
+
+(F) An error peculiar to VMS.  Perl does its own command line redirection, and
+couldn't open the file specified after '2>' or '2>>' on the command line for
+writing.
+
+=item Can't open input file %s as stdin
+
+(F) An error peculiar to VMS.  Perl does its own command line redirection, and
+couldn't open the file specified after '<' on the command line for reading.
+
+=item Can't open output file %s as stdout
+
+(F) An error peculiar to VMS.  Perl does its own command line redirection, and
+couldn't open the file specified after '>' or '>>' on the command line for
+writing.
+
+=item Can't open output pipe (name: %s)
+
+(P) An error peculiar to VMS.  Perl does its own command line redirection, and
+couldn't open the pipe into which to send data destined for stdout.
+
 =item Can't open perl script "%s": %s
 
 (F) The script you specified can't be opened for the indicated reason.
@@ -513,6 +571,11 @@ and then read it in under a different file handle.
 
 (S) The rename done by the B<-i> switch failed for some reason, probably because
 you don't have write permission to the directory.
+
+=item Can't reopen input pipe (name: %s) in binary mode
+
+(P) An error peculiar to VMS.  Perl thought stdin was a pipe, and tried to
+reopen it to accept binary data.  Alas, it failed.
 
 =item Can't reswap uid and euid
 
@@ -568,14 +631,6 @@ message indicates that such a conversion was attempted.
 of upgradability.  Upgrading to undef indicates an error in the
 code calling sv_upgrade.
 
-=item Can't use %s as left arg of an implicit ->
-
-(F) The compiler tried to interpret a bracketed expression as a subscript
-to an array reference.  But to the left of the brackets was an expression
-that didn't end in an arrow (->), or look like a subscripted expression.
-Only subscripted expressions with multiple subscripts are allowed to omit 
-the intervening arrow.
-
 =item Can't use %s for loop variable
 
 (F) Only a simple scalar variable may be used as a loop variable on a foreach.
@@ -586,7 +641,15 @@ the intervening arrow.
 reference of the type needed.  You can use the ref() function to
 test the type of the reference, if need be.
 
-=item Can't use a string as %s ref while "strict refs" in use
+=item Can't use \1 to mean $1 in expression
+
+(W) In an ordinary expression, backslash is a unary operator that creates
+a reference to its argument.  The use of backslash to indicate a backreference
+to a matched substring is only valid as part of a regular expression pattern.
+Trying to do this in ordinary Perl code produces a value that prints
+out looking like SCALAR(0xdecaf).  Use the $1 form instead.
+
+=item Can't use string ("%s") as %s ref while "strict refs" in use
 
 (F) Only hard references are allowed by "strict refs".  Symbolic references
 are disallowed.  See L<perlref>.
@@ -608,6 +671,12 @@ not allowed, because the magic can only be tied to one location (namely
 the global variable) and it would be incredibly confusing to have
 variables in your program that looked like magical variables but
 weren't.
+
+=item Can't use subscript on %s
+
+(F) The compiler tried to interpret a bracketed expression as a
+subscript.  But to the left of the brackets was an expression that
+didn't look like an array reference, or anything else subscriptable.
 
 =item Can't write to temp file for B<-e>: %s
 
@@ -664,9 +733,22 @@ times than it has returned.  This probably indicates an infinite
 recursion, unless you're writing strange benchmark programs, in which
 case it indicates something else.
 
-=item Did you mean $ instead of %?
+=item Did you mean $ or @ instead of %?
 
-(W) You probably said %hash{$key} when you meant $hash{$key}.
+(W) You probably said %hash{$key} when you meant $hash{$key} or @hash{@keys}.
+On the other hand, maybe you just meant %hash and got carried away.
+
+=item Do you need to predeclare %s?
+
+(S) This is an educated guess made in conjunction with the message "%s
+found where operator expected".  It often means a subroutine or module
+name is being referenced that hasn't been declared yet.  This may be
+because of ordering problems in your file, or because of a missing
+"sub", "package", "require", or "use" statement.  If you're
+referencing something that isn't defined yet, you don't actually have
+to define the subroutine or package before the current location.  You
+can use an empty "sub foo;" or "package FOO;" to enter a "forward"
+declaration.
 
 =item Don't know how to handle magic of type '%s'
 
@@ -685,6 +767,14 @@ been freed.
 
 (F) An untrapped exception was raised while executing an END subroutine.
 The interpreter is immediately exited.
+
+=item Error converting file specification %s
+
+(F) An error peculiar to VMS.  Since Perl may have to deal with file
+specifications in either VMS or Unix syntax, it converts them to a
+single form when it must operate on them directly.  Either you've
+passed an invalid file specification to Perl, or you've found a
+case the conversion routines don't handle.  Drat.
 
 =item Execution of %s aborted due to compilation errors.
 
@@ -705,9 +795,12 @@ a goto, or a loop control statement.
 (W) You are exiting a substitution by unconventional means, such as a
 a return, a goto, or a loop control statement.
 
-=item Fatal $PUTMSG error: %d
+=item Fatal VMS error at %s, line %d
 
-(F) An error peculiar to VMS.
+(P) An error peculiar to VMS.  Something untoward happened in a VMS system
+service or RTL routine; Perl's exit status should provide more details.  The
+filename in "at %s" and the line number in "line %d" tell you which section of
+the Perl source code is distressed.
 
 =item fcntl is not implemented
 
@@ -789,6 +882,12 @@ on the Internet.
 (W) You tried to get a socket or peer socket name on a closed socket.
 Did you forget to check the return value of your socket() call?
 
+=item getpwnam returned invalid UIC %#o for user "%s"
+
+(S) A warning peculiar to VMS.  The call to C<sys$getuai> underlying the
+C<getpwnam> operator returned an invalid UIC.
+
+
 =item Glob not terminated
 
 (F) The lexer saw a left angle bracket in a place where it was expecting
@@ -838,6 +937,11 @@ don't take to this kindly.
 
 (F) You used an 8 or 9 in a octal number.
 
+=item Illegal octal digit ignored
+
+(W) You may have tried to use an 8 or 9 in a octal number.  Interpretation
+of the octal number stopped before the 8 or 9.
+
 =item Insecure dependency in %s
 
 (F) You tried to do something that the tainting mechanism didn't like. 
@@ -860,6 +964,16 @@ See L<perlsec>.
 setgid script if $ENV{PATH} is derived from data supplied (or
 potentially supplied) by the user.  The script must set the path to a
 known value, using trustworthy data.  See L<perlsec>.
+
+=item Internal inconsistency in tracking vforks
+
+(S) A warning peculiar to VMS.  Perl keeps track of the number
+of times you've called C<fork> and C<exec>, in order to determine
+whether the current call to C<exec> should be affect the current
+script or a subprocess (see L<perlvms/exec>).  Somehow, this count
+has become scrambled, so Perl is making a guess and treating
+this C<exec> as a request to terminate the Perl script
+and execute the specified command.
 
 =item internal disaster in regexp
 
@@ -941,6 +1055,11 @@ one line to the next.
 
 (F) While certain functions allow you to specify a filehandle or an
 "indirect object" before the argument list, this ain't one of them.
+
+=item Missing operator before %s?
+
+(S) This is an educated guess made in conjunction with the message "%s
+found where operator expected".  Often the missing operator is a comma.
 
 =item Missing right bracket
 
@@ -1024,6 +1143,12 @@ See L<perlsec>.
 allowed to have a comma between that and the following arguments.
 Otherwise it'd be just another one of the arguments.
 
+=item No command into which to pipe on command line
+
+(F) An error peculiar to VMS.  Perl handles its own command line redirection,
+and found a '|' at the end of the command line, so it doesn't know whither you
+want to pipe the output from this command.
+
 =item No DB::DB routine defined
 
 (F) The currently executing code was compiled with the B<-d> switch,
@@ -1045,6 +1170,30 @@ but for some reason the perl5db.pl file (or some facsimile thereof)
 didn't define a DB::sub routine to be called at the beginning of each
 ordinary subroutine call.
 
+=item No error file after 2> or 2>> on command line
+
+(F) An error peculiar to VMS.  Perl handles its own command line redirection,
+and found a '2>' or a '2>>' on the command line, but can't find the name of the
+file to which to write data destined for stderr.
+
+=item No input file after < on command line
+
+(F) An error peculiar to VMS.  Perl handles its own command line redirection,
+and found a '<' on the command line, but can't find the name of the file from
+which to read data for stdin.
+
+=item No output file after > on command line
+
+(F) An error peculiar to VMS.  Perl handles its own command line redirection,
+and found a lone '>' at the end of the command line, so it doesn't know whither
+you wanted to redirect stdout.
+
+=item No output file after > or >> on command line
+
+(F) An error peculiar to VMS.  Perl handles its own command line redirection,
+and found a '>' or a '>>' on the command line, but can't find the name of the
+file to which to write data destined for stdout.
+
 =item No Perl script found in input
 
 (F) You called C<perl -x>, but no line was found in the file beginning
@@ -1064,6 +1213,12 @@ your system.
 
 (F) The argument to B<-I> must follow the B<-I> immediately with no
 intervening space.
+
+=item No such pipe open
+
+(P) An error peculiar to VMS.  The internal routine my_pclose() tried to
+close a pipe which hadn't been opened.  This should have been caught earlier as
+an attempt to close an unopened filehandle.
 
 =item No such signal: SIG%s
 
@@ -1172,6 +1327,14 @@ since hash lists come in key/value pairs.
 
 (F) An attempt was made to use an entry in an overloading table that
 somehow no longer points to a valid method.  See L<perlovl>.
+
+=item Operator or semicolon missing before %s
+
+(S) You used a variable or subroutine call where the parser was
+expecting an operator.  The parser has assumed you really meant
+to use an operator, but this is highly likely to be incorrect.
+For example, if you say "*foo *foo" it will be interpreted as
+if you said "*foo * 'foo'".
 
 =item Out of memory for yacc stack
 
@@ -1350,6 +1513,12 @@ anyway?  See L<perlfunc/require>.
 
 (F) The setuid emulator in suidperl decided you were up to no good.
 
+=item pid %d not a child
+
+(W) A warning peculiar to VMS.  Waitpid() was asked to wait for a process which
+isn't a subprocess of the current process.  While this is fine from VMS'
+perspective, it's probably not what you intended.
+
 =item POSIX getpgrp can't take an argument
 
 (F) Your C compiler uses POSIX getpgrp(), which takes no argument, unlike
@@ -1457,6 +1626,11 @@ The difference is that $foo[&bar] always behaves like a scalar, both when
 assigning to it and when evaluating its argument, while @foo[&bar] behaves
 like a list when you assign to it, and provides a list context to its
 subscript, which can do weird things if you're only expecting one subscript.
+
+On the other hand, if you were actually hoping to treat the array
+element as a list, you need to look into how references work, since
+Perl will not magically convert between scalars and lists for you.  See
+L<perlref>.
 
 =item Script is not setuid/setgid in suidperl
 
@@ -1884,6 +2058,11 @@ you and for any luckless subroutine that you happen to call.  You should
 use the new C<//m> and C<//s> modifiers now to do that without the dangerous
 action-at-a-distance effects of C<$*>.
 
+=item Use of %s in printf format not supported
+
+(F) You attempted to use a feature of printf that is accessible only
+from C.  This usually means there's a better way to do it in Perl.
+
 =item Use of %s is deprecated
 
 (D) The construct indicated is no longer recommended for use, generally
@@ -1916,6 +2095,22 @@ if you mixed up your C precedence with Python precedence and said
 when you meant to say
 
     ($one, $two) = (1, 2);
+
+Another common error is to use ordinary parentheses to construct a list
+reference when you should be using square or curly brackets, for
+example, if you say
+
+    $array = (1,2);
+
+when you should have said
+
+    $array = [1,2];
+
+The square brackets explicitly turn a list value into a scalar value,
+while parentheses do not.  So when a parenthesized list is evaluated in
+a scalar context, the comma is treated like C's comma operator, which
+throws away the left argument, which is not what you want.  See
+L<perlref> for more on this.
 
 =item Warning: unable to close filehandle %s properly.
 
@@ -1997,6 +2192,27 @@ of backslashes is grandfathered on the righthand side of a
 substitution, but stylistically it's better to use the variable form
 because other Perl programmers will expect it, and it works better
 if there are more than 9 backreferences.
+
+=item '|' and '<' may not both be specified on command line
+
+(F) An error peculiar to VMS.  Perl does its own command line redirection, and
+found that STDIN was a pipe, and that you also tried to redirect STDIN using
+'<'.  Only one STDIN stream to a customer, please.
+
+=item '|' and '>' may not both be specified on command line
+
+(F) An error peculiar to VMS.  Perl does its own command line redirection, and
+thinks you tried to redirect stdout both to a file and into a pipe to another
+command.  You need to choose one or the other, though nothing's stopping you
+from piping into a program or Perl script which 'splits' output into two
+streams, such as
+
+    open(OUT,">$ARGV[0]") or die "Can't write to $ARGV[0]: $!";
+    while (<STDIN>) {
+        print;
+        print OUT;
+    }
+    close OUT;
 
 =back
 

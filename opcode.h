@@ -1,3 +1,8 @@
+#define pp_i_preinc pp_preinc
+#define pp_i_predec pp_predec
+#define pp_i_postinc pp_postinc
+#define pp_i_postdec pp_postdec
+
 typedef enum {
 	OP_NULL,	/* 0 */
 	OP_STUB,	/* 1 */
@@ -1592,7 +1597,7 @@ EXT OP * (*check[])() = {
 	ck_null,	/* iter */
 	ck_null,	/* enterloop */
 	ck_null,	/* leaveloop */
-	ck_fun,		/* return */
+	ck_null,	/* return */
 	ck_null,	/* last */
 	ck_null,	/* next */
 	ck_null,	/* redo */
@@ -1767,10 +1772,10 @@ EXT U32 opargs[] = {
 	0x00000004,	/* const */
 	0x00000044,	/* gvsv */
 	0x00000044,	/* gv */
-	0x00000004,	/* padsv */
-	0x00000000,	/* padav */
-	0x00000000,	/* padhv */
-	0x00000000,	/* padany */
+	0x00000044,	/* padsv */
+	0x00000040,	/* padav */
+	0x00000040,	/* padhv */
+	0x00000040,	/* padany */
 	0x00000000,	/* pushre */
 	0x00000044,	/* rv2gv */
 	0x0000001c,	/* sv2len */

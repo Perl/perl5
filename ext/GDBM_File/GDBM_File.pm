@@ -18,10 +18,6 @@ require DynaLoader;
 );
 
 sub AUTOLOAD {
-    if (@_ > 1) {
-	$AutoLoader::AUTOLOAD = $AUTOLOAD;
-	goto &AutoLoader::AUTOLOAD;
-    }
     local($constname);
     ($constname = $AUTOLOAD) =~ s/.*:://;
     $val = constant($constname, @_ ? $_[0] : 0);

@@ -64,13 +64,15 @@ struct block_eval {
     I32		old_op_type;
     char *	old_name;
     OP *	old_eval_root;
+    SV *	cur_text;
 };
 
 #define PUSHEVAL(cx,n,fgv)						\
 	cx->blk_eval.old_in_eval = in_eval;				\
 	cx->blk_eval.old_op_type = op->op_type;				\
 	cx->blk_eval.old_name = n;					\
-	cx->blk_eval.old_eval_root = eval_root;
+	cx->blk_eval.old_eval_root = eval_root;				\
+	cx->blk_eval.cur_text = linestr;
 
 #define POPEVAL(cx)							\
 	in_eval = cx->blk_eval.old_in_eval;				\

@@ -69,7 +69,7 @@ reference as an ordinary reference.  Outside the class package,
 the reference is generally treated as an opaque value that may
 only be accessed through the class's methods.
 
-A constructor may rebless a referenced object currently belonging to
+A constructor may re-bless a referenced object currently belonging to
 another class, but then the new class is responsible for all cleanup
 later.  The previous blessing is forgotten, as an object may only
 belong to one class at a time.  (Although of course it's free to 
@@ -224,6 +224,13 @@ name with the package like this:
     $fred = Critter->MyCritter::find("Fred");
     $fred->MyCritter::display('Height', 'Weight');
 
+Sometimes you want to call a method when you don't know the method name
+ahead of time.  You can use the arrow form, replacing the method name
+with a simple scalar variable containing the method name:
+
+    $method = $fast ? "findfirst" : "findbest";
+    $fred->$method(@args);
+
 =head2 Destructors
 
 When the last reference to an object goes away, the object is
@@ -239,6 +246,21 @@ need to call DESTROY for any base classes that need it.  But this only
 applies to reblessed objects--an object reference that is merely
 I<CONTAINED> in the current object will be freed and destroyed
 automatically when the current object is freed.
+
+=head2 WARNING
+
+An indirect object is limited to a name, a scalar variable, or a block,
+because it would have to do too much lookahead otherwise, just like any
+other postfix dereference in the language.  The left side of -> is not so
+limited, because it's an infix operator, not a postfix operator.  
+
+That means that below, A and B are equivalent to each other, and C and D
+are equivalent, but AB and CD are different:
+
+    A: method $obref->{"fieldname"} 
+    B: (method $obref)->{"fieldname"}
+    C: $obref->{"fieldname"}->method() 
+    D: method {$obref->{"fieldname"}}
 
 =head2 Summary
 

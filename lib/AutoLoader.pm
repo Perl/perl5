@@ -14,6 +14,9 @@ AUTOLOAD {
 	if ($name =~ s/(\w{12,})\.al$/substr($1,0,11).".al"/e){
 	    eval {require $name};
 	}
+	elsif ($AUTOLOAD =~ /::DESTROY$/) {
+	    eval "sub $AUTOLOAD {}";
+	}
 	if ($@){
 	    $@ =~ s/ at .*\n//;
 	    croak $@;

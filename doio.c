@@ -43,12 +43,6 @@
 #include <sys/file.h>
 #endif
 
-/* Omit -- it causes too much grief on mixed systems.
-#ifdef I_UNISTD
-#include <unistd.h>
-#endif
-*/
-
 bool
 do_open(gv,name,len,supplied_fp)
 GV *gv;
@@ -153,7 +147,7 @@ FILE *supplied_fp;
 		    thatio = GvIO(gv);
 		    if (!thatio) {
 #ifdef EINVAL
-			errno = EINVAL;
+			SETERRNO(EINVAL,SS$_IVCHAN);
 #endif
 			goto say_false;
 		    }
@@ -412,7 +406,7 @@ register GV *gv;
 
 		sv_setpvn(sv,">",1);
 		sv_catpv(sv,oldname);
-		errno = 0;		/* in case sprintf set errno */
+		SETERRNO(0,0);		/* in case sprintf set errno */
 		if (!do_open(argvoutgv,SvPVX(sv),SvCUR(sv),Nullfp)) {
 		    warn("Can't do inplace edit on %s: %s",
 		      oldname, Strerror(errno) );
@@ -513,7 +507,7 @@ do_close(GV *gv, bool explicit)
     if (!gv)
 	gv = argvgv;
     if (!gv || SvTYPE(gv) != SVt_PVGV) {
-	errno = EBADF;
+	SETERRNO(EBADF,SS$_IVCHAN);
 	return FALSE;
     }
     io = GvIO(gv);
@@ -526,7 +520,7 @@ do_close(GV *gv, bool explicit)
 	if (IoTYPE(io) == '|') {
 	    status = my_pclose(IoIFP(io));
 	    retval = (status == 0);
-	    statusvalue = (unsigned short)status & 0xffff;
+	    statusvalue = FIXSTATUS(status);
 	}
 	else if (IoTYPE(io) == '-')
 	    retval = TRUE;
@@ -610,7 +604,7 @@ GV *gv;
 phooey:
     if (dowarn)
 	warn("tell() on unopened file");
-    errno = EBADF;
+    SETERRNO(EBADF,RMS$_IFI);
     return -1L;
 }
 
@@ -639,7 +633,7 @@ int whence;
 nuts:
     if (dowarn)
 	warn("seek() on unopened file");
-    errno = EBADF;
+    SETERRNO(EBADF,RMS$_IFI);
     return FALSE;
 }
 
@@ -797,30 +791,42 @@ dARGS
 {
     dSP;
     IO *io;
+    GV* tmpgv;
 
     if (op->op_flags & OPf_REF) {
 	EXTEND(sp,1);
-	io = GvIO(cGVOP->op_gv);
+	tmpgv = cGVOP->op_gv;
+      do_fstat:
+	io = GvIO(tmpgv);
 	if (io && IoIFP(io)) {
-	    statgv = cGVOP->op_gv;
+	    statgv = tmpgv;
 	    sv_setpv(statname,"");
 	    laststype = OP_STAT;
 	    return (laststatval = Fstat(fileno(IoIFP(io)), &statcache));
 	}
 	else {
-	    if (cGVOP->op_gv == defgv)
+	    if (tmpgv == defgv)
 		return laststatval;
 	    if (dowarn)
 		warn("Stat on unopened file <%s>",
-		  GvENAME(cGVOP->op_gv));
+		  GvENAME(tmpgv));
 	    statgv = Nullgv;
 	    sv_setpv(statname,"");
 	    return (laststatval = -1);
 	}
     }
     else {
-	dPOPss;
+	SV* sv = POPs;
 	PUTBACK;
+	if (SvTYPE(sv) == SVt_PVGV) {
+	    tmpgv = (GV*)sv;
+	    goto do_fstat;
+	}
+	else if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVGV) {
+	    tmpgv = (GV*)SvRV(sv);
+	    goto do_fstat;
+	}
+
 	statgv = Nullgv;
 	sv_setpv(statname,SvPV(sv, na));
 	laststype = OP_STAT;
@@ -915,6 +921,9 @@ char *cmd;
     register char *s;
     char flags[10];
 
+    while (*cmd && isSPACE(*cmd))
+	cmd++;
+
     /* save an extra exec if possible */
 
 #ifdef CSH
@@ -946,10 +955,16 @@ char *cmd;
 
     /* see if there are shell metacharacters in it */
 
-    /*SUPPRESS 530*/
+    if (*cmd == '.' && isSPACE(cmd[1]))
+	goto doshell;
+
+    if (strnEQ(cmd,"exec",4) && isSPACE(cmd[4]))
+	goto doshell;
+
     for (s = cmd; *s && isALPHA(*s); s++) ;	/* catch VAR=val gizmo */
     if (*s == '=')
 	goto doshell;
+
     for (s = cmd; *s; s++) {
 	if (*s != ' ' && !isALPHA(*s) && strchr("$&*(){}[]'\";\\|?<>~`\n",*s)) {
 	    if (*s == '\n' && !s[1]) {
@@ -961,6 +976,7 @@ char *cmd;
 	    return FALSE;
 	}
     }
+
     New(402,Argv, (s - cmd) / 2 + 2, char*);
     Cmd = savepvn(cmd, s-cmd);
     a = Argv;
@@ -1000,7 +1016,8 @@ register SV **sp;
 
     if (tainting) {
 	while (++mark <= sp) {
-	    if (SvMAGICAL(*mark) && mg_find(*mark, 't'))
+	    MAGIC *mg;
+	    if (SvMAGICAL(*mark) && (mg = mg_find(*mark, 't')) && mg->mg_len & 1)
 		tainted = TRUE;
 	}
 	mark = oldmark;
@@ -1091,7 +1108,7 @@ register SV **sp;
     case OP_UTIME:
 	TAINT_PROPER("utime");
 	if (sp - mark > 2) {
-#ifdef I_UTIME
+#if defined(I_UTIME) || defined(VMS)
 	    struct utimbuf utbuf;
 #else
 	    struct {
@@ -1212,7 +1229,7 @@ SV **sp;
     key = (key_t)SvNVx(*++mark);
     n = (optype == OP_MSGGET) ? 0 : SvIVx(*++mark);
     flags = SvIVx(*++mark);
-    errno = 0;
+    SETERRNO(0,0);
     switch (optype)
     {
 #ifdef HAS_MSG
@@ -1310,7 +1327,7 @@ SV **sp;
 	I32 i = SvIV(astr);
 	a = (char *)i;		/* ouch */
     }
-    errno = 0;
+    SETERRNO(0,0);
     switch (optype)
     {
 #ifdef HAS_MSG
@@ -1354,7 +1371,7 @@ SV **sp;
     mbuf = SvPV(mstr, len);
     if ((msize = len - sizeof(long)) < 0)
 	croak("Arg too short for msgsnd");
-    errno = 0;
+    SETERRNO(0,0);
     return msgsnd(id, (struct msgbuf *)mbuf, msize, flags);
 #else
     croak("msgsnd not implemented");
@@ -1387,7 +1404,7 @@ SV **sp;
     SvPV_force(mstr, len);
     mbuf = SvGROW(mstr, sizeof(long)+msize+1);
     
-    errno = 0;
+    SETERRNO(0,0);
     ret = msgrcv(id, (struct msgbuf *)mbuf, msize, mtype, flags);
     if (ret >= 0) {
 	SvCUR_set(mstr, sizeof(long)+ret);
@@ -1415,10 +1432,10 @@ SV **sp;
     opbuf = SvPV(opstr, opsize);
     if (opsize < sizeof(struct sembuf)
 	|| (opsize % sizeof(struct sembuf)) != 0) {
-	errno = EINVAL;
+	SETERRNO(EINVAL,LIB$_INVARG);
 	return -1;
     }
-    errno = 0;
+    SETERRNO(0,0);
     return semop(id, (struct sembuf *)opbuf, opsize/sizeof(struct sembuf));
 #else
     croak("semop not implemented");
@@ -1442,11 +1459,11 @@ SV **sp;
     mstr = *++mark;
     mpos = SvIVx(*++mark);
     msize = SvIVx(*++mark);
-    errno = 0;
+    SETERRNO(0,0);
     if (shmctl(id, IPC_STAT, &shmds) == -1)
 	return -1;
     if (mpos < 0 || msize < 0 || mpos + msize > shmds.shm_segsz) {
-	errno = EFAULT;		/* can't do as caller requested */
+	SETERRNO(EFAULT,SS$_ACCVIO);		/* can't do as caller requested */
 	return -1;
     }
     shm = (Shmat_t)shmat(id, (char*)NULL, (optype == OP_SHMREAD) ? SHM_RDONLY : 0);

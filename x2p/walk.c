@@ -12,6 +12,12 @@
 #include "a2p.h"
 #include "util.h"
 
+static void tab();
+static void fixtab();
+static void addsemi();
+static void emit_split();
+static void numericize();
+
 bool exitval = FALSE;
 bool realexit = FALSE;
 bool saw_getline = FALSE;
@@ -1554,7 +1560,7 @@ sub Pick {\n\
     return str;
 }
 
-void
+static void
 tab(str,lvl)
 register STR *str;
 register int lvl;
@@ -1567,7 +1573,7 @@ register int lvl;
 	str_cat(str,"    ");
 }
 
-void
+static void
 fixtab(str,lvl)
 register STR *str;
 register int lvl;
@@ -1587,7 +1593,7 @@ register int lvl;
     tab(str,lvl);
 }
 
-void
+static void
 addsemi(str)
 register STR *str;
 {
@@ -2056,7 +2062,7 @@ int *numericptr;
     return 1;
 }
 
-void
+static void
 numericize(node)
 register int node;
 {

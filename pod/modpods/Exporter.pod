@@ -4,7 +4,7 @@ Exporter - module to control namespace manipulations
 
 import - import functions into callers namespace
 
-=head1 SYNOPSYS
+=head1 SYNOPSIS
 
     package WhatEver;
     require Exporter;
@@ -12,7 +12,7 @@ import - import functions into callers namespace
     @EXPORT    = qw(func1, $foo, %tabs);
     @EXPORT_OK = qw(sin cos);
     ...
-    use Whatever;
+    use WhatEver;
     use WhatEver 'sin';
 
 =head1 DESCRIPTION
@@ -22,7 +22,7 @@ control what they will export into their user's namespace.
 The WhatEver module above has placed in its export list
 the function C<func1()>, the scalar C<$foo>, and the
 hash C<%tabs>.  When someone decides to 
-C<use WhatEver>, they get those identifier grafted
+C<use WhatEver>, they get those identifiers grafted
 onto their own namespace.  That means the user of 
 package whatever can use the function func1() instead
 of fully qualifying it as WhatEver::func1().  

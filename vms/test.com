@@ -6,7 +6,12 @@ $
 $!  A little basic setup
 $   On Error Then Goto wrapup
 $   olddef = F$Environment("Default")
-$   Set Default Perl_Root:[t]
+$   If F$TrnLNm("Perl_Root").nes.""
+$   Then
+$       Set Default Perl_Root:[t]
+$   Else
+$       Set Default [.t]
+$   EndIf
 $
 $!  Pick up a copy of perl to use for the tests
 $   Delete/Log/NoConfirm Perl.;*
@@ -56,7 +61,7 @@ $   Macro/NoDebug/Object=Echo.Obj Sys$Input
 		.end echo
 $   Link/NoTrace Echo.Obj;
 $   Delete/Log/NoConfirm Echo.Obj;*
-$   echo = "$Perl_Root:[T]Echo.Exe"
+$   echo = "$" + F$Parse("Echo.Exe")
 $
 $!  And do it
 $   MCR Sys$Disk:[]Perl.

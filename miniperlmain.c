@@ -8,9 +8,6 @@
 static void xs_init _((void));
 static PerlInterpreter *my_perl;
 
-/* This value may be raised by extensions for testing purposes */
-int perl_destruct_level = 0; /* 0=none, 1=full, 2=full with checks */
-
 int
 main(argc, argv, env)
 int argc;
@@ -36,7 +33,7 @@ char **env;
 
     exitstatus = perl_run( my_perl );
 
-    perl_destruct( my_perl, perl_destruct_level );
+    perl_destruct( my_perl );
     perl_free( my_perl );
 
     exit( exitstatus );

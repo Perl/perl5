@@ -2,7 +2,7 @@
 
 find - traverse a file tree
 
-=head1 SYNOPSYS
+=head1 SYNOPSIS
 
     use File::Find;
     find(\&wanted, '/foo','/bar');
@@ -10,7 +10,7 @@ find - traverse a file tree
 
 =head1 DESCRIPTION
 
-The wanted() function does whatever verificationsyou want.  $dir contains
+The wanted() function does whatever verifications you want.  $dir contains
 the current directory name, and $_ the current filename within that
 directory.  $name contains C<"$dir/$_">.  You are chdir()'d to $dir when
 the function is called.  The function may set $prune to prune the tree.

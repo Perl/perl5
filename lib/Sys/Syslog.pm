@@ -139,7 +139,7 @@ sub xlate {
     local($name) = @_;
     $name =~ y/a-z/A-Z/;
     $name = "LOG_$name" unless $name =~ /^LOG_/;
-    $name = "syslog'$name";
+    $name = "Sys::Syslog::$name";
     eval(&$name) || -1;
 }
 

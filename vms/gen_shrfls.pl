@@ -6,13 +6,18 @@
 #        Note: A rather simple-minded attempt is made to restore quotes to
 #        a /Define clause - use with care.
 #    $objsuffix - file type (including '.') used for object files.
+#    $libperl - Perl object library.
+#    $extnames - package names for static extensions (used to generate
+#        linker options file entries for boot functions)
+#    $rtlopt - name of options file specifying RTLs to which PerlShr.Exe
+#        must be linked
 #
 # Output:
 #    PerlShr_Attr.Opt - linker options file which speficies that global vars
 #        be placed in NOSHR,WRT psects.  Use when linking any object files
 #        against PerlShr.Exe, since cc places global vars in SHR,WRT psects
 #        by default.
-#    PerlShr_Sym.Opt - declares universal symbols for PerlShr.Exe
+#    PerlShr_Bld.Opt - declares universal symbols for PerlShr.Exe
 #    Perlshr_Gbl*.Mar, Perlshr_Gbl*.Obj (VAX  only) - declares global symbols
 #        for global vars (done here because gcc can't globaldef) and creates
 #        transfer vectors for routines on a VAX.
@@ -29,7 +34,7 @@
 #     (i.e. /Define=DEBUGGING,EMBED,MULTIPLICITY)?
 #
 # Author: Charles Bailey  bailey@genetics.upenn.edu
-# Revised: 21-Sep-1994
+# Revised: 01-Mar-1995
 
 require 5.000;
 
@@ -58,6 +63,15 @@ else { ($cpp_file) = ($cc_cmd =~ /~~NOCC~~(.*)/) }
 
 $objsuffix = shift @ARGV;
 print "\$objsuffix: \\$objsuffix\\\n" if $debug;
+$dbgprefix = shift @ARGV;
+print "\$dbgprefix: \\$dbgprefix\\\n" if $debug;
+$olbsuffix = shift @ARGV;
+print "\$olbsuffix: \\$olbsuffix\\\n" if $debug;
+$libperl = "${dbgprefix}libperl$olbsuffix";
+$extnames = shift @ARGV;
+print "\$extnames: \\$extnames\\\n" if $debug;
+$rtlopt = shift @ARGV;
+print "\$rtlopt: \\$rtlopt\\\n" if $debug;
 
 # Someday, we'll have $GetSyI built into perl . . .
 $isvax = `\$ Write Sys\$Output F\$GetSyI(\"HW_MODEL\")` <= 1024;
@@ -66,14 +80,14 @@ print "\$isvax: \\$isvax\\\n" if $debug;
 sub scan_var {
   my($line) = @_;
 
-  print "\tchecking for global variable\n" if $debug;
+  print "\tchecking for global variable\n" if $debug > 1;
   $line =~ s/INIT\(.*\)//;
   $line =~ s/\[.*//;
   $line =~ s/=.*//;
   $line =~ s/\W*;?\s*$//;
-  print "\tfiltered to \\$line\\\n" if $debug;
+  print "\tfiltered to \\$line\\\n" if $debug > 1;
   if ($line =~ /(\w+)$/) {
-    print "\tvar name is \\$1\\\n" if $debug;
+    print "\tvar name is \\$1\\\n" if $debug > 1;
    $vars{$1}++;
   }
 }
@@ -81,11 +95,11 @@ sub scan_var {
 sub scan_func {
   my($line) = @_;
 
-  print "\tchecking for global routine\n" if $debug;
+  print "\tchecking for global routine\n" if $debug > 1;
   if ( /(\w+)\s+\(/ ) {
-    print "\troutine name is \\$1\\\n" if $debug;
+    print "\troutine name is \\$1\\\n" if $debug > 1;
     if ($1 eq 'main' || $1 eq 'perl_init_ext') {
-      print "\tskipped\n" if $debug;
+      print "\tskipped\n" if $debug > 1;
     }
     else { $funcs{$1}++ }
   }
@@ -101,28 +115,28 @@ else {
 LINE: while (<CPP>) {
   while (/^#.*vmsish\.h/i .. /^#.*perl\.h/i) {
     while (/__VMS_PROTOTYPES__/i .. /__VMS_SEPYTOTORP__/i) {
-      print "vms_proto>> $_" if $debug;
+      print "vms_proto>> $_" if $debug > 2;
       &scan_func($_);
       if (/^EXT/) { &scan_var($_); }
       last LINE unless $_ = <CPP>;
     }
-    print "vmsish.h>> $_" if $debug;
+    print "vmsish.h>> $_" if $debug > 2;
     if (/^EXT/) { &scan_var($_); }
     last LINE unless $_ = <CPP>;
   }    
   while (/^#.*opcode\.h/i .. /^#.*perl\.h/i) {
-    print "opcode.h>> $_" if $debug;
+    print "opcode.h>> $_" if $debug > 2;
     if (/^OP \*\s/) { &scan_func($_); }
     if (/^EXT/) { &scan_var($_); }
     last LINE unless $_ = <CPP>;
   }
   while (/^#.*proto\.h/i .. /^#.*perl\.h/i) {
-    print "proto.h>> $_" if $debug;
+    print "proto.h>> $_" if $debug > 2;
     &scan_func($_);
     if (/^EXT/) { &scan_var($_); }
     last LINE unless $_ = <CPP>;
   }
-  print $_ if $debug;
+  print $_ if $debug > 3;
   if (/^EXT/) { &scan_var($_); }
 }
 close CPP;
@@ -130,27 +144,34 @@ while (<DATA>) {
   next if /^#/;
   s/\s+#.*\n//;
   ($key,$array) = split('=',$_);
-  print "Adding $key to \%$array list\n" if $debug;
+  print "Adding $key to \%$array list\n" if $debug > 1;
   ${$array}{$key}++;
+}
+foreach (split /\s+/, $extnames) {
+  my($pkgname) = $_;
+  $pkgname =~ s/::/__/g;
+  $funcs{"boot_$pkgname"}++;
+  print "Adding boot_$pkgname to \%funcs (for extension $_)\n" if $debug;
 }
 
 # Eventually, we'll check against existing copies here, so we can add new
 # symbols to an existing options file in an upwardly-compatible manner.
 
 $marord++;
-open(OPTSYM,">${dir}perlshr_sym.opt")
-  or die "$0: Can't write to ${dir}perlshr_sym.opt: $!\n";
+open(OPTBLD,">${dir}${dbgprefix}perlshr_bld.opt")
+  or die "$0: Can't write to ${dir}${dbgprefix}perlshr_bld.opt: $!\n";
 open(OPTATTR,">${dir}perlshr_attr.opt")
   or die "$0: Can't write to ${dir}perlshr_attr.opt: $!\n";
 if ($isvax) {
   open(MAR,">${dir}perlshr_gbl${marord}.mar")
     or die "$0: Can't write to ${dir}perlshr_gbl${marord}.mar: $!\n";
+  print MAR "\t.title perlshr_gbl$marord\n";
 }
 print OPTATTR "PSECT_ATTR=\$CHAR_STRING_CONSTANTS,PIC,SHR,NOEXE,RD,NOWRT\n";
 foreach $var (sort keys %vars) {
   print OPTATTR "PSECT_ATTR=${var},PIC,OVR,RD,NOEXE,WRT,NOSHR\n";
-  if ($isvax) { print OPTSYM "UNIVERSAL=$var\n"; }
-  else { print OPTSYM "SYMBOL_VECTOR=($var=DATA)\n"; }
+  if ($isvax) { print OPTBLD "UNIVERSAL=$var\n"; }
+  else { print OPTBLD "SYMBOL_VECTOR=($var=DATA)\n"; }
   if ($isvax) {
     if ($count++ > 200) {  # max 254 psects/file
       print MAR "\t.end\n";
@@ -158,6 +179,7 @@ foreach $var (sort keys %vars) {
       $marord++;
       open(MAR,">${dir}perlshr_gbl${marord}.mar")
         or die "$0: Can't write to ${dir}perlshr_gbl${marord}.mar: $!\n";
+      print MAR "\t.title perlshr_gbl$marord\n";
       $count = 0;
     }
     # This hack brought to you by the lack of a globaldef in gcc.
@@ -173,31 +195,51 @@ foreach $func (sort keys %funcs) {
     print MAR "\t.mask $func\n";
     print MAR "\tjmp L\^${func}+2\n";
   }
-  else { print OPTSYM "SYMBOL_VECTOR=($func=PROCEDURE)\n"; }
+  else { print OPTBLD "SYMBOL_VECTOR=($func=PROCEDURE)\n"; }
 }
 
-close OPTSYM;
 close OPTATTR;
+$incstr = 'perl,globals';
 if ($isvax) {
   print MAR "\t.end\n";
   close MAR;
-  open (GBLOPT,">PerlShr_Gbl.Opt") or die "$0: Can't write to PerlShr_Gbl.Opt: $!\n";
   $drvrname = "Compile_shrmars.tmp_".time;
   open (DRVR,">$drvrname") or die "$0: Can't write to $drvrname: $!\n";
   print DRVR "\$ Set NoOn\n";  
   print DRVR "\$ Delete/NoLog/NoConfirm $drvrname;\n";
   print DRVR "\$ old_proc_vfy = F\$Environment(\"VERIFY_PROCEDURE\")\n";
   print DRVR "\$ old_img_vfy = F\$Environment(\"VERIFY_IMAGE\")\n";
+  print DRVR "\$ MCR $^X -e \"\$ENV{'LIBPERL_RDT'} = (stat('$libperl'))[9]\"\n";
   print DRVR "\$ Set Verify\n";
+  print DRVR "\$ If F\$Search(\"$libperl\").eqs.\"\" Then Library/Object/Create $libperl\n";
   do {
-    print GBLOPT "PerlShr_Gbl${marord}$objsuffix\n";
+    $incstr .= ",perlshr_gbl$marord";
     print DRVR "\$ Macro/NoDebug/Object=PerlShr_Gbl${marord}$objsuffix PerlShr_Gbl$marord.Mar\n";
+    print DRVR "\$ Library/Object/Replace/Log $libperl PerlShr_Gbl${marord}$objsuffix\n";
   } while (--$marord); 
+  # We had to have a working miniperl to run this program; it's probably the
+  # one we just built.  It depended on LibPerl, which will be changed when
+  # the PerlShr_Gbl* modules get inserted, so miniperl will be out of date,
+  # and so, therefore, will all of its dependents . . .
+  # We touch LibPerl here so it'll be back 'in date', and we won't rebuild
+  # miniperl etc., and therefore LibPerl, the next time we invoke MM[KS].
   print DRVR "\$ old_proc_vfy = F\$Verify(old_proc_vfy,old_img_vfy)\n";
+  print DRVR "\$ MCR $^X -e \"utime 0, \$ENV{'LIBPERL_RDT'}, '$libperl'\"\n";
   close DRVR;
-  close GBLOPT;
-  exec "\$ \@$drvrname";
 }
+
+# Include object modules and RTLs in options file
+# Linker wants /Include and /Library on different lines
+print OPTBLD "$libperl/Include=($incstr)\n";
+print OPTBLD "$libperl/Library\n";
+open(RTLOPT,$rtlopt) or die "$0: Can't read $rtlopt: $!\n";
+while (<RTLOPT>) { print OPTBLD; }
+close RTLOPT;
+close OPTBLD;
+
+exec "\$ \@$drvrname" if $isvax;
+
+
 __END__
 
 # Oddball cases, so we can keep the perl.h scan above simple

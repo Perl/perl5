@@ -86,10 +86,6 @@ require DynaLoader;
 );
 
 sub AUTOLOAD {
-    if (@_ > 1) {
-	$AutoLoader::AUTOLOAD = $AUTOLOAD;
-	goto &AutoLoader::AUTOLOAD;
-    }
     local($constname);
     ($constname = $AUTOLOAD) =~ s/.*:://;
     $val = constant($constname, @_ ? $_[0] : 0);
@@ -106,6 +102,16 @@ sub AUTOLOAD {
     eval "sub $AUTOLOAD { $val }";
     goto &$AUTOLOAD;
 }
+
+
+# pack a sockaddr_in structure for use in bind() calls.
+# (here to hide the 'S n C4 x8' magic from applications)
+sub sockaddr_in{
+    my($af, $port, @quad) = @_;
+    my $pack = 'S n C4 x8'; # lookup $pack from hash using $af?
+    pack($pack, $af, $port, @quad);
+}
+
 
 bootstrap Socket;
 

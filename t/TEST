@@ -14,6 +14,8 @@ if ($ARGV[0] eq '-v') {
 
 chdir 't' if -f 't/TEST';
 
+die "You need to run \"make test\" first to set things up.\n" unless -e 'perl';
+
 if ($ARGV[0] eq '') {
     @ARGV = split(/[ \n]/,
       `echo base/*.t comp/*.t cmd/*.t io/*.t; echo op/*.t lib/*.t`);

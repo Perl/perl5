@@ -752,12 +752,13 @@ PP(pp_enterwrite)
 
     if (!cv) {
 	if (fgv) {
-	    SV *tmpstr = sv_newmortal();
-	    gv_efullname(tmpstr, gv);
-	    DIE("Undefined format \"%s\" called",SvPVX(tmpstr));
+	    SV *tmpsv = sv_newmortal();
+	    gv_efullname(tmpsv, gv);
+	    DIE("Undefined format \"%s\" called",SvPVX(tmpsv));
 	}
 	DIE("Not a format reference");
     }
+    IoFLAGS(io) &= ~IOf_DIDTOP;
 
     return doform(cv,gv,op->op_next);
 }
@@ -787,7 +788,7 @@ PP(pp_leavewrite)
 		    IoFMT_NAME(io) = savepv(GvNAME(gv));
 		sprintf(tmpbuf, "%s_TOP", IoFMT_NAME(io));
 		topgv = gv_fetchpv(tmpbuf,FALSE, SVt_PVFM);
-                if ((topgv && GvFORM(topgv)) ||
+		if ((topgv && GvFORM(topgv)) ||
 		  !gv_fetchpv("top",FALSE,SVt_PVFM))
 		    IoTOP_NAME(io) = savepv(tmpbuf);
 		else
@@ -800,11 +801,27 @@ PP(pp_leavewrite)
 	    }
 	    IoTOP_GV(io) = topgv;
 	}
+	if (IoFLAGS(io) & IOf_DIDTOP) {	/* Oh dear.  It still doesn't fit. */
+	    I32 lines = IoLINES_LEFT(io);
+	    char *s = SvPVX(formtarget);
+	    while (lines-- > 0) {
+		s = strchr(s, '\n');
+		if (!s)
+		    break;
+		s++;
+	    }
+	    if (s) {
+		fwrite1(SvPVX(formtarget), s - SvPVX(formtarget), 1, ofp);
+		sv_chop(formtarget, s);
+		FmLINES(formtarget) -= IoLINES_LEFT(io);
+	    }
+	}
 	if (IoLINES_LEFT(io) >= 0 && IoPAGE(io) > 0)
 	    fwrite1(SvPVX(formfeed), SvCUR(formfeed), 1, ofp);
 	IoLINES_LEFT(io) = IoPAGE_LEN(io);
 	IoPAGE(io)++;
 	formtarget = toptarget;
+	IoFLAGS(io) |= IOf_DIDTOP;
 	return doform(GvFORM(IoTOP_GV(io)),gv,op);
     }
 
@@ -834,6 +851,7 @@ PP(pp_leavewrite)
 	else {
 	    FmLINES(formtarget) = 0;
 	    SvCUR_set(formtarget, 0);
+	    *SvEND(formtarget) = '\0';
 	    if (IoFLAGS(io) & IOf_FLUSH)
 		(void)fflush(fp);
 	    PUSHs(&sv_yes);
@@ -857,19 +875,22 @@ PP(pp_prtf)
     else
 	gv = defoutgv;
     if (!(io = GvIO(gv))) {
-	if (dowarn)
-	    warn("Filehandle %s never opened", GvNAME(gv));
-	errno = EBADF;
+	if (dowarn) {
+	    gv_fullname(sv,gv);
+	    warn("Filehandle %s never opened", SvPV(sv,na));
+	}
+	SETERRNO(EBADF,RMS$_IFI);
 	goto just_say_no;
     }
     else if (!(fp = IoOFP(io))) {
 	if (dowarn)  {
+	    gv_fullname(sv,gv);
 	    if (IoIFP(io))
-		warn("Filehandle %s opened only for input", GvNAME(gv));
+		warn("Filehandle %s opened only for input", SvPV(sv,na));
 	    else
-		warn("printf on closed filehandle %s", GvNAME(gv));
+		warn("printf on closed filehandle %s", SvPV(sv,na));
 	}
-	errno = EBADF;
+	SETERRNO(EBADF,IoIFP(io)?RMS$_FAC:RMS$_IFI);
 	goto just_say_no;
     }
     else {
@@ -902,18 +923,18 @@ PP(pp_sysread)
     char *buffer;
     int length;
     int bufsize;
-    SV *bufstr;
+    SV *bufsv;
     STRLEN blen;
 
     gv = (GV*)*++MARK;
     if (!gv)
 	goto say_undef;
-    bufstr = *++MARK;
-    buffer = SvPV_force(bufstr, blen);
+    bufsv = *++MARK;
+    buffer = SvPV_force(bufsv, blen);
     length = SvIVx(*++MARK);
     if (length < 0)
 	DIE("Negative length");
-    errno = 0;
+    SETERRNO(0,0);
     if (MARK < SP)
 	offset = SvIVx(*++MARK);
     else
@@ -924,17 +945,17 @@ PP(pp_sysread)
 #ifdef HAS_SOCKET
     if (op->op_type == OP_RECV) {
 	bufsize = sizeof buf;
-	buffer = SvGROW(bufstr, length+1);
+	buffer = SvGROW(bufsv, length+1);
 	length = recvfrom(fileno(IoIFP(io)), buffer, length, offset,
 	    (struct sockaddr *)buf, &bufsize);
 	if (length < 0)
 	    RETPUSHUNDEF;
-	SvCUR_set(bufstr, length);
-	*SvEND(bufstr) = '\0';
-	(void)SvPOK_only(bufstr);
-	SvSETMAGIC(bufstr);
+	SvCUR_set(bufsv, length);
+	*SvEND(bufsv) = '\0';
+	(void)SvPOK_only(bufsv);
+	SvSETMAGIC(bufsv);
 	if (tainting)
-	    sv_magic(bufstr, Nullsv, 't', Nullch, 0);
+	    sv_magic(bufsv, Nullsv, 't', Nullch, 0);
 	SP = ORIGMARK;
 	sv_setpvn(TARG, buf, bufsize);
 	PUSHs(TARG);
@@ -944,7 +965,7 @@ PP(pp_sysread)
     if (op->op_type == OP_RECV)
 	DIE(no_sock_func, "recv");
 #endif
-    buffer = SvGROW(bufstr, length+offset+1);
+    buffer = SvGROW(bufsv, length+offset+1);
     if (op->op_type == OP_SYSREAD) {
 	length = read(fileno(IoIFP(io)), buffer+offset, length);
     }
@@ -960,12 +981,12 @@ PP(pp_sysread)
 	length = fread(buffer+offset, 1, length, IoIFP(io));
     if (length < 0)
 	goto say_undef;
-    SvCUR_set(bufstr, length+offset);
-    *SvEND(bufstr) = '\0';
-    (void)SvPOK_only(bufstr);
-    SvSETMAGIC(bufstr);
+    SvCUR_set(bufsv, length+offset);
+    *SvEND(bufsv) = '\0';
+    (void)SvPOK_only(bufsv);
+    SvSETMAGIC(bufsv);
     if (tainting)
-	sv_magic(bufstr, Nullsv, 't', Nullch, 0);
+	sv_magic(bufsv, Nullsv, 't', Nullch, 0);
     SP = ORIGMARK;
     PUSHi(length);
     RETURN;
@@ -986,7 +1007,7 @@ PP(pp_send)
     GV *gv;
     IO *io;
     int offset;
-    SV *bufstr;
+    SV *bufsv;
     char *buffer;
     int length;
     STRLEN blen;
@@ -994,12 +1015,12 @@ PP(pp_send)
     gv = (GV*)*++MARK;
     if (!gv)
 	goto say_undef;
-    bufstr = *++MARK;
-    buffer = SvPV(bufstr, blen);
+    bufsv = *++MARK;
+    buffer = SvPV(bufsv, blen);
     length = SvIVx(*++MARK);
     if (length < 0)
 	DIE("Negative length");
-    errno = 0;
+    SETERRNO(0,0);
     io = GvIO(gv);
     if (!io || !IoIFP(io)) {
 	length = -1;
@@ -1094,7 +1115,7 @@ PP(pp_truncate)
     int result = 1;
     GV *tmpgv;
 
-    errno = 0;
+    SETERRNO(0,0);
 #if defined(HAS_TRUNCATE) || defined(HAS_CHSIZE)
 #ifdef HAS_TRUNCATE
     if (op->op_flags & OPf_SPECIAL) {
@@ -1128,7 +1149,7 @@ PP(pp_truncate)
     if (result)
 	RETPUSHYES;
     if (!errno)
-	errno = EBADF;
+	SETERRNO(EBADF,RMS$_IFI);
     RETPUSHUNDEF;
 #else
     DIE("truncate not implemented");
@@ -1143,7 +1164,7 @@ PP(pp_fcntl)
 PP(pp_ioctl)
 {
     dSP; dTARGET;
-    SV *argstr = POPs;
+    SV *argsv = POPs;
     unsigned int func = U_I(POPn);
     int optype = op->op_type;
     char *s;
@@ -1151,24 +1172,24 @@ PP(pp_ioctl)
     GV *gv = (GV*)POPs;
     IO *io = GvIOn(gv);
 
-    if (!io || !argstr || !IoIFP(io)) {
-	errno = EBADF;	/* well, sort of... */
+    if (!io || !argsv || !IoIFP(io)) {
+	SETERRNO(EBADF,RMS$_IFI);	/* well, sort of... */
 	RETPUSHUNDEF;
     }
 
-    if (SvPOK(argstr) || !SvNIOK(argstr)) {
+    if (SvPOK(argsv) || !SvNIOK(argsv)) {
 	STRLEN len;
-	s = SvPV_force(argstr, len);
+	s = SvPV_force(argsv, len);
 	retval = IOCPARM_LEN(func);
 	if (len < retval) {
-	    s = Sv_Grow(argstr, retval+1);
-	    SvCUR_set(argstr, retval);
+	    s = Sv_Grow(argsv, retval+1);
+	    SvCUR_set(argsv, retval);
 	}
 
-	s[SvCUR(argstr)] = 17;	/* a little sanity check here */
+	s[SvCUR(argsv)] = 17;	/* a little sanity check here */
     }
     else {
-	retval = SvIV(argstr);
+	retval = SvIV(argsv);
 #ifdef DOSISH
 	s = (char*)(long)retval;	/* ouch */
 #else
@@ -1195,12 +1216,12 @@ PP(pp_ioctl)
 #   endif
 #endif
 
-    if (SvPOK(argstr)) {
-	if (s[SvCUR(argstr)] != 17)
+    if (SvPOK(argsv)) {
+	if (s[SvCUR(argsv)] != 17)
 	    DIE("Possible memory corruption: %s overflowed 3rd argument",
 		op_name[optype]);
-	s[SvCUR(argstr)] = 0;		/* put our null back */
-	SvSETMAGIC(argstr);		/* Assume it has changed */
+	s[SvCUR(argsv)] = 0;		/* put our null back */
+	SvSETMAGIC(argsv);		/* Assume it has changed */
     }
 
     if (retval == -1)
@@ -1263,7 +1284,7 @@ PP(pp_socket)
     gv = (GV*)POPs;
 
     if (!gv) {
-	errno = EBADF;
+	SETERRNO(EBADF,LIB$_INVARG);
 	RETPUSHUNDEF;
     }
 
@@ -1345,7 +1366,7 @@ PP(pp_bind)
 {
     dSP;
 #ifdef HAS_SOCKET
-    SV *addrstr = POPs;
+    SV *addrsv = POPs;
     char *addr;
     GV *gv = (GV*)POPs;
     register IO *io = GvIOn(gv);
@@ -1354,7 +1375,7 @@ PP(pp_bind)
     if (!io || !IoIFP(io))
 	goto nuts;
 
-    addr = SvPV(addrstr, len);
+    addr = SvPV(addrsv, len);
     TAINT_PROPER("bind");
     if (bind(fileno(IoIFP(io)), (struct sockaddr *)addr, len) >= 0)
 	RETPUSHYES;
@@ -1364,7 +1385,7 @@ PP(pp_bind)
 nuts:
     if (dowarn)
 	warn("bind() on closed fd");
-    errno = EBADF;
+    SETERRNO(EBADF,SS$_IVCHAN);
     RETPUSHUNDEF;
 #else
     DIE(no_sock_func, "bind");
@@ -1375,7 +1396,7 @@ PP(pp_connect)
 {
     dSP;
 #ifdef HAS_SOCKET
-    SV *addrstr = POPs;
+    SV *addrsv = POPs;
     char *addr;
     GV *gv = (GV*)POPs;
     register IO *io = GvIOn(gv);
@@ -1384,7 +1405,7 @@ PP(pp_connect)
     if (!io || !IoIFP(io))
 	goto nuts;
 
-    addr = SvPV(addrstr, len);
+    addr = SvPV(addrsv, len);
     TAINT_PROPER("connect");
     if (connect(fileno(IoIFP(io)), (struct sockaddr *)addr, len) >= 0)
 	RETPUSHYES;
@@ -1394,7 +1415,7 @@ PP(pp_connect)
 nuts:
     if (dowarn)
 	warn("connect() on closed fd");
-    errno = EBADF;
+    SETERRNO(EBADF,SS$_IVCHAN);
     RETPUSHUNDEF;
 #else
     DIE(no_sock_func, "connect");
@@ -1420,7 +1441,7 @@ PP(pp_listen)
 nuts:
     if (dowarn)
 	warn("listen() on closed fd");
-    errno = EBADF;
+    SETERRNO(EBADF,SS$_IVCHAN);
     RETPUSHUNDEF;
 #else
     DIE(no_sock_func, "listen");
@@ -1429,13 +1450,14 @@ nuts:
 
 PP(pp_accept)
 {
+    struct sockaddr_in saddr;	/* use a struct to avoid alignment problems */
     dSP; dTARGET;
 #ifdef HAS_SOCKET
     GV *ngv;
     GV *ggv;
     register IO *nstio;
     register IO *gstio;
-    int len = sizeof buf;
+    int len = sizeof saddr;
     int fd;
 
     ggv = (GV*)POPs;
@@ -1454,7 +1476,7 @@ PP(pp_accept)
     if (IoIFP(nstio))
 	do_close(ngv, FALSE);
 
-    fd = accept(fileno(IoIFP(gstio)), (struct sockaddr *)buf, &len);
+    fd = accept(fileno(IoIFP(gstio)), (struct sockaddr *)&saddr, &len);
     if (fd < 0)
 	goto badexit;
     IoIFP(nstio) = fdopen(fd, "r");
@@ -1467,13 +1489,13 @@ PP(pp_accept)
 	goto badexit;
     }
 
-    PUSHp(buf, len);
+    PUSHp((char *)&saddr, len);
     RETURN;
 
 nuts:
     if (dowarn)
 	warn("accept() on closed fd");
-    errno = EBADF;
+    SETERRNO(EBADF,SS$_IVCHAN);
 
 badexit:
     RETPUSHUNDEF;
@@ -1500,7 +1522,7 @@ PP(pp_shutdown)
 nuts:
     if (dowarn)
 	warn("shutdown() on closed fd");
-    errno = EBADF;
+    SETERRNO(EBADF,SS$_IVCHAN);
     RETPUSHUNDEF;
 #else
     DIE(no_sock_func, "shutdown");
@@ -1527,6 +1549,7 @@ PP(pp_ssockopt)
     unsigned int lvl;
     GV *gv;
     register IO *io;
+    int aint;
 
     if (optype == OP_GSOCKOPT)
 	sv = sv_2mortal(NEWSV(22, 257));
@@ -1543,14 +1566,18 @@ PP(pp_ssockopt)
     fd = fileno(IoIFP(io));
     switch (optype) {
     case OP_GSOCKOPT:
-	SvGROW(sv, 256);
+	SvGROW(sv, 257);
 	(void)SvPOK_only(sv);
-	if (getsockopt(fd, lvl, optname, SvPVX(sv), (int*)&SvCUR(sv)) < 0)
+	SvCUR_set(sv,256);
+	*SvEND(sv) ='\0';
+	aint = SvCUR(sv);
+	if (getsockopt(fd, lvl, optname, SvPVX(sv), &aint) < 0)
 	    goto nuts2;
+	SvCUR_set(sv,aint);
+	*SvEND(sv) ='\0';
 	PUSHs(sv);
 	break;
     case OP_SSOCKOPT: {
-	    int aint;
 	    STRLEN len = 0;
 	    char *buf = 0;
 	    if (SvPOKp(sv))
@@ -1571,7 +1598,7 @@ PP(pp_ssockopt)
 nuts:
     if (dowarn)
 	warn("[gs]etsockopt() on closed fd");
-    errno = EBADF;
+    SETERRNO(EBADF,SS$_IVCHAN);
 nuts2:
     RETPUSHUNDEF;
 
@@ -1598,31 +1625,36 @@ PP(pp_getpeername)
     int fd;
     GV *gv = (GV*)POPs;
     register IO *io = GvIOn(gv);
+    int aint;
 
     if (!io || !IoIFP(io))
 	goto nuts;
 
     sv = sv_2mortal(NEWSV(22, 257));
-    SvCUR_set(sv, 256);
-    SvPOK_on(sv);
+    (void)SvPOK_only(sv);
+    SvCUR_set(sv,256);
+    *SvEND(sv) ='\0';
+    aint = SvCUR(sv);
     fd = fileno(IoIFP(io));
     switch (optype) {
     case OP_GETSOCKNAME:
-	if (getsockname(fd, (struct sockaddr *)SvPVX(sv), (int*)&SvCUR(sv)) < 0)
+	if (getsockname(fd, (struct sockaddr *)SvPVX(sv), &aint) < 0)
 	    goto nuts2;
 	break;
     case OP_GETPEERNAME:
-	if (getpeername(fd, (struct sockaddr *)SvPVX(sv), (int*)&SvCUR(sv)) < 0)
+	if (getpeername(fd, (struct sockaddr *)SvPVX(sv), &aint) < 0)
 	    goto nuts2;
 	break;
     }
+    SvCUR_set(sv,aint);
+    *SvEND(sv) ='\0';
     PUSHs(sv);
     RETURN;
 
 nuts:
     if (dowarn)
 	warn("get{sock, peer}name() on closed fd");
-    errno = EBADF;
+    SETERRNO(EBADF,SS$_IVCHAN);
 nuts2:
     RETPUSHUNDEF;
 
@@ -1646,6 +1678,7 @@ PP(pp_stat)
 
     if (op->op_flags & OPf_REF) {
 	tmpgv = cGVOP->op_gv;
+      do_fstat:
 	if (tmpgv != defgv) {
 	    laststype = OP_STAT;
 	    statgv = tmpgv;
@@ -1660,7 +1693,16 @@ PP(pp_stat)
 	    max = 0;
     }
     else {
-	sv_setpv(statname, POPp);
+	SV* sv = POPs;
+	if (SvTYPE(sv) == SVt_PVGV) {
+	    tmpgv = (GV*)sv;
+	    goto do_fstat;
+	}
+	else if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVGV) {
+	    tmpgv = (GV*)SvRV(sv);
+	    goto do_fstat;
+	}
+	sv_setpv(statname, SvPV(sv,na));
 	statgv = Nullgv;
 #ifdef HAS_LSTAT
 	laststype = op->op_type;
@@ -2055,7 +2097,7 @@ PP(pp_fttext)
 	    if (dowarn)
 		warn("Test on unopened file <%s>",
 		  GvENAME(cGVOP->op_gv));
-	    errno = EBADF;
+	    SETERRNO(EBADF,RMS$_IFI);
 	    RETPUSHUNDEF;
 	}
     }
@@ -2135,6 +2177,11 @@ PP(pp_chdir)
     }
     TAINT_PROPER("chdir");
     PUSHi( chdir(tmps) >= 0 );
+#ifdef VMS
+    /* Clear the DEFAULT element of ENV so we'll get the new value
+     * in the future. */
+    hv_delete(GvHVn(envgv),"DEFAULT",7);
+#endif
     RETURN;
 }
 
@@ -2303,26 +2350,26 @@ char *filename;
 		    return 0;
 #endif
 	    }
-	    errno = 0;
+	    SETERRNO(0,0);
 #ifndef EACCES
 #define EACCES EPERM
 #endif
 	    if (instr(mybuf, "cannot make"))
-		errno = EEXIST;
+		SETERRNO(EEXIST,RMS$_FEX);
 	    else if (instr(mybuf, "existing file"))
-		errno = EEXIST;
+		SETERRNO(EEXIST,RMS$_FEX);
 	    else if (instr(mybuf, "ile exists"))
-		errno = EEXIST;
+		SETERRNO(EEXIST,RMS$_FEX);
 	    else if (instr(mybuf, "non-exist"))
-		errno = ENOENT;
+		SETERRNO(ENOENT,RMS$_FNF);
 	    else if (instr(mybuf, "does not exist"))
-		errno = ENOENT;
+		SETERRNO(ENOENT,RMS$_FNF);
 	    else if (instr(mybuf, "not empty"))
-		errno = EBUSY;
+		SETERRNO(EBUSY,SS$_DEVOFFLINE);
 	    else if (instr(mybuf, "cannot access"))
-		errno = EACCES;
+		SETERRNO(EACCES,RMS$_PRV);
 	    else
-		errno = EPERM;
+		SETERRNO(EPERM,RMS$_PRV);
 	    return 0;
 	}
 	else {	/* some mkdirs return no failure indication */
@@ -2330,9 +2377,9 @@ char *filename;
 	    if (op->op_type == OP_RMDIR)
 		anum = !anum;
 	    if (anum)
-		errno = 0;
+		SETERRNO(0,0);
 	    else
-		errno = EACCES;	/* a guess */
+		SETERRNO(EACCES,RMS$_PRV);	/* a guess */
 	}
 	return anum;
     }
@@ -2398,7 +2445,7 @@ PP(pp_open_dir)
     RETPUSHYES;
 nope:
     if (!errno)
-	errno = EBADF;
+	SETERRNO(EBADF,RMS$_DIR);
     RETPUSHUNDEF;
 #else
     DIE(no_dir_func, "opendir");
@@ -2442,7 +2489,7 @@ PP(pp_readdir)
 
 nope:
     if (!errno)
-	errno = EBADF;
+	SETERRNO(EBADF,RMS$_ISI);
     if (GIMME == G_ARRAY)
 	RETURN;
     else
@@ -2469,7 +2516,7 @@ PP(pp_telldir)
     RETURN;
 nope:
     if (!errno)
-	errno = EBADF;
+	SETERRNO(EBADF,RMS$_ISI);
     RETPUSHUNDEF;
 #else
     DIE(no_dir_func, "telldir");
@@ -2492,7 +2539,7 @@ PP(pp_seekdir)
     RETPUSHYES;
 nope:
     if (!errno)
-	errno = EBADF;
+	SETERRNO(EBADF,RMS$_ISI);
     RETPUSHUNDEF;
 #else
     DIE(no_dir_func, "seekdir");
@@ -2513,7 +2560,7 @@ PP(pp_rewinddir)
     RETPUSHYES;
 nope:
     if (!errno)
-	errno = EBADF;
+	SETERRNO(EBADF,RMS$_ISI);
     RETPUSHUNDEF;
 #else
     DIE(no_dir_func, "rewinddir");
@@ -2533,15 +2580,17 @@ PP(pp_closedir)
 #ifdef VOID_CLOSEDIR
     closedir(IoDIRP(io));
 #else
-    if (closedir(IoDIRP(io)) < 0)
+    if (closedir(IoDIRP(io)) < 0) {
+	IoDIRP(io) = 0; /* Don't try to close again--coredumps on SysV */
 	goto nope;
+    }
 #endif
     IoDIRP(io) = 0;
 
     RETPUSHYES;
 nope:
     if (!errno)
-	errno = EBADF;
+	SETERRNO(EBADF,RMS$_IFI);
     RETPUSHUNDEF;
 #else
     DIE(no_dir_func, "closedir");
@@ -2587,7 +2636,7 @@ PP(pp_wait)
     if (childpid > 0)
 	pidgone(childpid, argflags);
     value = (I32)childpid;
-    statusvalue = (U16)argflags;
+    statusvalue = FIXSTATUS(argflags);
     PUSHi(value);
     RETURN;
 #else
@@ -2608,7 +2657,7 @@ PP(pp_waitpid)
     childpid = TOPi;
     childpid = wait4pid(childpid, &argflags, optype);
     value = (I32)childpid;
-    statusvalue = (U16)argflags;
+    statusvalue = FIXSTATUS(argflags);
     SETi(value);
     RETURN;
 #else
@@ -2646,10 +2695,12 @@ PP(pp_system)
     if (childpid > 0) {
 	ihand = signal(SIGINT, SIG_IGN);
 	qhand = signal(SIGQUIT, SIG_IGN);
-	result = wait4pid(childpid, &status, 0);
+	do {
+	    result = wait4pid(childpid, &status, 0);
+	} while (result == -1 && errno == EINTR);
 	(void)signal(SIGINT, ihand);
 	(void)signal(SIGQUIT, qhand);
-	statusvalue = (U16)status;
+	statusvalue = FIXSTATUS(status);
 	if (result < 0)
 	    value = -1;
 	else {
@@ -2988,7 +3039,7 @@ PP(pp_shmwrite)
     PUSHi(value);
     RETURN;
 #else
-    pp_semget(ARGS);
+    return pp_semget(ARGS);
 #endif
 }
 
@@ -3013,7 +3064,7 @@ PP(pp_msgsnd)
     PUSHi(value);
     RETURN;
 #else
-    pp_semget(ARGS);
+    return pp_semget(ARGS);
 #endif
 }
 
@@ -3026,7 +3077,7 @@ PP(pp_msgrcv)
     PUSHi(value);
     RETURN;
 #else
-    pp_semget(ARGS);
+    return pp_semget(ARGS);
 #endif
 }
 
@@ -3063,7 +3114,7 @@ PP(pp_semctl)
     }
     RETURN;
 #else
-    pp_semget(ARGS);
+    return pp_semget(ARGS);
 #endif
 }
 
@@ -3076,7 +3127,7 @@ PP(pp_semop)
     PUSHi(value);
     RETURN;
 #else
-    pp_semget(ARGS);
+    return pp_semget(ARGS);
 #endif
 }
 
@@ -3121,9 +3172,9 @@ PP(pp_ghostent)
     }
     else if (which == OP_GHBYADDR) {
 	int addrtype = POPi;
-	SV *addrstr = POPs;
+	SV *addrsv = POPs;
 	STRLEN addrlen;
-	char *addr = SvPV(addrstr, addrlen);
+	char *addr = SvPV(addrsv, addrlen);
 
 	hent = gethostbyaddr(addr, addrlen, addrtype);
     }
@@ -3136,7 +3187,7 @@ PP(pp_ghostent)
 
 #ifdef HOST_NOT_FOUND
     if (!hent)
-	statusvalue = (U16)h_errno & 0xffff;
+	statusvalue = FIXSTATUS(h_errno);
 #endif
 
     if (GIMME != G_ARRAY) {
@@ -3731,10 +3782,12 @@ PP(pp_syscall)
     unsigned long a[20];
     register I32 i = 0;
     I32 retval = -1;
+    MAGIC *mg;
 
     if (tainting) {
 	while (++MARK <= SP) {
-	    if (SvGMAGICAL(*MARK) && SvSMAGICAL(*MARK) && mg_find(*MARK, 't'))
+	    if (SvGMAGICAL(*MARK) && SvSMAGICAL(*MARK) &&
+	      (mg = mg_find(*MARK, 't')) && mg->mg_len & 1)
 		tainted = TRUE;
 	}
 	MARK = ORIGMARK;
@@ -3748,8 +3801,10 @@ PP(pp_syscall)
     while (++MARK <= SP) {
 	if (SvNIOK(*MARK) || !i)
 	    a[i++] = SvIV(*MARK);
-	else
-	    a[i++] = (unsigned long)SvPVX(*MARK);
+	else if (*MARK == &sv_undef)
+	    a[i++] = 0;
+	else 
+	    a[i++] = (unsigned long)SvPV_force(*MARK, na);
 	if (i > 15)
 	    break;
     }

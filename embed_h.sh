@@ -1,5 +1,6 @@
 #!/bin/sh
 
+rm -f embed.h
 cat <<'END' >embed.h
 /* This file is derived from global.sym and interp.sym */
 

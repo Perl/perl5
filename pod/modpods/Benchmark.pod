@@ -8,7 +8,7 @@ timethese - run several chunks of code several times
 
 timeit - run a chunk of code and see how long it goes
 
-=head1 SYNOPSYS
+=head1 SYNOPSIS
 
     timethis ($count, "code");
 

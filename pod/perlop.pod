@@ -454,7 +454,7 @@ is equivalent to
     $a += 2;
     $a *= 3;
 
-=head2
+=head2 Comma Operator
 
 Binary "," is the comma operator.  In a scalar context it evaluates
 its left argument, throws that value away, then evaluates its right
@@ -462,6 +462,9 @@ argument and returns that value.  This is just like C's comma operator.
 
 In a list context, it's just the list argument separator, and inserts
 both its arguments into the list.
+
+The => digraph is simply a synonym for the comma operator.  It's useful
+for documenting arguments that come in pairs.
 
 =head2 List Operators (Rightward)
 
@@ -874,6 +877,12 @@ Examples:
     tr [\200-\377]
        [\000-\177];		# delete 8th bit
 
+If multiple translations are given for a character, only the first one is used:
+
+    tr/AAA/XYZ/
+
+will translate any A to X.
+
 Note that because the translation table is built at compile time, neither
 the SEARCHLIST nor the REPLACEMENTLIST are subjected to double quote
 interpolation.  That means that if you want to use variables, you must use
@@ -905,20 +914,20 @@ To pass a $ through to the shell you need to hide it with a backslash.
 The generalized form of backticks is C<qx//>.
 
 Evaluating a filehandle in angle brackets yields the next line from
-that file (newline included, so it's never false until end of file, at which
-time an undefined value is returned).  Ordinarily you must assign that
-value to a variable, but there is one situation where an automatic
+that file (newline included, so it's never false until end of file, at
+which time an undefined value is returned).  Ordinarily you must assign
+that value to a variable, but there is one situation where an automatic
 assignment happens.  I<If and ONLY if> the input symbol is the only
 thing inside the conditional of a C<while> loop, the value is
-automatically assigned to the variable C<$_>.  (This may seem like an
-odd thing to you, but you'll use the construct in almost every Perl
-script you write.)  Anyway, the following lines are equivalent to each
-other:
+automatically assigned to the variable C<$_>.  The assigned value is
+then tested to see if it is defined.  (This may seem like an odd thing
+to you, but you'll use the construct in almost every Perl script you
+write.)  Anyway, the following lines are equivalent to each other:
 
-    while ($_ = <STDIN>) { print; }
+    while (defined($_ = <STDIN>)) { print; }
     while (<STDIN>) { print; }
     for (;<STDIN>;) { print; }
-    print while $_ = <STDIN>;
+    print while defined($_ = <STDIN>);
     print while <STDIN>;
 
 The filehandles STDIN, STDOUT and STDERR are predefined.  (The

@@ -26,7 +26,7 @@ read($testfd, $buffer, 9) if $testfd > 2;
 print $buffer eq "#!./perl\n" ? "ok 4\n" : "not ok 4\n";
 
 @fds = POSIX::pipe();
-print $fds[0] == $testfd + 1 ? "ok 5\n" : "not ok 5\n";
+print $fds[0] > $testfd ? "ok 5\n" : "not ok 5\n";
 $writer = FileHandle->new_from_fd($fds[1], "w");
 $reader = FileHandle->new_from_fd($fds[0], "r");
 print $writer "ok 6\n";

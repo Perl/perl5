@@ -37,6 +37,7 @@ char rcsid[] = "perl.c\nPatch level: ###\n";
 
 static void find_beginning _((void));
 static void incpush _((char *));
+static void init_ids _((void));
 static void init_debugger _((void));
 static void init_lexer _((void));
 static void init_main_stash _((void));
@@ -61,8 +62,6 @@ void
 perl_construct( sv_interp )
 register PerlInterpreter *sv_interp;
 {
-    char* s;
-
     if (!(curinterp = sv_interp))
 	return;
 
@@ -116,15 +115,7 @@ register PerlInterpreter *sv_interp;
     tmps_floor	= -1;
 #endif
 
-    uid = (int)getuid();
-    euid = (int)geteuid();
-    gid = (int)getgid();
-    egid = (int)getegid();
-#ifdef VMS
-    uid |= gid << 16;
-    euid |= egid << 16;
-#endif
-    tainting = (euid != uid || egid != gid);
+    init_ids();
     sprintf(patchlevel, "%5.3f", 5.0 + (PATCHLEVEL / 1000.0));
 
     fdpid = newAV();	/* for remembering popen pids by fd */
@@ -135,15 +126,17 @@ register PerlInterpreter *sv_interp;
 }
 
 void
-perl_destruct(sv_interp, destruct_level)
+perl_destruct(sv_interp)
 register PerlInterpreter *sv_interp;
-int destruct_level;  /* 0=none, 1=full, 2=full with checks */
 {
+    int destruct_level;  /* 0=none, 1=full, 2=full with checks */
     I32 last_sv_count;
     HV *hv;
 
     if (!(curinterp = sv_interp))
 	return;
+
+    destruct_level = perl_destruct_level;
     LEAVE;
     FREETMPS;
 
@@ -228,6 +221,7 @@ char **env;
     char *scriptname;
     VOL bool dosearch = FALSE;
     char *validarg = "";
+    AV* comppadlist;
 
 #ifdef SETUID_SCRIPTS_ARE_SECURE_NOW
 #ifdef IAMSUID
@@ -253,6 +247,7 @@ setuid perl scripts securely.\n");
 	origfilename = savepv(argv[0]);
 	do_undump = FALSE;
 	cxstack_ix = -1;		/* start label stack again */
+	init_ids();
 	init_postdump_symbols(argc,argv,env);
 	return 0;
     }
@@ -263,7 +258,11 @@ setuid perl scripts securely.\n");
 
     switch (setjmp(top_env)) {
     case 1:
+#ifdef VMS
 	statusvalue = 255;
+#else
+	statusvalue = 1;
+#endif
     case 2:
 	curstash = defstash;
 	if (endav)
@@ -393,6 +392,9 @@ setuid perl scripts securely.\n");
     if (doextract)
 	find_beginning();
 
+    compcv = (CV*)NEWSV(1104,0);
+    sv_upgrade((SV *)compcv, SVt_PVCV);
+
     pad = newAV();
     comppad = pad;
     av_push(comppad, Nullsv);
@@ -403,8 +405,17 @@ setuid perl scripts securely.\n");
     min_intro_pending = 0;
     padix = 0;
 
+    comppadlist = newAV();
+    AvREAL_off(comppadlist);
+    av_store(comppadlist, 0, SvREFCNT_inc((SV*)comppad_name));
+    av_store(comppadlist, 1, SvREFCNT_inc((SV*)comppad));
+    CvPADLIST(compcv) = comppadlist;
+
     if (xsinit)
 	(*xsinit)();	/* in case linked C routines want magical variables */
+#ifdef VMS
+    init_os_extras();
+#endif
 
     init_predump_symbols();
     if (!do_undump)
@@ -511,13 +522,13 @@ PerlInterpreter *sv_interp;
 
 void
 my_exit(status)
-I32 status;
+U32 status;
 {
     register CONTEXT *cx;
     I32 gimme;
     SV **newsp;
 
-    statusvalue = (unsigned short)(status & 0xffff);
+    statusvalue = FIXSTATUS(status);
     if (cxstack_ix >= 0) {
 	if (cxstack_ix > 0)
 	    dounwind(0);
@@ -668,7 +679,11 @@ I32 flags;		/* See G_* flags in cop.h */
 	case 0:
 	    break;
 	case 1:
+#ifdef VMS
 	    statusvalue = 255;	/* XXX I don't think we use 1 anymore. */
+#else
+	statusvalue = 1;
+#endif
 	    /* FALL THROUGH */
 	case 2:
 	    /* my_exit() was called */
@@ -816,10 +831,12 @@ I32 namlen;
 	sv_magic(GvSV(gv), (SV*)gv, 0, name, namlen);
 }
 
-#ifdef DOSISH
-#define PERLLIB_SEP ';'
+#if defined(DOSISH)
+#    define PERLLIB_SEP ';'
+#elif defined(VMS)
+#    define PERLLIB_SEP '|'
 #else
-#define PERLLIB_SEP ':'
+#    define PERLLIB_SEP ':'
 #endif
 
 static void
@@ -925,7 +942,11 @@ char *s;
     case 'I':
 	taint_not("-I");
 	if (*++s) {
-	    av_push(GvAVn(incgv),newSVpv(s,0));
+	    char *e;
+	    for (e = s; *e && !isSPACE(*e); e++) ;
+	    av_push(GvAVn(incgv),newSVpv(s,e-s));
+	    if (*e)
+		return e;
 	}
 	else
 	    croak("No space allowed after -I");
@@ -1404,11 +1425,7 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 	    if (geteuid() != uid)
 		croak("Can't do seteuid!\n");
 	}
-	uid = (int)getuid();
-	euid = (int)geteuid();
-	gid = (int)getgid();
-	egid = (int)getegid();
-	tainting |= (euid != uid || egid != gid);
+	init_ids();
 	if (!cando(S_IXUSR,TRUE,&statbuf))
 	    croak("Permission denied\n");	/* they can't do this */
     }
@@ -1461,19 +1478,31 @@ find_beginning()
 }
 
 static void
+init_ids()
+{
+    uid = (int)getuid();
+    euid = (int)geteuid();
+    gid = (int)getgid();
+    egid = (int)getegid();
+#ifdef VMS
+    uid |= gid << 16;
+    euid |= egid << 16;
+#endif
+    tainting |= (euid != uid || egid != gid);
+}
+
+static void
 init_debugger()
 {
-    GV* tmpgv;
-
     curstash = debstash;
-    dbargs = GvAV(gv_AVadd((tmpgv = gv_fetchpv("args", GV_ADDMULTI, SVt_PVAV))));
+    dbargs = GvAV(gv_AVadd((gv_fetchpv("args", GV_ADDMULTI, SVt_PVAV))));
     AvREAL_off(dbargs);
     DBgv = gv_fetchpv("DB", GV_ADDMULTI, SVt_PVGV);
     DBline = gv_fetchpv("dbline", GV_ADDMULTI, SVt_PVAV);
-    DBsub = gv_HVadd(tmpgv = gv_fetchpv("sub", GV_ADDMULTI, SVt_PVHV));
-    DBsingle = GvSV((tmpgv = gv_fetchpv("single", GV_ADDMULTI, SVt_PV)));
-    DBtrace = GvSV((tmpgv = gv_fetchpv("trace", GV_ADDMULTI, SVt_PV)));
-    DBsignal = GvSV((tmpgv = gv_fetchpv("signal", GV_ADDMULTI, SVt_PV)));
+    DBsub = gv_HVadd(gv_fetchpv("sub", GV_ADDMULTI, SVt_PVHV));
+    DBsingle = GvSV((gv_fetchpv("single", GV_ADDMULTI, SVt_PV)));
+    DBtrace = GvSV((gv_fetchpv("trace", GV_ADDMULTI, SVt_PV)));
+    DBsignal = GvSV((gv_fetchpv("signal", GV_ADDMULTI, SVt_PV)));
     curstash = defstash;
 }
 
@@ -1593,8 +1622,7 @@ register char **env;
     toptarget = NEWSV(0,0);
     sv_upgrade(toptarget, SVt_PVFM);
     sv_setpvn(toptarget, "", 0);
-    tmpgv = gv_fetchpv("\001",TRUE, SVt_PV);
-    bodytarget = GvSV(tmpgv);
+    bodytarget = NEWSV(0,0);
     sv_upgrade(bodytarget, SVt_PVFM);
     sv_setpvn(bodytarget, "", 0);
     formtarget = bodytarget;
@@ -1675,7 +1703,6 @@ calllist(list)
 AV* list;
 {
     jmp_buf oldtop;
-    char *mess;
     STRLEN len;
     line_t oldline = curcop->cop_line;
 
@@ -1687,22 +1714,29 @@ AV* list;
 	SAVEFREESV(cv);
 
 	switch (setjmp(top_env)) {
-	case 0:
-	    PUSHMARK(stack_sp);
-	    perl_call_sv((SV*)cv, G_EVAL|G_DISCARD);
-	    mess = SvPVx(GvSV(gv_fetchpv("@",TRUE, SVt_PV)), len);
-	    if (len) {
-		Copy(oldtop, top_env, 1, jmp_buf);
-		curcop = &compiling;
-		curcop->cop_line = oldline;
-		if (list == beginav)
-		    croak("%sBEGIN failed--compilation aborted", mess);
-		else
-		    croak("%sEND failed--cleanup aborted", mess);
+	case 0: {
+		SV* atsv = GvSV(gv_fetchpv("@",TRUE, SVt_PV));
+		PUSHMARK(stack_sp);
+		perl_call_sv((SV*)cv, G_EVAL|G_DISCARD);
+		(void)SvPV(atsv, len);
+		if (len) {
+		    Copy(oldtop, top_env, 1, jmp_buf);
+		    curcop = &compiling;
+		    curcop->cop_line = oldline;
+		    if (list == beginav)
+			sv_catpv(atsv, "BEGIN failed--compilation aborted");
+		    else
+			sv_catpv(atsv, "END failed--cleanup aborted");
+		    croak("%s", SvPVX(atsv));
+		}
 	    }
 	    break;
 	case 1:
+#ifdef VMS
 	    statusvalue = 255;	/* XXX I don't think we use 1 anymore. */
+#else
+	statusvalue = 1;
+#endif
 	    /* FALL THROUGH */
 	case 2:
 	    /* my_exit() was called */

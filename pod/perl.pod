@@ -249,7 +249,7 @@ The B<-w> switch is not mandatory.
 Perl is at the mercy of your machine's definitions of various
 operations such as type casting, atof() and sprintf().
 
-If your stdio requires an seek or eof between reads and writes on a
+If your stdio requires a seek or eof between reads and writes on a
 particular stream, so does Perl.  (This doesn't apply to sysread()
 and syswrite().)
 

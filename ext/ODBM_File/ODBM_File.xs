@@ -75,7 +75,7 @@ odbm_STORE(db, key, value, flags = DBM_REPLACE)
 	if (RETVAL) {
 	    if (RETVAL < 0 && errno == EPERM)
 		croak("No write permission to odbm file");
-	    warn("odbm store returned %d, errno %d, key \"%s\"",
+	    croak("odbm store returned %d, errno %d, key \"%s\"",
 			RETVAL,errno,key.dptr);
 	}
 

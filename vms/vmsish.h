@@ -2,26 +2,53 @@
  *
  * VMS-specific C header file for perl5.
  *
- * Last revised: 09-Oct-1994 by Charles Bailey  bailey@genetics.upenn.edu
+ * Last revised: 12-Dec-1994 by Charles Bailey  bailey@genetics.upenn.edu
  */
 
 #ifndef __vmsish_h_included
 #define __vmsish_h_included
 
 #include <descrip.h> /* for dirent struct definitions */
+#include <libdef.h>  /* status codes for various places */
+#include <rmsdef.h>  /* at which errno and vaxc$errno are */
+#include <ssdef.h>   /* explicitly set in the perl source code */
+
+/* DEC's C compilers and gcc use incompatible definitions of _to(upp|low)er() */
+#ifdef _toupper
+#  undef _toupper
+#endif
+#define _toupper(c) (((c) < 'a' || (c) > 'z') ? (c) : (c) & ~040)
+#ifdef _tolower
+#  undef _tolower
+#endif
+#define _tolower(c) (((c) < 'A' || (c) > 'Z') ? (c) : (c) | 040)
 
 /* Assorted things to look like Unix */
 #ifdef __GNUC__
 #ifndef _IOLBF /* gcc's stdio.h doesn't define this */
 #define _IOLBF 1
 #endif
-#else
+#endif
 #include <processes.h> /* for vfork() */
 #include <unixio.h>
-#endif
 #include <unixlib.h>
 #include <file.h>  /* it's not <sys/file.h>, so don't use I_SYS_FILE */
-#define unlink remove
+#define unlink kill_file
+
+/* Macros to set errno using the VAX thread-safe calls, if present */
+#if (defined(__DECC) || defined(__DECCXX)) && !defined(__ALPHA)
+#  define set_errno(v)      (cma$tis_errno_set_value(v))
+#  define set_vaxc_errno(v) (vaxc$errno = (v))
+#else
+#  define set_errno(v)      (errno = (v))
+#  define set_vaxc_errno(v) (vaxc$errno = (v))
+#endif
+
+/* Handy way to vet calls to VMS system services and RTL routines. */
+#define _ckvmssts(call) { register unsigned long int __ckvms_sts; \
+  if (!((__ckvms_sts=(call))&1)) { \
+  set_errno(EVMSERR); set_vaxc_errno(__ckvms_sts); \
+  croak("Fatal VMS error at %s, line %d",__FILE__,__LINE__); } }
 
 #ifdef VMS_DO_SOCKETS
 #include "sockadapt.h"
@@ -56,6 +83,13 @@
 /* Assorted fiddling with sigs . . . */
 # include <signal.h>
 #define ABORT() abort()
+
+/* Used with our my_utime() routine in vms.c */
+struct utimbuf {
+  time_t actime;
+  time_t modtime;
+};
+#define utime my_utime
 
 /* This is what times() returns, but <times.h> calls it tbuffer_t on VMS */
 
@@ -107,6 +141,82 @@ typedef struct _dirdesc {
 
 #define rewinddir(dirp)		seekdir((dirp), 0)
 
+/* used for our emulation of getpw* */
+struct passwd {
+        char    *pw_name;    /* Username */
+        char    *pw_passwd;
+        Uid_t   pw_uid;      /* UIC member number */
+        Gid_t   pw_gid;      /* UIC group  number */
+        char    *pw_comment; /* Default device/directory (Unix-style) */
+        char    *pw_gecos;   /* Owner */
+        char    *pw_dir;     /* Default device/directory (VMS-style) */
+        char    *pw_shell;   /* Default CLI name (eg. DCL) */
+};
+#define pw_unixdir pw_comment  /* Default device/directory (Unix-style) */
+#define getpwnam my_getpwnam
+#define getpwuid my_getpwuid
+#define getpwent my_getpwent
+#define endpwent my_endpwent
+#define setpwent my_endpwent
+
+/* Our own stat_t substitute, since we play with st_dev and st_ino -
+ * we want atomic types so Unix-bound code which compares these fields
+ * for two files will work most of the time under VMS
+ */
+/* First, grab the system types, so we don't clobber them later */
+#include <stat.h>
+/* Since we've got to match the size of the CRTL's stat_t, we need
+ * to mimic DECC's alignment settings.
+ */
+#if defined(__DECC) || defined(__DECCXX)
+#  pragma __member_alignment __save
+#  pragma __nomember_alignment
+#endif
+#if defined(__DECC) 
+#  pragma __message __save
+#  pragma __message disable (__MISALGNDSTRCT)
+#  pragma __message disable (__MISALGNDMEM)
+#endif
+struct mystat
+{
+        char *st_devnam;  /* pointer to device name */
+        union {
+          unsigned short fid[3];
+          unsigned long st_ino_mostly;
+        } st_inode_u;
+        unsigned short st_mode;	/* file "mode" i.e. prot, dir, reg, etc. */
+        int	st_nlink;	/* for compatibility - not really used */
+        unsigned st_uid;	/* from ACP - QIO uic field */
+        unsigned short st_gid;	/* group number extracted from st_uid */
+        dev_t   st_rdev;	/* for compatibility - always zero */
+        off_t   st_size;	/* file size in bytes */
+        unsigned st_atime;	/* file access time; always same as st_mtime */
+        unsigned st_mtime;	/* last modification time */
+        unsigned st_ctime;	/* file creation time */
+        char	st_fab_rfm;	/* record format */
+        char	st_fab_rat;	/* record attributes */
+        char	st_fab_fsz;	/* fixed header size */
+        unsigned st_dev;	/* encoded device name */
+};
+#ifdef st_ino
+#  undef st_ino
+#endif
+#define st_ino st_inode_u.st_ino_mostly
+#define stat mystat
+typedef unsigned mydev_t;
+#define dev_t mydev_t
+typedef unsigned long myino_t;
+#define ino_t myino_t
+#if defined(__DECC) || defined(__DECCXX)
+#  pragma __member_alignment __restore
+#endif
+#if defined(__DECC) 
+#  pragma __message __restore
+#endif
+/* Cons up a 'delete' bit for testing access */
+#define S_IDUSR (S_IWUSR | S_IXUSR)
+#define S_IDGRP (S_IWGRP | S_IXGRP)
+#define S_IDOTH (S_IWOTH | S_IXOTH)
 
 /* Prototypes for functions unique to vms.c.  Don't include replacements
  * for routines in the mainline source files excluded by #ifndef VMS;
@@ -119,12 +229,11 @@ typedef struct _dirdesc {
  */
 typedef char  __VMS_PROTOTYPES__; /* prototype section start marker */
 char *	my_getenv _((char *));
-#ifndef HAS_WAITPID  /* Not a real waitpid - use only with popen from vms.c! */
 unsigned long int	waitpid _((unsigned long int, int *, int));
-#endif
 char *	my_gconvert _((double, int, int, char *));
 int	do_rmdir _((char *));
 int	kill_file _((char *));
+int	my_utime _((char *, struct utimbuf *));
 char *	fileify_dirspec _((char *, char *));
 char *	fileify_dirspec_ts _((char *, char *));
 char *	pathify_dirspec _((char *, char *));
@@ -145,32 +254,31 @@ void	seekdir _((DIR *, long));
 void	closedir _((DIR *));
 void	vmsreaddirversions _((DIR *, int));
 void	getredirection _((int *, char ***));
-int	flex_fstat _((int, stat_t *));
-int	flex_stat _((char *, stat_t *));
+I32	cando_by_name _((I32, I32, char *));
+int	flex_fstat _((int, struct stat *));
+int	flex_stat _((char *, struct stat *));
 int	trim_unixpath _((char *, char*));
-struct sv; /* forward declaration for vms_do_aexec and do_aspawn */
-           /* real declaration is in sv.h */
-#define bool char  /* This must match handy.h */
-bool	vms_do_aexec _((struct sv *, struct sv **, struct sv **));
+bool	vms_do_aexec _((SV *, SV **, SV **));
 bool	vms_do_exec _((char *));
-unsigned long int	do_aspawn _((struct sv *, struct sv **, struct sv **));
+unsigned long int	do_aspawn _((SV *, SV **, SV **));
 unsigned long int	do_spawn _((char *));
 int	my_fwrite _((void *, size_t, size_t, FILE *));
+struct passwd *	my_getpwnam _((char *name));
+struct passwd *	my_getpwuid _((Uid_t uid));
+struct passwd *	my_getpwent _(());
+void	my_endpwent _(());
+void	init_os_extras _(());
 typedef char __VMS_SEPYTOTORP__; /* prototype section end marker */
 
 #ifndef VMS_DO_SOCKETS
-/***** The following four #defines are temporary, and should be removed,
- * along with the corresponding routines in vms.c, when TCP/IP support
- * is integrated into the VMS port of perl5. (The temporary hacks are
- * here for now so pack can handle type N elements.)
- * - C. Bailey  26-Aug-1994
- *****/
-unsigned short int	tmp_shortflip _((unsigned short int));
-unsigned long int	tmp_longflip _((unsigned long int));
-#define htons(us) tmp_shortflip(us)
-#define ntohs(us) tmp_shortflip(us)
-#define htonl(ul) tmp_longflip(ul)
-#define ntohl(ul) tmp_longflip(ul)
+/* This relies on tricks in perl.h to pick up that these manifest constants
+ * are undefined and set up conversion routines.  It will then redefine
+ * these manifest constants, so the actual values will match config.h
+ */
+#undef HAS_HTONS
+#undef HAS_NTOHS
+#undef HAS_HTONL
+#undef HAS_NTOHL
 #endif
 
 #endif  /* __vmsish_h_included */

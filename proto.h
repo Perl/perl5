@@ -8,6 +8,7 @@
 #endif
 #ifdef OVERLOAD
 SV*	amagic_call _((SV* left,SV* right,int method,int dir));
+bool Gv_AMupdate _((HV* stash));
 #endif /* OVERLOAD */
 OP*	append_elem _((I32 optype, OP* head, OP* tail));
 OP*	append_list _((I32 optype, LISTOP* first, LISTOP* last));
@@ -42,6 +43,7 @@ OP *	ck_retarget _((OP *op));
 OP*	convert _((I32 optype, I32 flags, OP* op));
 char*	cpytill _((char* to, char* from, char* fromend, int delim, I32* retlen));
 void	croak _((char* pat,...)) __attribute__((format(printf,1,2),noreturn));
+CV*	cv_clone _((CV* proto));
 void	cv_undef _((CV* cv));
 #ifdef DEBUGGING
 void	cx_dump _((CONTEXT* cs));
@@ -93,7 +95,7 @@ void	do_vecset _((SV* sv));
 void	do_vop _((I32 optype, SV* sv, SV* left, SV* right));
 void	dump_all _((void));
 void	dump_eval _((void));
-#ifdef NOTDEF  /* See util.c */
+#ifdef DUMP_FDS  /* See util.c */
 int	dump_fds _((char* s));
 #endif
 void	dump_form _((GV* gv));
@@ -127,7 +129,7 @@ void	he_delayfree _((HE* hent));
 void	he_free _((HE* hent));
 void	hoistmust _((PMOP* pm));
 void	hv_clear _((HV* tb));
-SV*	hv_delete _((HV* tb, char* key, U32 klen));
+SV*	hv_delete _((HV* tb, char* key, U32 klen, I32 flags));
 bool	hv_exists _((HV* tb, char* key, U32 klen));
 SV**	hv_fetch _((HV* tb, char* key, U32 klen, I32 lval));
 I32	hv_iterinit _((HV* tb));
@@ -208,7 +210,7 @@ char*	my_bcopy _((char* from, char* to, I32 len));
 #if !defined(HAS_BZERO) && !defined(HAS_MEMSET)
 char*	my_bzero _((char* loc, I32 len));
 #endif
-void	my_exit _((I32 status)) __attribute__((noreturn));
+void	my_exit _((U32 status)) __attribute__((noreturn));
 #ifdef	USE_MY_FMOD
 double	my_fmod _((double x, double y));
 #endif
@@ -222,6 +224,8 @@ void	my_setenv _((char* nam, char* val));
 I32	my_stat _((void));
 #ifdef MYSWAP
 short	my_swap _((short s));
+long	my_htonl _((long l));
+long	my_ntohl _((long l));
 #endif
 void	my_unexec _((void));
 OP*	newANONLIST _((OP* op));
@@ -302,7 +306,7 @@ I32	perl_callpv _((char* subname, I32 sp, I32 gimme, I32 hasargs, I32 numargs));
 I32	perl_callsv _((SV* sv, I32 sp, I32 gimme, I32 hasargs, I32 numargs));
 #endif
 void	perl_construct _((PerlInterpreter* sv_interp));
-void	perl_destruct _((PerlInterpreter* sv_interp, int destruct_level));
+void	perl_destruct _((PerlInterpreter* sv_interp));
 void	perl_free _((PerlInterpreter* sv_interp));
 SV*	perl_get_sv _((char* name, I32 create));
 AV*	perl_get_av _((char* name, I32 create));
@@ -381,9 +385,6 @@ OP*	scalarvoid _((OP* op));
 unsigned long	scan_hex _((char* start, I32 len, I32* retlen));
 char*	scan_num _((char* s));
 unsigned long	scan_oct _((char* start, I32 len, I32* retlen));
-#ifdef NOTDEF /* See toke.c pp_ctl.c and op.c */
-void	scan_prefix _((PMOP* pm, char* string, I32 len));
-#endif
 OP*	scope _((OP* o));
 char*	screaminstr _((SV* bigsv, SV* littlesv));
 #ifndef VMS

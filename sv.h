@@ -100,7 +100,7 @@ struct io {
 #define SVf_POK		0x00040000	/* has valid public pointer value */
 #define SVf_ROK		0x00080000	/* has a valid reference pointer */
 
-#define SVf_FAKE	0x00100000	/* glob is just a copy */
+#define SVf_FAKE	0x00100000	/* glob or lexical is just a copy */
 #define SVf_OOK		0x00200000	/* has valid offset value */
 #define SVf_BREAK	0x00400000	/* refcnt is artificially low */
 #define SVf_READONLY	0x00800000	/* may not be modified */
@@ -130,6 +130,10 @@ struct io {
 #define SVpbm_TAIL	0x20000000
 
 #define SVpgv_MULTI	0x80000000
+
+#define SVpcv_CLONE	0x80000000	/* anon CV uses external lexicals */
+#define SVpcv_CLONED	0x40000000	/* a clone of one of those */
+#define SVpcv_ANON	0x20000000	/* CvGV() can't be trusted */
 
 #ifdef OVERLOAD
 #define SVpgv_AM        0x40000000
@@ -233,6 +237,7 @@ struct xpvfm {
     GV *	xcv_filegv;
     long	xcv_depth;		/* >= 2 indicates recursive call */
     AV *	xcv_padlist;
+    CV *	xcv_outside;
     I32		xfm_lines;
 };
 
@@ -266,10 +271,12 @@ struct xpvio {
 #define IOf_ARGV 1	/* this fp iterates over ARGV */
 #define IOf_START 2	/* check for null ARGV and substitute '-' */
 #define IOf_FLUSH 4	/* this fp wants a flush after write op */
+#define IOf_DIDTOP 8	/* just did top of form */
 
 /* The following macros define implementation-independent predicates on SVs. */
 
 #define SvNIOK(sv)		(SvFLAGS(sv) & (SVf_IOK|SVf_NOK))
+#define SvNIOKp(sv)		(SvFLAGS(sv) & (SVp_IOK|SVp_NOK))
 #define SvNIOK_off(sv)		(SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK| \
 						  SVp_IOK|SVp_NOK))
 

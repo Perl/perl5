@@ -16,6 +16,8 @@ sub assert {
 } 
 
 sub panic {
+    package DB;
+
     select(STDERR);
 
     print "\npanic: @_\n";
@@ -24,10 +26,11 @@ sub panic {
 
     # stack traceback gratefully borrowed from perl debugger
 
-    local($i,$_);
-    local($p,$f,$l,$s,$h,$a,@a,@sub);
+    local $_;
+    my $i;
+    my ($p,$f,$l,$s,$h,$a,@a,@frames);
     for ($i = 0; ($p,$f,$l,$s,$h,$w) = caller($i); $i++) {
-	@a = @DB'args;
+	@a = @args;
 	for (@a) {
 	    if (/^StB\000/ && length($_) == length($_main{'_main'})) {
 		$_ = sprintf("%s",$_);
@@ -41,10 +44,10 @@ sub panic {
 	}
 	$w = $w ? '@ = ' : '$ = ';
 	$a = $h ? '(' . join(', ', @a) . ')' : '';
-	push(@sub, "$w&$s$a from file $f line $l\n");
+	push(@frames, "$w&$s$a from file $f line $l\n");
     }
-    for ($i=0; $i <= $#sub; $i++) {
-	print $sub[$i];
+    for ($i=0; $i <= $#frames; $i++) {
+	print $frames[$i];
     }
     exit 1;
 } 

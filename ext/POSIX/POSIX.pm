@@ -7,20 +7,22 @@ require DynaLoader;
 require Config;
 @ISA = qw(Exporter DynaLoader);
 
-$H{assert_h} =	[qw(assert NDEBUG)];
+%EXPORT_TAGS = (
 
-$H{ctype_h} =	[qw(isalnum isalpha iscntrl isdigit isgraph islower
-		isprint ispunct isspace isupper isxdigit tolower toupper)];
+    assert_h =>	[qw(assert NDEBUG)],
 
-$H{dirent_h} =	[qw()];
+    ctype_h =>	[qw(isalnum isalpha iscntrl isdigit isgraph islower
+		isprint ispunct isspace isupper isxdigit tolower toupper)],
 
-$H{errno_h} =   [qw(E2BIG EACCES EAGAIN EBADF EBUSY ECHILD EDEADLK EDOM
+    dirent_h =>	[qw()],
+
+    errno_h =>	[qw(E2BIG EACCES EAGAIN EBADF EBUSY ECHILD EDEADLK EDOM
 		EEXIST EFAULT EFBIG EINTR EINVAL EIO EISDIR EMFILE
 		EMLINK ENAMETOOLONG ENFILE ENODEV ENOENT ENOEXEC ENOLCK
 		ENOMEM ENOSPC ENOSYS ENOTDIR ENOTEMPTY ENOTTY ENXIO
-		EPERM EPIPE ERANGE EROFS ESPIPE ESRCH EXDEV errno)];
+		EPERM EPIPE ERANGE EROFS ESPIPE ESRCH EXDEV errno)],
 
-$H{fcntl_h} =   [qw(FD_CLOEXEC F_DUPFD F_GETFD F_GETFL F_GETLK F_RDLCK
+    fcntl_h =>	[qw(FD_CLOEXEC F_DUPFD F_GETFD F_GETFL F_GETLK F_RDLCK
 		F_SETFD F_SETFL F_SETLK F_SETLKW F_UNLCK F_WRLCK
 		O_ACCMODE O_APPEND O_CREAT O_EXCL O_NOCTTY O_NONBLOCK
 		O_RDONLY O_RDWR O_TRUNC O_WRONLY
@@ -28,9 +30,9 @@ $H{fcntl_h} =   [qw(FD_CLOEXEC F_DUPFD F_GETFD F_GETFL F_GETLK F_RDLCK
 		SEEK_CUR SEEK_END SEEK_SET
 		S_IRGRP S_IROTH S_IRUSR S_IRWXG S_IRWXO S_IRWXU
 		S_ISBLK S_ISCHR S_ISDIR S_ISFIFO S_ISGID S_ISREG S_ISUID
-		S_IWGRP S_IWOTH S_IWUSR)];
+		S_IWGRP S_IWOTH S_IWUSR)],
 
-$H{float_h} =	[qw(DBL_DIG DBL_EPSILON DBL_MANT_DIG
+    float_h =>	[qw(DBL_DIG DBL_EPSILON DBL_MANT_DIG
 		DBL_MAX DBL_MAX_10_EXP DBL_MAX_EXP
 		DBL_MIN DBL_MIN_10_EXP DBL_MIN_EXP
 		FLT_DIG FLT_EPSILON FLT_MANT_DIG
@@ -39,11 +41,11 @@ $H{float_h} =	[qw(DBL_DIG DBL_EPSILON DBL_MANT_DIG
 		FLT_RADIX FLT_ROUNDS
 		LDBL_DIG LDBL_EPSILON LDBL_MANT_DIG
 		LDBL_MAX LDBL_MAX_10_EXP LDBL_MAX_EXP
-		LDBL_MIN LDBL_MIN_10_EXP LDBL_MIN_EXP)];
+		LDBL_MIN LDBL_MIN_10_EXP LDBL_MIN_EXP)],
 
-$H{grp_h} =	[qw()];
+    grp_h =>	[qw()],
 
-$H{limits_h} =	[qw( ARG_MAX CHAR_BIT CHAR_MAX CHAR_MIN CHILD_MAX
+    limits_h =>	[qw( ARG_MAX CHAR_BIT CHAR_MAX CHAR_MIN CHILD_MAX
 		INT_MAX INT_MIN LINK_MAX LONG_MAX LONG_MIN MAX_CANON
 		MAX_INPUT MB_LEN_MAX NAME_MAX NGROUPS_MAX OPEN_MAX
 		PATH_MAX PIPE_BUF SCHAR_MAX SCHAR_MIN SHRT_MAX SHRT_MIN
@@ -52,30 +54,30 @@ $H{limits_h} =	[qw( ARG_MAX CHAR_BIT CHAR_MAX CHAR_MIN CHILD_MAX
 		_POSIX_LINK_MAX _POSIX_MAX_CANON _POSIX_MAX_INPUT
 		_POSIX_NAME_MAX _POSIX_NGROUPS_MAX _POSIX_OPEN_MAX
 		_POSIX_PATH_MAX _POSIX_PIPE_BUF _POSIX_SSIZE_MAX
-		_POSIX_STREADM_MAX _POSIX_TZNAME_MAX)];
+		_POSIX_STREADM_MAX _POSIX_TZNAME_MAX)],
 
-$H{locale_h} =  [qw(LC_ALL LC_COLLATE LC_CTYPE LC_MONETARY LC_NUMERIC
-		LC_TIME NULL localeconv setlocale)];
+    locale_h =>	[qw(LC_ALL LC_COLLATE LC_CTYPE LC_MONETARY LC_NUMERIC
+		LC_TIME NULL localeconv setlocale)],
 
-$H{math_h} =    [qw(HUGE_VAL acos asin atan ceil cosh fabs floor fmod
-		frexp ldexp log10 modf pow sinh tanh)];
+    math_h =>	[qw(HUGE_VAL acos asin atan ceil cosh fabs floor fmod
+		frexp ldexp log10 modf pow sinh tanh)],
 
-$H{pwd_h} =	[qw()];
+    pwd_h =>	[qw()],
 
-$H{setjmp_h} =	[qw(longjmp setjmp siglongjmp sigsetjmp)];
+    setjmp_h =>	[qw(longjmp setjmp siglongjmp sigsetjmp)],
 
-$H{signal_h} =  [qw(SA_NOCLDSTOP SIGABRT SIGALRM SIGCHLD SIGCONT SIGFPE
+    signal_h =>	[qw(SA_NOCLDSTOP SIGABRT SIGALRM SIGCHLD SIGCONT SIGFPE
 		SIGHUP SIGILL SIGINT SIGKILL SIGPIPE SIGQUIT SIGSEGV
 		SIGSTOP SIGTERM SIGTSTP SIGTTIN SIGTTOU SIGUSR1 SIGUSR2
 		SIG_BLOCK SIG_DFL SIG_ERR SIG_IGN SIG_SETMASK SIG_UNBLOCK
 		raise sigaction signal sigpending sigprocmask
-		sigsuspend)];
+		sigsuspend)],
 
-$H{stdarg_h} =	[qw()];
+    stdarg_h =>	[qw()],
 
-$H{stddef_h} =	[qw(NULL offsetof)];
+    stddef_h =>	[qw(NULL offsetof)],
 
-$H{stdio_h} =   [qw(BUFSIZ EOF FILENAME_MAX L_ctermid L_cuserid
+    stdio_h =>	[qw(BUFSIZ EOF FILENAME_MAX L_ctermid L_cuserid
 		L_tmpname NULL SEEK_CUR SEEK_END SEEK_SET STREAM_MAX
 		TMP_MAX stderr stdin stdout _IOFBF _IOLBF _IONBF
 		clearerr fclose fdopen feof ferror fflush fgetc fgetpos
@@ -83,33 +85,33 @@ $H{stdio_h} =   [qw(BUFSIZ EOF FILENAME_MAX L_ctermid L_cuserid
 		fscanf fseek fsetpos ftell fwrite getchar gets
 		perror putc putchar puts remove rewind
 		scanf setbuf setvbuf sscanf tmpfile tmpnam
-		ungetc vfprintf vprintf vsprintf)];
+		ungetc vfprintf vprintf vsprintf)],
 
-$H{stdlib_h} =  [qw(EXIT_FAILURE EXIT_SUCCESS MB_CUR_MAX NULL RAND_MAX
+    stdlib_h =>	[qw(EXIT_FAILURE EXIT_SUCCESS MB_CUR_MAX NULL RAND_MAX
 		abort atexit atof atoi atol bsearch calloc div
 		free getenv labs ldiv malloc mblen mbstowcs mbtowc
-		qsort realloc strtod strtol stroul wcstombs wctomb)];
+		qsort realloc strtod strtol stroul wcstombs wctomb)],
 
-$H{string_h} =  [qw(NULL memchr memcmp memcpy memmove memset strcat
+    string_h =>	[qw(NULL memchr memcmp memcpy memmove memset strcat
 		strchr strcmp strcoll strcpy strcspn strerror strlen
 		strncat strncmp strncpy strpbrk strrchr strspn strstr
-		strtok strxfrm)];
+		strtok strxfrm)],
 
-$H{sys_stat_h} = [qw(S_IRGRP S_IROTH S_IRUSR S_IRWXG S_IRWXO S_IRWXU
+    sys_stat_h => [qw(S_IRGRP S_IROTH S_IRUSR S_IRWXG S_IRWXO S_IRWXU
 		S_ISBLK S_ISCHR S_ISDIR S_ISFIFO S_ISGID S_ISREG
 		S_ISUID S_IWGRP S_IWOTH S_IWUSR S_IXGRP S_IXOTH S_IXUSR
-		fstat mkfifo)];
+		fstat mkfifo)],
 
-$H{sys_times_h} = [qw()];
+    sys_times_h => [qw()],
 
-$H{sys_types_h} = [qw()];
+    sys_types_h => [qw()],
 
-$H{sys_utsname_h} = [qw(uname)];
+    sys_utsname_h => [qw(uname)],
 
-$H{sys_wait_h} = [qw(WEXITSTATUS WIFEXITED WIFSIGNALED WIFSTOPPED
-		WNOHANG WSTOPSIG WTERMSIG WUNTRACED)];
+    sys_wait_h => [qw(WEXITSTATUS WIFEXITED WIFSIGNALED WIFSTOPPED
+		WNOHANG WSTOPSIG WTERMSIG WUNTRACED)],
 
-$H{termios_h} = [qw( B0 B110 B1200 B134 B150 B1800 B19200 B200 B2400
+    termios_h => [qw( B0 B110 B1200 B134 B150 B1800 B19200 B200 B2400
 		B300 B38400 B4800 B50 B600 B75 B9600 BRKINT CLOCAL
 		CREAD CS5 CS6 CS7 CS8 CSIZE CSTOPB ECHO ECHOE ECHOK
 		ECHONL HUPCL ICANON ICRNL IEXTEN IGNBRK IGNCR IGNPAR
@@ -119,12 +121,12 @@ $H{termios_h} = [qw( B0 B110 B1200 B134 B150 B1800 B19200 B200 B2400
 		TOSTOP VEOF VEOL VERASE VINTR VKILL VMIN VQUIT VSTART
 		VSTOP VSUSP VTIME
 		cfgetispeed cfgetospeed cfsetispeed cfsetospeed tcdrain
-		tcflow tcflush tcgetattr tcsendbreak tcsetattr )];
+		tcflow tcflush tcgetattr tcsendbreak tcsetattr )],
 
-$H{time_h} =    [qw(CLK_TCK CLOCKS_PER_SEC NULL asctime clock ctime
-		difftime mktime strftime tzset tzname)];
+    time_h =>	[qw(CLK_TCK CLOCKS_PER_SEC NULL asctime clock ctime
+		difftime mktime strftime tzset tzname)],
 
-$H{unistd_h} =  [qw(F_OK NULL R_OK SEEK_CUR SEEK_END SEEK_SET
+    unistd_h =>	[qw(F_OK NULL R_OK SEEK_CUR SEEK_END SEEK_SET
 		STRERR_FILENO STDIN_FILENO STDOUT_FILENO W_OK X_OK
 		_PC_CHOWN_RESTRICTED _PC_LINK_MAX _PC_MAX_CANON
 		_PC_MAX_INPUT _PC_NAME_MAX _PC_NO_TRUNC _PC_PATH_MAX
@@ -138,28 +140,13 @@ $H{unistd_h} =  [qw(F_OK NULL R_OK SEEK_CUR SEEK_END SEEK_SET
 		dup2 dup execl execle execlp execv execve execvp
 		fpathconf getcwd getegid geteuid getgid getgroups
 		getpid getuid isatty lseek pathconf pause setgid setpgid
-		setsid setuid sysconf tcgetpgrp tcsetpgrp ttyname)];
+		setsid setuid sysconf tcgetpgrp tcsetpgrp ttyname)],
 
-$H{utime_h} =	[qw()];
+    utime_h =>	[qw()],
 
-sub expand {
-    local (@mylist);
-    foreach $entry (@_) {
-	if ($H{$entry}) {
-	    push(@mylist, @{$H{$entry}});
-	}
-	else {
-	    push(@mylist, $entry);
-	}
-    }
-    @mylist;
-}
+);
 
-@EXPORT = expand qw(assert_h ctype_h dirent_h errno_h fcntl_h float_h
-		grp_h limits_h locale_h math_h pwd_h setjmp_h signal_h
-		stdarg_h stddef_h stdio_h stdlib_h string_h sys_stat_h
-		sys_times_h sys_types_h sys_utsname_h sys_wait_h
-		termios_h time_h unistd_h utime_h);
+Exporter::export_tags();
 
 @EXPORT_OK = qw(
     closedir opendir readdir rewinddir
@@ -179,9 +166,10 @@ sub expand {
     utime
 );
 
+# Grandfather old foo_h form to new :foo_h form
 sub import {
     my $this = shift;
-    my @list = expand @_;
+    my @list = map { m/^\w+_h$/ ? ":$_" : $_ } @_;
     local $Exporter::ExportLevel = 1;
     Exporter::import($this,@list);
 }
@@ -237,7 +225,7 @@ sub gensym {
 sub ungensym {
     local($x) = shift;
     $x =~ s/.*:://;
-    delete $::_POSIX{$x};
+    delete $POSIX::{$x};
 }
 
 ############################
@@ -257,7 +245,7 @@ sub new {
     $mode =~ s/a.*/>>/ ||
     $mode =~ s/w.*/>/ ||
     ($mode = '<');
-    open($glob, "$mode $filename");
+    open($glob, "$mode $filename") and
     bless \$glob;
 }
 
@@ -268,7 +256,7 @@ sub new_from_fd {
     $mode =~ s/a.*/>>/ ||
     $mode =~ s/w.*/>/ ||
     ($mode = '<');
-    open($glob, "$mode&=$fd");
+    open($glob, "$mode&=$fd") and
     bless \$glob;
 }
 
@@ -279,6 +267,10 @@ sub clearerr {
 
 sub close {
     POSIX::usage "close(filehandle)" if @_ != 1;
+    close($_[0]);
+}
+
+sub DESTROY {
     close($_[0]);
     ungensym($_[0]);
 }

@@ -50,16 +50,20 @@ taint_env()
     if (tainting) {
 	MAGIC *mg = 0;
 	svp = hv_fetch(GvHVn(envgv),"PATH",4,FALSE);
-	if (!svp || *svp == &sv_undef || (mg = mg_find(*svp, 't'))) {
-	    tainted = 1;
+	if (!svp || *svp == &sv_undef ||
+	  ((mg = mg_find(*svp, 't')) && mg->mg_len & 1))
+	{
+	    tainted = TRUE;
 	    if (mg && MgTAINTEDDIR(mg))
 		taint_proper("Insecure directory in %s%s", "$ENV{PATH}");
 	    else
 		taint_proper("Insecure %s%s", "$ENV{PATH}");
 	}
 	svp = hv_fetch(GvHVn(envgv),"IFS",3,FALSE);
-	if (svp && *svp != &sv_undef && mg_find(*svp, 't')) {
-	    tainted = 1;
+	if (svp && *svp != &sv_undef &&
+	  (mg = mg_find(*svp, 't')) && mg->mg_len & 1)
+	{
+	    tainted = TRUE;
 	    taint_proper("Insecure %s%s", "$ENV{IFS}");
 	}
     }

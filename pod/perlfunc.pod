@@ -234,11 +234,18 @@ Returns the context of the current subroutine call.  In a scalar context,
 returns TRUE if there is a caller, that is, if we're in a subroutine or
 eval() or require(), and FALSE otherwise.  In a list context, returns
 
-    ($package,$filename,$line) = caller;
+    ($package, $filename, $line) = caller;
 
 With EXPR, it returns some extra information that the debugger uses to
 print a stack trace.  The value of EXPR indicates how many call frames
 to go back before the current one.
+
+    ($package, $filename, $line,
+     $subroutine, $hasargs, $wantargs) = caller($i);
+
+Furthermore, when called from within the DB package, caller returns more
+detailed information: it sets sets the list variable @DB:args to be the
+arguments with which that subroutine was invoked.
 
 =item chdir EXPR
 
@@ -310,6 +317,9 @@ You can actually chop anything that's an lvalue, including an assignment:
 If you chop a list, each element is chopped.  Only the value of the
 last chop is returned.
 
+Note that chop returns the last character.  To return all but the last
+character, use C<substr($string, 0, -1)>.
+
 =item chown LIST
 
 Changes the owner (and group) of a list of files.  The first two
@@ -371,7 +381,7 @@ Closes a directory opened by opendir().
 
 Attempts to connect to a remote socket, just as the connect system call
 does.  Returns TRUE if it succeeded, FALSE otherwise.  NAME should be a
-package address of the appropriate type for the socket.  See example in
+packed address of the appropriate type for the socket.  See example in
 L<perlipc>.
 
 =item cos EXPR
@@ -404,7 +414,7 @@ their own password:
     } 
 
 Of course, typing in your own password to whoever asks you 
-for it is unwise at best.
+for it is unwise.
 
 =item dbmclose ASSOC_ARRAY
 
@@ -492,8 +502,8 @@ a hash key lookup:
 
 Outside of an eval(), prints the value of LIST to C<STDERR> and exits with
 the current value of $!  (errno).  If $! is 0, exits with the value of
-C<($? E<gt>E<gt> 8)> (`command` status).  If C<($? E<gt>E<gt> 8)> is 0,
-exits with 255.  Inside an eval(), the error message is stuffed into C<$@>.
+C<($? E<gt>E<gt> 8)> (backtick `command` status).  If C<($? E<gt>E<gt> 8)> is 0,
+exits with 255.  Inside an eval(), the error message is stuffed into C<$@>,
 and the eval() is terminated with the undefined value.
 
 Equivalent examples:
@@ -611,27 +621,31 @@ Returns 1 if the next read on FILEHANDLE will return end of file, or if
 FILEHANDLE is not open.  FILEHANDLE may be an expression whose value
 gives the real filehandle name.  (Note that this function actually
 reads a character and then ungetc()s it, so it is not very useful in an
-interactive context.)  An C<eof> without an argument returns the eof status
-for the last file read.  Empty parentheses () may be used to indicate
+interactive context.)  Do not read from a terminal file (or call
+C<eof(FILEHANDLE)> on it) after end-of-file is reached.  Filetypes such
+as terminals may lose the end-of-file condition if you do.
+
+An C<eof> without an argument uses the last file read as argument.
+Empty parentheses () may be used to indicate
 the pseudo file formed of the files listed on the command line, i.e.
 C<eof()> is reasonable to use inside a while (<>) loop to detect the end
 of only the last file.  Use C<eof(ARGV)> or eof without the parentheses to
 test I<EACH> file in a while (<>) loop.  Examples:
 
+    # reset line numbering on each input file
+    while (<>) {
+	print "$.\t$_";
+	close(ARGV) if (eof);	# Not eof().
+    }
+
     # insert dashes just before last line of last file
     while (<>) {
 	if (eof()) {
 	    print "--------------\n";
+	    close(ARGV);	# close or break; is needed if we
+				# are reading from the terminal
 	}
 	print;
-    }
-
-    # reset line numbering on each input file
-    while (<>) {
-	print "$.\t$_";
-	if (eof) {	# Not eof().
-	    close(ARGV);
-	}
     }
 
 Practical hint: you almost never need to use C<eof> in Perl, because the
@@ -693,7 +707,7 @@ reader wonder what else might be happening (nothing is).) Cases 3 and 4
 likewise behave in the same way: they run the code <$x>, which does
 nothing at all.  (Case 4 is preferred for purely visual reasons.) Case 5
 is a place where normally you I<WOULD> like to use double quotes, except
-that in particular situation, you can just use symbolic references
+in that particular situation, you can just use symbolic references
 instead, as in case 6.
 
 =item exec LIST
@@ -852,10 +866,14 @@ accumulator, C<$^A>.  Eventually, when a write() is done, the contents of
 C<$^A> are written to some filehandle, but you could also read C<$^A>
 yourself and then set C<$^A> back to "".  Note that a format typically
 does one formline() per line of form, but the formline() function itself
-doesn't care how many newlines are embedded in the PICTURE.  Be careful
-if you put double quotes around the picture, since an "C<@>" character may
-be taken to mean the beginning of an array name.  formline() always
-returns TRUE.
+doesn't care how many newlines are embedded in the PICTURE.  This means
+that the ~ and ~~ tokens will treat the entire PICTURE as a single line.
+You may therefore need to use multiple formlines to implement a single
+record format, just like the format compiler.
+
+Be careful if you put double quotes around the picture, since an "C<@>"
+character may be taken to mean the beginning of an array name.
+formline() always returns TRUE.
 
 =item getc FILEHANDLE
 
@@ -1018,7 +1036,7 @@ operator.
 =item gmtime EXPR
 
 Converts a time as returned by the time function to a 9-element array
-with the time analyzed for the Greenwich timezone.  Typically used as
+with the time localized for the Greenwich timezone.  Typically used as
 follows:
 
 
@@ -1031,6 +1049,8 @@ the range 0..6.  If EXPR is omitted, does C<gmtime(time())>.
 
 =item goto LABEL
 
+=item goto EXPR
+
 =item goto &NAME
 
 The goto-LABEL form finds the statement labeled with LABEL and resumes
@@ -1041,6 +1061,12 @@ can be used to go almost anywhere else within the dynamic scope,
 including out of subroutines, but it's usually better to use some other
 construct such as last or die.  The author of Perl has never felt the
 need to use this form of goto (in Perl, that is--C is another matter).
+
+The goto-EXPR form expects a label name, whose scope will be resolved
+dynamically.  This allows for computed gotos per FORTRAN, but isn't
+necessarily recommended if you're optimizing for maintainability:
+
+    goto ("FOO", "BAR", "GLARCH")[$i];
 
 The goto-&NAME form is highly magical, and substitutes a call to the
 named subroutine for the currently running subroutine.  This is used by
@@ -1081,7 +1107,7 @@ omitted, uses $_.
 There is no built-in import() function.  It is merely an ordinary
 method subroutine defined (or inherited) by modules that wish to export
 names to another module.  The use() function calls the import() method
-for the package used.  See also L</use> below and L<perlmod>.
+for the package used.  See also L</use> and L<perlmod>.
 
 =item index STR,SUBSTR,POSITION
 
@@ -1228,8 +1254,8 @@ it succeeded, FALSE otherwise.  See example in L<perlipc>.
 =item local EXPR
 
 In general, you should be using "my" instead of "local", because it's
-faster and safer.  Format variables have to use "local" though, as
-do any other variables whose local value must be visible to called
+faster and safer.  Format variables often use "local" though, as
+do other variables whose current value must be visible to called
 subroutines.  This is known as dynamic scoping.  Lexical scoping is
 done with "my", which works more like C's auto declarations.
 
@@ -1277,11 +1303,12 @@ parameters to a subroutine.  Examples:
     }
 
 Note that local() is a run-time command, and so gets executed every
-time through a loop.  In Perl 4 it used  up more stack storage each
+time through a loop.  In Perl 4 it used more stack storage each
 time until the loop was exited.  Perl 5 reclaims the space each time
 through, but it's still more efficient to declare your variables
 outside the loop.
 
+A local is simply a modifier on an lvalue expression.
 When you assign to a localized EXPR, the local doesn't change whether
 EXPR is viewed as a scalar or an array.  So
 
@@ -1435,17 +1462,37 @@ used to name the parameters to a subroutine.  Examples:
     }
     # Outer @ARGV again visible
 
-When you assign to the EXPR, the "my" doesn't change whether
+The "my" is simply a modifier on something you might assign to.
+So when you do assign to the EXPR, the "my" doesn't change whether
 EXPR is viewed as a scalar or an array.  So
 
-    my($foo) = <STDIN>;
+    my ($foo) = <STDIN>;
     my @FOO = <STDIN>;
 
 both supply a list context to the righthand side, while
 
     my $foo = <STDIN>;
 
-supplies a scalar context.
+supplies a scalar context.  But the following only declares one variable:
+
+    my $foo, $bar = 1;
+
+That has the same effect as
+
+    my $foo;
+    $bar = 1;
+
+The declared variable is not introduced (is not visible) until after
+the current statement.  Thus,
+
+    my $x = $x;
+
+can be used to initialize the new $x with the value of the old $x, and 
+the expression
+
+    my $x = 123 and $x == 123
+
+is false unless the old $x happened to have the value 123.
 
 Some users may wish to encourage the use of lexically scoped variables.
 As an aid to catching implicit references to package variables,
@@ -1947,8 +1994,8 @@ If EXPR is a bare word, the require assumes a "F<.pm>" extension for you,
 to make it easy to load standard modules.  This form of loading of 
 modules does not risk altering your namespace.
 
-For a yet more powerful import facility, see the L</use()> below, and 
-also L<perlmod>.
+For a yet-more-powerful import facility, see the L</use()> and 
+L<perlmod>.
 
 =item reset EXPR
 
@@ -2020,7 +2067,7 @@ call of stdio.  FILEHANDLE may be an expression whose value gives the name
 of the filehandle.  The values for WHENCE are 0 to set the file pointer to
 POSITION, 1 to set the it to current plus POSITION, and 2 to set it to EOF
 plus offset.  You may use the values SEEK_SET, SEEK_CUR, and SEEK_END for
-this is usin the POSIX module.  Returns 1 upon success, 0 otherwise.
+this is using the POSIX module.  Returns 1 upon success, 0 otherwise.
 
 =item seekdir DIRHANDLE,POS
 
@@ -2146,7 +2193,7 @@ implement setpgrp(2).
 =item setpriority WHICH,WHO,PRIORITY
 
 Sets the current priority for a process, a process group, or a user.
-(See Lsetpriority(2)>.)  Will produce a fatal error if used on a machine
+(See setpriority(2).)  Will produce a fatal error if used on a machine
 that doesn't implement setpriority(2).
 
 =item setsockopt SOCKET,LEVEL,OPTNAME,OPTVAL
@@ -2330,7 +2377,8 @@ using C<??> as the pattern delimiters, but it still returns the array
 value.)  The use of implicit split to @_ is deprecated, however.
 
 If EXPR is omitted, splits the $_ string.  If PATTERN is also omitted,
-splits on whitespace (C</[ \t\n]+/>).  Anything matching PATTERN is taken
+splits on whitespace (after skipping any leading whitespace).
+Anything matching PATTERN is taken
 to be a delimiter separating the fields.  (Note that the delimiter may
 be longer than one character.)  If LIMIT is specified and is not
 negative, splits into no more than that many fields (though it may
@@ -2340,7 +2388,7 @@ If LIMIT is negative, it is treated as if an arbitrarily large LIMIT
 had been specified.
 
 A pattern matching the null string (not to be confused with
-a null pattern C<//., which is just one member of the set of patterns
+a null pattern C<//>, which is just one member of the set of patterns
 matching a null string) will split the value of EXPR into separate
 characters at each point it matches that way.  For example:
 
@@ -2369,17 +2417,22 @@ produces the list value
 
 The pattern C</PATTERN/> may be replaced with an expression to specify
 patterns that vary at runtime.  (To do runtime compilation only once,
-use C</$variable/o>.)  As a special case, specifying a space S<(' ')> will
-split on white space just as split with no arguments does, but leading
-white space does I<NOT> produce a null first field.  Thus, split(' ') can
-be used to emulate B<awk>'s default behavior, whereas C<split(/ /)> will
-give you as many null initial fields as there are leading spaces.
+use C</$variable/o>.)
+
+As a special case, specifying a PATTERN of space (C<' '>) will split on
+white space just as split with no arguments does.  Thus, split(' ') can
+be used to emulate B<awk>'s default behavior, whereas C<split(/ /)>
+will give you as many null initial fields as there are leading spaces.
+A split on /\s+/ is like a split(' ') except that any leading
+whitespace produces a null first field.  A split with no arguments
+really does a C<split(' ', $_)> internally.
 
 Example:
 
     open(passwd, '/etc/passwd');
     while (<passwd>) {
-	($login, $passwd, $uid, $gid, $gcos, $home, $shell) = split(/:/);
+	($login, $passwd, $uid, $gid, $gcos, 
+	    $home, $shell) = split(/:/);
 	...
     }
 
@@ -2495,7 +2548,10 @@ out the names of those files that contain a match:
 Extracts a substring out of EXPR and returns it.  First character is at
 offset 0, or whatever you've set $[ to.  If OFFSET is negative, starts
 that far from the end of the string.  If LEN is omitted, returns
-everything to the end of the string.  You can use the substr() function
+everything to the end of the string.  If LEN is negative, leaves that
+many characters off the end of the string.
+
+You can use the substr() function
 as an lvalue, in which case EXPR must be an lvalue.  If you assign
 something shorter than LEN, the string will shrink, and if you assign
 something longer than LEN, the string will grow to accommodate it.  To
@@ -2580,15 +2636,15 @@ the corresponding system library routine.
 =item tie VARIABLE,PACKAGENAME,LIST
 
 This function binds a variable to a package that will provide the
-implementation for the variable.  VARIABLE is the name of the variable
-to be enchanted.  PACKAGENAME is the name of a package implementing
-objects of correct type.  Any additional arguments are passed to the
-"new" method of the package.  Typically these are arguments such as
-might be passed to the dbm_open() function of C.
+implementation for the variable.  VARIABLE is the name of the variable to
+be enchanted.  PACKAGENAME is the name of a package implementing objects
+of correct type.  Any additional arguments are passed to the "new" method
+of the package (meaning TIESCALAR, TIEARRAY, or TIEHASH).  Typically these
+are arguments such as might be passed to the dbm_open() function of C.
 
 Note that functions such as keys() and values() may return huge array
-values when used on large DBM files.  You may prefer to use the each()
-function to iterate over large DBM files.  Example:
+values when used on large objects, like DBM files.  You may prefer to
+use the each() function to iterate over such.  Example:
 
     # print out history file offsets
     tie(%HIST, NDBM_File, '/usr/lib/news/history', 1, 0);

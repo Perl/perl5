@@ -175,7 +175,6 @@ h2xs.SH			Program to make .xs files from C header files
 handy.h			Handy definitions
 hints/3b1.sh		Hints for named architecture
 hints/3b1cc		Hints for named architecture
-hints/PowerUNIX.sh	Hints for named architecture
 hints/README.hints	Notes about hints.
 hints/aix.sh		Hints for named architecture
 hints/altos486.sh	Hints for named architecture
@@ -210,6 +209,7 @@ hints/netbsd.sh		Hints for named architecture
 hints/next_3_0.sh	Hints for named architecture
 hints/next_3_2.sh	Hints for named architecture
 hints/opus.sh		Hints for named architecture
+hints/powerunix.sh	Hints for named architecture
 hints/sco_2_3_0.sh	Hints for named architecture
 hints/sco_2_3_1.sh	Hints for named architecture
 hints/sco_2_3_2.sh	Hints for named architecture
@@ -273,6 +273,7 @@ lib/Text/ParseWords.pm	Perl module to split words on arbitrary delimiter
 lib/Text/Soundex.pm	Perl module to implement Soundex
 lib/Text/Tabs.pm	Do expand and unexpand
 lib/TieHash.pm		Base class for tied hashes
+lib/SubstrHash.pm	Compact hash for known key, value and table size
 lib/Time/Local.pm	Reverse translation of localtime, gmtime
 lib/abbrev.pl		An abbreviation table builder
 lib/assert.pl		assertion and panic with stack trace
@@ -402,6 +403,7 @@ pod/perlsyn.pod		Syntax info
 pod/perltrap.pod	Trap info
 pod/perlvar.pod		Variable info
 pod/pod2html		Translator to turn pod into HTML
+pod/pod2latex		Translator to turn pod into LaTeX
 pod/pod2man		Translator to turn pod into manpage
 pod/splitman		Splits perlfunc into multiple man pages
 pp.c			Push/Pop code
@@ -448,6 +450,7 @@ t/io/print.t		See if print commands work
 t/io/tell.t		See if file seeking works
 t/lib/anydbm.t		See if AnyDBM_File works
 t/lib/bigint.t		See if bigint.pl works
+t/lib/bigintpm.t	See if BigInt.pm works
 t/lib/db-btree.t	See if DB_File works
 t/lib/db-hash.t		See if DB_File works
 t/lib/db-recno.t	See if DB_File works
@@ -485,6 +488,7 @@ t/op/mkdir.t		See if mkdir works
 t/op/my.t		See if lexical scoping works
 t/op/oct.t		See if oct and hex work
 t/op/ord.t		See if ord works
+t/op/overload.t		See if operator overload works
 t/op/pack.t		See if pack and unpack work
 t/op/pat.t		See if esoteric patterns work
 t/op/push.t		See if push and pop work
@@ -516,13 +520,17 @@ toke.c			The tokener
 unixish.h		Defines that are assumed on Unix
 util.c			Utility routines
 util.h			Public declarations for the above
+vms/Makefile		VMS port
 vms/config.vms		VMS port
 vms/descrip.mms		VMS port
-vms/ext/MM_VMS.pm	VMS port
+vms/ext/Filespec.pm	VMS-Unix file syntax interconversion
+vms/ext/MM_VMS.pm	VMS-specific methods for MakeMaker
+vms/ext/VMS/stdio/Makefile.PL	MakeMaker driver for VMS::stdio
+vms/ext/VMS/stdio/stdio.pm	VMS options to stdio routines
+vms/ext/VMS/stdio/stdio.xs	VMS options to stdio routines
 vms/gen_shrfls.pl	VMS port
 vms/genconfig.pl	VMS port
 vms/genopt.com		VMS port
-vms/makefile.		VMS port
 vms/mms2make.pl		VMS port
 vms/perlshr.c		VMS port
 vms/perlvms.pod		VMS port
@@ -536,7 +544,7 @@ writemain.SH		Generate perlmain.c from miniperlmain.c+extensions
 x2p/EXTERN.h		Same as above
 x2p/INTERN.h		Same as above
 x2p/Makefile.SH		Precursor to Makefile
-x2p/a2p.c		A byacc'ed a2p.y
+x2p/a2p.c		Output of a2p.y run through byacc
 x2p/a2p.h		Global declarations
 x2p/a2p.man		Manual page for awk to perl translator
 x2p/a2p.y		A yacc grammer for awk

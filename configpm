@@ -95,6 +95,37 @@ sub EXISTS{
 
 sub readonly { die "\%Config::Config is read-only\n" }
 
+sub myconfig {
+	my($output);
+	
+	$output = <<'END';
+Summary of my $package (patchlevel $PATCHLEVEL) configuration:
+  Platform:
+    osname=$osname, osver=$osvers, archname=$archname
+    uname='$myuname'
+    hint=$hint
+  Compiler:
+    cc='$cc', optimize='$optimize'
+    cppflags='$cppflags'
+    ccflags ='$ccflags'
+    ldflags ='$ldflags'
+    stdchar='$stdchar', d_stdstdio=$d_stdstdio, usevfork=$usevfork
+    voidflags=$voidflags, castflags=$castflags, d_casti32=$d_casti32, d_castneg=$d_castneg
+    intsize=$intsize, alignbytes=$alignbytes, usemymalloc=$usemymalloc, randbits=$randbits
+  Libraries:
+    so=$so
+    libpth=$libpth
+    libs=$libs
+    libc=$libc
+  Dynamic Linking:
+    dlsrc=$dlsrc, dlext=$dlext, d_dlsymun=$d_dlsymun
+    cccdlflags='$cccdlflags', ccdlflags='$ccdlflags', lddlflags='$lddlflags'
+
+END
+	$output =~ s/\$(\w+)/$Config{$1}/ge;
+	$output;
+}
+
 sub STORE { &readonly }
 sub DELETE{ &readonly }
 sub CLEAR { &readonly }

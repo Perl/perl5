@@ -2,7 +2,7 @@
  * 
  * Platform:  OpenVMS, VAX or AXP
  * Author:    Charles Bailey  bailey@genetics.upenn.edu
- * Revised:   4-Sep-1994
+ * Revised:   12-Dec-1994
  *
  *                           Implementation Note
  *     This section is added as an aid to users and DynaLoader developers, in
@@ -60,6 +60,7 @@
 #include <lib$routines.h>
 #include <rms.h>
 #include <ssdef.h>
+#include <starlet.h>
 
 typedef unsigned long int vmssts;
 
@@ -82,7 +83,7 @@ copy_errmsg(msg,unused)
     struct dsc$descriptor_s *   msg;
     vmssts  unused;
 {
-    if (*(msg->dsc$a_pointer) = '%') { /* first line */
+    if (*(msg->dsc$a_pointer) == '%') { /* first line */
       if (LastError)
         strncpy((LastError = saferealloc(LastError,msg->dsc$w_length)),
                  msg->dsc$a_pointer, msg->dsc$w_length);
@@ -105,12 +106,11 @@ dl_set_error(sts,stv)
     vmssts  sts;
     vmssts  stv;
 {
-    vmssts vec[3],pmsts;
+    vmssts vec[3];
 
     vec[0] = stv ? 2 : 1;
     vec[1] = sts;  vec[2] = stv;
-    if (!(pmsts = sys$putmsg(vec,copy_errmsg,0,0)) & 1)
-      croak("Fatal $PUTMSG error: %d",pmsts);
+    _ckvmssts(sys$putmsg(vec,copy_errmsg,0,0));
 }
 
 static void
@@ -131,7 +131,7 @@ MODULE = DynaLoader PACKAGE = DynaLoader
 BOOT:
     (void)dl_private_init();
 
-SV *
+void
 dl_expandspec(filespec)
     char *	filespec
     CODE:
@@ -155,14 +155,14 @@ dl_expandspec(filespec)
     }
     else {
       /* Now set up a default spec - everything but the name */
-      deflen = dlnam.nam$l_type - dlesa;
+      deflen = dlnam.nam$l_name - dlesa;
       memcpy(defspec,dlesa,deflen);
       memcpy(defspec+deflen,dlnam.nam$l_type,
              dlnam.nam$b_type + dlnam.nam$b_ver);
       deflen += dlnam.nam$b_type + dlnam.nam$b_ver;
       memcpy(vmsspec,dlnam.nam$l_name,dlnam.nam$b_name);
       DLDEBUG(2,fprintf(stderr,"\tsplit filespec: name = %.*s, default = %.*s\n",
-                        dlnam.nam$b_name,vmsspec,defspec,deflen));
+                        dlnam.nam$b_name,vmsspec,deflen,defspec));
       /* . . . and go back to expand it */
       dlnam.nam$b_nop = 0;
       dlfab.fab$l_dna = defspec;
@@ -190,7 +190,7 @@ dl_expandspec(filespec)
       }
     }
 
-void *
+void
 dl_load_file(filespec)
     char *	filespec
     CODE:
@@ -205,7 +205,7 @@ dl_load_file(filespec)
       unsigned short int len;
       unsigned short int code;
       char *string;
-    }  namlst[2] = {0,FSCN$_NAME,0, 0,0,0};
+    }  namlst[2] = {{0,FSCN$_NAME,0},{0,0,0}};
     struct libref *dlptr;
     vmssts sts, failed = 0;
     void *entry;
@@ -215,7 +215,7 @@ dl_load_file(filespec)
     specdsc.dsc$w_length = strlen(specdsc.dsc$a_pointer);
     DLDEBUG(2,fprintf(stderr,"\tVMS-ified filespec is %s\n",
                       specdsc.dsc$a_pointer));
-    dlptr = safemalloc(sizeof(struct libref));
+    New(7901,dlptr,1,struct libref);
     dlptr->name.dsc$b_dtype = dlptr->defspec.dsc$b_dtype = DSC$K_DTYPE_T;
     dlptr->name.dsc$b_class = dlptr->defspec.dsc$b_class = DSC$K_CLASS_S;
     sts = sys$filescan(&specdsc,namlst,0);
@@ -266,11 +266,11 @@ dl_load_file(filespec)
       ST(0) = &sv_undef;
     }
     else {
-      ST(0) = sv_2mortal(newSViv(dlptr));
+      ST(0) = sv_2mortal(newSViv((IV) dlptr));
     }
 
 
-void *
+void
 dl_find_symbol(librefptr,symname)
     void *	librefptr
     SV *	symname
@@ -293,7 +293,7 @@ dl_find_symbol(librefptr,symname)
       dl_set_error(sts,0);
       ST(0) = &sv_undef;
     }
-    else ST(0) = sv_2mortal(newSViv(entry));
+    else ST(0) = sv_2mortal(newSViv((IV) entry));
 
 
 void

@@ -23,11 +23,6 @@ int n;
 {
     stack_sp = sp;
     av_extend(stack, (p - stack_base) + (n) + 128);
-#ifdef NOTDEF
-    stack_sp = AvARRAY(stack) + (sp - stack_base);
-    stack_base = AvARRAY(stack);
-    stack_max = stack_base + AvMAX(stack) - 1;
-#endif
     return stack_sp;
 }
 
@@ -128,15 +123,22 @@ GV *gv;
     if (SvTYPE(osv) >= SVt_PVMG && SvMAGIC(osv) && SvTYPE(osv) != SVt_PVGV) {
 	sv_upgrade(sv, SvTYPE(osv));
 	if (SvGMAGICAL(osv)) {
+	    MAGIC* mg;
+	    bool oldtainted = tainted;
 	    mg_get(osv);
+	    if (tainting && tainted && (mg = mg_find(osv, 't'))) {
+		SAVESPTR(mg->mg_obj);
+		mg->mg_obj = osv;
+	    }
 	    SvFLAGS(osv) |= (SvFLAGS(osv) &
 		(SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
+	    tainted = oldtainted;
 	}
 	SvMAGIC(sv) = SvMAGIC(osv);
 	SvFLAGS(sv) |= SvMAGICAL(osv);
-	localizing = TRUE;
+	localizing = 1;
 	SvSETMAGIC(sv);
-	localizing = FALSE;
+	localizing = 0;
     }
     return sv;
 }
@@ -179,15 +181,22 @@ SV **sptr;
     if (SvTYPE(osv) >= SVt_PVMG && SvMAGIC(osv) && SvTYPE(osv) != SVt_PVGV) {
 	sv_upgrade(sv, SvTYPE(osv));
 	if (SvGMAGICAL(osv)) {
+	    MAGIC* mg;
+	    bool oldtainted = tainted;
 	    mg_get(osv);
+	    if (tainting && tainted && (mg = mg_find(osv, 't'))) {
+		SAVESPTR(mg->mg_obj);
+		mg->mg_obj = osv;
+	    }
 	    SvFLAGS(osv) |= (SvFLAGS(osv) &
 		(SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
+	    tainted = oldtainted;
 	}
 	SvMAGIC(sv) = SvMAGIC(osv);
 	SvFLAGS(sv) |= SvMAGICAL(osv);
-	localizing = TRUE;
+	localizing = 1;
 	SvSETMAGIC(sv);
-	localizing = FALSE;
+	localizing = 0;
     }
     return sv;
 }
@@ -421,15 +430,17 @@ I32 base;
 	    value = (SV*)SSPOPPTR;
 	    sv = (SV*)SSPOPPTR;
 	    sv_replace(sv,value);
-	    localizing = TRUE;
+	    localizing = 2;
 	    SvSETMAGIC(sv);
-	    localizing = FALSE;
+	    localizing = 0;
 	    break;
         case SAVEt_SV:				/* scalar reference */
 	    value = (SV*)SSPOPPTR;
 	    gv = (GV*)SSPOPPTR;
 	    sv = GvSV(gv);
-	    if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv) && SvTYPE(sv) != SVt_PVGV){
+	    if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv) &&
+		SvTYPE(sv) != SVt_PVGV)
+	    {
 		(void)SvUPGRADE(value, SvTYPE(sv));
 		SvMAGIC(value) = SvMAGIC(sv);
 		SvFLAGS(value) |= SvMAGICAL(sv);
@@ -438,15 +449,17 @@ I32 base;
 	    }
             SvREFCNT_dec(sv);
             GvSV(gv) = value;
-	    localizing = TRUE;
+	    localizing = 2;
 	    SvSETMAGIC(value);
-	    localizing = FALSE;
+	    localizing = 0;
             break;
         case SAVEt_SVREF:			/* scalar reference */
 	    ptr = SSPOPPTR;
 	    sv = *(SV**)ptr;
 	    value = (SV*)SSPOPPTR;
-	    if (SvTYPE(sv) >= SVt_PVMG && SvTYPE(sv) != SVt_PVGV) {
+	    if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv) &&
+		SvTYPE(sv) != SVt_PVGV)
+	    {
 		(void)SvUPGRADE(value, SvTYPE(sv));
 		SvMAGIC(value) = SvMAGIC(sv);
 		SvFLAGS(value) |= SvMAGICAL(sv);
@@ -455,9 +468,9 @@ I32 base;
 	    }
             SvREFCNT_dec(sv);
 	    *(SV**)ptr = value;
-	    localizing = TRUE;
+	    localizing = 2;
 	    SvSETMAGIC(value);
-	    localizing = FALSE;
+	    localizing = 0;
             break;
         case SAVEt_AV:				/* array reference */
 	    av = (AV*)SSPOPPTR;
@@ -572,7 +585,7 @@ I32 base;
 	    ptr = SSPOPPTR;
 	    hv = (HV*)ptr;
 	    ptr = SSPOPPTR;
-	    hv_delete(hv, (char*)ptr, (U32)SSPOPINT);
+	    (void)hv_delete(hv, (char*)ptr, (U32)SSPOPINT, G_DISCARD);
 	    Safefree(ptr);
 	    break;
 	case SAVEt_DESTRUCTOR:

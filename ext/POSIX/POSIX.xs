@@ -2412,7 +2412,8 @@ ungetc(handle, c)
 	RETVAL
 
 OutputStream
-new_tmpfile()
+new_tmpfile(packname = "FileHandle")
+    char *		packname
     CODE:
 	RETVAL = tmpfile();
     OUTPUT:
@@ -2582,6 +2583,13 @@ open(filename, flags = O_RDONLY, mode = 0666)
 	char *		filename
 	int		flags
 	Mode_t		mode
+    CODE:
+	if (flags & (O_APPEND|O_CREAT|O_TRUNC|O_RDWR|O_WRONLY|O_EXCL))
+	    TAINT_PROPER("open");
+	RETVAL = open(filename, flags, mode);
+    OUTPUT:
+	RETVAL
+
 
 HV *
 localeconv()
@@ -2972,7 +2980,7 @@ strxfrm(src)
           STRLEN dstlen;
           char *p = SvPV(src,srclen);
           srclen++;
-          ST(0) = sv_2mortal(newSV(srclen));
+          ST(0) = sv_2mortal(NEWSV(800,srclen));
           dstlen = strxfrm(SvPVX(ST(0)), p, (size_t)srclen);
           if (dstlen > srclen) {
               dstlen++;
@@ -2988,6 +2996,11 @@ SysRet
 mkfifo(filename, mode)
 	char *		filename
 	Mode_t		mode
+    CODE:
+	TAINT_PROPER("mkfifo");
+	RETVAL = mkfifo(filename, mode);
+    OUTPUT:
+	RETVAL
 
 SysRet
 tcdrain(fd)
@@ -3043,7 +3056,7 @@ clock()
 
 char *
 ctime(time)
-	Time_t *	time
+	Time_t		&time
 
 double
 difftime(time1, time2)

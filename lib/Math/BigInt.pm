@@ -2,32 +2,34 @@ package Math::BigInt;
 
 %OVERLOAD = ( 
 				# Anonymous subroutines:
-'+'	=>	sub {new BigInt &badd},
-'-'	=>	sub {new BigInt
+'+'	=>	sub {new Math::BigInt &badd},
+'-'	=>	sub {new Math::BigInt
 		       $_[2]? bsub($_[1],${$_[0]}) : bsub(${$_[0]},$_[1])},
-'<=>'	=>	sub {new BigInt
+'<=>'	=>	sub {new Math::BigInt
 		       $_[2]? bcmp($_[1],${$_[0]}) : bcmp(${$_[0]},$_[1])},
-'cmp'	=>	sub {new BigInt
+'cmp'	=>	sub {new Math::BigInt
 		       $_[2]? ($_[1] cmp ${$_[0]}) : (${$_[0]} cmp $_[1])},
-'*'	=>	sub {new BigInt &bmul},
-'/'	=>	sub {new BigInt 
+'*'	=>	sub {new Math::BigInt &bmul},
+'/'	=>	sub {new Math::BigInt 
 		       $_[2]? scalar bdiv($_[1],${$_[0]}) :
 			 scalar bdiv(${$_[0]},$_[1])},
-'%'	=>	sub {new BigInt
+'%'	=>	sub {new Math::BigInt
 		       $_[2]? bmod($_[1],${$_[0]}) : bmod(${$_[0]},$_[1])},
-'**'	=>	sub {new BigInt
+'**'	=>	sub {new Math::BigInt
 		       $_[2]? bpow($_[1],${$_[0]}) : bpow(${$_[0]},$_[1])},
-'neg'	=>	sub {new BigInt &bneg},
-'abs'	=>	sub {new BigInt &babs},
+'neg'	=>	sub {new Math::BigInt &bneg},
+'abs'	=>	sub {new Math::BigInt &babs},
 
 qw(
 ""	stringify
 0+	numify)			# Order of arguments unsignificant
 );
 
+$NaNOK=1;
+
 sub new {
   my $foo = bnorm($_[1]);
-  die "Not a number initialized to BigInt" if $foo eq "NaN";
+  die "Not a number initialized to Math::BigInt" if !$NaNOK && $foo eq "NaN";
   bless \$foo;
 }
 sub stringify { "${$_[0]}" }

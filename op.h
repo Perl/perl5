@@ -88,6 +88,8 @@ typedef U16 PADOFFSET;
 #define OPpDEREF_HV		64	/* Want ref to HV. */
 
 /* Private for OP_CONST */
+#define OPpCONST_ENTERED	16	/* Has been entered as symbol. */
+#define OPpCONST_ARYBASE	32	/* Was a $[ translated to constant. */
 #define OPpCONST_BARE		64	/* Was a bare word (filehandle?). */
 
 /* Private for OP_FLIP/FLOP */

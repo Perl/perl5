@@ -42,7 +42,7 @@ sdbm_STORE(db, key, value, flags = DBM_REPLACE)
 	if (RETVAL) {
 	    if (RETVAL < 0 && errno == EPERM)
 		croak("No write permission to sdbm file");
-	    warn("sdbm store returned %d, errno %d, key \"%s\"",
+	    croak("sdbm store returned %d, errno %d, key \"%s\"",
 			RETVAL,errno,key.dptr);
 	    sdbm_clearerr(db);
 	}

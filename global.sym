@@ -26,6 +26,7 @@ check
 coeff
 compiling
 compl_amg
+compcv
 comppad
 comppad_name
 comppad_name_fill
@@ -35,6 +36,7 @@ cop_seqmax
 cos_amg
 cryptseen
 cryptswitch_add
+cryptswitch_fp
 cshlen
 cshname
 curcop
@@ -395,6 +397,7 @@ hv_stashpv
 hv_iterinit
 hv_iterkey
 hv_iternext
+hv_iternextsv
 hv_iterval
 hv_magic
 hv_store

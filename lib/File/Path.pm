@@ -58,17 +58,19 @@ Unix file specification syntax.
 =item *
 
 a boolean value, which if TRUE will cause C<rmtree> to
-print a message each time it tries to delete a file,
-giving the name of the file, and indicating whether
-it's using C<rmdir> or C<unlink> to remove it.
+print a message each time it examines a file, giving the
+name of the file, and indicating whether it's using C<rmdir>
+or C<unlink> to remove it, or that it's skipping it.
 (defaults to FALSE)
 
 =item *
 
 a boolean value, which if TRUE will cause C<rmtree> to
-skip any files to which you do not have write access.
-This will change in the future when a criterion for
-'delete permission' is settled. (defaults to FALSE)
+skip any files to which you do not have delete access
+(if running under VMS) or write access (if running
+under another OS).  This will change in the future when
+a criterion for 'delete permission' under OSs other
+than VMS is settled. (defaults to FALSE)
 
 =back
 
@@ -81,7 +83,7 @@ Charles Bailey <bailey@genetics.upenn.edu>
 
 =head1 REVISION
 
-This document was last revised 29-Jan-1995, for perl 5.001
+This document was last revised 08-Mar-1995, for perl 5.001
 
 =cut
 
@@ -91,6 +93,8 @@ use Carp;
 require Exporter;
 @ISA = qw( Exporter );
 @EXPORT = qw( mkpath rmtree );
+
+$Is_VMS = $Config{'osname'} eq 'VMS';
 
 sub mkpath{
     my($paths, $verbose, $mode) = @_;
@@ -102,7 +106,7 @@ sub mkpath{
     $paths = [$paths] unless ref $paths;
     my(@created);
     foreach $path (@$paths){
-	next if -d $path;
+        next if -d $path;
         my(@p);
         foreach(split(/\//, $path)){
             push(@p, $_);
@@ -124,15 +128,24 @@ sub rmtree {
        $root =~ s#/$##;
        if (-d $root) { 
            opendir(D,$root);
+           $root =~ s#\.dir$## if $Is_VMS;
            @files = map("$root/$_", grep $_!~/^\.{1,2}$/, readdir(D));
            closedir(D);
            $count += rmtree(\@files,$verbose,$safe);
-           next if ($safe && !(-w $root));
+           if ($safe &&
+               ($Is_VMS ? !&VMS::Filespec::candelete($root) : !-w $root)) {
+               print "skipped $root\n" if $verbose;
+               next;
+           }
            print "rmdir $root\n" if $verbose;
            (rmdir $root && ++$count) or carp "Can't remove directory $root: $!";
         }
         else { 
-           next if ($safe && !(-w $root));
+           if ($safe &&
+               ($Is_VMS ? !&VMS::Filespec::candelete($root) : !-w $root)) {
+               print "skipped $root\n" if $verbose;
+               next;
+           }
            print "unlink $root\n" if $verbose;
            (unlink($root) && ++$count) or carp "Can't unlink file $root: $!";
         }

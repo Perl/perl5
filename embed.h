@@ -29,6 +29,7 @@
 #define coeff		Perl_coeff
 #define compiling	Perl_compiling
 #define compl_amg	Perl_compl_amg
+#define compcv		Perl_compcv
 #define comppad		Perl_comppad
 #define comppad_name	Perl_comppad_name
 #define comppad_name_fill	Perl_comppad_name_fill
@@ -38,6 +39,7 @@
 #define cos_amg		Perl_cos_amg
 #define cryptseen	Perl_cryptseen
 #define cryptswitch_add	Perl_cryptswitch_add
+#define cryptswitch_fp	Perl_cryptswitch_fp
 #define cshlen		Perl_cshlen
 #define cshname		Perl_cshname
 #define curcop		Perl_curcop
@@ -395,6 +397,7 @@
 #define hv_iterinit	Perl_hv_iterinit
 #define hv_iterkey	Perl_hv_iterkey
 #define hv_iternext	Perl_hv_iternext
+#define hv_iternextsv	Perl_hv_iternextsv
 #define hv_iterval	Perl_hv_iterval
 #define hv_magic	Perl_hv_magic
 #define hv_store	Perl_hv_store
@@ -1021,6 +1024,7 @@
 #define defoutgv	(curinterp->Idefoutgv)
 #define defstash	(curinterp->Idefstash)
 #define delaymagic	(curinterp->Idelaymagic)
+#define diehook		(curinterp->Idiehook)
 #define dirty		(curinterp->Idirty)
 #define dlevel		(curinterp->Idlevel)
 #define dlmax		(curinterp->Idlmax)
@@ -1056,6 +1060,7 @@
 #define leftgv		(curinterp->Ileftgv)
 #define lineary		(curinterp->Ilineary)
 #define localizing	(curinterp->Ilocalizing)
+#define main_cv		(curinterp->Imain_cv)
 #define main_root	(curinterp->Imain_root)
 #define main_start	(curinterp->Imain_start)
 #define mainstack	(curinterp->Imainstack)
@@ -1088,8 +1093,10 @@
 #define orslen		(curinterp->Iorslen)
 #define pad		(curinterp->Ipad)
 #define padname		(curinterp->Ipadname)
+#define parsehook	(curinterp->Iparsehook)
 #define patchlevel	(curinterp->Ipatchlevel)
 #define perldb		(curinterp->Iperldb)
+#define perl_destruct_level	(curinterp->Iperl_destruct_level)
 #define pidstatus	(curinterp->Ipidstatus)
 #define preambled	(curinterp->Ipreambled)
 #define preprocess	(curinterp->Ipreprocess)
@@ -1133,6 +1140,7 @@
 #define top_env		(curinterp->Itop_env)
 #define toptarget	(curinterp->Itoptarget)
 #define unsafe		(curinterp->Iunsafe)
+#define warnhook	(curinterp->Iwarnhook)
 
 #else	/* not multiple, so translate interpreter symbols the other way... */
 
@@ -1172,6 +1180,7 @@
 #define Idefoutgv	defoutgv
 #define Idefstash	defstash
 #define Idelaymagic	delaymagic
+#define Idiehook	diehook
 #define Idirty		dirty
 #define Idlevel		dlevel
 #define Idlmax		dlmax
@@ -1207,6 +1216,7 @@
 #define Ileftgv		leftgv
 #define Ilineary	lineary
 #define Ilocalizing	localizing
+#define Imain_cv	main_cv
 #define Imain_root	main_root
 #define Imain_start	main_start
 #define Imainstack	mainstack
@@ -1239,8 +1249,10 @@
 #define Iorslen		orslen
 #define Ipad		pad
 #define Ipadname	padname
+#define Iparsehook	parsehook
 #define Ipatchlevel	patchlevel
 #define Iperldb		perldb
+#define Iperl_destruct_level	perl_destruct_level
 #define Ipidstatus	pidstatus
 #define Ipreambled	preambled
 #define Ipreprocess	preprocess
@@ -1284,5 +1296,6 @@
 #define Itop_env	top_env
 #define Itoptarget	toptarget
 #define Iunsafe		unsafe
+#define Iwarnhook	warnhook
 
 #endif /* MULTIPLICITY */

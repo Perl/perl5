@@ -38,9 +38,9 @@ new value for the FileHandle attribute in question.  If not supplied,
 most of the methods do nothing to the current value, except for
 autoflush(), which will assume a 1 for you, just to be different.
 
-A few of these variables are considered "read-only".  This means that if you 
-try to assign to this variable, either directly or indirectly through
-a reference.  If you attempt to do so, you'll raise a run-time exception.
+A few of these variables are considered "read-only".  This means that if
+you try to assign to this variable, either directly or indirectly through
+a reference, you'll raise a run-time exception.
 
 =over 8
 
@@ -379,6 +379,9 @@ last eval() parsed and executed correctly (although the operations you
 invoked may have failed in the normal fashion).  (Mnemonic: Where was
 the syntax error "at"?)
 
+Note that warning messages are not collected in this variable.  You can,
+however, set up a routine to process warnings by setting $SIG{__WARN__} below.
+
 =item $PROCESS_ID
 
 =item $PID
@@ -602,7 +605,23 @@ the Perl script.  Here are some other examples:
 The one marked scary is problematic because it's a bareword, which means
 sometimes it's a string representing the function, and sometimes it's 
 going to call the subroutine call right then and there!  Best to be sure
-and quote it or take a reference to it.  *Plumber works too.  See <perlsubs>.
+and quote it or take a reference to it.  *Plumber works too.  See L<perlsubs>.
+
+Certain internal hooks can be also set using the %SIG hash.  The
+routine indicated by $SIG{__WARN__} is called when a warning message is
+about to be printed.  The warning message is passed as the first
+argument.  The presence of a __WARN__ hook causes the ordinary printing
+of warnings to STDERR to be suppressed.  You can use this to save warnings
+in a variable, or turn warnings into fatal errors, like this:
+
+    local $SIG{__WARN__} = sub { die $_[0] };
+    eval $proggie;
+
+The routine indicated by $SIG{__DIE__} is called when a fatal exception
+is about to be thrown.  The error message is passed as the first
+argument.  When a __DIE__ hook routine returns, the exception
+processing continues as it would have in the absence of the hook,
+unless the hook routine itself exits via a goto, a loop exit, or a die.
 
 =back
 

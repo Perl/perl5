@@ -129,6 +129,7 @@ I32 level;
     GV* gv;
     GV** gvp;
     HV* lastchance;
+    CV* cv;
 
     if (!stash)
 	return 0;
@@ -142,10 +143,21 @@ I32 level;
     if (SvTYPE(topgv) != SVt_PVGV)
 	gv_init(topgv, stash, name, len, TRUE);
 
-    if (GvCV(topgv)) {
-	if (!GvCVGEN(topgv) || GvCVGEN(topgv) >= sub_generation)
-	    return topgv;
+    if (cv=GvCV(topgv)) {
+	if (GvCVGEN(topgv) >= sub_generation)
+	    return topgv;	/* valid cached inheritance */
+	if (!GvCVGEN(topgv)) {	/* not an inheritance cache */
+	    if (CvROOT(cv) || CvXSUB(cv))
+		return topgv;	/* real definition */
+	    /* a simple undef -- save the slot for possible re-use */
+	}
+	else {
+	    /* stale cached entry, just junk it */
+	    GvCV(topgv) = cv = 0;
+	    GvCVGEN(topgv) = 0;
+	}
     }
+    /* if cv is still set, we have to free it if we find something to cache */
 
     gvp = (GV**)hv_fetch(stash,"ISA",3,FALSE);
     if (gvp && (gv = *gvp) != (GV*)&sv_undef && (av = GvAV(gv))) {
@@ -162,6 +174,11 @@ I32 level;
 	    }
 	    gv = gv_fetchmeth(basestash, name, len, level + 1);
 	    if (gv) {
+		if (cv) {				/* junk old undef */
+		    assert(SvREFCNT(topgv) > 1);
+		    SvREFCNT_dec(topgv);
+		    SvREFCNT_dec(cv);
+		}
 		GvCV(topgv) = GvCV(gv);			/* cache the CV */
 		GvCVGEN(topgv) = sub_generation;	/* valid for now */
 		return gv;
@@ -172,6 +189,11 @@ I32 level;
     if (!level) {
 	if (lastchance = gv_stashpv("UNIVERSAL", FALSE)) {
 	    if (gv = gv_fetchmeth(lastchance, name, len, level + 1)) {
+		if (cv) {				/* junk old undef */
+		    assert(SvREFCNT(topgv) > 1);
+		    SvREFCNT_dec(topgv);
+		    SvREFCNT_dec(cv);
+		}
 		GvCV(topgv) = GvCV(gv);			/* cache the CV */
 		GvCVGEN(topgv) = sub_generation;	/* valid for now */
 		return gv;
@@ -215,8 +237,7 @@ char* name;
 	else if (strNE(name, "AUTOLOAD")) {
 	    gv = gv_fetchmeth(stash, "AUTOLOAD", 8, 0);
 	    if (gv && (cv = GvCV(gv))) { /* One more chance... */
-		SV *tmpstr = sv_newmortal();
-		sv_catpv(tmpstr,HvNAME(stash));
+		SV *tmpstr = sv_2mortal(newSVpv(HvNAME(stash),0));
 		sv_catpvn(tmpstr,"::", 2);
 		sv_catpvn(tmpstr, name, nend - name);
 		sv_setsv(GvSV(CvGV(cv)), tmpstr);
@@ -350,8 +371,11 @@ I32 sv_type;
 		stash = defstash;
 	    else if ((COP*)curcop == &compiling) {
 		stash = curstash;
-		if (add && (hints & HINT_STRICT_VARS) && sv_type != SVt_PVCV) {
-		    if (stash && !hv_fetch(stash,name,len,0))
+		if (add && (hints & HINT_STRICT_VARS) &&
+		    sv_type != SVt_PVCV &&
+		    sv_type != SVt_PVGV &&
+		    sv_type != SVt_PVIO)
+		{
 			stash = 0;
 		}
 	    }
@@ -508,13 +532,14 @@ I32 sv_type;
     case '\\':
     case '/':
     case '|':
+    case '\001':
     case '\004':
+    case '\006':
     case '\010':
     case '\t':
     case '\020':
     case '\024':
     case '\027':
-    case '\006':
 	if (len > 1)
 	    break;
 	goto magicalize;
@@ -579,10 +604,14 @@ SV *sv;
 GV *gv;
 {
     GV* egv = GvEGV(gv);
-    HV *hv = GvSTASH(egv);
-
+    HV *hv;
+    
+    if (!egv)
+	egv = gv;
+    hv = GvSTASH(egv);
     if (!hv)
 	return;
+
     sv_setpv(sv, sv == (SV*)gv ? "*" : "");
     sv_catpv(sv,HvNAME(hv));
     sv_catpvn(sv,"::", 2);
@@ -673,8 +702,11 @@ GV* gv;
         warn("Attempt to free unreferenced glob pointers");
         return;
     }
-    if (--gp->gp_refcnt > 0)
+    if (--gp->gp_refcnt > 0) {
+	if (gp->gp_egv == gv)
+	    gp->gp_egv = 0;
         return;
+    }
 
     SvREFCNT_dec(gp->gp_sv);
     SvREFCNT_dec(gp->gp_av);
@@ -685,6 +717,8 @@ GV* gv;
     }
     if ((cv = gp->gp_cv) && !GvCVGEN(gv))
 	SvREFCNT_dec(cv);
+    SvREFCNT_dec(gp->gp_form);
+
     Safefree(gp);
     GvGP(gv) = 0;
 }
@@ -725,12 +759,20 @@ HV* stash;
   GV* gv;
   CV* cv;
   MAGIC* mg=mg_find((SV*)stash,'c');
-  AMT *amtp;
+  AMT *amtp=mg ? (AMT*)mg->mg_ptr: NULL;
 
   if (mg && (amtp=((AMT*)(mg->mg_ptr)))->was_ok_am == amagic_generation &&
              amtp->was_ok_sub == sub_generation)
       return HV_AMAGIC(stash)? TRUE: FALSE;
   gvp=(GV**)hv_fetch(stash,"OVERLOAD",8,FALSE);
+  if (amtp && amtp->table) {
+    int i;
+    for (i=1;i<NofAMmeth*2;i++) {
+      if (amtp->table[i]) {
+	SvREFCNT_dec(amtp->table[i]);
+      }
+    }
+  }
   sv_unmagic((SV*)stash, 'c');
 
   DEBUG_o( deb("Recalcing overload magic in package %s\n",HvNAME(stash)) );
@@ -771,7 +813,7 @@ HV* stash;
             default:
               if (!SvROK(sv)) {
                 if (!SvOK(sv)) break;
-		gv = gv_fetchmethod(curcop->cop_stash, SvPV(sv, na));
+		gv = gv_fetchmethod(stash, SvPV(sv, na));
                 if (gv) cv = GvCV(gv);
                 break;
               }
@@ -793,13 +835,13 @@ HV* stash;
           }
           if (cv) filled=1;
 	  else {
-	    die("Method for operation %s not found in package %s during blessing\n",
+	    die("Method for operation %s not found in package %.200s during blessing\n",
 		cp,HvNAME(stash));
 	    return FALSE;
 	  }
         }
       }
-      amt.table[i]=cv;
+      amt.table[i]=(CV*)SvREFCNT_inc(cv);
     }
     sv_magic((SV*)stash, 0, 'c', (char*)&amt, sizeof(amt));
     if (filled) {
@@ -828,17 +870,15 @@ int flags;
   CV **cvp=NULL, **ocvp=NULL;
   AMT *amtp, *oamtp;
   int fl=0, off, off1, lr=0, assign=AMGf_assign & flags, notfound=0;
-  int postpr=0;
+  int postpr=0, inc_dec_ass=0, assignshift=assign?1:0;
   HV* stash;
   if (!(AMGf_noleft & flags) && SvAMAGIC(left)
       && (mg = mg_find((SV*)(stash=SvSTASH(SvRV(left))),'c'))
       && (ocvp = cvp = ((oamtp=amtp=(AMT*)mg->mg_ptr)->table))
-      && (assign ?
-             ((cv = cvp[off=method+1]) 
-	      || ( amtp->fallback > AMGfallNEVER && /* fallback to
-						     * usual method */
-		  (fl = 1, cv = cvp[off=method]))):
-             (1 && (cv = cvp[off=method]))  )) {
+      && ((cv = cvp[off=method+assignshift]) 
+	  || (assign && amtp->fallback > AMGfallNEVER && /* fallback to
+						          * usual method */
+		  (fl = 1, cv = cvp[off=method])))) {
     lr = -1;			/* Call method for left argument */
   } else {
     if (cvp && amtp->fallback > AMGfallNEVER && flags & AMGf_unary) {
@@ -847,13 +887,13 @@ int flags;
       /* look for substituted methods */
 	 switch (method) {
 	 case inc_amg:
-	   if ((cv = cvp[off=add_ass_amg]) 
+	   if (((cv = cvp[off=add_ass_amg]) && (inc_dec_ass=1))
 	       || ((cv = cvp[off=add_amg]) && (postpr=1))) {
 	     right = &sv_yes; lr = -1; assign = 1;
 	   }
 	   break;
 	 case dec_amg:
-	   if ((cv = cvp[off=subtr_ass_amg]) 
+	   if (((cv = cvp[off=subtr_ass_amg])  && (inc_dec_ass=1))
 	       || ((cv = cvp[off=subtr_amg]) && (postpr=1))) {
 	     right = &sv_yes; lr = -1; assign = 1;
 	   }
@@ -867,24 +907,40 @@ int flags;
 	 case string_amg:
 	   (void)((cv = cvp[off=numer_amg]) || (cv = cvp[off=bool__amg]));
 	   break;
+	 case copy_amg:
+	   {
+	     SV* ref=SvRV(left);
+	     if (!SvROK(ref) && SvTYPE(ref) <= SVt_PVMG) { /* Just to be
+						      * extra
+						      * causious,
+						      * maybe in some
+						      * additional
+						      * cases sv_setsv
+						      * is safe too */
+		SV* newref = newSVsv(ref);
+		SvOBJECT_on(newref);
+		SvSTASH(newref) = (HV*)SvREFCNT_inc(SvSTASH(ref));
+		return newref;
+	     }
+	   }
+	   break;
 	 case abs_amg:
-	   if ((cvp[off1=lt_amg] || cvp[off1=lt_amg]) 
+	   if ((cvp[off1=lt_amg] || cvp[off1=ncmp_amg]) 
 	       && ((cv = cvp[off=neg_amg]) || (cv = cvp[off=subtr_amg]))) {
+	     SV* nullsv=sv_2mortal(newSViv(0));
 	     if (off1==lt_amg) {
-	       SV* lessp = amagic_call(left,
-				       sv_2mortal(newSViv(0)),
+	       SV* lessp = amagic_call(left,nullsv,
 				       lt_amg,AMGf_noright);
 	       logic = SvTRUE(lessp);
 	     } else {
-	       SV* lessp = amagic_call(left,
-				       sv_2mortal(newSViv(0)),
+	       SV* lessp = amagic_call(left,nullsv,
 				       ncmp_amg,AMGf_noright);
 	       logic = (SvNV(lessp) < 0);
 	     }
 	     if (logic) {
 	       if (off==subtr_amg) {
 		 right = left;
-		 left = sv_2mortal(newSViv(0));
+		 left = nullsv;
 		 lr = 1;
 	       }
 	     } else {
@@ -909,7 +965,8 @@ int flags;
 	       && (cv = cvp[off=method])) { /* Method for right
 					     * argument found */
       lr=1;
-    } else if (((ocvp && oamtp->fallback > AMGfallNEVER && (cvp=ocvp)) 
+    } else if (((ocvp && oamtp->fallback > AMGfallNEVER 
+		 && (cvp=ocvp) && (lr=-1)) 
 		|| (cvp && amtp->fallback > AMGfallNEVER && (lr=1)))
 	       && !(flags & AMGf_unary)) {
 				/* We look for substitution for
@@ -948,7 +1005,8 @@ int flags;
 	notfound = 1; lr = 1;
       } else {
 	char tmpstr[512];
-	sprintf(tmpstr,"Operation `%s': no method found,\n\tleft argument %s%200s,\n\tright argument %s%200s",
+        if (off==-1) off=method;
+	sprintf(tmpstr,"Operation `%s': no method found,\n\tleft argument %s%.200s,\n\tright argument %s%.200s",
 		      ((char**)AMG_names)[off],
 		      SvAMAGIC(left)? 
 		        "in overloaded package ":
@@ -972,15 +1030,25 @@ int flags;
     }
   }
   if (!notfound) {
-    DEBUG_o( deb("Operation `%s': method for %s argument found in package %s%s\n",
+    DEBUG_o( deb("Overloaded operator `%s'%s%s%s:\n\tmethod%s found%s in package %.200s%s\n",
 		 ((char**)AMG_names)[off],
-		 (lr? "right": "left"),
+		 method+assignshift==off? "" :
+		             " (initially `",
+		 method+assignshift==off? "" :
+		             ((char**)AMG_names)[method+assignshift],
+		 method+assignshift==off? "" : "')",
+		 flags & AMGf_unary? "" :
+		   lr==1 ? " for right argument": " for left argument",
+		 flags & AMGf_unary? " for argument" : "",
 		 HvNAME(stash), 
 		 fl? ",\n\tassignment variant used": "") );
-    /* Since we use shallow copy, we need to dublicate the contents,
-       probably we need also to use user-supplied version of coping?
-       */
-    if (assign || method==inc_amg || method==dec_amg) RvDEEPCP(left);
+    /* Since we use shallow copy during assignment, we need
+     * to dublicate the contents, probably calling user-supplied
+     * version of copy operator
+     */
+    if ((method+assignshift==off 
+	 && (assign || method==inc_amg || method==dec_amg))
+	|| inc_dec_ass) RvDEEPCP(left);
   }
   {
     dSP;
@@ -1047,6 +1115,11 @@ int flags;
 	SvSetSV(left,res); return res; break;
       }
       return ans? &sv_yes: &sv_no;
+    } else if (method==copy_amg) {
+      if (!SvROK(res)) {
+	die("Copy method did not return a reference");
+      }
+      return SvREFCNT_inc(SvRV(res));
     } else {
       return res;
     }

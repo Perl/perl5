@@ -70,10 +70,10 @@ HV *GvHVn();
 #define GvGP(gv)	(GvXPVGV(gv)->xgv_gp)
 #define GvNAME(gv)	(GvXPVGV(gv)->xgv_name)
 #define GvNAMELEN(gv)	(GvXPVGV(gv)->xgv_namelen)
-#define GvENAME(gv)	GvNAME(GvEGV(gv))
+#define GvENAME(gv)	GvNAME(GvEGV(gv) ? GvEGV(gv) : gv)
 
 #define GvSTASH(gv)	(GvXPVGV(gv)->xgv_stash)
-#define GvESTASH(gv)	GvSTASH(GvEGV(gv))
+#define GvESTASH(gv)	GvSTASH(GvEGV(gv) ? GvEGV(gv) : gv)
 
 #define Nullgv Null(GV*)
 

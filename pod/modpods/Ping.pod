@@ -12,7 +12,7 @@ Net::Ping, pingecho - check a host for upness
 This module contains routines to test for the reachability of remote hosts.
 Currently the only routine implemented is pingecho(). 
 
-pingecho() uses a TCP echo (I<NOT> an ICMP one) to determine if the
+pingecho() uses a TCP echo (I<not> an ICMP one) to determine if the
 remote host is reachable. This is usually adequate to tell that a remote
 host is available to rsh(1), ftp(1), or telnet(1) onto.
 

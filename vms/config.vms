@@ -39,7 +39,11 @@
  *	same as PRIVLIB_EXP, it is not defined, since presumably the
  *	program already searches PRIVLIB_EXP.
  */
-#undef ARCHLIB_EXP		/**/
+#ifndef __ALPHA
+#define ARCHLIB_EXP "/perl_root/lib/VMS_AXP"  /* config-skip */
+#else
+#define ARCHLIB_EXP "/perl_root/lib/VMS_VAX" /* config-skip */
+#endif
 
 /* CAT2:
  *	This macro catenates 2 tokens together.
@@ -538,6 +542,14 @@
  */
 #define HAS_VFORK	/**/
 
+/* Signal_t:
+ *	This symbol's value is either "void" or "int", corresponding to the
+ *	appropriate return type of a signal handler.  Thus, you can declare
+ *	a signal handler using "Signal_t (*handler)()", and define the
+ *	handler using "Signal_t handler(sig)".
+ */
+#define Signal_t void	/* Signal handler's return type */
+
 /* HASVOLATILE:
  *	This symbol, if defined, indicates that this C compiler knows about
  *	the volatile declaration.
@@ -570,7 +582,7 @@
  *	This symbol, if defined, indicates that the waitpid routine is
  *	available to wait for child process.
  */
-#undef HAS_WAITPID	/**/
+#define HAS_WAITPID	/**/
 
 /* HAS_WCSTOMBS:
  *	This symbol, if defined, indicates that the wcstombs routine is
@@ -663,7 +675,7 @@
 #undef PWCHANGE	/**/
 #undef PWCLASS	/**/
 #undef PWEXPIRE	/**/
-#undef PWCOMMENT	/**/
+#define PWCOMMENT	/**/
 
 /* I_STDDEF:
  *	This symbol, if defined, indicates that <stddef.h> exists and should
@@ -789,7 +801,7 @@
  *	This symbol, if defined, indicates that the routine utime() is
  *	available to update the access and modification times of files.
  */
-#undef HAS_UTIME		/**/
+#define HAS_UTIME		/**/
 
 /* I_STDARG:
  *	This symbol, if defined, indicates that <stdarg.h> exists and should
@@ -1030,7 +1042,7 @@
  *	getpwuid(), and getpwent() routines are available to 
  *	get password entries.
  */
-#undef HAS_PASSWD		/**/
+#define HAS_PASSWD		/**/
 
 /* HAS_PAUSE:
  *	This symbol, if defined, indicates that the pause routine is
@@ -1161,6 +1173,13 @@
  */
 #define I_MATH		/**/
 
+/* I_SYS_STAT:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <sys/stat.h>.
+ */
+#define I_SYS_STAT		/**/
+
+
 /* Off_t:
  *	This symbol holds the type used to declare offsets in the kernel.
  *	It can be int, long, off_t, etc... It may be necessary to include
@@ -1251,7 +1270,7 @@
 /* VMS: true for gcc, undef for VAXC/DECC.  This is handled in Descrip.MMS
  * C. Bailey  26-Aug-1994
  */
-/*#define 	GNUC_ATTRIBUTE_CHECK 	/* */
+/*#define 	GNUC_ATTRIBUTE_CHECK 	*/
 
 /* VOID_CLOSEDIR:
  *	This symbol, if defined, indicates that the closedir() routine

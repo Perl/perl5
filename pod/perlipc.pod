@@ -34,10 +34,10 @@ Here's a sample TCP client.
 		    gethostbyname($hostname);
     ($name, $aliases, $type, $len, $thataddr) = gethostbyname($them);
 
-    $this = pack($sockaddr, &AF_INET, 0, $thisaddr);
-    $that = pack($sockaddr, &AF_INET, $port, $thataddr);
+    $this = pack($sockaddr, AF_INET, 0, $thisaddr);
+    $that = pack($sockaddr, AF_INET, $port, $thataddr);
 
-    socket(S, &PF_INET, &SOCK_STREAM, $proto) || die "socket: $!";
+    socket(S, PF_INET, SOCK_STREAM, $proto) || die "socket: $!";
     bind(S, $this) || die "bind: $!";
     connect(S, $that) || die "connect: $!";
 
@@ -69,11 +69,11 @@ And here's a server:
     ($name, $aliases, $port) = getservbyname($port, 'tcp')
 	unless $port =~ /^\d+$/;
 
-    $this = pack($sockaddr, &AF_INET, $port, "\0\0\0\0");
+    $this = pack($sockaddr, AF_INET, $port, "\0\0\0\0");
 
     select(NS); $| = 1; select(stdout);
 
-    socket(S, &PF_INET, &SOCK_STREAM, $proto) || die "socket: $!";
+    socket(S, PF_INET, SOCK_STREAM, $proto) || die "socket: $!";
     bind(S, $this) || die "bind: $!";
     listen(S, 5) || die "connect: $!";
 

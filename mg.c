@@ -108,7 +108,7 @@ mg_len(sv)
 SV* sv;
 {
     MAGIC* mg;
-    char *s;
+    char *junk;
     STRLEN len;
 
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
@@ -130,7 +130,7 @@ SV* sv;
 	}
     }
 
-    s = SvPV(sv, len);
+    junk = SvPV(sv, len);
     return len;
 }
 
@@ -223,6 +223,7 @@ MAGIC *mg;
     register I32 paren;
     register char *s;
     register I32 i;
+    char *t;
 
     switch (*mg->mg_ptr) {
     case '1': case '2': case '3': case '4':
@@ -232,16 +233,14 @@ MAGIC *mg;
 	  getparen:
 	    if (curpm->op_pmregexp &&
 	      paren <= curpm->op_pmregexp->nparens &&
-	      (s = curpm->op_pmregexp->startp[paren]) ) {
-		i = curpm->op_pmregexp->endp[paren] - s;
+	      (s = curpm->op_pmregexp->startp[paren]) &&
+	      (t = curpm->op_pmregexp->endp[paren]) ) {
+		i = t - s;
 		if (i >= 0)
 		    return i;
-		else
-		    return 0;
 	    }
-	    else
-		return 0;
 	}
+	return 0;
 	break;
     case '+':
 	if (curpm) {
@@ -250,6 +249,7 @@ MAGIC *mg;
 		return 0;
 	    goto getparen;
 	}
+	return 0;
 	break;
     case '`':
 	if (curpm) {
@@ -258,23 +258,17 @@ MAGIC *mg;
 		i = curpm->op_pmregexp->startp[0] - s;
 		if (i >= 0)
 		    return i;
-		else
-		    return 0;
 	    }
-	    else
-		return 0;
 	}
-	break;
+	return 0;
     case '\'':
 	if (curpm) {
 	    if (curpm->op_pmregexp &&
 	      (s = curpm->op_pmregexp->endp[0]) ) {
 		return (STRLEN) (curpm->op_pmregexp->subend - s);
 	    }
-	    else
-		return 0;
 	}
-	break;
+	return 0;
     case ',':
 	return (STRLEN)ofslen;
     case '\\':
@@ -296,8 +290,12 @@ MAGIC *mg;
     register I32 paren;
     register char *s;
     register I32 i;
+    char *t;
 
     switch (*mg->mg_ptr) {
+    case '\001':		/* ^A */
+	sv_setsv(sv, bodytarget);
+	break;
     case '\004':		/* ^D */
 	sv_setiv(sv,(I32)(debug & 32767));
 	break;
@@ -330,49 +328,49 @@ MAGIC *mg;
 	    if (curpm->op_pmregexp &&
 	      paren <= curpm->op_pmregexp->nparens &&
 	      (s = curpm->op_pmregexp->startp[paren]) &&
-	      curpm->op_pmregexp->endp[paren] ) {
-		i = curpm->op_pmregexp->endp[paren] - s;
-		if (i >= 0)
+	      (t = curpm->op_pmregexp->endp[paren]) ) {
+		i = t - s;
+		if (i >= 0) {
+		    MAGIC *tmg;
 		    sv_setpvn(sv,s,i);
-		else
-		    sv_setsv(sv,&sv_undef);
+		    if (tainting && (tmg = mg_find(sv,'t')))
+			tmg->mg_len = 0;	/* guarantee $1 untainted */
+		    break;
+		}
 	    }
-	    else
-		sv_setsv(sv,&sv_undef);
 	}
+	sv_setsv(sv,&sv_undef);
 	break;
     case '+':
 	if (curpm) {
 	    paren = curpm->op_pmregexp->lastparen;
 	    if (paren)
 		goto getparen;
-	    else
-		sv_setsv(sv,&sv_undef);
 	}
+	sv_setsv(sv,&sv_undef);
 	break;
     case '`':
 	if (curpm) {
 	    if (curpm->op_pmregexp &&
 	      (s = curpm->op_pmregexp->subbeg) ) {
 		i = curpm->op_pmregexp->startp[0] - s;
-		if (i >= 0)
+		if (i >= 0) {
 		    sv_setpvn(sv,s,i);
-		else
-		    sv_setpvn(sv,"",0);
+		    break;
+		}
 	    }
-	    else
-		sv_setpvn(sv,"",0);
 	}
+	sv_setsv(sv,&sv_undef);
 	break;
     case '\'':
 	if (curpm) {
 	    if (curpm->op_pmregexp &&
 	      (s = curpm->op_pmregexp->endp[0]) ) {
 		sv_setpvn(sv,s, curpm->op_pmregexp->subend - s);
+		break;
 	    }
-	    else
-		sv_setpvn(sv,"",0);
 	}
+	sv_setsv(sv,&sv_undef);
 	break;
     case '.':
 #ifndef lint
@@ -538,29 +536,57 @@ MAGIC* mg;
 {
     register char *s;
     I32 i;
+    SV** svp;
 
-    i = whichsig(mg->mg_ptr);	/* ...no, a brick */
-    if (!i && (dowarn || strEQ(mg->mg_ptr,"ALARM")))
-	warn("No such signal: SIG%s", mg->mg_ptr);
+    s = mg->mg_ptr;
+    if (*s == '_') {
+	if (strEQ(s,"__DIE__"))
+	    svp = &diehook;
+	else if (strEQ(s,"__WARN__"))
+	    svp = &warnhook;
+	else if (strEQ(s,"__PARSE__"))
+	    svp = &parsehook;
+	else
+	    croak("No such hook: %s", s);
+	i = 0;
+    }
+    else {
+	i = whichsig(s);	/* ...no, a brick */
+	if (!i) {
+	    if (dowarn || strEQ(s,"ALARM"))
+		warn("No such signal: SIG%s", s);
+	    return 0;
+	}
+    }
     if (SvTYPE(sv) == SVt_PVGV || SvROK(sv)) {
-	(void)signal(i,sighandler);
+	if (i)
+	    (void)signal(i,sighandler);
+	else
+	    *svp = SvREFCNT_inc(sv);
 	return 0;
     }
     s = SvPV_force(sv,na);
-    if (strEQ(s,"IGNORE"))
-#ifndef lint
-	(void)signal(i,SIG_IGN);
-#else
-	;
-#endif
-    else if (strEQ(s,"DEFAULT") || !*s)
-	(void)signal(i,SIG_DFL);
+    if (strEQ(s,"IGNORE")) {
+	if (i)
+	    (void)signal(i,SIG_IGN);
+	else
+	    *svp = 0;
+    }
+    else if (strEQ(s,"DEFAULT") || !*s) {
+	if (i)
+	    (void)signal(i,SIG_DFL);
+	else
+	    *svp = 0;
+    }
     else {
-	(void)signal(i,sighandler);
 	if (!strchr(s,':') && !strchr(s,'\'')) {
 	    sprintf(tokenbuf, "main::%s",s);
 	    sv_setpv(sv,tokenbuf);
 	}
+	if (i)
+	    (void)signal(i,sighandler);
+	else
+	    *svp = SvREFCNT_inc(sv);
     }
     return 0;
 }
@@ -852,7 +878,10 @@ magic_gettaint(sv,mg)
 SV* sv;
 MAGIC* mg;
 {
-    tainted = TRUE;
+    if (mg->mg_len & 1)
+	tainted = TRUE;
+    else if (mg->mg_len & 2 && mg->mg_obj == sv)	/* kludge */
+	tainted = TRUE;
     return 0;
 }
 
@@ -861,11 +890,16 @@ magic_settaint(sv,mg)
 SV* sv;
 MAGIC* mg;
 {
-    if (!tainted) {
-	if (!SvMAGICAL(sv))
-	    SvMAGICAL_on(sv);
-	sv_unmagic(sv, 't');
+    if (localizing) {
+	if (localizing == 1)
+	    mg->mg_len <<= 1;
+	else
+	    mg->mg_len >>= 1;
     }
+    else if (tainted)
+	mg->mg_len |= 1;
+    else
+	mg->mg_len &= ~1;
     return 0;
 }
 
@@ -918,6 +952,9 @@ MAGIC* mg;
     I32 i;
     STRLEN len;
     switch (*mg->mg_ptr) {
+    case '\001':	/* ^A */
+	sv_setsv(bodytarget, sv);
+	break;
     case '\004':	/* ^D */
 	debug = (SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv)) | 0x80000000;
 	DEBUG_x(dump_all());
@@ -953,8 +990,10 @@ MAGIC* mg;
 	dowarn = (bool)(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
 	break;
     case '.':
-	if (localizing)
-	    save_sptr((SV**)&last_in_gv);
+	if (localizing) {
+	    if (localizing == 1)
+		save_sptr((SV**)&last_in_gv);
+	}
 	else if (SvOK(sv))
 	    IoLINES(GvIOp(last_in_gv)) = (long)SvIV(sv);
 	break;
@@ -1023,10 +1062,10 @@ MAGIC* mg;
 	compiling.cop_arybase = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
 	break;
     case '?':
-	statusvalue = U_S(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
+	statusvalue = FIXSTATUS(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
 	break;
     case '!':
-	errno = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);		/* will anyone ever use this? */
+	SETERRNO(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv),SS$_ABORT);		/* will anyone ever use this? */
 	break;
     case '<':
 	uid = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
@@ -1039,6 +1078,7 @@ MAGIC* mg;
 #else
 #ifdef HAS_SETREUID
 	(void)setreuid((Uid_t)uid, (Uid_t)-1);
+#else
 #ifdef HAS_SETRESUID
       (void)setresuid((Uid_t)uid, (Uid_t)-1, (Uid_t)-1);
 #else
@@ -1051,7 +1091,7 @@ MAGIC* mg;
 #endif
 #endif
 #endif
-	uid = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
+	uid = (I32)getuid();
 	tainting |= (euid != uid || egid != gid);
 	break;
     case '>':
@@ -1098,8 +1138,10 @@ MAGIC* mg;
 #else
 	if (gid == egid)			/* special case $( = $) */
 	    (void)setgid(gid);
-	else
+	else {
+	    gid = (I32)getgid();
 	    croak("setrgid() not implemented");
+	}
 #endif
 #endif
 #endif
@@ -1123,8 +1165,10 @@ MAGIC* mg;
 #else
 	if (egid == gid)			/* special case $) = $( */
 	    (void)setgid(egid);
-	else
+	else {
+	    egid = (I32)getegid();
 	    croak("setegid() not implemented");
+	}
 #endif
 #endif
 #endif

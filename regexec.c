@@ -852,10 +852,15 @@ char *prog;
 		if (OP(next) != BRANCH)	  /* No choice. */
 		    next = NEXTOPER(scan);/* Avoid recursion. */
 		else {
+		    int lastparen = *reglastparen;
 		    do {
 			reginput = locinput;
 			if (regmatch(NEXTOPER(scan)))
 			    return 1;
+			for (n = *reglastparen; n > lastparen; n--)
+			    regendp[n] = 0;
+			*reglastparen = n;
+			    
 #ifdef REGALIGN
 			/*SUPPRESS 560*/
 			if (n = NEXT(scan))
@@ -908,6 +913,7 @@ char *prog;
 			if (regmatch(next))
 			    return 1;
 		    /* Couldn't or didn't -- back up. */
+		    reginput = locinput + ln;
 		    if (regrepeat(scan, 1)) {
 			ln++;
 			reginput = locinput + ln;

@@ -1,11 +1,21 @@
 package Cwd;
 require 5.000;
 require Exporter;
+use Config;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(getcwd fastcwd);
 @EXPORT_OK = qw(chdir);
 
+
+# VMS: $ENV{'DEFAULT'} points to default directory at all times
+# 08-Dec-1994  Charles Bailey  bailey@genetics.upenn.edu
+# Note: Use of Cwd::getcwd() or Cwd::chdir() (but not Cwd::fastcwd())
+#   causes the logical name PWD to be defined in the process 
+#   logical name table as the default device and directory 
+#   seen by Perl. This may not be the same as the default device 
+#   and directory seen by DCL after Perl exits, since the effects
+#   the CRTL chdir() function persist only until Perl exits.
 
 # By Brandon S. Allbery
 #
@@ -13,6 +23,8 @@ require Exporter;
 
 sub getcwd
 {
+    if($Config{'osname'} eq 'VMS') { return $ENV{'PWD'} = $ENV{'DEFAULT'} }
+
     my($dotdots, $cwd, @pst, @cst, $dir, @tst);
 
     unless (@cst = stat('.'))
@@ -79,6 +91,8 @@ sub getcwd
 # you might chdir out of a directory that you can't chdir back into.
 
 sub fastcwd {
+    if($Config{'osname'} eq 'VMS') { return $ENV{'DEFAULT'} }
+
     my($odev, $oino, $cdev, $cino, $tdev, $tino);
     my(@path, $path);
     local(*DIR);
@@ -143,8 +157,11 @@ sub chdir_init{
 
 sub chdir {
     my($newdir) = shift;
+    $newdir =~ s|/{2,}|/|g;
     chdir_init() unless $chdir_init;
     return 0 unless (CORE::chdir $newdir);
+    if ($Config{'osname'} eq 'VMS') { return $ENV{PWD} = $ENV{DEFAULT} }
+
     if ($newdir =~ m#^/#) {
 	$ENV{'PWD'} = $newdir;
     }else{

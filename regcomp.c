@@ -268,10 +268,12 @@ PMOP* pm;
 		}
 		else	/* single branch is ok */
 		    scan = NEXTOPER(scan);
+		continue;
 	    }
 	    if (OP(scan) == UNLESSM) {
 		curback = -30000;
 		scan = regnext(scan);
+		continue;
 	    }
 	    if (OP(scan) == EXACTLY) {
 		char *t;
@@ -399,7 +401,7 @@ I32 *flagp;
     if (paren) {
 	if (*regparse == '?') {
 	    regparse++;
-	    paren = *nextchar();
+	    paren = *regparse++;
 	    ret = NULL;
 	    switch (paren) {
 	    case ':':
@@ -414,7 +416,7 @@ I32 *flagp;
 		while (*regparse && *regparse != ')')
 		    regparse++;
 		if (*regparse != ')')
-		    croak("Sequence (?#... not terminated", *regparse);
+		    croak("Sequence (?#... not terminated");
 		nextchar();
 		*flagp = TRYAGAIN;
 		return NULL;
@@ -1153,8 +1155,26 @@ nextchar()
     char* retval = regparse++;
 
     if (regflags & PMf_EXTENDED) {
-	while (isSPACE(*regparse))
-	    regparse++;
+	for (;;) {
+	    if (isSPACE(*regparse)) {
+		regparse++;
+		continue;
+	    }
+	    else if (*regparse == '(' && regparse[1] == '?' &&
+		    regparse[2] == '#') {
+		while (*regparse && *regparse != ')')
+		    regparse++;
+		regparse++;
+		continue;
+	    }
+	    else if (*regparse == '#') {
+		while (*regparse && *regparse != '\n')
+		    regparse++;
+		regparse++;
+		continue;
+	    }
+	    break;
+	}
     }
     return retval;
 }

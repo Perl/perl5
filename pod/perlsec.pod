@@ -108,7 +108,7 @@ so you must be careful with your patterns.  This is the I<ONLY> mechanism
 for untainting user supplied filenames if you want to do file operations
 on them (unless you make C<$E<gt>> equal to C<$E<lt>> ).
 
-For "Insecure PATH" messages, you need to set C<$ENV{'PATH}'> to a known
+For "Insecure $ENV{PATH}" messages, you need to set C<$ENV{'PATH'}> to a known
 value, and each directory in the path must be non-writable by the world.
 A frequently voiced gripe is that you can get this message even
 if the pathname to an executable is fully qualified.  But Perl can't

@@ -203,6 +203,9 @@ register SV **sarg;
 		len++, sarg--;
 		xlen = strlen(xs);
 		break;
+	    case 'n': case '*':
+		croak("Use of %c in printf format not supported", *t);
+
 	    case '0': case '1': case '2': case '3': case '4':
 	    case '5': case '6': case '7': case '8': case '9': 
 	    case '.': case '#': case '-': case '+': case ' ':
@@ -417,7 +420,7 @@ register SV *sv;
         return;
     }
     s = SvPV(sv, len);
-    if (len && !SvPOKp(sv))
+    if (len && !SvPOK(sv))
 	s = SvPV_force(sv, len);
     if (s && len) {
 	s += --len;
@@ -527,6 +530,7 @@ SV *right;
 	(void)memzero(dc + SvCUR(sv), len - SvCUR(sv) + 1);
     }
     SvCUR_set(sv, len);
+    *SvEND(sv) = '\0';
     (void)SvPOK_only(sv);
 #ifdef LIBERAL
     if (len >= sizeof(long)*4 &&
@@ -619,6 +623,9 @@ dARGS
 
     if (!hv)
 	RETURN;
+
+    (void)hv_iterinit(hv);	/* always reset iterator regardless */
+
     if (GIMME != G_ARRAY) {
 	dTARGET;
 
@@ -626,7 +633,6 @@ dARGS
 	    i = HvKEYS(hv);
 	else {
 	    i = 0;
-	    (void)hv_iterinit(hv);
 	    /*SUPPRESS 560*/
 	    while (entry = hv_iternext(hv)) {
 		i++;
@@ -638,8 +644,6 @@ dARGS
 
     /* Guess how much room we need.  hv_max may be a few too many.  Oh well. */
     EXTEND(sp, HvMAX(hv) * (dokeys + dovalues));
-
-    (void)hv_iterinit(hv);
 
     PUTBACK;	/* hv_iternext and hv_iterval might clobber stack_sp */
     while (entry = hv_iternext(hv)) {

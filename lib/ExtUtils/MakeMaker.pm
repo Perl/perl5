@@ -304,7 +304,10 @@ sub check_hints {
     $hint=(reverse sort @goodhints)[0];
 
     # execute the hintsfile:
-    eval `cat hints/$hint.pl`;
+    open HINTS, "hints/$hint.pl";
+    @goodhints = <HINTS>;
+    close HINTS;
+    eval join('',@goodhints);
 }
 
 # Setup dummy package:
@@ -672,8 +675,8 @@ Exporter::import('ExtUtils::MakeMaker',
 @Other_Att_Keys{qw(EXTRALIBS BSLOADLIBS LDLOADLIBS)} = (1) x 3;
 
 if ($Is_VMS = $Config{'osname'} eq 'VMS') {
-    require File::VMSspec;
-    import File::VMSspec 'vmsify';
+    require VMS::Filespec;
+    import VMS::Filespec 'vmsify';
 }
 
 
@@ -752,7 +755,8 @@ sub init_main {
 	}
 	$att{INST_EXE} = "./blib" unless $att{INST_EXE};
 	$att{MAP_TARGET} = "perl" unless $att{MAP_TARGET};
-	$att{LIBPERL_A} = 'libperl.a' unless $att{LIBPERL_A};
+	$att{LIBPERL_A} = $Is_VMS ? 'libperl.olb' : 'libperl.a'
+	    unless $att{LIBPERL_A};
     }
 
     # make a few simple checks
@@ -981,7 +985,7 @@ sub find_perl{
     foreach $dir (@$dirs){
 	next unless defined $dir; # $att{PERL_SRC} may be undefined
 	foreach $name (@$names){
-	    print "checking $dir/$name" if ($trace >= 2);
+	    print "Checking $dir/$name " if ($trace >= 2);
 	    if ($Is_VMS) {
 	      $name .= ".exe" unless -x "$dir/$name";
 	    }
@@ -1986,7 +1990,7 @@ sub extliblist{
 	    if (@fullname=<${thispth}/lib${thislib}.${so}.[0-9]*>){
 		$fullname=$fullname[-1]; #ATTN: 10 looses against 9!
 	    } elsif (-f ($fullname="$thispth/lib$thislib.$so")
-		     && (($Config{'dlsrc'} ne "dl_dld") || ($thislib eq "m"))){
+		     && (($Config{'dlsrc'} ne "dl_dld.xs") || ($thislib eq "m"))){
 	    } elsif (-f ($fullname="$thispth/lib${thislib}_s.a")
 		     && ($thislib .= "_s") ){ # we must explicitly ask for _s version
 	    } elsif (-f ($fullname="$thispth/lib$thislib.a")){

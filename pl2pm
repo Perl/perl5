@@ -20,6 +20,7 @@ while (<>) {
     @export = ();
     print "$oldpack => $newpack\n" if $verbose;
 
+    s/\bstd(in|out|err)\b/\U$&/g;
     s/(sub\s+)(\w+)(\s*\{[ \t]*\n)\s*package\s+$oldpack\s*;[ \t]*\n+/${1}main'$2$3/ig;
     if (/sub\s+main'/) {
 	@export = m/sub\s+main'(\w+)/g;

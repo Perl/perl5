@@ -55,6 +55,7 @@ sub norm { #(bint, bint) return rat_num
 	'NaN';
     } else {
 	local($gcd) = &'bgcd($num,$dom);
+	$gcd =~ s/^-/+/;
 	if ($gcd ne '+1') { 
 	    $num = &'bdiv($num,$gcd);
 	    $dom = &'bdiv($dom,$gcd);

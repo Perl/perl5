@@ -108,29 +108,54 @@ matter how many times you execute that line (unless you're in an
 C<eval("...")>), C<$coderef> will still have a reference to the I<SAME>
 anonymous subroutine.)
 
-For those who worry about these things, the current implementation 
-uses shallow binding of local() variables; my() variables are not
-accessible.  This precludes true closures.  However, you can work 
-around this with a run-time (rather than a compile-time) eval():
+Anonymous subroutines act as closures with respect to my() variables,
+that is, variables visible lexically within the current scope.  Closure
+is a notion out of the Lisp world that says if you define an anonymous
+function in a particular lexical context, it pretends to run in that
+context even when it's called outside of the context.
 
-    {
-	my $x = time;
-	$coderef = eval "sub { \$x }";
+In human terms, it's a funny way of passing arguments to a subroutine when
+you define it as well as when you call it.  It's useful for setting up
+little bits of code to run later, such as callbacks.  You can even
+do object-oriented stuff with it, though Perl provides a different
+mechanism to do that already--see L<perlobj>.
+
+You can also think of closure as a way to write a subroutine template without
+using eval.  (In fact, in version 5.000, eval was the I<only> way to get
+closures.  You may wish to use "require 5.001" if you use closures.)
+
+Here's a small example of how closures works:
+
+    sub newprint {
+	my $x = shift;
+	return sub { my $y = shift; print "$x, $y!\n"; };
     }
+    $h = newprint("Howdy");
+    $g = newprint("Greetings");
 
-Normally--if you'd used just C<sub{}> or even C<eval{}>--your unew sub
-would only have been able to access the global $x.  But because you've
-used a run-time eval(), this will not only generate a brand new subroutine
-reference each time called, it will all grant access to the my() variable
-lexically above it rather than the global one.  The particular $x 
-accessed will be different for each new sub you create.  This mechanism
-yields deep binding of variables.  (If you don't know what closures, deep
-binding, or shallow binding are, don't worry too much about it.)
+    # Time passes...
+
+    &$h("world");
+    &$g("earthlings");
+
+This prints
+
+    Howdy, world!
+    Greetings, earthlings!
+
+Note particularly that $x continues to refer to the value passed into
+newprint() *despite* the fact that the "my $x" has seemingly gone out of
+scope by the time the anonymous subroutine runs.  That's what closure
+is all about.
+
+This only applies to lexical variables, by the way.  Dynamic variables
+continue to work as they have always worked.  Closure is not something
+that most Perl programmers need trouble themselves about to begin with.
 
 =item 5.
 
 References are often returned by special subroutines called constructors.
-Perl objects are just reference a special kind of object that happens to know
+Perl objects are just references to a special kind of object that happens to know
 which package it's associated with.  Constructors are just special
 subroutines that know how to create that association.  They do so by
 starting with an ordinary reference, and it remains an ordinary reference
@@ -217,7 +242,7 @@ cumbersome to use method 2.  As a form of syntactic sugar, the two
 lines like that above can be written:
 
     $arrayref->[0] = "January";
-    $hashref->{"KEY} = "VALUE";
+    $hashref->{"KEY"} = "VALUE";
 
 The left side of the array can be any expression returning a reference,
 including a previous dereference.  Note that C<$array[$x]> is I<NOT> the
@@ -324,6 +349,70 @@ invisible to this mechanism.  For example:
 
 This will still print 10, not 20.  Remember that local() affects package
 variables, which are all "global" to the package.
+
+=head2 Not-so-symbolic references
+
+A new feature contributing to readability in 5.001 is that the brackets
+around a symbolic reference behave more like quotes, just as they
+always have within a string.  That is,
+
+    $push = "pop on ";
+    print "${push}over";
+
+has always meant to print "pop on over", despite the fact that push is
+a reserved word.  This has been generalized to work the same outside
+of quotes, so that
+
+    print ${push} . "over";
+
+and even
+
+    print ${ push } . "over";
+
+will have the same effect.  (This would have been a syntax error in
+5.000, though Perl 4 allowed it in the spaceless form.)  Note that this
+construct is I<not> considered to be a symbolic reference when you're
+using strict refs:
+
+    use strict 'refs';
+    ${ bareword };	# Okay, means $bareword.
+    ${ "bareword" };	# Error, symbolic reference.
+
+Similarly, because of all the subscripting that is done using single
+words, we've applied the same rule to any bareword that is used for
+subscripting a hash.  So now, instead of writing
+
+    $array{ "aaa" }{ "bbb" }{ "ccc" }
+
+you can just write
+
+    $array{ aaa }{ bbb }{ ccc }
+
+and not worry about whether the subscripts are reserved words.  In the
+rare event that you do wish to do something like
+
+    $array{ shift }
+
+you can force interpretation as a reserved word by adding anything that
+makes it more than a bareword:
+
+    $array{ shift() }
+    $array{ +shift }
+    $array{ shift @_ }
+
+The B<-w> switch will warn you if it interprets a reserved word as a string.
+But it will no longer warn you about using lowercase words, since the
+string is effectively quoted.
+
+=head2 WARNING
+
+You may not (usefully) use a reference as the key to a hash.  It will be
+converted into a string:
+
+    $x{ \$a } = $a;
+
+If you try to dereference the key, it won't do a hard dereference, and 
+you won't accomplish what you're attemping.
 
 =head2 Further Reading
 
