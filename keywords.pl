@@ -35,13 +35,7 @@ BEGIN
 CORE
 DESTROY
 END
-EQ
-GE
-GT
 INIT
-LE
-LT
-NE
 CHECK
 abs
 accept

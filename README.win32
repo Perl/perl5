@@ -646,7 +646,7 @@ as the virus checker interacts badly with miniperl.exe writing configure
 files (it seems to either catch file part written and treat it as suspicious,
 or virus checker may have it "locked" in a way which inhibits miniperl
 updating it). The build does complete with 
-   
+
    set PERLIO=perlio
 
 but that may be just luck. Other AntiVirus software may have similar issues.

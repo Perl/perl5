@@ -18,7 +18,7 @@ be read I<as is>: either as F<README.amiga>, or F<pod/perlamiga.pod>.
 
 A recent version of perl for the Amiga can be found at the Geek Gadgets
 section of the Aminet:
-  
+
       http://www.aminet.net/~aminet/dirs/dev_gg.html
 
 =cut
@@ -40,7 +40,7 @@ Contents
          -  GNU info files 
          -  LaTeX docs 
        BUILD 
-         -  Prerequisites 
+         -  Build Prerequisites 
          -  Getting the perl source 
          -  Application of the patches 
          -  Making 
@@ -180,7 +180,7 @@ can be constructed using C<pod2latex>.
 
 Here we discuss how to build Perl under AmigaOS.
 
-=head2 Prerequisites
+=head2 Build Prerequisites
 
 You need to have the latest B<ixemul> (Unix emulation for Amiga)
 from Aminet.
@@ -205,19 +205,14 @@ is normal and expected. (There is a conflict with a similarly-named file
 F<configure>, but it causes no harm.)
 
 =head2 Making
-	
-	remember to use a hefty wad of stack (I use 2000000)
+
+Remember to use a hefty wad of stack (I use 2000000)
 
   sh configure.gnu --prefix=/gg
 
-	the makedepend script has to be edited if it fails
-	
-	change $cat to /bin/cat at line 75
-	change cat to /bin/cat at line 163
-	change cat to /bin/cat at line 176 (both)
-	change $cat to /bin/cat at line 190
+Now type
 
-	now type make depend
+  make depend
 
 Now!
 

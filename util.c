@@ -2923,80 +2923,74 @@ Perl_repeatcpy(pTHX_ register char *to, register const char *from, I32 len, regi
 U32
 Perl_cast_ulong(pTHX_ NV f)
 {
-    long along;
-
+  if (f < 0.0)
+    return f < I32_MIN ? (U32) I32_MIN : (U32)(I32) f;
+  if (f < U32_MAX_P1) {
 #if CASTFLAGS & 2
-#   define BIGDOUBLE 2147483648.0
-    if (f >= BIGDOUBLE)
-	return (unsigned long)(f-(long)(f/BIGDOUBLE)*BIGDOUBLE)|0x80000000;
+    if (f < U32_MAX_P1_HALF)
+      return (U32) f;
+    f -= U32_MAX_P1_HALF;
+    return ((U32) f) | (1 + U32_MAX >> 1);
+#else
+    return (U32) f;
 #endif
-    if (f >= 0.0)
-	return (unsigned long)f;
-    along = (long)f;
-    return (unsigned long)along;
+  }
+  return f > 0 ? U32_MAX : 0 /* NaN */;
 }
-# undef BIGDOUBLE
-
-/* Unfortunately, on some systems the cast_uv() function doesn't
-   work with the system-supplied definition of ULONG_MAX.  The
-   comparison  (f >= ULONG_MAX) always comes out true.  It must be a
-   problem with the compiler constant folding.
-
-   In any case, this workaround should be fine on any two's complement
-   system.  If it's not, supply a '-DMY_ULONG_MAX=whatever' in your
-   ccflags.
-	       --Andy Dougherty      <doughera@lafcol.lafayette.edu>
-*/
-
-/* Code modified to prefer proper named type ranges, I32, IV, or UV, instead
-   of LONG_(MIN/MAX).
-                           -- Kenneth Albanowski <kjahds@kjahds.com>
-*/
-
-#ifndef MY_UV_MAX
-#  define MY_UV_MAX ((UV)IV_MAX * (UV)2 + (UV)1)
-#endif
 
 I32
 Perl_cast_i32(pTHX_ NV f)
 {
-    if (f >= I32_MAX)
-	return (I32) I32_MAX;
-    if (f <= I32_MIN)
-	return (I32) I32_MIN;
-    return (I32) f;
+  if (f < I32_MAX_P1)
+    return f < I32_MIN ? I32_MIN : (I32) f;
+  if (f < U32_MAX_P1) {
+#if CASTFLAGS & 2
+    if (f < U32_MAX_P1_HALF)
+      return (I32)(U32) f;
+    f -= U32_MAX_P1_HALF;
+    return (I32)(((U32) f) | (1 + U32_MAX >> 1));
+#else
+    return (I32)(U32) f;
+#endif
+  }
+  return f > 0 ? (I32)U32_MAX : 0 /* NaN */;
 }
 
 IV
 Perl_cast_iv(pTHX_ NV f)
 {
-    if (f >= IV_MAX) {
-	UV uv;
-	
-	if (f >= (NV)UV_MAX)
-	    return (IV) UV_MAX;	
-	uv = (UV) f;
-	return (IV)uv;
-    }
-    if (f <= IV_MIN)
-	return (IV) IV_MIN;
-    return (IV) f;
+  if (f < IV_MAX_P1)
+    return f < IV_MIN ? IV_MIN : (IV) f;
+  if (f < UV_MAX_P1) {
+#if CASTFLAGS & 2
+    /* For future flexibility allowing for sizeof(UV) >= sizeof(IV)  */
+    if (f < UV_MAX_P1_HALF)
+      return (IV)(UV) f;
+    f -= UV_MAX_P1_HALF;
+    return (IV)(((UV) f) | (1 + UV_MAX >> 1));
+#else
+    return (IV)(UV) f;
+#endif
+  }
+  return f > 0 ? (IV)UV_MAX : 0 /* NaN */;
 }
 
 UV
 Perl_cast_uv(pTHX_ NV f)
 {
-    if (f >= MY_UV_MAX)
-	return (UV) MY_UV_MAX;
-    if (f < 0) {
-	IV iv;
-	
-	if (f < IV_MIN)
-	    return (UV)IV_MIN;
-	iv = (IV) f;
-	return (UV) iv;
-    }
+  if (f < 0.0)
+    return f < IV_MIN ? (UV) IV_MIN : (UV)(IV) f;
+  if (f < UV_MAX_P1) {
+#if CASTFLAGS & 2
+    if (f < UV_MAX_P1_HALF)
+      return (UV) f;
+    f -= UV_MAX_P1_HALF;
+    return ((UV) f) | (1 + UV_MAX >> 1);
+#else
     return (UV) f;
+#endif
+  }
+  return f > 0 ? UV_MAX : 0 /* NaN */;
 }
 
 #ifndef HAS_RENAME

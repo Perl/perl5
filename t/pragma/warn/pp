@@ -108,3 +108,43 @@ $_ = "\x80  \xff" ;
 reverse ;
 EXPECT
 ########
+# pp.c
+use warnings 'pack' ;
+print unpack("C", pack("C",   -1)), "\n";
+print unpack("C", pack("C",    0)), "\n";
+print unpack("C", pack("C",  255)), "\n";
+print unpack("C", pack("C",  256)), "\n";
+print unpack("c", pack("c", -129)), "\n";
+print unpack("c", pack("c", -128)), "\n";
+print unpack("c", pack("c",  127)), "\n";
+print unpack("c", pack("c",  128)), "\n";
+no warnings 'pack' ;
+print unpack("C", pack("C",   -1)), "\n";
+print unpack("C", pack("C",    0)), "\n";
+print unpack("C", pack("C",  255)), "\n";
+print unpack("C", pack("C",  256)), "\n";
+print unpack("c", pack("c", -129)), "\n";
+print unpack("c", pack("c", -128)), "\n";
+print unpack("c", pack("c",  127)), "\n";
+print unpack("c", pack("c",  128)), "\n";
+EXPECT
+Character in "C" format wrapped at - line 3.
+Character in "C" format wrapped at - line 6.
+Character in "c" format wrapped at - line 7.
+Character in "c" format wrapped at - line 10.
+255
+0
+255
+0
+127
+-128
+127
+-128
+255
+0
+255
+0
+127
+-128
+127
+-128

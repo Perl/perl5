@@ -241,6 +241,5 @@ overload
 strict
 subs
 utf8
-vars
 warnings
 warnings::register

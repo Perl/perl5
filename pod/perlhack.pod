@@ -1686,18 +1686,18 @@ and -Uusemymalloc flags, after that you can use the make targets
 "perl.third" and "test.third".
 
 The short story is that with "atom" you can instrument the Perl
-executable to create a new executable called "perl.third".  When the
+executable to create a new executable called F<perl.third>.  When the
 instrumented executable is run, it creates a log of dubious memory
-traffic in file called "perl.3log".  See the manual pages of atom and
+traffic in file called F<perl.3log>.  See the manual pages of atom and
 third for more information.  The most extensive Third Degree
 documentation is available in the Compaq "Tru64 UNIX Programmer's
 Guide", chapter "Debugging Programs with Third Degree".
 
-The "test.third" leaves a lot of files named perl.3log.* in the t/
+The "test.third" leaves a lot of files named F<perl.3log.*> in the t/
 subdirectory.  There is a problem with these files: Third Degree is so
 effective that it finds problems also in the system libraries.
-Therefore there are certain types of errors that you should ignore
-in your debugging.  Errors with stack traces matching
+Therefore there are certain types of errors that you should ignore in
+your debugging.  Errors with stack traces matching
 
     __actual_atof|__catgets|_doprnt|__exc_|__exec|_findio|__localtime|setlocale|__sia_|__strxfrm
 
@@ -1728,6 +1728,52 @@ need to do too, if you don't want to see the "global leaks":
 
 	PERL_DESTRUCT_LEVEL=2 ./perl.third t/foo/bar.t
 
+=head2 Gprof Profiling
+
+gprof is a profiling tool available in many UNIX platforms.
+The profiling is based on statistical time-sampling; this means that
+some routines, especially those executing really fast, may be missed.
+
+You can build a profiled version of perl called "perl.gprof" by
+invoking the make target "perl.gprof".  Running the profiled version
+of Perl will create an output file called F<gmon.out> is created which
+contains the profiling data collected during the execution.
+
+The gprof tool can then display the collected data in various ways.
+Usually gprof understands the following options:
+
+=over 4
+
+=item -a
+
+Suppress statically defined functions from the profile.
+
+=item -b
+
+Suppress the verbose descriptions in the profile.
+
+=item -e routine
+
+Exclude the given routine and its descendants from the profile.
+
+=item -f routine
+
+Display only the given routine and its descendants in the profile.
+
+=item -s
+
+Generate a summary file called F<gmon.sum> which then may be given
+to subsequent gprof runs to accumulate data over several runs.
+
+=item -z
+
+Display routines that have zero usage.
+
+=back
+
+For more detailed explanation of the available commands and output
+formats, see your own local documentation of gprof.
+
 =head2 Pixie Profiling
 
 Pixie is a profiling tool available on IRIX and Tru64
@@ -1735,9 +1781,9 @@ Pixie is a profiling tool available on IRIX and Tru64
 using "basic-block counting".  A basic block is a program region that
 is entered only at the beginning and exited only at the end.
 
-You can build a profiled version of perl called "perl.pixie" by
+You can build a profiled version of perl called F<perl.pixie> by
 invoking the make target "perl.pixie" (in Tru64 a file called
-"perl.Addrs" will also be silently created, this file contains the
+F<perl.Addrs> will also be silently created, this file contains the
 addresses of the basic blocks).  Running the profiled version of Perl
 will create a new file called "perl.Counts" which contains the counts
 for the basic block for that particular program execution.

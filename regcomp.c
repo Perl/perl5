@@ -1059,7 +1059,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		if (!scan) 		/* It was not CURLYX, but CURLY. */
 		    scan = next;
 		if (ckWARN(WARN_REGEXP) && (minnext + deltanext == 0)
-		    && !(data->flags & (SF_HAS_PAR|SF_IN_PAR))
+		    && data && !(data->flags & (SF_HAS_PAR|SF_IN_PAR))
 		    && maxcount <= REG_INFTY/3) /* Complement check for big count */
 		{
 		    vWARN(RExC_parse,
@@ -4657,6 +4657,7 @@ Perl_save_re_context(pTHX)
     SAVEVPTR(PL_reg_oldcurpm);		/* from regexec.c */
     SAVEVPTR(PL_reg_curpm);		/* from regexec.c */
     SAVEI32(PL_regnpar);		/* () count. */
+    SAVEI32(PL_regsize);		/* from regexec.c */
 #ifdef DEBUGGING
     SAVEPPTR(PL_reg_starttry);		/* from regexec.c */
 #endif

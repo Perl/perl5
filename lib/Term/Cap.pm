@@ -1,9 +1,13 @@
 package Term::Cap;
 use Carp;
 
-our $VERSION = '1.00';
+our $VERSION = '1.01';
 
-# Last updated: Thu Nov 30 23:34:29 EST 2000 by schwern@pobox.com
+# Version undef: Thu Dec 14 20:02:42 CST 1995 by sanders@bsdi.com
+# Version 1.00:  Thu Nov 30 23:34:29 EST 2000 by schwern@pobox.com
+#	[PATCH] $VERSION crusade, strict, tests, etc... all over lib/
+# Version 1.01:  Wed May 23 00:00:00 CST 2001 by d-lewart@uiuc.edu
+#	Avoid warnings in Tgetent and Tputs
 
 # TODO:
 # support Berkeley DB termcaps
@@ -164,6 +168,14 @@ sub Tgetent { ## public -- static method
     }
 
     my @termcap_path = termcap_path;
+
+    unless (@termcap_path || $entry)
+    {
+	# last resort--fake up a termcap from terminfo 
+	local $ENV{TERM} = $term;
+	$entry = `infocmp -C 2>/dev/null`;
+    }
+
     croak "Can't find a valid termcap file" unless @termcap_path || $entry;
 
     $state = 1;					# 0 == finished
@@ -204,7 +216,7 @@ sub Tgetent { ## public -- static method
 	    }
 	}
 	defined $entry or $entry = '';
-	$entry .= $_;
+	$entry .= $_ if $_;
     };
 
     while ($state != 0) {
@@ -307,8 +319,11 @@ sub Tputs { ## public
 	$string = Tpad($self, $self->{'_' . $cap}, $cnt);
     } else {
 	# cache result because Tpad can be slow
-	$string = defined $self->{$cap} ? $self->{$cap} :
-	    ($self->{$cap} = Tpad($self, $self->{'_' . $cap}, 1));
+	unless (exists $self->{$cap}) {
+	    $self->{$cap} = exists $self->{"_$cap"} ?
+		Tpad($self, $self->{"_$cap"}, 1) : undef;
+	}
+	$string = $self->{$cap};
     }
     print $FH $string if $FH;
     $string;

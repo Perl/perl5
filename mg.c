@@ -633,7 +633,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 			PL_tainted = FALSE;
 		    }
 		    sv_setpvn(sv, s, i);
-		    if (DO_UTF8(PL_reg_sv) && is_utf8_string((U8*)s, i))
+                   if (PL_reg_sv && DO_UTF8(PL_reg_sv) && is_utf8_string((U8*)s, i))
 			SvUTF8_on(sv);
 		    else
 			SvUTF8_off(sv);

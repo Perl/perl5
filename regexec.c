@@ -144,6 +144,9 @@ S_regcppush(pTHX_ I32 parenfloor)
     int paren_elems_to_push = (PL_regsize - parenfloor) * REGCP_PAREN_ELEMS;
     int p;
 
+    if (paren_elems_to_push < 0)
+	Perl_croak(aTHX_ "panic: paren_elems_to_push < 0");
+
 #define REGCP_OTHER_ELEMS 5
     SSCHECK(paren_elems_to_push + REGCP_OTHER_ELEMS);
     for (p = PL_regsize; p > parenfloor; p--) {

@@ -1505,6 +1505,7 @@ t/lib/env.t		See if Env works
 t/lib/errno.t		See if Errno works
 t/lib/exporter.t        See if Exporter works
 t/lib/fatal.t           See if Fatal works
+t/lib/fcntl.t           See if Fcntl works
 t/lib/fields.t          See if base/fields works
 t/lib/filecache.t	See if FileCache works
 t/lib/filecopy.t	See if File::Copy works
@@ -1811,6 +1812,7 @@ t/pragma/strict.t	See if strictures work
 t/pragma/sub_lval.t	See if lvalue subroutines work
 t/pragma/subs.t		See if subroutine pseudo-importation works
 t/pragma/utf8.t		See if utf8 operations work
+t/pragma/vars.t		See if "use vars" work
 t/pragma/warn/1global	Tests of global warnings for warnings.t
 t/pragma/warn/2use	Tests for "use warnings" for warnings.t
 t/pragma/warn/3both	Tests for interaction of $^W and "use warnings"

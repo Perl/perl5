@@ -2070,7 +2070,7 @@ PP(pp_ioctl)
 {
     dSP; dTARGET;
     SV *argsv = POPs;
-    unsigned int func = U_I(POPn);
+    unsigned int func = POPu;
     int optype = PL_op->op_type;
     char *s;
     IV retval;
@@ -4658,7 +4658,7 @@ PP(pp_gnetent)
     else if (which == OP_GNBYADDR) {
 #ifdef HAS_GETNETBYADDR
 	int addrtype = POPi;
-	Netdb_net_t addr = (Netdb_net_t) U_L(POPn);
+	Netdb_net_t addr = (Netdb_net_t) (U32)POPu;
 	nent = PerlSock_getnetbyaddr(addr, addrtype);
 #else
 	DIE(aTHX_ PL_no_sock_func, "getnetbyaddr");

@@ -1076,6 +1076,36 @@ references can be weakened.
 with an assignment operator, which implies modifying the value itself.
 Perhaps you need to copy the value to a temporary, and repeat that.
 
+=item Character in "C" format wrapped
+
+(W pack) You said
+
+    pack("C", $x)
+
+where $x is either less than 0 or more than 255; the C<"C"> format is
+only for encoding native operating system characters (ASCII, EBCDIC,
+and so on) and not for Unicode characters, so Perl behaved as if you meant
+
+    pack("C", $x & 255)
+
+If you actually want to pack Unicode codepoints, use the C<"U"> format
+instead.
+
+=item Character in "c" format wrapped
+
+(W pack) You said
+
+    pack("c", $x)
+
+where $x is either less than -128 or more than 127; the C<"c"> format
+is only for encoding native operating system characters (ASCII, EBCDIC,
+and so on) and not for Unicode characters, so Perl behaved as if you meant
+
+    pack("c", $x & 255);
+
+If you actually want to pack Unicode codepoints, use the C<"U"> format
+instead.
+
 =item chmod() mode argument is missing initial 0
 
 (W chmod) A novice will sometimes say

@@ -2996,18 +2996,20 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	Perl_croak(aTHX_ "Can't call method \"%s\" on an undefined value", name);
 
     if (SvGMAGICAL(sv))
-        mg_get(sv);
+	mg_get(sv);
     if (SvROK(sv))
 	ob = (SV*)SvRV(sv);
     else {
 	GV* iogv;
 
+	/* this isn't a reference */
 	packname = Nullch;
 	if (!SvOK(sv) ||
 	    !(packname = SvPV(sv, packlen)) ||
 	    !(iogv = gv_fetchpv(packname, FALSE, SVt_PVIO)) ||
 	    !(ob=(SV*)GvIO(iogv)))
 	{
+	    /* this isn't the name of a filehandle either */
 	    if (!packname ||
 		((UTF8_IS_START(*packname) && DO_UTF8(sv))
 		    ? !isIDFIRST_utf8((U8*)packname)
@@ -3018,12 +3020,15 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 			   SvOK(sv) ? "without a package or object reference"
 				    : "on an undefined value");
 	    }
-	    stash = gv_stashpvn(packname, packlen, TRUE);
+	    /* assume it's a package name */
+	    stash = gv_stashpvn(packname, packlen, FALSE);
 	    goto fetch;
 	}
+	/* it _is_ a filehandle name -- replace with a reference */
 	*(PL_stack_base + TOPMARK + 1) = sv_2mortal(newRV((SV*)iogv));
     }
 
+    /* if we got here, ob should be a reference or a glob */
     if (!ob || !(SvOBJECT(ob)
 		 || (SvTYPE(ob) == SVt_PVGV && (ob = (SV*)GvIO((GV*)ob))
 		     && SvOBJECT(ob))))
@@ -3035,6 +3040,9 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
     stash = SvSTASH(ob);
 
   fetch:
+    /* NOTE: stash may be null, hope hv_fetch_ent and
+       gv_fetchmethod can cope (it seems they can) */
+
     /* shortcut for simple names */
     if (hashp) {
 	HE* he = hv_fetch_ent(stash, meth, 0, *hashp);
@@ -3047,11 +3055,18 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
     }
 
     gv = gv_fetchmethod(stash, name);
+
     if (!gv) {
+	/* This code tries to figure out just what went wrong with
+	   gv_fetchmethod.  It therefore needs to duplicate a lot of
+	   the internals of that function.  We can't move it inside
+	   Perl_gv_fetchmethod_autoload(), however, since that would
+	   cause UNIVERSAL->can("NoSuchPackage::foo") to croak, and we
+	   don't want that.
+	*/
 	char* leaf = name;
 	char* sep = Nullch;
 	char* p;
-	GV* gv;
 
 	for (p = name; *p; p++) {
 	    if (*p == '\'')
@@ -3060,24 +3075,28 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 		sep = p, leaf = p + 2;
 	}
 	if (!sep || ((sep - name) == 5 && strnEQ(name, "SUPER", 5))) {
-	    packname = sep ? CopSTASHPV(PL_curcop) : HvNAME(stash);
+	    /* the method name is unqualified or starts with SUPER:: */ 
+	    packname = sep ? CopSTASHPV(PL_curcop) :
+		stash ? HvNAME(stash) : packname;
 	    packlen = strlen(packname);
 	}
 	else {
+	    /* the method name is qualified */
 	    packname = name;
 	    packlen = sep - name;
 	}
-	gv = gv_fetchpv(packname, 0, SVt_PVHV);
-	if (gv && isGV(gv)) {
+	
+	/* we're relying on gv_fetchmethod not autovivifying the stash */
+	if (gv_stashpvn(packname, packlen, FALSE)) {
 	    Perl_croak(aTHX_
-		       "Can't locate object method \"%s\" via package \"%s\"",
-		       leaf, packname);
+		       "Can't locate object method \"%s\" via package \"%.*s\"",
+		       leaf, (int)packlen, packname);
 	}
 	else {
 	    Perl_croak(aTHX_
-		       "Can't locate object method \"%s\" via package \"%s\""
-		       " (perhaps you forgot to load \"%s\"?)",
-		       leaf, packname, packname);
+		       "Can't locate object method \"%s\" via package \"%.*s\""
+		       " (perhaps you forgot to load \"%.*s\"?)",
+		       leaf, (int)packlen, packname, (int)packlen, packname);
 	}
     }
     return isGV(gv) ? (SV*)GvCV(gv) : (SV*)gv;

@@ -124,6 +124,13 @@
 
 #undef __attribute__
 
+/* Since we dropped the gccish definition of __attribute__ we will want
+ * to redefine dNOOP, however (so that dTHX continues to work).  Yes,
+ * all this means that we can't do attribute checking on the DB_File,
+ * boo, hiss. */
+#undef  dNOOP
+#define dNOOP extern int Perl___notused
+
 /* If Perl has been compiled with Threads support,the symbol op will
    be defined here. This clashes with a field name in db.h, so get rid of it.
  */
