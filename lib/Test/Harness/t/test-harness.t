@@ -431,7 +431,9 @@ while (my($test, $expect) = each %samples) {
         select NULL;    # _run_all_tests() isn't as quiet as it should be.
         local $SIG{__WARN__} = sub { $warning .= join '', @_; };
         ($totals, $failed) = 
-          Test::Harness::_run_all_tests(catfile($SAMPLE_TESTS, $test));
+          Test::Harness::_run_all_tests($^O eq 'macos' ?
+					catfile($SAMPLE_TESTS, $test) :
+					"$SAMPLE_TESTS/$test");
     };
     select STDOUT;
 

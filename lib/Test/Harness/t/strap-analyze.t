@@ -463,7 +463,9 @@ while( my($test, $expect) = each %samples ) {
     }
 
     my $strap = Test::Harness::Straps->new;
-    my %results = $strap->analyze_file(catfile($SAMPLE_TESTS, $test));
+    my %results = $strap->analyze_file($^O eq 'macos' ?
+                                       catfile($SAMPLE_TESTS, $test) :
+                                       "$SAMPLE_TESTS/$test");
 
     is_deeply($results{details}, $expect->{details}, "$test details" );
 

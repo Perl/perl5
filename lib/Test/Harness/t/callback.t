@@ -54,7 +54,10 @@ $strap->{callback} = sub {
                             
 while( my($test, $expect) = each %samples ) {
     local @out = ();
-    $strap->analyze_file(catfile($SAMPLE_TESTS, $test));
+
+    $strap->analyze_file($^O eq 'macos' ?
+			 catfile($SAMPLE_TESTS, $test) :
+			 "$SAMPLE_TESTS/$test");
 
     is_deeply(\@out, $expect,   "$test callback");
 }
