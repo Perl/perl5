@@ -1592,12 +1592,12 @@ Perl_mfree(void *mp)
 		{
 		    dTHX;
 		    if (!PERL_IS_ALIVE || !PL_curcop || ckWARN_d(WARN_MALLOC))
-			Perl_warner(aTHX_ WARN_MALLOC, "%s free() ignored",
+			Perl_warner(aTHX_ WARN_MALLOC, "%s free() ignored (RMAGIC, PERL_CORE)",
 				    ovp->ov_rmagic == RMAGIC - 1 ?
 				    "Duplicate" : "Bad");
 		}
 #else
-		warn("%s free() ignored",
+		warn("%s free() ignored (RMAGIC)",
 		    ovp->ov_rmagic == RMAGIC - 1 ? "Duplicate" : "Bad");
 #endif		
 #else
@@ -1605,7 +1605,7 @@ Perl_mfree(void *mp)
 		{
 		    dTHX;
 		    if (!PERL_IS_ALIVE || !PL_curcop || ckWARN_d(WARN_MALLOC))
-			Perl_warner(aTHX_ WARN_MALLOC, "%s", "Bad free() ignored");
+			Perl_warner(aTHX_ WARN_MALLOC, "%s", "Bad free() ignored (PERL_CORE)");
 		}
 #else
 		warn("%s", "Bad free() ignored");
