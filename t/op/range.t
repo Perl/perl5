@@ -93,7 +93,7 @@ print join(":", map "[$_]", "B".."") eq '' ? "ok 26\n" : "not ok 26\n";
 print join(":", map "[$_]", "B"..undef) eq '' ? "ok 27\n" : "not ok 27\n";
 
 # undef..undef used to segfault
-print join(":", map "[$_]", undef..undef) eq '[0]' ? "ok 28\n" : "not ok 28\n";
+print join(":", map "[$_]", undef..undef) eq '[]' ? "ok 28\n" : "not ok 28\n";
 
 # also test undef in foreach loops
 @foo=(); push @foo, $_ for undef..2;
@@ -121,4 +121,4 @@ print join(":", map "[$_]", @foo) eq '' ? "ok 35\n" : "not ok 35\n";
 print join(":", map "[$_]", @foo) eq '' ? "ok 36\n" : "not ok 36\n";
 
 @foo=(); push @foo, $_ for undef..undef;
-print join(":", map "[$_]", @foo) eq '[0]' ? "ok 37\n" : "not ok 37\n";
+print join(":", map "[$_]", @foo) eq '[]' ? "ok 37\n" : "not ok 37\n";
