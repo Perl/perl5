@@ -3205,6 +3205,17 @@ detailed in here: http://sources.redhat.com/ml/cygwin/2001-12/msg00894.html
 
 One can build but not install (or test the build of) the NDBM_File
 on FAT filesystems.  Installation (or build) on NTFS works fine.
+If one attempts the test on a FAT install (or build) the following
+failures are expected:
+
+ ../ext/NDBM_File/ndbm.t       13  3328    71   59  83.10%  1-2 4 16-71
+ ../ext/ODBM_File/odbm.t      255 65280    ??   ??       %  ??
+ ../lib/AnyDBM_File.t           2   512    12    2  16.67%  1 4
+ ../lib/Memoize/t/errors.t      0   139    11    5  45.45%  7-11
+ ../lib/Memoize/t/tie_ndbm.t   13  3328     4    4 100.00%  1-4
+ run/fresh_perl.t                          97    1   1.03%  91
+
+NDBM_File fails and ODBM_File just coredumps.
 
 =head2 DJGPP does not build
 
