@@ -534,7 +534,6 @@ EOF
     my %env;
     @env{@env} = @env;
     for my $env (sort keys %env) {
-    {
 	print OUT "    $env",
 		exists $ENV{$env} ? "=$ENV{$env}" : ' (unset)',
 		"\n";
