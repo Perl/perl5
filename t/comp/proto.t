@@ -16,7 +16,7 @@ BEGIN {
 
 use strict;
 
-print "1..133\n";
+print "1..134\n";
 
 my $i = 1;
 
@@ -539,5 +539,9 @@ print "ok ", $i++, "\n";
 
 eval 'sub badproto3 (&$bar$@) { 1; }';
 print "not " unless $@ =~ /^Malformed prototype for main::badproto3 : &\$bar\$\@/;
+print "ok ", $i++, "\n";
+
+eval 'sub badproto4 (@ $b ar) { 1; }';
+print "not " unless $@ =~ /^Malformed prototype for main::badproto4 : \@\$bar/;
 print "ok ", $i++, "\n";
 
