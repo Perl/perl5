@@ -691,7 +691,17 @@ PP(pp_undef)
 	break;
     case SVt_PVGV:
 	if (SvFAKE(sv))
-	    sv_setsv(sv, &sv_undef);
+	    SvSetMagicSV(sv, &sv_undef);
+	else {
+	    GP *gp;
+	    gp_free((GV*)sv);
+	    Newz(602, gp, 1, GP);
+	    GvGP(sv) = gp_ref(gp);
+	    GvSV(sv) = NEWSV(72,0);
+	    GvLINE(sv) = curcop->cop_line;
+	    GvEGV(sv) = (GV*)sv;
+	    GvMULTI_on(sv);
+	}
 	break;
     default:
 	if (SvTYPE(sv) >= SVt_PV && SvPVX(sv) && SvLEN(sv)) {

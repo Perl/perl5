@@ -1889,8 +1889,11 @@ register SV *sstr;
 
     switch (stype) {
     case SVt_NULL:
-	(void)SvOK_off(dstr);
-	return;
+	if (dtype != SVt_PVGV) {
+	    (void)SvOK_off(dstr);
+	    return;
+	}
+	break;
     case SVt_IV:
 	if (dtype != SVt_IV && dtype < SVt_PVIV) {
 	    if (dtype < SVt_IV)
@@ -2187,7 +2190,12 @@ register SV *sstr;
 	SvIVX(dstr) = SvIVX(sstr);
     }
     else {
-	(void)SvOK_off(dstr);
+	if (dtype == SVt_PVGV) {
+	    if (dowarn)
+		warn("Undefined value assigned to typeglob");
+	}
+	else
+	    (void)SvOK_off(dstr);
     }
     SvTAINT(dstr);
 }
