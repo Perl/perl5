@@ -2167,6 +2167,7 @@ Policy_sh.SH		Hold site-wide preferences between Configure runs.
 Porting/apply		Apply patches sent by mail
 Porting/checkcase.pl	Check whether we are case-insensitive-fs-friendly
 Porting/check83.pl	Check whether we are 8.3-friendly
+Porting/checkAUTHORS.pl	Check that the AUTHORS file is complete
 Porting/checkURL.pl	Check whether we have working URLs
 Porting/checkVERSION.pl	Check whether we have $VERSIONs
 Porting/cmpVERSION.pl	Compare whether two trees have changed modules
