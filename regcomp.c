@@ -3996,13 +3996,7 @@ STATIC void
 S_reguni(pTHX_ UV uv, char* s, STRLEN* lenp)
 {
     dTHR;
-    if (SIZE_ONLY) {
-	U8 tmpbuf[UTF8_MAXLEN];
-	*lenp = uv_to_utf8(tmpbuf, uv) - tmpbuf;
-    }
-    else
-	*lenp = uv_to_utf8((U8*)s, uv) - (U8*)s;
-
+    *lenp = SIZE_ONLY ? UNISKIP(uv) : (uv_to_utf8((U8*)s, uv) - (U8*)s);
 }
 
 /*

@@ -2206,7 +2206,11 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
 	    return "";
 	}
     }
-    if (SvNOKp(sv)) {			/* See note in sv_2uv() */
+    if (SvPOK(sv)) {
+	*lp = SvCUR(sv);
+	return SvPVX(sv);
+    }
+    else if (SvNOKp(sv)) {			/* See note in sv_2uv() */
 	/* XXXX 64-bit?  IV may have better precision... */
 	/* I tried changing this to be 64-bit-aware and
 	 * the t/op/numconvert.t became very, very, angry.
@@ -2345,7 +2349,7 @@ char *
 Perl_sv_2pvutf8(pTHX_ register SV *sv, STRLEN *lp)
 {
     sv_utf8_upgrade(sv);
-    return sv_2pv(sv,lp);
+    return SvPV(sv,*lp);
 }
  
 /* This function is only called on magical items */
@@ -4324,14 +4328,23 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
 #endif
       SvCUR_set(sv, bytesread);
       buffer[bytesread] = '\0';
+      SvUTF8_off(sv);
       return(SvCUR(sv) ? SvPVX(sv) : Nullch);
     }
     else if (RsPARA(PL_rs)) {
 	rsptr = "\n\n";
 	rslen = 2;
     }
-    else
+    else {
+	/* Get $/ i.e. PL_rs into same encoding as stream wants */
+	if (SvUTF8(PL_rs)) {
+	    if (!sv_utf8_downgrade(PL_rs, TRUE)) {
+		Perl_croak(aTHX_ "Wide character in $/");
+	    }
+	}
 	rsptr = SvPV(PL_rs, rslen);
+    }
+
     rslast = rslen ? rsptr[rslen - 1] : '\0';
 
     if (RsPARA(PL_rs)) {		/* have to do this both before and after */
@@ -4549,6 +4562,8 @@ screamer2:
 	    }
 	}
     }
+
+    SvUTF8_off(sv);
 
     return (SvCUR(sv) - append) ? SvPVX(sv) : Nullch;
 }
@@ -5998,7 +6013,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	bool is_utf = FALSE;
 
 	char esignbuf[4];
-	U8 utf8buf[UTF8_MAXLEN];
+	U8 utf8buf[UTF8_MAXLEN+1];
 	STRLEN esignlen = 0;
 
 	char *eptr = Nullch;

@@ -47,7 +47,7 @@ S_do_trans_simple(pTHX_ SV *sv)
 
     tbl = (short*)cPVOP->op_pv;
     if (!tbl)
-	Perl_croak(aTHX_ "panic: do_trans");
+	Perl_croak(aTHX_ "panic: do_trans_simple");
 
     s = (U8*)SvPV(sv, len);
     send = s + len;
@@ -78,10 +78,7 @@ S_do_trans_simple(pTHX_ SV *sv)
 	c = utf8_to_uv(s, send - s, &ulen, 0);
         if (c < 0x100 && (ch = tbl[(short)c]) >= 0) {
             matches++;
-            if (ch < 0x80)
-                *d++ = ch;
-            else
-                d = uv_to_utf8(d,ch);
+	    d = uv_to_utf8(d, ch);
             s += ulen;
         }
 	else { /* No match -> copy */
@@ -110,7 +107,7 @@ S_do_trans_count(pTHX_ SV *sv)/* SPC - OK */
 
     tbl = (short*)cPVOP->op_pv;
     if (!tbl)
-	Perl_croak(aTHX_ "panic: do_trans");
+	Perl_croak(aTHX_ "panic: do_trans_count");
 
     s = (U8*)SvPV(sv, len);
     send = s + len;
@@ -151,7 +148,7 @@ S_do_trans_complex(pTHX_ SV *sv)/* SPC - NOT OK */
 
     tbl = (short*)cPVOP->op_pv;
     if (!tbl)
-	Perl_croak(aTHX_ "panic: do_trans");
+	Perl_croak(aTHX_ "panic: do_trans_complex");
 
     s = (U8*)SvPV(sv, len);
     send = s + len;
@@ -193,12 +190,9 @@ S_do_trans_complex(pTHX_ SV *sv)/* SPC - NOT OK */
                matches--;
            }
 
-           if (ch >= 0) {
-               if (hasutf)
-                 d = uv_to_utf8(d, ch);
-               else 
-                 *d++ = ch;
-           }
+           if (ch >= 0)
+               d = uv_to_utf8(d, ch);
+           
            matches++;
 
            s += hasutf && *s & 0x80 ? UNISKIP(*s) : 1;

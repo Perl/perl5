@@ -1413,6 +1413,7 @@ t/op/chars.t		See if character escapes work
 t/op/chop.t		See if chop works
 t/op/closure.t		See if closures work
 t/op/cmp.t		See if the various string and numeric compare work
+t/op/concat.t		See if string concatenation works
 t/op/cond.t		See if conditional expressions work
 t/op/context.t		See if context propagation works
 t/op/defins.t		See if auto-insert of defined() works
@@ -1441,6 +1442,7 @@ t/op/inc.t		See if inc/dec of integers near 32 bit limit work
 t/op/index.t		See if index works
 t/op/int.t		See if int works
 t/op/join.t		See if join works
+t/op/length.t		See if length works
 t/op/lex_assign.t	See if ops involving lexicals or pad temps work
 t/op/lfs.t		See if large files work for perlio
 t/op/list.t		See if array lists work
@@ -1473,6 +1475,7 @@ t/op/regexp.t		See if regular expressions work
 t/op/regexp_noamp.t	See if regular expressions work with optimizations
 t/op/regmesg.t		See if one can get regular expression errors
 t/op/repeat.t		See if x operator works
+t/op/reverse.t		See if reverse operator works
 t/op/runlevel.t		See if die() works from perl_call_*()
 t/op/sleep.t		See if sleep works
 t/op/sort.t		See if sort works
@@ -1495,6 +1498,7 @@ t/op/tr.t		See if tr works
 t/op/undef.t		See if undef works
 t/op/universal.t	See if UNIVERSAL class works
 t/op/unshift.t		See if unshift works
+t/op/utf8decode.t	See if UTF-8 decoding works
 t/op/vec.t		See if vectors work
 t/op/ver.t		See if v-strings and the %v format flag work
 t/op/wantarray.t	See if wantarray works
