@@ -1,4 +1,8 @@
-=head1 Perl TO-DO List
+=head1 NAME
+
+perltodo - Perl TO-DO List
+
+=head1 DESCRIPTION
 
 This is a list of wishes for Perl.  It is maintained by Nathan
 Torkington for the Perl porters.  Send updates to

@@ -20,8 +20,8 @@ open (DIQALA_SADS, ">Is/Y13.pl");  # though people outside of unicode.org
                                    #  might say DIQALA_KAIB...
 
 @fh = qw(
-          GEEZ KAIB SALS RABI HAMS SADS SABI empty
-          DIQALA_GEEZ empty DIQALA_SALS DIQALA_RABI DIQALA_HAMS DIQALA_SADS
+          GEEZ KAIB SALS RABI HAMS SADS SABI none
+          DIQALA_GEEZ none DIQALA_SALS DIQALA_RABI DIQALA_HAMS DIQALA_SADS
 	);
 
 
