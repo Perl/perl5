@@ -1670,22 +1670,27 @@ Perl_mod(pTHX_ OP *o, I32 type)
 	    goto nomod;
 	break; /* mod()ing was handled by ck_return() */
     }
-    if (type != OP_REFGEN ||
-	PL_check[o->op_type] != MEMBER_TO_FPTR(Perl_ck_ftst)) {
-	if (type != OP_LEAVESUBLV)
-	    o->op_flags |= OPf_MOD;
 
-	if (type == OP_AASSIGN || type == OP_SASSIGN)
-	    o->op_flags |= OPf_SPECIAL|OPf_REF;
-	else if (!type) {
-	    o->op_private |= OPpLVAL_INTRO;
-	    o->op_flags &= ~OPf_SPECIAL;
-	    PL_hints |= HINT_BLOCK_SCOPE;
-	}
-	else if (type != OP_GREPSTART && type != OP_ENTERSUB
-		 && type != OP_LEAVESUBLV)
-	    o->op_flags |= OPf_REF;
+    /* [20011101.069] File test operators interpret OPf_REF to mean that
+       their argument is a filehandle; thus \stat(".") should not set
+       it. AMS 20011102 */
+    if (type == OP_REFGEN &&
+        PL_check[o->op_type] == MEMBER_TO_FPTR(Perl_ck_ftst))
+        return o;
+
+    if (type != OP_LEAVESUBLV)
+        o->op_flags |= OPf_MOD;
+
+    if (type == OP_AASSIGN || type == OP_SASSIGN)
+	o->op_flags |= OPf_SPECIAL|OPf_REF;
+    else if (!type) {
+	o->op_private |= OPpLVAL_INTRO;
+	o->op_flags &= ~OPf_SPECIAL;
+	PL_hints |= HINT_BLOCK_SCOPE;
     }
+    else if (type != OP_GREPSTART && type != OP_ENTERSUB
+             && type != OP_LEAVESUBLV)
+	o->op_flags |= OPf_REF;
     return o;
 }
 
