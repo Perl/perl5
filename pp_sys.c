@@ -513,9 +513,9 @@ PP(pp_close)
     else
 	gv = (GV*)POPs;
 
-    if (SvRMAGICAL(gv) && (mg = mg_find((SV*)gv, 'q'))) {
+    if (mg = SvTIED_mg((SV*)gv, 'q')) {
 	PUSHMARK(SP);
-	XPUSHs(mg->mg_obj);
+	XPUSHs(SvTIED_obj((SV*)gv, mg));
 	PUTBACK;
 	ENTER;
 	perl_call_method("CLOSE", G_SCALAR);
@@ -707,8 +707,8 @@ PP(pp_tie)
     sv = TOPs;
     POPSTACK;
     if (sv_isobject(sv)) {
-	sv_unmagic(varsv, how);            
-	sv_magic(varsv, sv, how, Nullch, 0);
+	sv_unmagic(varsv, how);
+	sv_magic(varsv, (SvRV(sv) == varsv ? Nullsv : sv), how, Nullch, 0);
     }
     LEAVE;
     SP = PL_stack_base + markoff;
@@ -719,18 +719,12 @@ PP(pp_tie)
 PP(pp_untie)
 {
     djSP;
-    SV * sv ;
-
-    sv = POPs;
+    SV *sv = POPs;
+    char how = (SvTYPE(sv) == SVt_PVHV || SvTYPE(sv) == SVt_PVAV) ? 'P' : 'q';
 
     if (ckWARN(WARN_UNTIE)) {
         MAGIC * mg ;
-        if (SvMAGICAL(sv)) {
-            if (SvTYPE(sv) == SVt_PVHV || SvTYPE(sv) == SVt_PVAV)
-                mg = mg_find(sv, 'P') ;
-            else
-                mg = mg_find(sv, 'q') ;
-    
+        if (mg = SvTIED_mg(sv, how)) {
             if (mg && SvREFCNT(SvRV(mg->mg_obj)) > 1)  
 		warner(WARN_UNTIE,
 		    "untie attempted while %lu inner references still exist",
@@ -738,30 +732,23 @@ PP(pp_untie)
         }
     }
  
-    if (SvTYPE(sv) == SVt_PVHV || SvTYPE(sv) == SVt_PVAV)
-	sv_unmagic(sv, 'P');
-    else
-	sv_unmagic(sv, 'q');
+    sv_unmagic(sv, how);
     RETPUSHYES;
 }
 
 PP(pp_tied)
 {
     djSP;
-    SV * sv ;
-    MAGIC * mg ;
+    SV *sv = POPs;
+    char how = (SvTYPE(sv) == SVt_PVHV || SvTYPE(sv) == SVt_PVAV) ? 'P' : 'q';
+    MAGIC *mg;
 
-    sv = POPs;
-    if (SvMAGICAL(sv)) {
-        if (SvTYPE(sv) == SVt_PVHV || SvTYPE(sv) == SVt_PVAV)
-            mg = mg_find(sv, 'P') ;
-        else
-            mg = mg_find(sv, 'q') ;
-
-        if (mg)  {
-            PUSHs(sv_2mortal(newSVsv(mg->mg_obj))) ; 
-            RETURN ;
-	}
+    if (mg = SvTIED_mg(sv, how)) {
+	SV *osv = SvTIED_obj(sv, mg);
+	if (osv == mg->mg_obj)
+	    osv = sv_mortalcopy(osv);
+	PUSHs(osv);
+	RETURN;
     }
     RETPUSHUNDEF;
 }
@@ -868,7 +855,12 @@ PP(pp_sselect)
 /* little endians can use vecs directly */
 #if BYTEORDER == 0x1234 || BYTEORDER == 0x12345678
 #  if SELECT_MIN_BITS > 1
-    growsize = SELECT_MIN_BITS / 8;
+    /* If SELECT_MIN_BITS is greater than one we most probably will want
+     * to align the sizes with SELECT_MIN_BITS/8 because for example
+     * in many little-endian (Intel, Alpha) systems (Linux, OS/2, Digital
+     * UNIX, Solaris, NeXT) the smallest quantum select() operates on
+     * (sets bit) is 32 bits.  */
+    growsize = maxlen + (SELECT_MIN_BITS/8 - (maxlen % (SELECT_MIN_BITS/8)));
 #  else
     growsize = sizeof(fd_set);
 #  endif
@@ -1021,10 +1013,10 @@ PP(pp_getc)
     if (!gv)
 	gv = PL_argvgv;
 
-    if (SvRMAGICAL(gv) && (mg = mg_find((SV*)gv, 'q'))) {
+    if (mg = SvTIED_mg((SV*)gv, 'q')) {
 	I32 gimme = GIMME_V;
 	PUSHMARK(SP);
-	XPUSHs(mg->mg_obj);
+	XPUSHs(SvTIED_obj((SV*)gv, mg));
 	PUTBACK;
 	ENTER;
 	perl_call_method("GETC", gimme);
@@ -1239,7 +1231,7 @@ PP(pp_prtf)
     else
 	gv = PL_defoutgv;
 
-    if (SvRMAGICAL(gv) && (mg = mg_find((SV*)gv, 'q'))) {
+    if (mg = SvTIED_mg((SV*)gv, 'q')) {
 	if (MARK == ORIGMARK) {
 	    MEXTEND(SP, 1);
 	    ++MARK;
@@ -1247,7 +1239,7 @@ PP(pp_prtf)
 	    ++SP;
 	}
 	PUSHMARK(MARK - 1);
-	*MARK = mg->mg_obj;
+	*MARK = SvTIED_obj((SV*)gv, mg);
 	PUTBACK;
 	ENTER;
 	perl_call_method("PRINTF", G_SCALAR);
@@ -1351,12 +1343,12 @@ PP(pp_sysread)
 
     gv = (GV*)*++MARK;
     if ((PL_op->op_type == OP_READ || PL_op->op_type == OP_SYSREAD) &&
-	SvRMAGICAL(gv) && (mg = mg_find((SV*)gv, 'q')))
+	(mg = SvTIED_mg((SV*)gv, 'q')))
     {
 	SV *sv;
 	
 	PUSHMARK(MARK-1);
-	*MARK = mg->mg_obj;
+	*MARK = SvTIED_obj((SV*)gv, mg);
 	ENTER;
 	perl_call_method("READ", G_SCALAR);
 	LEAVE;
@@ -1490,13 +1482,11 @@ PP(pp_send)
     MAGIC *mg;
 
     gv = (GV*)*++MARK;
-    if (PL_op->op_type == OP_SYSWRITE &&
-	SvRMAGICAL(gv) && (mg = mg_find((SV*)gv, 'q')))
-    {
+    if (PL_op->op_type == OP_SYSWRITE && (mg = SvTIED_mg((SV*)gv, 'q'))) {
 	SV *sv;
 	
 	PUSHMARK(MARK-1);
-	*MARK = mg->mg_obj;
+	*MARK = SvTIED_obj((SV*)gv, mg);
 	ENTER;
 	perl_call_method("WRITE", G_SCALAR);
 	LEAVE;
@@ -2339,11 +2329,13 @@ PP(pp_ftrread)
 	if (result < 0)
 	    RETPUSHUNDEF;
 	RETPUSHNO;
-    } else
+    }
+    else
 	result = my_stat(ARGS);
 #else
     result = my_stat(ARGS);
 #endif
+    SPAGAIN;
     if (result < 0)
 	RETPUSHUNDEF;
     if (cando(S_IRUSR, 0, &PL_statcache))
@@ -2363,11 +2355,13 @@ PP(pp_ftrwrite)
 	if (result < 0)
 	    RETPUSHUNDEF;
 	RETPUSHNO;
-    } else
+    }
+    else
 	result = my_stat(ARGS);
 #else
     result = my_stat(ARGS);
 #endif
+    SPAGAIN;
     if (result < 0)
 	RETPUSHUNDEF;
     if (cando(S_IWUSR, 0, &PL_statcache))
@@ -2387,11 +2381,13 @@ PP(pp_ftrexec)
 	if (result < 0)
 	    RETPUSHUNDEF;
 	RETPUSHNO;
-    } else
+    }
+    else
 	result = my_stat(ARGS);
 #else
     result = my_stat(ARGS);
 #endif
+    SPAGAIN;
     if (result < 0)
 	RETPUSHUNDEF;
     if (cando(S_IXUSR, 0, &PL_statcache))
@@ -2411,11 +2407,13 @@ PP(pp_fteread)
 	if (result < 0)
 	    RETPUSHUNDEF;
 	RETPUSHNO;
-    } else
+    }
+    else
 	result = my_stat(ARGS);
 #else
     result = my_stat(ARGS);
 #endif
+    SPAGAIN;
     if (result < 0)
 	RETPUSHUNDEF;
     if (cando(S_IRUSR, 1, &PL_statcache))
@@ -2435,11 +2433,13 @@ PP(pp_ftewrite)
 	if (result < 0)
 	    RETPUSHUNDEF;
 	RETPUSHNO;
-    } else
+    }
+    else
 	result = my_stat(ARGS);
 #else
     result = my_stat(ARGS);
 #endif
+    SPAGAIN;
     if (result < 0)
 	RETPUSHUNDEF;
     if (cando(S_IWUSR, 1, &PL_statcache))
@@ -2459,11 +2459,13 @@ PP(pp_fteexec)
 	if (result < 0)
 	    RETPUSHUNDEF;
 	RETPUSHNO;
-    } else
+    }
+    else
 	result = my_stat(ARGS);
 #else
     result = my_stat(ARGS);
 #endif
+    SPAGAIN;
     if (result < 0)
 	RETPUSHUNDEF;
     if (cando(S_IXUSR, 1, &PL_statcache))

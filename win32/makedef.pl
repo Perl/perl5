@@ -28,6 +28,7 @@ while (<CFG>)
  {
   $define{$1} = 1 if /^\s*#\s*define\s+(MYMALLOC)\b/;
   $define{$1} = 1 if /^\s*#\s*define\s+(USE_THREADS)\b/;
+  $define{$1} = 1 if /^\s*#\s*define\s+(MULTIPLICITY)\b/;
  }
 close(CFG);
 
@@ -81,8 +82,6 @@ PL_archpat_auto
 PL_cryptseen
 PL_DBcv
 PL_generation
-PL_in_clean_all
-PL_in_clean_objs
 PL_lastgotoprobe
 PL_linestart
 PL_modcount
@@ -239,11 +238,6 @@ Perl_thread_create
 Perl_find_threadsv
 Perl_unlock_condpair
 Perl_magic_mutexfree
-Perl_sv_iv
-Perl_sv_nv
-Perl_sv_true
-Perl_sv_uv
-Perl_sv_pvn
 )];
  }
 

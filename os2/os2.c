@@ -5,6 +5,8 @@
 #define INCL_DOSERRORS
 #include <os2.h>
 
+#include <sys/uflags.h>
+
 /*
  * Various Unix compatibility functions for OS/2
  */
@@ -1633,6 +1635,7 @@ Perl_OS2_init(char **env)
     MALLOC_INIT;
     settmppath();
     OS2_Perl_data.xs_init = &Xs_OS2_init;
+    _uflags (_UF_SBRK_MODEL, _UF_SBRK_ARBITRARY);
     if (environ == NULL) {
 	environ = env;
     }

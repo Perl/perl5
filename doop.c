@@ -215,10 +215,9 @@ do_trans_UU_count(SV *sv)
     send = s + len;
 
     while (s < send) {
-	if ((uv = swash_fetch(rv, s)) < none) {
-	    s += UTF8SKIP(s);
+	if ((uv = swash_fetch(rv, s)) < none)
 	    matches++;
-	}
+	s += UTF8SKIP(s);
     }
 
     return matches;
@@ -1062,7 +1061,7 @@ do_kv(ARGSproto)
 	    RETURN;
 	}
 
-	if (!SvRMAGICAL(keys) || !mg_find((SV*)keys,'P'))
+	if (! SvTIED_mg((SV*)keys, 'P'))
 	    i = HvKEYS(keys);
 	else {
 	    i = 0;

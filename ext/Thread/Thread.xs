@@ -229,8 +229,8 @@ newthread (SV *startsv, AV *initargs, char *classname)
     static pthread_attr_t attr;
     static int attr_inited = 0;
     sigset_t fullmask, oldmask;
-#endif
     static int attr_joinable = ATTR_JOINABLE;
+#endif
 
     savethread = thr;
     thr = new_struct_thread(thr);

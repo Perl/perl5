@@ -1316,6 +1316,10 @@ PP(pp_negate)
 		sv_setsv(TARG, sv);
 		*SvPV_force(TARG, len) = *s == '-' ? '+' : '-';
 	    }
+	    else if (IN_UTF8 && *(U8*)s >= 0xc0 && isIDFIRST_utf8((U8*)s)) {
+		sv_setpvn(TARG, "-", 1);
+		sv_catsv(TARG, sv);
+	    }
 	    else
 		sv_setnv(TARG, -SvNV(sv));
 	    SETTARG;
@@ -2116,15 +2120,15 @@ PP(pp_sprintf)
 PP(pp_ord)
 {
     djSP; dTARGET;
-    I32 value;
+    UV value;
     U8 *tmps = (U8*)POPp;
     I32 retlen;
 
     if (IN_UTF8 && (*tmps & 0x80))
-	value = (I32) utf8_to_uv(tmps, &retlen);
+	value = utf8_to_uv(tmps, &retlen);
     else
-	value = (I32) (*tmps & 255);
-    XPUSHi(value);
+	value = (UV)(*tmps & 255);
+    XPUSHu(value);
     RETURN;
 }
 
@@ -2132,7 +2136,7 @@ PP(pp_chr)
 {
     djSP; dTARGET;
     char *tmps;
-    I32 value = POPi;
+    U32 value = POPu;
 
     (void)SvUPGRADE(TARG,SVt_PV);
 
@@ -2757,8 +2761,8 @@ PP(pp_splice)
     SV **tmparyval = 0;
     MAGIC *mg;
 
-    if (SvRMAGICAL(ary) && (mg = mg_find((SV*)ary,'P'))) {
-	*MARK-- = mg->mg_obj;
+    if (mg = SvTIED_mg((SV*)ary, 'P')) {
+	*MARK-- = SvTIED_obj((SV*)ary, mg);
 	PUSHMARK(MARK);
 	PUTBACK;
 	ENTER;
@@ -2955,8 +2959,8 @@ PP(pp_push)
     register SV *sv = &PL_sv_undef;
     MAGIC *mg;
 
-    if (SvRMAGICAL(ary) && (mg = mg_find((SV*)ary,'P'))) {
-	*MARK-- = mg->mg_obj;
+    if (mg = SvTIED_mg((SV*)ary, 'P')) {
+	*MARK-- = SvTIED_obj((SV*)ary, mg);
 	PUSHMARK(MARK);
 	PUTBACK;
 	ENTER;
@@ -3011,8 +3015,8 @@ PP(pp_unshift)
     register I32 i = 0;
     MAGIC *mg;
 
-    if (SvRMAGICAL(ary) && (mg = mg_find((SV*)ary,'P'))) {
-	*MARK-- = mg->mg_obj;
+    if (mg = SvTIED_mg((SV*)ary, 'P')) {
+	*MARK-- = SvTIED_obj((SV*)ary, mg);
 	PUSHMARK(MARK);
 	PUTBACK;
 	ENTER;
@@ -3429,7 +3433,7 @@ PP(pp_unpack)
 		    auint = utf8_to_uv((U8*)s, &along);
 		    s += along;
 		    sv = NEWSV(37, 0);
-		    sv_setiv(sv, (IV)auint);
+		    sv_setuv(sv, (UV)auint);
 		    PUSHs(sv_2mortal(sv));
 		}
 	    }
@@ -4528,9 +4532,9 @@ PP(pp_split)
 	av_extend(ary,0);
 	av_clear(ary);
 	SPAGAIN;
-	if (SvRMAGICAL(ary) && (mg = mg_find((SV *) ary, 'P'))) {
+	if (mg = SvTIED_mg((SV*)ary, 'P')) {
 	    PUSHMARK(SP);
-	    XPUSHs(mg->mg_obj);
+	    XPUSHs(SvTIED_obj((SV*)ary, mg));
 	}
 	else {
 	    if (!AvREAL(ary)) {
@@ -4779,7 +4783,6 @@ PP(pp_lock)
 	DEBUG_S(PerlIO_printf(PerlIO_stderr(), "0x%lx: pp_lock lock 0x%lx\n",
 			      (unsigned long)thr, (unsigned long)sv);)
 	MUTEX_UNLOCK(MgMUTEXP(mg));
-	SvREFCNT_inc(sv);	/* keep alive until magic_mutexfree */
 	save_destructor(unlock_condpair, sv);
     }
 #endif /* USE_THREADS */

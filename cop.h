@@ -206,7 +206,8 @@ struct block {
 	PL_stack_sp	 = PL_stack_base + cx->blk_oldsp,			\
 	PL_markstack_ptr = PL_markstack + cx->blk_oldmarksp,		\
 	PL_scopestack_ix = cx->blk_oldscopesp,				\
-	PL_retstack_ix	 = cx->blk_oldretsp
+	PL_retstack_ix	 = cx->blk_oldretsp,				\
+	PL_curpm         = cx->blk_oldpm
 
 /* substitution context */
 struct subst {

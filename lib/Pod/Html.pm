@@ -1373,9 +1373,6 @@ sub process_L {
 	# LREF: a la HREF L<show this text|man/section>
 	$linktext = $1 if s:^([^|]+)\|::;
 
-	# a :: acts like a /
-	s,::,/,;
-
 	# make sure sections start with a /
 	s,^",/",g;
 	s,^,/,g if (!m,/, && / /);
@@ -1399,6 +1396,11 @@ sub process_L {
     if ($page eq "") {
 	$link = "#" . htmlify(0,$section);
 	$linktext = $section unless defined($linktext);
+    } elsif ( $page =~ /::/ ) {
+	$linktext  = ($section ? "$section" : "$page");
+	$page =~ s,::,/,g;
+	$link = "$htmlroot/$page.html";
+	$link .= "#" . htmlify(0,$section) if ($section);
     } elsif (!defined $pages{$page}) {
 	warn "$0: $podfile: cannot resolve L<$str> in paragraph $paragraph: no such page '$page'\n";
 	$link = "";

@@ -500,7 +500,9 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
     /* No stash in name, so see how we can default */
 
     if (!stash) {
-	if (isIDFIRST(*name)) {
+	if (isIDFIRST(*name)
+	    || (IN_UTF8 && ((*name & 0xc0) == 0xc0) && isIDFIRST_utf8((U8*)name)))
+	{
 	    bool global = FALSE;
 
 	    if (isUPPER(*name)) {
@@ -566,7 +568,7 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
     if (!stash) {
 	if (!add)
 	    return Nullgv;
-	if (add & ~GV_ADDMULTI) {
+	{
 	    char sv_type_char = ((sv_type == SVt_PV) ? '$'
 				 : (sv_type == SVt_PVAV) ? '@'
 				 : (sv_type == SVt_PVHV) ? '%'

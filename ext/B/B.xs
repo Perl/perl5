@@ -1164,6 +1164,13 @@ CvXSUBANY(cv)
     CODE:
 	ST(0) = sv_2mortal(newSViv(CvXSUBANY(cv).any_iv));
 
+MODULE = B    PACKAGE = B::CV
+
+U8
+CvFLAGS(cv)
+      B::CV   cv
+
+
 MODULE = B	PACKAGE = B::HV		PREFIX = Hv
 
 STRLEN

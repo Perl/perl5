@@ -1,32 +1,33 @@
-#define SAVEt_ITEM	0
-#define SAVEt_SV	1
-#define SAVEt_AV	2
-#define SAVEt_HV	3
-#define SAVEt_INT	4
-#define SAVEt_LONG	5
-#define SAVEt_I32	6
-#define SAVEt_IV	7
-#define SAVEt_SPTR	8
-#define SAVEt_APTR	9
-#define SAVEt_HPTR	10
-#define SAVEt_PPTR	11
-#define SAVEt_NSTAB	12
-#define SAVEt_SVREF	13
-#define SAVEt_GP	14
-#define SAVEt_FREESV	15
-#define SAVEt_FREEOP	16
-#define SAVEt_FREEPV	17
-#define SAVEt_CLEARSV	18
-#define SAVEt_DELETE	19
-#define SAVEt_DESTRUCTOR 20
-#define SAVEt_REGCONTEXT 21
-#define SAVEt_STACK_POS  22
-#define SAVEt_I16	23
-#define SAVEt_AELEM     24
-#define SAVEt_HELEM     25
-#define SAVEt_OP	26
-#define SAVEt_HINTS	27
-#define SAVEt_ALLOC	28
+#define SAVEt_ITEM		0
+#define SAVEt_SV		1
+#define SAVEt_AV		2
+#define SAVEt_HV		3
+#define SAVEt_INT		4
+#define SAVEt_LONG		5
+#define SAVEt_I32		6
+#define SAVEt_IV		7
+#define SAVEt_SPTR		8
+#define SAVEt_APTR		9
+#define SAVEt_HPTR		10
+#define SAVEt_PPTR		11
+#define SAVEt_NSTAB		12
+#define SAVEt_SVREF		13
+#define SAVEt_GP		14
+#define SAVEt_FREESV		15
+#define SAVEt_FREEOP		16
+#define SAVEt_FREEPV		17
+#define SAVEt_CLEARSV		18
+#define SAVEt_DELETE		19
+#define SAVEt_DESTRUCTOR	20
+#define SAVEt_REGCONTEXT	21
+#define SAVEt_STACK_POS		22
+#define SAVEt_I16		23
+#define SAVEt_AELEM		24
+#define SAVEt_HELEM		25
+#define SAVEt_OP		26
+#define SAVEt_HINTS		27
+#define SAVEt_ALLOC		28
+#define SAVEt_GENERIC_SVREF	29
 
 #define SSCHECK(need) if (PL_savestack_ix + need > PL_savestack_max) savestack_grow()
 #define SSPUSHINT(i) (PL_savestack[PL_savestack_ix++].any_i32 = (I32)(i))
@@ -63,7 +64,7 @@
 #define LEAVE_SCOPE(old) if (PL_savestack_ix > old) leave_scope(old)
 
 /*
- * Not using SOFT_CAST on SAVEFREESV and SAVEFREESV
+ * Not using SOFT_CAST on SAVESPTR, SAVEGENERICSV and SAVEFREESV
  * because these are used for several kinds of pointer values
  */
 #define SAVEI16(i)	save_I16(SOFT_CAST(I16*)&(i))
@@ -77,6 +78,7 @@
 #define SAVEFREEOP(o)	save_freeop(SOFT_CAST(OP*)(o))
 #define SAVEFREEPV(p)	save_freepv(SOFT_CAST(char*)(p))
 #define SAVECLEARSV(sv)	save_clearsv(SOFT_CAST(SV**)&(sv))
+#define SAVEGENERICSV(s)	save_generic_svref((SV**)&(s))
 #define SAVEDELETE(h,k,l) \
 	  save_delete(SOFT_CAST(HV*)(h), SOFT_CAST(char*)(k), (I32)(l))
 #ifdef PERL_OBJECT

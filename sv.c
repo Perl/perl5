@@ -36,10 +36,6 @@
 #endif
 #endif
 
-#if defined(USE_STDIO_PTR) && defined(STDIO_PTR_LVALUE) && defined(STDIO_CNT_LVALUE) && !defined(__QNX__)
-#  define FAST_SV_GETS
-#endif
-
 #ifdef PERL_OBJECT
 #define FCALL this->*f
 #define VTBL this->*vtbl
@@ -3600,6 +3596,8 @@ sv_inc(register SV *sv)
 
     if (!sv)
 	return;
+    if (SvGMAGICAL(sv))
+	mg_get(sv);
     if (SvTHINKFIRST(sv)) {
 	if (SvREADONLY(sv)) {
 	    dTHR;
@@ -3616,8 +3614,6 @@ sv_inc(register SV *sv)
 	    sv_setiv(sv, i);
 	}
     }
-    if (SvGMAGICAL(sv))
-	mg_get(sv);
     flags = SvFLAGS(sv);
     if (flags & SVp_NOK) {
 	(void)SvNOK_only(sv);
@@ -3694,6 +3690,8 @@ sv_dec(register SV *sv)
 
     if (!sv)
 	return;
+    if (SvGMAGICAL(sv))
+	mg_get(sv);
     if (SvTHINKFIRST(sv)) {
 	if (SvREADONLY(sv)) {
 	    dTHR;
@@ -3710,8 +3708,6 @@ sv_dec(register SV *sv)
 	    sv_setiv(sv, i);
 	}
     }
-    if (SvGMAGICAL(sv))
-	mg_get(sv);
     flags = SvFLAGS(sv);
     if (flags & SVp_NOK) {
 	SvNVX(sv) -= 1.0;

@@ -1638,6 +1638,8 @@
 #define save_freeop         pPerl->Perl_save_freeop
 #undef  save_freepv
 #define save_freepv         pPerl->Perl_save_freepv
+#undef  save_generic_svref
+#define save_generic_svref  pPerl->Perl_generic_save_svref
 #undef  save_gp
 #define save_gp             pPerl->Perl_save_gp
 #undef  save_hash

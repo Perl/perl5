@@ -32,7 +32,9 @@ typedef long long __int64;
 #endif
 #  ifndef PERL_OBJECT
 #    define PERL_GLOBAL_STRUCT
-#    define MULTIPLICITY
+#    ifndef MULTIPLICITY
+#      define MULTIPLICITY
+#    endif
 #  endif
 #endif
 

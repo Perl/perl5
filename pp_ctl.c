@@ -1227,6 +1227,8 @@ die_where(char *message)
 	    return pop_return();
 	}
     }
+    if (!message)
+	message = SvPVx(ERRSV, PL_na);
     PerlIO_printf(PerlIO_stderr(), "%s",message);
     PerlIO_flush(PerlIO_stderr());
     my_failure_exit();
@@ -2651,6 +2653,7 @@ PP(pp_require)
 #else
 		sv_setpvf(namesv, "%s/%s", dir, name);
 #endif
+		TAINT_PROPER("require");
 		tryname = SvPVX(namesv);
 		tryrsfp = PerlIO_open(tryname, PERL_SCRIPT_MODE);
 		if (tryrsfp) {
@@ -2697,10 +2700,8 @@ PP(pp_require)
     ENTER;
     SAVETMPS;
     lex_start(sv_2mortal(newSVpv("",0)));
-    if (PL_rsfp_filters){
- 	save_aptr(&PL_rsfp_filters);
-	PL_rsfp_filters = NULL;
-    }
+    SAVEGENERICSV(PL_rsfp_filters);
+    PL_rsfp_filters = Nullav;
 
     PL_rsfp = tryrsfp;
     name = savepv(name);

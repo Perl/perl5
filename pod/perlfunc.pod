@@ -207,6 +207,34 @@ C<dbmclose>, C<dbmopen>
 
 =back
 
+=head2 Portability
+
+Perl was born in UNIX and therefore it can access all the common UNIX
+system calls.  In non-UNIX environments the functionality of many
+UNIX system calls may not be available or the details of the available
+functionality may be slightly different.  The Perl functions affected
+by this are:
+
+C<-X>, C<binmode>, C<chmod>, C<chown>, C<chroot>, C<crypt>,
+C<dbmclose>, C<dbmopen>, C<dump>, C<endgrent>, C<endhostent>,
+C<endnetent>, C<endprotoent>, C<endpwent>, C<endservent>, C<exec>,
+C<fcntl>, C<flock>, C<fork>, C<getgrent>, C<getgrgid>, C<gethostent>,
+C<getlogin>, C<getnetbyaddr>, C<getnetbyname>, C<getnetent>,
+C<getppid>, C<getprgp>, C<getpriority>, C<getprotobynumber>,
+C<getprotoent>, C<getpwent>, C<getpwnam>, C<getpwuid>,
+C<getservbyport>, C<getservent>, C<getsockopt>, C<glob>, C<ioctl>,
+C<kill>, C<link>, C<lstat>, C<msgctl>, C<msgget>, C<msgrcv>,
+C<msgsnd>, C<open>, C<pipe>, C<readlink>, C<select>, C<semctl>,
+C<semget>, C<semop>, C<setgrent>, C<sethostent>, C<setnetent>,
+C<setpgrp>, C<setpriority>, C<setprotoent>, C<setpwent>,
+C<setservent>, C<setsockopt>, C<shmctl>, C<shmget>, C<shmread>,
+C<shmwrite>, C<socketpair>, C<stat>, C<symlink>, C<syscall>,
+C<sysopen>, C<system>, C<times>, C<truncate>, C<umask>, C<utime>,
+C<wait>, C<waitpid>
+
+For more information about the portability of these functions, see
+L<perlport> and other available platform-specific documentation.
+
 =head2 Alphabetical Listing of Perl Functions
 
 =over 8
@@ -3909,12 +3937,13 @@ into that kind of thing.
 =item sysread FILEHANDLE,SCALAR,LENGTH
 
 Attempts to read LENGTH bytes of data into variable SCALAR from the
-specified FILEHANDLE, using the system call read(2).  It bypasses
-stdio, so mixing this with other kinds of reads, C<print()>, C<write()>,
-C<seek()>, or C<tell()> can cause confusion because stdio usually buffers
-data.  Returns the number of bytes actually read, C<0> at end of file,
-or undef if there was an error.  SCALAR will be grown or shrunk so that
-the last byte actually read is the last byte of the scalar after the read.
+specified FILEHANDLE, using the system call read(2).  It bypasses stdio,
+so mixing this with other kinds of reads, C<print()>, C<write()>,
+C<seek()>, C<tell()>, or C<eof()> can cause confusion because stdio
+usually buffers data.  Returns the number of bytes actually read, C<0>
+at end of file, or undef if there was an error.  SCALAR will be grown or
+shrunk so that the last byte actually read is the last byte of the
+scalar after the read.
 
 An OFFSET may be specified to place the read data at some place in the
 string other than the beginning.  A negative OFFSET specifies
@@ -3927,13 +3956,13 @@ the result of the read is appended.
 
 Sets FILEHANDLE's system position using the system call lseek(2).  It
 bypasses stdio, so mixing this with reads (other than C<sysread()>),
-C<print()>, C<write()>, C<seek()>, or C<tell()> may cause confusion.  FILEHANDLE may
-be an expression whose value gives the name of the filehandle.  The
-values for WHENCE are C<0> to set the new position to POSITION, C<1> to set
-the it to the current position plus POSITION, and C<2> to set it to EOF
-plus POSITION (typically negative).  For WHENCE, you may use the
-constants C<SEEK_SET>, C<SEEK_CUR>, and C<SEEK_END> from either the C<IO::Seekable>
-or the POSIX module.
+C<print()>, C<write()>, C<seek()>, C<tell()>, or C<eof()> may cause
+confusion.  FILEHANDLE may be an expression whose value gives the name
+of the filehandle.  The values for WHENCE are C<0> to set the new
+position to POSITION, C<1> to set the it to the current position plus
+POSITION, and C<2> to set it to EOF plus POSITION (typically negative).
+For WHENCE, you may use the constants C<SEEK_SET>, C<SEEK_CUR>, and
+C<SEEK_END> from either the C<IO::Seekable> or the POSIX module.
 
 Returns the new position, or the undefined value on failure.  A position
 of zero is returned as the string "C<0> but true"; thus C<sysseek()> returns
@@ -3994,11 +4023,11 @@ Attempts to write LENGTH bytes of data from variable SCALAR to the
 specified FILEHANDLE, using the system call write(2).  If LENGTH is
 not specified, writes whole SCALAR. It bypasses
 stdio, so mixing this with reads (other than C<sysread())>, C<print()>,
-C<write()>, C<seek()>, or C<tell()> may cause confusion because stdio usually
-buffers data.  Returns the number of bytes actually written, or C<undef>
-if there was an error.  If the LENGTH is greater than the available
-data in the SCALAR after the OFFSET, only as much data as is available
-will be written.
+C<write()>, C<seek()>, C<tell()>, or C<eof()> may cause confusion
+because stdio usually buffers data.  Returns the number of bytes
+actually written, or C<undef> if there was an error.  If the LENGTH is
+greater than the available data in the SCALAR after the OFFSET, only as
+much data as is available will be written.
 
 An OFFSET may be specified to write the data from some part of the
 string other than the beginning.  A negative OFFSET specifies writing

@@ -311,7 +311,7 @@ PP(pp_print)
 	gv = (GV*)*++MARK;
     else
 	gv = PL_defoutgv;
-    if (SvRMAGICAL(gv) && (mg = mg_find((SV*)gv, 'q'))) {
+    if (mg = SvTIED_mg((SV*)gv, 'q')) {
 	if (MARK == ORIGMARK) {
 	    /* If using default handle then we need to make space to 
 	     * pass object as 1st arg, so move other args up ...
@@ -322,7 +322,7 @@ PP(pp_print)
 	    ++SP;
 	}
 	PUSHMARK(MARK - 1);
-	*MARK = mg->mg_obj;
+	*MARK = SvTIED_obj((SV*)gv, mg);
 	PUTBACK;
 	ENTER;
 	perl_call_method("PRINT", G_SCALAR);
@@ -593,6 +593,7 @@ PP(pp_aassign)
      * clobber a value on the right that's used later in the list.
      */
     if (PL_op->op_private & OPpASSIGN_COMMON) {
+	EXTEND_MORTAL(lastrelem - firstrelem + 1);
         for (relem = firstrelem; relem <= lastrelem; relem++) {
             /*SUPPRESS 560*/
             if (sv = *relem) {
@@ -1055,9 +1056,9 @@ do_readline(void)
     I32 gimme = GIMME_V;
     MAGIC *mg;
 
-    if (SvRMAGICAL(PL_last_in_gv) && (mg = mg_find((SV*)PL_last_in_gv, 'q'))) {
+    if (mg = SvTIED_mg((SV*)PL_last_in_gv, 'q')) {
 	PUSHMARK(SP);
-	XPUSHs(mg->mg_obj);
+	XPUSHs(SvTIED_obj((SV*)PL_last_in_gv, mg));
 	PUTBACK;
 	ENTER;
 	perl_call_method("READLINE", gimme);
@@ -2110,7 +2111,6 @@ PP(pp_entersub)
 	    DEBUG_S(PerlIO_printf(PerlIO_stderr(), "%p: pp_entersub lock %p\n",
 				  thr, sv);)
 	    MUTEX_UNLOCK(MgMUTEXP(mg));
-	    SvREFCNT_inc(sv);	/* Keep alive until magic_mutexfree */
 	    save_destructor(unlock_condpair, sv);
 	}
 	MUTEX_LOCK(CvMUTEXP(cv));
@@ -2516,10 +2516,16 @@ PP(pp_method)
 	    !(iogv = gv_fetchpv(packname, FALSE, SVt_PVIO)) ||
 	    !(ob=(SV*)GvIO(iogv)))
 	{
-	    if (!packname || !isIDFIRST(*packname))
+	    if (!packname || 
+		((*(U8*)packname >= 0xc0 && IN_UTF8)
+		    ? !isIDFIRST_utf8((U8*)packname)
+		    : !isIDFIRST(*packname)
+		))
+	    {
 		DIE("Can't call method \"%s\" %s", name,
 		    SvOK(sv)? "without a package or object reference"
 			    : "on an undefined value");
+	    }
 	    stash = gv_stashpvn(packname, packlen, TRUE);
 	    goto fetch;
 	}

@@ -13,7 +13,7 @@ use Exporter ();
 
 use B qw(minus_c sv_undef walkoptree walksymtable main_root main_start peekop
 	 class cstring cchar svref_2object compile_stats comppadlist hash
-	 threadsv_names);
+	 threadsv_names main_cv );
 use B::Asmdata qw(@specialsv_name);
 
 use FileHandle;
@@ -596,10 +596,15 @@ sub B::CV::save {
 	warn sprintf("No definition for sub %s::%s (unable to autoload)\n",
 		     $cvstashname, $cvname); # debug
     }
-    $symsect->add(sprintf("xpvcvix%d\t%s, %u, 0, %d, %s, 0, Nullhv, Nullhv, %s, s\\_%x, $xsub, $xsubany, Nullgv, Nullgv, %d, s\\_%x, (CV*)s\\_%x, 0",
+    $symsect->add(sprintf("xpvcvix%d\t%s, %u, 0, %d, %s, 0, Nullhv, Nullhv, %s, s\\_%x, $xsub, $xsubany, Nullgv, Nullgv, %d, s\\_%x, (CV*)s\\_%x, 0x%x",
 			  $xpvcv_ix, cstring($pv), length($pv), $cv->IVX,
 			  $cv->NVX, $startfield, ${$cv->ROOT}, $cv->DEPTH,
-			  $$padlist, ${$cv->OUTSIDE}));
+                        $$padlist, ${$cv->OUTSIDE}, $cv->CvFLAGS));
+
+    if (${$cv->OUTSIDE} == ${main_cv()}){
+	$init->add(sprintf("CvOUTSIDE(s\\_%x)=PL_main_cv;",$$cv));
+    }
+
     if ($$gv) {
 	$gv->save;
 	$init->add(sprintf("CvGV(s\\_%x) = s\\_%x;",$$cv,$$gv));
@@ -1091,6 +1096,7 @@ sub save_unused_subs {
 }
 
 sub save_main {
+    my $curpad_nam = (comppadlist->ARRAY)[0]->save;
     my $curpad_sym = (comppadlist->ARRAY)[1]->save;
     walkoptree(main_root, "save");
     warn "done main optree, walking symtable for extras\n" if $debug_cv;
@@ -1098,7 +1104,10 @@ sub save_main {
 
     $init->add(sprintf("PL_main_root = s\\_%x;", ${main_root()}),
 	       sprintf("PL_main_start = s\\_%x;", ${main_start()}),
-	       "PL_curpad = AvARRAY($curpad_sym);");
+	       "PL_curpad = AvARRAY($curpad_sym);",
+               "av_store(CvPADLIST(PL_main_cv),0,SvREFCNT_inc($curpad_nam));",
+               "av_store(CvPADLIST(PL_main_cv),1,SvREFCNT_inc($curpad_sym));");
+
     output_boilerplate();
     print "\n";
     output_all("perl_init");

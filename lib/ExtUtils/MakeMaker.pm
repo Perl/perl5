@@ -271,7 +271,7 @@ sub full_setup {
 
  pasthru
 
- c_o xs_c xs_cpp xs_o top_targets linkext dlsyms dynamic dynamic_bs
+ c_o xs_c xs_o top_targets linkext dlsyms dynamic dynamic_bs
  dynamic_lib static static_lib manifypods processPL installbin subdirs
  clean realclean dist_basics dist_core dist_dir dist_test dist_ci
  install force perldepend makefile staticmake test ppd
