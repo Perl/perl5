@@ -395,7 +395,7 @@ sub _run_all_tests {
     my @dir_files = _globdir $Files_In_Dir if defined $Files_In_Dir;
     my $t_start = new Benchmark;
 
-    my $maxlen;
+    my $maxlen = 0;
     foreach (@tests) {
 	my $len = length;
 	$maxlen = $len if $len > $maxlen;
