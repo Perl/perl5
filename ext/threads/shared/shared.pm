@@ -1,4 +1,3 @@
-
 package threads::shared;
 
 use strict;
@@ -29,7 +28,6 @@ our $VERSION = '0.01';
 
 our %shared;
 
-
 sub cond_wait_disabled { return @_ };
 sub cond_signal_disabled { return @_};
 sub cond_broadcast_disabled { return @_};
@@ -59,7 +57,6 @@ sub CLONE {
 	}
 }
 
-
 package threads::shared::sv;
 use base 'threads::shared';
 
@@ -68,7 +65,6 @@ use base 'threads::shared';
 
 package threads::shared::hv;
 use base 'threads::shared';
-
 
 bootstrap threads::shared $VERSION;
 
@@ -97,7 +93,9 @@ threads::shared - Perl extension for sharing data structures between threads
 
 =head1 DESCRIPTION
 
- This modules allows you to share() variables. These variables will then be shared across different threads (and pseudoforks on win32). They are used together with the threads module.
+This modules allows you to share() variables. These variables will
+then be shared across different threads (and pseudoforks on
+win32). They are used together with the threads module.
 
 =head2 EXPORT
 
@@ -112,7 +110,7 @@ The exported functions need a reference due to unsufficent prototyping!
 
 =head1 AUTHOR
 
-Artur Bergman <lt>artur at contiller.se<gt>
+Artur Bergman E<lt>artur at contiller.seE<gt>
 
 threads is released under the same license as Perl
 
@@ -121,5 +119,3 @@ threads is released under the same license as Perl
 L<perl> L<threads>
 
 =cut
-
-
