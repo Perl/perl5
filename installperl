@@ -746,6 +746,8 @@ sub installlib {
     # .exists files, .PL files, and .t files.
     return if $name =~ m{\.orig$|~$|^#.+#$|,v$|^\.exists|\.PL$|\.t$} ||
               $dir  =~ m{/t(?:/|$)};
+    # ignore the test extensions
+    return if $dir =~ m{ext/XS/(?:APItest|Typemap)/};
 
     $name = "$dir/$name" if $dir ne '';
 
