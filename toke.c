@@ -1273,7 +1273,7 @@ S_scan_const(pTHX_ char *start)
 
                 if (min > max) {
 		    Perl_croak(aTHX_
-			       "Invalid [] range \"%c-%c\" in transliteration operator",
+			       "Invalid range \"%c-%c\" in transliteration operator",
 			       (char)min, (char)max);
                 }
 

@@ -1844,7 +1844,7 @@ C<{}> from your ending C<\x{}> - C<\x> without the curly braces can go only
 up to C<ff>.  The <-- HERE shows in the regular expression about where the
 problem was discovered.  See L<perlre>.
 
-=item Invalid [] range "%s" in transliteration operator
+=item Invalid range "%s" in transliteration operator
 
 (F) The range specified in the tr/// or y/// operator had a minimum
 character greater than the maximum character.  See L<perlop>.
