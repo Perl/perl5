@@ -201,18 +201,18 @@ NEXT.pm - Provide a pseudo-class NEXT (et al) that allows method redispatch
 =head1 DESCRIPTION
 
 NEXT.pm adds a pseudoclass named C<NEXT> to any program
-that uses it. If a method C<m> calls C<$self->NEXT::m()>, the call to
+that uses it. If a method C<m> calls C<$self-E<gt>NEXT::m()>, the call to
 C<m> is redispatched as if the calling method had not originally been found.
 
-In other words, a call to C<$self->NEXT::m()> resumes the depth-first,
+In other words, a call to C<$self-E<gt>NEXT::m()> resumes the depth-first,
 left-to-right search of C<$self>'s class hierarchy that resulted in the
 original call to C<m>.
 
-Note that this is not the same thing as C<$self->SUPER::m()>, which 
+Note that this is not the same thing as C<$self-E<gt>SUPER::m()>, which
 begins a new dispatch that is restricted to searching the ancestors
-of the current class. C<$self->NEXT::m()> can backtrack
+of the current class. C<$self-E<gt>NEXT::m()> can backtrack
 past the current class -- to look for a suitable method in other
-ancestors of C<$self> -- whereas C<$self->SUPER::m()> cannot.
+ancestors of C<$self> -- whereas C<$self-E<gt>SUPER::m()> cannot.
 
 A typical use would be in the destructors of a class hierarchy,
 as illustrated in the synopsis above. Each class in the hierarchy

@@ -301,7 +301,7 @@ ok( 1 );
     # last test here 49
 }
 
-# sysread() and syswrite() tested in lib/open.t since Fnctl is used
+# sysread() and syswrite() tested in lib/open.t since Fcntl is used
 
 END {
     1 while unlink "a";

@@ -29,6 +29,11 @@ sub path {
     return @path;
 }
 
+sub cwd {
+    # In OS/2 the "require Cwd" is unnecessary bloat.
+    return Cwd::sys_cwd();
+}
+
 =pod
 
 =item tmpdir
@@ -200,8 +205,7 @@ sub abs2rel {
 
     # Figure out the effective $base and clean it up.
     if ( !defined( $base ) || $base eq '' ) {
-        require Cwd;
-        $base = Cwd::sys_cwd() ;
+	$base = $self->cwd();
     } elsif ( ! $self->file_name_is_absolute( $base ) ) {
         $base = $self->rel2abs( $base ) ;
     } else {
@@ -259,8 +263,7 @@ sub rel2abs {
     if ( ! $self->file_name_is_absolute( $path ) ) {
 
         if ( !defined( $base ) || $base eq '' ) {
-            require Cwd;
-            $base = Cwd::sys_cwd() ;
+	    $base = $self->cwd();
         }
         elsif ( ! $self->file_name_is_absolute( $base ) ) {
             $base = $self->rel2abs( $base ) ;

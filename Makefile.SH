@@ -310,13 +310,11 @@ shextract = Makefile cflags config.h makeaperl makedepend \
 # available.  Dependencies handled manually below (for now).
 
 pl = pod/pod2html.PL pod/pod2latex.PL pod/pod2man.PL pod/pod2text.PL \
-	pod/pod2usage.PL pod/podchecker.PL pod/podselect.PL \
-	pod/buildtoc.PL
+	pod/pod2usage.PL pod/podchecker.PL pod/podselect.PL
 
 # lib/lib.pm is not listed here because it has a rule of its own.
 plextract = pod/pod2html pod/pod2latex pod/pod2man pod/pod2text \
-	pod/pod2usage pod/podchecker pod/podselect \
-	pod/buildtoc
+	pod/pod2usage pod/podchecker pod/podselect
 
 addedbyconf = UU $(shextract) $(plextract) lib/lib.pm pstruct
 
@@ -906,8 +904,8 @@ regen_all: $(PERLYVMS) regen regen_pods
 .PHONY:	manisort manicheck
 
 manisort:	FORCE
-	LC_ALL=C sort -fc MANIFEST || (echo "WARNING: re-sorting MANIFEST"; \
-		LC_ALL=C sort -fo MANIFEST MANIFEST)
+	LC_ALL=C sort -fdc MANIFEST || (echo "WARNING: re-sorting MANIFEST"; \
+		LC_ALL=C sort -fdo MANIFEST MANIFEST)
 
 manicheck:	FORCE
 	perl Porting/manicheck

@@ -319,7 +319,15 @@ It may seem obvious, but Perl is useful only when users can easily
 find it.  It's often a good idea to have both /usr/bin/perl and
 /usr/local/bin/perl be symlinks to the actual binary.  Be especially
 careful, however, not to overwrite a version of perl supplied by your
-vendor unless you are sure you know what you are doing.
+vendor unless you are sure you know what you are doing.  If you insist
+on replacing your vendor's perl, useful information on how it was
+configured may be found with
+
+	perl -V:config_args
+
+(Check the output carefully, however, since this doesn't preserve
+spaces in arguments to Configure.  For that, you have to look
+carefully at config_arg1, config_arg2, etc.)
 
 By default, Configure will not try to link /usr/bin/perl to
 the current version of perl.  You can turn on that behavior by running
