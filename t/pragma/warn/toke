@@ -368,62 +368,173 @@ Ambiguous use of ${fred} resolved to $fred at - line 4.
 ########
 # toke.c
 use warnings 'syntax' ;
-$a = _123;	print "$a\n"; # not a number, a string
-$a = 1_23;	print "$a\n";
-$a = 1__3;	print "$a\n"; # misplaced [ 5]
-$a = 123_;	print "$a\n"; # misplaced [ 6]
-$a = 123._456;	print "$a\n"; # misplaced [ 7]
-$a = 123.4_56;	print "$a\n"; 
-$a = 123.4__6;	print "$a\n"; # misplaced [ 9]
-$a = 123.456_;	print "$a\n"; # misplaced [10]
-$a = 0b_101;	print "$a\n"; # misplaced [11]
-$a = 0b1_01;	print "$a\n";
-$a = 0b1__1;	print "$a\n"; # misplaced [13]
-$a = 0b101_;	print "$a\n"; # misplaced [14]
-$a = 0_123;	print "$a\n"; # misplaced [15]
-$a = 01_23;	print "$a\n";
-$a = 01__3;	print "$a\n"; # misplaced [17]
-$a = 0123_;	print "$a\n"; # misplaced [18]
-$a = 0x_123;	print "$a\n"; # misplaced [19]
-$a = 0x1_23;	print "$a\n";
-$a = 0x1__3;	print "$a\n"; # misplaced [21]
-$a = 0x123_;	print "$a\n"; # misplaced [22]
+$a = _123; print "$a\n";		#( 3	string)
+$a = 1_23; print "$a\n";
+$a = 12_3; print "$a\n";
+$a = 123_; print "$a\n";		#  6
+$a = _+123; print "$a\n";		#  7	string)
+$a = +_123; print "$a\n";		#( 8	string)
+$a = +1_23; print "$a\n";
+$a = +12_3; print "$a\n";
+$a = +123_; print "$a\n";		# 11
+$a = _-123; print "$a\n";		#(12	string)
+$a = -_123; print "$a\n";		#(13	string)
+$a = -1_23; print "$a\n";
+$a = -12_3; print "$a\n";
+$a = -123_; print "$a\n";		# 16
+$a = 123._456; print "$a\n";		# 17
+$a = 123.4_56; print "$a\n";
+$a = 123.45_6; print "$a\n";
+$a = 123.456_; print "$a\n";		# 20
+$a = +123._456; print "$a\n";		# 21
+$a = +123.4_56; print "$a\n";	
+$a = +123.45_6; print "$a\n";	
+$a = +123.456_; print "$a\n";		# 24
+$a = -123._456; print "$a\n";		# 25
+$a = -123.4_56; print "$a\n";	
+$a = -123.45_6; print "$a\n";
+$a = -123.456_; print "$a\n";		# 28
+$a = 123.456E_12; print "$a\n";		# 29
+$a = 123.456E1_2; print "$a\n";
+$a = 123.456E12_; print "$a\n";		# 31
+$a = 123.456E_+12; print "$a\n";	# 32
+$a = 123.456E+_12; print "$a\n";	# 33
+$a = 123.456E+1_2; print "$a\n";
+$a = 123.456E+12_; print "$a\n";	# 35
+$a = 123.456E_-12; print "$a\n";	# 36
+$a = 123.456E-_12; print "$a\n";	# 37
+$a = 123.456E-1_2; print "$a\n";
+$a = 123.456E-12_; print "$a\n";	# 39
 no warnings 'syntax' ;
+$a = _123; print "$a\n";
+$a = 1_23; print "$a\n";
+$a = 12_3; print "$a\n";
+$a = 123_; print "$a\n";
+$a = _+123; print "$a\n";
+$a = +_123; print "$a\n";
+$a = +1_23; print "$a\n";
+$a = +12_3; print "$a\n";
+$a = +123_; print "$a\n";
+$a = _-123; print "$a\n";
+$a = -_123; print "$a\n";
+$a = -1_23; print "$a\n";
+$a = -12_3; print "$a\n";
+$a = -123_; print "$a\n";
+$a = 123._456; print "$a\n";
+$a = 123.4_56; print "$a\n";
+$a = 123.45_6; print "$a\n";
+$a = 123.456_; print "$a\n";
+$a = +123._456; print "$a\n";
+$a = +123.4_56; print "$a\n";
+$a = +123.45_6; print "$a\n";
+$a = +123.456_; print "$a\n";
+$a = -123._456; print "$a\n";
+$a = -123.4_56; print "$a\n";
+$a = -123.45_6; print "$a\n";
+$a = -123.456_; print "$a\n";
+$a = 123.456E_12; print "$a\n";
+$a = 123.456E1_2; print "$a\n";
+$a = 123.456E12_; print "$a\n";
+$a = 123.456E_+12; print "$a\n";
+$a = 123.456E+_12; print "$a\n";
+$a = 123.456E+1_2; print "$a\n";
+$a = 123.456E+12_; print "$a\n";
+$a = 123.456E_-12; print "$a\n";
+$a = 123.456E-_12; print "$a\n";
+$a = 123.456E-1_2; print "$a\n";
+$a = 123.456E-12_; print "$a\n";
 EXPECT
-Misplaced _ in number at - line 5.
 Misplaced _ in number at - line 6.
-Misplaced _ in number at - line 7.
-Misplaced _ in number at - line 9.
-Misplaced _ in number at - line 10.
 Misplaced _ in number at - line 11.
-Misplaced _ in number at - line 13.
-Misplaced _ in number at - line 14.
-Misplaced _ in number at - line 15.
+Misplaced _ in number at - line 16.
 Misplaced _ in number at - line 17.
-Misplaced _ in number at - line 18.
-Misplaced _ in number at - line 19.
+Misplaced _ in number at - line 20.
 Misplaced _ in number at - line 21.
-Misplaced _ in number at - line 22.
+Misplaced _ in number at - line 24.
+Misplaced _ in number at - line 25.
+Misplaced _ in number at - line 28.
+Misplaced _ in number at - line 29.
+Misplaced _ in number at - line 31.
+Misplaced _ in number at - line 32.
+Misplaced _ in number at - line 33.
+Misplaced _ in number at - line 35.
+Misplaced _ in number at - line 36.
+Misplaced _ in number at - line 37.
+Misplaced _ in number at - line 39.
 _123
 123
-13
 123
+123
+123
+_123
+123
+123
+123
+-123
+-_123
+-123
+-123
+-123
 123.456
 123.456
-123.46
 123.456
-5
-5
-3
-5
-83
-83
-11
-83
-291
-291
-19
-291
+123.456
+123.456
+123.456
+123.456
+123.456
+-123.456
+-123.456
+-123.456
+-123.456
+123456000000000
+123456000000000
+123456000000000
+123456000000000
+123456000000000
+123456000000000
+123456000000000
+1.23456e-10
+1.23456e-10
+1.23456e-10
+1.23456e-10
+_123
+123
+123
+123
+123
+_123
+123
+123
+123
+-123
+-_123
+-123
+-123
+-123
+123.456
+123.456
+123.456
+123.456
+123.456
+123.456
+123.456
+123.456
+-123.456
+-123.456
+-123.456
+-123.456
+123456000000000
+123456000000000
+123456000000000
+123456000000000
+123456000000000
+123456000000000
+123456000000000
+1.23456e-10
+1.23456e-10
+1.23456e-10
+1.23456e-10
 ########
 # toke.c
 use warnings 'bareword' ;

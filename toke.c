@@ -6878,8 +6878,8 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 
   Read a number in any of the formats that Perl accepts:
 
-  \d(_?\d)*(\.(\d(_?\d)*)?)?[Ee](\d+)	12 12.34 12.
-  \.\d(_?\d)*[Ee](\d+)			.34
+  \d(_?\d)*(\.(\d(_?\d)*)?)?[Ee][\+\-]?(\d(_?\d)*)	12 12.34 12.
+  \.\d(_?\d)*[Ee][\+\-]?(\d(_?\d)*)			.34
   0b[01](_?[01])*
   0[0-7](_?[0-7])*
   0x[0-9A-Fa-f](_?[0-9A-Fa-f])*
@@ -7162,22 +7162,56 @@ Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
 	}
 
 	/* read exponent part, if present */
-	if (*s && strchr("eE",*s) && strchr("+-0123456789",s[1])) {
+	if (*s && strchr("eE",*s) && strchr("+-0123456789_", s[1])) {
 	    floatit = TRUE;
 	    s++;
 
 	    /* regardless of whether user said 3E5 or 3e5, use lower 'e' */
 	    *d++ = 'e';		/* At least some Mach atof()s don't grok 'E' */
 
+	    /* stray preinitial _ */
+	    if (*s == '_') {
+	        if (ckWARN(WARN_SYNTAX))
+		    Perl_warner(aTHX_ WARN_SYNTAX,
+				"Misplaced _ in number");
+	        lastub = s++;
+	    }
+
 	    /* allow positive or negative exponent */
 	    if (*s == '+' || *s == '-')
 		*d++ = *s++;
 
-	    /* read digits of exponent (no underbars :-) */
-	    while (isDIGIT(*s)) {
+	    /* stray initial _ */
+	    if (*s == '_') {
+	        if (ckWARN(WARN_SYNTAX))
+		    Perl_warner(aTHX_ WARN_SYNTAX,
+				"Misplaced _ in number");
+	        lastub = s++;
+	    }
+
+	    /* read off the first digit */
+	    if (isDIGIT(*s)) {
 		if (d >= e)
 		    Perl_croak(aTHX_ number_too_long);
 		*d++ = *s++;
+	    }
+
+	    /* read digits of exponent */
+	    while (isDIGIT(*s) || *s == '_') {
+	        if (isDIGIT(*s)) {
+		    if (d >= e)
+		        Perl_croak(aTHX_ number_too_long);
+		    *d++ = *s;
+		}
+		else {
+		   if (ckWARN(WARN_SYNTAX) &&
+		       ((lastub && s == lastub + 1) ||
+			!isDIGIT(s[1])))
+		       Perl_warner(aTHX_ WARN_SYNTAX,
+				   "Misplaced _ in number");
+		   lastub = s;
+		}
+		s++;
 	    }
 	}
 
