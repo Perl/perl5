@@ -1017,6 +1017,7 @@ I32 flags;		/* See G_* flags in cop.h */
     bool oldcatch = CATCH_GET;
     dJMPENV;
     int ret;
+    OP* oldop = op;
 
     if (flags & G_DISCARD) {
 	ENTER;
@@ -1139,6 +1140,7 @@ I32 flags;		/* See G_* flags in cop.h */
 	FREETMPS;
 	LEAVE;
     }
+    op = oldop;
     return retval;
 }
 
