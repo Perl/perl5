@@ -820,5 +820,5 @@ BOOT:
 #if defined(USE_PERLIO) && !defined(USE_SFIO)
  PerlIO_define_layer(aTHX_ &PerlIO_encode);
 #endif
-#include "def_t_def.h"
+#include "def_t.exh"
 }

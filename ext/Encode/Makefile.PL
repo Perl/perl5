@@ -65,7 +65,7 @@ sub post_initialize
     my @files;
     foreach my $table (keys %tables)
     {
-	foreach my $ext (qw($(OBJ_EXT) .c .h _def.h .fnm))
+	foreach my $ext (qw($(OBJ_EXT) .c .h .exh .fnm))
     {
 	push (@files,$table.$ext);
     }
@@ -78,7 +78,7 @@ sub postamble
 {
     my $self = shift;
     my $dir  = $self->catdir($self->curdir,'ucm');
-    my $str  = "# Encode\$(OBJ_EXT) depends on .h and _def.h files not .c files - but all written by enc2xs\n";
+    my $str  = "# Encode\$(OBJ_EXT) depends on .h and .exh files not .c files - but all written by enc2xs\n";
     $str  .= 'Encode$(OBJ_EXT) :';
     foreach my $table (keys %tables)
     {
