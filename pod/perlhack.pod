@@ -564,10 +564,10 @@ so whether it was considered a bug.  See above for the location of
 the searchable archives.
 
 The CPAN testers ( http://testers.cpan.org/ ) are a group of
-volunteers who test CPAN modules on a variety of platforms.  Perl Labs
-( http://labs.perl.org/ ) automatically tests Perl source releases on
-platforms and gives feedback to the CPAN testers mailing list.  Both
-efforts welcome volunteers.
+volunteers who test CPAN modules on a variety of platforms.  Perl
+Smokers ( http://archives.develooper.com/daily-build@perl.org/ )
+automatically tests Perl source releases on platforms with various
+configurations.  Both efforts welcome volunteers.
 
 It's a good idea to read and lurk for a while before chipping in.
 That way you'll get to see the dynamic of the conversations, learn the
