@@ -100,20 +100,6 @@ Perl_cxinc(pTHX)
     return cxstack_ix + 1;
 }
 
-/* XXX for 5.8.X BINCOMPAT only */
-void
-Perl_push_return(pTHX_ OP *retop)
-{
-    Perl_croak(aTHX_ "panic: obsolete function push_return() called");
-}
-
-/* XXX for 5.8.X BINCOMPAT only */
-OP *
-Perl_pop_return(pTHX)
-{
-    Perl_croak(aTHX_ "panic: obsolete function pop_return() called");
-}
-
 void
 Perl_push_scope(pTHX)
 {

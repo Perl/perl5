@@ -856,12 +856,6 @@ END_EXTERN_C
 #define PL_regtill		(*Perl_Tregtill_ptr(aTHX))
 #undef  PL_restartop
 #define PL_restartop		(*Perl_Trestartop_ptr(aTHX))
-#undef  PL_retstack
-#define PL_retstack		(*Perl_Tretstack_ptr(aTHX))
-#undef  PL_retstack_ix
-#define PL_retstack_ix		(*Perl_Tretstack_ix_ptr(aTHX))
-#undef  PL_retstack_max
-#define PL_retstack_max		(*Perl_Tretstack_max_ptr(aTHX))
 #undef  PL_rs
 #define PL_rs			(*Perl_Trs_ptr(aTHX))
 #undef  PL_savestack

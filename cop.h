@@ -303,7 +303,6 @@ struct block_loop {
 struct block {
     I32		blku_oldsp;	/* stack pointer to copy stuff down to */
     COP *	blku_oldcop;	/* old curcop pointer */
-    I32		blku_SPARE1;	/* XXX for BINCOMPAT 5.8.x */
     I32		blku_oldmarksp;	/* mark stack index */
     I32		blku_oldscopesp;	/* scope stack index */
     PMOP *	blku_oldpm;	/* values of pattern match vars */

@@ -56,10 +56,6 @@ PERLVAR(Tmarkstack,	I32 *)		/* stack_sp locations we're remembering */
 PERLVAR(Tmarkstack_ptr,	I32 *)
 PERLVAR(Tmarkstack_max,	I32 *)
 
-PERLVAR(Tretstack,	OP **)		/* XXX for 5.8.x BINCOMPAT */
-PERLVAR(Tretstack_ix,	I32)		/* XXX for 5.8.x BINCOMPAT */
-PERLVAR(Tretstack_max,	I32)		/* XXX for 5.8.x BINCOMPAT */
-
 PERLVAR(TSv,		SV *)		/* used to hold temporary values */
 PERLVAR(TXpv,		XPV *)		/* used to hold temporary values */
 

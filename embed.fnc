@@ -596,10 +596,8 @@ p	|void	|pidgone	|Pid_t pid|int status
 Ap	|void	|pmflag		|U32* pmfl|int ch
 p	|OP*	|pmruntime	|OP* pm|OP* expr|OP* repl
 p	|OP*	|pmtrans	|OP* o|OP* expr|OP* repl
-p	|OP*	|pop_return
 Ap	|void	|pop_scope
 p	|OP*	|prepend_elem	|I32 optype|OP* head|OP* tail
-p	|void	|push_return	|OP* o
 Ap	|void	|push_scope
 p	|OP*	|ref		|OP* o|I32 type
 p	|OP*	|refkids	|OP* o|I32 type

@@ -126,9 +126,6 @@
 #define PL_regstartp		(vTHX->Tregstartp)
 #define PL_regtill		(vTHX->Tregtill)
 #define PL_restartop		(vTHX->Trestartop)
-#define PL_retstack		(vTHX->Tretstack)
-#define PL_retstack_ix		(vTHX->Tretstack_ix)
-#define PL_retstack_max		(vTHX->Tretstack_max)
 #define PL_rs			(vTHX->Trs)
 #define PL_savestack		(vTHX->Tsavestack)
 #define PL_savestack_ix		(vTHX->Tsavestack_ix)
@@ -853,9 +850,6 @@
 #define PL_Tregstartp		PL_regstartp
 #define PL_Tregtill		PL_regtill
 #define PL_Trestartop		PL_restartop
-#define PL_Tretstack		PL_retstack
-#define PL_Tretstack_ix		PL_retstack_ix
-#define PL_Tretstack_max	PL_retstack_max
 #define PL_Trs			PL_rs
 #define PL_Tsavestack		PL_savestack
 #define PL_Tsavestack_ix	PL_savestack_ix
