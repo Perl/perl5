@@ -328,6 +328,7 @@ ext.libs: $(static_ext)
 if test -f .patch ; then $spitshell >>Makefile <<'!NO!SUBS!' 
 patchlevel.h: .patch
 	perl fix_pl || (make -f Makefile.micro && ./microperl fix_pl)
+	$(SHELL) Makefile.SH
 
 !NO!SUBS!
 
