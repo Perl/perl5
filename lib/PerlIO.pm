@@ -228,7 +228,8 @@ This can be used to see the effect of/bugs in the various layers e.g.
 
 The following returns the B<names> of the PerlIO layers on a filehandle.
 
-   my @layers = PerlIO::get_layers(FH);
+   my @layers = PerlIO::get_layers($fh);
+   # You can use also FH or *FH, the bare FH doesn't pass 'use strict'.
 
 The layers are returned in the order an open() or binmode() call would
 use them.  Note that the stack begins (normally) from C<stdio> or from
@@ -238,10 +239,11 @@ C<unix>) is not part of the stack, but under C<perlio> it is.
 By default the layers from the input side of the filehandle is
 returned, to get the output side use the optional C<output> argument:
 
-   my @layers = PerlIO::get_layers(FH, output => 1);
+   my @layers = PerlIO::get_layers($fh, output => 1);
 
 (Usually the layers are identical on either side of a filehandle but
-for example with sockets there may be differences.)
+for example with sockets there may be differences, or if you have
+been using the C<open> pragma.)
 
 There is no set_layers(), nor does get_layers() return a tied array
 mirroring the stack, or anything fancy like that.  This is not
@@ -256,7 +258,7 @@ the name of the layer, and certain layers (like C<utf8>) are not real
 layers but instead flags on real layers: to get all of these returned
 separately use the optional C<separate> argument:
 
-   my @layer_and_args_and_flags = PerlIO::get_layers(FH, details => 1);
+   my @layer_and_args_and_flags = PerlIO::get_layers($fh, details => 1);
 
 The result will be up to be three times the number of layers:
 the first element will be a name, the second element the arguments
