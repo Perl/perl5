@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Feb 22 15:00:27 EET 2001 [metaconfig 3.0 PL70]
+# Generated on Thu Feb 22 15:19:20 EET 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -5436,10 +5436,13 @@ esac
 case "$useperlio" in
 $define)
 	echo "Perlio selected." >&4
+	;;
+*)
+	echo "Perlio not selected, using stdio." >&4
 	case "$archname" in
-        *-perlio*) echo "...and architecture name already has -perlio." >&4
+        *-stdio*) echo "...and architecture name already has -stdio." >&4
                 ;;
-        *)      archname="$archname-perlio"
+        *)      archname="$archname-stdio"
                 echo "...setting architecture name to $archname." >&4
                 ;;
         esac
@@ -15145,9 +15148,9 @@ $echo "Guessing which symbols your C compiler and preprocessor define..." >&4
 $cat <<'EOSH' > Cppsym.know
 a29k ABI64 aegis AES_SOURCE AIX AIX32 AIX370
 AIX41 AIX42 AIX43 AIX_SOURCE aixpc ALL_SOURCE
-alliant alpha am29000 AM29000 amiga AMIGAOS AMIX
-ansi ANSI_C_SOURCE apollo ardent atarist att386 att3b BeOS
-BIG_ENDIAN BIT_MSF bsd BSD bsd43 bsd4_2 bsd4_3 BSD4_3 bsd4_4
+alliant alpha am29000 AM29000 AMD64 amiga AMIGAOS AMIX
+ansi ANSI_C_SOURCE apollo ardent ARM32 atarist att386 att3b
+BeOS BIG_ENDIAN BIT_MSF bsd BSD bsd43 bsd4_2 bsd4_3 BSD4_3 bsd4_4
 BSD_4_3 BSD_4_4 BSD_NET2 BSD_TIME BSD_TYPES BSDCOMPAT bsdi
 bull c cadmus clipper CMU COFF COMPILER_VERSION
 concurrent convex cpu cray CRAY CRAYMPP ctix CX_UX
@@ -15160,7 +15163,7 @@ hp200 hp300 hp700 HP700 hp800 hp9000
 hp9000s200 hp9000s300 hp9000s400 hp9000s500
 hp9000s700 hp9000s800 hp9k8 hp_osf hppa hpux HPUX_SOURCE
 i186 i286 i386 i486 i586 i686 i8086 i80960 i860 I960
-iAPX286 ibm ibm032 ibmesa IBMR2 ibmrt ILP32 ILP64
+IA64 iAPX286 ibm ibm032 ibmesa IBMR2 ibmrt ILP32 ILP64
 INLINE_INTRINSICS INTRINSICS INT64 interdata is68k ksr1
 LANGUAGE_C LARGE_FILE_API LARGEFILE64_SOURCE
 LARGEFILE_SOURCE LFS64_LARGEFILE LFS_LARGEFILE
@@ -15184,7 +15187,7 @@ pc532 pdp11 PGC PIC plexus PORTAR posix
 POSIX1B_SOURCE POSIX2_SOURCE POSIX4_SOURCE
 POSIX_C_SOURCE POSIX_SOURCE POWER
 PROTOTYPES PWB pyr QNX R3000 REENTRANT RES Rhapsody RISC6000
-riscix riscos RT scs SCO sequent sgi SGI_SOURCE sinix
+riscix riscos RT S390 SA110 scs SCO sequent sgi SGI_SOURCE SH3 sinix
 SIZE_INT SIZE_LONG SIZE_PTR SOCKET_SOURCE SOCKETS_SOURCE
 sony sony_news sonyrisc sparc sparclite spectrum
 stardent stdc STDC_EXT stratos sun sun3 sun386
@@ -15192,6 +15195,7 @@ Sun386i svr3 svr4 SVR4_2 SVR4_SOURCE svr5
 SX system SYSTYPE_BSD SYSTYPE_BSD43 SYSTYPE_BSD44
 SYSTYPE_SVR4 SYSTYPE_SVR5 SYSTYPE_SYSV SYSV SYSV3 SYSV4 SYSV5
 sysV68 sysV88 Tek4132 Tek4300 titan
+TM3200 TM5400 TM5600
 tower tower32 tower32_200 tower32_600 tower32_700
 tower32_800 tower32_850 tss
 u370 u3b u3b2 u3b20 u3b200 u3b20d u3b5
