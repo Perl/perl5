@@ -14,7 +14,7 @@ BEGIN {
 }
 
 use Test;
-BEGIN { plan tests => 52 };
+BEGIN { plan tests => 72 };
 
 use strict;
 use warnings;
@@ -25,7 +25,7 @@ $IsEBCDIC = ord("A") != 0x41;
 
 #########################
 
-ok(1); # If we made it this far, we're ok.
+ok(1);
 
 # a standard collator (3.1.1)
 my $Collator = Unicode::Collate->new(
@@ -41,6 +41,7 @@ my $hangul = Unicode::Collate->new(
   level => 3,
   table => undef,
   normalization => undef,
+
   entry => <<'ENTRIES',
 0061      ; [.0A15.0020.0002] # LATIN SMALL LETTER A
 0041      ; [.0A15.0020.0008] # LATIN CAPITAL LETTER A
@@ -65,87 +66,127 @@ ENTRIES
 
 ok(ref $hangul, "Unicode::Collate");
 
+my $trailwt = Unicode::Collate->new(
+  level => 3,
+  table => undef,
+  normalization => undef,
+  hangul_terminator => 16,
+
+  entry => <<'ENTRIES', # Term < Jongseong < Jungseong < Choseong
+0061  ; [.0A15.0020.0002] # LATIN SMALL LETTER A
+0041  ; [.0A15.0020.0008] # LATIN CAPITAL LETTER A
+11A8  ; [.1801.0020.0002] # HANGUL JONGSEONG KIYEOK
+11A9  ; [.1801.0020.0002][.1801.0020.0002] # HANGUL JONGSEONG SSANGKIYEOK
+1161  ; [.1831.0020.0002] # HANGUL JUNGSEONG A
+1163  ; [.1832.0020.0002] # HANGUL JUNGSEONG YA
+1100  ; [.1861.0020.0002] # HANGUL CHOSEONG KIYEOK
+1101  ; [.1861.0020.0002][.1861.0020.0002] # HANGUL CHOSEONG SSANGKIYEOK
+1102  ; [.1862.0020.0002] # HANGUL CHOSEONG NIEUN
+3042  ; [.1921.0020.000E] # HIRAGANA LETTER A
+ENTRIES
+);
+
 #########################
 
 # L(simp)L(simp) vs L(comp): /GGA/
 ok($Collator->lt("\x{1100}\x{1100}\x{1161}", "\x{1101}\x{1161}"));
 ok($hangul  ->eq("\x{1100}\x{1100}\x{1161}", "\x{1101}\x{1161}"));
+ok($trailwt ->eq("\x{1100}\x{1100}\x{1161}", "\x{1101}\x{1161}"));
 
 # L(simp) vs L(simp)L(simp): /GA/ vs /GGA/
 ok($Collator->gt("\x{1100}\x{1161}", "\x{1100}\x{1100}\x{1161}"));
 ok($hangul  ->lt("\x{1100}\x{1161}", "\x{1100}\x{1100}\x{1161}"));
+ok($trailwt ->lt("\x{1100}\x{1161}", "\x{1100}\x{1100}\x{1161}"));
 
 # T(simp)T(simp) vs T(comp): /AGG/
 ok($Collator->lt("\x{1161}\x{11A8}\x{11A8}", "\x{1161}\x{11A9}"));
 ok($hangul  ->eq("\x{1161}\x{11A8}\x{11A8}", "\x{1161}\x{11A9}"));
+ok($trailwt ->eq("\x{1161}\x{11A8}\x{11A8}", "\x{1161}\x{11A9}"));
 
 # T(simp) vs T(simp)T(simp): /AG/ vs /AGG/
 ok($Collator->lt("\x{1161}\x{11A8}", "\x{1161}\x{11A8}\x{11A8}"));
 ok($hangul  ->lt("\x{1161}\x{11A8}", "\x{1161}\x{11A8}\x{11A8}"));
+ok($trailwt ->lt("\x{1161}\x{11A8}", "\x{1161}\x{11A8}\x{11A8}"));
 
 # LV vs LLV: /GA/ vs /GNA/
 ok($Collator->gt("\x{1100}\x{1161}", "\x{1100}\x{1102}\x{1161}"));
 ok($hangul  ->lt("\x{1100}\x{1161}", "\x{1100}\x{1102}\x{1161}"));
+ok($trailwt ->lt("\x{1100}\x{1161}", "\x{1100}\x{1102}\x{1161}"));
 
 # LVX vs LVV: /GAA/ vs /GA/.latinA
 ok($Collator->gt("\x{1100}\x{1161}\x{1161}", "\x{1100}\x{1161}A"));
 ok($hangul  ->gt("\x{1100}\x{1161}\x{1161}", "\x{1100}\x{1161}A"));
+ok($trailwt ->gt("\x{1100}\x{1161}\x{1161}", "\x{1100}\x{1161}A"));
 
 # LVX vs LVV: /GAA/ vs /GA/.hiraganaA
 ok($Collator->lt("\x{1100}\x{1161}\x{1161}", "\x{1100}\x{1161}\x{3042}"));
 ok($hangul  ->gt("\x{1100}\x{1161}\x{1161}", "\x{1100}\x{1161}\x{3042}"));
+ok($trailwt ->gt("\x{1100}\x{1161}\x{1161}", "\x{1100}\x{1161}\x{3042}"));
 
 # LVX vs LVV: /GAA/ vs /GA/.hanja
 ok($Collator->lt("\x{1100}\x{1161}\x{1161}", "\x{1100}\x{1161}\x{4E00}"));
 ok($hangul  ->gt("\x{1100}\x{1161}\x{1161}", "\x{1100}\x{1161}\x{4E00}"));
+ok($trailwt ->gt("\x{1100}\x{1161}\x{1161}", "\x{1100}\x{1161}\x{4E00}"));
 
 # LVL vs LVT: /GA/./G/ vs /GAG/
 ok($Collator->lt("\x{1100}\x{1161}\x{1100}", "\x{1100}\x{1161}\x{11A8}"));
 ok($hangul  ->lt("\x{1100}\x{1161}\x{1100}", "\x{1100}\x{1161}\x{11A8}"));
+ok($trailwt ->lt("\x{1100}\x{1161}\x{1100}", "\x{1100}\x{1161}\x{11A8}"));
 
 # LVT vs LVX: /GAG/ vs /GA/.latinA
 ok($Collator->gt("\x{1100}\x{1161}\x{11A8}", "\x{1100}\x{1161}A"));
 ok($hangul  ->gt("\x{1100}\x{1161}\x{11A8}", "\x{1100}\x{1161}A"));
+ok($trailwt ->gt("\x{1100}\x{1161}\x{11A8}", "\x{1100}\x{1161}A"));
 
 # LVT vs LVX: /GAG/ vs /GA/.hiraganaA
 ok($Collator->lt("\x{1100}\x{1161}\x{11A8}", "\x{1100}\x{1161}\x{3042}"));
 ok($hangul  ->gt("\x{1100}\x{1161}\x{11A8}", "\x{1100}\x{1161}\x{3042}"));
+ok($trailwt ->gt("\x{1100}\x{1161}\x{11A8}", "\x{1100}\x{1161}\x{3042}"));
 
 # LVT vs LVX: /GAG/ vs /GA/.hanja
 ok($Collator->lt("\x{1100}\x{1161}\x{11A8}", "\x{1100}\x{1161}\x{4E00}"));
 ok($hangul  ->gt("\x{1100}\x{1161}\x{11A8}", "\x{1100}\x{1161}\x{4E00}"));
+ok($trailwt ->gt("\x{1100}\x{1161}\x{11A8}", "\x{1100}\x{1161}\x{4E00}"));
 
 # LVT vs LVV: /GAG/ vs /GAA/
 ok($Collator->gt("\x{1100}\x{1161}\x{11A8}", "\x{1100}\x{1161}\x{1161}"));
 ok($hangul  ->lt("\x{1100}\x{1161}\x{11A8}", "\x{1100}\x{1161}\x{1161}"));
+ok($trailwt ->lt("\x{1100}\x{1161}\x{11A8}", "\x{1100}\x{1161}\x{1161}"));
 
 # LVL vs LVV: /GA/./G/ vs /GAA/
 ok($Collator->lt("\x{1100}\x{1161}\x{1100}", "\x{1100}\x{1161}\x{1161}"));
 ok($hangul  ->lt("\x{1100}\x{1161}\x{1100}", "\x{1100}\x{1161}\x{1161}"));
+ok($trailwt ->lt("\x{1100}\x{1161}\x{1100}", "\x{1100}\x{1161}\x{1161}"));
 
 # LV vs Syl(LV): /GA/ vs /[GA]/
 ok($Collator->eq("\x{1100}\x{1161}", "\x{AC00}"));
 ok($hangul  ->eq("\x{1100}\x{1161}", "\x{AC00}"));
+ok($trailwt ->eq("\x{1100}\x{1161}", "\x{AC00}"));
 
 # LVT vs Syl(LV)T: /GAG/ vs /[GA]G/
 ok($Collator->eq("\x{1100}\x{1161}\x{11A8}", "\x{AC00}\x{11A8}"));
 ok($hangul  ->eq("\x{1100}\x{1161}\x{11A8}", "\x{AC00}\x{11A8}"));
+ok($trailwt ->eq("\x{1100}\x{1161}\x{11A8}", "\x{AC00}\x{11A8}"));
 
 # LVT vs Syl(LVT): /GAG/ vs /[GAG]/
 ok($Collator->eq("\x{1100}\x{1161}\x{11A8}", "\x{AC01}"));
 ok($hangul  ->eq("\x{1100}\x{1161}\x{11A8}", "\x{AC01}"));
+ok($trailwt ->eq("\x{1100}\x{1161}\x{11A8}", "\x{AC01}"));
 
 # LVTT vs Syl(LVTT): /GAGG/ vs /[GAGG]/
 ok($Collator->eq("\x{1100}\x{1161}\x{11A9}", "\x{AC02}"));
 ok($hangul  ->eq("\x{1100}\x{1161}\x{11A9}", "\x{AC02}"));
+ok($trailwt ->eq("\x{1100}\x{1161}\x{11A9}", "\x{AC02}"));
 
 # LVTT vs Syl(LVT).T: /GAGG/ vs /[GAG]G/
 ok($Collator->gt("\x{1100}\x{1161}\x{11A9}", "\x{AC01}\x{11A8}"));
 ok($hangul  ->eq("\x{1100}\x{1161}\x{11A9}", "\x{AC01}\x{11A8}"));
+ok($trailwt ->eq("\x{1100}\x{1161}\x{11A9}", "\x{AC01}\x{11A8}"));
 
 # LLVT vs L.Syl(LVT): /GGAG/ vs /G[GAG]/
 ok($Collator->gt("\x{1101}\x{1161}\x{11A8}", "\x{1100}\x{AC01}"));
 ok($hangul  ->eq("\x{1101}\x{1161}\x{11A8}", "\x{1100}\x{AC01}"));
+ok($trailwt ->eq("\x{1101}\x{1161}\x{11A8}", "\x{1100}\x{AC01}"));
 
 #########################
 

@@ -1738,9 +1738,14 @@ lib/Unicode/Collate/keys.txt	Unicode::Collate
 lib/Unicode/Collate.pm		Unicode::Collate
 lib/Unicode/Collate/README	Unicode::Collate
 lib/Unicode/Collate/t/contract.t	Unicode::Collate
+lib/Unicode/Collate/t/hangtype.t	Unicode::Collate
 lib/Unicode/Collate/t/hangul.t	Unicode::Collate
 lib/Unicode/Collate/t/index.t	Unicode::Collate
+lib/Unicode/Collate/t/normal.t	Unicode::Collate
 lib/Unicode/Collate/t/test.t	Unicode::Collate
+lib/Unicode/Collate/t/trailwt.t	Unicode::Collate
+lib/Unicode/Collate/t/variable.t	Unicode::Collate
+lib/Unicode/Collate/t/version.t	Unicode::Collate
 lib/Unicode/README		Explanation what happened to lib/unicode.
 lib/Unicode/UCD.pm		Unicode character database
 lib/Unicode/UCD.t		See if Unicode character database works
