@@ -1044,15 +1044,24 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 		}
             }
 	    PerlIO_putc(file, ')');
-	    /* Now calculate quality wrt theoretical value */
+	    /* The "quality" of a hash is defined as the total number of
+	       comparisons needed to access every element once, relative
+	       to the expected number needed for a random hash.
+
+	       The total number of comparisons is equal to the sum of
+	       the squares of the number of entries in each backet.
+	       For a random hash of n keys into k backets, the expected
+	       value is
+				n + n(n-1)/2k
+	    */
+
 	    for (i = max; i > 0; i--) { /* Precision: count down. */
 		sum += freq[i] * i * i;
             }
 	    while ((keys = keys >> 1))
 		pow2 = pow2 << 1;
-	    /* Approximate by Poisson distribution */
 	    theoret = HvKEYS(sv);
-	    theoret += theoret * theoret/pow2;
+	    theoret += theoret * (theoret-1)/pow2;
 	    PerlIO_putc(file, '\n');
 	    Perl_dump_indent(aTHX_ level, file, "  hash quality = %.1"NVff"%%", theoret/sum*100);
 	}

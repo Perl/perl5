@@ -2654,6 +2654,7 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
     I32 grows = 0;
     register short *tbl;
 
+    PL_hints |= HINT_BLOCK_SCOPE;
     complement	= o->op_private & OPpTRANS_COMPLEMENT;
     del		= o->op_private & OPpTRANS_DELETE;
     squash	= o->op_private & OPpTRANS_SQUASH;
@@ -6817,7 +6818,7 @@ Perl_peep(pTHX_ register OP *o)
 		    pop->op_next->op_type == OP_AELEM &&
 		    !(pop->op_next->op_private &
 		      (OPpLVAL_INTRO|OPpLVAL_DEFER|OPpDEREF|OPpMAYBE_LVSUB)) &&
-		    (i = SvIV(((SVOP*)pop)->op_sv) - PL_compiling.cop_arybase)
+		    (i = SvIV(((SVOP*)pop)->op_sv) - PL_curcop->cop_arybase)
 				<= 255 &&
 		    i >= 0)
 		{

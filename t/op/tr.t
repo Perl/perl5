@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..67\n";
+print "1..69\n";
 
 $_ = "abcdefghijklmnopqrstuvwxyz";
 
@@ -375,4 +375,13 @@ print "ok 66\n";
 ($a = "R0_001") =~ tr/R_//d;
 print "not " if hex($a) != 1;
 print "ok 67\n";
+
+# From Inaba Hiroto
+@a = (1,2); map { y/1/./ for $_ } @a;
+print "not " if "@a" ne ". 2";
+print "ok 68\n";
+
+@a = (1,2); map { y/1/./ for $_.'' } @a;
+print "not " if "@a" ne "1 2";
+print "ok 69\n";
 
