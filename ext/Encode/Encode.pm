@@ -1,6 +1,6 @@
 package Encode;
 use strict;
-our $VERSION = do { my @r = (q$Revision: 1.58 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.60 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG = 0;
 use XSLoader ();
 XSLoader::load 'Encode';
@@ -15,8 +15,10 @@ our @EXPORT = qw(
   encodings  find_encoding
 );
 
-our @FB_FLAGS  = qw(DIE_ON_ERR WARN_ON_ERR RETURN_ON_ERR LEAVE_SRC PERLQQ);
-our @FB_CONSTS = qw(FB_DEFAULT FB_QUIET FB_WARN FB_PERLQQ FB_CROAK);
+our @FB_FLAGS  = qw(DIE_ON_ERR WARN_ON_ERR RETURN_ON_ERR LEAVE_SRC 
+		    PERLQQ HTMLCREF XMLCREF);
+our @FB_CONSTS = qw(FB_DEFAULT FB_CROAK FB_QUIET FB_WARN 
+		    FB_PERLQQ FB_HTMLCREF FB_XMLCREF);
 
 our @EXPORT_OK =
     (
@@ -194,6 +196,11 @@ sub predefine_encodings{
 	package Encode::UTF_EBCDIC;
 	*name         = sub{ shift->{'Name'} };
 	*new_sequence = sub{ return $_[0] };
+	*needs_lines = sub{ 0 };
+	*perlio_ok = sub { 
+	    eval{ require PerlIO::encoding };
+	    return $@ ? 0 : 1;
+	};
 	*decode = sub{
 	    my ($obj,$str,$chk) = @_;
 	    my $res = '';
@@ -221,6 +228,11 @@ sub predefine_encodings{
 	package Encode::Internal;
 	*name         = sub{ shift->{'Name'} };
 	*new_sequence = sub{ return $_[0] };
+	*needs_lines = sub{ 0 };
+	*perlio_ok = sub { 
+	    eval{ require PerlIO::encoding };
+	    return $@ ? 0 : 1;
+	};
 	*decode = sub{
 	    my ($obj,$str,$chk) = @_;
 	    utf8::upgrade($str);
@@ -237,6 +249,11 @@ sub predefine_encodings{
 	package Encode::utf8;
 	*name         = sub{ shift->{'Name'} };
 	*new_sequence = sub{ return $_[0] };
+	*needs_lines = sub{ 0 };
+	*perlio_ok = sub { 
+	    eval{ require PerlIO::encoding };
+	    return $@ ? 0 : 1;
+	};
 	*decode = sub{
 	    my ($obj,$octets,$chk) = @_;
 	    my $str = Encode::decode_utf8($octets);
@@ -539,6 +556,10 @@ you are debugging the mode above.
 
 =item perlqq mode (I<CHECK> = Encode::FB_PERLQQ)
 
+=item HTML charref mode (I<CHECK> = Encode::FB_HTMLCREF)
+
+=item XML charref mode (I<CHECK> = Encode::FB_XMLCREF)
+
 For encodings that are implemented by Encode::XS, CHECK ==
 Encode::FB_PERLQQ turns (en|de)code into C<perlqq> fallback mode.
 
@@ -547,6 +568,10 @@ where I<XX> is the hex representation of the octet  that could not be
 decoded to utf8.  And when you encode, '\x{I<xxxx>}' will be inserted,
 where I<xxxx> is the Unicode ID of the character that cannot be found
 in the character repertoire of the encoding.
+
+HTML/XML character reference modes are about the same, in place of
+\x{I<xxxx>}, HTML uses &#I<1234>; where I<1234> is a decimal digit and
+XML uses &#xI<abcd>; where I<abcd> is the hexadecimal digit.
 
 =item The bitmask
 
@@ -561,6 +586,8 @@ constants via C<use Encode qw(:fallback_all)>.
  RETURN_ON_ERR 0x0004                      X        X
  LEAVE_SRC     0x0008
  PERLQQ        0x0100                                        X
+ HTMLCREF      0x0200                                         
+ XMLCREF       0x0400                                          
 
 =head2 Unimplemented fallback schemes
 

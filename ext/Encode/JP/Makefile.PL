@@ -1,6 +1,7 @@
 use 5.7.2;
 use strict;
 use ExtUtils::MakeMaker;
+use strict;
 
 my %tables = (
 	      euc_jp_t   => ['euc-jp.ucm'],
@@ -11,6 +12,20 @@ my %tables = (
 			     qw(jis0201.ucm jis0208.ucm jis0212.ucm)
 			     ],
              );
+
+unless ($ENV{AGGREGATE_TABLES}){
+    my @ucm;
+    for my $k (keys %tables){
+	push @ucm, @{$tables{$k}};
+    }
+    %tables = ();
+    my $seq = 0;
+    for my $ucm (sort @ucm){
+	# 8.3 compliance !
+	my $t = sprintf ("%s_%02d_t", substr($ucm, 0, 2), $seq++);
+	$tables{$t} = [ $ucm ];
+    }
+}
 
 my $name = 'JP';
 

@@ -13,17 +13,18 @@ BEGIN {
 
 use strict;
 #use Test::More qw(no_plan);
-use Test::More tests => 15;
+use Test::More tests => 19;
 use Encode q(:all);
 
 
 my $original = '';
 my $nofallback  = '';
-my ($fallenback, $quiet, $perlqq);
+my ($fallenback, $quiet, $perlqq, $htmlcref, $xmlcref);
 for my $i (0x20..0x7e){
     $original .= chr($i);
 }
-$fallenback = $quiet = $perlqq = $nofallback = $original;
+$fallenback = $quiet = 
+$perlqq = $htmlcref = $xmlcref = $nofallback = $original;
 
 my $residue = '';
 for my $i (0x80..0xff){
@@ -31,6 +32,8 @@ for my $i (0x80..0xff){
     $residue    .= chr($i);
     $fallenback .= '?';
     $perlqq     .= sprintf("\\x{%04x}", $i);
+    $htmlcref    .= sprintf("&#%d;", $i);
+    $xmlcref    .= sprintf("&#x%x;", $i);
 }
 utf8::upgrade($original);
 my $meth   = find_encoding('ascii');
@@ -75,3 +78,13 @@ $src = $original;
 $dst = $meth->encode($src, FB_PERLQQ);
 is($dst, $perlqq,   "FB_PERLQQ");
 is($src, '', "FB_PERLQQ residue");
+
+$src = $original;
+$dst = $meth->encode($src, FB_HTMLCREF);
+is($dst, $htmlcref,   "FB_HTMLCREF");
+is($src, '', "FB_HTMLCREF residue");
+
+$src = $original;
+$dst = $meth->encode($src, FB_XMLCREF);
+is($dst, $xmlcref,   "FB_XMLCREF");
+is($src, '', "FB_XMLCREF residue");
