@@ -1,8 +1,14 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.94 2003/05/10 18:13:59 dankogai Exp $
+# $Id: Changes,v 1.95 2003/05/21 08:41:11 dankogai Exp $
 #
-$Revision: 1.94 $ $Date: 2003/05/10 18:13:59 $
+$Revision: 1.95 $ $Date: 2003/05/21 08:41:11 $
+! ucm/8859-*.ucm
+  Since bogus entries were found in iso-8859-6, all entries are
+  re-generated once again out of
+  http://www.unicode.org/Public/MAPPINGS/ISO8859/8859-*.TXT
+  Thank David Graff <graff@unagi.cis.upenn.edu> for the discovery
+  Message-Id: <200305201819.h4KIJRRU013746@unagi.cis.upenn.edu>
 + lib/Encode/Unicode/UTF7.pm
 ! lib/Encode/Config.pm lib/Encode/Alias.pm Unicode/Unicode.pm t/Unicode.t
   lib/Encode/Supported.pod

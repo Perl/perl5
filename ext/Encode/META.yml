@@ -1,6 +1,6 @@
 #XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
 name:         Encode
-version:      1.94
+version:      1.95
 version_from: Encode.pm
 installdirs:  perl
 requires:
