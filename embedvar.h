@@ -388,6 +388,7 @@
 #define PL_sh_path		(PERL_GET_INTERP->Ish_path)
 #define PL_sig_pending		(PERL_GET_INTERP->Isig_pending)
 #define PL_sighandlerp		(PERL_GET_INTERP->Isighandlerp)
+#define PL_sort_RealCmp		(PERL_GET_INTERP->Isort_RealCmp)
 #define PL_splitstr		(PERL_GET_INTERP->Isplitstr)
 #define PL_srand_called		(PERL_GET_INTERP->Isrand_called)
 #define PL_statusvalue		(PERL_GET_INTERP->Istatusvalue)
@@ -689,6 +690,7 @@
 #define PL_sh_path		(vTHX->Ish_path)
 #define PL_sig_pending		(vTHX->Isig_pending)
 #define PL_sighandlerp		(vTHX->Isighandlerp)
+#define PL_sort_RealCmp		(vTHX->Isort_RealCmp)
 #define PL_splitstr		(vTHX->Isplitstr)
 #define PL_srand_called		(vTHX->Isrand_called)
 #define PL_statusvalue		(vTHX->Istatusvalue)
@@ -993,6 +995,7 @@
 #define PL_Ish_path		PL_sh_path
 #define PL_Isig_pending		PL_sig_pending
 #define PL_Isighandlerp		PL_sighandlerp
+#define PL_Isort_RealCmp	PL_sort_RealCmp
 #define PL_Isplitstr		PL_splitstr
 #define PL_Isrand_called	PL_srand_called
 #define PL_Istatusvalue		PL_statusvalue
