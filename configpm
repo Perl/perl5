@@ -329,7 +329,7 @@ my $prevpos = 0;
 
 sub FIRSTKEY {
     $prevpos = 0;
-    substr($Config_SH_expanded, 0, index($Config_SH_expanded, '=') );
+    substr($Config_SH_expanded, 1, index($Config_SH_expanded, '=') - 1 );
 }
 
 sub NEXTKEY {
@@ -342,14 +342,11 @@ sub NEXTKEY {
     $len > 0 ? substr($Config_SH_expanded, $pos, $len) : undef;
 }
 
-sub EXISTS { 
+sub EXISTS {
     return 1 if exists($_[0]->{$_[1]});
 
     return(index($Config_SH_expanded, "\n$_[1]='") != -1 or
-           substr($Config_SH_expanded, 0, length($_[1])+2) eq "$_[1]='" or
-           index($Config_SH_expanded, "\n$_[1]=\"") != -1 or
-           substr($Config_SH_expanded, 0, length($_[1])+2) eq "$_[1]=\"" or
-           $_[1] =~ /^(?:(?:cc|ld)flags|libs(?:wanted)?)_nolargefiles$/
+           index($Config_SH_expanded, "\n$_[1]=\"") != -1
           );
 }
 

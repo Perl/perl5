@@ -14,7 +14,17 @@ use_ok('Config');
 
 ok(keys %Config > 500, "Config has more than 500 entries");
 
-ok(each %Config);
+my ($first) = Config::config_sh() =~ /^(\S+)=/m;
+die "Can't find first entry in Config::config_sh()" unless defined $first;
+print "# First entry is '$first'\n";
+
+# It happens that the we know what the first key should be. This is somewhat
+# cheating, but there was briefly a bug where the key got a bonus newline.
+my ($first_each) = each %Config;
+is($first_each, $first, "First key from each is correct");
+ok(exists($Config{$first_each}), "First key exists");
+ok(!exists($Config{"\n$first"}),
+   "Check that first key with prepended newline isn't falsely existing");
 
 is($Config{PERL_REVISION}, 5, "PERL_REVISION is 5");
 
@@ -208,11 +218,8 @@ is($Config{sig_name_init} =~ tr/,/,/, $Config{sig_size}, "sig_name_init size");
 my @virtual = qw(byteorder ccflags_nolargefiles ldflags_nolargefiles
 		 libs_nolargefiles libswanted_nolargefiles);
 
-# Also test that the first entry in config.sh is found correctly. Currently
-# there is special casing code for this
-my ($first) = Config::config_sh() =~ /^(\S+)=/m;
-die "Can't find first entry in Config::config_sh()" unless defined $first;
-print "# First entry is '$first'\n";
+# Also test that the first entry in config.sh is found correctly. There was
+# special casing code for this
 
 foreach my $pain ($first, @virtual) {
   # No config var is named with anything that is a regexp metachar
