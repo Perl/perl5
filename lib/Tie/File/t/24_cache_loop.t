@@ -4,11 +4,11 @@
 #
 
 use Config;
+my $file = "tf$$.txt";
 unless ($Config{d_alarm}) {
   print "1..0\n"; exit;
 }
 
-my $file = "tf$$.txt";
 $: = Tie::File::_default_recsep();
 my $data = join $:, "record0" .. "record9", "";
 my $V = $ENV{INTEGRITY};        # Verbose integrity checking?
