@@ -236,7 +236,7 @@ ULONG PERLEVAL (PCSZ name, LONG rargc, const RXSTRING *rargv,
 #define INCL_DOSEXCEPTIONS
 #define INCL_DOSERRORS
 #define INCL_REXXSAA
-#include &lt;os2.h&gt;
+#include <os2.h>
 
 /*
  * "The Road goes ever on and on, down from the door where it began."
@@ -323,15 +323,15 @@ ULONG PERL (PCSZ name, LONG rargc, const RXSTRING *rargv,
     ULONG ret;
 
     if (rargc != 1) {
-	sprintf(retstr-&gt;strptr, "one argument expected, got %ld", rargc);
-	retstr-&gt;strlength = strlen (retstr-&gt;strptr);
+	sprintf(retstr->strptr, "one argument expected, got %ld", rargc);
+	retstr->strlength = strlen (retstr->strptr);
 	return 1;
     }
-    if (rargv[0].strlength &gt;= sizeof(buf)) {
-	sprintf(retstr-&gt;strptr,
+    if (rargv[0].strlength >= sizeof(buf)) {
+	sprintf(retstr->strptr,
 		"length of the argument %ld exceeds the maximum %ld",
 		rargv[0].strlength, (long)sizeof(buf) - 1);
-	retstr-&gt;strlength = strlen (retstr-&gt;strptr);
+	retstr->strlength = strlen (retstr->strptr);
 	return 1;
     }
 
@@ -354,8 +354,8 @@ ULONG PERL (PCSZ name, LONG rargc, const RXSTRING *rargv,
 	ret = 1;
     else {
 	ret = 0;
-	sprintf(retstr-&gt;strptr, "%s", "ok");
-	retstr-&gt;strlength = strlen (retstr-&gt;strptr);
+	sprintf(retstr->strptr, "%s", "ok");
+	retstr->strlength = strlen (retstr->strptr);
     }
     PERL_SYS_TERM1(0);
     return ret;
@@ -365,8 +365,8 @@ ULONG PERLEXIT (PCSZ name, LONG rargc, const RXSTRING *rargv,
                     PCSZ queuename, PRXSTRING retstr)
 {
     if (rargc != 0) {
-	sprintf(retstr-&gt;strptr, "no arguments expected, got %ld", rargc);
-	retstr-&gt;strlength = strlen (retstr-&gt;strptr);
+	sprintf(retstr->strptr, "no arguments expected, got %ld", rargc);
+	retstr->strlength = strlen (retstr->strptr);
 	return 1;
     }
     PERL_SYS_TERM1(0);
@@ -377,21 +377,21 @@ ULONG PERLTERM (PCSZ name, LONG rargc, const RXSTRING *rargv,
                     PCSZ queuename, PRXSTRING retstr)
 {
     if (rargc != 0) {
-	sprintf(retstr-&gt;strptr, "no arguments expected, got %ld", rargc);
-	retstr-&gt;strlength = strlen (retstr-&gt;strptr);
+	sprintf(retstr->strptr, "no arguments expected, got %ld", rargc);
+	retstr->strlength = strlen (retstr->strptr);
 	return 1;
     }
     if (!my_perl) {
-	sprintf(retstr-&gt;strptr, "no perl interpreter present");
-	retstr-&gt;strlength = strlen (retstr-&gt;strptr);
+	sprintf(retstr->strptr, "no perl interpreter present");
+	retstr->strlength = strlen (retstr->strptr);
 	return 1;
     }
     perl_destruct(my_perl);
     perl_free(my_perl);
     my_perl = 0;
 
-    sprintf(retstr-&gt;strptr, "%s", "ok");
-    retstr-&gt;strlength = strlen (retstr-&gt;strptr);
+    sprintf(retstr->strptr, "%s", "ok");
+    retstr->strlength = strlen (retstr->strptr);
     return 0;
 }
 
@@ -400,15 +400,15 @@ ULONG PERLINIT (PCSZ name, LONG rargc, const RXSTRING *rargv,
                     PCSZ queuename, PRXSTRING retstr)
 {
     if (rargc != 0) {
-	sprintf(retstr-&gt;strptr, "no argument expected, got %ld", rargc);
-	retstr-&gt;strlength = strlen (retstr-&gt;strptr);
+	sprintf(retstr->strptr, "no argument expected, got %ld", rargc);
+	retstr->strlength = strlen (retstr->strptr);
 	return 1;
     }
     if (!init_perl(1))
 	return 1;
 
-    sprintf(retstr-&gt;strptr, "%s", "ok");
-    retstr-&gt;strlength = strlen (retstr-&gt;strptr);
+    sprintf(retstr->strptr, "%s", "ok");
+    retstr->strlength = strlen (retstr->strptr);
     return 0;
 }
 
@@ -420,8 +420,8 @@ ULONG PERLEVAL (PCSZ name, LONG rargc, const RXSTRING *rargv,
     char *str;
 
     if (rargc != 1) {
-	sprintf(retstr-&gt;strptr, "one argument expected, got %ld", rargc);
-	retstr-&gt;strlength = strlen (retstr-&gt;strptr);
+	sprintf(retstr->strptr, "one argument expected, got %ld", rargc);
+	retstr->strlength = strlen (retstr->strptr);
 	return 1;
     }
 
@@ -446,11 +446,11 @@ ULONG PERLEVAL (PCSZ name, LONG rargc, const RXSTRING *rargv,
     if (SvTRUE(ERRSV) || !SvOK(res))
 	ret = 1;
     str = SvPV(res, len);
-    if (len &lt;= 256			/* Default buffer is 256-char long */
-	|| !DosAllocMem((PPVOID)&amp;retstr-&gt;strptr, len,
+    if (len <= 256			/* Default buffer is 256-char long */
+	|| !DosAllocMem((PPVOID)&retstr->strptr, len,
 			PAG_READ|PAG_WRITE|PAG_COMMIT)) {
-	    memcpy(retstr-&gt;strptr, str, len);
-	    retstr-&gt;strlength = len;
+	    memcpy(retstr->strptr, str, len);
+	    retstr->strlength = len;
     } else
 	ret = 1;
 
