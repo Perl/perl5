@@ -225,15 +225,14 @@ never call the shell at all.
     } else {
 	my @temp = ($EUID, $EGID);
 	$EUID = $UID;
-	$EGID = $GID;    # XXX: initgroups() not called
+	$EGID = $GID;    # 	initgroups() also called!
 	# Make sure privs are really gone
 	($EUID, $EGID) = @temp;
-	die "Can't drop privileges" unless
-	    $UID == $EUID and
-	    $GID eq $EGID;	# String test
+	die "Can't drop privileges" 
+		unless $UID == $EUID  && $GID eq $EGID;	
 	$ENV{PATH} = "/bin:/usr/bin";
-	exec 'myprog', 'arg1', 'arg2' or
-	die "can't exec myprog: $!";
+	exec 'myprog', 'arg1', 'arg2' 
+	    or die "can't exec myprog: $!";
     }
 
 A similar strategy would work for wildcard expansion via C<glob>, although
@@ -320,9 +319,10 @@ First of all, however, you I<can't> take away read permission, because
 the source code has to be readable in order to be compiled and
 interpreted.  (That doesn't mean that a CGI script's source is
 readable by people on the web, though.)  So you have to leave the
-permissions at the socially friendly 0755 level.
+permissions at the socially friendly 0755 level.  This lets 
+people on your local system only see your source.
 
-Some people regard this as a security problem.  If your program does
+Some people mistakenly regard this as a security problem.  If your program does
 insecure things, and relies on people not knowing how to exploit those
 insecurities, it is not secure.  It is often possible for someone to
 determine the insecure things and exploit them without viewing the
@@ -345,3 +345,7 @@ statements like "This is unpublished proprietary software of XYZ Corp.
 Your access to it does not give you permission to use it blah blah
 blah."  You should see a lawyer to be sure your licence's wording will
 stand up in court.
+
+=head1 SEE ALSO
+
+L<perlrun> for its description of cleaning up environment variables.

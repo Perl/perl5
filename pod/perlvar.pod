@@ -6,15 +6,15 @@ perlvar - Perl predefined variables
 
 =head2 Predefined Names
 
-The following names have special meaning to Perl.  Most of the
+The following names have special meaning to Perl.  Most 
 punctuation names have reasonable mnemonics, or analogues in one of
-the shells.  Nevertheless, if you wish to use the long variable names,
+the shells.  Nevertheless, if you wish to use long variable names,
 you just need to say
 
     use English;
 
 at the top of your program.  This will alias all the short names to the
-long names in the current package.  Some of them even have medium names,
+long names in the current package.  Some even have medium names,
 generally borrowed from B<awk>.
 
 To go a step further, those variables that depend on the currently
@@ -28,7 +28,7 @@ after which you may use either
 
     method HANDLE EXPR
 
-or
+or more safely,
 
     HANDLE->method(EXPR)
 
@@ -112,11 +112,11 @@ test.  Note that outside of a C<while> test, this will not happen.
 
 =over 8
 
-=item $E<lt>I<digit>E<gt>
+=item $E<lt>I<digits>E<gt>
 
 Contains the subpattern from the corresponding set of parentheses in
 the last pattern matched, not counting patterns matched in nested
-blocks that have been exited already.  (Mnemonic: like \digit.)
+blocks that have been exited already.  (Mnemonic: like \digits.)
 These variables are all read-only.
 
 =item $MATCH
@@ -176,7 +176,8 @@ is 0.  (Mnemonic: * matches multiple things.)  Note that this variable
 influences the interpretation of only "C<^>" and "C<$>".  A literal newline can
 be searched for even when C<$* == 0>.
 
-Use of "C<$*>" is deprecated in modern perls.
+Use of "C<$*>" is deprecated in modern Perls, supplanted by 
+the C</s> and C</m> modifiers on pattern matching.
 
 =item input_line_number HANDLE EXPR
 
@@ -427,12 +428,11 @@ L<perlfunc/formline()>.
 =item $?
 
 The status returned by the last pipe close, backtick (C<``>) command,
-or system() operator.  Note that this is the status word returned by
-the wait() system call (or else is made up to look like it).  Thus,
-the exit value of the subprocess is actually (C<$? E<gt>E<gt> 8>), and
-C<$? & 255> gives which signal, if any, the process died from, and
-whether there was a core dump.  (Mnemonic: similar to B<sh> and
-B<ksh>.)
+or system() operator.  Note that this is the status word returned by the
+wait() system call (or else is made up to look like it).  Thus, the exit
+value of the subprocess is actually (C<$? E<gt>E<gt> 8>), and C<$? & 127>
+gives which signal, if any, the process died from, and C<$? & 128> reports
+whether there was a core dump.  (Mnemonic: similar to B<sh> and B<ksh>.)
 
 Additionally, if the C<h_errno> variable is supported in C, its value
 is returned via $? if any of the C<gethost*()> functions fail.

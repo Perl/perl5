@@ -14,7 +14,8 @@ To declare subroutines:
 
 To define an anonymous subroutine at runtime:
 
-    $subref = sub BLOCK;
+    $subref = sub BLOCK;	    # no proto
+    $subref = sub (PROTO) BLOCK;    # with proto
 
 To import subroutines:
 
@@ -24,7 +25,7 @@ To call subroutines:
 
     NAME(LIST);	   # & is optional with parentheses.
     NAME LIST;	   # Parentheses optional if predeclared/imported.
-    &NAME;	   # Passes current @_ to subroutine.
+    &NAME;	   # Makes current @_ visible to called subroutine.
 
 =head1 DESCRIPTION
 
@@ -33,7 +34,7 @@ may be located anywhere in the main program, loaded in from other files
 via the C<do>, C<require>, or C<use> keywords, or even generated on the
 fly using C<eval> or anonymous subroutines (closures).  You can even call
 a function indirectly using a variable containing its name or a CODE reference
-to it, as in C<$var = \&function>.
+to it.
 
 The Perl model for function call and return values is simple: all
 functions are passed as parameters one single flat list of scalars, and
@@ -190,6 +191,14 @@ disables any prototype checking on the arguments you do provide.  This
 is partly for historical reasons, and partly for having a convenient way
 to cheat if you know what you're doing.  See the section on Prototypes below.
 
+Function whose names are in all upper case are reserved to the Perl core,
+just as are modules whose names are in all lower case.  A function in
+all capitals is a loosely-held convention meaning it will be called
+indirectly by the run-time system itself.  Functions that do special,
+pre-defined things BEGIN, END, AUTOLOAD, and DESTROY--plus all the
+functions mentioned in L<perltie>.  The 5.005 release adds INIT
+to this list.
+
 =head2 Private Variables via my()
 
 Synopsis:
@@ -207,10 +216,19 @@ must be placed in parentheses.  All listed elements must be legal lvalues.
 Only alphanumeric identifiers may be lexically scoped--magical
 builtins like $/ must currently be localized with "local" instead.
 
-Unlike dynamic variables created by the "local" statement, lexical
+Unlike dynamic variables created by the "local" operator, lexical
 variables declared with "my" are totally hidden from the outside world,
 including any called subroutines (even if it's the same subroutine called
 from itself or elsewhere--every call gets its own copy).
+
+This doesn't mean that a my() variable declared in a statically
+I<enclosing> lexical scope would be invisible.  Only the dynamic scopes
+are cut off.   For example, the bumpx() function below has access to the
+lexical $x variable because both the my and the sub occurred at the same
+scope, presumably the file scope.
+
+    my $x = 10;
+    sub bumpx { $x++ } 
 
 (An eval(), however, can see the lexical variables of the scope it is
 being evaluated in so long as the names aren't hidden by declarations within
@@ -236,7 +254,7 @@ The "my" is simply a modifier on something you might assign to.  So when
 you do assign to the variables in its argument list, the "my" doesn't
 change whether those variables is viewed as a scalar or an array.  So
 
-    my ($foo) = <STDIN>;
+    my ($foo) = <STDIN>;		# WRONG?
     my @FOO = <STDIN>;
 
 both supply a list context to the right-hand side, while
@@ -245,7 +263,7 @@ both supply a list context to the right-hand side, while
 
 supplies a scalar context.  But the following declares only one variable:
 
-    my $foo, $bar = 1;
+    my $foo, $bar = 1;			# WRONG
 
 That has the same effect as
 
@@ -342,13 +360,13 @@ lexical of the same name is also visible:
 
 That will print out 20 and 10.
 
-You may declare "my" variables at the outermost scope of a file to
-hide any such identifiers totally from the outside world.  This is similar
+You may declare "my" variables at the outermost scope of a file to hide
+any such identifiers totally from the outside world.  This is similar
 to C's static variables at the file level.  To do this with a subroutine
-requires the use of a closure (anonymous function).  If a block (such as
-an eval(), function, or C<package>) wants to create a private subroutine
-that cannot be called from outside that block, it can declare a lexical
-variable containing an anonymous sub reference:
+requires the use of a closure (anonymous function with lexical access).
+If a block (such as an eval(), function, or C<package>) wants to create
+a private subroutine that cannot be called from outside that block,
+it can declare a lexical variable containing an anonymous sub reference:
 
     my $secret_version = '1.001-beta';
     my $secret_sub = sub { print $secret_version };
@@ -363,13 +381,28 @@ unqualified and unqualifiable.
 This does not work with object methods, however; all object methods have
 to be in the symbol table of some package to be found.
 
-Just because the lexical variable is lexically (also called statically)
-scoped doesn't mean that within a function it works like a C static.  It
-normally works more like a C auto.  But here's a mechanism for giving a
-function private variables with both lexical scoping and a static
-lifetime.  If you do want to create something like C's static variables,
-just enclose the whole function in an extra block, and put the
-static variable outside the function but in the block.
+=head2 Peristent Private Variables
+
+Just because a lexical variable is lexically (also called statically)
+scoped to its enclosing block, eval, or do FILE, this doesn't mean that
+within a function it works like a C static.  It normally works more
+like a C auto, but with implicit garbage collection.  
+
+Unlike local variables in C or C++, Perl's lexical variables don't
+necessarily get recycled just because their scope has exited.
+If something more permanent is still aware of the lexical, it will
+stick around.  So long as something else references a lexical, that
+lexical won't be freed--which is as it should be.  You wouldn't want
+memory being free until you were done using it, or kept around once you
+were done.  Automatic garbage collection takes care of this for you.
+
+This means that you can pass back or save away references to lexical
+variables, whereas to return a pointer to a C auto is a grave error.
+It also gives us a way to simulate C's function statics.  Here's a
+mechanism for giving a function private variables with both lexical
+scoping and a static lifetime.  If you do want to create something like
+C's static variables, just enclose the whole function in an extra block,
+and put the static variable outside the function but in the block.
 
     {
 	my $secret_val = 0;
@@ -397,6 +430,12 @@ starts to run:
 
 See L<perlrun> about the BEGIN function.
 
+If declared at the outermost scope, the file scope, then lexicals work
+someone like C's file statics.  They are available to all functions in
+that same file declared below them, but are inaccessible from outside of
+the file.  This is sometimes used in modules to create private variables
+for the whole module.
+
 =head2 Temporary Values via local()
 
 B<NOTE>: In general, you should be using "my" instead of "local", because
@@ -419,11 +458,12 @@ Synopsis:
     local *merlyn = 'randal';	# SAME THING: promote 'randal' to *randal
     local *merlyn = \$randal;   # just alias $merlyn, not @merlyn etc
 
-A local() modifies its listed variables to be local to the enclosing
-block, (or subroutine, C<eval{}>, or C<do>) and I<any called from
-within that block>.  A local() just gives temporary values to global
-(meaning package) variables.  This is known as dynamic scoping.  Lexical
-scoping is done with "my", which works more like C's auto declarations.
+A local() modifies its listed variables to be "local" to the enclosing
+block, eval, or C<do FILE>--and to I<any called from within that block>.
+A local() just gives temporary values to global (meaning package)
+variables.  It does not create a local variable.  This is known as
+dynamic scoping.  Lexical scoping is done with "my", which works more
+like C's auto declarations.
 
 If more than one variable is given to local(), they must be placed in
 parentheses.  All listed elements must be legal lvalues.  This operator works
@@ -541,9 +581,6 @@ Perl will print
     This is a test only a test.
     The array has 6 elements: 0, 1, 2, undef, undef, 5
 
-In short, be careful when manipulating the containers for composite types
-whose elements have been localized.
-
 =head2 Passing Symbol Table Entries (typeglobs)
 
 [Note:  The mechanism described in this section was originally the only
@@ -585,6 +622,77 @@ passing multiple arrays in a single LIST, because normally the LIST
 mechanism will merge all the array values so that you can't extract out
 the individual arrays.  For more on typeglobs, see
 L<perldata/"Typeglobs and Filehandles">.
+
+=head2 When to Still Use local()
+
+Despite the existence of my(), there are still three places where the
+local() operator still shines.  In fact, in these three places, you
+I<must> use C<local> instead of C<my>.
+
+=over
+
+=item 1. You need to give a global variable a temporary value, especially $_.
+
+The global variables, like @ARGV or the punctuation variables, must be 
+localized with local().  This block reads in I</etc/motd>, and splits
+it up into chunks separated by lines of equal signs, which are placed
+in @Fields.
+
+    {
+	local @ARGV = ("/etc/motd");
+        local $/ = undef;
+        local $_ = <>;	
+	@Fields = split /^\s*=+\s*$/;
+    } 
+
+It particular, its important to localize $_ in any routine that assigns
+to it.  Look out for implicit assignments in C<while> conditionals.
+
+=item 2. You need to create a local file or directory handle or a local function.
+
+A function that needs a filehandle of its own must use local() uses
+local() on complete typeglob.   This can be used to create new symbol
+table entries:
+
+    sub ioqueue {
+        local  (*READER, *WRITER);    # not my!
+        pipe    (READER,  WRITER);    or die "pipe: $!";
+        return (*READER, *WRITER);
+    }
+    ($head, $tail) = ioqueue();
+
+See the Symbol module for a way to create anonymous symbol table
+entries.
+
+Because assignment of a reference to a typeglob creates an alias, this
+can be used to create what is effectively a local function, or at least,
+a local alias.
+
+    {
+        local *grow = \&shrink;         # only until this block exists
+        grow();                 	# really calls shrink()
+	move();				# if move() grow()s, it shrink()s too
+    }
+    grow();				# get the real grow() again
+
+See L<perlref/"Function Templates"> for more about manipulating
+functions by name in this way.
+
+=item 3. You want to temporarily change just one element of an array or hash.
+
+You can localize just one element of an aggregate.  Usually this
+is done on dynamics:
+
+    {
+	local $SIG{INT} = 'IGNORE';
+	funct();			    # uninterruptible
+    } 
+    # interruptibility automatically restored here
+
+But it also works on lexically declared aggregates.  Prior to 5.005,
+this operation could on occasion misbehave.
+
+=back
 
 =head2 Pass by Reference
 
@@ -852,7 +960,7 @@ without C<&> or C<do>. Calls made using C<&> or C<do> are never
 inlined.  (See constant.pm for an easy way to declare most
 constants.)
 
-All of the following functions would be inlined.
+The following functions would all be inlined:
 
     sub pi ()		{ 3.14159 }		# Not exact, but close.
     sub PI ()		{ 4 * atan2 1, 1 }	# As good as it gets,
@@ -881,7 +989,7 @@ All of the following functions would be inlined.
 	sub N_FACTORIAL () { $prod }
     }
 
-If you redefine a subroutine which was eligible for inlining you'll get
+If you redefine a subroutine that was eligible for inlining, you'll get
 a mandatory warning.  (You can use this warning to tell whether or not a
 particular subroutine is considered constant.)  The warning is
 considered severe enough not to be optional because previously compiled
@@ -991,7 +1099,7 @@ library.
 If you call a subroutine that is undefined, you would ordinarily get an
 immediate fatal error complaining that the subroutine doesn't exist.
 (Likewise for subroutines being used as methods, when the method
-doesn't exist in any of the base classes of the class package.) If,
+doesn't exist in any base class of the class package.) If,
 however, there is an C<AUTOLOAD> subroutine defined in the package or
 packages that were searched for the original subroutine, then that
 C<AUTOLOAD> subroutine is called with the arguments that would have been
@@ -1036,7 +1144,6 @@ functions to perl code in L<perlxs>.
 
 =head1 SEE ALSO
 
-See L<perlref> for more on references.  See L<perlxs> if you'd
-like to learn about calling C subroutines from perl.  See
-L<perlmod> to learn about bundling up your functions in
-separate files.
+See L<perlref> for more about references and closures.  See L<perlxs> if
+you'd like to learn about calling C subroutines from perl.  See L<perlmod>
+to learn about bundling up your functions in separate files.

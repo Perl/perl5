@@ -1,4 +1,3 @@
-
 =head1 NAME
 
 perlfunc - Perl builtin functions
@@ -53,26 +52,36 @@ nonabortive failure is generally indicated in a scalar context by
 returning the undefined value, and in a list context by returning the
 null list.
 
-Remember the following rule:
-
-=over 8
-
-=item  I<THERE IS NO GENERAL RULE FOR CONVERTING A LIST INTO A SCALAR!>
-
-=back
-
+Remember the following important rule: There is B<no rule> that relates
+the behavior of an expression in list context to its behavior in scalar
+context, or vice versa.  It might do two totally different things.
 Each operator and function decides which sort of value it would be most
 appropriate to return in a scalar context.  Some operators return the
-length of the list that would have been returned in a list context.  Some
+length of the list that would have been returned in list context.  Some
 operators return the first value in the list.  Some operators return the
 last value in the list.  Some operators return a count of successful
 operations.  In general, they do what you want, unless you want
 consistency.
 
+An named array in scalar context is quite different from what would at
+first glance appear to be a list in scalar context.  You can't get a list
+like C<(1,2,3)> into being in scalar context, because the compiler knows
+the context at compile time.  It would generate the scalar comma operator
+there, not the list construction version of the comma.  That means it
+was never a list to start with.
+
+In general, functions in Perl that serve as wrappers for system calls
+of the same name (like chown(2), fork(2), closedir(2), etc.) all return
+true when they succeed and C<undef> otherwise, as is usually mentioned
+in the descriptions below.  This is different from the C interfaces,
+which return -1 on failure.  Exceptions to this rule are wait(),
+waitpid(), and syscall().  System calls also set the special C<$!>
+variable on failure.  Other functions do not, except accidentally.
+
 =head2 Perl Functions by Category
 
 Here are Perl's functions (including things that look like
-functions, like some of the keywords and named operators)
+functions, like some keywords and named operators)
 arranged by category.  Some functions appear in more
 than one place.
 
@@ -189,7 +198,7 @@ C<qw>, C<readline>, C<readpipe>, C<ref>, C<sub*>, C<sysopen>, C<tie>,
 C<tied>, C<uc>, C<ucfirst>, C<untie>, C<use>
 
 * - C<sub> was a keyword in perl4, but in perl5 it is an
-operator which can be used in expressions.
+operator, which can be used in expressions.
 
 =item Functions obsoleted in perl5
 
@@ -254,7 +263,7 @@ operator may be any of:
 The interpretation of the file permission operators C<-r>, C<-R>, C<-w>,
 C<-W>, C<-x>, and C<-X> is based solely on the mode of the file and the
 uids and gids of the user.  There may be other reasons you can't actually
-read, write or execute the file.  Also note that, for the superuser,
+read, write, or execute the file, such as AFS access control lists.  Also note that, for the superuser,
 C<-r>, C<-R>, C<-w>, and C<-W> always return 1, and C<-x> and C<-X> return
 1 if any execute bit is set in the mode.  Scripts run by the superuser may
 thus need to do a stat() to determine the actual mode of the
@@ -265,7 +274,7 @@ Example:
     while (<>) {
 	chop;
 	next unless -f $_;	# ignore specials
-	...
+	#...
     }
 
 Note that C<-s/a/b/> does not do a negated substitution.  Saying
@@ -274,7 +283,7 @@ following a minus are interpreted as file tests.
 
 The C<-T> and C<-B> switches work as follows.  The first block or so of the
 file is examined for odd characters such as strange control codes or
-characters with the high bit set.  If too many odd characters (E<gt>30%)
+characters with the high bit set.  If too many strange characters (E<gt>30%)
 are found, it's a C<-B> file, otherwise it's a C<-T> file.  Also, any file
 containing null in the first block is considered a binary file.  If C<-T>
 or C<-B> is used on a filehandle, the current stdio buffer is examined
@@ -336,17 +345,18 @@ and sleep() calls.
 
 If you want to use alarm() to time out a system call you need to use an
 eval/die pair.  You can't rely on the alarm causing the system call to
-fail with $! set to EINTR because Perl sets up signal handlers to
-restart system calls on some systems.  Using eval/die always works.
+fail with C<$!> set to EINTR because Perl sets up signal handlers to
+restart system calls on some systems.  Using eval/die always works,
+modulo the caveats given in L<perlipc/"Signals">.
 
     eval {
-	local $SIG{ALRM} = sub { die "alarm\n" };	# NB \n required
+	local $SIG{ALRM} = sub { die "alarm\n" };	# NB: \n required
 	alarm $timeout;
 	$nread = sysread SOCKET, $buffer, $size;
 	alarm 0;
     };
-    die if $@ && $@ ne "alarm\n";	# propagate errors
     if ($@) {
+	die unless $@ eq "alarm\n";	# propagate unexpected errors
     	# timed out
     }
     else {
@@ -378,7 +388,7 @@ translated to CR LF on output.  Binmode has no effect under Unix; in MS-DOS
 and similarly archaic systems, it may be imperative--otherwise your
 MS-DOS-damaged C library may mangle your file.  The key distinction between
 systems that need binmode and those that don't is their text file
-formats.  Systems like Unix and Plan9 that delimit lines with a single
+formats.  Systems like Unix, MacOS, and Plan9 that delimit lines with a single
 character, and that encode that character in C as '\n', do not need
 C<binmode>.  The rest need it.  If FILEHANDLE is an expression, the value
 is taken as the name of the filehandle.
@@ -392,17 +402,17 @@ an object in the CLASSNAME package--or the current package if no CLASSNAME
 is specified, which is often the case.  It returns the reference for
 convenience, because a bless() is often the last thing in a constructor.
 Always use the two-argument version if the function doing the blessing
-might be inherited by a derived class.  See L<perlobj> for more about the
-blessing (and blessings) of objects.
+might be inherited by a derived class.  See L<perltoot> and L<perlobj>
+for more about the blessing (and blessings) of objects.
 
 =item caller EXPR
 
 =item caller
 
-Returns the context of the current subroutine call.  In a scalar context,
+Returns the context of the current subroutine call.  In scalar context,
 returns the caller's package name if there is a caller, that is, if
 we're in a subroutine or eval() or require(), and the undefined value
-otherwise.  In a list context, returns
+otherwise.  In list context, returns
 
     ($package, $filename, $line) = caller;
 
@@ -464,7 +474,7 @@ VARIABLE is omitted, it chomps $_.  Example:
     while (<>) {
 	chomp;	# avoid \n on last field
 	@array = split(/:/);
-	...
+	# ...
     }
 
 You can actually chomp anything that's an lvalue, including an assignment:
@@ -490,7 +500,7 @@ Example:
     while (<>) {
 	chop;	# avoid \n on last field
 	@array = split(/:/);
-	...
+	#...
     }
 
 You can actually chop anything that's an lvalue, including an assignment:
@@ -517,13 +527,13 @@ Here's an example that looks up nonnumeric uids in the passwd file:
 
     print "User: ";
     chop($user = <STDIN>);
-    print "Files: "
+    print "Files: ";
     chop($pattern = <STDIN>);
 
     ($login,$pass,$uid,$gid) = getpwnam($user)
 	or die "$user not in passwd file";
 
-    @ary = <${pattern}>;	# expand filenames
+    @ary = glob($pattern);	# expand filenames
     chown $uid, $gid, @ary;
 
 On most systems, you are not allowed to change the ownership of the
@@ -544,12 +554,12 @@ If NUMBER is omitted, uses $_.
 
 =item chroot
 
-This function works as the system call by the same name: it makes the
+This function works like the system call by the same name: it makes the
 named directory the new root directory for all further pathnames that
-begin with a "/" by your process and all of its children.  (It doesn't
+begin with a "/" by your process and all its children.  (It doesn't
 change your current working directory, which is unaffected.)  For security
 reasons, this call is restricted to the superuser.  If FILENAME is
-omitted, does chroot to $_.
+omitted, does a chroot to $_.
 
 =item close FILEHANDLE
 
@@ -565,26 +575,32 @@ counter ($.), while the implicit close done by open() does not.
 If the file handle came from a piped open C<close> will additionally
 return FALSE if one of the other system calls involved fails or if the
 program exits with non-zero status.  (If the only problem was that the
-program exited non-zero $! will be set to 0.) Also, closing a pipe will
-wait for the process executing on the pipe to complete, in case you
+program exited non-zero $! will be set to 0.)  Also, closing a pipe 
+waits for the process executing on the pipe to complete, in case you
 want to look at the output of the pipe afterwards.  Closing a pipe
 explicitly also puts the exit status value of the command into C<$?>.
+
 Example:
 
     open(OUTPUT, '|sort >foo')  # pipe to sort
         or die "Can't start sort: $!";
-    ...				# print stuff to output
+    #...			# print stuff to output
     close OUTPUT		# wait for sort to finish
         or warn $! ? "Error closing sort pipe: $!"
                    : "Exit status $? from sort";
     open(INPUT, 'foo')		# get sort's results
         or die "Can't open 'foo' for input: $!";
 
-FILEHANDLE may be an expression whose value gives the real filehandle name.
+FILEHANDLE may be an expression whose value can be used as an indirect
+filehandle, usually the real filehandle name.
 
 =item closedir DIRHANDLE
 
-Closes a directory opened by opendir().
+Closes a directory opened by opendir() and returns the success of that
+system call.
+
+DIRHANDLE may be an expression whose value can be used as an indirect
+dirhandle, usually the real dirhandle name.
 
 =item connect SOCKET,NAME
 
@@ -624,7 +640,7 @@ to check the condition at the top of the loop.
 
 =item cos EXPR
 
-Returns the cosine of EXPR (expressed in radians).  If EXPR is omitted
+Returns the cosine of EXPR (expressed in radians).  If EXPR is omitted,
 takes cosine of $_.
 
 For the inverse cosine operation, you may use the POSIX::acos()
@@ -725,10 +741,10 @@ doesn't I<necessarily> indicate an exceptional condition: pop()
 returns C<undef> when its argument is an empty array, I<or> when the
 element to return happens to be C<undef>.
 
-You may also use defined() to check whether a subroutine exists.  On
-the other hand, use of defined() upon aggregates (hashes and arrays)
-is not guaranteed to produce intuitive results, and should probably be
-avoided.
+You may also use defined() to check whether a subroutine exists, by
+saying C<defined &func> without parentheses.  On the other hand, use
+of defined() upon aggregates (hashes and arrays) is not guaranteed to
+produce intuitive results, and should probably be avoided.
 
 When used on a hash element, it tells you whether the value is defined,
 not whether the key exists in the hash.  Use L</exists> for the latter
@@ -749,7 +765,7 @@ defined values.  For example, if you say
 
     "ab" =~ /a(.*)b/;
 
-the pattern match succeeds, and $1 is defined, despite the fact that it
+The pattern match succeeds, and $1 is defined, despite the fact that it
 matched "nothing".  But it didn't really match nothing--rather, it
 matched something that happened to be 0 characters long.  This is all
 very above-board and honest.  When a function returns an undefined value,
@@ -768,11 +784,12 @@ should instead use a simple test for size:
     if (%a_hash)   { print "has hash members\n"   }
 
 Using undef() on these, however, does clear their memory and then report
-them as not defined anymore, but you shoudln't do that unless you don't
+them as not defined anymore, but you shouldn't do that unless you don't
 plan to use them again, because it saves time when you load them up
-again to have memory already ready to be filled.
+again to have memory already ready to be filled.  The normal way to 
+free up space used by an aggregate is to assign the empty list.
 
-This counterintuitive behaviour of defined() on aggregates may be
+This counterintuitive behavior of defined() on aggregates may be
 changed, fixed, or broken in a future release of Perl.
 
 See also L</undef>, L</exists>, L</ref>.
@@ -796,20 +813,20 @@ And so does this:
 
     delete @HASH{keys %HASH}
 
-(But both of these are slower than the undef() command.)  Note that the
-EXPR can be arbitrarily complicated as long as the final operation is a
-hash element lookup or hash slice:
+(But both of these are slower than just assigning the empty list, or
+using undef().)  Note that the EXPR can be arbitrarily complicated as
+long as the final operation is a hash element lookup or hash slice:
 
     delete $ref->[$x][$y]{$key};
     delete @{$ref->[$x][$y]}{$key1, $key2, @morekeys};
 
 =item die LIST
 
-Outside of an eval(), prints the value of LIST to C<STDERR> and exits with
+Outside an eval(), prints the value of LIST to C<STDERR> and exits with
 the current value of C<$!> (errno).  If C<$!> is 0, exits with the value of
 C<($? E<gt>E<gt> 8)> (backtick `command` status).  If C<($? E<gt>E<gt> 8)>
 is 0, exits with 255.  Inside an eval(), the error message is stuffed into
-C<$@>, and the eval() is terminated with the undefined value; this makes
+C<$@> and the eval() is terminated with the undefined value.  This makes
 die() the way to raise an exception.
 
 Equivalent examples:
@@ -842,7 +859,7 @@ This is useful for propagating exceptions:
 
 If $@ is empty then the string "Died" is used.
 
-You can arrange for a callback to be called just before the die() does
+You can arrange for a callback to be run just before the die() does
 its deed, by setting the C<$SIG{__DIE__}> hook.  The associated handler
 will be called with the error text and can change the error message, if
 it sees fit, by calling die() again.  See L<perlvar/$SIG{expr}> for details on
@@ -879,7 +896,7 @@ is just like
 
     scalar eval `cat stat.pl`;
 
-except that it's more efficient, more concise, keeps track of the
+except that it's more efficient and concise, keeps track of the
 current filename for error messages, and searches all the B<-I>
 libraries if the file isn't in the current directory (see also the @INC
 array in L<perlvar/Predefined Names>).  It is also different in how
@@ -889,8 +906,20 @@ reparse the file every time you call it, so you probably don't want to
 do this inside a loop.
 
 Note that inclusion of library modules is better done with the
-use() and require() operators, which also do error checking
+use() and require() operators, which also do automatic error checking
 and raise an exception if there's a problem.
+
+You might like to use C<do> to read in a program configuration
+file.  Manual error checking can be done this way:
+
+    # read in config files: system first, then user 
+    for $file ('/share/prog/defaults.rc", "$ENV{HOME}/.someprogrc") {
+	unless ($return = do $file) {
+	    warn "couldn't parse $file: $@"         if $@;
+	    warn "couldn't do $file: $!"            unless defined $return;
+	    warn "couldn't run $file"               unless $return;
+	}
+    }
 
 =item dump LABEL
 
@@ -900,7 +929,7 @@ after having initialized all your variables at the beginning of the
 program.  When the new binary is executed it will begin by executing a
 C<goto LABEL> (with all the restrictions that C<goto> suffers).  Think of
 it as a goto with an intervening core dump and reincarnation.  If LABEL
-is omitted, restarts the program from the top.  WARNING: any files
+is omitted, restarts the program from the top.  WARNING: Any files
 opened at the time of the dump will NOT be open any more when the
 program is reincarnated, with possible resulting confusion on the part
 of Perl.  See also B<-u> option in L<perlrun>.
@@ -925,18 +954,22 @@ Example:
     QUICKSTART:
     Getopt('f');
 
+This operator is largely obsolete, partly because it's very hard to 
+convert a core file into an executable, and because the real perl-to-C
+compiler has superseded it.
+
 =item each HASH
 
-When called in a list context, returns a 2-element list consisting of the
+When called in list context, returns a 2-element list consisting of the
 key and value for the next element of a hash, so that you can iterate over
-it.  When called in a scalar context, returns the key for only the next
+it.  When called in scalar context, returns the key for only the "next"
 element in the hash.  (Note: Keys may be "0" or "", which are logically
 false; you may wish to avoid constructs like C<while ($k = each %foo) {}>
 for this reason.)
 
 Entries are returned in an apparently random order.  When the hash is
 entirely read, a null array is returned in list context (which when
-assigned produces a FALSE (0) value), and C<undef> is returned in a
+assigned produces a FALSE (0) value), and C<undef> in
 scalar context.  The next call to each() after that will start iterating
 again.  There is a single iterator for each hash, shared by all each(),
 keys(), and values() function calls in the program; it can be reset by
@@ -961,14 +994,14 @@ See also keys() and values().
 
 Returns 1 if the next read on FILEHANDLE will return end of file, or if
 FILEHANDLE is not open.  FILEHANDLE may be an expression whose value
-gives the real filehandle name.  (Note that this function actually
-reads a character and then ungetc()s it, so it is not very useful in an
+gives the real filehandle.  (Note that this function actually
+reads a character and then ungetc()s it, so isn't very useful in an
 interactive context.)  Do not read from a terminal file (or call
 C<eof(FILEHANDLE)> on it) after end-of-file is reached.  Filetypes such
 as terminals may lose the end-of-file condition if you do.
 
 An C<eof> without an argument uses the last file read as argument.
-Empty parentheses () may be used to indicate the pseudo file formed of
+Using C<eof()> with empty parentheses is very different.  It indicates the pseudo file formed of
 the files listed on the command line, i.e., C<eof()> is reasonable to
 use inside a C<while (E<lt>E<gt>)> loop to detect the end of only the
 last file.  Use C<eof(ARGV)> or eof without the parentheses to test
@@ -976,13 +1009,15 @@ I<EACH> file in a while (E<lt>E<gt>) loop.  Examples:
 
     # reset line numbering on each input file
     while (<>) {
+	next if /^\s*#/;	# skip comments 
 	print "$.\t$_";
-	close(ARGV) if (eof);	# Not eof().
+    } continue {
+	close ARGV  if eof;	# Not eof()!
     }
 
     # insert dashes just before last line of last file
     while (<>) {
-	if (eof()) {
+	if (eof()) {		# check for end of current file
 	    print "--------------\n";
 	    close(ARGV);	# close or break; is needed if we
 				# are reading from the terminal
@@ -991,7 +1026,7 @@ I<EACH> file in a while (E<lt>E<gt>) loop.  Examples:
     }
 
 Practical hint: you almost never need to use C<eof> in Perl, because the
-input operators return undef when they run out of data.
+input operators return C<undef> when they run out of data.
 
 =item eval EXPR
 
@@ -999,7 +1034,7 @@ input operators return undef when they run out of data.
 
 In the first form, the return value of EXPR is parsed and executed as if it
 were a little Perl program.  The value of the expression (which is itself
-determined within a scalar context) is first parsed, and if there are no
+determined within scalar context) is first parsed, and if there weren't any
 errors, executed in the context of the current Perl program, so that any
 variable settings or subroutine and format definitions remain afterwards.
 Note that the value is parsed every time the eval executes.  If EXPR is
@@ -1017,9 +1052,9 @@ The final semicolon, if any, may be omitted from the value of EXPR or within
 the BLOCK.
 
 In both forms, the value returned is the value of the last expression
-evaluated inside the mini-program, or a return statement may be used, just
+evaluated inside the mini-program; a return statement may be also used, just
 as with subroutines.  The expression providing the return value is evaluated
-in void, scalar or array context, depending on the context of the eval itself.
+in void, scalar, or list context, depending on the context of the eval itself.
 See L</wantarray> for more on how the evaluation context can be determined.
 
 If there is a syntax error or runtime error, or a die() statement is
@@ -1047,7 +1082,7 @@ Examples:
     eval '$answer = $a / $b'; warn $@ if $@;
 
     # a compile-time error
-    eval { $answer = };
+    eval { $answer = };			# WRONG
 
     # a run-time error
     eval '$answer =';	# sets $@
@@ -1079,7 +1114,7 @@ being looked at when:
     eval '$x';		# CASE 3
     eval { $x };	# CASE 4
 
-    eval "\$$x++"	# CASE 5
+    eval "\$$x++";	# CASE 5
     $$x++;		# CASE 6
 
 Cases 1 and 2 above behave identically: they run the code contained in
@@ -1103,24 +1138,24 @@ returns FALSE only if the command does not exist I<and> it is executed
 directly instead of via your system's command shell (see below).
 
 Since it's a common mistake to use system() instead of exec(), Perl
-warns you if there is a following statement which isn't die(), warn()
+warns you if there is a following statement which isn't die(), warn(),
 or exit() (if C<-w> is set  -  but you always do that).   If you
 I<really> want to follow an exec() with some other statement, you
 can use one of these styles to avoid the warning:
 
-    exec ('foo') or print STDERR "couldn't exec foo";
-    { exec ('foo') }; print STDERR "couldn't exec foo";
+    exec ('foo')   or print STDERR "couldn't exec foo: $!";
+    { exec ('foo') }; print STDERR "couldn't exec foo: $!";
 
-If there is more than one argument in LIST, or if LIST is an array with
-more than one value, calls execvp(3) with the arguments in LIST.  If
-there is only one scalar argument, the argument is checked for shell
-metacharacters, and if there are any, the entire argument is passed to
-the system's command shell for parsing (this is C</bin/sh -c> on Unix
-platforms, but varies on other platforms).  If there are no shell
-metacharacters in the argument, it is split into words and passed
-directly to execvp(), which is more efficient.  Note: exec() and
-system() do not flush your output buffer, so you may need to set C<$|>
-to avoid lost output.  Examples:
+If there is more than one argument in LIST, or if LIST is an array
+with more than one value, calls execvp(3) with the arguments in LIST.
+If there is only one scalar argument or an array with one element in it,
+the argument is checked for shell metacharacters, and if there are any,
+the entire argument is passed to the system's command shell for parsing
+(this is C</bin/sh -c> on Unix platforms, but varies on other platforms).
+If there are no shell metacharacters in the argument, it is split into
+words and passed directly to execvp(), which is more efficient.  Note:
+exec() and system() do not flush your output buffer, so you may need to
+set C<$|> to avoid lost output.  Examples:
 
     exec '/bin/echo', 'Your arguments are: ', @ARGV;
     exec "sort $outfile | uniq";
@@ -1143,6 +1178,21 @@ When the arguments get executed via the system shell, results will
 be subject to its quirks and capabilities.  See L<perlop/"`STRING`">
 for details.
 
+Using an indirect object with C<exec> or C<system> is also more secure.
+This usage forces interpretation of the arguments as a multivalued list,
+even if the list had just one argument.  That way you're safe from the
+shell expanding wildcards or splitting up words with whitespace in them.
+
+    @args = ( "echo surprise" );
+
+    system @args;               # subject to shell escapes if @args == 1
+    system { $args[0] } @args;  # safe even with one-arg list
+
+The first version, the one without the indirect object, ran the I<echo>
+program, passing it C<"surprise"> an argument.  The second version
+didn't--it tried to run a program literally called I<"echo surprise">,
+didn't find it, and set C<$?> to a non-zero value indicating failure.
+
 =item exists EXPR
 
 Returns TRUE if the specified hash key exists in its hash array, even
@@ -1158,7 +1208,13 @@ it exists, but the reverse doesn't necessarily hold true.
 Note that the EXPR can be arbitrarily complicated as long as the final
 operation is a hash key lookup:
 
-    if (exists $ref->[$x][$y]{$key}) { ... }
+    if (exists $ref->{"A"}{"B"}{$key}) { ... }
+
+Although the last element will not spring into existence just because its
+existence was tested, intervening ones will.  Thus C<$ref-E<gt>{"A"}>
+C<$ref-E<gt>{"B"}> will spring into existence due to the existence
+test for a $key element.  This autovivification may be fixed in a later
+release.
 
 =item exit EXPR
 
@@ -1179,6 +1235,8 @@ You shouldn't use exit() to abort a subroutine if there's any chance that
 someone might want to trap whatever error happened.  Use die() instead,
 which can be trapped by an eval().
 
+All C<END{}> blocks are run at exit time.  See L<perlsub> for details.
+
 =item exp EXPR
 
 =item exp
@@ -1193,18 +1251,36 @@ Implements the fcntl(2) function.  You'll probably have to say
     use Fcntl;
 
 first to get the correct function definitions.  Argument processing and
-value return works just like ioctl() below.  Note that fcntl() will produce
-a fatal error if used on a machine that doesn't implement fcntl(2).
+value return works just like ioctl() below.  
 For example:
 
     use Fcntl;
-    fcntl($filehandle, F_GETLK, $packed_return_buffer);
+    fcntl($filehandle, F_GETFL, $packed_return_buffer)
+	or die "can't fcntl F_GETFL: $!";
+
+You don't have to check for C<defined> on the return from 
+fnctl.  Like ioctl, it maps a 0 return from the system
+call into "0 but true" in Perl.  This string is true in 
+boolean context and 0 in numeric context.  It is also 
+exempt from the normal B<-w> warnings on improper numeric
+conversions.
+
+Note that fcntl() will produce a fatal error if used on a machine that
+doesn't implement fcntl(2).
 
 =item fileno FILEHANDLE
 
 Returns the file descriptor for a filehandle.  This is useful for
-constructing bitmaps for select().  If FILEHANDLE is an expression, the
-value is taken as the name of the filehandle.
+constructing bitmaps for select() and low-level POSIX tty-handling
+operations.  If FILEHANDLE is an expression, the value is taken as 
+an indirect filehandle, generally its name. 
+
+You can use this to find out whether two handles refer to the 
+same underlying descriptor:
+
+    if (fileno(THIS) == fileno(THAT)) {
+	print "THIS and THAT are dups\n";
+    } 
 
 =item flock FILEHANDLE,OPERATION
 
@@ -1215,10 +1291,11 @@ is Perl's portable file locking interface, although it locks only entire
 files, not records.
 
 On many platforms (including most versions or clones of Unix), locks
-established by flock() are B<merely advisory>.  This means that files
-locked with flock() may be modified by programs which do not also use
-flock().  Windows NT and OS/2, however, are among the platforms which
-supply mandatory locking.  See your local documentation for details.
+established by flock() are B<merely advisory>.  Such discretionary locks
+are more flexible, but offer fewer guarantees.  This means that files
+locked with flock() may be modified by programs that do not also use
+flock().  Windows NT and OS/2 are among the platforms which
+enforce mandatory locking.  See your local documentation for details.
 
 OPERATION is one of LOCK_SH, LOCK_EX, or LOCK_UN, possibly combined with
 LOCK_NB.  These constants are traditionally valued 1, 2, 8 and 4, but
@@ -1271,8 +1348,9 @@ See also L<DB_File> for other flock() examples.
 
 =item fork
 
-Does a fork(2) system call.  Returns the child pid to the parent process
-and 0 to the child process, or C<undef> if the fork is unsuccessful.
+Does a fork(2) system call.  Returns the child pid to the parent process,
+0 to the child process, or C<undef> if the fork is unsuccessful.
+
 Note: unflushed buffers remain unflushed in both processes, which means
 you may need to set C<$|> ($AUTOFLUSH in English) or call the autoflush()
 method of IO::Handle to avoid duplicate output.
@@ -1302,7 +1380,7 @@ moribund children.
 
 Note that if your forked child inherits system file descriptors like
 STDIN and STDOUT that are actually connected by a pipe or socket, even
-if you exit, the remote server (such as, say, httpd or rsh) won't think
+if you exit, then the remote server (such as, say, httpd or rsh) won't think
 you're done.  You should reopen those to /dev/null if it's any issue.
 
 =item format
@@ -1322,10 +1400,9 @@ example:
 
 See L<perlform> for many details and examples.
 
-
 =item formline PICTURE,LIST
 
-This is an internal function used by C<format>s, though you may call it
+This is an internal function used by C<format>s, though you may call it,
 too.  It formats (see L<perlform>) a list of values according to the
 contents of PICTURE, placing the output into the format output
 accumulator, C<$^A> (or $ACCUMULATOR in English).
@@ -1372,14 +1449,15 @@ Determination of whether $BSD_STYLE should be set
 is left as an exercise to the reader.
 
 The POSIX::getattr() function can do this more portably on systems
-alleging POSIX compliance.
+purporting POSIX compliance.
 See also the C<Term::ReadKey> module from your nearest CPAN site;
 details on CPAN can be found on L<perlmod/CPAN>.
 
 =item getlogin
 
-Returns the current login from F</etc/utmp>, if any.  If null, use
-getpwuid().
+Implements the C library function of the same name, which on most
+systems returns the current login from F</etc/utmp>, if any.  If null,
+use getpwuid().
 
     $login = getlogin || getpwuid($<) || "Kilroy";
 
@@ -1476,7 +1554,7 @@ machine that doesn't implement getpriority(2).
 =item endservent
 
 These routines perform the same functions as their counterparts in the
-system library.  Within a list context, the return values from the
+system library.  In list context, the return values from the
 various get routines are as follows:
 
     ($name,$passwd,$uid,$gid,
@@ -1489,17 +1567,17 @@ various get routines are as follows:
 
 (If the entry doesn't exist you get a null list.)
 
-Within a scalar context, you get the name, unless the function was a
+In scalar context, you get the name, unless the function was a
 lookup by name, in which case you get the other thing, whatever it is.
 (If the entry doesn't exist you get the undefined value.)  For example:
 
-    $uid = getpwnam
-    $name = getpwuid
-    $name = getpwent
-    $gid = getgrnam
-    $name = getgrgid
-    $name = getgrent
-    etc.
+    $uid   = getpwnam($name);
+    $name  = getpwuid($num);
+    $name  = getpwent();
+    $gid   = getgrnam($name);
+    $name  = getgrgid($num;
+    $name  = getgrent();
+    #etc.
 
 In I<getpw*()> the fields $quota, $comment, and $expire are special
 cases in the sense that in many systems they are unsupported.  If the
@@ -1529,6 +1607,20 @@ by saying something like:
 
     ($a,$b,$c,$d) = unpack('C4',$addr[0]);
 
+If you get tired of remembering which element of the return list contains
+which return value, by-name interfaces are also provided in modules:
+File::stat, Net::hostent, Net::netent, Net::protoent, Net::servent,
+Time::gmtime, Time::localtime, and User::grent.  These override the
+normal built-in, replacing them with versions that return objects with
+the appropriate names for each field.  For example:
+
+   use File::stat;
+   use User::pwent;
+   $is_his = (stat($filename)->uid == pwent($whoever)->uid);
+
+Even though it looks like they're the same method calls (uid), 
+they aren't, because a File::stat object is different from a User::pwent object.
+
 =item getsockname SOCKET
 
 Returns the packed sockaddr address of this end of the SOCKET connection.
@@ -1539,13 +1631,13 @@ Returns the packed sockaddr address of this end of the SOCKET connection.
 
 =item getsockopt SOCKET,LEVEL,OPTNAME
 
-Returns the socket option requested, or undefined if there is an error.
+Returns the socket option requested, or undef if there is an error.
 
 =item glob EXPR
 
 =item glob
 
-Returns the value of EXPR with filename expansions such as a shell would
+Returns the value of EXPR with filename expansions such as the standard Unix shell /bin/sh would
 do.  This is the internal function implementing the C<E<lt>*.cE<gt>>
 operator, but you can use it directly.  If EXPR is omitted, $_ is used.
 The C<E<lt>*.cE<gt>> operator is discussed in more detail in
@@ -1568,7 +1660,7 @@ years since 1900, I<not> simply the last two digits of the year.
 
 If EXPR is omitted, does C<gmtime(time())>.
 
-In a scalar context, returns the ctime(3) value:
+In scalar context, returns the ctime(3) value:
 
     $now_string = gmtime;  # e.g., "Thu Oct 13 04:54:34 1994"
 
@@ -1648,7 +1740,7 @@ see L</oct>.)  If EXPR is omitted, uses $_.
 
 =item import
 
-There is no builtin import() function.  It is merely an ordinary
+There is no builtin import() function.  It is just an ordinary
 method (subroutine) defined (or inherited) by modules that wish to export
 names to another module.  The use() function calls the import() method
 for the package used.  See also L</use()>, L<perlmod>, and L<Exporter>.
@@ -1668,6 +1760,10 @@ one less than the base, ordinarily -1.
 =item int
 
 Returns the integer portion of EXPR.  If EXPR is omitted, uses $_.
+You should not use this for rounding, because it truncates
+towards 0, and because machine representations of floating point
+numbers can sometimes produce counterintuitive results.  Usually sprintf() or printf(),
+or the POSIX::floor or POSIX::ceil functions, would serve you better.
 
 =item ioctl FILEHANDLE,FUNCTION,SCALAR
 
@@ -1678,7 +1774,7 @@ Implements the ioctl(2) function.  You'll probably have to say
 first to get the correct function definitions.  If F<ioctl.ph> doesn't
 exist or doesn't have the correct definitions you'll have to roll your
 own, based on your C header files such as F<E<lt>sys/ioctl.hE<gt>>.
-(There is a Perl script called B<h2ph> that comes with the Perl kit which
+(There is a Perl script called B<h2ph> that comes with the Perl kit that
 may help you in this, but it's nontrivial.)  SCALAR will be read and/or
 written depending on the FUNCTION--a pointer to the string value of SCALAR
 will be passed as the third argument of the actual ioctl call.  (If SCALAR
@@ -1713,6 +1809,9 @@ system:
 
     ($retval = ioctl(...)) || ($retval = -1);
     printf "System returned %d\n", $retval;
+
+The special string "0 but true" is excempt from B<-w> complaints
+about improper numeric conversions.
 
 =item join EXPR,LIST
 
@@ -1749,7 +1848,7 @@ or how about sorted by key:
 To sort an array by value, you'll need to use a C<sort> function.
 Here's a descending numeric sort of a hash by its values:
 
-    foreach $key (sort { $hash{$b} <=> $hash{$a} } keys %hash)) {
+    foreach $key (sort { $hash{$b} <=> $hash{$a} } keys %hash) {
 	printf "%4d %s\n", $hash{$key}, $key;
     }
 
@@ -1760,7 +1859,8 @@ an array by assigning a larger number to $#array.)  If you say
 
     keys %hash = 200;
 
-then C<%hash> will have at least 200 buckets allocated for it.  These
+then C<%hash> will have at least 200 buckets allocated for it--256 of them, in fact, since 
+it rounds up to the next power of two.  These
 buckets will be retained even if you do C<%hash = ()>, use C<undef
 %hash> if you want to free the storage while C<%hash> is still in scope.
 You can't shrink the number of buckets allocated for the hash using
@@ -1793,7 +1893,7 @@ C<continue> block, if any, is not executed:
 
     LINE: while (<STDIN>) {
 	last LINE if /^$/;	# exit when done with header
-	...
+	#...
     }
 
 See also L</continue> for an illustration of how C<last>, C<next>, and
@@ -1823,13 +1923,13 @@ If EXPR is omitted, uses $_.
 
 =item length
 
-Returns the length in characters of the value of EXPR.  If EXPR is
+Returns the length in bytes of the value of EXPR.  If EXPR is
 omitted, returns length of $_.
 
 =item link OLDFILE,NEWFILE
 
-Creates a new filename linked to the old filename.  Returns 1 for
-success, 0 otherwise.
+Creates a new filename linked to the old filename.  Returns TRUE for
+success, FALSE otherwise.
 
 =item listen SOCKET,QUEUESIZE
 
@@ -1838,10 +1938,10 @@ it succeeded, FALSE otherwise.  See example in L<perlipc/"Sockets: Client/Server
 
 =item local EXPR
 
-A local modifies the listed variables to be local to the enclosing block,
-subroutine, C<eval{}>, or C<do>.  If more than one value is listed, the
-list must be placed in parentheses.  See L<perlsub/"Temporary Values via
-local()"> for details, including issues with tied arrays and hashes.
+A local modifies the listed variables to be local to the enclosing
+block, file, or eval.  If more than one value is listed, the list must
+be placed in parentheses.  See L<perlsub/"Temporary Values via local()">
+for details, including issues with tied arrays and hashes.
 
 You really probably want to be using my() instead, because local() isn't
 what most people think of as "local".  See L<perlsub/"Private Variables
@@ -1864,7 +1964,7 @@ years since 1900, that is, $year is 123 in year 2023.
 
 If EXPR is omitted, uses the current time (C<localtime(time)>).
 
-In a scalar context, returns the ctime(3) value:
+In scalar context, returns the ctime(3) value:
 
     $now_string = localtime;  # e.g., "Thu Oct 13 04:54:34 1994"
 
@@ -1873,9 +1973,9 @@ instead a Perl builtin.  Also see the Time::Local module, and the
 strftime(3) and mktime(3) function available via the POSIX module.  To
 get somewhat similar but locale dependent date strings, set up your
 locale environment variables appropriately (please see L<perllocale>)
-and try for example
+and try for example:
 
-	use POSIX qw(strftime)
+    use POSIX qw(strftime);
 	$now_string = strftime "%a %b %e %H:%M:%S %Y", localtime;
 
 Note that the C<%a> and C<%b>, the short forms of the day of the week
@@ -1885,7 +1985,7 @@ and the month of the year, may not necessarily be three characters wide.
 
 =item log
 
-Returns logarithm (base I<e>) of EXPR.  If EXPR is omitted, returns log
+Returns the natural logarithm (base I<e>) of EXPR.  If EXPR is omitted, returns log
 of $_.
 
 =item lstat FILEHANDLE
@@ -1894,9 +1994,10 @@ of $_.
 
 =item lstat
 
-Does the same thing as the stat() function, but stats a symbolic link
-instead of the file the symbolic link points to.  If symbolic links are
-unimplemented on your system, a normal stat() is done.
+Does the same thing as the stat() function (including setting the
+special C<_> filehandle) but stats a symbolic link instead of the file
+the symbolic link points to.  If symbolic links are unimplemented on
+your system, a normal stat() is done.
 
 If EXPR is omitted, stats $_.
 
@@ -1935,13 +2036,13 @@ original list for which the BLOCK or EXPR evaluates to true.
 =item mkdir FILENAME,MODE
 
 Creates the directory specified by FILENAME, with permissions specified
-by MODE (as modified by umask).  If it succeeds it returns 1, otherwise
-it returns 0 and sets C<$!> (errno).
+by MODE (as modified by umask).  If it succeeds it returns TRUE, otherwise
+it returns FALSE and sets C<$!> (errno).
 
 =item msgctl ID,CMD,ARG
 
 Calls the System V IPC function msgctl(2).  If CMD is &IPC_STAT, then ARG
-must be a variable which will hold the returned msqid_ds structure.
+must be a variable that will hold the returned msqid_ds structure.
 Returns like ioctl: the undefined value for error, "0 but true" for
 zero, or the actual return value otherwise.
 
@@ -1969,7 +2070,7 @@ an error.
 =item my EXPR
 
 A "my" declares the listed variables to be local (lexically) to the
-enclosing block, subroutine, C<eval>, or C<do/require/use>'d file.  If
+enclosing block, file, or C<eval>.  If
 more than one value is listed, the list must be placed in parentheses.  See
 L<perlsub/"Private Variables via my()"> for details.
 
@@ -1982,7 +2083,7 @@ the next iteration of the loop:
 
     LINE: while (<STDIN>) {
 	next LINE if /^#/;	# discard comments
-	...
+	#...
     }
 
 Note that if there were a C<continue> block on the above, it would get
@@ -2030,17 +2131,20 @@ output.  If the filename begins with '>>', the file is opened for
 appending.  You can put a '+' in front of the '>' or '<' to indicate that
 you want both read and write access to the file; thus '+<' is almost
 always preferred for read/write updates--the '+>' mode would clobber the
-file first.  The prefix and the filename may be separated with spaces.
+file first.  You can't usually use either read-write mode for updating
+textfiles, since they have variable length records.  See the B<-i>
+switch in L<perlrun> for a better approach.
+
+The prefix and the filename may be separated with spaces.
 These various prefixes correspond to the fopen(3) modes of 'r', 'r+', 'w',
 'w+', 'a', and 'a+'.
 
-If the filename begins with "|", the filename is interpreted as a command
-to which output is to be piped, and if the filename ends with a "|", the
-filename is interpreted See L<perlipc/"Using open() for IPC"> for more
-examples of this.  as command which pipes input to us.  (You may not have
-a raw open() to a command that pipes both in I<and> out, but see
-L<IPC::Open2>, L<IPC::Open3>, and L<perlipc/"Bidirectional Communication">
-for alternatives.)
+If the filename begins with "|", the filename is interpreted as a
+command to which output is to be piped, and if the filename ends with a
+"|", the filename is interpreted See L<perlipc/"Using open() for IPC">
+for more examples of this.  (You are not allowed to open() to a command
+that pipes both in I<and> out, but see L<IPC::Open2>, L<IPC::Open3>,
+and L<perlipc/"Bidirectional Communication"> for alternatives.)
 
 Opening '-' opens STDIN and opening 'E<gt>-' opens STDOUT.  Open returns
 nonzero upon success, the undefined value otherwise.  If the open
@@ -2051,15 +2155,15 @@ If you're unfortunate enough to be running Perl on a system that
 distinguishes between text files and binary files (modern operating
 systems don't care), then you should check out L</binmode> for tips for
 dealing with this.  The key distinction between systems that need binmode
-and those that don't is their text file formats.  Systems like Unix and
-Plan9 that delimit lines with a single character, and that encode that
+and those that don't is their text file formats.  Systems like Unix, MacOS, and
+Plan9, which delimit lines with a single character, and which encode that
 character in C as '\n', do not need C<binmode>.  The rest need it.
 
 When opening a file, it's usually a bad idea to continue normal execution
 if the request failed, so C<open> is frequently used in connection with
 C<die>. Even if C<die> won't do what you want (say, in a CGI script,
 where you want to make a nicely formatted error message (but there are
-modules which can help with that problem)) you should always check
+modules that can help with that problem)) you should always check
 the return value from opening a file. The infrequent exception is when
 working with an unopened filehandle is actually what you want to do.
 
@@ -2088,25 +2192,26 @@ Examples:
     }
 
     sub process {
-	local($filename, $input) = @_;
+	my($filename, $input) = @_;
 	$input++;		# this is a string increment
 	unless (open($input, $filename)) {
 	    print STDERR "Can't open $filename: $!\n";
 	    return;
 	}
 
+	local $_;
 	while (<$input>) {		# note use of indirection
 	    if (/^#include "(.*)"/) {
 		process($1, $input);
 		next;
 	    }
-	    ...		# whatever
+	    #...		# whatever
 	}
     }
 
 You may also, in the Bourne shell tradition, specify an EXPR beginning
 with "E<gt>&", in which case the rest of the string is interpreted as the
-name of a filehandle (or file descriptor, if numeric) which is to be
+name of a filehandle (or file descriptor, if numeric) to be
 duped and opened.  You may use & after E<gt>, E<gt>E<gt>, E<lt>, +E<gt>,
 +E<gt>E<gt>, and +E<lt>.  The
 mode you specify should match the mode of the original filehandle.
@@ -2116,8 +2221,8 @@ Here is a script that saves, redirects, and restores STDOUT and
 STDERR:
 
     #!/usr/bin/perl
-    open(SAVEOUT, ">&STDOUT");
-    open(SAVEERR, ">&STDERR");
+    open(OLDOUT, ">&STDOUT");
+    open(OLDERR, ">&STDERR");
 
     open(STDOUT, ">foo.out") || die "Can't redirect stdout";
     open(STDERR, ">&STDOUT") || die "Can't dup stdout";
@@ -2131,8 +2236,8 @@ STDERR:
     close(STDOUT);
     close(STDERR);
 
-    open(STDOUT, ">&SAVEOUT");
-    open(STDERR, ">&SAVEERR");
+    open(STDOUT, ">&OLDOUT");
+    open(STDERR, ">&OLDERR");
 
     print STDOUT "stdout 2\n";
     print STDERR "stderr 2\n";
@@ -2165,21 +2270,47 @@ The following pairs are more or less equivalent:
 
 See L<perlipc/"Safe Pipe Opens"> for more examples of this.
 
-NOTE: On any operation which may do a fork, unflushed buffers remain
+NOTE: On any operation that may do a fork, any unflushed buffers remain
 unflushed in both processes, which means you may need to set C<$|> to
 avoid duplicate output.
 
 Closing any piped filehandle causes the parent process to wait for the
 child to finish, and returns the status value in C<$?>.
 
+The filename passed to open will have leading and trailing
+whitespace deleted, and the normal redirection chararacters
+honored.  This property, known as "magic open", 
+can often be used to good effect.  A user could specify a filename of
+"rsh cat file |", or you could change certain filenames as needed:
+
+    $filename =~ s/(.*\.gz)\s*$/gzip -dc < $1|/;
+    open(FH, $filename) or die "Can't open $filename: $!";
+
+However, to open a file with arbitrary weird characters in it, it's
+necessary to protect any leading and trailing whitespace:
+
+    $file =~ s#^(\s)#./$1#;
+    open(FOO, "< $file\0");
+
+If you want a "real" C open() (see L<open(2)> on your system), then you
+should use the sysopen() function, which involves no such magic.  This is
+another way to protect your filenames from interpretation.  For example:
+
+    use IO::Handle;
+    sysopen(HANDLE, $path, O_RDWR|O_CREAT|O_EXCL)
+	or die "sysopen $path: $!";
+    $oldfh = select(HANDLE); $| = 1; select($oldfh);
+    print HANDLE "stuff $$\n");
+    seek(HANDLE, 0, 0);
+    print "File contains: ", <HANDLE>;
+
 Using the constructor from the IO::Handle package (or one of its
-subclasses, such as IO::File or IO::Socket),
-you can generate anonymous filehandles which have the scope of whatever
-variables hold references to them, and automatically close whenever
-and however you leave that scope:
+subclasses, such as IO::File or IO::Socket), you can generate anonymous
+filehandles that have the scope of whatever variables hold references to
+them, and automatically close whenever and however you leave that scope:
 
     use IO::File;
-    ...
+    #...
     sub read_myfile_munged {
 	my $ALL = shift;
 	my $handle = new IO::File;
@@ -2190,26 +2321,6 @@ and however you leave that scope:
 	return $first, <$handle> if $ALL;	# Or here.
 	$first;					# Or here.
     }
-
-The filename that is passed to open will have leading and trailing
-whitespace deleted.  To open a file with arbitrary weird
-characters in it, it's necessary to protect any leading and trailing
-whitespace thusly:
-
-    $file =~ s#^(\s)#./$1#;
-    open(FOO, "< $file\0");
-
-If you want a "real" C open() (see L<open(2)> on your system), then
-you should use the sysopen() function.  This is another way to
-protect your filenames from interpretation.  For example:
-
-    use IO::Handle;
-    sysopen(HANDLE, $path, O_RDWR|O_CREAT|O_EXCL, 0700)
-	or die "sysopen $path: $!";
-    HANDLE->autoflush(1);
-    HANDLE->print("stuff $$\n");
-    seek(HANDLE, 0, 0);
-    print "File contains: ", <HANDLE>;
 
 See L</seek()> for some details about mixing reading and writing.
 
@@ -2283,7 +2394,7 @@ follows:
     X	Back up a byte.
     @	Null fill to absolute position.
 
-Each letter may optionally be followed by a number which gives a repeat
+Each letter may optionally be followed by a number giving a repeat
 count.  With all types except "a", "A", "b", "B", "h", "H", and "P" the
 pack function will gobble up that many values from the LIST.  A * for the
 repeat count means to use however many items are left.  The "a" and "A"
@@ -2340,6 +2451,8 @@ Examples:
 
 The same template may generally also be used in the unpack function.
 
+=item package 
+
 =item package NAMESPACE
 
 Declares the compilation unit as being in the given namespace.  The scope
@@ -2350,11 +2463,15 @@ statement affects only dynamic variables--including those you've used
 local() on--but I<not> lexical variables created with my().  Typically it
 would be the first declaration in a file to be included by the C<require>
 or C<use> operator.  You can switch into a package in more than one place;
-it influences merely which symbol table is used by the compiler for the
+it merely influences which symbol table is used by the compiler for the
 rest of that block.  You can refer to variables and filehandles in other
 packages by prefixing the identifier with the package name and a double
 colon:  C<$Package::Variable>.  If the package name is null, the C<main>
 package as assumed.  That is, C<$::sail> is equivalent to C<$main::sail>.
+
+If NAMESPACE is omitted, then there is no current package, and all
+identifiers must be fully qualified or lexicals.  This is stricter
+than C<use strict>, since it also extends to function names.
 
 See L<perlmod/"Packages"> for more information about packages, modules,
 and classes.  See L<perlsub> for other scoping issues.
@@ -2408,11 +2525,11 @@ token is a term, it may be misinterpreted as an operator unless you
 interpose a + or put parentheses around the arguments.)  If FILEHANDLE is
 omitted, prints by default to standard output (or to the last selected
 output channel--see L</select>).  If LIST is also omitted, prints $_ to
-STDOUT.  To set the default output channel to something other than
+the currently selected output channel.  To set the default output channel to something other than
 STDOUT use the select operation.  Note that, because print takes a
-LIST, anything in the LIST is evaluated in a list context, and any
+LIST, anything in the LIST is evaluated in list context, and any
 subroutine that you call will have one or more of its expressions
-evaluated in a list context.  Also be careful not to follow the print
+evaluated in list context.  Also be careful not to follow the print
 keyword with a left parenthesis unless you want the corresponding right
 parenthesis to terminate the arguments to the print--interpose a + or
 put parentheses around all the arguments.
@@ -2434,7 +2551,7 @@ in effect, the character used for the decimal point in formatted real numbers
 is affected by the LC_NUMERIC locale.  See L<perllocale>.
 
 Don't fall into the trap of using a printf() when a simple
-print() would do.  The print() is more efficient, and less
+print() would do.  The print() is more efficient and less
 error prone.
 
 =item prototype FUNCTION
@@ -2507,15 +2624,15 @@ specified FILEHANDLE.  Returns the number of bytes actually read, or
 undef if there was an error.  SCALAR will be grown or shrunk to the
 length actually read.  An OFFSET may be specified to place the read
 data at some other place than the beginning of the string.  This call
-is actually implemented in terms of stdio's fread call.  To get a true
-read system call, see sysread().
+is actually implemented in terms of stdio's fread(3) call.  To get a true
+read(2) system call, see sysread().
 
 =item readdir DIRHANDLE
 
 Returns the next directory entry for a directory opened by opendir().
-If used in a list context, returns all the rest of the entries in the
+If used in list context, returns all the rest of the entries in the
 directory.  If there are no more entries, returns an undefined value in
-a scalar context or a null list in a list context.
+scalar context or a null list in list context.
 
 If you're planning to filetest the return values out of a readdir(), you'd
 better prepend the directory in question.  Otherwise, because we didn't
@@ -2527,13 +2644,16 @@ chdir() there, it would have been testing the wrong file.
 
 =item readline EXPR
 
-Reads from the file handle EXPR.  In scalar context, a single line
+Reads from the filehandle whose typeglob is contained in EXPR.  In scalar context, a single line
 is read and returned.  In list context, reads until end-of-file is
 reached and returns a list of lines (however you've defined lines
 with $/ or $INPUT_RECORD_SEPARATOR).
 This is the internal function implementing the C<E<lt>EXPRE<gt>>
 operator, but you can use it directly.  The C<E<lt>EXPRE<gt>>
 operator is discussed in more detail in L<perlop/"I/O Operators">.
+
+    $line = <STDIN>;
+    $line = readline(*STDIN);		# same thing
 
 =item readlink EXPR
 
@@ -2546,7 +2666,7 @@ omitted, uses $_.
 
 =item readpipe EXPR
 
-EXPR is interpolated and then executed as a system command.
+EXPR is executed as a system command.
 The collected standard output of the command is returned.
 In scalar context, it comes back as a single (potentially
 multi-line) string.  In list context, returns a list of lines
@@ -2584,7 +2704,7 @@ themselves about what was just input:
 	    $front = $_;
 	    while (<STDIN>) {
 		if (/}/) {	# end of comment?
-		    s|^|$front{|;
+		    s|^|$front\{|;
 		    redo LINE;
 		}
 	    }
@@ -2617,7 +2737,7 @@ name is returned instead.  You can think of ref() as a typeof() operator.
     if (ref($r) eq "HASH") {
 	print "r is a reference to a hash.\n";
     }
-    if (!ref ($r) {
+    if (!ref($r)) {
 	print "r is not a reference at all.\n";
     }
 
@@ -2642,9 +2762,9 @@ essentially just a variety of eval().  Has semantics similar to the following
 subroutine:
 
     sub require {
-	local($filename) = @_;
+	my($filename) = @_;
 	return 1 if $INC{$filename};
-	local($realfilename,$result);
+	my($realfilename,$result);
 	ITER: {
 	    foreach $prefix (@INC) {
 		$realfilename = "$prefix/$filename";
@@ -2658,7 +2778,7 @@ subroutine:
 	die $@ if $@;
 	die "$filename did not return true value" unless $result;
 	$INC{$filename} = $realfilename;
-	$result;
+	return $result;
     }
 
 Note that the file will not be included twice under the same specified
@@ -2675,20 +2795,20 @@ modules does not risk altering your namespace.
 
 In other words, if you try this:
 
-        require Foo::Bar ; # a splendid bareword 
+        require Foo::Bar; 	# a splendid bareword 
 
 The require function will actually look for the "Foo/Bar.pm" file in the 
 directories specified in the @INC array.
 
-But if you try this :
+But if you try this:
 
         $class = 'Foo::Bar';
-        require $class ; # $class is not a bareword
-or
-        require "Foo::Bar" ; # not a bareword because of the ""
+        require $class; 	# $class is not a bareword
+    #or
+        require "Foo::Bar"; # not a bareword because of the ""
 
 The require function will look for the "Foo::Bar" file in the @INC array and 
-will complain about not finding "Foo::Bar" there. In this case you can do :
+will complain about not finding "Foo::Bar" there. In this case you can do:
 
         eval "require $class";
 
@@ -2720,20 +2840,20 @@ so you'll probably want to use them instead.  See L</my>.
 
 =item return
 
-Returns from a subroutine, eval(), or do FILE with the value of the
-given EXPR.  Evaluation of EXPR may be in a list, scalar, or void
+Returns from a subroutine, eval(), or C<do FILE> with the value 
+given in EXPR.  Evaluation of EXPR may be in list, scalar, or void
 context, depending on how the return value will be used, and the context
 may vary from one execution to the next (see wantarray()).  If no EXPR
-is given, returns an empty list in a list context, an undefined value in
-a scalar context, or nothing in a void context.
+is given, returns an empty list in list context, an undefined value in
+scalar context, or nothing in a void context.
 
 (Note that in the absence of a return, a subroutine, eval, or do FILE
 will automatically return the value of the last expression evaluated.)
 
 =item reverse LIST
 
-In a list context, returns a list value consisting of the elements
-of LIST in the opposite order.  In a scalar context, concatenates the
+In list context, returns a list value consisting of the elements
+of LIST in the opposite order.  In scalar context, concatenates the
 elements of LIST, and returns a string value consisting of those bytes,
 but in the opposite order.
 
@@ -2767,8 +2887,8 @@ last occurrence at or before that position.
 
 =item rmdir
 
-Deletes the directory specified by FILENAME if it is empty.  If it
-succeeds it returns 1, otherwise it returns 0 and sets C<$!> (errno).  If
+Deletes the directory specified by FILENAME if that directory is empty.  If it
+succeeds it returns TRUE, otherwise it returns FALSE and sets C<$!> (errno).  If
 FILENAME is omitted, uses $_.
 
 =item s///
@@ -2777,13 +2897,13 @@ The substitution operator.  See L<perlop>.
 
 =item scalar EXPR
 
-Forces EXPR to be interpreted in a scalar context and returns the value
+Forces EXPR to be interpreted in scalar context and returns the value
 of EXPR.
 
     @counts = ( scalar @a, scalar @b, scalar @c );
 
 There is no equivalent operator to force an expression to
-be interpolated in a list context because it's in practice never
+be interpolated in list context because it's in practice never
 needed.  If you really wanted to do so, however, you could use
 the construction C<@{[ (some expression) ]}>, but usually a simple
 C<(some expression)> suffices.
@@ -2875,8 +2995,8 @@ If you want to select on many filehandles you might wish to write a
 subroutine:
 
     sub fhbits {
-	local(@fhlist) = split(' ',$_[0]);
-	local($bits);
+	my(@fhlist) = split(' ',$_[0]);
+	my($bits);
 	for (@fhlist) {
 	    vec($bits,fileno($_),1) = 1;
 	}
@@ -2894,7 +3014,7 @@ or to block until something becomes ready just do this
     $nfound = select($rout=$rin, $wout=$win, $eout=$ein, undef);
 
 Most systems do not bother to return anything useful in $timeleft, so
-calling select() in a scalar context just returns $nfound.
+calling select() in scalar context just returns $nfound.
 
 Any of the bit masks can also be undef.  The timeout, if specified, is
 in seconds, which may be fractional.  Note: not all implementations are
@@ -2905,13 +3025,14 @@ You can effect a sleep of 250 milliseconds this way:
 
     select(undef, undef, undef, 0.25);
 
-B<WARNING>: Do not attempt to mix buffered I/O (like read() or E<lt>FHE<gt>)
-with select().  You have to use sysread() instead.
+B<WARNING>: One should not attempt to mix buffered I/O (like read()
+or E<lt>FHE<gt>) with select(), except as permitted by POSIX, and even
+then only on POSIX systems.  You have to use sysread() instead.
 
 =item semctl ID,SEMNUM,CMD,ARG
 
 Calls the System V IPC function semctl.  If CMD is &IPC_STAT or
-&GETALL, then ARG must be a variable which will hold the returned
+&GETALL, then ARG must be a variable that will hold the returned
 semid_ds structure or semaphore value array.  Returns like ioctl: the
 undefined value for error, "0 but true" for zero, or the actual return
 value otherwise.
@@ -2984,7 +3105,7 @@ right end.
 =item shmctl ID,CMD,ARG
 
 Calls the System V IPC function shmctl.  If CMD is &IPC_STAT, then ARG
-must be a variable which will hold the returned shmid_ds structure.
+must be a variable that will hold the returned shmid_ds structure.
 Returns like ioctl: the undefined value for error, "0 but true" for
 zero, or the actual return value otherwise.
 
@@ -2999,7 +3120,7 @@ segment id, or the undefined value if there is an error.
 
 Reads or writes the System V shared memory segment ID starting at
 position POS for size SIZE by attaching to it, copying in/out, and
-detaching from it.  When reading, VAR must be a variable which will
+detaching from it.  When reading, VAR must be a variable that will
 hold the data read.  When writing, if STRING is too long, only SIZE
 bytes are used; if STRING is too short, nulls are written to fill out
 SIZE bytes.  Return TRUE if successful, or FALSE if there is an error.
@@ -3008,6 +3129,16 @@ SIZE bytes.  Return TRUE if successful, or FALSE if there is an error.
 
 Shuts down a socket connection in the manner indicated by HOW, which
 has the same interpretation as in the system call of the same name.
+
+    shutdown(SOCKET, 0);                # I/we have stopped reading data
+    shutdown(SOCKET, 1);                # I/we have stopped writing data
+    shutdown(SOCKET, 2);                # I/we have stopped using this socket
+
+This is useful with sockets when you want to tell the other
+side you're done writing but not done reading, or vice versa.
+It's also a more insistent form of close because it also 
+disables the filedescriptor in any forked copies in other
+processes.
 
 =item sin EXPR
 
@@ -3033,7 +3164,9 @@ using alarm().
 
 On some older systems, it may sleep up to a full second less than what
 you requested, depending on how it counts seconds.  Most modern systems
-always sleep the full amount.
+always sleep the full amount.  They may appear to sleep longer than that,
+however, because your process might not be scheduled right away in a
+busy multitasking system.
 
 For delays of finer granularity than one second, you may use Perl's
 syscall() interface to access setitimer(2) if your system supports it,
@@ -3054,6 +3187,16 @@ Creates an unnamed pair of sockets in the specified domain, of the
 specified type.  DOMAIN, TYPE, and PROTOCOL are specified the same as
 for the system call of the same name.  If unimplemented, yields a fatal
 error.  Returns TRUE if successful.
+
+Some systems defined pipe() in terms of socketpair, in which a call
+to C<pipe(Rdr, Wtr)> is essentially:
+
+    use Socket;
+    socketpair(Rdr, Wtr, AF_UNIX, SOCK_STREAM, PF_UNSPEC);
+    shutdown(Rdr, 1);        # no more writing for reader
+    shutdown(Wtr, 0);        # no more reading for writer
+
+See L<perlipc> for an example of socketpair use.
 
 =item sort SUBNAME LIST
 
@@ -3186,8 +3329,8 @@ sanity checks in the interest of speed.
 =item splice ARRAY,OFFSET
 
 Removes the elements designated by OFFSET and LENGTH from an array, and
-replaces them with the elements of LIST, if any.  In a list context,
-returns the elements removed from the array.  In a scalar context,
+replaces them with the elements of LIST, if any.  In list context,
+returns the elements removed from the array.  In scalar context,
 returns the last element removed, or C<undef> if no elements are
 removed.  The array grows or shrinks as necessary.  If LENGTH is
 omitted, removes everything from OFFSET onward.  The following
@@ -3197,13 +3340,13 @@ equivalences hold (assuming C<$[ == 0>):
     pop(@a)		splice(@a,-1)
     shift(@a)		splice(@a,0,1)
     unshift(@a,$x,$y)	splice(@a,0,0,$x,$y)
-    $a[$x] = $y		splice(@a,$x,1,$y);
+    $a[$x] = $y		splice(@a,$x,1,$y)
 
 Example, assuming array lengths are passed before arrays:
 
     sub aeq {	# compare two list values
-	local(@a) = splice(@_,0,shift);
-	local(@b) = splice(@_,0,shift);
+	my(@a) = splice(@_,0,shift);
+	my(@b) = splice(@_,0,shift);
 	return 0 unless @a == @b;	# same len?
 	while (@a) {
 	    return 0 if pop(@a) ne pop(@b);
@@ -3220,19 +3363,21 @@ Example, assuming array lengths are passed before arrays:
 
 =item split
 
-Splits a string into an array of strings, and returns it.
+Splits a string into an array of strings, and returns it.  By default,
+empty leading fields are preserved, and empty trailing ones are deleted.
 
-If not in a list context, returns the number of fields found and splits into
-the @_ array.  (In a list context, you can force the split into @_ by
+If not in list context, returns the number of fields found and splits into
+the @_ array.  (In list context, you can force the split into @_ by
 using C<??> as the pattern delimiters, but it still returns the list
-value.)  The use of implicit split to @_ is deprecated, however.
+value.)  The use of implicit split to @_ is deprecated, however, because
+it clobbers your subroutine arguments.
 
 If EXPR is omitted, splits the $_ string.  If PATTERN is also omitted,
 splits on whitespace (after skipping any leading whitespace).  Anything
 matching PATTERN is taken to be a delimiter separating the fields.  (Note
 that the delimiter may be longer than one character.)
 
-If LIMIT is specified and is positive, splits into no more than that
+If LIMIT is specified and positive, splits into no more than that
 many fields (though it may split into fewer).  If LIMIT is unspecified
 or zero, trailing null fields are stripped (which potential users
 of pop() would do well to remember).  If LIMIT is negative, it is
@@ -3286,11 +3431,10 @@ really does a C<split(' ', $_)> internally.
 
 Example:
 
-    open(passwd, '/etc/passwd');
-    while (<passwd>) {
-	($login, $passwd, $uid, $gid, $gcos,
-	    $home, $shell) = split(/:/);
-	...
+    open(PASSWD, '/etc/passwd');
+    while (<PASSWD>) {
+	($login, $passwd, $uid, $gid, $gcos,$home, $shell) = split(/:/);
+	#...
     }
 
 (Note that $shell above will still have a newline on it.  See L</chop>,
@@ -3302,7 +3446,7 @@ Returns a string formatted by the usual printf conventions of the
 C library function sprintf().  See L<sprintf(3)> or L<printf(3)>
 on your system for an explanation of the general principles.
 
-Perl does all of its own sprintf() formatting -- it emulates the C
+Perl does its own sprintf() formatting -- it emulates the C
 function sprintf(), but it doesn't use it (except for floating-point
 numbers, and even then only the standard modifiers are allowed).  As a
 result, any non-standard extensions in your local sprintf() are not
@@ -3485,7 +3629,7 @@ the rarest character is selected, based on some static frequency tables
 constructed from some C programs and English text.  Only those places
 that contain this "rarest" character are examined.)
 
-For example, here is a loop which inserts index producing entries
+For example, here is a loop that inserts index producing entries
 before any line containing a certain pattern:
 
     while (<>) {
@@ -3493,11 +3637,11 @@ before any line containing a certain pattern:
 	print ".IX foo\n" if /\bfoo\b/;
 	print ".IX bar\n" if /\bbar\b/;
 	print ".IX blurfl\n" if /\bblurfl\b/;
-	...
+	# ...
 	print;
     }
 
-In searching for /\bfoo\b/, only those locations in $_ that contain "f"
+In searching for C</\bfoo\b/>, only those locations in $_ that contain "f"
 will be looked at, because "f" is rarer than "o".  In general, this is
 a big win except in pathological cases.  The only question is whether
 it saves you more time than it took to build the linked list in the
@@ -3549,7 +3693,7 @@ that far from the end of the string.  If LEN is omitted, returns
 everything to the end of the string.  If LEN is negative, leaves that
 many characters off the end of the string.
 
-If you specify a substring which is partly outside the string, the part
+If you specify a substring that is partly outside the string, the part
 within the string is returned.    If the substring is totally outside
 the string a warning is produced.
 
@@ -3573,7 +3717,7 @@ Returns 1 for success, 0 otherwise.  On systems that don't support
 symbolic links, produces a fatal error at run time.  To check for that,
 use eval:
 
-    $symlink_exists = (eval {symlink("","")};, $@ eq '');
+    $symlink_exists =  eval { symlink("",""); 1 };
 
 =item syscall LIST
 
@@ -3589,7 +3733,7 @@ because Perl has to assume that any string pointer might be written
 through.  If your
 integer arguments are not literals and have never been interpreted in a
 numeric context, you may need to add 0 to them to force them to look
-like numbers.
+like numbers.  This emulates the syswrite() function (or vice versa):
 
     require 'syscall.ph';		# may need to run h2ph
     $s = "hi there\n";
@@ -3624,11 +3768,26 @@ system-dependent; they are available via the standard module C<Fcntl>.
 However, for historical reasons, some values are universal: zero means
 read-only, one means write-only, and two means read/write.
 
-If the file named by FILENAME does not exist and the C<open> call
-creates it (typically because MODE includes the O_CREAT flag), then
-the value of PERMS specifies the permissions of the newly created
-file.  If PERMS is omitted, the default value is 0666, which allows
-read and write for all.  This default is reasonable: see C<umask>.
+If the file named by FILENAME does not exist and the C<open> call creates
+it (typically because MODE includes the O_CREAT flag), then the value of
+PERMS specifies the permissions of the newly created file.  If you omit
+the PERMS argument to C<sysopen>, Perl uses the octal value C<0666>.
+These permission values need to be in octal, and are modified by your
+process's current C<umask>.  The C<umask> value is a number representing
+disabled permissions bits--if your C<umask> were 027 (group can't write;
+others can't read, write, or execute), then passing C<sysopen> 0666 would
+create a file with mode 0640 (C<0666 &~ 027> is 0640).
+
+If you find this C<umask> talk confusing, here's some advice: supply a
+creation mode of 0666 for regular files and one of 0777 for directories
+(in C<mkdir>) and executable files.  This gives users the freedom of
+choice: if they want protected files, they might choose process umasks
+of 022, 027, or even the particularly antisocial mask of 077.  Programs
+should rarely if ever make policy decisions better left to the user.
+The exception to this is when writing files that should be kept private:
+mail files, web browser cookies, I<.rhosts> files, and so on.  In short,
+seldom if ever use 0644 as argument to C<sysopen> because that takes
+away the user's option to have a more permissive umask.  Better to omit it.
 
 The IO::File module provides a more object-oriented approach, if you're
 into that kind of thing.
@@ -3692,40 +3851,16 @@ program they're running doesn't actually interrupt your program.
     system(@args) == 0
 	 or die "system @args failed: $?"
 
-Here's a more elaborate example of analysing the return value from
-system() on a Unix system to check for all possibilities, including for
-signals and core dumps.
+You can check all the failure possibilities by inspecting
+C<$?> like this:
 
-    $! = 0;
-    $rc = system @args;
-    printf "system(%s) returned %#04x: ", "@args", $rc;
-    if ($rc == 0) {
-	print "ran with normal exit\n";
-    }
-    elsif ($rc == 0xff00) {
-	# Note that $! can be an empty string if the command that
-	# system() tried to execute was not found, not executable, etc.
-	# These errors occur in the child process after system() has
-	# forked, so the errno value is not visible in the parent.
-	printf "command failed: %s\n", ($! || "Unknown system() error");
-    }
-    elsif (($rc & 0xff) == 0) {
-	$rc >>= 8;
-	print "ran with non-zero exit status $rc\n";
-    }
-    else {
-	print "ran with ";
-	if ($rc &   0x80) {
-	    $rc &= ~0x80;
-	    print "core dump from ";
-	}
-	print "signal $rc\n"
-    }
-    $ok = ($rc != 0);
+    $exit_value  = $? >> 8;
+    $signal_num  = $? & 127;
+    $dumped_core = $? & 128;
 
 When the arguments get executed via the system shell, results will
 be subject to its quirks and capabilities.  See L<perlop/"`STRING`">
-for details.
+and L</exec> for details.
 
 =item syswrite FILEHANDLE,SCALAR,LENGTH,OFFSET
 
@@ -3819,7 +3954,7 @@ For further details see L<perltie>, L<tied VARIABLE>.
 =item tied VARIABLE
 
 Returns a reference to the object underlying VARIABLE (the same value
-that was originally returned by the tie() call which bound the variable
+that was originally returned by the tie() call that bound the variable
 to a package.)  Returns the undefined value if VARIABLE isn't tied to a
 package.
 
@@ -3904,6 +4039,8 @@ parameter.  Examples:
     select undef, undef, undef, 0.25;
     ($a, $b, undef, $c) = &foo;       # Ignore third value returned
 
+Note that this is a unary operator, not a list operator.
+
 =item unlink LIST
 
 =item unlink
@@ -3926,12 +4063,12 @@ If LIST is omitted, uses $_.
 
 Unpack does the reverse of pack: it takes a string representing a
 structure and expands it out into a list value, returning the array
-value.  (In a scalar context, it returns merely the first value
+value.  (In scalar context, it returns merely the first value
 produced.)  The TEMPLATE has the same format as in the pack function.
 Here's a subroutine that does substring:
 
     sub substr {
-	local($what,$where,$howmuch) = @_;
+	my($what,$where,$howmuch) = @_;
 	unpack("x$where a$howmuch", $what);
     }
 
@@ -3989,7 +4126,7 @@ If the first argument to C<use> is a number, it is treated as a version
 number instead of a module name.  If the version of the Perl interpreter
 is less than VERSION, then an error message is printed and Perl exits
 immediately.  This is often useful if you need to check the current
-Perl version before C<use>ing library modules which have changed in
+Perl version before C<use>ing library modules that have changed in
 incompatible ways from older versions of Perl.  (We try not to do
 this more than we have to.)
 
@@ -4010,7 +4147,7 @@ If you don't want your namespace altered, explicitly supply an empty list:
 
 That is exactly equivalent to
 
-    BEGIN { require Module; }
+    BEGIN { require Module }
 
 If the VERSION argument is present between Module and LIST, then the
 C<use> will call the VERSION method in class Module with the given
@@ -4028,9 +4165,10 @@ are also implemented this way.  Currently implemented pragmas are:
     use strict  qw(subs vars refs);
     use subs    qw(afunc blurfl);
 
-These pseudo-modules import semantics into the current block scope, unlike
-ordinary modules, which import symbols into the current package (which are
-effective through the end of the file).
+Some of these these pseudo-modules import semantics into the current
+block scope (like C<strict> or C<integer>, unlike ordinary modules,
+which import symbols into the current package (which are effective
+through the end of the file).
 
 There's a corresponding "no" command that unimports meanings imported
 by use, i.e., it calls C<unimport Module LIST> instead of C<import>.
@@ -4115,7 +4253,7 @@ of the deceased process, or -1 if there is no such child process.  The
 status is returned in C<$?>.  If you say
 
     use POSIX ":sys_wait_h";
-    ...
+    #...
     waitpid(-1,&WNOHANG);
 
 then you can do a non-blocking wait for any process.  Non-blocking wait
@@ -4124,6 +4262,8 @@ wait4(2) system calls.  However, waiting for a particular pid with
 FLAGS of 0 is implemented everywhere.  (Perl emulates the system call
 by remembering the status values of processes that have exited but have
 not been harvested by the Perl script yet.)
+
+See L<perlipc> for other examples.
 
 =item wantarray
 
@@ -4184,7 +4324,7 @@ examples.
 
 =item write
 
-Writes a formatted record (possibly multi-line) to the specified file,
+Writes a formatted record (possibly multi-line) to the specified FILEHANDLE,
 using the format associated with that file.  By default the format for
 a file is the one having the same name as the filehandle, but the
 format for the current output channel (see the select() function) may be set

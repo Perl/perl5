@@ -25,7 +25,7 @@ comments.
 
     # turn the line into the first word, a colon, and the
     # number of characters on the rest of the line
-    s/^(\w+)(.*)/ lc($1) . ":" . length($2) /ge;
+    s/^(\w+)(.*)/ lc($1) . ":" . length($2) /meg;
 
 =item Comments Inside the Regexp
 
@@ -69,8 +69,9 @@ delimiter within the pattern:
 
 =head2 I'm having trouble matching over more than one line.  What's wrong?
 
-Either you don't have newlines in your string, or you aren't using the
-correct modifier(s) on your pattern.
+Either you don't have more than one line in the string you're looking at
+(probably), or else you aren't using the correct modifier(s) on your
+pattern (possibly).
 
 There are many ways to get multiline data into a string.  If you want
 it to happen automatically while reading input, you'll want to set $/
@@ -94,7 +95,7 @@ record read in.
 
     $/ = '';  		# read in more whole paragraph, not just one line
     while ( <> ) {
-	while ( /\b(\w\S+)(\s+\1)+\b/gi ) {
+	while ( /\b([\w'-]+)(\s+\1)+\b/gi ) {  	# word starts alpha
 	    print "Duplicate $1 at paragraph $.\n";
 	}
     }
@@ -132,6 +133,16 @@ If you wanted text and not lines, you would use
 But if you want nested occurrences of C<START> through C<END>, you'll
 run up against the problem described in the question in this section
 on matching balanced text.
+
+Here's another example of using C<..>:
+
+    while (<>) {
+        $in_header =   1  .. /^$/;
+        $in_body   = /^$/ .. eof();
+	# now choose between them
+    } continue {
+	reset if eof();		# fix $.
+    } 
 
 =head2 I put a regular expression into $/ but it didn't work. What's wrong?
 
@@ -211,7 +222,7 @@ This prints:
 
     this is a SUcCESS case
 
-=head2 How can I make C<\w> match accented characters?
+=head2 How can I make C<\w> match national character sets?
 
 See L<perllocale>.
 
@@ -600,6 +611,18 @@ all mixed.
 
 =head1 AUTHOR AND COPYRIGHT
 
-Copyright (c) 1997 Tom Christiansen and Nathan Torkington.
-All rights reserved.  See L<perlfaq> for distribution information.
+Copyright (c) 1997, 1998 Tom Christiansen and Nathan Torkington.
+All rights reserved.
 
+When included as part of the Standard Version of Perl, or as part of
+its complete documentation whether printed or otherwise, this work
+may be distributed only under the terms of Perl's Artistic License.
+Any distribution of this file or derivatives thereof I<outside>
+of that package require that special arrangements be made with
+copyright holder.
+
+Irrespective of its distribution, all code examples in this file
+are hereby placed into the public domain.  You are permitted and
+encouraged to use this code in your own programs for fun
+or for profit as you see fit.  A simple comment in the code giving
+credit would be courteous but is not required.
