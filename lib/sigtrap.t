@@ -8,9 +8,7 @@ BEGIN {
 use strict;
 use Config;
 
-my $can_catch_kill = 0;
-
-use Test::More tests => 18;
+use Test::More tests => 15;
 
 use_ok( 'sigtrap' );
 
@@ -69,19 +67,6 @@ like( $out->read, qr/^Installing handler/, 'does it talk with $Verbose set?' );
 eval { sigtrap::handler_die('FAKE') };
 like( $@, qr/^Caught a SIGFAKE/, 'does handler_die() croak?' );
  
-SKIP: {
-	skip( 'kill not implemented', 3) unless $can_catch_kill and
-		$Config{sig_name} =~ 'ABRT';
-
-	$out = tie *STDERR, 'TieOut';
-	my $line = __LINE__ + 1;
-	eval { sigtrap::handler_traceback('kudra') };
-	is( $@, '', 'handler_traceback() should not die' );
-	my $trace = $out->read();
-	like( $trace, qr/^Caught a SIGkudra/, 'check traceback message' );
-	like( $trace, qr/eval.+sigtrap.t.+$line/, 'check trace in traceback' );
-} # end of SKIP
-
 package TieOut;
 
 sub TIEHANDLE {
