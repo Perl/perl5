@@ -622,7 +622,7 @@ I32 *flagp;
     char *origparse = regparse;
     char *maxpos;
     I32 min;
-    I32 max = 32767;
+    I32 max = REG_INFTY;
 
     ret = regatom(&flags);
     if (ret == NULL) {
@@ -664,7 +664,7 @@ I32 *flagp;
 		maxpos = regparse;
 	    max = atoi(maxpos);
 	    if (!max && *maxpos != '0')
-		max = 32767;		/* meaning "infinity" */
+		max = REG_INFTY;		/* meaning "infinity" */
 	    regparse = next;
 	    nextchar();
 

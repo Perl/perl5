@@ -176,3 +176,19 @@ esac
 #     assembler of the form:
 #          (warning) Use of GR3 when frame >= 8192 may cause conflict.
 #     These warnings are harmless and can be safely ignored.
+
+#
+# cppstdin and cpprun need the -Aa option if you use the unbundled 
+# ANSI C compiler (*not* the bundled K&R compiler or gcc)
+# [XXX this should be enabled automatically by Configure, but isn't yet.]
+#
+case "$cppstdin" in
+'')
+    case "$ccflags" in
+    *-Aa*)
+	cpprun="${cc:-cc} -E -Aa"
+	cppstdin="$cpprun"
+	;;
+    esac
+    ;;
+esac

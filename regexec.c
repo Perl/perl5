@@ -1078,7 +1078,7 @@ char *prog;
 	    goto repeat;
 	case STAR:
 	    ln = 0;
-	    n = 32767;
+	    n = REG_INFTY;
 	    scan = NEXTOPER(scan);
 	    goto repeat;
 	case PLUS:
@@ -1087,7 +1087,7 @@ char *prog;
 	    * when we know what character comes next.
 	    */
 	    ln = 1;
-	    n = 32767;
+	    n = REG_INFTY;
 	    scan = NEXTOPER(scan);
 	  repeat:
 	    if (regkind[(U8)OP(next)] == EXACT) {
@@ -1106,7 +1106,7 @@ char *prog;
 		minmod = 0;
 		if (ln && regrepeat(scan, ln) < ln)
 		    sayNO;
-		while (n >= ln || (n == 32767 && ln > 0)) { /* ln overflow ? */
+		while (n >= ln || (n == REG_INFTY && ln > 0)) { /* ln overflow ? */
 		    /* If it could work, try it. */
 		    if (c1 == -1000 ||
 			UCHARAT(reginput) == c1 ||
@@ -1209,7 +1209,7 @@ I32 max;
     register char *loceol = regeol;
 
     scan = reginput;
-    if (max != 32767 && max < loceol - scan)
+    if (max != REG_INFTY && max < loceol - scan)
       loceol = scan + max;
     opnd = OPERAND(p);
     switch (OP(p)) {

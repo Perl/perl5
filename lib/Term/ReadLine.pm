@@ -336,6 +336,7 @@ sub get_line {
   my $self = shift;
   $self->Tk_loop if $Term::ReadLine::toloop && defined &Tk::DoOneEvent;
   my $in = $self->IN;
+  local ($/) = "\n";
   return scalar <$in>;
 }
 

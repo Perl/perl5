@@ -420,6 +420,7 @@ lib/User/grent.pm	By-name interface to Perl's builtin getgr*
 lib/User/pwent.pm	By-name interface to Perl's builtin getpw*
 lib/abbrev.pl		An abbreviation table builder
 lib/assert.pl		assertion and panic with stack trace
+lib/attrs.pm		attrs extension Perl module (stub)
 lib/autouse.pm		Load and call a function only when it's used
 lib/base.pm		Establish IS-A relationship at compile time
 lib/bigfloat.pl		An arbitrary precision floating point package
