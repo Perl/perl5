@@ -2,8 +2,7 @@
 
 BEGIN {
 	chdir 't' if -d 't';
-#	@INC = '../lib';
-push @INC, '../lib';
+	@INC = '../lib';
 }
 
 use Test::More;
@@ -12,7 +11,7 @@ BEGIN {
 	if ($^O =~ /MSWin32/i) {
 		plan tests => 44;
 	} else {
-		plan skip_all => 'Test irrelevant outside of MSWin32';
+		plan skip_all => 'This is not Win32';
 	}
 }
 
