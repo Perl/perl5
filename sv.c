@@ -3609,7 +3609,7 @@ sv_2mortal(register SV *sv)
     if (!sv)
 	return sv;
     if (SvREADONLY(sv) && SvIMMORTAL(sv))
-	return;
+	return sv;
     if (++tmps_ix >= tmps_max)
 	sv_mortalgrow();
     tmps_stack[tmps_ix] = sv;

@@ -25,7 +25,7 @@ See L<perlmodlib/Pragmatic Modules>.
 =cut
 
 my %bitmask = (
-taint => 0x00001000
+taint => 0x00100000
 );
 
 sub bits {

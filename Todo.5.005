@@ -63,3 +63,5 @@ Documentation
     document Win32 choices
     rework INSTALL to reflect changes in installation structure
     spot-check all new modules for completeness
+    better docs for pack()/unpack()
+    add perlport.pod

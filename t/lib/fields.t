@@ -6,6 +6,8 @@ use vars qw($DEBUG);
 my $w;
 
 BEGIN {
+   chdir 't' if -d 't';
+   @INC = '../lib' if -d '../lib';
    $SIG{__WARN__} = sub {
        if ($_[0] =~ /^Hides field 'b1' in base class/) {
            $w++;
