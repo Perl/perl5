@@ -727,6 +727,7 @@ sub _downcopy {
     last if $writable eq "";
     $self->_seekb($pos);
     $self->_write_record($writable);
+    last if $last_read_was_short && $data eq "";
     $len -= $readsize if defined $len;
     $pos += $readsize;
   }
