@@ -483,3 +483,17 @@ sub re {
     $re;
 }
 EXPECT
+########
+use strict;
+my $foo = "ZZZ\n";
+END { print $foo }
+EXPECT
+ZZZ
+########
+eval '
+use strict;
+my $foo = "ZZZ\n";
+END { print $foo }
+';
+EXPECT
+ZZZ

@@ -2619,7 +2619,7 @@ doeval(int gimme, OP** startop)
     SAVESPTR(PL_compcv);
     PL_compcv = (CV*)NEWSV(1104,0);
     sv_upgrade((SV *)PL_compcv, SVt_PVCV);
-    CvUNIQUE_on(PL_compcv);
+    CvEVAL_on(PL_compcv);
 #ifdef USE_THREADS
     CvOWNER(PL_compcv) = 0;
     New(666, CvMUTEXP(PL_compcv), 1, perl_mutex);

@@ -358,8 +358,8 @@ pad_findmy(char *name)
     /* Check if if we're compiling an eval'', and adjust seq to be the
      * eval's seq number.  This depends on eval'' having a non-null
      * CvOUTSIDE() while it is being compiled.  The eval'' itself is
-     * identified by CvUNIQUE being set and CvGV being null. */
-    if (outside && CvUNIQUE(PL_compcv) && !CvGV(PL_compcv) && cxstack_ix >= 0) {
+     * identified by CvEVAL being true and CvGV being null. */
+    if (outside && CvEVAL(PL_compcv) && !CvGV(PL_compcv) && cxstack_ix >= 0) {
 	cx = &cxstack[cxstack_ix];
 	if (CxREALEVAL(cx))
 	    seq = cx->blk_oldcop->cop_seq;

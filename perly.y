@@ -307,7 +307,7 @@ startformsub:	/* NULL */	/* start a format subroutine scope */
 subname	:	WORD	{ STRLEN n_a; char *name = SvPV(((SVOP*)$1)->op_sv,n_a);
 			  if (strEQ(name, "BEGIN") || strEQ(name, "END")
 			      || strEQ(name, "INIT"))
-			      CvUNIQUE_on(PL_compcv);
+			      CvSPECIAL_on(PL_compcv);
 			  $$ = $1; }
 	;
 
@@ -327,7 +327,7 @@ package :	PACKAGE WORD ';'
 	;
 
 use	:	USE startsub
-			{ CvUNIQUE_on(PL_compcv); /* It's a BEGIN {} */ }
+			{ CvSPECIAL_on(PL_compcv); /* It's a BEGIN {} */ }
 		    WORD WORD listexpr ';'
 			{ utilize($1, $2, $4, $5, $6); }
 	;
