@@ -20,6 +20,8 @@
 #define PERL_IN_HV_C
 #include "perl.h"
 
+#define HV_MAX_LENGTH_BEFORE_SPLIT 4
+
 STATIC HE*
 S_new_he(pTHX)
 {
@@ -277,6 +279,10 @@ S_hv_fetch_flags(pTHX_ HV *hv, const char *key, I32 klen, I32 lval, int flags)
 
     if (HvREHASH(hv)) {
 	PERL_HASH_INTERNAL(hash, key, klen);
+	/* Yes, you do need this even though you are not "storing" because
+	   you can flip the flags below if doing an lval lookup.  (And that
+	   was put in to give the semantics Andreas was expecting.)  */
+	flags |= HVhek_REHASH;
     } else {
 	PERL_HASH(hash, key, klen);
     }
@@ -311,7 +317,7 @@ S_hv_fetch_flags(pTHX_ HV *hv, const char *key, I32 klen, I32 lval, int flags)
             }
             else
                 HeKFLAGS(entry) = flags;
-            if (flags)
+            if (flags & HVhek_ENABLEHVKFLAGS)
                 HvHASKFLAGS_on(hv);
         }
         if (flags & HVhek_FREEKEY)
@@ -450,6 +456,10 @@ Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
 
     if (HvREHASH(hv)) {
 	PERL_HASH_INTERNAL(hash, key, klen);
+	/* Yes, you do need this even though you are not "storing" because
+	   you can flip the flags below if doing an lval lookup.  (And that
+	   was put in to give the semantics Andreas was expecting.)  */
+	flags |= HVhek_REHASH;
     } else if (!hash) {
 	PERL_HASH(hash, key, klen);
     }
@@ -481,7 +491,7 @@ Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
             }
             else
                 HeKFLAGS(entry) = flags;
-            if (flags)
+            if (flags & HVhek_ENABLEHVKFLAGS)
                 HvHASKFLAGS_on(hv);
         }
 	if (key != keysave)
@@ -597,7 +607,7 @@ Perl_hv_store_flags(pTHX_ HV *hv, const char *key, I32 klen, SV *val,
                  register U32 hash, int flags)
 {
     register XPVHV* xhv;
-    register I32 i;
+    register U32 n_links;
     register HE *entry;
     register HE **oentry;
 
@@ -644,9 +654,10 @@ Perl_hv_store_flags(pTHX_ HV *hv, const char *key, I32 klen, SV *val,
 
     /* oentry = &(HvARRAY(hv))[hash & (I32) HvMAX(hv)]; */
     oentry = &((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
-    i = 1;
 
-    for (entry = *oentry; entry; i=0, entry = HeNEXT(entry)) {
+    n_links = 0;
+
+    for (entry = *oentry; entry; ++n_links, entry = HeNEXT(entry)) {
 	if (HeHASH(entry) != hash)		/* strings can't be equal */
 	    continue;
 	if (HeKLEN(entry) != (I32)klen)
@@ -713,9 +724,16 @@ Perl_hv_store_flags(pTHX_ HV *hv, const char *key, I32 klen, SV *val,
     *oentry = entry;
 
     xhv->xhv_keys++; /* HvKEYS(hv)++ */
-    if (i) {				/* initial entry? */
+    if (!n_links) {				/* initial entry? */
 	xhv->xhv_fill++; /* HvFILL(hv)++ */
-    } else if (xhv->xhv_keys > (IV)xhv->xhv_max /* HvKEYS(hv) > HvMAX(hv) */) {
+    } else if ((xhv->xhv_keys > (IV)xhv->xhv_max)
+	       || ((n_links > HV_MAX_LENGTH_BEFORE_SPLIT) && !HvREHASH(hv))) {
+	/* Use the old HvKEYS(hv) > HvMAX(hv) condition to limit bucket
+	   splits on a rehashed hash, as we're not going to split it again,
+	   and if someone is lucky (evil) enough to get all the keys in one
+	   list they could exhaust our memory as we repeatedly double the
+	   number of buckets on every entry. Linear search feels a less worse
+	   thing to do.  */
         hsplit(hv);
     }
 
@@ -757,7 +775,7 @@ Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, U32 hash)
     XPVHV* xhv;
     char *key;
     STRLEN klen;
-    I32 i;
+    U32 n_links;
     HE *entry;
     HE **oentry;
     bool is_utf8;
@@ -820,9 +838,9 @@ Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, U32 hash)
 
     /* oentry = &(HvARRAY(hv))[hash & (I32) HvMAX(hv)]; */
     oentry = &((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
-    i = 1;
+    n_links = 0;
     entry = *oentry;
-    for (; entry; i=0, entry = HeNEXT(entry)) {
+    for (; entry; ++n_links, entry = HeNEXT(entry)) {
 	if (HeHASH(entry) != hash)		/* strings can't be equal */
 	    continue;
 	if (HeKLEN(entry) != (I32)klen)
@@ -876,10 +894,17 @@ Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, U32 hash)
     *oentry = entry;
 
     xhv->xhv_keys++; /* HvKEYS(hv)++ */
-    if (i) {				/* initial entry? */
+    if (!n_links) {				/* initial entry? */
 	xhv->xhv_fill++; /* HvFILL(hv)++ */
-    } else if (xhv->xhv_keys > (IV)xhv->xhv_max /* HvKEYS(hv) > HvMAX(hv) */) {
-	hsplit(hv);
+    } else if ((xhv->xhv_keys > (IV)xhv->xhv_max)
+	       || ((n_links > HV_MAX_LENGTH_BEFORE_SPLIT) && !HvREHASH(hv))) {
+	/* Use only the old HvKEYS(hv) > HvMAX(hv) condition to limit bucket
+	   splits on a rehashed hash, as we're not going to split it again,
+	   and if someone is lucky (evil) enough to get all the keys in one
+	   list they could exhaust our memory as we repeatedly double the
+	   number of buckets on every entry. Linear search feels a less worse
+	   thing to do.  */
+        hsplit(hv);
     }
 
     return entry;
@@ -1501,7 +1526,7 @@ S_hsplit(pTHX_ HV *hv)
 
 
     /* Pick your policy for "hashing isn't working" here:  */
-    if (longest_chain < 8 || longest_chain * 2 < HvTOTALKEYS(hv)
+    if (longest_chain <= HV_MAX_LENGTH_BEFORE_SPLIT /* split worked?  */
 	|| HvREHASH(hv)) {
 	return;
     }
@@ -1513,7 +1538,7 @@ S_hsplit(pTHX_ HV *hv)
     }
 
     /* Awooga. Awooga. Pathological data.  */
-    /*PerlIO_printf(PerlIO_stderr(), "Awooga %d of %d with %d/%d buckets\n",
+    /*PerlIO_printf(PerlIO_stderr(), "%p %d of %d with %d/%d buckets\n", hv,
       longest_chain, HvTOTALKEYS(hv), HvFILL(hv),  1+HvMAX(hv));*/
 
     ++newsize;
@@ -1523,7 +1548,6 @@ S_hsplit(pTHX_ HV *hv)
     xhv->xhv_fill = 0;
     HvSHAREKEYS_off(hv);
     HvREHASH_on(hv);
-    HvHASKFLAGS_on(hv);
 
     aep = (HE **) xhv->xhv_array;
 
@@ -2086,6 +2110,9 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
 	hv_free_ent(hv, oldentry);
     }
 
+    /*if (HvREHASH(hv) && entry && !HeKREHASH(entry))
+      PerlIO_printf(PerlIO_stderr(), "Awooga %p %p\n", hv, entry);*/
+
     xhv->xhv_eiter = entry; /* HvEITER(hv) = entry */
     return entry;
 }
@@ -2375,6 +2402,9 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
 
     if (!(Svp = hv_fetch(PL_strtab, str, len, FALSE)))
 	hv_store(PL_strtab, str, len, Nullsv, hash);
+
+	Can't rehash the shared string table, so not sure if it's worth
+	counting the number of entries in the linked list
     */
     xhv = (XPVHV*)SvANY(PL_strtab);
     /* assert(xhv_array != 0) */
