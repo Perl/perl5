@@ -22,5 +22,5 @@ $req->header("If-None-Match" => $etag);
 $res = $ua->request($req);
 print $res->as_string;
 
-print "not " unless $res->code eq "304" && $res->header("Client-Request-Num") == 2;
+print "not " unless $res->code eq "304" && $res->header("Client-Response-Num") == 2;
 print "ok 2\n";

@@ -16,7 +16,7 @@ use IO::Socket;
 use Net::Cmd;
 use Net::Config;
 
-$VERSION = "2.17"; # $Id: //depot/libnet/Net/SMTP.pm#17 $
+$VERSION = "2.19"; # $Id: //depot/libnet/Net/SMTP.pm#20 $
 
 @ISA = qw(Net::Cmd IO::Socket::INET);
 
@@ -92,15 +92,35 @@ sub etrn {
 	$self->_ETRN(@_);
 }
 
+sub auth { # auth(username, password) by mengwong 20011106.  the only supported mechanism at this time is PLAIN.
+    # 
+    # my $auth = $smtp->supports("AUTH");
+    # $smtp->auth("username", "password") or die $smtp->message;
+    # 
+
+    require MIME::Base64;
+
+    my $self = shift;
+    my ($username, $password) = @_;
+    die "auth(username, password)" if not length $username;
+
+    my $mechanisms = $self->supports('AUTH',500,["Command unknown: 'AUTH'"]);
+    return unless defined $mechanisms;
+
+    if (not grep { uc $_ eq "PLAIN" } split ' ', $mechanisms) {
+	$self->set_status(500, ["PLAIN mechanism not supported; server supports $mechanisms"]);
+	return;
+    }
+    my $authstring = MIME::Base64::encode_base64(join "\0", ($username)x2, $password);
+    $authstring =~ s/\n//g; # wrap long lines
+
+    $self->_AUTH("PLAIN $authstring");
+}
+
 sub hello
 {
  my $me = shift;
- my $domain = shift ||
-	      eval {
-		    require Net::Domain;
-		    Net::Domain::hostfqdn();
-		   } ||
-		"";
+ my $domain = shift || "localhost.localdomain";
  my $ok = $me->_EHLO($domain);
  my @msg = $me->message;
 
@@ -376,6 +396,7 @@ sub _QUIT { shift->command("QUIT")->response()	    == CMD_OK }
 sub _DATA { shift->command("DATA")->response()	    == CMD_MORE } 
 sub _TURN { shift->unsupported(@_); } 			   	  
 sub _ETRN { shift->command("ETRN", @_)->response()  == CMD_OK }
+sub _AUTH { shift->command("AUTH", @_)->response()  == CMD_OK }   
 
 1;
 
@@ -444,7 +465,7 @@ known as mailhost:
 =item new Net::SMTP [ HOST, ] [ OPTIONS ]
 
 This is the constructor for a new Net::SMTP object. C<HOST> is the
-name of the remote host to which a SMTP connection is required.
+name of the remote host to which an SMTP connection is required.
 
 If C<HOST> is not given, then the C<SMTP_Host> specified in C<Net::Config>
 will be used.
@@ -502,6 +523,12 @@ normally not have to call it manually.
 =item etrn ( DOMAIN )
 
 Request a queue run for the DOMAIN given.
+
+=item auth ( USERNAME, PASSWORD )
+
+Attempt SASL authentication.  At this time only the PLAIN mechanism is supported.
+
+At some point in the future support for using Authen::SASL will be added
 
 =item mail ( ADDRESS [, OPTIONS] )
 
@@ -609,6 +636,6 @@ it under the same terms as Perl itself.
 
 =for html <hr>
 
-I<$Id: //depot/libnet/Net/SMTP.pm#17 $>
+I<$Id: //depot/libnet/Net/SMTP.pm#20 $>
 
 =cut

@@ -11,6 +11,7 @@ sub ok
 
     print "ok $no\n" if $ok ;
     print "not ok $no\n" unless $ok ;
+    printf "# Failed test at line %d\n", (caller)[2] unless $ok ;
 }
 
 sub writeFile
@@ -41,7 +42,7 @@ sub readFile
 
 my $Inc = '' ;
 foreach (@INC)
- { $Inc .= "-I$_ " }
+ { $Inc .= "-I'$_' " }
  
 my $Perl = '' ;
 $Perl = ($ENV{'FULLPERL'} or $^X or 'perl') ;

@@ -45,6 +45,6 @@ print "ok 1\n";
 
 #$res->content(""); print $res->as_string;
 
-print "not " unless $res->header("Client-Request-Num") == 2 &&
+print "not " unless $res->header("Client-Response-Num") == 2 &&
                     $res->header("Connection") eq "close";
 print "ok 2\n";

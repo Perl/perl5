@@ -41,13 +41,11 @@ Availability
 
 The latest copy of Compress::ZLib is available on CPAN
 
-    modules/by-module/Compress/Compress-Zlib-*
+    http://www.cpan.org/modules/by-module/Archive/Archive-Zip-*.tar.gz
 
 and zlib is available at
 
-    http://www.cdrom.com/pub/infozip/zlib/
-    ftp://ftp.uu.net/pub/archiving/zip/zlib*
-    ftp://swrinde.nde.swri.edu/pub/png/src/zlib*
+    http://www.gzip.org/zlib/
 
 
 Paul Marquess

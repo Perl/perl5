@@ -13,7 +13,7 @@ use Net::Cmd;
 use Carp;
 use Net::Config;
 
-$VERSION = "2.22"; # $Id: //depot/libnet/Net/POP3.pm#19 $
+$VERSION = "2.22"; # $Id: //depot/libnet/Net/POP3.pm#20 $
 
 @ISA = qw(Net::Cmd IO::Socket::INET);
 
@@ -417,7 +417,7 @@ Send the PASS command. Returns the number of messages in the mailbox.
 
 =item login ( [ USER [, PASS ]] )
 
-Send both the the USER and PASS commands. If C<PASS> is not given the
+Send both the USER and PASS commands. If C<PASS> is not given the
 C<Net::POP3> uses C<Net::Netrc> to lookup the password using the host
 and username. If the username is not specified then the current user name
 will be used.
@@ -520,6 +520,6 @@ it under the same terms as Perl itself.
 
 =for html <hr>
 
-I<$Id: //depot/libnet/Net/POP3.pm#19 $>
+I<$Id: //depot/libnet/Net/POP3.pm#20 $>
 
 =cut

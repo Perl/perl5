@@ -1,3 +1,20 @@
+#!perl -w
+
+my $zlib_ok;
+for (("", "live/", "t/live/")) {
+    if (-f $_ . "ZLIB_OK") {
+	$zlib_ok++;
+	last;
+    }
+}
+
+unless ($zlib_ok) {
+    print "1..0\n";
+    print "Apparently no working ZLIB installed\n";
+    exit;
+}
+
+
 print "1..4\n";
 
 use strict;
@@ -29,5 +46,3 @@ for my $te (undef, "", "deflate", "gzip", "trailers, deflate;q=0.4, identity;q=0
     $res->content("");
     print $res->as_string;
 }
-
-

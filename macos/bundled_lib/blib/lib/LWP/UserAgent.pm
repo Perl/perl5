@@ -1,4 +1,4 @@
-# $Id: UserAgent.pm,v 1.99 2001/10/26 18:05:22 gisle Exp $
+# $Id: UserAgent.pm,v 2.1 2001/12/11 21:11:29 gisle Exp $
 
 package LWP::UserAgent;
 use strict;
@@ -103,7 +103,7 @@ use vars qw(@ISA $VERSION);
 
 require LWP::MemberMixin;
 @ISA = qw(LWP::MemberMixin);
-$VERSION = sprintf("%d.%02d", q$Revision: 1.99 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%03d", q$Revision: 2.1 $ =~ /(\d+)\.(\d+)/);
 
 use HTTP::Request ();
 use HTTP::Response ();
@@ -284,11 +284,11 @@ sub send_request
     local($SIG{__DIE__});  # protect agains user defined die handlers
 
     # Check that we have a METHOD and a URL first
-    return HTTP::Response->new(&HTTP::Status::RC_BAD_REQUEST, "Method missing")
+    return _new_response($request, &HTTP::Status::RC_BAD_REQUEST, "Method missing")
 	unless $method;
-    return HTTP::Response->new(&HTTP::Status::RC_BAD_REQUEST, "URL missing")
+    return _new_response($request, &HTTP::Status::RC_BAD_REQUEST, "URL missing")
 	unless $url;
-    return HTTP::Response->new(&HTTP::Status::RC_BAD_REQUEST, "URL must be absolute")
+    return _new_response($request, &HTTP::Status::RC_BAD_REQUEST, "URL must be absolute")
 	unless $url->scheme;
 
     LWP::Debug::trace("$method $url");
@@ -332,8 +332,7 @@ sub send_request
       $protocol = eval { LWP::Protocol::create($scheme, $self) };
       if ($@) {
 	$@ =~ s/ at .* line \d+.*//s;  # remove file/line number
-
-	return HTTP::Response->new(&HTTP::Status::RC_NOT_IMPLEMENTED, $@);
+	return _new_response($request, &HTTP::Status::RC_NOT_IMPLEMENTED, $@);
       }
     }
 
@@ -463,7 +462,7 @@ sub request
 	}
 
 	$referral->url($referral_uri);
-	$referral->remove_header('Host');
+	$referral->remove_header('Host', 'Cookie');
 
 	return $response unless $self->redirect_ok($referral);
 
@@ -1123,6 +1122,14 @@ sub _need_proxy
     }
     LWP::Debug::debug('Not proxied');
     undef;
+}
+
+sub _new_response {
+    my($request, $code, $message) = @_;
+    my $response = HTTP::Response->new($code, $message);
+    $response->request($request);
+    $response->header("Client-Date" => HTTP::Date::time2str(time));
+    return $response;
 }
 
 1;

@@ -10,7 +10,7 @@ require Exporter;
 use vars qw(@ISA @EXPORT_OK);
 @ISA = 'Exporter';
 @EXPORT_OK = 'sort_file';
-$VERSION = '1.00';
+$VERSION = '1.01';
 
 sub sort_file {
     my @args = @_;
@@ -935,6 +935,10 @@ Exports C<sort_file> on request.
 
 =over 4
 
+=item v1.01, Monday, January 14, 2002
+
+Change license to be that of Perl.
+
 =item v1.00, Tuesday, November 13, 2001
 
 Long overdue release.
@@ -1060,14 +1064,14 @@ Hubert Toullec E<lt>Hubert.Toullec@wanadoo.frE<gt>.
 
 Chris Nandor E<lt>pudge@pobox.comE<gt>, http://pudge.net/
 
-Copyright (c) 1997-2001 Chris Nandor.  All rights reserved.  This program
-is free software; you can redistribute it and/or modify it under the terms
-of the Artistic License, distributed with Perl.
+Copyright (c) 1997-2002 Chris Nandor.  All rights reserved.  This program
+is free software; you can redistribute it and/or modify it under the same
+terms as Perl itself.
 
 
 =head1 VERSION
 
-v1.00, Tuesday, November 13, 2001
+v1.01, Monday, January 14, 2002
 
 
 =head1 SEE ALSO

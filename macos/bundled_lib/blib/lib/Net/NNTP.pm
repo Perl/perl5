@@ -14,7 +14,7 @@ use Carp;
 use Time::Local;
 use Net::Config;
 
-$VERSION = "2.20"; # $Id: //depot/libnet/Net/NNTP.pm#13 $
+$VERSION = "2.20"; # $Id: //depot/libnet/Net/NNTP.pm#14 $
 @ISA     = qw(Net::Cmd IO::Socket::INET);
 
 sub new
@@ -1016,7 +1016,7 @@ the beginning of the test string just inside the open square
 bracket.
 
 The final operation uses the backslash character to
-invalidate the special meaning of the a open square bracket C<[>,
+invalidate the special meaning of an open square bracket C<[>,
 the asterisk, backslash or the question mark. Two backslashes in
 sequence will result in the evaluation of the backslash as a
 character with no special meaning.
@@ -1064,6 +1064,6 @@ it under the same terms as Perl itself.
 
 =for html <hr>
 
-I<$Id: //depot/libnet/Net/NNTP.pm#13 $>
+I<$Id: //depot/libnet/Net/NNTP.pm#14 $>
 
 =cut

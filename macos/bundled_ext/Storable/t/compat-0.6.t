@@ -15,18 +15,7 @@
 # Baseline for first official release.
 #
 
-BEGIN {
-    chdir('t') if -d 't';    
-    @INC = '.'; 
-    push @INC, '../lib';
-    require Config; import Config;
-    if ($Config{'extensions'} !~ /\bStorable\b/) {
-        print "1..0 # Skip: Storable was not built\n";
-        exit 0;
-    }
-    require 'lib/st-dump.pl';
-}
-
+require 't/dump.pl';
 sub ok;
 
 print "1..8\n";
@@ -90,7 +79,7 @@ sub obj { $_[0]->{obj} }
 package main;
 
 my $is_EBCDIC = (ord('A') == 193) ? 1 : 0;
- 
+
 my $r = ROOT->make;
 
 my $data = '';
@@ -111,16 +100,13 @@ if (!$is_EBCDIC) {			# ASCII machine
 
 my $expected_length = $is_EBCDIC ? 217 : 278;
 ok 1, length $data == $expected_length;
-  
+
 my $y = thaw($data);
 ok 2, 1;
 ok 3, ref $y eq 'ROOT';
 
 $Storable::canonical = 1;		# Prevent "used once" warning
 $Storable::canonical = 1;
-# Allow for long double string conversions.
-$y->{num}->[3] += 0;
-$r->{num}->[3] += 0;
 ok 4, nfreeze($y) eq nfreeze($r);
 
 ok 5, $y->ref->{key1} eq 'val1';

@@ -1,7 +1,7 @@
 # File	  : Zlib.pm
 # Author  : Paul Marquess
-# Created : 27th August 2001
-# Version : 1.14
+# Created : 13 December 2001
+# Version : 1.16
 #
 #     Copyright (c) 1995-2001 Paul Marquess. All rights reserved.
 #     This program is free software; you can redistribute it and/or
@@ -19,27 +19,34 @@ use IO::Handle ;
 
 use strict ;
 use warnings ;
-use vars qw($VERSION @ISA @EXPORT $AUTOLOAD 
-	    $deflateDefault $deflateParamsDefault $inflateDefault) ;
+use vars qw($VERSION @ISA @EXPORT $AUTOLOAD);
+use vars qw($deflateDefault $deflateParamsDefault $inflateDefault);
 
-$VERSION = "1.14" ;
+$VERSION = "1.16" ;
 
 @ISA = qw(Exporter DynaLoader);
 # Items to export into callers namespace by default. Note: do not export
 # names by default without a very good reason. Use EXPORT_OK instead.
 # Do not simply export all your public functions/methods/constants.
 @EXPORT = qw(
-	deflateInit inflateInit
+	deflateInit 
+	inflateInit
 
-	compress uncompress
+	compress 
+	uncompress
 
 	gzip gunzip
 
-	gzopen $gzerrno
+	gzopen 
+	$gzerrno
 
-	adler32 crc32
+	adler32 
+	crc32
 
 	ZLIB_VERSION
+
+	DEF_WBITS
+	OS_CODE
 
         MAX_MEM_LEVEL
 	MAX_WBITS
@@ -75,24 +82,13 @@ $VERSION = "1.14" ;
 
 
 sub AUTOLOAD {
-    # This AUTOLOAD is used to 'autoload' constants from the constant()
-    # XS function.  If a constant is not found then control is passed
-    # to the AUTOLOAD in AutoLoader.
-
     my($constname);
     ($constname = $AUTOLOAD) =~ s/.*:://;
-    my $val = constant($constname, @_ ? $_[0] : 0);
-    if ($! != 0) {
-	if ($! =~ /Invalid/) {
-	    $AutoLoader::AUTOLOAD = $AUTOLOAD;
-	    goto &AutoLoader::AUTOLOAD;
-	}
-	else {
-	    croak "Your vendor has not defined Compress::Zlib macro $constname"
-	}
-    }
-    eval "sub $AUTOLOAD { $val }";
-    goto &$AUTOLOAD;
+    my ($error, $val) = constant($constname);
+    Carp::croak $error if $error;
+    no strict 'refs';
+    *{$AUTOLOAD} = sub { $val };
+    goto &{$AUTOLOAD};
 }
 
 bootstrap Compress::Zlib $VERSION ;

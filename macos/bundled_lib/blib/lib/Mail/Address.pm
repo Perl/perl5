@@ -11,7 +11,7 @@ use Carp;
 use vars qw($VERSION);
 use locale;
 
-$VERSION = "1.40";
+$VERSION = "1.42";
 sub Version { $VERSION }
 
 #
@@ -154,6 +154,8 @@ sub new {
 
 sub parse {
  my $pkg = shift;
+ my @line    = grep { defined $_} @_;
+ my $line    = join '', @line;
 
  local $_;
 
@@ -162,10 +164,10 @@ sub parse {
  my @address = ();
  my @objs    = ();
  my $depth   = 0;
- my $idx = 0;
- my $tokens = _tokenise(grep { defined $_} @_);
- my $len = scalar(@{$tokens});
- my $next = _find_next($idx,$tokens,$len);
+ my $idx     = 0;
+ my $tokens  = _tokenise(@line);
+ my $len     = @$tokens;
+ my $next    = _find_next($idx,$tokens,$len);
 
  for( ; $idx < $len ; $idx++) {
   $_ = $tokens->[$idx];
@@ -186,7 +188,7 @@ sub parse {
    }
   }
   elsif($_ eq ',') {
-   warn "Unmatched '<>'" if($depth);
+   warn "Unmatched '<>' in $line" if($depth);
    my $o = _complete($pkg,\@phrase, \@address, \@comment);
    push(@objs, $o) if(defined $o);
    $depth = 0;
@@ -198,11 +200,11 @@ sub parse {
   elsif($next eq "<") {
    push(@phrase,$_);
   }
-  elsif($_ =~ /\A[\Q.\@:;\E]\Z/ || !scalar(@address) || $address[$#address] =~ /\A[\Q.\@:;\E]\Z/) {
+  elsif( /\A[\Q.\@:;\E]\Z/ || !@address || $address[-1] =~ /\A[\Q.\@:;\E]\Z/) {
    push(@address,$_);
   }
   else {
-   warn "Unmatched '<>'" if($depth);
+   warn "Unmatched '<>' in $line" if($depth);
    my $o = _complete($pkg,\@phrase, \@address, \@comment);
    push(@objs, $o) if(defined $o);
    $depth = 0;

@@ -122,7 +122,8 @@ print "not " unless $h->header("ABC_ABC") eq "foo" &&
                     $h->header("ABC-ABC") eq "bar";
 print "ok 10\n";
 
-$h->remove_header("Abc_Abc");
-print "not " unless !defined($h->header("abc_abc")) &&
+print "not " unless $h->remove_header("Abc_Abc") &&
+                    !defined($h->header("abc_abc")) &&
                     $h->header("ABC-ABC") eq "bar";
 print "ok 11\n";
+

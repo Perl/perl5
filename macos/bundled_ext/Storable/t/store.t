@@ -12,17 +12,7 @@
 # Baseline for first official release.
 #
 
-sub BEGIN {
-    chdir('t') if -d 't';
-    @INC = '.'; 
-    push @INC, '../lib';
-    require Config; import Config;
-    if ($Config{'extensions'} !~ /\bStorable\b/) {
-        print "1..0 # Skip: Storable was not built\n";
-        exit 0;
-    }
-    require 'lib/st-dump.pl';
-}
+require 't/dump.pl';
 
 use Storable qw(store retrieve store_fd nstore_fd fd_retrieve);
 
@@ -36,13 +26,13 @@ $c->{attribute} = 'attrval';
 @a = ('first', undef, 3, -4, -3.14159, 456, 4.5,
 	$b, \$a, $a, $c, \$c, \%a);
 
-print "not " unless defined store(\@a, 'store');
+print "not " unless defined store(\@a, 't/store');
 print "ok 1\n";
 
 $dumped = &dump(\@a);
 print "ok 2\n";
 
-$root = retrieve('store');
+$root = retrieve('t/store');
 print "not " unless defined $root;
 print "ok 3\n";
 
@@ -52,7 +42,7 @@ print "ok 4\n";
 print "not " unless $got eq $dumped; 
 print "ok 5\n";
 
-1 while unlink 'store';
+unlink 'store';
 
 package FOO; @ISA = qw(Storable);
 
@@ -65,10 +55,10 @@ sub make {
 package main;
 
 $foo = FOO->make;
-print "not " unless $foo->store('store');
+print "not " unless $foo->store('t/store');
 print "ok 6\n";
 
-print "not " unless open(OUT, '>>store');
+print "not " unless open(OUT, '>>t/store');
 print "ok 7\n";
 binmode OUT;
 
@@ -82,7 +72,7 @@ print "ok 10\n";
 print "not " unless close(OUT);
 print "ok 11\n";
 
-print "not " unless open(OUT, 'store');
+print "not " unless open(OUT, 't/store');
 binmode OUT;
 
 $r = fd_retrieve(::OUT);
@@ -114,6 +104,5 @@ print "not " unless $@;
 print "ok 20\n";
 
 close OUT;
-END { 1 while unlink 'store' }
-
+unlink 't/store';
 

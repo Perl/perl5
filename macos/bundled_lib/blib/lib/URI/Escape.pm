@@ -1,5 +1,5 @@
 #
-# $Id: Escape.pm,v 3.19 2001/08/24 17:25:43 gisle Exp $
+# $Id: Escape.pm,v 3.20 2001/10/26 22:55:26 gisle Exp $
 #
 
 package URI::Escape;
@@ -114,7 +114,7 @@ require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(uri_escape uri_unescape);
 @EXPORT_OK = qw(%escapes);
-$VERSION = sprintf("%d.%02d", q$Revision: 3.19 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 3.20 $ =~ /(\d+)\.(\d+)/);
 
 use Carp ();
 
@@ -133,8 +133,7 @@ sub uri_escape
 	unless (exists  $subst{$patn}) {
 	    # Because we can't compile the regex we fake it with a cached sub
 	    (my $tmp = $patn) =~ s,/,\\/,g;
-	    $subst{$patn} =
-	      eval "sub {\$_[0] =~ s/([$tmp])/\$escapes{\$1}/g; }";
+	    eval "\$subst{\$patn} = sub {\$_[0] =~ s/([$tmp])/\$escapes{\$1}/g; }";
 	    Carp::croak("uri_escape: $@") if $@;
 	}
 	&{$subst{$patn}}($text);

@@ -5,6 +5,9 @@ BEGIN {
 	chdir 't' if -d 't';
 	@INC = '../lib';
     }
+    if (ord('A') == 193 && !eval "require Convert::EBCDIC") {
+        print "1..0 # EBCDIC but no Convert::EBCDIC\n"; exit 0;
+    }
 }
 
 use Net::Domain qw(hostname domainname hostdomain);
@@ -15,7 +18,7 @@ unless($NetConfig{test_hosts}) {
     exit 0;
 }
 
-print "1..1\n";
+print "1..2\n";
 
 $domain = domainname();
 
@@ -25,3 +28,13 @@ if(defined $domain && $domain ne "") {
 else {
  print "not ok 1\n";
 }
+
+# This check thats hostanme does not overwrite $_
+my @domain = qw(foo.example.com bar.example.jp);
+my @copy = @domain;
+
+my @dummy = grep { hostname eq $_ } @domain;
+
+($domain[0] && $domain[0] eq $copy[0])
+  ? print "ok 2\n"
+  : print "not ok 2\n";

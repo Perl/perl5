@@ -1,7 +1,7 @@
 # This Makefile is for the Compress::Zlib extension to perl.
 #
 # It was generated automatically by MakeMaker version
-#  (Revision: ) from the contents of
+# 1.16 (Revision: ) from the contents of
 # Makefile.PL. Don't edit this file, edit Makefile.PL instead.
 #
 #	ANY CHANGES MADE HERE WILL BE LOST!
@@ -14,16 +14,18 @@
 #	LIBS => [q[-L/usr/local/lib -lz ]]
 #	NAME => q[Compress::Zlib]
 #	VERSION_FROM => q[Zlib.pm]
-#	depend => { dist=>q[MyRelease] }
-#	dist => { COMPRESS=>q[gzip], SUFFIX=>q[gz] }
+#	XS => { Zlib.xs=>q[Zlib.c] }
+#	clean => { FILES=>q[constants.h constants.xs] }
+#	depend => { Makefile=>q[config.in] }
+#	dist => { DIST_DEFAULT=>q[MyDoubleCheck Downgrade tardist], COMPRESS=>q[gzip], SUFFIX=>q[gz] }
 
 # --- MakeMaker constants section:
 NAME = Compress::Zlib
 DISTNAME = Compress-Zlib
 NAME_SYM = Compress_Zlib
-VERSION = 1.14
-VERSION_SYM = 1_14
-XS_VERSION = 1.14
+VERSION = 1.16
+VERSION_SYM = 1_16
+XS_VERSION = 1.16
 INST_LIB = :::::lib
 INST_ARCHLIB = :::::lib
 PERL_LIB = :::::lib
@@ -78,6 +80,7 @@ XS_FILES= Zlib.xs
 C_FILES = Zlib.c \
 	adler32.c \
 	compress.c \
+	constants.c \
 	crc32.c \
 	deflate.c \
 	gzio.c \
@@ -91,7 +94,8 @@ C_FILES = Zlib.c \
 	trees.c \
 	uncompr.c \
 	zutil.c
-H_FILES = deflate.h \
+H_FILES = constants.h \
+	deflate.h \
 	infblock.h \
 	infcodes.h \
 	inffast.h \

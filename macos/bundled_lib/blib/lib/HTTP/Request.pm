@@ -1,5 +1,5 @@
 #
-# $Id: Request.pm,v 1.29 2001/08/28 05:08:57 gisle Exp $
+# $Id: Request.pm,v 1.30 2001/11/15 06:42:40 gisle Exp $
 
 package HTTP::Request;
 
@@ -10,7 +10,7 @@ HTTP::Request - Class encapsulating HTTP Requests
 =head1 SYNOPSIS
 
  require HTTP::Request;
- $request = HTTP::Request->new(GET => 'http://www.oslonett.no/');
+ $request = HTTP::Request->new(GET => 'http://www.oslo.net/');
 
 =head1 DESCRIPTION
 
@@ -23,13 +23,12 @@ Instances of this class are usually passed to the C<request()> method
 of an C<LWP::UserAgent> object:
 
  $ua = LWP::UserAgent->new;
- $request = HTTP::Request->new(GET => 'http://www.oslonett.no/');
+ $request = HTTP::Request->new(GET => 'http://www.oslo.net/');
  $response = $ua->request($request);
 
 C<HTTP::Request> is a subclass of C<HTTP::Message> and therefore
 inherits its methods.  The inherited methods most often used are header(),
-push_header(), remove_header(), headers_as_string() and content().
-See L<HTTP::Message> for details.
+push_header(), remove_header(), and content(). See L<HTTP::Message> for details.
 
 The following additional methods are available:
 
@@ -39,16 +38,21 @@ The following additional methods are available:
 
 require HTTP::Message;
 @ISA = qw(HTTP::Message);
-$VERSION = sprintf("%d.%02d", q$Revision: 1.29 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.30 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 
-=item $r = HTTP::Request->new($method, $uri, [$header, [$content]])
+=item $r = HTTP::Request->new($method, $uri)
+
+=item $r = HTTP::Request->new($method, $uri, $header)
+
+=item $r = HTTP::Request->new($method, $uri, $header, $content)
 
 Constructs a new C<HTTP::Request> object describing a request on the
 object C<$uri> using method C<$method>.  The C<$uri> argument can be
-either a string, or a reference to a C<URI> object.  The $header
+either a string, or a reference to a C<URI> object.  The optional $header
 argument should be a reference to an C<HTTP::Headers> object.
+The optional $content argument should be a string.
 
 =cut
 
@@ -83,6 +87,8 @@ request.
 If an argument is given the attribute is given that as its new
 value. If no argument is given the value is not touched. In either
 case the previous value is returned.
+
+The method() method argument should be a string.
 
 The uri() method accept both a reference to a URI object and a
 string as its argument.  If a string is given, then it should be
@@ -160,7 +166,7 @@ L<HTTP::Headers>, L<HTTP::Message>, L<HTTP::Request::Common>
 
 =head1 COPYRIGHT
 
-Copyright 1995-1998 Gisle Aas.
+Copyright 1995-2001 Gisle Aas.
 
 This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

@@ -1,7 +1,7 @@
 package LWP::Authen::Digest;
 use strict;
 
-require MD5;
+require Digest::MD5;
 
 sub authenticate
 {
@@ -18,7 +18,7 @@ sub authenticate
     my $uri = $request->url->path_query;
     $uri = "/" unless length $uri;
 
-    my $md5 = new MD5;
+    my $md5 = Digest::MD5->new;
 
     my(@digest);
     $md5->add(join(":", $user, $auth_param->{realm}, $pass));

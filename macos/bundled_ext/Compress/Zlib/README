@@ -1,8 +1,8 @@
                                  Compress::Zlib
 
-                                  Version 1.14
+                                  Version 1.16
 
-                                27th August 2001
+                                13 December 2001
 
              Copyright (c) 1995-2001 Paul Marquess. All rights reserved.
          This program is free software; you can redistribute it and/or
@@ -285,7 +285,22 @@ CHANGES
 
   1.14 - 27th August 2001
 
-      * Memory overwrite bug fixed in "inflate". Kudos to Rob Somons for
+      * Memory overwrite bug fixed in "inflate". Kudos to Rob Simons for
         reporting the bug and to Anton Berezin for fixing it for me.
+
+  1.15 - 4th December 2001
+
+      * Changes a few types to get the module to build on 64-bit Solaris
+
+      * Changed the up/downgrade logic to default to the older constructs, and
+        to only call a downgrade if specifically requested. Some older versions
+        of Perl were having problems with the in-place edit.
+
+      * added the new XS constant code.
+
+  1.16 - 13 December 2001
+
+      * Fixed bug in Makefile.PL that stopped "perl Makefile.PL PREFIX=..."
+        working.
 
 Paul Marquess <Paul.Marquess@btinternet.com>

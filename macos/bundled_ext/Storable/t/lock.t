@@ -2,7 +2,10 @@
 
 # $Id: lock.t,v 1.0.1.4 2001/01/03 09:41:00 ram Exp $
 #
-#  @COPYRIGHT@
+#  Copyright (c) 1995-2000, Raphael Manfredi
+#  
+#  You may redistribute only under the same terms as Perl 5, as specified
+#  in the README file that comes with the distribution.
 #
 # $Log: lock.t,v $
 # Revision 1.0.1.4  2001/01/03 09:41:00  ram
@@ -19,31 +22,15 @@
 #
 #
 
-sub BEGIN {
-    chdir('t') if -d 't';
-    @INC = '.'; 
-    push @INC, '../lib';
-    require Config; import Config;
-    if ($Config{'extensions'} !~ /\bStorable\b/) {
-        print "1..0 # Skip: Storable was not built\n";
-        exit 0;
-    }
-    if ($^O eq 'mpeix') {
-	print "1..0 # Skip: truncate missing on MPE\n";
-	exit 0;
-    }	
-
-    require 'lib/st-dump.pl';
-}
-
-sub ok;
-
 use Storable qw(lock_store lock_retrieve);
 
 unless (&Storable::CAN_FLOCK) {
-    print "1..0 # Skip: fcntl/flock emulation broken on this platform\n";
+	print "1..0 # Skip: fcntl/flock emulation broken on this platform\n";
 	exit 0;
 }
+
+require 't/dump.pl';
+sub ok;
 
 print "1..5\n";
 
@@ -53,10 +40,10 @@ print "1..5\n";
 # We're just ensuring things work, we're not validating locking.
 #
 
-ok 1, defined lock_store(\@a, 'store');
+ok 1, defined lock_store(\@a, 't/store');
 ok 2, $dumped = &dump(\@a);
 
-$root = lock_retrieve('store');
+$root = lock_retrieve('t/store');
 ok 3, ref $root eq 'ARRAY';
 ok 4, @a == @$root;
 ok 5, &dump($root) eq $dumped; 

@@ -19,7 +19,7 @@ use strict;
 use Carp;
 use vars qw($VERSION $FIELD_NAME);
 
-$VERSION = "1.40";
+$VERSION = "1.42";
 
 my $MAIL_FROM = 'KEEP';
 my %HDR_LENGTHS = ();
@@ -112,7 +112,7 @@ sub _fold_line
 
  if(length($_[0]) > $ml)
   {
-   if ($_[0] =~ /^([-\w]+)/ and exists $STRUCTURE{ lc $1 } )
+   if ($_[0] =~ /^([-\w]+)/ && exists $STRUCTURE{ lc $1 } )
     {
      #Split the line up
      # first bias towards splitting at a , or a ; >4/5 along the line
@@ -135,14 +135,8 @@ sub _fold_line
     }
    else
     {
-      my $dif = $max-$min;
-
-      $_[0] =~ s/(?:^|\G)
-		(?:
-		  (.{$min,$max})\s+
-		 |(.{$min,$max})
-		)
-                /$+\n    /xg;
+      $_[0] =~ s/(.{$min,$max})\s+|(.{$max})/$+\n    /g;
+      $_[0] =~ s/\s*$/\n/s;
     }
   }
 

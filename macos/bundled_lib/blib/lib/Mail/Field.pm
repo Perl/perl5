@@ -12,7 +12,7 @@ use Carp;
 use strict;
 use vars qw($AUTOLOAD $VERSION);
 
-$VERSION = "1.40";
+$VERSION = "1.42";
 
 unless(defined &UNIVERSAL::can) {
     *UNIVERSAL::can = sub {

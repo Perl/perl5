@@ -18,19 +18,7 @@
 # Baseline for first official release.
 #
 
-sub BEGIN {
-    chdir('t') if -d 't';
-    @INC = '.'; 
-    push @INC, '../lib';
-    require Config; import Config;
-    if ($Config{'extensions'} !~ /\bStorable\b/) {
-        print "1..0 # Skip: Storable was not built\n";
-        exit 0;
-    }
-}
-
 use Storable qw(store retrieve);
-use File::Spec;
 
 print "1..8\n";
 
@@ -38,30 +26,30 @@ my $test = 1;
 my $bad = ['foo', sub { 1 },  'bar'];
 my $result;
 
-eval {$result = store ($bad , 'store')};
+eval {$result = store ($bad , 't/store')};
 print ((!defined $result)?"ok $test\n":"not ok $test\n"); $test++;
 print (($@ ne '')?"ok $test\n":"not ok $test\n"); $test++;
 
 $Storable::forgive_me=1;
 
-my $devnull = File::Spec->devnull;
-
 open(SAVEERR, ">&STDERR");
-open(STDERR, ">$devnull") or 
+open(STDERR, ">/dev/null") or 
   ( print SAVEERR "Unable to redirect STDERR: $!\n" and exit(1) );
 
-eval {$result = store ($bad , 'store')};
+eval {$result = store ($bad , 't/store')};
 
 open(STDERR, ">&SAVEERR");
 
 print ((defined $result)?"ok $test\n":"not ok $test\n"); $test++;
 print (($@ eq '')?"ok $test\n":"not ok $test\n"); $test++;
 
-my $ret = retrieve('store');
+my $ret = retrieve('t/store');
 print ((defined $ret)?"ok $test\n":"not ok $test\n"); $test++;
 print (($ret->[0] eq 'foo')?"ok $test\n":"not ok $test\n"); $test++;
 print (($ret->[2] eq 'bar')?"ok $test\n":"not ok $test\n"); $test++;
 print ((ref $ret->[1] eq 'SCALAR')?"ok $test\n":"not ok $test\n"); $test++;
 
 
-END { 1 while unlink 'store' }
+END {
+  unlink 't/store';
+}

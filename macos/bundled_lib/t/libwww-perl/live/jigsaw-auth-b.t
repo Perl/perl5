@@ -46,6 +46,6 @@ $res = $ua->request($req);
 #print $res->as_string;
 
 print "not " unless $res->content =~ /Your browser made it!/ &&
-	            $res->header("Client-Request-Num") == 5;
+	            $res->header("Client-Response-Num") == 5;
 print "ok 3\n";
 

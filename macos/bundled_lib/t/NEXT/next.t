@@ -1,4 +1,9 @@
-#! /usr/local/bin/perl -w
+BEGIN {
+    if ($ENV{PERL_CORE}) {
+        chdir('t') if -d 't';
+        @INC = qw(../lib);
+    }
+}
 
 BEGIN { print "1..25\n"; }
 

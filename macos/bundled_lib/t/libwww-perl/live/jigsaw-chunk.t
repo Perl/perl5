@@ -11,7 +11,7 @@ my $res = $ua->request($req);
 print "not " unless $res->is_success && $res->content_type eq "text/plain";
 print "ok 1\n";
 
-print "not " unless $res->header("Transfer-Encoding") eq "chunked";
+print "not " unless $res->header("Client-Transfer-Encoding") eq "chunked";
 print "ok 2\n";
 
 for (${$res->content_ref}) {

@@ -10,7 +10,7 @@ use Exporter;
 use SelfLoader;
 use vars qw { $VERSION @ISA %EXPORT_TAGS };
 
-$VERSION = '1.86';
+$VERSION = '1.89';
 @ISA		= qw ( Exporter );
 		     
 %EXPORT_TAGS	= ( ALL => [ qw(
@@ -429,6 +429,9 @@ sub extract_variable (;$$)
 
 sub _match_variable($$)
 {
+#  $#
+#  $^
+#  $$
 	my ($textref, $pre) = @_;
 	my $startpos = pos($$textref) = pos($$textref)||0;
 	unless ($$textref =~ m/\G($pre)/gc)
@@ -437,19 +440,24 @@ sub _match_variable($$)
 		return;
 	}
 	my $varpos = pos($$textref);
-	unless ($$textref =~ m/\G(\$#?|[*\@\%]|\\&)+/gc)
+        unless ($$textref =~ m{\G\$\s*(\d+|[][&`'+*./|,";%=~:?!\@<>()-]|\^[a-z]?)}gci)
 	{
+	    unless ($$textref =~ m/\G((\$#?|[*\@\%]|\\&)+)/gc)
+	    {
 		_failmsg "Did not find leading dereferencer", pos $$textref;
 		pos $$textref = $startpos;
 		return;
-	}
+	    }
+	    my $deref = $1;
 
-	unless ($$textref =~ m/\G\s*(?:::|')?(?:[_a-z]\w*(?:::|'))*[_a-z]\w*/gci
-		or _match_codeblock($textref, "", '\{', '\}', '\{', '\}', 0))
-	{
+	    unless ($$textref =~ m/\G\s*(?:::|')?(?:[_a-z]\w*(?:::|'))*[_a-z]\w*/gci
+	    	or _match_codeblock($textref, "", '\{', '\}', '\{', '\}', 0)
+		or $deref eq '$#' or $deref eq '$$' )
+	    {
 		_failmsg "Bad identifier after dereferencer", pos $$textref;
 		pos $$textref = $startpos;
 		return;
+	    }
 	}
 
 	while (1)
@@ -854,13 +862,13 @@ sub extract_multiple (;$$$$)	# ($text, $functions_ref, $max_fields, $ignoreunkno
 	my ($lastpos, $firstpos);
 	my @fields = ();
 
-	for ($$textref)
+	#for ($$textref)
 	{
 		my @func = defined $_[1] ? @{$_[1]} : @{$def_func};
 		my $max  = defined $_[2] && $_[2]>0 ? $_[2] : 1_000_000_000;
 		my $igunk = $_[3];
 
-		pos ||= 0;
+		pos $$textref ||= 0;
 
 		unless (wantarray)
 		{
@@ -888,51 +896,57 @@ sub extract_multiple (;$$$$)	# ($text, $functions_ref, $max_fields, $ignoreunkno
 			}
 		}
 
-		FIELD: while (pos() < length())
+		FIELD: while (pos($$textref) < length($$textref))
 		{
 			my $field;
+			my @bits;
 			foreach my $i ( 0..$#func )
 			{
+				my $pref;
 				$func = $func[$i];
 				$class = $class[$i];
-				$lastpos = pos;
+				$lastpos = pos $$textref;
 				if (ref($func) eq 'CODE')
-					{ ($field) = $func->($_) }
+					{ ($field,undef,$pref) = @bits = $func->($$textref) }
 				elsif (ref($func) eq 'Text::Balanced::Extractor')
-					{ $field = $func->extract($_) }
-				elsif( m/\G$func/gc )
-					{ $field = defined($1) ? $1 : $& }
-
+					{ @bits = $field = $func->extract($$textref) }
+				elsif( $$textref =~ m/\G$func/gc )
+					{ @bits = $field = defined($1) ? $1 : $& }
+				$pref ||= "";
 				if (defined($field) && length($field))
 				{
-					if (defined($unkpos) && !$igunk)
-					{
-						push @fields, substr($_, $unkpos, $lastpos-$unkpos);
-						$firstpos = $unkpos unless defined $firstpos;
-						undef $unkpos;
-						last FIELD if @fields == $max;
+					if (!$igunk) {
+						$unkpos = pos $$textref
+							if length($pref) && !defined($unkpos);
+						if (defined $unkpos)
+						{
+							push @fields, substr($$textref, $unkpos, $lastpos-$unkpos).$pref;
+							$firstpos = $unkpos unless defined $firstpos;
+							undef $unkpos;
+							last FIELD if @fields == $max;
+						}
 					}
-					push @fields, $class 
-						? bless(\$field, $class)
+					push @fields, $class
+						? bless (\$field, $class)
 						: $field;
 					$firstpos = $lastpos unless defined $firstpos;
-					$lastpos = pos;
+					$lastpos = pos $$textref;
 					last FIELD if @fields == $max;
 					next FIELD;
 				}
 			}
-			if (/\G(.)/gcs)
+			if ($$textref =~ /\G(.)/gcs)
 			{
-				$unkpos = pos()-1
+				$unkpos = pos($$textref)-1
 					unless $igunk || defined $unkpos;
 			}
 		}
 		
 		if (defined $unkpos)
 		{
-			push @fields, substr($_, $unkpos);
+			push @fields, substr($$textref, $unkpos);
 			$firstpos = $unkpos unless defined $firstpos;
-			$lastpos = length;
+			$lastpos = length $$textref;
 		}
 		last;
 	}
@@ -1925,13 +1939,18 @@ such substrings are skipped. Otherwise, they are returned.
 =back
 
 The extraction process works by applying each extractor in
-sequence to the text string. If the extractor is a subroutine it
-is called in a list
-context and is expected to return a list of a single element, namely
-the extracted text.
-Note that the value returned by an extractor subroutine need not bear any
-relationship to the corresponding substring of the original text (see
-examples below).
+sequence to the text string.
+
+If the extractor is a subroutine it is called in a list context and is
+expected to return a list of a single element, namely the extracted
+text. It may optionally also return two further arguments: a string
+representing the text left after extraction (like $' for a pattern
+match), and a string representing any prefix skipped before the
+extraction (like $` in a pattern match). Note that this is designed
+to facilitate the use of other Text::Balanced subroutines with
+C<extract_multiple>. Note too that the value returned by an extractor
+subroutine need not bear any relationship to the corresponding substring
+of the original text (see examples below).
 
 If the extractor is a precompiled regular expression or a string,
 it is matched against the text in a scalar context with a leading

@@ -1,9 +1,9 @@
 #
-# $Id: LWP.pm,v 1.112 2001/10/26 23:24:03 gisle Exp $
+# $Id: LWP.pm,v 1.117 2001/12/14 20:43:12 gisle Exp $
 
 package LWP;
 
-$VERSION = "5.60";
+$VERSION = "5.63";
 sub Version { $VERSION; }
 
 require 5.004;
@@ -15,7 +15,7 @@ __END__
 
 =head1 NAME
 
-LWP - Library for WWW access in Perl
+LWP - The World-Wide Web library for Perl
 
 =head1 SYNOPSIS
 
@@ -25,18 +25,18 @@ LWP - Library for WWW access in Perl
 
 =head1 DESCRIPTION
 
-Libwww-perl is a collection of Perl modules which provides a simple
-and consistent application programming interface (API) to the World-Wide Web.  The
-main focus of the library is to provide classes and functions that
-allow you to write WWW clients, thus libwww-perl is a WWW
-client library. The library also contain modules that are of more
-general use.
+The libwww-perl collection is a set of Perl modules which provides a
+simple and consistent application programming interface (API) to the
+World-Wide Web.  The main focus of the library is to provide classes
+and functions that allow you to write WWW clients. The library also
+contain modules that are of more general use and even classes that
+help you implement simple HTTP servers.
 
-Most modules in this library are object oriented.  The user
+Most modules in this library provide an object oriented API.  The user
 agent, requests sent and responses received from the WWW server are
 all represented by objects.  This makes a simple and powerful
-interface to these services.  The interface should be easy to extend
-and customize for your needs.
+interface to these services.  The interface is easy to extend
+and customize for your own needs.
 
 The main features of the library are:
 
@@ -73,11 +73,6 @@ Supports access through proxy servers.
 =item *
 
 Provides parser for F<robots.txt> files and a framework for constructing robots.
-
-=item *
-
-Cooperates with Tk.  A simple Tk-based GUI browser
-called 'tkweb' is distributed with the Tk extension for perl.
 
 =item *
 
@@ -157,13 +152,13 @@ The main attributes of the request objects are:
 =item *
 
 The B<method> is a short string that tells what kind of
-request this is.  The most used methods are B<GET>, B<PUT>,
+request this is.  The most common methods are B<GET>, B<PUT>,
 B<POST> and B<HEAD>.
 
 =item *
 
-The B<url> is a string denoting the protocol, server and
-the name of the "document" we want to access.  The B<url> might
+The B<uri> is a string denoting the protocol, server and
+the name of the "document" we want to access.  The B<uri> might
 also encode various other parameters.
 
 =item *
@@ -241,12 +236,11 @@ The user agent is an interface layer between
 your application code and the network.  Through this interface you are
 able to access the various servers on the network.
 
-The libwww-perl class name for the user agent is
-C<LWP::UserAgent>.  Every libwww-perl application that wants to
-communicate should create at least one object of this class. The main
-method provided by this object is request(). This method takes an
-C<HTTP::Request> object as argument and (eventually) returns a
-C<HTTP::Response> object.
+The class name for the user agent is C<LWP::UserAgent>.  Every
+libwww-perl application that wants to communicate should create at
+least one object of this class. The main method provided by this
+object is request(). This method takes an C<HTTP::Request> object as
+argument and (eventually) returns a C<HTTP::Response> object.
 
 The user agent has many other attributes that let you
 configure how it will interact with the network and with your
@@ -300,11 +294,11 @@ represented in actual perl code:
 
   # Create a user agent object
   use LWP::UserAgent;
-  $ua = new LWP::UserAgent;
-  $ua->agent("AgentName/0.1 " . $ua->agent);
+  $ua = LWP::UserAgent->new;
+  $ua->agent("MyApp/0.1 ");
 
   # Create a request
-  my $req = new HTTP::Request POST => 'http://www.perl.com/cgi-bin/BugGlimpse';
+  my $req = HTTP::Request->new(POST => 'http://www.perl.com/cgi-bin/BugGlimpse');
   $req->content_type('application/x-www-form-urlencoded');
   $req->content('match=www&errors=0');
 
@@ -352,16 +346,16 @@ internal error response.
 The library automatically adds a "Host" and a "Content-Length" header
 to the HTTP request before it is sent over the network.
 
-For GET request you might want to add the "If-Modified-Since" header
-to make the request conditional.
+For GET request you might want to add a "If-Modified-Since" or
+"If-None-Match" header to make the request conditional.
 
 For POST request you should add the "Content-Type" header.  When you
 try to emulate HTML E<lt>FORM> handling you should usually let the value
 of the "Content-Type" header be "application/x-www-form-urlencoded".
 See L<lwpcook> for examples of this.
 
-The libwww-perl HTTP implementation currently support the HTTP/1.0
-protocol.  HTTP/0.9 servers are also handled correctly.
+The libwww-perl HTTP implementation currently support the HTTP/1.1
+and HTTP/1.0 protocol.
 
 The library allows you to access proxy server through HTTP.  This
 means that you can set up the library to forward all types of request
@@ -524,6 +518,8 @@ library. Indentation shows class inheritance.
  WWW::RobotRules    -- Parse robots.txt files
    WWW::RobotRules::AnyDBM_File -- Persistent RobotRules
 
+ Net::HTTP          -- Low level HTTP client
+
 The following modules provide various functions and definitions.
 
  LWP                -- This file.  Library version number and documentation.
@@ -534,6 +530,7 @@ The following modules provide various functions and definitions.
  HTTP::Date         -- Date parsing module for HTTP date formats
  HTTP::Negotiate    -- HTTP content negotiation calculation
  File::Listing      -- Parse directory listings
+ HTML::Form         -- Processing for <form>s in HTML documents
 
 
 =head1 MORE DOCUMENTATION
@@ -543,6 +540,43 @@ provide.  The I<lwpcook> manpage is the libwww-perl cookbook that contain
 examples of typical usage of the library.  You might want to take a
 look at how the scripts C<lwp-request>, C<lwp-rget> and C<lwp-mirror>
 are implemented.
+
+=head1 ENVIRONMENT
+
+The following environment variables are used by LWP:
+
+=over
+
+=item HOME
+
+The C<LWP::MediaTypes> functions will look for the F<.media.types> and
+F<.mime.types> files relative to you home directory.
+
+=item http_proxy
+
+=item ftp_proxy
+
+=item xxx_proxy
+
+=item no_proxy
+
+These environment variables can be set to enable communication through
+a proxy server.  See the description of the C<env_proxy> method in
+L<LWP::UserAgent>.
+
+=item PERL_LWP_USE_HTTP_10
+
+Enable the old HTTP/1.0 protocol driver instead of the new HTTP/1.1
+driver.  You might want to set this to a TRUE value if you discover
+that your old LWP applications fails after you installed LWP-5.60 or
+better.
+
+=item PERL_HTTP_URI_CLASS
+
+Used to decide what URI objects to instantiate.  The default is C<URI>.
+You might want to set it to C<URI::URL> for compatiblity with old times.
+
+=back
 
 =head1 BUGS
 

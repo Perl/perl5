@@ -1,4 +1,4 @@
-print "1..3\n";
+print "1..4\n";
 
 use HTTP::Request;
 use HTTP::Negotiate;
@@ -63,6 +63,24 @@ expect(\@a, [['var2' => 0.25],
 	    ]
 );
 
+$variants = [
+  ['var-en', undef, 'text/html', undef, undef, 'en', undef],
+  ['var-de', undef, 'text/html', undef, undef, 'de', undef],
+  ['var-ES', undef, 'text/html', undef, undef, 'ES', undef],
+  ['provoke-warning',  undef, undef, undef, undef, 'x-no-content-type', undef],
+ ];
+
+$HTTP::Negotiate::DEBUG=1;
+$ENV{HTTP_ACCEPT_LANGUAGE}='DE,en,fr;Q=0.5,es;q=0.1';
+
+$a = choose($variants);
+
+if ($a eq 'var-de') {
+     ok;
+}
+else {
+     not_ok
+}
 
 
 

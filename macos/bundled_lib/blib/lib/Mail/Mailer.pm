@@ -47,6 +47,13 @@ to use can be specified in C<@args> with
 
     $mailer = new Mail::Mailer 'smtp', Server => $server;
 
+The smtp mailer does not handle C<Cc> and C<Bcc> lines, neither their
+C<Resent-*> fellows.
+
+=item C<qmail>
+
+Use qmail's qmail-inject program to deliver the mail.
+
 =item C<test>
 
 Used for debugging, this calls C</bin/echo> to display the data.  No
@@ -124,7 +131,7 @@ use vars qw(@ISA $VERSION $MailerBinary $MailerType %Mailers @Mailers);
 use Config;
 use strict;
 
-$VERSION = "1.40";
+$VERSION = "1.42";
 
 sub Version { $VERSION }
 
@@ -140,6 +147,7 @@ sub Version { $VERSION }
     'sendmail'  =>      '/usr/lib/sendmail;/usr/sbin/sendmail;/usr/ucblib/sendmail',
 
     'smtp'	=> 	undef,
+    'qmail'     =>      '/usr/sbin/qmail-inject;/var/qmail/bin/qmail-inject',
     'test'	=> 	'test'
 );
 

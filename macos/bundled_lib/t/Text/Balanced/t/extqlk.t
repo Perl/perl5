@@ -1,3 +1,10 @@
+BEGIN {
+    if ($ENV{PERL_CORE}) {
+        chdir('t') if -d 't';
+        @INC = qw(../lib);
+    }
+}
+
 #! /usr/local/bin/perl -ws
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl test.pl'

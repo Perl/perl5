@@ -14,7 +14,7 @@ use Exporter ();
 BEGIN {
     require 5.000;
 
-    $VERSION = "1.40";
+    $VERSION = "1.42";
 
     *AUTOLOAD = \&AutoLoader::AUTOLOAD;
     @ISA = qw(Exporter);
@@ -137,15 +137,15 @@ sub maildomain {
     if(defined $config && open(CF,$config)) {
 	my %var;
 	while(<CF>) {
-	    if(/\AD([a-zA-Z])([\w.]+)/) {
-		my($v,$arg) = ($1,$2);
-		$arg =~ s/\$([a-zA-Z])/exists $var{$1} ? $var{$1} : '$' . $1/eg;
+	    if(my ($v, $arg) = /^D([a-zA-Z])([\w.\$\-]+)/) {
+		$arg =~ s/\$([a-zA-Z])/exists $var{$1} ? $var{$1} : '$'.$1/eg;
 		$var{$v} = $arg;
 	    }
 	}
 	close(CF);
-	$domain = $var{'j'} if defined $var{'j'};
-	$domain = $var{'M'} if defined $var{'M'};
+	$domain = $var{j} if defined $var{j};
+	$domain = $var{M} if defined $var{M};
+	$domain = $var{S} if defined $var{S};
 	return $domain
 	    if(defined $domain);
     }

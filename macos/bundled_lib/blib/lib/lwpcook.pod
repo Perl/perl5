@@ -1,6 +1,6 @@
 =head1 NAME
 
-lwpcook - libwww-perl cookbook
+lwpcook - The libwww-perl cookbook
 
 =head1 DESCRIPTION
 
@@ -20,11 +20,11 @@ net.  The LWP::Simple module provides the get() function that return
 the document specified by its URL argument:
 
   use LWP::Simple;
-  $doc = get 'http://www.sn.no/libwww-perl/';
+  $doc = get 'http://www.linpro.no/lwp/';
 
 or, as a perl one-liner using the getprint() function:
 
-  perl -MLWP::Simple -e 'getprint "http://www.sn.no/libwww-perl/"'
+  perl -MLWP::Simple -e 'getprint "http://www.linpro.no/lwp/"'
 
 or, how about fetching the latest perl by running this command:
 
@@ -151,16 +151,15 @@ required header, with something like this:
  use LWP::UserAgent;
 
  $ua = LWP::UserAgent->new;
- $ua->proxy(['http', 'ftp'] => 'http://proxy.myorg.com');
+ $ua->proxy(['http', 'ftp'] => 'http://username:password@proxy.myorg.com');
 
  $req = HTTP::Request->new('GET',"http://www.perl.com");
- $req->proxy_authorization_basic("proxy_user", "proxy_password");
 
  $res = $ua->request($req);
  print $res->content if $res->is_success;
 
-Replace C<proxy.myorg.com>, C<proxy_user> and
-C<proxy_password> with something suitable for your site.
+Replace C<proxy.myorg.com>, C<username> and
+C<password> with something suitable for your site.
 
 
 =head1 ACCESS TO PROTECTED DOCUMENTS

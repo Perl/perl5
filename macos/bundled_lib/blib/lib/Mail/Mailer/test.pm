@@ -7,7 +7,7 @@ sub can_cc { 0 }
 
 sub exec {
     my($self, $exe, $args, $to) = @_;
-    exec('sh', '-c', "echo to: " . join(" ",@{$to}) . "; cat");
+    exec('sh', '-c', 'echo "to: ' . join(" ",@{$to}) . '"; cat');
 }
 
 1;

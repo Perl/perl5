@@ -1,5 +1,5 @@
 #
-# $Id: Message.pm,v 1.24 2001/08/06 23:47:06 gisle Exp $
+# $Id: Message.pm,v 1.25 2001/11/15 06:42:23 gisle Exp $
 
 package HTTP::Message;
 
@@ -15,7 +15,7 @@ HTTP::Message - Class encapsulating HTTP messages
 
 =head1 DESCRIPTION
 
-A C<HTTP::Message> object contains some headers and a content (body).
+An C<HTTP::Message> object contains some headers and a content (body).
 The class is abstract, i.e. it only used as a base class for
 C<HTTP::Request> and C<HTTP::Response> and should never instantiated
 as itself.
@@ -32,12 +32,12 @@ require HTTP::Headers;
 require Carp;
 use strict;
 use vars qw($VERSION $AUTOLOAD);
-$VERSION = sprintf("%d.%02d", q$Revision: 1.24 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.25 $ =~ /(\d+)\.(\d+)/);
 
 $HTTP::URI_CLASS ||= $ENV{PERL_HTTP_URI_CLASS} || "URI";
 eval "require $HTTP::URI_CLASS"; die $@ if $@;
 
-=item $mess = new HTTP::Message;
+=item $mess = HTTP::Message->new
 
 This is the object constructor.  It should only be called internally
 by this library.  External code should construct C<HTTP::Request> or
@@ -78,7 +78,7 @@ sub clone
 =item $mess->protocol([$proto])
 
 Sets the HTTP protocol used for the message.  The protocol() is a string
-like "HTTP/1.0" or "HTTP/1.1".
+like C<HTTP/1.0> or C<HTTP/1.1>.
 
 =cut
 
@@ -92,8 +92,8 @@ previous content is returned.
 
 =item $mess->add_content($data)
 
-The add_content() methods appends more data to the end of the previous
-content.
+The add_content() methods appends more data to the end of the current
+content buffer.
 
 =cut
 
@@ -111,9 +111,9 @@ sub add_content
 
 =item $mess->content_ref
 
-The content_ref() method will return a reference to content string.
+The content_ref() method will return a reference to content buffer string.
 It can be more efficient to access the content this way if the content
-is huge, and it can be used for direct manipulation of the content,
+is huge, and it can even be used for direct manipulation of the content,
 for instance:
 
   ${$res->content_ref} =~ s/\bfoo\b/bar/g;
@@ -137,8 +137,12 @@ Return the embedded HTTP::Headers object.
 
 =item $mess->headers_as_string([$endl])
 
-Call the HTTP::Headers->as_string() method for the headers in the
-message.
+Call the as_string() method for the headers in the
+message.  This will be the same as:
+
+ $mess->headers->as_string
+
+but it will make your program a whole character shorter :-)
 
 =cut
 
@@ -153,9 +157,10 @@ convenient access to these methods.  Refer to L<HTTP::Headers> for
 details of these methods:
 
   $mess->header($field => $val);
-  $mess->scan(\&doit);
   $mess->push_header($field => $val);
+  $mess->init_header($field => $val);
   $mess->remove_header($field);
+  $mess->scan(\&doit);
 
   $mess->date;
   $mess->expires;
@@ -183,10 +188,14 @@ details of these methods:
 # delegate all other method calls the the _headers object.
 sub AUTOLOAD
 {
-    my $self = shift;
     my $method = substr($AUTOLOAD, rindex($AUTOLOAD, '::')+2);
     return if $method eq "DESTROY";
-    $self->{'_headers'}->$method(@_);
+
+    # We create the function here so that it will not need to be
+    # autoloaded the next time.
+    no strict 'refs';
+    *$method = eval "sub { shift->{'_headers'}->$method(\@_) }";
+    goto &$method;
 }
 
 # Private method to access members in %$self
@@ -203,7 +212,7 @@ sub _elem
 
 =head1 COPYRIGHT
 
-Copyright 1995-1997 Gisle Aas.
+Copyright 1995-2001 Gisle Aas.
 
 This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

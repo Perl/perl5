@@ -1,7 +1,7 @@
 /* Filename: Zlib.xs
  * Author  : Paul Marquess, <Paul.Marquess@btinternet.com>
- * Created : 27th August 2001
- * Version : 1.14
+ * Created : 13 December 2001
+ * Version : 1.16
  *
  *   Copyright (c) 1995-2001 Paul Marquess. All rights reserved.
  *   This program is free software; you can redistribute it and/or
@@ -42,7 +42,7 @@
 
 typedef struct di_stream {
     z_stream stream;
-    int	     bufsize; 
+    uLong	     bufsize; 
     SV *     dictionary ;
     uLong    dict_adler ;
 } di_stream;
@@ -56,7 +56,7 @@ typedef di_stream * Compress__Zlib__inflateStream ;
 typedef struct gzType {
     gzFile gz ;
     SV *   buffer ;
-    int	   offset ;
+    uLong   offset ;
     bool   closed ;
 }  gzType ;
 
@@ -68,6 +68,9 @@ typedef gzType* Compress__Zlib__gzFile ;
 
 
 #define GZERRNO	"Compress::Zlib::gzerrno"
+
+#define adlerInitial adler32(0L, Z_NULL, 0)
+#define crcInitial crc32(0L, Z_NULL, 0)
 
 #if 1
 static char *my_z_errmsg[] = {
@@ -84,10 +87,7 @@ static char *my_z_errmsg[] = {
 #endif
 
 
-static uLong adlerInitial ;
-static uLong crcInitial ;
 static int trace = 0 ;
-SV *sv_NULL ;
 
 static void
 #ifdef CAN_PROTOTYPE
@@ -130,12 +130,44 @@ gzFile file ;
     SetGzErrorNo(error_no) ;
 }
 
+static void
+#ifdef CAN_PROTOTYPE
+DispStream(di_stream * s, char * message)
+#else
+DispStream(s, message)
+    di_stream * s;
+    char * message;
+#endif
+{
+    if (! trace)
+        return ;
+
+    printf("DispStream %d - %s \n", s, message) ;
+
+    if (s)  {
+	printf("    stream           %lx\n", s->stream);
+	printf("    stream.zalloc    %lx\n", s->stream.zalloc);
+	printf("    stream.zfree     %lx\n", s->stream.zfree);
+	printf("    stream.opaque    %lx\n", s->stream.opaque);
+	printf("    stream.next_in   %lx\n", s->stream.next_in);
+	printf("    stream.next_out  %lx\n", s->stream.next_out);
+	printf("    stream.avail_in  %lx\n", s->stream.avail_in);
+	printf("    stream.avail_out %lx\n", s->stream.avail_out);
+	printf("    bufsize          %lx\n", s->bufsize);
+	printf("    dictionary       %lx\n", s->dictionary);
+	printf("    dict_adler       %lx\n", s->dict_adler);
+	printf("\n");
+
+    }
+}
+
+
 static di_stream *
 #ifdef CAN_PROTOTYPE
-InitStream(int bufsize)
+InitStream(uLong bufsize)
 #else
 InitStream(bufsize)
-    int bufsize ;
+    uLong bufsize ;
 #endif
 {
     di_stream *s = (di_stream *)safemalloc(sizeof(di_stream));
@@ -234,269 +266,19 @@ char * string;
     }
 
     if (!SvOK(sv)) { 
-        sv = sv_NULL ;
+        sv = newSVpv("", 0);
     }	
     return sv ;
 }
 
-static double
-#ifdef CAN_PROTOTYPE
-constant(char * name, int arg)
-#else
-constant(name, arg)
-char *name;
-int arg;
-#endif
-{
-    errno = 0;
-    switch (*name) {
-    case 'A':
-	break;
-    case 'B':
-	break;
-    case 'C':
-	break;
-    case 'D':
-	if (strEQ(name, "DEF_WBITS"))
-#ifdef DEF_WBITS
-	    return DEF_WBITS;
-#else
-	    goto not_there;
-#endif
-	break;
-    case 'E':
-	break;
-    case 'F':
-	    goto not_there;
-	break;
-    case 'G':
-	break;
-    case 'H':
-	break;
-    case 'I':
-	break;
-    case 'J':
-	break;
-    case 'K':
-	break;
-    case 'L':
-	break;
-    case 'M':
-	if (strEQ(name, "MAX_MEM_LEVEL"))
-#ifdef MAX_MEM_LEVEL
-	    return MAX_MEM_LEVEL;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "MAX_WBITS"))
-#ifdef MAX_WBITS
-	    return MAX_WBITS;
-#else
-	    goto not_there;
-#endif
-	break;
-    case 'N':
-	break;
-    case 'O':
-	if (strEQ(name, "OS_CODE"))
-#ifdef OS_CODE
-	    return OS_CODE;
-#else
-	    goto not_there;
-#endif
-	break;
-    case 'P':
-	break;
-    case 'Q':
-	break;
-    case 'R':
-	break;
-    case 'S':
-	break;
-    case 'T':
-	break;
-    case 'U':
-	break;
-    case 'V':
-	break;
-    case 'W':
-	break;
-    case 'X':
-	break;
-    case 'Y':
-	break;
-    case 'Z':
-	if (strEQ(name, "Z_ASCII"))
-#ifdef Z_ASCII
-	    return Z_ASCII;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "Z_BEST_COMPRESSION"))
-#ifdef Z_BEST_COMPRESSION
-	    return Z_BEST_COMPRESSION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "Z_BEST_SPEED"))
-#ifdef Z_BEST_SPEED
-	    return Z_BEST_SPEED;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "Z_BINARY"))
-#ifdef Z_BINARY
-	    return Z_BINARY;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "Z_BUF_ERROR"))
-#ifdef Z_BUF_ERROR
-	    return Z_BUF_ERROR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "Z_DATA_ERROR"))
-#ifdef Z_DATA_ERROR
-	    return Z_DATA_ERROR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "Z_DEFAULT_COMPRESSION"))
-#ifdef Z_DEFAULT_COMPRESSION
-	    return Z_DEFAULT_COMPRESSION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "Z_DEFAULT_STRATEGY"))
-#ifdef Z_DEFAULT_STRATEGY
-	    return Z_DEFAULT_STRATEGY;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "Z_DEFLATED"))
-#ifdef Z_DEFLATED
-	    return Z_DEFLATED;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "Z_ERRNO"))
-#ifdef Z_ERRNO
-	    return Z_ERRNO;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "Z_FILTERED"))
-#ifdef Z_FILTERED
-	    return Z_FILTERED;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "Z_FINISH"))
-#ifdef Z_FINISH
-	    return Z_FINISH;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "Z_FULL_FLUSH"))
-#ifdef Z_FULL_FLUSH
-	    return Z_FULL_FLUSH;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "Z_HUFFMAN_ONLY"))
-#ifdef Z_HUFFMAN_ONLY
-	    return Z_HUFFMAN_ONLY;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "Z_MEM_ERROR"))
-#ifdef Z_MEM_ERROR
-	    return Z_MEM_ERROR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "Z_NEED_DICT"))
-#ifdef Z_NEED_DICT
-	    return Z_NEED_DICT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "Z_NO_COMPRESSION"))
-#ifdef Z_NO_COMPRESSION
-	    return Z_NO_COMPRESSION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "Z_NO_FLUSH"))
-#ifdef Z_NO_FLUSH
-	    return Z_NO_FLUSH;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "Z_NULL"))
-#ifdef Z_NULL
-	    return Z_NULL;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "Z_OK"))
-#ifdef Z_OK
-	    return Z_OK;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "Z_PARTIAL_FLUSH"))
-#ifdef Z_PARTIAL_FLUSH
-	    return Z_PARTIAL_FLUSH;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "Z_STREAM_END"))
-#ifdef Z_STREAM_END
-	    return Z_STREAM_END;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "Z_STREAM_ERROR"))
-#ifdef Z_STREAM_ERROR
-	    return Z_STREAM_ERROR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "Z_SYNC_FLUSH"))
-#ifdef Z_SYNC_FLUSH
-	    return Z_SYNC_FLUSH;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "Z_UNKNOWN"))
-#ifdef Z_UNKNOWN
-	    return Z_UNKNOWN;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "Z_VERSION_ERROR"))
-#ifdef Z_VERSION_ERROR
-	    return Z_VERSION_ERROR;
-#else
-	    goto not_there;
-#endif
-	break;
-    }
-    errno = EINVAL;
-    return 0;
-
-not_there:
-    errno = ENOENT;
-    return 0;
-}
-
+#include "constants.h"
 
 MODULE = Compress::Zlib		PACKAGE = Compress::Zlib	PREFIX = Zip_
 
 REQUIRE:	1.924
 PROTOTYPES:	DISABLE
+
+INCLUDE: constants.xs
 
 BOOT:
     /* Check this version of zlib is == 1 */
@@ -510,21 +292,11 @@ BOOT:
         sv_setpv(gzerror_sv, "") ;
         SvIOK_on(gzerror_sv) ;
     }
-    sv_NULL = newSVpv("", 0);
 
 
 #define Zip_zlib_version()	(char*)zlib_version
 char*
 Zip_zlib_version()
-
-#define Zip_ZLIB_VERSION()	ZLIB_VERSION
-char *
-Zip_ZLIB_VERSION()
-
-double
-constant(name,arg)
-	char *		name
-	int		arg
 
 
 Compress::Zlib::gzFile
@@ -586,7 +358,7 @@ Zip_gzread(file, buf, len=4096)
 	unsigned	len
 	SV *		buf
 	voidp		bufp = NO_INIT
-	int		bufsize = 0 ;
+	uLong		bufsize = 0 ;
 	int		RETVAL = 0 ;
 	CODE:
 	if (SvREADONLY(buf) && PL_curcop != &PL_compiling)
@@ -597,7 +369,7 @@ Zip_gzread(file, buf, len=4096)
         SvCUR_set(buf, 0);
 	/* any left over from gzreadline ? */
 	if ((bufsize = SvCUR(file->buffer)) > 0) {
-	    int movesize ;
+	    uLong movesize ;
 	    RETVAL = bufsize ;
 	
 	    if (bufsize < len) {
@@ -702,10 +474,6 @@ Zip_gzerror(file)
 MODULE = Compress::Zlib	PACKAGE = Compress::Zlib	PREFIX = Zip_
 
 
-BOOT:
-    adlerInitial = adler32(0L, Z_NULL, 0);
-    crcInitial   = crc32(0L, Z_NULL, 0);
-
 #define Zip_adler32(buf, adler) adler32(adler, buf, (uInt)len)
 
 uLong
@@ -720,11 +488,11 @@ Zip_adler32(buf, adler=adlerInitial)
 	buf = (Byte*)SvPV(sv, len) ;
 
 	if (items < 2)
-	  adler = adlerInitial ;
+	  adler = adlerInitial;
 	else if (SvOK(ST(1)))
 	  adler = SvUV(ST(1)) ;
 	else
-	  adler = crcInitial ; 
+	  adler = adlerInitial;
  
 #define Zip_crc32(buf, crc) crc32(crc, buf, (uInt)len)
 
@@ -740,11 +508,11 @@ Zip_crc32(buf, crc=crcInitial)
 	buf = (Byte*)SvPV(sv, len) ;
 
 	if (items < 2)
-	  crc = crcInitial ;
+	  crc = crcInitial;
 	else if (SvOK(ST(1)))
 	  crc = SvUV(ST(1)) ;
 	else
-	  crc = crcInitial ; 
+	  crc = crcInitial;
 
 MODULE = Compress::Zlib PACKAGE = Compress::Zlib
 
@@ -755,7 +523,7 @@ _deflateInit(level, method, windowBits, memLevel, strategy, bufsize, dictionary)
     int windowBits
     int memLevel
     int strategy
-    int bufsize
+    uLong bufsize
     SV * dictionary
   PPCODE:
 
@@ -793,7 +561,7 @@ _deflateInit(level, method, windowBits, memLevel, strategy, bufsize, dictionary)
 void
 _inflateInit(windowBits, bufsize, dictionary)
     int windowBits
-    int bufsize
+    uLong bufsize
     SV * dictionary
   PPCODE:
  
@@ -831,7 +599,7 @@ void
 deflate (s, buf)
     Compress::Zlib::deflateStream	s
     SV *	buf
-    int		outsize = NO_INIT 
+    uLong		outsize = NO_INIT 
     SV * 	output = NO_INIT
     int		err = 0;
   PPCODE:
@@ -841,7 +609,8 @@ deflate (s, buf)
  
     /* initialise the input buffer */
     s->stream.next_in = (Bytef*)SvPV(buf, *(STRLEN*)&s->stream.avail_in) ;
-    /* s->stream.avail_in = SvCUR(buf) ; */
+    /* s->stream.next_in = (Bytef*)SvPVX(buf); */
+    s->stream.avail_in = SvCUR(buf) ;
 
     /* and the output buffer */
     /* output = sv_2mortal(newSVpv("", s->bufsize)) ; */
@@ -852,6 +621,7 @@ deflate (s, buf)
     s->stream.next_out = (Bytef*) SvPVX(output) ;
     s->stream.avail_out = outsize;
     
+
     while (s->stream.avail_in != 0) {
 
         if (s->stream.avail_out == 0) {
@@ -890,7 +660,7 @@ void
 flush(s, f=Z_FINISH)
     Compress::Zlib::deflateStream	s
     int	f
-    int	outsize = NO_INIT
+    uLong	outsize = NO_INIT
     SV * output = NO_INIT
     int err = Z_OK ;
   PPCODE:
@@ -959,7 +729,7 @@ void
 inflate (s, buf)
     Compress::Zlib::inflateStream	s
     SV *	buf
-    int		outsize = NO_INIT 
+    uLong		outsize = NO_INIT 
     SV * 	output = NO_INIT
     int		err = Z_OK ;
   ALIAS:

@@ -22,8 +22,8 @@ use Mac::Types;
 @EXPORT_OK = (@EXPORT, @Mac::AppleEvents::EXPORT);
 %EXPORT_TAGS = (all => [@EXPORT, @EXPORT_OK]);
 
-$REVISION = '$Id: Simple.pm,v 1.4 2000/09/15 00:21:12 pudge Exp $';
-$VERSION  = '1.00';
+$REVISION = '$Id: Simple.pm,v 1.6 2002/01/15 15:48:26 pudge Exp $';
+$VERSION  = '1.01';
 $DEBUG	||= 0;
 $SWITCH ||= 0;
 $WARN	||= 0;
@@ -709,9 +709,13 @@ C<all> export tag.
 
 =over 4
 
-=item v1.01, 
+=item v1.01, Monday, January 14, 2002
+
+Make _getdata smarter.
 
 Added utxt coercion to text.  Catch errors in coercion.
+
+Change license to be that of Perl.
 
 =item v1.00, Monday, September 11, 2000
 
@@ -840,9 +844,9 @@ Here goes ...
 
 Chris Nandor E<lt>pudge@pobox.comE<gt>, http://pudge.net/
 
-Copyright (c) 1998-2000 Chris Nandor.  All rights reserved.  This program
-is free software; you can redistribute it and/or modify it under the terms
-of the Artistic License, distributed with Perl.
+Copyright (c) 1998-2002 Chris Nandor.  All rights reserved.  This program
+is free software; you can redistribute it and/or modify it under the same
+terms as Perl itself.
 
 =head1 SEE ALSO
 
@@ -855,4 +859,4 @@ Interapplication Communication.
 
 =head1 VERSION
 
-v1.00, Monday, September 11, 2000
+v1.01, Monday, January 14, 2002

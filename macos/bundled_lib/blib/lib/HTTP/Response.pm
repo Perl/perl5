@@ -1,5 +1,5 @@
 #
-# $Id: Response.pm,v 1.35 2001/08/07 00:26:57 gisle Exp $
+# $Id: Response.pm,v 1.36 2001/11/15 06:42:40 gisle Exp $
 
 package HTTP::Response;
 
@@ -32,7 +32,7 @@ C<request()> method of an C<LWP::UserAgent> object:
 
 C<HTTP::Response> is a subclass of C<HTTP::Message> and therefore
 inherits its methods.  The inherited methods most often used are header(),
-push_header(), remove_header(), headers_as_string(), and content().
+push_header(), remove_header(), and content().
 The header convenience methods are also available.  See
 L<HTTP::Message> for details.
 
@@ -45,7 +45,7 @@ The following additional methods are available:
 
 require HTTP::Message;
 @ISA = qw(HTTP::Message);
-$VERSION = sprintf("%d.%02d", q$Revision: 1.35 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.36 $ =~ /(\d+)\.(\d+)/);
 
 use HTTP::Status ();
 use strict;
@@ -386,7 +386,7 @@ sub fresh_until
 
 =head1 COPYRIGHT
 
-Copyright 1995-1997 Gisle Aas.
+Copyright 1995-2001 Gisle Aas.
 
 This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

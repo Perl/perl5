@@ -7,6 +7,15 @@ for my $count (1..3, 'four')
 {
 	switch ([$count])
 	{
+
+=pod
+
+=head1 Test
+
+We also test if Switch is POD-friendly here
+
+=cut
+
 		case qr/\d/ {
 				switch ($count) {
 					case 1     { print "ok 1\n" }
@@ -16,3 +25,11 @@ for my $count (1..3, 'four')
 		case 'four' { print "ok 4\n" }
 	}
 }
+
+__END__
+
+=head1 Another test
+
+Still friendly???
+
+=cut

@@ -15,18 +15,8 @@
 # Baseline for first official release.
 #
 
-sub BEGIN {
-    chdir('t') if -d 't';
-    @INC = '.'; 
-    push @INC, '../lib';
-    require Config; import Config;
-    if ($Config{'extensions'} !~ /\bStorable\b/) {
-        print "1..0 # Skip: Storable was not built\n";
-        exit 0;
-    }
-    require 'lib/st-dump.pl';
-    sub ok;
-}
+require 't/dump.pl';
+sub ok;
 
 use Storable qw(freeze nfreeze thaw);
 
