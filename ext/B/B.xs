@@ -625,14 +625,6 @@ cchar(sv)
 void
 threadsv_names()
     PPCODE:
-#ifdef USE_5005THREADS
-	int i;
-	STRLEN len = strlen(PL_threadsv_names);
-
-	EXTEND(sp, len);
-	for (i = 0; i < len; i++)
-	    PUSHs(sv_2mortal(newSVpvn(&PL_threadsv_names[i], 1)));
-#endif
 
 
 #define OP_next(o)	o->op_next

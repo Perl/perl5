@@ -36,17 +36,6 @@
 #   include "config.h"
 #endif
 
-#if defined(USE_ITHREADS) && defined(USE_5005THREADS)
-#  include "error: USE_ITHREADS and USE_5005THREADS are incompatible"
-#endif
-
-/* XXX This next guard can disappear if the sources are revised
-   to use USE_5005THREADS throughout. -- A.D  1/6/2000
-*/
-#if defined(USE_ITHREADS) && defined(USE_5005THREADS)
-#  include "error: USE_ITHREADS and USE_5005THREADS are incompatible"
-#endif
-
 /* See L<perlguts/"The Perl API"> for detailed notes on
  * PERL_IMPLICIT_CONTEXT and PERL_IMPLICIT_SYS */
 
@@ -66,12 +55,6 @@
 #ifdef USE_ITHREADS
 #  if !defined(MULTIPLICITY)
 #    define MULTIPLICITY
-#  endif
-#endif
-
-#ifdef USE_5005THREADS
-#  ifndef PERL_IMPLICIT_CONTEXT
-#    define PERL_IMPLICIT_CONTEXT
 #  endif
 #endif
 
@@ -96,20 +79,12 @@
 /* <--- here ends the logic shared by perl.h and makedef.pl */
 
 #ifdef PERL_IMPLICIT_CONTEXT
-#  ifdef USE_5005THREADS
-struct perl_thread;
-#    define pTHX	register struct perl_thread *thr PERL_UNUSED_DECL
-#    define aTHX	thr
-#    define dTHR	dNOOP /* only backward compatibility */
-#    define dTHXa(a)	pTHX = (struct perl_thread*)a
-#  else
-#    ifndef MULTIPLICITY
-#      define MULTIPLICITY
-#    endif
-#    define pTHX	register PerlInterpreter *my_perl PERL_UNUSED_DECL
-#    define aTHX	my_perl
-#    define dTHXa(a)	pTHX = (PerlInterpreter*)a
+#  ifndef MULTIPLICITY
+#    define MULTIPLICITY
 #  endif
+#  define pTHX	register PerlInterpreter *my_perl PERL_UNUSED_DECL
+#  define aTHX	my_perl
+#  define dTHXa(a)	pTHX = (PerlInterpreter*)a
 #  define dTHX		pTHX = PERL_GET_THX
 #  define pTHX_		pTHX,
 #  define aTHX_		aTHX,
@@ -361,8 +336,7 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 /* HP-UX 10.X CMA (Common Multithreaded Architecure) insists that
    pthread.h must be included before all other header files.
 */
-#if (defined(USE_5005THREADS) || defined(USE_ITHREADS)) \
-    && defined(PTHREAD_H_FIRST) && defined(I_PTHREAD)
+#if defined(USE_ITHREADS) && defined(PTHREAD_H_FIRST) && defined(I_PTHREAD)
 #  include <pthread.h>
 #endif
 
@@ -684,18 +658,7 @@ typedef struct perl_mstats perl_mstats_t;
 #       define INCLUDE_PROTOTYPES /* for <socks.h> */
 #       define PERL_SOCKS_NEED_PROTOTYPES
 #   endif
-#   ifdef USE_5005THREADS
-#       define PERL_USE_THREADS /* store our value */
-#       undef USE_5005THREADS
-#   endif
 #   include <socks.h>
-#   ifdef USE_5005THREADS
-#       undef USE_5005THREADS /* socks.h does this on its own */
-#   endif
-#   ifdef PERL_USE_THREADS
-#       define USE_5005THREADS /* restore our value */
-#       undef PERL_USE_THREADS
-#   endif
 #   ifdef PERL_SOCKS_NEED_PROTOTYPES /* keep cpp space clean */
 #       undef INCLUDE_PROTOTYPES
 #       undef PERL_SOCKS_NEED_PROTOTYPES
@@ -758,15 +721,9 @@ int sockatmark(int);
 #   define SS_NORMAL  		0
 #endif
 
-#ifdef USE_5005THREADS
-#  define ERRSV (thr->errsv)
-#  define DEFSV THREADSV(0)
-#  define SAVE_DEFSV save_threadsv(0)
-#else
-#  define ERRSV GvSV(PL_errgv)
-#  define DEFSV GvSV(PL_defgv)
-#  define SAVE_DEFSV SAVESPTR(GvSV(PL_defgv))
-#endif /* USE_5005THREADS */
+#define ERRSV GvSV(PL_errgv)
+#define DEFSV GvSV(PL_defgv)
+#define SAVE_DEFSV SAVESPTR(GvSV(PL_defgv))
 
 #define ERRHV GvHV(PL_errgv)	/* XXX unused, here for compatibility */
 
@@ -1993,19 +1950,13 @@ typedef struct clone_params CLONE_PARAMS;
 #  endif
 #endif
 
-/*
- * USE_5005THREADS needs to be after unixish.h as <pthread.h> includes
+/* USE_5005THREADS needs to be after unixish.h as <pthread.h> includes
  * <sys/signal.h> which defines NSIG - which will stop inclusion of <signal.h>
  * this results in many functions being undeclared which bothers C++
  * May make sense to have threads after "*ish.h" anyway
  */
 
-#if defined(USE_5005THREADS) || defined(USE_ITHREADS)
-#  if defined(USE_5005THREADS)
-   /* pending resolution of licensing issues, we avoid the erstwhile
-    * atomic.h everywhere */
-#  define EMULATE_ATOMIC_REFCOUNTS
-#  endif
+#if defined(USE_ITHREADS)
 #  ifdef NETWARE
 #   include <nw5thread.h>
 #  else
@@ -2040,7 +1991,7 @@ typedef pthread_key_t	perl_key;
 #    endif /* WIN32 */
 #  endif /* FAKE_THREADS */
 #endif	/* NETWARE */
-#endif /* USE_5005THREADS || USE_ITHREADS */
+#endif /* USE_ITHREADS */
 
 #if defined(WIN32)
 #  include "win32.h"
@@ -2144,12 +2095,8 @@ typedef pthread_key_t	perl_key;
 #endif
 
 #if defined(PERL_IMPLICIT_CONTEXT) && !defined(PERL_GET_THX)
-#  ifdef USE_5005THREADS
-#    define PERL_GET_THX		((struct perl_thread *)PERL_GET_CONTEXT)
-#  else
 #  ifdef MULTIPLICITY
 #    define PERL_GET_THX		((PerlInterpreter *)PERL_GET_CONTEXT)
-#  endif
 #  endif
 #  define PERL_SET_THX(t)		PERL_SET_CONTEXT(t)
 #endif
@@ -2230,12 +2177,6 @@ union any {
     void	(*any_dxptr) (pTHX_ void*);
 };
 #endif
-
-#ifdef USE_5005THREADS
-#define ARGSproto struct perl_thread *thr
-#else
-#define ARGSproto
-#endif /* USE_5005THREADS */
 
 typedef I32 (*filter_t) (pTHX_ int, SV *, int);
 
@@ -2577,11 +2518,7 @@ Gid_t getegid (void);
 #  define DEBUG_Xv(a) DEBUG__(DEBUG_Xv_TEST, a)
 #  define DEBUG_D(a) DEBUG__(DEBUG_D_TEST, a)
 
-#  ifdef USE_5005THREADS
-#    define DEBUG_S(a) DEBUG__(DEBUG_S_TEST, a)
-#  else
-#    define DEBUG_S(a)
-#  endif
+#  define DEBUG_S(a)
 
 #  define DEBUG_T(a) DEBUG__(DEBUG_T_TEST, a)
 #  define DEBUG_R(a) DEBUG__(DEBUG_R_TEST, a)
@@ -3265,9 +3202,6 @@ enum {		/* pass one of these to get_vtbl */
     want_vtbl_collxfrm,
     want_vtbl_amagic,
     want_vtbl_amagicelem,
-#ifdef USE_5005THREADS
-    want_vtbl_mutex,
-#endif
     want_vtbl_regdata,
     want_vtbl_regdatum,
     want_vtbl_backref
@@ -3381,9 +3315,7 @@ struct perl_vars *PL_VarsPtr;
 */
 
 struct interpreter {
-#  ifndef USE_5005THREADS
-#    include "thrdvar.h"
-#  endif
+#  include "thrdvar.h"
 #  include "intrpvar.h"
 /*
  * The following is a buffer where new variables must
@@ -3398,21 +3330,7 @@ struct interpreter {
 };
 #endif /* MULTIPLICITY */
 
-#ifdef USE_5005THREADS
-/* If we have threads define a struct with all the variables
- * that have to be per-thread
- */
-
-
-struct perl_thread {
-#include "thrdvar.h"
-};
-
-typedef struct perl_thread *Thread;
-
-#else
 typedef void *Thread;
-#endif
 
 /* Done with PERLVAR macros for now ... */
 #undef PERLVAR
@@ -3465,9 +3383,7 @@ typedef void *Thread;
 #if !defined(MULTIPLICITY)
 START_EXTERN_C
 #  include "intrpvar.h"
-#  ifndef USE_5005THREADS
-#    include "thrdvar.h"
-#  endif
+#  include "thrdvar.h"
 END_EXTERN_C
 #endif
 
@@ -3557,10 +3473,6 @@ EXT MGVTBL PL_vtbl_fm =	{0,	MEMBER_TO_FPTR(Perl_magic_setfm),
 EXT MGVTBL PL_vtbl_uvar =	{MEMBER_TO_FPTR(Perl_magic_getuvar),
 				MEMBER_TO_FPTR(Perl_magic_setuvar),
 					0,	0,	0};
-#ifdef USE_5005THREADS
-EXT MGVTBL PL_vtbl_mutex =	{0,	0,	0,	0,	
-					MEMBER_TO_FPTR(Perl_magic_mutexfree)};
-#endif /* USE_5005THREADS */
 EXT MGVTBL PL_vtbl_defelem = {MEMBER_TO_FPTR(Perl_magic_getdefelem),
     					MEMBER_TO_FPTR(Perl_magic_setdefelem),
 					0,	0,	0};
@@ -3611,10 +3523,6 @@ EXT MGVTBL PL_vtbl_bm;
 EXT MGVTBL PL_vtbl_fm;
 EXT MGVTBL PL_vtbl_uvar;
 EXT MGVTBL PL_vtbl_ovrld;
-
-#ifdef USE_5005THREADS
-EXT MGVTBL PL_vtbl_mutex;
-#endif /* USE_5005THREADS */
 
 EXT MGVTBL PL_vtbl_defelem;
 EXT MGVTBL PL_vtbl_regexp;

@@ -469,16 +469,8 @@ Perl_save_padsv(pTHX_ PADOFFSET off)
 SV **
 Perl_save_threadsv(pTHX_ PADOFFSET i)
 {
-#ifdef USE_5005THREADS
-    SV **svp = &THREADSV(i);	/* XXX Change to save by offset */
-    DEBUG_S(PerlIO_printf(Perl_debug_log, "save_threadsv %"UVuf": %p %p:%s\n",
-			  (UV)i, svp, *svp, SvPEEK(*svp)));
-    save_svref(svp);
-    return svp;
-#else
     Perl_croak(aTHX_ "panic: save_threadsv called in non-threaded perl");
     return 0;
-#endif /* USE_5005THREADS */
 }
 
 void

@@ -47,15 +47,8 @@ Perl_vdeb(pTHX_ const char *pat, va_list *args)
 #ifdef DEBUGGING
     char* file = OutCopFILE(PL_curcop);
 
-#ifdef USE_5005THREADS
-    PerlIO_printf(Perl_debug_log, "0x%"UVxf" (%s:%ld)\t",
-		  PTR2UV(thr),
-		  (file ? file : "<free>"),
-		  (long)CopLINE(PL_curcop));
-#else
     PerlIO_printf(Perl_debug_log, "(%s:%ld)\t", (file ? file : "<free>"),
 		  (long)CopLINE(PL_curcop));
-#endif /* USE_5005THREADS */
     (void) PerlIO_vprintf(Perl_debug_log, pat, *args);
 #endif /* DEBUGGING */
 }

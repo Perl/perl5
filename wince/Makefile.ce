@@ -375,14 +375,6 @@ CRYPT_FLAG	= -DHAVE_DES_FCRYPT
 PERL_MALLOC	= undef
 !ENDIF
 
-!IF "$(USE_5005THREADS)" == ""
-USE_5005THREADS	= undef
-!ENDIF
-
-!IF "$(USE_5005THREADS)" == "define"
-USE_ITHREADS	= undef
-!ENDIF
-
 !IF "$(USE_IMP_SYS)" == "define"
 PERL_MALLOC	= undef
 !ENDIF
@@ -407,16 +399,15 @@ USE_PERLIO	= undef
 USE_PERLCRT	= undef
 !ENDIF
 
-!IF "$(USE_IMP_SYS)$(USE_MULTI)$(USE_5005THREADS)" == "defineundefundef"
+!IF "$(USE_IMP_SYS)$(USE_MULTI)" == "defineundef"
 USE_MULTI	= define
 !ENDIF
 
 !IF "$(USE_ITHREADS)$(USE_MULTI)" == "defineundef"
 USE_MULTI	= define
-USE_5005THREADS	= undef
 !ENDIF
 
-!IF "$(USE_MULTI)$(USE_5005THREADS)" != "undefundef"
+!IF "$(USE_MULTI)" != "undef"
 BUILDOPT	= $(BUILDOPT) -DPERL_IMPLICIT_CONTEXT
 !ENDIF
 
@@ -749,9 +740,7 @@ CFG_VARS = \
  "static_ext=$(STATIC_EXT)" \
  "dynamic_ext=$(DYNAMIC_EXT)" \
  "nonxs_ext=$(NONXS_EXT)" \
- "use5005threads=$(USE_5005THREADS)" \
  "useithreads=$(USE_ITHREADS)" \
- "usethreads=$(USE_5005THREADS)" \
  "usemultiplicity=$(USE_MULTI)" \
  "useperlio=$(USE_PERLIO)" \
  "LINK_FLAGS=$(LDLIBPATH) $(LINK_FLAGS) $(SUBSYS)" \

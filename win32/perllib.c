@@ -261,7 +261,7 @@ DllMain(HANDLE hModule,		/* DLL module handle */
             PerlIO_cleanup() was done here but fails (B).
          */     
 	EndSockets();
-#if defined(USE_5005THREADS) || defined(USE_ITHREADS)
+#if defined(USE_ITHREADS)
 	if (PL_curinterp)
 	    FREE_THREAD_KEY;
 #endif

@@ -4380,11 +4380,7 @@ PP(pp_split)
 #endif
     }
     else if (gimme != G_ARRAY)
-#ifdef USE_5005THREADS
-	ary = (AV*)PAD_SVl(0);
-#else
 	ary = GvAVn(PL_defgv);
-#endif /* USE_5005THREADS */
     else
 	ary = Nullav;
     if (ary && (gimme != G_ARRAY || (pm->op_pmflags & PMf_ONCE))) {
@@ -4644,25 +4640,6 @@ PP(pp_split)
     RETPUSHUNDEF;
 }
 
-#ifdef USE_5005THREADS
-void
-Perl_unlock_condpair(pTHX_ void *svv)
-{
-    MAGIC *mg = mg_find((SV*)svv, PERL_MAGIC_mutex);
-
-    if (!mg)
-	Perl_croak(aTHX_ "panic: unlock_condpair unlocking non-mutex");
-    MUTEX_LOCK(MgMUTEXP(mg));
-    if (MgOWNER(mg) != thr)
-	Perl_croak(aTHX_ "panic: unlock_condpair unlocking mutex that we don't own");
-    MgOWNER(mg) = 0;
-    COND_SIGNAL(MgOWNERCONDP(mg));
-    DEBUG_S(PerlIO_printf(Perl_debug_log, "0x%"UVxf": unlock 0x%"UVxf"\n",
-			  PTR2UV(thr), PTR2UV(svv)));
-    MUTEX_UNLOCK(MgMUTEXP(mg));
-}
-#endif /* USE_5005THREADS */
-
 PP(pp_lock)
 {
     dSP;
@@ -4679,15 +4656,5 @@ PP(pp_lock)
 
 PP(pp_threadsv)
 {
-#ifdef USE_5005THREADS
-    dSP;
-    EXTEND(SP, 1);
-    if (PL_op->op_private & OPpLVAL_INTRO)
-	PUSHs(*save_threadsv(PL_op->op_targ));
-    else
-	PUSHs(THREADSV(PL_op->op_targ));
-    RETURN;
-#else
     DIE(aTHX_ "tried to access per-thread data in non-threaded perl");
-#endif /* USE_5005THREADS */
 }

@@ -368,12 +368,6 @@ struct thread_intern {
     WORD               Wshowwindow;
 };
 
-#ifdef USE_5005THREADS
-#  ifndef USE_DECLSPEC_THREAD
-#    define HAVE_THREAD_INTERN
-#  endif /* !USE_DECLSPEC_THREAD */
-#endif /* USE_5005THREADS */
-
 #define HAVE_INTERP_INTERN
 typedef struct {
     long	num;
@@ -397,9 +391,7 @@ struct interp_intern {
     child_tab *	pseudo_children;
 #endif
     void *	internal_host;
-#ifndef USE_5005THREADS
     struct thread_intern	thr_intern;
-#endif
     UINT	timerid;
     unsigned 	poll_count;
     Sighandler_t sigtable[SIG_SIZE];
@@ -428,23 +420,13 @@ DllExport int win32_async_check(pTHX);
 #define w32_sighandler			(PL_sys_intern.sigtable)
 #define w32_poll_count			(PL_sys_intern.poll_count)
 #define w32_do_async			(w32_poll_count++ > WIN32_POLL_INTERVAL)
-#ifdef USE_5005THREADS
-#  define w32_strerror_buffer	(thr->i.Wstrerror_buffer)
-#  define w32_getlogin_buffer	(thr->i.Wgetlogin_buffer)
-#  define w32_crypt_buffer	(thr->i.Wcrypt_buffer)
-#  define w32_servent		(thr->i.Wservent)
-#  define w32_init_socktype	(thr->i.Winit_socktype)
-#  define w32_use_showwindow	(thr->i.Wuse_showwindow)
-#  define w32_showwindow	(thr->i.Wshowwindow)
-#else
-#  define w32_strerror_buffer	(PL_sys_intern.thr_intern.Wstrerror_buffer)
-#  define w32_getlogin_buffer	(PL_sys_intern.thr_intern.Wgetlogin_buffer)
-#  define w32_crypt_buffer	(PL_sys_intern.thr_intern.Wcrypt_buffer)
-#  define w32_servent		(PL_sys_intern.thr_intern.Wservent)
-#  define w32_init_socktype	(PL_sys_intern.thr_intern.Winit_socktype)
-#  define w32_use_showwindow	(PL_sys_intern.thr_intern.Wuse_showwindow)
-#  define w32_showwindow	(PL_sys_intern.thr_intern.Wshowwindow)
-#endif /* USE_5005THREADS */
+#define w32_strerror_buffer	(PL_sys_intern.thr_intern.Wstrerror_buffer)
+#define w32_getlogin_buffer	(PL_sys_intern.thr_intern.Wgetlogin_buffer)
+#define w32_crypt_buffer	(PL_sys_intern.thr_intern.Wcrypt_buffer)
+#define w32_servent		(PL_sys_intern.thr_intern.Wservent)
+#define w32_init_socktype	(PL_sys_intern.thr_intern.Winit_socktype)
+#define w32_use_showwindow	(PL_sys_intern.thr_intern.Wuse_showwindow)
+#define w32_showwindow	(PL_sys_intern.thr_intern.Wshowwindow)
 
 /* UNICODE<>ANSI translation helpers */
 /* Use CP_ACP when mode is ANSI */

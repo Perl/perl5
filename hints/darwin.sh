@@ -145,7 +145,7 @@ firstmakefile=GNUmakefile;
 #
 # Fix when Apple fixes libc.
 #
-case "$usethreads$useithreads$use5005threads" in
+case "$usethreads$useithreads" in
   *define*)
     cat <<EOM >&4
 

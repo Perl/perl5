@@ -74,16 +74,6 @@ USE_IMP_SYS = define
 USE_PERLIO	= define
 
 #
-# WARNING! This option is deprecated and will eventually go away (enable
-# USE_ITHREADS instead).
-#
-# uncomment to enable threads-capabilities.  This is incompatible with
-# USE_ITHREADS, and is only here for people who may have come to rely
-# on the experimental Thread support that was in 5.005.
-#
-#USE_5005THREADS	= define
-
-#
 # uncomment one of the following lines if you are using either
 # Visual C++ 2.x or Visual C++ 6.x (aka Visual Studio 98)
 #
@@ -206,14 +196,6 @@ CRYPT_FLAG	= -DHAVE_DES_FCRYPT
 PERL_MALLOC	= undef
 !ENDIF
 
-!IF "$(USE_5005THREADS)" == ""
-USE_5005THREADS	= undef
-!ENDIF
-
-!IF "$(USE_5005THREADS)" == "define"
-USE_ITHREADS	= undef
-!ENDIF
-
 !IF "$(USE_IMP_SYS)" == "define"
 PERL_MALLOC	= undef
 !ENDIF
@@ -238,16 +220,15 @@ USE_PERLIO	= undef
 USE_PERLCRT	= undef
 !ENDIF
 
-!IF "$(USE_IMP_SYS)$(USE_MULTI)$(USE_5005THREADS)" == "defineundefundef"
+!IF "$(USE_IMP_SYS)$(USE_MULTI)" == "defineundef"
 USE_MULTI	= define
 !ENDIF
 
 !IF "$(USE_ITHREADS)$(USE_MULTI)" == "defineundef"
 USE_MULTI	= define
-USE_5005THREADS	= undef
 !ENDIF
 
-!IF "$(USE_MULTI)$(USE_5005THREADS)" != "undefundef"
+!IF "$(USE_MULTI)" != "undef"
 BUILDOPT	= $(BUILDOPT) -DPERL_IMPLICIT_CONTEXT
 !ENDIF
 
@@ -272,9 +253,6 @@ WIN64			= undef
 !ENDIF
 !ENDIF
 
-!IF "$(USE_5005THREADS)" == "define"
-ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)-thread
-!ELSE
 !IF "$(USE_MULTI)" == "define"
 ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)-multi
 !ELSE
@@ -282,7 +260,6 @@ ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)-multi
 ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)-perlio
 !ELSE
 ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)
-!ENDIF
 !ENDIF
 !ENDIF
 
@@ -787,9 +764,7 @@ CFG_VARS	=					\
 		"libpth=$(CCLIBDIR:"=\");$(EXTRALIBDIRS:"=\")"	\
 		"libc=$(LIBC)"				\
 		"make=$(MAKE_BARE)"				\
-		"use5005threads=$(USE_5005THREADS)"	\
 		"useithreads=$(USE_ITHREADS)"		\
-		"usethreads=$(USE_5005THREADS)"		\
 		"usemultiplicity=$(USE_MULTI)"		\
 		"useperlio=$(USE_PERLIO)"		\
 		"LINK_FLAGS=$(LINK_FLAGS:"=\")"		\

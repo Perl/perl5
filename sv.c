@@ -4757,11 +4757,6 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
     case PERL_MAGIC_dbline:
 	vtable = &PL_vtbl_dbline;
 	break;
-#ifdef USE_5005THREADS
-    case PERL_MAGIC_mutex:
-	vtable = &PL_vtbl_mutex;
-	break;
-#endif /* USE_5005THREADS */
 #ifdef USE_LOCALE_COLLATE
     case PERL_MAGIC_collxfrm:
         vtable = &PL_vtbl_collxfrm;
@@ -8805,10 +8800,6 @@ ptr_table_* functions.
 
 
 #if defined(USE_ITHREADS)
-
-#if defined(USE_5005THREADS)
-#  include "error: USE_5005THREADS and USE_ITHREADS are incompatible"
-#endif
 
 #ifndef GpREFCNT_inc
 #  define GpREFCNT_inc(gp)	((gp) ? (++(gp)->gp_refcnt, (gp)) : (GP*)NULL)

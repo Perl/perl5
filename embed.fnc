@@ -106,9 +106,6 @@ Ap	|UV	|cast_uv	|NV f
 #if !defined(HAS_TRUNCATE) && !defined(HAS_CHSIZE) && defined(F_FREESP)
 Ap	|I32	|my_chsize	|int fd|Off_t length
 #endif
-#if defined(USE_5005THREADS)
-Ap	|MAGIC*	|condpair_magic	|SV *sv
-#endif
 p	|OP*	|convert	|I32 optype|I32 flags|OP* o
 Afprd	|void	|croak		|const char* pat|...
 Apr	|void	|vcroak		|const char* pat|va_list* args
@@ -222,9 +219,6 @@ Apd	|char*	|fbm_instr	|unsigned char* big|unsigned char* bigend \
 				|SV* littlesv|U32 flags
 p	|char*	|find_script	|char *scriptname|bool dosearch \
 				|char **search_ext|I32 flags
-#if defined(USE_5005THREADS)
-p	|PADOFFSET|find_threadsv|const char *name
-#endif
 p	|OP*	|force_list	|OP* arg
 p	|OP*	|fold_constants	|OP* arg
 Afpd	|char*	|form		|const char* pat|...
@@ -392,9 +386,6 @@ p	|int	|magic_gettaint	|SV* sv|MAGIC* mg
 p	|int	|magic_getuvar	|SV* sv|MAGIC* mg
 p	|int	|magic_getvec	|SV* sv|MAGIC* mg
 p	|U32	|magic_len	|SV* sv|MAGIC* mg
-#if defined(USE_5005THREADS)
-p	|int	|magic_mutexfree|SV* sv|MAGIC* mg
-#endif
 p	|int	|magic_nextpack	|SV* sv|MAGIC* mg|SV* key
 p	|U32	|magic_regdata_cnt|SV* sv|MAGIC* mg
 p	|int	|magic_regdatum_get|SV* sv|MAGIC* mg
@@ -559,9 +550,6 @@ pd	|void	|pad_reset
 pd	|void	|pad_swipe	|PADOFFSET po|bool refadjust
 p	|void	|peep		|OP* o
 dopM	|PerlIO*|start_glob	|SV* pattern|IO *io
-#if defined(USE_5005THREADS)
-Ap	|struct perl_thread*	|new_struct_thread|struct perl_thread *t
-#endif
 #if defined(USE_REENTRANT_API)
 Ap	|void	|reentrant_size
 Ap	|void	|reentrant_init
@@ -806,9 +794,6 @@ Apd	|UV	|to_utf8_fold	|U8 *p|U8* ustrp|STRLEN *lenp
 #if defined(UNLINK_ALL_VERSIONS)
 Ap	|I32	|unlnk		|char* f
 #endif
-#if defined(USE_5005THREADS)
-Ap	|void	|unlock_condpair|void* svv
-#endif
 Apd	|I32	|unpack_str	|char *pat|char *patend|char *s|char *strbeg|char *strend|char **new_s|I32 ocnt|U32 flags
 Ap	|void	|unsharepvn	|const char* sv|I32 len|U32 hash
 p	|void	|unshare_hek	|HEK* hek
@@ -863,9 +848,6 @@ Ap	|struct perl_vars *|GetVars
 #endif
 Ap	|int	|runops_standard
 Ap	|int	|runops_debug
-#if defined(USE_5005THREADS)
-Ap	|SV*	|sv_lock	|SV *sv
-#endif
 Afpd	|void	|sv_catpvf_mg	|SV *sv|const char* pat|...
 Ap	|void	|sv_vcatpvf_mg	|SV* sv|const char* pat|va_list* args
 Apd	|void	|sv_catpv_mg	|SV *sv|const char *ptr
@@ -1056,9 +1038,6 @@ s	|void*	|vrun_body	|va_list args
 s	|void*	|vcall_body	|va_list args
 s	|void*	|vcall_list_body|va_list args
 #endif
-#  if defined(USE_5005THREADS)
-s	|struct perl_thread *	|init_main_thread
-#  endif
 #endif
 
 #if defined(PERL_IN_PP_C) || defined(PERL_DECL_PROT)

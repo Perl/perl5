@@ -226,12 +226,6 @@ PERLVAR(Ilinestart,	char *)		/* beg. of most recently read line */
 PERLVAR(Ipending_ident,	char)		/* pending identifier lookup */
 PERLVAR(Isublex_info,	SUBLEXINFO)	/* from toke.c */
 
-#ifdef USE_5005THREADS
-PERLVAR(Ithrsv,		SV *)		/* struct perl_thread for main thread */
-PERLVARI(Ithreadnum,	U32,	0)	/* incremented each thread creation */
-PERLVAR(Istrtab_mutex,	perl_mutex)	/* Mutex for string table access */
-#endif /* USE_5005THREADS */
-
 PERLVAR(Iuid,		Uid_t)		/* current real user id */
 PERLVAR(Ieuid,		Uid_t)		/* current effective user id */
 PERLVAR(Igid,		Gid_t)		/* current real group id */
@@ -411,26 +405,6 @@ PERLVAR(Isrand_called,	bool)
 PERLVARA(Iuudmap,256,	char)
 PERLVAR(Ibitcount,	char *)
 
-#ifdef USE_5005THREADS
-PERLVAR(Isv_mutex,	perl_mutex)	/* Mutex for allocating SVs in sv.c */
-PERLVAR(Ieval_mutex,	perl_mutex)	/* Mutex for doeval */
-PERLVAR(Ieval_cond,	perl_cond)	/* Condition variable for doeval */
-PERLVAR(Ieval_owner,	struct perl_thread *)
-					/* Owner thread for doeval */
-PERLVAR(Inthreads,	int)		/* Number of threads currently */
-PERLVAR(Ithreads_mutex,	perl_mutex)	/* Mutex for nthreads and thread list */
-PERLVAR(Inthreads_cond,	perl_cond)	/* Condition variable for nthreads */
-PERLVAR(Isvref_mutex,	perl_mutex)	/* Mutex for SvREFCNT_{inc,dec} */
-PERLVARI(Ithreadsv_names,char *,	THREADSV_NAMES)
-#ifdef FAKE_THREADS
-PERLVAR(Icurthr,	struct perl_thread *)
-					/* Currently executing (fake) thread */
-#endif
-
-PERLVAR(Icred_mutex,	perl_mutex)	/* altered credentials in effect */
-
-#endif /* USE_5005THREADS */
-
 PERLVAR(Ipsig_ptr, SV**)
 PERLVAR(Ipsig_name, SV**)
 
@@ -450,11 +424,6 @@ PERLVAR(IProc,		struct IPerlProc*)
 PERLVAR(Iptr_table,	PTR_TBL_t*)
 #endif
 PERLVARI(Ibeginav_save, AV*, Nullav)	/* save BEGIN{}s when compiling */
-
-#ifdef USE_5005THREADS
-PERLVAR(Ifdpid_mutex,	perl_mutex)	/* mutex for fdpid array */
-PERLVAR(Isv_lock_mutex,	perl_mutex)	/* mutex for SvLOCK macro */
-#endif
 
 PERLVAR(Ixnv_arenaroot,	XPV*)		/* list of allocated xnv areas */
 PERLVAR(Ixrv_arenaroot,	XPV*)		/* list of allocated xrv areas */

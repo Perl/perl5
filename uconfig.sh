@@ -669,7 +669,6 @@ uidsign='1'
 uidsize='4'
 uidtype=int
 uquadtype='uint64_t'
-use5005threads='undef'
 use64bitall='undef'
 use64bitint='undef'
 usecrosscompile='undef'

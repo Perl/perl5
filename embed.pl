@@ -519,22 +519,20 @@ print EM <<'END';
 /* (Doing namespace management portably in C is really gross.) */
 
 /*
-   The following combinations of MULTIPLICITY, USE_5005THREADS
-   and PERL_IMPLICIT_CONTEXT are supported:
+   The following combinations of MULTIPLICITY and PERL_IMPLICIT_CONTEXT
+   are supported:
      1) none
      2) MULTIPLICITY	# supported for compatibility
      3) MULTIPLICITY && PERL_IMPLICIT_CONTEXT
-     4) USE_5005THREADS && PERL_IMPLICIT_CONTEXT
-     5) MULTIPLICITY && USE_5005THREADS && PERL_IMPLICIT_CONTEXT
 
    All other combinations of these flags are errors.
 
-   #3, #4, #5, and #6 are supported directly, while #2 is a special
+   only #3 is supported directly, while #2 is a special
    case of #3 (supported by redefining vTHX appropriately).
 */
 
 #if defined(MULTIPLICITY)
-/* cases 2, 3 and 5 above */
+/* cases 2 and 3 above */
 
 #  if defined(PERL_IMPLICIT_CONTEXT)
 #    define vTHX	aTHX
@@ -550,18 +548,6 @@ for $sym (sort keys %thread) {
 
 print EM <<'END';
 
-#  if defined(USE_5005THREADS)
-/* case 5 above */
-
-END
-
-for $sym (sort keys %intrp) {
-    print EM multon($sym,'I','PERL_GET_INTERP->');
-}
-
-print EM <<'END';
-
-#  else		/* !USE_5005THREADS */
 /* cases 2 and 3 above */
 
 END
@@ -572,11 +558,9 @@ for $sym (sort keys %intrp) {
 
 print EM <<'END';
 
-#  endif	/* USE_5005THREADS */
-
 #else	/* !MULTIPLICITY */
 
-/* cases 1 and 4 above */
+/* case 1 above */
 
 END
 
@@ -586,20 +570,6 @@ for $sym (sort keys %intrp) {
 
 print EM <<'END';
 
-#  if defined(USE_5005THREADS)
-/* case 4 above */
-
-END
-
-for $sym (sort keys %thread) {
-    print EM multon($sym,'T','aTHX->');
-}
-
-print EM <<'END';
-
-#  else	/* !USE_5005THREADS */
-/* case 1 above */
-
 END
 
 for $sym (sort keys %thread) {
@@ -608,7 +578,6 @@ for $sym (sort keys %thread) {
 
 print EM <<'END';
 
-#  endif	/* USE_5005THREADS */
 #endif	/* MULTIPLICITY */
 
 #if defined(PERL_GLOBAL_STRUCT)

@@ -27,10 +27,6 @@
 
 /* Important ones in the first cache line (if alignment is done right) */
 
-#ifdef USE_5005THREADS
-PERLVAR(interp,		PerlInterpreter*)	/* thread owner */
-#endif
-
 PERLVAR(Tstack_sp,	SV **)		/* top of the stack */
 #ifdef OP_IN_REGISTER
 PERLVAR(Topsave,	OP *)
@@ -245,32 +241,6 @@ PERLVAR(Twatchok,	char *)
 
 /* Note that the variables below are all explicitly referenced in the code
  * as thr->whatever and therefore don't need the 'T' prefix. */
-
-#ifdef USE_5005THREADS
-
-PERLVAR(oursv,		SV *)
-PERLVAR(cvcache,	HV *)
-PERLVAR(self,		perl_os_thread)	/* Underlying thread object */
-PERLVAR(flags,		U32)
-PERLVAR(threadsv,	AV *)		/* Per-thread SVs ($_, $@ etc.) */
-PERLVAR(threadsvp,	SV **)		/* AvARRAY(threadsv) */
-PERLVAR(specific,	AV *)		/* Thread-specific user data */
-PERLVAR(errsv,		SV *)		/* Backing SV for $@ */
-PERLVAR(mutex,		perl_mutex)	/* For the fields others can change */
-PERLVAR(tid,		U32)
-PERLVAR(prev,		struct perl_thread *)
-PERLVAR(next,		struct perl_thread *)
-					/* Circular linked list of threads */
-
-#ifdef HAVE_THREAD_INTERN
-PERLVAR(i,		struct thread_intern)
-					/* Platform-dependent internals */
-#endif
-
-PERLVAR(trailing_nul,	char)		/* For the sake of thrsv and oursv */
-PERLVAR(thr_done,	bool)		/* True when the thread has finished */
-
-#endif /* USE_5005THREADS */
 
 PERLVAR(Treg_match_utf8,	bool)		/* was what we matched against utf8 */
 

@@ -73,7 +73,7 @@ PP(pp_regcomp)
     tmpstr = POPs;
 
     /* prevent recompiling under /o and ithreads. */
-#if defined(USE_ITHREADS) || defined(USE_5005THREADS)
+#if defined(USE_ITHREADS)
     if (pm->op_pmflags & PMf_KEEP && PM_GETRE(pm))
 	 RETURN;
 #endif
@@ -138,7 +138,7 @@ PP(pp_regcomp)
     /* XXX runtime compiled output needs to move to the pad */
     if (pm->op_pmflags & PMf_KEEP) {
 	pm->op_private &= ~OPpRUNTIME;	/* no point compiling again */
-#if !defined(USE_ITHREADS) && !defined(USE_5005THREADS)
+#if !defined(USE_ITHREADS)
 	/* XXX can't change the optree at runtime either */
 	cLOGOP->op_first->op_next = PL_op->op_next;
 #endif
@@ -1654,14 +1654,6 @@ PP(pp_enteriter)
     ENTER;
     SAVETMPS;
 
-#ifdef USE_5005THREADS
-    if (PL_op->op_flags & OPf_SPECIAL) {
-	svp = &THREADSV(PL_op->op_targ);	/* per-thread variable */
-	SAVEGENERICSV(*svp);
-	*svp = NEWSV(0,0);
-    }
-    else
-#endif /* USE_5005THREADS */
     if (PL_op->op_targ) {
 #ifndef USE_ITHREADS
 	svp = &PAD_SVl(PL_op->op_targ);		/* "my" variable */
@@ -2136,10 +2128,8 @@ PP(pp_goto)
 		EXTEND(PL_stack_sp, items); /* @_ could have been extended. */
 		Copy(AvARRAY(av), PL_stack_sp, items, SV*);
 		PL_stack_sp += items;
-#ifndef USE_5005THREADS
 		SvREFCNT_dec(GvAV(PL_defgv));
 		GvAV(PL_defgv) = cx->blk_sub.savearray;
-#endif /* USE_5005THREADS */
 		/* abandon @_ if it got reified */
 		if (AvREAL(av)) {
 		    (void)sv_2mortal((SV*)av);	/* delay until return */
@@ -2151,11 +2141,7 @@ PP(pp_goto)
 	    }
 	    else if (CvXSUB(cv)) {	/* put GvAV(defgv) back onto stack */
 		AV* av;
-#ifdef USE_5005THREADS
-		av = (AV*)PAD_SVl(0);
-#else
 		av = GvAV(PL_defgv);
-#endif
 		items = AvFILLp(av) + 1;
 		PL_stack_sp++;
 		EXTEND(PL_stack_sp, items); /* @_ could have been extended. */
@@ -2220,32 +2206,14 @@ PP(pp_goto)
 			sub_crush_depth(cv);
 		    pad_push(padlist, CvDEPTH(cv), cx->blk_sub.hasargs);
 		}
-#ifdef USE_5005THREADS
-		if (!cx->blk_sub.hasargs) {
-		    AV* av = (AV*)PAD_SVl(0);
-		
-		    items = AvFILLp(av) + 1;
-		    if (items) {
-			/* Mark is at the end of the stack. */
-			EXTEND(SP, items);
-			Copy(AvARRAY(av), SP + 1, items, SV*);
-			SP += items;
-			PUTBACK ;		
-		    }
-		}
-#endif /* USE_5005THREADS */
 		PAD_SET_CUR(padlist, CvDEPTH(cv));
-#ifndef USE_5005THREADS
 		if (cx->blk_sub.hasargs)
-#endif /* USE_5005THREADS */
 		{
 		    AV* av = (AV*)PAD_SVl(0);
 		    SV** ary;
 
-#ifndef USE_5005THREADS
 		    cx->blk_sub.savearray = GvAV(PL_defgv);
 		    GvAV(PL_defgv) = (AV*)SvREFCNT_inc(av);
-#endif /* USE_5005THREADS */
 		    CX_CURPAD_SAVE(cx->blk_sub);
 		    cx->blk_sub.argarray = av;
 		    ++mark;
@@ -2693,12 +2661,6 @@ S_doeval(pTHX_ int gimme, OP** startop)
     assert(CxTYPE(&cxstack[cxstack_ix]) == CXt_EVAL);
     cxstack[cxstack_ix].blk_eval.cv = PL_compcv;
 
-#ifdef USE_5005THREADS
-    CvOWNER(PL_compcv) = 0;
-    New(666, CvMUTEXP(PL_compcv), 1, perl_mutex);
-    MUTEX_INIT(CvMUTEXP(PL_compcv));
-#endif /* USE_5005THREADS */
-
     /* set up a scratch pad */
 
     CvPADLIST(PL_compcv) = pad_new(padnew_SAVE);
@@ -2765,12 +2727,6 @@ S_doeval(pTHX_ int gimme, OP** startop)
 	    Perl_croak(aTHX_ "%sCompilation failed in regexp",
 		       (*msg ? msg : "Unknown error\n"));
 	}
-#ifdef USE_5005THREADS
-	MUTEX_LOCK(&PL_eval_mutex);
-	PL_eval_owner = 0;
-	COND_SIGNAL(&PL_eval_cond);
-	MUTEX_UNLOCK(&PL_eval_mutex);
-#endif /* USE_5005THREADS */
 	RETPUSHUNDEF;
     }
     CopLINE_set(&PL_compiling, 0);
@@ -2807,12 +2763,6 @@ S_doeval(pTHX_ int gimme, OP** startop)
     SP = PL_stack_base + POPMARK;		/* pop original mark */
     PL_op = saveop;			/* The caller may need it. */
     PL_lex_state = LEX_NOTPARSING;	/* $^S needs this. */
-#ifdef USE_5005THREADS
-    MUTEX_LOCK(&PL_eval_mutex);
-    PL_eval_owner = 0;
-    COND_SIGNAL(&PL_eval_cond);
-    MUTEX_UNLOCK(&PL_eval_mutex);
-#endif /* USE_5005THREADS */
 
     RETURNOP(PL_eval_start);
 }
@@ -3202,14 +3152,6 @@ PP(pp_require)
     CopLINE_set(&PL_compiling, 0);
 
     PUTBACK;
-#ifdef USE_5005THREADS
-    MUTEX_LOCK(&PL_eval_mutex);
-    if (PL_eval_owner && PL_eval_owner != thr)
-	while (PL_eval_owner)
-	    COND_WAIT(&PL_eval_cond, &PL_eval_mutex);
-    PL_eval_owner = thr;
-    MUTEX_UNLOCK(&PL_eval_mutex);
-#endif /* USE_5005THREADS */
 
     /* Store and reset encoding. */
     encoding = PL_encoding;
@@ -3296,14 +3238,6 @@ PP(pp_entereval)
     if (PERLDB_LINE && PL_curstash != PL_debstash)
 	save_lines(CopFILEAV(&PL_compiling), PL_linestr);
     PUTBACK;
-#ifdef USE_5005THREADS
-    MUTEX_LOCK(&PL_eval_mutex);
-    if (PL_eval_owner && PL_eval_owner != thr)
-	while (PL_eval_owner)
-	    COND_WAIT(&PL_eval_cond, &PL_eval_mutex);
-    PL_eval_owner = thr;
-    MUTEX_UNLOCK(&PL_eval_mutex);
-#endif /* USE_5005THREADS */
     ret = doeval(gimme, NULL);
     if (PERLDB_INTER && was != (I32)PL_sub_generation /* Some subs defined here. */
 	&& ret != PL_op->op_next) {	/* Successive compilation. */

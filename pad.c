@@ -152,14 +152,7 @@ Perl_pad_new(pTHX_ padnew_flags flags)
 	AvFLAGS(a0) = AVf_REIFY;
     }
     else {
-#ifdef USE_5005THREADS
-	av_store(padname, 0, newSVpvn("@_", 2));
-	a0 = newAV();
-	SvPADMY_on((SV*)a0);		/* XXX Needed? */
-	av_store(pad, 0, (SV*)a0);
-#else
 	av_store(pad, 0, Nullsv);
-#endif /* USE_THREADS */
     }
 
     AvREAL_off(padlist);
@@ -528,19 +521,6 @@ Perl_pad_findmy(pTHX_ char *name)
 
     DEBUG_Xv(PerlIO_printf(Perl_debug_log, "Pad findmy:  \"%s\"\n", name));
 
-#ifdef USE_5005THREADS
-    /*
-     * Special case to get lexical (and hence per-thread) @_.
-     * XXX I need to find out how to tell at parse-time whether use
-     * of @_ should refer to a lexical (from a sub) or defgv (global
-     * scope and maybe weird sub-ish things like formats). See
-     * startsub in perly.y.  It's possible that @_ could be lexical
-     * (at least from subs) even in non-threaded perl.
-     */
-    if (strEQ(name, "@_"))
-	return 0;		/* success. (NOT_IN_PAD indicates failure) */
-#endif /* USE_5005THREADS */
-
     /* The one we're looking for is probably just before comppad_name_fill. */
     for (off = AvFILLp(PL_comppad_name); off > 0; off--) {
 	if ((sv = svp[off]) &&
@@ -817,10 +797,8 @@ Perl_pad_sv(pTHX_ PADOFFSET po)
 	cp = Nullav;
 #endif
 
-#ifndef USE_5005THREADS
     if (!po)
 	Perl_croak(aTHX_ "panic: pad_sv po");
-#endif
     DEBUG_X(PerlIO_printf(Perl_debug_log,
 	"Pad 0x%"UVxf"[0x%"UVxf"] sv:      %ld sv=0x%"UVxf"\n",
 	PTR2UV(cp), PTR2UV(PL_curpad), (long)po, PTR2UV(PL_curpad[po]))
@@ -1314,11 +1292,6 @@ S_cv_clone2(pTHX_ CV *proto, CV *outside)
     CvFLAGS(cv) = CvFLAGS(proto) & ~CVf_CLONE;
     CvCLONED_on(cv);
 
-#ifdef USE_5005THREADS
-    New(666, CvMUTEXP(cv), 1, perl_mutex);
-    MUTEX_INIT(CvMUTEXP(cv));
-    CvOWNER(cv)		= 0;
-#endif /* USE_5005THREADS */
 #ifdef USE_ITHREADS
     CvFILE(cv)		= CvXSUB(proto) ? CvFILE(proto)
 					: savepv(CvFILE(proto));

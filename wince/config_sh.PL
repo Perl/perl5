@@ -49,11 +49,8 @@ my @noxs    = FindExt::noxs_extensions();
 my @known   = sort(@dynamic,split(/\s+/,$opt{'staticext'}),@noxs);
 $opt{'known_extensions'} = join(' ',@known);
 
-if (!$opt{'use5005threads'} || $opt{'use5005threads'} eq 'undef')
- {
-  @dynamic = grep(!/Thread/,@dynamic);
-  @known   = grep(!/Thread/,@dynamic);
- }
+@dynamic = grep(!/Thread/,@dynamic);
+@known   = grep(!/Thread/,@dynamic);
 
 $opt{'dynamic_ext'} = join(' ',@dynamic);
 $opt{'nonxs_ext'}   = join(' ',@noxs);

@@ -29,10 +29,6 @@ struct xpvcv {
     long	xcv_depth;	/* >= 2 indicates recursive call */
     PADLIST *	xcv_padlist;
     CV *	xcv_outside;
-#ifdef USE_5005THREADS
-    perl_mutex *xcv_mutexp;
-    struct perl_thread *xcv_owner;	/* current owner thread */
-#endif /* USE_5005THREADS */
     cv_flags_t	xcv_flags;
 };
 
@@ -68,10 +64,6 @@ Returns the stash of the CV.
 #define CvDEPTH(sv)	((XPVCV*)SvANY(sv))->xcv_depth
 #define CvPADLIST(sv)	((XPVCV*)SvANY(sv))->xcv_padlist
 #define CvOUTSIDE(sv)	((XPVCV*)SvANY(sv))->xcv_outside
-#ifdef USE_5005THREADS
-#define CvMUTEXP(sv)	((XPVCV*)SvANY(sv))->xcv_mutexp
-#define CvOWNER(sv)	((XPVCV*)SvANY(sv))->xcv_owner
-#endif /* USE_5005THREADS */
 #define CvFLAGS(sv)	((XPVCV*)SvANY(sv))->xcv_flags
 
 #define CVf_CLONE	0x0001	/* anon CV uses external lexicals */

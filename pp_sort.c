@@ -1514,10 +1514,6 @@ PP(pp_sort)
 		    PL_secondgv = gv_fetchpv("b", TRUE, SVt_PV);
 		    PL_sortstash = stash;
 		}
-#ifdef USE_5005THREADS
-		sv_lock((SV *)PL_firstgv);
-		sv_lock((SV *)PL_secondgv);
-#endif
 		SAVESPTR(GvSV(PL_firstgv));
 		SAVESPTR(GvSV(PL_secondgv));
 	    }
@@ -1536,10 +1532,8 @@ PP(pp_sort)
 		/* This is mostly copied from pp_entersub */
 		AV *av = (AV*)PAD_SVl(0);
 
-#ifndef USE_5005THREADS
 		cx->blk_sub.savearray = GvAV(PL_defgv);
 		GvAV(PL_defgv) = (AV*)SvREFCNT_inc(av);
-#endif /* USE_5005THREADS */
 		CX_CURPAD_SAVE(cx->blk_sub);
 		cx->blk_sub.argarray = av;
 	    }
@@ -1612,11 +1606,7 @@ sortcv_stacked(pTHX_ SV *a, SV *b)
     I32 result;
     AV *av;
 
-#ifdef USE_5005THREADS
-    av = (AV*)PAD_SVl(0);
-#else
     av = GvAV(PL_defgv);
-#endif
 
     if (AvMAX(av) < 1) {
 	SV** ary = AvALLOC(av);

@@ -216,74 +216,6 @@ Perl_allocmy(pTHX_ char *name)
     return off;
 }
 
-
-#ifdef USE_5005THREADS
-/* find_threadsv is not reentrant */
-PADOFFSET
-Perl_find_threadsv(pTHX_ const char *name)
-{
-    char *p;
-    PADOFFSET key;
-    SV **svp;
-    /* We currently only handle names of a single character */
-    p = strchr(PL_threadsv_names, *name);
-    if (!p)
-	return NOT_IN_PAD;
-    key = p - PL_threadsv_names;
-    MUTEX_LOCK(&thr->mutex);
-    svp = av_fetch(thr->threadsv, key, FALSE);
-    if (svp)
-	MUTEX_UNLOCK(&thr->mutex);
-    else {
-	SV *sv = NEWSV(0, 0);
-	av_store(thr->threadsv, key, sv);
-	thr->threadsvp = AvARRAY(thr->threadsv);
-	MUTEX_UNLOCK(&thr->mutex);
-	/*
-	 * Some magic variables used to be automagically initialised
-	 * in gv_fetchpv. Those which are now per-thread magicals get
-	 * initialised here instead.
-	 */
-	switch (*name) {
-	case '_':
-	    break;
-	case ';':
-	    sv_setpv(sv, "\034");
-	    sv_magic(sv, 0, PERL_MAGIC_sv, name, 1);
-	    break;
-	case '&':
-	case '`':
-	case '\'':
-	    PL_sawampersand = TRUE;
-	    /* FALL THROUGH */
-	case '1':
-	case '2':
-	case '3':
-	case '4':
-	case '5':
-	case '6':
-	case '7':
-	case '8':
-	case '9':
-	    SvREADONLY_on(sv);
-	    /* FALL THROUGH */
-
-	/* XXX %! tied to Errno.pm needs to be added here.
-	 * See gv_fetchpv(). */
-	/* case '!': */
-
-	default:
-	    sv_magic(sv, 0, PERL_MAGIC_sv, name, 1);
-	}
-	DEBUG_S(PerlIO_printf(Perl_error_log,
-			      "find_threadsv: new SV %p for $%s%c\n",
-			      sv, (*name < 32) ? "^" : "",
-			      (*name < 32) ? toCTRL(*name) : *name));
-    }
-    return key;
-}
-#endif /* USE_5005THREADS */
-
 /* Destructor */
 
 void
@@ -341,17 +273,8 @@ Perl_op_clear(pTHX_ OP *o)
     switch (o->op_type) {
     case OP_NULL:	/* Was holding old type, if any. */
     case OP_ENTEREVAL:	/* Was holding hints. */
-#ifdef USE_5005THREADS
-    case OP_THREADSV:	/* Was holding index into thr->threadsv AV. */
-#endif
 	o->op_targ = 0;
 	break;
-#ifdef USE_5005THREADS
-    case OP_ENTERITER:
-	if (!(o->op_flags & OPf_SPECIAL))
-	    break;
-	/* FALL THROUGH */
-#endif /* USE_5005THREADS */
     default:
 	if (!(o->op_flags & OPf_REF)
 	    || (PL_check[o->op_type] != MEMBER_TO_FPTR(Perl_ck_ftst)))
@@ -1190,12 +1113,6 @@ Perl_mod(pTHX_ OP *o, I32 type)
 	}
 	break;
 
-#ifdef USE_5005THREADS
-    case OP_THREADSV:
-	PL_modcount++;	/* XXX ??? */
-	break;
-#endif /* USE_5005THREADS */
-
     case OP_PUSHMARK:
 	break;
 
@@ -1853,13 +1770,7 @@ Perl_block_end(pTHX_ I32 floor, OP *seq)
 STATIC OP *
 S_newDEFSVOP(pTHX)
 {
-#ifdef USE_5005THREADS
-    OP *o = newOP(OP_THREADSV, 0);
-    o->op_targ = find_threadsv("_");
-    return o;
-#else
     return newSVREF(newGVOP(OP_GV, 0, PL_defgv));
-#endif /* USE_5005THREADS */
 }
 
 void
@@ -1943,12 +1854,7 @@ Perl_jmaybe(pTHX_ OP *o)
 {
     if (o->op_type == OP_LIST) {
 	OP *o2;
-#ifdef USE_5005THREADS
-	o2 = newOP(OP_THREADSV, 0);
-	o2->op_targ = find_threadsv(";");
-#else
 	o2 = newSVREF(newGVOP(OP_GV, 0, gv_fetchpv(";", TRUE, SVt_PV))),
-#endif /* USE_5005THREADS */
 	o = convert(OP_JOIN, 0, prepend_elem(OP_LIST, o2, o));
     }
     return o;
@@ -2732,34 +2638,18 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl)
 	    if (CopLINE(PL_curcop) < PL_multi_end)
 		CopLINE_set(PL_curcop, (line_t)PL_multi_end);
 	}
-#ifdef USE_5005THREADS
-	else if (repl->op_type == OP_THREADSV
-		 && strchr("&`'123456789+",
-			   PL_threadsv_names[repl->op_targ]))
-	{
-	    curop = 0;
-	}
-#endif /* USE_5005THREADS */
 	else if (repl->op_type == OP_CONST)
 	    curop = repl;
 	else {
 	    OP *lastop = 0;
 	    for (curop = LINKLIST(repl); curop!=repl; curop = LINKLIST(curop)) {
 		if (PL_opargs[curop->op_type] & OA_DANGEROUS) {
-#ifdef USE_5005THREADS
-		    if (curop->op_type == OP_THREADSV) {
-			repl_has_vars = 1;
-			if (strchr("&`'123456789+", curop->op_private))
-			    break;
-		    }
-#else
 		    if (curop->op_type == OP_GV) {
 			GV *gv = cGVOPx_gv(curop);
 			repl_has_vars = 1;
 			if (strchr("&`'123456789+", *GvENAME(gv)))
 			    break;
 		    }
-#endif /* USE_5005THREADS */
 		    else if (curop->op_type == OP_RV2CV)
 			break;
 		    else if (curop->op_type == OP_RV2SV ||
@@ -3769,12 +3659,7 @@ Perl_newFOROP(pTHX_ I32 flags,char *label,line_t forline,OP *sv,OP *expr,OP *blo
 	    Perl_croak(aTHX_ "Can't use %s for loop variable", PL_op_desc[sv->op_type]);
     }
     else {
-#ifdef USE_5005THREADS
-	padoff = find_threadsv("_");
-	iterflags |= OPf_SPECIAL;
-#else
 	sv = newGVOP(OP_GV, 0, PL_defgv);
-#endif
     }
     if (expr->op_type == OP_RV2AV || expr->op_type == OP_PADAV) {
 	expr = mod(force_list(scalar(ref(expr, OP_ITER))), OP_GREPSTART);
@@ -3865,14 +3750,6 @@ Perl_cv_undef(pTHX_ CV *cv)
     CV *outsidecv;
     CV *freecv = Nullcv;
 
-#ifdef USE_5005THREADS
-    if (CvMUTEXP(cv)) {
-	MUTEX_DESTROY(CvMUTEXP(cv));
-	Safefree(CvMUTEXP(cv));
-	CvMUTEXP(cv) = 0;
-    }
-#endif /* USE_5005THREADS */
-
 #ifdef USE_ITHREADS
     if (CvFILE(cv) && !CvXSUB(cv)) {
 	/* for XSUBs CvFILE point directly to static memory; __FILE__ */
@@ -3882,13 +3759,8 @@ Perl_cv_undef(pTHX_ CV *cv)
 #endif
 
     if (!CvXSUB(cv) && CvROOT(cv)) {
-#ifdef USE_5005THREADS
-	if (CvDEPTH(cv) || (CvOWNER(cv) && CvOWNER(cv) != thr))
-	    Perl_croak(aTHX_ "Can't undef active subroutine");
-#else
 	if (CvDEPTH(cv))
 	    Perl_croak(aTHX_ "Can't undef active subroutine");
-#endif /* USE_5005THREADS */
 	ENTER;
 
 	PAD_SAVE_SETNULLPAD;
@@ -4229,13 +4101,6 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     CvGV(cv) = gv;
     CvFILE_set_from_cop(cv, PL_curcop);
     CvSTASH(cv) = PL_curstash;
-#ifdef USE_5005THREADS
-    CvOWNER(cv) = 0;
-    if (!CvMUTEXP(cv)) {
-	New(666, CvMUTEXP(cv), 1, perl_mutex);
-	MUTEX_INIT(CvMUTEXP(cv));
-    }
-#endif /* USE_5005THREADS */
 
     if (ps)
 	sv_setpv((SV*)cv, ps);
@@ -4475,11 +4340,6 @@ Perl_newXS(pTHX_ char *name, XSUBADDR_t subaddr, char *filename)
 	}
     }
     CvGV(cv) = gv;
-#ifdef USE_5005THREADS
-    New(666, CvMUTEXP(cv), 1, perl_mutex);
-    MUTEX_INIT(CvMUTEXP(cv));
-    CvOWNER(cv) = 0;
-#endif /* USE_5005THREADS */
     (void)gv_fetchfile(filename);
     CvFILE(cv) = filename;	/* NOTE: not copied, as it is expected to be
 				   an external constant string */
@@ -5713,21 +5573,9 @@ Perl_ck_shift(pTHX_ OP *o)
 	OP *argop;
 
 	op_free(o);
-#ifdef USE_5005THREADS
-	if (!CvUNIQUE(PL_compcv)) {
-	    argop = newOP(OP_PADAV, OPf_REF);
-	    argop->op_targ = 0;		/* PAD_SV(0) is @_ */
-	}
-	else {
-	    argop = newUNOP(OP_RV2AV, 0,
-		scalar(newGVOP(OP_GV, 0,
-		    gv_fetchpv("ARGV", TRUE, SVt_PVAV))));
-	}
-#else
 	argop = newUNOP(OP_RV2AV, 0,
 	    scalar(newGVOP(OP_GV, 0, !CvUNIQUE(PL_compcv) ?
 			   PL_defgv : gv_fetchpv("ARGV", TRUE, SVt_PVAV))));
-#endif /* USE_5005THREADS */
 	return newUNOP(type, 0, scalar(argop));
     }
     return scalar(modkids(ck_fun(o), type));

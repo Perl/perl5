@@ -179,20 +179,6 @@ char *strerrorcat(char *str, int err) {
     int msgsiz;
     char *msg;
 
-#ifdef USE_5005THREADS
-    char *buf = malloc(BUFSIZ);
-
-    if (buf == 0)
-      return 0;
-    if (strerror_r(err, buf, BUFSIZ) == 0)
-      msg = buf;
-    else
-      msg = strerror_r_failed;
-    msgsiz = strlen(msg);
-    if (strsiz + msgsiz < BUFSIZ)
-      strcat(str, msg);
-    free(buf);
-#else
     dTHX;
 
     if ((msg = strerror(err)) == 0)
@@ -200,7 +186,6 @@ char *strerrorcat(char *str, int err) {
     msgsiz = strlen(msg);		/* Note msg = buf and free() above. */
     if (strsiz + msgsiz < BUFSIZ)	/* Do not move this after #endif. */
       strcat(str, msg);
-#endif
 
     return str;
 }
@@ -209,20 +194,6 @@ char *strerrorcpy(char *str, int err) {
     int msgsiz;
     char *msg;
 
-#ifdef USE_5005THREADS
-    char *buf = malloc(BUFSIZ);
-
-    if (buf == 0)
-      return 0;
-    if (strerror_r(err, buf, BUFSIZ) == 0)
-      msg = buf;
-    else
-      msg = strerror_r_failed;
-    msgsiz = strlen(msg);
-    if (msgsiz < BUFSIZ)
-      strcpy(str, msg);
-    free(buf);
-#else
     dTHX;
 
     if ((msg = strerror(err)) == 0)
@@ -230,7 +201,6 @@ char *strerrorcpy(char *str, int err) {
     msgsiz = strlen(msg);	/* Note msg = buf and free() above. */
     if (msgsiz < BUFSIZ)	/* Do not move this after #endif. */
       strcpy(str, msg);
-#endif
 
     return str;
 }

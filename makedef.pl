@@ -105,7 +105,6 @@ if ($define{USE_ITHREADS}) {
 
 $define{PERL_IMPLICIT_CONTEXT} ||=
     $define{USE_ITHREADS} ||
-    $define{USE_5005THREADS}  ||
     $define{MULTIPLICITY} ;
 
 if ($define{USE_ITHREADS} && $PLATFORM ne 'win32' && $^O ne 'darwin') {
@@ -582,7 +581,7 @@ if ($define{'MYMALLOC'}) {
 		    Perl_strdup
 		    Perl_putenv
 		    )];
-    if ($define{'USE_5005THREADS'} || $define{'USE_ITHREADS'}) {
+    if ($define{'USE_ITHREADS'}) {
 	emit_symbols [qw(
 			PL_malloc_mutex
 			)];
@@ -602,13 +601,13 @@ else {
 		    )];
 }
 
-unless ($define{'USE_5005THREADS'} || $define{'USE_ITHREADS'}) {
+unless ($define{'USE_ITHREADS'}) {
     skip_symbols [qw(
 		    PL_thr_key
 		    )];
 }
 
-unless ($define{'USE_5005THREADS'}) {
+# USE_5005THREADS symbols. Kept as reference for easier removal
     skip_symbols [qw(
 		    PL_sv_mutex
 		    PL_strtab_mutex
@@ -635,7 +634,6 @@ unless ($define{'USE_5005THREADS'}) {
 		    Perl_magic_mutexfree
 		    Perl_sv_lock
 		    )];
-}
 
 unless ($define{'USE_ITHREADS'}) {
     skip_symbols [qw(
@@ -730,11 +728,6 @@ sub readvar {
     }
     close(VARS);
     return \@syms;
-}
-
-if ($define{'USE_5005THREADS'}) {
-    my $thrd = readvar($thrdvar_h);
-    skip_symbols $thrd;
 }
 
 if ($define{'PERL_GLOBAL_STRUCT'}) {
@@ -960,7 +953,7 @@ else {
 	my $glob = readvar($intrpvar_h);
 	emit_symbols $glob;
     }
-    unless ($define{'MULTIPLICITY'} || $define{'USE_5005THREADS'}) {
+    unless ($define{'MULTIPLICITY'}) {
 	my $glob = readvar($thrdvar_h);
 	emit_symbols $glob;
     }

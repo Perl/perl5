@@ -68,9 +68,6 @@
 #if !defined(HAS_TRUNCATE) && !defined(HAS_CHSIZE) && defined(F_FREESP)
 #define my_chsize		Perl_my_chsize
 #endif
-#if defined(USE_5005THREADS)
-#define condpair_magic		Perl_condpair_magic
-#endif
 #define convert			Perl_convert
 #define croak			Perl_croak
 #define vcroak			Perl_vcroak
@@ -176,9 +173,6 @@
 #define fbm_compile		Perl_fbm_compile
 #define fbm_instr		Perl_fbm_instr
 #define find_script		Perl_find_script
-#if defined(USE_5005THREADS)
-#define find_threadsv		Perl_find_threadsv
-#endif
 #define force_list		Perl_force_list
 #define fold_constants		Perl_fold_constants
 #define form			Perl_form
@@ -339,9 +333,6 @@
 #define magic_getuvar		Perl_magic_getuvar
 #define magic_getvec		Perl_magic_getvec
 #define magic_len		Perl_magic_len
-#if defined(USE_5005THREADS)
-#define magic_mutexfree		Perl_magic_mutexfree
-#endif
 #define magic_nextpack		Perl_magic_nextpack
 #define magic_regdata_cnt	Perl_magic_regdata_cnt
 #define magic_regdatum_get	Perl_magic_regdatum_get
@@ -501,9 +492,6 @@
 #define pad_reset		Perl_pad_reset
 #define pad_swipe		Perl_pad_swipe
 #define peep			Perl_peep
-#if defined(USE_5005THREADS)
-#define new_struct_thread	Perl_new_struct_thread
-#endif
 #if defined(USE_REENTRANT_API)
 #define reentrant_size		Perl_reentrant_size
 #define reentrant_init		Perl_reentrant_init
@@ -725,9 +713,6 @@
 #if defined(UNLINK_ALL_VERSIONS)
 #define unlnk			Perl_unlnk
 #endif
-#if defined(USE_5005THREADS)
-#define unlock_condpair		Perl_unlock_condpair
-#endif
 #define unpack_str		Perl_unpack_str
 #define unsharepvn		Perl_unsharepvn
 #define unshare_hek		Perl_unshare_hek
@@ -781,9 +766,6 @@
 #endif
 #define runops_standard		Perl_runops_standard
 #define runops_debug		Perl_runops_debug
-#if defined(USE_5005THREADS)
-#define sv_lock			Perl_sv_lock
-#endif
 #define sv_catpvf_mg		Perl_sv_catpvf_mg
 #define sv_vcatpvf_mg		Perl_sv_vcatpvf_mg
 #define sv_catpv_mg		Perl_sv_catpv_mg
@@ -950,9 +932,6 @@
 #define vcall_body		S_vcall_body
 #define vcall_list_body		S_vcall_list_body
 #endif
-#  if defined(USE_5005THREADS)
-#define init_main_thread	S_init_main_thread
-#  endif
 #endif
 #if defined(PERL_IN_PP_C) || defined(PERL_DECL_PROT)
 #define refto			S_refto
@@ -1669,9 +1648,6 @@
 #if !defined(HAS_TRUNCATE) && !defined(HAS_CHSIZE) && defined(F_FREESP)
 #define my_chsize(a,b)		Perl_my_chsize(aTHX_ a,b)
 #endif
-#if defined(USE_5005THREADS)
-#define condpair_magic(a)	Perl_condpair_magic(aTHX_ a)
-#endif
 #define convert(a,b,c)		Perl_convert(aTHX_ a,b,c)
 #define vcroak(a,b)		Perl_vcroak(aTHX_ a,b)
 #if defined(PERL_IMPLICIT_CONTEXT)
@@ -1759,9 +1735,6 @@
 #define fbm_compile(a,b)	Perl_fbm_compile(aTHX_ a,b)
 #define fbm_instr(a,b,c,d)	Perl_fbm_instr(aTHX_ a,b,c,d)
 #define find_script(a,b,c,d)	Perl_find_script(aTHX_ a,b,c,d)
-#if defined(USE_5005THREADS)
-#define find_threadsv(a)	Perl_find_threadsv(aTHX_ a)
-#endif
 #define force_list(a)		Perl_force_list(aTHX_ a)
 #define fold_constants(a)	Perl_fold_constants(aTHX_ a)
 #define vform(a,b)		Perl_vform(aTHX_ a,b)
@@ -1920,9 +1893,6 @@
 #define magic_getuvar(a,b)	Perl_magic_getuvar(aTHX_ a,b)
 #define magic_getvec(a,b)	Perl_magic_getvec(aTHX_ a,b)
 #define magic_len(a,b)		Perl_magic_len(aTHX_ a,b)
-#if defined(USE_5005THREADS)
-#define magic_mutexfree(a,b)	Perl_magic_mutexfree(aTHX_ a,b)
-#endif
 #define magic_nextpack(a,b,c)	Perl_magic_nextpack(aTHX_ a,b,c)
 #define magic_regdata_cnt(a,b)	Perl_magic_regdata_cnt(aTHX_ a,b)
 #define magic_regdatum_get(a,b)	Perl_magic_regdatum_get(aTHX_ a,b)
@@ -2080,9 +2050,6 @@
 #define pad_reset()		Perl_pad_reset(aTHX)
 #define pad_swipe(a,b)		Perl_pad_swipe(aTHX_ a,b)
 #define peep(a)			Perl_peep(aTHX_ a)
-#if defined(USE_5005THREADS)
-#define new_struct_thread(a)	Perl_new_struct_thread(aTHX_ a)
-#endif
 #if defined(USE_REENTRANT_API)
 #define reentrant_size()	Perl_reentrant_size(aTHX)
 #define reentrant_init()	Perl_reentrant_init(aTHX)
@@ -2301,9 +2268,6 @@
 #if defined(UNLINK_ALL_VERSIONS)
 #define unlnk(a)		Perl_unlnk(aTHX_ a)
 #endif
-#if defined(USE_5005THREADS)
-#define unlock_condpair(a)	Perl_unlock_condpair(aTHX_ a)
-#endif
 #define unpack_str(a,b,c,d,e,f,g,h)	Perl_unpack_str(aTHX_ a,b,c,d,e,f,g,h)
 #define unsharepvn(a,b,c)	Perl_unsharepvn(aTHX_ a,b,c)
 #define unshare_hek(a)		Perl_unshare_hek(aTHX_ a)
@@ -2355,9 +2319,6 @@
 #endif
 #define runops_standard()	Perl_runops_standard(aTHX)
 #define runops_debug()		Perl_runops_debug(aTHX)
-#if defined(USE_5005THREADS)
-#define sv_lock(a)		Perl_sv_lock(aTHX_ a)
-#endif
 #define sv_vcatpvf_mg(a,b,c)	Perl_sv_vcatpvf_mg(aTHX_ a,b,c)
 #define sv_catpv_mg(a,b)	Perl_sv_catpv_mg(aTHX_ a,b)
 #define sv_catpvn_mg(a,b,c)	Perl_sv_catpvn_mg(aTHX_ a,b,c)
@@ -2520,9 +2481,6 @@
 #define vcall_body(a)		S_vcall_body(aTHX_ a)
 #define vcall_list_body(a)	S_vcall_list_body(aTHX_ a)
 #endif
-#  if defined(USE_5005THREADS)
-#define init_main_thread()	S_init_main_thread(aTHX)
-#  endif
 #endif
 #if defined(PERL_IN_PP_C) || defined(PERL_DECL_PROT)
 #define refto(a)		S_refto(aTHX_ a)

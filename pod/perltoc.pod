@@ -10799,9 +10799,9 @@ C<ttyname_r_proto>
 
 C<u16size>, C<u16type>, C<u32size>, C<u32type>, C<u64size>, C<u64type>,
 C<u8size>, C<u8type>, C<uidformat>, C<uidsign>, C<uidsize>, C<uidtype>,
-C<uname>, C<uniq>, C<uquadtype>, C<use5005threads>, C<use64bitall>,
-C<use64bitint>, C<usecrosscompile>, C<usedl>, C<useithreads>,
-C<uselargefiles>, C<uselongdouble>, C<usemorebits>, C<usemultiplicity>,
+C<uname>, C<uniq>, C<uquadtype>, C<use64bitall>, C<use64bitint>,
+C<usecrosscompile>, C<usedl>, C<useithreads>, C<uselargefiles>,
+C<uselongdouble>, C<usemorebits>, C<usemultiplicity>,
 C<usemymalloc>, C<usenm>, C<useopcode>, C<useperlio>, C<useposix>,
 C<usereentrant>, C<usesfio>, C<useshrplib>, C<usesocks>, C<usethreads>,
 C<usevendorprefix>, C<usevfork>, C<usrinc>, C<uuname>, C<uvoformat>,

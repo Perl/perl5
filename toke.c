@@ -2322,13 +2322,7 @@ Perl_yylex(pTHX)
 	if (PL_lex_dojoin) {
 	    PL_nextval[PL_nexttoke].ival = 0;
 	    force_next(',');
-#ifdef USE_5005THREADS
-	    PL_nextval[PL_nexttoke].opval = newOP(OP_THREADSV, 0);
-	    PL_nextval[PL_nexttoke].opval->op_targ = find_threadsv("\"");
-	    force_next(PRIVATEREF);
-#else
 	    force_ident("\"", '$');
-#endif /* USE_5005THREADS */
 	    PL_nextval[PL_nexttoke].ival = 0;
 	    force_next('$');
 	    PL_nextval[PL_nexttoke].ival = 0;
@@ -5286,17 +5280,6 @@ S_pending_ident(pTHX)
     */
 
     if (!strchr(PL_tokenbuf,':')) {
-#ifdef USE_5005THREADS
-        /* Check for single character per-thread SVs */
-        if (PL_tokenbuf[0] == '$' && PL_tokenbuf[2] == '\0'
-            && !isALPHA(PL_tokenbuf[1]) /* Rule out obvious non-threadsvs */
-            && (tmp = find_threadsv(&PL_tokenbuf[1])) != NOT_IN_PAD)
-        {
-            yylval.opval = newOP(OP_THREADSV, 0);
-            yylval.opval->op_targ = tmp;
-            return PRIVATEREF;
-        }
-#endif /* USE_5005THREADS */
         if ((tmp = pad_findmy(PL_tokenbuf)) != NOT_IN_PAD) {
             /* might be an "our" variable" */
             if (PAD_COMPNAME_FLAGS(tmp) & SVpad_OUR) {
@@ -7575,11 +7558,6 @@ Perl_start_subparse(pTHX_ I32 is_format, U32 flags)
     PL_subline = CopLINE(PL_curcop);
     CvPADLIST(PL_compcv) = pad_new(padnew_SAVE|padnew_SAVESUB);
     CvOUTSIDE(PL_compcv) = (CV*)SvREFCNT_inc(outsidecv);
-#ifdef USE_5005THREADS
-    CvOWNER(PL_compcv) = 0;
-    New(666, CvMUTEXP(PL_compcv), 1, perl_mutex);
-    MUTEX_INIT(CvMUTEXP(PL_compcv));
-#endif /* USE_5005THREADS */
 
     return oldsavestack_ix;
 }

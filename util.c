@@ -967,10 +967,6 @@ Perl_vmess(pTHX_ const char *pat, va_list *args)
 			   line_mode ? "line" : "chunk",
 			   (IV)IoLINES(GvIOp(PL_last_in_gv)));
 	}
-#ifdef USE_5005THREADS
-	if (thr->tid)
-	    Perl_sv_catpvf(aTHX_ sv, " thread %ld", thr->tid);
-#endif
 	sv_catpv(sv, PL_dirty ? dgd : ".\n");
     }
     return sv;
@@ -1332,9 +1328,6 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
     message = SvPV(msv, msglen);
 
     if (ckDEAD(err)) {
-#ifdef USE_5005THREADS
-	DEBUG_S(PerlIO_printf(Perl_debug_log, "croak: 0x%"UVxf" %s", PTR2UV(thr), message));
-#endif /* USE_5005THREADS */
 	if (PL_diehook) {
 	    /* sv_2cv might call Perl_croak() */
 	    SV *olddiehook = PL_diehook;
@@ -2082,7 +2075,7 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
 void
 Perl_atfork_lock(void)
 {
-#if defined(USE_5005THREADS) || defined(USE_ITHREADS)
+#if defined(USE_ITHREADS)
     /* locks must be held in locking order (if any) */
 #  ifdef MYMALLOC
     MUTEX_LOCK(&PL_malloc_mutex);
@@ -2095,7 +2088,7 @@ Perl_atfork_lock(void)
 void
 Perl_atfork_unlock(void)
 {
-#if defined(USE_5005THREADS) || defined(USE_ITHREADS)
+#if defined(USE_ITHREADS)
     /* locks must be released in same order as in atfork_lock() */
 #  ifdef MYMALLOC
     MUTEX_UNLOCK(&PL_malloc_mutex);
@@ -2109,7 +2102,7 @@ Perl_my_fork(void)
 {
 #if defined(HAS_FORK)
     Pid_t pid;
-#if (defined(USE_5005THREADS) || defined(USE_ITHREADS)) && !defined(HAS_PTHREAD_ATFORK)
+#if defined(USE_ITHREADS) && !defined(HAS_PTHREAD_ATFORK)
     atfork_lock();
     pid = fork();
     atfork_unlock();
@@ -2802,7 +2795,7 @@ Perl_find_script(pTHX_ char *scriptname, bool dosearch, char **search_ext, I32 f
 void *
 Perl_get_context(void)
 {
-#if defined(USE_5005THREADS) || defined(USE_ITHREADS)
+#if defined(USE_ITHREADS)
 #  ifdef OLD_PTHREADS_API
     pthread_addr_t t;
     if (pthread_getspecific(PL_thr_key, &t))
@@ -2823,7 +2816,7 @@ Perl_get_context(void)
 void
 Perl_set_context(void *t)
 {
-#if defined(USE_5005THREADS) || defined(USE_ITHREADS)
+#if defined(USE_ITHREADS)
 #  ifdef I_MACH_CTHREADS
     cthread_set_data(cthread_self(), t);
 #  else
@@ -2834,280 +2827,6 @@ Perl_set_context(void *t)
 }
 
 #endif /* !PERL_GET_CONTEXT_DEFINED */
-
-#ifdef USE_5005THREADS
-
-#ifdef FAKE_THREADS
-/* Very simplistic scheduler for now */
-void
-schedule(void)
-{
-    thr = thr->i.next_run;
-}
-
-void
-Perl_cond_init(pTHX_ perl_cond *cp)
-{
-    *cp = 0;
-}
-
-void
-Perl_cond_signal(pTHX_ perl_cond *cp)
-{
-    perl_os_thread t;
-    perl_cond cond = *cp;
-
-    if (!cond)
-	return;
-    t = cond->thread;
-    /* Insert t in the runnable queue just ahead of us */
-    t->i.next_run = thr->i.next_run;
-    thr->i.next_run->i.prev_run = t;
-    t->i.prev_run = thr;
-    thr->i.next_run = t;
-    thr->i.wait_queue = 0;
-    /* Remove from the wait queue */
-    *cp = cond->next;
-    Safefree(cond);
-}
-
-void
-Perl_cond_broadcast(pTHX_ perl_cond *cp)
-{
-    perl_os_thread t;
-    perl_cond cond, cond_next;
-
-    for (cond = *cp; cond; cond = cond_next) {
-	t = cond->thread;
-	/* Insert t in the runnable queue just ahead of us */
-	t->i.next_run = thr->i.next_run;
-	thr->i.next_run->i.prev_run = t;
-	t->i.prev_run = thr;
-	thr->i.next_run = t;
-	thr->i.wait_queue = 0;
-	/* Remove from the wait queue */
-	cond_next = cond->next;
-	Safefree(cond);
-    }
-    *cp = 0;
-}
-
-void
-Perl_cond_wait(pTHX_ perl_cond *cp)
-{
-    perl_cond cond;
-
-    if (thr->i.next_run == thr)
-	Perl_croak(aTHX_ "panic: perl_cond_wait called by last runnable thread");
-
-    New(666, cond, 1, struct perl_wait_queue);
-    cond->thread = thr;
-    cond->next = *cp;
-    *cp = cond;
-    thr->i.wait_queue = cond;
-    /* Remove ourselves from runnable queue */
-    thr->i.next_run->i.prev_run = thr->i.prev_run;
-    thr->i.prev_run->i.next_run = thr->i.next_run;
-}
-#endif /* FAKE_THREADS */
-
-MAGIC *
-Perl_condpair_magic(pTHX_ SV *sv)
-{
-    MAGIC *mg;
-
-    (void)SvUPGRADE(sv, SVt_PVMG);
-    mg = mg_find(sv, PERL_MAGIC_mutex);
-    if (!mg) {
-	condpair_t *cp;
-
-	New(53, cp, 1, condpair_t);
-	MUTEX_INIT(&cp->mutex);
-	COND_INIT(&cp->owner_cond);
-	COND_INIT(&cp->cond);
-	cp->owner = 0;
-	LOCK_CRED_MUTEX;		/* XXX need separate mutex? */
-	mg = mg_find(sv, PERL_MAGIC_mutex);
-	if (mg) {
-	    /* someone else beat us to initialising it */
-	    UNLOCK_CRED_MUTEX;		/* XXX need separate mutex? */
-	    MUTEX_DESTROY(&cp->mutex);
-	    COND_DESTROY(&cp->owner_cond);
-	    COND_DESTROY(&cp->cond);
-	    Safefree(cp);
-	}
-	else {
-	    sv_magic(sv, Nullsv, PERL_MAGIC_mutex, 0, 0);
-	    mg = SvMAGIC(sv);
-	    mg->mg_ptr = (char *)cp;
-	    mg->mg_len = sizeof(cp);
-	    UNLOCK_CRED_MUTEX;		/* XXX need separate mutex? */
-	    DEBUG_S(WITH_THR(PerlIO_printf(Perl_debug_log,
-					   "%p: condpair_magic %p\n", thr, sv)));
-	}
-    }
-    return mg;
-}
-
-SV *
-Perl_sv_lock(pTHX_ SV *osv)
-{
-    MAGIC *mg;
-    SV *sv = osv;
-
-    LOCK_SV_LOCK_MUTEX;
-    if (SvROK(sv)) {
-	sv = SvRV(sv);
-    }
-
-    mg = condpair_magic(sv);
-    MUTEX_LOCK(MgMUTEXP(mg));
-    if (MgOWNER(mg) == thr)
-	MUTEX_UNLOCK(MgMUTEXP(mg));
-    else {
-	while (MgOWNER(mg))
-	    COND_WAIT(MgOWNERCONDP(mg), MgMUTEXP(mg));
-	MgOWNER(mg) = thr;
-	DEBUG_S(PerlIO_printf(Perl_debug_log,
-			      "0x%"UVxf": Perl_lock lock 0x%"UVxf"\n",
-			      PTR2UV(thr), PTR2UV(sv)));
-	MUTEX_UNLOCK(MgMUTEXP(mg));
-	SAVEDESTRUCTOR_X(Perl_unlock_condpair, sv);
-    }
-    UNLOCK_SV_LOCK_MUTEX;
-    return sv;
-}
-
-/*
- * Make a new perl thread structure using t as a prototype. Some of the
- * fields for the new thread are copied from the prototype thread, t,
- * so t should not be running in perl at the time this function is
- * called. The use by ext/Thread/Thread.xs in core perl (where t is the
- * thread calling new_struct_thread) clearly satisfies this constraint.
- */
-struct perl_thread *
-Perl_new_struct_thread(pTHX_ struct perl_thread *t)
-{
-#if !defined(PERL_IMPLICIT_CONTEXT)
-    struct perl_thread *thr;
-#endif
-    SV *sv;
-    SV **svp;
-    I32 i;
-
-    sv = newSVpvn("", 0);
-    SvGROW(sv, sizeof(struct perl_thread) + 1);
-    SvCUR_set(sv, sizeof(struct perl_thread));
-    thr = (Thread) SvPVX(sv);
-#ifdef DEBUGGING
-    Poison(thr, 1, struct perl_thread);
-    PL_markstack = 0;
-    PL_scopestack = 0;
-    PL_savestack = 0;
-    PL_retstack = 0;
-    PL_dirty = 0;
-    PL_localizing = 0;
-    Zero(&PL_hv_fetch_ent_mh, 1, HE);
-    PL_efloatbuf = (char*)NULL;
-    PL_efloatsize = 0;
-#else
-    Zero(thr, 1, struct perl_thread);
-#endif
-
-    thr->oursv = sv;
-    init_stacks();
-
-    PL_curcop = &PL_compiling;
-    thr->interp = t->interp;
-    thr->cvcache = newHV();
-    thr->threadsv = newAV();
-    thr->specific = newAV();
-    thr->errsv = newSVpvn("", 0);
-    thr->flags = THRf_R_JOINABLE;
-    thr->thr_done = 0;
-    MUTEX_INIT(&thr->mutex);
-
-    JMPENV_BOOTSTRAP;
-
-    PL_in_eval = EVAL_NULL;	/* ~(EVAL_INEVAL|EVAL_WARNONLY|EVAL_KEEPERR|EVAL_INREQUIRE) */
-    PL_restartop = 0;
-
-    PL_statname = NEWSV(66,0);
-    PL_errors = newSVpvn("", 0);
-    PL_maxscream = -1;
-    PL_regcompp = MEMBER_TO_FPTR(Perl_pregcomp);
-    PL_regexecp = MEMBER_TO_FPTR(Perl_regexec_flags);
-    PL_regint_start = MEMBER_TO_FPTR(Perl_re_intuit_start);
-    PL_regint_string = MEMBER_TO_FPTR(Perl_re_intuit_string);
-    PL_regfree = MEMBER_TO_FPTR(Perl_pregfree);
-    PL_regindent = 0;
-    PL_reginterp_cnt = 0;
-    PL_lastscream = Nullsv;
-    PL_screamfirst = 0;
-    PL_screamnext = 0;
-    PL_reg_start_tmp = 0;
-    PL_reg_start_tmpl = 0;
-    PL_reg_poscache = Nullch;
-
-    PL_peepp = MEMBER_TO_FPTR(Perl_peep);
-
-    /* parent thread's data needs to be locked while we make copy */
-    MUTEX_LOCK(&t->mutex);
-
-#ifdef PERL_FLEXIBLE_EXCEPTIONS
-    PL_protect = t->Tprotect;
-#endif
-
-    PL_curcop = t->Tcurcop;       /* XXX As good a guess as any? */
-    PL_defstash = t->Tdefstash;   /* XXX maybe these should */
-    PL_curstash = t->Tcurstash;   /* always be set to main? */
-
-    PL_tainted = t->Ttainted;
-    PL_curpm = t->Tcurpm;	/* XXX No PMOP ref count */
-    PL_rs = newSVsv(t->Trs);
-    PL_last_in_gv = Nullgv;
-    PL_ofs_sv = t->Tofs_sv ? SvREFCNT_inc(PL_ofs_sv) : Nullsv;
-    PL_defoutgv = (GV*)SvREFCNT_inc(t->Tdefoutgv);
-    PL_chopset = t->Tchopset;
-    PL_bodytarget = newSVsv(t->Tbodytarget);
-    PL_toptarget = newSVsv(t->Ttoptarget);
-    if (t->Tformtarget == t->Ttoptarget)
-	PL_formtarget = PL_toptarget;
-    else
-	PL_formtarget = PL_bodytarget;
-
-    /* Initialise all per-thread SVs that the template thread used */
-    svp = AvARRAY(t->threadsv);
-    for (i = 0; i <= AvFILLp(t->threadsv); i++, svp++) {
-	if (*svp && *svp != &PL_sv_undef) {
-	    SV *sv = newSVsv(*svp);
-	    av_store(thr->threadsv, i, sv);
-	    sv_magic(sv, 0, PERL_MAGIC_sv, &PL_threadsv_names[i], 1);
-	    DEBUG_S(PerlIO_printf(Perl_debug_log,
-		"new_struct_thread: copied threadsv %"IVdf" %p->%p\n",
-				  (IV)i, t, thr));
-	}
-    }
-    thr->threadsvp = AvARRAY(thr->threadsv);
-
-    MUTEX_LOCK(&PL_threads_mutex);
-    PL_nthreads++;
-    thr->tid = ++PL_threadnum;
-    thr->next = t->next;
-    thr->prev = t;
-    t->next = thr;
-    thr->next->prev = thr;
-    MUTEX_UNLOCK(&PL_threads_mutex);
-
-    /* done copying parent's state */
-    MUTEX_UNLOCK(&t->mutex);
-
-#ifdef HAVE_THREAD_INTERN
-    Perl_init_thread_intern(thr);
-#endif /* HAVE_THREAD_INTERN */
-    return thr;
-}
-#endif /* USE_5005THREADS */
 
 #ifdef PERL_GLOBAL_STRUCT
 struct perl_vars *
@@ -3228,11 +2947,6 @@ Perl_get_vtbl(pTHX_ int vtbl_id)
     case want_vtbl_uvar:
 	result = &PL_vtbl_uvar;
 	break;
-#ifdef USE_5005THREADS
-    case want_vtbl_mutex:
-	result = &PL_vtbl_mutex;
-	break;
-#endif
     case want_vtbl_defelem:
 	result = &PL_vtbl_defelem;
 	break;
