@@ -16,7 +16,7 @@ use FileHandle ();
 use File::Basename ();
 use File::Path ();
 use vars qw($VERSION);
-$VERSION = substr q$Revision: 1.29 $, 10;
+$VERSION = substr q$Revision: 1.30 $, 10;
 
 =head1 NAME
 
@@ -50,7 +50,7 @@ sub init {
     # Files, directories
     #
 
-    print qq{
+    print qq[
 
 CPAN is the world-wide archive of perl resources. It consists of about
 100 sites that all replicate the same contents all around the globe.
@@ -62,7 +62,7 @@ If you do not want to enter a dialog now, you can answer 'no' to this
 question and I\'ll try to autoconfigure. (Note: you can revisit this
 dialog anytime later by typing 'o conf init' at the cpan prompt.)
 
-};
+];
 
     my $manual_conf =
 	ExtUtils::MakeMaker::prompt("Are you ready for manual configuration?",
@@ -166,30 +166,32 @@ those.
 
     my(@path) = split /$Config{'path_sep'}/, $ENV{'PATH'};
     my $progname;
-    for $progname (qw/gzip tar unzip make lynx ncftp ftp/){
+    for $progname (qw/gzip tar unzip make lynx ncftpget ncftp ftp/){
       my $progcall = $progname;
-	my $path = $CPAN::Config->{$progname} 
-	        || $Config::Config{$progname}
-		|| "";
-	if (MM->file_name_is_absolute($path)) {
-	  # testing existence is not good enough, some have these exe
-	  # extensions
+      # we don't need ncftp if we have ncftpget
+      next if $progname eq "ncftp" && $CPAN::Config->{ncftpget} gt " ";
+      my $path = $CPAN::Config->{$progname} 
+	  || $Config::Config{$progname}
+	      || "";
+      if (MM->file_name_is_absolute($path)) {
+	# testing existence is not good enough, some have these exe
+	# extensions
 
-	  # warn "Warning: configured $path does not exist\n" unless -e $path;
-	  # $path = "";
-	} else {
-	    $path = '';
-	}
-	unless ($path) {
-	  # e.g. make -> nmake
-	  $progcall = $Config::Config{$progname} if $Config::Config{$progname};
-	}
+	# warn "Warning: configured $path does not exist\n" unless -e $path;
+	# $path = "";
+      } else {
+	$path = '';
+      }
+      unless ($path) {
+	# e.g. make -> nmake
+	$progcall = $Config::Config{$progname} if $Config::Config{$progname};
+      }
 
-	$path ||= find_exe($progcall,[@path]);
-	warn "Warning: $progcall not found in PATH\n" unless
-	    $path; # not -e $path, because find_exe already checked that
-	$ans = prompt("Where is your $progname program?",$path) || $path;
-	$CPAN::Config->{$progname} = $ans;
+      $path ||= find_exe($progcall,[@path]);
+      warn "Warning: $progcall not found in PATH\n" unless
+	  $path; # not -e $path, because find_exe already checked that
+      $ans = prompt("Where is your $progname program?",$path) || $path;
+      $CPAN::Config->{$progname} = $ans;
     }
     my $path = $CPAN::Config->{'pager'} || 
 	$ENV{PAGER} || find_exe("less",[@path]) || 
