@@ -6257,10 +6257,10 @@ Perl_scan_num(pTHX_ char *start)
     register char *s = start;		/* current position in buffer */
     register char *d;			/* destination in temp buffer */
     register char *e;			/* end of temp buffer */
-    I32 tryiv;				/* used to see if it can be an int */
+    IV tryiv;				/* used to see if it can be an IV */
     NV value;				/* number read, as a double */
     SV *sv;				/* place to put the converted number */
-    I32 floatit;			/* boolean: int or float? */
+    bool floatit;			/* boolean: int or float? */
     char *lastub = 0;			/* position of last underbar */
     static char number_too_long[] = "Number too long";
 
@@ -6532,9 +6532,11 @@ Perl_scan_num(pTHX_ char *start)
 	    sv_setiv(sv, tryiv);
 	else
 	    sv_setnv(sv, value);
-	if ( floatit ? (PL_hints & HINT_NEW_FLOAT) : (PL_hints & HINT_NEW_INTEGER) )
+	if ( floatit ? (PL_hints & HINT_NEW_FLOAT) :
+	               (PL_hints & HINT_NEW_INTEGER) )
 	    sv = new_constant(PL_tokenbuf, d - PL_tokenbuf, 
-			      (floatit ? "float" : "integer"), sv, Nullsv, NULL);
+			      (floatit ? "float" : "integer"),
+			      sv, Nullsv, NULL);
 	break;
     }
 
