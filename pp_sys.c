@@ -4048,24 +4048,14 @@ PP(pp_system)
     I32 did_pipes = 0;
 
     if (PL_tainting) {
-	int some_arg_tainted = 0;
 	TAINT_ENV();
 	while (++MARK <= SP) {
 	    (void)SvPV_nolen(*MARK);      /* stringify for taint check */
-	    if (PL_tainted) {
-		some_arg_tainted = 1;
+	    if (PL_tainted)
 		break;
-	    }
 	}
 	MARK = ORIGMARK;
-	/* XXX Remove warning at end of deprecation cycle --RD 2002-02  */
-	if (SP - MARK == 1) {
-	    TAINT_PROPER("system");
-	}
-	else if (some_arg_tainted && ckWARN2(WARN_TAINT, WARN_DEPRECATED)) {
-	    Perl_warner(aTHX_ packWARN2(WARN_TAINT, WARN_DEPRECATED),
-		"Use of tainted arguments in %s is deprecated", "system");
-	}
+	TAINT_PROPER("system");
     }
     PERL_FLUSHALL_FOR_CHILD;
 #if (defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(OS2) || defined(PERL_MICRO)
@@ -4186,24 +4176,14 @@ PP(pp_exec)
     STRLEN n_a;
 
     if (PL_tainting) {
-	int some_arg_tainted = 0;
 	TAINT_ENV();
 	while (++MARK <= SP) {
 	    (void)SvPV_nolen(*MARK);      /* stringify for taint check */
-	    if (PL_tainted) {
-		some_arg_tainted = 1;
+	    if (PL_tainted)
 		break;
-	    }
 	}
 	MARK = ORIGMARK;
-	/* XXX Remove warning at end of deprecation cycle --RD 2002-02  */
-	if (SP - MARK == 1) {
-	    TAINT_PROPER("exec");
-	}
-	else if (some_arg_tainted && ckWARN2(WARN_TAINT, WARN_DEPRECATED)) {
-	    Perl_warner(aTHX_ packWARN2(WARN_TAINT, WARN_DEPRECATED),
-		"Use of tainted arguments in %s is deprecated", "exec");
-	}
+	TAINT_PROPER("exec");
     }
     PERL_FLUSHALL_FOR_CHILD;
     if (PL_op->op_flags & OPf_STACKED) {
