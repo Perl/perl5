@@ -80,7 +80,7 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 	goto ENCODE_END;
     }
 
-    while (code = do_encode(dir, s, &slen, d, dlen, &dlen, !check))
+    while( (code = do_encode(dir, s, &slen, d, dlen, &dlen, !check)) ) 
     {
 	SvCUR_set(dst, dlen+ddone);
 	SvPOK_only(dst);
@@ -172,14 +172,14 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 	    else {
 		if (check & ENCODE_DIE_ON_ERR){
 		    Perl_croak(aTHX_ ERR_DECODE_NOMAP,
-                              PTR2UV(enc->name[0]), (U8)s[slen]);
+                              enc->name[0], (UV)s[slen]);
 		    return &PL_sv_undef; /* never reaches but be safe */
 		}
 		if (check & ENCODE_WARN_ON_ERR){
 		    Perl_warner(
 			aTHX_ packWARN(WARN_UTF8),
 			ERR_DECODE_NOMAP,
-                       PTR2UV(enc->name[0]), (U8)s[slen]);
+               	        enc->name[0], (UV)s[slen]);
 		}
 		if (check & ENCODE_RETURN_ON_ERR){
 		    goto ENCODE_SET_SRC;
