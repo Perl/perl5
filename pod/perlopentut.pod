@@ -925,7 +925,7 @@ The two-argument form of C<binmode> is being used, for example
 
 =back
 
-For more detailed discussion about PerlIO see L<perlio>;
+For more detailed discussion about PerlIO see L<PerlIO>;
 for more detailed discussion about Unicode and I/O see L<perluniintro>.
 
 =head1 SEE ALSO 

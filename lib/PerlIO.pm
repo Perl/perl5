@@ -203,7 +203,7 @@ Nick Ing-Simmons E<lt>nick@ing-simmons.netE<gt>
 
 =head1 SEE ALSO
 
-L<perlfunc/"binmode">, L<perlfunc/"open">, L<perlunicode>, L<Encode>
+L<perlfunc/"binmode">, L<perlfunc/"open">, L<perlunicode>, L<perliol>, L<Encode>
 
 =cut
 
