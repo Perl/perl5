@@ -31,6 +31,501 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 12171] By: jhi                                   on 2001/09/24  12:26:58
+        Log: Subject: [PATCH gb2312.enc] (Re: [PATCH perl@12088] 2022-cn.enc of Encode.pm)
+             From: SADAHIRO Tomoyuki <BQW10602@nifty.com>
+             Date: Mon, 24 Sep 2001 20:04:58 +0900
+             Message-Id: <20010924200207.A030.BQW10602@nifty.com>         
+     Branch: perl
+	   ! ext/Encode/Encode/gb2312.enc
+____________________________________________________________________________
+[ 12170] By: jhi                                   on 2001/09/24  12:08:30
+        Log: Clarifying comment to #12164.
+     Branch: perl
+	   ! lib/Cwd.pm
+____________________________________________________________________________
+[ 12169] By: jhi                                   on 2001/09/24  11:59:33
+        Log: Subject: [PATCH] Re: What sort of Makefile.PL should h2xs write?
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Sun, 23 Sep 2001 23:00:56 +0100
+             Message-ID: <20010923230055.Y4971@plum.flirble.org>
+             
+             (with "sample_constants" changed to "fallback")
+     Branch: perl
+	   + ext/I18N/Langinfo/fallback.c ext/I18N/Langinfo/fallback.xs
+	   ! MANIFEST ext/I18N/Langinfo/Langinfo.xs
+	   ! ext/I18N/Langinfo/Makefile.PL lib/ExtUtils/Constant.pm
+	   ! lib/h2xs.t utils/h2xs.PL
+____________________________________________________________________________
+[ 12168] By: jhi                                   on 2001/09/24  11:25:56
+        Log: Metaconfig unit change for #12167.
+     Branch: metaconfig
+	   ! U/modified/Cppsym.U
+____________________________________________________________________________
+[ 12167] By: jhi                                   on 2001/09/24  11:25:22
+        Log: Add a few glibc cpp symbols to probe for.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 12166] By: jhi                                   on 2001/09/24  11:14:43
+        Log: DJGPP tweaks for Laszlo Molnar.
+     Branch: perl
+	   ! djgpp/djgppsed.sh dosish.h
+____________________________________________________________________________
+[ 12165] By: ams                                   on 2001/09/24  10:07:08
+        Log: Subject: [PATCH t/op/inccode.t] More tests
+             From: rgarciasuarez@free.fr (Rafael Garcia-Suarez)
+             Date: 24 Sep 2001 10:01:44 -0000
+             Message-Id: <slrn9qu158.l2t.rgarciasuarez@rafael.kazibao.net>
+     Branch: perl
+	   ! t/op/inccode.t
+____________________________________________________________________________
+[ 12164] By: ams                                   on 2001/09/24  09:43:29
+        Log: Subject: [PATCH Cwd.pm] local $/ = "\n";
+             From: Jeff 'japhy/Marillion' Pinyan <jeffp@crusoe.net>
+             Date: Mon, 24 Sep 2001 00:22:32 -0400 (EDT)
+             Message-Id: <Pine.GSO.4.21.0109240021410.9178-100000@crusoe.crusoe.net>
+     Branch: perl
+	   ! lib/Cwd.pm
+____________________________________________________________________________
+[ 12163] By: jhi                                   on 2001/09/23  22:50:35
+        Log: 1_compile updates.
+     Branch: perl
+	   ! t/lib/1_compile.t
+____________________________________________________________________________
+[ 12162] By: jhi                                   on 2001/09/23  21:11:22
+        Log: Subject: [PATCH] proposal : put the @INC-hooks directly in %INC
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Wed, 19 Sep 2001 22:47:14 +0200
+             Message-ID: <20010919224714.A6382@rafael>
+     Branch: perl
+	   ! pod/perlvar.pod pp_ctl.c
+____________________________________________________________________________
+[ 12161] By: ams                                   on 2001/09/23  17:40:02
+        Log: Subject: [PATCH MANIFEST lib/filetest t/lib/1_compile.t] Add Tests for
+             filetest Pragma
+             From: "chromatic" <chromatic@rmci.net>
+             Date: Sun, 23 Sep 2001 12:07:25 -0600
+             Message-Id: <20010923181223.32427.qmail@onion.perl.org>
+     Branch: perl
+	   + lib/filetest.t
+	   ! MANIFEST t/lib/1_compile.t
+____________________________________________________________________________
+[ 12160] By: ams                                   on 2001/09/23  16:32:11
+        Log: Additional minor chdir() tweak.
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 12159] By: ams                                   on 2001/09/23  16:25:01
+        Log: Subject: PATCH lib/ExtUtils/Command.t
+             From: Abe Timmerman <abe@ztreet.demon.nl>
+             Date: Sun, 23 Sep 2001 19:11:44 +0200
+             Message-Id: <b94sqtk7sidi2501apjssfubdc2ulmap38@4ax.com>
+     Branch: perl
+	   ! lib/ExtUtils/Command.t
+____________________________________________________________________________
+[ 12158] By: jhi                                   on 2001/09/23  12:52:36
+        Log: Subject: [PATCH] Win32 compilation without USE_ITHREADS
+             From: "Mattia Barbon" <mbarbon@dsi.unive.it>
+             Date: Sun, 23 Sep 2001 02:02:26 +0200
+             Message-ID: <3BAD42B2.2951.39B2E2A@localhost>
+     Branch: perl
+	   ! makedef.pl
+____________________________________________________________________________
+[ 12157] By: jhi                                   on 2001/09/23  12:46:05
+        Log: Subject: [PATCH t/op/study.t] Cleanup & OS/390 "fix"
+             From: Michael G Schwern <schwern@pobox.com> (by way of Craig A. Berry)         
+             Date: Sat, 22 Sep 2001 12:54:39 -0500
+             Message-Id: <a05101003b7d27f77cfa1@[172.16.52.1]>
+     Branch: perl
+	   ! t/op/study.t
+____________________________________________________________________________
+[ 12156] By: nick                                  on 2001/09/23  07:48:44
+        Log: Integrate mainline
+     Branch: perlio
+	   - check83.pl
+	  !> ext/Encode/Encode/2022-cn.enc
+____________________________________________________________________________
+[ 12155] By: nick                                  on 2001/09/23  07:48:01
+        Log: Integrate mainline
+     Branch: perlio
+	  +> (branch 64 files)
+	   - ext/Encode/Encode/cns11643-1.enc
+	   - ext/Encode/Encode/cns11643-2.enc
+	   - ext/Encode/Encode/iso2022-cn.enc
+	   - ext/Encode/Encode/iso2022-jp.enc
+	   - ext/Encode/Encode/iso2022-jp1.enc
+	   - ext/Encode/Encode/iso2022-jp2.enc
+	   - ext/Encode/Encode/iso2022-kr.enc ext/Encode/Encode/iso2022.enc
+	   - ext/Encode/Encode/iso8859-1.enc
+	   - ext/Encode/Encode/iso8859-1.ucm
+	   - ext/Encode/Encode/iso8859-10.enc
+	   - ext/Encode/Encode/iso8859-10.ucm
+	   - ext/Encode/Encode/iso8859-13.enc
+	   - ext/Encode/Encode/iso8859-13.ucm
+	   - ext/Encode/Encode/iso8859-14.enc
+	   - ext/Encode/Encode/iso8859-14.ucm
+	   - ext/Encode/Encode/iso8859-15.enc
+	   - ext/Encode/Encode/iso8859-15.ucm
+	   - ext/Encode/Encode/iso8859-16.enc
+	   - ext/Encode/Encode/iso8859-16.ucm
+	   - ext/Encode/Encode/iso8859-2.enc
+	   - ext/Encode/Encode/iso8859-2.ucm
+	   - ext/Encode/Encode/iso8859-3.enc
+	   - ext/Encode/Encode/iso8859-3.ucm
+	   - ext/Encode/Encode/iso8859-4.enc
+	   - ext/Encode/Encode/iso8859-4.ucm
+	   - ext/Encode/Encode/iso8859-5.enc
+	   - ext/Encode/Encode/iso8859-5.ucm
+	   - ext/Encode/Encode/iso8859-6.enc
+	   - ext/Encode/Encode/iso8859-6.ucm
+	   - ext/Encode/Encode/iso8859-7.enc
+	   - ext/Encode/Encode/iso8859-7.ucm
+	   - ext/Encode/Encode/iso8859-8.enc
+	   - ext/Encode/Encode/iso8859-8.ucm
+	   - ext/Encode/Encode/iso8859-9.enc
+	   - ext/Encode/Encode/iso8859-9.ucm
+	   - ext/Encode/Encode/isoir-197.enc
+	   - ext/Encode/Encode/macRomania.enc pod/perltootc.pod
+	   - t/lib/sample-tests/header_at_end
+	   - t/lib/sample-tests/header_at_end_fail
+	  !> (integrate 174 files)
+____________________________________________________________________________
+[ 12154] By: ams                                   on 2001/09/23  07:11:46
+        Log: Mention $ENV{SYS$LOGIN} in chdir() documentation, as suggested
+             by Blair Zajac.
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 12153] By: ams                                   on 2001/09/23  06:56:32
+        Log: Subject: [PATCH pp.c t/op/gv.t pod/perlref.pod pod/perldiag.pod] Re:
+             Forgotten deprecation of *glob{FILEHANDLE}?
+             From: "chromatic" <chromatic@rmci.net>
+             Date: Sat, 22 Sep 2001 21:27:56 -0600
+             Message-Id: <20010923033252.33085.qmail@onion.perl.org>
+     Branch: perl
+	   ! pod/perldiag.pod pod/perlref.pod pp.c t/op/gv.t
+____________________________________________________________________________
+[ 12152] By: ams                                   on 2001/09/23  06:42:58
+        Log: Subject: [PATCH lib/File/Find.pm] Fixing lib/File/Find/t/taint.t on VMS
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sun, 23 Sep 2001 03:34:39 -0400
+             Message-Id: <20010923033439.E7005@blackrider>
+     Branch: perl
+	   ! lib/File/Find.pm
+____________________________________________________________________________
+[ 12151] By: ams                                   on 2001/09/23  06:37:57
+        Log: Subject: Re: t/op/magic.t missing tests on Win32
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sat, 22 Sep 2001 20:29:09 -0400
+             Message-Id: <20010922202909.I18223@blackrider>
+     Branch: perl
+	   ! t/op/magic.t
+____________________________________________________________________________
+[ 12150] By: ams                                   on 2001/09/23  06:36:26
+        Log: Subject: [PATCH MANIFEST lib/Dumpvalue.t lib/Dumpvalue.pm] Add tests for
+             Dumpvalue.pm
+             From: "chromatic" <chromatic@rmci.net>
+             Date: Sat, 22 Sep 2001 19:41:31 -0600
+             Message-Id: <20010923014628.7739.qmail@onion.perl.org>
+     Branch: perl
+	   + lib/Dumpvalue.t
+	   ! MANIFEST lib/Dumpvalue.pm
+____________________________________________________________________________
+[ 12149] By: ams                                   on 2001/09/23  06:25:35
+        Log: Subject: [PATCH perl@12088] 2022-cn.enc of Encode.pm
+             From: SADAHIRO Tomoyuki <BQW10602@nifty.com>
+             Date: Sun, 23 Sep 2001 15:27:56 +0900
+             Message-Id: <20010923152641.5E26.BQW10602@nifty.com>
+     Branch: perl
+	   ! ext/Encode/Encode/2022-cn.enc
+____________________________________________________________________________
+[ 12148] By: jhi                                   on 2001/09/22  23:33:42
+        Log: Manual eror in #12147.
+     Branch: perl
+	   ! win32/win32.c
+____________________________________________________________________________
+[ 12147] By: jhi                                   on 2001/09/22  23:25:02
+        Log: Integrate change #12146 from maintperl;
+             win32_chdir() et al don't handle a NULL argument gracefully
+     Branch: perl
+	  !> win32/perlhost.h win32/win32.c
+____________________________________________________________________________
+[ 12146] By: gsar                                  on 2001/09/22  23:18:47
+        Log: win32_chdir() et al don't handle a NULL argument gracefully
+     Branch: maint-5.6/perl
+	   ! win32/perlhost.h win32/win32.c
+____________________________________________________________________________
+[ 12145] By: gsar                                  on 2001/09/22  23:17:42
+        Log: typo in change#12026
+     Branch: maint-5.6/perl
+	   ! op.c
+____________________________________________________________________________
+[ 12144] By: jhi                                   on 2001/09/22  21:22:28
+        Log: Subject: [PATCH] Re: scalar context unpack bugs
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Sat, 22 Sep 2001 23:07:56 +0100
+             Message-ID: <20010922230755.O4971@plum.flirble.org>
+     Branch: perl
+	   ! pp_pack.c t/op/pack.t
+____________________________________________________________________________
+[ 12143] By: jhi                                   on 2001/09/22  21:18:43
+        Log: Try ExtUtils::Command.t everywhere, not just on Win32
+             (as suggested by NI-S).  Also allow running it either
+             in t/ or in the main directory.
+     Branch: perl
+	   ! lib/ExtUtils/Command.t
+____________________________________________________________________________
+[ 12142] By: jhi                                   on 2001/09/22  21:04:39
+        Log: Update the test on warnings/register.t.
+     Branch: perl
+	   ! t/lib/1_compile.t
+____________________________________________________________________________
+[ 12141] By: jhi                                   on 2001/09/22  20:40:06
+        Log: The code is now almost tidy enough to keep the IRIX cc happy.
+     Branch: perl
+	   ! hints/irix_6.sh
+____________________________________________________________________________
+[ 12140] By: ams                                   on 2001/09/22  17:26:32
+        Log: Subject: [PATCH perl@12088] configure.com: don't build 'threads" w/out
+             use_ithreads
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Sat, 22 Sep 2001 13:15:32 -0500
+             Message-Id: <a05101005b7d284f5192c@[172.16.52.1]>
+     Branch: perl
+	   ! configure.com
+____________________________________________________________________________
+[ 12139] By: ams                                   on 2001/09/22  16:44:08
+        Log: Do what perl_clone() does for sharedsv functions.
+     Branch: perl
+	   ! embed.pl proto.h
+____________________________________________________________________________
+[ 12138] By: jhi                                   on 2001/09/22  16:42:04
+        Log: Retract #12134; reintroduce #11949: PADOFFSETs are now UVs
+             (suggested by Sarathy, extensions shouldn't be dabbling with
+             op structures, so binary backward compatibility should not be
+             an issue.)
+     Branch: perl
+	   ! hints/irix_6.sh op.h
+____________________________________________________________________________
+[ 12137] By: ams                                   on 2001/09/22  16:21:05
+        Log: More cleanups. (What's PERL_DECL_PROT?)
+     Branch: perl
+	   ! embed.pl proto.h sharedsv.h
+____________________________________________________________________________
+[ 12136] By: ams                                   on 2001/09/22  15:14:34
+        Log: Subject: [PATCH MANIFEST lib/warnings/register.t lib/warnings/register.pm]
+             Add Tests for warnings::register, Doc Update
+             From: "chromatic" <chromatic@rmci.net>
+             Date: Sat, 22 Sep 2001 09:43:20 -0600
+             Message-Id: <20010922154815.32004.qmail@onion.perl.org>
+     Branch: perl
+	   + lib/warnings/register.t
+	   ! MANIFEST lib/warnings/register.pm
+____________________________________________________________________________
+[ 12135] By: ams                                   on 2001/09/22  15:07:50
+        Log: `@foo' should be @foo for consistency.
+     Branch: perl
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[ 12134] By: jhi                                   on 2001/09/22  14:20:47
+        Log: (Retracted by #12138)
+             
+             Add -woff (turn warning off) 3187:
+             "A pointer is converted to a smaller integer."
+             This happens when your pointers are 64-bit: then every case
+             of converting pointers to PADOFFSETs (explicitly 32-bit)
+             faces truncation (even explicit use of INT2PTR doesn't help).
+             CxITERVAR(), POPLOOP(), and PUSHLOOP() are afflicted.
+             Changing PADOFFSET from U32 to UV would help, but that
+             would break binary backward compatibility of BASEOP and padop
+             (assuming you have been using 64-bit pointers).
+     Branch: perl
+	   ! hints/irix_6.sh
+____________________________________________________________________________
+[ 12133] By: jhi                                   on 2001/09/22  13:53:49
+        Log: More 8.3-cleanup: there isn't an encoding called macRumanian,
+             but the name comes from the inside the file, not from the file
+             name, and Rumanian is the name of the language.
+     Branch: perl
+	   + ext/Encode/Encode/macRumanian.enc
+	   - ext/Encode/Encode/macRomania.enc
+	   ! MANIFEST
+____________________________________________________________________________
+[ 12132] By: jhi                                   on 2001/09/22  13:48:29
+        Log: Rename perltootc as perltooc for 8.3-friedliness.
+     Branch: perl
+	   + pod/perltooc.pod
+	   - pod/perltootc.pod
+	   ! MANIFEST pod/buildtoc.PL pod/perl.pod pod/perlboot.pod
+	   ! pod/perlmod.pod pod/perlobj.pod pod/perltoc.pod
+	   ! pod/perltoot.pod
+____________________________________________________________________________
+[ 12131] By: jhi                                   on 2001/09/22  13:38:49
+        Log: Find more conflicts by lowercasing.
+     Branch: perl
+	   + Porting/check83.pl
+	   - check83.pl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 12130] By: jhi                                   on 2001/09/22  13:20:20
+        Log: The AIX cc 5.0.0.0 is simply too buggy.
+     Branch: perl
+	   ! hints/aix.sh
+____________________________________________________________________________
+[ 12129] By: ams                                   on 2001/09/22  12:35:38
+        Log: Uninteresting cleanup.
+     Branch: perl
+	   ! form.h
+____________________________________________________________________________
+[ 12128] By: ams                                   on 2001/09/22  12:28:48
+        Log: Subject: [PATCH@12110] Missing ")" in CvFILEGV
+             From: "Paul Marquess" <Paul_Marquess@Yahoo.co.uk>
+             Date: Sat, 22 Sep 2001 14:29:13 +0100
+             Message-Id: <AIEAJICLCBDNAAOLLOKLAEGADAAA.Paul_Marquess@Yahoo.co.uk>
+     Branch: perl
+	   ! cv.h
+____________________________________________________________________________
+[ 12127] By: ams                                   on 2001/09/22  12:04:28
+        Log: What's a backet?
+     Branch: perl
+	   ! dump.c
+____________________________________________________________________________
+[ 12126] By: ams                                   on 2001/09/22  10:02:34
+        Log: Removed duplicated tests #19 and #20.
+     Branch: perl
+	   ! t/op/do.t
+____________________________________________________________________________
+[ 12125] By: ams                                   on 2001/09/22  03:58:41
+        Log: Subject: Re: [ID 20010919.001] local() fails on imported variables
+             From: Michael Carman <mjcarman@home.com>
+             Date: Fri, 21 Sep 2001 17:54:05 -0500
+             Message-Id: <3BABC50D.6040202@home.com>
+             (Applied with some changes.)
+     Branch: perl
+	   ! pod/perlmod.pod
+____________________________________________________________________________
+[ 12124] By: ams                                   on 2001/09/22  03:44:19
+        Log: Subject: [PATCH t/op/chdir.t] Reconciling the Cwd/File::Spec differences
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Fri, 21 Sep 2001 19:20:40 -0400
+             Message-Id: <20010921192040.E5494@blackrider>
+     Branch: perl
+	   ! t/op/chdir.t
+____________________________________________________________________________
+[ 12123] By: ams                                   on 2001/09/22  03:41:08
+        Log: Subject: [PATCH] t/op/chdir.t won't pass on VMS
+             From: Blair Zajac <blair@orcaware.com>
+             Date: Fri, 21 Sep 2001 15:13:04 -0700
+             Message-Id: <3BABBB70.55FD41DC@orcaware.com>
+     Branch: perl
+	   ! t/op/chdir.t
+____________________________________________________________________________
+[ 12122] By: ams                                   on 2001/09/22  03:37:07
+        Log: Subject: [REPATCH] Re: [PATCH t/op/do.t] new regression tests for bug ID
+             20010920.007
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Fri, 21 Sep 2001 17:59:03 -0400
+             Message-Id: <20010921175903.V5494@blackrider>
+     Branch: perl
+	   ! t/op/do.t
+____________________________________________________________________________
+[ 12121] By: ams                                   on 2001/09/22  03:30:38
+        Log: Subject: [PATCH pod/perlport.pod] expand DOS-like table (was Re: test
+             suite on WinCE)
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Fri, 21 Sep 2001 19:41:03 -0400
+             Message-Id: <20010921194103.G5494@blackrider>
+     Branch: perl
+	   ! pod/perlport.pod
+____________________________________________________________________________
+[ 12120] By: ams                                   on 2001/09/22  03:28:06
+        Log: Subject: [PATCH t/op/magic.t] Re: Weird $ENV{FOO} = undef warning
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Fri, 21 Sep 2001 17:33:35 -0400
+             Message-Id: <20010921173335.T5494@blackrider>
+             ($ENV{FOO}=undef hunk not applied.)
+     Branch: perl
+	   ! t/op/magic.t
+____________________________________________________________________________
+[ 12119] By: ams                                   on 2001/09/22  03:02:26
+        Log: Subject: [PATCH] perldiag.pod
+             From: Peter Scott <Peter@PSDT.com>
+             Date: Fri, 21 Sep 2001 18:54:50 -0700
+             Message-Id: <4.3.2.7.2.20010921183823.00aa9890@mail.webquarry.com>
+             (Moved to the right place.)
+     Branch: perl
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[ 12118] By: ams                                   on 2001/09/21  20:05:29
+        Log: Subject: [PATCH t/op/do.t] new regression tests for bug ID 20010920.007
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Fri, 21 Sep 2001 22:36:54 +0200
+             Message-Id: <20010921223654.A12742@rafael>
+     Branch: perl
+	   ! t/op/do.t
+____________________________________________________________________________
+[ 12117] By: jhi                                   on 2001/09/21  20:05:23
+        Log: Restore things as they were before
+             the backward compatibility police notices.
+     Branch: perl
+	   ! lib/Cwd.pm
+____________________________________________________________________________
+[ 12116] By: jhi                                   on 2001/09/21  17:52:28
+        Log: More Cwd from Schwern: make also OS/2 and DOS
+             Cwd agree with File::Spec (that is, native path
+             syntax using \ instead of / -- backward compatibility
+             polic warning) and stop Win32 from using bsd_realpath().
+     Branch: perl
+	   ! lib/Cwd.pm
+____________________________________________________________________________
+[ 12115] By: jhi                                   on 2001/09/21  17:19:03
+        Log: Subject: [PATCH @12110] RE: Untested libraries update
+             From: "Paul Marquess" <Paul_Marquess@Yahoo.co.uk>
+             Date: Fri, 21 Sep 2001 18:21:07 +0100
+             Message-ID: <AIEAJICLCBDNAAOLLOKLOEENDAAA.Paul_Marquess@Yahoo.co.uk>
+     Branch: perl
+	   ! lib/warnings/register.pm
+____________________________________________________________________________
+[ 12114] By: jhi                                   on 2001/09/21  17:09:52
+        Log: Subject: Re: And now the Cwd problem (was Re: chdir.t problem...)
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Thu, 20 Sep 2001 22:54:02 -0400
+             Message-ID: <20010920225402.A3611@blackrider>
+     Branch: perl
+	   ! lib/Cwd.pm
+____________________________________________________________________________
+[ 12113] By: ams                                   on 2001/09/21  17:08:24
+        Log: Subject: [PATCH] avoid v-strings with require/use
+             From: Ronald J Kimball <rjk@linguist.Thayer.dartmouth.edu>
+             Date: Fri, 21 Sep 2001 12:34:40 -0400
+             Message-Id: <20010921123440.A148500@linguist.thayer.dartmouth.edu>
+     Branch: perl
+	   ! ext/ByteLoader/bytecode.h ext/Data/Dumper/Dumper.pm
+	   ! ext/Devel/DProf/DProf.pm ext/IO/lib/IO/Dir.pm
+	   ! ext/IO/lib/IO/File.pm ext/IO/lib/IO/Handle.pm
+	   ! ext/IO/lib/IO/Pipe.pm ext/IO/lib/IO/Seekable.pm
+	   ! ext/Opcode/Opcode.pm lib/AnyDBM_File.pm lib/AutoLoader.pm
+	   ! lib/AutoSplit.pm lib/Class/Struct.pm lib/Cwd.pm
+	   ! lib/Dumpvalue.pm lib/ExtUtils/Command.pm
+	   ! lib/ExtUtils/Install.pm lib/ExtUtils/Installed.pm
+	   ! lib/ExtUtils/Liblist.pm lib/ExtUtils/Mksymlists.pm
+	   ! lib/ExtUtils/Packlist.pm lib/Fatal.pm lib/File/Basename.pm
+	   ! lib/File/CheckTree.pm lib/File/Compare.pm lib/File/Copy.pm
+	   ! lib/File/Find.pm lib/File/Path.pm lib/File/stat.pm
+	   ! lib/FileHandle.pm lib/Math/Trig.pm lib/Net/Ping.pm
+	   ! lib/Net/hostent.pm lib/Net/netent.pm lib/Net/protoent.pm
+	   ! lib/Net/servent.pm lib/Shell.pm lib/Tie/Array.pm
+	   ! lib/Tie/Handle.pm lib/Time/Local.pm lib/Time/gmtime.pm
+	   ! lib/Time/localtime.pm lib/User/grent.pm lib/base.pm
+	   ! lib/diagnostics.pm lib/fields.pm lib/vars.pm
+	   ! pod/perl56delta.pod pod/perlfunc.pod pp_ctl.c utils/pl2pm.PL
+____________________________________________________________________________
+[ 12110] By: jhi                                   on 2001/09/21  13:59:13
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 12109] By: jhi                                   on 2001/09/21  13:44:43
         Log: Make AIX and Tru64 compilers happy.  
      Branch: perl
