@@ -210,7 +210,7 @@ sub bits ($) {
 {
     srand;		# These three lines are for test 7
     my $time = time;	# It's just faster to do them here.
-    my $rand = rand;
+    my $rand = join ", ", rand, rand, rand;
 
     # Hints for TEST 5
     # 
@@ -251,7 +251,7 @@ sub bits ($) {
     #
     while ($time == time) { }	# Wait for new second, just in case.
     srand;
-    if (rand == $rand) {
+    if ((join ", ", rand, rand, rand) eq $rand) {
 	print "not ok 7\n";
 	print "# srand without args isn't varying.\n";
     } else {
