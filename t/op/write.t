@@ -15,30 +15,32 @@ sub swrite {
 }
 
 my @NumTests = (
-    [ '@###',   0, 1, 9999.5, 9999.4999, -999.5, 1e100 ],
-    [ '@0##',   0, 1, 9999.5, -999.4999, -999.5, 1e100 ],
-    [ '^###',   0, undef ],
-    [ '^0##',   0, undef ],
-    [ '@###.',  0, 1, 9999.5, 9999.4999, -999.5 ],
-    [ '@##.##', 0, 1, 999.995, 999.99499, -100 ],
-    [ '@0#.##', 0, 1, 10, -0.0001 ],
-	    );
+    # [ format, value1, expected1, value2, expected2, .... ]
+    [ '@###',           0,   '   0',         1, '   1',     9999.5, '####',
+		9999.4999,   '9999',    -999.5, '####',     1e+100, '####' ],
 
-sub mkfmt($){
-    my $fmt = shift();
-    my $fieldwidth = length( $fmt );
-    my $leadzero = $fmt =~ /^.0/ ? "0" : "";
-    if( $fmt =~ /\.(#*)/ ){
-        my $fractwidth = length( $1 );
-        return "%#${leadzero}${fieldwidth}.${fractwidth}f"
-    } else {
-        return "%${leadzero}${fieldwidth}.0f"
-    }
-} 
+    [ '@0##',           0,   '0000',         1, '0001',     9999.5, '####',
+		-999.4999,   '-999',    -999.5, '####',     1e+100, '####' ],
+
+    [ '^###',           0,   '   0',     undef, '    ' ],
+
+    [ '^0##',           0,   '0000',     undef, '    ' ],
+
+    [ '@###.',          0,  '   0.',         1, '   1.',    9999.5, '#####',
+                9999.4999,  '9999.',    -999.5, '#####' ],
+
+    [ '@##.##',         0, '  0.00',         1, '  1.00',  999.995, '######',
+                999.99499, '999.99',      -100, '######' ],
+
+    [ '@0#.##',         0, '000.00',         1, '001.00',       10, '010.00',
+                  -0.0001, '-00.00' ],
+
+);
+
 
 my $num_tests = 0;
 for my $tref ( @NumTests ){
-    $num_tests += @$tref - 1;
+    $num_tests += (@$tref - 1)/2;
 }
 #---------------------------------------------------------
 
@@ -479,22 +481,13 @@ EOD
 my $nt = $bas_tests;
 for my $tref ( @NumTests ){
     my $writefmt = shift( @$tref );
-    my $printfmt = mkfmt( $writefmt );
-    my $blank_when_undef = substr( $writefmt, 0, 1 ) eq '^';
-    for my $val ( @$tref ){
+    while (@$tref) {
+	my $val      = shift @$tref;
+	my $expected = shift @$tref;
         my $writeres = swrite( $writefmt, $val );
-        my $printres;
-        if( $blank_when_undef && ! defined($val) ){
-            $printres = ' ' x length( $writefmt );
-        } else {
-            $printres = sprintf( $printfmt, $val || 0 );
-            if( length($printres) > length( $writefmt ) ){
-                $printres = '#' x length( $writefmt );
-            }
-        }
         $nt++;
 
-        print $printres eq $writeres ? "ok $nt\n" : "not ok $nt\n";
+        print $expected eq $writeres ? "ok $nt\n" : "not ok $nt\n";
     }
 }
 
