@@ -2511,8 +2511,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
 	    if (paren == '>')
 		node = SUSPEND, flag = 0;
 	    reginsert(pRExC_state, node,ret);
-	    Set_Node_Offset(ret, oregcomp_parse);
-	    Set_Node_Length(ret,  RExC_parse - oregcomp_parse + 2);
+	    Set_Node_Cur_Length(ret);
+	    Set_Node_Offset(ret, parse_start + 1);
 	    ret->flags = flag;
 	    regtail(pRExC_state, ret, reg_node(pRExC_state, TAIL));
 	}
@@ -2793,7 +2793,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp)
 {
     register regnode *ret = 0;
     I32 flags;
-    char *parse_start = 0;
+    char *parse_start = RExC_parse;
 
     *flagp = WORST;		/* Tentatively. */
 
@@ -3056,6 +3056,7 @@ tryagain:
 	default:
 	    /* Do not generate `unrecognized' warnings here, we fall
 	       back into the quick-grab loop below */
+	    parse_start--;
 	    goto defchar;
 	}
 	break;
@@ -4425,6 +4426,7 @@ S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode *opnd)
               RExC_parse - RExC_start,
               RExC_offsets[0])); 
 	Set_Node_Offset(place, RExC_parse);
+	Set_Node_Length(place, 1);
     }
     src = NEXTOPER(place);
     FILL_ADVANCE_NODE(place, op);
