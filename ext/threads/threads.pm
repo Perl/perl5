@@ -56,7 +56,8 @@ our $VERSION = '1.03';
 # || 0 to ensure compatibility with previous versions
 sub equal { ($_[0]->tid == $_[1]->tid) || 0 }
 
-# use "goto" trick to avoid pad problems from 5.8.1, should also be faster
+# use "goto" trick to avoid pad problems from 5.8.1 (fixed in 5.8.2)
+# should also be faster
 sub async (&;@) { unshift @_,'threads'; goto &new }
 
 sub object {
