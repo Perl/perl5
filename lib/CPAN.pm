@@ -1,6 +1,6 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 package CPAN;
-$VERSION = '1.74_01';
+$VERSION = '1.75_01';
 # $Id: CPAN.pm,v 1.409 2003/07/28 22:07:23 k Exp $
 
 # only used during development:
