@@ -3949,7 +3949,8 @@ output to an SV.  If the appended data contains "wide" characters
 (including, but not limited to, SVs with a UTF-8 PV formatted with %s,
 and characters >255 formatted with %c), the original SV might get
 upgraded to UTF-8.  Handles 'get' magic, but not 'set' magic.  See
-C<sv_catpvf_mg>.
+C<sv_catpvf_mg>. If the original SV was UTF-8, the pattern should be
+valid UTF-8; if the original SV was bytes, the pattern should be too.
 
 	void	sv_catpvf(SV* sv, const char* pat, ...)
 
