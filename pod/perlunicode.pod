@@ -42,6 +42,21 @@ is needed.>  See L<utf8>.
 You can also use the C<encoding> pragma to change the default encoding
 of the data in your script; see L<encoding>.
 
+=item C<use encoding> needed to upgrade non-Latin-1 byte strings
+
+By default, there is a fundamental asymmetry in Perl's unicode model:
+implicit upgrading from byte strings to Unicode strings assumes that
+they were encoded in I<ISO 8859-1 (Latin-1)>, but Unicode strings are
+downgraded with UTF-8 encoding.  This happens because the first 256
+codepoints in Unicode happens to agree with Latin-1.  
+
+If you wish to interpret byte strings as UTF-8 instead, use the
+C<encoding> pragma:
+
+    use encoding 'utf8';
+
+See L</"Byte and Character Semantics"> for more details.
+
 =back
 
 =head2 Byte and Character Semantics
@@ -86,12 +101,12 @@ Otherwise, byte semantics are in effect.  The C<bytes> pragma should
 be used to force byte semantics on Unicode data.
 
 If strings operating under byte semantics and strings with Unicode
-character data are concatenated, the new string will be upgraded to
-I<ISO 8859-1 (Latin-1)>, even if the old Unicode string used EBCDIC.
-This translation is done without regard to the system's native 8-bit
-encoding, so to change this for systems with non-Latin-1 and 
-non-EBCDIC native encodings use the C<encoding> pragma.  See
-L<encoding>.
+character data are concatenated, the new string will be created by
+decoding the byte strings as I<ISO 8859-1 (Latin-1)>, even if the
+old Unicode string used EBCDIC.  This translation is done without
+regard to the system's native 8-bit encoding.  To change this for
+systems with non-Latin-1 and non-EBCDIC native encodings, use the
+C<encoding> pragma.  See L<encoding>.
 
 Under character semantics, many operations that formerly operated on
 bytes now operate on characters. A character in Perl is

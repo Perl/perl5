@@ -192,6 +192,25 @@ not "\x{99F1}\x{99DD} is the symbol of perl.\n".
 
 You can override this by giving extra arguments; see below.
 
+=head2 Implicit upgrading for byte strings
+
+By default, if strings operating under byte semantics and strings
+with Unicode character data are concatenated, the new string will
+be created by decoding the byte strings as I<ISO 8859-1 (Latin-1)>.
+
+The B<encoding> pragma changes this to use the specified encoding
+instead.  For example:
+
+    use encoding 'utf8';
+    my $string = chr(20000); # a Unicode string
+    utf8::encode($string);   # now it's a UTF-8 encoded byte string
+    # concatenate with another Unicode string
+    print length($string . chr(20000));
+
+Will print C<2>, because C<$string> is upgraded as UTF-8.  Without
+C<use encoding 'utf8';>, it will print C<4> instead, since C<$string>
+is three octets when interpreted as Latin-1.
+
 =head1 FEATURES THAT REQUIRE 5.8.1
 
 Some of the features offered by this pragma requires perl 5.8.1.  Most
