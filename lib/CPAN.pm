@@ -1,14 +1,11 @@
 package CPAN;
 use vars qw{$META $Signal $Cwd $End $Suppress_readline};
 
-$VERSION = '1.09';
+$VERSION = '1.15';
 
-# $Id: CPAN.pm,v 1.94 1996/12/24 00:41:14 k Exp $
+# $Id: CPAN.pm,v 1.106 1997/01/24 12:26:36 k Exp $
 
-# my $version = substr q$Revision: 1.94 $, 10; # only used during development
-
-BEGIN {require 5.003;}
-require UNIVERSAL if $] == 5.003;
+# my $version = substr q$Revision: 1.106 $, 10; # only used during development
 
 use Carp ();
 use Config ();
@@ -20,7 +17,7 @@ use File::Basename ();
 use File::Copy ();
 use File::Find;
 use File::Path ();
-use IO::File ();
+use FileHandle ();
 use Safe ();
 use Text::ParseWords ();
 
@@ -45,6 +42,7 @@ END { $End++; &cleanup; }
 		 );
 
 $CPAN::DEBUG ||= 0;
+$CPAN::Signal ||= 0;
 
 package CPAN;
 use vars qw($VERSION @EXPORT $AUTOLOAD $DEBUG $META);
@@ -57,9 +55,12 @@ use strict qw(vars);
 $META ||= new CPAN;                 # In case we reeval ourselves we
                                     # need a ||
 
-CPAN::Config->load;
+CPAN::Config->load unless defined $CPAN::No_Config_is_ok;
 
-@EXPORT = qw(autobundle bundle expand force install make recompile shell test clean);
+@EXPORT = qw( 
+	     autobundle bundle expand force get
+	     install make readme recompile shell test clean
+	    );
 
 
 
@@ -112,7 +113,7 @@ sub checklock {
     my($self) = @_;
     my $lockfile = CPAN->catfile($CPAN::Config->{cpan_home},".lock");
     if (-f $lockfile && -M _ > 0) {
-	my $fh = IO::File->new($lockfile);
+	my $fh = FileHandle->new($lockfile);
 	my $other = <$fh>;
 	$fh->close;
 	if (defined $other && $other) {
@@ -141,7 +142,7 @@ sub checklock {
     }
     File::Path::mkpath($CPAN::Config->{cpan_home});
     my $fh;
-    unless ($fh = IO::File->new(">$lockfile")) {
+    unless ($fh = FileHandle->new(">$lockfile")) {
 	if ($! =~ /Permission/) {
 	    my $incc = $INC{'CPAN/Config.pm'};
 	    my $myincc = MY->catfile($ENV{HOME},'.cpan','CPAN','MyConfig.pm');
@@ -170,7 +171,11 @@ or
     $self->{LOCK} = $lockfile;
     $fh->close;
     $SIG{'TERM'} = sub { &cleanup; die "Got SIGTERM, leaving"; };
-    $SIG{'INT'} = sub { &cleanup, die "Got a second SIGINT" if $Signal; $Signal = 1; };
+    $SIG{'INT'} = sub {
+	my $s = $Signal == 2 ? "a second" : "another";
+	&cleanup, die "Got $s SIGINT" if $Signal;
+	$Signal = 1;
+    };
     $SIG{'__DIE__'} = \&cleanup;
     print STDERR "Signal handler set.\n" unless $CPAN::Config->{'inhibit_startup_message'};
 }
@@ -222,7 +227,8 @@ sub hasMD5 {
     } elsif (not defined $self->{'hasMD5'}) {
 	eval {require MD5;};
 	if ($@) {
-	    print "MD5 security checks disabled because MD5 not installed. Please consider installing MD5\n";
+	    print "MD5 security checks disabled because MD5 not installed.
+  Please consider installing MD5\n";
 	    $self->{'hasMD5'} = 0;
 	} else {
 	    $self->{'hasMD5'}++;
@@ -312,9 +318,13 @@ Readline support $rl_avail
 	    last;
 	} elsif (/./) {
 	    my(@line);
-	    eval { @line = Text::ParseWords::shellwords($_) };
-	    warn($@), next if $@;
-	    $CPAN::META->debug("line[".join(":",@line)."]") if $CPAN::DEBUG;
+	    if ($] < 5.00322) { # parsewords had a bug at until recently
+		@line = split;
+	    } else {
+		eval { @line = Text::ParseWords::shellwords($_) };
+		warn($@), next if $@;
+	    }
+	    $CPAN::META->debug("line[".join("|",@line)."]") if $CPAN::DEBUG;
 	    my $command = shift @line;
 	    eval { CPAN::Shell->$command(@line) };
 	    warn $@ if $@;
@@ -327,7 +337,7 @@ Readline support $rl_avail
 }
 
 package CPAN::Shell;
-use vars qw($AUTOLOAD);
+use vars qw($AUTOLOAD $redef);
 @CPAN::Shell::ISA = qw(CPAN::Debug);
 
 # private function ro re-eval this module (handy during development)
@@ -355,12 +365,13 @@ i         none                    anything of above
 
 r          as             reinstall recommendations
 u          above          uninstalled distributions
-See manpage for autobundle, recompile, force, etc.
+See manpage for autobundle, recompile, force, look, etc.
 
-make      modules,        make
-test      dists, bundles, make test (implies make)
-install   "r" or "u"      make install (implies test)
-clean                     make clean
+make                      make
+test      modules,        make test (implies make)
+install   dists, bundles, make install (implies test)
+clean     "r" or "u"      make clean
+readme                    display the README file
 
 reload    index|cpan    load most recent indices/CPAN.pm
 h or ?                  display this menu
@@ -376,6 +387,7 @@ sub a { print shift->format_result('Author',@_);}
 #-> sub CPAN::Shell::b ;
 sub b {
     my($self,@which) = @_;
+    CPAN->debug("which[@which]") if $CPAN::DEBUG;
     my($incdir,$bdir,$dh); 
     foreach $incdir ($CPAN::Config->{'cpan_home'},@INC) {
 	$bdir = $CPAN::META->catdir($incdir,"Bundle");
@@ -460,7 +472,7 @@ sub o {
 			next unless lc($_) eq lc($what);
 			$CPAN::DEBUG |= $CPAN::DEBUG{$_};
 		    }
-		    print "unknown argument $what\n";
+		    print "unknown argument [$what]\n";
 		}
 	    }
 	} else {
@@ -490,11 +502,23 @@ Known options:
 sub reload {
     if ($_[1] =~ /cpan/i) {
 	CPAN->debug("reloading the whole CPAN.pm") if $CPAN::DEBUG;
-	my $fh = IO::File->new($INC{'CPAN.pm'});
-	local $/;
+	my $fh = FileHandle->new($INC{'CPAN.pm'});
+	local($/);
 	undef $/;
+	$redef = 0;
+	local($SIG{__WARN__})
+	    = sub {
+		if ( $_[0] =~ /Subroutine \w+ redefined/ ) {
+		    ++$redef;
+		    local($|) = 1;
+		    print ".";
+		    return;
+		}
+		warn @_;
+	    };
 	eval <$fh>;
 	warn $@ if $@;
+	print "\n$redef subroutines redefined\n";
     } elsif ($_[1] =~ /index/) {
 	CPAN::Index->force_reload;
     }
@@ -510,10 +534,12 @@ sub _binary_extensions {
 	next if $file =~ /^Contact Author/;
 	next if $file =~ /perl5[._-]\d{3}(?:[\d_]+)?\.tar[._-]gz$/;
 	next unless $module->xs_file;
+	local($|) = 1;
+	print ".";
 	push @result, $module;
     }
 #    print join " | ", @result;
-#    print "\n";
+    print "\n";
     return @result;
 }
 
@@ -576,6 +602,7 @@ sub _u_r_common {
 		$have = "-";
 	    }
 	}
+	return if $CPAN::Signal; # this is sometimes lengthy
 	$seen{$file} ||= 0;
 	if ($what eq "a") {
 	    push @result, sprintf "%s %s\n", $module->id, $have;
@@ -595,7 +622,6 @@ sub _u_r_common {
 	$have = substr($have,0,8) if length($have) > 8;
 	printf $sprintf, $module->id, $have, $latest, $file;
 	$need{$module->id}++;
-	return if $CPAN::Signal; # this is sometimes lengthy
     }
     unless (%need) {
 	if ($what eq "u") {
@@ -641,7 +667,7 @@ sub autobundle {
 	$me = sprintf "Snapshot_%04d_%02d_%02d_%02d", $y, $m, $d, ++$c;
 	$to = $CPAN::META->catfile($todir,"$me.pm");
     }
-    my($fh) = IO::File->new(">$to") or Carp::croak "Can't open >$to: $!";
+    my($fh) = FileHandle->new(">$to") or Carp::croak "Can't open >$to: $!";
     $fh->print(
 	       "package Bundle::$me;\n\n",
 	       "\$VERSION = '0.01';\n\n",
@@ -680,7 +706,19 @@ sub expand {
 	my $obj;
 	if (defined $regex) {
 	    for $obj ( sort {$a->id cmp $b->id} $CPAN::META->all($class)) {
-		push @m, $obj if $obj->id =~ /$regex/i or $obj->can('name') && $obj->name  =~ /$regex/i;
+		push @m, $obj
+		    if
+			$obj->id =~ /$regex/i
+			    or
+			(
+			 (
+			  $] < 5.00303 ### provide sort of compatibility with 5.003
+			  ||
+			  $obj->can('name')
+			 )
+			 &&
+			 $obj->name  =~ /$regex/i
+			);
 	    }
 	} else {
 	    my($xarg) = $arg;
@@ -689,7 +727,7 @@ sub expand {
 	    }
 	    if ($CPAN::META->exists($class,$xarg)) {
 		$obj = $CPAN::META->instance($class,$xarg);
-	    } elsif ($obj = $CPAN::META->exists($class,$arg)) {
+	    } elsif ($CPAN::META->exists($class,$arg)) {
 		$obj = $CPAN::META->instance($class,$arg);
 	    } else {
 		next;
@@ -735,8 +773,15 @@ sub rematein {
 	}
 	if (ref $obj) {
 	    CPAN->debug(qq{pragma[$pragma] meth[$meth] obj[$obj] as_string\[}.$obj->as_string.qq{\]}) if $CPAN::DEBUG;
-	    $obj->$pragma() if $pragma && $obj->can($pragma);
+	    $obj->$pragma()
+		if
+		    $pragma
+			&&
+		    ($] < 5.00303 || $obj->can($pragma)); ### compatibility with 5.003
 	    $obj->$meth();
+	} elsif ($CPAN::META->exists('CPAN::Author',$s)) {
+	    $obj = $CPAN::META->instance('CPAN::Author',$s);
+	    print "Don't be silly, you can't $meth ", $obj->fullname, " ;-)\n";
 	} else {
 	    print "Warning: Cannot $meth $s, don't know what it is\n";
 	}
@@ -745,16 +790,20 @@ sub rematein {
 
 #-> sub CPAN::Shell::force ;
 sub force   { shift->rematein('force',@_); }
+#-> sub CPAN::Shell::get ;
+sub get     { shift->rematein('get',@_); }
 #-> sub CPAN::Shell::readme ;
 sub readme  { shift->rematein('readme',@_); }
 #-> sub CPAN::Shell::make ;
 sub make    { shift->rematein('make',@_); }
-#-> sub CPAN::Shell::clean ;
-sub clean   { shift->rematein('clean',@_); }
 #-> sub CPAN::Shell::test ;
 sub test    { shift->rematein('test',@_); }
 #-> sub CPAN::Shell::install ;
 sub install { shift->rematein('install',@_); }
+#-> sub CPAN::Shell::clean ;
+sub clean   { shift->rematein('clean',@_); }
+#-> sub CPAN::Shell::look ;
+sub look   { shift->rematein('look',@_); }
 
 package CPAN::FTP;
 use vars qw($Ua);
@@ -768,6 +817,7 @@ sub ftp_get {
 	on host [$host] as local [$target]\n]
 		      ) if $CPAN::DEBUG;
     my $ftp = Net::FTP->new($host);
+    return 0 unless defined $ftp;
     $ftp->debug(1) if $CPAN::DEBUG{'FTP'} & $CPAN::DEBUG;
     $class->debug(qq[Going to ->login("anonymous","$Config::Config{'cf_email'}")\n]);
     unless ( $ftp->login("anonymous",$Config::Config{'cf_email'}) ){
@@ -785,7 +835,8 @@ sub ftp_get {
 	warn "Couldn't fetch $file from $host";
 	return;
     }
-    $ftp->quit;
+    $ftp->quit; # it's ok if this fails
+    return 1;
 }
 
 #-> sub CPAN::FTP::localize ;
@@ -808,9 +859,13 @@ sub localize {
 	require LWP::UserAgent;
  	unless ($Ua) {
 	    $Ua = new LWP::UserAgent;
-	    $Ua->proxy('ftp',  $ENV{'ftp_proxy'})  if defined $ENV{'ftp_proxy'};
-	    $Ua->proxy('http', $ENV{'http_proxy'}) if defined $ENV{'http_proxy'};
-	    $Ua->no_proxy($ENV{'no_proxy'})        if defined $ENV{'no_proxy'};
+	    my($var);
+	    $Ua->proxy('ftp',  $var)
+		if $var = $CPAN::Config->{'ftp_proxy'} || $ENV{'ftp_proxy'};
+	    $Ua->proxy('http', $var)
+		if $var = $CPAN::Config->{'http_proxy'} || $ENV{'http_proxy'};
+	    $Ua->no_proxy($var)
+		if $var = $CPAN::Config->{'no_proxy'} || $ENV{'no_proxy'};
 	}
     }
 
@@ -839,13 +894,14 @@ sub localize {
 	}
 
 	if ($CPAN::META->hasLWP) {
-	    print "Fetching $url\n";
+	    print "Fetching $url with LWP\n";
 	    my $res = $Ua->mirror($url, $aslocal);
 	    if ($res->is_success) {
 		return $aslocal;
 	    }
 	}
 	if ($url =~ m|^ftp://(.*?)/(.*)/(.*)|) {
+	    # that's the nice and easy way thanks to Graham
 	    my($host,$dir,$getfile) = ($1,$2,$3);
 	    if ($CPAN::META->hasFTP) {
 		$dir =~ s|/+|/|g;
@@ -854,69 +910,111 @@ sub localize {
   on host  [$host]
   as local [$aslocal]") if $CPAN::DEBUG;
 		CPAN::FTP->ftp_get($host,$dir,$getfile,$aslocal) && return $aslocal;
-	    } elsif (-x $CPAN::Config->{'ftp'}) {
-		my($netrc) = CPAN::FTP::netrc->new;
-		if ($netrc->hasdefault() || $netrc->contains($host)) {
-		    print(
-			  qq{
-  Trying with external ftp to get $url
-  As this requires some features that are not thoroughly tested, we\'re
-  not sure, that we get it right. Please, install Net::FTP as soon
-  as possible. Just type "install Net::FTP". Thank you.
+		warn "Net::FTP failed for some reason\n";
+	    } else {
+		warn qq{
+  Please, install Net::FTP as soon as possible. Just type
+    install Net::FTP
+  Thank you.
 
 }
-			 );
-		    my($fh) = IO::File->new;
-		    my($cwd) = Cwd::cwd();
-		    chdir $aslocal_dir;
-		    my($targetfile) = File::Basename::basename($aslocal);
-		    my(@dialog);
-		    push @dialog, map {"cd $_\n"} split "/", $dir;
-		    push @dialog, "get $getfile $targetfile\n";
-		    push @dialog, "quit\n";
-		    open($fh, "|$CPAN::Config->{'ftp'} $host") or die "Couldn't open ftp: $!";
-		    # pilot is blind now
-		    foreach (@dialog) {
-			$fh->print($_);
+	    }
+
+	    # Came back if Net::FTP couldn't establish connection (or failed otherwise)
+	    # Maybe they are behind a firewall, but they gave us
+	    # a socksified (or other) ftp program...
+	    my($netrcfile,$fh);
+	    if (-x $CPAN::Config->{'ftp'}) {
+		my $timestamp = 0;
+		my($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,
+		   $ctime,$blksize,$blocks) = stat($aslocal);
+		$timestamp = $mtime if defined $mtime;
+
+		my($netrc) = CPAN::FTP::netrc->new;
+		my($verbose) = $CPAN::DEBUG{'FTP'} & $CPAN::DEBUG ? " -v" : "";
+
+		my $targetfile = File::Basename::basename($aslocal);
+		my(@dialog);
+		push(
+		     @dialog,
+		     "lcd $aslocal_dir",
+		     "cd /",
+		     map("cd $_", split "/", $dir), # RFC 1738
+		     "bin",
+		     "get $getfile $targetfile",
+		     "quit"
+		    );
+		if (! $netrc->netrc) {
+		    warn "No ~/.netrc file found";
+		} elsif ($netrc->hasdefault || $netrc->contains($host)) {
+		    CPAN->debug(
+				sprint(
+				       "hasdef[%d]cont($host)[%d]",
+				       $netrc->hasdefault,
+				       $netrc->contains($host)
+				      )
+			       ) if $CPAN::DEBUG;
+		    if ($netrc->protected) {
+			print(
+			      qq{
+  Trying with external ftp to get
+    $url
+  As this requires some features that are not thoroughly tested, we\'re
+  not sure, that we get it right....
+
+}
+			     );
+			my $fh = FileHandle->new;
+			$fh->open("|$CPAN::Config->{'ftp'}$verbose $host")
+			    or die "Couldn't open ftp: $!";
+			# pilot is blind now
+			CPAN->debug("dialog [".(join "|",@dialog)."]") if $CPAN::DEBUG;
+			foreach (@dialog) { $fh->print("$_\n") }
+			$fh->close;		# Wait for process to complete
+			($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
+			 $atime,$mtime,$ctime,$blksize,$blocks) = stat($aslocal);
+			if ($mtime > $timestamp) {
+			    print "GOT $aslocal\n";
+			    return $aslocal;
+			} else {
+			    print "Hmm... Still failed!\n";
+			}
+		    } else {
+			warn "Your $netrcfile is not correctly protected.\n";
 		    }
-		    chdir($cwd);
+		} else {
+		    warn "Your ~/.netrc neither contains $host
+  nor does it have a default entry\n";
+		}
+
+		# OK, they don't have a valid ~/.netrc. Use 'ftp -n' then and
+		# login manually to host, using e-mail as password.
+		print qq{Issuing "ftp$verbose -n"\n};
+		unshift @dialog, "open $host", "user anonymous $Config::Config{'cf_email'}";
+		CPAN->debug("dialog [".(join "|",@dialog)."]") if $CPAN::DEBUG;
+		$fh = FileHandle->new;
+		$fh->open("|$CPAN::Config->{'ftp'} -n") or
+		    die "Cannot fork: $!\n";
+		foreach (@dialog) { $fh->print("$_\n") }
+		$fh->close;
+		($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
+		   $atime,$mtime,$ctime,$blksize,$blocks) = stat($aslocal);
+		if ($mtime > $timestamp) {
+		    print "GOT $aslocal\n";
 		    return $aslocal;
 		} else {
-		    my($netrcfile) = $netrc->netrc();
-		    if ($netrcfile){
-			print qq{  Your $netrcfile does not contain host $host.\n}
- 		    } else {
-			print qq{  I could not find or open your .netrc file.\n}
-		    }
-		    print qq{  If you want to use external ftp,
-  please enter the host $host (or a default entry)
-  into your .netrc file and retry.
-
-  The format of a proper entry in your .netrc file would be:
-    machine $host
-    login ftp
-    password $Config::Config{cf_email}
-
-  A typical default entry would be:
-    default login ftp password $Config::Config{cf_email}
-
-  Please make also sure, your .netrc will not be readable by others.
-  You don\'t have to leave and restart CPAN.pm, I\'ll look again next
-  time I come around here.\n\n};
-	       }
+		    print "Bad luck... Still failed!\n";
+		}
 	    }
 	    sleep 2;
 	}
+
+	# what, still not succeeded?
 	if (-x $CPAN::Config->{'lynx'}) {
-##	    $self->debug("Trying with lynx for [$url]") if $CPAN::DEBUG;
 	    my($want_compressed);
 	    print(
 		  qq{
   Trying with lynx to get $url
-  As lynx has so many options and versions, we\'re not sure, that we
-  get it right. It is recommended that you install Net::FTP as soon
-  as possible. Just type "install Net::FTP". Thank you.
-
 }
 		 );
 	    $want_compressed = $aslocal =~ s/\.gz//;
@@ -950,24 +1048,33 @@ sub localize {
     Carp::croak("Cannot fetch $file from anywhere");
 }
 
-package CPAN::FTP::external;
-
 package CPAN::FTP::netrc;
 
 sub new {
     my($class) = @_;
     my $file = MY->catfile($ENV{HOME},".netrc");
+
+    my($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
+       $atime,$mtime,$ctime,$blksize,$blocks)
+	= stat($file);
+    my $protected = 0;
+
     my($fh,@machines,$hasdefault);
     $hasdefault = 0;
-    if($fh = IO::File->new($file,"r")){
+    $fh = FileHandle->new or die "Could not create a filehandle";
+
+    if($fh->open($file)){
+	$protected = ($mode & 077) == 0;
 	local($/) = "";
       NETRC: while (<$fh>) {
-	    my(@tokens) = split ' ', $_;
+	    my(@tokens) = split " ", $_;
 	  TOKEN: while (@tokens) {
 		my($t) = shift @tokens;
-		$hasdefault++, last NETRC if $t eq "default"; # we will most
-                                                        # probably be
-                                                        # able to anonftp
+		if ($t eq "default"){
+		    $hasdefault++;
+		    warn "saw a default entry before tokens[@tokens]";
+		    last NETRC;
+		}
 		last TOKEN if $t eq "macdef";
 		if ($t eq "machine") {
 		    push @machines, shift @tokens;
@@ -975,20 +1082,26 @@ sub new {
 	    }
 	}
     } else {
-	$file = "";
+	$file = $hasdefault = $protected = "";
     }
+
     bless {
 	   'mach' => [@machines],
 	   'netrc' => $file,
 	   'hasdefault' => $hasdefault,
+	   'protected' => $protected,
 	  }, $class;
 }
 
 sub hasdefault { shift->{'hasdefault'} }
-sub netrc { shift->{'netrc'} }
+sub netrc      { shift->{'netrc'}      }
+sub protected  { shift->{'protected'}  }
 sub contains {
     my($self,$mach) = @_;
-    scalar grep {$_ eq $mach} @{$self->{'mach'}};
+    for ( @{$self->{'mach'}} ) {
+	return 1 if $_ eq $mach;
+    }
+    return 0;
 }
 
 package CPAN::Complete;
@@ -1002,10 +1115,19 @@ sub complete {
     $pos ||= 0;
     CPAN->debug("word [$word] line[$line] pos[$pos]") if $CPAN::DEBUG;
     $line =~ s/^\s*//;
+    if ($line =~ s/^(force\s*)//) {
+	$pos -= length($1);
+    }
     my @return;
     if ($pos == 0) {
-	@return = grep(/^$word/, sort qw(! a b d h i m o q r u autobundle clean make test install reload));
-    } elsif ( $line !~ /^[\!abdhimorut]/ ) {
+	@return = grep(
+		       /^$word/,
+		       sort qw(
+			       ! a b d h i m o q r u autobundle clean
+			       make test install force reload look
+			      )
+		      );
+    } elsif ( $line !~ /^[\!abdhimorutl]/ ) {
 	@return = ();
     } elsif ($line =~ /^a\s/) {
 	@return = completex('CPAN::Author',$word);
@@ -1013,7 +1135,7 @@ sub complete {
 	@return = completex('CPAN::Bundle',$word);
     } elsif ($line =~ /^d\s/) {
 	@return = completex('CPAN::Distribution',$word);
-    } elsif ($line =~ /^([mru]\s|(make|clean|test|install)\s)/ ) {
+    } elsif ($line =~ /^([mru]|make|clean|test|install|readme|look)\s/ ) {
 	@return = (completex('CPAN::Module',$word),completex('CPAN::Bundle',$word));
     } elsif ($line =~ /^i\s/) {
 	@return = complete_any($word);
@@ -1122,7 +1244,7 @@ sub read_authindex {
     my($cl,$index_target) = @_;
     my $pipe = "$CPAN::Config->{gzip} --decompress --stdout $index_target";
     warn "Going to read $index_target\n";
-    my $fh = IO::File->new("$pipe|");
+    my $fh = FileHandle->new("$pipe|");
     while (<$fh>) {
 	chomp;
 	my($userid,$fullname,$email) = /alias\s+(\S+)\s+\"([^\"\<]+)\s+<([^\>]+)\>\"/;
@@ -1142,7 +1264,7 @@ sub read_modpacks {
     my($cl,$index_target) = @_;
     my $pipe = "$CPAN::Config->{gzip} --decompress --stdout $index_target";
     warn "Going to read $index_target\n";
-    my $fh = IO::File->new("$pipe|");
+    my $fh = FileHandle->new("$pipe|");
     while (<$fh>) {
 	next if 1../^\s*$/;
 	chomp;
@@ -1210,7 +1332,7 @@ sub read_modlist {
     my($cl,$index_target) = @_;
     my $pipe = "$CPAN::Config->{gzip} --decompress --stdout $index_target";
     warn "Going to read $index_target\n";
-    my $fh = IO::File->new("$pipe|");
+    my $fh = FileHandle->new("$pipe|");
     my $eval = "";
     while (<$fh>) {
 	next if 1../^\s*$/;
@@ -1268,7 +1390,7 @@ sub as_string {
 	next if $_ eq 'ID';
 	my $extra = "";
 	$_ eq "CPAN_USERID" and $extra = " (".$self->author.")";
-	if (ref $self->{$_}) { # Should we setup a language interface? XXX
+	if (ref($self->{$_}) eq "ARRAY") { # Should we setup a language interface? XXX
 	    push @m, sprintf "    %-12s %s%s\n", $_, "@{$self->{$_}}", $extra;
 	} else {
 	    push @m, sprintf "    %-12s %s%s\n", $_, $self->{$_}, $extra;
@@ -1344,6 +1466,9 @@ sub get {
     my $packagedir;
 
     $self->debug("local_file[$local_file]") if $CPAN::DEBUG;
+    if ($CPAN::META->hasMD5) {
+	$self->verifyMD5;
+    }
     if ($local_file =~ /(\.tar\.(gz|Z)|\.tgz|\.zip)$/i){
 	$self->debug("Removing tmp") if $CPAN::DEBUG;
 	File::Path::rmtree("tmp");
@@ -1404,7 +1529,7 @@ sub get {
 		# do we have anything to do?
 		$self->{'configure'} = $configure;
 	    } else {
-		my $fh = IO::File->new(">$makefilepl") or Carp::croak("Could not open >$makefilepl");
+		my $fh = FileHandle->new(">$makefilepl") or Carp::croak("Could not open >$makefilepl");
 		my $cf = $self->called_for || "unknown";
 		$fh->print(qq{
 # This Makefile.PL has been autogenerated by the module CPAN.pm
@@ -1432,10 +1557,51 @@ sub new {
     return bless $this, $class;
 }
 
+#-> sub CPAN::Distribution::look ;
+sub look {
+    my($self) = @_;
+    if (  $CPAN::Config->{'shell'} ) {
+	print qq{
+Trying to open a subshell in the build directory...
+};
+    } else {
+	print qq{
+Your configuration does not define a value for subshells.
+Please define it with "o conf shell <your shell>"
+};
+	return;
+    }
+    my $dist = $self->id;
+    my $dir  = $self->dir or $self->get;
+    $dir = $self->dir;
+    my $pwd  = Cwd::cwd();
+    chdir($dir);
+    print qq{Working directory is $dir.\n};
+    system($CPAN::Config->{'shell'})==0 or die "Subprocess shell error";
+    chdir($pwd);
+}
+
 #-> sub CPAN::Distribution::readme ;
 sub readme {
     my($self) = @_;
-    print "Readme not yet implemented (says ".$self->id.")\n";
+    my($dist) = $self->id;
+    my($sans,$suffix) = $dist =~ /(.+)\.(tgz|tar[\._-]gz|tar\.Z|zip)$/;
+    $self->debug("sans[$sans] suffix[$suffix]\n") if $CPAN::DEBUG;
+    my($local_file);
+    my($local_wanted) =
+	 CPAN->catfile(
+			$CPAN::Config->{keep_source_where},
+			"authors",
+			"id",
+			split("/","$sans.readme"),
+		       );
+    $self->debug("Doing localize") if $CPAN::DEBUG;
+    $local_file = CPAN::FTP->localize("authors/id/$sans.readme", $local_wanted);
+    my $fh_pager = FileHandle->new;
+    $fh_pager->open("|$CPAN::Config->{'pager'}") or die "Could not open pager $CPAN::Config->{'pager'}: $!";
+    my $fh_readme = FileHandle->new;
+    $fh_readme->open($local_file) or die "Could not open $local_file: $!";
+    $fh_pager->print(<$fh_readme>);
 }
 
 #-> sub CPAN::Distribution::verifyMD5 ;
@@ -1487,7 +1653,7 @@ sub verifyMD5 {
 sub MD5_check_file {
     my($self,$lfile,$basename) = @_;
     my($cksum);
-    my $fh = new IO::File;
+    my $fh = new FileHandle;
     local($/)=undef;
     if (open $fh, $lfile){
 	my $eval = <$fh>;
@@ -1554,9 +1720,6 @@ sub make {
     $self->debug($self->id) if $CPAN::DEBUG;
     print "Running make\n";
     $self->get;
-    if ($CPAN::META->hasMD5) {
-	$self->verifyMD5;
-    }
     EXCUSE: {
 	  my @e;
 	  $self->{archived} eq "NO" and push @e, "Is neither a tar nor a zip archive.";
@@ -1565,7 +1728,7 @@ sub make {
 	  defined $self->{'make'} and push @e, "Has already been processed within this session";
 	  print join "", map {"  $_\n"} @e and return if @e;
      }
-    print "\n  CPAN: Going to build ".$self->id."\n\n";
+    print "\n  CPAN.pm: Going to build ".$self->id."\n\n";
     my $builddir = $self->dir;
     chdir $builddir or Carp::croak("Couldn't chdir $builddir: $!");
     $self->debug("Changed directory to $builddir") if $CPAN::DEBUG;
@@ -1675,43 +1838,20 @@ sub install {
     $self->test;
     return if $CPAN::Signal;
     print "Running make install\n";
-    EXCUSE: {
-	  my @e;
-	  exists $self->{'build_dir'} or push @e, "Has no own directory";
-	  exists $self->{'make'} or push @e, "Make had some problems, maybe interrupted? Won't install";
-	  exists $self->{'make'} and $self->{'make'} eq 'NO' and push @e, "Oops, make had returned bad status";
-	  exists $self->{'install'} and push @e, $self->{'install'} eq "YES" ? "Already done" : "Already tried without success";
-	  print join "", map {"  $_\n"} @e and return if @e;
-     }
+  EXCUSE: {
+	my @e;
+	exists $self->{'build_dir'} or push @e, "Has no own directory";
+	exists $self->{'make'} or push @e, "Make had some problems, maybe interrupted? Won't install";
+	exists $self->{'make'} and $self->{'make'} eq 'NO' and push @e, "Oops, make had returned bad status";
+	exists $self->{'install'} and push @e, $self->{'install'} eq "YES" ? "Already done" : "Already tried without success";
+	print join "", map {"  $_\n"} @e and return if @e;
+    }
     chdir $self->{'build_dir'} or Carp::croak("Couldn't chdir to $self->{'build_dir'}");
     $self->debug("Changed directory to $self->{'build_dir'}") if $CPAN::DEBUG;
     my $system = join " ", $CPAN::Config->{'make'}, "install", $CPAN::Config->{make_install_arg};
-    my($pipe) = IO::File->new("$system 2>&1 |");
+    my($pipe) = FileHandle->new("$system 2>&1 |");
     my($makeout) = "";
-
- # #If I were to try this, I'd do something like:
- # #
- # #  $SIG{ALRM} = sub { die "alarm\n" };
- # #
- # #  open(PROC,"make somesuch|");
- # #  eval {
- # #	alarm 30;
- # #	while(<PROC>) {
- # #	  alarm 30;
- # #	}
- # #  }
- # #  close(PROC);
- # #  alarm 0;
- # #
- # #I'm really not sure how reliable this would is, though.
- # #
- # #--
- # #Kenneth Albanowski (kjahds@kjahds.com, CIS: 70705,126)
- # #
- # #
- # #
- # #
-	while (<$pipe>){
+    while (<$pipe>){
 	print;
 	$makeout .= $_;
     }
@@ -1764,7 +1904,7 @@ sub contains {
 	$parsefile = $to;
     }
     my @result;
-    my $fh = new IO::File;
+    my $fh = new FileHandle;
     local $/ = "\n";
     open($fh,$parsefile) or die "Could not open '$parsefile': $!";
     my $inpod = 0;
@@ -1806,23 +1946,23 @@ sub rematein {
 
 #-> sub CPAN::Bundle::force ;
 sub force   { shift->rematein('force',@_); }
+#-> sub CPAN::Bundle::get ;
+sub get     { shift->rematein('get',@_); }
+#-> sub CPAN::Bundle::make ;
+sub make    { shift->rematein('make',@_); }
+#-> sub CPAN::Bundle::test ;
+sub test    { shift->rematein('test',@_); }
 #-> sub CPAN::Bundle::install ;
 sub install { shift->rematein('install',@_); }
 #-> sub CPAN::Bundle::clean ;
 sub clean   { shift->rematein('clean',@_); }
-#-> sub CPAN::Bundle::test ;
-sub test    { shift->rematein('test',@_); }
-#-> sub CPAN::Bundle::make ;
-sub make    { shift->rematein('make',@_); }
 
-# XXX not yet implemented!
 #-> sub CPAN::Bundle::readme ;
 sub readme  {
     my($self) = @_;
     my($file) = $self->cpan_file or print("No File found for bundle ", $self->id, "\n"), return;
     $self->debug("self[$self] file[$file]") if $CPAN::DEBUG;
     $CPAN::META->instance('CPAN::Distribution',$file)->readme;
-#    CPAN::FTP->localize("authors/id/$file",$index_wanted); # XXX
 }
 
 package CPAN::Module;
@@ -1885,7 +2025,7 @@ sub as_string {
 		    ) if $self->{statd};
     my $local_file = $self->inst_file;
     if ($local_file && ! exists $self->{MANPAGE}) {
-	my $fh = IO::File->new($local_file) or Carp::croak("Couldn't open $local_file: $!");
+	my $fh = FileHandle->new($local_file) or Carp::croak("Couldn't open $local_file: $!");
 	my $inpod = 0;
 	my(@result);
 	local $/ = "\n";
@@ -1949,10 +2089,12 @@ sub rematein {
 
 #-> sub CPAN::Module::readme ;
 sub readme { shift->rematein('readme') }
+#-> sub CPAN::Module::look ;
+sub look { shift->rematein('look') }
+#-> sub CPAN::Module::get ;
+sub get    { shift->rematein('get',@_); }
 #-> sub CPAN::Module::make ;
 sub make   { shift->rematein('make') }
-#-> sub CPAN::Module::clean ;
-sub clean  { shift->rematein('clean') }
 #-> sub CPAN::Module::test ;
 sub test   { shift->rematein('test') }
 #-> sub CPAN::Module::install ;
@@ -1973,6 +2115,8 @@ sub install {
     }
     $self->rematein('install') if $doit;
 }
+#-> sub CPAN::Module::clean ;
+sub clean  { shift->rematein('clean') }
 
 #-> sub CPAN::Module::inst_file ;
 sub inst_file {
@@ -2007,6 +2151,7 @@ sub xs_file {
 sub inst_version {
     my($self) = @_;
     my $parsefile = $self->inst_file or return 0;
+    local($^W) = 0 if $] < 5.00303 && $ExtUtils::MakeMaker::VERSION < 5.38;
     my $have = MY->parse_version($parsefile);
     $have ||= 0;
     $have =~ s/\s+//g;
@@ -2199,7 +2344,7 @@ sub edit {
 		$CPAN::Config->{$o} = [@args];
 	    }
 	} else {
-	    $CPAN::Config->{$o} = $args[0];
+	    $CPAN::Config->{$o} = $args[0] if defined $args[0];
 	    print "    $o    ";
 	    print defined $CPAN::Config->{$o} ? $CPAN::Config->{$o} : "UNDEFINED";
 	}
@@ -2212,7 +2357,7 @@ sub commit {
     my $mode;
     # mkpath!?
 
-    my($fh) = IO::File->new;
+    my($fh) = FileHandle->new;
     $configpm ||= cfile();
     if (-f $configpm) {
 	$mode = (stat $configpm)[2];
@@ -2274,12 +2419,6 @@ sub load {
 	      my($configpmdir) = MY->catdir($path_to_cpan,"CPAN");
 	      my($configpmtest) = MY->catfile($configpmdir,"Config.pm");
 	      if (-d $configpmdir || File::Path::mkpath($configpmdir)) {
-#_#_# following code dumped core on me with 5.003_11, a.k.
-#_#_#		       $fh = IO::File->new;
-#_#_#		       if ($fh->open(">$configpmtest")) {
-#_#_#			  $fh->print("1;\n");
-#_#_#			   $configpm = $configpmtest;
-#_#_#		       }
 		  if (-w $configpmtest or -w $configpmdir) {
 		      $configpm = $configpmtest;
 		  }
@@ -2306,9 +2445,12 @@ sub load_succeeded {
     for (qw(
 	    cpan_home keep_source_where build_dir build_cache index_expire
 	    gzip tar unzip make pager makepl_arg make_arg make_install_arg
-	    urllist inhibit_startup_message
+	    urllist inhibit_startup_message ftp_proxy http_proxy no_proxy
 	   )) {
-	$miss++ unless defined $CPAN::Config->{$_}; # we want them all
+	unless (defined $CPAN::Config->{$_}){
+	    $miss++;
+	    CPAN->debug("undefined configuration parameter $_") if $CPAN::DEBUG;
+	}
     }
     return !$miss;
 }
@@ -2456,15 +2598,15 @@ each as object-E<gt>as_glimpse. E.g.
     Author          ANDYD (Andy Dougherty)
     Author          MERLYN (Randal L. Schwartz)
 
-=item make, test, install, clean modules or distributions
+=item make, test, install, clean  modules or distributions
 
-The four commands do indeed exist just as written above. Each of them
-takes as many arguments as provided and investigates for each what it
-might be. Is it a distribution file (recognized by embedded slashes),
-this file is being processed. Is it a module, CPAN determines the
+These commands do indeed exist just as written above. Each of them
+takes any number of arguments and investigates for each what it might
+be. Is it a distribution file (recognized by embedded slashes), this
+file is being processed. Is it a module, CPAN determines the
 distribution file where this module is included and processes that.
 
-Any C<make> and C<test> are run unconditionally. A 
+Any C<make>, C<test>, and C<readme> are run unconditionally. A 
 
   C<install E<lt>distribution_fileE<gt>>
 
@@ -2491,6 +2633,14 @@ Example:
     OpenGL-0.4/COPYRIGHT
     [...]
 
+=item readme, look module or distribution
+
+These two commands take only one argument, be it a module or a
+distribution file. C<readme> displays the README of the associated
+distribution file. C<Look> gets and untars (if not yet done) the
+distribution file, changes to the appropriate directory and opens a
+subshell process in that directory.
+
 =back
 
 =head2 CPAN::Shell
@@ -2501,6 +2651,34 @@ input is split by the Text::ParseWords::shellwords() routine which
 acts like most shells do. The first word is being interpreted as the
 method to be called and the rest of the words are treated as arguments
 to this method.
+
+=head2 autobundle
+
+C<autobundle> writes a bundle file into the
+C<$CPAN::Config-E<gt>{cpan_home}/Bundle> directory. The file contains
+a list of all modules that are both available from CPAN and currently
+installed within @INC. The name of the bundle file is based on the
+current date and a counter.
+
+=head2 recompile
+
+recompile() is a very special command in that it takes no argument and
+runs the make/test/install cycle with brute force over all installed
+dynamically loadable extensions (aka XS modules) with 'force' in
+effect. Primary purpose of this command is to finish a network
+installation. Imagine, you have a common source tree for two different
+architectures. You decide to do a completely independent fresh
+installation. You start on one architecture with the help of a Bundle
+file produced earlier. CPAN installs the whole Bundle for you, but
+when you try to repeat the job on the second architecture, CPAN
+responds with a C<"Foo up to date"> message for all modules. So you
+will be glad to run recompile in the second architecture and
+youE<39>re done.
+
+Another popular use for C<recompile> is to act as a rescue in case your
+perl breaks binary compatibility. If one of the modules that CPAN uses
+is in turn depending on binary compatibility (so you cannot run CPAN
+commands), then you should try the CPAN::Nox module for recovery.
 
 =head2 ProgrammerE<39>s interface
 
@@ -2564,33 +2742,68 @@ There is a meaningless Bundle::Demo available on CPAN. Try to install
 it, it usually does no harm, just demonstrates what the Bundle
 interface looks like.
 
-=head2 autobundle
+=head2 Prerequisites
 
-C<autobundle> writes a bundle file into the
-C<$CPAN::Config-E<gt>{cpan_home}/Bundle> directory. The file contains
-a list of all modules that are both available from CPAN and currently
-installed within @INC. The name of the bundle file is based on the
-current date and a counter.
+If you have a local mirror of CPAN and can access all files with
+"file:" URLs, then you only need a perl better than perl5.003 to run
+this module. Otherwise Net::FTP is strongly recommended. LWP may be
+required for non-UNIX systems or if your nearest CPAN site is
+associated with an URL that is not C<ftp:>.
 
-=head2 recompile
+If you have neither Net::FTP nor LWP, there is a fallback mechanism
+implemented for an external ftp command or for an external lynx
+command.
 
-recompile() is a very special command in that it takes no argument and
-runs the make/test/install cycle with brute force over all installed
-dynamically loadable extensions (aka XS modules) with 'force' in
-effect. Primary purpose of this command is to act as a rescue in case
-your perl breaks binary compatibility. If one of the modules that CPAN
-uses is in turn depending on binary compatibility (so you cannot run
-CPAN commands), then you should try the CPAN::Nox module for recovery.
+This module presumes that all packages on CPAN
 
-Another popular use for recompile is to finish a network
-installation. Imagine, you have a common source tree for two different
-architectures. You decide to do a completely independent fresh
-installation. You start on one architecture with the help of a Bundle
-file produced earlier. CPAN installs the whole Bundle for you, but
-when you try to repeat the job on the second architecture, CPAN
-responds with a C<"Foo up to date"> message for all modules. So you
-will be glad to run recompile in the second architecture and
-youE<39>re done.
+=over 2
+
+=item *
+
+declare their $VERSION variable in an easy to parse manner. This
+prerequisite can hardly be relaxed because it consumes by far too much
+memory to load all packages into the running program just to determine
+the $VERSION variable . Currently all programs that are dealing with
+version use something like this
+
+    perl -MExtUtils::MakeMaker -le \
+        'print MM->parse_version($ARGV[0])' filename
+
+If you are author of a package and wonder if your $VERSION can be
+parsed, please try the above method.
+
+=item *
+
+come as compressed or gzipped tarfiles or as zip files and contain a
+Makefile.PL (well we try to handle a bit more, but without much
+enthusiasm).
+
+=back
+
+=head2 Debugging
+
+The debugging of this module is pretty difficult, because we have
+interferences of the software producing the indices on CPAN, of the
+mirroring process on CPAN, of packaging, of configuration, of
+synchronicity, and of bugs within CPAN.pm.
+
+In interactive mode you can try "o debug" which will list options for
+debugging the various parts of the package. The output may not be very
+useful for you as it's just a byproduct of my own testing, but if you
+have an idea which part of the package may have a bug, it's sometimes
+worth to give it a try and send me more specific output. You should
+know that "o debug" has built-in completion support.
+
+=head2 Floppy, Zip, and all that Jazz
+
+CPAN.pm works nicely without network too. If you maintain machines
+that are not networked at all, you should consider working with file:
+URLs. Of course, you have to collect your modules somewhere first. So
+you might use CPAN.pm to put together all you need on a networked
+machine. Then copy the $CPAN::Config->{keep_source_where} (but not
+$CPAN::Config->{build_dir}) directory on a floppy. This floppy is kind
+of a personal CPAN. CPAN.pm on the non-networked machines works nicely
+with this floppy.
 
 =head1 CONFIGURATION
 
@@ -2667,57 +2880,15 @@ Most functions in package CPAN are exported per default. The reason
 for this is that the primary use is intended for the cpan shell or for
 oneliners.
 
-=head1 Debugging
+=head1 BUGS
 
-The debugging of this module is pretty difficult, because we have
-interferences of the software producing the indices on CPAN, of the
-mirroring process on CPAN, of packaging, of configuration, of
-synchronicity, and of bugs within CPAN.pm.
+we should give coverage for _all_ of the CPAN and not just the
+__PAUSE__ part, right? In this discussion CPAN and PAUSE have become
+equal -- but they are not. PAUSE is authors/ and modules/. CPAN is
+PAUSE plus the clpa/, doc/, misc/, ports/, src/, scripts/.
 
-In interactive mode you can try "o debug" which will list options for
-debugging the various parts of the package. The output may not be very
-useful for you as it's just a byproduct of my own testing, but if you
-have an idea which part of the package may have a bug, it's sometimes
-worth to give it a try and send me more specific output. You should
-know that "o debug" has built-in completion support.
-
-=head2 Prerequisites
-
-If you have a local mirror of CPAN and can access all files with
-"file:" URLs, then you only need perl5.003 to run this
-module. Otherwise Net::FTP is recommended. LWP may be required for
-non-UNIX systems or if your nearest CPAN site is associated with an
-URL that is not C<ftp:>.
-
-If you have neither Net::FTP nor LWP, there is a fallback mechanism
-implemented for an external ftp command or for an external lynx
-command.
-
-This module presumes that all packages on CPAN
-
-=over 2
-
-=item *
-
-declare their $VERSION variable in an easy to parse manner. This
-prerequisite can hardly be relaxed because it consumes by far too much
-memory to load all packages into the running program just to determine
-the $VERSION variable . Currently all programs that are dealing with
-version use something like this
-
-    perl -MExtUtils::MakeMaker -le \
-        'print MM->parse_version($ARGV[0])' filename
-
-If you are author of a package and wonder if your $VERSION can be
-parsed, please try the above method.
-
-=item *
-
-come as compressed or gzipped tarfiles or as zip files and contain a
-Makefile.PL (well we try to handle a bit more, but without much
-enthusiasm).
-
-=back
+Future development should be directed towards a better intergration of
+the other parts.
 
 =head1 AUTHOR
 

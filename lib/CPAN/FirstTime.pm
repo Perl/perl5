@@ -4,8 +4,8 @@ sub new {
     my($self,@arg) = @_;
     bless [@arg], $self;
 }
-sub con { shift->[0] }
-sub cou { shift->[1] }
+sub continent { shift->[0] }
+sub country { shift->[1] }
 sub url { shift->[2] }
 
 package CPAN::FirstTime;
@@ -14,7 +14,7 @@ use strict;
 use ExtUtils::MakeMaker qw(prompt);
 require File::Path;
 use vars qw($VERSION);
-$VERSION = "1.00";
+$VERSION = substr q$Revision: 1.13 $, 10;
 
 =head1 NAME
 
@@ -38,9 +38,15 @@ sub init {
     require CPAN::Nox;
     eval {require CPAN::Config;};
     $CPAN::Config ||= {};
-    
+    local($/) = "\n";
+    local($\) = "";
+
     my($ans,$default,$local,$cont,$url,$expected_size);
     
+    #
+    # Files, directories
+    #
+
     print qq{
 
 The CPAN module needs a directory of its own to cache important
@@ -85,6 +91,10 @@ next question.
     $CPAN::Config->{keep_source_where} = MM->catdir($CPAN::Config->{cpan_home},"sources");
     $CPAN::Config->{build_dir} = MM->catdir($CPAN::Config->{cpan_home},"build");
 
+    #
+    # Cache size, Index expire
+    #
+
     print qq{
 
 How big should the disk cache be for keeping the build directories
@@ -98,6 +108,10 @@ with all the intermediate files?
 
     # XXX This the time when we refetch the index files (in days)
     $CPAN::Config->{'index_expire'} = 1;
+
+    #
+    # External programs
+    #
 
     print qq{
 
@@ -118,9 +132,16 @@ properly. Please correct me, if I guess the wrong path for a program.
 	    find_exe("more",[@path]) || "more";
     $ans = prompt("What is your favorite pager program?",$path) || $path;
     $CPAN::Config->{'pager'} = $ans;
+    $path = $CPAN::Config->{'shell'} || $ENV{SHELL} || "";
+    $ans = prompt("What is your favorite shell?",$path) || $path;
+
+    #
+    # Arguments to make etc.
+    #
+
     print qq{
 
-Every Makefile.PL is run by perl in a seperate process. Likewise we
+Every Makefile.PL is run by perl in a separate process. Likewise we
 run \'make\' and \'make install\' in processes. If you have any parameters
 \(e.g. PREFIX, INSTALLPRIVLIB, UNINST or the like\) you want to pass to
 the calls, please specify them here.
@@ -137,6 +158,10 @@ the calls, please specify them here.
     $CPAN::Config->{make_install_arg} =
 	prompt("Parameters for the 'make install' command?",$default);
 
+    #
+    # Alarm period
+    #
+
     print qq{
 
 Sometimes you may wish to leave the processes run by CPAN alone
@@ -152,7 +177,10 @@ If you set this value to 0, these processes will wait forever.
     $CPAN::Config->{inactivity_timeout} =
 	prompt("Timout for inacivity during Makefile.PL?",$default);
 
-    $default = $CPAN::Config->{makepl_arg} || "";
+
+    #
+    # MIRRORED.BY
+    #
 
     $local = 'MIRRORED.BY';
     if (@{$CPAN::Config->{urllist}||[]}) {
@@ -174,6 +202,19 @@ Please enter it here: };
 	    s/\s//g;
 	    push @{$CPAN::Config->{urllist}}, $_ if $_;
 	}
+    }
+
+    print qq{
+
+If you\'re accessing the net via proxies, you can specify them in the
+CPAN configuration or via environment variables. The variable in
+the \$CPAN::Config takes precedence.
+
+};
+
+    for (qw/ftp_proxy http_proxy no_proxy/) {
+	$default = $CPAN::Config->{$_} || $ENV{$_};
+	$CPAN::Config->{$_} = prompt("Your $_?",$default);
     }
 
     # We don't ask that now, it will be noticed in time....
@@ -279,7 +320,7 @@ file:, ftp: or http: URL, or "q" to finish selecting.
 	my $sel;
 	if ($ans =~ /^\d/) {
 	    my $this = $valid[$ans-1];
-	    my($con,$cou,$url) = ($this->con,$this->cou,$this->url);
+	    my($con,$cou,$url) = ($this->continent,$this->country,$this->url);
 	    push @{$CPAN::Config->{urllist}}, $url unless $seen{$url}++;
 	    delete $all{$con}{$cou}{$url};
 	    #	    print "Was a number [$ans] con[$con] cou[$cou] url[$url]\n";
