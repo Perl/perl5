@@ -686,7 +686,7 @@ clobber:	_realcleaner _mopup
 distclean:	clobber
 
 # Like distclean but also removes emacs backups and *.orig.
-veryclean:	_verycleaner _mopup
+veryclean:	_verycleaner _mopup clobber
 
 # Do not 'make _mopup' directly.
 _mopup:
