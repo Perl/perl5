@@ -1,5 +1,5 @@
 # -*- Mode: cperl; cperl-indent-level: 4 -*-
-# $Id: Harness.pm,v 1.52 2003/07/17 19:02:48 andy Exp $
+# $Id: Harness.pm,v 1.54 2003/08/15 01:05:00 andy Exp $
 
 package Test::Harness;
 
@@ -22,7 +22,7 @@ use vars qw($VERSION $Verbose $Switches $Have_Devel_Corestack $Curtest
 
 $Have_Devel_Corestack = 0;
 
-$VERSION = '2.29';
+$VERSION = '2.30';
 
 $ENV{HARNESS_ACTIVE} = 1;
 
@@ -1096,17 +1096,17 @@ analysis.
 Either Tim Bunce or Andreas Koenig, we don't know. What we know for
 sure is, that it was inspired by Larry Wall's TEST script that came
 with perl distributions for ages. Numerous anonymous contributors
-exist.  Andreas Koenig held the torch for many years.
+exist.  Andreas Koenig held the torch for many years, and then
+Michael G Schwern.
 
-Current maintainer is Michael G Schwern E<lt>schwern@pobox.comE<gt>
+Current maintainer is Andy Lester C<< <andy@petdance.com> >>.
 
 =head1 LICENSE
 
 This program is free software; you can redistribute it and/or 
 modify it under the same terms as Perl itself.
 
-See F<http://www.perl.com/perl/misc/Artistic.html>
-
+See L<http://www.perl.com/perl/misc/Artistic.html>
 
 =head1 TODO
 
@@ -1114,6 +1114,8 @@ Provide a way of running tests quietly (ie. no printing) for automated
 validation of tests.  This will probably take the form of a version
 of runtests() which rather than printing its output returns raw data
 on the state of the tests.  (Partially done in Test::Harness::Straps)
+
+Document the format.
 
 Fix HARNESS_COMPILE_TEST without breaking its core usage.
 
@@ -1126,10 +1128,36 @@ Deal with VMS's "not \nok 4\n" mistake.
 
 Add option for coverage analysis.
 
+Trap STDERR.
+
+Implement Straps total_results()
+
+Remember exit code
+
+Completely redo the print summary code.
+
+Implement Straps callbacks.  (experimentally implemented)
+
+Straps->analyze_file() not taint clean, don't know if it can be
+
+Fix that damned VMS nit.
+
+HARNESS_TODOFAIL to display TODO failures
+
+Add a test for verbose.
+
+Change internal list of test results to a hash.
+
+Fix stats display when there's an overrun.
+
+Fix so perls with spaces in the filename work.
+
 =for _private
+
 Keeping whittling away at _run_all_tests()
 
 =for _private
+
 Clean up how the summary is printed.  Get rid of those damned formats.
 
 =head1 BUGS
