@@ -1180,6 +1180,30 @@ Perl_is_utf8_mark(pTHX_ U8 *p)
     return swash_fetch(PL_utf8_mark, p, TRUE);
 }
 
+/*
+=for apidoc A|UV|to_utf8_case|U8 *p|U8* ustrp|STRLEN *lenp|SV **swash|char *normal|char *special
+
+The "p" contains the pointer to the UTF-8 string encoding
+the character that is being converted.
+
+The "ustrp" is a pointer to the character buffer to put the
+conversion result to.  The "lenp" is a pointer to the length
+of the result.
+
+The "swash" is a pointer to the swash to use.
+
+The "normal" is a string like "ToLower" which means the swash
+$utf8::ToLower, which is stored in lib/unicore/To/Lower.pl,
+and loaded by SWASHGET, using lib/utf8_heavy.pl.
+
+The "special" is a string like "utf8::ToSpecLower", which means
+the hash %utf8::ToSpecLower, which is stored in in the same file,
+lib/unicore/To/Lower.pl, and also loaded by SWASHGET.  The access
+to the hash is by Perl_to_utf8_case().
+
+=cut
+ */
+
 UV
 Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp,char *normal, char *special)
 {
