@@ -345,3 +345,14 @@ EXPECT
 Unmatched right bracket at (re_eval 1) line 1, at end of line
 syntax error at (re_eval 1) line 1, near ""{"}"
 Compilation failed in regexp at - line 1.
+########
+BEGIN { @ARGV = qw(a b c) }
+BEGIN { print "argv <@ARGV>\nbegin <",shift,">\n" }
+END { print "end <",shift,">\nargv <@ARGV>\n" }
+INIT { print "init <",shift,">\n" }
+EXPECT
+argv <a b c>
+begin <a>
+init <b>
+end <c>
+argv <>

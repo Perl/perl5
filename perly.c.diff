@@ -88,12 +88,24 @@ Index: perly.c
 - short yyss[YYSTACKSIZE];
 - YYSTYPE yyvs[YYSTACKSIZE];
 - #define yystacksize YYSTACKSIZE
-  #line 631 "perly.y"
+  #line 632 "perly.y"
    /* PROGRAM */
 --- 1283,1288 ----
 ***************
 *** 1361,1372 ****
---- 1291,1347 ----
+  #define YYACCEPT goto yyaccept
+  #define YYERROR goto yyerrlab
+  int
+! yyparse()
+  {
+      register int yym, yyn, yystate;
+  #if YYDEBUG
+      register char *yys;
+      extern char *getenv();
+  
+      if (yys = getenv("YYDEBUG"))
+      {
+--- 1291,1348 ----
   #define YYACCEPT goto yyaccept
   #define YYERROR goto yyerrlab
 + 
@@ -109,8 +121,7 @@ Index: perly.c
 + };
 + 
 + void
-+ yydestruct(ptr)
-+ void* ptr;
++ yydestruct(void *ptr)
 + {
 +     struct ysv* ysave = (struct ysv*)ptr;
 +     if (ysave->yyss) Safefree(ysave->yyss);
@@ -125,7 +136,7 @@ Index: perly.c
 + }
 + 
   int
-  yyparse()
+! yyparse(void)
   {
       register int yym, yyn, yystate;
 +     register short *yyssp;
@@ -136,7 +147,9 @@ Index: perly.c
 +     int retval = 0;
   #if YYDEBUG
       register char *yys;
++ #ifndef __cplusplus
       extern char *getenv();
++ #endif
 + #endif
 + 
 +     struct ysv *ysave = (struct ysv*)safemalloc(sizeof(struct ysv));
@@ -153,7 +166,7 @@ Index: perly.c
       {
 ***************
 *** 1381,1384 ****
---- 1356,1367 ----
+--- 1357,1368 ----
       yychar = (-1);
   
 +     /*
@@ -173,7 +186,7 @@ Index: perly.c
 !             printf("yydebug: state %d, reading %d (%s)\n", yystate,
                       yychar, yys);
           }
---- 1379,1383 ----
+--- 1380,1384 ----
               if (yychar <= YYMAXTOKEN) yys = yyname[yychar];
               if (!yys) yys = "illegal-symbol";
 !             fprintf(stderr, "yydebug: state %d, reading %d (%s)\n", yystate,
@@ -191,7 +204,7 @@ Index: perly.c
 !             goto yyoverflow;
           }
           *++yyssp = yystate = yytable[yyn];
---- 1389,1412 ----
+--- 1390,1413 ----
   #if YYDEBUG
           if (yydebug)
 !             fprintf(stderr, "yydebug: state %d, shifting to state %d\n",
@@ -228,7 +241,7 @@ Index: perly.c
 !                     goto yyoverflow;
                   }
                   *++yyssp = yystate = yytable[yyn];
---- 1444,1468 ----
+--- 1445,1469 ----
   #if YYDEBUG
                   if (yydebug)
 !                     fprintf(stderr,
@@ -262,7 +275,7 @@ Index: perly.c
 !                             *yyssp);
   #endif
                   if (yyssp <= yyss) goto yyabort;
---- 1474,1480 ----
+--- 1475,1481 ----
   #if YYDEBUG
                   if (yydebug)
 !                     fprintf(stderr,
@@ -278,7 +291,7 @@ Index: perly.c
 !                     yystate, yychar, yys);
           }
   #endif
---- 1493,1499 ----
+--- 1494,1500 ----
               if (yychar <= YYMAXTOKEN) yys = yyname[yychar];
               if (!yys) yys = "illegal-symbol";
 !             fprintf(stderr,
@@ -293,21 +306,21 @@ Index: perly.c
 !         printf("yydebug: state %d, reducing by rule %d (%s)\n",
                   yystate, yyn, yyrule[yyn]);
   #endif
---- 1504,1508 ----
+--- 1505,1509 ----
   #if YYDEBUG
       if (yydebug)
 !         fprintf(stderr, "yydebug: state %d, reducing by rule %d (%s)\n",
                   yystate, yyn, yyrule[yyn]);
   #endif
 ***************
-*** 2278,2283 ****
+*** 2279,2284 ****
   #if YYDEBUG
           if (yydebug)
 !             printf("yydebug: after reduction, shifting from state 0 to\
 !  state %d\n", YYFINAL);
   #endif
           yystate = YYFINAL;
---- 2292,2298 ----
+--- 2294,2300 ----
   #if YYDEBUG
           if (yydebug)
 !             fprintf(stderr,
@@ -316,20 +329,20 @@ Index: perly.c
   #endif
           yystate = YYFINAL;
 ***************
-*** 2293,2297 ****
+*** 2294,2298 ****
                   if (yychar <= YYMAXTOKEN) yys = yyname[yychar];
                   if (!yys) yys = "illegal-symbol";
 !                 printf("yydebug: state %d, reading %d (%s)\n",
                           YYFINAL, yychar, yys);
               }
---- 2308,2312 ----
+--- 2310,2314 ----
                   if (yychar <= YYMAXTOKEN) yys = yyname[yychar];
                   if (!yys) yys = "illegal-symbol";
 !                 fprintf(stderr, "yydebug: state %d, reading %d (%s)\n",
                           YYFINAL, yychar, yys);
               }
 ***************
-*** 2308,2317 ****
+*** 2309,2318 ****
   #if YYDEBUG
       if (yydebug)
 !         printf("yydebug: after reduction, shifting from state %d \
@@ -340,7 +353,7 @@ Index: perly.c
 !         goto yyoverflow;
       }
       *++yyssp = yystate;
---- 2323,2347 ----
+--- 2325,2349 ----
   #if YYDEBUG
       if (yydebug)
 !         fprintf(stderr,
@@ -367,7 +380,7 @@ Index: perly.c
       }
       *++yyssp = yystate;
 ***************
-*** 2319,2326 ****
+*** 2320,2327 ****
       goto yyloop;
   yyoverflow:
 !     yyerror("yacc stack overflow");
@@ -376,7 +389,7 @@ Index: perly.c
   yyaccept:
 !     return (0);
   }
---- 2349,2356 ----
+--- 2351,2358 ----
       goto yyloop;
   yyoverflow:
 !     yyerror("Out of memory for yacc stack");
