@@ -14,7 +14,7 @@ the L<perl58delta>, which describes differences between 5.6.0 and
 
 =head1 Incompatible Changes
 
-We believe none.
+None, we believe.
 
 =head1 Core Enhancements
 
@@ -50,8 +50,9 @@ The following modules and pragmata have been updated since Perl 5.8.1:
 
 =item ExtUtils::MakeMaker
 
-Now able to generate a SIGNATURE file if Module::Signature is installed.
-(work completed as part of The Perl Foundation's grant to Autrijus Tang)
+Now able to generate a SIGNATURE file if Module::Signature is installed,
+by passing (SIGN => 1) to WriteMakefile().  (Work completed as part of
+The Perl Foundation's grant to Autrijus Tang)
 
 =item I18N::LangTags
 
@@ -110,7 +111,7 @@ around their problems as best possible.
 Starting with 5.8.3 we intend to make more frequent maintenance releases,
 with a smaller number of changes in each. The intent is to propagate
 bug fixes out to stable releases more rapidly and make upgrading stable
-releases less of an upheaval. Hopefully this will give end users more
+releases less of an upheaval. This should give end users more
 flexibility in their choice of upgrade timing, and allow them easier
 assessment of the impact of upgrades. The current plan is for code freezes
 as follows
