@@ -220,6 +220,7 @@ c3 = gv.c sv.c taint.c toke.c util.c deb.c run.c globals.c perlio.c utf8.c unive
 # for 5.7/8:
 # numeric.c locale.c pp_pack.c
 cm = SubLaunch.c crypt.c
+# HandleSocket.cp 
 mf = DirectoryCopy.c FileCopy.c FSpCompat.c FullPath.c IterateDirectory.c MoreDesktopMgr.c \
 	MoreFiles.c MoreFilesExtras.c Search.c
 
@@ -330,7 +331,7 @@ preplibrary: miniperl
 	end
 	:miniperl -Ilib -I::lib -e 'use AutoSplit; autosplit_lib_modules(@ARGV)' :lib:Å.pm :lib:Å:Å.pm
 	directory ::
-	:macos:miniperl -Ilib -I:macos:lib -e 'use AutoSplit; autosplit_lib_modules(@ARGV)' :lib:Å.pm :lib:Å:Å.pm
+	:macos:miniperl -Ilib -I:macos:lib -e 'use AutoSplit; autosplit_lib_modules(@ARGV)' :lib:Å.pm :lib:Å:Å.pm :lib:Å:Å:Å.pm
 	directory macos
 	Echo > preplibrary
 
