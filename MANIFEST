@@ -56,7 +56,6 @@ ext/attrs/attrs.pm		attrs extension Perl module
 ext/attrs/attrs.xs		attrs extension external subroutines
 ext/attrs/Makefile.PL		attrs extension makefile writer
 ext/B/B.pm		Compiler backend support functions and methods
-ext/B/B.t		See if B works
 ext/B/B.xs		Compiler backend external subroutines
 ext/B/B/Asmdata.pm	Compiler backend data for assembler
 ext/B/B/assemble	Assemble compiler bytecode
@@ -77,11 +76,8 @@ ext/B/B/Showlex.pm	Compiler Showlex backend
 ext/B/B/Stackobj.pm	Compiler stack objects support functions
 ext/B/B/Stash.pm	Compiler module to identify stashes
 ext/B/B/Terse.pm	Compiler Terse backend
-ext/B/B/Terse.t		See if B::Terse works
 ext/B/B/Xref.pm		Compiler Xref backend
-ext/B/Debug.t		See if B::Debug works
 ext/B/defsubs_h.PL	Generator for constant subroutines
-ext/B/Deparse.t		See if B::Deparse works
 ext/B/Makefile.PL	Compiler backend makefile writer
 ext/B/NOTES		Compiler backend notes
 ext/B/O.pm		Compiler front-end module (-MO=...)
@@ -92,8 +88,12 @@ ext/B/ramblings/magic		Compiler ramblings: notes on magic
 ext/B/ramblings/reg.alloc	Compiler ramblings: register allocation
 ext/B/ramblings/runtime.porting	Compiler ramblings: porting PP enging
 ext/B/README		Compiler backend README
-ext/B/Showlex.t		See if B::ShowLex works
-ext/B/Stash.t		See if B::Stash works
+ext/B/t/b.t		See if B works
+ext/B/t/debug.t		See if B::Debug works
+ext/B/t/deparse.t	See if B::Deparse works
+ext/B/t/showlex.t	See if B::ShowLex works
+ext/B/t/stash.t		See if B::Stash works
+ext/B/t/terse.t		See if B::Terse works
 ext/B/TESTS		Compiler backend test data
 ext/B/Todo		Compiler backend Todo list
 ext/B/typemap			Compiler backend interface types
@@ -575,11 +575,11 @@ ext/threads/Changes		ithreads
 ext/threads/Makefile.PL		ithreads
 ext/threads/README		ithreads
 ext/threads/t/basic.t		ithreads
+ext/threads/t/stress_cv.t	Test with multiple threads, coderef cv argument.
+ext/threads/t/stress_string.t	Test with multiple threads, string cv argument.
 ext/threads/threads.h		ithreads
 ext/threads/threads.pm          ithreads
 ext/threads/threads.xs		ithreads
-ext/threads/t/stress_string.t	Test with multiple threads, string cv argument.
-ext/threads/t/stress_cv.t	Test with multiple threads, coderef cv argument.
 ext/Time/HiRes/Changes		Time::HiRes extension
 ext/Time/HiRes/hints/dynixptx.pl	Hint for Time::HiRes for named architecture
 ext/Time/HiRes/hints/sco.pl	Hints for Time::HiRes for named architecture
