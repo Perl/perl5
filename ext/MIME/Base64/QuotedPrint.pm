@@ -65,7 +65,7 @@ modify it under the same terms as Perl itself.
 use strict;
 use vars qw(@ISA @EXPORT $VERSION);
 if (ord('A') == 193) { # on EBCDIC machines we need translation help
-    require Encode; import Encode;
+    require Encode;
 }
 
 require Exporter;
