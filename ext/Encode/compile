@@ -1,7 +1,7 @@
 #!../../perl -w
 BEGIN {
-    unshift @INC, '../../lib';
-    $ENV{PATH} .= ';../..' if $^O eq 'MSWin32';
+    unshift @INC, qw(../../lib ../../../lib);
+    $ENV{PATH} .= ';../..;../../..' if $^O eq 'MSWin32';
 }
 use strict;
 use Getopt::Std;
