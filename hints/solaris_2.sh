@@ -94,6 +94,20 @@ case "$workshoplibpth_done" in
 esac
 EOCBU
 
+case "$cc" in
+'')	if test -f /opt/SUNwspro/bin/cc; then
+		cat <<EOF		
+
+You specified no cc but you seem to have the Workshop compiler installed,
+using that.  If you want something else, specify that in the command line,
+e.g. Configure -Dcc=gcc
+
+EOF
+		cc=/opt/SUNwspro/bin/cc
+	fi
+	;;
+esac
+
 ######################################################
 # General sanity testing.  See below for excerpts from the Solaris FAQ.
 #
