@@ -1690,11 +1690,11 @@ PP(pp_enteriter)
 	cx->blk_loop.iterary = (AV*)SvREFCNT_inc(POPs);
 	if (SvTYPE(cx->blk_loop.iterary) != SVt_PVAV) {
 	    dPOPss;
+	    /* See comment in pp_flop() */
 	    if (SvNIOKp(sv) || !SvPOKp(sv) ||
 		SvNIOKp(cx->blk_loop.iterary) || !SvPOKp(cx->blk_loop.iterary) ||
 		(looks_like_number(sv) && *SvPVX(sv) != '0' &&
-		 looks_like_number((SV*)cx->blk_loop.iterary) &&
-		 *SvPVX(cx->blk_loop.iterary) != '0'))
+		 looks_like_number((SV*)cx->blk_loop.iterary)))
 	    {
 		 if (SvNV(sv) < IV_MIN ||
 		     SvNV((SV*)cx->blk_loop.iterary) >= IV_MAX)
