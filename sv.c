@@ -7837,7 +7837,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	SV *vecsv;
 	U8 *vecstr = Null(U8*);
 	STRLEN veclen = 0;
-	char c;
+	char c = 0;
 	int i;
 	unsigned base = 0;
 	IV iv = 0;
