@@ -487,6 +487,7 @@ $(plextract):	miniperl lib/Config.pm lib/re.pm
 	$(LDLIBPTH) ./miniperl -Ilib $@.PL
 
 extra.pods: perl
+	-@test -f extra.pods && rm -f `cat extra.pods`
 	-@rm -f extra.pods
 	-@for x in `grep -l '^=[a-z]' README.*` ; do \
 	    nx=`echo $$x | sed -e "s/README\.//"`; \
@@ -494,9 +495,9 @@ extra.pods: perl
 	    echo "pod/perl"$$nx".pod" >> extra.pods ; \
 	done
 
-install: all install.perl install.man extra.pods
+install: all install.perl install.man
 
-install.perl:	all installperl
+install.perl:	all extra.pods installperl
 	if [ -n "$(COMPILE)" ]; \
 	then \
 		cd utils; $(MAKE) compile; \
@@ -506,7 +507,7 @@ install.perl:	all installperl
 	fi
 	$(LDLIBPTH) ./perl installperl
 
-install.man:	all installman
+install.man:	all extra.pods installman
 	$(LDLIBPTH) ./perl installman
 
 # XXX Experimental. Hardwired values, but useful for testing.
