@@ -3094,6 +3094,8 @@ PP(pp_substr)
 		    sv_setpvn(sv,"",0);	/* avoid lexical reincarnation */
 	    }
 
+	    if (SvREFCNT(TARG) > 1)	/* don't share the TARG (#20933) */
+		TARG = sv_newmortal();
 	    if (SvTYPE(TARG) < SVt_PVLV) {
 		sv_upgrade(TARG, SVt_PVLV);
 		sv_magic(TARG, Nullsv, PERL_MAGIC_substr, Nullch, 0);
@@ -3124,6 +3126,8 @@ PP(pp_vec)
 
     SvTAINTED_off(TARG);		/* decontaminate */
     if (lvalue) {			/* it's an lvalue! */
+	if (SvREFCNT(TARG) > 1)	/* don't share the TARG (#20933) */
+	    TARG = sv_newmortal();
 	if (SvTYPE(TARG) < SVt_PVLV) {
 	    sv_upgrade(TARG, SVt_PVLV);
 	    sv_magic(TARG, Nullsv, PERL_MAGIC_vec, Nullch, 0);
