@@ -1,3 +1,5 @@
+#include "beosish.h"
+
 #undef waitpid
 
 #include <sys/wait.h>
@@ -9,8 +11,8 @@
  * of this, though.) */
 
 pid_t beos_waitpid(pid_t process_id, int *status_location, int options) {
-    pid_t got = waitpid(procedd_is, status_location, options);
+    pid_t got = waitpid(process_id, status_location, options);
     if (status_location)
-        *status_location <<= 8;
+      *status_location <<= 8; /* What about the POSIX low bits? */
     return got;
 }
