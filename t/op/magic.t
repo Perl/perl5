@@ -30,7 +30,7 @@ system './perl', '-e', <<'END';
 	    print "ok 3\n";
 	}
 	else {
-	    print "not ok 3 $a\n";
+	    print "not ok 3 ($x @_)\n";
 	}
     }
 
