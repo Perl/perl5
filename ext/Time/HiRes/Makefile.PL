@@ -338,7 +338,8 @@ EOD
 	    $has_nanosleep++;
 	    $DEFINE .= ' -DTIME_HIRES_NANOSLEEP';
 	}
-    } elsif (has_x ("nanosleep (NULL, NULL)")) {
+    } elsif ($^O ne 'mpeix' && # MPE/iX falsely finds nanosleep.
+             has_x ("nanosleep (NULL, NULL)")) {
 	$has_nanosleep++;
 	$DEFINE .= ' -DTIME_HIRES_NANOSLEEP';
     }
