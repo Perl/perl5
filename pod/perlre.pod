@@ -395,7 +395,7 @@ Say,
 matches a chunk of non-parentheses, possibly included in parentheses
 themselves.
 
-=item C<(?imsx)>
+=item C<(?imstx)>
 
 One or more embedded pattern-match modifiers.  This is particularly
 useful for patterns that are specified in a table somewhere, some of

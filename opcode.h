@@ -2264,7 +2264,7 @@ EXT U32 opargs[] = {
 	0x00009c8e,	/* oct */
 	0x00009c8e,	/* abs */
 	0x00009c9c,	/* length */
-	0x0091150c,	/* substr */
+	0x0991150c,	/* substr */
 	0x0011151c,	/* vec */
 	0x0091151c,	/* index */
 	0x0091151c,	/* rindex */

@@ -4858,6 +4858,8 @@ void pmflag(U16 *pmfl, int ch)
 	*pmfl |= PMf_MULTILINE;
     else if (ch == 's')
 	*pmfl |= PMf_SINGLELINE;
+    else if (ch == 't')
+	*pmfl |= PMf_TAINTMEM;
     else if (ch == 'x')
 	*pmfl |= PMf_EXTENDED;
 }
@@ -4879,7 +4881,7 @@ scan_pat(char *start)
     pm = (PMOP*)newPMOP(OP_MATCH, 0);
     if (multi_open == '?')
 	pm->op_pmflags |= PMf_ONCE;
-    while (*s && strchr("iogcmsx", *s))
+    while (*s && strchr("iogcmstx", *s))
 	pmflag(&pm->op_pmflags,*s++);
     pm->op_pmpermflags = pm->op_pmflags;
 
@@ -4924,13 +4926,15 @@ scan_subst(char *start)
     multi_start = first_start;	/* so whole substitution is taken together */
 
     pm = (PMOP*)newPMOP(OP_SUBST, 0);
-    while (*s && strchr("iogcmsex", *s)) {
+    while (*s) {
 	if (*s == 'e') {
 	    s++;
 	    es++;
 	}
-	else
+	else if (strchr("iogcmstx", *s))
 	    pmflag(&pm->op_pmflags,*s++);
+	else
+	    break;
     }
 
     if (es) {

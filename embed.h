@@ -141,6 +141,7 @@
 #define div_amg			Perl_div_amg
 #define div_ass_amg		Perl_div_ass_amg
 #define do_aexec		Perl_do_aexec
+#define do_binmode		Perl_do_binmode
 #define do_chomp		Perl_do_chomp
 #define do_chop			Perl_do_chop
 #define do_close		Perl_do_close
@@ -192,6 +193,7 @@
 #define filter_add		Perl_filter_add
 #define filter_del		Perl_filter_del
 #define filter_read		Perl_filter_read
+#define find_script		Perl_find_script
 #define find_threadsv		Perl_find_threadsv
 #define fold			Perl_fold
 #define fold_constants		Perl_fold_constants

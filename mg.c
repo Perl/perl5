@@ -460,7 +460,8 @@ magic_get(SV *sv, MAGIC *mg)
 		    }
 		    sv_setpvn(sv,s,i);
 		    if (tainting)
-			tainted = was_tainted || RX_MATCH_TAINTED(rx);
+			tainted = (was_tainted || RX_MATCH_TAINTED(rx) ||
+				   (curpm->op_pmflags & PMf_TAINTMEM));
 		    break;
 		}
 	    }
