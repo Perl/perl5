@@ -126,7 +126,7 @@ PerlIOVia_pushed(PerlIO *f, const char *mode, SV *arg)
     {
      STRLEN pkglen = 0;
      char *pkg = SvPV(arg,pkglen);
-     s->obj = arg;
+     s->obj = SvREFCNT_inc(arg);
      s->stash  = gv_stashpvn(pkg, pkglen, FALSE);
      if (s->stash)
       {
@@ -135,7 +135,10 @@ PerlIOVia_pushed(PerlIO *f, const char *mode, SV *arg)
        if (result)
         {
          if (sv_isobject(result))
-          s->obj = SvREFCNT_inc(result);
+          {
+           s->obj = SvREFCNT_inc(result);
+           SvREFCNT_dec(arg);
+          }
          else if (SvIV(result) != 0)
           return SvIV(result);
         }
@@ -147,6 +150,13 @@ PerlIOVia_pushed(PerlIO *f, const char *mode, SV *arg)
      else
       {
        Perl_warn(aTHX_ "Cannot find package '%.*s'",(int) pkglen,pkg);
+#ifdef ENOSYS
+       errno = ENOSYS;
+#else
+#ifdef ENOENT
+       errno = ENOENT;
+#endif
+#endif
        code = -1;
       }
     }
