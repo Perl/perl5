@@ -56,7 +56,7 @@ if (socket(T,PF_INET,SOCK_STREAM,6)) {
   }
   else {
 	print "# You're allowed to fail tests 2 and 3 if\n";
-	print "# the echo service has been disabled or if your
+	print "# the echo service has been disabled or if your\n";
         print "# gethostbyname() cannot resolve your localhost.\n";
 	print "# 'Connection refused' indicates disabled echo service.\n";
 	print "# 'Interrupted system call' indicates a hanging echo service.\n";
