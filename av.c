@@ -634,7 +634,7 @@ Perl_avhv_fetch_ent(pTHX_ AV *av, SV *keysv, I32 lval, U32 hash)
    
     he = hv_fetch_ent(keys, keysv, FALSE, hash);
     if (!he)
-        Perl_croak(aTHX_ "No such pseudo-hash field '%s'", SvPV(keysv,n_a));
+        Perl_croak(aTHX_ "No such pseudo-hash field \"%s\"", SvPV(keysv,n_a));
     return av_fetch(av, avhv_index_sv(HeVAL(he)), lval);
 }
 

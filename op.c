@@ -6141,7 +6141,7 @@ Perl_peep(pTHX_ register OP *o)
 	    key = SvPV(*svp, keylen);
 	    indsvp = hv_fetch(GvHV(*fields), key, keylen, FALSE);
 	    if (!indsvp) {
-		Perl_croak(aTHX_ "No such field \"%s\" in variable %s of type %s",
+		Perl_croak(aTHX_ "No such pseudo-hash field \"%s\" in variable %s of type %s",
 		      key, SvPV(lexname, n_a), HvNAME(SvSTASH(lexname)));
 	    }
 	    ind = SvIV(*indsvp);
