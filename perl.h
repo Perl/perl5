@@ -1948,6 +1948,7 @@ EXT MGVTBL vtbl_amagicelem;
 #endif /* !DOINIT */
 
 #ifdef OVERLOAD
+
 EXT long amagic_generation;
 
 #define NofAMmeth 58
@@ -2042,6 +2043,38 @@ enum {
   concat_amg,	concat_ass_amg,
   copy_amg,	neg_amg
 };
+
+/*
+ * some compilers like to redefine cos et alia as faster
+ * (and less accurate?) versions called F_cos et cetera (Quidquid
+ * latine dictum sit, altum viditur.)  This trick collides with
+ * the Perl overloading (amg).  The following #defines fool both.
+ */
+
+#ifdef _FASTMATH
+#   ifdef atan2
+#       define F_atan2_amg  atan2_amg
+#   endif
+#   ifdef cos
+#       define F_cos_amg    cos_amg
+#   endif
+#   ifdef exp
+#       define F_exp_amg    exp_amg
+#   endif
+#   ifdef log
+#       define F_log_amg    log_amg
+#   endif
+#   ifdef pow
+#       define F_pow_amg    pow_amg
+#   endif
+#   ifdef sin
+#       define F_sin_amg    sin_amg
+#   endif
+#   ifdef sqrt
+#       define F_sqrt_amg   sqrt_amg
+#   endif
+#endif /* _FASTMATH */
+
 #endif /* OVERLOAD */
 
 #ifdef USE_LOCALE_COLLATE
