@@ -1,6 +1,17 @@
 Revision history for Perl suite Locale::Maketext
-                                        Time-stamp: "2003-04-02 10:37:42 AHST"
+                                        Time-stamp: "2003-04-18 22:07:29 AHDT"
 
+2003-04-18  Sean M. Burke  sburke@cpan.org
+	* Release 1.05:  Different Makefile.PL, same .pm code.
+	
+	Jesse Vincent, Hugo van der Sanden, and Jarkko Hietaniemi
+	encourage me to add this to the makefile:
+	 ($] < 5.008) ? () : ( INSTALLDIRS => 'perl'),
+	so that when you install this on a recent version of perl (5.8 or
+	later), the installation will overwrite the Maketext.pm in your
+	core library directory.  Email me if this produces trouble for any
+	of you folks out there, okay?
+	
 2003-04-02  Sean M. Burke  sburke@cpan.org
 	* Release 1.04: Implementing proper HTTP "tag;q=rank" parsing for
 	get_handle.  This should make all the difference for users/victims
