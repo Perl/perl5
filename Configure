@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sat Feb  3 18:13:59 EET 2001 [metaconfig 3.0 PL70]
+# Generated on Sat Feb  3 18:24:21 EET 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -1807,7 +1807,8 @@ EOH
 	dflt='n'
 	. ./myread
 	case "$ans" in
-	[yY]) echo >&4 "Okay, continuing." ;;
+	[yY]) echo >&4 "Okay, continuing."
+	      usedevel="$define" ;;
 	*) echo >&4 "Okay, bye."
 	   exit 1
 	   ;;
@@ -1815,6 +1816,16 @@ EOH
 	;;
     esac
     ;;
+esac
+case "$usedevel" in
+$define|true|[yY]*)
+	case "$versiononly" in
+	'') versiononly="$define" ;;
+	esac
+	case "$installusrbinperl" in
+	'') installusrbinperl="$undef" ;;
+	esac
+	;;
 esac
 
 : general instructions
