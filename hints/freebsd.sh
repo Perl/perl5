@@ -231,7 +231,9 @@ EOM
 			;;
 	      5.*)	d_gethostbyaddr_r="undef"
 			d_gethostbyaddr_r_proto="0"
-			# no need for -pthread in 5.*
+                        if [ `/sbin/sysctl -n kern.osreldate` -lt 500016 ]; then
+                                ldflags="-pthread $ldflags"
+                        fi
 			;;
 	      *)	ldflags="-pthread $ldflags"
 			;;
