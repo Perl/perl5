@@ -2444,10 +2444,30 @@ PP(pp_quotemeta)
 	(void)SvUPGRADE(TARG, SVt_PV);
 	SvGROW(TARG, (len * 2) + 1);
 	d = SvPVX(TARG);
-	while (len--) {
-	    if (!(*s & 0x80) && !isALNUM(*s))
-		*d++ = '\\';
-	    *d++ = *s++;
+	if (IN_UTF8) {
+	    while (len) {
+		if (*s & 0x80) {
+		    STRLEN ulen = UTF8SKIP(s);
+		    if (ulen > len)
+			ulen = len;
+		    len -= ulen;
+		    while (ulen--)
+			*d++ = *s++;
+		}
+		else {
+		    if (!isALNUM(*s))
+			*d++ = '\\';
+		    *d++ = *s++;
+		    len--;
+		}
+	    }
+	}
+	else {
+	    while (len--) {
+		if (!isALNUM(*s))
+		    *d++ = '\\';
+		*d++ = *s++;
+	    }
 	}
 	*d = '\0';
 	SvCUR_set(TARG, d - SvPVX(TARG));
