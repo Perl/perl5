@@ -764,6 +764,7 @@ lib/unicode/In/Tamil.pl				Unicode character database
 lib/unicode/In/Telugu.pl			Unicode character database
 lib/unicode/In/Thai.pl				Unicode character database
 lib/unicode/In/Tibetan.pl			Unicode character database
+lib/unicode/Is/ASCII.pl				Unicode character database
 lib/unicode/Is/Alnum.pl				Unicode character database
 lib/unicode/Is/Alpha.pl				Unicode character database
 lib/unicode/Is/BidiAN.pl			Unicode character database
@@ -780,6 +781,7 @@ lib/unicode/Is/BidiWS.pl			Unicode character database
 lib/unicode/Is/C.pl				Unicode character database
 lib/unicode/Is/Cc.pl				Unicode character database
 lib/unicode/Is/Cn.pl				Unicode character database
+lib/unicode/Is/Cntrl.pl				Unicode character database
 lib/unicode/Is/Co.pl				Unicode character database
 lib/unicode/Is/DCcircle.pl			Unicode character database
 lib/unicode/Is/DCcompat.pl			Unicode character database
@@ -799,6 +801,7 @@ lib/unicode/Is/DCwide.pl			Unicode character database
 lib/unicode/Is/DecoCanon.pl			Unicode character database
 lib/unicode/Is/DecoCompat.pl			Unicode character database
 lib/unicode/Is/Digit.pl				Unicode character database
+lib/unicode/Is/Graph.pl				Unicode character database
 lib/unicode/Is/L.pl				Unicode character database
 lib/unicode/Is/Ll.pl				Unicode character database
 lib/unicode/Is/Lm.pl				Unicode character database
@@ -818,6 +821,7 @@ lib/unicode/Is/Pd.pl				Unicode character database
 lib/unicode/Is/Pe.pl				Unicode character database
 lib/unicode/Is/Po.pl				Unicode character database
 lib/unicode/Is/Print.pl				Unicode character database
+lib/unicode/Is/Punct.pl				Unicode character database
 lib/unicode/Is/Ps.pl				Unicode character database
 lib/unicode/Is/S.pl				Unicode character database
 lib/unicode/Is/Sc.pl				Unicode character database
@@ -827,6 +831,7 @@ lib/unicode/Is/Space.pl				Unicode character database
 lib/unicode/Is/Syllable.pl			Unicode character database
 lib/unicode/Is/Upper.pl				Unicode character database
 lib/unicode/Is/Word.pl				Unicode character database
+lib/unicode/Is/XDigit.pl			Unicode character database
 lib/unicode/Is/Z.pl				Unicode character database
 lib/unicode/Is/Zl.pl				Unicode character database
 lib/unicode/Is/Zp.pl				Unicode character database
