@@ -43,6 +43,7 @@ from the following list:
     $ENV{TMPDIR}
     $ENV{TEMP}
     $ENV{TMP}
+    C:/temp
     /tmp
     /
 
@@ -52,7 +53,7 @@ my $tmpdir;
 sub tmpdir {
     return $tmpdir if defined $tmpdir;
     my $self = shift;
-    foreach (@ENV{qw(TMPDIR TEMP TMP)}, qw(/tmp /)) {
+    foreach (@ENV{qw(TMPDIR TEMP TMP)}, qw(C:/temp /tmp /)) {
 	next unless defined && -d;
 	$tmpdir = $_;
 	last;
