@@ -25,7 +25,7 @@ $VERSION = '0.47';
              cmp_ok
              skip todo todo_skip
              pass fail
-             eq_array eq_hash eq_set eq_deeply
+             eq_array eq_hash eq_set
              $TODO
              plan
              can_ok  isa_ok

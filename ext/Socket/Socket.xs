@@ -371,10 +371,10 @@ unpack_sockaddr_un(sun_sv)
 			addr.sun_family,
 			AF_UNIX);
 	}
-	e = addr.sun_path;
-	while (*e && e < addr.sun_path + sizeof addr.sun_path)
+	e = (char*)addr.sun_path;
+	while (*e && e < (char*)addr.sun_path + sizeof addr.sun_path)
 	    ++e;
-	ST(0) = sv_2mortal(newSVpvn(addr.sun_path, e - addr.sun_path));
+	ST(0) = sv_2mortal(newSVpvn(addr.sun_path, e - (char*)addr.sun_path));
 #else
 	ST(0) = (SV *) not_here("unpack_sockaddr_un");
 #endif
