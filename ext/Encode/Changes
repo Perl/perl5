@@ -1,8 +1,27 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.50 2002/04/19 06:13:02 dankogai Exp $
+# $Id: Changes,v 1.51 2002/04/20 09:58:23 dankogai Exp dankogai $
 #
-1.50 $Date: 2002/04/19 06:13:02 $
+
+1.51 $Date: 2002/04/20 09:58:23 $
+! t/TW.t
+  Updated test suite by Autrijis so "make test" is happy again
+  Message-Id: <20020420082104.GA25037@not.autrijus.org>
++ ucm/big5-eten.ucm
+! ucm/big5-hkscs.ucm lib/Encode/Alias.pm 
+- ucm/big5.ucm
+  TW/TW.pm TW/Makefile.PL
+  Updates by Autrijus.  'big5' is no longer a canonical but an
+  alias to 'big5-eten'. big5-hkscs is now in 2001 edition.
+  Message-Id: <20020419195346.GA19597@not.autrijus.org>
+! Encode.xs
+  Fix by NI-XS that fallback may cause SEGV w/ Perl/TK
+  Message-Id: <20020419184509.1924.1@bactrian.ni-s.u-net.com>
+! Encode.pm
+  PerlIO detection a little bit smarter; no longer uses eval qq{}
+  but eval {}.
+
+1.50 2002/04/19 06:13:02
 ! ! Encode.pm Encode.xs Encode/encoding.h
 + t/fallback.pm
   New Fallback API imlemented and documented.  See "perldoc Encode"
@@ -374,7 +393,7 @@
   Typo fixes and improvements by jhi
   Message-Id: <200204010201.FAA03564@alpha.hut.fi>, et al.
 
-1.11  $Date: 2002/04/19 06:13:02 $
+1.11  $Date: 2002/04/20 09:58:23 $
 + t/encoding.t
 + t/jperl.t
 ! MANIFEST

@@ -289,8 +289,8 @@ ext/Encode/ucm/adobeStdenc.ucm	Unicode Character Map
 ext/Encode/ucm/adobeSymbol.ucm	Unicode Character Map
 ext/Encode/ucm/adobeZdingbat.ucm	Unicode Character Map
 ext/Encode/ucm/ascii.ucm	Unicode Character Map
+ext/Encode/ucm/big5-eten.ucm	Unicode Character Map
 ext/Encode/ucm/big5-hkscs.ucm	Unicode Character Map
-ext/Encode/ucm/big5.ucm	Unicode Character Map
 ext/Encode/ucm/cp037.ucm	Unicode Character Map
 ext/Encode/ucm/cp1006.ucm	Unicode Character Map
 ext/Encode/ucm/cp1026.ucm	Unicode Character Map

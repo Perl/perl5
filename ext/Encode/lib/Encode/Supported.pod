@@ -227,8 +227,8 @@ respective document pages.
 
   Standard      DOS/Win Macintosh                Comment/Reference
   ----------------------------------------------------------------
-  big5          cp950   MacChineseTrad
-  big5-hkscs
+  big5-eten     cp950   MacChineseTrad {big5 aliased to big5-eten}
+  big5-hkscs                              
   ----------------------------------------------------------------
 
 =item Encode::HanExtra -- More Chinese via CPAN
