@@ -1506,7 +1506,7 @@ Perl_magic_setsubstr(pTHX_ SV *sv, MAGIC *mg)
 	sv_insert(lsv, lvoff, lvlen, tmps, len);
 	SvUTF8_on(lsv);
     }
-    else if (SvUTF8(lsv)) {
+    else if (lsv && SvUTF8(lsv)) {
 	sv_pos_u2b(lsv, &lvoff, &lvlen);
 	tmps = (char*)bytes_to_utf8((U8*)tmps, &len);
 	sv_insert(lsv, lvoff, lvlen, tmps, len);
