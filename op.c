@@ -2147,8 +2147,7 @@ Perl_block_end(pTHX_ I32 floor, OP *seq)
 {
     int needblockscope = PL_hints & HINT_BLOCK_SCOPE;
     OP* retval = scalarseq(seq);
-    if (!PL_error_count)
-        LEAVE_SCOPE(floor);
+    LEAVE_SCOPE(floor);
     PL_pad_reset_pending = FALSE;
     PL_compiling.op_private = PL_hints;
     if (needblockscope)
