@@ -2320,7 +2320,31 @@ win32_rewind(FILE *pf)
 DllExport FILE*
 win32_tmpfile(void)
 {
-    return tmpfile();
+    dTHX;
+    char prefix[MAX_PATH+1];
+    char filename[MAX_PATH+1];
+    DWORD len = GetTempPath(MAX_PATH, prefix);
+    if (len && len < MAX_PATH) {
+	if (GetTempFileName(prefix, "plx", 0, filename)) {
+	    HANDLE fh = CreateFile(filename,
+				   DELETE | GENERIC_READ | GENERIC_WRITE,
+				   0,
+				   NULL,
+				   CREATE_ALWAYS,
+				   FILE_ATTRIBUTE_NORMAL
+				   | FILE_FLAG_DELETE_ON_CLOSE,
+				   NULL);
+	    if (fh != INVALID_HANDLE_VALUE) {
+		int fd = win32_open_osfhandle((long)fh, 0);
+		if (fd >= 0) {
+		    DEBUG_p(PerlIO_printf(Perl_debug_log,
+					  "Created tmpfile=%s\n",filename));
+		    return fdopen(fd, "w+b");
+		}
+	    }
+	}
+    }
+    return NULL;
 }
 
 DllExport void
