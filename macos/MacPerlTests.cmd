@@ -137,8 +137,8 @@ echo "::macos:perl -I::lib    :lib:db-recno.t" >> ::macos:MacPerlTests.out
 ::macos:perl -I::lib    :lib:db-recno.t >> ::macos:MacPerlTests.out
 echo "::macos:perl -I::lib    :lib:dirhand.t" >> ::macos:MacPerlTests.out
 ::macos:perl -I::lib    :lib:dirhand.t >> ::macos:MacPerlTests.out
-# echo "::macos:perl -I::lib    :lib:dosglob.t" >> ::macos:MacPerlTests.out
-# ::macos:perl -I::lib    :lib:dosglob.t >> ::macos:MacPerlTests.out
+echo "::macos:perl -I::lib    :lib:dosglob.t" >> ::macos:MacPerlTests.out
+::macos:perl -I::lib    :lib:dosglob.t >> ::macos:MacPerlTests.out
 # echo "::macos:perl -I::lib    :lib:dprof.t" >> ::macos:MacPerlTests.out
 # ::macos:perl -I::lib    :lib:dprof.t >> ::macos:MacPerlTests.out
 echo "::macos:perl -I::lib    :lib:dumper-ovl.t" >> ::macos:MacPerlTests.out
@@ -175,14 +175,14 @@ echo "::macos:perl -I::lib    :lib:filespec.t" >> ::macos:MacPerlTests.out
 ::macos:perl -I::lib    :lib:filespec.t >> ::macos:MacPerlTests.out
 echo "::macos:perl -I::lib    :lib:findbin.t" >> ::macos:MacPerlTests.out
 ::macos:perl -I::lib    :lib:findbin.t >> ::macos:MacPerlTests.out
-# echo "::macos:perl -I::lib    :lib:ftmp-mktemp.t" >> ::macos:MacPerlTests.out
-# ::macos:perl -I::lib    :lib:ftmp-mktemp.t >> ::macos:MacPerlTests.out
-# echo "::macos:perl -I::lib    :lib:ftmp-posix.t" >> ::macos:MacPerlTests.out
-# ::macos:perl -I::lib    :lib:ftmp-posix.t >> ::macos:MacPerlTests.out
-# echo "::macos:perl -I::lib    :lib:ftmp-security.t" >> ::macos:MacPerlTests.out
-# ::macos:perl -I::lib    :lib:ftmp-security.t >> ::macos:MacPerlTests.out
-# echo "::macos:perl -I::lib    :lib:ftmp-tempfile.t" >> ::macos:MacPerlTests.out
-# ::macos:perl -I::lib    :lib:ftmp-tempfile.t >> ::macos:MacPerlTests.out
+echo "::macos:perl -I::lib    :lib:ftmp-mktemp.t" >> ::macos:MacPerlTests.out
+::macos:perl -I::lib    :lib:ftmp-mktemp.t >> ::macos:MacPerlTests.out
+echo "::macos:perl -I::lib    :lib:ftmp-posix.t" >> ::macos:MacPerlTests.out
+::macos:perl -I::lib    :lib:ftmp-posix.t >> ::macos:MacPerlTests.out
+echo "::macos:perl -I::lib    :lib:ftmp-security.t" >> ::macos:MacPerlTests.out
+::macos:perl -I::lib    :lib:ftmp-security.t >> ::macos:MacPerlTests.out
+echo "::macos:perl -I::lib    :lib:ftmp-tempfile.t" >> ::macos:MacPerlTests.out
+::macos:perl -I::lib    :lib:ftmp-tempfile.t >> ::macos:MacPerlTests.out
 echo "::macos:perl -I::lib    :lib:gdbm.t" >> ::macos:MacPerlTests.out
 ::macos:perl -I::lib    :lib:gdbm.t >> ::macos:MacPerlTests.out
 echo "::macos:perl -I::lib    :lib:getopt.t" >> ::macos:MacPerlTests.out
@@ -405,8 +405,8 @@ echo "::macos:perl -I::lib    :op:local.t" >> ::macos:MacPerlTests.out
 ::macos:perl -I::lib    :op:local.t >> ::macos:MacPerlTests.out
 echo "::macos:perl -I::lib    :op:lop.t" >> ::macos:MacPerlTests.out
 ::macos:perl -I::lib    :op:lop.t >> ::macos:MacPerlTests.out
-# echo "::macos:perl -I::lib    :op:magic.t" >> ::macos:MacPerlTests.out
-# ::macos:perl -I::lib    :op:magic.t >> ::macos:MacPerlTests.out
+echo "::macos:perl -I::lib    :op:magic.t" >> ::macos:MacPerlTests.out
+::macos:perl -I::lib    :op:magic.t >> ::macos:MacPerlTests.out
 echo "::macos:perl -I::lib    :op:method.t" >> ::macos:MacPerlTests.out
 ::macos:perl -I::lib    :op:method.t >> ::macos:MacPerlTests.out
 echo "::macos:perl -I::lib    :op:misc.t" >> ::macos:MacPerlTests.out
@@ -571,22 +571,13 @@ echo "IO problems.  Feel free to run them, and note the failures."
 echo "These tests are known to fail.  Run if you want to, but beware"
 echo "because crashes are possible."
 echo ""
-echo "# DOS::Glob doesn't work ... do we care?"
-echo "::macos:perl -I::lib    :lib:dosglob.t >> ::macos:MacPerlTests.out"
-echo ""
 echo "# Devel::DProf seems to work, but test needs major work :/"
 echo "::macos:perl -I::lib    :lib:dprof.t >> ::macos:MacPerlTests.out"
 echo ""
-echo "# I have no idea about these ..."
-echo "::macos:perl -I::lib    :lib:ftmp-mktemp.t >> ::macos:MacPerlTests.out"
-echo "::macos:perl -I::lib    :lib:ftmp-posix.t >> ::macos:MacPerlTests.out"
-echo "::macos:perl -I::lib    :lib:ftmp-security.t >> ::macos:MacPerlTests.out"
-echo "::macos:perl -I::lib    :lib:ftmp-tempfile.t >> ::macos:MacPerlTests.out"
-echo ""
-echo "# system() fails to return a good value"
+echo "# fails all tests (system() fails to return a good value)"
 echo "::macos:perl -I::lib    :op:die_exit.t >> ::macos:MacPerlTests.out"
 echo ""
-echo "# I dunno here"
+echo "# fails test 16   (system() fails to return a good value)"
 echo "::macos:perl -I::lib    :op:magic.t >> ::macos:MacPerlTests.out"
 echo ""
 echo "# fails tests 129, 130, 142, 161 (known problem in sfio)"
@@ -594,3 +585,7 @@ echo "::macos:perl -I::lib    :op:sprintf.t >> ::macos:MacPerlTests.out"
 echo ""
 echo "# fails tests 329 (known problem in sysopen warning)"
 echo "::macos:perl -I::lib    :pragma:warnings.t >> ::macos:MacPerlTests.out"
+echo ""
+echo "# :op:misc.t, :op:runlevel.t, :pragma:strict.t, :pragma:subs.t, and"
+echo "# :pragma:warnings.t all produce a lot of errors because of error"
+echo "# output format; not sure what to do about them"

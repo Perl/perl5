@@ -128,7 +128,7 @@ Dynamic_Ext_Std	=
 Dynamic_Ext_Xtr =	
 Static_Lib_Mac	= \
 	ExtUtils:MM_MacOS ExtUtils:Miniperl Config Errno \
-	Mac:Hooks Mac:Pane \
+	Mac:Hooks Mac:Pane Mac::LowMem \
 	Mac:AppleEvents:Simple Mac:BuildTools Mac:Apps:Launch
 
 ########

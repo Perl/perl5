@@ -273,8 +273,10 @@ resource 'SIZE' (-1) {
 	reserved,
 	reserved,
 	reserved,
-	3840 * 1024,
-	1536 * 1024
+/*	3840 * 1024,
+	1536 * 1024 */
+	10 * 1024 * 1024,
+	2  * 1024 * 1024
 };
 
 type 'MrPS' as 'SIZE';
