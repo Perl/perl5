@@ -13,7 +13,6 @@ Copying			The GNU General Public License
 EXTERN.h		Included before foreign .h files
 INSTALL			Detailed installation instructions
 INTERN.h		Included before domestic .h files
-MAINTAIN		Who maintains which files
 MANIFEST		This list of files
 Makefile.SH		A script that generates Makefile
 Makefile.micro		microperl Makefile
