@@ -17,7 +17,7 @@ $Debug = 0;
 $Verbose = 1;
 $Is_VMS = $^O eq 'VMS';
 
-$VERSION = substr(q$Revision: 1.27 $,10,4);
+$VERSION = "1.28";
 
 $Quiet = 0;
 
@@ -25,7 +25,6 @@ $MANIFEST = 'MANIFEST';
 
 # Really cool fix from Ilya :)
 unless (defined $Config{d_link}) {
-    local($^W) = 0;  # avoid sub redefined message
     *ln = \&cp;
 }
 
@@ -249,7 +248,7 @@ sub best {
     if (-l $srcFile) {
 	cp($srcFile, $dstFile);
     } else {
-	ln($srcFile, $dstFile);
+	ln($srcFile, $dstFile) or cp($srcFile, $dstFile);
     }
 }
 
@@ -394,6 +393,6 @@ L<ExtUtils::MakeMaker> which has handy targets for most of the functionality.
 
 =head1 AUTHOR
 
-Andreas Koenig E<lt>F<koenig@franz.ww.TU-Berlin.DE>E<gt>
+Andreas Koenig F<E<lt>koenig@franz.ww.TU-Berlin.DEE<gt>>
 
 =cut
