@@ -1043,7 +1043,7 @@ EOP
 		    $cmd =~ /^$rc+\s*(-)?(\d+)?$/ && do {
 			pop(@hist) if length($cmd) > 1;
 			$i = $1 ? ($#hist-($2?$2:1)) : ($2?$2:$#hist);
-			$cmd = $hist[$i] . "\n";
+			$cmd = $hist[$i];
 			print $OUT $cmd;
 			redo CMD; };
 		    $cmd =~ /^$sh$sh\s*([\x00-\xff]*)/ && do {
@@ -1059,7 +1059,7 @@ EOP
 			    print $OUT "No such command!\n\n";
 			    next CMD;
 			}
-			$cmd = $hist[$i] . "\n";
+			$cmd = $hist[$i];
 			print $OUT $cmd;
 			redo CMD; };
 		    $cmd =~ /^$sh$/ && do {
