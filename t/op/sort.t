@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 use warnings;
-print "1..105\n";
+print "1..115\n";
 
 # these shouldn't hang
 {
@@ -486,6 +486,38 @@ ok join(" ", map {0+$_} @input), "2 1 0 5 4 3 8 7 6",
 $output = reverse sort {$b cmp $a} @input;
 ok $output, "AAABBBCCC", 'Reversed stable $b cmp $a sort in scalar context';
 
+sub sortr {
+    reverse sort @_;
+}
+
+@output = sortr &generate;
+ok join(" ", map {0+$_} @output), "8 7 6 5 4 3 2 1 0",
+    'reversed stable sort return list context';
+$output = sortr &generate;
+ok $output, "CCCBBBAAA",
+    'reversed stable sort return scalar context';
+
+sub sortcmpr {
+    reverse sort {$a cmp $b} @_;
+}
+
+@output = sortcmpr &generate;
+ok join(" ", map {0+$_} @output), "8 7 6 5 4 3 2 1 0",
+    'reversed stable $a cmp $b sort return list context';
+$output = sortcmpr &generate;
+ok $output, "CCCBBBAAA",
+    'reversed stable $a cmp $b sort return scalar context';
+
+sub sortcmprba {
+    reverse sort {$b cmp $a} @_;
+}
+
+@output = sortcmprba &generate;
+ok join(" ", map {0+$_} @output), "2 1 0 5 4 3 8 7 6",
+    'reversed stable $b cmp $a sort return list context';
+$output = sortcmprba &generate;
+ok $output, "AAABBBCCC",
+'reversed stable $b cmp $a sort return scalar context';
 
 # And now with numbers
 
@@ -551,3 +583,26 @@ ok "@input", "C B A F E D I H G", 'revesed stable $b <=> $a in place sort';
 @input = &generate1;
 $output = reverse sort {$b <=> $a} @input;
 ok $output, "CBAFEDIHG", 'reversed stable $b <=> $a sort in scalar context';
+
+
+sub sortnumr {
+    reverse sort {$a <=> $b} @_;
+}
+
+@output = sortnumr &generate1;
+ok "@output", "I H G F E D C B A",
+    'reversed stable $a <=> $b sort return list context';
+$output = sortnumr &generate1;
+ok $output, "IHGFEDCBA",
+    'reversed stable $a <=> $b sort return scalar context';
+
+sub sortnumrba {
+    reverse sort {$b <=> $a} @_;
+}
+
+@output = sortnumrba &generate1;
+ok "@output", "C B A F E D I H G",
+    'reversed stable $b <=> $a sort return list context';
+$output = sortnumrba &generate1;
+ok $output, "CBAFEDIHG",
+'reversed stable $b <=> $a sort return scalar context';
