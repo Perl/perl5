@@ -78,8 +78,8 @@ Options:
     -t   Display pod using pod2text instead of pod2man and nroff
              (-t is the default on win32)
     -u	 Display unformatted pod text
-    -m   Display modules file in its entirety
-    -l   Display the modules file name
+    -m   Display module's file in its entirety
+    -l   Display the module's file name
     -F   Arguments are file names, not modules
     -v	 Verbosely describe what's going on
     -X	 use index if present (looks for pod.idx at $Config{archlib})
