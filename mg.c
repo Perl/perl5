@@ -124,6 +124,18 @@ Perl_mg_get(pTHX_ SV *sv)
     int new = 0;
     MAGIC *newmg, *head, *cur, *mg;
     I32 mgs_ix = SSNEW(sizeof(MGS));
+    int was_temp = SvTEMP(sv);
+    /* guard against sv having being freed midway by holding a private
+       reference. */
+
+    /* sv_2mortal has this side effect of turning on the TEMP flag, which can
+       cause the SV's buffer to get stolen (and maybe other stuff).
+       So restore it.
+    */
+    sv_2mortal(SvREFCNT_inc(sv));
+    if (!was_temp) {
+	SvTEMP_off(sv);
+    }
 
     save_magic(mgs_ix, sv);
 
@@ -138,10 +150,6 @@ Perl_mg_get(pTHX_ SV *sv)
 	if (!(mg->mg_flags & MGf_GSKIP) && vtbl && vtbl->svt_get) {
 	    CALL_FPTR(vtbl->svt_get)(aTHX_ sv, mg);
 
-	    /* guard against sv having been freed */
-	    if (SvTYPE(sv) == SVTYPEMASK) {
-		Perl_croak(aTHX_ "Tied variable freed while still in use");
-	    }
 	    /* guard against magic having been deleted - eg FETCH calling
 	     * untie */
 	    if (!SvMAGIC(sv))
@@ -173,6 +181,12 @@ Perl_mg_get(pTHX_ SV *sv)
     }
 
     restore_magic(aTHX_ INT2PTR(void *, (IV)mgs_ix));
+
+    if (SvREFCNT(sv) == 1) {
+	/* We hold the last reference to this SV, which implies that the
+	   SV was deleted as a side effect of the routines we called.  */
+	SvOK_off(sv);
+    }
     return 0;
 }
 
