@@ -514,7 +514,7 @@ my __PACKAGE__ $obj now works.
 =item *
 
 POSIX::sleep() now returns the number of I<unslept> seconds
-(as thex POSIX standard says), as opposed to CORE::sleep() which
+(as the POSIX standard says), as opposed to CORE::sleep() which
 returns the number of slept seconds.
 
 =item *
