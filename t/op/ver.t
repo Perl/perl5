@@ -5,9 +5,19 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..28\n";
+print "1..33\n";
 
 my $test = 1;
+
+sub okeq {
+    my $ok = $_[0] eq $_[1];;
+    print "not " unless $ok;
+    print "ok ", $test++;
+    print " # $_[2]" if !$ok && @_ == 3;
+    print "\n";
+}
+
+sub skip { print "ok ", $test++, " # Skip: $_[0]\n" }
 
 use v5.5.640;
 require v5.5.640;
@@ -45,11 +55,9 @@ if (ord("\t") == 9) { # ASCII
 else {
     $x = v212.213.214;
 }
-print "not " unless $x eq "MNO";
-print "ok $test\n";  ++$test;
+okeq($x, "MNO");
 
-print "not " unless v1.20.300.4000 eq "\x{1}\x{14}\x{12c}\x{fa0}";
-print "ok $test\n";  ++$test;
+okeq(v1.20.300.4000, "\x{1}\x{14}\x{12c}\x{fa0}");
 
 #
 # now do the same without the "v"
@@ -72,108 +80,94 @@ if (ord("\t") == 9) { # ASCII
 else {
     $x = 212.213.214;
 }
-print "not " unless $x eq "MNO";
-print "ok $test\n";  ++$test;
+okeq($x, "MNO");
 
-print "not " unless 1.20.300.4000 eq "\x{1}\x{14}\x{12c}\x{fa0}";
-print "ok $test\n";  ++$test;
+okeq(1.20.300.4000, "\x{1}\x{14}\x{12c}\x{fa0}");
 
 # test sprintf("%vd"...) etc
 if (ord("\t") == 9) { # ASCII
-    print "not " unless sprintf("%vd", "Perl") eq '80.101.114.108';
+    okeq(sprintf("%vd", "Perl"), '80.101.114.108');
 }
 else {
-    print "not " unless sprintf("%vd", "Perl") eq '215.133.153.147';
+    okeq(sprintf("%vd", "Perl"), '215.133.153.147');
 }
-print "ok $test\n";  ++$test;
 
-print "not " unless sprintf("%vd", v1.22.333.4444) eq '1.22.333.4444';
-print "ok $test\n";  ++$test;
+okeq(sprintf("%vd", v1.22.333.4444), '1.22.333.4444');
 
 if (ord("\t") == 9) { # ASCII
-    print "not " unless sprintf("%vx", "Perl") eq '50.65.72.6c';
+    okeq(sprintf("%vx", "Perl"), '50.65.72.6c');
 }
 else {
-    print "not " unless sprintf("%vx", "Perl") eq 'd7.85.99.93';
+    okeq(sprintf("%vx", "Perl"), 'd7.85.99.93');
 }
-print "ok $test\n";  ++$test;
 
-print "not " unless sprintf("%vX", 1.22.333.4444) eq '1.16.14D.115C';
-print "ok $test\n";  ++$test;
+okeq(sprintf("%vX", 1.22.333.4444), '1.16.14D.115C');
 
 if (ord("\t") == 9) { # ASCII
-    print "not " unless sprintf("%#*vo", ":", "Perl") eq '0120:0145:0162:0154';
+    okeq(sprintf("%#*vo", ":", "Perl"), '0120:0145:0162:0154');
 }
 else {
-    print "not " unless sprintf("%#*vo", ":", "Perl") eq '0327:0205:0231:0223';
+    okeq(sprintf("%#*vo", ":", "Perl"), '0327:0205:0231:0223');
 }
-print "ok $test\n";  ++$test;
 
-print "not " unless sprintf("%*vb", "##", v1.22.333.4444)
-    eq '1##10110##101001101##1000101011100';
-print "ok $test\n";  ++$test;
+okeq(sprintf("%*vb", "##", v1.22.333.4444),
+    '1##10110##101001101##1000101011100');
 
-print "not " unless sprintf("%vd", join("", map { chr }
-					    unpack 'U*', pack('U*',2001,2002,2003)))
-		    eq '2001.2002.2003';
-print "ok $test\n";  ++$test;
+okeq(sprintf("%vd", join("", map { chr }
+			 unpack 'U*', pack('U*',2001,2002,2003))),
+     '2001.2002.2003');
 
 {
     use bytes;
-    if (ord("\t") == 9) { # ASCII
-        print "not " unless sprintf("%vd", "Perl") eq '80.101.114.108';
-    }
-    else {
-        print "not " unless sprintf("%vd", "Perl") eq '215.133.153.147';
-    }
-    print "ok $test\n";  ++$test;
 
     if (ord("\t") == 9) { # ASCII
-        print "not " unless
-            sprintf("%vd", 1.22.333.4444) eq '1.22.197.141.225.133.156';
+        okeq(sprintf("%vd", "Perl"), '80.101.114.108');
     }
     else {
-        print "not " unless
-            sprintf("%vd", 1.22.333.4444) eq '1.22.142.84.187.81.112';
+        okeq(sprintf("%vd", "Perl"), '215.133.153.147');
     }
-    print "ok $test\n";  ++$test;
 
     if (ord("\t") == 9) { # ASCII
-        print "not " unless sprintf("%vx", "Perl") eq '50.65.72.6c';
+	okeq(sprintf("%vd", 1.22.333.4444), '1.22.197.141.225.133.156');
     }
     else {
-        print "not " unless sprintf("%vx", "Perl") eq 'd7.85.99.93';
+        okeq(sprintf("%vd", 1.22.333.4444), '1.22.142.84.187.81.112');
     }
-    print "ok $test\n";  ++$test;
 
     if (ord("\t") == 9) { # ASCII
-        print "not " unless sprintf("%vX", v1.22.333.4444) eq '1.16.C5.8D.E1.85.9C';
+        okeq(sprintf("%vx", "Perl"), '50.65.72.6c');
     }
     else {
-        print "not " unless sprintf("%vX", v1.22.333.4444) eq '1.16.8E.54.BB.51.70';
+        okeq(sprintf("%vx", "Perl"), 'd7.85.99.93');
     }
-    print "ok $test\n";  ++$test;
 
     if (ord("\t") == 9) { # ASCII
-        print "not " unless sprintf("%#*vo", ":", "Perl") eq '0120:0145:0162:0154';
+        okeq(sprintf("%vX", v1.22.333.4444), '1.16.C5.8D.E1.85.9C');
     }
     else {
-        print "not " unless sprintf("%#*vo", ":", "Perl") eq '0327:0205:0231:0223';
+        okeq(sprintf("%vX", v1.22.333.4444), '1.16.8E.54.BB.51.70');
     }
-    print "ok $test\n";  ++$test;
 
     if (ord("\t") == 9) { # ASCII
-        print "not " unless sprintf("%*vb", "##", v1.22.333.4444)
-	    eq '1##10110##11000101##10001101##11100001##10000101##10011100';
+        okeq(sprintf("%#*vo", ":", "Perl"), '0120:0145:0162:0154');
     }
     else {
-        print "not " unless sprintf("%*vb", "##", v1.22.333.4444)
-            eq '1##10110##10001110##1010100##10111011##1010001##1110000';
+        okeq(sprintf("%#*vo", ":", "Perl"), '0327:0205:0231:0223');
     }
-    print "ok $test\n";  ++$test;
+
+    if (ord("\t") == 9) { # ASCII
+        okeq(sprintf("%*vb", "##", v1.22.333.4444),
+	     '1##10110##11000101##10001101##11100001##10000101##10011100');
+    }
+    else {
+        okeq(sprintf("%*vb", "##", v1.22.333.4444),
+            '1##10110##10001110##1010100##10111011##1010001##1110000');
+    }
 }
 
 {
+    # 24..28
+
     # bug id 20000323.056
 
     print "not " unless "\x{41}" eq +v65;
@@ -196,3 +190,35 @@ print "ok $test\n";  ++$test;
     print "ok $test\n";
     $test++;
 }
+
+# See if the things Camel-III says are true: 29..33
+
+# Chapter 2 pp67/68
+my $vs = v1.20.300.4000;
+okeq($vs,"\x{1}\x{14}\x{12c}\x{fa0}","v-string ne \\x{}");
+okeq($vs,chr(1).chr(20).chr(300).chr(4000),"v-string ne chr()");
+okeq('foo',((chr(193) eq 'A') ? v134.150.150 : v102.111.111),"v-string ne ''");
+
+# Chapter 15, pp403
+
+# See if sane addr and gethostbyaddr() work
+eval { require Socket; gethostbyaddr(v127.0.0.1,Socket::AF_INET()) };
+if ($@)
+ {
+  # No - so don't test insane fails.
+  skip("No Socket");
+ }
+else
+ {
+  my $ip   = v2004.148.0.1;
+  my $host;
+  eval { $host = gethostbyaddr($ip,Socket::AF_INET()) };
+  okeq($@ =~ /Wide character/,1,"Non-bytes leak to gethostbyaddr");
+ }
+
+# Chapter 28, pp671
+okeq(v5.6.0 lt v5.7.0,1,"v5.6.0 lt v5.7.0 fails");
+
+# floating point too messy
+# my $v = ord($^V)+ord(substr($^V,1,1))/1000+ord(substr($^V,2,1))/1000000;
+# okeq($v,$],"\$^V and \$] do not match");

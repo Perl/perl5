@@ -1410,7 +1410,6 @@ t/base/lex.t		See if lexical items work
 t/base/pat.t		See if pattern matching works
 t/base/rs.t		See if record-read works
 t/base/term.t		See if various terms work
-t/camel-III/vstring.t	See if Camel 3rd edition is lying.
 t/cmd/elsif.t		See if else-if works
 t/cmd/for.t		See if for loops work
 t/cmd/mod.t		See if statement modifiers work

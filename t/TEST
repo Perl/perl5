@@ -46,7 +46,7 @@ $ENV{EMXSHELL} = 'sh';        # For OS/2
 
 if ($#ARGV == -1) {
     @ARGV = split(/[ \n]/,
-      `echo base/*.t comp/*.t cmd/*.t run/*.t io/*.t; echo op/*.t pragma/*.t lib/*.t pod/*.t camel-III/*.t`);
+      `echo base/*.t comp/*.t cmd/*.t run/*.t io/*.t; echo op/*.t pragma/*.t lib/*.t pod/*.t`);
 }
 
 # %infinite = ( 'comp/require.t', 1, 'op/bop.t', 1, 'lib/hostname.t', 1 );
