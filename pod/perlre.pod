@@ -293,7 +293,8 @@ Perl defines the following zero-width assertions:
     \A	Match only at beginning of string
     \Z	Match only at end of string, or before newline at the end
     \z	Match only at end of string
-    \G	Match only where previous m//g left off (works only with /g)
+    \G	Match only at pos() (e.g. at the end-of-match position
+        of prior m//g)
 
 A word boundary (C<\b>) is a spot between two characters
 that has a C<\w> on one side of it and a C<\W> on the other side
@@ -388,6 +389,12 @@ metaquoting escape sequence to disable all metacharacters' special
 meanings like this:
 
     /$unquoted\Q$quoted\E$unquoted/
+
+Beware that if you put literal backslashes (those not inside
+interpolated variables) between C<\Q> and C<\E>, double-quotish
+backslash interpolation may lead to confusing results.  If you
+I<need> to use literal backslashes within C<\Q...\E>,
+consult L<perlop/"Gory details of parsing quoted constructs">.
 
 =head2 Extended Patterns
 
@@ -570,6 +577,8 @@ module.  See L<perlsec> for details about both these mechanisms.
 
 B<WARNING>: This extended regular expression feature is considered
 highly experimental, and may be changed or deleted without notice.
+A simplified version of the syntax may be introduced for commonly
+used idioms.
 
 This is a "postponed" regular subexpression.  The C<code> is evaluated
 at run time, at the moment this subexpression may match.  The result
@@ -598,9 +607,11 @@ highly experimental, and may be changed or deleted without notice.
 
 An "independent" subexpression, one which matches the substring
 that a I<standalone> C<pattern> would match if anchored at the given
-position--but it matches no more than this substring.  This
+position, and it matches I<nothing other than this substring>.  This
 construct is useful for optimizations of what would otherwise be
 "eternal" matches, because it will not backtrack (see L<"Backtracking">).
+It may also be useful in places where the "grab all you can, and do not
+give anything back" semantic is desirable.
 
 For example: C<^(?E<gt>a*)ab> will never match, since C<(?E<gt>a*)>
 (anchored at the beginning of string, as above) will match I<all>
@@ -623,7 +634,7 @@ Consider this pattern:
 
     m{ \(
 	  ( 
-	    [^()]+ 
+	    [^()]+		# x+
           | 
             \( [^()]* \)
           )+
@@ -643,7 +654,7 @@ hung.  However, a tiny change to this pattern
 
     m{ \( 
 	  ( 
-	    (?> [^()]+ )
+	    (?> [^()]+ )	# change x+ above to (?> x+ )
           | 
             \( [^()]* \)
           )+
@@ -659,6 +670,27 @@ B<-w> saying it C<"matches the null string many times">):
 On simple groups, such as the pattern C<(?E<gt> [^()]+ )>, a comparable
 effect may be achieved by negative look-ahead, as in C<[^()]+ (?! [^()] )>.
 This was only 4 times slower on a string with 1000000 C<a>s.
+
+The "grab all you can, and do not give anything back" semantic is desirable
+in many situations where on the first sight a simple C<()*> looks like
+the correct solution.  Suppose we parse text with comments being delimited
+by C<#> followed by some optional (horizontal) whitespace.  Contrary to
+its appearence, C<#[ \t]*> I<is not> the correct subexpression to match
+the comment delimiter, because it may "give up" some whitespace if
+the remainder of the pattern can be made to match that way.  The correct
+answer is either one of these:
+
+    (?>#[ \t]*)
+    #[ \t]*(?![ \t])
+
+For example, to grab non-empty comments into $1, one should use either
+one of these:
+
+    / (?> \# [ \t]* ) (        .+ ) /x;
+    /     \# [ \t]*   ( [^ \t] .* ) /x;
+
+Which one you pick depends on which of these expressions better reflects
+the above specification of comments.
 
 =item C<(?(condition)yes-pattern|no-pattern)>
 
@@ -688,7 +720,8 @@ themselves.
 A fundamental feature of regular expression matching involves the
 notion called I<backtracking>, which is currently used (when needed)
 by all regular expression quantifiers, namely C<*>, C<*?>, C<+>,
-C<+?>, C<{n,m}>, and C<{n,m}?>.
+C<+?>, C<{n,m}>, and C<{n,m}?>.  Backtracking is often optimized
+internally, but the general principle outlined here is valid.
 
 For a regular expression to match, the I<entire> regular expression must
 match, not just part of it.  So if the beginning of a pattern containing a
@@ -861,20 +894,22 @@ is not a zero-width assertion, but a one-width assertion.
 
 B<WARNING>: particularly complicated regular expressions can take
 exponential time to solve because of the immense number of possible
-ways they can use backtracking to try match.  For example, this will
-take a painfully long time to run
+ways they can use backtracking to try match.  For example, without
+internal optimizations done by the regular expression engine, this will
+take a painfully long time to run:
 
-    /((a{0,5}){0,5}){0,5}/
+    'aaaaaaaaaaaa' =~ /((a{0,5}){0,5}){0,5}[c]/
 
 And if you used C<*>'s instead of limiting it to 0 through 5 matches,
 then it would take forever--or until you ran out of stack space.
 
-A powerful tool for optimizing such beasts is "independent" groups,
-which do not backtrace (see L<C<(?E<gt>pattern)>>).  Note also that
-zero-length look-ahead/look-behind assertions will not backtrace to make
+A powerful tool for optimizing such beasts is what is known as an
+"independent group",
+which does not backtrack (see L<C<(?E<gt>pattern)>>).  Note also that
+zero-length look-ahead/look-behind assertions will not backtrack to make
 the tail match, since they are in "logical" context: only 
 whether they match is considered relevant.  For an example
-where side-effects of a look-ahead I<might> have influenced the
+where side-effects of look-ahead I<might> have influenced the
 following match, see L<C<(?E<gt>pattern)>>.
 
 =head2 Version 8 Regular Expressions
@@ -1007,7 +1042,7 @@ may match zero-length substrings.  Here's a simple example being:
     @chars = split //, $string;		  # // is not magic in split
     ($whitewashed = $string) =~ s/()/ /g; # parens avoid magic s// /
 
-Thus Perl allows the C</()/> construct, which I<forcefully breaks
+Thus Perl allows such constructs, by I<forcefully breaking
 the infinite loop>.  The rules for this are different for lower-level
 loops given by the greedy modifiers C<*+{}>, and for higher-level
 ones like the C</g> modifier or split() operator.
@@ -1047,6 +1082,8 @@ position one notch further in the string.
 
 The additional state of being I<matched with zero-length> is associated with
 the matched string, and is reset by each assignment to pos().
+Zero-length matches at the end of the previous match are ignored
+during C<split>.
 
 =head2 Creating custom RE engines
 
@@ -1097,8 +1134,12 @@ part of this regular expression needs to be converted explicitly
 
 =head1 BUGS
 
-This manpage is varies from difficult to understand to completely
-and utterly opaque.
+This document varies from difficult to understand to completely
+and utterly opaque.  The wandering prose riddled with jargon is
+hard to fathom in several places.
+
+This document needs a rewrite that separates the tutorial content
+from the reference content.
 
 =head1 SEE ALSO
 
