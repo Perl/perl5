@@ -16,7 +16,7 @@ sub foo2
     $x;
 }
 
-print "1..18\n";
+print "1..20\n";
 
 $_[0] = "not ok 1\n";
 $result = do foo1("ok 1\n");
@@ -65,6 +65,14 @@ if (open(DO, ">$$.18")) {
 }
 
 do "$$.18";
+
+eval qq{ do qq(a file that does not exist); };
+print "not " if $@;
+print "ok 19\n";
+
+eval qq{ do uc qq(a file that does not exist); };
+print "not " if $@;
+print "ok 20\n";
 
 END {
     1 while unlink("$$.16", "$$.17", "$$.18");
