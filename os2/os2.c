@@ -2637,18 +2637,30 @@ my_tmpfile ()
 
 #undef rmdir
 
+/* EMX flavors do not tolerate trailing slashes.  t/op/mkdir.t has many
+   trailing slashes, so we need to support this as well. */
+
 int
 my_rmdir (__const__ char *s)
 {
-    char buf[MAXPATHLEN];
+    char b[MAXPATHLEN];
+    char *buf = b;
     STRLEN l = strlen(s);
+    int rc;
 
-    if (s[l-1] == '/' || s[l-1] == '\\') {	/* EMX rmdir fails... */
+    if (s[l-1] == '/' || s[l-1] == '\\') {	/* EMX mkdir fails... */
+	if (l >= sizeof b)
+	    New(1305, buf, l + 1, char);
 	strcpy(buf,s);
-	buf[l - 1] = 0;
+	while (l > 1 && (s[l-1] == '/' || s[l-1] == '\\'))
+	    l--;
+	buf[l] = 0;
 	s = buf;
     }
-    return rmdir(s);
+    rc = rmdir(s);
+    if (b != buf)
+	Safefree(buf);
+    return rc;
 }
 
 #undef mkdir
@@ -2656,15 +2668,24 @@ my_rmdir (__const__ char *s)
 int
 my_mkdir (__const__ char *s, long perm)
 {
-    char buf[MAXPATHLEN];
+    char b[MAXPATHLEN];
+    char *buf = b;
     STRLEN l = strlen(s);
+    int rc;
 
     if (s[l-1] == '/' || s[l-1] == '\\') {	/* EMX mkdir fails... */
+	if (l >= sizeof b)
+	    New(1305, buf, l + 1, char);
 	strcpy(buf,s);
-	buf[l - 1] = 0;
+	while (l > 1 && (s[l-1] == '/' || s[l-1] == '\\'))
+	    l--;
+	buf[l] = 0;
 	s = buf;
     }
-    return mkdir(s, perm);
+    rc = mkdir(s, perm);
+    if (b != buf)
+	Safefree(buf);
+    return rc;
 }
 
 #undef flock

@@ -39,6 +39,10 @@ sub runperl {
 
   $stdout = '' unless defined $stdout;
   $stderr = '' unless defined $stderr;
+  local %ENV = %ENV;
+  delete $ENV{PERLLIB};
+  delete $ENV{PERL5LIB};
+  delete $ENV{PERL5OPT};
   my $pid = fork;
   return (0, "Couldn't fork: $!") unless defined $pid;   # failure
   if ($pid) {                   # parent
@@ -149,22 +153,22 @@ try({PERL5OPT => '-t'},
     '1',
     '');
 
-try({PERLLIB => "foobar:42"},
+try({PERLLIB => "foobar$Config{path_sep}42"},
     ['-e', 'print grep { $_ eq "foobar" } @INC'],
     'foobar',
     '');
 
-try({PERLLIB => "foobar:42"},
+try({PERLLIB => "foobar$Config{path_sep}42"},
     ['-e', 'print grep { $_ eq "42" } @INC'],
     '42',
     '');
 
-try({PERL5LIB => "foobar:42"},
+try({PERL5LIB => "foobar$Config{path_sep}42"},
     ['-e', 'print grep { $_ eq "foobar" } @INC'],
     'foobar',
     '');
 
-try({PERL5LIB => "foobar:42"},
+try({PERL5LIB => "foobar$Config{path_sep}42"},
     ['-e', 'print grep { $_ eq "42" } @INC'],
     '42',
     '');
