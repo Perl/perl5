@@ -982,23 +982,39 @@ be
     perl Makefile.PL LIB=~/lib
 
 This will install the module's architecture-independent files into
-~/lib, the architecture-dependent files into ~/lib/$archname/auto.
+~/lib, the architecture-dependent files into ~/lib/$archname.
 
 Another way to specify many INSTALL directories with a single
 parameter is PREFIX.
 
     perl Makefile.PL PREFIX=~
 
-This will replace the string specified by $Config{prefix} in all
-$Config{install*} values.
+This will replace the string specified by C<$Config{prefix}> in all
+C<$Config{install*}> values.
 
 Note, that in both cases the tilde expansion is done by MakeMaker, not
-by perl by default, nor by make. Conflicts between parameters LIB,
-PREFIX and the various INSTALL* arguments are resolved such that 
-INSTALL* takes precedence.
+by perl by default, nor by make.
+
+Conflicts between parameters LIB,
+PREFIX and the various INSTALL* arguments are resolved so that:
+
+=over 4
+
+=item *
+
+setting LIB overrides any setting of INSTALLPRIVLIB, INSTALLARCHLIB,
+INSTALLSITELIB, INSTALLSITEARCH (and they are not affected by PREFIX);
+
+=item *
+
+without LIB, setting PREFIX replaces the initial C<$Config{prefix}>
+part of those INSTALL* arguments, even if the latter are explicitly
+set (but are set to still start with C<$Config{prefix}>).
+
+=back
 
 If the user has superuser privileges, and is not working on AFS
-(Andrew File System) or relatives, then the defaults for
+or relatives, then the defaults for
 INSTALLPRIVLIB, INSTALLARCHLIB, INSTALLSCRIPT, etc. will be appropriate,
 and this incantation will be the best:
 
@@ -1145,11 +1161,6 @@ or as NAME=VALUE pairs on the command line:
 
 =over 2
 
-=item AUTHOR
-
-String containing name (and email address) of package author(s). Is used
-in PPD (Perl Package Description) files for PPM (Perl Package Manager).
-
 =item ABSTRACT
 
 One line description of the module. Will be included in PPD file.
@@ -1159,6 +1170,11 @@ One line description of the module. Will be included in PPD file.
 Name of the file that contains the package description. MakeMaker looks
 for a line in the POD matching /^($package\s-\s)(.*)/. This is typically
 the first line in the "=head1 NAME" section. $2 becomes the abstract.
+
+=item AUTHOR
+
+String containing name (and email address) of package author(s). Is used
+in PPD (Perl Package Description) files for PPM (Perl Package Manager).
 
 =item BINARY_LOCATION
 
@@ -1409,11 +1425,6 @@ to INSTALLBIN during 'make install'
 Old name for INST_SCRIPT. Deprecated. Please use INST_SCRIPT if you
 need to use it.
 
-=item INST_LIB
-
-Directory where we put library files of this extension while building
-it.
-
 =item INST_HTMLLIBDIR
 
 Directory to hold the man pages in HTML format at 'make' time
@@ -1421,6 +1432,11 @@ Directory to hold the man pages in HTML format at 'make' time
 =item INST_HTMLSCRIPTDIR
 
 Directory to hold the man pages in HTML format at 'make' time
+
+=item INST_LIB
+
+Directory where we put library files of this extension while building
+it.
 
 =item INST_MAN1DIR
 
@@ -1437,34 +1453,6 @@ Directory, where executable files should be installed during
 testing. make install will copy the files in INST_SCRIPT to
 INSTALLSCRIPT.
 
-=item PERL_MALLOC_OK
-
-defaults to 0.  Should be set to TRUE if the extension can work with
-the memory allocation routines substituted by the Perl malloc() subsystem.
-This should be applicable to most extensions with exceptions of those
-
-=over
-
-=item *
-
-with bugs in memory allocations which are caught by Perl's malloc();
-
-=item *
-
-which interact with the memory allocator in other ways than via
-malloc(), realloc(), free(), calloc(), sbrk() and brk();
-
-=item *
-
-which rely on special alignment which is not provided by Perl's malloc().
-
-=back
-
-B<NOTE.>  Negligence to set this flag in I<any one> of loaded extension
-nullifies many advantages of Perl's malloc(), such as better usage of
-system resources, error detection, memory usage reporting, catchable failure
-of memory allocations, etc.
-
 =item LDFROM
 
 defaults to "$(OBJECT)" and is used in the ld command to specify
@@ -1473,8 +1461,12 @@ specify ld flags)
 
 =item LIB
 
-LIB can only be set at C<perl Makefile.PL> time. It has the effect of
+LIB should only be set at C<perl Makefile.PL> time but is allowed as a
+MakeMaker argument. It has the effect of
 setting both INSTALLPRIVLIB and INSTALLSITELIB to that value regardless any
+explicit setting of those arguments (or of PREFIX).  
+INSTALLARCHLIB and INSTALLSITEARCH are set to the corresponding 
+architecture subdirectory.
 
 =item LIBPERL_A
 
@@ -1578,6 +1570,8 @@ List of object files, defaults to '$(BASEEXT)$(OBJ_EXT)', but can be a long
 string containing all object files, e.g. "tkpBind.o
 tkpButton.o tkpCanvas.o"
 
+(Where BASEEXT is the last component of NAME, and OBJ_EXT is $Config{obj_ext}.)
+
 =item OPTIMIZE
 
 Defaults to C<-O>. Set it to C<-g> to turn debugging on. The flag is
@@ -1594,11 +1588,39 @@ to $(CC).
 
 =item PERL_ARCHLIB
 
-Same as above for architecture dependent files.
+Same as below, but for architecture dependent files.
 
 =item PERL_LIB
 
 Directory containing the Perl library to use.
+
+=item PERL_MALLOC_OK
+
+defaults to 0.  Should be set to TRUE if the extension can work with
+the memory allocation routines substituted by the Perl malloc() subsystem.
+This should be applicable to most extensions with exceptions of those
+
+=over 4
+
+=item *
+
+with bugs in memory allocations which are caught by Perl's malloc();
+
+=item *
+
+which interact with the memory allocator in other ways than via
+malloc(), realloc(), free(), calloc(), sbrk() and brk();
+
+=item *
+
+which rely on special alignment which is not provided by Perl's malloc().
+
+=back
+
+B<NOTE.>  Negligence to set this flag in I<any one> of loaded extension
+nullifies many advantages of Perl's malloc(), such as better usage of
+system resources, error detection, memory usage reporting, catchable failure
+of memory allocations, etc.
 
 =item PERL_SRC
 
@@ -1647,6 +1669,8 @@ Ref to array of subdirectories containing library files.  Defaults to
 they contain will be installed in the corresponding location in the
 library.  A libscan() method can be used to alter the behaviour.
 Defining PM in the Makefile.PL will override PMLIBDIRS.
+
+(Where BASEEXT is the last component of NAME.)
 
 =item POLLUTE
 
@@ -1725,12 +1749,15 @@ MakeMaker object. The following lines will be parsed o.k.:
     ( $VERSION ) = '$Revision: 1.222 $ ' =~ /\$Revision:\s+([^\s]+)/;
     $FOO::VERSION = '1.10';
     *FOO::VERSION = \'1.11';
+    our $VERSION = 1.2.3;	# new for perl5.6.0 
 
 but these will fail:
 
     my $VERSION = '1.01';
     local $VERSION = '1.02';
     local $FOO::VERSION = '1.30';
+
+(Putting C<my> or C<local> on the preceding line will work o.k.)
 
 The file named in VERSION_FROM is not added as a dependency to
 Makefile. This is not really correct, but it would be a major pain
@@ -1785,6 +1812,8 @@ part of the Makefile.
 =item depend
 
   {ANY_TARGET => ANY_DEPENDECY, ...}
+
+(ANY_TARGET must not be given a double-colon rule by MakeMaker.)
 
 =item dist
 
