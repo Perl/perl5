@@ -2987,7 +2987,7 @@ typedef struct am_table_short AMTS;
 
 #if !defined(Atol) && defined(USE_LONG_LONG) && defined(HAS_LONG_LONG)
 #   if !defined(Atol) && defined(HAS_STRTOLL)
-#       define Atol(s) strtoll(s, (char*)0)
+#       define Atol(s) strtoll(s, (char*)0, 10)
 #   endif
 #   if !defined(Atol) && defined(HAS_ATOLL)
 #       define Atol atoll
