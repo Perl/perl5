@@ -462,7 +462,7 @@ PP(pp_rv2av)
 		    if (ckWARN(WARN_UNINITIALIZED))
 			warner(WARN_UNINITIALIZED, PL_warn_uninit);
 		    if (GIMME == G_ARRAY) {
-			POPs;
+			(void)POPs;
 			RETURN;
 		    }
 		    RETSETUNDEF;
@@ -486,7 +486,7 @@ PP(pp_rv2av)
 
     if (GIMME == G_ARRAY) {
 	I32 maxarg = AvFILL(av) + 1;
-	POPs;				/* XXXX May be optimized away? */
+	(void)POPs;			/* XXXX May be optimized away? */
 	EXTEND(SP, maxarg);          
 	if (SvRMAGICAL(av)) {
 	    U32 i; 

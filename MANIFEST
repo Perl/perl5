@@ -191,6 +191,7 @@ ext/DB_File/DB_File.xs		Berkeley DB extension external subroutines
 ext/DB_File/DB_File_BS		Berkeley DB extension mkbootstrap fodder
 ext/DB_File/Makefile.PL		Berkeley DB extension makefile writer
 ext/DB_File/dbinfo		Berkeley DB database version checker
+ext/DB_File/hints/dynixptx.pl	Hint for DB_File for named architecture
 ext/DB_File/typemap		Berkeley DB extension interface types
 ext/Data/Dumper/Changes		Data pretty printer, changelog
 ext/Data/Dumper/Dumper.pm	Data pretty printer, module
@@ -240,6 +241,8 @@ ext/IO/lib/IO/Select.pm		IO system select() interface
 ext/IO/lib/IO/Socket.pm		IO socket handle package
 ext/IO/lib/IO/Socket/INET.pm	IO INET specific socket methods
 ext/IO/lib/IO/Socket/UNIX.pm	IO UNIX specific socket methods
+ext/IO/poll.c			IO poll() emulation using select()
+ext/IO/poll.h			IO poll() emulation using select()
 ext/IPC/SysV/ChangeLog		IPC::SysV extension Perl module
 ext/IPC/SysV/hints/next_3.pl	Hint for IPC::SysV for named architecture
 ext/IPC/SysV/MANIFEST		IPC::SysV extension Perl module
@@ -279,6 +282,7 @@ ext/POSIX/POSIX.pm		POSIX extension Perl module
 ext/POSIX/POSIX.pod		POSIX extension documentation
 ext/POSIX/POSIX.xs		POSIX extension external subroutines
 ext/POSIX/hints/bsdos.pl	Hint for POSIX for named architecture
+ext/POSIX/hints/dynixptx.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/freebsd.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/linux.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/netbsd.pl	Hint for POSIX for named architecture
