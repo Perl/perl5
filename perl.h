@@ -253,13 +253,6 @@
 #   endif
 #endif /* HAS_MEMCMP */
 
-/* XXX we prefer bcmp slightly for comparisons that don't care about ordering */
-#ifndef HAS_BCMP
-#   ifndef bcmp
-#	define bcmp(s1,s2,l) memcmp(s1,s2,l)
-#   endif
-#endif /* HAS_BCMP */
-
 #if !defined(HAS_MEMMOVE) && !defined(memmove)
 #   if defined(HAS_BCOPY) && defined(HAS_SAFE_BCOPY)
 #	define memmove(d,s,l) bcopy(s,d,l)
@@ -678,16 +671,15 @@ typedef I32 (*filter_t) _((int, SV *, int));
 #   endif
 # endif
 #endif
-
-#ifndef SH_PATH			/* May be a variable. */
-#   define SH_PATH BIN_SH
-#ifndef BIN_SH
-#   define BIN_SH "/bin/sh"
-#endif
-#endif
-
-#ifndef HAS_PAUSE
-#define pause() sleep((32767<<16)+32767)
+  
+/* Some unistd.h's give a prototype for pause() even though
+   HAS_PAUSE ends up undefined.  This causes the #define
+   below to be rejected by the compmiler.  Sigh.
+*/
+#ifdef HAS_PAUSE
+#define Pause	pause
+#else
+#define Pause() sleep((32767<<16)+32767)
 #endif
 
 #ifndef IOCPARM_LEN
@@ -923,7 +915,11 @@ char *strcpy(), *strcat();
 #endif
 
 #ifndef __cplusplus
+#ifdef __NeXT__ /* or whatever catches all NeXTs */
+char *crypt ();       /* Maybe more hosts will need the unprototyped version */
+#else
 char *crypt _((const char*, const char*));
+#endif
 char *getenv _((const char*));
 Off_t lseek _((int,Off_t,int));
 char *getlogin _((void));
@@ -1040,6 +1036,7 @@ EXT SV **	curpad;
 
 /* temp space */
 EXT SV *	Sv;
+EXT HE		He;
 EXT XPV *	Xpv;
 EXT char	buf[2048];	/* should be longer than PATH_MAX */
 EXT char	tokenbuf[256];
