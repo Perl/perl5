@@ -12,7 +12,7 @@ use Config;
 $Is_VMS = $^O eq 'VMS';
 $Is_MacOS = $^O eq 'MacOS';
 
-plan tests => 102;
+plan tests => 105;
 
 my $Perl = which_perl();
 
@@ -280,15 +280,25 @@ SKIP: {
 }
     
 SKIP: {
-    skip("This test uses perlio", 1) unless $Config{useperlio};
+    skip("These tests use perlio", 5) unless $Config{useperlio};
     my $w;
     use warnings 'layer';
     local $SIG{__WARN__} = sub { $w = shift };
 
     eval { open(F, ">>>", "afile") };
     like($w, qr/perlio: invalid separator character '>' in layer spec/,
-	 "bad open warning");
+	 "bad open (>>>) warning");
     like($@, qr/Unknown open\(\) mode '>>>'/,
-	 "bad open failure");
+	 "bad open (>>>) failure");
+
+    eval { open(F, ">:u", "afile" ) };
+    like($w, qr/perlio: unknown layer "u"/,
+	 'bad layer ">:u" warning');
+    eval { open(F, "<:u", "afile" ) };
+    like($w, qr/perlio: unknown layer "u"/,
+	 'bad layer "<:u" warning');
+    eval { open(F, ":u", "afile" ) };
+    like($@, qr/Unknown open\(\) mode ':u'/,
+	 'bad layer ":u" failure');
 }
 
