@@ -2708,7 +2708,7 @@ PP(pp_ftsize)
     djSP; dTARGET;
     if (result < 0)
 	RETPUSHUNDEF;
-#ifdef Size_t_size > IVSISE
+#if Size_t_size > IVSISE
     PUSHn(PL_statcache.st_size);
 #else
     PUSHi(PL_statcache.st_size);
