@@ -4645,6 +4645,10 @@ sv_vcatpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, 
 	    base = 10;
 	    goto uns_integer;
 
+	case 'b':
+	    base = 2;
+	    goto uns_integer;
+
 	case 'O':
 	    intsize = 'l';
 	    /* FALL THROUGH */
@@ -4697,6 +4701,14 @@ sv_vcatpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, 
 		    dig = uv & 7;
 		    *--eptr = '0' + dig;
 		} while (uv >>= 3);
+		if (alt && *eptr != '0')
+		    *--eptr = '0';
+		break;
+	    case 2:
+		do {
+		    dig = uv & 1;
+		    *--eptr = '0' + dig;
+		} while (uv >>= 1);
 		if (alt && *eptr != '0')
 		    *--eptr = '0';
 		break;

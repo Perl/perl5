@@ -541,6 +541,7 @@ VIRTUAL OP*	scalar _((OP* o));
 VIRTUAL OP*	scalarkids _((OP* o));
 VIRTUAL OP*	scalarseq _((OP* o));
 VIRTUAL OP*	scalarvoid _((OP* o));
+VIRTUAL UV	scan_bin _((char* start, I32 len, I32* retlen));
 VIRTUAL UV	scan_hex _((char* start, I32 len, I32* retlen));
 VIRTUAL char*	scan_num _((char* s));
 VIRTUAL UV	scan_oct _((char* start, I32 len, I32* retlen));

@@ -5899,7 +5899,7 @@ scan_str(char *start)
 
   Read a number in any of the formats that Perl accepts:
 
-  0(x[0-7A-F]+)|([0-7]+)
+  0(x[0-7A-F]+)|([0-7]+)|(b[01])
   [\d_]+(\.[\d_]*)?[Ee](\d+)
 
   Underbars (_) are allowed in decimal numbers.  If -w is on,
@@ -5933,18 +5933,19 @@ scan_num(char *start)
       croak("panic: scan_num");
       
     /* if it starts with a 0, it could be an octal number, a decimal in
-       0.13 disguise, or a hexadecimal number.
+       0.13 disguise, or a hexadecimal number, or a binary number.
     */
     case '0':
 	{
 	  /* variables:
 	     u		holds the "number so far"
-	     shift	the power of 2 of the base (hex == 4, octal == 3)
+	     shift	the power of 2 of the base
+			(hex == 4, octal == 3, binary == 1)
 	     overflowed	was the number more than we can hold?
 
 	     Shift is used when we add a digit.  It also serves as an "are
-	     we in octal or hex?" indicator to disallow hex characters when
-	     in octal mode.
+	     we in octal/hex/binary?" indicator to disallow hex characters
+	     when in octal mode.
 	   */
 	    UV u;
 	    I32 shift;
@@ -5953,6 +5954,9 @@ scan_num(char *start)
 	    /* check for hex */
 	    if (s[1] == 'x') {
 		shift = 4;
+		s += 2;
+	    } else if (s[1] == 'b') {
+		shift = 1;
 		s += 2;
 	    }
 	    /* check for a decimal in disguise */
@@ -5963,7 +5967,7 @@ scan_num(char *start)
 		shift = 3;
 	    u = 0;
 
-	    /* read the rest of the octal number */
+	    /* read the rest of the number */
 	    for (;;) {
 		UV n, b;	/* n is used in the overflow test, b is the digit we're adding on */
 
@@ -5980,13 +5984,21 @@ scan_num(char *start)
 
 		/* 8 and 9 are not octal */
 		case '8': case '9':
-		    if (shift != 4)
+		    if (shift == 3)
 			yyerror("Illegal octal digit");
+		    else
+			if (shift == 1)
+			    yyerror("Illegal binary digit");
 		    /* FALL THROUGH */
 
 	        /* octal digits */
-		case '0': case '1': case '2': case '3': case '4':
+		case '2': case '3': case '4':
 		case '5': case '6': case '7':
+		    if (shift == 1)
+			yyerror("Illegal binary digit");
+		    /* FALL THROUGH */
+
+		case '0': case '1':
 		    b = *s++ & 15;		/* ASCII digit -> value of digit */
 		    goto digit;
 
@@ -6007,7 +6019,8 @@ scan_num(char *start)
 		    if (!overflowed && (n >> shift) != u
 			&& !(PL_hints & HINT_NEW_BINARY)) {
 			warn("Integer overflow in %s number",
-			     (shift == 4) ? "hex" : "octal");
+			     (shift == 4) ? "hex"
+			     : ((shift == 3) ? "octal" : "binary"));
 			overflowed = TRUE;
 		    }
 		    u = n | b;		/* add the digit to the end */

@@ -1822,6 +1822,8 @@ PP(pp_oct)
 	tmps++;
     if (*tmps == 'x')
 	value = scan_hex(++tmps, 99, &argtype);
+    else if (*tmps == 'b')
+	value = scan_bin(++tmps, 99, &argtype);
     else
 	value = scan_oct(tmps, 99, &argtype);
     XPUSHu(value);

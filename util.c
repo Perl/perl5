@@ -2395,6 +2395,29 @@ same_dirent(char *a, char *b)
 #endif /* !HAS_RENAME */
 
 UV
+scan_bin(char *start, I32 len, I32 *retlen)
+{
+    register char *s = start;
+    register UV retval = 0;
+    bool overflowed = FALSE;
+    while (len && *s >= '0' && *s <= '1') {
+      register UV n = retval << 1;
+      if (!overflowed && (n >> 1) != retval) {
+          warn("Integer overflow in binary number");
+          overflowed = TRUE;
+      }
+      retval = n | (*s++ - '0');
+      len--;
+    }
+    if (len && (*s >= '2' || *s <= '9')) {
+      dTHR;
+      if (ckWARN(WARN_UNSAFE))
+          warner(WARN_UNSAFE, "Illegal binary digit ignored");
+    }
+    *retlen = s - start;
+    return retval;
+}
+UV
 scan_oct(char *start, I32 len, I32 *retlen)
 {
     register char *s = start;

@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..9\n";
+print "1..11\n";
 
 print +(oct('01234') == 01234) ? "ok" : "not ok", " 1\n";
 print +(oct('0x1234') == 0x1234) ? "ok" : "not ok", " 2\n";
@@ -11,3 +11,5 @@ print +(hex('80000000') == 0x80000000) ? "ok" : "not ok", " 6\n";
 print +(oct('1234') == 668) ? "ok" : "not ok", " 7\n";
 print +(hex('1234') == 4660) ? "ok" : "not ok", " 8\n";
 print +(hex('0x1234') == 0x1234) ? "ok" : "not ok", " 9\n";
+print +(oct('b11100') == 28) ? "ok" : "not ok", " 10\n";
+print +(oct('b101010') == 0b101010) ? "ok" : "not ok", " 11\n";

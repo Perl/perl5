@@ -6,6 +6,8 @@
      Illegal hex digit ignored 
 	my $a = hex "0xv9" ;
 
+     Illegal binary digit ignored
+      my $a = oct "0b9" ;
 
 __END__
 # util.c
@@ -19,3 +21,9 @@ use warning 'unsafe' ;
 *a =  hex "0xv9" ;
 EXPECT
 Illegal hex digit ignored at - line 3.
+########
+# util.c
+use warning 'unsafe' ;
+*a =  oct "0b9" ;
+EXPECT
+Illegal binary digit ignored at - line 3.

@@ -40,6 +40,12 @@ maintenance versions.
 
 =head1 Core Changes
 
+Binary numbers are now supported as literals, in s?printf formats, and
+C<oct()>:
+
+	$answer = 0b101010;
+	printf "The answer is: %b\n", oct("0b101010");
+
 The length argument of C<syswrite()> is now optional.
 
 Better 64-bit support -- but full support still a distant goal.  One

@@ -2237,8 +2237,9 @@ See the L</use> function, which C<no> is the opposite of.
 =item oct
 
 Interprets EXPR as an octal string and returns the corresponding
-value.  (If EXPR happens to start off with C<0x>, interprets it as
-a hex string instead.)  The following will handle decimal, octal, and
+value.  (If EXPR happens to start off with C<0x>, interprets it as a
+hex string.  If EXPR starts off with C<0b>, it is interpreted as a
+binary string.)  The following will handle decimal, binary, octal, and
 hex in the standard Perl or C notation:
 
     $val = oct($val) if $val =~ /^0/;
@@ -3644,6 +3645,7 @@ In addition, Perl permits the following widely-supported conversions:
    %X	like %x, but using upper-case letters
    %E	like %e, but using an upper-case "E"
    %G	like %g, but with an upper-case "E" (if applicable)
+   %b	an unsigned integer, in binary
    %p	a pointer (outputs the Perl value's address in hexadecimal)
    %n	special: *stores* the number of characters output so far
         into the next variable in the parameter list 

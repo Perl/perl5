@@ -245,6 +245,7 @@ integer formats:
     .23E-10
     0xffff		# hex
     0377		# octal
+    0b111000		# binary
     4_294_967_296	# underline for legibility
 
 String literals are usually delimited by either single or double
