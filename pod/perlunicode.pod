@@ -632,10 +632,21 @@ And finally, C<scalar reverse()> reverses by character rather than by byte.
 =head2 User-Defined Character Properties
 
 You can define your own character properties by defining subroutines
-whose names begin with "In" or "Is".  The subroutines must be defined
-in the C<main> package.  The user-defined properties can be used in the
-regular expression C<\p> and C<\P> constructs.  Note that the effect
-is compile-time and immutable once defined.
+whose names begin with "In" or "Is".  The subroutines can be defined in
+any package.  The user-defined properties can be used in the regular
+expression C<\p> and C<\P> constructs; if you are using a user-defined
+property from a package other than the one you are in, you must specify
+its package in the C<\p> or C<\P> construct.
+
+    # assuming property IsForeign defined in Lang::
+    package main;  # property package name required
+    if ($txt =~ /\p{Lang::IsForeign}+/) { ... }
+
+    package Lang;  # property package name not required
+    if ($txt =~ /\p{IsForeign}+/) { ... }
+
+
+Note that the effect is compile-time and immutable once defined.
 
 The subroutines must return a specially-formatted string, with one
 or more newline-separated lines.  Each line must be one of the following:
@@ -650,23 +661,30 @@ tabular characters) denoting a range of Unicode code points to include.
 =item *
 
 Something to include, prefixed by "+": a built-in character
-property (prefixed by "utf8::"), to represent all the characters in that
-property; two hexadecimal code points for a range; or a single
-hexadecimal code point.
+property (prefixed by "utf8::") or a user-defined character property,
+to represent all the characters in that property; two hexadecimal code
+points for a range; or a single hexadecimal code point.
 
 =item *
 
 Something to exclude, prefixed by "-": an existing character
-property (prefixed by "utf8::"), for all the characters in that
-property; two hexadecimal code points for a range; or a single
-hexadecimal code point.
+property (prefixed by "utf8::") or a user-defined character property,
+to represent all the characters in that property; two hexadecimal code
+points for a range; or a single hexadecimal code point.
 
 =item *
 
 Something to negate, prefixed "!": an existing character
-property (prefixed by "utf8::") for all the characters except the
-characters in the property; two hexadecimal code points for a range;
-or a single hexadecimal code point.
+property (prefixed by "utf8::") or a user-defined character property,
+to represent all the characters in that property; two hexadecimal code
+points for a range; or a single hexadecimal code point.
+
+=item *
+
+Something to intersect with, prefixed by "&": an existing character
+property (prefixed by "utf8::") or a user-defined character property,
+for all the characters except the characters in the property; two
+hexadecimal code points for a range; or a single hexadecimal code point.
 
 =back
 
@@ -713,6 +731,19 @@ The negation is useful for defining (surprise!) negated classes.
     +utf8::IsCn
     END
     }
+
+Intersection is useful for getting the common characters matched by
+two (or more) classes.
+
+    sub InFooAndBar {
+        return <<'END';
+    +main::Foo
+    &main::Bar
+    END
+    }
+
+It's important to remember not to use "&" for the first set -- that
+would be intersecting with nothing (resulting in an empty set).
 
 You can also define your own mappings to be used in the lc(),
 lcfirst(), uc(), and ucfirst() (or their string-inlined versions).
