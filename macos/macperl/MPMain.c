@@ -9,6 +9,9 @@ Apple Developer Support UK
 Language	:	MPW C
 
 $Log: MPMain.c,v $
+Revision 1.5  2001/11/08 06:01:40  neeri
+Change ExitToShell() to exit(0) to fix nasty GUSI crash (MacPerl Bug #467732)
+
 Revision 1.4  2001/10/11 05:19:31  neeri
 Fix exit code (MacPerl bug #422129)
 
@@ -1177,7 +1180,7 @@ void MainEvent(Boolean busy, long sleep, RgnHandle rgn)
 			Perl_die("Out of memory ! Aborting script for your own good...\n");
 		else							/* We aborted it, now buy a new goat */
 			if (!(gSacrificialGoat = NewHandle(SACRIFICE)))
-				ExitToShell();		/* Save our sorry ass. Shouldn't happen */
+				exit(0);		/* Save our sorry ass. Shouldn't happen */
 	
 	now = LMGetTicks();
 	if (spinning = busy) {
@@ -1443,7 +1446,7 @@ void main()
 	(void) SetScriptManagerVariable(smFontForce, 0);
 	
 	if (gQuitting)
-		ExitToShell();
+		exit(0);
 		
 	InitPerlEnviron();
 	
@@ -1459,5 +1462,5 @@ void main()
 		CloseTSMAwareApplication();
 	SetScriptManagerVariable(smFontForce, gSavedFontForce);
 	
-	ExitToShell();
+	exit(0);
 }

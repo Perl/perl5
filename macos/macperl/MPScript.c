@@ -5,6 +5,9 @@ Author	:	Matthias Neeracher
 Language	:	MPW C
 
 $Log: MPScript.c,v $
+Revision 1.7  2001/11/13 04:06:35  pudge
+Remov unused AddErrorDescription
+
 Revision 1.6  2001/09/26 21:51:15  pudge
 Sync with perforce maint-5.6/macperl/macos/macperl
 
@@ -886,49 +889,6 @@ char * StupidExtractor(void * data, int index)
 	}			
 }
 
-void AddErrorDescription(AppleEvent * reply)
-{
-#if 0
-	OSErr			err;
-	AliasHandle	file;
-	AEStream		aes;
-	AEDesc      newDesc;
-	short			line;
-
-	if (gFirstErrorLine == -1 || reply->descriptorType == typeNull) 
-		return;
-	
-	line = (short) gFirstErrorLine;
-	
-	if (NewAlias(nil, &gFirstErrorFile, &file)) 
-		return;
-		
-	HLock((Handle) file);
-	err = AEPutParamPtr(
-				reply, kOSAErrorOffendingObject, 
-				typeAlias, (Ptr) *file, GetHandleSize((Handle) file));
-	DisposeHandle((Handle) file);
-		
-	if (err)
-		return;
-		
-	if (AEStream_Open(&aes))
-		return;
-		
-	if (AEStream_OpenRecord(&aes, typeAERecord)
-	||	 AEStream_WriteKeyDesc(&aes, keyOSASourceStart, typeShortInteger, (Ptr) &line, 2)
-	||	 AEStream_WriteKeyDesc(&aes, keyOSASourceEnd, typeShortInteger, (Ptr) &line, 2)
-	||	 AEStream_CloseRecord(&aes)
-	||	 AEStream_Close(&aes, &newDesc)
-	) {
-		AEStream_Close(&aes, nil);
-	} else {
-		AEPutParamDesc(reply, kOSAErrorRange, &newDesc)	;
-		AEDisposeDesc(&newDesc);
-	}
-#endif
-}
-
 pascal OSErr DoScript(const AppleEvent *event, AppleEvent *reply, long refCon)
 {
 #if !defined(powerc) && !defined(__powerc)
@@ -1001,8 +961,6 @@ pascal OSErr DoScript(const AppleEvent *event, AppleEvent *reply, long refCon)
 			DisposeHandle(gMacPerl_Reply);
 			gMacPerl_Reply = nil;
 		}
-		
-		AddErrorDescription(reply);
 	}
 	
 	return ranOK ? 0 : (gMacPerl_SyntaxError ? 1 : 2);

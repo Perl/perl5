@@ -5,6 +5,9 @@ Author	:	Matthias Neeracher
 Language	:	MPW C/C++
 
 $Log: MPConsole.cp,v $
+Revision 1.7  2001/11/09 06:48:57  neeri
+Fix Ctrl-D handling (MacPerl Bug #471436)
+
 Revision 1.6  2001/11/02 22:36:17  pudge
 Sync with perforce
 
@@ -148,6 +151,7 @@ void HarvestConsole(DPtr doc, MPConsoleSocket * sock)
 		
 		doc->u.cons.fence = (*doc->theText)->teLength;
 		sock->eof			= true;
+		gGotEof				= nil;
 	} else 
 		while (chr-- > end)
 			if (*chr == '\n') {
