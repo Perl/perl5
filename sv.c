@@ -448,6 +448,10 @@ do_clean_all(pTHX_ SV *sv)
 {
     DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning loops: SV at 0x%"UVxf"\n", PTR2UV(sv)) ));
     SvFLAGS(sv) |= SVf_BREAK;
+    if (PL_comppad == (AV*)sv) {
+	PL_comppad = Nullav;
+	PL_curpad = Null(SV**);
+    }
     SvREFCNT_dec(sv);
 }
 
