@@ -1,4 +1,4 @@
-/* $Id: MD5.xs,v 1.26 2000/09/18 14:27:44 gisle Exp $ */
+/* $Id: MD5.xs,v 1.29 2001/09/07 05:33:57 gisle Exp $ */
 
 /* 
  * This library is free software; you can redistribute it and/or
@@ -44,7 +44,14 @@ extern "C" {
 }
 #endif
 
-/*#define MD5_DEBUG /**/
+#include "patchlevel.h"
+#if PATCHLEVEL <= 4 && !defined(PL_dowarn)
+   #define PL_dowarn dowarn
+#endif
+
+#ifndef SvPVbyte
+   #define SvPVbyte SvPV
+#endif
 
 /* Perl does not guarantee that U32 is exactly 32 bits.  Some system
  * has no integral type with exactly 32 bits.  For instance, A Cray has
@@ -137,7 +144,7 @@ static unsigned char PADDING[64] = {
 
 /* F, G, H and I are basic MD5 functions.
  */
-#define F(x, y, z) (((x) & ((y) ^ (z)) ^ (z)))
+#define F(x, y, z) ((((x) & ((y) ^ (z))) ^ (z)))
 #define G(x, y, z) F(z, x, y)
 #define H(x, y, z) ((x) ^ (y) ^ (z))
 #define I(x, y, z) ((y) ^ ((x) | (~z)))
@@ -195,7 +202,9 @@ MD5Init(MD5_CTX *ctx)
 static void
 MD5Transform(MD5_CTX* ctx, const U8* buf, STRLEN blocks)
 {
+#ifdef MD5_DEBUG
     static int tcount = 0;
+#endif
 
     U32 A = ctx->A;
     U32 B = ctx->B;
@@ -553,7 +562,7 @@ add(self, ...)
 	STRLEN len;
     PPCODE:
 	for (i = 1; i < items; i++) {
-	    data = (unsigned char *)(SvPV(ST(i), len));
+	    data = (unsigned char *)(SvPVbyte(ST(i), len));
 	    MD5Update(context, data, len);
 	}
 	XSRETURN(1);  /* self */
@@ -617,8 +626,16 @@ md5(...)
 	unsigned char digeststr[16];
     PPCODE:
 	MD5Init(&ctx);
+	if (PL_dowarn && items > 1) {
+	    data = (unsigned char *)SvPVbyte(ST(0), len);
+	    if (len == 11 && memEQ("Digest::MD5", data, 11)) {
+	         char *f = (ix == F_BIN) ? "md5" :
+                           (ix == F_HEX) ? "md5_hex" : "md5_base64";
+	         warn("&Digest::MD5::%s function probably called as method", f);
+            }
+	}
 	for (i = 0; i < items; i++) {
-	    data = (unsigned char *)(SvPV(ST(i), len));
+	    data = (unsigned char *)(SvPVbyte(ST(i), len));
 	    MD5Update(&ctx, data, len);
 	}
 	MD5Final(digeststr, &ctx);

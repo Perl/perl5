@@ -1,6 +1,6 @@
 # Mail::Header.pm
 #
-# Copyright (c) 1995-7 Graham Barr <gbarr@pobox.com>. All rights reserved.
+# Copyright (c) 1995-2001 Graham Barr <gbarr@pobox.com>. All rights reserved.
 # This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 
@@ -19,7 +19,7 @@ use strict;
 use Carp;
 use vars qw($VERSION $FIELD_NAME);
 
-$VERSION = "1.19";
+$VERSION = "1.40";
 
 my $MAIL_FROM = 'KEEP';
 my %HDR_LENGTHS = ();
@@ -242,24 +242,24 @@ sub _insert
 
  if($where < 0)
   {
-   $where = scalar(@{$me->{'mail_hdr_list'}}) + $where + 1;
+   $where = @{$me->{'mail_hdr_list'}} + $where + 1;
 
    $where = 0
 	if($where < 0);
   }
- elsif($where >= scalar(@{$me->{'mail_hdr_list'}}))
+ elsif($where >= @{$me->{'mail_hdr_list'}})
   {
-   $where = scalar(@{$me->{'mail_hdr_list'}});
+   $where = @{$me->{'mail_hdr_list'}};
   }
 
- my $atend = $where == scalar(@{$me->{'mail_hdr_list'}});
+ my $atend = $where == @{$me->{'mail_hdr_list'}};
 
  splice(@{$me->{'mail_hdr_list'}},$where,0,$line);
 
  $me->{'mail_hdr_hash'}{$tag} ||= [];
  my $ref = \${$me->{'mail_hdr_list'}}[$where];
 
- if(scalar($me->{'mail_hdr_hash'}{$tag}) && $where)
+ if($me->{'mail_hdr_hash'}{$tag} && $where)
   {
    if($atend)
     {
@@ -267,9 +267,8 @@ sub _insert
     }
    else
     {
-     my($ln,$i,$ref);
-     $i = 0;
-     foreach $ln (@{$me->{'mail_hdr_list'}})
+     my $i = 0;
+     foreach my $ln (@{$me->{'mail_hdr_list'}})
       {
        my $r = \$ln;
        last if($r == $ref);
@@ -750,7 +749,7 @@ sub fold_length
    if(defined $len)
     {
      $me->{'mail_hdr_foldlen'} = $len > 20 ? $len : 20;
-     $me->fold;
+     $me->fold if $me->{'mail_hdr_modify'};
     }
   }
 
@@ -1011,11 +1010,11 @@ multiple lines. IF C<TAG> is not given then all lines are unfolded.
 
 =head1 AUTHOR
 
-Graham Barr <gbarr@pobox.com>
+Graham Barr.  Maintained by Mark Overmeer <mailtools@overmeer.net>
 
 =head1 COPYRIGHT
 
-Copyright (c) 1995-7 Graham Barr. All rights reserved. This program is free
+Copyright (c) 1995-2001 Graham Barr. All rights reserved. This program is free
 software; you can redistribute it and/or modify it under the same terms
 as Perl itself.
 

@@ -3,7 +3,7 @@ package Memoize::Expire;
 # require 5.00556;
 use Carp;
 $DEBUG = 0;
-$VERSION = '0.65';
+$VERSION = '0.66';
 
 # This package will implement expiration by prepending a fixed-length header
 # to the font of the cached data.  The format of the header will be:
@@ -17,6 +17,13 @@ sub _header_size () { length(_header_fmt) }
 # Usage:  memoize func 
 #         TIE => [Memoize::Expire, LIFETIME => sec, NUM_USES => n,
 #                 TIE => [...] ]
+
+BEGIN {
+  eval {require Time::HiRes};
+  unless ($@) {
+    Time::HiRes->import('time');
+  }
+}
 
 sub TIEHASH {
   my ($package, %args) = @_;
@@ -54,7 +61,7 @@ sub STORE {
 sub FETCH {
   $DEBUG and print STDERR " >> Fetch cached value for $_[1]\n";
   my ($data, $last_access, $expire_time, $num_uses_left) = _get_item($_[0]{C}{$_[1]});
-  $DEBUG and print STDERR " >>   (ttl: ", ($expire_time-time), ", nuses: $num_uses_left)\n";
+  $DEBUG and print STDERR " >>   (ttl: ", ($expire_time-time()), ", nuses: $num_uses_left)\n";
   $num_uses_left--;
   $last_access = time;
   _set_header(@_, $data, $last_access, $expire_time, $num_uses_left);
@@ -113,8 +120,6 @@ sub _get_header  {
 
 1;
 
-# Below is the stub of documentation for your module. You better edit it!
-
 =head1 NAME 
 
 Memoize::Expire - Plug-in module for automatic expiration of memoized values
@@ -123,7 +128,7 @@ Memoize::Expire - Plug-in module for automatic expiration of memoized values
 
   use Memoize;
   use Memoize::Expire;
-  tie my %cache => 'Memoize::Expire', 
+  tie my %cache => 'Memoize::Expire',
 	  	     LIFETIME => $lifetime,    # In seconds
 		     NUM_USES => $n_uses;
 
@@ -224,6 +229,11 @@ STORE
 Given a function argument and the corresponding function value, store
 them into the cache.
 
+=item
+CLEAR
+
+(Optional.)  Flush the cache completely.
+
 =back
 
 The user who wants the memoization cache to be expired according to
@@ -262,7 +272,7 @@ cache item after ten seconds.
 
 	sub TIEHASH {
 	  my ($package, %args) = @_;
-          my $cache = $args{$HASH} || {};
+          my $cache = $args{HASH} || {};
 	  bless $cache => $package;
 	}
 
@@ -299,7 +309,7 @@ entirely absent or was older than ten seconds.
 You should always support a C<HASH> argument to C<TIEHASH> that ties
 the underlying cache so that the user can specify that the cache is
 also persistent or that it has some other interesting semantics.  The
-example above demonstrates how to do this, as does C<Memozie::Expire>.
+example above demonstrates how to do this, as does C<Memoize::Expire>.
 
 Another sample module, C<Memoize::Saves>, is included with this
 package.  It implements a policy that allows you to specify that
@@ -326,7 +336,7 @@ This module is experimental, and may contain bugs.  Please report bugs
 to the address below.
 
 Number-of-uses is stored as a 16-bit unsigned integer, so can't exceed
-65535.  
+65535.
 
 Because of clock granularity, expiration times may occur up to one
 second sooner than you expect.  For example, suppose you store a value
@@ -334,9 +344,8 @@ with a lifetime of ten seconds, and you store it at 12:00:00.998 on a
 certain day.  Memoize will look at the clock and see 12:00:00.  Then
 9.01 seconds later, at 12:00:10.008 you try to read it back.  Memoize
 will look at the clock and see 12:00:10 and conclude that the value
-has expired.  Solution: Build an expiration policy module that uses
-Time::HiRes to examine a clock with better granularity.  Contributions
-are welcome.  Send them to:
+has expired.  This will probably not occur if if you have
+C<Time::HiRes> installed.
 
 =head1 AUTHOR
 
@@ -356,6 +365,6 @@ http://www.plover.com/~mjd/perl/Memoize/  (for news and updates)
 I maintain a mailing list on which I occasionally announce new
 versions of Memoize.  The list is for announcements only, not
 discussion.  To join, send an empty message to
-mjd-perl-memoize-request@Plover.com.  
+mjd-perl-memoize-request@Plover.com.
 
 =cut

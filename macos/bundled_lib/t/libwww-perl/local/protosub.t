@@ -44,7 +44,9 @@ sub new
     print "ok 1\n";
     my $self = $class->SUPER::new(@_);
     for (keys %$self) {
-	print "$_: $self->{$_}\n";
+	my $v = $self->{$_};
+	$v = "<undef>" unless defined($v);
+	print "$_: $v\n";
     }
     $self;
 }

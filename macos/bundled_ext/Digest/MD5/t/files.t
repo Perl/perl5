@@ -8,10 +8,10 @@ use Digest::MD5 qw(md5 md5_hex md5_base64);
 # This is the output of: 'md5sum Changes README MD5.pm MD5.xs rfc1321.txt'
 #
 my $EXPECT = "\n" eq chr(10) ? <<EOT1 : <<EOT2;  # Mac OS \n is chr(13)
-832bac36f489f93a3d6dadd20d55b105  Changes
+df6bb160e273cbf342bd1a947ebb155f  Changes
 e2447354c8b24340bc49e38f8d00bf3b  README
-dcc1f89cf6144d81e5f9d291d9849ef1  MD5.pm
-61debd0ec12e131e1ba220e2f3ad2d26  MD5.xs
+bf8c3c72d071d1c0303fc9e311820708  MD5.pm
+abcee0576dd82eca765f54bace61c434  MD5.xs
 754b9db19f79dbc4992f7166eb0f37ce  rfc1321.txt
 EOT1
 3f33c2d0e531cc5902ae9832014a11e3  Changes

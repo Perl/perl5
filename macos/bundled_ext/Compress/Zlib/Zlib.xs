@@ -1,7 +1,7 @@
 /* Filename: Zlib.xs
  * Author  : Paul Marquess, <Paul.Marquess@btinternet.com>
- * Created : 28th April 2001
- * Version : 1.13
+ * Created : 27th August 2001
+ * Version : 1.14
  *
  *   Copyright (c) 1995-2001 Paul Marquess. All rights reserved.
  *   This program is free software; you can redistribute it and/or
@@ -177,10 +177,10 @@ gzreadline(file, output)
     while (1) {
 
 	/* anything left from last time */
-	if (n = SvCUR(store)) {
+	if ((n = SvCUR(store))) {
 
     	    out_ptr = SvPVX(store) + file->offset ;
-	    if (p = ninstr(out_ptr, out_ptr + n - 1, nl, nl)) {
+	    if ((p = ninstr(out_ptr, out_ptr + n - 1, nl, nl))) {
             /* if (rschar != 0777 && */
                 /* p = ninstr(out_ptr, out_ptr + n - 1, rs, rs+rslen-1)) { */
 
@@ -587,6 +587,7 @@ Zip_gzread(file, buf, len=4096)
 	SV *		buf
 	voidp		bufp = NO_INIT
 	int		bufsize = 0 ;
+	int		RETVAL = 0 ;
 	CODE:
 	if (SvREADONLY(buf) && PL_curcop != &PL_compiling)
             croak("gzread: buffer parameter is read-only");
@@ -632,6 +633,7 @@ int
 gzreadline(file, buf)
 	Compress::Zlib::gzFile	file
 	SV *		buf
+	int		RETVAL = 0;
 	CODE:
 	if (SvREADONLY(buf) && PL_curcop != &PL_compiling) 
             croak("gzreadline: buffer parameter is read-only"); 
@@ -649,7 +651,8 @@ gzreadline(file, buf)
         if (RETVAL >= 0) {
             /* SvCUR(buf) = RETVAL; */
             SvTAINT(buf) ;
-            /* *SvEND(buf) = '\0'; */
+            /* Don't need to explicitly terminate with '\0', because
+		sv_catpvn aready has */
         }
 
 #define Zip_gzwrite(file, buf) gzwrite(file->gz, buf, (unsigned)len)
@@ -762,7 +765,7 @@ _deflateInit(level, method, windowBits, memLevel, strategy, bufsize, dictionary)
     if (trace)
         warn("in _deflateInit(level=%d, method=%d, windowBits=%d, memLevel=%d, strategy=%d, bufsize=%d\n",
 	level, method, windowBits, memLevel, strategy, bufsize) ;
-    if (s = InitStream(bufsize) ) {
+    if ((s = InitStream(bufsize)) ) {
         err = deflateInit2(&(s->stream), level, 
 			   method, windowBits, memLevel, strategy);
 
@@ -800,7 +803,7 @@ _inflateInit(windowBits, bufsize, dictionary)
     if (trace)
         warn("in _inflateInit(windowBits=%d, bufsize=%d, dictionary=%d\n",
                 windowBits, bufsize, SvCUR(dictionary)) ;
-    if (s = InitStream(bufsize) ) {
+    if ((s = InitStream(bufsize)) ) {
         err = inflateInit2(&(s->stream), windowBits);
  
         if (err != Z_OK) {
@@ -824,13 +827,13 @@ _inflateInit(windowBits, bufsize, dictionary)
 
 MODULE = Compress::Zlib PACKAGE = Compress::Zlib::deflateStream
 
-int 
+void 
 deflate (s, buf)
     Compress::Zlib::deflateStream	s
     SV *	buf
     int		outsize = NO_INIT 
     SV * 	output = NO_INIT
-    int		err = NO_INIT
+    int		err = 0;
   PPCODE:
   
     /* If the buffer is a reference, dereference it */
@@ -952,7 +955,7 @@ msg(s)
 
 MODULE = Compress::Zlib PACKAGE = Compress::Zlib::inflateStream
 
-int 
+void 
 inflate (s, buf)
     Compress::Zlib::inflateStream	s
     SV *	buf
@@ -981,7 +984,7 @@ inflate (s, buf)
     while (1) {
 
         if (s->stream.avail_out == 0) {
-            SvGROW(output, outsize + s->bufsize) ;
+            SvGROW(output, outsize + s->bufsize+1) ;
             s->stream.next_out = (Bytef*) SvPVX(output) + outsize ;
             outsize += s->bufsize ;
             s->stream.avail_out = s->bufsize ;

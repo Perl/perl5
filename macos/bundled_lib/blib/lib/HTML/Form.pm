@@ -98,12 +98,13 @@ sub parse
     while (my $t = $p->get_tag) {
 	my($tag,$attr) = @$t;
 	if ($tag eq "form") {
-	    my $action = $attr->{'action'};
+	    my $action = delete $attr->{'action'};
 	    $action = "" unless defined $action;
 	    $action = URI->new_abs($action, $base_uri);
-	    $f = $class->new($attr->{'method'},
+	    $f = $class->new(delete $attr->{'method'},
 			     $action,
-			     $attr->{'enctype'});
+			     delete $attr->{'enctype'});
+	    $f->{extra_attr} = $attr;
 	    push(@forms, $f);
 	    while (my $t = $p->get_tag) {
 		my($tag, $attr) = @$t;

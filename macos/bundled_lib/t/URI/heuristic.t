@@ -6,8 +6,10 @@ if (-f "OFFLINE") {
 print "1..14\n";
 
 use URI::Heuristic qw(uf_urlstr uf_url);
-$URI::Heuristic::DEBUG++;
-open(STDERR, ">&STDOUT");  # redirect STDERR
+if (shift) {
+    $URI::Heuristic::DEBUG++;
+    open(STDERR, ">&STDOUT");  # redirect STDERR
+}
 
 print "not " unless uf_urlstr("http://www.sn.no/") eq "http://www.sn.no/";
 print "ok 1\n";

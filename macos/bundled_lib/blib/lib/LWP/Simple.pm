@@ -1,5 +1,5 @@
 #
-# $Id: Simple.pm,v 1.34 2001/04/10 17:16:34 gisle Exp $
+# $Id: Simple.pm,v 1.35 2001/07/21 03:09:10 gisle Exp $
 
 =head1 NAME
 
@@ -159,7 +159,7 @@ use HTTP::Status;
 push(@EXPORT, @HTTP::Status::EXPORT);
 
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.34 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.35 $ =~ /(\d+)\.(\d+)/);
 $FULL_LWP++ if grep {lc($_) eq "http_proxy"} keys %ENV;
 
 
@@ -281,6 +281,12 @@ sub _get
 	return _trivial_http_get($host, $port, $path);
     } else {
         _init_ua() unless $ua;
+	if (@_ && $url !~ /^\w+:/) {
+	    # non-absolute redirect from &_trivial_http_get
+	    my($host, $port, $path) = @_;
+	    require URI;
+	    $url = URI->new_abs($url, "http://$host:$port$path");
+	}
 	my $request = HTTP::Request->new(GET => $url);
 	my $response = $ua->request($request);
 	return $response->is_success ? $response->content : undef;
@@ -320,7 +326,7 @@ sub _trivial_http_get
            # redirect
            my $url = $1;
            return undef if $loop_check{$url}++;
-           return _get($url);
+           return _get($url, $host, $port, $path);
        }
        return undef unless $code =~ /^2/;
        $buf =~ s/.+?\015?\012\015?\012//s;  # zap header

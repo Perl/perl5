@@ -1,8 +1,3 @@
-BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
-}
-
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl test.pl'
 
@@ -11,9 +6,9 @@ BEGIN {
 # Change 1..1 below to 1..last_test_to_print .
 # (It may become useful if the test is moved to ./t subdirectory.)
 
-BEGIN { $| = 1; print "1..81\n"; }
+BEGIN { $| = 1; print "1..45\n"; }
 END {print "not ok 1\n" unless $loaded;}
-use Text::Balanced qw ( extract_variable );
+use Text::Balanced qw ( extract_delimited );
 $loaded = 1;
 print "ok 1\n";
 $count=2;
@@ -35,9 +30,8 @@ while (defined($str = <DATA>))
 	debug "\tUsing: $cmd\n";
 	debug "\t   on: [$str]\n";
 
-	my @res;
-	$var = eval "\@res = $cmd";
-	debug "\t list got: [" . join("|",@res) . "]\n";
+	$var = eval "() = $cmd";
+	debug "\t list got: [$var]\n";
 	debug "\t list left: [$str]\n";
 	print "not " if (substr($str,pos($str)||0,1) eq ';')==$neg;
 	print "ok ", $count++;
@@ -56,52 +50,41 @@ while (defined($str = <DATA>))
 }
 
 __DATA__
+# USING: extract_delimited($str,'/#$',undef,'/#$');
+/a/;
+/a///;
+#b#;
+#b###;
+$c$;
+$c$$$;
 
-# USING: extract_variable($str);
-# THESE SHOULD FAIL
-$a->;
-$a (1..3) { print $a };
+# TEST EXTRACTION OF DELIMITED TEXT WITH ESCAPES
+# USING: extract_delimited($str,'/#$',undef,'\\');
+/a/;
+/a\//;
+#b#;
+#b\##;
+$c$;
+$c\$$;
 
-# USING: extract_variable($str);
-*var;
-*$var;
-*{var};
-*{$var};
-*var{cat};
-\&var;
-\&mod::var;
-\&mod'var;
-$a;
-$_;
-$a[1];
-$_[1];
-$a{cat};
-$_{cat};
-$a->[1];
-$a->{"cat"}[1];
-@$listref;
-@{$listref};
-$obj->nextval;
-$obj->_nextval;
-$obj->next_val_;
-@{$obj->nextval};
-@{$obj->nextval($cat,$dog)->{new}};
-@{$obj->nextval($cat?$dog:$fish)->{new}};
-@{$obj->nextval(cat()?$dog:$fish)->{new}};
-$ a {'cat'};
-$a::b::c{d}->{$e->()};
-$a'b'c'd{e}->{$e->()};
-$a'b::c'd{e}->{$e->()};
-$#_;
-$#array;
-$#{array};
-$var[$#var];
+# TEST EXTRACTION OF DELIMITED TEXT
+# USING: extract_delimited($str);
+'a';
+"b";
+`c`;
+'a\'';
+'a\\';
+'\\a';
+"a\\";
+"\\a";
+"b\'\"\'";
+`c '\`abc\`'`;
 
-# THESE SHOULD FAIL
-$a->;
-@{$;
-$ a :: b :: c
-$ a ' b ' c
+# TEST EXTRACTION OF DELIMITED TEXT
+# USING: extract_delimited($str,'/#$','-->');
+-->/a/;
+-->#b#;
+-->$c$;
 
-# USING: extract_variable($str,'=*');
-========$a;
+# THIS SHOULD FAIL
+$c$;

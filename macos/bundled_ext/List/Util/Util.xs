@@ -14,6 +14,39 @@
 #    define PERL_SUBVERSION	SUBVERSION
 #endif
 
+#ifndef aTHX
+#  define aTHX
+#  define pTHX
+#endif
+
+/* Some platforms have strict exports. And before 5.7.3 cxinc (or Perl_cxinc)
+   was not exported. Therefore platforms like win32, VMS etc have problems
+   so we redefine it here -- GMB
+*/
+#if PERL_VERSION < 7
+/* Not in 5.6.1. */
+#  define SvUOK(sv)           SvIOK_UV(sv)
+#  ifdef cxinc
+#    undef cxinc
+#  endif
+#  define cxinc() my_cxinc(aTHX)
+static I32
+my_cxinc(pTHX)
+{
+    cxstack_max = cxstack_max * 3 / 2;
+    Renew(cxstack, cxstack_max + 1, struct context);      /* XXX should fix CXINC macro */
+    return cxstack_ix + 1;
+}
+#endif
+
+#if PERL_VERSION < 6
+#    define NV double
+#endif
+
+#ifndef Drand01
+#    define Drand01()		((rand() & 0x7FFF) / (double) ((unsigned long)1 << 15))
+#endif
+
 #if PERL_VERSION < 5
 #  ifndef gv_stashpvn
 #    define gv_stashpvn(n,l,c) gv_stashpv(n,c)
@@ -163,6 +196,11 @@ CODE:
     HV *stash;
     CV *cv;
     OP *reducecop;
+    PERL_CONTEXT *cx;
+    SV** newsp;
+    I32 gimme = G_SCALAR;
+    bool oldcatch = CATCH_GET;
+
     if(items <= 1) {
 	XSRETURN_UNDEF;
     }
@@ -179,6 +217,8 @@ CODE:
     SAVETMPS;
     SAVESPTR(PL_op);
     ret = ST(1);
+    CATCH_SET(TRUE);
+    PUSHBLOCK(cx, CXt_NULL, SP);
     for(index = 2 ; index < items ; index++) {
 	GvSV(agv) = ret;
 	GvSV(bgv) = ST(index);
@@ -186,7 +226,9 @@ CODE:
 	CALLRUNOPS(aTHX);
 	ret = *PL_stack_sp;
     }
-    ST(0) = ret;
+    ST(0) = sv_mortalcopy(ret);
+    POPBLOCK(cx,PL_curpm);
+    CATCH_SET(oldcatch);
     XSRETURN(1);
 }
 
@@ -201,6 +243,11 @@ CODE:
     HV *stash;
     CV *cv;
     OP *reducecop;
+    PERL_CONTEXT *cx;
+    SV** newsp;
+    I32 gimme = G_SCALAR;
+    bool oldcatch = CATCH_GET;
+
     if(items <= 1) {
 	XSRETURN_UNDEF;
     }
@@ -213,17 +260,55 @@ CODE:
     PL_curpad = AvARRAY((AV*)AvARRAY(CvPADLIST(cv))[1]);
     SAVETMPS;
     SAVESPTR(PL_op);
+    CATCH_SET(TRUE);
+    PUSHBLOCK(cx, CXt_NULL, SP);
     for(index = 1 ; index < items ; index++) {
 	GvSV(PL_defgv) = ST(index);
 	PL_op = reducecop;
 	CALLRUNOPS(aTHX);
 	if (SvTRUE(*PL_stack_sp)) {
 	  ST(0) = ST(index);
+	  POPBLOCK(cx,PL_curpm);
+	  CATCH_SET(oldcatch);
 	  XSRETURN(1);
 	}
     }
+    POPBLOCK(cx,PL_curpm);
+    CATCH_SET(oldcatch);
     XSRETURN_UNDEF;
 }
+
+void
+shuffle(...)
+PROTOTYPE: @
+CODE:
+{
+    int index;
+    struct op dmy_op;
+    struct op *old_op = PL_op;
+    SV *my_pad[2];
+    SV **old_curpad = PL_curpad;
+
+    /* We call pp_rand here so that Drand01 get initialized if rand()
+       or srand() has not already been called
+    */
+    my_pad[1] = sv_newmortal();
+    memzero((char*)(&dmy_op), sizeof(struct op));
+    dmy_op.op_targ = 1;
+    PL_op = &dmy_op;
+    PL_curpad = (SV **)&my_pad;
+    *(PL_ppaddr[OP_RAND])(aTHX);
+    PL_op = old_op;
+    PL_curpad = old_curpad;
+    for (index = items ; index > 1 ; ) {
+	int swap = (int)(Drand01() * (double)(index--));
+	SV *tmp = ST(swap);
+	ST(swap) = ST(index);
+	ST(index) = tmp;
+    }
+    XSRETURN(items);
+}
+
 
 MODULE=List::Util	PACKAGE=Scalar::Util
 
@@ -239,10 +324,17 @@ CODE:
     ST(0) = sv_newmortal();
     (void)SvUPGRADE(ST(0),SVt_PVNV);
     sv_setpvn(ST(0),ptr,len);
-    if(SvNOKp(num) || !SvIOKp(num)) {
+    if(SvNOK(num) || SvPOK(num) || SvMAGICAL(num)) {
 	SvNVX(ST(0)) = SvNV(num);
 	SvNOK_on(ST(0));
     }
+#ifdef SVf_IVisUV
+    else if (SvUOK(num)) {
+	SvUVX(ST(0)) = SvUV(num);
+	SvIOK_on(ST(0));
+	SvIsUV_on(ST(0));
+    }
+#endif
     else {
 	SvIVX(ST(0)) = SvIV(num);
 	SvIOK_on(ST(0));

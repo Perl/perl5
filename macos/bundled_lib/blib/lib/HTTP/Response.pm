@@ -1,5 +1,5 @@
 #
-# $Id: Response.pm,v 1.34 2000/06/13 20:05:59 gisle Exp $
+# $Id: Response.pm,v 1.35 2001/08/07 00:26:57 gisle Exp $
 
 package HTTP::Response;
 
@@ -45,7 +45,7 @@ The following additional methods are available:
 
 require HTTP::Message;
 @ISA = qw(HTTP::Message);
-$VERSION = sprintf("%d.%02d", q$Revision: 1.34 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.35 $ =~ /(\d+)\.(\d+)/);
 
 use HTTP::Status ();
 use strict;
@@ -147,7 +147,6 @@ A "Content-Base:" or a "Content-Location:" header in the response.
 For backwards compatability with older HTTP implementations we will
 also look for the "Base:" header.
 
-
 =item 3.
 
 The URI used to request this response. This might not be the original
@@ -171,6 +170,8 @@ sub base
                $self->header('Content-Location') ||  # HTTP/1.1
                $self->header('Base');                # HTTP/1.0
     return $HTTP::URI_CLASS->new_abs($base, $self->request->uri);
+    # So yes, if $base is undef, the return value is effectively
+    # just a copy of $self->request->uri.
 }
 
 
@@ -242,7 +243,7 @@ sub error_as_HTML
 <HTML>
 <HEAD><TITLE>$title</TITLE></HEAD>
 <BODY>
-<H1>$title</h1>
+<H1>$title</H1>
 $body
 </BODY>
 </HTML>

@@ -1,7 +1,7 @@
 # This Makefile is for the Digest::MD5 extension to perl.
 #
 # It was generated automatically by MakeMaker version
-# 2.13 (Revision: ) from the contents of
+# 2.16 (Revision: ) from the contents of
 # Makefile.PL. Don't edit this file, edit Makefile.PL instead.
 #
 #	ANY CHANGES MADE HERE WILL BE LOST!
@@ -16,9 +16,9 @@
 NAME = Digest::MD5
 DISTNAME = Digest-MD5
 NAME_SYM = Digest_MD5
-VERSION = 2.13
-VERSION_SYM = 2_13
-XS_VERSION = 2.13
+VERSION = 2.16
+VERSION_SYM = 2_16
+XS_VERSION = 2.16
 INST_LIB = :::::lib
 INST_ARCHLIB = :::::lib
 PERL_LIB = :::::lib
@@ -118,7 +118,7 @@ realclean purge ::  clean
 # --- MakeMaker ppd section:
 # Creates a PPD (Perl Package Description) for a binary distribution.
 ppd:
-	@$(PERL) -e "print qq{<SOFTPKG NAME=\"Digest-MD5\" VERSION=\"2,13,0,0\">\n}. qq{\t<TITLE>Digest-MD5</TITLE>\n}. qq{\t<ABSTRACT></ABSTRACT>\n}. qq{\t<AUTHOR></AUTHOR>\n}. qq{\t<IMPLEMENTATION>\n}. qq{\t\t<OS NAME=\"$(OSNAME)\" />\n}. qq{\t\t<ARCHITECTURE NAME=\"\" />\n}. qq{\t\t<CODEBASE HREF=\"\" />\n}. qq{\t</IMPLEMENTATION>\n}. qq{</SOFTPKG>\n}" > Digest-MD5.ppd
+	@$(PERL) -e "print qq{<SOFTPKG NAME=\"Digest-MD5\" VERSION=\"2,16,0,0\">\n}. qq{\t<TITLE>Digest-MD5</TITLE>\n}. qq{\t<ABSTRACT></ABSTRACT>\n}. qq{\t<AUTHOR></AUTHOR>\n}. qq{\t<IMPLEMENTATION>\n}. qq{\t\t<OS NAME=\"$(OSNAME)\" />\n}. qq{\t\t<ARCHITECTURE NAME=\"\" />\n}. qq{\t\t<CODEBASE HREF=\"\" />\n}. qq{\t</IMPLEMENTATION>\n}. qq{</SOFTPKG>\n}" > Digest-MD5.ppd
 
 # --- MakeMaker postamble section:
 

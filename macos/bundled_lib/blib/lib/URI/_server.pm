@@ -32,19 +32,20 @@ sub host
     if (@_) {
 	my $tmp = $old;
 	$tmp = "" unless defined $tmp;
-	my $ui;
-	$ui = $1 if $tmp =~ s/^([^@]*@)//;
-	$tmp =~ s/^[^:]*//;        # get rid of old host
+	my $ui = ($tmp =~ /^([^@]*@)/) ? $1 : "";
+	my $port = ($tmp =~ /(:\d+)$/) ? $1 : "";
 	my $new = shift;
-	if (defined $new) {
+	$new = "" unless defined $new;
+	if (length $new) {
 	    $new =~ s/[@]/%40/g;   # protect @
-	    $tmp = ($new =~ /:/) ? $new : "$new$tmp";
+	    $port = $1 if $new =~ s/(:\d+)$//;
 	}
-	$tmp = "$ui$tmp" if defined $ui;
-	$self->authority($tmp);
+	$self->authority("$ui$new$port");
     }
-    return undef if !defined($old) || $old !~ /^(?:[^@]*@)?([^:]*)/;
-    return uri_unescape($1);
+    return undef unless defined $old;
+    $old =~ s/^[^@]*@//;
+    $old =~ s/:\d+$//;
+    return uri_unescape($old);
 }
 
 sub _port

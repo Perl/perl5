@@ -2,6 +2,7 @@ package Mail::Mailer::smtp;
 use vars qw(@ISA);
 use Net::SMTP;
 use Mail::Util qw(mailaddress);
+use Carp;
 
 require Mail::Mailer::rfc822;
 @ISA = qw(Mail::Mailer::rfc822);
@@ -13,7 +14,7 @@ sub exec {
     my %opt = @$args;
     my $host = $opt{'Server'} || undef;
     # for Net::SMTP we do not really exec
-    my $smtp = Net::SMTP->new($host, Debug => 0)
+    my $smtp = Net::SMTP->new($host, Debug => 0, %args)
 	or return undef;
 
     ${*$self}{'sock'} = $smtp;
@@ -52,8 +53,14 @@ sub close {
     my $sock = ${*$self}{'sock'};
     if ($sock && fileno($sock)) {
         $self->epilogue;
-	close($sock);
+        # Epilogue should destroy the SMTP filehandle,
+        # but just to be on the safe side.
+        if ($sock && fileno($sock)) {
+            close $sock
+                or croak 'Cannot destroy socket filehandle';
+        }
     }
+    1;
 }
 
 package Mail::Mailer::smtp::pipe;

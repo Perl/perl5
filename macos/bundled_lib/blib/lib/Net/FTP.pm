@@ -19,9 +19,10 @@ use IO::Socket;
 use Time::Local;
 use Net::Cmd;
 use Net::Config;
+use Fcntl qw(O_WRONLY O_RDONLY O_APPEND O_CREAT O_TRUNC);
 # use AutoLoader qw(AUTOLOAD);
 
-$VERSION = "2.56"; # $Id:$
+$VERSION = "2.61"; # $Id: //depot/libnet/Net/FTP.pm#61 $
 @ISA     = qw(Exporter Net::Cmd IO::Socket::INET);
 
 # Someday I will "use constant", when I am not bothered to much about
@@ -36,6 +37,12 @@ sub pasv_xfer_unique {
     $sftp->pasv_xfer($sfile,$dftp,$dfile,1);
 }
 
+BEGIN {
+  # make a constant so code is fast'ish
+  my $is_os390 = $^O eq 'os390';
+  *trEBCDIC = sub () { $is_os390 }
+}
+
 1;
 # Having problems with AutoLoader
 #__END__
@@ -48,6 +55,7 @@ sub new
 
  my $host = $peer;
  my $fire = undef;
+ my $fire_type = undef;
 
  if(exists($arg{Firewall}) || Net::Config->requires_firewall($peer))
   {
@@ -60,6 +68,9 @@ sub new
     {
      $peer = $fire;
      delete $arg{Port};
+	 $fire_type = $arg{FirewallType}
+	 || $ENV{FTP_FIREWALL_TYPE}
+	 || undef;
     }
   }
 
@@ -77,6 +88,8 @@ sub new
 
  ${*$ftp}{'net_ftp_firewall'} = $fire
 	if(defined $fire);
+ ${*$ftp}{'net_ftp_firewall_type'} = $fire_type
+	if(defined $fire_type);
 
  ${*$ftp}{'net_ftp_passive'} = int
 	exists $arg{Passive}
@@ -109,28 +122,16 @@ sub new
 
 sub hash {
     my $ftp = shift;		# self
-    my $prev = ${*$ftp}{'net_ftp_hash'} || [\*STDERR, 0];
 
-    unless(@_) {
-      return $prev;
-    }
     my($h,$b) = @_;
-    if(@_ == 1) {
-      unless($h) {
-        delete ${*$ftp}{'net_ftp_hash'};
-        return $prev;
-      }
-      elsif(ref($h)) {
-        $b = 1024;
-      }
-      else {
-        ($h,$b) = (\*STDERR,$h);
-      }
+    unless($h) {
+      delete ${*$ftp}{'net_ftp_hash'};
+      return [\*STDERR,0];
     }
+    ($h,$b) = (ref($h)? $h : \*STDERR, $b || 1024);
     select((select($h), $|=1)[0]);
     $b = 512 if $b < 512;
     ${*$ftp}{'net_ftp_hash'} = [$h, $b];
-    $prev;
 }        
 
 sub quit
@@ -205,7 +206,7 @@ sub size {
   my $io;
   if($ftp->supported("SIZE")) {
     return $ftp->_SIZE($file)
-	? ($ftp->message =~ /(\d+)/)[0]
+	? ($ftp->message =~ /(\d+)$/)[0]
 	: undef;
  }
  elsif($ftp->supported("STAT")) {
@@ -215,14 +216,14 @@ sub size {
    my $line;
    foreach $line (@msg) {
      return (split(/\s+/,$line))[4]
-	 if $line =~ /^[-rw]{10}/
+	 if $line =~ /^[-rwx]{10}/
    }
  }
  else {
    my @files = $ftp->dir($file);
    if(@files) {
      return (split(/\s+/,$1))[4]
-	 if $files[0] =~ /^([-rw]{10}.*)$/;
+	 if $files[0] =~ /^([-rwx]{10}.*)$/;
    }
  }
  undef;
@@ -244,7 +245,9 @@ sub login {
   $user ||= "anonymous";
   $ruser = $user;
 
-  $fwtype = $NetConfig{'ftp_firewall_type'} || 0;
+  $fwtype = ${*$ftp}{'net_ftp_firewall_type'}
+  || $NetConfig{'ftp_firewall_type'}
+  || 0;
 
   if ($fwtype && defined ${*$ftp}{'net_ftp_firewall'}) {
     if ($fwtype == 1 || $fwtype == 7) {
@@ -399,7 +402,7 @@ sub abort
  send($ftp,pack("CCC", $TELNET_IAC, $TELNET_IP, $TELNET_IAC),MSG_OOB);
 
  $ftp->command(pack("C",$TELNET_DM) . "ABOR");
- 
+
  ${*$ftp}{'net_ftp_dataconn'}->close()
     if defined ${*$ftp}{'net_ftp_dataconn'};
 
@@ -442,7 +445,7 @@ sub get
   {
    $loc = \*FD;
 
-   unless(($where) ? open($loc,">>$local") : open($loc,">$local"))
+   unless(sysopen($loc, $local, O_CREAT | O_WRONLY | ($where ? O_APPEND : O_TRUNC)))
     {
      carp "Cannot open Local file $local: $!\n";
      $data->abort;
@@ -469,6 +472,13 @@ sub get
  while(1)
   {
    last unless $len = $data->read($buf,$blksize);
+
+   if (trEBCDIC && $ftp->type ne 'I')
+    {
+     $buf = $ftp->toebcdic($buf);
+     $len = length($buf);
+    }
+
    if($hashh) {
     $count += $len;
     print $hashh "#" x (int($count / $hashb));
@@ -487,10 +497,20 @@ sub get
 
  print $hashh "\n" if $hashh;
 
- close($loc)
-	unless defined $localfd;
- 
- $data->close(); # implied $ftp->response
+ unless (defined $localfd)
+  {
+   unless (close($loc))
+    {
+     carp "Cannot close file $local (perhaps disk space) $!\n";
+     return undef;
+    }
+  }
+
+ unless ($data->close()) # implied $ftp->response
+  {
+   carp "Unable to close datastream";
+   return undef;
+  }
 
  return $local;
 }
@@ -542,7 +562,7 @@ sub rmdir
     my $ok;
 
     return $ok
-	if $ftp->_RMD( $dir ) || !$recurse;
+	if $ok = $ftp->_RMD( $dir ) or !$recurse;
 
     # Try to delete the contents
     # Get a list of all the files in the directory
@@ -572,6 +592,18 @@ sub rmdir
     # rmdir() will fail because directory is not empty
     return $ftp->_RMD($dir) ;
 }
+
+sub restart
+{
+  @_ == 2 || croak 'usage: $ftp->restart( BYTE_OFFSET )';
+
+  my($ftp,$where) = @_;
+
+  ${*$ftp}{'net_ftp_rest'} = $where;
+
+  return undef;
+}
+
 
 sub mkdir
 {
@@ -606,7 +638,7 @@ sub mkdir
     {
      my($status,$message) = ($ftp->status,$ftp->message);
      my $pwd = $ftp->pwd;
-     
+
      if($pwd && $ftp->cwd($dir))
       {
        $path = $dir;
@@ -671,7 +703,7 @@ sub _store_cmd
   {
    $loc = \*FD;
 
-   unless(open($loc,"<$local"))
+   unless(sysopen($loc, $local, O_RDONLY))
     {
      carp "Cannot open Local file $local: $!\n";
      return undef;
@@ -701,6 +733,12 @@ sub _store_cmd
   {
    last unless $len = sysread($loc,$buf="",$blksize);
 
+   if (trEBCDIC)
+    {
+     $buf = $ftp->toascii($buf); 
+     $len = length($buf);
+    }
+
    if($hashh) {
     $count += $len;
     print $hashh "#" x (int($count / $hashb));
@@ -726,8 +764,11 @@ sub _store_cmd
  $sock->close() or
 	return undef;
 
- ($remote) = $ftp->message =~ /unique file name:\s*(\S*)\s*\)/
-	if ('STOU' eq uc $cmd);
+ if ('STOU' eq uc $cmd and $ftp->message =~ m/unique\ file\ name:(.*)\)|"(.*)"/)
+  {
+   require File::Basename;
+   $remote = File::Basename::basename($+) 
+  }
 
  return $remote;
 }
@@ -747,11 +788,13 @@ sub port
 
    ${*$ftp}{'net_ftp_listen'} ||= IO::Socket::INET->new(Listen    => 5,
 				    	    	        Proto     => 'tcp',
+							Timeout   => $ftp->timeout,
+							LocalAddr => $ftp->sockhost,
 				    	    	       );
-  
+
    my $listen = ${*$ftp}{'net_ftp_listen'};
 
-   my($myport, @myaddr) = ($listen->sockport, split(/\./,$ftp->sockhost));
+   my($myport, @myaddr) = ($listen->sockport, split(/\./,$listen->sockhost));
 
    $port = join(',', @myaddr, $myport >> 8, $myport & 0xff);
 
@@ -802,10 +845,9 @@ sub supported {
     my $text = $ftp->message;
     if($text =~ /following\s+commands/i) {
 	$text =~ s/^.*\n//;
-	$text =~ s/\n/ /sog;
-	while($text =~ /(\w+)([* ])/g) {
-	    $hash->{"\U$1"} = $2 eq " " ? 1 : 0;
-	}
+        while($text =~ /(\*?)(\w+)(\*?)/sg) {
+            $hash->{"\U$2"} = !length("$1$3");
+        }
     }
     else {
 	$hash->{$cmd} = $text !~ /unimplemented/i;
@@ -923,6 +965,11 @@ sub _list_cmd
 
  $data->close();
 
+ if (trEBCDIC)
+  {
+   for (@$list) { $_ = $ftp->toebcdic($_) }
+  }
+
  wantarray ? @{$list}
            : $list;
 }
@@ -996,9 +1043,9 @@ sub _data_cmd
    return $data;
  }
 
- 
+
  close(delete ${*$ftp}{'net_ftp_listen'});
- 
+
  return undef;
 }
 
@@ -1151,7 +1198,7 @@ Net::FTP - FTP Client class
 =head1 SYNOPSIS
 
     use Net::FTP;
-    
+
     $ftp = Net::FTP->new("some.host.name", Debug => 0);
     $ftp->login("anonymous",'me@here.there');
     $ftp->cwd("/pub");
@@ -1212,6 +1259,11 @@ connection is made to the firewall machine and the string C<@hostname> is
 appended to the login identifier. This kind of setup is also refered to
 as a ftp proxy.
 
+B<FirewallType> - The type of firewall running on the machine indicated by
+B<Firewall>. This can be overridden by an environment variable
+C<FTP_FIREWALL_TYPE>. For a list of permissible types, see the description of
+ftp_firewall_type in L<Net::Config>.
+
 B<BlockSize> - This is the block size that Net::FTP will use when doing
 transfers. (defaults to 10240)
 
@@ -1227,10 +1279,11 @@ using passive mode. This is not usually required except for some I<dumb>
 servers, and some firewall configurations. This can also be set by the
 environment variable C<FTP_PASSIVE>.
 
-B<Hash> - If TRUE, print hash marks (#) on STDERR every 1024 bytes.  This
-simply invokes the C<hash()> method for you, so that hash marks are displayed
-for all transfers.  You can, of course, call C<hash()> explicitly whenever
-you'd like.
+B<Hash> - If given a reference to a file handle (e.g., C<\*STDERR>),
+print hash marks (#) on that filehandle every 1024 bytes.  This
+simply invokes the C<hash()> method for you, so that hash marks
+are displayed for all transfers.  You can, of course, call C<hash()>
+explicitly whenever you'd like.
 
 If the constructor fails undef will be returned and an error message will
 be in $@
@@ -1306,6 +1359,13 @@ Change directory to the parent of the current directory.
 
 Returns the full pathname of the current directory.
 
+=item restart ( WHERE )
+
+Set the byte offset at which to begin the next data transfer. Net::FTP simply
+records this value and uses it when during the next data transfer. For this
+reason this method will not return an error, but setting it may cause
+a subsequent data transfer to fail.
+
 =item rmdir ( DIR )
 
 Remove the directory with the name C<DIR>.
@@ -1342,7 +1402,7 @@ not be transfered, and the remaining bytes will be appended to
 the local file if it already exists.
 
 Returns C<LOCAL_FILE>, or the generated local file name if C<LOCAL_FILE>
-is not given.
+is not given. If an error was encountered undef is returned.
 
 =item put ( LOCAL_FILE [, REMOTE_FILE ] )
 
@@ -1545,6 +1605,10 @@ given the the timeout value from the command connection will be used.
 
 Returns the number of bytes written before any <CRLF> translation.
 
+=item bytes_read ()
+
+Returns the number of bytes read so far.
+
 =item abort ()
 
 Abort the current data transfer.
@@ -1624,6 +1688,19 @@ L<Net::Cmd>
 ftp(1), ftpd(8), RFC 959
 http://www.cis.ohio-state.edu/htbin/rfc/rfc959.html
 
+=head1 USE EXAMPLES
+
+For an example of the use of Net::FTP see
+
+=over 4
+
+=item http://www.csh.rit.edu/~adam/Progs/autoftp-2.0.tar.gz
+
+C<autoftp> is a program that can retrieve, send, or list files via
+the FTP protocol in a non-interactive manner.
+
+=back
+
 =head1 CREDITS
 
 Henry Gabryjelski <henryg@WPI.EDU> - for the suggestion of creating directories
@@ -1638,5 +1715,9 @@ Roderick Schertler <roderick@gate.net> - for various inputs
 Copyright (c) 1995-1998 Graham Barr. All rights reserved.
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
+
+=for html <hr>
+
+I<$Id: //depot/libnet/Net/FTP.pm#61 $>
 
 =cut

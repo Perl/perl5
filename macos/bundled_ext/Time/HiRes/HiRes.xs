@@ -69,7 +69,12 @@ typedef union {
 } FT_t;
 
 /* Number of 100 nanosecond units from 1/1/1601 to 1/1/1970 */
-#define EPOCH_BIAS  116444736000000000i64
+#ifdef __GNUC__
+#define Const64(x) x##LL
+#else
+#define Const64(x) x##i64
+#endif
+#define EPOCH_BIAS  Const64(116444736000000000)
 
 /* NOTE: This does not compute the timezone info (doing so can be expensive,
  * and appears to be unsupported even by glibc) */
@@ -82,10 +87,10 @@ gettimeofday (struct timeval *tp, void *not_used)
     GetSystemTimeAsFileTime(&ft.ft_val);
 
     /* seconds since epoch */
-    tp->tv_sec = (long)((ft.ft_i64 - EPOCH_BIAS) / 10000000i64);
+    tp->tv_sec = (long)((ft.ft_i64 - EPOCH_BIAS) / Const64(10000000));
 
     /* microseconds remaining */
-    tp->tv_usec = (long)((ft.ft_i64 / 10i64) % 1000000i64);
+    tp->tv_usec = (long)((ft.ft_i64 / Const64(10)) % Const64(1000000));
 
     return 0;
 }
@@ -324,6 +329,205 @@ hrt_ualarm(int usec, int interval)
 }
 #endif
 
+#if !defined(HAS_UALARM) && defined(VMS)
+#define HAS_UALARM
+#define ualarm vms_ualarm 
+
+#include <lib$routines.h>
+#include <ssdef.h>
+#include <starlet.h>
+#include <descrip.h>
+#include <signal.h>
+#include <jpidef.h>
+#include <psldef.h>
+
+#define VMSERR(s)   (!((s)&1))
+
+static void
+us_to_VMS(useconds_t mseconds, unsigned long v[])
+{
+    int iss;
+    unsigned long qq[2];
+
+    qq[0] = mseconds;
+    qq[1] = 0;
+    v[0] = v[1] = 0;
+
+    iss = lib$addx(qq,qq,qq);
+    if (VMSERR(iss)) lib$signal(iss);
+    iss = lib$subx(v,qq,v);
+    if (VMSERR(iss)) lib$signal(iss);
+    iss = lib$addx(qq,qq,qq);
+    if (VMSERR(iss)) lib$signal(iss);
+    iss = lib$subx(v,qq,v);
+    if (VMSERR(iss)) lib$signal(iss);
+    iss = lib$subx(v,qq,v);
+    if (VMSERR(iss)) lib$signal(iss);
+}
+
+static int
+VMS_to_us(unsigned long v[])
+{
+    int iss;
+    unsigned long div=10,quot, rem;
+
+    iss = lib$ediv(&div,v,&quot,&rem);
+    if (VMSERR(iss)) lib$signal(iss);
+
+    return quot;
+}
+
+typedef unsigned short word;
+typedef struct _ualarm {
+    int function;
+    int repeat;
+    unsigned long delay[2];
+    unsigned long interval[2];
+    unsigned long remain[2];
+} Alarm;
+
+
+static int alarm_ef;
+static Alarm *a0, alarm_base;
+#define UAL_NULL   0
+#define UAL_SET    1
+#define UAL_CLEAR  2
+#define UAL_ACTIVE 4
+static void ualarm_AST(Alarm *a);
+
+static int 
+vms_ualarm(int mseconds, int interval)
+{
+    Alarm *a, abase;
+    struct item_list3 {
+        word length;
+        word code;
+        void *bufaddr;
+        void *retlenaddr;
+    } ;
+    static struct item_list3 itmlst[2];
+    static int first = 1;
+    unsigned long asten;
+    int iss, enabled;
+
+    if (first) {
+        first = 0;
+        itmlst[0].code       = JPI$_ASTEN;
+        itmlst[0].length     = sizeof(asten);
+        itmlst[0].retlenaddr = NULL;
+        itmlst[1].code       = 0;
+        itmlst[1].length     = 0;
+        itmlst[1].bufaddr    = NULL;
+        itmlst[1].retlenaddr = NULL;
+
+        iss = lib$get_ef(&alarm_ef);
+        if (VMSERR(iss)) lib$signal(iss);
+
+        a0 = &alarm_base;
+        a0->function = UAL_NULL;
+    }
+    itmlst[0].bufaddr    = &asten;
+    
+    iss = sys$getjpiw(0,0,0,itmlst,0,0,0);
+    if (VMSERR(iss)) lib$signal(iss);
+    if (!(asten&0x08)) return -1;
+
+    a = &abase;
+    if (mseconds) {
+        a->function = UAL_SET;
+    } else {
+        a->function = UAL_CLEAR;
+    }
+
+    us_to_VMS(mseconds, a->delay);
+    if (interval) {
+        us_to_VMS(interval, a->interval);
+        a->repeat = 1;
+    } else 
+        a->repeat = 0;
+
+    iss = sys$clref(alarm_ef);
+    if (VMSERR(iss)) lib$signal(iss);
+
+    iss = sys$dclast(ualarm_AST,a,0);
+    if (VMSERR(iss)) lib$signal(iss);
+
+    iss = sys$waitfr(alarm_ef);
+    if (VMSERR(iss)) lib$signal(iss);
+
+    if (a->function == UAL_ACTIVE) 
+        return VMS_to_us(a->remain);
+    else
+        return 0;
+}
+
+
+
+static void
+ualarm_AST(Alarm *a)
+{
+    int iss;
+    unsigned long now[2];
+
+    iss = sys$gettim(now);
+    if (VMSERR(iss)) lib$signal(iss);
+
+    if (a->function == UAL_SET || a->function == UAL_CLEAR) {
+        if (a0->function == UAL_ACTIVE) {
+            iss = sys$cantim(a0,PSL$C_USER);
+            if (VMSERR(iss)) lib$signal(iss);
+
+            iss = lib$subx(a0->remain, now, a->remain);
+            if (VMSERR(iss)) lib$signal(iss);
+
+            if (a->remain[1] & 0x80000000) 
+                a->remain[0] = a->remain[1] = 0;
+        }
+
+        if (a->function == UAL_SET) {
+            a->function = a0->function;
+            a0->function = UAL_ACTIVE;
+            a0->repeat = a->repeat;
+            if (a0->repeat) {
+                a0->interval[0] = a->interval[0];
+                a0->interval[1] = a->interval[1];
+            }
+            a0->delay[0] = a->delay[0];
+            a0->delay[1] = a->delay[1];
+
+            iss = lib$subx(now, a0->delay, a0->remain);
+            if (VMSERR(iss)) lib$signal(iss);
+
+            iss = sys$setimr(0,a0->delay,ualarm_AST,a0);
+            if (VMSERR(iss)) lib$signal(iss);
+        } else {
+            a->function = a0->function;
+            a0->function = UAL_NULL;
+        }
+        iss = sys$setef(alarm_ef);
+        if (VMSERR(iss)) lib$signal(iss);
+    } else if (a->function == UAL_ACTIVE) {
+        if (a->repeat) {
+            iss = lib$subx(now, a->interval, a->remain);
+            if (VMSERR(iss)) lib$signal(iss);
+
+            iss = sys$setimr(0,a->interval,ualarm_AST,a);
+            if (VMSERR(iss)) lib$signal(iss);
+        } else {
+            a->function = UAL_NULL;
+        }
+        iss = sys$wake(0,0);
+        if (VMSERR(iss)) lib$signal(iss);
+        lib$signal(SS$_ASTFLT);
+    } else {
+        lib$signal(SS$_BADPARAM);
+    }
+}
+
+#endif /* !HAS_UALARM && VMS */
+
+
+
 #ifdef HAS_GETTIMEOFDAY
 
 static int
@@ -379,9 +583,15 @@ usleep(useconds)
 	if (items > 0) {
 	    if (useconds > 1E6) {
 		IV seconds = (IV) (useconds / 1E6);
-		sleep(seconds);
-		useconds -= 1E6 * seconds;
-	    }
+		/* If usleep() has been implemented using setitimer()
+		 * then this contortion is unnecessary-- but usleep()
+		 * may be implemented in some other way, so let's contort. */
+		if (seconds) {
+		    sleep(seconds);
+		    useconds -= 1E6 * seconds;
+		}
+	    } else if (useconds < 0.0)
+	        croak("Time::HiRes::usleep(%"NVgf"): negative time not invented yet", useconds);
 	    usleep((UV)useconds);
 	} else
 	    PerlProc_pause();
@@ -402,9 +612,12 @@ sleep(...)
 	gettimeofday(&Ta, NULL);
 	if (items > 0) {
 	    NV seconds  = SvNV(ST(0));
-	    IV useconds = 1E6 * (seconds - (IV)seconds);
-	    sleep(seconds);
-	    usleep(useconds);
+	    if (seconds >= 0.0) {
+  	         UV useconds = 1E6 * (seconds - (UV)seconds);
+		 sleep((UV)seconds);
+		 usleep(useconds);
+	    } else
+	        croak("Time::HiRes::sleep(%"NVgf"): negative time not invented yet", seconds);
 	} else
 	    PerlProc_pause();
 	gettimeofday(&Tb, NULL);
@@ -424,17 +637,23 @@ int
 ualarm(useconds,interval=0)
 	int useconds
 	int interval
-
-int
-alarm(fseconds,finterval=0)
-	NV fseconds
-	NV finterval
-	PREINIT:
-	int useconds, uinterval;
 	CODE:
-	useconds = fseconds * 1000000;
-	uinterval = finterval * 1000000;
-	RETVAL = ualarm (useconds, uinterval);
+	if (useconds < 0 || interval < 0)
+	    croak("Time::HiRes::ualarm(%d, %d): negative time not invented yet", useconds, interval);
+	RETVAL = ualarm(useconds, interval);
+
+	OUTPUT:
+	RETVAL
+
+NV
+alarm(seconds,interval=0)
+	NV seconds
+	NV interval
+	CODE:
+	if (seconds < 0.0 || interval < 0.0)
+	    croak("Time::HiRes::alarm(%"NVgf", %"NVgf"): negative time not invented yet", seconds, interval);
+	RETVAL = (NV)ualarm(seconds  * 1000000,
+			    interval * 1000000) / 1E6;
 
 	OUTPUT:
 	RETVAL
@@ -520,6 +739,8 @@ setitimer(which, seconds, interval = 0)
 	struct itimerval newit;
 	struct itimerval oldit;
     PPCODE:
+	if (seconds < 0.0 || interval < 0.0)
+	    croak("Time::HiRes::setitimer(%"IVdf", %"NVgf", %"NVgf"): negative time not invented yet", which, seconds, interval);
 	newit.it_value.tv_sec  = seconds;
 	newit.it_value.tv_usec =
 	  (seconds  - (NV)newit.it_value.tv_sec)    * 1000000.0;

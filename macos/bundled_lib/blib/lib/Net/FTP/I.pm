@@ -1,4 +1,4 @@
-##
+## $Id: //depot/libnet/Net/FTP/I.pm#12 $
 ## Package to read/write on BINARY data connections
 ##
 
@@ -10,7 +10,7 @@ use Carp;
 require Net::FTP::dataconn;
 
 @ISA = qw(Net::FTP::dataconn);
-$VERSION = "1.08"; # $Id: //depot/libnet/Net/FTP/I.pm#6$
+$VERSION = "1.11"; 
 
 sub read {
   my    $data 	 = shift;
@@ -26,7 +26,7 @@ sub read {
   $blksize = $size if $size > $blksize;
 
   while(($l = length(${*$data})) < $size) {
-   $n += ($b = sysread($data, ${*$data}, $blksize, $l));
+   $n += ($b = sysread($data, ${*$data}, $blksize, $l)) || 0;
    last unless $b;
   }
 
@@ -47,9 +47,6 @@ sub write {
   my    $size    = shift || croak 'write($buf,$size,[$timeout])';
   my    $timeout = @_ ? shift : $data->timeout;
 
-  $data->can_write($timeout) or
-	 croak "Timeout";
-
   # If the remote server has closed the connection we will be signal'd
   # when we write. This can happen if the disk on the remote server fills up
 
@@ -57,8 +54,12 @@ sub write {
   my $sent = $size;
   my $off = 0;
 
+  my $blksize = ${*$data}{'net_ftp_blksize'};
   while($sent > 0) {
-    my $n = syswrite($data, $buf, $sent,$off);
+    $data->can_write($timeout) or
+	 croak "Timeout";
+
+    my $n = syswrite($data, $buf, $sent > $blksize ? $blksize : $sent ,$off);
     return undef unless defined($n);
     $sent -= $n;
     $off += $n;

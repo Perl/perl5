@@ -14,14 +14,27 @@
 # Revision 1.0.1.2  2000/11/05 17:22:05  ram
 # patch6: stress hook a little more with refs to lexicals
 #
+# $Log: recurse.t,v $
 # Revision 1.0.1.1  2000/09/17 16:48:05  ram
 # patch1: added test case for store hook bug
 #
+# $Log: recurse.t,v $
 # Revision 1.0  2000/09/01 19:40:42  ram
 # Baseline for first official release.
 #
 
-require 't/dump.pl';
+sub BEGIN {
+    chdir('t') if -d 't';
+    @INC = '.'; 
+    push @INC, '../lib';
+    require Config; import Config;
+    if ($Config{'extensions'} !~ /\bStorable\b/) {
+        print "1..0 # Skip: Storable was not built\n";
+        exit 0;
+    }
+    require 'lib/st-dump.pl';
+}
+
 sub ok;
 
 use Storable qw(freeze thaw dclone);

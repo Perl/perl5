@@ -14,7 +14,7 @@ use Carp;
 use Time::Local;
 use Net::Config;
 
-$VERSION = "2.19"; # $Id: //depot/libnet/Net/NNTP.pm#8$
+$VERSION = "2.20"; # $Id: //depot/libnet/Net/NNTP.pm#13 $
 @ISA     = qw(Net::Cmd IO::Socket::INET);
 
 sub new
@@ -60,7 +60,7 @@ sub new
 
  my $c = $obj->code;
  my @m = $obj->message;
- 
+
  unless(exists $arg{Reader} && $arg{Reader} == 0) {
    # if server is INN and we have transfer rights the we are currently
    # talking to innd not nnrpd
@@ -514,9 +514,14 @@ sub _msg_arg
   {
    if(ref($spec))
     {
-     $arg = $spec->[0] . "-";
-     $arg .= $spec->[1]
-	if defined $spec->[1] && $spec->[1] > $spec->[0];
+     $arg = $spec->[0];
+     if(defined $spec->[1])
+      {
+       $arg .= "-"
+	  if $spec->[1] != $spec->[0];
+       $arg .= $spec->[1]
+	  if $spec->[1] > $spec->[0];
+      }
     }
    else
     {
@@ -660,7 +665,7 @@ Net::NNTP - NNTP Client class
 =head1 SYNOPSIS
 
     use Net::NNTP;
-    
+
     $nntp = Net::NNTP->new("some.host.name");
     $nntp->quit;
 
@@ -799,8 +804,8 @@ that it will allow posting.
 
 Obtain information about all the active newsgroups. The results is a reference
 to a hash where the key is a group name and each value is a reference to an
-array. The elements in this array are:- the first article number in the group,
-the last article number in the group and any information flags about the group.
+array. The elements in this array are:- the last article number in the group,
+the first article number in the group and any information flags about the group.
 
 =item newgroups ( SINCE [, DISTRIBUTIONS ])
 
@@ -1056,5 +1061,9 @@ Graham Barr <gbarr@pobox.com>
 Copyright (c) 1995-1997 Graham Barr. All rights reserved.
 This program is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
+
+=for html <hr>
+
+I<$Id: //depot/libnet/Net/NNTP.pm#13 $>
 
 =cut

@@ -1,5 +1,5 @@
 #
-# $Id: Escape.pm,v 3.16 2000/08/16 18:45:23 gisle Exp $
+# $Id: Escape.pm,v 3.19 2001/08/24 17:25:43 gisle Exp $
 #
 
 package URI::Escape;
@@ -19,14 +19,15 @@ URI::Escape - Escape and unescape unsafe characters
 =head1 DESCRIPTION
 
 This module provides functions to escape and unescape URI strings as
-defined by RFC 2396.  URIs consist of a restricted set of characters,
+defined by RFC 2396 (and updated by RFC 2732).
+URIs consist of a restricted set of characters,
 denoted as C<uric> in RFC 2396.  The restricted set of characters
 consists of digits, letters, and a few graphic symbols chosen from
 those common to most of the character encodings and input facilities
 available to Internet users:
 
   "A" .. "Z", "a" .. "z", "0" .. "9",
-  ";", "/", "?", ":", "@", "&", "=", "+", "$", ",",   # reserved
+  ";", "/", "?", ":", "@", "&", "=", "+", "$", ",", "[", "]",   # reserved
   "-", "_", ".", "!", "~", "*", "'", "(", ")"
 
 In addition any byte (octet) can be represented in a URI by an escape
@@ -58,7 +59,10 @@ character class (between [ ]).  E.g.:
   "^A-Za-z"                     # everything not a letter
 
 The default set of characters to be escaped is all those which are
-I<not> part of the C<uric> character class shown above.
+I<not> part of the C<uric> character class shown above as well as the
+reserved characters.  I.e. the default is:
+
+  "^A-Za-z0-9\-_.!~*'()"
 
 =item uri_unescape($string,...)
 
@@ -96,7 +100,7 @@ L<URI>
 
 =head1 COPYRIGHT
 
-Copyright 1995-2000 Gisle Aas.
+Copyright 1995-2001 Gisle Aas.
 
 This program is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
@@ -110,7 +114,7 @@ require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(uri_escape uri_unescape);
 @EXPORT_OK = qw(%escapes);
-$VERSION = sprintf("%d.%02d", q$Revision: 3.16 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 3.19 $ =~ /(\d+)\.(\d+)/);
 
 use Carp ();
 
@@ -128,14 +132,15 @@ sub uri_escape
     if (defined $patn){
 	unless (exists  $subst{$patn}) {
 	    # Because we can't compile the regex we fake it with a cached sub
+	    (my $tmp = $patn) =~ s,/,\\/,g;
 	    $subst{$patn} =
-	      eval "sub {\$_[0] =~ s/([$patn])/\$escapes{\$1}/g; }";
+	      eval "sub {\$_[0] =~ s/([$tmp])/\$escapes{\$1}/g; }";
 	    Carp::croak("uri_escape: $@") if $@;
 	}
 	&{$subst{$patn}}($text);
     } else {
-	# Default unsafe characters. (RFC 2396 ^uric)
-	$text =~ s/([^;\/?:@&=+\$,A-Za-z0-9\-_.!~*'()])/$escapes{$1}/g;
+	# Default unsafe characters.  RFC 2732 ^(uric - reserved)
+	$text =~ s/([^A-Za-z0-9\-_.!~*'()])/$escapes{$1}/g;
     }
     $text;
 }

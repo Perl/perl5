@@ -9,7 +9,7 @@ use HTTP::Headers::Util qw(split_header_words join_header_words);
 use LWP::Debug ();
 
 use vars qw($VERSION);
-$VERSION = sprintf("%d.%02d", q$Revision: 1.16 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.19 $ =~ /(\d+)\.(\d+)/);
 
 my $EPOCH_OFFSET = 0;  # difference from Unix epoch
 if ($^O eq "MacOS") {
@@ -240,13 +240,11 @@ sub extract_cookies
 {
     my $self = shift;
     my $response = shift || return;
+
     my @set = split_header_words($response->_header("Set-Cookie2"));
-    my $netscape_cookies;
-    unless (@set) {
-	@set = $response->_header("Set-Cookie");
-	return $response unless @set;
-	$netscape_cookies++;
-    }
+    my @ns_set = $response->_header("Set-Cookie");
+
+    return $response unless @set || @ns_set;  # quick exit
 
     my $url = $response->request->url;
     my $req_host = $url->host;
@@ -255,16 +253,23 @@ sub extract_cookies
     my $req_path = _url_path($url);
     _normalize_path($req_path) if $req_path =~ /%/;
 
-    if ($netscape_cookies) {
+    if (@ns_set) {
 	# The old Netscape cookie format for Set-Cookie
         # http://www.netscape.com/newsref/std/cookie_spec.html
 	# can for instance contain an unquoted "," in the expires
 	# field, so we have to use this ad-hoc parser.
 	my $now = time();
-	my @old = @set;
-	@set = ();
+
+	# Build a hash of cookies that was present in Set-Cookie2
+	# headers.  We need to skip them if we also find them in a
+	# Set-Cookie header.
+	my %in_set2;
+	for (@set) {
+	    $in_set2{$_->[0]}++;
+	}
+
 	my $set;
-	for $set (@old) {
+	for $set (@ns_set) {
 	    my @cur;
 	    my $param;
 	    my $expires;
@@ -282,9 +287,12 @@ sub extract_cookies
 		    push(@cur, $k => $v);
 		}
 	    }
+	    next if $in_set2{$cur[0]};
+
 #	    push(@cur, "Port" => $req_port);
 	    push(@cur, "Discard" => undef) unless $expires;
 	    push(@cur, "Version" => 0);
+	    push(@cur, "ns-cookie" => 1);
 	    push(@set, \@cur);
 	}
     }
@@ -319,10 +327,12 @@ sub extract_cookies
 	my $discard   = delete $hash{discard};
 	my $secure    = delete $hash{secure};
 	my $maxage    = delete $hash{'max-age'};
+	my $ns_cookie = delete $hash{'ns-cookie'};
 
 	# Check domain
 	my $domain  = delete $hash{domain};
-	if (defined($domain) && $domain ne $req_host) {
+	if (defined($domain)
+	    && $domain ne $req_host && $domain ne ".$req_host") {
 	    if ($domain !~ /\./ && $domain ne "local") {
 	        LWP::Debug::debug("Domain $domain contains no dot");
 		next SET_COOKIE;
@@ -338,7 +348,7 @@ sub extract_cookies
 		next SET_COOKIE;
 	    }
 	    my $hostpre = substr($req_host, 0, length($req_host) - $len);
-	    if ($hostpre =~ /\./ && !$netscape_cookies) {
+	    if ($hostpre =~ /\./ && !$ns_cookie) {
 	        LWP::Debug::debug("Host prefix contain a dot: $hostpre => $domain");
 		next SET_COOKIE;
 	    }
@@ -351,7 +361,7 @@ sub extract_cookies
 	if (defined $path && $path ne '') {
 	    $path_spec++;
 	    _normalize_path($path) if $path =~ /%/;
-	    if (!$netscape_cookies &&
+	    if (!$ns_cookie &&
                 substr($req_path, 0, length($path)) ne $path) {
 	        LWP::Debug::debug("Path $path is not a prefix of $req_path");
 		next SET_COOKIE;
@@ -658,7 +668,7 @@ sub _normalize_path  # so that plain string compare can be used
     $_[0] =~ s/%([0-9a-fA-F][0-9a-fA-F])/
 	         $x = uc($1);
                  $x eq "2F" || $x eq "25" ? "%$x" :
-                                            pack("c", hex($x));
+                                            pack("C", hex($x));
               /eg;
     $_[0] =~ s/([\0-\x20\x7f-\xff])/sprintf("%%%02X",ord($1))/eg;
 }

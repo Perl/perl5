@@ -1,5 +1,5 @@
 #
-# $Id: Headers.pm,v 1.40 2001/03/19 19:30:16 gisle Exp $
+# $Id: Headers.pm,v 1.41 2001/04/12 06:50:28 gisle Exp $
 
 package HTTP::Headers;
 
@@ -30,7 +30,7 @@ The following methods are available:
 
 use strict;
 use vars qw($VERSION $TRANSLATE_UNDERSCORE);
-$VERSION = sprintf("%d.%02d", q$Revision: 1.40 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.41 $ =~ /(\d+)\.(\d+)/);
 
 use Carp ();
 
@@ -85,7 +85,7 @@ attribute-value pairs as parameters to the constructor.  I<E.g.>:
  $h = new HTTP::Headers
      Date         => 'Thu, 03 Feb 1994 00:00:00 GMT',
      Content_Type => 'text/html; version=3.2',
-     Content_Base => 'http://www.sn.no/';
+     Content_Base => 'http://www.perl.org/';
 
 =cut
 

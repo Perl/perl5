@@ -10,50 +10,50 @@ $r = new WWW::RobotRules::AnyDBM_File "myrobot/2.0", $file;
 
 $r->parse("http://www.aas.no/robots.txt", "");
 
-$r->visit("www.aas.no");
+$r->visit("www.aas.no:80");
 
-print "not " if $r->no_visits("www.aas.no") != 1;
+print "not " if $r->no_visits("www.aas.no:80") != 1;
 print "ok 1\n";
 
 
-$r->push_rules("www.sn.no", "/aas", "/per");
-$r->push_rules("www.sn.no", "/god", "/old");
+$r->push_rules("www.sn.no:80", "/aas", "/per");
+$r->push_rules("www.sn.no:80", "/god", "/old");
 
-@r = $r->rules("www.sn.no");
+@r = $r->rules("www.sn.no:80");
 print "Rules: @r\n";
 
 print "not " if "@r" ne "/aas /per /god /old";
 print "ok 2\n";
 
 $r->clear_rules("per");
-$r->clear_rules("www.sn.no");
+$r->clear_rules("www.sn.no:80");
 
-@r = $r->rules("www.sn.no");
+@r = $r->rules("www.sn.no:80");
 print "Rules: @r\n";
 
 print "not " if "@r" ne "";
 print "ok 3\n";
 
-$r->visit("www.aas.no", time+10);
-$r->visit("www.sn.no");
+$r->visit("www.aas.no:80", time+10);
+$r->visit("www.sn.no:80");
 
-print "No visits: ", $r->no_visits("www.aas.no"), "\n";
-print "Last visit: ", $r->last_visit("www.aas.no"), "\n";
-print "Fresh until: ", $r->fresh_until("www.aas.no"), "\n";
+print "No visits: ", $r->no_visits("www.aas.no:80"), "\n";
+print "Last visit: ", $r->last_visit("www.aas.no:80"), "\n";
+print "Fresh until: ", $r->fresh_until("www.aas.no:80"), "\n";
 
-print "not " if $r->no_visits("www.aas.no") != 2;
+print "not " if $r->no_visits("www.aas.no:80") != 2;
 print "ok 4\n";
 
-print "not " if abs($r->last_visit("www.sn.no") - time) > 2;
+print "not " if abs($r->last_visit("www.sn.no:80") - time) > 2;
 print "ok 5\n";
 
 $r = undef;
 
 # Try to reopen the database without a name specified
 $r = new WWW::RobotRules::AnyDBM_File undef, $file;
-$r->visit("www.aas.no");
+$r->visit("www.aas.no:80");
 
-print "not " if $r->no_visits("www.aas.no") != 3;
+print "not " if $r->no_visits("www.aas.no:80") != 3;
 print "ok 6\n";
 
 print "Agent-Name: ", $r->agent, "\n";
@@ -74,7 +74,7 @@ untie %cat;
 # Try to open database with a different agent name
 $r = new WWW::RobotRules::AnyDBM_File "MOMSpider/2.0", $file;
 
-print "not " if $r->no_visits("www.sn.no");
+print "not " if $r->no_visits("www.sn.no:80");
 print "ok 8\n";
 
 # Try parsing

@@ -42,7 +42,7 @@ sub authenticate
     my %resp = map { $_ => $auth_param->{$_} } qw(realm nonce opaque);
     @resp{qw(username uri response algorithm)} = ($user, $uri, $digest, "MD5");
 
-    if($auth_param->{qop} eq "auth") {
+    if (($auth_param->{qop} || "") eq "auth") {
 	@resp{qw(qop cnonce nc)} = ("auth", $cnonce, $nc);
     }
 

@@ -1,4 +1,4 @@
-# $Id: RobotRules.pm,v 1.21 2000/04/07 20:17:54 gisle Exp $
+# $Id: RobotRules.pm,v 1.22 2001/04/20 18:38:22 gisle Exp $
 
 package WWW::RobotRules;
 
@@ -46,7 +46,7 @@ The following methods are provided:
 
 =cut
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.21 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.22 $ =~ /(\d+)\.(\d+)/);
 sub Version { $VERSION; }
 
 use strict;
@@ -83,7 +83,7 @@ retrieve the F</robots.txt> file, and the contents of the file.
 sub parse {
     my($self, $robot_txt_uri, $txt, $fresh_until) = @_;
     $robot_txt_uri = URI->new("$robot_txt_uri");
-    my $netloc = $robot_txt_uri->authority;
+    my $netloc = $robot_txt_uri->host . ":" . $robot_txt_uri->port;
 
     $self->clear_rules($netloc);
     $self->fresh_until($netloc, $fresh_until || (time + 365*24*3600));
@@ -173,7 +173,7 @@ sub parse {
 sub is_me {
     my($self, $ua) = @_;
     my $me = $self->agent;
-    return index(lc($ua), lc($me)) >= 0;
+    return index(lc($me), lc($ua)) >= 0;
 }
 
 =item $rules->allowed($uri)
@@ -185,7 +185,7 @@ Returns TRUE if this robot is allowed to retrieve this URL.
 sub allowed {
     my($self, $uri) = @_;
     $uri = URI->new("$uri");
-    my $netloc = $uri->authority;
+    my $netloc = $uri->host . ":" . $uri->port;
 
     my $fresh_until = $self->fresh_until($netloc);
     return -1 if !defined($fresh_until) || $fresh_until < time;

@@ -25,7 +25,8 @@ sub canonical
 		$unreserved_escape{sprintf "%%%02X", ord($_)} = $_;
 	    }
 	}
-	$$other =~ s/(%[0-9A-F]{2})/$unreserved_escape{$1} || $1/ge;
+	$$other =~ s/(%[0-9A-F]{2})/exists $unreserved_escape{$1} ?
+	                                   $unreserved_escape{$1} : $1/ge;
 	$other->path("/") if $slash_path;
     }
     $other;

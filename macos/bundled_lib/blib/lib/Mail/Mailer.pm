@@ -95,6 +95,12 @@ of mailx, one could set C<PERL_MAILERS> to:
 
     "mail:/does/not/exists:sendmail:$HOME/test/bin/sendmail"
 
+On systems which may include C<:> in file names, use C<|> as separator
+between type-groups.
+
+    "mail:c:/does/not/exists|sendmail:$HOME/test/bin/sendmail"
+
+
 =back
 
 =head1 SEE ALSO
@@ -103,15 +109,12 @@ Mail::Send
 
 =head1 AUTHORS
 
-Maintained by Graham Barr E<lt>F<gbarr@pobox.com>E<gt>
+Maintained by Mark Overmeer <mailtools@overmeer.net>
 
 Original code written by Tim Bunce E<lt>F<Tim.Bunce@ig.co.uk>E<gt>,
 with a kick start from Graham Barr E<lt>F<gbarr@pobox.com>E<gt>. With
 contributions by Gerard Hickey E<lt>F<hickey@ctron.com>E<gt> Small fix
 and documentation by Nathan Torkington E<lt>F<gnat@frii.com>E<gt>.
-
-For support please contact comp.lang.perl.misc or Graham Barr
-E<lt>F<gbarr@pobox.com>E<gt>
 
 =cut
 
@@ -121,7 +124,7 @@ use vars qw(@ISA $VERSION $MailerBinary $MailerType %Mailers @Mailers);
 use Config;
 use strict;
 
-$VERSION = "1.21"; # $Id: //depot/MailTools/Mail/Mailer.pm#13 $
+$VERSION = "1.40";
 
 sub Version { $VERSION }
 
@@ -142,8 +145,8 @@ sub Version { $VERSION }
 
 # There are several flavours of mail, which do we have ????
 
+if(my $cmd = is_exe('mailx;Mail;mail'))
 {
-    my $cmd = is_exe('mailx;Mail;mail');
     my $osname = $Config{'osname'};
 
     if($osname =~ /(?:dgux)|(?:solaris)/io) {
@@ -155,7 +158,11 @@ sub Version { $VERSION }
     push @Mailers, 'mail', $cmd;
 }
 
-push(@Mailers, split(/:/,$ENV{PERL_MAILERS})) if $ENV{PERL_MAILERS};
+if($ENV{PERL_MAILERS})
+{   push @Mailers
+       , map { split /\:/, $_, 2}
+             split /$Config{path_sep}/, $ENV{PERL_MAILERS};
+}
 
 %Mailers = @Mailers;
 
@@ -163,7 +170,11 @@ $MailerBinary = undef;
 
 # does this really need to be done? or should a default mailer be specfied?
 
-if($^O eq 'MacOS' || $^O eq 'VMS' || $^O eq 'MSWin32') {
+if($^O eq 'os2') {
+    $Mailers{sendmail} = 'sendmail' unless is_exe($Mailers{sendmail});
+}
+
+if($^O eq 'MacOS' || $^O eq 'VMS' || $^O eq 'MSWin32' || $^O eq 'os2') {
     $MailerType = 'smtp';
     $MailerBinary = $Mailers{$MailerType};
 }
@@ -207,7 +218,7 @@ sub is_exe {
     my $exe = shift;
     my $cmd;
 
-    foreach $cmd (split /;/, $exe) {
+    foreach $cmd (split /\;/, $exe) {
 	$cmd =~ s/^\s+//;
 
 	# remove any options
@@ -215,11 +226,11 @@ sub is_exe {
 
 	# check for absolute or relative path
 	return ($cmd)
-	    if (-x $name and ! -d $name and $name =~ m:/:);
+	    if (-x $name and ! -d $name and $name =~ m:[\\/]:);
 
 	if (defined $ENV{PATH}) {
 	    my $dir;
-	    foreach $dir (split(/:/, $ENV{PATH})) {
+	    foreach $dir (split(/$Config{path_sep}/, $ENV{PATH})) {
 		return "$dir/$cmd"
 		    if (-x "$dir/$name" && ! -d "$dir/$name");
 	    }

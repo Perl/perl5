@@ -1,10 +1,10 @@
-# $Id: AnyDBM_File.pm,v 1.9 1998/01/06 10:07:00 aas Exp $
+# $Id: AnyDBM_File.pm,v 1.10 2001/10/26 20:32:28 gisle Exp $
 
 package WWW::RobotRules::AnyDBM_File;
 
 require  WWW::RobotRules;
 @ISA = qw(WWW::RobotRules);
-$VERSION = sprintf("%d.%02d", q$Revision: 1.9 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.10 $ =~ /(\d+)\.(\d+)/);
 
 use Carp ();
 use AnyDBM_File;
@@ -71,6 +71,7 @@ sub agent {
 	    my $file = $self->{'filename'};
 	    untie %{$self->{'dbm'}};
 	    tie %{$self->{'dbm'}}, 'AnyDBM_File', $file, O_TRUNC|O_RDWR, 0640;
+	    %{$self->{'dbm'}} = ();
 	    $self->{'dbm'}{"|ua-name|"} = $newname;
 	}
     }

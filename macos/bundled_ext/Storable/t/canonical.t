@@ -12,7 +12,17 @@
 # Baseline for first official release.
 #
 
-BEGIN { push @INC, "../blib" }
+sub BEGIN {
+    chdir('t') if -d 't';
+    @INC = '.'; 
+    push @INC, '../lib';
+    require Config; import Config;
+    if ($Config{'extensions'} !~ /\bStorable\b/) {
+        print "1..0 # Skip: Storable was not built\n";
+        exit 0;
+    }
+}
+
 
 use Storable qw(freeze thaw dclone);
 use vars qw($debugging $verbose);

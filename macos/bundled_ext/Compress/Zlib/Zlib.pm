@@ -1,7 +1,7 @@
 # File	  : Zlib.pm
 # Author  : Paul Marquess
-# Created : 28th April 2001
-# Version : 1.13
+# Created : 27th August 2001
+# Version : 1.14
 #
 #     Copyright (c) 1995-2001 Paul Marquess. All rights reserved.
 #     This program is free software; you can redistribute it and/or
@@ -22,7 +22,7 @@ use warnings ;
 use vars qw($VERSION @ISA @EXPORT $AUTOLOAD 
 	    $deflateDefault $deflateParamsDefault $inflateDefault) ;
 
-$VERSION = "1.13" ;
+$VERSION = "1.14" ;
 
 @ISA = qw(Exporter DynaLoader);
 # Items to export into callers namespace by default. Note: do not export
@@ -286,7 +286,7 @@ sub memGzip
  
   # write a minimal gzip header
   my(@m);
-  push @m, pack("c" . MIN_HDR_SIZE, 
+  push @m, pack("C" . MIN_HDR_SIZE, 
                 MAGIC1, MAGIC2, Z_DEFLATED(), 0,0,0,0,0,0, OSCODE) ;
  
   # if the deflation buffer isn't a reference, make it one
@@ -1013,7 +1013,7 @@ F<Paul.Marquess@btinternet.com>. The latest copy of the module can be
 found on CPAN in F<modules/by-module/Compress/Compress-Zlib-x.x.tar.gz>.
 
 The primary site for the I<zlib> compression library is
-F<http://www.info-zip.org/pub/infozip/zlib/>.
+F<http://www.gzip.org/zlib/>.
 
 =head1 MODIFICATION HISTORY
 

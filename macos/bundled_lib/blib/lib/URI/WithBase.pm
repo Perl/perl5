@@ -48,6 +48,15 @@ sub AUTOLOAD
     $self->[0]->$method(@_);
 }
 
+sub can {                                  # override UNIVERSAL::can
+    my $self = shift;
+    $self->SUPER::can(@_) || (
+      ref($self)
+      ? $self->[0]->can(@_)
+      : undef
+    )
+}
+
 sub base {
     my $self = shift;
     my $base  = $self->[1];

@@ -5,9 +5,10 @@
 package Net::FTP::dataconn;
 
 use Carp;
-use vars qw(@ISA $timeout);
+use vars qw(@ISA $timeout $VERSION);
 use Net::Cmd;
 
+$VERSION = '0.10';
 @ISA = qw(IO::Socket::INET);
 
 sub reading
@@ -118,6 +119,12 @@ sub cmd
  my $ftp = shift;
 
  ${*$ftp}{'net_ftp_cmd'};
+}
+
+sub bytes_read {
+ my $ftp = shift;
+
+ ${*$ftp}{'net_ftp_bytesread'} || 0;
 }
 
 1;

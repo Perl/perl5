@@ -35,14 +35,23 @@ sub AUTOLOAD
 		}
 		no strict 'refs';
 		@{$NEXT::NEXT{$self,$wanted_method}} = 
-			map { *{"${_}::$caller_method"}{CODE}||() } @forebears;
+			map { *{"${_}::$caller_method"}{CODE}||() } @forebears
+				unless $wanted_method eq 'AUTOLOAD';
 		@{$NEXT::NEXT{$self,$wanted_method}} = 
-			map { *{"${_}::AUTOLOAD"}{CODE}||() } @forebears
-				unless @{$NEXT::NEXT{$self,$wanted_method}};
+			map { (*{"${_}::AUTOLOAD"}{CODE}) ?
+						"${_}::AUTOLOAD" : () } @forebears
+				unless @{$NEXT::NEXT{$self,$wanted_method}||[]};
 	}
-	$wanted_method = shift @{$NEXT::NEXT{$self,$wanted_method}};
-	return shift()->$wanted_method(@_) if $wanted_method;
-	return;
+	my $call_method = shift @{$NEXT::NEXT{$self,$wanted_method}};
+	return unless defined $call_method;
+	if (ref $call_method eq 'CODE') {
+		return shift()->$call_method(@_)
+	}
+	else {	# AN AUTOLOAD
+		no strict 'refs';
+		${$call_method} = $caller_method eq 'AUTOLOAD' && ${"${caller_class}::AUTOLOAD"} || $wanted;
+		return $call_method->(@_);
+	}
 }
 
 1;
@@ -95,8 +104,14 @@ that uses it. If a method C<m> calls C<$self->NEXT::m()>, the call to
 C<m> is redispatched as if the calling method had not originally been found.
 
 In other words, a call to C<$self->NEXT::m()> resumes the depth-first,
-left-to-right search of parent classes that resulted in the original
-call to C<m>.
+left-to-right search of C<$self>'s class hierarchy that resulted in the
+original call to C<m>.
+
+Note that this is not the same thing as C<$self->SUPER::m()>, which 
+begins a new dispatch that is restricted to searching the ancestors
+of the current class. C<$self->NEXT::m()> can backtrack
+past the current class -- to look for a suitable method in other
+ancestors of C<$self> -- whereas C<$self->SUPER::m()> cannot.
 
 A typical use would be in the destructors of a class hierarchy,
 as illustrated in the synopsis above. Each class in the hierarchy
@@ -134,7 +149,6 @@ Comment, suggestions, and patches welcome.
 
 =head1 COPYRIGHT
 
- Copyright (c) 2000, Damian Conway. All Rights Reserved.
+ Copyright (c) 2000-2001, Damian Conway. All Rights Reserved.
  This module is free software. It may be used, redistributed
-and/or modified under the terms of the Perl Artistic License
-     (see http://www.perl.com/perl/misc/Artistic.html)
+    and/or modified under the same terms as Perl itself.

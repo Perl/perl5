@@ -22,7 +22,9 @@ WriteMakefile(
 	NAME   	 	=> 'Compress::Zlib',
 	VERSION_FROM  	=> 'Zlib.pm',
 	INC      	=> "-I$ZLIB_INCLUDE" ,
-	'dist'	 	=> {COMPRESS=>'gzip', SUFFIX=>'gz'},
+	'dist'	 	=> {COMPRESS=>'gzip', SUFFIX=>'gz',
+			    DIST_DEFAULT => 'MyDoubleCheck tardist',
+			    },
 	($BUILD_ZLIB
 	  ? (MYEXTLIB	=> "$ZLIB_LIB/libz\$(LIB_EXT)")
 	  : (LIBS	=> [ "-L$ZLIB_LIB -lz " ])
@@ -32,14 +34,18 @@ WriteMakefile(
 	       AUTHOR  	=> 'Paul Marquess <Paul.Marquess@btinternet.com>')
 	    : ()
 	),
-	'depend'	=> {'dist' => 'MyRelease' },
 	) ;
 
 sub MY::postamble {
     my $postamble =<<'END';
 
-MyRelease:	
-	echo hello
+MyDoubleCheck:	
+	@echo Checking config.in is setup for a release
+	@(grep '^LIB.*/usr/local/lib' config.in && 		\
+	grep '^INCLUDE.*/usr/local/include' config.in &&	\
+	grep '^BUILD_ZLIB.*False' config.in) >/dev/null ||		\
+	(echo config.in needs fixing ; exit 1)
+	@echo config.in is ok
 
 Zlib.xs:	typemap
 	@$(TOUCH) Zlib.xs

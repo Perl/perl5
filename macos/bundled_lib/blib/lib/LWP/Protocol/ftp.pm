@@ -1,5 +1,5 @@
 #
-# $Id: ftp.pm,v 1.28 2001/03/16 00:14:47 gisle Exp $
+# $Id: ftp.pm,v 1.31 2001/10/26 20:13:20 gisle Exp $
 
 # Implementation of the ftp protocol (RFC 959). We let the Net::FTP
 # package do all the dirty work.
@@ -19,10 +19,117 @@ require LWP::Protocol;
 
 use strict;
 eval {
+    package LWP::Protocol::MyFTP;
+
     require Net::FTP;
     Net::FTP->require_version(2.00);
+
+    use vars qw(@ISA);
+    @ISA=qw(Net::FTP);
+
+    sub new {
+	my $class = shift;
+	LWP::Debug::trace('()');
+
+	my $self = $class->SUPER::new(@_) || return undef;
+
+	my $mess = $self->message;  # welcome message
+	LWP::Debug::debug($mess);
+	$mess =~ s|\n.*||s; # only first line left
+	$mess =~ s|\s*ready\.?$||;
+	# Make the version number more HTTP like
+	$mess =~ s|\s*\(Version\s*|/| and $mess =~ s|\)$||;
+	${*$self}{myftp_server} = $mess;
+	#$response->header("Server", $mess);
+
+	$self;
+    }
+
+    sub http_server {
+	my $self = shift;
+	${*$self}{myftp_server};
+    }
+
+    sub home {
+	my $self = shift;
+	my $old = ${*$self}{myftp_home};
+	if (@_) {
+	    ${*$self}{myftp_home} = shift;
+	}
+	$old;
+    }
+
+    sub go_home {
+	LWP::Debug::trace('');
+	my $self = shift;
+	$self->cwd(${*$self}{myftp_home});
+    }
+
+    sub request_count {
+	my $self = shift;
+	++${*$self}{myftp_reqcount};
+    }
+
+    sub ping {
+	LWP::Debug::trace('');
+	my $self = shift;
+	return $self->go_home;
+    }
+
 };
 my $init_failed = $@;
+
+
+sub _connect {
+    my($self, $host, $port, $user, $account, $password, $timeout) = @_;
+
+    my $key;
+    my $conn_cache = $self->{ua}{conn_cache};
+    if ($conn_cache) {
+	$key = "$host:$port:$user";
+	$key .= ":$account" if defined($account);
+	if (my $ftp = $conn_cache->withdraw("ftp", $key)) {
+	    if ($ftp->ping) {
+		LWP::Debug::debug('Reusing old connection');
+		# save it again
+		$conn_cache->deposit("ftp", $key, $ftp);
+		return $ftp;
+	    }
+	}
+    }
+
+    # try to make a connection
+    my $ftp = LWP::Protocol::MyFTP->new($host,
+					Port => $port,
+					Timeout => $timeout,
+				       );
+    # XXX Should be some what to pass on 'Passive' (header??)
+    unless ($ftp) {
+	$@ =~ s/^Net::FTP: //;
+	return HTTP::Response->new(&HTTP::Status::RC_INTERNAL_SERVER_ERROR, $@);
+    }
+
+    LWP::Debug::debug("Logging in as $user (password $password)...");
+    unless ($ftp->login($user, $password, $account)) {
+	# Unauthorized.  Let's fake a RC_UNAUTHORIZED response
+	my $mess = scalar($ftp->message);
+	LWP::Debug::debug($mess);
+	$mess =~ s/\n$//;
+	my $res =  HTTP::Response->new(&HTTP::Status::RC_UNAUTHORIZED, $mess);
+	$res->header("Server", $ftp->http_server);
+	$res->header("WWW-Authenticate", qq(Basic Realm="FTP login"));
+	return $res;
+    }
+    LWP::Debug::debug($ftp->message);
+
+    my $home = $ftp->pwd;
+    LWP::Debug::debug("home: '$home'");
+    $ftp->home($home);
+
+    $conn_cache->deposit("ftp", $key, $ftp) if $conn_cache;
+
+    return $ftp;
+}
 
 
 sub request
@@ -77,39 +184,16 @@ sub request
     }
 
     # We allow the account to be specified in the "Account" header
-    my $acct     = $request->header('Account');
+    my $account = $request->header('Account');
 
-    # try to make a connection
-    my $ftp = Net::FTP->new($host, Port => $port);
-    unless ($ftp) {
-       $@ =~ s/^Net::FTP: //;
-       return HTTP::Response->new(&HTTP::Status::RC_INTERNAL_SERVER_ERROR, $@);
-    }
+    my $ftp = $self->_connect($host, $port, $user, $account, $password, $timeout);
+    return $ftp if ref($ftp) eq "HTTP::Response"; # ugh!
 
     # Create an initial response object
-    my $response = HTTP::Response->new(&HTTP::Status::RC_OK,
-				       "Document follows");
+    my $response = HTTP::Response->new(&HTTP::Status::RC_OK, "OK");
+    $response->header(Server => $ftp->http_server);
+    $response->header('Client-Request-Num' => $ftp->request_count);
     $response->request($request);
-
-    my $mess = $ftp->message;  # welcome message
-    LWP::Debug::debug($mess);
-    $mess =~ s|\n.*||s; # only first line left
-    $mess =~ s|\s*ready\.?$||;
-    # Make the version number more HTTP like
-    $mess =~ s|\s*\(Version\s*|/| and $mess =~ s|\)$||;
-    $response->header("Server", $mess);
-
-    $ftp->timeout($timeout) if $timeout;
-
-    LWP::Debug::debug("Logging in as $user (password $password)...");
-    unless ($ftp->login($user, $password, $acct)) {
-	# Unauthorized.  Let's fake a RC_UNAUTHORIZED response
-	my $res =  HTTP::Response->new(&HTTP::Status::RC_UNAUTHORIZED,
-				       scalar($ftp->message));
-	$res->header("WWW-Authenticate", qq(Basic Realm="FTP login"));
-	return $res;
-    }
-    LWP::Debug::debug($ftp->message);
 
     # Get & fix the path
     my @path =  grep { length } $url->path_segments;
@@ -152,6 +236,36 @@ sub request
 	    }
 	}
 
+	# We'll use this later to abort the transfer if necessary. 
+	# if $max_size is defined, we need to abort early. Otherwise, it's
+      # a normal transfer
+	my $max_size = undef;
+
+	# Set resume location, if the client requested it
+	if ($request->header('Range') && $ftp->supported('REST'))
+	{
+		my $range_info = $request->header('Range');
+
+		# Change bytes=2772992-6781209 to just 2772992
+		my ($start_byte,$end_byte) = $range_info =~ /.*=\s*(\d+)-(\d+)/;
+
+		if (!defined $start_byte || !defined $end_byte ||
+		  ($start_byte < 0) || ($start_byte > $end_byte) || ($end_byte < 0))
+		{
+		  return HTTP::Response->new(&HTTP::Status::RC_BAD_REQUEST,
+		     'Incorrect syntax for Range request');
+		}
+
+		$max_size = $end_byte-$start_byte;
+
+		$ftp->restart($start_byte);
+	}
+	elsif ($request->header('Range') && !$ftp->supported('REST'))
+	{
+		return HTTP::Response->new(&HTTP::Status::RC_NOT_IMPLEMENTED,
+	         "Server does not support resume.");
+	}
+
 	my $data;  # the data handle
 	LWP::Debug::debug("retrieve file?");
 	if (length($remote_file) and $data = $ftp->retr($remote_file)) {
@@ -171,6 +285,33 @@ sub request
 		$response = $self->collect($arg, $response, sub {
 		    my $content = '';
 		    my $result = $data->read($content, $size);
+
+                    # Stop early if we need to.
+                    if (defined $max_size)
+                    {
+                      # We need an interface to Net::FTP::dataconn for getting
+                      # the number of bytes already read
+                      my $bytes_received = $data->bytes_read();
+
+                      # We were already over the limit. (Should only happen
+                      # once at the end.)
+                      if ($bytes_received - length($content) > $max_size)
+                      {
+                        $content = '';
+                      }
+                      # We just went over the limit
+                      elsif ($bytes_received  > $max_size)
+                      {
+                        # Trim content
+                        $content = substr($content, 0,
+                          $max_size - ($bytes_received - length($content)) );
+                      }
+                      # We're under the limit
+                      else
+                      {
+                      }
+                    }
+
 		    return \$content;
 		} );
 	    }
@@ -213,8 +354,8 @@ sub request
 		$response->header('Content-Type' => 'text/html');
 		$content = "<HEAD><TITLE>File Listing</TITLE>\n";
 		my $base = $request->url->clone;
-		my $path = $base->epath;
-		$base->epath("$path/") unless $path =~ m|/$|;
+		my $path = $base->path;
+		$base->path("$path/") unless $path =~ m|/$|;
 		$content .= qq(<BASE HREF="$base">\n</HEAD>\n);
 		$content .= "<BODY>\n<UL>\n";
 		for (File::Listing::parse_dir(\@lsl, 'GMT')) {

@@ -1,5 +1,5 @@
 #
-# $Id: file.pm,v 1.19 1999/04/23 17:54:02 gisle Exp $
+# $Id: file.pm,v 1.20 2001/08/06 23:47:42 gisle Exp $
 
 package LWP::Protocol::file;
 
@@ -108,8 +108,8 @@ sub request
 	}
 	# Ensure that the base URL is "/" terminated
 	my $base = $url->clone;
-	unless ($base->epath =~ m|/$|) {
-	    $base->epath($base->epath . "/");
+	unless ($base->path =~ m|/$|) {
+	    $base->path($base->path . "/");
 	}
 	my $html = join("\n",
 			"<HTML>\n<HEAD>",

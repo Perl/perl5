@@ -1,4 +1,4 @@
-print "1..34\n";
+print "1..35\n";
 
 #use LWP::Debug '+';
 use HTTP::Cookies;
@@ -531,7 +531,40 @@ print "not " unless $req->header("Cookie") eq "JSESSIONID=ABCDERANDOM123" &&
                     $req->header("Cookie2") eq "\$Version=\"1\"";
 print "ok 34\n";
 
+# test mixing of Set-Cookie and Set-Cookie2 headers.
+# Example from http://www.trip.com/trs/trip/flighttracker/flight_tracker_home.xsl
+# which gives up these headers:
+#
+# HTTP/1.1 200 OK
+# Connection: close
+# Date: Fri, 20 Jul 2001 19:54:58 GMT
+# Server: Apache/1.3.19 (Unix) ApacheJServ/1.1.2
+# Content-Type: text/html
+# Content-Type: text/html; charset=iso-8859-1
+# Link: </trip/stylesheet.css>; rel="stylesheet"; type="text/css"
+# Servlet-Engine: Tomcat Web Server/3.2.1 (JSP 1.1; Servlet 2.2; Java 1.3.0; SunOS 5.8 sparc; java.vendor=Sun Microsystems Inc.)
+# Set-Cookie: trip.appServer=1111-0000-x-024;Domain=.trip.com;Path=/
+# Set-Cookie: JSESSIONID=fkumjm7nt1.JS24;Path=/trs
+# Set-Cookie2: JSESSIONID=fkumjm7nt1.JS24;Version=1;Discard;Path="/trs"
+# Title: TRIP.com Travel - FlightTRACKER
+# X-Meta-Description: Trip.com privacy policy
+# X-Meta-Keywords: privacy policy
 
+$req = HTTP::Request->new('GET', 'http://www.trip.com/trs/trip/flighttracker/flight_tracker_home.xsl');
+$res = HTTP::Response->new(200, "OK");
+$res->request($req);
+$res->push_header("Set-Cookie"  => qq(trip.appServer=1111-0000-x-024;Domain=.trip.com;Path=/));
+$res->push_header("Set-Cookie"  => qq(JSESSIONID=fkumjm7nt1.JS24;Path=/trs));
+$res->push_header("Set-Cookie2" => qq(JSESSIONID=fkumjm7nt1.JS24;Version=1;Discard;Path="/trs"));
+#print $res->as_string;
+
+$c = HTTP::Cookies->new;  # clear it
+$c->extract_cookies($res);
+print $c->as_string;
+print "not " unless $c->as_string eq <<'EOT'; print "ok 35\n";
+Set-Cookie3: trip.appServer="1111-0000-x-024"; path="/"; domain=".trip.com"; path_spec; discard; version=0
+Set-Cookie3: JSESSIONID="fkumjm7nt1.JS24"; path="/trs"; domain="www.trip.com"; path_spec; discard; version=1
+EOT
 
 #-------------------------------------------------------------------
 

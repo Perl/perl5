@@ -4,7 +4,7 @@ use Config qw(%Config);
 use ExtUtils::MakeMaker;
 
 my @extra;
-#@extra = (DEFINE => "-DU32_ALIGNMENT_REQUIRED") unless free_u32_alignment();
+@extra = (DEFINE => "-DU32_ALIGNMENT_REQUIRED") unless free_u32_alignment();
 
 WriteMakefile(
     'NAME'	   => 'Digest::MD5',
@@ -12,9 +12,7 @@ WriteMakefile(
     @extra,
     'dist'         => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
 );
-exit;
 
-#--------------
 
 
 sub free_u32_alignment
@@ -35,6 +33,10 @@ sub free_u32_alignment
 #include <stdio.h>
 #include "EXTERN.h"
 #include "perl.h"
+
+#ifdef printf
+ #undef printf
+#endif
 
 int main(int argc, char** argv, char** env)
 {

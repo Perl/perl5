@@ -1,9 +1,9 @@
-# $Id: Negotiate.pm,v 1.7 1999/03/20 07:37:35 gisle Exp $
+# $Id: Negotiate.pm,v 1.9 2001/08/07 00:10:45 gisle Exp $
 #
 
 package HTTP::Negotiate;
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.7 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.9 $ =~ /(\d+)\.(\d+)/);
 sub Version { $VERSION; }
 
 require 5.002;
@@ -72,7 +72,7 @@ sub choose ($;$)
     });
 
     # Check if any of the variants specify a language.  We do this
-    # because it influence how we treat those without (they default to
+    # because it influences how we treat those without (they default to
     # 0.5 instead of 1).
     my $any_lang = 0;
     for $var (@$variants) {
@@ -98,11 +98,12 @@ sub choose ($;$)
     my @Q = ();  # This is where we collect the results of the
 		 # quality calcualtions
 
-    # Calculate quality for all the variant's that are available.
+    # Calculate quality for all the variants that are available.
     for (@$variants) {
 	my($id, $qs, $ct, $enc, $cs, $lang, $bs) = @$_;
 	$qs = 1 unless defined $qs;
 	$bs = 0 unless defined $bs;
+	$lang = lc($lang) if $lang; # lg tags are always case-insensitive
 	if ($DEBUG) {
 	    print "\nEvaluating $id ($ct)\n";
 	    printf "  qs   = %.3f\n", $qs;
@@ -164,17 +165,26 @@ sub choose ($;$)
 		$q = $this_q unless defined $q;
 		$q = $this_q if $this_q > $q;
 	    }
-	    unless (defined $q) {
+	    if(defined $q) {
+	        $DEBUG and print " -- Exact language match at q=$q\n";
+	    } else {
 		# If there was no exact match and at least one of
 		# the Accept-Language field values is a complete
 		# subtag prefix of the content language tag(s), then
 		# the "q" parameter value of the largest matching
 		# prefix is used.
+		$DEBUG and print " -- No exact language match\n";
 		my $selected = undef;
 		for $al (keys %{ $accept{'language'} }) {
-		    if (substr($lang, 0, length($al)) eq $al) {
+		    if (substr($lang, 0, 1 + length($al)) eq "$al-") {
+		        # $lang starting with $al isn't enough, or else
+		        #  Accept-Language: hu (Hungarian) would seem
+		        #  to accept a document in hup (Hupa)
+		        $DEBUG and print " -- $lang ISA $al\n";
 			$selected = $al unless defined $selected;
 			$selected = $al if length($al) > length($selected);
+		    } else {
+		        $DEBUG and print " -- $lang  isn't a $al\n";
 		    }
 		}
 		$q = $accept{'language'}{$selected}{'q'} if $selected;
@@ -411,7 +421,7 @@ language is in this context a natural language spoken, written, or
 otherwise conveyed by human beings for communication of information to
 other human beings.  Computer languages are explicitly excluded.
 
-The language tags are defined by RFC-1766.  Examples
+The language tags are defined by RFC 3066.  Examples
 are:
 
   no               Norwegian
@@ -492,13 +502,13 @@ would mean: "I prefer Norwegian, but will accept British English (with
 
 =head1 COPYRIGHT
 
-Copyright 1996, Gisle Aas.
+Copyright 1996,2001 Gisle Aas.
 
 This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 
 =head1 AUTHOR
 
-Gisle Aas <aas@sn.no>
+Gisle Aas <gisle@aas.no>
 
 =cut

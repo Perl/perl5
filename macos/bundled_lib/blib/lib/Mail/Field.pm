@@ -1,6 +1,6 @@
 # Mail::Field.pm
 #
-# Copyright (c) 1995-2000 Graham Barr <gbarr@pobox.com>. All rights reserved.
+# Copyright (c) 1995-2001 Graham Barr. All rights reserved.
 # This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 
@@ -12,7 +12,7 @@ use Carp;
 use strict;
 use vars qw($AUTOLOAD $VERSION);
 
-$VERSION = "1.08";
+$VERSION = "1.40";
 
 unless(defined &UNIVERSAL::can) {
     *UNIVERSAL::can = sub {
@@ -485,7 +485,9 @@ C<_header_pkg_name> subroutine in C<Mail::Field>
 
 =head1 AUTHOR
 
-Graham Barr <gbarr@pobox.com>
+Graham Barr.
+
+Maintained by Mark Overmeer <mailtools@overmeer.net>
 
 =head1 SEE ALSO
 
@@ -494,11 +496,11 @@ L<MIME::*>s
 =head1 CREDITS
 
 Eryq <eryq@rhine.gsfc.nasa.gov> - for all the help in defining this package
-so that Mail::* and MIME::* can be integrated together.
+so that C<Mail::*> and C<MIME::*> can be integrated together.
 
 =head1 COPYRIGHT
 
-Copyright (c) 1995-2000 Graham Barr. All rights reserved. This program is free
+Copyright (c) 1995-2001 Graham Barr. All rights reserved. This program is free
 software; you can redistribute it and/or modify it under the same terms
 as Perl itself.
 

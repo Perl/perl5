@@ -11,13 +11,10 @@ avaliable on the libnet web page at
 
     http://www.pobox.com/~gbarr/libnet/
 
-
-
 =head2 How to contribute to this document
 
 You may mail corrections, additions, and suggestions to me
 gbarr@pobox.com.
-
 
 =head1 Author and Copyright Information
 
@@ -34,8 +31,6 @@ in respect of this information or its use.
 
 
 =head1 Obtaining and installing libnet
-
-=over 4
 
 =head2 What is libnet ?
 
@@ -71,17 +66,13 @@ The latest libnet release is always on CPAN, you will find it
 in 
 
  http://www.perl.com/CPAN/modules/by-module/Net/
- 
+
 The latest release and information is also avaliable on the libnet web page
 at
 
  http://www.pobox.com/~gbarr/libnet/
 
-=back
-
 =head1 Using Net::FTP
-
-=over
 
 =head2 How do I download files from a FTP server ?
 
@@ -222,7 +213,7 @@ some examples how you can implement these yourself.
 
 sub mput {
   my($ftp,$pattern) = @_;
-  foreach my $file (<$pattern>) {
+  foreach my $file (glob($pattern)) {
     $ftp->put($file) or warn $ftp->message;
   }
 }
@@ -235,11 +226,7 @@ sub mget {
 }
 
 
-=back
-
 =head1 Using Net::SMTP
-
-=over
 
 =head2 Why can't the part of an Email address after the @ be used as the hostname ?
 
@@ -264,11 +251,7 @@ will suceed with something like
 This command will only fail if you pass it an address in a domain the
 the server directly delivers for, and that address does not exist.
 
-=back
-
 =head1 Debugging scripts
-
-=over
 
 =head2 How can I debug my scripts that use Net::* modules ?
 
@@ -280,9 +263,9 @@ are being sent to the remote server and what responces are being
 received back.
 
     #!/your/path/to/perl
-    
+
     use Net::FTP;
-    
+
     my $ftp = new Net::FTP($host, Debug => 1);
     $ftp->login('gbarr','password');
     $ftp->quit;
@@ -313,9 +296,12 @@ show data coming from the server or C<&gt&gt&gt&gt> to show data
 going to the server. The remainder of the line is the command
 being sent or responce being received.
 
-=back
-
 =head1 AUTHOR AND COPYRIGHT
 
 Copyright (c) 1997 Graham Barr.
 All rights reserved.
+
+=for html <hr>
+
+I<$Id: //depot/libnet/Net/libnetFAQ.pod#4 $>
+

@@ -28,7 +28,7 @@ At a later stage, or in another program, you may retrieve data from
 the stored file and recreate the same hiearchy in memory. If you
 had blessed references, the retrieved references are blessed into
 the same package, so you must make sure you have access to the
-same perl class as the one used to create the relevant objects.
+same perl class than the one used to create the relevant objects.
 
 There is also a dclone() routine which performs an optimized mirroring
 of any data structure, preserving its topology.
@@ -60,10 +60,7 @@ Thanks to (in chronological order):
     Albert N. Micheev <Albert.N.Micheev@f80.n5049.z2.fidonet.org>
     Marc Lehmann <pcg@opengroup.org>
 	Justin Banks <justinb@wamnet.com>
-	Jarkko Hietaniemi <jhi@iki.fi> (AGAIN, as perl 5.7.0 Pumpking!)
-	Salvador Ortiz Garcia <sog@msg.com.mx>
-	Dominic Dunlop <domo@computer.org>
-	Erik Haugan <erik@solbors.no>
+	Jarkko Hietaniemi <jhi@iki.fi> (AGAIN, as perl 5.7.0 Pumpkin!)
 
 for their contributions.
 

@@ -1,5 +1,5 @@
 #
-# $Id: Message.pm,v 1.23 1998/11/19 21:45:00 aas Exp $
+# $Id: Message.pm,v 1.24 2001/08/06 23:47:06 gisle Exp $
 
 package HTTP::Message;
 
@@ -32,9 +32,9 @@ require HTTP::Headers;
 require Carp;
 use strict;
 use vars qw($VERSION $AUTOLOAD);
-$VERSION = sprintf("%d.%02d", q$Revision: 1.23 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.24 $ =~ /(\d+)\.(\d+)/);
 
-$HTTP::URI_CLASS ||= "URI::URL";
+$HTTP::URI_CLASS ||= $ENV{PERL_HTTP_URI_CLASS} || "URI";
 eval "require $HTTP::URI_CLASS"; die $@ if $@;
 
 =item $mess = new HTTP::Message;

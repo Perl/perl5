@@ -1,5 +1,5 @@
 #
-# $Id: Request.pm,v 1.27 1999/11/17 20:38:14 gisle Exp $
+# $Id: Request.pm,v 1.29 2001/08/28 05:08:57 gisle Exp $
 
 package HTTP::Request;
 
@@ -39,7 +39,7 @@ The following additional methods are available:
 
 require HTTP::Message;
 @ISA = qw(HTTP::Message);
-$VERSION = sprintf("%d.%02d", q$Revision: 1.27 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.29 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 
@@ -101,10 +101,14 @@ sub uri
 	if (!defined $uri) {
 	    # that's ok
 	} elsif (ref $uri) {
+	    Carp::croak("A URI can't be a " . ref($uri) . " reference")
+		if ref($uri) eq 'HASH' or ref($uri) eq 'ARRAY';
+	    Carp::croak("Can't use a " . ref($uri) . " object as a URI")
+		unless $uri->can('scheme');
 	    $uri = $uri->clone;
 	    unless ($HTTP::URI_CLASS eq "URI") {
 		# Argh!! Hate this... old LWP legacy!
-		eval { $uri = $uri->abs; };
+		eval { local $SIG{__DIE__}; $uri = $uri->abs; };
 		die $@ if $@ && $@ !~ /Missing base argument/;
 	    }
 	} else {

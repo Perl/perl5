@@ -1,4 +1,6 @@
-#!/usr/local/bin/perl
+#!/usr/local/bin/perl -w
+
+use strict;
 
 # This script is run Test::Harness on the tests found under the
 # "t" directory.
@@ -22,6 +24,8 @@ use Test::Harness;
 $Test::Harness::verbose = shift
   if $ARGV[0] =~ /^\d+$/ || $ARGV[0] eq "-v";
 
+my @tests;
+
 if (@ARGV) {
     for (@ARGV) {
 	if (-d $_) {
@@ -33,6 +37,7 @@ if (@ARGV) {
     }
 } else {
     @tests = (<base/*.t>, <html/*.t>, <robot/*.t>, <local/*.t>);
+    push(@tests,  <live/*.t>) if -f "live/ENABLED";
     push(@tests, <net/*.t>) if -f "net/config.pl";
 }
 

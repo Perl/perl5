@@ -1,7 +1,7 @@
 # Mail::Internet.pm
 #
-# Copyright (c) 1995-8 Graham Barr <gbarr@pobox.com>. All rights
-# reserved. This program is free software; you can redistribute it and/or
+# Copyright (c) 1995-2001 Graham Barr <gbarr@pobox.com>. All rights reserved.
+# This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 #
 
@@ -16,7 +16,7 @@ use Mail::Header;
 use vars qw($VERSION);
 
 BEGIN {
-    $VERSION = "1.33";
+    $VERSION = "1.40";
     *AUTOLOAD = \&AutoLoader::AUTOLOAD;
 
     unless(defined &UNIVERSAL::isa) {
@@ -109,7 +109,7 @@ sub body
  if(@_)
   {
    my $new = shift;
-   $me->{'mail_inet_body'} = ref($new) eq 'ARRAY' ? $new : [ $new ];
+   $me->{'mail_inet_body'} = ref($new) eq 'ARRAY' ? $new : [ $new, @_ ];
   }
 
  return $body;
@@ -549,7 +549,7 @@ sub _prephdr {
 
     my $tag;
 
-    foreach $tag (qw(From Sender)) {
+    foreach $tag (qw(From Sender)) {  # Sender is deprecated
 	$hdr->add($tag,$from)
 	    unless($hdr->get($tag));
     }
@@ -785,10 +785,15 @@ also be given.
 
 =over 4
 
-=item body ()
+=item body ( [ BODY ] )
 
 Returns the body of the message. This is a reference to an array.
 Each entry in the array represents a single line in the message.
+
+If I<BODY> is given, it can be a referenc to an aray or an array, then
+the body will be replaced. If a reference is passed, it is used directly
+and not copied, so any sunsequent changes to the array will change the
+contents of the body.
 
 =item print_header ( [ FILEHANDLE ] )
 
@@ -940,11 +945,11 @@ L<Mail::Address>
 
 =head1 AUTHOR
 
-Graham Barr <gbarr@pobox.com>
+Graham Barr.  Maintained by Mark Overmeer <mailtools@overmeer.net>
 
 =head1 COPYRIGHT
 
-Copyright (c) 1995-7 Graham Barr. All rights reserved. This program is free
+Copyright (c) 1995-2001 Graham Barr. All rights reserved. This program is free
 software; you can redistribute it and/or modify it under the same terms
 as Perl itself.
 

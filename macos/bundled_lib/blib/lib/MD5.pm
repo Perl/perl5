@@ -3,7 +3,7 @@ package MD5;  # legacy stuff
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '2.02';  # $Date: 2001/10/03 19:31:55 $
+$VERSION = '2.02';  # $Date: 2001/03/14 04:44:31 $
 
 require Digest::MD5;
 @ISA=qw(Digest::MD5);

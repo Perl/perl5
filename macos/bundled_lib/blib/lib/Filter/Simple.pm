@@ -2,7 +2,7 @@ package Filter::Simple;
 
 use vars qw{ $VERSION };
 
-$VERSION = '0.60';
+$VERSION = '0.61';
 
 use Filter::Util::Call;
 use Carp;
@@ -15,8 +15,6 @@ sub import {
 sub FILTER (&;$) {
 	my $caller = caller;
 	my ($filter, $terminator) = @_;
-	croak "Usage: use Filter::Simple sub {...}, $terminator_opt;"
-		unless ref $filter eq CODE;
 	*{"${caller}::import"} = gen_filter_import($caller,$filter,$terminator);
 	*{"${caller}::unimport"} = \*filter_unimport;
 }
@@ -110,7 +108,7 @@ To use the module it is necessary to do the following:
 =item 1.
 
 Download, build, and install the Filter::Util::Call module.
-(If you have Perl 5.7.1 or later you already have Filter::Util::Call.)
+(If you have Perl 5.7.1 or later, this is already done for you.)
 
 =item 2.
 
@@ -203,10 +201,15 @@ a source code filter is reduced to:
 
 =item 1.
 
+Download and install the Filter::Simple module.
+(If you have Perl 5.7.1 or later, this is already done for you.)
+
+=item 2.
+
 Set up a module that does a C<use Filter::Simple> and then
 calls C<FILTER { ... }>.
 
-=item 2.
+=item 3.
 
 Within the anonymous subroutine or block that is passed to
 C<FILTER>, process the contents of $_ to change the source code in
@@ -298,6 +301,35 @@ This is exactly the same as:
 
 except that the C<FILTER> subroutine is not exported by Filter::Simple.
 
+=head2 Using Filter::Simple and Exporter together
+
+You can't directly use Exporter when Filter::Simple.
+
+Filter::Simple generates an C<import> subroutine for your module
+(which hides the one inherited from Exporter).
+
+The C<FILTER> code you specify will, however, receive the C<import>'s argument
+list, so you can use that filter block as your C<import> subroutine.
+
+You'll need to call C<Exporter::export_to_level> from your C<FILTER> code
+to make it work correctly.
+
+For example:
+
+        use Filter::Simple;
+
+        use base Exporter;
+        @EXPORT    = qw(foo);
+        @EXPORT_OK = qw(bar);
+
+        sub foo { print "foo\n" }
+        sub bar { print "bar\n" }
+
+        FILTER {
+                # Your filtering code here
+                __PACKAGE__->export_to_level(2,undef,@_);
+        }
+
 
 =head2 How it works
 
@@ -338,7 +370,6 @@ Damian Conway (damian@conway.org)
 
 =head1 COPYRIGHT
 
- Copyright (c) 2000, Damian Conway. All Rights Reserved.
- This module is free software. It may be used, redistributed
-and/or modified under the terms of the Perl Artistic License
-     (see http://www.perl.com/perl/misc/Artistic.html)
+    Copyright (c) 2000-2001, Damian Conway. All Rights Reserved.
+    This module is free software. It may be used, redistributed
+        and/or modified under the same terms as Perl itself.

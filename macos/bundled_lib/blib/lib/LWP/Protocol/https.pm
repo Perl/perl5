@@ -1,73 +1,59 @@
 #
-# $Id: https.pm,v 1.8 1999/09/20 12:48:37 gisle Exp $
+# $Id: https.pm,v 1.10 2001/10/26 18:29:27 gisle Exp $
 
 use strict;
 
 package LWP::Protocol::https;
 
-# Figure out which SSL implementation to use
-use vars qw($SSL_CLASS);
-if ($IO::Socket::SSL::VERSION) {
-    $SSL_CLASS = "IO::Socket::SSL"; # it was already loaded
-} else {
-    eval { require Net::SSL; };     # from Crypt-SSLeay
-    if ($@) {
-	require IO::Socket::SSL;
-	$SSL_CLASS = "IO::Socket::SSL";
-    } else {
-	$SSL_CLASS = "Net::SSL";
-    }
-}
-
-
 use vars qw(@ISA);
 
 require LWP::Protocol::http;
-@ISA=qw(LWP::Protocol::http);
+require LWP::Protocol::https10;
 
-sub _new_socket
+@ISA = qw(LWP::Protocol::http);
+my $SSL_CLASS = $LWP::Protocol::https10::SSL_CLASS;
+
+#we need this to setup a proper @ISA tree
 {
-    my($self, $host, $port, $timeout) = @_;
-    local($^W) = 0;  # IO::Socket::INET can be noisy
-    my $sock = $SSL_CLASS->new(PeerAddr => $host,
-			       PeerPort => $port,
-			       Proto    => 'tcp',
-			       Timeout  => $timeout,
-			      );
-    unless ($sock) {
-	# IO::Socket::INET leaves additional error messages in $@
-	$@ =~ s/^.*?: //;
-	die "Can't connect to $host:$port ($@)";
+    package LWP::Protocol::MyHTTPS;
+    use vars qw(@ISA);
+    @ISA = ($SSL_CLASS, 'LWP::Protocol::MyHTTP');
+
+    #we need to call both Net::SSL::configure and Net::HTTP::configure
+    #however both call SUPER::configure (which is IO::Socket::INET)
+    #to avoid calling that twice we override Net::HTTP's
+    #_http_socket_configure
+
+    sub configure {
+        my $self = shift;
+        for my $class (@ISA) {
+            my $cfg = $class->can('configure');
+            $cfg->($self, @_);
+        }
+        $self;
     }
-    $sock;
+
+    sub _http_socket_configure {
+	$_[0];
+    }
+
+    # The underlying SSLeay classes fails to work if the socket is
+    # placed in non-blocking mode.  This override of the blocking
+    # method makes sure it stays the way it was created.
+    sub blocking { }  # noop
 }
 
-sub _check_sock
-{
-    my($self, $req, $sock) = @_;
-    my $check = $req->header("If-SSL-Cert-Subject");
-    if (defined $check) {
-	my $cert = $sock->get_peer_certificate ||
-	    die "Missing SSL certificate";
-	my $subject = $cert->subject_name;
-	die "Bad SSL certificate subject: '$subject' !~ /$check/"
-	    unless $subject =~ /$check/;
-	$req->remove_header("If-SSL-Cert-Subject");  # don't pass it on
-    }
+sub _conn_class {
+    "LWP::Protocol::MyHTTPS";
 }
 
-sub _get_sock_info
 {
-    my $self = shift;
-    $self->SUPER::_get_sock_info(@_);
-    my($res, $sock) = @_;
-    $res->header("Client-SSL-Cipher" => $sock->get_cipher);
-    my $cert = $sock->get_peer_certificate;
-    if ($cert) {
-	$res->header("Client-SSL-Cert-Subject" => $cert->subject_name);
-	$res->header("Client-SSL-Cert-Issuer" => $cert->issuer_name);
+    #if we inherit from LWP::Protocol::https10 we inherit from
+    #LWP::Protocol::http10, so just setup aliases for these two
+    no strict 'refs';
+    for (qw(_check_sock _get_sock_info)) {
+        *{"$_"} = \&{"LWP::Protocol::https10::$_"};
     }
-    $res->header("Client-SSL-Warning" => "Peer certificate not verified");
 }
 
 1;

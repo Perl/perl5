@@ -1,8 +1,8 @@
                                  Compress::Zlib
 
-                                  Version 1.13
+                                  Version 1.14
 
-                                 28th April 2001 
+                                27th August 2001
 
              Copyright (c) 1995-2001 Paul Marquess. All rights reserved.
          This program is free software; you can redistribute it and/or
@@ -35,7 +35,7 @@ installed on your system:
       compatible with versions of zlib <= 1.0.1).
 
       The zlib compression library is available at
-      http://www.info-zip.org/pub/infozip/zlib/
+      http://www.gzip.org/zlib/
 
 
 When building Compress::Zlib, you can optionally build the zlib
@@ -279,8 +279,13 @@ CHANGES
       * Modified Makefile.PL to only enable the warnings pragma if
         using perl 5.6.1 or better.
 
-  1.13 - 
+  1.13 - 31st June 2001
 
-      * 
+      * Make sure config.in is consistant when released.
+
+  1.14 - 27th August 2001
+
+      * Memory overwrite bug fixed in "inflate". Kudos to Rob Somons for
+        reporting the bug and to Anton Berezin for fixing it for me.
 
 Paul Marquess <Paul.Marquess@btinternet.com>

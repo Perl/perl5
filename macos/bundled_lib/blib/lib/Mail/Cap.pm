@@ -1,11 +1,10 @@
-#
 
 package Mail::Cap;
 use strict;
 
 use vars qw($VERSION $useCache);
 
-$VERSION = "1.07";
+$VERSION = "1.40";
 sub Version { $VERSION; }
 
 =head1 NAME
@@ -330,7 +329,9 @@ modify it under the same terms as Perl itself.
 
 Gisle Aas <aas@oslonett.no> 
 
-Maintained by Graham Barr <gbarr@pobox.com>
+Modified by Graham Barr <gbarr@pobox.com>
+
+Maintained by Mark Overmeer <mailtools@overmeer.net>
 
 =cut
 

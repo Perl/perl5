@@ -1,6 +1,6 @@
 # Mail::Util.pm
 #
-# Copyright (c) 1995-8 Graham Barr <gbarr@pobox.com>. All rights reserved.
+# Copyright (c) 1995-2001 Graham Barr <gbarr@pobox.com>. All rights reserved.
 # This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 
@@ -14,7 +14,7 @@ use Exporter ();
 BEGIN {
     require 5.000;
 
-    $VERSION = "1.16";
+    $VERSION = "1.40";
 
     *AUTOLOAD = \&AutoLoader::AUTOLOAD;
     @ISA = qw(Exporter);
@@ -62,11 +62,13 @@ the return value by setting C<$ENV{MAILADDRESS}>
 
 =head1 AUTHOR
 
-Graham Barr <gbarr@pobox.com>
+Graham Barr.
+
+Maintained by Mark Overmeer <mailtools@overmeer.net>
 
 =head1 COPYRIGHT
 
-Copyright (c) 1995-8 Graham Barr. All rights reserved. This program is free
+Copyright (c) 1995-2001 Graham Barr. All rights reserved. This program is free
 software; you can redistribute it and/or modify it under the same terms
 as Perl itself.
 
@@ -222,9 +224,9 @@ sub mailaddress {
 	$mailaddress = $InternetConfig{kICEmail()};
     }
 
-    $mailaddress ||= $ENV{USER} ||
+    $mailaddress ||= $ENV{USER}    ||
                      $ENV{LOGNAME} ||
-                     eval { (getpwuid($>))[6] } ||
+                     getpwuid($>)  ||
                      "postmaster";
 
     ##

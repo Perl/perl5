@@ -1,4 +1,4 @@
-package MyFilter;
+package FilterTest;
 
 BEGIN {
     chdir('t') if -d 't';    
