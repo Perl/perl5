@@ -2420,6 +2420,7 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
 I32
 Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 {
+    I32 result;
     if (!pid)
 	return -1;
 #if !defined(HAS_WAITPID) && !defined(HAS_WAIT4) || defined(HAS_WAITPID_RUNTIME)
@@ -2457,15 +2458,14 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
     if (!HAS_WAITPID_RUNTIME)
 	goto hard_way;
 #  endif
-    return PerlProc_waitpid(pid,statusp,flags);
+    result = PerlProc_waitpid(pid,statusp,flags);
 #endif
 #if !defined(HAS_WAITPID) && defined(HAS_WAIT4)
-    return wait4((pid==-1)?0:pid,statusp,flags,Null(struct rusage *));
+    result = wait4((pid==-1)?0:pid,statusp,flags,Null(struct rusage *));
 #endif
 #if !defined(HAS_WAITPID) && !defined(HAS_WAIT4) || defined(HAS_WAITPID_RUNTIME)
   hard_way:
     {
-	I32 result;
 	if (flags)
 	    Perl_croak(aTHX_ "Can't do waitpid with flags");
 	else {
@@ -2474,9 +2474,12 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 	    if (result < 0)
 		*statusp = -1;
 	}
-	return result;
     }
 #endif
+    if (result < 0 && errno == EINTR) {
+	PERL_ASYNC_CHECK();
+    }
+    return result;
 }
 #endif /* !DOSISH || OS2 || WIN32 || NETWARE */
 
@@ -3894,8 +3897,8 @@ Perl_getcwd_sv(pTHX_ register SV *sv)
 
 Returns a pointer to the next character after the parsed
 vstring, as well as updating the passed in sv.
- * 
-Function must be called like 
+ *
+Function must be called like
  	
         sv = NEWSV(92,5);
 	s = new_vstring(s,sv);
