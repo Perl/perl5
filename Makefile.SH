@@ -802,6 +802,7 @@ realclean:	_realcleaner _mopup
 	@echo "Note that make realclean does not delete config.sh or Policy.sh"
 
 _clobber:
+	-@rm -f Cross/run-* Cross/to-* Cross/from-*
 	rm -f config.sh cppstdin Policy.sh
 
 clobber:	_realcleaner _mopup _clobber

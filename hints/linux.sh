@@ -119,7 +119,7 @@ main() {
 	exit(0); /* succeed (yes, it's ELF) */
 }
 EOM
-if ${cc:-gcc} try.c >/dev/null 2>&1 && ./a.out; then
+if ${cc:-gcc} try.c >/dev/null 2>&1 && $run ./a.out; then
     cat <<'EOM' >&4
 
 You appear to have ELF support.  I'll try to use it for dynamic loading.

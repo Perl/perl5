@@ -962,12 +962,6 @@
  */
 #define SH_PATH "/bin/sh"  /**/
 
-/* CROSSCOMPILE:
- *	This symbol, if defined, signifies that we our
- *	build process is a cross-compilation.
- */
-/*#define CROSSCOMPILE		/**/
-
 /* INTSIZE:
  *	This symbol contains the value of sizeof(int) so that the C
  *	preprocessor can make decisions based on it.
@@ -1051,7 +1045,7 @@
  *	double, or a long double when applicable. Usual values are 2,
  *	4 and 8. The default is eight, for safety.
  */
-#if defined(CROSSCOMPILE) || defined(MULTIARCH)
+#if defined(USE_CROSS_COMPILE) || defined(MULTIARCH)
 #  define MEM_ALIGNBYTES 8
 #else
 #define MEM_ALIGNBYTES 8
@@ -1128,7 +1122,7 @@
  *	so the default case (for NeXT) is big endian to catch them. 
  *	This might matter for NeXT 3.0.
  */
-#if defined(CROSSCOMPILE) || defined(MULTIARCH)
+#if defined(USE_CROSS_COMPILE) || defined(MULTIARCH)
 #  ifdef __LITTLE_ENDIAN__
 #    if LONGSIZE == 4
 #      define BYTEORDER 0x1234
