@@ -418,6 +418,8 @@ sub compile_ucm
  $encoding{$name} = [$e2u,$u2e,$erep,$min_el,$max_el];
 }
 
+
+
 sub compile_enc
 {
  my ($fh,$name) = @_;
@@ -458,8 +460,9 @@ sub compile_enc
     {
      # So why is it 1% faster to leave the my here?
      my $line = <$fh>;
-     die "Line should be exactly 65 characters long including newline"
-       unless length ($line) == 65;
+     $line =~ s/\r\n$/\n/;
+     die "$.:${line}Line should be exactly 65 characters long including
+     newline (".length($line).")" unless length ($line) == 65;
      # Split line into groups of 4 hex digits, convert groups to ints
      # This takes 65.35		
      # map {hex $_} $line =~ /(....)/g
