@@ -55,10 +55,10 @@ ok( add_file('foo'), 'add a temporary file' );
 
 # there shouldn't be a MANIFEST there
 my ($res, $warn) = catch_warning( \&mkmanifest ); 
-is( $warn, <<ADDING, "mkmanifest() displayed it's additions" );
-Added to MANIFEST: MANIFEST
-Added to MANIFEST: foo
-ADDING
+# Canonize the order.
+$warn = join("", map { "$_|" } sort { lc $a cmp lc $b } split /\r?\n/, $warn);
+is( $warn, "Added to MANIFEST: foo|Added to MANIFEST: MANIFEST|",
+    "mkmanifest() displayed it's additions" );
 
 # and now you see it
 ok( -e 'MANIFEST', 'create MANIFEST file' );
