@@ -101,7 +101,7 @@ sub SPLICE
 
 package main;
 
-print "1..35\n";                   
+print "1..36\n";                   
 my $test = 1;
 
 {my @ary;
@@ -196,7 +196,7 @@ foreach $n (@ary)
   print "ok ", $test++,"\n";         
  }
 
-# (30-33) 20020303 MJD
+# (30-33) 20020303 mjd-perl-patch+@plover.com
 @ary = ();
 $seen{POP} = 0;
 pop @ary;                       # this didn't used to call POP at all
@@ -222,6 +222,29 @@ print "ok ", $test++,"\n";
 untie @ary;   
 
 }
+
+# 20020401 mjd-perl-patch+@plover.com
+# Thanks to Dave Mitchell for the small test case
+{ require './test.pl';
+  curr_test(35);
+  local $::TODO = 'Not fixed yet';
+  fresh_perl_is(<<'End_of_Test', "ok", {}, "Core dump in 'leavetry'");
+######## [ID 20020301.011] Core dump in 'leavetry' in 5.7.2
+  my @a;
+  
+  sub X::TIEARRAY { bless {}, 'X' }
+
+  sub X::SPLICE {
+    do '/dev/null';
+    die;
+  }
+
+  tie @a, 'X';
+  eval { splice(@a) };
+  print "ok\n"
+End_of_Test
+}
+$test++;
                            
 print "not " unless $seen{'DESTROY'} == 2;
 print "ok ", $test++,"\n";         
