@@ -84,12 +84,21 @@ END
  a123456789b123456789c123456789d123456789e123456789f123456789g123456789g123
  4567
 END
+TEST10
+my mother once said
+"never eat paste my darling"
+would that I heeded
+END
+   my mother once said
+ "never eat paste my darling"
+ would that I heeded
+END
 DONE
 
 
 $| = 1;
 
-print "1..", @tests/2, "\n";
+print "1..". @tests . "\n";
 
 use Text::Wrap;
 
@@ -102,28 +111,36 @@ while (@tests) {
 
 	$in =~ s/^TEST(\d+)?\n//;
 
-	my $back = wrap('   ', ' ', $in);
+        # Make sure split() doesn't drop trailing empty sets.
+        my @in = split("\n", $in, -1);
+        @in = ((map { "$_\n" } @in[0..$#in-1]), $in[-1]);
 
-	if ($back eq $out) {
-		print "ok $tn\n";
-	} elsif ($rerun) {
-		my $oi = $in;
-		foreach ($in, $back, $out) {
-			s/\t/^I\t/gs;
-			s/\n/\$\n/gs;
-		}
-		print "------------ input ------------\n";
-		print $in;
-		print "\n------------ output -----------\n";
-		print $back;
-		print "\n------------ expected ---------\n";
-		print $out;
-		print "\n-------------------------------\n";
-		$Text::Wrap::debug = 1;
-		wrap('   ', ' ', $oi);
-		exit(1);
-	} else {
-		print "not ok $tn\n";
-	}
-	$tn++;
+        # We run wrap() both with a string and a list to test its
+        # line joining logic.
+	foreach my $back (wrap('   ', ' ', @in),
+                          wrap('   ', ' ', $in) ) {
+
+                if ($back eq $out) {
+                        print "ok $tn\n";
+                } elsif ($rerun) {
+                        my $oi = $in;
+                        foreach ($in, $back, $out) {
+                                s/\t/^I\t/gs;
+                                s/\n/\$\n/gs;
+                        }
+                        print "------------ input ------------\n";
+                        print $in;
+                        print "\n------------ output -----------\n";
+                        print $back;
+                        print "\n------------ expected ---------\n";
+                        print $out;
+                        print "\n-------------------------------\n";
+                        $Text::Wrap::debug = 1;
+                        wrap('   ', ' ', $oi);
+                        exit(1);
+                } else {
+                        print "not ok $tn\n";
+                }
+                $tn++;
+        }
 }
