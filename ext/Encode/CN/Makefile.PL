@@ -3,9 +3,11 @@ use strict;
 use ExtUtils::MakeMaker;
 
 my %tables = (EUC_CN   => ['euc-cn.enc'],
+	      GBK      => ['gbk.enc'],
 	      GB2312   => ['gb2312.enc'],
 	      GB12345  => ['gb12345.enc'],
 	      CP936    => ['cp936.enc'],
+	      'ISO-IR-165' => ['iso-ir-165.enc'],
              );
 
 my $name = 'CN';

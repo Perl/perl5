@@ -170,7 +170,7 @@ define_alias( qr/^ujis$/i => 'euc-jp' );
 # TODO: HP-UX '8' encodings arabic8 greek8 hebrew8 kana8 thai8 turkish8
 # TODO: HP-UX '15' encodings japanese15 korean15 roi15
 # TODO: Cyrillic encoding ISO-IR-111 (useful?)
-# TODO: Chinese encodings GB18030 GBK Big5-HSKCS EUC-TW
+# TODO: Chinese encodings GB18030 EUC-TW HZ
 # TODO: Armenian encoding ARMSCII-8
 # TODO: Hebrew encoding ISO-8859-8-1
 # TODO: Thai encoding TCVN

@@ -6,3 +6,4 @@ XSLoader::load('Encode::CN',$VERSION);
 
 1;
 __END__
+todo: HZ (Escape-based)

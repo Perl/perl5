@@ -246,6 +246,7 @@ ext/Encode/Encode/8859-9.enc		Encode table
 ext/Encode/Encode/8859-9.ucm		Encode table
 ext/Encode/Encode/ascii.enc		Encode table
 ext/Encode/Encode/ascii.ucm		Encode table
+ext/Encode/Encode/big5-hkscs.enc	Encode table
 ext/Encode/Encode/big5.enc		Encode table
 ext/Encode/Encode/cp1006.enc		Encode table
 ext/Encode/Encode/cp1047.enc		Encode table
@@ -294,9 +295,11 @@ ext/Encode/Encode/euc-kr.enc		Encode table
 ext/Encode/Encode/gb12345.enc		Encode table
 ext/Encode/Encode/gb1988.enc		Encode table
 ext/Encode/Encode/gb2312.enc		Encode table
+ext/Encode/Encode/gbk.enc		Encode table
 ext/Encode/Encode/gsm0338.enc		Encode table
 ext/Encode/Encode/HZ.enc		Encode table
 ext/Encode/Encode/ir-197.enc		Encode table
+ext/Encode/Encode/iso-ir-165.enc	Encode table
 ext/Encode/Encode/jis0201.enc		Encode table
 ext/Encode/Encode/jis0201.ucm		Encode table
 ext/Encode/Encode/jis0208.enc		Encode table
@@ -1134,8 +1137,8 @@ lib/look.pl			A "look" equivalent
 lib/Math/BigFloat.pm		An arbitrary precision floating-point arithmetic package
 lib/Math/BigInt.pm		An arbitrary precision integer arithmetic package
 lib/Math/BigInt/Calc.pm		Pure Perl module to support Math::BigInt
-lib/Math/BigInt/t/bare_mbi.t	Test MBI under Math::BigInt::BareCalc
 lib/Math/BigInt/t/bare_mbf.t	Test MBF under Math::BigInt::BareCalc
+lib/Math/BigInt/t/bare_mbi.t	Test MBI under Math::BigInt::BareCalc
 lib/Math/BigInt/t/bigfltpm.inc	Shared tests for bigfltpm.t and sub_mbf.t
 lib/Math/BigInt/t/bigfltpm.t	See if BigFloat.pm works
 lib/Math/BigInt/t/bigintc.t	See if BigInt/Calc.pm works
@@ -1416,9 +1419,6 @@ lib/Tie/Array/push.t		Test for Tie::Array
 lib/Tie/Array/splice.t		Test for Tie::Array::SPLICE
 lib/Tie/Array/std.t		Test for Tie::StdArray
 lib/Tie/Array/stdpush.t		Test for Tie::StdArray
-lib/Tie/Handle.pm		Base class for tied handles
-lib/Tie/Handle/stdhandle.t	Test for Tie::StdHandle
-lib/Tie/Hash.pm			Base class for tied hashes
 lib/Tie/File.pm                 Files as tied arrays.
 lib/Tie/File/01_gen.t           Test for Tie::File.
 lib/Tie/File/02_fetchsize.t     Test for Tie::File.
@@ -1433,6 +1433,9 @@ lib/Tie/File/10_splice_rs.t     Test for Tie::File.
 lib/Tie/File/11_rv_splice_rs.t  Test for Tie::File.
 lib/Tie/File/12_longfetch_rs.t  Test for Tie::File.
 lib/Tie/File/13_size_rs.t       Test for Tie::File.
+lib/Tie/Handle.pm		Base class for tied handles
+lib/Tie/Handle/stdhandle.t	Test for Tie::StdHandle
+lib/Tie/Hash.pm			Base class for tied hashes
 lib/Tie/Memoize.pm		Base class for memoized tied hashes
 lib/Tie/Memoize.t		Test for Memoize.t
 lib/Tie/RefHash.pm		Base class for tied hashes with references as keys
