@@ -592,7 +592,7 @@ module:
 
 =item chomp VARIABLE
 
-=item chomp LIST
+=item chomp( LIST )
 
 =item chomp
 
@@ -626,7 +626,7 @@ characters removed is returned.
 
 =item chop VARIABLE
 
-=item chop LIST
+=item chop( LIST )
 
 =item chop
 

@@ -5330,12 +5330,12 @@ Perl_keyword(pTHX_ register char *d, I32 len)
 	    if (strEQ(d,"cos"))			return -KEY_cos;
 	    break;
 	case 4:
-	    if (strEQ(d,"chop"))		return -KEY_chop;
+	    if (strEQ(d,"chop"))		return KEY_chop;
 	    break;
 	case 5:
 	    if (strEQ(d,"close"))		return -KEY_close;
 	    if (strEQ(d,"chdir"))		return -KEY_chdir;
-	    if (strEQ(d,"chomp"))		return -KEY_chomp;
+	    if (strEQ(d,"chomp"))		return KEY_chomp;
 	    if (strEQ(d,"chmod"))		return -KEY_chmod;
 	    if (strEQ(d,"chown"))		return -KEY_chown;
 	    if (strEQ(d,"crypt"))		return -KEY_crypt;
