@@ -723,7 +723,7 @@ S_skipspace(pTHX_ register char *s)
 		PL_minus_n = PL_minus_p = 0;
 	    }
 	    else
-		sv_setpv(PL_linestr,";");
+		sv_setpvn(PL_linestr,";", 1);
 
 	    /* reset variables for next time we lex */
 	    PL_oldoldbufptr = PL_oldbufptr = PL_bufptr = s = PL_linestart
@@ -2568,12 +2568,12 @@ Perl_yylex(pTHX)
 	    PL_preambled = TRUE;
 	    sv_setpv(PL_linestr,incl_perldb());
 	    if (SvCUR(PL_linestr))
-		sv_catpv(PL_linestr,";");
+		sv_catpvn(PL_linestr,";", 1);
 	    if (PL_preambleav){
 		while(AvFILLp(PL_preambleav) >= 0) {
 		    SV *tmpsv = av_shift(PL_preambleav);
 		    sv_catsv(PL_linestr, tmpsv);
-		    sv_catpv(PL_linestr, ";");
+		    sv_catpvn(PL_linestr, ";", 1);
 		    sv_free(tmpsv);
 		}
 		sv_free((SV*)PL_preambleav);
@@ -2608,7 +2608,7 @@ Perl_yylex(pTHX)
 		        sv_catpv(PL_linestr,"our @F=split(' ');");
 		}
 	    }
-	    sv_catpv(PL_linestr, "\n");
+	    sv_catpvn(PL_linestr, "\n", 1);
 	    PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart = SvPVX(PL_linestr);
 	    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
 	    PL_last_lop = PL_last_uni = Nullch;
