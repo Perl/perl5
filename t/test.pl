@@ -302,6 +302,11 @@ sub which_perl {
 	    }
 	}
 	
+        # Its like this.  stat on Cygwin treats 'perl' to mean 'perl.exe'
+        # but open does not.  This can get confusing, so to be safe we
+        # always put the .exe on the end on Cygwin.
+        $Perl .= $exe if $^O eq 'cygwin' && $Perl !~ /\Q$exe\E$/;
+
 	warn "which_perl: cannot find $Perl from $^X" unless -f $Perl;
 	
 	# For subcommands to use.
