@@ -788,7 +788,7 @@ BEGIN {
     my $divide_op = infix_op("/");
     my $modulo_op = infix_op("%");
     my $lshift_op = infix_op("<<");
-    my $rshift_op = infix_op("<<");
+    my $rshift_op = infix_op(">>");
     my $ncmp_op = sub { "($_[0] > $_[1] ? 1 : ($_[0] < $_[1]) ? -1 : 0)" };
     my $scmp_op = prefix_op("sv_cmp");
     my $seq_op = prefix_op("sv_eq");
