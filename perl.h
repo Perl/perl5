@@ -1233,17 +1233,19 @@ char *strcpy(), *strcat();
 #endif
 
 #ifndef __cplusplus
-#ifdef __NeXT__ /* or whatever catches all NeXTs */
+#  ifdef __NeXT__ /* or whatever catches all NeXTs */
 char *crypt ();       /* Maybe more hosts will need the unprototyped version */
-#else
+#  else
+#    ifndef WIN32
 char *crypt _((const char*, const char*));
-#endif
-#ifndef DONT_DECLARE_STD
-#ifndef getenv
+#    endif
+#  endif
+#  ifndef DONT_DECLARE_STD
+#    ifndef getenv
 char *getenv _((const char*));
-#endif
+#    endif
 Off_t lseek _((int,Off_t,int));
-#endif
+#  endif
 char *getlogin _((void));
 #endif
 
