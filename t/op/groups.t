@@ -10,6 +10,11 @@ sub quit {
     exit 0;
 }
 
+unless (eval { getgrgid(0); 1 }) {
+    print "1..0 # Skip: getgrgid() not implemented\n";
+    exit 0;
+}
+
 quit() if (($^O eq 'MSWin32' || $^O eq 'NetWare') or $^O =~ /lynxos/i);
 
 # We have to find a command that prints all (effective
@@ -63,11 +68,6 @@ EOM
     }
     # Okay, not today.
     quit();
-}
-
-unless (eval { getgrgid(0); 1 }) {
-    print "1..0 # Skip: getgrgid() not implemented\n";
-    exit 0;
 }
 
 chomp($groups);
