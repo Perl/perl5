@@ -161,16 +161,29 @@ struct perl_thread *getTHR _((void));
  * Systems with very fast mutexes (and/or slow conditionals) may wish to
  * remove the "if (threadnum) ..." test.
  */
-#define LOCK_SV_MUTEX			\
-    STMT_START {			\
+#define LOCK_SV_MUTEX				\
+    STMT_START {				\
 	if (PL_threadnum)			\
-	    MUTEX_LOCK(&PL_sv_mutex);	\
+	    MUTEX_LOCK(&PL_sv_mutex);		\
     } STMT_END
 
-#define UNLOCK_SV_MUTEX			\
-    STMT_START {			\
+#define UNLOCK_SV_MUTEX				\
+    STMT_START {				\
 	if (PL_threadnum)			\
-	    MUTEX_UNLOCK(&PL_sv_mutex);	\
+	    MUTEX_UNLOCK(&PL_sv_mutex);		\
+    } STMT_END
+
+/* Likewise for strtab_mutex */
+#define LOCK_STRTAB_MUTEX			\
+    STMT_START {				\
+	if (PL_threadnum)			\
+	    MUTEX_LOCK(&PL_strtab_mutex);	\
+    } STMT_END
+
+#define UNLOCK_STRTAB_MUTEX			\
+    STMT_START {				\
+	if (PL_threadnum)			\
+	    MUTEX_UNLOCK(&PL_strtab_mutex);	\
     } STMT_END
 
 #ifndef THREAD_RET_TYPE
@@ -223,6 +236,8 @@ typedef struct condpair {
 #define COND_DESTROY(c)
 #define LOCK_SV_MUTEX
 #define UNLOCK_SV_MUTEX
+#define LOCK_STRTAB_MUTEX
+#define UNLOCK_STRTAB_MUTEX
 
 #define THR
 /* Rats: if dTHR is just blank then the subsequent ";" throws an error */

@@ -18,7 +18,7 @@ static void hv_magic_check _((HV *hv, bool *needs_copy, bool *needs_store));
 #ifndef PERL_OBJECT
 static void hsplit _((HV *hv));
 static void hfreeentries _((HV *hv));
-static HE* more_he _((void));
+static void more_he _((void));
 #endif
 
 #if defined(STRANGE_MALLOC) || defined(MYMALLOC)
@@ -32,22 +32,25 @@ STATIC HE*
 new_he(void)
 {
     HE* he;
-    if (PL_he_root) {
-        he = PL_he_root;
-        PL_he_root = HeNEXT(he);
-        return he;
-    }
-    return more_he();
+    LOCK_SV_MUTEX;
+    if (!PL_he_root)
+        more_he();
+    he = PL_he_root;
+    PL_he_root = HeNEXT(he);
+    UNLOCK_SV_MUTEX;
+    return he;
 }
 
 STATIC void
 del_he(HE *p)
 {
+    LOCK_SV_MUTEX;
     HeNEXT(p) = (HE*)PL_he_root;
     PL_he_root = p;
+    UNLOCK_SV_MUTEX;
 }
 
-STATIC HE*
+STATIC void
 more_he(void)
 {
     register HE* he;
@@ -60,7 +63,6 @@ more_he(void)
         he++;
     }
     HeNEXT(he) = 0;
-    return new_he();
 }
 
 STATIC HEK *
@@ -1149,6 +1151,7 @@ unsharepvn(char *str, I32 len, U32 hash)
     } */
     xhv = (XPVHV*)SvANY(PL_strtab);
     /* assert(xhv_array != 0) */
+    LOCK_STRTAB_MUTEX;
     oentry = &((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
     for (entry = *oentry; entry; i=0, oentry = &HeNEXT(entry), entry = *oentry) {
 	if (HeHASH(entry) != hash)		/* strings can't be equal */
@@ -1168,6 +1171,7 @@ unsharepvn(char *str, I32 len, U32 hash)
 	}
 	break;
     }
+    UNLOCK_STRTAB_MUTEX;
     
     if (!found)
 	warn("Attempt to free non-existent shared string");    
@@ -1193,6 +1197,7 @@ share_hek(char *str, I32 len, register U32 hash)
     */
     xhv = (XPVHV*)SvANY(PL_strtab);
     /* assert(xhv_array != 0) */
+    LOCK_STRTAB_MUTEX;
     oentry = &((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
     for (entry = *oentry; entry; i=0, entry = HeNEXT(entry)) {
 	if (HeHASH(entry) != hash)		/* strings can't be equal */
@@ -1219,6 +1224,7 @@ share_hek(char *str, I32 len, register U32 hash)
     }
 
     ++HeVAL(entry);				/* use value slot as REFCNT */
+    UNLOCK_STRTAB_MUTEX;
     return HeKEY_hek(entry);
 }
 
