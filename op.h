@@ -79,6 +79,7 @@ typedef U32 PADOFFSET;
 				/*  On OP_ENTERSUB || OP_NULL, saw a "do". */
 				/*  On OP_(ENTER|LEAVE)EVAL, don't clear $@ */
 				/*  On OP_ENTERITER, loop var is per-thread */
+                                /*  On pushre, re is /\s+/ imp. by split " " */
 
 /* old names; don't use in new code, but don't break them, either */
 #define OPf_LIST	OPf_WANT_LIST
