@@ -1,12 +1,17 @@
 package File::Spec::Win32;
 
+use strict;
+use vars qw(@ISA);
+require File::Spec::Unix;
+@ISA = qw(File::Spec::Unix);
+
 =head1 NAME
 
 File::Spec::Win32 - methods for Win32 file specs
 
 =head1 SYNOPSIS
 
- use File::Spec::Win32; # Done internally by File::Spec if needed
+ require File::Spec::Win32; # Done internally by File::Spec if needed
 
 =head1 DESCRIPTION
 
@@ -16,37 +21,46 @@ the semantics.
 
 =over
 
-=cut 
+=item devnull
 
-#use Config;
-#use Cwd;
-use File::Basename;
-require Exporter;
-use strict;
+Returns a string representation of the null device.
 
-use vars qw(@ISA);
+=cut
 
-use File::Spec;
-Exporter::import('File::Spec', qw( $Verbose));
-
-@ISA = qw(File::Spec::Unix);
-
-$ENV{EMXSHELL} = 'sh'; # to run `commands`
-
-sub file_name_is_absolute {
-    my($self,$file) = @_;
-    $file =~ m{^([a-z]:)?[\\/]}i ;
+sub devnull {
+    return "nul";
 }
 
-sub catdir {
+=item tmpdir
+
+Returns a string representation of the first existing directory
+from the following list:
+
+    $ENV{TMPDIR}
+    $ENV{TEMP}
+    $ENV{TMP}
+    /tmp
+    /
+
+=cut
+
+my $tmpdir;
+sub tmpdir {
+    return $tmpdir if defined $tmpdir;
     my $self = shift;
-    my @args = @_;
-    for (@args) {
-	# append a slash to each argument unless it has one there
-	$_ .= "\\" if $_ eq '' or substr($_,-1) ne "\\";
+    foreach (@ENV{qw(TMPDIR TEMP TMP)}, qw(/tmp /)) {
+	next unless defined && -d;
+	$tmpdir = $_;
+	last;
     }
-    my $result = $self->canonpath(join('', @args));
-    $result;
+    $tmpdir = '' unless defined $tmpdir;
+    $tmpdir = $self->canonpath($tmpdir);
+    return $tmpdir;
+}
+
+sub file_name_is_absolute {
+    my ($self,$file) = @_;
+    return scalar($file =~ m{^([a-z]:)?[\\/]}i);
 }
 
 =item catfile
@@ -57,26 +71,20 @@ complete path ending with a filename
 =cut
 
 sub catfile {
-    my $self = shift @_;
+    my $self = shift;
     my $file = pop @_;
     return $file unless @_;
     my $dir = $self->catdir(@_);
-    $dir =~ s/(\\\.)$//;
-    $dir .= "\\" unless substr($dir,length($dir)-1,1) eq "\\";
+    $dir .= "\\" unless substr($dir,-1) eq "\\";
     return $dir.$file;
-}
-
-sub devnull {
-    return "nul";
 }
 
 sub path {
     local $^W = 1;
-    my($self) = @_;
     my $path = $ENV{'PATH'} || $ENV{'Path'} || $ENV{'path'};
     my @path = split(';',$path);
-    foreach(@path) { $_ = '.' if $_ eq '' }
-    @path;
+    foreach (@path) { $_ = '.' if $_ eq '' }
+    return @path;
 }
 
 =item canonpath
@@ -87,22 +95,23 @@ path. On UNIX eliminated successive slashes and successive "/.".
 =cut
 
 sub canonpath {
-    my($self,$path) = @_;
+    my ($self,$path) = @_;
     $path =~ s/^([a-z]:)/\u$1/;
     $path =~ s|/|\\|g;
-    $path =~ s|\\+|\\|g ;                          # xx////xx  -> xx/xx
-    $path =~ s|(\\\.)+\\|\\|g ;                    # xx/././xx -> xx/xx
+    $path =~ s|([^\\])\\+|\1\\|g;                  # xx////xx  -> xx/xx
+    $path =~ s|(\\\.)+\\|\\|g;                     # xx/././xx -> xx/xx
     $path =~ s|^(\.\\)+|| unless $path eq ".\\";   # ./xx      -> xx
-    $path =~ s|\\$|| 
-             unless $path =~ m#^([a-z]:)?\\#;      # xx/       -> xx
-    $path .= '.' if $path =~ m#\\$#;
-    $path;
+    $path =~ s|\\$||
+             unless $path =~ m#^([A-Z]:)?\\#;      # xx/       -> xx
+    return $path;
 }
-
-1;
-__END__
 
 =back
 
-=cut 
+=head1 SEE ALSO
 
+L<File::Spec>
+
+=cut
+
+1;

@@ -1,47 +1,18 @@
 package File::Spec;
 
-require Exporter;
-
-@ISA = qw(Exporter);
-# Items to export into callers namespace by default. Note: do not export
-# names by default without a very good reason. Use EXPORT_OK instead.
-# Do not simply export all your public functions/methods/constants.
-@EXPORT = qw(
-	
-);
-@EXPORT_OK = qw($Verbose);
-
 use strict;
-use vars qw(@ISA $VERSION $Verbose);
+use vars qw(@ISA $VERSION);
 
 $VERSION = '0.6';
 
-$Verbose = 0;
+my %module = (MacOS   => 'Mac',
+	      MSWin32 => 'Win32',
+	      os2     => 'OS2',
+	      VMS     => 'VMS');
 
-require File::Spec::Unix;
-
-
-sub load {
-	my($class,$OS) = @_;
-	if ($OS eq 'VMS') {
-		require File::Spec::VMS;
-		require VMS::Filespec;
-		'File::Spec::VMS'
-	} elsif ($OS eq 'os2') {
-		require File::Spec::OS2;
-		'File::Spec::OS2'
-	} elsif ($OS eq 'MacOS') {
-		require File::Spec::Mac;
-		'File::Spec::Mac'
-	} elsif ($OS eq 'MSWin32') {
-		require File::Spec::Win32;
-		'File::Spec::Win32'
-	} else {
-		'File::Spec::Unix'
-	}
-}
-
-@ISA = load('File::Spec', $^O);
+my $module = $module{$^O} || 'Unix';
+require "File/Spec/$module.pm";
+@ISA = ("File::Spec::$module");
 
 1;
 __END__
@@ -109,8 +80,3 @@ Kenneth Albanowski <F<kjahds@kjahds.com>>, Andy Dougherty
 support by Charles Bailey <F<bailey@newman.upenn.edu>>.  OS/2 support by
 Ilya Zakharevich <F<ilya@math.ohio-state.edu>>. Mac support by Paul Schinder
 <F<schinder@pobox.com>>.
-
-=cut
-
-
-1;

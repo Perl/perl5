@@ -1,23 +1,6 @@
 package File::Spec::Unix;
 
-use Exporter ();
-use Config;
-use File::Basename qw(basename dirname fileparse);
-use DirHandle;
 use strict;
-use vars qw(@ISA $Is_Mac $Is_OS2 $Is_VMS $Is_Win32);
-use File::Spec;
-
-Exporter::import('File::Spec', '$Verbose');
-
-$Is_OS2 = $^O eq 'os2';
-$Is_Mac = $^O eq 'MacOS';
-$Is_Win32 = $^O eq 'MSWin32';
-
-if ($Is_VMS = $^O eq 'VMS') {
-    require VMS::Filespec;
-    import VMS::Filespec qw( &vmsify );
-}
 
 =head1 NAME
 
@@ -25,7 +8,7 @@ File::Spec::Unix - methods used by File::Spec
 
 =head1 SYNOPSIS
 
-C<require File::Spec::Unix;>
+ require File::Spec::Unix; # Done automatically by File::Spec
 
 =head1 DESCRIPTION
 
@@ -43,12 +26,12 @@ path. On UNIX eliminated successive slashes and successive "/.".
 =cut
 
 sub canonpath {
-    my($self,$path) = @_;
-    $path =~ s|/+|/|g ;                            # xx////xx  -> xx/xx
-    $path =~ s|(/\.)+/|/|g ;                       # xx/././xx -> xx/xx
+    my ($self,$path) = @_;
+    $path =~ s|/+|/|g;                             # xx////xx  -> xx/xx
+    $path =~ s|(/\.)+/|/|g;                        # xx/././xx -> xx/xx
     $path =~ s|^(\./)+|| unless $path eq "./";     # ./xx      -> xx
     $path =~ s|/$|| unless $path eq "/";           # xx/       -> xx
-    $path;
+    return $path;
 }
 
 =item catdir
@@ -61,20 +44,14 @@ trailing slash :-)
 
 =cut
 
-# ';
-
 sub catdir {
-    shift;
+    my $self = shift;
     my @args = @_;
-    for (@args) {
+    foreach (@args) {
 	# append a slash to each argument unless it has one there
-	$_ .= "/" if $_ eq '' or substr($_,-1) ne "/";
+	$_ .= "/" if $_ eq '' || substr($_,-1) ne "/";
     }
-    my $result = join('', @args);
-    # remove a trailing slash unless we are root
-    substr($result,-1) = ""
-	if length($result) > 1 && substr($result,-1) eq "/";
-    $result;
+    return $self->canonpath(join('', @args));
 }
 
 =item catfile
@@ -85,29 +62,27 @@ complete path ending with a filename
 =cut
 
 sub catfile {
-    my $self = shift @_;
+    my $self = shift;
     my $file = pop @_;
     return $file unless @_;
     my $dir = $self->catdir(@_);
-    for ($dir) {
-	$_ .= "/" unless substr($_,length($_)-1,1) eq "/";
-    }
+    $dir .= "/" unless substr($dir,-1) eq "/";
     return $dir.$file;
 }
 
 =item curdir
 
-Returns a string representing of the current directory.  "." on UNIX.
+Returns a string representation of the current directory.  "." on UNIX.
 
 =cut
 
 sub curdir {
-    return "." ;
+    return ".";
 }
 
 =item devnull
 
-Returns the name of the null device (bit bucket). "/dev/null" on UNIX.
+Returns a string representation of the null device. "/dev/null" on UNIX.
 
 =cut
 
@@ -117,7 +92,7 @@ sub devnull {
 
 =item rootdir
 
-Returns a string representing of the root directory.  "/" on UNIX.
+Returns a string representation of the root directory.  "/" on UNIX.
 
 =cut
 
@@ -125,9 +100,31 @@ sub rootdir {
     return "/";
 }
 
+=item tmpdir
+
+Returns a string representation of the first writable directory
+from the following list or "" if none are writable:
+
+    $ENV{TMPDIR}
+    /tmp
+
+=cut
+
+my $tmpdir;
+sub tmpdir {
+    return $tmpdir if defined $tmpdir;
+    foreach ($ENV{TMPDIR}, "/tmp") {
+	next unless defined && -d && -w _;
+	$tmpdir = $_;
+	last;
+    }
+    $tmpdir = '' unless defined $tmpdir;
+    return $tmpdir;
+}
+
 =item updir
 
-Returns a string representing of the parent directory.  ".." on UNIX.
+Returns a string representation of the parent directory.  ".." on UNIX.
 
 =cut
 
@@ -143,7 +140,7 @@ directory. (Does not strip symlinks, only '.', '..', and equivalents.)
 =cut
 
 sub no_upwards {
-    my($self) = shift;
+    my $self = shift;
     return grep(!/^\.{1,2}$/, @_);
 }
 
@@ -154,8 +151,8 @@ Takes as argument a path and returns true, if it is an absolute path.
 =cut
 
 sub file_name_is_absolute {
-    my($self,$file) = @_;
-    $file =~ m:^/: ;
+    my ($self,$file) = @_;
+    return scalar($file =~ m:^/:);
 }
 
 =item path
@@ -165,12 +162,9 @@ Takes no argument, returns the environment variable PATH as an array.
 =cut
 
 sub path {
-    my($self) = @_;
-    my $path_sep = ":";
-    my $path = $ENV{PATH};
-    my @path = split $path_sep, $path;
-    foreach(@path) { $_ = '.' if $_ eq '' }
-    @path;
+    my @path = split(':', $ENV{PATH});
+    foreach (@path) { $_ = '.' if $_ eq '' }
+    return @path;
 }
 
 =item join
@@ -180,19 +174,8 @@ join is the same as catfile.
 =cut
 
 sub join {
-	my($self) = shift @_;
-	$self->catfile(@_);
-}
-
-=item nativename
-
-TBW.
-
-=cut
-
-sub nativename {
-	my($self,$name) = shift @_;
-	$name;
+    my $self = shift;
+    return $self->catfile(@_);
 }
 
 =back
@@ -204,4 +187,3 @@ L<File::Spec>
 =cut
 
 1;
-__END__
