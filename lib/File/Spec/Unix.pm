@@ -69,12 +69,8 @@ trailing slash :-)
 
 sub catdir {
     my $self = shift;
-    my @args = @_;
-    foreach (@args) {
-	# append a slash to each argument unless it has one there
-	$_ .= "/" if $_ eq '' || substr($_,-1) ne "/";
-    }
-    return $self->canonpath(join('', @args));
+
+    $self->canonpath(join('/', @_, '')); # '' because need a trailing '/'
 }
 
 =item catfile
@@ -99,9 +95,7 @@ Returns a string representation of the current directory.  "." on UNIX.
 
 =cut
 
-sub curdir {
-    return ".";
-}
+sub curdir () { '.' }
 
 =item devnull
 
@@ -109,9 +103,7 @@ Returns a string representation of the null device. "/dev/null" on UNIX.
 
 =cut
 
-sub devnull {
-    return "/dev/null";
-}
+sub devnull () { '/dev/null' }
 
 =item rootdir
 
@@ -119,9 +111,7 @@ Returns a string representation of the root directory.  "/" on UNIX.
 
 =cut
 
-sub rootdir {
-    return "/";
-}
+sub rootdir () { '/' }
 
 =item tmpdir
 
@@ -171,9 +161,7 @@ Returns a string representation of the parent directory.  ".." on UNIX.
 
 =cut
 
-sub updir {
-    return "..";
-}
+sub updir () { '..' }
 
 =item no_upwards
 
@@ -194,9 +182,7 @@ is not or is significant when comparing file specifications.
 
 =cut
 
-sub case_tolerant {
-    return 0;
-}
+sub case_tolerant () { 0 }
 
 =item file_name_is_absolute
 
@@ -343,13 +329,8 @@ relative, then it is converted to absolute form using
 L</rel2abs()>. This means that it is taken to be relative to
 L<cwd()|Cwd>.
 
-On systems with the concept of a volume, this assumes that both paths
-are on the $destination volume, and ignores the $base volume.  If this
-assumption may be wrong (like in VMS), trying to "unify" the paths with
-abs2rel() results in nonsense.
-
 On systems that have a grammar that indicates filenames, this ignores the 
-$base filename as well. Otherwise all path components are assumed to be
+$base filename. Otherwise all path components are assumed to be
 directories.
 
 If $path is relative, it is converted to absolute form using L</rel2abs()>.
@@ -425,11 +406,8 @@ relative, then it is converted to absolute form using
 L</rel2abs()>. This means that it is taken to be relative to
 L<cwd()|Cwd>.
 
-On systems with the concept of a volume, this assumes that both paths 
-are on the $base volume, and ignores the $path volume. 
-
-On systems that have a grammar that indicates filenames, this ignores the 
-$base filename as well. Otherwise all path components are assumed to be
+On systems that have a grammar that indicates filenames, this ignores
+the $base filename. Otherwise all path components are assumed to be
 directories.
 
 If $path is absolute, it is cleaned up and returned using L</canonpath()>.

@@ -43,6 +43,17 @@ sub tmpdir {
 			      '/'  );
 }
 
+sub catdir {
+    my $self = shift;
+    my @args = @_;
+    foreach (@args) {
+	tr[\\][/];
+        # append a backslash to each argument unless it has one there
+        $_ .= "/" unless m{/$};
+    }
+    return $self->canonpath(join('', @args));
+}
+
 sub canonpath {
     my ($self,$path) = @_;
     $path =~ s/^([a-z]:)/\l$1/s;
@@ -52,6 +63,8 @@ sub canonpath {
     $path =~ s|^(\./)+(?=[^/])||s;		# ./xx      -> xx
     $path =~ s|/\Z(?!\n)||
              unless $path =~ m#^([a-z]:)?/\Z(?!\n)#si;# xx/       -> xx
+    $path =~ s{^/\.\.$}{/};                     # /..    -> /
+    1 while $path =~ s{^/\.\.}{};               # /../xx -> /xx
     return $path;
 }
 
@@ -140,10 +153,9 @@ sub abs2rel {
     }
 
     # Split up paths
-    my ( undef, $path_directories, $path_file ) =
-        $self->splitpath( $path, 1 ) ;
-
-    my $base_directories = ($self->splitpath( $base, 1 ))[1] ;
+    my ( $path_volume, $path_directories, $path_file ) = $self->splitpath( $path, 1 ) ;
+    my ( $base_volume, $base_directories ) = $self->splitpath( $base, 1 ) ;
+    return $path unless $path_volume eq $base_volume;
 
     # Now, remove all leading components that are the same
     my @pathchunks = $self->splitdir( $path_directories );

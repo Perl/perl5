@@ -367,6 +367,12 @@ Construct a complete filespec using VMS syntax
 
 sub catpath {
     my($self,$dev,$dir,$file) = @_;
+    
+    # We look for a volume in $dev, then in $dir, but not both
+    my ($dir_volume, $dir_dir, $dir_file) = $self->splitpath($dir);
+    $dev = $dir_volume unless length $dev;
+    $dir = length $dir_file ? $self->catfile($dir_dir, $dir_file) : $dir_dir;
+    
     if ($dev =~ m|^/+([^/]+)|) { $dev = "$1:"; }
     else { $dev .= ':' unless $dev eq '' or $dev =~ /:\Z(?!\n)/; }
     if (length($dev) or length($dir)) {
@@ -384,33 +390,13 @@ Use VMS syntax when converting filespecs.
 
 sub abs2rel {
     my $self = shift;
-
     return vmspath(File::Spec::Unix::abs2rel( $self, @_ ))
-        if ( join( '', @_ ) =~ m{/} ) ;
+        if grep m{/}, @_;
 
     my($path,$base) = @_;
+    $base = $self->_cwd() unless defined $base and length $base;
 
-    # Note: we use '/' to glue things together here, then let canonpath()
-    # clean them up at the end.
-
-    # Clean up $path
-    if ( ! $self->file_name_is_absolute( $path ) ) {
-        $path = $self->rel2abs( $path ) ;
-    }
-    else {
-        $path = $self->canonpath( $path ) ;
-    }
-
-    # Figure out the effective $base and clean it up.
-    if ( !defined( $base ) || $base eq '' ) {
-        $base = $self->canonpath( $self->_cwd ) ;
-    }
-    elsif ( ! $self->file_name_is_absolute( $base ) ) {
-        $base = $self->rel2abs( $base ) ;
-    }
-    else {
-        $base = $self->canonpath( $base ) ;
-    }
+    for ($path, $base) { $_ = $self->canonpath($_) }
 
     # Are we even starting $path on the same (node::)device as $base?  Note that
     # logical paths or nodename differences may be on the "same device" 
@@ -421,23 +407,12 @@ sub abs2rel {
     # if there is a case blind device (or node) difference of any sort
     # and we do not even try to call $parse() or consult %ENV for $trnlnm()
     # (this module needs to run on non VMS platforms after all).
-    my $path_device = ($self->splitpath( $path, 1 ))[0];
-    my $base_device = ($self->splitpath( $base, 1 ))[0];
-    if ( lc( $path_device ) ne lc( $base_device ) ) {
-        return ( $path ) ;
-    }
+    
+    my ($path_volume, $path_directories, $path_file) = $self->splitpath($path);
+    my ($base_volume, $base_directories, $base_file) = $self->splitpath($base);
+    return $path unless lc($path_volume) eq lc($base_volume);
 
-    # Split up paths
-    my ( $path_directories, $path_file ) =
-        ($self->splitpath( $path, 1 ))[1,2] ;
-
-    $path_directories = $1
-        if $path_directories =~ /^\[(.*)\]\Z(?!\n)/s ;
-
-    my $base_directories = ($self->splitpath( $base, 1 ))[1] ;
-
-    $base_directories = $1
-        if $base_directories =~ /^\[(.*)\]\Z(?!\n)/s ;
+    for ($path, $base) { $_ = $self->rel2abs($_) }
 
     # Now, remove all leading components that are the same
     my @pathchunks = $self->splitdir( $path_directories );
@@ -455,8 +430,7 @@ sub abs2rel {
 
     # @basechunks now contains the directories to climb out of,
     # @pathchunks now has the directories to descend in to.
-    $path_directories = '-.' x @basechunks . join( '.', @pathchunks ) ;
-    $path_directories =~ s{\.\Z(?!\n)}{} ;
+    $path_directories = join '.', ('-' x @basechunks, @pathchunks) ;
     return $self->canonpath( $self->catpath( '', $path_directories, $path_file ) ) ;
 }
 
@@ -516,6 +490,9 @@ sub rel2abs {
 
 See L<File::Spec> and L<File::Spec::Unix>.  This package overrides the
 implementation of these methods, not the semantics.
+
+An explanation of VMS file specs can be found at
+L<"http://h71000.www7.hp.com/doc/731FINAL/4506/4506pro_014.html#apps_locating_naming_files">.
 
 =cut
 
