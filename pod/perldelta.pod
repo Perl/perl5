@@ -3037,12 +3037,16 @@ know yet which the new semantics will exactly be.  In any case the
 change will break existing code that relies on the current
 (ill-defined) semantics, so just avoid doing this in general.
 
-=head2 Self-tying of Arrays and Hashes Is Forbidden
+=head2 Self-tying Problems
 
 Self-tying of arrays and hashes is broken in rather deep and
 hard-to-fix ways.  As a stop-gap measure to avoid people from getting
 frustrated at the mysterious results (core dumps, most often) it is
 for now forbidden (you will get a fatal error even from an attempt).
+
+Self-tying of globs is broken, but not disabled.
+
+Self-tying of scalars and IO works.
 
 =head2 Building Extensions Can Fail Because Of Largefiles
 
