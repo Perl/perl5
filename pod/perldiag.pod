@@ -3249,7 +3249,7 @@ will deny it.
 The function indicated isn't implemented on this architecture, according
 to the probings of Configure.
 
-=item The stat preceding C<-l _> wasn't an lstat
+=item The stat preceding %s wasn't an lstat
 
 (F) It makes no sense to test the current stat buffer for symbolic
 linkhood if the last stat that wrote to the stat buffer already went

@@ -74,7 +74,7 @@
     flock STDIN, 8;
     flock $a, 8;
 
-  lstat() on filehandle %s			[pp_stat]
+  The stat preceding lstat() wasn't an lstat %s	[pp_stat]
     lstat(STDIN);
 
   warn(warn_nl, "stat");			[pp_stat]
@@ -354,7 +354,7 @@ lstat(STDIN) ;
 no warnings 'io' ;
 lstat(STDIN) ;
 EXPECT
-lstat() on filehandle STDIN at - line 13.
+The stat preceding lstat() wasn't an lstat at - line 13.
 ########
 # pp_sys.c [pp_fttext]
 use warnings qw(unopened closed) ;
