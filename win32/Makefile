@@ -341,9 +341,9 @@ SUBSYS		= console
 CXX_FLAG	= -TP -GX
 
 !IF "$(USE_PERLCRT)" != "define"
-PERLCRTLIBC	= msvcrt.lib
+LIBC	= msvcrt.lib
 !ELSE
-PERLCRTLIBC	= PerlCRT.lib
+LIBC	= PerlCRT.lib
 !ENDIF
 
 PERLEXE_RES	=
