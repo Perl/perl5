@@ -47,6 +47,7 @@ struct xpvcv {
 #define CVf_CLONED	0x02	/* a clone of one of those */
 #define CVf_ANON	0x04	/* CvGV() can't be trusted */
 #define CVf_OLDSTYLE	0x08
+#define CVf_UNIQUE	0x10	/* can't be cloned */
 
 #define CvCLONE(cv)		(CvFLAGS(cv) & CVf_CLONE)
 #define CvCLONE_on(cv)		(CvFLAGS(cv) |= CVf_CLONE)
@@ -63,3 +64,7 @@ struct xpvcv {
 #define CvOLDSTYLE(cv)		(CvFLAGS(cv) & CVf_OLDSTYLE)
 #define CvOLDSTYLE_on(cv)	(CvFLAGS(cv) |= CVf_OLDSTYLE)
 #define CvOLDSTYLE_off(cv)	(CvFLAGS(cv) &= ~CVf_OLDSTYLE)
+
+#define CvUNIQUE(cv)		(CvFLAGS(cv) & CVf_UNIQUE)
+#define CvUNIQUE_on(cv)		(CvFLAGS(cv) |= CVf_UNIQUE)
+#define CvUNIQUE_off(cv)	(CvFLAGS(cv) &= ~CVf_UNIQUE)

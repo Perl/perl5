@@ -562,6 +562,7 @@ setuid perl scripts securely.\n");
 
     compcv = (CV*)NEWSV(1104,0);
     sv_upgrade((SV *)compcv, SVt_PVCV);
+    CvUNIQUE_on(compcv);
 
     comppad = newAV();
     av_push(comppad, Nullsv);

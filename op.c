@@ -195,7 +195,7 @@ pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix)
 
 		depth = CvDEPTH(cv);
 		if (!depth) {
-		    if (newoff && (CvANON(cv) || CvGV(cv)))
+		    if (newoff && !CvUNIQUE(cv))
 			return 0; /* don't clone inactive sub's stack frame */
 		    depth = 1;
 		}
@@ -210,14 +210,16 @@ pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix)
 		    SvNVX(sv) = (double)curcop->cop_seq;
 		    SvIVX(sv) = 999999999;	/* A ref, intro immediately */
 		    SvFLAGS(sv) |= SVf_FAKE;
-		    /* "It's closures all the way down." */
-		    CvCLONE_on(compcv);
-		    if (cv != startcv) {
-			CV *bcv;
-			for (bcv = startcv;
-			     bcv && bcv != cv && !CvCLONE(bcv);
-			     bcv = CvOUTSIDE(bcv))
-			    CvCLONE_on(bcv);
+		    if (!CvUNIQUE(cv)) {
+			/* "It's closures all the way down." */
+			CvCLONE_on(compcv);
+			if (cv != startcv) {
+			    CV *bcv;
+			    for (bcv = startcv;
+				 bcv && bcv != cv && !CvCLONE(bcv);
+				 bcv = CvOUTSIDE(bcv))
+				CvCLONE_on(bcv);
+			}
 		    }
 		}
 		av_store(comppad, newoff, SvREFCNT_inc(oldsv));
@@ -2798,11 +2800,13 @@ CV* cv;
 		  cv,
 		  (CvANON(cv) ? "ANON"
 		   : (cv == main_cv) ? "MAIN"
+		   : CvUNIQUE(outside) ? "UNIQUE"
 		   : CvGV(cv) ? GvNAME(CvGV(cv)) : "?mystery?"),
 		  outside,
 		  (!outside ? "null"
 		   : CvANON(outside) ? "ANON"
 		   : (outside == main_cv) ? "MAIN"
+		   : CvUNIQUE(outside) ? "UNIQUE"
 		   : CvGV(outside) ? GvNAME(CvGV(outside)) : "?mystery?"));
 
     for (ix = 1; ix <= AvFILL(pad); ix++) {
@@ -2829,6 +2833,8 @@ CV* outside;
     SV** ppad = AvARRAY(protopad);
     AV* comppadlist;
     CV* cv;
+
+    assert(!CvUNIQUE(proto));
 
     ENTER;
     SAVESPTR(curpad);

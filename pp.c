@@ -248,8 +248,11 @@ PP(pp_rv2cv)
     /* We usually try to add a non-existent subroutine in case of AUTOLOAD. */
     /* (But not in defined().) */
     CV *cv = sv_2cv(TOPs, &stash, &gv, !(op->op_flags & OPf_SPECIAL));
-
-    if (!cv)
+    if (cv) {
+	if (CvCLONE(cv))
+	    cv = (CV*)sv_2mortal((SV*)cv_clone(cv));
+    }
+    else
 	cv = (CV*)&sv_undef;
     SETs((SV*)cv);
     RETURN;

@@ -1926,7 +1926,7 @@ int gimme;
     SAVESPTR(compcv);
     compcv = (CV*)NEWSV(1104,0);
     sv_upgrade((SV *)compcv, SVt_PVCV);
-    CvOUTSIDE(compcv) = (CV*)SvREFCNT_inc(caller);
+    CvUNIQUE_on(compcv);
 
     comppad = newAV();
     comppad_name = newAV();
@@ -1941,6 +1941,8 @@ int gimme;
     av_store(comppadlist, 0, (SV*)comppad_name);
     av_store(comppadlist, 1, (SV*)comppad);
     CvPADLIST(compcv) = comppadlist;
+    CvOUTSIDE(compcv) = (CV*)SvREFCNT_inc(caller);
+
     SAVEFREESV(compcv);
 
     /* make sure we compile in the right package */
