@@ -1,7 +1,7 @@
 package Encode::Alias;
 use strict;
 use Encode;
-our $VERSION = do { my @r = (q$Revision: 1.25 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.26 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG = 0;
 require Exporter;
 
@@ -178,7 +178,7 @@ sub init_aliases
     define_alias( qr/\b(?:ibm|ms|windows)[-_]?(\d\d\d\d?)$/i => '"cp$1"');
 
     # Sometimes seen with a leading zero.
-    define_alias( qr/\bcp037\b/i => '"cp37"');
+    # define_alias( qr/\bcp037\b/i => '"cp37"');
 
     # Mac Mappings
     # predefined in *.ucm; unneeded

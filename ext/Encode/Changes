@@ -1,9 +1,34 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.26 2002/04/07 15:22:04 dankogai Exp $
+# $Id: Changes,v 1.30 2002/04/08 02:34:51 dankogai Exp $
 #
 
-1.26 $Date: 2002/04/07 15:22:04 $
+1.30 $Date: 2002/04/08 02:34:51 $
++ lib/Encode/Encoder.pm
+  Object Oriented Encoder.  I reckon something like this is in need.
+! Encode.pm
+! t/Unicode.pm
+! lib/Encode/Supported.pod
+  * autoloading but that prevented upper-case canonicals such as UTF-16
+    is fixed.  Now even UTF/UCS are autoloaded!
+  * encodings() is now more intuitive.
+  * t/Unicode.t fixed to explicitly use Unicode.pm -- BOM values are
+    stored therein.
+  * Obligatory fixes to the POD.
+! lib/Encode/Supported.pod
+  Patch from Anton applied.
+  Message-Id: <66641479.20020408033300@motor.ru>
+! Encode.pm
+! lib/Encode/Unicode.pm
+  Cosmetic changes: "bless $obj, $class" => "bless $obj => class"
+
+1.28 2002/04/07 18:58:42 
+! MANIFEST
++ t/Unicode.t
++ t/grow.t
+  Just a MANIFEST for those missing files.
+
+1.26 Date: 2002/04/07 15:22:04
 ! JP/Makefile.PL
 ! t/Aliases.PL
   Schwarn's patches against Makefile.PL has zapped jis*.ucm.  Restored.
@@ -147,7 +172,7 @@
   Typo fixes and improvements by jhi
   Message-Id: <200204010201.FAA03564@alpha.hut.fi>, et al.
 
-1.11  $Date: 2002/04/07 15:22:04 $
+1.11  $Date: 2002/04/08 02:34:51 $
 + t/encoding.t
 + t/jperl.t
 ! MANIFEST

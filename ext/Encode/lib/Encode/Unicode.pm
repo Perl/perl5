@@ -3,7 +3,7 @@ package Encode::Unicode;
 use strict;
 use warnings;
 
-our $VERSION = do { my @r = (q$Revision: 1.25 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.26 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 #
 # Aux. subs & constants
@@ -66,7 +66,7 @@ for my $name (qw(UTF-16 UTF-16BE UTF-16LE
 	       size   =>   $size,
 	       endian => $endian,
 	       ucs2   =>   $ucs2,
-	      }, __PACKAGE__;
+	      } => __PACKAGE__;
 
 }
 
@@ -387,7 +387,8 @@ Galaxy> Triology,  C<First the Universe was created and it was a bad
 move>. Their mistake was not this magnitude so let's forgive them.
 
 (I don't dare make any comparison with Unicode Consortium and the
-Vogols here :)
+Vogons here ;)  Or, comparing Encode to Babel Fish is completely
+appropriate -- if you can only stick this into your ear :)
 
 A surrogate pair was born when Unicode Consortium had finally
 admitted that 16 bit was not big enough to hold all the world's
