@@ -97,7 +97,7 @@ third-party modules and extensions, designed for everything from
 commercial database interfaces to keyboard/screen control to web
 walking and CGI scripts.  The master web site for CPAN is
 http://www.cpan.org/ and there is the CPAN Multiplexer at
-http://www.perl.com/CPAN/CPAN.html which will choose a mirror near you
+http://www.cpan.org/CPAN.html which will choose a mirror near you
 via DNS.  See http://www.perl.com/CPAN (without a slash at the
 end) for how this process works. Also, http://mirror.cpan.org/
 has a nice interface to the http://www.cpan.org/MIRRORED.BY

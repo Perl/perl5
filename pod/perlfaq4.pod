@@ -322,7 +322,7 @@ will not create a list of 500,000 integers.
 
 =head2 How can I output Roman numerals?
 
-Get the http://www.perl.com/CPAN/modules/by-module/Roman module.
+Get the http://www.cpan.org/modules/by-module/Roman module.
 
 =head2 Why aren't my random numbers random?
 
@@ -334,7 +334,7 @@ than more.
 
 Computers are good at being predictable and bad at being random
 (despite appearances caused by bugs in your programs :-).
-http://www.perl.com/CPAN/doc/FMTEYEWTK/random , courtesy of Tom
+http://www.cpan.org/doc/FMTEYEWTK/random , courtesy of Tom
 Phoenix, talks more about this.  John von Neumann said, ``Anyone who
 attempts to generate random numbers by deterministic means is, of
 course, living in a state of sin.''
@@ -1473,7 +1473,7 @@ If you need to sort on several fields, the following paradigm is useful.
 This can be conveniently combined with precalculation of keys as given
 above.
 
-See http://www.perl.com/CPAN/doc/FMTEYEWTK/sort.html for more about
+See http://www.cpan.org/doc/FMTEYEWTK/sort.html for more about
 this approach.
 
 See also the question below on sorting hashes.

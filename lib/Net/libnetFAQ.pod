@@ -65,7 +65,7 @@ should not be the case with perl version 5.004 or later.
 The latest libnet release is always on CPAN, you will find it
 in 
 
- http://www.perl.com/CPAN/modules/by-module/Net/
+ http://www.cpan.org/modules/by-module/Net/
 
 The latest release and information is also avaliable on the libnet web page
 at

@@ -404,7 +404,7 @@ are many others.
 An elaborate subroutine (for 7-bit ASCII only) to pull out balanced
 and possibly nested single chars, like C<`> and C<'>, C<{> and C<}>,
 or C<(> and C<)> can be found in
-http://www.perl.com/CPAN/authors/id/TOMC/scripts/pull_quotes.gz .
+http://www.cpan.org/authors/id/TOMC/scripts/pull_quotes.gz .
 
 The C::Scan module from CPAN also contains such subs for internal use,
 but they are undocumented.

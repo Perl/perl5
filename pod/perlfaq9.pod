@@ -115,7 +115,7 @@ Here's one "simple-minded" approach, that works for most files:
 
 If you want a more complete solution, see the 3-stage striphtml
 program in
-http://www.perl.com/CPAN/authors/Tom_Christiansen/scripts/striphtml.gz
+http://www.cpan.org/authors/Tom_Christiansen/scripts/striphtml.gz
 .
 
 Here are some tricky cases that you should think about when picking
@@ -272,7 +272,7 @@ with a complete URL. This redirection is handled by the web browser.
 
       use CGI qw/:standard/;
 
-      my $url = 'http://www.perl.com/CPAN/';
+      my $url = 'http://www.cpan.org/';
       print redirect($url);
 
 
@@ -377,7 +377,7 @@ mail addresses with a simple regex, such as
 C</^[\w.-]+\@(?:[\w-]+\.)+\w+$/>.  It's a very bad idea.  However,
 this also throws out many valid ones, and says nothing about
 potential deliverability, so it is not suggested.  Instead, see
-http://www.perl.com/CPAN/authors/Tom_Christiansen/scripts/ckaddr.gz,
+http://www.cpan.org/authors/Tom_Christiansen/scripts/ckaddr.gz,
 which actually checks against the full RFC spec (except for nested
 comments), looks for addresses you may not wish to accept mail to
 (say, Bill Clinton or your postmaster), and then makes sure that the

@@ -8,9 +8,9 @@ You can think of a module as the fundamental unit of reusable Perl
 code; See L<perlmod> for details.  Whenever anyone creates a chunk
 of Perl code that they think will be useful to the world, they
 register as a Perl developer at
-http://www.perl.com/CPAN/modules/04pause.html so that they can then
+http://www.cpan.org/modules/04pause.html so that they can then
 upload their code to CPAN.  CPAN is the Comprehensive Perl Archive
-Network and can be accessed at http://www.perl.com/CPAN/, or searched
+Network and can be accessed at http://www.cpan.org/, or searched
 via http://cpan.perl.com/ and
 http://theory.uwinnipeg.ca/mod_perl/cpan-search.pl .
 
@@ -57,7 +57,7 @@ B<If you're on Unix,>
 
 You can use Andreas Koenig's CPAN module
 (which comes standard with Perl, or can itself be downloaded
-from http://www.perl.com/CPAN/modules/by-module/CPAN)
+from http://www.cpan.org/modules/by-module/CPAN)
 to automate the following steps, from DECOMPRESS through INSTALL.
 
 A. DECOMPRESS

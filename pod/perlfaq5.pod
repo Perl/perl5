@@ -838,7 +838,7 @@ Or even:
 
 Otherwise you'll have to write your own multiplexing print
 function--or your own tee program--or use Tom Christiansen's,
-at http://www.perl.com/CPAN/authors/id/TOMC/scripts/tct.gz , which is
+at http://www.cpan.org/authors/id/TOMC/scripts/tct.gz , which is
 written in Perl and offers much greater functionality
 than the stock version.
 
@@ -1130,7 +1130,7 @@ documentation for details.
 
 This is elaborately and painstakingly described in the "Far More Than
 You Ever Wanted To Know" in
-http://www.perl.com/CPAN/doc/FMTEYEWTK/file-dir-perms .
+http://www.cpan.org/doc/FMTEYEWTK/file-dir-perms .
 
 The executive summary: learn how your filesystem works.  The
 permissions on a file say what can happen to the data in that file.

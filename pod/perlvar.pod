@@ -1381,7 +1381,7 @@ expression matches in a program, regardless of whether they occur
 in the scope of C<use English>.  For that reason, saying C<use
 English> in libraries is strongly discouraged.  See the
 Devel::SawAmpersand module documentation from CPAN
-(http://www.perl.com/CPAN/modules/by-module/Devel/)
+(http://www.cpan.org/modules/by-module/Devel/)
 for more information.
 
 Having to even think about the C<$^S> variable in your exception
