@@ -108,7 +108,7 @@ if ($^O =~ /^(linux|dec_osf)$/) {
       print "# [$_]\n";
       if (/^\S+\s+$$\s/) {
 	$sawpid++;
-	if (/\sfoobar$/) {
+	if (/\sfoobar\s*$/) { # Linux 2.2 leaves extra trailing spaces.
 	  $sawexe++;
         }
 	last;
