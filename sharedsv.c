@@ -21,6 +21,7 @@
 #include "perl.h"
 
 PerlInterpreter* sharedsv_space;
+perl_mutex sharedsv_space_mutex;
 
 #ifdef USE_ITHREADS
 
@@ -45,6 +46,7 @@ void
 Perl_sharedsv_init(pTHX)
 {
     sharedsv_space = PERL_GET_CONTEXT;
+    MUTEX_INIT(&sharedsv_space_mutex);
 }
 
 /*
@@ -145,9 +147,9 @@ Increments the threadcount of a sharedsv.
 void
 Perl_sharedsv_thrcnt_inc(pTHX_ shared_sv* ssv)
 {
-  SHAREDSvLOCK(ssv);
+  SHAREDSvEDIT(ssv);
   SvREFCNT_inc(ssv->sv);
-  SHAREDSvUNLOCK(ssv);
+  SHAREDSvRELEASE(ssv);
 }
 
 /*
@@ -163,7 +165,6 @@ void
 Perl_sharedsv_thrcnt_dec(pTHX_ shared_sv* ssv)
 {
     SV* sv;
-    SHAREDSvLOCK(ssv);
     SHAREDSvEDIT(ssv);
     sv = SHAREDSvGET(ssv);
     if (SvREFCNT(sv) == 1) {
@@ -195,7 +196,6 @@ Perl_sharedsv_thrcnt_dec(pTHX_ shared_sv* ssv)
     }
     SvREFCNT_dec(sv);
     SHAREDSvRELEASE(ssv);
-    SHAREDSvUNLOCK(ssv);
 }
 
 #endif
