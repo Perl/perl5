@@ -1,11 +1,14 @@
 #!./perl -w
 
 my $child;
+my $can_fork;
 
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require Config; import Config;
+    $can_fork = $Config{d_fork} || ($^O eq 'MSWin32' && $Config{useithreads});
+
     if ($Config{'extensions'} !~ /\bSocket\b/ && 
         !(($^O eq 'VMS') && $Config{d_socket})) {
 	print "1..0\n";
@@ -18,7 +21,7 @@ BEGIN {
     # This is convoluted, but we must fork before Test::More, else child's
     # Test::More thinks that it ran no tests, and prints a message to that
     # effect
-    if( $Config{d_fork} ) {
+    if( $can_fork) {
       my $parent = $$;
       $child = fork;
       die "Fork failed" unless defined $child;
@@ -46,7 +49,7 @@ my $skip_reason;
 
 if( !$Config{d_alarm} ) {
   plan skip_all => "alarm() not implemented on this platform";
-} elsif( !$Config{d_fork} ) {
+} elsif( !$can_fork ) {
   plan skip_all => "fork() not implemented on this platform";
 } else {
   # This should fail but not die if there is real socketpair
@@ -115,7 +118,7 @@ $SIG{PIPE} = 'IGNORE';
   is (syswrite (LEFT, "void"), undef, "syswrite to shutdown left should fail");
   alarm 60;
 }
-SKIP: {
+{
   # This may need skipping on some OSes
   ok (($!{EPIPE} or $!{ESHUTDOWN}), '$! should be EPIPE or ESHUTDOWN')
     or printf "\$\!=%d(%s)\n", $!, $!;
@@ -136,9 +139,14 @@ is ($buffer, $expect, "content what we expected?");
 ok (close LEFT, "close left");
 ok (close RIGHT, "close right");
 
+
 # And now datagrams
 # I suspect we also need a self destruct time-bomb for these, as I don't see any
 # guarantee that the stack won't drop a UDP packet, even if it is for localhost.
+
+SKIP: {
+  skip "No usable SOCK_DGRAM", 24 if ($^O eq 'MSWin32');
+
 
 ok (socketpair (LEFT, RIGHT, AF_UNIX, SOCK_DGRAM, PF_UNSPEC),
     "socketpair (LEFT, RIGHT, AF_UNIX, SOCK_DGRAM, PF_UNSPEC)")
@@ -199,6 +207,8 @@ foreach $expect (@gripping) {
 
 ok (close LEFT, "close left");
 ok (close RIGHT, "close right");
+
+} # end of DGRAM SKIP
 
 kill "INT", $child or warn "Failed to kill child process $child: $!";
 exit 0;
