@@ -369,7 +369,7 @@ PerlIO_putc(f,ch)
 PerlIO *f;
 int ch;
 {
- putc(ch,f);
+ return putc(ch,f);
 }
 
 #undef PerlIO_ungetc
@@ -378,7 +378,7 @@ PerlIO_ungetc(f,ch)
 PerlIO *f;
 int ch;
 {
- ungetc(ch,f);
+ return ungetc(ch,f);
 }
 
 #undef PerlIO_read
