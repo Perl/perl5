@@ -172,25 +172,10 @@ struct thread {
 
     /* Now the fields that used to be "per interpreter" (even when global) */
 
-    /* Fields used by magic variables such as $@, $/ and so on */
-    bool	Ttainted;
-    PMOP *	Tcurpm;
-    SV *	Tnrs;
-    SV *	Trs;
-    GV *	Tlast_in_gv;
-    char *	Tofs;
-    STRLEN	Tofslen;
-    GV *	Tdefoutgv;
-    char *	Tchopset;
-    SV *	Tformtarget;
-    SV *	Tbodytarget;
-    SV *	Ttoptarget;
-
-    /* Stashes */
+    /* XXX What about magic variables such as $/, $? and so on? */
     HV *	Tdefstash;
     HV *	Tcurstash;
 
-    /* Stacks */
     SV **	Ttmps_stack;
     I32		Ttmps_ix;
     I32		Ttmps_floor;
@@ -218,7 +203,6 @@ struct thread {
     HV *	Tcvcache;
     perl_thread	self;			/* Underlying thread object */
     U32		flags;
-    AV *	specific;		/* Thread specific data (& magicals) */
     perl_mutex	mutex;			/* For the fields others can change */
     U32		tid;
     struct thread *next, *prev;		/* Circular linked list of threads */
@@ -294,18 +278,6 @@ typedef struct condpair {
 #undef	Xpv
 #undef	statbuf
 #undef	timesbuf
-#undef	tainted
-#undef	curpm
-#undef	nrs
-#undef	rs
-#undef	last_in_gv
-#undef	ofs
-#undef	ofslen
-#undef	defoutgv
-#undef	chopset
-#undef	formtarget
-#undef	bodytarget
-#undef	toptarget
 #undef	top_env
 #undef	runlevel
 #undef	in_eval
@@ -352,19 +324,6 @@ typedef struct condpair {
 #define Xpv		(thr->TXpv)
 #define statbuf		(thr->Tstatbuf)
 #define timesbuf	(thr->Ttimesbuf)
-#define	tainted		(thr->Ttainted)
-#define	tainted		(thr->Ttainted)
-#define	curpm		(thr->Tcurpm)
-#define	nrs		(thr->Tnrs)
-#define	rs		(thr->Trs)
-#define	last_in_gv	(thr->Tlast_in_gv)
-#define	ofs		(thr->Tofs)
-#define	ofslen		(thr->Tofslen)
-#define	defoutgv	(thr->Tdefoutgv)
-#define	chopset		(thr->Tchopset)
-#define	formtarget	(thr->Tformtarget)
-#define	bodytarget	(thr->Tbodytarget)
-#define	toptarget	(thr->Ttoptarget)
 #define defstash	(thr->Tdefstash)
 #define curstash	(thr->Tcurstash)
 

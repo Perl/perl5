@@ -190,8 +190,6 @@ bool	io_close _((IO* io));
 OP*	invert _((OP* cmd));
 OP*	jmaybe _((OP* arg));
 I32	keyword _((char* d, I32 len));
-PADOFFSET	key_create _((void));
-void	key_destroy _((PADOFFSET key));
 void	leave_scope _((I32 base));
 void	lex_end _((void));
 void	lex_start _((SV* line));
@@ -324,6 +322,7 @@ OP*	newLISTOP _((I32 type, I32 flags, OP* first, OP* last));
 OP*	newPMOP _((I32 type, I32 flags));
 OP*	newPVOP _((I32 type, I32 flags, char* pv));
 SV*	newRV _((SV* ref));
+SV*	newRV_noinc _((SV *));
 #ifdef LEAKTEST
 SV*	newSV _((I32 x, STRLEN len));
 #else
@@ -340,9 +339,6 @@ SV*	newSVsv _((SV* old));
 OP*	newUNOP _((I32 type, I32 flags, OP* first));
 OP*	newWHILEOP _((I32 flags, I32 debuggable, LOOP* loop,
 		      I32 whileline, OP* expr, OP* block, OP* cont));
-#ifdef USE_THREADS
-struct thread *	new_struct_thread _((struct thread *t));
-#endif
 PerlIO*	nextargv _((GV* gv));
 char*	ninstr _((char* big, char* bigend, char* little, char* lend));
 OP*	oopsCV _((OP* o));
@@ -470,6 +466,11 @@ SV*	sv_2mortal _((SV* sv));
 double	sv_2nv _((SV* sv));
 char*	sv_2pv _((SV* sv, STRLEN* lp));
 UV	sv_2uv _((SV* sv));
+IV	sv_iv _((SV* sv));
+UV	sv_uv _((SV* sv));
+double	sv_nv _((SV* sv));
+char *	sv_pvn _((SV *, STRLEN *));
+I32	sv_true _((SV *));
 void	sv_add_arena _((char* ptr, U32 size, U32 flags));
 int	sv_backoff _((SV* sv));
 SV*	sv_bless _((SV* sv, HV* stash));

@@ -219,6 +219,7 @@ gv_fetchmeth(HV *stash, char *name, STRLEN len, I32 level)
 		    (cv = GvCV(gv)) &&
 		    (CvROOT(cv) || CvXSUB(cv)))
 		{
+		    dTHR;	/* just for SvREFCNT_inc */
 		    if (cv = GvCV(topgv))
 			SvREFCNT_dec(cv);
 		    GvCV(topgv) = (CV*)SvREFCNT_inc(GvCV(gv));
@@ -1284,7 +1285,6 @@ amagic_call(SV *left, SV *right, int method, int flags)
 	|| inc_dec_ass) RvDEEPCP(left);
   }
   {
-    dTHR;
     dSP;
     BINOP myop;
     SV* res;
@@ -1362,3 +1362,4 @@ amagic_call(SV *left, SV *right, int method, int flags)
   }
 }
 #endif /* OVERLOAD */
+

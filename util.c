@@ -56,10 +56,6 @@
 static void xstat _((void));
 #endif
 
-#ifdef USE_THREADS
-static U32 threadnum = 0;
-#endif /* USE_THREADS */
-
 #ifndef MYMALLOC
 
 /* paranoid version of malloc */
@@ -97,6 +93,7 @@ safemalloc(MEM_SIZE size)
     else {
 	PerlIO_puts(PerlIO_stderr(),no_mem) FLUSH;
 	my_exit(1);
+        return Nullch;
     }
     /*NOTREACHED*/
 }
@@ -145,6 +142,7 @@ saferealloc(Malloc_t where,MEM_SIZE size)
     else {
 	PerlIO_puts(PerlIO_stderr(),no_mem) FLUSH;
 	my_exit(1);
+	return Nullch;
     }
     /*NOTREACHED*/
 }
@@ -199,6 +197,7 @@ safecalloc(MEM_SIZE count, MEM_SIZE size)
     else {
 	PerlIO_puts(PerlIO_stderr(),no_mem) FLUSH;
 	my_exit(1);
+	return Nullch;
     }
     /*NOTREACHED*/
 }
@@ -1349,8 +1348,7 @@ my_setenv(char *nam, char *val)
 #else /* if WIN32 */
 
 void
-my_setenv(nam,val)
-char *nam, *val;
+my_setenv(char *nam,char *val)
 {
 
 #ifdef USE_WIN32_RTL_ENV
@@ -1448,10 +1446,7 @@ char *f;
 
 #if !defined(HAS_BCOPY) || !defined(HAS_SAFE_BCOPY)
 char *
-my_bcopy(from,to,len)
-register char *from;
-register char *to;
-register I32 len;
+my_bcopy(register char *from,register char *to,register I32 len)
 {
     char *retval = to;
 
@@ -1900,9 +1895,7 @@ rsignal_restore(int signo, Sigsave_t *save)
 #else /* !HAS_SIGACTION */
 
 Sighandler_t
-rsignal(signo, handler)
-int signo;
-Sighandler_t handler;
+rsignal(int signo, Sighandler_t handler)
 {
     return signal(signo, handler);
 }
@@ -1911,15 +1904,13 @@ static int sig_trapped;
 
 static
 Signal_t
-sig_trap(signo)
-int signo;
+sig_trap(int signo)
 {
     sig_trapped++;
 }
 
 Sighandler_t
-rsignal_state(signo)
-int signo;
+rsignal_state(int signo)
 {
     Sighandler_t oldsig;
 
@@ -1932,19 +1923,14 @@ int signo;
 }
 
 int
-rsignal_save(signo, handler, save)
-int signo;
-Sighandler_t handler;
-Sigsave_t *save;
+rsignal_save(int signo, Sighandler_t handler, Sigsave_t *save)
 {
     *save = signal(signo, handler);
     return (*save == SIG_ERR) ? -1 : 0;
 }
 
 int
-rsignal_restore(signo, save)
-int signo;
-Sigsave_t *save;
+rsignal_restore(int signo, Sigsave_t *save)
 {
     return (signal(signo, *save) == SIG_ERR) ? -1 : 0;
 }
@@ -2259,13 +2245,13 @@ scan_hex(char *start, I32 len, I32 *retlen)
     bool overflowed = FALSE;
     char *tmp;
 
-    while (len-- && *s && (tmp = strchr(hexdigit, *s))) {
+    while (len-- && *s && (tmp = strchr((char *) hexdigit, *s))) {
 	register UV n = retval << 4;
 	if (!overflowed && (n >> 4) != retval) {
 	    warn("Integer overflow in hex number");
 	    overflowed = TRUE;
 	}
-	retval = n | (tmp - hexdigit) & 15;
+	retval = n | ((tmp - hexdigit) & 15);
 	s++;
     }
     *retlen = s - start;
@@ -2400,138 +2386,6 @@ condpair_magic(SV *sv)
     }
     return mg;
 }
-
-/*
- * Make a new perl thread structure using t as a prototype. If t is NULL
- * then this is the initial main thread and we have to bootstrap carefully.
- * Some of the fields for the new thread are copied from the prototype
- * thread, t, so t should not be running in perl at the time this function
- * is called. The usual case, where t is the thread calling new_struct_thread,
- * clearly satisfies this constraint.
- */
-struct thread *
-new_struct_thread(t)
-struct thread *t;
-{
-    struct thread *thr;
-    XPV *xpv;
-    SV *sv;
-
-    Newz(53, thr, 1, struct thread);
-    cvcache = newHV();
-    curcop = &compiling;
-    thr->specific = newAV();
-    thr->flags = THRf_R_JOINABLE;
-    MUTEX_INIT(&thr->mutex);
-    if (t) {
-	oursv = newSVpv("", 0);
-	SvGROW(oursv, sizeof(struct thread) + 1);
-	SvCUR_set(oursv, sizeof(struct thread));
-	thr = (struct thread *) SvPVX(sv);
-    } else {
-	/* Handcraft thrsv similarly to mess_sv */
-	New(53, thrsv, 1, SV);
-	Newz(53, xpv, 1, XPV);
-	SvFLAGS(thrsv) = SVt_PV;
-	SvANY(thrsv) = (void*)xpv;
-	SvREFCNT(thrsv) = 1 << 30;	/* practically infinite */
-	SvPVX(thrsv) = (char*)thr;
-	SvCUR_set(thrsv, sizeof(thr));
-	SvLEN_set(thrsv, sizeof(thr));
-	*SvEND(thrsv) = '\0';		/* in the trailing_nul field */
-	oursv = thrsv;
-    }
-    if (t) {
-	curcop = t->Tcurcop;       /* XXX As good a guess as any? */
-	defstash = t->Tdefstash;   /* XXX maybe these should */
-	curstash = t->Tcurstash;   /* always be set to main? */
-	/* top_env? */
-	/* runlevel */
-	tainted = t->Ttainted;
-	curpm = t->Tcurpm;         /* XXX No PMOP ref count */
-	nrs = newSVsv(t->Tnrs);
-	rs = newSVsv(t->Trs);
-	last_in_gv = (GV*)SvREFCNT_inc(t->Tlast_in_gv);
-	ofslen = t->Tofslen;
-	ofs = savepvn(t->Tofs, ofslen);
-	defoutgv = (GV*)SvREFCNT_inc(t->Tdefoutgv);
-	chopset = t->Tchopset;
-	formtarget = newSVsv(t->Tformtarget);
-	bodytarget = newSVsv(t->Tbodytarget);
-	toptarget = newSVsv(t->Ttoptarget);
-	keys = newSVpv("", 0);
-    } else {
-	curcop = &compiling;
-	chopset = " \n-";
-   }
-    MUTEX_LOCK(&threads_mutex);
-    nthreads++;
-    thr->tid = threadnum++;
-    if (t) {
-	thr->next = t->next;
-	thr->prev = t;
-	t->next = thr;
-	thr->next->prev = thr;
-    } else {
-	thr->next = thr;
-	thr->prev = thr;
-    }
-    MUTEX_UNLOCK(&threads_mutex);
-
-#ifdef HAVE_THREAD_INTERN
-    init_thread_intern(thr);
-#else
-    thr->self = pthread_self();
-#endif /* HAVE_THREAD_INTERN */
-    SET_THR(thr);
-    if (!t) {
-	/*
-	 * These must come after the SET_THR because sv_setpvn does
-	 * SvTAINT and the taint fields require dTHR.
-	 */
-	toptarget = NEWSV(0,0);
-	sv_upgrade(toptarget, SVt_PVFM);
-	sv_setpvn(toptarget, "", 0);
-	bodytarget = NEWSV(0,0);
-	sv_upgrade(bodytarget, SVt_PVFM);
-	sv_setpvn(bodytarget, "", 0);
-	formtarget = bodytarget;
-    }
-    return thr;
-}
-
-PADOFFSET
-key_create()
-{
-    char *s;
-    STRLEN len;
-    PADOFFSET i;
-    MUTEX_LOCK(&keys_mutex);
-    s = SvPV(keys, len);
-    for (i = 0; i < len; i++) {
-	if (!s[i]) {
-	    s[i] = 1;
-	    break;
-	}
-    }
-    if (i == len)
-	sv_catpvn(keys, "\1", 1);
-    MUTEX_UNLOCK(&keys_mutex);
-    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "key_create: %d\n", (int)i));
-    return i;
-}
-
-void
-key_destroy(key)
-PADOFFSET key;
-{
-    char *s;
-    MUTEX_LOCK(&keys_mutex);
-    s = SvPVX(keys);
-    s[key] = 0;
-    MUTEX_UNLOCK(&keys_mutex);
-    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "key_destroy: %d\n", (int)key));
-}
 #endif /* USE_THREADS */
 
 #ifdef HUGE_VAL
@@ -2546,3 +2400,4 @@ Perl_huge(void)
  return HUGE_VAL;
 }
 #endif
+

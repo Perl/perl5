@@ -82,7 +82,7 @@ threadstart(void *arg)
 #else
     Thread thr = (Thread) arg;
     LOGOP myop;
-    dSP;
+    djSP;
     I32 oldmark = TOPMARK;
     I32 oldscope = scopestack_ix;
     I32 retval;
@@ -208,7 +208,6 @@ static SV *
 newthread (SV *startsv, AV *initargs, char *Class)
 {
 #ifdef USE_THREADS
-    dTHR;
     dSP;
     Thread savethread;
     int i;
@@ -219,9 +218,38 @@ newthread (SV *startsv, AV *initargs, char *Class)
 #endif
     
     savethread = thr;
-    thr = new_struct_thread(thr);
+    sv = newSVpv("", 0);
+    SvGROW(sv, sizeof(struct thread) + 1);
+    SvCUR_set(sv, sizeof(struct thread));
+    thr = (Thread) SvPVX(sv);
+    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "%p: newthread(%s) = %p)\n",
+			  savethread, SvPEEK(startsv), thr));
+    oursv = sv; 
+    /* If we don't zero these foostack pointers, init_stacks won't init them */
+    markstack = 0;
+    scopestack = 0;
+    savestack = 0;
+    retstack = 0;
     init_stacks(ARGS);
+    curcop = savethread->Tcurcop;	/* XXX As good a guess as any? */
     SPAGAIN;
+    defstash = savethread->Tdefstash;	/* XXX maybe these should */
+    curstash = savethread->Tcurstash;	/* always be set to main? */
+    /* top_env? */
+    /* runlevel */
+    cvcache = newHV();
+    thr->flags = THRf_R_JOINABLE;
+    MUTEX_INIT(&thr->mutex);
+    thr->tid = ++threadnum;
+    /* Insert new thread into the circular linked list and bump nthreads */
+    MUTEX_LOCK(&threads_mutex);
+    thr->next = savethread->next;
+    thr->prev = savethread;
+    savethread->next = thr;
+    thr->next->prev = thr;
+    nthreads++;
+    MUTEX_UNLOCK(&threads_mutex);
+
     DEBUG_L(PerlIO_printf(PerlIO_stderr(),
 			  "%p: newthread, tid is %u, preparing stack\n",
 			  savethread, thr->tid));
@@ -570,3 +598,4 @@ await_signal()
 	RETVAL = c ? psig_ptr[c] : &sv_no;
     OUTPUT:
 	RETVAL
+

@@ -42,7 +42,7 @@ static I32 sortcxix;
 
 PP(pp_wantarray)
 {
-    dSP;
+    djSP;
     I32 cxix;
     EXTEND(SP, 1);
 
@@ -66,7 +66,7 @@ PP(pp_regcmaybe)
 }
 
 PP(pp_regcomp) {
-    dSP;
+    djSP;
     register PMOP *pm = (PMOP*)cLOGOP->op_other;
     register char *t;
     SV *tmpstr;
@@ -103,7 +103,7 @@ PP(pp_regcomp) {
 
 PP(pp_substcont)
 {
-    dSP;
+    djSP;
     register PMOP *pm = (PMOP*) cLOGOP->op_other;
     register CONTEXT *cx = &cxstack[cxstack_ix];
     register SV *dstr = cx->sb_dstr;
@@ -225,7 +225,7 @@ rxres_free(void **rsp)
 
 PP(pp_formline)
 {
-    dSP; dMARK; dORIGMARK;
+    djSP; dMARK; dORIGMARK;
     register SV *form = *++MARK;
     register U16 *fpc;
     register char *t;
@@ -518,7 +518,7 @@ PP(pp_formline)
 
 PP(pp_grepstart)
 {
-    dSP;
+    djSP;
     SV *src;
 
     if (stack_base + *markstack_ptr == sp) {
@@ -555,7 +555,7 @@ PP(pp_mapstart)
 
 PP(pp_mapwhile)
 {
-    dSP;
+    djSP;
     I32 diff = (sp - stack_base) - *markstack_ptr;
     I32 count;
     I32 shift;
@@ -619,7 +619,7 @@ PP(pp_mapwhile)
 
 PP(pp_sort)
 {
-    dSP; dMARK; dORIGMARK;
+    djSP; dMARK; dORIGMARK;
     register SV **up;
     SV **myorigmark = ORIGMARK;
     register I32 max;
@@ -753,7 +753,7 @@ PP(pp_range)
 
 PP(pp_flip)
 {
-    dSP;
+    djSP;
 
     if (GIMME == G_ARRAY) {
 	RETURNOP(((CONDOP*)cUNOP->op_first)->op_false);
@@ -785,7 +785,7 @@ PP(pp_flip)
 
 PP(pp_flop)
 {
-    dSP;
+    djSP;
 
     if (GIMME == G_ARRAY) {
 	dPOPPOPssrl;
@@ -899,14 +899,14 @@ block_gimme(void)
 	return G_VOID;
 
     switch (cxstack[cxix].blk_gimme) {
-    case G_VOID:
-	return G_VOID;
     case G_SCALAR:
 	return G_SCALAR;
     case G_ARRAY:
 	return G_ARRAY;
     default:
 	croak("panic: bad gimme: %d\n", cxstack[cxix].blk_gimme);
+    case G_VOID:
+	return G_VOID;
     }
 }
 
@@ -1029,21 +1029,21 @@ die_where(char *message)
 	    SV **svp;
 	    STRLEN klen = strlen(message);
 	    
-	    svp = hv_fetch(errhv, message, klen, TRUE);
+	    svp = hv_fetch(GvHV(errgv), message, klen, TRUE);
 	    if (svp) {
 		if (!SvIOK(*svp)) {
 		    static char prefix[] = "\t(in cleanup) ";
 		    sv_upgrade(*svp, SVt_IV);
 		    (void)SvIOK_only(*svp);
-		    SvGROW(errsv, SvCUR(errsv)+sizeof(prefix)+klen);
-		    sv_catpvn(errsv, prefix, sizeof(prefix)-1);
-		    sv_catpvn(errsv, message, klen);
+		    SvGROW(GvSV(errgv), SvCUR(GvSV(errgv))+sizeof(prefix)+klen);
+		    sv_catpvn(GvSV(errgv), prefix, sizeof(prefix)-1);
+		    sv_catpvn(GvSV(errgv), message, klen);
 		}
 		sv_inc(*svp);
 	    }
 	}
 	else
-	    sv_setpv(errsv, message);
+	    sv_setpv(GvSV(errgv), message);
 	
 	cxix = dopoptoeval(cxstack_ix);
 	if (cxix >= 0) {
@@ -1066,7 +1066,7 @@ die_where(char *message)
 	    LEAVE;
 
 	    if (optype == OP_REQUIRE) {
-		char* msg = SvPV(errsv, na);
+		char* msg = SvPVx(GvSV(errgv), na);
 		DIE("%s", *msg ? msg : "Compilation failed in require");
 	    }
 	    return pop_return();
@@ -1081,7 +1081,7 @@ die_where(char *message)
 
 PP(pp_xor)
 {
-    dSP; dPOPTOPssrl;
+    djSP; dPOPTOPssrl;
     if (SvTRUE(left) != SvTRUE(right))
 	RETSETYES;
     else
@@ -1090,7 +1090,7 @@ PP(pp_xor)
 
 PP(pp_andassign)
 {
-    dSP;
+    djSP;
     if (!SvTRUE(TOPs))
 	RETURN;
     else
@@ -1099,7 +1099,7 @@ PP(pp_andassign)
 
 PP(pp_orassign)
 {
-    dSP;
+    djSP;
     if (SvTRUE(TOPs))
 	RETURN;
     else
@@ -1109,7 +1109,7 @@ PP(pp_orassign)
 #ifdef DEPRECATED
 PP(pp_entersubr)
 {
-    dSP;
+    djSP;
     SV** mark = (stack_base + *markstack_ptr + 1);
     SV* cv = *mark;
     while (mark < sp) {	/* emulate old interface */
@@ -1123,7 +1123,7 @@ PP(pp_entersubr)
 
 PP(pp_caller)
 {
-    dSP;
+    djSP;
     register I32 cxix = dopoptosub(cxstack_ix);
     register CONTEXT *cx;
     I32 dbcxix;
@@ -1258,7 +1258,7 @@ sortcmp_locale(const void *a, const void *b)
 
 PP(pp_reset)
 {
-    dSP;
+    djSP;
     char *tmps;
 
     if (MAXARG < 1)
@@ -1328,7 +1328,7 @@ PP(pp_scope)
 
 PP(pp_enteriter)
 {
-    dSP; dMARK;
+    djSP; dMARK;
     register CONTEXT *cx;
     I32 gimme = GIMME_V;
     SV **svp;
@@ -1360,7 +1360,7 @@ PP(pp_enteriter)
 
 PP(pp_enterloop)
 {
-    dSP;
+    djSP;
     register CONTEXT *cx;
     I32 gimme = GIMME_V;
 
@@ -1376,7 +1376,7 @@ PP(pp_enterloop)
 
 PP(pp_leaveloop)
 {
-    dSP;
+    djSP;
     register CONTEXT *cx;
     struct block_loop cxloop;
     I32 gimme;
@@ -1417,7 +1417,7 @@ PP(pp_leaveloop)
 
 PP(pp_return)
 {
-    dSP; dMARK;
+    djSP; dMARK;
     I32 cxix;
     register CONTEXT *cx;
     struct block_sub cxsub;
@@ -1493,7 +1493,7 @@ PP(pp_return)
 
 PP(pp_last)
 {
-    dSP;
+    djSP;
     I32 cxix;
     register CONTEXT *cx;
     struct block_loop cxloop;
@@ -1675,7 +1675,7 @@ PP(pp_dump)
 
 PP(pp_goto)
 {
-    dSP;
+    djSP;
     OP *retop = 0;
     I32 ix;
     register CONTEXT *cx;
@@ -1982,7 +1982,7 @@ PP(pp_goto)
 
 PP(pp_exit)
 {
-    dSP;
+    djSP;
     I32 anum;
 
     if (MAXARG < 1)
@@ -2002,7 +2002,7 @@ PP(pp_exit)
 #ifdef NOTYET
 PP(pp_nswitch)
 {
-    dSP;
+    djSP;
     double value = SvNVx(GvSV(cCOP->cop_gv));
     register I32 match = I_32(value);
 
@@ -2021,7 +2021,7 @@ PP(pp_nswitch)
 
 PP(pp_cswitch)
 {
-    dSP;
+    djSP;
     register I32 match;
 
     if (multiline)
@@ -2109,7 +2109,6 @@ docatch(OP *o)
 static OP *
 doeval(int gimme)
 {
-    dTHR;
     dSP;
     OP *saveop = op;
     HV *newstash;
@@ -2161,7 +2160,7 @@ doeval(int gimme)
     CvPADLIST(compcv) = comppadlist;
 
     if (saveop->op_type != OP_REQUIRE)
-	CvOUTSIDE(compcv) = caller ? (CV*)SvREFCNT_inc(caller) : 0;
+	CvOUTSIDE(compcv) = (CV*)SvREFCNT_inc(caller);
 
     SAVEFREESV(compcv);
 
@@ -2187,7 +2186,7 @@ doeval(int gimme)
     if (saveop->op_flags & OPf_SPECIAL)
 	in_eval |= 4;
     else
-	sv_setpv(errsv,"");
+	sv_setpv(GvSV(errgv),"");
     if (yyparse() || error_count || !eval_root) {
 	SV **newsp;
 	I32 gimme;
@@ -2206,7 +2205,7 @@ doeval(int gimme)
 	lex_end();
 	LEAVE;
 	if (optype == OP_REQUIRE) {
-	    char* msg = SvPV(errsv, na);
+	    char* msg = SvPVx(GvSV(errgv), na);
 	    DIE("%s", *msg ? msg : "Compilation failed in require");
 	}
 	SvREFCNT_dec(rs);
@@ -2261,7 +2260,7 @@ doeval(int gimme)
 
 PP(pp_require)
 {
-    dSP;
+    djSP;
     register CONTEXT *cx;
     SV *sv;
     char *name;
@@ -2411,7 +2410,7 @@ PP(pp_dofile)
 
 PP(pp_entereval)
 {
-    dSP;
+    djSP;
     register CONTEXT *cx;
     dPOPss;
     I32 gimme = GIMME_V, was = sub_generation;
@@ -2471,7 +2470,7 @@ PP(pp_entereval)
 
 PP(pp_leaveeval)
 {
-    dSP;
+    djSP;
     register SV **mark;
     SV **newsp;
     PMOP *newpm;
@@ -2560,14 +2559,14 @@ PP(pp_leaveeval)
     LEAVE;
 
     if (!(save_flags & OPf_SPECIAL))
-	sv_setpv(errsv,"");
+	sv_setpv(GvSV(errgv),"");
 
     RETURNOP(retop);
 }
 
 PP(pp_entertry)
 {
-    dSP;
+    djSP;
     register CONTEXT *cx;
     I32 gimme = GIMME_V;
 
@@ -2580,14 +2579,14 @@ PP(pp_entertry)
     eval_root = op;		/* Only needed so that goto works right. */
 
     in_eval = 1;
-    sv_setpv(errsv,"");
+    sv_setpv(GvSV(errgv),"");
     PUTBACK;
     return DOCATCH(op->op_next);
 }
 
 PP(pp_leavetry)
 {
-    dSP;
+    djSP;
     register SV **mark;
     SV **newsp;
     PMOP *newpm;
@@ -2628,7 +2627,7 @@ PP(pp_leavetry)
     curpm = newpm;	/* Don't pop $1 et al till now */
 
     LEAVE;
-    sv_setpv(errsv,"");
+    sv_setpv(GvSV(errgv),"");
     RETURN;
 }
 
@@ -2809,3 +2808,4 @@ doparseform(SV *sv)
     sv_magic(sv, Nullsv, 'f', Nullch, 0);
     SvCOMPILED_on(sv);
 }
+

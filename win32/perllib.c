@@ -2,16 +2,12 @@
  * "The Road goes ever on and on, down from the door where it began."
  */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
 
 #ifdef __cplusplus
-}
 #  define EXTERN_C extern "C"
 #else
 #  define EXTERN_C extern

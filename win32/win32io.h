@@ -3,6 +3,9 @@
 
 #ifdef __BORLANDC__
 #include <stdarg.h>
+#define MSconst
+#else
+#define MSconst const
 #endif
 
 typedef struct {
@@ -20,7 +23,7 @@ int	(*pfnvprintf)(const char *format, va_list arg);
 size_t	(*pfnfread)(void *buf, size_t size, size_t count, FILE *pf);
 size_t	(*pfnfwrite)(const void *buf, size_t size, size_t count, FILE *pf);
 FILE*	(*pfnfopen)(const char *path, const char *mode);
-FILE*	(*pfnfdopen)(int fh, const char *mode);
+FILE*	(*pfnfdopen)(int fh,  MSconst char *mode); 
 FILE*	(*pfnfreopen)(const char *path, const char *mode, FILE *pf);
 int	(*pfnfclose)(FILE *pf);
 int	(*pfnfputs)(const char *s,FILE *pf);
@@ -55,12 +58,12 @@ int	(*pfnwrite)(int fd, const void *buf, unsigned int cnt);
 int	(*pfnopenmode)(int mode);
 int	(*pfn_open_osfhandle)(long handle, int flags);
 long	(*pfn_get_osfhandle)(int fd);
-int	(*pfnspawnvp)(int mode, const char *cmdname, const char *const *argv);
+int	(*pfnspawnvp)(int mode, const char *cmdname, MSconst char * const *argv);
 int	(*pfnmkdir)(const char *path);
 int	(*pfnrmdir)(const char *path);
 int	(*pfnchdir)(const char *path);
 int	(*pfnflock)(int fd, int oper);
-int	(*pfnexecvp)(const char *cmdname, const char *const *argv);
+int	(*pfnexecvp)(const char *cmdname, MSconst char *const *argv);
 void	(*pfnperror)(const char *str);
 void	(*pfnsetbuf)(FILE *pf, char *buf);
 int	(*pfnsetvbuf)(FILE *pf, char *buf, int type, size_t size);
@@ -85,3 +88,4 @@ int	signature_end;
 typedef WIN32_IOSUBSYSTEM	*PWIN32_IOSUBSYSTEM;
 
 #endif /* WIN32IO_H */
+

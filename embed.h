@@ -289,8 +289,6 @@
 #define invert			Perl_invert
 #define io_close		Perl_io_close
 #define jmaybe			Perl_jmaybe
-#define key_create		Perl_key_create
-#define key_destroy		Perl_key_destroy
 #define keyword			Perl_keyword
 #define know_next		Perl_know_next
 #define last_lop		Perl_last_lop
@@ -445,6 +443,7 @@
 #define newPVOP			Perl_newPVOP
 #define newRANGE		Perl_newRANGE
 #define newRV			Perl_newRV
+#define newRV_noinc		Perl_newRV_noinc
 #define newSLICEOP		Perl_newSLICEOP
 #define newSTATEOP		Perl_newSTATEOP
 #define newSUB			Perl_newSUB
@@ -461,7 +460,6 @@
 #define newWHILEOP		Perl_newWHILEOP
 #define newXS			Perl_newXS
 #define newXSUB			Perl_newXSUB
-#define new_struct_thread	Perl_new_struct_thread
 #define nextargv		Perl_nextargv
 #define nexttoke		Perl_nexttoke
 #define nexttype		Perl_nexttype
@@ -516,7 +514,6 @@
 #define padix			Perl_padix
 #define patleave		Perl_patleave
 #define peep			Perl_peep
-#define per_thread_magicals	Perl_per_thread_magicals
 #define pidgone			Perl_pidgone
 #define pidstatus		Perl_pidstatus
 #define pmflag			Perl_pmflag
@@ -823,7 +820,6 @@
 #define pp_socket		Perl_pp_socket
 #define pp_sockpair		Perl_pp_sockpair
 #define pp_sort			Perl_pp_sort
-#define pp_specific		Perl_pp_specific
 #define pp_splice		Perl_pp_splice
 #define pp_split		Perl_pp_split
 #define pp_sprintf		Perl_pp_sprintf
@@ -1058,12 +1054,14 @@
 #define sv_insert		Perl_sv_insert
 #define sv_isa			Perl_sv_isa
 #define sv_isobject		Perl_sv_isobject
+#define sv_iv			Perl_sv_iv
 #define sv_len			Perl_sv_len
 #define sv_magic		Perl_sv_magic
 #define sv_mortalcopy		Perl_sv_mortalcopy
 #define sv_newmortal		Perl_sv_newmortal
 #define sv_newref		Perl_sv_newref
 #define sv_no			Perl_sv_no
+#define sv_nv			Perl_sv_nv
 #define sv_peek			Perl_sv_peek
 #define sv_pvn_force		Perl_sv_pvn_force
 #define sv_ref			Perl_sv_ref
@@ -1086,12 +1084,14 @@
 #define sv_setuv		Perl_sv_setuv
 #define sv_taint		Perl_sv_taint
 #define sv_tainted		Perl_sv_tainted
+#define sv_true			Perl_sv_true
 #define sv_undef		Perl_sv_undef
 #define sv_unmagic		Perl_sv_unmagic
 #define sv_unref		Perl_sv_unref
 #define sv_untaint		Perl_sv_untaint
 #define sv_upgrade		Perl_sv_upgrade
 #define sv_usepvn		Perl_sv_usepvn
+#define sv_uv			Perl_sv_uv
 #define sv_vcatpvfn		Perl_sv_vcatpvfn
 #define sv_vsetpvfn		Perl_sv_vsetpvfn
 #define sv_yes			Perl_sv_yes
@@ -1181,10 +1181,6 @@
 #ifndef BINCOMPAT3
 
 #define Error			Perl_Error
-#define SvIV			Perl_SvIV
-#define SvNV			Perl_SvNV
-#define SvTRUE			Perl_SvTRUE
-#define SvUV			Perl_SvUV
 #define block_type		Perl_block_type
 #define boot_core_UNIVERSAL	Perl_boot_core_UNIVERSAL
 #define comppad_name_floor	Perl_comppad_name_floor
@@ -1268,8 +1264,7 @@
 #define e_tmpname		(curinterp->Ie_tmpname)
 #define endav			(curinterp->Iendav)
 #define envgv			(curinterp->Ienvgv)
-#define errhv			(curinterp->Ierrhv)
-#define errsv			(curinterp->Ierrsv)
+#define errgv			(curinterp->Ierrgv)
 #define eval_root		(curinterp->Ieval_root)
 #define eval_start		(curinterp->Ieval_start)
 #define fdpid			(curinterp->Ifdpid)
@@ -1283,8 +1278,6 @@
 #define incgv			(curinterp->Iincgv)
 #define initav			(curinterp->Iinitav)
 #define inplace			(curinterp->Iinplace)
-#define keys			(curinterp->Ikeys)
-#define keys_mutex		(curinterp->Ikeys_mutex)
 #define last_in_gv		(curinterp->Ilast_in_gv)
 #define lastfd			(curinterp->Ilastfd)
 #define lastretstr		(curinterp->Ilastretstr)
@@ -1297,7 +1290,6 @@
 #define lineary			(curinterp->Ilineary)
 #define localizing		(curinterp->Ilocalizing)
 #define localpatches		(curinterp->Ilocalpatches)
-#define magical_keys		(curinterp->Imagical_keys)
 #define main_cv			(curinterp->Imain_cv)
 #define main_root		(curinterp->Imain_root)
 #define main_start		(curinterp->Imain_start)
@@ -1424,8 +1416,7 @@
 #define Ie_tmpname		e_tmpname
 #define Iendav			endav
 #define Ienvgv			envgv
-#define Ierrhv			errhv
-#define Ierrsv			errsv
+#define Ierrgv			errgv
 #define Ieval_root		eval_root
 #define Ieval_start		eval_start
 #define Ifdpid			fdpid
@@ -1439,8 +1430,6 @@
 #define Iincgv			incgv
 #define Iinitav			initav
 #define Iinplace		inplace
-#define Ikeys			keys
-#define Ikeys_mutex		keys_mutex
 #define Ilast_in_gv		last_in_gv
 #define Ilastfd			lastfd
 #define Ilastretstr		lastretstr
@@ -1453,7 +1442,6 @@
 #define Ilineary		lineary
 #define Ilocalizing		localizing
 #define Ilocalpatches		localpatches
-#define Imagical_keys		magical_keys
 #define Imain_cv		main_cv
 #define Imain_root		main_root
 #define Imain_start		main_start
@@ -1589,8 +1577,7 @@
 #define e_fp			Perl_e_fp
 #define e_tmpname		Perl_e_tmpname
 #define endav			Perl_endav
-#define errhv			Perl_errhv
-#define errsv			Perl_errsv
+#define errgv			Perl_errgv
 #define eval_root		Perl_eval_root
 #define eval_start		Perl_eval_start
 #define fdpid			Perl_fdpid
@@ -1604,8 +1591,6 @@
 #define incgv			Perl_incgv
 #define initav			Perl_initav
 #define inplace			Perl_inplace
-#define keys			Perl_keys
-#define keys_mutex		Perl_keys_mutex
 #define last_in_gv		Perl_last_in_gv
 #define lastfd			Perl_lastfd
 #define lastretstr		Perl_lastretstr
@@ -1618,7 +1603,6 @@
 #define lineary			Perl_lineary
 #define localizing		Perl_localizing
 #define localpatches		Perl_localpatches
-#define magical_keys		Perl_magical_keys
 #define main_cv			Perl_main_cv
 #define main_root		Perl_main_root
 #define main_start		Perl_main_start

@@ -801,7 +801,7 @@ do_print(register SV *sv, FILE *fp)
 I32
 my_stat(ARGSproto)
 {
-    dSP;
+    djSP;
     IO *io;
     GV* tmpgv;
 
@@ -852,7 +852,7 @@ my_stat(ARGSproto)
 I32
 my_lstat(ARGSproto)
 {
-    dSP;
+    djSP;
     SV *sv;
     if (op->op_flags & OPf_REF) {
 	EXTEND(sp,1);
@@ -1551,3 +1551,4 @@ do_shmio(I32 optype, SV **mark, SV **sp)
 }
 
 #endif /* SYSV IPC */
+

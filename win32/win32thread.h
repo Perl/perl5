@@ -95,9 +95,18 @@ typedef HANDLE perl_mutex;
     } STMT_END
 
 #define THR ((struct thread *) TlsGetValue(thr_key))
+#define THREAD_CREATE(t, f)	Perl_thread_create(t, f)
+#define THREAD_POST_CREATE(t)	NOOP
+#define THREAD_RET_TYPE		DWORD WINAPI
+#define THREAD_RET_CAST(p)	((DWORD)(p))
+
+typedef THREAD_RET_TYPE thread_func_t(void *);
 
 #define HAVE_THREAD_INTERN
-void init_thread_intern _((struct thread *thr));
+START_EXTERN_C
+void Perl_init_thread_intern _((struct thread *thr));
+int Perl_thread_create _((struct thread *thr, thread_func_t *fn));
+END_EXTERN_C
 
 #define JOIN(t, avp)							\
     STMT_START {							\
@@ -112,14 +121,6 @@ void init_thread_intern _((struct thread *thr));
 	    croak("panic: TlsSetValue");		\
     } STMT_END
 
-#define THREAD_CREATE(t, f)	Perl_thread_create(t, f)
-#define THREAD_POST_CREATE(t)	NOOP
-#define THREAD_RET_TYPE		DWORD WINAPI
-#define THREAD_RET_CAST(p)	((DWORD)(p))
 #define YIELD			Sleep(0)
-
-typedef THREAD_RET_TYPE thread_func_t(void *);
-
-int Perl_thread_create _((struct thread *thr, thread_func_t *fn));
 
 #endif /* _WIN32THREAD_H */

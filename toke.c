@@ -1225,37 +1225,27 @@ yylex(void)
 	    return PRIVATEREF;
 	}
 
-	if (!strchr(tokenbuf,':')) {
-#ifdef USE_THREADS
-	    /* Check for single character per-thread magicals */
-	    if (tokenbuf[0] == '$' && tokenbuf[2] == '\0'
-		&& (tmp = find_thread_magical(&tokenbuf[1])) != NOT_IN_PAD) {
-		yylval.opval = newOP(OP_SPECIFIC, 0);
-		yylval.opval->op_targ = tmp;
-		return PRIVATEREF;
-	    }
-#endif /* USE_THREADS */
-	    if ((tmp = pad_findmy(tokenbuf)) != NOT_IN_PAD) {
-		if (last_lop_op == OP_SORT &&
-		    tokenbuf[0] == '$' &&
-		    (tokenbuf[1] == 'a' || tokenbuf[1] == 'b')
-		    && !tokenbuf[2])
+	if (!strchr(tokenbuf,':')
+	    && (tmp = pad_findmy(tokenbuf)) != NOT_IN_PAD) {
+	    if (last_lop_op == OP_SORT &&
+		tokenbuf[0] == '$' &&
+		(tokenbuf[1] == 'a' || tokenbuf[1] == 'b')
+		&& !tokenbuf[2])
+	    {
+		for (d = in_eval ? oldoldbufptr : linestart;
+		     d < bufend && *d != '\n';
+		     d++)
 		{
-		    for (d = in_eval ? oldoldbufptr : linestart;
-			 d < bufend && *d != '\n';
-			 d++)
-		    {
-			if (strnEQ(d,"<=>",3) || strnEQ(d,"cmp",3)) {
-			    croak("Can't use \"my %s\" in sort comparison",
-				  tokenbuf);
-			}
+		    if (strnEQ(d,"<=>",3) || strnEQ(d,"cmp",3)) {
+			croak("Can't use \"my %s\" in sort comparison",
+			      tokenbuf);
 		    }
 		}
-
-		yylval.opval = newOP(OP_PADANY, 0);
-		yylval.opval->op_targ = tmp;
-		return PRIVATEREF;
 	    }
+
+	    yylval.opval = newOP(OP_PADANY, 0);
+	    yylval.opval->op_targ = tmp;
+	    return PRIVATEREF;
 	}
 
 	/* Force them to make up their mind on "@foo". */
@@ -2611,7 +2601,7 @@ yylex(void)
 		    (oldoldbufptr == last_lop || oldoldbufptr == last_uni) &&
 		    /* NO SKIPSPACE BEFORE HERE! */
 		    (expect == XREF ||
-		     (opargs[last_lop_op] >> OASHIFT & 7) == OA_FILEREF) )
+		     ((opargs[last_lop_op] >> OASHIFT)& 7) == OA_FILEREF) )
 		{
 		    bool immediate_paren = *s == '(';
 
@@ -5362,7 +5352,7 @@ yyerror(char *s)
     if (in_eval & 2)
 	warn("%_", msg);
     else if (in_eval)
-	sv_catsv(errsv, msg);
+	sv_catsv(GvSV(errgv), msg);
     else
 	PerlIO_write(PerlIO_stderr(), SvPVX(msg), SvCUR(msg));
     if (++error_count >= 10)
@@ -5371,3 +5361,4 @@ yyerror(char *s)
     in_my_stash = Nullhv;
     return 0;
 }
+

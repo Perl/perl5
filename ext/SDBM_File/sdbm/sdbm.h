@@ -49,7 +49,7 @@ typedef struct {
 
 extern datum nullitem;
 
-#ifdef __STDC__
+#if defined(__STDC__) || defined(__cplusplus)
 #define proto(p) p
 #else
 #define proto(p) ()
@@ -268,3 +268,4 @@ extern long sdbm_hash proto((char *, int));
 #endif
 
 #endif /* Include guard */
+

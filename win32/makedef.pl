@@ -87,6 +87,7 @@ Perl_pp_interp
 Perl_pp_map
 Perl_pp_nswitch
 Perl_q
+Perl_rcsid
 Perl_reall_srchlen
 Perl_regdump
 Perl_regfold

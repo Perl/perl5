@@ -11,6 +11,7 @@
 # newly built perl.
 INST_DRV=c:
 INST_TOP=$(INST_DRV)\perl
+BUILDOPT=-DUSE_THREADS -TP
 
 #
 # uncomment next line if you are using Visual C++ 2.x
@@ -18,7 +19,7 @@ INST_TOP=$(INST_DRV)\perl
 
 #
 # uncomment next line if you want debug version of perl (big,slow)
-#CFG=Debug
+CFG=Debug
 
 #
 # set the install locations of the compiler include/libraries
@@ -49,7 +50,8 @@ RUNTIME  = -MD
 !ENDIF
 INCLUDES = -I.\include -I. -I..
 #PCHFLAGS = -Fp"$(INTDIR)/modules.pch" -YX 
-DEFINES  = -DWIN32 -D_CONSOLE -DPERLDLL -TP
+DEFINES  = -DWIN32 -D_CONSOLE $(BUILDOPT)
+LOCDEFS  = -DPERLDLL
 SUBSYS   = console
 
 !IF "$(RUNTIME)" == "-MD"
@@ -82,7 +84,7 @@ LIBFILES = oldnames.lib kernel32.lib user32.lib gdi32.lib \
 	oleaut32.lib netapi32.lib uuid.lib wsock32.lib mpr.lib winmm.lib \
 	version.lib odbc32.lib odbccp32.lib
 
-CFLAGS   = -nologo -W3 $(INCLUDES) $(DEFINES) $(PCHFLAGS) $(OPTIMIZE)
+CFLAGS   = -nologo -W3 $(INCLUDES) $(DEFINES) $(LOCDEFS) $(PCHFLAGS) $(OPTIMIZE)
 LINK_FLAGS  = -nologo $(LIBFILES) $(LINK_DBG) -machine:I386
 OBJOUT_FLAG = -Fo
 
@@ -195,11 +197,13 @@ CORE_OBJ= ..\av.obj	\
 WIN32_C = perllib.c \
 	win32.c \
 	win32io.c \
-	win32sck.c
+	win32sck.c \
+	win32thread.c 
 
 WIN32_OBJ = win32.obj \
 	win32io.obj \
-	win32sck.obj
+	win32sck.obj \
+	win32thread.obj 
 
 PERL95_OBJ = perl95.obj \
 	win32mt.obj \
@@ -241,7 +245,7 @@ CORE_H = ..\av.h	\
 	.\include\sys\socket.h	\
 	.\win32.h
 
-EXTENSIONS=DynaLoader Socket IO Fcntl Opcode SDBM_File attrs
+EXTENSIONS=DynaLoader Socket IO Fcntl Opcode SDBM_File attrs Thread
 
 DYNALOADER=$(EXTDIR)\DynaLoader\DynaLoader
 SOCKET=$(EXTDIR)\Socket\Socket
@@ -250,6 +254,7 @@ OPCODE=$(EXTDIR)\Opcode\Opcode
 SDBM_FILE=$(EXTDIR)\SDBM_File\SDBM_File
 IO=$(EXTDIR)\IO\IO
 ATTRS=$(EXTDIR)\attrs\attrs
+THREAD=$(EXTDIR)\Thread\Thread
 
 SOCKET_DLL=..\lib\auto\Socket\Socket.dll
 FCNTL_DLL=..\lib\auto\Fcntl\Fcntl.dll
@@ -257,6 +262,7 @@ OPCODE_DLL=..\lib\auto\Opcode\Opcode.dll
 SDBM_FILE_DLL=..\lib\auto\SDBM_File\SDBM_File.dll
 IO_DLL=..\lib\auto\IO\IO.dll
 ATTRS_DLL=..\lib\auto\attrs\attrs.dll
+THREAD_DLL=..\lib\auto\Thread\Thread.dll
 
 STATICLINKMODULES=DynaLoader
 DYNALOADMODULES=	\
@@ -265,7 +271,8 @@ DYNALOADMODULES=	\
 	$(OPCODE_DLL)	\
 	$(SDBM_FILE_DLL)\
 	$(IO_DLL)	\
-	$(ATTRS_DLL)
+	$(ATTRS_DLL)    \
+	$(THREAD_DLL)
 
 POD2HTML=$(PODDIR)\pod2html
 POD2MAN=$(PODDIR)\pod2man
@@ -295,13 +302,14 @@ perlglob.obj  : perlglob.c
 config.w32 : $(CFGSH_TMPL)
 	copy $(CFGSH_TMPL) config.w32
 
-.\config.h : $(CFGSH_TMPL)
+.\config.h : $(CFGH_TMPL)
 	-del /f config.h
 	copy $(CFGH_TMPL) config.h
+	
 
 ..\config.sh : config.w32 $(MINIPERL) config_sh.PL
 	$(MINIPERL) -I..\lib config_sh.PL "INST_DRV=$(INST_DRV)" \
-	    "INST_TOP=$(INST_TOP)" "cc=$(CC)" "ccflags=$(RUNTIME) -DWIN32" \
+	    "INST_TOP=$(INST_TOP)" "cc=$(CC)" "ccflags=$(OPTIMIZE) $(DEFINES)" \
 	    "cf_email=$(EMAIL)" "libs=$(LIBFILES)" "incpath=$(CCINCDIR)" \
 	    "libpth=$(CCLIBDIR)" "libc=$(LIBC)" \
 	    config.w32 > ..\config.sh
@@ -325,7 +333,7 @@ $(CORE_OBJ)  : $(CORE_H)
 $(DLL_OBJ)   : $(CORE_H) 
 
 perldll.def : $(MINIPERL) $(CONFIGPM)
-	$(MINIPERL) -w makedef.pl $(CCTYPE) > perldll.def
+	$(MINIPERL) -w makedef.pl $(DEFINES) $(CCTYPE) > perldll.def
 
 $(PERLDLL): perldll.def $(CORE_OBJ) $(WIN32_OBJ) $(DLL_OBJ)
 	$(LINK32) -dll -def:perldll.def -out:$@ @<<
@@ -392,6 +400,12 @@ $(ATTRS_DLL): $(PERLEXE) $(ATTRS).xs
 	$(MAKE)
 	cd ..\..\win32
 
+$(THREAD_DLL): $(PERLEXE) $(THREAD).xs
+	cd $(EXTDIR)\$(*B)
+	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	$(MAKE)
+	cd ..\..\win32
+
 
 $(IO_DLL): $(PERLEXE) $(CONFIGPM) $(IO).xs
 	cd $(EXTDIR)\$(*B)
@@ -449,9 +463,9 @@ distclean: clean
 		$(PERLIMPLIB) ..\miniperl.lib $(MINIMOD)
 	-del /f *.def *.map
 	-del /f $(SOCKET_DLL) $(IO_DLL) $(SDBM_FILE_DLL) $(FCNTL_DLL) \
-		$(OPCODE_DLL) $(ATTRS_DLL)
+		$(OPCODE_DLL) $(ATTRS_DLL) $(THREAD_DLL)
 	-del /f $(SOCKET).c $(IO).c $(SDBM_FILE).c $(FCNTL).c $(OPCODE).c \
-		$(DYNALOADER).c $(ATTRS).c
+		$(DYNALOADER).c $(ATTRS).c $(THREAD).c
 	-del /f $(PODDIR)\*.html
 	-del /f $(PODDIR)\*.bat
 	-del /f ..\config.sh ..\splittree.pl perlmain.c dlutils.c \

@@ -235,7 +235,7 @@ pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix)
 			    warn("Variable \"%s\" will not stay shared", name);
 		    }
 		}
-		av_store(comppad, newoff, oldsv ? SvREFCNT_inc(oldsv) : 0);
+		av_store(comppad, newoff, SvREFCNT_inc(oldsv));
 		return newoff;
 	    }
 	}
@@ -494,33 +494,6 @@ pad_reset(void)
     }
     pad_reset_pending = FALSE;
 }
-
-#ifdef USE_THREADS
-PADOFFSET
-find_thread_magical(name)
-char *name;
-{
-    dTHR;
-    char *p;
-    PADOFFSET key;
-    /* We currently only handle single character magicals */
-    p = strchr(per_thread_magicals, *name);
-    if (!p)
-	return NOT_IN_PAD;
-    key = magical_keys[p - per_thread_magicals];
-    if (key == NOT_IN_PAD) {
-	SV *sv;
-	key = magical_keys[p - per_thread_magicals] = key_create();
-	sv = NEWSV(0, 0);
-	av_store(thr->specific, key, sv);
-	sv_magic(sv, 0, 0, name, 1); 
-	DEBUG_L(PerlIO_printf(PerlIO_stderr(),
-			      "find_thread_magical: key %d new SV %p for %d\n",
-			      (int)key, sv, (int)*name));
-    }
-    return key;
-}
-#endif /* USE_THREADS */
 
 /* Destructor */
 
@@ -1149,7 +1122,6 @@ mod(OP *o, I32 type)
 	    goto nomod;
 	/* FALL THROUGH */
     case OP_PADSV:
-    case OP_SPECIFIC:
 	modcount++;
 	if (!type)
 	    croak("Can't localize lexical variable %s",
@@ -1306,10 +1278,6 @@ ref(OP *o, I32 type)
 	}
 	break;
       
-    case OP_SPECIFIC:
-	o->op_flags |= OPf_MOD;		/* XXX ??? */
-	break;
-
     case OP_RV2AV:
     case OP_RV2HV:
 	o->op_flags |= OPf_REF; 
@@ -2096,8 +2064,7 @@ pmruntime(OP *o, OP *expr, OP *repl)
 		    else if (curop->op_type == OP_PADSV ||
 			     curop->op_type == OP_PADAV ||
 			     curop->op_type == OP_PADHV ||
-			     curop->op_type == OP_PADANY ||
-			     curop->op_type == OP_SPECIFIC) {
+			     curop->op_type == OP_PADANY) {
 			     /* is okay */
 		    }
 		    else
@@ -3295,8 +3262,8 @@ newSUB(I32 floor, OP *o, OP *proto, OP *block)
 		    croak(not_safe);
 		else {
 		    /* force display of errors found but not reported */
-		    sv_catpv(errsv, not_safe);
-		    croak("%s", SvPV(errsv, na));
+		    sv_catpv(GvSV(errgv), not_safe);
+		    croak("%s", SvPVx(GvSV(errgv), na));
 		}
 	    }
 	}
@@ -3678,8 +3645,6 @@ newSVREF(OP *o)
 	o->op_ppaddr = ppaddr[OP_PADSV];
 	return o;
     }
-    else if (o->op_type == OP_SPECIFIC)
-	return o;
     return newUNOP(OP_RV2SV, 0, scalar(o));
 }
 

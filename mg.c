@@ -247,7 +247,6 @@ mg_free(SV *sv)
 U32
 magic_len(SV *sv, MAGIC *mg)
 {
-    dTHR;
     register I32 paren;
     register char *s;
     register I32 i;
@@ -311,7 +310,6 @@ magic_len(SV *sv, MAGIC *mg)
 int
 magic_get(SV *sv, MAGIC *mg)
 {
-    dTHR;
     register I32 paren;
     register char *s;
     register I32 i;
@@ -398,11 +396,7 @@ magic_get(SV *sv, MAGIC *mg)
     case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9': case '&':
 	if (curpm && (rx = curpm->op_pmregexp)) {
-	    /*
-	     * Pre-threads, this was paren = atoi(GvENAME((GV*)mg->mg_obj));
-	     * XXX Does the new way break anything?
-	     */
-	    paren = atoi(mg->mg_ptr);
+	    paren = atoi(GvENAME((GV*)mg->mg_obj));
 	  getparen:
 	    if (paren <= rx->nparens &&
 		(s = rx->startp[paren]) &&
@@ -559,11 +553,6 @@ magic_get(SV *sv, MAGIC *mg)
 	break;
     case '0':
 	break;
-#ifdef USE_THREADS
-    case '@':
-	sv_setsv(sv, errsv);
-	break;
-#endif /* USE_THREADS */
     }
     return 0;
 }
@@ -729,6 +718,7 @@ magic_getsig(SV *sv, MAGIC *mg)
     	if(psig_ptr[i])
     	    sv_setsv(sv,psig_ptr[i]);
     	else {
+	    dTHR;		/* just for SvREFCNT_inc */
     	    Sighandler_t sigstate = rsignal_state(i);
 
     	    /* cache state so we don't fetch it again */
@@ -867,7 +857,6 @@ magic_setnkeys(SV *sv, MAGIC *mg)
 static int
 magic_methpack(SV *sv, MAGIC *mg, char *meth)
 {
-    dTHR;
     dSP;
 
     ENTER;
@@ -905,7 +894,6 @@ magic_getpack(SV *sv, MAGIC *mg)
 int
 magic_setpack(SV *sv, MAGIC *mg)
 {
-    dTHR;
     dSP;
 
     PUSHMARK(sp);
@@ -935,7 +923,6 @@ magic_clearpack(SV *sv, MAGIC *mg)
 
 int magic_wipepack(SV *sv, MAGIC *mg)
 {
-    dTHR;
     dSP;
 
     PUSHMARK(sp);
@@ -950,7 +937,6 @@ int magic_wipepack(SV *sv, MAGIC *mg)
 int
 magic_nextpack(SV *sv, MAGIC *mg, SV *key)
 {
-    dTHR;
     dSP;
     char *meth = SvOK(key) ? "NEXTKEY" : "FIRSTKEY";
 
@@ -1112,7 +1098,6 @@ magic_setsubstr(SV *sv, MAGIC *mg)
 int
 magic_gettaint(SV *sv, MAGIC *mg)
 {
-    dTHR;
     TAINT_IF((mg->mg_len & 1) ||
 	     (mg->mg_len & 2) && mg->mg_obj == sv);	/* kludge */
     return 0;
@@ -1619,11 +1604,6 @@ magic_set(SV *sv, MAGIC *mg)
 		origargv[i] = Nullch;
 	}
 	break;
-#ifdef USE_THREADS
-    case '@':
-	sv_setsv(errsv, sv);
-	break;
-#endif /* USE_THREADS */
     }
     return 0;
 }
@@ -1681,7 +1661,6 @@ unwind_handler_stack(void *p)
 Signal_t
 sighandler(int sig)
 {
-    dTHR;
     dSP;
     GV *gv;
     HV *st;
@@ -1782,3 +1761,5 @@ sighandler(int sig)
     Xpv = tXpv;
     return;
 }
+
+

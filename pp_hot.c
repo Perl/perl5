@@ -48,7 +48,7 @@ unset_cvowner(void *cvarg)
 
 PP(pp_const)
 {
-    dSP;
+    djSP;
     XPUSHs(cSVOP->op_sv);
     RETURN;
 }
@@ -64,7 +64,7 @@ PP(pp_nextstate)
 
 PP(pp_gvsv)
 {
-    dSP;
+    djSP;
     EXTEND(sp,1);
     if (op->op_private & OPpLVAL_INTRO)
 	PUSHs(save_scalar(cGVOP->op_gv));
@@ -86,7 +86,7 @@ PP(pp_pushmark)
 
 PP(pp_stringify)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
     STRLEN len;
     char *s;
     s = SvPV(TOPs,len);
@@ -97,14 +97,14 @@ PP(pp_stringify)
 
 PP(pp_gv)
 {
-    dSP;
+    djSP;
     XPUSHs((SV*)cGVOP->op_gv);
     RETURN;
 }
 
 PP(pp_and)
 {
-    dSP;
+    djSP;
     if (!SvTRUE(TOPs))
 	RETURN;
     else {
@@ -115,7 +115,7 @@ PP(pp_and)
 
 PP(pp_sassign)
 {
-    dSP; dPOPTOPssrl;
+    djSP; dPOPTOPssrl;
     MAGIC *mg;
 
     if (op->op_private & OPpASSIGN_BACKWARDS) {
@@ -131,7 +131,7 @@ PP(pp_sassign)
 
 PP(pp_cond_expr)
 {
-    dSP;
+    djSP;
     if (SvTRUEx(POPs))
 	RETURNOP(cCONDOP->op_true);
     else
@@ -151,7 +151,7 @@ PP(pp_unstack)
 
 PP(pp_concat)
 {
-  dSP; dATARGET; tryAMAGICbin(concat,opASSIGN);
+  djSP; dATARGET; tryAMAGICbin(concat,opASSIGN);
   {
     dPOPTOPssrl;
     STRLEN len;
@@ -178,7 +178,7 @@ PP(pp_concat)
 
 PP(pp_padsv)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
     XPUSHs(TARG);
     if (op->op_flags & OPf_MOD) {
 	if (op->op_private & OPpLVAL_INTRO)
@@ -197,7 +197,7 @@ PP(pp_readline)
 
 PP(pp_eq)
 {
-    dSP; tryAMAGICbinSET(eq,0); 
+    djSP; tryAMAGICbinSET(eq,0); 
     {
       dPOPnv;
       SETs(boolSV(TOPn == value));
@@ -207,7 +207,7 @@ PP(pp_eq)
 
 PP(pp_preinc)
 {
-    dSP;
+    djSP;
     if (SvREADONLY(TOPs) || SvTYPE(TOPs) > SVt_PVLV)
 	croak(no_modify);
     if (SvIOK(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
@@ -224,7 +224,7 @@ PP(pp_preinc)
 
 PP(pp_or)
 {
-    dSP;
+    djSP;
     if (SvTRUE(TOPs))
 	RETURN;
     else {
@@ -235,7 +235,7 @@ PP(pp_or)
 
 PP(pp_add)
 {
-    dSP; dATARGET; tryAMAGICbin(add,opASSIGN); 
+    djSP; dATARGET; tryAMAGICbin(add,opASSIGN); 
     {
       dPOPTOPnnrl_ul;
       SETn( left + right );
@@ -245,7 +245,7 @@ PP(pp_add)
 
 PP(pp_aelemfast)
 {
-    dSP;
+    djSP;
     AV *av = GvAV((GV*)cSVOP->op_sv);
     SV** svp = av_fetch(av, op->op_private, op->op_flags & OPf_MOD);
     PUSHs(svp ? *svp : &sv_undef);
@@ -254,7 +254,7 @@ PP(pp_aelemfast)
 
 PP(pp_join)
 {
-    dSP; dMARK; dTARGET;
+    djSP; dMARK; dTARGET;
     MARK++;
     do_join(TARG, *MARK, MARK, SP);
     SP = MARK;
@@ -264,7 +264,7 @@ PP(pp_join)
 
 PP(pp_pushre)
 {
-    dSP;
+    djSP;
 #ifdef DEBUGGING
     /*
      * We ass_u_me that LvTARGOFF() comes first, and that two STRLENs
@@ -285,7 +285,7 @@ PP(pp_pushre)
 
 PP(pp_print)
 {
-    dSP; dMARK; dORIGMARK;
+    djSP; dMARK; dORIGMARK;
     GV *gv;
     IO *io;
     register PerlIO *fp;
@@ -382,7 +382,7 @@ PP(pp_print)
 
 PP(pp_rv2av)
 {
-    dSP; dPOPss;
+    djSP; dPOPss;
     AV *av;
 
     if (SvROK(sv)) {
@@ -457,7 +457,7 @@ PP(pp_rv2av)
 
 PP(pp_rv2hv)
 {
-    dSP; dTOPss;
+    djSP; dTOPss;
     HV *hv;
 
     if (SvROK(sv)) {
@@ -538,7 +538,7 @@ PP(pp_rv2hv)
 
 PP(pp_aassign)
 {
-    dSP;
+    djSP;
     SV **lastlelem = stack_sp;
     SV **lastrelem = stack_base + POPMARK;
     SV **firstrelem = stack_base + POPMARK + 1;
@@ -740,7 +740,7 @@ PP(pp_aassign)
 
 PP(pp_match)
 {
-    dSP; dTARG;
+    djSP; dTARG;
     register PMOP *pm = cPMOP;
     register char *t;
     register char *s;
@@ -952,7 +952,6 @@ ret_no:
 OP *
 do_readline(void)
 {
-    dTHR;
     dSP; dTARGETSTACKED;
     register SV *sv;
     STRLEN tmplen = 0;
@@ -1211,7 +1210,7 @@ do_readline(void)
 
 PP(pp_enter)
 {
-    dSP;
+    djSP;
     register CONTEXT *cx;
     I32 gimme = OP_GIMME(op, -1);
 
@@ -1232,7 +1231,7 @@ PP(pp_enter)
 
 PP(pp_helem)
 {
-    dSP;
+    djSP;
     HE* he;
     SV **svp;
     SV *keysv = POPs;
@@ -1281,7 +1280,7 @@ PP(pp_helem)
 
 PP(pp_leave)
 {
-    dSP;
+    djSP;
     register CONTEXT *cx;
     register SV **mark;
     SV **newsp;
@@ -1337,7 +1336,7 @@ PP(pp_leave)
 
 PP(pp_iter)
 {
-    dSP;
+    djSP;
     register CONTEXT *cx;
     SV* sv;
     AV* av;
@@ -1383,7 +1382,7 @@ PP(pp_iter)
 
 PP(pp_subst)
 {
-    dSP; dTARG;
+    djSP; dTARG;
     register PMOP *pm = cPMOP;
     PMOP *rpm = pm;
     register SV *dstr;
@@ -1635,7 +1634,7 @@ ret_no:
 
 PP(pp_grepwhile)
 {
-    dSP;
+    djSP;
 
     if (SvTRUEx(POPs))
 	stack_base[markstack_ptr[-1]++] = stack_base[*markstack_ptr];
@@ -1676,7 +1675,7 @@ PP(pp_grepwhile)
 
 PP(pp_leavesub)
 {
-    dSP;
+    djSP;
     SV **mark;
     SV **newsp;
     PMOP *newpm;
@@ -1745,7 +1744,7 @@ get_db_sub(SV **svp, CV *cv)
 
 PP(pp_entersub)
 {
-    dSP; dPOPss;
+    djSP; dPOPss;
     GV *gv;
     HV *stash;
     register CV *cv;
@@ -2158,7 +2157,7 @@ sub_crush_depth(CV *cv)
 
 PP(pp_aelem)
 {
-    dSP;
+    djSP;
     SV** svp;
     I32 elem = POPi;
     AV* av = (AV*)POPs;
@@ -2227,7 +2226,7 @@ vivify_ref(SV *sv, U32 to_what)
 
 PP(pp_method)
 {
-    dSP;
+    djSP;
     SV* sv;
     SV* ob;
     GV* gv;

@@ -361,7 +361,7 @@ GetShell(void)
 }
 
 int
-do_aspawn(void* really, void** mark, void** arglast)
+do_aspawn(void* really, void ** mark, void ** arglast)
 {
     char **argv;
     char *strPtr;
@@ -524,7 +524,7 @@ opendir(char *filename)
 /*  char           *dummy;*/
 
     /* check to see if filename is a directory */
-    if (win32_stat(filename, &sbuf) < 0 || sbuf.st_mode & S_IFDIR == 0) {
+    if (win32_stat(filename, &sbuf) < 0 || (sbuf.st_mode & S_IFDIR) == 0) {
 	return NULL;
     }
 
@@ -987,7 +987,7 @@ win32_fopen(const char *filename, const char *mode)
 DllExport FILE *
 win32_fdopen( int handle, const char *mode)
 {
-    return pIOSubSystem->pfnfdopen(handle, mode);
+    return pIOSubSystem->pfnfdopen(handle, (char *) mode);
 }
 
 DllExport FILE *
@@ -1205,13 +1205,13 @@ win32_chdir(const char *dir)
 DllExport int
 win32_spawnvp(int mode, const char *cmdname, const char *const *argv)
 {
-    return pIOSubSystem->pfnspawnvp(mode, cmdname, argv);
+    return pIOSubSystem->pfnspawnvp(mode, cmdname, (char * const *) argv);
 }
 
 DllExport int
 win32_execvp(const char *cmdname, const char *const *argv)
 {
-    return pIOSubSystem->pfnexecvp(cmdname, argv);
+    return pIOSubSystem->pfnexecvp(cmdname, (char *const *)argv);
 }
 
 DllExport void
@@ -1637,3 +1637,7 @@ Perl_win32_init(int *argcp, char ***argvp)
     _control87(MCW_EM, MCW_EM);
 #endif
 }
+
+
+
+
