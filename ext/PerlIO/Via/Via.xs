@@ -70,7 +70,6 @@ PerlIOVia_method(pTHX_ PerlIO *f,char *method,CV **save,int flags,...)
    IV count;
    dSP;
    SV *arg;
-   int i = 0;
    ENTER;
    PUSHMARK(sp);
    XPUSHs(s->obj);
@@ -165,7 +164,7 @@ PerlIOVia_pushed(PerlIO *f, const char *mode, SV *arg)
 }
 
 PerlIO *
-PerlIOVia_open(pTHX_ PerlIO_funcs *self, AV *layers, IV n, const char *mode, int fd, int imode, int perm, PerlIO *f, int narg, SV **args)
+PerlIOVia_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers, IV n, const char *mode, int fd, int imode, int perm, PerlIO *f, int narg, SV **args)
 {
  if (!f)
   {
@@ -392,7 +391,6 @@ PerlIOVia_get_base(PerlIO *f)
 {
  if (PerlIOBase(f)->flags & PERLIO_F_CANREAD)
   {
-   dTHX;
    PerlIOVia *s = PerlIOSelf(f,PerlIOVia);
    if (s->var)
     {
@@ -410,7 +408,6 @@ PerlIOVia_get_ptr(PerlIO *f)
    PerlIOVia *s = PerlIOSelf(f,PerlIOVia);
    if (s->var)
     {
-     dTHX;
      STDCHAR *p = (STDCHAR *)(SvEND(s->var) - s->cnt);
      return p;
     }

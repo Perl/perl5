@@ -1,3 +1,5 @@
+#define PERL_NO_GET_CONTEXT
+
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
@@ -7,7 +9,8 @@
 #include "EBCDIC.h"
 #include "Symbols.h"
 
-#define UNIMPLEMENTED(x,y) y x (SV *sv, char *encoding) {   \
+
+#define UNIMPLEMENTED(x,y) y x (SV *sv, char *encoding) {dTHX;   \
                          Perl_croak(aTHX_ "panic_unimplemented"); \
 			 return (y)0; /* fool picky compilers */ \
                          }
@@ -51,6 +54,7 @@ typedef struct
 SV *
 PerlIOEncode_getarg(PerlIO *f)
 {
+ dTHX;
  PerlIOEncode *e = PerlIOSelf(f,PerlIOEncode);
  SV *sv = &PL_sv_undef;
  if (e->enc)

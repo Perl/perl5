@@ -1,6 +1,20 @@
 #ifndef _PERLIOL_H
 #define _PERLIOL_H
 
+typedef struct
+{
+ PerlIO_funcs *funcs;
+ SV *arg;
+} PerlIO_pair_t;
+
+typedef struct
+{
+ IV refcnt;
+ IV cur;
+ IV len;
+ PerlIO_pair_t *array;
+} PerlIO_list_t;
+
 struct _PerlIO_funcs
 {
  char *		name;
@@ -9,7 +23,7 @@ struct _PerlIO_funcs
  IV		(*Pushed)(PerlIO *f,const char *mode,SV *arg);
  IV		(*Popped)(PerlIO *f);
  PerlIO *	(*Open)(pTHX_ PerlIO_funcs *tab,
-			AV *layers, IV n,
+			PerlIO_list_t *layers, IV n,
 			const char *mode,
 			int fd, int imode, int perm,
 			PerlIO *old,
@@ -95,8 +109,8 @@ EXT PerlIO_funcs PerlIO_mmap;
 #endif
 
 extern PerlIO *PerlIO_allocate(pTHX);
-extern SV *PerlIO_arg_fetch(pTHX_ AV *av,IV n);
-#define PerlIOArg PerlIO_arg_fetch(aTHX_ layers,n+1)
+extern SV *PerlIO_arg_fetch(PerlIO_list_t *av,IV n);
+#define PerlIOArg PerlIO_arg_fetch(layers,n)
 
 #if O_BINARY != O_TEXT
 #define PERLIO_STDTEXT "t"
@@ -139,7 +153,7 @@ typedef struct
  IV		oneword;    /* Emergency buffer */
 } PerlIOBuf;
 
-extern PerlIO *	PerlIOBuf_open       (pTHX_ PerlIO_funcs *self, AV *layers, IV n, const char *mode, int fd, int imode, int perm, PerlIO *old, int narg, SV **args);
+extern PerlIO *	PerlIOBuf_open       (pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers, IV n, const char *mode, int fd, int imode, int perm, PerlIO *old, int narg, SV **args);
 extern IV	PerlIOBuf_pushed     (PerlIO *f, const char *mode,SV *arg);
 extern SSize_t	PerlIOBuf_read       (PerlIO *f, void *vbuf, Size_t count);
 extern SSize_t	PerlIOBuf_unread     (PerlIO *f, const void *vbuf, Size_t count);

@@ -81,7 +81,7 @@ typedef PerlIOl *PerlIO;
 #define PERLIO_LAYERS 1
 
 extern void	PerlIO_define_layer	(pTHX_ PerlIO_funcs *tab);
-extern SV *	PerlIO_find_layer	(pTHX_ const char *name, STRLEN len, int load);
+extern PerlIO_funcs *PerlIO_find_layer	(pTHX_ const char *name, STRLEN len, int load);
 extern PerlIO *	PerlIO_push		(pTHX_ PerlIO *f,PerlIO_funcs *tab,const char *mode,SV *arg);
 extern void	PerlIO_pop		(pTHX_ PerlIO *f);
 
