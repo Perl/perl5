@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq4 - Data Manipulation ($Revision: 1.37 $, $Date: 2002/11/13 06:04:00 $)
+perlfaq4 - Data Manipulation ($Revision: 1.39 $, $Date: 2003/01/03 20:06:21 $)
 
 =head1 DESCRIPTION
 
@@ -22,12 +22,12 @@ representations and conversions.
 
 To limit the number of decimal places in your numbers, you
 can use the printf or sprintf function.  See the
-L<perlop|"Floating Point Arithmetic"> for more details.
+L<"Floating Point Arithmetic"|perlop> for more details.
 
 	printf "%.2f", 10/3;
-	
+
 	my $number = sprintf "%.2f", 10/3;
-	
+
 =head2 Why isn't my octal data interpreted correctly?
 
 Perl only understands octal and hex numbers as such when they occur as
@@ -43,13 +43,13 @@ The inverse mapping from decimal to octal can be done with either the
 "%o" or "%O" sprintf() formats.
 
 This problem shows up most often when people try using chmod(), mkdir(),
-umask(), or sysopen(), which by widespread tradition typically take 
+umask(), or sysopen(), which by widespread tradition typically take
 permissions in octal.
 
     chmod(644,  $file);	# WRONG
     chmod(0644, $file);	# right
 
-Note the mistake in the first line was specifying the decimal literal 
+Note the mistake in the first line was specifying the decimal literal
 644, rather than the intended octal literal 0644.  The problem can
 be seen with:
 
@@ -57,7 +57,7 @@ be seen with:
 
 Surely you had not intended C<chmod(01204, $file);> - did you?  If you
 want to use numeric literals as arguments to chmod() et al. then please
-try to express them as octal constants, that is with a leading zero and 
+try to express them as octal constants, that is with a leading zero and
 with the following digits restricted to the set 0..7.
 
 =head2 Does Perl have a round() function?  What about ceil() and floor()?  Trig functions?
@@ -94,7 +94,7 @@ alternation:
 
     for ($i = 0; $i < 1.01; $i += 0.05) { printf "%.1f ",$i}
 
-    0.0 0.1 0.1 0.2 0.2 0.2 0.3 0.3 0.4 0.4 0.5 0.5 0.6 0.7 0.7 
+    0.0 0.1 0.1 0.2 0.2 0.2 0.3 0.3 0.4 0.4 0.5 0.5 0.6 0.7 0.7
     0.8 0.8 0.9 0.9 1.0 1.0
 
 Don't blame Perl.  It's the same as in C.  IEEE says we have to do this.
@@ -364,18 +364,18 @@ L<perlfunc/"localtime">):
 
 Use the following simple functions:
 
-    sub get_century    { 
+    sub get_century    {
 	return int((((localtime(shift || time))[5] + 1999))/100);
-    } 
-    sub get_millennium { 
+    }
+    sub get_millennium {
 	return 1+int((((localtime(shift || time))[5] + 1899))/1000);
-    } 
+    }
 
 You can also use the POSIX strftime() function which may be a bit
 slower but is easier to read and maintain.
 
 	use POSIX qw/strftime/;
-	
+
 	my $week_of_the_year = strftime "%W", localtime;
 	my $day_of_the_year  = strftime "%j", localtime;
 
@@ -434,9 +434,9 @@ If you only need to find the date (and not the same time), you
 can use the Date::Calc module.
 
 	use Date::Calc qw(Today Add_Delta_Days);
-	
+
 	my @date = Add_Delta_Days( Today(), -1 );
-	
+
 	print "@date\n";
 
 Most people try to use the time rather than the calendar to
@@ -452,7 +452,7 @@ throws this off. Russ Allbery offers this solution.
 		my $tdst = (localtime $then)[8] > 0;
 		$then - ($tdst - $ndst) * 60 * 60;
 		}
-		
+
 Should give you "this time yesterday" in seconds since epoch relative to
 the first argument or the current time if no argument is given and
 suitable for passing to localtime or whatever else you need to do with
@@ -576,7 +576,7 @@ pull out the smallest nesting parts one at a time:
 
     while (s/BEGIN((?:(?!BEGIN)(?!END).)*)END//gs) {
 	# do something with $1
-    } 
+    }
 
 A more complicated and sneaky approach is to make Perl's regular
 expression engine do it for you.  This is courtesy Dean Inada, and
@@ -635,7 +635,7 @@ capabilities.
 
 You can access the first characters of a string with substr().
 To get the first character, for example, start at position 0
-and grab the string of length 1.  
+and grab the string of length 1.
 
 
 	$string = "Just another Perl Hacker";
@@ -645,11 +645,11 @@ To change part of a string, you can use the optional fourth
 argument which is the replacement string.
 
     substr( $string, 13, 4, "Perl 5.8.0" );
-	
+
 You can also use substr() as an lvalue.
 
     substr( $string, 13, 4 ) =  "Perl 5.8.0";
-	
+
 =head2 How do I change the Nth occurrence of something?
 
 You have to keep track of N yourself.  For example, let's say you want
@@ -754,7 +754,7 @@ example, take a data line like this:
     SAR001,"","Cimetrix, Inc","Bob Smith","CAM",N,8,1,0,7,"Error, Core Dumped"
 
 Due to the restriction of the quotes, this is a fairly complex
-problem.  Thankfully, we have Jeffrey Friedl, author of 
+problem.  Thankfully, we have Jeffrey Friedl, author of
 I<Mastering Regular Expressions>, to handle these for us.  He
 suggests (assuming your string is contained in $text):
 
@@ -799,10 +799,10 @@ Or more nicely written as:
 
 This idiom takes advantage of the C<foreach> loop's aliasing
 behavior to factor out common code.  You can do this
-on several strings at once, or arrays, or even the 
+on several strings at once, or arrays, or even the
 values of a hash if you use a slice:
 
-    # trim whitespace in the scalar, the array, 
+    # trim whitespace in the scalar, the array,
     # and all the values in the hash
     foreach ($scalar, @array, @hash{keys %hash}) {
         s/^\s+//;
@@ -812,7 +812,7 @@ values of a hash if you use a slice:
 =head2 How do I pad a string with blanks or pad a number with zeroes?
 
 (This answer contributed by Uri Guttman, with kibitzing from
-Bart Lateur.) 
+Bart Lateur.)
 
 In the following examples, C<$pad_len> is the length to which you wish
 to pad the string, C<$text> or C<$num> contains the string to be padded,
@@ -833,7 +833,7 @@ C<$pad_len>.
     # Right padding a string with blanks (no truncation):
     $padded = sprintf("%-${pad_len}s", $text);
 
-    # Left padding a number with 0 (no truncation): 
+    # Left padding a number with 0 (no truncation):
     $padded = sprintf("%0${pad_len}d", $num);
 
     # Right padding a string with blanks using pack (will truncate):
@@ -857,19 +857,19 @@ Left and right padding with any character, modifying C<$text> directly:
 =head2 How do I extract selected columns from a string?
 
 Use substr() or unpack(), both documented in L<perlfunc>.
-If you prefer thinking in terms of columns instead of widths, 
+If you prefer thinking in terms of columns instead of widths,
 you can use this kind of thing:
 
     # determine the unpack format needed to split Linux ps output
     # arguments are cut columns
     my $fmt = cut2fmt(8, 14, 20, 26, 30, 34, 41, 47, 59, 63, 67, 72);
 
-    sub cut2fmt { 
+    sub cut2fmt {
 	my(@positions) = @_;
 	my $template  = '';
 	my $lastpos   = 1;
 	for my $place (@positions) {
-	    $template .= "A" . ($place - $lastpos) . " "; 
+	    $template .= "A" . ($place - $lastpos) . " ";
 	    $lastpos   = $place;
 	}
 	$template .= "A*";
@@ -907,7 +907,7 @@ be, you'd have to do this:
 It's probably better in the general case to treat those
 variables as entries in some special hash.  For example:
 
-    %user_defs = ( 
+    %user_defs = (
 	foo  => 23,
 	bar  => 19,
     );
@@ -921,7 +921,7 @@ of the FAQ.
 The problem is that those double-quotes force stringification--
 coercing numbers and references into strings--even when you
 don't want them to be strings.  Think of it this way: double-quote
-expansion is used to produce new strings.  If you already 
+expansion is used to produce new strings.  If you already
 have a string, why do you need more?
 
 If you get used to writing odd things like these:
@@ -952,7 +952,7 @@ that actually do care about the difference between a string and a
 number, such as the magical C<++> autoincrement operator or the
 syscall() function.
 
-Stringification also destroys arrays.  
+Stringification also destroys arrays.
 
     @lines = `command`;
     print "@lines";		# WRONG - extra blanks
@@ -964,15 +964,15 @@ Check for these three things:
 
 =over 4
 
-=item 1. There must be no space after the << part.
+=item There must be no space after the << part.
 
-=item 2. There (probably) should be a semicolon at the end.
+=item There (probably) should be a semicolon at the end.
 
-=item 3. You can't (easily) have any space in front of the tag.
+=item You can't (easily) have any space in front of the tag.
 
 =back
 
-If you want to indent the text in the here document, you 
+If you want to indent the text in the here document, you
 can do this:
 
     # all in one
@@ -982,7 +982,7 @@ can do this:
     HERE_TARGET
 
 But the HERE_TARGET must still be flush against the margin.
-If you want that indented also, you'll have to quote 
+If you want that indented also, you'll have to quote
 in the indentation.
 
     ($quote = <<'    FINIS') =~ s/^\s+//gm;
@@ -1077,7 +1077,7 @@ with
 
     @bad[0]  = `same program that outputs several lines`;
 
-The C<use warnings> pragma and the B<-w> flag will warn you about these 
+The C<use warnings> pragma and the B<-w> flag will warn you about these
 matters.
 
 =head2 How can I remove duplicate elements from a list or array?
@@ -1233,8 +1233,8 @@ like this one.  It uses the CPAN module FreezeThaw:
     @a = @b = ( "this", "that", [ "more", "stuff" ] );
 
     printf "a and b contain %s arrays\n",
-        cmpStr(\@a, \@b) == 0 
-	    ? "the same" 
+        cmpStr(\@a, \@b) == 0
+	    ? "the same"
 	    : "different";
 
 This approach also works for comparing hashes.  Here
@@ -1244,7 +1244,7 @@ we'll demonstrate two different answers:
 
     %a = %b = ( "this" => "that", "extra" => [ "more", "stuff" ] );
     $a{EXTRA} = \%b;
-    $b{EXTRA} = \%a;                    
+    $b{EXTRA} = \%a;
 
     printf "a and b contain %s hashes\n",
 	cmpStr(\%a, \%b) == 0 ? "the same" : "different";
@@ -1264,9 +1264,9 @@ use the first() function in the List::Util module, which comes with
 Perl 5.8.  This example finds the first element that contains "Perl".
 
 	use List::Util qw(first);
-	
+
 	my $element = first { /Perl/ } @array;
-	
+
 If you cannot use List::Util, you can make your own loop to do the
 same thing.  Once you find the element, you stop the loop with last.
 
@@ -1280,13 +1280,13 @@ If you want the array index, you can iterate through the indices
 and check the array element at each index until you find one
 that satisfies the condition.
 
-	my( $found, $i ) = ( undef, -1 );
-    for( $i = 0; $i < @array; $i++ ) 
+	my( $found, $index ) = ( undef, -1 );
+    for( $i = 0; $i < @array; $i++ )
     	{
-        if( $array[$i] =~ /Perl/ ) 
-        	{ 
+        if( $array[$i] =~ /Perl/ )
+        	{
         	$found = $array[$i];
-        	$index = $i; 
+        	$index = $i;
         	last;
         	}
         }
@@ -1408,7 +1408,7 @@ Here's another; let's compute spherical volumes:
 	$_ **= 3;
 	$_ *= (4/3) * 3.14159;  # this will be constant folded
     }
-    
+
 which can also be done with map() which is made to transform
 one list into another:
 
@@ -1420,7 +1420,7 @@ the values are not copied, so if you modify $orbit (in this
 case), you modify the value.
 
     for $orbit ( values %orbits ) {
-	($orbit **= 3) *= (4/3) * 3.14159; 
+	($orbit **= 3) *= (4/3) * 3.14159;
     }
 
 Prior to perl 5.6 C<values> returned copies of the values,
@@ -1440,7 +1440,7 @@ Use the rand() function (see L<perlfunc/rand>):
     $element = $array[$index];
 
 Make sure you I<only call srand once per program, if then>.
-If you are calling it more than once (such as before each 
+If you are calling it more than once (such as before each
 call to rand), you're almost certainly doing something wrong.
 
 =head2 How do I permute N elements of a list?
@@ -1455,6 +1455,14 @@ on CPAN).  It's written in XS code and is very efficient.
 	while (my @perm = $p_iterator->next) {
 	   print "next permutation: (@perm)\n";
 	}
+
+For even faster execution, you could do:
+
+   use Algorithm::Permute;
+   my @array = 'a'..'d';
+   Algorithm::Permute::permute {
+      print "next permutation: (@array)\n";
+   } @array;
 
 Here's a little program that generates all permutations of
 all the words on each line of input. The algorithm embodied
@@ -1585,13 +1593,13 @@ Or use the CPAN module Bit::Vector:
     @ints = $vector->Index_List_Read();
 
 Bit::Vector provides efficient methods for bit vector, sets of small integers
-and "big int" math. 
+and "big int" math.
 
 Here's a more extensive illustration using vec():
 
     # vec demo
     $vector = "\xff\x0f\xef\xfe";
-    print "Ilya's string \\xff\\x0f\\xef\\xfe represents the number ", 
+    print "Ilya's string \\xff\\x0f\\xef\\xfe represents the number ",
 	unpack("N", $vector), "\n";
     $is_set = vec($vector, 23, 1);
     print "Its 23rd bit is ", $is_set ? "set" : "clear", ".\n";
@@ -1611,7 +1619,7 @@ Here's a more extensive illustration using vec():
     set_vec(0,32,17);
     set_vec(1,32,17);
 
-    sub set_vec { 
+    sub set_vec {
 	my ($offset, $width, $value) = @_;
 	my $vector = '';
 	vec($vector, $offset, $width) = $value;
@@ -1628,7 +1636,7 @@ Here's a more extensive illustration using vec():
 	print "vector length in bytes: ", length($vector), "\n";
 	@bytes = unpack("A8" x length($vector), $bits);
 	print "bits are: @bytes\n\n";
-    } 
+    }
 
 =head2 Why does defined() return true on empty arrays and hashes?
 
@@ -1695,8 +1703,8 @@ use the keys() function in a scalar context:
 
     $num_keys = keys %hash;
 
-The keys() function also resets the iterator, which means that you may 
-see strange results if you use this between uses of other hash operators 
+The keys() function also resets the iterator, which means that you may
+see strange results if you use this between uses of other hash operators
 such as each().
 
 =head2 How do I sort a hash (optionally by value instead of key)?
@@ -1967,10 +1975,10 @@ if you just want to say, ``Is this a float?''
             return undef;
         } else {
             return $num;
-        } 
-    } 
+        }
+    }
 
-    sub is_numeric { defined getnum($_[0]) } 
+    sub is_numeric { defined getnum($_[0]) }
 
 Or you could check out the L<String::Scanf|String::Scanf> module on the CPAN
 instead. The POSIX module (part of the standard Perl distribution) provides
@@ -1985,10 +1993,10 @@ or Storable modules from CPAN.  Starting from Perl 5.8 Storable is part
 of the standard distribution.  Here's one example using Storable's C<store>
 and C<retrieve> functions:
 
-    use Storable; 
+    use Storable;
     store(\%hash, "filename");
 
-    # later on...  
+    # later on...
     $href = retrieve("filename");        # by ref
     %hash = %{ retrieve("filename") };   # direct to hash
 
@@ -1998,7 +2006,7 @@ The Data::Dumper module on CPAN (or the 5.005 release of Perl) is great
 for printing out data structures.  The Storable module, found on CPAN,
 provides a function called C<dclone> that recursively copies its argument.
 
-    use Storable qw(dclone); 
+    use Storable qw(dclone);
     $r2 = dclone($r1);
 
 Where $r1 can be a reference to any kind of data structure you'd like.

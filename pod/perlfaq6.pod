@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq6 - Regular Expressions ($Revision: 1.18 $, $Date: 2002/10/30 18:44:21 $)
+perlfaq6 - Regular Expressions ($Revision: 1.20 $, $Date: 2003/01/03 20:05:28 $)
 
 =head1 DESCRIPTION
 
@@ -8,7 +8,7 @@ This section is surprisingly small because the rest of the FAQ is
 littered with answers involving regular expressions.  For example,
 decoding a URL and checking whether something is a number are handled
 with regular expressions, but those answers are found elsewhere in
-this document (in L<perlfaq9>: ``How do I decode or create those %-encodings 
+this document (in L<perlfaq9>: ``How do I decode or create those %-encodings
 on the web'' and L<perlfaq4>: ``How do I determine whether a scalar is
 a number/whole/integer/float'', to be precise).
 
@@ -143,16 +143,16 @@ Here's another example of using C<..>:
 	# now choose between them
     } continue {
 	reset if eof();		# fix $.
-    } 
+    }
 
 =head2 I put a regular expression into $/ but it didn't work. What's wrong?
 
-As of Perl 5.8.0, $/ has to be a string.  This may change in 5.10,
+Up to Perl 5.8.0, $/ has to be a string.  This may change in 5.10,
 but don't get your hopes up. Until then, you can use these examples
 if you really need to do this.
 
-Use the four argument form of sysread to continually add to 
-a buffer.  After you add to the buffer, you check if you have a 
+Use the four argument form of sysread to continually add to
+a buffer.  After you add to the buffer, you check if you have a
 complete line (using your regular expression).
 
        local $_ = "";
@@ -162,11 +162,11 @@ complete line (using your regular expression).
              # do stuff here.
           }
        }
- 
+
  You can do the same thing with foreach and a match using the
  c flag and the \G anchor, if you do not mind your entire file
  being in memory at the end.
-       
+
        local $_ = "";
        while( sysread FH, $_, 8192, length ) {
           foreach my $record ( m/\G((?s).*?)your_pattern/gc ) {
@@ -201,7 +201,7 @@ And here it is as a subroutine, modeled after the above:
 	my $mask = uc $old ^ $old;
 
 	uc $new | $mask .
-	    substr($mask, -1) x (length($new) - length($old))        
+	    substr($mask, -1) x (length($new) - length($old))
     }
 
     $a = "this is a TEsT case";
@@ -280,8 +280,8 @@ documented in L<perlre>.
 No matter which locale you are in, the alphabetic characters are
 the characters in \w without the digits and the underscore.
 As a regex, that looks like C</[^\W\d_]/>.  Its complement,
-the non-alphabetics, is then everything in \W along with 
-the digits and the underscore, or C</[\W\d_]/>. 
+the non-alphabetics, is then everything in \W along with
+the digits and the underscore, or C</[\W\d_]/>.
 
 =head2 How can I quote a variable to use in a regex?
 
@@ -442,9 +442,9 @@ playing hot potato.
 Use the split function:
 
     while (<>) {
-	foreach $word ( split ) { 
+	foreach $word ( split ) {
 	    # do something with $word here
-	} 
+	}
     }
 
 Note that this isn't really a word in the English sense; it's just
@@ -478,7 +478,7 @@ in the previous question:
 If you wanted to do the same thing for lines, you wouldn't need a
 regular expression:
 
-    while (<>) { 
+    while (<>) {
 	$seen{$_}++;
     }
     while ( ($line, $count) = each %seen ) {
@@ -500,12 +500,12 @@ The following is extremely inefficient:
     @popstates = qw(CO ON MI WI MN);
     while (defined($line = <>)) {
 	for $state (@popstates) {
-	    if ($line =~ /\b$state\b/i) {  
+	    if ($line =~ /\b$state\b/i) {
 		print $line;
 		last;
 	    }
 	}
-    }                                        
+    }
 
 That's because Perl has to recompile all those patterns for each of
 the lines of the file.  As of the 5.005 release, there's a much better
@@ -602,7 +602,7 @@ still need the C<g> flag.
 		{
 		print "Found $1\n";
 		}
-		
+
 After the match fails at the letter C<a>, perl resets pos()
 and the next match on the same string starts at the beginning.
 
@@ -648,7 +648,7 @@ which works in 5.004 or later.
 For each line, the PARSER loop first tries to match a series
 of digits followed by a word boundary.  This match has to
 start at the place the last match left off (or the beginning
-of the string on the first match). Since C<m/ \G( \d+\b   
+of the string on the first match). Since C<m/ \G( \d+\b
 )/gcx> uses the C<c> flag, if the string does not match that
 regular expression, perl does not reset pos() and the next
 match starts at the same position to try a different
@@ -737,7 +737,7 @@ Goldberg:
 	   (?:[A-Z][A-Z])*?
 	   GX
 	/x;
-	
+
 This succeeds if the "martian" character GX is in the string, and fails
 otherwise.  If you don't like using (?!<), you can replace (?!<[A-Z])
 with (?:^|[^A-Z]).

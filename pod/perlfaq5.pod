@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq5 - Files and Formats ($Revision: 1.26 $, $Date: 2002/09/21 21:04:17 $)
+perlfaq5 - Files and Formats ($Revision: 1.27 $, $Date: 2002/12/06 07:40:11 $)
 
 =head1 DESCRIPTION
 
@@ -30,7 +30,7 @@ value, Perl will flush the handle's buffer after each
 print() or write(). Setting $| affects buffering only for
 the currently selected default file handle. You choose this
 handle with the one argument select() call (see
-L<perlvar/$|> and L<perlfunc/select>).
+L<perlvar/$E<verbar>> and L<perlfunc/select>).
 
 Use select() to choose the desired handle, then set its
 per-filehandle variables.
@@ -110,7 +110,7 @@ C<.c.orig> file.
 
 Use the File::Temp module, see L<File::Temp> for more information.
 
-  use File::Temp qw/ tempfile tempdir /; 
+  use File::Temp qw/ tempfile tempdir /;
 
   $dir = tempdir( CLEANUP => 1 );
   ($fh, $filename) = tempfile( DIR => $dir );
@@ -164,7 +164,7 @@ Berkeley-style ps:
     #   15158 p5  T      0:00 perl /home/tchrist/scripts/now-what
     $PS_T = 'A6 A4 A7 A5 A*';
     open(PS, "ps|");
-    print scalar <PS>; 
+    print scalar <PS>;
     while (<PS>) {
 	($pid, $tt, $stat, $time, $command) = unpack($PS_T, $_);
 	for $var (qw!pid tt stat time command!) {
@@ -282,9 +282,9 @@ an expression where you would place the filehandle:
 That block is a proper block like any other, so you can put more
 complicated code there.  This sends the message out to one of two places:
 
-    $ok = -x "/bin/cat";                
+    $ok = -x "/bin/cat";
     print { $ok ? $fd[1] : $fd[2] } "cat stat $ok\n";
-    print { $fd[ 1+ ($ok || 0) ]  } "cat stat $ok\n";           
+    print { $fd[ 1+ ($ok || 0) ]  } "cat stat $ok\n";
 
 This approach of treating C<print> and C<printf> like object methods
 calls doesn't work for the diamond operator.  That's because it's a
@@ -369,7 +369,7 @@ I<then> gives you read-write access:
     open(FH, "+> /path/name");		# WRONG (almost always)
 
 Whoops.  You should instead use this, which will fail if the file
-doesn't exist.  
+doesn't exist.
 
     open(FH, "+< /path/name");  	# open for update
 
@@ -458,11 +458,11 @@ best therefore to use glob() only in list context.
 
 Normally perl ignores trailing blanks in filenames, and interprets
 certain leading characters (or a trailing "|") to mean something
-special. 
+special.
 
 The three argument form of open() lets you specify the mode
 separately from the filename.  The open() function treats
-special mode characters and whitespace in the filename as 
+special mode characters and whitespace in the filename as
 literals
 
 	open FILE, "<", "  file  ";  # filename is "   file   "
@@ -532,7 +532,7 @@ for your own system's idiosyncrasies (sometimes called "features").
 Slavish adherence to portability concerns shouldn't get in the way of
 your getting your job done.)
 
-For more information on file locking, see also 
+For more information on file locking, see also
 L<perlopentut/"File Locking"> if you have it (new for 5.6).
 
 =back
@@ -699,7 +699,7 @@ to each filehandle.
 You can use the File::Slurp module to do it in one step.
 
 	use File::Slurp;
-	
+
 	$all_of_it = read_file($filename); # entire file in scalar
     @all_lines = read_file($filename); # one line perl element
 
@@ -710,7 +710,7 @@ do so one line at a time:
     while (<INPUT>) {
 	chomp;
 	# do something with $_
-    } 
+    }
     close(INPUT)	    	|| die "can't close $file: $!";
 
 This is tremendously more efficient than reading the entire file into
@@ -735,7 +735,7 @@ You can read the entire filehandle contents into a scalar.
 	$var = <INPUT>;
     }
 
-That temporarily undefs your record separator, and will automatically 
+That temporarily undefs your record separator, and will automatically
 close the file at block exit.  If the file is already open, just use this:
 
     $var = do { local $/; <INPUT> };
@@ -754,7 +754,7 @@ set it to C<""> to eliminate empty paragraphs (C<"abc\n\n\n\ndef">,
 for instance, gets treated as two paragraphs and not three), or
 C<"\n\n"> to accept empty paragraphs.
 
-Note that a blank line must have no blanks in it.  Thus 
+Note that a blank line must have no blanks in it.  Thus
 S<C<"fred\n \nstuff\n\n">> is one paragraph, but C<"fred\n\nstuff\n\n"> is two.
 
 =head2 How can I read a single character from a file?  From the keyboard?
@@ -931,7 +931,7 @@ Or even with a literal numeric descriptor:
 
 Note that "<&STDIN" makes a copy, but "<&=STDIN" make
 an alias.  That means if you close an aliased handle, all
-aliases become inaccessible.  This is not true with 
+aliases become inaccessible.  This is not true with
 a copied one.
 
 Error checking, as always, has been left as an exercise for the reader.
@@ -949,8 +949,8 @@ to, you may be able to do this:
 
 Or, just use the fdopen(3S) feature of open():
 
-    { 
-	local *F; 
+    {
+	local *F;
 	open F, "<&=$fd" or die "Cannot reopen fd=$fd: $!";
 	close F;
     }

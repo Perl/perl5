@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq1 - General Questions About Perl ($Revision: 1.10 $, $Date: 2002/08/29 03:34:00 $)
+perlfaq1 - General Questions About Perl ($Revision: 1.11 $, $Date: 2002/12/06 07:40:11 $)
 
 =head1 DESCRIPTION
 
@@ -83,7 +83,7 @@ The 5.0 release is, essentially, a ground-up rewrite of the original
 perl source code from releases 1 through 4.  It has been modularized,
 object-oriented, tweaked, trimmed, and optimized until it almost doesn't
 look like the old code.  However, the interface is mostly the same, and
-compatibility with previous releases is very high. 
+compatibility with previous releases is very high.
 See L<perltrap/"Perl4 to Perl5 Traps">.
 
 To avoid the "what language is perl5?" confusion, some people prefer to
@@ -94,14 +94,14 @@ See L<perlhist> for a history of Perl revisions.
 
 =head2 What is perl6?
 
-At The Second O'Reilly Open Source Software Convention, Larry Wall            
+At The Second O'Reilly Open Source Software Convention, Larry Wall
 announced Perl6 development would begin in earnest. Perl6 was an oft
 used term for Chip Salzenberg's project to rewrite Perl in C++ named
 Topaz. However, Topaz provided valuable insights to the next version
-of Perl and its implementation, but was ultimately abandoned.   
+of Perl and its implementation, but was ultimately abandoned.
 
-If you want to learn more about Perl6, or have a desire to help in 
-the crusade to make Perl a better place then peruse the Perl6 developers 
+If you want to learn more about Perl6, or have a desire to help in
+the crusade to make Perl a better place then peruse the Perl6 developers
 page at http://dev.perl.org/perl6/ and get involved.
 
 Perl6 is not scheduled for release yet, and Perl5 will still be supported

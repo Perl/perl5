@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq8 - System Interaction ($Revision: 1.14 $, $Date: 2002/11/10 17:35:47 $)
+perlfaq8 - System Interaction ($Revision: 1.16 $, $Date: 2003/01/03 20:03:57 $)
 
 =head1 DESCRIPTION
 
@@ -77,7 +77,7 @@ Or like this:
 Controlling input buffering is a remarkably system-dependent matter.
 On many systems, you can just use the B<stty> command as shown in
 L<perlfunc/getc>, but as you see, that's already getting you into
-portability snags.  
+portability snags.
 
     open(TTY, "+</dev/tty") or die "no tty: $!";
     system "stty  cbreak </dev/tty >/dev/tty 2>&1";
@@ -188,14 +188,14 @@ positions, etc, you might wish to use Term::Cap module:
 
 =head2 How do I get the screen size?
 
-If you have Term::ReadKey module installed from CPAN, 
+If you have Term::ReadKey module installed from CPAN,
 you can use it to fetch the width and height in characters
 and in pixels:
 
     use Term::ReadKey;
     ($wchar, $hchar, $wpixels, $hpixels) = GetTerminalSize();
 
-This is more portable than the raw C<ioctl>, but not as 
+This is more portable than the raw C<ioctl>, but not as
 illustrative:
 
     require 'sys/ioctl.ph';
@@ -275,7 +275,7 @@ next.
 
 If you expect characters to get to your device when you print() them,
 you'll want to autoflush that filehandle.  You can use select()
-and the C<$|> variable to control autoflushing (see L<perlvar/$|>
+and the C<$|> variable to control autoflushing (see L<perlvar/$E<verbar>>
 and L<perlfunc/select>, or L<perlfaq5>, ``How do I flush/unbuffer an
 output filehandle?  Why must I do this?''):
 
@@ -383,11 +383,11 @@ not an issue with C<system("cmd&")>.
 You have to be prepared to "reap" the child process when it finishes.
 
     $SIG{CHLD} = sub { wait };
-    
+
     $SIG{CHLD} = 'IGNORE';
-    
-You can also use a double fork. You immediately wait() for your 
-first child, and the init daemon will wait() for your grandchild once 
+
+You can also use a double fork. You immediately wait() for your
+first child, and the init daemon will wait() for your grandchild once
 it exits.
 
 	unless ($pid = fork) {
@@ -445,8 +445,8 @@ If perl was installed correctly and your shadow library was written
 properly, the getpw*() functions described in L<perlfunc> should in
 theory provide (read-only) access to entries in the shadow password
 file.  To change the file, make a new shadow password file (the format
-varies from system to system--see L<passwd(5)> for specifics) and use
-pwd_mkdb(8) to install it (see L<pwd_mkdb(8)> for more details).
+varies from system to system--see L<passwd> for specifics) and use
+pwd_mkdb(8) to install it (see L<pwd_mkdb> for more details).
 
 =head2 How do I set the time and date?
 
@@ -511,14 +511,14 @@ something like this:
 
 Release 5 of Perl added the END block, which can be used to simulate
 atexit().  Each package's END block is called when the program or
-thread ends (see L<perlmod> manpage for more details).  
+thread ends (see L<perlmod> manpage for more details).
 
 For example, you can use this to make sure your filter program
 managed to finish its output without filling up the disk:
 
     END {
 	close(STDOUT) || die "stdout close failed: $!";
-    } 
+    }
 
 The END block isn't called when untrapped signals kill the program,
 though, so if you use END blocks you should also use
@@ -556,7 +556,10 @@ syscall(), you can use the syscall function (documented in
 L<perlfunc>).
 
 Remember to check the modules that came with your distribution, and
-CPAN as well--someone may already have written a module to do it.
+CPAN as well---someone may already have written a module to do it. On
+Windows, try Win32::API.  On Macs, try Mac::Carbon.  If no module
+has an interface to the C function, you can inline a bit of C in your
+Perl source with Inline::C.
 
 =head2 Where do I get the include files to do ioctl() or syscall()?
 
@@ -594,8 +597,8 @@ scripts inherently insecure.  Perl gives you a number of options
 The IPC::Open2 module (part of the standard perl distribution) is an
 easy-to-use approach that internally uses pipe(), fork(), and exec() to do
 the job.  Make sure you read the deadlock warnings in its documentation,
-though (see L<IPC::Open2>).  See 
-L<perlipc/"Bidirectional Communication with Another Process"> and 
+though (see L<IPC::Open2>).  See
+L<perlipc/"Bidirectional Communication with Another Process"> and
 L<perlipc/"Bidirectional Communication with Yourself">
 
 You may also use the IPC::Open3 module (part of the standard perl
@@ -783,7 +786,7 @@ Strictly speaking, nothing.  Stylistically speaking, it's not a good
 way to write maintainable code.  Perl has several operators for
 running external commands.  Backticks are one; they collect the output
 from the command for use in your program.  The C<system> function is
-another; it doesn't do this.  
+another; it doesn't do this.
 
 Writing backticks in your program sends a clear message to the readers
 of your code that you wanted to collect the output of the command.
@@ -944,7 +947,7 @@ different process from the shell it was started from.  Changes to a
 process are not reflected in its parent--only in any children
 created after the change.  There is shell magic that may allow you to
 fake it by eval()ing the script's output in your shell; check out the
-comp.unix.questions FAQ for details.  
+comp.unix.questions FAQ for details.
 
 =back
 
@@ -965,7 +968,7 @@ module for other solutions.
 
 =item *
 
-Open /dev/tty and use the TIOCNOTTY ioctl on it.  See L<tty(4)>
+Open /dev/tty and use the TIOCNOTTY ioctl on it.  See L<tty>
 for details.  Or better yet, you can just use the POSIX::setsid()
 function, so you don't have to worry about process groups.
 
@@ -1044,7 +1047,7 @@ sample code) and then have a signal handler for the INT signal that
 passes the signal on to the subprocess.  Or you can check for it:
 
     $rc = system($cmd);
-    if ($rc & 127) { die "signal death" } 
+    if ($rc & 127) { die "signal death" }
 
 =head2 How do I open a file without blocking?
 
@@ -1060,16 +1063,16 @@ sysopen():
 =head2 How do I install a module from CPAN?
 
 The easiest way is to have a module also named CPAN do it for you.
-This module comes with perl version 5.004 and later.  
+This module comes with perl version 5.004 and later.
 
     $ perl -MCPAN -e shell
 
     cpan shell -- CPAN exploration and modules installation (v1.59_54)
     ReadLine support enabled
 
-    cpan> install Some::Module 
+    cpan> install Some::Module
 
-To manually install the CPAN module, or any well-behaved CPAN module 
+To manually install the CPAN module, or any well-behaved CPAN module
 for that matter, follow these steps:
 
 =over 4
@@ -1176,7 +1179,7 @@ but other times it is not.  Modern programs C<use Socket;> instead.
 
 =head1 AUTHOR AND COPYRIGHT
 
-Copyright (c) 1997-2002 Tom Christiansen and Nathan Torkington.
+Copyright (c) 1997-2003 Tom Christiansen and Nathan Torkington.
 All rights reserved.
 
 This documentation is free; you can redistribute it and/or modify it
