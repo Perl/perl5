@@ -2549,6 +2549,13 @@ PP(pp_chdir)
 	if (svp)
 	    tmps = SvPV(*svp, na);
     }
+#ifdef VMS
+    if (!tmps || !*tmps) {
+       svp = hv_fetch(GvHVn(envgv), "SYS$LOGIN", 9, FALSE);
+       if (svp)
+           tmps = SvPV(*svp, na);
+    }
+#endif
     TAINT_PROPER("chdir");
     PUSHi( chdir(tmps) >= 0 );
 #ifdef VMS
