@@ -581,6 +581,34 @@ subtest 9 failed.
 
 No known fix.
 
+=head2 OS/390
+
+OS/390 has rather many test failures but the situation is actually
+better than it was in 5.6.0, it's just that so many new modules and
+tests have been added.
+
+ Failed Test                     Stat Wstat Total Fail  Failed  List of Failed
+ -----------------------------------------------------------------------------
+ ../ext/B/Deparse.t                            14    1   7.14%  14
+ ../ext/B/Showlex.t                             1    1 100.00%  1
+ ../ext/Encode/Encode/Tcl.t                   610   13   2.13%  592 594 596 598
+                                                                600 602 604-610
+ ../ext/IO/lib/IO/t/io_unix.t     113 28928     5    3  60.00%  3-5
+ ../ext/POSIX/POSIX.t                          29    1   3.45%  14
+ ../ext/Storable/t/lock.t         255 65280     5    3  60.00%  3-5
+ ../lib/locale.t                  129 33024   117   19  16.24%  99-117
+ ../lib/warnings.t                            434    1   0.23%  75
+ ../lib/ExtUtils.t                             27    1   3.70%  25
+ ../lib/Math/BigInt/t/bigintpm.t             1190    1   0.08%  1145
+ ../lib/Unicode/UCD.t                          81   48  59.26%  1-16 49-64 66-81
+ ../lib/User/pwent.t                            9    1  11.11%  4
+ op/pat.t                                     660    6   0.91%  242-243 424-425
+                                                                626-627
+ op/split.t                         0     9    ??   ??       %  ??
+ op/taint.t                                   174    3   1.72%  156 162 168
+ op/tr.t                                       70    3   4.29%  50 58-59
+ Failed 16/422 test scripts, 96.21% okay. 105/23251 subtests failed, 99.55% okay.
+
 =head2 op/sprintf tests 129 and 130
 
 The op/sprintf tests 129 and 130 are known to fail on some platforms.
@@ -645,6 +673,12 @@ Many floating point inaccuracies:
   ext/POSIX/POSIX            14
 
 =head2 VMS
+
+Rather many tests are failing in VMS but that actually more tests
+succeed in VMS than they used to, it's just that there are many,
+many more tests than there used to be.
+
+Here are the known failures from some compiler/platform combinations.
 
 DEC C V5.3-006 on OpenVMS VAX V6.2
  
