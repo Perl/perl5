@@ -1543,6 +1543,13 @@ PP(pp_lt)
 	}
     }
 #endif
+#ifndef NV_PRESERVES_UV
+    else if (SvROK(TOPs) && SvROK(TOPm1s)) {
+        SP--;
+        SETs(boolSV(SvRV(TOPs) < SvRV(TOPp1s)));
+        RETURN;
+    }
+#endif
     {
       dPOPnv;
       SETs(boolSV(TOPn < value));
@@ -1609,6 +1616,13 @@ PP(pp_gt)
 		RETURN;
 	    }
 	}
+    }
+#endif
+#ifndef NV_PRESERVES_UV
+    else if (SvROK(TOPs) && SvROK(TOPm1s)) {
+        SP--;
+        SETs(boolSV(SvRV(TOPs) > SvRV(TOPp1s)));
+        RETURN;
     }
 #endif
     {
@@ -1679,6 +1693,13 @@ PP(pp_le)
 	}
     }
 #endif
+#ifndef NV_PRESERVES_UV
+    else if (SvROK(TOPs) && SvROK(TOPm1s)) {
+        SP--;
+        SETs(boolSV(SvRV(TOPs) <= SvRV(TOPp1s)));
+        RETURN;
+    }
+#endif
     {
       dPOPnv;
       SETs(boolSV(TOPn <= value));
@@ -1747,6 +1768,13 @@ PP(pp_ge)
 	}
     }
 #endif
+#ifndef NV_PRESERVES_UV
+    else if (SvROK(TOPs) && SvROK(TOPm1s)) {
+        SP--;
+        SETs(boolSV(SvRV(TOPs) >= SvRV(TOPp1s)));
+        RETURN;
+    }
+#endif
     {
       dPOPnv;
       SETs(boolSV(TOPn >= value));
@@ -1772,19 +1800,16 @@ PP(pp_ne)
 	    bool auvok = SvUOK(TOPm1s);
 	    bool buvok = SvUOK(TOPs);
 	
-	    if (!auvok && !buvok) { /* ## IV <=> IV ## */
-		IV aiv = SvIVX(TOPm1s);
-		IV biv = SvIVX(TOPs);
+	    if (auvok == buvok) { /* ## IV == IV or UV == UV ## */
+                /* Casting IV to UV before comparison isn't going to matter
+                   on 2s complement. On 1s complement or sign&magnitude
+                   (if we have any of them) it could make negative zero
+                   differ from normal zero. As I understand it. (Need to
+                   check - is negative zero implementation defined behaviour
+                   anyway?). NWC  */
+		UV buv = SvUVX(POPs);
+		UV auv = SvUVX(TOPs);
 		
-		SP--;
-		SETs(boolSV(aiv != biv));
-		RETURN;
-	    }
-	    if (auvok && buvok) { /* ## UV != UV ## */
-		UV auv = SvUVX(TOPm1s);
-		UV buv = SvUVX(TOPs);
-		
-		SP--;
 		SETs(boolSV(auv != buv));
 		RETURN;
 	    }
