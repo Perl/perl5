@@ -154,7 +154,6 @@ require 5.000;
 use vars qw($VERSION @EXPORT @EXPORT_OK $AUTOLOAD);
 use Carp;
 use Symbol;
-use English;
 use SelectSaver;
 
 require Exporter;
@@ -383,85 +382,85 @@ sub getlines {
 
 sub autoflush {
     my $old = new SelectSaver qualify($_[0], caller);
-    my $prev = $OUTPUT_AUTOFLUSH;
-    $OUTPUT_AUTOFLUSH = @_ > 1 ? $_[1] : 1;
+    my $prev = $|;
+    $| = @_ > 1 ? $_[1] : 1;
     $prev;
 }
 
 sub output_field_separator {
     my $old = new SelectSaver qualify($_[0], caller);
-    my $prev = $OUTPUT_FIELD_SEPARATOR;
-    $OUTPUT_FIELD_SEPARATOR = $_[1] if @_ > 1;
+    my $prev = $,;
+    $, = $_[1] if @_ > 1;
     $prev;
 }
 
 sub output_record_separator {
     my $old = new SelectSaver qualify($_[0], caller);
-    my $prev = $OUTPUT_RECORD_SEPARATOR;
-    $OUTPUT_RECORD_SEPARATOR = $_[1] if @_ > 1;
+    my $prev = $\;
+    $\ = $_[1] if @_ > 1;
     $prev;
 }
 
 sub input_record_separator {
     my $old = new SelectSaver qualify($_[0], caller);
-    my $prev = $INPUT_RECORD_SEPARATOR;
-    $INPUT_RECORD_SEPARATOR = $_[1] if @_ > 1;
+    my $prev = $/;
+    $/ = $_[1] if @_ > 1;
     $prev;
 }
 
 sub input_line_number {
     my $old = new SelectSaver qualify($_[0], caller);
-    my $prev = $INPUT_LINE_NUMBER;
-    $INPUT_LINE_NUMBER = $_[1] if @_ > 1;
+    my $prev = $.;
+    $. = $_[1] if @_ > 1;
     $prev;
 }
 
 sub format_page_number {
     my $old = new SelectSaver qualify($_[0], caller);
-    my $prev = $FORMAT_PAGE_NUMBER;
-    $FORMAT_PAGE_NUMBER = $_[1] if @_ > 1;
+    my $prev = $%;
+    $% = $_[1] if @_ > 1;
     $prev;
 }
 
 sub format_lines_per_page {
     my $old = new SelectSaver qualify($_[0], caller);
-    my $prev = $FORMAT_LINES_PER_PAGE;
-    $FORMAT_LINES_PER_PAGE = $_[1] if @_ > 1;
+    my $prev = $=;
+    $= = $_[1] if @_ > 1;
     $prev;
 }
 
 sub format_lines_left {
     my $old = new SelectSaver qualify($_[0], caller);
-    my $prev = $FORMAT_LINES_LEFT;
-    $FORMAT_LINES_LEFT = $_[1] if @_ > 1;
+    my $prev = $-;
+    $- = $_[1] if @_ > 1;
     $prev;
 }
 
 sub format_name {
     my $old = new SelectSaver qualify($_[0], caller);
-    my $prev = $FORMAT_NAME;
-    $FORMAT_NAME = qualify($_[1], caller) if @_ > 1;
+    my $prev = $~;
+    $~ = qualify($_[1], caller) if @_ > 1;
     $prev;
 }
 
 sub format_top_name {
     my $old = new SelectSaver qualify($_[0], caller);
-    my $prev = $FORMAT_TOP_NAME;
-    $FORMAT_TOP_NAME = qualify($_[1], caller) if @_ > 1;
+    my $prev = $^;
+    $^ = qualify($_[1], caller) if @_ > 1;
     $prev;
 }
 
 sub format_line_break_characters {
     my $old = new SelectSaver qualify($_[0], caller);
-    my $prev = $FORMAT_LINE_BREAK_CHARACTERS;
-    $FORMAT_LINE_BREAK_CHARACTERS = $_[1] if @_ > 1;
+    my $prev = $:;
+    $: = $_[1] if @_ > 1;
     $prev;
 }
 
 sub format_formfeed {
     my $old = new SelectSaver qualify($_[0], caller);
-    my $prev = $FORMAT_FORMFEED;
-    $FORMAT_FORMFEED = $_[1] if @_ > 1;
+    my $prev = $^L;
+    $^L = $_[1] if @_ > 1;
     $prev;
 }
 
