@@ -837,9 +837,10 @@ perl_destruct(pTHXx)
 	    svend = &sva[SvREFCNT(sva)];
 	    for (sv = sva + 1; sv < svend; ++sv) {
 		if (SvTYPE(sv) != SVTYPEMASK) {
-		    PerlIO_printf(Perl_debug_log, "leaked: 0x%p"
-                                  pTHX__FORMAT "\n",
-                                  sv pTHX__VALUE);
+		    PerlIO_printf(Perl_debug_log, "leaked: sv=0x%p"
+			" flags=0x08%"UVxf
+			" refcnt=%"UVuf pTHX__FORMAT "\n",
+			sv, sv->sv_flags, sv->sv_refcnt pTHX__VALUE);
 		}
 	    }
 	}
