@@ -829,246 +829,241 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
         GvMULTI_on(gv) ;
 
     /* set up magic where warranted */
-    switch (*name) {
-    case 'A':
-	if (strEQ(name, "ARGV")) {
-	    IoFLAGS(GvIOn(gv)) |= IOf_ARGV|IOf_START;
-	}
-	break;
-    case 'E':
-	if (strnEQ(name, "EXPORT", 6))
-	    GvMULTI_on(gv);
-	break;
-    case 'I':
-	if (strEQ(name, "ISA")) {
-	    AV* av = GvAVn(gv);
-	    GvMULTI_on(gv);
-	    sv_magic((SV*)av, (SV*)gv, PERL_MAGIC_isa, Nullch, 0);
-	    /* NOTE: No support for tied ISA */
-	    if ((add & GV_ADDMULTI) && strEQ(nambeg,"AnyDBM_File::ISA")
-		&& AvFILLp(av) == -1)
+    if (len > 1) {
+	if (*name > 'V' ) {
+	    /* Nothing else to do.
+	       The compile will probably turn the switch statement into a
+	       branch table. Make sure we avoid even that small overhead for
+	       the common case of lower case variable names.  */
+	} else {
+	    const char *name2 = name + 1;
+	    switch (*name) {
+	    case 'A':
+		if (strEQ(name2, "RGV")) {
+		    IoFLAGS(GvIOn(gv)) |= IOf_ARGV|IOf_START;
+		}
+		break;
+	    case 'E':
+		if (strnEQ(name2, "XPORT", 5))
+		    GvMULTI_on(gv);
+		break;
+	    case 'I':
+		if (strEQ(name2, "SA")) {
+		    AV* av = GvAVn(gv);
+		    GvMULTI_on(gv);
+		    sv_magic((SV*)av, (SV*)gv, PERL_MAGIC_isa, Nullch, 0);
+		    /* NOTE: No support for tied ISA */
+		    if ((add & GV_ADDMULTI) && strEQ(nambeg,"AnyDBM_File::ISA")
+			&& AvFILLp(av) == -1)
+			{
+			    char *pname;
+			    av_push(av, newSVpvn(pname = "NDBM_File",9));
+			    gv_stashpvn(pname, 9, TRUE);
+			    av_push(av, newSVpvn(pname = "DB_File",7));
+			    gv_stashpvn(pname, 7, TRUE);
+			    av_push(av, newSVpvn(pname = "GDBM_File",9));
+			    gv_stashpvn(pname, 9, TRUE);
+			    av_push(av, newSVpvn(pname = "SDBM_File",9));
+			    gv_stashpvn(pname, 9, TRUE);
+			    av_push(av, newSVpvn(pname = "ODBM_File",9));
+			    gv_stashpvn(pname, 9, TRUE);
+			}
+		}
+		break;
+	    case 'O':
+		if (strEQ(name2, "VERLOAD")) {
+		    HV* hv = GvHVn(gv);
+		    GvMULTI_on(gv);
+		    hv_magic(hv, Nullgv, PERL_MAGIC_overload);
+		}
+		break;
+	    case 'S':
+		if (strEQ(name2, "IG")) {
+		    HV *hv;
+		    I32 i;
+		    if (!PL_psig_ptr) {
+			Newz(73, PL_psig_ptr,  SIG_SIZE, SV*);
+			Newz(73, PL_psig_name, SIG_SIZE, SV*);
+			Newz(73, PL_psig_pend, SIG_SIZE, int);
+		    }
+		    GvMULTI_on(gv);
+		    hv = GvHVn(gv);
+		    hv_magic(hv, Nullgv, PERL_MAGIC_sig);
+		    for (i = 1; i < SIG_SIZE; i++) {
+			SV ** init;
+			init = hv_fetch(hv, PL_sig_name[i], strlen(PL_sig_name[i]), 1);
+			if (init)
+			    sv_setsv(*init, &PL_sv_undef);
+			PL_psig_ptr[i] = 0;
+			PL_psig_name[i] = 0;
+			PL_psig_pend[i] = 0;
+		    }
+		}
+		break;
+	    case 'V':
+		if (strEQ(name2, "ERSION"))
+		    GvMULTI_on(gv);
+		break;
+	    case '\005':	/* $^ENCODING */
+		if (strEQ(name2, "NCODING"))
+		    goto magicalize;
+		break;
+	    case '\017':	/* $^OPEN */
+		if (strEQ(name2, "PEN"))
+		    goto magicalize;
+		break;
+	    case '\024':	/* ${^TAINT} */
+		if (strEQ(name2, "AINT"))
+		    goto ro_magicalize;
+		break;
+	    case '\025':
+		if (strEQ(name2, "NICODE")) 
+		    goto ro_magicalize;
+		break;
+	    case '\027':	/* $^WARNING_BITS */
+		if (strEQ(name2, "ARNING_BITS"))
+		    goto magicalize;
+		break;
+	    case '1':
+	    case '2':
+	    case '3':
+	    case '4':
+	    case '5':
+	    case '6':
+	    case '7':
+	    case '8':
+	    case '9':
 	    {
-		char *pname;
-		av_push(av, newSVpvn(pname = "NDBM_File",9));
-		gv_stashpvn(pname, 9, TRUE);
-		av_push(av, newSVpvn(pname = "DB_File",7));
-		gv_stashpvn(pname, 7, TRUE);
-		av_push(av, newSVpvn(pname = "GDBM_File",9));
-		gv_stashpvn(pname, 9, TRUE);
-		av_push(av, newSVpvn(pname = "SDBM_File",9));
-		gv_stashpvn(pname, 9, TRUE);
-		av_push(av, newSVpvn(pname = "ODBM_File",9));
-		gv_stashpvn(pname, 9, TRUE);
+		/* ensures variable is only digits */
+		/* ${"1foo"} fails this test (and is thus writeable) */
+		/* added by japhy, but borrowed from is_gv_magical */
+		const char *end = name + len;
+		while (--end > name) {
+		    if (!isDIGIT(*end)) return gv;
+		}
+		goto ro_magicalize;
+	    }
 	    }
 	}
-	break;
-    case 'O':
-        if (strEQ(name, "OVERLOAD")) {
-            HV* hv = GvHVn(gv);
-            GvMULTI_on(gv);
-            hv_magic(hv, Nullgv, PERL_MAGIC_overload);
-        }
-        break;
-    case 'S':
-	if (strEQ(name, "SIG")) {
-	    HV *hv;
-	    I32 i;
-	    if (!PL_psig_ptr) {
-		Newz(73, PL_psig_ptr,  SIG_SIZE, SV*);
-		Newz(73, PL_psig_name, SIG_SIZE, SV*);
-		Newz(73, PL_psig_pend, SIG_SIZE, int);
-	    }
-	    GvMULTI_on(gv);
-	    hv = GvHVn(gv);
-	    hv_magic(hv, Nullgv, PERL_MAGIC_sig);
-	    for (i = 1; i < SIG_SIZE; i++) {
-	    	SV ** init;
-	    	init = hv_fetch(hv, PL_sig_name[i], strlen(PL_sig_name[i]), 1);
-	    	if (init)
-		    sv_setsv(*init, &PL_sv_undef);
-	    	PL_psig_ptr[i] = 0;
-	    	PL_psig_name[i] = 0;
-	    	PL_psig_pend[i] = 0;
-	    }
-	}
-	break;
-    case 'V':
-	if (strEQ(name, "VERSION"))
-	    GvMULTI_on(gv);
-	break;
+    } else if (len == 1) {
+	/* Names of length 1.  */
+	switch (*name) {
+	case '&':
+	case '`':
+	case '\'':
+	    if (
+		sv_type == SVt_PVAV ||
+		sv_type == SVt_PVHV ||
+		sv_type == SVt_PVCV ||
+		sv_type == SVt_PVFM ||
+		sv_type == SVt_PVIO
+		) { break; }
+	    PL_sawampersand = TRUE;
+	    goto ro_magicalize;
 
-    case '&':
-    case '`':
-    case '\'':
-       if (
-           len > 1 ||
-           sv_type == SVt_PVAV ||
-           sv_type == SVt_PVHV ||
-           sv_type == SVt_PVCV ||
-           sv_type == SVt_PVFM ||
-           sv_type == SVt_PVIO
-       ) { break; }
-	PL_sawampersand = TRUE;
-	goto ro_magicalize;
+	case ':':
+	    sv_setpv(GvSV(gv),PL_chopset);
+	    goto magicalize;
 
-    case ':':
-	if (len > 1)
-	    break;
-	sv_setpv(GvSV(gv),PL_chopset);
-	goto magicalize;
-
-    case '?':
-	if (len > 1)
-	    break;
+	case '?':
 #ifdef COMPLEX_STATUS
-	(void)SvUPGRADE(GvSV(gv), SVt_PVLV);
+	    (void)SvUPGRADE(GvSV(gv), SVt_PVLV);
 #endif
-	goto magicalize;
+	    goto magicalize;
 
-    case '!':
-	if (len > 1)
+	case '!':
+
+	    /* If %! has been used, automatically load Errno.pm.
+	       The require will itself set errno, so in order to
+	       preserve its value we have to set up the magic
+	       now (rather than going to magicalize)
+	    */
+
+	    sv_magic(GvSV(gv), (SV*)gv, PERL_MAGIC_sv, name, len);
+
+	    if (sv_type == SVt_PVHV)
+		require_errno(gv);
+
 	    break;
-
-	/* If %! has been used, automatically load Errno.pm.
-	   The require will itself set errno, so in order to
-	   preserve its value we have to set up the magic
-	   now (rather than going to magicalize)
-	*/
-
-	sv_magic(GvSV(gv), (SV*)gv, PERL_MAGIC_sv, name, len);
-
-	if (sv_type == SVt_PVHV)
-	    require_errno(gv);
-
-	break;
-    case '-':
-	if (len > 1)
-	    break;
-	else {
+	case '-':
+	{
             AV* av = GvAVn(gv);
             sv_magic((SV*)av, Nullsv, PERL_MAGIC_regdata, Nullch, 0);
 	    SvREADONLY_on(av);
-        }
-	goto magicalize;
-    case '*':
-	if (len == 1 && sv_type == SVt_PV && ckWARN2(WARN_DEPRECATED, WARN_SYNTAX))
-	    Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
-		    "$* is no longer supported");
-	break;
-    case '#':
-	if (len == 1 && sv_type == SVt_PV && ckWARN2(WARN_DEPRECATED, WARN_SYNTAX))
-	    Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
-		    "Use of $# is deprecated");
-	/* FALL THROUGH */
-    case '[':
-    case '^':
-    case '~':
-    case '=':
-    case '%':
-    case '.':
-    case '(':
-    case ')':
-    case '<':
-    case '>':
-    case ',':
-    case '\\':
-    case '/':
-    case '\001':	/* $^A */
-    case '\003':	/* $^C */
-    case '\004':	/* $^D */
-    case '\006':	/* $^F */
-    case '\010':	/* $^H */
-    case '\011':	/* $^I, NOT \t in EBCDIC */
-    case '\016':        /* $^N */
-    case '\020':	/* $^P */
-	if (len > 1)
+	    goto magicalize;
+	}
+	case '*':
+	    if (sv_type == SVt_PV && ckWARN2(WARN_DEPRECATED, WARN_SYNTAX))
+		Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
+			    "$* is no longer supported");
 	    break;
-	goto magicalize;
-    case '|':
-	if (len > 1)
-	    break;
-	sv_setiv(GvSV(gv), (IV)(IoFLAGS(GvIOp(PL_defoutgv)) & IOf_FLUSH) != 0);
-	goto magicalize;
-    case '\005':	/* $^E && $^ENCODING */
-	if (len > 1 && strNE(name, "\005NCODING"))
-	    break;
-	goto magicalize;
+	case '#':
+	    if (sv_type == SVt_PV && ckWARN2(WARN_DEPRECATED, WARN_SYNTAX))
+		Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
+			    "Use of $# is deprecated");
+	    goto magicalize;
+	case '|':
+	    sv_setiv(GvSV(gv), (IV)(IoFLAGS(GvIOp(PL_defoutgv)) & IOf_FLUSH) != 0);
+	    goto magicalize;
 
-    case '\017':	/* $^O & $^OPEN */
-	if (len > 1 && strNE(name, "\017PEN"))
-	    break;
-	goto magicalize;
-    case '\023':	/* $^S */
-	if (len > 1)
-	    break;
-	goto ro_magicalize;
-    case '\024':	/* $^T, ${^TAINT} */
-        if (len == 1)
-            goto magicalize;
-        else if (strEQ(name, "\024AINT"))
-            goto ro_magicalize;
-        else
-            break;
-    case '\025':
-        if (len > 1 && strNE(name, "\025NICODE")) 
-	    break;
-	goto ro_magicalize;
-
-    case '\027':	/* $^W & $^WARNING_BITS */
-	if (len > 1
-	    && strNE(name, "\027ARNING_BITS")
-	    )
-	    break;
-	goto magicalize;
-
-    case '+':
-	if (len > 1)
-	    break;
-	else {
-            AV* av = GvAVn(gv);
+	case '+':
+	{
+	    AV* av = GvAVn(gv);
             sv_magic((SV*)av, (SV*)av, PERL_MAGIC_regdata, Nullch, 0);
 	    SvREADONLY_on(av);
-        }
-	/* FALL THROUGH */
-    case '1':
-    case '2':
-    case '3':
-    case '4':
-    case '5':
-    case '6':
-    case '7':
-    case '8':
-    case '9':
-	/* ensures variable is only digits */
-	/* ${"1foo"} fails this test (and is thus writeable) */
-	/* added by japhy, but borrowed from is_gv_magical */
-
-	if (len > 1) {
-	    const char *end = name + len;
-	    while (--end > name) {
-		if (!isDIGIT(*end)) return gv;
-	    }
+	    /* FALL THROUGH */
 	}
-
-      ro_magicalize:
-	SvREADONLY_on(GvSV(gv));
-      magicalize:
-	sv_magic(GvSV(gv), (SV*)gv, PERL_MAGIC_sv, name, len);
-	break;
-
-    case '\014':	/* $^L */
-	if (len > 1)
+	case '\023':	/* $^S */
+	case '1':
+	case '2':
+	case '3':
+	case '4':
+	case '5':
+	case '6':
+	case '7':
+	case '8':
+	case '9':
+	ro_magicalize:
+	    SvREADONLY_on(GvSV(gv));
+	    /* FALL THROUGH */
+	case '[':
+	case '^':
+	case '~':
+	case '=':
+	case '%':
+	case '.':
+	case '(':
+	case ')':
+	case '<':
+	case '>':
+	case ',':
+	case '\\':
+	case '/':
+	case '\001':	/* $^A */
+	case '\003':	/* $^C */
+	case '\004':	/* $^D */
+	case '\005':	/* $^E */
+	case '\006':	/* $^F */
+	case '\010':	/* $^H */
+	case '\011':	/* $^I, NOT \t in EBCDIC */
+	case '\016':	/* $^N */
+	case '\017':	/* $^O */
+	case '\020':	/* $^P */
+	case '\024':	/* $^T */
+	case '\027':	/* $^W */
+	magicalize:
+	    sv_magic(GvSV(gv), (SV*)gv, PERL_MAGIC_sv, name, len);
 	    break;
-	sv_setpv(GvSV(gv),"\f");
-	PL_formfeed = GvSV(gv);
-	break;
-    case ';':
-	if (len > 1)
+
+	case '\014':	/* $^L */
+	    sv_setpv(GvSV(gv),"\f");
+	    PL_formfeed = GvSV(gv);
 	    break;
-	sv_setpv(GvSV(gv),"\034");
-	break;
-    case ']':
-	if (len == 1) {
+	case ';':
+	    sv_setpv(GvSV(gv),"\034");
+	    break;
+	case ']':
+	{
 	    SV *sv = GvSV(gv);
 	    if (!sv_derived_from(PL_patchlevel, "version"))
 		(void *)upg_version(PL_patchlevel);
@@ -1077,14 +1072,15 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	    SvREFCNT_dec(sv);
 	}
 	break;
-    case '\026':	/* $^V */
-	if (len == 1) {
+	case '\026':	/* $^V */
+	{
 	    SV *sv = GvSV(gv);
 	    GvSV(gv) = new_version(PL_patchlevel);
 	    SvREADONLY_on(GvSV(gv));
 	    SvREFCNT_dec(sv);
 	}
 	break;
+	}
     }
     return gv;
 }
