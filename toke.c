@@ -1352,12 +1352,6 @@ S_scan_const(pTHX_ char *start)
 			yyerror("Missing right brace on \\x{}");
 			e = s;
 		    }
-		    if (!utf) {
-			dTHR;
-			if (ckWARN(WARN_UTF8))
-			    Perl_warner(aTHX_ WARN_UTF8,
-				   "Use of \\x{} without utf8 declaration");
-		    }
 		    /* note: utf always shorter than hex */
 		    d = (char*)uv_to_utf8((U8*)d,
 					  (UV)scan_hex(s + 1, e - s - 1, &len));
