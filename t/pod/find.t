@@ -24,7 +24,7 @@ if ($^O eq 'VMS') {
 }
 print "### searching $lib_dir\n";
 my %pods = pod_find("$lib_dir");
-my $result = join(',', sort values %pods);
+my $result = join("\n### ", sort values %pods);
 print "### found $result\n";
 my $compare = join(',', qw(
     Pod::Checker
@@ -39,7 +39,10 @@ my $compare = join(',', qw(
 if ($^O eq 'VMS') {
     $compare = lc($compare);
     $result = join(',', sort grep(/pod::/, values %pods));
-    $result =~ s/$Qlib_dir/pod::/g;
+    my $undollared = $Qlib_dir;
+    $undollared =~ s/\$/\\\$/g;
+    $undollared =~ s/\-/\\\-/g;
+    $result =~ s/$undollared/pod::/g;
     my $count = 0;
     my @result = split(/,/,$result);
     my @compare = split(/,/,$compare);

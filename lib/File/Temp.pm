@@ -340,6 +340,7 @@ sub _gettemp {
 
       if ($^O eq 'VMS') {  # need volume to avoid relative dir spec
         $parent = File::Spec->catdir($volume, @dirs[0..$#dirs-1]);
+        $parent = 'sys$disk:[]' if $parent eq '';
       } else {
 
 	# Put it back together without the last one
@@ -1107,7 +1108,7 @@ sub tempdir  {
       # Prepend the supplied directory or temp dir
       if ($options{"DIR"}) {
 
-	$template = File::Spec->catfile($options{"DIR"}, $template);
+        $template = File::Spec->catdir($options{"DIR"}, $template);
 
       } elsif ($options{TMPDIR}) {
 

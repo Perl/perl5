@@ -328,6 +328,7 @@ if ($ENV{PERLSHR_USE_GSMATCH}) {
     # number in the top four bits and use the bottom four for build options
     # that'll cause incompatibilities
     ($ver, $sub) = $] =~ /\.(\d\d\d)(\d\d)/;
+    $ver += 0; $sub += 0;
     $gsmatch = ($sub >= 50) ? "equal" : "lequal"; # Force an equal match for
 						  # dev, but be more forgiving
 						  # for releases
