@@ -104,7 +104,7 @@ This function takes a country code from one code set,
 and returns the corresponding code from another code set.
 
     $alpha2 = country_code2code('fin',
-		 LOCALE_CODE_ALPHA_3 => LOCALE_CODE_ALPHA_2);
+		 LOCALE_CODE_ALPHA_3, LOCALE_CODE_ALPHA_2);
     # $alpha2 will now be 'fi'
 
 If the code passed is not a valid country code in
@@ -281,7 +281,7 @@ Official home page for the ISO 3166 maintenance agency.
 
 Another useful, but not official, home page.
 
-=item http://www.cia.gov/cia/publications/factbook/docs/app-f.html
+=item http://www.cia.gov/cia/publications/factbook/docs/app-d-1.html
 
 An appendix in the CIA world fact book which lists country codes
 as defined by ISO 3166, FIPS 10-4, and internet domain names.

@@ -1,7 +1,7 @@
 #
 # Locale::Country - ISO codes for country identification (ISO 3166)
 #
-# $Id: Country.pm,v 2.4 2002/05/20 05:05:18 neilb Exp $
+# $Id: Country.pm,v 2.6 2002/07/10 16:33:27 neilb Exp $
 #
 
 package Locale::Country;
@@ -17,7 +17,7 @@ use Locale::Constants;
 #	Public Global Variables
 #-----------------------------------------------------------------------
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
-$VERSION   = sprintf("%d.%02d", q$Revision: 2.4 $ =~ /(\d+)\.(\d+)/);
+$VERSION   = sprintf("%d.%02d", q$Revision: 2.6 $ =~ /(\d+)\.(\d+)/);
 @ISA       = qw(Exporter);
 @EXPORT    = qw(code2country country2code
                 all_country_codes all_country_names
@@ -299,6 +299,8 @@ sub _code2codeset
 	}
 
     }
+
+    close(DATA);
 }
 
 1;
@@ -313,7 +315,7 @@ al:alb:008:Albania
 am:arm:051:Armenia
 an:ant:530:Netherlands Antilles
 ao:ago:024:Angola
-aq:::Antarctica
+aq:ata:010:Antarctica
 ar:arg:032:Argentina
 as:asm:016:American Samoa
 at:aut:040:Austria
@@ -335,15 +337,14 @@ bo:bol:068:Bolivia
 br:bra:076:Brazil
 bs:bhs:044:Bahamas
 bt:btn:064:Bhutan
-bv:::Bouvet Island
+bv:bvt:074:Bouvet Island
 bw:bwa:072:Botswana
 by:blr:112:Belarus
 bz:blz:084:Belize
 ca:can:124:Canada
-cc:::Cocos (Keeling) Islands
-cd:cod:180:Congo, The Democratic Republic of the:Congo, Democratic Republic of the
+cc:cck:166:Cocos (Keeling) Islands
 cf:caf:140:Central African Republic
-cg:cog:178:Congo
+cg:cog:178:Congo:Congo, Republic of the
 ch:che:756:Switzerland
 ci:civ:384:Cote D'Ivoire
 ck:cok:184:Cook Islands
@@ -354,7 +355,7 @@ co:col:170:Colombia
 cr:cri:188:Costa Rica
 cu:cub:192:Cuba
 cv:cpv:132:Cape Verde
-cx:::Christmas Island
+cx:cxr:162:Christmas Island
 cy:cyp:196:Cyprus
 cz:cze:203:Czech Republic
 de:deu:276:Germany
@@ -376,7 +377,7 @@ fk:flk:238:Falkland Islands (Malvinas):Falkland Islands (Islas Malvinas)
 fm:fsm:583:Micronesia, Federated States of
 fo:fro:234:Faroe Islands
 fr:fra:250:France
-fx:::France, Metropolitan
+fx:fxx:249:France, Metropolitan
 ga:gab:266:Gabon
 gb:gbr:826:United Kingdom:Great Britain
 gd:grd:308:Grenada
@@ -390,13 +391,13 @@ gn:gin:324:Guinea
 gp:glp:312:Guadeloupe
 gq:gnq:226:Equatorial Guinea
 gr:grc:300:Greece
-gs:::South Georgia and the South Sandwich Islands
+gs:sgs:239:South Georgia and the South Sandwich Islands
 gt:gtm:320:Guatemala
 gu:gum:316:Guam
 gw:gnb:624:Guinea-Bissau
 gy:guy:328:Guyana
 hk:hkg:344:Hong Kong
-hm:::Heard Island and McDonald Islands
+hm:hmd:334:Heard Island and McDonald Islands
 hn:hnd:340:Honduras
 hr:hrv:191:Croatia
 ht:hti:332:Haiti
@@ -405,7 +406,7 @@ id:idn:360:Indonesia
 ie:irl:372:Ireland
 il:isr:376:Israel
 in:ind:356:India
-io:::British Indian Ocean Territory
+io:iot:086:British Indian Ocean Territory
 iq:irq:368:Iraq
 ir:irn:364:Iran, Islamic Republic of:Iran
 is:isl:352:Iceland
@@ -509,7 +510,7 @@ sy:syr:760:Syrian Arab Republic:Syria
 sz:swz:748:Swaziland
 tc:tca:796:Turks and Caicos Islands
 td:tcd:148:Chad
-tf:::French Southern Territories
+tf:atf:260:French Southern Territories
 tg:tgo:768:Togo
 th:tha:764:Thailand
 tj:tjk:762:Tajikistan
@@ -525,7 +526,7 @@ tw:twn:158:Taiwan, Province of China:Taiwan
 tz:tza:834:Tanzania, United Republic of:Tanzania
 ua:ukr:804:Ukraine
 ug:uga:800:Uganda
-um:::United States Minor Outlying Islands
+um:umi:581:United States Minor Outlying Islands
 us:usa:840:United States:USA:United States of America
 uy:ury:858:Uruguay
 uz:uzb:860:Uzbekistan
@@ -539,9 +540,9 @@ vu:vut:548:Vanuatu
 wf:wlf:876:Wallis and Futuna
 ws:wsm:882:Samoa
 ye:yem:887:Yemen
-yt:::Mayotte
+yt:myt:175:Mayotte
 yu:yug:891:Yugoslavia
 za:zaf:710:South Africa
 zm:zmb:894:Zambia
-zr:::Zaire
+zr:zar:180:Zaire:Congo, The Democratic Republic of the:Congo, Democratic Republic of the
 zw:zwe:716:Zimbabwe

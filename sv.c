@@ -7734,7 +7734,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
         /* large enough for "%#.#f" --chip */
 	/* what about long double NVs? --jhi */
 
-	SV *vecsv;
+	SV *vecsv = Nullsv;
 	U8 *vecstr = Null(U8*);
 	STRLEN veclen = 0;
 	char c = 0;
@@ -7774,7 +7774,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
     We allow format specification elements in this order:
 	\d+\$              explicit format parameter index
 	[-+ 0#]+           flags
-	\*?(\d+\$)?v       vector with optional (optionally specified) arg
+	v|*(\d+\$)?v       vector with optional (optionally specified) arg
 	\d+|\*(\d+\$)?     width using optional (optionally specified) arg
 	\.(\d*|\*(\d+\$)?) precision using optional (optionally specified) arg
 	[hlqLV]            size
@@ -7886,7 +7886,10 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    q++;
 	    if (*q == '*') {
 		q++;
-		if (EXPECT_NUMBER(q, epix) && *q++ != '$') /* epix currently unused */
+		if (EXPECT_NUMBER(q, epix) && *q++ != '$')
+		    goto unknown;
+		/* XXX: todo, support specified precision parameter */
+		if (epix)
 		    goto unknown;
 		if (args)
 		    i = va_arg(*args, int);
@@ -10154,6 +10157,11 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     Copy(proto_perl->Inexttype, PL_nexttype, 5,	I32);
     PL_nexttoke		= proto_perl->Inexttoke;
 
+    /* XXX This is probably masking the deeper issue of why
+     * SvANY(proto_perl->Ilinestr) can be NULL at this point. For test case:
+     * http://archive.develooper.com/perl5-porters%40perl.org/msg83298.html
+     * (A little debugging with a watchpoint on it may help.)
+     */
     if (SvANY(proto_perl->Ilinestr)) {
 	PL_linestr		= sv_dup_inc(proto_perl->Ilinestr, param);
 	i = proto_perl->Ibufptr - SvPVX(proto_perl->Ilinestr);
@@ -10192,6 +10200,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_padix_floor		= proto_perl->Ipadix_floor;
     PL_pad_reset_pending	= proto_perl->Ipad_reset_pending;
 
+    /* XXX See comment on SvANY(proto_perl->Ilinestr) above */
     if (SvANY(proto_perl->Ilinestr)) {
 	i = proto_perl->Ilast_uni - SvPVX(proto_perl->Ilinestr);
 	PL_last_uni		= SvPVX(PL_linestr) + (i < 0 ? 0 : i);

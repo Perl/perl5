@@ -11,7 +11,13 @@ PerlIO::scalar - support module for in-memory IO.
 
 =head1 SYNOPSIS
 
-   open($fh,"<...",\$scalar);
+   open($fh,"<",\$scalar);
+   open($fh,">",\$scalar);
+
+or
+
+   open($fh,"<:scalar",\$scalar);
+   open($fh,">:scalar",\$scalar);
 
 =head1 DESCRIPTION
 

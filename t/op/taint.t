@@ -970,4 +970,6 @@ else
     test 204, $@ eq '';
     eval { exec("lskdfj does not exist","with","args"); };
     test 205, $@ eq '';
+
+    # If you add tests here update also the above skip block for VMS.
 }

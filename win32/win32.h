@@ -307,9 +307,6 @@ extern FILE *		my_fdopen(int, char *);
 #endif
 extern int		my_fclose(FILE *);
 extern int		my_fstat(int fd, Stat_t *sbufptr);
-extern int		do_aspawn(void *really, void **mark, void **sp);
-extern int		do_spawn(char *cmd);
-extern int		do_spawn_nowait(char *cmd);
 extern char *		win32_get_privlib(const char *pl);
 extern char *		win32_get_sitelib(const char *pl);
 extern char *		win32_get_vendorlib(const char *pl);

@@ -85,15 +85,13 @@ int _fcloseall();
 #  define win32_get_sitelib g_win32_get_sitelib
 #  undef win32_get_vendorlib
 #  define win32_get_vendorlib g_win32_get_vendorlib
-#  undef do_spawn
-#  define do_spawn g_do_spawn
 #  undef getlogin
 #  define getlogin g_getlogin
 #endif
 
 static void		get_shell(void);
 static long		tokenize(const char *str, char **dest, char ***destv);
-	int		do_spawn2(char *cmd, int exectype);
+static int		do_spawn2(pTHX_ char *cmd, int exectype);
 static BOOL		has_shell_metachars(char *ptr);
 static long		filetime_to_clock(PFILETIME ft);
 static BOOL		filetime_from_time(PFILETIME ft, time_t t);
@@ -516,12 +514,8 @@ get_shell(void)
 }
 
 int
-do_aspawn(void *vreally, void **vmark, void **vsp)
+Perl_do_aspawn(pTHX_ SV *really, SV **mark, SV **sp)
 {
-    dTHX;
-    SV *really = (SV*)vreally;
-    SV **mark = (SV**)vmark;
-    SV **sp = (SV**)vsp;
     char **argv;
     char *str;
     int status;
@@ -607,10 +601,9 @@ find_next_space(const char *s)
     return (char*)s;
 }
 
-int
-do_spawn2(char *cmd, int exectype)
+static int
+do_spawn2(pTHX_ char *cmd, int exectype)
 {
-    dTHX;
     char **a;
     char *s;
     char **argv;
@@ -700,21 +693,21 @@ do_spawn2(char *cmd, int exectype)
 }
 
 int
-do_spawn(char *cmd)
+Perl_do_spawn(pTHX_ char *cmd)
 {
-    return do_spawn2(cmd, EXECF_SPAWN);
+    return do_spawn2(aTHX_ cmd, EXECF_SPAWN);
 }
 
 int
-do_spawn_nowait(char *cmd)
+Perl_do_spawn_nowait(pTHX_ char *cmd)
 {
-    return do_spawn2(cmd, EXECF_SPAWN_NOWAIT);
+    return do_spawn2(aTHX_ cmd, EXECF_SPAWN_NOWAIT);
 }
 
 bool
 Perl_do_exec(pTHX_ char *cmd)
 {
-    do_spawn2(cmd, EXECF_EXEC);
+    do_spawn2(aTHX_ cmd, EXECF_EXEC);
     return FALSE;
 }
 
@@ -2718,17 +2711,22 @@ win32_popen(const char *command, const char *mode)
     int stdfd, oldfd;
     int ourmode;
     int childpid;
+    DWORD nhandle;
+    HANDLE old_h;
+    int lock_held = 0;
 
     /* establish which ends read and write */
     if (strchr(mode,'w')) {
         stdfd = 0;		/* stdin */
         parent = 1;
         child = 0;
+	nhandle = STD_INPUT_HANDLE;
     }
     else if (strchr(mode,'r')) {
         stdfd = 1;		/* stdout */
         parent = 0;
         child = 1;
+	nhandle = STD_OUTPUT_HANDLE;
     }
     else
         return NULL;
@@ -2744,7 +2742,7 @@ win32_popen(const char *command, const char *mode)
     /* the child doesn't inherit handles */
     ourmode |= O_NOINHERIT;
 
-    if (win32_pipe( p, 512, ourmode) == -1)
+    if (win32_pipe(p, 512, ourmode) == -1)
         return NULL;
 
     /* save current stdfd */
@@ -2759,11 +2757,24 @@ win32_popen(const char *command, const char *mode)
     /* close the child end in parent */
     win32_close(p[child]);
 
+    /* save the old std handle, and set the std handle */
+    OP_REFCNT_LOCK;
+    lock_held = 1;
+    old_h = GetStdHandle(nhandle);
+    SetStdHandle(nhandle, (HANDLE)_get_osfhandle(stdfd));
+
     /* start the child */
     {
 	dTHX;
 	if ((childpid = do_spawn_nowait((char*)command)) == -1)
 	    goto cleanup;
+
+	/* restore the old std handle */
+	if (lock_held) {
+	    SetStdHandle(nhandle, old_h);
+	    OP_REFCNT_UNLOCK;
+	    lock_held = 0;
+	}
 
 	/* revert stdfd to whatever it was before */
 	if (win32_dup2(oldfd, stdfd) == -1)
@@ -2787,6 +2798,11 @@ cleanup:
     /* we don't need to check for errors here */
     win32_close(p[0]);
     win32_close(p[1]);
+    if (lock_held) {
+	SetStdHandle(nhandle, old_h);
+	OP_REFCNT_UNLOCK;
+	lock_held = 0;
+    }
     if (oldfd != -1) {
         win32_dup2(oldfd, stdfd);
         win32_close(oldfd);

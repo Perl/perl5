@@ -520,7 +520,7 @@ And finally create a file Makefile.PL that looks like this:
 	WriteMakefile(
 	    NAME   => 'Mytest2::mylib',
 	    SKIP   => [qw(all static static_lib dynamic dynamic_lib)],
-	    clean  => {'FILES' => 'libmylib$(LIBEEXT)'},
+	    clean  => {'FILES' => 'libmylib$(LIB_EXT)'},
 	);
 
 

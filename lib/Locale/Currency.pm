@@ -2,7 +2,7 @@
 # Locale::Currency - ISO three letter codes for currency identification
 #                    (ISO 4217)
 #
-# $Id: Currency.pm,v 2.1 2002/02/06 04:07:10 neilb Exp $
+# $Id: Currency.pm,v 2.2 2002/07/10 16:33:27 neilb Exp $
 #
 
 package Locale::Currency;
@@ -15,7 +15,7 @@ require Exporter;
 #	Public Global Variables
 #-----------------------------------------------------------------------
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION      = sprintf("%d.%02d", q$Revision: 2.1 $ =~ /(\d+)\.(\d+)/);
+$VERSION      = sprintf("%d.%02d", q$Revision: 2.2 $ =~ /(\d+)\.(\d+)/);
 @ISA          = qw(Exporter);
 @EXPORT       = qw(&code2currency &currency2code
                    &all_currency_codes &all_currency_names );
@@ -117,6 +117,8 @@ sub all_currency_names
         $CODES{$code} = $currency;
         $CURRENCIES{"\L$currency"} = $code;
     }
+
+    close(DATA);
 }
 
 1;

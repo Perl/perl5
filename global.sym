@@ -96,6 +96,9 @@ Perl_die
 Perl_dounwind
 Perl_do_binmode
 Perl_do_close
+Perl_do_aspawn
+Perl_do_spawn
+Perl_do_spawn_nowait
 Perl_do_join
 Perl_do_open
 Perl_do_open9
