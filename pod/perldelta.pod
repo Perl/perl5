@@ -7,6 +7,84 @@ perldelta - what's new for perl v5.7.0
 This document describes differences between the 5.6.0 release and
 the 5.7.0 release.
 
+=head1 Security Vulnerability
+
+A potential security vulnerability in the optional suidperl component
+of Perl has been identified.  The suidperl is neither built nor
+installed by default.  As of August the 20th, 2000, the only known
+vulnerable platform is Linux, most likely all Linux distributions.
+The CERT and various vendors have been alerted about the vulnerability.
+
+The problem was caused by Perl trying to report a suspected security
+exploit attempt using an external program, /bin/mail.  In Linux
+platforms the /bin/mail program had an undocumented feature which gave
+access to a root shell, resulting in a serious compromise, instead of
+reporting the exploit attempt.  If you don't have /bin/mail or if you
+have 'safe suid scripts' or if you haven't installed the suidperl, you
+are safe.
+
+The exploit attempt reporting feature has been completely removed from
+the Perl 5.7.0 release, so that particular vulnerability isn't there
+anymore.  However, further security vulnerabilities are,
+unfortunately, always possible.  The suidperl code is being reviewed
+and if deemed too risky to continue being supported, in the extreme
+case it may be completely removed in future releases.  In any case,
+suidperl should only be used by security experts who know exactly what
+they are doing and why they are using suidperl instead of some other solution.
+A good tool for similar needs is sudo: http://www.courtesan.com/sudo/
+
+=head1 Incompatible Changes
+
+=head2 Arrays Now Always Interpolate Into Double-Quoted Strings
+
+Constructs like "foo@bar" now always assume the C<@bar> to be an array,
+regardless of whether it is known that C<@bar> is an array.
+
+=head2 bless(REF, REF) is now a fatal error
+
+The semantics of bless(REF, REF) were unclear and until someone proves
+it to make some sense, it is forbidden.
+
+=head2 The eg/* Directory Removed
+
+The very dusty examples in the eg/ directory have been removed.
+Suggestions for new shiny examples welcome but the main issue is that
+the examples need to be documented, tested, and--most importantly--maintained.
+
+=head2 The lib/chat2.pl
+
+The obsolete chat2 library that should never have been allowed
+to escape the laboratory has been decommissioned.
+
+=head2 Unimplemented (But Recognized) POSIX Regex Features Now Fatal
+
+The unimplemented POSIX regex features [[.cc.]] and [[=c=]] are still
+recognized but now cause fatal errors.  The previous behaviour of
+ignoring them by default and warning if requested was unacceptable
+since it, in a way, falsely promised that the features could be used.
+
+=head2 lstat(FILEHANDLE) now warns
+
+lstat(FILEHANDLE) now gives a warning because the operation makes no sense.
+In future releases this may become a fatal error.
+
+=head2 Obsolete String Comparison Operators Removed
+
+The long since deprecated uppercase aliases for the string comparison
+operators (EQ, NE, LT, LE, GE, GT) have now been removed.
+
+=head2 The Regular Expression Submatches Are Now Unset When Backtracking 
+
+The regular expression captured submatches ($1, $2, ...) are now
+consistently unset if the match fails, instead of leaving false
+data lying around in them.
+
+=head2 tr///CU Removed, Not To Return
+
+The tr///C and tr///U features have been removed and will not return;
+the interface was a mistake.  Sorry about that.  For similar
+functionality, see pack('U0', ...) and pack('C0', ...).
+
 =head1 Core Enhancements
 
 =over 4
@@ -18,12 +96,6 @@ in multiple arguments.)
 
 =item *
 
-Infinity (in numerical context, for example as "Inf", the exact string
-representation is platform-dependent) doesn't cause "not a number"
-warnings.
-
-=item *
-
 my __PACKAGE__ now works.
 
 =item *
@@ -32,8 +104,8 @@ no Module; now works even if there is no "sub unimport" in the Module.
 
 =item *
 
-The numerical comparison <=> now returns C<undef> if either operand is a NaN.
-Previously the behaviour was unspecified.
+The numerical comparison operators return C<undef> if either operand
+is a NaN.  Previously the behaviour was unspecified.
 
 =item *
 
@@ -43,20 +115,28 @@ C<pack('U0a*', ...)> can now be used to force the string to UTF8.
 
 prototype(\&) is now available.
 
-=item *
-
-sort() is now re-entrant (sort() can call sort(), in other words)
-
 =back
 
 =head1 Modules and Pragmata
 
 =head2 New Modules
 
-The Storable extnesion, version 0.7.2, released the 14th of August
+=over 4
+
+=item *
+
+File::Temp, version 0.10, allows one to create temporary files
+and directories in an easy, portable, and secure way.
+
+=item *
+
+The Storable extension, version 0.7.2, released the 14th of August
 2000, has been added to the Perl distribution.  Storable gives
-persistence to Perl data structures by allowing to store and retrieve
-Perl data to and from files in fast and compact binary format.
+persistence to Perl data structures by allowing the storage and
+retrieval of Perl data to and from files in a fast and compact binary
+format.
+
+=back
 
 =head2 Updated And Improved Modules and Pragmata
 
@@ -116,18 +196,13 @@ Callbacks doing (naughtily) "next;" instead of "return;" now work.
 
 =item *
 
-File::Glob::globI() rename to File::Glob::bsd_glob() to avoid
+File::Glob::glob() renamed to File::Glob::bsd_glob() to avoid
 prototype mismatch with CORE::glob().
 
 =item *
 
 File::Spec has been updated to version 0.82, released the
 1st of July 2000.
-
-=item *
-
-File::Temp has been updated to version 0.10 (unpublished as the 20th
-of August 2000).
 
 =item *
 
@@ -145,7 +220,7 @@ a port number.
 
 =item *
 
-IPC::Open3 now allows the use of numeric filedescriptors.
+IPC::Open3 now allows the use of numeric file descriptors.
 
 =item *
 
@@ -154,11 +229,11 @@ with 'no lib' now works.
 
 =item *
 
-Math::BigFloat now more robust (less "uninitialized" warnings).
+Math::BigFloat now more robust (fewer "uninitialized" warnings).
 
 =item *
 
-Math::Complex now handles extreme values (e.g. 1E20-1E30i more) more
+Math::Complex now handles extreme values (e.g. cplx(1E20, 1E30)) more
 gracefully.
 
 =item *
@@ -170,8 +245,11 @@ numbers).
 
 =item *
 
-Pod::LaTeX has been updated to version 0.52, released the 15th
-of May 2000.
+Pod::LaTeX has been updated to version 0.52, released the 15th of May
+2000.  Note that this is a complete rewrite which translates pod much
+better, has many more options and much better documentation.  It also
+now uses the Pod::Parser backend, meaning that Pod::LaTeX will stay
+abreast other pod translators.
 
 =item *
 
@@ -182,7 +260,7 @@ Pod::Select 1.13, and Pod::Usage 1.13.
 
 =item *
 
-The subpragma 'debug' of the 're' pragma now produces cleaner output.
+The 'debug' subpragma the 're' pragma now produces cleaner output.
 
 =item *
 
@@ -190,7 +268,7 @@ C<%INC> now localized in a Safe compartment so that use/require work.
 
 =item *
 
-SelfLoader no more loses C<$@> in AUTOLOAD.
+SelfLoader no longer loses C<$@> in AUTOLOAD.
 
 =item *
 
@@ -223,7 +301,7 @@ Text::Wrap::wtbrap now handles multiline strings properly.
 
 =item *
 
-UNIVERSAL::isa no more caches methods incorrectly.
+UNIVERSAL::isa no longer caches methods incorrectly.
 
 =back
 
@@ -263,7 +341,7 @@ Eradicate "array context" from the documentation and diagnostics.
 
 =item *
 
-The return values of a failing backtick (`, qx{}) are now documented
+The return values of failing backticks (`, qx{}) are now documented
 in perlop.
 
 =item *
@@ -282,10 +360,6 @@ in regular expressions.
 
 =item *
 
-Add an URL for FSF in README.
-
-=item *
-
 The timeout unit of IO::Select is now documented to be identical
 to the timeout unit of the 4-arg select(), that is, (optionally
 fractional) seconds, or an undef to wait indefinitely.
@@ -296,12 +370,12 @@ Document the C<D> and C<d> magic types.
 
 =item *
 
-The ordering of PODs in perl.pod is now more sensical.
+The ordering of PODs in perl.pod is now more sensible.
 
 =item *
 
-perlbook now only mentions the Camel III, all other book references
-have been moved to perlfaq2, some good known books added.
+perlbook now only mentions the Camel III; all other book references
+have been moved to perlfaq2; some good known books added.
 
 =item *
 
@@ -309,7 +383,7 @@ Numerous missing warning/error messages added to perldiag.
 
 =item *
 
-Tell what's perl6 in perlfaq1.
+Changed the description of perl6 in perlfaq1.
 
 =item *
 
@@ -329,30 +403,30 @@ POSIX module documentation embellished.
 
 =item *
 
-Clarify the status of shadow password support.
+Clarified the status of shadow password support.
 
 =item *
 
-Remind that preprocessors and source filters can alter
+Reminded that preprocessors and source filters can alter
 your code before Perl sees it and therefore debugging
 can be somewhat surprising.  ("I didn't write *that*!")
 
 =item *
 
-Remove incorrect documentation about implicit split to @_
+Removed incorrect documentation about implicit split to @_
 in list context, which never really worked in Perl 5 anyway.
 
 =item *
 
-Tell that split /^/ is split /^/m.
+Explain that split /^/ is split /^/m.
 
 =item *
 
-Many more sprintf() examples in perlfunc.
+Added many more sprintf() examples in perlfunc.
 
 =item *
 
-Document the handling of negative indices to tied arrays.
+Documented the handling of negative indices to tied arrays.
 
 =item *
 
@@ -360,7 +434,7 @@ The C<$yday> in localtime()/gmtime() is 0..364, not 1..365.
 
 =item *
 
-Document that tr() is not tr(1): that is, do not expect regular expressions.
+Documented that tr() is not tr(1): that is, do not expect regular expressions.
 
 =item *
 
@@ -375,7 +449,7 @@ variable interpolation.
 
 =item *
 
-Document that the values() are copies, not aliases.
+Documented that the values() are aliases, not copies.
 
 =back
 
@@ -386,17 +460,17 @@ Document that the values() are copies, not aliases.
 =item *
 
 perl56delta details the changes between the 5.005 release and the
-release 5.6.0.
+5.6.0 release.
 
 =item *
 
-perl56delta is a Perl debugging tutorial.
+perldebtut is a Perl debugging tutorial.
 
 =item *
 
 perlebcdic contains considerations for running Perl on EBCDIC platforms.
 Note that unfortunately EBCDIC platforms that used to supported back in
-Perl 5.005 are still unsupported by Perl 5.7; the plan, however, is to
+Perl 5.005 are still unsupported by Perl 5.7.0; the plan, however, is to
 bring them back to the fold.  
 
 =item *
@@ -414,7 +488,7 @@ perlretut is a regular expression tutorial.
 
 =item *
 
-perlrequick is regular expressions quick-start guide.
+perlrequick is a regular expressions quick-start guide.
 Yes, much quicker than perlretut.
 
 =item *
@@ -423,32 +497,6 @@ perlutil explains the command line utilities packaged with the Perl
 distribution.
 
 =back
-
-=head1 Security Vulnerability
-
-A potential security vulnerability in the optional suidperl component
-of Perl has been identified.  The suidperl is neither built nor
-installed by default.  As of August the 20th 2000 the only known
-vulnerable platform is Linux, most likely all Linux distributions.
-The CERT and various vendors have been alerted about the vulnerability.
-
-The problem was caused by Perl trying to report a suspected security
-exploit attempt using an external program, /bin/mail.  In Linux
-platforms the /bin/mail program had an undocumented feature which gave
-access to a root shell, resulting in a serious compromise, instead of
-reporting the exploit attempt.  If you don't have /bin/mail or if you
-have 'safe suid scripts' or if you haven't installed the suidperl, you
-are safe.
-
-The exploit attempt reporting feature has been completely removed from
-the Perl 5.7.0 release, so that particular vulnerability isn't there
-anymore.  However, further security vulnerabilities are,
-unfortunately, always possible.  The suidperl code is being reviewed
-and if deemed too risky to continue being supported, in the extreme
-case it may be completely removed in future releases.  In any case,
-suidperl should only be used by security experts who know exactly what
-they are doing and why are they using suidperl instead of some other solution.
-A good tool for similar needs is sudo: http://www.courtesan.com/sudo/
 
 =head1 Performance Enhancements
 
@@ -465,12 +513,12 @@ natively 64-bit this makes no difference.)
 
 =head2 Policy.sh policy change
 
-If you are reusing a Policy.sh file (see INSTALL) and you use 
+If you are reusing a Policy.sh file (see INSTALL) and you use
 Configure -Dprefix=/foo/bar and in the old Policy $prefix eq
-$siteprefix and $prefix eq $vendorprefix, all of them will now
-be changed to the new prefix, /foo/bar.  (Previously only $prefix
-did change.)  If you do not like this new behaviour, specify
-prefix, siteprefix, and vendorprefix explicitly.
+$siteprefix and $prefix eq $vendorprefix, all of them will now be
+changed to the new prefix, /foo/bar.  (Previously only $prefix
+changed.)  If you do not like this new behaviour, specify prefix,
+siteprefix, and vendorprefix explicitly.
 
 =head2 Additional Library Locations
 
@@ -485,7 +533,7 @@ build Perl (basically, the 'cc' doesn't do ANSI C).  If this seems
 to be the case and the 'cc' does not seem to be the GNU C compiler
 'gcc', an automatic attempt is made to find and use 'gcc' instead.
 
-=head2 If gcc seems to be from from a different operating system release ...
+=head2 If gcc seems to be from a different operating system release ...
 
 gcc needs to closely track the operating system release because gcc
 wants to have its own versions of the operating system header files
@@ -496,7 +544,7 @@ was used to compile the gcc and that release is different from the one
 being used now, gcc gives a clearly visible warning that trouble may
 lie ahead.
 
-=head2 If no binary compatibilty with 5.005 wanted, no 5.005 modules, either
+=head2 If no binary compatibility with 5.005 wanted, no 5.005 modules, either
 
 If no binary compatibility with the 5.005 release is wanted, Configure
 does not suggest including the 5.005 modules in the @INC.
@@ -533,7 +581,7 @@ Perl now works on post-4.0 BSD/OSes.
 
 =head2 All BSDs
 
-Setting the C<$0> now works (as much as possible, see perlvar for details).
+Setting the C<$0> now works (as much as possible; see perlvar for details).
 
 =head2 Cygwin
 
@@ -664,7 +712,7 @@ during build or later.
 
 =item *
 
-No more dying on math errors in runtime.
+no longer dying on math errors in runtime.
 
 =item *
 
@@ -697,7 +745,7 @@ Now works with Perl's malloc.
 
 =item *
 
-accept() no more leaks memory.
+accept() no longer leaks memory.
 
 =item *
 
@@ -766,7 +814,7 @@ Redefining constant subroutines using eval (again) warns.
 
 Several debugger fixes: exit code now reflects the script exit code,
 condition C<"0"> now treated correctly, the C<d> command now checks
-line number, the C<$.> no more gets corrupted, all debugger output now
+line number, the C<$.> no longer gets corrupted, all debugger output now
 goes correctly to the socket if RemotePort is set.
 
 =item *
@@ -791,25 +839,25 @@ Fixed numerous memory leaks, especially in eval "".
 
 =item *
 
-Moduli of unsigned numbers now works (4063328477 % 65535 used to
+Modulus of unsigned numbers now works (4063328477 % 65535 used to
 return 27406, instead of 27047).
 
 =item *
 
-msgrcv() no more warns about uninitialized input scalar.
+msgrcv() no longer warns about uninitialized input scalar.
 
 =item *
 
-Some "not a number" warnings introduce in 5.6.0 eliminated to be
-more compatible with 5.005.
+Some "not a number" warnings introduced in 5.6.0 eliminated to be
+more compatible with 5.005.  Infinity is now recognized as a number.
 
 =item *
 
-out() variables will not cause "will not stay shared" warnings
+our() variables will not cause "will not stay shared" warnings
 
 =item *
 
-The pack "Z" now correctly terminates the string with an "\0".
+pack "Z" now correctly terminates the string with an "\0".
 
 =item *
 
@@ -822,7 +870,7 @@ POSIX::STDERR_FILENO (not POSIX::STRERR_FILENO).
 
 =item *
 
-printf() no more resets the numeric locale to "C".
+printf() no longer resets the numeric locale to "C".
 
 =item *
 
@@ -835,7 +883,7 @@ In quad (64-bit) platforms numbers now stay integers longer
 
 =item *
 
-Printing quads (64-bit integers) with printfs/sprintf works now
+Printing quads (64-bit integers) with printf/sprintf works now
 without q L ll prefixes (assuming you are on a quad-capable platform).
 
 =item *
@@ -856,22 +904,22 @@ C</x{ab}/> now works.
 
 =item *
 
-scalar() now doesn't force scalar context when used in void context.
+scalar() now forces scalar context even when used in void context.
 
 =item *
 
-All the documented examples Shell.pm now work.
+All the documented Shell.pm examples now work.
 
 =item *
 	
 sort() arguments are now compiled in the right wantarray context
-(were accidentally using the context of the sort() itself).
+(they were accidentally using the context of the sort() itself).
 
 =item *
 
 Changed the POSIX character class C<[[:space:]]> to include the (very
 rare) vertical tabulator character.  Added a new POSIX-ish character
-class C<[[:blank:]] which stands for horizontal whitespace (currently,
+class C<[[:blank:]]> which stands for horizontal whitespace (currently,
 the space and the tabulator).
 
 =item *
@@ -893,7 +941,7 @@ in multiple thread simultaneously are now thread-safe.
 
 =item *
 
-Allow non-variable as left-handside of non-updating tr///.
+Allow read-only string on left hand side of non-modifying tr///.
 
 =item *
 
@@ -901,6 +949,7 @@ Several Unicode fixes (but still not perfect).
 
 BOMs (byte order marks) in the beginning of Perl files
 (scripts, modules) should now be transparently skipped.
+UTF16 encoded Perl files should now be read correctly.
 
 The character tables have been updated to new Unicode 3.0 features.
 
@@ -919,7 +968,7 @@ theory.
 
 The C<tr///> operator now works I<slightly> better but is still rather
 broken.  Note that the C<tr///CU> functionality has been removed (but
-see pack('U0', ...).
+see pack('U0', ...)).
 
 Zero entries were missing from the Unicode classes like C<IsDigit>.
 
@@ -966,8 +1015,8 @@ C<tr/a-y//>, which was probably not what you would have expected.)
 
 =item *
 
-The "Unrecgonized escape" warning has been extended to include C<\8>,
-C<\9>, and C<\_>.  There is no need to espace any of the C<\w> characters.
+The "Unrecognized escape" warning has been extended to include C<\8>,
+C<\9>, and C<\_>.  There is no need to escape any of the C<\w> characters.
 
 =back
 
@@ -1027,7 +1076,7 @@ pod/find tests Pod::Find.
 
 =item *
 
-op/sprintf coverage is now of much more comprehensive.
+op/sprintf coverage is now much more comprehensive.
 
 =item *
 
@@ -1035,7 +1084,7 @@ op/taint now continues on failed shmget().
 
 =item *
 
-lib/*lfs.t now continues even if SIXFSZ happens.
+lib/sysfs.t now continues even if SIXFSZ happens.
 
 =item *
 
@@ -1043,73 +1092,21 @@ lib/syslog.t now works without sockets.
 
 =back
 
-=head1 Incompatible Changes
-
-=head2 Arrays Now Always Interpolate Into Double-Quoted Strings
-
-Constructs like "foo@bar" now always assume the C<@bar> to be an array,
-and not dependent on whether it is known whether that is an array or not.
-
-=head2 bless(REF, REF) is now a fatal error
-
-The semantics of bless(REF, REF) were unclear and until someone proves
-it to make some sense, it is forbidden.
-
-=head2 The eg/* Directory Removed
-
-The very dusty examples in the eg/ directory have been removed.
-Suggestions for new shiny examples welcome but the main issue is that
-the examples need to be documented, tested, and most importantly maintained.
-
-=head2 The lib/chat2.pl
-
-The obsolete chat2 library that should never have been allowed
-to escape the laboratory has been decommissioned.
-
-=head2 The Unimplemented (But Recognized) POSIX Regex Features Now Fatal
-
-The unimplemented POSIX regex features [[.cc.]] and [[=c=]] are
-recognized as before but now cause fatal runtime errors.  The previous
-behaviour of ignoring them by default and warning if requested was
-unacceptable since it in a way falsely promised that the features
-can be used.
-
-=head2 lstat(FILEHANDLE) now warns
-
-lstat(FILEHANDLE) now gives a warning because the operation makes no sense.
-In future releases this may become a fatal error.
-
-=head2 Obsolete String Comparison Operators Removed
-
-The long since deprecated uppercase aliases for the string comparison
-operators (EQ, NE, LT, LE, GE, GT) have now been removed.
-
-=head2 The Regular Expression Submatches Are Now Unset When Backtracking 
-
-The regular expression captured submatches ($1, $2, ...) are now
-consistently unset if the match fails, instead of leaving false
-data lying around in them.
-
-=head2 tr///CU Removed, Not To Return
-
-The tr///C and tr///U features have been removed and will not return,
-the interface was a mistake.  Sorry about that.  For similar
-functionality, see pack('U0', ...) and pack('C0', ...).
-
 =head1 Changed Internals
 
 =head2 apidoc
 
-The perlapi.pod now attempts to document the internal API
-(a companion to perlguts).
+perlapi.pod (a companion to perlguts) now attempts to document the
+internal API.
 
 =head2 microperl
 
-There is now a way to build really minimal perl called microperl.
-Building does not require even running Configure, C<make -f Makefile.micro>
-should be enough.  Beware: microperl makes many assumptions, some of
-which may be too bold, the resulting executable may crash or
-otherwise misbehave in wondrous ways.  For careful hackers only.
+There is now a way to build a really minimal perl called microperl.
+Building microperl does not require even running Configure;
+C<make -f Makefile.micro> should be enough.  Beware: microperl makes
+many assumptions, some of which may be too bold; the resulting
+executable may crash or otherwise misbehave in wondrous ways.  For
+careful hackers only.
 
 =head2 Publicize More Functions
 
@@ -1144,7 +1141,7 @@ issues with `largefiles', a change brought by Perl 5.6.0 in where file
 offsets are by default 64 bits wide (assuming the platform supports
 such large files).  Modules may fail to compile at all or compile and
 work incorrectly.  Currently there is no good solution for the problem
-but Configure now stores the flags and libraries that effect the
+but Configure now stores the flags and libraries that affect the
 largefileness to the %Config hash, the extensions that are having
 problems can try configuring themselves without the largefileness.
 This is admittedly not a clean solution.
@@ -1153,15 +1150,15 @@ This is admittedly not a clean solution.
 
 =head1 Reporting Bugs
 
-If you find what you think is a bug, you might check the
-articles recently posted to the comp.lang.perl.misc newsgroup.
-There may also be information at http://www.perl.com/perl/, the Perl
-Home Page.
+If you find what you think is a bug, you might check the articles
+recently posted to the comp.lang.perl.misc newsgroup and the perl
+bug database at http://bugs.perl.org.  There may also be
+information at http://www.perl.com/perl/, the Perl Home Page.
 
 If you believe you have an unreported bug, please run the B<perlbug>
 program included with your release.  Be sure to trim your bug down
 to a tiny but sufficient test case.  Your bug report, along with the
-output of C<perl -V>, will be sent off to perlbug@perl.com to be
+output of C<perl -V>, will be sent off to perlbug@perl.org to be
 analysed by the Perl porting team.
 
 =head1 SEE ALSO
@@ -1179,6 +1176,6 @@ The F<Artistic> and F<Copying> files for copyright information.
 Written by Jarkko Hietaniemi <F<jhi@iki.fi>>, with many contributions
 from The Perl Porters and Perl Users submitting feedback and patches.
 
-Send omissions or corrections to <F<perlbug@perl.com>>.
+Send omissions or corrections to <F<perlbug@perl.org>>.
 
 =cut

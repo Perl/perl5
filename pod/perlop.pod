@@ -299,7 +299,9 @@ to the right argument.
 
 Binary "<=>" returns -1, 0, or 1 depending on whether the left
 argument is numerically less than, equal to, or greater than the right
-argument.
+argument.  If your platform supports NaNs (not-a-numbers) as numeric
+values, using them with "<=>" (or any other numeric comparison)
+returns undef.
 
 Binary "eq" returns true if the left argument is stringwise equal to
 the right argument.
@@ -307,8 +309,9 @@ the right argument.
 Binary "ne" returns true if the left argument is stringwise not equal
 to the right argument.
 
-Binary "cmp" returns -1, 0, or 1 depending on whether the left argument is stringwise
-less than, equal to, or greater than the right argument.
+Binary "cmp" returns -1, 0, or 1 depending on whether the left
+argument is stringwise less than, equal to, or greater than the right
+argument.
 
 "lt", "le", "ge", "gt" and "cmp" use the collation (sort) order specified
 by the current locale if C<use locale> is in effect.  See L<perllocale>.
