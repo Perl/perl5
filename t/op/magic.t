@@ -83,8 +83,8 @@ else {
     }
 
 END
+    $test += 2;
 }
-$test += 2;
 
 # can we slice ENV?
 @val1 = @ENV{keys(%ENV)};
