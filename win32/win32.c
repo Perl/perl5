@@ -841,6 +841,12 @@ win32_vfprintf(FILE *fp, const char *format, va_list args)
     return (pIOSubSystem->pfnvfprintf(fp, format, args));
 }
 
+DllExport int
+win32_vprintf(const char *format, va_list args)
+{
+    return (pIOSubSystem->pfnvprintf(format, args));
+}
+
 DllExport size_t
 win32_fread(void *buf, size_t size, size_t count, FILE *fp)
 {
@@ -998,6 +1004,18 @@ win32_setmode(int fd, int mode)
     return pIOSubSystem->pfnsetmode(fd, mode);
 }
 
+DllExport long
+win32_lseek(int fd, long offset, int origin)
+{
+    return pIOSubSystem->pfnlseek(fd, offset, origin);
+}
+
+DllExport long
+win32_tell(int fd)
+{
+    return pIOSubSystem->pfntell(fd);
+}
+
 DllExport int
 win32_open(const char *path, int flag, ...)
 {
@@ -1017,6 +1035,12 @@ DllExport int
 win32_close(int fd)
 {
     return pIOSubSystem->pfnclose(fd);
+}
+
+DllExport int
+win32_eof(int fd)
+{
+    return pIOSubSystem->pfneof(fd);
 }
 
 DllExport int
@@ -1048,16 +1072,19 @@ win32_mkdir(const char *dir, int mode)
 {
     return pIOSubSystem->pfnmkdir(dir); /* just ignore mode */
 }
+
 DllExport int
 win32_rmdir(const char *dir)
 {
     return pIOSubSystem->pfnrmdir(dir);
 }
+
 DllExport int
 win32_chdir(const char *dir)
 {
     return pIOSubSystem->pfnchdir(dir);
 }
+
 DllExport int
 win32_spawnvpe(int mode, const char *cmdname,
 	       const char *const *argv, const char *const *envp)

@@ -4,8 +4,8 @@ require 5.002;
 
 use vars qw($VERSION $XS_VERSION @ISA @EXPORT_OK);
 
-$VERSION = "1.02";
-$XS_VERSION = "1.00";
+$VERSION = "1.03";
+$XS_VERSION = "1.01";
 
 use strict;
 use Carp;
@@ -380,7 +380,9 @@ such as open would need to be enabled.
 
     formline enterwrite leavewrite
 
-    print sysread syswrite send recv eof tell seek sysseek
+    print sysread syswrite send recv
+
+    eof tell seek systell sysseek
 
     readdir telldir seekdir rewinddir
 

@@ -1357,6 +1357,11 @@ PP(pp_eof)
 
 PP(pp_tell)
 {
+    return pp_systell(ARGS);
+}
+
+PP(pp_systell)
+{
     dSP; dTARGET;
     GV *gv;
 

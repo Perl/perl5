@@ -36,7 +36,6 @@ print OUT <<'EOH';
 static void
 xs_init()
 {
-    dXSUB_SYS;
 EOH
 
 if (@ARGV) {
@@ -53,6 +52,8 @@ if (@exts) {
     $subname =~ s/::/__/g;
     print OUT "extern void	boot_${subname} _((CV* cv));\n"
   }
+  # May not actually be a declaration, so put after other declarations
+  print OUT "  dXSUB_SYS;\n";
   foreach $ext (@exts) {
     my($subname) = $ext;
     $subname =~ s/::/__/g;

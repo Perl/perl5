@@ -130,9 +130,8 @@ sub catfile {
     my $file = pop @_;
     return $file unless @_;
     my $dir = $self->catdir(@_);
-    for ($dir) {
-	$_ .= "\\" unless substr($_,length($_)-1,1) eq "\\";
-    }
+    $dir =~ s/(\\\.)$//;
+    $dir .= "\\" unless substr($dir,length($dir)-1,1) eq "\\";
     return $dir.$file;
 }
 
@@ -256,6 +255,7 @@ path. On UNIX eliminated successive slashes and successive "/.".
 
 sub canonpath {
     my($self,$path) = @_;
+    $path =~ s/^([a-z]:)/\u$1/;
     $path =~ s|/|\\|g;
     $path =~ s|\\+|\\|g ;                          # xx////xx  -> xx/xx
     $path =~ s|(\\\.)+\\|\\|g ;                    # xx/././xx -> xx/xx

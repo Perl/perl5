@@ -1229,6 +1229,14 @@ C<./Configure -S> and rebuild Perl.
 (F) The range specified in a character class had a minimum character
 greater than the maximum character.  See L<perlre>.
 
+=item Invalid type in pack: '%s'
+
+(F) The given character is not a valid pack type.  See L<perlop/pack>.
+
+=item Invalid type in unpack: '%s'
+
+(F) The given character is not a valid unpack type.  See L<perlop/unpack>.
+
 =item ioctl is not implemented
 
 (F) Your machine apparently doesn't implement ioctl(), which is pretty
@@ -1987,10 +1995,10 @@ or setgid bit set.  This doesn't make much sense.
 (F) The lexer couldn't find the final delimiter of a // or m{}
 construct.  Remember that bracketing delimiters count nesting level.
 
-=item seek() on unopened file
+=item %sseek() on unopened file
 
-(W) You tried to use the seek() function on a filehandle that was either
-never opened or has since been closed.
+(W) You tried to use the seek() or sysseek() function on a filehandle that
+was either never opened or has since been closed.
 
 =item select not implemented
 
@@ -2206,10 +2214,10 @@ or "msg".  See L<perlfunc/semctl>, for example.
 (W) The filehandle you're writing to got itself closed sometime before now.
 Check your logic flow.
 
-=item tell() on unopened file
+=item %stell() on unopened file
 
-(W) You tried to use the tell() function on a filehandle that was either
-never opened or has since been closed.
+(W) You tried to use the tell() or systell() function on a filehandle that
+was either never opened or has since been closed.
 
 =item Test on unopened file E<lt>%sE<gt>
 

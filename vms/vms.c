@@ -2,8 +2,8 @@
  *
  * VMS-specific routines for perl5
  *
- * Last revised: 15-Feb-1997 by Charles Bailey  bailey@genetics.upenn.edu
- * Version: 5.3.27
+ * Last revised: 11-Apr-1997 by Charles Bailey  bailey@genetics.upenn.edu
+ * Version: 5.3.97c
  */
 
 #include <acedef.h>
@@ -774,15 +774,18 @@ my_gconvert(double val, int ndig, int trail, char *buf)
  * rmesexpand() returns the address of the resultant string if
  * successful, and NULL on error.
  */
+static char *do_tounixspec(char *, char *, int);
+
 static char *
 do_rmsexpand(char *filespec, char *outbuf, int ts, char *defspec, unsigned opts)
 {
   static char __rmsexpand_retbuf[NAM$C_MAXRSS+1];
+  char vmsfspec[NAM$C_MAXRSS+1], tmpfspec[NAM$C_MAXRSS+1];
   char esa[NAM$C_MAXRSS], *cp, *out = NULL;
   struct FAB myfab = cc$rms_fab;
   struct NAM mynam = cc$rms_nam;
   STRLEN speclen;
-  unsigned long int retsts, haslower = 0;
+  unsigned long int retsts, haslower = 0, isunix = 0;
 
   if (!filespec || !*filespec) {
     set_vaxc_errno(LIB$_INVARG); set_errno(EINVAL);
@@ -792,12 +795,20 @@ do_rmsexpand(char *filespec, char *outbuf, int ts, char *defspec, unsigned opts)
     if (ts) out = New(7019,outbuf,NAM$C_MAXRSS+1,char);
     else    outbuf = __rmsexpand_retbuf;
   }
+  if ((isunix = (strchr(filespec,'/') != NULL))) {
+    if (do_tovmsspec(filespec,vmsfspec,0) == NULL) return NULL;
+    filespec = vmsfspec;
+  }
 
   myfab.fab$l_fna = filespec;
   myfab.fab$b_fns = strlen(filespec);
   myfab.fab$l_nam = &mynam;
 
   if (defspec && *defspec) {
+    if (strchr(defspec,'/') != NULL) {
+      if (do_tovmsspec(defspec,tmpfspec,0) == NULL) return NULL;
+      defspec = tmpfspec;
+    }
     myfab.fab$l_dna = defspec;
     myfab.fab$b_dns = strlen(defspec);
   }
@@ -852,7 +863,17 @@ do_rmsexpand(char *filespec, char *outbuf, int ts, char *defspec, unsigned opts)
   if (haslower) __mystrtolower(out);
 
   /* Have we been working with an expanded, but not resultant, spec? */
-  if (!mynam.nam$b_rsl) strcpy(outbuf,esa);
+  /* Also, convert back to Unix syntax if necessary. */
+  if (!mynam.nam$b_rsl) {
+    if (isunix) {
+      if (do_tounixspec(esa,outbuf,0) == NULL) return NULL;
+    }
+    else strcpy(outbuf,esa);
+  }
+  else if (isunix) {
+    if (do_tounixspec(outbuf,tmpfspec,0) == NULL) return NULL;
+    strcpy(outbuf,tmpfspec);
+  }
   return outbuf;
 }
 /*}}}*/
@@ -896,8 +917,6 @@ char *rmsexpand_ts(char *spec, char *buf, char *def, unsigned opt)
 ** License or the Perl Artistic License.  Copies of each may be
 ** found in the Perl standard distribution.
  */
-
-static char *do_tounixspec(char *, char *, int);
 
 /*{{{ char *fileify_dirspec[_ts](char *path, char *buf)*/
 static char *do_fileify_dirspec(char *dir,char *buf,int ts)

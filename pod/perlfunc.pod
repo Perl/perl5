@@ -108,8 +108,8 @@ delete, each, exists, keys, values
 
 binmode, close, closedir, dbmclose, dbmopen, die, eof,
 fileno, flock, format, getc, print, printf, read, readdir,
-rewinddir, seek, seekdir, select, syscall, sysread,
-syswrite, tell, telldir, truncate, warn, write
+rewinddir, seek, seekdir, select, syscall, sysread, sysseek,
+systell, syswrite, tell, telldir, truncate, warn, write
 
 =item Functions for fixed length data or records
 
@@ -2096,17 +2096,29 @@ follows:
 
     c	A signed char value.
     C	An unsigned char value.
+
     s	A signed short value.
     S	An unsigned short value.
+	  (This 'short' is _exactly_ 16 bits, which may differ from
+	   what a local C compiler calls 'short'.)
+
     i	A signed integer value.
     I	An unsigned integer value.
+	  (This 'integer' is _at_least_ 32 bits wide.  Its exact size
+	   depends on what a local C compiler calls 'int', and may
+	   even be larger than the 'long' described in the next item.)
+
     l	A signed long value.
     L	An unsigned long value.
+	  (This 'long' is _exactly_ 32 bits, which may differ from
+	   what a local C compiler calls 'long'.)
 
-    n	A short in "network" order.
-    N	A long in "network" order.
+    n	A short in "network" (big-endian) order.
+    N	A long in "network" (big-endian) order.
     v	A short in "VAX" (little-endian) order.
     V	A long in "VAX" (little-endian) order.
+	  (These 'shorts' and 'longs' are _exactly_ 16 bits and
+	   _exactly_ 32 bits, respectively.)
 
     f	A single-precision float in the native format.
     d	A double-precision float in the native format.
@@ -2116,10 +2128,10 @@ follows:
 
     u	A uuencoded string.
 
-    w A BER compressed integer.  Bytes give an unsigned integer base
-      128, most significant digit first, with as few digits as
-      possible, and with the bit 8 of each byte except the last set
-      to "1."
+    w	A BER compressed integer.  Its bytes represent an unsigned
+	integer in base 128, most significant digit first, with as few
+	digits as possible.  Bit eight (the high bit) is set on each
+	byte except the last.
 
     x	A null byte.
     X	Back up a byte.
@@ -3330,11 +3342,12 @@ into that kind of thing.
 =item sysread FILEHANDLE,SCALAR,LENGTH
 
 Attempts to read LENGTH bytes of data into variable SCALAR from the
-specified FILEHANDLE, using the system call read(2).  It bypasses
-stdio, so mixing this with other kinds of reads or with seek() may
-cause confusion.  Returns the number of bytes actually read, or undef
-if there was an error.  SCALAR will be grown or shrunk so that the
-last byte actually read is the last byte of the scalar after the read.
+specified FILEHANDLE, using the system call read(2).  It bypasses stdio,
+so mixing this with other kinds of reads, print(), write(), seek(), or
+tell() can cause confusion.  Returns the number of bytes actually read,
+or undef if there was an error.  SCALAR will be grown or shrunk so that
+the last byte actually read is the last byte of the scalar after the
+read.
 
 An OFFSET may be specified to place the read data at some place in the
 string other than the beginning.  A negative OFFSET specifies
@@ -3346,13 +3359,25 @@ the result of the read is appended.
 =item sysseek FILEHANDLE,POSITION,WHENCE
 
 Randomly positions the system file pointer for FILEHANDLE using the
-system call lseek(2).  It bypasses stdio, so mixing this with read(),
-print(), write(), or seek() may cause confusion.  FILEHANDLE may be an
-expression whose value gives the name of the filehandle.  The values for
-WHENCE are 0 to set the file pointer to POSITION, 1 to set the it to
-current plus POSITION, and 2 to set it to EOF plus offset.  You may use
-the values SEEK_SET, SEEK_CUR, and SEEK_END for this from either the
-IO::Seekable or the POSIX module.  Returns 1 upon success, 0 otherwise.
+system call lseek(2).  It bypasses stdio, so mixing this with reads
+(other than sysread()), print(), write(), seek(), or tell() may cause
+confusion.  FILEHANDLE may be an expression whose value gives the name
+of the filehandle.  The values for WHENCE are 0 to set the file pointer
+to POSITION, 1 to set the it to current plus POSITION, and 2 to set it
+to EOF plus offset.  You may use the values SEEK_SET, SEEK_CUR, and
+SEEK_END for this from either the IO::Seekable or the POSIX module.
+Returns 1 upon success, 0 otherwise.  See also L</systell>.
+
+=item systell FILEHANDLE
+
+=item systell
+
+Returns the current position of the system file pointer for FILEHANDLE
+as reported by the system call lseek(2).  It bypasses stdio, so mixing
+this with reads (other than sysread()), print(), write(), seek(), or
+tell() may cause confusion.  FILEHANDLE may be an expression whose value
+gives the name of the actual filehandle.  If FILEHANDLE is omitted,
+assumes the file last read.  See also L</sysseek>.
 
 =item system LIST
 
@@ -3404,10 +3429,11 @@ signals and core dumps.
 
 Attempts to write LENGTH bytes of data from variable SCALAR to the
 specified FILEHANDLE, using the system call write(2).  It bypasses
-stdio, so mixing this with prints or with seek() may cause confusion.
-Returns the number of bytes actually written, or undef if there was an
-error.  If the length is greater than the available data, only as much
-data as is available will be written.
+stdio, so mixing this with reads (other than sysread()), print(),
+write(), seek(), or tell() may cause confusion.  Returns the number of
+bytes actually written, or undef if there was an error.  If the length
+is greater than the available data, only as much data as is available
+will be written.
 
 An OFFSET may be specified to write the data from some part of the
 string other than the beginning.  A negative OFFSET specifies writing

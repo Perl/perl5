@@ -8,6 +8,7 @@ extern "C" {
 
 #include "EXTERN.h"
 #include "perl.h"
+#include "XSUB.h"
 
 #ifdef __cplusplus
 }
@@ -60,12 +61,35 @@ char *staticlinkmodules[] = {
 
 EXTERN_C void boot_DynaLoader _((CV* cv));
 
+static
+XS(w32_GetCurrentDirectory)
+{
+ dXSARGS;
+ SV *sv = sv_newmortal();
+ /* Make one call with zero size - return value is required size */
+ DWORD len = GetCurrentDirectory((DWORD)0,NULL);
+ SvUPGRADE(sv,SVt_PV);
+ SvGROW(sv,len);
+ SvCUR(sv) = GetCurrentDirectory((DWORD) SvLEN(sv), SvPVX(sv));
+ /* 
+  * If result != 0 
+  *   then it worked, set PV valid, 
+  *   else leave it 'undef' 
+  */
+ if (SvCUR(sv))
+  SvPOK_on(sv);
+ EXTEND(sp,1);
+ ST(0) = sv;
+ XSRETURN(1);
+}
+
 static void
 xs_init()
 {
     char *file = __FILE__;
     dXSUB_SYS;
     newXS("DynaLoader::boot_DynaLoader", boot_DynaLoader, file);
+    newXS("Win32::GetCurrentDirectory", w32_GetCurrentDirectory, file);
 }
 
 extern HANDLE PerlDllHandle;

@@ -162,7 +162,7 @@ sub fileparse {
       ($dirpath,$basename) = ($fullname =~ /^(.*[:>\]])?(.*)/);
     }
   }
-  if ($fstype =~ /^MSDOS/i) {
+  if ($fstype =~ /^MS(DOS|Win32)/i) {
     ($dirpath,$basename) = ($fullname =~ /^((?:.*[:\\\/])?)(.*)/);
     $dirpath .= '.\\' unless $dirpath =~ /[\\\/]$/;
   }
@@ -172,10 +172,6 @@ sub fileparse {
   elsif ($fstype =~ /^AmigaOS/i) {
     ($dirpath,$basename) = ($fullname =~ /(.*[:\/])?(.*)/);
     $dirpath = './' unless $dirpath;
-  }
-  elsif ($fstype =~ /^MSWin32/i) {
-    ($dirpath,$basename) = ($fullname =~ /^(.*[:\\\/])?(.*)/);
-    $dirpath .= ".\\" unless $dirpath =~ /[\\\/]$/;
   }
   elsif ($fstype !~ /^VMS/i) {  # default to Unix
     ($dirpath,$basename) = ($fullname =~ m#^(.*/)?(.*)#);

@@ -660,24 +660,20 @@ do_tell(gv)
 GV *gv;
 {
     register IO *io;
+    register PerlIO *fp;
 
-    if (!gv)
-	goto phooey;
-
-    io = GvIO(gv);
-    if (!io || !IoIFP(io))
-	goto phooey;
-
+    if (gv && (io = GvIO(gv)) && (fp = IoIFP(io))) {
 #ifdef ULTRIX_STDIO_BOTCH
-    if (PerlIO_eof(IoIFP(io)))
-	(void)PerlIO_seek (IoIFP(io), 0L, 2);		/* ultrix 1.2 workaround */
+	if (PerlIO_eof(fp))
+	    (void)PerlIO_seek(fp, 0L, 2);	/* ultrix 1.2 workaround */
 #endif
-
-    return PerlIO_tell(IoIFP(io));
-
-phooey:
+	if (op->op_type == OP_SYSTELL)
+	    return lseek(PerlIO_fileno(fp), 0L, 1);
+	else
+	    return PerlIO_tell(fp);
+    }
     if (dowarn)
-	warn("tell() on unopened file");
+	warn("%s() on unopened file", op_name[op->op_type]);
     SETERRNO(EBADF,RMS$_IFI);
     return -1L;
 }
@@ -702,7 +698,7 @@ int whence;
 	    return PerlIO_seek(fp, pos, whence) >= 0;
     }
     if (dowarn)
-	warn("seek() on unopened file");
+	warn("%s() on unopened file", op_name[op->op_type]);
     SETERRNO(EBADF,RMS$_IFI);
     return FALSE;
 }

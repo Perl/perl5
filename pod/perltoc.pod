@@ -860,10 +860,11 @@ $^E, $^H, $^M
 =item New and changed builtin functions
 
 delete on slices, flock, printf and sprintf, keys as an lvalue, my() in
-Control Structures, pack() and unpack(), sysseek(), use VERSION, use Module
-VERSION LIST, prototype(FUNCTION), srand, $_ as Default, C<m//g> does not
-reset search position on failure, C<m//x> ignores whitespace before ?*+{},
-nested C<sub{}> closures work now, formats work right on changing lexicals
+Control Structures, pack() and unpack(), sysseek() and systell(), use
+VERSION, use Module VERSION LIST, prototype(FUNCTION), srand, $_ as
+Default, C<m//g> does not reset search position on failure, C<m//x> ignores
+whitespace before ?*+{}, nested C<sub{}> closures work now, formats work
+right on changing lexicals
 
 =item New builtin methods
 
@@ -1221,15 +1222,16 @@ sub NAME, sub NAME BLOCK, substr EXPR,OFFSET,LEN, substr EXPR,OFFSET,
 symlink OLDFILE,NEWFILE, syscall LIST, sysopen FILEHANDLE,FILENAME,MODE,
 sysopen FILEHANDLE,FILENAME,MODE,PERMS, sysread
 FILEHANDLE,SCALAR,LENGTH,OFFSET, sysread FILEHANDLE,SCALAR,LENGTH, sysseek
-FILEHANDLE,POSITION,WHENCE, system LIST, syswrite
-FILEHANDLE,SCALAR,LENGTH,OFFSET, syswrite FILEHANDLE,SCALAR,LENGTH, tell
-FILEHANDLE, tell, telldir DIRHANDLE, tie VARIABLE,CLASSNAME,LIST, tied
-VARIABLE, time, times, tr///, truncate FILEHANDLE,LENGTH, truncate
-EXPR,LENGTH, uc EXPR, uc, ucfirst EXPR, ucfirst, umask EXPR, umask, undef
-EXPR, undef, unlink LIST, unlink, unpack TEMPLATE,EXPR, untie VARIABLE,
-unshift ARRAY,LIST, use Module LIST, use Module, use Module VERSION LIST,
-use VERSION, utime LIST, values HASH, vec EXPR,OFFSET,BITS, wait, waitpid
-PID,FLAGS, wantarray, warn LIST, write FILEHANDLE, write EXPR, write, y///
+FILEHANDLE,POSITION,WHENCE, systell FILEHANDLE, systell, system LIST,
+syswrite FILEHANDLE,SCALAR,LENGTH,OFFSET, syswrite
+FILEHANDLE,SCALAR,LENGTH, tell FILEHANDLE, tell, telldir DIRHANDLE, tie
+VARIABLE,CLASSNAME,LIST, tied VARIABLE, time, times, tr///, truncate
+FILEHANDLE,LENGTH, truncate EXPR,LENGTH, uc EXPR, uc, ucfirst EXPR,
+ucfirst, umask EXPR, umask, undef EXPR, undef, unlink LIST, unlink, unpack
+TEMPLATE,EXPR, untie VARIABLE, unshift ARRAY,LIST, use Module LIST, use
+Module, use Module VERSION LIST, use VERSION, utime LIST, values HASH, vec
+EXPR,OFFSET,BITS, wait, waitpid PID,FLAGS, wantarray, warn LIST, write
+FILEHANDLE, write EXPR, write, y///
 
 =back
 

@@ -299,10 +299,12 @@ provides seven bits of the total value, with the most significant
 first.  Bit eight of each byte is set, except for the last byte, in
 which bit eight is clear.
 
-=item sysseek()
+=item sysseek() and systell()
 
-This is a variant of seek() that works on the system file pointer.
-It is the only reliable way to seek before sysread() or syswrite().
+These are new.  The sysseek() operator is a variant of seek() that works
+on the system file pointer.  It is the only reliable way to seek before
+using sysread() or syswrite().  Its companion operator systell() reports
+the current position of the system file pointer.
 
 =item use VERSION
 

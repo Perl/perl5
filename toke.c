@@ -2514,6 +2514,7 @@ yylex()
 	default:			/* not a keyword */
 	  just_a_word: {
 		GV *gv;
+		SV *sv;
 		char lastchar = (bufptr == oldoldbufptr ? 0 : bufptr[-1]);
 
 		/* Get the rest if it looks like a package qualifier */
@@ -2580,6 +2581,13 @@ yylex()
 		s = skipspace(s);
 		if (*s == '(') {
 		    CLINE;
+		    if (gv && GvCVu(gv)) {
+			for (d = s + 1; *d == ' ' || *d == '\t'; d++) ;
+			if (*d == ')' && (sv = cv_const_sv(GvCV(gv)))) {
+			    s = d + 1;
+			    goto its_constant;
+			}
+		    }
 		    nextval[nexttoke].opval = yylval.opval;
 		    expect = XOPERATOR;
 		    force_next(WORD);
@@ -2604,27 +2612,18 @@ yylex()
 
 		if (gv && GvCVu(gv)) {
 		    CV* cv = GvCV(gv);
-		    if (*s == '(') {
-			nextval[nexttoke].opval = yylval.opval;
-			expect = XTERM;
-			force_next(WORD);
-			yylval.ival = 0;
-			TOKEN('&');
-		    }
 		    if (lastchar == '-')
 			warn("Ambiguous use of -%s resolved as -&%s()",
 				tokenbuf, tokenbuf);
 		    last_lop = oldbufptr;
 		    last_lop_op = OP_ENTERSUB;
 		    /* Check for a constant sub */
-		    {
-			SV *sv = cv_const_sv(cv);
-			if (sv) {
-			    SvREFCNT_dec(((SVOP*)yylval.opval)->op_sv);
-			    ((SVOP*)yylval.opval)->op_sv = SvREFCNT_inc(sv);
-			    yylval.opval->op_private = 0;
-			    TOKEN(WORD);
-			}
+		    if ((sv = cv_const_sv(cv))) {
+		  its_constant:
+			SvREFCNT_dec(((SVOP*)yylval.opval)->op_sv);
+			((SVOP*)yylval.opval)->op_sv = SvREFCNT_inc(sv);
+			yylval.opval->op_private = 0;
+			TOKEN(WORD);
 		    }
 
 		    /* Resolve to GV now. */
@@ -3530,11 +3529,14 @@ yylex()
 	case KEY_sysopen:
 	    LOP(OP_SYSOPEN,XTERM);
 
-	case KEY_sysread:
-	    LOP(OP_SYSREAD,XTERM);
+	case KEY_systell:
+	    UNI(OP_SYSTELL);
 
 	case KEY_sysseek:
 	    LOP(OP_SYSSEEK,XTERM);
+
+	case KEY_sysread:
+	    LOP(OP_SYSREAD,XTERM);
 
 	case KEY_syswrite:
 	    LOP(OP_SYSWRITE,XTERM);
@@ -4188,6 +4190,7 @@ I32 len;
 		if (strEQ(d,"sysopen"))		return -KEY_sysopen;
 		if (strEQ(d,"sysread"))		return -KEY_sysread;
 		if (strEQ(d,"sysseek"))		return -KEY_sysseek;
+		if (strEQ(d,"systell"))		return -KEY_systell;
 		break;
 	    case 8:
 		if (strEQ(d,"syswrite"))	return -KEY_syswrite;

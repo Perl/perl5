@@ -91,6 +91,12 @@ sub is_abs_path
   {
    return m#^[a-z]:[\\/]#i;
   }
+ elsif ($^O eq 'VMS')
+  {
+    # If it's a logical name, expand it.
+    $_ = $ENV{$_} while /^[\w\$\-]+$/ and $ENV{$_};
+    return m!^/! or m![<\[][^.\-\]>]! or /:[^<\[]/;
+  }
  else
   {
    return m#^/#;

@@ -69,21 +69,30 @@ skip any files to which you do not have delete access
 (if running under VMS) or write access (if running
 under another OS).  This will change in the future when
 a criterion for 'delete permission' under OSs other
-than VMS is settled. (defaults to FALSE)
+than VMS is settled.  (defaults to FALSE)
 
 =back
 
-It returns the number of files successfully deleted. Symlinks are
+It returns the number of files successfully deleted.  Symlinks are
 treated as ordinary files.
+
+B<NOTE:> If the third parameter is not TRUE, C<rmtree> is B<unsecure>
+in the face of failure or interruption.  Files and directories which
+were not deleted may be left with permissions reset to allow world
+read and write access.  Note also that the occurrence of errors in
+rmtree can be determined I<only> by trapping diagnostic messages
+using C<$SIG{__WARN__}>; it is not apparent from the return value.
+Therefore, you must be extremely careful about using C<rmtree($foo,$bar,0>
+in situations where security is an issue.
 
 =head1 AUTHORS
 
-Tim Bunce E<lt>F<Tim.Bunce@ig.co.uk>E<gt>
-Charles Bailey E<lt>F<bailey@genetics.upenn.edu>E<gt>
+Tim Bunce <F<Tim.Bunce@ig.co.uk>> and
+Charles Bailey <F<bailey@genetics.upenn.edu>>
 
 =head1 REVISION
 
-Current $VERSION is 1.02.
+Current $VERSION is 1.03.
 
 =cut
 
@@ -94,7 +103,7 @@ use Exporter ();
 use strict;
 
 use vars qw( $VERSION @ISA @EXPORT );
-$VERSION = "1.02";
+$VERSION = "1.03";
 @ISA = qw( Exporter );
 @EXPORT = qw( mkpath rmtree );
 
@@ -138,13 +147,14 @@ sub rmtree {
     my($root);
     foreach $root (@{$roots}) {
 	$root =~ s#/$##;
-	$count++, next unless -e $root;
+	next unless -e $root;
 	if (not -l $root and -d _) {
 	    # notabene: 0777 is for making readable in the first place,
 	    # it's also intended to change it to writable in case we have
 	    # to recurse in which case we are better than rm -rf for 
 	    # subtrees with strange permissions
-	    chmod 0777, $root
+	    my $rp = (stat(_))[2] & 0777;  #Is this portable???
+	    chmod(0777, ($Is_VMS ? VMS::Filespec::fileify($root) : $root))
 	      or carp "Can't make directory $root read+writeable: $!"
 		unless $safe;
 
@@ -168,8 +178,15 @@ sub rmtree {
 	      or carp "Can't make directory $root writeable: $!"
 		if $force_writeable;
 	    print "rmdir $root\n" if $verbose;
-	    rmdir($root) && ++$count
-	      or carp "Can't remove directory $root: $!";
+	    if (rmdir $root) {
+		++$count;
+	    }
+	    else {
+		carp "Can't remove directory $root: $!";
+		chmod($rp, ($Is_VMS ? VMS::Filespec::fileify($root) : $root))
+		    or carp("and can't restore permissions to "
+		            . sprintf("0%o",$rp) . "\n");
+	    }
 	}
 	else { 
 	    if ($safe &&
@@ -177,14 +194,24 @@ sub rmtree {
 		print "skipped $root\n" if $verbose;
 		next;
 	    }
+	    my $rp = (stat(_))[2] & 0777;  #Is this portable???
 	    chmod 0666, $root
 	      or carp "Can't make file $root writeable: $!"
 		if $force_writeable;
 	    print "unlink $root\n" if $verbose;
 	    # delete all versions under VMS
 	    while (-e $root || -l $root) {
-		unlink($root) && ++$count
-		  or croak "Can't unlink file $root: $!";
+		if (unlink $root) {
+		    ++$count;
+		}
+		else {
+		    carp "Can't unlink file $root: $!";
+		    if ($force_writeable) {
+			chmod $rp, $root
+			    or carp("and can't restore permissions to "
+			            . sprintf("0%o",$rp) . "\n");
+		    }
+		}
 	    }
 	}
     }

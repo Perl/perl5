@@ -2839,7 +2839,10 @@ sub test {
 # --- Test and Installation Sections ---
 
     my($self, %attribs) = @_;
-    my($tests) = $attribs{TESTS} || (-d "t" ? "t/*.t" : "");
+    my $tests = $attribs{TESTS};
+    if (!$tests && -d 't') {
+	$tests = $Is_Win32 ? join(' ', <t\\*.t>) : 't/*.t';
+    }
     my(@m);
     push(@m,"
 TEST_VERBOSE=0

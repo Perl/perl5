@@ -21,6 +21,7 @@ EXT char*	win32_strerror(int e);
 EXT int		win32_fprintf(FILE *pf, const char *format, ...);
 EXT int		win32_printf(const char *format, ...);
 EXT int		win32_vfprintf(FILE *pf, const char *format, va_list arg);
+EXT int		win32_vprintf(const char *format, va_list arg);
 EXT size_t	win32_fread(void *buf, size_t size, size_t count, FILE *pf);
 EXT size_t	win32_fwrite(const void *buf, size_t size, size_t count, FILE *pf);
 EXT FILE*	win32_fopen(const char *path, const char *mode);
@@ -100,6 +101,7 @@ void *	SetIOSubSystem(void	*piosubsystem);
 #define	fprintf			win32_fprintf
 #define	vfprintf		win32_vfprintf
 #define	printf			win32_printf
+#define	vprintf			win32_vprintf
 #define fread(buf,size,count,f)	win32_fread(buf,size,count,f)
 #define fwrite(buf,size,count,f)	win32_fwrite(buf,size,count,f)
 #define fopen			win32_fopen

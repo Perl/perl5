@@ -48,12 +48,12 @@ OPTIMIZE = -Od $(RUNTIME) -Z7 -D "_DEBUG"
 !  ELSE
 OPTIMIZE = -Od $(RUNTIME)d -Z7 -D "_DEBUG"
 !  ENDIF
-LINK_DBG = -pdb:$(*B).pdb
+LINK_DBG = -debug -pdb:none
 !ELSE
 !  IF "$(CCTYPE)" == "MSVC20"
 OPTIMIZE = -Od $(RUNTIME) -D "NDEBUG"
 !  ELSE
-OPTIMIZE = -O2 $(RUNTIME) -D "NDEBUG"
+OPTIMIZE = -Od $(RUNTIME) -D "NDEBUG"
 !  ENDIF
 LINK_DBG = -release
 !ENDIF

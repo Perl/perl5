@@ -1,7 +1,5 @@
 package Cwd;
 require 5.000;
-require Exporter;
-use Carp;
 
 =head1 NAME
 
@@ -44,13 +42,20 @@ kept up to date if all packages which use chdir import it from Cwd.
 
 =cut
 
+## use strict;
+
+use Carp;
+
+$VERSION = '2.00';
+
+require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(cwd getcwd fastcwd fastgetcwd);
-@EXPORT_OK = qw(chdir abs_path fast_abspath);
+@EXPORT_OK = qw(chdir abs_path fast_abs_path);
 
-# use strict;
 
 # The 'natural and safe form' for UNIX (pwd may be setuid root)
+
 sub _backtick_pwd {
     my $cwd;
     chop($cwd = `pwd`);
@@ -275,14 +280,13 @@ sub abs_path
     $cwd;
 }
 
-sub fast_abspath
-{
- my $cwd = getcwd();
- my $path = shift || '.';
- chdir($path) || croak "Cannot chdir to $path:$!";
- my $realpath = getcwd();
- chdir($cwd)  || croak "Cannot chdir back to $cwd:$!";
- $realpath;
+sub fast_abs_path {
+    my $cwd = getcwd();
+    my $path = shift || '.';
+    chdir($path) || croak "Cannot chdir to $path:$!";
+    my $realpath = getcwd();
+    chdir($cwd)  || croak "Cannot chdir back to $cwd:$!";
+    $realpath;
 }
 
 
@@ -297,7 +301,14 @@ sub fast_abspath
 #   the CRTL chdir() function persist only until Perl exits.
 
 sub _vms_cwd {
-    return $ENV{'DEFAULT'}
+    return $ENV{'DEFAULT'};
+}
+
+sub _vms_abs_path {
+    return $ENV{'DEFAULT'} unless @_;
+    my $path = VMS::Filespec::pathify($_[0]);
+    croak("Invalid path name $_[0]") unless defined $path;
+    return VMS::Filespec::rmsexpand($path);
 }
 
 sub _os2_cwd {
@@ -307,7 +318,16 @@ sub _os2_cwd {
     return $ENV{'PWD'};
 }
 
-*_NT_cwd     = \&_os2_cwd unless defined &_NT_cwd;
+sub _win32_cwd {
+    $ENV{'PWD'} = Win32::GetCurrentDirectory();
+    $ENV{'PWD'} =~ s:\\:/:g ;
+    return $ENV{'PWD'};
+}
+
+*_NT_cwd = \&_win32_cwd if (!defined &_NT_cwd && 
+                            defined &Win32::GetCurrentDirectory);
+
+*_NT_cwd = \&_os2_cwd unless defined &_NT_cwd;
 
 sub _msdos_cwd {
     $ENV{'PWD'} = `command /c cd`;
@@ -320,34 +340,35 @@ sub _msdos_cwd {
     local $^W = 0;	# assignments trigger 'subroutine redefined' warning
 
     if ($^O eq 'VMS') {
-        *cwd        = \&_vms_cwd;
-        *getcwd     = \&_vms_cwd;
-        *fastcwd    = \&_vms_cwd;
-        *fastgetcwd = \&_vms_cwd;
-        *abs_path	= \&fast_abspath;
+        *cwd		= \&_vms_cwd;
+        *getcwd		= \&_vms_cwd;
+        *fastcwd	= \&_vms_cwd;
+        *fastgetcwd	= \&_vms_cwd;
+        *abs_path	= \&_vms_abs_path;
+        *fast_abs_path	= \&_vms_abs_path;
     }
     elsif ($^O eq 'NT' or $^O eq 'MSWin32') {
         # We assume that &_NT_cwd is defined as an XSUB or in the core.
-        *cwd         = \&_NT_cwd;
-        *getcwd      = \&_NT_cwd;
-        *fastcwd     = \&_NT_cwd;
-        *fastgetcwd  = \&_NT_cwd;
-        *abs_path    = \&fast_abspath;
+        *cwd		= \&_NT_cwd;
+        *getcwd		= \&_NT_cwd;
+        *fastcwd	= \&_NT_cwd;
+        *fastgetcwd	= \&_NT_cwd;
+        *abs_path	= \&fast_abs_path;
     }
     elsif ($^O eq 'os2') {
         # sys_cwd may keep the builtin command
-        *cwd	 = defined &sys_cwd ? \&sys_cwd : \&_os2_cwd;
-        *getcwd	 = defined &sys_cwd ? \&sys_cwd : \&_os2_cwd;
-        *fastgetcwd	 = defined &sys_cwd ? \&sys_cwd : \&_os2_cwd;
-        *fastcwd	 = defined &sys_cwd ? \&sys_cwd : \&_os2_cwd;
-        *abs_path	= \&fast_abspath;
+        *cwd		= defined &sys_cwd ? \&sys_cwd : \&_os2_cwd;
+        *getcwd		= \&cwd;
+        *fastgetcwd	= \&cwd;
+        *fastcwd	= \&cwd;
+        *abs_path	= \&fast_abs_path;
     }
     elsif ($^O eq 'msdos') {
-        *cwd     = \&_msdos_cwd;
-        *getcwd     = \&_msdos_cwd;
-        *fastgetcwd = \&_msdos_cwd;
-        *fastcwd = \&_msdos_cwd;
-        *abs_path	= \&fast_abspath;
+        *cwd		= \&_msdos_cwd;
+        *getcwd		= \&_msdos_cwd;
+        *fastgetcwd	= \&_msdos_cwd;
+        *fastcwd	= \&_msdos_cwd;
+        *abs_path	= \&fast_abs_path;
     }
 }
 
