@@ -689,8 +689,7 @@ variable is output in a single Perl statement.  Handles self-referential
 structures correctly.
 
 The return value can be C<eval>ed to get back an identical copy of the
-original reference structure (although you might need to turn off strictures
-to eval it).
+original reference structure.
 
 Any references that are the same as one of those passed in will be named
 C<$VAR>I<n> (where I<n> is a numeric suffix), and other duplicate references
@@ -704,7 +703,8 @@ The default output of self-referential structures can be C<eval>ed, but the
 nested references to C<$VAR>I<n> will be undefined, since a recursive
 structure cannot be constructed using one Perl statement.  You should set the
 C<Purity> flag to 1 to get additional statements that will correctly fill in
-these references.
+these references.  Moreover, if C<eval>ed when strictures are in effect,
+you need to ensure that any variables it accesses are previously declared.
 
 In the extended usage form, the references to be dumped can be given
 user-specified names.  If a name begins with a C<*>, the output will 
