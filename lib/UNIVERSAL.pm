@@ -38,7 +38,7 @@ C<isa> can be called as either a static or object method call.
 =item can ( METHOD )
 
 C<can> checks if the object has a method called C<METHOD>. If it does
-then a reference to the sub is returned. If it does not the I<undef>
+then a reference to the sub is returned. If it does not then I<undef>
 is returned.
 
 C<can> can be called as either a static or object method call.

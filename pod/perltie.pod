@@ -630,7 +630,7 @@ This is the constructor for the class.  That means it is expected to
 return a blessed reference of some sort. The reference can be used to
 hold some internal information.
 
-    sub TIEHANDLE { print "<shout>\n"; my $r; bless \$r, shift }
+    sub TIEHANDLE { print "<shout>\n"; my $i; bless \$i, shift }
 
 =item PRINT this, LIST
 

@@ -842,7 +842,7 @@ case it indicates something else.
 (W) You probably said %hash{$key} when you meant $hash{$key} or @hash{@keys}.
 On the other hand, maybe you just meant %hash and got carried away.
 
-=item Died.
+=item Died
 
 (F) You passed die() an empty string (the equivalent of C<die "">) or
 you called it with no args and both C<$@> and C<$_> were empty.
@@ -2363,7 +2363,7 @@ on the front of your variable.
 of Perl.  Check the E<lt>#!E<gt> line, or manually feed your script
 into Perl yourself.
 
-=item Warning: something's wrong.
+=item Warning: something's wrong
 
 (W) You passed warn() an empty string (the equivalent of C<warn "">) or
 you called it with no args and C<$_> was empty.
