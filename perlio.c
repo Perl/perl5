@@ -90,13 +90,13 @@ PerlIO_init(void)
 /* Implement all the PerlIO interface ourselves.
 */
 
+/* We _MUST_ have <unistd.h> if we are using lseek() and may have large files */
 #ifdef I_UNISTD
 #include <unistd.h>
 #endif
 
 #undef printf
 void PerlIO_debug(char *fmt,...) __attribute__((format(printf,1,2)));
-
 
 void
 PerlIO_debug(char *fmt,...)
@@ -137,7 +137,7 @@ PerlIO_debug(char *fmt,...)
 
 struct _PerlIO
 {
- IV       flags;
+ IV       flags;      /* Various flags for state */
  IV       fd;         /* Maybe pointer on some OSes */
  int      oflags;     /* open/fcntl flags */
  STDCHAR *buf;        /* Start of buffer */
@@ -145,11 +145,12 @@ struct _PerlIO
  STDCHAR *ptr;        /* Current position in buffer */
  Size_t   bufsiz;     /* Size of buffer */
  Off_t    posn;       /* Offset of f->buf into the file */
- int      oneword;
+ int      oneword;    /* An if-all-else-fails area as a buffer */
 };
 
-int _perlio_size     = 0;
+/* Table of pointers to the PerlIO structs (malloc'ed) */
 PerlIO **_perlio     = NULL;
+int _perlio_size     = 0;
 
 void
 PerlIO_alloc_buf(PerlIO *f)
@@ -164,10 +165,12 @@ PerlIO_alloc_buf(PerlIO *f)
   }
  f->ptr = f->buf;
  f->end = f->ptr;
- PerlIO_debug(__FUNCTION__ " f=%p b=%p p=%p e=%p\n",
-                  f,f->buf,f->ptr,f->end);
 }
 
+
+/* This "flush" is akin to sfio's sync in that it handles files in either
+   read or write state
+*/
 #undef PerlIO_flush
 int
 PerlIO_flush(PerlIO *f)
@@ -179,6 +182,7 @@ PerlIO_flush(PerlIO *f)
                 f,f->flags,(f->ptr-f->buf),f->buf,f->ptr);
    if (f->flags & PERLIO_F_WRBUF)
     {
+     /* write() the buffer */
      STDCHAR *p = f->buf;
      int count;
      while (p < f->ptr)
@@ -196,20 +200,16 @@ PerlIO_flush(PerlIO *f)
         }
       }
      f->posn += (p - f->buf);
-     PerlIO_debug(__FUNCTION__ "(w) f=%p p=%ld\n",f,(long)f->posn);
     }
    else if (f->flags & PERLIO_F_RDBUF)
     {
+     /* Note position change */
      f->posn += (f->ptr - f->buf);
      if (f->ptr < f->end)
       {
+       /* We did not consume all of it */
        f->posn = lseek(f->fd,f->posn,SEEK_SET);
       }
-     PerlIO_debug(__FUNCTION__ "(r+) f=%p p=%ld\n",f,(long)f->posn);
-    }
-   else
-    {
-     PerlIO_debug(__FUNCTION__ "(?) f=%p p=%ld\n",f,(long)f->posn);
     }
    f->ptr = f->end = f->buf;
    f->flags &= ~(PERLIO_F_RDBUF|PERLIO_F_WRBUF);
@@ -279,6 +279,7 @@ PerlIO_oflags(const char *mode)
 PerlIO *
 PerlIO_allocate(void)
 {
+ /* Find a free slot in the table, growing table as necessary */
  PerlIO *f;
  int i = 0;
  while (1)
@@ -376,6 +377,7 @@ PerlIO_close(PerlIO *f)
 void
 PerlIO_cleanup(void)
 {
+ /* Close all the files */
  int i;
  PerlIO_debug(__FUNCTION__ "\n");
  for (i=_perlio_size-1; i >= 0; i--)
@@ -536,15 +538,14 @@ PerlIO_set_ptrcnt(PerlIO *f, STDCHAR *ptr, int cnt)
 {
  if (f)
   {
-   dTHX;
    if (!f->buf)
     PerlIO_alloc_buf(f);
    f->ptr = ptr;
-   assert(f->ptr >= f->buf);
-   if (PerlIO_get_cnt(f) != cnt)
+   if (PerlIO_get_cnt(f) != cnt || f->ptr < f->buf)
     {
      dTHX;
-     assert(PerlIO_get_cnt(f) != cnt);
+     assert(PerlIO_get_cnt(f) == cnt);
+     assert(f->ptr >= f->buf);
     }
    f->flags |= PERLIO_F_RDBUF;
   }
@@ -624,13 +625,9 @@ PerlIO_eof(PerlIO *f)
 char *
 PerlIO_getname(PerlIO *f, char *buf)
 {
-#ifdef VMS
- return fgetname(f,buf);
-#else
  dTHX;
  Perl_croak(aTHX_ "Don't know how to get file name");
  return NULL;
-#endif
 }
 
 #undef PerlIO_ungetc
@@ -640,7 +637,6 @@ PerlIO_ungetc(PerlIO *f, int ch)
  if (f->buf && (f->flags & PERLIO_F_RDBUF) && f->ptr > f->buf)
   {
    *--(f->ptr) = ch;
-   PerlIO_debug(__FUNCTION__ " f=%p c=%c\n",f,ch);
    return ch;
   }
  PerlIO_debug(__FUNCTION__ " f=%p c=%c - cannot\n",f,ch);
@@ -702,7 +698,7 @@ PerlIO_getc(PerlIO *f)
  STDCHAR buf;
  int count = PerlIO_read(f,&buf,1);
  if (count == 1)
-  return buf;
+  return (unsigned char) buf;
  return -1;
 }
 
@@ -754,7 +750,7 @@ PerlIO_write(PerlIO *f, const void *vbuf, Size_t count)
      if ((SSize_t) count < avail)
       avail = count;
      f->flags |= PERLIO_F_WRBUF;
-     if (1 || (f->flags & PERLIO_F_LINEBUF))
+     if (f->flags & PERLIO_F_LINEBUF)
       {
        while (avail > 0)
         {
@@ -803,8 +799,7 @@ PerlIO_tell(PerlIO *f)
  Off_t posn = f->posn;
  if (f->buf)
   posn += (f->ptr - f->buf);
- PerlIO_debug(__FUNCTION__ " f=%p r=%ld b=%p p=%p e=%ld\n",
-              f,(long)f->posn,f->buf,f->ptr,(long)posn);
+ PerlIO_debug(__FUNCTION__ " f=%p b=%ld a=%ld\n",f,(long)f->posn,(long)posn);
  return posn;
 }
 
@@ -879,12 +874,13 @@ PerlIO *
 PerlIO_tmpfile(void)
 {
  dTHX;
+ /* I have no idea how portable mkstemp() is ... */
  SV *sv = newSVpv("/tmp/PerlIO_XXXXXX",0);
  int fd = mkstemp(SvPVX(sv));
  PerlIO *f = NULL;
  if (fd >= 0)
   {
-   PerlIO *f = PerlIO_fdopen(fd,"w+");
+   f = PerlIO_fdopen(fd,"w+");
    if (f)
     {
      f->flags |= PERLIO_F_TEMP;
@@ -900,6 +896,7 @@ PerlIO *
 PerlIO_importFILE(FILE *f, int fl)
 {
  int fd = fileno(f);
+ /* Should really push stdio discipline when we have them */
  return PerlIO_fdopen(fd,"r+");
 }
 
@@ -908,6 +905,7 @@ FILE *
 PerlIO_exportFILE(PerlIO *f, int fl)
 {
  PerlIO_flush(f);
+ /* Should really push stdio discipline when we have them */
  return fdopen(PerlIO_fileno(f),"r+");
 }
 
