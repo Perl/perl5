@@ -6,7 +6,7 @@ use Config;
 
 
 unless($Config{'useithreads'} eq 'define') {
-    die "We need a perl that is built with USEITHREAD!\n";
+    die "We need a perl that is built with USEITHREADS!\n";
 }
 
 
