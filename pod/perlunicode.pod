@@ -632,13 +632,22 @@ Level 1 - Basic Unicode Support
         [ 1] \x{...}
         [ 2] \N{...}
         [ 3] . \p{Is...} \P{Is...}
-        [ 4] now scripts (see UTR#24 Script Names) in  addition to blocks
+        [ 4] now scripts (see UTR#24 Script Names) in addition to blocks
         [ 5] have negation
-        [ 6] can use look-ahead to emulate subtracion
+        [ 6] can use look-ahead to emulate subtraction (*)
         [ 7] include Letters in word characters
         [ 8] see UTR#21 Case Mappings: Perl implements 1:1 mappings
         [ 9] see UTR#13 Unicode Newline Guidelines
         [10] should do ^ and $ also on \x{2028} and \x{2029}
+
+(*) Instead of [\u0370-\u03FF-[{UNASSIGNED}]] as suggested by the TR
+18 you can use negated lookahead: to match currently assigned modern
+Greek characters use for example
+
+		/(?!\p{Cn})[\x{0370}-\x{03ff}]/
+
+In other words: the matched character must not be a non-assigned
+character, but it must be in the block of modern Greek characters.
 
 =item *
 
