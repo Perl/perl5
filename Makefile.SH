@@ -545,10 +545,10 @@ extra.pods: miniperl
 	-@rm -f extra.pods
 	-@for x in `grep -l '^=[a-z]' README.* | grep -v README.vms` ; do \
 	    nx=`echo $$x | sed -e "s/README\.//"`; \
-	    $(LNS) ../$$x "pod/perl"$$nx".pod" ; \
+	    cd pod ; $(LNS) ../$$x "perl"$$nx".pod" ; cd .. ; \
 	    echo "pod/perl"$$nx".pod" >> extra.pods ; \
 	done
-	-@test -f vms/perlvms.pod && $(LNS) ../vms/perlvms.pod pod/perlvms.pod && echo "pod/perlvms.pod" >> extra.pods
+	-@test -f vms/perlvms.pod && cd pod && $(LNS) ../vms/perlvms.pod perlvms.pod && cd .. && echo "pod/perlvms.pod" >> extra.pods
 
 install-strip:
 	$(MAKE) STRIPFLAGS=-s install
@@ -581,7 +581,7 @@ install.man:	all installman
 # XXX Experimental. Hardwired values, but useful for testing.
 # Eventually Configure could ask for some of these values.
 install.html: all installhtml
-	-@test -f README.vms && $(LNS) ../README.vms vms/README_vms.pod
+	-@test -f README.vms && cd vms && $(LNS) ../README.vms README_vms.pod && cd ..
 	$(LDLIBPTH) ./perl installhtml                   \
       --podroot=. --podpath=. --recurse  \
       --htmldir=$(privlib)/html     \

@@ -306,10 +306,6 @@ case "$0$running_c_cmd" in
   *) echo "!!! Apparently we are running a renamed Configure: '$0'." >&2
 esac
 
-# Copy pod:
-
-cp -uf ./README.os2 ./pod/perlos2.pod
-
 # This script UU/usethreads.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use threads.
 cat > UU/usethreads.cbu <<'EOCBU'
