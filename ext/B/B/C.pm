@@ -83,7 +83,7 @@ BEGIN {
 
 # Code sections
 my ($init, $decl, $symsect, $binopsect, $condopsect, $copsect, 
-    $gvopsect, $listopsect, $logopsect, $loopsect, $opsect, $pmopsect,
+    $padopsect, $listopsect, $logopsect, $loopsect, $opsect, $pmopsect,
     $pvopsect, $svopsect, $unopsect, $svsect, $xpvsect, $xpvavsect,
     $xpvhvsect, $xpvcvsect, $xpvivsect, $xpvnvsect, $xpvmgsect, $xpvlvsect,
     $xrvsect, $xpvbmsect, $xpviosect );
@@ -276,17 +276,17 @@ sub B::SVOP::save {
     savesym($op, sprintf("(OP*)&svop_list[%d]", $svopsect->index));
 }
 
-sub B::GVOP::save {
+sub B::PADOP::save {
     my ($op, $level) = @_;
     my $sym = objsym($op);
     return $sym if defined $sym;
-    my $gvsym = $op->gv->save;
-    $gvopsect->add(sprintf("s\\_%x, s\\_%x, %s,$handle_VC_problem %u, %u, %u, 0x%x, 0x%x, Nullgv",
+    $padopsect->add(sprintf("s\\_%x, s\\_%x, %s,$handle_VC_problem %u, %u, %u, 0x%x, 0x%x, Nullgv",
 			   ${$op->next}, ${$op->sibling}, $op->ppaddr,
 			   $op->targ, $op->type, $op_seq, $op->flags,
 			   $op->private));
-    $init->add(sprintf("gvop_list[%d].op_gv = %s;", $gvopsect->index, $gvsym));
-    savesym($op, sprintf("(OP*)&gvop_list[%d]", $gvopsect->index));
+    $init->add(sprintf("padop_list[%d].op_padix = %ld;",
+		       $padopsect->index, $op->padix));
+    savesym($op, sprintf("(OP*)&padop_list[%d]", $padopsect->index));
 }
 
 sub B::COP::save {
@@ -610,7 +610,7 @@ sub B::CV::save {
 	my $stashname = $egv->STASH->NAME;
          if ($cvname eq "bootstrap")
           {                                   
-           my $file = $cv->FILEGV->SV->PV;    
+           my $file = $gv->FILE;    
            $decl->add("/* bootstrap $file */"); 
            warn "Bootstrap $stashname $file\n";
            $xsub{$stashname}='Dynamic'; 
@@ -700,13 +700,6 @@ sub B::CV::save {
 	warn sprintf("done saving GV 0x%x for CV 0x%x\n",
 		     $$gv, $$cv) if $debug_cv;
     }
-    my $filegv = $cv->FILEGV;
-    if ($$filegv) {
-	$filegv->save;
-	$init->add(sprintf("CvFILEGV(s\\_%x) = s\\_%x;", $$cv, $$filegv));
-	warn sprintf("done saving FILEGV 0x%x for CV 0x%x\n",
-		     $$filegv, $$cv) if $debug_cv;
-    }
     my $stash = $cv->STASH;
     if ($$stash) {
 	$stash->save;
@@ -793,12 +786,8 @@ sub B::GV::save {
 #              warn "GV::save &$name\n"; # debug
 	    } 
         }     
-	my $gvfilegv = $gv->FILEGV;
-	if ($$gvfilegv) {
-	    $gvfilegv->save;
-	    $init->add(sprintf("GvFILEGV($sym) = (GV*)s\\_%x;",$$gvfilegv));
-#	    warn "GV::save GvFILEGV(*$name)\n"; # debug
-	}
+	$init->add(sprintf("GvFILE($sym) = %s;", cstring($gv->FILE)));
+#	warn "GV::save GvFILE(*$name)\n"; # debug
 	my $gvform = $gv->FORM;
 	if ($$gvform) {
 	    $gvform->save;
@@ -951,7 +940,7 @@ sub output_all {
     my $init_name = shift;
     my $section;
     my @sections = ($opsect, $unopsect, $binopsect, $logopsect, $condopsect,
-		    $listopsect, $pmopsect, $svopsect, $gvopsect, $pvopsect,
+		    $listopsect, $pmopsect, $svopsect, $padopsect, $pvopsect,
 		    $loopsect, $copsect, $svsect, $xpvsect,
 		    $xpvavsect, $xpvhvsect, $xpvcvsect, $xpvivsect, $xpvnvsect,
 		    $xpvmgsect, $xpvlvsect, $xrvsect, $xpvbmsect, $xpviosect);
@@ -1022,8 +1011,10 @@ typedef struct {
     void      (*xcv_xsub) (CV*);
     void *	xcv_xsubany;
     GV *	xcv_gv;
-    GV *	xcv_filegv;
-    long	xcv_depth;		/* >= 2 indicates recursive call */
+#if defined(PERL_BINCOMPAT_5005)
+    GV *	xcv_filegv;	/* XXX unused (and deprecated) */
+#endif
+    long	xcv_depth;	/* >= 2 indicates recursive call */
     AV *	xcv_padlist;
     CV *	xcv_outside;
 #ifdef USE_THREADS
@@ -1399,7 +1390,7 @@ sub save_main {
 sub init_sections {
     my @sections = (init => \$init, decl => \$decl, sym => \$symsect,
 		    binop => \$binopsect, condop => \$condopsect,
-		    cop => \$copsect, gvop => \$gvopsect,
+		    cop => \$copsect, padop => \$padopsect,
 		    listop => \$listopsect, logop => \$logopsect,
 		    loop => \$loopsect, op => \$opsect, pmop => \$pmopsect,
 		    pvop => \$pvopsect, svop => \$svopsect, unop => \$unopsect,

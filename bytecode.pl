@@ -9,7 +9,7 @@ my %alias_to = (
     U8 => [qw(char)],
 );
 
-my @optype= qw(OP UNOP BINOP LOGOP LISTOP PMOP SVOP GVOP PVOP LOOP COP);
+my @optype= qw(OP UNOP BINOP LOGOP LISTOP PMOP SVOP PADOP PVOP LOOP COP);
 
 # Nullsv *must* come first in the following so that the condition
 # ($$sv == 0) can continue to be used to test (sv == Nullsv).
@@ -339,7 +339,6 @@ xcv_stash	*(SV**)&CvSTASH(bytecode_sv)		svindex
 xcv_start	CvSTART(bytecode_sv)			opindex
 xcv_root	CvROOT(bytecode_sv)			opindex
 xcv_gv		*(SV**)&CvGV(bytecode_sv)		svindex
-xcv_filegv	*(SV**)&CvFILEGV(bytecode_sv)		svindex
 xcv_depth	CvDEPTH(bytecode_sv)			long
 xcv_padlist	*(SV**)&CvPADLIST(bytecode_sv)		svindex
 xcv_outside	*(SV**)&CvOUTSIDE(bytecode_sv)		svindex
@@ -366,7 +365,7 @@ gp_refcnt_add	GvREFCNT(bytecode_sv)			I32		x
 gp_av		*(SV**)&GvAV(bytecode_sv)		svindex
 gp_hv		*(SV**)&GvHV(bytecode_sv)		svindex
 gp_cv		*(SV**)&GvCV(bytecode_sv)		svindex
-gp_filegv	*(SV**)&GvFILEGV(bytecode_sv)		svindex
+gp_file		GvFILE(bytecode_sv)			pvcontents
 gp_io		*(SV**)&GvIOp(bytecode_sv)		svindex
 gp_form		*(SV**)&GvFORM(bytecode_sv)		svindex
 gp_cvgen	GvCVGEN(bytecode_sv)			U32
@@ -393,7 +392,7 @@ pregcomp	PL_op					pvcontents	x
 op_pmflags	cPMOP->op_pmflags			U16
 op_pmpermflags	cPMOP->op_pmpermflags			U16
 op_sv		cSVOP->op_sv				svindex
-op_gv		*(SV**)&cGVOP->op_gv			svindex
+op_padix	cPADOP->op_padix			PADOFFSET
 op_pv		cPVOP->op_pv				pvcontents
 op_pv_tr	cPVOP->op_pv				op_tr_array
 op_redoop	cLOOP->op_redoop			opindex

@@ -94,6 +94,9 @@ typedef U32 PADOFFSET;
 /* Private for lvalues */
 #define OPpLVAL_INTRO	128	/* Lvalue must be localized or lvalue sub */
 
+/* Private for OP_LEAVE, OP_LEAVESUB, OP_LEAVESUBLV and OP_LEAVEWRITE */
+#define OPpREFCOUNTED		64	/* op_targ carries a refcount */
+
 /* Private for OP_AASSIGN */
 #define OPpASSIGN_COMMON	64	/* Left & right have syms in common. */
 
@@ -235,9 +238,9 @@ struct svop {
     SV *	op_sv;
 };
 
-struct gvop {
+struct padop {
     BASEOP
-    GV *	op_gv;
+    PADOFFSET	op_padix;
 };
 
 struct pvop {
@@ -261,7 +264,7 @@ struct loop {
 #define cLOGOP ((LOGOP*)PL_op)
 #define cPMOP ((PMOP*)PL_op)
 #define cSVOP ((SVOP*)PL_op)
-#define cGVOP ((GVOP*)PL_op)
+#define cPADOP ((PADOP*)PL_op)
 #define cPVOP ((PVOP*)PL_op)
 #define cCOP ((COP*)PL_op)
 #define cLOOP ((LOOP*)PL_op)
@@ -272,7 +275,7 @@ struct loop {
 #define cLOGOPo ((LOGOP*)o)
 #define cPMOPo ((PMOP*)o)
 #define cSVOPo ((SVOP*)o)
-#define cGVOPo ((GVOP*)o)
+#define cPADOPo ((PADOP*)o)
 #define cPVOPo ((PVOP*)o)
 #define cCVOPo ((CVOP*)o)
 #define cCOPo ((COP*)o)
@@ -284,7 +287,7 @@ struct loop {
 #define kLOGOP ((LOGOP*)kid)
 #define kPMOP ((PMOP*)kid)
 #define kSVOP ((SVOP*)kid)
-#define kGVOP ((GVOP*)kid)
+#define kPADOP ((PADOP*)kid)
 #define kPVOP ((PVOP*)kid)
 #define kCOP ((COP*)kid)
 #define kLOOP ((LOOP*)kid)
@@ -314,7 +317,7 @@ struct loop {
 #define OA_LISTOP (4 << OCSHIFT)
 #define OA_PMOP (5 << OCSHIFT)
 #define OA_SVOP (6 << OCSHIFT)
-#define OA_GVOP (7 << OCSHIFT)
+#define OA_PADOP (7 << OCSHIFT)
 #define OA_PVOP_OR_SVOP (8 << OCSHIFT)
 #define OA_LOOP (9 << OCSHIFT)
 #define OA_COP (10 << OCSHIFT)

@@ -68,15 +68,16 @@ Perl_gv_fetchfile(pTHX_ const char *name)
     tmpbuf[1] = '<';
     strcpy(tmpbuf + 2, name);
     gv = *(GV**)hv_fetch(PL_defstash, tmpbuf, tmplen, TRUE);
-    if (!isGV(gv))
+    if (!isGV(gv)) {
 	gv_init(gv, PL_defstash, tmpbuf, tmplen, FALSE);
+	sv_setpv(GvSV(gv), name);
+	if (*name == '/' && (instr(name, "/lib/") || instr(name, ".pm")))
+	    GvMULTI_on(gv);
+	if (PERLDB_LINE)
+	    hv_magic(GvHVn(gv_AVadd(gv)), gv, 'L');
+    }
     if (tmpbuf != smallbuf)
 	Safefree(tmpbuf);
-    sv_setpv(GvSV(gv), name);
-    if (*name == '/' && (instr(name, "/lib/") || instr(name, ".pm")))
-	GvMULTI_on(gv);
-    if (PERLDB_LINE)
-	hv_magic(GvHVn(gv_AVadd(gv)), gv, 'L');
     return gv;
 }
 
@@ -101,7 +102,7 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
     GvGP(gv) = gp_ref(gp);
     GvSV(gv) = NEWSV(72,0);
     GvLINE(gv) = PL_curcop->cop_line;
-    GvFILEGV(gv) = PL_curcop->cop_filegv;
+    GvFILE(gv) = PL_curcop->cop_filegv ? SvPVX(GvSV(PL_curcop->cop_filegv)) : "";
     GvCVGEN(gv) = 0;
     GvEGV(gv) = gv;
     sv_magic((SV*)gv, (SV*)gv, '*', name, len);
@@ -120,7 +121,6 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 
 	PL_sub_generation++;
 	CvGV(GvCV(gv)) = (GV*)SvREFCNT_inc(gv);
-	CvFILEGV(GvCV(gv)) = PL_curcop->cop_filegv;
 	CvSTASH(GvCV(gv)) = PL_curstash;
 #ifdef USE_THREADS
 	CvOWNER(GvCV(gv)) = 0;
@@ -896,7 +896,7 @@ Perl_gv_check(pTHX_ HV *stash)
 		if (SvTYPE(gv) != SVt_PVGV || GvMULTI(gv))
 		    continue;
 		PL_curcop->cop_line = GvLINE(gv);
-		filegv = GvFILEGV(gv);
+		filegv = GvFILEGV(gv);		/* XXX could be made faster */
 		PL_curcop->cop_filegv = filegv;
 		if (filegv && GvMULTI(filegv))	/* Filename began with slash */
 		    continue;

@@ -58,9 +58,9 @@ PP(pp_gvsv)
     djSP;
     EXTEND(SP,1);
     if (PL_op->op_private & OPpLVAL_INTRO)
-	PUSHs(save_scalar(cGVOP->op_gv));
+	PUSHs(save_scalar((GV*)cSVOP->op_sv));
     else
-	PUSHs(GvSV(cGVOP->op_gv));
+	PUSHs(GvSV((GV*)cSVOP->op_sv));
     RETURN;
 }
 
@@ -95,7 +95,7 @@ PP(pp_stringify)
 PP(pp_gv)
 {
     djSP;
-    XPUSHs((SV*)cGVOP->op_gv);
+    XPUSHs(cSVOP->op_sv);
     RETURN;
 }
 

@@ -21,7 +21,13 @@
 #include "keywords.h"
 
 /* #define PL_OP_SLAB_ALLOC */
-                                                            
+
+/* XXXXXX testing */
+#define OP_REFCNT_LOCK		NOOP
+#define OP_REFCNT_UNLOCK	NOOP
+#define OpREFCNT_set(o,n)	NOOP
+#define OpREFCNT_dec(o)		0
+
 #ifdef PL_OP_SLAB_ALLOC 
 #define SLAB_SIZE 8192
 static char    *PL_OpPtr  = NULL;
@@ -640,6 +646,26 @@ Perl_op_free(pTHX_ OP *o)
     if (!o || o->op_seq == (U16)-1)
 	return;
 
+    if (o->op_private & OPpREFCOUNTED) {
+	switch (o->op_type) {
+	case OP_LEAVESUB:
+	case OP_LEAVESUBLV:
+	case OP_LEAVEEVAL:
+	case OP_LEAVE:
+	case OP_SCOPE:
+	case OP_LEAVEWRITE:
+	    OP_REFCNT_LOCK;
+	    if (OpREFCNT_dec(o)) {
+		OP_REFCNT_UNLOCK;
+		return;
+	    }
+	    OP_REFCNT_UNLOCK;
+	    break;
+	default:
+	    break;
+	}
+    }
+
     if (o->op_flags & OPf_KIDS) {
 	for (kid = cUNOPo->op_first; kid; kid = nextkid) {
 	    nextkid = kid->op_sibling; /* Get before next freeing kid */
@@ -691,8 +717,8 @@ S_op_clear(pTHX_ OP *o)
     case OP_GVSV:
     case OP_GV:
     case OP_AELEMFAST:
-	SvREFCNT_dec(cGVOPo->op_gv);
-	cGVOPo->op_gv = Nullgv;
+	SvREFCNT_dec(cSVOPo->op_sv);
+	cSVOPo->op_sv = Nullsv;
 	break;
     case OP_CONST:
 	SvREFCNT_dec(cSVOPo->op_sv);
@@ -1331,7 +1357,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
 		    break;
 		}
 		
-		cv = GvCV(kGVOP->op_gv);
+		cv = GvCV((GV*)kSVOP->op_sv);
 		if (!cv) 
 		    goto restore_2cv;
 		if (CvLVALUE(cv))
@@ -1957,6 +1983,8 @@ Perl_newPROG(pTHX_ OP *o)
 			       ((PL_in_eval & EVAL_KEEPERR)
 				? OPf_SPECIAL : 0), o);
 	PL_eval_start = linklist(PL_eval_root);
+	PL_eval_root->op_private |= OPpREFCOUNTED;
+	OpREFCNT_set(PL_eval_root, 1);
 	PL_eval_root->op_next = 0;
 	peep(PL_eval_start);
     }
@@ -1966,6 +1994,8 @@ Perl_newPROG(pTHX_ OP *o)
 	PL_main_root = scope(sawparens(scalarvoid(o)));
 	PL_curcop = &PL_compiling;
 	PL_main_start = LINKLIST(PL_main_root);
+	PL_main_root->op_private |= OPpREFCOUNTED;
+	OpREFCNT_set(PL_main_root, 1);
 	PL_main_root->op_next = 0;
 	peep(PL_main_start);
 	PL_compcv = 0;
@@ -2785,7 +2815,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl)
 		    }
 #else
 		    if (curop->op_type == OP_GV) {
-			GV *gv = ((GVOP*)curop)->op_gv;
+			GV *gv = (GV*)((SVOP*)curop)->op_sv;
 			repl_has_vars = 1;
 			if (strchr("&`'123456789+", *GvENAME(gv)))
 			    break;
@@ -2869,18 +2899,7 @@ OP *
 Perl_newGVOP(pTHX_ I32 type, I32 flags, GV *gv)
 {
     dTHR;
-    GVOP *gvop;
-    NewOp(1101, gvop, 1, GVOP);
-    gvop->op_type = type;
-    gvop->op_ppaddr = PL_ppaddr[type];
-    gvop->op_gv = (GV*)SvREFCNT_inc(gv);
-    gvop->op_next = (OP*)gvop;
-    gvop->op_flags = flags;
-    if (PL_opargs[type] & OA_RETSCALAR)
-	scalar((OP*)gvop);
-    if (PL_opargs[type] & OA_TARGET)
-	gvop->op_targ = pad_alloc(type, SVs_PADTMP);
-    return CHECKOP(type, gvop);
+    return newSVOP(type, flags, SvREFCNT_inc(gv));
 }
 
 OP *
@@ -3119,7 +3138,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	    for (curop = LINKLIST(o); curop != o; curop = LINKLIST(curop)) {
 		if (PL_opargs[curop->op_type] & OA_DANGEROUS) {
 		    if (curop->op_type == OP_GV) {
-			GV *gv = ((GVOP*)curop)->op_gv;
+			GV *gv = (GV*)((SVOP*)curop)->op_sv;
 			if (gv == PL_defgv || SvCUR(gv) == PL_generation)
 			    break;
 			SvCUR(gv) = PL_generation;
@@ -3171,7 +3190,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 		{
 		    tmpop = ((UNOP*)left)->op_first;
 		    if (tmpop->op_type == OP_GV && !pm->op_pmreplroot) {
-			pm->op_pmreplroot = (OP*)((GVOP*)tmpop)->op_gv;
+			pm->op_pmreplroot = (OP*)((SVOP*)tmpop)->op_sv;
 			pm->op_pmflags |= PMf_ONCE;
 			tmpop = cUNOPo->op_first;	/* to list (nulled) */
 			tmpop = ((UNOP*)tmpop)->op_first; /* to pushmark */
@@ -3922,7 +3941,6 @@ S_cv_clone2(pTHX_ CV *proto, CV *outside)
     MUTEX_INIT(CvMUTEXP(cv));
     CvOWNER(cv)		= 0;
 #endif /* USE_THREADS */
-    CvFILEGV(cv)	= CvFILEGV(proto);
     CvGV(cv)		= (GV*)SvREFCNT_inc(CvGV(proto));
     CvSTASH(cv)		= CvSTASH(proto);
     CvROOT(cv)		= CvROOT(proto);
@@ -4248,7 +4266,6 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	}
     }
     CvGV(cv) = (GV*)SvREFCNT_inc(gv);
-    CvFILEGV(cv) = PL_curcop->cop_filegv;
     CvSTASH(cv) = PL_curstash;
 #ifdef USE_THREADS
     CvOWNER(cv) = 0;
@@ -4326,12 +4343,14 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	}
     }
 
-    if(CvLVALUE(cv)) {
+    if (CvLVALUE(cv)) {
 	CvROOT(cv) = newUNOP(OP_LEAVESUBLV, 0, scalarseq(block));
     }
     else {
 	CvROOT(cv) = newUNOP(OP_LEAVESUB, 0, scalarseq(block));
     }
+    CvROOT(cv)->op_private |= OPpREFCOUNTED;
+    OpREFCNT_set(CvROOT(cv), 1);
     CvSTART(cv) = LINKLIST(CvROOT(cv));
     CvROOT(cv)->op_next = 0;
     peep(CvSTART(cv));
@@ -4481,7 +4500,7 @@ Perl_newXS(pTHX_ char *name, XSUBADDR_t subaddr, char *filename)
     MUTEX_INIT(CvMUTEXP(cv));
     CvOWNER(cv) = 0;
 #endif /* USE_THREADS */
-    CvFILEGV(cv) = gv_fetchfile(filename);
+    (void)gv_fetchfile(filename);
     CvXSUB(cv) = subaddr;
 
     if (name) {
@@ -4545,7 +4564,6 @@ Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
     cv = PL_compcv;
     GvFORM(gv) = cv;
     CvGV(cv) = (GV*)SvREFCNT_inc(gv);
-    CvFILEGV(cv) = PL_curcop->cop_filegv;
 
     for (ix = AvFILLp(PL_comppad); ix > 0; ix--) {
 	if (!SvPADMY(PL_curpad[ix]) && !SvIMMORTAL(PL_curpad[ix]))
@@ -4553,6 +4571,8 @@ Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
     }
 
     CvROOT(cv) = newUNOP(OP_LEAVEWRITE, 0, scalarseq(block));
+    CvROOT(cv)->op_private |= OPpREFCOUNTED;
+    OpREFCNT_set(CvROOT(cv), 1);
     CvSTART(cv) = LINKLIST(CvROOT(cv));
     CvROOT(cv)->op_next = 0;
     peep(CvSTART(cv));
@@ -5667,11 +5687,11 @@ S_simplify_sort(pTHX_ OP *o)
     if (kUNOP->op_first->op_type != OP_GV)
 	return;
     kid = kUNOP->op_first;				/* get past rv2sv */
-    if (GvSTASH(kGVOP->op_gv) != PL_curstash)
+    if (GvSTASH((GV*)kSVOP->op_sv) != PL_curstash)
 	return;
-    if (strEQ(GvNAME(kGVOP->op_gv), "a"))
+    if (strEQ(GvNAME((GV*)kSVOP->op_sv), "a"))
 	reversed = 0;
-    else if(strEQ(GvNAME(kGVOP->op_gv), "b"))
+    else if(strEQ(GvNAME((GV*)kSVOP->op_sv), "b"))
 	reversed = 1;
     else
 	return;
@@ -5682,10 +5702,10 @@ S_simplify_sort(pTHX_ OP *o)
     if (kUNOP->op_first->op_type != OP_GV)
 	return;
     kid = kUNOP->op_first;				/* get past rv2sv */
-    if (GvSTASH(kGVOP->op_gv) != PL_curstash
+    if (GvSTASH((GV*)kSVOP->op_sv) != PL_curstash
 	|| ( reversed
-	    ? strNE(GvNAME(kGVOP->op_gv), "a")
-	    : strNE(GvNAME(kGVOP->op_gv), "b")))
+	    ? strNE(GvNAME((GV*)kSVOP->op_sv), "a")
+	    : strNE(GvNAME((GV*)kSVOP->op_sv), "b")))
 	return;
     o->op_flags &= ~(OPf_STACKED | OPf_SPECIAL);
     if (reversed)
@@ -6084,11 +6104,11 @@ Perl_peep(pTHX_ register OP *o)
 		    o->op_type = OP_AELEMFAST;
 		    o->op_ppaddr = PL_ppaddr[OP_AELEMFAST];
 		    o->op_private = (U8)i;
-		    GvAVn(((GVOP*)o)->op_gv);
+		    GvAVn((GV*)((SVOP*)o)->op_sv);
 		}
 	    }
 	    else if ((o->op_private & OPpEARLY_CV) && ckWARN(WARN_UNSAFE)) {
-		GV *gv = cGVOPo->op_gv;
+		GV *gv = (GV*)cSVOPo->op_sv;
 		if (SvTYPE(gv) == SVt_PVGV && GvCV(gv) && SvPVX(GvCV(gv))) {
 		    /* XXX could check prototype here instead of just carping */
 		    SV *sv = sv_newmortal();

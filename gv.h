@@ -19,7 +19,7 @@ struct gp {
     U32		gp_cvgen;	/* generational validity of cached gv_cv */
     U32		gp_flags;	/* XXX unused */
     line_t	gp_line;	/* line first declared at (for -w) */
-    GV *	gp_filegv;	/* file first declared in (for -w) */
+    char *	gp_file;	/* file first declared in (for -w) */
 };
 
 #if defined(CRIPPLED_CC) && (defined(iAPX286) || defined(M_I286) || defined(I80286))
@@ -70,7 +70,8 @@ HV *GvHVn();
 #define GvGPFLAGS(gv)	(GvGP(gv)->gp_flags)
 
 #define GvLINE(gv)	(GvGP(gv)->gp_line)
-#define GvFILEGV(gv)	(GvGP(gv)->gp_filegv)
+#define GvFILE(gv)	(GvGP(gv)->gp_file)
+#define GvFILEGV(gv)	(gv_fetchfile(GvGP(gv)->gp_file))
 
 #define GvEGV(gv)	(GvGP(gv)->gp_egv)
 #define GvENAME(gv)	GvNAME(GvEGV(gv) ? GvEGV(gv) : gv)

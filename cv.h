@@ -24,8 +24,10 @@ struct xpvcv {
     void	(*xcv_xsub) (pTHXo_ CV*);
     ANY		xcv_xsubany;
     GV *	xcv_gv;
-    GV *	xcv_filegv;
-    long	xcv_depth;		/* >= 2 indicates recursive call */
+#if defined(PERL_BINCOMPAT_5005)
+    GV *	xcv_filegv;	/* XXX unused (and deprecated) */
+#endif
+    long	xcv_depth;	/* >= 2 indicates recursive call */
     AV *	xcv_padlist;
     CV *	xcv_outside;
 #ifdef USE_THREADS
@@ -43,7 +45,6 @@ struct xpvcv {
 #define CvXSUB(sv)	((XPVCV*)SvANY(sv))->xcv_xsub
 #define CvXSUBANY(sv)	((XPVCV*)SvANY(sv))->xcv_xsubany
 #define CvGV(sv)	((XPVCV*)SvANY(sv))->xcv_gv
-#define CvFILEGV(sv)	((XPVCV*)SvANY(sv))->xcv_filegv
 #define CvDEPTH(sv)	((XPVCV*)SvANY(sv))->xcv_depth
 #define CvPADLIST(sv)	((XPVCV*)SvANY(sv))->xcv_padlist
 #define CvOUTSIDE(sv)	((XPVCV*)SvANY(sv))->xcv_outside

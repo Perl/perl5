@@ -184,7 +184,7 @@ END
     '@',  4,		# listop
     '/',  5,		# pmop
     '$',  6,		# svop
-    '*',  7,		# gvop
+    '#',  7,		# padop
     '"',  8,		# pvop_or_svop
     '{',  9,		# loop
     ';',  10,		# cop
@@ -350,8 +350,8 @@ wantarray	wantarray		ck_null		is0
 
 const		constant item		ck_svconst	s$	
 
-gvsv		scalar variable		ck_null		ds*	
-gv		glob value		ck_null		ds*	
+gvsv		scalar variable		ck_null		ds$	
+gv		glob value		ck_null		ds$	
 gelem		glob elem		ck_null		d2	S S
 padsv		private variable	ck_null		ds0
 padav		private array		ck_null		d0
@@ -511,7 +511,7 @@ quotemeta	quotemeta		ck_fun		fsTu%	S?
 # Arrays.
 
 rv2av		array dereference	ck_rvconst	dt1	
-aelemfast	constant array element	ck_null		s*	A S
+aelemfast	constant array element	ck_null		s$	A S
 aelem		array element		ck_null		s2	A S
 aslice		array slice		ck_null		m@	A L
 

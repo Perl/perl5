@@ -5,17 +5,6 @@ use Carp;
 
 @ISA		= qw( Exporter );
 @EXPORT		= qw( timegm timelocal );
-@EXPORT_OK	= qw( $no_range_check );
-
-sub import {
-    my $package = shift;
-    my @args;
-    for (@_) {
-	$no_range_check = 1, next	if $_ eq 'no_range_check';
-	push @args, $_;
-    }
-    Time::Local->export_to_level(1, $package, @args);
-}
 
 # Set up constants
     $SEC  = 1;
@@ -151,21 +140,23 @@ This is consistent with the values returned from localtime() and gmtime().
 
 Also worth noting is the ability to disable the range checking that
 would normally occur on the input $sec, $min, $hours, $mday, and $mon
-values.  You can do this by setting $Time::Local::no_range_check = 1,
-or by invoking the module with C<use Time::Local 'no_range_check'>.
-This enables you to abuse the terminology somewhat and gain the
-flexibilty to do things like:
+values.  You can do this by localizing $Time::Local::no_range_check
+to 1.
 
-	use Time::Local qw( no_range_check );
+	use Time::Local;
+	
+	{
+	    local $Time::Local::no_range_check = 1;
 
-	# The 365th day of 1999
-	print scalar localtime timelocal 0,0,0,365,0,99;
+	    # The 365th day of 1999
+	    print scalar localtime timelocal 0,0,0,365,0,99;
 
-	# The twenty thousandth day since 1970
-	print scalar localtime timelocal 0,0,0,20000,0,70;
+	    # The twenty thousandth day since 1970
+	    print scalar localtime timelocal 0,0,0,20000,0,70;
 
-	# And even the 10,000,000th second since 1999!
-	print scalar localtime timelocal 10000000,0,0,1,0,99;
+	    # And even the 10,000,000th second since 1999!
+	    print scalar localtime timelocal 10000000,0,0,1,0,99;
+	}
 
 Your mileage may vary when trying this trick with minutes and hours,
 and it doesn't work at all for months.

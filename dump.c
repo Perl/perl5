@@ -512,11 +512,11 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
     switch (o->op_type) {
     case OP_GVSV:
     case OP_GV:
-	if (cGVOPo->op_gv) {
+	if (cSVOPo->op_sv) {
 	    SV *tmpsv = NEWSV(0,0);
 	    ENTER;
 	    SAVEFREESV(tmpsv);
-	    gv_fullname3(tmpsv, cGVOPo->op_gv, Nullch);
+	    gv_fullname3(tmpsv, (GV*)cSVOPo->op_sv, Nullch);
 	    Perl_dump_indent(aTHX_ level, file, "GV = %s\n", SvPV(tmpsv, n_a));
 	    LEAVE;
 	}
@@ -569,6 +569,15 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
     case OP_QR:
     case OP_SUBST:
 	do_pmop_dump(level, file, cPMOPo);
+	break;
+    case OP_LEAVE:
+    case OP_LEAVEEVAL:
+    case OP_LEAVESUB:
+    case OP_LEAVESUBLV:
+    case OP_LEAVEWRITE:
+    case OP_SCOPE:
+	if (o->op_private & OPpREFCOUNTED)
+	    Perl_dump_indent(aTHX_ level, file, "REFCNT = %"UVuf"\n", (UV)o->op_targ);
 	break;
     default:
 	break;
@@ -1059,7 +1068,6 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	Perl_dump_indent(aTHX_ level, file, "  XSUB = 0x%"UVxf"\n", PTR2UV(CvXSUB(sv)));
 	Perl_dump_indent(aTHX_ level, file, "  XSUBANY = %"IVdf"\n", (IV)CvXSUBANY(sv).any_i32);
  	do_gvgv_dump(level, file, "  GVGV::GV", CvGV(sv));
-	do_gv_dump(level, file, "  FILEGV", CvFILEGV(sv));
 	Perl_dump_indent(aTHX_ level, file, "  DEPTH = %"IVdf"\n", (IV)CvDEPTH(sv));
 #ifdef USE_THREADS
 	Perl_dump_indent(aTHX_ level, file, "  MUTEXP = 0x%"UVxf"\n", PTR2UV(CvMUTEXP(sv)));
@@ -1118,8 +1126,8 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	Perl_dump_indent(aTHX_ level, file, "    CVGEN = 0x%"UVxf"\n", (UV)GvCVGEN(sv));
 	Perl_dump_indent(aTHX_ level, file, "    GPFLAGS = 0x%"UVxf"\n", (UV)GvGPFLAGS(sv));
 	Perl_dump_indent(aTHX_ level, file, "    LINE = %"IVdf"\n", (IV)GvLINE(sv));
+	Perl_dump_indent(aTHX_ level, file, "    FILE = \"%s\"\n", GvFILE(sv));
 	Perl_dump_indent(aTHX_ level, file, "    FLAGS = 0x%"UVxf"\n", (UV)GvFLAGS(sv));
-	do_gv_dump (level, file, "    FILEGV", GvFILEGV(sv));
 	do_gv_dump (level, file, "    EGV", GvEGV(sv));
 	break;
     case SVt_PVIO:

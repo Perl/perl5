@@ -1458,8 +1458,8 @@ EXT U32 PL_opargs[] = {
 	0x00000004,	/* pushmark */
 	0x00000014,	/* wantarray */
 	0x00000c04,	/* const */
-	0x00000e44,	/* gvsv */
-	0x00000e44,	/* gv */
+	0x00000c44,	/* gvsv */
+	0x00000c44,	/* gv */
 	0x00022440,	/* gelem */
 	0x00000044,	/* padsv */
 	0x00000040,	/* padav */
@@ -1578,7 +1578,7 @@ EXT U32 PL_opargs[] = {
 	0x0001368e,	/* lc */
 	0x0001378e,	/* quotemeta */
 	0x00000248,	/* rv2av */
-	0x00026e04,	/* aelemfast */
+	0x00026c04,	/* aelemfast */
 	0x00026404,	/* aelem */
 	0x00046801,	/* aslice */
 	0x00009600,	/* each */
