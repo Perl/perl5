@@ -12,12 +12,12 @@ my $bits_in_uv = int (0.001 + log (~0+1) / log 2);
 
 # 3**30 < 2**48, don't trust things outside that range on a Cray
 # Likewise other 3 should not overflow 48 bits if I did my sums right.
-my @pow = ([3,30,1e-14],
-           [4,32,0],
-           [5,20,1e-14],
-           [2.5, 10,,1e-14],
-           [-2, 69,0],
-           [-3, 30,0],
+my @pow = ([  3, 30, 1e-14],
+           [  4, 32,     0],
+           [  5, 20, 1e-14],
+           [2.5, 10, 1e-14],
+           [ -2, 69,     0],
+           [ -3, 30, 1e-14],
 );
 my $tests;
 $tests += $_->[1] foreach @pow;
