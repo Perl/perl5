@@ -757,7 +757,7 @@ Use the following commands to test perl with Purify:
 	make all pureperl
 	cd t
 	ln -s ../pureperl perl
-	setenv PERL_DESTRUCT_LEVEL 5
+	setenv PERL_DESTRUCT_LEVEL 2
 	./perl TEST
 
 Disabling Perl's malloc allows Purify to monitor allocations and leaks
