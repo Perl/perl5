@@ -165,7 +165,7 @@ C<B::> modules counts), or like to run Perl with the C<-D> option.
 =head2 Reordering of SVt_* constants
 
 The relative ordering of constants that define the various types of C<SV>
-have changed; in particular, C<SVt_PVGV> has been moved ahead of C<SVt_PVLV>,
+have changed; in particular, C<SVt_PVGV> has been moved before C<SVt_PVLV>,
 C<SVt_PVAV>, C<SVt_PVHV> and C<SVt_PVCV>.  This is unlikely to make any
 difference unless you have code that explicitly makes assumptions about that
 ordering. (The inheritance hierarchy of C<B::*> objects has been changed
