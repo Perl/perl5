@@ -15,7 +15,7 @@ use warnings;
 use strict;
 use Config;
 
-print "1..31\n";
+print "1..32\n";
 
 use B::Deparse;
 my $deparse = B::Deparse->new() or print "not ";
@@ -83,12 +83,11 @@ print "not " if "{\n    (-1) ** \$a;\n}"
 		ne $deparse->coderef2text(sub{(-1) ** $a });
 print "ok " . $i++ . "\n";
 
-# XXX ToDo - constsub that returns a reference
-#use constant cr => ['hello'];
-#my $string = "sub " . $deparse->coderef2text(\&cr);
-#my $val = (eval $string)->();
-#print "not " if ref($val) ne 'ARRAY' || $val->[0] ne 'hello';
-#print "ok " . $i++ . "\n";
+use constant cr => ['hello'];
+my $string = "sub " . $deparse->coderef2text(\&cr);
+my $val = (eval $string)->();
+print "not " if ref($val) ne 'ARRAY' || $val->[0] ne 'hello';
+print "ok " . $i++ . "\n";
 
 my $a;
 my $Is_VMS = $^O eq 'VMS';
