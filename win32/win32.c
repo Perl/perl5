@@ -1633,7 +1633,7 @@ win32_uname(struct utsname *name)
 	char *arch;
 	GetSystemInfo(&info);
 
-#if defined(__BORLANDC__) || defined(__MINGW32__)
+#if (defined(__BORLANDC__)&&(__BORLANDC__<=0x520)) || defined(__MINGW32__)
 	switch (info.u.s.wProcessorArchitecture) {
 #else
 	switch (info.wProcessorArchitecture) {
