@@ -491,10 +491,10 @@ PERLVAR(Inumeric_radix_sv,	SV *)	/* The radix separator if not '.' */
 PERLVAR(Iregex_pad,     SV**)		/* All regex objects */
 PERLVAR(Iregex_padav,   AV*)		/* All regex objects */
 
-#ifdef USE_REENTRANT_API
-PERLVAR(Ireentrant_buffer, REENTR*)	/* here we store the _r buffers */
 #endif
 
+#ifdef USE_REENTRANT_API
+PERLVAR(Ireentrant_buffer, REENTR*)	/* here we store the _r buffers */
 #endif
 
 PERLVARI(Isavebegin,     bool,	FALSE)	/* save BEGINs for compiler	*/
