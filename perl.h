@@ -1371,6 +1371,7 @@ typedef I32 (*filter_t) _((int, SV *, int));
 #        include "os2thread.h"
 #      else
 #        ifdef I_MACH_CTHREADS
+#          include <mach/cthreads.h>
 typedef cthread_t	perl_os_thread;
 typedef mutex_t		perl_mutex;
 typedef condition_t	perl_cond;
@@ -1815,8 +1816,22 @@ typedef Sighandler_t Sigsave_t;
 #endif
 
 #ifdef MYMALLOC
-#  define MALLOC_INIT MUTEX_INIT(&PL_malloc_mutex)
-#  define MALLOC_TERM MUTEX_DESTROY(&PL_malloc_mutex)
+#  ifdef I_MACH_CTHREADS
+#    define MALLOC_INIT					\
+	STMT_START {					\
+		PL_malloc_mutex = NULL;			\
+		MUTEX_INIT(&PL_malloc_mutex);		\
+	} STMT_END
+#    define MALLOC_TERM					\
+	STMT_START {					\
+		perl_mutex tmp = PL_malloc_mutex;	\
+		PL_malloc_mutex = NULL;			\
+		MUTEX_DESTROY(&tmp);			\
+	} STMT_END
+#  else
+#    define MALLOC_INIT MUTEX_INIT(&PL_malloc_mutex)
+#    define MALLOC_TERM MUTEX_DESTROY(&PL_malloc_mutex)
+#  endif
 #else
 #  define MALLOC_INIT
 #  define MALLOC_TERM
@@ -2505,7 +2520,8 @@ enum {
   to_sv_amg,   to_av_amg,
   to_hv_amg,   to_gv_amg,
   to_cv_amg,   iter_amg,    
-  max_amg_code,
+  max_amg_code
+  /* Do not leave a trailing comma here.  C9X allows it, C89 doesn't. */
 };
 
 #define NofAMmeth max_amg_code

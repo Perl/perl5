@@ -179,7 +179,7 @@ chmod 'non-existent'		# chmod
 utime 'non-existent'		# utime
 rename 'non-existent', 'non-existent1'	# rename
 link 'non-existent', 'non-existent1' # link
-symlink 'non-existent', 'non-existent1' # symlink
+'???'				# symlink
 readlink 'non-existent', 'non-existent1' # readlink
 '???'				# mkdir
 '???'				# rmdir

@@ -144,6 +144,16 @@ fi
 # be #included before any other includes (in perl.h)
 if [ "$xxOsRevMajor" -eq 10 -a "X$usethreads" = "X$define" ]; then
 
+    if [ ! -f /usr/include/pthread.h -o ! -f /usr/lib/libcma.sl ]; then
+     cat <<EOM >&4
+In HP-UX 10.X for threads you need both the files
+/usr/include/pthread.h and /usr/lib/libcma.sl.
+
+Either you must install the CMA package or you must upgrade to HP-UX 11.
+EOM
+	exit 1
+    fi
+
     # HP-UX 10.X uses the old pthreads API
     case "$d_oldpthreads" in
     '') d_oldpthreads="$define" ;;

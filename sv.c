@@ -694,7 +694,7 @@ sv_upgrade(register SV *sv, U32 mt)
 	cur	= 0;
 	len	= 0;
 	nv	= SvNVX(sv);
-	iv	= (IV)nv;
+	iv	= I_V(nv);
 	magic	= 0;
 	stash	= 0;
 	del_XNV(SvANY(sv));

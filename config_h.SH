@@ -242,12 +242,26 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_getgrps HAS_GETGROUPS		/**/
 
+/* HAS_GETHOSTNAME:
+ *	This symbol, if defined, indicates that the C program may use the
+ *	gethostname() routine to derive the host name.  See also HAS_UNAME
+ *	and PHOSTNAME.
+ */
 /* HAS_UNAME:
  *	This symbol, if defined, indicates that the C program may use the
  *	uname() routine to derive the host name.  See also HAS_GETHOSTNAME
  *	and PHOSTNAME.
  */
+/* PHOSTNAME:
+ *	This symbol, if defined, indicates that the C program may use the
+ *	contents of PHOSTNAME as a command to feed to the popen() routine
+ *	to derive the host name.  See also HAS_GETHOSTNAME and HAS_UNAME.
+ *	Note that the command uses a fully qualified path, so that it is safe
+ *	even if used by a process with super-user privileges.
+ */
+#$d_gethname HAS_GETHOSTNAME	/**/
 #$d_uname HAS_UNAME		/**/
+#$d_phostname PHOSTNAME "$aphostname"	/* How to get the host name */
 
 /* HAS_GETLOGIN:
  *	This symbol, if defined, indicates that the getlogin routine is
@@ -1106,6 +1120,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_void_closedir VOID_CLOSEDIR		/**/
 
+/* HAS_FD_SET:
+ *	This symbol, when defined, indicates presence of the fd_set typedef
+ *	in <sys/types.h>
+ */
+#$d_fd_set HAS_FD_SET	/**/
+
 /* Gconvert:
  *	This preprocessor macro is defined to convert a floating point
  *	number to a string without a trailing decimal point.  This
@@ -1176,6 +1196,13 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_sigaction HAS_SIGACTION	/**/
 
+/* HAS_SIGSETJMP:
+ *	This variable indicates to the C program that the sigsetjmp()
+ *	routine is available to save the calling process's registers
+ *	and stack environment for later use by siglongjmp(), and
+ *	to optionally save the process's signal mask.  See
+ *	Sigjmp_buf, Sigsetjmp, and Siglongjmp.
+ */
 /* Sigjmp_buf:
  *	This is the buffer type to be used with Sigsetjmp and Siglongjmp.
  */
@@ -1426,8 +1453,18 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	output.  This symbol will have the value "-" if CPPSTDIN needs a minus
  *	to specify standard input, otherwise the value is "".
  */
+/* CPPRUN:
+ *	This symbol contains the string which will invoke a C preprocessor on
+ *	the standard input and produce to standard output. It needs to end
+ *	with CPPLAST, after all other preprocessor flags have been specified.
+ *	The main difference with CPPSTDIN is that this program will never be a
+ *	pointer to a shell wrapper, i.e. it will be empty if no preprocessor is
+ *	available directly to the user. Note that it may well be different from
+ *	the preprocessor used to compile the C program.
+ */
 #define CPPSTDIN "$cppstdin"
 #define CPPMINUS "$cppminus"
+#define CPPRUN "$cpprun"
 
 /* HAS_ACCESS:
  *	This manifest constant lets the C program know that the access()
@@ -1436,6 +1473,9 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_access HAS_ACCESS		/**/
 
+/* HAS_CSH:
+ *	This symbol, if defined, indicates that the C-shell exists.
+ */
 /* CSH:
  *	This symbol, if defined, contains the full pathname of csh.
  */
@@ -2266,6 +2306,15 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	instance.
  */
 #define ARCHNAME "$archname"		/**/
+
+/* PTHREAD_CREATE_JOINABLE:
+ *	This symbol, if defined, indicates how to create pthread
+ *	in joinable (aka undetached) state.  Not defined here if
+ *	pthread.h already has defined PTHREAD_CREATE_JOINABLE.
+ *	If defined, possible values are PTHREAD_CREATE_UNDETACHED
+ *	and __UNDETACHED.
+ */
+#$d_pthread_create_joinable PTHREAD_CREATE_JOINABLE $pthread_create_joinable /**/
 
 /* HAS_PTHREAD_YIELD:
  *	This symbol, if defined, indicates that the pthread_yield 

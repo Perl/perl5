@@ -135,8 +135,10 @@ C<unlink>, C<utime>
 
 =item Keywords related to the control flow of your perl program
 
-C<caller>, C<continue>, C<die>, C<do>, C<dump>, C<eval>, C<exit>,
-C<goto>, C<last>, C<next>, C<redo>, C<return>, C<sub>, C<wantarray>
+C<caller>, C<continue>, C<die>, C<do>, C<dump>, C<else>, C<elsif>,
+C<eval>, C<exit>, C<for>, C<foreach>, C<goto>, C<if>, C<last>,
+C<next>, C<redo>, C<return>, C<sub>, C<unless>, C<wantarray>,
+C<while>, C<until>
 
 =item Keywords related to scoping
 
@@ -671,14 +673,14 @@ L<perlipc/"Sockets: Client/Server Communication">.
 =item continue BLOCK
 
 Actually a flow control statement rather than a function.  If there is a
-C<continue> BLOCK attached to a BLOCK (typically in a C<while> or
-C<foreach>), it is always executed just before the conditional is about to
-be evaluated again, just like the third part of a C<for> loop in C.  Thus
+C<continue> BLOCK attached to a BLOCK (typically in a L<(while> or
+L</foreach>), it is always executed just before the conditional is about to
+be evaluated again, just like the third part of a L</for> loop in C.  Thus
 it can be used to increment a loop variable, even when the loop has been
 continued via the C<next> statement (which is similar to the C C<continue>
 statement).
 
-C<last>, C<next>, or C<redo> may appear within a C<continue>
+L</last>, L</next>, or L</redo> may appear within a C<continue>
 block. C<last> and C<redo> will behave as if they had been executed within
 the main block. So will C<next>, but since it will execute a C<continue>
 block, it may be more entertaining.
@@ -696,6 +698,8 @@ block, it may be more entertaining.
 Omitting the C<continue> section is semantically equivalent to using an
 empty one, logically enough. In that case, C<next> goes directly back
 to check the condition at the top of the loop.
+
+See also L<perlsyn>.
 
 =item cos EXPR
 
@@ -942,11 +946,12 @@ as the first line of the handler (see L<perlvar/$^S>).
 
 Not really a function.  Returns the value of the last command in the
 sequence of commands indicated by BLOCK.  When modified by a loop
-modifier, executes the BLOCK once before testing the loop condition.
-(On other statements the loop modifiers test the conditional first.)
+modifier such as L</while> or L</until>, executes the BLOCK once
+before testing the loop condition.  (On other statements the loop
+modifiers test the conditional first.)
 
 C<do BLOCK> does I<not> count as a loop, so the loop control statements
-C<next>, C<last> or C<redo> cannot be used to leave or restart the block.
+L</next>, L</last> or L</redo> cannot be used to leave or restart the block.
 
 =item do SUBROUTINE(LIST)
 
@@ -1060,6 +1065,12 @@ only in a different order:
     }
 
 See also C<keys()> and C<values()>.
+
+=item else BLOCK
+
+=item elsif (EXPR) BLOCK
+
+See L</if>.
 
 =item eof FILEHANDLE
 
@@ -1431,6 +1442,38 @@ Here's a mailbox appender for BSD systems.
     unlock();
 
 See also L<DB_File> for other flock() examples.
+
+=item for (INITIAL; WHILE; EACH) BLOCK
+
+Do INITIAL, enter BLOCK while EXPR is true, at the end of each round
+do EACH. For example:
+
+	for ($i = 0, $j = 0; $i < 10; $i++) {
+		if ($i % 3 == 0) { $j++ }
+		print "i = $i, j = $j\n";
+	}
+
+See L<perlsyn> for more details.  See also L</foreach>, a twin of
+C<for>, L</while> and L</until>, close cousins of L<for>, and
+L</last>, L</next>, and L</redo> for additional control flow.
+
+=item foreach LOOPVAR (LIST) BLOCK
+
+Enter BLOCK as LOOPVAR set in turn to each element of LIST.
+For example:
+
+	foreach $rolling (@stones) { print "rolling $stone\n" }
+
+	foreach my $file (@files)  { print "file $file\n" }
+
+The LOOPVAR is optional and defaults to C<$_>.  If the elements are
+modifiable (as opposed to constants or tied variables) you can modify them.
+
+	foreach (@words) { tr/abc/xyz/ }
+
+See L<perlsyn> for more details.  See also L</for>, a twin of
+C<foreach>, L</while> and L</until>, close cousins of L<for>, and
+L</last>, L</next>, and L</redo> for additional control flow.
 
 =item fork
 
@@ -1838,6 +1881,21 @@ see L</oct>.)  If EXPR is omitted, uses C<$_>.
     print hex '0xAf'; # prints '175'
     print hex 'aF';   # same
 
+=item if (EXPR) BLOCK
+
+=item if (EXPR) BLOCK else BLOCK2
+
+=item if (EXPR) BLOCK elsif (EXPR2) BLOCK2
+
+Enter BLOCKs conditionally.  The first EXPR to return true
+causes the corresponding BLOCK to be entered, or, in the case
+of C<else>, the fall-through default BLOCK.
+
+Take notice: Perl wants BLOCKS, expressions (like e.g. in C, C++, or
+Pascal) won't do.
+
+See L<perlsyn> for more details.  See also C<unless>.
+
 =item import
 
 There is no builtin C<import()> function.  It is just an ordinary
@@ -1999,8 +2057,10 @@ C<continue> block, if any, is not executed:
 C<last> cannot be used to exit a block which returns a value such as
 C<eval {}>, C<sub {}> or C<do {}>.
 
-See also L</continue> for an illustration of how C<last>, C<next>, and
-C<redo> work.
+See also L</continue> for an illustration of how C<last>, L</next>, and
+L</redo> work.
+
+See also L<perlsyn>.
 
 =item lc EXPR
 
@@ -2210,8 +2270,10 @@ refers to the innermost enclosing loop.
 C<next> cannot be used to exit a block which returns a value such as
 C<eval {}>, C<sub {}> or C<do {}>.
 
-See also L</continue> for an illustration of how C<last>, C<next>, and
-C<redo> work.
+See also L</continue> for an illustration of how L</last>, C<next>, and
+L</redo> work.
+
+See also L<perlsyn>.
 
 =item no Module LIST
 
@@ -2501,6 +2563,12 @@ follows:
     V	A long in "VAX" (little-endian) order.
 	  (These 'shorts' and 'longs' are _exactly_ 16 bits and
 	   _exactly_ 32 bits, respectively.)
+
+    q	A signed quad (64-bit) value.
+    Q	An unsigned quad value.
+	  (Available only if your system supports 64-bit integer values
+	   _and_ if Perl has been compiled to support those.
+           Causes a fatal error otherwise.)
 
     f	A single-precision float in the native format.
     d	A double-precision float in the native format.
@@ -2825,7 +2893,7 @@ See L<perlipc/"UDP: Message Passing"> for examples.
 =item redo
 
 The C<redo> command restarts the loop block without evaluating the
-conditional again.  The C<continue> block, if any, is not executed.  If
+conditional again.  The L</continue> block, if any, is not executed.  If
 the LABEL is omitted, the command refers to the innermost enclosing
 loop.  This command is normally used by programs that want to lie to
 themselves about what was just input:
@@ -2850,8 +2918,10 @@ themselves about what was just input:
 C<redo> cannot be used to retry a block which returns a value such as
 C<eval {}>, C<sub {}> or C<do {}>.
 
-See also L</continue> for an illustration of how C<last>, C<next>, and
+See also L</continue> for an illustration of how L</last>, L</next>, and
 C<redo> work.
+
+See also L<perlsyn>.
 
 =item ref EXPR
 
@@ -3921,8 +3991,8 @@ system-dependent; they are available via the standard module C<Fcntl>.
 For historical reasons, some values work on almost every system
 supported by perl: zero means read-only, one means write-only, and two
 means read/write.  We know that these values do I<not> work under
-OS/390 Unix and on the Macintosh; you probably don't want to use them
-in new code.
+OS/390 & VM/ESA Unix and on the Macintosh; you probably don't want to
+use them in new code.
 
 If the file named by FILENAME does not exist and the C<open()> call creates
 it (typically because MODE includes the C<O_CREAT> flag), then the value of
@@ -4205,8 +4275,6 @@ not trying to restrict access for yourself, returns C<undef>.
 Remember that a umask is a number, usually given in octal; it is I<not> a
 string of octal digits.  See also L</oct>, if all you have is a string.
 
-
-
 =item undef EXPR
 
 =item undef
@@ -4232,6 +4300,13 @@ parameter.  Examples:
     ($a, $b, undef, $c) = &foo;       # Ignore third value returned
 
 Note that this is a unary operator, not a list operator.
+
+=item unless (EXPR) BLOCK
+
+The negative counterpart of L</if>.  If the EXPR returns false the
+BLOCK is entered.
+
+See also L<perlsyn>.
 
 =item unlink LIST
 
@@ -4282,10 +4357,6 @@ The following efficiently counts the number of set bits in a bit vector:
 
     $setbits = unpack("%32b*", $selectmask);
 
-=item untie VARIABLE
-
-Breaks the binding between a variable and a package.  (See C<tie()>.)
-
 =item unshift ARRAY,LIST
 
 Does the opposite of a C<shift()>.  Or the opposite of a C<push()>,
@@ -4297,6 +4368,21 @@ array, and returns the new number of elements in the array.
 Note the LIST is prepended whole, not one element at a time, so the
 prepended elements stay in the same order.  Use C<reverse()> to do the
 reverse.
+
+=item until (EXPR) BLOCK
+
+=item do BLOCK until (EXPR)
+
+Enter BLOCK until EXPR returns false.  The first form may avoid entering
+the BLOCK, the second form enters the BLOCK at least once.
+
+See L</do>, L</while>, and L</for>.
+
+See also L<perlsyn>.
+
+=item untie VARIABLE
+
+Breaks the binding between a variable and a package.  (See C<tie()>.)
 
 =item use Module LIST
 
@@ -4513,6 +4599,15 @@ warnings (even the so-called mandatory ones).  An example:
 
 See L<perlvar> for details on setting C<%SIG> entries, and for more
 examples.
+
+=item while (EXPR) BLOCK
+
+=item do BLOCK while (EXPR)
+
+Enter BLOCK while EXPR is true.  The first form may avoid entering the
+BLOCK, the second form enters the BLOCK at least once.
+
+See also L<perlsyn>, L</for>, L</until>, and L</continue>.
 
 =item write FILEHANDLE
 
