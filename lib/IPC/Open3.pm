@@ -186,7 +186,7 @@ sub _open3 {
 	}
 	local($")=(" ");
 	exec @cmd
-	    or croak "open3: exec of @cmd failed";
+	    or croak "$Me: exec of @cmd failed";
     } elsif ($do_spawn) {
 	# All the bookkeeping of coincidence between handles is
 	# handled in spawn_with_handles.
@@ -227,7 +227,7 @@ sub _open3 {
 				    handle => \*STDERR },
 				], \@close, @cmd);
 	};
-	die "open3: $@" if $@;
+	die "$Me: $@" if $@;
     }
 
     xclose $kid_rdr if !$dup_wtr;
