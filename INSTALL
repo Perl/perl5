@@ -847,14 +847,16 @@ and web services, that process data originating from external sources.
 In Perl 5.8.1 a security feature was introduced to make it harder
 to create such degenerate hashes.
 
-Because of this feature the keys(), values(), and each() functions
-may return the hash elements in different order between different
-runs of Perl even with the same data.  One can still revert to the old
+Because of this feature the keys(), values(), and each() functions may
+return the hash elements in different order between different runs of
+Perl even with the same data.  One can still revert to the old
 repeatable order by setting the environment variable PERL_HASH_SEED,
-see L<perlrun>.  Another option is to add -DUSE_HASH_SEED_EXPLICIT to
-the compilation flags, in which case one has to explicitly set the
-PERL_HASH_SEED environment variable to enable the security feature,
-or -DNO_HASH_SEED to completely disable the feature.
+see L<perlrun/PERL_HASH_SEED>.  Another option is to add
+-DUSE_HASH_SEED_EXPLICIT to the compilation flags (for example by
+using C<Configure -Accflags=-DUSE_HAS_SEED_EXPLICIT>), in which case
+one has to explicitly set the PERL_HASH_SEED environment variable to
+enable the security feature, or by adding -DNO_HASH_SEED to the compilation
+flags to completely disable the randomisation feature.
 
 B<Perl has never guaranteed any ordering of the hash keys>, and the
 ordering has already changed several times during the lifetime of
