@@ -79,6 +79,22 @@ Version v5.5.650        Development release working toward v5.6
 ----------------
 
 ____________________________________________________________________________
+[  5040] By: gsar                                  on 2000/02/08  07:51:20
+        Log: documentation patches (from Michael Schwern and Yitzchak
+             Scott-Thoennes)
+     Branch: perl
+	   ! av.c hv.c lib/UNIVERSAL.pm pod/perlapi.pod
+____________________________________________________________________________
+[  5039] By: gsar                                  on 2000/02/08  07:22:46
+        Log: alias to $^V to $PERL_VERSION_TUPLE
+     Branch: perl
+	   ! lib/English.pm pod/perlvar.pod
+____________________________________________________________________________
+[  5038] By: gsar                                  on 2000/02/08  07:03:34
+        Log: update Changes
+     Branch: perl
+	   ! Changes pod/perlhist.pod
+____________________________________________________________________________
 [  5037] By: gsar                                  on 2000/02/08  06:59:55
         Log: Windows has a somewhat different sitelib layout, and needs
              $sitelib/archname added as well
