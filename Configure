@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Jul  5 22:55:23 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Tue Jul  6 11:02:34 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -4397,15 +4397,22 @@ $grep "^[ 	]*#.*\$wanted" | \
 while read cline; do
 	name=\`echo \$cline | $awk "\$awkprg" | $tr -d '"'\`
 	case "\$name" in
-	*[/\\\\]\$wanted) echo "\$name"; exit 0;;
-	*[\\\\/]\$wanted) echo "\$name"; exit 0;;
-	*) name='';;
+	*[/\\\\]\$wanted) echo "\$name"; exit 1;;
+	*[\\\\/]\$wanted) echo "\$name"; exit 1;;
+	*) exit 2;;
 	esac;
 done;
+#
+# status = 0: grep returned 0 lines, case statement not executed
+# status = 1: headerfile found
+# status = 2: while loop executed, no headerfile found
+#
+status=\$?
 $rm -f foo\$\$.c;
-case "\$name" in
-'') exit 1;;
-esac
+if test \$status -eq 1; then
+	exit 0;
+fi
+exit 1
 EOF
 chmod +x findhdr
 
