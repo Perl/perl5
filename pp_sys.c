@@ -1588,11 +1588,11 @@ PP(pp_send)
     djSP; dMARK; dORIGMARK; dTARGET;
     GV *gv;
     IO *io;
-    Off_t offset;
     SV *bufsv;
     char *buffer;
     Size_t length;
     SSize_t retval;
+    IV offset;
     STRLEN blen;
     MAGIC *mg;
 
@@ -1620,7 +1620,7 @@ PP(pp_send)
 #else
     length = SvIVx(*++MARK);
 #endif
-    if (length < 0)
+    if ((Size_t)length < 0)
 	DIE(aTHX_ "Negative length");
     SETERRNO(0,0);
     io = GvIO(gv);
@@ -1635,11 +1635,7 @@ PP(pp_send)
     }
     else if (PL_op->op_type == OP_SYSWRITE) {
 	if (MARK < SP) {
-#if Off_t_size > IVSIZE
-	    offset = SvNVx(*++MARK);
-#else
 	    offset = SvIVx(*++MARK);
-#endif
 	    if (offset < 0) {
 		if (-offset > blen)
 		    DIE(aTHX_ "Offset outside string");
@@ -1842,9 +1838,9 @@ PP(pp_truncate)
     STRLEN n_a;
 
 #if Size_t_size > IVSIZE
-    length = (Off_t)POPn;
+    len = (Off_t)POPn;
 #else
-    length = (Off_t)POPi;
+    len = (Off_t)POPi;
 #endif
     /* Checking for length < 0 is problematic as the type might or
      * might not be signed: if it is not, clever compilers will moan. */ 
