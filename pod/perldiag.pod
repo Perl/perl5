@@ -33,11 +33,11 @@ The symbols C<"%(-?@> sort before the letters, while C<[> and C<\> sort after.
 to try to declare one with a package qualifier on the front.  Use local()
 if you want to localize a package variable.
 
-=item "my" variable %s masks earlier declaration in same scope
+=item "my" variable %s masks earlier declaration in same %s
 
-(W) A lexical variable has been redeclared in the same scope, effectively
-eliminating all access to the previous instance.  This is almost always
-a typographical error.  Note that the earlier variable will still exist
+(W) A lexical variable has been redeclared in the current scope or statement,
+effectively eliminating all access to the previous instance.  This is almost
+always a typographical error.  Note that the earlier variable will still exist
 until the end of the scope or until all closure referents to it are
 destroyed.
 
