@@ -1960,5 +1960,14 @@ way you wish, provided you do not restrict others from doing the same.
 
 close OUT or die "Can't close $file: $!";
 chmod 0755, $file or die "Can't reset permissions for $file: $!\n";
+unlink 'psed';
+print "Linking s2p to psed.\n";
+if (defined $Config{d_link}) {
+  link 's2p', 'psed';
+} else {
+  unshift @INC, '../lib';
+  require File::Copy;
+  File::Copy::syscopy('s2p', 'psed');
+}
 exec("$Config{'eunicefix'} $file") if $Config{'eunicefix'} ne ':';
 chdir $origdir;
