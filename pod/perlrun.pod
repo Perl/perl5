@@ -791,7 +791,7 @@ to write on, values used as a number that doesn't look like numbers,
 using an array as though it were a scalar, if your subroutines
 recurse more than 100 deep, and innumerable other things.
 
-This switch really just enables the internal C<^$W> variable.  You
+This switch really just enables the internal C<$^W> variable.  You
 can disable or promote into fatal errors specific warnings using
 C<__WARN__> hooks, as described in L<perlvar> and L<perlfunc/warn>.
 See also L<perldiag> and L<perltrap>.  A new, fine-grained warning

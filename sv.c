@@ -4801,7 +4801,19 @@ S_sv_add_backref(pTHX_ SV *tsv, SV *sv)
 	sv_magic(tsv, (SV*)av, PERL_MAGIC_backref, NULL, 0);
 	SvREFCNT_dec(av);           /* for sv_magic */
     }
-    av_push(av,sv);
+    if (AvFILLp(av) >= AvMAX(av)) {
+        SV **svp = AvARRAY(av);
+        I32 i = AvFILLp(av);
+        while (i >= 0) {
+            if (svp[i] == &PL_sv_undef) {
+                svp[i] = sv;        /* reuse the slot */
+                return;
+            }
+            i--;
+        }
+        av_extend(av, AvFILLp(av)+1);
+    }
+    AvARRAY(av)[++AvFILLp(av)] = sv; /* av_push() */
 }
 
 /* delete a back-reference to ourselves from the backref magic associated
@@ -8112,6 +8124,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	\d+\$              explicit format parameter index
 	[-+ 0#]+           flags
 	v|\*(\d+\$)?v      vector with optional (optionally specified) arg
+	0		   flag (as above): repeated to allow "v02" 	
 	\d+|\*(\d+\$)?     width using optional (optionally specified) arg
 	\.(\d*|\*(\d+\$)?) precision using optional (optionally specified) arg
 	[hlqLV]            size
@@ -8177,6 +8190,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	}
 
 	if (!asterisk)
+	    if( *q == '0' ) 
+		fill = *q++;
 	    EXPECT_NUMBER(q, width);
 
 	if (vectorize) {
@@ -8604,6 +8619,9 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		intsize = 'q';
 #endif
 		break;
+/* [perl #20339] - we should accept and ignore %lf rather than die */
+	    case 'l':
+		/* FALL THROUGH */
 	    default:
 #if defined(USE_LONG_DOUBLE)
 		intsize = args ? 0 : 'q';
@@ -8616,8 +8634,6 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		/* FALL THROUGH */
 #endif
 	    case 'h':
-		/* FALL THROUGH */
-	    case 'l':
 		goto unknown;
 	    }
 

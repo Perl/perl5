@@ -2076,6 +2076,7 @@ PP(pp_goto)
 	    }
 
 	    /* First do some returnish stuff. */
+	    FREETMPS;
 	    cxix = dopoptosub(cxstack_ix);
 	    if (cxix < 0)
 		DIE(aTHX_ "Can't goto subroutine outside a subroutine");

@@ -5209,7 +5209,7 @@ static int
 S_pending_ident(pTHX)
 {
     register char *d;
-    register I32 tmp;
+    register I32 tmp = 0;
     /* pit holds the identifier we read and pending_ident is reset */
     char pit = PL_pending_ident;
     PL_pending_ident = 0;
@@ -6266,6 +6266,8 @@ S_scan_ident(pTHX_ register char *s, register char *send, char *dest, STRLEN des
 			funny, dest, funny, dest);
 		}
 	    }
+	    if (PL_lex_inwhat == OP_STRINGIFY)
+		PL_expect = XREF;
 	}
 	else {
 	    s = bracket;		/* let the parser handle it */
@@ -6880,7 +6882,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 	termlen = 1;
     }
     else {
-	termcode = utf8_to_uvchr(s, &termlen);
+	termcode = utf8_to_uvchr((U8*)s, &termlen);
 	Copy(s, termstr, termlen, U8);
 	if (!UTF8_IS_INVARIANT(term))
 	    has_utf8 = TRUE;
@@ -6914,7 +6916,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 	    while (cont) {
 		int offset = s - SvPVX(PL_linestr);
 		bool found = sv_cat_decode(sv, PL_encoding, PL_linestr,
-					   &offset, termstr, termlen);
+					   &offset, (char*)termstr, termlen);
 		char *ns = SvPVX(PL_linestr) + offset;
 		char *svlast = SvEND(sv) - 1;
 
@@ -7002,7 +7004,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 		else if (*s == term) {
 		    if (termlen == 1)
 			break;
-		    if (s+termlen <= PL_bufend && memEQ(s, termstr, termlen))
+		    if (s+termlen <= PL_bufend && memEQ(s, (char*)termstr, termlen))
 			break;
 		}
 		else if (!has_utf8 && !UTF8_IS_INVARIANT((U8)*s) && UTF)
