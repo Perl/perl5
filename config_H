@@ -14,7 +14,7 @@
  * $Id: Config_h.U,v 3.0.1.4 1995/09/25 09:10:49 ram Exp $
  */
 
-/* Configuration time: Fri Aug 30 15:56:35 EDT 1996
+/* Configuration time: Wed Sep 11 15:24:25 EDT 1996
  * Configured by: doughera
  * Target system: sunos fractal 5.5 generic i86pc i386 i86pc 
  */
@@ -280,12 +280,6 @@
  *	available to get the login name.
  */
 #define HAS_GETLOGIN		/**/
-
-/* HAS_GETPGRP:
- *	This symbol, if defined, indicates that the getpgrp routine is
- *	available to get the current process group.
- */
-#define HAS_GETPGRP		/**/
 
 /* HAS_GETPGRP2:
  *	This symbol, if defined, indicates that the getpgrp2() (as in DG/UX)
@@ -579,24 +573,6 @@
  *	available to handle locale-specific ctype implementations.
  */
 #define HAS_SETLOCALE	/**/
-
-/* HAS_SETPGID:
- *	This symbol, if defined, indicates that the setpgid routine is
- *	available to set process group ID.
- */
-#define HAS_SETPGID	/**/
-
-/* HAS_SETPGRP:
- *	This symbol, if defined, indicates that the setpgrp routine is
- *	available to set the current process group.
- */
-/* USE_BSDPGRP:
- *	This symbol, if defined, indicates that the BSD notion of process
- *	group is to be used. For instance, you have to say setpgrp(pid, pgrp)
- *	instead of the USG setpgrp().
- */
-#define HAS_SETPGRP		/**/
-/*#define USE_BSDPGRP		/ **/
 
 /* HAS_SETPGRP2:
  *	This symbol, if defined, indicates that the setpgrp2() (as in DG/UX)
@@ -1357,8 +1333,8 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define ARCHLIB "/opt/perl/lib/i86pc-solaris/5.00304"		/**/
-#define ARCHLIB_EXP "/opt/perl/lib/i86pc-solaris/5.00304"		/**/
+#define ARCHLIB "/opt/perl/lib/i86pc-solaris/5.00305"		/**/
+#define ARCHLIB_EXP "/opt/perl/lib/i86pc-solaris/5.00305"		/**/
 
 /* BYTEORDER:
  *	This symbol holds the hexadecimal constant defined in byteorder,
@@ -1395,7 +1371,7 @@
  *	makes sense if you *have* dlsym, which we will presume is the
  *	case if you're using dl_dlopen.xs.
  */
-/*#define 	DLSYM_NEEDS_UNDERSCORE 	/ * */
+/*#define 	DLSYM_NEEDS_UNDERSCORE 	/ **/
 
 /* SETUID_SCRIPTS_ARE_SECURE_NOW:
  *	This symbol, if defined, indicates that the bug that prevents
@@ -1433,6 +1409,50 @@
  *	The last two assume trailing zeros should not be kept.
  */
 #define Gconvert(x,n,t,b) gconvert((x),(n),(t),(b))
+
+/* HAS_GETPGID:
+ *	This symbol, if defined, indicates to the C program that 
+ *	the getpgid(pid) function is available to get the
+ *	process group id.
+ */
+#define HAS_GETPGID		/**/
+
+/* HAS_GETPGRP:
+ *	This symbol, if defined, indicates that the getpgrp routine is
+ *	available to get the current process group.
+ */
+/* USE_BSD_GETPGRP:
+ *	This symbol, if defined, indicates that getpgrp needs one
+ *	arguments whereas USG one needs none.
+ */
+#define HAS_GETPGRP		/**/
+/*#define USE_BSD_GETPGRP	/ **/
+
+/* HAS_SETPGID:
+ *	This symbol, if defined, indicates to the C program that 
+ *	the setpgid(pid, gpid) function is available to set the
+ *	process group id.
+ */
+#define HAS_SETPGID		/**/
+
+/* HAS_SETPGRP:
+ *	This symbol, if defined, indicates that the setpgrp routine is
+ *	available to set the current process group.
+ */
+/* USE_BSD_SETPGRP:
+ *	This symbol, if defined, indicates that setpgrp needs two
+ *	arguments whereas USG one needs none.  See also HAS_SETPGID
+ *	for a POSIX interface.
+ */
+/* USE_BSDPGRP:
+ *	This symbol, if defined, indicates that the BSD notion of process
+ *	group is to be used. For instance, you have to say setpgrp(pid, pgrp)
+ *	instead of the USG setpgrp().  This should be obsolete since
+ *	there are systems which have BSD-ish setpgrp but USG-ish getpgrp.
+ */
+#define HAS_SETPGRP		/**/
+/*#define USE_BSD_SETPGRP	/ **/
+/*#define USE_BSDPGRP		/ **/
 
 /* USE_SFIO:
  *	This symbol, if defined, indicates that sfio should
