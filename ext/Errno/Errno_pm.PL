@@ -105,7 +105,7 @@ sub get_files {
 	    $pat = '^#(?:line)?\s*\d+\s+"([^"]+)"';
 	}
 	while(<CPPO>) {
-	    if ($^O eq 'os2') {
+	    if ($^O eq 'os2' or $^O eq 'MSWin32') {
 		if (/$pat/o) {
 		   my $f = $1;
 		   $f =~ s,\\\\,/,g;

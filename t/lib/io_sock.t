@@ -28,7 +28,9 @@ use IO::Socket;
 
 $listen = IO::Socket::INET->new(Listen => 2,
 				Proto => 'tcp',
-				Timeout => 2,
+				# some systems seem to need as much as 10,
+				# so be generous with the timeout
+				Timeout => 15,
 			       ) or die "$!";
 
 print "ok 1\n";
@@ -87,7 +89,7 @@ if($pid = fork()) {
 
 # Test various other ways to create INET sockets that should
 # also work.
-$listen = IO::Socket::INET->new(Listen => '', Timeout => 2) or die "$!";
+$listen = IO::Socket::INET->new(Listen => '', Timeout => 15) or die "$!";
 $port = $listen->sockport;
 
 if($pid = fork()) {
