@@ -244,8 +244,8 @@ my %items = ();			# associative array used to find the location
 my $Is83;                       # is dos with short filenames (8.3)
 
 sub init_globals {
-$dircache = "pod2html.d~~";
-$itemcache = "pod2html.i~~";
+$dircache = "pod2htmd$cache_ext";
+$itemcache = "pod2htmi$cache_ext";
 
 @begin_stack = ();		# begin/end stack
 

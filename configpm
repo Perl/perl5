@@ -30,6 +30,7 @@ sub import {
   my $pkg = shift;
   @_ = @EXPORT unless @_;
   my @func = grep {$_ ne '%Config'} @_;
+  local $Exporter::ExportLevel = 1;
   Exporter::import('Config', @func) if @func;
   return if @func == @_;
   my $callpkg = caller(0);
