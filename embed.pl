@@ -2414,9 +2414,11 @@ s	|void	|regoptail	|struct RExC_state_t*|regnode *|regnode *
 s	|void	|regtail	|struct RExC_state_t*|regnode *|regnode *
 s	|char*|regwhite	|char *|char *
 s	|char*|nextchar	|struct RExC_state_t*
+#  ifdef DEBUGGING
 s	|regnode*|dumpuntil	|regnode *start|regnode *node \
 				|regnode *last|SV* sv|I32 l
 s	|void	|put_byte	|SV* sv|int c
+#  endif
 s	|void	|scan_commit	|struct RExC_state_t*|struct scan_data_t *data
 s	|void	|cl_anything	|struct RExC_state_t*|struct regnode_charclass_class *cl
 s	|int	|cl_is_anything	|struct regnode_charclass_class *cl
@@ -2453,8 +2455,10 @@ s	|char*	|find_byclass	|regexp * prog|regnode *c|char *s|char *strend|char *star
 #endif
 
 #if defined(PERL_IN_RUN_C) || defined(PERL_DECL_PROT)
+#   ifdef DEBUGGING
 s	|CV*	|deb_curcv	|I32 ix
 s	|void	|debprof	|OP *o
+#   endif
 #endif
 
 #if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)
@@ -2506,7 +2510,7 @@ s	|void	|not_a_number	|SV *sv
 s	|I32	|visit		|SVFUNC_t f
 s	|void	|sv_add_backref	|SV *tsv|SV *sv
 s	|void	|sv_del_backref	|SV *sv
-#  if defined(DEBUGGING)
+#  ifdef DEBUGGING
 s	|void	|del_sv	|SV *p
 #  endif
 #  if !defined(NV_PRESERVES_UV)
@@ -2557,7 +2561,9 @@ s	|char *	|filter_gets	|SV *sv|PerlIO *fp|STRLEN append
 s	|HV *	|find_in_my_stash|char *pkgname|I32 len
 s	|SV*	|new_constant	|char *s|STRLEN len|const char *key|SV *sv \
 				|SV *pv|const char *type
+#  if defined(DEBUGGING)
 s	|void	|tokereport	|char *thing|char *s|I32 rv
+#  endif
 s	|int	|ao		|int toketype
 s	|void	|depcom
 s	|char*	|incl_perldb

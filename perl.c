@@ -1868,7 +1868,7 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
 {
     dSP;
     UNOP myop;		/* fake syntax tree node */
-    I32 oldmark = SP - PL_stack_base;
+    volatile I32 oldmark = SP - PL_stack_base;
     volatile I32 retval = 0;
     I32 oldscope;
     int ret;

@@ -4175,10 +4175,11 @@ S_regcurly(pTHX_ register char *s)
 }
 
 
+#ifdef DEBUGGING
+
 STATIC regnode *
 S_dumpuntil(pTHX_ regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
 {
-#ifdef DEBUGGING
     register U8 op = EXACT;	/* Arbitrary non-END op. */
     register regnode *next;
 
@@ -4244,9 +4245,10 @@ S_dumpuntil(pTHX_ regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
 	else if (op == WHILEM)
 	    l--;
     }
-#endif	/* DEBUGGING */
     return node;
 }
+
+#endif	/* DEBUGGING */
 
 /*
  - regdump - dump a regexp onto Perl_debug_log in vaguely comprehensible form
@@ -4328,6 +4330,8 @@ Perl_regdump(pTHX_ regexp *r)
 #endif	/* DEBUGGING */
 }
 
+#ifdef DEBUGGING
+
 STATIC void
 S_put_byte(pTHX_ SV *sv, int c)
 {
@@ -4338,6 +4342,8 @@ S_put_byte(pTHX_ SV *sv, int c)
     else
 	Perl_sv_catpvf(aTHX_ sv, "%c", c);
 }
+
+#endif	/* DEBUGGING */
 
 /*
 - regprop - printable representation of opcode

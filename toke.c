@@ -181,6 +181,8 @@ int yyactlevel = -1;
 /* grandfather return to old style */
 #define OLDLOP(f) return(yylval.ival=f,PL_expect = XTERM,PL_bufptr = s,(int)LSTOP)
 
+#ifdef DEBUGGING
+
 STATIC void
 S_tokereport(pTHX_ char *thing, char* s, I32 rv)
 {
@@ -198,6 +200,8 @@ S_tokereport(pTHX_ char *thing, char* s, I32 rv)
         PerlIO_printf(Perl_debug_log, "### %s\n", SvPV_nolen(report));
     });
 }
+
+#endif
 
 /*
  * S_ao

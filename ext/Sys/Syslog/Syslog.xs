@@ -30,9 +30,11 @@ constant_LOG_NO(char *name, int len)
     errno = EINVAL;
     return 0;
 
+#if !defined(LOG_NOTICE) || !defined(LOG_NOWAIT)
 not_there:
     errno = ENOENT;
     return 0;
+#endif
 }
 
 static double
@@ -69,9 +71,11 @@ constant_LOG_N(char *name, int len)
     errno = EINVAL;
     return 0;
 
+#if !defined(LOG_NDELAY) || !defined(LOG_NEWS) || !defined(LOG_NFACILITIES)
 not_there:
     errno = ENOENT;
     return 0;
+#endif
 }
 
 static double
@@ -106,9 +110,11 @@ constant_LOG_P(char *name, int len)
     errno = EINVAL;
     return 0;
 
+#if !defined(LOG_PERROR) || !defined(LOG_PID) || !defined(LOG_PRIMASK)
 not_there:
     errno = ENOENT;
     return 0;
+#endif
 }
 
 static double
@@ -139,9 +145,11 @@ constant_LOG_AU(char *name, int len)
     errno = EINVAL;
     return 0;
 
+#if !defined(LOG_AUTH) || !defined(LOG_AUTHPRIV)
 not_there:
     errno = ENOENT;
     return 0;
+#endif
 }
 
 static double
@@ -162,9 +170,11 @@ constant_LOG_A(char *name, int len)
     errno = EINVAL;
     return 0;
 
+#if !defined(LOG_ALERT)
 not_there:
     errno = ENOENT;
     return 0;
+#endif
 }
 
 static double
@@ -191,9 +201,11 @@ constant_LOG_CR(char *name, int len)
     errno = EINVAL;
     return 0;
 
+#if !defined(LOG_CRIT) || !defined(LOG_CRON)
 not_there:
     errno = ENOENT;
     return 0;
+#endif
 }
 
 static double
@@ -214,9 +226,11 @@ constant_LOG_C(char *name, int len)
     errno = EINVAL;
     return 0;
 
+#if !defined(LOG_CONS)
 not_there:
     errno = ENOENT;
     return 0;
+#endif
 }
 
 static double
@@ -243,9 +257,11 @@ constant_LOG_D(char *name, int len)
     errno = EINVAL;
     return 0;
 
+#if !defined(LOG_DAEMON) || !defined(LOG_DEBUG)
 not_there:
     errno = ENOENT;
     return 0;
+#endif
 }
 
 static double
@@ -272,9 +288,11 @@ constant_LOG_U(char *name, int len)
     errno = EINVAL;
     return 0;
 
+#if !defined(LOG_USER) || !defined(LOG_UUCP)
 not_there:
     errno = ENOENT;
     return 0;
+#endif
 }
 
 static double
@@ -301,9 +319,11 @@ constant_LOG_E(char *name, int len)
     errno = EINVAL;
     return 0;
 
+#if !defined(LOG_EMERG) || !defined(LOG_ERR)
 not_there:
     errno = ENOENT;
     return 0;
+#endif
 }
 
 static double
@@ -330,9 +350,11 @@ constant_LOG_F(char *name, int len)
     errno = EINVAL;
     return 0;
 
+#if !defined(LOG_FACMASK) || !defined(LOG_FTP)
 not_there:
     errno = ENOENT;
     return 0;
+#endif
 }
 
 static double
@@ -411,9 +433,11 @@ constant_LOG_LO(char *name, int len)
     errno = EINVAL;
     return 0;
 
+#if !defined(LOG_LOCAL0) || !defined(LOG_LOCAL1) || !defined(LOG_LOCAL2) || !defined(LOG_LOCAL3) || !defined(LOG_LOCAL4) || !defined(LOG_LOCAL5) || !defined(LOG_LOCAL6) || !defined(LOG_LOCAL7)
 not_there:
     errno = ENOENT;
     return 0;
+#endif
 }
 
 static double
@@ -442,9 +466,11 @@ constant_LOG_L(char *name, int len)
     errno = EINVAL;
     return 0;
 
+#if !defined(LOG_LFMT) || !defined(LOG_LPR)
 not_there:
     errno = ENOENT;
     return 0;
+#endif
 }
 
 static double
@@ -544,9 +570,11 @@ constant(char *name, int len)
     errno = EINVAL;
     return 0;
 
+#if !defined(LOG_INFO) || !defined(LOG_KERN) || !defined(LOG_MAIL) || !defined(LOG_ODELAY) || !defined(LOG_SYSLOG) || !defined(LOG_WARNING)
 not_there:
     errno = ENOENT;
     return 0;
+#endif
 }
 
 

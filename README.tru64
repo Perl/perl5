@@ -15,11 +15,13 @@ is compiled and/or runs.
 =head2 Compiling Perl 5 on Tru64
 
 The recommended compiler to use in Tru64 is the native C compiler.
-The native compiler produces much faster code (the speed difference is
-noticeable: several dozen percentages) and also more correct code: if you
-are considering using the GNU C compiler you should use the gcc 2.95.3
-release since older gcc releases are known to produce buggy code when
-compiling Perl.
+The native compiler produces much faster code (the speed difference
+is noticeable: several dozen percentages) and also more correct code:
+if you are considering using the GNU C compiler you should use the
+gcc 2.95.3 since all older gcc releases are known to produce broken
+code when compiling Perl.  One manifestation of this brokenness is
+the lib/sdbm test dumping core; another is the op/regexp dumping core
+(depending on the GCC release).
 
 =head2 Using Large Files with Perl on Tru64
 

@@ -2136,8 +2136,8 @@ static int store_hook(
 	I32 classnum;
 	int ret;
 	int clone = cxt->optype & ST_CLONE;
-	char mtype;				/* for blessed ref to tied structures */
-	unsigned char eflags;	/* used when object type is SHT_EXTRA */
+	char mtype = 0;				/* for blessed ref to tied structures */
+	unsigned char eflags = 0;	/* used when object type is SHT_EXTRA */
 
 	TRACEME(("store_hook, class \"%s\", tagged #%d", HvNAME(pkg), cxt->tagnum));
 
@@ -4459,7 +4459,7 @@ magic_ok:
 	 * information to check.
 	 */
 
-	if (cxt->netorder = (use_network_order & 0x1))
+	if ((cxt->netorder = (use_network_order & 0x1)))
 		return &PL_sv_undef;			/* No byte ordering info */
 
 	sprintf(byteorder, "%lx", (unsigned long) BYTEORDER);

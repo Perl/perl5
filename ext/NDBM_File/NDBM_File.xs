@@ -53,7 +53,7 @@ ndbm_TIEHASH(dbtype, filename, flags, mode)
 	    DBM * 	dbp ;
 
 	    RETVAL = NULL ;
-	    if (dbp =  dbm_open(filename, flags, mode)) {
+	    if ((dbp =  dbm_open(filename, flags, mode))) {
 	        RETVAL = (NDBM_File)safemalloc(sizeof(NDBM_File_type)) ;
     	        Zero(RETVAL, 1, NDBM_File_type) ;
 		RETVAL->dbp = dbp ;
