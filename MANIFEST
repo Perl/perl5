@@ -2082,6 +2082,7 @@ makedir.SH			Precursor to makedir
 Makefile.micro			microperl Makefile
 Makefile.SH			A script that generates Makefile
 malloc.c			A version of malloc you might not want
+malloc_ctl.h			A version of malloc you might not want
 MANIFEST			This list of files
 mg.c				Magic code
 mg.h				Magic header

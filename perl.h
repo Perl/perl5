@@ -500,27 +500,42 @@ int usleep(unsigned int);
 #  else
 #    define EMBEDMYMALLOC	/* for compatibility */
 #  endif
-START_EXTERN_C
-Malloc_t Perl_malloc (MEM_SIZE nbytes);
-Malloc_t Perl_calloc (MEM_SIZE elements, MEM_SIZE size);
-Malloc_t Perl_realloc (Malloc_t where, MEM_SIZE nbytes);
-/* 'mfree' rather than 'free', since there is already a 'perl_free'
- * that causes clashes with case-insensitive linkers */
-Free_t   Perl_mfree (Malloc_t where);
-END_EXTERN_C
-
-typedef struct perl_mstats perl_mstats_t;
 
 #  define safemalloc  Perl_malloc
 #  define safecalloc  Perl_calloc
 #  define saferealloc Perl_realloc
 #  define safefree    Perl_mfree
+#  define CHECK_MALLOC_TOO_LATE_FOR_(code)	STMT_START {		\
+	if (!PL_tainting && MallocCfg_ptr[MallocCfg_cfg_env_read])	\
+		code;							\
+    } STMT_END
+#  define CHECK_MALLOC_TOO_LATE_FOR(ch)				\
+	CHECK_MALLOC_TOO_LATE_FOR_(MALLOC_TOO_LATE_FOR(ch))
+#  define panic_write2(s)		write(2, s, strlen(s))
+#  define CHECK_MALLOC_TAINT(newval)				\
+	CHECK_MALLOC_TOO_LATE_FOR_(				\
+		if (newval) {					\
+		  panic_write2("panic: tainting with $ENV{PERL_MALLOC_OPT}\n");\
+		  exit(1); })
+extern int Perl_doing_taint(int argc, char *argv[], char *envp[]);
+#  define MALLOC_CHECK_TAINT(argc,argv,env)	STMT_START {	\
+	if (Perl_doing_taint(argc, argv, env))	{		\
+		MallocCfg_ptr[MallocCfg_skip_cfg_env] = 1;	\
+    }} STMT_END;
 #else  /* MYMALLOC */
 #  define safemalloc  safesysmalloc
 #  define safecalloc  safesyscalloc
 #  define saferealloc safesysrealloc
 #  define safefree    safesysfree
+#  define CHECK_MALLOC_TOO_LATE_FOR(ch)		((void)0)
+#  define CHECK_MALLOC_TAINT(newval)		((void)0)
+#  define MALLOC_CHECK_TAINT(argc,argv,env)
 #endif /* MYMALLOC */
+
+#define TOO_LATE_FOR_(ch,s)	Perl_croak(aTHX_ "Too late for \"-%c\" option%s", (char)(ch), s)
+#define TOO_LATE_FOR(ch)	TOO_LATE_FOR_(ch, "")
+#define MALLOC_TOO_LATE_FOR(ch)	TOO_LATE_FOR_(ch, " with $ENV{PERL_MALLOC_OPT}")
+#define MALLOC_CHECK_TAINT2(argc,argv)	MALLOC_CHECK_TAINT(argc,argv,NULL)
 
 #if !defined(HAS_STRCHR) && defined(HAS_INDEX) && !defined(strchr)
 #define strchr index
@@ -1712,17 +1727,10 @@ int isnan(double d);
 
 #endif
 
-struct perl_mstats {
-    UV *nfree;
-    UV *ntotal;
-    IV topbucket, topbucket_ev, topbucket_odd, totfree, total, total_chain;
-    IV total_sbrk, sbrks, sbrk_good, sbrk_slack, start_slack, sbrked_remains;
-    IV minbucket;
-    /* Level 1 info */
-    UV *bucket_mem_size;
-    UV *bucket_available_size;
-    UV nbuckets;
-};
+#ifdef MYMALLOC
+#  include "malloc_ctl.h"
+#endif
+
 struct RExC_state_t;
 
 typedef MEM_SIZE STRLEN;
@@ -1969,13 +1977,6 @@ typedef struct clone_params CLONE_PARAMS;
 #      define PERL_FPU_INIT
 #    endif
 #  endif
-#endif
-
-#ifdef JPL
-    /* E.g. JPL needs to operate on a copy of the real environment.
-     * JDK 1.2 and 1.3 seem to get upset if the original environment
-     * is diddled with. */
-#   define NEED_ENVIRON_DUP_FOR_MODIFY
 #endif
 
 #ifndef PERL_SYS_INIT3

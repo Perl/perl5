@@ -72,6 +72,7 @@ unless you terminated before repeatedly calling cacheout.
 
 require 5.006;
 use Carp;
+use Config;
 use strict;
 no strict 'refs';
 # These are not C<my> for legacy reasons.
@@ -88,7 +89,9 @@ sub import {
     *{$pkg.'::close'}    = \&cacheout_close;
 
     # Reap our children
-    @{"$pkg\::SIG"}{'CLD', 'CHLD', 'PIPE'} = ('IGNORE')x3;
+    ${"$pkg\::SIG"}{'CLD'}  = 'IGNORE' if $Config{sig_name} =~ /\bCLD\b/;
+    ${"$pkg\::SIG"}{'CHLD'} = 'IGNORE' if $Config{sig_name} =~ /\bCHLD\b/;
+    ${"$pkg\::SIG"}{'PIPE'} = 'IGNORE' if $Config{sig_name} =~ /\bPIPE\b/;
 
     # Truth is okay here because setting maxopen to 0 would be bad
     return $cacheout_maxopen = $args{maxopen} if $args{maxopen};

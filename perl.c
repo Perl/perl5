@@ -1162,6 +1162,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	    break;
 
 	case 't':
+	    CHECK_MALLOC_TOO_LATE_FOR('t');
 	    if( !PL_tainting ) {
 	         PL_taint_warn = TRUE;
 	         PL_tainting = TRUE;
@@ -1169,6 +1170,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	    s++;
 	    goto reswitch;
 	case 'T':
+	    CHECK_MALLOC_TOO_LATE_FOR('T');
 	    PL_tainting = TRUE;
 	    PL_taint_warn = FALSE;
 	    s++;
@@ -1351,6 +1353,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
 	while (isSPACE(*s))
 	    s++;
 	if (*s == '-' && *(s+1) == 'T') {
+	    CHECK_MALLOC_TOO_LATE_FOR('T');
 	    PL_tainting = TRUE;
             PL_taint_warn = FALSE;
 	}
@@ -2539,12 +2542,12 @@ Perl_moreswitches(pTHX_ char *s)
 	return s;
     case 't':
         if (!PL_tainting)
-            Perl_croak(aTHX_ "Too late for \"-t\" option");
+	    TOO_LATE_FOR('t');
         s++;
         return s;
     case 'T':
 	if (!PL_tainting)
-	    Perl_croak(aTHX_ "Too late for \"-T\" option");
+	    TOO_LATE_FOR('T');
 	s++;
 	return s;
     case 'u':
@@ -3402,8 +3405,36 @@ S_init_ids(pTHX)
     PL_uid |= PL_gid << 16;
     PL_euid |= PL_egid << 16;
 #endif
+    /* Should not happen: */
+    CHECK_MALLOC_TAINT(PL_uid && (PL_euid != PL_uid || PL_egid != PL_gid));
     PL_tainting |= (PL_uid && (PL_euid != PL_uid || PL_egid != PL_gid));
 }
+
+#ifdef MYMALLOC
+/* This is used very early in the lifetime of the program. */
+int
+Perl_doing_taint(int argc, char *argv[], char *envp[])
+{
+    int uid = PerlProc_getuid();
+    int euid = PerlProc_geteuid();
+    int gid = PerlProc_getgid();
+    int egid = PerlProc_getegid();
+
+#ifdef VMS
+    uid |= gid << 16;
+    euid |= egid << 16;
+#endif
+    if (uid && (euid != uid || egid != gid))
+	return 1;
+    /* This is a really primitive check; $ENV{PERL_MALLOC_OPT} is
+	ignored only if -T are the first chars together; otherwise one
+	gets "Too late" message. */
+    if ( argc > 1 && argv[1][0] == '-'
+         && (argv[1][1] == 't' || argv[1][1] == 'T') )
+	return 1;
+    return 0;
+}
+#endif
 
 STATIC void
 S_forbid_setid(pTHX_ char *s)
@@ -3632,10 +3663,6 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
     char *s;
     SV *sv;
     GV* tmpgv;
-#ifdef NEED_ENVIRON_DUP_FOR_MODIFY
-    char **dup_env_base = 0;
-    int dup_env_count = 0;
-#endif
 
     PL_toptarget = NEWSV(0,0);
     sv_upgrade(PL_toptarget, SVt_PVFM);
@@ -3690,26 +3717,6 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	{
 	    environ[0] = Nullch;
 	}
-#ifdef NEED_ENVIRON_DUP_FOR_MODIFY
-	{
-	    char **env_base;
-	    for (env_base = env; *env; env++) 
-		dup_env_count++;
-	    if ((dup_env_base = (char **)
-		 safesysmalloc( sizeof(char *) * (dup_env_count+1) ))) {
-		char **dup_env;
-		for (env = env_base, dup_env = dup_env_base;
-		     *env;
-		     env++, dup_env++) {
-		    /* With environ one needs to use safesysmalloc(). */
-		    *dup_env = safesysmalloc(strlen(*env) + 1);
-		    (void)strcpy(*dup_env, *env);
-		}
-		*dup_env = Nullch;
-		env = dup_env_base;
-	    } /* else what? */
-	}
-#endif /* NEED_ENVIRON_DUP_FOR_MODIFY */
 	if (env)
 	  for (; *env; env++) {
 	    if (!(s = strchr(*env,'=')))
@@ -3724,14 +3731,6 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	    if (env != environ)
 	        mg_set(sv);
 	  }
-#ifdef NEED_ENVIRON_DUP_FOR_MODIFY
-	if (dup_env_base) {
-	    char **dup_env;
-	    for (dup_env = dup_env_base; *dup_env; dup_env++)
-		safesysfree(*dup_env);
-	    safesysfree(dup_env_base);
-	}
-#endif /* NEED_ENVIRON_DUP_FOR_MODIFY */
 #endif /* USE_ENVIRON_ARRAY */
     }
     TAINT_NOT;

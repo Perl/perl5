@@ -31,6 +31,13 @@ close PM;
 if( $VERSION == 0 ){
 	die "Did not find VERSION in $dprof_pm";
 }
+my $stty = 'undef';
+foreach my $s (qw(/bin/stty /usr/bin/stty)) {
+    if (-x $s) {
+	$stty = qq["$s"];
+	last;
+    }
+}
 open OUT,">$file" or die "Can't create $file: $!";
 
 print "Extracting $file (with variable substitutions)\n";
@@ -46,6 +53,7 @@ $Config{'startperl'}
 require 5.003;
 
 my \$VERSION = '$VERSION';
+my \$stty    = $stty;
 
 !GROK!THIS!
 
@@ -937,11 +945,17 @@ $incl_excl
 %Time ExclSec CumulS #Calls sec/call Csec/c  Name
 .
 
-format STAT =
- ^>>>   ^>>>> ^>>>>> ^>>>>>   ^>>>>> ^>>>>>  ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-$pcnt, $secs, $csecs, $ncalls, $percall, $cpercall, $name
-.
+BEGIN {
+    my $fmt = ' ^>>>   ^>>>> ^>>>>> ^>>>>>   ^>>>>> ^>>>>>  ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<';
+    if (-t STDOUT and defined $stty and my ($cols) = `$stty -a` =~ /\bcolumns\s+(\d+)/)
+    {
+	$fmt .= '<' x ($cols - length $fmt) if $cols > 80;
+    }
 
+    eval "format STAT = \n$fmt" . '
+$pcnt, $secs, $csecs, $ncalls, $percall, $cpercall, $name
+.';
+}
 !NO!SUBS!
 
 close OUT or die "Can't close $file: $!";

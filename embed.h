@@ -1130,6 +1130,9 @@
 #define parse_unicode_opts	Perl_parse_unicode_opts
 #endif
 #ifdef PERL_CORE
+#define seed			Perl_seed
+#endif
+#ifdef PERL_CORE
 #define report_evil_fh		Perl_report_evil_fh
 #endif
 #ifdef PERL_CORE
@@ -1500,9 +1503,6 @@
 #if defined(PERL_IN_PP_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define refto			S_refto
-#endif
-#ifdef PERL_CORE
-#define seed			S_seed
 #endif
 #endif
 #if defined(PERL_IN_PP_PACK_C) || defined(PERL_DECL_PROT)
@@ -3634,6 +3634,9 @@
 #define parse_unicode_opts(a)	Perl_parse_unicode_opts(aTHX_ a)
 #endif
 #ifdef PERL_CORE
+#define seed()			Perl_seed(aTHX)
+#endif
+#ifdef PERL_CORE
 #define report_evil_fh(a,b,c)	Perl_report_evil_fh(aTHX_ a,b,c)
 #endif
 #ifdef PERL_CORE
@@ -3998,9 +4001,6 @@
 #if defined(PERL_IN_PP_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define refto(a)		S_refto(aTHX_ a)
-#endif
-#ifdef PERL_CORE
-#define seed()			S_seed(aTHX)
 #endif
 #endif
 #if defined(PERL_IN_PP_PACK_C) || defined(PERL_DECL_PROT)
