@@ -5,6 +5,15 @@ $ENV{PATH} ="/bin:/usr/bin:/usr/xpg4/bin:/usr/ucb" .
 $ENV{LC_ALL} = "C"; # so that external utilities speak English
 $ENV{LANGUAGE} = 'C'; # GNU locale extension
 
+BEGIN {
+    require Config;
+    if ($@) {
+	print "1..0 # Skip: no Config\n";
+    } else {
+	Config->import;
+    }
+}
+
 sub quit {
     print "1..0 # Skip: no `id` or `groups`\n";
     exit 0;
@@ -61,7 +70,7 @@ GROUPS: {
 #
 # If these tests fail, report the particular incantation you use
 # on this platform to find *all* the groups that an arbitrary
-# luser may belong to, using the 'perlbug' program.
+# user may belong to, using the 'perlbug' program.
 EOM
 	}
 	last GROUPS;
@@ -104,7 +113,7 @@ print "1..2\n";
 
 $pwgid = $( + 0;
 ($pwgnam) = getgrgid($pwgid);
-if ($^O eq 'cygwin') { # basegroup on Cygwin has id = 0.
+if ($Config{myuname} =~ /^cygwin_nt/i) { # basegroup on CYGWIN_NT has id = 0.
     @basegroup{$pwgid,$pwgnam} = (0,0);
 } else {
     @basegroup{$pwgid,$pwgnam} = (1,1);
