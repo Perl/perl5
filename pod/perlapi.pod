@@ -1701,7 +1701,7 @@ Found in file util.c
 
 =item savesvpv
 
-A version of C<savepv()>/C<savepvn() which gets the string to duplicate from
+A version of C<savepv()>/C<savepvn()> which gets the string to duplicate from
 the passed in SV using C<SvPV()>
 
 	char*	savesvpv(SV* sv)
