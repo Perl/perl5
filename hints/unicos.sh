@@ -10,7 +10,10 @@ esac
 # Let's not do that. --jhi
 ccflags="$ccflags -h matherror=errno" 
 # Give int((2/3)*3) a chance to be 2, not 1. --jhi
-ccflags="$ccflags -h rounddiv"
+case "`uname -m`" in
+"CRAY TS")	;; # -h rounddiv not available here
+*)		ccflags="$ccflags -h rounddiv" ;;
+esac
 # Avoid an optimizer bug where a volatile variables
 # isn't correctly saved and restored --Mark P. Lutz 
 pp_ctl_cflags='ccflags="$ccflags -h scalar0 -h vector0"'
