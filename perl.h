@@ -2482,6 +2482,7 @@ public:
 	CPerlObj(IPerlMem*, IPerlEnv*, IPerlStdIO*, IPerlLIO*, IPerlDir*, IPerlSock*, IPerlProc*);
 	void Init(void);
 	void* operator new(size_t nSize, IPerlMem *pvtbl);
+	static void operator delete(void* pPerl, IPerlMem *pvtbl);
 #endif /* PERL_OBJECT */
 
 #ifdef PERL_GLOBAL_STRUCT

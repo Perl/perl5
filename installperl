@@ -158,7 +158,7 @@ if ($Is_Cygwin) {
   };
 } else {
   $perldll = 'perl.' . $dlext;
-  $perldll = 'perlcore.' . $dlext if $Config{'ccflags'} =~ /PERL_OBJECT/i;
+  $perldll = 'perl56.' . $dlext if $Config{'ccflags'} =~ /PERL_OBJECT/i;
 }
 
 -f $perldll || die "No perl DLL built\n";

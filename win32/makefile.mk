@@ -502,8 +502,8 @@ PERL95EXE	= ..\perl95.exe
 .ENDIF
 
 .IF "$(USE_OBJECT)" == "define"
-PERLIMPLIB	*= ..\perlcore$(a)
-PERLDLL		= ..\perlcore.dll
+PERLIMPLIB	*= ..\perl56$(a)
+PERLDLL		= ..\perl56.dll
 .ELSE
 PERLIMPLIB	*= ..\perl$(a)
 PERLDLL		= ..\perl.dll

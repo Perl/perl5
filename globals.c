@@ -35,10 +35,17 @@ CPerlObj::CPerlObj(IPerlMem* ipM, IPerlEnv* ipE, IPerlStdIO* ipStd,
 void*
 CPerlObj::operator new(size_t nSize, IPerlMem *pvtbl)
 {
-    if(pvtbl != NULL)
+    if(pvtbl)
 	return pvtbl->pMalloc(pvtbl, nSize);
 
     return NULL;
+}
+
+void
+CPerlObj::operator delete(void *pPerl, IPerlMem *pvtbl)
+{
+    if(pvtbl)
+	pvtbl->pFree(pvtbl, pPerl);
 }
 
 void

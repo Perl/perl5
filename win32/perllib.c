@@ -91,6 +91,49 @@ PerlEnvUname(struct IPerlEnv*, struct utsname *name)
     return win32_uname(name);
 }
 
+void
+PerlEnvClearenv(struct IPerlEnv*)
+{
+    dTHXo;
+    char *envv = GetEnvironmentStrings();
+    char *cur = envv;
+    STRLEN len;
+    while (*cur) {
+	char *end = strchr(cur,'=');
+	if (end && end != cur) {
+	    *end = '\0';
+	    my_setenv(cur,Nullch);
+	    *end = '=';
+	    cur = end + strlen(end+1)+2;
+	}
+	else if ((len = strlen(cur)))
+	    cur += len+1;
+    }
+    FreeEnvironmentStrings(envv);
+}
+
+void*
+PerlEnvGetChildEnv(struct IPerlEnv*)
+{
+    return NULL;
+}
+
+void
+PerlEnvFreeChildEnv(struct IPerlEnv*, void* env)
+{
+}
+
+char*
+PerlEnvGetChildDir(struct IPerlEnv*)
+{
+    return NULL;
+}
+
+void
+PerlEnvFreeChildDir(struct IPerlEnv*, char* dir)
+{
+}
+
 unsigned long
 PerlEnvOsId(struct IPerlEnv*)
 {
@@ -115,7 +158,11 @@ struct IPerlEnv perlEnv =
     PerlEnvPutenv,
     PerlEnvGetenv_len,
     PerlEnvUname,
-    NULL,
+    PerlEnvClearenv,
+    PerlEnvGetChildEnv,
+    PerlEnvFreeChildEnv,
+    PerlEnvGetChildDir,
+    PerlEnvFreeChildDir,
     PerlEnvOsId,
     PerlEnvLibPath,
     PerlEnvSiteLibPath,
@@ -375,6 +422,8 @@ PerlStdIOInit(struct IPerlStdIO*)
 void
 PerlStdIOInitOSExtras(struct IPerlStdIO*)
 {
+    dTHXo;
+    xs_init(pPerl);
     Perl_init_os_extras();
 }
 
@@ -1407,7 +1456,7 @@ EXTERN_C int perl_parse(PerlInterpreter* sv_interp, void (*xsinit)(CPerlObj*), i
     CPerlObj* pPerl = (CPerlObj*)sv_interp;
     try
     {
-	retVal = pPerl->perl_parse(xs_init, argc, argv, env);
+	retVal = pPerl->perl_parse(xsinit, argc, argv, env);
     }
 /*
     catch(int x)
@@ -1427,13 +1476,9 @@ EXTERN_C int perl_parse(PerlInterpreter* sv_interp, void (*xsinit)(CPerlObj*), i
 
 #undef PL_perl_destruct_level
 #define PL_perl_destruct_level int dummy
-#undef w32_perldll_handle
-#define w32_perldll_handle g_w32_perldll_handle
-HANDLE g_w32_perldll_handle;
-#else
-extern HANDLE w32_perldll_handle;
 #endif /* PERL_OBJECT */
 
+extern HANDLE w32_perldll_handle;
 static DWORD g_TlsAllocIndex;
 
 EXTERN_C DllExport bool
@@ -1486,7 +1531,12 @@ RunPerl(int argc, char **argv, char **env)
     perl_construct( my_perl );
     PL_perl_destruct_level = 0;
 
+#ifdef PERL_OBJECT
+    /* PERL_OBJECT build sets Dynaloader in PerlStdIOInitOSExtras */
+    exitstatus = perl_parse(my_perl, NULL, argc, argv, env);
+#else
     exitstatus = perl_parse(my_perl, xs_init, argc, argv, env);
+#endif
     if (!exitstatus) {
 	exitstatus = perl_run( my_perl );
     }
@@ -1518,9 +1568,7 @@ DllMain(HANDLE hModule,		/* DLL module handle */
 #endif
 	g_TlsAllocIndex = TlsAlloc();
 	DisableThreadLibraryCalls(hModule);
-#ifndef PERL_OBJECT
 	w32_perldll_handle = hModule;
-#endif
 	break;
 
 	/* The DLL is detaching from a process due to

@@ -2475,6 +2475,35 @@ GIVE_UP:
     return Nullch;
 }
 
+/* The following are just place holders.
+ * Some hosts may provide and environment that the OS is
+ * not tracking, therefore, these host must provide that
+ * environment and the current directory to CreateProcess
+ */
+
+void*
+get_childenv(void)
+{
+    return NULL;
+}
+
+void
+free_childenv(void*)
+{
+}
+
+char*
+get_childdir(void)
+{
+    return NULL;
+}
+
+void
+free_childdir(char*)
+{
+}
+
+
 /* XXX this needs to be made more compatible with the spawnvp()
  * provided by the various RTLs.  In particular, searching for
  * *.{com,bat,cmd} files (as done by the RTLs) is unimplemented.
@@ -2494,6 +2523,8 @@ win32_spawnvp(int mode, const char *cmdname, const char *const *argv)
 #else
     dTHXo;
     DWORD ret;
+    void* env;
+    char* dir;
     STARTUPINFO StartupInfo;
     PROCESS_INFORMATION ProcessInformation;
     DWORD create = 0;
@@ -2501,6 +2532,9 @@ win32_spawnvp(int mode, const char *cmdname, const char *const *argv)
     char *cmd = create_command_line(cmdname, strcmp(cmdname, argv[0]) == 0
 			     	             ? &argv[1] : argv);
     char *fullcmd = Nullch;
+
+    env = PerlEnv_get_childenv();
+    dir = PerlEnv_get_childdir();
 
     switch(mode) {
     case P_NOWAIT:	/* asynch + remember result */
@@ -2544,8 +2578,8 @@ RETRY:
 		       NULL,		/* thread attributes */
 		       TRUE,		/* inherit handles */
 		       create,		/* creation flags */
-		       NULL,		/* inherit environment */
-		       NULL,		/* inherit cwd */
+		       (LPVOID)env,	/* inherit environment */
+		       dir,		/* inherit cwd */
 		       &StartupInfo,
 		       &ProcessInformation))
     {
@@ -2580,7 +2614,10 @@ RETRY:
     }
 
     CloseHandle(ProcessInformation.hThread);
+
 RETVAL:
+    PerlEnv_free_childenv(env);
+    PerlEnv_free_childdir(dir);
     Safefree(cmd);
     Safefree(fullcmd);
     return (int)ret;

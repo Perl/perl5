@@ -68,7 +68,7 @@ close(CFG);
 if ($PLATFORM eq 'win32') {
     warn join(' ',keys %define)."\n";
     if ($define{PERL_OBJECT}) {
-	print "LIBRARY PerlCore\n";
+	print "LIBRARY Perl56\n";
 	print "DESCRIPTION 'Perl interpreter'\n";
 	print "EXPORTS\n";
 #    output_symbol("perl_alloc");
