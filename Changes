@@ -29,6 +29,202 @@ Version v5.8.3		Maintenance release working toward v5.8.3
 --------------
 ____________________________________________________________________________
 ____________________________________________________________________________
+[ 22140] By: nicholas                              on 2004/01/14  14:37:50
+        Log: rebuild pod/perltoc.pod
+     Branch: maint-5.8/perl
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[ 22139] By: nicholas                              on 2004/01/14  14:34:46
+        Log: Note that I failed to integrate the suidperl patch. me--
+     Branch: maint-5.8/perl
+	   ! pod/perl583delta.pod
+____________________________________________________________________________
+[ 22138] By: nicholas                              on 2004/01/14  13:51:23
+        Log: Revert 21936 (which solves leaks with threads and weak references)
+             because it can introduce new SEGVs, and I'd prefer to ship with
+             the same bugs as 5.8.2, rather than different bugs.
+             Same bugs feels like the lesser of two evils.
+     Branch: maint-5.8/perl
+	   ! mg.c sv.c
+____________________________________________________________________________
+[ 22137] By: nicholas                              on 2004/01/14  13:20:47
+        Log: Integrate CGI::Fast and CGI::Util from CGI 3.03
+             (just version number changes)
+             I don't want to integratre CGI.pm 3.03 as it also has functionality
+             changes, and is less than 48 hours old.
+     Branch: maint-5.8/perl
+	  !> lib/CGI/Fast.pm lib/CGI/Util.pm
+____________________________________________________________________________
+[ 22135] By: nicholas                              on 2004/01/14  12:25:57
+        Log: Some more updates
+     Branch: maint-5.8/perl
+	   ! pod/perl583delta.pod
+____________________________________________________________________________
+[ 22134] By: nicholas                              on 2004/01/13  23:07:41
+        Log: Integrate:
+             [ 22133]
+             Add VMS to the list of "don't fork" OSes
+             [In the most simple way possible. Fix this properly post 5.8.3
+             to use $Config{d_fork} or something more robust]
+     Branch: maint-5.8/perl
+	  !> ext/threads/shared/t/wait.t
+____________________________________________________________________________
+[ 22132] By: nicholas                              on 2004/01/13  21:55:59
+        Log: Integrate:
+             [ 21644]
+             Document the fact that keys() and values() are optimized
+             for void context (as suggested by Liz.)
+             
+             [ 22108]
+             documentation nit
+             
+             [ 22125]
+             Document usage of $_ and pos() inside /(?{...})/.
+             (see change #2367.)
+     Branch: maint-5.8/perl
+	  !> pod/perlfunc.pod pod/perlop.pod pod/perlre.pod
+____________________________________________________________________________
+[ 22131] By: nicholas                              on 2004/01/13  21:16:27
+        Log: Back out 22144.
+             (Craig Berry informs us that the official name is
+             "OpenVMS Industry Standard 64"  
+             which may be shortened to "OpenVMS I64"
+             Bah. Marketrdroids)
+     Branch: maint-5.8/perl
+	   ! pod/perl583delta.pod
+____________________________________________________________________________
+[ 22127] By: nicholas                              on 2004/01/13  08:55:10
+        Log: Integrate:
+             [ 22122]
+             Subject: Re: 5.8.3-RC1, ext/threads/shared/t/wait still hanging
+             From: Mike Pomraning <mjp@pilcrow.madison.wi.us>
+             Message-ID: <Pine.LNX.4.58.0401121127210.15844@benevelle.wi.securepipe.com>
+             Date: Mon, 12 Jan 2004 12:41:52 -0600 (CST)
+     Branch: maint-5.8/perl
+	  !> ext/threads/shared/t/wait.t
+____________________________________________________________________________
+[ 22118] By: nicholas                              on 2004/01/12  12:43:13
+        Log: Integrate:
+             [ 22117]
+             Subject: Re: [perl #24846] [PATCH] Apparent utf8 bug in join() in 5.8.[012] 
+             From: SADAHIRO Tomoyuki <bqw10602@nifty.com>
+             Date: Mon, 12 Jan 2004 11:19:37 +0900
+             Message-Id: <20040112111007.EB69.BQW10602@nifty.com>
+     Branch: maint-5.8/perl
+	  !> doop.c t/op/join.t
+____________________________________________________________________________
+[ 22116] By: nicholas                              on 2004/01/11  23:55:36
+        Log: Integrate:
+             [ 22115]
+             Subject: Re: 5.8.3-RC1, ext/threads/shared/t/wait still hanging
+             From: Mike Pomraning <mjp@pilcrow.madison.wi.us>
+             Message-ID: <Pine.LNX.4.58.0401111548010.6679@localhost.localdomain>
+             Date: Sun, 11 Jan 2004 16:24:18 -0600 (CST)
+     Branch: maint-5.8/perl
+	  !> ext/threads/shared/t/wait.t
+____________________________________________________________________________
+[ 22114] By: nicholas                              on 2004/01/11  23:27:27
+        Log: Typo spotted by Jarkko
+     Branch: maint-5.8/perl
+	   ! pod/perl583delta.pod
+____________________________________________________________________________
+[ 22111] By: nicholas                              on 2004/01/11  19:57:50
+        Log: Subject: Re: [PATCH win32/makefile.mk] (was Re: 5.8.3 RC1)
+             From: Abe Timmerman <abe@ztreet.demon.nl>
+             Message-Id: <200401111813.40829.abe@ztreet.demon.nl>
+             Date: Sun, 11 Jan 2004 18:13:40 +0100
+             
+             plus revert 22092 and 22080
+     Branch: maint-5.8/perl
+	   ! pod/buildtoc win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[ 22105] By: nicholas                              on 2004/01/09  22:10:43
+        Log: Integrate:
+             [ 22104]
+             Bah. Makefile.PL still tests the sub-MANIFEST
+     Branch: maint-5.8/perl
+	  !> ext/Storable/MANIFEST
+____________________________________________________________________________
+[ 22099] By: nicholas                              on 2004/01/08  16:52:35
+        Log: Update META.yml
+             ext/threads and ext/PerlIO now aren't in the list - is this correct?
+     Branch: maint-5.8/perl
+	   ! META.yml
+____________________________________________________________________________
+[ 22098] By: nicholas                              on 2004/01/08  15:24:15
+        Log: Integrate:
+             [ 22096]
+             Subject: [PATCH pod/perlhist.pod] Mention 5.8.3-RC1
+             From: Abigail <abigail@abigail.nl>
+             Message-ID: <20040107230027.GC393@abigail.nl>
+             Date: Thu, 8 Jan 2004 00:00:27 +0100
+     Branch: maint-5.8/perl
+	  !> pod/perlhist.pod
+____________________________________________________________________________
+[ 22097] By: nicholas                              on 2004/01/08  14:44:17
+        Log: That was RC1. With some bonus bits
+     Branch: maint-5.8/perl
+	   ! patchlevel.h
+____________________________________________________________________________
+[ 22095] By: nicholas                              on 2004/01/08  13:13:10
+        Log: Remove duplicated entries, spotted by Enache Adrian
+     Branch: maint-5.8/perl
+	   ! Changes
+____________________________________________________________________________
+[ 22094] By: nicholas                              on 2004/01/08  13:09:12
+        Log: Fixes from Petras Kudaras and Gisle Aas, plus document the addition
+             to perldiag.pod
+     Branch: maint-5.8/perl
+	   ! pod/perl583delta.pod
+____________________________________________________________________________
+[ 22093] By: nicholas                              on 2004/01/08  12:46:09
+        Log: Graham says that the search.cpan.org pod finder hashes on name
+             The 4 files all thinking they are perldelta.pod confuses it.
+     Branch: maint-5.8/perl
+	   ! pod/perl581delta.pod pod/perl582delta.pod pod/perl58delta.pod
+____________________________________________________________________________
+[ 22092] By: nicholas                              on 2004/01/08  12:33:11
+        Log: Subject: Re: [PATCH win32/makefile.mk] (was Re: 5.8.3 RC1)
+             From: Abe Timmerman <abe@ztreet.demon.nl>
+             Message-Id: <200401080156.01280.abe@ztreet.demon.nl>
+             Date: Thu, 8 Jan 2004 01:56:01 +0100
+     Branch: maint-5.8/perl
+	   ! win32/makefile.mk
+____________________________________________________________________________
+[ 22090] By: nicholas                              on 2004/01/07  13:30:14
+        Log: Correct timestamp on ext/IO/IO.xs
+     Branch: maint-5.8/perl
+	   ! ext/IO/IO.xs
+____________________________________________________________________________
+[ 22089] By: nicholas                              on 2004/01/07  13:19:41
+        Log: Seems to be an off-by-4-years in Perforce on MacOS. Fix it. Grr.
+     Branch: maint-5.8/perl
+	   ! ext/Digest/MD5/hints/MacOS.pl ext/Filter/t/call.t
+	   ! ext/POSIX/t/taint.t lib/AutoSplit.t lib/Devel/SelfStubber.pm
+	   ! lib/Devel/SelfStubber.t lib/File/DosGlob.t lib/Pod/t/Usage.t
+	   ! lib/blib.pm lib/charnames.t lib/diagnostics.t lib/subs.t
+	   ! t/comp/cpp.t t/comp/use.t t/io/inplace.t t/io/iprefix.t
+	   ! t/lib/compmod.pl t/lib/filter-util.pl t/lib/warnings/mg
+	   ! t/op/glob.t t/op/method.t t/op/mkdir.t t/op/read.t
+	   ! t/op/recurse.t t/op/srand.t t/op/study.t t/op/subst_wamp.t
+	   ! t/pod/testp2pt.pl t/run/exit.t t/run/switchI.t
+	   ! t/run/switchPx.t t/run/switchx.t t/x2p/s2p.t utils/splain.PL
+____________________________________________________________________________
+[ 22088] By: nicholas                              on 2004/01/07  13:10:22
+        Log: Attempt timestamp fixup
+     Branch: maint-5.8/perl
+	   ! ext/IO/IO.xs
+____________________________________________________________________________
+[ 22087] By: nicholas                              on 2004/01/07  12:10:19
+        Log: This is RC1
+     Branch: maint-5.8/perl
+	   ! patchlevel.h
+____________________________________________________________________________
+[ 22086] By: nicholas                              on 2004/01/07  12:09:16
+        Log: Update Changes
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 22085] By: nicholas                              on 2004/01/07  12:08:00
         Log: Cargo cult upgrade to 5.8.3
      Branch: maint-5.8/perl
