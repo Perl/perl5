@@ -78,7 +78,7 @@ sub compare {
     }
     else {
 	unless (defined($size) && $size > 0) {
-	    $size = $fromsize;
+	    $size = $fromsize || -s TO || 0;
 	    $size = 1024 if $size < 512;
 	    $size = $Too_Big if $size > $Too_Big;
 	}
