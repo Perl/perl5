@@ -60,7 +60,7 @@ The following encodings are always available.
 
   Canonical     Aliases                      Comments & References
   ----------------------------------------------------------------
-  ascii         US-ascii                                    [ECMA]
+  ascii         US-ascii ISO-646-US                         [ECMA]
   ascii-ctrl			                  Special Encoding
   iso-8859-1    latin1                                       [ISO]
   null				                  Special Encoding

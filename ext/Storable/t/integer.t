@@ -1,5 +1,4 @@
 #!./perl -w
-
 #
 #  Copyright 2002, Larry Wall.
 #

@@ -72,6 +72,8 @@ sub _base_len
     #print "BASE_LEN: $BASE_LEN MAX_VAL: $MAX_VAL BASE: $BASE RBASE: $RBASE ";
     #print "BASE_LEN_SMALL: $BASE_LEN_SMALL MBASE: $MBASE\n";
 
+    undef &_mul;
+    undef &_div;
     if ($caught & 1 != 0)
       {
       # must USE_MUL

@@ -1,6 +1,4 @@
 #!./perl
-
-# $Id: freeze.t,v 1.0.1.1 2001/07/01 11:25:16 ram Exp $
 #
 #  Copyright (c) 1995-2000, Raphael Manfredi
 #  

@@ -423,6 +423,8 @@ use_ok('Test::Harness');
 
 tie *NULL, 'My::Dev::Null' or die $!;
 
+$SAMPLE_TESTS = VMS::Filespec::unixify($SAMPLE_TESTS) if $^O eq 'VMS';
+
 while (my($test, $expect) = each %samples) {
     # _run_all_tests() runs the tests but skips the formatting.
     my($totals, $failed);
@@ -431,7 +433,9 @@ while (my($test, $expect) = each %samples) {
         select NULL;    # _run_all_tests() isn't as quiet as it should be.
         local $SIG{__WARN__} = sub { $warning .= join '', @_; };
         ($totals, $failed) = 
-          Test::Harness::_run_all_tests(catfile($SAMPLE_TESTS, $test));
+          Test::Harness::_run_all_tests($^O eq 'macos' ?
+					catfile($SAMPLE_TESTS, $test) :
+					"$SAMPLE_TESTS/$test");
     };
     select STDOUT;
 
@@ -449,7 +453,9 @@ while (my($test, $expect) = each %samples) {
         is_deeply( {map { $_=>$totals->{$_} } keys %{$expect->{total}}},
                    $expect->{total},
                                                   "$test - totals" );
-        is_deeply( {map { $_=>$failed->{catfile($SAMPLE_TESTS, $test)}{$_} }
+        is_deeply( {map { $_=>$failed->{$^O eq 'macos' ?
+                                        catfile($SAMPLE_TESTS, $test) :
+                                        "$SAMPLE_TESTS/$test"}{$_} }
                     keys %{$expect->{failed}}},
                    $expect->{failed},
                                                   "$test - failed" );

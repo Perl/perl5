@@ -401,8 +401,9 @@ Win9x can not rename() an open file (although WinNT can).
 The Cygwin chroot() implementation has holes (it can not restrict file
 access by native Win32 programs).
 
-Inplace editing ( perl -i ) of files doesn't work without doing a backup 
-of the file being edited ( perl -i.bak ).
+Inplace editing C<perl -i> of files doesn't work without doing a backup 
+of the file being edited C<perl -i.bak> because of windowish restrictions,
+so Perl adds the C<.bak> automatically if you just use C<perl -i>.
 
 =back
 

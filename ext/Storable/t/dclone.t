@@ -1,6 +1,4 @@
 #!./perl
-
-# $Id: dclone.t,v 1.0 2000/09/01 19:40:41 ram Exp $
 #
 #  Copyright (c) 1995-2000, Raphael Manfredi
 #  

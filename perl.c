@@ -2363,6 +2363,12 @@ Perl_moreswitches(pTHX_ char *s)
     case 'i':
 	if (PL_inplace)
 	    Safefree(PL_inplace);
+#if defined(__CYGWIN__) /* do backup extension automagically */
+	if (*(s+1) == '\0') {
+	PL_inplace = savepv(".bak");
+	return s+1;
+	}
+#endif /* __CYGWIN__ */
 	PL_inplace = savepv(s+1);
 	/*SUPPRESS 530*/
 	for (s = PL_inplace; *s && !isSPACE(*s); s++) ;

@@ -52,9 +52,14 @@ $strap->{callback} = sub {
     push @out, $type;
 };
                             
+$SAMPLE_TESTS = VMS::Filespec::unixify($SAMPLE_TESTS) if $^O eq 'VMS';
+
 while( my($test, $expect) = each %samples ) {
     local @out = ();
-    $strap->analyze_file(catfile($SAMPLE_TESTS, $test));
+
+    $strap->analyze_file($^O eq 'macos' ?
+			 catfile($SAMPLE_TESTS, $test) :
+			 "$SAMPLE_TESTS/$test");
 
     is_deeply(\@out, $expect,   "$test callback");
 }

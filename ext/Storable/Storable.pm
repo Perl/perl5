@@ -1,4 +1,3 @@
-# $Id: Storable.pm,v 1.0.1.13 2001/12/01 13:34:49 ram Exp $
 #
 #  Copyright (c) 1995-2000, Raphael Manfredi
 #  

@@ -1,6 +1,4 @@
 #!./perl
-
-# $Id: tied_hook.t,v 1.0.1.1 2001/02/17 12:29:01 ram Exp $
 #
 #  Copyright (c) 1995-2000, Raphael Manfredi
 #  
