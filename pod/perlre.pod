@@ -316,8 +316,10 @@ with a '^'. This is a Perl extension.  For example:
     [:^space:]	    \S	    \P{IsSpace}
     [:^word:]	    \W	    \P{IsWord}
 
-The POSIX character classes [.cc.] and [=cc=] are recognized but
-B<not> supported and trying to use them will cause an error.
+Perl respects the POSIX standard in that POSIX character classes are
+only supported within a character class.  The POSIX character classes
+[.cc.] and [=cc=] are recognized but B<not> supported and trying to
+use them will cause an error.
 
 Perl defines the following zero-width assertions:
 
@@ -347,7 +349,8 @@ It is also useful when writing C<lex>-like scanners, when you have
 several patterns that you want to match against consequent substrings
 of your string, see the previous reference.  The actual location
 where C<\G> will match can also be influenced by using C<pos()> as
-an lvalue.  See L<perlfunc/pos>.
+an lvalue.  Currently C<\G> only works when used at the
+beginning of the pattern. See L<perlfunc/pos>.
 
 The bracketing construct C<( ... )> creates capture buffers.  To
 refer to the digit'th buffer use \<digit> within the
