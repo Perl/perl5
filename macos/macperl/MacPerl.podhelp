@@ -1,9 +1,9 @@
 @menu
-pod:pod/perl.pod		MacPerl Overview
-pod:pod/perltoc.pod		Table of contents
-pod:pod/macperl.pod		Macintosh specific features	
-pod:pod/macperlbook.pod	MacPerl book information
-@sub Macintosh Toolbox Modules
+pod:pod/perl.pod			MacPerl Overview
+pod:pod/perltoc.pod			Table of contents
+pod:pod/macperl.pod			Macintosh specific features	
+pod:pod/macperlbook.pod			MacPerl book information
+@sub				Macintosh Toolbox Modules
 pod:lib/Mac/Toolbox.pod			Overview
 @sep
 pod:lib/Mac/Types.pm			MacOS Types
@@ -25,17 +25,17 @@ pod:lib/Mac/Resources.pm		Resource Manager
 pod:lib/Mac/Gestalt.pm			Gestalt Manager
 pod:lib/Mac/AppleEvents.pm		AppleEvents
 pod:lib/Mac/Processes.pm		Process Manager
-pod:lib/Mac/OSA.pm				Open Scripting Architecture
+pod:lib/Mac/OSA.pm			Open Scripting Architecture
 pod:lib/Mac/Components.pm		QuickTime Components
 pod:lib/Mac/Speech.pm			Speech Synthesis Manager
 pod:lib/Mac/SpeechRecognition.pm	Speech Recognition Manager
 @sep
-pod:lib/Mac/InternetConfig.pm	Internet Config 
+pod:lib/Mac/InternetConfig.pm		Internet Config 
 @sep
 pod:pod/macperlcat.pod			Chris' AppleEvents Tutorial
 @end
-@sub Perl FAQ
-pod:pod/perlfaq.pod				Overview
+@sub				Perl FAQ
+pod:pod/perlfaq.pod			Overview
 @sep
 pod:pod/perlfaq1.pod			General Questions About Perl
 pod:pod/perlfaq2.pod			Obtaining and Learning about Perl
@@ -48,49 +48,50 @@ pod:pod/perlfaq8.pod			System Interaction
 pod:pod/perlfaq9.pod			Networking
 @end
 @sep
-pod:pod/perldata.pod	Data structures
-pod:pod/perlsyn.pod		Syntax
-pod:pod/perlop.pod		Operators and precedence
-pod:pod/perlre.pod		Regular expressions
-pod:pod/perlfunc.pod	Builtin functions
-pod:pod/perlvar.pod		Predefined variables
+pod:pod/perldata.pod		Data structures
+pod:pod/perlsyn.pod			Syntax
+pod:pod/perlop.pod			Operators and precedence
+pod:pod/perlre.pod			Regular expressions
+pod:pod/perlfunc.pod			Builtin functions
+pod:pod/perlvar.pod			Predefined variables
 @sep
-@sub Advanced Topics
-pod:pod/perlsub.pod		Subroutines
-pod:pod/perlmod.pod		Modules
-pod:pod/perlmodlib.pod	Creating new Modules
-pod:pod/perlref.pod		References
-pod:pod/perldsc.pod		Data structures intro
-pod:pod/perllol.pod		Lists of lists
-pod:pod/perlobj.pod		Objects
-pod:pod/perltie.pod		Tied Objects
-pod:pod/perlbot.pod		OO tricks and examples
-pod:pod/perltoot.pod	OO tutorial
-pod:pod/perlform.pod	Formats
-pod:pod/perlipc.pod		Interprocess communication
-@sub Interfacing to C
+@sub				Advanced Topics
+pod:pod/perlsub.pod			Subroutines
+pod:pod/perlmod.pod			Modules
+pod:pod/perlmodlib.pod			Creating new Modules
+pod:pod/perlref.pod			References
+pod:pod/perldsc.pod			Data structures intro
+pod:pod/perllol.pod			Lists of lists
+pod:pod/perlobj.pod			Objects
+pod:pod/perltie.pod			Tied Objects
+pod:pod/perlbot.pod			OO tricks and examples
+pod:pod/perltoot.pod			OO tutorial
+pod:pod/perlform.pod			Formats
+pod:pod/perlipc.pod			Interprocess communication
+@sub				Interfacing to C
 pod:pod/perlxs.pod			XS API
-pod:pod/perlxstut.pod		XS tutorial
-pod:pod/perlguts.pod		Internal functions
-pod:pod/perlapio.pod		Internal I/O Interface
-pod:pod/perlcall.pod		Calling from C
-pod:pod/perlembed.pod		Embedding Perl
+pod:pod/perlxstut.pod			XS tutorial
+pod:pod/perlguts.pod			Internal functions
+pod:pod/perlapio.pod			Internal I/O Interface
+pod:pod/perlcall.pod			Calling from C
+pod:pod/perlembed.pod			Embedding Perl
 @end
 @end
-@sub Troubleshooting
-pod:pod/perldebug.pod	Debugging
-pod:pod/perldiag.pod	Diagnostic messages
-pod:pod/perltrap.pod	Traps for the unwary
+@sub				Troubleshooting
+pod:pod/perldebug.pod			Debugging
+pod:pod/perldiag.pod			Diagnostic messages
+pod:pod/perltrap.pod			Traps for the unwary
 @end
-@sub Various
-pod:pod/perlstyle.pod	Style guide
-pod:pod/perlpod.pod		Documentation format
-pod:pod/perlbook.pod	Book information
-pod:pod/perldelta.pod	News for Perl 5.004
+@sub				Various
+pod:pod/perlstyle.pod			Style guide
+pod:pod/perlpod.pod			Documentation format
+pod:pod/perlbook.pod			Book information
+pod:pod/perldelta.pod			News for Perl 5.004
 @end
 @sep
-http://www.iis.ee.ethz.ch/~neeri/macintosh/perl.html	MacPerl Homepage
-http://www.ptf.com/macperl/								The MacPerl Pages (PTF)
+http://www.macperl.org/			MacPerl Homepage
+http://dev.macperl.org/			MacPerl Development
+http://www.ptf.com/macperl/		The MacPerl Pages (PTF)
 @end
 
 @index :pod:perlop.pod
@@ -203,7 +204,7 @@ http://www.ptf.com/macperl/								The MacPerl Pages (PTF)
 @alias	-k  -X
 @alias	-T  -X
 @alias	-B  -X
-@alias	-M	-X
+@alias	-M  -X
 @alias	-A  -X
 @alias	-C  -X
 @end
@@ -213,11 +214,11 @@ http://www.ptf.com/macperl/								The MacPerl Pages (PTF)
 @rename	sub	NAME
 @end
 @index	:pod:perlsyn.pod
-@alias	if			Compound statements
+@alias	if		Compound statements
 @alias	unless		Compound statements
 @alias	while		Compound statements
-@alias	do			Compound statements
-@alias	for			Compound statements
+@alias	do		Compound statements
+@alias	for		Compound statements
 @alias	foreach		Compound statements
 @alias	next		Compound statements
 @alias	last		Compound statements

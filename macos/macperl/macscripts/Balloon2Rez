@@ -1,0 +1,131 @@
+Perl -Sx "{0}" {"Parameters"}
+Exit 0
+
+#!perl
+#
+# Balloon2Rez - High level language for creating dialog and menu balloon descriptions
+#
+# Written by              Peter Lewis        <peter.lewis@info.curtin.edu.au>
+# Some modifications by   Matthias Neeracher <neeri@iis.ee.ethz.ch>
+#
+# 04Dec94 MN removed hardcoded constants, allow some spacing flexibility
+#
+
+$balloons_strh_id = 26724;
+
+$in_name  = $ARGV[0];
+$in_name  =~ /^(.*)\.ball\w*$/i || die "Input needs suffix .ball*";
+$out_name = "$1.r";
+
+open(STDIN,"$in_name") || die "Failed to open input \"$in_name\"";
+open(STDOUT,">$out_name") || die "Failed to open output \"$out_name\"";
+
+print <<INCLUDES;
+#include "Types.r"
+#include "BalloonTypes.r"
+
+INCLUDES
+
+@strings=();
+
+while (<>) {
+	chop;
+	next if /^$/;
+	last if /^END$/;
+	die "Bad line '$_'" unless /(DIALOG|MENU)\s+(\d+)\s*(.*)/;
+	$dialog = $1 eq "DIALOG"; $id = $2; $name=$3;
+	@items=();
+	@menus=();
+	$menuitem=0;
+	while (<>) {
+		chop;
+		next if /^\s*$/;
+		if ($dialog) {
+			last if /^END-DIALOG$/;
+			die "Quote in line '$_'" if /"/;
+			die "Bad dialog line '$_'" unless /^\s*(\d+)\.(\d+)\s+(.*)/;
+			($item,$kind,$text) = ($1-1,$2,$3);
+		} else {
+			last if /^END-MENU$/;
+			die "Quote in line '$_'" if /"/;
+			die "Bad menu line '$_'" unless /^\s*(\d+)\.(\d)\s+(.*)/;
+			($item,$kind,$text) = ($1,$2,$3);
+		}
+		$base=$item*4;
+		$item=$base+$kind-1;
+		$index = &find_string($text);
+		$items[$item] = $index;
+		$items[$base+0] = 0 unless $items[$base+0];
+		$items[$base+1] = 0 unless $items[$base+1];
+		$items[$base+2] = 0 unless $items[$base+2];
+		$items[$base+3] = 0 unless $items[$base+3];
+	}
+   if ($dialog) {
+   	print <<"HEADER";
+resource 'hdlg' ($id,"$name") {
+\t2,0,0,0,0,
+\tHMSkipItem { },
+\t{
+HEADER
+	} else {
+      print <<"HEADER";
+resource 'hmnu' ($id,"$name") {
+\t2,0,0,0,
+\tHMSkipItem { },
+\t{
+HEADER
+	}
+	for $item (1..@items/4) {
+		$base = ($item-1)*4;
+		if ($items[$base+0] || $items[$base+1] ||
+			 $items[$base+2] || $items[$base+3]) {
+			print "\t\tHMStringResItem { /* ", 
+				($dialog ? $item : ($item ? $item-1 : "title")),
+				" */\n";
+			if ($dialog) {
+				print <<"ITEM";
+\t\t\t{0,0},
+\t\t\t{0,0,0,0},
+ITEM
+			}
+			for $k (0..3) {
+				$index = $items[$base+$k];
+				if ($index) {
+					print "\t\t\t$balloons_strh_id,$index,\n";
+				} else {
+					print "\t\t\t0,0,\n";
+				}
+			}
+			print "\t\t},\n";
+		} else {
+			print "\t\tHMSkipItem { }, /* $item */\n";
+		}
+	}
+	print <<"TRAILER";
+\t}
+};
+
+TRAILER
+}
+
+print "resource 'STR#' ($balloons_strh_id,\"Balloon Help Strings\") {\n";
+print "\t{\n";
+for $index (1..@strings) {
+	print "\t\t/* $index */\n";
+	print "\t\t\"$strings[$index-1]\",\n";
+}
+print "\t}\n";
+print "};\n\n";
+
+exit;
+
+sub find_string {
+	local($s) = @_;
+	local($i);
+	for $i (1..@strings) {
+		return $i if $s eq $strings[$i-1];
+	}
+	$i = @strings;
+	$strings[$i] = $s;
+	return $i+1;
+}

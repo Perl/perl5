@@ -148,11 +148,17 @@ MENU 130	Edit
 	7.1	Selects all text in the active window.
 	7.2	Selects all text in the active window. Not available because this operation is non-functional.
 
-	9.1	Jump to File (and Line) given by current selection.
-	9.2	Jump to File (and Line) given by current selection. Select a file name and/or line number to enable this item.
+	9.1	Find text in current editor window.
+	9.2	Find text in current editor window.Not available because there is no open current window.
 
-	11.1	Set the font and size of the document.
-	13.1	Edit MacPerl Preferences.
+	10.1	Find text again.
+	10.2	Find text again. Not available because there is no open current window.
+
+	11.1	Jump to File (and Line) given by current selection.
+	11.2	Jump to File (and Line) given by current selection. Select a file name and/or line number to enable this item.
+
+	13.1	Set the font and size of the document.
+	15.1	Edit MacPerl Preferences.
 END-MENU
 
 MENU 131	Window
@@ -177,6 +183,9 @@ MENU 132 Script
 
 	7.1	Turns on the Perl debugger.
 	7.3	Turns off the Perl debugger.
+
+	8.1	Turns on taint checks.
+	8.3	Turns off taint checks.
 END-MENU
 
 END
