@@ -17,11 +17,11 @@ use ExtUtils::MakeMaker;
 use Config;
 
 WriteMakefile(
-    'NAME'			=> 'Storable',
-    'DISTNAME'		=> "Storable",
-	'MAN3PODS'		=> {},
-    PREREQ_PM		=> {'Test::More' => 0},
-    'VERSION_FROM'	=> 'Storable.pm',
-    'dist'			=> { SUFFIX => 'gz', COMPRESS => 'gzip -f' },
+    'NAME'              => 'Storable',
+    'DISTNAME'          => "Storable",
+    'MAN3PODS'          => {},
+    PREREQ_PM           => { 'Test::More' => '0.41' },
+    INSTALLDIRS         => 'perl',
+    'VERSION_FROM'      => 'Storable.pm',
+    'dist'              => { SUFFIX => 'gz', COMPRESS => 'gzip -f' },
 );
-
