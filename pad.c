@@ -575,11 +575,11 @@ Perl_pad_findmy(pTHX_ char *name)
 	    continue;
 	}
 	else {
-	    if (   seq >  (U32)I_32(SvNVX(sv))	/* min */
+	    if (   seq >  U_32(SvNVX(sv))	/* min */
 		&& seq <= (U32)SvIVX(sv))	/* max */
 		return off;
 	    else if ((SvFLAGS(sv) & SVpad_OUR)
-		    && (U32)I_32(SvNVX(sv)) == PAD_MAX) /* min */
+		    && U_32(SvNVX(sv)) == PAD_MAX) /* min */
 	    {
 		/* look for an our that's being introduced; this allows
 		 *    our $foo = 0 unless defined $foo;
@@ -667,8 +667,8 @@ S_pad_findlex(pTHX_ char *name, PADOFFSET newoff, CV* innercv)
 		continue;
 	    }
 	    else {
-		if (   seq >  (U32)I_32(SvNVX(sv))	/* min */
-		    && seq <= (U32)SvIVX(sv)		/* max */
+		if (   seq >  U_32(SvNVX(sv))	/* min */
+		    && seq <= (U32)SvIVX(sv)	/* max */
 		    && !(newoff && !depth) /* ignore inactive when cloning */
 		)
 		    goto found;
@@ -708,7 +708,7 @@ found:
 		"             matched:   offset %ld"
 		    " (%lu,%lu), sv=0x%"UVxf"\n",
 		(long)off,
-		(unsigned long)I_32(SvNVX(sv)),
+		(unsigned long)U_32(SvNVX(sv)),
 		(unsigned long)SvIVX(sv),
 		PTR2UV(oldsv)
 	    )
@@ -908,7 +908,7 @@ Perl_intro_my(pTHX)
 	    DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 		"Pad intromy: %ld \"%s\", (%lu,%lu)\n",
 		(long)i, SvPVX(sv),
-		(unsigned long)I_32(SvNVX(sv)), (unsigned long)SvIVX(sv))
+		(unsigned long)U_32(SvNVX(sv)), (unsigned long)SvIVX(sv))
 	    );
 	}
     }
@@ -956,7 +956,7 @@ Perl_pad_leavemy(pTHX)
 	    DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 		"Pad leavemy: %ld \"%s\", (%lu,%lu)\n",
 		(long)off, SvPVX(sv),
-		(unsigned long)I_32(SvNVX(sv)), (unsigned long)SvIVX(sv))
+		(unsigned long)U_32(SvNVX(sv)), (unsigned long)SvIVX(sv))
 	    );
 	}
     }
@@ -1210,7 +1210,7 @@ Perl_do_dump_pad(pTHX_ I32 level, PerlIO *file, PADLIST *padlist, int full)
 		    (int) ix,
 		    PTR2UV(ppad[ix]),
 		    (unsigned long) (ppad[ix] ? SvREFCNT(ppad[ix]) : 0),
-		    (unsigned long)I_32(SvNVX(namesv)),
+		    (unsigned long)U_32(SvNVX(namesv)),
 		    (unsigned long)SvIVX(namesv),
 		    SvPVX(namesv)
 		);
