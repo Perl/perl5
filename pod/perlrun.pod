@@ -315,7 +315,7 @@ If the extension does contain one or more C<*> characters, then each C<*>
 is replaced with the current filename.  In perl terms you could think of
 this as:
 
-    ($old_file_name = $extension) =~ s/\*/$file_name/g;
+    ($backup = $extension) =~ s/\*/$file_name/g;
 
 This allows you to add a prefix to the backup file, instead of (or in
 addition to) a suffix:
@@ -326,6 +326,14 @@ Or even to place backup copies of the original files into another
 directory (provided the directory already exists):
 
     $ perl -pi'old/*.bak' -e 's/bar/baz/' fileA # backup to 'old/fileA.bak'
+
+These sets of one-liners are equivalent:
+
+    $ perl -pi -e 's/bar/baz/' fileA		# overwrite current file
+    $ perl -pi'*' -e 's/bar/baz/' fileA		# overwrite current file
+
+    $ perl -pi'.bak' -e 's/bar/baz/' fileA	# backup to 'fileA.bak'
+    $ perl -pi'*.bak' -e 's/bar/baz/' fileA	# backup to 'fileA.bak'
 
 From the shell, saying
 
@@ -339,9 +347,16 @@ is the same as using the script:
 which is equivalent to
 
     #!/usr/bin/perl
+    $extension = '.bak';
     while (<>) {
 	if ($ARGV ne $oldargv) {
-	    rename($ARGV, $ARGV . '.bak');
+	    if ($extension !~ /\*/) {
+		$backup = $ARGV . $extension;
+	    }
+	    else {
+		($backup = $extension) =~ s/\*/$ARGV/g;
+	    }
+	    rename($ARGV, $backup);
 	    open(ARGVOUT, ">$ARGV");
 	    select(ARGVOUT);
 	    $oldargv = $ARGV;
@@ -355,12 +370,31 @@ which is equivalent to
 
 except that the B<-i> form doesn't need to compare $ARGV to $oldargv to
 know when the filename has changed.  It does, however, use ARGVOUT for
-the selected filehandle.  Note that STDOUT is restored as the
-default output filehandle after the loop.
+the selected filehandle.  Note that STDOUT is restored as the default
+output filehandle after the loop.
 
-You can use C<eof> without parentheses to locate the end of each input file,
-in case you want to append to each file, or reset line numbering (see
-example in L<perlfunc/eof>).
+As shown above, Perl creates the backup file whether or not any output
+is actually changed.  So this is just a fancy way to copy files:
+
+    $ perl -p -i'/some/file/path/*' -e 1 file1 file2 file3...
+  or
+    $ perl -p -i'.bak' -e 1 file1 file2 file3...
+
+You can use C<eof> without parentheses to locate the end of each input
+file, in case you want to append to each file, or reset line numbering
+(see example in L<perlfunc/eof>).
+
+If, for a given file, Perl is unable to create the backup file as
+specified in the extension then it will skip that file and continue on
+with the next one (if it exists).
+
+For a discussion of issues surrounding file permissions and C<-i>, see
+L<perlfaq5/Why does Perl let me delete read-only files?  Why does -i clobber protected files?  Isn't this a bug in Perl?>.
+
+You cannot use B<-i> to create directories or to strip extensions from
+files.
+
+Perl does not expand C<~>, so don't do that.
 
 Finally, note that the B<-i> switch does not impede execution when no
 files are given on the command line.  In this case, no backup is made
