@@ -1161,6 +1161,7 @@ I32 type;
     else if (!type) {
 	op->op_private |= OPpLVAL_INTRO;
 	op->op_flags &= ~OPf_SPECIAL;
+	hints |= HINT_BLOCK_SCOPE;
     }
     else if (type != OP_GREPSTART && type != OP_ENTERSUB)
 	op->op_flags |= OPf_REF;
