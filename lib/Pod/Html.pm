@@ -761,7 +761,7 @@ sub scan_headings {
     # scan for =head directives, note their name, and build an index
     #  pointing to each of them.
     foreach my $line (@data) {
-	if ($line =~ /^\s*=(head)([1-6])\s+(.*)/) {
+	if ($line =~ /^=(head)([1-6])\s+(.*)/) {
 	    ($tag,$which_head, $title) = ($1,$2,$3);
 	    chomp($title);
 	    $$sections{htmlify(0,$title)} = 1;
@@ -788,7 +788,7 @@ sub scan_headings {
     # get rid of bogus lists
     $index =~ s,\t*<UL>\s*</UL>\n,,g;
 
-    $ignore = 1;	# retore old value;
+    $ignore = 1;	# restore old value;
 
     return $index;
 }
