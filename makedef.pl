@@ -780,6 +780,7 @@ if ($PLATFORM eq 'win32') {
 			    Perl_thread_create
 			    Perl_win32_init
 			    RunPerl
+			    win32_async_check
 			    win32_errno
 			    win32_environ
 			    win32_abort

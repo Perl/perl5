@@ -556,7 +556,7 @@ Apd	|I32	|call_argv	|const char* sub_name|I32 flags|char** argv
 Apd	|I32	|call_method	|const char* methname|I32 flags
 Apd	|I32	|call_pv	|const char* sub_name|I32 flags
 Apd	|I32	|call_sv	|SV* sv|I32 flags
-p	|void	|despatch_signals
+Ap	|void	|despatch_signals
 Apd	|SV*	|eval_pv	|const char* p|I32 croak_on_error
 Apd	|I32	|eval_sv	|SV* sv|I32 flags
 Apd	|SV*	|get_sv		|const char* name|I32 create
