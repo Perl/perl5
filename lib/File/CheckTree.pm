@@ -1,8 +1,9 @@
 package File::CheckTree;
 
 use 5.006;
-use Exporter;
 use Cwd;
+use Exporter;
+use File::Spec;
 use warnings;
 use strict;
 
@@ -107,7 +108,8 @@ sub validate {
             my $this = $test;
 
             # expand relative $file to full pathname if preceded by cd directive
-            $file = $cwd . '/' . $file if $cwd && $file !~ m|^/|;
+            $file = File::Spec->catfile($cwd, $file) 
+                    if $cwd && !File::Spec->file_name_is_absolute($file);
 
             # put filename in after the test operator
             $this =~ s/(-\w\b)/$1 "\$file"/g;
