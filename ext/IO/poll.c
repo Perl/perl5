@@ -22,7 +22,7 @@
 # include <time.h>
 #endif
 #include <sys/types.h>
-#if defined(HAS_SOCKET) && !defined(VMS) /* VMS handles sockets via vmsish.h */
+#if defined(HAS_SOCKET) && !defined(VMS) && !defined(ultrix) /* VMS handles sockets via vmsish.h, ULTRIX dies of socket struct redefinitions */
 #  include <sys/socket.h>
 #endif
 #include <sys/stat.h>
