@@ -236,7 +236,8 @@ ldflags="$ldflags -Wl,-woff,84"
 
 # workaround for an optimizer bug
 case "`$cc -version 2>&1`" in
-*7.2.*|*7.3.1.*) op_cflags='optimize=-O1' ;;
+*7.2.*)   op_cflags='optimize=-O1'; opmini_cflags='optimize=-O1' ;;
+*7.3.1.*) op_cflags='optimize=-O2'; opmini_cflags='optimize=-O2' ;;
 esac
 
 # We don't want these libraries.
