@@ -652,8 +652,9 @@ PP(pp_sort)
 	RETPUSHUNDEF;
     }
 
+    ENTER;
+    SAVEPPTR(sortcop);
     if (op->op_flags & OPf_STACKED) {
-	ENTER;
 	if (op->op_flags & OPf_SPECIAL) {
 	    OP *kid = cLISTOP->op_first->op_sibling;	/* pass pushmark */
 	    kid = kUNOP->op_first;			/* pass rv2gv */
@@ -740,7 +741,6 @@ PP(pp_sort)
 	    POPSTACK();
 	    CATCH_SET(oldcatch);
 	}
-	LEAVE;
     }
     else {
 	if (max > 1) {
@@ -749,6 +749,7 @@ PP(pp_sort)
 		  (op->op_private & OPpLOCALE) ? sv_cmp_locale : sv_cmp);
 	}
     }
+    LEAVE;
     stack_sp = ORIGMARK + max;
     return nextop;
 }
