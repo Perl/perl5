@@ -162,7 +162,7 @@ if ($Is_Cygwin) {
   $perldll = 'perl56.' . $dlext if $Config{'ccflags'} =~ /PERL_OBJECT/i;
 }
 
-   if ($dlsrc != "dl_none.xs") {
+   if ($dlsrc ne "dl_none.xs") {
       -f $perldll || die "No perl DLL built\n";
 
 # Install the DLL
