@@ -259,7 +259,6 @@ RunPerl(int argc, char **argv, char **env)
 {
     int exitstatus;
     PerlInterpreter *my_perl, *new_perl = NULL;
-    struct perl_thread *thr;
 
 #ifndef __BORLANDC__
     /* XXX this _may_ be a problem on some compilers (e.g. Borland) that
@@ -289,7 +288,7 @@ RunPerl(int argc, char **argv, char **env)
 
     if (!(my_perl = perl_alloc()))
 	return (1);
-    perl_construct( my_perl );
+    perl_construct(my_perl);
     PL_perl_destruct_level = 0;
 
     exitstatus = perl_parse(my_perl, xs_init, argc, argv, env);
@@ -312,15 +311,15 @@ RunPerl(int argc, char **argv, char **env)
 #  else
 	new_perl = perl_clone(my_perl, 1);
 #  endif
-	exitstatus = perl_run( new_perl );
+	exitstatus = perl_run(new_perl);
 	PERL_SET_THX(my_perl);
 #else
-	exitstatus = perl_run( my_perl );
+	exitstatus = perl_run(my_perl);
 #endif
     }
 
-    perl_destruct( my_perl );
-    perl_free( my_perl );
+    perl_destruct(my_perl);
+    perl_free(my_perl);
 #ifdef USE_ITHREADS
     if (new_perl) {
 	PERL_SET_THX(new_perl);

@@ -37,7 +37,7 @@ The open pragma is used to declare one or more default disciplines for
 I/O operations.  Any open() and readpipe() (aka qx//) operators found
 within the lexical scope of this pragma will use the declared defaults.
 Neither open() with an explicit set of disciplines, nor sysopen() are
-not influenced by this pragma.
+influenced by this pragma.
 
 Only the two pseudo-disciplines ":raw" and ":crlf" are currently
 available.
