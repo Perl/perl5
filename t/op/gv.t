@@ -4,7 +4,7 @@
 # various typeglob tests
 #
 
-print "1..16\n";
+print "1..18\n";
 
 # type coersion on assignment
 $foo = 'foo';

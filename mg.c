@@ -906,8 +906,8 @@ char *meth;
 
     ENTER;
     SAVETMPS;
-    PUSHMARK(sp);
-    EXTEND(sp, 2);
+    PUSHMARK(SP);
+    EXTEND(SP, 2);
     PUSHs(mg->mg_obj);
     if (mg->mg_ptr) {
 	if (mg->mg_len >= 0)
@@ -945,8 +945,8 @@ MAGIC* mg;
 {
     dSP;
 
-    PUSHMARK(sp);
-    EXTEND(sp, 3);
+    PUSHMARK(SP);
+    EXTEND(SP, 3);
     PUSHs(mg->mg_obj);
     if (mg->mg_ptr) {
 	if (mg->mg_len >= 0)
@@ -978,7 +978,7 @@ MAGIC* mg;
 {
     dSP;
 
-    PUSHMARK(sp);
+    PUSHMARK(SP);
     XPUSHs(mg->mg_obj);
     PUTBACK;
 
@@ -998,8 +998,8 @@ SV* key;
 
     ENTER;
     SAVETMPS;
-    PUSHMARK(sp);
-    EXTEND(sp, 2);
+    PUSHMARK(SP);
+    EXTEND(SP, 2);
     PUSHs(mg->mg_obj);
     if (SvOK(key))
 	PUSHs(key);
@@ -1818,7 +1818,7 @@ int sig;
 	sv = sv_newmortal();
 	sv_setpv(sv,sig_name[sig]);
     }
-    PUSHMARK(sp);
+    PUSHMARK(SP);
     PUSHs(sv);
     PUTBACK;
 

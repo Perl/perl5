@@ -505,7 +505,7 @@ dARGS
     }
 
     /* Guess how much room we need.  hv_max may be a few too many.  Oh well. */
-    EXTEND(sp, HvMAX(hv) * (dokeys + dovalues));
+    EXTEND(SP, HvMAX(hv) * (dokeys + dovalues));
 
     PUTBACK;	/* hv_iternext and hv_iterval might clobber stack_sp */
     while (entry = hv_iternext(hv)) {

@@ -1361,7 +1361,7 @@ int flags;
     PUTBACK;
     pp_pushmark();
 
-    EXTEND(sp, notfound + 5);
+    EXTEND(SP, notfound + 5);
     PUSHs(lr>0? right: left);
     PUSHs(lr>0? left: right);
     PUSHs( lr > 0 ? &sv_yes : ( assign ? &sv_undef : &sv_no ));

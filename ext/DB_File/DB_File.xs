@@ -160,8 +160,8 @@ const DBT * key2 ;
     ENTER ;
     SAVETMPS;
 
-    PUSHMARK(sp) ;
-    EXTEND(sp,2) ;
+    PUSHMARK(SP) ;
+    EXTEND(SP,2) ;
     PUSHs(sv_2mortal(newSVpv(data1,key1->size)));
     PUSHs(sv_2mortal(newSVpv(data2,key2->size)));
     PUTBACK ;
@@ -207,8 +207,8 @@ const DBT * key2 ;
     ENTER ;
     SAVETMPS;
 
-    PUSHMARK(sp) ;
-    EXTEND(sp,2) ;
+    PUSHMARK(SP) ;
+    EXTEND(SP,2) ;
     PUSHs(sv_2mortal(newSVpv(data1,key1->size)));
     PUSHs(sv_2mortal(newSVpv(data2,key2->size)));
     PUTBACK ;
@@ -245,7 +245,7 @@ size_t size ;
     ENTER ;
     SAVETMPS;
 
-    PUSHMARK(sp) ;
+    PUSHMARK(SP) ;
 
     XPUSHs(sv_2mortal(newSVpv((char*)data,size)));
     PUTBACK ;

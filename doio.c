@@ -591,6 +591,7 @@ do_close(GV *gv, bool not_implicit)
     if (!io) {		/* never opened */
 	if (dowarn && not_implicit)
 	    warn("Close on unopened file <%s>",GvENAME(gv));
+	SETERRNO(EBADF,SS$_IVCHAN);
 	return FALSE;
     }
     retval = io_close(io);
@@ -627,6 +628,9 @@ IO* io;
 		retval = (PerlIO_close(IoIFP(io)) != EOF);
 	}
 	IoOFP(io) = IoIFP(io) = Nullfp;
+    }
+    else {
+	SETERRNO(EBADF,SS$_IVCHAN);
     }
 
     return retval;
@@ -835,7 +839,7 @@ dARGS
     GV* tmpgv;
 
     if (op->op_flags & OPf_REF) {
-	EXTEND(sp,1);
+	EXTEND(SP,1);
 	tmpgv = cGVOP->op_gv;
       do_fstat:
 	io = GvIO(tmpgv);
@@ -887,7 +891,7 @@ dARGS
     dSP;
     SV *sv;
     if (op->op_flags & OPf_REF) {
-	EXTEND(sp,1);
+	EXTEND(SP,1);
 	if (cGVOP->op_gv == defgv) {
 	    if (laststype != OP_LSTAT)
 		croak("The stat preceding -l _ wasn't an lstat");
@@ -1368,7 +1372,7 @@ SV **sp;
     return -1;			/* should never happen */
 }
 
-#if defined(__sun__) && defined(__svr4__) /* XXX Need metaconfig test */
+#if defined(__sun) && defined(__SVR4) /* XXX Need metaconfig test */
 /* Solaris manpage says that it uses (like linux)
    int semctl (int semid, int semnum, int cmd, union semun arg)
    but the system include files do not define union semun !!!!
@@ -1390,7 +1394,7 @@ SV **sp;
     char *a;
     I32 id, n, cmd, infosize, getinfo;
     I32 ret = -1;
-#if defined(__linux__) || (defined(__sun__) && defined(__svr4__))
+#if defined(__linux__) || (defined(__sun) && defined(__SVR4))
 /* XXX Need metaconfig test */
     union semun unsemds;
 #endif
@@ -1423,7 +1427,7 @@ SV **sp;
 	else if (cmd == GETALL || cmd == SETALL)
 	{
 	    struct semid_ds semds;
-#if defined(__linux__) || (defined(__sun__) && defined(__svr4__))
+#if defined(__linux__) || (defined(__sun) && defined(__SVR4))
 	/* XXX Need metaconfig test */
 /* linux and Solaris2 uses :
    int semctl (int semid, int semnum, int cmd, union semun arg)
@@ -1484,7 +1488,7 @@ SV **sp;
 #endif
 #ifdef HAS_SEM
     case OP_SEMCTL:
-#if defined(__linux__) || (defined(__sun__) && defined(__svr4__))
+#if defined(__linux__) || (defined(__sun) && defined(__SVR4))
 	/* XXX Need metaconfig test */
         unsemds.buf = (struct semid_ds *)a;
 	ret = semctl(id, n, cmd, unsemds);
