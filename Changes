@@ -8,6 +8,2259 @@ or in the .../src/5/0/unsupported directory for sub-version
 releases.)
 
 ----------------
+Version 5.003_06
+----------------
+This patch was primarily to fix bugs, improve the documentation,
+and work towards restoring binary compatibility with 5.003.
+The details are described below.  A very brief summary is:
+
+o Visible Changes to Core Functionality
+
+   -Significantly improved support _with documentation_ for
+    locales, including LC_COLLATE.  See the new pod/perli18n.pod.
+    Thanks to Jarkkko Hietaniemi.
+
+   -new version of Math::Complex, with test suite.  Ought to be
+    backwards compatible, but check it out if you use Math::Complex.
+
+   -Pre-extending hashes now works.  keys %hash = 5000 will pre-size
+    %hash.
+
+   -__DATA__ filehandle is untainted.
+
+o Changes in Core Internals
+
+   -gv_fullname and gv_efullname have reverted to their pre-5.003_03
+    versions for binary compatibility.  Actually, they are implemented
+    as stubs pointing to the new 3-argument forms gv_fullname3 and
+    gv_efullname3.
+
+   -Perl's malloc is once again called 'Mymalloc' (with -DHIDEMYMALLOC),
+    as it was pre-5.003_01.  Again, this is for binary compatibility
+    with 5.003.
+
+o Configure and build enhancements
+
+   -many new tests for the standard library.
+
+   -test suite now locale-friendly.
+
+   -a2p.man and s2p.man now made into pods.
+
+o Bug fixes
+
+   -whitespace lexer errors fixed.
+
+   -many, many other things.  See details below.
+
+o Specific Changes
+
+Here are the specific file-by-file changes.
+
+# This is my patch perl5.003_06.pat to perl5.003_05
+# The full description is below.
+# Please execute the following commands before applying this patch.
+# (You can feed this patch to 'sh' to do so.)
+#  Andy Dougherty		<doughera@lafcol.lafayette.edu>
+
+# We'll create some new tests, but patch won't automatically make them
+# executable.
+for t in abbrev.t autoloader.t basename.t checktree.t complex.t \
+	env.t fatal.t filecache.t filecopy.t filefind.t filepath.t \
+	findbin.t getopt.t hostname.t parsewords.t searchdict.t \
+	selectsaver.t symbol.t texttabs.t textwrap.t timelocal.t
+do
+    touch t/lib/$t
+    chmod +x t/lib/$t
+done
+
+# The a2p.man and s2p.man pages have been changed into pods.
+rm -f x2p/a2p.man x2p/s2p.man
+
+exit 0
+
+
+This is patch perl5.003_06.pat to perl version 5.003_05.
+This takes you from 5.003_05 to 5.003_06.
+
+To apply this patch, run the above commands,
+cd to your perl source directory and then type
+
+	patch -p1 -N < perl5.003_06.pat
+
+The changes are described after each /^Index:/ line below.  This is
+designed so you can examine each change with a command such as
+
+	csplit -k perl5.003_06.pat '/^Index:/' '{999}'
+
+(Of course, since there are more than 100 Index entries, your
+csplit may complain, since many csplit's have an arbitrary limit of 100
+files.  Still, you can manually split the file or roll your own.)
+
+Patch and enjoy,
+
+    Andy Dougherty		doughera@lafcol.lafayette.edu
+    Dept. of Physics
+    Lafayette College, Easton PA 18042
+
+Index: Changes
+
+    Updated for 5.003_06.
+
+Index: Configure
+
+    Add -Wl,rpath option for irix* to find the installed shared
+    libperl.so
+
+    Add /shlib to libpth.  It is used by Digital Unix 4.0.
+
+    Date: Mon, 30 Sep 1996 14:01:05 +0100
+    From: Sven Verdoolaege <skimo@breughel.ufsia.ac.be>
+
+    Detect Cygnus Win32, or at least don't let Configure get fooled
+    into thinking it's OS/2.
+
+Index: INSTALL
+
+    Date: Mon, 7 Oct 1996 22:03:00 +0300
+    From: Jarkko Hietaniemi <jhi@alpha.hut.fi>
+    Subject: LC_COLLATE.
+
+    Big patch to add, document, and test LC_COLLATE support.
+
+    added LC_COLLATE doc.
+
+Index: MANIFEST
+
+    Date: Sun, 22 Sep 1996 00:59:56 +0200
+    From: Gisle Aas <aas@aas.no>
+    Subject: More standard library test scripts
+
+    This is a collection of test scripts for the standard library modules.
+    Some of the tests does not pass unless some of the patches I have sent
+    out are applied.
+
+    Date: Sat, 28 Sep 1996 15:11:06 +0200
+    From: Andreas Koenig <k@anna.in-berlin.de>
+    Subject: Dale's posting as patch (Was: Perl 5.003_5 make fails on NS3.2 - CURED)
+
+    Handle NeXT, POSIX, and setpgid in pp_sys.c and POSIX.
+
+    Date: Mon, 7 Oct 1996 22:03:00 +0300
+    From: Jarkko Hietaniemi <jhi@alpha.hut.fi>
+    Subject: LC_COLLATE.
+
+    Big patch to add, document, and test LC_COLLATE support.
+
+    added perli18n.pod.
+
+Index: README
+
+    Changed Larry's address to larry@wall.org.
+
+Index: configpm
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: configure
+
+    Date: Mon, 30 Sep 1996 14:01:05 +0100
+    From: Sven Verdoolaege <skimo@breughel.ufsia.ac.be>
+
+    Warn the user of case-insensitive file systems that they may have
+    accidentally gotten 'configure' instead of 'Configure'.
+
+Index: doio.c
+
+    Date: Thu, 03 Oct 1996 16:31:46 -0400 (EDT)
+    From: Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>
+    Subject: VMS patches to 5.003_05
+
+Index: doop.c
+
+    Date: Mon, 30 Sep 1996 01:13:28 -0400
+    From: Spider Boardman <spider@Orb.Nashua.NH.US>
+    Subject: Re: pre extending hash? - need speed
+
+    The patch below (which is relative to perl5.001l) implements
+    "keys %hash = 50_000;" (or other integer-evaluable sizes) for
+    pre-sizing hashes.  I've only moved the patch forward from
+    when I first did it.  I'm sure the code in hv_ksplit could be
+    improved.
+
+Index: dump.c
+
+    Restore the 5.003 gv_fullname() and gv_efullname() functions.
+    Provide new 3-arg forms gv_fullname3() and gv_efullname3().
+
+Index: embed.h
+
+    Restore the 5.003 gv_fullname() and gv_efullname() functions.
+    Provide new 3-arg forms gv_fullname3() and gv_efullname3().
+
+Index: ext/DynaLoader/DynaLoader.pm
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: ext/FileHandle/FileHandle.pm
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: ext/IO/IO.pm
+
+    Updated to IO-1.12.
+
+Index: ext/IO/IO.xs
+
+    Updated to IO-1.12.
+
+Index: ext/IO/lib/IO/File.pm
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+    Updated to IO-1.12.
+
+Index: ext/IO/lib/IO/Handle.pm
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+    Updated to IO-1.12.
+
+Index: ext/IO/lib/IO/Pipe.pm
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+    Updated to IO-1.12.
+
+Index: ext/IO/lib/IO/Seekable.pm
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+    Updated to IO-1.12.
+
+Index: ext/IO/lib/IO/Select.pm
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+    Updated to IO-1.12.
+
+Index: ext/IO/lib/IO/Socket.pm
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+    Updated to IO-1.12.
+
+Index: ext/NDBM_File/hints/dynixptx.pl
+
+    Perl 5.003_05 compiles on DYNIX/ptx 4.0 (v4.1.3), and passes all tests.
+    The only change needed is in "ext/NDBM_File/Makefile.PL" - on this system,
+    ndbm is actually contained in the libc library, and must be linked against
+    -lc when compiling.  (this is for dynamic ELF executables, I didn't compile
+    statically)
+
+Index: ext/Opcode/Opcode.pm
+
+    Date: Fri, 20 Sep 1996 12:59:21 +0200
+    From: Gisle Aas <aas@bergen.sn.no>
+    Subject: Re: Symbol.pm clobbers $_ at startup
+
+    The same kind of problem seem to be present in Opcode.pm:
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: ext/Opcode/Safe.pm
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: ext/POSIX/POSIX.pod
+
+    Date: Mon, 7 Oct 1996 22:03:00 +0300
+    From: Jarkko Hietaniemi <jhi@alpha.hut.fi>
+    Subject: LC_COLLATE.
+
+    Big patch to add, document, and test LC_COLLATE support.
+
+    enhanced setlocale() docs and introduced the one-argument variant doc.
+
+Index: ext/POSIX/POSIX.xs
+
+    Date: Mon, 7 Oct 1996 22:03:00 +0300
+    From: Jarkko Hietaniemi <jhi@alpha.hut.fi>
+    Subject: LC_COLLATE.
+
+    Big patch to add, document, and test LC_COLLATE support.
+
+    setlocale() allowed one argument only,
+    call to perl_init_fold() (in util.c) if setlocale() succeeded.
+
+Index: ext/POSIX/hints/next_3.pl
+
+    Date: Sat, 28 Sep 1996 15:11:06 +0200
+    From: Andreas Koenig <k@anna.in-berlin.de>
+    Subject: Dale's posting as patch (Was: Perl 5.003_5 make fails on NS3.2 - CURED)
+
+    Handle NeXT, POSIX, and setpgid in pp_sys.c and POSIX.
+
+Index: ext/SDBM_File/sdbm/sdbm.h
+
+    Revert from Perl_malloc to Mymalloc for binary compatibility with
+    5.003.
+
+Index: ext/Socket/Socket.pm
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: global.sym
+
+    Restore the 5.003 gv_fullname() and gv_efullname() functions.
+    Provide new 3-arg forms gv_fullname3() and gv_efullname3().
+
+    Date: Mon, 30 Sep 1996 01:13:28 -0400
+    From: Spider Boardman <spider@Orb.Nashua.NH.US>
+    Subject: Re: pre extending hash? - need speed
+
+    The patch below (which is relative to perl5.001l) implements
+    "keys %hash = 50_000;" (or other integer-evaluable sizes) for
+    pre-sizing hashes.  I've only moved the patch forward from
+    when I first did it.  I'm sure the code in hv_ksplit could be
+    improved.
+
+    Date: Mon, 7 Oct 1996 22:03:00 +0300
+    From: Jarkko Hietaniemi <jhi@alpha.hut.fi>
+    Subject: LC_COLLATE.
+
+    Big patch to add, document, and test LC_COLLATE support.
+
+    added var lc_collate_active and func mem_collxfrm.
+
+Index: gv.c
+
+    Restore the 5.003 gv_fullname() and gv_efullname() functions.
+    Provide new 3-arg forms gv_fullname3() and gv_efullname3().
+
+Index: handy.h
+
+    Date: Sat, 21 Sep 1996 21:33:15 -0400 (EDT)
+    From: Kenneth Albanowski <kjahds@kjahds.com>
+    Subject: Full LONG_MAX & co. patch over 5.003_05
+
+    This patch contains the changes I've collected for the various _MAX issues
+    since 5.003_05. No patches issued between 5.003_05 and this one should be
+    applied, use this one instead.
+
+    The effect is to remove the CHAR_* and I8_* constants (which are
+    ambiguous) and to explicitly cast all of the constants.
+
+Index: hints/machten.sh
+
+    Add notes about MachTen 4.0.3 SYSV IPC.
+
+Index: hints/next_3.sh
+
+    Replace optimize="-g" by optimize="" since we're just trying to turn off
+    the optimizier.
+
+    Date: Sat, 28 Sep 1996 15:11:06 +0200
+    From: Andreas Koenig <k@anna.in-berlin.de>
+    Subject: Dale's posting as patch (Was: Perl 5.003_5 make fails on NS3.2 - CURED)
+
+    Handle NeXT, POSIX, and setpgid in pp_sys.c and POSIX.
+
+Index: hv.c
+
+    Date: Fri, 20 Sep 1996 15:38:57 -0400
+    From: Gurusamy Sarathy <gsar@engin.umich.edu>
+    Subject: Re: "Attempt to free non-existent shared string"? (with patch)
+
+    I found a subtle problem with the lazydelete mechanism (which is used
+    to postpone the delete of a entry that may be getting iterated over).
+    I was using the HeKLEN slot to hold the hint, but the real HeKLEN is
+    needed later to call unsharepvn().  This means that only magical
+    hash entries can use the HeKLEN slot to hold flags.
+
+    Here's a tested patch against 5.00305 that fixes the problem.
+    The patch simply moves the LAZYDEL hint to become a SV-level private
+    flag.
+
+    Date: Mon, 30 Sep 1996 01:13:28 -0400
+    From: Spider Boardman <spider@Orb.Nashua.NH.US>
+    Subject: Re: pre extending hash? - need speed
+
+    The patch below (which is relative to perl5.001l) implements
+    "keys %hash = 50_000;" (or other integer-evaluable sizes) for
+    pre-sizing hashes.  I've only moved the patch forward from
+    when I first did it.  I'm sure the code in hv_ksplit could be
+    improved.
+
+Index: hv.h
+
+    Date: Fri, 20 Sep 1996 15:38:57 -0400
+    From: Gurusamy Sarathy <gsar@engin.umich.edu>
+    Subject: Re: "Attempt to free non-existent shared string"? (with patch)
+
+    I found a subtle problem with the lazydelete mechanism (which is used
+    to postpone the delete of a entry that may be getting iterated over).
+    I was using the HeKLEN slot to hold the hint, but the real HeKLEN is
+    needed later to call unsharepvn().  This means that only magical
+    hash entries can use the HeKLEN slot to hold flags.
+
+    Here's a tested patch against 5.00305 that fixes the problem.
+    The patch simply moves the LAZYDEL hint to become a SV-level private
+    flag.
+
+Index: installman
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: installperl
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: lib/AutoLoader.pm
+
+    Date: Mon Sep  9 09:29:44 1996
+    From: Gisle Aas <aas@bergen.sn.no>
+    Subject: Re: problem with 'die' and UserAgent
+
+    > This is a patch to the AutoLoader.pm (from 5.003) that fixes the problem:
+    This is a better patch (no need to test for /::DESTROY$/ twice):
+
+    Date: Mon, 30 Sep 1996 00:54:37 -0400
+    From: Spider Boardman <spider@Orb.Nashua.NH.US>
+
+    The test and patches for AutoLoader were also non-functional,
+    since the regexp context (curpm) was still being clobbered by the
+    filename manipulations:
+
+    Date: Sun, 06 Oct 1996 16:15:07 +0200
+    From: Gisle Aas <aas@bergen.sn.no>
+    Subject: Re: Can't locate auto/U/autosplit.ix
+
+    It would IMHO be much better if the AutoLoader exported the AUTOLOAD()
+    function.  With an exported AUTOLOAD() we would not have to inherit
+    from AutoLoader, and we would avoid these problems.
+
+    This patch tries to explain the behavior of AutoLoader instead by
+    updating its documentation.
+
+Index: lib/Benchmark.pm
+
+    Date: Sat, 28 Sep 1996 17:01:22 +0300 (EET DST)
+    From: Jarkko Hietaniemi <jhi@cc.hut.fi>
+    Subject: a really really tiny typo
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: lib/Cwd.pm
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: lib/Devel/SelfStubber.pm
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: lib/Env.pm
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: lib/Exporter.pm
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: lib/ExtUtils/Embed.pm
+
+    Remove unwantd space after the I in -I$Config[archlib}
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: lib/ExtUtils/Install.pm
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: lib/ExtUtils/MM_Unix.pm
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: lib/ExtUtils/MM_VMS.pm
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+    Date: Thu, 03 Oct 1996 16:31:46 -0400 (EDT)
+    From: Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>
+    Subject: VMS patches to 5.003_05
+
+Index: lib/ExtUtils/MakeMaker.pm
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: lib/ExtUtils/Manifest.pm
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+    Date: Thu, 03 Oct 1996 16:31:46 -0400 (EDT)
+    From: Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>
+    Subject: VMS patches to 5.003_05
+
+Index: lib/ExtUtils/Mksymlists.pm
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: lib/ExtUtils/xsubpp
+
+    Change a reference from perlapi(1) to perlxs(1).
+
+Index: lib/File/Basename.pm
+
+    Date: Fri, 20 Sep 1996 14:11:05 +0200
+    From: Gisle Aas <aas@bergen.sn.no>
+    Subject: File::BaseName: "/" is legal path separator for MSDOS
+
+    The File::BaseName module should allow "/" as path separator when
+    fileparse_set_fstype("MSDOS") is in effect:
+
+    Date: Fri, 20 Sep 1996 13:58:52 +0200
+    From: Gisle Aas <aas@bergen.sn.no>
+    Subject: File::Basename documentation patch
+
+    Date: Mon, 30 Sep 1996 00:54:37 -0400
+    From: Spider Boardman <spider@Orb.Nashua.NH.US>
+
+    For t/lib/basename.t, though, the associated patch for
+    File::Basename was also wrong:
+
+    Date: Thu, 03 Oct 1996 16:31:46 -0400 (EDT)
+    From: Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>
+    Subject: VMS patches to 5.003_05
+
+Index: lib/File/Copy.pm
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: lib/File/Find.pm
+
+    Date: Sat, 7 Sep 1996 21:37:44 +0200
+    From: Michael De La Rue <mikedlr@it.com.pl>
+    Subject: File::Find assumes $_ remains unchanged; bug
+
+    The File::Find perl module assumes that the $_ variable remains unchanged
+    through the user defined function which is callbacked from find.  It carries
+    out a stat operation
+
+    Simplest fix is merely to document this
+
+Index: lib/File/Path.pm
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: lib/FindBin.pm
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: lib/Getopt/Long.pm
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: lib/I18N/Collate.pm
+
+    Date: Mon, 7 Oct 1996 22:03:00 +0300
+    From: Jarkko Hietaniemi <jhi@alpha.hut.fi>
+    Subject: LC_COLLATE.
+
+    Big patch to add, document, and test LC_COLLATE support.
+
+    deprecated and trapped (will whine if called and tell to migrate away)
+
+Index: lib/IPC/Open2.pm
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: lib/IPC/Open3.pm
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: lib/Math/BigInt.pm
+
+    Date: Mon, 7 Oct 1996 22:03:00 +0300
+    From: Jarkko Hietaniemi <jhi@alpha.hut.fi>
+    Subject: LC_COLLATE.
+
+    Big patch to add, document, and test LC_COLLATE support.
+
+    ord() is a dangerous thing.
+
+Index: lib/Math/Complex.pm
+
+    Date: Thu, 03 Oct 96 18:38:08 +0200
+    From: Raphael Manfredi <Raphael_Manfredi@grenoble.hp.com>
+    # Complex numbers and associated mathematical functions
+    # -- Raphael Manfredi, Sept 1996
+    # New version.  Should be backwards compatible, but please
+    # check it out if you use it.
+
+Index: lib/Pod/Text.pm
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: lib/Search/Dict.pm
+
+    Date: Sat, 21 Sep 1996 23:02:42 +0200
+    From: Gisle Aas <aas@aas.no>
+    Subject: look() in Search::Dict should use lc() istead of tr/A-Z/a-z/
+
+    The Search::Dict look() function should use the lc() function instead
+    of tr/A-Z/a-z/.  This will make folding of non-english letters work if
+    the locale is set up correctly.
+
+Index: lib/SelfLoader.pm
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: lib/Symbol.pm
+
+    Date: Fri, 20 Sep 1996 12:38:14 +0200
+    From: Gisle Aas <aas@bergen.sn.no>
+    Subject: Symbol.pm clobbers $_ at startup
+
+      perl -le 'BEGIN {$_="foo";} use Symbol; print qualify($_)'
+
+    I don't understand why the module want to initialize %global from
+    <DATA> in the first place.  Perhaps we want to apply this patch
+    instead.
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: lib/Sys/Hostname.pm
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: lib/Term/Cap.pm
+
+    Date: 23 Sep 1996 14:11:38 +0200
+    From: Ulrich Pfeifer <pfeifer@charly.informatik.uni-dortmund.de>
+    Subject: Patch for Term::Cap
+
+    'use Term::Cap' produces a warning when diagnosics are active. The
+    patch below avoids the warning.
+
+    [The $entry .= $_ usage is idiomatic enough that it ought to be
+    ok, I would think, but the patch certainly is ok too.]
+
+Index: lib/Term/Complete.pm
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: lib/Term/ReadLine.pm
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: lib/Test/Harness.pm
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+    Date: Thu, 03 Oct 1996 16:31:46 -0400 (EDT)
+    From: Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>
+    Subject: VMS patches to 5.003_05
+
+Index: lib/Text/Abbrev.pm
+
+    Date: 23 Sep 1996 11:33:01 +0200
+    From: Ulrich Pfeifer <pfeifer@charly.informatik.uni-dortmund.de>
+    Subject: Text::Abbrev (Re: More standard library test scripts)
+
+    This patch merges the Text::Abbrev related patches/tests from Gisle
+    and my previous patch (i.e. replaces both).
+
+Index: lib/Text/Tabs.pm
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: lib/Text/Wrap.pm
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: lib/Time/Local.pm
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: lib/UNIVERSAL.pm
+
+    Add in stub file.
+
+Index: lib/bigint.pl
+
+    Date: Mon, 7 Oct 1996 22:03:00 +0300
+    From: Jarkko Hietaniemi <jhi@alpha.hut.fi>
+    Subject: LC_COLLATE.
+
+    Big patch to add, document, and test LC_COLLATE support.
+
+    ord() is a dangerous thing.
+
+Index: lib/diagnostics.pm
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: lib/overload.pm
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: lib/perl5db.pl
+
+    Date: Mon, 30 Sep 1996 00:34:58 -0400 (EDT)
+    From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+    Subject: Re: dereferencing a hash from the debugger won't work
+
+Index: lib/splain
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: lib/strict.pm
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: makedepend.SH
+
+    Add explicit $touch $firstmakefile for QNX which apparently
+    preserves modification times for a 'cp' command.
+    I worry, though, that touch might not be portable to OS/2.
+    If it is, then I'll remove the fancy case statement.
+
+Index: malloc.c
+
+    Not all sbrks return zeroed memory.
+
+Index: mg.c
+
+    Restore the 5.003 gv_fullname() and gv_efullname() functions.
+    Provide new 3-arg forms gv_fullname3() and gv_efullname3().
+
+    Date: Sun, 29 Sep 1996 22:18:19 -0400 (EDT)
+    From: Chip Salzenberg <salzench@nielsenmedia.com>
+    Subject: 5.003_05: Fix numeric value of $!
+
+    This patch undoes a bit of over-zealous integerization in mg.c, related
+    to the numeric value of $!.
+
+    Date: Mon, 30 Sep 1996 01:13:28 -0400
+    From: Spider Boardman <spider@Orb.Nashua.NH.US>
+    Subject: Re: pre extending hash? - need speed
+
+    The patch below (which is relative to perl5.001l) implements
+    "keys %hash = 50_000;" (or other integer-evaluable sizes) for
+    pre-sizing hashes.  I've only moved the patch forward from
+    when I first did it.  I'm sure the code in hv_ksplit could be
+    improved.
+
+    Date: Thu, 03 Oct 1996 16:31:46 -0400 (EDT)
+    From: Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>
+    Subject: VMS patches to 5.003_05
+
+    Date: Fri, 4 Oct 1996 12:38:31 -0400 (EDT)
+    From: Chip Salzenberg <salzench@nielsenmedia.com>
+    Subject: 5.003_05: Fix numeric $! and $^E
+
+    This patch undoes a bit of over-zealous integerization in mg.c,
+    related to the numeric values of $! and $^E.  This patch *REPLACES*
+    the one I posted earlier, which was only effective for $!.
+
+    [Some of this is superceded by similar stuff in the VMS patches.]
+
+Index: op.c
+
+    Restore the 5.003 gv_fullname() and gv_efullname() functions.
+    Provide new 3-arg forms gv_fullname3() and gv_efullname3().
+
+    Date: Mon, 30 Sep 1996 01:13:28 -0400
+    From: Spider Boardman <spider@Orb.Nashua.NH.US>
+    Subject: Re: pre extending hash? - need speed
+
+    The patch below (which is relative to perl5.001l) implements
+    "keys %hash = 50_000;" (or other integer-evaluable sizes) for
+    pre-sizing hashes.  I've only moved the patch forward from
+    when I first did it.  I'm sure the code in hv_ksplit could be
+    improved.
+
+Index: opcode.h
+
+    Date: Mon, 16 Sep 1996 16:37:48 -0700
+    From: Jonathan Biggar <jon@sems.com>
+    Subject: Perl 5.003 bug when embedding in C++ program
+
+    The following patch is necessary in order to embed the Perl5.003 interpreter
+    into a C++ program without getting prototype mismatch errors from the
+    C++ compiler.
+
+Index: opcode.pl
+
+    Date: Mon, 16 Sep 1996 16:37:48 -0700
+    From: Jonathan Biggar <jon@sems.com>
+    Subject: Perl 5.003 bug when embedding in C++ program
+
+    The following patch is necessary in order to embed the Perl5.003 interpreter
+    into a C++ program without getting prototype mismatch errors from the
+    C++ compiler.
+
+Index: patchlevel.h
+
+    Change to subversion 6.
+
+Index: perl.c
+
+    From: Roderick Schertler <roderick@gate.net>
+    Subject: Re: -T flag and removal of `.' from @INC
+
+    support C<perl -e'attached code'>
+
+    Date: Tue, 01 Oct 1996 19:02:17 -0400
+    From: Gurusamy Sarathy <gsar@engin.umich.edu>
+    Subject: Re: 2 core dumps (patch)
+    Message-Id: <199610012302.TAA08395@aatma.engin.umich.edu>
+
+    The problem is an uninitialized SV slot in errgv.  Here's a patch.
+
+    Date: Thu, 03 Oct 1996 16:31:46 -0400 (EDT)
+    From: Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>
+    Subject: VMS patches to 5.003_05
+
+Index: perl.h
+
+    Date: Sat, 21 Sep 1996 21:33:15 -0400 (EDT)
+    From: Kenneth Albanowski <kjahds@kjahds.com>
+    Subject: Full LONG_MAX & co. patch over 5.003_05
+
+    This patch contains the changes I've collected for the various _MAX issues
+    since 5.003_05. No patches issued between 5.003_05 and this one should be
+    applied, use this one instead.
+
+    The effect is to remove the CHAR_* and I8_* constants (which are
+    ambiguous) and to explicitly cast all of the constants.
+
+    Date: Mon, 30 Sep 1996 01:13:28 -0400
+    From: Spider Boardman <spider@Orb.Nashua.NH.US>
+    Subject: Re: pre extending hash? - need speed
+
+    The patch below (which is relative to perl5.001l) implements
+    "keys %hash = 50_000;" (or other integer-evaluable sizes) for
+    pre-sizing hashes.  I've only moved the patch forward from
+    when I first did it.  I'm sure the code in hv_ksplit could be
+    improved.
+
+    Revert from Perl_malloc to Mymalloc for binary compatibility with
+    5.003.
+
+    Date: Mon, 7 Oct 1996 22:03:00 +0300
+    From: Jarkko Hietaniemi <jhi@alpha.hut.fi>
+    Subject: LC_COLLATE.
+
+    Big patch to add, document, and test LC_COLLATE support.
+
+Index: perl_exp.SH
+
+    Add new function perl_init_fold.  (I'm not sure it goes here.)
+
+Index: perlio.c
+
+    Date: Thu, 12 Sep 96 15:58 PDT
+    From: Hunter Kelly <retnuh@zule.pixar.com>
+    Subject: Re: 5.003_05 is available.
+
+    Fix PerlIO_reopen parameters.
+
+Index: perlsdio.h
+
+    Date: Fri, 13 Sep 1996 17:24:01 -0400
+    From: John Stoffel <jfs@jfs.fluent.com>
+    Subject: Re: 5.003_05 is available.
+
+    Undef Irix getc_unlocked and putc_unlocked #defines.
+
+    Date: Thu, 03 Oct 1996 16:31:46 -0400 (EDT)
+    From: Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>
+    Subject: VMS patches to 5.003_05
+
+Index: pod/Makefile
+
+    Date: Mon, 7 Oct 1996 22:03:00 +0300
+    From: Jarkko Hietaniemi <jhi@alpha.hut.fi>
+    Subject: LC_COLLATE.
+
+    Big patch to add, document, and test LC_COLLATE support.
+
+    perli18n.pod (and perlapio.pod, btw) added.
+
+Index: pod/buildtoc
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: pod/perl.pod
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+    Changed Larry's address to larry@wall.org.
+
+    Date: Mon, 7 Oct 1996 22:03:00 +0300
+    From: Jarkko Hietaniemi <jhi@alpha.hut.fi>
+    Subject: LC_COLLATE.
+
+    Big patch to add, document, and test LC_COLLATE support.
+
+    perli18n advertised.
+
+Index: pod/perlapio.pod
+
+    Date: Wed, 11 Sep 1996 11:55:18 -0500
+    From: "Daniel S. Lewart" <lewart@vadds.cvm.uiuc.edu>
+    Subject: POD spelling patches
+
+Index: pod/perlbook.pod
+
+    Updated for Second Edition.
+
+Index: pod/perlcall.pod
+
+    Date: Wed, 11 Sep 1996 11:55:18 -0500
+    From: "Daniel S. Lewart" <lewart@vadds.cvm.uiuc.edu>
+    Subject: POD spelling patches
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: pod/perldata.pod
+
+    Date: Wed, 11 Sep 1996 11:55:18 -0500
+    From: "Daniel S. Lewart" <lewart@vadds.cvm.uiuc.edu>
+    Subject: POD spelling patches
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: pod/perldebug.pod
+
+    Date: Wed, 11 Sep 1996 11:55:18 -0500
+    From: "Daniel S. Lewart" <lewart@vadds.cvm.uiuc.edu>
+    Subject: POD spelling patches
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: pod/perldiag.pod
+
+    Date: Wed, 11 Sep 1996 11:55:18 -0500
+    From: "Daniel S. Lewart" <lewart@vadds.cvm.uiuc.edu>
+    Subject: POD spelling patches
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+    Date: Thu, 03 Oct 1996 16:31:46 -0400 (EDT)
+    From: Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>
+    Subject: VMS patches to 5.003_05
+
+Index: pod/perldsc.pod
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: pod/perlembed.pod
+
+    Date: Wed, 11 Sep 1996 11:55:18 -0500
+    From: "Daniel S. Lewart" <lewart@vadds.cvm.uiuc.edu>
+    Subject: POD spelling patches
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: pod/perlform.pod
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: pod/perlfunc.pod
+
+    Date: Wed, 11 Sep 1996 11:55:18 -0500
+    From: "Daniel S. Lewart" <lewart@vadds.cvm.uiuc.edu>
+    Subject: POD spelling patches
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: pod/perlguts.pod
+
+    Date: Wed, 11 Sep 1996 11:55:18 -0500
+    From: "Daniel S. Lewart" <lewart@vadds.cvm.uiuc.edu>
+    Subject: POD spelling patches
+    Date: Mon, 23 Sep 96 13:18:01 PDT
+    From: Jeff Okamoto <okamoto@hpcc123.corp.hp.com>
+    Subject: Re: perlguts API Listing patch
+
+    Here's the lastest complete version for inclusion into _06 or .004.  This
+    incorporates and supersedes Dean's patch.
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: pod/perli18n.pod
+
+    Date: Mon, 7 Oct 1996 22:03:00 +0300
+    From: Jarkko Hietaniemi <jhi@alpha.hut.fi>
+    Subject: LC_COLLATE.
+
+    Big patch to add, document, and test LC_COLLATE support.
+
+    written.
+
+Index: pod/perlipc.pod
+
+    Date: Wed, 11 Sep 1996 11:55:18 -0500
+    From: "Daniel S. Lewart" <lewart@vadds.cvm.uiuc.edu>
+    Subject: POD spelling patches
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: pod/perllol.pod
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: pod/perlmod.pod
+
+    Date: Wed, 11 Sep 1996 11:55:18 -0500
+    From: "Daniel S. Lewart" <lewart@vadds.cvm.uiuc.edu>
+    Subject: POD spelling patches
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+    Date: Wed, 02 Oct 1996 16:52:08 -0400
+    From: Roderick Schertler <roderick@gate.net>
+    Subject: documentation for $? in END
+
+    Document the behavior with $? WRT END subroutines.
+
+Index: pod/perlobj.pod
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: pod/perlop.pod
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+    Date: Fri, 4 Oct 1996 10:36:19 -0400 (EDT)
+    From: Kenneth Albanowski <kjahds@kjahds.com>
+    Subject: Re: Suggestion for improving man page
+
+    Add alternative names for various escape sequences.
+
+Index: pod/perlpod.pod
+
+    Date: Wed, 11 Sep 1996 11:55:18 -0500
+    From: "Daniel S. Lewart" <lewart@vadds.cvm.uiuc.edu>
+    Subject: POD spelling patches
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: pod/perlre.pod
+
+    Date: Wed, 11 Sep 1996 11:55:18 -0500
+    From: "Daniel S. Lewart" <lewart@vadds.cvm.uiuc.edu>
+    Subject: POD spelling patches
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+    Date: Fri, 4 Oct 1996 10:36:19 -0400 (EDT)
+    From: Kenneth Albanowski <kjahds@kjahds.com>
+    Subject: Re: Suggestion for improving man page
+
+    Add alternative names for various escape sequences.
+
+Index: pod/perlref.pod
+
+    Date: Wed, 11 Sep 1996 11:55:18 -0500
+    From: "Daniel S. Lewart" <lewart@vadds.cvm.uiuc.edu>
+    Subject: POD spelling patches
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: pod/perlrun.pod
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: pod/perlsec.pod
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: pod/perlstyle.pod
+
+    Date: Wed, 11 Sep 1996 11:55:18 -0500
+    From: "Daniel S. Lewart" <lewart@vadds.cvm.uiuc.edu>
+    Subject: POD spelling patches
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: pod/perlsub.pod
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: pod/perlsyn.pod
+
+    Date: Wed, 11 Sep 1996 11:55:18 -0500
+    From: "Daniel S. Lewart" <lewart@vadds.cvm.uiuc.edu>
+    Subject: POD spelling patches
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: pod/perltie.pod
+
+    Date: Wed, 11 Sep 1996 11:55:18 -0500
+    From: "Daniel S. Lewart" <lewart@vadds.cvm.uiuc.edu>
+    Subject: POD spelling patches
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: pod/perltoc.pod
+
+    Date: Wed, 11 Sep 1996 11:55:18 -0500
+    From: "Daniel S. Lewart" <lewart@vadds.cvm.uiuc.edu>
+    Subject: POD spelling patches
+
+    Changed Larry's address to larry@wall.org.
+
+Index: pod/perltrap.pod
+
+    Date: Wed, 11 Sep 1996 13:26:18 -0400
+    From: Gurusamy Sarathy <gsar@engin.umich.edu>
+    Subject: a perl425 trap
+
+    Here's an addition that should be self-explanatory.
+    [interpolation issues]
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: pod/perlvar.pod
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+    Date: Wed, 02 Oct 1996 16:52:08 -0400
+    From: Roderick Schertler <roderick@gate.net>
+    Subject: documentation for $? in END
+
+    Document the behavior with $? WRT END subroutines.
+
+Index: pod/perlxstut.pod
+
+    Date: Wed, 11 Sep 1996 11:55:18 -0500
+    From: "Daniel S. Lewart" <lewart@vadds.cvm.uiuc.edu>
+    Subject: POD spelling patches
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: pod/pod2man.PL
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+    Bugs found in pod2man
+
+    The following bugs were noticed, and some fixed:
+
+    1. Where a L<> link extends over more than one line, pod2man does not
+    treat it as a link but displays it literally, and so these have been
+    rearranged to place the link on one line.  This is the only bug worked
+    around.  [Fixed; the rearrangements, which were done beforehand,
+    remain in some cases, but are no longer necessary, and pod paragraphs
+    can now be safely reformatted to whatever width is desired in the pod,
+    without breaking links.]
+
+    2. It seems to swallow spaces after certain links: for example, part
+    of the "open" entry in the perlfunc manpage comes out as "the
+    \f(CWbinmode\fR entry elsewhere in this documentfor tips", the source
+    having been "L</binmode> for tips".  [Fixed.]
+
+    3. 'L</"Pass by Reference">', in perlsub.pod, comes out as '\fI/"Pass
+    by Reference\fR', that is, with an initial '/"'.
+
+    4. If a pod line begins with ".", nothing is done to prevent [tng]roff
+    from treating it as a [tng]roff instruction.
+
+    5. When the paragraph below =head1 NAME has more than one line, this
+    confuses pod2man: so in the case of Term::Readline, the manpage begins
+    with a stray line 'no real package is found, substitutes stubs instead
+    of basic functions."'.
+
+    Of course, it would be better to fix pod2man; I hope that the new Pod
+    modules, when ready, will not have these defects.
+
+Index: pp_ctl.c
+
+    Restore the 5.003 gv_fullname() and gv_efullname() functions.
+    Provide new 3-arg forms gv_fullname3() and gv_efullname3().
+
+    Date: Mon, 7 Oct 1996 22:03:00 +0300
+    From: Jarkko Hietaniemi <jhi@alpha.hut.fi>
+    Subject: LC_COLLATE.
+
+    Big patch to add, document, and test LC_COLLATE support.
+
+    sortcmp() sprouted a LC_COLLATE branch.
+
+Index: pp_hot.c
+
+    Restore the 5.003 gv_fullname() and gv_efullname() functions.
+    Provide new 3-arg forms gv_fullname3() and gv_efullname3().
+
+    Date: Thu, 19 Sep 1996 11:58:22 -0400
+    From: "Randy J. Ray" <rjray@uswest.com>
+    Subject: Patch: Untaint FH flag and clean DATA handles
+
+    This patch adds a IOf_UNTAINT flag in sv.h, as one of the possibles
+    on an xpvio->xio_flags struct member. It is used to mark the given
+    file handle as a clean source, even when tainting is turned on.
+    There are also patches to pp_sys.c in pp_sysread to check this flag
+    before tainting data, and in pp_hot.c in do_readline for the same
+    reason. Lastly, it patches toke.c to automatically set this flag on
+    on a __DATA__ filehandle. The creation of the $pack::DATA
+    pseudo-filehandle is already checked against running under eval, so
+    this should not introduce any insecurity.
+
+    This patch *does not*:
+
+    * Add the "untaint" keyword.
+
+Index: pp_sys.c
+
+    Restore the 5.003 gv_fullname() and gv_efullname() functions.
+    Provide new 3-arg forms gv_fullname3() and gv_efullname3().
+
+    Date: Thu, 19 Sep 1996 11:58:22 -0400
+    From: "Randy J. Ray" <rjray@uswest.com>
+    Subject: Patch: Untaint FH flag and clean DATA handles
+
+    This patch adds a IOf_UNTAINT flag in sv.h, as one of the possibles
+    on an xpvio->xio_flags struct member. It is used to mark the given
+    file handle as a clean source, even when tainting is turned on.
+    There are also patches to pp_sys.c in pp_sysread to check this flag
+    before tainting data, and in pp_hot.c in do_readline for the same
+    reason. Lastly, it patches toke.c to automatically set this flag on
+    on a __DATA__ filehandle. The creation of the $pack::DATA
+    pseudo-filehandle is already checked against running under eval, so
+    this should not introduce any insecurity.
+
+    This patch *does not*:
+
+    * Add the "untaint" keyword.
+
+    Date: Sun, 22 Sep 1996 17:26:57 -0400
+    From: "Randy J. Ray" <rjray@uswest.com>
+    Subject: Patch to patch for untainting
+
+    The following patch ensures that a glob used as a filehandle that
+    has had the UNTAINT flag set will not carry that flag over on a
+    re-open. In a nutshell, a re-open of the DATA filehandle would be
+    considered untainted, and an object of class IO::Handle (or one of
+    its sub-classes) that is marked untainted with the untaint method,
+    then closed and re-opened, retained the untaintedness.
+
+    Date: Mon, 30 Sep 1996 00:54:37 -0400
+    From: Spider Boardman <spider@Orb.Nashua.NH.US>
+
+    First, with IO::untaint, the patches as posted resulted in a
+    miniperl which couldn't open files, so the autosplitting of the
+    library and the creation of Makefiles for the extensions didn't
+    work.  Worse, it didn't just fail to open files, it dumped core.
+
+Index: proto.h
+
+    Restore the 5.003 gv_fullname() and gv_efullname() functions.
+    Provide new 3-arg forms gv_fullname3() and gv_efullname3().
+
+    Date: Mon, 30 Sep 1996 01:13:28 -0400
+    From: Spider Boardman <spider@Orb.Nashua.NH.US>
+    Subject: Re: pre extending hash? - need speed
+
+    The patch below (which is relative to perl5.001l) implements
+    "keys %hash = 50_000;" (or other integer-evaluable sizes) for
+    pre-sizing hashes.  I've only moved the patch forward from
+    when I first did it.  I'm sure the code in hv_ksplit could be
+    improved.
+
+    Date: Mon, 7 Oct 1996 22:03:00 +0300
+    From: Jarkko Hietaniemi <jhi@alpha.hut.fi>
+    Subject: LC_COLLATE.
+
+    Big patch to add, document, and test LC_COLLATE support.
+
+    mem_collxfrm() and perl_init_fold() added.
+
+Index: run.c
+
+    Restore the 5.003 gv_fullname() and gv_efullname() functions.
+    Provide new 3-arg forms gv_fullname3() and gv_efullname3().
+
+Index: sv.c
+
+    Restore the 5.003 gv_fullname() and gv_efullname() functions.
+    Provide new 3-arg forms gv_fullname3() and gv_efullname3().
+
+    Date: Mon, 30 Sep 1996 01:13:28 -0400
+    From: Spider Boardman <spider@Orb.Nashua.NH.US>
+    Subject: Re: pre extending hash? - need speed
+
+    The patch below (which is relative to perl5.001l) implements
+    "keys %hash = 50_000;" (or other integer-evaluable sizes) for
+    pre-sizing hashes.  I've only moved the patch forward from
+    when I first did it.  I'm sure the code in hv_ksplit could be
+    improved.
+
+    Date: Thu, 03 Oct 1996 16:31:46 -0400 (EDT)
+    From: Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>
+    Subject: VMS patches to 5.003_05
+
+      I've added some DEBUG_Ps to sv.c which give a trace of the
+      fast I/O fiddling with stdio in sv_gets().  These were useful
+      to me in setting up the VMS fast I/O, and I left them in in
+      case they're useful to someone in the future.  However, if you
+      think it overloads -DP too much, feel free to drop it.  (-DP
+      already adds a profile of op usage to its advertised output.)
+
+    Date: Mon, 7 Oct 1996 22:03:00 +0300
+    From: Jarkko Hietaniemi <jhi@alpha.hut.fi>
+    Subject: LC_COLLATE.
+
+    Big patch to add, document, and test LC_COLLATE support.
+
+    sv_cmp() sprouted a LC_COLLATE branch.
+
+Index: sv.h
+
+    Date: Thu, 19 Sep 1996 11:58:22 -0400
+    From: "Randy J. Ray" <rjray@uswest.com>
+    Subject: Patch: Untaint FH flag and clean DATA handles
+
+    This patch adds a IOf_UNTAINT flag in sv.h, as one of the possibles
+    on an xpvio->xio_flags struct member. It is used to mark the given
+    file handle as a clean source, even when tainting is turned on.
+    There are also patches to pp_sys.c in pp_sysread to check this flag
+    before tainting data, and in pp_hot.c in do_readline for the same
+    reason. Lastly, it patches toke.c to automatically set this flag on
+    on a __DATA__ filehandle. The creation of the $pack::DATA
+    pseudo-filehandle is already checked against running under eval, so
+    this should not introduce any insecurity.
+
+    This patch *does not*:
+
+    * Add the "untaint" keyword.
+
+    Date: Fri, 20 Sep 1996 15:38:57 -0400
+    From: Gurusamy Sarathy <gsar@engin.umich.edu>
+    Subject: Re: "Attempt to free non-existent shared string"? (with patch)
+
+    I found a subtle problem with the lazydelete mechanism (which is used
+    to postpone the delete of a entry that may be getting iterated over).
+    I was using the HeKLEN slot to hold the hint, but the real HeKLEN is
+    needed later to call unsharepvn().  This means that only magical
+    hash entries can use the HeKLEN slot to hold flags.
+
+    Here's a tested patch against 5.00305 that fixes the problem.
+    The patch simply moves the LAZYDEL hint to become a SV-level private
+    flag.
+
+Index: t/base/term.t
+
+    Date: Mon, 7 Oct 1996 22:03:00 +0300
+    From: Jarkko Hietaniemi <jhi@alpha.hut.fi>
+    Subject: LC_COLLATE.
+
+    Big patch to add, document, and test LC_COLLATE support.
+
+    \n not necessarily lt ' '.
+
+Index: t/comp/package.t
+
+    Date: Mon, 7 Oct 1996 22:03:00 +0300
+    From: Jarkko Hietaniemi <jhi@alpha.hut.fi>
+    Subject: LC_COLLATE.
+
+    Big patch to add, document, and test LC_COLLATE support.
+
+    XYZ not necessarily gt xyz.
+
+Index: t/lib/abbrev.t
+
+    Date: Sun, 22 Sep 1996 00:59:56 +0200
+    From: Gisle Aas <aas@aas.no>
+    Subject: More standard library test scripts
+
+    This is a collection of test scripts for the standard library modules.
+    Some of the tests does not pass unless some of the patches I have sent
+    out are applied.
+
+    Date: 23 Sep 1996 11:33:01 +0200
+    From: Ulrich Pfeifer <pfeifer@charly.informatik.uni-dortmund.de>
+    Subject: Text::Abbrev (Re: More standard library test scripts)
+
+    This patch merges the Text::Abbrev related patches/tests from Gisle
+    and my previous patch (i.e. replaces both).
+
+Index: t/lib/anydbm.t
+
+    Date: Mon, 7 Oct 1996 22:03:00 +0300
+    From: Jarkko Hietaniemi <jhi@alpha.hut.fi>
+    Subject: LC_COLLATE.
+
+    Big patch to add, document, and test LC_COLLATE support.
+
+    A not necessarily gt a.
+
+Index: t/lib/autoloader.t
+
+    Date: Sun, 22 Sep 1996 00:59:56 +0200
+    From: Gisle Aas <aas@aas.no>
+    Subject: More standard library test scripts
+
+    This is a collection of test scripts for the standard library modules.
+    Some of the tests does not pass unless some of the patches I have sent
+    out are applied.
+
+    Date: Mon, 30 Sep 1996 00:54:37 -0400
+    From: Spider Boardman <spider@Orb.Nashua.NH.US>
+
+    The test and patches for AutoLoader were also non-functional,
+    since the regexp context (curpm) was still being clobbered by the
+    filename manipulations:
+
+Index: t/lib/basename.t
+
+    Date: Sun, 22 Sep 1996 00:59:56 +0200
+    From: Gisle Aas <aas@aas.no>
+    Subject: More standard library test scripts
+
+    This is a collection of test scripts for the standard library modules.
+    Some of the tests does not pass unless some of the patches I have sent
+    out are applied.
+
+    Date: Mon, 30 Sep 1996 00:54:37 -0400
+    From: Spider Boardman <spider@Orb.Nashua.NH.US>
+
+    Fix the number of tests.
+
+    Date: Thu, 03 Oct 1996 16:31:46 -0400 (EDT)
+    From: Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>
+    Subject: VMS patches to 5.003_05
+
+    A different set of tests for File::Basename and friends.
+
+Index: t/lib/checktree.t
+
+    Date: Sun, 22 Sep 1996 00:59:56 +0200
+    From: Gisle Aas <aas@aas.no>
+    Subject: More standard library test scripts
+
+    This is a collection of test scripts for the standard library modules.
+    Some of the tests does not pass unless some of the patches I have sent
+    out are applied.
+
+Index: t/lib/complex.t
+
+    Date: Thu, 03 Oct 96 18:38:08 +0200
+    From: Raphael Manfredi <Raphael_Manfredi@grenoble.hp.com>
+    # Complex numbers and associated mathematical functions
+    # -- Raphael Manfredi, Sept 1996
+
+    Tests for new version.
+
+Index: t/lib/db-btree.t
+
+    Date: Mon, 7 Oct 1996 22:03:00 +0300
+    From: Jarkko Hietaniemi <jhi@alpha.hut.fi>
+    Subject: LC_COLLATE.
+
+    Big patch to add, document, and test LC_COLLATE support.
+
+    A not necessarily gt a.
+
+Index: t/lib/db-hash.t
+
+    Date: Mon, 7 Oct 1996 22:03:00 +0300
+    From: Jarkko Hietaniemi <jhi@alpha.hut.fi>
+    Subject: LC_COLLATE.
+
+    Big patch to add, document, and test LC_COLLATE support.
+
+    A not necessarily gt a.
+
+Index: t/lib/env.t
+
+    Date: Sun, 22 Sep 1996 00:59:56 +0200
+    From: Gisle Aas <aas@aas.no>
+    Subject: More standard library test scripts
+
+    This is a collection of test scripts for the standard library modules.
+    Some of the tests does not pass unless some of the patches I have sent
+    out are applied.
+
+Index: t/lib/fatal.t
+
+    Date: Sun, 22 Sep 1996 00:59:56 +0200
+    From: Gisle Aas <aas@aas.no>
+    Subject: More standard library test scripts
+
+    This is a collection of test scripts for the standard library modules.
+    Some of the tests does not pass unless some of the patches I have sent
+    out are applied.
+
+Index: t/lib/filecache.t
+
+    Date: Sun, 22 Sep 1996 00:59:56 +0200
+    From: Gisle Aas <aas@aas.no>
+    Subject: More standard library test scripts
+
+    This is a collection of test scripts for the standard library modules.
+    Some of the tests does not pass unless some of the patches I have sent
+    out are applied.
+
+Index: t/lib/filecopy.t
+
+    Date: Sun, 22 Sep 1996 00:59:56 +0200
+    From: Gisle Aas <aas@aas.no>
+    Subject: More standard library test scripts
+
+    This is a collection of test scripts for the standard library modules.
+    Some of the tests does not pass unless some of the patches I have sent
+    out are applied.
+
+Index: t/lib/filefind.t
+
+    Date: Sun, 22 Sep 1996 00:59:56 +0200
+    From: Gisle Aas <aas@aas.no>
+    Subject: More standard library test scripts
+
+    This is a collection of test scripts for the standard library modules.
+    Some of the tests does not pass unless some of the patches I have sent
+    out are applied.
+
+Index: t/lib/filepath.t
+
+    Date: Sun, 22 Sep 1996 00:59:56 +0200
+    From: Gisle Aas <aas@aas.no>
+    Subject: More standard library test scripts
+
+    This is a collection of test scripts for the standard library modules.
+    Some of the tests does not pass unless some of the patches I have sent
+    out are applied.
+
+Index: t/lib/findbin.t
+
+    Date: Sun, 22 Sep 1996 00:59:56 +0200
+    From: Gisle Aas <aas@aas.no>
+    Subject: More standard library test scripts
+
+    This is a collection of test scripts for the standard library modules.
+    Some of the tests does not pass unless some of the patches I have sent
+    out are applied.
+
+Index: t/lib/gdbm.t
+
+    Date: Mon, 7 Oct 1996 22:03:00 +0300
+    From: Jarkko Hietaniemi <jhi@alpha.hut.fi>
+    Subject: LC_COLLATE.
+
+    Big patch to add, document, and test LC_COLLATE support.
+
+    A not necessarily gt a.
+
+Index: t/lib/getopt.t
+
+    Date: Sun, 22 Sep 1996 00:59:56 +0200
+    From: Gisle Aas <aas@aas.no>
+    Subject: More standard library test scripts
+
+    This is a collection of test scripts for the standard library modules.
+    Some of the tests does not pass unless some of the patches I have sent
+    out are applied.
+
+Index: t/lib/hostname.t
+
+    Date: Sun, 22 Sep 1996 00:59:56 +0200
+    From: Gisle Aas <aas@aas.no>
+    Subject: More standard library test scripts
+
+    This is a collection of test scripts for the standard library modules.
+    Some of the tests does not pass unless some of the patches I have sent
+    out are applied.
+
+Index: t/lib/ndbm.t
+
+    Date: Mon, 7 Oct 1996 22:03:00 +0300
+    From: Jarkko Hietaniemi <jhi@alpha.hut.fi>
+    Subject: LC_COLLATE.
+
+    Big patch to add, document, and test LC_COLLATE support.
+
+    A not necessarily gt a.
+
+Index: t/lib/odbm.t
+
+    Date: Mon, 7 Oct 1996 22:03:00 +0300
+    From: Jarkko Hietaniemi <jhi@alpha.hut.fi>
+    Subject: LC_COLLATE.
+
+    Big patch to add, document, and test LC_COLLATE support.
+
+    A not necessarily gt a.
+
+Index: t/lib/parsewords.t
+
+    Date: Sun, 22 Sep 1996 00:59:56 +0200
+    From: Gisle Aas <aas@aas.no>
+    Subject: More standard library test scripts
+
+    This is a collection of test scripts for the standard library modules.
+    Some of the tests does not pass unless some of the patches I have sent
+    out are applied.
+
+Index: t/lib/sdbm.t
+
+    Date: Mon, 7 Oct 1996 22:03:00 +0300
+    From: Jarkko Hietaniemi <jhi@alpha.hut.fi>
+    Subject: LC_COLLATE.
+
+    Big patch to add, document, and test LC_COLLATE support.
+
+    A not necessarily gt a.
+
+Index: t/lib/searchdict.t
+
+    Date: Sun, 22 Sep 1996 00:59:56 +0200
+    From: Gisle Aas <aas@aas.no>
+    Subject: More standard library test scripts
+
+    This is a collection of test scripts for the standard library modules.
+    Some of the tests does not pass unless some of the patches I have sent
+    out are applied.
+
+Index: t/lib/selectsaver.t
+
+    Date: Sun, 22 Sep 1996 00:59:56 +0200
+    From: Gisle Aas <aas@aas.no>
+    Subject: More standard library test scripts
+
+    This is a collection of test scripts for the standard library modules.
+    Some of the tests does not pass unless some of the patches I have sent
+    out are applied.
+
+Index: t/lib/symbol.t
+
+    Date: Sun, 22 Sep 1996 00:59:56 +0200
+    From: Gisle Aas <aas@aas.no>
+    Subject: More standard library test scripts
+
+    This is a collection of test scripts for the standard library modules.
+    Some of the tests does not pass unless some of the patches I have sent
+    out are applied.
+
+    Date: Mon, 30 Sep 1996 00:54:37 -0400
+    From: Spider Boardman <spider@Orb.Nashua.NH.US>
+
+    The various new lib/*.t tests didn't all work.  For some, it was
+    only because the count of tests was wrong:
+
+Index: t/lib/texttabs.t
+
+    Date: Sun, 22 Sep 1996 00:59:56 +0200
+    From: Gisle Aas <aas@aas.no>
+    Subject: More standard library test scripts
+
+    This is a collection of test scripts for the standard library modules.
+    Some of the tests does not pass unless some of the patches I have sent
+    out are applied.
+
+Index: t/lib/textwrap.t
+
+    Date: Sun, 22 Sep 1996 00:59:56 +0200
+    From: Gisle Aas <aas@aas.no>
+    Subject: More standard library test scripts
+
+    This is a collection of test scripts for the standard library modules.
+    Some of the tests does not pass unless some of the patches I have sent
+    out are applied.
+
+Index: t/lib/timelocal.t
+
+    Date: Sun, 22 Sep 1996 00:59:56 +0200
+    From: Gisle Aas <aas@aas.no>
+    Subject: More standard library test scripts
+
+    This is a collection of test scripts for the standard library modules.
+    Some of the tests does not pass unless some of the patches I have sent
+    out are applied.
+
+Index: t/op/each.t
+
+    Date: Mon, 30 Sep 1996 01:13:28 -0400
+    From: Spider Boardman <spider@Orb.Nashua.NH.US>
+    Subject: Re: pre extending hash? - need speed
+
+    The patch below (which is relative to perl5.001l) implements
+    "keys %hash = 50_000;" (or other integer-evaluable sizes) for
+    pre-sizing hashes.  I've only moved the patch forward from
+    when I first did it.  I'm sure the code in hv_ksplit could be
+    improved.
+
+    Date: Mon, 7 Oct 1996 22:03:00 +0300
+    From: Jarkko Hietaniemi <jhi@alpha.hut.fi>
+    Subject: LC_COLLATE.
+
+    Big patch to add, document, and test LC_COLLATE support.
+
+    A not necessarily gt a.
+
+Index: t/op/glob.t
+
+    Date: Tue, 01 Oct 1996 16:37:03 -0400 (EDT)
+    From: Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>
+    Subject: Re: glob test 1 failing...bad test or bug
+
+    Under AIX 4.1.4, with LOCALE set en_GB (British english) glob test one
+    fails because <op/*> sorts  op/re_* before op/rea*, while
+    $otherway = `echo op/*`  sorts  op/re_* after op/re[a-z]*.t
+
+    This version doesn't rely on the sorting order.
+
+Index: t/op/magic.t
+
+    Date: Mon, 7 Oct 1996 22:03:00 +0300
+    From: Jarkko Hietaniemi <jhi@alpha.hut.fi>
+    Subject: LC_COLLATE.
+
+    Big patch to add, document, and test LC_COLLATE support.
+
+Index: t/op/readdir.t
+
+    Date: Mon, 7 Oct 1996 22:03:00 +0300
+    From: Jarkko Hietaniemi <jhi@alpha.hut.fi>
+    Subject: LC_COLLATE.
+
+    Big patch to add, document, and test LC_COLLATE support.
+
+    A not necessarily gt a.
+
+Index: t/op/sort.t
+
+    Date: Mon, 7 Oct 1996 22:03:00 +0300
+    From: Jarkko Hietaniemi <jhi@alpha.hut.fi>
+    Subject: LC_COLLATE.
+
+    Big patch to add, document, and test LC_COLLATE support.
+
+    A not necessarily gt a.
+
+Index: toke.c
+
+    Date: Sat, 14 Sep 1996 17:08:16 -0400
+    From: Gurusamy Sarathy <gsar@engin.umich.edu>
+    Subject: whitespace induced lexer errors (with patch)
+
+    I finally got around to fixing skipspace() to not indiscriminately
+    overwrite oldbufptr and oldoldbufptr (which are used in making
+    expectation decisions in the lexer).
+
+    Date: Sat, 14 Sep 1996 18:55:16 -0400
+    From: Gurusamy Sarathy <gsar@engin.umich.edu>
+    Subject: perl lexer won't accept C<my($a,$b);$a<=>$b;>
+
+    Date: Thu, 19 Sep 1996 11:58:22 -0400
+    From: "Randy J. Ray" <rjray@uswest.com>
+    Subject: Patch: Untaint FH flag and clean DATA handles
+
+    This patch adds a IOf_UNTAINT flag in sv.h, as one of the possibles
+    on an xpvio->xio_flags struct member. It is used to mark the given
+    file handle as a clean source, even when tainting is turned on.
+    There are also patches to pp_sys.c in pp_sysread to check this flag
+    before tainting data, and in pp_hot.c in do_readline for the same
+    reason. Lastly, it patches toke.c to automatically set this flag on
+    on a __DATA__ filehandle. The creation of the $pack::DATA
+    pseudo-filehandle is already checked against running under eval, so
+    this should not introduce any insecurity.
+
+    This patch *does not*:
+
+    * Add the "untaint" keyword.
+
+Index: util.c
+
+    Date: Mon, 7 Oct 1996 22:03:00 +0300
+    From: Jarkko Hietaniemi <jhi@alpha.hut.fi>
+    Subject: LC_COLLATE.
+
+    Big patch to add, document, and test LC_COLLATE support.
+
+    rewrote perl_init_i18n() completely.
+	- reworded to be much more friendly and clear.
+	- perl_init_fold() split to its own function.
+    wrote mem_collxfrm().
+
+Index: utils/c2ph.PL
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: utils/h2ph.PL
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: utils/h2xs.PL
+
+    Date: Sat, 21 Sep 1996 16:38:24 -0500
+    From: Dean Roehrich <roehrich@cray.com>
+    Subject: h2xs bug fix
+
+    The h2xs that is in perl5.003_05 has a regexp bug which prevents it from
+    finding #define statements and filling the constant() function.  This patch
+    fixes that.  The h2xs_test program found this--maybe people who are
+    modifying h2xs should get a copy of the test program.
+
+    This also adds a -d to enable debugging messages (there's just one for now).
+    I've also placed some of the doc-related things in alphabetical order.
+
+    h2xs_test can be found in my directory on CPAN.  Those of you modifying
+    xsubpp should know there's a test suite for that, too, called XSTEST which
+    can also be found in my directory on CPAN.
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    Here is a patch for various typos and other defects in the Perl
+    5.003_05 pods, including the pods embedded in library modules.
+
+Index: utils/perldoc.PL
+
+    Date: Sun, 29 Sep 1996 22:00:09 -0400 (EDT)
+    From: Kenneth Albanowski <kjahds@kjahds.com>
+    Subject: perldoc patch
+
+    Ilya has found that this change makes perldoc much more useful under OS/2.
+
+Index: vms/config.vms
+
+    Date: Thu, 03 Oct 1996 16:31:46 -0400 (EDT)
+    From: Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>
+    Subject: VMS patches to 5.003_05
+
+Index: vms/descrip.mms
+
+    Date: Thu, 03 Oct 1996 16:31:46 -0400 (EDT)
+    From: Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>
+    Subject: VMS patches to 5.003_05
+
+Index: vms/genconfig.pl
+
+    Date: Thu, 03 Oct 1996 16:31:46 -0400 (EDT)
+    From: Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>
+    Subject: VMS patches to 5.003_05
+
+Index: vms/perlvms.pod
+
+    Date: Thu, 03 Oct 1996 16:31:46 -0400 (EDT)
+    From: Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>
+    Subject: VMS patches to 5.003_05
+
+Index: vms/vms.c
+
+    Date: Thu, 03 Oct 1996 16:31:46 -0400 (EDT)
+    From: Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>
+    Subject: VMS patches to 5.003_05
+
+Index: x2p/a2p.pod
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    This patch just changed the old a2p.man page into a pod page.
+
+Index: x2p/s2p.PL
+
+    Date: Fri, 20 Sep 1996 15:08:33 +0100 (BST)
+    From: "Joseph S. Myers" <jsm28@hermes.cam.ac.uk>
+    Subject: Pod typos, pod2man bugs, and miscellaneous installation comments
+
+    This patch just changed the old s2p.man page into a pod page.
+    I then embedded the pod into the s2p script.
+
+----------------
 Version 5.003_05
 ----------------
 
@@ -18,7 +2271,7 @@ A very brief summary is:
 o Visible Changes to Core Functionality
 
    -Add support for a READLINE method to tied filehandles.
-    
+
    -times function now uses CLK_TCK if HZ is not available, rather
     than just defaulting to 60.  times output might change on some
     systems, but should be correct now.
@@ -33,7 +2286,7 @@ o Configure and build enhancements
    -Enhance detection of [gs]etpgrp() variants.  Some systems have
     BSD-style behavior for one and POSIX for the other.  Use
     [gs]etpgid() instead, whenever possible.
-  
+
    -You can now build a shared libperl.so without running through
     the LD_RUN_PATH hoops, if your system supports appropriate
     ld command-line options.  Solaris, NetBSD, and Linux are currently
@@ -41,7 +2294,7 @@ o Configure and build enhancements
     for embedders.)
 
    -VMS updates.
-    
+
    -Fix installperl and installman so that the -n option really only
     prints commands.  (previously, it would still do the mkdirs.)
 
@@ -172,7 +2425,7 @@ Index: config_h.SH
 
     Updated to match Configure.
 
-    Changed the DLSYM_NEEDS_UNDERSCORE comment to 
+    Changed the DLSYM_NEEDS_UNDERSCORE comment to
     /**/ to conform to metaconfig style.
 
 Index: emacs/cperl-mode.el
@@ -739,7 +2992,7 @@ o Visible Changes to Core Functionality
     it's in the same category as `` and system().
 
 o Configure and build enhancements
-   
+
    -perl library name is again -lperl, not -lperl5 in some cases.
    -Several hint files no longer set -g -DDEBUGGING by default.
     Instead, they just turn off optimization, since that is
@@ -759,7 +3012,7 @@ o Bug fixes
 o Specific Changes
 
 Here are the specific file-by-file changes.
-    
+
 # This is my patch perl5.003_04.pat to perl5.003_03
 # The full description is below.
 # Please execute the following commands before applying this patch.
@@ -1548,7 +3801,7 @@ Index: hints/dgux.sh
 Index: hints/dynixptx.sh
 
 	Fix typo in comment.
-	
+
 	Configure will now automatically detect shared libperl stuff.
 
 Index: hints/epix.sh
@@ -1877,20 +4130,20 @@ Version 5.003_02
 ----------------
 o Visible Changes to Core Functionality
   - Redefining constant subs, or changing sub's prototype now give warnings.
-  - Fixes for ++/-- of values close to max/min size of an integer 
-  - Warning for un-qualified bareword as handler in $SIG{}. 
-  - UNIVERSAL::isa can now be called as static method. 
+  - Fixes for ++/-- of values close to max/min size of an integer
+  - Warning for un-qualified bareword as handler in $SIG{}.
+  - UNIVERSAL::isa can now be called as static method.
 
 o Changes in Core Internals
   - PerlIO abstraction added.
     Perl core and standard extensions no longer assume ANSI C's stdio is IO
     mechanism, Default Configure mode is still to use stdio via set of C macros.
-    Alternate modes are to use stdio via one perlio.c module, or 
+    Alternate modes are to use stdio via one perlio.c module, or
     to use sfio if available.
-    
+
   - Several bug fixs from perl5-porters
       - Make sources non-ANSI C correct again.
-      - SUPER in gv.c 
+      - SUPER in gv.c
       - Last of shared-hash-key patches
       - eval '(0,1..3)'; # --> SegFault
       - coredumps after simple subsitutes.
@@ -1898,18 +4151,18 @@ o Changes in Core Internals
       - Fixed io_udp test.
       - Fixed another abuse of malloc'ed memory.
   - Enabled DEBUGING_MSTATS whenever perl's malloc() is used.
-  - Reverted to default of not hiding perl's malloc (if used). 
+  - Reverted to default of not hiding perl's malloc (if used).
 
 o Changes in the Standard Library and Utilities
   - Fixed MakeMaker for static SDBM and builing in a link tree.
-  - Upgraded to IO-1.09, and includes latest (still experimental) IO::Select. 
+  - Upgraded to IO-1.09, and includes latest (still experimental) IO::Select.
   - Documentation/test tweak to DB_File
-  - h2xs upgrade to allow use C::Scan module 
+  - h2xs upgrade to allow use C::Scan module
 
 o Changes in OS-specific and Build-time Support
   - Attempted to re-created 5.003_01's NeXT support with metaconfig units.
-  - Updated MANIFEST 
-  - make minitest now depends on lib/Config.pm, as some of tests require it. 
+  - Updated MANIFEST
+  - make minitest now depends on lib/Config.pm, as some of tests require it.
   - Included latest plan9 sub-directory
   - Applied OS/2 patches.
   - Typo patch for VMS.
