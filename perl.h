@@ -1164,6 +1164,18 @@ typedef NVTYPE NV;
 #   ifdef LDBL_MANT_DIG
 #       define NV_MANT_DIG LDBL_MANT_DIG
 #   endif
+#   ifdef LDBL_MAX
+#       define NV_MAX LDBL_MAX
+#       define NV_MIN LDBL_MIN
+#   else
+#       ifdef HUGE_VALL
+#           define NV_MAX HUGE_VALL
+#       else
+#           ifdef HUGE_VAL
+#               define NV_MAX ((NV)HUGE_VAL)
+#           endif
+#       endif
+#   endif
 #   ifdef HAS_SQRTL
 #       define Perl_cos cosl
 #       define Perl_sin sinl
@@ -1199,6 +1211,14 @@ typedef NVTYPE NV;
 #   define NV_DIG DBL_DIG
 #   ifdef DBL_MANT_DIG
 #       define NV_MANT_DIG DBL_MANT_DIG
+#   endif
+#   ifdef DBL_MAX
+#       define NV_MAX DBL_MAX
+#       define NV_MIN DBL_MIN
+#   else
+#       ifdef HUGE_VAL
+#           define NV_MAX HUGE_VAL
+#       endif
 #   endif
 #   define Perl_cos cos
 #   define Perl_sin sin
