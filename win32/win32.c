@@ -733,7 +733,7 @@ win32_opendir(char *filename)
     long		len;
     long		idx;
     char		scanname[MAX_PATH+3];
-    struct stat		sbuf;
+    Stat_t		sbuf;
     WIN32_FIND_DATAA	aFindData;
     WIN32_FIND_DATAW	wFindData;
     HANDLE		fh;
@@ -1160,7 +1160,7 @@ alien_process:
 }
 
 DllExport int
-win32_stat(const char *path, struct stat *sbuf)
+win32_stat(const char *path, Stat_t *sbuf)
 {
     dTHX;
     char	buffer[MAX_PATH+1];
@@ -1217,10 +1217,18 @@ win32_stat(const char *path, struct stat *sbuf)
 
     /* pwbuffer or path will be mapped correctly above */
     if (USING_WIDE()) {
-	res = _wstat(pwbuffer, (struct _stat *)sbuf);
+#if defined(WIN64) || defined(USE_LARGE_FILES)
+	res = _wstati64(pwbuffer, sbuf);
+#else
+	res = _wstat(pwbuffer, sbuf);
+#endif
     }
     else {
+#if defined(WIN64) || defined(USE_LARGE_FILES)
+	res = _stati64(path, sbuf);
+#else
 	res = stat(path, sbuf);
+#endif
     }
     sbuf->st_nlink = nlink;
 
@@ -1238,7 +1246,7 @@ win32_stat(const char *path, struct stat *sbuf)
 	}
 	if (r != 0xffffffff && (r & FILE_ATTRIBUTE_DIRECTORY)) {
 	    /* sbuf may still contain old garbage since stat() failed */
-	    Zero(sbuf, 1, struct stat);
+	    Zero(sbuf, 1, Stat_t);
 	    sbuf->st_mode = S_IFDIR | S_IREAD;
 	    errno = 0;
 	    if (!(r & FILE_ATTRIBUTE_READONLY))
@@ -2092,7 +2100,7 @@ win32_crypt(const char *txt, const char *salt)
 #define FTEXT			0x80	/* file handle is in text mode */
 
 /***
-*int my_open_osfhandle(long osfhandle, int flags) - open C Runtime file handle
+*int my_open_osfhandle(intptr_t osfhandle, int flags) - open C Runtime file handle
 *
 *Purpose:
 *       This function allocates a free C Runtime file handle and associates
@@ -2103,7 +2111,7 @@ win32_crypt(const char *txt, const char *salt)
 *	This works with MSVC++ 4.0+ or GCC/Mingw32
 *
 *Entry:
-*       long osfhandle - Win32 HANDLE to associate with C Runtime file handle.
+*       intptr_t osfhandle - Win32 HANDLE to associate with C Runtime file handle.
 *       int flags      - flags to associate with C Runtime file handle.
 *
 *Exit:
@@ -2127,7 +2135,7 @@ static int
 _alloc_osfhnd(void)
 {
     HANDLE hF = CreateFile("NUL", 0, 0, NULL, OPEN_ALWAYS, 0, NULL);
-    int fh = _open_osfhandle((long)hF, 0);
+    int fh = _open_osfhandle((intptr_t)hF, 0);
     CloseHandle(hF);
     if (fh == -1)
         return fh;
@@ -2136,7 +2144,7 @@ _alloc_osfhnd(void)
 }
 
 static int
-my_open_osfhandle(long osfhandle, int flags)
+my_open_osfhandle(intptr_t osfhandle, int flags)
 {
     int fh;
     char fileflags;		/* _osfile flags */
@@ -2489,16 +2497,45 @@ win32_fflush(FILE *pf)
     return fflush(pf);
 }
 
-DllExport long
+DllExport Off_t
 win32_ftell(FILE *pf)
 {
+#if defined(WIN64) || defined(USE_LARGE_FILES)
+    fpos_t pos;
+    if (fgetpos(pf, &pos))
+	return -1;
+    return (Off_t)pos;
+#else
     return ftell(pf);
+#endif
 }
 
 DllExport int
-win32_fseek(FILE *pf,long offset,int origin)
+win32_fseek(FILE *pf, Off_t offset,int origin)
 {
+#if defined(WIN64) || defined(USE_LARGE_FILES)
+    fpos_t pos;
+    switch (origin) {
+    case SEEK_CUR:
+	if (fgetpos(pf, &pos))
+	    return -1;
+	offset += pos;
+	break;
+    case SEEK_END:
+	fseek(pf, 0, SEEK_END);
+	pos = _telli64(fileno(pf));
+	offset += pos;
+	break;
+    case SEEK_SET:
+	break;
+    default:
+	errno = EINVAL;
+	return -1;
+    }
+    return fsetpos(pf, &offset);
+#else
     return fseek(pf, offset, origin);
+#endif
 }
 
 DllExport int
@@ -2538,7 +2575,7 @@ win32_tmpfile(void)
 				   | FILE_FLAG_DELETE_ON_CLOSE,
 				   NULL);
 	    if (fh != INVALID_HANDLE_VALUE) {
-		int fd = win32_open_osfhandle((long)fh, 0);
+		int fd = win32_open_osfhandle((intptr_t)fh, 0);
 		if (fd >= 0) {
 #if defined(__BORLANDC__)
         	    setmode(fd,O_BINARY);
@@ -2561,7 +2598,7 @@ win32_abort(void)
 }
 
 DllExport int
-win32_fstat(int fd,struct stat *sbufptr)
+win32_fstat(int fd, Stat_t *sbufptr)
 {
 #ifdef __BORLANDC__
     /* A file designated by filehandle is not shown as accessible
@@ -2953,16 +2990,24 @@ win32_setmode(int fd, int mode)
     return setmode(fd, mode);
 }
 
-DllExport long
-win32_lseek(int fd, long offset, int origin)
+DllExport Off_t
+win32_lseek(int fd, Off_t offset, int origin)
 {
+#if defined(WIN64) || defined(USE_LARGE_FILES)
+    return _lseeki64(fd, offset, origin);
+#else
     return lseek(fd, offset, origin);
+#endif
 }
 
-DllExport long
+DllExport Off_t
 win32_tell(int fd)
 {
+#if defined(WIN64) || defined(USE_LARGE_FILES)
+    return _telli64(fd);
+#else
     return tell(fd);
+#endif
 }
 
 DllExport int
@@ -3887,7 +3932,7 @@ static DWORD pagesize  = 0;		/* XXX threadead */
 static DWORD allocsize = 0;		/* XXX threadead */
 
 void *
-sbrk(int need)
+sbrk(ptrdiff_t need)
 {
  void *result;
  if (!pagesize)
@@ -3980,7 +4025,7 @@ win32_free(void *block)
 
 
 int
-win32_open_osfhandle(long handle, int flags)
+win32_open_osfhandle(intptr_t handle, int flags)
 {
 #ifdef USE_FIXED_OSFHANDLE
     if (IsWin95())
@@ -3989,10 +4034,10 @@ win32_open_osfhandle(long handle, int flags)
     return _open_osfhandle(handle, flags);
 }
 
-long
+intptr_t
 win32_get_osfhandle(int fd)
 {
-    return _get_osfhandle(fd);
+    return (intptr_t)_get_osfhandle(fd);
 }
 
 DllExport void*

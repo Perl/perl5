@@ -94,7 +94,7 @@ typedef int		(*LPPrintf)(struct IPerlStdIO*, FILE*, const char*,
 			    ...);
 typedef int		(*LPVprintf)(struct IPerlStdIO*, FILE*, const char*,
 			    va_list);
-typedef long		(*LPTell)(struct IPerlStdIO*, FILE*);
+typedef Off_t		(*LPTell)(struct IPerlStdIO*, FILE*);
 typedef int		(*LPSeek)(struct IPerlStdIO*, FILE*, Off_t, int);
 typedef void		(*LPRewind)(struct IPerlStdIO*, FILE*);
 typedef FILE*		(*LPTmpfile)(struct IPerlStdIO*);
@@ -597,15 +597,15 @@ typedef int		(*LPLIOClose)(struct IPerlLIO*, int);
 typedef int		(*LPLIODup)(struct IPerlLIO*, int);
 typedef int		(*LPLIODup2)(struct IPerlLIO*, int, int);
 typedef int		(*LPLIOFlock)(struct IPerlLIO*, int, int);
-typedef int		(*LPLIOFileStat)(struct IPerlLIO*, int, struct stat*);
+typedef int		(*LPLIOFileStat)(struct IPerlLIO*, int, Stat_t*);
 typedef int		(*LPLIOIOCtl)(struct IPerlLIO*, int, unsigned int,
 			    char*);
 typedef int		(*LPLIOIsatty)(struct IPerlLIO*, int);
 typedef int		(*LPLIOLink)(struct IPerlLIO*, const char*,
 				     const char *);
-typedef long		(*LPLIOLseek)(struct IPerlLIO*, int, long, int);
+typedef Off_t		(*LPLIOLseek)(struct IPerlLIO*, int, Off_t, int);
 typedef int		(*LPLIOLstat)(struct IPerlLIO*, const char*,
-			    struct stat*);
+			    Stat_t*);
 typedef char*		(*LPLIOMktemp)(struct IPerlLIO*, char*);
 typedef int		(*LPLIOOpen)(struct IPerlLIO*, const char*, int);	
 typedef int		(*LPLIOOpen3)(struct IPerlLIO*, const char*, int, int);	
@@ -618,7 +618,7 @@ typedef int		(*LPLIOSetmode)(struct IPerlLIO*, FILE*, int);
 typedef int		(*LPLIOSetmode)(struct IPerlLIO*, int, int);
 #endif	/* NETWARE */
 typedef int		(*LPLIONameStat)(struct IPerlLIO*, const char*,
-			    struct stat*);
+			    Stat_t*);
 typedef char*		(*LPLIOTmpnam)(struct IPerlLIO*, char*);
 typedef int		(*LPLIOUmask)(struct IPerlLIO*, int);
 typedef int		(*LPLIOUnlink)(struct IPerlLIO*, const char*);

@@ -4,12 +4,12 @@ specially designed to be readable as is.
 
 =head1 NAME
 
-perlwin32 - Perl under Win32
+perlwin32 - Perl under Windows
 
 =head1 SYNOPSIS
 
-These are instructions for building Perl under Windows (9x, NT and
-2000).
+These are instructions for building Perl under Windows 9x/NT/2000/XP
+on the Intel x86 and Itanium architectures.
 
 =head1 DESCRIPTION
 
@@ -35,10 +35,11 @@ you will also need to download and use various other build-time and
 run-time support software described in those files.
 
 This set of instructions is meant to describe a so-called "native"
-port of Perl to Win32 platforms.  The resulting Perl requires no
+port of Perl to Win32 platforms.  This includes both 32-bit and
+64-bit Windows operating systems.  The resulting Perl requires no
 additional software to run (other than what came with your operating
 system).  Currently, this port is capable of using one of the
-following compilers:
+following compilers on the Intel x86 architecture:
 
       Borland C++		version 5.02 or later
       Microsoft Visual C++	version 4.2 or later
@@ -48,7 +49,13 @@ The last of these is a high quality freeware compiler.  Support
 for it is still experimental.  (Older versions of GCC are known
 not to work.)
 
-This port currently supports MakeMaker (the set of modules that
+This port can also be built on the Intel IA64 using:
+
+      Microsoft Platform SDK	Nov 2001 (64-bit compiler and tools)
+
+The MS Platform SDK can be downloaded from http://www.microsoft.com/.
+
+This port fully supports MakeMaker (the set of modules that
 is used to build extensions to perl).  Therefore, you should be
 able to build and install most extensions found in the CPAN sites.
 See L<Usage Hints for Perl on Win32> below for general hints about this.
@@ -60,8 +67,8 @@ See L<Usage Hints for Perl on Win32> below for general hints about this.
 =item Make
 
 You need a "make" program to build the sources.  If you are using
-Visual C++ under Windows NT or 2000, nmake will work.  All other
-builds need dmake.
+Visual C++ or the Platform SDK tools under Windows NT/2000/XP, nmake
+will work.  All other builds need dmake.
 
 dmake is a freely available make that has very nice macro features
 and parallelability.
@@ -99,7 +106,7 @@ The nmake Makefile also has known incompatibilities with the
 "command.com" shell that comes with Windows 9x.  You will need to
 use dmake and makefile.mk to build under Windows 9x.
 
-The surest way to build it is on Windows NT, using the cmd shell.
+The surest way to build it is on Windows NT/2000/XP, using the cmd shell.
 
 Make sure the path to the build directory does not contain spaces.  The
 build usually works in this circumstance, but some tests will fail.
@@ -124,6 +131,12 @@ under which the Visual C dmake configuration lives) in your environment
 and edit win32/config.vc to change "make=nmake" into "make=dmake".  The
 latter step is only essential if you want to use dmake as your default
 make for building extensions using MakeMaker.
+
+=item Microsoft Platform SDK 64-bit Compiler
+
+The nmake that comes with the Platform SDK will suffice for building
+Perl.  Make sure you are building within one of the "Build Environment"
+shells available after you install the Platform SDK from the Start Menu.
 
 =item Mingw32 with GCC
 
@@ -177,9 +190,9 @@ here:
 
 Make sure you are in the "win32" subdirectory under the perl toplevel.
 This directory contains a "Makefile" that will work with
-versions of nmake that come with Visual C++, and a dmake "makefile.mk"
-that will work for all supported compilers.  The defaults in the dmake
-makefile are setup to build using the GCC compiler.
+versions of nmake that come with Visual C++ or the Platform SDK, and
+a dmake "makefile.mk" that will work for all supported compilers.  The
+defaults in the dmake makefile are setup to build using the GCC compiler.
 
 =item *
 
@@ -226,7 +239,7 @@ Be sure to read the instructions near the top of the makefiles carefully.
 Type "dmake" (or "nmake" if you are using that make).
 
 This should build everything.  Specifically, it will create perl.exe,
-perl56.dll at the perl toplevel, and various other extension dll's
+perl58.dll at the perl toplevel, and various other extension dll's
 under the lib\auto directory.  If the build fails for any reason, make
 sure you have done the previous steps correctly.
 
@@ -237,9 +250,18 @@ sure you have done the previous steps correctly.
 Type "dmake test" (or "nmake test").  This will run most of the tests from
 the testsuite (many tests will be skipped).
 
-There should be no test failures when running under Windows NT 4.0 or
-Windows 2000.  Many tests I<will> fail under Windows 9x due to the inferior
-command shell.
+There should be no test failures when running under Windows NT/2000/XP.
+Many tests I<will> fail under Windows 9x due to the inferior command shell.
+
+The following known test failures under the 64-bit edition of Windows .NET
+Server beta 3 are expected to be fixed before the 5.8.0 release:
+
+    Failed Test              Stat Wstat Total Fail  Failed  List of Failed
+    ------------------------------------------------------------------------
+    ../ext/Encode/t/JP.t        3   768    37    3   8.11%  15 26 37
+    ../ext/Encode/t/perlio.t    7  1792    20    7  35.00%  1-2 5-6 10 14 18
+    ../ext/threads/t/end.t                  6    4  66.67%  3-6
+    op/fork.t                              18    3  16.67%  2 15 17
 
 Some test failures may occur if you use a command shell other than the
 native "cmd.exe", or if you are building from a path that contains
@@ -546,11 +568,50 @@ all of the ActiveState extensions and most other Win32 extensions from
 CPAN in source form, along with many added bugfixes, and with MakeMaker
 support.  This bundle is available at:
 
-   http://www.cpan.org/authors/id/GSAR/libwin32-0.151.zip
+   http://www.cpan.org/authors/id/GSAR/libwin32-0.18.zip
 
 See the README in that distribution for building and installation
 instructions.  Look for later versions that may be available at the
 same location.
+
+=item Notes on 64-bit Windows
+
+Windows .NET Server supports the LLP64 data model on the Intel Itanium
+architecture.
+
+The LLP64 data model is different from the LP64 data model that is the
+norm on 64-bit Unix platforms.  In the former, C<int> and C<long> are
+both 32-bit data types, while pointers are 64 bits wide.  In addition,
+there is a separate 64-bit wide integral type, C<__int64>.  In contrast,
+the LP64 data model that is pervasive on Unix platforms provides C<int>
+as the 32-bit type, while both the C<long> type and pointers are of
+64-bit precision.  Note that both models provide for 64-bits of
+addressability.
+
+64-bit Windows running on Itanium is capable of running 32-bit x86
+binaries transparently.  This means that you could use a 32-bit build
+of Perl on a 64-bit system.  Given this, why would one want to build
+a 64-bit build of Perl?  Here are some reasons why you would bother:
+
+=item *
+
+A 64-bit native application will run much more efficiently on
+Itanium hardware.
+
+=item *
+
+There is no 2GB limit on process size.
+
+=item *
+
+Perl automatically provides large file support when built under
+64-bit Windows.
+
+=item *
+
+Embedding Perl inside a 64-bit application.
+
+=back
 
 =item Running Perl Scripts
 
@@ -717,6 +778,8 @@ Support for fork() emulation was added in 5.6 (ActiveState Tool Corp).
 
 Win9x support was added in 5.6 (Benjamin Stuhl).
 
-Last updated: 1 April 2001
+Support for 64-bit Windows added in 5.8 (ActiveState Corp).
+
+Last updated: 20 April 2002
 
 =cut

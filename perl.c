@@ -2947,7 +2947,7 @@ S_fd_on_nosuid_fs(pTHX_ int fd)
         defined(HAS_STRUCT_FS_DATA)	&& \
         defined(NOSTAT_ONE)
 #   define FD_ON_NOSUID_CHECK_OKAY
-    struct stat fdst;
+    Stat_t fdst;
 
     if (fstat(fd, &fdst) == 0) {
         struct ustat us;
@@ -2977,7 +2977,7 @@ S_fd_on_nosuid_fs(pTHX_ int fd)
 #   define FD_ON_NOSUID_CHECK_OKAY
     FILE                *mtab = fopen("/etc/mtab", "r");
     struct mntent       *entry;
-    struct stat         stb, fsb;
+    Stat_t              stb, fsb;
 
     if (mtab && (fstat(fd, &stb) == 0)) {
         while (entry = getmntent(mtab)) {
@@ -3057,7 +3057,7 @@ S_validate_suid(pTHX_ char *validarg, char *scriptname, int fdscript)
 	 * Then we just have to make sure he or she can execute it.
 	 */
 	{
-	    struct stat tmpstatbuf;
+	    Stat_t tmpstatbuf;
 
 	    if (
 #ifdef HAS_SETREUID
@@ -3638,7 +3638,7 @@ S_init_perllib(pTHX)
 #endif
 #ifdef MACOS_TRADITIONAL
     {
-	struct stat tmpstatbuf;
+	Stat_t tmpstatbuf;
     	SV * privdir = NEWSV(55, 0);
 	char * macperl = PerlEnv_getenv("MACPERL");
 	
@@ -3782,7 +3782,7 @@ S_incpush(pTHX_ char *p, int addsubdirs, int addoldvers)
 	    const char *incverlist[] = { PERL_INC_VERSION_LIST };
 	    const char **incver;
 #endif
-	    struct stat tmpstatbuf;
+	    Stat_t tmpstatbuf;
 #ifdef VMS
 	    char *unix;
 	    STRLEN len;

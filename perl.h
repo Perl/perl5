@@ -2279,6 +2279,10 @@ struct ptr_tbl {
 #  define htovs(x)	vtohs(x)
 # endif
 	/* otherwise default to functions in util.c */
+short htovs(short n);
+short vtohs(short n);
+long htovl(long n);
+long vtohl(long n);
 #endif
 
 /* *MAX Plus 1. A floating point value.
@@ -3742,6 +3746,9 @@ typedef struct am_table_short AMTS;
 #    ifdef __hpux
 #        define strtoll __strtoll	/* secret handshake */
 #    endif
+#    ifdef WIN64
+#        define strtoll _strtoi64	/* secret handshake */
+#    endif
 #   if !defined(Strtol) && defined(HAS_STRTOLL)
 #       define Strtol	strtoll
 #   endif
@@ -3758,6 +3765,9 @@ typedef struct am_table_short AMTS;
  * (as is done for Atoul(), see below) but for backward compatibility
  * we just assume atol(). */
 #   if defined(USE_64_BIT_INT) && defined(IV_IS_QUAD) && QUADKIND == QUAD_IS_LONG_LONG && defined(HAS_ATOLL)
+#    ifdef WIN64
+#       define atoll    _atoi64		/* secret handshake */
+#    endif
 #       define Atol	atoll
 #   else
 #       define Atol	atol
@@ -3767,6 +3777,9 @@ typedef struct am_table_short AMTS;
 #if !defined(Strtoul) && defined(USE_64_BIT_INT) && defined(UV_IS_QUAD) && QUADKIND == QUAD_IS_LONG_LONG
 #    ifdef __hpux
 #        define strtoull __strtoull	/* secret handshake */
+#    endif
+#    ifdef WIN64
+#        define strtoull _strtoui64	/* secret handshake */
 #    endif
 #    if !defined(Strtoul) && defined(HAS_STRTOULL)
 #       define Strtoul	strtoull

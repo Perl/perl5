@@ -2279,7 +2279,7 @@ void
 Perl_dump_fds(pTHX_ char *s)
 {
     int fd;
-    struct stat tmpstatbuf;
+    Stat_t tmpstatbuf;
 
     PerlIO_printf(Perl_debug_log,"%s", s);
     for (fd = 0; fd < 32; fd++) {
@@ -2640,8 +2640,8 @@ Perl_same_dirent(pTHX_ char *a, char *b)
 {
     char *fa = strrchr(a,'/');
     char *fb = strrchr(b,'/');
-    struct stat tmpstatbuf1;
-    struct stat tmpstatbuf2;
+    Stat_t tmpstatbuf1;
+    Stat_t tmpstatbuf2;
     SV *tmpsv = sv_newmortal();
 
     if (fa)
@@ -3863,7 +3863,7 @@ Perl_getcwd_sv(pTHX_ register SV *sv)
 
 #else
 
-    struct stat statbuf;
+    Stat_t statbuf;
     int orig_cdev, orig_cino, cdev, cino, odev, oino, tdev, tino;
     int namelen, pathlen=0;
     DIR *dir;

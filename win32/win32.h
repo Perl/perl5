@@ -72,6 +72,7 @@
 #include <stdio.h>
 #include <direct.h>
 #include <stdlib.h>
+#include <stddef.h>
 #include <fcntl.h>
 #ifndef EXT
 #include "EXTERN.h"
@@ -200,7 +201,7 @@ struct utsname {
 typedef long		uid_t;
 typedef long		gid_t;
 typedef unsigned short	mode_t;
-#pragma  warning(disable: 4018 4035 4101 4102 4244 4245 4761)
+#pragma  warning(disable: 4102)	/* "unreferenced label" */
 
 /* Visual C thinks that a pointer to a member variable is 16 bytes in size. */
 #define PERL_MEMBER_PTR_SIZE	16
@@ -236,6 +237,16 @@ typedef long		gid_t;
 
 /* compatibility stuff for other compilers goes here */
 
+#ifndef _INTPTR_T_DEFINED
+typedef int		intptr_t;
+#  define _INTPTR_T_DEFINED
+#endif
+
+#ifndef _UINTPTR_T_DEFINED
+typedef unsigned int	uintptr_t;
+#  define _UINTPTR_T_DEFINED
+#endif
+
 START_EXTERN_C
 
 /* For UNIX compatibility. */
@@ -247,7 +258,10 @@ extern  gid_t	getegid(void);
 extern  int	setuid(uid_t uid);
 extern  int	setgid(gid_t gid);
 extern  int	kill(int pid, int sig);
-extern  void	*sbrk(int need);
+#ifndef USE_PERL_SBRK
+extern  void	*sbrk(ptrdiff_t need);
+#  define HAS_SBRK_PROTO
+#endif
 extern	char *	getlogin(void);
 extern	int	chown(const char *p, uid_t o, gid_t g);
 extern  int	mkstemp(const char *path);
@@ -292,7 +306,7 @@ DllExport void		win32_get_child_IO(child_IO_table* ptr);
 extern FILE *		my_fdopen(int, char *);
 #endif
 extern int		my_fclose(FILE *);
-extern int		my_fstat(int fd, struct stat *sbufptr);
+extern int		my_fstat(int fd, Stat_t *sbufptr);
 extern int		do_aspawn(void *really, void **mark, void **sp);
 extern int		do_spawn(char *cmd);
 extern int		do_spawn_nowait(char *cmd);
@@ -477,7 +491,7 @@ DllExport int win32_async_check(pTHX);
  * Control structure for lowio file handles
  */
 typedef struct {
-    long osfhnd;    /* underlying OS file HANDLE */
+    intptr_t osfhnd;/* underlying OS file HANDLE */
     char osfile;    /* attributes of file (e.g., open in text mode?) */
     char pipech;    /* one char buffer for handles opened on pipes */
     int lockinitflag;
@@ -511,7 +525,7 @@ EXTERN_C _CRTIMP ioinfo* __pioinfo[];
 #define _pipech(i)  (_pioinfo(i)->pipech)
 
 /* since we are not doing a dup2(), this works fine */
-#define _set_osfhnd(fh, osfh) (void)(_osfhnd(fh) = (long)osfh)
+#define _set_osfhnd(fh, osfh) (void)(_osfhnd(fh) = (intptr_t)osfh)
 #endif
 #endif
 
