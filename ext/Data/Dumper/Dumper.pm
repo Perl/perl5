@@ -230,7 +230,7 @@ sub _dump {
 	  if ($s->{purity} and $s->{level} > 0) {
 	    $out = ($realtype eq 'HASH')  ? '{}' :
 	      ($realtype eq 'ARRAY') ? '[]' :
-		"''" ;
+		'do{my $o}' ;
 	    push @post, $name . " = " . $s->{seen}{$id}[0];
 	  }
 	  else {

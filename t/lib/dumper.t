@@ -56,11 +56,11 @@ sub TEST {
 
 if (defined &Data::Dumper::Dumpxs) {
   print "### XS extension loaded, will run XS tests\n";
-  $TMAX = 174; $XS = 1;
+  $TMAX = 186; $XS = 1;
 }
 else {
   print "### XS extensions not loaded, will NOT run XS tests\n";
-  $TMAX = 87; $XS = 0;
+  $TMAX = 93; $XS = 0;
 }
 
 print "1..$TMAX\n";
@@ -301,11 +301,11 @@ EOT
 #           #0
 #           10,
 #           #1
-#           '',
+#           do{my $o},
 #           #2
 #           {
 #             'a' => 1,
-#             'b' => '',
+#             'b' => do{my $o},
 #             'c' => [],
 #             'd' => {}
 #           }
@@ -331,10 +331,10 @@ EOT
 #*::foo = \5;
 #*::foo = [
 #  10,
-#  '',
+#  do{my $o},
 #  {
 #    'a' => 1,
-#    'b' => '',
+#    'b' => do{my $o},
 #    'c' => [],
 #    'd' => {}
 #  }
@@ -364,7 +364,7 @@ EOT
 #*::foo = \@bar;
 #*::foo = {
 #  'a' => 1,
-#  'b' => '',
+#  'b' => do{my $o},
 #  'c' => [],
 #  'd' => {}
 #};
@@ -391,7 +391,7 @@ EOT
 #*::foo = $bar;
 #*::foo = {
 #  'a' => 1,
-#  'b' => '',
+#  'b' => do{my $o},
 #  'c' => [],
 #  'd' => {}
 #};
@@ -640,7 +640,7 @@ TEST q(Data::Dumper->new([\&z,$c],['*a','*c'])->Seen({'*b' => \&z})->Dumpxs;)
   $WANT = <<'EOT';
 #@a = (
 #  undef,
-#  ''
+#  do{my $o}
 #);
 #$a[1] = \$a[0];
 EOT
@@ -677,7 +677,7 @@ TEST q(Data::Dumper->new([$a,$b],['a','b'])->Purity(1)->Dumpxs;)
 #  {
 #    a => \[
 #        {
-#          c => ''
+#          c => do{my $o}
 #        },
 #        {
 #          d => \[]
@@ -766,5 +766,36 @@ EOT
 
 TEST q(Data::Dumper->new([$a,$b,$c],['a','b','c'])->Maxdepth(1)->Dump;);
 TEST q(Data::Dumper->new([$a,$b,$c],['a','b','c'])->Maxdepth(1)->Dumpxs;)
+	if $XS;
+}
+
+{
+    $a = \$a;
+    $b = [$a];
+
+############# 175
+##
+  $WANT = <<'EOT';
+#$b = [
+#  \$b->[0]
+#];
+EOT
+
+TEST q(Data::Dumper->new([$b],['b'])->Purity(0)->Dump;);
+TEST q(Data::Dumper->new([$b],['b'])->Purity(0)->Dumpxs;)
+	if $XS;
+
+############# 181
+##
+  $WANT = <<'EOT';
+#$b = [
+#  \do{my $o}
+#];
+#${$b->[0]} = $b->[0];
+EOT
+
+
+TEST q(Data::Dumper->new([$b],['b'])->Purity(1)->Dump;);
+TEST q(Data::Dumper->new([$b],['b'])->Purity(1)->Dumpxs;)
 	if $XS;
 }

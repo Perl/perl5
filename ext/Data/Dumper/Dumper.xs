@@ -202,7 +202,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 			else if (realtype == SVt_PVAV)
 			    sv_catpvn(retval, "[]", 2);
 			else
-			    sv_catpvn(retval, "''", 2);
+			    sv_catpvn(retval, "do{my $o}", 9);
 			postentry = newSVpvn(name, namelen);
 			sv_catpvn(postentry, " = ", 3);
 			sv_catsv(postentry, othername);
