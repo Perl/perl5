@@ -136,33 +136,48 @@ EOM
 cat > UU/usethreads.cbu <<'EOCBU'
 case "$usethreads" in
 $define|true|[yY]*)
+        lc_r=`/sbin/ldconfig -r|grep ':-lc_r'|awk '{print $NF}'`
         case "$osvers" in  
-        3.*|4.0*) ldflags="-pthread $ldflags"
-              ;;
-        2.2*) if [ ! -r /usr/lib/libc_r ]; then
-              cat <<'EOM' >&4
-POSIX threads are not supported by default on FreeBSD $osvers.  Follow the
-instructions in 'man pthread' to build and install the needed libraries.
-EOM
-                 exit 1
-              fi
-              set `echo X "$libswanted "| sed -e 's/ c / c_r /'`
-              shift
-              libswanted="$*"
-              # Configure will probably pick the wrong libc to use for nm
-              # scan.
-              # The safest quick-fix is just to not use nm at all.
-              usenm=false
-              ;;
-         *)   cat <<'EOM' >&4
+	2.2.8|3.*|4.*)
+	      if [ ! -r "$lc_r" ]; then
+	      cat <<EOM >&4
+POSIX threads should be supported by FreeBSD $osvers --
+but your system is missing the shared libc_r.
+(/sbin/ldconfig -r doesn't find any).
 
-It is not known if FreeBSD $osvers supports POSIX threads or not.
-Consider upgrading to the latest STABLE release.
-
+Consider using the latest STABLE release.
 EOM
-              exit 1
-              ;;
-        esac
-	;;
+		 exit 1
+	      fi
+	      ldflags="-pthread $ldflags"
+	      ;;
+        2.2*) if [ ! -r "$lc_r" ]; then
+              cat <<EOM >&4
+POSIX threads are not supported by default on FreeBSD $osvers.
+
+Please consider upgrading to at least FreeBSD 2.2.8.
+
+(While 2.2.7 does have pthreads, it has some problems
+ with the combination of threads and pipes and therefore
+ many Perl tests will either hang or fail.)
+EOM
+		 exit 1
+	      fi
+	      ;;
+	 *)   cat <<EOM >&4
+I did not know that FreeBSD $osvers supports POSIX threads.
+
+Feel free to tell me (jhi@iki.fi) otherwise.
+EOM
+	      exit 1
+	      ;;
+	esac
+        unset lc_r
+	set `echo X "$libswanted "| sed -e 's/ c / c_r /'`
+	shift
+	libswanted="$*"
+	# Configure will probably pick the wrong libc to use for nm scan.
+	# The safest quick-fix is just to not use nm at all.
+	usenm=false
 esac
 EOCBU
