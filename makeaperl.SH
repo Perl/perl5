@@ -18,7 +18,9 @@ case "$0" in
 esac
 echo "Extracting makeaperl (with variable substitutions)"
 $spitshell >makeaperl <<!GROK!THIS!
-#!$binexp/perl
+$startperl
+    eval 'exec perl -S \$0 "\$@"'
+	if 0;
 !GROK!THIS!
 
 $spitshell >>makeaperl <<'!NO!SUBS!'
