@@ -420,6 +420,11 @@ struct.  It should also C<Unread()> any unconsumed data that has been
 read and buffered from the layer below back to that layer, so that it
 can be re-provided to what ever is now above.
 
+When a PerlIO * is destructed all the layers should pop back to
+leave a NULL. However if ->Popped() returns true then perlio.c
+assumes that either the layer has popped itself, or the layer is
+super special and needs to be retained for other reasons.
+
 Returns 0 on success and failure.
 
 =item Open
