@@ -51,7 +51,7 @@ typedef struct {
 #define NEEDS_LINES	1
 
 #if 0
-#define OUR_ENCODE_FB "Encode::FB_DEFAULT"
+#define OUR_ENCODE_FB "Encode::FB_PERLQQ"
 #else
 #define OUR_ENCODE_FB "Encode::FB_QUIET"
 #endif
@@ -139,9 +139,6 @@ PerlIOEncode_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg)
 	    }
 	}
 	PerlIOBase(f)->flags |= PERLIO_F_UTF8;
-	if (e->flags & NEEDS_LINES) {
-	    PerlIOBase(f)->flags |= PERLIO_F_LINEBUF;
-	}
     }
 
     e->chk = newSVsv(get_sv("PerlIO::encoding::check",0));
@@ -528,11 +525,33 @@ PerlIOEncode_dup(pTHX_ PerlIO * f, PerlIO * o,
 SSize_t
 PerlIOEncode_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 {
-    SSize_t size = PerlIOBuf_write(aTHX_ f, vbuf, count);
     PerlIOEncode *e = PerlIOSelf(f, PerlIOEncode);
     if (e->flags & NEEDS_LINES) {
+	SSize_t done = 0;
+	const char *ptr = (const char *) vbuf;
+	const char *end = ptr+count;
+	while (ptr < end) {
+	    const char *nl = ptr;
+	    while (nl < end && *nl++ != '\n') /* empty body */;
+	    done = PerlIOBuf_write(aTHX_ f, ptr, nl-ptr);
+	    if (done != nl-ptr) {
+		if (done > 0) {
+		    ptr += done;
+		}
+		break;
+	    }
+	    ptr += done;
+	    if (ptr[-1] == '\n') {
+		if (PerlIOEncode_flush(aTHX_ f) != 0) {
+		    break;
+		}
+	    }
+	}
+	return (SSize_t) (ptr - (const char *) vbuf);
     }
-    return size;
+    else {
+	return PerlIOBuf_write(aTHX_ f, vbuf, count);
+    }
 }
 
 PerlIO_funcs PerlIO_encode = {

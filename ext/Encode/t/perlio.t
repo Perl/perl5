@@ -63,14 +63,15 @@ for my $e (qw/euc-jp shiftjis 7bit-jis iso-2022-jp iso-2022-jp-1/){
 
     # then create a file via perlio without autoflush
 	
- TODO:{
-	todo_skip "$e: !perlio_ok", 1  unless perlio_ok($e);
+# TODO:{
+#        local $TODO = "perlio broken";
+#	todo_skip "$e: !perlio_ok", 1  unless perlio_ok($e);
 	open $fh, ">:encoding($e)", $pfile or die "$sfile : $!";
 	$fh->autoflush(0);
 	print $fh $utext;
 	close $fh;
 	ok(compare($sfile, $pfile) == 0 => ">:encoding($e)");
-    }
+#    }
 	
     # this time print line by line.
     # works even for ISO-2022!
@@ -82,8 +83,9 @@ for my $e (qw/euc-jp shiftjis 7bit-jis iso-2022-jp iso-2022-jp-1/){
     close $fh;
     is(compare($sfile, $pfile), 0 => ">:encoding($e); line-by-line");
 
- TODO:{
-	todo_skip "$e: !perlio_ok", 2 unless perlio_ok($e);
+# TODO:{
+#        local $TODO = "perlio broken";
+#	todo_skip "$e: !perlio_ok", 2 unless perlio_ok($e);
 	open $fh, "<:encoding($e)", $pfile or die "$pfile : $!";
 	$fh->autoflush(0);
 	my $dtext = join('' => <$fh>);
@@ -96,7 +98,7 @@ for my $e (qw/euc-jp shiftjis 7bit-jis iso-2022-jp iso-2022-jp-1/){
 	}
 	close $fh;
 	ok($utext eq $dtext, "<:encoding($e); line-by-line");
-    }
+#    }
     $DEBUG or unlink ($sfile, $pfile);
 }
 
