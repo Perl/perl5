@@ -2,7 +2,7 @@ print "1..46\n";
 
 BEGIN {
     chdir 't' if -d 't';
-    unshift @INC, '../lib';
+    @INC = '../lib';
 }
 
 sub a : lvalue { my $a = 34; bless \$a }  # Return a temporary

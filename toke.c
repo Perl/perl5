@@ -209,10 +209,8 @@ S_no_op(pTHX_ char *what, char *s)
 
     if (!s)
 	s = oldbp;
-    else {
-	assert(s >= oldbp);
+    else
 	PL_bufptr = s;
-    }
     yywarn(Perl_form(aTHX_ "%s found where operator expected", what));
     if (is_first)
 	Perl_warn(aTHX_ "\t(Missing semicolon on previous line?)\n");
@@ -223,8 +221,10 @@ S_no_op(pTHX_ char *what, char *s)
 	    Perl_warn(aTHX_ "\t(Do you need to predeclare %.*s?)\n",
 		t - PL_oldoldbufptr, PL_oldoldbufptr);
     }
-    else
+    else {
+	assert(s >= oldbp);
 	Perl_warn(aTHX_ "\t(Missing operator before %.*s?)\n", s - oldbp, oldbp);
+    }
     PL_bufptr = oldbp;
 }
 
@@ -357,7 +357,6 @@ Perl_lex_start(pTHX_ SV *line)
 	    SAVEVPTR(PL_nextval[toke]);
 	}
 	SAVEI32(PL_nexttoke);
-	PL_nexttoke = 0;
     }
     SAVECOPLINE(PL_curcop);
     SAVEPPTR(PL_bufptr);
@@ -391,6 +390,7 @@ Perl_lex_start(pTHX_ SV *line)
     PL_lex_stuff = Nullsv;
     PL_lex_repl = Nullsv;
     PL_lex_inpat = 0;
+    PL_nexttoke = 0;
     PL_lex_inwhat = 0;
     PL_sublex_info.sub_inwhat = 0;
     PL_linestr = line;
@@ -812,7 +812,7 @@ Perl_str_to_version(pTHX_ SV *sv)
 	I32 skip;
 	UV n;
 	if (utf)
-	    n = utf8_to_uv((U8*)start, &skip);
+	    n = utf8_to_uv_chk((U8*)start, &skip, 0);
 	else {
 	    n = *(U8*)start;
 	    skip = 1;
@@ -1219,7 +1219,7 @@ S_scan_const(pTHX_ char *start)
                 if (min > max) {
 		    Perl_croak(aTHX_
 			       "Invalid [] range \"%c-%c\" in transliteration operator",
-			       min, max);
+			       (char)min, (char)max);
                 }
 
 #ifndef ASCIIish
@@ -1305,9 +1305,11 @@ S_scan_const(pTHX_ char *start)
 		*d++ = *s++;
 	}
 
-	/* check for embedded arrays (@foo, @:foo, @'foo, @{foo}, @$foo) */
+	/* check for embedded arrays
+	   (@foo, @:foo, @'foo, @{foo}, @$foo, @+, @-)
+	   */
 	else if (*s == '@' && s[1]
-		 && (isALNUM_lazy_if(s+1,UTF) || strchr(":'{$", s[1])))
+		 && (isALNUM_lazy_if(s+1,UTF) || strchr(":'{$+-", s[1])))
 	    break;
 
 	/* check for embedded scalars.  only stop if we're sure it's a
@@ -1323,7 +1325,7 @@ S_scan_const(pTHX_ char *start)
 	/* (now in tr/// code again) */
 
 	if (*s & 0x80 && thisutf) {
-	   (void)utf8_to_uv((U8*)s, &len);
+	   (void)utf8_to_uv_chk((U8*)s, &len, 0);
 	   if (len == 1) {
 	       /* illegal UTF8, make it valid */
 	       char *old_pvx = SvPVX(sv);
@@ -1489,7 +1491,10 @@ S_scan_const(pTHX_ char *start)
 			char *ostart = SvPVX(sv);
 			SvCUR_set(sv, d - ostart);
 			SvPOK_on(sv);
+			*d = '\0';
 			sv_utf8_upgrade(sv);
+			/* this just broke our allocation above... */
+			SvGROW(sv, send - start);
 			d = SvPVX(sv) + SvCUR(sv);
 			has_utf = TRUE;
 		    }
@@ -3980,11 +3985,11 @@ Perl_yylex(pTHX)
 		/* Mark this internal pseudo-handle as clean */
 		IoFLAGS(GvIOp(gv)) |= IOf_UNTAINT;
 		if (PL_preprocess)
-		    IoTYPE(GvIOp(gv)) = '|';
+		    IoTYPE(GvIOp(gv)) = IoTYPE_PIPE;
 		else if ((PerlIO*)PL_rsfp == PerlIO_stdin())
-		    IoTYPE(GvIOp(gv)) = '-';
+		    IoTYPE(GvIOp(gv)) = IoTYPE_STD;
 		else
-		    IoTYPE(GvIOp(gv)) = '<';
+		    IoTYPE(GvIOp(gv)) = IoTYPE_RDONLY;
 #if defined(WIN32) && !defined(PERL_TEXTMODE_SCRIPTS)
 		/* if the script was opened in binmode, we need to revert
 		 * it to text mode for compatibility; but only iff it has CRs
@@ -3993,7 +3998,7 @@ Perl_yylex(pTHX)
 		    && PL_bufend[-1] == '\n' && PL_bufend[-2] == '\r')
 		{
 		    Off_t loc = 0;
-		    if (IoTYPE(GvIOp(gv)) == '<') {
+		    if (IoTYPE(GvIOp(gv)) == IoTYPE_RDONLY) {
 			loc = PerlIO_tell(PL_rsfp);
 			(void)PerlIO_seek(PL_rsfp, 0L, 0);
 		    }
@@ -5092,12 +5097,12 @@ Perl_keyword(pTHX_ register char *d, I32 len)
 	    if (strEQ(d,"cos"))			return -KEY_cos;
 	    break;
 	case 4:
-	    if (strEQ(d,"chop"))		return KEY_chop;
+	    if (strEQ(d,"chop"))		return -KEY_chop;
 	    break;
 	case 5:
 	    if (strEQ(d,"close"))		return -KEY_close;
 	    if (strEQ(d,"chdir"))		return -KEY_chdir;
-	    if (strEQ(d,"chomp"))		return KEY_chomp;
+	    if (strEQ(d,"chomp"))		return -KEY_chomp;
 	    if (strEQ(d,"chmod"))		return -KEY_chmod;
 	    if (strEQ(d,"chown"))		return -KEY_chown;
 	    if (strEQ(d,"crypt"))		return -KEY_crypt;
@@ -5742,13 +5747,12 @@ S_new_constant(pTHX_ char *s, STRLEN len, const char *key, SV *sv, SV *pv,
     SAVETMPS;
     
     PUSHMARK(SP) ;
-    EXTEND(sp, 4);
+    EXTEND(sp, 3);
     if (pv)
  	PUSHs(pv);
     PUSHs(sv);
     if (pv)
  	PUSHs(typesv);
-    PUSHs(cv);
     PUTBACK;
     call_sv(cv, G_SCALAR | ( PL_in_eval ? 0 : G_EVAL));
     
@@ -7355,7 +7359,7 @@ Perl_yyerror(pTHX_ char *s)
 	qerror(msg);
     if (PL_error_count >= 10) {
 	if (PL_in_eval && SvCUR(ERRSV))
-	    Perl_croak(aTHX_ "%_%s has too many errors.\n",
+	    Perl_croak(aTHX_ "%"SVf"%s has too many errors.\n",
 		       ERRSV, CopFILE(PL_curcop));
 	else
 	    Perl_croak(aTHX_ "%s has too many errors.\n",

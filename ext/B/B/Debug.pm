@@ -53,7 +53,6 @@ sub B::PMOP::debug {
     printf "\top_pmnext\t0x%x\n", ${$op->pmnext};
     printf "\top_pmregexp->precomp\t%s\n", cstring($op->precomp);
     printf "\top_pmflags\t0x%x\n", $op->pmflags;
-    $op->pmshort->debug;
     $op->pmreplroot->debug;
 }
 
@@ -244,7 +243,7 @@ sub B::SPECIAL::debug {
 sub compile {
     my $order = shift;
     B::clearsym();
-    if ($order eq "exec") {
+    if ($order && $order eq "exec") {
         return sub { walkoptree_exec(main_start, "debug") }
     } else {
         return sub { walkoptree(main_root, "debug") }

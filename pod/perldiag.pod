@@ -182,6 +182,29 @@ spots.  This is now heavily deprecated.
 must either both be scalars or both be lists.  Otherwise Perl won't
 know which context to supply to the right side.
 
+=item Negative offset to vec in lvalue context
+
+(F) When vec is called in an lvalue context, the second argument must be
+greater than or equal to zero.
+
+=item Attempt to bless into a reference
+
+(F) The CLASSNAME argument to the bless() operator is expected to be
+the name of the package to bless the resulting object into. You've
+supplied instead a reference to something: perhaps you wrote
+
+    bless $self, $proto;
+
+when you intended
+
+    bless $self, ref($proto) || $proto;
+
+If you actually want to bless into the stringified version
+of the reference supplied, you need to stringify it yourself, for
+example by:
+
+    bless $self, "$proto";
+
 =item Attempt to free non-arena SV: 0x%lx
 
 (P internal) All SV objects are supposed to be allocated from arenas
@@ -386,7 +409,7 @@ check the return value of your socket() call?  See L<perlfunc/bind>.
 =item Bizarre copy of %s in %s
 
 (P) Perl detected an attempt to copy an internal value that is not
-copiable.
+copyable.
 
 =item B<-P> not allowed for setuid/setgid script
 
@@ -425,12 +448,6 @@ L<perlfunc/pack>.
 
 (F) Only hard references may be blessed.  This is how Perl "enforces"
 encapsulation of objects.  See L<perlobj>.
-
-=item Can't break at that line
-
-(S internal) A warning intended to only be printed while running within
-the debugger, indicating the line number specified wasn't the location
-of a statement that could be stopped at.
 
 =item Can't call method "%s" in empty package "%s"
 
@@ -545,10 +562,11 @@ C<-i.bak>, or some such.
 characters and Perl was unable to create a unique filename during
 inplace editing with the B<-i> switch.  The file was ignored.
 
-=item Can't do {n,m} with n > m
+=item Can't do {n,m} with n > m before << HERE in regex m/%s/
 
-(F) Minima must be less than or equal to maxima.  If you really want
-your regexp to match something 0 times, just put {0}.  See L<perlre>.
+(F) Minima must be less than or equal to maxima. If you really want your
+regexp to match something 0 times, just put {0}. The << HERE shows in the
+regular expression about where the problem was discovered. See L<perlre>.
 
 =item Can't do setegid!
 
@@ -1025,35 +1043,6 @@ references can be weakened.
 with an assignment operator, which implies modifying the value itself.
 Perhaps you need to copy the value to a temporary, and repeat that.
 
-=item Character class syntax [%s] belongs inside character classes
-
-(W unsafe) The character class constructs [: :], [= =], and [. .]  go
-I<inside> character classes, the [] are part of the construct, for
-example: /[012[:alpha:]345]/.  Note that [= =] and [. .] are not
-currently implemented; they are simply placeholders for future
-extensions and will cause fatal errors.
-
-=item Character class syntax [. .] is reserved for future extensions
-
-(F regexp) Within regular expression character classes ([]) the syntax
-beginning with "[." and ending with ".]" is reserved for future
-extensions.  If you need to represent those character sequences inside
-a regular expression character class, just quote the square brackets
-with the backslash: "\[." and ".\]".
-
-=item Character class syntax [= =] is reserved for future extensions
-
-(F) Within regular expression character classes ([]) the syntax
-beginning with "[=" and ending with "=]" is reserved for future
-extensions.  If you need to represent those character sequences inside
-a regular expression character class, just quote the square brackets
-with the backslash: "\[=" and "=\]".
-
-=item Character class [:%s:] unknown
-
-(F) The class in the character class [: :] syntax is unknown.  See
-L<perlre>.
-
 =item chmod() mode argument is missing initial 0
 
 (W chmod) A novice will sometimes say
@@ -1064,7 +1053,7 @@ not realizing that 777 will be interpreted as a decimal number,
 equivalent to 01411.  Octal constants are introduced with a leading 0 in
 Perl, as in C.
 
-=item Close on unopened file %s
+=item close() on unopened filehandle %s
 
 (W unopened) You tried to close a filehandle that was never opened.
 
@@ -1360,12 +1349,6 @@ you which section of the Perl source code is distressed.
 (F) Your machine apparently doesn't implement fcntl().  What is this, a
 PDP-11 or something?
 
-=item Filehandle %s never opened
-
-(W unopened) An I/O operation was attempted on a filehandle that was
-never initialized.  You need to do an open() or a socket() call, or call
-a constructor from the FileHandle package.
-
 =item Filehandle %s opened only for input
 
 (W io) You tried to write on a read-only filehandle.  If you intended it
@@ -1401,10 +1384,11 @@ some time before now.  Check your logic flow.  flock() operates on
 filehandles.  Are you attempting to call flock() on a dirhandle by the
 same name?
 
-=item ?+* follows nothing in regexp
+=item Quantifier follows nothing before << HERE in regex m/%s/
 
-(F) You started a regular expression with a quantifier.  Backslash it if
-you meant it literally.   See L<perlre>.
+(F) You started a regular expression with a quantifier. Backslash it if you
+meant it literally. The << HERE shows in the regular expression about where the
+problem was discovered. See L<perlre>.
 
 =item Format not terminated
 
@@ -1638,16 +1622,6 @@ C<$ENV{ENV}> or C<$ENV{BASH_ENV}> are derived from data supplied (or
 potentially supplied) by the user.  The script must set the path to a
 known value, using trustworthy data.  See L<perlsec>.
 
-=item In string, @%s now must be written as \@%s
-
-(F) It used to be that Perl would try to guess whether you wanted an
-array interpolated or a literal @.  It did this when the string was
-first used at runtime.  Now strings are parsed at compile time, and
-ambiguous instances of @ must be disambiguated, either by prepending a
-backslash to indicate a literal, or by declaring (or using) the array
-within the program before the string (lexically).  (Someday it will
-simply assume that an unbackslashed @ interpolates an array.)
-
 =item Integer overflow in %s number
 
 (W overflow) The hexadecimal, octal or binary number you have specified
@@ -1660,9 +1634,12 @@ transparently promotes all numbers to a floating point representation
 internally--subject to loss of precision errors in subsequent
 operations.
 
-=item internal disaster in regexp
+=item Internal disaster before << HERE in regex m/%s/
 
 (P) Something went badly wrong in the regular expression parser.
+The << HERE shows in the regular expression about where the problem was
+discovered.
+
 
 =item Internal inconsistency in tracking vforks
 
@@ -1673,9 +1650,11 @@ L<perlvms/"exec LIST">).  Somehow, this count has become scrambled, so
 Perl is making a guess and treating this C<exec> as a request to
 terminate the Perl script and execute the specified command.
 
-=item internal urp in regexp at /%s/
+=item Internal urp before << HERE in regex m/%s/
 
-(P) Something went badly awry in the regular expression parser.
+(P) Something went badly awry in the regular expression parser. The <<<HERE
+shows in the regular expression about where the problem was discovered.
+
 
 =item %s (...) interpreted as function
 
@@ -1734,6 +1713,16 @@ silently ignored.
 (F) Your machine apparently doesn't implement ioctl(), which is pretty
 strange for a machine that supports C.
 
+=item `%s' is not a code reference
+
+(W) The second (fourth, sixth, ...) argument of overload::constant needs
+to be a code reference. Either an anonymous subroutine, or a reference
+to a subroutine.
+
+=item `%s' is not an overloadable type
+
+(W) You tried to overload a constant type the overload package is unaware of.
+
 =item junk on end of regexp
 
 (P) The regular expression parser is confused.
@@ -1767,11 +1756,23 @@ effective uids or gids failed.
 to check the return value of your socket() call?  See
 L<perlfunc/listen>.
 
+=item lstat() on filehandle %s
+
+(W io) You tried to do a lstat on a filehandle.  What did you mean
+by that?  lstat() makes sense only on filenames.  (Perl did a fstat()
+instead on the filehandle.)
+
 =item Lvalue subs returning %s not implemented yet
 
 (F) Due to limitations in the current implementation, array and hash
 values cannot be returned in subroutines used in lvalue context.  See
 L<perlsub/"Lvalue subroutines">.
+
+=item Lookbehind longer than %d not implemented before << HERE in reges m/%s/
+
+(F) There is currently a limit on the length of string which lookbehind can
+handle. This restriction may be eased in a future release. The << HERE shows in
+the regular expression about where the problem was discovered.
 
 =item Malformed PERLLIB_PREFIX
 
@@ -1879,6 +1880,14 @@ catches that.  But an easy way to do the same thing is:
 
 Another way is to assign to a substr() that's off the end of the string.
 
+Yet another way is to assign to a C<foreach> loop I<VAR> when I<VAR>
+is aliased to a constant in the look I<LIST>:
+
+        $x = 1;
+        foreach my $n ($x, 2) {
+            $n *= 2; # modifies the $x, but fails on attempt to modify the 2
+        } 
+
 =item Modification of non-creatable array value attempted, %s
 
 (F) You tried to make an array value spring into existence, and the
@@ -1949,13 +1958,15 @@ provided for this purpose.
 (F) You tried to do a read/write/send/recv operation with a buffer
 length that is less than 0.  This is difficult to imagine.
 
-=item nested *?+ in regexp
+=item Nested quantifiers before << HERE in regex m/%s/
 
-(F) You can't quantify a quantifier without intervening parentheses.  So
-things like ** or +* or ?* are illegal.
+(F) You can't quantify a quantifier without intervening parentheses. So
+things like ** or +* or ?* are illegal. The << HERE shows in the regular
+expression about where the problem was discovered.
 
 Note, however, that the minimal matching quantifiers, C<*?>, C<+?>, and
 C<??> appear to be nested quantifiers, but aren't.  See L<perlre>.
+
 
 =item %s never introduced
 
@@ -2235,6 +2246,11 @@ L<perlport> for more on portability concerns.
 
 See also L<perlport> for writing portable code.
 
+=item Odd number of arguments for overload::constant
+
+(W) The call to overload::constant contained an odd number of arguments.
+The arguments should come in pairs.
+
 =item Odd number of elements in hash assignment
 
 (W misc) You specified an odd number of elements to initialize a hash,
@@ -2246,6 +2262,17 @@ which is odd, because hashes come in key/value pairs.
 pointing outside the buffer.  This is difficult to imagine.  The sole
 exception to this is that C<sysread()>ing past the buffer will extend
 the buffer and zero pad the new area.
+
+=item -%s on unopened filehandle %s
+
+(W unopened) You tried to invoke a file test operator on a filehandle
+that isn't open.  Check your logic.  See also L<perlfunc/-X>.
+
+=item %s() on unopened %s %s
+
+(W unopened) An I/O operation was attempted on a filehandle that was
+never initialized.  You need to do an open(), a sysopen(), or a socket()
+call, or call a constructor from the FileHandle package.
 
 =item oops: oopsAV
 
@@ -2554,6 +2581,35 @@ problem can be found in L<perllocale> section B<LOCALE PROBLEMS>.
 process which isn't a subprocess of the current process.  While this is
 fine from VMS' perspective, it's probably not what you intended.
 
+=item POSIX syntax [%s] belongs inside character classes
+
+(W unsafe) The character class constructs [: :], [= =], and [. .]  go
+I<inside> character classes, the [] are part of the construct, for
+example: /[012[:alpha:]345]/.  Note that [= =] and [. .] are not
+currently implemented; they are simply placeholders for future
+extensions and will cause fatal errors.
+
+=item POSIX  syntax [. .] is reserved for future extensions
+
+(F regexp) Within regular expression character classes ([]) the syntax
+beginning with "[." and ending with ".]" is reserved for future
+extensions.  If you need to represent those character sequences inside
+a regular expression character class, just quote the square brackets
+with the backslash: "\[." and ".\]".
+
+=item POSIX syntax [= =] is reserved for future extensions
+
+(F) Within regular expression character classes ([]) the syntax
+beginning with "[=" and ending with "=]" is reserved for future
+extensions.  If you need to represent those character sequences inside
+a regular expression character class, just quote the square brackets
+with the backslash: "\[=" and "=\]".
+
+=item POSIX class [:%s:] unknown
+
+(F) The class in the character class [: :] syntax is unknown.  See
+L<perlre>.
+
 =item POSIX getpgrp can't take an argument
 
 (F) Your system has POSIX getpgrp(), which takes no argument, unlike
@@ -2676,6 +2732,20 @@ in L<perlos2>.
 (S unsafe) The subroutine being declared or defined had previously been
 declared or defined with a different function prototype.
 
+=item Quantifier in {,} bigger than %d before << HERE in regex m/%s/
+
+(F) There is currently a limit to the size of the min and max values of the
+{min,max} construct. The << HERE shows in the regular expression about where
+the problem was discovered. See L<perlre>.
+
+=item Quantifier unexpected on zero-length expression before << HERE in regex m/%s/
+
+(W regexp) You applied a regular expression quantifier in a place where
+it makes no sense, such as on a zero-width assertion.  Try putting the
+quantifier inside the assertion instead.  For example, the way to match
+"abc" provided that it is followed by three repetitions of "xyz" is
+C</abc(?=(?:xyz){3})/>, not C</abc(?=xyz){3}/>.
+
 =item Range iterator outside integer range
 
 (F) One (or both) of the numeric arguments to the range operator ".."
@@ -2736,17 +2806,22 @@ Doing so has no effect.
 (W internal) The internal sv_replace() function was handed a new SV with
 a reference count of other than 1.
 
+=item Reference to nonexistent group before << HERE in regex m/%s/
+
+(F) You used something like C<\7> in your regular expression, but there are
+not at least seven sets of capturing parentheses in the expression. If you
+wanted to have the character with value 7 inserted into the regular expression,
+prepend a zero to make the number at least two digits: C<\07>
+
+The << HERE shows in the regular expression about where the problem was
+discovered.
+
 =item regexp memory corruption
 
 (P) The regular expression engine got confused by what the regular
 expression compiler gave it.
 
-=item regexp *+ operand could be empty
-
-(F) The part of the regexp subject to either the * or + quantifier could
-match an empty string.
-
-=item regexp out of space
+=item Regexp out of space
 
 (P) A "can't happen" error, because safemalloc() should have caught it
 earlier.
@@ -2815,7 +2890,7 @@ or setgid bit set.  This doesn't make much sense.
 construct.  Remember that bracketing delimiters count nesting level.
 Missing the leading C<$> from a variable C<$m> may cause this error.
 
-=item %sseek() on unopened file
+=item %sseek() on unopened filehandle
 
 (W unopened) You tried to use the seek() or sysseek() function on a
 filehandle that was either never opened or has since been closed.
@@ -2823,6 +2898,10 @@ filehandle that was either never opened or has since been closed.
 =item select not implemented
 
 (F) This machine doesn't implement the select() system call.
+
+=item Self-ties are not supported
+
+(F) Self-ties are not supported in the current implementation.
 
 =item Semicolon seems to be missing
 
@@ -2843,22 +2922,31 @@ scalar that had previously been marked as free.
 (W closed) The socket you're sending to got itself closed sometime
 before now.  Check your logic flow.
 
-=item Sequence (? incomplete
+=item Sequence (? incomplete before << HERE mark in regex m/%s/
 
-(F) A regular expression ended with an incomplete extension (?.  See
+(F) A regular expression ended with an incomplete extension (?. The <<<HERE
+shows in the regular expression about where the problem was discovered. See
 L<perlre>.
 
-=item Sequence (?%s...) not implemented
+=item Sequence (?{...}) not terminated or not {}-balanced in regex m/%s/
 
-(F) A proposed regular expression extension has the character reserved
-but has not yet been written.  See L<perlre>.
+(F) If the contents of a (?{...}) clause contains braces, they must balance
+for Perl to properly detect the end of the clause. See L<perlre>.
 
-=item Sequence (?%s...) not recognized
+=item Sequence (?%s...) not implemented before << HERE mark in regex m/%s/
+
+(F) A proposed regular expression extension has the character reserved but
+has not yet been written. The << HERE shows in the regular expression about
+where the problem was discovered. See L<perlre>.
+
+=item Sequence (?%s...) not recognized before << HERE mark in regex m/%s/
 
 (F) You used a regular expression extension that doesn't make sense.
+The << HERE shows in the regular expression about
+where the problem was discovered. 
 See L<perlre>.
 
-=item Sequence (?#... not terminated
+=item Sequence (?#... not terminated in regex m/%s/
 
 (F) A regular expression comment must be terminated by a closing
 parenthesis.  Embedded parentheses aren't allowed.  See L<perlre>.
@@ -2990,19 +3078,10 @@ unless there was a failure.  You probably wanted to use system()
 instead, which does return.  To suppress this warning, put the exec() in
 a block by itself.
 
-=item Stat on unopened file %s
+=item stat() on unopened filehandle %s
 
-(W unopened) You tried to use the stat() function (or an equivalent file
-test) on a filehandle that was either never opened or has since been
-closed.
-
-=item Strange *+?{} on zero-length expression
-
-(W regexp) You applied a regular expression quantifier in a place where
-it makes no sense, such as on a zero-width assertion.  Try putting the
-quantifier inside the assertion instead.  For example, the way to match
-"abc" provided that it is followed by three repetitions of "xyz" is
-C</abc(?=(?:xyz){3})/>, not C</abc(?=xyz){3}/>.
+(W unopened) You tried to use the stat() function on a filehandle that
+was either never opened or has since been closed.
 
 =item Stub found while resolving method `%s' overloading %s
 
@@ -3050,6 +3129,24 @@ assignment or as a subroutine argument for example).
 
 (F) Your Perl was compiled with B<-D>SETUID_SCRIPTS_ARE_SECURE_NOW, but
 a version of the setuid emulator somehow got run anyway.
+
+=item Switch (?(condition)... contains too many branches before << HERE in regex m/%s/
+
+(F) A (?(condition)if-clause|else-clause) construct can have at most two
+branches (the if-clause and the else-clause). If you want one or both to
+contain alternation, such as using C<this|that|other>, enclose it in
+clustering parentheses:
+
+    (?(condition)(?:this|that|other)|else-clause)
+
+The << HERE shows in the regular expression about where the problem was
+discovered. See L<perlre>.
+
+=item Switch condition not recognized before << HERE in regex m/%s/
+
+(F) If the argument to the (?(...)if-clause|else-clause) construct is a
+number, it can be only a number. The << HERE shows in the regular expression
+about where the problem was discovered. See L<perlre>.
 
 =item switching effective %s is not implemented
 
@@ -3105,15 +3202,10 @@ before now.  Check your logic flow.
 (F) You tried to use C<goto> to reach a label that was too deeply nested
 for Perl to reach.  Perl is doing you a favor by refusing.
 
-=item tell() on unopened file
+=item tell() on unopened filehandle
 
 (W unopened) You tried to use the tell() function on a filehandle that
 was either never opened or has since been closed.
-
-=item Test on unopened file %s
-
-(W unopened) You tried to invoke a file test operator on a filehandle
-that isn't open.  Check your logic.  See also L<perlfunc/-X>.
 
 =item That use of $[ is unsupported
 
@@ -3325,10 +3417,22 @@ Check the #! line, or manually feed your script into Perl yourself.
 (F) The unexec() routine failed for some reason.  See your local FSF
 representative, who probably put it there in the first place.
 
+
 =item Unknown BYTEORDER
 
 (F) There are no byte-swapping functions for a machine with this byte
 order.
+
+=item Unknown switch condition (?(%.2s before << HERE in regex m/%s/
+
+(F) The condition of a (?(condition)if-clause|else-clause) construct is not
+known. The condition may be lookaround (the condition is true if the
+lookaround is true), a (?{...}) construct (the condition is true if the
+code evaluates to a true value), or a number (the condition is true if the
+set of capturing parentheses named by the number is defined).
+
+The << HERE shows in the regular expression about where the problem was
+discovered.  See L<perlre>.
 
 =item Unknown open() mode '%s'
 
@@ -3343,13 +3447,14 @@ iterating over it, and someone else stuck a message in the stream of
 data Perl expected.  Someone's very confused, or perhaps trying to
 subvert Perl's population of %ENV for nefarious purposes.
 
-=item unmatched [] in regexp
+=item unmatched [ before << HERE mark in regex m/%s/
 
-(F) The brackets around a character class must match.  If you wish to
+(F) The brackets around a character class must match. If you wish to
 include a closing bracket in a character class, backslash it or put it
-first.  See L<perlre>.
+first. See L<perlre>. The << HERE shows in the regular expression about
+where the escape was discovered.
 
-=item unmatched () in regexp
+=item unmatched ( in regexp before << HERE mark in regex m/%s/
 
 (F) Unbackslashed parentheses must always be balanced in regular
 expressions.  If you're a vi user, the % key is valuable for finding the
@@ -3381,12 +3486,14 @@ script, a binary program, or a directory as a Perl program.
 recognized by Perl inside character classes.  The character was
 understood literally.
 
-=item /%s/: Unrecognized escape \\%c passed through
+=item Unrecognized escape \\%c passed through before << HERE in m/%s/
 
 (W regexp) You used a backslash-character combination which is not
-recognized by Perl.  This combination appears in an interpolated
-variable or a C<'>-delimited regular expression.  The character was
-understood literally.
+recognized by Perl. This combination appears in an interpolated variable or
+a C<'>-delimited regular expression. The character was understood
+literally. The << HERE shows in the regular expression about where the escape
+was discovered.
+
 
 =item Unrecognized escape \\%c passed through
 
@@ -3673,6 +3780,12 @@ anonymous, using the C<sub {}> syntax.  When inner anonymous subs that
 reference variables in outer subroutines are called or referenced, they
 are automatically rebound to the current values of such variables.
 
+=item Variable length lookbehind not implemented before << HERE in regex m/%s/
+
+(F) Lookbehind is allowed only for subexpressions whose length is fixed and
+known at compile time. The << HERE shows in the regular expression about where
+the problem was discovered.
+
 =item Version number must be a constant number
 
 (P) The attempt to translate a C<use Module n.n LIST> statement into
@@ -3708,6 +3821,10 @@ but in actual fact, you got
     rand(+5);
 
 So put in parentheses to say what you really mean.
+
+=item Wide character in %s
+
+(F) Perl met a wide character (>255) when it wasn't expecting one.
 
 =item write() on closed filehandle %s
 

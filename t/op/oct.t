@@ -57,11 +57,23 @@ print length eq 5                      ? "ok" : "not ok", " 37\n";
 print $_ eq "\0"."_"."7"."_"."7"       ? "ok" : "not ok", " 38\n";
 chop, chop, chop, chop;
 print $_ eq "\0"                       ? "ok" : "not ok", " 39\n";
-print "\077_" eq "?_"                  ? "ok" : "not ok", " 40\n";
+if (ord("\t") != 9) {
+    # question mark is 111 in 1047, 037, && POSIX-BC
+    print "\157_" eq "?_"                  ? "ok" : "not ok", " 40\n";
+}
+else {
+    print "\077_" eq "?_"                  ? "ok" : "not ok", " 40\n";
+}
 
 $_ = "\x_7_7";
 print length eq 5                      ? "ok" : "not ok", " 41\n";
 print $_ eq "\0"."_"."7"."_"."7"       ? "ok" : "not ok", " 42\n";
 chop, chop, chop, chop;
 print $_ eq "\0"                       ? "ok" : "not ok", " 43\n";
-print "\x2F_" eq "/_"                  ? "ok" : "not ok", " 44\n";
+if (ord("\t") != 9) {
+    # / is 97 in 1047, 037, && POSIX-BC
+    print "\x61_" eq "/_"                  ? "ok" : "not ok", " 44\n";
+}
+else {
+    print "\x2F_" eq "/_"                  ? "ok" : "not ok", " 44\n";
+}

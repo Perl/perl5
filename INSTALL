@@ -24,6 +24,15 @@ with all the defaults are:
 
 Each of these is explained in further detail below.
 
+B<NOTE>: starting from the release 5.6.0 Perl will use a version
+scheme where even-numbered subreleases (like 5.6) are stable
+maintenance releases and odd-numbered subreleases (like 5.7) are
+unstable development releases.  Development releases should not be
+used in production environments.  Fixes and new features are first
+carefully tested in development releases and only if they prove
+themselves to be worthy will they be migrated to the maintenance
+releases.
+
 The above commands will install Perl to /usr/local or /opt, depending
 on the platform.  If that's not okay with you, use
 
@@ -76,7 +85,7 @@ extensions that have not been updated for the new naming convention
 with:
 
 	perl Makefile.PL POLLUTE=1
-	
+
 Alternatively, you can enable CPP symbol pollution wholesale by
 building perl itself with:
 
@@ -159,7 +168,7 @@ run, you may have to run it on a platform where GCC is available, and move
 the sources back to the platform without GCC.
 
 If you succeed in automatically converting the sources to a K&R compatible
-form, be sure to email perlbug@perl.com to let us know the steps you
+form, be sure to email perlbug@perl.org to let us know the steps you
 followed.  This will enable us to officially support this option.
 
 =back
@@ -327,7 +336,14 @@ output, you can run
 
 	sh Configure -des
 
-For my Solaris system, I usually use
+Note: for development releases (odd subreleases, like 5.7, as opposed
+to maintenance releases which have even subreleases, like 5.6)
+if you want to use Configure -d, you will also need to supply -Dusedevel
+to Configure, because the default answer to the question "do you really
+want to Configure a development version?" is "no".  The -Dusedevel
+skips that sanity check.
+
+For example for my Solaris system, I usually use
 
 	sh Configure -Dprefix=/opt/perl -Doptimize='-xpentium -xO4' -des
 
@@ -670,6 +686,52 @@ or by
 Eventually (by perl v5.6.0) this internal confusion ought to disappear,
 and these options may disappear as well.
 
+=head2 64 bit support.
+
+If your platform does not have 64 bits natively, but can simulate them with
+compiler flags and/or C<long long> or C<int64_t>, you can build a perl that
+uses 64 bits.
+
+There are actually two modes of 64-bitness: the first one is achieved
+using Configure -Duse64bitint and the second one using Configure
+-Duse64bitall.  The difference is that the first one is minimal and
+the second one maximal.  The first works in more places than the second.
+
+The C<use64bitint> does only as much as is required to get 64-bit
+integers into Perl (this may mean, for example, using "long longs")
+while your memory may still be limited to 2 gigabytes (because your
+pointers could still be 32-bit).  Note that the name C<64bitint> does
+not imply that your C compiler will be using 64-bit C<int>s (it might,
+but it doesn't have to): the C<use64bitint> means that you will be
+able to have 64 bits wide scalar values.
+
+The C<use64bitall> goes all the way by attempting to switch also
+integers (if it can), longs (and pointers) to being 64-bit.  This may
+create an even more binary incompatible Perl than -Duse64bitint: the
+resulting executable may not run at all in a 32-bit box, or you may
+have to reboot/reconfigure/rebuild your operating system to be 64-bit
+aware.
+
+Natively 64-bit systems like Alpha and Cray need neither -Duse64bitint
+nor -Duse64bitall.
+
+    NOTE: 64-bit support is still experimental on most platforms.
+    Existing support only covers the LP64 data model.  In particular, the
+    LLP64 data model is not yet supported.  64-bit libraries and system
+    APIs on many platforms have not stabilized--your mileage may vary.
+
+=head2 Long doubles
+
+In some systems you may be able to use long doubles to enhance the
+range and precision of your double precision floating point numbers
+(that is, Perl's numbers).  Use Configure -Duselongdouble to enable
+this support (if it is available).
+
+=head2 "more bits"
+
+You can "Configure -Dusemorebits" to turn on both the 64-bit support
+and the long double support.
+
 =head2 Selecting File IO mechanisms
 
 Previous versions of perl used the standard IO mechanisms as defined in
@@ -701,7 +763,7 @@ extension modules or external libraries may not work.  This
 configuration exists to allow these issues to be worked on.
 
 This option requires the 'sfio' package to have been built and installed.
-A (fairly old) version of sfio is in CPAN.
+The latest sfio is available from http://www.research.att.com/sw/tools/sfio/
 
 You select this option by
 
@@ -717,9 +779,6 @@ this is a problem at least for some versions of Linux and SunOS 4.
 Configure should detect this problem and warn you about problems with
 _exit vs. exit.  If you have this problem, the fix is to go back to
 your sfio sources and correct iffe's guess about atexit.
-
-There also might be a more recent release of Sfio that fixes your
-problem.
 
 =item 2.
 
@@ -738,6 +797,13 @@ If you have already selected -Duseperlio, and if Configure does not
 detect sfio, then this will be the default suggested by Configure.
 
 =back
+
+=head2 SOCKS
+
+Perl can be configured to be 'socksified', that is, to use the SOCKS
+TCP/IP proxy protocol library.  SOCKS is used to give applications
+access to transport layer network proxies.  Perl supports only SOCKS
+Version 5.  You can find more about SOCKS from http://www.socks.nec.com/
 
 =head2 Dynamic Loading
 
@@ -1682,6 +1748,51 @@ test, it does not necessarily mean you have a broken perl.  This test
 tries to exercise the regular expression subsystem quite thoroughly,
 and may well be far more demanding than your normal usage.
 
+=item Test failures from lib/ftmp-security saying "system possibly insecure"
+
+Firstly, test failures from the ftmp-security are not necessarily
+serious or indicative of a real security threat.  That being said,
+they bear investigating.
+
+The tests may fail for the following reasons.   Note that each of the
+tests is run both in the building directory and the temporary
+directory, as returned by File::Spec->tmpdir().
+
+(1) If the directory the tests are being run is owned by somebody else
+than the user running the tests, or root (uid 0).  This failure can
+happen if the Perl source code distribution is unpacked in a way that
+the user ids in the distribution package are used as-is.  Some tar
+programs do this.
+
+(2) If the directory the test are being run in is writable by group
+or by other (remember: with UNIX/POSIX semantics, write access to
+a directory means the right to add/remove files in that directory),
+and there is no sticky bit set in the directory.  'Sticky bit' is
+a feature used in some UNIXes to give extra protection to files: if
+the bit is on a directory, no one but the owner (or the root) can remove
+that file even if the permissions of the directory would allow file
+removal by others.  This failure can happen if the permissions in the
+directory simply are a bit too liberal for the tests' liking.  This
+may or may not be a real problem: it depends on the permissions policy
+used on this particular directory/project/system/site.  This failure
+can also happen if the system either doesn't support the sticky bit
+(this is the case with many non-UNIX platforms: in principle the
+File::Temp should know about these platforms and skip the tests), or
+if the system supports the sticky bit but for some reason or reasons
+it is not being used.  This is for example the case with HP-UX: as of
+HP-UX release 11.00, the sticky bit is very much supported, but HP-UX
+doesn't use it on its /tmp directory as shipped.  Also as with the
+permissions, some local policy might dictate that the stickiness is
+not used.
+
+(3) If the system supports the POSIX 'chown giveaway' feature and if
+any of the parent directories of the temporary file back to the root
+directory are 'unsafe', using the definitions given above in (1) and
+(2).
+
+See the documentation for the File::Temp module for more information
+about the various security aspects.
+
 =back
 
 =head1 make install
@@ -1720,12 +1831,17 @@ anything, you can run
 
 make install will install the following:
 
+    binaries
+
 	perl,
 	    perl5.nnn	where nnn is the current release number.  This
 			will be a link to perl.
 	suidperl,
 	    sperl5.nnn	If you requested setuid emulation.
 	a2p          	awk-to-perl translator
+
+    scripts
+
 	cppstdin	This is used by perl -P, if your cc -E can't
 			read from stdin.
 	c2ph, pstruct	Scripts for handling C structures in header files.
@@ -1738,13 +1854,21 @@ make install will install the following:
 	pl2pm		Convert Perl 4 .pl files to Perl 5 .pm modules
 	pod2html,	Converters from perl's pod documentation format
 	pod2latex, 	to other useful formats.
-	pod2man, and
-	pod2text
+	pod2man,
+	pod2text,
+	pod2checker,
+	pod2select,
+	pod2usage
 	splain		Describe Perl warnings and errors
 	dprofpp		Perl code profile post-processor
 
-	library files	in $privlib and $archlib specified to
+    library files
+
+			in $privlib and $archlib specified to
 			Configure, usually under /usr/local/lib/perl5/.
+
+    documentation
+
 	man pages	in $man1dir, usually /usr/local/man/man1.
 	module man
 	pages		in $man3dir, usually /usr/local/man/man3.
@@ -1753,10 +1877,27 @@ make install will install the following:
 Installperl will also create the directories listed above
 in L<"Installation Directories">.
 
-Perl's *.h header files and the libperl.a library are also installed
+Perl's *.h header files and the libperl library are also installed
 under $archlib so that any user may later build new modules, run the
 optional Perl compiler, or embed the perl interpreter into another
 program even if the Perl source is no longer available.
+
+Sometimes you only want to install the version-specific parts of the perl
+installation.  For example, you may wish to install a newer version of
+perl alongside an already installed production version of perl without
+disabling installation of new modules for the production version.
+To only install the version-specific parts of the perl installation, run
+
+	Configure -Dversiononly
+
+or answer 'y' to the appropriate Configure prompt.  Alternatively,
+you can just manually run
+
+	./perl installperl -v
+
+and skip installman altogether.
+See also L<"Maintaining completely separate versions"> for another
+approach.
 
 =head1 Coexistence with earlier versions of perl5
 
@@ -1944,7 +2085,7 @@ available in TeX format.  Type
 If you have difficulty building perl, and none of the advice in this file
 helps, and careful reading of the error message and the relevant manual
 pages on your system doesn't help either, then you should send a message
-to either the comp.lang.perl.misc newsgroup or to perlbug@perl.com with
+to either the comp.lang.perl.misc newsgroup or to perlbug@perl.org with
 an accurate description of your problem.
 
 Please include the output of the ./myconfig shell script that comes with

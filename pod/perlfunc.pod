@@ -612,6 +612,8 @@ If VARIABLE is omitted, it chomps C<$_>.  Example:
 	# ...
     }
 
+If VARIABLE is a hash, it chomps the hash's values, but not its keys.
+
 You can actually chomp anything that's an lvalue, including an assignment:
 
     chomp($cwd = `pwd`);
@@ -637,6 +639,8 @@ Example:
 	@array = split(/:/);
 	#...
     }
+
+If VARIABLE is a hash, it chops the hash's values, but not its keys.
 
 You can actually chop anything that's an lvalue, including an assignment:
 
@@ -794,6 +798,8 @@ empty one, logically enough.  In that case, C<next> goes directly back
 to check the condition at the top of the loop.
 
 =item cos EXPR
+
+=item cos
 
 Returns the cosine of EXPR (expressed in radians).  If EXPR is omitted,
 takes cosine of C<$_>.
@@ -2424,8 +2430,6 @@ divided by the natural log of N.  For example:
 
 See also L</exp> for the inverse operation.
 
-=item lstat FILEHANDLE
-
 =item lstat EXPR
 
 =item lstat
@@ -2819,7 +2823,7 @@ otherwise it's necessary to protect any leading and trailing whitespace:
     $file =~ s#^(\s)#./$1#;
     open(FOO, "< $file\0");
 
-(this may not work on some bizzare filesystems).  One should
+(this may not work on some bizarre filesystems).  One should
 conscientiously choose between the I<magic> and 3-arguments form
 of open():
 
@@ -3153,13 +3157,13 @@ because they obey the native byteorder and endianness.  For example a
 4-byte integer 0x12345678 (305419896 decimal) be ordered natively
 (arranged in and handled by the CPU registers) into bytes as
 
- 	0x12 0x34 0x56 0x78	# little-endian
- 	0x78 0x56 0x34 0x12	# big-endian
+ 	0x12 0x34 0x56 0x78	# big-endian
+ 	0x78 0x56 0x34 0x12	# little-endian
 
-Basically, the Intel, Alpha, and VAX CPUs are little-endian, while
-everybody else, for example Motorola m68k/88k, PPC, Sparc, HP PA,
-Power, and Cray are big-endian.  MIPS can be either: Digital used it
-in little-endian mode; SGI uses it in big-endian mode.
+Basically, the Intel and VAX CPUs are little-endian, while everybody
+else, for example Motorola m68k/88k, PPC, Sparc, HP PA, Power, and
+Cray are big-endian.  Alpha and MIPS can be either: Digital/Compaq
+used/uses them in little-endian mode; SGI/Cray uses them in big-endian mode.
 
 The names `big-endian' and `little-endian' are comic references to
 the classic "Gulliver's Travels" (via the paper "On Holy Wars and a
@@ -3285,9 +3289,9 @@ Examples:
 
 The same template may generally also be used in unpack().
 
-=item package 
-
 =item package NAMESPACE
+
+=item package 
 
 Declares the compilation unit as being in the given namespace.  The scope
 of the package declaration is from the declaration itself through the end
@@ -3346,7 +3350,7 @@ array in subroutines, just like C<shift>.
 =item pos
 
 Returns the offset of where the last C<m//g> search left off for the variable
-is in question (C<$_> is used when the variable is not specified).  May be
+in question (C<$_> is used when the variable is not specified).  May be
 modified to change that offset.  Such modification will also influence
 the C<\G> zero-width assertion in regular expressions.  See L<perlre> and
 L<perlop>.
@@ -4101,7 +4105,7 @@ C<syscall> interface to access setitimer(2) if your system supports
 it, or else see L</select> above.  The Time::HiRes module from CPAN
 may also help.
 
-See also the POSIX module's C<sigpause> function.
+See also the POSIX module's C<pause> function.
 
 =item socket SOCKET,DOMAIN,TYPE,PROTOCOL
 
@@ -4414,6 +4418,12 @@ numbers, and even then only the standard modifiers are allowed).  As a
 result, any non-standard extensions in your local C<sprintf> are not
 available from Perl.
 
+Unlike C<printf>, C<sprintf> does not do what you probably mean when you
+pass it an array as your first argument. The array is given scalar context,
+and instead of using the 0th element of the array as the format, Perl will
+use the count of elements in the array as the format, which is almost never
+useful.
+
 Perl's C<sprintf> permits the following universally-known conversions:
 
    %%	a percent sign
@@ -4445,6 +4455,12 @@ permits these unnecessary but widely-supported conversions:
    %U	a synonym for %lu
    %O	a synonym for %lo
    %F	a synonym for %f
+
+Note that the number of exponent digits in the scientific notation by
+C<%e>, C<%E>, C<%g> and C<%G> for numbers with the modulus of the
+exponent less than 100 is system-dependent: it may be three or less
+(zero-padded as necessary).  In other words, 1.23 times ten to the
+99th may be either "1.23e99" or "1.23e099".
 
 Perl permits the following universally-known flags between the C<%>
 and the conversion letter:
@@ -5075,6 +5091,7 @@ A class implementing a hash should have the following methods:
     FIRSTKEY this
     NEXTKEY this, lastkey
     DESTROY this
+    UNTIE this
 
 A class implementing an ordinary array should have the following methods:
 
@@ -5091,6 +5108,7 @@ A class implementing an ordinary array should have the following methods:
     SPLICE this, offset, length, LIST
     EXTEND this, count
     DESTROY this
+    UNTIE this
 
 A class implementing a file handle should have the following methods:
 
@@ -5101,8 +5119,15 @@ A class implementing a file handle should have the following methods:
     WRITE this, scalar, length, offset
     PRINT this, LIST
     PRINTF this, format, LIST
+    BINMODE this
+    EOF this
+    FILENO this
+    SEEK this, position, whence
+    TELL this
+    OPEN this, mode, LIST
     CLOSE this
     DESTROY this
+    UNTIE this
 
 A class implementing a scalar should have the following methods:
 
@@ -5110,6 +5135,7 @@ A class implementing a scalar should have the following methods:
     FETCH this,
     STORE this, value
     DESTROY this
+    UNTIE this
 
 Not all methods indicated above need be implemented.  See L<perltie>,
 L<Tie::Hash>, L<Tie::Array>, L<Tie::Scalar>, and L<Tie::Handle>.
@@ -5378,7 +5404,8 @@ derive their C<import> method via inheritance from the C<Exporter> class that
 is defined in the C<Exporter> module.  See L<Exporter>.  If no C<import>
 method can be found then the call is skipped.
 
-If you don't want your namespace altered, explicitly supply an empty list:
+If you do not want to call the package's C<import> method (for instance,
+to stop your namespace from being altered), explicitly supply the empty list:
 
     use Module ();
 
@@ -5399,8 +5426,9 @@ called).  Note that there is no comma after VERSION!
 Because this is a wide-open interface, pragmas (compiler directives)
 are also implemented this way.  Currently implemented pragmas are:
 
-    use integer;
+    use constant;
     use diagnostics;
+    use integer;
     use sigtrap  qw(SEGV BUS);
     use strict   qw(subs vars refs);
     use subs     qw(afunc blurfl);
@@ -5420,7 +5448,9 @@ by C<use>, i.e., it calls C<unimport Module LIST> instead of C<import>.
 
 If no C<unimport> method can be found the call fails with a fatal error.
 
-See L<perlmod> for a list of standard modules and pragmas.
+See L<perlmod> for a list of standard modules and pragmas.  See L<perlrun>
+for the C<-M> and C<-m> command-line options to perl that give C<use>
+functionality from the command-line.
 
 =item utime LIST
 
@@ -5466,7 +5496,7 @@ If BITS is 8, "elements" coincide with bytes of the input string.
 
 If BITS is 16 or more, bytes of the input string are grouped into chunks
 of size BITS/8, and each group is converted to a number as with
-pack()/unpack() with big-endian formats C<n>/C<N> (and analoguously
+pack()/unpack() with big-endian formats C<n>/C<N> (and analogously
 for BITS==64).  See L<"pack"> for details.
 
 If bits is 4 or less, the string is broken into bytes, then the bits
@@ -5481,9 +5511,18 @@ to give the expression the correct precedence as in
 
     vec($image, $max_x * $x + $y, 8) = 3;
 
-If the selected element is off the end of the string, the value 0 is
-returned.  If an element off the end of the string is written to,
-Perl will first extend the string with sufficiently many zero bytes.
+If the selected element is outside the string, the value 0 is returned.
+If an element off the end of the string is written to, Perl will first
+extend the string with sufficiently many zero bytes.   It is an error
+to try to write off the beginning of the string (i.e. negative OFFSET).
+
+The string should not contain any character with the value > 255 (which
+can only happen if you're using UTF8 encoding).  If it does, it will be
+treated as something which is not UTF8 encoded.  When the C<vec> was
+assigned to, other parts of your program will also no longer consider the
+string to be UTF8 encoded.  In other words, if you do have such characters
+in your string, vec() will operate on the actual byte string, and not the
+conceptual character string.
 
 Strings created with C<vec> can also be manipulated with the logical
 operators C<|>, C<&>, C<^>, and C<~>.  These operators will assume a bit

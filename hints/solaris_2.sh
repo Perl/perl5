@@ -45,8 +45,13 @@ case "$archname" in
     ;;
 esac
 
-test -z "`${cc:-cc} -V 2>&1|grep -i workshop`" || ccisworkshop="$define"
-test -z "`${cc:-cc} -v 2>&1|grep -i gcc`"      || ccisgcc="$define"
+cc=${cc:-cc}
+
+ccversion="`$cc -V 2>&1|head -1|sed 's/^cc: //'`"
+case "$ccversion" in
+*WorkShop*) ccname=workshop ;;
+*) ccversion='' ;;
+esac
 
 cat >UU/workshoplibpth.cbu<<'EOCBU'
 case "$workshoplibpth_done" in
@@ -70,8 +75,8 @@ case "$workshoplibpth_done" in
 esac
 EOCBU
 
-case "$ccisworkshop" in
-"$define")
+case "$ccname" in
+workshop)
 	cat >try.c <<EOF
 #include <sunmath.h>
 int main() { return(0); }
@@ -328,8 +333,12 @@ case "$usethreads" in
 $define|true|[yY]*)
         ccflags="-D_REENTRANT $ccflags"
 
-        # sched_yield is in -lposix4
-        set `echo X "$libswanted "| sed -e 's/ c / posix4 pthread c /'`
+        # sched_yield is in -lposix4 up to Solaris 2.6, in -lrt starting with Solaris 7
+	case `uname -r` in
+	5.[0-6] | 5.5.1) sched_yield_lib="posix4" ;;
+	*) sched_yield_lib="rt";
+	esac
+        set `echo X "$libswanted "| sed -e "s/ c / $sched_yield_lib pthread c /"`
         shift
         libswanted="$*"
 
@@ -354,7 +363,7 @@ $define|true|[yY]*)
 	    siglongjmp(env, 2);
 	}
 EOM
-        if test "`arch`" = i86pc -a "$osvers" = 2.6 && \
+        if test "`arch`" = i86pc -a `uname -r` = 5.6 && \
            ${cc:-cc} try.c -lpthread >/dev/null 2>&1 && ./a.out; then
  	    d_sigsetjmp=$undef
 	    cat << 'EOM' >&2
@@ -376,45 +385,45 @@ case "$uselargefiles" in
 ''|$define|true|[yY]*)
 
 # Keep these in the left margin.
-ccflags_largefiles="`getconf LFS_CFLAGS 2>/dev/null`"
-ldflags_largefiles="`getconf LFS_LDFLAGS 2>/dev/null`"
-libswanted_largefiles="`getconf LFS_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g`"
+ccflags_uselargefiles="`getconf LFS_CFLAGS 2>/dev/null`"
+ldflags_uselargefiles="`getconf LFS_LDFLAGS 2>/dev/null`"
+libswanted_uselargefiles="`getconf LFS_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g`"
 
-    ccflags="$ccflags $ccflags_largefiles"
-    ldflags="$ldflags $ldflags_largefiles"
-    libswanted="$libswanted $libswanted_largefiles"
+    ccflags="$ccflags $ccflags_uselargefiles"
+    ldflags="$ldflags $ldflags_uselargefiles"
+    libswanted="$libswanted $libswanted_uselargefiles"
     ;;
 esac
 EOCBU
 
-cat > UU/use64bitint.cbu <<'EOCBU'
-# This script UU/use64bitint.cbu will get 'called-back' by Configure 
-# after it has prompted the user for whether to use 64 bit integers.
-case "$use64bitint" in
+# This is truly a mess.
+case "$usemorebits" in
 "$define"|true|[yY]*)
-	    case "`uname -r`" in
-	    5.[1-6])
-		cat >&4 <<EOM
-Solaris `uname -r|sed -e 's/^5\.\([789]\)$/\1/'` does not support 64-bit integers.
-You should upgrade to at least Solaris 7.
-EOM
-		exit 1
-		;;
-	    esac
-	    ;;
+	use64bitint="$define"    
+	uselongdouble="$define"    
+	;;
 esac
-EOCBU
 
 cat > UU/use64bitall.cbu <<'EOCBU'
 # This script UU/use64bitall.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to be maximally 64 bitty.
 case "$use64bitall-$use64bitall_done" in
 "$define-"|true-|[yY]*-)
+	    case "`uname -r`" in
+	    5.[1-6])
+		cat >&4 <<EOM
+Solaris `uname -r|sed -e 's/^5\.\([789]\)$/\1/'` does not support 64-bit pointers.
+You should upgrade to at least Solaris 7.
+EOM
+		exit 1
+		;;
+	    esac
 	    libc='/usr/lib/sparcv9/libc.so'
 	    if test ! -f $libc; then
 		cat >&4 <<EOM
 
 I do not see the 64-bit libc, $libc.
+(You are either in an old sparc or in an x86.)
 Cannot continue, aborting.
 
 EOM
@@ -424,16 +433,17 @@ EOM
 	    case "$cc -v 2>/dev/null" in
 	    *gcc*)
 		echo 'main() { return 0; }' > try.c
-		if ${cc:-cc} -mcpu=v9 -m64 -S try.c 2>&1 | grep -e \
-		    '-m64 is not supported by this configuration'; then
+		case "`${cc:-cc} -mcpu=v9 -m64 -S try.c 2>&1 | grep 'm64 is not supported by this configuration'`" in
+		*"m64 is not supported"*)
 		    cat >&4 <<EOM
 
-Full 64-bit build not supported by this configuration.
+Full 64-bit build not supported by this gcc configuration.
 Cannot continue, aborting.
 
 EOM
 		    exit 1
-		fi
+		    ;;
+		esac    
 		ccflags="$ccflags -mcpu=v9 -m64"
 		if test X`getconf XBS5_LP64_OFF64_CFLAGS 2>/dev/null` != X; then
 		    ccflags="$ccflags -Wa,`getconf XBS5_LP64_OFF64_CFLAGS 2>/dev/null`"
@@ -473,17 +483,18 @@ cat > UU/uselongdouble.cbu <<'EOCBU'
 # after it has prompted the user for whether to use long doubles.
 case "$uselongdouble-$uselongdouble_done" in
 "$define-"|true-|[yY]*-)
-	case "$ccisworkshop" in
-	'')	cat >&4 <<EOM
+	case "$ccname" in
+	workshop)
+		libswanted="$libswanted sunmath"
+		loclibpth="$loclibpth /opt/SUNWspro/lib"
+		;;
+	*)	cat >&4 <<EOM
 
-I do not see the Sun Workshop compiler; therefore I do not see
+The Sun Workshop compiler is not being used; therefore I do not see
 the libsunmath; therefore I do not know how to do long doubles, sorry.
 I'm disabling the use of long doubles.
 EOM
 		uselongdouble="$undef"
-		;;
-	*)	libswanted="$libswanted sunmath"
-		loclibpth="$loclibpth /opt/SUNWspro/lib"
 		;;
 	esac
 	uselongdouble_done=yes
@@ -500,9 +511,6 @@ case "$uselongdouble" in
 esac
 
 rm -f try.c try.o try
-# keep that leading tab
-	ccisworkshop=''
-	ccisgcc=''
 
 # This is just a trick to include some useful notes.
 cat > /dev/null <<'End_of_Solaris_Notes'

@@ -43,7 +43,8 @@ yourself.
 =item Win32::DomainName()
 
 [CORE] Returns the name of the Microsoft Network domain that the
-owner of the current perl process is logged into.
+owner of the current perl process is logged into.  This function does
+B<not> work on Windows 9x.
 
 =item Win32::ExpandEnvironmentStrings(STRING)
 

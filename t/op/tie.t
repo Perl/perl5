@@ -6,13 +6,14 @@
 # Currently it only tests the untie warning 
 
 chdir 't' if -d 't';
-unshift @INC, "../lib";
+@INC = '../lib';
 $ENV{PERL5LIB} = "../lib";
 
 $|=1;
 
 # catch warnings into fatal errors
 $SIG{__WARN__} = sub { die "WARNING: @_" } ;
+$SIG{__DIE__}  = sub { die @_ };
 
 undef $/;
 @prgs = split "\n########\n", <DATA>;
@@ -25,7 +26,7 @@ for (@prgs){
     $results = $@ ;
     $results =~ s/\n+$//;
     $expected =~ s/\n+$//;
-    if ( $status or $results and $results !~ /^WARNING: $expected/){
+    if ( $status or $results and $results !~ /^(WARNING: )?$expected/){
 	print STDERR "STATUS: $status\n";
 	print STDERR "PROG: $prog\n";
 	print STDERR "EXPECTED:\n$expected\n";
@@ -42,6 +43,21 @@ use Tie::Hash ;
 tie %h, Tie::StdHash;
 untie %h;
 EXPECT
+########
+
+# standard behaviour, without any extra references
+use Tie::Hash ;
+{package Tie::HashUntie;
+ use base 'Tie::StdHash';
+ sub UNTIE
+  {
+   warn "Untied\n";
+  }
+}
+tie %h, Tie::HashUntie;
+untie %h;
+EXPECT
+Untied
 ########
 
 # standard behaviour, with 1 extra reference
@@ -158,6 +174,7 @@ sub Self::DESTROY { $b = $_[0] + 0; }
 }
 die unless $a == $b;
 EXPECT
+Self-ties are not supported 
 ########
 # Interaction of tie and vec
 

@@ -893,6 +893,10 @@ sub scan_dir {
 	    $pages{$_}  = "" unless defined $pages{$_};
 	    $pages{$_} .= "$dir/$_.pod:";
 	    push(@pods, "$dir/$_.pod");
+	} elsif (/\.html\z/) { 	    	    	    	    # .html
+	    s/\.html\z//;
+	    $pages{$_}  = "" unless defined $pages{$_};
+	    $pages{$_} .= "$dir/$_.pod:";
 	} elsif (/\.pm\z/) { 	    	    	    	    # .pm
 	    s/\.pm\z//;
 	    $pages{$_}  = "" unless defined $pages{$_};

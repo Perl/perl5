@@ -7,15 +7,18 @@
 
 package Math::Complex;
 
-$VERSION = "1.30";
-
 our($VERSION, @ISA, @EXPORT, %EXPORT_TAGS, $Inf);
 
+$VERSION = 1.31;
+
 BEGIN {
-    my $e = $!;
-    $Inf = CORE::exp(CORE::exp(30)); # We do want an arithmetic overflow.
-    $! = $e; # Clear ERANGE.
-    undef $Inf unless $Inf =~ /^inf(?:inity)?$/i; # Inf INF inf Infinity
+    unless ($^O eq 'unicosmk') {
+        my $e = $!;
+	# We do want an arithmetic overflow.
+        eval '$Inf = CORE::exp(CORE::exp(30))';
+        $! = $e; # Clear ERANGE.
+        undef $Inf unless $Inf =~ /^inf(?:inity)?$/i; # Inf INF inf Infinity
+    }
     $Inf = "Inf" if !defined $Inf || !($Inf > 0); # Desperation.
 }
 
@@ -1250,23 +1253,15 @@ sub display_format {
 		my %obj = %{$self->{display_format}};
 		@display_format{keys %obj} = values %obj;
 	    }
-	    if (@_ == 1) {
-		$display_format{style} = shift;
-	    } else {
-		my %new = @_;
-		@display_format{keys %new} = values %new;
-	    }
-	} else {				# Called as a class method
-	    if (@_ = 1) {
-		$display_format{style} = $self;
-	    } else {
-		my %new = @_;
-		@display_format{keys %new} = values %new;
-	    }
-	    undef $self;
+	}
+	if (@_ == 1) {
+	    $display_format{style} = shift;
+	} else {
+	    my %new = @_;
+	    @display_format{keys %new} = values %new;
 	}
 
-	if (defined $self) {
+	if (ref $self) { # Called as an object method
 	    $self->{display_format} = { %display_format };
 	    return
 		wantarray ?
@@ -1274,6 +1269,7 @@ sub display_format {
 		    $self->{display_format}->{style};
 	}
 
+        # Called as a class method
 	%DISPLAY_FORMAT = %display_format;
 	return
 	    wantarray ?
@@ -1393,11 +1389,11 @@ sub stringify_polar {
 
 	$t -= int(CORE::abs($t) / pit2) * pit2;
 
-	if ($format{polar_pretty_print}) {
+	if ($format{polar_pretty_print} && $t) {
 	    my ($a, $b);
 	    for $a (2..9) {
 		$b = $t * $a / pi;
-		if (int($b) == $b) {
+		if ($b =~ /^-?\d+$/) {
 		    $b = $b < 0 ? "-" : "" if CORE::abs($b) == 1;
 		    $theta = "${b}pi/$a";
 		    last;

@@ -377,6 +377,7 @@ perl_destruct(pTHXx)
     DEBUG_S(PerlIO_printf(Perl_debug_log, "perl_destruct: armageddon has arrived\n"));
     MUTEX_DESTROY(&PL_threads_mutex);
     COND_DESTROY(&PL_nthreads_cond);
+    PL_nthreads--;
 #endif /* !defined(FAKE_THREADS) */
 #endif /* USE_THREADS */
 
@@ -835,7 +836,7 @@ setuid perl scripts securely.\n");
 
     PL_origargv = argv;
     PL_origargc = argc;
-#ifndef VMS  /* VMS doesn't have environ array */
+#if !defined( VMS) && !defined(EPOC)  /* VMS doesn't have environ array */
     PL_origenviron = environ;
 #endif
 
@@ -1255,13 +1256,17 @@ print \"  \\@INC:\\n    @INC\\n\";");
     if (xsinit)
 	(*xsinit)(aTHXo);	/* in case linked C routines want magical variables */
 #ifndef PERL_MICRO
-#if defined(VMS) || defined(WIN32) || defined(DJGPP) || defined(__CYGWIN__)
+#if defined(VMS) || defined(WIN32) || defined(DJGPP) || defined(__CYGWIN__) || defined(EPOC)
     init_os_extras();
 #endif
 #endif
 
 #ifdef USE_SOCKS
+#   ifdef HAS_SOCKS5_INIT
+    socks5_init(argv[0]);
+#   else
     SOCKSinit(argv[0]);
+#   endif
 #endif    
 
     init_predump_symbols();
@@ -2060,9 +2065,25 @@ Perl_moreswitches(pTHX_ char *s)
     case 'd':
 	forbid_setid("-d");
 	s++;
-	if (*s == ':' || *s == '=')  {
-	    my_setenv("PERL5DB", Perl_form(aTHX_ "use Devel::%s;", ++s));
+	/* The following permits -d:Mod to accepts arguments following an =
+	   in the fashion that -MSome::Mod does. */
+	if (*s == ':' || *s == '=') {
+	    char *start;
+	    SV *sv;
+	    sv = newSVpv("use Devel::", 0);
+	    start = ++s;
+	    /* We now allow -d:Module=Foo,Bar */
+	    while(isALNUM(*s) || *s==':') ++s;
+	    if (*s != '=')
+		sv_catpv(sv, start);
+	    else {
+		sv_catpvn(sv, start, s-start);
+		sv_catpv(sv, " split(/,/,q{");
+		sv_catpv(sv, ++s);
+		sv_catpv(sv,    "})");
+	    }
 	    s += strlen(s);
+	    my_setenv("PERL5DB", SvPV(sv, PL_na));
 	}
 	if (!PL_perldb) {
 	    PL_perldb = PERLDB_ALL;
@@ -2228,7 +2249,7 @@ Perl_moreswitches(pTHX_ char *s)
 	return s;
     case 'v':
 	PerlIO_printf(PerlIO_stdout(),
-		      Perl_form(aTHX_ "\nThis is perl, v%vd built for %s",
+		      Perl_form(aTHX_ "\nThis is perl, v%"VDf" built for %s",
 				PL_patchlevel, ARCHNAME));
 #if defined(LOCAL_PATCH_COUNT)
 	if (LOCAL_PATCH_COUNT > 0)
@@ -2301,7 +2322,7 @@ Perl_moreswitches(pTHX_ char *s)
 	PerlIO_printf(PerlIO_stdout(),
 		      "\n\
 Perl may be copied only under the terms of either the Artistic License or the\n\
-GNU General Public License, which may be found in the Perl 5.0 source kit.\n\n\
+GNU General Public License, which may be found in the Perl 5 source kit.\n\n\
 Complete documentation for Perl, including FAQ lists, should be found on\n\
 this system using `man perl' or `perldoc perl'.  If you have access to the\n\
 Internet, point your browser at http://www.perl.com/, the Perl Home Page.\n\n");
@@ -2851,16 +2872,6 @@ S_validate_suid(pTHX_ char *validarg, char *scriptname, int fdscript)
 	    if (tmpstatbuf.st_dev != PL_statbuf.st_dev ||
 		tmpstatbuf.st_ino != PL_statbuf.st_ino) {
 		(void)PerlIO_close(PL_rsfp);
-		if (PL_rsfp = PerlProc_popen("/bin/mail root","w")) {	/* heh, heh */
-		    PerlIO_printf(PL_rsfp,
-"User %"Uid_t_f" tried to run dev %ld ino %ld in place of dev %ld ino %ld!\n\
-(Filename of set-id script was %s, uid %"Uid_t_f" gid %"Gid_t_f".)\n\nSincerely,\nperl\n",
-			PL_uid,(long)tmpstatbuf.st_dev, (long)tmpstatbuf.st_ino,
-			(long)PL_statbuf.st_dev, (long)PL_statbuf.st_ino,
-			CopFILE(PL_curcop),
-			PL_statbuf.st_uid, PL_statbuf.st_gid);
-		    (void)PerlProc_pclose(PL_rsfp);
-		}
 		Perl_croak(aTHX_ "Permission denied\n");
 	    }
 	    if (
@@ -3457,7 +3468,7 @@ S_init_perllib(pTHX)
 #endif /* MACOS_TRADITIONAL */
 }
 
-#if defined(DOSISH)
+#if defined(DOSISH) || defined(EPOC)
 #    define PERLLIB_SEP ';'
 #else
 #  if defined(VMS)
@@ -3679,7 +3690,14 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 
     while (AvFILL(paramList) >= 0) {
 	cv = (CV*)av_shift(paramList);
-	SAVEFREESV(cv);
+	if ((PL_minus_c & 0x10) && (paramList == PL_beginav)) {
+		/* save PL_beginav for compiler */
+	    if (! PL_beginav_save)
+		PL_beginav_save = newAV();
+	    av_push(PL_beginav_save, (SV*)cv);
+	} else {
+	    SAVEFREESV(cv);
+	}
 #ifdef PERL_FLEXIBLE_EXCEPTIONS
 	CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_vcall_list_body), cv);
 #else

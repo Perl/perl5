@@ -2,7 +2,7 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    unshift @INC, "../lib" if -d "../lib";
+    @INC = '../lib';
     eval {my @n = getgrgid 0};
     if ($@ && $@ =~ /(The \w+ function is unimplemented)/) {
 	print "1..0 # Skip: $1\n";
@@ -70,7 +70,8 @@ my %seen;
 setgrent();
 while (<GR>) {
     chomp;
-    my @s = split /:/;
+    # LIMIT -1 so that groups with no users don't fall off
+    my @s = split /:/, $_, -1;
     my ($name_s,$passwd_s,$gid_s,$members_s) = @s;
     if (@s) {
 	push @{ $seen{$name_s} }, $.;
@@ -139,7 +140,7 @@ print "ok ", $tst++;
 print "\t# (not necessarily serious: run t/op/grent.t by itself)" if $not;
 print "\n";
 
-# Test both the scalar and array contexts.
+# Test both the scalar and list contexts.
 
 my @gr1;
 

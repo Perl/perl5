@@ -2,7 +2,7 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    unshift @INC, '../lib';
+    @INC = '../lib';
     unshift @INC, '.';
     require Config; import Config;
     if (!$Config{d_setlocale} || $Config{ccflags} =~ /\bD?NO_LOCALE\b/) {
@@ -664,6 +664,7 @@ foreach $Locale (@Locale) {
 	print "# testing 116 failed for locale '$Locale' for characters @f\n"
             if @f;
     }
+
 }
 
 # Recount the errors.
@@ -709,26 +710,30 @@ EOW
     }
 }
 
-# Tell which locales ere okay.
+# Tell which locales were okay.
 
 if ($didwarn) {
     my @s;
     
     foreach my $l (@Locale) {
 	my $p = 0;
-	foreach my $t (102..102) {
+	foreach my $t (102..116) {
 	    $p++ if $Problem{$t}{$l};
 	}
 	push @s, $l if $p == 0;
     }
     
-    my $s = join(" ", @s);
-    $s =~ s/(.{50,60}) /$1\n#\t/g;
+    if (@s) {
+        my $s = join(" ", @s);
+        $s =~ s/(.{50,60}) /$1\n#\t/g;
 
-    warn
-	"# The following locales\n#\n",
-        "#\t", $s, "\n#\n",
-	"# tested okay.\n#\n",
+        warn
+    	    "# The following locales\n#\n",
+            "#\t", $s, "\n#\n",
+	    "# tested okay.\n#\n",
+    } else {
+        warn "# None of your locales was fully okay.\n";
+    }
 }
 
 # eof

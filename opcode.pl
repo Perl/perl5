@@ -321,7 +321,7 @@ sub tab {
 #	trans not OK (dTARG; TARG = sv_newmortal();)
 #	ucfirst etc not OK: TMP arg processed inplace
 #	quotemeta not OK (unsafe when TARG == arg)
-#	each repeat not OK too due to array context
+#	each repeat not OK too due to list context
 #	pack split - unknown whether they are safe
 #	sprintf: is calling do_sprintf(TARG,...) which can act on TARG
 #	  before other args are processed.
@@ -515,7 +515,7 @@ abs		abs			ck_fun		fsTu%	S?
 # String stuff.
 
 length		length			ck_lengthconst	isTu%	S?
-substr		substr			ck_fun		st@	S S S? S?
+substr		substr			ck_substr	st@	S S S? S?
 vec		vec			ck_fun		ist@	S S S
 
 index		index			ck_index	isT@	S S S?

@@ -2,7 +2,7 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    unshift @INC, "../lib" if -d "../lib";
+    @INC = '../lib';
     eval {my @n = getpwuid 0};
     if ($@ && $@ =~ /(The \w+ function is unimplemented)/) {
 	print "1..0 # Skip: $1\n";
@@ -71,7 +71,8 @@ my %seen;
 setpwent();
 while (<PW>) {
     chomp;
-    my @s = split /:/;
+    # LIMIT -1 so that users with empty shells don't fall off
+    my @s = split /:/, $_, -1;
     my ($name_s, $passwd_s, $uid_s, $gid_s, $gcos_s, $home_s, $shell_s) = @s;
     next if /^\+/; # ignore NIS includes
     if (@s) {
@@ -136,7 +137,7 @@ print "ok ", $tst++;
 print "\t# (not necessarily serious: run t/op/pwent.t by itself)" if $not;
 print "\n";
 
-# Test both the scalar and array contexts.
+# Test both the scalar and list contexts.
 
 my @pw1;
 

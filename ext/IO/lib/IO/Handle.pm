@@ -71,7 +71,7 @@ corresponding built-in functions:
     $io->printf ( FMT, [ARGS] )
     $io->stat
     $io->sysread ( BUF, LEN, [OFFSET] )
-    $io->syswrite ( BUF, LEN, [OFFSET] )
+    $io->syswrite ( BUF, [LEN, [OFFSET]] )
     $io->truncate ( LEN )
 
 See L<perlvar> for complete descriptions of each of the following
@@ -115,13 +115,13 @@ Returns true if the object is currently a valid file descriptor.
 =item $io->getline
 
 This works like <$io> described in L<perlop/"I/O Operators">
-except that it's more readable and can be safely called in an
-array context but still returns just one line.
+except that it's more readable and can be safely called in a
+list context but still returns just one line.
 
 =item $io->getlines
 
-This works like <$io> when called in an array context to
-read all the remaining lines in a file, except that it's more readable.
+This works like <$io> when called in a list context to read all
+the remaining lines in a file, except that it's more readable.
 It will also croak() if accidentally called in a scalar context.
 
 =item $io->ungetc ( ORD )
@@ -425,8 +425,11 @@ sub write {
 
 sub syswrite {
     @_ >= 2 && @_ <= 4 or croak 'usage: $io->syswrite(BUF [, LEN [, OFFSET]])';
-    $_[2] = length($_[1]) unless defined $_[2];
-    syswrite($_[0], $_[1], $_[2], $_[3] || 0);
+    if (defined($_[2])) {
+	syswrite($_[0], $_[1], $_[2], $_[3] || 0);
+    } else {
+	syswrite($_[0], $_[1]);
+    }
 }
 
 sub stat {

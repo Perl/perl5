@@ -91,7 +91,7 @@ BEGIN {
     $::HaveUtil = ($@ eq "");
 };
 
-my $Version = "1.31";
+my $Version = "1.32";
 
 # Changed in 1.06 to skip Mail::Send and Mail::Util if not available.
 # Changed in 1.07 to see more sendmail execs, and added pipe output.
@@ -127,6 +127,7 @@ my $Version = "1.31";
 # Changed in 1.29 Perlbug(tron): auto(-ok), short prompts RFOLEY 05-05-2000
 # Changed in 1.30 Added warnings on failure to open files MSTEVENS 13-07-2000
 # Changed in 1.31 Add checks on close().Fix my $var unless. TJENNESS 26-07-2000
+# Changed in 1.32 Use File::Spec->tmpdir TJENNESS 20-08-2000
 
 # TODO: - Allow the user to re-name the file on mail failure, and
 #       make sure failure (transmission-wise) of Mail::Send is
@@ -134,7 +135,7 @@ my $Version = "1.31";
 #       - Test -b option
 
 my( $file, $usefile, $cc, $address, $perlbug, $testaddress, $filename,
-    $subject, $from, $verbose, $ed, $outfile, $Is_MacOS, $category, $severity, 
+    $subject, $from, $verbose, $ed, $outfile, $Is_MacOS, $category, $severity,
     $fh, $me, $Is_MSWin32, $Is_VMS, $msg, $body, $andcc, %REP, $ok);
 
 my $perl_version = $^V ? sprintf("v%vd", $^V) : $];
@@ -173,9 +174,9 @@ sub ask_for_alternatives { # (category|severity)
 	    'default' => 'low',
 	    'ok'      => 'none',
 	    'opts'    => [qw(critical high medium low wishlist none)], # zero
-	}, 	
+	},
     );
-    die "Invalid alternative($name) requested\n" unless grep(/^$name$/, keys %alts); 
+    die "Invalid alternative($name) requested\n" unless grep(/^$name$/, keys %alts);
     my $alt = "";
     if ($ok) {
 	$alt = $alts{$name}{'ok'};
@@ -222,7 +223,7 @@ sub Init {
     # -------- Configuration ---------
 
     # perlbug address
-    $perlbug = 'perlbug@perl.com';
+    $perlbug = 'perlbug@perl.org';
 
     # Test address
     $testaddress = 'perlbug-test@perl.com';
@@ -905,12 +906,8 @@ EOF
 }
 
 sub filename {
-    my $dir = $Is_VMS ? 'sys$scratch:'
-	: ($Is_MSWin32 && $ENV{'TEMP'}) ? $ENV{'TEMP'}
-        : $Is_MacOS ? $ENV{'TMPDIR'}
-	: '/tmp';
+    my $dir = File::Spec->tmpdir();
     $filename = "bugrep0$$";
-#    $dir .= "\\" if $Is_MSWin32 and $dir !~ m|[\\/]$|;
     $filename++ while -e File::Spec->catfile($dir, $filename);
     $filename = File::Spec->catfile($dir, $filename);
 }
@@ -963,7 +960,7 @@ will be needed.  Simply run it, and follow the prompts.
 
 If you are unable to run B<perlbug> (most likely because you don't have
 a working setup to send mail that perlbug recognizes), you may have to
-compose your own report, and email it to B<perlbug@perl.com>.  You might
+compose your own report, and email it to B<perlbug@perl.org>.  You might
 find the B<-d> option useful to get summary information in that case.
 
 In any case, when reporting a bug, please make sure you have run through
@@ -1041,7 +1038,7 @@ definitely be fixed.  Use the C<diff> program to generate your patches
 (C<diff> is being maintained by the GNU folks as part of the B<diffutils>
 package, so you should be able to get it from any of the GNU software
 repositories).  If you do submit a patch, the cool-dude counter at
-perlbug@perl.com will register you as a savior of the world.  Your
+perlbug@perl.org will register you as a savior of the world.  Your
 patch may be returned with requests for changes, or requests for more
 detailed explanations about your fix.
 
@@ -1061,7 +1058,7 @@ B<perlbug> will, amongst other things, ensure your report includes
 crucial information about your version of perl.  If C<perlbug> is unable
 to mail your report after you have typed it in, you may have to compose
 the message yourself, add the output produced by C<perlbug -d> and email
-it to B<perlbug@perl.com>.  If, for some reason, you cannot run
+it to B<perlbug@perl.org>.  If, for some reason, you cannot run
 C<perlbug> at all on your system, be sure to include the entire output
 produced by running C<perl -V> (note the uppercase V).
 
@@ -1088,7 +1085,7 @@ version of perl comes out and your bug is still present.
 
 =item B<-a>
 
-Address to send the report to.  Defaults to `perlbug@perl.com'.
+Address to send the report to.  Defaults to `perlbug@perl.org'.
 
 =item B<-b>
 

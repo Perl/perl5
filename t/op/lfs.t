@@ -4,7 +4,7 @@
 
 BEGIN {
 	chdir 't' if -d 't';
-	unshift @INC, '../lib';
+	@INC = '../lib';
 	# Don't bother if there are no quad offsets.
 	require Config; import Config;
 	if ($Config{lseeksize} < 8) {

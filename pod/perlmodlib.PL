@@ -115,7 +115,7 @@ print OUT <<'EOF';
 
 To find out I<all> modules installed on your system, including
 those without documentation or outside the standard release,
-jus tdo this:
+just do this:
 
     % find `perl -e 'print "@INC"'` -name '*.pm' -print
 

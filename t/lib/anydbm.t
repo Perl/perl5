@@ -4,7 +4,7 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    unshift @INC, '../lib';
+    @INC = '../lib';
     require Config; import Config;
     if (($Config{'extensions'} !~ /\b(DB|[A-Z]DBM)_File\b/) ){
       print "1..0 # Skipping (no DB_File or [A-Z]DBM_File)\n";

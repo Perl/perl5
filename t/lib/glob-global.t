@@ -2,7 +2,7 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    unshift @INC, '../lib';
+    @INC = '../lib';
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bFile\/Glob\b/i) {
         print "1..0\n";
@@ -56,7 +56,7 @@ while (defined($_ = <*/*.t>)) {
 print "not " if @r != $r;
 print "ok 5\n";
 
-# check if array context works
+# check if list context works
 @r = ();
 for (<*/*.t>) {
     #print "# $_\n";

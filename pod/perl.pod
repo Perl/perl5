@@ -34,6 +34,7 @@ For ease of access, the Perl manual has been split up into several sections:
     perlrun		Perl execution and options
     perldiag		Perl diagnostic messages
     perllexwarn		Perl warnings and their control
+    perldebtut		Perl debugging tutorial
     perldebug		Perl debugging
 
     perlvar		Perl predefined variables
@@ -41,19 +42,10 @@ For ease of access, the Perl manual has been split up into several sections:
     perlopentut		Perl open() tutorial
     perlretut		Perl regular expressions tutorial
 
-    perlref		Perl references, the rest of the story
     perlre		Perl regular expressions, the rest of the story
+    perlref		Perl references, the rest of the story
+
     perlform		Perl formats
-    perllocale		Perl locale support
-    perlunicode		Perl unicode support
-
-    perlipc		Perl interprocess communication
-    perlfork		Perl fork() information
-    perlnumber		Perl number semantics
-    perlthrtut		Perl threads tutorial
-
-    perlport		Perl portability guide
-    perlsec		Perl security
 
     perlboot		Perl OO tutorial for beginners
     perltoot		Perl OO tutorial, part 1
@@ -61,6 +53,18 @@ For ease of access, the Perl manual has been split up into several sections:
     perlobj		Perl objects
     perlbot		Perl OO tricks and examples
     perltie		Perl objects hidden behind simple variables
+
+    perlipc		Perl interprocess communication
+    perlfork		Perl fork() information
+    perlnumber		Perl number semantics
+    perlthrtut		Perl threads tutorial
+
+    perlport		Perl portability guide
+    perllocale		Perl locale support
+    perlunicode		Perl unicode support
+    perlebcdic		Considerations for running Perl on EBCDIC platforms
+
+    perlsec		Perl security
 
     perlmod		Perl modules: how they work
     perlmodlib		Perl modules: how to write and use
@@ -100,6 +104,7 @@ For ease of access, the Perl manual has been split up into several sections:
     perl5005delta	Perl changes in version 5.005
     perl5004delta	Perl changes in version 5.004
 
+    perlaix		Perl notes for AIX
     perlamiga		Perl notes for Amiga
     perlcygwin		Perl notes for Cygwin
     perldos		Perl notes for DOS
@@ -313,7 +318,7 @@ affected by wraparound).
 
 You may mail your bug reports (be sure to include full configuration
 information as output by the myconfig program in the perl source
-tree, or by C<perl -V>) to perlbug@perl.com .  If you've succeeded
+tree, or by C<perl -V>) to perlbug@perl.org .  If you've succeeded
 in compiling perl, the B<perlbug> script in the F<utils/> subdirectory
 can be used to help mail in a bug report.
 

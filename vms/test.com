@@ -19,7 +19,7 @@ $           Write Sys$Error "Can't find test directory"
 $           Exit 44
 $       EndIf
 $   EndIf
-$   Set Message /Facility/Severity/Identification/Text
+$   Set Message /NoFacility/NoSeverity/NoIdentification/NoText
 $
 $   exe = ".Exe"
 $   If p1.nes."" Then exe = p1
@@ -110,7 +110,7 @@ $   Deck/Dollar=$$END-OF-TEST$$
 use Config;
 
 @compexcl=('cpp.t');
-@ioexcl=('argv.t','dup.t','fs.t','pipe.t','openpid.t');
+@ioexcl=('argv.t','dup.t','fs.t','pipe.t');
 @libexcl=('db-btree.t','db-hash.t','db-recno.t',
           'gdbm.t','io_dup.t', 'io_pipe.t', 'io_poll.t', 'io_sel.t',
           'io_sock.t', 'io_unix.t',
@@ -173,7 +173,7 @@ while ($test = shift) {
 	} else {
 	    $switch = '';
 	}
-	open(results,"\$ MCR Sys\$Disk:[]Perl. \"-I[-.lib]\" $switch $test |") || (print "can't run.\n");
+	open(results,"\$ MCR Sys\$Disk:[]Perl. \"-I[-.lib]\" $switch $test 2>&1|") || (print "can't run.\n");
     $ok = 0;
     $next = 0;
     $pending_not = 0;

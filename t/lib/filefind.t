@@ -6,7 +6,7 @@ my $symlink_exists = eval { symlink("",""); 1 };
 
 BEGIN {
     chdir 't' if -d 't';
-    unshift @INC, '../lib';
+    @INC = '../lib';
 }
 
 if ( $symlink_exists ) { print "1..117\n"; }

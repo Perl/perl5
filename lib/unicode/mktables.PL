@@ -2,16 +2,16 @@
 
 use bytes;
 
-$UnicodeData = "Unicode.300";
+$UnicodeData = "Unicode.301";
 $SyllableData = "syllables.txt";
-$PropData = "Props.txt";
+$PropData = "PropList.txt";
 
 
 # Note: we try to keep filenames unique within first 8 chars.  Using
 # subdirectories for the following helps.
-mkdir "In", 0777;
-mkdir "Is", 0777;
-mkdir "To", 0777;
+mkdir "In", 0755;
+mkdir "Is", 0755;
+mkdir "To", 0755;
 
 @todo = (
 # typical
@@ -161,7 +161,7 @@ mkdir "To", 0777;
 
 # Number
 
-    ['Number', 	'$num',			'$num'],
+    ['Number', 	'$num ne ""',		'$num'],
 
 # Mirrored
 

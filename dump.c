@@ -279,9 +279,9 @@ Perl_sv_peek(pTHX_ SV *sv)
 	}
     }
     else if (SvNOKp(sv)) {
- 	RESTORE_NUMERIC_STANDARD();
+	STORE_NUMERIC_LOCAL_SET_STANDARD();
 	Perl_sv_catpvf(aTHX_ t, "(%g)",SvNVX(sv));
- 	RESTORE_NUMERIC_LOCAL();
+	RESTORE_NUMERIC_LOCAL();
     }
     else if (SvIOKp(sv)) {
 	if (SvIsUV(sv))
@@ -769,7 +769,7 @@ void
 Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bool dumpops, STRLEN pvlim)
 {
     dTHR;
-    SV *d = sv_newmortal();
+    SV *d;
     char *s;
     U32 flags;
     U32 type;
@@ -783,7 +783,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
     flags = SvFLAGS(sv);
     type = SvTYPE(sv);
 
-    Perl_sv_setpvf(aTHX_ d,
+    d = Perl_newSVpvf(aTHX_
 		   "(0x%"UVxf") at 0x%"UVxf"\n%*s  REFCNT = %"IVdf"\n%*s  FLAGS = (",
 		   PTR2UV(SvANY(sv)), PTR2UV(sv),
 		   (int)(PL_dumpindent*level), "", (IV)SvREFCNT(sv),
@@ -833,6 +833,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	if (GvINTRO(sv))	sv_catpv(d, "INTRO,");
 	if (GvMULTI(sv))	sv_catpv(d, "MULTI,");
 	if (GvASSUMECV(sv))	sv_catpv(d, "ASSUMECV,");
+	if (GvIN_PAD(sv))       sv_catpv(d, "IN_PAD,");
 	if (GvIMPORTED(sv)) {
 	    sv_catpv(d, "IMPORT");
 	    if (GvIMPORTED(sv) == GVf_IMPORTED)
@@ -867,6 +868,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
     switch (type) {
     case SVt_NULL:
 	PerlIO_printf(file, "NULL%s\n", s);
+	SvREFCNT_dec(d);
 	return;
     case SVt_IV:
 	PerlIO_printf(file, "IV%s\n", s);
@@ -915,6 +917,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	break;
     default:
 	PerlIO_printf(file, "UNKNOWN(0x%"UVxf") %s\n", (UV)type, s);
+	SvREFCNT_dec(d);
 	return;
     }
     if (type >= SVt_PVIV || type == SVt_IV) {
@@ -927,7 +930,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	PerlIO_putc(file, '\n');
     }
     if (type >= SVt_PVNV || type == SVt_NV) {
-	RESTORE_NUMERIC_STANDARD();
+	STORE_NUMERIC_LOCAL_SET_STANDARD();
 	/* %Vg doesn't work? --jhi */
 #ifdef USE_LONG_DOUBLE
 	Perl_dump_indent(aTHX_ level, file, "  NV = %.*" PERL_PRIgldbl "\n", LDBL_DIG, SvNVX(sv));
@@ -940,10 +943,13 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	Perl_dump_indent(aTHX_ level, file, "  RV = 0x%"UVxf"\n", PTR2UV(SvRV(sv)));
 	if (nest < maxnest)
 	    do_sv_dump(level+1, file, SvRV(sv), nest+1, maxnest, dumpops, pvlim);
+	SvREFCNT_dec(d);
 	return;
     }
-    if (type < SVt_PV)
+    if (type < SVt_PV) {
+	SvREFCNT_dec(d);
 	return;
+    }
     if (type <= SVt_PVLV) {
 	if (SvPVX(sv)) {
 	    Perl_dump_indent(aTHX_ level, file,"  PV = 0x%"UVxf" ", PTR2UV(SvPVX(sv)));
@@ -1042,7 +1048,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	    theoret = HvKEYS(sv);
 	    theoret += theoret * theoret/pow2;
 	    PerlIO_putc(file, '\n');
-	    Perl_dump_indent(aTHX_ level, file, "  hash quality = %.1f%%", theoret/sum*100);
+	    Perl_dump_indent(aTHX_ level, file, "  hash quality = %.1"NVff"%%", theoret/sum*100);
 	}
 	PerlIO_putc(file, '\n');
 	Perl_dump_indent(aTHX_ level, file, "  KEYS = %"IVdf"\n", (IV)HvKEYS(sv));
@@ -1178,6 +1184,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	Perl_dump_indent(aTHX_ level, file, "  FLAGS = 0x%"UVxf"\n", (UV)IoFLAGS(sv));
 	break;
     }
+    SvREFCNT_dec(d);
 }
 
 void

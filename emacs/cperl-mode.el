@@ -7364,7 +7364,7 @@ $~	The name of the current report format.
 ?PATTERN?	One-time pattern match.
 @ARGV	Command line arguments (not including the command name - see $0).
 @INC	List of places to look for perl scripts during do/include/use.
-@_	Parameter array for subroutines.  Also used by split unless in array context.
+@_	Parameter array for subroutines.  Also used by split unless in list context.
 \\  Creates reference to what follows, like \$var, or quotes non-\w in strings.
 \\0	Octal char, e.g. \\033.
 \\E	Case modification terminator.  See \\Q, \\L, and \\U.

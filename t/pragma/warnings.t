@@ -2,9 +2,10 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    unshift @INC, '../lib';
+    @INC = '../lib';
     $ENV{PERL5LIB} = '../lib';
     require Config; import Config;
+    $ENV{PERL_DESTRUCT_LEVEL} = 0 unless $ENV{PERL_DESTRUCT_LEVEL} > 3;
 }
 
 $| = 1;

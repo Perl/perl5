@@ -548,17 +548,6 @@ Free_t   Perl_mfree (Malloc_t where);
 
 typedef struct perl_mstats perl_mstats_t;
 
-struct perl_mstats {
-    unsigned long *nfree;
-    unsigned long *ntotal;
-    long topbucket, topbucket_ev, topbucket_odd, totfree, total, total_chain;
-    long total_sbrk, sbrks, sbrk_good, sbrk_slack, start_slack, sbrked_remains;
-    long minbucket;
-    /* Level 1 info */
-    unsigned long *bucket_mem_size;
-    unsigned long *bucket_available_size;
-};
-
 #  define safemalloc  Perl_malloc
 #  define safecalloc  Perl_calloc
 #  define saferealloc Perl_realloc
@@ -1079,6 +1068,11 @@ typedef UVTYPE UV;
 #define PTR2IV(p)	INT2PTR(IV,p)
 #define PTR2UV(p)	INT2PTR(UV,p)
 #define PTR2NV(p)	NUM2PTR(NV,p)
+#if PTRSIZE == LONGSIZE 
+#  define PTR2ul(p)	(unsigned long)(p)
+#else
+#  define PTR2ul(p)	INT2PTR(unsigned long,p)	
+#endif
   
 #ifdef USE_LONG_DOUBLE
 #  if !(defined(HAS_LONG_DOUBLE) && (LONG_DOUBLESIZE > DOUBLESIZE))
@@ -1164,6 +1158,18 @@ typedef NVTYPE NV;
 #   ifdef LDBL_MANT_DIG
 #       define NV_MANT_DIG LDBL_MANT_DIG
 #   endif
+#   ifdef LDBL_MAX
+#       define NV_MAX LDBL_MAX
+#       define NV_MIN LDBL_MIN
+#   else
+#       ifdef HUGE_VALL
+#           define NV_MAX HUGE_VALL
+#       else
+#           ifdef HUGE_VAL
+#               define NV_MAX ((NV)HUGE_VAL)
+#           endif
+#       endif
+#   endif
 #   ifdef HAS_SQRTL
 #       define Perl_cos cosl
 #       define Perl_sin sinl
@@ -1200,6 +1206,14 @@ typedef NVTYPE NV;
 #   ifdef DBL_MANT_DIG
 #       define NV_MANT_DIG DBL_MANT_DIG
 #   endif
+#   ifdef DBL_MAX
+#       define NV_MAX DBL_MAX
+#       define NV_MIN DBL_MIN
+#   else
+#       ifdef HUGE_VAL
+#           define NV_MAX HUGE_VAL
+#       endif
+#   endif
 #   define Perl_cos cos
 #   define Perl_sin sin
 #   define Perl_sqrt sqrt
@@ -1220,14 +1234,21 @@ typedef NVTYPE NV;
 
 #if !defined(Perl_atof) && defined(USE_LONG_DOUBLE) && defined(HAS_LONG_DOUBLE)
 #   if !defined(Perl_atof) && defined(HAS_STRTOLD) 
-#       define Perl_atof(s) strtold(s, (char**)NULL)
+#       define Perl_atof(s) (NV)strtold(s, (char**)NULL)
 #   endif
 #   if !defined(Perl_atof) && defined(HAS_ATOLF)
-#       define Perl_atof atolf
+#       define Perl_atof (NV)atolf
+#   endif
+#   if !defined(Perl_atof) && defined(PERL_SCNfldbl)
+#       define Perl_atof PERL_SCNfldbl
+#       define Perl_atof2(s,f) sscanf((s), "%"PERL_SCNfldbl, &(f))
 #   endif
 #endif
 #if !defined(Perl_atof)
 #   define Perl_atof atof /* we assume atof being available anywhere */
+#endif
+#if !defined(Perl_atof2)
+#   define Perl_atof2(s,f) ((f) = (NV)Perl_atof(s))
 #endif
 
 /* Previously these definitions used hardcoded figures. 
@@ -1408,6 +1429,18 @@ typedef NVTYPE NV;
 
 #endif
 
+struct perl_mstats {
+    UV *nfree;
+    UV *ntotal;
+    IV topbucket, topbucket_ev, topbucket_odd, totfree, total, total_chain;
+    IV total_sbrk, sbrks, sbrk_good, sbrk_slack, start_slack, sbrked_remains;
+    IV minbucket;
+    /* Level 1 info */
+    UV *bucket_mem_size;
+    UV *bucket_available_size;
+    UV nbuckets;
+};
+
 typedef MEM_SIZE STRLEN;
 
 typedef struct op OP;
@@ -1423,7 +1456,12 @@ typedef struct pvop PVOP;
 typedef struct loop LOOP;
 
 typedef struct interpreter PerlInterpreter;
-typedef struct sv SV;
+#ifdef UTS
+#   define STRUCT_SV perl_sv /* Amdahl's <ksync.h> has struct sv */
+#else
+#   define STRUCT_SV sv
+#endif
+typedef struct STRUCT_SV SV;
 typedef struct av AV;
 typedef struct hv HV;
 typedef struct cv CV;
@@ -1596,7 +1634,11 @@ typedef struct ptr_tbl PTR_TBL_t;
 #     endif
 #   endif
 # endif
-#endif         
+#endif
+
+#ifndef NO_ENVIRON_ARRAY
+#  define USE_ENVIRON_ARRAY
+#endif
 
 #ifndef PERL_SYS_INIT3
 #  define PERL_SYS_INIT3(argvp,argcp,envp) PERL_SYS_INIT(argvp,argcp)
@@ -1786,9 +1828,25 @@ typedef pthread_key_t	perl_key;
 #  endif 
 #endif
 
+#ifndef UVf
+#  ifdef CHECK_FORMAT
+#    define UVf UVuf
+#  else
+#    define UVf "Vu"
+#  endif 
+#endif
+
+#ifndef VDf
+#  ifdef CHECK_FORMAT
+#    define VDf "p"
+#  else
+#    define VDf "vd"
+#  endif 
+#endif
+
 /* Some unistd.h's give a prototype for pause() even though
    HAS_PAUSE ends up undefined.  This causes the #define
-   below to be rejected by the compmiler.  Sigh.
+   below to be rejected by the compiler.  Sigh.
 */
 #ifdef HAS_PAUSE
 #define Pause	pause
@@ -2008,6 +2066,7 @@ Gid_t getegid (void);
 
 #ifndef Perl_error_log
 #  define Perl_error_log	(PL_stderrgv			\
+				 && GvIOp(PL_stderrgv)          \
 				 && IoOFP(GvIOp(PL_stderrgv))	\
 				 ? IoOFP(GvIOp(PL_stderrgv))	\
 				 : PerlIO_stderr())
@@ -2223,18 +2282,18 @@ typedef OP* (CPERLscope(*PPADDR_t)[]) (pTHX);
 #    define environ (*environ_pointer)
 EXT char *** environ_pointer;
 #  else
-#    if defined(__APPLE__)
+#    if defined(__APPLE__) && defined(PERL_CORE)
 #      include <crt_externs.h>	/* for the env array */
 #      define environ (*_NSGetEnviron())
 #    endif
 #  endif
 #else
    /* VMS and some other platforms don't use the environ array */
-#  if !defined(VMS)
+#  ifdef USE_ENVIRON_ARRAY
 #    if !defined(DONT_DECLARE_STD) || \
         (defined(__svr4__) && defined(__GNUC__) && defined(sun)) || \
         defined(__sgi) || \
-        defined(__DGUX) || defined(EPOC)
+        defined(__DGUX) 
 extern char **	environ;	/* environment variables supplied via exec */
 #    endif
 #  endif
@@ -2852,7 +2911,8 @@ EXT MGVTBL PL_vtbl_defelem = {MEMBER_TO_FPTR(Perl_magic_getdefelem),MEMBER_TO_FP
 
 EXT MGVTBL PL_vtbl_regexp = {0,0,0,0, MEMBER_TO_FPTR(Perl_magic_freeregexp)};
 EXT MGVTBL PL_vtbl_regdata = {0, 0, MEMBER_TO_FPTR(Perl_magic_regdata_cnt), 0, 0};
-EXT MGVTBL PL_vtbl_regdatum = {MEMBER_TO_FPTR(Perl_magic_regdatum_get), 0, 0, 0, 0};
+EXT MGVTBL PL_vtbl_regdatum = {MEMBER_TO_FPTR(Perl_magic_regdatum_get),
+			       MEMBER_TO_FPTR(Perl_magic_regdatum_set), 0, 0, 0};
 
 #ifdef USE_LOCALE_COLLATE
 EXT MGVTBL PL_vtbl_collxfrm = {0,
@@ -3095,8 +3155,20 @@ typedef struct am_table_short AMTS;
 	((PL_hints & HINT_LOCALE) && \
 	  PL_numeric_radix && (c) == PL_numeric_radix)
 
-#define RESTORE_NUMERIC_LOCAL()		if ((PL_hints & HINT_LOCALE) && PL_numeric_standard) SET_NUMERIC_LOCAL()
-#define RESTORE_NUMERIC_STANDARD()	if ((PL_hints & HINT_LOCALE) && PL_numeric_local) SET_NUMERIC_STANDARD()
+#define STORE_NUMERIC_LOCAL_SET_STANDARD() \
+	bool was_local = (PL_hints & HINT_LOCALE) && PL_numeric_local; \
+	if (!was_local) SET_NUMERIC_STANDARD();
+
+#define STORE_NUMERIC_STANDARD_SET_LOCAL() \
+	bool was_standard = !(PL_hints & HINT_LOCALE) || PL_numeric_standard; \
+	if (!was_standard) SET_NUMERIC_LOCAL();
+
+#define RESTORE_NUMERIC_LOCAL() \
+	if (was_local) SET_NUMERIC_LOCAL();
+
+#define RESTORE_NUMERIC_STANDARD() \
+	if (was_standard) SET_NUMERIC_STANDARD();
+
 #define Atof				my_atof
 
 #else /* !USE_LOCALE_NUMERIC */
@@ -3104,6 +3176,8 @@ typedef struct am_table_short AMTS;
 #define SET_NUMERIC_STANDARD()  	/**/
 #define SET_NUMERIC_LOCAL()     	/**/
 #define IS_NUMERIC_RADIX(c)		(0)
+#define STORE_NUMERIC_LOCAL_SET_STANDARD()	/**/
+#define STORE_NUMERIC_STANDARD_SET_LOCAL()	/**/
 #define RESTORE_NUMERIC_LOCAL()		/**/
 #define RESTORE_NUMERIC_STANDARD()	/**/
 #define Atof				Perl_atof
@@ -3353,6 +3427,10 @@ typedef struct am_table_short AMTS;
    HAS_MUNMAP
    I_SYSMMAN
    Mmap_t
+
+   NVef
+   NVff
+   NVgf
 
    so that Configure picks them up. */
 

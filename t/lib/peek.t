@@ -2,7 +2,7 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    unshift @INC, '../lib';
+    @INC = '../lib';
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bPeek\b/) {
         print "1..0 # Skip: Devel::Peek was not built\n";
@@ -30,7 +30,7 @@ sub do_test {
 	    print $pattern, "\n" if $DEBUG;
 	    my $dump = <IN>;
 	    print $dump, "\n"    if $DEBUG;
-	    print "[$dump] vs [$pattern]\nnot " unless $dump =~ /$pattern/m;
+	    print "[$dump] vs [$pattern]\nnot " unless $dump =~ /$pattern/ms;
 	    print "ok $_[0]\n";
 	    close(IN);
 	} else {
@@ -44,7 +44,7 @@ sub do_test {
 our   $a;
 our   $b;
 my    $c;
-local $d;
+local $d = 0;
 
 do_test( 1,
 	$a = "foo",
@@ -204,10 +204,12 @@ do_test(13,
     ROOT = $ADDR
     XSUB = 0x0
     XSUBANY = 0
-    GVGV::GV = $ADDR\\t"main" :: "__ANON__"
-    FILE = ".+\\b(?i:peek\\.t)"
+    GVGV::GV = $ADDR\\t"main" :: "__ANON__[^"]*"
+    FILE = ".*\\b(?i:peek\\.t)"
     DEPTH = 0
-    FLAGS = 0x4
+(?:    MUTEXP = $ADDR
+    OWNER = $ADDR
+)?    FLAGS = 0x4
     PADLIST = $ADDR
     OUTSIDE = $ADDR \\(MAIN\\)');
 
@@ -218,7 +220,7 @@ do_test(14,
   FLAGS = \\(ROK\\)
   RV = $ADDR
   SV = PVCV\\($ADDR\\) at $ADDR
-    REFCNT = 3
+    REFCNT = (3|4)
     FLAGS = \\(\\)
     IV = 0
     NV = 0
@@ -228,9 +230,11 @@ do_test(14,
     XSUB = 0x0
     XSUBANY = 0
     GVGV::GV = $ADDR\\t"main" :: "do_test"
-    FILE = ".+\\b(?i:peek\\.t)"
+    FILE = ".*\\b(?i:peek\\.t)"
     DEPTH = 1
-    FLAGS = 0x0
+(?:    MUTEXP = $ADDR
+    OWNER = $ADDR
+)?    FLAGS = 0x0
     PADLIST = $ADDR
       \\d+\\. $ADDR \\("\\$pattern" \\d+-\\d+\\)
      \\d+\\. $ADDR \\(FAKE "\\$DEBUG" 0-\\d+\\)
@@ -278,7 +282,7 @@ do_test(17,
 	*a,
 'SV = PVGV\\($ADDR\\) at $ADDR
   REFCNT = 5
-  FLAGS = \\(GMG,SMG,MULTI\\)
+  FLAGS = \\(GMG,SMG,MULTI(?:,IN_PAD)?\\)
   IV = 0
   NV = 0
   MAGIC = $ADDR
@@ -299,10 +303,10 @@ do_test(17,
     CVGEN = 0x0
     GPFLAGS = 0x0
     LINE = \\d+
-    FILE = ".+\\b(?i:peek\\.t)"
+    FILE = ".*\\b(?i:peek\\.t)"
     FLAGS = $ADDR
     EGV = $ADDR\\t"a"');
 
 END {
-  unlink("peek$$");
+  1 while unlink("peek$$");
 }

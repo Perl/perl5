@@ -947,7 +947,7 @@ In certain systems, the operating system's locale support
 is broken and cannot be fixed or used by Perl.  Such deficiencies can
 and will result in mysterious hangs and/or Perl core dumps when the
 C<use locale> is in effect.  When confronted with such a system,
-please report in excruciating detail to <F<perlbug@perl.com>>, and
+please report in excruciating detail to <F<perlbug@perl.org>>, and
 complain to your vendor: bug fixes may exist for these problems
 in your operating system.  Sometimes such bug fixes are called an
 operating system upgrade.

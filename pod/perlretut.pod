@@ -1672,15 +1672,17 @@ i.e., a non-mark followed by one or more marks.
 
 As if all those classes weren't enough, Perl also defines POSIX style
 character classes.  These have the form C<[:name:]>, with C<name> the
-name of the POSIX class.  The POSIX classes are alpha, alnum, ascii,
-cntrl, digit, graph, lower, print, punct, space, upper, word, and
-xdigit.  If C<utf8> is being used, then these classes are defined the
-same as their corresponding perl Unicode classes: C<[:upper:]> is the
-same as C<\p{IsUpper}>, etc.  The POSIX character classes, however,
-don't require using C<utf8>.  The C<[:digit:]>, C<[:word:]>, and
+name of the POSIX class.  The POSIX classes are C<alpha>, C<alnum>,
+C<ascii>, C<cntrl>, C<digit>, C<graph>, C<lower>, C<print>, C<punct>,
+C<space>, C<upper>, and C<xdigit>, and two extensions, C<word> (a Perl
+extension to match C<\w>), and C<blank> (a GNU extension).  If C<utf8>
+is being used, then these classes are defined the same as their
+corresponding perl Unicode classes: C<[:upper:]> is the same as
+C<\p{IsUpper}>, etc.  The POSIX character classes, however, don't
+require using C<utf8>.  The C<[:digit:]>, C<[:word:]>, and
 C<[:space:]> correspond to the familiar C<\d>, C<\w>, and C<\s>
-character classes.  To negate a POSIX class, put a C<^> in front of the
-name, so that, e.g., C<[:^digit:]> corresponds to C<\D> and under
+character classes.  To negate a POSIX class, put a C<^> in front of
+the name, so that, e.g., C<[:^digit:]> corresponds to C<\D> and under
 C<utf8>, C<\P{IsDigit}>.  The Unicode and POSIX character classes can
 be used just like C<\d>, both inside and outside of character classes:
 
@@ -2044,8 +2046,41 @@ in the regexp.  Here are some silly examples:
                                          # prints 'Hi Mom!'
     $x =~ /aaa(?{print "Hi Mom!";})def/; # doesn't match,
                                          # no 'Hi Mom!'
+
+Pay careful attention to the next example:
+
     $x =~ /abc(?{print "Hi Mom!";})ddd/; # doesn't match,
                                          # no 'Hi Mom!'
+                                         # but why not?
+
+At first glance, you'd think that it shouldn't print, because obviously
+the C<ddd> isn't going to match the target string. But look at this
+example:
+
+    $x =~ /abc(?{print "Hi Mom!";})[d]dd/; # doesn't match,
+                                           # but _does_ print
+
+Hmm. What happened here? If you've been following along, you know that
+the above pattern should be effectively the same as the last one --
+enclosing the d in a character class isn't going to change what it
+matches. So why does the first not print while the second one does?
+
+The answer lies in the optimizations the REx engine makes. In the first
+case, all the engine sees are plain old characters (aside from the
+C<?{}> construct). It's smart enough to realize that the string 'ddd'
+doesn't occur in our target string before actually running the pattern
+through. But in the second case, we've tricked it into thinking that our
+pattern is more complicated than it is. It takes a look, sees our
+character class, and decides that it will have to actually run the
+pattern to determine whether or not it matches, and in the process of
+running it hits the print statement before it discovers that we don't
+have a match.
+
+To take a closer look at how the engine does optimizations, see the
+section L<"Pragmas and debugging"> below.
+
+More fun with C<?{}>:
+
     $x =~ /(?{print "Hi Mom!";})/;       # matches,
                                          # prints 'Hi Mom!'
     $x =~ /(?{$c = 1;})(?{print "$c";})/;  # matches,

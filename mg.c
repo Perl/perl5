@@ -292,7 +292,8 @@ Perl_mg_copy(pTHX_ SV *sv, SV *nsv, const char *key, I32 klen)
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
 	if (isUPPER(mg->mg_type)) {
 	    sv_magic(nsv,
-		     mg->mg_type == 'P' ? SvTIED_obj(sv, mg) : mg->mg_obj,
+		     mg->mg_type == 'P' ? SvTIED_obj(sv, mg) :
+		     (mg->mg_type == 'D' && mg->mg_obj) ? sv : mg->mg_obj,
 		     toLOWER(mg->mg_type), key, klen);
 	    count++;
 	}
@@ -376,6 +377,15 @@ Perl_magic_regdatum_get(pTHX_ SV *sv, MAGIC *mg)
 		sv_setiv(sv,i);
 	    }
     }
+    return 0;
+}
+
+int
+Perl_magic_regdatum_set(pTHX_ SV *sv, MAGIC *mg)
+{
+    dTHR;
+    Perl_croak(aTHX_ PL_no_modify);
+    /* NOT REACHED */
     return 0;
 }
 
@@ -565,9 +575,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	    if (PL_lex_state != LEX_NOTPARSING)
 		(void)SvOK_off(sv);
 	    else if (PL_in_eval)
-		sv_setiv(sv, 1);
-	    else
-		sv_setiv(sv, 0);
+ 		sv_setiv(sv, PL_in_eval & ~(EVAL_INREQUIRE));
 	}
 	break;
     case '\024':		/* ^T */
@@ -906,7 +914,7 @@ Perl_magic_set_all_env(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_clear_all_env(pTHX_ SV *sv, MAGIC *mg)
 {
-#if defined(VMS)
+#if defined(VMS) || defined(EPOC)
     Perl_die(aTHX_ "Can't make list assignment to %%ENV on this system");
 #else
 #   ifdef PERL_IMPLICIT_SYS
@@ -1277,8 +1285,6 @@ Perl_magic_setdbline(pTHX_ SV *sv, MAGIC *mg)
 		     atoi(MgPV(mg,n_a)), FALSE);
     if (svp && SvIOKp(*svp) && (o = INT2PTR(OP*,SvIVX(*svp))))
 	o->op_private = i;
-    else if (ckWARN_d(WARN_INTERNAL))
-	Perl_warner(aTHX_ WARN_INTERNAL, "Can't break at that line\n");
     return 0;
 }
 
@@ -1419,6 +1425,8 @@ Perl_magic_getsubstr(pTHX_ SV *sv, MAGIC *mg)
     if (rem + offs > len)
 	rem = len - offs;
     sv_setpvn(sv, tmps + offs, (STRLEN)rem);
+    if (DO_UTF8(lsv))
+        SvUTF8_on(sv);
     return 0;
 }
 
@@ -1740,18 +1748,21 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	            PL_compiling.cop_warnings = pWARN_NONE;
 		    break;
 		}
-                if (isWARN_on(sv, WARN_ALL) && !isWARNf_on(sv, WARN_ALL)) {
-	            PL_compiling.cop_warnings = pWARN_ALL;
-	            PL_dowarn |= G_WARN_ONCE ;
-	        }	
-		else {
+		{
 		    STRLEN len, i;
 		    int accumulate = 0 ;
+		    int any_fatals = 0 ;
 		    char * ptr = (char*)SvPV(sv, len) ;
-		    for (i = 0 ; i < len ; ++i) 
-		        accumulate += ptr[i] ;
+		    for (i = 0 ; i < len ; ++i) {
+		        accumulate |= ptr[i] ;
+		        any_fatals |= (ptr[i] & 0xAA) ;
+		    }
 		    if (!accumulate)
 	                PL_compiling.cop_warnings = pWARN_NONE;
+		    else if (isWARN_on(sv, WARN_ALL) && !any_fatals) {
+	                PL_compiling.cop_warnings = pWARN_ALL;
+	                PL_dowarn |= G_WARN_ONCE ;
+	            }	
                     else {
 	                if (specialWARN(PL_compiling.cop_warnings))
 		            PL_compiling.cop_warnings = newSVsv(sv) ;
@@ -1760,6 +1771,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	                if (isWARN_on(PL_compiling.cop_warnings, WARN_ONCE))
 	                    PL_dowarn |= G_WARN_ONCE ;
 	            }
+
 		}
 	    }
 	}

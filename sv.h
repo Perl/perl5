@@ -61,7 +61,7 @@ typedef enum {
 
 /* Using C's structural equivalence to help emulate C++ inheritance here... */
 
-struct sv {
+struct STRUCT_SV {
     void*	sv_any;		/* pointer to something */
     U32		sv_refcnt;	/* how many references to us */
     U32		sv_flags;	/* what we are */
@@ -442,6 +442,15 @@ Unsets the IV status of an SV.
 =for apidoc Am|void|SvIOK_only|SV* sv
 Tells an SV that it is an integer and disables all other OK bits.
 
+=for apidoc Am|void|SvIOK_only_UV|SV* sv
+Tells and SV that it is an unsigned integer and disables all other OK bits.
+
+=for apidoc Am|void|SvIOK_UV|SV* sv
+Returns a boolean indicating whether the SV contains an unsigned integer.
+
+=for apidoc Am|void|SvIOK_notUV|SV* sv
+Returns a boolean indicating whether the SV contains an signed integer.
+
 =for apidoc Am|bool|SvNOK|SV* sv
 Returns a boolean indicating whether the SV contains a double.
 
@@ -566,6 +575,23 @@ Set the length of the string which is in the SV.  See C<SvCUR>.
 #define SvNOK_only(sv)		((void)SvOK_off(sv), \
 				    SvFLAGS(sv) |= (SVf_NOK|SVp_NOK))
 
+/*
+=for apidoc Am|void|SvUTF8|SV* sv
+Returns a boolean indicating whether the SV contains UTF-8 encoded data.
+
+=for apidoc Am|void|SvUTF8_on|SV *sv
+Tells an SV that it is a string and encoded in UTF8.  Do not use frivolously.
+
+=for apidoc Am|void|SvUTF8_off|SV *sv
+Unsets the UTF8 status of an SV.
+
+=for apidoc Am|void|SvPOK_only_UTF8|SV* sv
+Tells an SV that it is a UTF8 string (do not use frivolously)
+and disables all other OK bits.
+  
+=cut
+ */
+
 #define SvUTF8(sv)		(SvFLAGS(sv) & SVf_UTF8)
 #define SvUTF8_on(sv)		(SvFLAGS(sv) |= (SVf_UTF8))
 #define SvUTF8_off(sv)		(SvFLAGS(sv) &= ~(SVf_UTF8))
@@ -611,6 +637,8 @@ Set the length of the string which is in the SV.  See C<SvCUR>.
 #define SvAMAGIC(sv)		(SvFLAGS(sv) & SVf_AMAGIC)
 #define SvAMAGIC_on(sv)		(SvFLAGS(sv) |= SVf_AMAGIC)
 #define SvAMAGIC_off(sv)	(SvFLAGS(sv) &= ~SVf_AMAGIC)
+
+#define SvGAMAGIC(sv)           (SvFLAGS(sv) & (SVs_GMG|SVf_AMAGIC)) 
 
 /*
 #define Gv_AMG(stash) \
@@ -734,18 +762,15 @@ Set the length of the string which is in the SV.  See C<SvCUR>.
 #define IoTYPE(sv)	((XPVIO*)  SvANY(sv))->xio_type
 #define IoFLAGS(sv)	((XPVIO*)  SvANY(sv))->xio_flags
 
-/*
-IoTYPE(sv) is a single character saying what type of I/O connection
-this is:
-    |        pipe
-    -        stdin or stdout
-    <        read-only
-    >        write-only
-    a        append
-    +        read and write
-    s        socket
-    space    closed
-*/
+/* IoTYPE(sv) is a single character telling the type of I/O connection. */
+#define IoTYPE_RDONLY	'<'
+#define IoTYPE_WRONLY	'>'
+#define IoTYPE_RDWR	'+'
+#define IoTYPE_APPEND 	'a'
+#define IoTYPE_PIPE	'|'
+#define IoTYPE_STD	'-'	/* stdin or stdout */
+#define IoTYPE_SOCKET	's'
+#define IoTYPE_CLOSED	' '
 
 /*
 =for apidoc Am|bool|SvTAINTED|SV* sv

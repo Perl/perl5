@@ -128,6 +128,13 @@ d_setreuid='undef'
 # Tell perl which symbols to export for dynamic linking.
 case "$cc" in
 *gcc*) ccdlflags='-Xlinker' ;;
+*) ccversion=`lslpp -L | grep 'C for AIX Compiler$' | awk '{print $2}'`
+   case "$ccversion" in
+     4.4.0.0|4.4.0.1|4.4.0.2)
+	echo >&4 "*** This C compiler ($ccversion) is outdated."
+	echo >&4 "*** Please upgrade to at least 4.4.0.3."
+	;;
+     esac
 esac
 # the required -bE:$installarchlib/CORE/perl.exp is added by
 # libperl.U (Configure) later.
@@ -171,9 +178,9 @@ $define|true|[yY]*)
 	    ;;
 	*)
 	    cat >&4 <<EOM
-For pthreads you should use the AIX C compiler cc_r.
-(now your compiler was set to '$cc')
-Cannot continue, aborting.
+*** For pthreads you should use the AIX C compiler cc_r.
+*** (now your compiler was set to '$cc')
+*** Cannot continue, aborting.
 EOM
 	    exit 1
 	    ;;
@@ -207,29 +214,46 @@ cat > UU/uselargefiles.cbu <<'EOCBU'
 case "$uselargefiles" in
 ''|$define|true|[yY]*)
 # Keep these at the left margin.
-ccflags_largefiles="`getconf XBS5_ILP32_OFFBIG_CFLAGS 2>/dev/null`"
-ldflags_largefiles="`getconf XBS5_ILP32_OFFBIG_LDFLAGS 2>/dev/null`"
+ccflags_uselargefiles="`getconf XBS5_ILP32_OFFBIG_CFLAGS 2>/dev/null`"
+ldflags_uselargefiles="`getconf XBS5_ILP32_OFFBIG_LDFLAGS 2>/dev/null`"
 	# _Somehow_ in AIX 4.3.1.0 the above getconf call manages to
 	# insert(?) *something* to $ldflags so that later (in Configure) evaluating
 	# $ldflags causes a newline after the '-b64' (the result of the getconf).
 	# (nothing strange shows up in $ldflags even in hexdump;
-	#  so it may be something in the shell, instead?)
+	#  so it may be something (a bug) in the shell, instead?)
 	# Try it out: just uncomment the below line and rerun Configure:
-# echo >&4 "AIX 4.3.1.0 $ldflags_largefiles mystery" ; exit 1
+# echo >&4 "AIX 4.3.1.0 $ldflags_uselargefiles mystery" ; exit 1
 	# Just don't ask me how AIX does it, I spent hours wondering.
-	# Therefore the line re-evaluating ldflags_largefiles: it seems to fix
+	# Therefore the line re-evaluating ldflags_uselargefiles: it seems to fix
 	# the whatever it was that AIX managed to break. --jhi
-	ldflags_largefiles="`echo $ldflags_largefiles`"
+	ldflags_uselargefiles="`echo $ldflags_uselargefiles`"
 # Keep this at the left margin.
-libswanted_largefiles="`getconf XBS5_ILP32_OFFBIG_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g`"
-	case "$ccflags_largefiles$ldflags_largefiles$libs_largefiles" in
+libswanted_uselargefiles="`getconf XBS5_ILP32_OFFBIG_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g`"
+	case "$ccflags_uselargefiles$ldflags_uselargefiles$libs_uselargefiles" in
 	'');;
-	*) ccflags="$ccflags $ccflags_largefiles"
-	   ldflags="$ldflags $ldflags_largefiles"
-	   libswanted="$libswanted $libswanted_largefiles"
+	*) ccflags="$ccflags $ccflags_uselargefiles"
+	   ldflags="$ldflags $ldflags_uselargefiles"
+	   libswanted="$libswanted $libswanted_uselargefiles"
 	   ;;
 	esac
-	;;
+	case "$gccversion" in
+	'') ;;
+	*)
+	cat >&4 <<EOM
+
+*** Warning: gcc in AIX might not work with the largefile support of Perl
+*** (default since 5.6.0), this combination hasn't been tested.
+*** I will try, though.
+
+EOM
+	# Remove xlc-spefific -qflags.
+        ccflags="`echo $ccflags | sed -e 's@ -q[^ ]*@ @g' -e 's@^-q[^ ]* @@g'`"
+        ldflags="`echo $ldflags | sed -e 's@ -q[^ ]*@ @g' -e 's@^-q[^ ]* @@g'`"
+	echo >&4 "(using ccflags $ccflags)"
+	echo >&4 "(using ldflags $ldflags)"
+        ;; 
+        esac
+        ;;
 esac
 EOCBU
 
@@ -356,7 +380,10 @@ cat > UU/uselongdouble.cbu <<'EOCBU'
 # after it has prompted the user for whether to use long doubles.
 case "$uselongdouble" in
 $define|true|[yY]*)
-	ccflags="$ccflags -qlongdouble"
+        case "$cc" in
+        *gcc*) ;;
+        *) ccflags="$ccflags -qlongdouble" ;;
+        esac
 	# The explicit cc128, xlc128, xlC128 are not needed,
 	# the -qlongdouble should do the trick. --jhi
 	d_Gconvert='sprintf((b),"%.*llg",(n),(x))'

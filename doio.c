@@ -87,7 +87,7 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
     register IO *io = GvIOn(gv);
     PerlIO *saveifp = Nullfp;
     PerlIO *saveofp = Nullfp;
-    char savetype = ' ';
+    char savetype = IoTYPE_CLOSED;
     int writing = 0;
     PerlIO *fp;
     int fd;
@@ -108,7 +108,7 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 
     if (IoIFP(io)) {
 	fd = PerlIO_fileno(IoIFP(io));
-	if (IoTYPE(io) == '-')
+	if (IoTYPE(io) == IoTYPE_STD)
 	    result = 0;
 	else if (fd <= PL_maxsysfd) {
 	    saveifp = IoIFP(io);
@@ -116,7 +116,7 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    savetype = IoTYPE(io);
 	    result = 0;
 	}
-	else if (IoTYPE(io) == '|')
+	else if (IoTYPE(io) == IoTYPE_PIPE)
 	    result = PerlProc_pclose(IoIFP(io));
 	else if (IoIFP(io) != IoOFP(io)) {
 	    if (IoOFP(io)) {
@@ -146,14 +146,14 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 
 	switch (result = rawmode & O_ACCMODE) {
 	case O_RDONLY:
-	     IoTYPE(io) = '<';
+	     IoTYPE(io) = IoTYPE_RDONLY;
 	     break;
 	case O_WRONLY:
-	     IoTYPE(io) = '>';
+	     IoTYPE(io) = IoTYPE_WRONLY;
 	     break;
 	case O_RDWR:
 	default:
-	     IoTYPE(io) = '+';
+	     IoTYPE(io) = IoTYPE_RDWR;
 	     break;
 	}
 
@@ -216,14 +216,14 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	}
 	mode[0] = mode[1] = mode[2] = mode[3] = '\0';
 	IoTYPE(io) = *type;
-	if (*type == '+' && tlen > 1 && type[tlen-1] != '|') { /* scary */
+	if (*type == IoTYPE_RDWR && tlen > 1 && type[tlen-1] != IoTYPE_PIPE) { /* scary */
 	    mode[1] = *type++;
 	    --tlen;
 	    writing = 1;
 	}
 
-	if (*type == '|') {
-	    if (num_svs && (tlen != 2 || type[1] != '-')) {
+	if (*type == IoTYPE_PIPE) {
+	    if (num_svs && (tlen != 2 || type[1] != IoTYPE_STD)) {
 	      unknown_desr:
 		Perl_croak(aTHX_ "Unknown open() mode '%.*s'", (int)olen, oname);
 	    }
@@ -261,11 +261,12 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    }
 	    writing = 1;
 	}
-	else if (*type == '>') {
+	else if (*type == IoTYPE_WRONLY) {
 	    TAINT_PROPER("open");
 	    type++;
-	    if (*type == '>') {
-		mode[0] = IoTYPE(io) = 'a';
+	    if (*type == IoTYPE_WRONLY) {
+		/* Two IoTYPE_WRONLYs in a row make for an IoTYPE_APPEND. */
+		mode[0] = IoTYPE(io) = IoTYPE_APPEND;
 		type++;
 		tlen--;
 	    }
@@ -313,15 +314,30 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 			     * be optimized away on most platforms;
 			     * only Solaris and Linux seem to flush
 			     * on that. --jhi */
-			    PerlIO_seek(fp, 0, SEEK_CUR);
+#ifdef USE_SFIO
+			    /* sfio fails to clear error on next
+			       sfwrite, contrary to documentation.
+			       -- Nick Clark */
+			    if (PerlIO_seek(fp, 0, SEEK_CUR) == -1)
+				PerlIO_clearerr(fp);
+#endif
 			    /* On the other hand, do all platforms
 			     * take gracefully to flushing a read-only
 			     * filehandle?  Perhaps we should do
 			     * fsetpos(src)+fgetpos(dst)?  --nik */
 			    PerlIO_flush(fp);
 			    fd = PerlIO_fileno(fp);
-			    if (IoTYPE(thatio) == 's')
-				IoTYPE(io) = 's';
+			    /* When dup()ing STDIN, STDOUT or STDERR
+			     * explicitly set appropriate access mode */
+			    if (IoIFP(thatio) == PerlIO_stdout()
+				|| IoIFP(thatio) == PerlIO_stderr())
+			        IoTYPE(io) = IoTYPE_WRONLY;
+			    else if (IoIFP(thatio) == PerlIO_stdin())
+                                IoTYPE(io) = IoTYPE_RDONLY;
+			    /* When dup()ing a socket, say result is
+			     * one as well */
+			    else if (IoTYPE(thatio) == IoTYPE_SOCKET)
+				IoTYPE(io) = IoTYPE_SOCKET;
 			}
 			else
 			    fd = -1;
@@ -339,16 +355,16 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    else {
 		/*SUPPRESS 530*/
 		for (; isSPACE(*type); type++) ;
-		if (strEQ(type,"-")) {
+		if (*type == IoTYPE_STD && !type[1]) {
 		    fp = PerlIO_stdout();
-		    IoTYPE(io) = '-';
+		    IoTYPE(io) = IoTYPE_STD;
 		}
 		else  {
 		    fp = PerlIO_open((num_svs ? name : type), mode);
 		}
 	    }
 	}
-	else if (*type == '<') {
+	else if (*type == IoTYPE_RDONLY) {
 	    if (num_svs && tlen != 1)
 	        goto unknown_desr;
 	    /*SUPPRESS 530*/
@@ -363,16 +379,16 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		name = type;
 		goto duplicity;
 	    }
-	    if (strEQ(type,"-")) {
+	    if (*type == IoTYPE_STD && !type[1]) {
 		fp = PerlIO_stdin();
-		IoTYPE(io) = '-';
+		IoTYPE(io) = IoTYPE_STD;
 	    }
 	    else
 		fp = PerlIO_open((num_svs ? name : type), mode);
 	}
-	else if (tlen > 1 && type[tlen-1] == '|') {
+	else if (tlen > 1 && type[tlen-1] == IoTYPE_PIPE) {
 	    if (num_svs) {
-		if (tlen != 2 || type[0] != '-')
+		if (tlen != 2 || type[0] != IoTYPE_STD)
 		    goto unknown_desr;
 	    }
 	    else {
@@ -403,18 +419,18 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		    mode = "r";
 		fp = PerlProc_popen(name,mode);
 	    }
-	    IoTYPE(io) = '|';
+	    IoTYPE(io) = IoTYPE_PIPE;
 	}
 	else {
 	    if (num_svs)
 		goto unknown_desr;
 	    name = type;
-	    IoTYPE(io) = '<';
+	    IoTYPE(io) = IoTYPE_RDONLY;
 	    /*SUPPRESS 530*/
 	    for (; isSPACE(*name); name++) ;
 	    if (strEQ(name,"-")) {
 		fp = PerlIO_stdin();
-		IoTYPE(io) = '-';
+		IoTYPE(io) = IoTYPE_STD;
 	    }
 	    else {
 		char *mode;
@@ -430,19 +446,19 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
     }
     if (!fp) {
 	dTHR;
-	if (ckWARN(WARN_NEWLINE) && IoTYPE(io) == '<' && strchr(name, '\n'))
+	if (ckWARN(WARN_NEWLINE) && IoTYPE(io) == IoTYPE_RDONLY && strchr(name, '\n'))
 	    Perl_warner(aTHX_ WARN_NEWLINE, PL_warn_nl, "open");
 	goto say_false;
     }
     if (IoTYPE(io) &&
-      IoTYPE(io) != '|' && IoTYPE(io) != '-') {
+      IoTYPE(io) != IoTYPE_PIPE && IoTYPE(io) != IoTYPE_STD) {
 	dTHR;
 	if (PerlLIO_fstat(PerlIO_fileno(fp),&PL_statbuf) < 0) {
 	    (void)PerlIO_close(fp);
 	    goto say_false;
 	}
 	if (S_ISSOCK(PL_statbuf.st_mode))
-	    IoTYPE(io) = 's';	/* in case a socket was passed in to us */
+	    IoTYPE(io) = IoTYPE_SOCKET;	/* in case a socket was passed in to us */
 #ifdef HAS_SOCKET
 	else if (
 #ifdef S_IFMT
@@ -450,13 +466,15 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 #else
 	    !PL_statbuf.st_mode
 #endif
-	) {
+	    && IoTYPE(io) != IoTYPE_WRONLY  /* Dups of STD* filehandles already have */
+	    && IoTYPE(io) != IoTYPE_RDONLY  /* type so they aren't marked as sockets */
+	) {				    /* on OS's that return 0 on fstat()ed pipe */
 	    char tmpbuf[256];
 	    Sock_size_t buflen = sizeof tmpbuf;
 	    if (PerlSock_getsockname(PerlIO_fileno(fp), (struct sockaddr *)tmpbuf,
 			    &buflen) >= 0
 		  || errno != ENOTSOCK)
-		IoTYPE(io) = 's'; /* some OS's return 0 on fstat()ed socket */
+		IoTYPE(io) = IoTYPE_SOCKET; /* some OS's return 0 on fstat()ed socket */
 				/* but some return 0 for streams too, sigh */
 	}
 #endif
@@ -504,8 +522,8 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
     IoFLAGS(io) &= ~IOf_NOLINE;
     if (writing) {
 	dTHR;
-	if (IoTYPE(io) == 's'
-	    || (IoTYPE(io) == '>' && S_ISCHR(PL_statbuf.st_mode)) )
+	if (IoTYPE(io) == IoTYPE_SOCKET
+	    || (IoTYPE(io) == IoTYPE_WRONLY && S_ISCHR(PL_statbuf.st_mode)) )
 	{
 	    char *mode;
 	    if (out_raw)
@@ -773,8 +791,8 @@ Perl_do_pipe(pTHX_ SV *sv, GV *rgv, GV *wgv)
     IoIFP(rstio) = PerlIO_fdopen(fd[0], "r");
     IoOFP(wstio) = PerlIO_fdopen(fd[1], "w");
     IoIFP(wstio) = IoOFP(wstio);
-    IoTYPE(rstio) = '<';
-    IoTYPE(wstio) = '>';
+    IoTYPE(rstio) = IoTYPE_RDONLY;
+    IoTYPE(wstio) = IoTYPE_WRONLY;
     if (!IoIFP(rstio) || !IoOFP(wstio)) {
 	if (IoIFP(rstio)) PerlIO_close(IoIFP(rstio));
 	else PerlLIO_close(fd[0]);
@@ -810,9 +828,8 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
     if (!io) {		/* never opened */
 	if (not_implicit) {
 	    dTHR;
-	    if (ckWARN(WARN_UNOPENED))
-		Perl_warner(aTHX_ WARN_UNOPENED, 
-		       "Close on unopened file %s",GvENAME(gv));
+	    if (ckWARN(WARN_UNOPENED)) /* no check for closed here */
+		report_evil_fh(gv, io, PL_op->op_type);
 	    SETERRNO(EBADF,SS$_IVCHAN);
 	}
 	return FALSE;
@@ -823,7 +840,7 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
 	IoPAGE(io) = 0;
 	IoLINES_LEFT(io) = IoPAGE_LEN(io);
     }
-    IoTYPE(io) = ' ';
+    IoTYPE(io) = IoTYPE_CLOSED;
     return retval;
 }
 
@@ -834,7 +851,7 @@ Perl_io_close(pTHX_ IO *io, bool not_implicit)
     int status;
 
     if (IoIFP(io)) {
-	if (IoTYPE(io) == '|') {
+	if (IoTYPE(io) == IoTYPE_PIPE) {
 	    status = PerlProc_pclose(IoIFP(io));
 	    if (not_implicit) {
 		STATUS_NATIVE_SET(status);
@@ -844,7 +861,7 @@ Perl_io_close(pTHX_ IO *io, bool not_implicit)
 		retval = (status != -1);
 	    }
 	}
-	else if (IoTYPE(io) == '-')
+	else if (IoTYPE(io) == IoTYPE_STD)
 	    retval = TRUE;
 	else {
 	    if (IoOFP(io) && IoOFP(io) != IoIFP(io)) {		/* a socket */
@@ -875,13 +892,22 @@ Perl_do_eof(pTHX_ GV *gv)
     if (!io)
 	return TRUE;
     else if (ckWARN(WARN_IO)
-	     && (IoTYPE(io) == '>' || IoIFP(io) == PerlIO_stdout()
+	     && (IoTYPE(io) == IoTYPE_WRONLY || IoIFP(io) == PerlIO_stdout()
 		 || IoIFP(io) == PerlIO_stderr()))
     {
-	SV* sv = sv_newmortal();
-	gv_efullname4(sv, gv, Nullch, FALSE);
-	Perl_warner(aTHX_ WARN_IO, "Filehandle %s opened only for output",
-		    SvPV_nolen(sv));
+	/* integrate to report_evil_fh()? */
+        char *name = NULL; 
+	if (isGV(gv)) {
+	    SV* sv = sv_newmortal();
+	    gv_efullname4(sv, gv, Nullch, FALSE);
+	    name = SvPV_nolen(sv);
+	}
+	if (name && *name)
+	    Perl_warner(aTHX_ WARN_IO,
+			"Filehandle %s opened only for output", name);
+	else
+	    Perl_warner(aTHX_ WARN_IO,
+			"Filehandle opened only for output");
     }
 
     while (IoIFP(io)) {
@@ -925,8 +951,8 @@ Perl_do_tell(pTHX_ GV *gv)
     }
     {
 	dTHR;
-	if (ckWARN(WARN_UNOPENED))
-	    Perl_warner(aTHX_ WARN_UNOPENED, "tell() on unopened file");
+	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
+	    report_evil_fh(gv, io, PL_op->op_type);
     }
     SETERRNO(EBADF,RMS$_IFI);
     return (Off_t)-1;
@@ -947,8 +973,8 @@ Perl_do_seek(pTHX_ GV *gv, Off_t pos, int whence)
     }
     {
 	dTHR;
-	if (ckWARN(WARN_UNOPENED))
-	    Perl_warner(aTHX_ WARN_UNOPENED, "seek() on unopened file");
+	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
+	    report_evil_fh(gv, io, PL_op->op_type);
     }
     SETERRNO(EBADF,RMS$_IFI);
     return FALSE;
@@ -964,8 +990,8 @@ Perl_do_sysseek(pTHX_ GV *gv, Off_t pos, int whence)
 	return PerlLIO_lseek(PerlIO_fileno(fp), pos, whence);
     {
 	dTHR;
-	if (ckWARN(WARN_UNOPENED))
-	    Perl_warner(aTHX_ WARN_UNOPENED, "sysseek() on unopened file");
+	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
+	    report_evil_fh(gv, io, PL_op->op_type);
     }
     SETERRNO(EBADF,RMS$_IFI);
     return (Off_t)-1;
@@ -1160,6 +1186,11 @@ Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
 	}
 	/* FALL THROUGH */
     default:
+#if 0
+	/* XXX Fix this when the I/O disciplines arrive. XXX */
+	if (DO_UTF8(sv))
+	    sv_utf8_downgrade(sv, FALSE);
+#endif
 	tmps = SvPV(sv, len);
 	break;
     }
@@ -1169,7 +1200,7 @@ Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
      * but only until the system hard limit/the filesystem limit,
      * at which we would get EPERM.  Note that when using buffered
      * io the write failure can be delayed until the flush/close. --jhi */
-    if (len && (PerlIO_write(fp,tmps,len) == 0 || PerlIO_error(fp)))
+    if (len && (PerlIO_write(fp,tmps,len) == 0))
 	return FALSE;
     return !PerlIO_error(fp);
 }
@@ -1179,25 +1210,24 @@ Perl_my_stat(pTHX)
 {
     djSP;
     IO *io;
-    GV* tmpgv;
+    GV* gv;
 
     if (PL_op->op_flags & OPf_REF) {
 	EXTEND(SP,1);
-	tmpgv = cGVOP_gv;
+	gv = cGVOP_gv;
       do_fstat:
-	io = GvIO(tmpgv);
+	io = GvIO(gv);
 	if (io && IoIFP(io)) {
-	    PL_statgv = tmpgv;
+	    PL_statgv = gv;
 	    sv_setpv(PL_statname,"");
 	    PL_laststype = OP_STAT;
 	    return (PL_laststatval = PerlLIO_fstat(PerlIO_fileno(IoIFP(io)), &PL_statcache));
 	}
 	else {
-	    if (tmpgv == PL_defgv)
+	    if (gv == PL_defgv)
 		return PL_laststatval;
-	    if (ckWARN(WARN_UNOPENED))
-		Perl_warner(aTHX_ WARN_UNOPENED, "Stat on unopened file %s",
-		  GvENAME(tmpgv));
+	    if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
+		report_evil_fh(gv, io, PL_op->op_type);
 	    PL_statgv = Nullgv;
 	    sv_setpv(PL_statname,"");
 	    return (PL_laststatval = -1);
@@ -1209,11 +1239,11 @@ Perl_my_stat(pTHX)
 	STRLEN n_a;
 	PUTBACK;
 	if (SvTYPE(sv) == SVt_PVGV) {
-	    tmpgv = (GV*)sv;
+	    gv = (GV*)sv;
 	    goto do_fstat;
 	}
 	else if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVGV) {
-	    tmpgv = (GV*)SvRV(sv);
+	    gv = (GV*)SvRV(sv);
 	    goto do_fstat;
 	}
 

@@ -15,6 +15,7 @@
 #define PERL_IN_HV_C
 #include "perl.h"
 
+
 STATIC HE*
 S_new_he(pTHX)
 {
@@ -74,7 +75,7 @@ S_save_hek(pTHX_ const char *str, I32 len, U32 hash)
 {
     char *k;
     register HEK *hek;
-    
+
     New(54, k, HEK_BASESIZE + len + 1, char);
     hek = (HEK*)k;
     Copy(str, HEK_KEY(hek), len, char);
@@ -128,7 +129,7 @@ Perl_he_dup(pTHX_ HE *e, bool shared)
 Returns the SV which corresponds to the specified key in the hash.  The
 C<klen> is the length of the key.  If C<lval> is set then the fetch will be
 part of a store.  Check that the return value is non-null before
-dereferencing it to a C<SV*>. 
+dereferencing it to a C<SV*>.
 
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
@@ -172,7 +173,7 @@ Perl_hv_fetch(pTHX_ HV *hv, const char *key, U32 klen, I32 lval)
 
     xhv = (XPVHV*)SvANY(hv);
     if (!xhv->xhv_array) {
-	if (lval 
+	if (lval
 #ifdef DYNAMIC_ENV_FETCH  /* if it's an %ENV lookup, we may get it on the fly */
 	         || (HvNAME(hv) && strEQ(HvNAME(hv),ENV_HV_NAME))
 #endif
@@ -191,7 +192,7 @@ Perl_hv_fetch(pTHX_ HV *hv, const char *key, U32 klen, I32 lval)
 	    continue;
 	if (HeKLEN(entry) != klen)
 	    continue;
-	if (memNE(HeKEY(entry),key,klen))	/* is this it? */
+	if (HeKEY(entry) != key && memNE(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
 	return &HeVAL(entry);
     }
@@ -224,7 +225,7 @@ if you want the function to compute it.  IF C<lval> is set then the fetch
 will be part of a store.  Make sure the return value is non-null before
 accessing it.  The return value when C<tb> is a tied hash is a pointer to a
 static location, so be sure to make a copy of the structure if you need to
-store it somewhere. 
+store it somewhere.
 
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
@@ -278,7 +279,7 @@ Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
 
     xhv = (XPVHV*)SvANY(hv);
     if (!xhv->xhv_array) {
-	if (lval 
+	if (lval
 #ifdef DYNAMIC_ENV_FETCH  /* if it's an %ENV lookup, we may get it on the fly */
 	         || (HvNAME(hv) && strEQ(HvNAME(hv),ENV_HV_NAME))
 #endif
@@ -290,7 +291,7 @@ Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
     }
 
     key = SvPV(keysv, klen);
-    
+
     if (!hash)
 	PERL_HASH(hash, key, klen);
 
@@ -300,7 +301,7 @@ Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
 	    continue;
 	if (HeKLEN(entry) != klen)
 	    continue;
-	if (memNE(HeKEY(entry),key,klen))	/* is this it? */
+	if (HeKEY(entry) != key && memNE(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
 	return entry;
     }
@@ -351,7 +352,7 @@ NULL if the operation failed or if the value did not need to be actually
 stored within the hash (as in the case of tied hashes).  Otherwise it can
 be dereferenced to get the original C<SV*>.  Note that the caller is
 responsible for suitably incrementing the reference count of C<val> before
-the call, and decrementing it if the function returned NULL.  
+the call, and decrementing it if the function returned NULL.
 
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
@@ -403,7 +404,7 @@ Perl_hv_store(pTHX_ HV *hv, const char *key, U32 klen, SV *val, register U32 has
 	    continue;
 	if (HeKLEN(entry) != klen)
 	    continue;
-	if (memNE(HeKEY(entry),key,klen))	/* is this it? */
+	if (HeKEY(entry) != key && memNE(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
 	SvREFCNT_dec(HeVAL(entry));
 	HeVAL(entry) = val;
@@ -440,7 +441,7 @@ stored within the hash (as in the case of tied hashes).  Otherwise the
 contents of the return value can be accessed using the C<He???> macros
 described here.  Note that the caller is responsible for suitably
 incrementing the reference count of C<val> before the call, and
-decrementing it if the function returned NULL. 
+decrementing it if the function returned NULL.
 
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
@@ -504,7 +505,7 @@ Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, register U32 hash)
 	    continue;
 	if (HeKLEN(entry) != klen)
 	    continue;
-	if (memNE(HeKEY(entry),key,klen))	/* is this it? */
+	if (HeKEY(entry) != key && memNE(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
 	SvREFCNT_dec(HeVAL(entry));
 	HeVAL(entry) = val;
@@ -534,7 +535,7 @@ Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, register U32 hash)
 =for apidoc hv_delete
 
 Deletes a key/value pair in the hash.  The value SV is removed from the
-hash and returned to the caller.  The C<klen> is the length of the key. 
+hash and returned to the caller.  The C<klen> is the length of the key.
 The C<flags> value will normally be zero; if set to G_DISCARD then NULL
 will be returned.
 
@@ -591,7 +592,7 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, U32 klen, I32 flags)
 	    continue;
 	if (HeKLEN(entry) != klen)
 	    continue;
-	if (memNE(HeKEY(entry),key,klen))	/* is this it? */
+	if (HeKEY(entry) != key && memNE(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
 	*oentry = HeNEXT(entry);
 	if (i && !*oentry)
@@ -633,7 +634,7 @@ Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
     register HE *entry;
     register HE **oentry;
     SV *sv;
-    
+
     if (!hv)
 	return Nullsv;
     if (SvRMAGICAL(hv)) {
@@ -656,7 +657,7 @@ Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
 		key = SvPV(keysv, klen);
 		keysv = sv_2mortal(newSVpvn(key,klen));
 		(void)strupr(SvPVX(keysv));
-		hash = 0; 
+		hash = 0;
 	    }
 #endif
 	}
@@ -666,7 +667,7 @@ Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
 	return Nullsv;
 
     key = SvPV(keysv, klen);
-    
+
     if (!hash)
 	PERL_HASH(hash, key, klen);
 
@@ -678,7 +679,7 @@ Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
 	    continue;
 	if (HeKLEN(entry) != klen)
 	    continue;
-	if (memNE(HeKEY(entry),key,klen))	/* is this it? */
+	if (HeKEY(entry) != key && memNE(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
 	*oentry = HeNEXT(entry);
 	if (i && !*oentry)
@@ -723,7 +724,7 @@ Perl_hv_exists(pTHX_ HV *hv, const char *key, U32 klen)
 	if (mg_find((SV*)hv,'P')) {
 	    dTHR;
 	    sv = sv_newmortal();
-	    mg_copy((SV*)hv, sv, key, klen); 
+	    mg_copy((SV*)hv, sv, key, klen);
 	    magic_existspack(sv, mg_find(sv, 'p'));
 	    return SvTRUE(sv);
 	}
@@ -738,7 +739,7 @@ Perl_hv_exists(pTHX_ HV *hv, const char *key, U32 klen)
     xhv = (XPVHV*)SvANY(hv);
 #ifndef DYNAMIC_ENV_FETCH
     if (!xhv->xhv_array)
-	return 0; 
+	return 0;
 #endif
 
     PERL_HASH(hash, key, klen);
@@ -753,7 +754,7 @@ Perl_hv_exists(pTHX_ HV *hv, const char *key, U32 klen)
 	    continue;
 	if (HeKLEN(entry) != klen)
 	    continue;
-	if (memNE(HeKEY(entry),key,klen))	/* is this it? */
+	if (HeKEY(entry) != key && memNE(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
 	return TRUE;
     }
@@ -800,7 +801,7 @@ Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
 	    dTHR;		/* just for SvTRUE */
 	    sv = sv_newmortal();
 	    keysv = sv_2mortal(newSVsv(keysv));
-	    mg_copy((SV*)hv, sv, (char*)keysv, HEf_SVKEY); 
+	    mg_copy((SV*)hv, sv, (char*)keysv, HEf_SVKEY);
 	    magic_existspack(sv, mg_find(sv, 'p'));
 	    return SvTRUE(sv);
 	}
@@ -809,7 +810,7 @@ Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
 	    key = SvPV(keysv, klen);
 	    keysv = sv_2mortal(newSVpvn(key,klen));
 	    (void)strupr(SvPVX(keysv));
-	    hash = 0; 
+	    hash = 0;
 	}
 #endif
     }
@@ -817,7 +818,7 @@ Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
     xhv = (XPVHV*)SvANY(hv);
 #ifndef DYNAMIC_ENV_FETCH
     if (!xhv->xhv_array)
-	return 0; 
+	return 0;
 #endif
 
     key = SvPV(keysv, klen);
@@ -834,7 +835,7 @@ Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
 	    continue;
 	if (HeKLEN(entry) != klen)
 	    continue;
-	if (memNE(HeKEY(entry),key,klen))	/* is this it? */
+	if (HeKEY(entry) != key && memNE(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
 	return TRUE;
     }
@@ -1012,9 +1013,9 @@ Perl_newHV(pTHX)
     xhv = (XPVHV*)SvANY(hv);
     SvPOK_off(hv);
     SvNOK_off(hv);
-#ifndef NODEFAULT_SHAREKEYS    
+#ifndef NODEFAULT_SHAREKEYS
     HvSHAREKEYS_on(hv);         /* key-sharing on by default */
-#endif    
+#endif
     xhv->xhv_max = 7;		/* start with 8 buckets */
     xhv->xhv_fill = 0;
     xhv->xhv_pmroot = 0;
@@ -1039,8 +1040,8 @@ Perl_newHVhv(pTHX_ HV *ohv)
 #if 0
     if (! SvTIED_mg((SV*)ohv, 'P')) {
 	/* Quick way ???*/
-    } 
-    else 
+    }
+    else
 #endif
     {
 	HE *entry;
@@ -1050,13 +1051,13 @@ Perl_newHVhv(pTHX_ HV *ohv)
 	/* Slow way */
 	hv_iterinit(ohv);
 	while ((entry = hv_iternext(ohv))) {
-	    hv_store(hv, HeKEY(entry), HeKLEN(entry), 
+	    hv_store(hv, HeKEY(entry), HeKLEN(entry),
 		     SvREFCNT_inc(HeVAL(entry)), HeHASH(entry));
 	}
 	HvRITER(ohv) = hv_riter;
 	HvEITER(ohv) = hv_eiter;
     }
-    
+
     return hv;
 }
 
@@ -1123,7 +1124,7 @@ Perl_hv_clear(pTHX_ HV *hv)
 	(void)memzero(xhv->xhv_array, (xhv->xhv_max + 1) * sizeof(HE*));
 
     if (SvRMAGICAL(hv))
-	mg_clear((SV*)hv); 
+	mg_clear((SV*)hv);
 }
 
 STATIC void
@@ -1154,7 +1155,7 @@ S_hfreeentries(pTHX_ HV *hv)
 	    if (++riter > max)
 		break;
 	    entry = array[riter];
-	} 
+	}
     }
     (void)hv_iterinit(hv);
 }
@@ -1186,7 +1187,7 @@ Perl_hv_undef(pTHX_ HV *hv)
     xhv->xhv_keys = 0;
 
     if (SvRMAGICAL(hv))
-	mg_clear((SV*)hv); 
+	mg_clear((SV*)hv);
 }
 
 /*
@@ -1194,7 +1195,7 @@ Perl_hv_undef(pTHX_ HV *hv)
 
 Prepares a starting point to traverse a hash table.  Returns the number of
 keys in the hash (i.e. the same as C<HvKEYS(tb)>).  The return value is
-currently only meaningful for hashes without tie magic. 
+currently only meaningful for hashes without tie magic.
 
 NOTE: Before version 5.004_65, C<hv_iterinit> used to return the number of
 hash buckets that happen to be in use.  If you still need that esoteric
@@ -1341,9 +1342,10 @@ Perl_hv_iterkeysv(pTHX_ register HE *entry)
 {
     if (HeKLEN(entry) == HEf_SVKEY)
 	return sv_mortalcopy(HeKEY_sv(entry));
-    else
-	return sv_2mortal(newSVpvn((HeKLEN(entry) ? HeKEY(entry) : ""),
-				  HeKLEN(entry)));
+    else {
+	return sv_2mortal(newSVpvn_share((HeKLEN(entry) ? HeKEY(entry) : ""),
+				  HeKLEN(entry), HeHASH(entry)));
+    }
 }
 
 /*
@@ -1420,7 +1422,7 @@ Perl_unsharepvn(pTHX_ const char *str, I32 len, U32 hash)
     register HE **oentry;
     register I32 i = 1;
     I32 found = 0;
-    
+
     /* what follows is the moral equivalent of:
     if ((Svp = hv_fetch(PL_strtab, tmpsv, FALSE, hash))) {
 	if (--*Svp == Nullsv)
@@ -1435,7 +1437,7 @@ Perl_unsharepvn(pTHX_ const char *str, I32 len, U32 hash)
 	    continue;
 	if (HeKLEN(entry) != len)
 	    continue;
-	if (memNE(HeKEY(entry),str,len))	/* is this it? */
+	if (HeKEY(entry) != str && memNE(HeKEY(entry),str,len))	/* is this it? */
 	    continue;
 	found = 1;
 	if (--HeVAL(entry) == Nullsv) {
@@ -1449,11 +1451,11 @@ Perl_unsharepvn(pTHX_ const char *str, I32 len, U32 hash)
 	break;
     }
     UNLOCK_STRTAB_MUTEX;
-    
+
     {
         dTHR;
         if (!found && ckWARN_d(WARN_INTERNAL))
-	    Perl_warner(aTHX_ WARN_INTERNAL, "Attempt to free non-existent shared string");    
+	    Perl_warner(aTHX_ WARN_INTERNAL, "Attempt to free non-existent shared string '%s'",str);
     }
 }
 
@@ -1471,7 +1473,7 @@ Perl_share_hek(pTHX_ const char *str, I32 len, register U32 hash)
     I32 found = 0;
 
     /* what follows is the moral equivalent of:
-       
+
     if (!(Svp = hv_fetch(PL_strtab, str, len, FALSE)))
     	hv_store(PL_strtab, str, len, Nullsv, hash);
     */
@@ -1484,7 +1486,7 @@ Perl_share_hek(pTHX_ const char *str, I32 len, register U32 hash)
 	    continue;
 	if (HeKLEN(entry) != len)
 	    continue;
-	if (memNE(HeKEY(entry),str,len))	/* is this it? */
+	if (HeKEY(entry) != str && memNE(HeKEY(entry),str,len))	/* is this it? */
 	    continue;
 	found = 1;
 	break;

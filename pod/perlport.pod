@@ -181,10 +181,12 @@ numbers to secondary storage such as a disk file or tape.
 
 Conflicting storage orders make utter mess out of the numbers.  If a
 little-endian host (Intel, VAX) stores 0x12345678 (305419896 in
-decimal), a big-endian host (Motorola, MIPS, Sparc, PA) reads it as
-0x78563412 (2018915346 in decimal).  To avoid this problem in network
-(socket) connections use the C<pack> and C<unpack> formats C<n>
-and C<N>, the "network" orders.  These are guaranteed to be portable.
+decimal), a big-endian host (Motorola, Sparc, PA) reads it as
+0x78563412 (2018915346 in decimal).  Alpha and MIPS can be either:
+Digital/Compaq used/uses them in little-endian mode; SGI/Cray uses
+them in big-endian mode.  To avoid this problem in network (socket)
+connections use the C<pack> and C<unpack> formats C<n> and C<N>, the
+"network" orders.  These are guaranteed to be portable.
 
 You can explore the endianness of your platform by unpacking a
 data structure packed in native format such as:
@@ -681,7 +683,7 @@ The ActiveState Pages, http://www.activestate.com/
 =item *
 
 The Cygwin environment for Win32; F<README.cygwin> (installed 
-as L<perlcygwin>), http://sourceware.cygnus.com/cygwin/
+as L<perlcygwin>), http://sources.redhat.com/cygwin/
 
 =item *
 
@@ -1042,7 +1044,8 @@ Also see:
 
 *
 
-L<perlos390>, F<README.os390>, F<README.posix-bc>, F<README.vmesa>
+L<perlos390>, F<README.os390>, F<perlposix-bc>, F<README.vmesa>,
+L<perlebcdic>.
 
 =item *
 
@@ -1053,7 +1056,7 @@ general usage issues for all EBCDIC Perls.  Send a message body of
 =item  *
 
 AS/400 Perl information at
-ttp://as400.rochester.ibm.com/
+http://as400.rochester.ibm.com/
 as well as on CPAN in the F<ports/> directory.
 
 =back
@@ -1753,7 +1756,7 @@ two seconds. (Win32)
 Not implemented. (S<Mac OS>, VOS)
 
 Can only be applied to process handles returned for processes spawned
-using C<system(1, ...)>. (Win32)
+using C<system(1, ...)> or pseudo processes created with C<fork()>. (Win32)
 
 Not useful. (S<RISC OS>)
 
@@ -1992,8 +1995,9 @@ http://www.perl.com/CPAN/ports/index.html for binary distributions.
 
 =head1 SEE ALSO
 
-L<perlamiga>, L<perlcygwin>, L<perldos>, L<perlhpux>, L<perlos2>,
-L<perlos390>, L<perlwin32>, L<perlvms>, and L<Win32>.
+L<perlaix>, L<perlamiga>, L<perlcygwin>, L<perldos>, L<perlebcdic>,
+L<perlhpux>, L<perlos2>, L<perlos390>, L<perlposix-bc>, L<perlwin32>,
+L<perlvms>, and L<Win32>.
 
 =head1 AUTHORS / CONTRIBUTORS
 
@@ -2009,7 +2013,7 @@ Neale Ferguson <neale@mailbox.tabnsw.com.au>,
 David J. Fiander <davidf@mks.com>,
 Paul Green <Paul_Green@stratus.com>,
 M.J.T. Guy <mjtg@cus.cam.ac.uk>,
-Jarkko Hietaniemi <jhi@iki.fi<gt>,
+Jarkko Hietaniemi <jhi@iki.fi>,
 Luther Huffman <lutherh@stratcom.com>,
 Nick Ing-Simmons <nick@ni-s.u-net.com>,
 Andreas J. KE<ouml>nig <koenig@kulturbox.de>,

@@ -48,10 +48,10 @@ Null SV pointer.
    just figure out all the headers such a test needs.
    Andy Dougherty	August 1996
 */
-/* bool is built-in for g++-2.6.3 and later, which might be used 
+/* bool is built-in for g++-2.6.3 and later, which might be used
    for extensions.  <_G_config.h> defines _G_HAVE_BOOL, but we can't
    be sure _G_config.h will be included before this file.  _G_config.h
-   also defines _G_HAVE_BOOL for both gcc and g++, but only g++ 
+   also defines _G_HAVE_BOOL for both gcc and g++, but only g++
    actually has bool.  Hence, _G_HAVE_BOOL is pretty useless for us.
    g++ can be identified by __GNUG__.
    Andy Dougherty	February 2000
@@ -101,8 +101,8 @@ Null SV pointer.
    Similarly, there is no guarantee that I16 and U16 have exactly 16
    bits.
 
-   For dealing with issues that may arise from various 32/64-bit 
-   systems, we will ask Configure to check out 
+   For dealing with issues that may arise from various 32/64-bit
+   systems, we will ask Configure to check out
 
    	SHORTSIZE == sizeof(short)
    	INTSIZE == sizeof(int)
@@ -296,6 +296,8 @@ Converts the specified character to lowercase.
 #define isALPHA(c)	(isUPPER(c) || isLOWER(c))
 #define isSPACE(c) \
 	((c) == ' ' || (c) == '\t' || (c) == '\n' || (c) =='\r' || (c) == '\f')
+#define isPSXSPC(c)	(isSPACE(c) || (c) == '\v')
+#define isBLANK(c)	((c) == ' ' || (c) == '\t')
 #define isDIGIT(c)	((c) >= '0' && (c) <= '9')
 #ifdef EBCDIC
     /* In EBCDIC we do not do locales: therefore() isupper() is fine. */
@@ -382,6 +384,9 @@ Converts the specified character to lowercase.
 #  endif
 #endif /* USE_NEXT_CTYPE */
 
+#define isPSXSPC_LC(c)		(isSPACE_LC(c) || (c) == '\v')
+#define isBLANK_LC(c)		isBLANK(c) /* could be wrong */
+
 #define isALNUM_uni(c)		is_uni_alnum(c)
 #define isIDFIRST_uni(c)	is_uni_idfirst(c)
 #define isALPHA_uni(c)		is_uni_alpha(c)
@@ -400,6 +405,9 @@ Converts the specified character to lowercase.
 #define toTITLE_uni(c)		to_uni_title(c)
 #define toLOWER_uni(c)		to_uni_lower(c)
 
+#define isPSXSPC_uni(c)		(isSPACE_uni(c) ||(c) == '\f')
+#define isBLANK_uni(c)		isBLANK(c) /* could be wrong */
+
 #define isALNUM_LC_uni(c)	(c < 256 ? isALNUM_LC(c) : is_uni_alnum_lc(c))
 #define isIDFIRST_LC_uni(c)	(c < 256 ? isIDFIRST_LC(c) : is_uni_idfirst_lc(c))
 #define isALPHA_LC_uni(c)	(c < 256 ? isALPHA_LC(c) : is_uni_alpha_lc(c))
@@ -415,6 +423,9 @@ Converts the specified character to lowercase.
 #define toUPPER_LC_uni(c)	(c < 256 ? toUPPER_LC(c) : to_uni_upper_lc(c))
 #define toTITLE_LC_uni(c)	(c < 256 ? toUPPER_LC(c) : to_uni_title_lc(c))
 #define toLOWER_LC_uni(c)	(c < 256 ? toLOWER_LC(c) : to_uni_lower_lc(c))
+
+#define isPSXSPC_LC_uni(c)	(isSPACE_LC_uni(c) ||(c) == '\f')
+#define isBLANK_LC_uni(c)	isBLANK(c) /* could be wrong */
 
 #define isALNUM_utf8(p)		is_utf8_alnum(p)
 #define isIDFIRST_utf8(p)	is_utf8_idfirst(p)
@@ -434,21 +445,27 @@ Converts the specified character to lowercase.
 #define toTITLE_utf8(p)		to_utf8_title(p)
 #define toLOWER_utf8(p)		to_utf8_lower(p)
 
-#define isALNUM_LC_utf8(p)	isALNUM_LC_uni(utf8_to_uv(p, 0))
-#define isIDFIRST_LC_utf8(p)	isIDFIRST_LC_uni(utf8_to_uv(p, 0))
-#define isALPHA_LC_utf8(p)	isALPHA_LC_uni(utf8_to_uv(p, 0))
-#define isSPACE_LC_utf8(p)	isSPACE_LC_uni(utf8_to_uv(p, 0))
-#define isDIGIT_LC_utf8(p)	isDIGIT_LC_uni(utf8_to_uv(p, 0))
-#define isUPPER_LC_utf8(p)	isUPPER_LC_uni(utf8_to_uv(p, 0))
-#define isLOWER_LC_utf8(p)	isLOWER_LC_uni(utf8_to_uv(p, 0))
-#define isALNUMC_LC_utf8(p)	isALNUMC_LC_uni(utf8_to_uv(p, 0))
-#define isCNTRL_LC_utf8(p)	isCNTRL_LC_uni(utf8_to_uv(p, 0))
-#define isGRAPH_LC_utf8(p)	isGRAPH_LC_uni(utf8_to_uv(p, 0))
-#define isPRINT_LC_utf8(p)	isPRINT_LC_uni(utf8_to_uv(p, 0))
-#define isPUNCT_LC_utf8(p)	isPUNCT_LC_uni(utf8_to_uv(p, 0))
-#define toUPPER_LC_utf8(p)	toUPPER_LC_uni(utf8_to_uv(p, 0))
-#define toTITLE_LC_utf8(p)	toTITLE_LC_uni(utf8_to_uv(p, 0))
-#define toLOWER_LC_utf8(p)	toLOWER_LC_uni(utf8_to_uv(p, 0))
+#define isPSXSPC_utf8(c)	(isSPACE_utf8(c) ||(c) == '\f')
+#define isBLANK_utf8(c)		isBLANK(c) /* could be wrong */
+
+#define isALNUM_LC_utf8(p)	isALNUM_LC_uni(utf8_to_uv_chk(p, 0, 0))
+#define isIDFIRST_LC_utf8(p)	isIDFIRST_LC_uni(utf8_to_uv_chk(p, 0, 0))
+#define isALPHA_LC_utf8(p)	isALPHA_LC_uni(utf8_to_uv_chk(p, 0, 0))
+#define isSPACE_LC_utf8(p)	isSPACE_LC_uni(utf8_to_uv_chk(p, 0, 0))
+#define isDIGIT_LC_utf8(p)	isDIGIT_LC_uni(utf8_to_uv_chk(p, 0, 0))
+#define isUPPER_LC_utf8(p)	isUPPER_LC_uni(utf8_to_uv_chk(p, 0, 0))
+#define isLOWER_LC_utf8(p)	isLOWER_LC_uni(utf8_to_uv_chk(p, 0, 0))
+#define isALNUMC_LC_utf8(p)	isALNUMC_LC_uni(utf8_to_uv_chk(p, 0, 0))
+#define isCNTRL_LC_utf8(p)	isCNTRL_LC_uni(utf8_to_uv_chk(p, 0, 0))
+#define isGRAPH_LC_utf8(p)	isGRAPH_LC_uni(utf8_to_uv_chk(p, 0, 0))
+#define isPRINT_LC_utf8(p)	isPRINT_LC_uni(utf8_to_uv_chk(p, 0, 0))
+#define isPUNCT_LC_utf8(p)	isPUNCT_LC_uni(utf8_to_uv_chk(p, 0, 0))
+#define toUPPER_LC_utf8(p)	toUPPER_LC_uni(utf8_to_uv_chk(p, 0, 0))
+#define toTITLE_LC_utf8(p)	toTITLE_LC_uni(utf8_to_uv_chk(p, 0, 0))
+#define toLOWER_LC_utf8(p)	toLOWER_LC_uni(utf8_to_uv_chk(p, 0, 0))
+
+#define isPSXSPC_LC_utf8(c)	(isSPACE_LC_utf8(c) ||(c) == '\f')
+#define isBLANK_LC_utf8(c)	isBLANK(c) /* could be wrong */
 
 #ifdef EBCDIC
 EXT int ebcdic_control (int);
@@ -467,7 +484,7 @@ typedef U16 line_t;
 #endif
 
 
-/* 
+/*
    XXX LEAKTEST doesn't really work in perl5.  There are direct calls to
    safemalloc() in the source, so LEAKTEST won't pick them up.
    (The main "offenders" are extensions.)
@@ -484,7 +501,7 @@ typedef U16 line_t;
 Creates a new SV.  A non-zero C<len> parameter indicates the number of
 bytes of preallocated string space the SV should have.  An extra byte for a
 tailing NUL is also reserved.  (SvPOK is not set for the SV even if string
-space is allocated.)  The reference count for the new SV is set to 1. 
+space is allocated.)  The reference count for the new SV is set to 1.
 C<id> is an integer id between 0 and 1299 (used to identify leaks).
 
 =for apidoc Am|void|New|int id|void* ptr|int nitems|type

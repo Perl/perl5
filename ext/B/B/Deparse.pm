@@ -14,6 +14,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber
 	 OPpLVAL_INTRO OPpENTERSUB_AMPER OPpSLICE OPpCONST_BARE
 	 OPpTRANS_SQUASH OPpTRANS_DELETE OPpTRANS_COMPLEMENT OPpTARGET_MY
 	 SVf_IOK SVf_NOK SVf_ROK SVf_POK
+         CVf_METHOD CVf_LOCKED CVf_LVALUE
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED);
 $VERSION = 0.591;
@@ -432,6 +433,13 @@ sub deparse_sub {
     if ($cv->FLAGS & SVf_POK) {
 	$proto = "(". $cv->PV . ") ";
     }
+    if ($cv->CvFLAGS & (CVf_METHOD|CVf_LOCKED|CVf_LVALUE)) {
+        $proto .= ": ";
+        $proto .= "lvalue " if $cv->CvFLAGS & CVf_LVALUE;
+        $proto .= "locked " if $cv->CvFLAGS & CVf_LOCKED;
+        $proto .= "method " if $cv->CvFLAGS & CVf_METHOD;
+    }
+
     local($self->{'curcv'}) = $cv;
     local($self->{'curstash'}) = $self->{'curstash'};
     if (not null $cv->ROOT) {
@@ -839,7 +847,7 @@ sub pp_i_preinc { pfixop(@_, "++", 23) }
 sub pp_i_predec { pfixop(@_, "--", 23) }
 sub pp_i_postinc { maybe_targmy(@_, \&pfixop, "++", 23, POSTFIX) }
 sub pp_i_postdec { maybe_targmy(@_, \&pfixop, "--", 23, POSTFIX) }
-sub pp_complement { maybe_targmy(@_. \&pfixop, "~", 21) }
+sub pp_complement { maybe_targmy(@_, \&pfixop, "~", 21) }
 
 sub pp_negate { maybe_targmy(@_, \&real_negate) }
 sub real_negate {
@@ -2487,7 +2495,7 @@ sub pchr { # ASCII
 
 sub collapse {
     my(@chars) = @_;
-    my($c, $str, $tr);
+    my($str, $c, $tr) = ("");
     for ($c = 0; $c < @chars; $c++) {
 	$tr = $chars[$c];
 	$str .= pchr($tr);
@@ -2540,7 +2548,7 @@ sub tr_decode_byte {
 	}
 	@from = @newfrom;
     }
-    unless ($flags & OPpTRANS_DELETE) {
+    unless ($flags & OPpTRANS_DELETE || !@to) {
 	pop @to while $#to and $to[$#to] == $to[$#to -1];
     }
     my($from, $to);

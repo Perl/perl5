@@ -6,10 +6,16 @@ my ($out) = __FILE__ =~ /(^.*)\.PL/i;
 $out =~ s/_h$/.h/;
 open(OUT,">$out") || die "Cannot open $file:$!";
 print "Extracting $out...\n";
-foreach my $const (qw(AVf_REAL 
+foreach my $const (qw(
+		      AVf_REAL 
 		      HEf_SVKEY
+		      SVf_READONLY SVTYPEMASK
+		      GVf_IMPORTED_AV GVf_IMPORTED_HV
+		      GVf_IMPORTED_SV GVf_IMPORTED_CV
+		      CVf_METHOD CVf_LOCKED CVf_LVALUE
                       SVf_IOK SVf_IVisUV SVf_NOK SVf_POK 
-		      SVf_ROK SVp_IOK SVp_POK ))
+		      SVf_ROK SVp_IOK SVp_POK SVp_NOK
+		      ))
  {
   doconst($const);
  }

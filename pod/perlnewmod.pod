@@ -224,7 +224,7 @@ installs modules, and this produces a Makefile with a C<dist> target.
 
 Once you've ensured that your module passes its own tests - always a
 good thing to make sure - you can C<make dist>, and the Makefile will
-hopefully produce you a nice tarball of your module, ready for upliad.
+hopefully produce you a nice tarball of your module, ready for upload.
 
 =item Upload the tarball
 

@@ -2,7 +2,7 @@
 
 BEGIN {
     chdir( 't' ) if -d 't';
-    unshift @INC, '../lib';
+    @INC = '../lib';
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bDevel\/DProf\b/){
       print "1..0 # Skip: Devel::DProf was not built\n";

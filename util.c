@@ -659,6 +659,8 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 			 (!done && (lang || PerlEnv_getenv("LC_CTYPE")))
 				    ? "" : Nullch)))
 	    setlocale_failure = TRUE;
+	else
+	    curctype = savepv(curctype);
 #endif /* USE_LOCALE_CTYPE */
 #ifdef USE_LOCALE_COLLATE
 	if (! (curcoll =
@@ -666,6 +668,8 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 			 (!done && (lang || PerlEnv_getenv("LC_COLLATE")))
 				   ? "" : Nullch)))
 	    setlocale_failure = TRUE;
+	else
+	    curcoll = savepv(curcoll);
 #endif /* USE_LOCALE_COLLATE */
 #ifdef USE_LOCALE_NUMERIC
 	if (! (curnum =
@@ -673,6 +677,8 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 			 (!done && (lang || PerlEnv_getenv("LC_NUMERIC")))
 				  ? "" : Nullch)))
 	    setlocale_failure = TRUE;
+	else
+	    curnum = savepv(curnum);
 #endif /* USE_LOCALE_NUMERIC */
     }
 
@@ -689,14 +695,20 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #ifdef USE_LOCALE_CTYPE
 	if (! (curctype = setlocale(LC_CTYPE, "")))
 	    setlocale_failure = TRUE;
+	else
+	    curctype = savepv(curctype);
 #endif /* USE_LOCALE_CTYPE */
 #ifdef USE_LOCALE_COLLATE
 	if (! (curcoll = setlocale(LC_COLLATE, "")))
 	    setlocale_failure = TRUE;
+	else
+	    curcoll = savepv(curcoll);
 #endif /* USE_LOCALE_COLLATE */
 #ifdef USE_LOCALE_NUMERIC
 	if (! (curnum = setlocale(LC_NUMERIC, "")))
 	    setlocale_failure = TRUE;
+	else
+	    curnum = savepv(curnum);
 #endif /* USE_LOCALE_NUMERIC */
     }
 
@@ -808,15 +820,16 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #endif /* ! LC_ALL */
 
 #ifdef USE_LOCALE_CTYPE
-	curctype = setlocale(LC_CTYPE, Nullch);
+	curctype = savepv(setlocale(LC_CTYPE, Nullch));
 #endif /* USE_LOCALE_CTYPE */
 #ifdef USE_LOCALE_COLLATE
-	curcoll = setlocale(LC_COLLATE, Nullch);
+	curcoll = savepv(setlocale(LC_COLLATE, Nullch));
 #endif /* USE_LOCALE_COLLATE */
 #ifdef USE_LOCALE_NUMERIC
-	curnum = setlocale(LC_NUMERIC, Nullch);
+	curnum = savepv(setlocale(LC_NUMERIC, Nullch));
 #endif /* USE_LOCALE_NUMERIC */
     }
+    else {
 
 #ifdef USE_LOCALE_CTYPE
     new_ctype(curctype);
@@ -829,9 +842,22 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #ifdef USE_LOCALE_NUMERIC
     new_numeric(curnum);
 #endif /* USE_LOCALE_NUMERIC */
+    }
 
 #endif /* USE_LOCALE */
 
+#ifdef USE_LOCALE_CTYPE
+    if (curctype != NULL)
+	Safefree(curctype);
+#endif /* USE_LOCALE_CTYPE */
+#ifdef USE_LOCALE_COLLATE
+    if (curcoll != NULL)
+	Safefree(curcoll);
+#endif /* USE_LOCALE_COLLATE */
+#ifdef USE_LOCALE_NUMERIC
+    if (curnum != NULL)
+	Safefree(curnum);
+#endif /* USE_LOCALE_NUMERIC */
     return ok;
 }
 
@@ -1896,14 +1922,20 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
 	    PerlIO *serr = Perl_error_log;
 	    PerlIO_write(serr, message, msglen);
 #ifdef LEAKTEST
-	    DEBUG_L(xstat());
+	    DEBUG_L(*message == '!' 
+		? (xstat(message[1]=='!'
+			 ? (message[2]=='!' ? 2 : 1)
+			 : 0)
+		   , 0)
+		: 0);
 #endif
 	    (void)PerlIO_flush(serr);
 	}
     }
 }
 
-#ifndef VMS  /* VMS' my_setenv() is in VMS.c */
+#ifdef USE_ENVIRON_ARRAY
+       /* VMS' and EPOC's my_setenv() is in vms.c and epoc.c */
 #if !defined(WIN32) && !defined(__CYGWIN__)
 void
 Perl_my_setenv(pTHX_ char *nam, char *val)
@@ -2070,7 +2102,7 @@ Perl_setenv_getix(pTHX_ char *nam)
     return i;
 }
 
-#endif /* !VMS */
+#endif /* !VMS && !EPOC*/
 
 #ifdef UNLINK_ALL_VERSIONS
 I32
@@ -2676,6 +2708,7 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 
     if (!pid)
 	return -1;
+#if !defined(HAS_WAITPID) && !defined(HAS_WAIT4) || defined(HAS_WAITPID_RUNTIME)
     if (pid > 0) {
 	sprintf(spid, "%"IVdf, (IV)pid);
 	svp = hv_fetch(PL_pidstatus,spid,strlen(spid),FALSE);
@@ -2698,6 +2731,7 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 	    return pid;
 	}
     }
+#endif
 #ifdef HAS_WAITPID
 #  ifdef HAS_WAITPID_RUNTIME
     if (!HAS_WAITPID_RUNTIME)
@@ -3555,6 +3589,8 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
     PL_dirty = 0;
     PL_localizing = 0;
     Zero(&PL_hv_fetch_ent_mh, 1, HE);
+    PL_efloatbuf = (char*)NULL;
+    PL_efloatsize = 0;
 #else
     Zero(thr, 1, struct perl_thread);
 #endif
@@ -3573,7 +3609,7 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
 
     JMPENV_BOOTSTRAP;
 
-    PL_in_eval = EVAL_NULL;	/* ~(EVAL_INEVAL|EVAL_WARNONLY|EVAL_KEEPERR) */
+    PL_in_eval = EVAL_NULL;	/* ~(EVAL_INEVAL|EVAL_WARNONLY|EVAL_KEEPERR|EVAL_INREQUIRE) */
     PL_restartop = 0;
 
     PL_statname = NEWSV(66,0);
@@ -3868,41 +3904,69 @@ Perl_my_fflush_all(pTHX)
 NV
 Perl_my_atof(pTHX_ const char* s)
 {
+    NV x = 0.0;
 #ifdef USE_LOCALE_NUMERIC
     if ((PL_hints & HINT_LOCALE) && PL_numeric_local) {
-	NV x, y;
+	NV y;
 
-	x = Perl_atof(s);
+	Perl_atof2(s, x);
 	SET_NUMERIC_STANDARD();
-	y = Perl_atof(s);
+	Perl_atof2(s, y);
 	SET_NUMERIC_LOCAL();
 	if ((y < 0.0 && y < x) || (y > 0.0 && y > x))
 	    return y;
-	return x;
     }
     else
-	return Perl_atof(s);
+	Perl_atof2(s, x);
 #else
-    return Perl_atof(s);
+    Perl_atof2(s, x);
 #endif
+    return x;
 }
 
 void
-Perl_report_closed_fh(pTHX_ GV *gv, IO *io, const char *func, const char *obj)
+Perl_report_evil_fh(pTHX_ GV *gv, IO *io, I32 op)
 {
-    SV *sv;
-    char *name;
+    char *vile;
+    I32   warn_type;
+    char *func =
+	op == OP_READLINE   ? "readline"  :	/* "<HANDLE>" not nice */
+	op == OP_LEAVEWRITE ? "write" :		/* "write exit" not nice */
+	PL_op_desc[op];
+    char *pars = OP_IS_FILETEST(op) ? "" : "()";
+    char *type = OP_IS_SOCKET(op) || (io && IoTYPE(io) == IoTYPE_SOCKET) ?
+                     "socket" : "filehandle";
+    char *name = NULL;
 
-    assert(gv);
+    if (io && IoTYPE(io) == IoTYPE_CLOSED) {
+	vile = "closed";
+	warn_type = WARN_CLOSED;
+    }
+    else {
+	vile = "unopened";
+	warn_type = WARN_UNOPENED;
+    }
 
-    sv = sv_newmortal();
-    gv_efullname4(sv, gv, Nullch, FALSE);
-    name = SvPVX(sv);
+    if (gv && isGV(gv)) {
+	SV *sv = sv_newmortal();
+	gv_efullname4(sv, gv, Nullch, FALSE);
+	name = SvPVX(sv);
+    }
 
-    Perl_warner(aTHX_ WARN_CLOSED, "%s() on closed %s %s", func, obj, name);
-
-    if (io && IoDIRP(io))
-	Perl_warner(aTHX_ WARN_CLOSED,
-		    "\t(Are you trying to call %s() on dirhandle %s?)\n",
-		    func, name);
+    if (name && *name) {
+	Perl_warner(aTHX_ warn_type,
+		    "%s%s on %s %s %s", func, pars, vile, type, name);
+	if (io && IoDIRP(io) && !(IoFLAGS(io) & IOf_FAKE_DIRP))
+	    Perl_warner(aTHX_ warn_type,
+			"\t(Are you trying to call %s%s on dirhandle %s?)\n",
+			func, pars, name);
+    }
+    else {
+	Perl_warner(aTHX_ warn_type,
+		    "%s%s on %s %s", func, pars, vile, type);
+	if (io && IoDIRP(io) && !(IoFLAGS(io) & IOf_FAKE_DIRP))
+	    Perl_warner(aTHX_ warn_type,
+			"\t(Are you trying to call %s%s on dirhandle?)\n",
+			func, pars);
+    }
 }

@@ -168,8 +168,7 @@ sub struct {
     $cnt = 0;
     foreach $name (@methods){
         if ( do { no strict 'refs'; defined &{$class . "::$name"} } ) {
-            warnings::warn "function '$name' already defined, overrides struct accessor method"
-                if warnings::enabled();
+            warnings::warnif("function '$name' already defined, overrides struct accessor method");
         }
         else {
             $pre = $pst = $cmt = $sel = '';

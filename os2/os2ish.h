@@ -271,6 +271,8 @@ char *my_tmpnam (char *);
 #define isatty	_isterm
 #define rand	random
 #define srand	srandom
+#define strtoll	_strtoll
+#define strtoull	_strtoull
 
 /*
  * fwrite1() should be a routine with the same calling sequence as fwrite(),
@@ -304,6 +306,9 @@ void *emx_realloc (void *, size_t);
 	(FILE_ptr(fp) > FILE_base(fp) && c == (int)*(FILE_ptr(fp) - 1) \
 	 ? (--FILE_ptr(fp), ++FILE_cnt(fp), (int)c) : ungetc(c,fp))
 #endif
+
+/* ctermid is missing from emx0.9d */
+char *ctermid(char *s);
 
 #define OP_BINARY O_BINARY
 

@@ -10,7 +10,7 @@
 package Pod::Select;
 
 use vars qw($VERSION);
-$VERSION = 1.12;  ## Current version of this package
+$VERSION = 1.13;  ## Current version of this package
 require  5.005;    ## requires this Perl version or later
 
 #############################################################################
@@ -92,7 +92,7 @@ The formal syntax of a section specification is:
 
 =over 4
 
-=item
+=item *
 
 I<head1-title-regex>/I<head2-title-regex>/...
 
@@ -160,7 +160,7 @@ The formal syntax of a range specification is:
 
 =over 4
 
-=item
+=item *
 
 /I<start-range-regex>/[../I<end-range-regex>/]
 

@@ -72,7 +72,7 @@ corresponding README.
 2) Read the manual entries before running perl.
 
 3) IMPORTANT!  Help save the world!  Communicate any problems and suggested
-patches to perlbug@perl.com so we can keep the world in sync.
+patches to perlbug@perl.org so we can keep the world in sync.
 If you have a problem, there's someone else out there who either has had
 or will have the same problem.  It's usually helpful if you send the
 output of the "myconfig" script in the main perl directory.

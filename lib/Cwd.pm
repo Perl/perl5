@@ -66,30 +66,38 @@ kept up to date if all packages which use chdir import it from Cwd.
 
 =cut
 
-## use strict;
+use strict;
 
 use Carp;
 
-$VERSION = '2.03';
+our $VERSION = '2.03';
 
-require Exporter;
-@ISA = qw(Exporter);
-@EXPORT = qw(cwd getcwd fastcwd fastgetcwd);
-@EXPORT_OK = qw(chdir abs_path fast_abs_path realpath fast_realpath);
+use base qw/ Exporter /;
+our @EXPORT = qw(cwd getcwd fastcwd fastgetcwd);
+our @EXPORT_OK = qw(chdir abs_path fast_abs_path realpath fast_realpath);
 
 
 # The 'natural and safe form' for UNIX (pwd may be setuid root)
 
 sub _backtick_pwd {
-    my $cwd;
-    chop($cwd = `pwd`);
+    my $cwd = `pwd`;
+    # `pwd` may fail e.g. if the disk is full
+    chomp($cwd) if defined $cwd;
     $cwd;
 }
 
 # Since some ports may predefine cwd internally (e.g., NT)
 # we take care not to override an existing definition for cwd().
 
-*cwd = \&_backtick_pwd unless defined &cwd;
+unless(defined &cwd) {
+    # The pwd command is not available in some chroot(2)'ed environments
+    if(grep { -x "$_/pwd" } split(':', $ENV{PATH})) {
+	*cwd = \&_backtick_pwd;
+    }
+    else {
+	*cwd = \&getcwd;
+    }
+}
 
 
 # By Brandon S. Allbery
@@ -156,7 +164,7 @@ sub fastcwd {
 my $chdir_init = 0;
 
 sub chdir_init {
-    if ($ENV{'PWD'} and $^O ne 'os2' and $^O ne 'dos') {
+    if ($ENV{'PWD'} and $^O ne 'os2' and $^O ne 'dos' and $^O ne 'MSWin32') {
 	my($dd,$di) = stat('.');
 	my($pd,$pi) = stat($ENV{'PWD'});
 	if (!defined $dd or !defined $pd or $di != $pi or $dd != $pd) {
@@ -164,10 +172,12 @@ sub chdir_init {
 	}
     }
     else {
-	$ENV{'PWD'} = cwd();
+	my $wd = cwd();
+	$wd = Win32::GetFullPathName($wd) if $^O eq 'MSWin32';
+	$ENV{'PWD'} = $wd;
     }
     # Strip an automounter prefix (where /tmp_mnt/foo/bar == /foo/bar)
-    if ($ENV{'PWD'} =~ m|(/[^/]+(/[^/]+/[^/]+))(.*)|s) {
+    if ($^O ne 'MSWin32' and $ENV{'PWD'} =~ m|(/[^/]+(/[^/]+/[^/]+))(.*)|s) {
 	my($pd,$pi) = stat($2);
 	my($dd,$di) = stat($1);
 	if (defined $pd and defined $dd and $di == $pi and $dd == $pd) {
@@ -178,11 +188,17 @@ sub chdir_init {
 }
 
 sub chdir {
-    my $newdir = shift || '';	# allow for no arg (chdir to HOME dir)
-    $newdir =~ s|///*|/|g;
+    my $newdir = @? ? shift : '';	# allow for no arg (chdir to HOME dir)
+    $newdir =~ s|///*|/|g unless $^O eq 'MSWin32';
     chdir_init() unless $chdir_init;
     return 0 unless CORE::chdir $newdir;
-    if ($^O eq 'VMS') { return $ENV{'PWD'} = $ENV{'DEFAULT'} }
+    if ($^O eq 'VMS') {
+	return $ENV{'PWD'} = $ENV{'DEFAULT'}
+    }
+    elsif ($^O eq 'MSWin32') {
+	$ENV{'PWD'} = Win32::GetFullPathName($newdir);
+	return 1;
+    }
 
     if ($newdir =~ m#^/#s) {
 	$ENV{'PWD'} = $newdir;
@@ -200,38 +216,62 @@ sub chdir {
     1;
 }
 
+# Taken from Cwd.pm It is really getcwd with an optional
+# parameter instead of '.'
+#
 
-# By Jeff "japhy" Pinyan (07/23/2000)
-#   usage:  abs_path(PATHNAME)
-# see the docs
+sub abs_path
+{
+    my $start = @_ ? shift : '.';
+    my($dotdots, $cwd, @pst, @cst, $dir, @tst);
 
-sub abs_path {
-  my $base = @_ ? $_[0] : ".";
-  my $path = "";
-  my $file;
-
-  do {
-    my @devino = (stat($base))[0,1] or
-      carp("stat($base): $!"), return;
-
-    $base .= "/..";
-
-    opendir PREV, $base or carp("opendir($base): $!"), return;
-    while (defined($file = readdir PREV)) {
-      next if $file eq "." or $file eq "..";
-      my @entry = (lstat("$base/$file"))[0,1] or
-        carp("lstat($base/$file): $!"), return;
-      last if $devino[0] == $entry[0] and $devino[1] == $entry[1];
+    unless (@cst = stat( $start ))
+    {
+	carp "stat($start): $!";
+	return '';
     }
-    closedir PREV;
-
-    $path = (defined $file and $file) . "/$path";
-  } while defined $file;
-
-  length($path) > 1 and chop $path;
-  return $path;
+    $cwd = '';
+    $dotdots = $start;
+    do
+    {
+	$dotdots .= '/..';
+	@pst = @cst;
+	unless (opendir(PARENT, $dotdots))
+	{
+	    carp "opendir($dotdots): $!";
+	    return '';
+	}
+	unless (@cst = stat($dotdots))
+	{
+	    carp "stat($dotdots): $!";
+	    closedir(PARENT);
+	    return '';
+	}
+	if ($pst[0] == $cst[0] && $pst[1] == $cst[1])
+	{
+	    $dir = undef;
+	}
+	else
+	{
+	    do
+	    {
+		unless (defined ($dir = readdir(PARENT)))
+	        {
+		    carp "readdir($dotdots): $!";
+		    closedir(PARENT);
+		    return '';
+		}
+		$tst[0] = $pst[0]+1 unless (@tst = lstat("$dotdots/$dir"))
+	    }
+	    while ($dir eq '.' || $dir eq '..' || $tst[0] != $pst[0] ||
+		   $tst[1] != $pst[1]);
+	}
+	$cwd = (defined $dir ? "$dir" : "" ) . "/$cwd" ;
+	closedir(PARENT);
+    } while (defined $dir);
+    chop($cwd) unless $cwd eq '/'; # drop the trailing /
+    $cwd;
 }
-
 
 # added function alias for those of us more
 # used to the libc function.  --tchrist 27-Jan-00
@@ -239,7 +279,7 @@ sub abs_path {
 
 sub fast_abs_path {
     my $cwd = getcwd();
-    my $path = shift || '.';
+    my $path = @_ ? shift : '.';
     CORE::chdir($path) || croak "Cannot chdir to $path:$!";
     my $realpath = getcwd();
     CORE::chdir($cwd)  || croak "Cannot chdir back to $cwd:$!";
@@ -308,10 +348,15 @@ sub _qnx_cwd {
 }
 
 sub _qnx_abs_path {
-    my $path = shift || '.';
+    my $path = @_ ? shift : '.';
     my $realpath=`/usr/bin/fullpath -t $path`;
     chop $realpath;
     return $realpath;
+}
+
+sub _epoc_cwd {
+    $ENV{'PWD'} = EPOC::getcwd();
+    return $ENV{'PWD'};
 }
 
 {
@@ -360,6 +405,12 @@ sub _qnx_abs_path {
         *getcwd	= \&cwd;
         *fastgetcwd	= \&cwd;
         *fastcwd	= \&cwd;
+        *abs_path	= \&fast_abs_path;
+    }
+    elsif ($^O eq 'epoc') {
+        *getcwd	= \&_epoc_cwd;
+        *fastgetcwd	= \&_epoc_cwd;
+        *fastcwd	= \&_epoc_cwd;
         *abs_path	= \&fast_abs_path;
     }
 }

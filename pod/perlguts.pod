@@ -4,10 +4,10 @@ perlguts - Introduction to the Perl API
 
 =head1 DESCRIPTION
 
-This document attempts to describe how to use the Perl API, as well as containing 
-some info on the basic workings of the Perl core. It is far from complete 
-and probably contains many errors. Please refer any questions or 
-comments to the author below.
+This document attempts to describe how to use the Perl API, as well as
+containing some info on the basic workings of the Perl core. It is far
+from complete and probably contains many errors. Please refer any
+questions or comments to the author below.
 
 =head1 Variables
 
@@ -209,6 +209,39 @@ line and all will be well.
 
 To free an SV that you've created, call C<SvREFCNT_dec(SV*)>.  Normally this
 call is not necessary (see L<Reference Counts and Mortality>).
+
+=head2 Offsets
+
+Perl provides the function C<sv_chop> to efficiently remove characters
+from the beginning of a string; you give it an SV and a pointer to
+somewhere inside the the PV, and it discards everything before the
+pointer. The efficiency comes by means of a little hack: instead of
+actually removing the characters, C<sv_chop> sets the flag C<OOK>
+(offset OK) to signal to other functions that the offset hack is in
+effect, and it puts the number of bytes chopped off into the IV field
+of the SV. It then moves the PV pointer (called C<SvPVX>) forward that
+many bytes, and adjusts C<SvCUR> and C<SvLEN>. 
+
+Hence, at this point, the start of the buffer that we allocated lives
+at C<SvPVX(sv) - SvIV(sv)> in memory and the PV pointer is pointing
+into the middle of this allocated storage.
+
+This is best demonstrated by example:
+
+  % ./perl -Ilib -MDevel::Peek -le '$a="12345"; $a=~s/.//; Dump($a)'
+  SV = PVIV(0x8128450) at 0x81340f0
+    REFCNT = 1
+    FLAGS = (POK,OOK,pPOK)
+    IV = 1  (OFFSET)
+    PV = 0x8135781 ( "1" . ) "2345"\0
+    CUR = 4
+    LEN = 5
+
+Here the number of bytes chopped off (1) is put into IV, and
+C<Devel::Peek::Dump> helpfully reminds us that this is an offset. The
+portion of the string between the "real" and the "fake" beginnings is
+shown in parentheses, and the values of C<SvCUR> and C<SvLEN> reflect
+the fake beginning, not the real one.
 
 =head2 What's Really Stored in an SV?
 
@@ -1877,18 +1910,49 @@ This function isn't exported out of the Perl core.
 If you edit F<embed.pl>, you will need to run C<make regen_headers> to
 force a rebuild of F<embed.h> and other auto-generated files.
 
-=head2 Formatted Printing of IVs and UVs
+=head2 Formatted Printing of IVs, UVs, and NVs
 
-If you are printing IVs or UVs instead of the stdio(3) style formatting
-codes like C<%d> you should use the following macros for portability
+If you are printing IVs, UVs, or NVS instead of the stdio(3) style
+formatting codes like C<%d>, C<%ld>, C<%f>, you should use the
+following macros for portability
 
 	IVdf		IV in decimal
 	UVuf		UV in decimal
 	UVof		UV in octal
 	UVxf		UV in hexadecimal
+	NVef		NV %e-like
+	NVff		NV %f-like
+	NVgf		NV %g-like
 
-For example: printf("IV is %"IVdf"\n", iv);  That will expand
-to whatever is the correct format for the IVs.
+These will take care of 64-bit integers and long doubles.
+For example:
+
+	printf("IV is %"IVdf"\n", iv);
+
+The IVdf will expand to whatever is the correct format for the IVs.
+
+If you are printing addresses of pointers, use UVxf combined
+with PTR2UV(), do not use %lx or %p.
+
+=head2 Pointer-To-Integer and Integer-To-Pointer
+
+Because pointer size does not necessarily equal integer size,
+use the follow macros to do it right.
+
+	PTR2UV(pointer)
+	PTR2IV(pointer)
+	PTR2NV(pointer)
+	INT2PTR(pointertotype, integer)
+
+For example:
+
+	IV  iv = ...;
+	SV *sv = INT2PTR(SV*, iv);
+
+and
+
+	AV *av = ...;
+	UV  uv = PTR2UV(av);
 
 =head2 Source Documentation
 
@@ -1941,8 +2005,7 @@ produced a new character set containing all the characters you can
 possibly think of and more. There are several ways of representing these
 characters, and the one Perl uses is called UTF8. UTF8 uses
 a variable number of bytes to represent a character, instead of just
-one. You can learn more about Unicode at
-L<http://www.unicode.org/|http://www.unicode.org/>
+one. You can learn more about Unicode at http://www.unicode.org/
 
 =head2 How can I recognise a UTF8 string?
 
@@ -1963,7 +2026,7 @@ whether the current character in a string is valid UTF8.
 As mentioned above, UTF8 uses a variable number of bytes to store a
 character. Characters with values 1...128 are stored in one byte, just
 like good ol' ASCII. Character 129 is stored as C<v194.129>; this
-contines up to character 191, which is C<v194.191>. Now we've run out of
+continues up to character 191, which is C<v194.191>. Now we've run out of
 bits (191 is binary C<10111111>) so we move on; 192 is C<v195.128>. And
 so it goes on, moving to three bytes at character 2048.
 
@@ -2075,12 +2138,12 @@ However, you must not do this, for example:
         sv_utf8_upgrade(left);
 
 If you do this in a binary operator, you will actually change one of the
-strings that came into the operator, and, while it shouldn't be noticable
+strings that came into the operator, and, while it shouldn't be noticeable
 by the end user, it can cause problems.
 
 Instead, C<bytes_to_utf8> will give you a UTF8-encoded B<copy> of its
 string argument. This is useful for having the data available for
-comparisons and so on, without harming the orginal SV. There's also
+comparisons and so on, without harming the original SV. There's also
 C<utf8_to_bytes> to go the other way, but naturally, this will fail if
 the string contains any characters above 255 that can't be represented
 in a single byte.

@@ -16,7 +16,7 @@ package CGI::Push;
 # The most recent version and complete docs are available at:
 #   http://stein.cshl.org/WWW/software/CGI/
 
-$CGI::Push::VERSION='1.02';
+$CGI::Push::VERSION='1.03';
 use CGI;
 use CGI::Util 'rearrange';
 @ISA = ('CGI');
@@ -60,7 +60,7 @@ sub do_push {
     while (1) {
 	last unless (@contents = &$callback($self,++$COUNTER)) && defined($contents[0]);
 	print "Content-type: ${type}$CGI::CRLF$CGI::CRLF" 
-	    unless $type eq 'dynamic';
+	    unless $type =~ /^dynamic|heterogeneous$/i;
 	print @contents,"$CGI::CRLF";
 	print "${boundary}$CGI::CRLF";
 	do_sleep($self->push_delay()) if $self->push_delay();

@@ -4,7 +4,7 @@
 # separate executable and can't simply use eval.
 
 chdir 't' if -d 't';
-unshift @INC, "../lib";
+@INC = '../lib';
 $ENV{PERL5LIB} = "../lib";
 
 $|=1;
@@ -346,7 +346,7 @@ print "you die joe!\n" unless "@x" eq 'x y z';
 /(?{"{"})/	# Check it outside of eval too
 EXPECT
 Sequence (?{...}) not terminated or not {}-balanced at - line 1, within pattern
-/(?{"{"})/: Sequence (?{...}) not terminated or not {}-balanced at - line 1.
+Sequence (?{...}) not terminated or not {}-balanced before HERE mark in regex m/(?{ << HERE "{"})/ at - line 1.
 ########
 /(?{"{"}})/	# Check it outside of eval too
 EXPECT
@@ -371,8 +371,8 @@ argv <e>
 # fdopen from a system descriptor to a system descriptor used to close
 # the former.
 open STDERR, '>&=STDOUT' or die $!;
-select STDOUT; $| = 1; print fileno STDOUT;
-select STDERR; $| = 1; print fileno STDERR;
+select STDOUT; $| = 1; print fileno STDOUT or die $!;
+select STDERR; $| = 1; print fileno STDERR or die $!;
 EXPECT
 1
 2

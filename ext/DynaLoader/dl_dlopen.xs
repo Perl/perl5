@@ -198,7 +198,7 @@ int
 dl_unload_file(libref)
     void *	libref
   CODE:
-    DLDEBUG(1,PerlIO_printf(Perl_debug_log, "dl_unload_file(%lx):\n", libref));
+    DLDEBUG(1,PerlIO_printf(Perl_debug_log, "dl_unload_file(%lx):\n", PTR2ul(libref)));
     RETVAL = (dlclose(libref) == 0 ? 1 : 0);
     if (!RETVAL)
         SaveError(aTHX_ "%s", dlerror()) ;

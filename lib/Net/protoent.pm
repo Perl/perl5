@@ -5,7 +5,7 @@ use 5.005_64;
 our(@EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 BEGIN { 
     use Exporter   ();
-    @EXPORT      = qw(getprotobyname getprotobynumber getprotoent);
+    @EXPORT      = qw(getprotobyname getprotobynumber getprotoent getproto);
     @EXPORT_OK   = qw( $p_name @p_aliases $p_proto );
     %EXPORT_TAGS = ( FIELDS => [ @EXPORT_OK, @EXPORT ] );
 }

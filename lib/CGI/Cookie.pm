@@ -40,17 +40,18 @@ sub raw_fetch {
     my %results;
     my($key,$value);
 
-    my(@pairs) = split("; ",$raw_cookie);
+    my(@pairs) = split("; ?",$raw_cookie);
     foreach (@pairs) {
-	if (/^([^=]+)=(.*)/) {
-	    $key = $1;
-	    $value = $2;
-	}
-	else {
-	    $key = $_;
-	    $value = '';
-	}
-	$results{$key} = $value;
+      s/\s*(.*?)\s*/$1/;
+      if (/^([^=]+)=(.*)/) {
+	$key = $1;
+	$value = $2;
+      }
+      else {
+	$key = $_;
+	$value = '';
+      }
+      $results{$key} = $value;
     }
     return \%results unless wantarray;
     return %results;
@@ -60,17 +61,18 @@ sub parse {
     my ($self,$raw_cookie) = @_;
     my %results;
 
-    my(@pairs) = split("; ",$raw_cookie);
+    my(@pairs) = split("; ?",$raw_cookie);
     foreach (@pairs) {
-	my($key,$value) = split("=");
-	my(@values) = map unescape($_),split('&',$value);
-	$key = unescape($key);
-	# Some foreign cookies are not in name=value format, so ignore
-	# them.
-	next if !defined($value);
-	# A bug in Netscape can cause several cookies with same name to
-	# appear.  The FIRST one in HTTP_COOKIE is the most recent version.
-	$results{$key} ||= $self->new(-name=>$key,-value=>\@values);
+      s/\s*(.*?)\s*/$1/;
+      my($key,$value) = split("=");
+      my(@values) = map unescape($_),split('&',$value);
+      $key = unescape($key);
+      # Some foreign cookies are not in name=value format, so ignore
+      # them.
+      next if !defined($value);
+      # A bug in Netscape can cause several cookies with same name to
+      # appear.  The FIRST one in HTTP_COOKIE is the most recent version.
+      $results{$key} ||= $self->new(-name=>$key,-value=>\@values);
     }
     return \%results unless wantarray;
     return %results;
@@ -382,7 +384,7 @@ Get or set the cookie's value.  Example:
 	$value = $c->value;
 	@new_value = $c->value(['a','b','c','d']);
 
-B<value()> is context sensitive.  In an array context it will return
+B<value()> is context sensitive.  In a list context it will return
 the current value of the cookie as an array.  In a scalar context it
 will return the B<first> value of a multivalued cookie.
 

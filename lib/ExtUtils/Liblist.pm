@@ -17,18 +17,18 @@ sub ext {
 
 sub _unix_os2_ext {
     my($self,$potential_libs, $verbose) = @_;
-    if ($^O =~ 'os2' and $Config{libs}) { 
+    if ($^O =~ 'os2' and $Config{perllibs}) { 
 	# Dynamic libraries are not transitive, so we may need including
 	# the libraries linked against perl.dll again.
 
 	$potential_libs .= " " if $potential_libs;
-	$potential_libs .= $Config{libs};
+	$potential_libs .= $Config{perllibs};
     }
     return ("", "", "", "") unless $potential_libs;
     warn "Potential libraries are '$potential_libs':\n" if $verbose;
 
     my($so)   = $Config{'so'};
-    my($libs) = $Config{'libs'};
+    my($libs) = $Config{'perllibs'};
     my $Config_libext = $Config{lib_ext} || ".a";
 
 
@@ -198,7 +198,7 @@ sub _win32_ext {
     my $BC		= 1 if $cc =~ /^bcc/i;
     my $GC		= 1 if $cc =~ /^gcc/i;
     my $so		= $Config{'so'};
-    my $libs		= $Config{'libs'};
+    my $libs		= $Config{'perllibs'};
     my $libpth		= $Config{'libpth'};
     my $libext		= $Config{'lib_ext'} || ".lib";
 
@@ -342,7 +342,7 @@ sub _vms_ext {
                  $self->{CCFLAS}   || $Config{'ccflags'};
   @crtls = ( ($dbgqual =~ m-/Debug-i ? $Config{'dbgprefix'} : '')
               . 'PerlShr/Share' );
-  push(@crtls, grep { not /\(/ } split /\s+/, $Config{'libs'});
+  push(@crtls, grep { not /\(/ } split /\s+/, $Config{'perllibs'});
   push(@crtls, grep { not /\(/ } split /\s+/, $Config{'libc'});
   # In general, we pass through the basic libraries from %Config unchanged.
   # The one exception is that if we're building in the Perl source tree, and
@@ -628,7 +628,7 @@ Unix-OS/2 version in several respects:
 =item *
 
 If C<$potential_libs> is empty, the return value will be empty.
-Otherwise, the libraries specified by C<$Config{libs}> (see Config.pm)
+Otherwise, the libraries specified by C<$Config{perllibs}> (see Config.pm)
 will be appended to the list of C<$potential_libs>.  The libraries
 will be searched for in the directories specified in C<$potential_libs>,
 C<$Config{libpth}>, and in C<$Config{installarchlib}/CORE>.
@@ -672,7 +672,7 @@ Entries in C<$potential_libs> beginning with a colon and followed by
 alphanumeric characters are treated as flags.  Unknown flags will be ignored.
 
 An entry that matches C</:nodefault/i> disables the appending of default
-libraries found in C<$Config{libs}> (this should be only needed very rarely).
+libraries found in C<$Config{perllibs}> (this should be only needed very rarely).
 
 An entry that matches C</:nosearch/i> disables all searching for
 the libraries specified after it.  Translation of C<-Lfoo> and
@@ -682,7 +682,7 @@ valid files or directories.
 
 An entry that matches C</:search/i> reenables searching for
 the libraries specified after it.  You can put it at the end to
-enable searching for default libraries specified by C<$Config{libs}>.
+enable searching for default libraries specified by C<$Config{perllibs}>.
 
 =item *
 

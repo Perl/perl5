@@ -249,6 +249,8 @@ nm_opt='-p'
 
 ####### We define these functions ourselves
 
+d_strtoll='define'
+d_strtoull='define'
 d_getprior='define'
 d_setprior='define'
 
@@ -305,10 +307,6 @@ case "$0$running_c_cmd" in
     ;;
   *) echo "!!! Apparently we are running a renamed Configure: '$0'." >&2
 esac
-
-# Copy pod:
-
-cp -uf ./README.os2 ./pod/perlos2.pod
 
 # This script UU/usethreads.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use threads.

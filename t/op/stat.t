@@ -4,7 +4,7 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    unshift @INC, '../lib';
+    @INC = '../lib';
 }
 
 use Config;
@@ -32,7 +32,7 @@ if (open(FOO, ">Op.stat.tmp")) {
   else {
     print "# res=$res, nlink=$nlink.\nnot ok 1\n";
   }
-  if ($Is_MSWin32 or $Is_Cygwin || ($mtime && $mtime == $ctime)) {
+  if ($Is_MSWin32 or $Is_Cygwin or $Is_Dos || ($mtime && $mtime == $ctime)) {
     print "ok 2\n";
   }
   else {

@@ -745,6 +745,7 @@ go back to service a new client.
 		at port $port";
 
 	spawn sub {
+	    $|=1;
 	    print "Hello there, $name, it's now ", scalar localtime, $EOL;
 	    exec '/usr/games/fortune'		# XXX: `wrong' line terminators
 		or confess "can't exec fortune: $!";
@@ -1246,6 +1247,11 @@ find yourself overly concerned about reliability and start building checks
 into your message system, then you probably should use just TCP to start
 with.
 
+Note that UDP datagrams are I<not> a bytestream and should not be treated
+as such. This makes using I/O mechanisms with internal buffering
+like stdio (i.e. print() and friends) especially cumbersome. Use syswrite(),
+or better send(), like in the example below.
+
 Here's a UDP program similar to the sample Internet TCP client given
 earlier.  However, instead of checking one host at a time, the UDP version
 will check many of them asynchronously by simulating a multicast and then
@@ -1295,6 +1301,11 @@ with TCP, you'd have to use a different socket handle for each host.
 	printf "%8d %s\n", $histime - time, scalar localtime($histime);
 	$count--;
     }
+
+Note that this example does not include any retries and may consequently
+fail to contact a reachable host. The most prominent reason for this
+is congestion of the queues on the sending host if the number of
+list of hosts to contact is sufficiently large.
 
 =head1 SysV IPC
 

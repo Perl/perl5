@@ -2,7 +2,7 @@
 
 print "1..22\n";
 
-BEGIN { unshift @INC, '../lib' }
+BEGIN { @INC = '../lib' }
 use English qw( -no_match_vars ) ;
 use Config;
 my $threads = $Config{'use5005threads'} || 0;

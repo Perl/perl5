@@ -4,6 +4,7 @@ use 5.005_64;
 our(@EXPORT, @EXPORT_OK, $VERSION);
 
 my $is_dosish;
+my $is_epoc;
 my $is_vms;
 
 BEGIN {
@@ -11,6 +12,7 @@ BEGIN {
     @EXPORT = @EXPORT = ();
     @EXPORT_OK = @EXPORT_OK = qw(AUTOLOAD);
     $is_dosish = $^O eq 'dos' || $^O eq 'os2' || $^O eq 'MSWin32';
+    $is_epoc = $^O eq 'epoc';
     $is_vms = $^O eq 'VMS';
     $VERSION = '5.57';
 }
@@ -51,7 +53,11 @@ AUTOLOAD {
 			     $filename = "./$filename";
 			}
 		    }
-		    elsif ($is_vms) {
+		    elsif ($is_epoc) {
+			unless ($filename =~ m{^([a-z?]:)?[\\/]}is) {
+			     $filename = "./$filename";
+			}
+		    }elsif ($is_vms) {
 			# XXX todo by VMSmiths
 			$filename = "./$filename";
 		    }

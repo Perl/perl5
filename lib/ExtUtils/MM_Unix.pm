@@ -305,8 +305,8 @@ sub cflags {
     $libperl ||= $self->{LIBPERL_A} || "libperl$self->{LIB_EXT}" ;
     $libperl =~ s/\.\$\(A\)$/$self->{LIB_EXT}/;
 
-    @cflags{qw(cc ccflags optimize large split shellflags)}
-	= @Config{qw(cc ccflags optimize large split shellflags)};
+    @cflags{qw(cc ccflags optimize shellflags)}
+	= @Config{qw(cc ccflags optimize shellflags)};
     my($optdebug) = "";
 
     $cflags{shellflags} ||= '';
@@ -341,16 +341,12 @@ sub cflags {
 	  optimize=\"$cflags{optimize}\"
 	  perltype=\"$cflags{perltype}\"
 	  optdebug=\"$cflags{optdebug}\"
-	  large=\"$cflags{large}\"
-	  split=\"$cflags{'split'}\"
 	  eval '$prog'
 	  echo cc=\$cc
 	  echo ccflags=\$ccflags
 	  echo optimize=\$optimize
 	  echo perltype=\$perltype
 	  echo optdebug=\$optdebug
-	  echo large=\$large
-	  echo split=\$split
 	  `;
 	my($line);
 	foreach $line (@o){
@@ -368,7 +364,7 @@ sub cflags {
 	$cflags{optimize} = $optdebug;
     }
 
-    for (qw(ccflags optimize perltype large split)) {
+    for (qw(ccflags optimize perltype)) {
 	$cflags{$_} =~ s/^\s+//;
 	$cflags{$_} =~ s/\s+/ /g;
 	$cflags{$_} =~ s/\s+$//;
@@ -411,8 +407,6 @@ sub cflags {
 CCFLAGS = $self->{CCFLAGS}
 OPTIMIZE = $self->{OPTIMIZE}
 PERLTYPE = $self->{PERLTYPE}
-LARGE = $self->{LARGE}
-SPLIT = $self->{SPLIT}
 MPOLLUTE = $pollute
 };
 
@@ -483,7 +477,7 @@ sub const_cccmd {
     return '' unless $self->needs_linking();
     return $self->{CONST_CCCMD} =
 	q{CCCMD = $(CC) -c $(INC) $(CCFLAGS) $(OPTIMIZE) \\
-	$(PERLTYPE) $(LARGE) $(SPLIT) $(MPOLLUTE) $(DEFINE_VERSION) \\
+	$(PERLTYPE) $(MPOLLUTE) $(DEFINE_VERSION) \\
 	$(XS_DEFINE_VERSION)};
 }
 
@@ -812,7 +806,7 @@ DIST_DEFAULT = $dist_default
 
 =item dist_basics (o)
 
-Defines the targets distclean, distcheck, skipcheck, manifest.
+Defines the targets distclean, distcheck, skipcheck, manifest, veryclean.
 
 =cut
 
@@ -839,6 +833,11 @@ skipcheck :
 manifest :
 	$(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) -MExtUtils::Manifest=mkmanifest \\
 		-e mkmanifest
+};
+
+    push @m, q{
+veryclean : realclean
+	$(RM_F) *~ *.orig */*~ */*.orig
 };
     join "", @m;
 }
@@ -1071,13 +1070,7 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)/.exists 
     }
     $ldfrom = "-all $ldfrom -none" if ($^O eq 'dec_osf');
 
-    # Brain dead solaris linker does not use LD_RUN_PATH?
-    # This fixes dynamic extensions which need shared libs
-    my $ldrun = '';
-    $ldrun = join ' ', map "-R$_", split /:/, $self->{LD_RUN_PATH}
-       if ($^O eq 'solaris');
-
-    # The IRIX linker also doesn't use LD_RUN_PATH
+    # The IRIX linker doesn't use LD_RUN_PATH
     $ldrun = qq{-rpath "$self->{LD_RUN_PATH}"}
 	if ($^O eq 'irix' && $self->{LD_RUN_PATH});
 
@@ -1147,9 +1140,9 @@ in these dirs:
 @$dirs
 ";
     }
-    foreach $dir (@$dirs){
-	next unless defined $dir; # $self->{PERL_SRC} may be undefined
-	foreach $name (@$names){
+    foreach $name (@$names){
+	foreach $dir (@$dirs){
+	    next unless defined $dir; # $self->{PERL_SRC} may be undefined
 	    my ($abs, $val);
 	    if ($self->file_name_is_absolute($name)) { # /foo/bar
 		$abs = $name;
@@ -2371,7 +2364,7 @@ $(MAKE_APERL_FILE) : $(FIRST_MAKEFILE)
 
     # The front matter of the linkcommand...
     $linkcmd = join ' ', "\$(CC)",
-	    grep($_, @Config{qw(large split ldflags ccdlflags)});
+	    grep($_, @Config{qw(ldflags ccdlflags)});
     $linkcmd =~ s/\s+/ /g;
     $linkcmd =~ s,(perl\.exp),\$(PERL_INC)/$1,;
 
@@ -2454,7 +2447,7 @@ MAP_PERLINC   = @{$perlinc || []}
 MAP_STATIC    = ",
 join(" \\\n\t", reverse sort keys %static), "
 
-MAP_PRELIBS   = $Config::Config{libs} $Config::Config{cryptlib}
+MAP_PRELIBS   = $Config::Config{perllibs} $Config::Config{cryptlib}
 ";
 
     if (defined $libperl) {
@@ -2498,11 +2491,6 @@ MAP_LIBPERL = $libperl
     }
     # SUNOS ld does not take the full path to a shared library
     my $llibperl = ($libperl)?'$(MAP_LIBPERL)':'-lperl';
-
-    # Brain dead solaris linker does not use LD_RUN_PATH?
-    # This fixes dynamic extensions which need shared libs
-    my $ldfrom = ($^O eq 'solaris')?
-           join(' ', map "-R$_", split /:/, $self->{LD_RUN_PATH}):'';
 
 push @m, "
 \$(MAP_TARGET) :: $tmp/perlmain\$(OBJ_EXT) \$(MAP_LIBPERL) \$(MAP_STATIC) \$(INST_ARCHAUTODIR)/extralibs.all
@@ -3173,9 +3161,11 @@ form Foo/Bar and replaces the slash with C<::>. Returns the replacement.
 sub replace_manpage_separator {
     my($self,$man) = @_;
 	if ($^O eq 'uwin') {
-		$man =~ s,/+,.,g;
+	    $man =~ s,/+,.,g;
+	} elsif ($Is_Dos) {
+	    $man =~ s,/+,__,g;
 	} else {
-		$man =~ s,/+,::,g;
+	    $man =~ s,/+,::,g;
 	}
     $man;
 }
@@ -3494,7 +3484,7 @@ WARN_IF_OLD_PACKLIST = $(PERL) -we 'exit unless -f $$ARGV[0];' \\
 -e 'print "Please make sure the two installations are not conflicting\n";'
 
 UNINST=0
-VERBINST=1
+VERBINST=0
 
 MOD_INSTALL = $(PERL) -I$(INST_LIB) -I$(PERL_LIB) -MExtUtils::Install \
 -e "install({@ARGV},'$(VERBINST)',0,'$(UNINST)');"

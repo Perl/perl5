@@ -4,7 +4,7 @@
  * exactly on the third column */
 
 #define PERL_REVISION	5		/* age */
-#define PERL_VERSION	6		/* epoch */
+#define PERL_VERSION	7		/* epoch */
 #define PERL_SUBVERSION	0		/* generation */
 
 /* The following numbers describe the earliest compatible version of
@@ -69,7 +69,8 @@
  */
 #if !defined(PERL_PATCHLEVEL_H_IMPLICIT) && !defined(LOCAL_PATCH_COUNT)
 static	char	*local_patches[] = {
-	NULL
+        NULL
+	,"DEVEL7368"
 	,NULL
 };
 

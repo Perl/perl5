@@ -1,5 +1,5 @@
 # Pod::Man -- Convert POD data to formatted *roff input.
-# $Id: Man.pm,v 1.4 2000/04/26 04:03:41 eagle Exp $
+# $Id: Man.pm,v 1.8 2000/10/10 02:14:31 eagle Exp $
 #
 # Copyright 1999, 2000 by Russ Allbery <rra@stanford.edu>
 #
@@ -38,7 +38,7 @@ use vars qw(@ISA %ESCAPES $PREAMBLE $VERSION);
 # Perl core and too many things could munge CVS magic revision strings.
 # This number should ideally be the same as the CVS revision in podlators,
 # however.
-$VERSION = 1.04;
+$VERSION = 1.08;
 
 
 ############################################################################
@@ -47,8 +47,10 @@ $VERSION = 1.04;
 
 # The following is the static preamble which starts all *roff output we
 # generate.  It's completely static except for the font to use as a
-# fixed-width font, which is designed by @CFONT@.  $PREAMBLE should
-# therefore be run through s/\@CFONT\@/<font>/g before output.
+# fixed-width font, which is designed by @CFONT@, and the left and right
+# quotes to use for C<> text, designated by @LQOUTE@ and @RQUOTE@.
+# $PREAMBLE should therefore be run through s/\@CFONT\@/<font>/g before
+# output.
 $PREAMBLE = <<'----END OF PREAMBLE----';
 .de Sh \" Subsection heading
 .br
@@ -93,8 +95,8 @@ $PREAMBLE = <<'----END OF PREAMBLE----';
 .    if (\n(.H=4u)&(1m=20u) .ds -- \(*W\h'-12u'\(*W\h'-8u'-\"  diablo 12 pitch
 .    ds L" ""
 .    ds R" ""
-.    ds C` `
-.    ds C' '
+.    ds C` @LQUOTE@
+.    ds C' @RQUOTE@
 'br\}
 .el\{\
 .    ds -- \|\(em\|
@@ -183,7 +185,8 @@ $PREAMBLE = <<'----END OF PREAMBLE----';
 .\}
 .rm #[ #] #H #V #F C
 ----END OF PREAMBLE----
-                                   
+#`# for cperl-mode
+
 # This table is taken nearly verbatim from Tom Christiansen's pod2man.  It
 # assumes that the standard preamble has already been printed, since that's
 # what defines all of the accent marks.  Note that some of these are quoted
@@ -194,7 +197,7 @@ $PREAMBLE = <<'----END OF PREAMBLE----';
     'lt'        =>    '<',      # left chevron, less-than
     'gt'        =>    '>',      # right chevron, greater-than
     'quot'      =>    '"',      # double quote
-    'sol'       =>    '/',      # solidus
+    'sol'       =>    '/',      # solidus (forward slash)
     'verbar'    =>    '|',      # vertical bar
 
     'Aacute'    =>    "A\\*'",  # capital A, acute accent
@@ -275,7 +278,7 @@ sub protect {
     s/^([.\'\\])/\\&$1/mg;
     $_;
 }
-                    
+
 # Given a command and a single argument that may or may not contain double
 # quotes, handle double-quote formatting for it.  If there are no double
 # quotes, just return the command followed by the argument in double quotes.
@@ -306,7 +309,7 @@ sub switchquotes {
 # Translate a font string into an escape.
 sub toescape { (length ($_[0]) > 1 ? '\f(' : '\f') . $_[0] }
 
-                    
+
 ############################################################################
 # Initialization
 ############################################################################
@@ -325,7 +328,8 @@ sub initialize {
     for (qw/fixed fixedbold fixeditalic fixedbolditalic/) {
         if (defined $$self{$_}) {
             if (length ($$self{$_}) < 1 || length ($$self{$_}) > 2) {
-                croak "roff font should be 1 or 2 chars, not `$$self{$_}'";
+                croak qq(roff font should be 1 or 2 chars,)
+                    . qq( not "$$self{$_}");
             }
         } else {
             $$self{$_} = '';
@@ -370,16 +374,35 @@ sub initialize {
         $$self{$_} =~ s/\"/\"\"/g if $$self{$_};
     }
 
+    # Figure out what quotes we'll be using for C<> text.
+    $$self{quotes} ||= '"';
+    if ($$self{quotes} eq 'none') {
+        $$self{LQUOTE} = $$self{RQUOTE} = '';
+    } elsif (length ($$self{quotes}) == 1) {
+        $$self{LQUOTE} = $$self{RQUOTE} = $$self{quotes};
+    } elsif ($$self{quotes} =~ /^(.)(.)$/
+             || $$self{quotes} =~ /^(..)(..)$/) {
+        $$self{LQUOTE} = $1;
+        $$self{RQUOTE} = $2;
+    } else {
+        croak qq(Invalid quote specification "$$self{quotes}");
+    }
+
+    # Double the first quote; note that this should not be s///g as two
+    # double quotes is represented in *roff as three double quotes, not
+    # four.  Weird, I know.
+    $$self{LQUOTE} =~ s/\"/\"\"/;
+    $$self{RQUOTE} =~ s/\"/\"\"/;
+
     $$self{INDENT}  = 0;        # Current indentation level.
     $$self{INDENTS} = [];       # Stack of indentations.
     $$self{INDEX}   = [];       # Index keys waiting to be printed.
+    $$self{ITEMS}   = 0;        # The number of consecutive =items.
 
     $self->SUPER::initialize;
 }
 
-# For each document we process, output the preamble first.  Note that the
-# fixed width font is a global default; once we interpolate it into the
-# PREAMBLE, it ain't ever changing.  Maybe fix this later.
+# For each document we process, output the preamble first.
 sub begin_pod {
     my $self = shift;
 
@@ -425,15 +448,18 @@ sub begin_pod {
     }
 
     # Now, print out the preamble and the title.
-    $PREAMBLE =~ s/\@CFONT\@/$$self{fixed}/;
-    chomp $PREAMBLE;
+    local $_ = $PREAMBLE;
+    s/\@CFONT\@/$$self{fixed}/;
+    s/\@LQUOTE\@/$$self{LQUOTE}/;
+    s/\@RQUOTE\@/$$self{RQUOTE}/;
+    chomp $_;
     print { $self->output_handle } <<"----END OF HEADER----";
 .\\" Automatically generated by Pod::Man version $VERSION
 .\\" @{[ scalar localtime ]}
 .\\"
 .\\" Standard preamble:
 .\\" ======================================================================
-$PREAMBLE
+$_
 .\\" ======================================================================
 .\\"
 .IX Title "$name $section"
@@ -460,9 +486,19 @@ sub command {
     my $self = shift;
     my $command = shift;
     return if $command eq 'pod';
-    return if ($$self{EXCLUDE} && $command ne 'end');
-    $command = 'cmd_' . $command;
-    $self->$command (@_);
+   return if ($$self{EXCLUDE} && $command ne 'end');
+    if ($self->can ('cmd_' . $command)) {
+        $command = 'cmd_' . $command;
+        $self->$command (@_);
+     } else {
+        my ($text, $line, $paragraph) = @_;
+        my $file;
+        ($file, $line) = $paragraph->file_line;
+        $text =~ s/\n+\z//;
+        $text = " $text" if ($text =~ /^\S/);
+        warn qq($file:$line: Unknown command paragraph "=$command$text"\n);
+        return;
+    }
 }
 
 # Called for a verbatim paragraph.  Gets the paragraph, the line number, and
@@ -479,7 +515,7 @@ sub verbatim {
     1 while s/^(.*?)(\t+)/$1 . ' ' x (length ($2) * 8 - length ($1) % 8)/me;
     s/\\/\\e/g;
     s/^(\s*\S)/'\&' . $1/gme;
-    $self->makespace if $$self{NEEDSPACE};
+    $self->makespace;
     $self->output (".Vb $lines\n$_.Ve\n");
     $$self{NEEDSPACE} = 0;
 }
@@ -505,7 +541,7 @@ sub textblock {
           >
           (
               ,?\s+(and\s+)?    # Allow lots of them, conjuncted.
-              L<  
+              L<
                   /
                   ( [:\w]+ ( \(\) )? )
               >
@@ -531,7 +567,7 @@ sub textblock {
     # scalars as well as scalars and does the right thing with them.
     $text = $self->parse ($text, @_);
     $text =~ s/\n\s*$/\n/;
-    $self->makespace if $$self{NEEDSPACE};
+    $self->makespace;
     $self->output (protect $self->mapfonts ($text));
     $self->outindex;
     $$self{NEEDSPACE} = 1;
@@ -591,7 +627,7 @@ sub sequence {
         my $tmp = $self->buildlink ($_);
         return bless \ "$tmp", 'Pod::Man::String';
     }
-                         
+
     # Whitespace protection replaces whitespace with "\ ".
     if ($command eq 'S') {
         s/\s+/\\ /g;
@@ -621,6 +657,10 @@ sub cmd_head1 {
     local $_ = $self->parse (@_);
     s/\s+$//;
     s/\\s-?\d//g;
+    if ($$self{ITEMS} > 1) {
+        $$self{ITEMS} = 0;
+        $self->output (".PD\n");
+    }
     $self->output (switchquotes ('.SH', $self->mapfonts ($_)));
     $self->outindex (($_ eq 'NAME') ? () : ('Header', $_));
     $$self{NEEDSPACE} = 0;
@@ -631,6 +671,10 @@ sub cmd_head2 {
     my $self = shift;
     local $_ = $self->parse (@_);
     s/\s+$//;
+    if ($$self{ITEMS} > 1) {
+        $$self{ITEMS} = 0;
+        $self->output (".PD\n");
+    }
     $self->output (switchquotes ('.Sh', $self->mapfonts ($_)));
     $self->outindex ('Subsection', $_);
     $$self{NEEDSPACE} = 0;
@@ -685,7 +729,7 @@ sub cmd_item {
     my $index;
     if (/\w/ && !/^\w[.\)]\s*$/) {
         $index = $_;
-        $index =~ s/^\s*[-*+o.]?\s*//;
+        $index =~ s/^\s*[-*+o.]?(?:\s+|\Z)//;
     }
     s/^\*(\s|\Z)/\\\(bu$1/;
     if ($$self{WEIRDINDENT}) {
@@ -693,9 +737,11 @@ sub cmd_item {
         $$self{WEIRDINDENT} = 0;
     }
     $_ = $self->mapfonts ($_);
+    $self->output (".PD 0\n") if ($$self{ITEMS} == 1);
     $self->output (switchquotes ('.Ip', $_, $$self{INDENT}));
     $self->outindex ($index ? ('Item', $index) : ());
     $$self{NEEDSPACE} = 0;
+    $$self{ITEMS}++;
 }
 
 # Begin a block for a particular translator.  Setting VERBATIM triggers
@@ -828,7 +874,7 @@ sub parse {
     $self->parse_text ({ -expand_seq   => 'sequence',
                          -expand_ptree => 'collapse' }, @_);
 }
-    
+
 # Takes a parse tree and a flag saying whether or not to treat it as literal
 # text (not call guesswork on it), and returns the concatenation of all of
 # the text strings in that parse tree.  If the literal flag isn't true,
@@ -942,7 +988,10 @@ sub guesswork {
 # Make vertical whitespace.
 sub makespace {
     my $self = shift;
-    $self->output ($$self{INDENT} > 0 ? ".Sp\n" : ".PP\n");
+    $self->output (".PD\n") if ($$self{ITEMS} > 1);
+    $$self{ITEMS} = 0;
+    $self->output ($$self{INDENT} > 0 ? ".Sp\n" : ".PP\n")
+        if $$self{NEEDSPACE};
 }
 
 # Output any pending index entries, and optionally an index entry given as
@@ -1103,6 +1152,18 @@ Pod::Man doesn't assume you have this, and defaults to CB.  Some systems
 (such as Solaris) have this font available as CX.  Only matters for troff(1)
 output.
 
+=item quotes
+
+Sets the quote marks used to surround CE<lt>> text.  If the value is a
+single character, it is used as both the left and right quote; if it is two
+characters, the first character is used as the left quote and the second as
+the right quoted; and if it is four characters, the first two are used as
+the left quote and the second two as the right quote.
+
+This may also be set to the special value C<none>, in which case no quote
+marks are added around CE<lt>> text (but the font is still changed for troff
+output).
+
 =item release
 
 Set the centered footer.  By default, this is the version of Perl you run
@@ -1139,7 +1200,7 @@ details.
 
 =over 4
 
-=item roff font should be 1 or 2 chars, not `%s'
+=item roff font should be 1 or 2 chars, not "%s"
 
 (F) You specified a *roff font (using C<fixed>, C<fixedbold>, etc.) that
 wasn't either one or two characters.  Pod::Man doesn't support *roff fonts
@@ -1152,6 +1213,16 @@ versions of nroff(1) and troff(1) don't either).
 unable to parse.  You should never see this error message; it probably
 indicates a bug in Pod::Man.
 
+=item Invalid quote specification "%s"
+
+(F) The quote specification given (the quotes option to the constructor) was
+invalid.  A quote specification must be one, two, or four characters long.
+
+=item %s:%d: Unknown command paragraph "%s".
+
+(W) The POD source contained a non-standard command paragraph (something of
+the form C<=command args>) that Pod::Man didn't know about.  It was ignored.
+
 =item Unknown escape EE<lt>%sE<gt>
 
 (W) The POD source contained an C<EE<lt>E<gt>> escape that Pod::Man didn't
@@ -1161,6 +1232,11 @@ know about.  C<EE<lt>%sE<gt>> was printed verbatim in the output.
 
 (W) The POD source contained a non-standard interior sequence (something of
 the form C<XE<lt>E<gt>>) that Pod::Man didn't know about.  It was ignored.
+
+=item %s: Unknown command paragraph "%s" on line %d.
+
+(W) The POD source contained a non-standard command paragraph (something of
+the form C<=command args>) that Pod::Man didn't know about. It was ignored.
 
 =item Unmatched =back
 

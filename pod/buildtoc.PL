@@ -80,6 +80,7 @@ if (-d "pod") {
     perlrun
     perldiag
     perllexwarn
+    perldebtut
     perldebug
 
     perlvar
@@ -87,19 +88,10 @@ if (-d "pod") {
     perlopentut
     perlretut
 
-    perlref
     perlre
+    perlref
+
     perlform
-    perllocale
-    perlunicode
-
-    perlipc
-    perlfork
-    perlnumber
-    perlthrtut
-
-    perlport
-    perlsec
 
     perlboot
     perltoot
@@ -107,6 +99,18 @@ if (-d "pod") {
     perlobj
     perlbot
     perltie
+
+    perlipc
+    perlfork
+    perlnumber
+    perlthrtut
+
+    perlport
+    perllocale
+    perlunicode
+    perlebcdic
+
+    perlsec
 
     perlmod
     perlmodlib
@@ -146,6 +150,7 @@ if (-d "pod") {
     perl5005delta       
     perl5004delta       
 
+    perlaix
     perlamiga          
     perlcygwin          
     perldos             
@@ -159,6 +164,7 @@ if (-d "pod") {
 	  );
 
 @ARCHPODS = qw(
+    perlaix	
     perlamiga          
     perlcygwin          
     perldos             
@@ -468,3 +474,7 @@ sub output ($) {
 
 !NO!SUBS!
 
+close OUT or die "Can't close $file: $!";
+chmod 0755, $file or die "Can't reset permissions for $file: $!\n";
+exec("$Config{'eunicefix'} $file") if $Config{'eunicefix'} ne ':';
+chdir $origdir;
