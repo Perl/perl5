@@ -11,7 +11,7 @@ BEGIN {
     $ENV{PERL_DESTRUCT_LEVEL} = 0;	# XXX known trouble with global destruction
 }
 $| = 1;
-print "1..12\n";
+print "1..14\n";
 use Thread;
 print "ok 1\n";
 
@@ -32,23 +32,40 @@ print $t->join;
 }
 $t->join;
 
-sub islocked
+sub dorecurse
 {
  my $val = shift;
  my $ret;
  print $val;
  if (@_)
   {
-   $ret = Thread->new(\&islocked, @_);
+   $ret = Thread->new(\&dorecurse, @_);
    $ret->join;
   }
 }
 
-$t = new Thread \&islocked, map { "ok $_\n" } 6..10;
+$t = new Thread \&dorecurse, map { "ok $_\n" } 6..10;
 $t->join;
 
 # test that sleep lets other thread run
-$t = new Thread \&islocked,"ok 11\n";
+$t = new Thread \&dorecurse,"ok 11\n";
 sleep 6;
 print "ok 12\n";
 $t->join;
+
+sub islocked
+{
+ use attrs 'locked';
+ my $val = shift;
+ my $ret;
+ print $val;
+ if (@_)
+  {
+   $ret = Thread->new(\&islocked, shift);
+  }
+ $ret;
+}
+
+$t = Thread->new(\&islocked, "ok 13\n", "ok 14\n");
+$t->join->join;
+
