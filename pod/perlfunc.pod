@@ -1449,23 +1449,23 @@ Converts a time as returned by the time function to a 9-element array
 with the time localized for the standard Greenwich time zone.  
 Typically used as follows:
 
-
+    #  0    1    2     3     4    5     6     7     8
     ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
 					    gmtime(time);
 
 All array elements are numeric, and come straight out of a struct tm.
 In particular this means that $mon has the range 0..11 and $wday has
-the range 0..6.  Also, $year is the number of years since 1900, I<not>
-simply the last two digits of the year.
+the range 0..6 with sunday as day 0.  Also, $year is the number of
+years since 1900, I<not> simply the last two digits of the year.
 
 If EXPR is omitted, does C<gmtime(time())>.
 
-In a scalar context, prints out the ctime(3) value:
+In a scalar context, returns the ctime(3) value:
 
     $now_string = gmtime;  # e.g., "Thu Oct 13 04:54:34 1994"
 
-Also see the F<timegm.pl> library, and the strftime(3) function available
-via the POSIX module.
+Also see the timegm() function provided by the Time::Local module,
+and the strftime(3) function available via the POSIX module.
 
 =item goto LABEL
 
@@ -1501,7 +1501,7 @@ will be able to tell that this routine was called first.
 
 =item grep EXPR,LIST
 
-This is similar in spirit to, but not the same as, L<grep(1)>
+This is similar in spirit to, but not the same as, grep(1)
 and its relatives.  In particular, it is not limited to using
 regular expressions.
 
@@ -1605,7 +1605,7 @@ system:
 
 =item join EXPR,LIST
 
-Joins the separate strings of LIST or ARRAY into a single string with
+Joins the separate strings of LIST into a single string with
 fields separated by the value of EXPR, and returns the string.
 Example:
 
@@ -1635,7 +1635,7 @@ or how about sorted by key:
 	print $key, '=', $ENV{$key}, "\n";
     }
 
-To sort an array by value, you'll need to use a C<sort{}> function.
+To sort an array by value, you'll need to use a C<sort> function.
 Here's a descending numeric sort of a hash by its values:
 
     foreach $key (sort { $hash{$b} <=> $hash{$a} } keys %hash)) {
@@ -1739,20 +1739,23 @@ Converts a time as returned by the time function to a 9-element array
 with the time analyzed for the local time zone.  Typically used as
 follows:
 
+    #  0    1    2     3     4    5     6     7     8
     ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
 						localtime(time);
 
 All array elements are numeric, and come straight out of a struct tm.
 In particular this means that $mon has the range 0..11 and $wday has
-the range 0..6 and $year is year-1900, that is, $year is 123 in year
-2023.  If EXPR is omitted, uses the current time ("localtime(time)").
+the range 0..6 with sunday as day 0.  Also, $year is the number of
+years since 1900, that is, $year is 123 in year 2023.
+
+If EXPR is omitted, uses the current time (C<localtime(time)>).
 
 In a scalar context, returns the ctime(3) value:
 
     $now_string = localtime;  # e.g., "Thu Oct 13 04:54:34 1994"
 
-Also see the Time::Local module, and the strftime(3) function available
-via the POSIX module.
+Also see the Time::Local module, and the strftime(3) and mktime(3)
+function available via the POSIX module.
 
 =item log EXPR
 
@@ -2786,7 +2789,7 @@ has the same interpretation as in the system call of the same name.
 Returns the sine of EXPR (expressed in radians).  If EXPR is omitted,
 returns sine of $_.
 
-For the inverse sine operation, you may use the POSIX::sin()
+For the inverse sine operation, you may use the POSIX::asin()
 function, or use this relation:
 
     sub asin { atan2($_[0], sqrt(1 - $_[0] * $_[0])) }
@@ -2806,7 +2809,7 @@ always sleep the full amount.
 
 For delays of finer granularity than one second, you may use Perl's
 syscall() interface to access setitimer(2) if your system supports it, 
-or else see L</select()> below.  
+or else see L</select()>.  
 
 See also the POSIX module's sigpause() function.
 
@@ -2862,7 +2865,7 @@ Examples:
     @articles = sort {$a cmp $b} @files;
 
     # now case-insensitively
-    @articles = sort { uc($a) cmp uc($b)} @files;
+    @articles = sort {uc($a) cmp uc($b)} @files;
 
     # same thing in reversed order
     @articles = sort {$b cmp $a} @files;
@@ -3142,19 +3145,19 @@ follows:
 Not all fields are supported on all filesystem types.  Here are the 
 meaning of the fields:
 
-  dev	    device number of filesystem 
-  ino	    inode number 
-  mode	    file mode  (type and permissions)
-  nlink	    number of (hard) links to the file 
-  uid	    numeric user ID of file's owner 
-  gid	    numeric group ID of file's owner 
-  rdev	    the device identifier (special files only)
-  size	    total size of file, in bytes 
-  atime	    last access time since the epoch
-  mtime	    last modify time since the epoch
-  ctime	    inode change time (NOT creation time!) since the epoch
-  blksize   preferred block size for file system I/O
-  blocks    actual number of blocks allocated
+  0  dev       device number of filesystem 
+  1  ino       inode number 
+  2  mode      file mode  (type and permissions)
+  3  nlink     number of (hard) links to the file 
+  4  uid       numeric user ID of file's owner 
+  5  gid       numeric group ID of file's owner 
+  6  rdev      the device identifier (special files only)
+  7  size      total size of file, in bytes 
+  8  atime     last access time since the epoch
+  9  mtime     last modify time since the epoch
+ 10  ctime     inode change time (NOT creation time!) since the epoch
+ 11  blksize   preferred block size for file system I/O
+ 12  blocks    actual number of blocks allocated
 
 (The epoch was at 00:00 January 1, 1970 GMT.)
 
@@ -3176,11 +3179,11 @@ Takes extra time to study SCALAR (C<$_> if unspecified) in anticipation of
 doing many pattern matches on the string before it is next modified.
 This may or may not save time, depending on the nature and number of
 patterns you are searching on, and on the distribution of character
-frequencies in the string to be searched--you probably want to compare
+frequencies in the string to be searched -- you probably want to compare
 run times with and without it to see which runs faster.  Those loops
 which scan for many short constant strings (including the constant
 parts of more complex patterns) will benefit most.  You may have only
-one study active at a time--if you study a different scalar the first
+one study active at a time -- if you study a different scalar the first
 is "unstudied".  (The way study works is this: a linked list of every
 character in the string to be searched is made, so we know, for
 example, where all the 'k' characters are.  From each search string,
@@ -3264,7 +3267,7 @@ Returns 1 for success, 0 otherwise.  On systems that don't support
 symbolic links, produces a fatal error at run time.  To check for that,
 use eval:
 
-    $symlink_exists = (eval 'symlink("","");', $@ eq '');
+    $symlink_exists = (eval {symlink("","")};, $@ eq '');
 
 =item syscall LIST
 
@@ -3478,7 +3481,7 @@ seconds, for this process and the children of this process.
 
 =item tr///
 
-The translation operator.  See L<perlop>.
+The translation operator.  Same as y///. See L<perlop>.
 
 =item truncate FILEHANDLE,LENGTH
 
@@ -3817,6 +3820,6 @@ Note that write is I<NOT> the opposite of read.  Unfortunately.
 
 =item y///
 
-The translation operator.  See L<perlop>.
+The translation operator.  Same as tr///.  See L<perlop>.
 
 =back
