@@ -257,7 +257,7 @@ lintflags = -hbvxac
 .c$(OBJ_EXT):
 	$(CCCMD) $(PLDLFLAGS) $*.c
 
-all: $(FIRSTMAKEFILE) miniperl $(private) $(plextract) $(public) $(dynamic_ext) $(nonxs_ext)
+all: $(FIRSTMAKEFILE) miniperl $(private) $(public) $(dynamic_ext) $(nonxs_ext)
 	@echo " ";
 	@echo "	Everything is up to date. 'make test' to run test suite."
 
@@ -270,7 +270,7 @@ compile: all
 translators:	miniperl lib/Config.pm FORCE
 	@echo " "; echo "	Making x2p stuff"; cd x2p; $(LDLIBPTH) $(MAKE) all
 
-utilities:	miniperl lib/Config.pm FORCE
+utilities:	miniperl lib/Config.pm $(plextract) FORCE
 	@echo " "; echo "	Making utilities"; cd utils; $(LDLIBPTH) $(MAKE) all
 
 
@@ -454,7 +454,7 @@ sperl$(OBJ_EXT): perl.c perly.h patchlevel.h $(h)
 # We have to call our ./makedir because Ultrix 4.3 make can't handle the line
 #	test -d lib/auto || mkdir lib/auto
 #
-preplibrary: miniperl lib/Config.pm $(plextract)
+preplibrary: miniperl lib/Config.pm
 	@sh ./makedir lib/auto
 	@echo "	AutoSplitting perl library"
 	$(LDLIBPTH) ./miniperl -Ilib -e 'use AutoSplit; \
