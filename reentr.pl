@@ -169,7 +169,8 @@ while (<DATA>) {
 	$prereqh  = "$h.h";
 	$prereqsh = "\$$prereqs $prereqh";
     }
-    print <<EOF if $opts{U};
+    if ($opts{U}) {
+	print <<EOF;
 ?RCS: \$Id: d_${f}_r.U,v $
 ?RCS:
 ?RCS: Copyright (c) 2002 Jarkko Hietaniemi
@@ -207,12 +208,13 @@ set ${f}_r d_${f}_r
 eval \$inlibc
 case "\$d_${f}_r" in
 "\$define")
-	hdrs="\$i_systypes sys/types.h define stdio.h $prereqsh"
-	case "$h" in
-	time)
-		hdrs="\$hdrs \$i_systime sys/time.h"
-		;;
-	esac
+EOF
+        my $hdrs = "\$i_systypes sys/types.h define stdio.h $prereqsh";
+        if ($h eq 'time') {
+	    $hdrs .= " \$i_systime sys/time.h";
+	}
+	print <<EOF;
+	hdrs="$hdrs"
 	case "\$d_${f}_r_proto:\$usethreads" in
 	":define")	d_${f}_r_proto=define
 		set d_${f}_r_proto ${f}_r \$hdrs
@@ -222,26 +224,27 @@ case "\$d_${f}_r" in
 	case "\$d_${f}_r_proto" in
 	define)
 EOF
-	for my $p (@p) {
-	    my ($r, $a) = ($p =~ /^(.)_(.+)/);
-	    my $v = join(", ", map { $m{$_} } split '', $a);
-	    if ($opts{U}) {
-		print <<EOF ;
+    }
+    for my $p (@p) {
+        my ($r, $a) = ($p =~ /^(.)_(.+)/);
+	my $v = join(", ", map { $m{$_} } split '', $a);
+	if ($opts{U}) {
+	    print <<EOF ;
 	case "\$${f}_r_proto" in
 	''|0) try='$m{$r} ${f}_r($v);'
 	./protochk "extern \$try" \$hdrs && ${f}_r_proto=$p ;;
 	esac
 EOF
-            }
-	    $seenh{$f}->{$p}++;
-	    push @{$seena{$f}}, $p;
-	    $seenp{$p}++;
-	    $seent{$f} = $t;
-	    $seens{$f} = $m{S};
-	    $seend{$f} = $m{D};
-	}
-	if ($opts{U}) {
-	    print <<EOF;
+        }
+        $seenh{$f}->{$p}++;
+        push @{$seena{$f}}, $p;
+        $seenp{$p}++;
+        $seent{$f} = $t;
+        $seens{$f} = $m{S};
+        $seend{$f} = $m{D};
+    }
+    if ($opts{U}) {
+	print <<EOF;
 	case "\$${f}_r_proto" in
 	''|0)	d_${f}_r=undef
  	        ${f}_r_proto=0

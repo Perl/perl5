@@ -744,7 +744,7 @@ EXPECT
 Unrecognized escape \q passed through at - line 4.
 ########
 # toke.c
-# 20020328 mjd@plover.com at behest of jfriedl@yahoo.com
+# 20020328 mjd-perl-patch+@plover.com at behest of jfriedl@yahoo.com
 use warnings 'regexp';
 "foo" =~ /foo/c;
 "foo" =~ /foo/cg;
@@ -755,7 +755,7 @@ EXPECT
 Use of /c modifier is meaningless without /g at - line 4.
 ########
 # toke.c
-# 20020328 mjd@plover.com at behest of jfriedl@yahoo.com
+# 20020328 mjd-perl-patch+@plover.com at behest of jfriedl@yahoo.com
 use warnings 'regexp';
 $_ = "ab" ; 
 s/ab/ab/c;
@@ -766,3 +766,25 @@ s/ab/ab/cg;
 EXPECT
 Use of /c modifier is meaningless in s/// at - line 5.
 Use of /c modifier is meaningless in s/// at - line 6.
+########
+-wa
+# toke.c
+# 20020414 mjd-perl-patch+@plover.com # -a flag should suppress these warnings
+print "@F\n";
+EXPECT
+
+########
+-w
+# toke.c
+# 20020414 mjd-perl-patch+@plover.com # -a flag should suppress these warnings
+print "@F\n";
+EXPECT
+Possible unintended interpolation of @F in string at - line 4.
+Name "main::F" used only once: possible typo at - line 4.
+########
+-wa
+# toke.c
+# 20020414 mjd-perl-patch+@plover.com
+EXPECT
+
+

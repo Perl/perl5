@@ -6,7 +6,7 @@ BEGIN {
         chdir 't';
     }
 }
-use Test::More tests => 45;
+use Test::More tests => 55;
 
 my @Exported_Funcs;
 BEGIN { 
@@ -168,3 +168,38 @@ TODO: {
 lock_keys(%ENV);
 eval { () = $ENV{I_DONT_EXIST} };
 like( $@, qr/^Attempt to access disallowed key 'I_DONT_EXIST' in a restricted hash/,   'locked %ENV');
+
+{
+    my %hash;
+
+    lock_keys(%hash, 'first');
+
+    is (scalar keys %hash, 0, "place holder isn't a key");
+    $hash{first} = 1;
+    is (scalar keys %hash, 1, "we now have a key");
+    delete $hash{first};
+    is (scalar keys %hash, 0, "now no key");
+
+    unlock_keys(%hash);
+
+    $hash{interregnum} = 1.5;
+    is (scalar keys %hash, 1, "key again");
+    delete $hash{interregnum};
+    is (scalar keys %hash, 0, "no key again");
+
+    lock_keys(%hash, 'second');
+
+    is (scalar keys %hash, 0, "place holder isn't a key");
+
+    eval {$hash{zeroeth} = 0};
+    like ($@,
+          qr/^Attempt to access disallowed key 'zeroeth' in a restricted hash/,
+          'locked key never mentioned before should fail');
+    eval {$hash{first} = -1};
+    like ($@,
+          qr/^Attempt to access disallowed key 'first' in a restricted hash/,
+          'previously locked place holders should also fail');
+    is (scalar keys %hash, 0, "and therefore there are no keys");
+    $hash{second} = 1;
+    is (scalar keys %hash, 1, "we now have just one key");
+}

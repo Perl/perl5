@@ -89,7 +89,12 @@ case `$cc -v 2>&1`"" in
 		    case "$gccversion" in
 			3*)
 			    case "$archname" in
-				PA-RISC*) ccflags="$ccflags -mpa-risc-2-0" ;;
+                               PA-RISC*)
+                                   case "$ccflags" in
+                                       *-mpa-risc*) ;;
+                                       *) ccflags="$ccflags -mpa-risc-2-0" ;;
+                                       esac
+                                   ;;
 				esac
 			    ;;
 			*)  # gcc with gas will not accept +DA2.0
@@ -483,8 +488,18 @@ EOM
 		    # tell perl.h to include <pthread.h> before other
 		    # include files
 		    ccflags="$ccflags -DPTHREAD_H_FIRST"
-# First column on purpose.
+# First column on purpose:
+# this is not a standard Configure variable
+# but we need to get this noticed.
 pthread_h_first="$define"
+
+		    # HP-UX 10.X seems to have no easy
+		    # way of detecting these *time_r protos.
+		    d_gmtime_r_proto='define'
+		    gmtime_r_proto='REENTRANT_PROTO_I_TS'
+		    d_localtime_r_proto='define'
+		    localtime_r_proto='REENTRANT_PROTO_I_TS'
+
 		    # Avoid the poisonous conflicting (and irrelevant)
 		    # prototypes of setkey(). 
 		    i_crypt="$undef"

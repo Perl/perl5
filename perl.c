@@ -3472,6 +3472,10 @@ Perl_init_argv_symbols(pTHX_ register int argc, register char **argv)
 		(void)sv_utf8_decode(sv);
 	}
     }
+
+    if (PL_minus_a) {
+      (void) get_av("main::F", TRUE | GV_ADDMULTI);
+    }
 }
 
 #ifdef HAS_PROCSELFEXE
