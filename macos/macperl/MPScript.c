@@ -625,6 +625,7 @@ pascal Boolean RunScript(ArgExtractor extractor, void * data)
 	gRunningPerl 	=  true;
 	gMacPerl_Quit	=	0;
 	gMacPerl_OSErr	=	0;
+	gMacPerl_ErrorFormat	= 1;
 	
 	ShowWindowStatus();
 	
