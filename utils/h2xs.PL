@@ -1052,12 +1052,14 @@ END
 my ($email,$author);
 
 eval {
-       my $user;
-       ($user,$author) = (getpwuid($>))[0,6];
-       $author =~ s/,.*$//; # in case of sub fields
-       my $domain = $Config{'mydomain'};
-       $domain =~ s/^\.//;
-       $email = "$user\@$domain";
+       my $username;
+       ($username,$author) = (getpwuid($>))[0,6];
+       if (defined $username && defined $author) {
+	   $author =~ s/,.*$//; # in case of sub fields
+	   my $domain = $Config{'mydomain'};
+	   $domain =~ s/^\.//;
+	   $email = "$username\@$domain";
+       }
      };
 
 $author ||= "A. U. Thor";
