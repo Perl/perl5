@@ -7,6 +7,7 @@
    sfio.h (inside an _cplusplus gard).
    It is completely pointless as we have already included it ourselves.
 */
+
 #if !defined(_STDIO_H) && !defined(FILE) && !defined(_STDIO_INCLUDED) && !defined(__STDIO_LOADED)
 #define _STDIO_H
 #define _STDIO_INCLUDED
@@ -17,50 +18,52 @@ struct _FILE;
 
 #define _CANNOT "CANNOT"
 
-#undef stdin
-#undef stdout
-#undef stderr
-#undef getc
-#undef putc
 #undef clearerr
-#undef fflush
+#undef fclose
+#undef fdopen
 #undef feof
 #undef ferror
-#undef fileno
-
-#undef fprintf
-#undef tmpfile
-#undef fclose
-#undef fopen
-#undef vfprintf
+#undef fflush
 #undef fgetc
+#undef fgetpos
+#undef fgets
+#undef fileno
+#undef fopen
+#undef fprintf
 #undef fputc
 #undef fputs
-#undef ungetc
 #undef fread
-#undef fwrite
-#undef fgetpos
+#undef freopen
+#undef fscanf
 #undef fseek
 #undef fsetpos
 #undef ftell
-#undef rewind
-#undef fdopen
-#undef popen
-#undef pclose
+#undef fwrite
+#undef getc
+#undef getc_unlocked
 #undef getw
+#undef pclose
+#undef popen
+#undef putc
+#undef putc_unlocked
 #undef putw
-#undef freopen
+#undef rewind
 #undef setbuf
 #undef setvbuf
-#undef fscanf
-#undef fgets
-#undef getc_unlocked
-#undef putc_unlocked
+#undef stderr
+#undef stdin
+#undef stdout
+#undef tmpfile
+#undef ungetc
+#undef vfprintf
+
 #define fprintf    _CANNOT _fprintf_
 #define stdin      _CANNOT _stdin_
 #define stdout     _CANNOT _stdout_
 #define stderr     _CANNOT _stderr_
+#ifndef OS2
 #define tmpfile()  _CANNOT _tmpfile_
+#endif
 #define fclose(f)  _CANNOT _fclose_
 #define fflush(f)  _CANNOT _fflush_
 #define fopen(p,m)  _CANNOT _fopen_
@@ -75,7 +78,9 @@ struct _FILE;
 #define fputs(s,f)  _CANNOT _fputs_
 #define getc(f)  _CANNOT _getc_
 #define putc(c,f)  _CANNOT _putc_
+#ifndef OS2
 #define ungetc(c,f)  _CANNOT _ungetc_
+#endif
 #define fread(b,s,c,f)  _CANNOT _fread_
 #define fwrite(b,s,c,f)  _CANNOT _fwrite_
 #define fgetpos(f,p)  _CANNOT _fgetpos_
@@ -102,7 +107,6 @@ struct _FILE;
 #define popen(c,m)  _CANNOT _popen_
 #define getw(f)  _CANNOT _getw_
 #define putw(v,f)  _CANNOT _putw_
+#ifndef OS2
 #define pclose(f)  _CANNOT _pclose_
-
-
-
+#endif
