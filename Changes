@@ -29,6 +29,460 @@ Version v5.8.3		Maintenance release working toward v5.8.3
 --------------
 ____________________________________________________________________________
 ____________________________________________________________________________
+[ 21911] By: nicholas                              on 2003/12/14  20:25:18
+        Log: Integrate:
+             [ 21898]
+             Add Perl_ceil
+             
+             [ 21910]
+             Forgot to remove a comment
+     Branch: maint-5.8/perl
+	  !> perl.h pp.c
+____________________________________________________________________________
+[ 21909] By: nicholas                              on 2003/12/14  19:53:35
+        Log: Integrate:
+             [ 21647]
+             Subject: [PATCH] Re: PERL_VERSION, SUBVERSION, PATCHLEVEL
+             From: "Marcus Holland-Moritz" <mhx-perl@gmx.net>
+             Date: Mon, 3 Nov 2003 20:53:33 +0100
+             Message-ID: <023a01c3a244$2a1dd5a0$0c2f1fac@R2D2>
+             
+             [ 21902]
+             Subject: Re: 5.6.2-RC1 on Cygwin
+             From: Yitzchak Scott-Thoennes <sthoenna@efn.org>
+             Date: Sat, 6 Dec 2003 22:32:59 -0800
+             Message-ID: <20031207063259.GA3004@efn.org>
+             (with tweaks to cleanup code)
+     Branch: maint-5.8/perl
+	  !> ext/Devel/PPPort/PPPort.pm t/op/taint.t
+____________________________________________________________________________
+[ 21908] By: nicholas                              on 2003/12/14  19:16:51
+        Log: Integrate:
+             [ 21872]
+             temporary fix to avoid t/op/tie.t failures on Win32
+             
+             [ 21904]
+             Clean up a bug I introduced into caseless ENV hv_delete
+             (should be the proper fix for 21870 and 21872's band aid)
+             
+             [ 21905]
+             Subject: Re: Change 21862
+             From: Enache Adrian <enache@rdslink.ro>
+             Date: Wed, 10 Dec 2003 06:05:58 +0200
+             Message-ID: <20031210040558.GC1584@ratsnest.hole>
+             
+             (1st hunk), plus the equivalent for hv_delete_common
+             
+             [ 21906]
+             Some fool missed a letter n.
+             (and then "optimised" code based on its absense. D'oh)
+             Restore the correct behaviour - fetch with uppercase key, then if
+             still not found store with mixed/lowercase key.
+             
+             [ 21907]
+             S_save_hek_flags should honour the "free" flag.
+             Ought to mask the flag bits that shouldn't be stored.
+     Branch: maint-5.8/perl
+	  !> hv.c
+____________________________________________________________________________
+[ 21903] By: nicholas                              on 2003/12/13  23:02:59
+        Log: Integrate:
+             [ 21834]
+             Subject: Re: [perl #24574] find2perl provides different results to find
+             From: Slaven Rezic <slaven@rezic.de>
+             Date: 30 Nov 2003 22:16:59 +0100
+             Message-ID: <8765h1pnec.fsf@vran.herceg.de>
+             
+             (plus a note about find2perl now defaulting to -print in perldelta)
+             
+             [ 21891]
+             Make the XSRETURN macro evaluate its argument only once.
+     Branch: maint-5.8/perl
+	  !> XSUB.h pod/perldelta.pod x2p/find2perl.PL
+____________________________________________________________________________
+[ 21901] By: nicholas                              on 2003/12/13  21:22:15
+        Log: Integrate:
+             [ 21892]
+             Subject: Patch for: [perl #24650] File::CheckTree should list Larry Wall as author, not unknown 
+             From: David Dyck <david.dyck@fluke.com>
+             Date: Sat, 13 Dec 2003 00:01:34 -0800 (PST)
+             Message-ID: <Pine.LNX.4.51.0312122351450.8825@dd.tc.fluke.com>
+             
+             [ 21895]
+             alarm() is now implemented on Win32.
+             
+             [ 21897]
+             Reformat a long line in perlembed.pod (bug #24623).
+     Branch: maint-5.8/perl
+	  !> lib/File/CheckTree.pm pod/perlembed.pod pod/perlport.pod
+____________________________________________________________________________
+[ 21900] By: nicholas                              on 2003/12/13  21:08:12
+        Log: Integrate:
+             [ 21855]
+             Subject: [PATCH] SCALAR/FIRSTKEY for tied hashes in scalar context
+             From: Tassilo von Parseval <tassilo.parseval@post.rwth-aachen.de>
+             Date: Sat, 06 Dec 2003 11:50:59 +0100
+             Message-id: <20031206105059.GA13989@ethan>
+             
+             [ 21856]
+             Clarify the description of SCALAR in perltie
+             
+             [ 21857]
+             Remove the "Can't provide tied hash usage" error from perldiag.
+             Mention the new tied hash SCALAR method in perldelta.
+             
+             [ 21863]
+             Missing thingies.
+             
+             [ 21865]
+             Subject: [PATCH] documenting SCALAR gotcha
+             From: Tassilo von Parseval <tassilo.parseval@post.rwth-aachen.de>
+             Date: Sun, 07 Dec 2003 16:41:16 +0100
+             Message-id: <20031207154116.GA825@ethan>
+             
+             [ 21869]
+             Subject: [PATCH] iterator reset moved to hv.c (was: [PATCH] SCALAR/FIRSTKEY for tied hashes in scalar context)
+             From: Tassilo von Parseval <tassilo.parseval@post.rwth-aachen.de>
+             Date: Mon, 08 Dec 2003 08:17:46 +0100
+             Message-id: <20031208071746.GA594@ethan>
+             
+             [ 21896]
+             The binary compatibility notes say that new global functions should
+             go at the end. Not that I'm anything more than "trainee" when it
+             comes to this bincompat stuff.
+     Branch: maint-5.8/perl
+	   ! pp.c pp_hot.c
+	  !> embed.fnc embed.h global.sym hv.c lib/Tie/Hash.pm mg.c
+	  !> pod/perlapi.pod pod/perldiag.pod pod/perlfunc.pod
+	  !> pod/perltie.pod proto.h t/op/tie.t
+____________________________________________________________________________
+[ 21899] By: nicholas                              on 2003/12/13  20:26:39
+        Log: Refactor to use t/test.pl
+     Branch: maint-5.8/perl
+	   ! t/op/avhv.t
+____________________________________________________________________________
+[ 21894] By: nicholas                              on 2003/12/13  17:59:41
+        Log: regenerate perltoc.pod and Integrate:
+             [ 21884]
+             Subject: RE: [perl #24610] Pod::Html infinite recursion
+             From: Anders Johnson <ajohnson@nvidia.com>
+             Date: Fri, 12 Dec 2003 14:07:40 -0800
+             Message-ID: <33171CC36240D94EAF1FE584B1D14E0A06EC6F51@mail-sc-11.nvidia.com>
+             (with tweaks)
+             
+             [ 21885]
+             Fix some of the pods to produce more standard manpages,
+             as reported by Eric S. Raymond.
+             
+             [ 21886]
+             More POD fixes ; regenerate perltoc and perlmodlib.
+             
+             [ 21893]
+             foreach qw() { # not valid syntax for 5.005. So fix it.
+     Branch: maint-5.8/perl
+	   ! pod/perltoc.pod
+	  !> README.ce README.netware ext/DynaLoader/DynaLoader_pm.PL
+	  !> lib/Getopt/Std.pm lib/Pod/Html.pm lib/diagnostics.pm
+	  !> pod/buildtoc pod/perlmodlib.pod
+____________________________________________________________________________
+[ 21890] By: nicholas                              on 2003/12/13  16:19:29
+        Log: Integrate:
+             [ 21826]
+             Upgrade to Test::Harness 2.38.
+             Introduce the prove(1) utility.
+             (The prove-switches test is disabled for now.)
+             
+             [ 21836]
+             The prove utility should also be installed on VMS and on Windows.
+             Haven't we regression tests for installations yet ?
+             
+             [ 21871]
+             Upgrade to Digest-MD5 2.33.
+             
+             [ 21874]
+             Suppress a C< $DB::single = 1 > from Switch.pm, as noticed
+             by Jan Dubois.
+     Branch: maint-5.8/perl
+	  +> lib/Test/Harness/bin/prove lib/Test/Harness/t/inc_taint.t
+	  +> lib/Test/Harness/t/prove-switches.t t/lib/Dev/Null.pm
+	  +> t/lib/sample-tests/inc_taint t/lib/sample-tests/taint_warn
+	  +> utils/prove.PL
+	   ! installperl
+	  !> MANIFEST ext/Digest/MD5/Changes ext/Digest/MD5/MD5.pm
+	  !> ext/Digest/MD5/MD5.xs ext/Digest/MD5/Makefile.PL
+	  !> ext/Digest/MD5/t/files.t ext/Digest/MD5/typemap lib/Switch.pm
+	  !> lib/Test/Harness.pm lib/Test/Harness/Assert.pm
+	  !> lib/Test/Harness/Changes lib/Test/Harness/Iterator.pm
+	  !> lib/Test/Harness/Straps.pm lib/Test/Harness/t/00compile.t
+	  !> lib/Test/Harness/t/assert.t lib/Test/Harness/t/callback.t
+	  !> lib/Test/Harness/t/pod.t lib/Test/Harness/t/strap-analyze.t
+	  !> lib/Test/Harness/t/strap.t lib/Test/Harness/t/test-harness.t
+	  !> utils.lst utils/Makefile vms/descrip_mms.template
+	  !> win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[ 21889] By: nicholas                              on 2003/12/13  15:55:57
+        Log: Integrate:
+             [ 21859]
+             Math::BigInt::Scalar is only for tests.
+             Move it under t/lib.
+             
+             [ 21860]
+             Forgot to update the MANIFEST.
+             
+             [ 21861]
+             Subject: [PATCH] Math::BigInt v1.67 (pre-release)
+             From: Tels <perl_dummy@bloodgate.com>
+             Date: Sat, 6 Dec 2003 20:19:44 +0100
+             Message-Id: <200312062016.50484@bloodgate.com>
+             
+             [ 21882]
+             Subject: [PATCH] Math::BigInt v1.67 released
+             From: Tels <perl_dummy@bloodgate.com>
+             Date: Fri, 12 Dec 2003 18:47:43 +0100
+             Message-Id: <200312121847.49039@bloodgate.com>
+     Branch: maint-5.8/perl
+	  +> lib/Math/BigInt/t/const_mbf.t lib/Math/BigInt/t/fallback.t
+	  +> t/lib/Math/BigInt/Scalar.pm
+	   - lib/Math/BigInt/Scalar.pm
+	  !> MANIFEST lib/Math/BigFloat.pm lib/Math/BigInt.pm
+	  !> lib/Math/BigInt/Calc.pm lib/Math/BigInt/t/bare_mbf.t
+	  !> lib/Math/BigInt/t/bare_mbi.t lib/Math/BigInt/t/bigfltpm.inc
+	  !> lib/Math/BigInt/t/bigfltpm.t lib/Math/BigInt/t/bigintc.t
+	  !> lib/Math/BigInt/t/bigintpm.inc lib/Math/BigInt/t/bigintpm.t
+	  !> lib/Math/BigInt/t/bigints.t lib/Math/BigInt/t/biglog.t
+	  !> lib/Math/BigInt/t/constant.t lib/Math/BigInt/t/downgrade.t
+	  !> lib/Math/BigInt/t/sub_mbf.t lib/Math/BigInt/t/sub_mbi.t
+	  !> lib/Math/BigInt/t/with_sub.t
+____________________________________________________________________________
+[ 21888] By: nicholas                              on 2003/12/13  14:42:15
+        Log: Integrate:
+             [ 21858]
+             Subject: [PATCH] casting bug in VMS part of Perl_start_glob
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Sat, 06 Dec 2003 12:44:40 -0600
+             Message-ID: <3FD22398.1060506@mac.com>
+             
+             [ 21864]
+             Subject: [PATCH] setenv tweak for VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Sat, 06 Dec 2003 18:13:32 -0600
+             Message-ID: <3FD270AC.3000106@mac.com>
+             
+             [ 21879]
+             Subject: [PATCH] environ array fix for VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Thu, 11 Dec 2003 14:35:29 -0600
+             Message-ID: <3FD8D511.2030805@mac.com>
+             
+             [ 21881]
+             Subject: [PATCH] d_u32align for win32
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 11 Dec 2003 01:33:39 -0800
+             Message-ID: <lrzndzr958.fsf@caliper.activestate.com>
+     Branch: maint-5.8/perl
+	  !> doio.c vms/vms.c win32/config.bc win32/config.gc
+	  !> win32/config.vc
+____________________________________________________________________________
+[ 21887] By: nicholas                              on 2003/12/13  14:12:49
+        Log: Integrate:
+             [ 21873]
+             Subject: [PATCH perlunicode.pod, encoding.pm] Implicit upgrading docs
+             From: Autrijus Tang <autrijus@autrijus.org>
+             Date: Tue, 9 Dec 2003 20:39:16 +0800
+             Message-ID: <20031209123915.GA1454@not.autrijus.org>
+             
+             [ 21877]
+             Add a mention of the error "DESTROY created new reference
+             to dead object" in perldiag.
+             
+             [ 21878]
+             Subject: [PATCH] Perl 5.9.0 AUTHORS
+             From: Mark Leighton Fisher <mark-fisher@mindspring.com>
+             Message-ID: <3FD8E74F.7000202@mindspring.com>
+             Date: Thu, 11 Dec 2003 16:53:19 -0500
+     Branch: maint-5.8/perl
+	  !> AUTHORS ext/Encode/encoding.pm pod/perldiag.pod
+	  !> pod/perlunicode.pod
+____________________________________________________________________________
+[ 21862] By: nick                                  on 2003/12/06  21:16:01
+        Log: Win32/MinGW tweaks
+             A. ENV_IS_CASELESS has trys to free(keysave) when 
+             keysave isn't in scope yet.
+             B. For default makefile.mk which build with perlhost.h 
+             stuff "live" need to link with g++ to find new/delete etc.
+     Branch: maint-5.8/perl
+	   ! hv.c win32/makefile.mk
+____________________________________________________________________________
+[ 21852] By: nicholas                              on 2003/12/05  21:09:27
+        Log: Integrate:
+             [ 21851]
+             Back out the Makefile.PL part of 21808 as requested by Gisle Aas
+     Branch: maint-5.8/perl
+	  !> ext/Digest/MD5/Makefile.PL
+____________________________________________________________________________
+[ 21850] By: nicholas                              on 2003/12/05  19:44:34
+        Log: Integrate:
+             [ 21843]
+             Subject: [PATCH] another ext/SDBM_File/sdbm build fix
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Thu, 04 Dec 2003 16:00:03 -0600
+             Message-ID: <3FCFAE63.1080106@mac.com>
+             
+             [ 21844]
+             Subject: [REPATCH lib/AutoLoader.t] Test can() with AutoLoader
+             From: chromatic <chromatic@wgz.org>
+             Date: Mon, 01 Dec 2003 09:20:21 -0800
+             Message-Id: <1070299221.1275.19.camel@localhost>
+     Branch: maint-5.8/perl
+	  !> ext/SDBM_File/sdbm/Makefile.PL lib/AutoLoader.t
+____________________________________________________________________________
+[ 21849] By: nicholas                              on 2003/12/05  19:26:44
+        Log: Integrate:
+             [ 21837]
+             Subject: Re: XS modules having problems with CLONE and ithreads unless PERL_NO_GET_CONTEXT is defined
+             From: Stas Bekman <stas@stason.org>
+             Date: Wed, 03 Dec 2003 01:41:42 -0800
+             Message-ID: <3FCDAFD6.9050106@stason.org>
+             
+             [ 21842]
+             Subject: [PATCH] $^P, eval and caller
+             From: Paul Johnson <paul@pjcj.net>
+             Date: Fri, 5 Dec 2003 00:57:21 +0100
+             Message-ID: <20031204235721.GJ26355@pjcj.net>
+     Branch: maint-5.8/perl
+	   ! mg.c
+	  !> sv.c
+____________________________________________________________________________
+[ 21848] By: nicholas                              on 2003/12/05  18:43:44
+        Log: Integrate:
+             [ 21840]
+             Subject: Re: a2p.pod not being installed in 5.8.2?
+             From: Alan Burlison <Alan.Burlison@sun.com>
+             Date: Thu, 04 Dec 2003 12:14:30 +0000
+             Message-ID: <3FCF2526.3030905@sun.com>
+             
+             [ 21846]
+             Subject: [PATCH] Configure gets d_u32align wrong
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 05 Dec 2003 03:47:01 -0800
+             Message-ID: <lr4qwfbi6i.fsf_-_@caliper.activestate.com>
+     Branch: maint-5.8/perl
+	  !> Configure installperl
+____________________________________________________________________________
+[ 21847] By: nicholas                              on 2003/12/05  18:25:53
+        Log: Integrate:
+             [ 21841]
+             Fix File::Copy with hard links on Windows.
+             
+             Subject: [PATCH] Re: perl @ 21830
+             From: Steve Hay <steve.hay@uk.radan.com>
+             Date: Wed, 03 Dec 2003 10:53:02 +0000
+             Message-ID: <3FCDC08E.7080800@uk.radan.com>
+             
+             and
+             Date: Thu, 04 Dec 2003 11:02:22 +0000
+             Message-ID: <3FCF143E.1040905@uk.radan.com>
+     Branch: maint-5.8/perl
+	  !> lib/File/Copy.pm lib/File/Copy.t
+____________________________________________________________________________
+[ 21839] By: nicholas                              on 2003/12/03  21:51:48
+        Log: Integrate:
+             [ 21832]
+             Better docs for the special code blocks, based on :
+             Subject: [DOCPATCH] BEGIN, CHECK, INIT, END explained more
+             From: Elizabeth Mattijsen <liz@dijkmat.nl>
+             Date: Sat, 29 Nov 2003 23:15:56 +0100
+             Message-Id: <p05111b01bbeec2e8bf30@[192.168.56.3]>
+             
+             [ 21835]
+             FAQ sync.
+     Branch: maint-5.8/perl
+	  !> pod/perlfaq1.pod pod/perlfaq2.pod pod/perlfaq3.pod
+	  !> pod/perlfaq4.pod pod/perlfaq5.pod pod/perlmod.pod
+	  !> pod/perlsub.pod
+____________________________________________________________________________
+[ 21838] By: nicholas                              on 2003/12/03  19:13:35
+        Log: Remove duplicate call to PERL_HASH in delete
+             Transpires that in maint there just aren't enough shared hash SVs
+             to make the check in hv.c worth it.
+     Branch: maint-5.8/perl
+	   ! hv.c
+____________________________________________________________________________
+[ 21831] By: nicholas                              on 2003/12/02  20:35:22
+        Log: Integrate:
+             (The hv.c changes of 17740)
+             [ 17740]
+             Clean up copy-on-write macros and debug facilities (new flag 'C').
+             Handle CoW in hashes:
+             Subject: Re: why would tr/// be performing hash copies?
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Sun, 18 Aug 2002 23:17:01 +0100
+             Message-id: <20020818221700.GD294@Bagpuss.unfortu.net>
+             
+             [ 21747]
+             merge hv_exists and hv_exists_ent into S_hv_exists_common
+             
+             [ 21750]
+             integrate hv_delete and hv_delete_ent into hv_delete_common
+             
+             [ 21753]
+             merge hv_fetch and hv_fetch_ent into hv_fetch_common
+             remove S_hv_fetch_flags
+             hv.c now 13% smaller than when I started. hv_store TODO
+             
+             [ 21758]
+             Merge sv_store_flags and sv_store_ent into sv_store_common
+             
+             [ 21760]
+             Shift negative klen/flags games from hv_fetch_common out to hv_fetch
+             
+             [ 21765]
+             Tweaks to S_hv_delete_common:
+             make the magic call hv_fetch_common rather than ent-or-not
+             grab the hash from a shared hash key scalar if possible
+             use masked flags rather than flags for the comparison
+             
+             [ 21766]
+             Move the negative key -> utf8 flag conversion out to hv_delete
+             
+             [ 21768]
+             Shift negative klen/flags games from hv_exists_common out to hv_exists
+             
+             [ 21769]
+             Shift negative klen/flags games from hv_store_common out to hv_store
+             
+             [ 21770]
+             Farewell hv_exists_common - exists is now a call to fetch
+             (with the exists magic handling moved into fetch)
+             
+             [ 21771]
+             "Space Is a Province of Brazil"
+             Farewell, hv_store_common. Store is now part of Fetch.
+             All tests pass. hv.c 15% smaller than when I started all this
+             
+             [ 21772]
+             Reorder functions in hv.c so that callers of hv_fetch_common are all
+             close to it.
+             
+             [ 21779]
+             D'oh. Mistake in the DYNAMIC_ENV_FETCH conditional code
+             reported by Craig Berry
+             
+             [ 21781]
+             Tweak the order of initialisation of oentry in hv_fetch_common -
+             C source now cleaner, but optimised object file still the same size.
+             
+             [ 21782]
+             Should fix the infinite loop on a dynamic %ENV fetch
+     Branch: maint-5.8/perl
+	   ! hv.c
+	  !> embed.fnc embed.h proto.h
+____________________________________________________________________________
+[ 21830] By: nicholas                              on 2003/11/30  21:36:13
+        Log: Update Changes
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 21829] By: nicholas                              on 2003/11/30  21:35:03
         Log: Integrate:
              [ 21827]
