@@ -146,6 +146,12 @@ EOT
 	    }
 	}
 	close RESULTS;
+	if ($ENV{PERL_3LOG}) {
+	    my $tpp = $test;
+	    $tpp =~ s:/:_:g;
+	    $tpp =~ s:\.t$::;
+	    rename("perl.3log", "perl.3log.$tpp");
+	}
 	$next = $next - 1;
 	if ($ok && $next == $max) {
 	    if ($max) {
