@@ -9327,7 +9327,7 @@ EOM
 		    gethbadd_addr_type="$ans"
 
 		    # Remove the "const" if needed.
-		    gethbadd_addr_type=`echo $gethbadd_addr_type | sed 's/^const //'`
+		    gethbadd_addr_type=`echo "$gethbadd_addr_type" | sed 's/^const //'`
 
 		    rp='What is the type for the 2nd argument to gethostbyaddr ?'
 		    dflt="Size_t"
