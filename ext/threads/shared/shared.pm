@@ -6,24 +6,24 @@ use Config;
 require Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT = qw(share cond_wait cond_broadcast cond_signal unlock);
+our @EXPORT_OK = qw(_id _thrcnt _refcnt);
 our $VERSION = '0.90';
 
-use XSLoader;
-XSLoader::load('threads::shared',$VERSION);
 
-BEGIN {
-    if ($Config{'useithreads'}) {
+if ($Config{'useithreads'}) {
 	*cond_wait = \&cond_wait_enabled;
 	*cond_signal = \&cond_signal_enabled;
 	*cond_broadcast = \&cond_broadcast_enabled;
 	*unlock = \&unlock_enabled;
-    } else {
+	require XSLoader;
+	XSLoader::load('threads::shared',$VERSION);
+}
+else {
 	*share = \&share_disabled;
 	*cond_wait = \&cond_wait_disabled;
 	*cond_signal = \&cond_signal_disabled;
 	*cond_broadcast = \&cond_broadcast_disabled;
 	*unlock = \&unlock_disabled;
-    }
 }
 
 

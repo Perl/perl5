@@ -61,9 +61,9 @@ sub start_thread {
     print "Thread started\n";
 }
 
-my $thread = threads->new("start_thread","argument");
+my $thread = threads->create("start_thread","argument");
 
-$thread->new(sub { print "I am a thread"},"argument");
+$thread->create(sub { print "I am a thread"},"argument");
 
 $thread->join();
 
@@ -100,13 +100,11 @@ a warning if you do it the other way around.
 
 =over
 
-=item $thread = new(function, LIST)
+=item $thread = threads->create(function, LIST)
 
 This will create a new thread with the entry point function and give
 it LIST as parameters.  It will return the corresponding threads
 object.
-
-create() is an alias to new.
 
 =item $thread->join
 

@@ -906,6 +906,20 @@ MODULE = threads::shared                PACKAGE = threads::shared
 PROTOTYPES: ENABLE
 
 void
+_id(SV *ref)
+	PROTOTYPE: \[$@%]
+CODE:
+	shared_sv *shared;
+	if(SvROK(ref))
+	    ref = SvRV(ref);
+	if (shared = Perl_sharedsv_find(aTHX_ ref)) {
+	    ST(0) = sv_2mortal(newSViv(PTR2IV(shared)));
+	    XSRETURN(1);
+	}
+	XSRETURN_UNDEF;
+
+
+void
 _refcnt(SV *ref)
 	PROTOTYPE: \[$@%]
 CODE:
