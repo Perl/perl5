@@ -5,6 +5,9 @@ Authors	:	Matthias Neeracher & Tim Endres
 Language	:	MPW C
 
 $Log: MPDroplet.r,v $
+Revision 1.3  2001/10/03 19:23:16  pudge
+Sync with perforce maint-5.6/macperl
+
 Revision 1.2  2001/01/23 05:31:47  neeri
 Make Droplet and Font LDEF buildable with SC (Tasks 24870, 24872)
 
@@ -33,6 +36,8 @@ include "MPExtension.rsrc" 'ICN#'(128);
 include "MPExtension.rsrc" 'icl4'(128);
 include "MPExtension.rsrc" 'icl8'(128);
 include "MPExtension.rsrc" 'ics#'(128);
+include "MPExtension.rsrc" 'ics4'(128);
+include "MPExtension.rsrc" 'ics8'(128);
 include "MPExtension.rsrc" 'ALRT'(4096);
 include "MPExtension.rsrc" 'DITL'(4096);
 include "MPExtension.rsrc" 'FREF'(128);
@@ -66,6 +71,8 @@ resource 'McPs' (SERsrcBase) {
 		'icl4', 'icl4',  128,  128,
 		'icl8', 'icl8',  128,  128,
 		'ics#', 'ics#',  128,  128,
+		'ics4', 'ics4',  128,  128,
+		'ics8', 'ics8',  128,  128,
 		'ALRT', 'ALRT', 4096, 4096,
 		'DITL', 'DITL', 4096, 4096,
 		'FREF', 'FREF',  128,  128,

@@ -9,6 +9,12 @@ Apple Developer Support UK
 Language	:	MPW C
 
 $Log: MacPerl.r,v $
+Revision 1.10  2001/10/03 19:23:16  pudge
+Sync with perforce maint-5.6/macperl
+
+Revision 1.9  2001/09/26 21:51:15  pudge
+Sync with perforce maint-5.6/macperl/macos/macperl
+
 Revision 1.8  2001/09/24 04:31:55  neeri
 Include cursors in build (MacPerl Bug #432129)
 
@@ -139,12 +145,15 @@ include "MacPerl.rsrc" 'ICN#'(132) 	as 'MrPI'(128);
 include "MacPerl.rsrc" 'icl4'(132) 	as 'MrP4'(128);
 include "MacPerl.rsrc" 'icl8'(132) 	as 'MrP8'(128);
 include "MacPerl.rsrc" 'ics#'(132) 	as 'MrP#'(128);
+include "MacPerl.rsrc" 'ics4'(132) 	as 'MrP3'(128);
+include "MacPerl.rsrc" 'ics8'(132) 	as 'MrP7'(128);
 include "MacPerl.rsrc" 'ICN#'(134);
 include "MacPerl.rsrc" 'icl4'(134);
 include "MacPerl.rsrc" 'icl8'(134);
-include "MacPerl.rsrc" 'ics#'(134);
 include "MacPerl.rsrc" 'DITL'(258);
 include "MacPerl.rsrc" 'DLOG'(258);
+include "MacPerl.rsrc" 'DITL'(259);
+include "MacPerl.rsrc" 'DLOG'(259);
 include "MacPerl.rsrc" 'DITL'(352);
 include "MacPerl.rsrc" 'DLOG'(352);
 include "MacPerl.rsrc" 'FREF'(128);
@@ -167,6 +176,7 @@ include "MacPerl.rsrc" 'ICN#'(389);
 include "MacPerl.rsrc" 'PICT'(128);
 include "MacPerl.rsrc" 'PICT'(129);
 include "MacPerl.rsrc" 'PICT'(130);
+include "MacPerl.rsrc" 'PICT'(131);
 include "MacPerl.rsrc" 'snd '(128);
 include "MacPerl.rsrc" 'snd '(129);
 include "MacPerl.rsrc" 'icl4'(129);
@@ -203,19 +213,8 @@ include "Perl.rsrc" 'CURS' (163);
 include "Perl.rsrc" 'acur' (0);
 include "Perl.rsrc" 'acur' (128);
 
+#define MPAppName "MacPerl"
 #include "MPVersion.r";
-
-resource 'vers' (1) {
-	MPRevision, MPVersion, MPState, MPBuild, verUS,
-	MPVersionStr,
-	"MacPerl - ported by Matthias Neeracher."
-	};
-
-resource 'vers' (2) {
-	MPRevision, MPVersion, MPState, MPBuild, verUS,
-	MPVersionStr,
-	"Perl " MPVersionStr " (" MPDate ")"
-	};
 
 resource 'STR#' (CreditID) {
 	{
@@ -229,14 +228,16 @@ resource 'STR#' (CreditID) {
 		"Vicki Brown",		"Jason Buberel",	"James Burgess",
 		"Sean Burke",
 		"Alun Carr",		"Sam Choukri",		"JŸrgen Christoffel",
-		"Henry Churchyard",	"Robert Coie",		"Scott Collins",
+		"Henry Churchyard",	"Robert Coie",
+		"Scott Collins",	"Jim Correia",
 		"Brad Cox",		"Peter Creath",		"Kevin Cutts",
 		"Robert Decker",	"Christian Dippel", 	"Steve Dorner",			
 		"John Draper",
 		"Paul DuBois",		"Paul Duda",
 		"Torsten Ekedahl",	"Tim Endres",		"Gus Fernandez",
 		"Glenn Fleishman",	"brian d foy",		"David Friedlander",
-		"Alan Fry",		"Greg Galanos",		"Steve Goodwin",
+		"Alan Fry",		"Greg Galanos",
+		"Scott R. Godin",	"Steve Goodwin",
 		"Guy Greenbaum",	"Janis Greenberg",	"Michael Greenspon",
 		"Sal Gurnani",		"David Hansen",		"Steve Hampson",
 		"Brad Hanson",		"Toni Harbaugh",	"Tom Harrington",
@@ -244,7 +245,8 @@ resource 'STR#' (CreditID) {
 		"Kee Hinckley",		"Todd Hivnor",		"C. Joe Holmes",
 		"Stewart Holt",		"Tom Holub",
 		"Elton Hughes",		"David Huggins-Daines",
-		"Christian Huldt",	"Jeff Johnson",		"John Kamp",
+		"Christian Huldt",	"Nat Irons",
+		"Jeff Johnson",		"John Kamp",
 		"Dick Karpinski",	"Jim Kateley",		"Pete Keleher",
 		"Thomas Kimpton",	"Andreas Kšnig",	"Manfred Lauer",
 		"Gary LaVoy",		"Xah Lee",		"Thomas Lenggenhager",
@@ -254,13 +256,16 @@ resource 'STR#' (CreditID) {
 		"Will Merrill",		"William Middleton",	"Peter Mšller",
 		"Richard Moe",		"Bill Moore",		"Rich Morin",
 		"Chris Myers",		"Jennifer Nandor",	"Asa Packer",
-		"Paul Patton",		"Mark Pease",		"Lasse Petersen",
+		"Paul Patton",		"Mark Pease",		"James \"Kibo\" Parry",
+		"Lasse Petersen",
 		"John Peterson",	"Brad Pickering",	"Marco Piovanelli",
 		"Tom Pollard",		"Simon Poole",		"Malcolm Pradhan",
 		"Quinn",		"Tim Rand",		"Alasdair Rawsthorne",
 		"Kevin Reid",		"Charlie Reiman",	"King Rhoton",
-		"Marcel Riechert",	"Diller Ryan",		"Gurusamy Sarathy",
+		"Marcel Riechert",	"Axel Rose",
+		"Diller Ryan",		"Gurusamy Sarathy",
 		"Paul Schinder",	"Matthias Schmitt",	"Adam Schneider",
+		"David Schooley",
 		"Shimizu Shu",		"Sandra Silcot",	"Paul Snively",
 		"Stephan Somogyi",	"Omar Souka",		"Jon Stevens",
 		"Dan Strnad",		"Ken Stuart",		"Man Wei Tam",
