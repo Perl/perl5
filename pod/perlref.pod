@@ -14,27 +14,32 @@ contain scalars, you can now easily build arrays of arrays, arrays of
 hashes, hashes of arrays, arrays of hashes of functions, and so on.
 
 Hard references are smart--they keep track of reference counts for you,
-automatically freeing the thing referred to when its reference count
-goes to zero.  (Note: The reference counts for values in self-referential
-or cyclic data structures may not go to zero without a little help; see
+automatically freeing the thing referred to when its reference count goes
+to zero.  (Note: The reference counts for values in self-referential or
+cyclic data structures may not go to zero without a little help; see
 L<perlobj/"Two-Phased Garbage Collection"> for a detailed explanation.
-If that thing happens to be an object, the object is
-destructed.  See L<perlobj> for more about objects.  (In a sense,
-everything in Perl is an object, but we usually reserve the word for
-references to objects that have been officially "blessed" into a class package.)
+If that thing happens to be an object, the object is destructed.  See
+L<perlobj> for more about objects.  (In a sense, everything in Perl is an
+object, but we usually reserve the word for references to objects that
+have been officially "blessed" into a class package.)
 
+Symbolic references are names of variables or other objects, just as a
+symbolic link in a UNIX filesystem contains merely the name of a file.
+The C<*glob> notation is a kind of symbolic reference.  (Symbolic
+references are sometimes called "soft references", but please don't call
+them that; references are confusing enough without useless synonyms.)
 
-A symbolic reference contains the name of a variable, just as a
-symbolic link in the filesystem contains merely the name of a file.  
-The C<*glob> notation is a kind of symbolic reference.  Hard references
-are more like hard links in the file system: merely another way
-at getting at the same underlying object, irrespective of its name.
+In contrast, hard references are more like hard links in a UNIX file
+system: They are used to access an underlying object without concern for
+what its (other) name is.  When the word "reference" is used without an
+adjective, like in the following paragraph, it usually is talking about a
+hard reference.
 
-"Hard" references are easy to use in Perl.  There is just one
-overriding principle:  Perl does no implicit referencing or
-dereferencing.  When a scalar is holding a reference, it always behaves
-as a scalar.  It doesn't magically start being an array or a hash
-unless you tell it so explicitly by dereferencing it.
+References are easy to use in Perl.  There is just one overriding
+principle: Perl does no implicit referencing or dereferencing.  When a
+scalar is holding a reference, it always behaves as a simple scalar.  It
+doesn't magically start being an array or hash or subroutine; you have to
+tell it explicitly to do so, by dereferencing it.
 
 References can be constructed several ways.
 
