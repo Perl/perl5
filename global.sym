@@ -157,6 +157,10 @@ Perl_ibcmp_utf8
 Perl_init_stacks
 Perl_init_tm
 Perl_instr
+Perl_is_lvalue_sub
+Perl_to_uni_upper_lc
+Perl_to_uni_title_lc
+Perl_to_uni_lower_lc
 Perl_is_uni_alnum
 Perl_is_uni_alnumc
 Perl_is_uni_idfirst
@@ -496,6 +500,8 @@ Perl_utf8n_to_uvchr
 Perl_utf8n_to_uvuni
 Perl_uvchr_to_utf8
 Perl_uvuni_to_utf8
+Perl_uvchr_to_utf8_flags
+Perl_uvuni_to_utf8_flags
 Perl_pv_uni_display
 Perl_sv_uni_display
 Perl_warn

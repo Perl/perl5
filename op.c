@@ -2866,7 +2866,8 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 		U8 range_mark = UTF_TO_NATIVE(0xff);
 		sv_catpvn(transv, (char *)&range_mark, 1);
 	    }
-	    t = uvuni_to_utf8(tmpbuf, 0x7fffffff);
+	    t = uvuni_to_utf8_flags(tmpbuf, 0x7fffffff,
+				    UNICODE_ALLOW_SUPER);
 	    sv_catpvn(transv, (char*)tmpbuf, t - tmpbuf);
 	    t = (U8*)SvPVX(transv);
 	    tlen = SvCUR(transv);

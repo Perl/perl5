@@ -2258,7 +2258,7 @@ PP(pp_complement)
 	      while (tmps < send) {
 		  UV c = utf8n_to_uvchr(tmps, send-tmps, &l, UTF8_ALLOW_ANYUV);
 		  tmps += UTF8SKIP(tmps);
-		  result = uvchr_to_utf8(result, ~c);
+		  result = uvchr_to_utf8_flags(result, ~c, UNICODE_ALLOW_ANY);
 	      }
 	      *result = '\0';
 	      result -= targlen;
@@ -3148,7 +3148,8 @@ PP(pp_chr)
 
     if (value > 255 && !IN_BYTES) {
 	SvGROW(TARG, UNISKIP(value)+1);
-	tmps = (char*)uvchr_to_utf8((U8*)SvPVX(TARG), value);
+	tmps = (char*)uvchr_to_utf8_flags((U8*)SvPVX(TARG), value,
+					  UNICODE_ALLOW_SUPER);
 	SvCUR_set(TARG, tmps - SvPVX(TARG));
 	*tmps = '\0';
 	(void)SvPOK_only(TARG);

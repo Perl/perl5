@@ -1573,8 +1573,8 @@ Found in file handy.h
 
 Returns a pointer to the next character after the parsed
 vstring, as well as updating the passed in sv.
- * 
-Function must be called like 
+ *
+Function must be called like
  	
         sv = NEWSV(92,5);
 	s = new_vstring(s,sv);
@@ -4453,20 +4453,28 @@ is the recommended wide native character-aware way of saying
 =for hackers
 Found in file utf8.c
 
-=item uvuni_to_utf8
+=item uvuni_to_utf8_flags
 
 Adds the UTF8 representation of the Unicode codepoint C<uv> to the end
 of the string C<d>; C<d> should be have at least C<UTF8_MAXLEN+1> free
 bytes available. The return value is the pointer to the byte after the
 end of the new character. In other words,
 
+    d = uvuni_to_utf8_flags(d, uv, flags);
+
+or, in most cases,
+
     d = uvuni_to_utf8(d, uv);
+
+(which is equivalent to)
+
+    d = uvuni_to_utf8_flags(d, uv, 0);
 
 is the recommended Unicode-aware way of saying
 
     *(d++) = uv;
 
-	U8*	uvuni_to_utf8(U8 *d, UV uv)
+	U8*	uvuni_to_utf8_flags(U8 *d, UV uv, UV flags)
 
 =for hackers
 Found in file utf8.c

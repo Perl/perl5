@@ -1618,9 +1618,9 @@ EOT
 {
     # from Robin Houston
 
-    my $x = "\x{12345678}";
+    my $x = "\x{10FFFD}";
     $x =~ s/(.)/$1/g;
-    print "not " unless ord($x) == 0x12345678 && length($x) == 1;
+    print "not " unless ord($x) == 0x10FFFD && length($x) == 1;
     print "ok 587\n";
 }
 
