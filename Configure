@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Nov 16 03:18:20 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Thu Nov 16 16:33:41 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >/tmp/c1$$ <<EOF
@@ -478,6 +478,7 @@ d_rmdir=''
 d_safebcpy=''
 d_safemcpy=''
 d_sanemcmp=''
+d_sbrkproto=''
 d_select=''
 d_sem=''
 d_semctl=''
@@ -10895,6 +10896,11 @@ $rm -f try.* try core
 set d_sanemcmp
 eval $setvar
 
+: see if prototype for sbrk is available
+echo " "
+set d_sbrkproto sbrk $i_unistd unistd.h
+eval $hasproto
+
 : see if select exists
 set select d_select
 eval $inlibc
@@ -15719,6 +15725,7 @@ d_rmdir='$d_rmdir'
 d_safebcpy='$d_safebcpy'
 d_safemcpy='$d_safemcpy'
 d_sanemcmp='$d_sanemcmp'
+d_sbrkproto='$d_sbrkproto'
 d_sched_yield='$d_sched_yield'
 d_scm_rights='$d_scm_rights'
 d_seekdir='$d_seekdir'

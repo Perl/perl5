@@ -894,7 +894,9 @@ Malloc_t Perl_sbrk (int size);
 #include <unistd.h>
 #endif
 #else
+#ifndef HAS_SBRK_PROTO
 extern	Malloc_t sbrk(int);
+#endif
 #endif
 #endif
 

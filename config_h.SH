@@ -3231,5 +3231,14 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_fsync HAS_FSYNC		/**/
 
+/* HAS_SBRK_PROTO:
+ *	This symbol, if defined, indicates that the system provides
+ *	a prototype for the sbrk() function.  Otherwise, it is up
+ *	to the program to supply one.  Good guesses are
+ *		extern void* sbrk _((int));
+ *		extern void* sbrk _((size_t));
+ */
+#$d_sbrkproto	HAS_SBRK_PROTO	/**/
+
 #endif
 !GROK!THIS!

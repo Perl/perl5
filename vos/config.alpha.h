@@ -1825,6 +1825,15 @@
  */
 #define HAS_SANE_MEMCMP	/**/
 
+/* HAS_SBRK_PROTO:
+ *	This symbol, if defined, indicates that the system provides
+ *	a prototype for the sbrk() function.  Otherwise, it is up
+ *	to the program to supply one.  Good guesses are
+ *		extern void* sbrk _((int));
+ *		extern void* sbrk _((size_t));
+ */
+/*#define	HAS_SBRK_PROTO	/ **/
+
 /* HAS_SEM:
  *	This symbol, if defined, indicates that the entire sem*(2) library is
  *	supported.
