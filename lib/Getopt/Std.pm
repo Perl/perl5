@@ -23,9 +23,9 @@ getopts - Process single-character switches with switch clustering
 The getopt() function processes single-character switches with switch
 clustering.  Pass one argument which is a string containing all switches
 that take an argument.  For each switch found, sets $opt_x (where x is the
-switch name) to the value of the argument, or 1 if no argument.  Switches
-which take an argument don't care whether there is a space between the
-switch and the argument.
+switch name) to the value of the argument if an argument is expected,
+or 1 otherwise.  Switches which take an argument don't care whether
+there is a space between the switch and the argument.
 
 The getopts() function is similar, but you should pass to it the list of all
 switches to be recognized.  If unspecified switches are found on the
