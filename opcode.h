@@ -2320,7 +2320,7 @@ EXT U32 opargs[] = {
 	0x00002505,	/* anonhash */
 	0x02993501,	/* splice */
 	0x0002351d,	/* push */
-	0x00003c14,	/* pop */
+	0x00003c04,	/* pop */
 	0x00003c04,	/* shift */
 	0x0002351d,	/* unshift */
 	0x0002d501,	/* sort */
