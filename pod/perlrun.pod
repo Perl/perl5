@@ -1111,20 +1111,19 @@ PERL_ENCODING environment variable is consulted for an encoding name.
 =item PERL_HASH_SEED
 
 (Since Perl 5.8.1.)  Used to randomise Perl's internal hash function.
+To emulate the pre-5.8.1 behaviour, set to an integer (zero means
+exactly the same order as 5.8.0).  "Pre-5.8.1" means, among other
+things, that hash keys will be ordered the same between different runs
+of Perl.
 
-The default behaviour is B<not> to randomise if the PERL_HASH_SEED is
-unset.  If Perl has been compiled with C<-DUSE_HASH_SEED>, the default
-behaviour B<is> to randomise.  If Perl hash been compiled with
-C<-DNO_HASH_SEED>, the hash randomisation is completely disabled.
-
-If PERL_HASH_SEED is set to a numeric (positive integer) string,
-that is used as the seed.
+The default behaviour is to randomise unless the PERL_HASH_SEED is set.
+If Perl has been compiled with C<-DUSE_HASH_SEED_EXPLICIT>, the default
+behaviour is B<not> to randomise unless the PERL_HASH_SEED is set.
 
 If PERL_HASH_SEED is unset or set to a non-numeric string, Perl uses
 the pseudorandom seed supplied by the operating system and libraries.
-
-The seed being set means that each different run of Perl will have
-a different ordering of the results of keys(), values(), and each().
+This means that each different run of Perl will have a different
+ordering of the results of keys(), values(), and each().
 
 See L<perlsec/"Algorithmic Complexity Attacks"> for more information.
 

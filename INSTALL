@@ -849,12 +849,12 @@ to create such degenerate hashes.
 
 Because of this feature the keys(), values(), and each() functions
 may return the hash elements in different order between different
-runs of Perl even with the same data.  The additional randomisation
-is enabled if the environment variable PERL_HASH_SEED is set, see
-perlrun for details.
-
-One make the randomisation default by adding -DUSE_HASH_SEED to the
-compilation flags, or completely disable it by adding -DNO_HASH_SEED.
+runs of Perl even with the same data.  One can still revert to the old
+repeatable order by setting the environment variable PERL_HASH_SEED,
+see L<perlrun>.  Another option is to add -DUSE_HASH_SEED_EXPLICIT to
+the compilation flags, in which case one has to explicitly set the
+PERL_HASH_SEED environment variable to enable the security feature,
+or -DNO_HASH_SEED to completely disable the feature.
 
 B<Perl has never guaranteed any ordering of the hash keys>, and the
 ordering has already changed several times during the lifetime of
