@@ -1769,7 +1769,7 @@ PP(pp_send)
 	if (length > blen - offset)
 	    length = blen - offset;
 	if (DO_UTF8(bufsv)) {
-	    buffer = utf8_hop((U8 *)buffer, offset);
+	    buffer = (char*)utf8_hop((U8 *)buffer, offset);
 	    length = utf8_hop((U8 *)buffer, length) - (U8 *)buffer;
 	}
 	else {
