@@ -3025,6 +3025,8 @@ Perl_yylex(pTHX)
 			CvLOCKED_on(PL_compcv);
 		    else if (!PL_in_my && len == 6 && strnEQ(s, "method", len))
 			CvMETHOD_on(PL_compcv);
+		    else if (!PL_in_my && len == 9 && strnEQ(s, "assertion", len))
+		        CvASSERTION_on(PL_compcv);
 #ifdef USE_ITHREADS
 		    else if (PL_in_my == KEY_our && len == 6 &&
 			     strnEQ(s, "unique", len))

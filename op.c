@@ -5785,6 +5785,7 @@ Perl_ck_subr(pTHX_ OP *o)
     I32 contextclass = 0;
     char *e = 0;
     STRLEN n_a;
+    bool delete=0;
 
     o->op_private |= OPpENTERSUB_HASTARG;
     for (cvop = o2; cvop->op_sibling; cvop = cvop->op_sibling) ;
@@ -5798,9 +5799,18 @@ Perl_ck_subr(pTHX_ OP *o)
 	    cv = GvCVu(gv);
 	    if (!cv)
 		tmpop->op_private |= OPpEARLY_CV;
-	    else if (SvPOK(cv)) {
-		namegv = CvANON(cv) ? gv : CvGV(cv);
-		proto = SvPV((SV*)cv, n_a);
+	    else {
+		if (SvPOK(cv)) {
+		    namegv = CvANON(cv) ? gv : CvGV(cv);
+		    proto = SvPV((SV*)cv, n_a);
+		}
+		if (CvASSERTION(cv)) {
+		    if (PL_hints & HINT_ASSERTING) {
+			if (PERLDB_ASSERTION && PL_curstash != PL_debstash)
+			    o->op_private |= OPpENTERSUB_DB;
+		    }
+		    else delete=1;
+		}
 	    }
 	}
     }
@@ -5984,6 +5994,10 @@ Perl_ck_subr(pTHX_ OP *o)
     if (proto && !optional &&
 	  (*proto && *proto != '@' && *proto != '%' && *proto != ';'))
 	return too_few_arguments(o, gv_ename(namegv));
+    if(delete) {
+	op_free(o);
+	o=newSVOP(OP_CONST, 0, newSViv(0));
+    }
     return o;
 }
 

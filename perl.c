@@ -1024,6 +1024,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	case 'W':
 	case 'X':
 	case 'w':
+	case 'A':
 	    if ((s = moreswitches(s)))
 		goto reswitch;
 	    break;
@@ -1235,7 +1236,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
 		d = s;
 		if (!*s)
 		    break;
-		if (!strchr("DIMUdmtw", *s))
+		if (!strchr("DIMUdmtwA", *s))
 		    Perl_croak(aTHX_ "Illegal switch in PERL5OPT: -%c", *s);
 		while (++s && *s) {
 		    if (isSPACE(*s)) {
@@ -2319,6 +2320,20 @@ Perl_moreswitches(pTHX_ char *s)
 	    }
 	}
 	return s;
+    case 'A':
+	forbid_setid("-A");
+	if (*++s) {
+	    SV *sv=newSVpv("use assertions::activate split(/,/,q{",0);
+	    sv_catpv(sv,s);
+	    sv_catpv(sv,"})");
+	    s+=strlen(s);
+	    if(!PL_preambleav)
+		PL_preambleav = newAV();
+	    av_push(PL_preambleav, sv);
+	}
+	else
+	    Perl_croak(aTHX_ "No space allowed after -A");
+	return s;
     case 'M':
 	forbid_setid("-M");	/* XXX ? */
 	/* FALL THROUGH */
@@ -3265,6 +3280,8 @@ Perl_init_debugger(pTHX)
     sv_setiv(PL_DBtrace, 0);
     PL_DBsignal = GvSV((gv_fetchpv("signal", GV_ADDMULTI, SVt_PV)));
     sv_setiv(PL_DBsignal, 0);
+    PL_DBassertion = GvSV((gv_fetchpv("assertion", GV_ADDMULTI, SVt_PV)));
+    sv_setiv(PL_DBassertion, 0);
     PL_curstash = ostash;
 }
 

@@ -120,6 +120,7 @@ PERLVAR(IDBsub,		GV *)
 PERLVAR(IDBsingle,	SV *)
 PERLVAR(IDBtrace,	SV *)
 PERLVAR(IDBsignal,	SV *)
+PERLVAR(IDBassertion,   SV *)
 PERLVAR(Ilineary,	AV *)		/* lines of script for debugger */
 PERLVAR(Idbargs,	AV *)		/* args to call listed by caller function */
 

@@ -326,6 +326,23 @@ sub eval {
 # Needed for the statement after exec():
 
 BEGIN { $ini_warn = $^W; $^W = 0 } # Switch compilation warnings off until another BEGIN.
+
+# test if assertions are supported and actived:
+BEGIN {
+    $ini_assertion=
+      eval "sub asserting_test : assertion {1}; asserting_test()";
+    # $ini_assertion = undef => assertions unsupported,
+    #        "       = 0 => assertions supported but inactive
+    #        "       = 1 => assertions suported and active
+    # print "\$ini_assertion=$ini_assertion\n";
+}
+INIT { # We use also INIT {} because test doesn't work in BEGIN {} if
+       # '-A' flag is in the perl script source file after the shebang
+       # as in '#!/usr/bin/perl -A'
+    $ini_assertion=
+      eval "sub asserting_test1 : assertion {1}; asserting_test1()";
+}
+
 local($^W) = 0;			# Switch run-time warnings off during init.
 warn (			# Do not ;-)
       $dumpvar::hashDepth,     
@@ -359,7 +376,10 @@ $inhibit_exit = $option{PrintRet} = 1;
 		  recallCommand ShellBang pager tkRunning ornaments
 		  signalLevel warnLevel dieLevel inhibit_exit
 		  ImmediateStop bareStringify CreateTTY
-		  RemotePort windowSize);
+		  RemotePort windowSize DollarCaretP OnlyAssertions
+		  WarnAssertions);
+
+@RememberOnROptions = qw(DollarCaretP OnlyAssertions);
 
 %optionVars    = (
 		 hashDepth	=> \$dumpvar::hashDepth,
@@ -381,6 +401,7 @@ $inhibit_exit = $option{PrintRet} = 1;
 		 ImmediateStop	=> \$ImmediateStop,
 		 RemotePort	=> \$remoteport,
 		 windowSize	=> \$window,
+		 WarnAssertions => \$warnassertions,
 );
 
 %optionAction  = (
@@ -401,6 +422,8 @@ $inhibit_exit = $option{PrintRet} = 1;
 		  tkRunning	=> \&tkRunning,
 		  ornaments	=> \&ornaments,
 		  RemotePort	=> \&RemotePort,
+		  DollarCaretP  => \&DollarCaretP,
+		  OnlyAssertions=> \&OnlyAssertions,
 		 );
 
 %optionRequire = (
@@ -897,7 +920,7 @@ EOP
 			$incr = $window - 1;
 			$cmd = 'l ' . ($start) . '+'; };
 			# rjsf ->
-		  $cmd =~ /^([aAbBhlLMoOvwW])\b\s*(.*)/s && do { 
+		  $cmd =~ /^([aAbBhlLMoOvwWP])\b\s*(.*)/s && do { 
 				&cmd_wrapper($1, $2, $line); 
 				next CMD; 
 			};
@@ -1054,6 +1077,7 @@ EOP
 		        print $OUT "Warning: some settings and command-line options may be lost!\n";
 			my (@script, @flags, $cl);
 			push @flags, '-w' if $ini_warn;
+			push @flags, '-A' if $ini_assertion;
 			# Put all the old includes at the start to get
 			# the same debugger.
 			for (@ini_INC) {
@@ -1075,7 +1099,7 @@ EOP
 				 ? $term->GetHistory : @hist);
 			my @had_breakpoints = keys %had_breakpoints;
 			set_list("PERLDB_VISITED", @had_breakpoints);
-			set_list("PERLDB_OPT", %option);
+			set_list("PERLDB_OPT", options2remember());
 			set_list("PERLDB_ON_LOAD", %break_on_load);
 			my @hard;
 			for (0 .. $#had_breakpoints) {
@@ -1389,7 +1413,19 @@ sub sub {
 	 print_trace($LINEINFO, -1, 1, 1, "$sub$al") )
      : print_lineinfo(' ' x ($stack_depth - 1), "entering $sub$al\n")) if $frame;
     if (wantarray) {
-	@ret = &$sub;
+        if ($assertion) {
+            $assertion=0;
+	    eval {
+	        @ret = &$sub;
+	    };
+	    if ($@) {
+	      print $OUT $@;
+	      $signal=1 unless $warnassertions;
+	    }
+	}
+	else {
+	    @ret = &$sub;
+	}
 	$single |= $stack[$stack_depth--];
 	($frame & 4 
 	 ? ( print_lineinfo(' ' x $stack_depth, "out "), 
@@ -1405,11 +1441,24 @@ sub sub {
 	}
 	@ret;
     } else {
-        if (defined wantarray) {
-	    $ret = &$sub;
-        } else {
-            &$sub; undef $ret;
-        };
+        if ($assertion) {
+	    $assertion=0;
+	    eval {
+	        $ret = &$sub;
+	    };
+	    if ($@) {
+	      print $OUT $@;
+	      $signal=1 unless $warnassertions;
+	    }
+	    $ret=undef unless defined wantarray;
+	}
+	else {
+	    if (defined wantarray) {
+	        $ret = &$sub;
+	    } else {
+	        &$sub; undef $ret;
+	    }
+	}
 	$single |= $stack[$stack_depth--];
 	($frame & 4 
 	 ? (  print_lineinfo(' ' x $stack_depth, "out "),
@@ -1963,6 +2012,25 @@ sub cmd_W {
 	}
 }
 
+
+
+sub cmd_P {
+  if ($cmd =~ /^.\b\s*([+-]?)\s*(~?)\s*(\w+(\s*\|\s*\w+)*)\s*$/) {
+    my ($how, $neg, $flags)=($1, $2, $3);
+    my $acu=parse_DollarCaretP_flags($flags);
+    if (defined $acu) {
+      $acu= ~$acu if $neg;
+      if ($how eq '+') { $^P|=$acu }
+      elsif ($how eq '-') { $^P&=~$acu }
+      else { $^P=$acu }
+    }
+    # else { print $OUT "undefined acu\n" }
+  }
+  my $expanded=expand_DollarCaretP_flags($^P);
+  print $OUT "Internal Perl debugger flags:\n\$^P=$expanded\n";
+  $expanded
+}
+
 ### END of the API section
 
 sub save {
@@ -2386,6 +2454,13 @@ sub dump_option {
     printf $OUT "%20s = '%s'\n", $opt, $val;
 }
 
+sub options2remember {
+  foreach my $k (@RememberOnROptions) {
+    $option{$k}=option_val($k, 'N/A');
+  }
+  return %option;
+}
+
 sub option_val {
     my ($opt, $default)= @_;
     my $val;
@@ -2597,6 +2672,40 @@ sub NonStop {
     }
     $runnonstop = shift if @_;
     $runnonstop;
+}
+
+sub DollarCaretP {
+    if ($term) {
+	&warn("Some flag changes could not take effect until next 'R'!\n") if @_;
+    }
+    $^P = parse_DollarCaretP_flags(shift) if @_;
+    expand_DollarCaretP_flags($^P)
+}
+
+sub OnlyAssertions {
+    if ($term) {
+        &warn("Too late to set up OnlyAssertions mode, enabled on next 'R'!\n") if @_;
+    }
+    if (@_) {
+      unless (defined $ini_assertion) {
+	if ($term) {
+	  &warn("Current Perl interpreter doesn't support assertions");
+	}
+	return 0;
+      }
+      if (shift) {
+	unless ($ini_assertion) {
+	  print "Assertions will also be actived on next 'R'!\n";
+	  $ini_assertion=1;
+	}
+	$^P&= ~$DollarCaretP_flags{PERLDBf_SUB};
+	$^P|=$DollarCaretP_flags{PERLDBf_ASSERTION};
+      }
+      else {
+	$^P|=$DollarCaretP_flags{PERLDBf_SUB};
+      }
+    }
+    !($^P & $DollarCaretP_flags{PERLDBf_SUB}) || 0;
 }
 
 sub pager {
@@ -3454,6 +3563,70 @@ sub clean_ENV {
     } else {
         delete($ENV{PERLDB_PIDS});
     }
+}
+
+
+# PERLDBf_... flag names from perl.h
+our (%DollarCaretP_flags, %DollarCaretP_flags_r);
+BEGIN {
+  %DollarCaretP_flags =
+    ( PERLDBf_SUB =>        0x01, # Debug sub enter/exit
+      PERLDBf_LINE =>       0x02, # Keep line #
+      PERLDBf_NOOPT =>      0x04, # Switch off optimizations
+      PERLDBf_INTER =>      0x08, # Preserve more data
+      PERLDBf_SUBLINE =>    0x10, # Keep subr source lines
+      PERLDBf_SINGLE =>     0x20, # Start with single-step on
+      PERLDBf_NONAME =>     0x40, # For _SUB: no name of the subr
+      PERLDBf_GOTO =>       0x80, # Report goto: call DB::goto
+      PERLDBf_NAMEEVAL =>  0x100, # Informative names for evals
+      PERLDBf_NAMEANON =>  0x200, # Informative names for anon subs
+      PERLDBf_ASSERTION => 0x400, # Debug assertion subs enter/exit
+      PERLDB_ALL =>        0x33f, # No _NONAME, _GOTO, _ASSERTION
+    );
+
+  %DollarCaretP_flags_r=reverse %DollarCaretP_flags;
+}
+
+sub parse_DollarCaretP_flags {
+    my $flags=shift;
+    $flags=~s/^\s+//;
+    $flags=~s/\s+$//;
+    my $acu=0;
+    foreach my $f (split /\s*\|\s*/, $flags) {
+      my $value;
+      if ($f=~/^0x([[:xdigit:]]+)$/) {
+	$value=hex $1;
+      }
+      elsif ($f=~/^(\d+)$/) {
+	$value=int $1;
+      }
+      elsif ($f=~/^DEFAULT$/i) {
+	$value=$DollarCaretP_flags{PERLDB_ALL};
+      }
+      else {
+	$f=~/^(?:PERLDBf_)?(.*)$/i;
+	$value=$DollarCaretP_flags{'PERLDBf_'.uc($1)};
+	unless (defined $value) {
+	  print $OUT ("Unrecognized \$^P flag '$f'!\n",
+		      "Acceptable flags are: ".
+		      join(', ', sort keys %DollarCaretP_flags),
+		      ", and hexadecimal and decimal numbers.\n");
+	  return undef;
+	}
+      }
+      $acu|=$value;
+    }
+    $acu;
+}
+
+sub expand_DollarCaretP_flags {
+  my $DollarCaretP=shift;
+  my @bits= ( map { my $n=(1<<$_);
+		    ($DollarCaretP & $n)
+		      ? ($DollarCaretP_flags_r{$n}
+			 || sprintf('0x%x', $n))
+			: () } 0..31 );
+  return @bits ? join('|', @bits) : 0;
 }
 
 END {

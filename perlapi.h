@@ -88,6 +88,8 @@ END_EXTERN_C
 #define PL_Argv			(*Perl_IArgv_ptr(aTHX))
 #undef  PL_Cmd
 #define PL_Cmd			(*Perl_ICmd_ptr(aTHX))
+#undef  PL_DBassertion
+#define PL_DBassertion		(*Perl_IDBassertion_ptr(aTHX))
 #undef  PL_DBcv
 #define PL_DBcv			(*Perl_IDBcv_ptr(aTHX))
 #undef  PL_DBgv

@@ -219,7 +219,7 @@ my @extvars = qw(sv_undef sv_yes sv_no na dowarn
                  curcop compiling
                  tainting tainted stack_base stack_sp sv_arenaroot
 		 no_modify
-                 curstash DBsub DBsingle debstash
+                 curstash DBsub DBsingle DBassertion debstash
                  rsfp
                  stdingv
 		 defgv
