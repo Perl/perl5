@@ -1918,6 +1918,8 @@ localization)
 
 =item The localeconv function
 
+=item I18N::Langinfo
+
 =back
 
 =item LOCALE CATEGORIES
@@ -4676,11 +4678,11 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item UNICOS
 
-=item UNICOS/mk ext/IPC/SysV/t/sem test 8
-
 =item UTS
 
 =item VMS
+
+=item Win32
 
 =item Localising a Tied Variable Leaks Memory
 
@@ -8941,6 +8943,8 @@ C<zcat>, C<zip>
 
 =item DESCRIPTION
 
+=item NOTES
+
 =back
 
 =head2 DB - programmatic interface to the Perl debugging API (draft,
@@ -11333,6 +11337,28 @@ Zhuang, {zu} : Zulu, {zun} : Zuni
 
 =back
 
+=head2 I18N::Langinfo - query locale information
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item EXPORT
+
+=back
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
 =head2 IO - load various IO modules
 
 =over 4
@@ -11960,6 +11986,32 @@ set ( NAME => VALUE [, NAME => VALUE ...] ), setall ( VALUES ), setval ( N
 
 =back
 
+=head2 Langinfo - Perl extension for blah blah blah
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item EXPORT
+
+=item Exportable constants
+
+=back
+
+=item HISTORY
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
 =head2 List::Util - A selection of general-utility list subroutines
 
 =over 4
@@ -12399,21 +12451,63 @@ stringify, bstr(), bdiv, Modifying and =, bpow
 
 Canonical notation, Input, Output
 
+=item ACCURACY and PRECISION
+
 =over 4
 
-=item Rounding
+=item Precision P
 
-bfround ( +$scale ), bround  ( +$scale ), bround  ( -$scale )
+=item Accuracy A
 
-=item Internals
+=item Fallback F
+
+=item Rounding mode R
+
+'trunc', 'even', 'odd', '+inf', '-inf', 'zero', Precision, Accuracy
+(significant digits), Setting/Accessing, Creating numbers, Usage,
+Precedence, Overriding globals, Local settings, Rounding, Default values,
+Remarks
+
+=back
+
+=item INTERNALS
+
+=over 4
 
 =item mantissa(), exponent() and parts()
 
 =back
 
+=item EXAMPLES
+
+  use Math::BigInt qw(bstr bint);
+  $x = bstr("1234")			# string "1234"
+  $x = "$x";				# same as bstr()
+  $x = bneg("1234")			# Bigint "-1234"
+  $x = Math::BigInt->bneg("1234");	# Bigint "-1234"
+  $x = Math::BigInt->babs("-12345");	# Bigint "12345"
+  $x = Math::BigInt->bnorm("-0 00");	# BigInt "0"
+  $x = bint(1) + bint(2);		# BigInt "3"
+  $x = bint(1) + "2";			# ditto (auto-BigIntify of "2")
+  $x = bint(1); 			# BigInt "1"
+  $x = $x + 5 / 2;			# BigInt "3"
+  $x = $x ** 3; 			# BigInt "27"
+  $x *= 2;				# BigInt "54"
+  $x = new Math::BigInt;		# BigInt "0"
+  $x--; 				# BigInt "-1"
+  $x = Math::BigInt->badd(4,5)		# BigInt "9"
+  $x = Math::BigInt::badd(4,5)		# BigInt "9"
+  print $x->bsstr();			# 9e+0
+
 =item Autocreating constants
 
 =item PERFORMANCE
+
+=over 4
+
+=item Replacing the math library
+
+=back
 
 =item BUGS
 
@@ -12426,7 +12520,31 @@ Overloading -$x, Mixing different object types, bsqrt()
 
 =item LICENSE
 
+=item SEE ALSO
+
 =item AUTHORS
+
+=back
+
+=head2 Math::BigInt::Calc - Pure Perl module to support Math::BigInt
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item EXPORT
+
+=item LICENSE
+
+This program is free software; you may redistribute it and/or modify it
+under
+the same terms as Perl itself. 
+
+=item AUTHORS
+
+=item SEE ALSO
 
 =back
 
@@ -13988,14 +14106,15 @@ release, section
 
 roff font should be 1 or 2 chars, not "%s", Invalid link %s, Invalid quote
 specification "%s", %s:%d: Unknown command paragraph "%s", Unknown escape
-EE<lt>%sE<gt>, Unknown sequence %s, %s: Unknown command paragraph "%s" on
-line %d, Unmatched =back
+EE<lt>%sE<gt>, Unknown sequence %s, Unmatched =back
 
 =item BUGS
 
 =item SEE ALSO
 
 =item AUTHOR
+
+=item COPYRIGHT AND LICENSE
 
 =back
 
@@ -14493,6 +14612,8 @@ specification "%s", %s:%d: Unknown command paragraph "%s", Unknown escape:
 
 =item AUTHOR
 
+=item COPYRIGHT AND LICENSE
+
 =back
 
 =head2 Pod::Text::Color - Convert POD data to formatted color ASCII text
@@ -14508,6 +14629,8 @@ specification "%s", %s:%d: Unknown command paragraph "%s", Unknown escape:
 =item SEE ALSO
 
 =item AUTHOR
+
+=item COPYRIGHT AND LICENSE
 
 =back
 
@@ -14526,6 +14649,8 @@ text
 
 =item AUTHOR
 
+=item COPYRIGHT AND LICENSE
+
 =back
 
 =head2 Pod::Text::Termcap, Pod::Text::Color - Convert POD data to ASCII
@@ -14540,6 +14665,8 @@ text with format escapes
 =item SEE ALSO
 
 =item AUTHOR
+
+=item COPYRIGHT AND LICENSE
 
 =back
 
@@ -14888,15 +15015,23 @@ closelog
 
 =item DIAGNOSTICS
 
-Invalid attribute name %s, Name "%s" used only once: possible typo, No
-comma allowed after filehandle, Bareword "%s" not allowed while "strict
-subs" in use
+Bad escape sequence %s, Bareword "%s" not allowed while "strict subs" in
+use, Invalid attribute name %s, Name "%s" used only once: possible typo, No
+comma allowed after filehandle, No name for escape sequence %s
+
+=item ENVIRONMENT
+
+ANSI_COLORS_DISABLED
 
 =item RESTRICTIONS
 
 =item NOTES
 
+=item SEE ALSO
+
 =item AUTHORS
+
+=item LICENSE
 
 =back
 
@@ -15713,7 +15848,27 @@ VAL, TYPE ), UNIVERSAL::can ( VAL, METHOD )
 
 =item Matching Scripts and Blocks
 
+=item Code Point Arguments
+
 =item charinrange
+
+=back
+
+=over 4
+
+=item compexcl
+
+=back
+
+=over 4
+
+=item casefold
+
+=back
+
+=over 4
+
+=item casespec
 
 =back
 

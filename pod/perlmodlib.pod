@@ -602,6 +602,10 @@ Arbitrary size floating point math package
 
 Arbitrary size integer math package
 
+=item Math::BigInt::Calc
+
+Pure Perl module to support Math::BigInt
+
 =item Math::Complex
 
 Complex numbers and associated mathematical functions
@@ -889,26 +893,6 @@ Expand and unexpand tabs per the unix expand(1) and unexpand(1)
 =item Text::Wrap
 
 Line wrapping to form simple paragraphs
-
-=item Thread
-
-Manipulate threads in Perl (EXPERIMENTAL, subject to change)
-
-=item Thread::Queue
-
-Thread-safe queues
-
-=item Thread::Semaphore
-
-Thread-safe semaphores
-
-=item Thread::Signal
-
-Start a thread which runs signal handlers reliably
-
-=item Thread::Specific
-
-Thread-specific keys
 
 =item Tie::Array
 
