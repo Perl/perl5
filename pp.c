@@ -4803,5 +4803,5 @@ PP(pp_threadsv)
  * indent-tabs-mode: t
  * End:
  *
- * vim: expandtab shiftwidth=4:
+ * vim: shiftwidth=4:
 */

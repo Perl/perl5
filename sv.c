@@ -12408,5 +12408,5 @@ Perl_sv_cat_decode(pTHX_ SV *dsv, SV *encoding,
  * indent-tabs-mode: t
  * End:
  *
- * vim: expandtab shiftwidth=4:
+ * vim: shiftwidth=4:
 */

@@ -5877,5 +5877,5 @@ lockf_emulate_flock(int fd, int operation)
  * indent-tabs-mode: t
  * End:
  *
- * vim: expandtab shiftwidth=4:
+ * vim: shiftwidth=4:
 */

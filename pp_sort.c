@@ -1925,5 +1925,5 @@ amagic_cmp_locale(pTHX_ register SV *str1, register SV *str2)
  * indent-tabs-mode: t
  * End:
  *
- * vim: expandtab shiftwidth=4:
+ * vim: shiftwidth=4:
 */

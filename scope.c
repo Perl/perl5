@@ -1154,5 +1154,5 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
  * indent-tabs-mode: t
  * End:
  *
- * vim: expandtab shiftwidth=4:
+ * vim: shiftwidth=4:
 */

@@ -3934,5 +3934,5 @@ S_path_is_absolute(pTHX_ char *name)
  * indent-tabs-mode: t
  * End:
  *
- * vim: expandtab shiftwidth=4:
+ * vim: shiftwidth=4:
 */
