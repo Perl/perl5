@@ -95,6 +95,67 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  6715] By: jhi                                   on 2000/08/19  15:39:09
+        Log: Subject: [ID 20000817.023] endianness description in perlfunc.pod
+             From: Jonathan D Johnston <jdjohnston2@juno.com>
+             Date: Thu, 17 Aug 2000 23:13:01 -0400       
+             Message-Id: <20000817.231304.-743351.1.jdjohnston2@juno.com>
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[  6714] By: jhi                                   on 2000/08/19  15:34:04
+        Log: Introduce a 'veryclean' target that is like 'distclean'
+             but also removes *~ and *.orig.
+     Branch: perl
+	   ! Makefile.SH lib/ExtUtils/MM_Unix.pm pod/Makefile.SH
+	   ! utils/Makefile x2p/Makefile.SH
+____________________________________________________________________________
+[  6713] By: jhi                                   on 2000/08/19  14:15:45
+        Log: Put back the long double avoidance code to POSIX.xs
+             because VMS seems to need it still.
+     Branch: perl
+	   ! ext/POSIX/POSIX.xs
+____________________________________________________________________________
+[  6712] By: jhi                                   on 2000/08/19  14:10:41
+        Log: Subject: [PATCH: 6698] was Re: [PATCH: 6640] VMS Makefile.SH update (fwd)
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Fri, 18 Aug 2000 18:18:31 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10008181818100.322420-100000@aspara.forte.com>
+     Branch: perl
+	   ! lib/Pod/Find.pm t/pod/find.t
+____________________________________________________________________________
+[  6711] By: jhi                                   on 2000/08/19  14:09:19
+        Log: Subject: [PATCH: 6698] tidy up the temp files left by peek tests on VMS
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Fri, 18 Aug 2000 17:54:10 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10008181751350.322420-100000@aspara.forte.com>
+             cc: vmsperl@perl.org
+     Branch: perl
+	   ! t/lib/peek.t
+____________________________________________________________________________
+[  6710] By: jhi                                   on 2000/08/19  14:08:01
+        Log: Subject: [PATCH 5.6.0+] fix for Win32::GetFullPathName and Win32::GetShortPathName
+             From: Jan Dubois <jand@ActiveState.com>
+             Date: Fri, 18 Aug 2000 16:31:48 -0700
+             Message-ID: <2ihrps00u6qkpjtfq6f2b1d1ndkrs7l04u@4ax.com>
+     Branch: perl
+	   ! win32/win32.c
+____________________________________________________________________________
+[  6709] By: jhi                                   on 2000/08/19  14:06:57
+        Log: Fix a core dump in lib/selfloader under -DDEBUGGING.
+             
+             Subject: PATCH @6698 for [ID 20000817.007] Not OK: perl v5.7.0 +SUIDMAIL +DEVEL6676 on alpha-dec_osf 4.0f (UNINSTALLED) 
+             From: Spider.Boardman@Orb.Nashua.NH.US
+             Date: Fri, 18 Aug 2000 18:41:14 -0400
+             Message-Id: <200008182241.SAA29667@Orb.Nashua.NH.US>
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[  6708] By: jhi                                   on 2000/08/18  22:04:49
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  6707] By: jhi                                   on 2000/08/18  21:55:14
         Log: Add warnif(), check warnings further up the stack,
              all the warnings functions now can take an optional object reference.
