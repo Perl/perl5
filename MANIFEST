@@ -954,11 +954,17 @@ os2/OS2/Process/Process.pm	system() constants in a module
 os2/OS2/Process/Process.xs	system() constants in a module
 os2/OS2/REXX/Changes		DLL access module
 os2/OS2/REXX/MANIFEST		DLL access module
+os2/OS2/REXX/DLL/Changes		DLL access module
+os2/OS2/REXX/DLL/DLL.pm		DLL access module
+os2/OS2/REXX/DLL/DLL.xs		DLL access module
+os2/OS2/REXX/DLL/MANIFEST	DLL access module
+os2/OS2/REXX/DLL/Makefile.PL	DLL access module
 os2/OS2/REXX/Makefile.PL	DLL access module
 os2/OS2/REXX/REXX.pm		DLL access module
 os2/OS2/REXX/REXX.xs		DLL access module
 os2/OS2/REXX/t/rx_cmprt.t	DLL access module
 os2/OS2/REXX/t/rx_dllld.t	DLL access module
+os2/OS2/REXX/t/rx_emxrv.t	DLL access module
 os2/OS2/REXX/t/rx_objcall.t	DLL access module
 os2/OS2/REXX/t/rx_sql.test	DLL access module
 os2/OS2/REXX/t/rx_tiesql.test	DLL access module

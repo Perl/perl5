@@ -147,12 +147,18 @@ else {
     print FH "helloworld\n";
     truncate FH, 5;
   }
-  if ($^O eq 'dos') {
+  if ($^O eq 'dos'
+	# Not needed on HPFS, but needed on HPFS386 ?!
+      or $^O eq 'os2')
+  {
       close (FH); open (FH, ">>Iofs.tmp") or die "Can't reopen Iofs.tmp";
   }
   if (-s "Iofs.tmp" == 5) {print "ok 25\n"} else {print "not ok 25\n"}
   truncate FH, 0;
-  if ($^O eq 'dos') {
+  if ($^O eq 'dos'
+	# Not needed on HPFS, but needed on HPFS386 ?!
+      or $^O eq 'os2')
+  {
       close (FH); open (FH, ">>Iofs.tmp") or die "Can't reopen Iofs.tmp";
   }
   if (-z "Iofs.tmp") {print "ok 26\n"} else {print "not ok 26\n"}

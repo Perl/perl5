@@ -638,7 +638,8 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	int saveerrno = errno;
 	sv_setnv(sv, (NV)errno);
 #ifdef OS2
-	if (errno == errno_isOS2) sv_setpv(sv, os2error(Perl_rc));
+	if (errno == errno_isOS2 || errno == errno_isOS2_set)
+	    sv_setpv(sv, os2error(Perl_rc));
 	else
 #endif
 	sv_setpv(sv, errno ? Strerror(errno) : "");

@@ -1560,6 +1560,10 @@ typedef union any ANY;
 # endif
 #endif         
 
+#ifndef PERL_SYS_INIT3
+#  define PERL_SYS_INIT3(argvp,argcp,envp) PERL_SYS_INIT(argvp,argcp)
+#endif
+
 #ifndef MAXPATHLEN
 #  ifdef PATH_MAX
 #    ifdef _POSIX_PATH_MAX

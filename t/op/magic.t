@@ -22,6 +22,7 @@ sub ok {
 $Is_MSWin32 = $^O eq 'MSWin32';
 $Is_VMS     = $^O eq 'VMS';
 $Is_Dos   = $^O eq 'dos';
+$Is_os2   = $^O eq 'os2';
 $Is_Cygwin   = $^O =~ /cygwin/;
 $PERL = ($Is_MSWin32 ? '.\perl' : './perl');
 
@@ -117,6 +118,9 @@ ok 18, $$ > 0, $$;
        chomp($wd = `pwd`);
        $wd =~ s#/t$##;
     }
+    elsif($Is_os2) {
+       $wd = Cwd::sys_cwd();
+    }
     else {
 	$wd = '.';
     }
@@ -142,6 +146,9 @@ __END__
 :endofperl
 EOT
     }
+    elsif ($Is_os2) {
+      $script = "./show-shebang";
+    }
     if ($^O eq 'os390' or $^O eq 'posix-bc' or $^O eq 'vmesa') {  # no shebang
 	$headmaybe = <<EOH ;
     eval 'exec ./perl -S \$0 \${1+"\$\@"}'
@@ -158,15 +165,15 @@ EOF
     ok 21, close(SCRIPT), $!;
     ok 22, chmod(0755, $script), $!;
     $_ = `$script`;
-    s/\.exe//i if $Is_Dos or $Is_Cygwin;
+    s/\.exe//i if $Is_Dos or $Is_Cygwin or $Is_os2;
     s{\bminiperl\b}{perl}; # so that test doesn't fail with miniperl
     s{is perl}{is $perl}; # for systems where $^X is only a basename
     s{\\}{/}g;
-    ok 23, ($Is_MSWin32 ? uc($_) eq uc($s1) : $_ eq $s1), ":$_:!=:$s1:";
+    ok 23, (($Is_MSWin32 || $Is_os2) ? uc($_) eq uc($s1) : $_ eq $s1), " :$_:!=:$s1:";
     $_ = `$perl $script`;
-    s/\.exe//i if $Is_Dos;
+    s/\.exe//i if $Is_Dos or $Is_os2;
     s{\\}{/}g;
-    ok 24, ($Is_MSWin32 ? uc($_) eq uc($s1) : $_ eq $s1), ":$_:!=:$s1: after `$perl $script`";
+    ok 24, (($Is_MSWin32 || $Is_os2) ? uc($_) eq uc($s1) : $_ eq $s1), " :$_:!=:$s1: after `$perl $script`";
     ok 25, unlink($script), $!;
 }
 
@@ -211,8 +218,8 @@ if ($Is_MSWin32) {
     ok 35, (scalar(keys(%ENV)) == 0);
 }
 else {
-    ok "32 # skipped",1;
-    ok "33 # skipped",1;
-    ok "34 # skipped",1;
-    ok "35 # skipped",1;
+    ok "32 # skipped: no caseless %ENV support",1;
+    ok "33 # skipped: no caseless %ENV support",1;
+    ok "34 # skipped: no caseless %ENV support",1;
+    ok "35 # skipped: no caseless %ENV support",1;
 }

@@ -2726,7 +2726,11 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	magicname("0", "0", 1);
     }
     if (tmpgv = gv_fetchpv("\030",TRUE, SVt_PV))
+#ifdef OS2
+	sv_setpv(GvSV(tmpgv), os2_execname());
+#else
 	sv_setpv(GvSV(tmpgv),PL_origargv[0]);
+#endif
     if (PL_argvgv = gv_fetchpv("ARGV",TRUE, SVt_PVAV)) {
 	GvMULTI_on(PL_argvgv);
 	(void)gv_AVadd(PL_argvgv);
