@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Jan 24 16:12:51 EET 2002 [metaconfig 3.0 PL70]
+# Generated on Mon Jan 28 01:36:10 EET 2002 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -7555,8 +7555,8 @@ true)
 		linux*)  # ld won't link with a bare -lperl otherwise.
 			dflt=libperl.$so
 			;;
-		cygwin*) # include version
-			dflt=`echo libperl$version | sed -e 's/\./_/g'`$lib_ext
+		cygwin*) # ld links against an importlib
+			dflt=libperl$lib_ext
 			;;
 		*)	# Try to guess based on whether libc has major.minor.
 			case "$libc" in

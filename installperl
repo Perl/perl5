@@ -234,7 +234,9 @@ if (($Is_W32 and ! $Is_NetWare)  or $Is_Cygwin) {
 
   if ($Is_Cygwin) {
     $perldll = $libperl;
-    $perldll =~ s/(\..*)?$/.$dlext/;
+    my $v_e_r_s = $ver; $v_e_r_s =~ tr/./_/;
+    $perldll =~ s/(\..*)?$/$v_e_r_s.$dlext/;
+    $perldll =~ s/^lib/cyg/;
     if ($Config{useshrplib} eq 'true') {
       # install ld2 and perlld as well
       foreach ('ld2', 'perlld') {
@@ -242,6 +244,18 @@ if (($Is_W32 and ! $Is_NetWare)  or $Is_Cygwin) {
         copy("$_", "$installbin/$_");
         chmod(0755, "$installbin/$_");
       };
+      { 
+		open (LD2, "$installbin/ld2");
+		print LD2 "#!/bin/sh\n#\n# ld wrapper, passes all args to perlld;\n#\n"
+		          . "for trythis in $installbin/perl\ndo\n  if [ -x \$trythis ]\n"
+		          . "  then\n    \$trythis $installbin/perlld \"\$\@\"\n"
+		          . "    exit \$?\n  fi\ndone\n# hard luck!\necho i see no perl"
+		          . " executable around there\necho perl is required to build "
+		          . "dynamic libraries\necho look if the path to perl in /bin/ld2"
+		          . " is correct\nexit 1\n";
+		close LD2;
+      };
+      chmod(0755, "$installbin/ld2");
     };
   } else {
     $perldll = 'perl57.' . $dlext;
