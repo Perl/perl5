@@ -1090,6 +1090,14 @@ lib/termcap.pl			Perl library supporting termcap usage
 lib/Test.pm			A simple framework for writing test scripts
 lib/Test/Harness.pm		A test harness
 lib/Test/Harness.t		See if Test::Harness works
+lib/Test/Simple.pm              Basic utility for writing tests
+lib/Test/Simple/t/exit.t        Test::Simple test, exit codes
+lib/Test/Simple/t/extra.t       Test::Simple test
+lib/Test/Simple/t/fail.t        Test::Simple test, test failures
+lib/Test/Simple/t/missing.t     Test::Simple test, missing tests
+lib/Test/Simple/t/no_plan.t     Test::Simple test, forgot the plan
+lib/Test/Simple/t/plan_is_noplan.t      Test::Simple test, no_plan
+lib/Test/Simple/t/simple.t                              for exit.t
 lib/Test/t/fail.t		See if Test works
 lib/Test/t/mix.t		See if Test works
 lib/Test/t/onfail.t		See if Test works
@@ -1844,6 +1852,17 @@ t/lib/st-dump.pl		See if Storable works
 t/lib/strict/refs		Tests of "use strict 'refs'" for strict.t
 t/lib/strict/subs		Tests of "use strict 'subs'" for strict.t
 t/lib/strict/vars		Tests of "use strict 'vars'" for strict.t
+t/lib/Test/Simple/Catch.pm      Utility module for testing Test::Simple
+t/lib/Test/Simple/sample_tests/death.plx                for exit.t
+t/lib/Test/Simple/sample_tests/death_in_eval.plx        for exit.t
+t/lib/Test/Simple/sample_tests/extras.plx               for exit.t
+t/lib/Test/Simple/sample_tests/five_fail.plx            for exit.t
+t/lib/Test/Simple/sample_tests/last_minute_death.plx    for exit.t
+t/lib/Test/Simple/sample_tests/one_fail.plx             for exit.t
+t/lib/Test/Simple/sample_tests/require.plx              for exit.t
+t/lib/Test/Simple/sample_tests/success.plx              for exit.t
+t/lib/Test/Simple/sample_tests/too_few.plx              for exit.t
+t/lib/Test/Simple/sample_tests/two_fail.plx             for exit.t
 t/lib/warnings/1global		Tests of global warnings for warnings.t
 t/lib/warnings/2use		Tests for "use warnings" for warnings.t
 t/lib/warnings/3both		Tests for interaction of $^W and "use warnings"
