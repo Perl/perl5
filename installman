@@ -67,6 +67,7 @@ $opts{verbose} ||= $opts{V} || $opts{notify};
 
 $packlist = ExtUtils::Packlist->new("$Config{installarchlib}/.packlist");
 
+
 # Install the main pod pages.
 runpod2man('pod', $opts{man1dir}, $opts{man1ext});
 
@@ -74,22 +75,17 @@ runpod2man('pod', $opts{man1dir}, $opts{man1ext});
 runpod2man('lib', $opts{man3dir}, $opts{man3ext});
 
 # Install the pods embedded in the installed scripts
-runpod2man('utils', $opts{man1dir}, $opts{man1ext}, 'c2ph', 'h2ph', 'h2xs',
-	   'perlcc', 'perldoc', 'perlbug', 'pl2pm', 'splain', 'dprofpp');
-runpod2man('x2p', $opts{man1dir}, $opts{man1ext}, 's2p', 'a2p.pod',
-	   'find2perl');
-runpod2man('pod', $opts{man1dir}, $opts{man1ext}, 'pod2man', 'pod2html',
-	   'pod2text', 'pod2usage', 'podchecker', 'podselect');
-
-# It would probably be better to have this page linked
-# to the c2ph man page.  Or, this one could say ".so man1/c2ph.1",
-# but then it would have to pay attention to $opts{man1dir} and $opts{man1ext}.
-runpod2man('utils', $opts{man1dir}, $opts{man1ext}, 'pstruct'); 
-
-# Similar concern as with pstruct/c2ph above: psed is s2p by other name.
-runpod2man('x2p', $opts{man1dir}, $opts{man1ext}, 'psed'); 
-
-runpod2man('lib/ExtUtils', $opts{man1dir}, $opts{man1ext}, 'xsubpp');
+open UTILS, "utils.lst" or die "Can't open 'utils.lst': $!";
+while (<UTILS>) {
+    next if /^#/;
+    chomp;
+    $_ = $1 if /#.*pod\s*=\s*(\S+)/;
+    my ($where, $what) = m|^(.*)/(.*)|;
+    runpod2man($where, $opts{man1dir}, $opts{man1ext}, $what);
+    if (($where, $what) = /#.*link\s*=\s*(\S+)/) {
+        runpod2man($where, $opts{man1dir}, $opts{man1ext}, $what);
+    }
+}
 
 sub runpod2man {
     # @script is scripts names if we are installing manpages embedded 

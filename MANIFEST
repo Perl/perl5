@@ -1858,6 +1858,7 @@ utf8.h			Unicode header
 utfebcdic.h		Unicode on EBCDIC (UTF-EBCDIC, tr16) header
 util.c			Utility routines
 util.h			Dummy header
+utils.lst		Lists utilities bundled with Perl
 utils/Makefile		Extract the utility scripts
 utils/c2ph.PL		program to translate dbx stabs to perl
 utils/dprofpp.PL	Perl code profile post-processor
