@@ -23,6 +23,15 @@ Summary of my $package ($baserev patchlevel $PATCHLEVEL subversion $SUBVERSION) 
     uname='$myuname'
     hint=$hint, useposix=$useposix, d_sigaction=$d_sigaction
     usethreads=$usethreads useperlio=$useperlio d_sfio=$d_sfio
+!GROK!THIS!
+case "$use64bits$usemultiplicity" in
+*define*)
+  $spitshell <<!GROK!THIS!
+    use64bits=$use64bits usemultiplicity=$usemultiplicity
+!GROK!THIS!
+  ;;
+esac
+$spitshell <<!GROK!THIS!
   Compiler:
     cc='$cc', optimize='$optimize', gccversion=$gccversion
     cppflags='$cppflags'
