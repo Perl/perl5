@@ -2,6 +2,8 @@ package Encode::JP::JIS;
 use Encode::JP;
 use base 'Encode::Encoding';
 
+use strict;
+
 # Just for the time being, we implement jis-7bit
 # encoding via EUC
 
@@ -14,7 +16,7 @@ sub decode
     my ($obj,$str,$chk) = @_;
     my $res = $str;
     jis_euc(\$res);
-    return Encode::decode('euc-jp', $euc, $chk);
+    return Encode::decode('euc-jp', $res, $chk);
 }
 
 sub encode
