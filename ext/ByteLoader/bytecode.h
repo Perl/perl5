@@ -140,8 +140,10 @@ typedef IV IV64;
 	hv_store((HV*)sv, bstate->bs_pv.xpv_pv, bstate->bs_pv.xpv_cur, arg, 0)
 #define BSET_pv_free(pv)	Safefree(pv.xpv_pv)
 #define BSET_pregcomp(o, arg) \
-	(PM_SETRE(((PMOP*)o), (arg ? \
-        	CALLREGCOMP(aTHX_ arg, arg + bstate->bs_pv.xpv_cur, ((PMOP*)o)) : 0)))
+	STMT_START { \
+		PM_SETRE(((PMOP*)o), (arg ? \
+        	         CALLREGCOMP(aTHX_ arg, arg + bstate->bs_pv.xpv_cur, ((PMOP*)o)) : 0)); \
+	} STMT_END
 #define BSET_newsv(sv, arg)				\
 	STMT_START {					\
 	    sv = (arg == SVt_PVAV ? (SV*)newAV() :	\
