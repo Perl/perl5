@@ -1559,7 +1559,7 @@ PP(pp_caller)
 	    PL_dbargs = GvAV(gv_AVadd(tmpgv = gv_fetchpv("DB::args", TRUE,
 				SVt_PVAV)));
 	    GvMULTI_on(tmpgv);
-	    AvREAL_off(PL_dbargs);		/* XXX Should be REIFY */
+	    AvREAL_off(PL_dbargs);	/* XXX should be REIFY (see av.h) */
 	}
 
 	if (AvMAX(PL_dbargs) < AvFILLp(ary) + off)
