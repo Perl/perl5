@@ -3053,6 +3053,14 @@ B<-T> option must appear on the command line: C<perl -T scriptname>.
 B<-M> or B<-m> option.  This is an error because B<-M> and B<-m> options
 are not intended for use inside scripts.  Use the C<use> pragma instead.
 
+=item Too late to run %s block
+
+(W void) A CHECK or INIT block is being defined during run time proper,
+when the opportunity to run them has already passed.  Perhaps you are
+loading a file with C<require> or C<do> when you should be using
+C<use> instead.  Or perhaps you should put the C<require> or C<do>
+inside a BEGIN block.
+
 =item Too many ('s
 
 =item Too many )'s

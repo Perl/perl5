@@ -4655,6 +4655,8 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    if (!PL_checkav)
 		PL_checkav = newAV();
 	    DEBUG_x( dump_sub(gv) );
+	    if (PL_main_start && ckWARN(WARN_VOID))
+		Perl_warner(aTHX_ WARN_VOID, "Too late to run CHECK block");
 	    av_unshift(PL_checkav, 1);
 	    av_store(PL_checkav, 0, SvREFCNT_inc(cv));
 	    GvCV(gv) = 0;
@@ -4663,6 +4665,8 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    if (!PL_initav)
 		PL_initav = newAV();
 	    DEBUG_x( dump_sub(gv) );
+	    if (PL_main_start && ckWARN(WARN_VOID))
+		Perl_warner(aTHX_ WARN_VOID, "Too late to run INIT block");
 	    av_push(PL_initav, SvREFCNT_inc(cv));
 	    GvCV(gv) = 0;
 	}
@@ -4803,6 +4807,8 @@ Perl_newXS(pTHX_ char *name, XSUBADDR_t subaddr, char *filename)
 	else if (strEQ(s, "CHECK")) {
 	    if (!PL_checkav)
 		PL_checkav = newAV();
+	    if (PL_main_start && ckWARN(WARN_VOID))
+		Perl_warner(aTHX_ WARN_VOID, "Too late to run CHECK block");
 	    av_unshift(PL_checkav, 1);
 	    av_store(PL_checkav, 0, SvREFCNT_inc(cv));
 	    GvCV(gv) = 0;
@@ -4810,6 +4816,8 @@ Perl_newXS(pTHX_ char *name, XSUBADDR_t subaddr, char *filename)
 	else if (strEQ(s, "INIT")) {
 	    if (!PL_initav)
 		PL_initav = newAV();
+	    if (PL_main_start && ckWARN(WARN_VOID))
+		Perl_warner(aTHX_ WARN_VOID, "Too late to run INIT block");
 	    av_push(PL_initav, SvREFCNT_inc(cv));
 	    GvCV(gv) = 0;
 	}
