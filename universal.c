@@ -726,6 +726,7 @@ XS(XS_PerlIO_get_layers)
     dXSARGS;
     if (items < 1 || items % 2 == 0)
 	Perl_croak(aTHX_ "Usage: PerlIO_get_layers(filehandle[,args])");
+#ifdef USE_PERLIO
     {
 	SV *	sv;
 	GV *	gv;
@@ -841,6 +842,7 @@ XS(XS_PerlIO_get_layers)
 	     XSRETURN(nitem);
 	}
     }
+#endif
 
     XSRETURN(0);
 }
