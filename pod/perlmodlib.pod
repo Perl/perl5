@@ -289,10 +289,6 @@ Generates cross reference reports for Perl programs
 
 Benchmark running times of Perl code
 
-=item ByteLoader
-
-Load byte compiled perl code
-
 =item CGI
 
 Simple Common Gateway Interface Class
