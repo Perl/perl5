@@ -1,5 +1,15 @@
 Revision history for Perl extension Time::HiRes.
 
+1.41
+	- At some point the ability to figure our the correct incdir
+	  for EXTERN.h (either a core perl build, or an installed perl)
+	  had broken (which lead into all test compiles failing with
+	  a core perl build, but thanks to the robustness of Makefile.PL
+	  nothing of was visible).  The brokenness seemed to be caused
+	  by $ENV{PERL_CORE} not being on for core builds?  Now stole
+	  a trick from the Encode that sets $ENV{PERL_CORE} right, and
+	  both styles of build should work again.
+
 1.40
 	- Nick Clark noticed that the my_catdir() emulation function
 	  was broken (which means that we didn't really work for Perls

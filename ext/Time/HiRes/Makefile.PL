@@ -14,6 +14,10 @@ my $DEFINE;
 my $LIBS;
 my $XSOPT;
 
+unless($ENV{PERL_CORE}) { # This trick from Encode/Makefile.PL.
+    $ENV{PERL_CORE} = 1 if ($^X =~ m{\bminiperl[^/\\\]>:]*$}o);
+}
+
 # Perls 5.002 and 5.003 did not have File::Spec, fake what we need.
 
 sub my_dirsep {
@@ -81,13 +85,16 @@ sub try_compile_and_link {
 	my $errornull;
 
 	my $COREincdir;
+
 	if ($ENV{PERL_CORE}) {
 	    my $updir = File::Spec->updir;
 	    $COREincdir = File::Spec->catdir(($updir) x 3);
 	} else {
 	    $COREincdir = File::Spec->catdir($Config{'archlibexp'}, 'CORE');
 	}
+
 	my $ccflags = $Config{'ccflags'} . ' ' . "-I$COREincdir";
+
 	if ($^O eq 'VMS') {
 	    if ($ENV{PERL_CORE}) {
 		# Fragile if the extensions change hierachy within
@@ -106,8 +113,9 @@ sub try_compile_and_link {
 	    $errornull = '';
 	}
 
-	$cccmd = "$Config{'cc'} -o $tmp $ccflags $tmp.c @$LIBS $errornull"
+        $cccmd = "$Config{'cc'} -o $tmp $ccflags $tmp.c @$LIBS $errornull"
 	    unless defined $cccmd;
+
 	if ($^O eq 'VMS') {
 	    open( CMDFILE, ">$tmp.com" );
 	    print CMDFILE "\$ SET MESSAGE/NOFACILITY/NOSEVERITY/NOIDENT/NOTEXT\n";
@@ -219,13 +227,16 @@ sub unixinit {
     print "Checking for libraries...\n";
     my $lib;
     for $lib (@$LIBS) {
-	print "Checking for $lib...\n";
+	print "Checking for $lib... ";
 	$LIBS = [ $lib ];
 	if ($Config{libs} =~ /\b$lib\b/ || has_x("time(0)")) {
 	    push @goodlibs, $lib;
+	    print "found.\n";
+	} else {
+	    print "NOT found.\n";
 	}
     }
-    @$LIBS = @goodlibs;
+    $LIBS = [ @goodlibs ];
     print @$LIBS ?
 	  "You have extra libraries: @$LIBS.\n" :
           "You have no applicable extra libraries.\n";
