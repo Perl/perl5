@@ -607,7 +607,7 @@ PP(pp_fileno)
 PP(pp_umask)
 {
     djSP; dTARGET;
-    int anum;
+    Mode_t anum;
 
 #ifdef HAS_UMASK
     if (MAXARG < 1) {
@@ -3380,7 +3380,7 @@ PP(pp_fork)
 {
 #ifdef HAS_FORK
     djSP; dTARGET;
-    int childpid;
+    Pid_t childpid;
     GV *tmpgv;
 
     EXTEND(SP, 1);
@@ -3404,7 +3404,7 @@ PP(pp_wait)
 {
 #if !defined(DOSISH) || defined(OS2) || defined(WIN32)
     djSP; dTARGET;
-    int childpid;
+    Pid_t childpid;
     int argflags;
 
     childpid = wait4pid(-1, &argflags, 0);
@@ -3420,7 +3420,7 @@ PP(pp_waitpid)
 {
 #if !defined(DOSISH) || defined(OS2) || defined(WIN32)
     djSP; dTARGET;
-    int childpid;
+    Pid_t childpid;
     int optype;
     int argflags;
 
@@ -3439,7 +3439,7 @@ PP(pp_system)
 {
     djSP; dMARK; dORIGMARK; dTARGET;
     I32 value;
-    int childpid;
+    Pid_t childpid;
     int result;
     int status;
     Sigsave_t ihand,qhand;     /* place to save signals during system() */

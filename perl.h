@@ -2762,9 +2762,6 @@ typedef struct am_table_short AMTS;
 #           define Semctl(id, num, cmd, semun) semctl(id, num, cmd, semun.buf)
 #       endif
 #   endif
-#   ifndef Semctl	/* Place our bets on the semun horse. */
-#       define Semctl(id, num, cmd, semun) semctl(id, num, cmd, semun)
-#   endif
 #endif
 
 /* Mention

@@ -121,6 +121,13 @@ malloc_cflags='ccflags="-DSTRICT_ALIGNMENT $ccflags"'
 	ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -D_POSIX_C_SOURCE"
 	optimize="-O3"
 	usenm='undef'
+	case "`uname -s`" in
+	# Without the -mabi=64 gcc in 64-bit IRIX has problems passing
+	# and returning small structures.  This affects inet_*() and semctl().
+	# See http://reality.sgi.com/ariel/freeware/gcc-2.8.1-notes.html
+	# for more information.  Reported by Lionel Cons <lionel.cons@cern.ch>.
+	IRIX64) ccflags="$ccflags -mabi=64" ;;
+	esac
 	;;
 *)
 	# this is needed to force the old-32 paths

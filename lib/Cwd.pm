@@ -136,6 +136,7 @@ sub fastcwd {
 	unshift(@path, $direntry);
     }
     $path = '/' . join('/', @path);
+    if ($^O eq 'apollo') { $path = "/".$path; }
     # At this point $path may be tainted (if tainting) and chdir would fail.
     # To be more useful we untaint it then check that we landed where we started.
     $path = $1 if $path =~ /^(.*)$/;	# untaint

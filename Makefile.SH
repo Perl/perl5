@@ -1,5 +1,5 @@
 #! /bin/sh
-case $CONFIG in
+case $CONFIGDOTSH in
 '')
 	if test -f config.sh; then TOP=.;
 	elif test -f ../config.sh; then TOP=..;
@@ -531,22 +531,22 @@ _mopup:
 
 # Do not 'make _tidy' directly.
 _tidy:
-	-cd pod; $(MAKE) clean
-	-cd utils; $(MAKE) clean
-	-cd x2p; $(MAKE) clean
+	-cd pod; $(LDLIBPTH) $(MAKE) clean
+	-cd utils; $(LDLIBPTH) $(MAKE) clean
+	-cd x2p; $(LDLIBPTH) $(MAKE) clean
 	-@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) $(nonxs_ext) ; do \
-	sh ext/util/make_ext clean $$x MAKE=$(MAKE) ; \
+	$(LDLIBPTH) sh ext/util/make_ext clean $$x MAKE=$(MAKE) ; \
 	done
 	rm -f testcompile compilelog
 
 # Do not 'make _cleaner' directly.
 _cleaner:
 	-cd os2; rm -f Makefile
-	-cd pod; $(MAKE) realclean
-	-cd utils; $(MAKE) realclean
-	-cd x2p; $(MAKE) realclean
+	-cd pod; $(LDLIBPTH) $(MAKE) realclean
+	-cd utils; $(LDLIBPTH) $(MAKE) realclean
+	-cd x2p; $(LDLIBPTH) $(MAKE) realclean
 	-@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) $(nonxs_ext) ; do \
-	sh ext/util/make_ext realclean $$x MAKE=$(MAKE) ; \
+	$(LDLIBPTH) sh ext/util/make_ext realclean $$x MAKE=$(MAKE) ; \
 	done
 	rm -f *.orig */*.orig *~ */*~ core core.perl.*.? core.miniperl.*.? perl.core miniperl.core t/core t/core.perl.*.? t/perl.core t/tmp???? t/c t/perl so_locations t/nonexistent1
 	rm -rf $(addedbyconf)

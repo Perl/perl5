@@ -28,7 +28,7 @@ locale.  See L<perllocale>.
 
 Treat string as multiple lines.  That is, change "^" and "$" from matching
 at only the very start or end of the string to the start or end of any
-line anywhere within the string,
+line anywhere within the string.
 
 =item s
 

@@ -24,7 +24,7 @@
 # The file is then given to the system loader (cc/xlc command line)
 # as -bE:export.file.
 
-case $CONFIG in
+case $CONFIGDOTSH in
 '')
 	if test -f config.sh; then TOP=.;
 	elif test -f ../config.sh; then TOP=..;

@@ -1,22 +1,32 @@
-#!/bin/sh
+case $CONFIGDOTSH in
+'')
+	if test -f config.sh; then TOP=.;
+	elif test -f ../config.sh; then TOP=..;
+	elif test -f ../../config.sh; then TOP=../..;
+	elif test -f ../../../config.sh; then TOP=../../..;
+	elif test -f ../../../../config.sh; then TOP=../../../..;
+	else
+	    echo "Can't find the perl config.sh file produced by Configure"; 
+	    exit 1
+	fi
+	. $TOP/config.sh
+	;;
+esac
+: This forces SH files to create target in same directory as SH file.
+: This is so that make depend always knows where to find SH derivatives.
+case "$0" in
+*/*) cd `expr X$0 : 'X\(.*\)/'` ;;
+esac
+echo "Extracting myconfig (with variable substitutions)"
+$spitshell >myconfig <<!GROK!THIS!
+$startsh
 
 # This script is designed to provide a handy summary of the configuration
 # information being used to build perl. This is especially useful if you
 # are requesting help from comp.lang.perl.misc on usenet or via mail.
 
-if test -f config.sh; then TOP=.;
-elif test -f ../config.sh; then TOP=..;
-elif test -f ../../config.sh; then TOP=../..;
-elif test -f ../../../config.sh; then TOP=../../..;
-elif test -f ../../../../config.sh; then TOP=../../../..;
-else
-	echo "Can't find the perl config.sh file produced by Configure"; exit 1
-fi
-. $TOP/config.sh
-
 # Note that the text lines /^Summary of/ .. /^\s*$/ are copied into Config.pm.
-
-$spitshell <<!GROK!THIS!
+cat <<'!NO!SUBS!'
 Summary of my $package (revision $baserev version $PERL_VERSION subversion $PERL_SUBVERSION) configuration:
   Platform:
     osname=$osname, osvers=$osvers, archname=$archname
@@ -42,4 +52,7 @@ Summary of my $package (revision $baserev version $PERL_VERSION subversion $PERL
     dlsrc=$dlsrc, dlext=$dlext, d_dlsymun=$d_dlsymun, ccdlflags='$ccdlflags'
     cccdlflags='$cccdlflags', lddlflags='$lddlflags'
 
+!NO!SUBS!
 !GROK!THIS!
+chmod 755 myconfig
+$eunicefix myconfig

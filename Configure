@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Mar 15 18:36:13 EET 1999 [metaconfig 3.0 PL70]
+# Generated on Mon Apr 19 22:21:08 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -106,6 +106,13 @@ if test -d /usr/lpp -a -f /usr/bin/bsh -a -f /usr/bin/uname; then
 	if test X`/usr/bin/uname -v` = X4; then
 		avoidksh="to avoid AIX 4's /bin/sh"
 		newsh=/usr/bin/bsh
+	fi
+fi
+if test -f /osf_boot -a -f /usr/sbin/setld; then
+	if test X`/usr/bin/uname -s` = XOSF1; then
+	        avoidksh="to avoid Digital UNIX' ksh"
+	        newsh=/bin/sh
+	        unset BIN_SH # if this is 'xpg4' sh will start up ksh
 	fi
 fi
 case "$inksh/$needksh" in
@@ -661,11 +668,13 @@ d_dirent64_s=''
 d_flock64_s=''
 d_fstat64=''
 d_ftruncate64=''
-d_ino64t=''
+d_ino64_t=''
+d_llseek=''
 d_lockf64=''
 d_lseek64=''
 d_lstat64=''
-d_off64t=''
+d_off64_t=''
+d_offset_t=''
 d_open64=''
 d_opendir64=''
 d_readdir64=''
@@ -756,6 +765,7 @@ scriptdirexp=''
 selectminbits=''
 selecttype=''
 sh=''
+sig_count=''
 sig_name=''
 sig_name_init=''
 sig_num=''
@@ -1311,7 +1321,7 @@ esac
 
 : script used to extract .SH files with variable substitutions
 cat >extract <<'EOS'
-CONFIG=true
+CONFIGDOTSH=true
 echo "Doing variable substitutions on .SH files..."
 if test -f $src/MANIFEST; then
 	set x `awk '{print $1}' <$src/MANIFEST | grep '\.SH$'`
@@ -1770,7 +1780,6 @@ more
 nm
 nroff
 pg
-tee
 test
 uname
 zip
@@ -2096,7 +2105,7 @@ EOM
 					osvers=2
 				fi
 			fi
-			unset tmp
+			tmp=''
 			;;
 		pc*)
 			if test -n "$DJGPP"; then
@@ -5319,19 +5328,6 @@ EOM
 		beos*)  xxx='' ;;
 		*)		xxx='LD_LIBRARY_PATH' ;;
 		esac
-		if test X"$xxx" != "X"; then
-			$cat <<EOM  | $tee -a ../config.msg >&4
-
-To build perl, you must add the current working directory to your
-$xxx environment variable before running make.  You can do
-this with
-   $xxx=\`pwd\`:\$$xxx; export $xxx
-for Bourne-style shells, or
-   setenv $xxx \`pwd\`
-for Csh-style shells.  You *MUST* do this before running make.
-
-EOM
-		fi
 		;;
 	*)	useshrplib='false' ;;
 	esac
@@ -6876,7 +6872,7 @@ while $test $# -ge 2; do
     shift 2;
 done > try.c;
 echo "int main () { struct $struct foo; foo.$field = 0; }" >> try.c;
-if eval $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
+if $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
 	val="$define";
 else
 	val="$undef";
@@ -7242,6 +7238,10 @@ if $test X"$use64bits" = X"$define"; then
 	set lockf64 d_lockf64
 	eval $inlibc
 
+	: see if llseek exists
+	set llseek d_llseek
+	eval $inlibc
+
 	: see if lseek64 exists
 	set lseek64 d_lseek64
 	eval $inlibc
@@ -7283,6 +7283,7 @@ if $test X"$use64bits" = X"$define"; then
 	echo $n "Checking to see if your system supports off64_t...$c" >&4
 	$cat >try.c <<EOCP
 #include <sys/types.h>
+#include <unistd.h>
 off64_t foo() { off64_t x; x = 7; return x; }'
 EOCP
 	if $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
@@ -7293,7 +7294,26 @@ EOCP
 		echo " Nope, it doesn't." >&4
 	fi
 	$rm -f try.*
-	set d_off64t
+	set d_off64_t
+	eval $setvar
+
+	: check for offset_t
+	echo " "
+	echo $n "Checking to see if your system supports offset_t...$c" >&4
+	$cat >try.c <<EOCP
+#include <sys/types.h>
+#include <unistd.h>
+offset_t foo() { offset_t x; x = 7; return x; }'
+EOCP
+	if $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
+		val="$define"
+		echo " Yup, it does." >&4
+	else
+		val="$undef"
+		echo " Nope, it doesn't." >&4
+	fi
+	$rm -f try.*
+	set d_offset_t
 	eval $setvar
 
 	: check for ino64_t
@@ -7318,7 +7338,7 @@ EOCP
 	else
 		echo " Nope, it doesn't." >&4
 	fi
-	set d_ino64t
+	set d_ino64_t
 	eval $setvar
 
 	: check for struct flock64
@@ -7353,7 +7373,7 @@ EOCP
 
 else
 	val="$undef"
-	for xxx in d_fstat64 d_ftruncate64 d_lockf64 d_lseek64 d_lstat64 d_open64 d_opendir64 d_readdir64 d_seekdir64 d_stat64 d_telldir64 d_truncate64 d_off64t d_ino64t d_flock64_s d_dirent64_s
+	for xxx in d_fstat64 d_ftruncate64 d_lockf64 d_lseek64 d_lstat64 d_open64 d_opendir64 d_readdir64 d_seekdir64 d_stat64 d_telldir64 d_truncate64 d_off64_t d_offset_t d_ino64_t d_flock64_s d_dirent64_s
 	do
 		set $xxx
 		eval $setvar
@@ -7982,7 +8002,6 @@ else
 		eval $setvar
 	done
 fi
-
 : see if flock exists
 set flock d_flock
 eval $inlibc
@@ -11434,6 +11453,8 @@ esac
 
 : Trace out the files included by signal.h, then look for SIGxxx names.
 : Remove SIGARRAYSIZE used by HPUX.
+: Remove SIGSTKSIZE used by Linux.
+: Remove SIGSTKSZ used by Posix.
 : Remove SIGTYP void lines used by OS2.
 xxx=`echo '#include <signal.h>' |
 	$cppstdin $cppminus $cppflags 2>/dev/null |
@@ -11451,7 +11472,7 @@ case "$xxxfiles" in
 '')	xxxfiles=`./findhdr signal.h` ;;
 esac
 xxx=`awk '
-$1 ~ /^#define$/ && $2 ~ /^SIG[A-Z0-9]*$/ && $2 !~ /SIGARRAYSIZE/ && $3 !~ /void/ {
+$1 ~ /^#define$/ && $2 ~ /^SIG[A-Z0-9]*$/ && $2 !~ /SIGARRAYSIZE/ && $2 !~ /SIGSTKSIZE/ && $2 !~ /SIGSTKSZ/ && $3 !~ /void/ {
 	print substr($2, 4, 20)
 }
 $1 == "#" && $2 ~ /^define$/ && $3 ~ /^SIG[A-Z0-9]*$/ && $3 !~ /SIGARRAYSIZE/ && $4 !~ /void/ {
@@ -11551,20 +11572,22 @@ $1 ~ /^NSIG$/ { nsig = $2 }
 	sig_name[$2] = $1
 	sig_num[$2] = $2
     }
-
 }
 END { 
-    if (nsig == 0) { nsig = maxsig + 1 }
-	for (n = 1; n < nsig; n++) {
-		if (sig_name[n]) {
-			printf("%s %d\n", sig_name[n], sig_num[n])
-		}
-		else {
-			printf("NUM%d %d\n", n, n) 
-		}
+    if (nsig == 0) {
+    	nsig = maxsig + 1
+    }
+    printf("NSIG %d\n", nsig);
+    for (n = 1; n < nsig; n++) {
+ 	if (sig_name[n]) {
+ 	    printf("%s %d\n", sig_name[n], sig_num[n])
 	}
+ 	else {
+ 	    printf("NUM%d %d\n", n, n) 
+ 	}
+    }
     for (n = 0; n < ndups; n++) {
-		printf("%s %d\n", dup_name[n], dup_num[n])
+ 	printf("%s %d\n", dup_name[n], dup_num[n])
     }
 }
 EOP
@@ -11630,7 +11653,8 @@ else
 	0) set HUP INT QUIT ILL TRAP ABRT EMT FPE KILL BUS SEGV SYS PIPE ALRM TERM;;
 	esac
 	echo $@ | $tr ' ' $trnl | \
-		$awk '{ printf $1; printf " %d\n", ++s; }' >signal.lst
+ 	    $awk '{ printf "%s %d\n", $1, ++s; }
+ 		  END { printf "NSIG %d\n", ++s }' >signal.lst
 fi
 $rm -f signal.c signal$_exe signal$_o signal.nsg signal.ls1
 EOS
@@ -11649,19 +11673,20 @@ case "$doinit" in
 yes)
 	echo "Generating a list of signal names and numbers..." >&4
 	. ./signal_cmd
-	sig_name=`$awk '{printf "%s ", $1}' signal.lst`
-	sig_name="ZERO $sig_name"
-	sig_name_init=`$awk 'BEGIN { printf "\"ZERO\", " }
-						{ printf "\"%s\", ", $1 }
-						END { printf "0\n" }' signal.lst`
-	sig_num=`$awk '{printf "%d ", $2}' signal.lst`
-	sig_num="0 $sig_num"
-	sig_num_init=`$awk 'BEGIN { printf "0, " }
-					{ printf "%d, ", $2}
-					END { printf "0\n"}' signal.lst`
+ 	sig_count=`$awk '/^NSIG/ { printf "%d", $2 }' signal.lst`
+ 	sig_name=`$awk 'BEGIN { printf "ZERO " }
+ 			!/^NSIG/ { printf "%s ", $1 }' signal.lst`
+ 	sig_num=`$awk  'BEGIN { printf "0 " }
+ 			!/^NSIG/ { printf "%d ", $2 }' signal.lst`
+ 	sig_name_init=`$awk 'BEGIN	{ printf "\"ZERO\", " }
+ 			     !/^NSIG/	{ printf "\"%s\", ", $1 }
+ 			     END	{ printf "0\n" }' signal.lst`
+ 	sig_num_init=`$awk  'BEGIN	{ printf "0, " }
+ 			     !/^NSIG/	{ printf "%d, ", $2}
+ 			     END	{ printf "0\n"}' signal.lst`
 	;;
 esac
-echo "The following signals are available:"
+echo "The following $sig_count signals are available:"
 echo " "
 echo $sig_name | $awk \
 'BEGIN { linelen = 0 }
@@ -12000,7 +12025,7 @@ do
 done
 $rm -f try.c
 EOS
-unset postprocess_cc_v
+postprocess_cc_v=''
 chmod +x ccsym
 $eunicefix ccsym
 ./ccsym > ccsym1.raw
@@ -12770,13 +12795,14 @@ d_hasmntopt='$d_hasmntopt'
 d_htonl='$d_htonl'
 d_index='$d_index'
 d_inetaton='$d_inetaton'
-d_ino64t='$d_ino64t'
+d_ino64_t='$d_ino64_t'
 d_int64t='$d_int64t'
 d_iovec_s='$d_iovec_s'
 d_isascii='$d_isascii'
 d_killpg='$d_killpg'
 d_lchown='$d_lchown'
 d_link='$d_link'
+d_llseek='$d_llseek'
 d_locconv='$d_locconv'
 d_lockf64='$d_lockf64'
 d_lockf='$d_lockf'
@@ -12814,7 +12840,8 @@ d_munmap='$d_munmap'
 d_mymalloc='$d_mymalloc'
 d_nextkey64='$d_nextkey64'
 d_nice='$d_nice'
-d_off64t='$d_off64t'
+d_off64_t='$d_off64_t'
+d_offset_t='$d_offset_t'
 d_old_pthread_create_joinable='$d_old_pthread_create_joinable'
 d_oldpthreads='$d_oldpthreads'
 d_oldsock='$d_oldsock'
@@ -13177,6 +13204,7 @@ shmattype='$shmattype'
 shortsize='$shortsize'
 shrpenv='$shrpenv'
 shsharp='$shsharp'
+sig_count='$sig_count'
 sig_name='$sig_name'
 sig_name_init='$sig_name_init'
 sig_num='$sig_num'
@@ -13254,7 +13282,7 @@ $test -f UU/cmdline.opt && $cat UU/cmdline.opt >> config.sh
 : add special variables
 $test -f $src/patchlevel.h && \
 awk '/^#define[ 	]+PERL_/ {printf "%s=%s\n",$2,$3}' $src/patchlevel.h >>config.sh
-echo "CONFIG=true" >>config.sh
+echo "CONFIGDOTSH=true" >>config.sh
 
 : propagate old symbols
 if $test -f UU/config.sh; then
