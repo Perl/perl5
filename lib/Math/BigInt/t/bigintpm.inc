@@ -810,6 +810,10 @@ acmpNaN:acmpNaN:
 -inf:123:1
 +inf:-123:1
 -inf:-123:1
+123:-inf:-1
+-123:inf:-1
+-123:-inf:-1
+123:inf:-1
 # return undef
 +inf:NaN:
 NaN:inf:
