@@ -109,17 +109,17 @@ sub timing_info {
 	    $hr, $min, $sec, $user, $sys);
 }
 
-my %symtable;
-sub savesym {
-    my ($obj, $value) = @_;
-#    warn(sprintf("savesym: sym_%x => %s\n", $$obj, $value)); # debug
-    $symtable{sprintf("sym_%x", $$obj)} = $value;
-}
+#my %symtable;
+#sub savesym {
+#    my ($obj, $value) = @_;
+##    warn(sprintf("savesym: sym_%x => %s\n", $$obj, $value)); # debug
+#    $symtable{sprintf("sym_%x", $$obj)} = $value;
+#}
 
-sub objsym {
-    my $obj = shift;
-    return $symtable{sprintf("sym_%x", $$obj)};
-}
+#sub objsym {
+#    my $obj = shift;
+#    return $symtable{sprintf("sym_%x", $$obj)};
+#}
 
 sub walkoptree_exec {
     my ($op, $method, $level) = @_;
@@ -202,39 +202,63 @@ sub walksymtable {
 {
     package B::Section;
     my $output_fh;
+    my %sections;
     
     sub new {
-	my ($class, $section) = @_;
+	my ($class, $section, $symtable, $default) = @_;
 	$output_fh ||= FileHandle->new_tmpfile;
-	bless [$section, -1], $class;
+	my $obj = bless [-1, $section, $symtable, $default], $class;
+	$sections{$section} = $obj;
+	return $obj;
     }
     
+    sub get {
+	my ($class, $section) = @_;
+	return $sections{$section};
+    }
+
     sub add {
 	my $section = shift;
 	while (defined($_ = shift)) {
-	    print $output_fh "$section->[0]\t$_\n";
-	    $section->[1]++;
+	    print $output_fh "$section->[1]\t$_\n";
+	    $section->[0]++;
 	}
-    }
-
-    sub name {
-	my $section = shift;
-	return $section->[0];
     }
 
     sub index {
 	my $section = shift;
+	return $section->[0];
+    }
+
+    sub name {
+	my $section = shift;
 	return $section->[1];
     }
 
+    sub symtable {
+	my $section = shift;
+	return $section->[2];
+    }
+	
+    sub default {
+	my $section = shift;
+	return $section->[3];
+    }
+	
     sub output {
 	my ($section, $fh, $format) = @_;
-	my $name = $section->[0];
+	my $name = $section->name;
+	my $sym = $section->symtable || {};
+	my $default = $section->default;
+
 	seek($output_fh, 0, 0);
 	while (<$output_fh>) {
 	    chomp;
 	    s/^(.*?)\t//;
 	    if ($1 eq $name) {
+		s{(s\\_[0-9a-f]+)} {
+		    exists($sym->{$1}) ? $sym->{$1} : $default;
+		}ge;
 		printf $fh $format, $_;
 	    }
 	}

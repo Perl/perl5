@@ -9,7 +9,8 @@ package B::CC;
 use strict;
 use B qw(main_start main_root class comppadlist peekop svref_2object
 	timing_info);
-use B::C qw(save_unused_subs objsym output_all output_boilerplate output_main);
+use B::C qw(save_unused_subs objsym init_sections
+	    output_all output_boilerplate output_main);
 use B::Bblock qw(find_leaders);
 use B::Stackobj qw(:types :flags);
 
@@ -530,7 +531,6 @@ sub pp_cond_expr {
     runtime(sprintf("if (!$bool) goto %s;", label($false)));
     return $op->true;
 }
-	    
 
 sub pp_padsv {
     my $op = shift;
@@ -1379,7 +1379,7 @@ sub cc_main {
 
     return if $errors;
     if (!defined($module)) {
-	$init->add(sprintf("main_root = sym_%x;", ${main_root()}),
+	$init->add(sprintf("main_root = s\\_%x;", ${main_root()}),
 		   "main_start = $start;",
 		   "curpad = AvARRAY($curpad_sym);");
     }
@@ -1493,8 +1493,9 @@ sub compile {
 	    }
 	}
     }
-    $init = new B::Section "init";
-    $decl = new B::Section "decl";
+    init_sections();
+    $init = B::Section->get("init");
+    $decl = B::Section->get("decl");
 
     if (@options) {
 	return sub {
