@@ -95,7 +95,9 @@ static BOOL		has_shell_metachars(char *ptr);
 static long		filetime_to_clock(PFILETIME ft);
 static BOOL		filetime_from_time(PFILETIME ft, time_t t);
 static char *		get_emd_part(char *leading, char *trailing, ...);
-static void		remove_dead_process(HANDLE deceased);
+static void		remove_dead_process(long deceased);
+static long		find_pid(int pid);
+static char *		qualified_path(const char *cmd);
 
 HANDLE	w32_perldll_handle = INVALID_HANDLE_VALUE;
 static DWORD	w32_platform = (DWORD)-1;
@@ -841,42 +843,40 @@ chown(const char *path, uid_t owner, gid_t group)
     return 0;
 }
 
-static void
-remove_dead_process(HANDLE deceased)
+static long
+find_pid(int pid)
 {
-#ifndef USE_RTL_WAIT
-    int child;
+    long child;
     for (child = 0 ; child < w32_num_children ; ++child) {
-	if (w32_child_pids[child] == deceased) {
-	    Copy(&w32_child_pids[child+1], &w32_child_pids[child],
-		 (w32_num_children-child-1), HANDLE);
-	    w32_num_children--;
-	    break;
-	}
+	if (w32_child_pids[child] == pid)
+	    return child;
     }
-#endif
+    return -1;
+}
+
+static void
+remove_dead_process(long child)
+{
+    if (child >= 0) {
+	CloseHandle(w32_child_handles[child]);
+	Copy(&w32_child_handles[child+1], &w32_child_handles[child],
+	     (w32_num_children-child-1), HANDLE);
+	Copy(&w32_child_pids[child+1], &w32_child_pids[child],
+	     (w32_num_children-child-1), DWORD);
+	w32_num_children--;
+    }
 }
 
 DllExport int
 win32_kill(int pid, int sig)
 {
-#ifdef USE_RTL_WAIT
-    HANDLE hProcess= OpenProcess(PROCESS_ALL_ACCESS, TRUE, pid);
-#else
-    HANDLE hProcess = (HANDLE) pid;
-#endif
-
-    if (hProcess == NULL) {
-	croak("kill process failed!\n");
-    }
-    else {
-	if (!TerminateProcess(hProcess, sig))
-	    croak("kill process failed!\n");
+    HANDLE hProcess;
+    hProcess = OpenProcess(PROCESS_ALL_ACCESS, TRUE, pid);
+    if (hProcess && TerminateProcess(hProcess, sig))
 	CloseHandle(hProcess);
-
-	/* WaitForMultipleObjects() on a pid that was killed returns error
-	 * so if we know the pid is gone we remove it from process list */
-	remove_dead_process(hProcess);
+    else {
+	errno = EINVAL;
+	return -1;
     }
     return 0;
 }
@@ -1135,27 +1135,40 @@ win32_utime(const char *filename, struct utimbuf *times)
 DllExport int
 win32_waitpid(int pid, int *status, int flags)
 {
-    int rc;
+    int retval = -1;
     if (pid == -1) 
-      return win32_wait(status);
+	return win32_wait(status);
     else {
-      rc = cwait(status, pid, WAIT_CHILD);
-    /* cwait() returns "correctly" on Borland */
+	long child = find_pid(pid);
+	if (child >= 0) {
+	    HANDLE hProcess = w32_child_handles[child];
+	    DWORD waitcode = WaitForSingleObject(hProcess, INFINITE);
+	    if (waitcode != WAIT_FAILED) {
+		if (GetExitCodeProcess(hProcess, &waitcode)) {
+		    *status = (int)((waitcode & 0xff) << 8);
+		    retval = (int)w32_child_pids[child];
+		    remove_dead_process(child);
+		    return retval;
+		}
+	    }
+	    else
+		errno = ECHILD;
+	}
+	else {
+	    retval = cwait(status, pid, WAIT_CHILD);
+	    /* cwait() returns "correctly" on Borland */
 #ifndef __BORLANDC__
-    if (status)
-	*status *= 256;
+	    if (status)
+		*status *= 256;
 #endif
-      remove_dead_process((HANDLE)pid);
+	}
     }
-    return rc >= 0 ? pid : rc;                
+    return retval >= 0 ? pid : retval;                
 }
 
 DllExport int
 win32_wait(int *status)
 {
-#ifdef USE_RTL_WAIT
-    return wait(status);
-#else
     /* XXX this wait emulation only knows about processes
      * spawned via win32_spawnvp(P_NOWAIT, ...).
      */
@@ -1169,7 +1182,7 @@ win32_wait(int *status)
 
     /* if a child exists, wait for it to die */
     waitcode = WaitForMultipleObjects(w32_num_children,
-				      w32_child_pids,
+				      w32_child_handles,
 				      FALSE,
 				      INFINITE);
     if (waitcode != WAIT_FAILED) {
@@ -1178,13 +1191,10 @@ win32_wait(int *status)
 	    i = waitcode - WAIT_ABANDONED_0;
 	else
 	    i = waitcode - WAIT_OBJECT_0;
-	if (GetExitCodeProcess(w32_child_pids[i], &exitcode) ) {
-	    CloseHandle(w32_child_pids[i]);
+	if (GetExitCodeProcess(w32_child_handles[i], &exitcode) ) {
 	    *status = (int)((exitcode & 0xff) << 8);
 	    retval = (int)w32_child_pids[i];
-	    Copy(&w32_child_pids[i+1], &w32_child_pids[i],
-		 (w32_num_children-i-1), HANDLE);
-	    w32_num_children--;
+	    remove_dead_process(i);
 	    return retval;
 	}
     }
@@ -1192,8 +1202,6 @@ win32_wait(int *status)
 FAILED:
     errno = GetLastError();
     return -1;
-
-#endif
 }
 
 static UINT timerid = 0;
@@ -1791,16 +1799,10 @@ win32_pclose(FILE *pf)
     win32_fclose(pf);
     SvIVX(sv) = 0;
 
-    remove_dead_process((HANDLE)childpid);
+    if (win32_waitpid(childpid, &status, 0) == -1)
+        return -1;
 
-    /* wait for the child */
-    if (cwait(&status, childpid, WAIT_CHILD) == -1)
-        return (-1);
-    /* cwait() returns "correctly" on Borland */
-#ifndef __BORLANDC__
-    status *= 256;
-#endif
-    return (status);
+    return status;
 
 #endif /* USE_RTL_POPEN */
 }
@@ -1993,26 +1995,212 @@ win32_chdir(const char *dir)
     return chdir(dir);
 }
 
+static char *
+create_command_line(const char* command, const char * const *args)
+{
+    int index;
+    char *cmd, *ptr, *arg;
+    STRLEN len = strlen(command) + 1;
+
+    for (index = 0; (ptr = (char*)args[index]) != NULL; ++index)
+	len += strlen(ptr) + 1;
+
+    New(1310, cmd, len, char);
+    ptr = cmd;
+    strcpy(ptr, command);
+    ptr += strlen(ptr);
+    *ptr++ = ' ';
+
+    for (index = 0; (arg = (char*)args[index]) != NULL; ++index) {
+	strcpy(ptr, arg);
+	ptr += strlen(ptr);
+	if ((char*)args[index+1] != NULL)
+	    *ptr++ = ' ';
+    }
+
+    return cmd;
+}
+
+static char *
+qualified_path(const char *cmd)
+{
+    char *pathstr;
+    char *fullcmd, *curfullcmd;
+    STRLEN cmdlen = 0;
+    int has_slash = 0;
+
+    if (!cmd)
+	return Nullch;
+    fullcmd = (char*)cmd;
+    while (*fullcmd) {
+	if (*fullcmd == '/' || *fullcmd == '\\')
+	    has_slash++;
+	fullcmd++;
+	cmdlen++;
+    }
+
+    /* look in PATH */
+    pathstr = win32_getenv("PATH");
+    New(0, fullcmd, MAX_PATH+1, char);
+    curfullcmd = fullcmd;
+
+    while (1) {
+	DWORD res;
+
+	/* start by appending the name to the current prefix */
+	strcpy(curfullcmd, cmd);
+	curfullcmd += cmdlen;
+
+	/* if it doesn't end with '.', or has no extension, try adding
+	 * a trailing .exe first */
+	if (cmd[cmdlen-1] != '.'
+	    && (cmdlen < 4 || cmd[cmdlen-4] != '.'))
+	{
+	    strcpy(curfullcmd, ".exe");
+	    res = GetFileAttributes(fullcmd);
+	    if (res != 0xFFFFFFFF && !(res & FILE_ATTRIBUTE_DIRECTORY))
+		return fullcmd;
+	    *curfullcmd = '\0';
+	}
+
+	/* that failed, try the bare name */
+	res = GetFileAttributes(fullcmd);
+	if (res != 0xFFFFFFFF && !(res & FILE_ATTRIBUTE_DIRECTORY))
+	    return fullcmd;
+
+	/* quit if no other path exists, or if cmd already has path */
+	if (!pathstr || !*pathstr || has_slash)
+	    break;
+
+	/* skip leading semis */
+	while (*pathstr == ';')
+	    pathstr++;
+
+	/* build a new prefix from scratch */
+	curfullcmd = fullcmd;
+	while (*pathstr && *pathstr != ';') {
+	    if (*pathstr == '"') {	/* foo;"baz;etc";bar */
+		pathstr++;		/* skip initial '"' */
+		while (*pathstr && *pathstr != '"') {
+		    if (curfullcmd-fullcmd < MAX_PATH-cmdlen-5)
+			*curfullcmd++ = *pathstr;
+		    pathstr++;
+		}
+		if (*pathstr)
+		    pathstr++;		/* skip trailing '"' */
+	    }
+	    else {
+		if (curfullcmd-fullcmd < MAX_PATH-cmdlen-5)
+		    *curfullcmd++ = *pathstr;
+		pathstr++;
+	    }
+	}
+	if (*pathstr)
+	    pathstr++;			/* skip trailing semi */
+	if (curfullcmd > fullcmd	/* append a dir separator */
+	    && curfullcmd[-1] != '/' && curfullcmd[-1] != '\\')
+	{
+	    *curfullcmd++ = '\\';
+	}
+    }
+GIVE_UP:
+    Safefree(fullcmd);
+    return Nullch;
+}
+
+/* XXX this needs to be made more compatible with the spawnvp()
+ * provided by the various RTLs.  In particular, searching for
+ * *.{com,bat,cmd} files (as done by the RTLs) is unimplemented.
+ * This doesn't significantly affect perl itself, because we
+ * always invoke things using PERL5SHELL if a direct attempt to
+ * spawn the executable fails.
+ * 
+ * XXX splitting and rejoining the commandline between do_aspawn()
+ * and win32_spawnvp() could also be avoided.
+ */
+
 DllExport int
 win32_spawnvp(int mode, const char *cmdname, const char *const *argv)
 {
-    int status;
+#ifdef USE_RTL_SPAWNVP
+    return spawnvp(mode, cmdname, (char * const *)argv);
+#else
+    DWORD ret;
+    STARTUPINFO StartupInfo;
+    PROCESS_INFORMATION ProcessInformation;
+    DWORD create = 0;
 
-#ifndef USE_RTL_WAIT
-    if (mode == P_NOWAIT && w32_num_children >= MAXIMUM_WAIT_OBJECTS)
-	return -1;
-#endif
+    char *cmd = create_command_line(cmdname, strcmp(cmdname, argv[0]) == 0
+			     	             ? &argv[1] : argv);
+    char *fullcmd = Nullch;
 
-    status = spawnvp(mode, cmdname, (char * const *) argv);
-#ifndef USE_RTL_WAIT
-    /* XXX For the P_NOWAIT case, Borland RTL returns pinfo.dwProcessId
-     * while VC RTL returns pinfo.hProcess. For purposes of the custom
-     * implementation of win32_wait(), we assume the latter.
-     */
-    if (mode == P_NOWAIT && status >= 0)
-	w32_child_pids[w32_num_children++] = (HANDLE)status;
+    switch(mode) {
+    case P_NOWAIT:	/* asynch + remember result */
+	if (w32_num_children >= MAXIMUM_WAIT_OBJECTS) {
+	    errno = EAGAIN;
+	    ret = -1;
+	    goto RETVAL;
+	}
+	/* FALL THROUGH */
+    case P_WAIT:	/* synchronous execution */
+	break;
+    default:		/* invalid mode */
+	errno = EINVAL;
+	ret = -1;
+	goto RETVAL;
+    }
+    memset(&StartupInfo,0,sizeof(StartupInfo));
+    StartupInfo.cb = sizeof(StartupInfo);
+    StartupInfo.wShowWindow = SW_SHOWDEFAULT;
+
+RETRY:
+    if (!CreateProcess(cmdname,		/* search PATH to find executable */
+		       cmd,		/* executable, and its arguments */
+		       NULL,		/* process attributes */
+		       NULL,		/* thread attributes */
+		       TRUE,		/* inherit handles */
+		       create,		/* creation flags */
+		       NULL,		/* inherit environment */
+		       NULL,		/* inherit cwd */
+		       &StartupInfo,
+		       &ProcessInformation))
+    {
+	/* initial NULL argument to CreateProcess() does a PATH
+	 * search, but it always first looks in the directory
+	 * where the current process was started, which behavior
+	 * is undesirable for backward compatibility.  So we
+	 * jump through our own hoops by picking out the path
+	 * we really want it to use. */
+	if (!fullcmd) {
+	    fullcmd = qualified_path(cmdname);
+	    if (fullcmd) {
+		cmdname = fullcmd;
+		goto RETRY;
+	    }
+	}
+	errno = ENOENT;
+	ret = -1;
+	goto RETVAL;
+    }
+
+    if (mode == P_NOWAIT) {
+	/* asynchronous spawn -- store handle, return PID */
+	w32_child_handles[w32_num_children] = ProcessInformation.hProcess;
+	ret = w32_child_pids[w32_num_children] = ProcessInformation.dwProcessId;
+	++w32_num_children;
+    }
+    else  {
+	WaitForSingleObject(ProcessInformation.hProcess, INFINITE);
+	GetExitCodeProcess(ProcessInformation.hProcess, &ret);
+	CloseHandle(ProcessInformation.hProcess);
+    }
+
+    CloseHandle(ProcessInformation.hThread);
+RETVAL:
+    Safefree(cmd);
+    Safefree(fullcmd);
+    return (int)ret;
 #endif
-    return status;
 }
 
 DllExport int
@@ -2567,9 +2755,8 @@ Perl_init_os_extras()
     w32_perlshell_tokens = Nullch;
     w32_perlshell_items = -1;
     w32_fdpid = newAV();		/* XXX needs to be in Perl_win32_init()? */
-#ifndef USE_RTL_WAIT
+    New(1313, w32_children, 1, child_tab);
     w32_num_children = 0;
-#endif
 
     /* these names are Activeware compatible */
     newXS("Win32::GetCwd", w32_GetCwd, file);
