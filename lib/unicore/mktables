@@ -638,7 +638,8 @@ sub UnicodeData_Txt()
                                 || $code == 0x000A  # 000A: LINE FEED
                                 || $code == 0x000B  # 000B: VERTICAL TAB
                                 || $code == 0x000C  # 000C: FORM FEED
-                                || $code == 0x000D; # 000D: CARRIAGE RETURN
+                                || $code == 0x000D  # 000D: CARRIAGE RETURN
+                                || $code == 0x0085; # 0085: NEL
 
 
         $Cat{SpacePerl}->$op($code) if $cat =~ /^Z/
@@ -659,9 +660,10 @@ sub UnicodeData_Txt()
         $Cat{Title}->$op($code) if $cat eq "Lt";
         $Cat{ASCII}->$op($code) if $code <= 0x007F;
         $Cat{Cntrl}->$op($code) if $cat =~ /^C/;
-        $Cat{Graph}->$op($code) if $cat =~ /^[^C]/
+        $Cat{Graph}->$op($code) if $cat =~ /^[LMNPS]/
                                 && $cat ne "Zs";
-        $Cat{Print}->$op($code) if $cat =~ /^[^C]/;
+        $Cat{Print}->$op($code) if $cat =~ /^[LMNPS]/
+                                || $cat eq "Zs";
         $Cat{Punct}->$op($code) if $cat =~ /^P/;
 
         $Cat{XDigit}->$op($code) if ($code >= 0x30 && $code <= 0x39)  ## 0..9
