@@ -76,13 +76,13 @@ INST_ARCH	*= \$(ARCHNAME)
 # tests.  This should be enabled to get the fork() emulation.  Do not
 # enable unless you know what you're doing!
 #
-USE_ITHREADS	*= define
+#USE_ITHREADS	*= define
 
 #
 # uncomment to enable the implicit "host" layer for all system calls
 # made by perl.  This is needed and auto-enabled by USE_OBJECT above.
 #
-USE_IMP_SYS	*= define
+#USE_IMP_SYS	*= define
 
 #
 # uncomment exactly one of the following
@@ -950,6 +950,7 @@ $(MINIDIR)\gcrt0$(o): .\gstartup.c
 # this target added for Win95 port but used to keep the WinNT port able to 
 # use this file
 __not_needed:
+	$(NOOP)
 
 $(GLOBEXE) : perlglob$(o)
 .IF "$(CCTYPE)" == "BORLAND"

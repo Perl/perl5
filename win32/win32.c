@@ -2369,8 +2369,13 @@ Nt4CreateHardLinkW(
     StreamId.dwStreamId = BACKUP_LINK;
     StreamId.dwStreamAttributes = 0;
     StreamId.dwStreamNameSize = 0;
+#ifdef __BORLANDC__
+    StreamId.Size.u.HighPart = 0;
+    StreamId.Size.u.LowPart = dwLen;
+#else
     StreamId.Size.HighPart = 0;
     StreamId.Size.LowPart = dwLen;
+#endif
 
     bSuccess = pfnBackupWrite(handle, (LPBYTE)&StreamId, dwSize, &dwWritten,
 			      FALSE, FALSE, &lpContext);
