@@ -10033,6 +10033,10 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    sv = (SV*)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = sv_dup(sv, param);
 	    break;
+	case SAVEt_BOOL:
+	    ptr = POPPTR;
+	    *(bool*)ptr = (bool)POPBOOL;
+	    break;
 	default:
 	    Perl_croak(aTHX_ "panic: ss_dup inconsistency");
 	}
