@@ -89,7 +89,12 @@ case `$cc -v 2>&1`"" in
 		    case "$gccversion" in
 			3*)
 			    case "$archname" in
-				PA-RISC*) ccflags="$ccflags -mpa-risc-2-0" ;;
+                               PA-RISC*)
+                                   case "$ccflags" in
+                                       *-mpa-risc*) ;;
+                                       *) ccflags="$ccflags -mpa-risc-2-0" ;;
+                                       esac
+                                   ;;
 				esac
 			    ;;
 			*)  # gcc with gas will not accept +DA2.0
