@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Sep 11 21:59:48 EET DST 1998 [metaconfig 3.0 PL70]
+# Generated on Tue Sep 29 00:08:14 EET DST 1998 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by jhi@iki.fi)
 
 cat >/tmp/c1$$ <<EOF
@@ -317,6 +317,7 @@ d_dlopen=''
 d_dlsymun=''
 d_dosuid=''
 d_suidsafe=''
+d_drand48proto=''
 d_dup2=''
 d_eaccess=''
 d_endgrent=''
@@ -699,7 +700,11 @@ privlib=''
 privlibexp=''
 prototype=''
 ptrsize=''
+drand01=''
 randbits=''
+randfunc=''
+randseedtype=''
+seedfunc=''
 installscript=''
 scriptdir=''
 scriptdirexp=''
@@ -737,7 +742,9 @@ d_tmpfile64=''
 sysman=''
 trnl=''
 uidtype=''
+archname64=''
 use64bits=''
+usemultiplicity=''
 nm_opt=''
 nm_so_opt=''
 runnm=''
@@ -873,6 +880,7 @@ defvoidused=15
 useposix=true
 : set useopcode=false in your hint file to disable the Opcode extension.
 useopcode=true
+: set usemultiplicity on the Configure command line to enable multiplicity.
 : set usethreads on the Configure command line to enable threads.
 : List of libraries we want.
 : If anyone needs -lnet, put it in a hint file.
@@ -1687,7 +1695,6 @@ comm
 cp
 echo
 expr
-find
 grep
 ls
 make
@@ -1709,14 +1716,11 @@ date
 egrep
 gzip
 less
-line
 ln
 more
 nm
 nroff
-perl
 pg
-sendmail
 tee
 test
 uname
@@ -2009,12 +2013,12 @@ EOM
 			osvers="$2.$3"
 		fi
 	fi
-	$test -f /sys/posix.dll &&
-		$test -f /usr/bin/what &&
-		set X `/usr/bin/what /sys/posix.dll` &&
-		$test "$3" = UWIN &&
-		osname=uwin &&
-		osvers="$5"
+       $test -f /sys/posix.dll &&
+	       $test -f /usr/bin/what &&
+	       set X `/usr/bin/what /sys/posix.dll` &&
+	       $test "$3" = UWIN &&
+	       osname=uwin &&
+	       osvers="$5"
 	if $test -f $uname; then
 		set X $myuname
 		shift
@@ -2461,6 +2465,54 @@ esac
 set d_oldpthreads
 eval $setvar
 
+cat <<EOM
+
+Perl can be built so that multiple Perl interpreters can coexist
+within the same Perl executable.  To do so, Configure must be run with
+-Dusemultiplicity.
+
+Normally you do not need this and you should answer no.
+
+EOM
+case "$usemultiplicity" in
+$define|true|[yY]*)	dflt='y';;
+*) dflt='n';;
+esac
+rp='Build Perl for multiplicity?'
+. ./myread
+case "$ans" in
+y|Y)	val="$define" ;;     
+*)      val="$undef" ;;
+esac
+set usemultiplicity
+eval $setvar 
+
+cat <<EOM
+
+Perl can be built to take advantage of explicit 64-bit interfaces,
+on some systems.  To do so, Configure must be run with -Duse64bits.
+
+If this doesn't make any sense to you, just accept the default 'n'.
+EOM
+case "$use64bits" in
+$define|true|[yY]*)	dflt='y';;
+*) dflt='n';;
+esac
+rp='Try to use explicit 64-bit interfaces, if available?'
+. ./myread
+case "$ans" in
+y|Y) 
+	val="$define"
+	;;     
+*)      
+	val="$undef"
+	;;
+esac
+set use64bits
+eval $setvar
+
+archname64=''
+
 : determine the architecture name
 echo " "
 if xxx=`./loc arch blurfl $pth`; $test -f "$xxx"; then
@@ -2483,26 +2535,56 @@ case "$myarchname" in
 	archname=''
 	;;
 esac
+myarchname="$tarch"
 case "$archname" in
 '') dflt="$tarch";;
 *) dflt="$archname";;
 esac
 rp='What is your architecture name'
 . ./myread
+archname="$ans"
 case "$usethreads" in
-$define)  echo "Threads selected." >&4
-          case "$ans" in
-          *-thread) echo "...and architecture name already ends in -thread." >&4
-                    archname="$ans"
-                    ;;
-          *)        archname="$ans-thread"
-                    echo "...setting architecture name to $archname." >&4
-                    ;;
-          esac
-          ;;
-*)        archname="$ans" ;;
+$define)
+	echo "Threads selected." >&4
+	case "$archname" in
+        *-thread*) echo "...and architecture name already has -thread." >&4
+                ;;
+        *)      archname="$archname-thread"
+                echo "...setting architecture name to $archname." >&4
+                ;;
+        esac
+	;;
 esac
-myarchname="$tarch"
+case "$usemultiplicity" in
+$define)
+	echo "Multiplicity selected." >&4
+	case "$archname" in
+        *-multi*) echo "...and architecture name already has -multi." >&4
+                ;;
+        *)      archname="$archname-multi"
+                echo "...setting architecture name to $archname." >&4
+                ;;
+        esac
+	;;
+esac
+case "$use64bits" in
+$define)
+	echo "Explicit 64-bitness selected." >&4
+	case "$archname64" in
+	'')
+		;;
+	*)
+		case "$archname" in
+	        *-$archname64*) echo "...and architecture name already has $archname64." >&4
+	                ;;
+	        *)      archname="$archname-$archname64"
+	                echo "...setting architecture name to $archname." >&4
+	                ;;
+	        esac
+		;;
+	esac
+esac
+
 : is AFS running?
 echo " "
 case "$afs" in
@@ -3894,6 +3976,16 @@ fi
 case "$hint" in
 none|recommended) dflt="$ccflags $dflt" ;;
 *) dflt="$ccflags";;
+esac
+
+case "$usemultiplicity" in
+$define)
+	case "$dflt" in
+	*-DMULTIPLICITY* ) ;;
+	*)	dflt="$dflt -DMULTIPLICITY"
+		;;
+	esac
+	;;
 esac
 
 case "$dflt" in
@@ -6001,30 +6093,6 @@ fi
 
 cat <<EOM
 
-Perl can be built to take advantage of 64-bit interfaces, on some systems.
-To do so, Configure must be run with -Dusethreads.
-
-If this doesn't make any sense to you, just accept the default 'n'.
-EOM
-case "$use64bits" in
-$define|true|[yY]*)	dflt='y';;
-*) dflt='n';;
-esac
-rp='Try to use 64-bit APIs, if available?'
-. ./myread
-case "$ans" in
-y|Y) 
-	val="$define"
-	;;     
-*)      
-	val="$undef"
-	;;
-esac
-set use64bits
-eval $setvar 
-
-cat <<EOM
-
 Previous version of $package used the standard IO mechanisms as defined
 in <stdio.h>.  Versions 5.003_02 and later of perl allow alternate IO
 mechanisms via a "PerlIO" abstraction, but the stdio mechanism is still
@@ -6876,17 +6944,14 @@ while $test $# -ge 2; do
     shift 2;
 done > try.c;
 echo "int main () { struct $struct foo; foo.$field = 0; }" >> try.c;
-set try;
-if eval $cc $optimize $ccflags -c try.c; then
-	echo "Your struct $struct has field $field."; >&4
+if eval $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
 	val="$define";
 else
-	echo "Your struct $struct does not have field $field."; >&4
 	val="$undef";
 fi;
 set $varname;
 eval $setvar;
-$rm -f try.c try'
+$rm -f try.c try.o'
 
 
 if $test X"$use64bits" = X"$define"; then
@@ -6983,15 +7048,34 @@ EOCP
 
 	: check for struct flock64
 	echo " "
+	echo "Checking to see if your system supports struct flock64..." >&4
 	if $h_fcntl; then
 		set d_flock64s flock64 l_len define fcntl.h
 		eval $hasfield
+	else
+		val="$undef"
+		set d_flock64s
+		eval $setvar
 	fi
+	case "$d_flock64s" in
+	"$define")	echo "Yup, it does." >&4
+			;;
+	*)		echo "Nope, it doesn't." >&4
+			;;
+	esac
 
 	: check for struct dirent64
 	echo " "
+	echo "Checking to see if your system supports struct dirent64..." >&4
 	set d_dirent64s dirent64 d_off $i_dirent dirent.h
 	eval $hasfield
+	case "$d_flock64s" in
+	"$define")	echo "Yup, it does." >&4
+			;;
+	*)		echo "Nope, it doesn't." >&4
+			;;
+	esac
+
 else
 	val="$undef"
 	for xxx in d_fstat64 d_ftruncate64 d_lockf64 d_lseek64 d_lstat64 d_open64 d_opendir64 d_readdir64 d_seekdir64 d_stat64 d_telldir64 d_truncate64 d_off64t d_ino64t d_flock64s d_dirent64s
@@ -7116,6 +7200,30 @@ $rm -f fred fred.? dyna.$dlext dyna.? tmp-dyna.?
 
 set d_dlsymun
 eval $setvar
+
+hasproto='varname=$1; func=$2; shift; shift;
+while $test $# -ge 2; do
+	case "$1" in
+	$define) echo "#include <$2>";;
+	esac ;
+    shift 2;
+done > try.c;
+$cppstdin $cppflags $cppminus < try.c > tryout.c 2>/dev/null;
+if $contains "$func.*(" tryout.c >/dev/null 2>&1; then
+	echo "$func() prototype found.";
+	val="$define";
+else
+	echo "$func() prototype NOT found.";
+	val="$undef";
+fi;
+set $varname;
+eval $setvar;
+$rm -f try.c tryout.c'
+
+: see if prototype for drand48 is available
+echo " "
+set d_drand48proto drand48 $i_stdlib stdlib.h $i_unistd unistd.h
+eval $hasproto
 
 : see if dup2 exists
 set dup2 d_dup2
@@ -7482,25 +7590,6 @@ eval $inlibc
 set gethostent d_gethent
 eval $inlibc
 
-hasproto='varname=$1; func=$2; shift; shift;
-while $test $# -ge 2; do
-	case "$1" in
-	$define) echo "#include <$2>";;
-	esac ;
-    shift 2;
-done > try.c;
-$cppstdin $cppflags $cppminus < try.c > tryout.c 2>/dev/null;
-if $contains "$func.*(" tryout.c >/dev/null 2>&1; then
-	echo "$func() prototype found.";
-	val="$define";
-else
-	echo "$func() prototype NOT found.";
-	val="$undef";
-fi;
-set $varname;
-eval $setvar;
-$rm -f try.c tryout.c'
-
 : see if this is a netdb.h system
 set netdb.h i_netdb
 eval $inhdr
@@ -7740,9 +7829,11 @@ eval $inlibc
 set inttypes.h i_inttypes
 eval $inhdr
 : check for int64_t
-echo " "
-echo $n "Checking to see if your system supports int64_t...$c" >&4
-$cat >try.c <<EOCP
+case "$use64bits" in
+"$define" )
+	echo " "
+	echo $n "Checking to see if your system supports int64_t...$c" >&4
+	$cat >try.c <<EOCP
 #include <sys/types.h>
 #$i_inttypes I_INTTYPES
 #ifdef I_INTTYPES
@@ -7750,14 +7841,18 @@ $cat >try.c <<EOCP
 #endif
 int64_t foo() { int64_t x; x = 7; return x; }'
 EOCP
-if $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
-	val="$define"
-	echo " Yup, it does." >&4
-else
-	val="$undef"
-	echo " Nope, it doesn't." >&4
-fi
-$rm -f try.*
+	if $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
+		val="$define"
+		echo " Yup, it does." >&4
+	else
+		val="$undef"
+		echo " Nope, it doesn't." >&4
+	fi
+	$rm -f try.*
+	;;
+*)	val="$undef"
+	;;
+esac
 set d_int64t
 eval $setvar
 
@@ -7835,6 +7930,33 @@ eval $inlibc
 set lockf d_lockf
 eval $inlibc
 
+: check for length of double
+echo " "
+case "$doublesize" in
+'')
+	$echo $n "Checking to see how big your double precision numbers are...$c" >&4
+	$cat >try.c <<'EOCP'
+#include <stdio.h>
+main()
+{
+	printf("%d\n", sizeof(double));
+}
+EOCP
+	set try
+	if eval $compile_ok; then
+		doublesize=`./try`
+		$echo " $doublesize bytes." >&4
+	else
+		dflt='8'
+		echo "(I can't seem to compile the test program.  Guessing...)"
+		rp="What is the size of a double precision number (in bytes)?"
+		. ./myread
+		doublesize="$ans"
+	fi
+	;;
+esac
+$rm -f try.c try
+
 : check for long doubles
 echo " "
 echo $n "Checking to see if your system supports long doubles...$c" >&4
@@ -7874,6 +7996,9 @@ EOCP
 		. ./myread
 		longdblsize="$ans"
 	fi
+	if $test "X$doublesize" = "X$longdblsize"; then
+		echo "(That isn't any different from an ordinary double.)"
+	fi	
 	;;
 esac
 $rm -f try.c try
@@ -7917,6 +8042,9 @@ EOCP
 		. ./myread
 		longlongsize="$ans"
 	fi
+	if $test "X$longsize" = "X$longlongsize"; then
+		echo "(That isn't any different from an ordinary long.)"
+	fi	
 	;;
 esac
 $rm -f try.c try
@@ -8517,7 +8645,7 @@ else
     echo "You do not have union semun in <sys/sem.h>." >&4
     val="$undef"
 fi
-$rm -f try try.c
+$rm -f try try.c try.h
 set d_union_semun
 eval $setvar
 
@@ -8526,6 +8654,31 @@ case "$d_sem" in
 $define)
     : see whether semctl IPC_STAT can use union semun
     echo " "
+    $cat > try.h <<END
+#ifndef S_IRUSR
+#   ifdef S_IREAD
+#	define S_IRUSR S_IREAD
+#	define S_IWUSR S_IWRITE
+#	define S_IXUSR S_IEXEC
+#   else
+#	define S_IRUSR 0400
+#	define S_IWUSR 0200
+#	define S_IXUSR 0100
+#   endif
+#   define S_IRGRP (S_IRUSR>>3)
+#   define S_IWGRP (S_IWUSR>>3)
+#   define S_IXGRP (S_IXUSR>>3)
+#   define S_IROTH (S_IRUSR>>6)
+#   define S_IWOTH (S_IWUSR>>6)
+#   define S_IXOTH (S_IXUSR>>6)
+#endif
+#ifndef S_IRWXU
+#   define S_IRWXU (S_IRUSR|S_IWUSR|S_IXUSR)
+#   define S_IRWXG (S_IRGRP|S_IWGRP|S_IXGRP)
+#   define S_IRWXO (S_IROTH|S_IWOTH|S_IXOTH)
+#endif
+END
+
     $cat > try.c <<END
 #include <sys/types.h>
 #include <sys/ipc.h>
@@ -8533,6 +8686,7 @@ $define)
 #include <sys/stat.h>
 #include <stdio.h>
 #include <errno.h>
+#include "try.h"
 #ifndef errno
 extern int errno;
 #endif
@@ -8598,6 +8752,7 @@ END
 #include <sys/ipc.h>
 #include <sys/sem.h>
 #include <sys/stat.h>
+#include "try.h"
 #include <stdio.h>
 #include <errno.h>
 #ifndef errno
@@ -8646,6 +8801,7 @@ END
     *)  echo "You cannot use struct semid_ds * for semctl IPC_STAT." >&4
         ;;
     esac
+    $rm -f try.h
     ;;
 *)  val="$undef"
 
@@ -9919,32 +10075,135 @@ EOM
 esac
 $rm -f try.* .out
 
-: check for length of double
+
+: How can we generate normalized random numbers ?
 echo " "
-case "$doublesize" in
+case "$randfunc" in
 '')
-	$echo $n "Checking to see how big your double precision numbers are...$c" >&4
-	$cat >try.c <<'EOCP'
-#include <stdio.h>
-main()
-{
-	printf("%d\n", sizeof(double));
-}
-EOCP
-	set try
-	if eval $compile_ok; then
-		doublesize=`./try`
-		$echo " $doublesize bytes." >&4
+	if set drand48 val -f; eval $csym; $val; then
+		dflt="drand48"
+		echo "Good, found drand48()." >&4
+	elif set random val -f; eval $csym; $val; then
+		dflt="random"
+		echo "OK, found random()." >&4
 	else
-		dflt='8'
-		echo "(I can't seem to compile the test program.  Guessing...)"
-		rp="What is the size of a double precision number (in bytes)?"
-		. ./myread
-		doublesize="$ans"
+		dflt="rand"
+		echo "Yick, looks like I have to use rand()." >&4
 	fi
+	echo " "
+	;;
+*)
+	dflt="$randfunc"
 	;;
 esac
-$rm -f try.c try
+cont=true
+
+case "$ccflags" in
+*-Dmy_rand=*|*-Dmy_srand=*)
+	echo "Removing obsolete -Dmy_rand, -Dmy_srand, and -Drandbits from ccflags." >&4
+	ccflags="`echo $ccflags | sed -e 's/-Dmy_rand=random/ /'`"
+	ccflags="`echo $ccflags | sed -e 's/-Dmy_srand=srandom/ /'`"
+	ccflags="`echo $ccflags | sed -e 's/-Drandbits=[0-9][0-9]*/ /'`"
+	;;
+esac
+
+while $test "$cont"; do
+	rp="Use which function to generate random numbers?"
+	. ./myread
+	if $test "$ans" = "$dflt"; then
+		: null
+	else
+		randbits=''
+	fi
+	randfunc="$ans"
+	if set $ans val -f; eval $csym; $val; then
+		cont=''
+	else
+		dflt=n
+		rp="Function $ans does not exists. Use that name anyway?"
+		. ./myread
+		dflt=rand
+		case "$ans" in
+			[yY]*) cont='';;
+		esac
+	fi
+	case "$cont" in
+	'')
+		case "$randfunc" in
+		drand48)
+			drand01="drand48()"
+			seedfunc="srand48"
+			randbits=48
+			randseedtype=long
+			;;
+		rand|random)
+			case "$randbits" in
+			'')
+echo "Checking to see how many bits your $randfunc() function produces..." >&4
+				$cat >try.c <<EOCP
+#$i_unistd I_UNISTD
+#$i_stdlib I_STDLIB
+#include <stdio.h>
+#ifdef I_UNISTD
+#  include <unistd.h>
+#endif
+#ifdef I_STDLIB
+#  include <stdlib.h>
+#endif
+main()
+{
+	register int i;
+	register unsigned long tmp;
+	register unsigned long max = 0L;
+
+	for (i = 1000; i; i--) {
+		tmp = (unsigned long) $randfunc();
+		if (tmp > max) max = tmp;
+	}
+	for (i = 0; max; i++)
+		max /= 2;
+	printf("%d\n",i);
+}
+EOCP
+				set try
+				if eval $compile_ok; then
+					dflt=`try`
+				else
+					dflt='?'
+					echo "(I can't seem to compile the test program...)"
+				fi
+				;;
+			*)
+				dflt="$randbits"
+				;;
+			esac
+			rp="How many bits does your $randfunc() function produce?"
+			. ./myread
+			randbits="$ans"
+			$rm -f try.c try
+			drand01="($randfunc() / (double) ((unsigned long)1 << $randbits))"
+			seedfunc="s$randfunc"
+			randseedtype=unsigned
+			;;
+		*)
+			dflt="31"
+			rp="How many bits does your $randfunc() function produce?"
+			. ./myread
+			randbits="$ans"
+			seedfunc="s$randfunc"
+			drand01="($randfunc() / (double) ((unsigned long)1 << $randbits))"
+			if set $seedfunc val -f; eval $csym; $val; then
+				echo "(Using $seedfunc() to seed random generator)"
+			else
+				echo "(Warning: no $seedfunc() to seed random generator)"
+				seedfunc=rand
+			fi
+			randseedtype=unsigned
+			;;
+		esac
+		;;
+	esac
+done
 
 echo " "
 echo "Determining whether or not we are on an EBCDIC system..." >&4
@@ -10336,55 +10595,6 @@ EOCP
 esac
 $rm -f try.c try
 
-: check for size of random number generator
-echo " "
-case "$randbits" in
-'')
-	echo "Checking to see how many bits your rand function produces..." >&4
-	$cat >try.c <<EOCP
-#$i_unistd I_UNISTD
-#$i_stdlib I_STDLIB
-#include <stdio.h>
-#ifdef I_UNISTD
-#  include <unistd.h>
-#endif
-#ifdef I_STDLIB
-#  include <stdlib.h>
-#endif
-EOCP
-	$cat >>try.c <<'EOCP'
-main()
-{
-	register int i;
-	register unsigned long tmp;
-	register unsigned long max = 0L;
-
-	for (i = 1000; i; i--) {
-		tmp = (unsigned long)rand();
-		if (tmp > max) max = tmp;
-	}
-	for (i = 0; max; i++)
-		max /= 2;
-	printf("%d\n",i);
-}
-EOCP
-	set try
-	if eval $compile_ok; then
-		dflt=`./try$_exe`
-	else
-		dflt='?'
-		echo "(I can't seem to compile the test program...)"
-	fi
-	;;
-*)
-	dflt="$randbits"
-	;;
-esac
-rp='How many bits does your rand() function produce?'
-. ./myread
-randbits="$ans"
-$rm -f try.* try
-
 : see if ar generates random libraries by itself
 echo " "
 echo "Checking how to generate random libraries on your machine..." >&4
@@ -10643,7 +10853,7 @@ case "$selectminbits" in
 	$define)
 		$cat <<EOM
 
-Checking to see how on how many bits at a time your select() operates...
+Checking to see on how many bits at a time your select() operates...
 EOM
 		$cat >try.c <<EOCP
 #include <sys/types.h>
@@ -10700,7 +10910,11 @@ EOCP
 		set try
 		if eval $compile_ok; then
 			selectminbits=`./try`
-			echo "Your select() operates on $selectminbits bits at a time." >&4
+			case "$selectminbits" in
+			1)	bits="1 bit" ;;
+			*)	bits="$selectminbits bits" ;;
+			esac
+			echo "Your select() operates on $bits at a time." >&4
 		else
 			rp='What is the minimum number of bits your select() operates on?'
 			case "$byteorder" in
@@ -11463,7 +11677,7 @@ set stddef.h i_stddef
 eval $inhdr
 
 : see if sys/access.h is available
-set sysaccess.h i_sysaccess
+set sys/access.h i_sysaccess
 eval $inhdr
 
 : see if ioctl defs are in sgtty, termio, sys/filio or sys/ioctl
@@ -11496,7 +11710,7 @@ set sys/resource.h i_sysresrc
 eval $inhdr
 
 : see if sys/security.h is available
-set syssecrt.h i_syssecrt
+set sys/security.h i_syssecrt
 eval $inhdr
 
 : see if this is a sys/un.h system
@@ -11865,6 +12079,7 @@ apiversion='$apiversion'
 ar='$ar'
 archlib='$archlib'
 archlibexp='$archlibexp'
+archname64='$archname64'
 archname='$archname'
 archobjs='$archobjs'
 awk='$awk'
@@ -11937,6 +12152,7 @@ d_dlerror='$d_dlerror'
 d_dlopen='$d_dlopen'
 d_dlsymun='$d_dlsymun'
 d_dosuid='$d_dosuid'
+d_drand48proto='$d_drand48proto'
 d_dup2='$d_dup2'
 d_eaccess='$d_eaccess'
 d_endgrent='$d_endgrent'
@@ -12169,6 +12385,7 @@ direntrytype='$direntrytype'
 dlext='$dlext'
 dlsrc='$dlsrc'
 doublesize='$doublesize'
+drand01='$drand01'
 dynamic_ext='$dynamic_ext'
 eagain='$eagain'
 ebcdic='$ebcdic'
@@ -12356,6 +12573,8 @@ privlibexp='$privlibexp'
 prototype='$prototype'
 ptrsize='$ptrsize'
 randbits='$randbits'
+randfunc='$randfunc'
+randseedtype='$randseedtype'
 ranlib='$ranlib'
 rd_nodata='$rd_nodata'
 rm='$rm'
@@ -12364,6 +12583,7 @@ runnm='$runnm'
 scriptdir='$scriptdir'
 scriptdirexp='$scriptdirexp'
 sed='$sed'
+seedfunc='$seedfunc'
 selectminbits='$selectminbits'
 selecttype='$selecttype'
 sendmail='$sendmail'
@@ -12424,6 +12644,7 @@ uname='$uname'
 uniq='$uniq'
 use64bits='$use64bits'
 usedl='$usedl'
+usemultiplicity='$usemultiplicity'
 usemymalloc='$usemymalloc'
 usenm='$usenm'
 useopcode='$useopcode'
@@ -12518,26 +12739,26 @@ if $contains '^depend:' [Mm]akefile >/dev/null 2>&1; then
 	*)
 		$cat <<EOM
 
-Now you need to generate make dependencies by running "make depend".
-You might prefer to run it in background: "make depend > makedepend.out &"
+Now you need to generate make dependencies by running "$make depend".
+You might prefer to run it in background: "$make depend > makedepend.out &"
 It can take a while, so you might not want to run it right now.
 
 EOM
 		;;
 	esac
-	rp="Run make depend now?"
+	rp="Run $make depend now?"
 	. UU/myread
 	case "$ans" in
 	y*)
-		make depend && echo "Now you must run a make."
+		$make depend && echo "Now you must run a $make."
 		;;
 	*)
-		echo "You must run 'make depend' then 'make'."
+		echo "You must run '$make depend' then '$make'."
 		;;
 	esac
 elif test -f [Mm]akefile; then
 	echo " "
-	echo "Now you must run a make."
+	echo "Now you must run a $make."
 else
 	echo "Done."
 fi

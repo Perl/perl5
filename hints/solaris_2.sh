@@ -306,6 +306,25 @@ EOM
     fi
 fi
 
+# 64-bitness
+# jhi@iki.fi, inspired by Alan Burlison.
+
+if [ "X$use64bits" = "X$define" ]; then
+    uname_r=`uname -r`
+    case "$uname_r" in
+    1.*|2.[1-5])
+	echo >&4 "Solaris $uname_r does not support 64-bit types."
+	echo >&4 "You should upgrade to at least Solaris 2.6."
+	exit 1
+	;;
+    esac
+    ccflags="$ccflags `getconf LFS_CFLAGS` -DUSE_LONG_LONG"
+    ldflags="$ldflags `getconf LFS_LDFLAGS`"
+    libswanted="$libswanted `getconf LFS_LIBS`"
+    # When a 64-bit cc becomes available $archname64 may need setting
+    # so that $archname gets it attached.
+fi
+
 # This is just a trick to include some useful notes.
 cat > /dev/null <<'End_of_Solaris_Notes'
 

@@ -1096,14 +1096,9 @@ unlikely to be what you want.
 (F) An untrapped exception was raised while executing an END subroutine.
 The interpreter is immediately exited.
 
-=item effective %s access is not implemented
+=item entering effective %s failed
 
-(F) We cannot switch the real and effective uids or gids.
-The C<filetest access> pragma is unavailable in this system.
-
-=item entering effective %s access failed
-
-(F) While under the C<filetest access> pragma, switching the real and
+(F) While under the C<use filetest> pragma, switching the real and
 effective uids or gids failed.
 
 =item Error converting file specification %s
@@ -1486,9 +1481,9 @@ L<perlfunc/last>.
 that name, not even if you count where you were called from.  See
 L<perlfunc/last>.
 
-=item leaving effective %s access failed
+=item leaving effective %s failed
 
-(F) While under the C<filetest access> pragma, switching the real and
+(F) While under the C<use filetest> pragma, switching the real and
 effective uids or gids failed.
 
 =item listen() on closed fd
@@ -2473,6 +2468,11 @@ of an assignment or as a subroutine argument for example).
 
 (F) Your Perl was compiled with B<-D>SETUID_SCRIPTS_ARE_SECURE_NOW, but a
 version of the setuid emulator somehow got run anyway.
+
+=item switching effective %s is not implemented
+
+(F) While under the C<use filetest> pragma, we cannot switch the
+real and effective uids or gids.
 
 =item syntax error
 

@@ -1560,11 +1560,13 @@ PP(pp_cos)
    compatibility by calling rand() but allow the user to override it.
    See INSTALL for details.  --Andy Dougherty  15 July 1998
 */
-#ifndef my_rand
-#  define my_rand	rand
-#endif
-#ifndef my_srand
-#  define my_srand	srand
+/* Now it's after 5.005, and Configure supports drand48() and random(),
+   in addition to rand().  So the overrides should not be needed any more.
+   --Jarkko Hietaniemi	27 September 1998
+ */
+
+#ifndef HAS_DRAND48_PROTO
+extern double drand48 _((void));
 #endif
 
 PP(pp_rand)
@@ -1578,22 +1580,10 @@ PP(pp_rand)
     if (value == 0.0)
 	value = 1.0;
     if (!srand_called) {
-	(void)my_srand((unsigned)seed());
+	(void)seedDrand01((Rand_seed_t)seed());
 	srand_called = TRUE;
     }
-#if RANDBITS == 31
-    value = my_rand() * value / 2147483648.0;
-#else
-#if RANDBITS == 16
-    value = my_rand() * value / 65536.0;
-#else
-#if RANDBITS == 15
-    value = my_rand() * value / 32768.0;
-#else
-    value = my_rand() * value / (double)(((unsigned long)1) << RANDBITS);
-#endif
-#endif
-#endif
+    value *= Drand01();
     XPUSHn(value);
     RETURN;
 }
@@ -1606,7 +1596,7 @@ PP(pp_srand)
 	anum = seed();
     else
 	anum = POPu;
-    (void)my_srand((unsigned)anum);
+    (void)seedDrand01((Rand_seed_t)anum);
     srand_called = TRUE;
     EXTEND(SP, 1);
     RETPUSHYES;
@@ -1619,9 +1609,9 @@ seed(void)
      * This is really just a quick hack which grabs various garbage
      * values.  It really should be a real hash algorithm which
      * spreads the effect of every input bit onto every output bit,
-     * if someone who knows about such tings would bother to write it.
+     * if someone who knows about such things would bother to write it.
      * Might be a good idea to add that function to CORE as well.
-     * No numbers below come from careful analysis or anyting here,
+     * No numbers below come from careful analysis or anything here,
      * except they are primes and SEED_C1 > 1E6 to get a full-width
      * value from (tv_sec * SEED_C1 + tv_usec).  The multipliers should
      * probably be bigger too.

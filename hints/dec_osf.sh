@@ -202,9 +202,10 @@ fi
 #	new.)	useshrplib="$define"	;;
 #esac
 
-# The EFF_ONLY_OK from <sys/access.h> is dysfunctional for [RWX]_OK
-# as of Digital UNIX 4.0[A-D]?.  If and when this gets fixed, adjust
-# this appropriately. 
+# The EFF_ONLY_OK from <sys/access.h> is present but dysfunctional for
+# [RWX]_OK as of Digital UNIX 4.0[A-D]?.  If and when this gets fixed,
+# please adjust this appropriately.  See also pp_sys.c just before the
+# emulate_eaccess().
 
 pp_sys_cflags='ccflags="$ccflags -DNO_EFF_ONLY_OK"'
 
@@ -218,11 +219,17 @@ unset _DEC_uname_r
 #
 # History:
 #
+# perl5.005_51:
+#
+#	September-1998 Jarkko Hietaniemi <jhi@iki.fi>
+#
+#	* Added the -DNO_EFF_ONLY_OK flag ('use filetest;' support).
+#
 # perl5.004_57:
 #
 #	19-Dec-1997 Spider Boardman <spider@Orb.Nashua.NH.US>
 #
-#	* Newer Digial UNIX compilers enforce signaling for NaN without
+#	* Newer Digital UNIX compilers enforce signaling for NaN without
 #	  -ieee.  Added -fprm d at the same time since it's friendlier for
 #	  embedding.
 #

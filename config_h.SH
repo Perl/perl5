@@ -1050,7 +1050,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 
 /* I_SYS_ACCESS:
  *     This symbol, if defined, indicates to the C program that it should
- *     include <sysaccess.h>.
+ *     include <sys/access.h>.
  */
 #$i_sysaccess   I_SYS_ACCESS                /**/
 
@@ -1361,11 +1361,30 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #define PTRSIZE $ptrsize		/**/
 
-/* RANDBITS:
- *	This symbol contains the number of bits of random number the rand()
- *	function produces.  Usual values are 15, 16, and 31.
+/* Drand01:
+ *	This macro is to be used to generate uniformly distributed
+ *	random numbers over the range [0., 1.[.  You may have to supply
+ *	an 'extern double drand48();' in your program since SunOS 4.1.3
+ *	doesn't provide you with anything relevant in it's headers.
+ *	See HAS_DRAND48_PROTO.
  */
-#define RANDBITS $randbits		/**/
+/* Rand_seed_t:
+ *	This symbol defines the type of the argument of the
+ *	random seed function.
+ */
+/* seedDrand01:
+ *	This symbol defines the macro to be used in seeding the
+ *	random number generator (see Drand01).
+ */
+/* RANDBITS:
+ *	This symbol indicates how many bits are produced by the
+ *	function used to generate normalized random numbers.
+ *	Values include 15, 16, 31, and 48.
+ */
+#define Drand01()		$drand01		/**/
+#define Rand_seed_t		$randseedtype		/**/
+#define seedDrand01(x)	$seedfunc((Rand_seed_t)x)	/**/
+#define RANDBITS		$randbits		/**/
 
 /* SSize_t:
  *	This symbol holds the type used by functions that return
@@ -1679,7 +1698,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	This symbol is defined if this system has a stat structure declaring
  *	st_blksize and st_blocks.
  */
-#$d_statblks USE_STAT_BLOCKS 	/* backward compatibility */
+#$d_statblks USE_STAT_BLOCKS 	/**/
 
 /* HAS_STRERROR:
  *	This symbol, if defined, indicates that the strerror routine is
@@ -2019,7 +2038,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	available to seekdir files larger than 2 gigabytes.
  */
 /* HAS_STAT64:
- *	This symbol, if defined, indicates that the fstat64 routine is
+ *	This symbol, if defined, indicates that the stat64 routine is
  *	available to stat files larger than 2 gigabytes.
  */
 /* HAS_TELLDIR64:
@@ -2158,8 +2177,8 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$d_tmpfile64   HAS_TMPFILE64	/**/
 
 /* USE_64_BITS:
- *	This symbol, if defined, indicates that 64-bit APIs should
- *	be used when available.  If not defined, the native default APIs
+ *	This symbol, if defined, indicates that 64-bit interfaces should
+ *	be used when available.  If not defined, the native default interfaces
  *	will be used (be they 32 or 64 bits).
  */
 #$use64bits	USE_64_BITS		/**/
@@ -2170,6 +2189,14 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	used in a fully backward compatible manner.
  */
 #$useperlio	USE_PERLIO		/**/
+
+/* HAS_DRAND48_PROTO:
+ *	This symbol, if defined, indicates that the system provides
+ *	a prototype for the drand48() function.  Otherwise, it is up
+ *	to the program to supply one.  A good guess is
+ *		extern double drand48 _((void));
+ */
+#$d_drand48proto	HAS_DRAND48_PROTO	/**/
 
 /* HAS_GETHOST_PROTOS:
  *	This symbol, if defined, indicates that <netdb.h> includes

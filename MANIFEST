@@ -228,6 +228,7 @@ ext/IO/lib/IO/Seekable.pm	IO::Seekable extension Perl module
 ext/IO/lib/IO/Select.pm		IO::Select extension Perl module
 ext/IO/lib/IO/Socket.pm		IO::Socket extension Perl module
 ext/IPC/SysV/ChangeLog		IPC::SysV extension Perl module
+ext/IPC/SysV/hints/next_3.pl	Hint for IPC::SysV for named architecture
 ext/IPC/SysV/MANIFEST		IPC::SysV extension Perl module
 ext/IPC/SysV/Makefile.PL	IPC::SysV extension Perl module
 ext/IPC/SysV/Msg.pm		IPC::SysV extension Perl module

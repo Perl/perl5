@@ -771,20 +771,10 @@ you can change a number of factors in the way perl is built
 by adding appropriate -D directives to your ccflags variable in
 config.sh.
 
-For example, you can replace the rand() and srand() functions in the
-perl source by any other random number generator by a trick such as the
-following (this should all be on one line):
-
-	sh Configure -Dccflags='-Dmy_rand=random -Dmy_srand=srandom' \
-		-Drandbits=31
-
-or you can use the drand48 family of functions with
-
-	sh Configure -Dccflags='-Dmy_rand=lrand48 -Dmy_srand=srand48' \
-		-Drandbits=31
-
-or by adding the -D flags to your ccflags at the appropriate Configure
-prompt.  (Read pp.c to see how this works.)
+Starting from Perl 5.005_53 you no more need to replace the rand() and
+srand() functions in the perl source by any other random number
+generator because Configure chooses the widest one available
+(drand48(), srandom(), or rand()).
 
 You should also run Configure interactively to verify that a hint file
 doesn't inadvertently override your ccflags setting.  (Hints files

@@ -836,9 +836,7 @@ Free_t   Perl_free _((Malloc_t where));
     because then IV/UV have been 32 bits, too.  Which, in turn means
     that even if the system has quads (e.g. long long), IV cannot be a
     quad.  Introducing a 64-bit IV (because of long long existing)
-    would introduce binary incompatibility.  Therefore the
-    USE_LONG_LONG guard below when probing for quads and the check for
-    PTRSIZE further down when defining IV/UV.
+    will introduce binary incompatibility.
 
     Summary: a long long system needs to add -DUSE_LONG_LONG to $ccflags
     to get quads -- and if its pointers are still 32 bits, this will break
@@ -889,7 +887,7 @@ Free_t   Perl_free _((Malloc_t where));
 #endif
 
 /* See above note on LP32 about the PTRSIZE test. --jhi */
-#if defined(HAS_QUAD) && PTRSIZE > 4
+#if defined(HAS_QUAD) && (PTRSIZE > 4 || defined(USE_LONG_LONG))
    typedef          Quad_t IV;
    typedef unsigned Quad_t UV;
 #  if defined(PERL_QUAD_IS_INT64_T) && defined(INT64_MAX)
@@ -1194,8 +1192,9 @@ typedef union any ANY;
 #       endif
 	/* Some systems have open64() in libc but use that only
 	 * for true LP64 mode, in mixed mode (ILP32LL64, for example)
-	 * they use the vanilla open(). --jhi */
-#       if defined(HAS_OPEN64) && !defined(NO_OPEN64)
+	 * they use the vanilla open().  Such systems should undefine
+	 * d_open64 in their hints files. --jhi */
+#       if defined(HAS_OPEN64)
 #           define open open64
 #       endif
 #       ifdef HAS_OPENDIR64

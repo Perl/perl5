@@ -173,6 +173,17 @@ static int dooneliner _((char *cmd, char *filename));
 
 #endif /* no flock() */
 
+#ifndef MAXPATHLEN
+#  ifdef PATH_MAX
+#    define MAXPATHLEN PATH_MAX
+#  else
+#    define MAXPATHLEN 1024
+#  endif
+#endif
+
+#define ZBTLEN 10
+static char zero_but_true[ZBTLEN + 1] = "0 but true";
+
 #if defined(I_SYS_ACCESS) && !defined(R_OK)
 #  include <sys/access.h>
 #endif
@@ -184,7 +195,7 @@ static int dooneliner _((char *cmd, char *filename));
 /* F_OK unused: if stat() cannot find it... */
 
 #if !defined(PERL_EFF_ACCESS_R_OK) && defined(HAS_ACCESS) && defined(EFF_ONLY_OK) && !defined(NO_EFF_ONLY_OK)
-/* Digital UNIX, UnixWare */
+/* Digital UNIX (when the EFF_ONLY_OK gets fixed), UnixWare */
 #   define PERL_EFF_ACCESS_R_OK(p) (access((p), R_OK | EFF_ONLY_OK))
 #   define PERL_EFF_ACCESS_W_OK(p) (access((p), W_OK | EFF_ONLY_OK))
 #   define PERL_EFF_ACCESS_X_OK(p) (access((p), X_OK | EFF_ONLY_OK))
@@ -221,7 +232,7 @@ emulate_eaccess (const char* path, int mode) {
 
     MUTEX_LOCK(&PL_cred_mutex);
 #if !defined(HAS_SETREUID) && !defined(HAS_SETRESUID)
-    croak("effective uid access is not implemented");
+    croak("switching effective uid is not implemented");
 #else
 #ifdef HAS_SETREUID
     if (setreuid(euid, ruid))
@@ -230,11 +241,11 @@ emulate_eaccess (const char* path, int mode) {
     if (setresuid(euid, ruid, (Uid_t)-1))
 #endif
 #endif
-	croak("entering effective uid access failed");
+	croak("entering effective uid failed");
 #endif
 
 #if !defined(HAS_SETREGID) && !defined(HAS_SETRESGID)
-    croak("effective gid access is not implemented");
+    croak("switching effective gid is not implemented");
 #else
 #ifdef HAS_SETREGID
     if (setregid(egid, rgid))
@@ -243,7 +254,7 @@ emulate_eaccess (const char* path, int mode) {
     if (setresgid(egid, rgid, (Gid_t)-1))
 #endif
 #endif
-	croak("entering effective gid access failed");
+	croak("entering effective gid failed");
 #endif
 
     res = access(path, mode);
@@ -255,7 +266,7 @@ emulate_eaccess (const char* path, int mode) {
     if (setresuid(ruid, euid, (Uid_t)-1))
 #endif
 #endif
-	croak("leaving effective uid access failed");
+	croak("leaving effective uid failed");
 
 #ifdef HAS_SETREGID
     if (setregid(rgid, egid))
@@ -264,7 +275,7 @@ emulate_eaccess (const char* path, int mode) {
     if (setresgid(rgid, egid, (Gid_t)-1))
 #endif
 #endif
-	croak("leaving effective gid access failed");
+	croak("leaving effective gid failed");
     MUTEX_UNLOCK(&PL_cred_mutex);
 
     return res;
@@ -277,22 +288,11 @@ emulate_eaccess (const char* path, int mode) {
 #if !defined(PERL_EFF_ACCESS_R_OK)
 STATIC int
 emulate_eaccess (const char* path, int mode) {
-    croak("effective uid access is not implemented");
+    croak("switching effective uid is not implemented");
     /*NOTREACHED*/
     return -1;
 }
 #endif
-
-#ifndef MAXPATHLEN
-#  ifdef PATH_MAX
-#    define MAXPATHLEN PATH_MAX
-#  else
-#    define MAXPATHLEN 1024
-#  endif
-#endif
-
-#define ZBTLEN 10
-static char zero_but_true[ZBTLEN + 1] = "0 but true";
 
 PP(pp_backtick)
 {
