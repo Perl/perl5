@@ -1099,35 +1099,35 @@ STATIC int	S_dooneliner(pTHX_ char *cmd, char *filename);
 #endif
 
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_DECL_PROT)
-STATIC regnode*	S_reg(pTHX_ I32, I32 *);
-STATIC regnode*	S_reganode(pTHX_ U8, U32);
-STATIC regnode*	S_regatom(pTHX_ I32 *);
-STATIC regnode*	S_regbranch(pTHX_ I32 *, I32);
-STATIC void	S_reguni(pTHX_ UV, char *, STRLEN*);
-STATIC regnode*	S_regclass(pTHX);
-STATIC regnode*	S_regclassutf8(pTHX);
+STATIC regnode*	S_reg(pTHX_ struct RExC_state_t*, I32, I32 *);
+STATIC regnode*	S_reganode(pTHX_ struct RExC_state_t*, U8, U32);
+STATIC regnode*	S_regatom(pTHX_ struct RExC_state_t*, I32 *);
+STATIC regnode*	S_regbranch(pTHX_ struct RExC_state_t*, I32 *, I32);
+STATIC void	S_reguni(pTHX_ struct RExC_state_t*, UV, char *, STRLEN*);
+STATIC regnode*	S_regclass(pTHX_ struct RExC_state_t*);
+STATIC regnode*	S_regclassutf8(pTHX_ struct RExC_state_t*);
 STATIC I32	S_regcurly(pTHX_ char *);
-STATIC regnode*	S_reg_node(pTHX_ U8);
-STATIC regnode*	S_regpiece(pTHX_ I32 *);
-STATIC void	S_reginsert(pTHX_ U8, regnode *);
-STATIC void	S_regoptail(pTHX_ regnode *, regnode *);
-STATIC void	S_regtail(pTHX_ regnode *, regnode *);
+STATIC regnode*	S_reg_node(pTHX_ struct RExC_state_t*, U8);
+STATIC regnode*	S_regpiece(pTHX_ struct RExC_state_t*, I32 *);
+STATIC void	S_reginsert(pTHX_ struct RExC_state_t*, U8, regnode *);
+STATIC void	S_regoptail(pTHX_ struct RExC_state_t*, regnode *, regnode *);
+STATIC void	S_regtail(pTHX_ struct RExC_state_t*, regnode *, regnode *);
 STATIC char*	S_regwhite(pTHX_ char *, char *);
-STATIC char*	S_nextchar(pTHX);
+STATIC char*	S_nextchar(pTHX_ struct RExC_state_t*);
 STATIC regnode*	S_dumpuntil(pTHX_ regnode *start, regnode *node, regnode *last, SV* sv, I32 l);
 STATIC void	S_put_byte(pTHX_ SV* sv, int c);
-STATIC void	S_scan_commit(pTHX_ struct scan_data_t *data);
-STATIC void	S_cl_anything(pTHX_ struct regnode_charclass_class *cl);
+STATIC void	S_scan_commit(pTHX_ struct RExC_state_t*, struct scan_data_t *data);
+STATIC void	S_cl_anything(pTHX_ struct RExC_state_t*, struct regnode_charclass_class *cl);
 STATIC int	S_cl_is_anything(pTHX_ struct regnode_charclass_class *cl);
-STATIC void	S_cl_init(pTHX_ struct regnode_charclass_class *cl);
-STATIC void	S_cl_init_zero(pTHX_ struct regnode_charclass_class *cl);
+STATIC void	S_cl_init(pTHX_ struct RExC_state_t*, struct regnode_charclass_class *cl);
+STATIC void	S_cl_init_zero(pTHX_ struct RExC_state_t*, struct regnode_charclass_class *cl);
 STATIC void	S_cl_and(pTHX_ struct regnode_charclass_class *cl, struct regnode_charclass_class *and_with);
-STATIC void	S_cl_or(pTHX_ struct regnode_charclass_class *cl, struct regnode_charclass_class *or_with);
-STATIC I32	S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, struct scan_data_t *data, U32 flags);
-STATIC I32	S_add_data(pTHX_ I32 n, char *s);
+STATIC void	S_cl_or(pTHX_ struct RExC_state_t*, struct regnode_charclass_class *cl, struct regnode_charclass_class *or_with);
+STATIC I32	S_study_chunk(pTHX_ struct RExC_state_t*, regnode **scanp, I32 *deltap, regnode *last, struct scan_data_t *data, U32 flags);
+STATIC I32	S_add_data(pTHX_ struct RExC_state_t*, I32 n, char *s);
 STATIC void	S_re_croak2(pTHX_ const char* pat1, const char* pat2, ...) __attribute__((noreturn));
-STATIC I32	S_regpposixcc(pTHX_ I32 value);
-STATIC void	S_checkposixcc(pTHX);
+STATIC I32	S_regpposixcc(pTHX_ struct RExC_state_t*, I32 value);
+STATIC void	S_checkposixcc(pTHX_ struct RExC_state_t*);
 #endif
 
 #if defined(PERL_IN_REGEXEC_C) || defined(PERL_DECL_PROT)
