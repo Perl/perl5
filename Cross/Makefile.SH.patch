@@ -1,34 +1,26 @@
---- ../Makefile.SH	2003-04-22 14:13:52.000000000 +0000
-+++ Makefile.SH	2003-05-27 21:07:07.000000000 +0000
-@@ -104,16 +104,17 @@
- 
- 	case "$osname" in
- 	linux)
+--- ../Makefile.SH	2003-08-22 09:49:04.000000000 -0500
++++ Makefile.SH	2003-09-05 02:38:40.000000000 -0500
+@@ -110,18 +110,7 @@
+ 	    # INSTALL file, under "Building a shared perl library".
+ 	    # If there is no pre-existing $libperl, we don't need
+ 	    # to do anything further.
+-	    if test -f $archlib/CORE/$libperl; then
 -		rm -f preload
--		cat <<-'EOT' > preload
--		#! /bin/sh
--		lib=$1
--		shift
--		test -r $lib && export LD_PRELOAD="$lib $LD_PRELOAD"
--		exec "$@"
--		EOT
+-		cat <<'EOT' > preload
+-#! /bin/sh
+-lib=$1
+-shift
+-test -r $lib && export LD_PRELOAD="$lib $LD_PRELOAD"
+-exec "$@"
+-EOT
 -		chmod 755 preload
 -		ldlibpth="$ldlibpth `pwd`/preload `pwd`/$libperl"
-+#		rm -f preload
-+#		cat <<-'EOT' > preload
-+#		#! /bin/sh
-+#		lib=$1
-+#		shift
-+#		test -r $lib && export LD_PRELOAD="$lib $LD_PRELOAD"
-+#		exec "$@"
-+#		EOT
-+#		chmod 755 preload
-+#		ldlibpth="$ldlibpth `pwd`/preload `pwd`/$libperl"
-+		echo linux libraries overridden my cross-compile patches
- 		;;
+-	    fi
++	    echo linux libraries overwritten by cross-compile patches
+ 	    ;;
  	os390)	test -f /bin/env && ldlibpth="/bin/env $ldlibpth"
  		;;
-@@ -343,9 +344,20 @@
+@@ -349,9 +338,21 @@
  .c.s:
  	$(CCCMDSRC) -S $*.c
  
@@ -38,6 +30,7 @@
 +#all: $(FIRSTMAKEFILE) miniperl$(EXE_EXT) extra.pods $(private) $(public) $(dynamic_ext) $(nonxs_ext) extras.make
 +#	@echo " ";
 +#	@echo "	Everything is up to date. Type '$(MAKE) test' to run test suite."
++
 +all: $(FIRSTMAKEFILE) miniperl$(EXE_EXT)
 +	mv miniperl miniperl-arm
 +	ln -s /usr/bin/perl miniperl
@@ -48,11 +41,11 @@
 +
 +more3: $(nonxs_ext)
 +
-+more4: extras.make 
++more4: extras.make
  
  .PHONY: all compile translators utilities
  
-@@ -355,10 +367,10 @@
+@@ -361,10 +362,10 @@
  	cd x2p; $(MAKE) compile;
  	cd pod; $(MAKE) compile;
  
@@ -65,7 +58,7 @@
  	@echo " "; echo "	Making utilities"; cd utils; $(LDLIBPTH) $(MAKE) all
  
  
-@@ -535,7 +547,7 @@
+@@ -541,7 +542,7 @@
  	$(CC) -o miniperl $(CLDFLAGS) \
  	    `echo $(obj) | sed 's/ op$(OBJ_EXT) / /'` \
  	    miniperlmain$(OBJ_EXT) opmini$(OBJ_EXT) perl$(OBJ_EXT) $(libs)
@@ -74,16 +67,16 @@
  !NO!SUBS!
  		;;
  	beos*|next4*)
-@@ -552,7 +564,7 @@
- 	-@rm -f miniperl.xok
- 	$(CC) $(CLDFLAGS) -o miniperl \
- 	    miniperlmain$(OBJ_EXT) opmini$(OBJ_EXT) $(LLIBPERL) $(libs)
+@@ -549,7 +550,7 @@
+ miniperl: $& miniperlmain$(OBJ_EXT) $(LIBPERL) opmini$(OBJ_EXT)
+ 	$(CC) -o miniperl `echo $(obj) | sed 's/ op$(OBJ_EXT) / /'` \
+ 	    miniperlmain$(OBJ_EXT) opmini$(OBJ_EXT) perl$(OBJ_EXT) $(libs)
 -	$(LDLIBPTH) ./miniperl -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
 +#	$(LDLIBPTH) ./miniperl -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
  !NO!SUBS!
  		;;
- 	esac
-@@ -678,7 +690,7 @@
+ 	darwin*)
+@@ -716,7 +717,7 @@
  # We need to autosplit in two steps because VOS can't handle so many args
  #
  .PHONY: preplibrary
@@ -92,7 +85,7 @@
  	@sh ./makedir lib/auto
  	@echo "	AutoSplitting perl library"
  	$(LDLIBPTH) ./miniperl -Ilib -e 'use AutoSplit; \
-@@ -690,11 +702,11 @@
+@@ -728,11 +729,11 @@
  # Take care to avoid modifying lib/Config.pm without reason
  # (If trying to create a new port and having problems with the configpm script,
  # try 'make minitest' and/or commenting out the tests at the end of configpm.)
@@ -106,7 +99,7 @@
  	$(LDLIBPTH) ./miniperl minimod.pl > minimod.tmp
  	sh mv-if-diff minimod.tmp $@
  	-touch lib/ExtUtils/Miniperl.pm
-@@ -702,18 +714,18 @@
+@@ -740,18 +741,18 @@
  lib/re.pm: ext/re/re.pm
  	cp ext/re/re.pm ext/re/re.tmp && sh mv-if-diff ext/re/re.tmp lib/re.pm
  
@@ -125,11 +118,11 @@
  	$(LDLIBPTH) ./miniperl -Ilib lib/lib_pm.PL
  
 -extra.pods: miniperl$(EXE_EXT)
-+extra.pods:
++extra.pods: 
  	-@test -f extra.pods && rm -f `cat extra.pods`
  	-@rm -f extra.pods
  	-@for x in `grep -l '^=[a-z]' README.* | grep -v README.vms` ; do \
-@@ -752,18 +764,10 @@
+@@ -793,18 +794,7 @@
  	$(MAKE) install.perl install.man STRIPFLAGS=$(STRIPFLAGS) INSTALLFLAGS=-n
  
  install.perl:	all installperl
@@ -140,18 +133,16 @@
 -		cd ../pod; $(MAKE) compile; \
 -	else :; \
 -	fi
--	$(LDLIBPTH) ./perl installperl $(INSTALLFLAGS) $(STRIPFLAGS)
+-	$(LDLIBPTH) ./perl installperl --destdir=$(DESTDIR) $(INSTALLFLAGS) $(STRIPFLAGS)
 -	$(MAKE) extras.install
-+	/usr/bin/perl -Ifake_config_library -MConfig installperl $(INSTALLFLAGS) $(STRIPFLAGS)
- 
+-
 -install.man:	all installman
--	$(LDLIBPTH) ./perl installman $(INSTALLFLAGS)
-+install.man:	installman
-+	/usr/bin/perl -Ifake_config_library -MConfig installman $(INSTALLFLAGS)
+-	$(LDLIBPTH) ./perl installman --destdir=$(DESTDIR) $(INSTALLFLAGS)
++	/usr/bin/perl -Ifake_config_library -MConfig installperl $(INSTALLFLAGS) $(STRIPFLAGS)
  
  # XXX Experimental. Hardwired values, but useful for testing.
  # Eventually Configure could ask for some of these values.
-@@ -870,16 +874,16 @@
+@@ -920,16 +910,16 @@
  #
  # DynaLoader may be needed for extensions that use Makefile.PL.
  
@@ -168,11 +159,11 @@
  	@$(LDLIBPTH) sh ext/util/make_ext $(STATIC) $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
  
 -n_dummy $(nonxs_ext):	miniperl$(EXE_EXT) preplibrary $(DYNALOADER) FORCE
-+n_dummy $(nonxs_ext):	 preplibrary $(DYNALOADER) FORCE
++n_dummy $(nonxs_ext):	preplibrary $(DYNALOADER) FORCE
  	@$(LDLIBPTH) sh ext/util/make_ext nonxs $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
  
  .PHONY: clean _tidy _mopup _cleaner1 _cleaner2 \
-@@ -1019,7 +1023,7 @@
+@@ -1069,7 +1059,7 @@
  
  test_prep_pre: preplibrary utilities $(nonxs_ext)
  
@@ -181,7 +172,7 @@
  	PERL=./perl $(MAKE) _test_prep
  
  _test_tty:
-@@ -1088,7 +1092,7 @@
+@@ -1157,7 +1147,7 @@
  
  # Can't depend on lib/Config.pm because that might be where miniperl
  # is crashing.

@@ -15,7 +15,7 @@ BEGIN {
 }
 
 use Test;
-BEGIN { plan tests => 199 };
+BEGIN { plan tests => 200 };
 
 use strict;
 use warnings;
@@ -86,7 +86,8 @@ eval { require Unicode::Normalize };
 
 if (!$@ && !$IsEBCDIC) {
   my $NFD = Unicode::Collate->new(
-    table => undef,
+    table => 'keys.txt',
+    level => 1,
     entry => <<'ENTRIES',
 0430  ; [.0CB5.0020.0002.0430] # CYRILLIC SMALL LETTER A
 0410  ; [.0CB5.0020.0008.0410] # CYRILLIC CAPITAL LETTER A
@@ -101,11 +102,8 @@ ENTRIES
   ok($NFD->eq("\x{4D3}\x{325}", "\x{430}\x{308}\x{325}"));
   ok($NFD->lt("\x{430}\x{308}A", "\x{430}\x{308}B"));
   ok($NFD->lt("\x{430}\x{3099}B", "\x{430}\x{308}\x{3099}A"));
-  ok($NFD->eq("\x{0430}\x{3099}\x{309A}\x{0308}",
-              "\x{0430}\x{309A}\x{3099}\x{0308}") );
 }
 else {
-  ok(1);
   ok(1);
   ok(1);
   ok(1);
@@ -117,7 +115,7 @@ my $trad = Unicode::Collate->new(
   table => 'keys.txt',
   normalization => undef,
   ignoreName => qr/HANGUL|HIRAGANA|KATAKANA|BOPOMOFO/,
-  level => 4,
+  level => 3,
   entry => << 'ENTRIES',
  0063 0068 ; [.0A3F.0020.0002.0063] % "ch" in traditional Spanish
  0043 0068 ; [.0A3F.0020.0008.0043] # "Ch" in traditional Spanish
@@ -138,6 +136,8 @@ ok(
 );
 ok($trad->eq("ocho", "oc\cAho")); # UCA v9
 ok($trad->eq("ocho", "oc\0\cA\0\cBho")); # UCA v9
+ok($trad->eq("-", "")); # also UCA v8
+ok($trad->lt("oc-ho", "ocho")); # also UCA v8
 
 my $hiragana = "\x{3042}\x{3044}";
 my $katakana = "\x{30A2}\x{30A4}";

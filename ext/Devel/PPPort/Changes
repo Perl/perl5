@@ -1,3 +1,8 @@
+2.006 - 8th September 2003
+
+    * call_(pv|sv|method|argv) added
+    * still compiler-warnings for grok_??? and 5.6.x, fixed
+
 2.005 - 2nd September 2003
 
     * Some tweaks to grok_(hex|oct|bin) to make compiler warnings

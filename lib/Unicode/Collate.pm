@@ -14,7 +14,7 @@ use File::Spec;
 
 require Exporter;
 
-our $VERSION = '0.27';
+our $VERSION = '0.28';
 our $PACKAGE = __PACKAGE__;
 
 our @ISA = qw(Exporter);
@@ -53,7 +53,7 @@ use constant NOMATCHPOS => -1;
 # A coderef to get combining class imported from Unicode::Normalize
 # (i.e. \&Unicode::Normalize::getCombinClass).
 # This is also used as a HAS_UNICODE_NORMALIZE flag.
-our $getCombinClass;
+our $CVgetCombinClass;
 
 # Supported Levels
 use constant MinLevel => 1;
@@ -225,17 +225,16 @@ sub checkCollator {
 	croak "Unicode/Normalize.pm is required to normalize strings: $@"
 	    if $@;
 
-	$getCombinClass = \&Unicode::Normalize::getCombinClass
-	    if ! $getCombinClass;
+	$CVgetCombinClass = \&Unicode::Normalize::getCombinClass
+	    if ! $CVgetCombinClass;
 
-	my $norm = $self->{normalization};
-	$self->{normCode} = sub {
+	if ($self->{normalization} ne 'prenormalized') {
+	    my $norm = $self->{normalization};
+	    $self->{normCode} = sub {
 		Unicode::Normalize::normalize($norm, shift);
 	    };
-
-	eval { $self->{normCode}->("") }; # try
-	if ($@) {
-	    croak "$PACKAGE unknown normalization form name: $norm";
+	    eval { $self->{normCode}->("") }; # try
+	    $@ and croak "$PACKAGE unknown normalization form name: $norm";
 	}
     }
     return;
@@ -261,7 +260,7 @@ sub new
 	if ! exists $self->{overrideHangul};
     $self->{overrideCJK} = ''
 	if ! exists $self->{overrideCJK};
-    $self->{normalization} = 'D'
+    $self->{normalization} = 'NFD'
 	if ! exists $self->{normalization};
     $self->{alternate} = $self->{alternateTable} || 'shifted'
 	if ! exists $self->{alternate};
@@ -490,19 +489,31 @@ sub splitCE
 		    $i = $p;
 		}
 	    }
-	}
 
-	# with Combining Char (UTS#10, 4.2.1).
-	# requires Unicode::Normalize.
-	# Not be $wLen, as not croaked due to $norm.
-	if ($getCombinClass) {
-	    for (my $p = $i + 1; $p < @src; $p++) {
-		next if ! defined $src[$p];
-		last unless $getCombinClass->($src[$p]);
-		my $tail = CODE_SEP . $src[$p];
-		if ($ent->{$ce.$tail}) {
-		    $ce .= $tail;
-		    $src[$p] = undef;
+	# not-contiguous contraction with Combining Char (cf. UTS#10, S2.1).
+	# This process requires Unicode::Normalize.
+	# If "normalize" is undef, here should be skipped *always*
+	# (in spite of bool value of $CVgetCombinClass),
+	# since canonical ordering cannot be expected.
+	# Blocked combining character should not be contracted.
+
+	    if ($self->{normalization})
+	    # $self->{normCode} is false in the case of "prenormalized".
+	    {
+		my $preCC = 0;
+		my $curCC = 0;
+
+		for (my $p = $i + 1; $p < @src; $p++) {
+		    next if ! defined $src[$p];
+		    $curCC = $CVgetCombinClass->($src[$p]);
+		    last unless $curCC;
+		    my $tail = CODE_SEP . $src[$p];
+		    if ($preCC != $curCC && $ent->{$ce.$tail}) {
+			$ce .= $tail;
+			$src[$p] = undef;
+		    } else {
+			$preCC = $curCC;
+		    }
 		}
 	    }
 	}
@@ -1128,16 +1139,37 @@ If specified, strings are normalized before preparation of sort keys
 
 A form name C<Unicode::Normalize::normalize()> accepts will be applied
 as C<$normalization_form>.
+Acceptable names include C<'NFD'>, C<'NFC'>, C<'NFKD'>, and C<'NFKC'>.
 See C<Unicode::Normalize::normalize()> for detail.
 If omitted, C<'NFD'> is used.
 
 L<normalization> is performed after L<preprocess> (if defined).
 
-If C<undef> is passed explicitly as the value for this key,
+Furthermore, special values, C<undef> and C<"prenormalized">, can be used,
+though they are not concerned with C<Unicode::Normalize::normalize()>.
+
+If C<undef> (not a string C<"undef">) is passed explicitly
+as the value for this key,
 any normalization is not carried out (this may make tailoring easier
 if any normalization is not desired).
+Under C<(normalization =E<gt> undef)>, only contiguous contractions
+are resolved; e.g. C<A-cedilla-ring> would be primary equal to C<A>,
+even if C<A-ring> (and C<A-ring-cedilla>) is ordered after C<Z>.
+In this point,
+C<(normalization =E<gt> undef, preprocess =E<gt> sub { NFD(shift) })>
+B<is not> equivalent to C<(normalization =E<gt> 'NFD')>.
 
-see B<CAVEAT>.
+In the case of C<(normalization =E<gt> "prenormalized")>,
+any normalization is not performed, but
+non-contiguous contractions with combining characters are performed.
+Therefore
+C<(normalization =E<gt> 'prenormalized', preprocess =E<gt> sub { NFD(shift) })>
+B<is> equivalent to C<(normalization =E<gt> 'NFD')>.
+If source strings are finely prenormalized,
+C<(normalization =E<gt> 'prenormalized')> may save time for normalization.
+
+Except C<(normalization =E<gt> undef)>,
+B<Unicode::Normalize> is required (see also B<CAVEAT>).
 
 =item overrideCJK
 

@@ -2,22 +2,12 @@
 
 ##############################################################################
 #
-#	Ok, so there is this buildsystem that has variables set in shell
-#	like this:
+#	generate_config_sh
+#		Process that takes an automatically generated config.sh
+#		file and allows the environment to overload the values
+#		automatically discovered by Configure on our target platform.
 #
-#	cc='gcc'
-#
-#	This means we can go
-#
-#	if test "${AR+set}" != set; then
-#		ar='arm-linux-ar'
-#	else 
-#		ar=${AR}
-#	fi
-#
-#	Right??? WRONG!
-#
-#	Damn perl installation *PARSES* and *PATTERN MATCHES* this file.
+#	Author	Redvers Davies <red@criticalintegration.com>
 #
 ##############################################################################
 

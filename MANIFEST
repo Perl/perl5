@@ -1464,6 +1464,8 @@ lib/open.t			See if the open pragma works
 lib/overload.pm			Module for overloading perl operators
 lib/overload.t			See if operator overloading works
 lib/perl5db.pl			Perl debugging routines
+lib/perl5db/de0.t		Testing debugger commands
+lib/perl5db/dumpvar.t		Testing the dumper used by the debugger
 lib/PerlIO.pm			PerlIO support module
 lib/PerlIO/via/QuotedPrint.pm	PerlIO::via::QuotedPrint
 lib/PerlIO/via/t/QuotedPrint.t	PerlIO::via::QuotedPrint
@@ -1726,6 +1728,7 @@ lib/Unicode/Collate/Changes	Unicode::Collate
 lib/Unicode/Collate/keys.txt	Unicode::Collate
 lib/Unicode/Collate.pm		Unicode::Collate
 lib/Unicode/Collate/README	Unicode::Collate
+lib/Unicode/Collate/t/contract.t	Unicode::Collate
 lib/Unicode/Collate/t/hangul.t	Unicode::Collate
 lib/Unicode/Collate/t/index.t	Unicode::Collate
 lib/Unicode/Collate/t/test.t	Unicode::Collate

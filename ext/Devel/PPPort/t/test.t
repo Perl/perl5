@@ -95,6 +95,11 @@ SAVE_DEFSV
 PERL_UNUSED_DECL
 dNOOP
 
+call_argv
+call_method
+call_pv
+call_sv
+
 get_cv
 get_av
 get_hv

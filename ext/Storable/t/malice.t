@@ -51,7 +51,7 @@ use Test::More;
 # present in files, but not in things store()ed to memory
 $fancy = ($] > 5.007 ? 2 : 0);
 
-plan tests => 368 + length ($byteorder) * 4 + $fancy * 8;
+plan tests => 368 + length ($byteorder) * 4 + $fancy * 8 + 1;
 
 use Storable qw (store retrieve freeze thaw nstore nfreeze);
 
@@ -324,3 +324,15 @@ test_things($contents, \&store_and_retrieve, 'file', 1);
 # And now try almost everything again with a Storable string
 $stored = nfreeze \%hash;
 test_things($stored, \&freeze_and_thaw, 'string', 1);
+
+# Test that the bug fixed by #20587 doesn't affect us under some older
+# Perl. AMS 20030901
+{
+    chop(my $a = chr(0xDF).chr(256));
+    my %a = (chr(0xDF) => 1);
+    $a{$a}++;
+    freeze \%a;
+    # If we were built with -DDEBUGGING, the assert() should have killed
+    # us, which will probably alert the user that something went wrong.
+    ok(1);
+}

@@ -783,6 +783,10 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
 #define STORABLE_BIN_WRITE_MINOR	6
 #endif /* (PATCHLEVEL <= 6) */
 
+#if (PATCHLEVEL <= 8 || (PATCHLEVEL == 8 && SUBVERSION < 1))
+#define PL_sv_placeholder PL_sv_undef
+#endif
+
 /*
  * Useful store shortcuts...
  */
@@ -2249,7 +2253,13 @@ static int store_hash(stcxt_t *cxt, HV *hv)
                             PUTMARK(flags);
                             TRACEME(("(#%d) key '%s' flags %x %u", i, keyval, flags, *keyval));
                         } else {
-                            assert (flags == 0);
+                            /* This is a workaround for a bug in 5.8.0
+                               that causes the HEK_WASUTF8 flag to be
+                               set on an HEK without the hash being
+                               marked as having key flags. We just
+                               cross our fingers and drop the flag.
+                               AMS 20030901 */
+                            assert (flags == 0 || flags == SHV_K_WASUTF8);
                             TRACEME(("(#%d) key '%s'", i, keyval));
                         }
 			WLEN(keylen);
@@ -2340,7 +2350,13 @@ static int store_hash(stcxt_t *cxt, HV *hv)
                             PUTMARK(flags);
                             TRACEME(("(#%d) key '%s' flags %x", i, key, flags));
                         } else {
-                            assert (flags == 0);
+                            /* This is a workaround for a bug in 5.8.0
+                               that causes the HEK_WASUTF8 flag to be
+                               set on an HEK without the hash being
+                               marked as having key flags. We just
+                               cross our fingers and drop the flag.
+                               AMS 20030901 */
+                            assert (flags == 0 || flags == SHV_K_WASUTF8);
                             TRACEME(("(#%d) key '%s'", i, key));
                         }
                         if (flags & SHV_K_ISSV) {
