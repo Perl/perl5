@@ -2641,6 +2641,13 @@ known as Open Edition MVS) and VM-ESA were supported.  Due to the
 changes required by the UTF-8 (Unicode) support in Perl 5.6 the EBCDIC
 platforms are not supported in Perl 5.6.0.
 
+=head2 NEXTSTEP 3.3 POSIX test failure
+
+In NEXTSTEP 3.3p2 the implementation of the strftime(3) in the
+operating system libraries is buggy: the %j format numbers the days of
+a month starting from zero, which, while being logical to programmers,
+will cause the subtests 19 to 27 of the lib/posix test may fail.
+
 =head2 UNICOS/mk CC failures during Configure run
 
 In UNICOS/mk the following errors may appear during the Configure run:
