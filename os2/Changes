@@ -287,3 +287,9 @@ after 5.005_53:
 		it is incremented by the number of messages retrieved.
 	Dies with "QUITing..." if WM_QUIT message is obtained.
 
+after 5.005_54:
+ 	Opening pipes from/to processes could fail if (un)appropriate
+ 	combination of STDIN/STDOUT was closed.
+ 
+ 	If the only shell-metachars of a command are ' 2>&1' at the
+ 	end of a command, it is executed without calling the external shell.

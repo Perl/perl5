@@ -459,11 +459,12 @@ static ULONG os2_mytype;
 /* global PL_Argv[] contains arguments. */
 
 int
-do_spawn_ve(really, flag, execf, inicmd)
+do_spawn_ve(really, flag, execf, inicmd, addflag)
 SV *really;
 U32 flag;
 U32 execf;
 char *inicmd;
+U32 addflag;
 {
     dTHR;
 	int trueflag = flag;
@@ -476,6 +477,7 @@ char *inicmd;
 	char **argsp = fargs;
 	char nargs = 4;
 	int force_shell;
+ 	int new_stderr = -1, nostderr = 0, fl_stderr;
 	STRLEN n_a;
 	
 	if (flag == P_WAIT)
@@ -558,6 +560,24 @@ char *inicmd;
 	    }
 	}
 
+	if (addflag) {
+	    addflag = 0;
+	    new_stderr = dup(2);		/* Preserve stderr */
+	    if (new_stderr == -1) {
+		if (errno == EBADF)
+		    nostderr = 1;
+		else {
+		    rc = -1;
+		    goto finish;
+		}
+	    } else
+		fl_stderr = fcntl(2, F_GETFD);
+	    rc = dup2(1,2);
+	    if (rc == -1)
+		goto finish;
+	    fcntl(new_stderr, F_SETFD, FD_CLOEXEC);
+	}
+
 #if 0
 	rc = result(trueflag, spawnvp(flag,tmps,PL_Argv));
 #else
@@ -593,7 +613,9 @@ char *inicmd;
                     if (l >= sizeof scrbuf) {
                        Safefree(scr);
                      longbuf:
-                       croak("Size of scriptname too big: %d", l);
+                       warn("Size of scriptname too big: %d", l);
+		       rc = -1;
+		       goto finish;
                     }
                     strcpy(scrbuf, scr);
                     Safefree(scr);
@@ -781,6 +803,13 @@ char *inicmd;
 	    && ((trueflag & 0xFF) == P_WAIT)) 
 	    rc = 255 << 8; /* Emulate the fork(). */
 
+  finish:
+    if (new_stderr != -1) {	/* How can we use error codes? */
+	dup2(new_stderr, 2);
+	close(new_stderr);
+	fcntl(2, F_SETFD, fl_stderr);
+    } else if (nostderr)
+       close(2);
     return rc;
 }
 
@@ -815,7 +844,7 @@ register SV **sp;
 	}
 	*a = Nullch;
 
-	rc = do_spawn_ve(really, flag, EXECF_SPAWN, NULL);
+	rc = do_spawn_ve(really, flag, EXECF_SPAWN, NULL, 0);
     } else
     	rc = -1;
     do_execfree();
@@ -832,7 +861,7 @@ int execf;
     register char *s;
     char flags[10];
     char *shell, *copt, *news = NULL;
-    int rc, err, seenspace = 0;
+    int rc, err, seenspace = 0, mergestderr = 0;
     char fullcmd[MAXNAMLEN + 1];
 
 #ifdef TRYSHELL
@@ -885,6 +914,18 @@ int execf;
 		break;
 	    } else if (*s == '\\' && !seenspace) {
 		continue;		/* Allow backslashes in names */
+	    } else if (*s == '>' && s >= cmd + 3
+			&& s[-1] == '2' && s[1] == '&' && s[2] == '1'
+			&& isSPACE(s[-2]) ) {
+		char *t = s + 3;
+
+		while (*t && isSPACE(*t))
+		    t++;
+		if (!*t) {
+		    s[-2] = '\0';
+		    mergestderr = 1;
+		    break;		/* Allow 2>&1 as the last thing */
+		}
 	    }
 	    /* We do not convert this to do_spawn_ve since shell
 	       should be smart enough to start itself gloriously. */
@@ -927,7 +968,7 @@ int execf;
     }
     *a = Nullch;
     if (PL_Argv[0])
-	rc = do_spawn_ve(NULL, 0, execf, cmd);
+	rc = do_spawn_ve(NULL, 0, execf, cmd, mergestderr);
     else
     	rc = -1;
     if (news)
@@ -977,6 +1018,7 @@ char	*mode;
     register I32 pid, rc;
     PerlIO *res;
     SV *sv;
+    int fh_fl;
     
     /* `this' is what we use in the parent, `that' in the child. */
     this = (*mode == 'w');
@@ -988,26 +1030,51 @@ char	*mode;
     if (pipe(p) < 0)
 	return Nullfp;
     /* Now we need to spawn the child. */
+    if (p[this] == (*mode == 'r')) {	/* if fh 0/1 was initially closed. */
+	int new = dup(p[this]);
+
+	if (new == -1)
+	    goto closepipes;
+	close(p[this]);
+	p[this] = new;
+    }
     newfd = dup(*mode == 'r');		/* Preserve std* */
-    if (p[that] != (*mode == 'r')) {
+    if (newfd == -1) {		
+	/* This cannot happen due to fh being bad after pipe(), since
+	   pipe() should have created fh 0 and 1 even if they were
+	   initially closed.  But we closed p[this] before.  */
+	if (errno != EBADF) {
+	  closepipes:
+	    close(p[0]);
+	    close(p[1]);
+	    return Nullfp;
+	}
+    } else
+	fh_fl = fcntl(*mode == 'r', F_GETFD);
+    if (p[that] != (*mode == 'r')) {	/* if fh 0/1 was initially closed. */
 	dup2(p[that], *mode == 'r');
 	close(p[that]);
     }
     /* Where is `this' and newfd now? */
     fcntl(p[this], F_SETFD, FD_CLOEXEC);
-    fcntl(newfd, F_SETFD, FD_CLOEXEC);
+    if (newfd != -1)
+	fcntl(newfd, F_SETFD, FD_CLOEXEC);
     pid = do_spawn_nowait(cmd);
-    if (newfd != (*mode == 'r')) {
+    if (newfd == -1)
+	close(*mode == 'r');		/* It was closed initially */
+    else if (newfd != (*mode == 'r')) {	/* Probably this check is not needed */
 	dup2(newfd, *mode == 'r');	/* Return std* back. */
 	close(newfd);
-    }
+	fcntl(*mode == 'r', F_SETFD, fh_fl);
+    } else
+	fcntl(*mode == 'r', F_SETFD, fh_fl);
     if (p[that] == (*mode == 'r'))
 	close(p[that]);
     if (pid == -1) {
 	close(p[this]);
-	return NULL;
+	return Nullfp;
     }
-    if (p[that] < p[this]) {
+    if (p[that] < p[this]) {		/* Make fh as small as possible */
 	dup2(p[this], p[that]);
 	close(p[this]);
 	p[this] = p[that];
