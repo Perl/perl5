@@ -7252,6 +7252,7 @@ Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
 	    UV u = 0;
 	    I32 shift;
 	    bool overflowed = FALSE;
+	    bool just_zero  = TRUE;	/* just plain 0 or binary number? */
 	    static NV nvshift[5] = { 1.0, 2.0, 4.0, 8.0, 16.0 };
 	    static char* bases[5] = { "", "binary", "", "octal",
 				      "hexadecimal" };
@@ -7268,9 +7269,11 @@ Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
 	    if (s[1] == 'x') {
 		shift = 4;
 		s += 2;
+		just_zero = FALSE;
 	    } else if (s[1] == 'b') {
 		shift = 1;
 		s += 2;
+		just_zero = FALSE;
 	    }
 	    /* check for a decimal in disguise */
 	    else if (s[1] == '.' || s[1] == 'e' || s[1] == 'E')
@@ -7342,6 +7345,7 @@ Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
 		    */
 
 		  digit:
+		    just_zero = FALSE;
 		    if (!overflowed) {
 			x = u << shift;	/* make room for the digit */
 
@@ -7400,7 +7404,10 @@ Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
 #endif
 		sv_setuv(sv, u);
 	    }
-	    if (PL_hints & HINT_NEW_BINARY)
+	    if (just_zero && (PL_hints & HINT_NEW_INTEGER))
+		sv = new_constant(start, s - start, "integer", 
+				  sv, Nullsv, NULL);
+	    else if (PL_hints & HINT_NEW_BINARY)
 		sv = new_constant(start, s - start, "binary", sv, Nullsv, NULL);
 	}
 	break;

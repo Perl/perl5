@@ -48,10 +48,13 @@ print "1..",&last,"\n";
 sub test {
   $test++; 
   if (@_ > 1) {
+    my $comment = "";
+    $comment = " # " . $_ [2] if @_ > 2;
     if ($_[0] eq $_[1]) {
-      print "ok $test\n";
+      print "ok $test$comment\n";
     } else {
-      print "not ok $test: '$_[0]' ne '$_[1]'\n";
+      $comment .= ": '$_[0]' ne '$_[1]'";
+      print "not ok $test$comment\n";
     }
   } else {
     if (shift) {
@@ -1081,11 +1084,11 @@ sub xet { @_ == 2 ? $_[0]->{$_[1]} :
 package main;
 my $a = Foo->new;
 $a->xet('b', 42);
-print $a->xet('b') == 42 ? "ok 225\n" : "not ok 225\n";
-print defined eval { $a->{b} } ? "not ok 226\n" : "ok 226\n";
-print $@ =~ /zap/ ? "ok 227\n" : "not ok 227\n";
+test ($a->xet('b'), 42);
+test (!defined eval { $a->{b} });
+test ($@ =~ /zap/);
 
-print overload::StrVal(qr/a/) =~ /^Regexp=SCALAR\(0x[0-9a-f]+\)$/ ? "ok 228\n" : "not ok 228\n";
+test (overload::StrVal(qr/a/) =~ /^Regexp=SCALAR\(0x[0-9a-f]+\)$/);
 
 {
    package t229;
@@ -1100,8 +1103,20 @@ print overload::StrVal(qr/a/) =~ /^Regexp=SCALAR\(0x[0-9a-f]+\)$/ ? "ok 228\n" :
       my $y = $x;
       eval { $y++ };
    }
-   print $warn ? "not ok 229\n" : "ok 229\n";
+   main::test (!$warn);
+}
+
+{
+    my ($int, $out1, $out2);
+    {
+        BEGIN { $int = 0; overload::constant 'integer' => sub {$int++; 17}; }
+        $out1 = 0;
+        $out2 = 1;
+    }
+    test($int,  2,  "#24313");	# 230
+    test($out1, 17, "#24313");	# 231
+    test($out2, 17, "#24313");	# 232
 }
 
 # Last test is:
-sub last {229}
+sub last {232}
