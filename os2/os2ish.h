@@ -1,4 +1,6 @@
 #include <signal.h>
+#include <io.h>
+/* #include <sys/select.h> */
 
 /* HAS_IOCTL:
  *	This symbol, if defined, indicates that the ioctl() routine is
@@ -471,6 +473,14 @@ void init_PMWIN_entries(void);
 char *perllib_mangle(char *, unsigned int);
 
 char *os2error(int rc);
+int os2_stat(const char *name, struct stat *st);
+int setpriority(int which, int pid, int val);
+int getpriority(int which /* ignored */, int pid);
+
+#ifdef PERL_CORE
+int os2_do_spawn(pTHX_ char *cmd);
+int os2_do_aspawn(pTHX_ SV *really, void **vmark, void **vsp);
+#endif
 
 /* ************************************************************ */
 #define Dos32QuerySysState DosQuerySysState

@@ -1,4 +1,6 @@
 #include "dlfcn.h"
+#include "string.h"
+#include "stdio.h"
 
 #define INCL_BASE
 #include <os2.h>
@@ -67,10 +69,10 @@ dlerror(void)
 			  "OSO001.MSG", &len)) {
 		if (fail[0])
 		  sprintf(buf, 
-"OS/2 system error code %d, possible problematic module: '%s'",
+"OS/2 system error code %lu, possible problematic module: '%s'",
 			  retcode, fail);
 		else
-		  sprintf(buf, "OS/2 system error code %d", retcode);
+		  sprintf(buf, "OS/2 system error code %lu", retcode);
 	} else {
 		buf[len] = '\0';
 		if (len && buf[len - 1] == '\n')

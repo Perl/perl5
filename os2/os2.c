@@ -202,7 +202,7 @@ loadModule(char *modname)
     return h;
 }
 
-APIRET
+void
 loadByOrd(char *modname, ULONG ord)
 {
     if (ExtFCN[ord] == NULL) {
@@ -236,7 +236,6 @@ init_PMWIN_entries(void)
 	753,				/* GetLastError */
 	705,				/* CancelShutdown */
     };
-    BYTE buf[20];
     int i = 0;
     unsigned long rc;
 
@@ -303,10 +302,7 @@ sys_prio(pid)
 int 
 setpriority(int which, int pid, int val)
 {
-  ULONG rc, prio;
-  PQTOPLEVEL psi;
-
-  prio = sys_prio(pid);
+  ULONG rc, prio = sys_prio(pid);
 
   if (!(_emx_env & 0x200)) return 0; /* Nop if not OS/2. */
   if (priors[(32 - val) >> 5] + 1 == (prio >> 8)) {
@@ -346,20 +342,13 @@ setpriority(int which, int pid, int val)
 int 
 getpriority(int which /* ignored */, int pid)
 {
-  TIB *tib;
-  PIB *pib;
-  ULONG rc, ret;
+  ULONG ret;
 
   if (!(_emx_env & 0x200)) return 0; /* Nop if not OS/2. */
-  /* DosGetInfoBlocks has old priority! */
-/*   if (CheckOSError(DosGetInfoBlocks(&tib, &pib))) return -1; */
-/*   if (pid != pib->pib_ulpid) { */
   ret = sys_prio(pid);
   if (ret == PRIO_ERR) {
       return -1;
   }
-/*   } else */
-/*       ret = tib->tib_ptib2->tib2_ulpri; */
   return (1 - priors[((ret >> 8) - 1)])*32 - (ret & 0xFF);
 }
 
@@ -485,14 +474,15 @@ do_spawn_ve(pTHX_ SV *really, U32 flag, U32 execf, char *inicmd, U32 addflag)
 	int trueflag = flag;
 	int rc, pass = 1;
 	char *tmps;
-	char buf[256], *s = 0, scrbuf[280];
+	char buf[256], scrbuf[280];
 	char *args[4];
 	static char * fargs[4] 
 	    = { "/bin/sh", "-c", "\"$@\"", "spawn-via-shell", };
 	char **argsp = fargs;
-	char nargs = 4;
+	int nargs = 4;
 	int force_shell;
- 	int new_stderr = -1, nostderr = 0, fl_stderr;
+ 	int new_stderr = -1, nostderr = 0
+	int fl_stderr = 0;
 	STRLEN n_a;
 	
 	if (flag == P_WAIT)
@@ -739,7 +729,7 @@ do_spawn_ve(pTHX_ SV *really, U32 flag, U32 execf, char *inicmd, U32 addflag)
 				if (inicmd) { /* No spaces at start! */
 				    s = inicmd;
 				    while (*s && !isSPACE(*s)) {
-					if (*s++ = '/') {
+					if (*s++ == '/') {
 					    inicmd = NULL; /* Cannot use */
 					    break;
 					}
@@ -839,10 +829,8 @@ do_spawn3(pTHX_ char *cmd, int execf, int flag)
 {
     register char **a;
     register char *s;
-    char flags[10];
     char *shell, *copt, *news = NULL;
-    int rc, err, seenspace = 0, mergestderr = 0;
-    char fullcmd[MAXNAMLEN + 1];
+    int rc, seenspace = 0, mergestderr = 0;
 
 #ifdef TRYSHELL
     if ((shell = getenv("EMXSHELL")) != NULL)
@@ -962,8 +950,10 @@ do_spawn3(pTHX_ char *cmd, int execf, int flag)
 
 /* Array spawn.  */
 int
-os2_do_aspawn(pTHX_ SV *really, register SV **mark, register SV **sp)
+os2_do_aspawn(pTHX_ SV *really, register void **vmark, register void **vsp)
 {
+    register SV **mark = (SV **)vmark;
+    register SV **sp = (SV **)vsp;
     register char **a;
     int rc;
     int flag = P_WAIT, flag_set = 0;
@@ -1027,13 +1017,11 @@ PerlIO *
 my_syspopen(pTHX_ char *cmd, char *mode)
 {
 #ifndef USE_POPEN
-
     int p[2];
     register I32 this, that, newfd;
-    register I32 pid, rc;
-    PerlIO *res;
+    register I32 pid;
     SV *sv;
-    int fh_fl;
+    int fh_fl = 0;			/* Pacify the warning */
     
     /* `this' is what we use in the parent, `that' in the child. */
     this = (*mode == 'w');
@@ -1206,7 +1194,7 @@ int	setgid(x)	{ errno = EINVAL; return -1; }
        used with 5.001. Now just look for /dev/. */
 
 int
-os2_stat(char *name, struct stat *st)
+os2_stat(const char *name, struct stat *st)
 {
     static int ino = SHRT_MAX;
 
@@ -1298,8 +1286,6 @@ mod2fname(pTHX_ SV *sv)
     static char fname[9];
     int pos = 6, len, avlen;
     unsigned int sum = 0;
-    AV  *av;
-    SV  *svp;
     char *s;
     STRLEN n_a;
 
@@ -1771,8 +1757,8 @@ XS(XS_OS2_Process_Messages)
 	if (items == 2) {
 	    I32 cntr;
 	    SV *sv = ST(1);
-	    int fake = SvIV(sv);	/* Force SvIVX */
-	    
+
+	    (void)SvIV(sv);		/* Force SvIVX */	    
 	    if (!SvIOK(sv))
 		Perl_croak_nocontext("Can't upgrade count to IV");
 	    cntr = SvIVX(sv);
@@ -1965,8 +1951,6 @@ XS(XS_Cwd_sys_abspath)
 		   In all the cases it is safe to drop the drive part
 		   of the path. */
 		if ( !sys_is_relative(path) ) {
-		    int is_drived;
-
 		    if ( ( ( sys_is_absolute(dir)
 			     || (isALPHA(dir[0]) && dir[1] == ':' 
 				 && strnicmp(dir, path,1) == 0)) 
@@ -2203,6 +2187,7 @@ Xs_OS2_init(pTHX)
 	GvMULTI_on(gv);
 	sv_setnv(GvSV(gv), _osmajor + 0.001 * _osminor);
     }
+    return 0;
 }
 
 OS2_Perl_data_t OS2_Perl_data;
@@ -2248,7 +2233,6 @@ char *
 my_tmpnam (char *str)
 {
     char *p = getenv("TMP"), *tpath;
-    int len;
 
     if (!p) p = getenv("TEMP");
     tpath = tempnam(p, "pltmp");
