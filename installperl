@@ -245,7 +245,7 @@ if (($Is_W32 and ! $Is_NetWare)  or $Is_Cygwin) {
         chmod(0755, "$installbin/$_");
       };
       { 
-		open (LD2, "$installbin/ld2");
+		open (LD2, ">$installbin/ld2");
 		print LD2 "#!/bin/sh\n#\n# ld wrapper, passes all args to perlld;\n#\n"
 		          . "for trythis in $installbin/perl\ndo\n  if [ -x \$trythis ]\n"
 		          . "  then\n    \$trythis $installbin/perlld \"\$\@\"\n"
