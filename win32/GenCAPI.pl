@@ -284,6 +284,20 @@ ENDCODE
                 print OUTFILE "#endif\n" unless ($separateObj == 0);
 		next;
 	    }
+	    # handle special case for perl_atexit
+	    if ($name eq "perl_atexit") {
+		print OUTFILE <<ENDCODE;
+
+#undef $name
+extern "C" $type $name ($args)
+{
+    return pPerl->perl_atexit(fn, ptr);
+}
+ENDCODE
+                print OUTFILE "#endif\n" unless ($separateObj == 0);
+		next;
+	    }
+
 
 	    if($name eq "byterun" and $args eq "struct bytestream bs") {
 		next;
@@ -310,9 +324,8 @@ ENDCODE
 #undef $name
 extern "C" $type $funcName ($args)
 {
-$return pPerl->$funcName
 ENDCODE
-
+	    print OUTFILE "$return pPerl->$funcName";
             $doneone = 0;
             foreach $arg (@args) {
                 if ($arg =~ /(\w+)\W*$/) {

@@ -1464,14 +1464,4 @@ do_aspawn(void *vreally, void **vmark, void **vsp)
 }
 #endif  /* WIN32 */
 
-#ifndef DEBUGGING
-/* create a matching set of virtual entries for the non debugging version */
-void	CPerlObj::deb_place_holder _((const char* pat,...)) {};
-void	CPerlObj::deb_growlevel_place_holder _((void)) {};
-void	CPerlObj::debprofdump_place_holder _((void)) {};
-I32	CPerlObj::debop_place_holder _((OP* o)) { return 0; };
-I32	CPerlObj::debstack_place_holder _((void)) { return 0; };
-I32	CPerlObj::debstackptrs_place_holder _((void)) { return 0; };
-#endif
-
 #endif   /* PERL_OBJECT */

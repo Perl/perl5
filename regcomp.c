@@ -2231,11 +2231,11 @@ regcurly(register char *s)
     return TRUE;
 }
 
-#ifdef DEBUGGING
 
 STATIC regnode *
 dumpuntil(regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
 {
+#ifdef DEBUGGING
     register char op = EXACT;	/* Arbitrary non-END op. */
     register regnode *next, *onode;
 
@@ -2292,6 +2292,7 @@ dumpuntil(regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
 	else if (op == WHILEM)
 	    l--;
     }
+#endif /* DEBUGGING */
     return node;
 }
 
@@ -2301,6 +2302,7 @@ dumpuntil(regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
 void
 regdump(regexp *r)
 {
+#ifdef DEBUGGING
     SV *sv = sv_newmortal();
 
     (void)dumpuntil(r->program, r->program + 1, NULL, sv, 0);
@@ -2353,6 +2355,7 @@ regdump(regexp *r)
 	PerlIO_printf(Perl_debug_log, "implicit ");
     PerlIO_printf(Perl_debug_log, "minlen %ld ", (long) r->minlen);
     PerlIO_printf(Perl_debug_log, "\n");
+#endif /* DEBUGGING */
 }
 
 /*
@@ -2361,6 +2364,7 @@ regdump(regexp *r)
 void
 regprop(SV *sv, regnode *o)
 {
+#ifdef DEBUGGING
     register char *p = 0;
 
     sv_setpv(sv, ":");
@@ -2558,8 +2562,8 @@ regprop(SV *sv, regnode *o)
     }
     if (p)
 	sv_catpv(sv, p);
-}
 #endif /* DEBUGGING */
+}
 
 void
 pregfree(struct regexp *r)

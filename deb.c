@@ -15,7 +15,6 @@
 #include "EXTERN.h"
 #include "perl.h"
 
-#ifdef DEBUGGING
 #if !defined(I_STDARG) && !defined(I_VARARGS)
 
 /*
@@ -27,6 +26,7 @@ void
 deb(pat,a1,a2,a3,a4,a5,a6,a7,a8)
     char *pat;
 {
+#ifdef DEBUGGING
     dTHR;
     register I32 i;
     GV* gv = curcop->cop_filegv;
@@ -44,6 +44,7 @@ deb(pat,a1,a2,a3,a4,a5,a6,a7,a8)
     for (i=0; i<dlevel; i++)
 	PerlIO_printf(Perl_debug_log, "%c%c ",debname[i],debdelim[i]);
     PerlIO_printf(Perl_debug_log, pat,a1,a2,a3,a4,a5,a6,a7,a8);
+#endif /* DEBUGGING */
 }
 
 #else /* !defined(I_STDARG) && !defined(I_VARARGS) */
@@ -59,6 +60,7 @@ deb(pat, va_alist)
     va_dcl
 #  endif
 {
+#ifdef DEBUGGING
     dTHR;
     va_list args;
     register I32 i;
@@ -84,20 +86,24 @@ deb(pat, va_alist)
 #  endif
     (void) PerlIO_vprintf(Perl_debug_log,pat,args);
     va_end( args );
+#endif /* DEBUGGING */
 }
 #endif /* !defined(I_STDARG) && !defined(I_VARARGS) */
 
 void
 deb_growlevel(void)
 {
+#ifdef DEBUGGING
     dlmax += 128;
     Renew(debname, dlmax, char);
     Renew(debdelim, dlmax, char);
+#endif /* DEBUGGING */
 }
 
 I32
 debstackptrs(void)
 {
+#ifdef DEBUGGING
     dTHR;
     PerlIO_printf(Perl_debug_log, "%8lx %8lx %8ld %8ld %8ld\n",
 	(unsigned long)curstack, (unsigned long)stack_base,
@@ -106,12 +112,14 @@ debstackptrs(void)
     PerlIO_printf(Perl_debug_log, "%8lx %8lx %8ld %8ld %8ld\n",
 	(unsigned long)mainstack, (unsigned long)AvARRAY(curstack),
 	(long)mainstack, (long)AvFILLp(curstack), (long)AvMAX(curstack));
+#endif /* DEBUGGING */
     return 0;
 }
 
 I32
 debstack(void)
 {
+#ifdef DEBUGGING
     dTHR;
     I32 top = stack_sp - stack_base;
     register I32 i = top - 30;
@@ -148,8 +156,6 @@ debstack(void)
     }
     while (1);
     PerlIO_printf(Perl_debug_log, "\n");
+#endif /* DEBUGGING */
     return 0;
 }
-#else
-static int dummy; /* avoid totally empty deb.o file */
-#endif /* DEBUGGING */

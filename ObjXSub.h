@@ -820,10 +820,22 @@
 #define cv_const_sv         pPerl->Perl_cv_const_sv
 #undef  cv_undef
 #define cv_undef            pPerl->Perl_cv_undef
+#undef  cx_dump
+#define cx_dump             pPerl->Perl_cx_dump
 #undef  cxinc
 #define cxinc               pPerl->Perl_cxinc
 #undef  deb
 #define deb                 pPerl->Perl_deb
+#undef  deb_growlevel
+#define deb_growlevel       pPerl->Perl_deb_growlevel
+#undef  debprofdump
+#define debprofdump         pPerl->Perl_debprofdump
+#undef  debop
+#define debop               pPerl->Perl_debop
+#undef  debstack
+#define debstack            pPerl->Perl_debstack
+#undef  debstackptrs
+#define debstackptrs        pPerl->Perl_debstackptrs
 #undef  delimcpy
 #define delimcpy            pPerl->Perl_delimcpy
 #undef  deprecate
@@ -882,6 +894,22 @@
 #define dowantarray         pPerl->Perl_dowantarray
 #undef  dump_all
 #define dump_all            pPerl->Perl_dump_all
+#undef  dump_eval
+#define dump_eval           pPerl->Perl_dump_eval
+#undef  dump_form
+#define dump_form           pPerl->Perl_dump_form
+#undef  dump_gv
+#define dump_gv             pPerl->Perl_dump_gv
+#undef  dump_mstats
+#define dump_mstats         pPerl->Perl_dump_mstats
+#undef  dump_op
+#define dump_op             pPerl->Perl_dump_op
+#undef  dump_pm
+#define dump_pm             pPerl->Perl_dump_pm
+#undef  dump_packsubs
+#define dump_packsubs       pPerl->Perl_dump_packsubs
+#undef  dump_sub
+#define dump_sub            pPerl->Perl_dump_sub
 #undef  fbm_compile
 #define fbm_compile         pPerl->Perl_fbm_compile
 #undef  fbm_instr
@@ -1447,10 +1475,14 @@
 #define pregexec            pPerl->Perl_pregexec
 #undef  pregfree
 #define pregfree            pPerl->Perl_pregfree
+#undef  regdump
+#define regdump             pPerl->Perl_regdump
 #undef  regnext
 #define regnext             pPerl->Perl_regnext
 #undef  regnoderegnext
 #define regnoderegnext      pPerl->regnoderegnext
+#undef  regprop
+#define regprop             pPerl->Perl_regprop
 #undef  repeatcpy
 #define repeatcpy           pPerl->Perl_repeatcpy
 #undef  rninstr
@@ -1693,6 +1725,8 @@
 #define sv_newref	    pPerl->Perl_sv_newref
 #undef  sv_nv
 #define sv_nv		    pPerl->Perl_sv_nv
+#undef  sv_peek
+#define sv_peek		    pPerl->Perl_sv_peek
 #undef  sv_pvn
 #define sv_pvn		    pPerl->Perl_sv_pvn
 #undef  sv_pvn_force
@@ -1779,6 +1813,8 @@
 #define wait4pid            pPerl->Perl_wait4pid
 #undef  warn
 #define warn    	    pPerl->Perl_warn
+#undef  watch
+#define watch    	    pPerl->Perl_watch
 #undef  whichsig
 #define whichsig            pPerl->Perl_whichsig
 #undef  yyerror

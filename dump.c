@@ -15,13 +15,6 @@
 #include "EXTERN.h"
 #include "perl.h"
 
-#ifndef DEBUGGING
-void
-dump_all(void)
-{
-}
-#else  /* Rest of file is for DEBUGGING */
-
 #ifndef PERL_OBJECT
 #ifdef I_STDARG
 static void dump(char *pat, ...);
@@ -33,16 +26,19 @@ static void dump();
 void
 dump_all(void)
 {
+#ifdef DEBUGGING
     dTHR;
     PerlIO_setlinebuf(Perl_debug_log);
     if (main_root)
 	dump_op(main_root);
     dump_packsubs(defstash);
+#endif /* DEBUGGING */
 }
 
 void
 dump_packsubs(HV *stash)
 {
+#ifdef DEBUGGING
     dTHR;
     I32	i;
     HE	*entry;
@@ -62,11 +58,13 @@ dump_packsubs(HV *stash)
 		dump_packsubs(hv);		/* nested package */
 	}
     }
+#endif /* DEBUGGING */
 }
 
 void
 dump_sub(GV *gv)
 {
+#ifdef DEBUGGING
     SV *sv = sv_newmortal();
 
     gv_fullname3(sv, gv, Nullch);
@@ -79,11 +77,13 @@ dump_sub(GV *gv)
 	dump_op(CvROOT(GvCV(gv)));
     else
 	dump("<undef>\n");
+#endif /* DEBUGGING */
 }
 
 void
 dump_form(GV *gv)
 {
+#ifdef DEBUGGING
     SV *sv = sv_newmortal();
 
     gv_fullname3(sv, gv, Nullch);
@@ -92,17 +92,21 @@ dump_form(GV *gv)
 	dump_op(CvROOT(GvFORM(gv)));
     else
 	dump("<undef>\n");
+#endif /* DEBUGGING */
 }
 
 void
 dump_eval(void)
 {
+#ifdef DEBUGGING
     dump_op(eval_root);
+#endif /* DEBUGGING */
 }
 
 void
 dump_op(OP *o)
 {
+#ifdef DEBUGGING
     dump("{\n");
     if (o->op_seq)
 	PerlIO_printf(Perl_debug_log, "%-4d", o->op_seq);
@@ -311,11 +315,13 @@ dump_op(OP *o)
     }
     dumplvl--;
     dump("}\n");
+#endif /* DEBUGGING */
 }
 
 void
 dump_gv(GV *gv)
 {
+#ifdef DEBUGGING
     SV *sv;
 
     if (!gv) {
@@ -334,11 +340,13 @@ dump_gv(GV *gv)
     dump("\n");
     dumplvl--;
     dump("}\n");
+#endif /* DEBUGGING */
 }
 
 void
 dump_pm(PMOP *pm)
 {
+#ifdef DEBUGGING
     char ch;
 
     if (!pm) {
@@ -393,6 +401,7 @@ dump_pm(PMOP *pm)
 
     dumplvl--;
     dump("}\n");
+#endif /* DEBUGGING */
 }
 
 
@@ -402,11 +411,13 @@ static void dump(arg1,arg2,arg3,arg4,arg5)
 char *arg1;
 long arg2, arg3, arg4, arg5;
 {
+#ifdef DEBUGGING
     I32 i;
 
     for (i = dumplvl*4; i; i--)
 	(void)PerlIO_putc(Perl_debug_log,' ');
     PerlIO_printf(Perl_debug_log, arg1, arg2, arg3, arg4, arg5);
+#endif /* DEBUGGING */
 }
 
 #else
@@ -422,6 +433,7 @@ dump(pat,va_alist)
     va_dcl
 #endif
 {
+#ifdef DEBUGGING
     I32 i;
     va_list args;
 
@@ -434,7 +446,6 @@ dump(pat,va_alist)
 	(void)PerlIO_putc(Perl_debug_log,' ');
     PerlIO_vprintf(Perl_debug_log,pat,args);
     va_end(args);
+#endif /* DEBUGGING */
 }
-#endif
-
 #endif

@@ -919,10 +919,10 @@ sv_upgrade(register SV *sv, U32 mt)
     return TRUE;
 }
 
-#ifdef DEBUGGING
 char *
 sv_peek(SV *sv)
 {
+#ifdef DEBUGGING
     SV *t = sv_newmortal();
     STRLEN prevlen;
     int unref = 0;
@@ -1064,8 +1064,10 @@ sv_peek(SV *sv)
 	    sv_catpv(t, ")");
     }
     return SvPV(t, na);
+#else	/* DEBUGGING */
+    return "";
+#endif	/* DEBUGGING */
 }
-#endif
 
 int
 sv_backoff(register SV *sv)
@@ -4820,10 +4822,10 @@ sv_vcatpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, 
     }
 }
 
-#ifdef DEBUGGING
 void
 sv_dump(SV *sv)
 {
+#ifdef DEBUGGING
     SV *d = sv_newmortal();
     char *s;
     U32 flags;
@@ -5087,14 +5089,5 @@ sv_dump(SV *sv)
 	PerlIO_printf(Perl_debug_log, "  FLAGS = 0x%lx\n", (long)IoFLAGS(sv));
 	break;
     }
+#endif	/* DEBUGGING */
 }
-#else
-void
-sv_dump(SV *sv)
-{
-}
-#endif
-
-
-
-

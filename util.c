@@ -1935,8 +1935,8 @@ char	*mode;
 #endif /* !DOSISH */
 
 #ifdef DUMP_FDS
-dump_fds(s)
-char *s;
+void
+dump_fds(char *s)
 {
     int fd;
     struct stat tmpstatbuf;
@@ -1948,7 +1948,7 @@ char *s;
     }
     PerlIO_printf(PerlIO_stderr(),"\n");
 }
-#endif
+#endif	/* DUMP_FDS */
 
 #ifndef HAS_DUP2
 int

@@ -79,14 +79,7 @@ VIRTUAL void	cv_ckproto _((CV* cv, GV* gv, char* p));
 VIRTUAL CV*	cv_clone _((CV* proto));
 VIRTUAL SV*	cv_const_sv _((CV* cv));
 VIRTUAL void	cv_undef _((CV* cv));
-#ifdef DEBUGGING
 VIRTUAL void	cx_dump _((PERL_CONTEXT* cs));
-#else
-#ifdef PERL_OBJECT
-/* create a matching set of virtual entries for the non debugging version */
-VIRTUAL void	cx_dump_place_holder _((PERL_CONTEXT* cs));
-#endif
-#endif
 VIRTUAL SV*	filter_add _((filter_t funcp, SV* datasv));
 VIRTUAL void	filter_del _((filter_t funcp));
 VIRTUAL I32	filter_read _((int idx, SV* buffer, int maxlen));
@@ -95,24 +88,12 @@ VIRTUAL char **	get_op_names _((void));
 VIRTUAL char *	get_no_modify _((void));
 VIRTUAL U32 *	get_opargs _((void));
 VIRTUAL I32	cxinc _((void));
-#ifdef DEBUGGING
 VIRTUAL void	deb _((const char* pat,...)) __attribute__((format(printf,1,2)));
 VIRTUAL void	deb_growlevel _((void));
 VIRTUAL void	debprofdump _((void));
 VIRTUAL I32	debop _((OP* o));
 VIRTUAL I32	debstack _((void));
 VIRTUAL I32	debstackptrs _((void));
-#else
-#ifdef PERL_OBJECT
-/* create a matching set of virtual entries for the non debugging version */
-VIRTUAL void	deb_place_holder _((const char* pat,...));
-VIRTUAL void	deb_growlevel_place_holder _((void));
-VIRTUAL void	debprofdump_place_holder _((void));
-VIRTUAL I32	debop_place_holder _((OP* o));
-VIRTUAL I32	debstack_place_holder _((void));
-VIRTUAL I32	debstackptrs_place_holder _((void));
-#endif
-#endif
 VIRTUAL char*	delimcpy _((char* to, char* toend, char* from, char* fromend,
 		    int delim, I32* retlen));
 VIRTUAL void	deprecate _((char* s));
@@ -155,16 +136,9 @@ VIRTUAL void	do_vecset _((SV* sv));
 VIRTUAL void	do_vop _((I32 optype, SV* sv, SV* left, SV* right));
 VIRTUAL I32	dowantarray _((void));
 VIRTUAL void	dump_all _((void));
-#ifdef DEBUGGING
 VIRTUAL void	dump_eval _((void));
-#else
-#ifdef PERL_OBJECT
-/* create a matching set of virtual entries for the non debugging version */
-VIRTUAL void	dump_eval_place_holder _((void));
-#endif
-#endif
 #ifdef DUMP_FDS  /* See util.c */
-VIRTUAL int	dump_fds _((char* s));
+VIRTUAL void	dump_fds _((char* s));
 #endif
 VIRTUAL void	dump_form _((GV* gv));
 VIRTUAL void	dump_gv _((GV* gv));
@@ -413,7 +387,7 @@ VIRTUAL void	peep _((OP* o));
 PerlInterpreter*	perl_alloc _((void));
 #endif
 #ifdef PERL_OBJECT
-VIRTUAL void    perl_atexit _((void(*fn)(CPerlObj *, void *), void*));
+VIRTUAL void    perl_atexit _((void(*fn)(CPerlObj *, void *), void* ptr));
 #else
 void    perl_atexit _((void(*fn)(void *), void*));
 #endif
@@ -470,26 +444,12 @@ VIRTUAL void	push_scope _((void));
 VIRTUAL regexp*	pregcomp _((char* exp, char* xend, PMOP* pm));
 VIRTUAL OP*	ref _((OP* o, I32 type));
 VIRTUAL OP*	refkids _((OP* o, I32 type));
-#ifdef DEBUGGING
 VIRTUAL void	regdump _((regexp* r));
-#else
-#ifdef PERL_OBJECT
-/* create a matching set of virtual entries for the non debugging version */
-VIRTUAL void	regdump_place_holder _((regexp* r));
-#endif
-#endif
 VIRTUAL I32	pregexec _((regexp* prog, char* stringarg, char* strend, char* strbeg, I32 minend, SV* screamer, U32 nosave));
 VIRTUAL I32	regexec_flags _((regexp* prog, char* stringarg, char* strend, char* strbeg, I32 minend, SV* screamer, void* data, U32 flags));
 VIRTUAL void	pregfree _((struct regexp* r));
 VIRTUAL regnode* regnext _((regnode* p));
-#ifdef DEBUGGING
 VIRTUAL void	regprop _((SV* sv, regnode* o));
-#else
-#ifdef PERL_OBJECT
-/* create a matching set of virtual entries for the non debugging version */
-VIRTUAL void	regprop_place_holder _((SV* sv, regnode* o));
-#endif
-#endif
 VIRTUAL void	repeatcpy _((char* to, char* from, I32 len, I32 count));
 VIRTUAL char*	rninstr _((char* big, char* bigend, char* little, char* lend));
 VIRTUAL Sighandler_t rsignal _((int i, Sighandler_t t));
@@ -610,14 +570,7 @@ VIRTUAL void	sv_magic _((SV* sv, SV* obj, int how, char* name, I32 namlen));
 VIRTUAL SV*	sv_mortalcopy _((SV* oldsv));
 VIRTUAL SV*	sv_newmortal _((void));
 VIRTUAL SV*	sv_newref _((SV* sv));
-#ifdef DEBUGGING
 VIRTUAL char*	sv_peek _((SV* sv));
-#else
-#ifdef PERL_OBJECT
-/* create a matching set of virtual entries for the non debugging version */
-VIRTUAL char*	sv_peek_place_holder _((SV* sv));
-#endif
-#endif
 VIRTUAL char*	sv_pvn_force _((SV* sv, STRLEN* lp));
 VIRTUAL char*	sv_reftype _((SV* sv, int ob));
 VIRTUAL void	sv_replace _((SV* sv, SV* nsv));
@@ -663,14 +616,7 @@ VIRTUAL void	vivify_defelem _((SV* sv));
 VIRTUAL void	vivify_ref _((SV* sv, U32 to_what));
 VIRTUAL I32	wait4pid _((int pid, int* statusp, int flags));
 VIRTUAL void	warn _((const char* pat,...));
-#ifdef DEBUGGING
 VIRTUAL void	watch _((char** addr));
-#else
-#ifdef PERL_OBJECT
-/* create a matching set of virtual entries for the non debugging version */
-VIRTUAL void	watch_place_holder _((char** addr));
-#endif
-#endif
 VIRTUAL I32	whichsig _((char* sig));
 VIRTUAL int	yyerror _((char* s));
 VIRTUAL int	yylex _((void));
@@ -775,14 +721,7 @@ SV *is_an_int _((char *s, STRLEN l));
 int div128 _((SV *pnum, bool *done));
 
 int runops_standard _((void));
-#ifdef DEBUGGING
 int runops_debug _((void));
-#else
-#ifdef PERL_OBJECT
-/* create a matching set of virtual entries for the non debugging version */
-int runops_debug_place_holder _((void));
-#endif
-#endif
 void check_uni _((void));
 void  force_next _((I32 type));
 char *force_version _((char *start));
@@ -889,14 +828,8 @@ int do_aspawn _((void *vreally, void **vmark, void **vsp));
 
 #ifdef DEBUGGING
 void del_sv _((SV *p));
+#endif
 void debprof _((OP *o));
-#else
-#ifdef PERL_OBJECT
-/* create a matching set of virtual entries for the non debugging version */
-void del_sv_place_holder _((SV *p));
-void debprof_place_holder _((OP *o));
-#endif
-#endif
 
 void *bset_obj_store _((void *obj, I32 ix));
 OP *new_logop _((I32 type, I32 flags, OP **firstp, OP **otherp));
