@@ -19,6 +19,7 @@ including all commercially-important modern languages.  All characters
 in the largest Chinese, Japanese, and Korean dictionaries are also
 encoded. The standards will eventually cover almost all characters in
 more than 250 writing systems and thousands of languages.
+Unicode 1.0 was released in October 1991, and 4.0 in April 2003.
 
 A Unicode I<character> is an abstract entity.  It is not bound to any
 particular integer width, especially not to the C language C<char>.
@@ -33,11 +34,10 @@ case 0x0041 and 0x03B1, respectively.  These unique numbers are called
 I<code points>.
 
 The Unicode standard prefers using hexadecimal notation for the code
-points.  If numbers like C<0x0041> are unfamiliar to
-you, take a peek at a later section, L</"Hexadecimal Notation">.
-The Unicode standard uses the notation C<U+0041 LATIN CAPITAL LETTER A>,
-to give the hexadecimal code point and the normative name of
-the character.
+points.  If numbers like C<0x0041> are unfamiliar to you, take a peek
+at a later section, L</"Hexadecimal Notation">.  The Unicode standard
+uses the notation C<U+0041 LATIN CAPITAL LETTER A>, to give the
+hexadecimal code point and the normative name of the character.
 
 Unicode also defines various I<properties> for the characters, like
 "uppercase" or "lowercase", "decimal digit", or "punctuation";
@@ -86,12 +86,13 @@ characters that do not represent true characters.
 
 A common myth about Unicode is that it would be "16-bit", that is,
 Unicode is only represented as C<0x10000> (or 65536) characters from
-C<0x0000> to C<0xFFFF>.  B<This is untrue.> Since Unicode 2.0, Unicode
-has been defined all the way up to 21 bits (C<0x10FFFF>), and since
-Unicode 3.1, characters have been defined beyond C<0xFFFF>.  The first
-C<0x10000> characters are called the I<Plane 0>, or the I<Basic
-Multilingual Plane> (BMP).  With Unicode 3.1, 17 planes in all are
-defined--but nowhere near full of defined characters, yet.
+C<0x0000> to C<0xFFFF>.  B<This is untrue.>  Since Unicode 2.0 (July
+1996), Unicode has been defined all the way up to 21 bits (C<0x10FFFF>),
+and since Unicode 3.1 (March 2001), characters have been defined
+beyond C<0xFFFF>.  The first C<0x10000> characters are called the
+I<Plane 0>, or the I<Basic Multilingual Plane> (BMP).  With Unicode
+3.1, 17 (yes, seventeen) planes in all were defined--but they are
+nowhere near full of defined characters, yet.
 
 Another myth is that the 256-character blocks have something to
 do with languages--that each block would define the characters used
@@ -104,13 +105,14 @@ so on.  Scripts usually span varied parts of several blocks.
 For further information see L<Unicode::UCD>.
 
 The Unicode code points are just abstract numbers.  To input and
-output these abstract numbers, the numbers must be I<encoded> somehow.
-Unicode defines several I<character encoding forms>, of which I<UTF-8>
-is perhaps the most popular.  UTF-8 is a variable length encoding that
-encodes Unicode characters as 1 to 6 bytes (only 4 with the currently
-defined characters).  Other encodings include UTF-16 and UTF-32 and their
-big- and little-endian variants (UTF-8 is byte-order independent)
-The ISO/IEC 10646 defines the UCS-2 and UCS-4 encoding forms.
+output these abstract numbers, the numbers must be I<encoded> or
+I<serialised> somehow.  Unicode defines several I<character encoding
+forms>, of which I<UTF-8> is perhaps the most popular.  UTF-8 is a
+variable length encoding that encodes Unicode characters as 1 to 6
+bytes (only 4 with the currently defined characters).  Other encodings
+include UTF-16 and UTF-32 and their big- and little-endian variants
+(UTF-8 is byte-order independent) The ISO/IEC 10646 defines the UCS-2
+and UCS-4 encoding forms.
 
 For more information about encodings--for instance, to learn what
 I<surrogates> and I<byte order marks> (BOMs) are--see L<perlunicode>.
@@ -752,7 +754,10 @@ http://www.cl.cam.ac.uk/~mgk25/unicode.html
 How Does Unicode Work With Traditional Locales?
 
 In Perl, not very well.  Avoid using locales through the C<locale>
-pragma.  Use only one or the other.
+pragma.  Use only one or the other.  But see L<perlrun> for the
+description of the C<-C> switch and its environment counterpart,
+C<$ENV{PERL_UNICODE}> to see how to enable various Unicode features,
+for example by using locale settings.
 
 =back
 
@@ -876,7 +881,8 @@ to UTF-8 bytes and back, the code works even with older Perl 5 versions.
 =head1 SEE ALSO
 
 L<perlunicode>, L<Encode>, L<encoding>, L<open>, L<utf8>, L<bytes>,
-L<perlretut>, L<Unicode::Collate>, L<Unicode::Normalize>, L<Unicode::UCD>
+L<perlretut>, L<perlrun>, L<Unicode::Collate>, L<Unicode::Normalize>,
+L<Unicode::UCD>
 
 =head1 ACKNOWLEDGMENTS
 
