@@ -896,6 +896,9 @@ Background yourself like this:
 
 =back
 
+The Proc::Daemon module, available from CPAN, provides a function to
+perform these actions for you.
+
 =head2 How do I make my program run with sh and csh?
 
 See the F<eg/nih> script (part of the perl source distribution).
