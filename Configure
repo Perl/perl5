@@ -4679,6 +4679,9 @@ if "$useshrplib"; then
 	solaris|netbsd)
 		xxx="-R $shrpdir"
 		;;
+	freebsd)
+		xxx="-Wl,-R,$shrpdir"
+		;;
 	linux|irix*)
 		xxx="-Wl,-rpath,$shrpdir"
 		;;
