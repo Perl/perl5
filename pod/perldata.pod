@@ -636,7 +636,7 @@ The previous assignments are exactly equivalent to
     ($days[3], $days[4], $days[5]) = qw/Wed Thu Fri/;
     ($colors{'red'}, $colors{'blue'}, $colors{'green'})
                    = (0xff0000, 0x0000ff, 0x00ff00);
-    ($folks[0], $folks[-1]) = ($folks[0], $folks[-1]);
+    ($folks[0], $folks[-1]) = ($folks[-1], $folks[0]);
 
 Since changing a slice changes the original array or hash that it's
 slicing, a C<foreach> construct will alter some--or even all--of the
