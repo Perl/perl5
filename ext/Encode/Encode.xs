@@ -14,7 +14,7 @@
 UNIMPLEMENTED(_encoded_utf8_to_bytes, I32)
 UNIMPLEMENTED(_encoded_bytes_to_utf8, I32)
 
-#ifdef USE_PERLIO
+#if defined(USE_PERLIO) && !defined(USE_SFIO)
 /* Define an encoding "layer" in the perliol.h sense.
    The layer defined here "inherits" in an object-oriented sense from the
    "perlio" layer with its PerlIOBuf_* "methods".
@@ -324,7 +324,7 @@ PerlIO_funcs PerlIO_encode = {
  PerlIOBuf_get_cnt,
  PerlIOBuf_set_ptrcnt,
 };
-#endif
+#endif /* encode layer */
 
 void
 Encode_Define(pTHX_ encode_t *enc)

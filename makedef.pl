@@ -57,7 +57,7 @@ my %PLATFORM;
 @PLATFORM{@PLATFORM} = ();
 
 defined $PLATFORM || die "PLATFORM undefined, must be one of: @PLATFORM\n";
-exists $PLATFORM{$PLATFORM} || die "PLATFORM must be one of: @PLATFORM\n"; 
+exists $PLATFORM{$PLATFORM} || die "PLATFORM must be one of: @PLATFORM\n";
 
 my $config_sh   = "config.sh";
 my $config_h    = "config.h";
@@ -69,7 +69,7 @@ my $pp_sym      = "pp.sym";
 my $globvar_sym = "globvar.sym";
 my $perlio_sym  = "perlio.sym";
 
-if ($PLATFORM eq 'aix') { 
+if ($PLATFORM eq 'aix') {
     # Nothing for now.
 }
 elsif ($PLATFORM eq 'win32') {
@@ -125,7 +125,7 @@ $define{PERL_IMPLICIT_CONTEXT} ||=
 
 if ($define{PERL_CAPI}) {
     delete $define{PERL_OBJECT};
-    $define{MULTIPLICITY} = 1; 
+    $define{MULTIPLICITY} = 1;
     $define{PERL_IMPLICIT_CONTEXT} = 1;
     $define{PERL_IMPLICIT_SYS}     = 1;
 }
@@ -520,8 +520,8 @@ sub readvar {
 	# All symbols have a Perl_ prefix because that's what embed.h
 	# sticks in front of them.
 	push(@syms, &$proc($1,$2,$3)) if (/\bPERLVAR(A?I?C?)\(([IGT])(\w+)/);
-    } 
-    close(VARS); 
+    }
+    close(VARS);
     return \@syms;
 }
 
@@ -541,9 +541,38 @@ if ($define{'PERL_GLOBAL_STRUCT'}) {
 
 my @syms = ($global_sym, $globvar_sym); # $pp_sym is not part of the API
 
+my @layer_syms = qw(
+			 PerlIOBase_clearerr
+			 PerlIOBase_close
+			 PerlIOBase_eof
+			 PerlIOBase_error
+			 PerlIOBase_fileno
+			 PerlIOBuf_bufsiz
+			 PerlIOBuf_fdopen
+			 PerlIOBuf_fill
+			 PerlIOBuf_flush
+			 PerlIOBuf_get_cnt
+			 PerlIOBuf_get_ptr
+			 PerlIOBuf_open
+			 PerlIOBuf_pushed
+			 PerlIOBuf_read
+			 PerlIOBuf_reopen
+			 PerlIOBuf_seek
+			 PerlIOBuf_set_ptrcnt
+			 PerlIOBuf_setlinebuf
+			 PerlIOBuf_tell
+			 PerlIOBuf_unread
+			 PerlIOBuf_write
+			 PerlIO_define_layer
+			 PerlIO_pending
+			 PerlIO_push
+			 PerlIO_unread
+);
+
 if ($define{'USE_PERLIO'}) {
     push @syms, $perlio_sym;
     if ($define{'USE_SFIO'}) {
+	skip_symbols \@layer_syms;
 	# SFIO defines most of the PerlIO routines as macros
 	skip_symbols [qw(
 			 PerlIO_canset_cnt
@@ -591,34 +620,8 @@ if ($define{'USE_PERLIO'}) {
     }
 } else {
 	# Skip the PerlIO New Generation symbols.
-	skip_symbols [qw(
-			 PerlIOBase_clearerr
-			 PerlIOBase_close
-			 PerlIOBase_eof
-			 PerlIOBase_error
-			 PerlIOBase_fileno
-			 PerlIOBuf_bufsiz
-			 PerlIOBuf_fdopen
-			 PerlIOBuf_fill
-			 PerlIOBuf_flush
-			 PerlIOBuf_get_cnt
-			 PerlIOBuf_get_ptr
-			 PerlIOBuf_open
-			 PerlIOBuf_pushed
-			 PerlIOBuf_read
-			 PerlIOBuf_reopen
-			 PerlIOBuf_seek
-			 PerlIOBuf_set_ptrcnt
-			 PerlIOBuf_setlinebuf
-			 PerlIOBuf_tell
-			 PerlIOBuf_unread
-			 PerlIOBuf_write
-			 PerlIO_define_layer
-			 PerlIO_pending
-			 PerlIO_push
-			 PerlIO_unread
-			)];
-} 
+	skip_symbols \@layer_syms;
+}
 
 for my $syms (@syms) {
     open (GLOBAL, "<$syms") || die "failed to open $syms: $!\n";
@@ -651,15 +654,15 @@ else {
     unless ($define{'PERL_GLOBAL_STRUCT'}) {
 	my $glob = readvar($perlvars_h);
 	emit_symbols $glob;
-    } 
+    }
     unless ($define{'MULTIPLICITY'}) {
 	my $glob = readvar($intrpvar_h);
 	emit_symbols $glob;
-    } 
+    }
     unless ($define{'MULTIPLICITY'} || $define{'USE_5005THREADS'}) {
 	my $glob = readvar($thrdvar_h);
 	emit_symbols $glob;
-    } 
+    }
 }
 
 sub try_symbol {
@@ -863,7 +866,7 @@ foreach my $symbol (sort keys %export) {
 
 sub emit_symbol {
     my $symbol = shift;
-    chomp($symbol); 
+    chomp($symbol);
     $export{$symbol} = 1;
 }
 
