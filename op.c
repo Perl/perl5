@@ -3378,7 +3378,7 @@ OP *block;
     GV *gv = gv_fetchpv(name ? name : "__ANON__",
 			GV_ADDMULTI | (block ? 0 : GV_NOINIT), SVt_PVCV);
     char *ps = proto ? SvPVx(((SVOP*)proto)->op_sv, na) : Nullch;
-    register CV *cv;
+    register CV *cv=0;
     I32 ix;
 
     if (o)

@@ -745,6 +745,18 @@ you can use any pair of non-alphanumeric, non-whitespace characters as
 delimiters.  This is particularly useful for matching Unix path names
 that contain "/", to avoid LTS (leaning toothpick syndrome).  If "?" is
 the delimiter, then the match-only-once rule of C<?PATTERN?> applies.
+Be aware that the following may not behave in the fashion that you
+expect-
+
+    $a = 'echo test';
+    $a =~ m"$a";      # interpolates $a
+    $a =~ m'$a';      # doesn't interpolate, matches a literal `$a'
+    $a =~ m`$a`;      # interpolates likes double quotes, doesn't 
+                      # execute `echo test`
+
+That said, it is probably a good idea to not use quote like characters
+as regular expression delimiters.  If nothing else, it will make it
+easier for future maintainers of your code.
 
 PATTERN may contain variables, which will be interpolated (and the
 pattern recompiled) every time the pattern search is evaluated.  (Note
@@ -759,9 +771,10 @@ If you change them, Perl won't even notice.
 If the PATTERN evaluates to the empty string, the last
 I<successfully> matched regular expression is used instead.
 
-If used in a context that requires a list value, a pattern match returns a
+If the C</g> option is not used, C<m//> in a list context returns a
 list consisting of the subexpressions matched by the parentheses in the
-pattern, i.e., (C<$1>, $2, $3...).  (Note that here $1 etc. are also set, and
+pattern, i.e., (C<$1>, C<$2>, C<$3>...).  (Note that here
+C<$1> etc. are also set, and
 that this differs from Perl 4's behavior.)  If there are no parentheses,
 the return value is the list C<(1)> for success or C<('')> upon failure.
 With parentheses, C<()> is returned upon failure.

@@ -2254,10 +2254,9 @@ EXT bool	numeric_local INIT(TRUE);    /* Assume local numerics */
 #define SAVE_DEFSV SAVESPTR(GvSV(defgv))
 
 #ifdef HAS_SEM
-#   ifndef HAS_UNION_SEMUN
-#       include <sys/types.h>
-#       include <sys/ipc.h>
-#       include <sys/sem.h>
+#   include <sys/ipc.h>
+#   include <sys/sem.h>
+#   ifndef HAS_UNION_SEMUN	/* Provide the union semun. */
     union semun {
 	int val;
 	struct semid_ds *buf;
@@ -2271,10 +2270,9 @@ EXT bool	numeric_local INIT(TRUE);    /* Assume local numerics */
 #           define Semctl(id, num, cmd, semun) semctl(id, num, cmd, semun.buf)
 #       endif
 #   endif
-#   if defined(IPC_STAT) && !defined(Semctl)
-#       define Semctl(id, num, cmd, semun) croak("semctl not implemented")
+#   ifndef Semctl	/* Place our bets on the semun horse. */
+#       define Semctl(id, num, cmd, semun) semctl(id, num, cmd, semun)
 #   endif
 #endif
 
 #endif /* Include guard */
-

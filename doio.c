@@ -1508,16 +1508,18 @@ SV **sp;
     SETERRNO(0,0);
     switch (optype)
     {
-      union semun unsemds;
 #ifdef HAS_MSG
     case OP_MSGCTL:
 	ret = msgctl(id, cmd, (struct msqid_ds *)a);
 	break;
 #endif
 #ifdef HAS_SEM
-    case OP_SEMCTL:
-        unsemds.buf = (struct semid_ds *)a;
-	ret = Semctl(id, n, cmd, unsemds);
+    case OP_SEMCTL: {
+            union semun unsemds;
+
+            unsemds.buf = (struct semid_ds *)a;
+	    ret = Semctl(id, n, cmd, unsemds);
+        }
 	break;
 #endif
 #ifdef HAS_SHM

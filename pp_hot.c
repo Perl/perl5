@@ -98,7 +98,9 @@ PP(pp_sassign)
     }
     if (tainting && tainted && !SvTAINTED(left))
 	TAINT_NOT;
+    PUTBACK;
     SvSetMagicSV(right, left);
+    SPAGAIN;
     SETs(right);
     RETURN;
 }
@@ -980,8 +982,11 @@ do_readline()
 		    IoFLAGS(io) &= ~IOf_START;
 		    IoLINES(io) = 0;
 		    if (av_len(GvAVn(last_in_gv)) < 0) {
-			SV *tmpstr = newSVpv("-", 1); /* assume stdin */
-			av_push(GvAVn(last_in_gv), tmpstr);
+			do_open(last_in_gv,"-",1,FALSE,0,0,Nullfp);
+			sv_setpvn(GvSV(last_in_gv), "-", 1);
+			SvSETMAGIC(GvSV(last_in_gv));
+			fp = IoIFP(io);
+			goto have_fp;
 		    }
 		}
 		fp = nextargv(last_in_gv);
@@ -1121,6 +1126,7 @@ do_readline()
 	}
 	RETURN;
     }
+  have_fp:
     if (gimme == G_SCALAR) {
 	sv = TARG;
 	if (SvROK(sv))
