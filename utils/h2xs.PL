@@ -701,7 +701,8 @@ $opt_c = $opt_f = 1 if $opt_X;
 
 $opt_t ||= 'IV';
 
-my %const_xsub = map { $_,1 } split(/,+/, $opt_s) if $opt_s;
+my %const_xsub;
+%const_xsub = map { $_,1 } split(/,+/, $opt_s) if $opt_s;
 
 my $extralibs = '';
 
@@ -1307,7 +1308,8 @@ if ($opt_x && $opt_a) {
 my $licence_hash = $licence;
 $licence_hash =~ s/^/#/gm;
 
-my $pod = <<"END" unless $opt_P;
+my $pod;
+$pod = <<"END" unless $opt_P;
 ## Below is stub documentation for your module. You'd better edit it!
 #
 #=head1 NAME

@@ -494,42 +494,47 @@ sub input_record_separator {
 
 sub input_line_number {
     local $.;
-    my $tell = tell qualify($_[0], caller) if ref($_[0]);
+    () = tell qualify($_[0], caller) if ref($_[0]);
     my $prev = $.;
     $. = $_[1] if @_ > 1;
     $prev;
 }
 
 sub format_page_number {
-    my $old = new SelectSaver qualify($_[0], caller) if ref($_[0]);
+    my $old;
+    $old = new SelectSaver qualify($_[0], caller) if ref($_[0]);
     my $prev = $%;
     $% = $_[1] if @_ > 1;
     $prev;
 }
 
 sub format_lines_per_page {
-    my $old = new SelectSaver qualify($_[0], caller) if ref($_[0]);
+    my $old;
+    $old = new SelectSaver qualify($_[0], caller) if ref($_[0]);
     my $prev = $=;
     $= = $_[1] if @_ > 1;
     $prev;
 }
 
 sub format_lines_left {
-    my $old = new SelectSaver qualify($_[0], caller) if ref($_[0]);
+    my $old;
+    $old = new SelectSaver qualify($_[0], caller) if ref($_[0]);
     my $prev = $-;
     $- = $_[1] if @_ > 1;
     $prev;
 }
 
 sub format_name {
-    my $old = new SelectSaver qualify($_[0], caller) if ref($_[0]);
+    my $old;
+    $old = new SelectSaver qualify($_[0], caller) if ref($_[0]);
     my $prev = $~;
     $~ = qualify($_[1], caller) if @_ > 1;
     $prev;
 }
 
 sub format_top_name {
-    my $old = new SelectSaver qualify($_[0], caller) if ref($_[0]);
+    my $old;
+    $old = new SelectSaver qualify($_[0], caller) if ref($_[0]);
     my $prev = $^;
     $^ = qualify($_[1], caller) if @_ > 1;
     $prev;
@@ -604,7 +609,8 @@ sub constant {
 
 sub printflush {
     my $io = shift;
-    my $old = new SelectSaver qualify($io, caller) if ref($io);
+    my $old;
+    $old = new SelectSaver qualify($io, caller) if ref($io);
     local $| = 1;
     if(ref($io)) {
         print $io @_;
