@@ -28,6 +28,9 @@
 # and what-will-be-2.1
 #
 
+signal_t='void'
+d_voidsig='define'
+
 case "$osvers" in
 0.*|1.0*)
 	usedl="$undef"
