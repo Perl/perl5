@@ -75,7 +75,215 @@ indicator:
 
 
 ----------------
-Version 5.005_56        Development release working toward 5.006
+Version 5.005_57        Development release working toward 5.006
+----------------
+
+____________________________________________________________________________
+[  3089] By: gsar                                  on 1999/03/06  04:30:40
+        Log: tolerate CRs after options
+     Branch: perl
+           ! perl.c
+____________________________________________________________________________
+[  3088] By: jhi                                   on 1999/03/05  12:49:01
+        Log: Integrate from mainperl.
+     Branch: cfgperl
+          +> README.hurd
+          !> MANIFEST ext/Errno/Errno_pm.PL t/lib/io_sock.t
+____________________________________________________________________________
+[  3087] By: gsar                                  on 1999/03/05  06:41:16
+        Log: adjust timeouts to accomodate slow/busy systems
+     Branch: perl
+           ! t/lib/io_sock.t
+____________________________________________________________________________
+[  3083] By: gsar                                  on 1999/03/05  01:32:47
+        Log: integrate change#3081 from maint-5.005
+     Branch: perl
+          !> ext/Errno/Errno_pm.PL
+____________________________________________________________________________
+[  3082] By: gsar                                  on 1999/03/05  01:31:06
+        Log: integrate change#2904 from maint-5.005
+     Branch: perl
+          +> README.hurd
+          !> MANIFEST
+____________________________________________________________________________
+[  3081] By: gsar                                  on 1999/03/05  00:14:33
+        Log: protect against doubled backslashes
+     Branch: maint-5.005/perl
+           ! ext/Errno/Errno_pm.PL
+____________________________________________________________________________
+[  3077] By: jhi                                   on 1999/03/04  08:10:13
+        Log: Integrate from mainperl.
+     Branch: cfgperl
+          +> ext/B/B/Stash.pm
+	  !> MANIFEST README.hpux cc_runtime.h config_h.SH ext/B/B/C.pm
+	  !> ext/B/B/CC.pm gv.c lib/File/Compare.pm lib/Test/Harness.pm
+	  !> op.c pod/perldelta.pod pod/perlfunc.pod pod/pod2man.PL
+          !> t/lib/bigfloatpm.t t/lib/io_sock.t utils/perlcc.PL
+____________________________________________________________________________
+[  3076] By: jhi                                   on 1999/03/04  08:07:59
+        Log: Regen config_h.SH once more because of *size, 
+             noticed by
+             
+             From: Hans Mulder <hansm@icgned.icgroup.nl>
+             To: Jarkko Hietaniemi <jhi@iki.fi>
+             Cc: perl5-porters@perl.org
+             Subject: [PATCH for _56] LONGSIZE used before it is set in config.h
+             Date: Thu,  4 Mar 99 00:10:45 +0100
+             Message-Id: <9903032317.AA23021@icgned.icgroup.nl>
+     Branch: cfgperl
+           ! Configure config_h.SH
+____________________________________________________________________________
+[  3068] By: gsar                                  on 1999/03/04  05:48:03
+        Log: From: Hans Mulder <hansm@icgned.icgroup.nl>
+             Date: Thu,  4 Mar 99 00:10:45 +0100
+             Message-Id: <9903032317.AA23021@icgned.icgroup.nl>
+             Subject: [PATCH for _56] LONGSIZE used before it is set in config.h
+     Branch: perl
+           ! config_h.SH
+____________________________________________________________________________
+[  3067] By: gsar                                  on 1999/03/04  05:44:32
+        Log: exempt $foo::a,$foo::b from warnings only if sort() was seen in package foo
+             From: Graham Barr <gbarr@ti.com>
+             Date: Wed, 3 Mar 1999 17:23:56 -0600
+             Message-ID: <19990303172356.F7442@dal.asp.ti.com>
+             Subject: Re: 'use strict' doesn't work for one-letter variables
+     Branch: perl
+           ! gv.c op.c
+____________________________________________________________________________
+[  3066] By: gsar                                  on 1999/03/04  05:20:50
+        Log: updates to compiler modules
+             From: "Vishal Bhatia" <vishalb@hotmail.com>
+             Date: Tue, 02 Mar 1999 23:27:25 PST
+             Message-ID: <19990303072725.779.qmail@hotmail.com>
+             Subject: PATCH 5.005_56 + Test procedure
+     Branch: perl
+           + ext/B/B/Stash.pm
+	   ! MANIFEST cc_runtime.h ext/B/B/C.pm ext/B/B/CC.pm
+           ! lib/Test/Harness.pm utils/perlcc.PL
+____________________________________________________________________________
+[  3065] By: gsar                                  on 1999/03/04  05:03:30
+        Log: more s/s_/s!/ etc.
+     Branch: perl
+           ! pod/perldelta.pod pod/perlfunc.pod
+____________________________________________________________________________
+[  3064] By: gsar                                  on 1999/03/04  04:50:45
+        Log: integrate cfgperl contents into mainline
+     Branch: perl
+	  !> Configure README.vms bytecode.h config_h.SH configure.com
+	  !> ext/B/defsubs.h.PL hints/hpux.sh pod/perldelta.pod
+	  !> pod/perldiag.pod pp.c t/lib/ipc_sysv.t t/op/pack.t thread.h
+          !> vms/ext/vmsish.pm vms/subconfigure.com vms/vms.c vms/vmsish.h
+____________________________________________________________________________
+[  3063] By: gsar                                  on 1999/03/04  04:44:13
+        Log: HP-UX has yet another spelling for /NaNQ?/
+     Branch: perl
+           ! t/lib/bigfloatpm.t
+____________________________________________________________________________
+[  3062] By: gsar                                  on 1999/03/04  04:36:08
+        Log: error-check for accept() test
+     Branch: perl
+           ! t/lib/io_sock.t
+____________________________________________________________________________
+[  3061] By: gsar                                  on 1999/03/04  03:40:25
+        Log: allow custom comparison function in File::Compare::compare_text()
+             From: jan.dubois@ibm.net (Jan Dubois)
+             Date: Fri, 26 Feb 1999 21:56:09 +0100
+             Message-ID: <36db0838.8805651@smtp1.ibm.net>
+             Subject: Re: PodParser 1.07 (was: RE: C<stuff()> vs stuff()) 
+     Branch: perl
+           ! lib/File/Compare.pm
+____________________________________________________________________________
+[  3060] By: gsar                                  on 1999/03/04  03:37:38
+        Log: better version of change#3038
+             From: abigail@fnx.com
+             Date: Mon, 1 Mar 1999 14:11:36 -0500 (EST)
+             Message-ID: <19990301191136.5557.qmail@alexandra.wayne.fnx.com>
+             Subject: Re: [PATCH 5.005_03 TRIAL-5 pod/pod2man.PL] Recognize -> and => inside
+     Branch: perl
+           ! pod/pod2man.PL
+____________________________________________________________________________
+[  3058] By: jhi                                   on 1999/03/03  22:30:40
+        Log: Configure regen to
+             (1) match maint-5.005 patches #3056 and #3057
+             (2) better version of PHOSTNAME of #3050
+             (3) the crosscompile/multiarch config_h.SH trouble solved for now
+     Branch: cfgperl
+           ! Configure config_h.SH
+____________________________________________________________________________
+[  3054] By: jhi                                   on 1999/03/03  09:57:59
+        Log: Change #3053 missed perldelta.
+     Branch: cfgperl
+           ! pod/perldelta.pod
+____________________________________________________________________________
+[  3053] By: jhi                                   on 1999/03/03  08:29:43
+        Log: Use '!' to mark native integer packings instead of '_'.
+     Branch: cfgperl
+           ! pod/perldiag.pod pp.c t/lib/ipc_sysv.t t/op/pack.t
+____________________________________________________________________________
+[  3052] By: jhi                                   on 1999/03/02  23:12:36
+        Log: The HP-UX threads patch (change #3028) is needed also here.
+     Branch: cfgperl
+           ! hints/hpux.sh thread.h
+____________________________________________________________________________
+[  3051] By: jhi                                   on 1999/03/02  08:24:52
+        Log: From: Dan Sugalski <sugalskd@osshe.edu>
+             To: perl5-porters@perl.org, vmsperl@perl.org
+             Subject: [PATCH 5.005_0x and 5.005_5x]Minor update to README.VMS
+             Date: Mon, 01 Mar 1999 16:10:57 -0800
+             Message-Id: <3.0.6.32.19990301161057.03b1fc00@ous.edu>
+     Branch: cfgperl
+           ! README.vms
+     Branch: maint-5.005/perl
+           ! README.vms
+____________________________________________________________________________
+[  3050] By: jhi                                   on 1999/03/02  08:22:29
+        Log: From: Dan Sugalski <sugalskd@osshe.edu>
+             To: perl5-porters@perl.org, vmsperl@perl.org
+             Subject: [PATCH5.005_56]Diffs to get 5.005_56 building on VMS
+             Date: Mon, 01 Mar 1999 16:06:29 -0800
+             Message-Id: <3.0.6.32.19990301160629.02e09ec0@ous.edu>
+             
+             From: Dan Sugalski <sugalskd@osshe.edu>
+             To: perl5-porters@perl.org, vmsperl@perl.org
+             Subject: [PATCH 5.005_56]vmsish.pm patch
+             Date: Mon, 01 Mar 1999 20:19:04 -0800
+             Message-Id: <3.0.6.32.19990301201904.02cff460@ous.edu>
+             
+             plus Configure regen containing a "solution" to the
+             crosscompile/multiarch problem.
+     Branch: cfgperl
+	   ! Configure config_h.SH configure.com ext/B/defsubs.h.PL
+           ! vms/ext/vmsish.pm vms/subconfigure.com vms/vms.c vms/vmsish.h
+____________________________________________________________________________
+[  3049] By: jhi                                   on 1999/03/02  07:34:21
+        Log: From: Spider Boardman <spider@leggy.zk3.dec.com>
+             To: perl5-porters@perl.org
+             Subject: [PATCH] Eliminate (valid) warning in byterun.c
+             Date: Mon, 01 Mar 1999 17:27:59 -0500
+             Message-Id: <199903012227.RAA00181@leggy.zk3.dec.com>
+     Branch: cfgperl
+           ! bytecode.h
+     Branch: maint-5.005/perl
+           ! bytecode.h
+____________________________________________________________________________
+[  3048] By: gsar                                  on 1999/03/02  06:41:21
+        Log: updated HP-UX notes from Jeff Okamoto <okamoto@xfiles.intercon.hp.com>
+     Branch: perl
+           ! MANIFEST README.hpux
+____________________________________________________________________________
+[  3047] By: jhi                                   on 1999/03/01  06:34:43
+        Log: Integrate from mainperl.
+     Branch: cfgperl
+          +> README.hpux lib/File/Spec/Functions.pm
+          !> (integrate 28 files)
+____________________________________________________________________________
+[  3046] By: gsar                                  on 1999/03/01  05:34:28
+        Log: this is 5.005_56
+     Branch: perl
+           ! Changes
+
+----------------
+Version 5.005_56
 ----------------
 
 ____________________________________________________________________________

@@ -679,7 +679,7 @@ $indent = 0;
 $begun = "";
 
 # Unrolling [^-=A-Z>]|[A-Z](?!<)|[-=](?![A-Z]<)[\x00-\xFF] gives: // MRE pp 165.
-my $nonest = '(?x)              # Turn on /x mode.
+my $nonest = q{(?x)             # Turn on /x mode.
               (?:               # Group
                 [^-=A-Z>]*      # Anything that isn't a dash, equal sign or
                                 # closing hook isn't special. Eat as much as
@@ -695,7 +695,7 @@ my $nonest = '(?x)              # Turn on /x mode.
                   )             # End of special sequences.
                   [^-=A-Z>]*    # Followed by zero or more non-special chars. 
                 )*              # And we can repeat this as often as we can.
-              )';               # That's all folks.
+              )};               # That's all folks.
 
 while (<>) {
     if ($cutting) {

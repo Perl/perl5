@@ -202,6 +202,21 @@ Note that the behavior of:
 
 is unchanged (it continues to leave the file empty).
 
+=head2 C<eval '...'> improvements
+
+Line numbers (as reflected by caller() and most diagnostics) within
+C<eval '...'> were often incorrect when here documents were involved.
+This has been corrected.
+
+Lexical lookups for variables appearing in C<eval '...'> within
+functions that were themselves called within an C<eval '...'> were
+searching the wrong place for lexicals.  They now correctly terminate
+the lexical search at the subroutine call boundary.
+
+Parsing of here documents used to be flawed when they appeared as
+the replacement expression in C<eval 's/.../.../e'>.  This has
+been fixed.
+
 =head1 Supported Platforms
 
 =over 4
