@@ -612,10 +612,9 @@ PP(pp_sort)
     while (MARK < SP) {	/* This may or may not shift down one here. */
 	/*SUPPRESS 560*/
 	if (*up = *++MARK) {			/* Weed out nulls. */
-	    if (!SvPOK(*up))
+	    SvTEMP_off(*up);
+	    if (!sortcop && !SvPOK(*up))
 		(void)sv_2pv(*up, &na);
-	    else
-		SvTEMP_off(*up);
 	    up++;
 	}
     }
