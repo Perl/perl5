@@ -199,9 +199,8 @@ SV *val;
 	croak(no_modify);
     if (key > AvMAX(av))
 	av_extend(av,key);
-    if (AvREIFY(av))
+    if (!AvREAL(av) && AvREIFY(av))
 	av_reify(av);
-
     ary = AvARRAY(av);
     if (AvFILL(av) < key) {
 	if (!AvREAL(av)) {
@@ -385,12 +384,8 @@ register I32 num;
 	return;
     if (SvREADONLY(av))
 	croak(no_modify);
-    if (!AvREAL(av)) {
-	if (AvREIFY(av))
-	    av_reify(av);
-	else
-	    croak("Can't unshift");
-    }
+    if (!AvREAL(av) && AvREIFY(av))
+	av_reify(av);
     i = AvARRAY(av) - AvALLOC(av);
     if (i) {
 	if (i > num)
