@@ -8,7 +8,7 @@
 
 # Package name      : perl5
 # Source directory  : .
-# Configuration time: Fri Jun 15 02:15:37 EET DST 2001
+# Configuration time: Wed Jun 20 08:48:18 EET DST 2001
 # Configured by     : jhi
 # Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
 
@@ -63,7 +63,7 @@ ccsymbols='__alpha=1 __LANGUAGE_C__=1 __osf__=1 __unix__=1 _LONGLONG=1 _SYSTYPE_
 ccversion='V5.6-082'
 cf_by='jhi'
 cf_email='yourname@yourhost.yourplace.com'
-cf_time='Fri Jun 15 02:15:37 EET DST 2001'
+cf_time='Wed Jun 20 08:48:18 EET DST 2001'
 charsize='1'
 chgrp=''
 chmod=''
@@ -85,7 +85,7 @@ cppstdin='cppstdin'
 cppsymbols='_AES_SOURCE=1 __alpha=1 __ALPHA=1 _ANSI_C_SOURCE=1 __LANGUAGE_C__=1 _LONGLONG=1 __osf__=1 _OSF_SOURCE=1 _POSIX_C_SOURCE=199506 _POSIX_SOURCE=1 _REENTRANT=1 __STDC__=1 _SYSTYPE_BSD=1 __unix__=1 _XOPEN_SOURCE=1'
 cryptlib=''
 csh='csh'
-d_Gconvert='gcvt((x),(n),(b))'
+d_Gconvert='sprintf((b),"%.*g",(n),(x))'
 d_PRIEUldbl='define'
 d_PRIFUldbl='define'
 d_PRIGUldbl='define'
@@ -287,7 +287,6 @@ d_quad='define'
 d_readdir='define'
 d_readlink='define'
 d_readv='define'
-d_realpath='define'
 d_recvmsg='define'
 d_rename='define'
 d_rewinddir='define'
@@ -438,7 +437,7 @@ eunicefix=':'
 exe_ext=''
 expr='expr'
 extensions='B ByteLoader Cwd DB_File Data/Dumper Devel/DProf Devel/Peek Digest/MD5 Encode Fcntl File/Glob Filter/Util/Call IO IPC/SysV List/Util MIME/Base64 NDBM_File ODBM_File Opcode POSIX PerlIO/Scalar PerlIO/Via SDBM_File Socket Storable Sys/Hostname Sys/Syslog Thread Time/HiRes Time/Piece XS/Typemap attrs re Errno'
-fflushNULL='undef'
+fflushNULL='define'
 fflushall='undef'
 find=''
 firstmakefile='makefile'
@@ -670,7 +669,7 @@ patchlevel='7'
 path_sep=':'
 perl5='/u/vieraat/vieraat/jhi/Perl/bin/perl'
 perl=''
-perl_patchlevel='10575'
+perl_patchlevel='10721'
 perladmin='yourname@yourhost.yourplace.com'
 perllibs='-lm -liconv -lutil -lpthread -lexc'
 perlpath='/opt/perl/bin/perl'
@@ -870,7 +869,7 @@ PERL_SUBVERSION=1
 PERL_API_REVISION=5
 PERL_API_VERSION=5
 PERL_API_SUBVERSION=0
-PERL_PATCHLEVEL=10575
+PERL_PATCHLEVEL=10721
 PERL_CONFIG_SH=true
 # Variables propagated from previous config.sh file.
 pp_sys_cflags='ccflags="$ccflags -DNO_EFF_ONLY_OK"'

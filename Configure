@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Jun 20 02:24:20 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Wed Jun 20 08:47:08 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -485,7 +485,6 @@ d_seekdir=''
 d_telldir=''
 d_readlink=''
 d_readv=''
-d_realpath=''
 d_recvmsg=''
 d_rename=''
 d_rmdir=''
@@ -11407,10 +11406,6 @@ eval $inlibc
 set readv d_readv
 eval $inlibc
 
-: see if realpath exists
-set realpath d_realpath
-eval $inlibc
-
 : see if recvmsg exists
 set recvmsg d_recvmsg
 eval $inlibc
@@ -16717,7 +16712,6 @@ d_quad='$d_quad'
 d_readdir='$d_readdir'
 d_readlink='$d_readlink'
 d_readv='$d_readv'
-d_realpath='$d_realpath'
 d_recvmsg='$d_recvmsg'
 d_rename='$d_rename'
 d_rewinddir='$d_rewinddir'

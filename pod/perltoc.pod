@@ -3908,7 +3908,7 @@ PUSHn, PUSHp, PUSHs, PUSHu, PUTBACK, Renew, Renewc, require_pv, RETVAL,
 Safefree, savepv, savepvn, SAVETMPS, SP, SPAGAIN, ST, strEQ, strGE, strGT,
 strLE, strLT, strNE, strnEQ, strnNE, StructCopy, SvCUR, SvCUR_set, SvEND,
 SvGETMAGIC, SvGROW, SvIOK, SvIOKp, SvIOK_notUV, SvIOK_off, SvIOK_on,
-SvIOK_only, SvIOK_only_UV, SvIOK_UV, SvIV, SvIVx, SvIVX, SvLEN, SvNIOK,
+SvIOK_only, SvIOK_only_UV, SvIOK_UV, SvIV, SvIVX, SvIVx, SvLEN, SvNIOK,
 SvNIOKp, SvNIOK_off, SvNOK, SvNOKp, SvNOK_off, SvNOK_on, SvNOK_only, SvNV,
 SvNVx, SvNVX, SvOK, SvOOK, SvPOK, SvPOKp, SvPOK_off, SvPOK_on, SvPOK_only,
 SvPOK_only_UTF8, SvPV, SvPVbyte, SvPVbytex, SvPVbytex_force,
@@ -4575,7 +4575,13 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item Incompatible Changes
 
+=over 4
+
+=item 64-bit platforms and malloc
+
 =item Future Deprecations
+
+=back
 
 =item Core Enhancements
 
@@ -4583,13 +4589,11 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =over 4
 
-=item New Modules
+=item New Modules and Distribution
 
 =item Updated And Improved Modules and Pragmata
 
 =back
-
-=item Performance Enhancements
 
 =item Utility Changes
 
@@ -4650,6 +4654,8 @@ I<The Road goes ever on and on, down from the door where it began.>
 =item Localising a Tied Variable Leaks Memory
 
 =item Self-tying of Arrays and Hashes Is Forbidden
+
+=item Variable Attributes are not Currently Usable for Tieing
 
 =item Building Extensions Can Fail Because Of Largefiles
 

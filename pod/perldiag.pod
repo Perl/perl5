@@ -3286,6 +3286,12 @@ assignment or as a subroutine argument for example).
 (F) Your Perl was compiled with B<-D>SETUID_SCRIPTS_ARE_SECURE_NOW, but
 a version of the setuid emulator somehow got run anyway.
 
+=item sv_realpath: %s
+
+(S) You probably used some form of getcwd.  The implementation of
+that functionality detected something odd in your filesystem
+environment and gave up (returning undef).
+
 =item Switch (?(condition)... contains too many branches in regex;
 
 marked by <-- HERE in m/%s/

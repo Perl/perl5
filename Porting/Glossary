@@ -1258,10 +1258,6 @@ d_readv (d_readv.U):
 	This variable conditionally defines the HAS_READV symbol, which
 	indicates to the C program that the readv() routine is available.
 
-d_realpath (d_realpath.U):
-	This variable conditionally defines the HAS_REALPATH symbol, which
-	indicates to the C program that the realpath() routine is available.
-
 d_recvmsg (d_recvmsg.U):
 	This variable conditionally defines the HAS_RECVMSG symbol, which
 	indicates to the C program that the recvmsg() routine is available.
