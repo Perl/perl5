@@ -899,5 +899,22 @@ test $bar->{two}, 11;		# 205
 $bar->{three} = 13;
 test $bar->[3], 13;		# 206
 
+{
+  package B;
+  use overload bool => sub { ${+shift} };
+}
+
+my $aaa;
+{ my $bbbb = 0; $aaa = bless \$bbbb, B }
+
+test !$aaa, 1;
+
+unless ($aaa) {
+  test 'ok', 'ok';
+} else {
+  test 'is not', 'ok';
+}
+
+
 # Last test is:
-sub last {206}
+sub last {208}

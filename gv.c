@@ -1466,7 +1466,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
       case dec_amg:
 	SvSetSV(left,res); return left;
       case not_amg:
-	ans=!SvOK(res); break;
+	ans=!SvTRUE(res); break;
       }
       return boolSV(ans);
     } else if (method==copy_amg) {
