@@ -155,6 +155,7 @@ S_no_op(pTHX_ char *what, char *s)
     char *oldbp = PL_bufptr;
     bool is_first = (PL_oldbufptr == PL_linestart);
 
+    assert(s >= oldbp);
     PL_bufptr = s;
     yywarn(Perl_form(aTHX_ "%s found where operator expected", what));
     if (is_first)
@@ -165,10 +166,7 @@ S_no_op(pTHX_ char *what, char *s)
 	if (t < PL_bufptr && isSPACE(*t))
 	    Perl_warn(aTHX_ "\t(Do you need to predeclare %.*s?)\n",
 		t - PL_oldoldbufptr, PL_oldoldbufptr);
-
     }
-    else if (s <= oldbp)
-	Perl_warn(aTHX_ "\t(Missing operator before end of line?)\n");
     else
 	Perl_warn(aTHX_ "\t(Missing operator before %.*s?)\n", s - oldbp, oldbp);
     PL_bufptr = oldbp;
@@ -2656,11 +2654,11 @@ Perl_yylex(pTHX)
 	}
 
 	if (s[1] == '#' && (isIDFIRST_lazy(s+2) || strchr("{$:+-", s[2]))) {
-	    if (PL_expect == XOPERATOR)
-		no_op("Array length", PL_bufptr);
 	    PL_tokenbuf[0] = '@';
-	    s = scan_ident(s + 1, PL_bufend, PL_tokenbuf + 1, sizeof PL_tokenbuf - 1,
-			   FALSE);
+	    s = scan_ident(s + 1, PL_bufend, PL_tokenbuf + 1,
+			   sizeof PL_tokenbuf - 1, FALSE);
+	    if (PL_expect == XOPERATOR)
+		no_op("Array length", s);
 	    if (!PL_tokenbuf[1])
 		PREREF(DOLSHARP);
 	    PL_expect = XOPERATOR;
@@ -2668,10 +2666,11 @@ Perl_yylex(pTHX)
 	    TOKEN(DOLSHARP);
 	}
 
-	if (PL_expect == XOPERATOR)
-	    no_op("Scalar", PL_bufptr);
 	PL_tokenbuf[0] = '$';
-	s = scan_ident(s, PL_bufend, PL_tokenbuf + 1, sizeof PL_tokenbuf - 1, FALSE);
+	s = scan_ident(s, PL_bufend, PL_tokenbuf + 1,
+		       sizeof PL_tokenbuf - 1, FALSE);
+	if (PL_expect == XOPERATOR)
+	    no_op("Scalar", s);
 	if (!PL_tokenbuf[1]) {
 	    if (s == PL_bufend)
 		yyerror("Final $ should be \\$ or $name");
