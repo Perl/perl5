@@ -1,5 +1,5 @@
 
-print "1..11\n";
+print "1..9\n";
 my $i = 1;
 eval { require Net::Config; } || print "not "; print "ok ",$i++,"\n";
 eval { require Net::Domain; } || print "not "; print "ok ",$i++,"\n";
