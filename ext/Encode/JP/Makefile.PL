@@ -3,6 +3,7 @@ use strict;
 use ExtUtils::MakeMaker;
 
 my %tables = (EUC_JP   => ['euc-jp.enc'],
+              SHIFTJIS => ['shiftjis.enc'],
 	      MACJAPAN => ['macJapan.enc'],
 	      CP932    => ['cp932.enc'],
              );
