@@ -793,12 +793,11 @@ Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
 
     if (SvRMAGICAL(hv)) {
 	if (mg_find((SV*)hv,'P')) {
-	    SV* svret = sv_newmortal();
 	    sv = sv_newmortal();
 	    keysv = sv_2mortal(newSVsv(keysv));
-	    mg_copy((SV*)hv, sv, (char*)keysv, HEf_SVKEY);
-	    magic_existspack(svret, mg_find(sv, 'p'));
-	    return SvTRUE(svret);
+	    mg_copy((SV*)hv, sv, (char*)keysv, HEf_SVKEY); 
+	    magic_existspack(sv, mg_find(sv, 'p'));
+	    return SvTRUE(sv);
 	}
 #ifdef ENV_IS_CASELESS
 	else if (mg_find((SV*)hv,'E')) {
