@@ -107,6 +107,11 @@ close FH;
 # "wrong" and "right" may change if SelfLoader is changed.
 my %wrong = ( Parent => 'Parent', Child => 'Parent' );
 my %right = ( Parent => 'Parent', Child => 'Child' );
+if ($^O eq 'VMS') {
+    # extra line feeds for MBX IPC
+    %wrong = ( Parent => "Parent\n", Child => "Parent\n" );
+    %right = ( Parent => "Parent\n", Child => "Child\n" );
+}
 my @module = qw(Parent Child)
 ;
 sub fail {
