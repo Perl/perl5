@@ -1664,8 +1664,8 @@ interpreter.
 Three macros control the major Perl build flavors: MULTIPLICITY,
 USE_THREADS and PERL_OBJECT.  The MULTIPLICITY build has a C structure
 that packages all the interpreter state, there is a similar thread-specific
-data structure under USE_THREADS, and the PERL_OBJECT build has a C++
-class to maintain interpreter state.  In all three cases,
+data structure under USE_THREADS, and the (now deprecated) PERL_OBJECT
+build has a C++ class to maintain interpreter state.  In all three cases,
 PERL_IMPLICIT_CONTEXT is also normally defined, and enables the
 support for passing in a "hidden" first argument that represents all three
 data structures.
@@ -1708,10 +1708,11 @@ C<pTHX_> is one of a number of macros (in perl.h) that hide the
 details of the interpreter's context.  THX stands for "thread", "this",
 or "thingy", as the case may be.  (And no, George Lucas is not involved. :-)
 The first character could be 'p' for a B<p>rototype, 'a' for B<a>rgument,
-or 'd' for B<d>eclaration.
+or 'd' for B<d>eclaration, so we have C<pTHX>, C<aTHX> and C<dTHX>, and
+their variants.
 
-When Perl is built without PERL_IMPLICIT_CONTEXT, there is no first
-argument containing the interpreter's context.  The trailing underscore
+When Perl is built without options that set PERL_IMPLICIT_CONTEXT, there is no
+first argument containing the interpreter's context.  The trailing underscore
 in the pTHX_ macro indicates that the macro expansion needs a comma
 after the context argument because other arguments follow it.  If
 PERL_IMPLICIT_CONTEXT is not defined, pTHX_ will be ignored, and the
@@ -1720,7 +1721,7 @@ macro without the trailing underscore is used when there are no additional
 explicit arguments.
 
 When a core function calls another, it must pass the context.  This
-is normally hidden via macros.  Consider C<sv_setsv>.  It expands
+is normally hidden via macros.  Consider C<sv_setsv>.  It expands into
 something like this:
 
     ifdef PERL_IMPLICIT_CONTEXT
@@ -1747,8 +1748,8 @@ Under PERL_OBJECT in the core, that will translate to either:
                                        # see objXSUB.h
 
 Under PERL_OBJECT in extensions (aka PERL_CAPI), or under
-MULTIPLICITY/USE_THREADS w/ PERL_IMPLICIT_CONTEXT in both core
-and extensions, it will be:
+MULTIPLICITY/USE_THREADS with PERL_IMPLICIT_CONTEXT in both core
+and extensions, it will become:
 
     Perl_sv_setsv(aTHX_ foo, bar);     # the canonical Perl "API"
                                        # for all build flavors
@@ -1769,6 +1770,14 @@ cheaper than grabbing it from thread-local storage.)
 You can ignore [pad]THX[xo] when browsing the Perl headers/sources.
 Those are strictly for use within the core.  Extensions and embedders
 need only be aware of [pad]THX.
+
+=head2 So what happened to dTHR?
+
+C<dTHR> was introduced in perl 5.005 to support the older thread model.
+The older thread model now uses the C<THX> mechanism to pass context
+pointers around, so C<dTHR> is not useful any more.  Perl 5.6.0 and
+later still have it for backward source compatibility, but it is defined
+to be a no-op.
 
 =head2 How do I use all this in extensions?
 
@@ -1877,15 +1886,34 @@ Never add a comma after C<pTHX> yourself--always use the form of the
 macro with the underscore for functions that take explicit arguments,
 or the form without the argument for functions with no explicit arguments.
 
+=head2 Should I do anything special if I call perl from multiple threads?
+
+If you create interpreters in one thread and then proceed to call them in
+another, you need to make sure perl's own Thread Local Storage (TLS) slot is
+initialized correctly in each of those threads.
+
+The C<perl_alloc> and C<perl_clone> API functions will automatically set
+the TLS slot to the interpreter they created, so that there is no need to do
+anything special if the interpreter is always accessed in the same thread that
+created it, and that thread did not create or call any other interpreters
+afterwards.  If that is not the case, you have to set the TLS slot of the
+thread before calling any functions in the Perl API on that particular
+interpreter.  This is done by calling the C<PERL_SET_CONTEXT> macro in that
+thread as the first thing you do:
+
+	/* do this before doing anything else with some_perl */
+	PERL_SET_CONTEXT(some_perl);
+
+	... other Perl API calls on some_perl go here ...
+
 =head2 Future Plans and PERL_IMPLICIT_SYS
 
 Just as PERL_IMPLICIT_CONTEXT provides a way to bundle up everything
 that the interpreter knows about itself and pass it around, so too are
 there plans to allow the interpreter to bundle up everything it knows
 about the environment it's running on.  This is enabled with the
-PERL_IMPLICIT_SYS macro.  Currently it only works with PERL_OBJECT,
-but is mostly there for MULTIPLICITY and USE_THREADS (see inside
-iperlsys.h).
+PERL_IMPLICIT_SYS macro.  Currently it only works with PERL_OBJECT
+and USE_THREADS on Windows (see inside iperlsys.h).
 
 This allows the ability to provide an extra pointer (called the "host"
 environment) for all the system calls.  This makes it possible for
@@ -1945,7 +1973,8 @@ Other available flags are:
 
 =item s
 
-This is a static function and is defined as C<S_whatever>.
+This is a static function and is defined as C<S_whatever>, and usually
+called within the sources as C<whatever(...)>.
 
 =item n
 
@@ -1963,7 +1992,7 @@ The argument list should end with C<...>, like this:
 
     Afprd   |void   |croak          |const char* pat|...
 
-=item m
+=item M
 
 This function is part of the experimental development API, and may change 
 or disappear without notice.
