@@ -3365,8 +3365,9 @@ of values, as follows:
 
     x	A null byte.
     X	Back up a byte.
-    @	Null fill to absolute position, counted from the start of
-        the innermost ()-group.
+    @	Null fill or truncate to absolute position, counted from the
+        start of the innermost ()-group.
+    .   Null fill or truncate to absolute position specified by value.
     (	Start of a ()-group.
 
 Some letters in the TEMPLATE may optionally be followed by one or
@@ -3379,6 +3380,10 @@ which the modifier is valid):
         xX         Make x and X act as alignment commands.
 
         nNvV       Treat integers as signed instead of unsigned.
+
+        @.         Specify position as byte offset in the internal
+                   representation of the packed string. Efficient but
+                   dangerous.
 
     >   sSiIlLqQ   Force big-endian byte-order on the type.
         jJfFdDpP   (The "big end" touches the construct.)
@@ -3398,12 +3403,13 @@ The following rules apply:
 
 Each letter may optionally be followed by a number giving a repeat
 count.  With all types except C<a>, C<A>, C<Z>, C<b>, C<B>, C<h>,
-C<H>, C<@>, C<x>, C<X> and C<P> the pack function will gobble up that
-many values from the LIST.  A C<*> for the repeat count means to use
-however many items are left, except for C<@>, C<x>, C<X>, where it is
-equivalent to C<0>, and C<u>, where it is equivalent to 1 (or 45, what
-is the same).  A numeric repeat count may optionally be enclosed in
-brackets, as in C<pack 'C[80]', @arr>.
+C<H>, C<@>, C<.>, C<x>, C<X> and C<P> the pack function will gobble up
+that many values from the LIST.  A C<*> for the repeat count means to
+use however many items are left, except for C<@>, C<x>, C<X>, where it
+is equivalent to C<0>, for <.> where it means relative to string start
+and C<u>, where it is equivalent to 1 (or 45, which is the same).
+A numeric repeat count may optionally be enclosed in brackets, as in
+C<pack 'C[80]', @arr>.
 
 One can replace the numeric repeat count by a template enclosed in brackets;
 then the packed length of this template in bytes is used as a count.
@@ -3416,6 +3422,17 @@ possible alignment.
 When used with C<Z>, C<*> results in the addition of a trailing null
 byte (so the packed result will be one longer than the byte C<length>
 of the item).
+
+When used with C<@>, the repeat count represents an offset from the start
+of the innermost () group.
+
+When used with C<.>, the repeat count is used to determine the starting
+position from where the value offset is calculated. If the repeat count
+is 0, it's relative to the current position. If the repeat count is C<*>,
+the offset is relative to the start of the packed string. And if its an
+integer C<n> the offset is relative to the start of the n-th innermost
+() group (or the start of the string if C<n> is bigger then the group
+level).
 
 The repeat count for C<u> is interpreted as the maximal number of bytes
 to encode per line of output, with 0, 1 and 2 replaced by 45. The repeat 
@@ -3689,7 +3706,6 @@ C<@> starts again at 0. Therefore, the result of
 
 is the string "\0a\0\0bc".
 
-
 =item *
 
 C<x> and C<X> accept C<!> modifier.  In this case they act as
@@ -3780,6 +3796,8 @@ Examples:
     $bar = pack('s@4l', 12, 34);
     # short 12, zero fill to position 4, long 34
     # $foo eq $bar
+    $baz = pack('s.l', 12, 4, 34);
+    # short 12, zero fill to position 4, long 34
 
     $foo = pack('nN', 42, 4711);
     # pack big-endian 16- and 32-bit unsigned integers

@@ -183,9 +183,9 @@ S_mul128(pTHX_ SV *sv, U8 m)
 #define TYPE_NO_MODIFIERS(t)	((t) & 0xFF)
 
 #ifdef PERL_PACK_CAN_SHRIEKSIGN
-#define SHRIEKING_ALLOWED_TYPES "sSiIlLxXnNvV"
+# define SHRIEKING_ALLOWED_TYPES "sSiIlLxXnNvV@."
 #else
-#define SHRIEKING_ALLOWED_TYPES "sSiIlLxX"
+# define SHRIEKING_ALLOWED_TYPES "sSiIlLxX"
 #endif
 
 #ifndef PERL_PACK_CAN_BYTEORDER
@@ -761,13 +761,18 @@ S_measure_struct(pTHX_ tempsym_t* symptr)
 		Perl_croak(aTHX_ "Invalid type '%c' in %s",
 			   (int)TYPE_NO_MODIFIERS(symptr->code),
 			   symptr->flags & FLAG_PACK ? "pack" : "unpack" );
+#ifdef PERL_PACK_CAN_SHRIEKSIGN
+	    case '.' | TYPE_IS_SHRIEKING:
+	    case '@' | TYPE_IS_SHRIEKING:
+#endif
 	    case '@':
+	    case '.':
 	    case '/':
 	    case 'U':			/* XXXX Is it correct? */
 	    case 'w':
 	    case 'u':
 		Perl_croak(aTHX_ "Within []-length '%c' not allowed in %s",
-			   (int)symptr->code,
+			   (int) TYPE_NO_MODIFIERS(symptr->code),
 			   symptr->flags & FLAG_PACK ? "pack" : "unpack" );
 	    case '%':
 		size = 0;
@@ -1177,11 +1182,11 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, char *s, char *strbeg, char *strend, char 
     UV cuv = 0;
     NV cdouble = 0.0;
     const int bits_in_uv = CHAR_BIT * sizeof(cuv);
-    char* strrelbeg = s;
     bool beyond = FALSE;
     bool explicit_length;
     bool unpack_only_one = (symptr->flags & FLAG_UNPACK_ONLY_ONE) != 0;
     bool utf8 = (symptr->flags & FLAG_PARSE_UTF8) ? 1 : 0;
+    symptr->strbeg = s - strbeg;
 
     while (next_symbol(symptr)) {
 	packprops_t props;
@@ -1242,6 +1247,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, char *s, char *strbeg, char *strend, char 
 	    U32 group_modifiers = TYPE_MODIFIERS(datumtype & ~symptr->flags);
 	    symptr->flags |= group_modifiers;
             symptr->patend = savsym.grpend;
+	    symptr->previous = &savsym;
             symptr->level++;
 	    PUTBACK;
 	    while (len--) {
@@ -1253,14 +1259,46 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, char *s, char *strbeg, char *strend, char 
 		    break; /* No way to continue */
 	    }
 	    SPAGAIN;
-	    symptr->flags &= ~group_modifiers;
-            savsym.flags = symptr->flags;
+            savsym.flags = symptr->flags & ~group_modifiers;
             *symptr = savsym;
 	    break;
 	}
+#ifdef PERL_PACK_CAN_SHRIEKSIGN
+	case '.' | TYPE_IS_SHRIEKING:
+#endif
+	case '.': {
+	    char *from;
+	    SV *sv;
+#ifdef PERL_PACK_CAN_SHRIEKSIGN
+	    bool u8 = utf8 && !(datumtype & TYPE_IS_SHRIEKING);
+#else /* PERL_PACK_CAN_SHRIEKSIGN */
+	    bool u8 = utf8;
+#endif
+	    if (howlen == e_star) from = strbeg;
+	    else if (len <= 0) from = s;
+	    else {
+		tempsym_t *group = symptr;
+
+		while (--len && group) group = group->previous;
+		from = group ? strbeg + group->strbeg : strbeg;
+	    }
+	    sv = from <= s ?
+		newSVuv(  u8 ? (UV) utf8_length(from, s) : (UV) (s-from)) :
+		newSViv(-(u8 ? (IV) utf8_length(s, from) : (IV) (from-s)));
+	    XPUSHs(sv_2mortal(sv));
+	    break;
+	}
+#ifdef PERL_PACK_CAN_SHRIEKSIGN
+	case '@' | TYPE_IS_SHRIEKING:
+#endif
 	case '@':
-	    if (utf8) {
-		s = strrelbeg;
+	    s = strbeg + symptr->strbeg;
+#ifdef PERL_PACK_CAN_SHRIEKSIGN
+	    if (utf8  && !(datumtype & TYPE_IS_SHRIEKING))
+#else /* PERL_PACK_CAN_SHRIEKSIGN */
+	    if (utf8)
+#endif
+	    {
 		while (len > 0) {
 		    if (s >= strend)
 			Perl_croak(aTHX_ "'@' outside of string in unpack");
@@ -1270,9 +1308,9 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, char *s, char *strbeg, char *strend, char 
 		if (s > strend)
 		    Perl_croak(aTHX_ "'@' outside of string with malformed UTF-8 in unpack");
 	    } else {
-		if (len > strend - strrelbeg)
+		if (strend-s < len)
 		    Perl_croak(aTHX_ "'@' outside of string in unpack");
-		s = strrelbeg + len;
+		s += len;
 	    }
 	    break;
  	case 'X' | TYPE_IS_SHRIEKING:
@@ -1379,7 +1417,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, char *s, char *strbeg, char *strend, char 
 			    !is_utf8_space((U8 *) ptr)) break;
 		    if (ptr >= s) ptr += UTF8SKIP(ptr);
 		    else ptr++;
-		    if (ptr > s+len) 
+		    if (ptr > s+len)
 			Perl_croak(aTHX_ "Malformed UTF-8 string in unpack");
 		} else {
 		    for (ptr = s+len-1; ptr >= s; ptr--)
@@ -2513,30 +2551,65 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		       (int) TYPE_NO_MODIFIERS(datumtype));
 	case '%':
 	    Perl_croak(aTHX_ "'%%' may not be used in pack");
+	{
+	    char *from;
+#ifdef PERL_PACK_CAN_SHRIEKSIGN
+	case '.' | TYPE_IS_SHRIEKING:
+#endif
+	case '.':
+	    if (howlen == e_star) from = start;
+	    else if (len == 0) from = cur;
+	    else {
+		tempsym_t *group = symptr;
+
+		while (--len && group) group = group->previous;
+		from = group ? start + group->strbeg : start;
+	    }
+	    fromstr = NEXTFROM;
+	    len = SvIV(fromstr);
+	    goto resize;
+#ifdef PERL_PACK_CAN_SHRIEKSIGN
+	case '@' | TYPE_IS_SHRIEKING:
+#endif
 	case '@':
-	    if (utf8) {
-		char *s = start + symptr->strbeg;
-		while (len > 0 && s < cur) {
-		    s += UTF8SKIP(s);
-		    len--;
+	    from = start + symptr->strbeg;
+	  resize:
+#ifdef PERL_PACK_CAN_SHRIEKSIGN
+	    if (utf8  && !(datumtype & TYPE_IS_SHRIEKING))
+#else /* PERL_PACK_CAN_SHRIEKSIGN */
+	    if (utf8)
+#endif
+		if (len >= 0) {
+		    while (len && from < cur) {
+			from += UTF8SKIP(from);
+			len--;
+		    }
+		    if (from > cur)
+			Perl_croak(aTHX_ "Malformed UTF-8 string in pack");
+		    if (len) {
+			/* Here we know from == cur */
+		      grow:
+			GROWING(0, cat, start, cur, len);
+			Zero(cur, len, char);
+			cur += len;
+		    } else if (from < cur) {
+			len = cur - from;
+			goto shrink;
+		    } else goto no_change;
+		} else {
+		    cur = from;
+		    len = -len;
+		    goto utf8_shrink;
 		}
-		if (s > cur)
-		    Perl_croak(aTHX_ "Malformed UTF-8 string in pack");
-		if (len > 0) {
-		  grow:
-		    GROWING(0, cat, start, cur, len);
-		    Zero(cur, len, char);
-		    cur += len;
-		} else if (s < cur) cur = s;
-		else goto no_change;
-	    } else {
-		len -= cur - (start+symptr->strbeg);
+	    else {
+		len -= cur - from;
 		if (len > 0) goto grow;
+		if (len == 0) goto no_change;
 		len = -len;
-		if (len > 0) goto shrink;
-		else goto no_change;
+		goto shrink;
 	    }
 	    break;
+	}
 	case '(': {
             tempsym_t savsym = *symptr;
 	    U32 group_modifiers = TYPE_MODIFIERS(datumtype & ~symptr->flags);
@@ -2585,19 +2658,23 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 	case 'X':
 	    if (utf8) {
 		if (len < 1) goto no_change;
+	      utf8_shrink:
 		while (len > 0) {
 		    if (cur <= start)
-			Perl_croak(aTHX_ "'X' outside of string in pack");
+			Perl_croak(aTHX_ "'%c' outside of string in pack",
+				   (int) TYPE_NO_MODIFIERS(datumtype));
 		    while (--cur, UTF8_IS_CONTINUATION(*cur)) {
 			if (cur <= start)
-			    Perl_croak(aTHX_ "'X' outside of string in pack");
+			    Perl_croak(aTHX_ "'%c' outside of string in pack",
+				       (int) TYPE_NO_MODIFIERS(datumtype));
 		    }
 		    len--;
 		}
 	    } else {
 	      shrink:
 		if (cur - start < len)
-		    Perl_croak(aTHX_ "'X' outside of string in pack");
+		    Perl_croak(aTHX_ "'%c' outside of string in pack",
+			       (int) TYPE_NO_MODIFIERS(datumtype));
 		cur -= len;
 	    }
 	    if (cur < start+symptr->strbeg) {

@@ -12,7 +12,7 @@ my $no_endianness = $] > 5.009 ? '' :
 my $no_signedness = $] > 5.009 ? '' :
   "Signed/unsigned pack modifiers not available on this perl";
 
-plan tests => 14627;
+plan tests => 14697;
 
 use strict;
 use warnings;
@@ -507,7 +507,7 @@ foreach (
 ['p', 'Z3',  "foo",         "fo\0"],
 ['u', 'Z*',  "foo\0bar \0", "foo"],
 ['u', 'Z8',  "foo\0bar \0", "foo"],
-) 
+)
 {
     my ($what, $template, $in, $out) = @$_;
     my $got = $what eq 'u' ? (unpack $template, $in) : (pack $template, $in);
@@ -612,7 +612,7 @@ sub numbers_with_total {
         }
         if ($calc_sum == $calc_sum - 1 && $calc_sum == $max_p1) {
             # we're into floating point (either by getting out of the range of
-            # UV arithmetic, or because we're doing a floating point checksum) 
+            # UV arithmetic, or because we're doing a floating point checksum)
             # and our calculation of the checksum has become rounded up to
             # max_checksum + 1
             $calc_sum = 0;
@@ -858,13 +858,13 @@ SKIP: {
            ['a/a*/a*', '212ab345678901234567','ab3456789012'],
            ['a/a*/a*', '3012ab345678901234567', 'ab3456789012'],
            ['a/a*/b*', '212ab', $Is_EBCDIC ? '100000010100' : '100001100100'],
-  ) 
+  )
   {
     my ($pat, $in, $expect) = @$_;
     undef $x;
     eval { ($x) = unpack $pat, $in };
     is($@, '');
-    is($x, $expect) || 
+    is($x, $expect) ||
       printf "# list unpack ('$pat', '$in') gave %s, expected '$expect'\n",
              encode_list ($x);
 
@@ -1000,7 +1000,7 @@ foreach (
          ['@4', 'N', "\0"x4],
          ['a*@8a*', 'Camel', 'Dromedary', "Camel\0\0\0Dromedary"],
          ['a*@4a', 'Perl rules', '!', 'Perl!'],
-) 
+)
 {
   my ($template, @in) = @$_;
   my $out = pop @in;
@@ -1020,7 +1020,7 @@ foreach (
          ['@3', "ice"],
          ['@2a2', "water", "te"],
          ['a*@1a3', "steam", "steam", "tea"],
-) 
+)
 {
   my ($template, $in, @out) = @$_;
   my @got = eval {unpack $template, $in};
@@ -1205,7 +1205,7 @@ SKIP: {
   my @a = unpack( '(@1c)((@2c)@3c)', $buf );
   is( "@a", "@b" );
 
-  # various unpack count/code scenarios 
+  # various unpack count/code scenarios
   my @Env = ( a => 'AAA', b => 'BBB' );
   my $env = pack( 'S(S/A*S/A*)*', @Env/2, @Env );
 
@@ -1218,7 +1218,7 @@ SKIP: {
   #     2     4 5     7  10    1213
   eval { @pup = unpack( 'S/(S/A* S/A*)', substr( $env, 0, 13 ) ) };
   like( $@, qr{length/code after end of string} );
-  
+
   # postfix repeat count
   $env = pack( '(S/A* S/A*)' . @Env/2, @Env );
 
@@ -1251,7 +1251,7 @@ SKIP: {
   eval { my @inf = unpack( 'c/*a', "\x03AAA\x02BB" ); };
   like( $@, qr{'/' does not take a repeat count} );
 
-  # white space where possible 
+  # white space where possible
   my @Env = ( a => 'AAA', b => 'BBB' );
   my $env = pack( ' S ( S / A*   S / A* )* ', @Env/2, @Env );
   my @pup = unpack( ' S / ( S / A*   S / A* ) ', $env );
@@ -1280,8 +1280,8 @@ SKIP: {
   # @ repeat default 1
   my $s = pack( 'AA@A', 'A', 'B', 'C' );
   my @c = unpack( 'AA@A', $s );
-  is( $s, 'AC' ); 
-  is( "@c", "A C C" ); 
+  is( $s, 'AC' );
+  is( "@c", "A C C" );
 
   # no unpack code after /
   eval { my @a = unpack( "C/", "\3" ); };
@@ -1701,11 +1701,11 @@ is(unpack('c'), 65, "one-arg unpack (change #18751)"); # defaulting to $_
     is(unpack('@5X!8W', $up),   0xf8, "X! moving on upgraded string");
 
     is(pack("W2x", 0xfa, 0xe3), "\xfa\xe3\x00", "x on downgraded string");
-    is(pack("W2x!4", 0xfa, 0xe3), "\xfa\xe3\x00\x00", 
+    is(pack("W2x!4", 0xfa, 0xe3), "\xfa\xe3\x00\x00",
        "x! on downgraded string");
     is(pack("W2x!2", 0xfa, 0xe3), "\xfa\xe3", "x! on downgraded string");
     is(pack("U0C0W2x", 0xfa, 0xe3), "\xfa\xe3\x00", "x on upgraded string");
-    is(pack("U0C0W2x!4", 0xfa, 0xe3), "\xfa\xe3\x00\x00", 
+    is(pack("U0C0W2x!4", 0xfa, 0xe3), "\xfa\xe3\x00\x00",
        "x! on upgraded string");
     is(pack("U0C0W2x!2", 0xfa, 0xe3), "\xfa\xe3", "x! on upgraded string");
     is(pack("W2X", 0xfa, 0xe3), "\xfa", "X on downgraded string");
@@ -1713,13 +1713,13 @@ is(unpack('c'), 65, "one-arg unpack (change #18751)"); # defaulting to $_
     is(pack("W2X!2", 0xfa, 0xe3), "\xfa\xe3", "X! on downgraded string");
     is(pack("U0C0W2X!2", 0xfa, 0xe3), "\xfa\xe3", "X! on upgraded string");
     is(pack("W3X!2", 0xfa, 0xe3, 0xa6), "\xfa\xe3", "X! on downgraded string");
-    is(pack("U0C0W3X!2", 0xfa, 0xe3, 0xa6), "\xfa\xe3", 
+    is(pack("U0C0W3X!2", 0xfa, 0xe3, 0xa6), "\xfa\xe3",
        "X! on upgraded string");
 
     # backward eating through a ( moves the group starting point backwards
-    is(pack("a*(Xa)", "abc", "q"), "abq", 
+    is(pack("a*(Xa)", "abc", "q"), "abq",
        "eating before strbeg moves it back");
-    is(pack("a*(Xa)", "ab" . chr(512), "q"), "abq", 
+    is(pack("a*(Xa)", "ab" . chr(512), "q"), "abq",
        "eating before strbeg moves it back");
 
     # Check marked_upgrade
@@ -1730,7 +1730,7 @@ is(unpack('c'), 65, "one-arg unpack (change #18751)"); # defaulting to $_
     is(pack('W(W(Wa@3W)@6W)@9W', 0xa1, 0xa2, 0xa3, $up, 0xa4, 0xa5, 0xa6),
        "\xa1\xa2\xa3a\x00\xa4\x00\xa5\x00\xa6", "marked upgrade caused by a");
     is(pack('W(W(WW@3W)@6W)@9W', 0xa1, 0xa2, 0xa3, 256, 0xa4, 0xa5, 0xa6),
-       "\xa1\xa2\xa3\x{100}\x00\xa4\x00\xa5\x00\xa6", 
+       "\xa1\xa2\xa3\x{100}\x00\xa4\x00\xa5\x00\xa6",
        "marked upgrade caused by W");
     is(pack('W(W(WU0aC0@3W)@6W)@9W', 0xa1, 0xa2, 0xa3, "a", 0xa4, 0xa5, 0xa6),
        "\xa1\xa2\xa3a\x00\xa4\x00\xa5\x00\xa6", "marked upgrade caused by U0");
@@ -1742,11 +1742,11 @@ is(unpack('c'), 65, "one-arg unpack (change #18751)"); # defaulting to $_
     utf8::upgrade(my $high = "\xfeb");
 
     for my $format ("a0", "A0", "Z0", "U0a0C0", "U0A0C0", "U0Z0C0") {
-        is(pack("a* $format a*", "ab", $down, "cd"), "abcd", 
+        is(pack("a* $format a*", "ab", $down, "cd"), "abcd",
            "$format format on plain string");
         is(pack("a* $format a*", "ab", $up,   "cd"), "abcd",
            "$format format on upgraded string");
-        is(pack("a* $format a*", $high, $down, "cd"), "\xfebcd", 
+        is(pack("a* $format a*", $high, $down, "cd"), "\xfebcd",
            "$format format on plain string");
         is(pack("a* $format a*", $high, $up,   "cd"), "\xfebcd",
            "$format format on upgraded string");
@@ -1809,9 +1809,9 @@ is(unpack('c'), 65, "one-arg unpack (change #18751)"); # defaulting to $_
 }
 {
     # unpack("A*", $unicode) strips general unicode spaces
-    is(unpack("A*", "ab \n\xa0 \0"), "ab \n\xa0", 
+    is(unpack("A*", "ab \n\xa0 \0"), "ab \n\xa0",
        'normal A* strip leaves \xa0');
-    is(unpack("U0C0A*", "ab \n\xa0 \0"), "ab \n\xa0", 
+    is(unpack("U0C0A*", "ab \n\xa0 \0"), "ab \n\xa0",
        'normal A* strip leaves \xa0 even if it got upgraded for technical reasons');
     is(unpack("A*", pack("a*(U0U)a*", "ab \n", 0xa0, " \0")), "ab",
        'upgraded strings A* removes \xa0');
@@ -1821,4 +1821,152 @@ is(unpack('c'), 65, "one-arg unpack (change #18751)"); # defaulting to $_
        'upgraded strings A5 removes all unicode whitespace');
     is(unpack("A*", pack("U", 0x1680)), "",
        'upgraded strings A* with nothing left');
+}
+{
+    # Testing unpack . and .!
+    is(unpack(".", "ABCD"), 0, "offset at start of string is 0");
+    is(unpack(".", ""), 0, "offset at start of empty string is 0");
+    is(unpack("x3.", "ABCDEF"), 3, "simple offset works");
+    is(unpack("x3.", "ABC"), 3, "simple offset at end of string works");
+    is(unpack("x3.0", "ABC"), 0, "self offset is 0");
+    is(unpack("x3(x2.)", "ABCDEF"), 2, "offset is relative to inner group");
+    is(unpack("x3(X2.)", "ABCDEF"), -2,
+       "negative offset relative to inner group");
+    is(unpack("x3(X2.2)", "ABCDEF"), 1, "offset is relative to inner group");
+    is(unpack("x3(x2.0)", "ABCDEF"), 0, "self offset in group is still 0");
+    is(unpack("x3(x2.2)", "ABCDEF"), 5, "offset counts groups");
+    is(unpack("x3(x2.*)", "ABCDEF"), 5, "star offset is relative to start");
+
+    my $high = chr(8188) x 6;
+    is(unpack("x3(x2.)", $high), 2, "utf8 offset is relative to inner group");
+    is(unpack("x3(X2.)", $high), -2,
+       "utf8 negative offset relative to inner group");
+    is(unpack("x3(X2.2)", $high), 1, "utf8 offset counts groups");
+    is(unpack("x3(x2.0)", $high), 0, "utf8 self offset in group is still 0");
+    is(unpack("x3(x2.2)", $high), 5, "utf8 offset counts groups");
+    is(unpack("x3(x2.*)", $high), 5, "utf8 star offset is relative to start");
+
+    is(unpack("U0x3(x2.)", $high), 2,
+       "U0 mode utf8 offset is relative to inner group");
+    is(unpack("U0x3(X2.)", $high), -2,
+       "U0 mode utf8 negative offset relative to inner group");
+    is(unpack("U0x3(X2.2)", $high), 1,
+       "U0 mode utf8 offset counts groups");
+    is(unpack("U0x3(x2.0)", $high), 0,
+       "U0 mode utf8 self offset in group is still 0");
+    is(unpack("U0x3(x2.2)", $high), 5,
+       "U0 mode utf8 offset counts groups");
+    is(unpack("U0x3(x2.*)", $high), 5,
+       "U0 mode utf8 star offset is relative to start");
+
+    is(unpack("x3(x2.!)", $high), 2*3,
+       "utf8 offset is relative to inner group");
+    is(unpack("x3(X2.!)", $high), -2*3,
+       "utf8 negative offset relative to inner group");
+    is(unpack("x3(X2.!2)", $high), 1*3,
+       "utf8 offset counts groups");
+    is(unpack("x3(x2.!0)", $high), 0,
+       "utf8 self offset in group is still 0");
+    is(unpack("x3(x2.!2)", $high), 5*3,
+       "utf8 offset counts groups");
+    is(unpack("x3(x2.!*)", $high), 5*3,
+       "utf8 star offset is relative to start");
+
+    is(unpack("U0x3(x2.!)", $high), 2,
+       "U0 mode utf8 offset is relative to inner group");
+    is(unpack("U0x3(X2.!)", $high), -2,
+       "U0 mode utf8 negative offset relative to inner group");
+    is(unpack("U0x3(X2.!2)", $high), 1,
+       "U0 mode utf8 offset counts groups");
+    is(unpack("U0x3(x2.!0)", $high), 0,
+       "U0 mode utf8 self offset in group is still 0");
+    is(unpack("U0x3(x2.!2)", $high), 5,
+       "U0 mode utf8 offset counts groups");
+    is(unpack("U0x3(x2.!*)", $high), 5,
+       "U0 mode utf8 star offset is relative to start");
+}
+{
+    # Testing pack . and .!
+    is(pack("(a)5 .", 1..5, 3), "123", ". relative to string start, shorten");
+    eval { () = pack("(a)5 .", 1..5, -3) };
+    like($@, qr{'\.' outside of string in pack}, "Proper error message");
+    is(pack("(a)5 .", 1..5, 8), "12345\x00\x00\x00",
+       ". relative to string start, extend");
+    is(pack("(a)5 .", 1..5, 5), "12345", ". relative to string start, keep");
+
+    is(pack("(a)5 .0", 1..5, -3), "12",
+       ". relative to string current, shorten");
+    is(pack("(a)5 .0", 1..5, 2), "12345\x00\x00",
+       ". relative to string current, extend");
+    is(pack("(a)5 .0", 1..5, 0), "12345",
+       ". relative to string current, keep");
+
+    is(pack("(a)5 (.)", 1..5, -3), "12",
+       ". relative to group, shorten");
+    is(pack("(a)5 (.)", 1..5, 2), "12345\x00\x00",
+       ". relative to group, extend");
+    is(pack("(a)5 (.)", 1..5, 0), "12345",
+       ". relative to group, keep");
+
+    is(pack("(a)3 ((a)2 .)", 1..5, -2), "1",
+       ". relative to group, shorten");
+    is(pack("(a)3 ((a)2 .)", 1..5, 2), "12345",
+       ". relative to group, keep");
+    is(pack("(a)3 ((a)2 .)", 1..5, 4), "12345\x00\x00",
+       ". relative to group, extend");
+
+    is(pack("(a)3 ((a)2 .2)", 1..5, 2), "12",
+       ". relative to counted group, shorten");
+    is(pack("(a)3 ((a)2 .2)", 1..5, 7), "12345\x00\x00",
+       ". relative to counted group, extend");
+    is(pack("(a)3 ((a)2 .2)", 1..5, 5), "12345",
+       ". relative to counted group, keep");
+
+    is(pack("(a)3 ((a)2 .*)", 1..5, 2), "12",
+       ". relative to start, shorten");
+    is(pack("(a)3 ((a)2 .*)", 1..5, 7), "12345\x00\x00",
+       ". relative to start, extend");
+    is(pack("(a)3 ((a)2 .*)", 1..5, 5), "12345",
+       ". relative to start, keep");
+
+    is(pack('(a)5 (. @2 a)', 1..5, -3, "a"), "12\x00\x00a",
+       ". based shrink properly updates group starts");
+
+    is(pack("(W)3 ((W)2 .)", 0x301..0x305, -2), "\x{301}",
+       "utf8 . relative to group, shorten");
+    is(pack("(W)3 ((W)2 .)", 0x301..0x305, 2),
+       "\x{301}\x{302}\x{303}\x{304}\x{305}",
+       "utf8 . relative to group, keep");
+    is(pack("(W)3 ((W)2 .)", 0x301..0x305, 4),
+       "\x{301}\x{302}\x{303}\x{304}\x{305}\x00\x00",
+       "utf8 . relative to group, extend");
+
+    is(pack("(W)3 ((W)2 .!)", 0x301..0x305, -2), "\x{301}\x{302}",
+       "utf8 . relative to group, shorten");
+    is(pack("(W)3 ((W)2 .!)", 0x301..0x305, 4),
+       "\x{301}\x{302}\x{303}\x{304}\x{305}",
+       "utf8 . relative to group, keep");
+    is(pack("(W)3 ((W)2 .!)", 0x301..0x305, 6),
+       "\x{301}\x{302}\x{303}\x{304}\x{305}\x00\x00",
+       "utf8 . relative to group, extend");
+
+    is(pack('(W)5 (. @2 a)', 0x301..0x305, -3, "a"),
+       "\x{301}\x{302}\x00\x00a",
+       "utf8 . based shrink properly updates group starts");
+}
+{
+    # Testing @!
+    is(pack('a* @3',  "abcde"), "abc", 'Test basic @');
+    is(pack('a* @!3', "abcde"), "abc", 'Test basic @!');
+    is(pack('a* @2', "\x{301}\x{302}\x{303}\x{304}\x{305}"), "\x{301}\x{302}",
+       'Test basic utf8 @');
+    is(pack('a* @!2', "\x{301}\x{302}\x{303}\x{304}\x{305}"), "\x{301}",
+       'Test basic utf8 @!');
+
+    is(unpack('@4 a*',  "abcde"), "e", 'Test basic @');
+    is(unpack('@!4 a*', "abcde"), "e", 'Test basic @!');
+    is(unpack('@4 a*',  "\x{301}\x{302}\x{303}\x{304}\x{305}"), "\x{305}",
+       'Test basic utf8 @');
+    is(unpack('@!4 a*', "\x{301}\x{302}\x{303}\x{304}\x{305}"),
+       "\x{303}\x{304}\x{305}", 'Test basic utf8 @!');
 }

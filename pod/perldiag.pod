@@ -2775,6 +2775,11 @@ C<$arr[time]> instead of C<$arr[$time]>.
 parsing, but realloc() wouldn't give it more memory, virtual or
 otherwise.
 
+=item '.' outside of string in pack
+
+(F) The argument to a '.' in your template tried to move the working
+position to before the start of the packed string being built.
+
 =item '@' outside of string in unpack
 
 (F) You had a template that specified an absolute position outside
