@@ -1005,6 +1005,8 @@ file.  Manual error checking can be done this way:
 
 =item dump LABEL
 
+=item dump
+
 This causes an immediate core dump.  Primarily this is so that you can
 use the B<undump> program to turn your core dump into an executable binary
 after having initialized all your variables at the beginning of the

@@ -10,6 +10,11 @@ BEGIN {
 use Config;
 
 BEGIN {
+    if (!$Config{d_fork}) {
+        print "1..0\n";
+        exit 0;
+    }
+
     if(-d "lib" && -f "TEST") {
         if ( ($Config{'extensions'} !~ /\bSocket\b/ ||
               $Config{'extensions'} !~ /\bIO\b/)    &&

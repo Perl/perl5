@@ -2026,6 +2026,7 @@ PP(pp_goto)
     OP *enterops[GOTO_DEPTH];
     char *label;
     int do_dump = (PL_op->op_type == OP_DUMP);
+    static char must_have_label[] = "goto must have label";
 
     label = 0;
     if (PL_op->op_flags & OPf_STACKED) {
@@ -2279,12 +2280,15 @@ PP(pp_goto)
 		RETURNOP(CvSTART(cv));
 	    }
 	}
-	else
+	else {
 	    label = SvPV(sv,n_a);
+	    if (!(do_dump || *label))
+		DIE(must_have_label);
+	}
     }
     else if (PL_op->op_flags & OPf_SPECIAL) {
 	if (! do_dump)
-	    DIE("goto must have label");
+	    DIE(must_have_label);
     }
     else
 	label = cPVOP->op_pv;
