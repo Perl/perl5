@@ -1160,11 +1160,6 @@ lib/look.pl			A "look" equivalent
 lib/Math/BigFloat.pm		An arbitrary precision floating-point arithmetic package
 lib/Math/BigInt.pm		An arbitrary precision integer arithmetic package
 lib/Math/BigInt/Calc.pm		Pure Perl module to support Math::BigInt
-lib/Math/BigInt/t/mbi_rand.t	Test Math::BigInt randomly
-lib/Math/BigInt/t/use_lib1.t	Test combinations of Math::BigInt and BigFloat
-lib/Math/BigInt/t/use_lib2.t	Test combinations of Math::BigInt and BigFloat
-lib/Math/BigInt/t/use_lib3.t	Test combinations of Math::BigInt and BigFloat
-lib/Math/BigInt/t/use_lib4.t	Test combinations of Math::BigInt and BigFloat
 lib/Math/BigInt/t/bare_mbf.t	Test MBF under Math::BigInt::BareCalc
 lib/Math/BigInt/t/bare_mbi.t	Test MBI under Math::BigInt::BareCalc
 lib/Math/BigInt/t/bigfltpm.inc	Shared tests for bigfltpm.t and sub_mbf.t
@@ -1180,6 +1175,7 @@ lib/Math/BigInt/t/inf_nan.t	Special tests for inf and NaN handling
 lib/Math/BigInt/t/isa.t		Test for Math::BigInt inheritance
 lib/Math/BigInt/t/mbimbf.inc	Actual BigInt/BigFloat accuracy, precicion and fallback, round_mode tests
 lib/Math/BigInt/t/mbimbf.t	BigInt/BigFloat accuracy, precicion and fallback, round_mode
+lib/Math/BigInt/t/mbi_rand.t	Test Math::BigInt randomly
 lib/Math/BigInt/t/require.t	Test if require Math::BigInt works
 lib/Math/BigInt/t/sub_mbf.t	Empty subclass test of BigFloat
 lib/Math/BigInt/t/sub_mbi.t	Empty subclass test of BigInt
@@ -1187,6 +1183,16 @@ lib/Math/BigInt/t/sub_mif.t	Test A & P with subclasses using mbimbf.inc
 lib/Math/BigInt/t/upgrade.inc	Actual tests for upgrade.t
 lib/Math/BigInt/t/upgrade.t	Test if use Math::BigInt(); under upgrade works
 lib/Math/BigInt/t/use.t		Test if use Math::BigInt(); works
+lib/Math/BigInt/t/use_lib1.t	Test combinations of Math::BigInt and BigFloat
+lib/Math/BigInt/t/use_lib2.t	Test combinations of Math::BigInt and BigFloat
+lib/Math/BigInt/t/use_lib3.t	Test combinations of Math::BigInt and BigFloat
+lib/Math/BigInt/t/use_lib4.t	Test combinations of Math::BigInt and BigFloat
+lib/Math/BigRat.pm		Math::BigRat
+lib/Math/BigRat/t/bigfltpm.inc		Math::BigRat test
+lib/Math/BigRat/t/bigfltrt.t		Math::BigRat test
+lib/Math/BigRat/t/bigrat.t		Math::BigRat test
+lib/Math/BigRat/t/bigratpm.inc		Math::BigRat test
+lib/Math/BigRat/t/bigratpm.t		Math::BigRat test
 lib/Math/Complex.pm		A Complex package
 lib/Math/Complex.t		See if Math::Complex works
 lib/Math/Trig.pm		A simple interface to complex trigonometry
@@ -2247,6 +2253,7 @@ t/lib/locale/utf8		Part of locale.t in UTF8
 t/lib/Math/BigFloat/Subclass.pm	Empty subclass of BigFloat for test
 t/lib/Math/BigInt/BareCalc.pm	Bigint's simulation of Calc
 t/lib/Math/BigInt/Subclass.pm	Empty subclass of BigInt for test
+t/lib/Math/BigRat/Test.pm		Math::BigRat test helper
 t/lib/sample-tests/bailout		Test data for Test::Harness
 t/lib/sample-tests/combined		Test data for Test::Harness
 t/lib/sample-tests/descriptive		Test data for Test::Harness
