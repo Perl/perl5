@@ -24,6 +24,15 @@ with all the defaults are:
 
 Each of these is explained in further detail below.
 
+B<NOTE>: starting from the release 5.6.0 Perl will use a version
+scheme where even-numbered subreleases (like 5.6) are stable
+maintenance releases and odd-numbered subreleases (like 5.7) are
+unstable development releases.  Development releases should not be
+used in production environments.  Fixes and new features are first
+carefully tested in development releases and only if they prove
+themselves to be worthy will they be migrated to the maintenance
+releases.
+
 The above commands will install Perl to /usr/local or /opt, depending
 on the platform.  If that's not okay with you, use
 
@@ -327,7 +336,14 @@ output, you can run
 
 	sh Configure -des
 
-For my Solaris system, I usually use
+Note: for development releases (odd subreleases, like 5.7, as opposed
+to maintenance releases which have even subreleases, like 5.6)
+if you want to use Configure -d, you will also need to supply -Dusedevel
+to Configure, because the default answer to the question "do you really
+want to Configure a development version?" is "no".  The -Dusedevel
+skips that sanity check.
+
+For example for my Solaris system, I usually use
 
 	sh Configure -Dprefix=/opt/perl -Doptimize='-xpentium -xO4' -des
 
