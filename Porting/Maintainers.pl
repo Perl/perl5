@@ -483,7 +483,7 @@ package Maintainers;
 
 	'Test' =>
 		{
-		'MAINTAINER'	=> 'mschwern',
+		'MAINTAINER'	=> 'sburke',
 		'FILES'		=> q[lib/Test.pm lib/Test/t],
 		'CPAN'		=> 1,
 		},
