@@ -2,8 +2,6 @@
 
 perlhist - the Perl history records
 
-=for RCS
-
 =begin RCS
 
 #

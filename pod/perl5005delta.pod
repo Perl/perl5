@@ -662,7 +662,7 @@ subtle incompatibilities.
 
 =item CPAN
 
-See <perlmodinstall> and L<CPAN>.
+See L<perlmodinstall> and L<CPAN>.
 
 =item Cwd
 
