@@ -47,7 +47,7 @@ Encode upgraded to version 2.01
 
 =item *
 
-FileCache
+FileCache upgraded to version 1.04
 
 =item *
 
@@ -92,13 +92,18 @@ Time::Local upgraded to version 1.10
 
 Unicode::Collate upgraded to version 0.40
 
+=item *
+
+Unicode::Normalize upgraded to version 0.30
+
 =back
 
 =head1 Utility Changes
 
 =head2 Perl's debugger
 
-The debugger can now step backwards.
+The debugger can now emulate stepping backwards, by restarting and rerunning
+all bar the last command from a saved command history.
 
 =head2 h2ph
 
