@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..78\n";
+print "1..79\n";
 
 sub foo {
     local($a, $b) = @_;
@@ -271,3 +271,8 @@ print "ok 77\n";
 eval { for ($1) { local $_ = 1 } };
 print "not " if $@;
 print "ok 78\n";
+
+# The s/// adds 'g' magic to $_, but it should remain non-readonly
+eval { for("a") { for $x (1,2) { local $_="b"; s/(.*)/+$1/ } } };
+print "not " if $@;
+print "ok 79\n";

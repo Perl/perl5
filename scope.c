@@ -199,9 +199,9 @@ S_save_scalar_at(pTHX_ SV **sptr)
 
     sv = *sptr = NEWSV(0,0);
     if (SvTYPE(osv) >= SVt_PVMG && SvMAGIC(osv) && SvTYPE(osv) != SVt_PVGV) {
+	MAGIC *mg;
 	sv_upgrade(sv, SvTYPE(osv));
 	if (SvGMAGICAL(osv)) {
-	    MAGIC* mg;
 	    bool oldtainted = PL_tainted;
 	    mg_get(osv);		/* note, can croak! */
 	    if (PL_tainting && PL_tainted &&
@@ -214,7 +214,17 @@ S_save_scalar_at(pTHX_ SV **sptr)
 	    PL_tainted = oldtainted;
 	}
 	SvMAGIC(sv) = SvMAGIC(osv);
-	SvFLAGS(sv) |= SvMAGICAL(osv) | SvREADONLY(osv);
+	/* if it's a special scalar or if it has no 'set' magic,
+	 * propagate the SvREADONLY flag. --rgs 20030922 */
+	for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
+	    if (SvMAGIC(sv)->mg_type == '\0'
+		    || !SvMAGIC(sv)->mg_virtual->svt_set)
+	    {
+		SvFLAGS(sv) |= SvREADONLY(osv);
+		break;
+	    }
+	}
+	SvFLAGS(sv) |= SvMAGICAL(osv);
 	/* XXX SvMAGIC() is *shared* between osv and sv.  This can
 	 * lead to coredumps when both SVs are destroyed without one
 	 * of their SvMAGIC() slots being NULLed. */
