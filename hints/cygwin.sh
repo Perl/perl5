@@ -23,6 +23,8 @@ so='dll'
 libswanted=`echo " $libswanted " | sed -e 's/ c / /g'`
 # - eliminate -lm, symlink to libcygwin.a
 libswanted=`echo " $libswanted " | sed -e 's/ m / /g'`
+# - add libgdbm_compat & libcygipc to $libswanted
+libswanted="$libswanted gdbm_compat cygipc"
 test -z "$optimize" && optimize='-O2'
 ccflags="$ccflags -DPERL_USE_SAFE_PUTENV"
 # - otherwise i686-cygwin
