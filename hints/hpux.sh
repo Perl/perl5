@@ -41,6 +41,10 @@ if [ "$xxOsRevMajor" -le 10 ]; then
 
 echo "Archname is $archname"
 
+# Fix XSlib (CPAN) confusion when re-using a prefix but changing from ILP32
+# to LP64 builds.  They're NOT binary compatible, so quit claiming they are.
+archname64=LP64
+
 
 ### HP-UX OS specific behaviour
 
@@ -83,7 +87,10 @@ case `$cc -v 2>&1`"" in
 		*64*)
 		    echo "main(){}">try.c
 		    case "$gccversion" in
-			3*) ccflags="$ccflags -mpa-risc-2-0"
+			3*)
+			    case "$archname" in
+				PA-RISC*) ccflags="$ccflags -mpa-risc-2-0" ;;
+				esac
 			    ;;
 			*)  # gcc with gas will not accept +DA2.0
 			    case "`$cc -c -Wa,+DA2.0 try.c 2>&1`" in
@@ -104,6 +111,8 @@ case `$cc -v 2>&1`"" in
 			*)			# HPld
 			   case "$gccversion" in
 			       [12]*)
+				   # Why not 3 as well here?
+				   # Since not relevant to IA64, not changed.
 				   ldflags="$ldflags -Wl,+vnocompatwarnings"
 				   ccflags="$ccflags -Wl,+vnocompatwarnings"
 				   ;;
@@ -222,8 +231,15 @@ EOM
 		# HP-UX soon, including a user-friendly exit
 		case $gcc_64native in
 		    no) case "$gccversion" in
-			    [12]*)  ccflags="$ccflags -mlp64"
-				    ldflags="$ldflags -Wl,+DD64"
+			    [123]*) ccflags="$ccflags -mlp64"
+				    case "$archname" in
+					PA-RISC*)
+					    ldflags="$ldflags -Wl,+DD64"
+					    ;;
+					IA64*)
+					    ldflags="$ldflags -mlp64"
+					    ;;
+					esac
 				    ;;
 			    esac
 			;;
@@ -519,3 +535,14 @@ d_isnan='define'
 d_isinf='define'
 d_isfinite='define'
 d_unordered='define'
+# Next one(s) need the leading tab.  These are special 'hint' symbols that
+# are not to be propagated to config.sh, all related to pthreads draft 4
+# interfaces.
+case "$d_oldpthreads" in
+    ''|$undef)
+	d_crypt_r_proto='undef'
+	d_getgrent_r_proto='undef'
+	d_getpwent_r_proto='undef'
+	d_strerror_r_proto='undef'
+	;;
+    esac

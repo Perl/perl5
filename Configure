@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Mar 20 05:22:55 EET 2002 [metaconfig 3.0 PL70]
+# Generated on Thu Mar 21 17:43:57 EET 2002 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -9276,6 +9276,11 @@ eval $inlibc
 case "$d_asctime_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_time time.h"
+	case "time" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_asctime_r_proto:$usethreads" in
 	":define")	d_asctime_r_proto=define
 		set d_asctime_r_proto asctime_r $hdrs
@@ -9301,7 +9306,7 @@ case "$d_asctime_r" in
 	./protochk "extern $try" $hdrs && asctime_r_proto=I_SBI ;;
 	esac
 	case "$asctime_r_proto" in
-	'')	d_asctime_r=undef
+	''|0)	d_asctime_r=undef
  	        asctime_r_proto=0
 		echo "Disabling asctime_r, cannot determine prototype." >&4 ;;
 	* )	case "$asctime_r_proto" in
@@ -9314,6 +9319,8 @@ case "$d_asctime_r" in
 	*)	case "$usethreads" in
 		define) echo "asctime_r has no prototype, not using it." >&4 ;;
 		esac
+		d_asctime_r=undef
+		asctime_r_proto=0
 		;;
 	esac
 	;;
@@ -9932,6 +9939,11 @@ eval $inlibc
 case "$d_crypt_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_crypt crypt.h"
+	case "crypt" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_crypt_r_proto:$usethreads" in
 	":define")	d_crypt_r_proto=define
 		set d_crypt_r_proto crypt_r $hdrs
@@ -9949,7 +9961,7 @@ case "$d_crypt_r" in
 	./protochk "extern $try" $hdrs && crypt_r_proto=B_CCD ;;
 	esac
 	case "$crypt_r_proto" in
-	'')	d_crypt_r=undef
+	''|0)	d_crypt_r=undef
  	        crypt_r_proto=0
 		echo "Disabling crypt_r, cannot determine prototype." >&4 ;;
 	* )	case "$crypt_r_proto" in
@@ -9962,6 +9974,8 @@ case "$d_crypt_r" in
 	*)	case "$usethreads" in
 		define) echo "crypt_r has no prototype, not using it." >&4 ;;
 		esac
+		d_crypt_r=undef
+		crypt_r_proto=0
 		;;
 	esac
 	;;
@@ -9987,6 +10001,11 @@ eval $inlibc
 case "$d_ctermid_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_stdio stdio.h"
+	case "stdio" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_ctermid_r_proto:$usethreads" in
 	":define")	d_ctermid_r_proto=define
 		set d_ctermid_r_proto ctermid_r $hdrs
@@ -10000,7 +10019,7 @@ case "$d_ctermid_r" in
 	./protochk "extern $try" $hdrs && ctermid_r_proto=B_B ;;
 	esac
 	case "$ctermid_r_proto" in
-	'')	d_ctermid_r=undef
+	''|0)	d_ctermid_r=undef
  	        ctermid_r_proto=0
 		echo "Disabling ctermid_r, cannot determine prototype." >&4 ;;
 	* )	case "$ctermid_r_proto" in
@@ -10013,6 +10032,8 @@ case "$d_ctermid_r" in
 	*)	case "$usethreads" in
 		define) echo "ctermid_r has no prototype, not using it." >&4 ;;
 		esac
+		d_ctermid_r=undef
+		ctermid_r_proto=0
 		;;
 	esac
 	;;
@@ -10026,6 +10047,11 @@ eval $inlibc
 case "$d_ctime_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_time time.h"
+	case "time" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_ctime_r_proto:$usethreads" in
 	":define")	d_ctime_r_proto=define
 		set d_ctime_r_proto ctime_r $hdrs
@@ -10051,7 +10077,7 @@ case "$d_ctime_r" in
 	./protochk "extern $try" $hdrs && ctime_r_proto=I_SBI ;;
 	esac
 	case "$ctime_r_proto" in
-	'')	d_ctime_r=undef
+	''|0)	d_ctime_r=undef
  	        ctime_r_proto=0
 		echo "Disabling ctime_r, cannot determine prototype." >&4 ;;
 	* )	case "$ctime_r_proto" in
@@ -10064,6 +10090,8 @@ case "$d_ctime_r" in
 	*)	case "$usethreads" in
 		define) echo "ctime_r has no prototype, not using it." >&4 ;;
 		esac
+		d_ctime_r=undef
+		ctime_r_proto=0
 		;;
 	esac
 	;;
@@ -10397,6 +10425,11 @@ eval $inlibc
 case "$d_drand48_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_stdlib stdlib.h"
+	case "stdlib" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_drand48_r_proto:$usethreads" in
 	":define")	d_drand48_r_proto=define
 		set d_drand48_r_proto drand48_r $hdrs
@@ -10410,7 +10443,7 @@ case "$d_drand48_r" in
 	./protochk "extern $try" $hdrs && drand48_r_proto=I_ST ;;
 	esac
 	case "$drand48_r_proto" in
-	'')	d_drand48_r=undef
+	''|0)	d_drand48_r=undef
  	        drand48_r_proto=0
 		echo "Disabling drand48_r, cannot determine prototype." >&4 ;;
 	* )	case "$drand48_r_proto" in
@@ -10423,6 +10456,8 @@ case "$d_drand48_r" in
 	*)	case "$usethreads" in
 		define) echo "drand48_r has no prototype, not using it." >&4 ;;
 		esac
+		d_drand48_r=undef
+		drand48_r_proto=0
 		;;
 	esac
 	;;
@@ -10478,6 +10513,11 @@ eval $inlibc
 case "$d_endgrent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_grp grp.h"
+	case "grp" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_endgrent_r_proto:$usethreads" in
 	":define")	d_endgrent_r_proto=define
 		set d_endgrent_r_proto endgrent_r $hdrs
@@ -10495,7 +10535,7 @@ case "$d_endgrent_r" in
 	./protochk "extern $try" $hdrs && endgrent_r_proto=V_H ;;
 	esac
 	case "$endgrent_r_proto" in
-	'')	d_endgrent_r=undef
+	''|0)	d_endgrent_r=undef
  	        endgrent_r_proto=0
 		echo "Disabling endgrent_r, cannot determine prototype." >&4 ;;
 	* )	case "$endgrent_r_proto" in
@@ -10508,6 +10548,8 @@ case "$d_endgrent_r" in
 	*)	case "$usethreads" in
 		define) echo "endgrent_r has no prototype, not using it." >&4 ;;
 		esac
+		d_endgrent_r=undef
+		endgrent_r_proto=0
 		;;
 	esac
 	;;
@@ -10529,6 +10571,11 @@ eval $inlibc
 case "$d_endhostent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
+	case "netdb" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_endhostent_r_proto:$usethreads" in
 	":define")	d_endhostent_r_proto=define
 		set d_endhostent_r_proto endhostent_r $hdrs
@@ -10546,7 +10593,7 @@ case "$d_endhostent_r" in
 	./protochk "extern $try" $hdrs && endhostent_r_proto=V_S ;;
 	esac
 	case "$endhostent_r_proto" in
-	'')	d_endhostent_r=undef
+	''|0)	d_endhostent_r=undef
  	        endhostent_r_proto=0
 		echo "Disabling endhostent_r, cannot determine prototype." >&4 ;;
 	* )	case "$endhostent_r_proto" in
@@ -10559,6 +10606,8 @@ case "$d_endhostent_r" in
 	*)	case "$usethreads" in
 		define) echo "endhostent_r has no prototype, not using it." >&4 ;;
 		esac
+		d_endhostent_r=undef
+		endhostent_r_proto=0
 		;;
 	esac
 	;;
@@ -10576,6 +10625,11 @@ eval $inlibc
 case "$d_endnetent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
+	case "netdb" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_endnetent_r_proto:$usethreads" in
 	":define")	d_endnetent_r_proto=define
 		set d_endnetent_r_proto endnetent_r $hdrs
@@ -10593,7 +10647,7 @@ case "$d_endnetent_r" in
 	./protochk "extern $try" $hdrs && endnetent_r_proto=V_S ;;
 	esac
 	case "$endnetent_r_proto" in
-	'')	d_endnetent_r=undef
+	''|0)	d_endnetent_r=undef
  	        endnetent_r_proto=0
 		echo "Disabling endnetent_r, cannot determine prototype." >&4 ;;
 	* )	case "$endnetent_r_proto" in
@@ -10606,6 +10660,8 @@ case "$d_endnetent_r" in
 	*)	case "$usethreads" in
 		define) echo "endnetent_r has no prototype, not using it." >&4 ;;
 		esac
+		d_endnetent_r=undef
+		endnetent_r_proto=0
 		;;
 	esac
 	;;
@@ -10623,6 +10679,11 @@ eval $inlibc
 case "$d_endprotoent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
+	case "netdb" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_endprotoent_r_proto:$usethreads" in
 	":define")	d_endprotoent_r_proto=define
 		set d_endprotoent_r_proto endprotoent_r $hdrs
@@ -10640,7 +10701,7 @@ case "$d_endprotoent_r" in
 	./protochk "extern $try" $hdrs && endprotoent_r_proto=V_S ;;
 	esac
 	case "$endprotoent_r_proto" in
-	'')	d_endprotoent_r=undef
+	''|0)	d_endprotoent_r=undef
  	        endprotoent_r_proto=0
 		echo "Disabling endprotoent_r, cannot determine prototype." >&4 ;;
 	* )	case "$endprotoent_r_proto" in
@@ -10653,6 +10714,8 @@ case "$d_endprotoent_r" in
 	*)	case "$usethreads" in
 		define) echo "endprotoent_r has no prototype, not using it." >&4 ;;
 		esac
+		d_endprotoent_r=undef
+		endprotoent_r_proto=0
 		;;
 	esac
 	;;
@@ -10758,6 +10821,11 @@ eval $inlibc
 case "$d_endpwent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_pwd pwd.h"
+	case "pwd" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_endpwent_r_proto:$usethreads" in
 	":define")	d_endpwent_r_proto=define
 		set d_endpwent_r_proto endpwent_r $hdrs
@@ -10775,7 +10843,7 @@ case "$d_endpwent_r" in
 	./protochk "extern $try" $hdrs && endpwent_r_proto=V_H ;;
 	esac
 	case "$endpwent_r_proto" in
-	'')	d_endpwent_r=undef
+	''|0)	d_endpwent_r=undef
  	        endpwent_r_proto=0
 		echo "Disabling endpwent_r, cannot determine prototype." >&4 ;;
 	* )	case "$endpwent_r_proto" in
@@ -10788,6 +10856,8 @@ case "$d_endpwent_r" in
 	*)	case "$usethreads" in
 		define) echo "endpwent_r has no prototype, not using it." >&4 ;;
 		esac
+		d_endpwent_r=undef
+		endpwent_r_proto=0
 		;;
 	esac
 	;;
@@ -10805,6 +10875,11 @@ eval $inlibc
 case "$d_endservent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
+	case "netdb" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_endservent_r_proto:$usethreads" in
 	":define")	d_endservent_r_proto=define
 		set d_endservent_r_proto endservent_r $hdrs
@@ -10822,7 +10897,7 @@ case "$d_endservent_r" in
 	./protochk "extern $try" $hdrs && endservent_r_proto=V_S ;;
 	esac
 	case "$endservent_r_proto" in
-	'')	d_endservent_r=undef
+	''|0)	d_endservent_r=undef
  	        endservent_r_proto=0
 		echo "Disabling endservent_r, cannot determine prototype." >&4 ;;
 	* )	case "$endservent_r_proto" in
@@ -10835,6 +10910,8 @@ case "$d_endservent_r" in
 	*)	case "$usethreads" in
 		define) echo "endservent_r has no prototype, not using it." >&4 ;;
 		esac
+		d_endservent_r=undef
+		endservent_r_proto=0
 		;;
 	esac
 	;;
@@ -11479,6 +11556,11 @@ eval $inlibc
 case "$d_getgrent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_grp grp.h"
+	case "grp" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_getgrent_r_proto:$usethreads" in
 	":define")	d_getgrent_r_proto=define
 		set d_getgrent_r_proto getgrent_r $hdrs
@@ -11512,7 +11594,7 @@ case "$d_getgrent_r" in
 	./protochk "extern $try" $hdrs && getgrent_r_proto=I_SBIH ;;
 	esac
 	case "$getgrent_r_proto" in
-	'')	d_getgrent_r=undef
+	''|0)	d_getgrent_r=undef
  	        getgrent_r_proto=0
 		echo "Disabling getgrent_r, cannot determine prototype." >&4 ;;
 	* )	case "$getgrent_r_proto" in
@@ -11525,6 +11607,8 @@ case "$d_getgrent_r" in
 	*)	case "$usethreads" in
 		define) echo "getgrent_r has no prototype, not using it." >&4 ;;
 		esac
+		d_getgrent_r=undef
+		getgrent_r_proto=0
 		;;
 	esac
 	;;
@@ -11538,6 +11622,11 @@ eval $inlibc
 case "$d_getgrgid_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_grp grp.h"
+	case "grp" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_getgrgid_r_proto:$usethreads" in
 	":define")	d_getgrgid_r_proto=define
 		set d_getgrgid_r_proto getgrgid_r $hdrs
@@ -11563,7 +11652,7 @@ case "$d_getgrgid_r" in
 	./protochk "extern $try" $hdrs && getgrgid_r_proto=S_TSBI ;;
 	esac
 	case "$getgrgid_r_proto" in
-	'')	d_getgrgid_r=undef
+	''|0)	d_getgrgid_r=undef
  	        getgrgid_r_proto=0
 		echo "Disabling getgrgid_r, cannot determine prototype." >&4 ;;
 	* )	case "$getgrgid_r_proto" in
@@ -11576,6 +11665,8 @@ case "$d_getgrgid_r" in
 	*)	case "$usethreads" in
 		define) echo "getgrgid_r has no prototype, not using it." >&4 ;;
 		esac
+		d_getgrgid_r=undef
+		getgrgid_r_proto=0
 		;;
 	esac
 	;;
@@ -11589,6 +11680,11 @@ eval $inlibc
 case "$d_getgrnam_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_grp grp.h"
+	case "grp" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_getgrnam_r_proto:$usethreads" in
 	":define")	d_getgrnam_r_proto=define
 		set d_getgrnam_r_proto getgrnam_r $hdrs
@@ -11618,7 +11714,7 @@ case "$d_getgrnam_r" in
 	./protochk "extern $try" $hdrs && getgrnam_r_proto=S_CSBI ;;
 	esac
 	case "$getgrnam_r_proto" in
-	'')	d_getgrnam_r=undef
+	''|0)	d_getgrnam_r=undef
  	        getgrnam_r_proto=0
 		echo "Disabling getgrnam_r, cannot determine prototype." >&4 ;;
 	* )	case "$getgrnam_r_proto" in
@@ -11631,6 +11727,8 @@ case "$d_getgrnam_r" in
 	*)	case "$usethreads" in
 		define) echo "getgrnam_r has no prototype, not using it." >&4 ;;
 		esac
+		d_getgrnam_r=undef
+		getgrnam_r_proto=0
 		;;
 	esac
 	;;
@@ -11741,6 +11839,11 @@ eval $inlibc
 case "$d_gethostbyaddr_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
+	case "netdb" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_gethostbyaddr_r_proto:$usethreads" in
 	":define")	d_gethostbyaddr_r_proto=define
 		set d_gethostbyaddr_r_proto gethostbyaddr_r $hdrs
@@ -11790,7 +11893,7 @@ case "$d_gethostbyaddr_r" in
 	./protochk "extern $try" $hdrs && gethostbyaddr_r_proto=I_CII ;;
 	esac
 	case "$gethostbyaddr_r_proto" in
-	'')	d_gethostbyaddr_r=undef
+	''|0)	d_gethostbyaddr_r=undef
  	        gethostbyaddr_r_proto=0
 		echo "Disabling gethostbyaddr_r, cannot determine prototype." >&4 ;;
 	* )	case "$gethostbyaddr_r_proto" in
@@ -11803,6 +11906,8 @@ case "$d_gethostbyaddr_r" in
 	*)	case "$usethreads" in
 		define) echo "gethostbyaddr_r has no prototype, not using it." >&4 ;;
 		esac
+		d_gethostbyaddr_r=undef
+		gethostbyaddr_r_proto=0
 		;;
 	esac
 	;;
@@ -11816,6 +11921,11 @@ eval $inlibc
 case "$d_gethostbyname_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
+	case "netdb" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_gethostbyname_r_proto:$usethreads" in
 	":define")	d_gethostbyname_r_proto=define
 		set d_gethostbyname_r_proto gethostbyname_r $hdrs
@@ -11837,7 +11947,7 @@ case "$d_gethostbyname_r" in
 	./protochk "extern $try" $hdrs && gethostbyname_r_proto=I_CSD ;;
 	esac
 	case "$gethostbyname_r_proto" in
-	'')	d_gethostbyname_r=undef
+	''|0)	d_gethostbyname_r=undef
  	        gethostbyname_r_proto=0
 		echo "Disabling gethostbyname_r, cannot determine prototype." >&4 ;;
 	* )	case "$gethostbyname_r_proto" in
@@ -11850,6 +11960,8 @@ case "$d_gethostbyname_r" in
 	*)	case "$usethreads" in
 		define) echo "gethostbyname_r has no prototype, not using it." >&4 ;;
 		esac
+		d_gethostbyname_r=undef
+		gethostbyname_r_proto=0
 		;;
 	esac
 	;;
@@ -11863,6 +11975,11 @@ eval $inlibc
 case "$d_gethostent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
+	case "netdb" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_gethostent_r_proto:$usethreads" in
 	":define")	d_gethostent_r_proto=define
 		set d_gethostent_r_proto gethostent_r $hdrs
@@ -11896,7 +12013,7 @@ case "$d_gethostent_r" in
 	./protochk "extern $try" $hdrs && gethostent_r_proto=I_SD ;;
 	esac
 	case "$gethostent_r_proto" in
-	'')	d_gethostent_r=undef
+	''|0)	d_gethostent_r=undef
  	        gethostent_r_proto=0
 		echo "Disabling gethostent_r, cannot determine prototype." >&4 ;;
 	* )	case "$gethostent_r_proto" in
@@ -11909,6 +12026,8 @@ case "$d_gethostent_r" in
 	*)	case "$usethreads" in
 		define) echo "gethostent_r has no prototype, not using it." >&4 ;;
 		esac
+		d_gethostent_r=undef
+		gethostent_r_proto=0
 		;;
 	esac
 	;;
@@ -11935,6 +12054,11 @@ eval $inlibc
 case "$d_getlogin_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_unistd unistd.h"
+	case "unistd" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_getlogin_r_proto:$usethreads" in
 	":define")	d_getlogin_r_proto=define
 		set d_getlogin_r_proto getlogin_r $hdrs
@@ -11960,7 +12084,7 @@ case "$d_getlogin_r" in
 	./protochk "extern $try" $hdrs && getlogin_r_proto=B_BI ;;
 	esac
 	case "$getlogin_r_proto" in
-	'')	d_getlogin_r=undef
+	''|0)	d_getlogin_r=undef
  	        getlogin_r_proto=0
 		echo "Disabling getlogin_r, cannot determine prototype." >&4 ;;
 	* )	case "$getlogin_r_proto" in
@@ -11973,6 +12097,8 @@ case "$d_getlogin_r" in
 	*)	case "$usethreads" in
 		define) echo "getlogin_r has no prototype, not using it." >&4 ;;
 		esac
+		d_getlogin_r=undef
+		getlogin_r_proto=0
 		;;
 	esac
 	;;
@@ -12006,6 +12132,11 @@ eval $inlibc
 case "$d_getnetbyaddr_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
+	case "netdb" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_getnetbyaddr_r_proto:$usethreads" in
 	":define")	d_getnetbyaddr_r_proto=define
 		set d_getnetbyaddr_r_proto getnetbyaddr_r $hdrs
@@ -12043,7 +12174,7 @@ case "$d_getnetbyaddr_r" in
 	./protochk "extern $try" $hdrs && getnetbyaddr_r_proto=I_IISD ;;
 	esac
 	case "$getnetbyaddr_r_proto" in
-	'')	d_getnetbyaddr_r=undef
+	''|0)	d_getnetbyaddr_r=undef
  	        getnetbyaddr_r_proto=0
 		echo "Disabling getnetbyaddr_r, cannot determine prototype." >&4 ;;
 	* )	case "$getnetbyaddr_r_proto" in
@@ -12056,6 +12187,8 @@ case "$d_getnetbyaddr_r" in
 	*)	case "$usethreads" in
 		define) echo "getnetbyaddr_r has no prototype, not using it." >&4 ;;
 		esac
+		d_getnetbyaddr_r=undef
+		getnetbyaddr_r_proto=0
 		;;
 	esac
 	;;
@@ -12069,6 +12202,11 @@ eval $inlibc
 case "$d_getnetbyname_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
+	case "netdb" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_getnetbyname_r_proto:$usethreads" in
 	":define")	d_getnetbyname_r_proto=define
 		set d_getnetbyname_r_proto getnetbyname_r $hdrs
@@ -12094,7 +12232,7 @@ case "$d_getnetbyname_r" in
 	./protochk "extern $try" $hdrs && getnetbyname_r_proto=I_CSD ;;
 	esac
 	case "$getnetbyname_r_proto" in
-	'')	d_getnetbyname_r=undef
+	''|0)	d_getnetbyname_r=undef
  	        getnetbyname_r_proto=0
 		echo "Disabling getnetbyname_r, cannot determine prototype." >&4 ;;
 	* )	case "$getnetbyname_r_proto" in
@@ -12107,6 +12245,8 @@ case "$d_getnetbyname_r" in
 	*)	case "$usethreads" in
 		define) echo "getnetbyname_r has no prototype, not using it." >&4 ;;
 		esac
+		d_getnetbyname_r=undef
+		getnetbyname_r_proto=0
 		;;
 	esac
 	;;
@@ -12120,6 +12260,11 @@ eval $inlibc
 case "$d_getnetent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
+	case "netdb" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_getnetent_r_proto:$usethreads" in
 	":define")	d_getnetent_r_proto=define
 		set d_getnetent_r_proto getnetent_r $hdrs
@@ -12153,7 +12298,7 @@ case "$d_getnetent_r" in
 	./protochk "extern $try" $hdrs && getnetent_r_proto=I_SD ;;
 	esac
 	case "$getnetent_r_proto" in
-	'')	d_getnetent_r=undef
+	''|0)	d_getnetent_r=undef
  	        getnetent_r_proto=0
 		echo "Disabling getnetent_r, cannot determine prototype." >&4 ;;
 	* )	case "$getnetent_r_proto" in
@@ -12166,6 +12311,8 @@ case "$d_getnetent_r" in
 	*)	case "$usethreads" in
 		define) echo "getnetent_r has no prototype, not using it." >&4 ;;
 		esac
+		d_getnetent_r=undef
+		getnetent_r_proto=0
 		;;
 	esac
 	;;
@@ -12217,6 +12364,11 @@ eval $inlibc
 case "$d_getprotobyname_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
+	case "netdb" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_getprotobyname_r_proto:$usethreads" in
 	":define")	d_getprotobyname_r_proto=define
 		set d_getprotobyname_r_proto getprotobyname_r $hdrs
@@ -12238,7 +12390,7 @@ case "$d_getprotobyname_r" in
 	./protochk "extern $try" $hdrs && getprotobyname_r_proto=I_CSD ;;
 	esac
 	case "$getprotobyname_r_proto" in
-	'')	d_getprotobyname_r=undef
+	''|0)	d_getprotobyname_r=undef
  	        getprotobyname_r_proto=0
 		echo "Disabling getprotobyname_r, cannot determine prototype." >&4 ;;
 	* )	case "$getprotobyname_r_proto" in
@@ -12251,6 +12403,8 @@ case "$d_getprotobyname_r" in
 	*)	case "$usethreads" in
 		define) echo "getprotobyname_r has no prototype, not using it." >&4 ;;
 		esac
+		d_getprotobyname_r=undef
+		getprotobyname_r_proto=0
 		;;
 	esac
 	;;
@@ -12264,6 +12418,11 @@ eval $inlibc
 case "$d_getprotobynumber_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
+	case "netdb" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_getprotobynumber_r_proto:$usethreads" in
 	":define")	d_getprotobynumber_r_proto=define
 		set d_getprotobynumber_r_proto getprotobynumber_r $hdrs
@@ -12285,7 +12444,7 @@ case "$d_getprotobynumber_r" in
 	./protochk "extern $try" $hdrs && getprotobynumber_r_proto=I_ISD ;;
 	esac
 	case "$getprotobynumber_r_proto" in
-	'')	d_getprotobynumber_r=undef
+	''|0)	d_getprotobynumber_r=undef
  	        getprotobynumber_r_proto=0
 		echo "Disabling getprotobynumber_r, cannot determine prototype." >&4 ;;
 	* )	case "$getprotobynumber_r_proto" in
@@ -12298,6 +12457,8 @@ case "$d_getprotobynumber_r" in
 	*)	case "$usethreads" in
 		define) echo "getprotobynumber_r has no prototype, not using it." >&4 ;;
 		esac
+		d_getprotobynumber_r=undef
+		getprotobynumber_r_proto=0
 		;;
 	esac
 	;;
@@ -12311,6 +12472,11 @@ eval $inlibc
 case "$d_getprotoent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
+	case "netdb" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_getprotoent_r_proto:$usethreads" in
 	":define")	d_getprotoent_r_proto=define
 		set d_getprotoent_r_proto getprotoent_r $hdrs
@@ -12336,7 +12502,7 @@ case "$d_getprotoent_r" in
 	./protochk "extern $try" $hdrs && getprotoent_r_proto=I_SD ;;
 	esac
 	case "$getprotoent_r_proto" in
-	'')	d_getprotoent_r=undef
+	''|0)	d_getprotoent_r=undef
  	        getprotoent_r_proto=0
 		echo "Disabling getprotoent_r, cannot determine prototype." >&4 ;;
 	* )	case "$getprotoent_r_proto" in
@@ -12349,6 +12515,8 @@ case "$d_getprotoent_r" in
 	*)	case "$usethreads" in
 		define) echo "getprotoent_r has no prototype, not using it." >&4 ;;
 		esac
+		d_getprotoent_r=undef
+		getprotoent_r_proto=0
 		;;
 	esac
 	;;
@@ -12375,6 +12543,11 @@ eval $inlibc
 case "$d_getpwent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_pwd pwd.h"
+	case "pwd" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_getpwent_r_proto:$usethreads" in
 	":define")	d_getpwent_r_proto=define
 		set d_getpwent_r_proto getpwent_r $hdrs
@@ -12408,7 +12581,7 @@ case "$d_getpwent_r" in
 	./protochk "extern $try" $hdrs && getpwent_r_proto=I_SBIH ;;
 	esac
 	case "$getpwent_r_proto" in
-	'')	d_getpwent_r=undef
+	''|0)	d_getpwent_r=undef
  	        getpwent_r_proto=0
 		echo "Disabling getpwent_r, cannot determine prototype." >&4 ;;
 	* )	case "$getpwent_r_proto" in
@@ -12421,6 +12594,8 @@ case "$d_getpwent_r" in
 	*)	case "$usethreads" in
 		define) echo "getpwent_r has no prototype, not using it." >&4 ;;
 		esac
+		d_getpwent_r=undef
+		getpwent_r_proto=0
 		;;
 	esac
 	;;
@@ -12434,6 +12609,11 @@ eval $inlibc
 case "$d_getpwnam_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_pwd pwd.h"
+	case "pwd" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_getpwnam_r_proto:$usethreads" in
 	":define")	d_getpwnam_r_proto=define
 		set d_getpwnam_r_proto getpwnam_r $hdrs
@@ -12459,7 +12639,7 @@ case "$d_getpwnam_r" in
 	./protochk "extern $try" $hdrs && getpwnam_r_proto=I_CSBI ;;
 	esac
 	case "$getpwnam_r_proto" in
-	'')	d_getpwnam_r=undef
+	''|0)	d_getpwnam_r=undef
  	        getpwnam_r_proto=0
 		echo "Disabling getpwnam_r, cannot determine prototype." >&4 ;;
 	* )	case "$getpwnam_r_proto" in
@@ -12472,6 +12652,8 @@ case "$d_getpwnam_r" in
 	*)	case "$usethreads" in
 		define) echo "getpwnam_r has no prototype, not using it." >&4 ;;
 		esac
+		d_getpwnam_r=undef
+		getpwnam_r_proto=0
 		;;
 	esac
 	;;
@@ -12485,6 +12667,11 @@ eval $inlibc
 case "$d_getpwuid_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_pwd pwd.h"
+	case "pwd" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_getpwuid_r_proto:$usethreads" in
 	":define")	d_getpwuid_r_proto=define
 		set d_getpwuid_r_proto getpwuid_r $hdrs
@@ -12510,7 +12697,7 @@ case "$d_getpwuid_r" in
 	./protochk "extern $try" $hdrs && getpwuid_r_proto=S_TSBI ;;
 	esac
 	case "$getpwuid_r_proto" in
-	'')	d_getpwuid_r=undef
+	''|0)	d_getpwuid_r=undef
  	        getpwuid_r_proto=0
 		echo "Disabling getpwuid_r, cannot determine prototype." >&4 ;;
 	* )	case "$getpwuid_r_proto" in
@@ -12523,6 +12710,8 @@ case "$d_getpwuid_r" in
 	*)	case "$usethreads" in
 		define) echo "getpwuid_r has no prototype, not using it." >&4 ;;
 		esac
+		d_getpwuid_r=undef
+		getpwuid_r_proto=0
 		;;
 	esac
 	;;
@@ -12549,6 +12738,11 @@ eval $inlibc
 case "$d_getservbyname_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
+	case "netdb" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_getservbyname_r_proto:$usethreads" in
 	":define")	d_getservbyname_r_proto=define
 		set d_getservbyname_r_proto getservbyname_r $hdrs
@@ -12570,7 +12764,7 @@ case "$d_getservbyname_r" in
 	./protochk "extern $try" $hdrs && getservbyname_r_proto=I_CCSD ;;
 	esac
 	case "$getservbyname_r_proto" in
-	'')	d_getservbyname_r=undef
+	''|0)	d_getservbyname_r=undef
  	        getservbyname_r_proto=0
 		echo "Disabling getservbyname_r, cannot determine prototype." >&4 ;;
 	* )	case "$getservbyname_r_proto" in
@@ -12583,6 +12777,8 @@ case "$d_getservbyname_r" in
 	*)	case "$usethreads" in
 		define) echo "getservbyname_r has no prototype, not using it." >&4 ;;
 		esac
+		d_getservbyname_r=undef
+		getservbyname_r_proto=0
 		;;
 	esac
 	;;
@@ -12596,6 +12792,11 @@ eval $inlibc
 case "$d_getservbyport_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
+	case "netdb" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_getservbyport_r_proto:$usethreads" in
 	":define")	d_getservbyport_r_proto=define
 		set d_getservbyport_r_proto getservbyport_r $hdrs
@@ -12617,7 +12818,7 @@ case "$d_getservbyport_r" in
 	./protochk "extern $try" $hdrs && getservbyport_r_proto=I_ICSD ;;
 	esac
 	case "$getservbyport_r_proto" in
-	'')	d_getservbyport_r=undef
+	''|0)	d_getservbyport_r=undef
  	        getservbyport_r_proto=0
 		echo "Disabling getservbyport_r, cannot determine prototype." >&4 ;;
 	* )	case "$getservbyport_r_proto" in
@@ -12630,6 +12831,8 @@ case "$d_getservbyport_r" in
 	*)	case "$usethreads" in
 		define) echo "getservbyport_r has no prototype, not using it." >&4 ;;
 		esac
+		d_getservbyport_r=undef
+		getservbyport_r_proto=0
 		;;
 	esac
 	;;
@@ -12643,6 +12846,11 @@ eval $inlibc
 case "$d_getservent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
+	case "netdb" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_getservent_r_proto:$usethreads" in
 	":define")	d_getservent_r_proto=define
 		set d_getservent_r_proto getservent_r $hdrs
@@ -12668,7 +12876,7 @@ case "$d_getservent_r" in
 	./protochk "extern $try" $hdrs && getservent_r_proto=I_SD ;;
 	esac
 	case "$getservent_r_proto" in
-	'')	d_getservent_r=undef
+	''|0)	d_getservent_r=undef
  	        getservent_r_proto=0
 		echo "Disabling getservent_r, cannot determine prototype." >&4 ;;
 	* )	case "$getservent_r_proto" in
@@ -12681,6 +12889,8 @@ case "$d_getservent_r" in
 	*)	case "$usethreads" in
 		define) echo "getservent_r has no prototype, not using it." >&4 ;;
 		esac
+		d_getservent_r=undef
+		getservent_r_proto=0
 		;;
 	esac
 	;;
@@ -12707,6 +12917,11 @@ eval $inlibc
 case "$d_getspnam_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_shadow shadow.h"
+	case "shadow" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_getspnam_r_proto:$usethreads" in
 	":define")	d_getspnam_r_proto=define
 		set d_getspnam_r_proto getspnam_r $hdrs
@@ -12724,7 +12939,7 @@ case "$d_getspnam_r" in
 	./protochk "extern $try" $hdrs && getspnam_r_proto=S_CSBI ;;
 	esac
 	case "$getspnam_r_proto" in
-	'')	d_getspnam_r=undef
+	''|0)	d_getspnam_r=undef
  	        getspnam_r_proto=0
 		echo "Disabling getspnam_r, cannot determine prototype." >&4 ;;
 	* )	case "$getspnam_r_proto" in
@@ -12737,6 +12952,8 @@ case "$d_getspnam_r" in
 	*)	case "$usethreads" in
 		define) echo "getspnam_r has no prototype, not using it." >&4 ;;
 		esac
+		d_getspnam_r=undef
+		getspnam_r_proto=0
 		;;
 	esac
 	;;
@@ -12769,6 +12986,11 @@ eval $inlibc
 case "$d_gmtime_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_time time.h"
+	case "time" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_gmtime_r_proto:$usethreads" in
 	":define")	d_gmtime_r_proto=define
 		set d_gmtime_r_proto gmtime_r $hdrs
@@ -12786,7 +13008,7 @@ case "$d_gmtime_r" in
 	./protochk "extern $try" $hdrs && gmtime_r_proto=I_TS ;;
 	esac
 	case "$gmtime_r_proto" in
-	'')	d_gmtime_r=undef
+	''|0)	d_gmtime_r=undef
  	        gmtime_r_proto=0
 		echo "Disabling gmtime_r, cannot determine prototype." >&4 ;;
 	* )	case "$gmtime_r_proto" in
@@ -12799,6 +13021,8 @@ case "$d_gmtime_r" in
 	*)	case "$usethreads" in
 		define) echo "gmtime_r has no prototype, not using it." >&4 ;;
 		esac
+		d_gmtime_r=undef
+		gmtime_r_proto=0
 		;;
 	esac
 	;;
@@ -13007,6 +13231,11 @@ eval $inlibc
 case "$d_localtime_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_time time.h"
+	case "time" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_localtime_r_proto:$usethreads" in
 	":define")	d_localtime_r_proto=define
 		set d_localtime_r_proto localtime_r $hdrs
@@ -13024,7 +13253,7 @@ case "$d_localtime_r" in
 	./protochk "extern $try" $hdrs && localtime_r_proto=I_TS ;;
 	esac
 	case "$localtime_r_proto" in
-	'')	d_localtime_r=undef
+	''|0)	d_localtime_r=undef
  	        localtime_r_proto=0
 		echo "Disabling localtime_r, cannot determine prototype." >&4 ;;
 	* )	case "$localtime_r_proto" in
@@ -13037,6 +13266,8 @@ case "$d_localtime_r" in
 	*)	case "$usethreads" in
 		define) echo "localtime_r has no prototype, not using it." >&4 ;;
 		esac
+		d_localtime_r=undef
+		localtime_r_proto=0
 		;;
 	esac
 	;;
@@ -13772,6 +14003,11 @@ eval $inlibc
 case "$d_random_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_stdlib stdlib.h"
+	case "stdlib" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_random_r_proto:$usethreads" in
 	":define")	d_random_r_proto=define
 		set d_random_r_proto random_r $hdrs
@@ -13785,7 +14021,7 @@ case "$d_random_r" in
 	./protochk "extern $try" $hdrs && random_r_proto=I_TS ;;
 	esac
 	case "$random_r_proto" in
-	'')	d_random_r=undef
+	''|0)	d_random_r=undef
  	        random_r_proto=0
 		echo "Disabling random_r, cannot determine prototype." >&4 ;;
 	* )	case "$random_r_proto" in
@@ -13798,6 +14034,8 @@ case "$d_random_r" in
 	*)	case "$usethreads" in
 		define) echo "random_r has no prototype, not using it." >&4 ;;
 		esac
+		d_random_r=undef
+		random_r_proto=0
 		;;
 	esac
 	;;
@@ -13821,6 +14059,11 @@ eval $inlibc
 case "$d_readdir64_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_dirent dirent.h"
+	case "dirent" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_readdir64_r_proto:$usethreads" in
 	":define")	d_readdir64_r_proto=define
 		set d_readdir64_r_proto readdir64_r $hdrs
@@ -13838,7 +14081,7 @@ case "$d_readdir64_r" in
 	./protochk "extern $try" $hdrs && readdir64_r_proto=I_TS ;;
 	esac
 	case "$readdir64_r_proto" in
-	'')	d_readdir64_r=undef
+	''|0)	d_readdir64_r=undef
  	        readdir64_r_proto=0
 		echo "Disabling readdir64_r, cannot determine prototype." >&4 ;;
 	* )	case "$readdir64_r_proto" in
@@ -13851,6 +14094,8 @@ case "$d_readdir64_r" in
 	*)	case "$usethreads" in
 		define) echo "readdir64_r has no prototype, not using it." >&4 ;;
 		esac
+		d_readdir64_r=undef
+		readdir64_r_proto=0
 		;;
 	esac
 	;;
@@ -13864,6 +14109,11 @@ eval $inlibc
 case "$d_readdir_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_dirent dirent.h"
+	case "dirent" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_readdir_r_proto:$usethreads" in
 	":define")	d_readdir_r_proto=define
 		set d_readdir_r_proto readdir_r $hdrs
@@ -13881,7 +14131,7 @@ case "$d_readdir_r" in
 	./protochk "extern $try" $hdrs && readdir_r_proto=I_TS ;;
 	esac
 	case "$readdir_r_proto" in
-	'')	d_readdir_r=undef
+	''|0)	d_readdir_r=undef
  	        readdir_r_proto=0
 		echo "Disabling readdir_r, cannot determine prototype." >&4 ;;
 	* )	case "$readdir_r_proto" in
@@ -13894,6 +14144,8 @@ case "$d_readdir_r" in
 	*)	case "$usethreads" in
 		define) echo "readdir_r has no prototype, not using it." >&4 ;;
 		esac
+		d_readdir_r=undef
+		readdir_r_proto=0
 		;;
 	esac
 	;;
@@ -14411,6 +14663,11 @@ eval $inlibc
 case "$d_setgrent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_grp grp.h"
+	case "grp" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_setgrent_r_proto:$usethreads" in
 	":define")	d_setgrent_r_proto=define
 		set d_setgrent_r_proto setgrent_r $hdrs
@@ -14428,7 +14685,7 @@ case "$d_setgrent_r" in
 	./protochk "extern $try" $hdrs && setgrent_r_proto=V_H ;;
 	esac
 	case "$setgrent_r_proto" in
-	'')	d_setgrent_r=undef
+	''|0)	d_setgrent_r=undef
  	        setgrent_r_proto=0
 		echo "Disabling setgrent_r, cannot determine prototype." >&4 ;;
 	* )	case "$setgrent_r_proto" in
@@ -14441,6 +14698,8 @@ case "$d_setgrent_r" in
 	*)	case "$usethreads" in
 		define) echo "setgrent_r has no prototype, not using it." >&4 ;;
 		esac
+		d_setgrent_r=undef
+		setgrent_r_proto=0
 		;;
 	esac
 	;;
@@ -14458,6 +14717,11 @@ eval $inlibc
 case "$d_sethostent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
+	case "netdb" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_sethostent_r_proto:$usethreads" in
 	":define")	d_sethostent_r_proto=define
 		set d_sethostent_r_proto sethostent_r $hdrs
@@ -14475,7 +14739,7 @@ case "$d_sethostent_r" in
 	./protochk "extern $try" $hdrs && sethostent_r_proto=V_ID ;;
 	esac
 	case "$sethostent_r_proto" in
-	'')	d_sethostent_r=undef
+	''|0)	d_sethostent_r=undef
  	        sethostent_r_proto=0
 		echo "Disabling sethostent_r, cannot determine prototype." >&4 ;;
 	* )	case "$sethostent_r_proto" in
@@ -14488,6 +14752,8 @@ case "$d_sethostent_r" in
 	*)	case "$usethreads" in
 		define) echo "sethostent_r has no prototype, not using it." >&4 ;;
 		esac
+		d_sethostent_r=undef
+		sethostent_r_proto=0
 		;;
 	esac
 	;;
@@ -14517,6 +14783,11 @@ eval $inlibc
 case "$d_setlocale_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_locale locale.h"
+	case "locale" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_setlocale_r_proto:$usethreads" in
 	":define")	d_setlocale_r_proto=define
 		set d_setlocale_r_proto setlocale_r $hdrs
@@ -14530,7 +14801,7 @@ case "$d_setlocale_r" in
 	./protochk "extern $try" $hdrs && setlocale_r_proto=I_ICBI ;;
 	esac
 	case "$setlocale_r_proto" in
-	'')	d_setlocale_r=undef
+	''|0)	d_setlocale_r=undef
  	        setlocale_r_proto=0
 		echo "Disabling setlocale_r, cannot determine prototype." >&4 ;;
 	* )	case "$setlocale_r_proto" in
@@ -14543,6 +14814,8 @@ case "$d_setlocale_r" in
 	*)	case "$usethreads" in
 		define) echo "setlocale_r has no prototype, not using it." >&4 ;;
 		esac
+		d_setlocale_r=undef
+		setlocale_r_proto=0
 		;;
 	esac
 	;;
@@ -14560,6 +14833,11 @@ eval $inlibc
 case "$d_setnetent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
+	case "netdb" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_setnetent_r_proto:$usethreads" in
 	":define")	d_setnetent_r_proto=define
 		set d_setnetent_r_proto setnetent_r $hdrs
@@ -14577,7 +14855,7 @@ case "$d_setnetent_r" in
 	./protochk "extern $try" $hdrs && setnetent_r_proto=V_ID ;;
 	esac
 	case "$setnetent_r_proto" in
-	'')	d_setnetent_r=undef
+	''|0)	d_setnetent_r=undef
  	        setnetent_r_proto=0
 		echo "Disabling setnetent_r, cannot determine prototype." >&4 ;;
 	* )	case "$setnetent_r_proto" in
@@ -14590,6 +14868,8 @@ case "$d_setnetent_r" in
 	*)	case "$usethreads" in
 		define) echo "setnetent_r has no prototype, not using it." >&4 ;;
 		esac
+		d_setnetent_r=undef
+		setnetent_r_proto=0
 		;;
 	esac
 	;;
@@ -14623,6 +14903,11 @@ eval $inlibc
 case "$d_setprotoent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
+	case "netdb" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_setprotoent_r_proto:$usethreads" in
 	":define")	d_setprotoent_r_proto=define
 		set d_setprotoent_r_proto setprotoent_r $hdrs
@@ -14640,7 +14925,7 @@ case "$d_setprotoent_r" in
 	./protochk "extern $try" $hdrs && setprotoent_r_proto=V_ID ;;
 	esac
 	case "$setprotoent_r_proto" in
-	'')	d_setprotoent_r=undef
+	''|0)	d_setprotoent_r=undef
  	        setprotoent_r_proto=0
 		echo "Disabling setprotoent_r, cannot determine prototype." >&4 ;;
 	* )	case "$setprotoent_r_proto" in
@@ -14653,6 +14938,8 @@ case "$d_setprotoent_r" in
 	*)	case "$usethreads" in
 		define) echo "setprotoent_r has no prototype, not using it." >&4 ;;
 		esac
+		d_setprotoent_r=undef
+		setprotoent_r_proto=0
 		;;
 	esac
 	;;
@@ -14670,6 +14957,11 @@ eval $inlibc
 case "$d_setpwent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_pwd pwd.h"
+	case "pwd" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_setpwent_r_proto:$usethreads" in
 	":define")	d_setpwent_r_proto=define
 		set d_setpwent_r_proto setpwent_r $hdrs
@@ -14687,7 +14979,7 @@ case "$d_setpwent_r" in
 	./protochk "extern $try" $hdrs && setpwent_r_proto=V_H ;;
 	esac
 	case "$setpwent_r_proto" in
-	'')	d_setpwent_r=undef
+	''|0)	d_setpwent_r=undef
  	        setpwent_r_proto=0
 		echo "Disabling setpwent_r, cannot determine prototype." >&4 ;;
 	* )	case "$setpwent_r_proto" in
@@ -14700,6 +14992,8 @@ case "$d_setpwent_r" in
 	*)	case "$usethreads" in
 		define) echo "setpwent_r has no prototype, not using it." >&4 ;;
 		esac
+		d_setpwent_r=undef
+		setpwent_r_proto=0
 		;;
 	esac
 	;;
@@ -14737,6 +15031,11 @@ eval $inlibc
 case "$d_setservent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
+	case "netdb" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_setservent_r_proto:$usethreads" in
 	":define")	d_setservent_r_proto=define
 		set d_setservent_r_proto setservent_r $hdrs
@@ -14754,7 +15053,7 @@ case "$d_setservent_r" in
 	./protochk "extern $try" $hdrs && setservent_r_proto=V_ID ;;
 	esac
 	case "$setservent_r_proto" in
-	'')	d_setservent_r=undef
+	''|0)	d_setservent_r=undef
  	        setservent_r_proto=0
 		echo "Disabling setservent_r, cannot determine prototype." >&4 ;;
 	* )	case "$setservent_r_proto" in
@@ -14767,6 +15066,8 @@ case "$d_setservent_r" in
 	*)	case "$usethreads" in
 		define) echo "setservent_r has no prototype, not using it." >&4 ;;
 		esac
+		d_setservent_r=undef
+		setservent_r_proto=0
 		;;
 	esac
 	;;
@@ -15035,6 +15336,11 @@ eval $inlibc
 case "$d_srand48_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_stdlib stdlib.h"
+	case "stdlib" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_srand48_r_proto:$usethreads" in
 	":define")	d_srand48_r_proto=define
 		set d_srand48_r_proto srand48_r $hdrs
@@ -15048,7 +15354,7 @@ case "$d_srand48_r" in
 	./protochk "extern $try" $hdrs && srand48_r_proto=I_LS ;;
 	esac
 	case "$srand48_r_proto" in
-	'')	d_srand48_r=undef
+	''|0)	d_srand48_r=undef
  	        srand48_r_proto=0
 		echo "Disabling srand48_r, cannot determine prototype." >&4 ;;
 	* )	case "$srand48_r_proto" in
@@ -15061,6 +15367,8 @@ case "$d_srand48_r" in
 	*)	case "$usethreads" in
 		define) echo "srand48_r has no prototype, not using it." >&4 ;;
 		esac
+		d_srand48_r=undef
+		srand48_r_proto=0
 		;;
 	esac
 	;;
@@ -15074,6 +15382,11 @@ eval $inlibc
 case "$d_srandom_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_stdlib stdlib.h"
+	case "stdlib" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_srandom_r_proto:$usethreads" in
 	":define")	d_srandom_r_proto=define
 		set d_srandom_r_proto srandom_r $hdrs
@@ -15087,7 +15400,7 @@ case "$d_srandom_r" in
 	./protochk "extern $try" $hdrs && srandom_r_proto=I_TS ;;
 	esac
 	case "$srandom_r_proto" in
-	'')	d_srandom_r=undef
+	''|0)	d_srandom_r=undef
  	        srandom_r_proto=0
 		echo "Disabling srandom_r, cannot determine prototype." >&4 ;;
 	* )	case "$srandom_r_proto" in
@@ -15100,6 +15413,8 @@ case "$d_srandom_r" in
 	*)	case "$usethreads" in
 		define) echo "srandom_r has no prototype, not using it." >&4 ;;
 		esac
+		d_srandom_r=undef
+		srandom_r_proto=0
 		;;
 	esac
 	;;
@@ -15512,6 +15827,11 @@ eval $inlibc
 case "$d_strerror_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_string string.h"
+	case "string" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_strerror_r_proto:$usethreads" in
 	":define")	d_strerror_r_proto=define
 		set d_strerror_r_proto strerror_r $hdrs
@@ -15533,7 +15853,7 @@ case "$d_strerror_r" in
 	./protochk "extern $try" $hdrs && strerror_r_proto=B_IBW ;;
 	esac
 	case "$strerror_r_proto" in
-	'')	d_strerror_r=undef
+	''|0)	d_strerror_r=undef
  	        strerror_r_proto=0
 		echo "Disabling strerror_r, cannot determine prototype." >&4 ;;
 	* )	case "$strerror_r_proto" in
@@ -15546,6 +15866,8 @@ case "$d_strerror_r" in
 	*)	case "$usethreads" in
 		define) echo "strerror_r has no prototype, not using it." >&4 ;;
 		esac
+		d_strerror_r=undef
+		strerror_r_proto=0
 		;;
 	esac
 	;;
@@ -15881,6 +16203,11 @@ eval $inlibc
 case "$d_tmpnam_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_stdio stdio.h"
+	case "stdio" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_tmpnam_r_proto:$usethreads" in
 	":define")	d_tmpnam_r_proto=define
 		set d_tmpnam_r_proto tmpnam_r $hdrs
@@ -15894,7 +16221,7 @@ case "$d_tmpnam_r" in
 	./protochk "extern $try" $hdrs && tmpnam_r_proto=B_B ;;
 	esac
 	case "$tmpnam_r_proto" in
-	'')	d_tmpnam_r=undef
+	''|0)	d_tmpnam_r=undef
  	        tmpnam_r_proto=0
 		echo "Disabling tmpnam_r, cannot determine prototype." >&4 ;;
 	* )	case "$tmpnam_r_proto" in
@@ -15907,6 +16234,8 @@ case "$d_tmpnam_r" in
 	*)	case "$usethreads" in
 		define) echo "tmpnam_r has no prototype, not using it." >&4 ;;
 		esac
+		d_tmpnam_r=undef
+		tmpnam_r_proto=0
 		;;
 	esac
 	;;
@@ -15924,6 +16253,11 @@ eval $inlibc
 case "$d_ttyname_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_unistd unistd.h"
+	case "unistd" in
+	time)
+		hdrs="$hdrs $i_systime sys/time.h"
+		;;
+	esac
 	case "$d_ttyname_r_proto:$usethreads" in
 	":define")	d_ttyname_r_proto=define
 		set d_ttyname_r_proto ttyname_r $hdrs
@@ -15945,7 +16279,7 @@ case "$d_ttyname_r" in
 	./protochk "extern $try" $hdrs && ttyname_r_proto=B_IBI ;;
 	esac
 	case "$ttyname_r_proto" in
-	'')	d_ttyname_r=undef
+	''|0)	d_ttyname_r=undef
  	        ttyname_r_proto=0
 		echo "Disabling ttyname_r, cannot determine prototype." >&4 ;;
 	* )	case "$ttyname_r_proto" in
@@ -15958,6 +16292,8 @@ case "$d_ttyname_r" in
 	*)	case "$usethreads" in
 		define) echo "ttyname_r has no prototype, not using it." >&4 ;;
 		esac
+		d_ttyname_r=undef
+		ttyname_r_proto=0
 		;;
 	esac
 	;;
