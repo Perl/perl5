@@ -1561,6 +1561,10 @@ PP(pp_sysread)
 			  (struct sockaddr *)namebuf, &bufsize);
 	if (count < 0)
 	    RETPUSHUNDEF;
+#ifdef EPOC
+        /* Bogus return without padding */
+	bufsize = sizeof (struct sockaddr_in);
+#endif
 	SvCUR_set(bufsv, count);
 	*SvEND(bufsv) = '\0';
 	(void)SvPOK_only(bufsv);
