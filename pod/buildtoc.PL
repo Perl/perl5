@@ -146,7 +146,6 @@ if (-d "pod") {
 
     perlhist           
     perldelta           
-    perl56delta         
     perl5005delta       
     perl5004delta       
 
