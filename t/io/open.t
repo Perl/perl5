@@ -79,7 +79,7 @@ print "ok 23\n";
 
 unlink("afile");     
 }
-if ($Is_VMS) { for (24..46) { print "ok $_ # skipped: not Unix fork\n"; {
+if ($Is_VMS) { for (24..46) { print "ok $_ # skipped: not Unix fork\n"; }
 else {
 print "# \$!='$!'\nnot " unless open(my $f, '-|', <<'EOC');
 ./perl -e "print qq(a row\n); print qq(another row\n)"
