@@ -1722,8 +1722,8 @@ OP *repl;
     SV *rstr = ((SVOP*)repl)->op_sv;
     STRLEN tlen;
     STRLEN rlen;
-    register U8 *t = (U8*)SvPV(tstr, tlen);
-    register U8 *r = (U8*)SvPV(rstr, rlen);
+    register char *t = SvPV(tstr, tlen);
+    register char *r = SvPV(rstr, rlen);
     register I32 i;
     register I32 j;
     I32 delete;
@@ -1738,19 +1738,19 @@ OP *repl;
     if (complement) {
 	Zero(tbl, 256, short);
 	for (i = 0; i < tlen; i++)
-	    tbl[t[i]] = -1;
+	    tbl[t[i] & 0377] = -1;
 	for (i = 0, j = 0; i < 256; i++) {
 	    if (!tbl[i]) {
 		if (j >= rlen) {
 		    if (delete)
 			tbl[i] = -2;
 		    else if (rlen)
-			tbl[i] = r[j-1];
+			tbl[i] = r[j-1] & 0377;
 		    else
 			tbl[i] = i;
 		}
 		else
-		    tbl[i] = r[j++];
+		    tbl[i] = r[j++] & 0377;
 	    }
 	}
     }
@@ -1763,14 +1763,14 @@ OP *repl;
 	for (i = 0, j = 0; i < tlen; i++,j++) {
 	    if (j >= rlen) {
 		if (delete) {
-		    if (tbl[t[i]] == -1)
-			tbl[t[i]] = -2;
+		    if (tbl[t[i] & 0377] == -1)
+			tbl[t[i] & 0377] = -2;
 		    continue;
 		}
 		--j;
 	    }
-	    if (tbl[t[i]] == -1)
-		tbl[t[i]] = r[j];
+	    if (tbl[t[i] & 0377] == -1)
+		tbl[t[i] & 0377] = r[j] & 0377;
 	}
     }
     op_free(expr);
