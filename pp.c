@@ -1885,6 +1885,7 @@ PP(pp_hex)
     STRLEN n_a;
 
     tmps = POPpx;
+    argtype = 1;		/* allow underscores */
     XPUSHn(scan_hex(tmps, 99, &argtype));
     RETURN;
 }
@@ -1902,6 +1903,7 @@ PP(pp_oct)
 	tmps++;
     if (*tmps == '0')
 	tmps++;
+    argtype = 1;		/* allow underscores */
     if (*tmps == 'x')
 	value = scan_hex(++tmps, 99, &argtype);
     else if (*tmps == 'b')

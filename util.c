@@ -2877,9 +2877,13 @@ Perl_scan_bin(pTHX_ char *start, I32 len, I32 *retlen)
 
     for (; len-- && *s; s++) {
 	if (!(*s == '0' || *s == '1')) {
-	    if (*s == '_')
-		continue; /* Note: does not check for __ and the like. */
-	    if (seenb == FALSE && *s == 'b' && ruv == 0) {
+	    if (*s == '_' && len && *retlen
+		&& (s[1] == '0' || s[1] == '1'))
+	    {
+		--len;
+		++s;
+	    }
+	    else if (seenb == FALSE && *s == 'b' && ruv == 0) {
 		/* Disallow 0bbb0b0bbb... */
 		seenb = TRUE;
 		continue;
@@ -2902,7 +2906,8 @@ Perl_scan_bin(pTHX_ char *start, I32 len, I32 *retlen)
 		if (ckWARN_d(WARN_OVERFLOW))
 		    Perl_warner(aTHX_ WARN_OVERFLOW,
 				"Integer overflow in binary number");
-	    } else
+	    }
+	    else
 		ruv = xuv | (*s - '0');
 	}
 	if (overflowed) {
@@ -2942,8 +2947,12 @@ Perl_scan_oct(pTHX_ char *start, I32 len, I32 *retlen)
 
     for (; len-- && *s; s++) {
 	if (!(*s >= '0' && *s <= '7')) {
-	    if (*s == '_')
-		continue; /* Note: does not check for __ and the like. */
+	    if (*s == '_' && len && *retlen
+		&& (s[1] >= '0' && s[1] <= '7'))
+	    {
+		--len;
+		++s;
+	    }
 	    else {
 		/* Allow \octal to work the DWIM way (that is, stop scanning
 		 * as soon as non-octal characters are seen, complain only iff
@@ -2967,7 +2976,8 @@ Perl_scan_oct(pTHX_ char *start, I32 len, I32 *retlen)
 		if (ckWARN_d(WARN_OVERFLOW))
 		    Perl_warner(aTHX_ WARN_OVERFLOW,
 				"Integer overflow in octal number");
-	    } else
+	    }
+	    else
 		ruv = xuv | (*s - '0');
 	}
 	if (overflowed) {
@@ -3010,9 +3020,13 @@ Perl_scan_hex(pTHX_ char *start, I32 len, I32 *retlen)
     for (; len-- && *s; s++) {
 	hexdigit = strchr((char *) PL_hexdigit, *s);
 	if (!hexdigit) {
-	    if (*s == '_')
-		continue; /* Note: does not check for __ and the like. */
-	    if (seenx == FALSE && *s == 'x' && ruv == 0) {
+	    if (*s == '_' && len && *retlen && s[1]
+		&& (hexdigit = strchr((char *) PL_hexdigit, s[1])))
+	    {
+		--len;
+		++s;
+	    }
+	    else if (seenx == FALSE && *s == 'x' && ruv == 0) {
 		/* Disallow 0xxx0x0xxx... */
 		seenx = TRUE;
 		continue;
@@ -3035,7 +3049,8 @@ Perl_scan_hex(pTHX_ char *start, I32 len, I32 *retlen)
 		if (ckWARN_d(WARN_OVERFLOW))
 		    Perl_warner(aTHX_ WARN_OVERFLOW,
 				"Integer overflow in hexadecimal number");
-	    } else
+	    }
+	    else
 		ruv = xuv | ((hexdigit - PL_hexdigit) & 15);
 	}
 	if (overflowed) {

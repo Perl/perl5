@@ -1984,6 +1984,7 @@ Perl_moreswitches(pTHX_ char *s)
     case '0':
     {
 	dTHR;
+	numlen = 0;			/* disallow underscores */
 	rschar = (U32)scan_oct(s, 4, &numlen);
 	SvREFCNT_dec(PL_nrs);
 	if (rschar & ~((U8)~0))
@@ -2099,6 +2100,7 @@ Perl_moreswitches(pTHX_ char *s)
 	if (isDIGIT(*s)) {
 	    PL_ors = savepv("\n");
 	    PL_orslen = 1;
+	    numlen = 0;			/* disallow underscores */
 	    *PL_ors = (char)scan_oct(s, 3 + (*s == '0'), &numlen);
 	    s += numlen;
 	}
