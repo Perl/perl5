@@ -1074,9 +1074,13 @@ PP(pp_divide)
 #else
                 /* Otherwise we only attempt it if either or both operands
                    would not be preserved by an NV.  If both fit in NVs
-                   we fall through to the NV divide code below.  */
-                && ((left > ((UV)1 << NV_PRESERVES_UV_BITS))
-                    || (right > ((UV)1 << NV_PRESERVES_UV_BITS)))
+                   we fall through to the NV divide code below.  However,
+                   as left >= right to ensure integer result here, we know that
+                   we can skip the test on the right operand - right big
+                   enough not to be preserved can't get here unless left is
+                   also too big.  */
+
+                && (left > ((UV)1 << NV_PRESERVES_UV_BITS))
 #endif
                 ) {
                 /* Integer division can't overflow, but it can be imprecise.  */
