@@ -433,9 +433,7 @@ familiar with Perl on your operating system.
 
 Jon Orwant
 
-orwant@oreilly.com
-
-The Perl Journal, http://tpj.com
+orwant@medita.mit.edu
 
 with invaluable help from Chris Nandor, and valuable help from Brandon
 Allbery, Charles Bailey, Graham Barr, Dominic Dunlop, Jarkko
