@@ -31,6 +31,228 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 10297] By: jhi                                   on 2001/05/29  16:25:47
+        Log: Fix Perl_swash_init & Perl_swash_fetch to save ERRSV (= $@)
+             before Perl_load_module/Perl_call_method and restore the value
+             after if !SvTRUE(ERRSV).  (from Inaba Hiroto)
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[ 10296] By: jhi                                   on 2001/05/29  16:01:53
+        Log: Subject: Re: AIX and gcc (moving targets)
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Tue, 29 May 2001 17:59:40 +0200
+             Message-Id: <20010529175841.7078.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! ext/Storable/Makefile.PL
+____________________________________________________________________________
+[ 10295] By: jhi                                   on 2001/05/29  15:59:05
+        Log: Subject: Re: AIX and gcc (moving targets)
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Tue, 29 May 2001 12:32:57 +0200
+             Message-Id: <20010529115151.9FE0.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! ext/POSIX/Makefile.PL
+____________________________________________________________________________
+[ 10294] By: jhi                                   on 2001/05/29  15:53:43
+        Log: Syncing with Test 1.21, from Michael G Schwern (#10240 retracted)
+     Branch: perl
+	   ! lib/Test/Harness.pm t/lib/test-harness.t
+____________________________________________________________________________
+[ 10293] By: jhi                                   on 2001/05/29  15:46:10
+        Log: Syncing with Test 1.17, from Michael G Schwern.
+     Branch: perl
+	   + t/lib/Test/fail.t t/lib/Test/mix.t t/lib/Test/onfail.t
+	   + t/lib/Test/qr.t t/lib/Test/skip.t t/lib/Test/success.t
+	   + t/lib/Test/todo.t
+	   ! MANIFEST lib/Test.pm t/TEST
+____________________________________________________________________________
+[ 10292] By: jhi                                   on 2001/05/29  15:34:08
+        Log: Allow tests to be in deeper subdirectories so we can have
+             things like t/lib/Some-Module/foo.t (from Michael G Schwern)
+     Branch: perl
+	   ! t/TEST
+____________________________________________________________________________
+[ 10291] By: jhi                                   on 2001/05/29  15:29:37
+        Log: Add tests for Time::gmtime and Time::localtime.
+     Branch: perl
+	   + t/lib/time-gmtime.t t/lib/time-localtime.t
+	   ! MANIFEST t/lib/1_compile.t
+____________________________________________________________________________
+[ 10290] By: jhi                                   on 2001/05/29  15:15:44
+        Log: Add test for File::stat.
+     Branch: perl
+	   + t/lib/filestat.t
+	   ! MANIFEST t/lib/1_compile.t
+____________________________________________________________________________
+[ 10289] By: jhi                                   on 2001/05/29  15:05:38
+        Log: Add test for Net::servent.
+     Branch: perl
+	   + t/lib/net-sent.t
+	   ! MANIFEST t/lib/1_compile.t
+____________________________________________________________________________
+[ 10288] By: jhi                                   on 2001/05/29  14:57:15
+        Log: Add test for Net::protoent.
+     Branch: perl
+	   + t/lib/net-pent.t
+	   ! MANIFEST t/lib/1_compile.t
+____________________________________________________________________________
+[ 10287] By: jhi                                   on 2001/05/29  14:53:10
+        Log: Add test for Net::netent.
+     Branch: perl
+	   + t/lib/net-nent.t
+	   ! MANIFEST t/lib/1_compile.t
+____________________________________________________________________________
+[ 10286] By: jhi                                   on 2001/05/29  14:31:57
+        Log: Add test for User::grent.  Portability doubtful.
+     Branch: perl
+	   + t/lib/user-grent.t
+	   ! MANIFEST t/lib/1_compile.t
+____________________________________________________________________________
+[ 10285] By: jhi                                   on 2001/05/29  14:24:20
+        Log: Add test for User::pwent.
+             Probably will fall down somewhere for portability reasons.
+     Branch: perl
+	   + t/lib/user-pwent.t
+	   ! MANIFEST t/lib/1_compile.t
+____________________________________________________________________________
+[ 10284] By: jhi                                   on 2001/05/29  13:26:43
+        Log: Metaconfig units changes for #10283.
+     Branch: metaconfig
+	   ! U/installdirs/inc_version_list.U U/installdirs/perl5.U
+	   ! U/installdirs/siteman1.U U/installdirs/siteman3.U
+	   ! U/installdirs/sitescript.U U/modified/Signal.U
+____________________________________________________________________________
+[ 10283] By: jhi                                   on 2001/05/29  13:26:24
+        Log: Subject: [PATCH 5.6.1] signal names in Configure
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Tue, 29 May 2001 03:52:25 -0400
+             Message-ID: <20010529035225.A9400@math.ohio-state.edu>
+             
+             Subject: [PATCH 5.6.1] older perl in Configure
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Tue, 29 May 2001 03:55:40 -0400
+             Message-ID: <20010529035539.A9411@math.ohio-state.edu>
+             
+             Subject: [PATCH 5.6.1] goofs in Configure
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Tue, 29 May 2001 04:13:07 -0400
+             Message-ID: <20010529041307.A9658@math.ohio-state.edu>
+             
+             Configure portability tweaks.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 10282] By: jhi                                   on 2001/05/29  12:41:41
+        Log: Subject: [PATCH 5.6.1] extLibpath for OS/2
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Tue, 29 May 2001 04:07:06 -0400
+             Message-ID: <20010529040706.A9579@math.ohio-state.edu>
+     Branch: perl
+	   ! os2/os2.c
+____________________________________________________________________________
+[ 10281] By: jhi                                   on 2001/05/29  12:40:31
+        Log: Subject: [PATCH 5.6.1] extra static libs for OS/2
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Tue, 29 May 2001 04:01:38 -0400
+             Message-ID: <20010529040138.A9482@math.ohio-state.edu>
+     Branch: perl
+	   ! hints/os2.sh os2/Makefile.SHs
+____________________________________________________________________________
+[ 10280] By: jhi                                   on 2001/05/29  12:38:48
+        Log: Subject: Re: [PATCH 5.6.1] Test::Harness clumsy
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Tue, 29 May 2001 03:50:18 -0400
+             Message-ID: <20010529035018.A9387@math.ohio-state.edu>
+     Branch: perl
+	   ! lib/Test/Harness.pm
+____________________________________________________________________________
+[ 10279] By: jhi                                   on 2001/05/29  12:34:53
+        Log: Additional safeguard against $@ getting trampled; idea from Hugo.
+     Branch: perl
+	   ! lib/utf8_heavy.pl
+____________________________________________________________________________
+[ 10278] By: jhi                                   on 2001/05/29  02:15:24
+        Log: Subject: Re: [ID 20010528.004] dual bug under utf8: $@ has UTF8 flag and \s+ does not match
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Tue, 29 May 2001 03:03:45 +0100
+             Message-Id: <200105290203.DAA00825@crypt.compulink.co.uk>
+             
+             Explanation why the $@ always gets the UTF8 flag when under use utf8--
+             because we told it to have the flag when under use utf8.
+     Branch: perl
+	   ! pp_ctl.c
+____________________________________________________________________________
+[ 10277] By: jhi                                   on 2001/05/29  00:51:34
+        Log: At least a partial fix for 20010528.004.
+     Branch: perl
+	   ! lib/utf8_heavy.pl
+____________________________________________________________________________
+[ 10276] By: jhi                                   on 2001/05/29  00:42:59
+        Log: Subject: Re: Report /pro/3gl/CPAN/perl-5.7.1
+             From: Nicholas Clark <nick@ccl4.org> 
+             Date: Mon, 28 May 2001 23:39:38 +0100
+             Message-ID: <20010528233938.M86445@plum.flirble.org>
+             
+             More portable non-zero UV.
+     Branch: perl
+	   ! t/lib/extutils.t
+____________________________________________________________________________
+[ 10275] By: jhi                                   on 2001/05/29  00:40:28
+        Log: Subject: [PATCH] (was Re: Why t/lib/extutils.t is failing ...
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Mon, 28 May 2001 22:46:09 +0100
+             Message-ID: <20010528224608.L86445@plum.flirble.org>
+             
+             Test also "make clean".
+     Branch: perl
+	   ! t/lib/extutils.t
+____________________________________________________________________________
+[ 10274] By: jhi                                   on 2001/05/29  00:39:18
+        Log: Subject: Re: Would -Wno-unused -Wall be better?
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Tue, 29 May 2001 00:55:54 +0100
+             Message-ID: <20010529005553.B675@blackrider.blackstar.co.uk>
+     Branch: perl
+	   ! pp.h
+____________________________________________________________________________
+[ 10273] By: jhi                                   on 2001/05/29  00:36:06
+        Log: Add a test for 20010528.007, fixed in #10272.
+     Branch: perl
+	   ! t/op/misc.t toke.c
+____________________________________________________________________________
+[ 10272] By: jhi                                   on 2001/05/29  00:21:12
+        Log: Subject: Re: [ID 20010528.007] "\x{" causes panic:constant overflowed allocated space 
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Tue, 29 May 2001 00:23:23 +0100
+             Message-Id: <200105282323.AAA07930@crypt.compulink.co.uk>
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[ 10271] By: jhi                                   on 2001/05/28  22:52:11
+        Log: Subject: Re: [ID 20010528.001] use autouse 'URI::Escape' => qw(URI::Escape::uri_escape) failed
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Tue, 29 May 2001 00:42:59 +0100
+             Message-ID: <20010529004259.A675@blackrider.blackstar.co.uk>
+     Branch: perl
+	   ! t/pragma/autouse.t
+____________________________________________________________________________
+[ 10270] By: jhi                                   on 2001/05/28  21:44:06
+        Log: Some shells seemingly arrange the signal handlers differently
+             (bug id 20010521.004).
+     Branch: perl
+	   ! t/lib/sigaction.t
+____________________________________________________________________________
+[ 10269] By: jhi                                   on 2001/05/28  20:34:21
+        Log: Regen perlmodlib.
+     Branch: perl
+	   ! pod/perlmodlib.pod
+____________________________________________________________________________
+[ 10268] By: jhi                                   on 2001/05/28  19:08:45
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 10267] By: jhi                                   on 2001/05/28  19:03:54
         Log: Subject: [PATCH] perlnewmod.pod to reflect DLSI(P) change
              From: Elaine -HFB- Ashton <elaine@chaos.wustl.edu>
