@@ -2468,7 +2468,7 @@ PP(pp_quotemeta)
 		    *d++ = '\\';
 		*d++ = *s++;
 	    }
- 	}
+	}
 	*d = '\0';
 	SvCUR_set(TARG, d - SvPVX(TARG));
 	(void)SvPOK_only(TARG);

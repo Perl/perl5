@@ -489,23 +489,26 @@ that problem.
 
 If you need to install perl on many identical systems, it is
 convenient to compile it once and create an archive that can be
-installed on multiple systems.  Here's one way to do that:
+installed on multiple systems.  Suppose, for example, that you want to
+create an archive that can be installed in /opt/perl.
+Here's one way to do that:
 
     # Set up config.over to install perl into a different directory,
     # e.g. /tmp/perl5 (see previous part).
-    sh Configure -des
+    sh Configure -Dprefix=/opt/perl -des
     make
     make test
-    make install
+    make install   # This will install everything into /tmp/perl5.
     cd /tmp/perl5
-    # Edit $archlib/Config.pm to change all the
+    # Edit $archlib/Config.pm and $archlib/.packlist to change all the
     # install* variables back to reflect where everything will
-    # really be installed.
-    # Edit any of the scripts in $scriptdir to have the correct
+    # really be installed.  (That is, change /tmp/perl5 to /opt/perl
+    # everywhere in those files.)
+    # Check the scripts in $scriptdir to make sure they have the correct
     # #!/wherever/perl line.
     tar cvf ../perl5-archive.tar .
     # Then, on each machine where you want to install perl,
-    cd /usr/local  # Or wherever you specified as $prefix
+    cd /opt/perl # Or wherever you specified as $prefix
     tar xvf perl5-archive.tar
 
 =head2 Site-wide Policy settings

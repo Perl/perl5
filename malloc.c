@@ -572,10 +572,10 @@ static char bucket_of[] =
 
 static char *emergency_buffer;
 static MEM_SIZE emergency_buffer_size;
+static Malloc_t emergency_sbrk(MEM_SIZE size);
 
 static Malloc_t
-emergency_sbrk(size)
-    MEM_SIZE size;
+emergency_sbrk(MEM_SIZE size)
 {
     MEM_SIZE rsize = (((size - 1)>>LOG_OF_MIN_ARENA) + 1)<<LOG_OF_MIN_ARENA;
 
@@ -1615,8 +1615,7 @@ static long Perl_sbrk_oldsize;
 #   define PERLSBRK_64_K (1<<16)
 
 Malloc_t
-Perl_sbrk(size)
-int size;
+Perl_sbrk(int size)
 {
     IV got;
     int small, reqsize;

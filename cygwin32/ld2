@@ -6,4 +6,4 @@
 
 PERLPATH=/perl5.005
 
-$PERLPATH/perl $PERLPATH/perlld "$@"
+$PERLPATH/perl $PERLPATH/perlld -L$PERLPATH "$@"

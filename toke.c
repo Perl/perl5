@@ -2723,7 +2723,8 @@ int yylex(PERL_YYLEX_PARAM_DECL)
 		    for (t++; isSPACE(*t); t++) ;
 		    if (isIDFIRST_lazy(t)) {
 			t = scan_word(t, tmpbuf, sizeof tmpbuf, TRUE, &len);
-			if (*t != '(' && perl_get_cv(tmpbuf, FALSE))
+		        for (; isSPACE(*t); t++) ;
+			if (*t == ';' && perl_get_cv(tmpbuf, FALSE))
 			    warner(WARN_SYNTAX,
 				"You need to quote \"%s\"", tmpbuf);
 		    }

@@ -416,6 +416,7 @@ sub ExtUtils::MakeMaker::new {
     }
 
     my $newclass = ++$PACKNAME;
+    local @Parent = @Parent;	# Protect against non-local exits
     {
 #	no strict;
 	print "Blessing Object into class [$newclass]\n" if $Verbose>=2;
@@ -475,6 +476,9 @@ END
 
     $self->init_dirscan();
     $self->init_others();
+    my($argv) = neatvalue(\@ARGV);
+    $argv =~ s/^\[/(/;
+    $argv =~ s/\]$/)/;
 
     push @{$self->{RESULT}}, <<END;
 # This Makefile is for the $self->{NAME} extension to perl.
@@ -484,6 +488,8 @@ END
 # Makefile.PL. Don't edit this file, edit Makefile.PL instead.
 #
 #	ANY CHANGES MADE HERE WILL BE LOST!
+#
+#   MakeMaker ARGV: $argv
 #
 #   MakeMaker Parameters:
 END
@@ -529,7 +535,6 @@ END
     }
 
     push @{$self->{RESULT}}, "\n# End.";
-    pop @Parent;
 
     $self;
 }
