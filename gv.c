@@ -372,7 +372,7 @@ Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
 
     gv = gv_fetchmeth(stash, name, nend - name, 0);
     if (!gv) {
-	if (strEQ(name,"import"))
+	if (strEQ(name,"import") || strEQ(name,"unimport"))
 	    gv = (GV*)&PL_sv_yes;
 	else if (autoload)
 	    gv = gv_autoload4(stash, name, nend - name, TRUE);
