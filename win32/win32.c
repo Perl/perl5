@@ -636,12 +636,8 @@ win32_opendir(char *filename)
 	return NULL;
 
     /* check to see if filename is a directory */
-    if (win32_stat(filename, &sbuf) < 0 || (sbuf.st_mode & S_IFDIR) == 0) {
-	/* CRT is buggy on sharenames, so make sure it really isn't */
-	DWORD r = GetFileAttributes(filename);
-	if (r == 0xffffffff || !(r & FILE_ATTRIBUTE_DIRECTORY))
-	    return NULL;
-    }
+    if (win32_stat(filename, &sbuf) < 0)
+	return NULL;
 
     /* Get us a DIR structure */
     Newz(1303, p, 1, DIR);
@@ -881,7 +877,7 @@ win32_sleep(unsigned int t)
 DllExport int
 win32_stat(const char *path, struct stat *buffer)
 {
-    char		t[MAX_PATH+1]; 
+    char	t[MAX_PATH+1]; 
     const char	*p = path;
     int		l = strlen(path);
     int		res;
@@ -898,8 +894,22 @@ win32_stat(const char *path, struct stat *buffer)
 	}
     }
     res = stat(p,buffer);
+    if (res < 0) {
+	/* CRT is buggy on sharenames, so make sure it really isn't.
+	 * XXX using GetFileAttributesEx() will enable us to set
+	 * buffer->st_*time (but note that's not available on the
+	 * Windows of 1995) */
+	DWORD r = GetFileAttributes(p);
+	if (r != 0xffffffff && (r & FILE_ATTRIBUTE_DIRECTORY)) {
+	    buffer->st_mode |= S_IFDIR | S_IREAD;
+	    errno = 0;
+	    if (!(r & FILE_ATTRIBUTE_READONLY))
+		buffer->st_mode |= S_IWRITE | S_IEXEC;
+	    return 0;
+	}
+    }
 #ifdef __BORLANDC__
-    if (res == 0) {
+    else {
 	if (S_ISDIR(buffer->st_mode))
 	    buffer->st_mode |= S_IWRITE | S_IEXEC;
 	else if (S_ISREG(buffer->st_mode)) {
