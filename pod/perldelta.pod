@@ -1147,6 +1147,14 @@ autoloaded or is a symbolic reference.
 A bug that caused File::Find to lose track of the working directory
 when pruning top-level directories has been fixed.
 
+File::Find now also supports several other options to control its
+behavior.  It can follow symbolic links if the C<follow> option is
+specified.  Enabling the C<no_chdir> option will make File::Find skip
+changing the current directory when walking directories.  The C<untaint>
+flag can be useful when running with taint checks enabled.
+
+See L<File::Find>.
+
 =item File::Glob
 
 This extension implements BSD-style file globbing.  By default,
