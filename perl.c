@@ -903,7 +903,7 @@ setuid perl scripts securely.\n");
      * If you set PL_hash_seed (and assumedly also PL_hash_seed_set) yourself,
      * it is your responsibility to provide a good random seed! */
     if (!PL_hash_seed_set)
-	 PL_hash_seed = get_seed();
+	 PL_hash_seed = get_hash_seed();
     {
 	 char *s = PerlEnv_getenv("PERL_HASH_SEED_DEBUG");
 

@@ -4378,7 +4378,7 @@ Perl_seed(pTHX)
 }
 
 UV
-Perl_get_seed(pTHX)
+Perl_get_hash_seed(pTHX)
 {
      char *s = PerlEnv_getenv("PERL_HASH_SEED");
      UV myseed = 0;
