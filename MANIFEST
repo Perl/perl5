@@ -1549,6 +1549,7 @@ lib/Pod/ParseUtils.pm		Pod-Parser - pod utility functions
 lib/Pod/Perldoc/BaseTo.pm	utility module for perldoc
 lib/Pod/Perldoc/GetOptsOO.pm	options parsing for perldoc
 lib/Pod/Perldoc.pm		guts of the 'perldoc' utility
+lib/Pod/Perldoc/t/01_about_verbose.t	test Pod::Perldoc
 lib/Pod/Perldoc/t/checkerbasic.t	test Pod::Perldoc::ToChecker
 lib/Pod/Perldoc/ToChecker.pm	let perldoc check POD for errors
 lib/Pod/Perldoc/ToMan.pm	render POD as man pages
