@@ -102,7 +102,7 @@ $newmode = (($^O eq 'MSWin32') || ($^O eq 'NetWare')) ? 0444 : 0777;
 is(chmod($newmode,'a'), 1, "chmod succeeding");
 
 SKIP: {
-    skip("no link", 9) unless $has_link;
+    skip("no link", 7) unless $has_link;
 
     ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
      $blksize,$blocks) = stat('c');
