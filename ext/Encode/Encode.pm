@@ -136,6 +136,10 @@ sub getEncoding
 {
  my ($class,$name) = @_;
  my $enc;
+ if (ref($name) && $name->can('new_sequence'))
+  {
+   return $name;
+  }
  if (exists $encoding{$name})
   {
    return $encoding{$name};
