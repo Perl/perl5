@@ -88,6 +88,11 @@ sub _unlink {
 my $text    = "Hello World\n" ;
 
 my @perl    = ( $perl ) ;
+# When utf8 is turned on via environment variables, then uc will attempt to
+# use utf8; as part of the swash initialisation. The tests here run a child
+# perl and get it to uc() strings. So that child needs to know where utf8.pm
+# is.
+push @perl, q(-I../..) if $ENV{PERL_CORE};
 
 my $emitter_script =
    qq{print '$text' ; print STDERR uc( '$text' ) unless \@ARGV } ;
