@@ -3272,38 +3272,14 @@ of values, as follows:
     h	A hex string (low nybble first).
     H	A hex string (high nybble first).
 
-    c	A signed char value.
+    c	A signed char (8-bit) value.
     C	An unsigned char value.  Only does bytes.  See U for Unicode.
 
-    s	A signed short value.
+    s	A signed short (16-bit) value.
     S	An unsigned short value.
-	  (This 'short' is _exactly_ 16 bits, which may differ from
-	   what a local C compiler calls 'short'.  If you want
-	   native-length shorts, use the '!' suffix.)
 
-    i	A signed integer value.
-    I	An unsigned integer value.
-	  (This 'integer' is _at_least_ 32 bits wide.  Its exact
-           size depends on what a local C compiler calls 'int',
-           and may even be larger than the 'long' described in
-           the next item.)
-
-    l	A signed long value.
+    l	A signed long (32-bit) value.
     L	An unsigned long value.
-	  (This 'long' is _exactly_ 32 bits, which may differ from
-	   what a local C compiler calls 'long'.  If you want
-	   native-length longs, use the '!' suffix.)
-
-    n	An unsigned short in "network" (big-endian) order.
-    N	An unsigned long in "network" (big-endian) order.
-    v	An unsigned short in "VAX" (little-endian) order.
-    V	An unsigned long in "VAX" (little-endian) order.
-	  (These 'shorts' and 'longs' are _exactly_ 16 bits and
-	   _exactly_ 32 bits, respectively. If you want signed
-	   types instead of unsigned ones, use the '!' suffix.
-	   Note that this is _only_ safe if signed integers are
-	   stored in the same format on all platforms using the
-	   packed data.)
 
     q	A signed quad (64-bit) value.
     Q	An unsigned quad value.
@@ -3311,14 +3287,23 @@ of values, as follows:
 	   integer values _and_ if Perl has been compiled to support those.
            Causes a fatal error otherwise.)
 
-    j   A signed integer value (a Perl internal integer, IV).
-    J   An unsigned integer value (a Perl internal unsigned integer, UV).
+    i	A signed integer value.
+    I	A unsigned integer value.
+	  (This 'integer' is _at_least_ 32 bits wide.  Its exact
+           size depends on what a local C compiler calls 'int'.)
+ 
+    n	An unsigned short (16-bit) in "network" (big-endian) order.
+    N	An unsigned long (32-bit) in "network" (big-endian) order.
+    v	An unsigned short (16-bit) in "VAX" (little-endian) order.
+    V	An unsigned long (32-bit) in "VAX" (little-endian) order.
+
+    j   A Perl internal signed integer value (IV).
+    J   A Perl internal unsigned integer value (UV).
 
     f	A single-precision float in the native format.
     d	A double-precision float in the native format.
 
-    F	A floating point value in the native native format
-           (a Perl internal floating point value, NV).
+    F	A Perl internal floating point value (NV) in the native format
     D	A long double-precision float in the native format.
 	  (Long doubles are available only if your system supports long
 	   double values _and_ if Perl has been compiled to support those.
@@ -3341,6 +3326,23 @@ of values, as follows:
     @	Null fill to absolute position, counted from the start of
         the innermost ()-group.
     (	Start of a ()-group.
+
+Some letters in the TEMPLATE may optionally be followed by one or
+more of these modifiers (the second column lists the letters for
+which the modifier is valid):
+
+    !   sSlLiI     Forces native (short, long, int) sizes instead
+                   of fixed (16-/32-bit) sizes.
+
+        xX         Make x and X act as alignment commands.
+
+        nNvV       Treat integers as signed instead of unsigned.
+
+    >   sSiIlLqQ   Force big-endian byte-order on the type.
+        jJfFdDpP   (The "big end" touches the construct.)
+
+    <   sSiIlLqQ   Force little-endian byte-order on the type.
+        jJfFdDpP   (The "little end" touches the construct.)
 
 The following rules apply:
 
@@ -3446,6 +3448,11 @@ The C<P> type packs a pointer to a structure of the size indicated by the
 length.  A NULL pointer is created if the corresponding value for C<p> or
 C<P> is C<undef>, similarly for unpack().
 
+If your system has a strange pointer size (i.e. a pointer is neither as
+big as an int nor as big as a long), it may not be possible to pack or
+unpack pointers in big- or little-endian byte order.  Attempting to do
+so will result in a fatal error.
+
 =item *
 
 The C</> template character allows packing and unpacking of strings where
@@ -3477,7 +3484,7 @@ which Perl does not regard as legal in numeric strings.
 =item *
 
 The integer types C<s>, C<S>, C<l>, and C<L> may be
-immediately followed by a C<!> suffix to signify native shorts or
+followed by a C<!> modifier to signify native shorts or
 longs--as you can see from above for example a bare C<l> does mean
 exactly 32 bits, the native C<long> (as seen by the local C compiler)
 may be larger.  This is an issue mainly in 64-bit platforms.  You can
@@ -3543,9 +3550,36 @@ via L<Config>:
 Byteorders C<'1234'> and C<'12345678'> are little-endian, C<'4321'>
 and C<'87654321'> are big-endian.
 
-If you want portable packed integers use the formats C<n>, C<N>,
-C<v>, and C<V>, their byte endianness and size are known.
+If you want portable packed integers you can either use the formats
+C<n>, C<N>, C<v>, and C<V>, or you can use the C<E<gt>> and C<E<lt>>
+modifiers.  These modifiers are only available as of perl 5.8.5.
 See also L<perlport>.
+
+=item *
+
+All integer and floating point formats as well as C<p> and C<P> may
+be followed by the C<E<gt>> or C<E<lt>> modifiers to force big- or
+little- endian byte-order, respectively.  This is especially useful,
+since C<n>, C<N>, C<v> and C<V> don't cover signed integers, 64-bit
+integers and floating point values.  However, there are some things
+to keep in mind.
+
+Exchanging signed integers between different platforms only works
+if all platforms store them in the same format.  Most platforms store
+signed integers in two's complement, so usually this is not an issue.
+
+The C<E<gt>> or C<E<lt>> modifiers can only be used on floating point
+formats on big- or little-endian machines.  Otherwise, attempting to
+do so will result in a fatal error.
+
+Forcing big- or little-endian byte-order on floating point values for
+data exchange can only work if all platforms are using the same
+binary representation (e.g. IEEE floating point format).  Even if all
+platforms are using IEEE, there may be subtle differences.  Being able
+to use C<E<gt>> or C<E<lt>> on floating point values can be very useful,
+but also very dangerous if you don't know exactly what you're doing.
+It is definetely not a general way to portably store floating point
+values.
 
 =item *
 
@@ -3557,10 +3591,13 @@ may not be readable on another - even if both use IEEE floating point
 arithmetic (as the endian-ness of the memory representation is not part
 of the IEEE spec).  See also L<perlport>.
 
-Note that Perl uses doubles internally for all numeric calculation, and
-converting from double into float and thence back to double again will
-lose precision (i.e., C<unpack("f", pack("f", $foo)>) will not in general
-equal $foo).
+If you know exactly what you're doing, you can use the C<E<gt>> or C<E<lt>>
+modifiers to force big- or little-endian byte-order on floating point values.
+
+Note that Perl uses doubles (or long doubles, if configured) internally for
+all numeric calculation, and converting from double into float and thence back
+to double again will lose precision (i.e., C<unpack("f", pack("f", $foo)>)
+will not in general equal $foo).
 
 =item *
 
@@ -3616,7 +3653,7 @@ using two's complement representation).
 
 A comment in a TEMPLATE starts with C<#> and goes to the end of line.
 White space may be used to separate pack codes from each other, but
-a C<!> modifier and a repeat count must follow immediately.
+modifiers and a repeat count must follow immediately.
 
 =item *
 
@@ -3675,6 +3712,13 @@ Examples:
     $bar = pack('s@4l', 12, 34);
     # short 12, zero fill to position 4, long 34
     # $foo eq $bar
+
+    $foo = pack('nN', 42, 4711);
+    # pack big-endian 16- and 32-bit unsigned integers
+    $foo = pack('S>L>', 42, 4711);
+    # exactly the same
+    $foo = pack('s<l<', -42, 4711);
+    # pack little-endian 16- and 32-bit signed integers
 
 The same template may generally also be used in unpack().
 

@@ -1404,4 +1404,80 @@ Apd	|void	|hv_clear_placeholders|HV* hb
 Apd	|SV*	|hv_scalar	|HV* hv|
 p	|SV*	|magic_scalarpack|HV* hv|MAGIC*	mg
 
+#ifdef PERL_NEED_MY_HTOLE16
+np	|U16	|my_htole16	|U16 n
+#endif
+#ifdef PERL_NEED_MY_LETOH16
+np	|U16	|my_letoh16	|U16 n
+#endif
+#ifdef PERL_NEED_MY_HTOBE16
+np	|U16	|my_htobe16	|U16 n
+#endif
+#ifdef PERL_NEED_MY_BETOH16
+np	|U16	|my_betoh16	|U16 n
+#endif
+#ifdef PERL_NEED_MY_HTOLE32
+np	|U32	|my_htole32	|U32 n
+#endif
+#ifdef PERL_NEED_MY_LETOH32
+np	|U32	|my_letoh32	|U32 n
+#endif
+#ifdef PERL_NEED_MY_HTOBE32
+np	|U32	|my_htobe32	|U32 n
+#endif
+#ifdef PERL_NEED_MY_BETOH32
+np	|U32	|my_betoh32	|U32 n
+#endif
+#ifdef PERL_NEED_MY_HTOLE64
+np	|U64	|my_htole64	|U64 n
+#endif
+#ifdef PERL_NEED_MY_LETOH64
+np	|U64	|my_letoh64	|U64 n
+#endif
+#ifdef PERL_NEED_MY_HTOBE64
+np	|U64	|my_htobe64	|U64 n
+#endif
+#ifdef PERL_NEED_MY_BETOH64
+np	|U64	|my_betoh64	|U64 n
+#endif
+
+#ifdef PERL_NEED_MY_HTOLES
+np	|short	|my_htoles	|short n
+#endif
+#ifdef PERL_NEED_MY_LETOHS
+np	|short	|my_letohs	|short n
+#endif
+#ifdef PERL_NEED_MY_HTOBES
+np	|short	|my_htobes	|short n
+#endif
+#ifdef PERL_NEED_MY_BETOHS
+np	|short	|my_betohs	|short n
+#endif
+#ifdef PERL_NEED_MY_HTOLEI
+np	|int	|my_htolei	|int n
+#endif
+#ifdef PERL_NEED_MY_LETOHI
+np	|int	|my_letohi	|int n
+#endif
+#ifdef PERL_NEED_MY_HTOBEI
+np	|int	|my_htobei	|int n
+#endif
+#ifdef PERL_NEED_MY_BETOHI
+np	|int	|my_betohi	|int n
+#endif
+#ifdef PERL_NEED_MY_HTOLEL
+np	|long	|my_htolel	|long n
+#endif
+#ifdef PERL_NEED_MY_LETOHL
+np	|long	|my_letohl	|long n
+#endif
+#ifdef PERL_NEED_MY_HTOBEL
+np	|long	|my_htobel	|long n
+#endif
+#ifdef PERL_NEED_MY_BETOHL
+np	|long	|my_betohl	|long n
+#endif
+
+np	|void	|my_swabn	|void* ptr|int n
+
 END_EXTERN_C

@@ -54,10 +54,10 @@ L<perlfunc/accept>.
 
 (X) You can't allocate more than 64K on an MS-DOS machine.
 
-=item '!' allowed only after types %s
+=item '%c' allowed only after types %s
 
-(F) The '!' is allowed in pack() or unpack() only after certain types.
-See L<perlfunc/pack>.
+(F) The modifiers '!', '<' and '>' are allowed in pack() or unpack() only
+after certain types.  See L<perlfunc/pack>.
 
 =item Ambiguous call resolved as CORE::%s(), qualify as such or use &
 
@@ -630,6 +630,13 @@ waitpid() without flags is emulated.
 point.  For example, it'd be kind of silly to put a B<-x> on the #!
 line.
 
+=item Can't %s %s-endian %ss on this platform
+
+(F) Your platform's byte-order is neither big-endian nor little-endian,
+or it has a very strange pointer size.  Packing and unpacking big- or
+little-endian floating point values and pointers may not be possible.
+See L<perlfunc/pack>.
+
 =item Can't exec "%s": %s
 
 (W exec) A system(), exec(), or piped open call could not execute the
@@ -1050,6 +1057,12 @@ references are disallowed.  See L<perlref>.
 Errno.pm module. The Errno module is expected to tie the %! hash to
 provide symbolic names for C<$!> errno values.
 
+=item Can't use both '<' and '>' after type '%c' in %s
+
+(F) A type cannot be forced to have both big-endian and little-endian
+byte-order at the same time, so this combination of modifiers is not
+allowed.  See L<perlfunc/pack>.
+
 =item Can't use %s for loop variable
 
 (F) Only a simple scalar variable may be used as a loop variable on a
@@ -1366,6 +1379,11 @@ qualifying it as C<CORE::dump()>.  Maybe it's a typo.  See L<perlfunc/dump>.
 
 (S malloc) An internal routine called free() on something that had
 already been freed.
+
+=item Duplicate modifier '%c' after '%c' in %s
+
+(W) You have applied the same modifier more than once after a type
+in a pack template.  See L<perlfunc/pack>.
 
 =item elseif should be elsif
 
@@ -2891,6 +2909,13 @@ that a method requires a package that has not been loaded.
 (F) The module in question uses features of a version of Perl more
 recent than the currently running version.  How long has it been since
 you upgraded, anyway?  See L<perlfunc/require>.
+
+=item Perl_my_%s() not available
+
+(F) Your platform has very uncommon byte-order and integer size,
+so it was not possible to set up some or all fixed-width byte-order
+conversion functions.  This is only a problem when you're using the
+'<' or '>' modifiers in (un)pack templates.  See L<perlfunc/pack>.
 
 =item PERL_SH_DIR too long
 

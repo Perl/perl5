@@ -449,6 +449,241 @@ int usleep(unsigned int);
 #  define MYSWAP
 #endif
 
+#ifdef PERL_CORE
+
+/* macros for correct constant construction */
+# if INTSIZE >= 2
+#  define U16_CONST(x) ((U16)x##U)
+# else
+#  define U16_CONST(x) ((U16)x##UL)
+# endif
+
+# if INTSIZE >= 4
+#  define U32_CONST(x) ((U32)x##U)
+# else
+#  define U32_CONST(x) ((U32)x##UL)
+# endif
+
+# ifdef HAS_QUAD
+#  if INTSIZE >= 8
+#   define U64_CONST(x) ((U64)x##U)
+#  elif LONGSIZE >= 8
+#   define U64_CONST(x) ((U64)x##UL)
+#  elif QUADKIND == QUAD_IS_LONG_LONG
+#   define U64_CONST(x) ((U64)x##ULL)
+#  else /* best guess we can make */
+#   define U64_CONST(x) ((U64)x##UL)
+#  endif
+# endif
+
+/* byte-swapping functions for big-/little-endian conversion */
+# define _swab_16_(x) ((U16)( \
+         (((U16)(x) & U16_CONST(0x00ff)) << 8) | \
+         (((U16)(x) & U16_CONST(0xff00)) >> 8) ))
+
+# define _swab_32_(x) ((U32)( \
+         (((U32)(x) & U32_CONST(0x000000ff)) << 24) | \
+         (((U32)(x) & U32_CONST(0x0000ff00)) <<  8) | \
+         (((U32)(x) & U32_CONST(0x00ff0000)) >>  8) | \
+         (((U32)(x) & U32_CONST(0xff000000)) >> 24) ))
+
+# ifdef HAS_QUAD
+#  define _swab_64_(x) ((U64)( \
+          (((U64)(x) & U64_CONST(0x00000000000000ff)) << 56) | \
+          (((U64)(x) & U64_CONST(0x000000000000ff00)) << 40) | \
+          (((U64)(x) & U64_CONST(0x0000000000ff0000)) << 24) | \
+          (((U64)(x) & U64_CONST(0x00000000ff000000)) <<  8) | \
+          (((U64)(x) & U64_CONST(0x000000ff00000000)) >>  8) | \
+          (((U64)(x) & U64_CONST(0x0000ff0000000000)) >> 24) | \
+          (((U64)(x) & U64_CONST(0x00ff000000000000)) >> 40) | \
+          (((U64)(x) & U64_CONST(0xff00000000000000)) >> 56) ))
+# endif
+
+/*----------------------------------------------------------------------------*/
+# if BYTEORDER == 0x1234 || BYTEORDER == 0x12345678  /*     little-endian     */
+/*----------------------------------------------------------------------------*/
+#  define my_htole16(x)		(x)
+#  define my_letoh16(x)		(x)
+#  define my_htole32(x)		(x)
+#  define my_letoh32(x)		(x)
+#  define my_htobe16(x)		_swab_16_(x)
+#  define my_betoh16(x)		_swab_16_(x)
+#  define my_htobe32(x)		_swab_32_(x)
+#  define my_betoh32(x)		_swab_32_(x)
+#  ifdef HAS_QUAD
+#   define my_htole64(x)	(x)
+#   define my_letoh64(x)	(x)
+#   define my_htobe64(x)	_swab_64_(x)
+#   define my_betoh64(x)	_swab_64_(x)
+#  endif
+#  define my_htoles(x)		(x)
+#  define my_letohs(x)		(x)
+#  define my_htolei(x)		(x)
+#  define my_letohi(x)		(x)
+#  define my_htolel(x)		(x)
+#  define my_letohl(x)		(x)
+#  if SHORTSIZE == 1
+#   define my_htobes(x)		(x)
+#   define my_betohs(x)		(x)
+#  elif SHORTSIZE == 2
+#   define my_htobes(x)		_swab_16_(x)
+#   define my_betohs(x)		_swab_16_(x)
+#  elif SHORTSIZE == 4
+#   define my_htobes(x)		_swab_32_(x)
+#   define my_betohs(x)		_swab_32_(x)
+#  elif SHORTSIZE == 8
+#   define my_htobes(x)		_swab_64_(x)
+#   define my_betohs(x)		_swab_64_(x)
+#  else
+#   define PERL_NEED_MY_HTOBES
+#   define PERL_NEED_MY_BETOHS
+#  endif
+#  if INTSIZE == 1
+#   define my_htobei(x)		(x)
+#   define my_betohi(x)		(x)
+#  elif INTSIZE == 2
+#   define my_htobei(x)		_swab_16_(x)
+#   define my_betohi(x)		_swab_16_(x)
+#  elif INTSIZE == 4
+#   define my_htobei(x)		_swab_32_(x)
+#   define my_betohi(x)		_swab_32_(x)
+#  elif INTSIZE == 8
+#   define my_htobei(x)		_swab_64_(x)
+#   define my_betohi(x)		_swab_64_(x)
+#  else
+#   define PERL_NEED_MY_HTOBEI
+#   define PERL_NEED_MY_BETOHI
+#  endif
+#  if LONGSIZE == 1
+#   define my_htobel(x)		(x)
+#   define my_betohl(x)		(x)
+#  elif LONGSIZE == 2
+#   define my_htobel(x)		_swab_16_(x)
+#   define my_betohl(x)		_swab_16_(x)
+#  elif LONGSIZE == 4
+#   define my_htobel(x)		_swab_32_(x)
+#   define my_betohl(x)		_swab_32_(x)
+#  elif LONGSIZE == 8
+#   define my_htobel(x)		_swab_64_(x)
+#   define my_betohl(x)		_swab_64_(x)
+#  else
+#   define PERL_NEED_MY_HTOBEL
+#   define PERL_NEED_MY_BETOHL
+#  endif
+#  define my_htolen(p,n)	NOOP
+#  define my_letohn(p,n)	NOOP
+#  define my_htoben(p,n)	my_swabn(p,n)
+#  define my_betohn(p,n)	my_swabn(p,n)
+/*----------------------------------------------------------------------------*/
+# elif BYTEORDER == 0x4321 || BYTEORDER == 0x87654321  /*     big-endian      */
+/*----------------------------------------------------------------------------*/
+#  define my_htobe16(x)		(x)
+#  define my_betoh16(x)		(x)
+#  define my_htobe32(x)		(x)
+#  define my_betoh32(x)		(x)
+#  define my_htole16(x)		_swab_16_(x)
+#  define my_letoh16(x)		_swab_16_(x)
+#  define my_htole32(x)		_swab_32_(x)
+#  define my_letoh32(x)		_swab_32_(x)
+#  ifdef HAS_QUAD
+#   define my_htobe64(x)	(x)
+#   define my_betoh64(x)	(x)
+#   define my_htole64(x)	_swab_64_(x)
+#   define my_letoh64(x)	_swab_64_(x)
+#  endif
+#  define my_htobes(x)		(x)
+#  define my_betohs(x)		(x)
+#  define my_htobei(x)		(x)
+#  define my_betohi(x)		(x)
+#  define my_htobel(x)		(x)
+#  define my_betohl(x)		(x)
+#  if SHORTSIZE == 1
+#   define my_htoles(x)		(x)
+#   define my_letohs(x)		(x)
+#  elif SHORTSIZE == 2
+#   define my_htoles(x)		_swab_16_(x)
+#   define my_letohs(x)		_swab_16_(x)
+#  elif SHORTSIZE == 4
+#   define my_htoles(x)		_swab_32_(x)
+#   define my_letohs(x)		_swab_32_(x)
+#  elif SHORTSIZE == 8
+#   define my_htoles(x)		_swab_64_(x)
+#   define my_letohs(x)		_swab_64_(x)
+#  else
+#   define PERL_NEED_MY_HTOLES
+#   define PERL_NEED_MY_LETOHS
+#  endif
+#  if INTSIZE == 1
+#   define my_htolei(x)		(x)
+#   define my_letohi(x)		(x)
+#  elif INTSIZE == 2
+#   define my_htolei(x)		_swab_16_(x)
+#   define my_letohi(x)		_swab_16_(x)
+#  elif INTSIZE == 4
+#   define my_htolei(x)		_swab_32_(x)
+#   define my_letohi(x)		_swab_32_(x)
+#  elif INTSIZE == 8
+#   define my_htolei(x)		_swab_64_(x)
+#   define my_letohi(x)		_swab_64_(x)
+#  else
+#   define PERL_NEED_MY_HTOLEI
+#   define PERL_NEED_MY_LETOHI
+#  endif
+#  if LONGSIZE == 1
+#   define my_htolel(x)		(x)
+#   define my_letohl(x)		(x)
+#  elif LONGSIZE == 2
+#   define my_htolel(x)		_swab_16_(x)
+#   define my_letohl(x)		_swab_16_(x)
+#  elif LONGSIZE == 4
+#   define my_htolel(x)		_swab_32_(x)
+#   define my_letohl(x)		_swab_32_(x)
+#  elif LONGSIZE == 8
+#   define my_htolel(x)		_swab_64_(x)
+#   define my_letohl(x)		_swab_64_(x)
+#  else
+#   define PERL_NEED_MY_HTOLEL
+#   define PERL_NEED_MY_LETOHL
+#  endif
+#  define my_htolen(p,n)	my_swabn(p,n)
+#  define my_letohn(p,n)	my_swabn(p,n)
+#  define my_htoben(p,n)	NOOP
+#  define my_betohn(p,n)	NOOP
+/*----------------------------------------------------------------------------*/
+# else /*                       all other byte-orders                         */
+/*----------------------------------------------------------------------------*/
+#  define PERL_NEED_MY_HTOLE16
+#  define PERL_NEED_MY_LETOH16
+#  define PERL_NEED_MY_HTOBE16
+#  define PERL_NEED_MY_BETOH16
+#  define PERL_NEED_MY_HTOLE32
+#  define PERL_NEED_MY_LETOH32
+#  define PERL_NEED_MY_HTOBE32
+#  define PERL_NEED_MY_BETOH32
+#  ifdef HAS_QUAD
+#   define PERL_NEED_MY_HTOLE64
+#   define PERL_NEED_MY_LETOH64
+#   define PERL_NEED_MY_HTOBE64
+#   define PERL_NEED_MY_BETOH64
+#  endif
+#  define PERL_NEED_MY_HTOLES
+#  define PERL_NEED_MY_LETOHS
+#  define PERL_NEED_MY_HTOBES
+#  define PERL_NEED_MY_BETOHS
+#  define PERL_NEED_MY_HTOLEI
+#  define PERL_NEED_MY_LETOHI
+#  define PERL_NEED_MY_HTOBEI
+#  define PERL_NEED_MY_BETOHI
+#  define PERL_NEED_MY_HTOLEL
+#  define PERL_NEED_MY_LETOHL
+#  define PERL_NEED_MY_HTOBEL
+#  define PERL_NEED_MY_BETOHL
+/*----------------------------------------------------------------------------*/
+# endif /*                     end of byte-order macros                       */
+/*----------------------------------------------------------------------------*/
+
+#endif /* PERL_CORE */
+
 /* Cannot include embed.h here on Win32 as win32.h has not 
    yet been included and defines some config variables e.g. HAVE_INTERP_INTERN
  */
@@ -1089,6 +1324,13 @@ typedef UVTYPE UV;
 #    undef UV_IS_QUAD
 #    undef HAS_QUAD
 #  endif
+#endif
+
+#ifndef HAS_QUAD
+# undef PERL_NEED_MY_HTOLE64
+# undef PERL_NEED_MY_LETOH64
+# undef PERL_NEED_MY_HTOBE64
+# undef PERL_NEED_MY_BETOH64
 #endif
 
 #if defined(uts) || defined(UTS)

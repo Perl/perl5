@@ -2155,6 +2155,129 @@
 #ifdef PERL_CORE
 #define magic_scalarpack	Perl_magic_scalarpack
 #endif
+#ifdef PERL_NEED_MY_HTOLE16
+#ifdef PERL_CORE
+#define my_htole16		Perl_my_htole16
+#endif
+#endif
+#ifdef PERL_NEED_MY_LETOH16
+#ifdef PERL_CORE
+#define my_letoh16		Perl_my_letoh16
+#endif
+#endif
+#ifdef PERL_NEED_MY_HTOBE16
+#ifdef PERL_CORE
+#define my_htobe16		Perl_my_htobe16
+#endif
+#endif
+#ifdef PERL_NEED_MY_BETOH16
+#ifdef PERL_CORE
+#define my_betoh16		Perl_my_betoh16
+#endif
+#endif
+#ifdef PERL_NEED_MY_HTOLE32
+#ifdef PERL_CORE
+#define my_htole32		Perl_my_htole32
+#endif
+#endif
+#ifdef PERL_NEED_MY_LETOH32
+#ifdef PERL_CORE
+#define my_letoh32		Perl_my_letoh32
+#endif
+#endif
+#ifdef PERL_NEED_MY_HTOBE32
+#ifdef PERL_CORE
+#define my_htobe32		Perl_my_htobe32
+#endif
+#endif
+#ifdef PERL_NEED_MY_BETOH32
+#ifdef PERL_CORE
+#define my_betoh32		Perl_my_betoh32
+#endif
+#endif
+#ifdef PERL_NEED_MY_HTOLE64
+#ifdef PERL_CORE
+#define my_htole64		Perl_my_htole64
+#endif
+#endif
+#ifdef PERL_NEED_MY_LETOH64
+#ifdef PERL_CORE
+#define my_letoh64		Perl_my_letoh64
+#endif
+#endif
+#ifdef PERL_NEED_MY_HTOBE64
+#ifdef PERL_CORE
+#define my_htobe64		Perl_my_htobe64
+#endif
+#endif
+#ifdef PERL_NEED_MY_BETOH64
+#ifdef PERL_CORE
+#define my_betoh64		Perl_my_betoh64
+#endif
+#endif
+#ifdef PERL_NEED_MY_HTOLES
+#ifdef PERL_CORE
+#define my_htoles		Perl_my_htoles
+#endif
+#endif
+#ifdef PERL_NEED_MY_LETOHS
+#ifdef PERL_CORE
+#define my_letohs		Perl_my_letohs
+#endif
+#endif
+#ifdef PERL_NEED_MY_HTOBES
+#ifdef PERL_CORE
+#define my_htobes		Perl_my_htobes
+#endif
+#endif
+#ifdef PERL_NEED_MY_BETOHS
+#ifdef PERL_CORE
+#define my_betohs		Perl_my_betohs
+#endif
+#endif
+#ifdef PERL_NEED_MY_HTOLEI
+#ifdef PERL_CORE
+#define my_htolei		Perl_my_htolei
+#endif
+#endif
+#ifdef PERL_NEED_MY_LETOHI
+#ifdef PERL_CORE
+#define my_letohi		Perl_my_letohi
+#endif
+#endif
+#ifdef PERL_NEED_MY_HTOBEI
+#ifdef PERL_CORE
+#define my_htobei		Perl_my_htobei
+#endif
+#endif
+#ifdef PERL_NEED_MY_BETOHI
+#ifdef PERL_CORE
+#define my_betohi		Perl_my_betohi
+#endif
+#endif
+#ifdef PERL_NEED_MY_HTOLEL
+#ifdef PERL_CORE
+#define my_htolel		Perl_my_htolel
+#endif
+#endif
+#ifdef PERL_NEED_MY_LETOHL
+#ifdef PERL_CORE
+#define my_letohl		Perl_my_letohl
+#endif
+#endif
+#ifdef PERL_NEED_MY_HTOBEL
+#ifdef PERL_CORE
+#define my_htobel		Perl_my_htobel
+#endif
+#endif
+#ifdef PERL_NEED_MY_BETOHL
+#ifdef PERL_CORE
+#define my_betohl		Perl_my_betohl
+#endif
+#endif
+#ifdef PERL_CORE
+#define my_swabn		Perl_my_swabn
+#endif
 #define ck_anoncode		Perl_ck_anoncode
 #define ck_bitop		Perl_ck_bitop
 #define ck_concat		Perl_ck_concat
@@ -4646,6 +4769,129 @@
 #define hv_scalar(a)		Perl_hv_scalar(aTHX_ a)
 #ifdef PERL_CORE
 #define magic_scalarpack(a,b)	Perl_magic_scalarpack(aTHX_ a,b)
+#endif
+#ifdef PERL_NEED_MY_HTOLE16
+#ifdef PERL_CORE
+#define my_htole16		Perl_my_htole16
+#endif
+#endif
+#ifdef PERL_NEED_MY_LETOH16
+#ifdef PERL_CORE
+#define my_letoh16		Perl_my_letoh16
+#endif
+#endif
+#ifdef PERL_NEED_MY_HTOBE16
+#ifdef PERL_CORE
+#define my_htobe16		Perl_my_htobe16
+#endif
+#endif
+#ifdef PERL_NEED_MY_BETOH16
+#ifdef PERL_CORE
+#define my_betoh16		Perl_my_betoh16
+#endif
+#endif
+#ifdef PERL_NEED_MY_HTOLE32
+#ifdef PERL_CORE
+#define my_htole32		Perl_my_htole32
+#endif
+#endif
+#ifdef PERL_NEED_MY_LETOH32
+#ifdef PERL_CORE
+#define my_letoh32		Perl_my_letoh32
+#endif
+#endif
+#ifdef PERL_NEED_MY_HTOBE32
+#ifdef PERL_CORE
+#define my_htobe32		Perl_my_htobe32
+#endif
+#endif
+#ifdef PERL_NEED_MY_BETOH32
+#ifdef PERL_CORE
+#define my_betoh32		Perl_my_betoh32
+#endif
+#endif
+#ifdef PERL_NEED_MY_HTOLE64
+#ifdef PERL_CORE
+#define my_htole64		Perl_my_htole64
+#endif
+#endif
+#ifdef PERL_NEED_MY_LETOH64
+#ifdef PERL_CORE
+#define my_letoh64		Perl_my_letoh64
+#endif
+#endif
+#ifdef PERL_NEED_MY_HTOBE64
+#ifdef PERL_CORE
+#define my_htobe64		Perl_my_htobe64
+#endif
+#endif
+#ifdef PERL_NEED_MY_BETOH64
+#ifdef PERL_CORE
+#define my_betoh64		Perl_my_betoh64
+#endif
+#endif
+#ifdef PERL_NEED_MY_HTOLES
+#ifdef PERL_CORE
+#define my_htoles		Perl_my_htoles
+#endif
+#endif
+#ifdef PERL_NEED_MY_LETOHS
+#ifdef PERL_CORE
+#define my_letohs		Perl_my_letohs
+#endif
+#endif
+#ifdef PERL_NEED_MY_HTOBES
+#ifdef PERL_CORE
+#define my_htobes		Perl_my_htobes
+#endif
+#endif
+#ifdef PERL_NEED_MY_BETOHS
+#ifdef PERL_CORE
+#define my_betohs		Perl_my_betohs
+#endif
+#endif
+#ifdef PERL_NEED_MY_HTOLEI
+#ifdef PERL_CORE
+#define my_htolei		Perl_my_htolei
+#endif
+#endif
+#ifdef PERL_NEED_MY_LETOHI
+#ifdef PERL_CORE
+#define my_letohi		Perl_my_letohi
+#endif
+#endif
+#ifdef PERL_NEED_MY_HTOBEI
+#ifdef PERL_CORE
+#define my_htobei		Perl_my_htobei
+#endif
+#endif
+#ifdef PERL_NEED_MY_BETOHI
+#ifdef PERL_CORE
+#define my_betohi		Perl_my_betohi
+#endif
+#endif
+#ifdef PERL_NEED_MY_HTOLEL
+#ifdef PERL_CORE
+#define my_htolel		Perl_my_htolel
+#endif
+#endif
+#ifdef PERL_NEED_MY_LETOHL
+#ifdef PERL_CORE
+#define my_letohl		Perl_my_letohl
+#endif
+#endif
+#ifdef PERL_NEED_MY_HTOBEL
+#ifdef PERL_CORE
+#define my_htobel		Perl_my_htobel
+#endif
+#endif
+#ifdef PERL_NEED_MY_BETOHL
+#ifdef PERL_CORE
+#define my_betohl		Perl_my_betohl
+#endif
+#endif
+#ifdef PERL_CORE
+#define my_swabn		Perl_my_swabn
 #endif
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
 #define ck_bitop(a)		Perl_ck_bitop(aTHX_ a)

@@ -1746,7 +1746,7 @@ Perl_my_ntohl(pTHX_ long l)
  * -DWS
  */
 
-#define HTOV(name,type)						\
+#define HTOLE(name,type)					\
 	type							\
 	name (register type n)					\
 	{							\
@@ -1755,14 +1755,14 @@ Perl_my_ntohl(pTHX_ long l)
 		char c[sizeof(type)];				\
 	    } u;						\
 	    register I32 i;					\
-	    register I32 s;					\
-	    for (i = 0, s = 0; i < sizeof(u.c); i++, s += 8) {	\
+	    register I32 s = 0;					\
+	    for (i = 0; i < sizeof(u.c); i++, s += 8) {		\
 		u.c[i] = (n >> s) & 0xFF;			\
 	    }							\
 	    return u.value;					\
 	}
 
-#define VTOH(name,type)						\
+#define LETOH(name,type)					\
 	type							\
 	name (register type n)					\
 	{							\
@@ -1771,27 +1771,218 @@ Perl_my_ntohl(pTHX_ long l)
 		char c[sizeof(type)];				\
 	    } u;						\
 	    register I32 i;					\
-	    register I32 s;					\
+	    register I32 s = 0;					\
 	    u.value = n;					\
 	    n = 0;						\
-	    for (i = 0, s = 0; i < sizeof(u.c); i++, s += 8) {	\
-		n += (u.c[i] & 0xFF) << s;			\
+	    for (i = 0; i < sizeof(u.c); i++, s += 8) {		\
+		n |= ((type)(u.c[i] & 0xFF)) << s;		\
 	    }							\
 	    return n;						\
 	}
 
+/*
+ * Big-endian byte order functions.
+ */
+
+#define HTOBE(name,type)					\
+	type							\
+	name (register type n)					\
+	{							\
+	    union {						\
+		type value;					\
+		char c[sizeof(type)];				\
+	    } u;						\
+	    register I32 i;					\
+	    register I32 s = 8*(sizeof(u.c)-1);			\
+	    for (i = 0; i < sizeof(u.c); i++, s -= 8) {		\
+		u.c[i] = (n >> s) & 0xFF;			\
+	    }							\
+	    return u.value;					\
+	}
+
+#define BETOH(name,type)					\
+	type							\
+	name (register type n)					\
+	{							\
+	    union {						\
+		type value;					\
+		char c[sizeof(type)];				\
+	    } u;						\
+	    register I32 i;					\
+	    register I32 s = 8*(sizeof(u.c)-1);			\
+	    u.value = n;					\
+	    n = 0;						\
+	    for (i = 0; i < sizeof(u.c); i++, s -= 8) {		\
+		n |= ((type)(u.c[i] & 0xFF)) << s;		\
+	    }							\
+	    return n;						\
+	}
+
+/*
+ * If we just can't do it...
+ */
+
+#define NOT_AVAIL(name,type)                                    \
+        type                                                    \
+        name (register type n)                                  \
+        {                                                       \
+            Perl_croak_nocontext(#name "() not available");     \
+            return n; /* not reached */                         \
+        }
+
+
 #if defined(HAS_HTOVS) && !defined(htovs)
-HTOV(htovs,short)
+HTOLE(htovs,short)
 #endif
 #if defined(HAS_HTOVL) && !defined(htovl)
-HTOV(htovl,long)
+HTOLE(htovl,long)
 #endif
 #if defined(HAS_VTOHS) && !defined(vtohs)
-VTOH(vtohs,short)
+LETOH(vtohs,short)
 #endif
 #if defined(HAS_VTOHL) && !defined(vtohl)
-VTOH(vtohl,long)
+LETOH(vtohl,long)
 #endif
+
+#ifdef PERL_NEED_MY_HTOLE16
+# if U16SIZE == 2
+HTOLE(Perl_my_htole16,U16)
+# else
+NOT_AVAIL(Perl_my_htole16,U16)
+# endif
+#endif
+#ifdef PERL_NEED_MY_LETOH16
+# if U16SIZE == 2
+LETOH(Perl_my_letoh16,U16)
+# else
+NOT_AVAIL(Perl_my_letoh16,U16)
+# endif
+#endif
+#ifdef PERL_NEED_MY_HTOBE16
+# if U16SIZE == 2
+HTOBE(Perl_my_htobe16,U16)
+# else
+NOT_AVAIL(Perl_my_htobe16,U16)
+# endif
+#endif
+#ifdef PERL_NEED_MY_BETOH16
+# if U16SIZE == 2
+BETOH(Perl_my_betoh16,U16)
+# else
+NOT_AVAIL(Perl_my_betoh16,U16)
+# endif
+#endif
+
+#ifdef PERL_NEED_MY_HTOLE32
+# if U32SIZE == 4
+HTOLE(Perl_my_htole32,U32)
+# else
+NOT_AVAIL(Perl_my_htole32,U32)
+# endif
+#endif
+#ifdef PERL_NEED_MY_LETOH32
+# if U32SIZE == 4
+LETOH(Perl_my_letoh32,U32)
+# else
+NOT_AVAIL(Perl_my_letoh32,U32)
+# endif
+#endif
+#ifdef PERL_NEED_MY_HTOBE32
+# if U32SIZE == 4
+HTOBE(Perl_my_htobe32,U32)
+# else
+NOT_AVAIL(Perl_my_htobe32,U32)
+# endif
+#endif
+#ifdef PERL_NEED_MY_BETOH32
+# if U32SIZE == 4
+BETOH(Perl_my_betoh32,U32)
+# else
+NOT_AVAIL(Perl_my_betoh32,U32)
+# endif
+#endif
+
+#ifdef PERL_NEED_MY_HTOLE64
+# if U64SIZE == 8
+HTOLE(Perl_my_htole64,U64)
+# else
+NOT_AVAIL(Perl_my_htole64,U64)
+# endif
+#endif
+#ifdef PERL_NEED_MY_LETOH64
+# if U64SIZE == 8
+LETOH(Perl_my_letoh64,U64)
+# else
+NOT_AVAIL(Perl_my_letoh64,U64)
+# endif
+#endif
+#ifdef PERL_NEED_MY_HTOBE64
+# if U64SIZE == 8
+HTOBE(Perl_my_htobe64,U64)
+# else
+NOT_AVAIL(Perl_my_htobe64,U64)
+# endif
+#endif
+#ifdef PERL_NEED_MY_BETOH64
+# if U64SIZE == 8
+BETOH(Perl_my_betoh64,U64)
+# else
+NOT_AVAIL(Perl_my_betoh64,U64)
+# endif
+#endif
+
+#ifdef PERL_NEED_MY_HTOLES
+HTOLE(Perl_my_htoles,short)
+#endif
+#ifdef PERL_NEED_MY_LETOHS
+LETOH(Perl_my_letohs,short)
+#endif
+#ifdef PERL_NEED_MY_HTOBES
+HTOBE(Perl_my_htobes,short)
+#endif
+#ifdef PERL_NEED_MY_BETOHS
+BETOH(Perl_my_betohs,short)
+#endif
+
+#ifdef PERL_NEED_MY_HTOLEI
+HTOLE(Perl_my_htolei,int)
+#endif
+#ifdef PERL_NEED_MY_LETOHI
+LETOH(Perl_my_letohi,int)
+#endif
+#ifdef PERL_NEED_MY_HTOBEI
+HTOBE(Perl_my_htobei,int)
+#endif
+#ifdef PERL_NEED_MY_BETOHI
+BETOH(Perl_my_betohi,int)
+#endif
+
+#ifdef PERL_NEED_MY_HTOLEL
+HTOLE(Perl_my_htolel,long)
+#endif
+#ifdef PERL_NEED_MY_LETOHL
+LETOH(Perl_my_letohl,long)
+#endif
+#ifdef PERL_NEED_MY_HTOBEL
+HTOBE(Perl_my_htobel,long)
+#endif
+#ifdef PERL_NEED_MY_BETOHL
+BETOH(Perl_my_betohl,long)
+#endif
+
+void
+Perl_my_swabn(void *ptr, int n)
+{
+    register char *s = (char *)ptr;
+    register char *e = s + (n-1);
+    register char tc;
+
+    for (n /= 2; n > 0; s++, e--, n--) {
+      tc = *s;
+      *s = *e;
+      *e = tc;
+    }
+}
 
 PerlIO *
 Perl_my_popen_list(pTHX_ char *mode, int n, SV **args)

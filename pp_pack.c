@@ -55,16 +55,12 @@ static double UV_MAX_cxux = ((double)UV_MAX);
 /* CROSSCOMPILE and MULTIARCH are going to affect pp_pack() and pp_unpack().
    --jhi Feb 1999 */
 
-#if SHORTSIZE != SIZE16 || LONGSIZE != SIZE32
-#   define PERL_NATINT_PACK
-#endif
-
-#if LONGSIZE > 4 && defined(_CRAY)
-#  if BYTEORDER == 0x12345678
+#if U16SIZE > SIZE16 || U32SIZE > SIZE32
+#  if BYTEORDER == 0x1234 || BYTEORDER == 0x12345678    /* little-endian */
 #    define OFF16(p)	(char*)(p)
 #    define OFF32(p)	(char*)(p)
 #  else
-#    if BYTEORDER == 0x87654321
+#    if BYTEORDER == 0x4321 || BYTEORDER == 0x87654321  /* big-endian */
 #      define OFF16(p)	((char*)(p) + (sizeof(U16) - SIZE16))
 #      define OFF32(p)	((char*)(p) + (sizeof(U32) - SIZE32))
 #    else
@@ -135,6 +131,108 @@ S_mul128(pTHX_ SV *sv, U8 m)
 #endif
 
 #define TYPE_IS_SHRIEKING	0x100
+#define TYPE_IS_BIG_ENDIAN	0x200
+#define TYPE_IS_LITTLE_ENDIAN	0x400
+#define TYPE_ENDIANNESS_MASK	(TYPE_IS_BIG_ENDIAN|TYPE_IS_LITTLE_ENDIAN)
+#define TYPE_NO_ENDIANNESS(t)	((t) & ~TYPE_ENDIANNESS_MASK)
+#define TYPE_NO_MODIFIERS(t)	((t) & 0xFF)
+
+#define DO_BO_UNPACK(var, type)                                               \
+        STMT_START {                                                          \
+          switch (datumtype & TYPE_ENDIANNESS_MASK) {                         \
+            case TYPE_IS_BIG_ENDIAN:    var = my_betoh ## type (var); break;  \
+            case TYPE_IS_LITTLE_ENDIAN: var = my_letoh ## type (var); break;  \
+            default: break;                                                   \
+          }                                                                   \
+        } STMT_END
+
+#define DO_BO_PACK(var, type)                                                 \
+        STMT_START {                                                          \
+          switch (datumtype & TYPE_ENDIANNESS_MASK) {                         \
+            case TYPE_IS_BIG_ENDIAN:    var = my_htobe ## type (var); break;  \
+            case TYPE_IS_LITTLE_ENDIAN: var = my_htole ## type (var); break;  \
+            default: break;                                                   \
+          }                                                                   \
+        } STMT_END
+
+#define DO_BO_UNPACK_PTR(var, type, pre_cast)                                 \
+        STMT_START {                                                          \
+          switch (datumtype & TYPE_ENDIANNESS_MASK) {                         \
+            case TYPE_IS_BIG_ENDIAN:                                          \
+              var = (void *) my_betoh ## type ((pre_cast) var);               \
+              break;                                                          \
+            case TYPE_IS_LITTLE_ENDIAN:                                       \
+              var = (void *) my_letoh ## type ((pre_cast) var);               \
+              break;                                                          \
+            default:                                                          \
+              break;                                                          \
+          }                                                                   \
+        } STMT_END
+
+#define DO_BO_PACK_PTR(var, type, pre_cast)                                   \
+        STMT_START {                                                          \
+          switch (datumtype & TYPE_ENDIANNESS_MASK) {                         \
+            case TYPE_IS_BIG_ENDIAN:                                          \
+              var = (void *) my_htobe ## type ((pre_cast) var);               \
+              break;                                                          \
+            case TYPE_IS_LITTLE_ENDIAN:                                       \
+              var = (void *) my_htole ## type ((pre_cast) var);               \
+              break;                                                          \
+            default:                                                          \
+              break;                                                          \
+          }                                                                   \
+        } STMT_END
+
+#define BO_CANT_DOIT(action, type)                                            \
+         STMT_START {                                                         \
+           switch (datumtype & TYPE_ENDIANNESS_MASK) {                        \
+             case TYPE_IS_BIG_ENDIAN:                                         \
+               Perl_croak(aTHX_ "Can't %s big-endian %ss on this "            \
+                                "platform", #action, #type);                  \
+               break;                                                         \
+             case TYPE_IS_LITTLE_ENDIAN:                                      \
+               Perl_croak(aTHX_ "Can't %s little-endian %ss on this "         \
+                                "platform", #action, #type);                  \
+               break;                                                         \
+             default:                                                         \
+               break;                                                         \
+           }                                                                  \
+         } STMT_END
+
+#if PTRSIZE == INTSIZE
+# define DO_BO_UNPACK_P(var)	DO_BO_UNPACK_PTR(var, i, int)
+# define DO_BO_PACK_P(var)	DO_BO_PACK_PTR(var, i, int)
+#elif PTRSIZE == LONGSIZE
+# define DO_BO_UNPACK_P(var)	DO_BO_UNPACK_PTR(var, l, long)
+# define DO_BO_PACK_P(var)	DO_BO_PACK_PTR(var, l, long)
+#else
+# define DO_BO_UNPACK_P(var)	BO_CANT_DOIT(unpack, pointer)
+# define DO_BO_PACK_P(var)	BO_CANT_DOIT(pack, pointer)
+#endif
+
+#if defined(my_htolen) && defined(my_letohn) && \
+    defined(my_htoben) && defined(my_betohn)
+# define DO_BO_UNPACK_N(var, type)                                            \
+         STMT_START {                                                         \
+           switch (datumtype & TYPE_ENDIANNESS_MASK) {                        \
+             case TYPE_IS_BIG_ENDIAN:    my_betohn(&var, sizeof(type)); break;\
+             case TYPE_IS_LITTLE_ENDIAN: my_letohn(&var, sizeof(type)); break;\
+             default: break;                                                  \
+           }                                                                  \
+         } STMT_END
+
+# define DO_BO_PACK_N(var, type)                                              \
+         STMT_START {                                                         \
+           switch (datumtype & TYPE_ENDIANNESS_MASK) {                        \
+             case TYPE_IS_BIG_ENDIAN:    my_htoben(&var, sizeof(type)); break;\
+             case TYPE_IS_LITTLE_ENDIAN: my_htolen(&var, sizeof(type)); break;\
+             default: break;                                                  \
+           }                                                                  \
+         } STMT_END
+#else
+# define DO_BO_UNPACK_N(var, type)	BO_CANT_DOIT(unpack, type)
+# define DO_BO_PACK_N(var, type)	BO_CANT_DOIT(pack, type)
+#endif
 
 /* Returns the sizeof() struct described by pat */
 STATIC I32
@@ -159,10 +257,11 @@ S_measure_struct(pTHX_ register tempsym_t* symptr)
             break;
         }
 
-	switch(symptr->code) {
+        /* endianness doesn't influence the size of a type */
+	switch(TYPE_NO_ENDIANNESS(symptr->code)) {
 	default:
-    Perl_croak(aTHX_ "Invalid type '%c' in %s",
-                       (int)symptr->code,
+            Perl_croak(aTHX_ "Invalid type '%c' in %s",
+                       (int)TYPE_NO_MODIFIERS(symptr->code),
                        symptr->flags & FLAG_PACK ? "pack" : "unpack" );
 	case '@':
 	case '/':
@@ -415,15 +514,44 @@ S_next_symbol(pTHX_ register tempsym_t* symptr )
                      symptr->flags & FLAG_PACK ? "pack" : "unpack" );
       }
 
-      /* test for '!' modifier */
-      if (patptr < patend && *patptr == '!') {
-	static const char natstr[] = "sSiIlLxXnNvV";
-        patptr++;	        
-        if (strchr(natstr, code))
- 	  code |= TYPE_IS_SHRIEKING;
-        else
-   	  Perl_croak(aTHX_ "'!' allowed only after types %s in %s",
-                     natstr, symptr->flags & FLAG_PACK ? "pack" : "unpack" );
+      /* look for modifiers */
+      while (patptr < patend) {
+        const char *allowed;
+        I32 modifier = 0;
+        switch (*patptr) {
+          case '!':
+            modifier = TYPE_IS_SHRIEKING;
+            allowed = "sSiIlLxXnNvV";
+            break;
+          case '>':
+            modifier = TYPE_IS_BIG_ENDIAN;
+            allowed = "sSiIlLqQjJfFdDpP";
+            break;
+          case '<':
+            modifier = TYPE_IS_LITTLE_ENDIAN;
+            allowed = "sSiIlLqQjJfFdDpP";
+            break;
+          default:
+            break;
+        }
+        if (modifier == 0)
+          break;
+        if (!strchr(allowed, TYPE_NO_MODIFIERS(code)))
+          Perl_croak(aTHX_ "'%c' allowed only after types %s in %s", *patptr,
+                     allowed, symptr->flags & FLAG_PACK ? "pack" : "unpack" );
+        if ((code | modifier) == (code | TYPE_IS_BIG_ENDIAN | TYPE_IS_LITTLE_ENDIAN))
+          Perl_croak(aTHX_ "Can't use both '<' and '>' after type '%c' in %s",
+                     (int) TYPE_NO_MODIFIERS(code),
+                     symptr->flags & FLAG_PACK ? "pack" : "unpack" );
+        if (ckWARN(WARN_UNPACK)) {
+          if (code & modifier)
+	    Perl_warner(aTHX_ packWARN(WARN_UNPACK),
+                        "Duplicate modifier '%c' after '%c' in %s",
+                        *patptr, (int) TYPE_NO_MODIFIERS(code),
+                        symptr->flags & FLAG_PACK ? "pack" : "unpack" );
+        }
+        code |= modifier;
+        patptr++;
       }
 
       /* look for count and/or / */ 
@@ -548,7 +676,6 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
     howlen_t howlen;
 
     /* These must not be in registers: */
-    short ashort;
     int aint;
     long along;
 #ifdef HAS_QUAD
@@ -602,9 +729,9 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 
       redo_switch:
         beyond = s >= strend;
-	switch(datumtype) {
+	switch(TYPE_NO_ENDIANNESS(datumtype)) {
 	default:
-	    Perl_croak(aTHX_ "Invalid type '%c' in unpack", (int)datumtype );
+	    Perl_croak(aTHX_ "Invalid type '%c' in unpack", (int)TYPE_NO_MODIFIERS(datumtype) );
 
 	case '%':
 	    if (howlen == e_no_len)
@@ -894,13 +1021,13 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	    if (checksum) {
 		short ashort;
 		while (len-- > 0) {
-		     COPYNN(s, &ashort, sizeof(short));
-		      s += sizeof(short);
-		      if (checksum > bits_in_uv)
-			  cdouble += (NV)ashort;
-		      else
-			  cuv += ashort;
-
+		    COPYNN(s, &ashort, sizeof(short));
+		    DO_BO_UNPACK(ashort, s);
+		    s += sizeof(short);
+		    if (checksum > bits_in_uv)
+			cdouble += (NV)ashort;
+		    else
+			cuv += ashort;
 		}
 	    }
 	    else {
@@ -911,6 +1038,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		EXTEND_MORTAL(len);
 		while (len-- > 0) {
 		    COPYNN(s, &ashort, sizeof(short));
+		    DO_BO_UNPACK(ashort, s);
 		    s += sizeof(short);
 		    sv = NEWSV(38, 0);
 		    sv_setiv(sv, (IV)ashort);
@@ -927,16 +1055,17 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		len = along;
 	    if (checksum) {
       		while (len-- > 0) {
-		    COPY16(s, &ashort);
-#if SHORTSIZE > SIZE16
-		    if (ashort > 32767)
-			ashort -= 65536;
+		    COPY16(s, &asshort);
+		    DO_BO_UNPACK(asshort, 16);
+#if U16SIZE > SIZE16
+		    if (asshort > 32767)
+			asshort -= 65536;
 #endif
 		    s += SIZE16;
 		    if (checksum > bits_in_uv)
-			cdouble += (NV)ashort;
+			cdouble += (NV)asshort;
 		    else
-			cuv += ashort;
+			cuv += asshort;
 		}
 	    }
 	    else {
@@ -946,14 +1075,15 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		EXTEND_MORTAL(len);
 
 		while (len-- > 0) {
-		    COPY16(s, &ashort);
-#if SHORTSIZE > SIZE16
-		    if (ashort > 32767)
-			ashort -= 65536;
+		    COPY16(s, &asshort);
+		    DO_BO_UNPACK(asshort, 16);
+#if U16SIZE > SIZE16
+		    if (asshort > 32767)
+			asshort -= 65536;
 #endif
 		    s += SIZE16;
 		    sv = NEWSV(38, 0);
-		    sv_setiv(sv, (IV)ashort);
+		    sv_setiv(sv, (IV)asshort);
 		    PUSHs(sv_2mortal(sv));
 		}
 	    }
@@ -967,6 +1097,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		unsigned short aushort;
 		while (len-- > 0) {
 		    COPYNN(s, &aushort, sizeof(unsigned short));
+		    DO_BO_UNPACK(aushort, s);
 		    s += sizeof(unsigned short);
 		    if (checksum > bits_in_uv)
 			cdouble += (NV)aushort;
@@ -982,6 +1113,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		while (len-- > 0) {
   		    unsigned short aushort;
 		    COPYNN(s, &aushort, sizeof(unsigned short));
+		    DO_BO_UNPACK(aushort, s);
 		    s += sizeof(unsigned short);
 		    sv = NEWSV(39, 0);
 		    sv_setiv(sv, (UV)aushort);
@@ -1001,6 +1133,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	    if (checksum) {
 		while (len-- > 0) {
 		    COPY16(s, &aushort);
+		    DO_BO_UNPACK(aushort, 16);
 		    s += SIZE16;
 #ifdef HAS_NTOHS
 		    if (datumtype == 'n')
@@ -1023,6 +1156,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		EXTEND_MORTAL(len);
 		while (len-- > 0) {
 		    COPY16(s, &aushort);
+		    DO_BO_UNPACK(aushort, 16);
 		    s += SIZE16;
 		    sv = NEWSV(39, 0);
 #ifdef HAS_NTOHS
@@ -1091,6 +1225,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	    if (checksum) {
 		while (len-- > 0) {
 		    Copy(s, &aint, 1, int);
+		    DO_BO_UNPACK(aint, i);
 		    s += sizeof(int);
 		    if (checksum > bits_in_uv)
 			cdouble += (NV)aint;
@@ -1105,6 +1240,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		EXTEND_MORTAL(len);
 		while (len-- > 0) {
 		    Copy(s, &aint, 1, int);
+		    DO_BO_UNPACK(aint, i);
 		    s += sizeof(int);
 		    sv = NEWSV(40, 0);
 #ifdef __osf__
@@ -1145,6 +1281,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	    if (checksum) {
 		while (len-- > 0) {
 		    Copy(s, &auint, 1, unsigned int);
+		    DO_BO_UNPACK(auint, i);
 		    s += sizeof(unsigned int);
 		    if (checksum > bits_in_uv)
 			cdouble += (NV)auint;
@@ -1159,6 +1296,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		EXTEND_MORTAL(len);
 		while (len-- > 0) {
 		    Copy(s, &auint, 1, unsigned int);
+		    DO_BO_UNPACK(auint, i);
 		    s += sizeof(unsigned int);
 		    sv = NEWSV(41, 0);
 #ifdef __osf__
@@ -1180,6 +1318,13 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	    if (checksum) {
 		while (len-- > 0) {
 		    Copy(s, &aiv, 1, IV);
+#if IVSIZE == INTSIZE
+		    DO_BO_UNPACK(aiv, i);
+#elif IVSIZE == LONGSIZE
+		    DO_BO_UNPACK(aiv, l);
+#elif defined(HAS_QUAD) && IVSIZE == U64SIZE
+		    DO_BO_UNPACK(aiv, 64);
+#endif
 		    s += IVSIZE;
 		    if (checksum > bits_in_uv)
 			cdouble += (NV)aiv;
@@ -1194,6 +1339,13 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		EXTEND_MORTAL(len);
 		while (len-- > 0) {
 		    Copy(s, &aiv, 1, IV);
+#if IVSIZE == INTSIZE
+		    DO_BO_UNPACK(aiv, i);
+#elif IVSIZE == LONGSIZE
+		    DO_BO_UNPACK(aiv, l);
+#elif defined(HAS_QUAD) && IVSIZE == U64SIZE
+		    DO_BO_UNPACK(aiv, 64);
+#endif
 		    s += IVSIZE;
 		    sv = NEWSV(40, 0);
 		    sv_setiv(sv, aiv);
@@ -1208,6 +1360,13 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	    if (checksum) {
 		while (len-- > 0) {
 		    Copy(s, &auv, 1, UV);
+#if UVSIZE == INTSIZE
+		    DO_BO_UNPACK(auv, i);
+#elif UVSIZE == LONGSIZE
+		    DO_BO_UNPACK(auv, l);
+#elif defined(HAS_QUAD) && UVSIZE == U64SIZE
+		    DO_BO_UNPACK(auv, 64);
+#endif
 		    s += UVSIZE;
 		    if (checksum > bits_in_uv)
 			cdouble += (NV)auv;
@@ -1222,6 +1381,13 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		EXTEND_MORTAL(len);
 		while (len-- > 0) {
 		    Copy(s, &auv, 1, UV);
+#if UVSIZE == INTSIZE
+		    DO_BO_UNPACK(auv, i);
+#elif UVSIZE == LONGSIZE
+		    DO_BO_UNPACK(auv, l);
+#elif defined(HAS_QUAD) && UVSIZE == U64SIZE
+		    DO_BO_UNPACK(auv, 64);
+#endif
 		    s += UVSIZE;
 		    sv = NEWSV(41, 0);
 		    sv_setuv(sv, auv);
@@ -1237,6 +1403,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	    if (checksum) {
 		while (len-- > 0) {
 		    COPYNN(s, &along, sizeof(long));
+		    DO_BO_UNPACK(along, l);
 		    s += sizeof(long);
 		    if (checksum > bits_in_uv)
 			cdouble += (NV)along;
@@ -1251,6 +1418,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		EXTEND_MORTAL(len);
 		while (len-- > 0) {
 		    COPYNN(s, &along, sizeof(long));
+		    DO_BO_UNPACK(along, l);
 		    s += sizeof(long);
 		    sv = NEWSV(42, 0);
 		    sv_setiv(sv, (IV)along);
@@ -1271,6 +1439,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		    I32 along;
 #endif
 		    COPY32(s, &along);
+		    DO_BO_UNPACK(along, 32);
 #if LONGSIZE > SIZE32
 		    if (along > 2147483647)
 		        along -= 4294967296;
@@ -1292,6 +1461,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		    I32 along;
 #endif
 		    COPY32(s, &along);
+		    DO_BO_UNPACK(along, 32);
 #if LONGSIZE > SIZE32
 		    if (along > 2147483647)
 		        along -= 4294967296;
@@ -1312,6 +1482,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		while (len-- > 0) {
 		    unsigned long aulong;
 		    COPYNN(s, &aulong, sizeof(unsigned long));
+		    DO_BO_UNPACK(aulong, l);
 		    s += sizeof(unsigned long);
 		    if (checksum > bits_in_uv)
 			cdouble += (NV)aulong;
@@ -1327,6 +1498,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		while (len-- > 0) {
 		    unsigned long aulong;
 		    COPYNN(s, &aulong, sizeof(unsigned long));
+		    DO_BO_UNPACK(aulong, l);
 		    s += sizeof(unsigned long);
 		    sv = NEWSV(43, 0);
 		    sv_setuv(sv, (UV)aulong);
@@ -1346,6 +1518,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	    if (checksum) {
 		while (len-- > 0) {
 		    COPY32(s, &aulong);
+		    DO_BO_UNPACK(aulong, 32);
 		    s += SIZE32;
 #ifdef HAS_NTOHL
 		    if (datumtype == 'N')
@@ -1368,6 +1541,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		EXTEND_MORTAL(len);
 		while (len-- > 0) {
 		    COPY32(s, &aulong);
+		    DO_BO_UNPACK(aulong, 32);
 		    s += SIZE32;
 #ifdef HAS_NTOHL
 		    if (datumtype == 'N')
@@ -1439,6 +1613,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		    break;
 		else {
 		    Copy(s, &aptr, 1, char*);
+		    DO_BO_UNPACK_P(aptr);
 		    s += sizeof(char*);
 		}
 		sv = NEWSV(44, 0);
@@ -1500,6 +1675,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		break;
 	    else {
 		Copy(s, &aptr, 1, char*);
+		DO_BO_UNPACK_P(aptr);
 		s += sizeof(char*);
 	    }
 	    sv = NEWSV(44, 0);
@@ -1515,6 +1691,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	    if (checksum) {
 		while (len-- > 0) {
 		    Copy(s, &aquad, 1, Quad_t);
+		    DO_BO_UNPACK(aquad, 64);
 		    s += sizeof(Quad_t);
 		    if (checksum > bits_in_uv)
 			cdouble += (NV)aquad;
@@ -1532,6 +1709,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
                         aquad = 0;
                     else {
 		        Copy(s, &aquad, 1, Quad_t);
+			DO_BO_UNPACK(aquad, 64);
 		        s += sizeof(Quad_t);
                     }
                     sv = NEWSV(42, 0);
@@ -1550,6 +1728,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	    if (checksum) {
 		while (len-- > 0) {
 		    Copy(s, &auquad, 1, Uquad_t);
+		    DO_BO_UNPACK(auquad, 64);
 		    s += sizeof(Uquad_t);
 		    if (checksum > bits_in_uv)
 			cdouble += (NV)auquad;
@@ -1567,6 +1746,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
                         auquad = 0;
                     else {
                         Copy(s, &auquad, 1, Uquad_t);
+			DO_BO_UNPACK(auquad, 64);
                         s += sizeof(Uquad_t);
                     }
                     sv = NEWSV(43, 0);
@@ -1587,6 +1767,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	    if (checksum) {
 		while (len-- > 0) {
 		    Copy(s, &afloat, 1, float);
+		    DO_BO_UNPACK_N(afloat, float);
 		    s += sizeof(float);
 		    cdouble += afloat;
 		}
@@ -1598,6 +1779,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		EXTEND_MORTAL(len);
 		while (len-- > 0) {
 		    Copy(s, &afloat, 1, float);
+		    DO_BO_UNPACK_N(afloat, float);
 		    s += sizeof(float);
 		    sv = NEWSV(47, 0);
 		    sv_setnv(sv, (NV)afloat);
@@ -1612,6 +1794,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	    if (checksum) {
 		while (len-- > 0) {
 		    Copy(s, &adouble, 1, double);
+		    DO_BO_UNPACK_N(adouble, double);
 		    s += sizeof(double);
 		    cdouble += adouble;
 		}
@@ -1623,6 +1806,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		EXTEND_MORTAL(len);
 		while (len-- > 0) {
 		    Copy(s, &adouble, 1, double);
+		    DO_BO_UNPACK_N(adouble, double);
 		    s += sizeof(double);
 		    sv = NEWSV(48, 0);
 		    sv_setnv(sv, (NV)adouble);
@@ -1637,6 +1821,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	    if (checksum) {
 		while (len-- > 0) {
 		    Copy(s, &anv, 1, NV);
+		    DO_BO_UNPACK_N(anv, NV);
 		    s += NVSIZE;
 		    cdouble += anv;
 		}
@@ -1648,6 +1833,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		EXTEND_MORTAL(len);
 		while (len-- > 0) {
 		    Copy(s, &anv, 1, NV);
+		    DO_BO_UNPACK_N(anv, NV);
 		    s += NVSIZE;
 		    sv = NEWSV(48, 0);
 		    sv_setnv(sv, anv);
@@ -1663,6 +1849,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	    if (checksum) {
 		while (len-- > 0) {
 		    Copy(s, &aldouble, 1, long double);
+		    DO_BO_UNPACK_N(aldouble, long double);
 		    s += LONG_DOUBLESIZE;
 		    cdouble += aldouble;
 		}
@@ -1674,6 +1861,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		EXTEND_MORTAL(len);
 		while (len-- > 0) {
 		    Copy(s, &aldouble, 1, long double);
+		    DO_BO_UNPACK_N(aldouble, long double);
 		    s += LONG_DOUBLESIZE;
 		    sv = NEWSV(48, 0);
 		    sv_setnv(sv, (NV)aldouble);
@@ -1745,9 +1933,9 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 
 	if (checksum) {
 	    sv = NEWSV(42, 0);
-	    if (strchr("fFdD", datumtype) ||
+	    if (strchr("fFdD", TYPE_NO_MODIFIERS(datumtype)) ||
 	      (checksum > bits_in_uv &&
-	       strchr("csSiIlLnNUvVqQjJ", datumtype&0xFF)) ) {
+	       strchr("csSiIlLnNUvVqQjJ", TYPE_NO_MODIFIERS(datumtype))) ) {
 		NV trouble;
 
                 adouble = (NV) (1 << (checksum & 15));
@@ -2036,7 +2224,7 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 	    len = symptr->length;
 	    break;
         case e_star:
-	    len = strchr("@Xxu", datumtype) ? 0 : items; 
+	    len = strchr("@Xxu", TYPE_NO_MODIFIERS(datumtype)) ? 0 : items; 
 	    break;
         }
 
@@ -2056,9 +2244,9 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
             }
 	}
 
-	switch(datumtype) {
+	switch(TYPE_NO_ENDIANNESS(datumtype)) {
 	default:
-	    Perl_croak(aTHX_ "Invalid type '%c' in pack", (int)datumtype);
+	    Perl_croak(aTHX_ "Invalid type '%c' in pack", (int)TYPE_NO_MODIFIERS(datumtype));
 	case '%':
 	    Perl_croak(aTHX_ "'%%' may not be used in pack");
 	case '@':
@@ -2264,7 +2452,7 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 	case 'c':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
-		switch (datumtype) {
+		switch (TYPE_NO_MODIFIERS(datumtype)) {
 		case 'C':
 		    aint = SvIV(fromstr);
 		    if ((aint < 0 || aint > 255) &&
@@ -2330,6 +2518,7 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 		afloat = (float)SvNV(fromstr);
 # endif
 #endif
+		DO_BO_PACK_N(afloat, float);
 		sv_catpvn(cat, (char *)&afloat, sizeof (float));
 	    }
 	    break;
@@ -2362,21 +2551,27 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 		adouble = (double)SvNV(fromstr);
 # endif
 #endif
+		DO_BO_PACK_N(adouble, double);
 		sv_catpvn(cat, (char *)&adouble, sizeof (double));
 	    }
 	    break;
 	case 'F':
+	    Zero(&anv, 1, NV); /* can be long double with unused bits */
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
 		anv = SvNV(fromstr);
+		DO_BO_PACK_N(anv, NV);
 		sv_catpvn(cat, (char *)&anv, NVSIZE);
 	    }
 	    break;
 #if defined(HAS_LONG_DOUBLE) && defined(USE_LONG_DOUBLE)
 	case 'D':
+	    /* long doubles can have unused bits, which may be nonzero */
+	    Zero(&aldouble, 1, long double);
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
 		aldouble = (long double)SvNV(fromstr);
+		DO_BO_PACK_N(aldouble, long double);
 		sv_catpvn(cat, (char *)&aldouble, LONG_DOUBLESIZE);
 	    }
 	    break;
@@ -2411,6 +2606,7 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 		while (len-- > 0) {
 		    fromstr = NEXTFROM;
 		    aushort = SvUV(fromstr);
+		    DO_BO_PACK(aushort, s);
 		    sv_catpvn(cat, (char *)&aushort, sizeof(unsigned short));
 		}
             }
@@ -2425,6 +2621,7 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 		while (len-- > 0) {
 		    fromstr = NEXTFROM;
 		    aushort = (U16)SvUV(fromstr);
+		    DO_BO_PACK(aushort, 16);
 		    CAT16(cat, &aushort);
 		}
 
@@ -2438,6 +2635,7 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 		while (len-- > 0) {
 		    fromstr = NEXTFROM;
 		    ashort = SvIV(fromstr);
+		    DO_BO_PACK(ashort, s);
 		    sv_catpvn(cat, (char *)&ashort, sizeof(short));
 		}
 	    }
@@ -2449,6 +2647,7 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
 		ashort = (I16)SvIV(fromstr);
+		DO_BO_PACK(ashort, 16);
 		CAT16(cat, &ashort);
 	    }
 	    break;
@@ -2457,6 +2656,7 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
 		auint = SvUV(fromstr);
+		DO_BO_PACK(auint, i);
 		sv_catpvn(cat, (char*)&auint, sizeof(unsigned int));
 	    }
 	    break;
@@ -2464,6 +2664,13 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
 		aiv = SvIV(fromstr);
+#if IVSIZE == INTSIZE
+		DO_BO_PACK(aiv, i);
+#elif IVSIZE == LONGSIZE
+		DO_BO_PACK(aiv, l);
+#elif defined(HAS_QUAD) && IVSIZE == U64SIZE
+		DO_BO_PACK(aiv, 64);
+#endif
 		sv_catpvn(cat, (char*)&aiv, IVSIZE);
 	    }
 	    break;
@@ -2471,6 +2678,13 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
 		auv = SvUV(fromstr);
+#if UVSIZE == INTSIZE
+		DO_BO_PACK(auv, i);
+#elif UVSIZE == LONGSIZE
+		DO_BO_PACK(auv, l);
+#elif defined(HAS_QUAD) && UVSIZE == U64SIZE
+		DO_BO_PACK(auv, 64);
+#endif
 		sv_catpvn(cat, (char*)&auv, UVSIZE);
 	    }
 	    break;
@@ -2580,6 +2794,7 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
 		aint = SvIV(fromstr);
+		DO_BO_PACK(aint, i);
 		sv_catpvn(cat, (char*)&aint, sizeof(int));
 	    }
 	    break;
@@ -2613,6 +2828,7 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 		while (len-- > 0) {
 		    fromstr = NEXTFROM;
 		    aulong = SvUV(fromstr);
+		    DO_BO_PACK(aulong, l);
 		    sv_catpvn(cat, (char *)&aulong, sizeof(unsigned long));
 		}
 	    }
@@ -2625,6 +2841,7 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 		while (len-- > 0) {
 		    fromstr = NEXTFROM;
 		    aulong = SvUV(fromstr);
+		    DO_BO_PACK(aulong, 32);
 		    CAT32(cat, &aulong);
 		}
 	    }
@@ -2637,6 +2854,7 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 		while (len-- > 0) {
 		    fromstr = NEXTFROM;
 		    along = SvIV(fromstr);
+		    DO_BO_PACK(along, l);
 		    sv_catpvn(cat, (char *)&along, sizeof(long));
 		}
 	    }
@@ -2648,6 +2866,7 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
             while (len-- > 0) {
 		fromstr = NEXTFROM;
 		along = SvIV(fromstr);
+		DO_BO_PACK(along, 32);
 		CAT32(cat, &along);
 	    }
 	    break;
@@ -2656,6 +2875,7 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
 		auquad = (Uquad_t)SvUV(fromstr);
+		DO_BO_PACK(auquad, 64);
 		sv_catpvn(cat, (char*)&auquad, sizeof(Uquad_t));
 	    }
 	    break;
@@ -2663,6 +2883,7 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
 		aquad = (Quad_t)SvIV(fromstr);
+		DO_BO_PACK(aquad, 64);
 		sv_catpvn(cat, (char*)&aquad, sizeof(Quad_t));
 	    }
 	    break;
@@ -2694,6 +2915,7 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 		    else
 			aptr = SvPV_force(fromstr,n_a);
 		}
+		DO_BO_PACK_P(aptr);
 		sv_catpvn(cat, (char*)&aptr, sizeof(char*));
 	    }
 	    break;

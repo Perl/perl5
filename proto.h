@@ -1345,4 +1345,80 @@ PERL_CALLCONV void	Perl_hv_clear_placeholders(pTHX_ HV* hb);
 PERL_CALLCONV SV*	Perl_hv_scalar(pTHX_ HV* hv);
 PERL_CALLCONV SV*	Perl_magic_scalarpack(pTHX_ HV* hv, MAGIC*	mg);
 
+#ifdef PERL_NEED_MY_HTOLE16
+PERL_CALLCONV U16	Perl_my_htole16(U16 n);
+#endif
+#ifdef PERL_NEED_MY_LETOH16
+PERL_CALLCONV U16	Perl_my_letoh16(U16 n);
+#endif
+#ifdef PERL_NEED_MY_HTOBE16
+PERL_CALLCONV U16	Perl_my_htobe16(U16 n);
+#endif
+#ifdef PERL_NEED_MY_BETOH16
+PERL_CALLCONV U16	Perl_my_betoh16(U16 n);
+#endif
+#ifdef PERL_NEED_MY_HTOLE32
+PERL_CALLCONV U32	Perl_my_htole32(U32 n);
+#endif
+#ifdef PERL_NEED_MY_LETOH32
+PERL_CALLCONV U32	Perl_my_letoh32(U32 n);
+#endif
+#ifdef PERL_NEED_MY_HTOBE32
+PERL_CALLCONV U32	Perl_my_htobe32(U32 n);
+#endif
+#ifdef PERL_NEED_MY_BETOH32
+PERL_CALLCONV U32	Perl_my_betoh32(U32 n);
+#endif
+#ifdef PERL_NEED_MY_HTOLE64
+PERL_CALLCONV U64	Perl_my_htole64(U64 n);
+#endif
+#ifdef PERL_NEED_MY_LETOH64
+PERL_CALLCONV U64	Perl_my_letoh64(U64 n);
+#endif
+#ifdef PERL_NEED_MY_HTOBE64
+PERL_CALLCONV U64	Perl_my_htobe64(U64 n);
+#endif
+#ifdef PERL_NEED_MY_BETOH64
+PERL_CALLCONV U64	Perl_my_betoh64(U64 n);
+#endif
+
+#ifdef PERL_NEED_MY_HTOLES
+PERL_CALLCONV short	Perl_my_htoles(short n);
+#endif
+#ifdef PERL_NEED_MY_LETOHS
+PERL_CALLCONV short	Perl_my_letohs(short n);
+#endif
+#ifdef PERL_NEED_MY_HTOBES
+PERL_CALLCONV short	Perl_my_htobes(short n);
+#endif
+#ifdef PERL_NEED_MY_BETOHS
+PERL_CALLCONV short	Perl_my_betohs(short n);
+#endif
+#ifdef PERL_NEED_MY_HTOLEI
+PERL_CALLCONV int	Perl_my_htolei(int n);
+#endif
+#ifdef PERL_NEED_MY_LETOHI
+PERL_CALLCONV int	Perl_my_letohi(int n);
+#endif
+#ifdef PERL_NEED_MY_HTOBEI
+PERL_CALLCONV int	Perl_my_htobei(int n);
+#endif
+#ifdef PERL_NEED_MY_BETOHI
+PERL_CALLCONV int	Perl_my_betohi(int n);
+#endif
+#ifdef PERL_NEED_MY_HTOLEL
+PERL_CALLCONV long	Perl_my_htolel(long n);
+#endif
+#ifdef PERL_NEED_MY_LETOHL
+PERL_CALLCONV long	Perl_my_letohl(long n);
+#endif
+#ifdef PERL_NEED_MY_HTOBEL
+PERL_CALLCONV long	Perl_my_htobel(long n);
+#endif
+#ifdef PERL_NEED_MY_BETOHL
+PERL_CALLCONV long	Perl_my_betohl(long n);
+#endif
+
+PERL_CALLCONV void	Perl_my_swabn(void* ptr, int n);
+
 END_EXTERN_C

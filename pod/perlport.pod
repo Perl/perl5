@@ -224,6 +224,10 @@ them in big-endian mode.  To avoid this problem in network (socket)
 connections use the C<pack> and C<unpack> formats C<n> and C<N>, the
 "network" orders.  These are guaranteed to be portable.
 
+As of perl 5.8.5, you can also use the C<E<gt>> and C<E<lt>> modifiers
+to force big- or little-endian byte-order.  This is useful if you want
+to store signed integers or 64-bit integers, for example.
+
 You can explore the endianness of your platform by unpacking a
 data structure packed in native format such as:
 
