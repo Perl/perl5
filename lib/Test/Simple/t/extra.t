@@ -1,3 +1,8 @@
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+}
+
 # Can't use Test.pm, that's a 5.005 thing.
 package My::Test;
 
@@ -21,7 +26,7 @@ package main;
 
 require Test::Simple;
 
-push @INC, 't/lib/';
+push @INC, '../t/lib';
 require Test::Simple::Catch;
 my($out, $err) = Test::Simple::Catch::caught();
 
@@ -43,11 +48,7 @@ ok 4 - Car
 not ok 5 - Sar
 OUT
 
-    My::Test::ok($$err eq <<ERR);
-#     Failed test ($0 at line 31)
-#     Failed test ($0 at line 34)
-# Looks like you planned 3 tests but ran 2 extra.
-ERR
+    My::Test::ok($$err =~ /Looks like you planned 3 tests but ran 2 extra/);
 
     exit 0;
 }

@@ -13,6 +13,11 @@ BEGIN {
 
 use strict;
 
+BEGIN { 
+    chdir 't' if -d 't';
+    @INC = '../lib';
+}
+
 # Can't use Test.pm, that's a 5.005 thing.
 package My::Test;
 
@@ -36,7 +41,7 @@ package main;
 
 require Test::More;
 
-push @INC, 't/lib';
+push @INC, '../t/lib';
 require Test::Simple::Catch::More;
 my($out, $err) = Test::Simple::Catch::More::caught();
 

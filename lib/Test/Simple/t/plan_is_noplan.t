@@ -30,7 +30,7 @@ package main;
 
 require Test::Simple;
 
-push @INC, 't/lib';
+push @INC, '../t/lib';
 require Test::Simple::Catch::More;
 my($out, $err) = Test::Simple::Catch::More::caught();
 

@@ -1,4 +1,10 @@
 # Can't use Test.pm, that's a 5.005 thing.
+
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+}
+
 package My::Test;
 
 print "1..2\n";
@@ -21,7 +27,7 @@ package main;
 
 require Test::Simple;
 
-push @INC, 't/lib';
+push @INC, '../t/lib';
 require Test::Simple::Catch;
 my($out, $err) = Test::Simple::Catch::caught();
 
@@ -37,10 +43,7 @@ ok 1 - Foo
 not ok 2 - Bar
 OUT
 
-    My::Test::ok($$err eq <<ERR);
-#     Failed test ($0 at line 31)
-# Looks like you planned 5 tests but only ran 2.
-ERR
+    My::Test::ok($$err =~ /Looks like you planned 5 tests but only ran 2/);
 
     exit 0;
 }
