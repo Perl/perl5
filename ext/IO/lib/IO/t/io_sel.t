@@ -118,7 +118,7 @@ print "ok 21\n";
 # check warnings
 $SIG{__WARN__} = sub { 
     ++ $w 
-      if $_[0] =~ /^Call to depreciated method 'has_error', use 'has_exception'/ 
+      if $_[0] =~ /^Call to deprecated method 'has_error', use 'has_exception'/ 
     } ;
 $w = 0 ;
 IO::Select::has_error();
