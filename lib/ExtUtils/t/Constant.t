@@ -125,6 +125,33 @@ sub build_and_run {
 
   if ($^O eq 'VMS') { $make .= ' all'; }
 
+  # Sometimes it seems that timestamps can get confused
+
+  # make failed: 256
+  # Makefile out-of-date with respect to Makefile.PL
+  # Cleaning current config before rebuilding Makefile...
+  # make -f Makefile.old clean > /dev/null 2>&1 || /bin/sh -c true
+  # ../../perl "-I../../../lib" "-I../../../lib" Makefile.PL "PERL_CORE=1"
+  # Checking if your kit is complete...                         
+  # Looks good
+  # Writing Makefile for ExtTest
+  # ==> Your Makefile has been rebuilt. <==
+  # ==> Please rerun the make command.  <==
+  # false
+
+  my $timewarp = (-M "Makefile.PL") - (-M "$makefile$makefile_ext");
+  # Convert from days to seconds
+  $timewarp *= 86400;
+  print "# Makefile.PL is $timewarp second(s) older than $makefile$makefile_ext\n";
+  if ($timewarp < 0) {
+      # Sleep for a while to catch up.
+      $timewarp = -$timewarp;
+      $timewarp+=2;
+      $timewarp = 10 if $timewarp > 10;
+      print "# Sleeping for $timewarp second(s) to try to resolve this\n";
+      sleep $timewarp;
+  }
+
   print "# make = '$make'\n";
   @makeout = `$make`;
   if ($?) {
