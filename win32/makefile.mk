@@ -79,9 +79,9 @@ CCTYPE		*= BORLAND
 #
 # set this if you wish to use perl's malloc
 # WARNING: Turning this on/off WILL break binary compatibility with extensions
-# you may have compiled with/without it.  Be prepared to recompile all extensions
-# if you change the default.  Currently, this cannot be enabled if you ask for
-# PERL_OBJECT above.
+# you may have compiled with/without it.  Be prepared to recompile all
+# extensions if you change the default.  Currently, this cannot be enabled
+# if you ask for PERL_OBJECT above.
 #
 #PERL_MALLOC	*= define
 
@@ -543,7 +543,7 @@ CORE_H		= $(CORE_NOCFG_H) .\config.h
 MICROCORE_OBJ	= $(MICROCORE_SRC:db:+$(o))
 CORE_OBJ	= $(MICROCORE_OBJ) $(EXTRACORE_SRC:db:+$(o))
 WIN32_OBJ	= $(WIN32_SRC:db:+$(o))
-MINICORE_OBJ	= $(MINIDIR)\{$(MICROCORE_OBJ:f) miniperlmain$(o) $(EXTRACORE_SRC:db:+$(o))}
+MINICORE_OBJ	= $(MINIDIR)\{$(MICROCORE_OBJ:f) miniperlmain$(o) perlio$(o)}
 MINIWIN32_OBJ	= $(MINIDIR)\{$(WIN32_OBJ:f)}
 MINI_OBJ	= $(MINICORE_OBJ) $(MINIWIN32_OBJ)
 PERL95_OBJ	= $(PERL95_SRC:db:+$(o))

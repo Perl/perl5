@@ -72,9 +72,9 @@ INST_VER	= \5.00467
 #
 # set this if you wish to use perl's malloc
 # WARNING: Turning this on/off WILL break binary compatibility with extensions
-# you may have compiled with/without it.  Be prepared to recompile all extensions
-# if you change the default.  Currently, this cannot be enabled if you ask for
-# PERL_OBJECT above.
+# you may have compiled with/without it.  Be prepared to recompile all
+# extensions if you change the default.  Currently, this cannot be enabled
+# if you ask for PERL_OBJECT above.
 #
 #PERL_MALLOC	= define
 
@@ -516,7 +516,7 @@ CFG_VARS	=					\
 		"d_mymalloc=$(PERL_MALLOC)"		\
 		"libs=$(LIBFILES)"			\
 		"incpath=$(CCINCDIR)"			\
-		"libperl=$(PERLIMPLIB)"			\
+		"libperl=$(PERLIMPLIB:..\=)"			\
 		"libpth=$(CCLIBDIR) $(EXTRALIBDIRS)"	\
 		"libc=$(LIBC)"				\
 		"make=nmake"				\
