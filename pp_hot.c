@@ -2757,9 +2757,13 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	*(PL_stack_base + TOPMARK + 1) = sv_2mortal(newRV((SV*)iogv));
     }
 
-    if (!ob || !SvOBJECT(ob))
+    if (!ob || !(SvOBJECT(ob)
+		 || (SvTYPE(ob) == SVt_PVGV && (ob = (SV*)GvIO((GV*)ob))
+		     && SvOBJECT(ob))))
+    {
 	Perl_croak(aTHX_ "Can't call method \"%s\" on unblessed reference",
 		   name);
+    }
 
     stash = SvSTASH(ob);
 
