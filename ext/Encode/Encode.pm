@@ -743,7 +743,7 @@ implementation.  As such, they are efficient but may change.
 If CHECK is true, also checks the data in STRING for being well-formed
 UTF-8.  Returns true if successful, false otherwise.
 
-As of perl 5.8.1, L<utf8> also has utf8::is_utif8().
+As of perl 5.8.1, L<utf8> also has utf8::is_utf8().
 
 =item _utf8_on(STRING)
 
