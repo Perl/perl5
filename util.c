@@ -2160,6 +2160,7 @@ Perl_my_fork(void)
 #else
     /* this "canna happen" since nothing should be calling here if !HAS_FORK */
     Perl_croak_nocontext("fork() not available");
+    return 0;
 #endif /* HAS_FORK */
 }
 
