@@ -3125,6 +3125,25 @@ this is not Perl's fault-- the libc of Mac OS X is not threadsafe
 (in this particular test, the localtime() call is found to be
 threadunsafe.)
 
+=head2 OS/2 Test Failures
+
+The following tests are known to fail on OS/2 (for clarity
+only the failures are shown, not the full error messages):
+
+t/io/utf8............................FAILED at test 19
+t/op/grent...........................FAILED at test 2
+t/op/pwent...........................FAILED at test 1
+t/lib/os2_base.......................FAILED at test 13
+t/lib/os2_process....................FAILED at test 10
+t/lib/os2_process_kid................FAILED at test 10
+t/lib/rx_cmprt.......................FAILED at test 16
+ext/DB_File/t/db-btree...............FAILED at test 0
+ext/DB_File/t/db-hash................FAILED at test 0
+ext/DB_File/t/db-recno...............FAILED at test 0
+lib/ExtUtils/t/basic.................FAILED at test 14
+lib/ExtUtils/t/Constant..............FAILED at test 4
+lib/Memoize/t/errors.................FAILED at test 4
+
 =head2 op/sprintf tests 91, 129, and 130
 
 The op/sprintf tests 91, 129, and 130 are known to fail on some platforms.
