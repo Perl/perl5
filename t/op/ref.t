@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..41\n";
+print "1..47\n";
 
 # Test glob operations.
 
@@ -189,12 +189,30 @@ sub foo { print $_[1] }
 package WHATEVER;
 foo WHATEVER "ok 38\n";
 
+#
+# test the \(@foo) construct
+#
+package main;
+@foo = (1,2,3);
+@bar = \(@foo);
+@baz = \(1,@foo,@bar);
+print @bar == 3 ? "ok 39\n" : "not ok 39\n";
+print grep(ref($_), @bar) == 3 ? "ok 40\n" : "not ok 40\n";
+print @baz == 3 ? "ok 41\n" : "not ok 41\n";
+
+my(@fuu) = (1,2,3);
+my(@baa) = \(@fuu);
+my(@bzz) = \(1,@fuu,@baa);
+print @baa == 3 ? "ok 42\n" : "not ok 42\n";
+print grep(ref($_), @baa) == 3 ? "ok 43\n" : "not ok 43\n";
+print @bzz == 3 ? "ok 44\n" : "not ok 44\n";
+
 package FINALE;
 
 {
-    $ref3 = bless ["ok 41\n"];		# package destruction
-    my $ref2 = bless ["ok 40\n"];	# lexical destruction
-    local $ref1 = bless ["ok 39\n"];	# dynamic destruction
+    $ref3 = bless ["ok 47\n"];		# package destruction
+    my $ref2 = bless ["ok 46\n"];	# lexical destruction
+    local $ref1 = bless ["ok 45\n"];	# dynamic destruction
     1;					# flush any temp values on stack
 }
 

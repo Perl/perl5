@@ -997,6 +997,8 @@ I32 type;
     case OP_PADAV:
     case OP_PADHV:
 	modcount = 10000;
+	if (type == OP_REFGEN && op->op_flags & OPf_PARENS)
+	    return op;		/* Treat \(@foo) like ordinary list. */
 	/* FALL THROUGH */
     case OP_PADSV:
 	modcount++;

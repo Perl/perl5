@@ -73,8 +73,11 @@ Note that taking a reference to an enumerated list is not the same
 as using square brackets--instead it's the same as creating
 a list of references!
 
-    @list = (\$a, \$b, \$c);  
-    @list = \($a, $b, $c);	# same thing!
+    @list = (\$a, \@b, \%c);  
+    @list = \($a, @b, %c);	# same thing!
+
+As a special case, C<\(@foo)> returns a list of references to the contents 
+of C<@foo>, not a reference to C<@foo> itself.  Likewise for C<%foo>.
 
 =item 3.
 
