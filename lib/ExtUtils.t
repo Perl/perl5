@@ -7,7 +7,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-use warnings;
+# use warnings;
 use strict;
 use ExtUtils::MakeMaker;
 use ExtUtils::Constant qw (constant_types C_constant XS_constant autoload);
@@ -15,7 +15,8 @@ use Config;
 use File::Spec::Functions;
 use File::Spec;
 # Because were are going to be changing directory before running Makefile.PL
-my $perl = File::Spec->rel2abs( $^X );
+my $perl;
+$perl = rel2abs( $^X ) unless $] < 5.006; # Hack. Until 5.00503 has rel2abs
 # ExtUtils::Constant::C_constant uses $^X inside a comment, and we want to
 # compare output to ensure that it is the same. We were probably run as ./perl
 # whereas we will run the child with the full path in $perl. So make $^X for
@@ -45,7 +46,7 @@ my $package = "ExtTest";
 
 # Test the code that generates 1 and 2 letter name comparisons.
 my %compass = (
-N => 0, NE => 45, E => 90, SE => 135, S => 180, SW => 225, W => 270, NW => 315
+N => 0, 'NE' => 45, E => 90, SE => 135, S => 180, SW => 225, W => 270, NW => 315
 );
 
 my $parent_rfc1149 =
@@ -133,12 +134,14 @@ print FH "use $];\n";
 print FH <<'EOT';
 
 use strict;
-use warnings;
+EOT
+printf FH "use warnings;\n" unless $] < 5.006;
+print FH <<'EOT';
 use Carp;
 
 require Exporter;
 require DynaLoader;
-use vars qw ($VERSION @ISA @EXPORT_OK);
+use vars qw ($VERSION @ISA @EXPORT_OK $AUTOLOAD);
 
 $VERSION = '0.01';
 @ISA = qw(Exporter DynaLoader);
@@ -292,7 +295,7 @@ my %compass = (
 EOT
 
 while (my ($point, $bearing) = each %compass) {
-  print FH "$point => $bearing, "
+  print FH "'$point' => $bearing, "
 }
 
 print FH <<'EOT';

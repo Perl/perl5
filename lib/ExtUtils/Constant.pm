@@ -1,6 +1,6 @@
 package ExtUtils::Constant;
 use vars qw (@ISA $VERSION %XS_Constant %XS_TypeSet @EXPORT_OK %EXPORT_TAGS);
-$VERSION = '0.08';
+$VERSION = '0.09';
 
 =head1 NAME
 
@@ -92,8 +92,9 @@ C<undef>.  The value of the macro is not needed.
 
 =cut
 
-require 5.006; # I think, for [:cntrl:] in REGEXP
-use warnings;
+if ($] >= 5.006) {
+  eval "use warnings; 1" or die $@;
+}
 use strict;
 use Carp;
 
@@ -154,8 +155,15 @@ sub C_stringify {
   s/\t/\\t/g;
   s/\f/\\f/g;
   s/\a/\\a/g;
-  s/([[:cntrl:]])/sprintf "\\%03o", ord $1/ge;
-  s/\177/\\177/g;	# DEL doesn't seem to be a [:cntrl:]
+  unless ($] < 5.006) {
+    # This will elict a warning on 5.005_03 about [: :] being reserved unless
+    # I cheat
+    my $cheat = '([[:^print:]])';
+    s/$cheat/sprintf "\\%03o", ord $1/ge;
+  } else {
+    require POSIX;
+    s/([^A-Za-z0-9_])/POSIX::isprint($1) ? $1 : sprintf "\\%03o", ord $1/ge;
+  }
   $_;
 }
 
@@ -178,6 +186,12 @@ sub constant_types () {
 
 #ifndef NVTYPE
 typedef double NV; /* 5.6 and later define NVTYPE, and typedef NV to it.  */
+#endif
+#ifndef aTHX_
+#define aTHX_ /* 5.6 or later define this for threading support.  */
+#endif
+#ifndef pTHX_
+#define pTHX_ /* 5.6 or later define this for threading support.  */
 #endif
 EOT
 
