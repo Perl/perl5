@@ -2173,7 +2173,6 @@ static I32
 read_e_script(int idx, SV *buf_sv, int maxlen)
 {
     char *p, *nl;
-    FILTER_READ(idx+1, buf_sv, maxlen);
     p  = SvPVX(e_script);
     nl = strchr(p, '\n');
     nl = (nl) ? nl+1 : SvEND(e_script);
