@@ -60,7 +60,9 @@ This is intended to largely replace the deprecated pseudo-hashes.
 Restricts the given %hash's set of keys to @keys.  If @keys is not
 given it restricts it to its current keyset.  No more keys can be
 added.  delete() and exists() will still work, but it does not effect
-the set of allowed keys.
+the set of allowed keys. B<Note>: the current implementation does not
+allow you to bless() the resulting hash, so if you want to use
+lock_keys() for an object, you need to bless it prior to locking it.
 
   unlock_keys(%hash);
 
