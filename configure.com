@@ -2699,6 +2699,10 @@ $ ELSE
 $   libc=" "
 $ ENDIF
 $!
+$! perllibs should be libs with all non-core libs (such as gdbm) removed.
+$!
+$ perllibs=libs
+$!
 $! Are we 64 bit?
 $!
 $ IF use64bitint .OR. use64bitint .EQS. "define"
@@ -5095,6 +5099,7 @@ $ WC "patchlevel='" + patchlevel + "'"
 $ WC "path_sep='|'"
 $ WC "perl_root='" + perl_root + "'" ! VMS specific $trnlnm()
 $ WC "perladmin='" + perladmin + "'"
+$ WC "perllibs='" + perllibs + "'"
 $ WC "pgflquota='" + pgflquota + "'"
 $ WC "pidtype='" + pidtype + "'"
 $ WC "pm_apiversion='" + version + "'"
