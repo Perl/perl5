@@ -1,5 +1,5 @@
 ==============================================================================
-                  Release of version 0.70 of Filter::Simple
+                  Release of version 0.77 of Filter::Simple
 ==============================================================================
 
 
@@ -46,21 +46,10 @@ COPYRIGHT
 
 ==============================================================================
 
-CHANGES IN VERSION 0.70
+CHANGES IN VERSION 0.77
 
 
-	- Added FILTER_ONLY for fine-grained filtering of code,
-	  strings, or regexes
-
-	- Fixed document snafu regarding optional terminators
-
-	- Fixed bug so that FILTER now receives *all* import args
-	  (i.e. including the class name in $_[0])
-
-	- Allowed default terminator to allow comments embedded in it
-	  (thanks, Christian) and to handle __DATA__ and __END__
-
-	- Fixed handling of __DATA__ and *DATA
+	- Re-allowed user-defined terminators to be regexes
 
 
 ==============================================================================
