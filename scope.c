@@ -712,7 +712,7 @@ I32 base;
 	    break;
 	case SAVEt_HELEM:		/* hash element */
 	    value = (SV*)SSPOPPTR;
-	    sv = (SV*)SSPOPINT;
+	    sv = (SV*)SSPOPPTR;
 	    hv = (HV*)SSPOPPTR;
 	    ptr = hv_fetch_ent(hv, sv, 1, 0);
 	    if (ptr) {
