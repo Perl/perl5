@@ -128,6 +128,13 @@
 
 #define LOAD_UTF8_CHARCLASS(a,b) STMT_START { if (!CAT2(PL_utf8_,a)) (void)CAT2(is_utf8_, a)((U8*)b); } STMT_END
 
+/* for use after a quantifier and before an EXACT-like node -- japhy */
+#define NEXT_IMPT(from_rn,to_rn) STMT_START { \
+    to_rn = from_rn; \
+    while (PL_regkind[(U8)OP(to_rn)] == OPEN || OP(to_rn) == EVAL) \
+	to_rn += NEXT_OFF(to_rn); \
+} STMT_END 
+ 
 static void restore_pos(pTHX_ void *arg);
 
 STATIC CHECKPOINT
@@ -3037,14 +3044,28 @@ S_regmatch(pTHX_ regnode *prog)
 		if (ln && l == 0)
 		    n = ln;	/* don't backtrack */
 		locinput = PL_reginput;
-		if (PL_regkind[(U8)OP(next)] == EXACT) {
-		    c1 = (U8)*STRING(next);
-		    if (OP(next) == EXACTF)
-			c2 = PL_fold[c1];
-		    else if (OP(next) == EXACTFL)
-			c2 = PL_fold_locale[c1];
-		    else
-			c2 = c1;
+		if (
+		    PL_regkind[(U8)OP(next)] == EXACT ||
+		    PL_regkind[(U8)OP(next)] == OPEN ||
+		    OP(next) == EVAL
+		) {
+		    regnode *text_node = next;
+
+		    if (PL_regkind[(U8)OP(next)] != EXACT)
+			NEXT_IMPT(next, text_node);
+
+		    if (PL_regkind[(U8)OP(text_node)] != EXACT) {
+			c1 = c2 = -1000;
+		    }
+		    else {
+			c1 = (U8)*STRING(text_node);
+			if (OP(next) == EXACTF)
+			    c2 = PL_fold[c1];
+			else if (OP(text_node) == EXACTFL)
+			    c2 = PL_fold_locale[c1];
+			else
+			    c2 = c1;
+		    }
 		}
 		else
 		    c1 = c2 = -1000;
@@ -3096,14 +3117,28 @@ S_regmatch(pTHX_ regnode *prog)
 				  (IV) n, (IV)l)
 		    );
 		if (n >= ln) {
-		    if (PL_regkind[(U8)OP(next)] == EXACT) {
-			c1 = (U8)*STRING(next);
-			if (OP(next) == EXACTF)
-			    c2 = PL_fold[c1];
-			else if (OP(next) == EXACTFL)
-			    c2 = PL_fold_locale[c1];
-			else
-			    c2 = c1;
+		    if (
+			PL_regkind[(U8)OP(next)] == EXACT ||
+			PL_regkind[(U8)OP(next)] == OPEN ||
+			OP(next) == EVAL
+		    ) {
+			regnode *text_node = next;
+
+			if (PL_regkind[(U8)OP(next)] != EXACT)
+			    NEXT_IMPT(next, text_node);
+
+			if (PL_regkind[(U8)OP(text_node)] != EXACT) {
+			    c1 = c2 = -1000;
+			}
+			else {
+			    c1 = (U8)*STRING(text_node);
+			    if (OP(text_node) == EXACTF)
+				c2 = PL_fold[c1];
+			    else if (OP(text_node) == EXACTFL)
+				c2 = PL_fold_locale[c1];
+			    else
+				c2 = c1;
+			}
 		    }
 		    else
 			c1 = c2 = -1000;
@@ -3173,22 +3208,45 @@ S_regmatch(pTHX_ regnode *prog)
 	    * Lookahead to avoid useless match attempts
 	    * when we know what character comes next.
 	    */
-	    if (PL_regkind[(U8)OP(next)] == EXACT) {
-		U8 *s = (U8*)STRING(next);
-		if (!UTF) {
-		    c2 = c1 = *s;
-		    if (OP(next) == EXACTF)
-			c2 = PL_fold[c1];
-		    else if (OP(next) == EXACTFL)
-			c2 = PL_fold_locale[c1];
+
+	    /*
+	    * Used to only do .*x and .*?x, but now it allows
+	    * for )'s, ('s and (?{ ... })'s to be in the way
+	    * of the quantifier and the EXACT-like node.  -- japhy
+	    */
+
+	    if (
+		PL_regkind[(U8)OP(next)] == EXACT ||
+		PL_regkind[(U8)OP(next)] == OPEN ||
+		OP(next) == EVAL
+	    ) {
+		U8 *s;
+		regnode *text_node = next;
+
+		if (PL_regkind[(U8)OP(next)] != EXACT)
+		    NEXT_IMPT(next, text_node);
+
+		if (PL_regkind[(U8)OP(text_node)] != EXACT) {
+		    c1 = c2 = -1000;
 		}
-		else { /* UTF */
-		    if (OP(next) == EXACTF) {
-			c1 = to_utf8_lower(s);
-			c2 = to_utf8_upper(s);
+		else {
+		    s = (U8*)STRING(text_node);
+
+		    if (!UTF) {
+			c2 = c1 = *s;
+			if (OP(text_node) == EXACTF)
+			    c2 = PL_fold[c1];
+			else if (OP(text_node) == EXACTFL)
+			    c2 = PL_fold_locale[c1];
 		    }
-		    else {
-			c2 = c1 = utf8_to_uvchr(s, NULL);
+		    else { /* UTF */
+			if (OP(text_node) == EXACTF) {
+			    c1 = to_utf8_lower(s);
+			    c2 = to_utf8_upper(s);
+			}
+			else {
+			    c2 = c1 = utf8_to_uvchr(s, NULL);
+			}
 		    }
 		}
 	    }
