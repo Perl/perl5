@@ -2598,7 +2598,7 @@ Perl_yylex(pTHX)
 		     * at least, set argv[0] to the basename of the Perl
 		     * interpreter. So, having found "#!", we'll set it right.
 		     */
-		    SV *x = GvSV(gv_fetchpv("\030", TRUE, SVt_PV));
+		    SV *x = GvSV(gv_fetchpv("\030", TRUE, SVt_PV)); /* $^X */
 		    assert(SvPOK(x) || SvGMAGICAL(x));
 		    if (sv_eq(x, CopFILESV(PL_curcop))) {
 			sv_setpvn(x, ipath, ipathend - ipath);

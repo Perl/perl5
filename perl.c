@@ -3440,7 +3440,7 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	magicname("0", "0", 1);
 #endif
     }
-    if ((tmpgv = gv_fetchpv("\030",TRUE, SVt_PV)))
+    if ((tmpgv = gv_fetchpv("\030",TRUE, SVt_PV))) /* $^X */
 #ifdef OS2
 	sv_setpv(GvSV(tmpgv), os2_execname(aTHX));
 #else
