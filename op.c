@@ -1553,6 +1553,16 @@ register OP *o;
     if (!(opargs[type] & OA_FOLDCONST))
 	goto nope;
 
+    switch (type) {
+    case OP_SPRINTF:
+    case OP_UCFIRST:
+    case OP_LCFIRST:
+    case OP_UC:
+    case OP_LC:
+	if (o->op_private & OPpLOCALE)
+	    goto nope;
+    }
+
     if (error_count)
 	goto nope;		/* Don't try to run w/ errors */
 
