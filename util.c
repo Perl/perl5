@@ -3919,7 +3919,7 @@ Perl_report_evil_fh(pTHX_ GV *gv, IO *io, I32 op)
     if (name && *name) {
 	Perl_warner(aTHX_ warn,
 		    "%s%s on %s %s %s", func, pars, vile, type, name);
-	if (io && IoDIRP(io))
+	if (io && IoDIRP(io) && !(IoFLAGS(io) & IOf_FAKE_DIRP))
 	    Perl_warner(aTHX_ warn,
 			"\t(Are you trying to call %s%s on dirhandle %s?)\n",
 			func, pars, name);
@@ -3927,7 +3927,7 @@ Perl_report_evil_fh(pTHX_ GV *gv, IO *io, I32 op)
     else {
 	Perl_warner(aTHX_ warn,
 		    "%s%s on %s %s", func, pars, vile, type);
-	if (io && IoDIRP(io))
+	if (io && IoDIRP(io) && !(IoFLAGS(io) & IOf_FAKE_DIRP))
 	    Perl_warner(aTHX_ warn,
 			"\t(Are you trying to call %s%s on dirhandle?)\n",
 			func, pars);
