@@ -22,7 +22,7 @@ Changes5.8		Differences between 5.6.0 and 5.8.0 (and maint-5.6)
 Changes5.8.1		Differences between 5.8.0 and 5.8.1
 Changes5.8.2		Differences between 5.8.1 and 5.8.2
 Changes5.8.3		Differences between 5.8.2 and 5.8.3
-Changes5.8.3		Differences between 5.8.3 and 5.8.4
+Changes5.8.4		Differences between 5.8.3 and 5.8.4
 config_h.SH		Produces config.h
 configpm		Produces lib/Config.pm
 Configure		Portability tool
