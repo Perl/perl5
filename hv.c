@@ -886,7 +886,7 @@ HV *hv;
     }
     xhv->xhv_riter = -1;
     xhv->xhv_eiter = Null(HE*);
-    return xhv->xhv_fill;
+    return xhv->xhv_fill;	/* should be xhv->xhv_keys? May change later */
 }
 
 HE *
@@ -962,7 +962,10 @@ register HE *entry;
 I32 *retlen;
 {
     if (HeKLEN(entry) == HEf_SVKEY) {
-	return SvPV(HeKEY_sv(entry), *(STRLEN*)retlen);
+	STRLEN len;
+	char *p = SvPV(HeKEY_sv(entry), len);
+	*retlen = len;
+	return p;
     }
     else {
 	*retlen = HeKLEN(entry);

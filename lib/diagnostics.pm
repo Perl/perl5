@@ -175,6 +175,8 @@ if ($^O eq 'VMS') {
 @trypod = ("$archlib/pod/perldiag.pod",
 	   "$privlib/pod/perldiag-$].pod",
 	   "$privlib/pod/perldiag.pod");
+# handy for development testing of new warnings etc
+unshift @trypod, "./pod/perldiag.pod" if -e "pod/perldiag.pod";
 ($PODFILE) = ((grep { -e } @trypod), $trypod[$#trypod])[0];
 
 $DEBUG ||= 0;

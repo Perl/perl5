@@ -9,32 +9,36 @@
 # modify it under the same terms as Perl itself.
 #
 # With thanks to Tom Horsley for the seed code.
-#
-# $Id: patchls,v 1.3 1997/06/10 21:38:45 timbo Exp $
+
 
 use Getopt::Std;
 use Text::Wrap qw(wrap $columns);
 use Text::Tabs qw(expand unexpand);
 use strict;
+use vars qw($VERSION);
+
+$VERSION = 2.04;
 
 sub usage {
 die q{
   patchls [options] patchfile [ ... ]
 
-    -i     Invert: for each patched file list which patch files patch it.
     -h     no filename headers (like grep), only the listing.
     -l     no listing (like grep), only the filename headers.
+    -i     Invert: for each patched file list which patch files patch it.
     -c     Categorise the patch and sort by category (perl specific).
     -m     print formatted Meta-information (Subject,From,Msg-ID etc).
     -p N   strip N levels of directory Prefix (like patch), else automatic.
     -v     more verbose (-d for noisy debugging).
     -f F   only list patches which patch files matching regexp F
            (F has $ appended unless it contains a /).
+  other options for special uses:
     -I     just gather and display summary Information about the patches.
+    -4     write to stdout the PerForce commands to prepare for patching.
+    -M T   Like -m but only output listed meta tags (eg -M 'Title From')
+    -W N   set wrap width to N (defaults to 70, use 0 for no wrap)
 }
 }
-
-$columns = 70;
 
 $::opt_p = undef;	# undef != 0
 $::opt_d = 0;
@@ -45,11 +49,21 @@ $::opt_h = 0;
 $::opt_l = 0;
 $::opt_c = 0;
 $::opt_f = '';
+
+# special purpose options
 $::opt_I = 0;
+$::opt_4 = 0;	# output PerForce commands to prepare for patching
+$::opt_M = '';	# like -m but only output these meta items (-M Title)
+$::opt_W = 70;	# set wrap width columns (see Text::Wrap module)
 
 usage unless @ARGV;
 
-getopts("mihlvcp:f:I") or usage;
+getopts("mihlvc4p:f:IM:W:") or usage;
+
+$columns = $::opt_W || 9999999;
+
+$::opt_m = 1 if $::opt_M;
+my @show_meta = split(' ', $::opt_M || 'Title From Msg-ID');
 
 my %cat_title = (
     'BUILD'	=> 'BUILD PROCESS',
@@ -57,7 +71,7 @@ my %cat_title = (
     'DOC'	=> 'DOCUMENTATION',
     'LIB'	=> 'LIBRARY AND EXTENSIONS',
     'PORT1'	=> 'PORTABILITY - WIN32',
-    'PORT2'	=> 'PORTABILITY - OTHER',
+    'PORT2'	=> 'PORTABILITY - GENERAL',
     'TEST'	=> 'TESTS',
     'UTIL'	=> 'UTILITIES',
     'OTHER'	=> 'OTHER CHANGES',
@@ -84,6 +98,8 @@ my %ls;
 #	Index: embed.h
 
 my($in, $prevline, $prevtype, $ls);
+my(@removed, @added);
+my $prologue = 1;	# assume prologue till patch or /^exit\b/ seen
 
 foreach my $argv (@ARGV) {
     $in = $argv;
@@ -96,16 +112,24 @@ foreach my $argv (@ARGV) {
     my $type;
     while (<F>) {
 	unless (/^([-+*]{3}) / || /^(Index):/) {
-	    # not an interesting patch line but possibly meta-information
+	    # not an interesting patch line
+	    # but possibly meta-information or prologue
+	    if ($prologue) {
+		push @added, $1     if /^touch\s+(\S+)/;
+		push @removed, $1   if /^rm\s+(?:-f)?\s*(\S+)/;
+		$prologue = 0       if /^exit\b/;
+	    }
 	    next unless $::opt_m;
-	    $ls->{From}{$1}=1       if /^From:\s+(.*\S)/i;
-	    $ls->{Title}{$1}=1      if /^Subject:\s+(?:Re: )?(.*\S)/i;
-	    $ls->{'Msg-ID'}{$1}=1   if /^Message-Id:\s+(.*\S)/i;
-	    $ls->{Date}{$1}=1       if /^Date:\s+(.*\S)/i;
+	    $ls->{From}{$1}=1,next     if /^From:\s+(.*\S)/i;
+	    $ls->{Title}{$1}=1,next    if /^Subject:\s+(?:Re: )?(.*\S)/i;
+	    $ls->{'Msg-ID'}{$1}=1,next if /^Message-Id:\s+(.*\S)/i;
+	    $ls->{Date}{$1}=1,next     if /^Date:\s+(.*\S)/i;
+	    $ls->{$1}{$2}=1,next       if /^([-\w]+):\s+(.*\S)/;
 	    next;
 	}
 	$type = $1;
 	next if /^--- [0-9,]+ ----$/ || /^\*\*\* [0-9,]+ \*\*\*\*$/;
+	$prologue = 0;
 
 	print "Last: $prevline","This: ${_}Got:  $1\n\n" if $::opt_d;
 
@@ -113,12 +137,12 @@ foreach my $argv (@ARGV) {
 	# Patch copes with this, so must we. It's also handy for
 	# documenting manual changes by simply adding Index: lines
 	# to the file which describes the problem bing fixed.
-	add_file($ls, $1), next if /^Index:\s+(.*)/;
+	add_file($ls, $1), next if /^Index:\s+(\S+)/;
 
 	if (	($type eq '---' and $prevtype eq '***')	# Style 1
 	    or	($type eq '+++' and $prevtype eq '---')	# Style 2
 	) {
-	    if (/^[-+*]{3} (\S+)\s+.*\d\d:\d\d:\d\d/) {	# double check
+	    if (/^[-+*]{3} (\S+)\s*(.*?\d\d:\d\d:\d\d)?/) {	# double check
 		add_file($ls, $1);
 	    }
 	    else {
@@ -141,9 +165,9 @@ foreach my $argv (@ARGV) {
 print scalar(@ARGV)." files read.\n" if $::opt_v and @ARGV > 1;
 
 
-my @ls  = sort {
-    $a->{category} cmp $b->{category} || $a->{in} cmp $b->{in}
-} values %ls;
+# --- Firstly we filter and sort as needed ---
+
+my @ls  = values %ls;
 
 if ($::opt_f) {		# filter out patches based on -f <regexp>
     my $out;
@@ -156,6 +180,24 @@ if ($::opt_f) {		# filter out patches based on -f <regexp>
 	}
 	$match;
     } @ls;
+}
+
+@ls  = sort {
+    $a->{category} cmp $b->{category} || $a->{in} cmp $b->{in}
+} @ls;
+
+
+# --- Handle special modes ---
+
+if ($::opt_4) {
+    print map { "p4 delete $_\n" } @removed if @removed;
+    print map { "p4 add    $_\n" } @added   if @added;
+    my @patches = grep { $_->{is_in} } @ls;
+    my %patched = map { ($_, 1) } map { keys %{$_->{out}} } @patches;
+    delete @patched{@added};
+    my @patched = sort keys %patched;
+    print map { "p4 edit   $_\n" } @patched if @patched;
+    exit 0;
 }
 
 if ($::opt_I) {
@@ -171,12 +213,16 @@ if ($::opt_I) {
     my @all_out = sort keys %all_out;
     my @missing = grep { ! -f $_ } @all_out;
     print "$n_patches patch files patch ".@all_out." files (".@missing." missing)\n";
+    print "(use -v to list patches which patch 'missing' files)\n"
+	    if @missing && !$::opt_v;
     if ($::opt_v and @missing) {
 	print "Missing files:\n";
 	foreach $out (@missing) {
 	    printf "  %-20s\t%s\n", $out, $all_out{$out};
 	}
     }
+    print "Added files:   @added\n"   if @added;
+    print "Removed files: @removed\n" if @removed;
     exit 0+@missing;
 }
 
@@ -256,11 +302,27 @@ sub list_files_by_patch {
     $name = $ls->{in} unless defined $name;
     my @meta;
     if ($::opt_m) {
-	foreach(qw(Title From Msg-ID)) {
-	    next unless $ls->{$_};
-	    my @list = sort keys %{$ls->{$_}};
-	    push @meta, sprintf "%7s:  ", $_;
-	    @list = map { "\"$_\"" } @list if $_ eq 'Title';
+	my $meta;
+	foreach $meta (@show_meta) {
+	    next unless $ls->{$meta};
+	    my @list = sort keys %{$ls->{$meta}};
+	    push @meta, sprintf "%7s:  ", $meta;
+	    if ($meta eq 'Title') {
+		@list = map { s/\[?PATCH\]?:?\s*//g; "\"$_\""; } @list
+	    }
+	    elsif ($meta eq 'From') {
+		# fix-up bizzare addresses from japan and ibm :-)
+		foreach(@list) {
+		    s:\W+=?iso.*?<: <:;
+		    s/\d\d-\w\w\w-\d{4}\s+\d\d:\S+\s*//;
+		}
+	    }
+	    elsif ($meta eq 'Msg-ID') {
+		my %from; # limit long threads to one msg-id per site
+		@list = map {
+		    $from{(/@(.*?)>/ ? $1 : $_)}++ ? () : ($_);
+		} @list;
+	    }
 	    push @meta, my_wrap("","          ", join(", ",@list)."\n");
 	}
 	$name = "\n$name" if @meta and $name;

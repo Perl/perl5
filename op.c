@@ -125,7 +125,7 @@ char *name;
 	}
 	croak("Can't use global %s in \"my\"",name);
     }
-    if (AvFILL(comppad_name) >= 0) {
+    if (dowarn && AvFILL(comppad_name) >= 0) {
 	SV **svp = AvARRAY(comppad_name);
 	for (off = AvFILL(comppad_name); off > comppad_name_floor; off--) {
 	    if ((sv = svp[off])
@@ -2771,7 +2771,8 @@ OP *block;
     if (expr) {
 	if (once && expr->op_type == OP_CONST && !SvTRUE(((SVOP*)expr)->op_sv))
 	    return block;	/* do {} while 0 does once */
-	if (expr->op_type == OP_READLINE || expr->op_type == OP_GLOB) {
+	if (expr->op_type == OP_READLINE || expr->op_type == OP_GLOB
+	    || (expr->op_type == OP_NULL && expr->op_targ == OP_GLOB)) {
 	    expr = newUNOP(OP_DEFINED, 0,
 		newASSIGNOP(0, newSVREF(newGVOP(OP_GV, 0, defgv)), 0, expr) );
 	}
@@ -2795,10 +2796,11 @@ OP *block;
 }
 
 OP *
-newWHILEOP(flags, debuggable, loop, expr, block, cont)
+newWHILEOP(flags, debuggable, loop, whileline, expr, block, cont)
 I32 flags;
 I32 debuggable;
 LOOP *loop;
+I32 whileline;
 OP *expr;
 OP *block;
 OP *cont;
@@ -2809,7 +2811,8 @@ OP *cont;
     OP *op;
     OP *condop;
 
-    if (expr && (expr->op_type == OP_READLINE || expr->op_type == OP_GLOB)) {
+    if (expr && (expr->op_type == OP_READLINE || expr->op_type == OP_GLOB
+		 || (expr->op_type == OP_NULL && expr->op_targ == OP_GLOB))) {
 	expr = newUNOP(OP_DEFINED, 0,
 	    newASSIGNOP(0, newSVREF(newGVOP(OP_GV, 0, defgv)), 0, expr) );
     }
@@ -2819,8 +2822,14 @@ OP *cont;
 
     if (cont)
 	next = LINKLIST(cont);
-    if (expr)
+    if (expr) {
 	cont = append_elem(OP_LINESEQ, cont, newOP(OP_UNSTACK, 0));
+	if ((line_t)whileline != NOLINE) {
+	    copline = whileline;
+	    cont = append_elem(OP_LINESEQ, cont,
+			       newSTATEOP(0, Nullch, Nullop));
+	}
+    }
 
     listop = append_list(OP_LINESEQ, (LISTOP*)block, (LISTOP*)cont);
     redo = LINKLIST(listop);
@@ -2878,10 +2887,10 @@ newFOROP(I32 flags,char *label,line_t forline,OP *sv,OP *expr,OP *block,OP *cont
 #endif /* CAN_PROTOTYPE */
 {
     LOOP *loop;
+    OP *wop;
     int padoff = 0;
     I32 iterflags = 0;
 
-    copline = forline;
     if (sv) {
 	if (sv->op_type == OP_RV2SV) {	/* symbol table variable */
 	    sv->op_type = OP_RV2GV;
@@ -2908,8 +2917,9 @@ newFOROP(I32 flags,char *label,line_t forline,OP *sv,OP *expr,OP *block,OP *cont
     assert(!loop->op_next);
     Renew(loop, 1, LOOP);
     loop->op_targ = padoff;
-    return newSTATEOP(0, label, newWHILEOP(flags, 1, loop,
-	newOP(OP_ITER, 0), block, cont));
+    wop = newWHILEOP(flags, 1, loop, forline, newOP(OP_ITER, 0), block, cont);
+    copline = forline;
+    return newSTATEOP(0, label, wop);
 }
 
 OP*
@@ -2993,7 +3003,7 @@ CV* cv;
     SV** ppad;
     I32 ix;
 
-    PerlIO_printf(Perl_debug_log, "\tCV=0x%p (%s), OUTSIDE=0x%p (%s)\n",
+    PerlIO_printf(Perl_debug_log, "\tCV=0x%lx (%s), OUTSIDE=0x%lx (%s)\n",
 		  cv,
 		  (CvANON(cv) ? "ANON"
 		   : (cv == main_cv) ? "MAIN"
@@ -3016,7 +3026,7 @@ CV* cv;
 
     for (ix = 1; ix <= AvFILL(pad_name); ix++) {
 	if (SvPOK(pname[ix]))
-	    PerlIO_printf(Perl_debug_log, "\t%4d. 0x%p (%s\"%s\" %ld-%ld)\n",
+	    PerlIO_printf(Perl_debug_log, "\t%4d. 0x%lx (%s\"%s\" %ld-%ld)\n",
 			  ix, ppad[ix],
 			  SvFAKE(pname[ix]) ? "FAKE " : "",
 			  SvPVX(pname[ix]),
@@ -3791,7 +3801,7 @@ OP *op;
 	if (cLISTOP->op_first->op_type == OP_STUB) {
 	    op_free(op);
 	    op = newUNOP(type, OPf_SPECIAL,
-		newGVOP(OP_GV, 0, gv_fetchpv("main'ARGV", TRUE, SVt_PVAV)));
+               newGVOP(OP_GV, 0, gv_fetchpv("main::ARGV", TRUE, SVt_PVAV)));
 	}
 	return ck_fun(op);
     }
@@ -3962,7 +3972,7 @@ OP *op;
     else {
 	op_free(op);
 	if (type == OP_FTTTY)
-	    return newGVOP(type, OPf_REF, gv_fetchpv("main'STDIN", TRUE,
+           return newGVOP(type, OPf_REF, gv_fetchpv("main::STDIN", TRUE,
 				SVt_PVIO));
 	else
 	    return newUNOP(type, 0, newSVREF(newGVOP(OP_GV, 0, defgv)));
@@ -4112,7 +4122,13 @@ OP *
 ck_glob(op)
 OP *op;
 {
-    GV *gv = gv_fetchpv("glob", FALSE, SVt_PVCV);
+    GV *gv;
+
+    if ((op->op_flags & OPf_KIDS) && !cLISTOP->op_first->op_sibling)
+	append_elem(OP_GLOB, op, newSVREF(newGVOP(OP_GV, 0, defgv)));
+
+    if (!((gv = gv_fetchpv("glob", FALSE, SVt_PVCV)) && GvIMPORTED_CV(gv)))
+	gv = gv_fetchpv("CORE::GLOBAL::glob", FALSE, SVt_PVCV);
 
     if (gv && GvIMPORTED_CV(gv)) {
 	static int glob_index;
@@ -4127,10 +4143,10 @@ OP *op;
 		     append_elem(OP_LIST, op, 
 				 scalar(newUNOP(OP_RV2CV, 0,
 						newGVOP(OP_GV, 0, gv)))));
-	return ck_subr(op);
+	op = newUNOP(OP_NULL, 0, ck_subr(op));
+	op->op_targ = OP_GLOB;		/* hint at what it used to be */
+	return op;
     }
-    if ((op->op_flags & OPf_KIDS) && !cLISTOP->op_first->op_sibling)
-	append_elem(OP_GLOB, op, newSVREF(newGVOP(OP_GV, 0, defgv)));
     gv = newGVgen("main");
     gv_IOadd(gv);
     append_elem(OP_GLOB, op, newGVOP(OP_GV, 0, gv));
@@ -4617,7 +4633,8 @@ OP *op;
 	prev = o;
 	o = o->op_sibling;
     }
-    if (proto && !optional && *proto == '$')
+    if (proto && !optional &&
+	  (*proto && *proto != '@' && *proto != '%' && *proto != ';'))
 	return too_few_arguments(op, gv_ename(namegv));
     return op;
 }

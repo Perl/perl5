@@ -304,7 +304,7 @@ EXPECT
 0, 1, 2, 3
 ########
 sub foo {
-  goto bar if $a == 0;
+  goto bar if $a == 0 || $b == 0;
   $a <=> $b;
 }
 @a = (3, 2, 0, 1);

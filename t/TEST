@@ -51,6 +51,7 @@ while ($test = shift) {
     chop($te);
     print "$te" . '.' x (18 - length($te));
     if ($sharpbang) {
+	-x $test || (print "isn't executable.\n");
 	open(RESULTS,"./$test |") || (print "can't run.\n");
     } else {
 	open(SCRIPT,"$test") || die "Can't run $test.\n";

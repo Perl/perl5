@@ -67,7 +67,7 @@ sub getopt ($;$) {
               $$hash{$first} = $rest;
           }
           else {
-              eval "\$opt_$first = \$rest;";
+              ${"opt_$first"} = $rest;
               push( @EXPORT, "\$opt_$first" );
           }
 	}
@@ -76,7 +76,7 @@ sub getopt ($;$) {
               $$hash{$first} = 1;
           }
           else {
-              eval "\$opt_$first = 1;";
+              ${"opt_$first"} = 1;
               push( @EXPORT, "\$opt_$first" );
           }
 	    if ($rest ne '') {
@@ -116,7 +116,7 @@ sub getopts ($;$) {
                   $$hash{$first} = $rest;
               }
               else {
-                  eval "\$opt_$first = \$rest;";
+                  ${"opt_$first"} = $rest;
                   push( @EXPORT, "\$opt_$first" );
               }
 	    }
@@ -125,7 +125,7 @@ sub getopts ($;$) {
                   $$hash{$first} = 1;
               }
               else {
-                  eval "\$opt_$first = 1";
+                  ${"opt_$first"} = 1;
                   push( @EXPORT, "\$opt_$first" );
               }
 		if($rest eq '') {

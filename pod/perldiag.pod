@@ -35,7 +35,7 @@ if you want to localize a package variable.
 
 =item "my" variable %s masks earlier declaration in same scope
 
-(S) A lexical variable has been redeclared in the same scope, effectively
+(W) A lexical variable has been redeclared in the same scope, effectively
 eliminating all access to the previous instance.  This is almost always
 a typographical error.  Note that the earlier variable will still exist
 until the end of the scope or until all closure referents to it are
@@ -594,7 +594,11 @@ for us to go to.  See L<perlfunc/goto>.
 the closing delimiter was omitted.  Because bracketed quotes count nesting
 levels, the following is missing its final parenthesis:
 
-    print q(The character '(' starts a side comment.)
+    print q(The character '(' starts a side comment.);
+
+If you're getting this error from a here-document, you may have 
+included unseen whitespace before or after your closing tag. A good 
+programmer's editor will have a way to help you find these characters.
 
 =item Can't fork
 
@@ -778,13 +782,16 @@ of suidperl.
 
 =item Can't take log of %g
 
-(F) Logarithms are defined on only positive real numbers.
+(F) For ordinary real numbers, you can't take the logarithm of a
+negative number or zero. There's a Math::Complex package that comes
+standard with Perl, though, if you really want to do that for
+the negative numbers.
 
 =item Can't take sqrt of %g
 
 (F) For ordinary real numbers, you can't take the square root of a
-negative number.  There's a Complex package available for Perl, though,
-if you really want to do that.
+negative number.  There's a Math::Complex package that comes standard
+with Perl, though, if you really want to do that.
 
 =item Can't undef active subroutine
 
@@ -1315,10 +1322,14 @@ See L<perlfunc/sprintf>.
 =item Invalid type in pack: '%s'
 
 (F) The given character is not a valid pack type.  See L<perlfunc/pack>.
+(W) The given character is not a valid pack type but used to be silently
+ignored.
 
 =item Invalid type in unpack: '%s'
 
 (F) The given character is not a valid unpack type.  See L<perlfunc/unpack>.
+(W) The given character is not a valid unpack type but used to be silently
+ignored.
 
 =item ioctl is not implemented
 
@@ -2015,6 +2026,11 @@ an unintended loop in your inheritance hierarchy.
 (W) The internal sv_replace() function was handed a new SV with a
 reference count of other than 1.
 
+=item regexp *+ operand could be empty
+
+(F) The part of the regexp subject to either the * or + quantifier
+could match an empty string.
+
 =item regexp memory corruption
 
 (P) The regular expression engine got confused by what the regular
@@ -2082,6 +2098,7 @@ or setgid bit set.  This doesn't make much sense.
 
 (F) The lexer couldn't find the final delimiter of a // or m{}
 construct.  Remember that bracketing delimiters count nesting level.
+Missing the leading C<$> from a variable C<$m> may cause this error.
 
 =item %sseek() on unopened file
 
@@ -2252,11 +2269,13 @@ L<perlop/"Quote and Quote-like Operators">.
 
 (F) The lexer couldn't find the interior delimiter of a s/// or s{}{}
 construct.  Remember that bracketing delimiters count nesting level.
+Missing the leading C<$> from variable C<$s> may cause this error.
 
 =item Substitution replacement not terminated
 
 (F) The lexer couldn't find the final delimiter of a s/// or s{}{}
 construct.  Remember that bracketing delimiters count nesting level.
+Missing the leading C<$> from variable C<$s> may cause this error.
 
 =item substr outside of string
 
@@ -2413,7 +2432,8 @@ it.   See L<perlre>.
 =item Translation pattern not terminated
 
 (F) The lexer couldn't find the interior delimiter of a tr/// or tr[][]
-construct.
+or y/// or y[][] construct.  Missing the leading C<$> from variables
+C<$tr> or C<$y> may cause this error.
 
 =item Translation replacement not terminated
 
@@ -2634,6 +2654,10 @@ The simple rule is:  Inheritance will not work when autoloading
 non-methods.  The simple fix for old code is:  In any module that used to
 depend on inheriting C<AUTOLOAD> for non-methods from a base class named
 C<BaseClass>, execute C<*AUTOLOAD = \&BaseClass::AUTOLOAD> during startup.
+
+In code that currently says C<use AutoLoader; @ISA = qw(AutoLoader);> you
+should remove AutoLoader from @ISA and change C<use AutoLoader;> to
+C<C<use AutoLoader 'AUTOLOAD';>.
 
 =item Use of %s is deprecated
 

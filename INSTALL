@@ -99,8 +99,11 @@ and Configure will use the defaults from then on.
 After it runs, Configure will perform variable substitution on all the
 *.SH files and offer to run make depend.
 
-Configure supports a number of useful options.  Run B<Configure -h>
-to get a listing.  To compile with gcc, for example, you can run
+Configure supports a number of useful options.  Run B<Configure -h> to
+get a listing.  See the Porting/Glossary file for a complete list of
+Configure variables you can set and their definitions.
+
+To compile with gcc, for example, you should run
 
 	sh Configure -Dcc=gcc
 
@@ -325,12 +328,14 @@ and the following directories for manual pages:
 
 (Actually, Configure recognizes the SVR3-style
 /usr/local/man/l_man/man1 directories, if present, and uses those
-instead.) The module man pages are stuck in that strange spot so that
+instead.)
+
+The module man pages are stuck in that strange spot so that
 they don't collide with other man pages stored in /usr/local/man/man3,
 and so that Perl's man pages don't hide system man pages.  On some
 systems, B<man less> would end up calling up Perl's less.pm module man
-page, rather than the less program.  (This location may change in a
-future release of perl.)
+page, rather than the less program.  (This default location will likely
+change to /usr/local/man/man3 in a future release of perl.)
 
 Note:  Many users prefer to store the module man pages in
 /usr/local/man/man3.  You can do this from the command line with
@@ -423,6 +428,9 @@ installed on multiple systems.  Here's one way to do that:
     make test
     make install
     cd /tmp/perl5
+    # Edit lib/<archname>/<version>/Config.pm to change all the
+    # install* variables back to reflect where everything will
+    # really be installed.
     tar cvf ../perl5-archive.tar .
     # Then, on each machine where you want to install perl,
     cd /usr/local  # Or wherever you specified as $prefix
@@ -459,14 +467,17 @@ compatibility, answer "y".
 
 On the other hand, if you are embedding perl into another application
 and want the maximum namespace protection, then you probably ought to
-answer "n" when Configure asks if you want binary compatibility.
+answer "n" when Configure asks if you want binary compatibility, or
+disable it from the Configure command line with
+
+	sh Configure -Ud_bincompat3
 
 The default answer of "y" to maintain binary compatibility is probably
 appropriate for almost everyone.
 
-In a related issue, old extensions may possibly be affected by the changes
-in the Perl language in the current release.  Please see pod/perldelta for
-a description of what's changed.
+In a related issue, old extensions may possibly be affected by the
+changes in the Perl language in the current release.  Please see
+pod/perldelta.pod for a description of what's changed.
 
 =head2 Selecting File IO mechanisms
 
@@ -626,7 +637,7 @@ to point to the perl build directory.
 
 The only reliable answer is that you should specify a different
 directory for the architecture-dependent library for your -DDEBUGGING
-version of perl.  You can do this with by changing all the *archlib*
+version of perl.  You can do this by changing all the *archlib*
 variables in config.sh, namely archlib, archlib_exp, and
 installarchlib, to point to your new architecture-dependent library.
 
@@ -1159,9 +1170,9 @@ should run plain 'make' before 'make test' otherwise you won't have a
 complete build).  If 'make test' doesn't say "All tests successful"
 then something went wrong.  See the file t/README in the t subdirectory.
 
-If you want to run make test in the background you should 
 Note that you can't run the tests in background if this disables
-opening of /dev/tty.
+opening of /dev/tty. You can use 'make test-notty' in that case but
+a few tty tests will be skipped.
 
 If make test bombs out, just cd to the t directory and run ./TEST
 by hand to see if it makes any difference.  If individual tests
@@ -1174,10 +1185,10 @@ individual subtests is to cd to the t directory and run
 
 	./perl harness
 
-(this assumes that most tests succeed, since harness uses
+(this assumes that most basic tests succeed, since harness uses
 complicated constructs).
 
-You can also read the individual tests to see if there are any helpful
+You should also read the individual tests to see if there are any helpful
 comments that apply to your system.
 
 Note:  One possible reason for errors is that some external programs
@@ -1343,13 +1354,13 @@ to hand-edit some of the converted files to get them to parse
 correctly.  For example, h2ph breaks spectacularly on type casting and
 certain structures.
 
-=head installhtml --help
+=head1 installhtml --help
 
 Some sites may wish to make perl documentation available in HTML
 format.  The installhtml utility can be used to convert pod
-documentation into linked HTML files and install install them.
+documentation into linked HTML files and install them.
 
-The following command-line is an example of the one we use to convert
+The following command-line is an example of one used to convert
 perl documentation:
 
   ./installhtml                   \
@@ -1368,6 +1379,9 @@ many minutes to execute a large installation and you should expect to
 see warnings like "no title", "unexpected directive" and "cannot
 resolve" as the files are processed. We are aware of these problems
 (and would welcome patches for them).
+
+You may find it helpful to run installhtml twice. That should reduce
+the number of "cannot resolve" warnings.
 
 =head1 cd pod && make tex && (process the latex files)
 
@@ -1417,10 +1431,14 @@ generate the documentation.
 
 =head1 AUTHOR
 
-Andy Dougherty doughera@lafcol.lafayette.edu , borrowing very heavily
-from the original README by Larry Wall, and also with lots of helpful
-feedback from the perl5-porters@perl.org folks.
+Original author:  Andy Dougherty doughera@lafcol.lafayette.edu ,
+borrowing very heavily from the original README by Larry Wall,
+with lots of helpful feedback and additions from the
+perl5-porters@perl.org folks.
+
+If you have problems or questions, please see L<"Reporting Problems">
+above.
 
 =head1 LAST MODIFIED
 
-$Id: INSTALL,v 1.22 1997/08/01 15:39:14 doughera Released $
+$Id: INSTALL,v 1.28 1997/10/10 16:50:59 doughera Released $

@@ -649,8 +649,8 @@ realloc(mp, nbytes)
 #ifdef PERL_CORE
 #ifdef DEBUGGING
     if (debug & 128) {
-	PerlIO_printf(PerlIO_stderr(), "0x%lx: (%05lu) rfree\n",(unsigned long)res,(unsigned long)(an++));
-	PerlIO_printf(PerlIO_stderr(), "0x%lx: (%05lu) realloc %ld bytes\n",
+	PerlIO_printf(Perl_debug_log, "0x%lx: (%05lu) rfree\n",(unsigned long)res,(unsigned long)(an++));
+	PerlIO_printf(Perl_debug_log, "0x%lx: (%05lu) realloc %ld bytes\n",
 	    (unsigned long)res,(unsigned long)(an++),(long)size);
     }
 #endif
@@ -814,7 +814,7 @@ int size;
     }
 
 #ifdef PERL_CORE
-    DEBUG_m(PerlIO_printf(PerlIO_stderr(), "sbrk malloc size %ld (reqsize %ld), left size %ld, give addr 0x%lx\n",
+    DEBUG_m(PerlIO_printf(Perl_debug_log, "sbrk malloc size %ld (reqsize %ld), left size %ld, give addr 0x%lx\n",
 		    size, reqsize, Perl_sbrk_oldsize, got));
 #endif
 

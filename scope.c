@@ -165,7 +165,12 @@ save_gp(gv, empty)
 GV *gv;
 I32 empty;
 {
-    SSCHECK(3);
+    SSCHECK(6);
+    SSPUSHIV((IV)SvLEN(gv));
+    SvLEN(gv) = 0; /* forget that anything was allocated here */
+    SSPUSHIV((IV)SvCUR(gv));
+    SSPUSHPTR(SvPVX(gv));
+    SvPOK_off(gv);
     SSPUSHPTR(SvREFCNT_inc(gv));
     SSPUSHPTR(GvGP(gv));
     SSPUSHINT(SAVEt_GP);
@@ -188,26 +193,50 @@ AV *
 save_ary(gv)
 GV *gv;
 {
+    AV *oav, *av;
+
     SSCHECK(3);
     SSPUSHPTR(gv);
-    SSPUSHPTR(GvAVn(gv));
+    SSPUSHPTR(oav = GvAVn(gv));
     SSPUSHINT(SAVEt_AV);
 
     GvAV(gv) = Null(AV*);
-    return GvAVn(gv);
+    av = GvAVn(gv);
+    if (SvMAGIC(oav)) {
+	SvMAGIC(av) = SvMAGIC(oav);
+	SvFLAGS(av) |= SvMAGICAL(oav);
+	SvMAGICAL_off(oav);
+	SvMAGIC(oav) = 0;
+	localizing = 1;
+	SvSETMAGIC((SV*)av);
+	localizing = 0;
+    }
+    return av;
 }
 
 HV *
 save_hash(gv)
 GV *gv;
 {
+    HV *ohv, *hv;
+
     SSCHECK(3);
     SSPUSHPTR(gv);
-    SSPUSHPTR(GvHVn(gv));
+    SSPUSHPTR(ohv = GvHVn(gv));
     SSPUSHINT(SAVEt_HV);
 
     GvHV(gv) = Null(HV*);
-    return GvHVn(gv);
+    hv = GvHVn(gv);
+    if (SvMAGIC(ohv)) {
+	SvMAGIC(hv) = SvMAGIC(ohv);
+	SvFLAGS(hv) |= SvMAGICAL(ohv);
+	SvMAGICAL_off(ohv);
+	SvMAGIC(ohv) = 0;
+	localizing = 1;
+	SvSETMAGIC((SV*)hv);
+	localizing = 0;
+    }
+    return hv;
 }
 
 void
@@ -463,14 +492,38 @@ I32 base;
         case SAVEt_AV:				/* array reference */
 	    av = (AV*)SSPOPPTR;
 	    gv = (GV*)SSPOPPTR;
-            SvREFCNT_dec(GvAV(gv));
+	    if (GvAV(gv)) {
+		AV *goner = GvAV(gv);
+		SvMAGIC(av) = SvMAGIC(goner);
+		SvFLAGS(av) |= SvMAGICAL(goner);
+		SvMAGICAL_off(goner);
+		SvMAGIC(goner) = 0;
+		SvREFCNT_dec(goner);
+	    }
             GvAV(gv) = av;
+	    if (SvMAGICAL(av)) {
+		localizing = 2;
+		SvSETMAGIC((SV*)av);
+		localizing = 0;
+	    }
             break;
         case SAVEt_HV:				/* hash reference */
 	    hv = (HV*)SSPOPPTR;
 	    gv = (GV*)SSPOPPTR;
-            SvREFCNT_dec(GvHV(gv));
+	    if (GvHV(gv)) {
+		HV *goner = GvHV(gv);
+		SvMAGIC(hv) = SvMAGIC(goner);
+		SvFLAGS(hv) |= SvMAGICAL(goner);
+		SvMAGICAL_off(goner);
+		SvMAGIC(goner) = 0;
+		SvREFCNT_dec(goner);
+	    }
             GvHV(gv) = hv;
+	    if (SvMAGICAL(hv)) {
+		localizing = 2;
+		SvSETMAGIC((SV*)hv);
+		localizing = 0;
+	    }
             break;
 	case SAVEt_INT:				/* int reference */
 	    ptr = SSPOPPTR;
@@ -512,11 +565,17 @@ I32 base;
 	    gv = (GV*)SSPOPPTR;
 	    (void)sv_clear((SV*)gv);
 	    break;
-        case SAVEt_GP:				/* scalar reference */
+	case SAVEt_GP:				/* scalar reference */
 	    ptr = SSPOPPTR;
 	    gv = (GV*)SSPOPPTR;
             gp_free(gv);
             GvGP(gv) = (GP*)ptr;
+            if (SvPOK(gv) && SvLEN(gv) > 0) {
+                Safefree(SvPVX(gv));
+            }
+            SvPVX(gv) = (char *)SSPOPPTR;
+            SvCUR(gv) = (STRLEN)SSPOPIV;
+            SvLEN(gv) = (STRLEN)SSPOPIV;
 	    SvREFCNT_dec(gv);
             break;
 	case SAVEt_FREESV:
@@ -615,7 +674,7 @@ void
 cx_dump(cx)
 CONTEXT* cx;
 {
-    PerlIO_printf(Perl_debug_log, "CX %d = %s\n", cx - cxstack, block_type[cx->cx_type]);
+    PerlIO_printf(Perl_debug_log, "CX %ld = %s\n", (long)(cx - cxstack), block_type[cx->cx_type]);
     if (cx->cx_type != CXt_SUBST) {
 	PerlIO_printf(Perl_debug_log, "BLK_OLDSP = %ld\n", (long)cx->blk_oldsp);
 	PerlIO_printf(Perl_debug_log, "BLK_OLDCOP = 0x%lx\n", (long)cx->blk_oldcop);

@@ -2252,7 +2252,7 @@ EXT U32 opargs[] = {
 	0x0001111c,	/* vec */
 	0x0009111c,	/* index */
 	0x0009111c,	/* rindex */
-	0x0000210d,	/* sprintf */
+	0x0000210f,	/* sprintf */
 	0x00002105,	/* formline */
 	0x0000099e,	/* ord */
 	0x0000098e,	/* chr */

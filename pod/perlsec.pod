@@ -18,25 +18,28 @@ user or group IDs.  The setuid bit in Unix permissions is mode 04000, the
 setgid bit mode 02000; either or both may be set.  You can also enable taint
 mode explicitly by using the B<-T> command line flag. This flag is
 I<strongly> suggested for server programs and any program run on behalf of
-someone else, such as a CGI script.
+someone else, such as a CGI script. Once taint mode is on, it's on for
+the remainder of your script.
 
 While in this mode, Perl takes special precautions called I<taint
 checks> to prevent both obvious and subtle traps.  Some of these checks
 are reasonably simple, such as verifying that path directories aren't
 writable by others; careful programmers have always used checks like
 these.  Other checks, however, are best supported by the language itself,
-and it is these checks especially that contribute to making a setuid Perl
+and it is these checks especially that contribute to making a set-id Perl
 program more secure than the corresponding C program.
 
-You may not use data derived from outside your program to affect something
-else outside your program--at least, not by accident.  All command line
-arguments, environment variables, locale information (see L<perllocale>),
-and file input are marked as "tainted".  Tainted data may not be used
-directly or indirectly in any command that invokes a sub-shell, nor in any
-command that modifies files, directories, or processes.  Any variable set
-within an expression that has previously referenced a tainted value itself
-becomes tainted, even if it is logically impossible for the tainted value
-to influence the variable.  Because taintedness is associated with each
+You may not use data derived from outside your program to affect
+something else outside your program--at least, not by accident.  All
+command line arguments, environment variables, locale information (see
+L<perllocale>), results of certain system calls (readdir, readlink,
+the gecos field of getpw* calls), and all file input are marked as
+"tainted".  Tainted data may not be used directly or indirectly in any
+command that invokes a sub-shell, nor in any command that modifies
+files, directories, or processes.  Any variable set
+to a value derived from tainted data will itself be tainted,
+even if it is logically impossible for the tainted data
+to alter the variable.  Because taintedness is associated with each
 scalar value, some elements of an array can be tainted and others not.
 
 For example:
@@ -90,8 +93,9 @@ doing something like the last example above.
 =head2 Laundering and Detecting Tainted Data
 
 To test whether a variable contains tainted data, and whose use would thus
-trigger an "Insecure dependency" message, you can use the following
-I<is_tainted()> function.
+trigger an "Insecure dependency" message, check your nearby CPAN mirror
+for the F<Taint.pm> module, which should become available around November
+1997.  Or you may be able to use the following I<is_tainted()> function.
 
     sub is_tainted {
 	return ! eval {
@@ -172,8 +176,8 @@ makes sure you set the PATH.
 It's also possible to get into trouble with other operations that don't
 care whether they use tainted values.  Make judicious use of the file
 tests in dealing with any user-supplied filenames.  When possible, do
-opens and such after setting C<$E<gt> = $E<lt>>.  (Remember group IDs,
-too!)  Perl doesn't prevent you from opening tainted filenames for reading,
+opens and such B<after> properly dropping any special user (or group!)
+privileges. Perl doesn't prevent you from opening tainted filenames for reading,
 so be careful what you print out.  The tainting mechanism is intended to
 prevent stupid mistakes, not to remove the need for thought.
 
@@ -199,30 +203,36 @@ doing something it shouldn't.
 Here's a way to do backticks reasonably safely.  Notice how the B<exec> is
 not called with a string that the shell could expand.  This is by far the
 best way to call something that might be subjected to shell escapes: just
-never call the shell at all.  By the time we get to the B<exec>, tainting
-is turned off, however, so be careful what you call and what you pass it.
+never call the shell at all.  
 
     use English;
-    die unless defined $pid = open(KID, "-|");
+    die "Can't fork: $!" unless defined $pid = open(KID, "-|");
     if ($pid) {	          # parent
 	while (<KID>) {
 	    # do something
 	}
 	close KID;
     } else {
+	my @temp = ($EUID, $EGID);
 	$EUID = $UID;
 	$EGID = $GID;    # XXX: initgroups() not called
+	# Make sure privs are really gone
+	($EUID, $EGID) = @temp;
+	die "Can't drop privileges" unless
+	    $UID == $EUID and
+	    $GID eq $EGID;	# String test
 	$ENV{PATH} = "/bin:/usr/bin";
-	exec 'myprog', 'arg1', 'arg2';
+	exec 'myprog', 'arg1', 'arg2' or
 	die "can't exec myprog: $!";
     }
 
-A similar strategy would work for wildcard expansion via C<glob>.
+A similar strategy would work for wildcard expansion via C<glob>, although
+you can use C<readdir> instead.
 
 Taint checking is most useful when although you trust yourself not to have
 written a program to give away the farm, you don't necessarily trust those
 who end up using it not to try to trick it into doing something bad.  This
-is the kind of security checking that's useful for setuid programs and
+is the kind of security checking that's useful for set-id programs and
 programs launched on someone else's behalf, like CGI programs.
 
 This is quite different, however, from not even trusting the writer of the
@@ -236,28 +246,28 @@ are trapped and namespace access is carefully controlled.
 =head2 Security Bugs
 
 Beyond the obvious problems that stem from giving special privileges to
-systems as flexible as scripts, on many versions of Unix, setuid scripts
+systems as flexible as scripts, on many versions of Unix, set-id scripts
 are inherently insecure right from the start.  The problem is a race
 condition in the kernel.  Between the time the kernel opens the file to
-see which interpreter to run and when the (now-setuid) interpreter turns
+see which interpreter to run and when the (now-set-id) interpreter turns
 around and reopens the file to interpret it, the file in question may have
 changed, especially if you have symbolic links on your system.
 
 Fortunately, sometimes this kernel "feature" can be disabled.
 Unfortunately, there are two ways to disable it.  The system can simply
-outlaw scripts with the setuid bit set, which doesn't help much.
-Alternately, it can simply ignore the setuid bit on scripts.  If the
+outlaw scripts with any set-id bit set, which doesn't help much.
+Alternately, it can simply ignore the set-id bits on scripts.  If the
 latter is true, Perl can emulate the setuid and setgid mechanism when it
 notices the otherwise useless setuid/gid bits on Perl scripts.  It does
 this via a special executable called B<suidperl> that is automatically
 invoked for you if it's needed.
 
-However, if the kernel setuid script feature isn't disabled, Perl will
-complain loudly that your setuid script is insecure.  You'll need to
-either disable the kernel setuid script feature, or put a C wrapper around
+However, if the kernel set-id script feature isn't disabled, Perl will
+complain loudly that your set-id script is insecure.  You'll need to
+either disable the kernel set-id script feature, or put a C wrapper around
 the script.  A C wrapper is just a compiled program that does nothing
 except call your Perl program.   Compiled programs are not subject to the
-kernel bug that plagues setuid scripts.  Here's a simple wrapper, written
+kernel bug that plagues set-id scripts.  Here's a simple wrapper, written
 in C:
 
     #define REAL_PATH "/path/to/script"
@@ -278,7 +288,7 @@ for each of them.
 
 In recent years, vendors have begun to supply systems free of this
 inherent security bug.  On such systems, when the kernel passes the name
-of the setuid script to open to the interpreter, rather than using a
+of the set-id script to open to the interpreter, rather than using a
 pathname subject to meddling, it instead passes I</dev/fd/3>.  This is a
 special file already opened on the script, so that there can be no race
 condition for evil scripts to exploit.  On these systems, Perl should be

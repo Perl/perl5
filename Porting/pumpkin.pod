@@ -41,6 +41,10 @@ Subscribe by sending the message (in the body of your letter)
 
 to perl5-porters-request@perl.org .
 
+Archives of the list are held at:
+
+    http://www.rosat.mpe-garching.mpg.de/mailing-lists/perl-porters/
+
 =head1 How are Perl Releases Numbered?
 
 Perl version numbers are floating point numbers, such as 5.004.
@@ -73,9 +77,10 @@ In addition, there may be "developer" sub-versions available.  These
 are not official releases.  They may contain unstable experimental
 features, and are subject to rapid change.  Such developer
 sub-versions are numbered with sub-version numbers.  For example,
-version 5.004_04 is the 4'th developer version built on top of
-5.004.  It might include the _01, _02, and _03 changes, but it
-also might not.  Sub-versions are allowed to be subversive.
+version 5.003_04 is the 4'th developer version built on top of
+5.003.  It might include the _01, _02, and _03 changes, but it
+also might not.  Sub-versions are allowed to be subversive. (But see
+the next section for recent changes.)
 
 These sub-versions can also be used as floating point numbers, so
 you can do things such as
@@ -99,6 +104,11 @@ The separate bug-fix track is being established to allow us an easy
 way to distribute important bug fixes without waiting for the
 developers to untangle all the other problems in the current
 developer's release.
+
+Trial releases of bug-fix maintenance releases are announced on
+perl5-porters. Trial releases use the new subversion number (to avoid
+testers installing it over the previous release) and include a 'local
+patch' entry in patchlevel.h.
 
 Watch for announcements of maintenance subversions in
 comp.lang.perl.announce.
@@ -1157,14 +1167,14 @@ and/or fcntl() file locking.  It's a mess.
 
 =back
 
-=head1 AUTHOR
+=head1 AUTHORS
 
-Andy Dougherty <doughera@lafcol.lafayette.edu>.
-
-Additions by Chip Salzenberg <chip@perl.com>.
+Original author:  Andy Dougherty doughera@lafcol.lafayette.edu .
+Additions by Chip Salzenberg chip@perl.com and 
+Tim Bunce Tim.Bunce@ig.co.uk .
 
 All opinions expressed herein are those of the authorZ<>(s).
 
 =head1 LAST MODIFIED
 
-$Id: pumpkin.pod,v 1.10.1.1 1997/06/10 20:46:47 timbo Exp $
+$Id: pumpkin.pod,v 1.13 1997/08/28 18:26:40 doughera Released $

@@ -1127,7 +1127,12 @@ sub fixin { # stolen from the pink Camel book, more or less
 
 	# Now look (in reverse) for interpreter in absolute PATH (unless perl).
 	if ($cmd eq "perl") {
-	    $interpreter = $Config{perlpath};
+            if ($Config{startperl} =~ m,^\#!.*/perl,) {
+                $interpreter = $Config{startperl};
+                $interpreter =~ s,^\#!,,;
+            } else {
+                $interpreter = $Config{perlpath};
+            }
 	} else {
 	    my(@absdirs) = reverse grep {$self->file_name_is_absolute} $self->path;
 	    $interpreter = '';
@@ -2935,11 +2940,13 @@ sub test {
     if (!$tests && -d 't') {
 	$tests = $Is_Win32 ? join(' ', <t\\*.t>) : 't/*.t';
     }
+    # note: 'test.pl' name is also hardcoded in init_dirscan()
     my(@m);
     push(@m,"
 TEST_VERBOSE=0
 TEST_TYPE=test_\$(LINKTYPE)
 TEST_FILE = test.pl
+TEST_FILES = $tests
 TESTDB_SW = -d
 
 testdb :: testdb_\$(LINKTYPE)
@@ -2953,8 +2960,8 @@ test :: \$(TEST_TYPE)
     push(@m, "\n");
 
     push(@m, "test_dynamic :: pure_all\n");
-    push(@m, $self->test_via_harness('$(FULLPERL)', $tests)) if $tests;
-    push(@m, $self->test_via_script('$(FULLPERL)', 'test.pl')) if -f "test.pl";
+    push(@m, $self->test_via_harness('$(FULLPERL)', '$(TEST_FILES)')) if $tests;
+    push(@m, $self->test_via_script('$(FULLPERL)', '$(TEST_FILE)')) if -f "test.pl";
     push(@m, "\n");
 
     push(@m, "testdb_dynamic :: pure_all\n");
@@ -2966,8 +2973,8 @@ test :: \$(TEST_TYPE)
 
     if ($self->needs_linking()) {
 	push(@m, "test_static :: pure_all \$(MAP_TARGET)\n");
-	push(@m, $self->test_via_harness('./$(MAP_TARGET)', $tests)) if $tests;
-	push(@m, $self->test_via_script('./$(MAP_TARGET)', 'test.pl')) if -f "test.pl";
+	push(@m, $self->test_via_harness('./$(MAP_TARGET)', '$(TEST_FILES)')) if $tests;
+	push(@m, $self->test_via_script('./$(MAP_TARGET)', '$(TEST_FILE)')) if -f "test.pl";
 	push(@m, "\n");
 	push(@m, "testdb_static :: pure_all \$(MAP_TARGET)\n");
 	push(@m, $self->test_via_script('./$(MAP_TARGET) $(TESTDB_SW)', '$(TEST_FILE)'));

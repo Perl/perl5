@@ -29,8 +29,8 @@ perlapio - perl's IO abstraction interface.
 
     int     PerlIO_fileno(PerlIO *);
     PerlIO *PerlIO_fdopen(int, const char *);
-    PerlIO *PerlIO_importFILE(FILE *);
-    FILE   *PerlIO_exportFILE(PerlIO *);
+    PerlIO *PerlIO_importFILE(FILE *, int flags);
+    FILE   *PerlIO_exportFILE(PerlIO *, int flags);
     FILE   *PerlIO_findFILE(PerlIO *);
     void    PerlIO_releaseFILE(PerlIO *,FILE *);
 

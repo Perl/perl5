@@ -1,8 +1,8 @@
 # machten.sh
-# This is for MachTen 4.0.3.  It might work on other versions too.
+# This is for MachTen 4.0.3.  It might work on other versions and variants too.
 #
-# MachTen users might need a fixed tr from ftp.tenon.com.  This should
-# be described in the MachTen release notes.
+# Users of earlier MachTen versions might need a fixed tr from ftp.tenon.com.
+# This should be described in the MachTen release notes.
 #
 # MachTen 2.x has its own hint file.
 #
@@ -13,6 +13,7 @@
 #	Martijn Koster <m.koster@webcrawler.com>
 #	Richard Yeh <rcyeh@cco.caltech.edu>
 #
+# Raise perl's stack size -- Dominic Dunlop <domo@tcp.ip.lu> 970922
 # Reinstate sigsetjmp iff version is 4.0.3 or greater; use nm
 # (assumes Configure change); prune libswanted -- Dominic Dunlop 970113
 # Warn about test failure due to old Berkeley db -- Dominic Dunlop 970105
@@ -24,9 +25,6 @@
 #
 # MachTen 4.X does support dynamic loading, but perl doesn't
 # know how to use it yet.
-#
-#  Updated by Dominic Dunlop <domo@tcp.ip.lu>
-#  Tue Jan 14 10:17:18 WET 1997
 
 # Power MachTen is a real memory system and its standard malloc
 # has been optimized for this. Using this malloc instead of Perl's
@@ -35,6 +33,11 @@ usemymalloc='false'
 
 # Make symbol table listings les voluminous
 nmopts=-gp
+
+# Increase perl's stack size.  Without this, lib/complex.t crashes out.
+# Particularly perverse programs may require that perl has an even larger
+# stack allocation than that specified here.  (See  man setstackspace )
+ldflags='-Xlstack=0x014000'
 
 # Install in /usr/local by default
 prefix='/usr/local'

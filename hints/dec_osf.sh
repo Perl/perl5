@@ -117,6 +117,9 @@ libswanted="`echo $libswanted | sed -e 's/ dl / /'`"
 # libPW contains nothing useful for perl
 libswanted="`echo $libswanted | sed -e 's/ PW / /'`"
 
+# libnet contains nothing useful for perl here, and doesn't work
+libswanted="`echo $libswanted | sed -e 's/ net / /'`"
+
 # libbsd contains nothing used by perl that is not already in libc
 libswanted="`echo $libswanted | sed -e 's/ bsd / /'`"
 
@@ -170,6 +173,13 @@ unset _DEC_uname_r
     
 #
 # History:
+#
+# perl5.004_04:
+#
+#       19-Sep-1997 Spider Boardman <spider@Orb.Nashua.NH.US>
+#
+#	* libnet on Digital UNIX is for JAVA, not for sockets.
+#
 #
 # perl5.003_28:
 #

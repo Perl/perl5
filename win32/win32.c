@@ -1564,6 +1564,7 @@ XS(w32_GetShortPathName)
 {
     dXSARGS;
     SV *shortpath;
+    DWORD len;
 
     if(items != 1)
 	croak("usage: Win32::GetShortPathName($longPathName)");
@@ -1571,8 +1572,15 @@ XS(w32_GetShortPathName)
     shortpath = sv_mortalcopy(ST(0));
     SvUPGRADE(shortpath, SVt_PV);
     /* src == target is allowed */
-    if (GetShortPathName(SvPVX(shortpath), SvPVX(shortpath), SvCUR(shortpath)))
+    do {
+	len = GetShortPathName(SvPVX(shortpath),
+			       SvPVX(shortpath),
+			       SvLEN(shortpath));
+    } while (len >= SvLEN(shortpath) && sv_grow(shortpath,len+1));
+    if (len) {
+	SvCUR_set(shortpath,len);
 	ST(0) = shortpath;
+    }
     else
 	ST(0) = &sv_undef;
     XSRETURN(1);

@@ -2226,6 +2226,7 @@ int gimme;
     CvDEPTH(compcv) = 1;
 
     SP = stack_base + POPMARK;		/* pop original mark */
+    op = saveop;					/* The caller may need it. */
     RETURNOP(eval_start);
 }
 

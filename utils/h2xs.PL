@@ -418,7 +418,7 @@ END
 
 # require autoloader if XS is disabled.
 # if XS is enabled, require autoloader unless autoloading is disabled.
-if( $opt_X && (! $opt_A) ){
+if( ($opt_X && (! $opt_A)) || (!$opt_X) ) {
 	print PM <<"END";
 require AutoLoader;
 END
