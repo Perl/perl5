@@ -73,12 +73,14 @@ if ($ino == 0) {print "ok 20\n";} else {print "not ok 20\n";}
 unlink 'c';
 
 chdir $wd || die "Can't cd back to $wd";
+rmdir 'tmp';
 
 unlink 'c';
 if (`ls -l perl 2>/dev/null` =~ /^l.*->/) {  # we have symbolic links
     if (symlink("TEST","c")) {print "ok 21\n";} else {print "not ok 21\n";}
     $foo = `grep perl c`;
     if ($foo) {print "ok 22\n";} else {print "not ok 22\n";}
+    unlink 'c';
 }
 else {
     print "ok 21\nok 22\n";

@@ -242,6 +242,8 @@ PP(pp_eq)
 PP(pp_preinc)
 {
     dSP;
+    if (SvREADONLY(TOPs))
+	croak(no_modify);
     if (SvIOK(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
     	SvIVX(TOPs) != IV_MAX)
     {
@@ -297,7 +299,19 @@ PP(pp_join)
 PP(pp_pushre)
 {
     dSP;
+#ifdef DEBUGGING
+    /*
+     * We ass_u_me that LvTARGOFF() comes first, and that two STRLENs
+     * will be enough to hold an OP*.
+     */
+    SV* sv = sv_newmortal();
+    sv_upgrade(sv, SVt_PVLV);
+    LvTYPE(sv) = '/';
+    Copy(&op, &LvTARGOFF(sv), 1, OP*);
+    XPUSHs(sv);
+#else
     XPUSHs((SV*)op);
+#endif
     RETURN;
 }
 
@@ -1727,26 +1741,26 @@ PP(pp_entersub)
 	DIE("Not a CODE reference");
 
     if (!CvROOT(cv) && !CvXSUB(cv)) {
-	if (gv = CvGV(cv)) {
-	    SV *tmpstr;
-	    GV *ngv;
-	    if (cv != GvCV(gv)) {	/* autoloaded stub? */
-		cv = GvCV(gv);
-		goto retry;
-	    }
-	    tmpstr = sv_newmortal();
-	    gv_efullname3(tmpstr, gv, Nullch);
-	    ngv = gv_fetchmethod(GvESTASH(gv), "AUTOLOAD");
-	    if (ngv && ngv != gv && (cv = GvCV(ngv))) {	/* One more chance... */
-		gv = ngv;
-		sv_setsv(GvSV(CvGV(cv)), tmpstr);	/* Set CV's $AUTOLOAD */
-		SvTAINTED_off(GvSV(CvGV(cv)));
-		goto retry;
-	    }
-	    else
-		DIE("Undefined subroutine &%s called",SvPVX(tmpstr));
+	GV* autogv;
+	SV* subname;
+
+	/* anonymous or undef'd function leaves us no recourse */
+	if (CvANON(cv) || !(gv = CvGV(cv)))
+	    DIE("Undefined subroutine called");
+	/* autoloaded stub? */
+	if (cv != GvCV(gv)) {
+	    cv = GvCV(gv);
+	    goto retry;
 	}
-	DIE("Undefined subroutine called");
+	/* should call AUTOLOAD now? */
+	if ((autogv = gv_autoload(GvESTASH(gv), GvNAME(gv), GvNAMELEN(gv)))) {
+	    cv = GvCV(autogv);
+	    goto retry;
+	}
+	/* sorry */
+	subname = sv_newmortal();
+	gv_efullname3(subname, gv, Nullch);
+	DIE("Undefined subroutine &%s called", SvPVX(subname));
     }
 
     gimme = GIMME;
@@ -1844,8 +1858,8 @@ PP(pp_entersub)
 	    (void)SvREFCNT_inc(cv);
 	else {	/* save temporaries on recursion? */
 	    if (CvDEPTH(cv) == 100 && dowarn 
-		&& !(perldb && cv == GvCV(DBsub)))
-		warn("Deep recursion on subroutine \"%s\"",GvENAME(CvGV(cv)));
+		  && !(perldb && cv == GvCV(DBsub)))
+		sub_crush_depth(cv);
 	    if (CvDEPTH(cv) > AvFILL(padlist)) {
 		AV *av;
 		AV *newpad = newAV();
@@ -1922,6 +1936,19 @@ PP(pp_entersub)
 	    }
 	}
 	RETURNOP(CvSTART(cv));
+    }
+}
+
+void
+sub_crush_depth(cv)
+CV* cv;
+{
+    if (CvANON(cv))
+	warn("Deep recursion on anonymous subroutine");
+    else {
+	SV* tmpstr = sv_newmortal();
+	gv_efullname3(tmpstr, CvGV(cv), Nullch);
+	warn("Deep recursion on subroutine \"%s\"", SvPVX(tmpstr));
     }
 }
 

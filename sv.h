@@ -218,6 +218,8 @@ struct xpvbm {
     U8		xbm_rare;	/* rarest character in string */
 };
 
+/* This structure much match XPVCV */
+
 struct xpvfm {
     char *	xpv_pv;		/* pointer to malloced string */
     STRLEN	xpv_cur;	/* length of xpv_pv as a C string */
@@ -237,6 +239,8 @@ struct xpvfm {
     long	xcv_depth;		/* >= 2 indicates recursive call */
     AV *	xcv_padlist;
     CV *	xcv_outside;
+    U8		xcv_flags;
+
     I32		xfm_lines;
 };
 

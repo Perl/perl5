@@ -39,6 +39,10 @@ for (@prgs){
 __END__
 ()=()
 ########
+$a = ":="; split /($a)/o, "a:=b:=c"; print "@_"
+EXPECT
+a := b := c
+########
 $cusp = ~0 ^ (~0 >> 1);
 $, = " ";
 print +($cusp - 1) % 8, $cusp % 8, -$cusp % 8, ($cusp + 1) % 8, "!\n";
@@ -255,3 +259,13 @@ print p::func()->groovy(), "\n"
 EXPECT
 really groovy
 ########
+($k, $s)  = qw(x 0);
+@{$h{$k}} = qw(1 2 4);
+for (@{$h{$k}}) { $s += $_; delete $h{$k} if ($_ == 2) }
+print "bogus\n" unless $s == 7;
+########
+my $a = 'outer';
+eval q[ my $a = 'inner'; eval q[ print "$a " ] ];
+eval { my $x = 'peace'; eval q[ print "$x\n" ] }
+EXPECT
+inner peace

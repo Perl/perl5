@@ -9,6 +9,304 @@ releases.)
 
 
 ----------------
+Version 5.003_21
+----------------
+
+This release includes several important bug fixes, and a couple of
+minor but valuable language tweaks.  Please read on for a list of the
+significant changes:
+
+ CORE LANGUAGE CHANGES
+
+  Title:  "Fix overloading via inherited autoloaded functions"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199701131022.FAA22830@monk.mps.ohio-state.edu>
+   Date:  Mon, 13 Jan 1997 05:22:47 -0500 (EST)
+  Files:  gv.c lib/overload.pm pod/perldiag.pod t/pragma/overload.t
+
+  Title:  "Method call fixes: Don't cache in alias, don't skip undef"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  global.sym gv.c gv.h hv.c op.c pod/perlguts.pod
+          pod/perltoc.pod pp.c pp_ctl.c pp_hot.c proto.h scope.c sv.c
+          t/op/method.t
+
+  Title:  "Formats can be closures"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  cv.h op.c perly.c perly.c.diff perly.y pp_sys.c sv.h
+
+  Title:  "Quote 'foo' in C<$x{-foo}>"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  toke.c
+
+  Title:  "Forbid C< x->{y} > and C< x->[0] > under C<strict refs>"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  op.c pod/perldiag.pod t/pragma/strict-refs
+
+  Title:  "Allow <=> to return undef when operands are not ordered"
+   From:  Chip Salzenberg and Andreas Koenig
+  Files:  MANIFEST pp.c t/op/cmp.t
+
+  Title:  "Fail regex that starts with '{'"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  regcomp.c
+
+ CORE PORTABILITY
+
+  Title:  "Re: Perl 5.003_20: OS/2 patches"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199701101102.GAA19051@monk.mps.ohio-state.edu>
+   Date:  Fri, 10 Jan 1997 06:02:16 -0500 (EST)
+  Files:  hints/os2.sh os2/Changes os2/os2.c os2/os2ish.h pp_sys.c
+
+  Title:  "VMS patches for _20"
+   From:  Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>
+ Msg-ID:  <01IE7MGK7ULQ003K5M@hmivax.humgen.upenn.edu>
+   Date:  Tue, 14 Jan 1997 17:34:43 -0500 (EST)
+  Files:  configpm dosish.h os2/os2ish.h plan9/plan9ish.h proto.h
+          t/pragma/strict.t t/pragma/subs.t t/pragma/warning.t toke.c
+          unixish.h vms/Makefile vms/config.vms vms/descrip.mms
+          vms/genconfig.pl vms/perly_c.vms vms/test.com vms/vmsish.h
+          x2p/a2p.h x2p/str.c
+
+  Title:  "Irix 6.3 & 6.4 and perl5.003_20"
+   From:  John Stoffel <jfs@fluent.com>
+ Msg-ID:  <199701132242.RAA14601@jfs.Fluent.COM>
+   Date:  Mon, 13 Jan 1997 17:42:50 -0500 (EST)
+  Files:  MANIFEST hints/irix_6_3.sh hints/irix_6_4.sh
+
+  Title:  "Patch: MachTen hints, Configure"
+   From:  Dominic Dunlop <domo@slipper.ip.lu>
+ Msg-ID:  <v03010d00af0123a93670@[194.51.248.75]>
+   Date:  Tue, 14 Jan 1997 13:43:13 +0100
+  Files:  Configure hints/machten.sh
+
+  Title:  "Rename aux.sh to aux_3.sh for MS-LOSS"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  MANIFEST hints/aux_3.sh
+
+ OTHER CORE CHANGES
+
+  Title:  "Fix C< eval { my $x; eval '$x' } >"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  op.c t/op/misc.t
+
+  Title:  "Don't warn if eval '' uses outer func's lexicals"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  op.c
+
+  Title:  "Avoid memory wastage in wait(); make pidstatus global"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  global.sym interp.sym perl.c perl.h pp_sys.c
+
+  Title:  "Forbid ++ and -- on readonly values"
+   From:  "John Q. Linux" <jql@accessone.com>
+ Msg-ID:  <Pine.LNX.3.95.970110193330.11249D-100000@jql.accessone.com>
+   Date:  Fri, 10 Jan 1997 19:47:16 -0800 (PST)
+  Files:  pp.c pp_hot.c
+
+  Title:  "Keep array from dying during foreach(@array)"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  cop.h pp_ctl.c
+
+  Title:  "Fix C< $a="simple"; split /($a)/o >"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  pp.c t/op/misc.t
+
+  Title:  "Fix infinite loop for undef function in @SIG{__WARN__,__DIE__}"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  util.c
+
+  Title:  "Fix for anon-lists with tied entries coredump"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199701100745.CAA13057@aatma.engin.umich.edu>
+   Date:  Fri, 10 Jan 1997 02:45:11 -0500
+  Files:  pp.c
+
+  Title:  "Don't set SVf_PADBUSY on immortal SVs"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  op.c
+
+  Title:  "Patch for Object subroutines"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199701080156.UAA15366@monk.mps.ohio-state.edu>
+   Date:  Tue, 7 Jan 1997 20:56:02 -0500 (EST)
+  Files:  cop.h
+
+  Title:  "Use an SVt_PVLV to hold stacked OP pointers when debugging"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  pp.c pp_hot.c
+
+  Title:  "Undo change that freed large pad vars"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  scope.c
+
+ BUILD PROCESS
+
+  Title:  "Make MachTen hints file warn about db-recno failures"
+   From:  Dominic Dunlop <domo@slipper.ip.lu>
+ Msg-ID:  <v03010d00aef92fba6aca@[194.51.248.78]>
+   Date:  Wed, 8 Jan 1997 12:07:18 +0100
+  Files:  hints/machten.sh
+
+  Title:  "5.003_20, FreeBSD 3.0 and minor patch"
+   From:  roberto@eurocontrol.fr (Ollivier Robert)
+ Msg-ID:  <Mutt.19970108143747.roberto@caerdonn.eurocontrol.fr>
+   Date:  Wed, 8 Jan 1997 14:37:47 +0100
+  Files:  Configure
+
+  Title:  "Make installperl quieter; only shared libraries need 0555"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  installperl
+
+ TESTS
+
+  Title:  "Advice on TEST failure"
+   From:  Dominic Dunlop <domo@slipper.ip.lu>
+ Msg-ID:  <v03010d01aefbaefcf3bc@[194.51.248.78]>
+   Date:  Fri, 10 Jan 1997 10:19:07 +0100
+  Files:  t/TEST
+
+  Title:  "UNIVERSAL tests"
+   From:  Roderick Schertler <roderick@gate.net>
+  Files:  MANIFEST t/op/universal.t
+
+  Title:  "Test deletion of array during foreach"
+   From:  Jarkko Hietaniemi <jhi@alpha.hut.fi>
+  Files:  t/op/misc.t
+
+  Title:  "patch for db-recno.t"
+   From:  pmarquess@bfsec.bt.co.uk (Paul Marquess)
+ Msg-ID:  <9701121509.AA11147@claudius.bfsec.bt.co.uk>
+   Date:  Sun, 12 Jan 1997 15:09:33 +0000 (GMT)
+  Files:  t/lib/db-recno.t
+
+ LIBRARY AND EXTENSIONS
+
+  Title:  "Localize info about filesystems being case-forgiving"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  lib/File/Basename.pm pod/checkpods.PL pod/pod2html.PL
+          pod/pod2latex.PL pod/pod2man.PL pod/pod2text.PL
+          utils/c2ph.PL utils/h2ph.PL utils/h2xs.PL utils/perlbug.PL
+          utils/perldoc.PL utils/pl2pm.PL utils/splain.PL
+          x2p/find2perl.PL x2p/s2p.PL
+
+  Title:  "Fix for fd leak in IO::File::new_tmpfile"
+   From:  Graham Barr and Chip Salzenberg
+  Files:  ext/IO/IO.xs ext/IO/lib/IO/Handle.pm
+
+  Title:  "Refresh Getopt::Long to 2.6"
+   From:  Johan Vromans <jvromans@squirrel.nl>
+  Files:  lib/Getopt/Long.pm
+
+  Title:  "Refresh DB_File to 1.10"
+   From:  pmarquess@bfsec.bt.co.uk (Paul Marquess)
+ Msg-ID:  <9701141247.AA21242@claudius.bfsec.bt.co.uk>
+   Date:  Tue, 14 Jan 97 12:47:40 GMT
+  Files:  ext/DB_File/DB_File.pm ext/DB_File/DB_File.xs
+
+  Title:  "Re: FileCache::cacheout clobbers $_"
+   From:  Roderick Schertler <roderick@gate.net>
+ Msg-ID:  <pz3ewb3189.fsf@eeyore.ibcinc.com>
+   Date:  08 Jan 1997 23:45:58 -0500
+  Files:  lib/FileCache.pm lib/cacheout.pl
+
+  Title:  "PATCH: AutoSplit"
+   From:  Graham Barr <bodg@tiuk.ti.com>
+ Msg-ID:  <9603111010.AA29935@tiuk.ti.com>
+   Date:  11 Mar 1996 06:01:58 -0500
+  Files:  lib/AutoSplit.pm
+
+  Title:  "Re: Uninitialized value in Carp.pm ? "
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199701141815.NAA07960@aatma.engin.umich.edu>
+   Date:  Tue, 14 Jan 1997 13:15:25 -0500
+  Files:  lib/Carp.pm
+
+  Title:  "Avoid "uninitialized" warnings from POSIX::constant()"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  ext/POSIX/POSIX.pm
+
+  Title:  "Eliminate warning from C<use overload>"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  lib/overload.pm
+
+  Title:  "low priority patches"
+   From:  pmarquess@bfsec.bt.co.uk (Paul Marquess)
+ Msg-ID:  <9701081655.AA27349@claudius.bfsec.bt.co.uk>
+   Date:  Wed, 8 Jan 97 16:55:02 GMT
+  Files:  lib/Cwd.pm t/comp/redef.t t/lib/db-btree.t
+
+ UTILITIES
+
+  Title:  "Re: xsubpp and Tk ==> segfault"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199701080825.DAA15813@monk.mps.ohio-state.edu>
+   Date:  Wed, 8 Jan 1997 03:25:47 -0500 (EST)
+  Files:  lib/ExtUtils/xsubpp
+
+  Title:  "Re: MakeMaker and 'make uninstall'"
+   From:  Andreas Koenig <k@anna.in-berlin.de>
+ Msg-ID:  <199701101243.NAA26400@anna.in-berlin.de>
+   Date:  Fri, 10 Jan 1997 13:43:39 +0100
+  Files:  lib/ExtUtils/MM_Unix.pm
+
+  Title:  "Don't search for pod if path is already valid"
+   From:  Wayne Scott <wscott@ichips.intel.com>
+ Msg-ID:  <199701082325.PAA04521@pdxlx008.intel.com>
+   Date:  Wed, 08 Jan 1997 15:25:19 -0800
+  Files:  utils/perldoc.PL
+
+  Title:  "Yet another perldoc option"
+   From:  Gisle Aas <aas@aas.no>
+ Msg-ID:  <199610022200.AAA15334@furubotn.sn.no>
+   Date:  Thu, 3 Oct 1996 00:00:35 +0200
+  Files:  utils/perldoc.PL
+
+  Title:  "Re: perldoc, temp files, async pagers"
+   From:  Roderick Schertler <roderick@gate.net>
+ Msg-ID:  <pzwwtoom8p.fsf@eeyore.ibcinc.com>
+   Date:  07 Jan 1997 22:54:14 -0500
+  Files:  utils/perldoc.PL
+
+ DOCUMENTATION
+
+  Title:  "Full documentation generation patch"
+   From:  Raphael Manfredi <Raphael_Manfredi@grenoble.hp.com>
+ Msg-ID:  <15309.853323388@lyon.grenoble.hp.com>
+   Date:  Wed, 15 Jan 97 11:16:28 +0100
+  Files:  MANIFEST pod/roffitall pod/rofftoc
+
+  Title:  "Re: documentation correction (i.e. patch) for perlsyn.pod"
+   From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>
+ Msg-ID:  <E0vilLh-0000M6-00@ursa.cus.cam.ac.uk>
+   Date:  Fri, 10 Jan 1997 18:06:37 +0000
+  Files:  pod/perlsyn.pod
+
+  Title:  "Document use of pos() and /\G/"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199701132013.PAA26606@aatma.engin.umich.edu>
+   Date:  Mon, 13 Jan 1997 15:13:12 -0500
+  Files:  pod/perlfunc.pod pod/perlnews.pod pod/perlop.pod
+          pod/perlre.pod pod/perltoc.pod pod/perltrap.pod
+
+  Title:  "Fix example #4 in perlXStut"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199701050739.CAA11112@monk.mps.ohio-state.edu>
+   Date:  Sun, 5 Jan 1997 02:39:45 -0500 (EST)
+  Files:  pod/perlxstut.pod
+
+  Title:  "Document new closure warnings"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  op.c pod/perldiag.pod
+
+  Title:  "Misc. doc patches missing in _20"
+   From:  Roderick Schertler <roderick@gate.net>
+ Msg-ID:  <102.852695733@eeyore.ibcinc.com>
+   Date:  Tue, 07 Jan 1997 22:55:33 -0500
+  Files:  pod/perlsub.pod pod/perltoc.pod pod/perlvar.pod
+
+
+----------------
 Version 5.003_20
 ----------------
 

@@ -4,7 +4,7 @@
 # test method calls and autoloading.
 #
 
-print "1..18\n";
+print "1..20\n";
 
 @A::ISA = 'B';
 @B::ISA = 'C';
@@ -24,11 +24,15 @@ test( A->d, "C::d");		# Update hash table;
 *B::d = \&D::d;			# Import now.
 test (A->d, "D::d");		# Update hash table;
 
-eval 'sub B::d {"B::d1"}';	# Import now.
-test (A->d, "B::d1");		# Update hash table;
+{
+    local *B::d;
+    eval 'sub B::d {"B::d1"}';	# Import now.
+    test (A->d, "B::d1");	# Update hash table;
+    undef &B::d;
+    test ((eval { A->d }, ($@ =~ /Undefined subroutine/)), 1);
+}
 
-undef &B::d;			# Should work without any help too
-test (A->d, "C::d");
+test (A->d, "D::d");		# Back to previous state
 
 eval 'sub B::d {"B::d2"}';	# Import now.
 test (A->d, "B::d2");		# Update hash table;
@@ -53,6 +57,10 @@ test (A->d, "B::d4");		# Update hash table;
 
 delete $B::{d};			# Should work without any help too
 test (A->d, "C::d");
+
+*A::x = *A::d;			# See if cache incorrectly follows synonyms
+A->d;
+test (eval { A->x } || "nope", "nope");
 
 eval <<'EOF';
 sub C::e;
@@ -91,9 +99,9 @@ test(Y->f(), "B: In Y::f, 3");	# Which sticks
 
 *B::AUTOLOAD = sub {
   my $c = ++$counter;
-  my $method = $main::__ANON__; 
-  *$main::__ANON__ = sub { "new B: In $method, $c" };
-  goto &$main::__ANON__;
+  my $method = $AUTOLOAD; 
+  *$AUTOLOAD = sub { "new B: In $method, $c" };
+  goto &$AUTOLOAD;
 };
 
 test(A->eee(), "new B: In A::eee, 4");	# We get a correct $autoload

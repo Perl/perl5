@@ -218,6 +218,7 @@
 #define gv_AVadd		Perl_gv_AVadd
 #define gv_HVadd		Perl_gv_HVadd
 #define gv_IOadd		Perl_gv_IOadd
+#define gv_autoload		Perl_gv_autoload
 #define gv_check		Perl_gv_check
 #define gv_efullname		Perl_gv_efullname
 #define gv_efullname3		Perl_gv_efullname3
@@ -483,6 +484,7 @@
 #define patleave		Perl_patleave
 #define peep			Perl_peep
 #define pidgone			Perl_pidgone
+#define pidstatus		Perl_pidstatus
 #define pmflag			Perl_pmflag
 #define pmruntime		Perl_pmruntime
 #define pmtrans			Perl_pmtrans
@@ -975,9 +977,8 @@
 #define start_subparse		Perl_start_subparse
 #define statbuf			Perl_statbuf
 #define string_amg		Perl_string_amg
+#define sub_crush_depth		Perl_sub_crush_depth
 #define sub_generation		Perl_sub_generation
-#define sublex_done		Perl_sublex_done
-#define sublex_start		Perl_sublex_start
 #define subline			Perl_subline
 #define subname			Perl_subname
 #define subtr_amg		Perl_subtr_amg
@@ -1275,7 +1276,6 @@
 #define patchlevel		(curinterp->Ipatchlevel)
 #define perl_destruct_level	(curinterp->Iperl_destruct_level)
 #define perldb			(curinterp->Iperldb)
-#define pidstatus		(curinterp->Ipidstatus)
 #define preambleav		(curinterp->Ipreambleav)
 #define preambled		(curinterp->Ipreambled)
 #define preprocess		(curinterp->Ipreprocess)
@@ -1427,7 +1427,6 @@
 #define Ipatchlevel		patchlevel
 #define Iperl_destruct_level	perl_destruct_level
 #define Iperldb			perldb
-#define Ipidstatus		pidstatus
 #define Ipreambleav		preambleav
 #define Ipreambled		preambled
 #define Ipreprocess		preprocess
@@ -1588,7 +1587,6 @@
 #define patchlevel		Perl_patchlevel
 #define perl_destruct_level	Perl_perl_destruct_level
 #define perldb			Perl_perldb
-#define pidstatus		Perl_pidstatus
 #define preambleav		Perl_preambleav
 #define preambled		Perl_preambled
 #define preprocess		Perl_preprocess

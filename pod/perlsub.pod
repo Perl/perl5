@@ -754,6 +754,34 @@ starts scribbling on your @_ parameter list.
 This is all very powerful, of course, and should be used only in moderation
 to make the world a better place.  
 
+=head2 Constant Functions
+
+Functions with a prototype of C<()> are potential candidates for
+inlining.  If the result after optimization and constant folding is a
+constant then it will be used in place of new-style calls to the
+function.  Old-style calls (that is, calls made using C<&>) are not
+affected.
+
+All of the following functions would be inlined.
+
+    sub PI ()		{ 3.14159 }
+    sub ST_DEV ()	{ 0 }
+    sub ST_INO ()	{ 1 }
+
+    sub FLAG_FOO ()	{ 1 << 8 }
+    sub FLAG_BAR ()	{ 1 << 9 }
+    sub FLAG_MASK ()	{ FLAG_FOO | FLAG_BAR }
+    
+    sub OPT_BAZ ()	{ 1 }
+    sub BAZ_VAL () {
+	if (OPT_BAZ) {
+	    return 23;
+	}
+	else {
+	    return 42;
+	}
+    }
+
 If you redefine a subroutine which was eligible for inlining you'll get
 a mandatory warning.  (You can use this warning to tell whether or not a
 particular subroutine is considered constant.)  The warning is

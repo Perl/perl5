@@ -15,12 +15,6 @@
 #include "EXTERN.h"
 #include "perl.h"
 
-/*
- * This value determines how small an SV is "small enough" to keep
- * in a lexical variable in anticipation of the next invocation.
- */
-#define PADVAL_SMALL_ENOUGH 240
-
 SV**
 stack_grow(sp, p, n)
 SV** sp;
@@ -179,14 +173,13 @@ I32 empty;
     if (empty) {
 	register GP *gp;
 	Newz(602, gp, 1, GP);
-	GvGP(gv) = gp;
-	GvREFCNT(gv) = 1;
+	GvGP(gv) = gp_ref(gp);
 	GvSV(gv) = NEWSV(72,0);
 	GvLINE(gv) = curcop->cop_line;
 	GvEGV(gv) = gv;
     }
     else {
-	GvGP(gv)->gp_refcnt++;
+	gp_ref(GvGP(gv));
 	GvINTRO_on(gv);
     }
 }
@@ -556,16 +549,10 @@ I32 base;
 		case SVt_NULL:
 		    break;
 		case SVt_PVAV:
-		    if (AvMAX(sv) < (PADVAL_SMALL_ENOUGH / sizeof(SV*)))
-			av_clear((AV*)sv);
-		    else
-			av_undef((AV*)sv);
+		    av_clear((AV*)sv);
 		    break;
 		case SVt_PVHV:
-		    if (HvMAX(sv) < (PADVAL_SMALL_ENOUGH / sizeof(SV*)))
-			hv_clear((HV*)sv);
-		    else
-			hv_undef((HV*)sv);
+		    hv_clear((HV*)sv);
 		    break;
 		case SVt_PVCV:
 		    croak("panic: leave_scope pad code");
@@ -577,12 +564,6 @@ I32 base;
 		default:
 		    (void)SvOK_off(sv);
 		    (void)SvOOK_off(sv);
-		    if (SvPVX(sv) && SvLEN(sv) > PADVAL_SMALL_ENOUGH) {
-			Safefree(SvPVX(sv));
-			SvPVX(sv) = Nullch;
-			SvLEN(sv) = 0;
-			SvCUR(sv) = 0;
-		    }
 		    break;
 		}
 	    }

@@ -1911,8 +1911,7 @@ register SV *sstr;
 		    GvGP(dstr)->gp_refcnt--;
 		    GvINTRO_off(dstr);	/* one-shot flag */
 		    Newz(602,gp, 1, GP);
-		    GvGP(dstr) = gp;
-		    GvREFCNT(dstr) = 1;
+		    GvGP(dstr) = gp_ref(gp);
 		    GvSV(dstr) = NEWSV(72,0);
 		    GvLINE(dstr) = curcop->cop_line;
 		    GvEGV(dstr) = (GV*)dstr;
@@ -3523,16 +3522,14 @@ HV *stash;
 		(void)SvOK_off(sv);
 		if (SvTYPE(sv) >= SVt_PV) {
 		    SvCUR_set(sv, 0);
-		    SvTAINT(sv);
 		    if (SvPVX(sv) != Nullch)
 			*SvPVX(sv) = '\0';
+		    SvTAINT(sv);
 		}
 		if (GvAV(gv)) {
 		    av_clear(GvAV(gv));
 		}
-		if (GvHV(gv)) {
-		    if (HvNAME(GvHV(gv)))
-			continue;
+		if (GvHV(gv) && !HvNAME(GvHV(gv))) {
 		    hv_clear(GvHV(gv));
 #ifndef VMS  /* VMS has no environ array */
 		    if (gv == envgv)

@@ -158,6 +158,7 @@ pad_reset_pending
 padix
 padix_floor
 patleave
+pidstatus
 pow_amg
 pow_ass_amg
 ppaddr
@@ -434,6 +435,7 @@ gp_ref
 gv_AVadd
 gv_HVadd
 gv_IOadd
+gv_autoload
 gv_check
 gv_efullname
 gv_efullname3
@@ -1051,8 +1053,7 @@ sighandler
 skipspace
 stack_grow
 start_subparse
-sublex_done
-sublex_start
+sub_crush_depth
 sv_2bool
 sv_2cv
 sv_2io

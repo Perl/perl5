@@ -68,6 +68,8 @@ delete on slices, flock, keys as an lvalue, my() in Control Structures,
 unpack() and pack(), use VERSION, use Module VERSION LIST,
 prototype(FUNCTION), $_ as Default
 
+=item C<m//g> does not trigger a pos() reset on failure
+
 =item New Built-in Methods
 
 isa(CLASS), can(METHOD), VERSION( [NEED] ), class(), is_instance()
@@ -425,6 +427,8 @@ $ARGV, @ARGV, @INC, %INC, $ENV{expr}, $SIG{expr}
 =item Pass by Reference
 
 =item Prototypes
+
+=item Constant Functions
 
 =item Overriding Builtin Functions
 
@@ -1107,7 +1111,8 @@ Precedence
 =item General Regular Expression Traps using s///, etc.
 
 Regular Expression, Regular Expression, Regular Expression, Regular
-Expression, Regular Expression, Regular Expression, Regular Expression
+Expression, Regular Expression, Regular Expression, Regular Expression,
+Regular Expression
 
 =item Subroutine, Signal, Sorting Traps
 
@@ -1417,24 +1422,24 @@ av_shift, av_store, av_undef, av_unshift, CLASS, Copy, croak, CvSTASH,
 DBsingle, DBsub, DBtrace, dMARK, dORIGMARK, dowarn, dSP, dXSARGS, dXSI32,
 dXSI32, ENTER, EXTEND, FREETMPS, G_ARRAY, G_DISCARD, G_EVAL, GIMME,
 G_NOARGS, G_SCALAR, gv_fetchmeth, gv_fetchmethod, gv_stashpv, gv_stashsv,
-GvSV, he_free, hv_clear, hv_delete, hv_exists, hv_fetch, hv_iterinit,
-hv_iterkey, hv_iternext, hv_iternextsv, hv_iterval, hv_magic, HvNAME,
-hv_store, hv_undef, isALNUM, isALPHA, isDIGIT, isLOWER, isSPACE, isUPPER,
-items, ix, LEAVE, MARK, mg_clear, mg_copy, mg_find, mg_free, mg_get,
-mg_len, mg_magical, mg_set, Move, na, New, Newc, Newz, newAV, newHV,
-newRV_inc, newRV_noinc, newSV, newSViv, newSVnv, newSVpv, newSVrv, newSVsv,
-newXS, newXSproto, Nullav, Nullch, Nullcv, Nullhv, Nullsv, ORIGMARK,
-perl_alloc, perl_call_argv, perl_call_method, perl_call_pv, perl_call_sv,
-perl_construct, perl_destruct, perl_eval_sv, perl_free, perl_get_av,
-perl_get_cv, perl_get_hv, perl_get_sv, perl_parse, perl_require_pv,
-perl_run, POPi, POPl, POPp, POPn, POPs, PUSHMARK, PUSHi, PUSHn, PUSHp,
-PUSHs, PUTBACK, Renew, Renewc, RETVAL, safefree, safemalloc, saferealloc,
-savepv, savepvn, SAVETMPS, SP, SPAGAIN, ST, strEQ, strGE, strGT, strLE,
-strLT, strNE, strnEQ, strnNE, sv_2mortal, sv_bless, sv_catpv, sv_catpvn,
-sv_catsv, sv_cmp, sv_cmp, SvCUR, SvCUR_set, sv_dec, sv_dec, SvEND, sv_eq,
-SvGROW, sv_grow, sv_inc, SvIOK, SvIOK_off, SvIOK_on, SvIOK_only,
-SvIOK_only, SvIOKp, sv_isa, SvIV, sv_isobject, SvIVX, SvLEN, sv_len,
-sv_len, sv_magic, sv_mortalcopy, SvOK, sv_newmortal, sv_no, SvNIOK,
+he_free, he_delayfree, hv_clear, hv_delete, hv_exists, hv_fetch,
+hv_iterinit, hv_iterkey, hv_iternext, hv_iternextsv, hv_iterval, hv_magic,
+HvNAME, hv_store, hv_undef, isALNUM, isALPHA, isDIGIT, isLOWER, isSPACE,
+isUPPER, items, ix, LEAVE, MARK, mg_clear, mg_copy, mg_find, mg_free,
+mg_get, mg_len, mg_magical, mg_set, Move, na, New, Newc, Newz, newAV,
+newHV, newRV_inc, newRV_noinc, newSV, newSViv, newSVnv, newSVpv, newSVrv,
+newSVsv, newXS, newXSproto, Nullav, Nullch, Nullcv, Nullhv, Nullsv,
+ORIGMARK, perl_alloc, perl_call_argv, perl_call_method, perl_call_pv,
+perl_call_sv, perl_construct, perl_destruct, perl_eval_sv, perl_free,
+perl_get_av, perl_get_cv, perl_get_hv, perl_get_sv, perl_parse,
+perl_require_pv, perl_run, POPi, POPl, POPp, POPn, POPs, PUSHMARK, PUSHi,
+PUSHn, PUSHp, PUSHs, PUTBACK, Renew, Renewc, RETVAL, safefree, safemalloc,
+saferealloc, savepv, savepvn, SAVETMPS, SP, SPAGAIN, ST, strEQ, strGE,
+strGT, strLE, strLT, strNE, strnEQ, strnNE, sv_2mortal, sv_bless, sv_catpv,
+sv_catpvn, sv_catsv, sv_cmp, sv_cmp, SvCUR, SvCUR_set, sv_dec, sv_dec,
+SvEND, sv_eq, SvGROW, sv_grow, sv_inc, SvIOK, SvIOK_off, SvIOK_on,
+SvIOK_only, SvIOK_only, SvIOKp, sv_isa, SvIV, sv_isobject, SvIVX, SvLEN,
+sv_len, sv_len, sv_magic, sv_mortalcopy, SvOK, sv_newmortal, sv_no, SvNIOK,
 SvNIOK_off, SvNIOKp, SvNOK, SvNOK_off, SvNOK_on, SvNOK_only, SvNOK_only,
 SvNOKp, SvNV, SvNVX, SvPOK, SvPOK_off, SvPOK_on, SvPOK_only, SvPOK_only,
 SvPOKp, SvPV, SvPVX, SvREFCNT, SvREFCNT_dec, SvREFCNT_inc, SvROK,

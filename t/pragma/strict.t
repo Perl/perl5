@@ -8,10 +8,11 @@ BEGIN {
 
 $| = 1;
 
+my $Is_VMS = $^O eq 'VMS';
 my $tmpfile = "tmp0000";
 my $i = 0 ;
 1 while -f ++$tmpfile;
-END { unlink $tmpfile if $tmpfile; }
+END { if ($tmpfile) { 1 while unlink $tmpfile; } }
 
 my @prgs = () ;
 
@@ -58,12 +59,17 @@ for (@prgs){
 	shift @files ;
 	$prog = shift @files ;
     }
-    open TEST, "| sh -c './perl $switch' >$tmpfile 2>&1";
-    print TEST $prog, "\n";
+    open TEST, ">$tmpfile";
+    print TEST $prog,"\n";
     close TEST;
+    my $results = $Is_VMS ?
+                  `MCR $^X $switch $tmpfile` :
+                  `sh -c './perl $switch $tmpfile' 2>&1`;
     my $status = $?;
-    my $results = `cat $tmpfile`;
     $results =~ s/\n+$//;
+    # allow expected output to be written as if $prog is on STDIN
+    $results =~ s/tmp\d+/-/g;
+    $results =~ s/\n%[A-Z]+-[SIWEF]-.*$// if $Is_VMS;  # clip off DCL status msg
     $expected =~ s/\n+$//;
     my $prefix = ($results =~ s/^PREFIX\n//) ;
     if ( $results =~ s/^SKIPPED\n//) {

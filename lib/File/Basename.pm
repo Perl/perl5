@@ -91,8 +91,9 @@ would yield
 =item C<basename>
 
 The basename() routine returns the first element of the list produced
-by calling fileparse() with the same arguments.  It is provided for
-compatibility with the UNIX shell command basename(1).
+by calling fileparse() with the same arguments, except that it always
+quotes metacharacters in the given suffixes.  It is provided for
+programmer compatibility with the UNIX shell command basename(1).
 
 =item C<dirname>
 
@@ -115,20 +116,23 @@ require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(fileparse fileparse_set_fstype basename dirname);
 #use strict;
-#use vars qw($VERSION $Fileparse_fstype);
+#use vars qw($VERSION $Fileparse_fstype $Fileparse_fgcase);
 $VERSION = "2.4";
 
 
 #   fileparse_set_fstype() - specify OS-based rules used in future
 #                            calls to routines in this package
 #
-#   Currently recognized values: VMS, MSDOS, MacOS
+#   Currently recognized values: VMS, MSDOS, MacOS, os2, AmigaOS
 #       Any other name uses Unix-style rules
 
 sub fileparse_set_fstype {
-  my($old) = $Fileparse_fstype;
-  $Fileparse_fstype = $_[0] if $_[0];
-  $old;
+  my @old = ($Fileparse_fstype, $Fileparse_fgcase);
+  if (@_) {
+    $Fileparse_fstype = $_[0];
+    $Fileparse_fgcase = ($_[0] =~ /^(?:MacOS|VMS|os2|AmigaOS)/i);
+  }
+  wantarray ? @old : $old[0];
 }
 
 #   fileparse() - parse file specification
@@ -138,7 +142,7 @@ sub fileparse_set_fstype {
 
 sub fileparse {
   my($fullname,@suffices) = @_;
-  my($fstype) = $Fileparse_fstype;
+  my($fstype,$fgcase) = ($Fileparse_fstype, $Fileparse_fgcase);
   my($dirpath,$tail,$suffix,$basename);
 
   if ($fstype =~ /^VMS/i) {
@@ -165,15 +169,14 @@ sub fileparse {
   if (@suffices) {
     $tail = '';
     foreach $suffix (@suffices) {
-      if ($basename =~ /([\x00-\xff]*?)($suffix)$/) {
-        $tail = $2 . $tail;
-        $basename = $1;
+      my $pat = ($fgcase ? '(?i)' : '') . "($suffix)\$";
+      if ($basename =~ s/$pat//) {
+        $tail = $1 . $tail;
       }
     }
   }
 
   wantarray ? ($basename,$dirpath,$tail) : $basename;
-
 }
 
 
@@ -225,6 +228,6 @@ sub dirname {
     $dirname;
 }
 
-$Fileparse_fstype = $^O;
+fileparse_set_fstype $^O;
 
 1;

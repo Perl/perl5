@@ -174,7 +174,10 @@ represents backspace rather than a word boundary.)  The C<\A> and C<\Z> are
 just like "^" and "$" except that they won't match multiple times when the
 C</m> modifier is used, while "^" and "$" will match at every internal line
 boundary.  To match the actual end of the string, not ignoring newline,
-you can use C<\Z(?!\n)>.
+you can use C<\Z(?!\n)>.  The C<\G> assertion can be used to mix global
+matches (using C<m//g>) and non-global ones, as described in L<perlop>.
+The actual location where C<\G> will match can also be influenced
+by using C<pos()> as an lvalue.  See L<perlfunc/pos>.
 
 When the bracketing construct C<( ... )> is used, \E<lt>digitE<gt> matches the
 digit'th substring.  Outside of the pattern, always use "$" instead of "\"

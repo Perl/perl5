@@ -1566,7 +1566,19 @@ yylex()
 		s++;
 	    if (*s == ':' && s[1] != ':') /* for csh execing sh scripts */
 		s++;
-	    if (!in_eval && *s == '#' && s[1] == '!') {
+	    d = Nullch;
+	    if (!in_eval) {
+		if (*s == '#' && *(s+1) == '!')
+		    d = s + 2;
+#ifdef ALTERNATE_SHEBANG
+		else {
+		    static char as[] = ALTERNATE_SHEBANG;
+		    if (*s == as[0] && strnEQ(s, as, sizeof(as) - 1))
+			d = s + (sizeof(as) - 1);
+		}
+#endif /* ALTERNATE_SHEBANG */
+	    }
+	    if (d) {
 		/*
 		 * HP-UX (at least) sets argv[0] to the script name,
 		 * which makes $^X incorrect.  And Digital UNIX and Linux,
@@ -1577,7 +1589,6 @@ yylex()
 		char *ipath;
 		char *ibase;
 
-		d = s + 2;
 		while (*d == ' ' || *d == '\t')
 		    d++;
 		ipath = d;
@@ -1604,7 +1615,29 @@ yylex()
 		d = instr(s,"perl -");
 		if (!d)
 		    d = instr(s,"perl");
+#ifdef ALTERNATE_SHEBANG
+		/*
+		 * If the ALTERNATE_SHEBANG on this system starts with a
+		 * character that can be part of a Perl expression, then if
+		 * we see it but not "perl", we're probably looking at the
+		 * start of Perl code, not a request to hand off to some
+		 * other interpreter.  Similarly, if "perl" is there, but
+		 * not in the first 'word' of the line, we assume the line
+		 * contains the start of the Perl program.
+		 * This isn't foolproof, but it's generally a good guess.
+		 */
+		if (d && *s != '#') {
+		    char *c = s;
+		    while (*c && !strchr("; \t\r\n\f\v#", *c))
+			c++;
+		    if (c < d)
+			d = Nullch;	/* "perl" not in first word; ignore */
+		    else
+			*s = '#';	/* Don't try to parse shebang line */
+		}
+#endif
 		if (!d &&
+		    *s == '#' &&
 		    !minus_c &&
 		    !instr(s,"indir") &&
 		    instr(origargv[0],"perl"))
@@ -1891,17 +1924,29 @@ yylex()
 	case XOPERATOR:
 	    while (s < bufend && (*s == ' ' || *s == '\t'))
 		s++;
-	    if (s < bufend && isIDFIRST(*s)) {
-		d = scan_word(s, tokenbuf, FALSE, &len);
+	    d = s;
+	    tokenbuf[0] = '\0';
+	    if (d < bufend && *d == '-') {
+		tokenbuf[0] = '-';
+		d++;
+		while (d < bufend && (*d == ' ' || *d == '\t'))
+		    d++;
+	    }
+	    if (d < bufend && isIDFIRST(*d)) {
+		d = scan_word(d, tokenbuf + 1, FALSE, &len);
 		while (d < bufend && (*d == ' ' || *d == '\t'))
 		    d++;
 		if (*d == '}') {
+		    char minus = (tokenbuf[0] == '-');
 		    if (dowarn &&
-		      (keyword(tokenbuf, len) ||
-		       perl_get_cv(tokenbuf, FALSE) ))
+			(keyword(tokenbuf + 1, len) ||
+			 (minus && len == 1 && isALPHA(tokenbuf[1])) ||
+			 perl_get_cv(tokenbuf + 1, FALSE) ))
 			warn("Ambiguous use of {%s} resolved to {\"%s\"}",
-			    tokenbuf, tokenbuf);
-		    s = force_word(s,WORD,FALSE,TRUE,FALSE);
+			     tokenbuf + !minus, tokenbuf + !minus);
+		    s = force_word(s + minus, WORD, FALSE, TRUE, FALSE);
+		    if (minus)
+			force_next('-');
 		}
 	    }
 	    /* FALL THROUGH */

@@ -1242,6 +1242,7 @@ EXT U32		evalseq;	/* eval sequence number */
 EXT U32		sub_generation;	/* inc to force methods to be looked up again */
 EXT char **	origenviron;
 EXT U32		origalen;
+EXT HV *	pidstatus;	/* pid-to-status mappings for waitpid */
 EXT U32 *	profiledata;
 EXT int		maxo INIT(MAXO);/* Number of ops */
 EXT char *	osname;		/* operating system */
@@ -1740,7 +1741,6 @@ IEXT int	Iforkprocess;	/* so do_open |- can return proc# */
 
 /* subprocess state */
 IEXT AV *	Ifdpid;		/* keep fd-to-pid mappings for my_popen */
-IEXT HV *	Ipidstatus;	/* keep pid-to-status mappings for waitpid */
 
 /* internal state */
 IEXT VOL int	Iin_eval;	/* trap "fatal" errors? */

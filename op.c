@@ -212,7 +212,7 @@ pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix)
 		    SvNVX(sv) = (double)curcop->cop_seq;
 		    SvIVX(sv) = 999999999;	/* A ref, intro immediately */
 		    SvFLAGS(sv) |= SVf_FAKE;
-		    if (CvANON(compcv)) {
+		    if (CvANON(compcv) || CvFORMAT(compcv)) {
 			/* "It's closures all the way down." */
 			CvCLONE_on(compcv);
 			if (cv != startcv) {
@@ -224,16 +224,17 @@ pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix)
 				    CvCLONE_on(bcv);
 				else {
 				    if (dowarn)
-					warn("Value of %s may be unavailable",
+					warn(
+					  "Variable \"%s\" may be unavailable",
 					     name);
 				    break;
 				}
 			    }
 			}
 		    }
-		    else {
+		    else if (!CvUNIQUE(compcv)) {
 			if (dowarn && !CvUNIQUE(cv))
-			    warn("Value of %s will not stay shared", name);
+			    warn("Variable \"%s\" will not stay shared", name);
 		    }
 		}
 		av_store(comppad, newoff, SvREFCNT_inc(oldsv));
@@ -258,10 +259,14 @@ pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix)
 	    }
 	    break;
 	case CXt_EVAL:
-	    if (cx->blk_eval.old_op_type != OP_ENTEREVAL &&
-		cx->blk_eval.old_op_type != OP_ENTERTRY)
-		return 0;	/* require must have its own scope */
-	    saweval = i;
+	    switch (cx->blk_eval.old_op_type) {
+	    case OP_ENTEREVAL:
+		saweval = i;
+		break;
+	    case OP_REQUIRE:
+		/* require must have its own scope */
+		return 0;
+	    }
 	    break;
 	case CXt_SUB:
 	    if (!saweval)
@@ -2376,7 +2381,7 @@ OP *op;
         cop->cop_line = copline;
         copline = NOLINE;
     }
-    cop->cop_filegv = GvREFCNT_inc(curcop->cop_filegv);
+    cop->cop_filegv = (GV*)SvREFCNT_inc(curcop->cop_filegv);
     cop->cop_stash = curstash;
 
     if (perldb && curstash != debstash) {
@@ -2810,6 +2815,7 @@ CV *cv;
 	CvROOT(cv) = Nullop;
 	LEAVE;
     }
+    CvFLAGS(cv) = 0;
     SvREFCNT_dec(CvGV(cv));
     CvGV(cv) = Nullgv;
     SvREFCNT_dec(CvOUTSIDE(cv));
@@ -2847,13 +2853,13 @@ CV* cv;
 		  (CvANON(cv) ? "ANON"
 		   : (cv == main_cv) ? "MAIN"
 		   : CvUNIQUE(outside) ? "UNIQUE"
-		   : CvGV(cv) ? GvNAME(CvGV(cv)) : "?mystery?"),
+		   : CvGV(cv) ? GvNAME(CvGV(cv)) : "UNDEFINED"),
 		  outside,
 		  (!outside ? "null"
 		   : CvANON(outside) ? "ANON"
 		   : (outside == main_cv) ? "MAIN"
 		   : CvUNIQUE(outside) ? "UNIQUE"
-		   : CvGV(outside) ? GvNAME(CvGV(outside)) : "?mystery?"));
+		   : CvGV(outside) ? GvNAME(CvGV(outside)) : "UNDEFINED"));
 
     for (ix = 1; ix <= AvFILL(pad); ix++) {
 	if (SvPOK(pname[ix]))
@@ -2894,7 +2900,7 @@ CV* outside;
 	CvANON_on(cv);
 
     CvFILEGV(cv)	= CvFILEGV(proto);
-    CvGV(cv)		= GvREFCNT_inc(CvGV(proto));
+    CvGV(cv)		= (GV*)SvREFCNT_inc(CvGV(proto));
     CvSTASH(cv)		= CvSTASH(proto);
     CvROOT(cv)		= CvROOT(proto);
     CvSTART(cv)		= CvSTART(proto);
@@ -3018,17 +3024,15 @@ OP *op;
 OP *proto;
 OP *block;
 {
+    char *name = op ? SvPVx(cSVOP->op_sv, na) : Nullch;
+    GV *gv = gv_fetchpv(name ? name : "__ANON__", GV_ADDMULTI, SVt_PVCV);
     register CV *cv;
-    char *name = op ? SvPVx(cSVOP->op_sv, na) : "__ANON__";
-    GV* gv = gv_fetchpv(name, GV_ADDMULTI, SVt_PVCV);
-    AV* av;
+    AV *av;
     I32 ix;
 
-    if (op) {
+    if (op)
 	SAVEFREEOP(op);
-	sub_generation++;
-    }
-    if (cv = GvCV(gv)) {
+    if (cv = (name ? GvCV(gv) : Nullcv)) {
 	if (GvCVGEN(gv)) {
 	    /* just a cached method */
 	    SvREFCNT_dec(cv);
@@ -3045,9 +3049,8 @@ OP *block;
 			SvPOK(cv) ? SvPV((SV*)cv,na) : "none",
 			p ? p : "none");
 	    }
-	    if ((const_sv || dowarn) && strNE(name, "BEGIN")) {
+	    if (const_sv || dowarn) {
 		line_t oldline = curcop->cop_line;
-
 		curcop->cop_line = copline;
 		warn(const_sv ? "Constant subroutine %s redefined"
 			      : "Subroutine %s redefined",name);
@@ -3059,7 +3062,7 @@ OP *block;
     }
     if (cv) {				/* must reuse cv if autoloaded */
 	cv_undef(cv);
-	CvFLAGS(cv) = (CvFLAGS(cv)&~CVf_CLONE) | (CvFLAGS(compcv)&CVf_CLONE);
+	CvFLAGS(cv) = CvFLAGS(compcv);
 	CvOUTSIDE(cv) = CvOUTSIDE(compcv);
 	CvOUTSIDE(compcv) = 0;
 	CvPADLIST(cv) = CvPADLIST(compcv);
@@ -3070,11 +3073,14 @@ OP *block;
     }
     else {
 	cv = compcv;
+	if (name) {
+	    GvCV(gv) = cv;
+	    GvCVGEN(gv) = 0;
+	    sub_generation++;
+	}
     }
-    GvCV(gv) = cv;
-    GvCVGEN(gv) = 0;
+    CvGV(cv) = (GV*)SvREFCNT_inc(gv);
     CvFILEGV(cv) = curcop->cop_filegv;
-    CvGV(cv) = GvREFCNT_inc(gv);
     CvSTASH(cv) = curstash;
 
     if (proto) {
@@ -3088,7 +3094,6 @@ OP *block;
 	block = Nullop;
     }
     if (!block) {
-	CvROOT(cv) = 0;
 	copline = NOLINE;
 	LEAVE_SCOPE(floor);
 	return cv;
@@ -3100,7 +3105,7 @@ OP *block;
     AvFLAGS(av) = AVf_REIFY;
 
     for (ix = AvFILL(comppad); ix > 0; ix--) {
-	if (!SvPADMY(curpad[ix]))
+	if (!SvPADMY(curpad[ix]) && !SvIMMORTAL(curpad[ix]))
 	    SvPADTMP_on(curpad[ix]);
     }
 
@@ -3112,9 +3117,39 @@ OP *block;
     CvROOT(cv)->op_next = 0;
     peep(CvSTART(cv));
 
-    if (op) {
-	char *s = strrchr(name,':');
-	if (s)
+    if (name) {
+	char *s;
+
+	if (perldb && curstash != debstash) {
+	    SV *sv;
+	    SV *tmpstr = sv_newmortal();
+	    static GV *db_postponed;
+	    CV *cv;
+	    HV *hv;
+
+	    sprintf(buf, "%s:%ld",
+		    SvPVX(GvSV(curcop->cop_filegv)), (long)subline);
+	    sv = newSVpv(buf,0);
+	    sv_catpv(sv,"-");
+	    sprintf(buf,"%ld",(long)curcop->cop_line);
+	    sv_catpv(sv,buf);
+	    gv_efullname3(tmpstr, gv, Nullch);
+	    hv_store(GvHV(DBsub), SvPVX(tmpstr), SvCUR(tmpstr), sv, 0);
+	    if (!db_postponed) {
+		db_postponed = gv_fetchpv("DB::postponed", TRUE, SVt_PVHV);
+	    }
+	    hv = GvHVn(db_postponed);
+	    if (HvFILL(hv) >= 0 && hv_exists(hv, SvPVX(tmpstr), SvCUR(tmpstr))
+		&& (cv = GvCV(db_postponed))) {
+		dSP;
+		PUSHMARK(sp);
+		XPUSHs(tmpstr);
+		PUTBACK;
+		perl_call_sv((SV*)cv, G_DISCARD);
+	    }
+	}
+
+	if ((s = strrchr(name,':')))
 	    s++;
 	else
 	    s = name;
@@ -3145,37 +3180,6 @@ OP *block;
 	}
     }
 
-    if (perldb && curstash != debstash) {
-	SV *sv;
-	SV *tmpstr = sv_newmortal();
-	static GV *db_postponed;
-	CV *cv;
-	HV *hv;
-
-	sprintf(buf,"%s:%ld",SvPVX(GvSV(curcop->cop_filegv)), (long)subline);
-	sv = newSVpv(buf,0);
-	sv_catpv(sv,"-");
-	sprintf(buf,"%ld",(long)curcop->cop_line);
-	sv_catpv(sv,buf);
-	gv_efullname3(tmpstr, gv, Nullch);
-	hv_store(GvHV(DBsub), SvPVX(tmpstr), SvCUR(tmpstr), sv, 0);
-	if (!db_postponed) {
-	    db_postponed = gv_fetchpv("DB::postponed", TRUE, SVt_PVHV);
-	}
-	hv = GvHVn(db_postponed);
-	if (HvFILL(hv) >= 0 && hv_exists(hv, SvPVX(tmpstr), SvCUR(tmpstr))
-	    && (cv = GvCV(db_postponed))) {
-	    dSP;
-	    PUSHMARK(sp);
-	    XPUSHs(tmpstr);
-	    PUTBACK;
-	    perl_call_sv((SV*)cv, G_DISCARD);
-	}
-    }
-
-    if (!op)
-	GvCV(gv) = 0;	/* Will remember in SVOP instead. */
-
     copline = NOLINE;
     LEAVE_SCOPE(floor);
     return cv;
@@ -3202,18 +3206,19 @@ char *name;
 void (*subaddr) _((CV*));
 char *filename;
 {
+    GV *gv = gv_fetchpv(name ? name : "__ANON__", GV_ADDMULTI, SVt_PVCV);
     register CV *cv;
-    GV *gv = gv_fetchpv((name ? name : "__ANON__"), GV_ADDMULTI, SVt_PVCV);
 
-    if (name)
-	sub_generation++;
-    if (cv = GvCV(gv)) {
-	if (GvCVGEN(gv))
-	    cv = 0;			/* just a cached method */
-	else if (CvROOT(cv) || CvXSUB(cv)) {	/* already defined? */
+    if (cv = (name ? GvCV(gv) : Nullcv)) {
+	if (GvCVGEN(gv)) {
+	    /* just a cached method */
+	    SvREFCNT_dec(cv);
+	    cv = 0;
+	}
+	else if (CvROOT(cv) || CvXSUB(cv) || GvASSUMECV(gv)) {
+	    /* already defined (or promised) */
 	    if (dowarn) {
 		line_t oldline = curcop->cop_line;
-
 		curcop->cop_line = copline;
 		warn("Subroutine %s redefined",name);
 		curcop->cop_line = oldline;
@@ -3222,19 +3227,22 @@ char *filename;
 	    cv = 0;
 	}
     }
-    if (cv) {				/* must reuse cv if autoloaded */
-	assert(SvREFCNT(CvGV(cv)) > 1);
-	SvREFCNT_dec(CvGV(cv));
-    }
+
+    if (cv)				/* must reuse cv if autoloaded */
+	cv_undef(cv);
     else {
 	cv = (CV*)NEWSV(1105,0);
 	sv_upgrade((SV *)cv, SVt_PVCV);
+	if (name) {
+	    GvCV(gv) = cv;
+	    GvCVGEN(gv) = 0;
+	    sub_generation++;
+	}
     }
-    GvCV(gv) = cv;
-    CvGV(cv) = GvREFCNT_inc(gv);
-    GvCVGEN(gv) = 0;
+    CvGV(cv) = (GV*)SvREFCNT_inc(gv);
     CvFILEGV(cv) = gv_fetchfile(filename);
     CvXSUB(cv) = subaddr;
+
     if (name) {
 	char *s = strrchr(name,':');
 	if (s)
@@ -3244,19 +3252,20 @@ char *filename;
 	if (strEQ(s, "BEGIN")) {
 	    if (!beginav)
 		beginav = newAV();
-	    av_push(beginav, SvREFCNT_inc(gv));
+	    av_push(beginav, (SV *)cv);
+	    GvCV(gv) = 0;
 	}
 	else if (strEQ(s, "END")) {
 	    if (!endav)
 		endav = newAV();
 	    av_unshift(endav, 1);
-	    av_store(endav, 0, SvREFCNT_inc(gv));
+	    av_store(endav, 0, (SV *)cv);
+	    GvCV(gv) = 0;
 	}
     }
-    else {
-	GvCV(gv) = 0;	/* Will remember elsewhere instead. */
+    else
 	CvANON_on(cv);
-    }
+
     return cv;
 }
 
@@ -3289,11 +3298,11 @@ OP *block;
     }
     cv = compcv;
     GvFORM(gv) = cv;
-    CvGV(cv) = GvREFCNT_inc(gv);
+    CvGV(cv) = (GV*)SvREFCNT_inc(gv);
     CvFILEGV(cv) = curcop->cop_filegv;
 
     for (ix = AvFILL(comppad); ix > 0; ix--) {
-	if (!SvPADMY(curpad[ix]))
+	if (!SvPADMY(curpad[ix]) && !SvIMMORTAL(curpad[ix]))
 	    SvPADTMP_on(curpad[ix]);
     }
 
@@ -3635,9 +3644,31 @@ register OP *op;
 
     op->op_private |= (hints & HINT_STRICT_REFS);
     if (kid->op_type == OP_CONST) {
-	int iscv = (op->op_type==OP_RV2CV)*2;
-	GV *gv = 0;
+	char *name;
+	int iscv;
+	GV *gv;
+
+	name = SvPV(kid->op_sv, na);
+	if ((hints & HINT_STRICT_REFS) && (kid->op_private & OPpCONST_BARE)) {
+	    char *badthing = Nullch;
+	    switch (op->op_type) {
+	    case OP_RV2SV:
+		badthing = "a SCALAR";
+		break;
+	    case OP_RV2AV:
+		badthing = "an ARRAY";
+		break;
+	    case OP_RV2HV:
+		badthing = "a HASH";
+		break;
+	    }
+	    if (badthing)
+		croak(
+	  "Can't use bareword (\"%s\") as %s ref while \"strict refs\" in use",
+		      name, badthing);
+	}
 	kid->op_type = OP_GV;
+	iscv = (op->op_type == OP_RV2CV) * 2;
 	for (gv = 0; !gv; iscv++) {
 	    /*
 	     * This is a little tricky.  We only want to add the symbol if we
@@ -3647,7 +3678,7 @@ register OP *op;
 	     * or we get possible typo warnings.  OPpCONST_ENTERED says
 	     * whether the lexer already added THIS instance of this symbol.
 	     */
-	    gv = gv_fetchpv(SvPVx(kid->op_sv, na),
+	    gv = gv_fetchpv(name,
 		iscv | !(kid->op_private & OPpCONST_ENTERED),
 		iscv
 		    ? SVt_PVCV

@@ -14,7 +14,8 @@ sub OVERLOAD {
     } else {
       $sub = $arg{$_};
       if (not ref $sub and $sub !~ /::/) {
-	$sub = "${'package'}::$sub";
+	$ {$package . "::(" . $_} = $sub;
+	$sub = \&nil;
       }
       #print STDERR "Setting `$ {'package'}::\cO$_' to \\&`$sub'.\n";
       *{$package . "::(" . $_} = \&{ $sub };
@@ -49,16 +50,28 @@ sub Overloaded {
   $package->can('()');
 }
 
+sub ov_method {
+  my $globref = shift;
+  return undef unless $globref;
+  my $sub = \&{*$globref};
+  return $sub if $sub ne \&nil;
+  return shift->can($ {*$globref});
+}
+
 sub OverloadedStringify {
   my $package = shift;
   $package = ref $package if ref $package;
-  $package->can('(""')
+  #$package->can('(""')
+  ov_method mycan($package, '(""'), $package;
 }
 
 sub Method {
   my $package = shift;
   $package = ref $package if ref $package;
-  $package->can('(' . shift)
+  #my $meth = $package->can('(' . shift);
+  ov_method mycan($package, '(' . shift), $package;
+  #return $meth if $meth ne \&nil;
+  #return $ {*{$meth}};
 }
 
 sub AddrRef {
@@ -74,6 +87,17 @@ sub StrVal {
   (OverloadedStringify($_[0])) ?
     (AddrRef(shift)) :
     "$_[0]";
+}
+
+sub mycan {				# Real can would leave stubs.
+  my ($package, $meth) = @_;
+  return \*{$package . "::$meth"} if defined &{$package . "::$meth"};
+  my $p;
+  foreach $p (@{$package . "::ISA"}) {
+    my $out = mycan($p, $meth);
+    return $out if $out;
+  }
+  return undef;
 }
 
 1;

@@ -7,6 +7,12 @@
 #
 # It is impossible to test every prototype that can be specified, but
 # we should test as many as we can.
+#
+
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+}
 
 use strict;
 

@@ -203,7 +203,7 @@ hints/aix.sh		Hints for named architecture
 hints/altos486.sh	Hints for named architecture
 hints/amigaos.sh	Hints for named architecture
 hints/apollo.sh		Hints for named architecture
-hints/aux.sh		Hints for named architecture
+hints/aux_3.sh		Hints for named architecture
 hints/broken-db.msg	Warning message for systems with broken DB library
 hints/bsdos.sh		Hints for named architecture
 hints/convexos.sh	Hints for named architecture
@@ -224,6 +224,8 @@ hints/irix_4.sh		Hints for named architecture
 hints/irix_5.sh		Hints for named architecture
 hints/irix_6.sh		Hints for named architecture
 hints/irix_6_2.sh	Hints for named architecture
+hints/irix_6_3.sh	Hints for named architecture
+hints/irix_6_4.sh	Hints for named architecture
 hints/isc.sh		Hints for named architecture
 hints/isc_2.sh		Hints for named architecture
 hints/linux.sh		Hints for named architecture
@@ -526,6 +528,7 @@ pod/pod2latex.PL	Precursor for translator to turn pod into LaTeX
 pod/pod2man.PL		Precursor for translator to turn pod into manpage
 pod/pod2text.PL	        Precursor for translator to turn pod into text
 pod/roffitall		troff the whole man page set
+pod/rofftoc		Generate a table of contents in troff format
 pod/splitman		Splits perlfunc into multiple man pages
 pod/splitpod		Splits perlfunc into multiple pod pages
 pp.c			Push/Pop code
@@ -636,6 +639,7 @@ t/op/assignwarn.t	See if OP= operators warn correctly for undef targets
 t/op/auto.t		See if autoincrement et all work
 t/op/bop.t		See if bitops work
 t/op/chop.t		See if chop works
+t/op/cmp.t		See if the various string and numeric compare work
 t/op/cond.t		See if conditional expressions work
 t/op/delete.t		See if delete works
 t/op/do.t		See if subroutines work
@@ -687,6 +691,7 @@ t/op/sysio.t		See if sysread and syswrite work
 t/op/tie.t		See if tie/untie functions work
 t/op/time.t		See if time functions work
 t/op/undef.t		See if undef works
+t/op/universal.t	See if UNIVERSAL class works
 t/op/unshift.t		See if unshift works
 t/op/vec.t		See if vectors work
 t/op/write.t		See if write works

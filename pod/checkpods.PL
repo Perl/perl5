@@ -12,11 +12,8 @@ use File::Basename qw(&basename &dirname);
 
 # This forces PL files to create target in same directory as PL file.
 # This is so that make depend always knows where to find PL derivatives.
-chdir(dirname($0));
-($file = basename($0)) =~ s/\.PL$//;
-$file =~ s/\.pl$//
-	if ($Config{'osname'} eq 'VMS' or
-	    $Config{'osname'} eq 'OS2');  # "case-forgiving"
+chdir dirname($0);
+$file = basename($0, '.PL');
 
 open OUT,">$file" or die "Can't create $file: $!";
 

@@ -695,7 +695,10 @@ In a scalar context, C<m//g> iterates through the string, returning TRUE
 each time it matches, and FALSE when it eventually runs out of
 matches.  (In other words, it remembers where it left off last time and
 restarts the search at that point.  You can actually find the current
-match position of a string using the pos() function--see L<perlfunc>.)
+match position of a string or set it using the pos() function--see
+L<perlfunc/pos>.)  Note that you can use this feature to stack C<m//g>
+matches or intermix C<m//g> matches with C<m/\G.../>.
+
 If you modify the string in any way, the match position is reset to the
 beginning.  Examples:
 
@@ -710,6 +713,30 @@ beginning.  Examples:
 	}
     }
     print "$sentences\n";
+
+    # using m//g with \G
+    $_ = "ppooqppq";
+    while ($i++ < 2) {
+        print "1: '";
+        print $1 while /(o)/g; print "', pos=", pos, "\n";
+        print "2: '";
+        print $1 if /\G(q)/;   print "', pos=", pos, "\n";
+        print "3: '";
+        print $1 while /(p)/g; print "', pos=", pos, "\n";
+    }
+
+The last example should print:
+
+    1: 'oo', pos=4
+    2: 'q', pos=4
+    3: 'pp', pos=7
+    1: '', pos=7
+    2: 'q', pos=7
+    3: '', pos=7
+
+Note how C<m//g> matches change the value reported by C<pos()>, but the
+non-global match doesn't.
+
 
 =item q/STRING/
 

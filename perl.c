@@ -116,6 +116,8 @@ register PerlInterpreter *sv_interp;
 	nrs = newSVpv("\n", 1);
 	rs = SvREFCNT_inc(nrs);
 
+	pidstatus = newHV();
+
 #ifdef MSDOS
 	/*
 	 * There is no way we can refer to them from Perl so close them to save
@@ -154,7 +156,6 @@ register PerlInterpreter *sv_interp;
     PerlIO_init();      /* Hook to IO system */
 
     fdpid = newAV();	/* for remembering popen pids by fd */
-    pidstatus = newHV();/* for remembering status of dead pids */
 
     init_stacks();
     ENTER;
@@ -319,10 +320,6 @@ register PerlInterpreter *sv_interp;
     beginav = Nullav;
     endav = Nullav;
 
-    /* pid-to-status mappings for waitpid */
-    SvREFCNT_dec(pidstatus);
-    pidstatus = Nullhv;
-
     /* temp stack during pp_sort() */
     SvREFCNT_dec(sortstack);
     sortstack = Nullav;
@@ -402,8 +399,10 @@ register PerlInterpreter *sv_interp;
 	warn("Scalars leaked: %d\n", sv_count);
 
     sv_free_arenas();
-    
-    linestr = NULL;		/* No SVs have survived, need to clean out */
+
+    /* No SVs have survived, need to clean out */
+    linestr = NULL;
+    pidstatus = Nullhv;
     if (origfilename)
     	Safefree(origfilename);
     nuke_stacks();
@@ -1444,7 +1443,7 @@ char *s;
 	printf("\nThis is perl, version %s",patchlevel);
 #endif
 
-	printf("\n\nCopyright 1987-1996, Larry Wall\n");
+	printf("\n\nCopyright 1987-1997, Larry Wall\n");
 	printf("\n\t+ suidperl security patch");
 #ifdef MSDOS
 	printf("\n\nMS-DOS port Copyright (c) 1989, 1990, Diomidis Spinellis\n");

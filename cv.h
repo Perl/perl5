@@ -7,6 +7,8 @@
  *
  */
 
+/* This structure much match the beginning of XPVFM */
+
 struct xpvcv {
     char *	xpv_pv;		/* pointer to malloced string */
     STRLEN	xpv_cur;	/* length of xp_pv as a C string */
@@ -50,6 +52,7 @@ struct xpvcv {
 #define CVf_UNIQUE	0x10	/* can't be cloned */
 #define CVf_NODEBUG	0x20	/* no DB::sub indirection for this CV
 				   (esp. useful for special XSUBs) */
+#define CVf_FORMAT	0x40	/* is a format, not a sub */
 
 #define CvCLONE(cv)		(CvFLAGS(cv) & CVf_CLONE)
 #define CvCLONE_on(cv)		(CvFLAGS(cv) |= CVf_CLONE)
@@ -70,6 +73,10 @@ struct xpvcv {
 #define CvUNIQUE(cv)		(CvFLAGS(cv) & CVf_UNIQUE)
 #define CvUNIQUE_on(cv)		(CvFLAGS(cv) |= CVf_UNIQUE)
 #define CvUNIQUE_off(cv)	(CvFLAGS(cv) &= ~CVf_UNIQUE)
+
+#define CvFORMAT(cv)		(CvFLAGS(cv) & CVf_FORMAT)
+#define CvFORMAT_on(cv)		(CvFLAGS(cv) |= CVf_FORMAT)
+#define CvFORMAT_off(cv)	(CvFLAGS(cv) &= ~CVf_FORMAT)
 
 #define CvNODEBUG(cv)		(CvFLAGS(cv) & CVf_NODEBUG)
 #define CvNODEBUG_on(cv)	(CvFLAGS(cv) |= CVf_NODEBUG)

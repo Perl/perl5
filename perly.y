@@ -46,13 +46,13 @@ dep()
 %token <ival> DOLSHARP DO HASHBRACK NOAMP
 %token LOCAL MY
 
-%type <ival> prog decl local format startsub startanonsub
+%type <ival> prog decl local format startsub startanonsub startformsub
 %type <ival> remember mremember '&'
 %type <opval> block mblock lineseq line loop cond else
 %type <opval> expr term scalar ary hsh arylen star amper sideff
 %type <opval> argexpr nexpr texpr iexpr mexpr mnexpr mtexpr miexpr
-%type <opval> listexpr listexprcom indirob
-%type <opval> listop method subname proto subbody cont my_scalar
+%type <opval> listexpr listexprcom indirob listop method
+%type <opval> formname subname proto subbody cont my_scalar
 %type <pval> label
 
 %left <ival> OROP
@@ -264,10 +264,12 @@ decl	:	format
 			{ $$ = 0; }
 	;
 
-format	:	FORMAT startsub WORD block
+format	:	FORMAT startformsub formname block
 			{ newFORM($2, $3, $4); }
-	|	FORMAT startsub block
-			{ newFORM($2, Nullop, $3); }
+	;
+
+formname:	WORD		{ $$ = $1; }
+	|	/* NULL */	{ $$ = Nullop; }
 	;
 
 subrout	:	SUB startsub subname proto subbody
@@ -281,6 +283,11 @@ startsub:	/* NULL */	/* start a subroutine scope */
 startanonsub:	/* NULL */	/* start an anonymous subroutine scope */
 			{ $$ = start_subparse();
 			  CvANON_on(compcv); }
+	;
+
+startformsub:	/* NULL */	/* start a format subroutine scope */
+			{ $$ = start_subparse();
+			  CvFORMAT_on(compcv); }
 	;
 
 subname	:	WORD	{ char *name = SvPVx(((SVOP*)$1)->op_sv, na);

@@ -42,7 +42,9 @@ struct gp {
 
 #define GvFORM(gv)	(GvGP(gv)->gp_form)
 #define GvAV(gv)	(GvGP(gv)->gp_av)
-#define GvREFCNT_inc(gv) ((GV*)SvREFCNT_inc(gv))
+
+/* This macro is deprecated.  Do not use! */
+#define GvREFCNT_inc(gv) ((GV*)SvREFCNT_inc(gv))	/* DO NOT USE */
 
 #ifdef	MICROPORT	/* Microport 2.4 hack */
 AV *GvAVn();

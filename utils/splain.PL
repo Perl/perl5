@@ -13,10 +13,8 @@ use File::Basename qw(&basename &dirname);
 
 # This forces PL files to create target in same directory as PL file.
 # This is so that make depend always knows where to find PL derivatives.
-chdir(dirname($0));
-($file = basename($0)) =~ s/\.PL$//;
-$file =~ s/\.pl$//
-	if ($^O eq 'VMS' or $^O eq 'os2');  # "case-forgiving"
+chdir dirname($0);
+$file = basename($0, '.PL');
 
 # Open input file before creating output file.
 $IN = '../lib/diagnostics.pm';

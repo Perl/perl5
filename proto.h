@@ -8,7 +8,7 @@
 #endif
 #ifdef OVERLOAD
 SV*	amagic_call _((SV* left,SV* right,int method,int dir));
-bool Gv_AMupdate _((HV* stash));
+bool	Gv_AMupdate _((HV* stash));
 #endif /* OVERLOAD */
 OP*	append_elem _((I32 optype, OP* head, OP* tail));
 OP*	append_list _((I32 optype, LISTOP* first, LISTOP* last));
@@ -125,6 +125,7 @@ GP*	gp_ref _((GP* gp));
 GV*	gv_AVadd _((GV* gv));
 GV*	gv_HVadd _((GV* gv));
 GV*	gv_IOadd _((GV* gv));
+GV*	gv_autoload _((HV* stash, char* name, STRLEN len));
 void	gv_check _((HV* stash));
 void	gv_efullname _((SV* sv, GV* gv));
 void	gv_efullname3 _((SV* sv, GV* gv, char* prefix));
@@ -138,8 +139,8 @@ void	gv_init _((GV *gv, HV *stash, char *name, STRLEN len, int multi));
 HV*	gv_stashpv _((char* name, I32 create));
 HV*	gv_stashpvn _((char* name, U32 namelen, I32 create));
 HV*	gv_stashsv _((SV* sv, I32 create));
-void	he_delayfree _((HE* hent, I32 shared));
-void	he_free _((HE* hent, I32 shared));
+void	he_delayfree _((HV* hv, HE* hent));
+void	he_free _((HV* hv, HE* hent));
 void	hoistmust _((PMOP* pm));
 void	hv_clear _((HV* tb));
 SV*	hv_delete _((HV* tb, char* key, U32 klen, I32 flags));
@@ -199,7 +200,9 @@ int	magic_setamagic	_((SV* sv, MAGIC* mg));
 int	magic_setarylen	_((SV* sv, MAGIC* mg));
 int	magic_setbm	_((SV* sv, MAGIC* mg));
 int	magic_setdbline	_((SV* sv, MAGIC* mg));
+#ifdef USE_LOCALE_COLLATE
 int	magic_setcollxfrm _((SV* sv, MAGIC* mg));
+#endif
 int	magic_setenv	_((SV* sv, MAGIC* mg));
 int	magic_setfm	_((SV* sv, MAGIC* mg));
 int	magic_setisa	_((SV* sv, MAGIC* mg));
@@ -418,6 +421,7 @@ HEK*	share_hek _((char* sv, I32 len, U32 hash));
 Signal_t sighandler _((int sig));
 SV**	stack_grow _((SV** sp, SV**p, int n));
 int	start_subparse _((void));
+void	sub_crush_depth _((CV* cv));
 bool	sv_2bool _((SV* sv));
 CV*	sv_2cv _((SV* sv, HV** st, GV** gvp, I32 lref));
 IO*	sv_2io _((SV* sv));

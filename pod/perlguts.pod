@@ -677,6 +677,7 @@ The current kinds of Magic Virtual Tables are:
     i        vtbl_isaelem        @ISA array element
     L        0 (but sets RMAGICAL)     Perl Module/Debugger???
     l        vtbl_dbline         Debugger?
+    o        vtbl_collxfrm       Locale transformation
     P        vtbl_pack           Tied Array or Hash
     p        vtbl_packelem       Tied Array or Hash element
     q        vtbl_packelem       Tied Scalar or Handle
@@ -1232,13 +1233,20 @@ Returns a pointer to the stash for a specified package.  See C<gv_stashpv>.
 
 	HV*	gv_stashsv _((SV* sv, I32 create));
 
-=item GvSV
-
-Return the SV from the GV.
-
 =item he_free
 
-Releases a hash entry from an iterator.  See C<hv_iternext>.
+Releases a hash entry, such as while iterating though the hash.  See
+C<hv_iternext>.
+
+	void	he_free _((HV* hv, HE* hent));
+
+=item he_delayfree
+
+Releases a hash entry, such as while iterating though the hash, but
+delays actual freeing of key and value until the end of the current
+statement (or thereabouts) with C<sv_2mortal>.  See C<hv_iternext>.
+
+	void	he_delayfree _((HV* hv, HE* hent));
 
 =item hv_clear
 
@@ -2589,4 +2597,4 @@ API Listing by Dean Roehrich <roehrich@cray.com>.
 
 =head1 DATE
 
-Version 28: 1996/12/27
+Version 28.1: 1997/1/13

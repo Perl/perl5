@@ -754,6 +754,11 @@ to a matched substring is valid only as part of a regular expression pattern.
 Trying to do this in ordinary Perl code produces a value that prints
 out looking like SCALAR(0xdecaf).  Use the $1 form instead.
 
+=item Can't use bareword ("%s") as %s ref while \"strict refs\" in use
+
+(F) Only hard references are allowed by "strict refs".  Symbolic references
+are disallowed.  See L<perlref>.
+
 =item Can't use string ("%s") as %s ref while "strict refs" in use
 
 (F) Only hard references are allowed by "strict refs".  Symbolic references
@@ -1486,6 +1491,17 @@ will extend the buffer and zero pad the new area.
 
 (F) An attempt was made to use an entry in an overloading table that
 somehow no longer points to a valid method.  See L<overload>.
+
+=item Stub found while resolving method `%s' overloading `%s' in package `%s'
+
+(P) Overloading resolution over @ISA tree may be broken by importing stubs.
+Stubs should never be implicitely created, but explicit calls to C<can>
+may break this.
+
+=item Cannot resolve method `%s' overloading `%s' in package `s'
+
+(P) Internal error trying to resolve overloading specified by a method
+name (as opposed to a subroutine reference).
 
 =item Operator or semicolon missing before %s
 
@@ -2384,6 +2400,50 @@ that you apparently thought was imported from another module, because
 something else of the same name (usually a subroutine) is exported
 by that module.  It usually means you put the wrong funny character
 on the front of your variable.
+
+=item Variable "%s" may be unavailable
+
+(W) An inner (nested) I<anonymous> subroutine is inside a I<named>
+subroutine, and outside that is another subroutine; and the anonymous
+(innermost) subroutine is referencing a lexical variable defined in
+the outermost subroutine.  For example:
+
+   sub outermost { my $a; sub middle { sub { $a } } }
+
+If the anonymous subroutine is called or referenced (directly or
+indirectly) from the outermost subroutine, it will share the variable
+as you would expect.  But if the anonymous subroutine is called or
+referenced when the outermost subroutine is not active, it will see
+the value of the shared variable as it was before and during the
+*first* call to the outermost subroutine, which is probably not what
+you want.
+
+In these circumstances, it is usually best to make the middle
+subroutine anonymous, using the C<sub {}> syntax.  Perl has specific
+support for shared variables in nested anonymous subroutines; a named
+subroutine in between interferes with this feature.
+
+=item Variable "%s" will not stay shared
+
+(W) An inner (nested) I<named> subroutine is referencing a lexical
+variable defined in an outer subroutine.
+
+When the inner subroutine is called, it will probably see the value of
+the outer subroutine's variable as it was before and during the
+*first* call to the outer subroutine; in this case, after the first
+call to the outer subroutine is complete, the inner and outer
+subroutines will no longer share a common value for the variable.  In
+other words, the variable will no longer be shared.
+
+Furthermore, if the outer subroutine is anonymous and references a
+lexical variable outside itself, then the outer and inner subroutines
+will I<never> share the given variable.
+
+This problem can usually be solved by making the inner subroutine
+anonymous, using the C<sub {}> syntax.  When inner anonymous subs that
+reference variables in outer subroutines are called or referenced,
+they are automatically re-bound to the current values of such
+variables.
 
 =item Variable syntax.
 

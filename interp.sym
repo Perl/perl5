@@ -106,7 +106,6 @@ parsehook
 patchlevel
 perldb
 perl_destruct_level
-pidstatus
 preambled
 preambleav
 preprocess

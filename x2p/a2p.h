@@ -100,7 +100,8 @@
 # endif
 #else
 # if defined(VMS)
-#   include "../vmsish.h"
+#   define NO_PERL_TYPEDEFS
+#   include "[-]vmsish.h"
 # endif
 #endif
 

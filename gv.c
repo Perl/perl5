@@ -88,9 +88,8 @@ int multi;
     sv_upgrade((SV*)gv, SVt_PVGV);
     if (SvLEN(gv))
 	Safefree(SvPVX(gv));
-    Newz(602,gp, 1, GP);
+    Newz(602, gp, 1, GP);
     GvGP(gv) = gp_ref(gp);
-    GvREFCNT(gv) = 1;
     GvSV(gv) = NEWSV(72,0);
     GvLINE(gv) = curcop->cop_line;
     GvFILEGV(gv) = curcop->cop_filegv;
@@ -137,30 +136,28 @@ I32 level;
 
     if (!stash)
 	return 0;
-    if (level > 100)
+    if ((level > 100) || (level < -100))
 	croak("Recursive inheritance detected");
 
-    gvp = (GV**)hv_fetch(stash, name, len, TRUE);
-
     DEBUG_o( deb("Looking for method %s in package %s\n",name,HvNAME(stash)) );
-    topgv = *gvp;
-    if (SvTYPE(topgv) != SVt_PVGV)
-	gv_init(topgv, stash, name, len, TRUE);
 
-    if (cv = GvCV(topgv)) {
-	if (CvXSUB(cv) || CvROOT(cv) || CvGV(cv)) { /* Not deleted, possibly autoloaded. */
-	    if (GvCVGEN(topgv) >= sub_generation)
-		return topgv;	/* valid cached inheritance */
-	    if (!GvCVGEN(topgv)) {	/* not an inheritance cache */
+    gvp = (GV**)hv_fetch(stash, name, len, (level >= 0));
+    if (!gvp)
+	topgv = Nullgv;
+    else {
+	topgv = *gvp;
+	if (SvTYPE(topgv) != SVt_PVGV)
+	    gv_init(topgv, stash, name, len, TRUE);
+	if (cv = GvCV(topgv)) {
+	    /* If genuine method or valid cache entry, use it */
+	    if (!GvCVGEN(topgv) || GvCVGEN(topgv) >= sub_generation)
 		return topgv;
-	    }
+	    /* Stale cached entry: junk it */
+	    SvREFCNT_dec(cv);
+	    GvCV(topgv) = cv = Nullcv;
+	    GvCVGEN(topgv) = 0;
 	}
-	/* stale cached entry, just junk it */
-	SvREFCNT_dec(cv);
-	GvCV(topgv) = cv = 0;
-	GvCVGEN(topgv) = 0;
     }
-    /* Now cv = 0, and there is no cv in topgv. */
 
     gvp = (GV**)hv_fetch(stash,"ISA",3,FALSE);
     if (gvp && (gv = *gvp) != (GV*)&sv_undef && (av = GvAV(gv))) {
@@ -175,22 +172,25 @@ I32 level;
 			SvPVX(sv), HvNAME(stash));
 		continue;
 	    }
-	    gv = gv_fetchmeth(basestash, name, len, level + 1);
-	    if (gv) {
-		GvCV(topgv) = GvCV(gv);			/* cache the CV */
-		GvCVGEN(topgv) = sub_generation;	/* valid for now */
-		SvREFCNT_inc(GvCV(gv));
-		return gv;
-	    }
+	    gv = gv_fetchmeth(basestash, name, len,
+			      (level >= 0) ? level + 1 : level - 1);
+	    if (gv)
+		goto gotcha;
 	}
     }
 
-    if (!level) {
+    if (level == 0 || level == -1) {
 	if (lastchance = gv_stashpvn("UNIVERSAL", 9, FALSE)) {
-	    if (gv = gv_fetchmeth(lastchance, name, len, level + 1)) {
-		GvCV(topgv) = GvCV(gv);			/* cache the CV */
-		GvCVGEN(topgv) = sub_generation;	/* valid for now */
-		SvREFCNT_inc(GvCV(gv));
+	    if (gv = gv_fetchmeth(lastchance, name, len,
+				  (level >= 0) ? level + 1 : level - 1)) {
+	  gotcha:
+		/* Use topgv for cache only if it has no synonyms */
+		if (topgv && GvREFCNT(topgv) == 1) {
+		    if (cv = GvCV(topgv))
+			SvREFCNT_dec(cv);
+		    GvCV(topgv) = (CV*)SvREFCNT_inc(GvCV(gv));
+		    GvCVGEN(topgv) = sub_generation;
+		}
 		return gv;
 	    }
 	}
@@ -271,22 +271,50 @@ char* name;
     }
 
     if (!gv) {
-	CV* cv;
-
 	if (strEQ(name,"import"))
 	    gv = (GV*)&sv_yes;
-	else if (strNE(name, "AUTOLOAD")) {
-	    if (gv = gv_fetchmeth(stash, "AUTOLOAD", 8, 0)) {
-		/* One more chance... */
-		SV *tmpstr = sv_2mortal(newSVpv(HvNAME(stash),0));
-		sv_catpvn(tmpstr,"::", 2);
-		sv_catpvn(tmpstr, name, nend - name);
-		cv = GvCV(gv);
-		sv_setsv(GvSV(CvGV(cv)), tmpstr);
-		SvTAINTED_off(GvSV(CvGV(cv)));
-	    }
-	}
+	else
+	    gv = gv_autoload(stash, name, nend - name);
     }
+
+    return gv;
+}
+
+GV*
+gv_autoload(stash, name, len)
+HV* stash;
+char* name;
+STRLEN len;
+{
+    static char autoload[] = "AUTOLOAD";
+    static STRLEN autolen = 8;
+    GV* gv;
+    CV* cv;
+    HV* varstash;
+    GV* vargv;
+    SV* varsv;
+
+    if (len == autolen && strnEQ(name, autoload, autolen))
+	return Nullgv;
+    if (!(gv = gv_fetchmeth(stash, autoload, autolen, 0)))
+	return Nullgv;
+    cv = GvCV(gv);
+
+    /*
+     * Given &FOO::AUTOLOAD, set $FOO::AUTOLOAD to desired function name.
+     * The subroutine's original name may not be "AUTOLOAD", so we don't
+     * use that, but for lack of anything better we will use the sub's
+     * original package to look up $AUTOLOAD.
+     */
+    varstash = GvSTASH(CvGV(cv));
+    vargv = *(GV**)hv_fetch(varstash, autoload, autolen, TRUE);
+    if (!isGV(vargv))
+	gv_init(vargv, varstash, autoload, autolen, FALSE);
+    varsv = GvSV(vargv);
+    sv_setpv(varsv, HvNAME(stash));
+    sv_catpvn(varsv, "::", 2);
+    sv_catpvn(varsv, name, len);
+    SvTAINTED_off(varsv);
     return gv;
 }
 
@@ -796,8 +824,19 @@ gp_ref(gp)
 GP* gp;
 {
     gp->gp_refcnt++;
+    if (gp->gp_cv) {
+	if (gp->gp_cvgen) {
+	    /* multi-named GPs cannot be used for method cache */
+	    SvREFCNT_dec(gp->gp_cv);
+	    gp->gp_cv = Nullcv;
+	    gp->gp_cvgen = 0;
+	}
+	else {
+	    /* Adding a new name to a subroutine invalidates method cache */
+	    sub_generation++;
+	}
+    }
     return gp;
-
 }
 
 void
@@ -812,6 +851,10 @@ GV* gv;
     if (gp->gp_refcnt == 0) {
         warn("Attempt to free unreferenced glob pointers");
         return;
+    }
+    if (gp->gp_cv) {
+	/* Deleting the name of a subroutine invalidates method cache */
+	sub_generation++;
     }
     if (--gp->gp_refcnt > 0) {
 	if (gp->gp_egv == gv)
@@ -968,8 +1011,42 @@ HV* stash;
       
 	*buf = '(';			/* A cooky: "(". */
 	strcpy(buf + 1, cp);
-	gv = gv_fetchmeth(stash, buf, strlen(buf), 0); /* fills the stash! */
-        if(gv && (cv = GvCV(gv))) filled = 1;
+	DEBUG_o( deb("Checking overloading of `%s' in package `%.256s'\n",
+		     cp, HvNAME(stash)) );
+	gv = gv_fetchmeth(stash, buf, strlen(buf), -1); /* no filling stash! */
+        if(gv && (cv = GvCV(gv))) {
+	    char *name = buf;
+	    if (GvNAMELEN(CvGV(cv)) == 3 && strEQ(GvNAME(CvGV(cv)), "nil")
+		&& strEQ(HvNAME(GvSTASH(CvGV(cv))), "overload")) {
+		/* GvSV contains the name of the method. */
+		GV *ngv;
+		
+		DEBUG_o( deb("Resolving method `%.256s' for overloaded `%s' in package `%.256s'\n", 
+			     SvPV(GvSV(gv), na), cp, HvNAME(stash)) );
+		if (SvPOK(GvSV(gv)) 
+		    && (ngv = gv_fetchmethod(stash, SvPVX(GvSV(gv))))) {
+		    name = SvPVX(GvSV(gv));
+		    cv = GvCV(gv = ngv);
+		} else {
+		    /* Can be an import stub (created by `can'). */
+		    if (GvCVGEN(gv)) {
+			croak("Stub found while resolving method `%.256s' overloading `%s' in package `%.256s'", 
+			      (SvPOK(GvSV(gv)) ?  SvPVX(GvSV(gv)) : "???" ),
+			      cp, HvNAME(stash));
+		    } else
+			croak("Cannot resolve method `%.256s' overloading `%s' in package `%.256s'", 
+			      (SvPOK(GvSV(gv)) ?  SvPVX(GvSV(gv)) : "???" ),
+			      cp, HvNAME(stash));
+		}
+	        /* If the sub is only a stub then we may have a gv to AUTOLOAD */
+	        gv = (GV*)*hv_fetch(GvSTASH(gv), name, strlen(name), TRUE);
+	        cv = GvCV(gv);
+	    }
+	    DEBUG_o( deb("Overloading `%s' in package `%.256s' via `%.256s::%.256s' \n",
+			 cp, HvNAME(stash), HvNAME(GvSTASH(CvGV(cv))),
+			 GvNAME(CvGV(cv))) );
+	    filled = 1;
+	}
 #endif 
 	amt.table[i]=(CV*)SvREFCNT_inc(cv);
     }
@@ -1255,7 +1332,7 @@ int flags;
       case dec_amg:
 	SvSetSV(left,res); return left;
       case not_amg:
-ans=!SvOK(res); break;
+	ans=!SvOK(res); break;
       }
       return ans? &sv_yes: &sv_no;
     } else if (method==copy_amg) {

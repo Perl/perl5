@@ -55,6 +55,18 @@ void Perl_DJGPP_init();
  */
 #undef ACME_MESS	/**/
 
+/* ALTERNATE_SHEBANG:
+ *	This symbol, if defined, contains a "magic" string which may be used
+ *	as the first line of a Perl program designed to be executed directly
+ *	by name, instead of the standard Unix #!.  If ALTERNATE_SHEBANG
+ *	begins with a character other then #, then Perl will only treat
+ *	it as a command line if if finds the string "perl" in the first
+ *	word; otherwise it's treated as the first line of code in the script.
+ *	(IOW, Perl won't hand off to another interpreter via an alternate
+ *	shebang sequence that might be legal Perl code.)
+ */
+/* #define ALTERNATE_SHEBANG "#!" / **/
+
 /*
  * fwrite1() should be a routine with the same calling sequence as fwrite(),
  * but which outputs all of the bytes requested as a single stream (unlike

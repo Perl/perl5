@@ -478,7 +478,7 @@ minitest: miniperl
 	@echo "You may see some irrelevant test failures if you have been unable"
 	@echo "to build lib/Config.pm."
 	- cd t && (rm -f perl$(EXE_EXT); $(LNS) ../miniperl$(EXE_EXT) perl$(EXE_EXT)) \
-		&& ./perl TEST base/*.t comp/*.t cmd/*.t pragma/*.t io/*.t op/*.t </dev/tty
+		&& ./perl TEST base/*.t comp/*.t cmd/*.t io/*.t op/*.t pragma/*.t </dev/tty
 
 clist:	$(c)
 	echo $(c) | tr ' ' '\012' >.clist

@@ -143,6 +143,18 @@
  */
 #undef ACME_MESS	/**/
 
+/* ALTERNATE_SHEBANG:
+ *	This symbol, if defined, contains a "magic" string which may be used
+ *	as the first line of a Perl program designed to be executed directly
+ *	by name, instead of the standard Unix #!.  If ALTERNATE_SHEBANG
+ *	begins with a character other then #, then Perl will only treat
+ *	it as a command line if if finds the string "perl" in the first
+ *	word; otherwise it's treated as the first line of code in the script.
+ *	(IOW, Perl won't hand off to another interpreter via an alternate
+ *	shebang sequence that might be legal Perl code.)
+ */
+#define ALTERNATE_SHEBANG "$"
+
 /* Macros to set errno using the VAX thread-safe calls, if present */
 #if (defined(__DECC) || defined(__DECCXX)) && !defined(__ALPHA)
 #  define set_errno(v)      (cma$tis_errno_set_value(v))
@@ -413,6 +425,25 @@ typedef unsigned myino_t;
  *    <data type><TAB>name<WHITESPACE>_((<prototype args>));
  */
 
+#ifdef NO_PERL_TYPEDEFS
+  /* We don't have Perl typedefs available (e.g. when building a2p), so
+     we fake them here.  N.B.  There is *no* guarantee that the faked
+     prototypes will actually match the real routines.  If you want to
+     call Perl routines, include perl.h to get the real typedefs.  */
+#  ifndef bool
+#    define bool int
+#    define __MY_BOOL_TYPE_FAKE
+#  endif
+#  ifndef I32
+#    define I32  int
+#    define __MY_I32_TYPE_FAKE
+#  endif
+#  ifndef SV
+#    define SV   void   /* Since we only see SV * in prototypes */
+#    define __MY_SV_TYPE_FAKE
+#  endif
+#endif
+
 void	prime_env_iter _((void));
 void	getredirection _((int *, char ***));
 void	init_os_extras _(());
@@ -467,6 +498,21 @@ char *	my_getlogin _(());
 int	rmscopy _((char *, char *, int));
 typedef char __VMS_SEPYTOTORP__;
 /* prototype section end marker; `typedef' passes through cpp */
+
+#ifdef NO_PERL_TYPEDEFS  /* We'll try not to scramble later files */
+#  ifdef __MY_BOOL_TYPE_FAKE
+#    undef bool
+#    undef __MY_BOOL_TYPE_FAKE
+#  endif
+#  ifdef __MY_I32_TYPE_FAKE
+#    undef I32
+#    undef __MY_I32_TYPE_FAKE
+#  endif
+#  ifdef __MY_SV_TYPE_FAKE
+#    undef SV
+#    undef __MY_SV_TYPE_FAKE
+#  endif
+#endif
 
 #ifndef VMS_DO_SOCKETS
 /* This relies on tricks in perl.h to pick up that these manifest constants

@@ -11,6 +11,8 @@ $c = @{"def"} ;
 $c = %{"def"} ;
 $c = *{"def"} ;
 $c = \&{"def"} ;
+$c = def->[0];
+$c = def->{xyz};
 EXPECT
 
 ########
@@ -70,6 +72,20 @@ my $b ;
 my $a = *$b ;
 EXPECT
 Can't use an undefined value as a symbol reference at - line 5.
+########
+
+# strict refs - error
+use strict 'refs' ;
+my $a = fred->[0] ;
+EXPECT
+Can't use bareword ("fred") as an ARRAY ref while "strict refs" in use at - line 4.
+########
+
+# strict refs - error
+use strict 'refs' ;
+my $a = fred->{barney} ;
+EXPECT
+Can't use bareword ("fred") as a HASH ref while "strict refs" in use at - line 4.
 ########
 
 # strict refs - no error

@@ -2132,7 +2132,9 @@ like shift().
 
 Returns the offset of where the last C<m//g> search left off for the variable
 is in question ($_ is used when the variable is not specified). May be
-modified to change that offset.
+modified to change that offset.  Such modification will also influence
+the C<\G> zero-width assertion in regular expressions.  See L<perlre> and
+L<perlop>.
 
 =item print FILEHANDLE LIST
 

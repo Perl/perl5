@@ -37,6 +37,18 @@
  */
 #undef ACME_MESS	/**/
 
+/* ALTERNATE_SHEBANG:
+ *	This symbol, if defined, contains a "magic" string which may be used
+ *	as the first line of a Perl program designed to be executed directly
+ *	by name, instead of the standard Unix #!.  If ALTERNATE_SHEBANG
+ *	begins with a character other then #, then Perl will only treat
+ *	it as a command line if if finds the string "perl" in the first
+ *	word; otherwise it's treated as the first line of code in the script.
+ *	(IOW, Perl won't hand off to another interpreter via an alternate
+ *	shebang sequence that might be legal Perl code.)
+ */
+/* #define ALTERNATE_SHEBANG "#!" / **/
+
 #ifndef SIGABRT
 #    define SIGABRT SIGILL
 #endif
@@ -99,6 +111,8 @@ char *my_tmpnam (char *);
 #define tmpfile	my_tmpfile
 #define tmpnam	my_tmpnam
 #define isatty	_isterm
+#define rand	random
+#define srand	srandom
 
 /*
  * fwrite1() should be a routine with the same calling sequence as fwrite(),
@@ -153,6 +167,11 @@ void *emx_realloc (void *, size_t);
 #define Fstat(fd,bufptr)   fstat((fd),(bufptr))
 #define Fflush(fp)         fflush(fp)
 
+#endif
+
+/* With SD386 it is impossible to debug register variables. */
+#if !defined(PERL_IS_AOUT) && defined(DEBUGGING) && !defined(register)
+#  define register
 #endif
 
 /* Our private OS/2 specific data. */

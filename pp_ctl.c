@@ -1254,11 +1254,8 @@ PP(pp_enteriter)
 
     PUSHBLOCK(cx, CXt_LOOP, SP);
     PUSHLOOP(cx, svp, MARK);
-    if (op->op_flags & OPf_STACKED) {
-	AV* av = (AV*)POPs;
-	cx->blk_loop.iterary = av;
-	cx->blk_loop.iterix = -1;
-    }
+    if (op->op_flags & OPf_STACKED)
+	cx->blk_loop.iterary = (AV*)SvREFCNT_inc(POPs);
     else {
 	cx->blk_loop.iterary = curstack;
 	AvFILL(curstack) = sp - stack_base;
@@ -1632,8 +1629,7 @@ PP(pp_goto)
 		    (void)SvREFCNT_inc(cv);
 		else {	/* save temporaries on recursion? */
 		    if (CvDEPTH(cv) == 100 && dowarn)
-			warn("Deep recursion on subroutine \"%s\"",
-			    GvENAME(CvGV(cv)));
+			sub_crush_depth(cv);
 		    if (CvDEPTH(cv) > AvFILL(padlist)) {
 			AV *newpad = newAV();
 			SV **oldpad = AvARRAY(svp[CvDEPTH(cv)-1]);
@@ -1709,12 +1705,13 @@ PP(pp_goto)
 		    }
 		}
 		if (perldb && curstash != debstash) {
-		    /* &xsub is not copying @_ */
+		    /*
+		     * We do not care about using sv to call CV;
+		     * it's for informational purposes only.
+		     */
 		    SV *sv = GvSV(DBsub);
 		    save_item(sv);
 		    gv_efullname3(sv, CvGV(cv), Nullch);
-		    /* We do not care about using sv to call CV,
-		     * just for info. */
 		}
 		RETURNOP(CvSTART(cv));
 	    }

@@ -39,19 +39,23 @@ ENDOFBEG
 @non_v=();
 @v_fast=();
 @v_others=();
+$in_v = 0;
 
 while (<>) {
     next if m:^#!/bin/sh:;
     # Catch CONFIG=true and PATCHLEVEL=n line from Configure.
     s/^(\w+)=(true|\d+)\s*$/$1='$2'\n/;
-    unless (m/^(\w+)='(.*)'\s*$/){
+    unless ($in_v or m/^(\w+)='(.*\n)/){
 	push(@non_v, "#$_"); # not a name='value' line
 	next;
     }
-    $name = $1;
+    if ($in_v) { $val .= $_;             }
+    else       { ($name,$val) = ($1,$2); }
+    $in_v = $val !~ /'\n/;
+    next if $in_v;
     if ($extensions{$name}) { s,/,::,g }
-    if (!$fast{$name}){ push(@v_others, $_); next; }
-    push(@v_fast,$_);
+    if (!$fast{$name}){ push(@v_others, "$name='$val"); next; }
+    push(@v_fast,"$name='$val");
 }
 
 foreach(@non_v){ print CONFIG $_ }
@@ -99,7 +103,7 @@ sub FETCH {
     if ($start == -1) { $start = length($marker) } 
         else { $start += length($marker) + 1 }
     $value = substr($config_sh, $start, 
-        index($config_sh, q('), $start) - $start);
+        index($config_sh, qq('\n), $start) - $start);
  
     $value = undef if $value eq 'undef'; # So we can say "if $Config{'foo'}".
     $_[0]->{$_[1]} = $value; # cache it
@@ -116,7 +120,7 @@ sub FIRSTKEY {
 }
 
 sub NEXTKEY {
-    my $pos = index($config_sh, "\n", $prevpos) + 1;
+    my $pos = index($config_sh, qq('\n), $prevpos) + 2;
     my $len = index($config_sh, "=", $pos) - $pos;
     $prevpos = $pos;
     $len > 0 ? substr($config_sh, $pos, $len) : undef;

@@ -46,14 +46,19 @@ struct block_sub {
 	cx->blk_sub.dfoutgv = defoutgv;					\
 	(void)SvREFCNT_inc(cx->blk_sub.dfoutgv)
 
+/* We muck with cxstack_ix since _dec may call a DESTROY, overwriting cx. */
+
 #define POPSUB(cx)							\
 	if (cx->blk_sub.hasargs) {   /* put back old @_ */		\
 	    SvREFCNT_dec(GvAV(defgv));					\
 	    GvAV(defgv) = cx->blk_sub.savearray;			\
 	}								\
 	if (cx->blk_sub.cv) {						\
-	    if (!(CvDEPTH(cx->blk_sub.cv) = cx->blk_sub.olddepth))	\
+	    if (!(CvDEPTH(cx->blk_sub.cv) = cx->blk_sub.olddepth)) {	\
+		cxstack_ix++;						\
 		SvREFCNT_dec((SV*)cx->blk_sub.cv);			\
+		cxstack_ix--;						\
+	    }								\
 	}
 
 #define POPFORMAT(cx)							\
@@ -101,9 +106,11 @@ struct block_loop {
 	cx->blk_loop.redo_op = cLOOP->op_redoop;			\
 	cx->blk_loop.next_op = cLOOP->op_nextop;			\
 	cx->blk_loop.last_op = cLOOP->op_lastop;			\
-	cx->blk_loop.iterlval = Nullsv;					\
 	if (cx->blk_loop.itervar = (ivar))				\
-	    cx->blk_loop.itersave = SvREFCNT_inc(*cx->blk_loop.itervar);
+	    cx->blk_loop.itersave = SvREFCNT_inc(*cx->blk_loop.itervar);\
+	cx->blk_loop.iterlval = Nullsv;					\
+	cx->blk_loop.iterary = Nullav;					\
+	cx->blk_loop.iterix = -1;
 
 #define POPLOOP(cx)							\
 	newsp		= stack_base + cx->blk_loop.resetsp;		\
@@ -111,7 +118,9 @@ struct block_loop {
 	if (cx->blk_loop.itervar) {					\
 	    SvREFCNT_dec(*cx->blk_loop.itervar);			\
 	    *cx->blk_loop.itervar = cx->blk_loop.itersave;		\
-	}
+	}								\
+	if (cx->blk_loop.iterary && cx->blk_loop.iterary != curstack)	\
+	    SvREFCNT_dec(cx->blk_loop.iterary);
 
 /* context common to subroutines, evals and loops */
 struct block {

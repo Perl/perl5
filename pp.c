@@ -544,13 +544,11 @@ PP(pp_undef)
 	break;
     case SVt_PVCV:
 	cv_undef((CV*)sv);
-	sub_generation++;
 	break;
     case SVt_PVGV:
-        if (SvFAKE(sv)) {
-            sv_setsv(sv, &sv_undef);
-            break;
-        }
+	if (SvFAKE(sv))
+	    sv_setsv(sv, &sv_undef);
+	break;
     default:
 	if (SvPOK(sv) && SvLEN(sv)) {
 	    (void)SvOOK_off(sv);
@@ -568,6 +566,8 @@ PP(pp_undef)
 PP(pp_predec)
 {
     dSP;
+    if (SvREADONLY(TOPs))
+	croak(no_modify);
     if (SvIOK(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
     	SvIVX(TOPs) != IV_MIN)
     {
@@ -583,6 +583,8 @@ PP(pp_predec)
 PP(pp_postinc)
 {
     dSP; dTARGET;
+    if (SvREADONLY(TOPs))
+	croak(no_modify);
     sv_setsv(TARG, TOPs);
     if (SvIOK(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
     	SvIVX(TOPs) != IV_MAX)
@@ -602,6 +604,8 @@ PP(pp_postinc)
 PP(pp_postdec)
 {
     dSP; dTARGET;
+    if(SvREADONLY(TOPs))
+	croak(no_modify);
     sv_setsv(TARG, TOPs);
     if (SvIOK(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
     	SvIVX(TOPs) != IV_MIN)
@@ -851,12 +855,16 @@ PP(pp_ncmp)
       dPOPTOPnnrl;
       I32 value;
 
-      if (left > right)
-	value = 1;
-      else if (left < right)
+      if (left < right)
 	value = -1;
-      else
+      else if (left == right)
 	value = 0;
+      else if (left > right)
+	value = 1;
+      else {
+	SETs(&sv_undef);
+	RETURN;
+      }
       SETi(value);
       RETURN;
     }
@@ -2110,10 +2118,11 @@ PP(pp_lslice)
 
 PP(pp_anonlist)
 {
-    dSP; dMARK;
+    dSP; dMARK; dORIGMARK;
     I32 items = SP - MARK;
-    SP = MARK;
-    XPUSHs((SV*)sv_2mortal((SV*)av_make(items, MARK+1)));
+    SV *av = sv_2mortal((SV*)av_make(items, MARK+1));
+    SP = ORIGMARK;		/* av_make() might realloc stack_sp */
+    XPUSHs(av);
     RETURN;
 }
 
@@ -3696,7 +3705,8 @@ PP(pp_split)
     STRLEN len;
     register char *s = SvPV(sv, len);
     char *strend = s + len;
-    register PMOP *pm = (PMOP*)POPs;
+    register PMOP *pm;
+    register REGEXP *rx;
     register SV *dstr;
     register char *m;
     I32 iters = 0;
@@ -3707,12 +3717,17 @@ PP(pp_split)
     I32 realarray = 0;
     I32 base;
     AV *oldstack = curstack;
-    register REGEXP *rx = pm->op_pmregexp;
     I32 gimme = GIMME;
     I32 oldsave = savestack_ix;
 
+#ifdef DEBUGGING
+    Copy(&LvTARGOFF(POPs), &pm, 1, PMOP*);
+#else
+    pm = (PMOP*)POPs;
+#endif
     if (!pm || !s)
 	DIE("panic: do_split");
+    rx = pm->op_pmregexp;
 
     TAINT_IF((pm->op_pmflags & PMf_LOCALE) &&
 	     (pm->op_pmflags & (PMf_WHITE | PMf_SKIPWHITE)));
@@ -3792,7 +3807,7 @@ PP(pp_split)
 	    s = m;
 	}
     }
-    else if (pm->op_pmshort) {
+    else if (pm->op_pmshort && !rx->nparens) {
 	i = SvCUR(pm->op_pmshort);
 	if (i == 1) {
 	    i = *SvPVX(pm->op_pmshort);

@@ -675,7 +675,7 @@ PP(pp_sselect)
     }
 
 #if BYTEORDER == 0x1234 || BYTEORDER == 0x12345678
-#ifdef __linux__
+#if defined(__linux__) || defined(OS2)
     growsize = sizeof(fd_set);
 #else
     growsize = maxlen;		/* little endians can use vecs directly */
@@ -889,7 +889,6 @@ PP(pp_enterwrite)
 	fgv = gv;
 
     cv = GvFORM(fgv);
-
     if (!cv) {
 	if (fgv) {
 	    SV *tmpsv = sv_newmortal();
@@ -898,8 +897,10 @@ PP(pp_enterwrite)
 	}
 	DIE("Not a format reference");
     }
-    IoFLAGS(io) &= ~IOf_DIDTOP;
+    if (CvCLONE(cv))
+	cv = (CV*)sv_2mortal((SV*)cv_clone(cv));
 
+    IoFLAGS(io) &= ~IOf_DIDTOP;
     return doform(cv,gv,op->op_next);
 }
 
@@ -975,6 +976,8 @@ PP(pp_leavewrite)
 	    gv_efullname3(tmpsv, fgv, Nullch);
 	    DIE("Undefined top format \"%s\" called",SvPVX(tmpsv));
 	}
+	if (CvCLONE(cv))
+	    cv = (CV*)sv_2mortal((SV*)cv_clone(cv));
 	return doform(cv,gv,op);
     }
 
@@ -2847,12 +2850,12 @@ nope:
 
 PP(pp_fork)
 {
+#ifdef HAS_FORK
     dSP; dTARGET;
     int childpid;
     GV *tmpgv;
 
     EXTEND(SP, 1);
-#ifdef HAS_FORK
     childpid = fork();
     if (childpid < 0)
 	RETSETUNDEF;
@@ -2871,19 +2874,14 @@ PP(pp_fork)
 
 PP(pp_wait)
 {
+#if !defined(DOSISH) || defined(OS2)
     dSP; dTARGET;
     int childpid;
     int argflags;
-    I32 value;
 
-    EXTEND(SP, 1);
-#ifdef HAS_WAIT
-    childpid = wait(&argflags);
-    if (childpid > 0)
-	pidgone(childpid, argflags);
-    value = (I32)childpid;
-    statusvalue = FIXSTATUS(argflags);
-    PUSHi(value);
+    childpid = wait4pid(-1, &argflags, 0);
+    statusvalue = (childpid > 0) ? FIXSTATUS(argflags) : -1;
+    XPUSHi(childpid);
     RETURN;
 #else
     DIE(no_func, "Unsupported function wait");
@@ -2892,19 +2890,17 @@ PP(pp_wait)
 
 PP(pp_waitpid)
 {
+#if !defined(DOSISH) || defined(OS2)
     dSP; dTARGET;
     int childpid;
     int optype;
     int argflags;
-    I32 value;
 
-#ifdef HAS_WAIT
     optype = POPi;
     childpid = TOPi;
     childpid = wait4pid(childpid, &argflags, optype);
-    value = (I32)childpid;
-    statusvalue = FIXSTATUS(argflags);
-    SETi(value);
+    statusvalue = (childpid > 0) ? FIXSTATUS(argflags) : -1;
+    SETi(childpid);
     RETURN;
 #else
     DIE(no_func, "Unsupported function wait");

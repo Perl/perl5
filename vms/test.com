@@ -74,7 +74,7 @@ $
 $!  And do it
 $   testdir = "Directory/NoHead/NoTrail/Column=1"
 $   Define/User Perlshr Sys$Disk:[-]PerlShr'exe'
-$   MCR Sys$Disk:[]Perl. - "''p2'" "''p3'" "''p4'" "''p5'" "''p6'"
+$   MCR Sys$Disk:[]Perl. "-I[-.lib]" - "''p2'" "''p3'" "''p4'" "''p5'" "''p6'"
 $   Deck/Dollar=$$END-OF-TEST$$
 # $RCSfile: TEST,v $$Revision: 4.1 $$Date: 92/08/07 18:27:00 $
 # Modified for VMS 30-Sep-1994  Charles Bailey  bailey@genetics.upenn.edu
@@ -90,7 +90,7 @@ use Config;
 @compexcl=('cpp.t','script.t');
 @ioexcl=('argv.t','dup.t','fs.t','inplace.t','pipe.t');
 @libexcl=('anydbm.t','db-btree.t','db-hash.t','db-recno.t',
-          'gdbm.t','io_dup.t', 'io_pipe.t', 'io_sock.t',
+          'gdbm.t','io_dup.t', 'io_pipe.t', 'io_sel.t', 'io_sock.t',
           'ndbm.t','odbm.t','open2.t','open3.t','posix.t',
           'sdbm.t','soundex.t');
 
@@ -147,7 +147,7 @@ while ($test = shift) {
 	if (/#!..perl(.*)/) {
 	    $switch = $1;
 	    # Add "" to protect uppercase switches on command line
-	    $switch =~ s/-([A-Z]\S*)/"-$1"/g;
+	    $switch =~ s/-(\S*[A-Z]\S*)/"-$1"/g;
 	} else {
 	    $switch = '';
 	}

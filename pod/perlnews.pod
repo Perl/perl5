@@ -23,7 +23,8 @@ file in the distribution for details.
 There is a new Configure question that asks if you want to maintain
 binary compatibility with Perl 5.003.  If you choose binary
 compatibility, you do not have to recompile your extensions, but you
-might have symbol conflicts if you embed Perl in another application.
+might have symbol conflicts if you embed Perl in another application,
+just as in the 5.003 release.
 
 =head2 New Opcode Module and Revised Safe Module
 
@@ -185,6 +186,16 @@ function whose prototype you want to retrieve.
 
 Functions documented in the Camel to default to $_ now in
 fact do, and all those that do are so documented in L<perlfunc>.
+
+=head2 C<m//g> does not trigger a pos() reset on failure
+
+The C<m//g> match iteration construct used to reset the iteration
+when it failed to match (so that the next C<m//g> match would start at
+the beginning of the string).  You now have to explicitly do a
+C<pos $str = 0;> to reset the "last match" position, or modify the
+string in some way.  This change makes it practical to chain C<m//g>
+matches together in conjunction with ordinary matches using the C<\G>
+zero-width assertion.  See L<perlop> and L<perlre>.
 
 =back
 
@@ -652,4 +663,4 @@ Constructed by Tom Christiansen, grabbing material with permission
 from innumerable contributors, with kibitzing by more than a few Perl
 porters.
 
-Last update: Tue Dec 24 16:45:14 EST 1996
+Last update: Tue Jan 14 14:03:02 EST 1997

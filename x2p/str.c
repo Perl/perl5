@@ -297,6 +297,16 @@ register FILE *fp;
     int i;
     int bpx;
 
+#if defined(VMS)
+    /* An ungetc()d char is handled separately from the regular
+     * buffer, so we getc() it back out and stuff it in the buffer.
+     */
+    i = getc(fp);
+    if (i == EOF) return Nullch;
+    *(--((*fp)->_ptr)) = (unsigned char) i;
+    (*fp)->_cnt++;
+#endif
+
     cnt = FILE_cnt(fp);			/* get count into register */
     str->str_nok = 0;			/* invalidate number */
     str->str_pok = 1;			/* validate pointer */
@@ -317,7 +327,7 @@ register FILE *fp;
 	
 	FILE_cnt(fp) = cnt;		/* deregisterize cnt and ptr */
 	FILE_ptr(fp) = ptr;
-	i = FILE_filbuf(fp);		/* get more characters */
+	i = getc(fp);		/* get more characters */
 	cnt = FILE_cnt(fp);
 	ptr = FILE_ptr(fp);		/* reregisterize cnt and ptr */
 
