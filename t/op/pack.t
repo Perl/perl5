@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 1470;
+plan tests => 1476;
 
 use strict;
 use warnings;
@@ -442,25 +442,40 @@ is(pack("V", 0xdeadbeef), "\xef\xbe\xad\xde");
   my ($x, $y, $z);
   eval { ($x) = unpack '/a*','hello' };
   like($@, qr!/ must follow a numeric type!);
+  undef $x;
+  eval { $x = unpack '/a*','hello' };
+  like($@, qr!/ must follow a numeric type!);
 
+  undef $x;
   eval { ($z,$x,$y) = unpack 'a3/A C/a* C/Z', "003ok \003yes\004z\000abc" };
   is($@, '');
   is($z, 'ok');
   is($x, 'yes');
   is($y, 'z');
+  undef $z;
+  eval { $z = unpack 'a3/A C/a* C/Z', "003ok \003yes\004z\000abc" };
+  is($@, '');
+  is($z, 'ok');
 
+
+  undef $x;
   eval { ($x) = pack '/a*','hello' };
+  like($@,  qr!Invalid type in pack: '/'!);
+  undef $x;
+  eval { $x = pack '/a*','hello' };
   like($@,  qr!Invalid type in pack: '/'!);
 
   $z = pack 'n/a* N/Z* w/A*','string','hi there ','etc';
   my $expect = "\000\006string\0\0\0\012hi there \000\003etc";
   is($z, $expect);
 
+  undef $x;
   $expect = 'hello world';
   eval { ($x) = unpack ("w/a", chr (11) . "hello world!")};
   is($x, $expect);
   is($@, '');
 
+  undef $x;
   # Doing this in scalar context used to fail.
   eval { $x = unpack ("w/a", chr (11) . "hello world!")};
   is($@, '');
@@ -473,12 +488,14 @@ is(pack("V", 0xdeadbeef), "\xef\xbe\xad\xde");
   ) 
   {
     my ($pat, $in, $expect) = @$_;
+    undef $x;
     eval { ($x) = unpack $pat, $in };
     is($@, '');
     is($x, $expect) || 
       printf "# list unpack ('$pat', '$in') gave %s, expected '$expect'\n",
              encode_list ($x);
 
+    undef $x;
     eval { $x = unpack $pat, $in };
     is($@, '');
     is($x, $expect) ||
@@ -488,23 +505,29 @@ is(pack("V", 0xdeadbeef), "\xef\xbe\xad\xde");
 
   # / with #
 
-  eval { ($z,$x,$y) = unpack <<EOU, "003ok \003yes\004z\000abc" };
+  my $pattern = <<'EOU';
  a3/A			# Count in ASCII
  C/a*			# Count in a C char
  C/Z			# Count in a C char but skip after \0
 EOU
 
+  $x = $y = $z =undef;
+  eval { ($z,$x,$y) = unpack $pattern, "003ok \003yes\004z\000abc" };
   is($@, '');
   is($z, 'ok');
   is($x, 'yes');
   is($y, 'z');
+  undef $x;
+  eval { $z = unpack $pattern, "003ok \003yes\004z\000abc" };
+  is($@, '');
+  is($z, 'ok');
 
-  $z = pack <<EOP,'string','etc';
+  $pattern = <<'EOP';
   n/a*			# Count as network short
   w/A*			# Count a  BER integer
 EOP
   $expect = "\000\006string\003etc";
-
+  $z = pack $pattern,'string','etc';
   is($z, $expect);
 }
 
