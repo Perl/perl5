@@ -1087,8 +1087,9 @@ as Unicode (UTF-8), there still are many places where Unicode (in some
 encoding or another) could be given as arguments or received as
 results, or both, but it is not.
 
-The following are such interfaces.  For all of these Perl currently
-(as of 5.8.1) simply assumes byte strings both as arguments and results.
+The following are such interfaces.  For all of these interfaces Perl
+currently (as of 5.8.3) simply assumes byte strings both as arguments
+and results, or UTF-8 strings if the C<encoding> pragma has been used.
 
 One reason why Perl does not attempt to resolve the role of Unicode in
 this cases is that the answers are highly dependent on the operating
