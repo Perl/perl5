@@ -195,6 +195,7 @@ ext/Encode/Makefile.PL		Encode extension
 ext/Encode/Todo			Encode extension
 ext/Encode/Encode/ascii.enc	Encoding tables
 ext/Encode/Encode/big5.enc	Encoding tables
+ext/Encode/Encode/cp1047.enc	Encoding tables
 ext/Encode/Encode/cp1250.enc	Encoding tables
 ext/Encode/Encode/cp1251.enc	Encoding tables
 ext/Encode/Encode/cp1252.enc	Encoding tables
@@ -204,6 +205,7 @@ ext/Encode/Encode/cp1255.enc	Encoding tables
 ext/Encode/Encode/cp1256.enc	Encoding tables
 ext/Encode/Encode/cp1257.enc	Encoding tables
 ext/Encode/Encode/cp1258.enc	Encoding tables
+ext/Encode/Encode/cp37.enc	Encoding tables
 ext/Encode/Encode/cp437.enc	Encoding tables
 ext/Encode/Encode/cp737.enc	Encoding tables
 ext/Encode/Encode/cp775.enc	Encoding tables
@@ -260,6 +262,7 @@ ext/Encode/Encode/macRomania.enc	Encoding tables
 ext/Encode/Encode/macThai.enc		Encoding tables
 ext/Encode/Encode/macTurkish.enc	Encoding tables
 ext/Encode/Encode/macUkraine.enc	Encoding tables
+ext/Encode/Encode/posix-bc.enc		Encoding tables
 ext/Encode/Encode/shiftjis.enc		Encoding tables
 ext/Encode/Encode/symbol.enc		Encoding tables
 ext/Errno/ChangeLog		Errno perl module change log
