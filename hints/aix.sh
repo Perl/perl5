@@ -319,7 +319,10 @@ libswanted_uselargefiles="`getconf XBS5_ILP32_OFFBIG_LIBS 2>/dev/null|sed -e 's@
 		ldflags="`echo ' '$ldflags | sed -e 's@ -b@ -Wl,-b@g'`"
 		lddlflags="`echo ' '$lddlflags | sed -e 's@ -b@ -Wl,-b@g'`"
 		lddlflags="`echo ' '$lddlflags | sed -e 's@ -G @ -Wl,-G @g'`"
-		ld='gcc'
+		case "$use64bitall" in
+		    $define|true|[yY]*) ld="gcc -maix64"	;;
+		    *)			ld="gcc"		;;
+		    esac
 		echo >&4 "(using ccflags   $ccflags)"
 		echo >&4 "(using ldflags   $ldflags)"
 		echo >&4 "(using lddlflags $lddlflags)"
@@ -384,6 +387,13 @@ EOM
 	# Remove them.
 	ccflags="`echo $ccflags | sed -e 's@-q32@@'`"
 	ldflags="`echo $ldflags | sed -e 's@-b32@@'`"
+	case "$cc" in
+	    *gcc*)
+		ccflags="`echo $ccflags | sed -e 's@-q64@-maix64@'`"
+		ccflags_uselargefiles="`echo $ccflags_uselargefiles | sed -e 's@-q64@-maix64@'`"
+		qacflags="`echo $qacflags | sed -e 's@-q64@-maix64@'`"
+		;;
+	    esac
 	# Tell archiver to use large format.  Unless we remove 'ar'
 	# from 'trylist', the Configure script will just reset it to 'ar'
 	# immediately prior to writing config.sh.  This took me hours
