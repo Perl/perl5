@@ -1,6 +1,6 @@
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
+#    @INC = '../lib';
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bEncode\b/) {
       print "1..0 # Skip: Encode was not built\n";
@@ -88,8 +88,41 @@ my @hz_txt = (
 my $hz_exp = '007e0069006e002000470042002e5df162404e0d6b32'
  . 'ff0c52ff65bd65bc4eba3002004200790065002e007e';
 
+use constant BUFSIZ   => 64; # for test
+use constant hiragana => "\x{3042}\x{3044}\x{3046}\x{3048}\x{304A}";
+use constant han_kana => "\x{FF71}\x{FF72}\x{FF73}\x{FF74}\x{FF75}";
+use constant macron   => "\x{0100}\x{0112}\x{012a}\x{014c}\x{016a}";
+use constant TAIL     => 'bbb';
+use constant YES      =>  1;
+
+my @ary_buff = (  # [ encoding, decoded, encoded ]
+# type-M
+  ["euc-cn",      hiragana, "\xA4\xA2\xA4\xA4\xA4\xA6\xA4\xA8\xA4\xAA" ],
+  ["euc-jp",      hiragana, "\xA4\xA2\xA4\xA4\xA4\xA6\xA4\xA8\xA4\xAA" ],
+  ["euc-jp",      han_kana, "\x8E\xB1\x8E\xB2\x8E\xB3\x8E\xB4\x8E\xB5" ],
+  ["euc-kr",      hiragana, "\xAA\xA2\xAA\xA4\xAA\xA6\xAA\xA8\xAA\xAA" ],
+  ["shiftjis",    hiragana, "\x82\xA0\x82\xA2\x82\xA4\x82\xA6\x82\xA8" ],
+  ["shiftjis",    han_kana, "\xB1\xB2\xB3\xB4\xB5" ],
+# type-E
+  ["2022-cn",     hiragana, "\e\$)A\cN". '$"$$$&$($*' . "\cO" ],
+  ["2022-jp",     hiragana, "\e\$B".'$"$$$&$($*'."\e(B" ],
+  ["2022-kr",     hiragana, "\e\$)C\cN". '*"*$*&*(**' . "\cO" ],
+  [ $jis,         han_kana, "\e\(I".'12345'."\e(B" ],
+  ["2022-jp1", macron, "\e\$(D\x2A\x27\x2A\x37\x2A\x45\x2A\x57\x2A\x69\e(B"],
+  ["2022-jp2", "\x{C0}" . macron . "\x{C1}", 
+       "\e\$(D\e.A\eN\x40\x2A\x27\x2A\x37\x2A\x45\x2A\x57\x2A\x69\e(B\eN\x41"],
+# type-X
+  ["euc-jp-0212", hiragana, "\xA4\xA2\xA4\xA4\xA4\xA6\xA4\xA8\xA4\xAA" ],
+  ["euc-jp-0212", han_kana, "\x8E\xB1\x8E\xB2\x8E\xB3\x8E\xB4\x8E\xB5" ],
+  ["euc-jp-0212", macron, 
+     "\x8F\xAA\xA7\x8F\xAA\xB7\x8F\xAA\xC5\x8F\xAA\xD7\x8F\xAA\xE9" ],
+# type-H
+  [  $hz,         hiragana, "~{". '$"$$$&$($*' . "~}" ],
+  [  $hz,         hiragana, "~{". '$"$$' ."~\cJ". '$&$($*' . "~}" ],
+);
+
 plan test => $n*@encodings + $n*@encodings*@greek
-  + $n*@encodings*@ideodigit + $num_esc + $n + @hz_txt;
+  + $n*@encodings*@ideodigit + $num_esc + $n + @hz_txt + @ary_buff;
 
 foreach my $enc (@encodings)
  {
@@ -189,3 +222,33 @@ foreach my $enc (@encodings)
     }
   }
 }
+
+for my $ary (@ary_buff) {
+  my $NG = 0;
+  my $enc = $ary->[0];
+  for my $n ( int(BUFSIZ/2) .. 2*BUFSIZ+4 ){
+    my $dst = "a"x$n. $ary->[1] . TAIL;
+    my $src = "a"x$n. $ary->[2] . TAIL;
+    my $utf = buff_decode($enc, $src);
+    $NG++ unless $dst eq $utf;
+  }
+  ok($NG, 0, "$enc mangled translating to Unicode");
+}
+
+sub buff_decode {
+  my($enc, $str) = @_;
+  my $utf8 = '';
+  my $inconv = '';
+  while(length $str){
+    my $buff = $inconv.substr($str,0,BUFSIZ - length $inconv,'');
+    my $decoded = decode($enc, $buff, YES);
+    if(length $decoded){
+      $utf8 .= $decoded;
+      $inconv = $buff;
+    } else {
+      last; # malformed?
+    }
+  }
+  return $utf8;
+}
+
