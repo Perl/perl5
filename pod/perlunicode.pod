@@ -169,9 +169,10 @@ character with the Unicode uppercase property, while C<\p{M}> matches
 any mark character.  Single letter properties may omit the brackets,
 so that can be written C<\pM> also.  Many predefined character classes
 are available, such as C<\p{IsMirrored}> and C<\p{InTibetan}>.  The
-names of the C<In> classes are the official Unicode script and block
-names but with all non-alphanumeric characters removed, for example
-the block name C<"Latin-1 Supplement"> becomes C<\p{InLatin1Supplement}>.
+recommended names of the C<In> classes are the official Unicode script
+and block names but with all non-alphanumeric characters removed, for
+example the block name C<"Latin-1 Supplement"> becomes
+C<\p{InLatin1Supplement}>.
 
 Here is the list as of Unicode 3.1.0 (the two-letter classes) and
 as defined by Perl (the one-letter classes) (in Unicode materials

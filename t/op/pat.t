@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..715\n";
+print "1..716\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2121,9 +2121,13 @@ sub ok ($$) {
 }
 
 {
-  # high bit bug -- japhy
-  my $x = "ab\200d";
-  $x =~ /.*?\200/ or print "not ";
-  print "ok 715\n";
+    # high bit bug -- japhy
+    my $x = "ab\200d";
+    $x =~ /.*?\200/ or print "not ";
+    print "ok 715\n";
 }
 
+{
+    print "not " unless "\x80" =~ /\p{in-latin1_SUPPLEMENT}/;
+    print "ok 716\n";
+}
