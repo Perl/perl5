@@ -80,7 +80,7 @@ autoflush FH4 1;
 print FH4 "ok 9\n";
 print "# waiting for process $pid4 to exit\n";
 #VMS: Send an EOF to convince the subprocess to exit as well
-if ($^O eq 'VMS') { use VMS::Stdio qw(&writeof); writeof(FH4); }
+if ($^O eq 'VMS') { require VMS::Stdio; VMS::Stdio::writeof(FH4); }
 $reap_pid = waitpid $pid4, 0;
 print "# reaped pid $reap_pid != $pid4\nnot "
     unless $reap_pid == $pid4;         
