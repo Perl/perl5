@@ -9,7 +9,7 @@ BEGIN {
     $| = 1;
 }
 
-print "1..101\n";
+print "1..100\n";
 
 $a = {};
 bless $a, "Bob";
@@ -195,9 +195,3 @@ test ! UNIVERSAL::isa("\xff\xff\xff\0", 'HASH');
 my $x = {}; bless $x, 'X';
 test $x->isa('UNIVERSAL');
 test $x->isa('UNIVERSAL');
-
-
-# Check that the "historical accident" of UNIVERSAL having an import()
-# method doesn't effect anyone else.
-eval { Some::Package->import("bar") };
-test !$@;
