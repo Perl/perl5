@@ -1778,9 +1778,19 @@ PP(pp_leavesub)
     TAINT_NOT;
     if (gimme == G_SCALAR) {
 	MARK = newsp + 1;
-	if (MARK <= SP)
-	    *MARK = SvTEMP(TOPs) ? TOPs : sv_mortalcopy(TOPs);
-	else {
+	if (MARK <= SP) {
+	    if (cxsub.cv && CvDEPTH(cxsub.cv) > 1) {
+		if (SvTEMP(TOPs)) {
+		    *MARK = SvREFCNT_inc(TOPs);
+		    FREETMPS;
+		    sv_2mortal(*MARK);
+		} else {
+		    FREETMPS;
+		    *MARK = sv_mortalcopy(TOPs);
+		}
+	    } else
+		*MARK = SvTEMP(TOPs) ? TOPs : sv_mortalcopy(TOPs);
+	} else {
 	    MEXTEND(MARK, 0);
 	    *MARK = &sv_undef;
 	}
