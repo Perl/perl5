@@ -34,9 +34,8 @@ typedef struct {
 
 #define dl_connections	(dl_cxtx.x_connections)
 
-static void terminate(void)
+static void terminate(pTHX_ void *ptr)
 {
-    dTHX;
     dMY_CXT;
     int size = GetHandleSize((Handle) dl_connections) / sizeof(ConnectionID);
     HLock((Handle) dl_connections);
@@ -79,7 +78,7 @@ dl_load_file(filename, flags=0)
 	dMY_CXT;
     	if (!dl_connections) {
 	    dl_connections = (ConnectionID **)NewHandle(0);
-	    atexit(terminate);
+	    call_atexit(terminate, (void*)0);
     	}
         PtrAndHand((Ptr) &connID, (Handle) dl_connections, sizeof(ConnectionID));
     	RETVAL = connID;
