@@ -1072,24 +1072,73 @@ PerlIO_binmode(pTHX_ PerlIO *f, int iotype, int mode, const char *names)
     PerlIO_debug("PerlIO_binmode f=%p %s %c %x %s\n",
 		 (void*)f, PerlIOBase(f)->tab->name, iotype, mode,
 		 (names) ? names : "(Null)");
-    /* Can't flush if switching encodings. */
-    if (!(names && memEQ(names, ":encoding(", 10))) {
-        PerlIO_flush(f);
+    if (names) {
+	/* Do not flush etc. if (e.g.) switching encodings.
+	   if a pushed layer knows it needs to flush lower layers
+	   (for example :unix which is never going to call them)
+	   it can do the flush when it is pushed.
+	 */
+	return PerlIO_apply_layers(aTHX_ f, NULL, names) == 0 ? TRUE : FALSE;
+    }
+    else {
+	/* FIXME?: Looking down the layer stack seems wrong,
+	   but is a way of reaching past (say) an encoding layer
+	   to flip CRLF-ness of the layer(s) below
+	 */
 #ifdef PERLIO_USING_CRLF
-	if (!names && (mode & O_BINARY)) {
-	    PerlIO *top = f;
-	    while (*top) {
-	        if (PerlIOBase(top)->tab == &PerlIO_crlf) {
-		  PerlIOBase(top)->flags &= ~PERLIO_F_CRLF;
-		  break;
+	/* Legacy binmode only has meaning if O_TEXT has a value distinct from
+	   O_BINARY so we can look for it in mode.
+	 */
+	if (!(mode & O_BINARY)) {
+	    /* Text mode */
+	    while (*f) {
+		/* Perhaps we should turn on bottom-most aware layer
+		   e.g. Ilya's idea that UNIX TTY could serve
+		 */
+		if (PerlIOBase(f)->tab->kind & PERLIO_K_CANCRLF) {
+		    if (!(PerlIOBase(f)->flags & PERLIO_F_CRLF)) {
+			/* Not in text mode - flush any pending stuff and flip it */
+			PerlIO_flush(f);
+			PerlIOBase(f)->flags |= PERLIO_F_CRLF;
+		    }
+		    /* Only need to turn it on in one layer so we are done */
+		    return TRUE;
 		}
-		top = PerlIONext(top);
-		PerlIO_flush(top);
+		f = PerlIONext(f);
 	    }
+	    /* Not finding a CRLF aware layer presumably means we are binary
+	       which is not what was requested - so we failed
+	       We _could_ push :crlf layer but so could caller
+	     */
+	    return FALSE;
 	}
 #endif
+	/* Either asked for BINMODE or that is normal on this platform
+	   see if any CRLF aware layers are present and turn off the flag
+	   and possibly remove layer.
+	 */
+	while (*f) {
+	    if (PerlIOBase(f)->tab->kind & PERLIO_K_CANCRLF) {
+		if ((PerlIOBase(f)->flags & PERLIO_F_CRLF)) {
+		    /* In text mode - flush any pending stuff and flip it */
+		    PerlIO_flush(f);
+		    PerlIOBase(f)->flags &= ~PERLIO_F_CRLF;
+#ifndef PERLIO_USING_CRLF
+		    /* CRLF is unusual case - if this is just the :crlf layer pop it */
+		    if (PerlIOBase(f)->tab == &PerlIO_crlf) {
+			PerlIO_pop(aTHX_ f);
+		    }
+#endif
+		    /* Normal case is only one layer doing this, so exit on first
+		       abnormal case can always do multiple binmode calls
+		     */
+		    return TRUE;
+		}
+	    }
+	    f = PerlIONext(f);
+	}
+	return TRUE;
     }
-    return PerlIO_apply_layers(aTHX_ f, NULL, names) == 0 ? TRUE : FALSE;
 }
 
 int
@@ -2102,6 +2151,8 @@ PerlIOUnix_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg)
     IV code = PerlIOBase_pushed(aTHX_ f, mode, arg);
     PerlIOUnix *s = PerlIOSelf(f, PerlIOUnix);
     if (*PerlIONext(f)) {
+	/* We never call down so any pending stuff now */
+	PerlIO_flush(PerlIONext(f));
 	s->fd = PerlIO_fileno(PerlIONext(f));
 	/*
 	 * XXX could (or should) we retrieve the oflags from the open file
@@ -2333,8 +2384,11 @@ PerlIOStdio_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg)
 	FILE *stdio =
 	    PerlSIO_fdopen(PerlIO_fileno(PerlIONext(f)), mode =
 			   PerlIOStdio_mode(mode, tmode));
-	if (stdio)
+	if (stdio) {
 	    s->stdio = stdio;
+	    /* We never call down so any pending stuff now */
+	    PerlIO_flush(PerlIONext(f));
+	}
 	else
 	    return -1;
     }
