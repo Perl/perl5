@@ -509,6 +509,7 @@ ext/NDBM_File/typemap		NDBM extension interface types
 ext/ODBM_File/hints/cygwin.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/dec_osf.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/hpux.pl	Hint for ODBM_File for named architecture
+ext/ODBM_File/hints/linux.pl	Hint for NDBM_File for named architecture
 ext/ODBM_File/hints/sco.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/solaris.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/svr4.pl	Hint for ODBM_File for named architecture
@@ -2823,3 +2824,4 @@ x2p/util.h			Public declarations for the above
 x2p/walk.c			Parse tree walker
 XSUB.h				Include file for extension subroutines
 xsutils.c			Additional bundled package methods not in UNIVERSAL::
+
