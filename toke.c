@@ -5585,7 +5585,7 @@ S_pending_ident(pTHX)
     return WORD;
 }
 
-/* Weights are the number of occurrences of that keyword in about 190M of
+/* Weights are the number of occurrences of that keyword in about 135M of
    input to Perl_keyword from a lot of real perl. This routine is about 20%
    faster than the routine it replaces.  */
 
