@@ -1569,6 +1569,11 @@ sub init_main {
 	$self->{PERL_ARCHLIB} = $self->{PERL_LIB};
 	$self->{PERL_INC}     = ($Is_Win32) ? File::Spec->catdir($self->{PERL_LIB},"CORE") : $self->{PERL_SRC};
 
+	if (exists $INC{'Cross.pm'}) {
+	    $self->{PERL_ARCHLIB} = File::Spec->catdir("$self->{PERL_SRC}","xlib",$::Cross::platform);
+	    $self->{PERL_INC}     = File::Spec->catdir("$self->{PERL_SRC}","xlib",$::Cross::platform, $Is_Win32?("CORE"):());
+	}
+
 	# catch a situation that has occurred a few times in the past:
 	unless (
 		-s File::Spec->catfile($self->{PERL_SRC},'cflags')
@@ -1819,6 +1824,9 @@ sub init_INST {
     unless ($self->{INST_LIB}){
 	if ($self->{PERL_CORE}) {
 	    $self->{INST_LIB} = $self->{INST_ARCHLIB} = $self->{PERL_LIB};
+	    if (exists $INC{'Cross.pm'}) {
+		$self->{INST_LIB} = $self->{INST_ARCHLIB} = File::Spec->catdir($self->{PERL_LIB},"..","xlib",$::Cross::platform);
+	    }
 	} else {
 	    $self->{INST_LIB} = File::Spec->catdir($Curdir,"blib","lib");
 	}

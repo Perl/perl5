@@ -18,6 +18,7 @@ while (@ARGV && $ARGV[0] =~ /^([\w_]+)=(.*)$/)
  }
 
 $opt{CONFIG_H} ||= 'config.h';
+$opt{CORE_DIR} ||= '../lib/CORE';
 
 warn "Writing $opt{CONFIG_H}\n";
 
@@ -52,7 +53,7 @@ eval $str;
 die "$str:$@" if $@;
 
 open(H,">$file.new") || die "Cannot open $file.new:$!";
-#binmode H;		# no CRs (which cause a spurious rebuild)
+binmode H;		# no CRs (which cause a spurious rebuild)
 while (<SH>)
  {
   last if /^$term$/o;
@@ -76,9 +77,9 @@ close(H);
 close(SH);
 
 
-chmod(0666,"../lib/CORE/config.h");
-copy("$file.new","../lib/CORE/config.h") || die "Cannot copy:$!";
-chmod(0444,"../lib/CORE/config.h");
+chmod(0666,"$opt{CORE_DIR}/$opt{CONFIG_H}");
+copy("$file.new","$opt{CORE_DIR}/$opt{CONFIG_H}") || die "Cannot copy:$!";
+chmod(0444,"$opt{CORE_DIR}/$opt{CONFIG_H}");
 
 if (compare("$file.new",$file))
  {

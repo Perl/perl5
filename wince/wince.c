@@ -497,6 +497,12 @@ win32_utime(const char *filename, struct utimbuf *times)
 }
 
 DllExport int
+win32_gettimeofday(struct timeval *tp, void *not_used)
+{
+    return xcegettimeofday(tp,not_used);
+}
+
+DllExport int
 win32_uname(struct utsname *name)
 {
     struct hostent *hep;

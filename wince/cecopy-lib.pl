@@ -12,8 +12,8 @@ sub mk {
     $r=~/^(.*)\/[^\/]*?$/;
     mk($1);
   }
-  print STDERR "..\\miniperl.exe comp.pl --do cemkdir [p]\\lib\\$r\n";
-  system("..\\miniperl.exe -I..\\lib comp.pl --do cemkdir [p]\\lib\\$r");
+  print STDERR "..\\miniperl.exe -MCross comp.pl --do cemkdir [p]\\lib\\$r\n";
+  system("..\\miniperl.exe -I..\\lib -MCross comp.pl --do cemkdir [p]\\lib\\$r");
   $dirs{$r}++;
 }
 for (@files) {
@@ -22,7 +22,7 @@ for (@files) {
     mk($1);
   }
   # currently no stripping POD
-  system("..\\miniperl.exe -I..\\lib comp.pl --copy pc:..\\lib\\$_ ce:[p]\\lib\\$_");
+  system("..\\miniperl.exe -I..\\lib -MCross comp.pl --copy pc:..\\lib\\$_ ce:[p]\\lib\\$_");
 }
 
 sub BEGIN {
@@ -168,13 +168,9 @@ sub BEGIN {
     File/Spec.pm
     File/stat.pm
     File/Temp.pm
-    File/Spec/Cygwin.pm
-    File/Spec/Epoc.pm
     File/Spec/Functions.pm
     File/Spec/Mac.pm
-    File/Spec/OS2.pm
     File/Spec/Unix.pm
-    File/Spec/VMS.pm
     File/Spec/Win32.pm
     ExtUtils/Command.pm
     ExtUtils/Constant.pm
@@ -189,14 +185,9 @@ sub BEGIN {
     ExtUtils/Mksymlists.pm
     ExtUtils/MM.pm
     ExtUtils/MM_Any.pm
-    ExtUtils/MM_BeOS.pm
-    ExtUtils/MM_Cygwin.pm
     ExtUtils/MM_DOS.pm
-    ExtUtils/MM_NW5.pm
-    ExtUtils/MM_OS2.pm
     ExtUtils/MM_Unix.pm
     ExtUtils/MM_UWIN.pm
-    ExtUtils/MM_VMS.pm
     ExtUtils/MM_Win32.pm
     ExtUtils/MM_Win95.pm
     ExtUtils/MY.pm
