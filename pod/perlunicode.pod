@@ -1,14 +1,16 @@
 =head1 NAME
 
-perlunicode - Unicode support in Perl
+perlunicode - Unicode support in Perl (EXPERIMENTAL, subject to change)
 
 =head1 DESCRIPTION
 
 =head2 Important Caveat
 
-WARNING: The implementation of Unicode support in Perl is incomplete.
+    WARNING:  As of the 5.6.1 release, the implementation of Unicode
+    support in Perl is incomplete, and continues to be highly experimental.
 
-The following areas need further work.
+The following areas need further work.  They are being rapidly addressed
+in the 5.7.x development branch.
 
 =over 4
 
