@@ -3240,6 +3240,9 @@ typedef struct am_table_short AMTS;
 #   if !defined(Strtol) && defined(HAS_STRTOLL)
 #       define Strtol	strtoll
 #   endif
+#    if !defined(Strtol) && defined(HAS_STRTOQ)
+#       define Strtol	strtoq
+#    endif
 /* is there atoq() anywhere? */
 #endif
 #if !defined(Strtol) && defined(HAS_STRTOL)

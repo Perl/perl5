@@ -2450,9 +2450,28 @@ Perl_looks_like_number(pTHX_ SV *sv)
 	    s++;
         } while (isDIGIT(*s));
 
-	if (s - nbegin > TYPE_DIGITS(UV))	/* Cannot cache ato[ul]() */
+	/* Aaargh. long long really is irritating.
+	   In the gospel according to ANSI 1989, it is an axiom that "long"
+	   is the longest integer type, and that if you don't know how long
+	   something is you can cast it to long, and nothing will be lost
+	   (except possibly speed of execution if long is slower than the
+	   type is was).
+	   Now, one can't be sure if the old rules apply, or long long
+	   (or some other newfangled thing) is actually longer than the
+	   (formerly) longest thing.
+	*/
+	/* This lot will work for 64 bit  *as long as* either
+	   either long is 64 bit
+	   or     we can find both strtol/strtoq and strtoul/strtouq
+	   If not, we really should refuse to let the user use 64 bit IVs
+	   By "64 bit" I really mean IVs that don't get preserved by NVs
+	   It also should work for 128 bit IVs. Can any lend me a machine to
+	   test this?
+	*/
+	if (s - nbegin > TYPE_DIGITS(UV)) /* Cannot cache ato[ul]() */
 	    numtype |= IS_NUMBER_TO_INT_BY_ATOF | IS_NUMBER_LONGER_THAN_IV_MAX;
-	else if (s - nbegin < BIT_DIGITS(sizeof (IV)*8-1))
+	else if (s - nbegin < BIT_DIGITS(((sizeof (IV)>sizeof (long))
+					  ? sizeof(long) : sizeof (IV))*8-1))
 	    numtype |= IS_NUMBER_TO_INT_BY_ATOL;
 	else
 	    /* Can't be sure either way. (For 64 bit UV, 63 bit IV is 1 decimal

@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Dec 13 17:45:13 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Fri Dec 15 04:41:40 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -562,6 +562,7 @@ d_strtod=''
 d_strtol=''
 d_strtold=''
 d_strtoll=''
+d_strtoq=''
 d_strtoul=''
 d_strtoull=''
 d_strtouq=''
@@ -11927,9 +11928,82 @@ EOM
 	;;
 esac
 
+: see if strtoq exists
+set strtoq d_strtoq
+eval $inlibc
+
 : see if strtoul exists
 set strtoul d_strtoul
 eval $inlibc
+
+case "$d_strtoul" in
+"$define")
+	$cat <<EOM
+Checking whether your strtoul() works okay...
+EOM
+	$cat >try.c <<'EOCP'
+#include <errno.h>
+#include <stdio.h>
+extern unsigned long int strtoul(char *s, char **, int); 
+static int bad = 0;
+void check(char *s, unsigned long eul, int een) {
+	unsigned long gul;
+	errno = 0;
+	gul = strtoul(s, 0, 10);
+	if (!((gul == eul) && (errno == een)))
+		bad++;
+}
+int main() {
+	check(" 1", 1L, 0);
+	check(" 0", 0L, 0);
+EOCP
+	case "$longsize" in
+	8)
+	    $cat >>try.c <<'EOCP'
+	check("18446744073709551615", 18446744073709551615ULL, 0);
+	check("18446744073709551616", 18446744073709551615ULL, ERANGE);
+	check("-1", 18446744073709551615ULL, 0);
+	check("-18446744073709551614", 2, 0);
+	check("-18446744073709551615", 1, 0);
+       	check("-18446744073709551616", 18446744073709551615ULL, ERANGE);
+	check("-18446744073709551617", 18446744073709551615ULL, ERANGE);
+EOCP
+		;;
+	4)
+		    $cat >>try.c <<'EOCP'
+	check("4294967295", 4294967295UL, 0);
+	check("4294967296", 4294967295UL, ERANGE);
+	check("-1", 4294967295UL, 0);
+	check("-4294967294", 2, 0);
+	check("-4294967295", 1, 0);
+       	check("-4294967296", 4294967295UL, ERANGE);
+	check("-4294967297", 4294967295UL, ERANGE);
+EOCP
+		;;
+	*)
+: Should we write these tests to be more portable by sprintf-ing
+: ~0 and then manipulating that char string as input for strtol?
+		;;
+	esac
+	$cat >>try.c <<'EOCP'
+	if (!bad)
+		printf("ok\n");
+	return 0;
+}
+EOCP
+	set try
+	if eval $compile; then
+		case "`./try`" in
+		ok) echo "Your strtoul() seems to be working okay." ;;
+		*) cat <<EOM >&4
+Your strtoul() doesn't seem to be working okay.
+EOM
+		   d_strtoul="$undef"
+		   ;;
+		esac
+	fi
+	;;
+esac
 
 : see if strtoull exists
 set strtoull d_strtoull
@@ -11956,10 +12030,15 @@ int check(char *s, long long eull, int een) {
 		bad++;
 }
 int main() {
-	check(" 1",                                       1LL, 0);
-	check(" 0",                                       0LL, 0);
-	check("18446744073709551615", 18446744073709551615ULL, 0);
-	check("18446744073709551616", 18446744073709551615ULL, ERANGE);
+	check(" 1",                                        1LL, 0);
+	check(" 0",                                        0LL, 0);
+	check("18446744073709551615",  18446744073709551615ULL, 0);
+	check("18446744073709551616",  18446744073709551615ULL, ERANGE);
+	check("-1",                    18446744073709551615ULL, 0);
+	check("-18446744073709551614",                     2LL, 0);
+	check("-18446744073709551615",                     1LL, 0);
+       	check("-18446744073709551616", 18446744073709551615ULL, ERANGE);
+	check("-18446744073709551617", 18446744073709551615ULL, ERANGE);
 	if (!bad)
 		printf("ok\n");
 }
@@ -11981,6 +12060,52 @@ esac
 : see if strtouq exists
 set strtouq d_strtouq
 eval $inlibc
+
+case "$d_strtouq" in
+"$define")
+	$cat <<EOM
+Checking whether your strtouq() works okay...
+EOM
+	$cat >try.c <<'EOCP'
+#include <errno.h>
+#include <stdio.h>
+extern unsigned long long int strtouq(char *s, char **, int); 
+static int bad = 0;
+void check(char *s, unsigned long long eull, int een) {
+	unsigned long long gull;
+	errno = 0;
+	gull = strtouq(s, 0, 10);
+	if (!((gull == eull) && (errno == een)))
+		bad++;
+}
+int main() {
+	check(" 1",                                        1LL, 0);
+	check(" 0",                                        0LL, 0);
+	check("18446744073709551615",  18446744073709551615ULL, 0);
+	check("18446744073709551616",  18446744073709551615ULL, ERANGE);
+	check("-1",                    18446744073709551615ULL, 0);
+	check("-18446744073709551614",                     2LL, 0);
+	check("-18446744073709551615",                     1LL, 0);
+       	check("-18446744073709551616", 18446744073709551615ULL, ERANGE);
+	check("-18446744073709551617", 18446744073709551615ULL, ERANGE);
+	if (!bad)
+		printf("ok\n");
+	return 0;
+}
+EOCP
+	set try
+	if eval $compile; then
+		case "`./try`" in
+		ok) echo "Your strtouq() seems to be working okay." ;;
+		*) cat <<EOM >&4
+Your strtouq() doesn't seem to be working okay.
+EOM
+		   d_strtouq="$undef"
+		   ;;
+		esac
+	fi
+	;;
+esac
 
 : see if strxfrm exists
 set strxfrm d_strxfrm
@@ -15883,6 +16008,7 @@ d_strtod='$d_strtod'
 d_strtol='$d_strtol'
 d_strtold='$d_strtold'
 d_strtoll='$d_strtoll'
+d_strtoq='$d_strtoq'
 d_strtoul='$d_strtoul'
 d_strtoull='$d_strtoull'
 d_strtouq='$d_strtouq'

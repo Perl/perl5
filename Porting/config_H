@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : /m/fs/work/work/permanent/perl/pp4/perl
- * Configuration time: Tue Nov 21 20:44:07 EET 2000
+ * Configuration time: Fri Dec 15 04:43:47 EET 2000
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -585,12 +585,6 @@
  */
 #define HAS_STRTOL	/**/
 
-/* HAS_STRTOUL:
- *	This symbol, if defined, indicates that the strtoul routine is
- *	available to provide conversion of strings to unsigned long.
- */
-#define HAS_STRTOUL	/**/
-
 /* HAS_STRXFRM:
  *	This symbol, if defined, indicates that the strxfrm() routine is
  *	available to transform strings.
@@ -960,12 +954,6 @@
  *	D:/bin/sh.exe.
  */
 #define SH_PATH "/bin/sh"  /**/
-
-/* STDCHAR:
- *	This symbol is defined to be the type of char used in stdio.h.
- *	It has the values "unsigned char" or "char".
- */
-#define STDCHAR unsigned char	/**/
 
 /* CROSSCOMPILE:
  *	This symbol, if defined, signifies that we our
@@ -2111,6 +2099,12 @@
  */
 /*#define HAS_STRTOLL		/ **/
 
+/* HAS_STRTOQ:
+ *	This symbol, if defined, indicates that the strtoq routine is
+ *	available to convert strings to long longs (quads).
+ */
+/*#define HAS_STRTOQ		/ **/
+
 /* HAS_STRTOULL:
  *	This symbol, if defined, indicates that the strtoull routine is
  *	available to convert strings to unsigned long longs.
@@ -3190,6 +3184,18 @@
  */
 #define HAS_SETPGRP		/**/
 #define USE_BSD_SETPGRP	/**/
+
+/* HAS_STRTOUL:
+ *	This symbol, if defined, indicates that the strtoul routine is
+ *	available to provide conversion of strings to unsigned long.
+ */
+/*#define HAS_STRTOUL	/ **/
+
+/* STDCHAR:
+ *	This symbol is defined to be the type of char used in stdio.h.
+ *	It has the values "unsigned char" or "char".
+ */
+#define STDCHAR unsigned char	/**/
 
 /* HAS__FWALK:
  *	This symbol, if defined, indicates that the _fwalk system call is

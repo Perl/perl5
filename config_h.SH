@@ -605,12 +605,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_strtol HAS_STRTOL	/**/
 
-/* HAS_STRTOUL:
- *	This symbol, if defined, indicates that the strtoul routine is
- *	available to provide conversion of strings to unsigned long.
- */
-#$d_strtoul HAS_STRTOUL	/**/
-
 /* HAS_STRXFRM:
  *	This symbol, if defined, indicates that the strxfrm() routine is
  *	available to transform strings.
@@ -2125,6 +2119,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_strtoll HAS_STRTOLL		/**/
 
+/* HAS_STRTOQ:
+ *	This symbol, if defined, indicates that the strtoq routine is
+ *	available to convert strings to long longs (quads).
+ */
+#$d_strtoq HAS_STRTOQ		/**/
+
 /* HAS_STRTOULL:
  *	This symbol, if defined, indicates that the strtoull routine is
  *	available to convert strings to unsigned long longs.
@@ -3204,6 +3204,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_setpgrp HAS_SETPGRP		/**/
 #$d_bsdsetpgrp USE_BSD_SETPGRP	/**/
+
+/* HAS_STRTOUL:
+ *	This symbol, if defined, indicates that the strtoul routine is
+ *	available to provide conversion of strings to unsigned long.
+ */
+#$d_strtoul HAS_STRTOUL	/**/
 
 /* STDCHAR:
  *	This symbol is defined to be the type of char used in stdio.h.
