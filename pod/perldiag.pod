@@ -999,7 +999,7 @@ be a defined value.  This helps to delurk some insidious errors.
 (F) Only hard references are allowed by "strict refs".  Symbolic
 references are disallowed.  See L<perlref>.
 
-=item Can't use %%! because Errno.pm is not available
+=item Can't use %! because Errno.pm is not available
 
 (F) The first time the %! hash is used, perl automatically loads the
 Errno.pm module. The Errno module is expected to tie the %! hash to
