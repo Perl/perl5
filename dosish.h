@@ -128,6 +128,8 @@
  * get to use the same RTL functions as the core.
  */
 #  ifndef HASATTRIBUTE
-#    include <win32iop.h>
+#    ifndef PERL_OBJECT
+#      include <win32iop.h>
+#    endif
 #  endif
 #endif	/* WIN32 */

@@ -9,6 +9,9 @@
  */
 
 #if defined(OS2) || defined(WIN32)
+#if defined(WIN32)
+#include <io.h>
+#endif
 #include "../patchlevel.h"
 #endif
 #include "util.h"

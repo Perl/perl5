@@ -33,6 +33,7 @@ $BORLAND = 1 if $Config{'cc'} =~ /^bcc/i;
 $GCC     = 1 if $Config{'cc'} =~ /^gcc/i;
 $DMAKE = 1 if $Config{'make'} =~ /^dmake/i;
 $NMAKE = 1 if $Config{'make'} =~ /^nmake/i;
+$OBJ   = 1 if $Config{'ccflags'} =~ /PERL_OBJECT/i;
 
 sub dlsyms {
     my($self,%attribs) = @_;
@@ -163,7 +164,8 @@ sub init_others
    $self->{'LDLOADLIBS'}
       ||= ( $BORLAND
             ? 'import32.lib cw32mti.lib '
-            : 'msvcrt.lib oldnames.lib kernel32.lib comdlg32.lib winspool.lib gdi32.lib '
+            : ( $OBJ ? '' : 'msvcrt.lib ' )
+              .'oldnames.lib kernel32.lib comdlg32.lib winspool.lib gdi32.lib '
 	      .'advapi32.lib user32.lib shell32.lib netapi32.lib ole32.lib '
 	      .'oleaut32.lib uuid.lib wsock32.lib mpr.lib winmm.lib version.lib '
   	) . ' odbc32.lib odbccp32.lib';
@@ -447,7 +449,16 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)\.exists 
 
 sub perl_archive
 {
- return '$(PERL_INC)\perl$(LIB_EXT)';
+    my ($self) = @_;
+    if($OBJ) {
+        if ($self->{CAPI} eq 'TRUE') {
+            return '$(PERL_INC)\PerlCAPI$(LIB_EXT)';
+        }
+        else {
+            return '$(PERL_INC)\perlcore$(LIB_EXT)';
+        }
+    }
+    return '$(PERL_INC)\perl$(LIB_EXT)';
 }
 
 sub export_list

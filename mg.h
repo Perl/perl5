@@ -8,11 +8,11 @@
  */
 
 struct mgvtbl {
-    int		(*svt_get)	_((SV *sv, MAGIC* mg));
-    int		(*svt_set)	_((SV *sv, MAGIC* mg));
-    U32		(*svt_len)	_((SV *sv, MAGIC* mg));
-    int		(*svt_clear)	_((SV *sv, MAGIC* mg));
-    int		(*svt_free)	_((SV *sv, MAGIC* mg));
+    int		(CPERLscope(*svt_get))	_((SV *sv, MAGIC* mg));
+    int		(CPERLscope(*svt_set))	_((SV *sv, MAGIC* mg));
+    U32		(CPERLscope(*svt_len))	_((SV *sv, MAGIC* mg));
+    int		(CPERLscope(*svt_clear))	_((SV *sv, MAGIC* mg));
+    int		(CPERLscope(*svt_free))	_((SV *sv, MAGIC* mg));
 };
 
 struct magic {

@@ -26,22 +26,53 @@ calls.
 
 #include "EXTERN.h"
 #include "perl.h"
+
+#ifdef PERL_OBJECT
+#define NO_XSLOCKS
+#endif  /* PERL_OBJECT */
+
 #include "XSUB.h"
 
 #include "dlutils.c"	/* SaveError() etc	*/
 
 static void
-dl_private_init(void)
+dl_private_init(CPERLarg)
 {
-    (void)dl_generic_private_init();
+    (void)dl_generic_private_init(THIS);
 }
 
+/* 
+    This function assumes the list staticlinkmodules
+    will be formed from package names with '::' replaced
+    with '/'. Thus Win32::OLE is in the list as Win32/OLE
+*/
 static int
 dl_static_linked(char *filename)
 {
     char **p;
+    char* ptr;
+    static char subStr[] = "/auto/";
+    char szBuffer[MAX_PATH];
+
+    /* change all the '\\' to '/' */
+    strcpy(szBuffer, filename);
+    for(ptr = szBuffer; ptr = strchr(ptr, '\\'); ++ptr)
+	*ptr = '/';
+
+    /* delete the file name */
+    ptr = strrchr(szBuffer, '/');
+    if(ptr != NULL)
+	*ptr = '\0';
+
+    /* remove leading lib path */
+    ptr = strstr(szBuffer, subStr);
+    if(ptr != NULL)
+	ptr += sizeof(subStr)-1;
+    else
+	ptr = szBuffer;
+
     for (p = staticlinkmodules; *p;p++) {
-	if (strstr(filename, *p)) return 1;
+	if (strstr(ptr, *p)) return 1;
     };
     return 0;
 }
@@ -49,7 +80,7 @@ dl_static_linked(char *filename)
 MODULE = DynaLoader	PACKAGE = DynaLoader
 
 BOOT:
-    (void)dl_private_init();
+    (void)dl_private_init(THIS);
 
 void *
 dl_load_file(filename,flags=0)
@@ -57,15 +88,15 @@ dl_load_file(filename,flags=0)
     int			flags
     PREINIT:
     CODE:
-    DLDEBUG(1,fprintf(stderr,"dl_load_file(%s):\n", filename));
+    DLDEBUG(1,PerlIO_printf(PerlIO_stderr(),"dl_load_file(%s):\n", filename));
     if (dl_static_linked(filename) == 0)
 	RETVAL = (void*) LoadLibraryEx(filename, NULL, LOAD_WITH_ALTERED_SEARCH_PATH ) ;
     else
 	RETVAL = (void*) GetModuleHandle(NULL);
-    DLDEBUG(2,fprintf(stderr," libref=%x\n", RETVAL));
+    DLDEBUG(2,PerlIO_printf(PerlIO_stderr()," libref=%x\n", RETVAL));
     ST(0) = sv_newmortal() ;
     if (RETVAL == NULL)
-	SaveError("%d",GetLastError()) ;
+	SaveError(THIS_ "%d",GetLastError()) ;
     else
 	sv_setiv( ST(0), (IV)RETVAL);
 
@@ -75,13 +106,13 @@ dl_find_symbol(libhandle, symbolname)
     void *	libhandle
     char *	symbolname
     CODE:
-    DLDEBUG(2,fprintf(stderr,"dl_find_symbol(handle=%x, symbol=%s)\n",
+    DLDEBUG(2,PerlIO_printf(PerlIO_stderr(),"dl_find_symbol(handle=%x, symbol=%s)\n",
 		      libhandle, symbolname));
     RETVAL = (void*) GetProcAddress((HINSTANCE) libhandle, symbolname);
-    DLDEBUG(2,fprintf(stderr,"  symbolref = %x\n", RETVAL));
+    DLDEBUG(2,PerlIO_printf(PerlIO_stderr(),"  symbolref = %x\n", RETVAL));
     ST(0) = sv_newmortal() ;
     if (RETVAL == NULL)
-	SaveError("%d",GetLastError()) ;
+	SaveError(THIS_ "%d",GetLastError()) ;
     else
 	sv_setiv( ST(0), (IV)RETVAL);
 
@@ -100,9 +131,9 @@ dl_install_xsub(perl_name, symref, filename="$Package")
     void *		symref 
     char *		filename
     CODE:
-    DLDEBUG(2,fprintf(stderr,"dl_install_xsub(name=%s, symref=%x)\n",
+    DLDEBUG(2,PerlIO_printf(PerlIO_stderr(),"dl_install_xsub(name=%s, symref=%x)\n",
 		      perl_name, symref));
-    ST(0)=sv_2mortal(newRV((SV*)newXS(perl_name, (void(*)(CV*))symref, filename)));
+    ST(0)=sv_2mortal(newRV((SV*)newXS(perl_name, (void(*)(CV* _CPERLarg))symref, filename)));
 
 
 char *

@@ -119,13 +119,16 @@ if ($d_dosuid && $>) { die "You must run as root to install suidperl\n"; }
 
 if ($^O eq 'MSWin32') {
 
--f 'perl.' . $dlext || die "No perl DLL built\n";
+$perldll = 'perl.' . $dlext;
+$perldll = 'perlcore.' . $dlext if $Config{'ccflags'} =~ /PERL_OBJECT/i;
+
+-f $perldll || die "No perl DLL built\n";
 
 # Install the DLL
 
-safe_unlink("$installbin/$perl.$dlext");
-copy("perl.$dlext", "$installbin/$perl.$dlext");
-chmod(0755, "$installbin/$perl.$dlext");
+safe_unlink("$installbin/$perldll");
+copy("$perldll", "$installbin/$perldll");
+chmod(0755, "$installbin/$perldll");
 }
 
 # This will be used to store the packlist

@@ -54,7 +54,11 @@ PERLVAR(Ghe_root,	HE *)		/* free he list--shared by interpreters */
 PERLVAR(Gnice_chunk,	char *)		/* a nice chunk of memory to reuse */
 PERLVAR(Gnice_chunk_size,	U32)		/* how nice the chunk of memory is */
 
+#ifdef PERL_OBJECT
+PERLVARI(Grunops,	runops_proc_t,	FUNC_NAME_TO_PTR(RUNOPS_DEFAULT))	
+#else
 PERLVARI(Grunops,	runops_proc_t *,	RUNOPS_DEFAULT)	
+#endif
 
 PERLVAR(Gtokenbuf[256],	char)		
 PERLVAR(Gna,	STRLEN)		/* for use in SvPV when length is Not Applicable */

@@ -2,10 +2,10 @@
 
 patching.pod - Appropriate format for patches to the perl source tree
 
-=head2re to get this document
+=head2 Where to get this document
 
 The latest version of this document is available from
-     http://www.tdrenterprises.com/perl/perlpatch.html
+     http://perrin.dimensional.com/perl/perlpatch.html
 
 =head2 How to contribute to this document
 
@@ -130,8 +130,33 @@ block of code that you are patching.
 
 =item Testsuite
 
-Also please include an addition to the regression tests to properly
-exercise your patch.
+When submitting a patch you should make every effort to also include
+an addition to perl's regression tests to properly exercise your
+patch.  Your testsuite additions should generally follow these
+guidelines (courtesy of Gurusamy Sarathy (gsar@engin.umich.edu))-
+
+	Know what you're testing.  Read the docs, and the source.
+	Tend to fail, not succeed.
+	Interpret results strictly.
+	Use unrelated features (this will flush out bizarre interactions).
+	Use non-standard idioms (otherwise you are not testing TIMTOWTDI).
+	Avoid using hardcoded test umbers whenever possible (the EXPECTED/GOT style
+	  found in t/op/tie.t is much more maintainable, and gives better failure
+	  reports).
+	Give meaningful error messages when a test fails.
+	Avoid using qx// and system() unless you are testing for them.  If you
+	  do use them, make sure that you cover _all_ perl platforms.
+	Unlink any temporary files you create.
+	Promote unforeseen warnings to errors with $SIG{__WARN__}.
+	Be sure to use the libraries and modules shipped with version being tested,
+	  not those that were already installed.
+	Add comments to the code explaining what you are testing for.
+	Make updating the '1..42' string unnecessary.  Or make sure that you update it.
+	Test _all_ behaviors of a given operator, library, or function-
+	  All optional arguments
+	  Return values in various contexts (boolean, scalar, list, lvalue)
+	  Use both global and lexical variables
+	  Don't forget the exceptional, pathological cases.
 
 =back
 
@@ -261,7 +286,7 @@ mind.  8-)
 
 =head1 Last Modified
 
-Last modified 1 May 1998 by Daniel Grisinger <dgris@tdrenterprises.com>
+Last modified 21 May 1998 by Daniel Grisinger <dgris@perrin.dimensional.com>
 
 =head1 Author and Copyright Information
 

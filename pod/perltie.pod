@@ -603,9 +603,9 @@ or have auxiliary state to clean up.  Here's a very simple function:
 
 =back
 
-Note that functions such as keys() and values() may return huge array
-values when used on large objects, like DBM files.  You may prefer to
-use the each() function to iterate over such.  Example:
+Note that functions such as keys() and values() may return huge lists
+when used on large objects, like DBM files.  You may prefer to use the
+each() function to iterate over such.  Example:
 
     # print out history file offsets
     use NDBM_File;

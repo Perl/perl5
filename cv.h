@@ -21,7 +21,7 @@ struct xpvcv {
     HV *	xcv_stash;
     OP *	xcv_start;
     OP *	xcv_root;
-    void      (*xcv_xsub) _((CV*));
+    void      (*xcv_xsub) _((CV* _CPERLproto));
     ANY		xcv_xsubany;
     GV *	xcv_gv;
     GV *	xcv_filegv;
@@ -61,8 +61,7 @@ struct xpvcv {
 #define CVf_NODEBUG	0x0020	/* no DB::sub indirection for this CV
 				   (esp. useful for special XSUBs) */
 #define CVf_METHOD	0x0040	/* CV is explicitly marked as a method */
-#define CVf_LOCKED	0x0080	/* CV locks itself, package or first arg on entry */
-#define CVf_PACKAGE	0x0100	/* CV locks package on entry */
+#define CVf_LOCKED	0x0080	/* CV locks itself or first arg on entry */
 
 #define CvCLONE(cv)		(CvFLAGS(cv) & CVf_CLONE)
 #define CvCLONE_on(cv)		(CvFLAGS(cv) |= CVf_CLONE)
@@ -95,8 +94,3 @@ struct xpvcv {
 #define CvLOCKED(cv)		(CvFLAGS(cv) & CVf_LOCKED)
 #define CvLOCKED_on(cv)		(CvFLAGS(cv) |= CVf_LOCKED)
 #define CvLOCKED_off(cv)	(CvFLAGS(cv) &= ~CVf_LOCKED)
-
-#define CvPACKAGE(cv)		(CvFLAGS(cv) & CVf_PACKAGE)
-#define CvPACKAGE_on(cv)	(CvFLAGS(cv) |= CVf_PACKAGE)
-#define CvPACKAGE_off(cv)	(CvFLAGS(cv) &= ~CVf_PACKAGE)
-

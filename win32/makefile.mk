@@ -13,7 +13,16 @@
 # Set these to wherever you want "nmake install" to put your
 # newly built perl.
 INST_DRV	*= c:
-INST_TOP	*= $(INST_DRV)\perl5004.5x
+INST_TOP	*= $(INST_DRV)\perl
+
+# Comment this out if you DON'T want your perl installation to be versioned.
+# This means that the new installation will overwrite any files from the
+# old installation at the same INST_TOP location.  Leaving it enabled is
+# the safest route, as perl adds the extra version directory to all the
+# locations it installs files to.  If you disable it, an alternative
+# versioned installation can be obtained by setting INST_TOP above to a
+# path that includes an arbitrary version string.
+INST_VER	*= \5.00466
 
 #
 # uncomment to enable threads-capabilities
@@ -25,6 +34,11 @@ INST_TOP	*= $(INST_DRV)\perl5004.5x
 #CCTYPE		*= MSVC
 CCTYPE		*= BORLAND
 #CCTYPE		*= GCC
+
+#
+# uncomment next line if you want to use the perl object
+# Currently, this cannot be enabled if you ask for threads above
+#OBJECT		*= -DPERL_OBJECT
 
 #
 # uncomment next line if you want debug version of perl (big,slow)
@@ -46,13 +60,12 @@ CCTYPE		*= BORLAND
 # set this if you wish to use perl's malloc
 # WARNING: Turning this on/off WILL break binary compatibility with extensions
 # you may have compiled with/without it.  Be prepared to recompile all extensions
-# if you change the default.
-PERL_MALLOC	*= define
+# if you change the default.  Currently, this cannot be enabled if you ask for
+# PERL_OBJECT above.
+#PERL_MALLOC	*= define
 
 #
 # set the install locations of the compiler include/libraries
-# (you'll need to quote the value if it contains spaces: i.e.
-#     CCHOME    *= "f:\Program Files\vc"
 #
 #CCHOME		*= f:\msdev\vc
 CCHOME		*= C:\bc5
@@ -115,7 +128,7 @@ AUTODIR		= ..\lib\auto
 
 CC		= bcc32
 LINK32		= tlink32
-LIB32		= tlib
+LIB32		= tlib /P128
 IMPLIB		= implib -c
 
 #
@@ -145,12 +158,13 @@ CFLAGS		= -w -d -tWM -tWD $(INCLUDES) $(DEFINES) $(LOCDEFS) \
 LINK_FLAGS	= $(LINK_DBG) -L$(CCLIBDIR)
 OBJOUT_FLAG	= -o
 EXEOUT_FLAG	= -e
+LIBOUT_FLAG	= 
 
 .ELIF "$(CCTYPE)" == "GCC"
 
 CC		= gcc -pipe
 LINK32		= gcc -pipe
-LIB32		= ar
+LIB32		= ar rc
 IMPLIB		= dlltool
 
 o = .o
@@ -181,6 +195,7 @@ CFLAGS		= $(INCLUDES) $(DEFINES) $(LOCDEFS) $(OPTIMIZE)
 LINK_FLAGS	= $(LINK_DBG) -L$(CCLIBDIR)
 OBJOUT_FLAG	= -o
 EXEOUT_FLAG	= -o
+LIBOUT_FLAG	= 
 
 .ELSE
 
@@ -192,10 +207,7 @@ LIB32		= $(LINK32) -lib
 # Options
 #
 
-.IF "$(RUNTIME)" == ""
 RUNTIME		= -MD
-.ENDIF
-
 INCLUDES	= -I.\include -I. -I..
 #PCHFLAGS	= -Fpc:\temp\vcmoduls.pch -YX 
 DEFINES		= -DWIN32 -D_CONSOLE $(BUILDOPT) $(CRYPT_FLAG)
@@ -213,7 +225,7 @@ LIBC		= libcmt.lib
 .IF "$(CCTYPE)" == "MSVC20"
 OPTIMIZE	= -Od $(RUNTIME) -Z7 -D_DEBUG -DDEBUGGING
 .ELSE
-OPTIMIZE	= -Od $(RUNTIME)d -Z7 -D_DEBUG -DDEBUGGING
+OPTIMIZE	= -Od $(RUNTIME)d -Zi -D_DEBUG -DDEBUGGING
 .ENDIF
 LINK_DBG	= -debug -pdb:none
 .ELSE
@@ -236,6 +248,7 @@ CFLAGS		= -nologo -Gf -W3 $(INCLUDES) $(DEFINES) $(LOCDEFS) \
 LINK_FLAGS	= -nologo $(LINK_DBG) -machine:$(PROCESSOR_ARCHITECTURE)
 OBJOUT_FLAG	= -Fo
 EXEOUT_FLAG	= -Fe
+LIBOUT_FLAG	= /out:
 
 .ENDIF
 
@@ -278,8 +291,9 @@ $(o).dll:
 .ENDIF
 
 #
-INST_BIN	= $(INST_TOP)\bin
-INST_LIB	= $(INST_TOP)\lib
+INST_BIN	= $(INST_TOP)$(INST_VER)\bin\$(ARCHNAME)
+INST_SCRIPT	= $(INST_TOP)$(INST_VER)\bin
+INST_LIB	= $(INST_TOP)$(INST_VER)\lib
 INST_POD	= $(INST_LIB)\pod
 INST_HTML	= $(INST_POD)\html
 LIBDIR		= ..\lib
@@ -292,9 +306,11 @@ EXTUTILSDIR	= $(LIBDIR)\extutils
 .IF "$(OBJECT)" == "-DPERL_OBJECT"
 PERLIMPLIB	= ..\perlcore.lib
 PERLDLL		= ..\perlcore.dll
+CAPILIB		= $(COREDIR)\PerlCAPI.lib
 .ELSE
 PERLIMPLIB	= ..\perl.lib
 PERLDLL		= ..\perl.dll
+CAPILIB		=
 .ENDIF
 
 MINIPERL	= ..\miniperl.exe
@@ -467,6 +483,7 @@ PERLEXE_OBJ	= perlmain$(o)
 PERLDLL_OBJ	+= $(WIN32_OBJ) $(DLL_OBJ)
 .ELSE
 PERLEXE_OBJ	+= $(WIN32_OBJ) $(DLL_OBJ)
+PERL95_OBJ	+= DynaLoadmt$(o)
 .ENDIF
 
 DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attrs Thread B
@@ -493,7 +510,7 @@ ATTRS_DLL	= $(AUTODIR)\attrs\attrs.dll
 THREAD_DLL	= $(AUTODIR)\Thread\Thread.dll
 B_DLL		= $(AUTODIR)\B\B.dll
 
-EXTENSION_C	= 		\
+EXTENSION_C	=		\
 		$(SOCKET).c	\
 		$(FCNTL).c	\
 		$(OPCODE).c	\
@@ -504,16 +521,20 @@ EXTENSION_C	= 		\
 		$(THREAD).c	\
 		$(B).c
 
-EXTENSION_DLL	= 		\
+EXTENSION_DLL	=		\
 		$(SOCKET_DLL)	\
 		$(FCNTL_DLL)	\
 		$(OPCODE_DLL)	\
 		$(SDBM_FILE_DLL)\
 		$(IO_DLL)	\
 		$(POSIX_DLL)	\
-		$(ATTRS_DLL)	\
+		$(ATTRS_DLL)
+
+.IF "$(OBJECT)" == ""
+EXTENSION_DLL	+=		\
 		$(THREAD_DLL)	\
 		$(B_DLL)
+.ENDIF
 
 POD2HTML	= $(PODDIR)\pod2html
 POD2MAN		= $(PODDIR)\pod2man
@@ -523,14 +544,16 @@ POD2TEXT	= $(PODDIR)\pod2text
 CFG_VARS	=					\
 		"INST_DRV=$(INST_DRV)"			\
 		"INST_TOP=$(INST_TOP)"			\
+		"INST_VER=$(INST_VER)"			\
 		"archname=$(ARCHNAME)"			\
 		"cc=$(CC)"				\
-		"ccflags=$(OPTIMIZE) $(DEFINES)"	\
+		"ccflags=$(OPTIMIZE) $(DEFINES) $(OBJECT)"	\
 		"cf_email=$(EMAIL)"			\
 		"d_crypt=$(D_CRYPT)"			\
 		"d_mymalloc=$(PERL_MALLOC)"		\
 		"libs=$(LIBFILES:f)"			\
 		"incpath=$(CCINCDIR)"			\
+		"libperl=$(PERLIMPLIB)"			\
 		"libpth=$(strip $(CCLIBDIR) $(LIBFILES:d))" \
 		"libc=$(LIBC)"				\
 		"make=dmake"				\
@@ -544,7 +567,7 @@ CFG_VARS	=					\
 # Top targets
 #
 
-all : $(GLOBEXE) $(MINIMOD) $(CONFIGPM) $(PERLEXE) $(PERL95EXE) $(X2P) \
+all : $(GLOBEXE) $(MINIMOD) $(CONFIGPM) $(PERLEXE) $(PERL95EXE) $(CAPILIB) $(X2P) \
 	$(EXTENSION_DLL)
 
 $(DYNALOADER)$(o) : $(DYNALOADER).c $(CORE_H) $(EXTDIR)\DynaLoader\dlutils.c
@@ -584,7 +607,7 @@ regen_config_h:
 	cd .. && perl configpm
 	-del /f $(CFGH_TMPL)
 	-mkdir ..\lib\CORE
-	-perl -I..\lib config_h.PL
+	-perl -I..\lib config_h.PL "INST_VER=$(INST_VER)"
 	rename config.h $(CFGH_TMPL)
 
 $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
@@ -593,7 +616,8 @@ $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
 	$(XCOPY) ..\*.h $(COREDIR)\*.*
 	$(XCOPY) *.h $(COREDIR)\*.*
 	$(RCOPY) include $(COREDIR)\*.*
-	$(MINIPERL) -I..\lib config_h.PL || $(MAKE) $(MAKEMACROS) $(CONFIGPM)
+	$(MINIPERL) -I..\lib config_h.PL "INST_VER=$(INST_VER)" \
+	    || $(MAKE) $(MAKEMACROS) $(CONFIGPM)
 
 $(MINIPERL) : $(MINIDIR) $(MINI_OBJ)
 .IF "$(CCTYPE)" == "BORLAND"
@@ -691,13 +715,13 @@ perlmain.c : runperl.c
 	copy runperl.c perlmain.c
 
 perlmain$(o) : perlmain.c
-	$(CC) $(CFLAGS_O) -UPERLDLL $(EXEOUT_FLAG)$@ -c perlmain.c
+	$(CC) $(CFLAGS_O) -UPERLDLL $(OBJOUT_FLAG)$@ -c perlmain.c
 
 $(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ)
 .IF "$(CCTYPE)" == "BORLAND"
 	$(LINK32) -Tpe -ap $(LINK_FLAGS) \
-	    @$(mktmp c0x32$(o) $(PERLEXE_OBJ)\n \
-	    $@,\n \
+	    @$(mktmp c0x32$(o) $(PERLEXE_OBJ:s,\,\\)\n \
+	    $(@:s,\,\\),\n \
 	    $(PERLIMPLIB) $(LIBFILES)\n)
 .ELIF "$(CCTYPE)" == "GCC"
 	$(LINK32) -o $@ $(LINK_FLAGS)  \
@@ -726,6 +750,10 @@ win32mt$(o) : win32.c
 	$(CC) $(CFLAGS_O) -MT -UPERLDLL -DWIN95FIX -c \
 	    $(OBJOUT_FLAG)win32mt$(o) win32.c
 
+DynaLoadmt$(o) : $(DYNALOADER).c
+	$(CC) $(CFLAGS_O) -MT -UPERLDLL -DWIN95FIX -c \
+	    $(OBJOUT_FLAG)DynaLoadmt$(o) $(DYNALOADER).c
+
 $(PERL95EXE): $(PERLDLL) $(CONFIGPM) $(PERL95_OBJ)
 	$(LINK32) -subsystem:console -nodefaultlib -out:$@ $(LINK_FLAGS) \
 	    $(LIBFILES) $(PERL95_OBJ) $(PERLIMPLIB) libcmt.lib
@@ -739,6 +767,30 @@ $(DYNALOADER).c: $(MINIPERL) $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM)
 	$(XCOPY) $(EXTDIR)\$(*B)\$(*B).pm $(LIBDIR)\$(NULL)
 	cd $(EXTDIR)\$(*B) && $(XSUBPP) dl_win32.xs > $(*B).c
 	$(XCOPY) $(EXTDIR)\$(*B)\dlutils.c .
+
+.IF "$(OBJECT)" == "-DPERL_OBJECT"
+
+PerlCAPI.cpp : $(MINIPERL)
+	$(MINIPERL) GenCAPI.pl $(COREDIR)
+
+PerlCAPI$(o) : PerlCAPI.cpp
+.IF "$(CCTYPE)" == "BORLAND"
+	$(CC) $(CFLAGS_O) -c $(OBJOUT_FLAG)PerlCAPI$(o) PerlCAPI.cpp
+.ELIF "$(CCTYPE)" == "GCC"
+	$(CC) $(CFLAGS_O) -c $(OBJOUT_FLAG)PerlCAPI$(o) PerlCAPI.cpp
+.ELSE
+	$(CC) $(CFLAGS_O) -MT -UPERLDLL -DWIN95FIX -c \
+	    $(OBJOUT_FLAG)PerlCAPI$(o) PerlCAPI.cpp
+.ENDIF
+
+$(CAPILIB) : PerlCAPI.cpp PerlCAPI$(o)
+.IF "$(CCTYPE)" == "BORLAND"
+	$(LIB32) $(LIBOUT_FLAG)$(CAPILIB) +PerlCAPI$(o)
+.ELSE
+	$(LIB32) $(LIBOUT_FLAG)$(CAPILIB) PerlCAPI$(o)
+.ENDIF
+
+.ENDIF
 
 $(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
 	copy dl_win32.xs $(EXTDIR)\DynaLoader\dl_win32.xs
@@ -844,8 +896,8 @@ installbare :
 
 installutils : utils
 	$(XCOPY) $(GLOBEXE) $(INST_BIN)\*.*
-	$(XCOPY) bin\*.bat $(INST_BIN)\*.*
-	$(XCOPY) ..\pod\*.bat $(INST_BIN)\*.*
+	$(XCOPY) bin\*.bat $(INST_SCRIPT)\*.*
+	$(XCOPY) ..\pod\*.bat $(INST_SCRIPT)\*.*
 
 installhtml : doc
 	$(RCOPY) html\*.* $(INST_HTML)\*.*

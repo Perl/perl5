@@ -134,7 +134,7 @@ gv_init(GV *gv, HV *stash, char *name, STRLEN len, int multi)
     }
 }
 
-static void
+STATIC void
 gv_init_sv(GV *gv, I32 sv_type)
 {
     switch (sv_type) {
@@ -722,7 +722,7 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
 		SPAGAIN;
 		stash = gv_stashpvn("Errno",5,FALSE);
 		if (!stash || !(gv_fetchmethod(stash, "TIEHASH")))
-		    croak("Can't use %%! because Errno.pm is not avaliable");
+		    croak("Can't use %%! because Errno.pm is not available");
 	    }
 	}
 	goto magicalize;
@@ -1193,15 +1193,19 @@ amagic_call(SV *left, SV *right, int method, int flags)
    break;
 	 case copy_amg:
 	   {
-	     SV* ref=SvRV(left);
-	     if (!SvROK(ref) && SvTYPE(ref) <= SVt_PVMG) {
+	     /*
+		  * SV* ref causes confusion with the interpreter variable of
+		  * the same name
+		  */
+	     SV* tmpRef=SvRV(left);
+	     if (!SvROK(tmpRef) && SvTYPE(tmpRef) <= SVt_PVMG) {
 		/*
 		 * Just to be extra cautious.  Maybe in some
 		 * additional cases sv_setsv is safe, too.
 		 */
-		SV* newref = newSVsv(ref);
+		SV* newref = newSVsv(tmpRef);
 		SvOBJECT_on(newref);
-		SvSTASH(newref) = (HV*)SvREFCNT_inc(SvSTASH(ref));
+		SvSTASH(newref) = (HV*)SvREFCNT_inc(SvSTASH(tmpRef));
 		return newref;
 	     }
 	   }
@@ -1371,7 +1375,7 @@ amagic_call(SV *left, SV *right, int method, int flags)
     PUTBACK;
 
     if (op = pp_entersub(ARGS))
-      runops();
+      CALLRUNOPS();
     LEAVE;
     SPAGAIN;
 

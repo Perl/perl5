@@ -1061,6 +1061,7 @@ EXT char *op_desc[] = {
 };
 #endif
 
+#ifndef PERL_OBJECT
 START_EXTERN_C
 
 OP *	ck_anoncode	_((OP* o));
@@ -1444,11 +1445,13 @@ OP *	pp_lock		_((ARGSproto));
 OP *	pp_threadsv	_((ARGSproto));
 
 END_EXTERN_C
+#endif  /* PERL_OBJECT */
 
 #ifndef DOINIT
-EXT OP * (*ppaddr[])(ARGSproto);
+EXT OP * (CPERLscope(*ppaddr)[])(ARGSproto);
 #else
-EXT OP * (*ppaddr[])(ARGSproto) = {
+#ifndef PERL_OBJECT
+EXT OP * (CPERLscope(*ppaddr)[])(ARGSproto) = {
 	pp_null,
 	pp_stub,
 	pp_scalar,
@@ -1796,12 +1799,14 @@ EXT OP * (*ppaddr[])(ARGSproto) = {
 	pp_lock,
 	pp_threadsv,
 };
+#endif  /* PERL_OBJECT */
 #endif
 
-#ifndef DOINIT
-EXT OP * (*check[]) _((OP *op));
+#ifndef DOINIT 
+EXT OP * (CPERLscope(*check)[]) _((OP *op));
 #else
-EXT OP * (*check[]) _((OP *op)) = {
+#ifndef PERL_OBJECT
+EXT OP * (CPERLscope(*check)[]) _((OP *op)) = {
 	ck_null,	/* null */
 	ck_null,	/* stub */
 	ck_fun,		/* scalar */
@@ -2149,6 +2154,7 @@ EXT OP * (*check[]) _((OP *op)) = {
 	ck_rfun,	/* lock */
 	ck_null,	/* threadsv */
 };
+#endif  /* PERL_OBJECT */
 #endif
 
 #ifndef DOINIT

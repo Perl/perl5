@@ -66,12 +66,17 @@ if [ "$sh_cnt" -ne "$csh_cnt" ]; then
     d_csh='undef'
 fi
 
-# UnixWare has a broken csh.  The undocumented -X argument to uname is probably
-# a reasonable way of detecting UnixWare.  Also in 2.1.1 the fields in
-# FILE* got renamed! Plus 1.1 can't cast large floats to 32-bit ints.
-#	Leave leading tabs so Configure doesn't propagate these variables
+# Unixware-specific problems.  The undocumented -X argument to uname 
+# is probably a reasonable way of detecting UnixWare.  
+# UnixWare has a broken csh.  (This might already be detected above).
+# In Unixware 2.1.1 the fields in FILE* got renamed!
+$ Unixware 1.1 can't cast large floats to 32-bit ints.
+#
+#    Leave leading tabs on the next two lines so Configure doesn't 
+#    propagate these variables to config.sh
 	uw_ver=`uname -v`
 	uw_isuw=`uname -X 2>&1 | grep Release`
+
 if [ "$uw_isuw" = "Release = 4.2" ]; then
    case $uw_ver in
    1.1)
@@ -93,6 +98,7 @@ if [ "$uw_isuw" = "Release = 4.2MP" ]; then
 	;;
    esac
 fi
+# End of Unixware-specific tests.
 
 # DDE SMES Supermax Enterprise Server
 case "`uname -sm`" in

@@ -701,12 +701,12 @@ PP(pp_aassign)
 	    if (delaymagic & DM_UID) {
 		if (uid != euid)
 		    DIE("No setreuid available");
-		(void)setuid(uid);
+		(void)PerlProc_setuid(uid);
 	    }
 #  endif /* HAS_SETREUID */
 #endif /* HAS_SETRESUID */
-	    uid = (int)getuid();
-	    euid = (int)geteuid();
+	    uid = (int)PerlProc_getuid();
+	    euid = (int)PerlProc_geteuid();
 	}
 	if (delaymagic & DM_GID) {
 #ifdef HAS_SETRESGID
@@ -730,12 +730,12 @@ PP(pp_aassign)
 	    if (delaymagic & DM_GID) {
 		if (gid != egid)
 		    DIE("No setregid available");
-		(void)setgid(gid);
+		(void)PerlProc_setgid(gid);
 	    }
 #  endif /* HAS_SETREGID */
 #endif /* HAS_SETRESGID */
-	    gid = (int)getgid();
-	    egid = (int)getegid();
+	    gid = (int)PerlProc_getgid();
+	    egid = (int)PerlProc_getegid();
 	}
 	tainting |= (uid && (euid != uid || egid != gid));
     }
@@ -1799,7 +1799,7 @@ PP(pp_leavesub)
     return pop_return();
 }
 
-static CV *
+STATIC CV *
 get_db_sub(SV **svp, CV *cv)
 {
     dTHR;
@@ -1934,11 +1934,8 @@ PP(pp_entersub)
      */
     MUTEX_LOCK(CvMUTEXP(cv));
     if (CvFLAGS(cv) & CVf_LOCKED) {
-	MAGIC *mg;	  
-	if (CvFLAGS(cv) & CVf_PACKAGE) {
-	    sv = (SV *) CvGV(cv);
-	}
-	else if (CvFLAGS(cv) & CVf_METHOD) {
+	MAGIC *mg;	
+	if (CvFLAGS(cv) & CVf_METHOD) {
 	    if (SP > stack_base + TOPMARK)
 		sv = *(stack_base + TOPMARK + 1);
 	    else {
@@ -2108,7 +2105,7 @@ PP(pp_entersub)
 		curcopdb = NULL;
 	    }
 	    /* Do we need to open block here? XXXX */
-	    (void)(*CvXSUB(cv))(cv);
+	    (void)(*CvXSUB(cv))(cv _THIS);
 
 	    /* Enforce some sanity in scalar context. */
 	    if (gimme == G_SCALAR && ++markix != stack_sp - stack_base ) {

@@ -932,9 +932,59 @@ and it would import the open override, but if they said
 
 they would get the default imports without the overrides.
 
-Note that such overriding is restricted to the package that requests
-the import.  Some means of "globally" overriding builtins may become
-available in future.
+The foregoing mechanism for overriding builtins is restricted, quite
+deliberately, to the package that requests the import.  There is a second
+method that is sometimes applicable when you wish to override a builtin
+everywhere, without regard to namespace boundaries.  This is achieved by
+importing a sub into the special namespace C<CORE::GLOBAL::>.  Here is an
+example that quite brazenly replaces the C<glob> operator with something
+that understands regular expressions.
+
+    package REGlob;
+    require Exporter;
+    @ISA = 'Exporter';
+    @EXPORT_OK = 'glob';
+
+    sub import {
+	my $pkg = shift;
+	return unless @_;
+	my $sym = shift;
+	my $where = ($sym =~ s/^GLOBAL_// ? 'CORE::GLOBAL' : caller(0));
+	$pkg->export($where, $sym, @_);
+    }
+
+    sub glob {
+	my $pat = shift;
+	my @got;
+	local(*D);
+	if (opendir D, '.') { @got = grep /$pat/o, readdir D; closedir D; }
+	@got;
+    }
+    1;
+
+And here's how it could be (ab)used:
+
+    #use REGlob 'GLOBAL_glob';	    # override glob() in ALL namespaces
+    package Foo;
+    use REGlob 'glob';		    # override glob() in Foo:: only
+    print for <^[a-z_]+\.pm\$>;	    # show all pragmatic modules
+
+Note that the initial comment shows a contrived, even dangerous example.
+By overriding C<glob> globally, you would be forcing the new (and
+subversive) behavior for the C<glob> operator for B<every> namespace,
+without the complete cognizance or cooperation of the modules that own
+those namespaces.  Naturally, this should be done with extreme caution--if
+it must be done at all.
+
+The C<REGlob> example above does not implement all the support needed to
+cleanly override perl's C<glob> operator.  The builtin C<glob> has
+different behaviors depending on whether it appears in a scalar or list
+context, but our C<REGlob> doesn't.  Indeed, many perl builtins have such
+context sensitive behaviors, and these must be adequately supported by
+a properly written override.  For a fully functional example of overriding
+C<glob>, study the implementation of C<File::DosGlob> in the standard
+library.
+
 
 =head2 Autoloading
 

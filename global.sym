@@ -36,6 +36,8 @@ freq
 ge_amg
 get_op_descs
 get_op_names
+get_no_modify
+get_opargs
 gt_amg
 inc_amg
 init_thread_intern
@@ -72,6 +74,7 @@ nomem
 nomethod_amg
 not_amg
 numer_amg
+op_const_sv
 op_desc
 op_name
 opargs
@@ -432,7 +435,7 @@ mg_copy
 mg_find
 mg_free
 mg_get
-mg_len
+mg_length
 mg_magical
 mg_set
 mg_size

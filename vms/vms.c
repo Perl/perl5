@@ -3318,7 +3318,7 @@ struct passwd *my_getpwuid(Uid_t uid)
     else {
       uic.uic$l_uic= uid;
       if (!uic.uic$v_group)
-        uic.uic$v_group= getgid();
+        uic.uic$v_group= PerlProc_getgid();
       if (valid_uic(uic))
         status = sys$idtoasc(uic.uic$l_uic, &lname, &name_desc, 0, 0, 0);
       else status = SS$_IVIDENT;

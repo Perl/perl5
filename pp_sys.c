@@ -324,6 +324,23 @@ PP(pp_die)
 	if(tmpsv ? SvROK(tmpsv) : SvROK(error)) {
 	    if(tmpsv)
 		SvSetSV(error,tmpsv);
+	    else if(sv_isobject(error)) {
+		HV *stash = SvSTASH(SvRV(error));
+		GV *gv = gv_fetchmethod(stash, "PROPAGATE");
+		if (gv) {
+		    SV *file = sv_2mortal(newSVsv(GvSV(curcop->cop_filegv)));
+		    SV *line = sv_2mortal(newSViv(curcop->cop_line));
+		    EXTEND(SP, 3);
+		    PUSHMARK(SP);
+		    PUSHs(error);
+		    PUSHs(file);
+ 		    PUSHs(line);
+		    PUTBACK;
+		    perl_call_sv((SV*)GvCV(gv),
+				 G_SCALAR|G_EVAL|G_KEEPERR);
+		    sv_setsv(error,*stack_sp--);
+		}
+	    }
 	    pat = Nullch;
 	}
 	else {
@@ -476,7 +493,7 @@ PP(pp_umask)
     TAINT_PROPER("umask");
     XPUSHi(anum);
 #else
-    XPUSHs(&sv_undef)
+    XPUSHs(&sv_undef);
 #endif
     RETURN;
 }
@@ -907,7 +924,7 @@ PP(pp_read)
     return pp_sysread(ARGS);
 }
 
-static OP *
+STATIC OP *
 doform(CV *cv, GV *gv, OP *retop)
 {
     dTHR;
@@ -1570,7 +1587,7 @@ PP(pp_ioctl)
 
     if (optype == OP_IOCTL)
 #ifdef HAS_IOCTL
-	retval = ioctl(PerlIO_fileno(IoIFP(io)), func, s);
+	retval = PerlLIO_ioctl(PerlIO_fileno(IoIFP(io)), func, s);
 #else
 	DIE("ioctl is not implemented");
 #endif
@@ -1624,7 +1641,7 @@ PP(pp_flock)
 	fp = Nullfp;
     if (fp) {
 	(void)PerlIO_flush(fp);
-	value = (I32)(FLOCK(PerlIO_fileno(fp), argtype) >= 0);
+	value = (I32)(PerlLIO_flock(PerlIO_fileno(fp), argtype) >= 0);
     }
     else
 	value = 0;
@@ -3358,11 +3375,11 @@ PP(pp_tms)
     EXTEND(SP, 4);
 
 #ifndef VMS
-    (void)times(&timesbuf);
+    (void)PerlProc_times(&timesbuf);
 #else
-    (void)times((tbuffer_t *)&timesbuf);  /* time.h uses different name for */
-                                          /* struct tms, though same data   */
-                                          /* is returned.                   */
+    (void)PerlProc_times((tbuffer_t *)&timesbuf);  /* time.h uses different name for */
+                                                   /* struct tms, though same data   */
+                                                   /* is returned.                   */
 #endif
 
     PUSHs(sv_2mortal(newSVnv(((double)timesbuf.tms_utime)/HZ)));
@@ -3460,10 +3477,10 @@ PP(pp_sleep)
 
     (void)time(&lasttime);
     if (MAXARG < 1)
-	Pause();
+	PerlProc_pause();
     else {
 	duration = POPi;
-	sleep((unsigned int)duration);
+	PerlProc_sleep((unsigned int)duration);
     }
     (void)time(&when);
     XPUSHi(when - lasttime);
@@ -3960,7 +3977,7 @@ PP(pp_gservent)
 	}
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 #ifdef HAS_NTOHS
-	sv_setiv(sv, (IV)ntohs(sent->s_port));
+	sv_setiv(sv, (IV)PerlSock_ntohs(sent->s_port));
 #else
 	sv_setiv(sv, (IV)(sent->s_port));
 #endif
@@ -3978,7 +3995,7 @@ PP(pp_shostent)
 {
     djSP;
 #ifdef HAS_SETHOSTENT
-    sethostent(TOPi);
+    PerlSock_sethostent(TOPi);
     RETSETYES;
 #else
     DIE(no_sock_func, "sethostent");
@@ -3989,7 +4006,7 @@ PP(pp_snetent)
 {
     djSP;
 #ifdef HAS_SETNETENT
-    setnetent(TOPi);
+    PerlSock_setnetent(TOPi);
     RETSETYES;
 #else
     DIE(no_sock_func, "setnetent");
@@ -4000,7 +4017,7 @@ PP(pp_sprotoent)
 {
     djSP;
 #ifdef HAS_SETPROTOENT
-    setprotoent(TOPi);
+    PerlSock_setprotoent(TOPi);
     RETSETYES;
 #else
     DIE(no_sock_func, "setprotoent");
@@ -4011,7 +4028,7 @@ PP(pp_sservent)
 {
     djSP;
 #ifdef HAS_SETSERVENT
-    setservent(TOPi);
+    PerlSock_setservent(TOPi);
     RETSETYES;
 #else
     DIE(no_sock_func, "setservent");
@@ -4291,7 +4308,7 @@ PP(pp_getlogin)
 #ifdef HAS_GETLOGIN
     char *tmps;
     EXTEND(SP, 1);
-    if (!(tmps = getlogin()))
+    if (!(tmps = PerlProc_getlogin()))
 	RETPUSHUNDEF;
     PUSHp(tmps, strlen(tmps));
     RETURN;

@@ -206,6 +206,10 @@ sub _win32_ext {
     }
     warn "Potential libraries are '$potential_libs':\n" if $verbose;
 
+    # normalize to forward slashes
+    $libpth =~ s,\\,/,g;
+    $potential_libs =~ s,\\,/,g;
+
     # compute $extralibs from $potential_libs
 
     my(@searchpath); # from "-L/path" entries in $potential_libs
