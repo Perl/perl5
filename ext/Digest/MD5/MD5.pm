@@ -3,7 +3,7 @@ package Digest::MD5;
 use strict;
 use vars qw($VERSION @ISA @EXPORT_OK);
 
-$VERSION = '2.13';
+$VERSION = '2.16';  # $Date: 2001/09/07 05:45:14 $
 
 require Exporter;
 *import = \&Exporter::import;
@@ -16,11 +16,18 @@ eval {
     Digest::MD5->bootstrap($VERSION);
 };
 if ($@) {
-    # Try to load the pure perl version
-    require Digest::Perl::MD5;
+    my $olderr = $@;
+    eval {
+	# Try to load the pure perl version
+	require Digest::Perl::MD5;
 
-    Digest::Perl::MD5->import(qw(md5 md5_hex md5_base64));
-    push(@ISA, "Digest::Perl::MD5");  # make OO interface work
+	Digest::Perl::MD5->import(qw(md5 md5_hex md5_base64));
+	push(@ISA, "Digest::Perl::MD5");  # make OO interface work
+    };
+    if ($@) {
+	# restore the original error
+	die $olderr;
+    }
 }
 else {
     *reset = \&new;
@@ -88,6 +95,10 @@ Same as md5(), but will return the digest in hexadecimal form.
 
 Same as md5(), but will return the digest as a base64 encoded string.
 
+The base64 encoded string returned is not padded to be a multiple of 4
+bytes long.  If you want interoperability with other base64 encoded
+md5 digests you might want to append the string "==" to the result.
+
 =back
 
 =head1 METHODS
@@ -141,6 +152,10 @@ Same as $md5->digest, but will return the digest in hexadecimal form.
 
 Same as $md5->digest, but will return the digest as a base64 encoded
 string.
+
+The base64 encoded string returned is not padded to be a multiple of 4
+bytes long.  If you want interoperability with other base64 encoded
+md5 digests you might want to append the string "==" to the result.
 
 =back
 
@@ -215,7 +230,7 @@ RFC 1321
 This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 
- Copyright 1998-2000 Gisle Aas.
+ Copyright 1998-2001 Gisle Aas.
  Copyright 1995-1996 Neil Winton.
  Copyright 1991-1992 RSA Data Security, Inc.
 
