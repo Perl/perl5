@@ -1,3 +1,4 @@
+
 =head1 NAME
 
 perlfunc - Perl builtin functions
@@ -79,117 +80,120 @@ than one place.
 
 =item Functions for SCALARs or strings
 
-chomp, chop, chr, crypt, hex, index, lc, lcfirst, length,
-oct, ord, pack, q/STRING/, qq/STRING/, reverse, rindex,
-sprintf, substr, tr///, uc, ucfirst, y///
+C<chomp>, C<chop>, C<chr>, C<crypt>, C<hex>, C<index>, C<lc>, C<lcfirst>,
+C<length>, C<oct>, C<ord>, C<pack>, C<q>/STRING/, C<qq>/STRING/, C<reverse>,
+C<rindex>, C<sprintf>, C<substr>, C<tr///>, C<uc>, C<ucfirst>, C<y>///
 
 =item Regular expressions and pattern matching
 
-m//, pos, quotemeta, s///, split, study
+C<m>//, C<pos>, C<quotemeta>, C<s>///, C<split>, C<study>
 
 =item Numeric functions
 
-abs, atan2, cos, exp, hex, int, log, oct, rand, sin, sqrt,
-srand
+C<abs>, C<atan2>, C<cos>, C<exp>, C<hex>, C<int>, C<log>, C<oct>, C<rand>,
+C<sin>, C<sqrt>, C<srand>
 
 =item Functions for real @ARRAYs
 
-pop, push, shift, splice, unshift
+C<pop>, C<push>, C<shift>, C<splice>, C<unshift>
 
 =item Functions for list data
 
-grep, join, map, qw/STRING/, reverse, sort, unpack
+C<grep>, C<join>, C<map>, C<qw>/STRING/, C<reverse>, C<sort>, C<unpack>
 
 =item Functions for real %HASHes
 
-delete, each, exists, keys, values
+C<delete>, C<each>, C<exists>, C<keys>, C<values>
 
 =item Input and output functions
 
-binmode, close, closedir, dbmclose, dbmopen, die, eof,
-fileno, flock, format, getc, print, printf, read, readdir,
-rewinddir, seek, seekdir, select, syscall, sysread, sysseek,
-syswrite, tell, telldir, truncate, warn, write
+C<binmode>, C<close>, C<closedir>, C<dbmclose>, C<dbmopen>, C<die>, C<eof>,
+C<fileno>, C<flock>, C<format>, C<getc>, C<print>, C<printf>, C<read>,
+C<readdir>, C<rewinddir>, C<seek>, C<seekdir>, C<select>, C<syscall>,
+C<sysread>, C<sysseek>, C<syswrite>, C<tell>, C<telldir>, C<truncate>,
+C<warn>, C<write>
 
 =item Functions for fixed length data or records
 
-pack, read, syscall, sysread, syswrite, unpack, vec
+C<pack>, C<read>, C<syscall>, C<sysread>, C<syswrite>, C<unpack>, C<vec>
 
 =item Functions for filehandles, files, or directories
 
-I<-X>, chdir, chmod, chown, chroot, fcntl, glob, ioctl, link,
-lstat, mkdir, open, opendir, readlink, rename, rmdir,
-stat, symlink, umask, unlink, utime
+C<-I<X>>, C<chdir>, C<chmod>, C<chown>, C<chroot>, C<fcntl>, C<glob>,
+C<ioctl>, C<link>, C<lstat>, C<mkdir>, C<open>, C<opendir>, C<readlink>,
+C<rename>, C<rmdir>, C<stat>, C<symlink>, C<umask>, C<unlink>, C<utime>
 
 =item Keywords related to the control flow of your perl program
 
-caller, continue, die, do, dump, eval, exit, goto, last,
-next, redo, return, sub, wantarray
+C<caller>, C<continue>, C<die>, C<do>, C<dump>, C<eval>, C<exit>,
+C<goto>, C<last>, C<next>, C<redo>, C<return>, C<sub>, C<wantarray>
 
 =item Keywords related to scoping
 
-caller, import, local, my, package, use
+C<caller>, C<import>, C<local>, C<my>, C<package>, C<use>
 
 =item Miscellaneous functions
 
-defined, dump, eval, formline, local, my, reset, scalar,
-undef, wantarray
+C<defined>, C<dump>, C<eval>, C<formline>, C<local>, C<my>, C<reset>,
+C<scalar>, C<undef>, C<wantarray>
 
 =item Functions for processes and process groups
 
-alarm, exec, fork, getpgrp, getppid, getpriority, kill,
-pipe, qx/STRING/, setpgrp, setpriority, sleep, system,
-times, wait, waitpid
+C<alarm>, C<exec>, C<fork>, C<getpgrp>, C<getppid>, C<getpriority>, C<kill>,
+C<pipe>, C<qx>/STRING/, C<setpgrp>, C<setpriority>, C<sleep>, C<system>,
+C<times>, C<wait>, C<waitpid>
 
 =item Keywords related to perl modules
 
-do, import, no, package, require, use
+C<do>, C<import>, C<no>, C<package>, C<require>, C<use>
 
 =item Keywords related to classes and object-orientedness
 
-bless, dbmclose, dbmopen, package, ref, tie, tied, untie, use
+C<bless>, C<dbmclose>, C<dbmopen>, C<package>, C<ref>, C<tie>, C<tied>,
+C<untie>, C<use>
 
 =item Low-level socket functions
 
-accept, bind, connect, getpeername, getsockname,
-getsockopt, listen, recv, send, setsockopt, shutdown,
-socket, socketpair
+C<accept>, C<bind>, C<connect>, C<getpeername>, C<getsockname>,
+C<getsockopt>, C<listen>, C<recv>, C<send>, C<setsockopt>, C<shutdown>,
+C<socket>, C<socketpair>
 
 =item System V interprocess communication functions
 
-msgctl, msgget, msgrcv, msgsnd, semctl, semget, semop,
-shmctl, shmget, shmread, shmwrite
+C<msgctl>, C<msgget>, C<msgrcv>, C<msgsnd>, C<semctl>, C<semget>, C<semop>,
+C<shmctl>, C<shmget>, C<shmread>, C<shmwrite>
 
 =item Fetching user and group info
 
-endgrent, endhostent, endnetent, endpwent, getgrent,
-getgrgid, getgrnam, getlogin, getpwent, getpwnam,
-getpwuid, setgrent, setpwent
+C<endgrent>, C<endhostent>, C<endnetent>, C<endpwent>, C<getgrent>,
+C<getgrgid>, C<getgrnam>, C<getlogin>, C<getpwent>, C<getpwnam>,
+C<getpwuid>, C<setgrent>, C<setpwent>
 
 =item Fetching network info
 
-endprotoent, endservent, gethostbyaddr, gethostbyname,
-gethostent, getnetbyaddr, getnetbyname, getnetent,
-getprotobyname, getprotobynumber, getprotoent,
-getservbyname, getservbyport, getservent, sethostent,
-setnetent, setprotoent, setservent
+C<endprotoent>, C<endservent>, C<gethostbyaddr>, C<gethostbyname>,
+C<gethostent>, C<getnetbyaddr>, C<getnetbyname>, C<getnetent>,
+C<getprotobyname>, C<getprotobynumber>, C<getprotoent>,
+C<getservbyname>, C<getservbyport>, C<getservent>, C<sethostent>,
+C<setnetent>, C<setprotoent>, C<setservent>
 
 =item Time-related functions
 
-gmtime, localtime, time, times
+C<gmtime>, C<localtime>, C<time>, C<times>
 
 =item Functions new in perl5
 
-abs, bless, chomp, chr, exists, formline, glob, import, lc,
-lcfirst, map, my, no, prototype, qx, qw, readline, readpipe,
-ref, sub*, sysopen, tie, tied, uc, ucfirst, untie, use
+C<abs>, C<bless>, C<chomp>, C<chr>, C<exists>, C<formline>, C<glob>,
+C<import>, C<lc>, C<lcfirst>, C<map>, C<my>, C<no>, C<prototype>, C<qx>,
+C<qw>, C<readline>, C<readpipe>, C<ref>, C<sub*>, C<sysopen>, C<tie>,
+C<tied>, C<uc>, C<ucfirst>, C<untie>, C<use>
 
 * - C<sub> was a keyword in perl4, but in perl5 it is an
 operator which can be used in expressions.
 
 =item Functions obsoleted in perl5
 
-dbmclose, dbmopen
+C<dbmclose>, C<dbmopen>
 
 =back
 
@@ -197,11 +201,11 @@ dbmclose, dbmopen
 
 =over 8
 
-=item -X FILEHANDLE
+=item I<-X> FILEHANDLE
 
-=item -X EXPR
+=item I<-X> EXPR
 
-=item -X
+=item I<-X>
 
 A file test, where X is one of the letters listed below.  This unary
 operator takes one argument, either a filename or a filehandle, and

@@ -173,7 +173,7 @@ $trace = $signal = $single = 0;	# Uninitialized warning suppression
                                 # (local $^W cannot help - other packages!).
 $inhibit_exit = $option{PrintRet} = 1;
 
-@options     = qw(hashDepth arrayDepth DumpDBFiles DumpPackages 
+@options     = qw(hashDepth arrayDepth DumpDBFiles DumpPackages DumpReused
 		  compactDump veryCompact quote HighBit undefPrint
 		  globPrint PrintRet UsageOnly frame AutoTrace
 		  TTY noTTY ReadLine NonStop LineInfo maxTraceLen
@@ -185,6 +185,7 @@ $inhibit_exit = $option{PrintRet} = 1;
 		 arrayDepth	=> \$dumpvar::arrayDepth,
 		 DumpDBFiles	=> \$dumpvar::dumpDBFiles,
 		 DumpPackages	=> \$dumpvar::dumpPackages,
+		 DumpReused	=> \$dumpvar::dumpReused,
 		 HighBit	=> \$dumpvar::quoteHighBit,
 		 undefPrint	=> \$dumpvar::printUndef,
 		 globPrint	=> \$dumpvar::globPrint,
@@ -368,7 +369,7 @@ sub DB {
     &save;
     ($package, $filename, $line) = caller;
     $filename_ini = $filename;
-    $usercontext = '($@, $!, $,, $/, $\, $^W) = @saved;' .
+    $usercontext = '($@, $!, $^E, $,, $/, $\, $^W) = @saved;' .
       "package $package;";	# this won't let them modify, alas
     local(*dbline) = $main::{'_<' . $filename};
     $max = $#dbline;
@@ -1140,7 +1141,7 @@ EOP
 	  &eval;
 	}
     }				# if ($single || $signal)
-    ($@, $!, $,, $/, $\, $^W) = @saved;
+    ($@, $!, $^E, $,, $/, $\, $^W) = @saved;
     ();
 }
 
@@ -1190,7 +1191,7 @@ sub sub {
 }
 
 sub save {
-    @saved = ($@, $!, $,, $/, $\, $^W);
+    @saved = ($@, $!, $^E, $,, $/, $\, $^W);
     $, = ""; $/ = "\n"; $\ = ""; $^W = 0;
 }
 
@@ -1210,7 +1211,7 @@ sub eval {
     }
     my $at = $@;
     local $saved[0];		# Preserve the old value of $@
-    eval "&DB::save";
+    eval { &DB::save };
     if ($at) {
 	print $OUT $at;
     } elsif ($onetimeDump eq 'dump') {
@@ -1785,6 +1786,7 @@ B<O> [I<opt>[B<=>I<val>]] [I<opt>B<\">I<val>B<\">] [I<opt>B<?>]...
     I<globPrint>:			whether to print contents of globs;
     I<DumpDBFiles>:		dump arrays holding debugged files;
     I<DumpPackages>:		dump symbol tables of packages;
+    I<DumpReused>:		dump contents of \"reused\" addresses;
     I<quote>, I<HighBit>, I<undefPrint>:	change style of string dump;
   Option I<PrintRet> affects printing of return value after B<r> command,
          I<frame>    affects printing messages on entry and exit from subroutines.
