@@ -448,6 +448,8 @@ Under VMS, the pragma C<use vmsish 'status'> makes C<$?> reflect the
 actual VMS exit status, instead of the default emulation of POSIX
 status.
 
+Also see L<Error Indicators>.
+
 =item $OS_ERROR
 
 =item $ERRNO
@@ -462,6 +464,8 @@ context, yields the corresponding system error string.  You can assign
 to C<$!> to set I<errno> if, for instance, you want C<"$!"> to return the
 string for error I<n>, or you want to set the exit value for the die()
 operator.  (Mnemonic: What just went bang?)
+
+Also see L<Error Indicators>.
 
 =item $EXTENDED_OS_ERROR
 
@@ -490,6 +494,8 @@ via C<$!>.
 Caveats mentioned in the description of C<$!> generally apply to
 C<$^E>, also.  (Mnemonic: Extra error explanation.)
 
+Also see L<Error Indicators>.
+
 =item $EVAL_ERROR
 
 =item $@
@@ -502,6 +508,8 @@ the syntax error "at"?)
 Note that warning messages are not collected in this variable.  You can,
 however, set up a routine to process warnings by setting C<$SIG{__WARN__}>
 as described below.
+
+Also see L<Error Indicators>.
 
 =item $PROCESS_ID
 
@@ -869,3 +877,54 @@ See L<perlfunc/die>, L<perlfunc/warn> and L<perlfunc/eval> for
 additional info.
 
 =back
+
+=head2 Error Indicators
+
+The variables L<$@>, L<$!>, L<$^E>, and L<$?> contain information about
+different types of error conditions that may appear during execution of
+Perl script.  The variables are shown ordered by the "distance" between
+the subsystem which reported the error and the Perl process, and
+correspond to errors detected by the Perl interpreter, C library,
+operating system, or an external program, respectively.
+
+To illustrate the differences between these variables, consider the 
+following Perl expression:
+
+   eval '
+	 open PIPE, "/cdrom/install |";
+         @res = <PIPE>;
+	 close PIPE or die "bad pipe: $?, $!";
+	';
+
+After execution of this statement all 4 variables may have been set.  
+
+$@ is set if the string to be C<eval>-ed did not compile (this may happen if 
+C<open> or C<close> were imported with bad prototypes), or if Perl 
+code executed during evaluation die()d (either implicitly, say, 
+if C<open> was imported from module L<Fatal>, or the C<die> after 
+C<close> was triggered).  In these cases the value of $@ is the compile 
+error, or C<Fatal> error (which will interpolate C<$!>!), or the argument
+to C<die> (which will interpolate C<$!> and C<$?>!).
+
+When the above expression is executed, open(), C<<PIPEE<gt>>, and C<close> 
+are translated to C run-time library calls.  $! is set if one of these 
+calls fails.  The value is a symbolic indicator chosen by the C run-time 
+library, say C<No such file or directory>.
+
+On some systems the above C library calls are further translated 
+to calls to the kernel.  The kernel may have set more verbose error 
+indicator that one of the handful of standard C errors.  In such cases $^E 
+contains this verbose error indicator, which may be, say, C<CDROM tray not
+closed>.  On systems where C library calls are identical to system calls
+$^E is a duplicate of $!.
+
+Finally, $? may be set to non-C<0> value if the external program 
+C</cdrom/install> fails.  Upper bits of the particular value may reflect 
+specific error conditions encountered by this program (this is 
+program-dependent), lower-bits reflect mode of failure (segfault, completion,
+etc.).  Note that in contrast to $@, $!, and $^E, which are set only 
+if error condition is detected, the variable $? is set on each C<wait> or
+pipe C<close>, overwriting the old value.
+
+For more details, see the individual descriptions at L<$@>, L<$!>, L<$^E>,
+and L<$?>.
