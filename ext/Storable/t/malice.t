@@ -30,13 +30,32 @@ sub BEGIN {
 }
 
 use strict;
-use vars qw($file_magic_str $other_magic $network_magic);
+use vars qw($file_magic_str $other_magic $network_magic $major $minor
+           $C_visible_byteorder);
 $file_magic_str = 'pst0';
-$other_magic = 7 + $Config{ivsize};
+$other_magic = 7 + $Config{longsize};
 $network_magic = 2;
+$major = 2;
+$minor = 5;
+
+# Config.pm does games to figure out byteorder dynamically. In the process
+# it creates an 8 digit entry on long long builds on 32 bit long systems.
+# config.sh, config.h and therefore Storable.xs have a 4 digit entry.
+$C_visible_byteorder = $Config{byteorder};
+if ($Config{longsize} != $Config{ivsize}) {
+  if ($C_visible_byteorder =~ /^1234/) {
+    # Little endian
+    substr ($C_visible_byteorder, $Config{longsize}) = '';
+  } elsif ($C_visible_byteorder =~ /4321$/) {
+    # Big endian
+    $C_visible_byteorder = substr ($C_visible_byteorder, -$Config{longsize});
+  } else {
+    die "longs are $Config{longsize} bytes, IVs are $Config{ivsize}, byte order $C_visible_byteorder not regonised";
+  }
+}
 
 use Test;
-BEGIN { plan tests => 334 + $Config{ivsize} * 4}
+BEGIN { plan tests => 334 + $Config{longsize} * 4}
 
 use Storable qw (store retrieve freeze thaw nstore nfreeze);
 
@@ -58,8 +77,8 @@ sub test_hash {
 sub test_header {
   my ($header, $isfile, $isnetorder) = @_;
   ok (!!$header->{file}, !!$isfile, "is file");
-  ok ($header->{major}, 2, "major number");
-  ok ($header->{minor}, 5, "minor number");
+  ok ($header->{major}, $major, "major number");
+  ok ($header->{minor}, $minor, "minor number");
   ok (!!$header->{netorder}, !!$isnetorder, "is network order");
   if ($isnetorder) {
     # Skip these
@@ -67,10 +86,10 @@ sub test_header {
       ok (1, 1, "Network order header has no sizes");
     }
   } else {
-    ok ($header->{byteorder}, $Config{byteorder}, "byte order");
+    ok ($header->{byteorder}, $C_visible_byteorder, "byte order");
     ok ($header->{intsize}, $Config{intsize}, "int size");
     ok ($header->{longsize}, $Config{longsize}, "long size");
-    ok ($header->{ptrsize}, $Config{ptrsize}, "ptr size");
+    ok ($header->{ptrsize}, $Config{ptrsize}, "long size");
     ok ($header->{nvsize}, $Config{nvsize} || $Config{doublesize} || 8,
         "nv size"); # 5.00405 doesn't even have doublesize in config.
   }
@@ -147,21 +166,21 @@ sub test_things {
   my $minor1 = $header->{minor} + 1;
   substr ($copy, $file_magic + 1, 1) = chr $minor1;
   test_corrupt ($copy, $sub,
-                "/^Storable binary image v$header->{major}.$minor1 more recent than I am \\(v$header->{major}.$header->{minor}\\)/",
+                "/^Storable binary image v$header->{major}\.$minor1 more recent than I am \\(v$header->{major}\.$header->{minor}\\)/",
                 "higher minor");
 
   $copy = $contents;
   my $major1 = $header->{major} + 1;
   substr ($copy, $file_magic, 1) = chr 2*$major1;
   test_corrupt ($copy, $sub,
-                "/^Storable binary image v$major1.$header->{minor} more recent than I am \\(v$header->{major}.$header->{minor}\\)/",
+                "/^Storable binary image v$major1\.$header->{minor} more recent than I am \\(v$header->{major}\.$header->{minor}\\)/",
                 "higher major");
 
   # Continue messing with the previous copy
   $minor1 = $header->{minor} - 1;
   substr ($copy, $file_magic + 1, 1) = chr $minor1;
   test_corrupt ($copy, $sub,
-                "/^Storable binary image v$major1.$minor1 more recent than I am \\(v$header->{major}.$header->{minor}\\)/",
+                "/^Storable binary image v$major1\.$minor1 more recent than I am \\(v$header->{major}\.$header->{minor}\\)/",
               "higher major, lower minor");
 
   my $where;
@@ -176,7 +195,7 @@ sub test_things {
                   "byte order");
     $where = $file_magic + 3 + length $header->{byteorder};
     foreach (['intsize', "Integer"],
-             ['ivsize', "Long integer"],
+             ['longsize', "Long integer"],
              ['ptrsize', "Pointer integer"],
              ['nvsize', "Double"]) {
       my ($key, $name) = @$_;
@@ -217,7 +236,7 @@ my $length = -s $file;
 die "Don't seem to have written file '$file' as I can't get its length: $!"
   unless defined $file;
 
-die "Expected file to be $expected bytes (sizeof IV is $Config{ivsize}) but it is $length"
+die "Expected file to be $expected bytes (sizeof long is $Config{longsize}) but it is $length"
   unless $length == $expected;
 
 # Read the contents into memory:
@@ -245,7 +264,7 @@ $length = -s $file;
 die "Don't seem to have written file '$file' as I can't get its length: $!"
   unless defined $file;
 
-die "Expected file to be $expected bytes (sizeof IV is $Config{ivsize}) but it is $length"
+die "Expected file to be $expected bytes (sizeof long is $Config{longsize}) but it is $length"
   unless $length == $expected;
 
 # Read the contents into memory:
