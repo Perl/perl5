@@ -62,7 +62,7 @@
 # Configure Black Magic (TM)
 	# reset
 	_DEC_cc_style=
-case "$cc -v 2>&1 | grep cc" in
+case "`$cc -v 2>&1 | grep cc`" in
 *gcc*)	;; # pass
 *)	# compile something small: taint.c is fine for this.
     	# the main point is the '-v' flag of 'cc'.
@@ -80,7 +80,7 @@ case "$cc -v 2>&1 | grep cc" in
 esac
 
 # be nauseatingly ANSI
-case "$cc -v 2>&1 | grep gcc" in
+case "`$cc -v 2>&1 | grep gcc`" in
 *gcc*)	ccflags="$ccflags -ansi"
 	;;
 *)	ccflags="$ccflags -std"
@@ -93,7 +93,7 @@ esac
 # we want optimisation
 
 case "$optimize" in
-'')	case "$cc -v 2>&1 | grep gcc" in
+'')	case "`$cc -v 2>&1 | grep gcc`" in
 	*gcc*)	
 		optimize='-O3'				;;
 	*)	case "$_DEC_cc_style" in
@@ -208,7 +208,7 @@ cat > UU/usethreads.cbu <<'EOCBU'
 case "$usethreads" in
 $define|true|[yY]*)
 	# Threads interfaces changed with V4.0.
-	case "$cc -v 2>&1 | grep gcc" in
+	case "`$cc -v 2>&1 | grep gcc`" in
 	*gcc*)ccflags="-D_REENTRANT $ccflags" ;;
 	*)  case "`uname -r`" in
 	    *[123].*)	ccflags="-threads $ccflags" ;;
