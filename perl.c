@@ -469,8 +469,10 @@ perl_destruct(pTHXx)
     }
 
     /* jettison our possibly duplicated environment */
-
-#ifdef USE_ENVIRON_ARRAY
+    /* if PERL_USE_SAFE_PUTENV is defined environ will not have been copied
+     * so we certainly shouldn't free it here
+     */
+#if defined(USE_ENVIRON_ARRAY) && !defined(PERL_USE_SAFE_PUTENV)
     if (environ != PL_origenviron) {
 	I32 i;
 
