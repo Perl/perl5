@@ -2,7 +2,26 @@
 
 $ENV{PATH} = '/usr/xpg4/bin:/bin:/usr/bin:/usr/ucb';
 
-unless (($groups = `(id -Gn || groups) 2>/dev/null`) ne '') {
+# We have to find a command that prints all (effective
+# and real) group names (not ids).  The known commands are:
+# groups
+# id -Gn
+# id -a
+# Beware 1: some systems do just 'id -G' even when 'id -Gn' is used.
+# Beware 2: the 'id -a' output format is tricky.
+
+GROUPS: {
+    last GROUPS if ($groups = `groups 2>/dev/null`) ne '';
+    if ($groups = `id -Gn 2>/dev/null` ne '') {
+	last GROUPS unless $groups =~ /^(\d+)(\s+\d)*$/;
+    }
+    if ($groups = `id -a 2>/dev/null` ne '') {
+	if (/groups=/g && (@g = /\((.+?)\)/g)) {
+	    $groups = join(" ", @g);
+	    last GROUPS;
+	}
+    }
+    # Okay, not today.
     print "1..0\n";
     exit 0;
 }
