@@ -2964,14 +2964,14 @@ Perl_vload_module(pTHX_ U32 flags, SV *name, SV *ver, va_list *args)
     }
     {
 	line_t ocopline = PL_copline;
-	line_t ocopline2 = PL_curcop->cop_line;
+	COP *ocurcop = PL_curcop;
 	int oexpect = PL_expect;
 
 	utilize(!(flags & PERL_LOADMOD_DENY), start_subparse(FALSE, 0),
 		veop, modname, imop);
 	PL_expect = oexpect;
 	PL_copline = ocopline;
-	PL_curcop->cop_line = ocopline2;
+	PL_curcop = ocurcop;
     }
 }
 
