@@ -456,22 +456,6 @@ simply B<between digits>.
 
 =item *
 
-C<Attribute::Handlers> allows a class to define attribute handlers.
-
-    package MyPack;
-    use Attribute::Handlers;
-    sub Wolf :ATTR(SCALAR) { print "howl!\n" }
-
-    # later, in some package using or inheriting from MyPack...
-
-    my MyPack $Fluffy : Wolf; # the attribute handler Wolf will be called
-
-Both variables and routines can have attribute handlers.  Handlers can
-be specific to type (SCALAR, ARRAY, HASH, or CODE), or specific to the
-exact compilation phase (BEGIN, CHECK, INIT, or END).
-
-=item *
-
 B<B::Concise> is a new compiler backend for walking the Perl syntax
 tree, printing concise info about ops, from Stephen McCamant.  The
 output is highly customisable.  See L<B::Concise>.

@@ -2494,41 +2494,40 @@ module (sometimes unnecessary), B<INSTALL> the module
 
 attributes, attrs, autouse, base, blib, bytes, charnames, constant,
 diagnostics, encoding, fields, filetest, integer, less, locale, open, ops,
-overload, re, sigtrap, sort, strict, subs, threads, utf8, vars, vmsish,
-warnings, warnings::register
+overload, re, sigtrap, sort, strict, subs, utf8, vars, vmsish, warnings,
+warnings::register
 
 =item Standard Modules
 
-AnyDBM_File, Attribute::Handlers, AutoLoader, AutoSplit, B, B::Asmdata,
-B::Assembler, B::Bblock, B::Bytecode, B::C, B::CC, B::Concise, B::Debug,
-B::Deparse, B::Disassembler, B::Lint, B::Showlex, B::Stackobj, B::Stash,
-B::Terse, B::Xref, Benchmark, ByteLoader, CGI, CGI::Apache, CGI::Carp,
-CGI::Cookie, CGI::Fast, CGI::Pretty, CGI::Push, CGI::Switch, CGI::Util,
-CPAN, CPAN::FirstTime, CPAN::Nox, Carp, Carp::Heavy, Class::ISA,
-Class::Struct, Cwd, DB, DB_File, Devel::SelfStubber, Digest, DirHandle,
-Dumpvalue, Encode, Encode::EncodeFormat, Encode::Tcl, English, Env,
-Exporter, Exporter::Heavy, ExtUtils::Command, ExtUtils::Constant,
-ExtUtils::Embed, ExtUtils::Install, ExtUtils::Installed, ExtUtils::Liblist,
-ExtUtils::MM_Cygwin, ExtUtils::MM_NW5, ExtUtils::MM_OS2, ExtUtils::MM_Unix,
-ExtUtils::MM_VMS, ExtUtils::MM_Win32, ExtUtils::MakeMaker,
-ExtUtils::Manifest, ExtUtils::Mkbootstrap, ExtUtils::Mksymlists,
-ExtUtils::Packlist, ExtUtils::testlib, Fatal, Fcntl, File::Basename,
-File::CheckTree, File::Compare, File::Copy, File::DosGlob, File::Find,
-File::Path, File::Spec, File::Spec::Epoc, File::Spec::Functions,
-File::Spec::Mac, File::Spec::OS2, File::Spec::Unix, File::Spec::VMS,
-File::Spec::Win32, File::Temp, File::stat, FileCache, FileHandle,
-Filter::Simple, FindBin, Getopt::Long, Getopt::Std, I18N::Collate,
-I18N::LangTags, I18N::LangTags::List, IO, IPC::Open2, IPC::Open3,
-Locale::Constants, Locale::Country, Locale::Currency, Locale::Language,
-Locale::Maketext, Locale::Maketext::TPJ13, Math::BigFloat, Math::BigInt,
-Math::BigInt::Calc, Math::Complex, Math::Trig, Memoize,
-Memoize::AnyDBM_File, Memoize::Expire, Memoize::ExpireFile,
-Memoize::ExpireTest, Memoize::NDBM_File, Memoize::SDBM_File,
-Memoize::Saves, Memoize::Storable, NDBM_File, NEXT, Net::Cmd, Net::Config,
-Net::Domain, Net::FTP, Net::NNTP, Net::Netrc, Net::POP3, Net::Ping,
-Net::SMTP, Net::Time, Net::hostent, Net::libnetFAQ, Net::netent,
-Net::protoent, Net::servent, O, ODBM_File, Opcode, POSIX, PerlIO,
-Pod::Checker, Pod::Find, Pod::Html, Pod::InputObjects, Pod::LaTeX,
+AnyDBM_File, AutoLoader, AutoSplit, B, B::Asmdata, B::Assembler, B::Bblock,
+B::Bytecode, B::C, B::CC, B::Concise, B::Debug, B::Deparse,
+B::Disassembler, B::Lint, B::Showlex, B::Stackobj, B::Stash, B::Terse,
+B::Xref, Benchmark, ByteLoader, CGI, CGI::Apache, CGI::Carp, CGI::Cookie,
+CGI::Fast, CGI::Pretty, CGI::Push, CGI::Switch, CGI::Util, CPAN,
+CPAN::FirstTime, CPAN::Nox, Carp, Carp::Heavy, Class::ISA, Class::Struct,
+Cwd, DB, DB_File, Devel::SelfStubber, Digest, DirHandle, Dumpvalue, Encode,
+Encode::EncodeFormat, Encode::Tcl, English, Env, Exporter, Exporter::Heavy,
+ExtUtils::Command, ExtUtils::Constant, ExtUtils::Embed, ExtUtils::Install,
+ExtUtils::Installed, ExtUtils::Liblist, ExtUtils::MM_Cygwin,
+ExtUtils::MM_NW5, ExtUtils::MM_OS2, ExtUtils::MM_Unix, ExtUtils::MM_VMS,
+ExtUtils::MM_Win32, ExtUtils::MakeMaker, ExtUtils::Manifest,
+ExtUtils::Mkbootstrap, ExtUtils::Mksymlists, ExtUtils::Packlist,
+ExtUtils::testlib, Fatal, Fcntl, File::Basename, File::CheckTree,
+File::Compare, File::Copy, File::DosGlob, File::Find, File::Path,
+File::Spec, File::Spec::Epoc, File::Spec::Functions, File::Spec::Mac,
+File::Spec::OS2, File::Spec::Unix, File::Spec::VMS, File::Spec::Win32,
+File::Temp, File::stat, FileCache, FileHandle, Filter::Simple, FindBin,
+Getopt::Long, Getopt::Std, I18N::Collate, I18N::LangTags,
+I18N::LangTags::List, IO, IPC::Open2, IPC::Open3, Locale::Constants,
+Locale::Country, Locale::Currency, Locale::Language, Locale::Maketext,
+Locale::Maketext::TPJ13, Math::BigFloat, Math::BigInt, Math::BigInt::Calc,
+Math::Complex, Math::Trig, Memoize, Memoize::AnyDBM_File, Memoize::Expire,
+Memoize::ExpireFile, Memoize::ExpireTest, Memoize::NDBM_File,
+Memoize::SDBM_File, Memoize::Saves, Memoize::Storable, NDBM_File, NEXT,
+Net::Cmd, Net::Config, Net::Domain, Net::FTP, Net::NNTP, Net::Netrc,
+Net::POP3, Net::Ping, Net::SMTP, Net::Time, Net::hostent, Net::libnetFAQ,
+Net::netent, Net::protoent, Net::servent, O, ODBM_File, Opcode, POSIX,
+PerlIO, Pod::Checker, Pod::Find, Pod::Html, Pod::InputObjects, Pod::LaTeX,
 Pod::Man, Pod::ParseLink, Pod::ParseUtils, Pod::Parser, Pod::Plainer,
 Pod::Select, Pod::Text, Pod::Text::Color, Pod::Text::Overstrike,
 Pod::Text::Termcap, Pod::Usage, Pod::t::basic, SDBM_File, Safe,
@@ -8476,58 +8475,6 @@ C<strict refs>, C<strict vars>, C<strict subs>
 
 =back
 
-=head2 threads - Perl extension allowing use of interpreter based threads
-from perl
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-$thread = new(function, LIST), $thread->join, $thread->detach,
-threads->self, $thread->tid
-
-=item TODO
-
-Fix so the return value is returned when you join, Add join_all, Fix memory
-leaks!
-
-=item AUTHOR and COPYRIGHT
-
-=item BUGS
-
-creating a thread from within a thread is unsafe under win32,
-PERL_OLD_SIGNALS are not threadsafe, will not be
-
-=item SEE ALSO
-
-=back
-
-=head2 threadshared, threads::shared - Perl extension for sharing data
-structures between threads
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item EXPORT
-
-=item FUNCTIONS
-
-share VARIABLE, lock VARIABLE, unlock VARIABLE, cond_wait VARIABLE,
-cond_signal VARIABLE, cond_broadcast VARIABLE
-
-=item BUGS
-
-=item AUTHOR
-
-=item SEE ALSO
-
-=back
-
 =head2 utf8 - Perl pragma to enable/disable UTF-8 (or UTF-EBCDIC) in source
 code
 
@@ -8617,49 +8564,6 @@ warnings::warnif($object, $message)
 =back
 
 =item SEE ALSO
-
-=back
-
-=head2 Attribute::Handlers - Simpler definition of attribute handlers
-
-=over 4
-
-=item VERSION
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-[0], [1], [2], [3], [4], [5]
-
-=over 4
-
-=item Typed lexicals
-
-=item Type-specific attribute handlers
-
-=item Non-interpretive attribute handlers
-
-=item Phase-specific attribute handlers
-
-=item Attributes as C<tie> interfaces
-
-=back
-
-=item EXAMPLES
-
-=item DIAGNOSTICS
-
-C<Bad attribute type: ATTR(%s)>, C<Attribute handler %s doesn't handle %s
-attributes>, C<Declaration of %s attribute in package %s may clash with
-future reserved word>, C<Can't have two ATTR specifiers on one subroutine>,
-C<Can't autotie a %s>, C<Internal error: %s symbol went missing>
-
-=item AUTHOR
-
-=item BUGS
-
-=item COPYRIGHT
 
 =back
 
