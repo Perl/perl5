@@ -29,7 +29,7 @@ sed -e $SCONFIG -e $SGREPTMP -e $SECHOTMP -e $SDDC -e $SOUT -e 's=\.\( \./\$file
 sed -e $SEXISTS -e $SLIST -e $SCONFIG Makefile.SH |tr -d '\r' >s; mv -f s Makefile.SH
 sed -e $SEXISTS -e $SPACKLIST lib/ExtUtils/Install.pm |tr -d '\r' >s; mv -f s lib/ExtUtils/Install.pm
 sed -e $SEXISTS -e $SPACKLIST lib/ExtUtils/MM_Unix.pm |tr -d '\r' >s; mv -f s lib/ExtUtils/MM_Unix.pm
-sed -e $SEXISTS installperl >s; mv -f s installperl
+sed -e $SEXISTS -e $SPACKLIST installperl >s; mv -f s installperl
 sed -e $SPOD2HTML lib/Pod/Html.pm |tr -d '\r' >s; mv -f s lib/Pod/Html.pm
 sed -e $SCC -e $SLIST -e $SFILEC -e $SCOR -e $SDEPTMP -e $SHSED makedepend.SH |tr -d '\r' >s; mv -f s makedepend.SH
 sed -e $SCPP t/comp/cpp.aux |tr -d '\r' >s; mv -f s t/comp/cpp.aux
@@ -42,3 +42,7 @@ sed -e $SSTAT -e $STMP2 t/op/stat.t >s; mv -f s t/op/stat.t
 sed -e $SLIST x2p/Makefile.SH |tr -d '\r' >s; mv -f s x2p/Makefile.SH
 sed -e 's=^#define.\([A-Z]\+\)_EXP.*$=#define \1_EXP djgpp_pathexp("\1")=g' config_h.SH >s; mv -f s config_h.SH
 sed -e 's=:^/:={^([a-z]:)?[\\\\/]}=g' lib/termcap.pl >s; mv -f s lib/termcap.pl
+sed -e $SPACKLIST installman >s; mv -f s installman
+sed -e $SPACKLIST lib/ExtUtils/Installed.pm >s; mv -f s lib/ExtUtils/Installed.pm
+sed -e $SPACKLIST lib/ExtUtils/Packlist.pm >s; mv -f s lib/ExtUtils/Packlist.pm
+sed -e $SPACKLIST lib/ExtUtils/inst >s; mv -f s lib/ExtUtils/inst
