@@ -733,7 +733,7 @@ S_varname(pTHX_ GV *gv, char *gvtype, PADOFFSET targ,
     }
     else if (subscript_type == FUV_SUBSCRIPT_ARRAY) {
 	*SvPVX(name) = '$';
-	Perl_sv_catpvf(aTHX_ name, "[%"IVdf"]", aindex);
+	Perl_sv_catpvf(aTHX_ name, "[%"IVdf"]", (IV)aindex);
     }
     else if (subscript_type == FUV_SUBSCRIPT_WITHIN)
 	sv_insert(name, 0, 0,  "within ", 7);
