@@ -1190,7 +1190,7 @@ architecture.  For example:
 	perl Makefile.PL BINARY_LOCATION=x86/Agent.tar.gz
 
 builds a PPD package that references a binary of the C<Agent> package,
-located in the C<x86> directory.
+located in the C<x86> directory relative to the PPD itself.
 
 =item C
 
@@ -1594,7 +1594,7 @@ Defining PM in the Makefile.PL will override PMLIBDIRS.
 
 =item PPM_INSTALL_EXEC
 
-Name of the executable used to run C<PPM_INSTALL_SCRIPT> below.
+Name of the executable used to run C<PPM_INSTALL_SCRIPT> below. (e.g. perl)
 
 =item PPM_INSTALL_SCRIPT
 
