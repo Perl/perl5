@@ -2504,7 +2504,7 @@ operator is discussed in more detail in L<perlop/"I/O Operators">.
 
 Receives a message on a socket.  Attempts to receive LENGTH bytes of
 data into variable SCALAR from the specified SOCKET filehandle.
-Actually does a C recvfrom(), so that it can returns the address of the
+Actually does a C recvfrom(), so that it can return the address of the
 sender.  Returns the undefined value if there's an error.  SCALAR will
 be grown or shrunk to the length actually read.  Takes the same flags
 as the system call of the same name.
