@@ -763,7 +763,7 @@ do_binmode(PerlIO *fp, int iotype, int flag)
     if (flag != TRUE)
 	croak("panic: unsetting binmode"); /* Not implemented yet */
 #ifdef DOSISH
-#ifdef atarist
+#if defined(atarist) || defined(__MINT__)
     if (!PerlIO_flush(fp) && (fp->_flag |= _IOBIN))
 	return 1;
     else

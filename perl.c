@@ -1749,6 +1749,9 @@ moreswitches(char *s)
 #ifdef __VOS__
 	printf("Stratus VOS port by Paul_Green@stratus.com, 1997-1998\n");
 #endif
+#ifdef __MINT__
+	printf("MiNT port by Guido Flohr, 1997\n");
+#endif
 #ifdef BINARY_BUILD_NOTICE
 	BINARY_BUILD_NOTICE;
 #endif

@@ -500,6 +500,8 @@ BeOS is now supported.  See L<README.beos>.
 
 DOS is now supported under the DJGPP tools.  See L<README.dos>.
 
+MiNT is now supported.  See L<README.mint>.
+
 MPE/iX is now supported.  See L<README.mpeix>.
 
 MVS (aka OS390, aka Open Edition) is now supported.  See L<README.os390>.

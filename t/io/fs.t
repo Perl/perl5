@@ -9,7 +9,8 @@ BEGIN {
 
 use Config;
 
-$Is_Dosish = ($^O eq 'MSWin32' or $^O eq 'dos' or $^O eq 'os2');
+$Is_Dosish = ($^O eq 'MSWin32' or $^O eq 'dos' or
+	      $^O eq 'os2' or $^O eq 'mint');
 
 print "1..28\n";
 
