@@ -825,10 +825,14 @@ long a1, a2, a3, a4;
     }
     fputs(message,stderr);
     (void)Fflush(stderr);
-    if (e_fp) {
-	fclose(e_fp);
-	e_fp = Nullfp;
+    if (e_tmpname) {
+	if (e_fp) {
+	    fclose(e_fp);
+	    e_fp = Nullfp;
+	}
 	(void)UNLINK(e_tmpname);
+	Safefree(e_tmpname);
+	e_tmpname = Nullch;
     }
     statusvalue = SHIFTSTATUS(statusvalue);
 #ifdef VMS
@@ -984,10 +988,14 @@ croak(pat, va_alist)
     }
     fputs(message,stderr);
     (void)Fflush(stderr);
-    if (e_fp) {
-	fclose(e_fp);
-	e_fp = Nullfp;
+    if (e_tmpname) {
+	if (e_fp) {
+	    fclose(e_fp);
+	    e_fp = Nullfp;
+	}
 	(void)UNLINK(e_tmpname);
+	Safefree(e_tmpname);
+	e_tmpname = Nullch;
     }
     statusvalue = SHIFTSTATUS(statusvalue);
 #ifdef VMS
