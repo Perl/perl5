@@ -4228,12 +4228,16 @@ PP(pp_split)
 		for (i = 1; i <= rx->nparens; i++) {
 		    s = rx->startp[i] + orig;
 		    m = rx->endp[i] + orig;
-		    if (m && s) {
+
+		    /* japhy (07/27/01) -- the (m && s) test doesn't catch
+		       parens that didn't match -- they should be set to
+		       undef, not the empty string */
+		    if (m >= orig && s >= orig) {
 			dstr = NEWSV(33, m-s);
 			sv_setpvn(dstr, s, m-s);
 		    }
 		    else
-			dstr = NEWSV(33, 0);
+			dstr = &PL_sv_undef;  /* undef, not "" */
 		    if (make_mortal)
 			sv_2mortal(dstr);
 		    if (do_utf8)

@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..45\n";
+print "1..46\n";
 
 $FS = ':';
 
@@ -253,4 +253,15 @@ print "ok 32\n";
     }
     print "not " unless $r eq "he:o cruel world";
     print "ok 45\n";
+}
+
+
+{
+    # split /(A)|B/, "1B2" should return (1, undef, 2)
+    my @x = split /(A)|B/, "1B2";
+    print "not " unless
+      $x[0] eq '1' and
+      (not defined $x[1]) and
+      $x[2] eq '2';
+    print "ok 46\n";
 }
