@@ -11,9 +11,15 @@ BEGIN {
 }
 
 ok(grep { $_ eq 'Bla' } @INC);
-ok(grep { $_ eq 'Foo::Bar' } @INC);
+SKIP: {
+  skip 'Double colons not allowed in dir spec', 1 if $^O eq 'VMS';
+  ok(grep { $_ eq 'Foo::Bar' } @INC);
+}
 
 fresh_perl_is('print grep { $_ eq "Bla2" } @INC', 'Bla2',
 	      { switches => ['-IBla2'] }, '-I');
-fresh_perl_is('print grep { $_ eq "Foo::Bar2" } @INC', 'Foo::Bar2',
-	      { switches => ['-IFoo::Bar2'] }, '-I with colons');
+SKIP: {
+  skip 'Double colons not allowed in dir spec', 1 if $^O eq 'VMS';
+  fresh_perl_is('print grep { $_ eq "Foo::Bar2" } @INC', 'Foo::Bar2',
+	        { switches => ['-IFoo::Bar2'] }, '-I with colons');
+}

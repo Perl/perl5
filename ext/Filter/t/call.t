@@ -806,10 +806,12 @@ EOM
 
 my $a = `$Perl "-I." $Inc -e "no ${module6}; print q{ok}"`;
 ok(29, ($? >>8) == 0);
+chomp( $a ) if $^O eq 'VMS';
 ok(30, $a eq 'ok');
 
 $a = `$Perl "-I." $Inc $filename2`;
 ok(31, ($? >>8) == 0);
+chomp( $a ) if $^O eq 'VMS';
 ok(32, $a eq 'ok');
 
 }
