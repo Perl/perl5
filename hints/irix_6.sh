@@ -137,13 +137,6 @@ malloc_cflags='ccflags="-DSTRICT_ALIGNMENT $ccflags"'
 	;;
 esac
 
-# Don't groan about unused libraries.
-ccflags="$ccflags -Wl,-woff,84"
-case "$ld" in
-*cc*) ldflags="$ldflags -Wl,-woff,84" ;;
-*ld)  ldflags="$ldflags -woff 84"     ;;
-esac
-
 # We don't want these libraries.
 # Socket networking is in libc, these are not installed by default,
 # and just slow perl down. (scotth@sgi.com)
@@ -242,7 +235,7 @@ EOM
 	    esac
 	    case "$ccflags" in
 	    *-n32*)
-		ccflags="$ccflags -DUSE_LONG_LONG -D__LONGLONG"
+		ccflags="$ccflags -DUSE_LONG_LONG"
 		archname64="-n32"
 		d_open64="$undef"
 		# In -n32 mode (ILP32LL64) we use the standard open().
