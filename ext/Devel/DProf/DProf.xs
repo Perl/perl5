@@ -87,7 +87,7 @@ typedef struct {
     U32		total;
     U32		lastid;
     U32		default_perldb;
-    U32		depth;
+    UV		depth;
 #ifdef OS2
     ULONG	frequ;
     long long	start_cnt;
@@ -497,7 +497,7 @@ check_depth(pTHX_ void *foo)
 	    warn("garbled call depth when profiling");
 	}
 	else {
-	    I32 marks = g_depth - need_depth;
+	    IV marks = g_depth - need_depth;
 
 /* 	    warn("Check_depth: got %d, expected %d\n", g_depth, need_depth); */
 	    while (marks--) {

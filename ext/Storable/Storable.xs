@@ -278,8 +278,8 @@ typedef struct stcxt {
     HV *hclass;			/* which classnames have been seen, store time */
     AV *aclass;			/* which classnames have been seen, retrieve time */
     HV *hook;			/* cache for hook methods per class name */
-    I32 tagnum;			/* incremented at store time for each seen object */
-    I32 classnum;		/* incremented at store time for each seen classname */
+    IV tagnum;			/* incremented at store time for each seen object */
+    IV classnum;		/* incremented at store time for each seen classname */
     int netorder;		/* true if network order used */
     int s_tainted;		/* true if input source is tainted, at retrieve time */
     int forgive_me;		/* whether to be forgiving... */
