@@ -283,4 +283,4 @@ Simon Cozens, C<simon@cpan.org>
 L<perlmod>, L<perlmodlib>, L<perlmodinstall>, L<h2xs>, L<strict>,
 L<Carp>, L<Exporter>, L<perlpod>, L<Test>, L<ExtUtils::MakeMaker>,
 http://www.cpan.org/, Ken Williams' tutorial on building your own
-module at http://www.swarthmore.edu/~ken/perl_modules.html
+module at http://mathforum.org/~ken/perl_modules.html
