@@ -39,6 +39,8 @@
 #define PERL_IN_PERLIO_C
 #include "perl.h"
 
+#include "XSUB.h"
+
 #undef PerlMemShared_calloc
 #define PerlMemShared_calloc(x,y) calloc(x,y)
 #undef PerlMemShared_free
@@ -154,6 +156,26 @@ PerlIO_openn(pTHX_ const char *layers, const char *mode, int fd, int imode, int 
  return NULL;
 }
 
+XS(XS_PerlIO__Layer__find)
+{
+ dXSARGS;
+ if (items < 2)
+  Perl_croak(aTHX_ "Usage class->find(name[,load])");
+ else
+  {
+   char *name = SvPV_nolen(ST(1));
+   ST(0) = (strEQ(name,"crlf") || strEQ(name,"raw")) ? &PL_sv_yes : &PL_sv_undef;
+   XSRETURN(1);
+  }
+}
+
+
+void
+Perl_boot_core_PerlIO(pTHX)
+{
+ newXS("PerlIO::Layer::find",XS_PerlIO__Layer__find,__FILE__);
+}
+
 #endif
 
 
@@ -247,7 +269,6 @@ PerlIO_findFILE(PerlIO *pio)
 #include <sys/mman.h>
 #endif
 
-#include "XSUB.h"
 
 void PerlIO_debug(const char *fmt,...) __attribute__((format(__printf__,1,2)));
 
@@ -395,7 +416,6 @@ PerlIO_list_push(PerlIO_list_t *list,PerlIO_funcs *funcs,SV *arg)
  p = &(list->array[list->cur++]);
  p->funcs = funcs;
  if ((p->arg = arg)) {
-  dTHX; 
   SvREFCNT_inc(arg);
  }
 }
@@ -587,6 +607,22 @@ PerlIO_tab_sv(pTHX_ PerlIO_funcs *tab)
  return sv;
 }
 
+XS(XS_PerlIO__Layer__find)
+{
+ dXSARGS;
+ if (items < 2)
+  Perl_croak(aTHX_ "Usage class->find(name[,load])");
+ else
+  {
+   STRLEN len = 0;
+   char *name = SvPV(ST(1),len);
+   bool load  = (items > 2) ? SvTRUE(ST(2)) : 0;
+   PerlIO_funcs *layer = PerlIO_find_layer(aTHX_ name, len, load);
+   ST(0) = (layer) ? sv_2mortal(PerlIO_tab_sv(aTHX_ layer)) : &PL_sv_undef;
+   XSRETURN(1);
+  }
+}
+
 void
 PerlIO_define_layer(pTHX_ PerlIO_funcs *tab)
 {
@@ -724,10 +760,6 @@ PerlIO_default_layers(pTHX)
    const char *s  = (PL_tainting) ? Nullch : PerlEnv_getenv("PERLIO");
    PerlIO_def_layerlist = PerlIO_list_alloc();
 
-#ifdef USE_ATTRIBUTES_FOR_PERLIO
-   newXS("io::MODIFY_SCALAR_ATTRIBUTES",XS_io_MODIFY_SCALAR_ATTRIBUTES,__FILE__);
-#endif
-
    PerlIO_define_layer(aTHX_ &PerlIO_raw);
    PerlIO_define_layer(aTHX_ &PerlIO_unix);
    PerlIO_define_layer(aTHX_ &PerlIO_perlio);
@@ -755,6 +787,14 @@ PerlIO_default_layers(pTHX)
  return PerlIO_def_layerlist;
 }
 
+void
+Perl_boot_core_PerlIO(pTHX)
+{
+#ifdef USE_ATTRIBUTES_FOR_PERLIO
+   newXS("io::MODIFY_SCALAR_ATTRIBUTES",XS_io_MODIFY_SCALAR_ATTRIBUTES,__FILE__);
+#endif
+   newXS("PerlIO::Layer::find",XS_PerlIO__Layer__find,__FILE__);
+}
 
 PerlIO_funcs *
 PerlIO_default_layer(pTHX_ I32 n)

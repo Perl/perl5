@@ -1297,6 +1297,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
     av_store(comppadlist, 1, (SV*)PL_comppad);
     CvPADLIST(PL_compcv) = comppadlist;
 
+    boot_core_PerlIO();
     boot_core_UNIVERSAL();
 #ifndef PERL_MICRO
     boot_core_xsutils();

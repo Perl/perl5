@@ -2,15 +2,7 @@ package open;
 use Carp;
 $open::hint_bits = 0x20000;
 
-# layers array and hash mainly manipulated by C code in perlio.c
-use vars qw(%layers @layers);
-
-# Populate hash in non-PerlIO case
-%layers = (crlf => 1, raw => 0) unless (@layers);
-
-# warn join(',',keys %layers);
-
-our $VERSION = '1.00';
+our $VERSION = '1.01';
 
 sub import {
     my ($class,@args) = @_;
@@ -25,7 +17,7 @@ sub import {
 	my @val;
 	foreach my $layer (split(/\s+/,$discp)) {
             $layer =~ s/^://;
-	    unless(exists $layers{$layer}) {
+	    unless(PerlIO::Layer::->find($layer)) {
 		carp("Unknown discipline layer '$layer'");
 	    }
 	    push(@val,":$layer");
@@ -90,33 +82,14 @@ everywhere if PerlIO is enabled.
 
 =head1 IMPLEMENTATION DETAILS
 
-There are two package variables C<%layers> and C<@layers> which are
-mainly manipulated by C code in F<perlio.c>, but are visible to the
-nosy:
+There is a class method in C<PerlIO::Layer> C<find> which is implemented as XS code.
+It is called by C<import> to validate the layers:
 
-  print "Have ",join(',',keys %open::layers),"\n";
-  print "Using ",join(',',@open::layers),"\n";
+   PerlIO::Layer::->find("perlio")
 
-The C<%open::layers> hash is a record of the available "layers" that
-may be pushed onto a C<PerlIO> stream. The values of the hash are Perl
-objects, of class C<PerlIO::Layer> which are created by the C code in
-F<perlio.c>.  As yet there is nothing useful you can do with the
-objects at the perl level.
-
-The C<@open::layers> array is the current set of layers and their
-arguments.  The array consists of layer => argument pairs and I<must>
-always have even number of entries and the even entries I<must> be
-C<PerlIO::Layer> objects or Perl will "die" when it attempts to open a
-filehandle. In most cases the odd entry will be C<undef>, but in the
-case of (say) ":encoding(iso-8859-1)" it will be 'iso-8859-1'. These
-argument entries are currently restricted to being strings.
-
-When a new C<PerlIO> stream is opened, the C code looks at the array
-to determine the default layers to be pushed. So with care it is
-possible to manipulate the default layer "stack":
-
-    splice(@PerlIO::layers,-2,2);
-    push(@PerlIO::layers,$PerlIO::layers{'stdio'} => undef);
+The return value (if defined) is a Perl object, of class C<PerlIO::Layer> which is
+created by the C code in F<perlio.c>.  As yet there is nothing useful you can do with the
+object at the perl level.
 
 =head1 SEE ALSO
 
