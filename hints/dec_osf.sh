@@ -184,6 +184,17 @@ toke_cflags='optimize=-O2'
 ;;
 esac
 
+# The patch 23787
+# http://public.activestate.com/cgi-bin/perlbrowse?patch=23787
+# broke things for gcc (at least gcc 3.3) so that many of the pack()
+# checksum tests for formats L, j, J, especially when combined
+# with the < and > specifiers, started to fail if compiled with plain -O3.
+case "$isgcc" in
+gcc)
+pp_pack_cflags='optimize="-O3 -fno-cse-skip-blocks"'
+;;
+esac
+
 # we want dynamic fp rounding mode, and we want ieee exception semantics
 case "$isgcc" in
 gcc)	;;

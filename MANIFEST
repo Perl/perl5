@@ -334,6 +334,8 @@ ext/DynaLoader/dl_vmesa.xs	VM/ESA implementation
 ext/DynaLoader/dl_vms.xs	VMS implementation
 ext/DynaLoader/DynaLoader_pm.PL	Dynamic Loader perl module
 ext/DynaLoader/hints/aix.pl	Hint for DynaLoader for named architecture
+ext/DynaLoader/hints/gnukfreebsd.pl	Hint for DynaLoader for named architecture
+ext/DynaLoader/hints/gnuknetbsd.pl	Hint for DynaLoader for named architecture
 ext/DynaLoader/hints/linux.pl	Hint for DynaLoader for named architecture
 ext/DynaLoader/hints/netbsd.pl	Hint for DynaLoader for named architecture
 ext/DynaLoader/hints/openbsd.pl	Hint for DynaLoader for named architecture
@@ -657,6 +659,8 @@ ext/MIME/Base64/t/warn.t	See whether MIME::Base64 works
 ext/NDBM_File/hints/cygwin.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/dec_osf.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/dynixptx.pl	Hint for NDBM_File for named architecture
+ext/NDBM_File/hints/gnukfreebsd.pl	Hint for NDBM_File for named architecture
+ext/NDBM_File/hints/gnuknetbsd.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/linux.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/sco.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/solaris.pl	Hint for NDBM_File for named architecture
@@ -668,6 +672,8 @@ ext/NDBM_File/t/ndbm.t		See if NDBM_File works
 ext/NDBM_File/typemap		NDBM extension interface types
 ext/ODBM_File/hints/cygwin.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/dec_osf.pl	Hint for ODBM_File for named architecture
+ext/ODBM_File/hints/gnukfreebsd.pl	Hint for NDBM_File for named architecture
+ext/ODBM_File/hints/gnuknetbsd.pl	Hint for NDBM_File for named architecture
 ext/ODBM_File/hints/hpux.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/linux.pl	Hint for NDBM_File for named architecture
 ext/ODBM_File/hints/sco.pl	Hint for ODBM_File for named architecture
@@ -707,6 +713,8 @@ ext/PerlIO/via/via.xs		PerlIO layer for layers in perl
 ext/POSIX/hints/bsdos.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/dynixptx.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/freebsd.pl	Hint for POSIX for named architecture
+ext/POSIX/hints/gnukfreebsd.pl	Hint for POSIX for named architecture
+ext/POSIX/hints/gnuknetbsd.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/linux.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/mint.pl		Hint for POSIX for named architecture
 ext/POSIX/hints/netbsd.pl	Hint for POSIX for named architecture
@@ -767,6 +775,8 @@ ext/Socket/Socket.xs		Socket extension external subroutines
 ext/Socket/t/socketpair.t	See if socketpair works
 ext/Socket/t/Socket.t		See if Socket works
 ext/Storable/ChangeLog		Storable extension
+ext/Storable/hints/gnukfreebsd.pl	Hint for Storable for named architecture
+ext/Storable/hints/gnuknetbsd.pl	Hint for Storable for named architecture
 ext/Storable/hints/linux.pl	Hint for Storable for named architecture
 ext/Storable/Makefile.PL	Storable extension
 ext/Storable/MANIFEST		Storable extension
@@ -970,10 +980,13 @@ hints/esix4.sh			Hints for named architecture
 hints/fps.sh			Hints for named architecture
 hints/freebsd.sh		Hints for named architecture
 hints/genix.sh			Hints for named architecture
+hints/gnukfreebsd.sh			Hints for named architecture
+hints/gnuknetbsd.sh			Hints for named architecture
 hints/gnu.sh			Hints for named architecture
 hints/greenhills.sh		Hints for named architecture
 hints/hpux.sh			Hints for named architecture
 hints/i386.sh			Hints for named architecture
+hints/interix.sh		Hints for named architecture
 hints/irix_4.sh			Hints for named architecture
 hints/irix_5.sh			Hints for named architecture
 hints/irix_6_0.sh		Hints for named architecture
@@ -1259,8 +1272,8 @@ lib/Exporter.t			See if Exporter works
 lib/ExtUtils/Changes		MakeMaker change log
 lib/ExtUtils/Command/MM.pm	Calling MM functions from the cmd line
 lib/ExtUtils/Command.pm		Utilities for Make on non-UNIX platforms
-lib/ExtUtils/Constant.pm	generate XS code to import C header constants
 lib/ExtUtils/Constant/Base.pm	generate XS code to import C header constants
+lib/ExtUtils/Constant.pm	generate XS code to import C header constants
 lib/ExtUtils/Constant/Utils.pm	generate XS code to import C header constants
 lib/ExtUtils/Constant/XS.pm	generate XS code to import C header constants
 lib/ExtUtils/Embed.pm		Utilities for embedding Perl in C programs
@@ -2162,6 +2175,7 @@ perlio.c			C code for PerlIO abstraction
 perlio.h			PerlIO abstraction
 perliol.h			PerlIO Layer definition
 perlio.sym			Symbols for PerlIO abstraction
+perl_keyword.pl			A script to generate Perl_keyword() in toke.c
 perlsdio.h			Fake stdio using perlio
 perlsfio.h			Prototype sfio mapping for PerlIO
 perlsh				A poor man's perl shell
@@ -2172,7 +2186,6 @@ perly.fixer			A program to remove yacc stack limitations
 perly.h				The header file for perly.c
 perlyline.pl			Perl code to fix #line directives and gcc warnings in perly.c
 perly.y				Yacc grammar for perl
-perl_keyword.pl			A script to generate Perl_keyword() in toke.c
 plan9/aperl			Shell to make Perl error messages Acme-friendly
 plan9/arpa/inet.h		Plan9 port: replacement C header file
 plan9/buildinfo			Plan9 port: configuration information
