@@ -335,6 +335,7 @@ the strings?).
 	  5.5.640	2000-Feb-02
 	  5.5.650	2000-Feb-08	5.6 beta1
 	  5.5.660	2000-Feb-22	5.6 beta2
+	  5.5.670	2000-Feb-29	5.6 beta3
 
 =head2 SELECTED RELEASE SIZES
 

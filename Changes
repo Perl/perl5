@@ -95,6 +95,439 @@ Version v5.5.670        Development release working toward v5.6
 ----------------
 
 ____________________________________________________________________________
+[  5386] By: gsar                                  on 2000/03/01  03:04:54
+        Log: support kill(0,$pid) on Windows to test if process exists
+     Branch: perl
+	   ! README.win32 pod/perldelta.pod pod/perlport.pod win32/win32.c
+____________________________________________________________________________
+[  5385] By: gsar                                  on 2000/03/01  02:10:01
+        Log: integrate cfgperl changes into mainline
+     Branch: perl
+	  !> Configure Porting/Glossary Porting/config.sh Porting/config_H
+	  !> config_h.SH epoc/config.sh hints/dec_osf.sh hints/solaris_2.sh
+	  !> perl.h vms/subconfigure.com vos/config.def win32/config.bc
+	  !> win32/config.gc win32/config.vc
+____________________________________________________________________________
+[  5384] By: gsar                                  on 2000/03/01  01:47:55
+        Log: oops, change#5382 didn't really fix the typo
+     Branch: perl
+	   ! ext/DynaLoader/dl_dlopen.xs
+____________________________________________________________________________
+[  5383] By: gsar                                  on 2000/03/01  01:38:25
+        Log: avoid warning on type-mismatch
+     Branch: perl
+	   ! ext/DynaLoader/dlutils.c
+____________________________________________________________________________
+[  5382] By: gsar                                  on 2000/03/01  01:33:42
+        Log: fix bug in change#5381
+     Branch: perl
+	   ! ext/DynaLoader/dl_dlopen.xs
+____________________________________________________________________________
+[  5381] By: gsar                                  on 2000/03/01  00:46:44
+        Log: unload extension shared objects when exiting, implemented
+             only for dl_dlopen.xs (from Alan Burlison)
+     Branch: perl
+	   ! ext/DynaLoader/DynaLoader_pm.PL ext/DynaLoader/Makefile.PL
+	   ! ext/DynaLoader/dl_dlopen.xs ext/DynaLoader/dlutils.c
+____________________________________________________________________________
+[  5380] By: gsar                                  on 2000/03/01  00:34:10
+        Log: add perlnumber.pod (from Ilya Zakharevich); substantially edited
+             prose
+     Branch: perl
+	   + pod/perlnumber.pod
+	   ! MANIFEST pod/Makefile pod/buildtoc pod/perl.pod
+	   ! pod/perltoc.pod pod/roffitall
+____________________________________________________________________________
+[  5379] By: jhi                                   on 2000/02/29  23:37:01
+        Log: Be understanding.
+     Branch: cfgperl
+	   ! Configure config_h.SH
+     Branch: metaconfig/U/perl
+	   ! use64bits.U uselfs.U
+____________________________________________________________________________
+[  5378] By: gsar                                  on 2000/02/29  23:35:50
+        Log: VMS fixups (from Dan Sugalski); cosmetic tweaks
+     Branch: perl
+	   ! lib/Test/Harness.pm vms/vms.c
+____________________________________________________________________________
+[  5377] By: jhi                                   on 2000/02/29  23:12:29
+        Log: Tru64 hints fix from Spider Boardman; Tru64 hint for
+             d_Gconvert on long doubles to use sprintf %Lg.
+     Branch: cfgperl
+	   ! hints/dec_osf.sh
+____________________________________________________________________________
+[  5376] By: jhi                                   on 2000/02/29  23:02:45
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> gv.c lib/Pod/Html.pm malloc.c pod/perlapi.pod pod/perlcall.pod
+	  !> pod/perldiag.pod pod/perlembed.pod pod/perlfunc.pod
+	  !> pod/perlguts.pod pod/perlop.pod
+____________________________________________________________________________
+[  5375] By: gsar                                  on 2000/02/29  23:02:34
+        Log: fix File::Find::finddepth() bugs (from Helmut Jarausch)
+     Branch: perl
+	   ! lib/File/Find.pm
+____________________________________________________________________________
+[  5374] By: jhi                                   on 2000/02/29  23:01:35
+        Log: Add libsunmath (long double math library for Solaris,
+             SUNWspro cc only) awareness; fix various Solaris nits.
+     Branch: cfgperl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH epoc/config.sh hints/solaris_2.sh perl.h
+	   ! vms/subconfigure.com vos/config.def win32/config.bc
+	   ! win32/config.gc win32/config.vc
+     Branch: metaconfig
+	   ! U/modified/libs.U
+     Branch: metaconfig/U/perl
+	   + i_sunmath.U
+____________________________________________________________________________
+[  5373] By: gsar                                  on 2000/02/29  22:56:10
+        Log: fix Pod::Html to recognize C<< > >> etc., and convert some pods
+             to the more readable form (from Robin Barker)
+     Branch: perl
+	   ! lib/Pod/Html.pm pod/perlfunc.pod pod/perlop.pod
+____________________________________________________________________________
+[  5372] By: gsar                                  on 2000/02/29  22:52:27
+        Log: better fix for malloc bug in change#5346 (from Dominic Dunlop)
+     Branch: perl
+	   ! malloc.c
+____________________________________________________________________________
+[  5371] By: gsar                                  on 2000/02/29  22:29:36
+        Log: fix pods to reflect newer canonical names for call_sv() etc.
+     Branch: perl
+	   ! gv.c pod/perlapi.pod pod/perlcall.pod pod/perldiag.pod
+	   ! pod/perlembed.pod pod/perlguts.pod
+____________________________________________________________________________
+[  5370] By: jhi                                   on 2000/02/29  22:08:26
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> perl.c perl.h win32/win32.c win32/win32.h
+____________________________________________________________________________
+[  5369] By: gsar                                  on 2000/02/29  21:37:10
+        Log: remove bogus code that caused test failures on HP-UX
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[  5368] By: gsar                                  on 2000/02/29  20:45:01
+        Log: change#5364 had a few problems
+     Branch: perl
+	   ! perl.c win32/win32.c win32/win32.h
+____________________________________________________________________________
+[  5367] By: gsar                                  on 2000/02/29  18:19:04
+        Log: integrate cfgperl changes into mainline
+     Branch: perl
+	  !> Configure config_h.SH epoc/config.sh hints/hpux.sh
+	  !> hints/solaris_2.sh regcomp.c vms/subconfigure.com
+	  !> vos/config.def win32/config.bc win32/config.gc win32/config.vc
+____________________________________________________________________________
+[  5366] By: jhi                                   on 2000/02/29  18:15:09
+        Log: Some compilers have problems with quad switch() controls.
+     Branch: cfgperl
+	   ! regcomp.c
+____________________________________________________________________________
+[  5365] By: jhi                                   on 2000/02/29  18:14:30
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> perl.c win32/Makefile win32/makefile.mk win32/win32.c
+	  !> win32/win32.h
+____________________________________________________________________________
+[  5364] By: gsar                                  on 2000/02/29  18:11:34
+        Log: utf8-ize @ARGV when -C switch is used on Windows
+     Branch: perl
+	   ! perl.c win32/Makefile win32/makefile.mk win32/win32.c
+	   ! win32/win32.h
+____________________________________________________________________________
+[  5363] By: jhi                                   on 2000/02/29  17:47:48
+        Log: HP-UX lddlflags were broken.
+     Branch: cfgperl
+	   ! Configure config_h.SH
+     Branch: metaconfig/U/perl
+	   ! dlsrc.U
+____________________________________________________________________________
+[  5362] By: jhi                                   on 2000/02/29  17:32:27
+        Log: Make the failsafe question about socket address structure
+             sizes hopefully a bit less confusing.
+     Branch: cfgperl
+	   ! Configure config_h.SH
+     Branch: metaconfig
+	   ! U/protos/socksizetype.U
+____________________________________________________________________________
+[  5361] By: jhi                                   on 2000/02/29  17:17:10
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> malloc.c
+____________________________________________________________________________
+[  5360] By: gsar                                  on 2000/02/29  17:16:09
+        Log: malloc "fix" in change#5346 coredumps on HP-UX, revert
+     Branch: perl
+	   ! malloc.c
+____________________________________________________________________________
+[  5359] By: jhi                                   on 2000/02/29  17:06:12
+        Log: Make the warning about preferring HP's ar more visible.
+     Branch: cfgperl
+	   ! hints/hpux.sh
+____________________________________________________________________________
+[  5358] By: jhi                                   on 2000/02/29  17:04:36
+        Log: The sprintf option was blithely printing long doubles as
+             doubles (spotted by Spider Boardman); dqgcvt() wasn't ever
+             being used; made the test more thorough.
+     Branch: cfgperl
+	   ! Configure config_h.SH epoc/config.sh vms/subconfigure.com
+	   ! vos/config.def win32/config.bc win32/config.gc win32/config.vc
+     Branch: metaconfig
+	   ! U/compline/d_gconvert.U
+____________________________________________________________________________
+[  5357] By: jhi                                   on 2000/02/29  16:58:08
+        Log: Make the warning about abandoning long doubles more visible.
+     Branch: cfgperl
+	   ! Configure config_h.SH
+     Branch: metaconfig/U/perl
+	   ! uselongdbl.U
+____________________________________________________________________________
+[  5356] By: jhi                                   on 2000/02/29  16:51:33
+        Log: HP-UX gcc fix; detypo in use64bits.
+     Branch: cfgperl
+	   ! Configure config_h.SH
+     Branch: metaconfig/U/perl
+	   ! dlsrc.U use64bits.U
+____________________________________________________________________________
+[  5355] By: jhi                                   on 2000/02/29  16:31:17
+        Log: Solaris 64-bitness hints saga continues.
+     Branch: cfgperl
+	   ! hints/solaris_2.sh
+____________________________________________________________________________
+[  5354] By: jhi                                   on 2000/02/29  16:04:42
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> ext/Thread/Thread.xs perl.c perl.h
+____________________________________________________________________________
+[  5353] By: jhi                                   on 2000/02/29  15:54:10
+        Log: Solaris hints tweak for 64-bitallness.
+     Branch: cfgperl
+	   ! hints/solaris_2.sh
+____________________________________________________________________________
+[  5352] By: jhi                                   on 2000/02/29  15:35:13
+        Log: Too many 64-bitness option combinations.
+     Branch: cfgperl
+	   ! Configure config_h.SH
+     Branch: metaconfig/U/perl
+	   ! use64bits.U
+____________________________________________________________________________
+[  5351] By: gsar                                  on 2000/02/29  15:31:56
+        Log: more adjustments needed for change#5342 under use5005threads
+     Branch: perl
+	   ! ext/Thread/Thread.xs perl.c perl.h
+____________________________________________________________________________
+[  5350] By: jhi                                   on 2000/02/29  15:24:59
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  +> pod/perlboot.pod
+	  !> (integrate 40 files)
+____________________________________________________________________________
+[  5349] By: gsar                                  on 2000/02/29  08:13:56
+        Log: more m//s and $ vs \z fixups (from Greg Bacon)
+     Branch: perl
+	   ! lib/File/CheckTree.pm lib/File/Copy.pm lib/File/DosGlob.pm
+	   ! lib/File/Path.pm lib/File/Spec/Mac.pm lib/File/Spec/OS2.pm
+	   ! lib/File/Spec/Unix.pm lib/File/Spec/VMS.pm
+	   ! lib/File/Spec/Win32.pm
+____________________________________________________________________________
+[  5348] By: gsar                                  on 2000/02/29  08:00:48
+        Log: increase sleep to compensate for slow cpu (from Peter Haworth
+             <pmh@edison.ioppublishing.com>)
+     Branch: perl
+	   ! t/io/pipe.t
+____________________________________________________________________________
+[  5347] By: gsar                                  on 2000/02/29  07:52:35
+        Log: add OO tutorial for beginners (from Randal L. Schwartz
+             <merlyn@stonehenge.com>)
+     Branch: perl
+	   + pod/perlboot.pod
+	   ! MANIFEST pod/Makefile pod/buildtoc pod/perl.pod
+	   ! pod/perldelta.pod pod/perltoc.pod
+____________________________________________________________________________
+[  5346] By: gsar                                  on 2000/02/29  07:24:52
+        Log: malloc bug fix and machten hints (from Dominic Dunlop
+             <domo@computer.org>)
+     Branch: perl
+	   ! hints/machten.sh malloc.c
+____________________________________________________________________________
+[  5345] By: gsar                                  on 2000/02/29  06:32:56
+        Log: integrate cfgperl contents into mainline
+     Branch: perl
+	  !> Configure MANIFEST config_h.SH ext/DynaLoader/dl_aix.xs
+	  !> ext/DynaLoader/hints/aix.pl ext/File/Glob/Makefile.PL
+	  !> hints/aix.sh hints/hpux.sh hints/irix_6.sh hints/solaris_2.sh
+	  !> mg.c perl.h pod/perldelta.pod pod/perlop.pod pp.c sv.c
+	  !> t/lib/ipc_sysv.t t/op/64bit.t t/op/misc.t t/op/numconvert.t
+	  !> win32/config.bc win32/config.gc win32/config.vc
+____________________________________________________________________________
+[  5344] By: gsar                                  on 2000/02/29  06:25:33
+        Log: export list tweak
+     Branch: perl
+	   ! makedef.pl
+____________________________________________________________________________
+[  5343] By: gsar                                  on 2000/02/29  06:01:22
+        Log: various shenanigans in change#5342
+     Branch: perl
+	   ! makedef.pl thread.h util.c win32/Makefile win32/makefile.mk
+	   ! win32/win32.h win32/win32thread.h
+____________________________________________________________________________
+[  5342] By: gsar                                  on 2000/02/29  04:53:00
+        Log: support fetching current interpreter from TLS under useithreads
+     Branch: perl
+	   ! embed.h embed.pl embedvar.h global.sym intrpvar.h makedef.pl
+	   ! objXSUB.h perl.c perl.h perlapi.h perlvars.h pod/perldelta.pod
+	   ! proto.h sv.c thread.h util.c win32/perlhost.h win32/perllib.c
+	   ! win32/win32.h win32/win32thread.c win32/win32thread.h
+____________________________________________________________________________
+[  5341] By: jhi                                   on 2000/02/29  03:26:11
+        Log: Don't know how to do large files using gcc in HP-UX.
+     Branch: cfgperl
+	   ! hints/hpux.sh
+____________________________________________________________________________
+[  5340] By: jhi                                   on 2000/02/29  03:07:16
+        Log: Added few more libs to scan.
+     Branch: cfgperl
+	   ! Configure config_h.SH
+     Branch: metaconfig
+	   ! U/modified/Myinit.U U/modified/libs.U
+____________________________________________________________________________
+[  5339] By: jhi                                   on 2000/02/29  01:37:43
+        Log: Bigger warning on the changed behaviour of the unary ~.
+     Branch: cfgperl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[  5338] By: jhi                                   on 2000/02/29  01:17:07
+        Log: IRIX 64-bitness fixes.
+     Branch: cfgperl
+	   ! Configure config_h.SH hints/irix_6.sh
+     Branch: metaconfig
+	   ! U/modified/Cppsym.U
+____________________________________________________________________________
+[  5337] By: jhi                                   on 2000/02/29  00:59:08
+        Log: Userfriendliness.
+     Branch: cfgperl
+	   ! Configure config_h.SH
+     Branch: metaconfig/U/perl
+	   ! use64bits.U
+____________________________________________________________________________
+[  5336] By: jhi                                   on 2000/02/29  00:53:51
+        Log: Undo the sv_2pv() change of #5329, caused numconvert.t
+             problems in IRIX 32-n32. 
+     Branch: cfgperl
+	   ! sv.c
+____________________________________________________________________________
+[  5335] By: jhi                                   on 2000/02/29  00:22:37
+        Log: Fixes for building on HP-UX using gcc from Daniel S. Lewart.
+     Branch: cfgperl
+	   ! Configure config_h.SH hints/hpux.sh
+     Branch: metaconfig/U/perl
+	   ! dlsrc.U
+____________________________________________________________________________
+[  5334] By: jhi                                   on 2000/02/28  23:59:59
+        Log: Do not cast pointers into I32s.
+     Branch: cfgperl
+	   ! mg.c
+____________________________________________________________________________
+[  5333] By: jhi                                   on 2000/02/28  23:39:26
+        Log: More AIX fixes from Steven Hirsch.
+     Branch: cfgperl
+	   ! Configure config_h.SH ext/DynaLoader/dl_aix.xs
+	   ! ext/DynaLoader/hints/aix.pl hints/aix.sh
+     Branch: metaconfig/U/perl
+	   ! use64bits.U
+____________________________________________________________________________
+[  5332] By: jhi                                   on 2000/02/28  22:45:59
+        Log: Detypo.
+     Branch: cfgperl
+	   ! hints/irix_6.sh
+____________________________________________________________________________
+[  5331] By: jhi                                   on 2000/02/28  22:23:36
+        Log: Regularize the call-back units (and fix a bug in #5330).
+     Branch: cfgperl
+	   ! hints/aix.sh hints/hpux.sh hints/irix_6.sh hints/solaris_2.sh
+____________________________________________________________________________
+[  5330] By: jhi                                   on 2000/02/28  21:50:28
+        Log: Don't be overeager to turn on 64-bitallness.
+     Branch: cfgperl
+	   ! hints/solaris_2.sh
+____________________________________________________________________________
+[  5329] By: jhi                                   on 2000/02/28  20:32:53
+        Log: Lift the 32-bit straightjacket from bit ops;
+             prefer IV/UV over NV in sv_2pv().
+     Branch: cfgperl
+	   ! pod/perldelta.pod pod/perlop.pod pp.c sv.c t/op/64bit.t
+	   ! t/op/misc.t t/op/numconvert.t
+____________________________________________________________________________
+[  5328] By: jhi                                   on 2000/02/28  20:11:59
+        Log: Do not add -Ae for gcc.
+     Branch: cfgperl
+	   ! hints/hpux.sh
+____________________________________________________________________________
+[  5327] By: jhi                                   on 2000/02/28  17:35:39
+        Log: Use the vendor file(1).
+     Branch: cfgperl
+	   ! hints/hpux.sh hints/irix_6.sh hints/solaris_2.sh
+____________________________________________________________________________
+[  5326] By: jhi                                   on 2000/02/28  17:31:19
+        Log: Put back madvise lost because of a typo.
+     Branch: cfgperl
+	   ! Configure config_h.SH perl.h win32/config.bc win32/config.gc
+	   ! win32/config.vc
+____________________________________________________________________________
+[  5325] By: jhi                                   on 2000/02/28  16:44:32
+        Log: Tweak HP-UX libraries.
+     Branch: cfgperl
+	   ! hints/hpux.sh
+____________________________________________________________________________
+[  5324] By: jhi                                   on 2000/02/28  16:37:43
+        Log: Don't be overeager to turn on largefileness.
+     Branch: cfgperl
+	   ! hints/solaris_2.sh
+____________________________________________________________________________
+[  5323] By: jhi                                   on 2000/02/28  16:23:15
+        Log: AIX 64-bit patches from Steven Hirsch <hirschs@btv.ibm.com>
+             The patch to File/Glob/Makefile.PL is inconvenient but at the
+             moment necessary: adding an ext/FIle/Glob/hints/aix.pl to turn
+             off the optimization ($self->{OPTIMIZE} = '') doesn't work,
+             the file is processed by MakeMaker but OPTIMIZE ends up as -O
+             in the resulting Makefile.  A MakeMaker bug?
+     Branch: cfgperl
+	   ! MANIFEST ext/DynaLoader/dl_aix.xs ext/File/Glob/Makefile.PL
+	   ! hints/aix.sh t/lib/ipc_sysv.t
+____________________________________________________________________________
+[  5322] By: jhi                                   on 2000/02/28  16:17:33
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> (integrate 45 files)
+____________________________________________________________________________
+[  5321] By: gsar                                  on 2000/02/28  10:13:03
+        Log: avoid warnings in legacy code (from David Dyck)
+     Branch: perl
+	   ! lib/pwd.pl
+____________________________________________________________________________
+[  5320] By: gsar                                  on 2000/02/28  10:11:37
+        Log: find2perl doc tweak (from David Dyck <dcd@tc.fluke.com>)
+     Branch: perl
+	   ! x2p/find2perl.PL
+____________________________________________________________________________
+[  5319] By: gsar                                  on 2000/02/28  10:07:00
+        Log: fix outdated URLs (from Michael G Schwern)
+     Branch: perl
+	   ! pod/perldelta.pod pod/perlfaq1.pod pod/perlfaq2.pod
+	   ! pod/perlfaq3.pod pod/perlfaq4.pod pod/perlfaq8.pod
+	   ! pod/perlfaq9.pod pod/perlmodinstall.pod pod/perlmodlib.pod
+	   ! pod/perlopentut.pod pod/perlport.pod pod/perltoc.pod
+	   ! pod/perlvar.pod pod/perlxs.pod
+____________________________________________________________________________
+[  5318] By: gsar                                  on 2000/02/28  10:04:57
+        Log: update Changes, patchlevel etc.
+     Branch: perl
+	   ! Changes patchlevel.h win32/Makefile win32/config.bc
+	   ! win32/config.gc win32/config.vc win32/config_H.bc
+	   ! win32/config_H.gc win32/config_H.vc win32/makefile.mk
+____________________________________________________________________________
 [  5317] By: gsar                                  on 2000/02/28  09:39:47
         Log: make stringwise bitops work properly on utf8 strings
      Branch: perl
