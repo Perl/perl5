@@ -211,6 +211,7 @@ sub charinfo {
 	use Search::Dict 1.02;
 	if (look($UNICODEFH, "$hexk;", { xfrm => sub { $_[0] =~ /^([^;]+);(.+)/; sprintf "%06X;$2", hex($1) } } ) >= 0) {
 	    my $line = <$UNICODEFH>;
+	    return unless defined $line;
 	    chomp $line;
 	    my %prop;
 	    @prop{qw(
