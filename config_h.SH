@@ -3218,5 +3218,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_fcntl_can_lock FCNTL_CAN_LOCK		/**/
 
+/* HAS_FSYNC:
+ *	This symbol, if defined, indicates that the fsync routine is
+ *	available to write a file's modified data and attributes to
+ *	permanent storage.
+ */
+#$d_fsync HAS_FSYNC		/**/
+
 #endif
 !GROK!THIS!

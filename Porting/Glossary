@@ -614,6 +614,10 @@ d_fstatvfs (d_statvfs.U):
 	This variable conditionally defines the HAS_FSTATVFS symbol, which
 	indicates to the C program that the fstatvfs() routine is available.
 
+d_fsync (d_fsync.U):
+	This variable conditionally defines the HAS_FSYNC symbol, which
+	indicates to the C program that the fsync() routine is available.
+
 d_ftello (d_ftello.U):
 	This variable conditionally defines the HAS_FTELLO symbol, which
 	indicates to the C program that the ftello() routine is available.

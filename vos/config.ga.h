@@ -1357,6 +1357,13 @@
  */
 /*#define HAS_FSTATFS		/**/
 
+/* HAS_FSYNC:
+ *	This symbol, if defined, indicates that the fsync routine is
+ *	available to write a file's modified data and attributes to
+ *	permanent storage.
+ */
+/*#define HAS_FSYNC		/**/
+
 /* HAS_FTELLO:
  *	This symbol, if defined, indicates that the ftello routine is
  *	available to ftell beyond 32 bits (useful for ILP32 hosts).

@@ -3194,4 +3194,11 @@
  */
 /*#define FCNTL_CAN_LOCK		/ **/
 
+/* HAS_FSYNC:
+ *	This symbol, if defined, indicates that the fsync routine is
+ *	available to write a file's modified data and attributes to
+ *	permanent storage.
+ */
+# HAS_FSYNC		/**/
+
 #endif

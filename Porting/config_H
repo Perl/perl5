@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : /m/fs/work/work/permanent/perl/pp4/perl
- * Configuration time: Sat Nov 11 18:52:36 EET 2000
+ * Configuration time: Sun Nov 12 20:54:32 EET 2000
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -3197,5 +3197,12 @@
  *	It may be undefined on VMS.
  */
 #define FCNTL_CAN_LOCK		/**/
+
+/* HAS_FSYNC:
+ *	This symbol, if defined, indicates that the fsync routine is
+ *	available to write a file's modified data and attributes to
+ *	permanent storage.
+ */
+#define HAS_FSYNC		/**/
 
 #endif

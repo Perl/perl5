@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sat Nov 11 18:45:10 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Sun Nov 12 20:50:13 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >/tmp/c1$$ <<EOF
@@ -362,6 +362,7 @@ d_fs_data_s=''
 d_fseeko=''
 d_fsetpos=''
 d_fstatfs=''
+d_fsync=''
 d_ftello=''
 d_ftime=''
 d_gettimeod=''
@@ -9276,6 +9277,10 @@ set fstatvfs d_fstatvfs
 eval $inlibc
 
 
+: see if fsync exists
+set fsync d_fsync
+eval $inlibc
+
 : see if ftello exists
 set ftello d_ftello
 eval $inlibc
@@ -15576,6 +15581,7 @@ d_fseeko='$d_fseeko'
 d_fsetpos='$d_fsetpos'
 d_fstatfs='$d_fstatfs'
 d_fstatvfs='$d_fstatvfs'
+d_fsync='$d_fsync'
 d_ftello='$d_ftello'
 d_ftime='$d_ftime'
 d_getcwd='$d_getcwd'
