@@ -677,7 +677,7 @@ sub B::CV::save {
 }
 
 sub B::GV::save {
-    my ($gv) = @_;
+    my ($gv,$skip_cv) = @_;
     my $sym = objsym($gv);
     if (defined($sym)) {
 	#warn sprintf("GV 0x%x already saved as $sym\n", $$gv); # debug
@@ -735,7 +735,7 @@ sub B::GV::save {
 	    $gvhv->save;
 	}
 	my $gvcv = $gv->CV;
-	if ($$gvcv) {
+	if ($$gvcv && !$skip_cv) {
 	    $init->add(sprintf("GvCV($sym) = (CV*)s\\_%x;", $$gvcv));
 #	    warn "GV::save &$name\n"; # debug
 	    $gvcv->save;
@@ -1111,25 +1111,22 @@ sub B::GV::savecv
  my $package=$gv->STASH->NAME;
  my $name = $gv->NAME;
  my $cv = $gv->CV;
- return unless ($$cv || $name eq 'ISA');
+ my $sv = $gv->SV;
+ my $av = $gv->AV;
+ my $hv = $gv->HV;
+ my $skip_cv = 0;
+
  # We may be looking at this package just because it is a branch in the 
  # symbol table which is on the path to a package which we need to save
- # e.g. this is 'Getopt' and wee need to save 'Getopt::Long'
+ # e.g. this is 'Getopt' and we need to save 'Getopt::Long'
  # 
- if ($$cv && $name eq "bootstrap" && $cv->XSUB)
-  {
-   my $file = $cv->FILEGV->SV->PV;
-   $bootstrap->add($file);
-  }
- unless ($unused_sub_packages{$package})
-  {
-   warn sprintf("omitting cv $name in %s\n", $package) if $$cv; # if $debug_cv;
-   return ;
-  }
+ return unless ($unused_sub_packages{$package});
  if ($$cv) 
   {
    if ($name eq "bootstrap" && $cv->XSUB) 
     {
+     my $file = $cv->FILEGV->SV->PV;
+     $bootstrap->add($file);
      my $name = $gv->STASH->NAME.'::'.$name;
      no strict 'refs';
      *{$name} = \&Dummy_BootStrap;   
@@ -1137,12 +1134,12 @@ sub B::GV::savecv
     }
    warn sprintf("saving extra CV &%s::%s (0x%x) from GV 0x%x\n",
                   $package, $name, $$cv, $$gv) if ($debug_cv); 
-   $gv->save;
-  }
- elsif ($name eq 'ISA')
+  }                                     
+ else
   {
-   $gv->save;
+   return unless ($$av || $$sv || $$hv)
   }
+ $gv->save($skip_cv);
 }
 
 sub mark_package
