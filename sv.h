@@ -1067,9 +1067,9 @@ Release the internal mutex for an SV.
 #define Sv_Grow sv_grow
 
 #ifdef USE_THREADS
-#   define FDPID_LOCK()		MUTEX_LOCK(&PL_fdpid_mutex)
-#   define FDPID_UNLOCK()	MUTEX_UNLOCK(&PL_fdpid_mutex)
+#   define FDPID_LOCK		MUTEX_LOCK(&PL_fdpid_mutex)
+#   define FDPID_UNLOCK		MUTEX_UNLOCK(&PL_fdpid_mutex)
 #else
-#   define FDPID_LOCK()
-#   define FDPID_UNLOCK()
+#   define FDPID_LOCK
+#   define FDPID_UNLOCK
 #endif

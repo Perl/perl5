@@ -436,12 +436,17 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
     varstash = GvSTASH(CvGV(cv));
     vargv = *(GV**)hv_fetch(varstash, autoload, autolen, TRUE);
     ENTER;
+
+#ifdef USE_THREADS
     Perl_lock(aTHX_ (SV *)varstash);
+#endif
     if (!isGV(vargv))
 	gv_init(vargv, varstash, autoload, autolen, FALSE);
     LEAVE;
     varsv = GvSV(vargv);
+#ifdef USE_THREADS
     Perl_lock(aTHX_ varsv);
+#endif
     sv_setpv(varsv, HvNAME(stash));
     sv_catpvn(varsv, "::", 2);
     sv_catpvn(varsv, name, len);
