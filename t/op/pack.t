@@ -1,12 +1,25 @@
-#!./perl
+#!./perl -Tw
 
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
-    require Config; import Config;
+}
+
+use Config;
+
+$Is_EBCDIC = (defined $Config{ebcdic} && $Config{ebcdic} eq 'define');
+
+my $test = 1;
+sub ok {
+    my($ok) = @_;
+    print "not " unless $ok;
+    print "ok $test\n";
+    $test++;
+    return $ok;
 }
 
 print "1..161\n";
+
 # Note: All test numbers in comments are off by 1 after the comment below..
 
 $format = "c2 x5 C C x s d i l a6";
@@ -16,33 +29,29 @@ $format = "c2 x5 C C x s d i l a6";
 $foo = pack($format,@ary);
 @ary2 = unpack($format,$foo);
 
-print ($#ary == $#ary2 ? "ok 1\n" : "not ok 1\n");
+ok($#ary == $#ary2);
 
 $out1=join(':',@ary);
 $out2=join(':',@ary2);
 # Using long double NVs may introduce greater accuracy than wanted.
 $out1 =~ s/:9\.87654321097999\d*:/:9.87654321098:/;
 $out2 =~ s/:9\.87654321097999\d*:/:9.87654321098:/;
-print ($out1 eq $out2? "ok 2\n" : "not ok 2\n");
+ok($out1 eq $out2);
 
-print ($foo =~ /def/ ? "ok 3\n" : "not ok 3\n");
+ok($foo =~ /def/);
 
 # How about counting bits?
 
-print +($x = unpack("%32B*", "\001\002\004\010\020\040\100\200\377")) == 16
-	? "ok 4\n" : "not ok 4 $x\n";
+ok( ($x = unpack("%32B*", "\001\002\004\010\020\040\100\200\377")) == 16 );
 
-print +($x = unpack("%32b69", "\001\002\004\010\020\040\100\200\017")) == 12
-	? "ok 5\n" : "not ok 5 $x\n";
+ok( ($x = unpack("%32b69", "\001\002\004\010\020\040\100\200\017")) == 12 );
 
-print +($x = unpack("%32B69", "\001\002\004\010\020\040\100\200\017")) == 9
-	? "ok 6\n" : "not ok 6 $x\n";
+ok( ($x = unpack("%32B69", "\001\002\004\010\020\040\100\200\017")) == 9 );
 
 my $sum = 129; # ASCII
-$sum = 103 if ($Config{ebcdic} eq 'define');
+$sum = 103 if $Is_EBCDIC;
 
-print +($x = unpack("%32B*", "Now is the time for all good blurfl")) == $sum
-	? "ok 7\n" : "not ok 7 $x\n";
+ok( ($x = unpack("%32B*", "Now is the time for all good blurfl")) == $sum );
 
 open(BIN, "./perl") || open(BIN, "./perl.exe") || open(BIN, $^X)
     || die "Can't open ../perl or ../perl.exe: $!\n";
@@ -51,13 +60,11 @@ close BIN;
 
 $sum = unpack("%32b*", $foo);
 $longway = unpack("b*", $foo);
-print $sum == $longway =~ tr/1/1/ ? "ok 8\n" : "not ok 8\n";
+ok( $sum == $longway =~ tr/1/1/ );
 
-print +($x = unpack("I",pack("I", 0xFFFFFFFF))) == 0xFFFFFFFF
-	? "ok 9\n" : "not ok 9 $x\n";
+ok( ($x = unpack("I",pack("I", 0xFFFFFFFF))) == 0xFFFFFFFF );
 
 # check 'w'
-my $test=10;
 my @x = (5,130,256,560,32000,3097152,268435455,1073741844, 2**33,
          '4503599627365785','23728385234614992549757750638446');
 my $x = pack('w*', @x);
@@ -411,7 +418,7 @@ $test++;
 
 eval { ($x) = unpack 'a/a*/b*', '212ab' };
 my $expected_x = '100001100100';
-if ($Config{ebcdic} eq 'define') { $expected_x = '100000010100'; }
+if ($Is_EBCDIC) { $expected_x = '100000010100'; }
 print $@ eq '' && $x eq $expected_x ? "ok $test\n" : "#$x,$@\nnot ok $test\n";
 $test++;
 
