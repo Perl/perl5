@@ -323,7 +323,8 @@ and values.
 Significant updates on the encoding pragma functionality
 (tr/// and the DATA filehandle, formats).  The ISO 8859-6 conversion
 table has been corrected (the 0x30..0x39 erroneously mapped to
-U+0660..U+0669, instead of U+0030..U+0039).  The UTF-7 encoding has
+U+0660..U+0669, instead of U+0030..U+0039).  The GSM 03.38 conversion
+did not handle escape sequences correctly.  The UTF-7 encoding has
 been added (making Encode feature-complete with Unicode::String).
 
 =item fields
