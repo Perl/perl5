@@ -1288,6 +1288,7 @@
 #define invert			CPerlObj::Perl_invert
 #define io_close		CPerlObj::Perl_io_close
 #define is_an_int		CPerlObj::Perl_is_an_int
+#define is_handle_constructor	CPerlObj::Perl_is_handle_constructor
 #define is_uni_alnum		CPerlObj::Perl_is_uni_alnum
 #define is_uni_alnum_lc		CPerlObj::Perl_is_uni_alnum_lc
 #define is_uni_alpha		CPerlObj::Perl_is_uni_alpha

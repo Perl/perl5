@@ -1387,6 +1387,8 @@
 #define io_close		pPerl->Perl_io_close
 #undef  is_an_int
 #define is_an_int		pPerl->Perl_is_an_int
+#undef  is_handle_constructor
+#define is_handle_constructor	pPerl->Perl_is_handle_constructor
 #undef  is_uni_alnum
 #define is_uni_alnum		pPerl->Perl_is_uni_alnum
 #undef  is_uni_alnum_lc

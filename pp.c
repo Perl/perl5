@@ -240,9 +240,18 @@ PP(pp_rv2gv)
 		RETSETUNDEF;
 	    }
 	    sym = SvPV(sv, n_a);
-	    if (PL_op->op_private & HINT_STRICT_REFS)
-		DIE(PL_no_symref, sym, "a symbol");
-	    sv = (SV*)gv_fetchpv(sym, TRUE, SVt_PVGV);
+	    if ((PL_op->op_flags & OPf_SPECIAL) &&
+		!(PL_op->op_flags & OPf_MOD))
+	    {
+		sv = (SV*)gv_fetchpv(sym, FALSE, SVt_PVGV);
+		if (!sv)
+		    RETSETUNDEF;
+	    }
+	    else {
+		if (PL_op->op_private & HINT_STRICT_REFS)
+		    DIE(PL_no_symref, sym, "a symbol");
+		sv = (SV*)gv_fetchpv(sym, TRUE, SVt_PVGV);
+	    }
 	}
     }
     if (PL_op->op_private & OPpLVAL_INTRO)
@@ -287,9 +296,18 @@ PP(pp_rv2sv)
 		RETSETUNDEF;
 	    }
 	    sym = SvPV(sv, n_a);
-	    if (PL_op->op_private & HINT_STRICT_REFS)
-		DIE(PL_no_symref, sym, "a SCALAR");
-	    gv = (GV*)gv_fetchpv(sym, TRUE, SVt_PV);
+	    if ((PL_op->op_flags & OPf_SPECIAL) &&
+		!(PL_op->op_flags & OPf_MOD))
+	    {
+		gv = (GV*)gv_fetchpv(sym, FALSE, SVt_PV);
+		if (!gv)
+		    RETSETUNDEF;
+	    }
+	    else {
+		if (PL_op->op_private & HINT_STRICT_REFS)
+		    DIE(PL_no_symref, sym, "a SCALAR");
+		gv = (GV*)gv_fetchpv(sym, TRUE, SVt_PV);
+	    }
 	}
 	sv = GvSV(gv);
     }

@@ -894,6 +894,7 @@ void debprof _((OP *o));
 void *bset_obj_store _((void *obj, I32 ix));
 OP *new_logop _((I32 type, I32 flags, OP **firstp, OP **otherp));
 void simplify_sort _((OP *o));
+bool is_handle_constructor _((OP *o, I32 argnum));
 
 I32 do_trans_CC_simple _((SV *sv));
 I32 do_trans_CC_count _((SV *sv));

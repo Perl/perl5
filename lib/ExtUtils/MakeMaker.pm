@@ -441,7 +441,12 @@ sub ExtUtils::MakeMaker::new {
 	}
 	if ($self->{PARENT}) {
 	    $self->{PARENT}->{CHILDREN}->{$newclass} = $self;
-	    $self->{CAPI} = $self->{PARENT}->{CAPI};
+	    if (exists $self->{PARENT}->{CAPI}
+		and not exists $self->{CAPI})
+	    {
+		# inherit, but only if already unspecified
+		$self->{CAPI} = $self->{PARENT}->{CAPI};
+	    }
 	}
     } else {
 	parse_args($self,split(' ', $ENV{PERL_MM_OPT} || ''),@ARGV);
@@ -1209,6 +1214,10 @@ currently used by MakeMaker but may be handy in Makefile.PLs.
 =item CAPI
 
 Switch to force usage of the Perl C API even when compiling for PERL_OBJECT.
+
+Note that this attribute is passed through to any recursive build,
+but if and only if the submodule's Makefile.PL itself makes no mention
+of the 'CAPI' attribute.
 
 =item CCFLAGS
 

@@ -365,7 +365,8 @@ listening for more connections on a listen socket
 
 =head1 AUTHOR
 
-Graham Barr E<lt>F<gbarr@pobox.com>E<gt>
+Graham Barr. Currently maintained by the Perl Porters.  Please report all
+bugs to <perl5-porters@perl.org>.
 
 =head1 COPYRIGHT
 
