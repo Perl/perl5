@@ -319,6 +319,22 @@ Perl_deprecate(pTHX_ char *s)
 	Perl_warner(aTHX_ WARN_DEPRECATED, "Use of %s is deprecated", s);
 }
 
+void
+Perl_deprecate_old(pTHX_ char *s)
+{
+    /* This function should NOT be called for any new deprecated warnings */
+    /* Use Perl_deprecate instead                                         */
+    /*                                                                    */
+    /* It is here to maintain backward compatibility with the pre-5.8     */
+    /* warnings category hierarchy. The "deprecated" category used to     */
+    /* live under the "syntax" category. It is now a top-level category   */
+    /* in its own right.                                                  */
+
+    if (ckWARN2(WARN_DEPRECATED, WARN_SYNTAX))
+	Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX), 
+			"Use of %s is deprecated", s);
+}
+
 /*
  * depcom
  * Deprecate a comma-less variable list.
@@ -327,7 +343,7 @@ Perl_deprecate(pTHX_ char *s)
 STATIC void
 S_depcom(pTHX)
 {
-    deprecate("comma-less variable list");
+    deprecate_old("comma-less variable list");
 }
 
 /*
@@ -6445,7 +6461,7 @@ S_scan_heredoc(pTHX_ register char *s)
 	else
 	    term = '"';
 	if (!isALNUM_lazy_if(s,UTF))
-	    deprecate("bare << to mean <<\"\"");
+	    deprecate_old("bare << to mean <<\"\"");
 	for (; isALNUM_lazy_if(s,UTF); s++) {
 	    if (d < e)
 		*d++ = *s;

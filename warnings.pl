@@ -27,7 +27,6 @@ my $tree = {
 			     	'reserved'	=> DEFAULT_OFF,
 				'digit'		=> DEFAULT_OFF,
 			     	'parenthesis'	=> DEFAULT_OFF,
-       	 			'deprecated'	=> DEFAULT_OFF,
        	 			'printf'	=> DEFAULT_OFF,
        	 			'prototype'	=> DEFAULT_OFF,
        	 			'qw'		=> DEFAULT_OFF,
@@ -37,6 +36,7 @@ my $tree = {
          			'debugging'	=> DEFAULT_ON,
          			'malloc'	=> DEFAULT_ON,
 	 		   },
+        'deprecated'	=> DEFAULT_OFF,
        	'void'		=> DEFAULT_OFF,
        	'recursion'	=> DEFAULT_OFF,
        	'redefine'	=> DEFAULT_OFF,
@@ -223,6 +223,10 @@ $index = $offset ;
 #@{ $list{"all"} } = walk ($tree) ;
 walk ($tree) ;
 
+die <<EOM if $index > 255 ;
+Too many warnings categories -- max is 255
+    rewrite packWARN* & unpackWARN* macros 
+EOM
 
 $index *= 2 ;
 my $warn_size = int($index / 8) + ($index % 8 != 0) ;
@@ -249,11 +253,6 @@ print WARN <<'EOM';
 #define isWARN_on(c,x)	(IsSet(SvPVX(c), 2*(x)))
 #define isWARNf_on(c,x)	(IsSet(SvPVX(c), 2*(x)+1))
 
-#define ckDEAD(x)							\
-	   ( ! specialWARN(PL_curcop->cop_warnings) &&			\
-	    ( isWARNf_on(PL_curcop->cop_warnings, WARN_ALL) || 		\
-	      isWARNf_on(PL_curcop->cop_warnings, x)))
-
 #define ckWARN(x)							\
 	( (isLEXWARN_on && PL_curcop->cop_warnings != pWARN_NONE &&	\
 	      (PL_curcop->cop_warnings == pWARN_ALL ||			\
@@ -267,6 +266,23 @@ print WARN <<'EOM';
 	        isWARN_on(PL_curcop->cop_warnings, y) ) ) 		\
 	    ||	(isLEXWARN_off && PL_dowarn & G_WARN_ON) )
 
+#define ckWARN3(x,y,z)							\
+	  ( (isLEXWARN_on && PL_curcop->cop_warnings != pWARN_NONE &&	\
+	      (PL_curcop->cop_warnings == pWARN_ALL ||			\
+	        isWARN_on(PL_curcop->cop_warnings, x)  ||		\
+	        isWARN_on(PL_curcop->cop_warnings, y)  ||		\
+	        isWARN_on(PL_curcop->cop_warnings, z) ) ) 		\
+	    ||	(isLEXWARN_off && PL_dowarn & G_WARN_ON) )
+
+#define ckWARN4(x,y,z,t)						\
+	  ( (isLEXWARN_on && PL_curcop->cop_warnings != pWARN_NONE &&	\
+	      (PL_curcop->cop_warnings == pWARN_ALL ||			\
+	        isWARN_on(PL_curcop->cop_warnings, x)  ||		\
+	        isWARN_on(PL_curcop->cop_warnings, y)  ||		\
+	        isWARN_on(PL_curcop->cop_warnings, z)  ||		\
+	        isWARN_on(PL_curcop->cop_warnings, t) ) ) 		\
+	    ||	(isLEXWARN_off && PL_dowarn & G_WARN_ON) )
+
 #define ckWARN_d(x)							\
 	  (isLEXWARN_off || PL_curcop->cop_warnings == pWARN_ALL ||	\
 	     (PL_curcop->cop_warnings != pWARN_NONE &&			\
@@ -277,6 +293,39 @@ print WARN <<'EOM';
 	     (PL_curcop->cop_warnings != pWARN_NONE &&			\
 	        (isWARN_on(PL_curcop->cop_warnings, x)  ||		\
 	         isWARN_on(PL_curcop->cop_warnings, y) ) ) )
+
+#define ckWARN3_d(x,y,z)						\
+	  (isLEXWARN_off || PL_curcop->cop_warnings == pWARN_ALL ||	\
+	     (PL_curcop->cop_warnings != pWARN_NONE &&			\
+	        (isWARN_on(PL_curcop->cop_warnings, x)  ||		\
+	         isWARN_on(PL_curcop->cop_warnings, y)  ||		\
+	         isWARN_on(PL_curcop->cop_warnings, z) ) ) )
+
+#define ckWARN4_d(x,y,z,t)						\
+	  (isLEXWARN_off || PL_curcop->cop_warnings == pWARN_ALL ||	\
+	     (PL_curcop->cop_warnings != pWARN_NONE &&			\
+	        (isWARN_on(PL_curcop->cop_warnings, x)  ||		\
+	         isWARN_on(PL_curcop->cop_warnings, y)  ||		\
+	         isWARN_on(PL_curcop->cop_warnings, z)  ||		\
+	         isWARN_on(PL_curcop->cop_warnings, t) ) ) )
+
+#define packWARN(a)		(a                                 )
+#define packWARN2(a,b)		((a) | (b)<<8                      )
+#define packWARN3(a,b,c)	((a) | (b)<<8 | (c) <<16           )
+#define packWARN4(a,b,c,d)	((a) | (b)<<8 | (c) <<16 | (d) <<24)
+
+#define unpackWARN1(x)		((x)        & 0xFF)
+#define unpackWARN2(x)		(((x) >>8)  & 0xFF)
+#define unpackWARN3(x)		(((x) >>16) & 0xFF)
+#define unpackWARN4(x)		(((x) >>24) & 0xFF)
+
+#define ckDEAD(x)							\
+	   ( ! specialWARN(PL_curcop->cop_warnings) &&			\
+	    ( isWARNf_on(PL_curcop->cop_warnings, WARN_ALL) || 		\
+	      isWARNf_on(PL_curcop->cop_warnings, unpackWARN1(x)) ||	\
+	      isWARNf_on(PL_curcop->cop_warnings, unpackWARN2(x)) ||	\
+	      isWARNf_on(PL_curcop->cop_warnings, unpackWARN3(x)) ||	\
+	      isWARNf_on(PL_curcop->cop_warnings, unpackWARN4(x))))
 
 /* end of file warnings.h */
 

@@ -183,6 +183,7 @@ $a =~ /(?p{'x'})/ ;
 use warnings;
 no warnings 'deprecated' ;
 no warnings 'regexp' ;
+no warnings 'syntax' ;
 $a =~ /(?p{'x'})/ ;
 EXPECT
 (?p{}) is deprecated - use (??{}) in regex; marked by <-- HERE in m/(?p <-- HERE {'x'})/ at - line 4.

@@ -2280,6 +2280,12 @@ winsock handle leak fixed.
 
 =item *
 
+The lexical warnings category "deprecated" is no longer a sub-category
+of the "syntax" category. It is now a top-level category in its own
+right.
+
+=item *
+
 All regular expression compilation error messages are now hopefully
 easier to understand both because the error message now comes before
 the failed regex and because the point of failure is now clearly

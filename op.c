@@ -1027,7 +1027,7 @@ Perl_scalar(pTHX_ OP *o)
     case OP_SPLIT:
 	if ((kid = cLISTOPo->op_first) && kid->op_type == OP_PUSHRE) {
 	    if (!kPMOP->op_pmreplroot)
-		deprecate("implicit split to @_");
+		deprecate_old("implicit split to @_");
 	}
 	/* FALL THROUGH */
     case OP_MATCH:
@@ -1274,7 +1274,7 @@ Perl_scalarvoid(pTHX_ OP *o)
     case OP_SPLIT:
 	if ((kid = cLISTOPo->op_first) && kid->op_type == OP_PUSHRE) {
 	    if (!kPMOP->op_pmreplroot)
-		deprecate("implicit split to @_");
+		deprecate_old("implicit split to @_");
 	}
 	break;
     }
@@ -3355,7 +3355,7 @@ Perl_package(pTHX_ OP *o)
 	op_free(o);
     }
     else {
-	deprecate("\"package\" with no arguments");
+	deprecate_old("\"package\" with no arguments");
 	sv_setpv(PL_curstname,"<none>");
 	PL_curstash = Nullhv;
     }
@@ -5427,8 +5427,8 @@ Perl_newAVREF(pTHX_ OP *o)
 	return o;
     }
     else if ((o->op_type == OP_RV2AV || o->op_type == OP_PADAV)
-		&& ckWARN(WARN_DEPRECATED)) {
-	Perl_warner(aTHX_ WARN_DEPRECATED,
+		&& ckWARN2(WARN_DEPRECATED, WARN_SYNTAX)) {
+	Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
 		"Using an array as a reference is deprecated");
     }
     return newUNOP(OP_RV2AV, 0, scalar(o));
@@ -5451,8 +5451,8 @@ Perl_newHVREF(pTHX_ OP *o)
 	return o;
     }
     else if ((o->op_type == OP_RV2HV || o->op_type == OP_PADHV)
-		&& ckWARN(WARN_DEPRECATED)) {
-	Perl_warner(aTHX_ WARN_DEPRECATED,
+		&& ckWARN2(WARN_DEPRECATED, WARN_SYNTAX)) {
+	Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
 		"Using a hash as a reference is deprecated");
     }
     return newUNOP(OP_RV2HV, 0, scalar(o));
@@ -5913,8 +5913,8 @@ Perl_ck_fun(pTHX_ OP *o)
 		    char *name = SvPVx(((SVOP*)kid)->op_sv, n_a);
 		    OP *newop = newAVREF(newGVOP(OP_GV, 0,
 			gv_fetchpv(name, TRUE, SVt_PVAV) ));
-		    if (ckWARN(WARN_DEPRECATED))
-			Perl_warner(aTHX_ WARN_DEPRECATED,
+		    if (ckWARN2(WARN_DEPRECATED, WARN_SYNTAX))
+			Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
 			    "Array @%s missing the @ in argument %"IVdf" of %s()",
 			    name, (IV)numargs, PL_op_desc[type]);
 		    op_free(kid);
@@ -5933,8 +5933,8 @@ Perl_ck_fun(pTHX_ OP *o)
 		    char *name = SvPVx(((SVOP*)kid)->op_sv, n_a);
 		    OP *newop = newHVREF(newGVOP(OP_GV, 0,
 			gv_fetchpv(name, TRUE, SVt_PVHV) ));
-		    if (ckWARN(WARN_DEPRECATED))
-			Perl_warner(aTHX_ WARN_DEPRECATED,
+		    if (ckWARN2(WARN_DEPRECATED, WARN_SYNTAX))
+			Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
 			    "Hash %%%s missing the %% in argument %"IVdf" of %s()",
 			    name, (IV)numargs, PL_op_desc[type]);
 		    op_free(kid);
@@ -6191,7 +6191,7 @@ Perl_ck_lfun(pTHX_ OP *o)
 OP *
 Perl_ck_defined(pTHX_ OP *o)		/* 19990527 MJD */
 {
-    if ((o->op_flags & OPf_KIDS) && ckWARN(WARN_DEPRECATED)) {
+    if ((o->op_flags & OPf_KIDS) && ckWARN2(WARN_DEPRECATED, WARN_SYNTAX)) {
 	switch (cUNOPo->op_first->op_type) {
 	case OP_RV2AV:
 	    /* This is needed for
@@ -6201,9 +6201,9 @@ Perl_ck_defined(pTHX_ OP *o)		/* 19990527 MJD */
 	    break;                      /* Globals via GV can be undef */
 	case OP_PADAV:
 	case OP_AASSIGN:		/* Is this a good idea? */
-	    Perl_warner(aTHX_ WARN_DEPRECATED,
+	    Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
 			"defined(@array) is deprecated");
-	    Perl_warner(aTHX_ WARN_DEPRECATED,
+	    Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
 			"\t(Maybe you should just omit the defined()?)\n");
 	break;
 	case OP_RV2HV:
@@ -6213,9 +6213,9 @@ Perl_ck_defined(pTHX_ OP *o)		/* 19990527 MJD */
 	       */
 	    break;                      /* Globals via GV can be undef */
 	case OP_PADHV:
-	    Perl_warner(aTHX_ WARN_DEPRECATED,
+	    Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
 			"defined(%%hash) is deprecated");
-	    Perl_warner(aTHX_ WARN_DEPRECATED,
+	    Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
 			"\t(Maybe you should just omit the defined()?)\n");
 	    break;
 	default:

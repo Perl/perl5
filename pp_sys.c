@@ -3422,7 +3422,7 @@ PP(pp_chdir)
            )
         {
             if( MAXARG == 1 )
-                deprecate("chdir('') or chdir(undef) as chdir()");
+                deprecate_old("chdir('') or chdir(undef) as chdir()");
             tmps = SvPV(*svp, n_a);
         }
         else {
@@ -4043,8 +4043,8 @@ PP(pp_system)
 	if (SP - MARK == 1) {
 	    TAINT_PROPER("system");
 	}
-	else if (ckWARN(WARN_TAINT)) {
-	    Perl_warner(aTHX_ WARN_TAINT, 
+	else if (ckWARN2(WARN_TAINT, WARN_DEPRECATED)) {
+	    Perl_warner(aTHX_ packWARN2(WARN_TAINT, WARN_DEPRECATED),
 		"Use of tainted arguments in %s is deprecated", "system");
 	}
     }
@@ -4167,8 +4167,8 @@ PP(pp_exec)
 	if (SP - MARK == 1) {
 	    TAINT_PROPER("exec");
 	}
-	else if (ckWARN(WARN_TAINT)) {
-	    Perl_warner(aTHX_ WARN_TAINT, 
+	else if (ckWARN2(WARN_TAINT, WARN_DEPRECATED)) {
+	    Perl_warner(aTHX_ packWARN2(WARN_TAINT, WARN_DEPRECATED),
 		"Use of tainted arguments in %s is deprecated", "exec");
 	}
     }
