@@ -564,10 +564,12 @@ perl_destruct(pTHXx)
 
     /* startup and shutdown function lists */
     SvREFCNT_dec(PL_beginav);
+    SvREFCNT_dec(PL_beginav_save);
     SvREFCNT_dec(PL_endav);
     SvREFCNT_dec(PL_checkav);
     SvREFCNT_dec(PL_initav);
     PL_beginav = Nullav;
+    PL_beginav_save = Nullav;
     PL_endav = Nullav;
     PL_checkav = Nullav;
     PL_initav = Nullav;
