@@ -179,8 +179,8 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 		}
 	    }
 	    /* settle variables when fallback */
-	    dlen = SvCUR(dst);
-	    d   = (U8*)SvPVX(dst) + dlen;
+	    d   = (U8*)SvEND(dst);
+	    dlen = SvLEN(dst)-ddone-1;
 	    s   = (U8*)SvPVX(src) + sdone;
 	    slen = tlen - sdone;
 	    break;
