@@ -537,7 +537,7 @@ sub filter
 {
     my ($self) = @_ ;
     my ($status) ;
-    my ($here) = getcwd ;
+    my ($here) = quotemeta getcwd ;
  
     if (($status = filter_read()) > 0) {
         s/DIR/$here/g
