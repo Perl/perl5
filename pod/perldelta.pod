@@ -164,11 +164,6 @@ natively, ASCII or EBCDIC, unless GLOB_ALPHASORT is specified.)
 
 =head1 Core Enhancements
 
-=head2 AUTOLOAD Is Now Lvaluable
-
-AUTOLOAD is now lvaluable, meaning that you can add the :lvalue attribute
-to AUTOLOAD subroutines and you can assign to the AUTOLOAD return value.
-
 =head2 PerlIO is Now The Default
 
 =over 4
@@ -239,50 +234,33 @@ The list form of C<open> is now implemented for pipes (at least on UNIX):
 creates a pipe, and runs the equivalent of exec('cat', '/etc/motd') in
 the child process.
 
-=item *
+=back
 
-The following builtin functions are now overridable: chop(), chomp(),
-each(), keys(), pop(), push(), shift(), splice(), unshift().
+=head2 Signals Are Now Safe
 
-=item *
+Perl used to be fragile in that signals arriving at inopportune moments
+could corrupt Perl's internal state.  Now Perl postpones handling of
+signals until it's safe.
 
-Formats now support zero-padded decimal fields.
+=head2 Unicode Overhaul
 
-=item *
+Unicode in general should be now much more usable than in Perl 5.6.0
+(or even in 5.6.1).  Unicode can be used in hash keys, Unicode in
+regular expressions should work now, Unicode in tr/// should work now,
+Unicode in I/O should work now.
 
-Perl now tries internally to use integer values in numeric conversions
-and basic arithmetics (+ - * /) if the arguments are integers, and
-tries also to keep the results stored internally as integers.
-This change leads into often slightly faster and always less lossy
-arithmetics. (Previously Perl always preferred floating point numbers
-in its math.)
-
-=item *
-
-The printf() and sprintf() now support parameter reordering using the
-C<%\d+\$> and C<*\d+\$> syntaxes.  For example
-
-    print "%2\$s %1\$s\n", "foo", "bar";
-
-will print "bar foo\n"; This feature helps in writing
-internationalised software.
-
-=item *
-
-Unicode in general should be now much more usable.  Unicode can be
-used in hash keys, Unicode in regular expressions should work now,
-Unicode in tr/// should work now (though tr/// seems to be a
-particularly tricky to get right, so you have been warned)
+=over 4
 
 =item *
 
 The Unicode Character Database coming with Perl has been upgraded
-to Unicode 3.1.  For more information, see http://www.unicode.org/,
-and http://www.unicode.org/unicode/reports/tr27/
+to Unicode 3.1.1.  For more information, see http://www.unicode.org/.
+
+=item *
 
 For developers interested in enhancing Perl's Unicode capabilities:
 almost all the UCD files are included with the Perl distribution in
-the lib/unicode subdirectory.  The most notable omission, for space
+the lib/unicore subdirectory.  The most notable omission, for space
 considerations, is the Unihan database.
 
 =item *
@@ -296,11 +274,6 @@ C<\s> doesn't.)
 
 =back
 
-=head2 Signals Are Now Safe
-
-Perl used to be fragile in that signals arriving at inopportune moments
-could corrupt Perl's internal state.
-
 =head2 Understanding of Numbers
 
 In general a lot of fixing has happened in the area of Perl's
@@ -309,7 +282,21 @@ many systems the standard number parsing functions like C<strtoul()>
 and C<atof()> seem to have bugs, Perl tries to work around their
 deficiencies.  This results hopefully in more accurate numbers.
 
+Perl now tries internally to use integer values in numeric conversions
+and basic arithmetics (+ - * /) if the arguments are integers, and
+tries also to keep the results stored internally as integers.
+This change leads into often slightly faster and always less lossy
+arithmetics. (Previously Perl always preferred floating point numbers
+in its math.)
+
+=head2 Miscellaneous Enhancements
+
 =over 4
+
+=item *
+
+AUTOLOAD is now lvaluable, meaning that you can add the :lvalue attribute
+to AUTOLOAD subroutines and you can assign to the AUTOLOAD return value.
 
 =item *
 
@@ -326,14 +313,7 @@ L<perlembed>.
 
 =item *
 
-Lexicals I: lexicals outside an eval "" weren't resolved
-correctly inside a subroutine definition inside the eval "" if they
-were not already referenced in the top level of the eval""ed code.
-
-=item *
-
-Lexicals II: lexicals leaked at file scope into subroutines that
-were declared before the lexicals.
+Formats now support zero-padded decimal fields.
 
 =item *
 
@@ -355,6 +335,11 @@ is a NaN.  Previously the behaviour was unspecified.
 
 =item *
 
+The following builtin functions are now overridable: each(), keys(),
+pop(), push(), shift(), splice(), unshift().
+
+=item *
+
 C<pack('U0a*', ...)> can now be used to force a string to UTF8.
 
 =item *
@@ -363,22 +348,26 @@ my __PACKAGE__ $obj now works.
 
 =item *
 
+The printf() and sprintf() now support parameter reordering using the
+C<%\d+\$> and C<*\d+\$> syntaxes.  For example
+
+    print "%2\$s %1\$s\n", "foo", "bar";
+
+will print "bar foo\n"; This feature helps in writing
+internationalised software.
+
+=item *
+
 prototype(\&) is now available.
 
 =item *
 
-Right-hand side magic (GMAGIC) could in many cases such as string
-concatenation be invoked too many times.
+prototype(\[$@%&]) is now available to implicitly create references
+(useful for example if you want to emulate the tie() interface).
 
 =item *
 
-The rules for allowing underscores (underbars) in numeric constants
-have been relaxed and simplified: now you can have an underscore
-simply B<between digits>.
-
-=item *
-
-An UNTIE method is now available.
+UNTIE method is now recognised.
 
 =item *
 
@@ -387,7 +376,9 @@ file timestamps to the current time.
 
 =item *
 
-C<eval "v200"> now works.
+The rules for allowing underscores (underbars) in numeric constants
+have been relaxed and simplified: now you can have an underscore
+simply B<between digits>.
 
 =back
 
@@ -432,9 +423,10 @@ but if not possible, the familiar Perl implementation is used.
 
 =item *
 
-C<Devel::PPPort>, from Kenneth Albanowski, has been added.  It is
-primarily used by C<h2xs> to enhance portability of of XS modules
-between different versions of Perl.
+C<Devel::PPPort>, originally from Kenneth Albanowski and now
+maintained by Paul Marquess, has been added.  It is primarily used
+by C<h2xs> to enhance portability of of XS modules between different
+versions of Perl.
 
 =item *
 
@@ -453,7 +445,7 @@ RFC 1321, from Gisle Aas, has been added.  See L<Digest::MD5>.
     print $digest, "\n"; # 01d19d9d2045e005c3f1b80e8b164de1
 
 NOTE: the C<MD5> backward compatibility module is deliberately not
-included since its use is discouraged.
+included since its further use is discouraged.
 
 =item *
 
@@ -631,7 +623,7 @@ to Quoted-Printable.  See L<PerlIO::Via>.
 =item *
 
 C<Pod::ParseLink>, by Russ Allbery, has been added,
-to parse L<> links in pods as described in the new
+to parse L&lt;&gt; links in pods as described in the new
 perlpodspec.
 
 =item *
@@ -1114,14 +1106,15 @@ map() that changes the size of the list should now work faster.
 
 =item *
 
-sort() has been changed to use mergesort internally as opposed to the
-earlier quicksort.  For very small lists this may result in slightly
-slower sorting times, but in general the speedup should be at least
-20%.  Additional bonuses are that the worst case behaviour of sort()
-is now better (in computer science terms it now runs in time O(N log N),
-as opposed to quicksort's Theta(N**2) worst-case run time behaviour),
-and that sort() is now stable (meaning that elements with identical
-keys will stay ordered as they were before the sort).
+sort() has been changed to use primarily mergesort internally as
+opposed to the earlier quicksort.  For very small lists this may
+result in slightly slower sorting times, but in general the speedup
+should be at least 20%.  Additional bonuses are that the worst case
+behaviour of sort() is now better (in computer science terms it now
+runs in time O(N log N), as opposed to quicksort's Theta(N**2)
+worst-case run time behaviour), and that sort() is now stable
+(meaning that elements with identical keys will stay ordered as they
+were before the sort).  See the C<sort> pragma for information.
 
 =item *
 
@@ -1257,6 +1250,23 @@ site-wide changes).
 
 =item *
 
+If your file system supports symbolic links you can build Perl outside
+of the source directory by
+
+	mkdir /tmp/perl/build/directory
+	cd /tmp/perl/build/directory
+	sh /path/to/perl/source/Configure -Dmksymlinks ...
+
+This will create in /tmp/perl/build/directory a tree of symbolic links
+pointing to files in /path/to/perl/source.  The original files are left
+unaffected.  After Configure has finished you can just say
+
+	make all test
+
+and Perl will be built and tested, all in /tmp/perl/build/directory.
+
+=item *
+
 For Perl developers several new make targets for profiling
 and debugging have been added, see L<perlhack>.
 
@@ -1385,10 +1395,39 @@ however, you must specify -Dusedl in the arguments of Configure.
 
 =head1 Selected Bug Fixes
 
-Numerous memory leaks and uninitialized memory accesses have been hunted down.
-Most importantly anonymous subs used to leak quite a bit.
+Numerous memory leaks and uninitialized memory accesses have been
+hunted down.  Most importantly anonymous subs used to leak quite
+a bit.
 
 =over 4
+
+=item *
+
+The autouse pragma didn't work for Multi::Part::Function::Names.
+
+=item *
+
+chop(@list) in list context returned the characters chopped in
+reverse order.  This has been reversed to be in the right order.
+
+=item *
+
+Configure no longer includes the DBM libraries (dbm, gdbm, db, ndbm)
+when building the Perl binary.  The only exception to this is SunOS 4.x,
+which needs them.
+
+=item *
+
+The behaviour of non-decimal but numeric string constants such as
+"0x23" was platform-dependent: in some platforms that was seen as 35,
+in some as 0, in some as a floating point number (don't ask).  This
+was caused by Perl using the operating system libraries in a situation
+where the result of the string to number conversion is undefined: now
+Perl consistently handles such strings as zero in numeric contexts.
+
+=item *
+
+The order of DESTROYs has been made more predictable.
 
 =item *
 
@@ -1399,7 +1438,27 @@ goes correctly to the socket if RemotePort is set.
 
 =item *
 
+L<dprofpp> -R didn't work.
+
+=item *
+
 C<*foo{FORMAT}> now works.
+
+=item *
+
+UNIVERSAL::isa no longer caches methods incorrectly.  (This broke
+the Tk extension with 5.6.0.)
+
+=item *
+
+Lexicals I: lexicals outside an eval "" weren't resolved
+correctly inside a subroutine definition inside the eval "" if they
+were not already referenced in the top level of the eval""ed code.
+
+=item *
+
+Lexicals II: lexicals leaked at file scope into subroutines that
+were declared before the lexicals.
 
 =item *
 
@@ -1415,6 +1474,18 @@ Fixed numerous memory leaks, especially in eval "".
 
 =item *
 
+mkdir() now ignores trailing slashes in the directory name,
+as mandated by POSIX.
+
+=item *
+
+Some versions of glibc have a broken modfl().  This affects builds
+with C<-Duselongdouble>.  This version of Perl detects this brokenness
+and has a workaround for it.  The glibc release 2.2.2 is known to have
+fixed the modfl() bug.
+
+=item *
+
 Modulus of unsigned numbers now works (4063328477 % 65535 used to
 return 27406, instead of 27047).
 
@@ -1422,6 +1493,10 @@ return 27406, instead of 27047).
 
 Some "not a number" warnings introduced in 5.6.0 eliminated to be
 more compatible with 5.005.  Infinity is now recognised as a number.
+
+=item *
+
+Attributes (like :shared) didn't work with our().
 
 =item *
 
@@ -1435,6 +1510,15 @@ pack "Z" now correctly terminates the string with "\0".
 
 Fix password routines which in some shadow password platforms
 (e.g. HP-UX) caused getpwent() to return every other entry.
+
+=item *
+
+The PERL5OPT environment variable (for passing command line arguments
+to Perl) didn't work for more than a single group of options.
+
+=item *
+
+PERL5OPT with embedded spaces didn't work.
 
 =item *
 
@@ -1455,7 +1539,16 @@ Regular expressions on references and overloaded scalars now work.
 
 =item *
 
+Right-hand side magic (GMAGIC) could in many cases such as string
+concatenation be invoked too many times.
+
+=item *
+
 scalar() now forces scalar context even when used in void context.
+
+=item *
+
+SOCKS support is now much more robust.
 
 =item *
 
@@ -1471,8 +1564,26 @@ the space and the tab).
 
 =item *
 
+The tainting behaviour of sprintf() has been rationalized.  It does
+not taint the result of floating point formats anymore, making the
+behaviour consistent with that of string interpolation.
+
+=item *
+
+L<Sys::Syslog> ignored the C<LOG_AUTH> constant.
+
+=item *
+
+All but the first argument of the IO syswrite() method are now optional.
+
+=item *
+
 $AUTOLOAD, sort(), lock(), and spawning subprocesses
 in multiple threads simultaneously are now thread-safe.
+
+=item *
+
+Tie::ARRAY SPLICE method was broken.
 
 =item *
 
@@ -1480,7 +1591,7 @@ Allow read-only string on left hand side of non-modifying tr///.
 
 =item *
 
-Several Unicode fixes (but still not perfect).
+Several Unicode fixes.
 
 =over 8
 
@@ -1492,17 +1603,12 @@ UTF-16 (UCS-2) encoded Perl files should now be read correctly.
 
 =item *
 
-The character tables have been updated to Unicode 3.0.1.
+The character tables have been updated to Unicode 3.1.1.
 
 =item *
 
-chr() for values greater than 127 now create utf8 when under use
-utf8.
-
-=item *
-
-Comparing with utf8 data does not magically upgrade non-utf8 data into
-utf8.
+Comparing with utf8 data does not magically upgrade non-utf8 data
+into utf8.
 
 =item *
 
@@ -1512,172 +1618,22 @@ C<IsAlnum>, C<IsAlpha>, and C<IsWord> now match titlecase.
 
 Concatenation with the C<.> operator or via variable interpolation,
 C<eq>, C<substr>, C<reverse>, C<quotemeta>, the C<x> operator,
-substitution with C<s///>, single-quoted UTF8, should now work--in
-theory.
+substitution with C<s///>, single-quoted UTF8, should now work.
 
 =item *
 
-The C<tr///> operator now works I<slightly> better but is still rather
-broken.  Note that the C<tr///CU> functionality has been removed (but
-see pack('U0', ...)).
+The C<tr///> operator now works.  Note that the C<tr///CU>
+functionality has been removed (but see pack('U0', ...)).
 
 =item *
 
-vec() now refuses to deal with characters >255.
+C<eval "v200"> now works.
 
 =item *
 
 Zero entries were missing from the Unicode classes like C<IsDigit>.
 
-=item *
-
-chop(@list) in list context returned the characters chopped in
-reverse order.  This has been reversed to be in the right order.
-
-=item *
-
-The order of DESTROYs has been made more predictable.
-
-=item *
-
-mkdir() now ignores trailing slashes in the directory name,
-as mandated by POSIX.
-
-=item *
-
-Attributes (like :shared) didn't work with our().
-
-=item *
-
-The PERL5OPT environment variable (for passing command line arguments
-to Perl) didn't work for more than a single group of options.
-
-=item *
-
-The tainting behaviour of sprintf() has been rationalized.  It does
-not taint the result of floating point formats anymore, making the
-behaviour consistent with that of string interpolation.
-
-=item *
-
-All but the first argument of the IO syswrite() method are now optional.
-
-=item *
-
-Tie::ARRAY SPLICE method was broken.
-
-=item *
-
-vec() now tries to work with characters <= 255 when possible, but it leaves
-higher character values in place.  In that case, if vec() was used to modify
-the string, it is no longer considered to be utf8-encoded.
-
-=item *
-
-The autouse pragma didn't work for Multi::Part::Function::Names.
-
-=item *
-
-The behaviour of non-decimal but numeric string constants such as
-"0x23" was platform-dependent: in some platforms that was seen as 35,
-in some as 0, in some as a floating point number (don't ask).  This
-was caused by Perl using the operating system libraries in a situation
-where the result of the string to number conversion is undefined: now
-Perl consistently handles such strings as zero in numeric contexts.
-
-=item *
-
-L<dprofpp> -R didn't work.
-
-=item *
-
-PERL5OPT with embedded spaces didn't work.
-
-=item *
-
-L<Sys::Syslog> ignored the C<LOG_AUTH> constant.
-
-=item *
-
-Some versions of glibc have a broken modfl().  This affects builds
-with C<-Duselongdouble>.  This version of Perl detects this brokenness
-and has a workaround for it.  The glibc release 2.2.2 is known to have
-fixed the modfl() bug.
-
-=item *
-
-Linux previously had problems related to sockaddrlen when using
-accept(), revcfrom() (in Perl: recv()), getpeername(), and getsockname().
-
-=item *
-
-Previously DYNIX/ptx had problems in its Configure probe for non-blocking I/O.
-
-=item *
-
-Windows
-
-=over 8
-
-=item *
-
-Borland C++ v5.5 is now a supported compiler that can build Perl.
-However, the generated binaries continue to be incompatible with those
-generated by the other supported compilers (GCC and Visual C++).
-
-=item *
-
-Win32::GetCwd() correctly returns C:\ instead of C: when at the drive root.
-Other bugs in chdir() and Cwd::cwd() have also been fixed.
-
-=item *
-
-Duping socket handles with open(F, ">&MYSOCK") now works under Windows 9x.
-
-=item *
-
-HTML files will be installed in c:\perl\html instead of c:\perl\lib\pod\html
-
-=item *
-
-The makefiles now provide a single switch to bulk-enable all the features
-enabled in ActiveState ActivePerl (a popular Win32 binary distribution).
-
 =back
-
-=back
-
-=item *
-
-UNIVERSAL::isa no longer caches methods incorrectly.  (This broke
-the Tk extension with 5.6.0.)
-
-=item *
-
-Configure no longer includes the DBM libraries (dbm, gdbm, db, ndbm)
-when building the Perl binary.  The only exception to this is SunOS 4.x,
-which needs them.
-
-=item *
-
-SOCKS support is now much more robust.
-
-=item *
-
-If your file system supports symbolic links you can build Perl outside
-of the source directory by
-
-	mkdir /tmp/perl/build/directory
-	cd /tmp/perl/build/directory
-	sh /path/to/perl/source/Configure -Dmksymlinks ...
-
-This will create in /tmp/perl/build/directory a tree of symbolic links
-pointing to files in /path/to/perl/source.  The original files are left
-unaffected.  After Configure has finished you can just say
-
-	make all test
-
-and Perl will be built and tested, all in /tmp/perl/build/directory.
 
 =back
 
@@ -1702,6 +1658,10 @@ Setting C<$0> now works (as much as possible; see perlvar for details).
 Cygwin
 
 Numerous updates; currently synchronised with Cygwin 1.1.4.
+
+=item *
+
+Previously DYNIX/ptx had problems in its Configure probe for non-blocking I/O.
 
 =item *
 
@@ -1732,7 +1692,18 @@ of 32-bit and 64-bit libraries (a doomed attempt) made much harder.
 
 Linux
 
+=over 8
+
+=item *
+
 Long doubles should now work (see INSTALL).
+
+=item *
+
+Linux previously had problems related to sockaddrlen when using
+accept(), revcfrom() (in Perl: recv()), getpeername(), and getsockname().
+
+=back
 
 =item *
 
@@ -1804,7 +1775,17 @@ accept() no longer leaks memory.
 
 =item *
 
+Borland C++ v5.5 is now a supported compiler that can build Perl.
+However, the generated binaries continue to be incompatible with those
+generated by the other supported compilers (GCC and Visual C++).
+
+=item *
+
 Better chdir() return value for a non-existent directory.
+
+=item *
+
+Duping socket handles with open(F, ">&MYSOCK") now works under Windows 9x.
 
 =item *
 
@@ -1816,7 +1797,21 @@ $ENV{LIB} now used to search for libs under Visual C.
 
 =item *
 
+Win32::GetCwd() correctly returns C:\ instead of C: when at the drive root.
+Other bugs in chdir() and Cwd::cwd() have also been fixed.
+
+=item *
+
 A failed (pseudo)fork now returns undef and sets errno to EAGAIN.
+
+=item *
+
+HTML files will be installed in c:\perl\html instead of c:\perl\lib\pod\html
+
+=item *
+
+The makefiles now provide a single switch to bulk-enable all the features
+enabled in ActiveState ActivePerl (a popular Win32 binary distribution).
 
 =item *
 
