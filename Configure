@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Dec 15 19:09:33 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Fri Dec 15 19:53:39 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -11957,22 +11957,26 @@ EOCP
 	    $cat >>try.c <<'EOCP'
 	check("18446744073709551615", 18446744073709551615UL, 0);
 	check("18446744073709551616", 18446744073709551615UL, ERANGE);
+#if 0 /* strtoul() for /^-/ strings is undefined. */
 	check("-1", 18446744073709551615UL, 0);
 	check("-18446744073709551614", 2, 0);
 	check("-18446744073709551615", 1, 0);
        	check("-18446744073709551616", 18446744073709551615UL, ERANGE);
 	check("-18446744073709551617", 18446744073709551615UL, ERANGE);
+#endif
 EOCP
 		;;
 	4)
 		    $cat >>try.c <<'EOCP'
 	check("4294967295", 4294967295UL, 0);
 	check("4294967296", 4294967295UL, ERANGE);
+#if 0 /* strtoul() for /^-/ strings is undefined. */
 	check("-1", 4294967295UL, 0);
 	check("-4294967294", 2, 0);
 	check("-4294967295", 1, 0);
        	check("-4294967296", 4294967295UL, ERANGE);
 	check("-4294967297", 4294967295UL, ERANGE);
+#endif
 EOCP
 		;;
 	*)
@@ -12029,11 +12033,13 @@ int main() {
 	check(" 0",                                        0LL, 0);
 	check("18446744073709551615",  18446744073709551615ULL, 0);
 	check("18446744073709551616",  18446744073709551615ULL, ERANGE);
+#if 0 /* strtoull() for /^-/ strings is undefined. */
 	check("-1",                    18446744073709551615ULL, 0);
 	check("-18446744073709551614",                     2LL, 0);
 	check("-18446744073709551615",                     1LL, 0);
        	check("-18446744073709551616", 18446744073709551615ULL, ERANGE);
 	check("-18446744073709551617", 18446744073709551615ULL, ERANGE);
+#endif
 	if (!bad)
 		printf("ok\n");
 }
@@ -12078,11 +12084,13 @@ int main() {
 	check(" 0",                                        0LL, 0);
 	check("18446744073709551615",  18446744073709551615ULL, 0);
 	check("18446744073709551616",  18446744073709551615ULL, ERANGE);
+#if 0 /* strtouq() for /^-/ strings is undefined. */
 	check("-1",                    18446744073709551615ULL, 0);
 	check("-18446744073709551614",                     2LL, 0);
 	check("-18446744073709551615",                     1LL, 0);
        	check("-18446744073709551616", 18446744073709551615ULL, ERANGE);
 	check("-18446744073709551617", 18446744073709551615ULL, ERANGE);
+#endif
 	if (!bad)
 		printf("ok\n");
 	return 0;
