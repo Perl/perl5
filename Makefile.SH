@@ -553,7 +553,11 @@ extra.pods: miniperl
 install-strip:
 	$(MAKE) STRIPFLAGS=-s install
 
-install: all install.perl install.man
+install: all
+	$(MAKE) install.perl install.man STRIPFLAGS=$(STRIPFLAGS) INSTALLFLAGS=-S
+
+install-verbose: all
+	$(MAKE) install.perl install.man STRIPFLAGS=$(STRIPFLAGS) INSTALLFLAGS=
 
 install.perl:	all installperl
 	if [ -n "$(COMPILE)" ]; \
@@ -563,10 +567,10 @@ install.perl:	all installperl
 		cd ../pod; $(MAKE) compile; \
 	else :; \
 	fi
-	$(LDLIBPTH) ./perl installperl $(STRIPFLAGS)
+	$(LDLIBPTH) ./perl installperl $(INSTALLFLAGS) $(STRIPFLAGS)
 
 install.man:	all installman
-	$(LDLIBPTH) ./perl installman
+	$(LDLIBPTH) ./perl installman $(INSTALLFLAGS)
 
 # XXX Experimental. Hardwired values, but useful for testing.
 # Eventually Configure could ask for some of these values.
