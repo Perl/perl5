@@ -58,6 +58,7 @@ case "$osvers" in
 #
 2.0.5*|2.0-built*|2.1*)
  	usevfork='true'
+	usemymalloc='n'
 	d_dosuid='define'
 	d_setregid='define'
 	d_setreuid='define'
