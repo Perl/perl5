@@ -95,7 +95,7 @@ case "$cc" in
 	# objects in the library are of the same ABI we are compiling
 	# against. Albert Chin-A-Young <china@thewrittenword.com>
 	libscheck='case "$xxx" in
-*.a) /bin/ar p $xxx `/bin/ar t $xxx | /usr/bsd/head -1` >$$.o;
+*.a) /bin/ar p $xxx `/bin/ar t $xxx | sed q` >$$.o;
   case "`/usr/bin/file $$.o`" in
   *N32*) rm -f $$.o ;;
   *) rm -f $$.o; xxx=/no/n32$xxx ;;

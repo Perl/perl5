@@ -173,7 +173,7 @@ esac
 cat > UU/usethreads.cbu <<'EOCBU'
 case "$usethreads" in
 $define|true|[yY]*)
-        lc_r=`/sbin/ldconfig -r|grep ':-lc_r'|awk '{print $NF}'|tail -1`
+        lc_r=`/sbin/ldconfig -r|grep ':-lc_r'|awk '{print $NF}'|sed -n '$p'`
         case "$osvers" in  
 	0*|1*|2.0*|2.1*)   cat <<EOM >&4
 I did not know that FreeBSD $osvers supports POSIX threads.
