@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Feb  2 22:42:52 EET 1999 [metaconfig 3.0 PL70]
+# Generated on Mon Feb  8 01:45:46 EET 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -153,6 +153,9 @@ esac
 test -d UU || mkdir UU
 cd UU && rm -f ./*
 
+ccsymbols=''
+cppccsymbols=''
+cppsymbols=''
 dynamic_ext=''
 extensions=''
 known_extensions=''
@@ -386,6 +389,7 @@ longdblsize=''
 d_longlong=''
 longlongsize=''
 d_lstat=''
+d_madvise=''
 d_mblen=''
 d_mbstowcs=''
 d_mbtowc=''
@@ -396,11 +400,16 @@ d_memset=''
 d_mkdir=''
 d_mkfifo=''
 d_mktime=''
+d_mmap=''
+mmaptype=''
+d_mprotect=''
 d_msg=''
 d_msgctl=''
 d_msgget=''
 d_msgrcv=''
 d_msgsnd=''
+d_msync=''
+d_munmap=''
 d_nice=''
 d_open3=''
 d_fpathconf=''
@@ -610,6 +619,7 @@ i_bsdioctl=''
 i_sysfilio=''
 i_sysioctl=''
 i_syssockio=''
+i_sysmman=''
 i_sysmount=''
 i_sysndir=''
 i_sysparam=''
@@ -8599,6 +8609,10 @@ $rm -f try.c try
 set lstat d_lstat
 eval $inlibc
 
+: see if madvise exists
+set madvise d_madvise
+eval $inlibc
+
 : see if mblen exists
 set mblen d_mblen
 eval $inlibc
@@ -8637,6 +8651,37 @@ eval $inlibc
 
 : see if mktime exists
 set mktime d_mktime
+eval $inlibc
+
+: see if this is a sys/mman.h system
+set sys/mman.h i_sysmman
+eval $inhdr
+
+: see if mmap exists
+set mmap d_mmap
+eval $inlibc
+: see what shmat returns
+: default to something harmless
+mmaptype='void *'
+case "$i_sysmman$d_mmap" in
+"$define$define")
+	$cat >mmap.c <<'END'
+#include <sys/mman.h>
+void *mmap();
+END
+	if $cc $ccflags -c mmap.c >/dev/null 2>&1; then
+		mmaptype='void *'
+	else
+		mmaptype='caddr_t'
+	fi
+	echo "and it returns ($mmaptype)." >&4
+	;;
+esac
+
+
+
+: see if mprotect exists
+set mprotect d_mprotect
 eval $inlibc
 
 : see if msgctl exists
@@ -8690,6 +8735,14 @@ else
 fi
 set d_msg
 eval $setvar
+
+: see if msync exists
+set msync d_msync
+eval $inlibc
+
+: see if munmap exists
+set munmap d_munmap
+eval $inlibc
 
 : see if nice exists
 set nice d_nice
@@ -11871,32 +11924,37 @@ $comm -13 ccsym.true ccsym.list >ccsym.own
 $comm -12 ccsym.true ccsym.list >ccsym.com
 $comm -23 ccsym.true ccsym.list >ccsym.cpp
 also=''
-symbols='symbols'
 if $test -z ccsym.raw; then
-	echo "Your C compiler doesn't seem to define any symbol!" >&4
+	echo "Your C compiler doesn't seem to define any symbols!" >&4
 	echo " "
-	echo "However, your C preprocessor defines the following ones:"
+	echo "However, your C preprocessor defines the following symbols:"
 	$cat Cppsym.true
+    	ccsymbols=''
+	cppsymbols=`$cat Cppsym.true`
+	cppccsymbols="$cppsymbols"
 else
 	if $test -s ccsym.com; then
 		echo "Your C compiler and pre-processor define these symbols:"
 		$sed -e 's/\(.*\)=.*/\1/' ccsym.com
 		also='also '
 		symbols='ones'
+		cppccsymbols=`$cat ccsym.com`
 		$test "$silent" || sleep 1
 	fi
 	if $test -s ccsym.cpp; then
 		$test "$also" && echo " "
-		echo "Your C pre-processor ${also}defines the following $symbols:"
+		echo "Your C pre-processor ${also}defines the following symbols:"
 		$sed -e 's/\(.*\)=.*/\1/' ccsym.cpp
 		also='further '
+		cppsymbols=`$cat ccsym.cpp`
 		$test "$silent" || sleep 1
 	fi
 	if $test -s ccsym.own; then
 		$test "$also" && echo " "
-		echo "Your C compiler ${also}defines the following cpp variables:"
+		echo "Your C compiler ${also}defines the following cpp symbols:"
 		$sed -e 's/\(.*\)=1/\1/' ccsym.own
 		$sed -e 's/\(.*\)=.*/\1/' ccsym.own | $uniq >>Cppsym.true
+	        ccsymbols=`$cat ccsym.own`
 		$test "$silent" || sleep 1
 	fi
 fi
@@ -12480,6 +12538,7 @@ cc='$cc'
 cccdlflags='$cccdlflags'
 ccdlflags='$ccdlflags'
 ccflags='$ccflags'
+ccsymbols='$ccsymbols'
 cf_by='$cf_by'
 cf_email='$cf_email'
 cf_time='$cf_time'
@@ -12494,11 +12553,13 @@ cp='$cp'
 cpio='$cpio'
 cpp='$cpp'
 cpp_stuff='$cpp_stuff'
+cppccsymbols='$cppccsymbols'
 cppflags='$cppflags'
 cpplast='$cpplast'
 cppminus='$cppminus'
 cpprun='$cpprun'
 cppstdin='$cppstdin'
+cppsymbols='$cppsymbols'
 cryptlib='$cryptlib'
 csh='$csh'
 d_Gconvert='$d_Gconvert'
@@ -12624,6 +12685,7 @@ d_longlong='$d_longlong'
 d_lseek64='$d_lseek64'
 d_lstat64='$d_lstat64'
 d_lstat='$d_lstat'
+d_madvise='$d_madvise'
 d_mblen='$d_mblen'
 d_mbstowcs='$d_mbstowcs'
 d_mbtowc='$d_mbtowc'
@@ -12634,6 +12696,8 @@ d_memset='$d_memset'
 d_mkdir='$d_mkdir'
 d_mkfifo='$d_mkfifo'
 d_mktime='$d_mktime'
+d_mmap='$d_mmap'
+d_mprotect='$d_mprotect'
 d_msg='$d_msg'
 d_msg_ctrunc='$d_msg_ctrunc'
 d_msg_dontroute='$d_msg_dontroute'
@@ -12645,6 +12709,8 @@ d_msgget='$d_msgget'
 d_msghdr_s='$d_msghdr_s'
 d_msgrcv='$d_msgrcv'
 d_msgsnd='$d_msgsnd'
+d_msync='$d_msync'
+d_munmap='$d_munmap'
 d_mymalloc='$d_mymalloc'
 d_nextkey64='$d_nextkey64'
 d_nice='$d_nice'
@@ -12855,6 +12921,7 @@ i_sysfile='$i_sysfile'
 i_sysfilio='$i_sysfilio'
 i_sysin='$i_sysin'
 i_sysioctl='$i_sysioctl'
+i_sysmman='$i_sysmman'
 i_sysmount='$i_sysmount'
 i_sysndir='$i_sysndir'
 i_sysparam='$i_sysparam'
@@ -12938,6 +13005,7 @@ medium='$medium'
 mips='$mips'
 mips_type='$mips_type'
 mkdir='$mkdir'
+mmaptype='$mmaptype'
 models='$models'
 modetype='$modetype'
 more='$more'
