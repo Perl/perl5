@@ -591,6 +591,10 @@ perl_destruct(pTHXx)
     if (!specialWARN(PL_compiling.cop_warnings))
 	SvREFCNT_dec(PL_compiling.cop_warnings);
     PL_compiling.cop_warnings = Nullsv;
+#ifndef USE_ITHREADS
+    SvREFCNT_dec(CopFILEGV(&PL_compiling));
+    CopFILEGV_set(&PL_compiling, Nullgv);
+#endif
 
     /* Prepare to destruct main symbol table.  */
 
@@ -675,10 +679,15 @@ perl_destruct(pTHXx)
     SvREFCNT(&PL_sv_yes) = 0;
     sv_clear(&PL_sv_yes);
     SvANY(&PL_sv_yes) = NULL;
+    SvREADONLY_off(&PL_sv_yes);
 
     SvREFCNT(&PL_sv_no) = 0;
     sv_clear(&PL_sv_no);
     SvANY(&PL_sv_no) = NULL;
+    SvREADONLY_off(&PL_sv_no);
+
+    SvREFCNT(&PL_sv_undef) = 0;
+    SvREADONLY_off(&PL_sv_undef);
 
     if (PL_sv_count != 0 && ckWARN_d(WARN_INTERNAL))
 	Perl_warner(aTHX_ WARN_INTERNAL,"Scalars leaked: %ld\n", (long)PL_sv_count);
