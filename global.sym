@@ -1,6 +1,8 @@
 # Global symbols that need to be hidden in embedded applications.
 
 # Variables
+nthreads_cond
+threads_mutex
 
 AMG_names
 Error

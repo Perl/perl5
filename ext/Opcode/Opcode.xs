@@ -24,7 +24,7 @@ static SV  *get_op_bitspec _((char *opname, STRLEN len, int fatal));
  */
 
 static void
-op_names_init()
+op_names_init(void)
 {
     int i;
     STRLEN len;
@@ -58,10 +58,7 @@ op_names_init()
  */
 
 static void
-put_op_bitspec(optag, len, mask)
-    char *optag;
-    STRLEN len;
-    SV *mask;
+put_op_bitspec(char *optag, STRLEN len, SV *mask)
 {
     SV **svp;
     verify_opset(mask,1);
@@ -82,10 +79,7 @@ put_op_bitspec(optag, len, mask)
  */
 
 static SV *
-get_op_bitspec(opname, len, fatal)
-    char *opname;
-    STRLEN len;
-    int fatal;
+get_op_bitspec(char *opname, STRLEN len, int fatal)
 {
     SV **svp;
     if (!len)
@@ -108,8 +102,7 @@ get_op_bitspec(opname, len, fatal)
 
 
 static SV *
-new_opset(old_opset)
-    SV *old_opset;
+new_opset(SV *old_opset)
 {
     SV *opset;
     if (old_opset) {
@@ -128,9 +121,7 @@ new_opset(old_opset)
 
 
 static int
-verify_opset(opset, fatal)
-    SV *opset;
-    int fatal;
+verify_opset(SV *opset, int fatal)
 {
     char *err = Nullch;
     if      (!SvOK(opset))              err = "undefined";
@@ -144,11 +135,7 @@ verify_opset(opset, fatal)
 
 
 static void
-set_opset_bits(bitmap, bitspec, on, opname)
-    char *bitmap;
-    SV *bitspec;
-    int on;
-    char *opname;
+set_opset_bits(char *bitmap, SV *bitspec, int on, char *opname)
 {
     if (SvIOK(bitspec)) {
 	int myopcode = SvIV(bitspec);
@@ -182,8 +169,7 @@ set_opset_bits(bitmap, bitspec, on, opname)
 
 
 static void
-opmask_add(opset)	/* THE ONLY FUNCTION TO EDIT op_mask ITSELF	*/
-    SV *opset;
+opmask_add(SV *opset)	/* THE ONLY FUNCTION TO EDIT op_mask ITSELF	*/
 {
     int i,j;
     char *bitmask;
@@ -210,9 +196,7 @@ opmask_add(opset)	/* THE ONLY FUNCTION TO EDIT op_mask ITSELF	*/
 }
 
 static void
-opmask_addlocal(opset, op_mask_buf) /* Localise op_mask then opmask_add() */
-    SV *opset;
-    char *op_mask_buf;
+opmask_addlocal(SV *opset, char *op_mask_buf) /* Localise op_mask then opmask_add() */
 {
     char *orig_op_mask = op_mask;
     SAVEPPTR(op_mask);

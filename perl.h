@@ -69,7 +69,7 @@ register struct op *op asm(stringify(OP_IN_REGISTER));
 #    include "fakethr.h"
 #  else
 #    ifdef WIN32
-#      include "win32/win32thread.h"
+#      include <win32thread.h>
 #    else
 #      include <pthread.h>
 typedef pthread_mutex_t perl_mutex;

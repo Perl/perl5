@@ -1,8 +1,8 @@
 #ifdef USE_THREADS
 
 #ifdef WIN32
-#  include "win32/win32thread.h"
-#endif
+#  include <win32thread.h>
+#else
 
 /* POSIXish threads */
 typedef pthread_t perl_thread;
@@ -23,6 +23,7 @@ typedef pthread_t perl_thread;
 #  define pthread_condattr_default NULL
 #  define pthread_attr_default NULL
 #endif /* OLD_PTHREADS_API */
+#endif
 
 #ifndef YIELD
 #  define YIELD sched_yield()

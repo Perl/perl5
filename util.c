@@ -67,8 +67,7 @@ static void xstat _((void));
  */
 
 Malloc_t
-safemalloc(size)
-MEM_SIZE size;
+safemalloc(MEM_SIZE size)
 {
     Malloc_t ptr;
 #ifdef HAS_64K_LIMIT
@@ -101,9 +100,7 @@ MEM_SIZE size;
 /* paranoid version of realloc */
 
 Malloc_t
-saferealloc(where,size)
-Malloc_t where;
-MEM_SIZE size;
+saferealloc(Malloc_t where,MEM_SIZE size)
 {
     Malloc_t ptr;
 #if !defined(STANDARD_C) && !defined(HAS_REALLOC_PROTOTYPE)
@@ -151,13 +148,12 @@ MEM_SIZE size;
 /* safe version of free */
 
 Free_t
-safefree(where)
-Malloc_t where;
+safefree(Malloc_t where)
 {
 #if !(defined(I286) || defined(atarist))
-    DEBUG_m( PerlIO_printf(Perl_debug_log, "0x%x: (%05d) free\n",where,an++));
+    DEBUG_m( PerlIO_printf(Perl_debug_log, "0x%x: (%05d) free\n",(char *) where,an++));
 #else
-    DEBUG_m( PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) free\n",where,an++));
+    DEBUG_m( PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) free\n",(char *) where,an++));
 #endif
     if (where) {
 	/*SUPPRESS 701*/
@@ -168,9 +164,7 @@ Malloc_t where;
 /* safe version of calloc */
 
 Malloc_t
-safecalloc(count, size)
-MEM_SIZE count;
-MEM_SIZE size;
+safecalloc(MEM_SIZE count, MEM_SIZE size)
 {
     Malloc_t ptr;
 
@@ -212,9 +206,7 @@ MEM_SIZE size;
 #define ALIGN sizeof(long)
 
 Malloc_t
-safexmalloc(x,size)
-I32 x;
-MEM_SIZE size;
+safexmalloc(I32 x, MEM_SIZE size)
 {
     register Malloc_t where;
 
@@ -226,17 +218,14 @@ MEM_SIZE size;
 }
 
 Malloc_t
-safexrealloc(where,size)
-Malloc_t where;
-MEM_SIZE size;
+safexrealloc(Malloc_t where, MEM_SIZE size)
 {
     register Malloc_t new = saferealloc(where - ALIGN, size + ALIGN);
     return new + ALIGN;
 }
 
 void
-safexfree(where)
-Malloc_t where;
+safexfree(Malloc_t where)
 {
     I32 x;
 
@@ -249,10 +238,7 @@ Malloc_t where;
 }
 
 Malloc_t
-safexcalloc(x,count,size)
-I32 x;
-MEM_SIZE count;
-MEM_SIZE size;
+safexcalloc(I32 x,MEM_SIZE count, MEM_SIZE size)
 {
     register Malloc_t where;
 
@@ -265,7 +251,7 @@ MEM_SIZE size;
 }
 
 static void
-xstat()
+xstat(void)
 {
     register I32 i;
 

@@ -49,7 +49,7 @@ RUNTIME  = -MD
 !ENDIF
 INCLUDES = -I.\include -I. -I..
 #PCHFLAGS = -Fp"$(INTDIR)/modules.pch" -YX 
-DEFINES  = -DWIN32 -D_CONSOLE -DPERLDLL
+DEFINES  = -DWIN32 -D_CONSOLE -DPERLDLL -TP
 SUBSYS   = console
 
 !IF "$(RUNTIME)" == "-MD"

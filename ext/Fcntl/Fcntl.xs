@@ -23,17 +23,14 @@
 */
 
 static int
-not_here(s)
-char *s;
+not_here(char *s)
 {
     croak("%s not implemented on this architecture", s);
     return -1;
 }
 
 static double
-constant(name, arg)
-char *name;
-int arg;
+constant(char *name, int arg)
 {
     errno = 0;
     switch (*name) {

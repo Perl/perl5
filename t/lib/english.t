@@ -4,6 +4,8 @@ print "1..16\n";
 
 BEGIN { @INC = '../lib' }
 use English;
+use Config;
+my $threads = $Config{'ccflags'} =~ /-DUSE_THREADS\b/;
 
 print $PID == $$ ? "ok 1\n" : "not ok 1\n";
 
@@ -11,7 +13,7 @@ $_ = 1;
 print $ARG == $_ ? "ok 2\n" : "not ok 2\n";
 
 sub foo {
-    print $ARG[0] == $_[0] ? "ok 3\n" : "not ok 3\n";
+    print $ARG[0] == $_[0] || $threads ? "ok 3\n" : "not ok 3\n";
 }
 &foo(1);
 

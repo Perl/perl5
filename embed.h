@@ -282,6 +282,7 @@
 #define inc_amg			Perl_inc_amg
 #define ingroup			Perl_ingroup
 #define init_stacks		Perl_init_stacks
+#define init_thread_intern	Perl_init_thread_intern
 #define instr			Perl_instr
 #define intro_my		Perl_intro_my
 #define intuit_more		Perl_intuit_more
@@ -479,6 +480,8 @@
 #define nomemok			Perl_nomemok
 #define nomethod_amg		Perl_nomethod_amg
 #define not_amg			Perl_not_amg
+#define nthreads		Perl_nthreads
+#define nthreads_cond		Perl_nthreads_cond
 #define numer_amg		Perl_numer_amg
 #define numeric_local		Perl_numeric_local
 #define numeric_name		Perl_numeric_name
@@ -1090,6 +1093,8 @@
 #define taint_env		Perl_taint_env
 #define taint_proper		Perl_taint_proper
 #define thisexpr		Perl_thisexpr
+#define thr_key			Perl_thr_key
+#define threads_mutex		Perl_threads_mutex
 #define timesbuf		Perl_timesbuf
 #define tokenbuf		Perl_tokenbuf
 #define too_few_arguments	Perl_too_few_arguments

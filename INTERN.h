@@ -23,10 +23,17 @@
 #  define EXTCONST globaldef {"$GLOBAL_RO_VARS"} readonly
 #  define dEXTCONST globaldef {"$GLOBAL_RO_VARS"} readonly
 #else
+#  ifdef __cplusplus
+#   define EXT
+#   define dEXT
+#   define EXTCONST extern const
+#   define dEXTCONST const
+#else
 #  define EXT
 #  define dEXT
 #  define EXTCONST const
 #  define dEXTCONST const
+#endif
 #endif
 
 #undef INIT

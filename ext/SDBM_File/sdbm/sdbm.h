@@ -183,6 +183,10 @@ extern long sdbm_hash proto((char *, int));
 
 #ifdef I_MEMORY
 #include <memory.h>
+#endif      
+
+#ifdef __cplusplus
+#define HAS_MEMCPY
 #endif
 
 #ifdef HAS_MEMCPY
@@ -239,7 +243,9 @@ extern long sdbm_hash proto((char *, int));
 #	else
 #	    define memcmp Perl_my_memcmp
 #	endif
+#ifndef __cplusplus
 	extern int memcmp proto((char*, char*, int));
+#endif
 #   endif
 #endif /* HAS_MEMCMP */
 

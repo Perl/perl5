@@ -1042,12 +1042,10 @@ sv_backoff(register SV *sv)
 }
 
 char *
-sv_grow(register SV *sv, register I32 newlen)
-                
 #ifndef DOSISH
-                    
+sv_grow(register SV *sv, register I32 newlen)
 #else
-                     
+sv_grow(SV* sv, unsigned long newlen)
 #endif
 {
     register char *s;
@@ -4854,3 +4852,4 @@ sv_dump(SV *sv)
 {
 }
 #endif
+

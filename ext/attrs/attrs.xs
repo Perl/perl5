@@ -3,8 +3,7 @@
 #include "XSUB.h"
 
 static cv_flags_t
-get_flag(attr)
-char *attr;
+get_flag(char *attr)
 {
     if (strnEQ(attr, "method", 6))
 	return CVf_METHOD;
@@ -17,8 +16,8 @@ char *attr;
 MODULE = attrs		PACKAGE = attrs
 
 void
-import(class, ...)
-char *	class
+import(Class, ...)
+char *	Class
     ALIAS:
 	unimport = 1
     PREINIT:
