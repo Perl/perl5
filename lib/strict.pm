@@ -100,7 +100,19 @@ vars => 0x00000400
 
 sub bits {
     my $bits = 0;
-    foreach my $s (@_){ $bits |= $bitmask{$s} || 0; };
+    my @wrong;
+    foreach my $s (@_) {
+	push @wrong, $s unless exists $bitmask{$s};
+        $bits |= $bitmask{$s} || 0;
+    }
+    if (@wrong) {
+        my $useno = {
+         __PACKAGE__.'::import' => 'use',
+         __PACKAGE__.'::unimport' => 'no'
+        }->{ (caller(1))[3] };
+        require Carp;
+        Carp::croak("Don't know how to '$useno ".__PACKAGE__." qw(@wrong)'");
+    }
     $bits;
 }
 

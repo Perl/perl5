@@ -36,7 +36,7 @@ foreach (sort glob($^O eq 'MacOS' ? ":lib:strict:*" : "lib/strict/*")) {
 
 undef $/;
 
-print "1..", scalar @prgs, "\n";
+print "1..", @prgs + 4, "\n";
  
  
 for (@prgs){
@@ -98,3 +98,19 @@ for (@prgs){
     foreach (@temps) 
 	{ unlink $_ if $_ } 
 }
+
+eval qq(use strict 'garbage');
+print +($@ =~ /^Don't know how to 'use strict qw\(garbage\)/)
+	? "ok ".++$i."\n" : "not ok ".++$i."\t# $@";
+
+eval qq(no strict 'garbage');
+print +($@ =~ /^Don't know how to 'no strict qw\(garbage\)/)
+	? "ok ".++$i."\n" : "not ok ".++$i."\t# $@";
+
+eval qq(use strict qw(foo bar));
+print +($@ =~ /^Don't know how to 'use strict qw\(foo bar\)/)
+	? "ok ".++$i."\n" : "not ok ".++$i."\t# $@";
+
+eval qq(no strict qw(foo bar));
+print +($@ =~ /^Don't know how to 'no strict qw\(foo bar\)/)
+	? "ok ".++$i."\n" : "not ok ".++$i."\t# $@";
