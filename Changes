@@ -28,6 +28,420 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.7.X		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 15421] By: jhi                                   on 2002/03/22  15:18:30
+        Log: Forgot from #15416.
+     Branch: perl
+	   ! pod/perlfaq3.pod
+____________________________________________________________________________
+[ 15420] By: jhi                                   on 2002/03/22  15:15:37
+        Log: Subject: Re: Argument "1.23_45" isn't numeric in subroutine entry
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: Fri, 22 Mar 2002 16:27:51 +0100
+             Message-ID: <m3n0x0vczs.fsf@anima.de>
+     Branch: perl
+	   ! pod/perlmodstyle.pod
+____________________________________________________________________________
+[ 15419] By: jhi                                   on 2002/03/22  15:14:42
+        Log: metaconfig unit changes for #15418.
+     Branch: metaconfig
+	   ! U/threads/d_asctime_r.U U/threads/d_crypt_r.U
+	   ! U/threads/d_ctermid_r.U U/threads/d_ctime_r.U
+	   ! U/threads/d_drand48_r.U U/threads/d_endgrent_r.U
+	   ! U/threads/d_endhostent_r.U U/threads/d_endnetent_r.U
+	   ! U/threads/d_endprotoent_r.U U/threads/d_endpwent_r.U
+	   ! U/threads/d_endservent_r.U U/threads/d_getgrent_r.U
+	   ! U/threads/d_getgrgid_r.U U/threads/d_getgrnam_r.U
+	   ! U/threads/d_gethostbyaddr_r.U U/threads/d_gethostbyname_r.U
+	   ! U/threads/d_gethostent_r.U U/threads/d_getlogin_r.U
+	   ! U/threads/d_getnetbyaddr_r.U U/threads/d_getnetbyname_r.U
+	   ! U/threads/d_getnetent_r.U U/threads/d_getprotobyname_r.U
+	   ! U/threads/d_getprotobynumber_r.U U/threads/d_getprotoent_r.U
+	   ! U/threads/d_getpwent_r.U U/threads/d_getpwnam_r.U
+	   ! U/threads/d_getpwuid_r.U U/threads/d_getservbyname_r.U
+	   ! U/threads/d_getservbyport_r.U U/threads/d_getservent_r.U
+	   ! U/threads/d_getspnam_r.U U/threads/d_gmtime_r.U
+	   ! U/threads/d_localtime_r.U U/threads/d_random_r.U
+	   ! U/threads/d_readdir64_r.U U/threads/d_readdir_r.U
+	   ! U/threads/d_setgrent_r.U U/threads/d_sethostent_r.U
+	   ! U/threads/d_setlocale_r.U U/threads/d_setnetent_r.U
+	   ! U/threads/d_setprotoent_r.U U/threads/d_setpwent_r.U
+	   ! U/threads/d_setservent_r.U U/threads/d_srand48_r.U
+	   ! U/threads/d_srandom_r.U U/threads/d_strerror_r.U
+	   ! U/threads/d_tmpnam_r.U U/threads/d_ttyname_r.U
+____________________________________________________________________________
+[ 15418] By: jhi                                   on 2002/03/22  15:14:09
+        Log: The I_CSD, I_S, and V_S had wrong recepting datatype.
+             Also, there's no i_stdio.
+     Branch: perl
+	   ! Configure reentr.h reentr.pl
+____________________________________________________________________________
+[ 15417] By: jhi                                   on 2002/03/22  15:07:33
+        Log: Document a known AIX warning.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 15416] By: jhi                                   on 2002/03/22  15:03:05
+        Log: Undo #15415, allow the faq people to catch up first.
+     Branch: perl
+	   ! pod/perlfaq4.pod pod/perlfaq5.pod pod/perlfaq6.pod
+____________________________________________________________________________
+[ 15415] By: jhi                                   on 2002/03/22  13:30:38
+        Log: FAQ sync.
+     Branch: perl
+	   ! pod/perlfaq3.pod pod/perlfaq5.pod pod/perlfaq6.pod
+____________________________________________________________________________
+[ 15414] By: jhi                                   on 2002/03/22  13:25:17
+        Log: Subject: Re: Change 15398: Assuming the Apache 1.3 -D_GNU_SOURCE problem       
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: Fri, 22 Mar 2002 15:16:19 +0100
+             Message-ID: <m38z8kwuvg.fsf@anima.de>
+             
+             (plus reformat)
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 15413] By: jhi                                   on 2002/03/22  13:20:48
+        Log: Integrate perlio;
+             
+             Fix [ID 20020318.003] cannot open STDOUT into in memory variable
+             
+             Check for sanity of UTF-8 keys in hashes
+     Branch: perl
+	  +> t/op/utfhash.t
+	  !> MANIFEST doio.c
+____________________________________________________________________________
+[ 15412] By: nick                                  on 2002/03/22  10:50:53
+        Log: Check for sanity of UTF-8 keys in hashes
+             (feel free to add more tests...)
+     Branch: perlio
+	   + t/op/utfhash.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 15411] By: ams                                   on 2002/03/22  08:36:33
+        Log: Revert #15200 for backwards compatiblity reasons.
+     Branch: perl
+	   ! lib/AutoSplit.t lib/Test/Simple/t/fail-more.t pod/perldiag.pod
+	   ! pp_ctl.c t/op/override.t
+____________________________________________________________________________
+[ 15410] By: nick                                  on 2002/03/22  07:47:41
+        Log: Fix [ID 20020318.003] cannot open STDOUT into in memory variable
+             - when (e.g.) STDOUT is char special file and gets IoOFP
+             created - do _NOT_ pass num_svs as that fopen-s stringified
+             glob, and not fdopen-s the fd.
+     Branch: perlio
+	   ! doio.c
+____________________________________________________________________________
+[ 15409] By: nick                                  on 2002/03/22  07:19:33
+        Log: Integrate mainline
+     Branch: perlio
+	  +> ext/Encode/Encode/ibm-1250.ucm ext/Encode/Encode/ibm-1251.ucm
+	  +> ext/Encode/Encode/ibm-1252.ucm ext/Encode/Encode/ibm-1253.ucm
+	  +> ext/Encode/Encode/ibm-1254.ucm ext/Encode/Encode/ibm-1255.ucm
+	  +> ext/Encode/Encode/ibm-1256.ucm ext/Encode/Encode/ibm-1257.ucm
+	  +> ext/Encode/Encode/ibm-1258.ucm ext/Encode/lib/Encode/Alias.pm
+	  +> ext/Encode/lib/Encode/Details.pod
+	  +> ext/Encode/lib/Encode/Supported.pod ext/Encode/t/Aliases.t
+	  +> lib/Pod/t/htmlescp.pod lib/Pod/t/htmlescp.t
+	  +> lib/Pod/t/htmlview.pod lib/Pod/t/htmlview.t
+	  +> lib/Pod/t/pod2html-lib.pl
+	   - ext/Encode/lib/Encode/Description.pod ext/Encode/t/CJKalias.t
+	  !> (integrate 39 files)
+____________________________________________________________________________
+[ 15408] By: jhi                                   on 2002/03/22  04:09:19
+        Log: Win32 tweak from mjd.
+     Branch: perl
+	   ! lib/Tie/File.pm
+____________________________________________________________________________
+[ 15407] By: jhi                                   on 2002/03/22  04:07:13
+        Log: If Unicode keys are entered to a hash, a bit is turned on.
+             If the bit is on, when the keys are fetched from the hash
+             (%h, each %h, keys %h), the Unicodified versions of the keys
+             are returned if needed.  This solution errs on the size of
+             over-Unicodifying, the old solution erred on the side of
+             under-Unicodifying.  As long as the hash keys can be a mix
+             of byte and Unicode strings, a perfect fit is hard to come by.
+     Branch: perl
+	   ! doop.c dump.c ext/Devel/Peek/Peek.t hv.c hv.h
+	   ! pod/perlunicode.pod pp.c sv.h t/op/pat.t
+____________________________________________________________________________
+[ 15406] By: jhi                                   on 2002/03/22  01:21:57
+        Log: Subject: Re: Change 15398: Assuming the Apache 1.3 -D_GNU_SOURCE problem
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Fri, 22 Mar 2002 02:08:20 +0000
+             Message-Id: <E16oETc-0000vE-00@virgo.cus.cam.ac.uk>
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 15405] By: jhi                                   on 2002/03/21  23:13:44
+        Log: PM_SETRE() fallout.
+     Branch: perl
+	   ! ext/ByteLoader/bytecode.h
+____________________________________________________________________________
+[ 15404] By: jhi                                   on 2002/03/21  22:54:42
+        Log: Subject: [PATCH pod/perlxs.pod] doc fix
+             From: Stas Bekman <stas@stason.org>
+             Date: Thu, 21 Mar 2002 18:47:35 +0800
+             Message-ID: <3C99BA47.9010403@stason.org>
+     Branch: perl
+	   ! pod/perlxs.pod
+____________________________________________________________________________
+[ 15403] By: jhi                                   on 2002/03/21  22:53:11
+        Log: Subject: [PATCH]
+             From: Slaven Rezic <slaven.rezic@berlin.de>
+             Date: 21 Mar 2002 10:19:23 +0100
+             Message-ID: <87n0x2wa5g.fsf@vran.herceg.de>
+             
+             Disable gethostbyaddr_r for all 4.x FreeBSD versions.
+     Branch: perl
+	   ! hints/freebsd.sh
+____________________________________________________________________________
+[ 15402] By: jhi                                   on 2002/03/21  22:50:19
+        Log: Subject: Storable is inefficient retreiving large hashes [PATCH]
+             From: Tim Bunce <Tim.Bunce@pobox.com>
+             Date: Thu, 21 Mar 2002 21:18:05 +0000
+             Message-ID: <20020321211805.E25276@dansat.data-plan.com>
+     Branch: perl
+	   ! ext/Storable/Storable.xs
+____________________________________________________________________________
+[ 15401] By: jhi                                   on 2002/03/21  20:48:52
+        Log: Reword the Apache^Wmod_perl bit so that Sarathy
+             can sleep easier :-)
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 15400] By: jhi                                   on 2002/03/21  20:19:31
+        Log: It seems that the strange failure (core dump) of
+             t/uni/fold.t on ithreads Solaris builds is a gcc bug:
+             (1) using Sun's cc helps
+             (2) rewriting the ithreads PM_SETRE() to do the
+             setting in two steps helps
+             (3) no other platforms have the crash
+             (4) Tru64's Third Degree sees nothing evil
+             So we implement (2).
+     Branch: perl
+	   ! op.h
+____________________________________________________________________________
+[ 15399] By: jhi                                   on 2002/03/21  20:09:23
+        Log: Solaris: default to the SUNwspro cc if it is available.
+     Branch: perl
+	   ! hints/solaris_2.sh
+____________________________________________________________________________
+[ 15398] By: jhi                                   on 2002/03/21  18:41:57
+        Log: Assuming the Apache 1.3 -D_GNU_SOURCE problem
+             does not get fixed in time.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 15397] By: jhi                                   on 2002/03/21  18:19:53
+        Log: Subject: [PATCH@15387] -DCRIPPLED_CC RIP
+             From: Dave Mitchell <davem@fdgroup.com>
+             Date: Thu, 21 Mar 2002 17:24:40 +0000
+             Message-ID: <20020321172440.C13683@fdgroup.com>
+     Branch: perl
+	   ! INSTALL embed.fnc embed.h ext/Devel/PPPort/PPPort.pm gv.c gv.h
+	   ! pod/perlapi.pod proto.h sv.h toke.c
+____________________________________________________________________________
+[ 15396] By: jhi                                   on 2002/03/21  18:00:51
+        Log: One more proto escapee.
+     Branch: perl
+	   ! hints/linux.sh
+____________________________________________________________________________
+[ 15395] By: jhi                                   on 2002/03/21  17:56:57
+        Log: metaconfig unit change for #15394.
+     Branch: metaconfig/U/perl
+	   ! Checkcc.U
+____________________________________________________________________________
+[ 15394] By: jhi                                   on 2002/03/21  17:56:34
+        Log: Subject: [PATCH Configure] must do -Dcc=gcc with -Dusethreads
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Thu, 21 Mar 2002 17:35:00 GMT
+             Message-Id: <200203211735.RAA15135@tempest.npl.co.uk>
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 15393] By: jhi                                   on 2002/03/21  17:36:06
+        Log: Subject: Re: [tests for Pod::Html]
+             From: Stas Bekman <stas@stason.org>
+             Date: Fri, 22 Mar 2002 01:28:03 +0800 (SGT)
+             Message-ID: <Pine.LNX.4.44.0203220126250.29991-100000@hope.stason.org>
+     Branch: perl
+	   + lib/Pod/t/htmlview.pod lib/Pod/t/htmlview.t
+	   - t/pod2html/README
+	   ! MANIFEST lib/Pod/t/pod2html-lib.pl
+____________________________________________________________________________
+[ 15392] By: jhi                                   on 2002/03/21  16:17:53
+        Log: Subject: Re: [PATCH lib/Cwd.pm] fixing proto mismatch warning
+             From: Stas Bekman <stas@stason.org>
+             Date: Thu, 21 Mar 2002 18:50:56 +0800
+             Message-ID: <3C99BB10.50004@stason.org>
+     Branch: perl
+	   ! ext/Cwd/Cwd.xs
+____________________________________________________________________________
+[ 15391] By: jhi                                   on 2002/03/21  16:16:57
+        Log: Upgrade to Encode 0.95, from Dan Kogai.
+     Branch: perl
+	   + ext/Encode/Encode/ibm-1250.ucm ext/Encode/Encode/ibm-1251.ucm
+	   + ext/Encode/Encode/ibm-1252.ucm ext/Encode/Encode/ibm-1253.ucm
+	   + ext/Encode/Encode/ibm-1254.ucm ext/Encode/Encode/ibm-1255.ucm
+	   + ext/Encode/Encode/ibm-1256.ucm ext/Encode/Encode/ibm-1257.ucm
+	   + ext/Encode/Encode/ibm-1258.ucm ext/Encode/lib/Encode/Alias.pm
+	   + ext/Encode/lib/Encode/Details.pod
+	   + ext/Encode/lib/Encode/Supported.pod ext/Encode/t/Aliases.t
+	   - ext/Encode/lib/Encode/Description.pod ext/Encode/t/CJKalias.t
+	   ! MANIFEST ext/Encode/AUTHORS ext/Encode/CN/CN.pm
+	   ! ext/Encode/Changes ext/Encode/Encode.pm ext/Encode/MANIFEST
+	   ! ext/Encode/Makefile.PL
+____________________________________________________________________________
+[ 15390] By: jhi                                   on 2002/03/21  14:48:35
+        Log: Mention the new syslog try-harder feature.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 15389] By: jhi                                   on 2002/03/21  14:44:56
+        Log: metaconfig unit changes for #15388.
+     Branch: metaconfig
+	   ! U/threads/d_asctime_r.U U/threads/d_crypt_r.U
+	   ! U/threads/d_ctermid_r.U U/threads/d_ctime_r.U
+	   ! U/threads/d_drand48_r.U U/threads/d_endgrent_r.U
+	   ! U/threads/d_endhostent_r.U U/threads/d_endnetent_r.U
+	   ! U/threads/d_endprotoent_r.U U/threads/d_endpwent_r.U
+	   ! U/threads/d_endservent_r.U U/threads/d_getgrent_r.U
+	   ! U/threads/d_getgrgid_r.U U/threads/d_getgrnam_r.U
+	   ! U/threads/d_gethostbyaddr_r.U U/threads/d_gethostbyname_r.U
+	   ! U/threads/d_gethostent_r.U U/threads/d_getlogin_r.U
+	   ! U/threads/d_getnetbyaddr_r.U U/threads/d_getnetbyname_r.U
+	   ! U/threads/d_getnetent_r.U U/threads/d_getprotobyname_r.U
+	   ! U/threads/d_getprotobynumber_r.U U/threads/d_getprotoent_r.U
+	   ! U/threads/d_getpwent_r.U U/threads/d_getpwnam_r.U
+	   ! U/threads/d_getpwuid_r.U U/threads/d_getservbyname_r.U
+	   ! U/threads/d_getservbyport_r.U U/threads/d_getservent_r.U
+	   ! U/threads/d_getspnam_r.U U/threads/d_gmtime_r.U
+	   ! U/threads/d_localtime_r.U U/threads/d_random_r.U
+	   ! U/threads/d_readdir64_r.U U/threads/d_readdir_r.U
+	   ! U/threads/d_setgrent_r.U U/threads/d_sethostent_r.U
+	   ! U/threads/d_setlocale_r.U U/threads/d_setnetent_r.U
+	   ! U/threads/d_setprotoent_r.U U/threads/d_setpwent_r.U
+	   ! U/threads/d_setservent_r.U U/threads/d_srand48_r.U
+	   ! U/threads/d_srandom_r.U U/threads/d_strerror_r.U
+	   ! U/threads/d_tmpnam_r.U U/threads/d_ttyname_r.U
+____________________________________________________________________________
+[ 15388] By: jhi                                   on 2002/03/21  14:44:09
+        Log: Subject: [PATCH @15373] More HP-UX/IA64 work
+             From: Spider Boardman <spider@web.zk3.dec.com>
+             Date: Thu, 21 Mar 2002 09:23:45 -0500
+             Message-Id: <200203211423.JAA61178@leggy.zk3.dec.com>
+     Branch: perl
+	   ! Configure hints/hpux.sh reentr.pl
+____________________________________________________________________________
+[ 15387] By: jhi                                   on 2002/03/21  14:37:56
+        Log: NetWare diff from C Aditya.
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[ 15386] By: jhi                                   on 2002/03/21  14:36:05
+        Log: The htmlview test doesn't work yet.
+     Branch: perl
+	   + t/pod2html/README
+	   - lib/Pod/t/htmlview.pod lib/Pod/t/htmlview.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 15385] By: jhi                                   on 2002/03/21  14:15:01
+        Log: Placeholder.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 15384] By: jhi                                   on 2002/03/21  14:03:50
+        Log: Integrate perlio: missing tabs in makefile.mk.
+     Branch: perl
+	  !> win32/makefile.mk
+____________________________________________________________________________
+[ 15383] By: jhi                                   on 2002/03/21  13:52:18
+        Log: Subject: [tests for Pod::Html]
+             From: Stas Bekman <stas@stason.org>
+             Date: Tue, 19 Mar 2002 14:39:03 +0800 (SGT)
+             Message-ID: <Pine.LNX.4.44.0203191437360.25475-100000@hope.stason.org>
+     Branch: perl
+	   + lib/Pod/t/htmlescp.pod lib/Pod/t/htmlescp.t
+	   + lib/Pod/t/htmlview.pod lib/Pod/t/htmlview.t
+	   + lib/Pod/t/pod2html-lib.pl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 15382] By: nick                                  on 2002/03/21  07:21:57
+        Log: Integrate mainline (Win2k/MinGW all ok except threads/t/end.t)
+     Branch: perlio
+	  +> ext/Encode/AUTHORS ext/Encode/Changes
+	  +> ext/Encode/lib/Encode/Description.pod ext/Encode/t/CJKalias.t
+	  +> ext/Encode/t/jisx0208.euc ext/Encode/t/jisx0208.ref
+	  +> ext/Encode/t/jisx0212.euc ext/Encode/t/jisx0212.ref
+	  +> ext/I18N/Langinfo/fallback/const-c.inc
+	  +> ext/I18N/Langinfo/fallback/const-xs.inc
+	  +> lib/ExtUtils/t/Constant.t
+	   - ext/Encode/Encode/euc-jp-0212.enc
+	   - ext/Encode/lib/Encode/Tcl/Extended.pm ext/Encode/t/japanese.pl
+	   - ext/Encode/t/table.euc ext/Encode/t/table.ref
+	   - ext/I18N/Langinfo/fallback.xs lib/ExtUtils/t/ExtUtils.t
+	  !> (integrate 105 files)
+____________________________________________________________________________
+[ 15381] By: nick                                  on 2002/03/21  06:59:57
+        Log: Restore tabs so dmake will parse file!
+     Branch: perlio
+	   ! win32/makefile.mk
+____________________________________________________________________________
+[ 15380] By: jhi                                   on 2002/03/21  04:26:03
+        Log: Upgrade to Unicode::Normalize 0.16.
+     Branch: perl
+	   ! ext/Unicode/Normalize/Changes
+	   ! ext/Unicode/Normalize/Normalize.pm
+____________________________________________________________________________
+[ 15379] By: jhi                                   on 2002/03/21  02:59:46
+        Log: Schwern's wallet is a bit more loose.
+     Branch: perl
+	   ! t/lib/1_compile.t
+____________________________________________________________________________
+[ 15378] By: jhi                                   on 2002/03/20  21:57:22
+        Log: Subject: [PATCH]
+             From: "Paul Marquess" <paul_marquess@yahoo.co.uk>
+             Date: Wed, 20 Mar 2002 22:56:17 -0000
+             Message-ID: <AIEAJICLCBDNAAOLLOKLEEEAEAAA.paul_marquess@yahoo.co.uk>
+             
+             packWARN also for subdirs.
+     Branch: perl
+	   ! NetWare/nw5.c cygwin/cygwin.c djgpp/djgpp.c
+	   ! ext/Encode/Encode.xs ext/attrs/attrs.xs os2/os2.c vms/vms.c
+	   ! win32/win32.c
+____________________________________________________________________________
+[ 15377] By: jhi                                   on 2002/03/20  21:50:11
+        Log: A plan is better.
+     Branch: perl
+	   ! ext/Encode/t/CJKalias.t
+____________________________________________________________________________
+[ 15376] By: jhi                                   on 2002/03/20  21:26:09
+        Log: Upgrade to Encode 0.94, from Dan Kogai.
+     Branch: perl
+	   + ext/Encode/lib/Encode/Description.pod
+	   ! MANIFEST ext/Encode/AUTHORS ext/Encode/CN/CN.pm
+	   ! ext/Encode/Changes ext/Encode/Encode.pm ext/Encode/JP/JP.pm
+	   ! ext/Encode/KR/KR.pm ext/Encode/MANIFEST ext/Encode/TW/TW.pm
+	   ! ext/Encode/lib/Encode/Encoding.pm
+	   ! ext/Encode/lib/Encode/JP/ISO_2022_JP.pm
+	   ! ext/Encode/lib/Encode/JP/JIS.pm ext/Encode/lib/Encode/Tcl.pm
+	   ! ext/Encode/t/CJKalias.t
+____________________________________________________________________________
+[ 15375] By: jhi                                   on 2002/03/20  21:09:27
+        Log: Rats' nest.
+     Branch: perl
+	   ! hints/solaris_2.sh
+____________________________________________________________________________
+[ 15374] By: jhi                                   on 2002/03/20  21:01:59
+        Log: Rrright.
+     Branch: perl
+	   ! pod/perlguts.pod
+____________________________________________________________________________
+[ 15373] By: jhi                                   on 2002/03/20  17:36:43
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 15372] By: jhi                                   on 2002/03/20  16:54:35
         Log: Reapply #15336.
      Branch: perl
