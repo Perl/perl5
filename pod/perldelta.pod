@@ -11,7 +11,7 @@ release.
 
 This section contains a summary of the changes between the 5.6.0 release
 and the 5.6.1 release.  More details about the changes mentioned here
-may be found in the C<Changes> files that accompany the Perl source
+may be found in the F<Changes> files that accompany the Perl source
 distribution.  See L<perlhack> for pointers to online resources where you
 can inspect the individual patches described by these changes.
 
@@ -176,7 +176,7 @@ The (\&) prototype now works properly.
 
 =item map()
 
-map() could get pathalogically slow when the result list it generates
+map() could get pathologically slow when the result list it generates
 is larger than the source list.  The performance has been improved for
 common scenarios.
 
@@ -214,7 +214,7 @@ but continues to be highly experimental.  It is not expected to be
 fully supported in the 5.6.x maintenance releases.
 
 substr(), join(), repeat(), reverse(), quotemeta() and string
-concatenation were all handling unicode strings incorrectly in
+concatenation were all handling Unicode strings incorrectly in
 Perl 5.6.0.  This has been corrected.
 
 Support for C<tr///CU> and C<tr///UC> etc., have been removed since
@@ -309,7 +309,7 @@ C<my __PACKAGE__ $obj> now does the expected thing.
 On some systems (IRIX and Solaris among them) the system malloc is demonstrably
 better.  While the defaults haven't been changed in order to retain binary
 compatibility with earlier releases, you may be better off building perl
-with C<Configure -Uusemymalloc ...> as discussed in the C<INSTALL> file.
+with C<Configure -Uusemymalloc ...> as discussed in the F<INSTALL> file.
 
 C<Configure> has been enhanced in various ways:
 
@@ -322,7 +322,7 @@ Minimizes use of temporary files.
 =item *
 
 By default, does not link perl with libraries not used by it, such as
-the various dbm libraries.  SunOS hints preserve behavior on that
+the various dbm libraries.  SunOS 4.x hints preserve behavior on that
 platform.
 
 =item *
@@ -332,7 +332,12 @@ Support for pdp11-style memory models has been removed due to obsolescence.
 =item *
 
 Building outside the source tree is supported on systems that have
-symbolic links.
+symbolic links. This is done by running
+
+    sh /path/to/source/Configure -Dmksymlinks ...
+    make all test install
+
+in a directory other than the perl source directory.  See F<INSTALL>.
 
 =item *
 
@@ -356,7 +361,7 @@ The following pod documents are brand new:
     perlretut	Perl regular expressions tutorial
     perlutil	utilities packaged with the Perl distribution
 
-The C<INSTALL> file has been expanded to cover various issues, such as
+The F<INSTALL> file has been expanded to cover various issues, such as
 64-bit support.
 
 A longer list of contributors has been added to the source distribution.
@@ -671,7 +676,7 @@ will be needed to complete the toolkit for dealing with Unicode.
 
 The new C<\N> escape interpolates named characters within strings.
 For example, C<"Hi! \N{WHITE SMILING FACE}"> evaluates to a string
-with a unicode smiley face at the end.
+with a Unicode smiley face at the end.
 
 =head2 "our" declarations
 
@@ -686,7 +691,7 @@ variables.  See L<perlfunc/our>.
 
 Literals of the form C<v1.2.3.4> are now parsed as a string composed
 of characters with the specified ordinals.  This is an alternative, more
-readable way to construct (possibly unicode) strings instead of
+readable way to construct (possibly Unicode) strings instead of
 interpolating characters, as in C<"\x{1}\x{2}\x{3}\x{4}">.  The leading
 C<v> may be omitted if there are more than two ordinals, so C<1.2.3> is
 parsed the same as C<v1.2.3>.
