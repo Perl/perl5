@@ -512,14 +512,15 @@ support that).
 =item B<-u>
 
 causes Perl to dump core after compiling your script.  You can then
-take this core dump and turn it into an executable file by using the
+in theory take this core dump and turn it into an executable file by using the
 B<undump> program (not supplied).  This speeds startup at the expense of
 some disk space (which you can minimize by stripping the executable).
 (Still, a "hello world" executable comes out to about 200K on my
 machine.)  If you want to execute a portion of your script before dumping,
 use the dump() operator instead.  Note: availability of B<undump> is
 platform specific and may not be available for a specific port of
-Perl.
+Perl.  It has been superseded by the new perl-to-C compiler, which is more
+portable, even though it's still only considered beta.
 
 =item B<-U>
 

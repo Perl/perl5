@@ -166,7 +166,7 @@ C<eval> or C<system> calls.  In addition to tainting, never use the
 single-argument form of system() or exec().  Instead, supply the
 command and arguments as a list, which prevents shell globbing.
 
-=head2 How do I parse an email header?
+=head2 How do I parse a mail header?
 
 For a quick-and-dirty solution, try this solution derived
 from page 222 of the 2nd edition of "Programming Perl":
@@ -193,33 +193,33 @@ CGI.pm or CGI_Lite.pm (available from CPAN), or if you're trapped in
 the module-free land of perl1 .. perl4, you might look into cgi-lib.pl
 (available from http://www.bio.cam.ac.uk/web/form.html).
 
-=head2 How do I check a valid email address?
+=head2 How do I check a valid mail address?
 
 You can't.
 
 Without sending mail to the address and seeing whether it bounces (and
 even then you face the halting problem), you cannot determine whether
-an email address is valid.  Even if you apply the email header
+an mail address is valid.  Even if you apply the mail header
 standard, you can have problems, because there are deliverable
 addresses that aren't RFC-822 (the mail header standard) compliant,
 and addresses that aren't deliverable which are compliant.
 
-Many are tempted to try to eliminate many frequently-invalid email
+Many are tempted to try to eliminate many frequently-invalid mail
 addresses with a simple regexp, such as
 C</^[\w.-]+\@([\w.-]\.)+\w+$/>.  However, this also throws out many
 valid ones, and says nothing about potential deliverability, so is not
 suggested.  Instead, see
 http://www.perl.com/CPAN/authors/Tom_Christiansen/scripts/ckaddr.gz ,
 which actually checks against the full RFC spec (except for nested
-comments), looks for addresses you may not wish to accept email to
+comments), looks for addresses you may not wish to accept mail to
 (say, Bill Clinton or your postmaster), and then makes sure that the
 hostname given can be looked up in DNS.  It's not fast, but it works.
 
 Here's an alternative strategy used by many CGI script authors: Check
-the email address with a simple regexp (such as the one above).  If
+the mail address with a simple regexp (such as the one above).  If
 the regexp matched the address, accept the address.  If the regexp
 didn't match the address, request confirmation from the user that the
-email address they entered was correct.
+mail address they entered was correct.
 
 =head2 How do I decode a MIME/BASE64 string?
 
@@ -237,7 +237,7 @@ format after minor transliterations:
     $len = pack("c", 32 + 0.75*length);   # compute length byte
     print unpack("u", $len . $_);         # uudecode and print
 
-=head2 How do I return the user's email address?
+=head2 How do I return the user's mail address?
 
 On systems that support getpwuid, the $E<lt> variable and the
 Sys::Hostname module (which is part of the standard perl distribution),
@@ -246,9 +246,9 @@ you can probably try using something like this:
     use Sys::Hostname;
     $address = sprintf('%s@%s', getpwuid($<), hostname);
 
-Company policies on email address can mean that this generates addresses
-that the company's email system will not accept, so you should ask for
-users' email addresses when this matters.  Furthermore, not all systems
+Company policies on mail address can mean that this generates addresses
+that the company's mail system will not accept, so you should ask for
+users' mail addresses when this matters.  Furthermore, not all systems
 on which Perl runs are so forthcoming with this information as is Unix.
 
 The Mail::Util module from CPAN (part of the MailTools package) provides a
@@ -326,6 +326,18 @@ CPAN).  No ONC::RPC module is known.
 
 =head1 AUTHOR AND COPYRIGHT
 
-Copyright (c) 1997 Tom Christiansen and Nathan Torkington.
-All rights reserved.  See L<perlfaq> for distribution information.
+Copyright (c) 1997, 1998 Tom Christiansen and Nathan Torkington.
+All rights reserved.
 
+When included as part of the Standard Version of Perl, or as part of
+its complete documentation whether printed or otherwise, this work
+may be distributed only under the terms of Perl's Artistic License.
+Any distribution of this file or derivatives thereof I<outside>
+of that package require that special arrangements be made with
+copyright holder.
+
+Irrespective of its distribution, all code examples in this file
+are hereby placed into the public domain.  You are permitted and
+encouraged to use this code in your own programs for fun
+or for profit as you see fit.  A simple comment in the code giving
+credit would be courteous but is not required.

@@ -64,8 +64,8 @@ sections on each of the following:
 
 =back
 
-But for now, let's look at some of the general issues common to all
-of these types of data structures.
+But for now, let's look at general issues common to all
+these types of data structures.
 
 =head1 REFERENCES
 
@@ -461,7 +461,7 @@ types of data structures.
 				    $a cmp $b
 	    } keys %HoL )
  {
-     print "$family: ", join(", ", sort @{ $HoL{$family}), "\n";
+     print "$family: ", join(", ", sort @{ $HoL{$family} }), "\n";
  }
 
 =head1 LISTS OF HASHES
@@ -614,7 +614,7 @@ types of data structures.
  # append new members to an existing family
  %new_folks = (
      wife => "wilma",
-     pet  => "dino";
+     pet  => "dino",
  );
 
  for $what (keys %new_folks) {
