@@ -69,7 +69,9 @@ dl_generic_private_init(pTHXo)	/* called by dl_*.xs dl_private_init() */
     if (!dl_loaded_files)
 	dl_loaded_files = newHV(); /* provide cache for dl_*.xs if needed */
 #endif
+#ifdef DL_UNLOAD_ALL_AT_EXIT
     call_atexit(&dl_unload_all_files, (void*)0);
+#endif
 }
 
 

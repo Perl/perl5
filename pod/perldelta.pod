@@ -1484,6 +1484,16 @@ L<Devel::DProf> and L<dprofpp>.
 
 The Dumpvalue module provides screen dumps of Perl data.
 
+=item DynaLoader
+
+DynaLoader now supports a dl_unload_file() function on platforms that
+support unloading shared objects using dlclose().
+
+Perl can also optionally arrange to unload all extension shared objects
+loaded by Perl.  To enable this, build Perl with the Configure option
+C<-Accflags=-DDL_UNLOAD_ALL_AT_EXIT>.  (This maybe useful if you are
+using Apache with mod_perl.)
+
 =item Benchmark
 
 Overall, Benchmark results exhibit lower average error and better timing
@@ -1851,6 +1861,11 @@ The new Win32::GetFullPathName(FILENAME) returns the full absolute
 pathname for FILENAME in scalar context.  In list context it returns
 a two-element list containing the fully qualified directory name and
 the filename.  See L<Win32>.
+
+=item XSLoader
+
+The XSLoader extension is a simpler alternative to DynaLoader.
+See L<XSLoader>.
 
 =item DBM Filters
 
