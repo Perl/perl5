@@ -2063,6 +2063,9 @@ enum {
 	    nice_chunk = (char*)(chunk);		\
 	    nice_chunk_size = (chunk_size);		\
 	}						\
+	else {						\
+	    Safefree(chunk);				\
+	}						\
 	UNLOCK_SV_MUTEX;				\
     } while (0)
 
