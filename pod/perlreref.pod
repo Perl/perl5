@@ -225,7 +225,7 @@ Captured groups are numbered according to their I<opening> paren.
 The first four of these are like the escape sequences C<\L>, C<\l>,
 C<\U>, and C<\u>.  For Titlecase, see L</Titlecase>.
 
-=head2 Terminology
+=head2 TERMINOLOGY
 
 =head3 Titlecase
 
