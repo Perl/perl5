@@ -815,6 +815,10 @@ Perl interface to IEEE Std 1003.1
 
 On demand loader for PerlIO layers and root of PerlIO::* name space
 
+=item PerlIO::via::QuotedPrint
+
+PerlIO layer for quoted-printable strings
+
 =item Pod::Checker
 
 Check pod documents for syntax errors

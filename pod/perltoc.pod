@@ -4672,7 +4672,7 @@ Set_ptrcnt
 
 =item Extension Layers
 
-":encoding", ":Scalar", ":Via"
+":encoding", ":scalar", ":via"
 
 =back
 
@@ -5346,6 +5346,8 @@ I<The Road goes ever on and on, down from the door where it began.>
 =item BeOS
 
 =item Cygwin "unable to remap"
+
+=item Cygwin ndbm tests fail on FAT
 
 =item ext/threads/t/libc
 
@@ -7201,6 +7203,8 @@ I<dlsym()>, Win9x and C<d_eofnblk>, Compiler/Preprocessor defines
 
 =item File Permissions on Cygwin
 
+=item NDBM_File does not work on FAT filesystems
+
 =item Script Portability on Cygwin
 
 Pathnames, Text/Binary, F<.exe>, chown(), Miscellaneous
@@ -8376,8 +8380,8 @@ from perl
 =item DESCRIPTION
 
 $thread = threads->create(function, LIST), $thread->join, $thread->detach,
-threads->self, $thread->tid, threads->yield();, threads->list();, async
-BLOCK;
+threads->self, $thread->tid, threads->object( tid ), threads->yield();,
+threads->list();, async BLOCK;
 
 =item WARNINGS
 
@@ -16552,7 +16556,7 @@ name space
 
 =item DESCRIPTION
 
-unix, stdio, perlio, crlf, utf8, bytes, raw
+unix, stdio, perlio, crlf, utf8, bytes, raw, pop
 
 =over 4
 
