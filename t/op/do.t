@@ -31,7 +31,7 @@ sub ok {
     return $ok;
 }
 
-print "1..20\n";
+print "1..21\n";
 
 # Test do &sub and proper @_ handling.
 $_[0] = 0;
@@ -86,6 +86,9 @@ ok( !$@, "do on a non-existing file, first try" );
 
 eval qq{ do uc qq(a file that does not exist); };
 ok( !$@, "do on a non-existing file, second try"  );
+
+# 6 must be interpreted as a file name here
+ok( (!defined do 6) && $!, "'do 6' : $!" );
 
 END {
     1 while unlink("$$.16", "$$.17", "$$.18");
