@@ -85,6 +85,7 @@ $bar = <TESTFILE>;
 if ($bar eq "78") {print "ok 10\n";} else {print "not ok 10\n";}
 
 # Get rid of the temp file
+close TESTFILE;
 unlink "./foo";
 
 # Now for the tricky bit--full record reading
@@ -120,6 +121,7 @@ if ($^O eq 'VMS') {
   $bar = <TESTFILE>;
   if ($bar eq "z\n") {print "ok 14\n";} else {print "not ok 14\n";}
 
+  close TESTFILE;
   unlink "./foo.bar";
   unlink "./foo.com";  
 } else {
