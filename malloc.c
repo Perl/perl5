@@ -1269,8 +1269,6 @@ botch(char *diag, char *s, char *file, int line)
 	goto do_write;
     else {
 	dTHX;
-	char linebuf[10];
-
 	if (PerlIO_printf(PerlIO_stderr(),
 			  "assertion botched (%s?): %s%s %s:%d\n",
 			  diag, s, file, line) != 0) {
@@ -1282,8 +1280,16 @@ botch(char *diag, char *s, char *file, int line)
 	    write2(" (");
 	    write2(file);
 	    write2(":");
-	    sprintf(linebuf, "%d", line);
-	    write2(linebuf);
+	    {
+	      char linebuf[10];
+	      char *s = linebuf + sizeof(linebuf) - 1;
+	      int n = line;
+	      *s = 0;
+	      do {
+		*--s = '0' + (n % 10);
+	      } while (n /= 10);
+	      write2(s);
+	    }
 	    write2(")\n");
 	}
 	PerlProc_abort();
