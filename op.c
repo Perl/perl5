@@ -131,6 +131,7 @@ pad_allocmy(char *name)
 	for (off = AvFILLp(PL_comppad_name); off > PL_comppad_name_floor; off--) {
 	    if ((sv = svp[off])
 		&& sv != &PL_sv_undef
+		&& (SvIVX(sv) == 999999999 || SvIVX(sv) == 0)
 		&& strEQ(name, SvPVX(sv)))
 	    {
 		warner(WARN_UNSAFE,

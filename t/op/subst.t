@@ -1,5 +1,7 @@
 #!./perl
 
+BEGIN { @INC = ('../lib') }
+
 print "1..71\n";
 
 $x = 'foo';
