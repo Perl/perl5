@@ -272,30 +272,30 @@ sub c_o {
         $cpp_cmd =~ s/^CCCMD\s*=\s*\$\(CC\)/$cpp/;
         push @m, '
 .c.i:
-	'. $cpp_cmd . ' $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) $*.c > $*.i
+	'. $cpp_cmd . ' $(CCCDLFLAGS) -I$(PERL_INC) $(PASTHRU_DEFINE) $(DEFINE) $*.c > $*.i
 ';
     }
     push @m, '
 .c.s:
-	$(CCCMD) -S $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) $*.c
+	$(CCCMD) -S $(CCCDLFLAGS) -I$(PERL_INC) $(PASTHRU_DEFINE) $(DEFINE) $*.c
 ';
     push @m, '
 .c$(OBJ_EXT):
-	$(CCCMD) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) $*.c
+	$(CCCMD) $(CCCDLFLAGS) -I$(PERL_INC) $(PASTHRU_DEFINE) $(DEFINE) $*.c
 ';
     push @m, '
 .C$(OBJ_EXT):
-	$(CCCMD) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) $*.C
+	$(CCCMD) $(CCCDLFLAGS) -I$(PERL_INC) $(PASTHRU_DEFINE) $(DEFINE) $*.C
 ' if $^O ne 'os2' and $^O ne 'MSWin32' and $^O ne 'dos'; #Case-specific
     push @m, '
 .cpp$(OBJ_EXT):
-	$(CCCMD) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) $*.cpp
+	$(CCCMD) $(CCCDLFLAGS) -I$(PERL_INC) $(PASTHRU_DEFINE) $(DEFINE) $*.cpp
 
 .cxx$(OBJ_EXT):
-	$(CCCMD) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) $*.cxx
+	$(CCCMD) $(CCCDLFLAGS) -I$(PERL_INC) $(PASTHRU_DEFINE) $(DEFINE) $*.cxx
 
 .cc$(OBJ_EXT):
-	$(CCCMD) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) $*.cc
+	$(CCCMD) $(CCCDLFLAGS) -I$(PERL_INC) $(PASTHRU_DEFINE) $(DEFINE) $*.cc
 ';
     join "", @m;
 }
@@ -478,7 +478,8 @@ sub const_cccmd {
     return $self->{CONST_CCCMD} if $self->{CONST_CCCMD};
     return '' unless $self->needs_linking();
     return $self->{CONST_CCCMD} =
-	q{CCCMD = $(CC) -c $(INC) $(CCFLAGS) $(OPTIMIZE) \\
+	q{CCCMD = $(CC) -c $(PASTHRU_INC) $(INC) \\
+	$(CCFLAGS) $(OPTIMIZE) \\
 	$(PERLTYPE) $(MPOLLUTE) $(DEFINE_VERSION) \\
 	$(XS_DEFINE_VERSION)};
 }
@@ -2848,8 +2849,12 @@ sub pasthru {
     my($sep) = $Is_VMS ? ',' : '';
     $sep .= "\\\n\t";
 
-    foreach $key (qw(LIB LIBPERL_A LINKTYPE PREFIX OPTIMIZE INC DEFINE)) {
+    foreach $key (qw(LIB LIBPERL_A LINKTYPE PREFIX OPTIMIZE)) {
 	push @pasthru, "$key=\"\$($key)\"";
+    }
+
+    foreach $key (qw(DEFINE INC)) {
+	push @pasthru, "PASTHRU_$key=\"\$(PASTHRU_$key)\"";
     }
 
     push @m, "\nPASTHRU = ", join ($sep, @pasthru), "\n";
@@ -3826,7 +3831,7 @@ sub xs_o {	# many makes are too dumb to use xs_c then c_o
     '
 .xs$(OBJ_EXT):
 	$(PERLRUN) $(XSUBPP) $(XSPROTOARG) $(XSUBPPARGS) $*.xs > $*.xsc && $(MV) $*.xsc $*.c
-	$(CCCMD) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) $*.c
+	$(CCCMD) $(CCCDLFLAGS) -I$(PERL_INC) $(PASTHRU_DEFINE) $(DEFINE) $*.c
 ';
 }
 
