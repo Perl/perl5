@@ -18,10 +18,12 @@ the semantics.
 
 =cut 
 
+use strict;
 use Config;
 use File::Basename;
+
 use vars qw(@ISA $VERSION);
-$VERSION = '2.01_01';
+$VERSION = '2.02_01';
 
 require ExtUtils::MM_Win32;
 @ISA = qw(ExtUtils::MM_Win32);
@@ -30,33 +32,30 @@ use ExtUtils::MakeMaker qw( &neatvalue );
 
 $ENV{EMXSHELL} = 'sh'; # to run `commands`
 
-$BORLAND = 1 if $Config{'cc'} =~ /^bcc/i;
-$GCC     = 1 if $Config{'cc'} =~ /^gcc/i;
-$DMAKE = 1 if $Config{'make'} =~ /^dmake/i;
-$NMAKE = 1 if $Config{'make'} =~ /^nmake/i;
-$PERLMAKE = 1 if $Config{'make'} =~ /^pmake/i;
+my $BORLAND  = 1 if $Config{'cc'} =~ /^bcc/i;
+my $GCC      = 1 if $Config{'cc'} =~ /^gcc/i;
+my $DMAKE    = 1 if $Config{'make'} =~ /^dmake/i;
 
 
-	
-sub init_others
-{
- my ($self) = @_;
- $self->SUPER::init_others(@_);
+sub init_others {
+    my ($self) = @_;
+    $self->SUPER::init_others(@_);
 
- # incpath is copied to makefile var INCLUDE in constants sub, here just make it empty
- my $libpth = $Config{'libpth'};
- $libpth =~ s( )(;);
- $self->{'LIBPTH'} = $libpth;
- $self->{'BASE_IMPORT'} = $Config{'base_import'};
+    # incpath is copied to makefile var INCLUDE in constants sub, here just 
+    # make it empty
+    my $libpth = $Config{'libpth'};
+    $libpth =~ s( )(;);
+    $self->{'LIBPTH'} = $libpth;
+    $self->{'BASE_IMPORT'} = $Config{'base_import'};
  
- # Additional import file specified from Makefile.pl
- if($self->{'base_import'}) {
-	$self->{'BASE_IMPORT'} .= ', ' . $self->{'base_import'};
- }
+    # Additional import file specified from Makefile.pl
+    if($self->{'base_import'}) {
+        $self->{'BASE_IMPORT'} .= ', ' . $self->{'base_import'};
+    }
  
- $self->{'NLM_VERSION'} = $Config{'nlm_version'};
- $self->{'MPKTOOL'}	= $Config{'mpktool'};
- $self->{'TOOLPATH'}	= $Config{'toolpath'};
+    $self->{'NLM_VERSION'} = $Config{'nlm_version'};
+    $self->{'MPKTOOL'}	= $Config{'mpktool'};
+    $self->{'TOOLPATH'}	= $Config{'toolpath'};
 }
 
 
@@ -65,15 +64,17 @@ sub init_others
 Initializes lots of constants and .SUFFIXES and .PHONY
 
 =cut
-# NetWare override
+
 sub const_cccmd {
     my($self,$libperl)=@_;
     return $self->{CONST_CCCMD} if $self->{CONST_CCCMD};
     return '' unless $self->needs_linking();
-    return $self->{CONST_CCCMD} = 
-	q{CCCMD = $(CC) $(CCFLAGS) $(INC) $(OPTIMIZE) \\
-	$(PERLTYPE) $(MPOLLUTE) -o $@ \\
-	-DVERSION=\"$(VERSION)\" -DXS_VERSION=\"$(XS_VERSION)\"};
+    return $self->{CONST_CCCMD} = <<'MAKE_FRAG';
+CCCMD = $(CC) $(CCFLAGS) $(INC) $(OPTIMIZE) \
+	$(PERLTYPE) $(MPOLLUTE) -o $@ \
+	-DVERSION="$(VERSION)" -DXS_VERSION="$(XS_VERSION)"
+MAKE_FRAG
+
 }
 
 sub constants {
@@ -92,27 +93,27 @@ sub constants {
 	      INSTALLSITEARCH INSTALLBIN INSTALLSCRIPT PERL_LIB
 	      PERL_ARCHLIB SITELIBEXP SITEARCHEXP LIBPERL_A MYEXTLIB
 	      FIRST_MAKEFILE MAKE_APERL_FILE PERLMAINCC PERL_SRC
-	      PERL_INC PERL FULLPERL LIBPTH BASE_IMPORT PERLRUN FULLPERLRUN PERLRUNINST 
-	      FULL_AR PERL_CORE FULLPERLRUNINST NLM_VERSION MPKTOOL TOOLPATH
-		  
+	      PERL_INC PERL FULLPERL LIBPTH BASE_IMPORT PERLRUN
+              FULLPERLRUN PERLRUNINST FULLPERLRUNINST
+              FULL_AR PERL_CORE NLM_VERSION MPKTOOL TOOLPATH
+
 	      / ) {
 	next unless defined $self->{$tmp};
 	push @m, "$tmp = $self->{$tmp}\n";
     }
 
-	(my $boot = $self->{'NAME'}) =~ s/:/_/g;
-	$self->{'BOOT_SYMBOL'}=$boot;
-	push @m, "BOOT_SYMBOL = $self->{'BOOT_SYMBOL'}\n";
+    (my $boot = $self->{'NAME'}) =~ s/:/_/g;
+    $self->{'BOOT_SYMBOL'}=$boot;
+    push @m, "BOOT_SYMBOL = $self->{'BOOT_SYMBOL'}\n";
 
-	# If the final binary name is greater than 8 chars,
-	# truncate it here and rename it after creation
-	# otherwise, Watcom Linker fails
-	
-	if(length($self->{'BASEEXT'}) > 8) {
-		$self->{'NLM_SHORT_NAME'} = substr($self->{'BASEEXT'},0,8);
-		push @m, "NLM_SHORT_NAME = $self->{'NLM_SHORT_NAME'}\n";
-	}
-	
+    # If the final binary name is greater than 8 chars,
+    # truncate it here and rename it after creation
+    # otherwise, Watcom Linker fails
+    if(length($self->{'BASEEXT'}) > 8) {
+        $self->{'NLM_SHORT_NAME'} = substr($self->{'BASEEXT'},0,8);
+        push @m, "NLM_SHORT_NAME = $self->{'NLM_SHORT_NAME'}\n";
+    }
+
     push @m, qq{
 VERSION_MACRO = VERSION
 DEFINE_VERSION = -D\$(VERSION_MACRO)=\\\"\$(VERSION)\\\"
@@ -120,24 +121,22 @@ XS_VERSION_MACRO = XS_VERSION
 XS_DEFINE_VERSION = -D\$(XS_VERSION_MACRO)=\\\"\$(XS_VERSION)\\\"
 };
 
-	# Get the include path and replace the spaces with ;
-	# Copy this to makefile as INCLUDE = d:\...;d:\;
-	(my $inc = $Config{'incpath'}) =~ s/([ ]*)-I/;/g;
+    # Get the include path and replace the spaces with ;
+    # Copy this to makefile as INCLUDE = d:\...;d:\;
+    (my $inc = $Config{'incpath'}) =~ s/([ ]*)-I/;/g;
 
-	# Get the additional include path and append to INCLUDE, keep it in
-	# INC will give problems during compilation, hence reset it after getting
-	# the value
-	$self->{'INC'} = '';
-	push @m, qq{
+    # Get the additional include path and append to INCLUDE, keeping it
+    # in INC will give problems during compilation, hence reset it
+    # after getting the value
+    $self->{INC} = '';
+
+    push @m, qq{
 INCLUDE = $inc;
 };
 
-push @m, qq{
-INCLUDE = $inc;
-};
-	# Set the path to CodeWarrior binaries which might not have been set in
-	# any other place
-	push @m, qq{
+    # Set the path to CodeWarrior binaries which might not have been set in
+    # any other place
+    push @m, qq{
 PATH = \$(PATH);\$(TOOLPATH)
 };
 
@@ -194,12 +193,6 @@ makemakerdflt: all
 
 .SUFFIXES: .xs .c .C .cpp .cxx .cc \$(OBJ_EXT)
 
-# Nick wanted to get rid of .PRECIOUS. I don't remember why. I seem to recall, that
-# some make implementations will delete the Makefile when we rebuild it. Because
-# we call false(1) when we rebuild it. So make(1) is not completely wrong when it
-# does so. Our milage may vary.
-# .PRECIOUS: Makefile    # seems to be not necessary anymore
-
 .PHONY: all config static dynamic test linkext manifest
 
 # Where is the Config information that we are using/depend on
@@ -239,12 +232,6 @@ EXPORT_LIST = $tmp
 PERL_ARCHIVE = $tmp
 ";
 
-#    push @m, q{
-#INST_PM = }.join(" \\\n\t", sort values %{$self->{PM}}).q{
-#
-#PM_TO_BLIB = }.join(" \\\n\t", %{$self->{PM}}).q{
-#};
-
     push @m, q{
 TO_INST_PM = }.join(" \\\n\t", sort keys %{$self->{PM}}).q{
 
@@ -254,38 +241,50 @@ PM_TO_BLIB = }.join(" \\\n\t", %{$self->{PM}}).q{
     join('',@m);
 }
 
+
+=item static_lib (o)
+
+=cut
+
 sub static_lib {
     my($self) = @_;
-# Come to think of it, if there are subdirs with linkcode, we still have no INST_STATIC
-#    return '' unless $self->needs_linking(); #might be because of a subdir
 
     return '' unless $self->has_link_code;
 
-    my(@m);
-    push(@m, <<'END');
+    my $m = <<'END';
 $(INST_STATIC): $(OBJECT) $(MYEXTLIB) $(INST_ARCHAUTODIR)\.exists
 	$(RM_RF) $@
 END
 
     # If this extension has it's own library (eg SDBM_File)
     # then copy that to $(INST_STATIC) and add $(OBJECT) into it.
-    push(@m, "\t$self->{CP} \$(MYEXTLIB) \$\@\n") if $self->{MYEXTLIB};
+    $m .= <<'END'  if $self->{MYEXTLIB};
+	$self->{CP} $(MYEXTLIB) $\@
+END
 
-    push @m,
-q{	$(AR) }.($BORLAND ? '$@ $(OBJECT:^"+")'
-			  : ($GCC ? '-ru $@ $(OBJECT)'
-			          : '-type library -o $@ $(OBJECT)')).q{
-	}.$self->{NOECHO}.q{echo "$(EXTRALIBS)" > $(INST_ARCHAUTODIR)\extralibs.ld
+    my $ar_arg;
+    if( $BORLAND ) {
+        $ar_arg = '$@ $(OBJECT:^"+")';
+    }
+    elsif( $GCC ) {
+        $ar_arg = '-ru $@ $(OBJECT)';
+    }
+    else {
+        $ar_arg = '-type library -o $@ $(OBJECT)';
+    }
+
+    $m .= sprintf <<'END', $ar_arg;
+	$(AR) %s
+	$(NOECHO)echo "$(EXTRALIBS)" > $(INST_ARCHAUTODIR)\extralibs.ld
 	$(CHMOD) 755 $@
-};
-# CW change ( -type library ... )
-# Old mechanism - still available:
+END
 
-    push @m, "\t$self->{NOECHO}".q{echo "$(EXTRALIBS)" >> $(PERL_SRC)\ext.libs}."\n\n"
-	if $self->{PERL_SRC};
+    $m .= <<'END' if $self->{PERL_SRC};
+        $(NOECHO)echo "$(EXTRALIBS)" >> $(PERL_SRC)\ext.libs
 
-    push @m, $self->dir_target('$(INST_ARCHAUTODIR)');
-    join('', "\n",@m);
+END
+
+    return $m;
 }
 
 
@@ -296,7 +295,7 @@ Defines how to produce the *.so (or equivalent) files.
 =cut
 
 sub dynamic_lib {
-	my($self, %attribs) = @_;
+    my($self, %attribs) = @_;
     return '' unless $self->needs_linking(); #might be because of a subdir
 
     return '' unless $self->has_link_code;
@@ -304,96 +303,64 @@ sub dynamic_lib {
     my($otherldflags) = $attribs{OTHERLDFLAGS} || ($BORLAND ? 'c0d32.obj': '');
     my($inst_dynamic_dep) = $attribs{INST_DYNAMIC_DEP} || "";
     my($ldfrom) = '$(LDFROM)';
-    my(@m);
-	(my $boot = $self->{NAME}) =~ s/:/_/g;
-	my ($mpk);
-    push(@m,'
+
+    (my $boot = $self->{NAME}) =~ s/:/_/g;
+
+    my $m = <<'MAKE_FRAG';
 # This section creates the dynamically loadable $(INST_DYNAMIC)
 # from $(OBJECT) and possibly $(MYEXTLIB).
 OTHERLDFLAGS = '.$otherldflags.'
 INST_DYNAMIC_DEP = '.$inst_dynamic_dep.'
 
+# Create xdc data for an MT safe NLM in case of mpk build
 $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP)
-');
-#      push(@m,
-#      q{	$(LD) -out:$@ $(LDDLFLAGS) }.$ldfrom.q{ $(OTHERLDFLAGS) }
-#      .q{$(MYEXTLIB) $(PERL_ARCHIVE) $(LDLOADLIBS) -def:$(EXPORT_LIST)});
+	@echo Export boot_$(BOOT_SYMBOL) > $(BASEEXT).def
+	@echo $(BASE_IMPORT) >> $(BASEEXT).def
+	@echo Import @$(PERL_INC)\perl.imp >> $(BASEEXT).def
+MAKE_FRAG
 
-		# Create xdc data for an MT safe NLM in case of mpk build
-#	if ( scalar(keys %XS) == 0 ) { return; }
-    		push(@m, 
-    		q{	@echo Export boot_$(BOOT_SYMBOL) > $(BASEEXT).def
-}); 
-	push(@m, 
-    q{	@echo $(BASE_IMPORT) >> $(BASEEXT).def 
-});
-	push(@m, 
-    q{	@echo Import @$(PERL_INC)\perl.imp >> $(BASEEXT).def 
-});  
 
-		if ( $self->{CCFLAGS} =~ m/ -DMPK_ON /) {
-			$mpk=1;
-			push @m, '	$(MPKTOOL) $(XDCFLAGS) $(BASEEXT).xdc
-';
-			push @m, '	@echo xdcdata $(BASEEXT).xdc >> $(BASEEXT).def
-';
-		} else {
-			$mpk=0;
-		}
-		
-		push(@m,
-			q{	$(LD) $(LDFLAGS) $(OBJECT:.obj=.obj) } 
-			);
+    if ( $self->{CCFLAGS} =~ m/ -DMPK_ON /) {
+        $m .= <<'MAKE_FRAG';
+	$(MPKTOOL) $(XDCFLAGS) $(BASEEXT).xdc
+	@echo xdcdata $(BASEEXT).xdc >> $(BASEEXT).def
+MAKE_FRAG
+    }
 
-		push(@m,
-			q{	-desc "Perl 5.7.3 Extension ($(BASEEXT))	XS_VERSION: $(XS_VERSION)" -nlmversion $(NLM_VERSION) } 
-			);
-			
-		# Taking care of long names like FileHandle, ByteLoader, SDBM_File etc
-		if($self->{NLM_SHORT_NAME}) {
-			# In case of nlms with names exceeding 8 chars, build nlm in the 
-			# current dir, rename and move to auto\lib.  If we create in auto\lib
-			# in the first place, we can't rename afterwards.
-			push(@m,
-				q{ -o $(NLM_SHORT_NAME).$(DLEXT)}
-				);
-		} else {
-			push(@m,
-				q{ -o $(INST_AUTODIR)\\$(BASEEXT).$(DLEXT)}
-				);
-		}
-		# Add additional lib files if any (SDBM_File)
-		if($self->{MYEXTLIB}) {
-			push(@m,
-				q{ $(MYEXTLIB) }
-				);
-		}
+    $m .= '	$(LD) $(LDFLAGS) $(OBJECT:.obj=.obj) -desc "Perl 5.7.3 Extension ($(BASEEXT))  XS_VERSION: $(XS_VERSION)" -nlmversion $(NLM_VERSION)';
 
-#For now lets comment all the Watcom lib calls
-#q{ LibPath $(LIBPTH) Library plib3s.lib Library math3s.lib Library clib3s.lib Library emu387.lib Library $(PERL_ARCHIVE) Library $(PERL_INC)\Main.lib}
-        
-       
-		push(@m,
-				q{ $(PERL_INC)\Main.lib}
-			   .q{ -commandfile $(BASEEXT).def }
-			);
+    # Taking care of long names like FileHandle, ByteLoader, SDBM_File etc
+    if($self->{NLM_SHORT_NAME}) {
+        # In case of nlms with names exceeding 8 chars, build nlm in the 
+        # current dir, rename and move to auto\lib.  If we create in auto\lib
+        # in the first place, we can't rename afterwards.
+        $m .= q{ -o $(NLM_SHORT_NAME).$(DLEXT)}
+    } else {
+        $m .= q{ -o $(INST_AUTODIR)\\$(BASEEXT).$(DLEXT)}
+    }
 
-		# If it is having a short name, rename it 
-		if($self->{NLM_SHORT_NAME}) {
-			push @m, '
- if exist $(INST_AUTODIR)\\$(BASEEXT).$(DLEXT) del $(INST_AUTODIR)\\$(BASEEXT).$(DLEXT)';
-			push @m, '
- rename $(NLM_SHORT_NAME).$(DLEXT) $(BASEEXT).$(DLEXT)';
-			push @m, '
- move $(BASEEXT).$(DLEXT) $(INST_AUTODIR)';
-		}
+    # Add additional lib files if any (SDBM_File)
+    $m .= q{ $(MYEXTLIB) } if $self->{MYEXTLIB};
 
-    push @m, '
+    $m .= q{ $(PERL_INC)\Main.lib -commandfile $(BASEEXT).def}."\n";
+
+    # If it is having a short name, rename it 
+    if($self->{NLM_SHORT_NAME}) {
+        $m .= <<'MAKE_FRAG';
+	if exist $(INST_AUTODIR)\$(BASEEXT).$(DLEXT) del $(INST_AUTODIR)\$(BASEEXT).$(DLEXT) 
+	rename $(NLM_SHORT_NAME).$(DLEXT) $(BASEEXT).$(DLEXT) 
+	move $(BASEEXT).$(DLEXT) $(INST_AUTODIR)
+MAKE_FRAG
+    }
+
+    $m .= <<'MAKE_FRAG';
+
 	$(CHMOD) 755 $@
-';
+MAKE_FRAG
 
-    push @m, $self->dir_target('$(INST_ARCHAUTODIR)');
-   join('',@m);
+    $m .= $self->dir_target('$(INST_ARCHAUTODIR)');
+
+    return $m;
 }
 
 
@@ -403,4 +370,5 @@ __END__
 =back
 
 =cut 
+
 
