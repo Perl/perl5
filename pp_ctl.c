@@ -1985,7 +1985,7 @@ PP(pp_next)
 {
     I32 cxix;
     register PERL_CONTEXT *cx;
-    I32 oldsave;
+    I32 inner;
 
     if (PL_op->op_flags & OPf_SPECIAL) {
 	cxix = dopoptoloop(cxstack_ix);
@@ -2000,13 +2000,12 @@ PP(pp_next)
     if (cxix < cxstack_ix)
 	dounwind(cxix);
 
+    /* clear off anything above the scope we're re-entering, but
+     * save the rest until after a possible continue block */
+    inner = PL_scopestack_ix;
     TOPBLOCK(cx);
-
-    /* clean scope, but only if there's no continue block */
-    if (!(cx->blk_loop.last_op->op_private & OPpLOOP_CONTINUE)) {
-	oldsave = PL_scopestack[PL_scopestack_ix - 1];
-	LEAVE_SCOPE(oldsave);
-    }
+    if (PL_scopestack_ix < inner)
+	leave_scope(PL_scopestack[PL_scopestack_ix]);
     return cx->blk_loop.next_op;
 }
 
