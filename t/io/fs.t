@@ -245,14 +245,21 @@ else {
 }
 
 # check if rename() can be used to just change case of filename
-chdir './tmp';
-open(fh,'>x') || die "Can't create x";
-close(fh);
-rename('x', 'X');
-print 'not ' unless -e 'X';
-print "ok 27\n";
-unlink 'X';
-chdir $wd || die "Can't cd back to $wd";
+if ($^O eq 'cygwin') {
+  print "ok 27 # skipped: works only if check_case is set to relaxed.\n";
+} else { 
+  chdir './tmp';
+  open(fh,'>x') || die "Can't create x";
+  close(fh);
+  rename('x', 'X');
+  
+  # this works on win32 only, because fs isn't casesensitive
+  print 'not ' unless -e 'X'; 
+  
+  print "ok 27\n";
+  unlink 'X';
+  chdir $wd || die "Can't cd back to $wd";
+}
 
 # check if rename() works on directories
 if ($Is_VMSish) {
@@ -267,4 +274,5 @@ print "ok 28\n";
 -d 'tmp1' or print "not ";
 print "ok 29\n";
 
-END { rmdir 'tmp1'; 1 while unlink "Iofs.tmp"; }
+# need to remove 'tmp' if rename() in test 28 failed!
+END { rmdir 'tmp1'; rmdir 'tmp'; unlink "Iofs.tmp"; }
