@@ -3187,7 +3187,8 @@ S_incpush(pTHX_ char *p, int addsubdirs)
 	 */
 	if (addsubdirs) {
 #ifdef PERL_INC_VERSION_LIST
-	    const char *incverlist[] = { PERL_INC_VERSION_LIST, NULL };
+	    /* Configure terminates PERL_INC_VERSION_LIST with a NULL */
+	    const char *incverlist[] = { PERL_INC_VERSION_LIST };
 	    const char **incver;
 #endif
 	    struct stat tmpstatbuf;
@@ -3222,14 +3223,12 @@ S_incpush(pTHX_ char *p, int addsubdirs)
 		av_push(GvAVn(PL_incgv), newSVsv(subdir));
 
 #ifdef PERL_INC_VERSION_LIST
-	    for (incver = incverlist; *incver; incver++)
-	    {
+	    for (incver = incverlist; *incver; incver++) {
 		/* .../xxx if -d .../xxx */
 		Perl_sv_setpvf(aTHX_ subdir, "%"SVf"/%s", libdir, *incver);
 		if (PerlLIO_stat(SvPVX(subdir), &tmpstatbuf) >= 0 &&
 		      S_ISDIR(tmpstatbuf.st_mode))
 		    av_push(GvAVn(PL_incgv), newSVsv(subdir));
-   
 	    }
 #endif
 	}
