@@ -2702,6 +2702,7 @@ PP(pp_require)
     PUSHBLOCK(cx, CXt_EVAL, SP);
     PUSHEVAL(cx, name, PL_compiling.cop_filegv);
 
+    SAVEI16(PL_compiling.cop_line);
     PL_compiling.cop_line = 0;
 
     PUTBACK;
