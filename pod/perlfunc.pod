@@ -1336,8 +1336,9 @@ executed, an undefined value is returned by C<eval>, and C<$@> is set to the
 error message.  If there was no error, C<$@> is guaranteed to be a null
 string.  Beware that using C<eval> neither silences perl from printing
 warnings to STDERR, nor does it stuff the text of warning messages into C<$@>.
-To do either of those, you have to use the C<$SIG{__WARN__}> facility.  See
-L</warn> and L<perlvar>.
+To do either of those, you have to use the C<$SIG{__WARN__}> facility, or
+turn off warnings inside the BLOCK or EXPR using S<C<no warnings 'all'>>.
+See L</warn>, L<perlvar>, L<warnings> and L<perllexwarn>.
 
 Note that, because C<eval> traps otherwise-fatal errors, it is useful for
 determining whether a particular feature (such as C<socket> or C<symlink>)
