@@ -24,6 +24,7 @@ echo "Extracting cflags (with variable substitutions)"
 rm -f cflags
 $spitshell >cflags <<!GROK!THIS!
 $startsh
+src=$src
 !GROK!THIS!
 
 : In the following dollars and backticks do not need the extra backslash.
@@ -65,7 +66,7 @@ case $# in
 0) set *.c; echo "The current C flags are:" ;;
 esac
 
-set `echo "$* " | sed -e 's/\.[oc] / /g' -e 's/\.obj / /g'`
+set `echo "$* " | sed -e 's/\.[oc] / /g' -e 's/\.obj / /g' -e "s/\\$obj_ext / /g"`
 
 for file do
 
@@ -73,6 +74,12 @@ for file do
     1) ;;
     *) echo $n "    $file.c	$c" ;;
     esac
+
+    : allow for out-of-source experience
+
+    if test "X$src" != X.; then
+        ccflags="$ccflags -I$src -I."
+    fi
 
     : allow variables like toke_cflags to be evaluated
 

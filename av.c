@@ -91,7 +91,8 @@ Perl_av_extend(pTHX_ AV *av, I32 key)
 	else {
 	    if (AvALLOC(av)) {
 #ifndef STRANGE_MALLOC
-		U32 bytes;
+		MEM_SIZE bytes;
+		IV itmp;
 #endif
 
 #if defined(MYMALLOC) && !defined(PURIFY) && !defined(LEAKTEST)
@@ -107,13 +108,14 @@ Perl_av_extend(pTHX_ AV *av, I32 key)
 #else
 		bytes = (newmax + 1) * sizeof(SV*);
 #define MALLOC_OVERHEAD 16
-		tmp = MALLOC_OVERHEAD;
-		while (tmp - MALLOC_OVERHEAD < bytes)
-		    tmp += tmp;
-		tmp -= MALLOC_OVERHEAD;
-		tmp /= sizeof(SV*);
-		assert(tmp > newmax);
-		newmax = tmp - 1;
+		itmp = MALLOC_OVERHEAD;
+		while (itmp - MALLOC_OVERHEAD < bytes)
+		    itmp += itmp;
+		itmp -= MALLOC_OVERHEAD;
+		itmp /= sizeof(SV*);
+		assert(itmp > newmax);
+		newmax = itmp - 1;
+		assert(newmax >= AvMAX(av));
 		New(2,ary, newmax+1, SV*);
 		Copy(AvALLOC(av), ary, AvMAX(av)+1, SV*);
 		if (AvMAX(av) > 64)

@@ -1480,7 +1480,7 @@ Directory to hold the man pages at 'make' time
 =item INST_SCRIPT
 
 Directory, where executable files should be installed during
-'make'. Defaults to "./blib/bin", just to have a dummy location during
+'make'. Defaults to "./blib/script", just to have a dummy location during
 testing. make install will copy the files in INST_SCRIPT to
 INSTALLSCRIPT.
 

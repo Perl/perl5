@@ -93,12 +93,15 @@ print OUT "push(\@dl_library_path, split(' ', ",
 
 print OUT <<'EOT';
 
-# Add to @dl_library_path any extra directories we can gather from
-# environment variables. So far LD_LIBRARY_PATH is the only known
-# variable used for this purpose. Others may be added later.
+# Add to @dl_library_path any extra directories we can gather
+# from environment variables.
+push(@dl_library_path, split(/:/, $ENV{$Config::Config{ldlibpthname}}))
+    if exists      $Config::Config{ldlibpthname}        &&
+                   $Config::Config{ldlibpthname}  ne '' &&
+       exists $ENV{$Config::Config{ldlibpthname}}       ;;
+# E.g. HP-UX supports both its native SHLIB_PATH *and* LD_LIBRARY_PATH.
 push(@dl_library_path, split(/:/, $ENV{LD_LIBRARY_PATH}))
-    if $ENV{LD_LIBRARY_PATH};
-
+    if exists $ENV{LD_LIBRARY_PATH};
 
 # No prizes for guessing why we don't say 'bootstrap DynaLoader;' here.
 boot_DynaLoader('DynaLoader') if defined(&boot_DynaLoader) &&

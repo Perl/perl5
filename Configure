@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Jul  6 18:36:05 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Sun Jul 25 17:05:01 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -670,6 +670,9 @@ i_stdarg=''
 i_varargs=''
 i_varhdr=''
 i_vfork=''
+installprefix=''
+installprefixexp=''
+installstyle=''
 installusrbinperl=''
 intsize=''
 longsize=''
@@ -693,6 +696,7 @@ d_stat64=''
 d_telldir64=''
 d_truncate64=''
 libc=''
+ldlibpthname=''
 libperl=''
 shrpenv=''
 useshrplib=''
@@ -786,6 +790,8 @@ sitearchexp=''
 installsitelib=''
 sitelib=''
 sitelibexp=''
+siteprefix=''
+siteprefixexp=''
 sizetype=''
 so=''
 sharpbang=''
@@ -825,6 +831,13 @@ incpath=''
 mips=''
 mips_type=''
 usrinc=''
+d_vendorlib=''
+installvendorlib=''
+vendorlib=''
+vendorlibexp=''
+usevendorprefix=''
+vendorprefix=''
+vendorprefixexp=''
 defvoidused=''
 voidflags=''
 CONFIG=''
@@ -1290,7 +1303,12 @@ esac
 : Find the path to the source tree
 case "$src" in
 '') case "$0" in
-    */*) src=`echo $0 | sed -e 's%/[^/][^/]*$%%'`;;
+    */*) src=`echo $0 | sed -e 's%/[^/][^/]*$%%'`
+         case "$src" in
+	 /*)	;;
+         *)	src=`cd ../$src && pwd` ;;
+	 esac
+         ;;
     *)   src='.';;
     esac;;
 esac
@@ -2364,7 +2382,7 @@ EOM
 
 You may give one or more space-separated answers, or "none" if appropriate.
 A well-behaved OS will have no hints, so answering "none" or just "Policy"
-is a good thing.  DO NOT give a wrong version.
+is a good thing.  DO NOT give a wrong version or a wrong OS.
 
 EOM
 
@@ -2624,7 +2642,7 @@ esac
 case "$use64bits" in
 "$define"|true|[yY]*)
 : Look for a hint-file generated 'call-back-unit'.  If the
-: user has specified that a threading perl is to be built,
+: user has specified that a 64 bit perl is to be built,
 : we may need to set or change some other defaults.
 	if $test -f use64bits.cbu; then
 		. ./use64bits.cbu
@@ -2718,24 +2736,6 @@ $define)
 	esac
 esac
 
-: is AFS running?
-echo " "
-case "$afs" in
-$define|true)	afs=true ;;
-$undef|false)	afs=false ;;
-*)	if test -d /afs; then
-		afs=true
-	else
-		afs=false
-	fi
-	;;
-esac
-if $afs; then
-	echo "AFS may be running... I'll be extra cautious then..." >&4
-else
-	echo "AFS does not seem to be running..." >&4
-fi
-
 : decide how portable to be.  Allow command line overrides.
 case "$d_portable" in
 "$undef") ;;
@@ -2796,6 +2796,9 @@ exp_file=''
 nopath_ok=''
 orig_rp="$rp"
 orig_dflt="$dflt"
+case "$gfpth" in
+'') gfpth='.' ;;
+esac
 
 case "$fn" in
 *\(*)
@@ -2922,18 +2925,38 @@ while test "$type"; do
 		'')
 			case "$type" in
 			File)
-				if test -f "$ansexp"; then
-					type=''
-				elif test -r "$ansexp" || (test -h "$ansexp") >/dev/null 2>&1
-				then
-					echo "($value is not a plain file, but that's ok.)"
-					type=''
-				fi
+				for fp in $gfpth; do
+					if test "X$fp" = X.; then
+					    pf="$ansexp"
+					else    
+					    pf="$fp/$ansexp"
+					fi
+					if test -f "$pf"; then
+						type=''
+					elif test -r "$pf" || (test -h "$pf") >/dev/null 2>&1
+					then
+						echo "($value is not a plain file, but that's ok.)"
+						type=''
+					fi
+					if test X"$type" = X; then
+					    value="$pf"
+					    break
+					fi
+				done
 				;;
 			Directory)
-				if test -d "$ansexp"; then
-					type=''
-				fi
+				for fp in $gfpth; do
+					if test "X$fp" = X.; then
+					    pf="$ansexp"
+					else    
+					    pf="$fp/$ansexp"
+					fi
+					if test -d "$pf"; then
+						type=''
+						value="$pf"
+						break
+					fi
+				done
 				;;
 			Locate)
 				if test -d "$ansexp"; then
@@ -2987,6 +3010,7 @@ ans="$value"
 rp="$orig_rp"
 dflt="$orig_dflt"
 rm -f getfile.ok
+test "X$gfpthkeep" != Xy && gfpth=""
 EOSC
 
 : determine root of directory hierarchy where package will be installed.
@@ -3000,14 +3024,13 @@ case "$prefix" in
 esac
 $cat <<EOM
 
-By default, $package will be installed in $dflt/bin, manual
-pages under $dflt/man, etc..., i.e. with $dflt as prefix for
-all installation directories. Typically set to /usr/local, but you
-may choose /usr if you wish to install $package among your system
-binaries. If you wish to have binaries under /bin but manual pages
-under /usr/local/man, that's ok: you will be prompted separately
-for each of the installation directories, the prefix being only used
-to set the defaults.
+By default, $package will be installed in $dflt/bin, manual pages
+under $dflt/man, etc..., i.e. with $dflt as prefix for all
+installation directories. Typically this is something like /usr/local.
+If you wish to have binaries under /usr/bin but other parts of the
+installation under /usr/local, that's ok: you will be prompted
+separately for each of the installation directories, the prefix being
+only used to set the defaults.
 
 EOM
 fn=d~
@@ -3025,6 +3048,57 @@ case "$prefix" in
 esac
 prefix="$ans"
 prefixexp="$ansexp"
+
+: is AFS running?
+echo " "
+case "$afs" in
+$define|true)	afs=true ;;
+$undef|false)	afs=false ;;
+*)	if test -d /afs; then
+		afs=true
+	else
+		afs=false
+	fi
+	;;
+esac
+if $afs; then
+	echo "AFS may be running... I'll be extra cautious then..." >&4
+else
+	echo "AFS does not seem to be running..." >&4
+fi
+
+: determine installation prefix for where package is to be installed.
+if $afs; then 
+$cat <<EOM
+
+Since you are running AFS, I need to distinguish the directory in which
+files will reside from the directory in which they are installed (and from
+which they are presumably copied to the former directory by occult means).
+
+EOM
+	case "$installprefix" in
+	'') dflt=`echo $prefix | sed 's#^/afs/#/afs/.#'`;;
+	*) dflt="$installprefix";;
+	esac
+else
+$cat <<EOM
+
+In some special cases, particularly when building $package for distribution,
+it is convenient to distinguish between the directory in which files should 
+be installed from the directory ($prefix) in which they 
+will eventually reside.  For most users, these two directories are the same.
+
+EOM
+	case "$installprefix" in
+	'') dflt=$prefix ;;
+	*) dflt=$installprefix;;
+	esac
+fi
+fn=d~
+rp='What installation prefix should I use for installing files?'
+. ./getfile
+installprefix="$ans"
+installprefixexp="$ansexp"
 
 : set the prefixit variable, to compute a suitable default value
 prefixit='case "$3" in
@@ -3093,13 +3167,30 @@ else
 	apiversion="$version"
 fi
 
+: determine installation style
+: For now, try to deduce it from prefix unless it is already set.
+: Reproduce behavior of 5.005 and earlier, maybe drop that in 5.7.
+case "$installstyle" in
+'')	case "$prefix" in
+		*perl*) dflt='lib';;
+		*) dflt='lib/perl5' ;;
+	esac
+	;;
+*)	dflt='lib/perl5' ;;
+esac
+: Probably not worth prompting for this since we prompt for all
+: the directories individually, and the prompt would be too long and
+: confusing anyway.
+installstyle=$dflt
+
 : determine where private library files go
 : Usual default is /usr/local/lib/perl5/$version.
 : Also allow things like /opt/perl/lib/$version, since 
 : /opt/perl/lib/perl5... would be redundant.
-case "$prefix" in
-*perl*) set dflt privlib lib/$version ;;
-*)	 set dflt privlib lib/$package/$version ;;
+: The default "style" setting is made in installstyle.U
+case "$installstyle" in
+*lib/perl5*) set dflt privlib lib/$package/$version ;;
+*)	 set dflt privlib lib/$version ;;
 esac
 eval $prefixit
 $cat <<EOM
@@ -3111,27 +3202,11 @@ EOM
 fn=d~+
 rp='Pathname where the private library files will reside?'
 . ./getfile
-if $test "X$privlibexp" != "X$ansexp"; then
-	installprivlib=''
-fi
 privlib="$ans"
 privlibexp="$ansexp"
-if $afs; then
-	$cat <<EOM
-
-Since you are running AFS, I need to distinguish the directory in which
-private files reside from the directory in which they are installed (and from
-which they are presumably copied to the former directory by occult means).
-
-EOM
-	case "$installprivlib" in
-	'') dflt=`echo $privlibexp | sed 's#^/afs/#/afs/.#'`;;
-	*) dflt="$installprivlib";;
-	esac
-	fn=de~
-	rp='Where will private files be installed?'
-	. ./getfile
-	installprivlib="$ans"
+: Change installation prefix, if necessary.
+if $test X"$prefix" != X"$installprefix"; then
+	installprivlib=`echo $privlibexp | sed 's#^$prefix#$installprefix#'`
 else
 	installprivlib="$privlibexp"
 fi
@@ -3156,7 +3231,7 @@ case "$archlib" in
 *)	dflt="$archlib"
     ;;
 esac
-cat <<EOM
+$cat <<EOM
 
 $spackage contains architecture-dependent library files.  If you are
 sharing libraries in a heterogeneous environment, you might store
@@ -3169,31 +3244,16 @@ rp='Where do you want to put the public architecture-dependent libraries?'
 . ./getfile
 archlib="$ans"
 archlibexp="$ansexp"
-
-if $afs; then
-	$cat <<EOM
-
-Since you are running AFS, I need to distinguish the directory in
-which architecture-dependent library files reside from the directory
-in which they are installed (and from which they are presumably copied
-to the former directory by occult means).
-
-EOM
-	case "$installarchlib" in
-	'') dflt=`echo $archlibexp | sed 's#^/afs/#/afs/.#'`;;
-	*) dflt="$installarchlib";;
-	esac
-	fn=de~
-	rp='Where will architecture-dependent library files be installed?'
-	. ./getfile
-	installarchlib="$ans"
-else
-	installarchlib="$archlibexp"
-fi
 if $test X"$archlib" = X"$privlib"; then
 	d_archlib="$undef"
 else
 	d_archlib="$define"
+fi
+: Change installation prefix, if necessary.
+if $test X"$prefix" != X"$installprefix"; then
+	installarchlib=`echo $archlibexp | sed 's#^$prefix#$installprefix#'`
+else
+	installarchlib="$archlibexp"
 fi
 
 : make some quick guesses about what we are up against
@@ -4531,6 +4591,83 @@ case "$freetype" in
 esac
 echo "Your system uses $freetype free(), it would seem." >&4
 $rm -f malloc.[co]
+$cat <<EOM
+
+The installation process will also create a directory for
+vendor-supplied add-ons.  Vendors who supply perl with their system
+may find it convenient to place all vendor-supplied files in this
+directory rather than in the main distribution directory.  This will
+ease upgrades between binary-compatible maintenance versions of perl.
+
+Of course you may also use these directories in whatever way you see
+fit.  For example, you might use them to access modules shared over a
+company-wide network.
+
+The default answer should be fine for most people.
+This causes further questions about vendor add-ons to be skipped
+and no vendor-specific directories will be configured for perl.
+
+EOM
+rp='Do you want to configure vendor-specific add-on directories?'
+case "$usevendorprefix" in
+define|true|[yY]*) dflt=y ;;
+*) dflt=n ;;
+esac
+. ./myread
+case "$ans" in
+[yY]*)	fn=d~+
+	rp='Installation prefix to use for vendor-supplied add-ons?'
+	case "$vendorprefix" in
+	'') dflt='' ;;
+	*)  dflt=$vendorprefix ;;
+	esac
+	. ./getfile
+	oldvendorprefix=''
+	case "$vendorprefix" in
+	'') ;;
+	*)	case "$ans" in
+		"$prefix") ;;
+		*) oldvendorprefix="$prefix";;
+		esac
+		;;
+	esac
+	usevendorprefix="$define"
+	vendorprefix="$ans"
+	vendorprefixexp="$ansexp"
+	;;
+*)	usevendorprefix="$undef"
+	vendorprefix=''
+	vendorprefixexp=''
+	;;
+esac
+
+case "$vendorprefix" in
+'')	d_vendorlib="$undef"
+	vendorlib=''
+	vendorlibexp=''
+	;;
+*)	d_vendorlib="$define"
+	: determine where vendor-supplied modules go.
+	: Usual default is /usr/local/lib/perl5/vendor_perl
+	prog=`echo $package | $sed 's/-*[0-9.]*$//'`
+	case "$installstyle" in
+	*lib/perl5*) dflt=$vendorprefix/lib/$package/vendor_$prog ;;
+	*)	     dflt=$vendorprefix/lib/vendor_$prog ;;
+	esac
+	fn=d~+
+	rp='Pathname for the vendor-supplied library files?'
+	. ./getfile
+	vendorlib="$ans"
+	vendorlibexp="$ansexp"
+	: Change installation prefix, if necessary.
+	if $test X"$prefix" != X"$installprefix"; then
+		installvendorlib=`echo $vendorlibexp | $sed 's#^$prefix#$installprefix#'`
+	else
+		installvendorlib="$vendorlibexp"
+	fi
+	;;
+esac
+
 : Cruising for prototypes
 echo " "
 echo "Checking out function prototypes..." >&4
@@ -4584,22 +4721,10 @@ if $test "X$ansexp" != "X$binexp"; then
 fi
 bin="$ans"
 binexp="$ansexp"
-if $afs; then
-	$cat <<EOM
-
-Since you are running AFS, I need to distinguish the directory in which
-executables reside from the directory in which they are installed (and from
-which they are presumably copied to the former directory by occult means).
-
-EOM
-	case "$installbin" in
-	'') dflt=`echo $binexp | sed 's#^/afs/#/afs/.#'`;;
-	*) dflt="$installbin";;
-	esac
-	fn=de~
-	rp='Where will public executables be installed?'
-	. ./getfile
-	installbin="$ans"
+: Change installation prefix, if necessary.
+: XXX Bug? -- ignores Configure -Dinstallprefix setting.
+if $test X"$prefix" != X"$installprefix"; then
+	installbin=`echo $binexp | sed 's#^$prefix#$installprefix#'`
 else
 	installbin="$binexp"
 fi
@@ -4607,7 +4732,7 @@ fi
 : determine whether to install perl also as /usr/bin/perl
 
 echo " "
-if test -d /usr/bin -a "X$installbin" != X/usr/bin; then
+if $test -d /usr/bin -a "X$installbin" != X/usr/bin; then
 	$cat <<EOM
 Many scripts expect to perl to be installed as /usr/bin/perl.
 I can install the perl you are about to compile also as /usr/bin/perl
@@ -5158,8 +5283,7 @@ y*) usedl="$define"
 	tdir=`pwd`; cd $rsrc; $ls -C $dldir/dl*.xs; cd $tdir
 	rp="Source file to use for dynamic loading"
 	fn="fne"
-	# XXX This getfile call will fail the existence check if you try 
-	# building away from $src (this is not supported yet).
+	gfpth="$src"
 	. ./getfile
 	usedl="$define"
 	: emulate basename
@@ -5371,16 +5495,7 @@ EOM
 	. ./myread
 	case "$ans" in
 	true|$define|[Yy]*)
-		useshrplib='true'
-		# Why does next4 have to be so different?
-		case "${osname}${osvers}" in
-		next4*|rhapsody*)
-			xxx='DYLD_LIBRARY_PATH' ;;
-		os2*)	xxx='' ;; # Nothing special needed.
-		beos*)  xxx='' ;;
-		*)		xxx='LD_LIBRARY_PATH' ;;
-		esac
-		;;
+		useshrplib='true'  ;;
 	*)	useshrplib='false' ;;
 	esac
 	;;
@@ -5527,9 +5642,19 @@ EOM
 		;;
 	esac
 fi
+# Fix ccdlflags in AIX for building external extensions.
+# (For building Perl itself bare -bE:perl.exp is needed,
+#  Makefile.SH takes care of this.)
+case "$osname" in
+aix) ccdlflags="$ccdlflags -bE:$installarchlib/CORE/perl.exp" ;;
+esac
 # Respect a hint or command-line value.
 case "$shrpenv" in
 '') shrpenv="$tmp_shrpenv" ;;
+esac
+case "$ldlibpthname" in
+'')	ldlibpthname=LD_LIBRARY_PATH ;;
+none)	ldlibpthname='' ;;
 esac
 
 : determine where manual pages go
@@ -5575,25 +5700,13 @@ fi
 man1dir="$ans"
 man1direxp="$ansexp"
 case "$man1dir" in
-'') man1dir=' '
+'')	man1dir=' '
 	installman1dir='';;
 esac
-if $afs; then
-	$cat <<EOM
 
-Since you are running AFS, I need to distinguish the directory in which
-manual pages reside from the directory in which they are installed (and from
-which they are presumably copied to the former directory by occult means).
-
-EOM
-	case "$installman1dir" in
-	'') dflt=`echo $man1direxp | sed 's#^/afs/#/afs/.#'`;;
-	*) dflt="$installman1dir";;
-	esac
-	fn=de~
-	rp='Where will man pages be installed?'
-	. ./getfile
-	installman1dir="$ans"
+: Change installation prefix, if necessary.
+if $test X"$prefix" != X"$installprefix"; then
+	installman1dir=`echo $man1direxp | $sed 's#^$prefix#$installprefix#'`
 else
 	installman1dir="$man1direxp"
 fi
@@ -5702,52 +5815,46 @@ esac
 echo "If you don't want the manual sources installed, answer 'none'."
 prog=`echo $package | $sed 's/-*[0-9.]*$//'`
 case "$man3dir" in
-'')	case "$prefix" in 
-	*$prog*) dflt=`echo $man1dir | 
-			$sed -e 's/man1/man3/g' -e 's/man\.1/man\.3/g'` ;;
-	*)	dflt="$privlib/man/man3" ;;
-	esac
+'')	dflt=`echo $man1dir | $sed -e 's/man1/man3/g' -e 's/man\.1/man\.3/g'`
+	if $test -d "$privlib/man/man3"; then
+		cat <<EOM >&4
+
+WARNING:  Previous versions of perl installed man3 pages into
+$privlib/man/man3.  This version will suggest a 
+new default of $dflt.  
+EOM
+		tdflt=$dflt
+		dflt='n'
+		rp='Do you wish to preserve the old behavior?(y/n)'
+		. ./myread
+		case "$ans" in
+		y*) dflt="$privlib/man/man3" ;;
+		*)  dflt=$tdflt ;;
+		esac
+    fi
 	;;
 ' ') dflt=none;;
 *)	dflt="$man3dir" ;;
 esac
 echo " "
-
 fn=dn+~
 rp="Where do the $package library man pages (source) go?"
 . ./getfile
-if test "X$man3direxp" != "X$ansexp"; then
-	installman3dir=''
-fi
-
 man3dir="$ans"
 man3direxp="$ansexp"
-case "$man3dir" in
-'') man3dir=' '
+case "$man1dir" in
+'')	man3dir=' '
 	installman3dir='';;
 esac
-if $afs; then
-	$cat <<EOM
 
-Since you are running AFS, I need to distinguish the directory in which
-manual pages reside from the directory in which they are installed (and from
-which they are presumably copied to the former directory by occult means).
-
-EOM
-	case "$installman3dir" in
-	'') dflt=`echo $man3direxp | sed 's#^/afs/#/afs/.#'`;;
-	*) dflt="$installman3dir";;
-	esac
-	fn=de~
-	rp='Where will man pages be installed?'
-	. ./getfile
-	installman3dir="$ans"
+: Change installation prefix, if necessary.
+if $test X"$prefix" != X"$installprefix"; then
+	installman3dir=`echo $man3direxp | $sed 's#^$prefix#$installprefix#'`
 else
 	installman3dir="$man3direxp"
 fi
 
 : What suffix to use on installed man pages
-
 case "$man3dir" in
 ' ')
 	man3ext='0'
@@ -6146,9 +6253,10 @@ case "$scriptdir" in
 	dflt="$bin"
 	: guess some guesses
 	$test -d /usr/share/scripts && dflt=/usr/share/scripts
-	$test -d /usr/share/bin && dflt=/usr/share/bin
-	$test -d /usr/local/script && dflt=/usr/local/script
-	$test -d $prefixexp/script && dflt=$prefixexp/script
+	$test -d /usr/share/bin     && dflt=/usr/share/bin
+	$test -d /usr/local/script  && dflt=/usr/local/script
+	$test -d /usr/local/scripts && dflt=/usr/local/scripts
+	$test -d $prefixexp/script  && dflt=$prefixexp/script
 	set dflt
 	eval $prefixup
 	;;
@@ -6171,38 +6279,62 @@ if $test "X$ansexp" != "X$scriptdirexp"; then
 fi
 scriptdir="$ans"
 scriptdirexp="$ansexp"
-if $afs; then
-	$cat <<EOM
-
-Since you are running AFS, I need to distinguish the directory in which
-scripts reside from the directory in which they are installed (and from
-which they are presumably copied to the former directory by occult means).
-
-EOM
-	case "$installscript" in
-	'') dflt=`echo $scriptdirexp | sed 's#^/afs/#/afs/.#'`;;
-	*) dflt="$installscript";;
-	esac
-	fn=de~
-	rp='Where will public scripts be installed?'
-	. ./getfile
-	installscript="$ans"
+: Change installation prefix, if necessary.
+if $test X"$prefix" != X"$installprefix"; then
+	installscript=`echo $scriptdirexp | sed 's#^$prefix#$installprefix#'`
 else
 	installscript="$scriptdirexp"
 fi
 
-: determine where site specific libraries go.
-: Usual default is /usr/local/lib/perl5/site_perl/$apiversion
-prog=`echo $package | $sed 's/-*[0-9.]*$//'`
-case "$prefix" in
-*perl*) set dflt sitelib lib/site_$prog/$apiversion ;;
-*)	 set dflt sitelib lib/$package/site_$prog/$apiversion ;;
-esac
-eval $prefixit
 $cat <<EOM
 
-The installation process will also create a directory for
-site-specific extensions and modules.  Some users find it convenient
+After $package is installed, you may wish to install various
+add-on modules and utilities.  Typically, these add-ons will
+be installed under $prefix with the rest
+of this package.  However, you may wish to install such add-ons
+elsewhere under a different prefix.
+
+If you do not wish to put everything under a single prefix, that's
+ok.  You will be prompted for the individual locations; this siteprefix
+is only used to suggest the defaults.
+
+The default should be fine for most people.
+
+EOM
+fn=d~+
+rp='Installation prefix to use for add-on modules and utilities?'
+: XXX Here might be another good place for an installstyle setting.
+case "$siteprefix" in
+'') dflt=$prefix ;;
+*)  dflt=$siteprefix ;;
+esac
+. ./getfile
+oldsiteprefix=''
+case "$siteprefix" in
+'') ;;
+*)
+	case "$ans" in
+	"$prefix") ;;
+	*) oldsiteprefix="$prefix";;
+	esac
+	;;
+esac
+siteprefix="$ans"
+siteprefixexp="$ansexp"
+
+: determine where site specific libraries go.
+: Usual default is /usr/local/lib/perl5/site_perl
+: The default "style" setting is made in installstyle.U
+: XXX No longer works with Prefixit stuff.
+prog=`echo $package | $sed 's/-*[0-9.]*$//'`
+case "$installstyle" in
+*lib/perl5*) dflt=$siteprefix/lib/site_$prog ;;
+*)	 dflt=$siteprefix/lib/site_$prog ;;
+esac
+$cat <<EOM
+
+The installation process will create a directory for
+site-specific extensions and modules.  Most users find it convenient
 to place all site-specific files in this directory rather than in the
 main distribution directory.
 
@@ -6210,38 +6342,21 @@ EOM
 fn=d~+
 rp='Pathname for the site-specific library files?'
 . ./getfile
-if $test "X$sitelibexp" != "X$ansexp"; then
-	installsitelib=''
-fi
 sitelib="$ans"
 sitelibexp="$ansexp"
-if $afs; then
-	$cat <<EOM
-
-Since you are running AFS, I need to distinguish the directory in
-which site-specific files reside from the directory in which they are
-installed (and from which they are presumably copied to the former
-directory by occult means).
-
-EOM
-	case "$installsitelib" in
-	'') dflt=`echo $sitelibexp | sed 's#^/afs/#/afs/.#'`;;
-	*) dflt="$installsitelib";;
-	esac
-	fn=de~
-	rp='Where will site-specific files be installed?'
-	. ./getfile
-	installsitelib="$ans"
+: Change installation prefix, if necessary.
+if $test X"$prefix" != X"$installprefix"; then
+	installsitelib=`echo $sitelibexp | sed 's#^$prefix#$installprefix#'`
 else
 	installsitelib="$sitelibexp"
 fi
 
 : determine where site specific architecture-dependent libraries go.
-: sitelib  default is /usr/local/lib/perl5/site_perl/$apiversion
+: sitelib  default is /usr/local/lib/perl5/site_perl/
 : sitearch default is /usr/local/lib/perl5/site_perl/$apiversion/$archname
 : sitelib may have an optional trailing /share.
 tdflt=`echo $sitelib | $sed 's,/share$,,'`
-tdflt="$tdflt/$archname"
+tdflt="$tdflt/$apiversion/$archname"
 set sitearch sitearch none
 eval $prefixit
 case "$sitearch" in
@@ -6257,28 +6372,11 @@ EOM
 fn=nd~+
 rp='Pathname for the site-specific architecture-dependent library files?'
 . ./getfile
-if $test "X$sitearchexp" != "X$ansexp"; then
-	installsitearch=''
-fi
 sitearch="$ans"
 sitearchexp="$ansexp"
-if $afs; then
-	$cat <<EOM
-
-Since you are running AFS, I need to distinguish the directory in
-which site-specific architecture-dependent library files reside from
-the directory in which they are installed (and from which they are
-presumably copied to the former directory by occult means).
-
-EOM
-	case "$installsitearch" in
-	'') dflt=`echo $sitearchexp | sed 's#^/afs/#/afs/.#'`;;
-	*) dflt="$installsitearch";;
-	esac
-	fn=de~
-	rp='Where will site-specific architecture-dependent files be installed?'
-	. ./getfile
-	installsitearch="$ans"
+: Change installation prefix, if necessary.
+if $test X"$prefix" != X"$installprefix"; then
+	installsitearch=`echo $sitearchexp | sed 's#^$prefix#$installprefix#'`
 else
 	installsitearch="$sitearchexp"
 fi
@@ -11010,7 +11108,7 @@ if eval $compile_ok; then
 		echo "You have EBCDIC." >&4
 		val="$define"
 	else
-		echo "Nope, no EBCDIC.  Assuming ASCII or some ISO Latin." >&4
+		echo "Nope, no EBCDIC.  Assuming ASCII or some ISO Latin, or UTF." >&4
 	fi
 else
 	echo "I'm unable to compile the test program." >&4
@@ -12681,7 +12779,7 @@ find_extensions='
     done'
 tdir=`pwd`
 cd $rsrc/ext
-set
+set X
 shift
 eval $find_extensions
 set X $nonxs_extensions
@@ -13291,6 +13389,7 @@ d_tzname='$d_tzname'
 d_umask='$d_umask'
 d_uname='$d_uname'
 d_union_semun='$d_union_semun'
+d_vendorlib='$d_vendorlib'
 d_vfork='$d_vfork'
 d_void_closedir='$d_void_closedir'
 d_voidsig='$d_voidsig'
@@ -13419,11 +13518,15 @@ installarchlib='$installarchlib'
 installbin='$installbin'
 installman1dir='$installman1dir'
 installman3dir='$installman3dir'
+installprefix='$installprefix'
+installprefixexp='$installprefixexp'
 installprivlib='$installprivlib'
 installscript='$installscript'
 installsitearch='$installsitearch'
 installsitelib='$installsitelib'
+installstyle='$installstyle'
 installusrbinperl='$installusrbinperl'
+installvendorlib='$installvendorlib'
 intsize='$intsize'
 known_extensions='$known_extensions'
 ksh='$ksh'
@@ -13431,6 +13534,7 @@ large='$large'
 ld='$ld'
 lddlflags='$lddlflags'
 ldflags='$ldflags'
+ldlibpthname='$ldlibpthname'
 less='$less'
 lib_ext='$lib_ext'
 libc='$libc'
@@ -13550,6 +13654,8 @@ sitearch='$sitearch'
 sitearchexp='$sitearchexp'
 sitelib='$sitelib'
 sitelibexp='$sitelibexp'
+siteprefix='$siteprefix'
+siteprefixexp='$siteprefixexp'
 sizetype='$sizetype'
 sleep='$sleep'
 smail='$smail'
@@ -13603,9 +13709,14 @@ usesfio='$usesfio'
 useshrplib='$useshrplib'
 usesocks='$usesocks'
 usethreads='$usethreads'
+usevendorprefix='$usevendorprefix'
 usevfork='$usevfork'
 usrinc='$usrinc'
 uuname='$uuname'
+vendorlib='$vendorlib'
+vendorlibexp='$vendorlibexp'
+vendorprefix='$vendorprefix'
+vendorprefixexp='$vendorprefixexp'
 version='$version'
 vi='$vi'
 voidflags='$voidflags'

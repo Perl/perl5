@@ -44,17 +44,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #define LOC_SED 	"$full_sed"	/**/
 
-/* BIN:
- *	This symbol holds the path of the bin directory where the package will
- *	be installed. Program must be prepared to deal with ~name substitution.
- */
-/* BIN_EXP:
- *	This symbol is the filename expanded version of the BIN symbol, for
- *	programs that do not want to deal with that at run-time.
- */
-#define BIN "$bin"	/**/
-#define BIN_EXP "$binexp"	/**/
-
 /* HAS_ALARM:
  *	This symbol, if defined, indicates that the alarm routine is
  *	available.
@@ -1435,6 +1424,90 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$ebcdic	EBCDIC 		/**/
 
+/* ARCHLIB:
+ *	This variable, if defined, holds the name of the directory in
+ *	which the user wants to put architecture-dependent public
+ *	library files for $package.  It is most often a local directory
+ *	such as /usr/local/lib.  Programs using this variable must be
+ *	prepared to deal with filename expansion.  If ARCHLIB is the
+ *	same as PRIVLIB, it is not defined, since presumably the
+ *	program already searches PRIVLIB.
+ */
+/* ARCHLIB_EXP:
+ *	This symbol contains the ~name expanded version of ARCHLIB, to be used
+ *	in programs that are not prepared to deal with ~ expansion at run-time.
+ */
+#$d_archlib ARCHLIB "$archlib"		/**/
+#$d_archlib ARCHLIB_EXP "$archlibexp"		/**/
+
+/* BIN:
+ *	This symbol holds the path of the bin directory where the package will
+ *	be installed. Program must be prepared to deal with ~name substitution.
+ */
+/* BIN_EXP:
+ *	This symbol is the filename expanded version of the BIN symbol, for
+ *	programs that do not want to deal with that at run-time.
+ */
+#define BIN "$bin"	/**/
+#define BIN_EXP "$binexp"	/**/
+
+/* INSTALL_USR_BIN_PERL:
+ *	This symbol, if defined, indicates that Perl is to be installed
+ * 	also as /usr/bin/perl.
+ */
+#$installusrbinperl INSTALL_USR_BIN_PERL	/**/
+
+/* PRIVLIB:
+ *	This symbol contains the name of the private library for this package.
+ *	The library is private in the sense that it needn't be in anyone's
+ *	execution path, but it should be accessible by the world.  The program
+ *	should be prepared to do ~ expansion.
+ */
+/* PRIVLIB_EXP:
+ *	This symbol contains the ~name expanded version of PRIVLIB, to be used
+ *	in programs that are not prepared to deal with ~ expansion at run-time.
+ */
+#define PRIVLIB "$privlib"		/**/
+#define PRIVLIB_EXP "$privlibexp"		/**/
+
+/* SITEARCH:
+ *	This symbol contains the name of the private library for this package.
+ *	The library is private in the sense that it needn't be in anyone's
+ *	execution path, but it should be accessible by the world.  The program
+ *	should be prepared to do ~ expansion.
+ *	The standard distribution will put nothing in this directory.
+ *	Individual sites may place their own extensions and modules in
+ *	this directory.
+ */
+/* SITEARCH_EXP:
+ *	This symbol contains the ~name expanded version of SITEARCH, to be used
+ *	in programs that are not prepared to deal with ~ expansion at run-time.
+ */
+#define SITEARCH "$sitearch"		/**/
+#define SITEARCH_EXP "$sitearchexp"		/**/
+
+/* SITELIB:
+ *	This symbol contains the name of the private library for this package.
+ *	The library is private in the sense that it needn't be in anyone's
+ *	execution path, but it should be accessible by the world.  The program
+ *	should be prepared to do ~ expansion.
+ *	The standard distribution will put nothing in this directory.
+ *	Individual sites may place their own extensions and modules in
+ *	this directory.
+ */
+/* SITELIB_EXP:
+ *	This symbol contains the ~name expanded version of SITELIB, to be used
+ *	in programs that are not prepared to deal with ~ expansion at run-time.
+ */
+#define SITELIB "$sitelib"		/**/
+#define SITELIB_EXP "$sitelibexp"		/**/
+
+/* PERL_VENDORLIB_EXP:
+ *	This symbol contains the ~name expanded version of VENDORLIB, to be used
+ *	in programs that are not prepared to deal with ~ expansion at run-time.
+ */
+#$d_vendorlib PERL_VENDORLIB_EXP "$vendorlibexp"		/**/
+
 /* OSNAME:
  *	This symbol contains the name of the operating system, as determined
  *	by Configure.  You shouldn't rely on it too much; the specific
@@ -2070,22 +2143,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #define M_VOID			/* Xenix strikes again */
 #endif
 
-/* ARCHLIB:
- *	This variable, if defined, holds the name of the directory in
- *	which the user wants to put architecture-dependent public
- *	library files for $package.  It is most often a local directory
- *	such as /usr/local/lib.  Programs using this variable must be
- *	prepared to deal with filename expansion.  If ARCHLIB is the
- *	same as PRIVLIB, it is not defined, since presumably the
- *	program already searches PRIVLIB.
- */
-/* ARCHLIB_EXP:
- *	This symbol contains the ~name expanded version of ARCHLIB, to be used
- *	in programs that are not prepared to deal with ~ expansion at run-time.
- */
-#$d_archlib ARCHLIB "$archlib"		/**/
-#$d_archlib ARCHLIB_EXP "$archlibexp"		/**/
-
 /* DLSYM_NEEDS_UNDERSCORE:
  *	This symbol, if defined, indicates that we need to prepend an
  *	underscore to the symbol name before calling dlsym().  This only
@@ -2108,7 +2165,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 
 /* HAS_FTELLO:
  *	This symbol, if defined, indicates that the ftello routine is
- *	available to ftell from beyond 32 bits (useful for ILP32 hosts).
+ *	available to ftell beyond 32 bits (useful for ILP32 hosts).
  */
 #$d_ftello HAS_FTELLO		/**/
 
@@ -2330,12 +2387,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$i_sysstatvfs	I_SYS_STATVFS		/**/
 
-/* INSTALL_USR_BIN_PERL:
- *	This symbol, if defined, indicates that Perl is to be installed
- * 	also as /usr/bin/perl.
- */
-#$installusrbinperl INSTALL_USR_BIN_PERL	/**/
-
 /* HAS_FSTAT64:
  *	This symbol, if defined, indicates that the fstat64 routine is
  *	available to stat files (fds) larger than 2 gigabytes.
@@ -2400,19 +2451,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$d_off64_t      HAS_OFF64_T    	/**/
 #$d_dirent64_s   HAS_STRUCT_DIRENT64 	/**/
 
-/* PRIVLIB:
- *	This symbol contains the name of the private library for this package.
- *	The library is private in the sense that it needn't be in anyone's
- *	execution path, but it should be accessible by the world.  The program
- *	should be prepared to do ~ expansion.
- */
-/* PRIVLIB_EXP:
- *	This symbol contains the ~name expanded version of PRIVLIB, to be used
- *	in programs that are not prepared to deal with ~ expansion at run-time.
- */
-#define PRIVLIB "$privlib"		/**/
-#define PRIVLIB_EXP "$privlibexp"		/**/
-
 /* SELECT_MIN_BITS:
  *	This symbol holds the minimum number of bits operated by select.
  *	That is, if you do select(n, ...), how many bits at least will be
@@ -2421,38 +2459,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	the latter.  This is only useful if you have select(), naturally.
  */
 #define SELECT_MIN_BITS 	$selectminbits	/**/
-
-/* SITEARCH:
- *	This symbol contains the name of the private library for this package.
- *	The library is private in the sense that it needn't be in anyone's
- *	execution path, but it should be accessible by the world.  The program
- *	should be prepared to do ~ expansion.
- *	The standard distribution will put nothing in this directory.
- *	Individual sites may place their own extensions and modules in
- *	this directory.
- */
-/* SITEARCH_EXP:
- *	This symbol contains the ~name expanded version of SITEARCH, to be used
- *	in programs that are not prepared to deal with ~ expansion at run-time.
- */
-#define SITEARCH "$sitearch"		/**/
-#define SITEARCH_EXP "$sitearchexp"		/**/
-
-/* SITELIB:
- *	This symbol contains the name of the private library for this package.
- *	The library is private in the sense that it needn't be in anyone's
- *	execution path, but it should be accessible by the world.  The program
- *	should be prepared to do ~ expansion.
- *	The standard distribution will put nothing in this directory.
- *	Individual sites may place their own extensions and modules in
- *	this directory.
- */
-/* SITELIB_EXP:
- *	This symbol contains the ~name expanded version of SITELIB, to be used
- *	in programs that are not prepared to deal with ~ expansion at run-time.
- */
-#define SITELIB "$sitelib"		/**/
-#define SITELIB_EXP "$sitelibexp"		/**/
 
 /* STARTPERL:
  *	This variable contains the string to put in front of a perl

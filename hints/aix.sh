@@ -95,8 +95,13 @@ d_setreuid='undef'
 #
 # Tell perl which symbols to export for dynamic linking.
 case "$cc" in
-*gcc*) ccdlflags='-Xlinker -bE:perl.exp' ;;
-*) ccdlflags='-bE:perl.exp' ;;
+*gcc*) ccdlflags='-Xlinker' ;;
+esac
+# the required -bE:$installarchlib/CORE/perl.exp is added by
+# libperl.U (Configure) later.
+
+case "$ldlibpthname" in
+'') ldlibpthname=LIBPATH ;;
 esac
 
 # The first 3 options would not be needed if dynamic libs. could be linked
@@ -180,8 +185,19 @@ EOM
 	    esac
 	    ccflags="$ccflags `getconf XBS5_LPBIG_OFFBIG_CFLAGS`"
     	    ccflags="$ccflags -DUSE_LONG_LONG"
+
 	    ldflags="$ldflags `getconf XBS5_LPBIG_OFFBIG_LDFLAGS`"
-	    libswanted="$libswanted `getconf XBS5_LPBIG_OFFBIG_LIBS`"
+	    # _Somehow_ in AIX 4.3.1.0 the above getconf call manages to
+	    # insert(?) *something* to $ldflags so that later (in Configure) evaluating
+	    # $ldflags causes a newline after the '-b64' (the result of the getconf).
+	    # Try it out: just uncomment the below line and rerun Configure:
+#	    echo >& "AIX $ldflags mystery" ; exit 1
+	    # Just don't ask me how AIX does it.
+	    # Therefore the line re-evaluating ldflags: it seems to drop the whatever
+	    # AIX managed to break. --jhi
+	    ldflags="`echo $ldflags`"
+
+	    libswanted="$libswanted `getconf XBS5_LPBIG_OFFBIG_LIBS|sed -e 's@^-l@@' -e 's@ -l@ @g'`"
 	    # When a 64-bit cc becomes available $archname64
 	    # may need setting so that $archname gets it attached.
 	    ;;

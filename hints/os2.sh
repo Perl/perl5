@@ -351,5 +351,9 @@ for xxx in * ; do
 	fi
 done
 
+case "$ldlibpthname" in
+'') ldlibpthname=none ;;
+esac
+
 # Now go back
 cd ../..

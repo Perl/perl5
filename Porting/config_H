@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Mon Jul  5 22:50:29 EET DST 1999
+ * Configuration time: Sun Jul 25 17:08:22 EET DST 1999
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -29,17 +29,6 @@
  *	This symbol holds the complete pathname to the sed program.
  */
 #define LOC_SED 	"/usr/bin/sed"	/**/
-
-/* BIN:
- *	This symbol holds the path of the bin directory where the package will
- *	be installed. Program must be prepared to deal with ~name substitution.
- */
-/* BIN_EXP:
- *	This symbol is the filename expanded version of the BIN symbol, for
- *	programs that do not want to deal with that at run-time.
- */
-#define BIN "/opt/perl/bin"	/**/
-#define BIN_EXP "/opt/perl/bin"	/**/
 
 /* HAS_ALARM:
  *	This symbol, if defined, indicates that the alarm routine is
@@ -1421,6 +1410,90 @@
  */
 /*#define	EBCDIC 		/ **/
 
+/* ARCHLIB:
+ *	This variable, if defined, holds the name of the directory in
+ *	which the user wants to put architecture-dependent public
+ *	library files for perl5.  It is most often a local directory
+ *	such as /usr/local/lib.  Programs using this variable must be
+ *	prepared to deal with filename expansion.  If ARCHLIB is the
+ *	same as PRIVLIB, it is not defined, since presumably the
+ *	program already searches PRIVLIB.
+ */
+/* ARCHLIB_EXP:
+ *	This symbol contains the ~name expanded version of ARCHLIB, to be used
+ *	in programs that are not prepared to deal with ~ expansion at run-time.
+ */
+#define ARCHLIB "/opt/perl/lib/5.00557/alpha-dec_osf-thread"		/**/
+#define ARCHLIB_EXP "/opt/perl/lib/5.00557/alpha-dec_osf-thread"		/**/
+
+/* BIN:
+ *	This symbol holds the path of the bin directory where the package will
+ *	be installed. Program must be prepared to deal with ~name substitution.
+ */
+/* BIN_EXP:
+ *	This symbol is the filename expanded version of the BIN symbol, for
+ *	programs that do not want to deal with that at run-time.
+ */
+#define BIN "/opt/perl/bin"	/**/
+#define BIN_EXP "/opt/perl/bin"	/**/
+
+/* INSTALL_USR_BIN_PERL:
+ *	This symbol, if defined, indicates that Perl is to be installed
+ * 	also as /usr/bin/perl.
+ */
+#define INSTALL_USR_BIN_PERL	/**/
+
+/* PRIVLIB:
+ *	This symbol contains the name of the private library for this package.
+ *	The library is private in the sense that it needn't be in anyone's
+ *	execution path, but it should be accessible by the world.  The program
+ *	should be prepared to do ~ expansion.
+ */
+/* PRIVLIB_EXP:
+ *	This symbol contains the ~name expanded version of PRIVLIB, to be used
+ *	in programs that are not prepared to deal with ~ expansion at run-time.
+ */
+#define PRIVLIB "/opt/perl/lib/5.00557"		/**/
+#define PRIVLIB_EXP "/opt/perl/lib/5.00557"		/**/
+
+/* SITEARCH:
+ *	This symbol contains the name of the private library for this package.
+ *	The library is private in the sense that it needn't be in anyone's
+ *	execution path, but it should be accessible by the world.  The program
+ *	should be prepared to do ~ expansion.
+ *	The standard distribution will put nothing in this directory.
+ *	Individual sites may place their own extensions and modules in
+ *	this directory.
+ */
+/* SITEARCH_EXP:
+ *	This symbol contains the ~name expanded version of SITEARCH, to be used
+ *	in programs that are not prepared to deal with ~ expansion at run-time.
+ */
+#define SITEARCH "/opt/perl/lib/site_perl/5.00557/alpha-dec_osf-thread"		/**/
+#define SITEARCH_EXP "/opt/perl/lib/site_perl/5.00557/alpha-dec_osf-thread"		/**/
+
+/* SITELIB:
+ *	This symbol contains the name of the private library for this package.
+ *	The library is private in the sense that it needn't be in anyone's
+ *	execution path, but it should be accessible by the world.  The program
+ *	should be prepared to do ~ expansion.
+ *	The standard distribution will put nothing in this directory.
+ *	Individual sites may place their own extensions and modules in
+ *	this directory.
+ */
+/* SITELIB_EXP:
+ *	This symbol contains the ~name expanded version of SITELIB, to be used
+ *	in programs that are not prepared to deal with ~ expansion at run-time.
+ */
+#define SITELIB "/opt/perl/lib/site_perl"		/**/
+#define SITELIB_EXP "/opt/perl/lib/site_perl"		/**/
+
+/* PERL_VENDORLIB_EXP:
+ *	This symbol contains the ~name expanded version of VENDORLIB, to be used
+ *	in programs that are not prepared to deal with ~ expansion at run-time.
+ */
+/*#define PERL_VENDORLIB_EXP ""		/ **/
+
 /* OSNAME:
  *	This symbol contains the name of the operating system, as determined
  *	by Configure.  You shouldn't rely on it too much; the specific
@@ -2056,22 +2129,6 @@
 #define M_VOID			/* Xenix strikes again */
 #endif
 
-/* ARCHLIB:
- *	This variable, if defined, holds the name of the directory in
- *	which the user wants to put architecture-dependent public
- *	library files for perl5.  It is most often a local directory
- *	such as /usr/local/lib.  Programs using this variable must be
- *	prepared to deal with filename expansion.  If ARCHLIB is the
- *	same as PRIVLIB, it is not defined, since presumably the
- *	program already searches PRIVLIB.
- */
-/* ARCHLIB_EXP:
- *	This symbol contains the ~name expanded version of ARCHLIB, to be used
- *	in programs that are not prepared to deal with ~ expansion at run-time.
- */
-#define ARCHLIB "/opt/perl/lib/5.00557/alpha-dec_osf-thread"		/**/
-#define ARCHLIB_EXP "/opt/perl/lib/5.00557/alpha-dec_osf-thread"		/**/
-
 /* DLSYM_NEEDS_UNDERSCORE:
  *	This symbol, if defined, indicates that we need to prepend an
  *	underscore to the symbol name before calling dlsym().  This only
@@ -2094,7 +2151,7 @@
 
 /* HAS_FTELLO:
  *	This symbol, if defined, indicates that the ftello routine is
- *	available to ftell from beyond 32 bits (useful for ILP32 hosts).
+ *	available to ftell beyond 32 bits (useful for ILP32 hosts).
  */
 /*#define HAS_FTELLO		/ **/
 
@@ -2316,12 +2373,6 @@
  */
 #define	I_SYS_STATVFS		/**/
 
-/* INSTALL_USR_BIN_PERL:
- *	This symbol, if defined, indicates that Perl is to be installed
- * 	also as /usr/bin/perl.
- */
-#define INSTALL_USR_BIN_PERL	/**/
-
 /* HAS_FSTAT64:
  *	This symbol, if defined, indicates that the fstat64 routine is
  *	available to stat files (fds) larger than 2 gigabytes.
@@ -2386,19 +2437,6 @@
 /*#define      HAS_OFF64_T    	/ **/
 /*#define   HAS_STRUCT_DIRENT64 	/ **/
 
-/* PRIVLIB:
- *	This symbol contains the name of the private library for this package.
- *	The library is private in the sense that it needn't be in anyone's
- *	execution path, but it should be accessible by the world.  The program
- *	should be prepared to do ~ expansion.
- */
-/* PRIVLIB_EXP:
- *	This symbol contains the ~name expanded version of PRIVLIB, to be used
- *	in programs that are not prepared to deal with ~ expansion at run-time.
- */
-#define PRIVLIB "/opt/perl/lib/5.00557"		/**/
-#define PRIVLIB_EXP "/opt/perl/lib/5.00557"		/**/
-
 /* SELECT_MIN_BITS:
  *	This symbol holds the minimum number of bits operated by select.
  *	That is, if you do select(n, ...), how many bits at least will be
@@ -2407,38 +2445,6 @@
  *	the latter.  This is only useful if you have select(), naturally.
  */
 #define SELECT_MIN_BITS 	32	/**/
-
-/* SITEARCH:
- *	This symbol contains the name of the private library for this package.
- *	The library is private in the sense that it needn't be in anyone's
- *	execution path, but it should be accessible by the world.  The program
- *	should be prepared to do ~ expansion.
- *	The standard distribution will put nothing in this directory.
- *	Individual sites may place their own extensions and modules in
- *	this directory.
- */
-/* SITEARCH_EXP:
- *	This symbol contains the ~name expanded version of SITEARCH, to be used
- *	in programs that are not prepared to deal with ~ expansion at run-time.
- */
-#define SITEARCH "/opt/perl/lib/site_perl/5.00557/alpha-dec_osf-thread"		/**/
-#define SITEARCH_EXP "/opt/perl/lib/site_perl/5.00557/alpha-dec_osf-thread"		/**/
-
-/* SITELIB:
- *	This symbol contains the name of the private library for this package.
- *	The library is private in the sense that it needn't be in anyone's
- *	execution path, but it should be accessible by the world.  The program
- *	should be prepared to do ~ expansion.
- *	The standard distribution will put nothing in this directory.
- *	Individual sites may place their own extensions and modules in
- *	this directory.
- */
-/* SITELIB_EXP:
- *	This symbol contains the ~name expanded version of SITELIB, to be used
- *	in programs that are not prepared to deal with ~ expansion at run-time.
- */
-#define SITELIB "/opt/perl/lib/site_perl/5.00557"		/**/
-#define SITELIB_EXP "/opt/perl/lib/site_perl/5.00557"		/**/
 
 /* STARTPERL:
  *	This variable contains the string to put in front of a perl

@@ -1,3 +1,6 @@
+Check out always the latest perl5-porters discussions on these subjects
+before embaring on an implementation tour.
+
 Tie Modules
 	VecArray		Implement array using vec()
 	SubstrArray		Implement array using substr()
@@ -5,7 +8,7 @@ Tie Modules
 	ShiftSplice		Defines shift et al in terms of splice method
 
 Would be nice to have
-	pack "(stuff)*"
+	pack "(stuff)*", "(stuff)4", ...
 	Contiguous bitfields in pack/unpack
 	lexperl
 	Bundled perl preprocessor
@@ -20,10 +23,30 @@ Would be nice to have
 	reference to compiled regexp
 	lexically scoped functions: my sub foo { ... }
 	lvalue functions
+	    wantlvalue?  more generalized want()?
+	named prototypes: sub ($foo, @bar) foo { ... }
 	regression/sanity tests for suidperl
-	Full 64 bit support (i.e. "long long")
+	iterators/lazy evaluation/continuations/first/
+	    first_defined/short-circuiting grep/??
+	    This is a very thorny and hotly debated subject,
+	    tread carefully and do your homework first.
+	Full 64 bit support (i.e. "long long").  Things to consider:
+	    how to store/retrieve 32+ integers into/from Perl scalars?
+	    32+ constants in Perl code? (non-portable!)
+	    32+ arguments/return values to/from system calls? (seek et al)
+	    32+ bit ops (&|^~, currently explicitly disabled)
 	Generalise Errno way of extracting cpp symbols and use that in
 	    Errno and Fcntl (ExtUtils::CppSymbol?)
+	The _r-problem: for all the {set,get,end}*() system database
+	     calls (and a couple more: readdir, *rand*, crypt, *time,
+	     tmpnam) there are in many systems the _r versions
+	     to be used in re-entrant (=multithreaded) code.
+	     Icky things: the _r API is not standardized and
+	     the _r-forms require per-thread data to store their state.
+	Memory profiler: turn malloc.c:Perl_dump_mstats() into
+	    an extension (Devel::MProf?) that would return the malloc
+	    stats in a nice Perl datastructure (also a simple interface
+	    to return just the grand total would be good).
 
 Possible pragmas
 	debugger

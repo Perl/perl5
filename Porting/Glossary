@@ -1526,6 +1526,9 @@ d_union_semun (d_union_semun.U):
 	This variable conditionally defines HAS_UNION_SEMUN if the
 	union semun is defined by including <sys/sem.h>.
 
+d_vendorlib (vendorlib.U):
+	This variable conditionally defines PERL_VENDORLIB.
+
 d_vfork (d_vfork.U):
 	This variable conditionally defines the HAS_VFORK symbol, which
 	indicates the vfork() routine is available.
@@ -2115,6 +2118,18 @@ installman3dir (man3dir.U):
 	man3direxp only points to the read-only access location. For extra
 	portability, you should only use this variable within your makefiles.
 
+installprefix (installprefix.U):
+	This variable holds the name of the directory below which 
+	"make install" will install the package.  For most users, this
+	is the same as prefix.  However, it is useful for
+	installing the software into a different (usually temporary)
+	location after which it can be bundled up and moved somehow
+	to the final location specified by prefix.
+
+installprefixexp (installprefix.U):
+	This variable holds the full absolute path of installprefix
+	with all ~-expansion done.
+
 installprivlib (privlib.U):
 	This variable is really the same as privlibexp but may differ on
 	those systems using AFS. For extra portability, only this variable
@@ -2135,10 +2150,33 @@ installsitelib (sitelib.U):
 	those systems using AFS. For extra portability, only this variable
 	should be used in makefiles.
 
+installstyle (installstyle.U):
+	This variable describes the "style" of the perl installation.
+	This is intended to be useful for tools that need to
+	manipulate entire perl distributions.  Perl itself doesn't use
+	this to find its libraries -- the library directories are
+	stored directly in Config.pm.  Currently, there are only two
+	styles:  "lib" and "lib/perl5".  The default library locations
+	(e.g. privlib, sitelib) are either $prefix/lib or
+	$prefix/lib/perl5.  The former is useful if $prefix is a
+	directory dedicated to perl (e.g. /opt/perl), while the latter
+	is useful if $prefix is shared by many packages, e.g. if
+	$prefix=/usr/local.
+		This may later be extended to include other information, so
+	be careful with pattern-matching on the results.
+		For compatibility with perl5.005 and earlier, the default
+	setting is based on whether or not $prefix contains the string
+	"perl".
+
 installusrbinperl (instubperl.U):
 	This variable tells whether Perl should be installed also as
 	/usr/bin/perl in addition to
 	$installbin/perl
+
+installvendorlib (vendorlib.U):
+	This variable is really the same as vendorlibexp but may differ on
+	those systems using AFS. For extra portability, only this variable
+	should be used in makefiles.
 
 intsize (intsize.U):
 	This variable contains the value of the INTSIZE symbol, which
@@ -2172,6 +2210,11 @@ lddlflags (dlsrc.U):
 ldflags (ccflags.U):
 	This variable contains any additional C loader flags desired by
 	the user.  It is up to the Makefile to use this.
+
+ldlibpthname (libperl.U):
+	This variable holds the name of the shared library
+	search path, often LD_LIBRARY_PATH.  To get an empty
+	string, the hints file must set this to 'none'.
 
 less (Loc.U):
 	This variable is be used internally by Configure to determine the
@@ -2774,6 +2817,14 @@ sitelibexp (sitelib.U):
 	This variable is the ~name expanded version of sitelib, so that you
 	may use it directly in Makefiles or shell scripts.
 
+siteprefix (siteprefix.U):
+	This variable holds the full absolute path of the directory below
+	which the user will install add-on packages.
+
+siteprefixexp (siteprefix.U):
+	This variable holds the full absolute path of the directory below
+	which the user will install add-on packages.  Derived from siteprefix.
+
 sizetype (sizetype.U):
 	This variable defines sizetype to be something like size_t, 
 	unsigned long, or whatever type is used to declare length 
@@ -3042,6 +3093,26 @@ usrinc (usrinc.U):
 uuname (Loc.U):
 	This variable is defined but not used by Configure.
 	The value is a plain '' and is not useful.
+
+vendorlib (vendorlib.U):
+	This variable contains the eventual value of the VENDORLIB symbol,
+	which is the name of the private library for this package.  It may
+	have a ~ on the front. It is up to the makefile to eventually create
+	this directory while performing installation (with ~ substitution).
+	Vendors who distribute perl binaries may place their own
+	extensions and modules in this directory.
+
+vendorlibexp (vendorlib.U):
+	This variable is the ~name expanded version of vendorlib, so that you
+	may use it directly in Makefiles or shell scripts.
+
+vendorprefix (vendorprefix.U):
+	This variable holds the full absolute path of the directory below
+	which the vendor will install add-on packages.
+
+vendorprefixexp (vendorprefix.U):
+	This variable holds the full absolute path of the directory below
+	which the vendor will install add-on packages.  Derived from vendorprefix.
 
 version (patchlevel.U):
 	The full version number of this package.  This combines
