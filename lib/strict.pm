@@ -38,6 +38,7 @@ use symbolic references (see L<perlref>).
 =item C<strict vars>
 
 This generates a compile-time error if you access a variable that wasn't
+declared via C<use vars>,
 localized via C<my()> or wasn't fully qualified.  Because this is to avoid
 variable suicide problems and subtle dynamic scoping issues, a merely
 local() variable isn't good enough.  See L<perlfunc/my> and
@@ -47,6 +48,10 @@ L<perlfunc/local>.
     $X::foo = 1;	 # ok, fully qualified
     my $foo = 10;	 # ok, my() var
     local $foo = 9;	 # blows up
+
+    package Cinna;
+    use vars qw/ $bar /;	# Declares $bar in current package
+    $bar = 'HgS';		# ok, global declared via pragma
 
 The local() generated a compile-time error because you just touched a global
 name without fully qualifying it.
