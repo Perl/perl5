@@ -77,7 +77,7 @@ print @o2 == opcodes-3 ? "ok $t\n" : "not ok $t\n"; $t++;
 
 die $t unless $t == 16;
 print opmask() eq empty_opset() ? "ok $t\n" : "not ok $t\n"; $t++;	# work
-print length opmask() == int(opcodes()/8)+1 ? "ok $t\n" : "not ok $t\n"; $t++;
+print length opmask() == int((opcodes()+7)/8) ? "ok $t\n" : "not ok $t\n"; $t++;
 
 # --- verify_opset
 

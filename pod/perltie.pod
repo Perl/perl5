@@ -33,13 +33,14 @@ In the tie() call, C<VARIABLE> is the name of the variable to be
 enchanted.  C<CLASSNAME> is the name of a class implementing objects of
 the correct type.  Any additional arguments in the C<LIST> are passed to
 the appropriate constructor method for that class--meaning TIESCALAR(),
-TIEARRAY(), or TIEHASH().  (Typically these are arguments such as might be
-passed to the dbminit() function of C.) The object returned by the "new"
-method is also returned by the tie() function, which would be useful if
-you wanted to access other methods in C<CLASSNAME>. (You don't actually
-have to return a reference to a right "type" (e.g. HASH or C<CLASSNAME>)
-so long as it's a properly blessed object.)  You can also retrieve
-a reference to the underlying object using the tied() function.
+TIEARRAY(), TIEHASH() or TIEHANDLE().  (Typically these are arguments
+such as might be passed to the dbminit() function of C.) The object
+returned by the "new" method is also returned by the tie() function,
+which would be useful if you wanted to access other methods in
+C<CLASSNAME>. (You don't actually have to return a reference to a right
+"type" (e.g. HASH or C<CLASSNAME>) so long as it's a properly blessed
+object.)  You can also retrieve a reference to the underlying object
+using the tied() function.
 
 Unlike dbmopen(), the tie() function will not C<use> or C<require> a module
 for you--you need to do that explicitly yourself.
@@ -159,7 +160,7 @@ argument--the new value the user is trying to assign.
 =item DESTROY this
 
 This method will be triggered when the tied variable needs to be destructed.
-As with other object classes, such a method is seldom ncessary, since Perl
+As with other object classes, such a method is seldom necessary, since Perl
 deallocates its moribund object's memory for you automatically--this isn't
 C++, you know.  We'll use a DESTROY method here for debugging purposes only.
 
@@ -608,7 +609,55 @@ use the each() function to iterate over such.  Example:
 
 =head2 Tying FileHandles
 
-This isn't implemented yet.  Sorry; maybe someday.
+This is partially implemeted now.
+
+A class implementing a tied scalar should define the folowing methods:
+TIEHANDLE, PRINT, and possibly DESTROY.
+
+In future READLINE, EOF and possibly others will be added.
+
+It is especially useful when perl is embedded in some other program,
+where output to STDOUT and STDERR may have to be redirected in some
+special way. See nvi and the Apache module for examples.
+
+In our example we're going to create a shouting handle.
+
+    package Shout;
+
+=over
+
+=item TIEHANDLE classname, LIST
+
+This is the constructor for the class.  That means it is expected to
+return a blessed reference of some sort. The refence can be used to
+hold some internal information. We won't use it in out example.
+
+    sub TIEHANDLE { print "<shout>\n"; bless [], shift }
+
+=item PRINT this, LIST
+
+This method will be triggered every time the tied handle is printed to.
+Beyond its self refence it also expects the list that was passed to
+the print function.
+
+    sub PRINT { shift; for (@_) { print uc($_) } }
+
+=item DESTROY this
+
+As with the other types of ties, this method will be called when the
+tied handle is about to be destroyed. This is useful for debugging and
+possibly cleaning up.
+
+    sub DESTROY { print "</shout>\n" }
+
+=back
+
+Here's how to use our little example:
+
+    tie(*FOO,'Shout');
+    print FOO "hello\n";
+    $a = 4; $b = 6;
+    print FOO $a, " plus ", $b, " equals ", $a + $b, "\n";
 
 =head1 SEE ALSO
 
@@ -632,3 +681,5 @@ source code to MLDBM.
 =head1 AUTHOR
 
 Tom Christiansen
+
+TIEHANDLE by Sven Verdoolaege <skimo@dns.ufsia.ac.be>

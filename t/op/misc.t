@@ -169,3 +169,25 @@ BEGIN { undef = 0 }
 EXPECT
 Modification of a read-only value attempted at - line 1.
 BEGIN failed--compilation aborted at - line 1.
+########
+{
+    package foo;
+    sub PRINT {
+        shift;
+        print join(' ', reverse @_)."\n";
+    }
+    sub TIEHANDLE {
+        bless {}, shift;
+    }
+    sub DESTROY {
+	print "and destroyed as well\n";
+    }
+}
+{
+    local(*FOO);
+    tie(*FOO,'foo');
+    print FOO "sentence.", "reversed", "a", "is", "This";
+}
+EXPECT
+This is a reversed sentence.
+and destroyed as well
