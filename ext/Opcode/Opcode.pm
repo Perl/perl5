@@ -415,6 +415,8 @@ These are a hotchpotch of opcodes still waiting to be considered
 
     entertry leavetry -- can be used to 'hide' fatal errors
 
+    custom -- where should this go
+
 =item :base_math
 
 These ops are not included in :base_core because of the risk of them being

@@ -540,7 +540,7 @@ Perl_report_uninit(pTHX)
 {
     if (PL_op)
 	Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit,
-		    " in ", PL_op_desc[PL_op->op_type]);
+		    " in ", OP_DESC(PL_op));
     else
 	Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit, "", "");
 }
@@ -1616,7 +1616,7 @@ Perl_sv_setiv(pTHX_ register SV *sv, IV i)
     case SVt_PVFM:
     case SVt_PVIO:
 	Perl_croak(aTHX_ "Can't coerce %s to integer in %s", sv_reftype(sv,0),
-		   PL_op_desc[PL_op->op_type]);
+		   OP_DESC(PL_op));
     }
     (void)SvIOK_only(sv);			/* validate number */
     SvIVX(sv) = i;
@@ -1727,7 +1727,7 @@ Perl_sv_setnv(pTHX_ register SV *sv, NV num)
     case SVt_PVFM:
     case SVt_PVIO:
 	Perl_croak(aTHX_ "Can't coerce %s to number in %s", sv_reftype(sv,0),
-		   PL_op_name[PL_op->op_type]);
+		   OP_NAME(PL_op));
     }
     SvNVX(sv) = num;
     (void)SvNOK_only(sv);			/* validate number */
@@ -1807,7 +1807,7 @@ S_not_a_number(pTHX_ SV *sv)
     if (PL_op)
 	Perl_warner(aTHX_ WARN_NUMERIC,
 		    "Argument \"%s\" isn't numeric in %s", tmpbuf,
-		PL_op_desc[PL_op->op_type]);
+			OP_DESC(PL_op));
     else
 	Perl_warner(aTHX_ WARN_NUMERIC,
 		    "Argument \"%s\" isn't numeric", tmpbuf);
@@ -3355,7 +3355,7 @@ Perl_sv_utf8_downgrade(pTHX_ register SV* sv, bool fail_ok)
 			if (first && ch > 255) {
 			    if (PL_op)
 				Perl_warner(aTHX_ WARN_UTF8, "Wide character in byte %s",
-					   PL_op_desc[PL_op->op_type]);
+					   OP_DESC(PL_op);
 			    else
 			        Perl_warner(aTHX_ WARN_UTF8, "Wide character in byte");
 			    first = 0;
@@ -3370,7 +3370,7 @@ Perl_sv_utf8_downgrade(pTHX_ register SV* sv, bool fail_ok)
 		else {
 		    if (PL_op)
 		        Perl_croak(aTHX_ "Wide character in %s",
-				   PL_op_desc[PL_op->op_type]);
+				   OP_DESC(PL_op));
 		    else
 		        Perl_croak(aTHX_ "Wide character");
 		}
@@ -3597,7 +3597,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
     case SVt_PVIO:
 	if (PL_op)
 	    Perl_croak(aTHX_ "Bizarre copy of %s in %s", sv_reftype(sstr, 0),
-		PL_op_name[PL_op->op_type]);
+		OP_NAME(PL_op));
 	else
 	    Perl_croak(aTHX_ "Bizarre copy of %s", sv_reftype(sstr, 0));
 	break;
@@ -6760,7 +6760,7 @@ Perl_sv_pvn_force_flags(pTHX_ SV *sv, STRLEN *lp, I32 flags)
     else {
 	if (SvTYPE(sv) > SVt_PVLV && SvTYPE(sv) != SVt_PVFM) {
 	    Perl_croak(aTHX_ "Can't coerce %s to string in %s", sv_reftype(sv,0),
-		PL_op_name[PL_op->op_type]);
+		OP_NAME(PL_op));
 	}
 	else
 	    s = sv_2pv_flags(sv, lp, flags);

@@ -72,7 +72,7 @@ STATIC OP *
 S_no_fh_allowed(pTHX_ OP *o)
 {
     yyerror(Perl_form(aTHX_ "Missing comma after first argument to %s function",
-		 PL_op_desc[o->op_type]));
+		 OP_DESC(o)));
     return o;
 }
 
@@ -94,7 +94,7 @@ STATIC void
 S_bad_type(pTHX_ I32 n, char *t, char *name, OP *kid)
 {
     yyerror(Perl_form(aTHX_ "Type of arg %d to %s must be %s (not %s)",
-		 (int)n, name, t, PL_op_desc[kid->op_type]));
+		 (int)n, name, t, OP_DESC(kid)));
 }
 
 STATIC void
@@ -1141,7 +1141,7 @@ Perl_scalarvoid(pTHX_ OP *o)
     case OP_GETLOGIN:
       func_ops:
 	if (!(o->op_private & (OPpLVAL_INTRO|OPpOUR_INTRO)))
-	    useless = PL_op_desc[o->op_type];
+	    useless = OP_DESC(o);
 	break;
 
     case OP_RV2GV:
@@ -1510,7 +1510,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
 		      ? "do block"
 		      : (o->op_type == OP_ENTERSUB
 			? "non-lvalue subroutine call"
-			: PL_op_desc[o->op_type])),
+			: OP_DESC(o))),
 		     type ? PL_op_desc[type] : "local"));
 	return o;
 
@@ -1972,7 +1972,7 @@ S_my_kid(pTHX_ OP *o, OP *attrs)
 	     type != OP_PUSHMARK)
     {
 	yyerror(Perl_form(aTHX_ "Can't declare %s in \"%s\"",
-			  PL_op_desc[o->op_type],
+			  OP_DESC(o),
 			  PL_in_my == KEY_our ? "our" : "my"));
 	return o;
     }
@@ -5431,7 +5431,7 @@ Perl_ck_delete(pTHX_ OP *o)
 	    break;
 	default:
 	    Perl_croak(aTHX_ "%s argument is not a HASH or ARRAY element or slice",
-		  PL_op_desc[o->op_type]);
+		  OP_DESC(o));
 	}
 	op_null(kid);
     }
@@ -5536,14 +5536,14 @@ Perl_ck_exists(pTHX_ OP *o)
 	    (void) ref(kid, o->op_type);
 	    if (kid->op_type != OP_RV2CV && !PL_error_count)
 		Perl_croak(aTHX_ "%s argument is not a subroutine name",
-			   PL_op_desc[o->op_type]);
+			    OP_DESC(o));
 	    o->op_private |= OPpEXISTS_SUB;
 	}
 	else if (kid->op_type == OP_AELEM)
 	    o->op_flags |= OPf_SPECIAL;
 	else if (kid->op_type != OP_HELEM)
 	    Perl_croak(aTHX_ "%s argument is not a HASH or ARRAY element",
-		       PL_op_desc[o->op_type]);
+		        OP_DESC(o));
 	op_null(kid);
     }
     return o;
@@ -5821,7 +5821,7 @@ Perl_ck_fun(pTHX_ OP *o)
 		    }
 		    else if (kid->op_type == OP_READLINE) {
 			/* neophyte patrol: open(<FH>), close(<FH>) etc. */
-			bad_type(numargs, "HANDLE", PL_op_desc[o->op_type], kid);
+			bad_type(numargs, "HANDLE", OP_DESC(o), kid);
 		    }
 		    else {
 			I32 flags = OPf_SPECIAL;
@@ -5889,7 +5889,7 @@ Perl_ck_fun(pTHX_ OP *o)
 	}
 	o->op_private |= numargs;
 	if (kid)
-	    return too_many_arguments(o,PL_op_desc[o->op_type]);
+	    return too_many_arguments(o,OP_DESC(o));
 	listkids(o);
     }
     else if (PL_opargs[type] & OA_DEFGV) {
@@ -5901,7 +5901,7 @@ Perl_ck_fun(pTHX_ OP *o)
 	while (oa & OA_OPTIONAL)
 	    oa >>= 4;
 	if (oa && oa != OA_LIST)
-	    return too_few_arguments(o,PL_op_desc[o->op_type]);
+	    return too_few_arguments(o,OP_DESC(o));
     }
     return o;
 }
@@ -6000,7 +6000,7 @@ Perl_ck_grep(pTHX_ OP *o)
 
     kid = cLISTOPo->op_first->op_sibling;
     if (!kid || !kid->op_sibling)
-	return too_few_arguments(o,PL_op_desc[o->op_type]);
+	return too_few_arguments(o,OP_DESC(o));
     for (kid = kid->op_sibling; kid; kid = kid->op_sibling)
 	mod(kid, OP_GREPSTART);
 
@@ -6505,7 +6505,7 @@ Perl_ck_split(pTHX_ OP *o)
     scalar(kid);
 
     if (kid->op_sibling)
-	return too_many_arguments(o,PL_op_desc[o->op_type]);
+	return too_many_arguments(o,OP_DESC(o));
 
     return o;
 }
@@ -7097,6 +7097,44 @@ Perl_peep(pTHX_ register OP *o)
     }
     LEAVE;
 }
+
+#ifdef PERL_CUSTOM_OPS
+char* custom_op_name(pTHX_ OP* o)
+{
+    IV  index = PTR2IV(o->op_ppaddr);
+    SV* keysv;
+    HE* he;
+
+    if (!PL_custom_op_names) /* This probably shouldn't happen */
+        return PL_op_name[OP_CUSTOM];
+
+    keysv = sv_2mortal(newSViv(index));
+
+    he = hv_fetch_ent(PL_custom_op_names, keysv, 0, 0);
+    if (!he)
+        return PL_op_name[OP_CUSTOM]; /* Don't know who you are */
+
+    return SvPV_nolen(HeVAL(he));
+}
+
+char* custom_op_desc(pTHX_ OP* o)
+{
+    IV  index = PTR2IV(o->op_ppaddr);
+    SV* keysv;
+    HE* he;
+
+    if (!PL_custom_op_descs)
+        return PL_op_desc[OP_CUSTOM];
+
+    keysv = sv_2mortal(newSViv(index));
+
+    he = hv_fetch_ent(PL_custom_op_descs, keysv, 0, 0);
+    if (!he)
+        return PL_op_desc[OP_CUSTOM];
+
+    return SvPV_nolen(HeVAL(he));
+}
+#endif
 
 #include "XSUB.h"
 

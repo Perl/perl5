@@ -2357,6 +2357,50 @@ high character - C<HALF_UPGRADE> is one of those.
 
 =back
 
+=head1 Custom Operators
+
+Custom operator support is a new experimental feature that allows you do
+define your own ops. This is primarily to allow the building of
+interpreters for other languages in the Perl core, but it also allows
+optimizations through the creation of "macro-ops" (ops which perform the
+functions of multiple ops which are usually executed together, such as
+C<gvsv, gvsv, add>.) Currently, this feature must be enabled with the C
+flag C<-DPERL_CUSTOM_OPS>.
+
+Enabling the feature will create a new op type, C<OP_CUSTOM>. The Perl
+core does not "know" anything special about this op type, and so it will
+not be involved in any optimizations. This also means that you can
+define your custom ops to be any op structure - unary, binary, list and
+so on - you like.
+
+It's important to know what custom operators won't do for you. They
+won't let you add new syntax to Perl, directly. They won't even let you
+add new keywords, directly. In fact, they won't change the way Perl
+compiles a program at all. You have to do those changes yourself, after
+Perl has compiled the program. You do this either by manipulating the op
+tree using a C<CHECK> block and the C<B::Generate> module, or by adding
+a custom peephole optimizer with the C<optimize> module.
+
+When you do this, you replace ordinary Perl ops with custom ops by
+creating ops with the type C<OP_CUSTOM> and the C<pp_addr> of your own
+PP function. This should be defined in XS code, and should look like
+the PP ops in C<pp_*.c>. You are responsible for ensuring that your op
+takes the appropriate number of values from the stack, and you are
+responsible for adding stack marks if necessary.
+
+You should also "register" your op with the Perl interpreter so that it
+can produce sensible error and warning messages. Since it is possible to
+have multiple custom ops within the one "logical" op type C<OP_CUSTOM>,
+Perl uses the value of C<< o->op_ppaddr >> as a key into the
+C<PL_custom_op_descs> and C<PL_custom_op_names> hashes. This means you
+need to enter a name and description for your op at the appropriate
+place in the C<PL_custom_op_names> and C<PL_custom_op_descs> hashes.
+
+Forthcoming versions of C<B::Generate> (version 1.0 and above) should
+directly support the creation of custom ops by name; C<Opcodes::Custom> 
+will provide functions which make it trivial to "register" custom ops to
+the Perl interpreter.
+
 =head1 AUTHORS
 
 Until May 1997, this document was maintained by Jeff Okamoto

@@ -1195,27 +1195,27 @@ S_dopoptolabel(pTHX_ char *label)
 	case CXt_SUBST:
 	    if (ckWARN(WARN_EXITING))
 		Perl_warner(aTHX_ WARN_EXITING, "Exiting substitution via %s",
-			PL_op_name[PL_op->op_type]);
+			OP_NAME(PL_op));
 	    break;
 	case CXt_SUB:
 	    if (ckWARN(WARN_EXITING))
 		Perl_warner(aTHX_ WARN_EXITING, "Exiting subroutine via %s",
-			PL_op_name[PL_op->op_type]);
+			OP_NAME(PL_op));
 	    break;
 	case CXt_FORMAT:
 	    if (ckWARN(WARN_EXITING))
 		Perl_warner(aTHX_ WARN_EXITING, "Exiting format via %s",
-			PL_op_name[PL_op->op_type]);
+			OP_NAME(PL_op));
 	    break;
 	case CXt_EVAL:
 	    if (ckWARN(WARN_EXITING))
 		Perl_warner(aTHX_ WARN_EXITING, "Exiting eval via %s",
-			PL_op_name[PL_op->op_type]);
+			OP_NAME(PL_op));
 	    break;
 	case CXt_NULL:
 	    if (ckWARN(WARN_EXITING))
 		Perl_warner(aTHX_ WARN_EXITING, "Exiting pseudo-block via %s",
-			PL_op_name[PL_op->op_type]);
+			OP_NAME(PL_op));
 	    return -1;
 	case CXt_LOOP:
 	    if (!cx->blk_loop.label ||
@@ -1330,27 +1330,27 @@ S_dopoptoloop(pTHX_ I32 startingblock)
 	case CXt_SUBST:
 	    if (ckWARN(WARN_EXITING))
 		Perl_warner(aTHX_ WARN_EXITING, "Exiting substitution via %s",
-			PL_op_name[PL_op->op_type]);
+			OP_NAME(PL_op));
 	    break;
 	case CXt_SUB:
 	    if (ckWARN(WARN_EXITING))
 		Perl_warner(aTHX_ WARN_EXITING, "Exiting subroutine via %s",
-			PL_op_name[PL_op->op_type]);
+			OP_NAME(PL_op));
 	    break;
 	case CXt_FORMAT:
 	    if (ckWARN(WARN_EXITING))
 		Perl_warner(aTHX_ WARN_EXITING, "Exiting format via %s",
-			PL_op_name[PL_op->op_type]);
+			OP_NAME(PL_op));
 	    break;
 	case CXt_EVAL:
 	    if (ckWARN(WARN_EXITING))
 		Perl_warner(aTHX_ WARN_EXITING, "Exiting eval via %s",
-			PL_op_name[PL_op->op_type]);
+			OP_NAME(PL_op));
 	    break;
 	case CXt_NULL:
 	    if (ckWARN(WARN_EXITING))
 		Perl_warner(aTHX_ WARN_EXITING, "Exiting pseudo-block via %s",
-			PL_op_name[PL_op->op_type]);
+			OP_NAME(PL_op));
 	    return -1;
 	case CXt_LOOP:
 	    DEBUG_l( Perl_deb(aTHX_ "(Found loop #%ld)\n", (long)i));
