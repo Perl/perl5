@@ -54,5 +54,5 @@
 #define SAVEFREEPV(p) save_freepv((char*)(p))
 #define SAVECLEARSV(sv) save_clearsv((SV**)(&sv))
 #define SAVEDELETE(h,k,l) save_delete((HV*)(h), (char*)(k), (I32)l)
-#define SAVEDESTRUCTOR(f,p) save_destructor(f,(void*)p)
+#define SAVEDESTRUCTOR(f,p) save_destructor((void(*)_((void*)))f,(void*)p)
 
