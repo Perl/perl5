@@ -1056,6 +1056,53 @@ straddling of the proverbial fence causes problems.
 
 =back
 
+=head2 When Unicode Does Not Happen
+
+While Perl does have extensive ways to input and output in Unicode,
+and few other 'entry points' like the @ARGV which can be interpreted
+as Unicode (UTF-8), there still are many places where Unicode (in some
+encoding or another) could be given as arguments or received as
+results, or both, but it is not.
+
+The following are such interfaces.  For all of these Perl currently
+(as of 5.8.1) simply assumes byte strings both as arguments and results.
+
+One reason why Perl does not attempt to resolve the role of Unicode in
+this cases is that the answers are highly dependent on the operating
+system and the file system(s).  For example, whether filenames can be
+in Unicode, and in exactly what kind of encoding, is not exactly a
+portable concept.  Similarly for the qx and system: how well will the
+'command line interface' (and which of them?) handle Unicode?
+
+=over 4
+
+=item chmod, chmod, chown, chroot, exec, link, mkdir, rename, rmdir, stat, symlink, truncate, unlink, utime
+
+=item %ENV
+
+=item glob (aka the <*>)
+
+=item open, opendir, sysopen
+
+=item qx (aka the backtick operator), system
+
+=item readdir, readlink
+
+=back
+
+=head2 Forcing Unicode in Perl (Or Unforcing Unicode in Perl)
+
+Sometimes (see L</"When Unicode Does Not Happen">) there are
+situations where you simply need to force Perl to believe that a byte
+string is UTF-8, or vice versa.  The low-level calls
+utf8::upgrade($bytestring) and utf8::downgrade($utf8string) are
+the answers.
+
+Do not use them without careful thought, though: Perl may easily get
+very confused, angry, or even crash, if you suddenly change the 'nature'
+of scalar like that.  Especially careful you have to be if you use the
+utf8::upgrade(): any random byte string is not valid UTF-8.
+
 =head2 Using Unicode in XS
 
 If you want to handle Perl Unicode in XS extensions, you may find the
