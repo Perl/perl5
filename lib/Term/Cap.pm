@@ -168,6 +168,14 @@ sub Tgetent { ## public -- static method
     }
 
     my @termcap_path = termcap_path;
+
+    unless (@termcap_path || $entry)
+    {
+	# last resort--fake up a termcap from terminfo 
+	local $ENV{TERM} = $term;
+	$entry = `infocmp -C 2>/dev/null`;
+    }
+
     croak "Can't find a valid termcap file" unless @termcap_path || $entry;
 
     $state = 1;					# 0 == finished
