@@ -57,7 +57,7 @@ Perl_uvuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
     if (ckWARN(WARN_UTF8)) {
 	 if (UNICODE_IS_SURROGATE(uv) &&
 	     !(flags & UNICODE_ALLOW_SURROGATE))
-	      Perl_warner(aTHX_ WARN_UTF8, "UTF-16 surrogate 0x%04"UVxf, uv);
+	      Perl_warner(aTHX_ packWARN(WARN_UTF8), "UTF-16 surrogate 0x%04"UVxf, uv);
 	 else if (
 		  ((uv >= 0xFDD0 && uv <= 0xFDEF &&
 		    !(flags & UNICODE_ALLOW_FDD0))
@@ -72,7 +72,7 @@ Perl_uvuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 		  ((uv <= PERL_UNICODE_MAX) ||
 		   !(flags & UNICODE_ALLOW_SUPER))
 		  )
-	      Perl_warner(aTHX_ WARN_UTF8,
+	      Perl_warner(aTHX_ packWARN(WARN_UTF8),
 			 "Unicode character 0x%04"UVxf" is illegal", uv);
     }
     if (UNI_IS_INVARIANT(uv)) {
@@ -469,10 +469,10 @@ malformed:
 	    char *s = SvPVX(sv);
 
 	    if (PL_op)
-		Perl_warner(aTHX_ WARN_UTF8,
+		Perl_warner(aTHX_ packWARN(WARN_UTF8),
 			    "%s in %s", s,  OP_DESC(PL_op));
 	    else
-		Perl_warner(aTHX_ WARN_UTF8, "%s", s);
+		Perl_warner(aTHX_ packWARN(WARN_UTF8), "%s", s);
 	}
     }
 

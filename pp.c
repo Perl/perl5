@@ -519,7 +519,7 @@ PP(pp_bless)
 	    Perl_croak(aTHX_ "Attempt to bless into a reference");
 	ptr = SvPV(ssv,len);
 	if (ckWARN(WARN_MISC) && len == 0)
-	    Perl_warner(aTHX_ WARN_MISC,
+	    Perl_warner(aTHX_ packWARN(WARN_MISC),
 		   "Explicit blessing to '' (assuming package main)");
 	stash = gv_stashpvn(ptr, len, TRUE);
     }
@@ -555,7 +555,7 @@ PP(pp_gelem)
     case 'F':
 	if (strEQ(elem, "FILEHANDLE")) {
 	    /* finally deprecated in 5.8.0 */
-	    deprecate_old("*glob{FILEHANDLE}");
+	    deprecate("*glob{FILEHANDLE}");
 	    tmpRef = (SV*)GvIOp(gv);
 	}
 	else
@@ -776,7 +776,7 @@ PP(pp_undef)
 	break;
     case SVt_PVCV:
 	if (ckWARN(WARN_MISC) && cv_const_sv((CV*)sv))
-	    Perl_warner(aTHX_ WARN_MISC, "Constant subroutine %s undefined",
+	    Perl_warner(aTHX_ packWARN(WARN_MISC), "Constant subroutine %s undefined",
 		 CvANON((CV*)sv) ? "(anonymous)" : GvENAME(CvGV((CV*)sv)));
 	/* FALL THROUGH */
     case SVt_PVFM:
@@ -2956,7 +2956,7 @@ PP(pp_substr)
 	if (lvalue || repl)
 	    Perl_croak(aTHX_ "substr outside of string");
 	if (ckWARN(WARN_SUBSTR))
-	    Perl_warner(aTHX_ WARN_SUBSTR, "substr outside of string");
+	    Perl_warner(aTHX_ packWARN(WARN_SUBSTR), "substr outside of string");
 	RETPUSHUNDEF;
     }
     else {
@@ -2992,7 +2992,7 @@ PP(pp_substr)
 		    STRLEN n_a;
 		    SvPV_force(sv,n_a);
 		    if (ckWARN(WARN_SUBSTR))
-			Perl_warner(aTHX_ WARN_SUBSTR,
+			Perl_warner(aTHX_ packWARN(WARN_SUBSTR),
 				"Attempt to use reference as lvalue in substr");
 		}
 		if (SvOK(sv))		/* is it defined ? */
@@ -3867,7 +3867,7 @@ PP(pp_anonhash)
 	if (MARK < SP)
 	    sv_setsv(val, *++MARK);
 	else if (ckWARN(WARN_MISC))
-	    Perl_warner(aTHX_ WARN_MISC, "Odd number of elements in anonymous hash");
+	    Perl_warner(aTHX_ packWARN(WARN_MISC), "Odd number of elements in anonymous hash");
 	(void)hv_store_ent(hv,key,val,0);
     }
     SP = ORIGMARK;
@@ -3928,7 +3928,7 @@ PP(pp_splice)
     }
     if (offset > AvFILLp(ary) + 1) {
 	if (ckWARN(WARN_MISC))
-	    Perl_warner(aTHX_ WARN_MISC, "splice() offset past end of array" );
+	    Perl_warner(aTHX_ packWARN(WARN_MISC), "splice() offset past end of array" );
 	offset = AvFILLp(ary) + 1;
     }
     after = AvFILLp(ary) + 1 - (offset + length);

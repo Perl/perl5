@@ -3445,25 +3445,25 @@ Perl_report_evil_fh(pTHX_ GV *gv, IO *io, I32 op)
 
     if (op == OP_phoney_OUTPUT_ONLY || op == OP_phoney_INPUT_ONLY) {
 	if (name && *name)
-	    Perl_warner(aTHX_ WARN_IO, "Filehandle %s opened only for %sput",
+	    Perl_warner(aTHX_ packWARN(WARN_IO), "Filehandle %s opened only for %sput",
 			name,
 			(op == OP_phoney_INPUT_ONLY ? "in" : "out"));
 	else
-	    Perl_warner(aTHX_ WARN_IO, "Filehandle opened only for %sput",
+	    Perl_warner(aTHX_ packWARN(WARN_IO), "Filehandle opened only for %sput",
 			(op == OP_phoney_INPUT_ONLY ? "in" : "out"));
     } else if (name && *name) {
-	Perl_warner(aTHX_ warn_type,
+	Perl_warner(aTHX_ packWARN(warn_type),
 		    "%s%s on %s %s %s", func, pars, vile, type, name);
 	if (io && IoDIRP(io) && !(IoFLAGS(io) & IOf_FAKE_DIRP))
-	    Perl_warner(aTHX_ warn_type,
+	    Perl_warner(aTHX_ packWARN(warn_type),
 			"\t(Are you trying to call %s%s on dirhandle %s?)\n",
 			func, pars, name);
     }
     else {
-	Perl_warner(aTHX_ warn_type,
+	Perl_warner(aTHX_ packWARN(warn_type),
 		    "%s%s on %s %s", func, pars, vile, type);
 	if (gv && io && IoDIRP(io) && !(IoFLAGS(io) & IOf_FAKE_DIRP))
-	    Perl_warner(aTHX_ warn_type,
+	    Perl_warner(aTHX_ packWARN(warn_type),
 			"\t(Are you trying to call %s%s on dirhandle?)\n",
 			func, pars);
     }
@@ -4026,7 +4026,7 @@ Perl_new_vstring(pTHX_ char *s, SV *sv)
 		      rev += (*end - '0') * mult;
 		      mult *= 10;
 		      if (orev > rev && ckWARN_d(WARN_OVERFLOW))
-			   Perl_warner(aTHX_ WARN_OVERFLOW,
+			   Perl_warner(aTHX_ packWARN(WARN_OVERFLOW),
 				       "Integer overflow in decimal number");
 		 }
 	    }

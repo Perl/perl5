@@ -396,7 +396,7 @@ PP(pp_formline)
 	    else {
 		sv = &PL_sv_no;
 		if (ckWARN(WARN_SYNTAX))
-		    Perl_warner(aTHX_ WARN_SYNTAX, "Not enough format arguments");
+		    Perl_warner(aTHX_ packWARN(WARN_SYNTAX), "Not enough format arguments");
 	    }
 	    break;
 
@@ -1022,27 +1022,27 @@ S_dopoptolabel(pTHX_ char *label)
 	switch (CxTYPE(cx)) {
 	case CXt_SUBST:
 	    if (ckWARN(WARN_EXITING))
-		Perl_warner(aTHX_ WARN_EXITING, "Exiting substitution via %s",
+		Perl_warner(aTHX_ packWARN(WARN_EXITING), "Exiting substitution via %s",
 			OP_NAME(PL_op));
 	    break;
 	case CXt_SUB:
 	    if (ckWARN(WARN_EXITING))
-		Perl_warner(aTHX_ WARN_EXITING, "Exiting subroutine via %s",
+		Perl_warner(aTHX_ packWARN(WARN_EXITING), "Exiting subroutine via %s",
 			OP_NAME(PL_op));
 	    break;
 	case CXt_FORMAT:
 	    if (ckWARN(WARN_EXITING))
-		Perl_warner(aTHX_ WARN_EXITING, "Exiting format via %s",
+		Perl_warner(aTHX_ packWARN(WARN_EXITING), "Exiting format via %s",
 			OP_NAME(PL_op));
 	    break;
 	case CXt_EVAL:
 	    if (ckWARN(WARN_EXITING))
-		Perl_warner(aTHX_ WARN_EXITING, "Exiting eval via %s",
+		Perl_warner(aTHX_ packWARN(WARN_EXITING), "Exiting eval via %s",
 			OP_NAME(PL_op));
 	    break;
 	case CXt_NULL:
 	    if (ckWARN(WARN_EXITING))
-		Perl_warner(aTHX_ WARN_EXITING, "Exiting pseudo-block via %s",
+		Perl_warner(aTHX_ packWARN(WARN_EXITING), "Exiting pseudo-block via %s",
 			OP_NAME(PL_op));
 	    return -1;
 	case CXt_LOOP:
@@ -1157,27 +1157,27 @@ S_dopoptoloop(pTHX_ I32 startingblock)
 	switch (CxTYPE(cx)) {
 	case CXt_SUBST:
 	    if (ckWARN(WARN_EXITING))
-		Perl_warner(aTHX_ WARN_EXITING, "Exiting substitution via %s",
+		Perl_warner(aTHX_ packWARN(WARN_EXITING), "Exiting substitution via %s",
 			OP_NAME(PL_op));
 	    break;
 	case CXt_SUB:
 	    if (ckWARN(WARN_EXITING))
-		Perl_warner(aTHX_ WARN_EXITING, "Exiting subroutine via %s",
+		Perl_warner(aTHX_ packWARN(WARN_EXITING), "Exiting subroutine via %s",
 			OP_NAME(PL_op));
 	    break;
 	case CXt_FORMAT:
 	    if (ckWARN(WARN_EXITING))
-		Perl_warner(aTHX_ WARN_EXITING, "Exiting format via %s",
+		Perl_warner(aTHX_ packWARN(WARN_EXITING), "Exiting format via %s",
 			OP_NAME(PL_op));
 	    break;
 	case CXt_EVAL:
 	    if (ckWARN(WARN_EXITING))
-		Perl_warner(aTHX_ WARN_EXITING, "Exiting eval via %s",
+		Perl_warner(aTHX_ packWARN(WARN_EXITING), "Exiting eval via %s",
 			OP_NAME(PL_op));
 	    break;
 	case CXt_NULL:
 	    if (ckWARN(WARN_EXITING))
-		Perl_warner(aTHX_ WARN_EXITING, "Exiting pseudo-block via %s",
+		Perl_warner(aTHX_ packWARN(WARN_EXITING), "Exiting pseudo-block via %s",
 			OP_NAME(PL_op));
 	    return -1;
 	case CXt_LOOP:
@@ -1268,7 +1268,7 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 		    sv_catpvn(err, message, msglen);
 		    if (ckWARN(WARN_MISC)) {
 			STRLEN start = SvCUR(err)-msglen-sizeof(prefix)+1;
-			Perl_warner(aTHX_ WARN_MISC, SvPVX(err)+start);
+			Perl_warner(aTHX_ packWARN(WARN_MISC), SvPVX(err)+start);
 		    }
 		}
 	    }
@@ -2913,7 +2913,7 @@ PP(pp_require)
 		    PERL_VERSION, PERL_SUBVERSION);
 	    }
 	    if (ckWARN(WARN_PORTABLE))
-		Perl_warner(aTHX_ WARN_PORTABLE,
+		Perl_warner(aTHX_ packWARN(WARN_PORTABLE),
                         "v-string in use/require non-portable");
 	    RETPUSHYES;
 	}

@@ -3110,7 +3110,7 @@ S_regmatch(pTHX_ regnode *prog)
 			if (ckWARN(WARN_REGEXP) && n >= REG_INFTY
 			    && !(PL_reg_flags & RF_warned)) {
 			    PL_reg_flags |= RF_warned;
-			    Perl_warner(aTHX_ WARN_REGEXP, "%s limit (%d) exceeded",
+			    Perl_warner(aTHX_ packWARN(WARN_REGEXP), "%s limit (%d) exceeded",
 				 "Complex regular subexpression recursion",
 				 REG_INFTY - 1);
 			}
@@ -3162,7 +3162,7 @@ S_regmatch(pTHX_ regnode *prog)
 		if (ckWARN(WARN_REGEXP) && n >= REG_INFTY
 			&& !(PL_reg_flags & RF_warned)) {
 		    PL_reg_flags |= RF_warned;
-		    Perl_warner(aTHX_ WARN_REGEXP, "%s limit (%d) exceeded",
+		    Perl_warner(aTHX_ packWARN(WARN_REGEXP), "%s limit (%d) exceeded",
 			 "Complex regular subexpression recursion",
 			 REG_INFTY - 1);
 		}

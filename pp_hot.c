@@ -170,7 +170,7 @@ PP(pp_concat)
 	if (llen >= 2 && lpv[llen - 2] == '1' && lpv[llen - 1] == '9'
 	    && (llen == 2 || !isDIGIT(lpv[llen - 3])))
 	{
-	    Perl_warner(aTHX_ WARN_Y2K, "Possible Y2K bug: %s",
+	    Perl_warner(aTHX_ packWARN(WARN_Y2K), "Possible Y2K bug: %s",
 			"about to append an integer to '19'");
 	}
     }
@@ -927,11 +927,11 @@ S_do_oddball(pTHX_ HV *hash, SV **relem, SV **firstrelem)
 		(SvTYPE(SvRV(*relem)) == SVt_PVAV ||
 		 SvTYPE(SvRV(*relem)) == SVt_PVHV))
 	    {
-		Perl_warner(aTHX_ WARN_MISC,
+		Perl_warner(aTHX_ packWARN(WARN_MISC),
 			    "Reference found where even-sized list expected");
 	    }
 	    else
-		Perl_warner(aTHX_ WARN_MISC,
+		Perl_warner(aTHX_ packWARN(WARN_MISC),
 			    "Odd number of elements in hash assignment");
 	}
 	if (SvTYPE(hash) == SVt_PVAV) {
@@ -1488,7 +1488,7 @@ Perl_do_readline(pTHX)
 	if (ckWARN2(WARN_GLOB, WARN_CLOSED)
 		&& (!io || !(IoFLAGS(io) & IOf_START))) {
 	    if (type == OP_GLOB)
-		Perl_warner(aTHX_ WARN_GLOB,
+		Perl_warner(aTHX_ packWARN(WARN_GLOB),
 			    "glob failed (can't start child: %s)",
 			    Strerror(errno));
 	    else
@@ -1545,7 +1545,7 @@ Perl_do_readline(pTHX)
 	    }
 	    else if (type == OP_GLOB) {
 		if (!do_close(PL_last_in_gv, FALSE) && ckWARN(WARN_GLOB)) {
-		    Perl_warner(aTHX_ WARN_GLOB,
+		    Perl_warner(aTHX_ packWARN(WARN_GLOB),
 			   "glob failed (child exited with status %d%s)",
 			   (int)(STATUS_CURRENT >> 8),
 			   (STATUS_CURRENT & 0x80) ? ", core dumped" : "");
@@ -2879,11 +2879,11 @@ void
 Perl_sub_crush_depth(pTHX_ CV *cv)
 {
     if (CvANON(cv))
-	Perl_warner(aTHX_ WARN_RECURSION, "Deep recursion on anonymous subroutine");
+	Perl_warner(aTHX_ packWARN(WARN_RECURSION), "Deep recursion on anonymous subroutine");
     else {
 	SV* tmpstr = sv_newmortal();
 	gv_efullname3(tmpstr, CvGV(cv), Nullch);
-	Perl_warner(aTHX_ WARN_RECURSION, "Deep recursion on subroutine \"%s\"",
+	Perl_warner(aTHX_ packWARN(WARN_RECURSION), "Deep recursion on subroutine \"%s\"",
 		SvPVX(tmpstr));
     }
 }
@@ -2900,7 +2900,7 @@ PP(pp_aelem)
     SV *sv;
 
     if (SvROK(elemsv) && !SvGAMAGIC(elemsv) && ckWARN(WARN_MISC))
-	Perl_warner(aTHX_ WARN_MISC, "Use of reference \"%s\" as array index", SvPV_nolen(elemsv));
+	Perl_warner(aTHX_ packWARN(WARN_MISC), "Use of reference \"%s\" as array index", SvPV_nolen(elemsv));
     if (elem > 0)
 	elem -= PL_curcop->cop_arybase;
     if (SvTYPE(av) != SVt_PVAV)

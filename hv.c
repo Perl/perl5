@@ -1821,7 +1821,7 @@ Perl_unsharepvn(pTHX_ const char *str, I32 len, U32 hash)
     if (str != save)
 	Safefree(str);
     if (!found && ckWARN_d(WARN_INTERNAL))
-	Perl_warner(aTHX_ WARN_INTERNAL, "Attempt to free non-existent shared string '%s'",str);
+	Perl_warner(aTHX_ packWARN(WARN_INTERNAL), "Attempt to free non-existent shared string '%s'",str);
 }
 
 /* get a (constant) string ptr from the global string table

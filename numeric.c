@@ -175,7 +175,7 @@ Perl_grok_bin(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result) {
                 }
                 /* Bah. We're just overflowed.  */
                 if (ckWARN_d(WARN_OVERFLOW))
-                    Perl_warner(aTHX_ WARN_OVERFLOW,
+                    Perl_warner(aTHX_ packWARN(WARN_OVERFLOW),
                                 "Integer overflow in binary number");
                 overflowed = TRUE;
                 value_nv = (NV) value;
@@ -198,7 +198,7 @@ Perl_grok_bin(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result) {
                 goto redo;
 	    }
         if (ckWARN(WARN_DIGIT))
-            Perl_warner(aTHX_ WARN_DIGIT,
+            Perl_warner(aTHX_ packWARN(WARN_DIGIT),
                         "Illegal binary digit '%c' ignored", *s);
         break;
     }
@@ -209,7 +209,7 @@ Perl_grok_bin(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result) {
 #endif
 	) {
 	if (ckWARN(WARN_PORTABLE))
-	    Perl_warner(aTHX_ WARN_PORTABLE,
+	    Perl_warner(aTHX_ packWARN(WARN_PORTABLE),
 			"Binary number > 0b11111111111111111111111111111111 non-portable");
     }
     *len_p = s - start;
@@ -290,7 +290,7 @@ Perl_grok_hex(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result) {
                 }
                 /* Bah. We're just overflowed.  */
                 if (ckWARN_d(WARN_OVERFLOW))
-                    Perl_warner(aTHX_ WARN_OVERFLOW,
+                    Perl_warner(aTHX_ packWARN(WARN_OVERFLOW),
                                 "Integer overflow in hexadecimal number");
                 overflowed = TRUE;
                 value_nv = (NV) value;
@@ -313,7 +313,7 @@ Perl_grok_hex(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result) {
                 goto redo;
 	    }
         if (ckWARN(WARN_DIGIT))
-            Perl_warner(aTHX_ WARN_DIGIT,
+            Perl_warner(aTHX_ packWARN(WARN_DIGIT),
                         "Illegal hexadecimal digit '%c' ignored", *s);
         break;
     }
@@ -324,7 +324,7 @@ Perl_grok_hex(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result) {
 #endif
 	) {
 	if (ckWARN(WARN_PORTABLE))
-	    Perl_warner(aTHX_ WARN_PORTABLE,
+	    Perl_warner(aTHX_ packWARN(WARN_PORTABLE),
 			"Hexadecimal number > 0xffffffff non-portable");
     }
     *len_p = s - start;
@@ -372,7 +372,7 @@ Perl_grok_oct(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result) {
                 }
                 /* Bah. We're just overflowed.  */
                 if (ckWARN_d(WARN_OVERFLOW))
-                    Perl_warner(aTHX_ WARN_OVERFLOW,
+                    Perl_warner(aTHX_ packWARN(WARN_OVERFLOW),
                                 "Integer overflow in octal number");
                 overflowed = TRUE;
                 value_nv = (NV) value;
@@ -399,7 +399,7 @@ Perl_grok_oct(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result) {
          * someone seems to want to use the digits eight and nine). */
         if (digit == 8 || digit == 9) {
             if (ckWARN(WARN_DIGIT))
-                Perl_warner(aTHX_ WARN_DIGIT,
+                Perl_warner(aTHX_ packWARN(WARN_DIGIT),
                             "Illegal octal digit '%c' ignored", *s);
         }
         break;
@@ -411,7 +411,7 @@ Perl_grok_oct(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result) {
 #endif
 	) {
 	if (ckWARN(WARN_PORTABLE))
-	    Perl_warner(aTHX_ WARN_PORTABLE,
+	    Perl_warner(aTHX_ packWARN(WARN_PORTABLE),
 			"Octal number > 037777777777 non-portable");
     }
     *len_p = s - start;

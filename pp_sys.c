@@ -852,7 +852,7 @@ PP(pp_untie)
             }
            else if (ckWARN(WARN_UNTIE)) {
 	       if (mg && SvREFCNT(obj) > 1)
-		  Perl_warner(aTHX_ WARN_UNTIE,
+		  Perl_warner(aTHX_ packWARN(WARN_UNTIE),
 		      "untie attempted while %"UVuf" inner references still exist",
 		       (UV)SvREFCNT(obj) - 1 ) ;
            }
@@ -1357,10 +1357,10 @@ PP(pp_leavewrite)
 		    name = SvPV_nolen(sv);
 		}
 		if (name && *name)
-		    Perl_warner(aTHX_ WARN_IO,
+		    Perl_warner(aTHX_ packWARN(WARN_IO),
 				"Filehandle %s opened only for input", name);
 		else
-		    Perl_warner(aTHX_ WARN_IO,
+		    Perl_warner(aTHX_ packWARN(WARN_IO),
 				"Filehandle opened only for input");
 	    }
 	    else if (ckWARN(WARN_CLOSED))
@@ -1371,7 +1371,7 @@ PP(pp_leavewrite)
     else {
 	if ((IoLINES_LEFT(io) -= FmLINES(PL_formtarget)) < 0) {
 	    if (ckWARN(WARN_IO))
-		Perl_warner(aTHX_ WARN_IO, "page overflow");
+		Perl_warner(aTHX_ packWARN(WARN_IO), "page overflow");
 	}
 	if (!do_print(PL_formtarget, fp))
 	    PUSHs(&PL_sv_no);
@@ -1443,10 +1443,10 @@ PP(pp_prtf)
 		    name = SvPV_nolen(sv);
 		}
 		if (name && *name)
-		    Perl_warner(aTHX_ WARN_IO,
+		    Perl_warner(aTHX_ packWARN(WARN_IO),
 				"Filehandle %s opened only for input", name);
 		else
-		    Perl_warner(aTHX_ WARN_IO,
+		    Perl_warner(aTHX_ packWARN(WARN_IO),
 				"Filehandle opened only for input");
 	    }
 	    else if (ckWARN(WARN_CLOSED))
@@ -1680,10 +1680,10 @@ PP(pp_sysread)
 		name = SvPV_nolen(sv);
 	    }
 	    if (name && *name)
-		Perl_warner(aTHX_ WARN_IO,
+		Perl_warner(aTHX_ packWARN(WARN_IO),
 			    "Filehandle %s opened only for output", name);
 	    else
-		Perl_warner(aTHX_ WARN_IO,
+		Perl_warner(aTHX_ packWARN(WARN_IO),
 			    "Filehandle opened only for output");
 	}
 	goto say_undef;
@@ -2731,7 +2731,7 @@ PP(pp_stat)
 	if (PL_op->op_type == OP_LSTAT) {
 	    if (gv != PL_defgv) {
 		if (ckWARN(WARN_IO))
-		    Perl_warner(aTHX_ WARN_IO,
+		    Perl_warner(aTHX_ packWARN(WARN_IO),
 			"lstat() on filehandle %s", GvENAME(gv));
 	    } else if (PL_laststype != OP_LSTAT)
 		Perl_croak(aTHX_ "The stat preceding lstat() wasn't an lstat");
@@ -2760,7 +2760,7 @@ PP(pp_stat)
 	else if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVGV) {
 	    gv = (GV*)SvRV(sv);
 	    if (PL_op->op_type == OP_LSTAT && ckWARN(WARN_IO))
-		Perl_warner(aTHX_ WARN_IO,
+		Perl_warner(aTHX_ packWARN(WARN_IO),
 			"lstat() on filehandle %s", GvENAME(gv));
 	    goto do_fstat;
 	}
@@ -2775,7 +2775,7 @@ PP(pp_stat)
 	    PL_laststatval = PerlLIO_stat(SvPV(PL_statname, n_a), &PL_statcache);
 	if (PL_laststatval < 0) {
 	    if (ckWARN(WARN_NEWLINE) && strchr(SvPV(PL_statname, n_a), '\n'))
-		Perl_warner(aTHX_ WARN_NEWLINE, PL_warn_nl, "stat");
+		Perl_warner(aTHX_ packWARN(WARN_NEWLINE), PL_warn_nl, "stat");
 	    max = 0;
 	}
     }
@@ -3321,7 +3321,7 @@ PP(pp_fttext)
 	sv_setpv(PL_statname, SvPV(sv, n_a));
 	if (!(fp = PerlIO_open(SvPVX(PL_statname), "r"))) {
 	    if (ckWARN(WARN_NEWLINE) && strchr(SvPV(sv, n_a), '\n'))
-		Perl_warner(aTHX_ WARN_NEWLINE, PL_warn_nl, "open");
+		Perl_warner(aTHX_ packWARN(WARN_NEWLINE), PL_warn_nl, "open");
 	    RETPUSHUNDEF;
 	}
 	PL_laststatval = PerlLIO_fstat(PerlIO_fileno(fp), &PL_statcache);
@@ -3422,7 +3422,7 @@ PP(pp_chdir)
            )
         {
             if( MAXARG == 1 )
-                deprecate_old("chdir('') or chdir(undef) as chdir()");
+                deprecate("chdir('') or chdir(undef) as chdir()");
             tmps = SvPV(*svp, n_a);
         }
         else {

@@ -706,18 +706,18 @@ perl_destruct(pTHXx)
     FREETMPS;
     if (destruct_level >= 2 && ckWARN_d(WARN_INTERNAL)) {
 	if (PL_scopestack_ix != 0)
-	    Perl_warner(aTHX_ WARN_INTERNAL,
+	    Perl_warner(aTHX_ packWARN(WARN_INTERNAL),
 	         "Unbalanced scopes: %ld more ENTERs than LEAVEs\n",
 		 (long)PL_scopestack_ix);
 	if (PL_savestack_ix != 0)
-	    Perl_warner(aTHX_ WARN_INTERNAL,
+	    Perl_warner(aTHX_ packWARN(WARN_INTERNAL),
 		 "Unbalanced saves: %ld more saves than restores\n",
 		 (long)PL_savestack_ix);
 	if (PL_tmps_floor != -1)
-	    Perl_warner(aTHX_ WARN_INTERNAL,"Unbalanced tmps: %ld more allocs than frees\n",
+	    Perl_warner(aTHX_ packWARN(WARN_INTERNAL),"Unbalanced tmps: %ld more allocs than frees\n",
 		 (long)PL_tmps_floor + 1);
 	if (cxstack_ix != -1)
-	    Perl_warner(aTHX_ WARN_INTERNAL,"Unbalanced context: %ld more PUSHes than POPs\n",
+	    Perl_warner(aTHX_ packWARN(WARN_INTERNAL),"Unbalanced context: %ld more PUSHes than POPs\n",
 		 (long)cxstack_ix + 1);
     }
 
@@ -758,7 +758,7 @@ perl_destruct(pTHXx)
 	hent = array[0];
 	for (;;) {
 	    if (hent && ckWARN_d(WARN_INTERNAL)) {
-		Perl_warner(aTHX_ WARN_INTERNAL,
+		Perl_warner(aTHX_ packWARN(WARN_INTERNAL),
 		     "Unbalanced string table refcount: (%d) for \"%s\"",
 		     HeVAL(hent) - Nullsv, HeKEY(hent));
 		HeVAL(hent) = Nullsv;
@@ -794,7 +794,7 @@ perl_destruct(pTHXx)
     SvREADONLY_off(&PL_sv_undef);
 
     if (PL_sv_count != 0 && ckWARN_d(WARN_INTERNAL))
-	Perl_warner(aTHX_ WARN_INTERNAL,"Scalars leaked: %ld\n", (long)PL_sv_count);
+	Perl_warner(aTHX_ packWARN(WARN_INTERNAL),"Scalars leaked: %ld\n", (long)PL_sv_count);
 
 #if defined(PERLIO_LAYERS)
     /* No more IO - including error messages ! */
@@ -1350,7 +1350,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
 	Sighandler_t sigstate = rsignal_state(SIGCHLD);
 	if (sigstate == SIG_IGN) {
 	    if (ckWARN(WARN_SIGNAL))
-		Perl_warner(aTHX_ WARN_SIGNAL,
+		Perl_warner(aTHX_ packWARN(WARN_SIGNAL),
 			    "Can't ignore signal CHLD, forcing to default");
 	    (void)rsignal(SIGCHLD, (Sighandler_t)SIG_DFL);
 	}
@@ -2272,7 +2272,7 @@ Perl_moreswitches(pTHX_ char *s)
 	PL_debug |= DEBUG_TOP_FLAG;
 #else
 	if (ckWARN_d(WARN_DEBUGGING))
-	    Perl_warner(aTHX_ WARN_DEBUGGING,
+	    Perl_warner(aTHX_ packWARN(WARN_DEBUGGING),
 	           "Recompile perl with -DDEBUGGING to use -D switch\n");
 	for (s++; isALNUM(*s); s++) ;
 #endif

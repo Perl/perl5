@@ -261,7 +261,7 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
 	    HV* basestash = gv_stashsv(sv, FALSE);
 	    if (!basestash) {
 		if (ckWARN(WARN_MISC))
-		    Perl_warner(aTHX_ WARN_MISC, "Can't locate package %s for @%s::ISA",
+		    Perl_warner(aTHX_ packWARN(WARN_MISC), "Can't locate package %s for @%s::ISA",
 			SvPVX(sv), HvNAME(stash));
 		continue;
 	    }
@@ -786,7 +786,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
     /* Adding a new symbol */
 
     if (add & GV_ADDWARN && ckWARN_d(WARN_INTERNAL))
-	Perl_warner(aTHX_ WARN_INTERNAL, "Had to create %s unexpectedly", nambeg);
+	Perl_warner(aTHX_ packWARN(WARN_INTERNAL), "Had to create %s unexpectedly", nambeg);
     gv_init(gv, stash, name, len, add & GV_ADDMULTI);
     gv_init_sv(gv, sv_type);
 
@@ -1173,7 +1173,7 @@ Perl_gv_check(pTHX_ HV *stash)
 #else
 		CopFILEGV(PL_curcop) = gv_fetchfile(file);
 #endif
-		Perl_warner(aTHX_ WARN_ONCE,
+		Perl_warner(aTHX_ packWARN(WARN_ONCE),
 			"Name \"%s::%s\" used only once: possible typo",
 			HvNAME(stash), GvNAME(gv));
 	    }
@@ -1220,7 +1220,7 @@ Perl_gp_free(pTHX_ GV *gv)
 	return;
     if (gp->gp_refcnt == 0) {
 	if (ckWARN_d(WARN_INTERNAL))
-	    Perl_warner(aTHX_ WARN_INTERNAL,
+	    Perl_warner(aTHX_ packWARN(WARN_INTERNAL),
 			"Attempt to free unreferenced glob pointers");
         return;
     }

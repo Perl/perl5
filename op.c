@@ -199,7 +199,7 @@ Perl_pad_allocmy(pTHX_ char *name)
 		    || ((SvFLAGS(sv) & SVpad_OUR) && GvSTASH(sv) == ourstash))
 		&& strEQ(name, SvPVX(sv)))
 	    {
-		Perl_warner(aTHX_ WARN_MISC,
+		Perl_warner(aTHX_ packWARN(WARN_MISC),
 		    "\"%s\" variable %s masks earlier declaration in same %s",
 		    (PL_in_my == KEY_our ? "our" : "my"),
 		    name,
@@ -216,9 +216,9 @@ Perl_pad_allocmy(pTHX_ char *name)
 		    && ((SvFLAGS(sv) & SVpad_OUR) && GvSTASH(sv) == ourstash)
 		    && strEQ(name, SvPVX(sv)))
 		{
-		    Perl_warner(aTHX_ WARN_MISC,
+		    Perl_warner(aTHX_ packWARN(WARN_MISC),
 			"\"our\" variable %s redeclared", name);
-		    Perl_warner(aTHX_ WARN_MISC,
+		    Perl_warner(aTHX_ packWARN(WARN_MISC),
 			"\t(Did you mean \"local\" instead of \"our\"?)\n");
 		    break;
 		}
@@ -359,7 +359,7 @@ S_pad_findlex(pTHX_ char *name, PADOFFSET newoff, U32 seq, CV* startcv,
 				    if (ckWARN(WARN_CLOSURE)
 					&& !CvUNIQUE(bcv) && !CvUNIQUE(cv))
 				    {
-					Perl_warner(aTHX_ WARN_CLOSURE,
+					Perl_warner(aTHX_ packWARN(WARN_CLOSURE),
 					  "Variable \"%s\" may be unavailable",
 					     name);
 				    }
@@ -372,7 +372,7 @@ S_pad_findlex(pTHX_ char *name, PADOFFSET newoff, U32 seq, CV* startcv,
 			if (ckWARN(WARN_CLOSURE) && !SvFAKE(sv) && !CvUNIQUE(cv)
 			    && !(SvFLAGS(sv) & SVpad_OUR))
 			{
-			    Perl_warner(aTHX_ WARN_CLOSURE,
+			    Perl_warner(aTHX_ packWARN(WARN_CLOSURE),
 				"Variable \"%s\" will not stay shared", name);
 			}
 		    }
@@ -509,7 +509,7 @@ Perl_pad_leavemy(pTHX_ I32 fill)
     if (PL_min_intro_pending && fill < PL_min_intro_pending) {
 	for (off = PL_max_intro_pending; off >= PL_min_intro_pending; off--) {
 	    if ((sv = svp[off]) && sv != &PL_sv_undef && ckWARN_d(WARN_INTERNAL))
-		Perl_warner(aTHX_ WARN_INTERNAL, "%s never introduced", SvPVX(sv));
+		Perl_warner(aTHX_ packWARN(WARN_INTERNAL), "%s never introduced", SvPVX(sv));
 	}
     }
     /* "Deintroduce" my variables that are leaving with this scope. */
@@ -995,7 +995,7 @@ S_scalarboolean(pTHX_ OP *o)
 
 	    if (PL_copline != NOLINE)
 		CopLINE_set(PL_curcop, PL_copline);
-	    Perl_warner(aTHX_ WARN_SYNTAX, "Found = in conditional, should be ==");
+	    Perl_warner(aTHX_ packWARN(WARN_SYNTAX), "Found = in conditional, should be ==");
 	    CopLINE_set(PL_curcop, oldline);
 	}
     }
@@ -1067,7 +1067,7 @@ Perl_scalar(pTHX_ OP *o)
 	break;
     case OP_SORT:
 	if (ckWARN(WARN_VOID))
-	    Perl_warner(aTHX_ WARN_VOID, "Useless use of sort in scalar context");
+	    Perl_warner(aTHX_ packWARN(WARN_VOID), "Useless use of sort in scalar context");
     }
     return o;
 }
@@ -1281,7 +1281,7 @@ Perl_scalarvoid(pTHX_ OP *o)
 	break;
     }
     if (useless && ckWARN(WARN_VOID))
-	Perl_warner(aTHX_ WARN_VOID, "Useless use of %s in void context", useless);
+	Perl_warner(aTHX_ packWARN(WARN_VOID), "Useless use of %s in void context", useless);
     return o;
 }
 
@@ -2186,7 +2186,7 @@ Perl_bind_match(pTHX_ I32 type, OP *left, OP *right)
       const char *sample = ((left->op_type == OP_RV2AV ||
 			     left->op_type == OP_PADAV)
 			    ? "@array" : "%hash");
-      Perl_warner(aTHX_ WARN_MISC,
+      Perl_warner(aTHX_ packWARN(WARN_MISC),
              "Applying %s to %s will act on scalar(%s)",
              desc, sample, sample);
     }
@@ -2382,7 +2382,7 @@ Perl_localize(pTHX_ OP *o, I32 lex)
 		s++;
 
 	    if (*s == ';' || *s == '=')
-		Perl_warner(aTHX_ WARN_PARENTHESIS,
+		Perl_warner(aTHX_ packWARN(WARN_PARENTHESIS),
 			    "Parentheses missing around \"%s\" list",
 			    lex ? (PL_in_my == KEY_our ? "our" : "my") : "local");
 	}
@@ -3357,7 +3357,7 @@ Perl_package(pTHX_ OP *o)
 	op_free(o);
     }
     else {
-	deprecate_old("\"package\" with no arguments");
+	deprecate("\"package\" with no arguments");
 	sv_setpv(PL_curstname,"<none>");
 	PL_curstash = Nullhv;
     }
@@ -3898,7 +3898,7 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
     }
     if (first->op_type == OP_CONST) {
 	if (ckWARN(WARN_BAREWORD) && (first->op_private & OPpCONST_BARE))
-	    Perl_warner(aTHX_ WARN_BAREWORD, "Bareword found in conditional");
+	    Perl_warner(aTHX_ packWARN(WARN_BAREWORD), "Bareword found in conditional");
 	if ((type == OP_AND) == (SvTRUE(((SVOP*)first)->op_sv))) {
 	    op_free(first);
 	    *firstp = Nullop;
@@ -3945,7 +3945,7 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 	if (warnop) {
 	    line_t oldline = CopLINE(PL_curcop);
 	    CopLINE_set(PL_curcop, PL_copline);
-	    Perl_warner(aTHX_ WARN_MISC,
+	    Perl_warner(aTHX_ packWARN(WARN_MISC),
 		 "Value of %s%s can be \"0\"; test with defined()",
 		 PL_op_desc[warnop],
 		 ((warnop == OP_READLINE || warnop == OP_GLOB)
@@ -4653,7 +4653,7 @@ Perl_cv_ckproto(pTHX_ CV *cv, GV *gv, char *p)
 	    Perl_sv_catpvf(aTHX_ msg, "(%s)", p);
 	else
 	    sv_catpv(msg, "none");
-	Perl_warner(aTHX_ WARN_PROTOTYPE, "%"SVf, msg);
+	Perl_warner(aTHX_ packWARN(WARN_PROTOTYPE), "%"SVf, msg);
     }
 }
 
@@ -4793,7 +4793,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    if (!SvPOK((SV*)gv) && !(SvIOK((SV*)gv) && SvIVX((SV*)gv) == -1)
 		&& ckWARN_d(WARN_PROTOTYPE))
 	    {
-		Perl_warner(aTHX_ WARN_PROTOTYPE, "Runaway prototype");
+		Perl_warner(aTHX_ packWARN(WARN_PROTOTYPE), "Runaway prototype");
 	    }
 	    cv_ckproto((CV*)gv, NULL, ps);
 	}
@@ -4853,7 +4853,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 		    line_t oldline = CopLINE(PL_curcop);
 		    if (PL_copline != NOLINE)
 			CopLINE_set(PL_curcop, PL_copline);
-		    Perl_warner(aTHX_ WARN_REDEFINE,
+		    Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
 			CvCONST(cv) ? "Constant subroutine %s redefined"
 				    : "Subroutine %s redefined", name);
 		    CopLINE_set(PL_curcop, oldline);
@@ -5121,7 +5121,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 		PL_checkav = newAV();
 	    DEBUG_x( dump_sub(gv) );
 	    if (PL_main_start && ckWARN(WARN_VOID))
-		Perl_warner(aTHX_ WARN_VOID, "Too late to run CHECK block");
+		Perl_warner(aTHX_ packWARN(WARN_VOID), "Too late to run CHECK block");
 	    av_unshift(PL_checkav, 1);
 	    av_store(PL_checkav, 0, (SV*)cv);
 	    GvCV(gv) = 0;		/* cv has been hijacked */
@@ -5131,7 +5131,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 		PL_initav = newAV();
 	    DEBUG_x( dump_sub(gv) );
 	    if (PL_main_start && ckWARN(WARN_VOID))
-		Perl_warner(aTHX_ WARN_VOID, "Too late to run INIT block");
+		Perl_warner(aTHX_ packWARN(WARN_VOID), "Too late to run INIT block");
 	    av_push(PL_initav, (SV*)cv);
 	    GvCV(gv) = 0;		/* cv has been hijacked */
 	}
@@ -5212,7 +5212,7 @@ Perl_newXS(pTHX_ char *name, XSUBADDR_t subaddr, char *filename)
 		line_t oldline = CopLINE(PL_curcop);
 		if (PL_copline != NOLINE)
 		    CopLINE_set(PL_curcop, PL_copline);
-		Perl_warner(aTHX_ WARN_REDEFINE,
+		Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
 			    CvCONST(cv) ? "Constant subroutine %s redefined"
 					: "Subroutine %s redefined"
 			    ,name);
@@ -5272,7 +5272,7 @@ Perl_newXS(pTHX_ char *name, XSUBADDR_t subaddr, char *filename)
 	    if (!PL_checkav)
 		PL_checkav = newAV();
 	    if (PL_main_start && ckWARN(WARN_VOID))
-		Perl_warner(aTHX_ WARN_VOID, "Too late to run CHECK block");
+		Perl_warner(aTHX_ packWARN(WARN_VOID), "Too late to run CHECK block");
 	    av_unshift(PL_checkav, 1);
 	    av_store(PL_checkav, 0, (SV*)cv);
 	    GvCV(gv) = 0;		/* cv has been hijacked */
@@ -5281,7 +5281,7 @@ Perl_newXS(pTHX_ char *name, XSUBADDR_t subaddr, char *filename)
 	    if (!PL_initav)
 		PL_initav = newAV();
 	    if (PL_main_start && ckWARN(WARN_VOID))
-		Perl_warner(aTHX_ WARN_VOID, "Too late to run INIT block");
+		Perl_warner(aTHX_ packWARN(WARN_VOID), "Too late to run INIT block");
 	    av_push(PL_initav, (SV*)cv);
 	    GvCV(gv) = 0;		/* cv has been hijacked */
 	}
@@ -5318,7 +5318,7 @@ Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
 	    line_t oldline = CopLINE(PL_curcop);
 	    if (PL_copline != NOLINE)
 		CopLINE_set(PL_curcop, PL_copline);
-	    Perl_warner(aTHX_ WARN_REDEFINE, "Format %s redefined",name);
+	    Perl_warner(aTHX_ packWARN(WARN_REDEFINE), "Format %s redefined",name);
 	    CopLINE_set(PL_curcop, oldline);
 	}
 	SvREFCNT_dec(cv);
@@ -5389,7 +5389,7 @@ Perl_oopsAV(pTHX_ OP *o)
 
     default:
 	if (ckWARN_d(WARN_INTERNAL))
-	    Perl_warner(aTHX_ WARN_INTERNAL, "oops: oopsAV");
+	    Perl_warner(aTHX_ packWARN(WARN_INTERNAL), "oops: oopsAV");
 	break;
     }
     return o;
@@ -5414,7 +5414,7 @@ Perl_oopsHV(pTHX_ OP *o)
 
     default:
 	if (ckWARN_d(WARN_INTERNAL))
-	    Perl_warner(aTHX_ WARN_INTERNAL, "oops: oopsHV");
+	    Perl_warner(aTHX_ packWARN(WARN_INTERNAL), "oops: oopsHV");
 	break;
     }
     return o;
@@ -5429,8 +5429,8 @@ Perl_newAVREF(pTHX_ OP *o)
 	return o;
     }
     else if ((o->op_type == OP_RV2AV || o->op_type == OP_PADAV)
-		&& ckWARN2(WARN_DEPRECATED, WARN_SYNTAX)) {
-	Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
+		&& ckWARN(WARN_DEPRECATED)) {
+	Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
 		"Using an array as a reference is deprecated");
     }
     return newUNOP(OP_RV2AV, 0, scalar(o));
@@ -5453,8 +5453,8 @@ Perl_newHVREF(pTHX_ OP *o)
 	return o;
     }
     else if ((o->op_type == OP_RV2HV || o->op_type == OP_PADHV)
-		&& ckWARN2(WARN_DEPRECATED, WARN_SYNTAX)) {
-	Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
+		&& ckWARN(WARN_DEPRECATED)) {
+	Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
 		"Using a hash as a reference is deprecated");
     }
     return newUNOP(OP_RV2HV, 0, scalar(o));
@@ -5905,7 +5905,7 @@ Perl_ck_fun(pTHX_ OP *o)
 	    case OA_AVREF:
 		if ((type == OP_PUSH || type == OP_UNSHIFT)
 		    && !kid->op_sibling && ckWARN(WARN_SYNTAX))
-		    Perl_warner(aTHX_ WARN_SYNTAX,
+		    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
 			"Useless use of %s with no values",
 			PL_op_desc[type]);
 
@@ -6675,7 +6675,7 @@ Perl_ck_join(pTHX_ OP *o)
 	    char *pmstr = "STRING";
 	    if (PM_GETRE(kPMOP))
 		pmstr = PM_GETRE(kPMOP)->precomp;
-	    Perl_warner(aTHX_ WARN_SYNTAX,
+	    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
 			"/%s/ should probably be written as \"%s\"",
 			pmstr, pmstr);
 	}
@@ -7090,7 +7090,7 @@ Perl_peep(pTHX_ register OP *o)
 		    /* XXX could check prototype here instead of just carping */
 		    SV *sv = sv_newmortal();
 		    gv_efullname3(sv, gv, Nullch);
-		    Perl_warner(aTHX_ WARN_PROTOTYPE,
+		    Perl_warner(aTHX_ packWARN(WARN_PROTOTYPE),
 				"%s() called too early to check prototype",
 				SvPV_nolen(sv));
 		}
@@ -7159,9 +7159,9 @@ Perl_peep(pTHX_ register OP *o)
 		    line_t oldline = CopLINE(PL_curcop);
 
 		    CopLINE_set(PL_curcop, CopLINE((COP*)o->op_next));
-		    Perl_warner(aTHX_ WARN_EXEC,
+		    Perl_warner(aTHX_ packWARN(WARN_EXEC),
 				"Statement unlikely to be reached");
-		    Perl_warner(aTHX_ WARN_EXEC,
+		    Perl_warner(aTHX_ packWARN(WARN_EXEC),
 				"\t(Maybe you meant system() when you said exec()?)\n");
 		    CopLINE_set(PL_curcop, oldline);
 		}
