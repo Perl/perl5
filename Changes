@@ -28,6 +28,38 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 21315] By: jhi                                   on 2003/09/22  09:57:26
+        Log: Integrate:
+             [ 21311]
+             Some more perlio doc tweaks based on NI-S.
+     Branch: maint-5.8/perl
+	  !> pod/perliol.pod
+____________________________________________________________________________
+[ 21314] By: jhi                                   on 2003/09/22  09:34:25
+        Log: Punch the patchlevel back in for now.
+     Branch: maint-5.8/perl
+	   ! patchlevel.h
+____________________________________________________________________________
+[ 21313] By: jhi                                   on 2003/09/22  09:33:35
+        Log: Rephrase a bit.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 21312] By: jhi                                   on 2003/09/22  09:00:20
+        Log: Also :utf8 <INPUT> is now more careful.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 21310] By: jhi                                   on 2003/09/22  08:17:03
+        Log: Explain 5.6.1 in the scheme of things.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 21309] By: jhi                                   on 2003/09/22  07:52:53
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 21308] By: jhi                                   on 2003/09/22  07:10:32
         Log: Integrate:
              [ 21305]
