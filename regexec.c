@@ -599,9 +599,10 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	  find_anchor:
 	    while (t < strend - prog->minlen) {
 		if (*t == '\n') {
-		    if (t < s - prog->check_offset_min) {
+		    if (t < check_at - prog->check_offset_min) {
 			if (prog->anchored_substr) {
-			    /* We definitely contradict the found anchored
+			    /* Since we moved from the found position,
+			       we definitely contradict the found anchored
 			       substr.  Due to the above check we do not
 			       contradict "check" substr.
 			       Thus we can arrive here only if check substr
@@ -612,12 +613,17 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 				PL_colors[0],PL_colors[1], (long)(strpos - i_strpos), (long)(strpos - i_strpos + prog->anchored_offset)));
 			    goto do_other_anchored;
 			}
+			/* We don't contradict the found floating substring. */
+			/* XXXX Why not check for STCLASS? */
 			s = t + 1;
 			DEBUG_r(PerlIO_printf(Perl_debug_log, "Found /%s^%s/m at offset %ld...\n",
 			    PL_colors[0],PL_colors[1], (long)(s - i_strpos)));
 			goto set_useful;
 		    }
-		    DEBUG_r(PerlIO_printf(Perl_debug_log, "Found /%s^%s/m, restarting at offset %ld...\n",
+		    /* Position contradicts check-string */
+		    /* XXXX probably better to look for check-string
+		       than for "\n", so one should lower the limit for t? */
+		    DEBUG_r(PerlIO_printf(Perl_debug_log, "Found /%s^%s/m, restarting lookup for check-string at offset %ld...\n",
 			PL_colors[0],PL_colors[1], (long)(t + 1 - i_strpos)));
 		    strpos = s = t + 1;
 		    goto restart;
