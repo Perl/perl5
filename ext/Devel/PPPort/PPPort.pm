@@ -159,7 +159,7 @@ require DynaLoader;
 use strict;
 use vars qw( $VERSION @ISA @EXPORT @EXPORT_OK $data );
 
-$VERSION = "2.009";
+$VERSION = "2.010";
 
 @ISA = qw(Exporter DynaLoader);
 @EXPORT =  qw();
@@ -366,9 +366,10 @@ __DATA__
 
 #ifndef PERL_REVISION
 #   ifndef __PATCHLEVEL_H_INCLUDED__
+#       define PERL_PATCHLEVEL_H_IMPLICIT
 #       include <patchlevel.h>
 #   endif
-#   if !(defined(PERL_VERSION) || (SUBVERSION > 0 && defined(PATCHLEVEL)))
+#   if !(defined(PERL_VERSION) || (defined(SUBVERSION) && defined(PATCHLEVEL)))
 #       include <could_not_find_Perl_patchlevel.h>
 #   endif
 #   ifndef PERL_REVISION
