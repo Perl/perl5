@@ -922,6 +922,10 @@ sub maybe_local {
     if ($op->private & (OPpLVAL_INTRO|$our_intro)
 	and not $self->{'avoid_local'}{$$op}) {
 	my $our_local = ($op->private & OPpLVAL_INTRO) ? "local" : "our";
+	if( $our_local eq 'our' ) {
+	    die "Unexpected our($text)\n" unless $text =~ /^\W(\w+::)*\w+\z/;
+	    $text =~ s/(\w+::)+//; 
+	}
         if (want_scalar($op)) {
 	    return "$our_local $text";
 	} else {
