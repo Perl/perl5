@@ -25,7 +25,6 @@ use File::Compare;
 use File::Copy ();
 use File::Path ();
 use ExtUtils::Packlist;
-use Config;
 use subs qw(unlink link chmod);
 use vars qw($packlist);
 
@@ -75,7 +74,7 @@ my %archpms = (
     Config => 1, 
 );
 
-if ($^O eq 'dos') {
+if ($osname eq 'dos') {
     push(@scripts,'djgpp/fixpmain');
     $archpms{config} = $archpms{filehand} = 1;
 }
@@ -86,11 +85,27 @@ if ((-e "testcompile") && (defined($ENV{'COMPILE'})))
 }
 
 find(sub {
-	if ("$File::Find::dir/$_" =~ m{^ext/[^/]+/(.*)\.pm$}) {
-	    (my $pm = $1) =~ s{^lib/}{};
-	    $archpms{$pm} = 1;
+	if ("$File::Find::dir/$_" =~ m{^ext\b(.*)/([^/]+)\.pm$}) {
+	    my($path, $modname) = ($1,$2);
+
+	    # strip trailing component first
+	    $path =~ s{/[^/]*$}{};
+
+	    # strip optional "/lib";
+	    $path =~ s{/lib\b}{};
+
+	    # strip any leading /
+	    $path =~ s{^/}{};
+
+	    # reconstitute canonical module name
+	    $modname = "$path/$modname" if length $path;
+
+	    # remember it
+	    $archpms{$modname} = 1;
 	}
     }, 'ext');
+
+# print "[$_]\n" for sort keys %archpms;
 
 my $ver = $Config{version};
 my $release = substr($],0,3);   # Not used presently.
@@ -184,7 +199,7 @@ if ($Is_VMS) {
     copy("perlshr$exe_ext", "$installbin/${perl}shr$exe_ext");
     chmod(0755, "$installbin/${perl}shr$exe_ext");
 }
-elsif ($^O eq 'mpeix') {
+elsif ($osname eq 'mpeix') {
     # MPE lacks hard links and requires that executables with special
     # capabilities reside in the MPE namespace.
     safe_unlink("$installbin/perl$ver$exe_ext", $Config{perlpath});
@@ -247,8 +262,8 @@ else {
     @corefiles = <*.h libperl*.*>;
 
     # AIX needs perl.exp installed as well.
-    push(@corefiles,'perl.exp') if $^O eq 'aix';
-    if ($^O eq 'mpeix') {
+    push(@corefiles,'perl.exp') if $osname eq 'aix';
+    if ($osname eq 'mpeix') {
         # MPE needs mpeixish.h installed as well.
         mkpath("$installarchlib/CORE/mpeix", 1, 0777);
         push(@corefiles,'mpeix/mpeixish.h');
@@ -359,8 +374,9 @@ if (! $versiononly) {
 
 if (! $versiononly) {
     safe_unlink("$installscript/pstruct$scr_ext");
-    if ($^O eq 'dos' or $Is_VMS) {
+    if ($osname eq 'dos' or $Is_VMS or $osname eq 'transit') {
         copy("$installscript/c2ph$scr_ext", "$installscript/pstruct$scr_ext"); 
+	chmod(0755, "$installscript/pstruct$scr_ext");
     } else {
         link("$installscript/c2ph$scr_ext", "$installscript/pstruct$scr_ext");
     }
