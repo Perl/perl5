@@ -10,11 +10,13 @@ BEGIN {
 
 use Config;
 
-# Make sure when we run `perl` we get this perl
-$ENV{'PATH'} = '.' . $Config{'path_sep'} . $ENV{'PATH'};
-
 use Test::More tests => 5;
 use File::Spec;
+
+# Change 'perl' to './perl' so the shell doesn't go looking through PATH.
+sub safe_rel {
+    return File::Spec->catfile(File::Spec->curdir, $_[0]);
+}
 
 # Here we make sure File::Spec can properly deal with executables.
 # VMS has some trouble with these.
@@ -25,7 +27,7 @@ is( `$perl -le "print 'ok'"`, "ok\n",   'rel2abs($^X)' );
 $perl = File::Spec->canonpath($perl);
 is( `$perl -le "print 'ok'"`, "ok\n",   'canonpath on abs executable' );
 
-$perl = File::Spec->abs2rel($perl);
+$perl = safe_rel($perl);
 is( `$perl -le "print 'ok'"`, "ok\n",   'abs2rel()' );
 
 $perl = File::Spec->canonpath($^X);
