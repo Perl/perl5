@@ -774,6 +774,7 @@ const char * db_errpfx;
 char * buffer;
 #endif
 {
+    dTHX;
     SV * sv = perl_get_sv(ERR_BUFF, FALSE) ;
     if (sv) {
         if (db_errpfx)
@@ -1455,6 +1456,7 @@ INCLUDE: constants.xs
 
 BOOT:
   {
+    dTHX;
     SV * sv_err = perl_get_sv(ERR_BUFF, GV_ADD|GV_ADDMULTI) ;    
     MY_CXT_INIT;
     __getBerkeleyDBInfo() ;
