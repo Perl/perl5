@@ -32,7 +32,8 @@ $a =~ s/-u(PerlIO|open)(?:::\w+)?,//g if defined $Config{'useperlio'} and $Confi
 $a =~ s/-uWin32,// if $^O eq 'MSWin32';
 $a =~ s/-u(Cwd|File|File::Copy|OS2),//g if $^O eq 'os2';
 $a =~ s/-uCwd,// if $^O eq 'cygwin';
-if ($Config{static_ext} eq ' ') {
+if ($Config{static_ext} eq ' ' ||
+    $Config{static_ext} eq 'DynaLoader') {
   $b = '-uCarp,-uCarp::Heavy,-uDB,-uExporter,-uExporter::Heavy,-uattributes,'
      . '-umain,-ustrict,-uutf8,-uwarnings';
   if (ord('A') == 193) { # EBCDIC sort order is qw(a A) not qw(A a)
