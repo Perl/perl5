@@ -1235,7 +1235,10 @@ PP(pp_match)
 	pm = PL_curpm;
 	rx = PM_GETRE(pm);
     }
-    if (rx->minlen > len) goto failure;
+    if (rx->minlen > len &&
+	!PL_reg_match_utf8 /* ANYOFs can balloon to EXACTFs */
+	)
+      goto failure;
 
     truebase = t = s;
 

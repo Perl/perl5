@@ -1663,7 +1663,8 @@ Perl_utf8n_to_uvchr(pTHX_ U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 Build to the scalar dsv a displayable version of the string spv,
 length len, the displayable version being at most pvlim bytes long
 (if longer, the rest is truncated and "..." will be appended).
-The flags argument is currently unused but available for future extensions.
+The flags argument can have UNI_DISPLAY_ISPRINT set to display
+isprint() characters as themselves.
 The pointer to the PV of the dsv is returned.
 
 =cut */
@@ -1681,7 +1682,10 @@ Perl_pv_uni_display(pTHX_ SV *dsv, U8 *spv, STRLEN len, STRLEN pvlim, UV flags)
 	      break;
 	 }
 	 u = utf8_to_uvchr((U8*)s, 0);
-	 Perl_sv_catpvf(aTHX_ dsv, "\\x{%"UVxf"}", u);
+	 if ((flags & UNI_DISPLAY_ISPRINT) && u < 256 && isprint(u))
+	     Perl_sv_catpvf(aTHX_ dsv, "%c", u);
+	 else
+	     Perl_sv_catpvf(aTHX_ dsv, "\\x{%"UVxf"}", u);
     }
     if (truncated)
 	 sv_catpvn(dsv, "...", 3);
