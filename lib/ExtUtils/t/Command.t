@@ -31,14 +31,11 @@ BEGIN {
 }
 
 {
-    # get a file in the MM test directory, replace last char with wildcard 
+    # get a file in the current directory, replace last char with wildcard 
     my $file;
     {
         local *DIR;
-        my $mmtestdir = $ENV{PERL_CORE}
-          ? File::Spec->catdir(File::Spec->updir, 'lib', 'ExtUtils', 't')
-          : File::Spec->curdir;
-        opendir(DIR, $mmtestdir);
+        opendir(DIR, File::Spec->curdir());
         while ($file = readdir(DIR)) {
             $file =~ s/\.\z// if $^O eq 'VMS';
             last if $file =~ /^\w/;
