@@ -372,7 +372,7 @@ announcements, contests, and much more.  I<TPJ> has columns on web
 development, databases, Win32 Perl, graphical programming, regular
 expressions, and networking, and sponsors the Obfuscated Perl Contest
 and the Perl Poetry Contests.  As of mid-2001, the dead tree version
-of TPJ will be published as a quarterly supplement of the SysAdmin
+of TPJ will be published as a quarterly supplement of SysAdmin
 magazine ( http://www.sysadmin.com/ ) For more details on TPJ,
 see http://www.tpj.com/
 
