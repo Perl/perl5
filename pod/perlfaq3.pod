@@ -146,10 +146,8 @@ Here's a sample use of Benchmark:
   timethese($count, {
             'map' => sub { my @a = @junk;
 			   map { s/a/b/ } @a;
-			   return @a
-			 },
+			   return @a },
             'for' => sub { my @a = @junk;
-			   local $_;
 			   for (@a) { s/a/b/ };
 			   return @a },
            });
