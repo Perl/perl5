@@ -4087,7 +4087,7 @@ PerlIO_apply_layers(f,mode,layers), PerlIO_binmode(f,ptype,imode,layers),
 
 =item Eliminate need for "use utf8";
 
-=item Create a char *sv_printify(sv, STRLEN *lenp, UV flags) function
+=item Create a char *sv_printify(sv, STRLEN *lenp, UV flags)
 
 =item Autoload byte.pm
 
@@ -7340,7 +7340,7 @@ warnings::warnif($object, $message)
 
 =item DESCRIPTION
 
-[0], [1], [2], [3], [4]
+[0], [1], [2], [3], [4], [5]
 
 =over 4
 
@@ -7350,6 +7350,8 @@ warnings::warnif($object, $message)
 
 =item Non-interpretive attribute handlers
 
+=item Phase-specific attribute handlers
+
 =item Attributes as C<tie> interfaces
 
 =back
@@ -7357,6 +7359,11 @@ warnings::warnif($object, $message)
 =item EXAMPLES
 
 =item DIAGNOSTICS
+
+C<Bad attribute type: ATTR(%s)>, C<Attribute handler %s doesn't handle %s
+attributes>, C<Declaration of %s attribute in package %s may clash with
+future reserved word>, C<Can't have two ATTR specifiers on one subroutine>,
+C<Can't autotie a %s>, C<Internal error: %s symbol went missing>
 
 =item AUTHOR
 
@@ -12511,6 +12518,8 @@ C<MEMORY>, C<HASH>, C<TIE>, C<FAULT>, C<MERGE>
 
 =item AUTHOR
 
+=item COPYRIGHT AND LICENSE
+
 =item THANK YOU
 
 =back
@@ -15088,6 +15097,111 @@ C<HARNESS_ACTIVE>
 =item TODO
 
 =item BUGS
+
+=back
+
+=head2 Test::More - yet another framework for writing test scripts
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item I love it when a plan comes together
+
+=item Test names
+
+=item I'm ok, you're not ok.
+
+B<ok>
+
+=back
+
+=back
+
+B<is>, B<isnt>
+
+B<like>
+
+B<pass>, B<fail>
+
+=over 4
+
+=item Module tests
+
+B<use_ok>, B<require_ok>
+
+=back
+
+=over 4
+
+=item Conditional tests
+
+B<skip>   * UNIMPLEMENTED *
+
+=back
+
+B<todo>  * UNIMPLEMENTED *
+
+=over 4
+
+=item Comparision functions
+
+B<eq_array>
+
+=back
+
+B<eq_hash>
+
+B<eq_set>
+
+=over 4
+
+=item BUGS and CAVEATS
+
+=item AUTHOR
+
+=item HISTORY
+
+=item SEE ALSO
+
+=back
+
+=head2 Test::Simple - Basic utilities for writing tests.
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+B<ok>
+
+=back
+
+B<_sanity_check>
+
+B<_whoa>
+
+B<_my_exit>
+
+=over 4
+
+=item EXAMPLE
+
+=item CAVEATS
+
+=item HISTORY
+
+=item AUTHOR
+
+=item SEE ALSO
+
+L<Test::More>, L<Test>, L<Test::Unit>, L<Pod::Tests>, L<SelfTest>,
+L<Test::Harness>
 
 =back
 

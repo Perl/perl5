@@ -870,6 +870,14 @@ Provides a simple framework for writing test scripts
 
 Run perl standard test scripts with statistics
 
+=item Test::More
+
+Yet another framework for writing test scripts
+
+=item Test::Simple
+
+Basic utilities for writing tests.
+
 =item Text::Abbrev
 
 Create an abbreviation table from a list
@@ -893,6 +901,26 @@ Expand and unexpand tabs per the unix expand(1) and unexpand(1)
 =item Text::Wrap
 
 Line wrapping to form simple paragraphs
+
+=item Thread
+
+Manipulate threads in Perl (EXPERIMENTAL, subject to change)
+
+=item Thread::Queue
+
+Thread-safe queues
+
+=item Thread::Semaphore
+
+Thread-safe semaphores
+
+=item Thread::Signal
+
+Start a thread which runs signal handlers reliably
+
+=item Thread::Specific
+
+Thread-specific keys
 
 =item Tie::Array
 
