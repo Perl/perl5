@@ -375,7 +375,9 @@ sub _ccharness
 
     my $libs = _getSharedObjects($sourceprog);
 
-    my $cccmd = "$Config{cc} $Config{ccflags} $optimize $incdir "
+    my $ccflags = $Config{ccflags};
+    $ccflags .= ' -DUSEIMPORTLIB' if $Config{osname} =~ /cygwin/i;
+    my $cccmd = "$Config{cc} $ccflags $optimize $incdir "
 		."@args $dynaloader $linkargs @$libs";
 
     _print ("$cccmd\n", 36);
@@ -467,7 +469,8 @@ sub _lookforAuto
     my ($relabs, $relshared);
     my ($prefix);
     my $return;
-    my $sharedextension=$^O eq 'MSWin32' ? '.lib':$Config{so};
+    my $sharedextension = $^O =~ /MSWin32|cygwin|os2/i
+			  ? $Config{_a} : ".$Config{so}";
     ($prefix = $file) =~ s"(.*)\.pm"$1";
 
     my ($tmp, $modname) = ($prefix =~ m"(?:(.*)[\\/]){0,1}(.*)"s);
