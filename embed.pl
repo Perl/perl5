@@ -1969,6 +1969,7 @@ s	|char*|regcp_set_to	|I32 ss
 s	|void	|cache_re	|regexp *prog
 s	|U8*	|reghop		|U8 *pos|I32 off
 s	|U8*	|reghopmaybe	|U8 *pos|I32 off
+s	|char*	|find_byclass	|regexp * prog|regnode *c|char *s|char *strend|char *startpos|I32 norun
 #endif
 
 #if defined(PERL_IN_RUN_C) || defined(PERL_DECL_PROT)
