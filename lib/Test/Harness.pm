@@ -140,12 +140,12 @@ sub runtests {
 		    $bonus++, $totbonus++ if $todo{$this};
 		}
 		if ($this > $next) {
-		    # warn "Test output counter mismatch [test $this]\n";
+		    # print "Test output counter mismatch [test $this]\n";
 		    # no need to warn probably
 		    push @failed, $next..$this-1;
 		} elsif ($this < $next) {
 		    #we have seen more "ok" lines than the number suggests
-		    warn "Confused test output: test $this answered after test ", $next-1, "\n";
+		    print "Confused test output: test $this answered after test ", $next-1, "\n";
 		    $next = $this;
 		}
 		$next = $this + 1;
