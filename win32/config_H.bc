@@ -352,7 +352,7 @@
  *	This symbol, if defined, indicates that the getlogin routine is
  *	available to get the login name.
  */
-/*#define HAS_GETLOGIN		/**/
+#define HAS_GETLOGIN		/**/
 
 /* HAS_GETPGRP2:
  *	This symbol, if defined, indicates that the getpgrp2() (as in DG/UX)

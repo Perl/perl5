@@ -55,6 +55,26 @@ char  szShellPath[MAX_PATH+1];
 char  szPerlLibRoot[MAX_PATH+1];
 HANDLE PerlDllHandle = INVALID_HANDLE_VALUE;
 
+#ifdef USE_THREADS
+#  ifdef USE_DECLSPEC_THREAD
+__declspec(thread) char	strerror_buffer[512];
+__declspec(thread) char	getlogin_buffer[128];
+#    ifdef HAVE_DES_FCRYPT
+__declspec(thread) char	crypt_buffer[30];
+#    endif
+#  else
+#    define strerror_buffer	(thr->i.Wstrerror_buffer)
+#    define getlogin_buffer	(thr->i.Wgetlogin_buffer)
+#    define crypt_buffer	(thr->i.Wcrypt_buffer)
+#  endif
+#else
+char	strerror_buffer[512];
+char	getlogin_buffer[128];
+#  ifdef HAVE_DES_FCRYPT
+char	crypt_buffer[30];
+#  endif
+#endif
+
 static int do_spawn2(char *cmd, int exectype);
 
 int 
@@ -239,9 +259,9 @@ do_aspawn(void* really, void ** mark, void ** arglast)
     if (status < 0) {
 	if (dowarn)
 	    warn("Can't spawn \"%s\": %s", cmd, strerror(errno));
-	status = 255 << 8;
+	status = 255;
     }
-    return (status);
+    return (statusvalue = status*256);
 }
 
 int
@@ -321,9 +341,9 @@ do_spawn2(char *cmd, int exectype)
 		 (exectype == EXECF_EXEC ? "exec" : "spawn"),
 		 needToTry ? shell : argv[0],
 		 strerror(errno));
-	status = 255 << 8;
+	status = 255;
     }
-    return (status);
+    return (statusvalue = status*256);
 }
 
 int
@@ -556,6 +576,17 @@ setgid(gid_t agid)
     return (agid == ROOT_GID ? 0 : -1);
 }
 
+char *
+getlogin(void)
+{
+    dTHR;
+    char *buf = getlogin_buffer;
+    DWORD size = sizeof(getlogin_buffer);
+    if (GetUserName(buf,&size))
+	return buf;
+    return (char*)NULL;
+}
+
 /*
  * pretended kill
  */
@@ -578,15 +609,6 @@ kill(int pid, int sig)
 /*
  * File system stuff
  */
-
-#if 0
-int
-ioctl(int i, unsigned int u, char *data)
-{
-    croak("ioctl not implemented!\n");
-    return -1;
-}
-#endif
 
 DllExport unsigned int
 win32_sleep(unsigned int t)
@@ -732,6 +754,17 @@ win32_alarm(unsigned int sec)
      }
     return 0;
 }
+
+#ifdef HAVE_DES_FCRYPT
+extern char *	des_fcrypt(char *cbuf, const char *txt, const char *salt);
+
+DllExport char *
+win32_crypt(const char *txt, const char *salt)
+{
+    dTHR;
+    return des_fcrypt(crypt_buffer, txt, salt);
+}
+#endif
 
 #ifdef USE_FIXED_OSFHANDLE
 
@@ -935,16 +968,6 @@ win32_feof(FILE *fp)
  * WSAGetLastError() are not known by the library routine strerror
  * we have to roll our own.
  */
-
-#ifdef USE_THREADS
-#ifdef USE_DECLSPEC_THREAD
-__declspec(thread) char	strerror_buffer[512];
-#else
-#define strerror_buffer (thr->i.Wstrerror_buffer)
-#endif
-#else
-char	strerror_buffer[512];
-#endif
 
 DllExport char *
 win32_strerror(int e) 
@@ -1506,8 +1529,8 @@ static
 XS(w32_LoginName)
 {
     dXSARGS;
-    char name[256];
-    DWORD size = sizeof(name);
+    char *name = getlogin_buffer;
+    DWORD size = sizeof(getlogin_buffer);
     if (GetUserName(name,&size)) {
 	/* size includes NULL */
 	ST(0) = sv_2mortal(newSVpv(name,size-1));

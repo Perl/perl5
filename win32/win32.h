@@ -149,6 +149,7 @@ extern  int	setuid(uid_t uid);
 extern  int	setgid(gid_t gid);
 extern  int	kill(int pid, int sig);
 extern  void	*sbrk(int need);
+extern	char *	getlogin(void);
 
 #undef	 Stat
 #define  Stat		win32_stat
@@ -205,15 +206,19 @@ EXT void win32_strip_return(struct sv *sv);
  */
 
 #ifdef USE_THREADS
-#ifndef USE_DECLSPEC_THREAD
-#define HAVE_THREAD_INTERN
+#  ifndef USE_DECLSPEC_THREAD
+#    define HAVE_THREAD_INTERN
 
-struct thread_intern
-{
- char		Wstrerror_buffer[512];
- struct servent Wservent;
+struct thread_intern {
+    /* XXX can probably use one buffer instead of several */
+    char		Wstrerror_buffer[512];
+    struct servent	Wservent;
+    char		Wgetlogin_buffer[128];
+#    ifdef HAVE_DES_FCRYPT
+    char		Wcrypt_buffer[30];
+#    endif
 };
-#endif
-#endif
+#  endif /* !USE_DECLSPEC_THREAD */
+#endif /* USE_THREADS */
 
 #endif /* _INC_WIN32_PERL5 */

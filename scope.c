@@ -658,12 +658,12 @@ leave_scope(I32 base)
 	    }
 	    else {	/* Someone has a claim on this, so abandon it. */
 		U32 padflags = SvFLAGS(sv) & (SVs_PADBUSY|SVs_PADMY|SVs_PADTMP);
-		SvREFCNT_dec(sv);	/* Cast current value to the winds. */
 		switch (SvTYPE(sv)) {	/* Console ourselves with a new value */
 		case SVt_PVAV:	*(SV**)ptr = (SV*)newAV();	break;
 		case SVt_PVHV:	*(SV**)ptr = (SV*)newHV();	break;
 		default:	*(SV**)ptr = NEWSV(0,0);	break;
 		}
+		SvREFCNT_dec(sv);	/* Cast current value to the winds. */
 		SvFLAGS(*(SV**)ptr) |= padflags; /* preserve pad nature */
 	    }
 	    break;

@@ -169,6 +169,23 @@ also return the undefined value if a subroutine's return value will
 not be used at all, which allows subroutines to avoid a time-consuming
 calculation of a return value if it isn't going to be used.
 
+=head2 C<eval EXPR> determines value of EXPR in scalar context
+
+Perl (version 5) used to determine the value of EXPR inconsistently,
+sometimes incorrectly using the surrounding context for the determination.
+Now, the value of EXPR (before being parsed by eval) is always determined in
+a scalar context.  Once parsed, it is executed as before, by providing
+the context that the scope surrounding the eval provided.  This change
+makes the behavior Perl4 compatible, besides fixing bugs resulting from
+the inconsistent behavior.  This program:
+
+    @a = qw(time now is time);
+    print eval @a;
+    print '|', scalar eval @a;
+
+used to print something like "timenowis881399109|4", but now (and in perl4)
+prints "4|4".
+
 =head2 Changes to tainting checks
 
 A bug in previous versions may have failed to detect some insecure

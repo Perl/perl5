@@ -36,6 +36,16 @@ CCTYPE		*= BORLAND
 #CFG		*= Debug
 
 #
+# if you have the source for des_fcrypt(), uncomment this and make sure the
+# file exists (see README.win32)
+#CRYPT_SRC	*= des_fcrypt.c
+
+#
+# if you didn't set CRYPT_SRC and if you have des_fcrypt() available in a
+# library, uncomment this, and make sure the library exists (see README.win32)
+#CRYPT_LIB	*= des_fcrypt.lib
+
+#
 # set the install locations of the compiler include/libraries
 #CCHOME		*= f:\msdev\vc
 CCHOME		*= C:\bc5
@@ -54,6 +64,13 @@ CCLIBDIR	*= $(CCHOME)\lib
 #EMAIL *= 
 
 ##################### CHANGE THESE ONLY IF YOU MUST #####################
+
+.IF "$(CRYPT_SRC)$(CRYPT_LIB)" == ""
+D_CRYPT=undef
+.ELSE
+D_CRYPT=define
+CRYPT_FLAG=-DHAVE_DES_FCRYPT
+.ENDIF
 
 #
 # Programs to compile, build .lib files and link
@@ -74,11 +91,11 @@ IMPLIB = implib -c
 RUNTIME  = -D_RTLDLL
 INCLUDES = -I.\include -I. -I.. -I$(CCINCDIR)
 #PCHFLAGS = -H -H$(INTDIR)\bcmoduls.pch 
-DEFINES  = -DWIN32 $(BUILDOPT) 
+DEFINES  = -DWIN32 $(BUILDOPT) $(CRYPT_FLAG)
 LOCDEFS  = -DPERLDLL -DPERL_CORE
 SUBSYS   = console
 LIBC = cw32mti.lib
-LIBFILES = import32.lib $(LIBC) odbc32.lib odbccp32.lib
+LIBFILES = $(CRYPT_LIB) import32.lib $(LIBC) odbc32.lib odbccp32.lib
 
 WINIOMAYBE =
 
@@ -109,11 +126,11 @@ o = .o
 #
 RUNTIME  =
 INCLUDES = -I.\include -I. -I..
-DEFINES  = -DWIN32 $(BUILDOPT) 
+DEFINES  = -DWIN32 $(BUILDOPT) $(CRYPT_FLAG)
 LOCDEFS  = -DPERLDLL -DPERL_CORE
 SUBSYS   = console
 LIBC	 = -lcrtdll
-LIBFILES = -ladvapi32 -luser32 -lwsock32 -lmingw32 -lgcc -lmoldname $(LIBC) \
+LIBFILES = $(CRYPT_LIB) -ladvapi32 -luser32 -lwsock32 -lmingw32 -lgcc -lmoldname $(LIBC) \
 		-lkernel32
 
 WINIOMAYBE =
@@ -144,7 +161,7 @@ RUNTIME  = -MD
 .ENDIF
 INCLUDES = -I.\include -I. -I..
 #PCHFLAGS = -Fp$(INTDIR)\vcmoduls.pch -YX 
-DEFINES  = -DWIN32 -D_CONSOLE $(BUILDOPT)
+DEFINES  = -DWIN32 -D_CONSOLE $(BUILDOPT) $(CRYPT_FLAG)
 LOCDEFS  = -DPERLDLL -DPERL_CORE
 SUBSYS   = console
 
@@ -177,7 +194,7 @@ LINK_DBG = -release
 PROCESSOR_ARCHITECTURE *= x86
 
 # we don't add LIBC here, the compiler do it based on -MD/-MT
-LIBFILES = oldnames.lib kernel32.lib user32.lib gdi32.lib \
+LIBFILES = $(CRYPT_LIB) oldnames.lib kernel32.lib user32.lib gdi32.lib \
 	winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib \
 	oleaut32.lib netapi32.lib uuid.lib wsock32.lib mpr.lib winmm.lib \
 	version.lib odbc32.lib odbccp32.lib
@@ -261,6 +278,10 @@ XCOPY=xcopy /f /r /i /d
 RCOPY=xcopy /f /r /i /e /d
 #NULL=
 
+.IF "$(CRYPT_SRC)" != ""
+CRYPT_OBJ=$(CRYPT_SRC:db:+$(o))
+.ENDIF
+
 #
 # filenames given to xsubpp must have forward slashes (since it puts
 # full pathnames in #line strings)
@@ -292,7 +313,8 @@ CORE_C=	..\av.c		\
 	..\toke.c	\
 	..\universal.c	\
 	..\util.c	\
-	..\malloc.c
+	..\malloc.c	\
+	$(CRYPT_SRC)
 
 CORE_OBJ= ..\av$(o)	\
 	..\deb$(o)	\
@@ -320,7 +342,8 @@ CORE_OBJ= ..\av$(o)	\
 	..\toke$(o)	\
 	..\universal$(o)\
 	..\util$(o)	\
-	..\malloc$(o)
+	..\malloc$(o)	\
+	$(CRYPT_OBJ)
 
 WIN32_C = perllib.c \
 	win32.c \
@@ -333,7 +356,8 @@ WIN32_OBJ = win32$(o) \
 
 PERL95_OBJ = perl95$(o) \
 	win32mt$(o) \
-	win32sckmt$(o)
+	win32sckmt$(o) \
+	$(CRYPT_OBJ)
 
 DLL_OBJ = perllib$(o) $(DYNALOADER)$(o)
 
@@ -452,6 +476,7 @@ config.w32 : $(CFGSH_TMPL)
 	    "cc=$(CC)"				\
 	    "ccflags=$(OPTIMIZE) $(DEFINES)"	\
 	    "cf_email=$(EMAIL)"			\
+	    "d_crypt=$(D_CRYPT)"		\
 	    "libs=$(LIBFILES:f)"		\
 	    "incpath=$(CCINCDIR)"		\
 	    "libpth=$(strip $(CCLIBDIR) $(LIBFILES:d))" \

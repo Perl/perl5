@@ -1299,19 +1299,21 @@ END_EXTERN_C
 #endif
 
 #ifndef __cplusplus
-#ifdef __NeXT__ /* or whatever catches all NeXTs */
+#  ifdef __NeXT__ /* or whatever catches all NeXTs */
 char *crypt ();       /* Maybe more hosts will need the unprototyped version */
-#else
+#  else
+#    if !defined(WIN32) || !defined(HAVE_DES_FCRYPT)
 char *crypt _((const char*, const char*));
-#endif
-#ifndef DONT_DECLARE_STD
-#ifndef getenv
+#    endif /* !WIN32 && !HAVE_CRYPT_SOURCE */
+#  endif /* !__NeXT__ */
+#  ifndef DONT_DECLARE_STD
+#    ifndef getenv
 char *getenv _((const char*));
-#endif
+#    endif /* !getenv */
 Off_t lseek _((int,Off_t,int));
-#endif
+#  endif /* !DONT_DECLARE_STD */
 char *getlogin _((void));
-#endif
+#endif /* !__cplusplus */
 
 #ifdef UNLINK_ALL_VERSIONS /* Currently only makes sense for VMS */
 #define UNLINK unlnk

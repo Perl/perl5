@@ -46,6 +46,7 @@
 #define TMPPATH "plXXXXXX"
 
 #ifdef WIN32
+#define HAS_IOCTL
 #define HAS_UTIME
 #define HAS_KILL
 #endif
