@@ -4,7 +4,7 @@
 # the format supported by op/regexp.t.  If you want to add a test
 # that does fit that format, add it to op/re_tests, not here.
 
-print "1..184\n";
+print "1..185\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -840,6 +840,12 @@ $test++;
 pos($foo)=5;
 $foo=~/\G(..)/g;
 print "not " unless($1  eq 'cd');
+print "ok $test\n";
+$test++;
+
+$_='123x123'; 
+@res = /(\d*|x)/g;
+print "not " unless('123||x|123|' eq join '|', @res);
 print "ok $test\n";
 $test++;
 

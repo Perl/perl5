@@ -844,6 +844,7 @@ PP(pp_match)
     I32 minmatch = 0;
     I32 oldsave = PL_savestack_ix;
     I32 update_minmatch = 1;
+    I32 had_zerolen = 0;
 
     if (PL_op->op_flags & OPf_STACKED)
 	TARG = POPs;
@@ -907,7 +908,7 @@ play_it_again:
 	if ((s + rx->minlen) > strend)
 	    goto nope;
 	if (update_minmatch++)
-	    minmatch = (s == rx->startp[0]);
+	    minmatch = had_zerolen;
     }
     if (rx->check_substr) {
 	if (!(rx->reganch & ROPT_NOSCAN)) { /* Floating checkstring. */
@@ -993,8 +994,7 @@ play_it_again:
 	if (global) {
 	    truebase = rx->subbeg;
 	    strend = rx->subend;
-	    if (rx->startp[0] && rx->startp[0] == rx->endp[0])
-		++rx->endp[0];
+	    had_zerolen = (rx->startp[0] && rx->startp[0] == rx->endp[0]);
 	    PUTBACK;			/* EVAL blocks may use stack */
 	    r_flags |= REXEC_IGNOREPOS;
 	    goto play_it_again;
