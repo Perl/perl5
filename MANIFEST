@@ -489,6 +489,7 @@ ext/POSIX/POSIX.pod		POSIX extension documentation
 ext/POSIX/POSIX.xs		POSIX extension external subroutines
 ext/POSIX/t/posix.t		See if POSIX works
 ext/POSIX/t/sigaction.t		See if POSIX::sigaction works
+ext/POSIX/t/waitpid.t		See if waitpid works
 ext/POSIX/typemap		POSIX extension interface types
 ext/re/hints/mpeix.pl		Hints for re for named architecture
 ext/re/Makefile.PL		re extension makefile writer
