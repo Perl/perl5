@@ -651,6 +651,11 @@ If you're getting this error from a here-document, you may have included
 unseen whitespace before or after your closing tag. A good programmer's
 editor will have a way to help you find these characters.
 
+=item Can't find %s property definition %s 
+
+(F) You may have tried to use \p which means a Unicode property
+for example \p{Lu} is all uppercase letters.
+
 =item Can't fork
 
 (F) A fatal error occurred while trying to fork while opening a
