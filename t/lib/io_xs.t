@@ -21,10 +21,22 @@ BEGIN {
 use IO::File;
 use IO::Seekable;
 
-print "1..2\n";
-use IO::File;
+print "1..4\n";
+
 $x = new_tmpfile IO::File or print "not ";
 print "ok 1\n";
 print $x "ok 2\n";
 $x->seek(0,SEEK_SET);
 print <$x>;
+
+$x->seek(0,SEEK_SET);
+print $x "not ok 3\n";
+$p = $x->getpos;
+print $x "ok 3\n";
+$x->flush;
+$x->setpos($p);
+print scalar <$x>;
+
+$! = 0;
+$x->setpos(undef);
+print $! ? "ok 4 # $!\n" : "not ok 4\n";

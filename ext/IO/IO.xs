@@ -106,11 +106,12 @@ fsetpos(handle, pos)
 	InputStream	handle
 	SV *		pos
     CODE:
-	if (handle)
+	char *p;
+	if (handle && (p = SvPVx(pos, na)) && na == sizeof(Fpos_t))
 #ifdef PerlIO
-	    RETVAL = PerlIO_setpos(handle, (Fpos_t*)SvPVX(pos));
+	    RETVAL = PerlIO_setpos(handle, (Fpos_t*)p);
 #else
-	    RETVAL = fsetpos(handle, (Fpos_t*)SvPVX(pos));
+	    RETVAL = fsetpos(handle, (Fpos_t*)p);
 #endif
 	else {
 	    RETVAL = -1;
