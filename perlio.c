@@ -2872,19 +2872,26 @@ PerlIOBuf_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 	f = (*tab->Open) (aTHX_ tab, layers, n - 1, mode, fd, imode, perm,
 			  NULL, narg, args);
 	if (f) {
-	    PerlIO_push(aTHX_ f, self, mode, PerlIOArg);
-	    fd = PerlIO_fileno(f);
-#if (O_BINARY != O_TEXT) && !defined(__BEOS__)
-	    /*
-	     * do something about failing setmode()? --jhi
-	     */
-	    PerlLIO_setmode(fd, O_BINARY);
-#endif
-	    if (init && fd == 2) {
+            if (PerlIO_push(aTHX_ f, self, mode, PerlIOArg) == 0) {
 		/*
-		 * Initial stderr is unbuffered
+		 * if push fails during open, open fails. close will pop us.
 		 */
-		PerlIOBase(f)->flags |= PERLIO_F_UNBUF;
+		PerlIO_close (f);
+		return NULL;
+	    } else {
+		fd = PerlIO_fileno(f);
+#if (O_BINARY != O_TEXT) && !defined(__BEOS__)
+		/*
+		 * do something about failing setmode()? --jhi
+		 */
+		PerlLIO_setmode(fd, O_BINARY);
+#endif
+		if (init && fd == 2) {
+		    /*
+		     * Initial stderr is unbuffered
+		     */
+		    PerlIOBase(f)->flags |= PERLIO_F_UNBUF;
+		}
 	    }
 	}
     }
