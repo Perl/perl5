@@ -894,7 +894,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	PerlIO_printf(file, "PVIO%s\n", s);
 	break;
     default:
-	PerlIO_printf(file, "UNKNOWN(0x%x) %s\n", type, s);
+	PerlIO_printf(file, "UNKNOWN(0x%"UVxf") %s\n", (UV)type, s);
 	return;
     }
     if (type >= SVt_PVIV || type == SVt_IV) {
