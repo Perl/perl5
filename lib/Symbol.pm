@@ -34,7 +34,7 @@ support anonymous globs, C<Symbol::ungensym> is also provided.
 But it doesn't do anything.
 
 C<Symbol::qualify> turns unqualified symbol names into qualified
-variable names (e.g. "myvar" -> "MyPackage::myvar").  If it is given a
+variable names (e.g. "myvar" -E<gt> "MyPackage::myvar").  If it is given a
 second parameter, C<qualify> uses it as the default package;
 otherwise, it uses the package of its caller.  Regardless, global
 variable names (e.g. "STDOUT", "ENV", "SIG") are always qualfied with
@@ -56,12 +56,7 @@ require Exporter;
 my $genpkg = "Symbol::";
 my $genseq = 0;
 
-my %global;
-while (<DATA>) {
-    chomp;
-    $global{$_} = 1;
-}
-close DATA;
+my %global = map {$_ => 1} qw(ARGV ARGVOUT ENV INC SIG STDERR STDIN STDOUT);
 
 sub gensym () {
     my $name = "GEN" . $genseq++;
@@ -88,13 +83,3 @@ sub qualify ($;$) {
 }
 
 1;
-
-__DATA__
-ARGV
-ARGVOUT
-ENV
-INC
-SIG
-STDERR
-STDIN
-STDOUT
