@@ -137,6 +137,10 @@ sub containspod {
      local *DIR;
      local($")="/";
      my(@p,$p,$cip);
+     $file =~ tr|\\|/| if $Is_MSWin32 or $^O eq 'os2';
+     if ( $Is_MSWin32 and $file =~ s|^(//[^/]+)/|| ) {	# UNC path?
+         push(@p,$1);
+     }
      foreach $p (split(/\//, $file)){
 	if (($Is_VMS or $Is_MSWin32 or $^O eq 'os2') and not scalar @p) {
 	    # VMSish filesystems don't begin at '/'
