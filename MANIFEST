@@ -168,6 +168,7 @@ ext/Devel/PPPort/soak		Test Harness to run Devel::PPPort other Perls
 ext/Devel/PPPort/t/test.t	See if Devel::PPPort works
 ext/Devel/PPPort/TODO		Devel::PPPort Todo
 ext/Digest/MD5/Changes		Digest::MD5 extension changes
+ext/Digest/MD5/hints/dec_osf.pl	Hints for named architecture
 ext/Digest/MD5/hints/irix_6.pl	Hints for named architecture
 ext/Digest/MD5/hints/MacOS.pl	Hints for named architecture
 ext/Digest/MD5/Makefile.PL	Digest::MD5 extension makefile writer
