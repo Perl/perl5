@@ -2388,12 +2388,14 @@ PerlIOStdio_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
     if (f) {
 	char *path = SvPV_nolen(*args);
 	PerlIOStdio *s = PerlIOSelf(f, PerlIOStdio);
-	FILE *stdio =
-	    PerlSIO_freopen(path, (mode = PerlIOStdio_mode(mode, tmode)),
+	FILE *stdio;
+	PerlIOUnix_refcnt_dec(fileno(s->stdio));
+	stdio = PerlSIO_freopen(path, (mode = PerlIOStdio_mode(mode, tmode)),
 			    s->stdio);
 	if (!s->stdio)
 	    return NULL;
 	s->stdio = stdio;
+	PerlIOUnix_refcnt_inc(fileno(s->stdio));
 	return f;
     }
     else {
@@ -2413,6 +2415,7 @@ PerlIOStdio_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 				    PerlIOArg),
 				   PerlIOStdio);
 		    s->stdio = stdio;
+		    PerlIOUnix_refcnt_inc(fileno(s->stdio));
 		}
 		return f;
 	    }
@@ -2447,12 +2450,67 @@ PerlIOStdio_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 			       (aTHX_(f = PerlIO_allocate(aTHX)), self,
 				mode, PerlIOArg), PerlIOStdio);
 		s->stdio = stdio;
+		PerlIOUnix_refcnt_inc(fileno(s->stdio));
 		return f;
 	    }
 	}
     }
     return NULL;
 }
+
+PerlIO *
+PerlIOStdio_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param)
+{
+    /* This assumes no layers underneath - which is what
+       happens, but is not how I remember it. NI-S 2001/10/16
+     */
+    int fd = PerlIO_fileno(o);
+    if (fd >= 0) {
+	char buf[8];
+	FILE *stdio = PerlSIO_fdopen(fd, PerlIO_modestr(o, buf));
+	if (stdio) {
+	    if ((f = PerlIOBase_dup(aTHX_ f, o, param))) {
+		PerlIOSelf(f, PerlIOStdio)->stdio = stdio;
+		PerlIOUnix_refcnt_inc(fd);
+	    }
+	    else {
+		PerlSIO_fclose(stdio);
+	    }
+	}
+	else {
+	    PerlLIO_close(fd);
+	    f = NULL;
+	}
+    }
+    return f;
+}
+
+IV
+PerlIOStdio_close(PerlIO *f)
+{
+    dSYS;
+#ifdef SOCKS5_VERSION_NAME
+    int optval;
+    Sock_size_t optlen = sizeof(int);
+#endif
+    FILE *stdio = PerlIOSelf(f, PerlIOStdio)->stdio;
+    if (PerlIOUnix_refcnt_dec(fileno(stdio)) > 0) {
+	return 0;
+    }
+    return (
+#ifdef SOCKS5_VERSION_NAME
+	       (getsockopt
+		(PerlIO_fileno(f), SOL_SOCKET, SO_TYPE, (void *) &optval,
+		 &optlen) <
+		0) ? PerlSIO_fclose(stdio) : close(PerlIO_fileno(f))
+#else
+	       PerlSIO_fclose(stdio)
+#endif
+	);
+
+}
+
+
 
 SSize_t
 PerlIOStdio_read(PerlIO *f, void *vbuf, Size_t count)
@@ -2516,28 +2574,6 @@ PerlIOStdio_tell(PerlIO *f)
     dSYS;
     FILE *stdio = PerlIOSelf(f, PerlIOStdio)->stdio;
     return PerlSIO_ftell(stdio);
-}
-
-IV
-PerlIOStdio_close(PerlIO *f)
-{
-    dSYS;
-#ifdef SOCKS5_VERSION_NAME
-    int optval;
-    Sock_size_t optlen = sizeof(int);
-#endif
-    FILE *stdio = PerlIOSelf(f, PerlIOStdio)->stdio;
-    return (
-#ifdef SOCKS5_VERSION_NAME
-	       (getsockopt
-		(PerlIO_fileno(f), SOL_SOCKET, SO_TYPE, (void *) &optval,
-		 &optlen) <
-		0) ? PerlSIO_fclose(stdio) : close(PerlIO_fileno(f))
-#else
-	       PerlSIO_fclose(stdio)
-#endif
-	);
-
 }
 
 IV
@@ -2694,32 +2730,6 @@ PerlIOStdio_set_ptrcnt(PerlIO *f, STDCHAR * ptr, SSize_t cnt)
 }
 
 #endif
-
-PerlIO *
-PerlIOStdio_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param)
-{
-    /* This assumes no layers underneath - which is what
-       happens, but is not how I remember it. NI-S 2001/10/16
-     */
-    int fd = PerlLIO_dup(PerlIO_fileno(o));
-    if (fd >= 0) {
-	char buf[8];
-	FILE *stdio = PerlSIO_fdopen(fd, PerlIO_modestr(o, buf));
-	if (stdio) {
-	    if ((f = PerlIOBase_dup(aTHX_ f, o, param))) {
-		PerlIOSelf(f, PerlIOStdio)->stdio = stdio;
-	    }
-	    else {
-		PerlSIO_fclose(stdio);
-	    }
-	}
-	else {
-	    PerlLIO_close(fd);
-	    f = NULL;
-	}
-    }
-    return f;
-}
 
 PerlIO_funcs PerlIO_stdio = {
     "stdio",
