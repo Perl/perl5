@@ -9784,6 +9784,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_e_script		= sv_dup_inc(proto_perl->Ie_script, param);
     PL_perldb		= proto_perl->Iperldb;
     PL_perl_destruct_level = proto_perl->Iperl_destruct_level;
+    PL_exit_flags       = proto_perl->Iexit_flags;
 
     /* magical thingies */
     /* XXX time(&PL_basetime) when asked for? */
