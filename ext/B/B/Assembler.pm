@@ -55,7 +55,7 @@ sub B::Asmdata::PUT_U8 {
 sub B::Asmdata::PUT_U16 { pack("S", $_[0]) }
 sub B::Asmdata::PUT_U32 { pack("L", $_[0]) }
 sub B::Asmdata::PUT_I32 { pack("L", $_[0]) }
-sub B::Asmdata::PUT_NV  { sprintf("%s\0", $_[0]) } # "%lf" looses precision and pack('d',...)
+sub B::Asmdata::PUT_NV  { sprintf("%s\0", $_[0]) } # "%lf" loses precision and pack('d',...)
 						   # may not even be portable between compilers
 sub B::Asmdata::PUT_objindex { pack("L", $_[0]) } # could allow names here
 sub B::Asmdata::PUT_svindex { &B::Asmdata::PUT_objindex }

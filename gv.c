@@ -447,7 +447,7 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
          * pass along the same data via some unused fields in the CV
          */
         CvSTASH(cv) = stash;
-        SvPVX(cv) = (char *)name; /* cast to loose constness warning */
+        SvPVX(cv) = (char *)name; /* cast to lose constness warning */
         SvCUR(cv) = len;
         return gv;
     }
