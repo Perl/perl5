@@ -32,6 +32,176 @@ Version v5.7.1		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  7952] By: jhi                                   on 2000/12/01  23:54:47
+        Log: Subject: Re: long shell lines
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Thu, 30 Nov 2000 12:45:37 -0500 (EST)
+             Message-ID: <Pine.SOL.4.10.10011301044590.26388-100000@maxwell.phys.lafayette.edu>
+             
+             Split overly long shell command lines.
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[  7951] By: jhi                                   on 2000/12/01  23:48:02
+        Log: The metaconfig unit change for #7950.
+     Branch: metaconfig
+	   + U/modified/stdchar.U
+____________________________________________________________________________
+[  7950] By: jhi                                   on 2000/12/01  23:47:39
+        Log: Try to find stdchar also from <stdio_impl.h>.
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[  7949] By: jhi                                   on 2000/12/01  23:46:45
+        Log: Subject: Re: [ID 20001130.011] expression parsing bug ?
+             From: Ronald J Kimball <rjk@linguist.dartmouth.edu>
+             Date: Fri, 1 Dec 2000 16:26:08 -0500
+             Message-ID: <20001201162608.B1436@linguist.dartmouth.edu>
+             
+             Reword the diagnostic message.
+     Branch: perl
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[  7948] By: nick                                  on 2000/12/01  22:49:43
+        Log: Integrate mainline (for s/y/m as sub names stuff).
+     Branch: perlio
+	  !> lib/CPAN.pm lib/CPAN/FirstTime.pm pod/perldiag.pod t/op/misc.t
+	  !> t/pragma/warn/toke toke.c
+____________________________________________________________________________
+[  7947] By: jhi                                   on 2000/12/01  20:55:41
+        Log: Integrate perlio.
+     Branch: perl
+	  !> perlio.c perliol.h t/io/pipe.t
+____________________________________________________________________________
+[  7946] By: jhi                                   on 2000/12/01  20:36:51
+        Log: Upgrade to CPAN 1.59_51, from Andreas König.
+     Branch: perl
+	   ! lib/CPAN.pm lib/CPAN/FirstTime.pm
+____________________________________________________________________________
+[  7945] By: nick                                  on 2000/12/01  20:31:32
+        Log: Integrate mainline
+     Branch: perlio
+	  +> ext/Encode/Encode/EncodeFormat.pod lib/unicode/Is/Blank.pl
+	  +> lib/unicode/Is/SpacePerl.pl t/lib/class-struct.t
+	  +> t/lib/net-hostent.t
+	  !> (integrate 35 files)
+____________________________________________________________________________
+[  7944] By: jhi                                   on 2000/12/01  20:23:29
+        Log: Some help for 20001130.011.  Now one gets warnings like
+             "Ambiguous -f() resolved as a file test ..."
+     Branch: perl
+	   ! pod/perldiag.pod t/pragma/warn/toke toke.c
+____________________________________________________________________________
+[  7943] By: jhi                                   on 2000/12/01  19:44:44
+        Log: Retract #7941.  Forbidding subs m/s/etc is too cruel because
+             that also breaks using them as methods. 
+     Branch: perl
+	   ! pod/perldiag.pod t/op/misc.t toke.c
+____________________________________________________________________________
+[  7942] By: nick                                  on 2000/12/01  17:56:46
+        Log: Fix 'mmap' lib/filehand.t (ungetc) test fail.
+             Make 'unix' pass most tests
+             - do unread by temporary push of layer ("pending") holding unread chars
+             - fast_gets is now based on per-handle flag
+             - relax one of io/pipe.t tests to allow print to fail and close to
+             succeed so that it passes on unbuffered "unix" layer.
+             Remaining fail is sporadic and a genuine race condition between
+             parent/child in fork test.
+     Branch: perlio
+	   ! perlio.c perliol.h t/io/pipe.t
+____________________________________________________________________________
+[  7941] By: jhi                                   on 2000/12/01  15:28:58
+        Log: (Retracted by #7943.)
+             
+             Reserve the short named string operator names.
+     Branch: perl
+	   ! pod/perldiag.pod t/op/misc.t toke.c
+____________________________________________________________________________
+[  7940] By: jhi                                   on 2000/12/01  06:45:53
+        Log: Get the three different space character classes right under utf8.
+     Branch: perl
+	   + lib/unicode/Is/Blank.pl lib/unicode/Is/SpacePerl.pl
+	   ! MANIFEST lib/unicode/mktables.PL pod/perlre.pod regcomp.c
+	   ! regexec.c t/op/pat.t utf8.c
+____________________________________________________________________________
+[  7939] By: jhi                                   on 2000/12/01  03:26:26
+        Log: Two more tests that make no sense in UTF-8 since the test
+             data is not in UTF-8.
+     Branch: perl
+	   ! t/op/regexp.t
+____________________________________________________________________________
+[  7938] By: jhi                                   on 2000/12/01  03:20:39
+        Log: \x{} doesn't any more require 'use utf8' outside regexen so why
+             should it be required inside regexen?
+     Branch: perl
+	   ! regcomp.c t/op/regmesg.t
+____________________________________________________________________________
+[  7937] By: jhi                                   on 2000/12/01  02:58:53
+        Log: Fix for 20001130.008 and 20001130.010, the PL_regnpar wasn't
+             stored and restored, and thusly was trounced by the utf8 swash
+             routines.
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[  7936] By: jhi                                   on 2000/11/30  20:41:39
+        Log: Fix for 20001128.006, be more careful in Perl_sv_utf8_downgrade().
+             Why the different platforms behave so differently (core dump vs
+             no core dump) on this bug is a but of a mystery, but if I had to
+             guess I would mumble something like 'alignment'.
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[  7935] By: jhi                                   on 2000/11/30  16:17:02
+        Log: Subject: [PATCH perl@7930] toke.c perlio.c -Wformat nits
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Message-Id: <200011301427.OAA00030@tempest.npl.co.uk>
+             Date: Thu, 30 Nov 2000 14:27:12 GMT
+     Branch: perl
+	   ! perlio.c toke.c
+____________________________________________________________________________
+[  7934] By: jhi                                   on 2000/11/30  16:04:49
+        Log: In OS/390 'localhost' can be 'localhost.FOO.BAR'.
+     Branch: perl
+	   ! t/lib/net-hostent.t
+____________________________________________________________________________
+[  7933] By: jhi                                   on 2000/11/30  06:07:26
+        Log: Subject: [ID 20001129.007] Not OK: perl v5.7.0 +DEVEL7928 on VMS_AXP V7.1 (UNINSTALLED)
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Wed, 29 Nov 2000 15:16:45 -0800 (PST)
+             Message-Id: <Pine.OSF.4.10.10011291515570.328738-100000@aspara.forte.com>
+             
+             In VMS the localhost may be LOCALHOST.
+     Branch: perl
+	   ! t/lib/net-hostent.t
+____________________________________________________________________________
+[  7932] By: jhi                                   on 2000/11/30  01:11:11
+        Log: Subject: Re: question about retlen in utf8.c:Perl_utf8_to_uv()
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Wed, 29 Nov 2000 12:36:40 -0800 (PST)
+             Message-ID: <Pine.OSF.4.10.10011291233120.328738-100000@aspara.forte.com>
+             
+             plus regen perlapi.pod.
+     Branch: perl
+	   ! pod/perlapi.pod utf8.c
+____________________________________________________________________________
+[  7931] By: jhi                                   on 2000/11/30  01:06:19
+        Log: Subject:  [PATCH perl@7930] get t/lib/filter-util.t to work on VMS 
+             From: lane@DUPHY4.Physics.Drexel.Edu (Charles Lane)
+             Date:     Wed, 29 Nov 2000 17:15:11 EST
+             Message-Id: <001129171439.6099b@DUPHY4.Physics.Drexel.Edu>
+     Branch: perl
+	   ! t/lib/filter-util.pl t/lib/filter-util.t
+____________________________________________________________________________
+[  7930] By: jhi                                   on 2000/11/29  18:51:55
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
+[  7929] By: jhi                                   on 2000/11/29  18:50:55
+        Log: Update the va_copy() metaconfig unit.
+     Branch: metaconfig/U/perl
+	   ! need_va_copy.U
+____________________________________________________________________________
 [  7928] By: jhi                                   on 2000/11/29  17:50:43
         Log: Subject: [ID 20001128.003] Not OK: perl v5.7.0 +DEVEL7891 on ppc-linux 2.2.17  
              From: Dominic Dunlop <domo@computer.org>
@@ -61,7 +231,7 @@ ____________________________________________________________________________
 	   ! lib/File/stat.pm
 ____________________________________________________________________________
 [  7924] By: jhi                                   on 2000/11/29  16:32:15
-        Log: A test works better is it has the right 1..$n output.
+        Log: A test works better if it has the right 1..$n output.
      Branch: perl
 	   ! t/lib/class-struct.t
 ____________________________________________________________________________
