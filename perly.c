@@ -1628,8 +1628,8 @@ case 32:
 #line 209 "perly.y"
 { copline = yyvsp[-9].ival;
 			    yyval.opval = block_end(yyvsp[-7].ival,
-				   append_elem(OP_LINESEQ, scalar(yyvsp[-6].opval),
-				     newSTATEOP(0, yyvsp[-10].pval,
+				   newSTATEOP(0, yyvsp[-10].pval,
+				     append_elem(OP_LINESEQ, scalar(yyvsp[-6].opval),
 				       newWHILEOP(0, 1, (LOOP*)Nullop,
 						  scalar(yyvsp[-4].opval),
 						  yyvsp[0].opval, scalar(yyvsp[-2].opval))))); }

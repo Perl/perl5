@@ -208,8 +208,8 @@ loop	:	label WHILE '(' remember mtexpr ')' mblock cont
 			/* basically fake up an initialize-while lineseq */
 			{ copline = $2;
 			    $$ = block_end($4,
-				   append_elem(OP_LINESEQ, scalar($5),
-				     newSTATEOP(0, $1,
+				   newSTATEOP(0, $1,
+				     append_elem(OP_LINESEQ, scalar($5),
 				       newWHILEOP(0, 1, (LOOP*)Nullop,
 						  scalar($7),
 						  $11, scalar($9))))); }
