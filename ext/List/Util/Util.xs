@@ -276,7 +276,7 @@ CODE:
     dmy_op.op_targ = 1;
     PL_op = &dmy_op;
     PL_curpad = (SV **)&my_pad;
-    *(PL_ppaddr[OP_RAND])();
+    *(PL_ppaddr[OP_RAND])(aTHX);
     PL_op = old_op;
     PL_curpad = old_curpad;
     for (index = items ; index > 1 ; ) {

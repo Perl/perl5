@@ -1,3 +1,11 @@
+Change 641 on 2001/09/05 by <gbarr@pobox.com> (Graham Barr)
+
+	Fix shuffle() to compile with threaded perl
+
+Change 640 on 2001/09/05 by <gbarr@pobox.com> (Graham Barr)
+
+	Release 1.04
+
 Change 639 on 2001/09/05 by <gbarr@pobox.com> (Graham Barr)
 
 	Fix context type (caused a core on Tru64)
