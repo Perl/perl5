@@ -653,14 +653,8 @@ with "Perl_".  However, its list of global symbols was incomplete.
 This error has been rectified in Perl 5.004.
 
 However, some sites may need to maintain complete binary compatibility
-with Perl 5.003.  If you are building Perl for such a site, then after
-B<Configure> you should run these two commands:
-
-   perl old_embed.pl
-   sh old_perl_exp.SH
-
-These commands will make your new Perl as binary-compatible with
-version 5.003 as possible.
+with Perl 5.003.  If you are building Perl for such a site, then when
+B<Configure> asks if you want binary compatibility, answer "y".
 
 =head1 make depend
 
@@ -1095,4 +1089,4 @@ from the original README by Larry Wall.
 
 =head1 LAST MODIFIED
 
-9 October 1996
+24 December 1996
