@@ -135,6 +135,19 @@ savestack_grow(void)
 #undef GROW
 
 void
+tmps_grow(I32 n)
+{
+    dTHR;
+#ifndef STRESS_REALLOC
+    if (n < 128)
+	n = (PL_tmps_max < 512) ? 128 : 512;
+#endif
+    PL_tmps_max = PL_tmps_ix + n + 1;
+    Renew(PL_tmps_stack, PL_tmps_max, SV*);
+}
+
+
+void
 free_tmps(void)
 {
     dTHR;

@@ -578,6 +578,7 @@ swash_fetch
 swash_init
 taint_env
 taint_proper
+tmps_grow
 to_uni_lower
 to_uni_lower_lc
 to_uni_title

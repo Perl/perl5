@@ -2947,8 +2947,6 @@
 #define sv_magic		pPerl->Perl_sv_magic
 #undef  sv_mortalcopy
 #define sv_mortalcopy		pPerl->Perl_sv_mortalcopy
-#undef  sv_mortalgrow
-#define sv_mortalgrow		pPerl->Perl_sv_mortalgrow
 #undef  sv_ncmp
 #define sv_ncmp			pPerl->Perl_sv_ncmp
 #undef  sv_newmortal
@@ -3051,6 +3049,8 @@
 #define taint_env		pPerl->Perl_taint_env
 #undef  taint_proper
 #define taint_proper		pPerl->Perl_taint_proper
+#undef  tmps_grow
+#define tmps_grow		pPerl->Perl_tmps_grow
 #undef  to_uni_lower
 #define to_uni_lower		pPerl->Perl_to_uni_lower
 #undef  to_uni_lower_lc

@@ -931,6 +931,7 @@
 #define swash_init		Perl_swash_init
 #define taint_env		Perl_taint_env
 #define taint_proper		Perl_taint_proper
+#define tmps_grow		Perl_tmps_grow
 #define to_uni_lower		Perl_to_uni_lower
 #define to_uni_lower_lc		Perl_to_uni_lower_lc
 #define to_uni_title		Perl_to_uni_title
@@ -2041,7 +2042,6 @@
 #define sv_len_utf8		CPerlObj::Perl_sv_len_utf8
 #define sv_magic		CPerlObj::Perl_sv_magic
 #define sv_mortalcopy		CPerlObj::Perl_sv_mortalcopy
-#define sv_mortalgrow		CPerlObj::Perl_sv_mortalgrow
 #define sv_ncmp			CPerlObj::Perl_sv_ncmp
 #define sv_newmortal		CPerlObj::Perl_sv_newmortal
 #define sv_newref		CPerlObj::Perl_sv_newref
@@ -2093,6 +2093,7 @@
 #define swash_init		CPerlObj::Perl_swash_init
 #define taint_env		CPerlObj::Perl_taint_env
 #define taint_proper		CPerlObj::Perl_taint_proper
+#define tmps_grow		CPerlObj::Perl_tmps_grow
 #define to_uni_lower		CPerlObj::Perl_to_uni_lower
 #define to_uni_lower_lc		CPerlObj::Perl_to_uni_lower_lc
 #define to_uni_title		CPerlObj::Perl_to_uni_title

@@ -57,7 +57,6 @@ static void del_xiv _((XPVIV* p));
 static void del_xnv _((XPVNV* p));
 static void del_xpv _((XPV* p));
 static void del_xrv _((XRV* p));
-static void sv_mortalgrow _((void));
 static void sv_unglob _((SV* sv));
 
 #ifndef PURIFY
@@ -3551,14 +3550,6 @@ sv_dec(register SV *sv)
  * hopefully we won't free it until it has been assigned to a
  * permanent location. */
 
-STATIC void
-sv_mortalgrow(void)
-{
-    dTHR;
-    PL_tmps_max += (PL_tmps_max < 512) ? 128 : 512;
-    Renew(PL_tmps_stack, PL_tmps_max, SV*);
-}
-
 SV *
 sv_mortalcopy(SV *oldstr)
 {
@@ -3570,9 +3561,8 @@ sv_mortalcopy(SV *oldstr)
     SvREFCNT(sv) = 1;
     SvFLAGS(sv) = 0;
     sv_setsv(sv,oldstr);
-    if (++PL_tmps_ix >= PL_tmps_max)
-	sv_mortalgrow();
-    PL_tmps_stack[PL_tmps_ix] = sv;
+    EXTEND_MORTAL(1);
+    PL_tmps_stack[++PL_tmps_ix] = sv;
     SvTEMP_on(sv);
     return sv;
 }
@@ -3587,9 +3577,8 @@ sv_newmortal(void)
     SvANY(sv) = 0;
     SvREFCNT(sv) = 1;
     SvFLAGS(sv) = SVs_TEMP;
-    if (++PL_tmps_ix >= PL_tmps_max)
-	sv_mortalgrow();
-    PL_tmps_stack[PL_tmps_ix] = sv;
+    EXTEND_MORTAL(1);
+    PL_tmps_stack[++PL_tmps_ix] = sv;
     return sv;
 }
 
@@ -3603,9 +3592,8 @@ sv_2mortal(register SV *sv)
 	return sv;
     if (SvREADONLY(sv) && SvIMMORTAL(sv))
 	return sv;
-    if (++PL_tmps_ix >= PL_tmps_max)
-	sv_mortalgrow();
-    PL_tmps_stack[PL_tmps_ix] = sv;
+    EXTEND_MORTAL(1);
+    PL_tmps_stack[++PL_tmps_ix] = sv;
     SvTEMP_on(sv);
     return sv;
 }
