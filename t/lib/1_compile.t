@@ -69,7 +69,6 @@ __DATA__
 B::C
 B::CC
 B::Stackobj
-ByteLoader
 CPAN::FirstTime
 DynaLoader
 Pod::Plainer
