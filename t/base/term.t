@@ -7,7 +7,7 @@ print "1..6\n";
 # check "" interpretation
 
 $x = "\n";
-if ($x lt ' ') {print "ok 1\n";} else {print "not ok 1\n";}
+if ($x eq chr(10)) {print "ok 1\n";} else {print "not ok 1\n";}
 
 # check `` processing
 
