@@ -366,9 +366,18 @@ else {
 }
 
 safe_unlink("$installbin/s$perl_verbase$ver$exe_ext");
+safe_unlink("$installbin/suid$perl_verbase$ver$exe_ext");
 if ($d_dosuid) {
-    copy("suidperl$exe_ext", "$installbin/s$perl_verbase$ver$exe_ext");
-    chmod(04711, "$installbin/s$perl_verbase$ver$exe_ext");
+    # now that the set UID perl must be invoked with /dev/fd/... we need to
+    # give it a different name for maintenance releases, as there are too many
+    # entrenched scripts which call sperl directly. So the suid backend is
+    # suidperl
+    copy("suidperl$exe_ext", "$installbin/suid$perl_verbase$ver$exe_ext");
+    chmod(04711, "$installbin/suid$perl_verbase$ver$exe_ext");
+    # and we provide a "sperl" which will keep on working the way these scripts
+    # expect.
+    link("$installbin/$perl_verbase$ver$exe_ext",
+	 "$installbin/s$perl_verbase$ver$exe_ext");
 }
 
 # Install library files.
