@@ -3,7 +3,7 @@ package File::Spec;
 use strict;
 use vars qw(@ISA $VERSION);
 
-$VERSION = '0.6';
+$VERSION = '0.8';
 
 my %module = (MacOS   => 'Mac',
 	      MSWin32 => 'Win32',
@@ -23,11 +23,15 @@ File::Spec - portably perform operations on file names
 
 =head1 SYNOPSIS
 
-C<use File::Spec;>
+	use File::Spec;
 
-C<$x=File::Spec-E<gt>catfile('a','b','c');>
+	$x=File::Spec->catfile('a', 'b', 'c');
 
-which returns 'a/b/c' under Unix.
+which returns 'a/b/c' under Unix. Or:
+
+	use File::Spec::Functions;
+
+	$x = catfile('a', 'b', 'c');
 
 =head1 DESCRIPTION
 
@@ -49,28 +53,31 @@ OS specific routines is available in a separate module, including:
 	File::Spec::VMS
 
 The module appropriate for the current OS is automatically loaded by
-File::Spec. Since some modules (like VMS) make use of OS specific
-facilities, it may not be possible to load all modules under all operating
-systems.
+File::Spec. Since some modules (like VMS) make use of facilities available
+only under that OS, it may not be possible to load all modules under all
+operating systems.
 
 Since File::Spec is object oriented, subroutines should not called directly,
 as in:
 
 	File::Spec::catfile('a','b');
-	
+
 but rather as class methods:
 
 	File::Spec->catfile('a','b');
 
-For a reference of available functions, please consult L<File::Spec::Unix>,
-which contains the entire set, and inherited by the modules for other
-platforms. For further information, please see L<File::Spec::Mac>,
+For simple uses, L<File::Spec::Functions> provides convenient functional
+forms of these methods.
+
+For a list of available methods, please consult L<File::Spec::Unix>,
+which contains the entire set, and which is inherited by the modules for
+other platforms. For further information, please see L<File::Spec::Mac>,
 L<File::Spec::OS2>, L<File::Spec::Win32>, or L<File::Spec::VMS>.
 
 =head1 SEE ALSO
 
 File::Spec::Unix, File::Spec::Mac, File::Spec::OS2, File::Spec::Win32,
-File::Spec::VMS, ExtUtils::MakeMaker
+File::Spec::VMS, File::Spec::Functions, ExtUtils::MakeMaker
 
 =head1 AUTHORS
 

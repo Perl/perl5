@@ -13,6 +13,8 @@ $have_devel_corestack = 0;
 
 $VERSION = "1.1602";
 
+$ENV{HARNESS_ACTIVE} = 1;
+
 # Some experimental versions of OS/2 build have broken $?
 my $ignore_exitcode = $ENV{HARNESS_IGNORE_EXITCODE};
 
@@ -457,6 +459,10 @@ and report them as
 If relative, directory name is with respect to the current directory at
 the moment runtests() was called.  Putting absolute path into 
 C<HARNESS_FILELEAK_IN_DIR> may give more predicatable results.
+
+Harness sets C<HARNESS_ACTIVE> before executing the individual tests.
+This allows the tests to determine if they are being executed through the
+harness or by any other means.
 
 =head1 SEE ALSO
 

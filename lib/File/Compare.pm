@@ -6,10 +6,10 @@ use vars qw($VERSION @ISA @EXPORT @EXPORT_OK $Too_Big *FROM *TO);
 require Exporter;
 use Carp;
 
-$VERSION = '1.1001';
+$VERSION = '1.1002';
 @ISA = qw(Exporter);
 @EXPORT = qw(compare);
-@EXPORT_OK = qw(cmp);
+@EXPORT_OK = qw(cmp compare_text);
 
 $Too_Big = 1024 * 1024 * 2;
 
@@ -22,13 +22,11 @@ sub compare {
     croak("Usage: compare( file1, file2 [, buffersize]) ")
       unless(@_ == 2 || @_ == 3);
 
-    my $from = shift;
-    my $to = shift;
-    my $closefrom=0;
-    my $closeto=0;
-    my ($size, $fromsize, $status, $fr, $tr, $fbuf, $tbuf);
-    local(*FROM, *TO);
-    local($\) = '';
+    my ($from,$to,$size) = @_;
+    my $text_mode = defined($size) && $size < 0;
+
+    my ($fromsize,$closefrom,$closeto);
+    local (*FROM, *TO);
 
     croak("from undefined") unless (defined $from);
     croak("to undefined") unless (defined $to);
@@ -40,9 +38,11 @@ sub compare {
 	*FROM = $from;
     } else {
 	open(FROM,"<$from") or goto fail_open1;
-	binmode FROM;
+	unless ($text_mode) {
+	    binmode FROM;
+	    $fromsize = -s FROM;
+	}
 	$closefrom = 1;
-	$fromsize = -s FROM;
     }
 
     if (ref($to) &&
@@ -52,32 +52,41 @@ sub compare {
 	*TO = $to;
     } else {
 	open(TO,"<$to") or goto fail_open2;
-	binmode TO;
+	binmode TO unless $text_mode;
 	$closeto = 1;
     }
 
-    if ($closefrom && $closeto) {
+    if (!$text_mode && $closefrom && $closeto) {
 	# If both are opened files we know they differ if their size differ
 	goto fail_inner if $fromsize != -s TO;
     }
 
-    if (@_) {
-	$size = shift(@_) + 0;
-	croak("Bad buffer size for compare: $size\n") unless ($size > 0);
-    } else {
-	$size = $fromsize;
-	$size = 1024 if ($size < 512);
-	$size = $Too_Big if ($size > $Too_Big);
-    }
-
-    $fbuf = '';
-    $tbuf = '';
-    while(defined($fr = read(FROM,$fbuf,$size)) && $fr > 0) {
-	unless (defined($tr = read(TO,$tbuf,$fr)) and $tbuf eq $fbuf) {
-            goto fail_inner;
+    if ($text_mode) {
+	local $/ = "\n";
+	my ($fline,$tline);
+	while (defined($fline = <FROM>)) {
+	    unless (defined($tline = <TO>) && $fline eq $tline) {
+		goto fail_inner;
+	    }
 	}
+	goto fail_inner if defined($tline = <TO>);
     }
-    goto fail_inner if (defined($tr = read(TO,$tbuf,$size)) && $tr > 0);
+    else {
+	unless (defined($size) && $size > 0) {
+	    $size = $fromsize;
+	    $size = 1024 if $size < 512;
+	    $size = $Too_Big if $size > $Too_Big;
+	}
+
+	my ($fr,$tr,$fbuf,$tbuf);
+	$fbuf = $tbuf = '';
+	while(defined($fr = read(FROM,$fbuf,$size)) && $fr > 0) {
+	    unless (defined($tr = read(TO,$tbuf,$fr)) && $tbuf eq $fbuf) {
+		goto fail_inner;
+	    }
+	}
+	goto fail_inner if defined($tr = read(TO,$tbuf,$size)) && $tr > 0;
+    }
 
     close(TO) || goto fail_open2 if $closeto;
     close(FROM) || goto fail_open1 if $closefrom;
@@ -93,7 +102,7 @@ sub compare {
 
   fail_open2:
     if ($closefrom) {
-	$status = $!;
+	my $status = $!;
 	$! = 0;
 	close FROM;
 	$! = $status unless $!;
@@ -103,6 +112,9 @@ sub compare {
 }
 
 *cmp = \&compare;
+
+# Using a negative buffer size puts compare into text_mode
+sub compare_text { compare(@_[0..1], -1) }
 
 1;
 
@@ -128,6 +140,9 @@ from File::Compare by default.
 
 File::Compare::cmp is a synonym for File::Compare::compare.  It is
 exported from File::Compare only by request.
+
+File::Compare::compare_text does a line by line comparison of the two
+files. It stops as soon as a difference is detected.
 
 =head1 RETURN
 

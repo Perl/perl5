@@ -75,7 +75,572 @@ indicator:
 
 
 ----------------
-Version 5.005_55        Development release working toward 5.006
+Version 5.005_56        Development release working toward 5.006
+----------------
+
+____________________________________________________________________________
+[  3045] By: gsar                                  on 1999/03/01  03:32:30
+        Log: destroy PL_svref_mutex in perl_destruct()
+     Branch: perl
+           ! perl.c
+____________________________________________________________________________
+[  3044] By: gsar                                  on 1999/03/01  00:38:50
+        Log: up patchlevel &c.
+     Branch: perl
+	   ! Changes patchlevel.h pod/perlhist.pod win32/Makefile
+	   ! win32/config_H.bc win32/config_H.gc win32/config_H.vc
+           ! win32/makefile.mk
+____________________________________________________________________________
+[  3043] By: gsar                                  on 1999/03/01  00:14:15
+        Log: integrate cfgperl contents into mainline
+     Branch: perl
+           ! pod/perldelta.pod
+          !> Configure config_h.SH
+____________________________________________________________________________
+[  3042] By: gsar                                  on 1999/02/28  23:55:08
+        Log: slightly edited version of suggested patch
+             From: jan.dubois@ibm.net (Jan Dubois)
+             Date: Mon, 01 Mar 1999 00:32:05 +0100
+             Message-ID: <36dbcf2c.12325433@smtp1.ibm.net>
+             Subject: Re: [PATCH 5.005_55] Cleanup of File::Spec module
+     Branch: perl
+           + lib/File/Spec/Functions.pm
+           ! MANIFEST lib/File/Spec.pm
+____________________________________________________________________________
+[  3041] By: gsar                                  on 1999/02/28  22:47:19
+        Log: fix subtle bug in eval'' testsuite
+     Branch: perl
+           ! t/op/eval.t
+____________________________________________________________________________
+[  3040] By: gsar                                  on 1999/02/28  22:46:24
+        Log: avoid literal control characters in change#3039
+     Branch: perl
+           ! t/base/lex.t
+____________________________________________________________________________
+[  3039] By: gsar                                  on 1999/02/28  21:47:18
+        Log: todo item: permit extended control variables a la ${^Foo} (patch
+             courtesy Mark-Jason Dominus <mjd@plover.com>)
+     Branch: perl
+	   ! op.c pod/perldelta.pod pod/perltodo.pod pod/perlvar.pod
+           ! t/base/lex.t toke.c
+____________________________________________________________________________
+[  3038] By: gsar                                  on 1999/02/28  21:21:05
+        Log: From: abigail@fnx.com
+             Date: Sun, 28 Feb 1999 10:59:16 -0500 (EST)
+             Message-ID: <19990228155916.14496.qmail@alexandra.wayne.fnx.com>
+             Subject: Recognize -> and => inside [A-Z]<> sequences.
+     Branch: perl
+           ! pod/pod2man.PL
+____________________________________________________________________________
+[  3037] By: gsar                                  on 1999/02/28  21:12:22
+        Log: fix longstanding bug: searches for lexicals originating within eval''
+             weren't stopping at the subroutine boundary correctly
+     Branch: perl
+           ! op.c proto.h t/op/eval.t
+____________________________________________________________________________
+[  3036] By: gsar                                  on 1999/02/28  20:02:29
+        Log: revert parts of change#2990 to preserve predictable usage of Win32::Foo()
+             as stacked list values
+             From: jan.dubois@ibm.net (Jan Dubois)
+             Date: Sat, 27 Feb 1999 18:24:17 +0100
+             Message-ID: <36e22849.36531259@smtp1.ibm.net>
+             Subject: Re: resend [PATCH 5.005_55] Various win32/win32.c cleanup 
+     Branch: perl
+           ! win32/win32.c
+____________________________________________________________________________
+[  3035] By: gsar                                  on 1999/02/28  19:48:54
+        Log: remove superfluous stack_sp decl
+     Branch: perl
+           ! jpl/JNI/JNI.xs
+____________________________________________________________________________
+[  3034] By: gsar                                  on 1999/02/28  19:34:58
+        Log: s/print STDERR/warn/ suggested by abigail@fnx.com; add $VERSION
+     Branch: perl
+           ! lib/Getopt/Std.pm
+____________________________________________________________________________
+[  3033] By: gsar                                  on 1999/02/28  19:23:41
+        Log: add File::Compare::compare_text()
+             From: jan.dubois@ibm.net (Jan Dubois)
+             Date: Fri, 26 Feb 1999 00:20:41 +0100
+             Message-ID: <36dcd8ab.20195659@smtp1.ibm.net>
+             Subject: Re: PodParser 1.07 (was: RE: C<stuff()> vs stuff()) 
+     Branch: perl
+           ! lib/File/Compare.pm pod/perltodo.pod
+____________________________________________________________________________
+[  3032] By: gsar                                  on 1999/02/28  19:01:33
+        Log: add README.hpux
+     Branch: perl
+           + README.hpux
+           ! MAINTAIN MANIFEST
+____________________________________________________________________________
+[  3031] By: gsar                                  on 1999/02/28  18:49:08
+        Log: avoid escaping &amp; et al multiple times (variant of fix suggested by
+             James Cromie <jcromie@fossil.uswc.uswest.com>
+     Branch: perl
+           ! lib/Pod/Html.pm
+____________________________________________________________________________
+[  3030] By: gsar                                  on 1999/02/28  18:35:09
+        Log: From: jan.dubois@ibm.net (Jan Dubois)
+             Date: Wed, 24 Feb 1999 22:34:56 +0100
+             Message-ID: <36d86f1e.11495549@smtp1.ibm.net>
+             Subject: [PATCH 5.005_55] Test::Harness setting $ENV{HARNESS_ACTIVE}
+     Branch: perl
+           ! lib/Test/Harness.pm
+____________________________________________________________________________
+[  3029] By: gsar                                  on 1999/02/28  18:28:18
+        Log: add note about env pollution
+     Branch: perl
+           ! INSTALL pod/perltodo.pod
+____________________________________________________________________________
+[  3028] By: jhi                                   on 1999/02/26  14:40:00
+        Log: HP-UX 11 threads.
+             
+             From: Jeff Okamoto <okamoto@xfiles.intercon.hp.com>
+             To: perl5-porters@perl.org
+             Cc: jhi@cc.hut.fi
+             Subject: Maint 5 and _54 with threading on HP-UX 11.00
+             Date: Wed, 3 Feb 1999 12:57:18 -0800 (PST)
+             Message-Id: <199902032057.MAA10218@xfiles.intercon.hp.com>
+             
+             NOTE from jhi: the hpux hints could still be more robust by
+             disabling gdbm when necessary.
+             
+             Currently if there's a libgdbm.sl (gdbm 1.7.3) which is pre-11,
+             linking -lgdbm -lpthread creates an executable that instantly
+             core dumps on a pthreads internal panic:
+             
+             ./gdpt
+             
+             Pthread internal error: message: __libc_reinit() failed, file: ../pthreads/pthread.c, line: 1096
+             Return Pointer is 0xc082bf33
+             17639 quit (core dumped)  ./gdpt
+             
+             You don't have to *use* either gdbm or pthreads in the executable,
+             just linking them together is enough.  Workaround is to recompile
+             the GDBM under HP-UX 11, that makes the problem go away.
+     Branch: maint-5.005/perl
+           ! hints/hpux.sh thread.h
+____________________________________________________________________________
+[  3025] By: jhi                                   on 1999/02/25  20:41:07
+        Log: Temporary workaround for the config_h.SH versus
+             crosscompile and multiarch plus introduce 'rt'
+             to $libswanted: in UNIX98 sched_yield() lives there.
+     Branch: cfgperl
+           ! Configure config_h.SH
+____________________________________________________________________________
+[  3024] By: jhi                                   on 1999/02/24  12:54:59
+        Log: Integrate from mainperl.
+     Branch: cfgperl
+          +> t/lib/fatal.t
+          !> (integrate 44 files)
+____________________________________________________________________________
+[  3023] By: gsar                                  on 1999/02/24  07:02:12
+        Log: integrate cfgperl contents
+     Branch: perl
+          !> (integrate 30 files)
+____________________________________________________________________________
+[  3022] By: gsar                                  on 1999/02/24  05:59:47
+        Log: From: Daniel Grisinger <dgris@moiraine.dimensional.com>
+             Date: 23 Feb 1999 17:53:22 -0700
+             Message-ID: <m3g17w62rh.fsf@moiraine.dimensional.com>
+             Subject: [PATCH: _55] perldoc -q broken
+     Branch: perl
+           ! utils/perldoc.PL
+____________________________________________________________________________
+[  3021] By: gsar                                  on 1999/02/24  05:51:53
+        Log: ansify perlio.c, fix PerlIO-ish typos
+     Branch: perl
+	   ! ext/DynaLoader/dl_beos.xs ext/DynaLoader/dl_cygwin32.xs
+           ! iperlsys.h perlio.c
+____________________________________________________________________________
+[  3020] By: gsar                                  on 1999/02/24  05:28:06
+        Log: adjust a Perl_malloc() flag for NeXT
+             From: Hans Mulder <hansm@icgned.icgroup.nl>
+             Date: Tue, 23 Feb 99 00:26:25 +0100
+             Message-Id: <9902222329.AA17516@icgned.icgroup.nl>
+             Subject: [PATCH for _55] MUTEX_INIT_CALLS_MALLOC no longer necessary
+     Branch: perl
+           ! perl.h
+____________________________________________________________________________
+[  3019] By: gsar                                  on 1999/02/24  05:19:42
+        Log: perltodo adjustments from Joshua Pritikin <joshua.pritikin@db.com>
+     Branch: perl
+           ! pod/perltodo.pod
+____________________________________________________________________________
+[  3018] By: gsar                                  on 1999/02/24  04:15:18
+        Log: From: Joshua Pritikin <joshua.pritikin@db.com>
+             Date: Mon, 22 Feb 1999 11:29:09 -0500 (EST)
+             Message-ID: <Pine.GSO.4.02.9902221128200.500-100000@eq1062.wks.na.deuba.com>
+             Subject: improved error message [PATCH _55] [RESEND]
+     Branch: perl
+           ! sv.c
+____________________________________________________________________________
+[  3017] By: gsar                                  on 1999/02/24  03:50:34
+        Log: From: Tom Christiansen <tchrist@jhereg.perl.com>
+             Date: Sun, 21 Feb 1999 20:02:18 -0700
+             Message-Id: <199902220302.UAA09981@jhereg.perl.com>
+             Subject: perlfunc updates (against 55)
+     Branch: perl
+           ! pod/perlfunc.pod
+____________________________________________________________________________
+[  3016] By: gsar                                  on 1999/02/24  03:17:05
+        Log: testsuite adjustments
+             From: "M.J.T. Guy" <mjtg@cus.cam.ac.uk>
+             Date: Sat, 20 Feb 1999 15:24:57 +0000
+             Message-Id: <E10EEH3-0003Wf-00@taurus.cus.cam.ac.uk>
+             Subject: Not quite OK: perl5.005_55 on SunOS 4.1.3 / gcc
+     Branch: perl
+           ! t/lib/io_sock.t t/op/lex_assign.t
+____________________________________________________________________________
+[  3015] By: gsar                                  on 1999/02/24  02:54:47
+        Log: avoid modifying readonly values from qw()
+     Branch: perl
+           ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[  3014] By: gsar                                  on 1999/02/24  02:49:04
+        Log: more "correct" utbuf for utime()
+     Branch: perl
+           ! doio.c
+____________________________________________________________________________
+[  3013] By: jhi                                   on 1999/02/22  19:27:44
+        Log: Fix MacPerl version, change PowerUX to PowerMAX.
+             
+             From: Chris Nandor <pudge@pobox.com>
+             To: jhi@iki.fi
+             Cc: perl5-porters@perl.org
+             Subject: Re: perl current availability as documented by perl.pod
+             Date: Sun, 21 Feb 1999 11:06:03 -0500
+             Message-Id: <v04020a07b2f5df60c9e3@[192.168.0.77]>
+             
+             From: Tom Horsley <Tom.Horsley@mail.ccur.com>
+             To: jhi@iki.fi
+             Cc: perl5-porters@perl.org
+             Subject: Re: perl current availability as documented by perl.pod
+             Date: Mon, 22 Feb 1999 13:08:30 GMT
+             Message-Id: <199902221308.NAA19971@cleo.ccur.com>
+     Branch: cfgperl
+           ! pod/perl.pod
+     Branch: maint-5.005/perl
+           ! pod/perl.pod
+____________________________________________________________________________
+[  3012] By: jhi                                   on 1999/02/22  10:26:11
+        Log: Snapshot the cross-compilation/multiarchitecture stuff
+             (currently broken in next)
+     Branch: cfgperl
+           ! Configure config_h.SH pp.c
+____________________________________________________________________________
+[  3011] By: jhi                                   on 1999/02/22  10:24:51
+        Log: From: pmarquess@bfsec.bt.co.uk (Paul Marquess)
+             To: gsar@activestate.com (Gurusamy Sarathy)
+             Cc: perl5-porters@perl.org (Perl5 Porters)
+             Subject: [PATCH 5.005_55] DB_File 1.64 patch
+             Date: Mon, 22 Feb 1999 10:07:00 +0000 (GMT)
+             Message-Id: <9902221007.AA17751@claudius.bfsec.bt.co.uk>
+     Branch: cfgperl
+	   ! ext/DB_File/Changes ext/DB_File/DB_File.pm
+           ! ext/DB_File/DB_File.xs ext/DB_File/typemap t/lib/db-recno.t
+____________________________________________________________________________
+[  3009] By: jhi                                   on 1999/02/22  09:14:26
+        Log: Scratch #3008 and introduce $crosscompile and $multiarch
+             also in non-Configure lands.
+     Branch: cfgperl
+	   ! Configure config_h.SH hints/next_3.sh hints/next_3_0.sh
+	   ! hints/next_4.sh vms/subconfigure.com win32/config.bc
+	   ! win32/config.gc win32/config.vc win32/config_H.bc
+           ! win32/config_H.gc win32/config_H.vc
+____________________________________________________________________________
+[  3008] By: jhi                                   on 1999/02/22  08:58:04
+        Log: Add -DMULTIARCH (see change #3006).
+     Branch: cfgperl
+           ! hints/next_3.sh hints/next_3_0.sh hints/next_4.sh
+____________________________________________________________________________
+[  3007] By: jhi                                   on 1999/02/22  08:54:06
+        Log: Undo the references to local{lib,arch} introduced by #3006.
+     Branch: cfgperl
+           ! Configure config_h.SH
+____________________________________________________________________________
+[  3006] By: jhi                                   on 1999/02/22  08:43:50
+        Log: From: hansm@icgned.icgroup.nl
+             To: perlbug@perl.com
+             Subject: Not OK: perl 5.00555 on OPENSTEP-Mach-thread 4_2 (UNINSTALLED)
+             Date: Sun, 21 Feb 1999 22:58:55 +0100
+             Reply-To: hansmu@xs4all.nl
+             Message-Id: <9902212201.AA13386@icgned.icgroup.nl>
+             
+             plus other Configure changes: prepare for cross-compilation/
+             multiarchitecture builds.
+     Branch: cfgperl
+           ! Configure config_h.SH
+____________________________________________________________________________
+[  3005] By: jhi                                   on 1999/02/22  08:35:30
+        Log: Configure/Perl knew how to look for use Mach cthreads
+             but Configure didn't let them to be used ($osname 'next').
+     Branch: cfgperl
+           ! Configure config_h.SH
+     Branch: maint-5.005/perl
+           ! Configure
+____________________________________________________________________________
+[  3004] By: jhi                                   on 1999/02/21  15:46:02
+        Log: Update Acorn AVAILABILITY.
+     Branch: cfgperl
+           ! pod/perl.pod
+     Branch: maint-5.005/perl
+           ! pod/perl.pod
+____________________________________________________________________________
+[  3003] By: jhi                                   on 1999/02/21  14:50:42
+        Log: From: rjk@linguist.dartmouth.edu (Ronald J. Kimball)
+             To: perl5-porters@perl.org (Perl 5 Porters)
+             Subject: PATCH: perlref.pod - symbolic ref example
+             Date: Sat, 20 Feb 1999 17:32:11 -0500 (EST)
+             Message-Id: <199902202232.RAA62306@linguist.dartmouth.edu>
+     Branch: cfgperl
+           ! pod/perlref.pod
+     Branch: maint-5.005/perl
+           ! pod/perlref.pod
+____________________________________________________________________________
+[  3002] By: jhi                                   on 1999/02/21  14:35:22
+        Log: Sync cfgperl with maint-5.005 change #3000.
+     Branch: cfgperl
+           ! pod/perlfunc.pod t/op/pack.t
+____________________________________________________________________________
+[  2999] By: gsar                                  on 1999/02/20  22:48:30
+        Log: From:    John Bley <jbb6@acpub.duke.edu>
+             Date:    Sat, 20 Feb 1999 16:02:34 EST
+             Message-Id: <Pine.SOL.3.91.990220155832.9913A-100000@soc11.acpub.duke.edu>
+             Subject: [PATCH]5.005_55 (CORE) Sparse intializer in regcomp.c
+     Branch: perl
+           ! regcomp.c
+____________________________________________________________________________
+[  2998] By: jhi                                   on 1999/02/20  14:13:06
+        Log: Enhanced the endianness description.
+     Branch: cfgperl
+           ! pod/perlfunc.pod
+____________________________________________________________________________
+[  2996] By: jhi                                   on 1999/02/20  13:55:41
+        Log: Glossary now mostly fixed.
+     Branch: cfgperl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+           ! config_h.SH
+____________________________________________________________________________
+[  2994] By: jhi                                   on 1999/02/20  11:58:33
+        Log: Perldeltify GNU/Hurd.
+     Branch: cfgperl
+           ! pod/perldelta.pod
+____________________________________________________________________________
+[  2993] By: gsar                                  on 1999/02/20  00:59:10
+        Log: fix typo in Perl_sbrk()
+             From: hansm@icgned.icgroup.nl
+             Date: Fri, 19 Feb 1999 23:19:31 +0100
+             Message-Id: <9902192221.AA07213@icgned.icgroup.nl>
+             Subject: Not OK: perl 5.00555 on OPENSTEP-Mach 4_2 (UNINSTALLED)
+     Branch: perl
+           ! malloc.c
+____________________________________________________________________________
+[  2992] By: gsar                                  on 1999/02/20  00:51:08
+        Log: integrate change#2980 from maint-5.005
+     Branch: perl
+          !> utils/h2xs.PL
+____________________________________________________________________________
+[  2991] By: gsar                                  on 1999/02/20  00:34:01
+        Log: From: Hugo van der Sanden <hv@crypt.compulink.co.uk>
+             Date: Thu, 18 Feb 1999 18:51:38 +0000
+             Message-Id: <199902181851.SAA14018@crypt.compulink.co.uk>
+             Subject: [PATCH 5.005_55] test failures with MIME-tools-4.122 and perl 5.005_55 
+     Branch: perl
+           ! pp_hot.c t/op/pat.t
+____________________________________________________________________________
+[  2990] By: gsar                                  on 1999/02/20  00:30:48
+        Log: From: jan.dubois@ibm.net (Jan Dubois)
+             Date: Thu, 18 Feb 1999 19:14:07 +0100
+             Message-ID: <36d15809.40853323@smtp1.ibm.net>
+             Subject: resend [PATCH 5.005_55] Various win32/win32.c cleanup
+     Branch: perl
+           ! win32/win32.c
+____________________________________________________________________________
+[  2989] By: gsar                                  on 1999/02/20  00:27:01
+        Log: do poll() emulation unless HAS_POLL && I_POLL
+     Branch: perl
+           ! ext/IO/poll.h
+____________________________________________________________________________
+[  2988] By: gsar                                  on 1999/02/19  23:52:12
+        Log: tweak RE for NaNQ? recognition
+     Branch: perl
+           ! t/lib/bigfloatpm.t
+____________________________________________________________________________
+[  2987] By: gsar                                  on 1999/02/19  23:29:59
+        Log: mention C<use utf8> and C<use warning> in perldelta
+     Branch: perl
+           ! pod/perldelta.pod
+____________________________________________________________________________
+[  2985] By: jhi                                   on 1999/02/19  20:43:19
+        Log: pack/unpack better in (network-)short-non-16-bits and
+             (network-)long-non-32-bits systems such as Cray C90.
+     Branch: cfgperl
+           ! perl.h pp.c t/op/pack.t
+____________________________________________________________________________
+[  2984] By: jhi                                   on 1999/02/19  20:38:54
+        Log: Regen Configure.
+     Branch: cfgperl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+           ! perl.c
+____________________________________________________________________________
+[  2982] By: jhi                                   on 1999/02/19  19:51:49
+        Log: Configure update: fstatvfs/fstafs/getmntent/hasmntopt were
+             not probed for and 	
+             
+             From: "Kurt D. Starsinic" <kstar@chapin.edu>
+             To: Chaim Frenkel <chaimf@pobox.com>,
+             Russ Allbery <rra@stanford.edu>,
+             Jarkko Hietaniemi <jhi@iki.fi>,
+             Gurusamy Sarathy <gsar@activestate.com>,
+             Graham Barr <gbarr@pobox.com>
+             Cc: bdensch@ameritech.net, perlbug@perl.com
+             Subject: [PATCH] Re: Solaris 7 for Intel
+             Message-ID: <19990219124404.A30182@O2.chapin.edu>
+             
+             Glossary is still missing some terms because
+             mkglossary is misbehaving (change #2981 updated
+             Glossary manually)
+     Branch: cfgperl
+	   ! Configure Makefile.SH Porting/Glossary Porting/config.sh
+           ! Porting/config_H
+____________________________________________________________________________
+[  2980] By: gbarr                                 on 1999/02/19  16:06:53
+        Log: Make result of h2xs work when user adds C<use strict>
+     Branch: maint-5.005/perl
+           ! utils/h2xs.PL
+____________________________________________________________________________
+[  2979] By: gsar                                  on 1999/02/19  05:24:29
+        Log: doc for change#2978
+     Branch: perl
+           ! pod/perlsub.pod
+____________________________________________________________________________
+[  2978] By: gsar                                  on 1999/02/19  05:08:29
+        Log: bring '*' prototype closer to how it behaves internally
+     Branch: perl
+           + t/lib/fatal.t
+           ! MANIFEST lib/Fatal.pm op.c t/comp/proto.t
+____________________________________________________________________________
+[  2977] By: gsar                                  on 1999/02/19  02:50:31
+        Log: stem leakage of perly.h #defines #ifndef PERL_CORE
+     Branch: perl
+           ! perly.h
+____________________________________________________________________________
+[  2975] By: gsar                                  on 1999/02/18  21:41:57
+        Log: distinguish eval'' from BEGIN|INIT|END CVs (fixes buggy propagation
+             of lexical searches in BEGIN|INIT|END)
+     Branch: perl
+	   ! cop.h cv.h op.c perly.c perly.y pp_ctl.c t/op/misc.t
+           ! vms/perly_c.vms
+____________________________________________________________________________
+[  2974] By: gsar                                  on 1999/02/18  21:03:06
+        Log: missing PERL_POLLUTE_MALLOC
+     Branch: perl
+           ! ext/SDBM_File/sdbm/sdbm.h
+____________________________________________________________________________
+[  2973] By: gsar                                  on 1999/02/18  17:10:49
+        Log: From:    Andy Dougherty <doughera@lafayette.edu>
+             Date:    Wed, 17 Feb 1999 17:22:50 EST
+             Message-Id: <Pine.GSU.4.05.9902171720490.17243-100000@newton.phys>
+             Subject: [PATCH 5.005_xx] dotsh.pl triggers new warnings
+     Branch: perl
+           ! lib/dotsh.pl
+____________________________________________________________________________
+[  2972] By: gsar                                  on 1999/02/18  17:04:12
+        Log: s/#defined/#define/
+     Branch: perl
+           ! ext/Data/Dumper/Dumper.xs
+____________________________________________________________________________
+[  2970] By: gsar                                  on 1999/02/18  03:26:43
+        Log: ensure is data malloc()ed by GDBM is free()d (not Perl_mfree()d)
+     Branch: perl
+	   ! ext/GDBM_File/GDBM_File.pm ext/GDBM_File/GDBM_File.xs
+           ! ext/GDBM_File/typemap
+____________________________________________________________________________
+[  2969] By: gsar                                  on 1999/02/17  23:30:47
+        Log: correct slurp mode doc
+     Branch: perl
+           ! pod/perlfunc.pod pod/perlop.pod
+____________________________________________________________________________
+[  2968] By: jhi                                   on 1999/02/17  23:15:49
+        Log: Ultrix hints update.
+             
+             From: Spider Boardman <spider@zk3.dec.com>
+             To: perlbug@perl.com
+             Subject: Not OK: perl 5.00555 on RISC-ultrix 4.4 (UNINSTALLED)
+             Date: Tue, 16 Feb 1999 23:04:28 -0500
+             Message-Id: <9902170404.AA11036@abyss.zk3.dec.com>
+     Branch: cfgperl
+           ! hints/ultrix_4.sh
+____________________________________________________________________________
+[  2966] By: jhi                                   on 1999/02/17  23:09:21
+        Log: Change #2965 wiped out some Sarathy's _55 changes.
+             Now unwiped.
+     Branch: cfgperl
+           ! Configure pp.c t/op/pack.t
+____________________________________________________________________________
+[  2965] By: jhi                                   on 1999/02/17  23:00:04
+        Log: Configure tweaks.
+             
+             Fix the Unixware/SCO uname scan:
+             
+             From: Tom Hughes <thh@cyberscience.com>
+             To: perlbug@perl.com
+             Subject: Not OK: perl 5.00555 on i386-svr4 [actually Unixware 2.1] (UNINSTALLED)
+             Date: 17 Feb 1999 15:34:15 +0000    
+             Message-ID: <yekg185nix4.fsf@elva.cyberscience.com>
+             
+             AIX syscalls.exp scan: the syscall might be marked 32, 3264, or 64
+             
+             From: Joe Buehler <jhpb@hekimian.com>
+             To: perl5-porters@perl.org
+             Subject: setsid not detected by perl 5.005_02 configure under AIX 4.3
+             Date: 12 Feb 1999 11:25:21 -0500
+             Message-ID: <yd3lni3613i.fsf@ganymede.hekimian.com>
+             
+             Make the pthreads joinable constant scan to output to fd 4, not 2.
+     Branch: cfgperl
+           ! Configure
+____________________________________________________________________________
+[  2964] By: gsar                                  on 1999/02/17  21:30:07
+        Log: From: Tom Christiansen <tchrist@jhereg.perl.com>
+             Date: Wed, 17 Feb 1999 06:53:13 -0700
+             Message-Id: <199902171353.GAA15682@jhereg.perl.com>
+             Subject: PATCH: lib/Pod/Functions.pm for perl5.005_55
+     Branch: perl
+           ! lib/Pod/Functions.pm
+____________________________________________________________________________
+[  2963] By: gsar                                  on 1999/02/17  21:18:21
+        Log: fix comppad handling for failures in eval 'qr/(?p{...})/'
+             From: Hugo van der Sanden <hv@crypt.compulink.co.uk>
+             Date: Wed, 17 Feb 1999 10:06:01 +0000
+             Message-Id: <199902171006.KAA10204@crypt.compulink.co.uk>
+             Subject: Re: [5.005_53] panic: pad_free curpad 
+     Branch: perl
+           ! regcomp.c regexec.c t/op/misc.t
+____________________________________________________________________________
+[  2962] By: gsar                                  on 1999/02/16  21:26:28
+        Log: NaNQ? tweak
+     Branch: perl
+           ! t/lib/bigfloatpm.t
+____________________________________________________________________________
+[  2961] By: jhi                                   on 1999/02/16  19:26:38
+        Log: Integrate from mainperl.
+     Branch: cfgperl
+          !> (integrate 37 files)
+____________________________________________________________________________
+[  2960] By: gsar                                  on 1999/02/16  18:04:29
+        Log: undo change#2465 (qw[] is a real list now)
+     Branch: perl
+           ! pod/perlop.pod
+____________________________________________________________________________
+[  2959] By: gsar                                  on 1999/02/16  07:09:33
+        Log: this was 5.005_55
+     Branch: perl
+           ! Changes
+
+----------------
+Version 5.005_55
 ----------------
 
 ____________________________________________________________________________

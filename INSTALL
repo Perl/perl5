@@ -833,6 +833,13 @@ shouldn't do that, but some might.)
 
 =over 4
 
+=item Environment variable clashes
+
+Configure uses a CONFIG variable that is reported to cause trouble on
+ReliantUnix 5.44.  If your system sets this variable, you can try
+unsetting it before you run Configure.  Configure should eventually
+be fixed to avoid polluting the namespace of the environment.
+
 =item Running Configure Interactively
 
 If Configure runs into trouble, remember that you can always run

@@ -161,6 +161,28 @@ strings.  See L<perlfunc/"pack">.
 The new format type modifer '_' is useful for packing and unpacking
 native shorts, ints, and longs.  See L<perlfunc/"pack">.
 
+=head2 $^X variables may now have names longer than one character
+
+Formerly, $^X was synonymous with ${"\cX"}, but $^XY was a syntax
+error.  Now variable names that begin with a control character may be
+arbitrarily long.  However, for compatibility reasons, these variables
+I<must> be written with explicit braces, as C<${^XY}> for example.
+C<${^XYZ}> is synonymous with ${"\cXYZ"}. Variable names with more
+than one control character, such as C<${^XY^Z}>, are illegal.
+
+The old syntax has not changed.  As before, the `^X' may either be a
+literal control-X character or the two character sequence `caret' plus
+`X'.  When the braces are omitted, the variable name stops after the
+control character.  Thus C<"$^XYZ"> continues to be synonymous with
+C<$^X . "YZ"> as before.  
+
+As before, lexical variables may not have names beginning with control
+characters.  As before, variables whose names begin with a control
+character are always forced to be in package `main'.  These variables
+are all reserved for future extensions, except the ones that begin
+with C<^_>, which may be used by user programs and will not acquire a
+special meaning in any future version of Perl.
+
 =head1 Significant bug fixes
 
 =head2 E<lt>HANDLEE<gt> on empty files

@@ -2,7 +2,7 @@
 
 # $RCSfile: lex.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:04 $
 
-print "1..30\n";
+print "1..41\n";
 
 $x = 'x';
 
@@ -117,3 +117,68 @@ $foo =~ s/^not /substr(<<EOF, 0, 0)/e;
   Ignored
 EOF
 print $foo;
+
+# Tests for new extended control-character variables
+# MJD 19990227
+
+{ my $CX = "\cX";
+  my $CXY  ="\cXY";
+  $ {$CX} = 17;
+  $ {$CXY} = 23;
+  if ($ {^XY} != 23) { print "not "  }
+  print "ok 31\n";
+ 
+# Does the syntax where we use the literal control character still work?
+  if (eval "\$ {\cX}" != 17 or $@) { print "not "  }
+  print "ok 32\n";
+
+  eval "\$\cN = 24";                 # Literal control character
+  if ($@ or ${"\cN"} != 24) {  print "not "  }
+  print "ok 33\n";
+  if ($^N != 24) {  print "not "  }  # Control character escape sequence
+  print "ok 34\n";
+
+# Does the old UNBRACED syntax still do what it used to?
+  if ("$^XY" ne "17Y") { print "not " }
+  print "ok 35\n";
+
+  sub XX () { 6 }
+  $ {"\cN\cXX"} = 119; 
+  $^N = 5; #  This should be an unused ^Var.
+  $N = 5;
+  # The second caret here should be interpreted as an xor
+  if (($^N^XX) != 3) { print "not " } 
+  print "ok 36\n";
+#  if (($N  ^  XX()) != 3) { print "not " } 
+#  print "ok 32\n";
+
+  # These next two tests are trying to make sure that
+  # $^FOO is always global; it doesn't make sense to `my' it.
+  # 
+  eval 'my $^X;';
+  print "not " unless index ($@, 'Can\'t use global $^X in "my"') > -1;
+  print "ok 37\n";
+#  print "($@)\n" if $@;
+
+  eval 'my $ {^XYZ};';
+  print "not " unless index ($@, 'Can\'t use global $^XYZ in "my"') > -1;
+  print "ok 38\n";
+#  print "($@)\n" if $@;
+
+# Now let's make sure that caret variables are all forced into the main package.
+  package Someother;
+  $^N = 'Someother';
+  $ {^Nostril} = 'Someother 2';
+  $ {^M} = 'Someother 3';
+  package main;
+  print "not " unless $^N eq 'Someother';
+  print "ok 39\n";
+  print "not " unless $ {^Nostril} eq 'Someother 2';
+  print "ok 40\n";
+  print "not " unless $ {^M} eq 'Someother 3';
+  print "ok 41\n";
+
+  
+}
+
+

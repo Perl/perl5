@@ -563,6 +563,9 @@ perl_destruct(register PerlInterpreter *sv_interp)
     MUTEX_DESTROY(&PL_eval_mutex);
     MUTEX_DESTROY(&PL_cred_mutex);
     COND_DESTROY(&PL_eval_cond);
+#ifdef EMULATE_ATOMIC_REFCOUNTS
+    MUTEX_DESTROY(&PL_svref_mutex);
+#endif /* EMULATE_ATOMIC_REFCOUNTS */
 
     /* As the penultimate thing, free the non-arena SV for thrsv */
     Safefree(SvPVX(PL_thrsv));
