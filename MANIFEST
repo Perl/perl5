@@ -329,6 +329,8 @@ ext/DynaLoader/dl_vmesa.xs	VM/ESA implementation
 ext/DynaLoader/dl_vms.xs	VMS implementation
 ext/DynaLoader/DynaLoader_pm.PL	Dynamic Loader perl module
 ext/DynaLoader/hints/aix.pl	Hint for DynaLoader for named architecture
+ext/DynaLoader/hints/gnukfreebsd.pl	Hint for DynaLoader for named architecture
+ext/DynaLoader/hints/gnuknetbsd.pl	Hint for DynaLoader for named architecture
 ext/DynaLoader/hints/linux.pl	Hint for DynaLoader for named architecture
 ext/DynaLoader/hints/netbsd.pl	Hint for DynaLoader for named architecture
 ext/DynaLoader/hints/openbsd.pl	Hint for DynaLoader for named architecture
@@ -665,6 +667,8 @@ ext/ODBM_File/hints/cygwin.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/dec_osf.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/hpux.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/linux.pl	Hint for NDBM_File for named architecture
+ext/ODBM_File/hints/gnukfreebsd.pl	Hint for NDBM_File for named architecture
+ext/ODBM_File/hints/gnuknetbsd.pl	Hint for NDBM_File for named architecture
 ext/ODBM_File/hints/sco.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/solaris.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/svr4.pl	Hint for ODBM_File for named architecture
@@ -703,6 +707,8 @@ ext/POSIX/hints/bsdos.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/dynixptx.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/freebsd.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/linux.pl	Hint for POSIX for named architecture
+ext/POSIX/hints/gnukfreebsd.pl	Hint for POSIX for named architecture
+ext/POSIX/hints/gnuknetbsd.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/mint.pl		Hint for POSIX for named architecture
 ext/POSIX/hints/netbsd.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/next_3.pl	Hint for POSIX for named architecture
@@ -764,6 +770,8 @@ ext/Socket/t/socketpair.t	See if socketpair works
 ext/Socket/t/Socket.t		See if Socket works
 ext/Storable/ChangeLog		Storable extension
 ext/Storable/hints/linux.pl	Hint for Storable for named architecture
+ext/Storable/hints/gnukfreebsd.pl	Hint for Storable for named architecture
+ext/Storable/hints/gnuknetbsd.pl	Hint for Storable for named architecture
 ext/Storable/Makefile.PL	Storable extension
 ext/Storable/MANIFEST		Storable extension
 ext/Storable/README		Storable extension
@@ -980,6 +988,8 @@ hints/irix_6.sh			Hints for named architecture
 hints/isc_2.sh			Hints for named architecture
 hints/isc.sh			Hints for named architecture
 hints/linux.sh			Hints for named architecture
+hints/gnukfreebsd.sh			Hints for named architecture
+hints/gnuknetbsd.sh			Hints for named architecture
 hints/lynxos.sh			Hints for named architecture
 hints/machten_2.sh		Hints for named architecture
 hints/machten.sh		Hints for named architecture
