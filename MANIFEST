@@ -2601,6 +2601,7 @@ t/op/quotemeta.t		See if quotemeta works
 t/op/rand.t			See if rand works
 t/op/range.t			See if .. works
 t/op/read.t			See if read() works
+t/op/readline.t			See if <> / readline work
 t/op/readdir.t			See if readdir() works
 t/op/recurse.t			See if deep recursion works
 t/op/ref.t			See if refs and objects work
