@@ -98,6 +98,9 @@ struct itmlst_3 {
 #define expand_wild_cards(a,b,c,d)	mp_expand_wild_cards(aTHX_ a,b,c,d)
 #define getredirection(a,b)		mp_getredirection(aTHX_ a,b)
 
+/* see system service docs for $TRNLNM -- NOT the same as LNM$_MAX_INDEX */
+#define PERL_LNM_MAX_ALLOWED_INDEX 127
+
 static char *__mystrtolower(char *str)
 {
   if (str) for (; *str; ++str) *str= tolower(*str);
@@ -152,7 +155,7 @@ Perl_vmstrnenv(pTHX_ const char *lnm, char *eqv, unsigned long int idx,
     }
 #endif
 
-    if (!lnm || !eqv || idx > LNM$_MAX_INDEX) {
+    if (!lnm || !eqv || idx > PERL_LNM_MAX_ALLOWED_INDEX) {
       set_errno(EINVAL); set_vaxc_errno(SS$_BADPARAM); return 0;
     }
     for (cp1 = (char *)lnm, cp2 = uplnm; *cp1; cp1++, cp2++) {
