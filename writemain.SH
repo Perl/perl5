@@ -84,7 +84,6 @@ if test X"$args" != "X" ; then
 	mname=`echo $ext   | sed 's!/!::!g'`
 	cname=`echo $mname | sed 's!:!_!g'`
 
-	echo "    {"
 	if test "$ext" = "DynaLoader"; then
 	    : Must NOT install 'DynaLoader::boot_DynaLoader' as 'bootstrap'!
 	    : boot_DynaLoader is called directly in DynaLoader.pm
@@ -92,7 +91,6 @@ if test X"$args" != "X" ; then
 	else
 	    echo "        newXS(\"${mname}::bootstrap\", boot_${cname}, file);"
 	fi
-	echo "    }"
     done
 fi
 
