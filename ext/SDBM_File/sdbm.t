@@ -439,7 +439,7 @@ unlink <Op_dbmx*>, $Dfile;
     use strict ;
     use SDBM_File ;
 
-    unlink <Op.dbmx*>;
+    unlink <Op_dbmx*>;
     my $bad_key = 0 ;
     my %h = () ;
     ok(69, my $db = tie(%h, 'SDBM_File','Op_dbmx', O_RDWR|O_CREAT, 0640)) ;
@@ -466,7 +466,7 @@ unlink <Op_dbmx*>, $Dfile;
 
     undef $db ;
     untie %h ;
-    unlink <Op.dbmx*>;
+    unlink <Op_dbmx*>;
 }
 
 
@@ -476,7 +476,7 @@ unlink <Op_dbmx*>, $Dfile;
    use warnings ;
    use strict ;
    my %h ;
-   unlink <Op1.dbmx*>;
+   unlink <Op1_dbmx*>;
 
    ok(75, my $db = tie(%h, 'SDBM_File','Op1_dbmx', O_RDWR|O_CREAT, 0640)) ;
 
@@ -511,6 +511,6 @@ unlink <Op_dbmx*>, $Dfile;
 
    undef $db ;
    untie %h;
-   unlink <Op1.dbmx*>;
+   unlink <Op1_dbmx*>;
 }
 exit ;
