@@ -28,6 +28,325 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 20682] By: jhi                                   on 2003/08/13  17:19:03
+        Log: Integrate:
+             [ 20680]
+             Subject: [PATCH] GNU Public General Public General GNU Public License License
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Wed, 13 Aug 2003 11:15:40 -0700
+             Message-ID: <20030813181539.GA22658@windhund.schwern.org>
+             
+             [ 20681]
+             Subject: [PATCH lib/lib_pm.PL utils/perlcc.PL utils/h2xs.PL] RE: script wanted
+             From: Robin Barker <Robin.Barker@npl.co.uk>
+             Date: Wed, 13 Aug 2003 18:05:38 +0100
+             Message-ID: <533D273D4014D411AB1D00062938C4D904046637@hotel.npl.co.uk>
+     Branch: maint-5.8/perl
+	  !> lib/lib_pm.PL pod/perlartistic.pod pod/perlgpl.pod
+	  !> utils/h2xs.PL utils/perlcc.PL
+____________________________________________________________________________
+[ 20679] By: jhi                                   on 2003/08/13  13:55:52
+        Log: Integrate:
+             [ 20678]
+             Add cmpVERSION.pl from Slaven for comparing two
+             Perl source trees for modules that have changed
+             but have the same version numbers.
+     Branch: maint-5.8/perl
+	  +> Porting/cmpVERSION.pl
+	  !> MANIFEST
+____________________________________________________________________________
+[ 20677] By: jhi                                   on 2003/08/13  13:10:04
+        Log: Integrate:
+             [ 20668]
+             perlipc thinko by John P. Linderman.
+             
+             [ 20669]
+             More don't:s for nyetworking.
+             
+             [ 20670]
+             Subject: [PATCH Tie::File] turn the alarm off in the tests (was Re: maint @ 20617 (on VMS))
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Tue, 12 Aug 2003 21:12:00 -0500
+             Message-ID: <3F399E70.4050607@mac.com>
+             
+             [ 20671]
+             Subject: [PATCH] another VMS pod nit
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Wed, 13 Aug 2003 01:01:46 -0500
+             Message-ID: <3F39D44A.4010207@mac.com>
+             
+             [ 20672]
+             One tweak for microperl in OS/2.
+             
+             [ 20673]
+             One tweak from Dave Mitchell.
+             
+             [ 20674]
+             Make (hopefully) the Windows CR CR LF bug go away
+             by making the CRLF layer repel any other CRLF layers.
+             In other words: binmode(FH, ":crlf") in e.g. Win32
+             is effectively a no-op since there already is one
+             CRLF layer in the stack by default.
+             
+             [ 20675]
+             Bye bye, bug.
+             
+             [ 20676]
+             Make Johan's confusion go away, but there are no doubt more
+             similar cases.
+     Branch: maint-5.8/perl
+	  !> lib/File/Find.pm lib/Tie/File/t/24_cache_loop.t
+	  !> lib/Tie/File/t/29_downcopy.t lib/Tie/File/t/29a_upcopy.t
+	  !> perl.h perlio.c pod/perlipc.pod pod/perlport.pod
+	  !> pod/perlrun.pod t/io/crlf.t t/io/layers.t
+	  !> vms/descrip_mms.template
+____________________________________________________________________________
+[ 20675] By: jhi                                   on 2003/08/13  11:58:31
+        Log: Bye bye, bug.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 20667] By: jhi                                   on 2003/08/12  20:04:53
+        Log: Integrate:
+             [ 20659]
+             Document the known CR CR LF issue in Win32.
+             
+             [ 20660]
+             A better patch from Yitzchak Scott-Thoennes for [perl #23287].
+             
+             [ 20661]
+             perlreref tweaks from SADAHIRO Tomoyuki and Ian Truskett.
+             
+             [ 20662]
+             Subject: [PATCH: perl@20617] add handling for new perlreref.pod file to VMS build.
+             From: PPrymmer@factset.com
+             Date: Tue, 12 Aug 2003 16:24:21 -0400
+             Message-ID: <OF26F453CA.0F963A91-ON85256D80.006F991A-85256D80.007017F2@factset.com>
+             
+             [ 20663]
+             More missing pods for VMS.
+             
+             [ 20664]
+             Do some updates also on pod.mak -- which seems to
+             be badly out of date.
+             
+             [ 20665]
+             README.cygwin updates from Gerrit P. Haase.
+     Branch: maint-5.8/perl
+	  !> README.cygwin lib/ExtUtils/Installed.pm pod/perlreref.pod
+	  !> pp_sys.c vms/descrip_mms.template win32/pod.mak
+____________________________________________________________________________
+[ 20659] By: jhi                                   on 2003/08/12  18:39:09
+        Log: Document the known CR CR LF issue in Win32.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 20658] By: jhi                                   on 2003/08/12  13:57:58
+        Log: Integrate:
+             [ 20657]
+             Multiline one-liners are a bit too much to ask.
+     Branch: maint-5.8/perl
+	  !> t/op/closure.t
+____________________________________________________________________________
+[ 20656] By: jhi                                   on 2003/08/12  13:27:44
+        Log: Integrate:
+             [ 20650]
+             Subject: [PATCH 5.8.1 @20218] xsubpp: wrong code
+             From: Ilya Zakharevich <ilya@Math.Berkeley.EDU>
+             Date: Sun, 3 Aug 2003 06:19:02 -0700
+             Message-ID: <20030803131902.GA5146@math.berkeley.edu>
+             
+             [ 20651]
+             Microperl expects C89 (like the rest of Perl).
+             
+             [ 20652]
+             Subject: perlcheat
+             From: Juerd <juerd@cpan.org>
+             Date: Mon, 11 Aug 2003 20:24:34 +0200
+             Message-Id: <20030811182434.GI17748@c3.convolution.nl>
+             
+             [ 20653]
+             Retract #20644 and #20643; on non-microperl non-fcntl
+             systems Wrong Thing would be done.  (And as Sarathy
+             points out, closing both ends of a pipe is rather
+             identical to never opening it...)
+             
+             [ 20654]
+             Add perlcheat to the toc and perl.pod; regen toc. 
+             
+             [ 20655]
+             Advertise perlcheat.
+     Branch: maint-5.8/perl
+	  +> pod/perlcheat.pod
+	  !> MANIFEST README.micro pod/buildtoc.PL pod/perl.pod
+	  !> pod/perltoc.pod pp_sys.c util.c
+____________________________________________________________________________
+[ 20655] By: jhi                                   on 2003/08/12  13:24:21
+        Log: Advertise perlcheat.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 20649] By: jhi                                   on 2003/08/12  12:14:31
+        Log: Integrate:
+             [ 20639]
+             No dor in maint.
+             
+             [ 20640]
+             returning would be good, too.
+             
+             [ 20643]
+             A generally useful hunk from Ilya's microperl patch.
+             (If no fcntl F_SETFD, fake it the best we can.)
+             
+             [ 20644]
+             More microperlish faking in case no fcntl F_SETFD for pipes.
+             
+             [ 20645]
+             Localize PARENT (based on Ilya's microperl patch).
+             
+             [ 20646]
+             Apply much of Ilya's microperl patch, but instead of
+             implementing the opendir()/readdir()/closedir() using
+             external commands give up "ANSI-pureness" and define them
+             in uconfig.sh, also define other stuff like rename() and putenv().
+             Leave out the $| emulation in my_fork() since we are
+             not supposed to have fork() under microperl.
+             
+             [ 20647]
+             Oops.
+             
+             [ 20648]
+             If we are void we cannot return a value.
+     Branch: maint-5.8/perl
+	  !> Makefile.micro README.micro doio.c lib/Cwd.pm mg.c perl.c
+	  !> perl.h perlvars.h pp_sys.c sv.c uconfig.h uconfig.sh util.c
+____________________________________________________________________________
+[ 20642] By: jhi                                   on 2003/08/12  10:04:55
+        Log: Drop problematic test for now.
+     Branch: maint-5.8/perl
+	   - ext/Safe/t/safeops.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 20641] By: jhi                                   on 2003/08/12  10:03:56
+        Log: Retract #20640 and #20639; easier just to not have this
+             test in maint (it seems dependent on opcode.pl, urgh.)
+     Branch: maint-5.8/perl
+	  !> ext/Safe/t/safeops.t
+____________________________________________________________________________
+[ 20638] By: jhi                                   on 2003/08/12  09:45:10
+        Log: Clarify information about the HP-UX cc warning.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 20637] By: jhi                                   on 2003/08/12  09:36:26
+        Log: Looked funny in harness output.
+     Branch: maint-5.8/perl
+	   ! t/op/closure.t
+____________________________________________________________________________
+[ 20636] By: jhi                                   on 2003/08/12  08:58:28
+        Log: Integrate:
+             [ 20620]
+             Subject: [PATCH] [@20616] perlreref.pod incorrectly describes \c
+             From: merlyn@stonehenge.com (Randal L. Schwartz)
+             Date: 11 Aug 2003 09:45:29 -0700
+             Message-ID: <86isp4kus6.fsf@blue.stonehenge.com>
+             
+             Subject: [PATCH] perlreref.pod tweaks
+             From: Ronald J Kimball <rjk@linguist.Thayer.dartmouth.edu>
+             Date: Mon, 11 Aug 2003 13:19:51 -0400
+             Message-ID: <20030811171951.GA332851@linguist.thayer.dartmouth.edu>
+             
+             Plus a note about {,n} not being a quantifier.
+             
+             [ 20621]
+             perldelta tweaks.
+             
+             [ 20622]
+             [perl #23274] B::Deparse wasn't handling correctly builtins that
+             have two filehandles in their prototypes (pipe, socketpair,
+             accept) when non-bareword prototypes were used.
+             
+             [ 20623]
+             Add a new regression test for Safe : tests that all ops
+             can be trapped by a Safe compartement (except for the ones
+             that can't.)
+             
+             [ 20625]
+             Subject: Re: [PATCH] perlreref.pod tweaks
+             From: Iain Truskett <spoon@cpan.org>
+             Date: Tue, 12 Aug 2003 13:59:27 +1000
+             Message-ID: <20030812035927.GJ7914@gytha.anu.edu.au>
+             
+             plus explain "Titlecase".
+             
+             [ 20626]
+             head2-ify many of the head1s, will probably make this look
+             better in HTML.
+             
+             [ 20627]
+             Gotta Get'em Cases Right.
+             
+             [ 20628]
+             Too enthusiastic head2-ing.
+             
+             [ 20629]
+             =head2 ALL CAPS
+             
+             [ 20630]
+             Fix for [perl #23287] segfault in untie.
+             (Well, at least no more coredump.)
+             
+             [ 20631]
+             A new try from Dave Mitchell for [perl #23265].
+             
+             [ 20632]
+             The Debian people have expressed a wish for the boilerplate
+             being specific about the Perl version; patch from Nick Clark.
+             
+             [ 20633]
+             Subject: [PATCH h2xs] produce Foo-Bar/lib/Foo/Bar.pm
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sat, 9 Aug 2003 15:03:02 -0700
+             Message-ID: <20030809220301.GE24919@windhund.schwern.org>
+             
+             (plus one extra catfile() in h2xs.t)
+             
+             [ 20634]
+             Subject: [PATCH 5.8.1 @19053] XSLoader revisted
+             From: Ilya Zakharevich <ilya@Math.Berkeley.EDU>
+             Date: Mon, 21 Apr 2003 22:44:37 -0700
+             Message-ID: <20030422054437.GA8297@math.berkeley.edu>
+             
+             (the XSLoader doc hunk; the h2xs looks like a behavioural change)
+             
+             [ 20635]
+             Advertise neo-h2xs.
+     Branch: maint-5.8/perl
+	  +> ext/Safe/t/safeops.t
+	  !> MANIFEST ext/B/B/Deparse.pm ext/DynaLoader/XSLoader_pm.PL
+	  !> lib/h2xs.t pad.c pod/perlreref.pod pp_sys.c t/op/closure.t
+	  !> t/op/tie.t utils/h2xs.PL
+____________________________________________________________________________
+[ 20635] By: jhi                                   on 2003/08/12  08:48:56
+        Log: Advertise neo-h2xs.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 20621] By: jhi                                   on 2003/08/11  17:38:23
+        Log: perldelta tweaks.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 20618] By: jhi                                   on 2003/08/11  15:49:27
+        Log: $* is not yet fully gone in 5.8.1.
+     Branch: maint-5.8/perl
+	   ! pod/perlreref.pod
+____________________________________________________________________________
+[ 20617] By: jhi                                   on 2003/08/11  12:29:51
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 20616] By: jhi                                   on 2003/08/11  12:25:29
         Log: Advertise the PerlIO::via UTF8 method.
      Branch: maint-5.8/perl
