@@ -665,7 +665,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
      *   -1 = fallback to C locale failed
      */
 
-#ifdef USE_LOCALE
+#if defined(USE_LOCALE) && defined(USE_ENVIRON_ARRAY)
 
 #ifdef USE_LOCALE_CTYPE
     char *curctype   = NULL;
@@ -891,7 +891,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #endif /* USE_LOCALE_NUMERIC */
     }
 
-#endif /* USE_LOCALE */
+#endif /* USE_LOCALE && USE_ENVIRON_ARRAY */
 
 #ifdef USE_LOCALE_CTYPE
     if (curctype != NULL)
