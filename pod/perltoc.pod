@@ -10309,6 +10309,20 @@ disablecache ( ), enablecache ( ), timesum ( T1, T2 )
 
 =back
 
+=head2 ByteLoader - load byte compiled perl code
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
 =head2 Bytecode, B::Bytecode - Perl compiler's bytecode backend
 
 =over 4
@@ -11180,12 +11194,12 @@ C<ignore_versioned_solibs>, C<inc_version_list>, C<inc_version_list_init>,
 C<incpath>, C<inews>, C<installarchlib>, C<installbin>, C<installhtml1dir>,
 C<installhtml3dir>, C<installman1dir>, C<installman3dir>, C<installprefix>,
 C<installprefixexp>, C<installprivlib>, C<installscript>,
-C<installsitearch>, C<installsitebin>, C<installsitehtml1>,
-C<installsitehtml3>, C<installsitelib>, C<installsiteman1>,
-C<installsiteman3>, C<installsitescript>, C<installstyle>,
+C<installsitearch>, C<installsitebin>, C<installsitehtml1dir>,
+C<installsitehtml3dir>, C<installsitelib>, C<installsiteman1dir>,
+C<installsiteman3dir>, C<installsitescript>, C<installstyle>,
 C<installusrbinperl>, C<installvendorarch>, C<installvendorbin>,
-C<installvendorhtml1>, C<installvendorhtml3>, C<installvendorlib>,
-C<installvendorman1>, C<installvendorman3>, C<installvendorscript>,
+C<installvendorhtml1dir>, C<installvendorhtml3dir>, C<installvendorlib>,
+C<installvendorman1dir>, C<installvendorman3dir>, C<installvendorscript>,
 C<intsize>, C<issymlink>, C<ivdformat>, C<ivsize>, C<ivtype>
 
 =item k
@@ -11258,19 +11272,19 @@ C<setprotoent_r_proto>, C<setpwent_r_proto>, C<setservent_r_proto>, C<sh>,
 C<shar>, C<sharpbang>, C<shmattype>, C<shortsize>, C<shrpenv>, C<shsharp>,
 C<sig_count>, C<sig_name>, C<sig_name_init>, C<sig_num>, C<sig_num_init>,
 C<sig_size>, C<signal_t>, C<sitearch>, C<sitearchexp>, C<sitebin>,
-C<sitebinexp>, C<sitehtml1>, C<sitehtml1exp>, C<sitehtml3>,
-C<sitehtml3exp>, C<sitelib>, C<sitelib_stem>, C<sitelibexp>, C<siteman1>,
-C<siteman1exp>, C<siteman3>, C<siteman3exp>, C<siteprefix>,
-C<siteprefixexp>, C<sitescript>, C<sitescriptexp>, C<sizesize>,
-C<sizetype>, C<sleep>, C<smail>, C<so>, C<sockethdr>, C<socketlib>,
-C<socksizetype>, C<sort>, C<spackage>, C<spitshell>, C<sPRId64>,
-C<sPRIeldbl>, C<sPRIEUldbl>, C<sPRIfldbl>, C<sPRIFUldbl>, C<sPRIgldbl>,
-C<sPRIGUldbl>, C<sPRIi64>, C<sPRIo64>, C<sPRIu64>, C<sPRIx64>, C<sPRIXU64>,
-C<srand48_r_proto>, C<srandom_r_proto>, C<src>, C<sSCNfldbl>, C<ssizetype>,
-C<startperl>, C<startsh>, C<static_ext>, C<stdchar>, C<stdio_base>,
-C<stdio_bufsiz>, C<stdio_cnt>, C<stdio_filbuf>, C<stdio_ptr>,
-C<stdio_stream_array>, C<strerror_r_proto>, C<strings>, C<submit>,
-C<subversion>, C<sysman>
+C<sitebinexp>, C<sitehtml1dir>, C<sitehtml1direxp>, C<sitehtml3dir>,
+C<sitehtml3direxp>, C<sitelib>, C<sitelib_stem>, C<sitelibexp>,
+C<siteman1dir>, C<siteman1direxp>, C<siteman3dir>, C<siteman3direxp>,
+C<siteprefix>, C<siteprefixexp>, C<sitescript>, C<sitescriptexp>,
+C<sizesize>, C<sizetype>, C<sleep>, C<smail>, C<so>, C<sockethdr>,
+C<socketlib>, C<socksizetype>, C<sort>, C<spackage>, C<spitshell>,
+C<sPRId64>, C<sPRIeldbl>, C<sPRIEUldbl>, C<sPRIfldbl>, C<sPRIFUldbl>,
+C<sPRIgldbl>, C<sPRIGUldbl>, C<sPRIi64>, C<sPRIo64>, C<sPRIu64>,
+C<sPRIx64>, C<sPRIXU64>, C<srand48_r_proto>, C<srandom_r_proto>, C<src>,
+C<sSCNfldbl>, C<ssizetype>, C<startperl>, C<startsh>, C<static_ext>,
+C<stdchar>, C<stdio_base>, C<stdio_bufsiz>, C<stdio_cnt>, C<stdio_filbuf>,
+C<stdio_ptr>, C<stdio_stream_array>, C<strerror_r_proto>, C<strings>,
+C<submit>, C<subversion>, C<sysman>
 
 =item t
 
@@ -11294,11 +11308,12 @@ C<uvXUformat>
 =item v
 
 C<vendorarch>, C<vendorarchexp>, C<vendorbin>, C<vendorbinexp>,
-C<vendorhtml1>, C<vendorhtml1exp>, C<vendorhtml3>, C<vendorhtml3exp>,
-C<vendorlib>, C<vendorlib_stem>, C<vendorlibexp>, C<vendorman1>,
-C<vendorman1exp>, C<vendorman3>, C<vendorman3exp>, C<vendorprefix>,
-C<vendorprefixexp>, C<vendorscript>, C<vendorscriptexp>, C<version>,
-C<version_patchlevel_string>, C<versiononly>, C<vi>, C<voidflags>
+C<vendorhtml1dir>, C<vendorhtml1direxp>, C<vendorhtml3dir>,
+C<vendorhtml3direxp>, C<vendorlib>, C<vendorlib_stem>, C<vendorlibexp>,
+C<vendorman1dir>, C<vendorman1direxp>, C<vendorman3dir>,
+C<vendorman3direxp>, C<vendorprefix>, C<vendorprefixexp>, C<vendorscript>,
+C<vendorscriptexp>, C<version>, C<version_patchlevel_string>,
+C<versiononly>, C<vi>, C<voidflags>
 
 =item x
 
