@@ -5080,6 +5080,27 @@ Perl_sv_replace(pTHX_ register SV *sv, register SV *nsv)
     sv_clear(sv);
     assert(!SvREFCNT(sv));
     StructCopy(nsv,sv,SV);
+#ifdef PERL_COPY_ON_WRITE
+    if (SvIsCOW_normal(nsv)) {
+	/* We need to follow the pointers around the loop to make the
+	   previous SV point to sv, rather than nsv.  */
+	SV *next;
+	SV *current = nsv;
+	while ((next = SV_COW_NEXT_SV(current)) != nsv) {
+	    assert(next);
+	    current = next;
+	    assert(SvPVX(current) == SvPVX(nsv));
+	}
+	/* Make the SV before us point to the SV after us.  */
+	if (DEBUG_C_TEST) {
+	    PerlIO_printf(Perl_debug_log, "previous is\n");
+	    sv_dump(current);
+	    PerlIO_printf(Perl_debug_log, "move it from "UVxf" to "UVxf"\n",
+			  (UV) SV_COW_NEXT_SV(current), (UV) sv);
+	}
+	SV_COW_NEXT_SV(current) = sv;
+    }
+#endif
     SvREFCNT(sv) = refcnt;
     SvFLAGS(nsv) |= SVTYPEMASK;		/* Mark as freed */
     del_SV(nsv);
@@ -9179,7 +9200,7 @@ void
 Perl_rvpv_dup(pTHX_ SV *dstr, SV *sstr, CLONE_PARAMS* param)
 {
     if (SvROK(sstr)) {
-        SvRV(dstr) = SvWEAKREF(sstr)
+	SvRV(dstr) = SvWEAKREF(sstr)
 		     ? sv_dup(SvRV(sstr), param)
 		     : sv_dup_inc(SvRV(sstr), param);
     }
@@ -9188,6 +9209,12 @@ Perl_rvpv_dup(pTHX_ SV *dstr, SV *sstr, CLONE_PARAMS* param)
 	if (SvLEN(sstr)) {
 	    /* Normal PV - clone whole allocated space */
 	    SvPVX(dstr) = SAVEPVN(SvPVX(sstr), SvLEN(sstr)-1);
+	    if (SvREADONLY(sstr) && SvFAKE(sstr)) {
+		/* Not that normal - actually sstr is copy on write.
+		   But we are a true, independant SV, so:  */
+		SvREADONLY_off(dstr);
+		SvFAKE_off(dstr);
+	    }
 	}
 	else {
 	    /* Special case - not normally malloced for some reason */
@@ -9200,7 +9227,7 @@ Perl_rvpv_dup(pTHX_ SV *dstr, SV *sstr, CLONE_PARAMS* param)
 	    else {
 		/* Some other special case - random pointer */
 		SvPVX(dstr) = SvPVX(sstr);		
-            }
+	    }
 	}
     }
     else {
