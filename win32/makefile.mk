@@ -34,9 +34,14 @@ INST_TOP	*= $(INST_DRV)\perl
 # Visual C++ >= 5.x SP3
 #CCTYPE		*= MSVC60
 # Borland 5.02 or later
-#CCTYPE		*= BORLAND
+CCTYPE		*= BORLAND
 # mingw32+gcc-2.95.2 or better
-CCTYPE		*= GCC
+#CCTYPE		*= GCC
+
+# Specify version of compiler
+CCVER		= 5.2
+# uncomment this if you want to use Borland's VCL runtime library
+CCVCL		= define
 
 #
 # set the install locations of the compiler include/libraries. Running
@@ -45,9 +50,9 @@ CCTYPE		*= GCC
 # If such is the case you may have to set CCHOME explicitly.  Spaces in
 # the path name should not be quoted.
 #
-#CCHOME		*= c:\bc5
+CCHOME		*= F:\Borland\BC5
 #CCHOME		*= $(MSVCDIR)
-CCHOME		*= c:\gcc-2.95.2-msvcrt
+#CCHOME		*= c:\gcc-2.95.2-msvcrt
 CCINCDIR	*= $(CCHOME)\include
 CCLIBDIR	*= $(CCHOME)\lib
 
@@ -117,21 +122,21 @@ INST_ARCH	*= \$(ARCHNAME)
 # uncomment to enable multiple interpreters.  This is need for fork()
 # emulation.
 #
-#USE_MULTI	*= define
+USE_MULTI	*= define
 
 #
 # Beginnings of interpreter cloning/threads; still very incomplete.
 # This should be enabled to get the fork() emulation.  This needs
 # USE_MULTI as well.
 #
-#USE_ITHREADS	*= define
+USE_ITHREADS	*= define
 
 #
 # uncomment to enable the implicit "host" layer for all system calls
 # made by perl.  This needs USE_MULTI above.  This is also needed to
 # get fork().
 #
-#USE_IMP_SYS	*= define
+USE_IMP_SYS	*= define
 
 #
 # WARNING! This option is deprecated and will eventually go away (enable
@@ -351,7 +356,11 @@ INST_HTML	= $(INST_TOP)$(INST_VER)\html
 .IF "$(CCTYPE)" == "BORLAND"
 
 CC		= bcc32
+.IF $(CCVER)!=5.2
+LINK32		= ilink32
+.ELSE
 LINK32		= tlink32
+.END
 LIB32		= tlib /P128
 IMPLIB		= implib -c
 RSC		= rc
@@ -361,16 +370,16 @@ RSC		= rc
 #
 INCLUDES	= -I$(COREDIR) -I.\include -I. -I.. -I"$(CCINCDIR)"
 #PCHFLAGS	= -H -Hc -H=c:\temp\bcmoduls.pch 
-DEFINES		= -DWIN32 $(CRYPT_FLAG)
+DEFINES		= -DWIN32 -D_MT $(CRYPT_FLAG)
 LOCDEFS		= -DPERLDLL -DPERL_CORE
 SUBSYS		= console
 CXX_FLAG	= -P
 
 LIBC		= cw32mti.lib
-LIBFILES	= $(CRYPT_LIB) import32.lib $(LIBC) odbc32.lib odbccp32.lib
+LIBFILES	= $(CRYPT_LIB) import32.lib $(LIBC)
 
 .IF  "$(CFG)" == "Debug"
-OPTIMIZE	= -v -D_RTLDLL -DDEBUGGING
+OPTIMIZE	= -v -D_RTLDLL -DDEBUGGING -y -R
 LINK_DBG	= -v
 .ELSE
 OPTIMIZE	= -O2 -D_RTLDLL
@@ -383,6 +392,9 @@ LINK_FLAGS	= $(LINK_DBG) -L"$(INST_COREDIR)" -L"$(CCLIBDIR)"
 OBJOUT_FLAG	= -o
 EXEOUT_FLAG	= -e
 LIBOUT_FLAG	= 
+.IF $(CCVER)!=5.2
+LINK_FLAGS     += -Gn
+.END
 
 .ELIF "$(CCTYPE)" == "GCC"
 
