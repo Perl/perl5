@@ -608,10 +608,11 @@ Perl_do_trans(pTHX_ SV *sv)
     (void)SvPV(sv, len);
     if (!len)
 	return 0;
-    if (!SvPOKp(sv))
-	(void)SvPV_force(sv, len);
-    if (!(PL_op->op_private & OPpTRANS_IDENTICAL))
+    if (!(PL_op->op_private & OPpTRANS_IDENTICAL)) {
+	if (!SvPOKp(sv))
+	    (void)SvPV_force(sv, len);
 	(void)SvPOK_only_UTF8(sv);
+    }
 
     DEBUG_t( Perl_deb(aTHX_ "2.TBL\n"));
 
