@@ -868,7 +868,7 @@ clear_pmop:
 	    SvREPADTMP_on(PL_regex_pad[(cPMOPo)->op_pmoffset]);
             PM_SETRE(cPMOPo, (cPMOPo)->op_pmoffset);
         }
-#endif 
+#endif
 
 	break;
     }
@@ -3090,7 +3090,7 @@ Perl_newPMOP(pTHX_ I32 type, I32 flags)
             pmop->op_pmoffset = SvIV(repointer);
 	    SvREPADTMP_off(repointer);
 	    sv_setiv(repointer,0);
-        } else { 
+        } else {
             repointer = newSViv(0);
             av_push(PL_regex_padav,SvREFCNT_inc(repointer));
             pmop->op_pmoffset = av_len(PL_regex_padav);
@@ -3098,7 +3098,7 @@ Perl_newPMOP(pTHX_ I32 type, I32 flags)
         }
     }
 #endif
-        
+
         /* link into pm list */
     if (type != OP_TRANS && PL_curstash) {
 	pmop->op_pmnext = HvPMROOT(PL_curstash);
@@ -3807,10 +3807,10 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
 
     if (PERLDB_LINE && PL_curstash != PL_debstash) {
 	SV **svp = av_fetch(CopFILEAV(PL_curcop), (I32)CopLINE(cop), FALSE);
-        if (svp && *svp != &PL_sv_undef ) { 
+        if (svp && *svp != &PL_sv_undef ) {
            (void)SvIOK_on(*svp);
 	    SvIVX(*svp) = PTR2IV(cop);
-	} 
+	}
     }
 
     return prepend_elem(OP_LINESEQ, (OP*)cop, o);
@@ -5883,7 +5883,7 @@ Perl_ck_fun(pTHX_ OP *o)
 		    Perl_warner(aTHX_ WARN_SYNTAX,
 			"Useless use of %s with no values",
 			PL_op_desc[type]);
-		    
+		
 		if (kid->op_type == OP_CONST &&
 		    (kid->op_private & OPpCONST_BARE))
 		{
@@ -6793,7 +6793,7 @@ Perl_ck_subr(pTHX_ OP *o)
 			 contextclass = 0;
 			 *p = '\0';
 			 while (*--p != '[');
-			 bad_type(arg, Perl_form("one of %s", p),
+			 bad_type(arg, Perl_form(aTHX_ "one of %s", p),
 				 gv_ename(namegv), o2);
 			 *proto = s;
 		     } else
