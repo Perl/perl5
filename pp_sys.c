@@ -3679,6 +3679,8 @@ PP(pp_fork)
     EXTEND(SP, 1);
     PERL_FLUSHALL_FOR_CHILD;
     childpid = PerlProc_fork();
+    if (childpid == -1)
+	RETSETUNDEF;
     PUSHi(childpid);
     RETURN;
 #  else
@@ -3742,7 +3744,7 @@ PP(pp_system)
 	}
     }
     PERL_FLUSHALL_FOR_CHILD;
-#if (defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(OS2)
+#if (defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(OS2) && !defined(__CYGWIN__)
     if (PerlProc_pipe(pp) >= 0)
 	did_pipes = 1;
     while ((childpid = vfork()) == -1) {
