@@ -12,7 +12,7 @@ use vars qw(@ISA $VERSION $CLASS @EXPORT);
 
 @EXPORT = qw(qv);
 
-$VERSION = 0.39; # stop using CVS and switch to subversion
+$VERSION = 0.41; # stop using CVS and switch to subversion
 
 $CLASS = 'version';
 

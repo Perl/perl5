@@ -3962,7 +3962,7 @@ Perl_scan_version(pTHX_ char *s, SV *rv, bool qv)
     }
     if ( qv ) { /* quoted versions always become full version objects */
 	I32 len = av_len((AV *)sv);
-	for ( len = 2 - len; len != 0; len-- )
+	for ( len = 2 - len; len > 0; len-- )
 	    av_push((AV *)sv, newSViv(0));
     }
     return s;

@@ -4,7 +4,7 @@
 
 #########################
 
-use Test::More tests => 168;
+use Test::More tests => 170;
 
 diag "Tests with base class" unless $ENV{PERL_CORE};
 
@@ -222,6 +222,8 @@ sub BaseTests {
 	diag "testing CVS Revision" unless $ENV{PERL_CORE};
 	$version = new version qw$Revision: 1.2$;
 	ok ( $version eq "1.2.0", 'qw$Revision: 1.2$ eq 1.2.0' );
+	$version = new version qw$Revision: 1.2.3.4$;
+	ok ( $version eq "1.2.3.4", 'qw$Revision: 1.2.3.4$ eq 1.2.3.4' );
 	
 	# test reformed UNIVERSAL::VERSION
 	diag "Replacement UNIVERSAL::VERSION tests" unless $ENV{PERL_CORE};
