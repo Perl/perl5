@@ -2,11 +2,11 @@ package Text::Wrap;
 
 require Exporter;
 
-@ISA = (Exporter);
-@EXPORT = qw(wrap);
-@EXPORT_OK = qw($columns $wraplong);
+@ISA = qw(Exporter);
+@EXPORT = qw(wrap fill);
+@EXPORT_OK = qw($columns $break $huge);
 
-$VERSION = 98.112801;
+$VERSION = 98.112901;
 
 use vars qw($VERSION $columns $debug $break $huge);
 use strict;
@@ -61,6 +61,24 @@ sub wrap
 	return $r;
 }
 
+sub fill 
+{
+	my ($ip, $xp, @raw) = @_;
+	my @para;
+	my $pp;
+
+	for $pp (split(/\n\s+/, join("\n",@raw))) {
+		$pp =~ s/\s+/ /g;
+		my $x = wrap($ip, $xp, $pp);
+		push(@para, $x);
+	}
+
+	# if paragraph_indent is the same as line_indent, 
+	# separate paragraphs with blank lines
+
+	return join ($ip eq $xp ? "\n\n" : "\n", @para);
+}
+
 1;
 __END__
 
@@ -73,6 +91,7 @@ Text::Wrap - line wrapping to form simple paragraphs
 	use Text::Wrap
 
 	print wrap($initial_tab, $subsequent_tab, @text);
+	print fill($initial_tab, $subsequent_tab, @text);
 
 	use Text::Wrap qw(wrap $columns $huge);
 
@@ -95,6 +114,12 @@ are broken up.  Previous versions of wrap() die()ed instead.
 To restore the old (dying) behavior, set $Text::Wrap::huge to
 'die'.
 
+Text::Wrap::fill() is a simple multi-paragraph formatter.  It formats
+each paragraph separately and then joins them together when it's done.  It
+will destory any whitespace in the original text.  It breaks text into
+paragraphs by looking for whitespace after a newline.  In other respects
+it acts like wrap().
+
 =head1 EXAMPLE
 
 	print wrap("\t","","This is a bit of text that forms 
@@ -103,5 +128,5 @@ To restore the old (dying) behavior, set $Text::Wrap::huge to
 =head1 AUTHOR
 
 David Muir Sharnoff <muir@idiom.com> with help from Tim Pierce and
-many others.
+many many others.  
 

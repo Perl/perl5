@@ -1059,7 +1059,8 @@ t/lib/socket.t		See if Socket works
 t/lib/soundex.t		See if Soundex works
 t/lib/symbol.t		See if Symbol works
 t/lib/texttabs.t	See if Text::Tabs works
-t/lib/textwrap.t	See if Text::Wrap works
+t/lib/textfill.t	See if Text::Wrap::fill works
+t/lib/textwrap.t	See if Text::Wrap::wrap works
 t/lib/thread.t		Basic test of threading (skipped if no threads) 
 t/lib/tie-push.t	Test for Tie::Array
 t/lib/tie-stdarray.t	Test for Tie::StdArray
