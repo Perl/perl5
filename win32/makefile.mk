@@ -38,10 +38,10 @@ CCTYPE		*= BORLAND
 # mingw32+gcc-2.95.2 or better
 #CCTYPE		*= GCC
 
-# Specify version of compiler
-CCVER		= 5.2
-# uncomment this if you want to use Borland's VCL runtime library
-CCVCL		= define
+#
+# uncomment this if your Borland compiler is older than v5.5.
+#
+#BCCVER		= 5.2
 
 #
 # set the install locations of the compiler include/libraries. Running
@@ -53,6 +53,7 @@ CCVCL		= define
 CCHOME		*= F:\Borland\BC5
 #CCHOME		*= $(MSVCDIR)
 #CCHOME		*= c:\gcc-2.95.2-msvcrt
+
 CCINCDIR	*= $(CCHOME)\include
 CCLIBDIR	*= $(CCHOME)\lib
 
@@ -122,21 +123,21 @@ INST_ARCH	*= \$(ARCHNAME)
 # uncomment to enable multiple interpreters.  This is need for fork()
 # emulation.
 #
-USE_MULTI	*= define
+#USE_MULTI	*= define
 
 #
 # Beginnings of interpreter cloning/threads; still very incomplete.
 # This should be enabled to get the fork() emulation.  This needs
 # USE_MULTI as well.
 #
-USE_ITHREADS	*= define
+#USE_ITHREADS	*= define
 
 #
 # uncomment to enable the implicit "host" layer for all system calls
 # made by perl.  This needs USE_MULTI above.  This is also needed to
 # get fork().
 #
-USE_IMP_SYS	*= define
+#USE_IMP_SYS	*= define
 
 #
 # WARNING! This option is deprecated and will eventually go away (enable
@@ -269,6 +270,8 @@ PERL_MALLOC	*= undef
 
 USE_5005THREADS	*= undef
 
+BCCVER		*= 5.5
+
 .IF "$(USE_5005THREADS)" == "define"
 USE_ITHREADS	!= undef
 .ENDIF
@@ -356,7 +359,7 @@ INST_HTML	= $(INST_TOP)$(INST_VER)\html
 .IF "$(CCTYPE)" == "BORLAND"
 
 CC		= bcc32
-.IF $(CCVER)!=5.2
+.IF $(BCCVER) >= 5.5
 LINK32		= ilink32
 .ELSE
 LINK32		= tlink32
@@ -392,7 +395,7 @@ LINK_FLAGS	= $(LINK_DBG) -L"$(INST_COREDIR)" -L"$(CCLIBDIR)"
 OBJOUT_FLAG	= -o
 EXEOUT_FLAG	= -e
 LIBOUT_FLAG	= 
-.IF $(CCVER)!=5.2
+.IF $(BCCVER) >= 5.5
 LINK_FLAGS     += -Gn
 .END
 
