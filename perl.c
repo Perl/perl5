@@ -303,7 +303,7 @@ no threads.
 */
 
 int
-Perl_nothreadhook(pTHXx)
+Perl_nothreadhook(pTHX)
 {
     return 0;
 }
