@@ -926,6 +926,8 @@ ${^WIDE_SYSTEM_CALLS}, $EXECUTABLE_NAME, $^X, $ARGV, @ARGV, @INC, @_, %INC,
 
 =item DESCRIPTION
 
+=over 4
+
 =item Declaration and Access of Arrays of Arrays
 
 =item Growing Your Own
@@ -933,6 +935,8 @@ ${^WIDE_SYSTEM_CALLS}, $EXECUTABLE_NAME, $^X, $ARGV, @ARGV, @INC, @_, %INC,
 =item Access and Printing
 
 =item Slices
+
+=back
 
 =item SEE ALSO
 
@@ -1815,8 +1819,6 @@ http://testers.cpan.org/
 
 =item DOS and Derivatives
 
-Build instructions for OS/2, L<perlos2>
-
 =item S<Mac OS>
 
 =item VMS
@@ -2303,8 +2305,8 @@ Look around, Check it's new, Discuss the need, Choose a name, Check again
 =item Step-by-step: Making the module
 
 Start with F<h2xs>, Use L<strict|strict> and L<warnings|warnings>, Use
-L<Carp|Carp>, Use L<Exporter|Exporter> - wisely!,
-Use L<plain old documentation|perlpod>, Write tests, Write the README
+L<Carp|Carp>, Use L<Exporter|Exporter> - wisely!, Use L<plain old
+documentation|perlpod>, Write tests, Write the README
 
 =item Step-by-step: Distributing your module
 
@@ -3892,12 +3894,12 @@ sv_setref_pvn, sv_setref_uv, sv_setsv, sv_setsv_mg, sv_setuv, sv_setuv_mg,
 sv_true, sv_unmagic, sv_unref, sv_unref_flags, sv_upgrade, sv_usepvn,
 sv_usepvn_mg, sv_utf8_decode, sv_utf8_downgrade, sv_utf8_encode,
 sv_utf8_upgrade, sv_vcatpvfn, sv_vsetpvfn, THIS, toLOWER, toUPPER,
-utf8_distance, utf8_hop, utf8_length, utf8_to_bytes, utf8_to_uv,
-utf8_to_uv_simple, uv_to_utf8, warn, XPUSHi, XPUSHn, XPUSHp, XPUSHs,
-XPUSHu, XS, XSRETURN, XSRETURN_EMPTY, XSRETURN_IV, XSRETURN_NO,
-XSRETURN_NV, XSRETURN_PV, XSRETURN_UNDEF, XSRETURN_YES, XST_mIV, XST_mNO,
-XST_mNV, XST_mPV, XST_mUNDEF, XST_mYES, XS_VERSION, XS_VERSION_BOOTCHECK,
-Zero
+utf8n_to_uvchr, utf8n_to_uvuni, utf8_distance, utf8_hop, utf8_length,
+utf8_to_bytes, utf8_to_uvchr, utf8_to_uvuni, uvchr_to_utf8, uvuni_to_utf8,
+warn, XPUSHi, XPUSHn, XPUSHp, XPUSHs, XPUSHu, XS, XSRETURN, XSRETURN_EMPTY,
+XSRETURN_IV, XSRETURN_NO, XSRETURN_NV, XSRETURN_PV, XSRETURN_UNDEF,
+XSRETURN_YES, XST_mIV, XST_mNO, XST_mNV, XST_mPV, XST_mUNDEF, XST_mYES,
+XS_VERSION, XS_VERSION_BOOTCHECK, Zero
 
 =item AUTHORS
 
@@ -5053,7 +5055,7 @@ Thread, attrs, fields, re
 =item Changes in existing modules
 
 Benchmark, Carp, CGI, Fcntl, Math::Complex, Math::Trig, POSIX, DB_File,
-MakeMaker, CPAN, Cwd, Benchmark
+MakeMaker, CPAN, Cwd
 
 =back
 
@@ -5688,6 +5690,8 @@ EMX, RSX, HPFS, pdksh
 
 =over 4
 
+=item "It does not work"
+
 =item I cannot run external programs
 
 =item I cannot embed perl into my program, or use F<perl.dll> from my
@@ -5746,6 +5750,8 @@ Perl manual in F<.INF> format, Pdksh
 
 =over 4
 
+=item The short story
+
 =item Prerequisites
 
 =item Getting perl source
@@ -5759,7 +5765,7 @@ Perl manual in F<.INF> format, Pdksh
 =item Testing
 
 A lot of C<bad free>, Process terminated by SIGTERM/SIGINT, F<op/fs.t>,
-F<lib/io_pipe.t>, F<lib/io_sock.t>, F<op/stat.t>, F<lib/io_udp.t>
+F<op/stat.t>
 
 =item Installing the built perl
 
@@ -5806,13 +5812,29 @@ C<File::Copy::syscopy>, C<DynaLoader::mod2fname>,  C<Cwd::current_drive()>,
 C<Cwd::sys_is_absolute(name)>,	C<Cwd::sys_is_rooted(name)>, 
 C<Cwd::sys_is_relative(name)>,	C<Cwd::sys_cwd(name)>, 
 C<Cwd::sys_abspath(name, dir)>,  C<Cwd::extLibpath([type])>, 
-C<Cwd::extLibpath_set( path [, type ] )>
+C<Cwd::extLibpath_set( path [, type ] )>,
+C<OS2::Error(do_harderror,do_exception)>, C<OS2::Errors2Drive(drive)>,
+OS2::SysInfo(), OS2::BootDrive(), C<OS2::MorphPM(serve)>,
+C<OS2::UnMorphPM(serve)>, C<OS2::Serve_Messages(force)>,
+C<OS2::Process_Messages(force [, cnt])>, C<OS2::_control87(new,mask)>,
+OS2::get_control87(), C<OS2::set_control87_em(new=MCW_EM,mask=MCW_EM)>
+
+=item Prebuilt variables:
+
+$OS2::emx_rev, $OS2::emx_env, $OS2::os_ver
 
 =item Misfeatures
 
 =item Modifications
 
-C<popen>, C<tmpnam>, C<tmpfile>, C<ctermid>, C<stat>, C<flock>
+C<popen>, C<tmpnam>, C<tmpfile>, C<ctermid>, C<stat>, C<mkdir>, C<rmdir>,
+C<flock>
+
+=item Identifying DLLs
+
+=item Centralized management of resources
+
+C<HAB>, C<HMQ>
 
 =back
 
@@ -5833,8 +5855,6 @@ C<popen>, C<tmpnam>, C<tmpfile>, C<ctermid>, C<stat>, C<flock>
 =item Why dynamic linking?
 
 =item Why chimera build?
-
-explicit fork(), open FH, "|-", open FH, "-|"
 
 =back
 
@@ -6404,8 +6424,8 @@ new, phash
 
 =back
 
-=head2 integer - Perl pragma to compute arithmetic in integer instead of
-double
+=head2 integer - Perl pragma to use integer arithmetic instead of floating
+point
 
 =over 4
 
@@ -6687,6 +6707,15 @@ and non-UTF data.
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+=over 4
+
+=item Utility functions
+
+$num_octets = utf8::upgrade($string);, utf8::downgrade($string[, CHECK]),
+utf8::encode($string), $flag = utf8::decode($string)
+
+=back
 
 =item SEE ALSO
 
@@ -6973,8 +7002,7 @@ bytecode
 
 B<-ofilename>, B<-afilename>, B<-->, B<-f>, B<-fcompress-nullops>,
 B<-fomit-sequence-numbers>, B<-fbypass-nullops>, B<-On>, B<-D>, B<-Do>,
-B<-Db>, B<-Da>, B<-DC>, B<-S>, B<-upackage>    Stores package in the
-output.    =back
+B<-Db>, B<-Da>, B<-DC>, B<-S>, B<-upackage>
 
 =item EXAMPLES
 
@@ -7314,8 +7342,7 @@ STYLE ] ), cmpthese ( RESULTSHASHREF ), countit(TIME, CODE), disablecache (
 
 B<-ofilename>, B<-afilename>, B<-->, B<-f>, B<-fcompress-nullops>,
 B<-fomit-sequence-numbers>, B<-fbypass-nullops>, B<-On>, B<-D>, B<-Do>,
-B<-Db>, B<-Da>, B<-DC>, B<-S>, B<-upackage>    Stores package in the
-output.    =back
+B<-Db>, B<-Da>, B<-DC>, B<-S>, B<-upackage>
 
 =item EXAMPLES
 
@@ -8679,8 +8706,7 @@ strings in binary data, perl/Encode wrappers on non-Unicode XS modules
 
 =item Messing with Perl's Internals
 
-utf8_downgrade($string[, CHECK]), is_utf8(STRING [, CHECK]),
-valid_utf8(STRING)
+is_utf8(STRING [, CHECK]), valid_utf8(STRING)
 
 =item IMPLEMENTATION CLASSES
 
@@ -8955,8 +8981,6 @@ canonpath, cflags, manifypods, perl_archive
 
 =back
 
-perl_archive_after
-
 =head2 ExtUtils::MM_OS2 - methods to override UN*X behaviour in
 ExtUtils::MakeMaker
 
@@ -8966,7 +8990,11 @@ ExtUtils::MakeMaker
 
 =item DESCRIPTION
 
+=item METHODS
+
 =back
+
+perl_archive_after
 
 =head2 ExtUtils::MM_Unix - methods used by ExtUtils::MakeMaker
 
@@ -10096,8 +10124,6 @@ $fh->print, $fh->printf, $fh->getline, $fh->getlines
 
 =item SYNOPSIS
 
-    use Filter::Util::Call ;
-
 =item DESCRIPTION
 
 =over 4
@@ -10125,6 +10151,8 @@ B<$_>, B<$status>, B<filter_read> and B<filter_read_exact>, B<filter_del>
 =item Example 4: Using filter_del
 
 =back
+
+=item Filter::Simple
 
 =item AUTHOR
 
@@ -10420,6 +10448,8 @@ $io->getpos, $io->setpos, $io->setpos ( POS, WHENCE ), WHENCE=0 (SEEK_SET),
 WHENCE=1 (SEEK_CUR), WHENCE=1 (SEEK_END), $io->sysseek( POS, WHENCE ),
 $io->tell
 
+=item SEE ALSO
+
 =item HISTORY
 
 =back
@@ -10657,6 +10687,8 @@ I/O objects
 $io->getpos, $io->setpos, $io->setpos ( POS, WHENCE ), WHENCE=0 (SEEK_SET),
 WHENCE=1 (SEEK_CUR), WHENCE=1 (SEEK_END), $io->sysseek( POS, WHENCE ),
 $io->tell
+
+=item SEE ALSO
 
 =item HISTORY
 
@@ -10906,6 +10938,183 @@ set ( NAME => VALUE [, NAME => VALUE ...] ), setall ( VALUES ), setval ( N
 
 =back
 
+=head2 Locale::Constants - constants for Locale codes
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item KNOWN BUGS AND LIMITATIONS
+
+=item SEE ALSO
+
+Locale::Language, Locale::Country, Locale::Currency
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 Locale::Country - ISO codes for country identification (ISO 3166)
+
+=over 4
+
+=item SYNOPSIS
+
+=back
+
+=over 4
+
+=item DESCRIPTION
+
+B<alpha-2>, B<alpha-3>, B<numeric>
+
+=back
+
+=over 4
+
+=item CONVERSION ROUTINES
+
+code2country( CODE, [ CODESET ] ), country2code( STRING, [ CODESET ] ),
+country_code2code( CODE, CODESET, CODESET )
+
+=back
+
+=over 4
+
+=item QUERY ROUTINES
+
+C<all_country_codes( [ CODESET ] )>, C<all_country_names( [ CODESET ] )>
+
+=back
+
+=over 4
+
+=item CODE ALIASING
+
+=back
+
+=over 4
+
+=item EXAMPLES
+
+=item DOMAIN NAMES
+
+=item KNOWN BUGS AND LIMITATIONS
+
+=item SEE ALSO
+
+Locale::Language, Locale::Currency, ISO 3166,
+http://www.din.de/gremien/nas/nabd/iso3166ma/,
+http://www.egt.ie/standards/iso3166/iso3166-1-en.html,
+http://www.cia.gov/cia/publications/factbook/docs/app-f.html
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 Locale::Currency - ISO three letter codes for currency
+identification (ISO 4217)
+
+=over 4
+
+=item SYNOPSIS
+
+=back
+
+=over 4
+
+=item DESCRIPTION
+
+XTS, XXX
+
+=back
+
+=over 4
+
+=item CONVERSION ROUTINES
+
+code2currency(), currency2code()
+
+=back
+
+=over 4
+
+=item QUERY ROUTINES
+
+C<all_currency_codes()>, C<all_currency_names()>
+
+=back
+
+=over 4
+
+=item EXAMPLES
+
+=item KNOWN BUGS AND LIMITATIONS
+
+=item SEE ALSO
+
+Locale::Country, ISO 4217:1995, http://www.bsi-global.com/iso4217currency
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 Locale::Language - ISO two letter codes for language identification
+(ISO 639)
+
+=over 4
+
+=item SYNOPSIS
+
+=back
+
+=over 4
+
+=item DESCRIPTION
+
+=back
+
+=over 4
+
+=item CONVERSION ROUTINES
+
+code2language(), language2code()
+
+=back
+
+=over 4
+
+=item QUERY ROUTINES
+
+C<all_language_codes()>, C<all_language_names()>
+
+=back
+
+=over 4
+
+=item EXAMPLES
+
+=item KNOWN BUGS AND LIMITATIONS
+
+=item SEE ALSO
+
+Locale::Country, Locale::Currency, ISO 639:1988 (E/F),
+http://lcweb.loc.gov/standards/iso639-2/langhome.html
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
 =head2 Math::BigFloat - Arbitrary length float math package
 
 =over 4
@@ -11026,6 +11235,8 @@ cylindrical_to_spherical, spherical_to_cartesian, spherical_to_cylindrical
 =over 4
 
 =item SYNOPSIS
+
+=item DESCRIPTION
 
 C<O_RDONLY>, C<O_WRONLY>, C<O_RDWR>
 
@@ -11151,6 +11362,8 @@ functions
 =over 4
 
 =item SYNOPSIS
+
+=item DESCRIPTION
 
 C<O_RDONLY>, C<O_WRONLY>, C<O_RDWR>
 
@@ -11424,18 +11637,16 @@ after =back
 =item Warnings
 
 multiple occurence of link target I<name>, line containing nothing but
-whitespace in paragraph, file does not start with =head, No numeric
-argument for =over, previous =item has no contents, preceding non-item
-paragraph(s), =item type mismatch (I<one> vs. I<two>), I<N> unescaped
-C<E<lt>E<gt>> in paragraph, Unknown entity, No items in =over, No argument
-for =item, empty section in previous paragraph, Verbatim paragraph in NAME
-section
+whitespace in paragraph, file does not start with =head, previous =item has
+no contents, preceding non-item paragraph(s), =item type mismatch (I<one>
+vs. I<two>), I<N> unescaped C<E<lt>E<gt>> in paragraph, Unknown entity, No
+items in =over, No argument for =item, empty section in previous paragraph,
+Verbatim paragraph in NAME section
 
 =item Hyperlinks
 
-collapsing newlines to blanks, ignoring leading/trailing whitespace in
-link, (section) in '$page' deprecated, alternative text/node '%s' contains
-non-escaped | or /
+ignoring leading/trailing whitespace in link, (section) in '$page'
+deprecated, alternative text/node '%s' contains non-escaped | or /
 
 =back
 
@@ -12682,6 +12893,38 @@ C<Storable::is_retrieving>
 
 =back
 
+=head2 Switch - A switch statement for Perl
+
+=over 4
+
+=item VERSION
+
+=item SYNOPSIS
+
+=item BACKGROUND
+
+=item DESCRIPTION
+
+=over 4
+
+=item Allowing fall-through
+
+=item Automating fall-through
+
+=item Higher-order Operations
+
+=back
+
+=item DEPENDENCIES
+
+=item AUTHOR
+
+=item BUGS
+
+=item COPYRIGHT
+
+=back
+
 =head2 Symbol - manipulate Perl symbols and their names
 
 =over 4
@@ -12822,7 +13065,7 @@ C<tkRunning>, C<ornaments>, C<newTTY>
 
 =back
 
-=head2	 Test - provides a simple framework for writing test scripts
+=head2 Test - provides a simple framework for writing test scripts
 
 =over 4
 
@@ -12856,7 +13099,7 @@ NORMAL TESTS, SKIPPED TESTS, TODO TESTS
 
 =item The test script output
 
-B<1..M>, B<'ok', 'not ok'.  Ok?>, B<test numbers>,
+B<'1..M'>, B<'ok', 'not ok'.  Ok?>, B<test numbers>,
 B<$Test::Harness::verbose>, B<$Test::Harness::switches>, B<Skipping tests>,
 B<Todo tests>, B<Bail out!>, B<Comments>
 
@@ -12894,6 +13137,75 @@ C<HARNESS_ACTIVE>
 =item DESCRIPTION
 
 =item EXAMPLE
+
+=back
+
+=head2 Text::Balanced - Extract delimited text sequences from strings.
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item General behaviour in list contexts
+
+[0], [1], [2]
+
+=item General behaviour in scalar and void contexts
+
+=item A note about prefixes
+
+=item C<extract_delimited>
+
+=item C<extract_bracketed>
+
+=item C<extract_tagged>
+
+C<reject =E<gt> $listref>, C<ignore =E<gt> $listref>, C<fail =E<gt> $str>,
+[0], [1], [2], [3], [4], [5]
+
+=item C<gen_extract_tagged>
+
+=item C<extract_quotelike>
+
+[0], [1], [2], [3], [4], [5], [6], [7], [8], [9], [10]
+
+=item C<extract_quotelike> and "here documents"
+
+[0], [1], [2], [3], [4], [5], [6], [7..10]
+
+=item C<extract_codeblock>
+
+=item C<extract_multiple>
+
+=item C<gen_delimited_pat>
+
+=back
+
+=item DIAGNOSTICS
+
+ C<Did not find a suitable bracket: "%s">,  C<Did not find prefix: /%s/>, 
+C<Did not find opening bracket after prefix: "%s">,  C<No quotelike
+operator found after prefix: "%s">,  C<Unmatched closing bracket: "%c">, 
+C<Unmatched opening bracket(s): "%s">, C<Unmatched embedded quote (%s)>,
+C<Did not find closing delimiter to match '%s'>,  C<Mismatched closing
+bracket: expected "%c" but found "%s">,  C<No block delimiter found after
+quotelike "%s">, C<Did not find leading dereferencer>, C<Bad identifier
+after dereferencer>, C<Did not find expected opening bracket at %s>,
+C<Improperly nested codeblock at %s>,  C<Missing second block for quotelike
+"%s">, C<No match found for opening bracket>, C<Did not find opening tag:
+/%s/>, C<Unable to construct closing tag to match: /%s/>, C<Found invalid
+nested tag: %s>, C<Found unbalanced nested tag: %s>, C<Did not find closing
+tag>
+
+=item AUTHOR
+
+=item BUGS AND IRRITATIONS
+
+=item COPYRIGHT
 
 =back
 
@@ -13202,6 +13514,18 @@ function
 
 isa ( TYPE ), can ( METHOD ), VERSION ( [ REQUIRE ] ), UNIVERSAL::isa (
 VAL, TYPE ), UNIVERSAL::can ( VAL, METHOD )
+
+=back
+
+=head2 Unicode::UCD - Unicode character database versioning
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item SEE ALSO
 
 =back
 
