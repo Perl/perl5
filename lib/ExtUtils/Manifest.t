@@ -113,7 +113,7 @@ ok( exists( ExtUtils::Manifest::manifind()->{$quux} ), "manifind found $quux" );
 # only MANIFEST and foo are in the manifest
 my $files = maniread();
 is( keys %$files, 2, 'two files found' );
-is( join(' ', sort keys %$files), 'MANIFEST foo', 'both files found' );
+is( join(' ', sort { lc($a) cmp lc($b) } keys %$files), 'foo MANIFEST', 'both files found' );
 
 # poison the manifest, and add a comment that should be reported
 add_file( 'MANIFEST', 'none #none' );
