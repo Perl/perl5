@@ -2104,6 +2104,7 @@ regwhite(char *p, char *e)
 STATIC char*
 regpposixcc(I32 value)
 {
+    dTHR;
     char *posixcc = 0;
 
     if (value == '[' && PL_regcomp_parse + 1 < PL_regxend &&

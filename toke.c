@@ -1089,14 +1089,17 @@ scan_const(char *start)
 		    continue;
 		}
 		/* FALL THROUGH */
-	    /* default action is to copy the quoted character */
 	    default:
-		if (ckWARN(WARN_UNSAFE) && isALPHA(*s))
-		    warner(WARN_UNSAFE, 
-			   "Unrecognized escape \\%c passed through",
-			   *s);
-		*d++ = *s++;
-		continue;
+	        {
+		    dTHR;
+		    if (ckWARN(WARN_UNSAFE) && isALPHA(*s))
+			warner(WARN_UNSAFE, 
+			       "Unrecognized escape \\%c passed through",
+			       *s);
+		    /* default action is to copy the quoted character */
+		    *d++ = *s++;
+		    continue;
+		}
 
 	    /* \132 indicates an octal constant */
 	    case '0': case '1': case '2': case '3':
