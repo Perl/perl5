@@ -1,7 +1,7 @@
 package File::Find;
 require 5.000;
 require Exporter;
-require Config;
+use Config;
 require Cwd;
 require File::Basename;
 
@@ -133,8 +133,8 @@ sub finddir {
 
 		# Get link count and check for directoriness.
 
-		($dev,$ino,$mode,$nlink) = ($Is_VMS ? stat($_) : lstat($_))
-		    unless ($nlink || $dont_use_nlink);
+		($dev,$ino,$mode,$nlink) = ($Is_VMS ? stat($_) : lstat($_));
+		    # unless ($nlink || $dont_use_nlink);
 		
 		if (-d _) {
 
@@ -243,13 +243,13 @@ sub finddepthdir {
 $dont_use_nlink = 1 if ($Config::Config{'dont_use_nlink'});
 
 # These are hard-coded for now, but may move to hint files.
-if ($Config::Config{'osname'} eq 'VMS') {
+if ($^O eq 'VMS') {
   $Is_VMS = 1;
   $dont_use_nlink = 1;
 }
 
-$dont_use_nlink = 1 if $Config::Config{'osname'} =~ m:^os/?2$:i ;
-$dont_use_nlink = 1 if $Config::Config{'osname'} =~ m:^mswin32$:i ;
+$dont_use_nlink = 1 if $^O eq 'os2';
+$dont_use_nlink = 1 if $^O =~ m:^mswin32$:i ;
 
 1;
 
