@@ -831,7 +831,7 @@ filetime_from_time(PFILETIME pFileTime, time_t Time)
 }
 
 DllExport int
-win32_utime(const char *filename, const struct utimbuf *times)
+win32_utime(const char *filename, struct utimbuf *times)
 {
     HANDLE handle;
     FILETIME ftCreate;
