@@ -3462,7 +3462,7 @@ Perl_my_fflush_all(pTHX)
 double
 Perl_my_atof(const char* s) {
 #ifdef USE_LOCALE_NUMERIC
-    if (PL_numeric_local) {
+    if ((PL_hints & HINT_LOCALE) && PL_numeric_local) {
 	double x, y;
 
 	x = atof(s);

@@ -33,7 +33,7 @@ eval {
 # and mingw32 uses said silly CRT
 $have_setlocale = 0 if $^O eq 'MSWin32' && $Config{cc} =~ /^(cl|gcc)/i;
 
-print "1..", ($have_setlocale ? 114 : 98), "\n";
+print "1..", ($have_setlocale ? 115 : 98), "\n";
 
 use vars qw(&LC_ALL);
 
@@ -253,7 +253,7 @@ Esperanto:eo:eo:3
 Eesti Estonian:et:ee:4 6 13
 Suomi Finnish:fi:fi:1 15
 Flamish::fl:1 15
-français French:fr:be ca ch fr lu:1 15
+Français French:fr:be ca ch fr lu:1 15
 Deutsch German:de:at be ch de lu:1 15
 Euskaraz Basque:eu:es fr:1 15
 Gáidhlig Gaelic:gd:gb uk:1 14 15
@@ -276,7 +276,7 @@ Latvian:lv:lv:4 6 13
 Lithuanian:lt:lt:4 6 13
 Macedonian:mk:mk:1 15
 Maltese:mt:mt:3
-norsk Norwegian:no:no:1
+Norsk Norwegian:no:no:1 15
 Occitan:oc:es:1 15
 Polski Polish:pl:pl:2
 Português Portuguese:po:po br:1 15
@@ -286,8 +286,8 @@ Serbski Serbian:sr:yu:5
 Slovak:sk:sk:2
 Slovene Slovenian:sl:si:2
 Espanõl Spanish:es:ar bo cl co cr do ec es gt hn mx ni pa pe py sv uy ve:1 15
-Sqhip:sq:sq:1 15
-Swedish:sv:fi se:1 15
+Sqhip Albanian:sq:sq:1 15
+Svenska Swedish:sv:fi se:1 15
 Thai:th:th:11 tis620
 Turkish:tr:tr:9 turkish8
 Yiddish:::1 15
@@ -368,6 +368,8 @@ foreach my $locale (split(/\n/, $locales)) {
 	}
     }
 }
+
+setlocale(LC_ALL, "C");
 
 @Locale = sort @Locale;
 
@@ -648,7 +650,7 @@ foreach $Locale (@Locale) {
     }
 }
 
-foreach (99..114) {
+foreach (99..115) {
     if ($Problem{$_}) {
 	if ($_ == 102) {
 	    print "# The failure of test 102 is not necessarily fatal.\n";
@@ -662,7 +664,7 @@ foreach (99..114) {
 
 my $didwarn = 0;
 
-foreach (99..114) {
+foreach (99..115) {
     if ($Problem{$_}) {
 	my @f = sort keys %{ $Problem{$_} };
 	my $f = join(" ", @f);
