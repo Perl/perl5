@@ -154,7 +154,7 @@ for indenting, ^D is for undenting, and ^O is for blockdenting--
 as it were.  A more complete example, with comments, can be found at
 http://www.cpan.org/authors/id/TOMC/scripts/toms.exrc.gz
 
-The a2ps http://www-inf.enst.fr/%7Edemaille/a2ps/black+white.ps does
+The a2ps http://www-inf.enst.fr/%7Edemaille/a2ps/black+white.ps.gz does
 lots of things related to generating nicely printed output of
 documents, as does enscript at http://people.ssh.fi/mtr/genscript/.
 
