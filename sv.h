@@ -183,7 +183,7 @@ perform the upgrade if necessary.  See C<svtype>.
 
 #define SVf_AMAGIC	0x10000000      /* has magical overloaded methods */
 
-#define PRIVSHIFT 8
+#define PRIVSHIFT 8	/* (SVp_?OK >> PRIVSHIFT) == SVf_?OK */
 
 /* Some private flags. */
 
