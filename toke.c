@@ -7978,15 +7978,14 @@ Perl_scan_vstring(pTHX_ char *s, SV *sv)
     char *pos = s;
     char *start = s;
     if (*pos == 'v') pos++;  /* get past 'v' */
-    while (isDIGIT(*pos) || *pos == '_')
-    pos++;
+    while (pos < PL_bufend && (isDIGIT(*pos) || *pos == '_'))
+	pos++;
     if ( *pos != '.') {
 	/* this may not be a v-string if followed by => */
 	start = pos;
-	if (isSPACE(*start))
-	    start = skipspace(start);
-	if ( *start == '=' && start[1] == '>' )
-	{
+	while (start < PL_bufend && isSPACE(*start))
+	    ++start;
+	if ((PL_bufend - start) >= 2 && *start == '=' && start[1] == '>' ) {
 	    /* return string not v-string */
 	    sv_setpvn(sv,(char *)s,pos-s);
 	    return pos;
@@ -8029,13 +8028,13 @@ Perl_scan_vstring(pTHX_ char *s, SV *sv)
 	    sv_catpvn(sv, (const char*)tmpbuf, tmpend - tmpbuf);
 	    if (!UNI_IS_INVARIANT(NATIVE_TO_UNI(rev)))
 		 SvUTF8_on(sv);
-	    if (*pos == '.' && isDIGIT(pos[1]))
+	    if (pos + 1 < PL_bufend && *pos == '.' && isDIGIT(pos[1]))
 		 s = ++pos;
 	    else {
 		 s = pos;
 		 break;
 	    }
-	    while (isDIGIT(*pos) || *pos == '_')
+	    while (pos < PL_bufend && (isDIGIT(*pos) || *pos == '_'))
 		 pos++;
 	}
 	SvPOK_on(sv);
