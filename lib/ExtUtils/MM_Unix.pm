@@ -506,7 +506,8 @@ sub const_config {
     foreach $m (@{$self->{CONFIG}}){
 	# SITE*EXP macros are defined in &constants; avoid duplicates here
 	next if $once_only{$m} or $m eq 'sitelibexp' or $m eq 'sitearchexp';
-	push @m, uc($m) , ' = ' , quote_paren($self->{uc $m}), "\n";
+	$self->{uc $m} = quote_paren($self->{uc $m});
+	push @m, uc($m) , ' = ' , $self->{uc $m}, "\n";
 	$once_only{$m} = 1;
     }
     join('', @m);
