@@ -312,6 +312,7 @@ directory of your choice):
     installscript=`echo $installscript | sed "s!$prefix!$installprefix!"`
     installsitelib=`echo $installsitelib | sed "s!$prefix!$installprefix!"`
     installsitearch=`echo $installsitearch | sed "s!$prefix!$installprefix!"`
+    shrpdir=`echo $shrpdir | sed "s!$prefix!$installprefix!"`
 
 Then, you can Configure and install in the usual way:
 
@@ -536,9 +537,10 @@ correctly.  When using gcc, you should probably have i_stdarg='define'
 and i_varags='undef' in config.sh.  The problem is usually solved
 by running fixincludes correctly.
 
-If you wish to use dynamic loading on SunOS or Solaris, and you
-have GNU as and GNU ld installed, you may need to add B<-B/bin/> to
-your $ccflags and $ldflags so that the system's versions of as
+If you have problems with dynamic loading using gcc on SunOS or
+Solaris, and you are using GNU as and GNU ld, you may need to add
+B<-B/bin/> (for SunOS) or B<-B/usr/ccs/bin> (for Solaris) to your
+$ccflags, $ldflags, and $lddlflags so that the system's versions of as
 and ld are used.
 
 If you run into dynamic loading problems, check your setting of
