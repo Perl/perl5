@@ -1130,7 +1130,7 @@ preplibrary : $(MINIPERL_EXE) $(LIBPREREQ)
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	Copy/NoConfirm/Log $(MMS$SOURCE) [.lib.pod]
 
-[.lib.pod]perlvms.pod : [.pod]perlvms.pod
+[.lib.pod]perlvms.pod : [.vms]perlvms.pod
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	Copy/NoConfirm/Log $(MMS$SOURCE) [.lib.pod]
 
