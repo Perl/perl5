@@ -47,13 +47,24 @@ from the following list:
     /tmp
     /
 
+Since perl 5.8.0, if running under taint mode, and if the environment
+variables are tainted, they are not used.
+
 =cut
 
 my $tmpdir;
 sub tmpdir {
     return $tmpdir if defined $tmpdir;
     my $self = shift;
-    foreach (@ENV{qw(TMPDIR TEMP TMP)}, qw(C:/temp /tmp /)) {
+    my @dirlist = (@ENV{qw(TMPDIR TEMP TMP)}, qw(C:/temp /tmp /));
+    {
+	no strict 'refs';
+	if (${"\cTAINT"}) { # Check for taint mode on perl >= 5.8.0
+	    require Scalar::Util;
+	    @dirlist = grep { ! Scalar::Util::tainted $_ } @dirlist;
+	}
+    }
+    foreach (@dirlist) {
 	next unless defined && -d;
 	$tmpdir = $_;
 	last;
