@@ -1220,6 +1220,10 @@
 #define PerlIO_stdout		Perl_PerlIO_stdout
 #define PerlIO_stderr		Perl_PerlIO_stderr
 #endif /* PERLIO_LAYERS */
+#define deb_stack_all		Perl_deb_stack_all
+#ifdef PERL_IN_DEB_C
+#define deb_stack_n		S_deb_stack_n
+#endif
 #define ck_anoncode		Perl_ck_anoncode
 #define ck_bitop		Perl_ck_bitop
 #define ck_concat		Perl_ck_concat
@@ -2780,6 +2784,10 @@
 #define PerlIO_stdout()		Perl_PerlIO_stdout(aTHX)
 #define PerlIO_stderr()		Perl_PerlIO_stderr(aTHX)
 #endif /* PERLIO_LAYERS */
+#define deb_stack_all()		Perl_deb_stack_all(aTHX)
+#ifdef PERL_IN_DEB_C
+#define deb_stack_n(a)		S_deb_stack_n(aTHX_ a)
+#endif
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
 #define ck_bitop(a)		Perl_ck_bitop(aTHX_ a)
 #define ck_concat(a)		Perl_ck_concat(aTHX_ a)
