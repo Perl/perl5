@@ -927,7 +927,7 @@ Perl_to_uni_title(pTHX_ UV c, U8* p, STRLEN *lenp)
 UV
 Perl_to_uni_lower(pTHX_ UV c, U8* p, STRLEN *lenp)
 {
-    U8 tmpbuf[UTF8_MAXLEN+1];
+    U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
     uvchr_to_utf8(tmpbuf, (UV)c);
     return to_utf8_lower(tmpbuf, p, lenp);
 }
@@ -935,7 +935,7 @@ Perl_to_uni_lower(pTHX_ UV c, U8* p, STRLEN *lenp)
 UV
 Perl_to_uni_fold(pTHX_ UV c, U8* p, STRLEN *lenp)
 {
-    U8 tmpbuf[UTF8_MAXLEN+1];
+    U8 tmpbuf[UTF8_MAXLEN_FOLD+1];
     uvchr_to_utf8(tmpbuf, (UV)c);
     return to_utf8_fold(tmpbuf, p, lenp);
 }
@@ -1247,7 +1247,8 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp,char *normal
 	      return 0;
 	 }
     }
-    *lenp = UNISKIP(uv);
+    if *lenp)
+       *lenp = UNISKIP(uv);
     uvuni_to_utf8(ustrp, uv);
     return uv;
 }
