@@ -21,7 +21,8 @@ foreach my $const (qw(
  }
 foreach my $file (qw(op.h cop.h))
  {
-  open(OPH,"../../$file") || die "Cannot open ../../$file:$!";
+  my $path = $^O eq 'MacOS' ? ":::$file" : "../../$file";
+  open(OPH,"$path") || die "Cannot open $path:$!";
   while (<OPH>)
    {  
     doconst($1) if (/#define\s+(\w+)\s+([\(\)\|\dx]+)\s*(?:$|\/\*)/);

@@ -16,6 +16,7 @@ $VERSION = substr(q$Revision: 1.33 $, 10);
 @EXPORT_OK = ('mkmanifest', 'manicheck', 'fullcheck', 'filecheck', 
 	      'skipcheck', 'maniread', 'manicopy');
 
+$Is_MacOS = $^O eq 'MacOS';
 $Is_VMS = $^O eq 'VMS';
 if ($Is_VMS) { require File::Basename }
 
@@ -51,6 +52,7 @@ sub mkmanifest {
 	}
 	my $text = $all{$file};
 	($file,$text) = split(/\s+/,$text,2) if $Is_VMS && $text;
+	$file = _unmacify($file);
 	my $tabs = (5 - (length($file)+1)/8);
 	$tabs = 1 if $tabs < 1;
 	$tabs = 0 unless $text;
@@ -62,10 +64,11 @@ sub mkmanifest {
 sub manifind {
     local $found = {};
     find(sub {return if -d $_;
-	      (my $name = $File::Find::name) =~ s|./||;
+	      (my $name = $File::Find::name) =~ s|^\./||;
+	      $name =~ s/^:([^:]+)$/$1/ if $Is_MacOS;
 	      warn "Debug: diskfile $name\n" if $Debug;
-	      $name  =~ s#(.*)\.$#\L$1# if $Is_VMS;
-	      $found->{$name} = "";}, ".");
+	      $name =~ s#(.*)\.$#\L$1# if $Is_VMS;
+	      $found->{$name} = "";}, $Is_MacOS ? ":" : ".");
     $found;
 }
 
@@ -117,7 +120,8 @@ sub _manicheck {
 	    }
 	    warn "Debug: manicheck checking from disk $file\n" if $Debug;
 	    unless ( exists $read->{$file} ) {
-		warn "Not in $MANIFEST: $file\n" unless $Quiet;
+		my $canon = "\t" . _unmacify($file) if $Is_MacOS;
+		warn "Not in $MANIFEST: $file$canon\n" unless $Quiet;
 		push @missentry, $file;
 	    }
 	}
@@ -137,7 +141,13 @@ sub maniread {
     while (<M>){
 	chomp;
 	next if /^#/;
-	if ($Is_VMS) {
+	if ($Is_MacOS) {
+	    my($item,$text) = /^(\S+)\s*(.*)/;
+	    $item = _macify($item);
+	    $item =~ s/\\([0-3][0-7][0-7])/sprintf("%c", oct($1))/ge;
+	    $read->{$item}=$text;
+	}
+	elsif ($Is_VMS) {
 	    my($file)= /^(\S+)/;
 	    next unless $file;
 	    my($base,$dir) = File::Basename::fileparse($file);
@@ -167,7 +177,7 @@ sub _maniskip {
 	chomp;
 	next if /^#/;
 	next if /^\s*$/;
-	push @skip, $_;
+	push @skip, _macify($_);
     }
     close M;
     my $opts = $Is_VMS ? 'oi ' : 'o ';
@@ -190,13 +200,22 @@ sub manicopy {
     $target = VMS::Filespec::unixify($target) if $Is_VMS;
     File::Path::mkpath([ $target ],! $Quiet,$Is_VMS ? undef : 0755);
     foreach $file (keys %$read){
-	$file = VMS::Filespec::unixify($file) if $Is_VMS;
-	if ($file =~ m!/!) { # Ilya, that hurts, I fear, or maybe not?
-	    my $dir = File::Basename::dirname($file);
-	    $dir = VMS::Filespec::unixify($dir) if $Is_VMS;
-	    File::Path::mkpath(["$target/$dir"],! $Quiet,$Is_VMS ? undef : 0755);
+    	if ($Is_MacOS) {
+	    if ($file =~ m!:!) { 
+	   	my $dir = _maccat($target, $file);
+		$dir =~ s/[^:]+$//;
+	    	File::Path::mkpath($dir,1,0755);
+	    }
+	    cp_if_diff($file, _maccat($target, $file), $how);
+	} else {
+	    $file = VMS::Filespec::unixify($file) if $Is_VMS;
+	    if ($file =~ m!/!) { # Ilya, that hurts, I fear, or maybe not?
+		my $dir = File::Basename::dirname($file);
+		$dir = VMS::Filespec::unixify($dir) if $Is_VMS;
+		File::Path::mkpath(["$target/$dir"],! $Quiet,$Is_VMS ? undef : 0755);
+	    }
+	    cp_if_diff($file, "$target/$file", $how);
 	}
-	cp_if_diff($file, "$target/$file", $how);
     }
 }
 
@@ -205,8 +224,8 @@ sub cp_if_diff {
     -f $from or carp "$0: $from not found";
     my($diff) = 0;
     local(*F,*T);
-    open(F,$from) or croak "Can't read $from: $!\n";
-    if (open(T,$to)) {
+    open(F,"< $from\0") or croak "Can't read $from: $!\n";
+    if (open(T,"< $to\0")) {
 	while (<F>) { $diff++,last if $_ ne <T>; }
 	$diff++ unless eof(T);
 	close T;
@@ -234,7 +253,7 @@ sub cp {
     copy($srcFile,$dstFile);
     utime $access, $mod + ($Is_VMS ? 1 : 0), $dstFile;
     # chmod a+rX-w,go-w
-    chmod(  0444 | ( $perm & 0111 ? 0111 : 0 ),  $dstFile );
+    chmod(  0444 | ( $perm & 0111 ? 0111 : 0 ),  $dstFile ) unless ($^O eq 'MacOS');
 }
 
 sub ln {
@@ -257,6 +276,42 @@ sub best {
     } else {
 	ln($srcFile, $dstFile) or cp($srcFile, $dstFile);
     }
+}
+
+sub _macify {
+    my($file) = @_;
+
+    return $file unless $Is_MacOS;
+    
+    $file =~ s|^\./||;
+    if ($file =~ m|/|) {
+	$file =~ s|/+|:|g;
+	$file = ":$file";
+    }
+    
+    $file;
+}
+
+sub _maccat {
+    my($f1, $f2) = @_;
+    
+    return "$f1/$f2" unless $Is_MacOS;
+    
+    $f1 .= ":$f2";
+    $f1 =~ s/([^:]:):/$1/g;
+    return $f1;
+}
+
+sub _unmacify {
+    my($file) = @_;
+
+    return $file unless $Is_MacOS;
+    
+    $file =~ s|^:||;
+    $file =~ s|([/ \n])|sprintf("\\%03o", unpack("c", $1))|ge;
+    $file =~ y|:|/|;
+    
+    $file;
 }
 
 1;
