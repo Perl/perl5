@@ -782,7 +782,7 @@ get_sysinfo(ULONG pid, ULONG flags)
 	return 0;
     }
     psi = (PQTOPLEVEL)pbuffer;
-    if (psi && pid && pid != psi->procdata->pid) {
+    if (psi && pid && psi->procdata && pid != psi->procdata->pid) {
       Safefree(psi);
       Perl_croak_nocontext("panic: wrong pid in sysinfo");
     }
