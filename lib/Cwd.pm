@@ -379,6 +379,7 @@ sub _perl_abs_path
     {
 	$dotdots .= '/..';
 	@pst = @cst;
+	local *PARENT;
 	unless (opendir(PARENT, $dotdots))
 	{
 	    carp "opendir($dotdots): $!";

@@ -304,8 +304,10 @@ perl_construct(pTHXx)
 	("__environ", (unsigned long *) &environ_pointer, NULL);
 #endif /* environ */
 
-#ifdef  USE_ENVIRON_ARRAY
+#ifndef PERL_MICRO
+#   ifdef  USE_ENVIRON_ARRAY
     PL_origenviron = environ;
+#   endif
 #endif
 
     /* Use sysconf(_SC_CLK_TCK) if available, if not
@@ -522,6 +524,7 @@ perl_destruct(pTHXx)
     /* if PERL_USE_SAFE_PUTENV is defined environ will not have been copied
      * so we certainly shouldn't free it here
      */
+#ifndef PERL_MICRO
 #if defined(USE_ENVIRON_ARRAY) && !defined(PERL_USE_SAFE_PUTENV)
     if (environ != PL_origenviron
 #ifdef USE_ITHREADS
@@ -541,6 +544,7 @@ perl_destruct(pTHXx)
 	environ = PL_origenviron;
     }
 #endif
+#endif /* !PERL_MICRO */
 
 #ifdef USE_ITHREADS
     /* the syntax tree is shared between clones
@@ -1574,9 +1578,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
 
     boot_core_PerlIO();
     boot_core_UNIVERSAL();
-#ifndef PERL_MICRO
     boot_core_xsutils();
-#endif
 
     if (xsinit)
 	(*xsinit)(aTHX);	/* in case linked C routines want magical variables */
@@ -2994,6 +2996,8 @@ S_open_script(pTHX_ char *scriptname, bool dosearch, SV *sv, int *fdscript)
 	SV *cpp = newSVpvn("",0);
 	SV *cmd = NEWSV(0,0);
 
+	if (cpp_cfg[0] == 0) /* PERL_MICRO? */
+	     Perl_croak(aTHX_ "Can't run with cpp -P with CPPSTDIN undefined");
 	if (strEQ(cpp_cfg, "cppstdin"))
 	    Perl_sv_catpvf(aTHX_ cpp, "%s/", BIN_EXP);
 	sv_catpv(cpp, cpp_cfg);
@@ -3848,6 +3852,7 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	GvMULTI_on(PL_envgv);
 	hv = GvHVn(PL_envgv);
 	hv_magic(hv, Nullgv, PERL_MAGIC_env);
+#ifndef PERL_MICRO
 #ifdef USE_ENVIRON_ARRAY
 	/* Note that if the supplied env parameter is actually a copy
 	   of the global environ then it may now point to free'd memory
@@ -3879,6 +3884,7 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	        mg_set(sv);
 	  }
 #endif /* USE_ENVIRON_ARRAY */
+#endif /* !PERL_MICRO */
     }
     TAINT_NOT;
     if ((tmpgv = gv_fetchpv("$",TRUE, SVt_PV))) {

@@ -7091,6 +7091,7 @@ Perl_sv_reset(pTHX_ register char *s, HV *stash)
 		}
 		if (GvHV(gv) && !HvNAME(GvHV(gv))) {
 		    hv_clear(GvHV(gv));
+#ifndef PERL_MICRO
 #ifdef USE_ENVIRON_ARRAY
 		    if (gv == PL_envgv
 #  ifdef USE_ITHREADS
@@ -7101,6 +7102,7 @@ Perl_sv_reset(pTHX_ register char *s, HV *stash)
 			environ[0] = Nullch;
 		    }
 #endif
+#endif /* !PERL_MICRO */
 		}
 	    }
 	}

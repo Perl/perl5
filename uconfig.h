@@ -361,7 +361,7 @@
  *	available to read directory entries. You may have to include
  *	<dirent.h>. See I_DIRENT.
  */
-/*#define HAS_READDIR		/ **/
+#define HAS_READDIR		/**/
 
 /* HAS_SEEKDIR:
  *	This symbol, if defined, indicates that the seekdir routine is
@@ -392,7 +392,7 @@
  *	to rename files.  Otherwise you should do the unlink(), link(), unlink()
  *	trick.
  */
-/*#define HAS_RENAME	/ **/
+#define HAS_RENAME	/**/
 
 /* HAS_RMDIR:
  *	This symbol, if defined, indicates that the rmdir routine is
@@ -663,7 +663,7 @@
  *	whether dirent is available or not. You should use this pseudo type to
  *	portably declare your directory entries.
  */
-/*#define I_DIRENT		/ **/
+#define I_DIRENT		/**/
 /*#define DIRNAMLEN	/ **/
 #define Direntry_t struct dirent
 
@@ -738,7 +738,7 @@
  *	This symbol, if defined, indicates that <stdlib.h> exists and should
  *	be included.
  */
-/*#define I_STDLIB		/ **/
+#define I_STDLIB		/**/
 
 /* I_STRING:
  *	This symbol, if defined, indicates to the C program that it should
@@ -1999,7 +1999,7 @@
  *	This symbol, if defined, indicates that the strtoul routine is
  *	available to provide conversion of strings to unsigned long.
  */
-/*#define HAS_STRTOUL	/ **/
+#define HAS_STRTOUL	/**/
 
 /* HAS_UNION_SEMUN:
  *	This symbol, if defined, indicates that the union semun is

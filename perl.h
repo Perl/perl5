@@ -297,7 +297,7 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 # define STANDARD_C 1
 #endif
 
-#if defined(__cplusplus) || defined(WIN32) || defined(__sgi) || defined(OS2) || defined(__DGUX) || defined( EPOC) || defined(__QNX__) || defined(NETWARE)
+#if defined(__cplusplus) || defined(WIN32) || defined(__sgi) || defined(OS2) || defined(__DGUX) || defined( EPOC) || defined(__QNX__) || defined(NETWARE) || defined(PERL_MICRO)
 # define DONT_DECLARE_STD 1
 #endif
 
@@ -619,10 +619,12 @@ int usleep(unsigned int);
 #   endif
 #endif
 
+#ifndef PERL_MICRO
 #ifndef memchr
 #   ifndef HAS_MEMCHR
 #       define memchr(s,c,n) ninstr((char*)(s), ((char*)(s)) + n, &(c), &(c) + 1)
 #   endif
+#endif
 #endif
 
 #ifndef HAS_BCMP
@@ -1977,12 +1979,13 @@ typedef struct clone_params CLONE_PARAMS;
 #    endif
 #    define PERL_FPU_INIT fpsetmask(0);
 #  else
-#    if defined(SIGFPE) && defined(SIG_IGN)
+#    if defined(SIGFPE) && defined(SIG_IGN) && !defined(PERL_MICRO)
 #      define PERL_FPU_INIT       PL_sigfpe_saved = signal(SIGFPE, SIG_IGN);
 #      define PERL_FPU_PRE_EXEC   { Sigsave_t xfpe; rsignal_save(SIGFPE, PL_sigfpe_saved, &xfpe);
 #      define PERL_FPU_POST_EXEC    rsignal_restore(SIGFPE, &xfpe); }
 #    else
 #      define PERL_FPU_INIT
+
 #    endif
 #  endif
 #endif
