@@ -95,6 +95,133 @@ Version v5.6.0
 --------------
 
 ____________________________________________________________________________
+[  5631] By: gsar                                  on 2000/03/09  18:49:12
+        Log: track more of the child state on Windows
+     Branch: perl
+	   ! win32/win32.c win32/win32.h
+____________________________________________________________________________
+[  5630] By: gsar                                  on 2000/03/09  18:48:05
+        Log: UNIVERSAL::isa() and UNIVERSAL::can() fail for magic values
+     Branch: perl
+	   ! universal.c
+____________________________________________________________________________
+[  5629] By: gsar                                  on 2000/03/09  18:37:35
+        Log: tweak Unicode notes, other cleanups
+     Branch: perl
+	   ! Changes lib/bytes.pm lib/utf8.pm pod/perldelta.pod
+	   ! pod/perlhist.pod pod/perlunicode.pod
+____________________________________________________________________________
+[  5628] By: gsar                                  on 2000/03/09  17:39:58
+        Log: support binmode(F,":crlf") and use open IN => ":raw", OUT => ":crlf"
+             semantics; the pragma sets defaults for both open() and qx//
+     Branch: perl
+	   ! doio.c dosish.h embed.h embed.pl epoc/epocish.h lib/open.pm
+	   ! mpeix/mpeixish.h op.c op.h opcode.h opcode.pl os2/os2ish.h
+	   ! perl.h perlapi.c plan9/plan9ish.h pod/perlfunc.pod pp.sym
+	   ! pp_proto.h pp_sys.c proto.h sv.h vms/vmsish.h vos/vosish.h
+____________________________________________________________________________
+[  5627] By: gsar                                  on 2000/03/09  12:54:08
+        Log: avoid autoflushing behavior of fork/system/exec on Solaris (thanks
+             to fflush(NULL) bug)
+     Branch: perl
+	   ! hints/solaris_2.sh pod/perldelta.pod
+____________________________________________________________________________
+[  5626] By: gsar                                  on 2000/03/09  11:34:51
+        Log: abort build on HP-UX if bundled non-ANSI compiler is detected
+             (from Dominic Dunlop <domo@computer.org>)
+     Branch: perl
+	   ! hints/hpux.sh
+____________________________________________________________________________
+[  5625] By: gsar                                  on 2000/03/09  11:17:07
+        Log: patch from Larry to make -T filetest algorithm recognize utf8 as
+             "text"
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[  5624] By: gsar                                  on 2000/03/09  11:11:59
+        Log: provide support for deleting actions etc. (from Ronald J Kimball
+             <rjk@linguist.dartmouth.edu>)
+     Branch: perl
+	   ! lib/perl5db.pl pod/perldebug.pod
+____________________________________________________________________________
+[  5623] By: gsar                                  on 2000/03/09  06:39:21
+        Log: new xsubpp keywords should be in all caps
+     Branch: perl
+	   ! lib/ExtUtils/xsubpp
+____________________________________________________________________________
+[  5622] By: gsar                                  on 2000/03/09  06:26:04
+        Log: demand-load utf8.pm in swash routines
+     Branch: perl
+	   ! op.c utf8.c
+____________________________________________________________________________
+[  5621] By: gsar                                  on 2000/03/08  19:27:02
+        Log: make Dump() call the XSUB implementation transparently (modified
+             version of patch suggested by David Boyce <dsb@world.std.com>)
+     Branch: perl
+	   ! ext/Data/Dumper/Dumper.pm ext/Data/Dumper/Dumper.xs
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[  5620] By: gsar                                  on 2000/03/08  18:35:48
+        Log: do FILE should not see outside lexicals (from Rick Delaney
+             <rick@consumercontact.com>)
+     Branch: perl
+	   ! op.c pp_ctl.c t/comp/require.t
+____________________________________________________________________________
+[  5619] By: gsar                                  on 2000/03/08  18:04:45
+        Log: abstract code for C<use Foo 1.23 @ary;> into a Perl_load_module()
+             API function
+     Branch: perl
+	   ! doio.c embed.h embed.pl global.sym objXSUB.h op.c op.h
+	   ! perlapi.c pp_sys.c proto.h
+____________________________________________________________________________
+[  5618] By: jhi                                   on 2000/03/08  18:03:30
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  +> lib/Pod/Plainer.pm
+	  !> Changes MANIFEST dosish.h embedvar.h lib/Pod/InputObjects.pm
+	  !> lib/Pod/Parser.pm makedef.pl op.c op.h perl.c perlapi.h
+	  !> perlvars.h pod/perlop.pod pod/pod2latex.PL sv.c unixish.h
+	  !> vms/vmsish.h
+____________________________________________________________________________
+[  5617] By: jhi                                   on 2000/03/08  15:44:05
+        Log: ICU todo fixes.
+     Branch: cfgperl
+	   ! Todo-5.6
+____________________________________________________________________________
+[  5616] By: jhi                                   on 2000/03/08  14:30:40
+        Log: Even more Todo.
+     Branch: cfgperl
+	   ! Todo-5.6
+____________________________________________________________________________
+[  5615] By: jhi                                   on 2000/03/08  14:13:45
+        Log: More Todo.
+     Branch: cfgperl
+	   ! Todo-5.6
+____________________________________________________________________________
+[  5614] By: jhi                                   on 2000/03/08  13:50:53
+        Log: wording changes
+     Branch: cfgperl
+	   ! lib/Math/Complex.pm
+____________________________________________________________________________
+[  5613] By: gsar                                  on 2000/03/08  12:51:35
+        Log: clarify docs on return value from binding operators
+     Branch: perl
+	   ! pod/perlop.pod
+____________________________________________________________________________
+[  5612] By: gsar                                  on 2000/03/08  12:41:38
+        Log: shore up pod2latex shortcomings, and a Pod::Parser fix (from
+             Robin Barker)
+     Branch: perl
+	   + lib/Pod/Plainer.pm
+	   ! MANIFEST lib/Pod/Parser.pm pod/pod2latex.PL
+____________________________________________________________________________
+[  5611] By: gsar                                  on 2000/03/08  12:22:59
+        Log: integrate cfgperl changes into mainline
+     Branch: perl
+	   ! Changes
+	  !> installperl lib/Math/Complex.pm pod/perldelta.pod
+	  !> t/lib/complex.t vms/vmsish.h
+____________________________________________________________________________
 [  5610] By: gsar                                  on 2000/03/08  12:08:17
         Log: add missing locks for op refcounts
      Branch: perl

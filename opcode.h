@@ -1118,7 +1118,7 @@ EXT OP * (CPERLscope(*PL_check)[]) (pTHX_ OP *op) = {
 	MEMBER_TO_FPTR(Perl_ck_null),	/* srefgen */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* ref */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* bless */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* backtick */
+	MEMBER_TO_FPTR(Perl_ck_open),	/* backtick */
 	MEMBER_TO_FPTR(Perl_ck_glob),	/* glob */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* readline */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* rcatline */
@@ -1285,7 +1285,7 @@ EXT OP * (CPERLscope(*PL_check)[]) (pTHX_ OP *op) = {
 	MEMBER_TO_FPTR(Perl_ck_null),	/* dump */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* goto */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* exit */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* open */
+	MEMBER_TO_FPTR(Perl_ck_open),	/* open */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* close */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* pipe_op */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* fileno */

@@ -139,6 +139,9 @@ XS(XS_UNIVERSAL_isa)
 
     sv = ST(0);
 
+    if (SvGMAGICAL(sv))
+	mg_get(sv);
+
     if (!SvOK(sv) || !(SvROK(sv) || SvCUR(sv)))
 	XSRETURN_UNDEF;
 
@@ -161,6 +164,9 @@ XS(XS_UNIVERSAL_can)
 	Perl_croak(aTHX_ "Usage: UNIVERSAL::can(object-ref, method)");
 
     sv = ST(0);
+
+    if (SvGMAGICAL(sv))
+	mg_get(sv);
 
     if (!SvOK(sv) || !(SvROK(sv) || SvCUR(sv)))
 	XSRETURN_UNDEF;

@@ -711,23 +711,17 @@ Data_Dumper_Dumpxs(href, ...)
 	    I32 gimme = GIMME;
 
 	    if (!SvROK(href)) {		/* call new to get an object first */
-		SV *valarray;
-		SV *namearray;
-
-		if (items == 3) {
-		    valarray = ST(1);
-		    namearray = ST(2);
-		}
-		else
-		    croak("Usage: Data::Dumper::Dumpxs(PACKAGE, VAL_ARY_REF, NAME_ARY_REF)");
+		if (items < 2)
+		    croak("Usage: Data::Dumper::Dumpxs(PACKAGE, VAL_ARY_REF, [NAME_ARY_REF])");
 		
 		ENTER;
 		SAVETMPS;
 		
 		PUSHMARK(sp);
 		XPUSHs(href);
-		XPUSHs(sv_2mortal(newSVsv(valarray)));
-		XPUSHs(sv_2mortal(newSVsv(namearray)));
+		XPUSHs(sv_2mortal(newSVsv(ST(1))));
+		if (items >= 3)
+		    XPUSHs(sv_2mortal(newSVsv(ST(2))));
 		PUTBACK;
 		i = perl_call_method("new", G_SCALAR);
 		SPAGAIN;

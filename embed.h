@@ -116,6 +116,7 @@
 #define die_nocontext		Perl_die_nocontext
 #define deb_nocontext		Perl_deb_nocontext
 #define form_nocontext		Perl_form_nocontext
+#define load_module_nocontext	Perl_load_module_nocontext
 #define mess_nocontext		Perl_mess_nocontext
 #define warn_nocontext		Perl_warn_nocontext
 #define warner_nocontext	Perl_warner_nocontext
@@ -322,6 +323,8 @@
 #define linklist		Perl_linklist
 #define list			Perl_list
 #define listkids		Perl_listkids
+#define load_module		Perl_load_module
+#define vload_module		Perl_vload_module
 #define localize		Perl_localize
 #define looks_like_number	Perl_looks_like_number
 #define magic_clearenv		Perl_magic_clearenv
@@ -392,6 +395,7 @@
 #define mg_set			Perl_mg_set
 #define mg_size			Perl_mg_size
 #define mod			Perl_mod
+#define mode_from_discipline	Perl_mode_from_discipline
 #define moreswitches		Perl_moreswitches
 #define my			Perl_my
 #define my_atof			Perl_my_atof
@@ -1138,6 +1142,7 @@
 #define ck_match		Perl_ck_match
 #define ck_method		Perl_ck_method
 #define ck_null			Perl_ck_null
+#define ck_open			Perl_ck_open
 #define ck_repeat		Perl_ck_repeat
 #define ck_require		Perl_ck_require
 #define ck_rfun			Perl_ck_rfun
@@ -1762,6 +1767,7 @@
 #define linklist(a)		Perl_linklist(aTHX_ a)
 #define list(a)			Perl_list(aTHX_ a)
 #define listkids(a)		Perl_listkids(aTHX_ a)
+#define vload_module(a,b,c,d)	Perl_vload_module(aTHX_ a,b,c,d)
 #define localize(a,b)		Perl_localize(aTHX_ a,b)
 #define looks_like_number(a)	Perl_looks_like_number(aTHX_ a)
 #define magic_clearenv(a,b)	Perl_magic_clearenv(aTHX_ a,b)
@@ -1831,6 +1837,7 @@
 #define mg_set(a)		Perl_mg_set(aTHX_ a)
 #define mg_size(a)		Perl_mg_size(aTHX_ a)
 #define mod(a,b)		Perl_mod(aTHX_ a,b)
+#define mode_from_discipline(a)	Perl_mode_from_discipline(aTHX_ a)
 #define moreswitches(a)		Perl_moreswitches(aTHX_ a)
 #define my(a)			Perl_my(aTHX_ a)
 #define my_atof(a)		Perl_my_atof(aTHX_ a)
@@ -2567,6 +2574,7 @@
 #define ck_match(a)		Perl_ck_match(aTHX_ a)
 #define ck_method(a)		Perl_ck_method(aTHX_ a)
 #define ck_null(a)		Perl_ck_null(aTHX_ a)
+#define ck_open(a)		Perl_ck_open(aTHX_ a)
 #define ck_repeat(a)		Perl_ck_repeat(aTHX_ a)
 #define ck_require(a)		Perl_ck_require(aTHX_ a)
 #define ck_rfun(a)		Perl_ck_rfun(aTHX_ a)
@@ -3055,6 +3063,8 @@
 #define deb_nocontext		Perl_deb_nocontext
 #define Perl_form_nocontext	CPerlObj::Perl_form_nocontext
 #define form_nocontext		Perl_form_nocontext
+#define Perl_load_module_nocontext	CPerlObj::Perl_load_module_nocontext
+#define load_module_nocontext	Perl_load_module_nocontext
 #define Perl_mess_nocontext	CPerlObj::Perl_mess_nocontext
 #define mess_nocontext		Perl_mess_nocontext
 #define Perl_warn_nocontext	CPerlObj::Perl_warn_nocontext
@@ -3456,6 +3466,10 @@
 #define list			Perl_list
 #define Perl_listkids		CPerlObj::Perl_listkids
 #define listkids		Perl_listkids
+#define Perl_load_module	CPerlObj::Perl_load_module
+#define load_module		Perl_load_module
+#define Perl_vload_module	CPerlObj::Perl_vload_module
+#define vload_module		Perl_vload_module
 #define Perl_localize		CPerlObj::Perl_localize
 #define localize		Perl_localize
 #define Perl_looks_like_number	CPerlObj::Perl_looks_like_number
@@ -3590,6 +3604,8 @@
 #define mg_size			Perl_mg_size
 #define Perl_mod		CPerlObj::Perl_mod
 #define mod			Perl_mod
+#define Perl_mode_from_discipline	CPerlObj::Perl_mode_from_discipline
+#define mode_from_discipline	Perl_mode_from_discipline
 #define Perl_moreswitches	CPerlObj::Perl_moreswitches
 #define moreswitches		Perl_moreswitches
 #define Perl_my			CPerlObj::Perl_my
@@ -4981,6 +4997,8 @@
 #define ck_method		Perl_ck_method
 #define Perl_ck_null		CPerlObj::Perl_ck_null
 #define ck_null			Perl_ck_null
+#define Perl_ck_open		CPerlObj::Perl_ck_open
+#define ck_open			Perl_ck_open
 #define Perl_ck_repeat		CPerlObj::Perl_ck_repeat
 #define ck_repeat		Perl_ck_repeat
 #define Perl_ck_require		CPerlObj::Perl_ck_require
@@ -5751,6 +5769,7 @@
 #  define deb				Perl_deb_nocontext
 #  define die				Perl_die_nocontext
 #  define form				Perl_form_nocontext
+#  define load_module			Perl_load_module_nocontext
 #  define mess				Perl_mess_nocontext
 #  define newSVpvf			Perl_newSVpvf_nocontext
 #  define sv_catpvf			Perl_sv_catpvf_nocontext
@@ -5769,6 +5788,7 @@
 #  define Perl_die_nocontext		Perl_die
 #  define Perl_deb_nocontext		Perl_deb
 #  define Perl_form_nocontext		Perl_form
+#  define Perl_load_module_nocontext	Perl_load_module
 #  define Perl_mess_nocontext		Perl_mess
 #  define Perl_newSVpvf_nocontext	Perl_newSVpvf
 #  define Perl_sv_catpvf_nocontext	Perl_sv_catpvf

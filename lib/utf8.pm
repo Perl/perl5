@@ -31,7 +31,7 @@ utf8 - Perl pragma to enable/disable UTF-8 in source code
 =head1 DESCRIPTION
 
 WARNING: The implementation of Unicode support in Perl is incomplete.
-Expect sudden and unannounced changes!
+See L<perlunicode> for the exact details.
 
 The C<use utf8> pragma tells the Perl parser to allow UTF-8 in the
 program text in the current lexical scope.  The C<no utf8> pragma

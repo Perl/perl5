@@ -188,6 +188,10 @@
 #define Perl_form_nocontext	pPerl->Perl_form_nocontext
 #undef  form_nocontext
 #define form_nocontext		Perl_form_nocontext
+#undef  Perl_load_module_nocontext
+#define Perl_load_module_nocontext	pPerl->Perl_load_module_nocontext
+#undef  load_module_nocontext
+#define load_module_nocontext	Perl_load_module_nocontext
 #undef  Perl_mess_nocontext
 #define Perl_mess_nocontext	pPerl->Perl_mess_nocontext
 #undef  mess_nocontext
@@ -747,6 +751,14 @@
 #define Perl_leave_scope	pPerl->Perl_leave_scope
 #undef  leave_scope
 #define leave_scope		Perl_leave_scope
+#undef  Perl_load_module
+#define Perl_load_module	pPerl->Perl_load_module
+#undef  load_module
+#define load_module		Perl_load_module
+#undef  Perl_vload_module
+#define Perl_vload_module	pPerl->Perl_vload_module
+#undef  vload_module
+#define vload_module		Perl_vload_module
 #undef  Perl_looks_like_number
 #define Perl_looks_like_number	pPerl->Perl_looks_like_number
 #undef  looks_like_number

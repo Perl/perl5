@@ -1778,13 +1778,13 @@ typedef pthread_key_t	perl_key;
 #if defined(__CYGWIN__)
 /* USEMYBINMODE
  *   This symbol, if defined, indicates that the program should
- *   use the routine my_binmode(FILE *fp, char iotype) to insure
+ *   use the routine my_binmode(FILE *fp, char iotype, int mode) to insure
  *   that a file is in "binary" mode -- that is, that no translation
  *   of bytes occurs on read or write operations.
  */
 #  define USEMYBINMODE / **/
-#  define my_binmode(fp, iotype) \
-            (PerlLIO_setmode(PerlIO_fileno(fp), O_BINARY) != -1 ? TRUE : FALSE)
+#  define my_binmode(fp, iotype, mode) \
+            (PerlLIO_setmode(PerlIO_fileno(fp), mode) != -1 ? TRUE : FALSE)
 #endif
 
 #ifdef UNION_ANY_DEFINITION
@@ -3223,6 +3223,14 @@ typedef struct am_table_short AMTS;
 #    define O_WRONLY	0001
 #    define O_RDWR	0002
 #    define O_CREAT	0100
+#endif
+
+#ifndef O_BINARY
+#  define O_BINARY 0
+#endif
+
+#ifndef O_TEXT
+#  define O_TEXT 0
 #endif
 
 #ifdef IAMSUID

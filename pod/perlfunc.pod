@@ -443,20 +443,27 @@ L<perlipc/"Sockets: Client/Server Communication">.
 
 =item binmode FILEHANDLE
 
-Arranges for FILEHANDLE to be read or written in "binary" mode on
-systems where the run-time libraries distinguish between binary and
+Arranges for FILEHANDLE to be read or written in "binary" or "text" mode
+on systems where the run-time libraries distinguish between binary and
 text files.  If FILEHANDLE is an expression, the value is taken as the
-name of the filehandle.  binmode() should be called after open() but
-before any I/O is done on the filehandle.  The only way to reset
-binary mode on a filehandle is to reopen the file.
+name of the filehandle.  DISCIPLINE can be either of C<":raw"> for
+binary mode or C<":crlf"> for "text" mode.  If the DISCIPLINE is
+omitted, it defaults to C<":raw">.
 
-On many systems binmode() has no effect, and on some systems it is
-necessary when you're not working with a text file.  For the sake of
-portability it is a good idea to always use it when appropriate, and
-to never use it when it isn't appropriate.
+binmode() should be called after open() but before any I/O is done on
+the filehandle.
+
+On many systems binmode() currently has no effect, but in future, it
+will be extended to support user-defined input and output disciplines.
+On some systems binmode() is necessary when you're not working with a
+text file.  For the sake of portability it is a good idea to always use
+it when appropriate, and to never use it when it isn't appropriate.
 
 In other words:  Regardless of platform, use binmode() on binary
 files, and do not use binmode() on text files.
+
+The C<open> pragma can be used to establish default disciplines.
+See L<open>.
 
 The operating system, device drivers, C libraries, and Perl run-time
 system all work together to let the programmer treat a single
