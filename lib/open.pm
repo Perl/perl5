@@ -30,8 +30,8 @@ sub _get_locale_encoding {
 	    # parts of LC_ALL and LANG (the parts before the dot (if any)),
 	    # since we have Locale::Country and Locale::Language available.
 	    # TODO: get a database of Language -> Encoding mappings
-	    # (the Estonian database would be excellent!)
-	    # --jhi
+	    # (the Estonian database at http://www.eki.ee/letter/
+	    # would be excellent!) --jhi
 	}
 	if (defined $locale_encoding &&
 	    $locale_encoding eq 'euc' &&
