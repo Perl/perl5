@@ -123,6 +123,7 @@ struct utsname {
 #define PERL_SOCK_SYSREAD_IS_RECV
 #define PERL_SOCK_SYSWRITE_IS_SEND
 
+#define PERL_NO_FORCE_LINK		/* no need for PL_force_link_funcs */
 
 /* if USE_WIN32_RTL_ENV is not defined, Perl uses direct Win32 calls
  * to read the environment, bypassing the runtime's (usually broken)

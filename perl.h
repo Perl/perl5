@@ -37,6 +37,12 @@
 /* See L<perlguts/"The Perl API"> for detailed notes on
  * PERL_IMPLICIT_CONTEXT and PERL_IMPLICIT_SYS */
 
+#ifdef USE_ITHREADS
+#  if !defined(MULTIPLICITY) && !defined(PERL_OBJECT)
+#    define MULTIPLICITY
+#  endif
+#endif
+
 #ifdef USE_THREADS
 #  ifndef PERL_IMPLICIT_CONTEXT
 #    define PERL_IMPLICIT_CONTEXT
@@ -69,10 +75,6 @@
 #  ifndef PERL_IMPLICIT_SYS
 #    define PERL_IMPLICIT_SYS
 #  endif
-#endif
-
-#if defined(USE_ITHREADS) && !defined(MULTIPLICITY) && !defined(PERL_OBJECT)
-#  include "error: USE_ITHREADS must be built with MULTIPLICITY"
 #endif
 
 #ifdef PERL_OBJECT

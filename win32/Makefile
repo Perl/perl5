@@ -68,14 +68,14 @@ INST_ARCH	= \$(ARCHNAME)
 # XXX WARNING! This option currently undergoing changes.  May be broken.
 #
 # Beginnings of interpreter cloning/threads: still rather rough, fails
-# tests.  This should be enabled to get the fork() emulation.  Do not
-# enable unless you know what you're doing!
+# tests.  This should be enabled to get the fork() emulation.  This needs
+# one of USE_MULTI or USE_OBJECT enabled as well.
 #
 #USE_ITHREADS	= define
 
 #
 # uncomment to enable the implicit "host" layer for all system calls
-# made by perl.  This is needed and auto-enabled by USE_OBJECT above.
+# made by perl.  This needs one of USE_MULTI or USE_OBJECT above.
 # This is also needed to get fork().
 #
 #USE_IMP_SYS	= define
@@ -240,6 +240,15 @@ USE_IMP_SYS	= undef
 
 !IF "$(USE_PERLCRT)" == ""
 USE_PERLCRT	= undef
+!ENDIF
+
+!IF "$(USE_IMP_SYS)$(USE_MULTI)$(USE_5005THREADS)$(USE_OBJECT)" == "defineundefundefundef"
+USE_MULTI	= define
+!ENDIF
+
+!IF "$(USE_ITHREADS)$(USE_MULTI)$(USE_OBJECT)" == "defineundefundef"
+USE_MULTI	= define
+USE_5005THREADS	= undef
 !ENDIF
 
 !IF "$(USE_MULTI)$(USE_5005THREADS)$(USE_OBJECT)" != "undefundefundef"
@@ -419,13 +428,8 @@ $(o).dll:
 
 #
 # various targets
-!IF "$(USE_OBJECT)" == "define"
 PERLIMPLIB	= ..\perl56.lib
 PERLDLL		= ..\perl56.dll
-!ELSE
-PERLIMPLIB	= ..\perl.lib
-PERLDLL		= ..\perl.dll
-!ENDIF
 
 MINIPERL	= ..\miniperl.exe
 MINIDIR		= .\mini

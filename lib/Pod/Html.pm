@@ -459,7 +459,7 @@ END_OF_HEAD
 		    process_head( $1, $2, $doindex && $index );
 		} elsif (/^=item\s*(.*\S)?/sm) {	# =item text
 		    warn "$0: $podfile: =item without bullet, number or text"
-		       . " in paragraph $paragraph.\n" if $1 eq '';
+		       . " in paragraph $paragraph.\n" if !defined($1) or $1 eq '';
 		    process_item( $1 );
 		    $after_item = 1;
 		} elsif (/^=over\s*(.*)/) {		# =over N
@@ -1394,6 +1394,7 @@ sub process_text1($$;$){
     $lev++ unless defined $func;
     my $res = '';
 
+    $func ||= '';
     if( $func eq 'B' ){
 	# B<text> - boldface
 	$res = '<STRONG>' . process_text1( $lev, $rstr ) . '</STRONG>';
@@ -1785,13 +1786,13 @@ sub coderef($$){
     my( $url );
 
     my $fid = fragment_id( $item );
-
+    return( $url, $fid );
     if( defined( $page ) ){
 	# we have been given a $page...
 	$page =~ s{::}{/}g;
 
 	# Do we take it? Item could be a section!
-	my $base = $items{$fid};
+	my $base = $items{$fid} || "";
 	$base =~ s{[^/]*/}{};
 	if( $base ne "$page.html" ){
             ###   print STDERR "coderef( $page, $item ): items{$fid} = $items{$fid} = $base => discard page!\n";
@@ -1811,7 +1812,7 @@ sub coderef($$){
     # =item directive, then create a link to that page.
     if( defined $page ){
 	if( $page ){
-            if( $pages{$page} =~ /([^:.]*)\.[^:]*:/){
+            if( exists $pages{$page} and $pages{$page} =~ /([^:.]*)\.[^:]*:/){
 		$page = $1 . '.html';
 	    }
 	    my $link = "$htmlroot/$page#item_$fid";
@@ -1900,6 +1901,7 @@ sub depod($){
 sub depod1($;$){
   my( $rstr, $func ) = @_;
   my $res = '';
+  return $res unless defined $$rstr;
   if( ! defined( $func ) ){
       # skip to next begin of an interior sequence
       while( $$rstr =~ s/\A(.*?)([BCEFILSXZ])<// ){
@@ -1910,7 +1912,7 @@ sub depod1($;$){
   } elsif( $func eq 'E' ){
       # E<x> - convert to character
       $$rstr =~ s/^(\w+)>//;
-      $res .= $E2c{$1};
+      $res .= $E2c{$1} || "";
   } elsif( $func eq 'X' ){
       # X<> - ignore
       $$rstr =~ s/^[^>]*>//;
@@ -1978,7 +1980,7 @@ sub fragment_id {
 sub make_URL_href($){
     my( $url ) = @_;
     if( $url !~ 
-        s{^(http:[-\w/#~:.+=&%@!]+)(\?.*)?$}{<A HREF="$1$2">$1</A>}i ){
+        s{^(http:[-\w/#~:.+=&%@!]+)(\?.*)$}{<A HREF="$1$2">$1</A>}i ){
         $url = "<A HREF=\"$url\">$url</A>";
     }
     return $url;

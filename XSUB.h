@@ -119,10 +119,8 @@
 #  define VTBL_amagicelem	&PL_vtbl_amagicelem
 #endif
 
-#if defined(PERL_OBJECT) || defined(PERL_CAPI)
-#  include "perlapi.h"
-#  include "objXSUB.h"
-#endif	/* PERL_OBJECT || PERL_CAPI */
+#include "perlapi.h"
+#include "objXSUB.h"
 
 #if defined(PERL_IMPLICIT_CONTEXT) && !defined(PERL_NO_GET_CONTEXT) && !defined(PERL_CORE)
 #  undef aTHX

@@ -1464,6 +1464,12 @@ a literal "at" sign, or was meant to introduce a variable name
 that happens to be missing.  So you have to put either the backslash or
 the name.
 
+=item flock() on closed filehandle %s
+
+(W) The filehandle you're attempting to flock() got itself closed some
+time before now.  Check your logic flow.  flock() operates on filehandles.
+Are you attempting to call flock() on a dirhandle by the same name?
+
 =item Format %s redefined
 
 (W) You redefined a format.  To suppress this warning, say
@@ -3580,10 +3586,4 @@ in F<README.os2>.
 
 =back
 
-=item flock() on closed filehandle %s
-
-(W) The filehandle you're attempting to flock() got itself closed some
-time before now.  Check your logic flow.  flock() operates on filehandles.
-Are you attempting to call flock() on a dirhandle by the same name?
-
-=back
+=cut

@@ -1558,6 +1558,14 @@ A tutorial on managing class data for object modules.
 (F) Lexically scoped subroutines are not yet implemented.  Don't try that
 yet.
 
+=item "%s" variable %s masks earlier declaration in same %s
+
+(W) A "my" or "our" variable has been redeclared in the current scope or statement,
+effectively eliminating all access to the previous instance.  This is almost
+always a typographical error.  Note that the earlier variable will still exist
+until the end of the scope or until all closure referents to it are
+destroyed.
+
 =item '!' allowed only after types %s
 
 (F) The '!' is allowed in pack() and unpack() only after certain types.
@@ -1615,6 +1623,25 @@ declaration for the subroutine in question, or move the subroutine
 definition ahead of the call to get proper prototype checking.  Alternatively,
 if you are certain that you're calling the function correctly, you may put
 an ampersand before the name to avoid the warning.  See L<perlsub>.
+
+=item %s argument is not a HASH or ARRAY element
+
+(F) The argument to exists() must be a hash or array element, such as:
+
+    $foo{$bar}
+    $ref->[12]->["susie"]
+
+=item %s argument is not a HASH or ARRAY element or slice
+
+(F) The argument to delete() must be either a hash or array element, such as:
+
+    $foo{$bar}
+    $ref->[12]->["susie"]
+
+or a hash or array slice, such as:
+
+    @foo[$bar, $baz, $xyzzy]
+    @{$ref->[12]}{"susie", "queue"}
 
 =item %s argument is not a subroutine name
 
@@ -1682,6 +1709,17 @@ so it was truncated to the string shown.
 =item Can't check filesystem of script "%s"
 
 (P) For some reason you can't check the filesystem of the script for nosuid.
+
+=item Can't declare class for non-scalar %s in "%s"
+
+(S) Currently, only scalar variables can declared with a specific class
+qualifier in a "my" or "our" declaration.  The semantics may be extended
+for other types of variables in future.
+
+=item Can't declare %s in "%s"
+
+(F) Only scalar, array, and hash variables may be declared as "my" or
+"our" variables.  They must have ordinary identifiers as names.
 
 =item Can't ignore signal CHLD, forcing to default
 
@@ -1792,6 +1830,19 @@ intended it to be a read/write filehandle, you needed to open it with
 you intended only to read from the file, use "E<lt>".  See
 L<perlfunc/open>.
 
+=item flock() on closed filehandle %s
+
+(W) The filehandle you're attempting to flock() got itself closed some
+time before now.  Check your logic flow.  flock() operates on filehandles.
+Are you attempting to call flock() on a dirhandle by the same name?
+
+=item Global symbol "%s" requires explicit package name
+
+(F) You've said "use strict vars", which indicates that all variables
+must either be lexically scoped (using "my"), declared beforehand using
+"our", or explicitly qualified to say which package the global variable
+is in (using "::").
+
 =item Hexadecimal number > 0xffffffff non-portable
 
 (W) The hexadecimal number you specified is larger than 2**32-1
@@ -1895,6 +1946,22 @@ construction, but the command was missing or blank.
 (F) The reserved syntax for lexically scoped subroutines requires that they
 have a name with which they can be found.
 
+=item No %s specified for -%c
+
+(F) The indicated command line switch needs a mandatory argument, but
+you haven't specified one.
+
+=item No package name allowed for variable %s in "our"
+
+(F) Fully qualified variable names are not allowed in "our" declarations,
+because that doesn't make much sense under existing semantics.  Such
+syntax is reserved for future extensions.
+
+=item No space allowed after -%c
+
+(F) The argument to the indicated command line switch must follow immediately
+after the switch, without intervening spaces.
+
 =item no UTC offset information; assuming local time is UTC
 
 (S) A warning peculiar to VMS.  Perl was unable to find the local
@@ -1924,6 +1991,18 @@ reference.
 
 (P) Failed an internal consistency check while trying to reset all weak
 references to an object.
+
+=item Parentheses missing around "%s" list
+
+(W) You said something like
+
+    my $foo, $bar = @_;
+
+when you meant
+
+    my ($foo, $bar) = @_;
+
+Remember that "my", "our" and "local" bind closer than comma.
 
 =item Possible Y2K bug: %s
 

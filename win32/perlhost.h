@@ -1628,7 +1628,7 @@ PerlProcSignal(struct IPerlProc* piPerl, int sig, Sighandler_t subcode)
 }
 
 #ifdef USE_ITHREADS
-static DWORD WINAPI
+static THREAD_RET_TYPE
 win32_start_child(LPVOID arg)
 {
     PerlInterpreter *my_perl = (PerlInterpreter*)arg;
@@ -1740,9 +1740,14 @@ PerlProcFork(struct IPerlProc* piPerl)
     id = win32_start_child((LPVOID)new_perl);
     PERL_SET_INTERP(aTHXo);
 #  else
+#    ifdef USE_RTL_THREAD_API
+    handle = (HANDLE)_beginthreadex((void*)NULL, 0, win32_start_child,
+				    (void*)new_perl, 0, (unsigned*)&id);
+#    else
     handle = CreateThread(NULL, 0, win32_start_child,
 			  (LPVOID)new_perl, 0, &id);
-    PERL_SET_INTERP(aTHXo);
+#    endif
+    PERL_SET_INTERP(aTHXo);	/* XXX perl_clone*() set TLS */
     if (!handle)
 	Perl_croak(aTHX_ "panic: pseudo fork() failed");
     w32_pseudo_child_handles[w32_num_pseudo_children] = handle;
