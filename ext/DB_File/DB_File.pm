@@ -1,8 +1,8 @@
 # DB_File.pm -- Perl 5 interface to Berkeley DB 
 #
 # written by Paul Marquess (Paul.Marquess@btinternet.com)
-# last modified 4th August 1999
-# version 1.70
+# last modified 4th September 1999
+# version 1.71
 #
 #     Copyright (c) 1995-1999 Paul Marquess. All rights reserved.
 #     This program is free software; you can redistribute it and/or
@@ -145,7 +145,7 @@ use vars qw($VERSION @ISA @EXPORT $AUTOLOAD $DB_BTREE $DB_HASH $DB_RECNO $db_ver
 use Carp;
 
 
-$VERSION = "1.70" ;
+$VERSION = "1.71" ;
 
 #typedef enum { DB_BTREE, DB_HASH, DB_RECNO } DBTYPE;
 $DB_BTREE = new DB_File::BTREEINFO ;
@@ -421,10 +421,10 @@ DB_File - Perl5 access to Berkeley DB version 1.x
 
 B<DB_File> is a module which allows Perl programs to make use of the
 facilities provided by Berkeley DB version 1.x (if you have a newer
-version of DB, see L<Using DB_File with Berkeley DB version 2>). It is
-assumed that you have a copy of the Berkeley DB manual pages at hand
-when reading this documentation. The interface defined here mirrors the
-Berkeley DB interface closely.
+version of DB, see L<Using DB_File with Berkeley DB version 2 or 3>).
+It is assumed that you have a copy of the Berkeley DB manual pages at
+hand when reading this documentation. The interface defined here
+mirrors the Berkeley DB interface closely.
 
 Berkeley DB is a C library which provides a consistent interface to a
 number of database formats.  B<DB_File> provides an interface to all
@@ -465,32 +465,33 @@ number.
 
 =back
 
-=head2 Using DB_File with Berkeley DB version 2
+=head2 Using DB_File with Berkeley DB version 2 or 3
 
 Although B<DB_File> is intended to be used with Berkeley DB version 1,
-it can also be used with version 2. In this case the interface is
+it can also be used with version 2.or 3 In this case the interface is
 limited to the functionality provided by Berkeley DB 1.x. Anywhere the
-version 2 interface differs, B<DB_File> arranges for it to work like
-version 1. This feature allows B<DB_File> scripts that were built with
-version 1 to be migrated to version 2 without any changes.
+version 2 or 3 interface differs, B<DB_File> arranges for it to work
+like version 1. This feature allows B<DB_File> scripts that were built
+with version 1 to be migrated to version 2 or 3 without any changes.
 
 If you want to make use of the new features available in Berkeley DB
-2.x, use the Perl module B<BerkeleyDB> instead.
+2.x or 3.x, use the Perl module B<BerkeleyDB> instead.
 
 At the time of writing this document the B<BerkeleyDB> module is still
 alpha quality (the version number is < 1.0), and so unsuitable for use
 in any serious development work. Once its version number is >= 1.0, it
 is considered stable enough for real work.
 
-B<Note:> The database file format has changed in Berkeley DB version 2.
-If you cannot recreate your databases, you must dump any existing
-databases with the C<db_dump185> utility that comes with Berkeley DB.
-Once you have rebuilt DB_File to use Berkeley DB version 2, your
+B<Note:> The database file format has changed in both Berkeley DB
+version 2 and 3. If you cannot recreate your databases, you must dump
+any existing databases with the C<db_dump185> utility that comes with
+Berkeley DB.
+Once you have rebuilt DB_File to use Berkeley DB version 2 or 3, your
 databases can be recreated using C<db_load>. Refer to the Berkeley DB
 documentation for further details.
 
-Please read L<"COPYRIGHT"> before using version 2.x of Berkeley DB with
-DB_File.
+Please read L<"COPYRIGHT"> before using version 2.x or 3.x of Berkeley
+DB with DB_File.
 
 =head2 Interface to Berkeley DB
 
@@ -1940,11 +1941,12 @@ date, so the most recent version can always be found on CPAN (see
 L<perlmod/CPAN> for details), in the directory
 F<modules/by-module/DB_File>.
 
-This version of B<DB_File> will work with either version 1.x or 2.x of
-Berkeley DB, but is limited to the functionality provided by version 1.
+This version of B<DB_File> will work with either version 1.x, 2.x or
+3.x of Berkeley DB, but is limited to the functionality provided by
+version 1.
 
 The official web site for Berkeley DB is F<http://www.sleepycat.com>.
-Both versions 1 and 2 of Berkeley DB are available there.
+All versions of Berkeley DB are available there.
 
 Alternatively, Berkeley DB version 1 is available at your nearest CPAN
 archive in F<src/misc/db.1.85.tar.gz>.
