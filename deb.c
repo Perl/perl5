@@ -88,7 +88,7 @@ deb(pat, va_alist)
 #endif /* !defined(I_STDARG) && !defined(I_VARARGS) */
 
 void
-deb_growlevel()
+deb_growlevel(void)
 {
     dlmax += 128;
     Renew(debname, dlmax, char);
@@ -96,7 +96,7 @@ deb_growlevel()
 }
 
 I32
-debstackptrs()
+debstackptrs(void)
 {
     dTHR;
     PerlIO_printf(Perl_debug_log, "%8lx %8lx %8ld %8ld %8ld\n",
@@ -110,7 +110,7 @@ debstackptrs()
 }
 
 I32
-debstack()
+debstack(void)
 {
     dTHR;
     I32 top = stack_sp - stack_base;

@@ -17,7 +17,7 @@
 #include "perl.h"
 
 static void
-dep()
+dep(void)
 {
     deprecate("\"do\" to call subroutines");
 }

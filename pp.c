@@ -24,6 +24,16 @@
  */
 #ifdef CXUX_BROKEN_CONSTANT_CONVERT
 static double UV_MAX_cxux = ((double)UV_MAX);
+#endif  
+
+#ifdef HAS_CRYPT
+#ifdef __cplusplus
+#ifdef FCRYPT
+extern "C" char *fcrypt(char *,char *);
+#else
+extern "C" char *crypt(char *,char *);
+#endif
+#endif
 #endif
 
 /*
@@ -104,6 +114,14 @@ static U32 seed _((void));
 static bool srand_called = FALSE;
 
 /* variations on pp_null */
+
+#ifdef DONT_DECLARE_STD
+#ifdef I_UNISTD
+#include <unistd.h>
+#endif
+#else
+extern pid_t getpid (void);
+#endif
 
 PP(pp_stub)
 {
@@ -382,8 +400,7 @@ PP(pp_refgen)
 }
 
 static SV*
-refto(sv)
-SV* sv;
+refto(SV *sv)
 {
     SV* rv;
 
@@ -1500,7 +1517,7 @@ PP(pp_srand)
 }
 
 static U32
-seed()
+seed(void)
 {
     /*
      * This is really just a quick hack which grabs various garbage
@@ -2717,9 +2734,7 @@ PP(pp_reverse)
 }
 
 static SV      *
-mul128(sv, m)
-     SV             *sv;
-     U8              m;
+mul128(SV *sv, U8 m)
 {
   STRLEN          len;
   char           *s = SvPV(sv, len);
@@ -2727,11 +2742,11 @@ mul128(sv, m)
   U32             i = 0;
 
   if (!strnEQ(s, "0000", 4)) {  /* need to grow sv */
-    SV             *new = newSVpv("0000000000", 10);
+    SV             *New = newSVpv("0000000000", 10);
 
-    sv_catsv(new, sv);
+    sv_catsv(New, sv);
     SvREFCNT_dec(sv);		/* free old sv */
-    sv = new;
+    sv = New;
     s = SvPV(sv, len);
   }
   t = s + len - 1;
@@ -3441,10 +3456,7 @@ PP(pp_unpack)
 }
 
 static void
-doencodes(sv, s, len)
-register SV *sv;
-register char *s;
-register I32 len;
+doencodes(register SV *sv, register char *s, register I32 len)
 {
     char hunk[5];
 
@@ -3468,9 +3480,7 @@ register I32 len;
 }
 
 static SV      *
-is_an_int(s, l)
-     char           *s;
-     STRLEN          l;
+is_an_int(char *s, STRLEN l)
 {
   SV             *result = newSVpv("", l);
   char           *result_c = SvPV(result, na);	/* convenience */
@@ -3518,9 +3528,9 @@ is_an_int(s, l)
 }
 
 static int
-div128(pnum, done)
-     SV             *pnum;		    /* must be '\0' terminated */
-     bool           *done;
+div128(SV *pnum, char *done)
+                          		    /* must be '\0' terminated */
+                          
 {
   STRLEN          len;
   char           *s = SvPV(pnum, len);
@@ -4244,8 +4254,7 @@ PP(pp_split)
 
 #ifdef USE_THREADS
 void
-unlock_condpair(svv)
-void *svv;
+unlock_condpair(void *svv)
 {
     dTHR;
     MAGIC *mg = mg_find((SV*)svv, 'm');

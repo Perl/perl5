@@ -22,6 +22,12 @@
 # include <unistd.h>
 #endif
 
+#ifdef HAS_SYSCALL   
+#ifdef __cplusplus              
+extern "C" int syscall(unsigned long,...);
+#endif
+#endif
+
 #ifdef I_SYS_WAIT
 # include <sys/wait.h>
 #endif
@@ -832,8 +838,7 @@ PP(pp_sselect)
 }
 
 void
-setdefout(gv)
-GV *gv;
+setdefout(GV *gv)
 {
     dTHR;
     if (gv)
@@ -849,7 +854,7 @@ PP(pp_select)
     GV *newdefout, *egv;
     HV *hv;
 
-    newdefout = (op->op_private > 0) ? ((GV *) POPs) : NULL;
+    newdefout = (op->op_private > 0) ? ((GV *) POPs) : (GV *) NULL;
 
     egv = GvEGV(defoutgv);
     if (!egv)
@@ -918,10 +923,7 @@ PP(pp_read)
 }
 
 static OP *
-doform(cv,gv,retop)
-CV *cv;
-GV *gv;
-OP *retop;
+doform(CV *cv, GV *gv, OP *retop)
 {
     dTHR;
     register CONTEXT *cx;
@@ -2941,7 +2943,7 @@ PP(pp_telldir)
 {
     dSP; dTARGET;
 #if defined(HAS_TELLDIR) || defined(telldir)
-#if !defined(telldir) && !defined(HAS_TELLDIR_PROTOTYPE)
+#if !defined(telldir) && !defined(HAS_TELLDIR_PROTOTYPE) && !defined(DONT_DECLARE_STD)
     long telldir _((DIR *));
 #endif
     GV *gv = (GV*)POPs;
@@ -3604,10 +3606,10 @@ PP(pp_ghostent)
     I32 which = op->op_type;
     register char **elem;
     register SV *sv;
-    struct hostent *gethostbyname();
-    struct hostent *gethostbyaddr();
-#ifdef HAS_GETHOSTENT
-    struct hostent *gethostent();
+#if defined(HAS_GETHOSTENT) && !defined(DONT_DECLARE_STD)
+    struct hostent *gethostbyname(const char *);
+    struct hostent *gethostbyaddr(const char *, int, int);
+    struct hostent *gethostent(void);
 #endif
     struct hostent *hent;
     unsigned long len;
@@ -3705,9 +3707,11 @@ PP(pp_gnetent)
     I32 which = op->op_type;
     register char **elem;
     register SV *sv;
-    struct netent *getnetbyname();
-    struct netent *getnetbyaddr();
-    struct netent *getnetent();
+#ifndef DONT_DECLARE_STD
+    struct netent *getnetbyname(const char *);
+    struct netent *getnetbyaddr(long int, int);
+    struct netent *getnetent(void);
+#endif
     struct netent *nent;
 
     if (which == OP_GNBYNAME)
@@ -3777,10 +3781,12 @@ PP(pp_gprotoent)
 #ifdef HAS_SOCKET
     I32 which = op->op_type;
     register char **elem;
-    register SV *sv;
-    struct protoent *getprotobyname();
-    struct protoent *getprotobynumber();
-    struct protoent *getprotoent();
+    register SV *sv;  
+#ifndef DONT_DECLARE_STD
+    struct protoent *getprotobyname(const char *);
+    struct protoent *getprotobynumber(int);
+    struct protoent *getprotoent(void);
+#endif
     struct protoent *pent;
 
     if (which == OP_GPBYNAME)
@@ -3846,9 +3852,11 @@ PP(pp_gservent)
     I32 which = op->op_type;
     register char **elem;
     register SV *sv;
-    struct servent *getservbyname();
+#ifndef DONT_DECLARE_STD
+    struct servent *getservbyname(const char *, const char *);
     struct servent *getservbynumber();
-    struct servent *getservent();
+    struct servent *getservent(void);
+#endif
     struct servent *sent;
 
     if (which == OP_GSBYNAME) {
@@ -4230,7 +4238,7 @@ PP(pp_getlogin)
 
 PP(pp_syscall)
 {
-#ifdef HAS_SYSCALL
+#ifdef HAS_SYSCALL   
     dSP; dMARK; dORIGMARK; dTARGET;
     register I32 items = SP - MARK;
     unsigned long a[20];
@@ -4332,9 +4340,7 @@ PP(pp_syscall)
 */
 
 static int
-fcntl_emulate_flock(fd, operation)
-int fd;
-int operation;
+fcntl_emulate_flock(int fd, int operation)
 {
     struct flock flock;
  

@@ -17,7 +17,7 @@
 
 #ifndef DEBUGGING
 void
-dump_all()
+dump_all(void)
 {
 }
 #else  /* Rest of file is for DEBUGGING */
@@ -29,7 +29,7 @@ static void dump();
 #endif
 
 void
-dump_all()
+dump_all(void)
 {
     dTHR;
     PerlIO_setlinebuf(Perl_debug_log);
@@ -39,8 +39,7 @@ dump_all()
 }
 
 void
-dump_packsubs(stash)
-HV* stash;
+dump_packsubs(HV *stash)
 {
     dTHR;
     I32	i;
@@ -64,8 +63,7 @@ HV* stash;
 }
 
 void
-dump_sub(gv)
-GV* gv;
+dump_sub(GV *gv)
 {
     SV *sv = sv_newmortal();
 
@@ -82,8 +80,7 @@ GV* gv;
 }
 
 void
-dump_form(gv)
-GV* gv;
+dump_form(GV *gv)
 {
     SV *sv = sv_newmortal();
 
@@ -96,14 +93,13 @@ GV* gv;
 }
 
 void
-dump_eval()
+dump_eval(void)
 {
     dump_op(eval_root);
 }
 
 void
-dump_op(o)
-register OP *o;
+dump_op(OP *o)
 {
     dump("{\n");
     if (o->op_seq)
@@ -316,8 +312,7 @@ register OP *o;
 }
 
 void
-dump_gv(gv)
-register GV *gv;
+dump_gv(GV *gv)
 {
     SV *sv;
 
@@ -340,8 +335,7 @@ register GV *gv;
 }
 
 void
-dump_pm(pm)
-register PMOP *pm;
+dump_pm(PMOP *pm)
 {
     char ch;
 

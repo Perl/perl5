@@ -18,12 +18,15 @@
 #include "EXTERN.h"
 #include "perl.h"
 
+#ifdef I_UNISTD
+#include <unistd.h>
+#endif
+
 /* Hot code. */
 
 #ifdef USE_THREADS
 static void
-unset_cvowner(cvarg)
-void *cvarg;
+unset_cvowner(void *cvarg)
 {
     register CV* cv = (CV *) cvarg;
 #ifdef DEBUGGING
@@ -947,7 +950,7 @@ ret_no:
 }
 
 OP *
-do_readline()
+do_readline(void)
 {
     dTHR;
     dSP; dTARGETSTACKED;
@@ -1370,7 +1373,7 @@ PP(pp_iter)
 	}
 	LvTARG(lv) = SvREFCNT_inc(av);
 	LvTARGOFF(lv) = cx->blk_loop.iterix;
-	LvTARGLEN(lv) = -1;
+	LvTARGLEN(lv) = (UV) -1;
 	sv = (SV*)lv;
     }
 
@@ -1713,9 +1716,7 @@ PP(pp_leavesub)
 }
 
 static CV *
-get_db_sub(svp, cv)
-SV **svp;
-CV *cv;
+get_db_sub(SV **svp, CV *cv)
 {
     dTHR;
     SV *oldsv = *svp;
@@ -2144,8 +2145,7 @@ PP(pp_entersub)
 }
 
 void
-sub_crush_depth(cv)
-CV* cv;
+sub_crush_depth(CV *cv)
 {
     if (CvANON(cv))
 	warn("Deep recursion on anonymous subroutine");
@@ -2195,9 +2195,7 @@ PP(pp_aelem)
 }
 
 void
-vivify_ref(sv, to_what)
-SV* sv;
-U32 to_what;
+vivify_ref(SV *sv, U32 to_what)
 {
     if (SvGMAGICAL(sv))
 	mg_get(sv);

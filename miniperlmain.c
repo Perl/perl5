@@ -65,7 +65,7 @@ char **env;
 /* Do not delete this line--writemain depends on it */
 
 static void
-xs_init()
+xs_init(void)
 {
   dXSUB_SYS;
 }

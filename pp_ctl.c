@@ -164,9 +164,7 @@ PP(pp_substcont)
 }
 
 void
-rxres_save(rsp, rx)
-void **rsp;
-REGEXP *rx;
+rxres_save(void **rsp, REGEXP *rx)
 {
     UV *p = (UV*)*rsp;
     U32 i;
@@ -194,9 +192,7 @@ REGEXP *rx;
 }
 
 void
-rxres_restore(rsp, rx)
-void **rsp;
-REGEXP *rx;
+rxres_restore(void **rsp, REGEXP *rx)
 {
     UV *p = (UV*)*rsp;
     U32 i;
@@ -216,8 +212,7 @@ REGEXP *rx;
 }
 
 void
-rxres_free(rsp)
-void **rsp;
+rxres_free(void **rsp)
 {
     UV *p = (UV*)*rsp;
 
@@ -847,8 +842,7 @@ PP(pp_flop)
 /* Control. */
 
 static I32
-dopoptolabel(label)
-char *label;
+dopoptolabel(char *label)
 {
     dTHR;
     register I32 i;
@@ -888,14 +882,14 @@ char *label;
 }
 
 I32
-dowantarray()
+dowantarray(void)
 {
     I32 gimme = block_gimme();
     return (gimme == G_VOID) ? G_SCALAR : gimme;
 }
 
 I32
-block_gimme()
+block_gimme(void)
 {
     dTHR;
     I32 cxix;
@@ -917,8 +911,7 @@ block_gimme()
 }
 
 static I32
-dopoptosub(startingblock)
-I32 startingblock;
+dopoptosub(I32 startingblock)
 {
     dTHR;
     I32 i;
@@ -938,8 +931,7 @@ I32 startingblock;
 }
 
 static I32
-dopoptoeval(startingblock)
-I32 startingblock;
+dopoptoeval(I32 startingblock)
 {
     dTHR;
     I32 i;
@@ -958,8 +950,7 @@ I32 startingblock;
 }
 
 static I32
-dopoptoloop(startingblock)
-I32 startingblock;
+dopoptoloop(I32 startingblock)
 {
     dTHR;
     I32 i;
@@ -992,8 +983,7 @@ I32 startingblock;
 }
 
 void
-dounwind(cxix)
-I32 cxix;
+dounwind(I32 cxix)
 {
     dTHR;
     register CONTEXT *cx;
@@ -1026,8 +1016,7 @@ I32 cxix;
 }
 
 OP *
-die_where(message)
-char *message;
+die_where(char *message)
 {
     dTHR;
     if (in_eval) {
@@ -1230,9 +1219,7 @@ PP(pp_caller)
 }
 
 static int
-sortcv(a, b)
-const void *a;
-const void *b;
+sortcv(const void *a, const void *b)
 {
     dTHR;
     SV * const *str1 = (SV * const *)a;
@@ -1258,17 +1245,13 @@ const void *b;
 }
 
 static int
-sortcmp(a, b)
-const void *a;
-const void *b;
+sortcmp(const void *a, const void *b)
 {
     return sv_cmp(*(SV * const *)a, *(SV * const *)b);
 }
 
 static int
-sortcmp_locale(a, b)
-const void *a;
-const void *b;
+sortcmp_locale(const void *a, const void *b)
 {
     return sv_cmp_locale(*(SV * const *)a, *(SV * const *)b);
 }
@@ -1643,11 +1626,7 @@ PP(pp_redo)
 static OP* lastgotoprobe;
 
 static OP *
-dofindlabel(o,label,opstack,oplimit)
-OP *o;
-char *label;
-OP **opstack;
-OP **oplimit;
+dofindlabel(OP *o, char *label, OP **opstack, OP **oplimit)
 {
     OP *kid;
     OP **ops = opstack;
@@ -2063,9 +2042,7 @@ PP(pp_cswitch)
 /* Eval. */
 
 static void
-save_lines(array, sv)
-AV *array;
-SV *sv;
+save_lines(AV *array, SV *sv)
 {
     register char *s = SvPVX(sv);
     register char *send = SvPVX(sv) + SvCUR(sv);
@@ -2089,8 +2066,7 @@ SV *sv;
 }
 
 static OP *
-docatch(o)
-OP *o;
+docatch(OP *o)
 {
     dTHR;
     int ret;
@@ -2131,8 +2107,7 @@ OP *o;
 
 /* With USE_THREADS, eval_owner must be held on entry to doeval */
 static OP *
-doeval(gimme)
-int gimme;
+doeval(int gimme)
 {
     dTHR;
     dSP;
@@ -2658,8 +2633,7 @@ PP(pp_leavetry)
 }
 
 static void
-doparseform(sv)
-SV *sv;
+doparseform(SV *sv)
 {
     STRLEN len;
     register char *s = SvPV_force(sv, len);

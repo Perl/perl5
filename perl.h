@@ -1029,7 +1029,7 @@ union any {
 };
 
 #ifdef USE_THREADS
-#define ARGSproto struct thread *
+#define ARGSproto struct thread *thr
 #else
 #define ARGSproto void
 #endif /* USE_THREADS */
@@ -1361,7 +1361,7 @@ EXT struct thread *	thr;		/* Currently executing (fake) thread */
 
 /* VMS doesn't use environ array and NeXT has problems with crt0.o globals */
 #if !defined(VMS) && !(defined(NeXT) && defined(__DYNAMIC__))
-#ifndef DONT_DECLARE_STD
+#if !defined(DONT_DECLARE_STD) || (defined(__svr4__) && defined(__GNUC__) && defined(sun))
 extern char **	environ;	/* environment variables supplied via exec */
 #endif
 #else

@@ -204,8 +204,7 @@ U32 flags;
     } while (0)
 
 static void
-del_sv(p)
-SV* p;
+del_sv(SV *p)
 {
     if (debug & 32768) {
 	SV* sva;
@@ -233,10 +232,7 @@ SV* p;
 #endif /* DEBUGGING */
 
 void
-sv_add_arena(ptr, size, flags)
-char* ptr;
-U32 size;
-U32 flags;
+sv_add_arena(char *ptr, U32 size, U32 flags)
 {
     SV* sva = (SV*)ptr;
     register SV* sv;
@@ -264,7 +260,7 @@ U32 flags;
 
 /* sv_mutex must be held while calling more_sv() */
 static SV*
-more_sv()
+more_sv(void)
 {
     register SV* sv;
 
@@ -282,8 +278,7 @@ more_sv()
 }
 
 static void
-visit(f)
-SVFUNC f;
+visit(SVFUNC f)
 {
     SV* sva;
     SV* sv;
@@ -301,8 +296,7 @@ SVFUNC f;
 #endif /* PURIFY */
 
 static void
-do_report_used(sv)
-SV* sv;
+do_report_used(SV *sv)
 {
     if (SvTYPE(sv) != SVTYPEMASK) {
 	/* XXX Perhaps this ought to go to Perl_debug_log, if DEBUGGING. */
@@ -312,14 +306,13 @@ SV* sv;
 }
 
 void
-sv_report_used()
+sv_report_used(void)
 {
     visit(do_report_used);
 }
 
 static void
-do_clean_objs(sv)
-SV* sv;
+do_clean_objs(SV *sv)
 {
     SV* rv;
 
@@ -335,8 +328,7 @@ SV* sv;
 
 #ifndef DISABLE_DESTRUCTOR_KLUDGE
 static void
-do_clean_named_objs(sv)
-SV* sv;
+do_clean_named_objs(SV *sv)
 {
     if (SvTYPE(sv) == SVt_PVGV && GvSV(sv))
 	do_clean_objs(GvSV(sv));
@@ -346,7 +338,7 @@ SV* sv;
 static bool in_clean_objs = FALSE;
 
 void
-sv_clean_objs()
+sv_clean_objs(void)
 {
     in_clean_objs = TRUE;
 #ifndef DISABLE_DESTRUCTOR_KLUDGE
@@ -357,8 +349,7 @@ sv_clean_objs()
 }
 
 static void
-do_clean_all(sv)
-SV* sv;
+do_clean_all(SV *sv)
 {
     DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning loops:\n "), sv_dump(sv));)
     SvFLAGS(sv) |= SVf_BREAK;
@@ -368,7 +359,7 @@ SV* sv;
 static bool in_clean_all = FALSE;
 
 void
-sv_clean_all()
+sv_clean_all(void)
 {
     in_clean_all = TRUE;
     visit(do_clean_all);
@@ -376,7 +367,7 @@ sv_clean_all()
 }
 
 void
-sv_free_arenas()
+sv_free_arenas(void)
 {
     SV* sva;
     SV* svanext;
@@ -398,7 +389,7 @@ sv_free_arenas()
 }
 
 static XPVIV*
-new_xiv()
+new_xiv(void)
 {
     IV** xiv;
     if (xiv_root) {
@@ -413,8 +404,7 @@ new_xiv()
 }
 
 static void
-del_xiv(p)
-XPVIV* p;
+del_xiv(XPVIV *p)
 {
     IV** xiv = (IV**)((char*)(p) + sizeof(XPV));
     *xiv = (IV *)xiv_root;
@@ -422,7 +412,7 @@ XPVIV* p;
 }
 
 static XPVIV*
-more_xiv()
+more_xiv(void)
 {
     register IV** xiv;
     register IV** xivend;
@@ -443,7 +433,7 @@ more_xiv()
 }
 
 static XPVNV*
-new_xnv()
+new_xnv(void)
 {
     double* xnv;
     if (xnv_root) {
@@ -455,8 +445,7 @@ new_xnv()
 }
 
 static void
-del_xnv(p)
-XPVNV* p;
+del_xnv(XPVNV *p)
 {
     double* xnv = (double*)((char*)(p) + sizeof(XPVIV));
     *(double**)xnv = xnv_root;
@@ -464,7 +453,7 @@ XPVNV* p;
 }
 
 static XPVNV*
-more_xnv()
+more_xnv(void)
 {
     register double* xnv;
     register double* xnvend;
@@ -481,7 +470,7 @@ more_xnv()
 }
 
 static XRV*
-new_xrv()
+new_xrv(void)
 {
     XRV* xrv;
     if (xrv_root) {
@@ -493,15 +482,14 @@ new_xrv()
 }
 
 static void
-del_xrv(p)
-XRV* p;
+del_xrv(XRV *p)
 {
     p->xrv_rv = (SV*)xrv_root;
     xrv_root = p;
 }
 
 static XRV*
-more_xrv()
+more_xrv(void)
 {
     register XRV* xrv;
     register XRV* xrvend;
@@ -517,7 +505,7 @@ more_xrv()
 }
 
 static XPV*
-new_xpv()
+new_xpv(void)
 {
     XPV* xpv;
     if (xpv_root) {
@@ -529,15 +517,14 @@ new_xpv()
 }
 
 static void
-del_xpv(p)
-XPV* p;
+del_xpv(XPV *p)
 {
     p->xpv_pv = (char*)xpv_root;
     xpv_root = p;
 }
 
 static XPV*
-more_xpv()
+more_xpv(void)
 {
     register XPV* xpv;
     register XPV* xpvend;
@@ -557,7 +544,7 @@ more_xpv()
 #define del_XIV(p) free((char*)p)
 #else
 #define new_XIV() (void*)new_xiv()
-#define del_XIV(p) del_xiv(p)
+#define del_XIV(p) del_xiv((XPVIV*) p)
 #endif
 
 #ifdef PURIFY
@@ -565,7 +552,7 @@ more_xpv()
 #define del_XNV(p) free((char*)p)
 #else
 #define new_XNV() (void*)new_xnv()
-#define del_XNV(p) del_xnv(p)
+#define del_XNV(p) del_xnv((XPVNV*) p)
 #endif
 
 #ifdef PURIFY
@@ -573,7 +560,7 @@ more_xpv()
 #define del_XRV(p) free((char*)p)
 #else
 #define new_XRV() (void*)new_xrv()
-#define del_XRV(p) del_xrv(p)
+#define del_XRV(p) del_xrv((XRV*) p)
 #endif
 
 #ifdef PURIFY
@@ -581,7 +568,7 @@ more_xpv()
 #define del_XPV(p) free((char*)p)
 #else
 #define new_XPV() (void*)new_xpv()
-#define del_XPV(p) del_xpv(p)
+#define del_XPV(p) del_xpv((XPV *)p)
 #endif
 
 #define new_XPVIV() (void*)safemalloc(sizeof(XPVIV))
@@ -618,9 +605,7 @@ more_xpv()
 #define del_XPVIO(p) free((char*)p)
 
 bool
-sv_upgrade(sv, mt)
-register SV* sv;
-U32 mt;
+sv_upgrade(register SV *sv, U32 mt)
 {
     char*	pv;
     U32		cur;
@@ -895,8 +880,7 @@ U32 mt;
 
 #ifdef DEBUGGING
 char *
-sv_peek(sv)
-register SV *sv;
+sv_peek(SV *sv)
 {
     SV *t = sv_newmortal();
     STRLEN prevlen;
@@ -1043,8 +1027,7 @@ register SV *sv;
 #endif
 
 int
-sv_backoff(sv)
-register SV *sv;
+sv_backoff(register SV *sv)
 {
     assert(SvOOK(sv));
     if (SvIVX(sv)) {
@@ -1059,12 +1042,12 @@ register SV *sv;
 }
 
 char *
-sv_grow(sv,newlen)
-register SV *sv;
+sv_grow(register SV *sv, register I32 newlen)
+                
 #ifndef DOSISH
-register I32 newlen;
+                    
 #else
-unsigned long newlen;
+                     
 #endif
 {
     register char *s;
@@ -1101,9 +1084,7 @@ unsigned long newlen;
 }
 
 void
-sv_setiv(sv,i)
-register SV *sv;
-IV i;
+sv_setiv(register SV *sv, IV i)
 {
     sv_check_thinkfirst(sv);
     switch (SvTYPE(sv)) {
@@ -1141,9 +1122,7 @@ IV i;
 }
 
 void
-sv_setuv(sv,u)
-register SV *sv;
-UV u;
+sv_setuv(register SV *sv, UV u)
 {
     if (u <= IV_MAX)
 	sv_setiv(sv, u);
@@ -1152,9 +1131,7 @@ UV u;
 }
 
 void
-sv_setnv(sv,num)
-register SV *sv;
-double num;
+sv_setnv(register SV *sv, double num)
 {
     sv_check_thinkfirst(sv);
     switch (SvTYPE(sv)) {
@@ -1198,8 +1175,7 @@ double num;
 }
 
 static void
-not_a_number(sv)
-SV *sv;
+not_a_number(SV *sv)
 {
     dTHR;
     char tmpbuf[64];
@@ -1254,8 +1230,7 @@ SV *sv;
 }
 
 IV
-sv_2iv(sv)
-register SV *sv;
+sv_2iv(register SV *sv)
 {
     if (!sv)
 	return 0;
@@ -1335,8 +1310,7 @@ register SV *sv;
 }
 
 UV
-sv_2uv(sv)
-register SV *sv;
+sv_2uv(register SV *sv)
 {
     if (!sv)
 	return 0;
@@ -1406,8 +1380,7 @@ register SV *sv;
 }
 
 double
-sv_2nv(sv)
-register SV *sv;
+sv_2nv(register SV *sv)
 {
     if (!sv)
 	return 0.0;
@@ -1489,8 +1462,7 @@ register SV *sv;
 }
 
 static IV
-asIV(sv)
-SV *sv;
+asIV(SV *sv)
 {
     I32 numtype = looks_like_number(sv);
     double d;
@@ -1508,8 +1480,7 @@ SV *sv;
 }
 
 static UV
-asUV(sv)
-SV *sv;
+asUV(SV *sv)
 {
     I32 numtype = looks_like_number(sv);
 
@@ -1524,8 +1495,7 @@ SV *sv;
 }
 
 I32
-looks_like_number(sv)
-SV *sv;
+looks_like_number(SV *sv)
 {
     register char *s;
     register char *send;
@@ -1604,9 +1574,7 @@ SV *sv;
 }
 
 char *
-sv_2pv(sv, lp)
-register SV *sv;
-STRLEN *lp;
+sv_2pv(register SV *sv, STRLEN *lp)
 {
     register char *s;
     int olderrno;
@@ -1797,8 +1765,7 @@ STRLEN *lp;
 
 /* This function is only called on magical items */
 bool
-sv_2bool(sv)
-register SV *sv;
+sv_2bool(register SV *sv)
 {
     if (SvGMAGICAL(sv))
 	mg_get(sv);
@@ -1844,9 +1811,7 @@ register SV *sv;
  */
 
 void
-sv_setsv(dstr,sstr)
-SV *dstr;
-register SV *sstr;
+sv_setsv(SV *dstr, register SV *sstr)
 {
     dTHR;
     register U32 sflags;
@@ -2181,10 +2146,7 @@ register SV *sstr;
 }
 
 void
-sv_setpvn(sv,ptr,len)
-register SV *sv;
-register const char *ptr;
-register STRLEN len;
+sv_setpvn(register SV *sv, register const char *ptr, register STRLEN len)
 {
     assert(len >= 0);  /* STRLEN is probably unsigned, so this may
 			  elicit a warning, but it won't hurt. */
@@ -2208,9 +2170,7 @@ register STRLEN len;
 }
 
 void
-sv_setpv(sv,ptr)
-register SV *sv;
-register const char *ptr;
+sv_setpv(register SV *sv, register const char *ptr)
 {
     register STRLEN len;
 
@@ -2234,10 +2194,7 @@ register const char *ptr;
 }
 
 void
-sv_usepvn(sv,ptr,len)
-register SV *sv;
-register char *ptr;
-register STRLEN len;
+sv_usepvn(register SV *sv, register char *ptr, register STRLEN len)
 {
     sv_check_thinkfirst(sv);
     if (!SvUPGRADE(sv, SVt_PV))
@@ -2258,8 +2215,7 @@ register STRLEN len;
 }
 
 static void
-sv_check_thinkfirst(sv)
-register SV *sv;
+sv_check_thinkfirst(register SV *sv)
 {
     if (SvTHINKFIRST(sv)) {
 	if (SvREADONLY(sv)) {
@@ -2273,9 +2229,9 @@ register SV *sv;
 }
     
 void
-sv_chop(sv,ptr)	/* like set but assuming ptr is in sv */
-register SV *sv;
-register char *ptr;
+sv_chop(register SV *sv, register char *ptr)	/* like set but assuming ptr is in sv */
+                
+                   
 {
     register STRLEN delta;
 
@@ -2298,10 +2254,7 @@ register char *ptr;
 }
 
 void
-sv_catpvn(sv,ptr,len)
-register SV *sv;
-register char *ptr;
-register STRLEN len;
+sv_catpvn(register SV *sv, register char *ptr, register STRLEN len)
 {
     STRLEN tlen;
     char *junk;
@@ -2318,9 +2271,7 @@ register STRLEN len;
 }
 
 void
-sv_catsv(dstr,sstr)
-SV *dstr;
-register SV *sstr;
+sv_catsv(SV *dstr, register SV *sstr)
 {
     char *s;
     STRLEN len;
@@ -2331,9 +2282,7 @@ register SV *sstr;
 }
 
 void
-sv_catpv(sv,ptr)
-register SV *sv;
-register char *ptr;
+sv_catpv(register SV *sv, register char *ptr)
 {
     register STRLEN len;
     STRLEN tlen;
@@ -2357,9 +2306,9 @@ SV *
 newSV(x,len)
 I32 x;
 #else
-newSV(len)
+newSV(STRLEN len)
 #endif
-STRLEN len;
+           
 {
     register SV *sv;
     
@@ -2377,12 +2326,7 @@ STRLEN len;
 /* name is assumed to contain an SV* if (name && namelen == HEf_SVKEY) */
 
 void
-sv_magic(sv, obj, how, name, namlen)
-register SV *sv;
-SV *obj;
-int how;
-char *name;
-I32 namlen;
+sv_magic(register SV *sv, SV *obj, int how, char *name, I32 namlen)
 {
     MAGIC* mg;
     
@@ -2532,9 +2476,7 @@ I32 namlen;
 }
 
 int
-sv_unmagic(sv, type)
-SV* sv;
-int type;
+sv_unmagic(SV *sv, int type)
 {
     MAGIC* mg;
     MAGIC** mgp;
@@ -2568,12 +2510,7 @@ int type;
 }
 
 void
-sv_insert(bigstr,offset,len,little,littlelen)
-SV *bigstr;
-STRLEN offset;
-STRLEN len;
-char *little;
-STRLEN littlelen;
+sv_insert(SV *bigstr, STRLEN offset, STRLEN len, char *little, STRLEN littlelen)
 {
     register char *big;
     register char *mid;
@@ -2651,9 +2588,7 @@ STRLEN littlelen;
 /* make sv point to what nstr did */
 
 void
-sv_replace(sv,nsv)
-register SV *sv;
-register SV *nsv;
+sv_replace(register SV *sv, register SV *nsv)
 {
     U32 refcnt = SvREFCNT(sv);
     sv_check_thinkfirst(sv);
@@ -2679,8 +2614,7 @@ register SV *nsv;
 }
 
 void
-sv_clear(sv)
-register SV *sv;
+sv_clear(register SV *sv)
 {
     assert(sv);
     assert(SvREFCNT(sv) == 0);
@@ -2837,8 +2771,7 @@ register SV *sv;
 }
 
 SV *
-sv_newref(sv)
-SV* sv;
+sv_newref(SV *sv)
 {
     if (sv)
 	SvREFCNT(sv)++;
@@ -2846,8 +2779,7 @@ SV* sv;
 }
 
 void
-sv_free(sv)
-SV *sv;
+sv_free(SV *sv)
 {
     if (!sv)
 	return;
@@ -2877,8 +2809,7 @@ SV *sv;
 }
 
 STRLEN
-sv_len(sv)
-register SV *sv;
+sv_len(register SV *sv)
 {
     char *junk;
     STRLEN len;
@@ -2894,9 +2825,7 @@ register SV *sv;
 }
 
 I32
-sv_eq(str1,str2)
-register SV *str1;
-register SV *str2;
+sv_eq(register SV *str1, register SV *str2)
 {
     char *pv1;
     STRLEN cur1;
@@ -2922,14 +2851,12 @@ register SV *str2;
 }
 
 I32
-sv_cmp(str1, str2)
-register SV *str1;
-register SV *str2;
+sv_cmp(register SV *str1, register SV *str2)
 {
     STRLEN cur1 = 0;
-    char *pv1 = str1 ? SvPV(str1, cur1) : NULL;
+    char *pv1 = str1 ? SvPV(str1, cur1) : (char *) NULL;
     STRLEN cur2 = 0;
-    char *pv2 = str2 ? SvPV(str2, cur2) : NULL;
+    char *pv2 = str2 ? SvPV(str2, cur2) : (char *) NULL;
     I32 retval;
 
     if (!cur1)
@@ -2950,9 +2877,7 @@ register SV *str2;
 }
 
 I32
-sv_cmp_locale(sv1, sv2)
-register SV *sv1;
-register SV *sv2;
+sv_cmp_locale(register SV *sv1, register SV *sv2)
 {
 #ifdef USE_LOCALE_COLLATE
 
@@ -2964,9 +2889,9 @@ register SV *sv2;
 	goto raw_compare;
 
     len1 = 0;
-    pv1 = sv1 ? sv_collxfrm(sv1, &len1) : NULL;
+    pv1 = sv1 ? sv_collxfrm(sv1, &len1) : (char *) NULL;
     len2 = 0;
-    pv2 = sv2 ? sv_collxfrm(sv2, &len2) : NULL;
+    pv2 = sv2 ? sv_collxfrm(sv2, &len2) : (char *) NULL;
 
     if (!pv1 || !len1) {
 	if (pv2 && len2)
@@ -3007,13 +2932,11 @@ register SV *sv2;
  * according to the locale settings.
  */
 char *
-sv_collxfrm(sv, nxp)
-     SV *sv;
-     STRLEN *nxp;
+sv_collxfrm(SV *sv, STRLEN *nxp)
 {
     MAGIC *mg;
 
-    mg = SvMAGICAL(sv) ? mg_find(sv, 'o') : NULL;
+    mg = SvMAGICAL(sv) ? mg_find(sv, 'o') : (MAGIC *) NULL;
     if (!mg || !mg->mg_ptr || *(U32*)mg->mg_ptr != collation_ix) {
 	char *s, *xf;
 	STRLEN len, xlen;
@@ -3055,10 +2978,7 @@ sv_collxfrm(sv, nxp)
 #endif /* USE_LOCALE_COLLATE */
 
 char *
-sv_gets(sv,fp,append)
-register SV *sv;
-register PerlIO *fp;
-I32 append;
+sv_gets(register SV *sv, register FILE *fp, I32 append)
 {
     char *rsptr;
     STRLEN rslen;
@@ -3296,8 +3216,7 @@ screamer2:
 
 
 void
-sv_inc(sv)
-register SV *sv;
+sv_inc(register SV *sv)
 {
     register char *d;
     int flags;
@@ -3375,8 +3294,7 @@ register SV *sv;
 }
 
 void
-sv_dec(sv)
-register SV *sv;
+sv_dec(register SV *sv)
 {
     int flags;
 
@@ -3429,7 +3347,7 @@ register SV *sv;
  * permanent location. */
 
 static void
-sv_mortalgrow()
+sv_mortalgrow(void)
 {
     dTHR;
     tmps_max += (tmps_max < 512) ? 128 : 512;
@@ -3437,8 +3355,7 @@ sv_mortalgrow()
 }
 
 SV *
-sv_mortalcopy(oldstr)
-SV *oldstr;
+sv_mortalcopy(SV *oldstr)
 {
     dTHR;
     register SV *sv;
@@ -3456,7 +3373,7 @@ SV *oldstr;
 }
 
 SV *
-sv_newmortal()
+sv_newmortal(void)
 {
     dTHR;
     register SV *sv;
@@ -3474,8 +3391,7 @@ sv_newmortal()
 /* same thing without the copying */
 
 SV *
-sv_2mortal(sv)
-register SV *sv;
+sv_2mortal(register SV *sv)
 {
     dTHR;
     if (!sv)
@@ -3490,9 +3406,7 @@ register SV *sv;
 }
 
 SV *
-newSVpv(s,len)
-char *s;
-STRLEN len;
+newSVpv(char *s, STRLEN len)
 {
     register SV *sv;
 
@@ -3536,8 +3450,7 @@ va_dcl
 
 
 SV *
-newSVnv(n)
-double n;
+newSVnv(double n)
 {
     register SV *sv;
 
@@ -3550,8 +3463,7 @@ double n;
 }
 
 SV *
-newSViv(i)
-IV i;
+newSViv(IV i)
 {
     register SV *sv;
 
@@ -3564,8 +3476,7 @@ IV i;
 }
 
 SV *
-newRV(ref)
-SV *ref;
+newRV(SV *ref)
 {
     dTHR;
     register SV *sv;
@@ -3583,8 +3494,7 @@ SV *ref;
 
 #ifdef CRIPPLED_CC
 SV *
-newRV_noinc(ref)
-SV *ref;
+newRV_noinc(SV *ref)
 {
     register SV *sv;
 
@@ -3597,8 +3507,7 @@ SV *ref;
 /* make an exact duplicate of old */
 
 SV *
-newSVsv(old)
-register SV *old;
+newSVsv(register SV *old)
 {
     register SV *sv;
 
@@ -3623,9 +3532,7 @@ register SV *old;
 }
 
 void
-sv_reset(s,stash)
-register char *s;
-HV *stash;
+sv_reset(register char *s, HV *stash)
 {
     register HE *entry;
     register GV *gv;
@@ -3688,8 +3595,7 @@ HV *stash;
 }
 
 IO*
-sv_2io(sv)
-SV *sv;
+sv_2io(SV *sv)
 {
     IO* io;
     GV* gv;
@@ -3722,11 +3628,7 @@ SV *sv;
 }
 
 CV *
-sv_2cv(sv, st, gvp, lref)
-SV *sv;
-HV **st;
-GV **gvp;
-I32 lref;
+sv_2cv(SV *sv, HV **st, GV **gvp, I32 lref)
 {
     GV *gv;
     CV *cv;
@@ -3787,8 +3689,7 @@ I32 lref;
 
 #ifndef SvTRUE
 I32
-SvTRUE(sv)
-register SV *sv;
+SvTRUE(register SV *sv)
 {
     if (!sv)
 	return 0;
@@ -3819,8 +3720,7 @@ register SV *sv;
 
 #ifndef SvIV
 IV
-SvIV(sv)
-register SV *sv;
+SvIV(register SV *sv)
 {
     if (SvIOK(sv))
 	return SvIVX(sv);
@@ -3830,8 +3730,7 @@ register SV *sv;
 
 #ifndef SvUV
 UV
-SvUV(sv)
-register SV *sv;
+SvUV(register SV *sv)
 {
     if (SvIOK(sv))
 	return SvUVX(sv);
@@ -3841,8 +3740,7 @@ register SV *sv;
 
 #ifndef SvNV
 double
-SvNV(sv)
-register SV *sv;
+SvNV(register SV *sv)
 {
     if (SvNOK(sv))
 	return SvNVX(sv);
@@ -3852,9 +3750,7 @@ register SV *sv;
 
 #ifdef CRIPPLED_CC
 char *
-sv_pvn(sv, lp)
-SV *sv;
-STRLEN *lp;
+sv_pvn(SV *sv, STRLEN *lp)
 {
     if (SvPOK(sv)) {
 	*lp = SvCUR(sv);
@@ -3865,9 +3761,7 @@ STRLEN *lp;
 #endif
 
 char *
-sv_pvn_force(sv, lp)
-SV *sv;
-STRLEN *lp;
+sv_pvn_force(SV *sv, STRLEN *lp)
 {
     char *s;
 
@@ -3917,9 +3811,7 @@ STRLEN *lp;
 }
 
 char *
-sv_reftype(sv, ob)
-SV* sv;
-int ob;
+sv_reftype(SV *sv, int ob)
 {
     if (ob && SvOBJECT(sv))
 	return HvNAME(SvSTASH(sv));
@@ -3950,8 +3842,7 @@ int ob;
 }
 
 int
-sv_isobject(sv)
-SV *sv;
+sv_isobject(SV *sv)
 {
     if (!sv)
 	return 0;
@@ -3966,9 +3857,7 @@ SV *sv;
 }
 
 int
-sv_isa(sv, name)
-SV *sv;
-char *name;
+sv_isa(SV *sv, char *name)
 {
     if (!sv)
 	return 0;
@@ -3984,9 +3873,7 @@ char *name;
 }
 
 SV*
-newSVrv(rv, classname)
-SV *rv;
-char *classname;
+newSVrv(SV *rv, char *classname)
 {
     dTHR;
     SV *sv;
@@ -4007,10 +3894,7 @@ char *classname;
 }
 
 SV*
-sv_setref_pv(rv, classname, pv)
-SV *rv;
-char *classname;
-void* pv;
+sv_setref_pv(SV *rv, char *classname, void *pv)
 {
     if (!pv)
 	sv_setsv(rv, &sv_undef);
@@ -4020,40 +3904,28 @@ void* pv;
 }
 
 SV*
-sv_setref_iv(rv, classname, iv)
-SV *rv;
-char *classname;
-IV iv;
+sv_setref_iv(SV *rv, char *classname, IV iv)
 {
     sv_setiv(newSVrv(rv,classname), iv);
     return rv;
 }
 
 SV*
-sv_setref_nv(rv, classname, nv)
-SV *rv;
-char *classname;
-double nv;
+sv_setref_nv(SV *rv, char *classname, double nv)
 {
     sv_setnv(newSVrv(rv,classname), nv);
     return rv;
 }
 
 SV*
-sv_setref_pvn(rv, classname, pv, n)
-SV *rv;
-char *classname;
-char* pv;
-I32 n;
+sv_setref_pvn(SV *rv, char *classname, char *pv, I32 n)
 {
     sv_setpvn(newSVrv(rv,classname), pv, n);
     return rv;
 }
 
 SV*
-sv_bless(sv,stash)
-SV* sv;
-HV* stash;
+sv_bless(SV *sv, HV *stash)
 {
     dTHR;
     SV *ref;
@@ -4086,8 +3958,7 @@ HV* stash;
 }
 
 static void
-sv_unglob(sv)
-SV* sv;
+sv_unglob(SV *sv)
 {
     assert(SvTYPE(sv) == SVt_PVGV);
     SvFAKE_off(sv);
@@ -4101,8 +3972,7 @@ SV* sv;
 }
 
 void
-sv_unref(sv)
-SV* sv;
+sv_unref(SV *sv)
 {
     SV* rv = SvRV(sv);
     
@@ -4115,15 +3985,13 @@ SV* sv;
 }
 
 void
-sv_taint(sv)
-SV *sv;
+sv_taint(SV *sv)
 {
     sv_magic((sv), Nullsv, 't', Nullch, 0);
 }
 
 void
-sv_untaint(sv)
-SV *sv;
+sv_untaint(SV *sv)
 {
     if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
 	MAGIC *mg = mg_find(sv, 't');
@@ -4133,8 +4001,7 @@ SV *sv;
 }
 
 bool
-sv_tainted(sv)
-SV *sv;
+sv_tainted(SV *sv)
 {
     if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
 	MAGIC *mg = mg_find(sv, 't');
@@ -4145,9 +4012,7 @@ SV *sv;
 }
 
 void
-sv_setpviv(sv, iv)
-SV *sv;
-IV iv;
+sv_setpviv(SV *sv, IV iv)
 {
     STRLEN len;
     char buf[TYPE_DIGITS(UV)];
@@ -4224,28 +4089,14 @@ sv_catpvf(sv, pat, va_alist)
 }
 
 void
-sv_vsetpvfn(sv, pat, patlen, args, svargs, svmax, used_locale)
-    SV *sv;
-    const char *pat;
-    STRLEN patlen;
-    va_list *args;
-    SV **svargs;
-    I32 svmax;
-    bool *used_locale;
+sv_vsetpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, I32 svmax, char *used_locale)
 {
     sv_setpvn(sv, "", 0);
     sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale);
 }
 
 void
-sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale)
-    SV *sv;
-    const char *pat;
-    STRLEN patlen;
-    va_list *args;
-    SV **svargs;
-    I32 svmax;
-    bool *used_locale;
+sv_vcatpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, I32 svmax, char *used_locale)
 {
     dTHR;
     char *p;
@@ -4736,8 +4587,7 @@ sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale)
 
 #ifdef DEBUGGING
 void
-sv_dump(sv)
-SV* sv;
+sv_dump(SV *sv)
 {
     SV *d = sv_newmortal();
     char *s;
@@ -5000,8 +4850,7 @@ SV* sv;
 }
 #else
 void
-sv_dump(sv)
-SV* sv;
+sv_dump(SV *sv)
 {
 }
 #endif
