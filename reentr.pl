@@ -54,7 +54,11 @@ print <<EOF;
 #define REENTR_H 
 
 #ifdef USE_REENTRANT_API
- 
+
+#ifdef PERL_CORE
+#   define PL_REENTRANT_RETINT PL_reentrant_retint
+#endif
+
 /* Deprecations: some platforms have the said reentrant interfaces
  * but they are declared obsolete and are not to be used.  Often this
  * means that the platform has threadsafed the interfaces (hopefully).
@@ -137,15 +141,19 @@ my %seens; # the type of this function's "S"
 my %seend; # the type of this function's "D"
 my %seenm; # all the types
 my %seenu; # the length of the argument list of this function
+my %seenr; # the return type of this function
 
 while (<DATA>) { # Read in the protypes.
     next if /^\s+$/;
     chomp;
     my ($func, $hdr, $type, @p) = split(/\s*\|\s*/, $_, -1);
-    my $u;
+    my ($r,$u);
     # Split off the real function name and the argument list.
     ($func, $u) = split(' ', $func);
-    $seenu{$func} = defined $u ? length $u : 0;
+    $u = "V_V" unless $u;
+    ($r, $u) = ($u =~ /^(.)_(.+)/);
+    $seenu{$func} = $u eq 'V' ? 0 : length $u;
+    $seenr{$func} = $r;
     my $FUNC = uc $func; # for output.
     push @seenf, $func;
     my %m = %map;
@@ -454,7 +462,7 @@ EOF
 #if CRYPT_R_PROTO == REENTRANT_PROTO_B_CCD
 	$seend{$func} _${func}_data;
 #else
-	$seent{$func} *_${func}_struct_buffer;
+	$seent{$func} _${func}_struct;
 #endif
 EOF
     	    push @init, <<EOF;
@@ -469,7 +477,7 @@ EOF
 EOF
 	    pushssif $endif;
 	}
-        elsif ($func =~ /^(drand48|gmtime|localtime|random)$/) {
+        elsif ($func =~ /^(drand48|gmtime|localtime)$/) {
 	    pushssif $ifdef;
 	    push @struct, <<EOF;
 	$seent{$func} _${func}_struct;
@@ -478,19 +486,16 @@ EOF
 	        push @struct, <<EOF;
 	double	_${func}_double;
 EOF
-	    } elsif ($1 eq 'random') {
+	    }
+	    pushssif $endif;
+	}
+        elsif ($func =~ /^random$/) {
+	    pushssif $ifdef;
 	    push @struct, <<EOF;
-#   if RANDOM_R_PROTO == REENTRANT_PROTO_iS
-	int	_${func}_retval;
-#   endif
-#   if RANDOM_R_PROTO == REENTRANT_PROTO_lS
-	long	_${func}_retval;
-#   endif
-#   if RANDOM_R_PROTO == REENTRANT_PROTO_tS
-	int32_t	_${func}_retval;
+#   if RANDOM_R_PROTO != REENTRANT_PROTO_I_St
+	$seent{$func} _${func}_struct;
 #   endif
 EOF
-	    }
 	    pushssif $endif;
 	}
         elsif ($func =~ /^(getgrnam|getpwnam|getspnam)$/) {
@@ -679,7 +684,6 @@ EOF
 		$w = ", $w" if length $v;
 	    }
 	    my $call = "${func}_r($v$w)";
-	    $call = "((PL_reentrant_retint = $call))" if $r eq 'I' && $func ne 'random';
 	    push @wrap, <<EOF;
 #   if !defined($func) && ${FUNC}_R_PROTO == REENTRANT_PROTO_$p
 EOF
@@ -688,22 +692,36 @@ EOF
 #       define $func($v) $call
 EOF
 	    } else {
+		$call = "((PL_REENTRANT_RETINT = $call))" if $r eq 'I' && $func ne 'random';
 		if ($func =~ /^get/) {
 		    my $rv = $v ? ", $v" : "";
 		    if ($r eq 'I') {
-			push @wrap, <<EOF;
-#       define $func($v) ($call$test ? $true : (((PL_reentrant_retint > 0 && PL_reentrant_retint == ERANGE) || (errno == ERANGE)) ? Perl_reentrant_retry("$func"$rv) : 0))
-EOF
+			$call = qq[($call$test ? $true : (((PL_REENTRANT_RETINT == ERANGE) || (errno == ERANGE)) ? Perl_reentrant_retry("$func"$rv) : 0))];
 		    } else {
-			push @wrap, <<EOF;
-#       define $func($v) ($call$test ? $true : ((errno == ERANGE) ? Perl_reentrant_retry("$func"$rv) : 0))
-EOF
+			$call = qq[($call$test ? $true : ((errno == ERANGE) ? Perl_reentrant_retry("$func"$rv) : 0))];
                     }
 		} else {
-		    push @wrap, <<EOF;
-#       define $func($v) ($call$test ? $true : 0)
-EOF
+		    $call = qq[($call$test ? $true : 0)];
 		}
+
+		my $arg = join(", ", map { $seenm{$func}{substr($a,$_,1)}." ".$v[$_] } 0..$seenu{$func}-1);
+		my $ret = $seenr{$func} eq 'V' ? "" : "return ";
+		push @wrap, <<EOF;
+#       ifdef PERL_CORE
+#           define $func($v) $call
+#       else
+#           if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(PERL_GCC_PEDANTIC)
+#               define $func($v) ({int PL_REENTRANT_RETINT; $call;})
+#           else
+#               define $func($v) S_my_$func($v)
+                static $seenm{$func}{$seenr{$func}} S_my_$func($arg) {
+                    dTHX;
+                    int PL_REENTRANT_RETINT;
+                    $ret$call;
+                }
+#           endif
+#       endif
+EOF
 	    }
 	    push @wrap, <<EOF;
 #   endif
@@ -713,6 +731,38 @@ EOF
 	push @wrap, $endif, "\n";
     }
 }
+
+# New struct members added here to maintain binary compatibility with 5.8.0
+
+if (exists $seena{crypt}) {
+    push @struct, <<EOF;
+#ifdef HAS_CRYPT_R
+#if CRYPT_R_PROTO == REENTRANT_PROTO_B_CCD
+#else
+	struct crypt_data *_crypt_struct_buffer;
+#endif
+#endif /* HAS_CRYPT_R */
+EOF
+}
+
+if (exists $seena{random}) {
+    push @struct, <<EOF;
+#ifdef HAS_RANDOM_R
+#   if RANDOM_R_PROTO == REENTRANT_PROTO_I_iS
+	int	_random_retval;
+#   endif
+#   if RANDOM_R_PROTO == REENTRANT_PROTO_I_lS
+	long	_random_retval;
+#   endif
+#   if RANDOM_R_PROTO == REENTRANT_PROTO_I_St
+	$seent{random} _random_struct;
+	int32_t	_random_retval;
+#   endif
+#endif /* HAS_RANDOM_R */
+EOF
+}
+
+
 
 local $" = '';
 
@@ -726,7 +776,35 @@ typedef struct {
     int dummy; /* cannot have empty structs */
 } REENTR;
 
-/* The wrappers. */
+#endif /* USE_REENTRANT_API */
+
+#endif
+EOF
+
+close(H);
+
+die "reentr.inc: $!" unless open(H, ">reentr.inc");
+select H;
+
+local $" = '';
+
+print <<EOF;
+/*
+ *    reentr.inc
+ *
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
+ *
+ *  !!!!!!!   DO NOT EDIT THIS FILE   !!!!!!!
+ *  This file is built by reentrl.pl from data in reentr.pl.
+ */
+
+#ifndef REENTRINC
+#define REENTRINC
+
+#ifdef USE_REENTRANT_API
+
+/* The reentrant wrappers. */
 
 @wrap
 
@@ -1022,51 +1100,51 @@ Perl_reentrant_retry(const char *f, ...)
 EOF
 
 __DATA__
-asctime S	|time	|const struct tm|B_SB|B_SBI|I_SB|I_SBI
-crypt CC	|crypt	|struct crypt_data|B_CCS|B_CCD|D=CRYPTD*
-ctermid	B	|stdio	|		|B_B
-ctime S		|time	|const time_t	|B_SB|B_SBI|I_SB|I_SBI
-drand48		|stdlib	|struct drand48_data	|I_ST|T=double*
+asctime B_S	|time	|const struct tm|B_SB|B_SBI|I_SB|I_SBI
+crypt B_CC	|crypt	|struct crypt_data|B_CCS|B_CCD|D=CRYPTD*
+ctermid	B_B	|stdio	|		|B_B
+ctime B_S	|time	|const time_t	|B_SB|B_SBI|I_SB|I_SBI
+drand48	d_V	|stdlib	|struct drand48_data	|I_ST|T=double*|d=double
 endgrent	|grp	|		|I_H|V_H
 endhostent	|netdb	|		|I_D|V_D|D=struct hostent_data*
 endnetent	|netdb	|		|I_D|V_D|D=struct netent_data*
 endprotoent	|netdb	|		|I_D|V_D|D=struct protoent_data*
 endpwent	|pwd	|		|I_H|V_H
 endservent	|netdb	|		|I_D|V_D|D=struct servent_data*
-getgrent	|grp	|struct group	|I_SBWR|I_SBIR|S_SBW|S_SBI|I_SBI|I_SBIH
-getgrgid T	|grp	|struct group	|I_TSBWR|I_TSBIR|I_TSBI|S_TSBI|T=gid_t
-getgrnam C	|grp	|struct group	|I_CSBWR|I_CSBIR|S_CBI|I_CSBI|S_CSBI
-gethostbyaddr CWI	|netdb	|struct hostent	|I_CWISBWRE|S_CWISBWIE|S_CWISBIE|S_TWISBIE|S_CIISBIE|S_CSBIE|S_TSBIE|I_CWISD|I_CIISD|I_CII|I_TsISBWRE|D=struct hostent_data*|T=const void*|s=socklen_t
-gethostbyname C	|netdb	|struct hostent	|I_CSBWRE|S_CSBIE|I_CSD|D=struct hostent_data*
-gethostent	|netdb	|struct hostent	|I_SBWRE|I_SBIE|S_SBIE|S_SBI|I_SBI|I_SD|D=struct hostent_data*
-getlogin	|unistd	|		|I_BW|I_BI|B_BW|B_BI
-getnetbyaddr LI	|netdb	|struct netent	|I_UISBWRE|I_LISBI|S_TISBI|S_LISBI|I_TISD|I_LISD|I_IISD|I_uISBWRE|D=struct netent_data*|T=in_addr_t|U=unsigned long|u=uint32_t
-getnetbyname C	|netdb	|struct netent	|I_CSBWRE|I_CSBI|S_CSBI|I_CSD|D=struct netent_data*
-getnetent	|netdb	|struct netent	|I_SBWRE|I_SBIE|S_SBIE|S_SBI|I_SBI|I_SD|D=struct netent_data*
-getprotobyname C|netdb	|struct protoent|I_CSBWR|S_CSBI|I_CSD|D=struct protoent_data*
-getprotobynumber I	|netdb	|struct protoent|I_ISBWR|S_ISBI|I_ISD|D=struct protoent_data*
-getprotoent	|netdb	|struct protoent|I_SBWR|I_SBI|S_SBI|I_SD|D=struct protoent_data*
-getpwent	|pwd	|struct passwd	|I_SBWR|I_SBIR|S_SBW|S_SBI|I_SBI|I_SBIH
-getpwnam C	|pwd	|struct passwd	|I_CSBWR|I_CSBIR|S_CSBI|I_CSBI
-getpwuid T	|pwd	|struct passwd	|I_TSBWR|I_TSBIR|I_TSBI|S_TSBI|T=uid_t
-getservbyname CC|netdb	|struct servent	|I_CCSBWR|S_CCSBI|I_CCSD|D=struct servent_data*
-getservbyport IC|netdb	|struct servent	|I_ICSBWR|S_ICSBI|I_ICSD|D=struct servent_data*
-getservent	|netdb	|struct servent	|I_SBWR|I_SBI|S_SBI|I_SD|D=struct servent_data*
-getspnam C	|shadow	|struct spwd	|I_CSBWR|S_CSBI
-gmtime T	|time	|struct tm	|S_TS|I_TS|T=const time_t*
-localtime T	|time	|struct tm	|S_TS|I_TS|T=const time_t*
-random		|stdlib	|struct random_data|I_iS|I_lS|I_St|i=int*|l=long*|t=int32_t*
-readdir T	|dirent	|struct dirent	|I_TSR|I_TS|T=DIR*
-readdir64 T	|dirent	|struct dirent64|I_TSR|I_TS|T=DIR*
+getgrent S_V	|grp	|struct group	|I_SBWR|I_SBIR|S_SBW|S_SBI|I_SBI|I_SBIH
+getgrgid S_T	|grp	|struct group	|I_TSBWR|I_TSBIR|I_TSBI|S_TSBI|T=gid_t
+getgrnam S_C	|grp	|struct group	|I_CSBWR|I_CSBIR|S_CBI|I_CSBI|S_CSBI
+gethostbyaddr S_CWI	|netdb	|struct hostent	|I_CWISBWRE|S_CWISBWIE|S_CWISBIE|S_TWISBIE|S_CIISBIE|S_CSBIE|S_TSBIE|I_CWISD|I_CIISD|I_CII|I_TsISBWRE|D=struct hostent_data*|T=const void*|s=socklen_t
+gethostbyname S_C	|netdb	|struct hostent	|I_CSBWRE|S_CSBIE|I_CSD|D=struct hostent_data*
+gethostent S_V	|netdb	|struct hostent	|I_SBWRE|I_SBIE|S_SBIE|S_SBI|I_SBI|I_SD|D=struct hostent_data*
+getlogin B_V	|unistd	|		|I_BW|I_BI|B_BW|B_BI
+getnetbyaddr S_LI	|netdb	|struct netent	|I_UISBWRE|I_LISBI|S_TISBI|S_LISBI|I_TISD|I_LISD|I_IISD|I_uISBWRE|D=struct netent_data*|T=in_addr_t|U=unsigned long|u=uint32_t
+getnetbyname S_C	|netdb	|struct netent	|I_CSBWRE|I_CSBI|S_CSBI|I_CSD|D=struct netent_data*
+getnetent S_V	|netdb	|struct netent	|I_SBWRE|I_SBIE|S_SBIE|S_SBI|I_SBI|I_SD|D=struct netent_data*
+getprotobyname S_C	|netdb	|struct protoent|I_CSBWR|S_CSBI|I_CSD|D=struct protoent_data*
+getprotobynumber S_I	|netdb	|struct protoent|I_ISBWR|S_ISBI|I_ISD|D=struct protoent_data*
+getprotoent S_V	|netdb	|struct protoent|I_SBWR|I_SBI|S_SBI|I_SD|D=struct protoent_data*
+getpwent S_V	|pwd	|struct passwd	|I_SBWR|I_SBIR|S_SBW|S_SBI|I_SBI|I_SBIH
+getpwnam S_C	|pwd	|struct passwd	|I_CSBWR|I_CSBIR|S_CSBI|I_CSBI
+getpwuid S_T	|pwd	|struct passwd	|I_TSBWR|I_TSBIR|I_TSBI|S_TSBI|T=uid_t
+getservbyname S_CC	|netdb	|struct servent	|I_CCSBWR|S_CCSBI|I_CCSD|D=struct servent_data*
+getservbyport S_IC	|netdb	|struct servent	|I_ICSBWR|S_ICSBI|I_ICSD|D=struct servent_data*
+getservent S_V	|netdb	|struct servent	|I_SBWR|I_SBI|S_SBI|I_SD|D=struct servent_data*
+getspnam S_C	|shadow	|struct spwd	|I_CSBWR|S_CSBI
+gmtime S_T	|time	|struct tm	|S_TS|I_TS|T=const time_t*
+localtime S_T	|time	|struct tm	|S_TS|I_TS|T=const time_t*
+random L_V	|stdlib	|struct random_data|I_iS|I_lS|I_St|i=int*|l=long*|t=int32_t*
+readdir S_T	|dirent	|struct dirent	|I_TSR|I_TS|T=DIR*
+readdir64 S_T	|dirent	|struct dirent64|I_TSR|I_TS|T=DIR*
 setgrent	|grp	|		|I_H|V_H
-sethostent I	|netdb	|		|I_ID|V_ID|D=struct hostent_data*
-setlocale IC	|locale	|		|I_ICBI
-setnetent I	|netdb	|		|I_ID|V_ID|D=struct netent_data*
-setprotoent I	|netdb	|		|I_ID|V_ID|D=struct protoent_data*
+sethostent V_I	|netdb	|		|I_ID|V_ID|D=struct hostent_data*
+setlocale B_IC	|locale	|		|I_ICBI
+setnetent V_I	|netdb	|		|I_ID|V_ID|D=struct netent_data*
+setprotoent V_I	|netdb	|		|I_ID|V_ID|D=struct protoent_data*
 setpwent	|pwd	|		|I_H|V_H
-setservent I	|netdb	|		|I_ID|V_ID|D=struct servent_data*
-srand48 L	|stdlib	|struct drand48_data	|I_LS
-srandom	T	|stdlib	|struct random_data|I_TS|T=unsigned int
-strerror I	|string	|		|I_IBW|I_IBI|B_IBW
-tmpnam B	|stdio	|		|B_B
-ttyname	I	|unistd	|		|I_IBW|I_IBI|B_IBI
+setservent V_I	|netdb	|		|I_ID|V_ID|D=struct servent_data*
+srand48 V_L	|stdlib	|struct drand48_data	|I_LS
+srandom	V_T	|stdlib	|struct random_data|I_TS|T=unsigned int
+strerror B_I	|string	|		|I_IBW|I_IBI|B_IBW
+tmpnam B_B	|stdio	|		|B_B
+ttyname	B_I	|unistd	|		|I_IBW|I_IBI|B_IBI

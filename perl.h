@@ -3592,6 +3592,8 @@ START_EXTERN_C
 END_EXTERN_C
 #endif
 
+#include "reentr.inc"
+
 #undef PERLVAR
 #undef PERLVARA
 #undef PERLVARI

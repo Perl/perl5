@@ -2500,6 +2500,7 @@ README.win32			Perl notes for Windows
 README.Y2K		Notes about Year 2000 concerns
 reentr.c			Reentrant interfaces
 reentr.h			Reentrant interfaces
+reentr.inc			Reentrant interfaces
 reentr.pl			Reentrant interfaces
 regcomp.c			Regular expression compiler
 regcomp.h			Private declarations for above
