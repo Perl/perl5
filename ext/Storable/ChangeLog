@@ -1,3 +1,11 @@
+Wed Mar 17 15:40:29 GMT 2004   Nicholas Clark <nick@ccl4.org>
+
+    Version 2.12
+
+        1. Add regression tests for the auto-require of STORABLE_thaw
+        2. Add auto-require of modules to restore overloading (and tests)
+        3. Change to no context (should give speedup with ithreads)
+
 Sat Mar 13 20:11:03 GMT 2004   Nicholas Clark <nick@ccl4.org>
 	
     Version 2.11
