@@ -100,24 +100,54 @@
  * points to this initially, so top_env should always be non-null.
  *
  * Existence of a non-null top_env->je_prev implies it is valid to call
- * longjmp() at that runlevel (we make sure start_env.je_prev is always
- * null to ensure this).
+ * (*je_jump)() at that runlevel.  Always use the macros below!  They
+ * manage most of the complexity for you.
  *
  * je_mustcatch, when set at any runlevel to TRUE, means eval ops must
  * establish a local jmpenv to handle exception traps.  Care must be taken
  * to restore the previous value of je_mustcatch before exiting the
  * stack frame iff JMPENV_PUSH was not called in that stack frame.
- * GSAR 97-03-27
+ *
+ * The support for C++ try/throw causes a small loss of flexibility.
+ * No longer is it possible to place the body of exception-protected
+ * code in the same C function as JMPENV_PUSH &etc.  Older code that
+ * does this will continue to work with set/longjmp, but cannot use
+ * C++ exceptions.
+ *
+ * GSAR  19970327
+ * JPRIT 19980613 (C++ update)
  */
 
+#define JMP_NORMAL	0
+#define JMP_ABNORMAL	1	/* shouldn't happen */
+#define JMP_MYEXIT	2	/* exit */
+#define JMP_EXCEPTION	3	/* die */
+
+/* None of the JMPENV fields should be accessed directly.
+   Please use the macros below! */
 struct jmpenv {
     struct jmpenv *	je_prev;
-    Sigjmp_buf		je_buf;		
-    int			je_ret;		/* return value of last setjmp() */
-    bool		je_mustcatch;	/* longjmp()s must be caught locally */
+    int			je_stat;	/* JMP_* reason for setjmp() */
+    bool		je_mustcatch;	/* will need a new TRYBLOCK? */
+    void		(*je_jump) _((CPERLproto));
 };
-
 typedef struct jmpenv JMPENV;
+
+struct tryvtbl {
+    /* [0] executed before JMPENV_POP
+       [1] executed after JMPENV_POP
+           (NULL pointers are OK) */
+    char *try_context;
+    void (*try_normal    [2]) _((CPERLproto_ void*));
+    void (*try_abnormal  [2]) _((CPERLproto_ void*));
+    void (*try_exception [2]) _((CPERLproto_ void*));
+    void (*try_myexit    [2]) _((CPERLproto_ void*));
+};
+typedef struct tryvtbl TRYVTBL;
+
+typedef void (*tryblock_f) _((CPERLproto_ TRYVTBL *vtbl, void *locals));
+#define TRYBLOCK(mytry,vars) \
+	(*tryblock_function)(PERL_OBJECT_THIS_ &mytry, &vars)
 
 #ifdef OP_IN_REGISTER
 #define OP_REG_TO_MEM	opsave = op
@@ -127,30 +157,83 @@ typedef struct jmpenv JMPENV;
 #define OP_MEM_TO_REG	NOOP
 #endif
 
-#define dJMPENV		JMPENV cur_env
-#define JMPENV_PUSH(v) \
-    STMT_START {					\
-	cur_env.je_prev = top_env;			\
-	OP_REG_TO_MEM;					\
-	cur_env.je_ret = PerlProc_setjmp(cur_env.je_buf, 1);	\
-	OP_MEM_TO_REG;					\
-	top_env = &cur_env;				\
-	cur_env.je_mustcatch = FALSE;			\
-	(v) = cur_env.je_ret;				\
-    } STMT_END
-#define JMPENV_POP \
-    STMT_START { top_env = cur_env.je_prev; } STMT_END
+#define JMPENV_TOPINIT(top)			\
+STMT_START {					\
+    top.je_prev = NULL;				\
+    top.je_stat = JMP_ABNORMAL;			\
+    top.je_mustcatch = TRUE;			\
+    top_env = &top;				\
+} STMT_END
+
+#define JMPENV_INIT(env, jmp)			\
+STMT_START {					\
+    ((JMPENV*)&env)->je_prev = top_env;		\
+    ((JMPENV*)&env)->je_stat = JMP_NORMAL;	\
+    ((JMPENV*)&env)->je_jump = jmp;		\
+    OP_REG_TO_MEM;				\
+} STMT_END
+
+#define JMPENV_TRY(env)				\
+STMT_START {					\
+    OP_MEM_TO_REG;				\
+    ((JMPENV*)&env)->je_mustcatch = FALSE;	\
+    top_env = (JMPENV*)&env;			\
+} STMT_END
+
+#define JMPENV_POP_JE(env)			\
+STMT_START {					\
+	assert(top_env == (JMPENV*)&env);	\
+	top_env = ((JMPENV*)&env)->je_prev;	\
+} STMT_END
+
+#define JMPENV_STAT(env) ((JMPENV*)&env)->je_stat
+
 #define JMPENV_JUMP(v) \
     STMT_START {						\
+	assert((v) != JMP_NORMAL);				\
 	OP_REG_TO_MEM;						\
-	if (top_env->je_prev)					\
-	    PerlProc_longjmp(top_env->je_buf, (v));			\
-	if ((v) == 2)						\
-	    PerlProc_exit(STATUS_NATIVE_EXPORT);				\
-	PerlIO_printf(PerlIO_stderr(), "panic: top_env\n");	\
-	PerlProc_exit(1);						\
+	if (top_env->je_prev) {					\
+	    top_env->je_stat = (v);				\
+	    (*top_env->je_jump)(PERL_OBJECT_THIS);		\
+	}							\
+	if ((v) == JMP_MYEXIT)					\
+	    PerlProc_exit(STATUS_NATIVE_EXPORT);		\
+	PerlIO_printf(PerlIO_stderr(), no_top_env);		\
+	PerlProc_exit(1);					\
     } STMT_END
    
 #define CATCH_GET	(top_env->je_mustcatch)
 #define CATCH_SET(v)	(top_env->je_mustcatch = (v))
-   
+
+
+
+/*******************************************************************
+ * JMPENV_PUSH is the old depreciated API.  See perl.c for examples
+ *  of the new API.
+ */
+
+struct setjmpenv {
+    /* move to scope.c once JMPENV_PUSH is no longer needed XXX */
+    JMPENV		je0;
+    Sigjmp_buf		je_buf;		
+};
+typedef struct setjmpenv SETJMPENV;
+
+#define dJMPENV		SETJMPENV cur_env
+
+extern void setjmp_jump();
+
+#define JMPENV_PUSH(v) \
+    STMT_START {					\
+	JMPENV_INIT(cur_env, setjmp_jump);		\
+	PerlProc_setjmp(cur_env.je_buf, 1);		\
+	JMPENV_TRY(cur_env);				\
+	(v) = JMPENV_STAT(cur_env);			\
+    } STMT_END
+
+#define JMPENV_POP				\
+STMT_START {					\
+	assert(top_env == (JMPENV*) &cur_env);	\
+	top_env = cur_env.je0.je_prev;		\
+} STMT_END
+

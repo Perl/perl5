@@ -1307,7 +1307,7 @@ die(const char* pat, ...)
 	  thr, restartop, was_in_eval, top_env));
 #endif /* USE_THREADS */
     if ((!restartop && was_in_eval) || top_env->je_prev)
-	JMPENV_JUMP(3);
+	JMPENV_JUMP(JMP_EXCEPTION);
     return restartop;
 }
 
@@ -1355,7 +1355,7 @@ croak(const char* pat, ...)
     }
     if (in_eval) {
 	restartop = die_where(message);
-	JMPENV_JUMP(3);
+	JMPENV_JUMP(JMP_EXCEPTION);
     }
     PerlIO_puts(PerlIO_stderr(),message);
     (void)PerlIO_flush(PerlIO_stderr());
@@ -2759,10 +2759,7 @@ new_struct_thread(struct perl_thread *t)
        See comments in scope.h    
        Initialize top entry (as in perl.c for main thread)
      */
-    start_env.je_prev = NULL;
-    start_env.je_ret = -1;
-    start_env.je_mustcatch = TRUE;
-    top_env  = &start_env;
+    JMPENV_TOPINIT(start_env);
 
     in_eval = FALSE;
     restartop = 0;

@@ -104,6 +104,7 @@ class CPerlObj;
 #define STATIC
 #define CPERLscope(x) CPerlObj::x
 #define CPERLproto CPerlObj *
+#define CPERLproto_ CPERLproto,
 #define _CPERLproto ,CPERLproto
 #define CPERLarg CPerlObj *pPerl
 #define CPERLarg_ CPERLarg,
@@ -118,6 +119,7 @@ class CPerlObj;
 #define STATIC static
 #define CPERLscope(x) x
 #define CPERLproto
+#define CPERLproto_
 #define _CPERLproto
 #define CPERLarg void
 #define CPERLarg_
@@ -1638,6 +1640,10 @@ EXTCONST char no_func[]
   INIT("The %s function is unimplemented");
 EXTCONST char no_myglob[]
   INIT("\"my\" variable %s can't be in a package");
+EXTCONST char no_restartop[]
+  INIT("panic: restartop\n");
+EXTCONST char no_top_env[]
+  INIT("panic: top_env\n");
 
 #ifdef DOINIT
 EXT char *sig_name[] = { SIG_NAME };

@@ -2015,7 +2015,7 @@ PP(pp_goto)
 
     if (top_env->je_prev) {
         restartop = retop;
-        JMPENV_JUMP(3);
+        JMPENV_JUMP(JMP_EXCEPTION);
     }
 
     RETURNOP(retop);
@@ -2110,7 +2110,7 @@ STATIC OP *
 docatch(OP *o)
 {
     dTHR;
-    int ret;
+    int jmpstat;
     OP *oldop = op;
     dJMPENV;
 
@@ -2119,14 +2119,14 @@ docatch(OP *o)
     assert(CATCH_GET == TRUE);
     DEBUG_l(deb("Setting up local jumplevel %p, was %p\n", &cur_env, top_env));
 #endif
-    JMPENV_PUSH(ret);
-    switch (ret) {
+    JMPENV_PUSH(jmpstat);
+    switch (jmpstat) {
     default:				/* topmost level handles it */
 	JMPENV_POP;
 	op = oldop;
-	JMPENV_JUMP(ret);
+	JMPENV_JUMP(jmpstat);
 	/* NOTREACHED */
-    case 3:
+    case JMP_EXCEPTION:
 	if (!restartop) {
 	    PerlIO_printf(PerlIO_stderr(), "panic: restartop\n");
 	    break;
@@ -2134,7 +2134,7 @@ docatch(OP *o)
 	op = restartop;
 	restartop = 0;
 	/* FALL THROUGH */
-    case 0:
+    case JMP_NORMAL:
         CALLRUNOPS();
 	break;
     }

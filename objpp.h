@@ -513,6 +513,8 @@
 #define init_postdump_symbols  CPerlObj::init_postdump_symbols
 #undef  init_stacks
 #define init_stacks       CPerlObj::Perl_init_stacks
+#undef  install_tryblock_method
+#define install_tryblock_method	CPerlObj::Perl_install_tryblock_method
 #undef  intro_my
 #define intro_my          CPerlObj::Perl_intro_my
 #undef  nuke_stacks

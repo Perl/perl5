@@ -1380,6 +1380,11 @@ ignored.
 (F) Your machine apparently doesn't implement ioctl(), which is pretty
 strange for a machine that supports C.
 
+=item JMPENV_JUMP(%d) is bogus
+
+(S) Either some extension is trying to raise an exception type that is not
+supported by the JMPENV API, or memory has been corrupted.  See L<perlguts>.
+
 =item junk on end of regexp
 
 (P) The regular expression parser is confused.
@@ -1915,7 +1920,9 @@ was string.
 
 =item panic: top_env
 
-(P) The compiler attempted to do a goto, or something weird like that.
+(X) An attempt was made to throw some sort of exception when there
+was no exception stack.  Either perl failed to initialize properly, or
+the JMPENV API is being misused.  See L<perlguts>.
 
 =item panic: yylex
 

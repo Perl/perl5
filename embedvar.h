@@ -239,6 +239,7 @@
 #define tainting		(curinterp->Itainting)
 #define threadnum		(curinterp->Ithreadnum)
 #define thrsv			(curinterp->Ithrsv)
+#define tryblock_function	(curinterp->Itryblock_function)
 #define unsafe			(curinterp->Iunsafe)
 #define warnhook		(curinterp->Iwarnhook)
 
@@ -403,6 +404,7 @@
 #define Itainting		tainting
 #define Ithreadnum		threadnum
 #define Ithrsv			thrsv
+#define Itryblock_function	tryblock_function
 #define Iunsafe			unsafe
 #define Iwarnhook		warnhook
 
@@ -629,6 +631,7 @@
 #define tainting		Perl_tainting
 #define threadnum		Perl_threadnum
 #define thrsv			Perl_thrsv
+#define tryblock_function	Perl_tryblock_function
 #define unsafe			Perl_unsafe
 #define warnhook		Perl_warnhook
 

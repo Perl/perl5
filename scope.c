@@ -15,6 +15,17 @@
 #include "EXTERN.h"
 #include "perl.h"
 
+static void setjmp_tryblock _((CPERLarg_ TRYVTBL *vtbl, void *locals));
+    
+void
+install_tryblock_method(tryblock_f fn)
+{
+    if (fn)
+	tryblock_function = fn;
+    else
+	tryblock_function = setjmp_tryblock;
+}
+
 SV**
 stack_grow(SV **sp, SV **p, int n)
 {
@@ -906,3 +917,69 @@ cx_dump(PERL_CONTEXT *cx)
     }
 #endif	/* DEBUGGING */
 }
+
+#include "XSUB.h"
+
+/* make 'static' once JMPENV_PUSH is no longer used (see scope.h) XXX */
+void
+setjmp_jump(CPERLarg)
+{
+    dTHR;
+    PerlProc_longjmp(((SETJMPENV*)top_env)->je_buf, 1);
+}
+
+static void
+setjmp_tryblock(CPERLarg_ TRYVTBL *vtbl, void *locals)
+{
+    dTHR;
+    int jmpstat;
+    SETJMPENV je;
+    JMPENV_INIT(je, setjmp_jump);
+    PerlProc_setjmp(je.je_buf, 1);
+    JMPENV_TRY(je);
+    jmpstat = JMPENV_STAT(je);
+    switch (jmpstat) {
+    case JMP_NORMAL:
+	assert(vtbl->try_normal[0]);
+	(*vtbl->try_normal[0])(PERL_OBJECT_THIS_ locals);
+	break;
+    case JMP_EXCEPTION:
+	if (vtbl->try_exception[0])
+	    (*vtbl->try_exception[0])(PERL_OBJECT_THIS_ locals);
+	break;
+    case JMP_MYEXIT:
+	if (vtbl->try_myexit[0])
+	    (*vtbl->try_myexit[0])(PERL_OBJECT_THIS_ locals);
+	break;
+    default:
+	if (jmpstat != JMP_ABNORMAL)
+	    PerlIO_printf(PerlIO_stderr(),
+			  "JMPENV_JUMP(%d) is bogus\n", jmpstat);
+	if (vtbl->try_abnormal[0])
+	    (*vtbl->try_abnormal[0])(PERL_OBJECT_THIS_ locals);
+	break;
+    }
+    JMPENV_POP_JE(je);
+    switch (JMPENV_STAT(je)) {
+    case JMP_NORMAL:
+	if (vtbl->try_normal[1])
+	    (*vtbl->try_normal[1])(PERL_OBJECT_THIS_ locals);
+	break;
+    case JMP_EXCEPTION:
+	if (vtbl->try_exception[1])
+	    (*vtbl->try_exception[1])(PERL_OBJECT_THIS_ locals);
+	break;
+    case JMP_MYEXIT:
+	if (vtbl->try_myexit[1])
+	    (*vtbl->try_myexit[1])(PERL_OBJECT_THIS_ locals);
+	break;
+    default:
+	if (jmpstat != JMP_ABNORMAL)
+	    PerlIO_printf(PerlIO_stderr(),
+			  "JMPENV_JUMP(%d) is bogus\n", jmpstat);
+	if (vtbl->try_abnormal[1])
+	    (*vtbl->try_abnormal[1])(PERL_OBJECT_THIS_ locals);
+	break;
+    }
+}
+

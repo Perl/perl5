@@ -205,6 +205,7 @@ VIRTUAL I32	ibcmp _((char* a, char* b, I32 len));
 VIRTUAL I32	ibcmp_locale _((char* a, char* b, I32 len));
 VIRTUAL I32	ingroup _((I32 testgid, I32 effective));
 VIRTUAL void	init_stacks _((ARGSproto));
+VIRTUAL void	install_tryblock_method _((tryblock_f fn));
 VIRTUAL U32	intro_my _((void));
 VIRTUAL char*	instr _((char* big, char* little));
 VIRTUAL bool	io_close _((IO* io));
