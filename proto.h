@@ -358,6 +358,7 @@ VIRTUAL OP*	newSVOP _((I32 type, I32 flags, SV* sv));
 VIRTUAL SV*	newSViv _((IV i));
 VIRTUAL SV*	newSVnv _((double n));
 VIRTUAL SV*	newSVpv _((char* s, STRLEN len));
+VIRTUAL SV*	newSVpvn _((char *s, STRLEN len));
 VIRTUAL SV*	newSVpvf _((const char* pat, ...));
 VIRTUAL SV*	newSVrv _((SV* rv, char* classname));
 VIRTUAL SV*	newSVsv _((SV* old));
@@ -672,7 +673,6 @@ void sv_mortalgrow _((void));
 void sv_unglob _((SV* sv));
 void sv_check_thinkfirst _((SV *sv));
 
-SV *newSVpvn _((char *s, STRLEN len));
 
 void sv_catpv_mg _((SV *sv, char *ptr));
 void sv_catpvf_mg _((SV *sv, const char* pat, ...));
