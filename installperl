@@ -160,8 +160,11 @@ push(@corefiles,'perl.exp') if $^O eq 'aix';
 # If they have built sperl.o...
 push(@corefiles,'sperl.o') if -f 'sperl.o';
 foreach $file (@corefiles) {
-    cp_if_diff($file,"$installarchlib/CORE/$file");
-    &chmod($file =~ /^libperl/ ? 0555 : 0444,"$installarchlib/CORE/$file");
+    # HP-UX (at least) needs to maintain execute permissions
+    # on dynamically-loaded libraries.
+    cp_if_diff($file,"$installarchlib/CORE/$file")
+	and &chmod($file =~ /^\.(so|$dlext)$/ ? 0555 : 0444,
+		   "$installarchlib/CORE/$file");
 }
 
 # Offer to install perl in a "standard" location
@@ -364,15 +367,11 @@ sub installlib {
 	if (compare($_, "$installlib/$name") || $nonono) {
 	    &unlink("$installlib/$name");
 	    mkpath("$installlib/$dir", 1, 0777);
-	    cp_if_diff($_, "$installlib/$name");
 	    # HP-UX (at least) needs to maintain execute permissions
 	    # on dynamically-loaded libraries.
-	    if ($name =~ /\.(so|$dlext)$/o) {
-		&chmod(0555, "$installlib/$name");
-	    }
-	    else {
-		&chmod(0444, "$installlib/$name");
-	    }
+	    cp_if_diff($_, "$installlib/$name")
+		and &chmod($name =~ /\.(so|$dlext)$/o ? 0555 : 0444,
+			   "$installlib/$name");
 	}
     } elsif (-d $_) {
 	mkpath("$installlib/$name", 1, 0777);
@@ -387,6 +386,7 @@ sub installlib {
 # and then try to link against the installed libperl.a, you might
 # get an error message to the effect that the symbol table is older
 # than the library.
+# Return true if copying occurred.
 sub cp_if_diff {
     my($from,$to)=@_;
     -f $from || die "$0: $from not found";
@@ -402,5 +402,6 @@ sub cp_if_diff {
 	    ($atime, $mtime) = (stat $from)[8,9];
 	    utime $atime, $mtime, $to;
 	}
+	1;
     }
 }
