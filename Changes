@@ -28,6 +28,94 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 21250] By: jhi                                   on 2003/09/16  19:19:05
+        Log: Integrate:
+             [ 21247]
+             Subject: Re: [perl #23791] Many errors in build under NCR MP-RAS
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Tue, 16 Sep 2003 13:47:55 -0400 (EDT)
+             Message-ID: <Pine.SOL.4.53.0309161345020.13081@maxwell.phys.lafayette.edu>
+             
+             [ 21249]
+             More suggested patches for NCR MP-RAS from Andy Dougherty.
+     Branch: maint-5.8/perl
+	  +> ext/Time/HiRes/hints/svr4.pl
+	  !> MANIFEST ext/POSIX/hints/svr4.pl ext/Sys/Syslog/t/syslog.t
+	  !> hints/svr4.sh t/op/pack.t
+____________________________________________________________________________
+[ 21246] By: jhi                                   on 2003/09/16  18:49:37
+        Log: Integrate:
+             [ 21245]
+             Subject: Re: [PATCH 5.8.1 @19053] Getopt::Std
+             From: Ilya Zakharevich <ilya@Math.Berkeley.EDU>
+             Date: Wed, 4 Jun 2003 00:45:23 -0700
+             Message-ID: <20030604074523.GA7148@math.berkeley.edu>
+     Branch: maint-5.8/perl
+	  !> lib/Getopt/Std.pm
+____________________________________________________________________________
+[ 21244] By: jhi                                   on 2003/09/16  16:50:31
+        Log: Integrate:
+             [ 20650]
+             Subject: [PATCH 5.8.1 @20218] xsubpp: wrong code
+             From: Ilya Zakharevich <ilya@Math.Berkeley.EDU>
+             Date: Sun, 3 Aug 2003 06:19:02 -0700
+             Message-ID: <20030803131902.GA5146@math.berkeley.edu>
+             
+             [ 21243]
+             Give a concrete example of the still existing Unicode slowness.
+     Branch: maint-5.8/perl
+	  !> lib/ExtUtils/xsubpp pod/perlunicode.pod
+____________________________________________________________________________
+[ 21242] By: jhi                                   on 2003/09/16  06:41:34
+        Log: Integrate:
+             [ 21238]
+             Upgrade to MakeMaker 6.17.
+             
+             [ 21239]
+             Upgrade to File::Spec 0.85_03.
+             
+             [ 21240]
+             The test is not needed, says Schwern.
+             
+             [ 21241]
+             Make the VERSION of File::Spec be 0.86, otherwise File::Temp's
+             use File::Spec 0.8 is unhappy.
+     Branch: maint-5.8/perl
+	  +> lib/File/Spec/t/crossplatform.t
+	   - lib/base/t/fields-560.t
+	  !> MANIFEST lib/ExtUtils/Changes lib/ExtUtils/Install.pm
+	  !> lib/ExtUtils/MANIFEST.SKIP lib/ExtUtils/META.yml
+	  !> lib/ExtUtils/MM_Any.pm lib/ExtUtils/MM_Unix.pm
+	  !> lib/ExtUtils/MM_VMS.pm lib/ExtUtils/MM_Win32.pm
+	  !> lib/ExtUtils/MakeMaker.pm lib/ExtUtils/Manifest.pm
+	  !> lib/ExtUtils/README lib/ExtUtils/t/MM_Win32.t
+	  !> lib/ExtUtils/t/Manifest.t lib/ExtUtils/t/basic.t
+	  !> lib/File/Spec.pm lib/File/Spec/Mac.pm lib/File/Spec/OS2.pm
+	  !> lib/File/Spec/Unix.pm lib/File/Spec/VMS.pm
+	  !> lib/File/Spec/Win32.pm lib/File/Spec/t/Spec.t
+	  !> t/lib/MakeMaker/Test/Utils.pm
+____________________________________________________________________________
+[ 21237] By: jhi                                   on 2003/09/16  04:48:37
+        Log: In maint we get p-h warnings from the 5.6.0 fields test.
+     Branch: maint-5.8/perl
+	   ! lib/base/t/fields-560.t
+____________________________________________________________________________
+[ 21236] By: jhi                                   on 2003/09/16  04:41:09
+        Log: Integrate:
+             [ 21235]
+             Upgrade to base 2.03.
+             (Rename the fields-5.6.0.t to have less d.o.t.s.)
+     Branch: maint-5.8/perl
+	  +> lib/base/t/base.t lib/base/t/fields-560.t
+	  +> lib/base/t/fields-base.t lib/base/t/fields.t
+	   - lib/fields-base.t lib/fields.t
+	  !> MANIFEST lib/base.pm lib/fields.pm
+____________________________________________________________________________
+[ 21233] By: jhi                                   on 2003/09/15  06:25:10
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 21232] By: jhi                                   on 2003/09/15  06:14:11
         Log: Integrate:
              [ 21230]
