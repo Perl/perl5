@@ -5480,21 +5480,21 @@ Perl_sv_pos_u2b(pTHX_ register SV *sv, I32* offsetp, I32* lenp)
 	 MAGIC *mg = 0;
 	 bool found = FALSE;
 
-         if (S_utf8_mg_pos(aTHX_ sv, &mg, &cache, 0, offsetp, *offsetp, &s, start, send))
+         if (utf8_mg_pos(sv, &mg, &cache, 0, offsetp, *offsetp, &s, start, send))
              found = TRUE;
 	 if (!found && uoffset > 0) {
 	      while (s < send && uoffset--)
 		   s += UTF8SKIP(s);
 	      if (s >= send)
 		   s = send;
-              if (S_utf8_mg_pos_init(aTHX_ sv, &mg, &cache, 0, offsetp, s, start))
+              if (utf8_mg_pos_init(sv, &mg, &cache, 0, offsetp, s, start))
                   boffset = cache[1];
 	      *offsetp = s - start;
 	 }
 	 if (lenp) {
 	      found = FALSE;
 	      start = s;
-              if (S_utf8_mg_pos(aTHX_ sv, &mg, &cache, 2, lenp, *lenp + *offsetp, &s, start, send)) {
+              if (utf8_mg_pos(sv, &mg, &cache, 2, lenp, *lenp + *offsetp, &s, start, send)) {
                   *lenp -= boffset;
                   found = TRUE;
               }
@@ -5505,7 +5505,7 @@ Perl_sv_pos_u2b(pTHX_ register SV *sv, I32* offsetp, I32* lenp)
 			     s += UTF8SKIP(s);
 		   if (s >= send)
 			s = send;
-                   if (S_utf8_mg_pos_init(aTHX_ sv, &mg, &cache, 2, lenp, s, start))
+                   if (utf8_mg_pos_init(sv, &mg, &cache, 2, lenp, s, start))
 			cache[2] += *offsetp;
 	      }
 	      *lenp = s - start;
