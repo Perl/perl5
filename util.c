@@ -3481,8 +3481,6 @@ Perl_my_fflush_all(pTHX)
 void
 Perl_report_evil_fh(pTHX_ GV *gv, IO *io, I32 op)
 {
-    char *vile;
-    I32   warn_type;
     char *func =
 	op == OP_READLINE   ? "readline"  :	/* "<HANDLE>" not nice */
 	op == OP_LEAVEWRITE ? "write" :		/* "write exit" not nice */
@@ -3493,42 +3491,53 @@ Perl_report_evil_fh(pTHX_ GV *gv, IO *io, I32 op)
                      "socket" : "filehandle";
     char *name = NULL;
 
-    if (gv && io && IoTYPE(io) == IoTYPE_CLOSED) {
-	vile = "closed";
-	warn_type = WARN_CLOSED;
-    }
-    else {
-	vile = "unopened";
-	warn_type = WARN_UNOPENED;
-    }
-
     if (gv && isGV(gv)) {
 	name = GvENAME(gv);
     }
 
     if (op == OP_phoney_OUTPUT_ONLY || op == OP_phoney_INPUT_ONLY) {
-	if (name && *name)
-	    Perl_warner(aTHX_ packWARN(WARN_IO), "Filehandle %s opened only for %sput",
-			name,
-			(op == OP_phoney_INPUT_ONLY ? "in" : "out"));
-	else
-	    Perl_warner(aTHX_ packWARN(WARN_IO), "Filehandle opened only for %sput",
-			(op == OP_phoney_INPUT_ONLY ? "in" : "out"));
-    } else if (name && *name) {
-	Perl_warner(aTHX_ packWARN(warn_type),
-		    "%s%s on %s %s %s", func, pars, vile, type, name);
-	if (io && IoDIRP(io) && !(IoFLAGS(io) & IOf_FAKE_DIRP))
-	    Perl_warner(aTHX_ packWARN(warn_type),
-			"\t(Are you trying to call %s%s on dirhandle %s?)\n",
-			func, pars, name);
+        if (ckWARN(WARN_IO)) {
+            if (name && *name)
+                Perl_warner(aTHX_ packWARN(WARN_IO),
+                            "Filehandle %s opened only for %sput",
+                            name, (op == OP_phoney_INPUT_ONLY ? "in" : "out"));
+            else
+                Perl_warner(aTHX_ packWARN(WARN_IO),
+                            "Filehandle opened only for %sput",
+                            (op == OP_phoney_INPUT_ONLY ? "in" : "out"));
+        }
     }
     else {
-	Perl_warner(aTHX_ packWARN(warn_type),
-		    "%s%s on %s %s", func, pars, vile, type);
-	if (gv && io && IoDIRP(io) && !(IoFLAGS(io) & IOf_FAKE_DIRP))
-	    Perl_warner(aTHX_ packWARN(warn_type),
-			"\t(Are you trying to call %s%s on dirhandle?)\n",
-			func, pars);
+        char *vile;
+        I32   warn_type;
+
+        if (gv && io && IoTYPE(io) == IoTYPE_CLOSED) {
+            vile = "closed";
+            warn_type = WARN_CLOSED;
+        }
+        else {
+            vile = "unopened";
+            warn_type = WARN_UNOPENED;
+        }
+
+        if (ckWARN(warn_type)) {
+            if (name && *name) {
+                Perl_warner(aTHX_ packWARN(warn_type),
+                            "%s%s on %s %s %s", func, pars, vile, type, name);
+                if (io && IoDIRP(io) && !(IoFLAGS(io) & IOf_FAKE_DIRP))
+                    Perl_warner(aTHX_ packWARN(warn_type),
+                                "\t(Are you trying to call %s%s on dirhandle %s?)\n",
+                                func, pars, name);
+            }
+            else {
+                Perl_warner(aTHX_ packWARN(warn_type),
+                            "%s%s on %s %s", func, pars, vile, type);
+                if (gv && io && IoDIRP(io) && !(IoFLAGS(io) & IOf_FAKE_DIRP))
+                    Perl_warner(aTHX_ packWARN(warn_type),
+                                "\t(Are you trying to call %s%s on dirhandle?)\n",
+                                func, pars);
+            }
+        }
     }
 }
 
