@@ -237,7 +237,7 @@ while (defined ($file = next_file())) {
 	    } elsif(/^ident\s+(.*)/) {
 		print OUT $t, "# $1\n";
 	    }
-	} elsif(/^\s*(typedef\s*)?enum\b/) {
+	} elsif(/^\s*(typedef\s*)?enum(\s+[a-zA-Z_]\w*)?\s*\{/) {
 	    until(/\}.*?;/) {
 		chomp($next = <IN>);
 		$_ .= $next;
