@@ -4726,6 +4726,9 @@ xxx=''
 tmp_shrpenv=''
 if "$useshrplib"; then
     case "$osname" in 
+	aix)
+		# We'll set it in Makefile.SH...
+		;;
 	solaris|netbsd)
 		xxx="-R $shrpdir"
 		;;

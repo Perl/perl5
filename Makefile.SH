@@ -24,6 +24,7 @@ case "$d_dosuid" in
 esac
 
 linklibperl='$(LIBPERL)'
+shrpldflags='$(LDDLFLAGS)'
 case "$useshrplib" in
 true)
 	pldlflags="$cccdlflags"
@@ -36,6 +37,11 @@ true)
 		;;
 	sunos*|freebsd[23]*|netbsd*)
 		linklibperl="-lperl"
+		;;
+	aix*)
+		shrpldflags="-H512 -T512 -bhalt:4 -bM:SRE -bE:perl.exp -b noentry -lc -lm -lbsd"
+		aixinstdir=`pwd | sed 's/\/UU$//'`
+		linklibperl="-L $archlibexp/CORE -L $aixinstdir -lperl"
 		;;
 	esac
 	;;
@@ -98,6 +104,7 @@ man3ext = $man3ext
 # The following are used to build and install shared libraries for
 # dynamic loading.
 LDDLFLAGS = $lddlflags
+SHRPLDFLAGS = $shrpldflags
 CCDLFLAGS = $ccdlflags
 DLSUFFIX = .$dlext
 PLDLFLAGS = $pldlflags
@@ -248,8 +255,18 @@ $(LIBPERL): $& perl$(OBJ_EXT) $(obj)
 	case "$useshrplib" in
 	true)
 		$spitshell >>Makefile <<'!NO!SUBS!'
-	$(LD) $(LDDLFLAGS) -o $@ perl$(OBJ_EXT) $(obj)
+	$(LD) $(SHRPLDFLAGS) -o $@ perl$(OBJ_EXT) $(obj)
 !NO!SUBS!
+	    case "$osname" in
+	    aix)
+		    $spitshell >>Makefile <<'!NO!SUBS!'
+	mv $@ libperl$(OBJ_EXT)
+	$(AR) qv $(LIBPERL) libperl$(OBJ_EXT)
+!NO!SUBS!
+		      ;;
+	    *)
+		      ;;
+	    esac
 		;;
 	*)
 		$spitshell >>Makefile <<'!NO!SUBS!'
