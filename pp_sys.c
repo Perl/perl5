@@ -3276,7 +3276,11 @@ PP(pp_telldir)
 {
     djSP; dTARGET;
 #if defined(HAS_TELLDIR) || defined(telldir)
-# ifdef NEED_TELLDIR_PROTO /* XXX does _anyone_ need this? --AD 2/20/1998 */
+ /* XXX does _anyone_ need this? --AD 2/20/1998 */
+ /* XXX netbsd still seemed to.
+    XXX HAS_TELLDIR_PROTO is new style, NEED_TELLDIR_PROTO is old style.
+    --JHI 1999-Feb-02 */
+# if !defined(HAS_TELLDIR_PROTO) || defined(NEED_TELLDIR_PROTO)
     long telldir _((DIR *));
 # endif
     GV *gv = (GV*)POPs;

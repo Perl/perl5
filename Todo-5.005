@@ -25,6 +25,22 @@ MULTIPLICITY support
     complete work on safe recursive interpreters, C<Perl->new()>
     revisit extra implicit arg that provides curthread/curinterp context
 
+Configure
+    make configuring+building away from source directory work (VPATH et al)
+    _r support
+    cross-compilation configuring
+    mmap support
+    POSIX 1003.1 1996 Edition support
+
+Locales
+    locales across packages
+    decimal separator (3,1415927 is Europeanese for an approximation of pi)
+
+Regexen
+   POSIX [:foo:] character classes
+	([=bar=] and [.zap.] would nice too but there's no API for them)
+   approximate matching
+
 Reliable Signals
     alternate runops() for signal despatch
     figure out how to die() in delayed sighandler

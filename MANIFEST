@@ -207,6 +207,7 @@ ext/DynaLoader/DynaLoader_pm.PL	Dynamic Loader perl module
 ext/DynaLoader/Makefile.PL	Dynamic Loader makefile writer
 ext/DynaLoader/README		Dynamic Loader notes and intro
 ext/DynaLoader/dl_aix.xs	AIX implementation
+ext/DynaLoader/dl_beos.xs	BeOS implementation
 ext/DynaLoader/dl_cygwin32.xs	Cygwin32 implementation
 ext/DynaLoader/dl_dld.xs	GNU dld style implementation
 ext/DynaLoader/dl_dlopen.xs	BSD/SunOS4&5 dlopen() style implementation
@@ -228,6 +229,7 @@ ext/GDBM_File/GDBM_File.pm	GDBM extension Perl module
 ext/GDBM_File/GDBM_File.xs	GDBM extension external subroutines
 ext/GDBM_File/Makefile.PL	GDBM extension makefile writer
 ext/GDBM_File/typemap		GDBM extension interface types
+ext/GDBM_File/hints/sco.pl	Hint for GDBM_File for named architecture
 ext/IO/ChangeLog		IO perl module change log
 ext/IO/IO.pm			Top-level interface to IO::* classes
 ext/IO/IO.xs			IO extension external subroutines
@@ -546,6 +548,7 @@ lib/File/Copy.pm	Emulation of cp command
 lib/File/DosGlob.pm	Win32 DOS-globbing module
 lib/File/Find.pm	Routines to do a find
 lib/File/Path.pm	Do things like `mkdir -p' and `rm -r'
+lib/File/PathConvert.pm	converting between file names
 lib/File/Spec.pm	portable operations on file names
 lib/File/Spec/Mac.pm	portable operations on Mac file names
 lib/File/Spec/OS2.pm	portable operations on OS2 file names
@@ -952,7 +955,7 @@ pod/perlmodinstall.pod	Installing CPAN Modules
 pod/perlmodlib.pod	Module policy info
 pod/perlobj.pod		Object info
 pod/perlop.pod		Operator info
-pod/perlopentut.pod	Object info
+pod/perlopentut.pod	open() tutorial
 pod/perlpod.pod		Pod info
 pod/perlport.pod	Portability guide
 pod/perlre.pod		Regular expression info
@@ -963,6 +966,7 @@ pod/perlsec.pod		Security info
 pod/perlstyle.pod	Style info
 pod/perlsub.pod		Subroutine info
 pod/perlsyn.pod		Syntax info
+pod/perlthrtut.pod	Threads tutorial
 pod/perltie.pod		Tieing an object class into a simple variable
 pod/perltoc.pod		Table of Contents info
 pod/perltoot.pod	Tom's object-oriented tutorial

@@ -31,6 +31,7 @@ of sections:
     perlre		Perl regular expressions
     perlrun		Perl execution and options
     perlfunc		Perl builtin functions
+    perlopentut		Perl open() tutorial
     perlvar		Perl predefined variables
     perlsub		Perl subroutines
     perlopentut		Perl opening things tutorial
@@ -49,6 +50,7 @@ of sections:
     perltie		Perl objects hidden behind simple variables
     perlbot		Perl OO tricks and examples
     perlipc		Perl interprocess communication
+    perlthrtut		Perl threads tutorial
 
     perldebug		Perl debugging
     perldiag		Perl diagnostic messages

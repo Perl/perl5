@@ -5,13 +5,13 @@ use vars qw{$Try_autoload $Revision
 	    $Frontend  $Defaultsite
 	   };
 
-$VERSION = '1.44_54';
+$VERSION = '1.47';
 
-# $Id: CPAN.pm,v 1.250 1999/01/14 12:26:13 k Exp $
+# $Id: CPAN.pm,v 1.256 1999/01/25 13:06:22 k Exp $
 
 # only used during development:
 $Revision = "";
-# $Revision = "[".substr(q$Revision: 1.250 $, 10)."]";
+# $Revision = "[".substr(q$Revision: 1.256 $, 10)."]";
 
 use Carp ();
 use Config ();
@@ -27,6 +27,7 @@ use FileHandle ();
 use Safe ();
 use Text::ParseWords ();
 use Text::Wrap;
+use File::Spec;
 
 END { $End++; &cleanup; }
 
@@ -314,16 +315,51 @@ use vars qw($AUTOLOAD @ISA);
 @CPAN::Tarzip::ISA = qw(CPAN::Debug);
 
 package CPAN::Queue;
-# currently only used to determine if we should or shouldn't announce
-# the availability of a new CPAN module
 
-# but now we try to use it for dependency tracking. For that to happen
+# One use of the queue is to determine if we should or shouldn't
+# announce the availability of a new CPAN module
+
+# Now we try to use it for dependency tracking. For that to happen
 # we need to draw a dependency tree and do the leaves first. This can
 # easily be reached by running CPAN.pm recursively, but we don't want
 # to waste memory and run into deep recursion. So what we can do is
-# this: run the queue as the user suggested. When a dependency is
-# detected check if it is in the queue. If so, rearrange, otherwise
-# unshift it on the queue.
+# this:
+
+# CPAN::Queue is the package where the queue is maintained. Dependencies
+# often have high priority and must be brought to the head of the queue,
+# possibly by jumping the queue if they are already there. My first code
+# attempt tried to be extremely correct. Whenever a module needed
+# immediate treatment, I either unshifted it to the front of the queue,
+# or, if it was already in the queue, I spliced and let it bypass the
+# others. This became a too correct model that made it impossible to put
+# an item more than once into the queue. Why would you need that? Well,
+# you need temporary duplicates as the manager of the queue is a loop
+# that
+#
+#  (1) looks at the first item in the queue without shifting it off
+#
+#  (2) cares for the item
+#
+#  (3) removes the item from the queue, *even if its agenda failed and
+#      even if the item isn't the first in the queue anymore* (that way
+#      protecting against never ending queues)
+#
+# So if an item has prerequisites, the installation fails now, but we
+# want to retry later. That's easy if we have it twice in the queue.
+#
+# I also expect insane dependency situations where an item gets more
+# than two lives in the queue. Simplest example is triggered by 'install
+# Foo Foo Foo'. People make this kind of mistakes and I don't want to
+# get in the way. I wanted the queue manager to be a dumb servant, not
+# one that knows everything.
+#
+# Who would I tell in this model that the user wants to be asked before
+# processing? I can't attach that information to the module object,
+# because not modules are installed but distributions. So I'd have to
+# tell the distribution object that it should ask the user before
+# processing. Where would the question be triggered then? Most probably
+# in CPAN::Distribution::rematein.
+# Hope that makes sense, my head is a bit off:-) -- AK
 
 use vars qw{ @All };
 
@@ -334,7 +370,6 @@ sub new {
   # my @all = map { $_->{mod} } @All;
   # warn "Adding Queue object for mod[$mod] all[@all]";
   return $self;
-
 }
 
 sub first {
@@ -556,13 +591,18 @@ sub has_inst {
     $file =~ s|/|\\|g if $^O eq 'MSWin32';
     $file .= ".pm";
     if ($INC{$file}) {
-#	warn "$file in %INC"; #debug
+	# checking %INC is wrong, because $INC{LWP} may be true
+	# although $INC{"URI/URL.pm"} may have failed. But as
+	# I really want to say "bla loaded OK", I have to somehow
+	# cache results.
+	### warn "$file in %INC"; #debug
 	return 1;
     } elsif (eval { require $file }) {
 	# eval is good: if we haven't yet read the database it's
 	# perfect and if we have installed the module in the meantime,
 	# it tries again. The second require is only a NOOP returning
 	# 1 if we had success, otherwise it's retrying
+
 	$CPAN::Frontend->myprint("CPAN: $mod loaded ok\n");
 	if ($mod eq "CPAN::WAIT") {
 	    push @CPAN::Shell::ISA, CPAN::WAIT;
@@ -583,6 +623,8 @@ sub has_inst {
 
 });
 	sleep 2;
+    } else {
+	delete $INC{$file}; # if it inc'd LWP but failed during, say, URI
     }
     return 0;
 }
@@ -676,7 +718,8 @@ sub entries {
     $getcwd  = $CPAN::Config->{'getcwd'} || 'cwd';
     my($cwd) = CPAN->$getcwd();
     chdir $dir or Carp::croak("Can't chdir to $dir: $!");
-    my $dh = DirHandle->new(".") or Carp::croak("Couldn't opendir $dir: $!");
+    my $dh = DirHandle->new(File::Spec->curdir)
+        or Carp::croak("Couldn't opendir $dir: $!");
     my(@entries);
     for ($dh->read) {
 	next if $_ eq "." || $_ eq "..";
@@ -700,9 +743,15 @@ sub disk_usage {
     my($Du) = 0;
     find(
 	 sub {
-	     $File::Find::prune++ if $CPAN::Signal;
-	     return if -l $_;
-	     $Du += (-s _); # parens to help cperl-mode
+	   $File::Find::prune++ if $CPAN::Signal;
+	   return if -l $_;
+	   if ($^O eq 'MacOS') {
+	     require Mac::Files;
+	     my $cat  = Mac::Files::FSpGetCatInfo($_);
+	     $Du += $cat->ioFlLgLen() + $cat->ioFlRLgLen();
+	   } else {
+	     $Du += (-s _);
+	   }
 	 },
 	 $dir
 	);
@@ -1261,8 +1310,7 @@ sub reload {
       CPAN::Index->force_reload;
     } else {
       $CPAN::Frontend->myprint(qq{cpan     re-evals the CPAN.pm file
-index    re-reads the index files
-});
+index    re-reads the index files\n});
     }
 }
 
@@ -1764,6 +1812,20 @@ sub localize {
     $self->debug("file[$file] aslocal[$aslocal] force[$force]")
 	if $CPAN::DEBUG;
 
+    if ($^O eq 'MacOS') {
+        my($name, $path) = File::Basename::fileparse($aslocal, '');
+        if (length($name) > 31) {
+            $name =~ s/(\.(readme(\.(gz|Z))?|(tar\.)?(gz|Z)|tgz|zip|pm\.(gz|Z)))$//;
+            my $suf = $1;
+            my $size = 31 - length($suf);
+            while (length($name) > $size) {
+                chop $name;
+            }
+            $name .= $suf;
+            $aslocal = File::Spec->catfile($path, $name);
+        }
+    }
+
     return $aslocal if -f $aslocal && -r _ && !($force & 1);
     my($restore) = 0;
     if (-f $aslocal){
@@ -1820,6 +1882,7 @@ sub localize {
     } else {
 	@levels = qw/easy hard hardest/;
     }
+    @levels = qw/easy/ if $^O eq 'MacOS';
     for $level (@levels) {
 	my $method = "host$level";
 	my @host_seq = $level eq "easy" ?
@@ -2433,26 +2496,35 @@ sub reload {
 
     my $needshort = $^O eq "dos";
 
-    $cl->rd_authindex($cl->reload_x(
-				    "authors/01mailrc.txt.gz",
-				    $needshort ? "01mailrc.gz" : "",
-				    $force));
+    $cl->rd_authindex($cl
+		      ->reload_x(
+				 "authors/01mailrc.txt.gz",
+				 $needshort ?
+				 File::Spec->catfile('authors', '01mailrc.gz') :
+				 File::Spec->catfile('authors', '01mailrc.txt.gz'),
+				 $force));
     $t2 = time;
     $debug = "timing reading 01[".($t2 - $time)."]";
     $time = $t2;
     return if $CPAN::Signal; # this is sometimes lengthy
-    $cl->rd_modpacks($cl->reload_x(
-				   "modules/02packages.details.txt.gz",
-				   $needshort ? "02packag.gz" : "",
-				   $force));
+    $cl->rd_modpacks($cl
+		     ->reload_x(
+				"modules/02packages.details.txt.gz",
+				$needshort ?
+				File::Spec->catfile('modules', '02packag.gz') :
+				File::Spec->catfile('modules', '02packages.details.txt.gz'),
+				$force));
     $t2 = time;
     $debug .= "02[".($t2 - $time)."]";
     $time = $t2;
     return if $CPAN::Signal; # this is sometimes lengthy
-    $cl->rd_modlist($cl->reload_x(
-				  "modules/03modlist.data.gz",
-				  $needshort ? "03mlist.gz" : "",
-				  $force));
+    $cl->rd_modlist($cl
+		    ->reload_x(
+			       "modules/03modlist.data.gz",
+			       $needshort ?
+			       File::Spec->catfile('modules', '03mlist.gz') :
+			       File::Spec->catfile('modules', '03modlist.data.gz'),
+			       $force));
     $t2 = time;
     $debug .= "03[".($t2 - $time)."]";
     $time = $t2;
@@ -2485,7 +2557,8 @@ sub reload_x {
 
 #-> sub CPAN::Index::rd_authindex ;
 sub rd_authindex {
-    my($cl,$index_target) = @_;
+    my($cl, $index_target) = @_;
+    my @lines;
     return unless defined $index_target;
     $CPAN::Frontend->myprint("Going to read $index_target\n");
 #    my $fh = CPAN::Tarzip->TIEHANDLE($index_target);
@@ -2494,8 +2567,8 @@ sub rd_authindex {
     local(*FH);
     tie *FH, CPAN::Tarzip, $index_target;
     local($/) = "\n";
-    while (<FH>) {
-	chomp;
+    push @lines, split /\012/ while <FH>;
+    foreach (@lines) {
 	my($userid,$fullname,$email) =
 	    m/alias\s+(\S+)\s+\"([^\"\<]+)\s+\<([^\>]+)\>\"/;
 	next unless $userid && $fullname && $email;
@@ -2516,15 +2589,23 @@ sub userid {
 
 #-> sub CPAN::Index::rd_modpacks ;
 sub rd_modpacks {
-    my($cl,$index_target) = @_;
+    my($cl, $index_target) = @_;
+    my @lines;
     return unless defined $index_target;
     $CPAN::Frontend->myprint("Going to read $index_target\n");
     my $fh = CPAN::Tarzip->TIEHANDLE($index_target);
     local($/) = "\n";
     while ($_ = $fh->READLINE) {
-	last if /^\s*$/;
+	s/\012/\n/g;
+	my @ls = map {"$_\n"} split /\n/, $_;
+	unshift @ls, "\n" x length($1) if /^(\n+)/;
+	push @lines, @ls;
     }
-    while ($_ = $fh->READLINE) {
+    while (@lines) {
+	my $shift = shift(@lines);
+	last if $shift =~ /^\s*$/;
+    }
+    foreach (@lines) {
 	chomp;
 	my($mod,$version,$dist) = split;
 ###	$version =~ s/^\+//;
@@ -2607,13 +2688,19 @@ sub rd_modlist {
     my @eval;
     local($/) = "\n";
     while ($_ = $fh->READLINE) {
-	if (/^Date:\s+(.*)/){
+	s/\012/\n/g;
+	my @ls = map {"$_\n"} split /\n/, $_;
+	unshift @ls, "\n" x length($1) if /^(\n+)/;
+	push @eval, @ls;
+    }
+    while (@eval) {
+	my $shift = shift(@eval);
+	if ($shift =~ /^Date:\s+(.*)/){
 	    return if $date_of_03 eq $1;
 	    ($date_of_03) = $1;
 	}
-	last if /^\s*$/;
+	last if $shift =~ /^\s*$/;
     }
-    push @eval, $_ while $_ = $fh->READLINE;
     undef $fh;
     push @eval, q{CPAN::Modulelist->data;};
     local($^W) = 0;
@@ -2775,11 +2862,12 @@ sub get {
     } else {
 	$self->{archived} = "NO";
     }
-    chdir "..";
+    chdir File::Spec->updir;
     if ($self->{archived} ne 'NO') {
-	chdir "tmp";
+	chdir File::Spec->catdir(File::Spec->curdir, "tmp");
 	# Let's check if the package has its own directory.
-	my $dh = DirHandle->new(".") or Carp::croak("Couldn't opendir .: $!");
+	my $dh = DirHandle->new(File::Spec->curdir)
+	    or Carp::croak("Couldn't opendir .: $!");
 	my @readdir = grep $_ !~ /^\.\.?$/, $dh->read; ### MAC??
 	$dh->close;
 	my ($distdir,$packagedir);
@@ -2802,7 +2890,7 @@ sub get {
 	    }
 	}
 	$self->{'build_dir'} = $packagedir;
-	chdir "..";
+	chdir File::Spec->updir;
 
 	$self->debug("Changed directory to .. (self is $self [".$self->as_string."])")
 	    if $CPAN::DEBUG;
@@ -2933,6 +3021,12 @@ sub readme {
     $local_file = CPAN::FTP->localize("authors/id/$sans.readme",
 				      $local_wanted)
 	or $CPAN::Frontend->mydie(qq{No $sans.readme found});;
+
+    if ($^O eq 'MacOS') {
+        ExtUtils::MM_MacOS::launch_file($local_file);
+        return;
+    }
+
     my $fh_pager = FileHandle->new;
     local($SIG{PIPE}) = "IGNORE";
     $fh_pager->open("|$CPAN::Config->{'pager'}")
@@ -2999,6 +3093,7 @@ sub MD5_check_file {
     if (open $fh, $chk_file){
 	local($/);
 	my $eval = <$fh>;
+	$eval =~ s/\015?\012/\n/g;
 	close $fh;
 	my($comp) = Safe->new();
 	$cksum = $comp->reval($eval);
@@ -3184,6 +3279,11 @@ or
     chdir $builddir or Carp::croak("Couldn't chdir $builddir: $!");
     $self->debug("Changed directory to $builddir") if $CPAN::DEBUG;
 
+    if ($^O eq 'MacOS') {
+        ExtUtils::MM_MacOS::make($self);
+        return;
+    }
+
     my $system;
     if ($self->{'configure'}) {
       $system = $self->{'configure'};
@@ -3203,10 +3303,11 @@ or
 	if ($CPAN::Config->{inactivity_timeout}) {
 	    eval {
 		alarm $CPAN::Config->{inactivity_timeout};
-		local $SIG{CHLD} = sub { wait };
+		local $SIG{CHLD}; # = sub { wait };
 		if (defined($pid = fork)) {
 		    if ($pid) { #parent
-			wait;
+			# wait;
+			waitpid $pid, 0;
 		    } else {    #child
 		      # note, this exec isn't necessary if
 		      # inactivity_timeout is 0. On the Mac I'd
@@ -3245,7 +3346,6 @@ or
       for my $p (@prereq) {
 	$CPAN::Frontend->myprint("    $p\n");
       }
-      sleep 2;
       my $follow = 0;
       if ($CPAN::Config->{prerequisites_policy} eq "follow") {
 	$follow = 1;
@@ -3255,6 +3355,9 @@ or
 "Shall I follow them and prepend them to the queue
 of modules we are processing right now?", "yes");
 	$follow = $answer =~ /^\s*y/i;
+      } else {
+	local($") = ", ";
+	$CPAN::Frontend->myprint("  Ignoring dependencies on modules @prereq\n");
       }
       if ($follow) {
 	CPAN::Queue->jumpqueue(@prereq,$id); # requeue yourself
@@ -3279,46 +3382,33 @@ sub needs_prereq {
   my $fh = FileHandle->new("<Makefile") or
       $CPAN::Frontend->mydie("Couldn't open Makefile: $!");
   local($/) = "\n";
-  my($v);
-  while (<$fh>) {
-    last if ($v) = m| ^ \# \s+ ( \d+\.\d+ ) .* Revision: |x;
-  }
 
   my(@p,@need);
-  if (1) { # probably all versions of MakeMaker ever so far
-    while (<$fh>) {
-      last if /MakeMaker post_initialize section/;
-      my($p) = m{^[\#]
+  while (<$fh>) {
+    last if /MakeMaker post_initialize section/;
+    my($p) = m{^[\#]
 		 \s+PREREQ_PM\s+=>\s+(.+)
 		 }x;
-      next unless $p;
-      # warn "Found prereq expr[$p]";
+    next unless $p;
+    # warn "Found prereq expr[$p]";
 
-      while ( $p =~ m/(?:\s)([\w\:]+)=>q\[.*?\],?/g ){
-        push @p, $1;
-      }
-      last;
+    while ( $p =~ m/(?:\s)([\w\:]+)=>q\[.*?\],?/g ){
+      push @p, $1;
     }
-  } else { # MakeMaker after a patch I suggested. Let's wait and see
-    while (<$fh>) {
-      last if /MakeMaker post_initialize section/;
-      my($p) = m|\# prerequisite (\S+).+not found|;
-      next unless $p;
-      push @p, $p;
-    }
+    last;
   }
   for my $p (@p) {
-    unless ($CPAN::META->instance("CPAN::Module",$p)->inst_file){
-      if ($self->{'have_sponsored'}{$p}++) {
-	# We have already sponsored it and for some reason it's still
-	# not available. So we do nothing. Or what should we do?
-      } else {
-	# warn "----- Protegere $p -----";
-	push @need, $p;
-	# CPAN::Queue->jumpqueue($p);
-	# $ret++;
-      }
+    my $mo = $CPAN::META->instance("CPAN::Module",$p);
+    next if $mo->uptodate;
+    # it's not needed, so don't push it. We cannot omit this step, because
+    # if 'force' is in effect, nobody else will check.
+    if ($self->{'have_sponsored'}{$p}++){
+      # We have already sponsored it and for some reason it's still
+      # not available. So we do nothing. Or what should we do?
+      # if we push it again, we have a potential infinite loop
+      next;
     }
+    push @need, $p;
   }
   return @need;
 }
@@ -3345,6 +3435,12 @@ sub test {
 	Carp::croak("Couldn't chdir to $self->{'build_dir'}");
     $self->debug("Changed directory to $self->{'build_dir'}")
 	if $CPAN::DEBUG;
+
+    if ($^O eq 'MacOS') {
+        ExtUtils::MM_MacOS::make_test($self);
+        return;
+    }
+
     my $system = join " ", $CPAN::Config->{'make'}, "test";
     if (system($system) == 0) {
 	 $CPAN::Frontend->myprint("  $system -- OK\n");
@@ -3367,6 +3463,12 @@ sub clean {
     chdir $self->{'build_dir'} or
 	Carp::croak("Couldn't chdir to $self->{'build_dir'}");
     $self->debug("Changed directory to $self->{'build_dir'}") if $CPAN::DEBUG;
+
+    if ($^O eq 'MacOS') {
+        ExtUtils::MM_MacOS::make_clean($self);
+        return;
+    }
+
     my $system = join " ", $CPAN::Config->{'make'}, "clean";
     if (system($system) == 0) {
 	$CPAN::Frontend->myprint("  $system -- OK\n");
@@ -3409,6 +3511,12 @@ sub install {
 	Carp::croak("Couldn't chdir to $self->{'build_dir'}");
     $self->debug("Changed directory to $self->{'build_dir'}")
 	if $CPAN::DEBUG;
+
+    if ($^O eq 'MacOS') {
+        ExtUtils::MM_MacOS::make_install($self);
+        return;
+    }
+
     my $system = join(" ", $CPAN::Config->{'make'},
 		      "install", $CPAN::Config->{make_install_arg});
     my($stderr) = $^O =~ /Win/i ? "" : " 2>&1 ";
@@ -3523,7 +3631,14 @@ sub find_bundle_file {
 	or Carp::croak("Couldn't open $manifest: $!");
     local($/) = "\n";
     my $what2 = $what;
-    $what2 =~ s|Bundle/||;
+    if ($^O eq 'MacOS') {
+      $what =~ s/^://;
+      $what2 =~ tr|:|/|;
+      $what2 =~ s/:Bundle://;
+      $what2 =~ tr|:|/|;
+    } else {
+	$what2 =~ s|Bundle/||;
+    }
     my $bu;
     while (<$fh>) {
 	next if /^\s*\#/;
@@ -3537,6 +3652,7 @@ sub find_bundle_file {
 	# have no Bundle directory
 	$bu = $file if $file =~ m|\Q$what2\E$|;
     }
+    $bu =~ tr|/|:| if $^O eq 'MacOS';
     return MM->catfile($where, $bu) if $bu;
     Carp::croak("Couldn't find a Bundle file in $where");
 }
@@ -3839,15 +3955,12 @@ sub uptodate {
     if (defined $inst_file) {
 	$have = $self->inst_version;
     }
-    if (1){ # A block for scoping $^W, the if is just for the visual
-            # appeal
-	local($^W)=0;
-	if ($inst_file
-	    &&
-	    $have >= $latest
-	   ) {
-	    return 1;
-	}
+    local($^W)=0;
+    if ($inst_file
+	&&
+	$have >= $latest
+       ) {
+      return 1;
     }
     return;
 }
@@ -4058,6 +4171,10 @@ sub untar {
     my $tar = Archive::Tar->new($file,1);
     $tar->extract($tar->list_files); # I'm pretty sure we have nothing
                                      # that isn't compressed
+
+    ExtUtils::MM_MacOS::convert_files([$tar->list_files], 1)
+        if ($^O eq 'MacOS');
+
     return 1;
   } else {
     $CPAN::Frontend->mydie(qq{
@@ -4176,11 +4293,13 @@ each as object-E<gt>as_glimpse. E.g.
 
 =item make, test, install, clean  modules or distributions
 
-These commands take any number of arguments and investigate what is
+These commands take any number of arguments and investigates what is
 necessary to perform the action. If the argument is a distribution
-file name (recognized by embedded slashes), it is processed. If it is a
-module, CPAN determines the distribution file in which this module is
-included and processes that.
+file name (recognized by embedded slashes), it is processed. If it is
+a module, CPAN determines the distribution file in which this module
+is included and processes that, following any dependencies named in
+the module's Makefile.PL (this behavior is controlled by
+I<prerequisites_policy>.)
 
 Any C<make> or C<test> are run unconditionally. An
 
@@ -4505,6 +4624,9 @@ defined:
   make_install_arg   same as make_arg for 'make install'
   makepl_arg	     arguments passed to 'perl Makefile.PL'
   pager              location of external program more (or any pager)
+  prerequisites_policy
+                     what to do if you are missing module prerequisites
+                     ('follow' automatically, 'ask' me, or 'ignore')
   scan_cache	     controls scanning of cache ('atstart' or 'never')
   tar                location of external program tar
   unzip              location of external program unzip
@@ -4572,7 +4694,7 @@ install foreign, unmasked, unsigned code on your machine. We compare
 to a checksum that comes from the net just as the distribution file
 itself. If somebody has managed to tamper with the distribution file,
 they may have as well tampered with the CHECKSUMS file. Future
-development will go towards strong authentification.
+development will go towards strong authentication.
 
 =head1 EXPORT
 
@@ -4636,7 +4758,7 @@ will need to use Net::FTP.
 
 =item One way visibility
 
-I say one way visibility as these firewalls try to make themselves look
+I say one way visibility as these firewalls try to make themselve look
 invisible to the users inside the firewall. An FTP data connection is
 normally created by sending the remote server your IP address and then
 listening for the connection. But the remote server will not be able to

@@ -20,8 +20,8 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Jan 22 10:52:50 EET 1999 [metaconfig 3.0 PL70]
-# (with additional metaconfig patches by jhi@iki.fi)
+# Generated on Mon Feb  8 01:45:46 EET 1999 [metaconfig 3.0 PL70]
+# (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
 ARGGGHHHH!!!!!
@@ -153,6 +153,9 @@ esac
 test -d UU || mkdir UU
 cd UU && rm -f ./*
 
+ccsymbols=''
+cppccsymbols=''
+cppsymbols=''
 dynamic_ext=''
 extensions=''
 known_extensions=''
@@ -386,6 +389,7 @@ longdblsize=''
 d_longlong=''
 longlongsize=''
 d_lstat=''
+d_madvise=''
 d_mblen=''
 d_mbstowcs=''
 d_mbtowc=''
@@ -396,11 +400,16 @@ d_memset=''
 d_mkdir=''
 d_mkfifo=''
 d_mktime=''
+d_mmap=''
+mmaptype=''
+d_mprotect=''
 d_msg=''
 d_msgctl=''
 d_msgget=''
 d_msgrcv=''
 d_msgsnd=''
+d_msync=''
+d_munmap=''
 d_nice=''
 d_open3=''
 d_fpathconf=''
@@ -513,6 +522,7 @@ d_sysconf=''
 d_system=''
 d_tcgetpgrp=''
 d_tcsetpgrp=''
+d_telldirproto=''
 d_time=''
 timetype=''
 clocktype=''
@@ -609,6 +619,7 @@ i_bsdioctl=''
 i_sysfilio=''
 i_sysioctl=''
 i_syssockio=''
+i_sysmman=''
 i_sysmount=''
 i_sysndir=''
 i_sysparam=''
@@ -960,7 +971,7 @@ case "$sh" in
 $me:  Fatal Error:  I can't find a Bourne Shell anywhere.  
 
 Usually it's in /bin/sh.  How did you even get this far?
-Please contact me (Jarkko Hietaniemi) at jhi@iki.fi and 
+Please contact me (Perl Maintainers) at perlbug@perl.com and 
 we'll try to straighten this all out.
 EOM
 	exit 1
@@ -1429,7 +1440,7 @@ THIS PACKAGE SEEMS TO BE INCOMPLETE.
 You have the option of continuing the configuration process, despite the
 distinct possibility that your kit is damaged, by typing 'y'es.  If you
 do, don't blame me if something goes wrong.  I advise you to type 'n'o
-and contact the author (jhi@iki.fi).
+and contact the author (perlbug@perl.com).
 
 EOM
 		echo $n "Continue? [n] $c" >&4
@@ -1654,7 +1665,7 @@ Much effort has been expended to ensure that this shell script will run on any
 Unix system.  If despite that it blows up on yours, your best bet is to edit
 Configure and run it again.  If you can't run Configure for some reason,
 you'll have to generate a config.sh file by hand.  Whatever problems you
-have, let me (jhi@iki.fi) know how I blew it.
+have, let me (perlbug@perl.com) know how I blew it.
 
 This installation script affects things in two ways:
 
@@ -2017,7 +2028,7 @@ EOM
 	(cd $src/hints; ls -C *.sh) | $sed 's/\.sh/   /g' >&4
 	dflt=''
 	: Half the following guesses are probably wrong... If you have better
-	: tests or hints, please send them to jhi@iki.fi
+	: tests or hints, please send them to perlbug@perl.com
 	: The metaconfig authors would also appreciate a copy...
 	$test -f /irix && osname=irix
 	$test -f /xenix && osname=sco_xenix
@@ -2510,7 +2521,7 @@ case "$usethreads" in
 	*)
 	        cat >&4 <<EOM
 $osname is not known to support threads.
-Please let me (jhi@iki.fi) know how to do that.
+Please let perlbug@perl.com know how to do that.
 
 Cannot continue, aborting.
 EOM
@@ -2585,7 +2596,7 @@ case "$use64bits" in
 	*)
 		cat >&4 <<EOM
 $osname is not known to support 64-bit interfaces.
-Please let me (jhi@iki.fi) know how to do that.
+Please let perlbug@perl.com know how to do that.
 
 Cannot continue, aborting.
 EOM
@@ -3025,12 +3036,10 @@ echo ".)"
 
 if test 0 -eq "$subversion"; then
 	version=`LC_ALL=C; export LC_ALL; \
-		 LANGUAGE=C; export LANGUAGE; \
 		 echo $baserev $patchlevel | \
 		 $awk '{ printf "%.3f\n", $1 + $2/1000.0 }'`
 else
 	version=`LC_ALL=C; export LC_ALL; \
-		 LANGUAGE=C; export LANGUAGE; \
 		 echo $baserev $patchlevel $subversion | \
 		 $awk '{ printf "%.5f\n", $1 + $2/1000.0 + $3/100000.0 }'`
 fi
@@ -3371,7 +3380,7 @@ fi
 case "$models" in
 '')
 	$cat >pdp11.c <<'EOP'
-main() {
+int main() {
 #ifdef pdp11
 	exit(0);
 #else
@@ -3784,7 +3793,7 @@ false)
 esac
 
 case "$cppstdin" in
-"$wrapper") ;;
+"$wrapper"|'cppstdin') ;;
 *) $rm -f $wrapper;;
 esac
 $rm -f testcpp.c testcpp.out
@@ -4201,7 +4210,7 @@ echo " "
 echo "Checking your choice of C compiler and flags for coherency..." >&4
 $cat > try.c <<'EOF'
 #include <stdio.h>
-main() { printf("Ok\n"); exit(0); }
+int main() { printf("Ok\n"); exit(0); }
 EOF
 set X $cc $optimize $ccflags -o try $ldflags try.c $libs
 shift
@@ -4524,27 +4533,25 @@ fi
 : determine whether to install perl also as /usr/bin/perl
 
 echo " "
-case "$installusrbinperl" in
-'') if test -d /usr/bin -a "X$installbin" != X/usr/bin; then
+if test -d /usr/bin -a "X$installbin" != X/usr/bin; then
 	$cat <<EOM
 Many scripts expect to perl to be installed as /usr/bin/perl.
 I can install the perl you are about to compile also as /usr/bin/perl
 (in addition to $installbin/perl).
 EOM
-	dflt='y'
+	case "$installusrbinperl" in
+	"$undef"|[nN]*)	dflt='n';;
+	*)		dflt='y';;
+	esac
 	rp="Do you want to install perl as /usr/bin/perl?"
 	. ./myread
 	case "$ans" in
 	[yY]*)	val="$define";;
-	*)	val="$undef";;
+	*)	val="$undef" ;;
 	esac
-    fi
-    ;;
-esac
-case "$installusrbinperl" in
-"$undef"|[nN]*)	val="$undef";;
-*)		val="$define";;
-esac
+else
+	val="$undef"
+fi
 set installusrbinperl
 eval $setvar
 
@@ -4979,7 +4986,7 @@ yes)
 		else tval=false;
 		fi;;
 	*)
-		echo "main() { extern short $1$tdc; printf(\"%hd\", $1$tc); }" > t.c;
+		echo "int main() { extern short $1$tdc; printf(\"%hd\", $1$tc); }" > t.c;
 		if $cc $optimize $ccflags $ldflags -o t t.c $libs >/dev/null 2>&1;
 		then tval=true;
 		else tval=false;
@@ -5169,6 +5176,7 @@ use no flags, say "none".
 EOM
     case "$lddlflags" in
     '') case "$osname" in
+  			beos) dflt='-nostart' ;;
 			hpux)  dflt='-b' ;;
 			linux|irix*)	dflt='-shared' ;;
 			next)  dflt='none' ;;
@@ -5249,7 +5257,7 @@ $undef)
 	;;
 *)	case "$useshrplib" in
 	'')	case "$osname" in
-		svr4*|dgux|dynixptx|esix|powerux)
+		svr4*|dgux|dynixptx|esix|powerux|beos)
 			dflt=y
 			also='Building a shared libperl is required for dynamic loading to work on your system.'
 			;;
@@ -5294,6 +5302,7 @@ EOM
 		case "${osname}${osvers}" in
 		next4*)	xxx='DYLD_LIBRARY_PATH' ;;
 		os2*)	xxx='' ;; # Nothing special needed.
+		beos*)  xxx='' ;;
 		*)		xxx='LD_LIBRARY_PATH' ;;
 		esac
 		if test X"$xxx" != "X"; then
@@ -5380,7 +5389,7 @@ case "$shrpdir" in
 *)	$cat >&4 <<EOM
 WARNING:  Use of the shrpdir variable for the installation location of
 the shared $libperl is not supported.  It was never documented and
-will not work in this version.  Let me (jhi@iki.fi)
+will not work in this version.  Let me (perlbug@perl.com)
 know of any problems this may cause.
 
 EOM
@@ -5425,6 +5434,9 @@ if "$useshrplib"; then
 		;;
 	next)
 		# next doesn't like the default...
+		;;
+	beos)
+		# beos doesn't like the default, either.
 		;;
 	*)
 		tmp_shrpenv="env LD_RUN_PATH=$shrpdir"
@@ -6353,7 +6365,7 @@ case "$d_access" in
 #ifdef I_UNISTD
 #include <unistd.h>
 #endif
-main() {
+int main() {
 	exit(R_OK);
 }
 EOCP
@@ -6553,7 +6565,7 @@ case "$intsize" in
 	echo "Checking to see how big your integers are..." >&4
 	$cat >intsize.c <<'EOCP'
 #include <stdio.h>
-main()
+int main()
 {
 	printf("intsize=%d;\n", sizeof(int));
 	printf("longsize=%d;\n", sizeof(long));
@@ -6649,7 +6661,7 @@ $cat >try.c <<EOCP
 #include <sys/types.h>
 #include <signal.h>
 $signal_t blech(s) int s; { exit(3); }
-main()
+int main()
 {
 	$xxx i32;
 	double f, g;
@@ -6707,7 +6719,7 @@ $signal_t blech_in_list(s) int s; { exit(4); }
 unsigned long dummy_long(p) unsigned long p; { return p; }
 unsigned int dummy_int(p) unsigned int p; { return p; }
 unsigned short dummy_short(p) unsigned short p; { return p; }
-main()
+int main()
 {
 	double f;
 	unsigned long along;
@@ -6799,7 +6811,7 @@ if set vprintf val -f d_vprintf; eval $csym; $val; then
 	$cat >vprintf.c <<'EOF'
 #include <varargs.h>
 
-main() { xxx("foo"); }
+int main() { xxx("foo"); }
 
 xxx(va_alist)
 va_dcl
@@ -7516,7 +7528,7 @@ $cat >open3.c <<'EOCP'
 #ifdef I_SYS_FILE
 #include <sys/file.h>
 #endif
-main() {
+int main() {
 	if(O_RDONLY);
 #ifdef O_TRUNC
 	exit(0);
@@ -7572,7 +7584,7 @@ case "$o_nonblock" in
 '')
 	$cat head.c > try.c
 	$cat >>try.c <<'EOCP'
-main() {
+int main() {
 #ifdef O_NONBLOCK
 	printf("O_NONBLOCK\n");
 	exit(0);
@@ -7619,7 +7631,7 @@ extern int errno;
 $signal_t blech(x) int x; { exit(3); }
 EOCP
 	$cat >> try.c <<'EOCP'
-main()
+int main()
 {
 	int pd[2];
 	int pu[2];
@@ -7768,7 +7780,7 @@ if test "X$timeincl" = X; then
 #ifdef I_SYSSELECT
 #include <sys/select.h>
 #endif
-main()
+int main()
 {
 	struct tm foo;
 #ifdef S_TIMEVAL
@@ -7852,7 +7864,7 @@ $cat >fd_set.c <<EOCP
 #ifdef I_SYS_SELECT
 #include <sys/select.h>
 #endif
-main() {
+int main() {
 	fd_set fds;
 
 #ifdef TRYBITS
@@ -8406,7 +8418,7 @@ echo " "
 $cat >isascii.c <<'EOCP'
 #include <stdio.h>
 #include <ctype.h>
-main() {
+int main() {
 	int c = 'A';
 	if (isascii(c))
 		exit(0);
@@ -8481,7 +8493,7 @@ case "$doublesize" in
 	$echo $n "Checking to see how big your double precision numbers are...$c" >&4
 	$cat >try.c <<'EOCP'
 #include <stdio.h>
-main()
+int main()
 {
 	printf("%d\n", sizeof(double));
 }
@@ -8597,6 +8609,10 @@ $rm -f try.c try
 set lstat d_lstat
 eval $inlibc
 
+: see if madvise exists
+set madvise d_madvise
+eval $inlibc
+
 : see if mblen exists
 set mblen d_mblen
 eval $inlibc
@@ -8635,6 +8651,37 @@ eval $inlibc
 
 : see if mktime exists
 set mktime d_mktime
+eval $inlibc
+
+: see if this is a sys/mman.h system
+set sys/mman.h i_sysmman
+eval $inhdr
+
+: see if mmap exists
+set mmap d_mmap
+eval $inlibc
+: see what shmat returns
+: default to something harmless
+mmaptype='void *'
+case "$i_sysmman$d_mmap" in
+"$define$define")
+	$cat >mmap.c <<'END'
+#include <sys/mman.h>
+void *mmap();
+END
+	if $cc $ccflags -c mmap.c >/dev/null 2>&1; then
+		mmaptype='void *'
+	else
+		mmaptype='caddr_t'
+	fi
+	echo "and it returns ($mmaptype)." >&4
+	;;
+esac
+
+
+
+: see if mprotect exists
+set mprotect d_mprotect
 eval $inlibc
 
 : see if msgctl exists
@@ -8688,6 +8735,14 @@ else
 fi
 set d_msg
 eval $setvar
+
+: see if msync exists
+set msync d_msync
+eval $inlibc
+
+: see if munmap exists
+set munmap d_munmap
+eval $inlibc
 
 : see if nice exists
 set nice d_nice
@@ -8999,7 +9054,7 @@ EOCP
 #ifdef I_UNISTD
 #  include <unistd.h>  /* Needed for NetBSD */
 #endif
-main()
+int main()
 {
 char buf[128], abc[128];
 char *b;
@@ -9075,7 +9130,7 @@ EOCP
 #ifdef I_UNISTD
 #  include <unistd.h>  /* Needed for NetBSD */
 #endif
-main()
+int main()
 {
 char buf[128], abc[128];
 char *b;
@@ -9153,7 +9208,7 @@ EOCP
 #ifdef I_UNISTD
 #  include <unistd.h>  /* Needed for NetBSD */
 #endif
-main()
+int main()
 {
 char a = -1;
 char b = 0;
@@ -9638,7 +9693,7 @@ if set sigaction val -f d_sigaction; eval $csym; $val; then
 #include <stdio.h>
 #include <sys/types.h>
 #include <signal.h>
-main()
+int main()
 {
     struct sigaction act, oact;
 }
@@ -9665,7 +9720,7 @@ case "$d_sigsetjmp" in
 #include <setjmp.h>
 sigjmp_buf env;
 int set = 1;
-main()
+int main()
 {
 	if (sigsetjmp(env,1))
 		exit(set);
@@ -9755,7 +9810,7 @@ $cat >try.c <<EOP
 #include <stdio.h>
 #define FILE_ptr(fp)	$stdio_ptr
 #define FILE_cnt(fp)	$stdio_cnt
-main() {
+int main() {
 	FILE *fp = fopen("try.c", "r");
 	char c = getc(fp);
 	if (
@@ -9806,7 +9861,7 @@ $define)
 #include <stdio.h>
 #define FILE_base(fp)	$stdio_base
 #define FILE_bufsiz(fp)	$stdio_bufsiz
-main() {
+int main() {
 	FILE *fp = fopen("try.c", "r");
 	char c = getc(fp);
 	if (
@@ -9940,6 +9995,15 @@ eval $inlibc
 : see if tcsetpgrp exists
 set tcsetpgrp d_tcsetpgrp
 eval $inlibc
+
+: see if sys/types.h has to be included
+set sys/types.h i_systypes
+eval $inhdr
+
+: see if prototype for telldir is available
+echo " "
+set d_telldirproto telldir $i_systypes sys/types.h $i_dirent dirent.h
+eval $hasproto
 
 : define an is-a-typedef? function
 typedef='type=$1; var=$2; def=$3; shift; shift; shift; inclist=$@;
@@ -10084,10 +10148,6 @@ eval $inhdr
 set sys/ndir.h i_sysndir
 eval $inhdr
 
-: see if sys/types.h has to be included
-set sys/types.h i_systypes
-eval $inhdr
-
 : see if closedir exists
 set closedir d_closedir
 eval $inlibc
@@ -10213,7 +10273,7 @@ struct foobar {
 	char foo;
 	double bar;
 } try;
-main()
+int main()
 {
 	printf("%d\n", (char *)&try.bar - (char *)&try.foo);
 }
@@ -10248,7 +10308,7 @@ I'm now running the test program...
 EOM
 	$cat >try.c <<'EOCP'
 #include <stdio.h>
-main()
+int main()
 {
 	int i;
 	union {
@@ -10343,7 +10403,7 @@ $define)
 #include <sys/types.h>
 #include <stdio.h>
 #include <db.h>
-main()
+int main()
 {
 #ifdef DB_VERSION_MAJOR	/* DB version >= 2 */
     int Major, Minor, Patch ;
@@ -10426,7 +10486,7 @@ size_t size;
 {
 }
 HASHINFO info;
-main()
+int main()
 {
 	info.hash = hash_cb;
 }
@@ -10471,7 +10531,7 @@ const DBT *key2;
 {
 }
 BTREEINFO info;
-main()
+int main()
 {
 	info.prefix = prefix_cb;
 }
@@ -10524,7 +10584,7 @@ sub() {
 #endif
 	exit(0);
 }
-main() { sub(); }
+int main() { sub(); }
 EOCP
 	if $cc $ccflags -c -DTRY=$defvoidused try.c >.out 2>&1 ; then
 		voidflags=$defvoidused
@@ -10665,7 +10725,7 @@ echo "Checking to see how many bits your $randfunc() function produces..." >&4
 #ifdef I_STDLIB
 #  include <stdlib.h>
 #endif
-main()
+int main()
 {
 	register int i;
 	register unsigned long tmp;
@@ -11077,7 +11137,7 @@ case "$ptrsize" in
 	fi
 	$cat >>try.c <<'EOCP'
 #include <stdio.h>
-main()
+int main()
 {
 	printf("%d\n", sizeof(VOID_PTR));
 	exit(0);
@@ -11104,7 +11164,7 @@ echo "Checking how to generate random libraries on your machine..." >&4
 echo 'int bar1() { return bar2(); }' > bar1.c
 echo 'int bar2() { return 2; }' > bar2.c
 $cat > foo.c <<'EOP'
-main() { printf("%d\n", bar1()); exit(0); }
+int main() { printf("%d\n", bar1()); exit(0); }
 EOP
 $cc $ccflags -c bar1.c >/dev/null 2>&1
 $cc $ccflags -c bar2.c >/dev/null 2>&1
@@ -11540,7 +11600,7 @@ $cat > ssize.c <<EOM
 #include <sys/types.h>
 #define Size_t $sizetype
 #define SSize_t $dflt
-main()
+int main()
 {
 	if (sizeof(Size_t) == sizeof(SSize_t))
 		printf("$dflt\n");
@@ -11864,32 +11924,37 @@ $comm -13 ccsym.true ccsym.list >ccsym.own
 $comm -12 ccsym.true ccsym.list >ccsym.com
 $comm -23 ccsym.true ccsym.list >ccsym.cpp
 also=''
-symbols='symbols'
 if $test -z ccsym.raw; then
-	echo "Your C compiler doesn't seem to define any symbol!" >&4
+	echo "Your C compiler doesn't seem to define any symbols!" >&4
 	echo " "
-	echo "However, your C preprocessor defines the following ones:"
+	echo "However, your C preprocessor defines the following symbols:"
 	$cat Cppsym.true
+    	ccsymbols=''
+	cppsymbols=`$cat Cppsym.true`
+	cppccsymbols="$cppsymbols"
 else
 	if $test -s ccsym.com; then
 		echo "Your C compiler and pre-processor define these symbols:"
 		$sed -e 's/\(.*\)=.*/\1/' ccsym.com
 		also='also '
 		symbols='ones'
+		cppccsymbols=`$cat ccsym.com`
 		$test "$silent" || sleep 1
 	fi
 	if $test -s ccsym.cpp; then
 		$test "$also" && echo " "
-		echo "Your C pre-processor ${also}defines the following $symbols:"
+		echo "Your C pre-processor ${also}defines the following symbols:"
 		$sed -e 's/\(.*\)=.*/\1/' ccsym.cpp
 		also='further '
+		cppsymbols=`$cat ccsym.cpp`
 		$test "$silent" || sleep 1
 	fi
 	if $test -s ccsym.own; then
 		$test "$also" && echo " "
-		echo "Your C compiler ${also}defines the following cpp variables:"
+		echo "Your C compiler ${also}defines the following cpp symbols:"
 		$sed -e 's/\(.*\)=1/\1/' ccsym.own
 		$sed -e 's/\(.*\)=.*/\1/' ccsym.own | $uniq >>Cppsym.true
+	        ccsymbols=`$cat ccsym.own`
 		$test "$silent" || sleep 1
 	fi
 fi
@@ -12473,6 +12538,7 @@ cc='$cc'
 cccdlflags='$cccdlflags'
 ccdlflags='$ccdlflags'
 ccflags='$ccflags'
+ccsymbols='$ccsymbols'
 cf_by='$cf_by'
 cf_email='$cf_email'
 cf_time='$cf_time'
@@ -12487,11 +12553,13 @@ cp='$cp'
 cpio='$cpio'
 cpp='$cpp'
 cpp_stuff='$cpp_stuff'
+cppccsymbols='$cppccsymbols'
 cppflags='$cppflags'
 cpplast='$cpplast'
 cppminus='$cppminus'
 cpprun='$cpprun'
 cppstdin='$cppstdin'
+cppsymbols='$cppsymbols'
 cryptlib='$cryptlib'
 csh='$csh'
 d_Gconvert='$d_Gconvert'
@@ -12617,6 +12685,7 @@ d_longlong='$d_longlong'
 d_lseek64='$d_lseek64'
 d_lstat64='$d_lstat64'
 d_lstat='$d_lstat'
+d_madvise='$d_madvise'
 d_mblen='$d_mblen'
 d_mbstowcs='$d_mbstowcs'
 d_mbtowc='$d_mbtowc'
@@ -12627,6 +12696,8 @@ d_memset='$d_memset'
 d_mkdir='$d_mkdir'
 d_mkfifo='$d_mkfifo'
 d_mktime='$d_mktime'
+d_mmap='$d_mmap'
+d_mprotect='$d_mprotect'
 d_msg='$d_msg'
 d_msg_ctrunc='$d_msg_ctrunc'
 d_msg_dontroute='$d_msg_dontroute'
@@ -12638,6 +12709,8 @@ d_msgget='$d_msgget'
 d_msghdr_s='$d_msghdr_s'
 d_msgrcv='$d_msgrcv'
 d_msgsnd='$d_msgsnd'
+d_msync='$d_msync'
+d_munmap='$d_munmap'
 d_mymalloc='$d_mymalloc'
 d_nextkey64='$d_nextkey64'
 d_nice='$d_nice'
@@ -12750,6 +12823,7 @@ d_tcgetpgrp='$d_tcgetpgrp'
 d_tcsetpgrp='$d_tcsetpgrp'
 d_telldir64='$d_telldir64'
 d_telldir='$d_telldir'
+d_telldirproto='$d_telldirproto'
 d_time='$d_time'
 d_times='$d_times'
 d_tmpfile64='$d_tmpfile64'
@@ -12847,6 +12921,7 @@ i_sysfile='$i_sysfile'
 i_sysfilio='$i_sysfilio'
 i_sysin='$i_sysin'
 i_sysioctl='$i_sysioctl'
+i_sysmman='$i_sysmman'
 i_sysmount='$i_sysmount'
 i_sysndir='$i_sysndir'
 i_sysparam='$i_sysparam'
@@ -12930,6 +13005,7 @@ medium='$medium'
 mips='$mips'
 mips_type='$mips_type'
 mkdir='$mkdir'
+mmaptype='$mmaptype'
 models='$models'
 modetype='$modetype'
 more='$more'

@@ -46,10 +46,10 @@ true)
 	os2*)	# OS/2 doesn't need anything special for LD_LIBRARY_PATH.
 		ldlibpth=''
 		;;
-	sunos*|freebsd[23]*)
+	sunos*)
 		linklibperl="-lperl"
 		;;
-	netbsd*)
+	netbsd*|freebsd[234]*)
 		linklibperl="-L. -lperl"
 		;;
 	aix*)
@@ -67,6 +67,8 @@ true)
 		;;
 	hpux10*|hpux11*)
 		linklibperl="-L `pwd | sed 's/\/UU$//'` -Wl,+b$archlibexp/CORE -lperl"
+		;;
+	beos*)	ldlibpth="LIBRARY_PATH=`pwd`:$LIBRARY_PATH"
 		;;
 	esac
 	;;
@@ -611,13 +613,13 @@ minitest: miniperl lib/re.pm
 # Please *don't* use this unless all tests pass.
 # If you want to report test failures, use "make nok" instead.
 ok:	utilities
-	$(LBLIBPTH) ./perl -Ilib utils/perlbug -ok -s '(UNINSTALLED)'
+	$(LDLIBPTH) ./perl -Ilib utils/perlbug -ok -s '(UNINSTALLED)'
 
 okfile:	utilities
-	$(LBLIBPTH) ./perl -Ilib utils/perlbug -ok -s '(UNINSTALLED)' -F perl.ok
+	$(LDLIBPTH) ./perl -Ilib utils/perlbug -ok -s '(UNINSTALLED)' -F perl.ok
 
 nok:	utilities
-	$(LBLIBPTH) ./perl -Ilib utils/perlbug -nok -s '(UNINSTALLED)'
+	$(LDLIBPTH) ./perl -Ilib utils/perlbug -nok -s '(UNINSTALLED)'
 
 clist:	$(c)
 	echo $(c) | tr ' ' $(TRNL) >.clist

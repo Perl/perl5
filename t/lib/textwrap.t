@@ -88,9 +88,7 @@ DONE
 
 $| = 1;
 
-print "1..";
-print @tests/2;
-print "\n";
+print "1..", @tests/2, "\n";
 
 use Text::Wrap;
 

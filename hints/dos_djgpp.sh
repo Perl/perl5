@@ -63,4 +63,3 @@ $define|true|[yY]*)
 	;;
 esac
 EOCBU
-

@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Thu Dec  3 15:05:16 EET 1998
+ * Configuration time: Mon Feb  8 01:11:15 EET 1999
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -393,6 +393,18 @@
  *	available.
  */
 #define HAS_MKTIME		/**/
+
+/* HAS_MSYNC:
+ *	This symbol, if defined, indicates that the msync system call is
+ *	available to synchronize a mapped file.
+ */
+#define HAS_MSYNC		/**/
+
+/* HAS_MUNMAP:
+ *	This symbol, if defined, indicates that the munmap system call is
+ *	available to unmap a region, usually mapped by mmap().
+ */
+#define HAS_MUNMAP		/**/
 
 /* HAS_NICE:
  *	This symbol, if defined, indicates that the nice routine is
@@ -1641,6 +1653,18 @@
 #define LONGLONGSIZE 8		/**/
 #endif
 
+/* HAS_MMAP:
+ *	This symbol, if defined, indicates that the mmap system call is
+ *	available to map a file into memory.
+ */
+/* Mmap_t:
+ *	This symbol holds the return type of the mmap() system call
+ *	(and simultaneously the type of the first argument).
+ *	Usually set to 'void *' or 'cadd_t'.
+ */
+#define HAS_MMAP		/**/
+#define Mmap_t void *	/**/
+
 /* HAS_MSG:
  *	This symbol, if defined, indicates that the entire msg*(2) library is
  *	supported (IPC mechanism based on message queues).
@@ -2024,6 +2048,18 @@
  */
 /*#define HAS_FTELLO		/ **/
 
+/* HAS_MADVISE:
+ *	This symbol, if defined, indicates that the madvise system call is
+ *	available to map a file into memory.
+ */
+#define HAS_MADVISE		/**/
+
+/* HAS_MPROTECT:
+ *	This symbol, if defined, indicates that the mprotect system call is
+ *	available to modify the access protection of a memory mapped file.
+ */
+#define HAS_MPROTECT		/**/
+
 /* HAS_READV:
  *	This symbol, if defined, indicates that the readv routine is
  *	available to do gather reads.  You will also need <sys/uio.h>
@@ -2036,6 +2072,34 @@
  *	be used.
  */
 /*#define	USE_SFIO		/ **/
+
+/* HAS_FSTATFS:
+ *	This symbol, if defined, indicates that the fstatfs routine is
+ *	available to do stat filesystems of file descriptors.
+ */
+/* HAS_STRUCT_STATFS_FLAGS:
+ *	This symbol, if defined, indicates that the struct statfs
+ *	does have the f_flags member containing the mount flags of
+ *	the filesystem holding the file.
+ *	This kind of struct statfs is coming from sys/mount.h (BSD)
+ *	and not from sys/statfs.h (SYSV).
+ */
+#define HAS_FSTATFS		/**/
+#define HAS_STRUCT_STATFS_FLAGS		/**/
+
+/* HAS_FSTATVFS:
+ *	This symbol, if defined, indicates that the fstatvfs routine is
+ *	available to do stat filesystems of file descriptors.
+ */
+#define HAS_FSTATVFS		/**/
+
+/* HAS_TELLDIR_PROTO:
+ *	This symbol, if defined, indicates that the system provides
+ *	a prototype for the telldir() function.  Otherwise, it is up
+ *	to the program to supply one.  A good guess is
+ *		extern long telldir _((DIR*));
+ */
+#define	HAS_TELLDIR_PROTO	/**/
 
 /* HAS_WRITEV:
  *	This symbol, if defined, indicates that the writev routine is
@@ -2110,11 +2174,41 @@
 /*#define   I_INTTYPES                / **/
 /*#define     HAS_INT64_T               / **/
 
+/* I_MNTENT:
+ *	This symbol, if defined, indicates that <mntent.h> exists and
+ *	should be included.
+ */
+/*#define	I_MNTENT		/ **/
+
 /* I_POLL:
  *	This symbol, if defined, indicates that <poll.h> exists and
  *	should be included.
  */
 #define	I_POLL		/**/
+
+/* I_SYS_MMAN:
+ *	This symbol, if defined, indicates that <sys/mman.h> exists and
+ *	should be included.
+ */
+#define	I_SYS_MMAN		/**/
+
+/* I_SYS_MOUNT:
+ *	This symbol, if defined, indicates that <sys/mount.h> exists and
+ *	should be included.
+ */
+#define	I_SYS_MOUNT		/**/
+
+/* I_SYS_STATVFS:
+ *	This symbol, if defined, indicates that <sys/statvfs.h> exists and
+ *	should be included.
+ */
+#define	I_SYS_STATVFS		/**/
+
+/* INSTALL_USR_BIN_PERL:
+ *	This symbol, if defined, indicates that Perl is to be installed
+ * 	also as /usr/bin/perl.
+ */
+#define INSTALL_USR_BIN_PERL	/**/
 
 /* HAS_FSTAT64:
  *	This symbol, if defined, indicates that the fstat64 routine is
@@ -2294,6 +2388,12 @@
  */
 #define	USE_64_BITS		/**/
 
+/* MULTIPLICITY:
+ *	This symbol, if defined, indicates that Perl should
+ *	be built to use multiplicity.
+ */
+/*#define	MULTIPLICITY		/ **/
+
 /* USE_PERLIO:
  *	This symbol, if defined, indicates that the PerlIO abstraction should
  *	be used throughout.  If not defined, stdio should be
@@ -2383,7 +2483,7 @@
  *	in joinable (aka undetached) state.  NOTE: not defined
  *	if pthread.h already has defined PTHREAD_CREATE_JOINABLE
  *	(the new version of the constant).
- *	If defined, possible values are PTHREAD_CREATE_UNDETACHED
+ *	If defined, known values are PTHREAD_CREATE_UNDETACHED
  *	and __UNDETACHED.
  */
 /*#define OLD_PTHREAD_CREATE_JOINABLE  / **/
@@ -2412,12 +2512,6 @@
  *     include <mach/cthreads.h>.
  */
 /*#define   I_MACH_CTHREADS	/ **/
-
-/* MULTIPLICITY:
- *	This symbol, if defined, indicates that Perl should
- *	be built to use multiplicity.
- */
-/*#define	MULTIPLICITY		/ **/
 
 /* USE_THREADS:
  *	This symbol, if defined, indicates that Perl should

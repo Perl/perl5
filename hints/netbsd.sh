@@ -51,19 +51,17 @@ case "$osvers" in
 0.9*|1.[012]*|1.3|1.3.1)
 	d_setregid="$undef"
 	d_setreuid="$undef"
-	d_setrgid="$undef"
-	d_setruid="$undef"
 	;;
 esac
+
+# These are obsolete in any netbsd.
+d_setrgid="$undef"
+d_setruid="$undef"
 
 # there's no problem with vfork.
 case "$usevfork" in
 '') usevfork=true ;;
 esac
-
-# Avoid telldir prototype conflict in pp_sys.c  (NetBSD uses const DIR *)
-# Configure should test for this.  Volunteers?
-pp_sys_cflags='ccflags="$ccflags -DHAS_TELLDIR_PROTOTYPE"'
 
 # Pre-empt the /usr/bin/perl question of installperl.
 installusrbinperl='n'

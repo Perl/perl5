@@ -3631,7 +3631,41 @@ strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
 	    mytm.tm_isdst = isdst;
 	    (void) mktime(&mytm);
 	    len = strftime(tmpbuf, sizeof tmpbuf, fmt, &mytm);
-	    ST(0) = sv_2mortal(newSVpv(tmpbuf, len));
+	    /*
+	    ** The following is needed to handle to the situation where 
+	    ** tmpbuf overflows.  Basically we want to allocate a buffer
+	    ** and try repeatedly.  The reason why it is so complicated
+	    ** is that getting a return value of 0 from strftime can indicate
+	    ** one of the following:
+	    ** 1. buffer overflowed,
+	    ** 2. illegal conversion specifier, or
+	    ** 3. the format string specifies nothing to be returned(not
+	    **	  an error).  This could be because format is an empty string
+	    **    or it specifies %p that yields an empty string in some locale.
+	    ** If there is a better way to make it portable, go ahead by
+	    ** all means.
+	    */
+	    if ( ( len > 0 && len < sizeof(tmpbuf) )
+	    		|| ( len == 0 && strlen(fmt) == 0 ) ) {
+		ST(0) = sv_2mortal(newSVpv(tmpbuf, len));
+	    } else {
+		/* Possibly buf overflowed - try again with a bigger buf */
+		int	bufsize = strlen(fmt) + sizeof(tmpbuf);
+		char* 	buf = (char *) safemalloc(bufsize);
+		int	buflen;
+		while( buf ) {
+		    buflen = strftime(buf, bufsize, fmt, &mytm);
+		    if ( buflen > 0 && buflen < bufsize ) break;
+		    bufsize *= 2;
+		    buf = (char *) saferealloc(buf, bufsize);
+		}
+		if ( buf ) {
+		    ST(0) = sv_2mortal(newSVpv(buf, buflen));
+		    safefree(buf);
+		} else {
+		    ST(0) = sv_2mortal(newSVpv(tmpbuf, len));
+		}
+	    }
 	}
 
 void
