@@ -10,7 +10,7 @@ BEGIN {
     }
 }
 $|++;
-print "1..29\n";
+print "1..31\n";
 use strict;
 
 
@@ -191,59 +191,67 @@ sub ok {
 {
     my $counter : shared = 0;
 
-    sub waiter {
-	lock($counter);
-	$counter++;
-	cond_wait($counter);
-	$counter += 10;
+    # broad(N) forks off broad(N-1) and goes into a wait, in such a way
+    # that it's guaranteed to reach the wait before its child enters the
+    # locked region. When N reaches 0, the child instead does a
+    # cond_broadcast to wake all its ancestors.
+
+    sub broad {
+	my $n = shift;
+	my $th;
+	{
+	    lock($counter);
+	    if ($n > 0) {
+		$counter++;
+		$th = threads->new(\&broad, $n-1);
+		cond_wait($counter);
+		$counter += 10;
+	    }
+	    else {
+		ok(1, $counter == 3, "cond_broadcast: all three waiting");
+		cond_broadcast($counter);
+	    }
+	}
+	$th->join if $th;
     }
 
-    my $tr1 = threads->new(\&waiter);
-    my $tr2 = threads->new(\&waiter);
-    my $tr3 = threads->new(\&waiter);
-
-    while (1) {
-	lock $counter;
-	# make sure all 3 threads are waiting
-	next unless $counter == 3;
-	cond_broadcast $counter;
-	last;
-    }
-    $tr1->join(); $tr2->join(); $tr3->join();
-    ok(1, $counter == 33, "cond_broadcast: all three threads woken");
+    threads->new(\&broad, 3)->join;
+    ok(2, $counter == 33, "cond_broadcast: all three threads woken");
     print "# counter=$counter\n";
 
-    $Base += 1;
+    $Base += 2;
 
-    # ditto with refs and shared()
+
+    # ditto, but with refs and shared()
 
     my $counter2 = 0;
     share($counter2);
     my $r = \$counter2;
 
-    sub waiter2 {
-	lock($r);
-	$$r++;
-	cond_wait($r);
-	$$r += 10;
+    sub broad2 {
+	my $n = shift;
+	my $th;
+	{
+	    lock($r);
+	    if ($n > 0) {
+		$$r++;
+		$th = threads->new(\&broad2, $n-1);
+		cond_wait($r);
+		$$r += 10;
+	    }
+	    else {
+		ok(1, $$r == 3, "cond_broadcast: ref: all three waiting");
+		cond_broadcast($r);
+	    }
+	}
+	$th->join if $th;
     }
 
-    $tr1 = threads->new(\&waiter2);
-    $tr2 = threads->new(\&waiter2);
-    $tr3 = threads->new(\&waiter2);
-
-    while (1) {
-	lock($r);
-	# make sure all 3 threads are waiting
-	next unless $$r == 3;
-	cond_broadcast $r;
-	last;
-    }
-    $tr1->join(); $tr2->join(); $tr3->join();
-    ok(1, $$r == 33, "cond_broadcast: ref: all three threads woken");
+    threads->new(\&broad2, 3)->join;;
+    ok(2, $$r == 33, "cond_broadcast: ref: all three threads woken");
     print "# counter=$$r\n";
 
-    $Base += 1;
+    $Base += 2;
 
 }
 

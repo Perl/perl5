@@ -3305,12 +3305,12 @@ PP(pp_crypt)
 #   else
     sv_setpv(TARG, PerlProc_crypt(tmps, SvPV(right, n_a)));
 #   endif
+    SETs(TARG);
+    RETURN;
 #else
     DIE(aTHX_
       "The crypt() function is unimplemented due to excessive paranoia.");
 #endif
-    SETs(TARG);
-    RETURN;
 }
 
 PP(pp_ucfirst)

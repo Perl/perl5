@@ -122,6 +122,9 @@ archobjs (Unix.U):
 
 asctime_r_proto (d_asctime_r.U):
 	This variable encodes the prototype of asctime_r.
+	It is zero if d_asctime_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_asctime_r
+	is defined.
 
 awk (Loc.U):
 	This variable is used internally by Configure to determine the
@@ -332,6 +335,9 @@ cppsymbols (Cppsym.U):
 
 crypt_r_proto (d_crypt_r.U):
 	This variable encodes the prototype of crypt_r.
+	It is zero if d_crypt_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_crypt_r
+	is defined.
 
 cryptlib (d_crypt.U):
 	This variable holds -lcrypt or the path to a libcrypt.a archive if
@@ -345,9 +351,15 @@ csh (Loc.U):
 
 ctermid_r_proto (d_ctermid_r.U):
 	This variable encodes the prototype of ctermid_r.
+	It is zero if d_ctermid_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_ctermid_r
+	is defined.
 
 ctime_r_proto (d_ctime_r.U):
 	This variable encodes the prototype of ctime_r.
+	It is zero if d_ctime_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_ctime_r
+	is defined.
 
 d__fwalk (d__fwalk.U):
 	This variable conditionally defines HAS__FWALK if _fwalk() is
@@ -2212,6 +2224,9 @@ drand01 (randfunc.U):
 
 drand48_r_proto (d_drand48_r.U):
 	This variable encodes the prototype of drand48_r.
+	It is zero if d_drand48_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_drand48_r
+	is defined.
 
 dynamic_ext (Extensions.U):
 	This variable holds a list of XS extension files we want to
@@ -2244,21 +2259,39 @@ emacs (Loc.U):
 
 endgrent_r_proto (d_endgrent_r.U):
 	This variable encodes the prototype of endgrent_r.
+	It is zero if d_endgrent_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_endgrent_r
+	is defined.
 
 endhostent_r_proto (d_endhostent_r.U):
 	This variable encodes the prototype of endhostent_r.
+	It is zero if d_endhostent_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_endhostent_r
+	is defined.
 
 endnetent_r_proto (d_endnetent_r.U):
 	This variable encodes the prototype of endnetent_r.
+	It is zero if d_endnetent_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_endnetent_r
+	is defined.
 
 endprotoent_r_proto (d_endprotoent_r.U):
 	This variable encodes the prototype of endprotoent_r.
+	It is zero if d_endprotoent_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_endprotoent_r
+	is defined.
 
 endpwent_r_proto (d_endpwent_r.U):
 	This variable encodes the prototype of endpwent_r.
+	It is zero if d_endpwent_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_endpwent_r
+	is defined.
 
 endservent_r_proto (d_endservent_r.U):
 	This variable encodes the prototype of endservent_r.
+	It is zero if d_endservent_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_endservent_r
+	is defined.
 
 eunicefix (Init.U):
 	When running under Eunice this variable contains a command which will
@@ -2355,63 +2388,123 @@ gccversion (gccvers.U):
 
 getgrent_r_proto (d_getgrent_r.U):
 	This variable encodes the prototype of getgrent_r.
+	It is zero if d_getgrent_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getgrent_r
+	is defined.
 
 getgrgid_r_proto (d_getgrgid_r.U):
 	This variable encodes the prototype of getgrgid_r.
+	It is zero if d_getgrgid_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getgrgid_r
+	is defined.
 
 getgrnam_r_proto (d_getgrnam_r.U):
 	This variable encodes the prototype of getgrnam_r.
+	It is zero if d_getgrnam_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getgrnam_r
+	is defined.
 
 gethostbyaddr_r_proto (d_gethostbyaddr_r.U):
 	This variable encodes the prototype of gethostbyaddr_r.
+	It is zero if d_gethostbyaddr_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_gethostbyaddr_r
+	is defined.
 
 gethostbyname_r_proto (d_gethostbyname_r.U):
 	This variable encodes the prototype of gethostbyname_r.
+	It is zero if d_gethostbyname_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_gethostbyname_r
+	is defined.
 
 gethostent_r_proto (d_gethostent_r.U):
 	This variable encodes the prototype of gethostent_r.
+	It is zero if d_gethostent_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_gethostent_r
+	is defined.
 
 getlogin_r_proto (d_getlogin_r.U):
 	This variable encodes the prototype of getlogin_r.
+	It is zero if d_getlogin_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getlogin_r
+	is defined.
 
 getnetbyaddr_r_proto (d_getnetbyaddr_r.U):
 	This variable encodes the prototype of getnetbyaddr_r.
+	It is zero if d_getnetbyaddr_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getnetbyaddr_r
+	is defined.
 
 getnetbyname_r_proto (d_getnetbyname_r.U):
 	This variable encodes the prototype of getnetbyname_r.
+	It is zero if d_getnetbyname_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getnetbyname_r
+	is defined.
 
 getnetent_r_proto (d_getnetent_r.U):
 	This variable encodes the prototype of getnetent_r.
+	It is zero if d_getnetent_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getnetent_r
+	is defined.
 
 getprotobyname_r_proto (d_getprotobyname_r.U):
 	This variable encodes the prototype of getprotobyname_r.
+	It is zero if d_getprotobyname_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getprotobyname_r
+	is defined.
 
 getprotobynumber_r_proto (d_getprotobynumber_r.U):
 	This variable encodes the prototype of getprotobynumber_r.
+	It is zero if d_getprotobynumber_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getprotobynumber_r
+	is defined.
 
 getprotoent_r_proto (d_getprotoent_r.U):
 	This variable encodes the prototype of getprotoent_r.
+	It is zero if d_getprotoent_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getprotoent_r
+	is defined.
 
 getpwent_r_proto (d_getpwent_r.U):
 	This variable encodes the prototype of getpwent_r.
+	It is zero if d_getpwent_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getpwent_r
+	is defined.
 
 getpwnam_r_proto (d_getpwnam_r.U):
 	This variable encodes the prototype of getpwnam_r.
+	It is zero if d_getpwnam_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getpwnam_r
+	is defined.
 
 getpwuid_r_proto (d_getpwuid_r.U):
 	This variable encodes the prototype of getpwuid_r.
+	It is zero if d_getpwuid_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getpwuid_r
+	is defined.
 
 getservbyname_r_proto (d_getservbyname_r.U):
 	This variable encodes the prototype of getservbyname_r.
+	It is zero if d_getservbyname_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getservbyname_r
+	is defined.
 
 getservbyport_r_proto (d_getservbyport_r.U):
 	This variable encodes the prototype of getservbyport_r.
+	It is zero if d_getservbyport_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getservbyport_r
+	is defined.
 
 getservent_r_proto (d_getservent_r.U):
 	This variable encodes the prototype of getservent_r.
+	It is zero if d_getservent_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getservent_r
+	is defined.
 
 getspnam_r_proto (d_getspnam_r.U):
 	This variable encodes the prototype of getspnam_r.
+	It is zero if d_getspnam_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getspnam_r
+	is defined.
 
 gidformat (gidf.U):
 	This variable contains the format string used for printing a Gid_t.
@@ -2440,6 +2533,9 @@ gmake (Loc.U):
 
 gmtime_r_proto (d_gmtime_r.U):
 	This variable encodes the prototype of gmtime_r.
+	It is zero if d_gmtime_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_gmtime_r
+	is defined.
 
 grep (Loc.U):
 	This variable is used internally by Configure to determine the
@@ -3115,6 +3211,9 @@ lns (lns.U):
 
 localtime_r_proto (d_localtime_r.U):
 	This variable encodes the prototype of localtime_r.
+	It is zero if d_localtime_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_localtime_r
+	is defined.
 
 locincpth (ccflags.U):
 	This variable contains a list of additional directories to be
@@ -3603,6 +3702,9 @@ randfunc (randfunc.U):
 
 random_r_proto (d_random_r.U):
 	This variable encodes the prototype of random_r.
+	It is zero if d_random_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_random_r
+	is defined.
 
 randseedtype (randfunc.U):
 	Indicates the type of the argument of the seedfunc.
@@ -3620,9 +3722,15 @@ rd_nodata (nblock_io.U):
 
 readdir64_r_proto (d_readdir64_r.U):
 	This variable encodes the prototype of readdir64_r.
+	It is zero if d_readdir64_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_readdir64_r
+	is defined.
 
 readdir_r_proto (d_readdir_r.U):
 	This variable encodes the prototype of readdir_r.
+	It is zero if d_readdir_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_readdir_r
+	is defined.
 
 revision (patchlevel.U):
 	The value of revision comes from the patchlevel.h file.
@@ -3692,24 +3800,45 @@ sendmail (Loc.U):
 
 setgrent_r_proto (d_setgrent_r.U):
 	This variable encodes the prototype of setgrent_r.
+	It is zero if d_setgrent_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_setgrent_r
+	is defined.
 
 sethostent_r_proto (d_sethostent_r.U):
 	This variable encodes the prototype of sethostent_r.
+	It is zero if d_sethostent_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_sethostent_r
+	is defined.
 
 setlocale_r_proto (d_setlocale_r.U):
 	This variable encodes the prototype of setlocale_r.
+	It is zero if d_setlocale_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_setlocale_r
+	is defined.
 
 setnetent_r_proto (d_setnetent_r.U):
 	This variable encodes the prototype of setnetent_r.
+	It is zero if d_setnetent_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_setnetent_r
+	is defined.
 
 setprotoent_r_proto (d_setprotoent_r.U):
 	This variable encodes the prototype of setprotoent_r.
+	It is zero if d_setprotoent_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_setprotoent_r
+	is defined.
 
 setpwent_r_proto (d_setpwent_r.U):
 	This variable encodes the prototype of setpwent_r.
+	It is zero if d_setpwent_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_setpwent_r
+	is defined.
 
 setservent_r_proto (d_setservent_r.U):
 	This variable encodes the prototype of setservent_r.
+	It is zero if d_setservent_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_setservent_r
+	is defined.
 
 sh (sh.U):
 	This variable contains the full pathname of the shell used
@@ -3955,9 +4084,15 @@ sPRIXU64 (quadfio.U):
 
 srand48_r_proto (d_srand48_r.U):
 	This variable encodes the prototype of srand48_r.
+	It is zero if d_srand48_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_srand48_r
+	is defined.
 
 srandom_r_proto (d_srandom_r.U):
 	This variable encodes the prototype of srandom_r.
+	It is zero if d_srandom_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_srandom_r
+	is defined.
 
 src (src.U):
 	This variable holds the path to the package source. It is up to
@@ -4029,6 +4164,9 @@ stdio_stream_array (stdio_streams.U):
 
 strerror_r_proto (d_strerror_r.U):
 	This variable encodes the prototype of strerror_r.
+	It is zero if d_strerror_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_strerror_r
+	is defined.
 
 strings (i_string.U):
 	This variable holds the full path of the string header that will be
@@ -4086,6 +4224,9 @@ timetype (d_time.U):
 
 tmpnam_r_proto (d_tmpnam_r.U):
 	This variable encodes the prototype of tmpnam_r.
+	It is zero if d_tmpnam_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_tmpnam_r
+	is defined.
 
 to (Cross.U):
 	This variable contains the command used by Configure
@@ -4115,6 +4256,9 @@ troff (Loc.U):
 
 ttyname_r_proto (d_ttyname_r.U):
 	This variable encodes the prototype of ttyname_r.
+	It is zero if d_ttyname_r is undef, and one of the
+	REENTRANT_PROTO_T_ABC macros of reentr.h if d_ttyname_r
+	is defined.
 
 u16size (perlxv.U):
 	This variable is the size of an U16 in bytes.

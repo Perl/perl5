@@ -1,9 +1,32 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.71 2002/05/07 16:22:42 dankogai Exp dankogai $
+# $Id: Changes,v 1.72 2002/05/20 15:49:56 dankogai Exp dankogai $
 #
 
-$Revision: 1.71 $ $Date: 2002/05/07 16:22:42 $
+$Revision: 1.72 $ $Date: 2002/05/20 15:49:56 $
+! Makefile.PL
+  Subject: [PATCH] Encode should be in perl-core library path
+  Message-Id: <86r8k7h738.wl@mail.edge.co.jp>
+  Message-Id: <20020520161201.A11019@alpha.hut.fi>
+! lib/Encode/MIME/Header.pm
+  Subject: [PATCH] Encode::MIME::Header
+  Message-Id: <86sn4nh7a8.wl@mail.edge.co.jp>
+! Encode/Makefile_PL.e2x
+   Subject: [PATCH] Make Makefile_PL.e2x happy on MSWin32
+  Message-Id: <20020519201031.GA1603@not.autrijus.org>
+! CN/Makefile.PL Byte/Makefile.PL JP/Makefile.PL TW/Makefile.PL
+  Symbol/Makefile.PL KR/Makefile.PL EBCDIC/Makefile.PL Makefile.PL
+  AUTHORS
+  @16628 and @16652 from Vadim. Vadim was added to AUTHORS.
+  Subject: [PATCH] good day for WinCE port of perl.
+  Message-ID: <001301c1fc68$e808e560$a95cc3d9@vad>
+! Encode.xs
+! Unicode/Unicode.xs
+  Even more linting by Robin via @16532
+! Encode.xs
+  Even more typecast by Sarathy in @16460
+
+1.71 2002/05/07 16:22:42
 ! Encode.xs
   even more typecasts by Robin
   Message-Id: <200205071513.QAA05846@tempest.npl.co.uk>
@@ -11,7 +34,7 @@ $Revision: 1.71 $ $Date: 2002/05/07 16:22:42 $
   A very strange bug that was causing a bugus ucm -> C table
   generation that was revealed by a UCM file that Andreas was
   working.  This is the king of wierdest bug I've encountered
-  in the course of Encode maintainance.
+  in the course of Encode maintenance.
   Message-Id: <6C04F0FA-61D4-11D6-B164-00039301D480@dan.co.jp>
 
 1.70 2002/05/06 10:26:48
@@ -629,7 +652,7 @@ $Revision: 1.71 $ $Date: 2002/05/07 16:22:42 $
   Typo fixes and improvements by jhi
   Message-Id: <200204010201.FAA03564@alpha.hut.fi>, et al.
 
-1.11  $Date: 2002/05/07 16:22:42 $
+1.11  $Date: 2002/05/20 15:49:56 $
 + t/encoding.t
 + t/jperl.t
 ! MANIFEST
@@ -1105,5 +1128,3 @@ $Revision: 1.71 $ $Date: 2002/05/07 16:22:42 $
     Autrijus, you may fix Encode::HanExtra.
 + t/CJKalias.t
   + to test encode aliases added
-
- LocalWords:  maintainance

@@ -204,6 +204,9 @@ while (<DATA>) { # Read in the protypes.
 ?S:.
 ?S:${func}_r_proto:
 ?S:	This variable encodes the prototype of ${func}_r.
+?S:	It is zero if d_${func}_r is undef, and one of the
+?S:	REENTRANT_PROTO_T_ABC macros of reentr.h if d_${func}_r
+?S:	is defined.
 ?S:.
 ?C:HAS_${FUNC}_R:
 ?C:	This symbol, if defined, indicates that the ${func}_r routine
@@ -211,6 +214,9 @@ while (<DATA>) { # Read in the protypes.
 ?C:.
 ?C:${FUNC}_R_PROTO:
 ?C:	This symbol encodes the prototype of ${func}_r.
+?C:	It is zero if d_${func}_r is undef, and one of the
+?C:	REENTRANT_PROTO_T_ABC macros of reentr.h if d_${func}_r
+?C:	is defined.
 ?C:.
 ?H:#\$d_${func}_r HAS_${FUNC}_R	   /**/
 ?H:#define ${FUNC}_R_PROTO \$${func}_r_proto	   /**/

@@ -42,6 +42,7 @@ WriteMakefile(
 	      MAN3PODS	=> {},
 	      INC       => "-I./Encode",
 	      PMLIBDIRS => \@pmlibdirs,
+	      INSTALLDIRS => 'perl',
 	      );
 
 package MY;

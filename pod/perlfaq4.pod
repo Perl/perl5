@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq4 - Data Manipulation ($Revision: 1.22 $, $Date: 2002/05/16 12:44:24 $)
+perlfaq4 - Data Manipulation ($Revision: 1.24 $, $Date: 2002/05/20 16:50:08 $)
 
 =head1 DESCRIPTION
 
@@ -1707,15 +1707,17 @@ The Tie::IxHash module from CPAN might also be instructive.
 
 =head2 What's the difference between "delete" and "undef" with hashes?
 
-Hashes are pairs of scalars: the first is the key, the second is the
-value.  The key will be coerced to a string, although the value can be
-any kind of scalar: string, number, or reference.  If a key C<$key> is
-present in the array, C<exists($key)> will return true.  The value for
-a given key can be C<undef>, in which case C<$array{$key}> will be
-C<undef> while C<$exists{$key}> will return true.  This corresponds to
-(C<$key>, C<undef>) being in the hash.
+Hashes contain pairs of scalars: the first is the key, the
+second is the value.  The key will be coerced to a string,
+although the value can be any kind of scalar: string,
+number, or reference.  If a key $key is present in
+%hash, C<exists($hash{$key})> will return true.  The value
+for a given key can be C<undef>, in which case
+C<$hash{$key}> will be C<undef> while C<exists $hash{$key}>
+will return true.  This corresponds to (C<$key>, C<undef>)
+being in the hash.
 
-Pictures help...  here's the C<%ary> table:
+Pictures help...  here's the %hash table:
 
 	  keys  values
 	+------+------+
@@ -1727,16 +1729,16 @@ Pictures help...  here's the C<%ary> table:
 
 And these conditions hold
 
-	$ary{'a'}                       is true
-	$ary{'d'}                       is false
-	defined $ary{'d'}               is true
-	defined $ary{'a'}               is true
-	exists $ary{'a'}                is true (Perl5 only)
-	grep ($_ eq 'a', keys %ary)     is true
+	$hash{'a'}                       is true
+	$hash{'d'}                       is false
+	defined $hash{'d'}               is true
+	defined $hash{'a'}               is true
+	exists $hash{'a'}                is true (Perl5 only)
+	grep ($_ eq 'a', keys %hash)     is true
 
 If you now say
 
-	undef $ary{'a'}
+	undef $hash{'a'}
 
 your table now reads:
 
@@ -1751,18 +1753,18 @@ your table now reads:
 
 and these conditions now hold; changes in caps:
 
-	$ary{'a'}                       is FALSE
-	$ary{'d'}                       is false
-	defined $ary{'d'}               is true
-	defined $ary{'a'}               is FALSE
-	exists $ary{'a'}                is true (Perl5 only)
-	grep ($_ eq 'a', keys %ary)     is true
+	$hash{'a'}                       is FALSE
+	$hash{'d'}                       is false
+	defined $hash{'d'}               is true
+	defined $hash{'a'}               is FALSE
+	exists $hash{'a'}                is true (Perl5 only)
+	grep ($_ eq 'a', keys %hash)     is true
 
 Notice the last two: you have an undef value, but a defined key!
 
 Now, consider this:
 
-	delete $ary{'a'}
+	delete $hash{'a'}
 
 your table now reads:
 
@@ -1775,23 +1777,22 @@ your table now reads:
 
 and these conditions now hold; changes in caps:
 
-	$ary{'a'}                       is false
-	$ary{'d'}                       is false
-	defined $ary{'d'}               is true
-	defined $ary{'a'}               is false
-	exists $ary{'a'}                is FALSE (Perl5 only)
-	grep ($_ eq 'a', keys %ary)     is FALSE
+	$hash{'a'}                       is false
+	$hash{'d'}                       is false
+	defined $hash{'d'}               is true
+	defined $hash{'a'}               is false
+	exists $hash{'a'}                is FALSE (Perl5 only)
+	grep ($_ eq 'a', keys %hash)     is FALSE
 
 See, the whole entry is gone!
 
 =head2 Why don't my tied hashes make the defined/exists distinction?
 
-They may or may not implement the EXISTS() and DEFINED() methods
-differently.  For example, there isn't the concept of undef with hashes
-that are tied to DBM* files. This means the true/false tables above
-will give different results when used on such a hash.  It also means
-that exists and defined do the same thing with a DBM* file, and what
-they end up doing is not what they do with ordinary hashes.
+This depends on the tied hash's implementation of EXISTS().
+For example, there isn't the concept of undef with hashes
+that are tied to DBM* files. It also means that exists() and
+defined() do the same thing with a DBM* file, and what they
+end up doing is not what they do with ordinary hashes.
 
 =head2 How do I reset an each() operation part-way through?
 
@@ -1920,6 +1921,10 @@ Assuming that you don't care about IEEE notations like "NaN" or
    if (/^([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?$/)
 			{ print "a C float\n" }
 
+You can also use the L<Data::Types|Data::Types> module on
+the CPAN, which exports functions that validate data types
+using these and other regular expressions.
+
 If you're on a POSIX system, Perl's supports the C<POSIX::strtod>
 function.  Its semantics are somewhat cumbersome, so here's a C<getnum>
 wrapper function for more convenient access.  This function takes
@@ -1943,9 +1948,9 @@ if you just want to say, ``Is this a float?''
 
     sub is_numeric { defined getnum($_[0]) } 
 
-Or you could check out the String::Scanf module on CPAN instead.  The
-POSIX module (part of the standard Perl distribution) provides the
-C<strtod> and C<strtol> for converting strings to double and longs,
+Or you could check out the L<String::Scanf|String::Scanf> module on the CPAN
+instead. The POSIX module (part of the standard Perl distribution) provides
+the C<strtod> and C<strtol> for converting strings to double and longs,
 respectively.
 
 =head2 How do I keep persistent data across program calls?
