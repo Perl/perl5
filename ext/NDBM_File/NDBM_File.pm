@@ -1,12 +1,16 @@
 package NDBM_File;
 
-require TieHash;
+use strict;
+use vars qw($VERSION @ISA); 
+
+require Tie::Hash;
 require DynaLoader;
-@ISA = qw(TieHash DynaLoader);
 
-$VERSION = $VERSION = "1.00";
+@ISA = qw(Tie::Hash DynaLoader);
 
-bootstrap NDBM_File;
+$VERSION = "1.00";
+
+bootstrap NDBM_File $VERSION;
 
 1;
 

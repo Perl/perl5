@@ -39,12 +39,15 @@ L<perl(1)>, L<DB_File(3)>.
 
 package GDBM_File;
 
+use strict;
+use vars qw($VERSION @ISA @EXPORT $AUTOLOAD);
+
 require Carp;
-require TieHash;
+require Tie::Hash;
 require Exporter;
 use AutoLoader;
 require DynaLoader;
-@ISA = qw(TieHash Exporter DynaLoader);
+@ISA = qw(Tie::Hash Exporter DynaLoader);
 @EXPORT = qw(
 	GDBM_CACHESIZE
 	GDBM_FAST
@@ -56,12 +59,12 @@ require DynaLoader;
 	GDBM_WRITER
 );
 
-$VERSION = $VERSION = "1.00";
+$VERSION = "1.00";
 
 sub AUTOLOAD {
-    local($constname);
+    my($constname);
     ($constname = $AUTOLOAD) =~ s/.*:://;
-    $val = constant($constname, @_ ? $_[0] : 0);
+    my $val = constant($constname, @_ ? $_[0] : 0);
     if ($! != 0) {
 	if ($! =~ /Invalid/) {
 	    $AutoLoader::AUTOLOAD = $AUTOLOAD;
@@ -75,7 +78,7 @@ sub AUTOLOAD {
     goto &$AUTOLOAD;
 }
 
-bootstrap GDBM_File;
+bootstrap GDBM_File $VERSION;
 
 # Preloaded methods go here.  Autoload methods go after __END__, and are
 # processed by the autosplit program.

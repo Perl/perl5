@@ -1,12 +1,16 @@
 package ODBM_File;
 
-require TieHash;
+use strict;
+use vars qw($VERSION @ISA);
+
+require Tie::Hash;
 require DynaLoader;
-@ISA = qw(TieHash DynaLoader);
 
-$VERSION = $VERSION = "1.00";
+@ISA = qw(Tie::Hash DynaLoader);
 
-bootstrap ODBM_File;
+$VERSION = "1.00";
+
+bootstrap ODBM_File $VERSION;
 
 1;
 
