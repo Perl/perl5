@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Jun 13 16:12:49 EET DST 2003 [metaconfig 3.0 PL70]
+# Generated on Tue Jul  1 10:09:27 EEST 2003 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -1266,7 +1266,7 @@ archname=''
 : set usethreads on the Configure command line to enable threads.
 usereentrant='undef'
 : List of libraries we want.
-: If anyone needs -lnet, put it in a hint file.
+: If anyone needs extra -lxxx, put those in a hint file.
 libswanted="sfio socket bind inet nsl nm ndbm gdbm dbm db malloc dl dld ld sun"
 libswanted="$libswanted m crypt sec util c cposix posix ucb bsd BSD"
 : We probably want to search /usr/shlib before most other libraries.
