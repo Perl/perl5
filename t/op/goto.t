@@ -7,7 +7,7 @@ BEGIN {
     @INC = qw(. ../lib);
 }
 
-print "1..30\n";
+print "1..32\n";
 
 require "test.pl";
 
@@ -220,6 +220,14 @@ my $r = runperl(prog => 'use goto01; print qq[DONE\n]');
 is($r, "OK\nDONE\n", "goto within use-d file"); 
 unlink "goto01.pm";
 
+# test for [perl #24108]
+sub i_return_a_label {
+    print "ok 31 - i_return_a_label called\n";
+    return "returned_label";
+}
+eval { goto +i_return_a_label; };
+print "not ";
+returned_label : print "ok 32 - done to returned_label\n";
 
 exit;
 
