@@ -54,6 +54,8 @@ BEGIN {
 
 # test DB::save()
 {
+       no warnings 'uninitialized';
+
 	# assigning a number to $! seems to produce an error message, when read
 	local ($@, $,, $/, $\, $^W, $!) = (1 .. 5);
 	DB::save();
@@ -107,7 +109,7 @@ is( DB::_clientname('bar'), '','DB::_clientname should not return non refname');
 
 	my $line = __LINE__ + 1;
 	my @ret = eval { DB->backtrace() };
-	like( $ret[0], qr/file.+$0/, 'DB::backtrace() should report current file');
+       like( $ret[0], qr/file.+\Q$0\Q/, 'DB::backtrace() should report current file');
 	like( $ret[0], qr/line $line/, '... should report calling line number' );
 	like( $ret[0], qr/eval {...}/, '... should catch eval BLOCK' );
 
