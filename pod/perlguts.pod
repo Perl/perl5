@@ -385,10 +385,10 @@ Beginning with version 5.004, the following functions are also supported:
 
     HE*     hv_fetch_ent  (HV* tb, SV* key, I32 lval, U32 hash);
     HE*     hv_store_ent  (HV* tb, SV* key, SV* val, U32 hash);
-    
+
     bool    hv_exists_ent (HV* tb, SV* key, U32 hash);
     SV*     hv_delete_ent (HV* tb, SV* key, I32 flags, U32 hash);
-    
+
     SV*     hv_iterkeysv  (HE* entry);
 
 Note that these functions take C<SV*> keys, which simplifies writing

@@ -999,6 +999,39 @@ $   ENDIF
 $!
 $ ENDIF !%Config-I-VMS, skip remaining "where install" questions
 $!
+$ perl_symbol = "true"
+$ perl_verb = ""
+$ dflt = "y"
+$ IF .NOT.silent 
+$ THEN 
+$   echo ""
+$   echo "%Config-I-VMS, You may choose to write ''packageup'_SETUP.COM to assign a foreign"
+$   echo "-Config-I-VMS, symbol to invoke ''package', which is the usual method."
+$   echO "-Config-I-VMS, If you do not do so then you would need a DCL command verb at the"
+$   echo "-Config-I-VMS, process or the system wide level."
+$ ENDIF
+$ rp = "Invoke perl as a global symbol foreign command [''dflt'] "
+$ GOSUB myread
+$ IF (.NOT.ans).AND.(ans.NES."") THEN perl_symbol = "false"
+$!
+$ IF (.NOT.perl_symbol)
+$ THEN
+$   dflt = "y"
+$   IF .NOT.silent 
+$   THEN 
+$     echo ""
+$     echo "%Config-I-VMS, Since you won't be using a symbol you must choose to put the ''packageup'"
+$     echo "-Config-I-VMS, verb in a per-process table or in the system wide DCLTABLES (which"
+$     echo "-Config-I-VMS, would require write privilege)."
+$   ENDIF
+$   rp = "Invoke perl as a per process command verb [ ''dflt' ] "
+$   GOSUB myread
+$   IF (.NOT.ans).AND.(ans.NES."")
+$   THEN perl_verb = "DCLTABLES"
+$   ELSE perl_verb = "PROCESS"
+$   ENDIF
+$ ENDIF ! (.NOT.perl_symbol)
+$!
 $!: set the base revision
 $ baserev="5"
 $!: get the patchlevel
@@ -2145,6 +2178,28 @@ $ IF f$search("config.msg") .eqs. "" THEN echo "OK."
 $!
 $! %Config-I-VMS, write perl_setup.com here
 $!
+$ IF (.NOT.perl_symbol)
+$ THEN
+$   file_2_find = "[-]''packageup'.cld"
+$   echo ""
+$   echo4 "%Config-I-VMS, The perl.cld file is now being written..."
+$   OPEN/WRITE CONFIG 'file_2_find'
+$   IF (use_vmsdebug_perl)
+$   THEN
+$     WRITE CONFIG "define verb dbgperl"
+$     WRITE CONFIG F$FAO("!_!AS","image ''packageup'_root:[000000]dbgperl''ext'")
+$     WRITE CONFIG F$FAO("!_!AS","cliflags (foreign)")
+$     WRITE CONFIG ""
+$     WRITE CONFIG "define verb perl"
+$     WRITE CONFIG F$FAO("!_!AS","image ''packageup'_root:[000000]ndbgPerl''ext'")
+$     WRITE CONFIG F$FAO("!_!AS","cliflags (foreign)")
+$   ELSE
+$     WRITE CONFIG "define verb perl"
+$     WRITE CONFIG F$FAO("!_!AS","image ''packageup'_root:[000000]perl''ext'")
+$     WRITE CONFIG F$FAO("!_!AS","cliflags (foreign)")
+$   ENDIF
+$   CLOSE CONFIG
+$ ENDIF ! (.NOT.perl_symbol)
 $ echo ""
 $ echo4 "%Config-I-VMS, The perl_setup.com file is now being written..."
 $ file_2_find = "[-]perl_setup.com"
@@ -2162,20 +2217,34 @@ $ prefix = prefix - "000000."
 $ IF F$LOCATE(".]",prefix) .EQ. F$LENGTH(prefix) THEN -
     prefix = prefix - "]" + ".]" 
 $ WRITE CONFIG "$ define/translation=concealed Perl_Root ''prefix'"
-$ write config "$ ext = "".exe"""
-$ if sharedperl .eqs. "Y"
-$ then
+$ WRITE CONFIG "$ ext = "".exe"""
+$ IF sharedperl .EQS. "Y"
+$ THEN
 $   write config "$ if f$getsyi(""ARCH_NAME"") .nes. ""VAX"" then ext = "".AXE"""
-$ endif
-$ IF use_vmsdebug_perl .eqs. "Y"
-$ then
-$   WRITE CONFIG "$ dbgperl :== $Perl_Root:[000000]dbgPerl'ext'"
-$   WRITE CONFIG "$ perl    :== $Perl_Root:[000000]ndbgPerl'ext'"
-$   WRITE CONFIG "$ define dbgPerlShr Perl_Root:[000000]dbgPerlShr'ext'"
-$ else
-$   WRITE CONFIG "$ perl :== $Perl_Root:[000000]Perl'ext'"
-$   WRITE CONFIG "$ define PerlShr Perl_Root:[000000]PerlShr'ext'"
-$ endif
+$ ENDIF
+$ IF (perl_symbol)
+$ THEN
+$   IF (use_vmsdebug_perl)
+$   THEN
+$     WRITE CONFIG "$ dbgperl :== $Perl_Root:[000000]dbgPerl'ext'"
+$     WRITE CONFIG "$ perl    :== $Perl_Root:[000000]ndbgPerl'ext'"
+$     WRITE CONFIG "$ define dbgPerlShr Perl_Root:[000000]dbgPerlShr'ext'"
+$   ELSE
+$     WRITE CONFIG "$ perl :== $Perl_Root:[000000]Perl'ext'"
+$     WRITE CONFIG "$ define PerlShr Perl_Root:[000000]PerlShr'ext'"
+$   ENDIF
+$ ELSE ! .NOT.perl_symbol
+$   IF (use_vmsdebug_perl)
+$   THEN
+$     WRITE CONFIG "$ define dbgPerlShr Perl_Root:[000000]dbgPerlShr'ext'"
+$   ELSE
+$     WRITE CONFIG "$ define PerlShr Perl_Root:[000000]PerlShr'ext'"
+$   ENDIF
+$   IF perl_verb .EQS. "PROCESS"
+$   THEN
+$     WRITE CONFIG "$ set command ''packagup'_ROOT:[000000]''packageup'.CLD"
+$   ENDIF
+$ ENDIF !  perl_symbol
 $ WRITE CONFIG "$ define/nolog pod2text Perl_Root:[lib.pod]pod2text.com"
 $ WRITE CONFIG "$ define/nolog pod2html Perl_Root:[lib.pod]pod2html.com"
 $ WRITE CONFIG "$ define/nolog pod2man  Perl_Root:[lib.pod]pod2man.com"
@@ -2189,14 +2258,40 @@ $ ENDIF
 $ WRITE CONFIG "$!"
 $ WRITE CONFIG "$! Symbols for commonly used scripts:"
 $ WRITE CONFIG "$!"
-$ WRITE CONFIG "$ Perldoc  == ""'"+"'Perl' Perl_Root:[lib.pod]Perldoc.com -t"""
-$ WRITE CONFIG "$ pod2text == ""'"+"'Perl' pod2text"""
-$ WRITE CONFIG "$ pod2html == ""'"+"'Perl' pod2html"""
-$ WRITE CONFIG "$!pod2man  == ""'"+"'Perl' pod2man"""
-$ WRITE CONFIG "$!Perlbug  == ""'"+"'Perl' Perl_Root:[lib]Perlbug.com"""
-$ WRITE CONFIG "$!c2ph == ""'"+"'Perl' c2ph"""
-$ WRITE CONFIG "$!h2ph == ""'"+"'Perl' h2ph"""
-$ WRITE CONFIG "$!h2xs == ""'"+"'Perl' h2xs"""
+$ IF (perl_symbol)
+$ THEN
+$   WRITE CONFIG "$ Perldoc  == ""'"+"'Perl' Perl_Root:[lib.pod]Perldoc.com -t"""
+$   WRITE CONFIG "$ pod2text == ""'"+"'Perl' pod2text"""
+$   WRITE CONFIG "$ pod2html == ""'"+"'Perl' pod2html"""
+$   WRITE CONFIG "$ pod2latex == ""'"+"'Perl' Perl_Root:[lib.pod]pod2latex.com"""
+$   WRITE CONFIG "$!pod2man  == ""'"+"'Perl' pod2man"""
+$   WRITE CONFIG "$!Perlbug  == ""'"+"'Perl' Perl_Root:[lib]Perlbug.com"""
+$   WRITE CONFIG "$ c2ph     == ""'"+"'Perl' Perl_Root:[utils]c2ph.com"""
+$   IF F$LOCATE("Devel::DProf",extensions) .LT. F$LENGTH(extensions)
+$   THEN
+$     WRITE CONFIG "$ dprofpp     == ""'"+"'Perl' Perl_Root:[utils]dprofpp.com"""
+$   ENDIF 
+$   WRITE CONFIG "$ h2ph     == ""'"+"'Perl' Perl_Root:[utils]h2ph.com"""
+$   WRITE CONFIG "$ h2xs     == ""'"+"'Perl' Perl_Root:[utils]h2xs.com"""
+$   WRITE CONFIG "$!perlcc   == ""'"+"'Perl' Perl_Root:[utils]perlcc.com"""
+$   WRITE CONFIG "$ splain   == ""'"+"'Perl' Perl_Root:[utils]splain.com"""
+$ ELSE
+$   WRITE CONFIG "$ Perldoc  == ""Perl Perl_Root:[lib.pod]Perldoc.com -t"""
+$   WRITE CONFIG "$ pod2text == ""Perl pod2text"""
+$   WRITE CONFIG "$ pod2html == ""Perl pod2html"""
+$   WRITE CONFIG "$ pod2latex == ""Perl Perl_Root:[lib.pod]pod2latex.com"""
+$   WRITE CONFIG "$!pod2man  == ""Perl pod2man"""
+$   WRITE CONFIG "$!Perlbug  == ""Perl Perl_Root:[lib]Perlbug.com"""
+$   WRITE CONFIG "$ c2ph     == ""Perl Perl_Root:[utils]c2ph.com"""
+$   IF F$LOCATE("Devel::DProf",extensions) .LT. F$LENGTH(extensions)
+$   THEN
+$     WRITE CONFIG "$ dprofpp     == ""Perl Perl_Root:[utils]dprofpp.com"""
+$   ENDIF 
+$   WRITE CONFIG "$ h2ph     == ""Perl Perl_Root:[utils]h2ph.com"""
+$   WRITE CONFIG "$ h2xs     == ""Perl Perl_Root:[utils]h2xs.com"""
+$   WRITE CONFIG "$!perlcc   == ""Perl Perl_Root:[utils]perlcc.com"""
+$   WRITE CONFIG "$ splain   == ""Perl Perl_Root:[utils]splain.com"""
+$ ENDIF
 $ CLOSE CONFIG
 $!
 $ echo  ""
@@ -2206,6 +2301,20 @@ $ echo  "-Config-I-VMS, Add that file (or an @ call to it) to your [SY]LOGIN.COM
 $ echo  "-Config-I-VMS, when you are satisfied with a successful compilation,"
 $ echo  "-Config-I-VMS, testing, and installation of your perl."
 $ echo  ""
+$ IF ((.NOT.perl_symbol) .AND. (perl_verb .EQS. "DCLTABLES"))
+$ THEN
+$   file_2_find = "[-]''packageup'_install.com"
+$   OPEN/WRITE CONFIG 'file_2_find
+$   WRITE CONFIG "$ set command perl /table=sys$common:[syslib]dcltables.exe -"
+$   WRITE CONFIG "    /output=sys$common:[syslib]dcltables.exe"
+$   WRITE CONFIG "$ install replace sys$common:[syslib]dcltables.exe"
+$   CLOSE CONFIG
+$   echo4 ""
+$   echo4 "%Config-I-VMS, In order to install the ''packageup' verb into DCLTABLES run:"
+$   echo4 "-Config-I-VMS, @ ''F$SEARCH(file_2_find)'"
+$   echo4 "-Config-I-VMS, after a successful build, test, and install.  Do so with CMKRNL privilege."
+$   echo4 ""
+$ ENDIF
 $!
 $!figure out where we "are" by parsing 'vms_default_directory_name' 
 $!

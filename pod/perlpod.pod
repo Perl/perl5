@@ -173,7 +173,7 @@ here and in commands:
 		    L<text|name/"sec">
 		    L<text|"sec">
 		    L<text|/"sec">
-		
+
     F<file>	Used for filenames
     X<index>	An index entry
     Z<>		A zero-width character

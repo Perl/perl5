@@ -75,7 +75,7 @@ This information should not be considered complete; it includes possibly
 transient information about idiosyncrasies of some of the ports, almost
 all of which are in a state of constant evolution.  Thus, this material
 should be considered a perpetual work in progress
-(E<lt>IMG SRC="yellow_sign.gif" ALT="Under Construction"E<gt>).
+(<IMG SRC="yellow_sign.gif" ALT="Under Construction">).
 
 =head1 ISSUES
 
@@ -303,15 +303,15 @@ first 8 characters.
 Whitespace in filenames is tolerated on most systems, but not all.
 Many systems (DOS, VMS) cannot have more than one C<.> in their filenames.
 
-Don't assume C<E<gt>> won't be the first character of a filename.
-Always use C<E<lt>> explicitly to open a file for reading,
+Don't assume C<< > >> won't be the first character of a filename.
+Always use C<< < >> explicitly to open a file for reading,
 unless you want the user to be able to specify a pipe open.
 
     open(FILE, "< $existing_file") or die $!;
 
 If filenames might use strange characters, it is safest to open it
 with C<sysopen> instead of C<open>.  C<open> is magic and can
-translate characters like C<E<gt>>, C<E<lt>>, and C<|>, which may
+translate characters like C<< > >>, C<< < >>, and C<|>, which may
 be the wrong thing to do.  (Sometimes, though, it's the right thing.)
 
 =head2 System Interaction
@@ -787,7 +787,7 @@ you are so inclined.  For example:
     $ endif
 
 Do take care with C<$ ASSIGN/nolog/user SYS$COMMAND: SYS$INPUT> if your
-perl-in-DCL script expects to do things like C<$read = E<lt>STDINE<gt>;>.
+perl-in-DCL script expects to do things like C<< $read = <STDIN>; >>.
 
 Filenames are in the format "name.extension;version".  The maximum
 length for filenames is 39 characters, and the maximum length for
@@ -1053,9 +1053,9 @@ C<System$Path> until a name is made that points to an object on disk.
 Writing to a new file C<System:Modules> would be allowed only if
 C<System$Path> contains a single item list.  The filesystem will also
 expand system variables in filenames if enclosed in angle brackets, so
-C<E<lt>System$DirE<gt>.Modules> would look for the file
+C<< <System$Dir>.Modules >> would look for the file
 S<C<$ENV{'System$Dir'} . 'Modules'>>.  The obvious implication of this is
-that B<fully qualified filenames can start with C<E<lt>E<gt>>> and should
+that B<fully qualified filenames can start with C<< <> >>> and should
 be protected when C<open> is used for input.
 
 Because C<.> was in use as a directory separator and filenames could not
@@ -1095,11 +1095,11 @@ library emulates Unix filehandles.  Consequently, you can't rely on
 passing C<STDIN>, C<STDOUT>, or C<STDERR> to your children.
 
 The desire of users to express filenames of the form
-C<E<lt>Foo$DirE<gt>.Bar> on the command line unquoted causes problems,
+C<< <Foo$Dir>.Bar >> on the command line unquoted causes problems,
 too: C<``> command output capture has to perform a guessing game.  It
-assumes that a string C<E<lt>[^E<lt>E<gt>]+\$[^E<lt>E<gt>]E<gt>> is a
+assumes that a string C<< <[^<>]+\$[^<>]> >> is a
 reference to an environment variable, whereas anything else involving
-C<E<lt>> or C<E<gt>> is redirection, and generally manages to be 99%
+C<< < >> or C<< > >> is redirection, and generally manages to be 99%
 right.  Of course, the problem remains that scripts cannot rely on any
 Unix tools being available, or that any tools found have Unix-like command
 line arguments.
@@ -1500,7 +1500,7 @@ Not implemented. (S<Mac OS>, Win32, VMS, Plan9, S<RISC OS>, VOS)
 The C<|> variants are supported only if ToolServer is installed.
 (S<Mac OS>)
 
-open to C<|E<45>> and C<-|> are unsupported. (S<Mac OS>, Win32, S<RISC OS>)
+open to C<|-> and C<-|> are unsupported. (S<Mac OS>, Win32, S<RISC OS>)
 
 =item pipe READHANDLE,WRITEHANDLE
 
@@ -1605,7 +1605,7 @@ in C<wait> or C<waitpid>.  (Win32)
 
 There is no shell to process metacharacters, and the native standard is
 to pass a command line terminated by "\n" "\r" or "\0" to the spawned
-program.  Redirection such as C<E<gt> foo> is performed (if at all) by
+program.  Redirection such as C<< > foo >> is performed (if at all) by
 the run time library of the spawned program.  C<system> I<list> will call
 the Unix emulation library's C<exec> emulation, which attempts to provide
 emulation of the stdin, stdout, stderr in force in the parent, providing
@@ -1616,7 +1616,7 @@ of a child Unix program will exists.  Mileage B<will> vary.  (S<RISC OS>)
 Far from being POSIX compliant.  Because there may be no underlying
 /bin/sh tries to work around the problem by forking and execing the
 first token in its argument string.  Handles basic redirection
-("E<lt>" or "E<gt>") on its own behalf. (MiNT)
+("<" or ">") on its own behalf. (MiNT)
 
 =item times
 
@@ -1754,41 +1754,41 @@ First public release with perl5.005.
 
 =head1 AUTHORS / CONTRIBUTORS
 
-Abigail E<lt>abigail@fnx.comE<gt>,
-Charles Bailey E<lt>bailey@newman.upenn.eduE<gt>,
-Graham Barr E<lt>gbarr@pobox.comE<gt>,
-Tom Christiansen E<lt>tchrist@perl.comE<gt>,
-Nicholas Clark E<lt>Nicholas.Clark@liverpool.ac.ukE<gt>,
-Thomas Dorner E<lt>Thomas.Dorner@start.deE<gt>,
-Andy Dougherty E<lt>doughera@lafcol.lafayette.eduE<gt>,
-Dominic Dunlop E<lt>domo@vo.luE<gt>,
-Neale Ferguson E<lt>neale@mailbox.tabnsw.com.auE<gt>,
-David J. Fiander E<lt>davidf@mks.comE<gt>,
-Paul Green E<lt>Paul_Green@stratus.comE<gt>,
-M.J.T. Guy E<lt>mjtg@cus.cam.ac.ukE<gt>,
-Jarkko Hietaniemi E<lt>jhi@iki.fi<gt>,
-Luther Huffman E<lt>lutherh@stratcom.comE<gt>,
-Nick Ing-Simmons E<lt>nick@ni-s.u-net.comE<gt>,
-Andreas J. KE<ouml>nig E<lt>koenig@kulturbox.deE<gt>,
-Markus Laker E<lt>mlaker@contax.co.ukE<gt>,
-Andrew M. Langmead E<lt>aml@world.std.comE<gt>,
-Larry Moore E<lt>ljmoore@freespace.netE<gt>,
-Paul Moore E<lt>Paul.Moore@uk.origin-it.comE<gt>,
-Chris Nandor E<lt>pudge@pobox.comE<gt>,
-Matthias Neeracher E<lt>neeri@iis.ee.ethz.chE<gt>,
-Gary Ng E<lt>71564.1743@CompuServe.COME<gt>,
-Tom Phoenix E<lt>rootbeer@teleport.comE<gt>,
-AndrE<eacute> Pirard E<lt>A.Pirard@ulg.ac.beE<gt>,
-Peter Prymmer E<lt>pvhp@forte.comE<gt>,
-Hugo van der Sanden E<lt>hv@crypt0.demon.co.ukE<gt>,
-Gurusamy Sarathy E<lt>gsar@activestate.comE<gt>,
-Paul J. Schinder E<lt>schinder@pobox.comE<gt>,
-Michael G Schwern E<lt>schwern@pobox.comE<gt>,
-Dan Sugalski E<lt>sugalskd@ous.eduE<gt>,
-Nathan Torkington E<lt>gnat@frii.comE<gt>.
+Abigail <abigail@fnx.com>,
+Charles Bailey <bailey@newman.upenn.edu>,
+Graham Barr <gbarr@pobox.com>,
+Tom Christiansen <tchrist@perl.com>,
+Nicholas Clark <Nicholas.Clark@liverpool.ac.uk>,
+Thomas Dorner <Thomas.Dorner@start.de>,
+Andy Dougherty <doughera@lafcol.lafayette.edu>,
+Dominic Dunlop <domo@vo.lu>,
+Neale Ferguson <neale@mailbox.tabnsw.com.au>,
+David J. Fiander <davidf@mks.com>,
+Paul Green <Paul_Green@stratus.com>,
+M.J.T. Guy <mjtg@cus.cam.ac.uk>,
+Jarkko Hietaniemi <jhi@iki.fi<gt>,
+Luther Huffman <lutherh@stratcom.com>,
+Nick Ing-Simmons <nick@ni-s.u-net.com>,
+Andreas J. KE<ouml>nig <koenig@kulturbox.de>,
+Markus Laker <mlaker@contax.co.uk>,
+Andrew M. Langmead <aml@world.std.com>,
+Larry Moore <ljmoore@freespace.net>,
+Paul Moore <Paul.Moore@uk.origin-it.com>,
+Chris Nandor <pudge@pobox.com>,
+Matthias Neeracher <neeri@iis.ee.ethz.ch>,
+Gary Ng <71564.1743@CompuServe.COM>,
+Tom Phoenix <rootbeer@teleport.com>,
+AndrE<eacute> Pirard <A.Pirard@ulg.ac.be>,
+Peter Prymmer <pvhp@forte.com>,
+Hugo van der Sanden <hv@crypt0.demon.co.uk>,
+Gurusamy Sarathy <gsar@activestate.com>,
+Paul J. Schinder <schinder@pobox.com>,
+Michael G Schwern <schwern@pobox.com>,
+Dan Sugalski <sugalskd@ous.edu>,
+Nathan Torkington <gnat@frii.com>.
 
 This document is maintained by Chris Nandor
-E<lt>pudge@pobox.comE<gt>.
+<pudge@pobox.com>.
 
 =head1 VERSION
 

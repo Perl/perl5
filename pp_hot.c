@@ -621,6 +621,93 @@ PP(pp_rv2hv)
     }
 }
 
+STATIC int
+S_do_maybe_phash(pTHX_ AV *ary, SV **lelem, SV **firstlelem, SV **relem,
+		 SV **lastrelem)
+{
+    OP *leftop;
+    SV *tmpstr;
+    I32 i;
+
+    leftop = ((BINOP*)PL_op)->op_last;
+    assert(leftop);
+    assert(leftop->op_type == OP_NULL && leftop->op_targ == OP_LIST);
+    leftop = ((LISTOP*)leftop)->op_first;
+    assert(leftop);
+    /* Skip PUSHMARK and each element already assigned to. */
+    for (i = lelem - firstlelem; i > 0; i--) {
+	leftop = leftop->op_sibling;
+	assert(leftop);
+    }
+    if (leftop->op_type != OP_RV2HV)
+	return 0;
+
+    /* pseudohash */
+    if (av_len(ary) > 0)
+	av_fill(ary, 0);		/* clear all but the fields hash */
+    if (lastrelem >= relem) {
+	while (relem < lastrelem) {	/* gobble up all the rest */
+	    SV *tmpstr;
+	    assert(relem[0]);
+	    assert(relem[1]);
+	    /* Avoid a memory leak when avhv_store_ent dies. */
+	    tmpstr = sv_newmortal();
+	    sv_setsv(tmpstr,relem[1]);	/* value */
+	    relem[1] = tmpstr;
+	    if (avhv_store_ent(ary,relem[0],tmpstr,0))
+		SvREFCNT_inc(tmpstr);
+	    if (SvMAGICAL(ary) != 0 && SvSMAGICAL(tmpstr))
+		mg_set(tmpstr);
+	    relem += 2;
+	    TAINT_NOT;
+	}
+    }
+    if (relem == lastrelem)
+	return 1;
+    return 2;
+}
+
+STATIC void
+S_do_oddball(pTHX_ HV *hash, SV **relem, SV **firstrelem)
+{
+    if (*relem) {
+	SV *tmpstr;
+	if (ckWARN(WARN_MISC)) {
+	    if (relem == firstrelem &&
+		SvROK(*relem) &&
+		(SvTYPE(SvRV(*relem)) == SVt_PVAV ||
+		 SvTYPE(SvRV(*relem)) == SVt_PVHV))
+	    {
+		Perl_warner(aTHX_ WARN_MISC,
+			    "Reference found where even-sized list expected");
+	    }
+	    else
+		Perl_warner(aTHX_ WARN_MISC,
+			    "Odd number of elements in hash assignment");
+	}
+	if (SvTYPE(hash) == SVt_PVAV) {
+	    /* pseudohash */
+	    tmpstr = sv_newmortal();
+	    if (avhv_store_ent((AV*)hash,*relem,tmpstr,0))
+		SvREFCNT_inc(tmpstr);
+	    if (SvMAGICAL(hash) && SvSMAGICAL(tmpstr))
+		mg_set(tmpstr);
+	}
+	else {
+	    HE *didstore;
+	    tmpstr = NEWSV(29,0);
+	    didstore = hv_store_ent(hash,*relem,tmpstr,0);
+	    if (SvMAGICAL(hash)) {
+		if (SvSMAGICAL(tmpstr))
+		    mg_set(tmpstr);
+		if (!didstore)
+		    sv_2mortal(tmpstr);
+	    }
+	}
+	TAINT_NOT;
+    }
+}
+
 PP(pp_aassign)
 {
     djSP;
@@ -646,21 +733,22 @@ PP(pp_aassign)
      * special care that assigning the identifier on the left doesn't
      * clobber a value on the right that's used later in the list.
      */
-    if (PL_op->op_private & OPpASSIGN_COMMON) {
+    if (PL_op->op_private & (OPpASSIGN_COMMON)) {
 	EXTEND_MORTAL(lastrelem - firstrelem + 1);
-        for (relem = firstrelem; relem <= lastrelem; relem++) {
-            /*SUPPRESS 560*/
-            if (sv = *relem) {
+	for (relem = firstrelem; relem <= lastrelem; relem++) {
+	    /*SUPPRESS 560*/
+	    if (sv = *relem) {
 		TAINT_NOT;	/* Each item is independent */
-                *relem = sv_mortalcopy(sv);
+		*relem = sv_mortalcopy(sv);
 	    }
-        }
+	}
     }
 
     relem = firstrelem;
     lelem = firstlelem;
     ary = Null(AV*);
     hash = Null(HV*);
+
     while (lelem <= lastlelem) {
 	TAINT_NOT;		/* Each item stands on its own, taintwise. */
 	sv = *lelem++;
@@ -668,7 +756,19 @@ PP(pp_aassign)
 	case SVt_PVAV:
 	    ary = (AV*)sv;
 	    magic = SvMAGICAL(ary) != 0;
-	    
+	    if (PL_op->op_private & OPpASSIGN_HASH) {
+		switch (do_maybe_phash(ary, lelem, firstlelem, relem,
+				       lastrelem))
+		{
+		case 0:
+		    goto normal_array;
+		case 1:
+		    do_oddball((HV*)ary, relem, firstrelem);
+		}
+		relem = lastrelem + 1;
+		break;
+	    }
+	normal_array:
 	    av_clear(ary);
 	    av_extend(ary, lastrelem - relem);
 	    i = 0;
@@ -688,7 +788,7 @@ PP(pp_aassign)
 		TAINT_NOT;
 	    }
 	    break;
-	case SVt_PVHV: {
+	case SVt_PVHV: {				/* normal hash */
 		SV *tmpstr;
 
 		hash = (HV*)sv;
@@ -715,27 +815,7 @@ PP(pp_aassign)
 		    TAINT_NOT;
 		}
 		if (relem == lastrelem) {
-		    if (*relem) {
-			HE *didstore;
-			if (ckWARN(WARN_MISC)) {
-			    if (relem == firstrelem &&
-				SvROK(*relem) &&
-				( SvTYPE(SvRV(*relem)) == SVt_PVAV ||
-				  SvTYPE(SvRV(*relem)) == SVt_PVHV ) )
-				Perl_warner(aTHX_ WARN_MISC, "Reference found where even-sized list expected");
-			    else
-				Perl_warner(aTHX_ WARN_MISC, "Odd number of elements in hash assignment");
-			}
-			tmpstr = NEWSV(29,0);
-			didstore = hv_store_ent(hash,*relem,tmpstr,0);
-			if (magic) {
-			    if (SvSMAGICAL(tmpstr))
-				mg_set(tmpstr);
-			    if (!didstore)
-				sv_2mortal(tmpstr);
-			}
-			TAINT_NOT;
-		    }
+		    do_oddball(hash, relem, firstrelem);
 		    relem++;
 		}
 	    }

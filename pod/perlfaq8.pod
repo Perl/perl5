@@ -410,7 +410,7 @@ For example:
     }
 
 However, because syscalls restart by default, you'll find that if
-you're in a "slow" call, such as E<lt>FHE<gt>, read(), connect(), or
+you're in a "slow" call, such as <FH>, read(), connect(), or
 wait(), that the only way to terminate them is by "longjumping" out;
 that is, by raising an exception.  See the time-out handler for a
 blocking flock() in L<perlipc/"Signals"> or chapter 6 of the Camel.
@@ -976,7 +976,7 @@ sysopen():
     sysopen(FH, "/tmp/somefile", O_WRONLY|O_NDELAY|O_CREAT, 0644)
         or die "can't open /tmp/somefile: $!":
 
-   
+
 
 
 =head2 How do I install a module from CPAN?

@@ -103,6 +103,13 @@ Perl_avhv_fetch_ent(pTHXo_ AV *ar, SV* keysv, I32 lval, U32 hash)
     return ((CPerlObj*)pPerl)->Perl_avhv_fetch_ent(ar, keysv, lval, hash);
 }
 
+#undef  Perl_avhv_store_ent
+SV**
+Perl_avhv_store_ent(pTHXo_ AV *ar, SV* keysv, SV* val, U32 hash)
+{
+    return ((CPerlObj*)pPerl)->Perl_avhv_store_ent(ar, keysv, val, hash);
+}
+
 #undef  Perl_avhv_iternext
 HE*
 Perl_avhv_iternext(pTHXo_ AV *ar)

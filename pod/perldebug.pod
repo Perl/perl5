@@ -126,7 +126,7 @@ of the next statement.  If an expression is supplied that includes
 function calls, those functions will be executed with stops before
 each statement.
 
-=item E<lt>CRE<gt>
+=item <CR>
 
 Repeat last C<n> or C<s> command.
 
@@ -145,7 +145,7 @@ List C<incr+1> lines starting at C<min>.
 
 =item l min-max
 
-List lines C<min> through C<max>.  C<l E<45>> is synonymous to C<E<45>>.
+List lines C<min> through C<max>.  C<l -> is synonymous to C<->.
 
 =item l line
 
@@ -506,25 +506,25 @@ corresponds to F</dev/ttyc>, say, by issuing a command like
 
 See L<"Debugger Internals"> below for more details.
 
-=item E<lt> [ command ]
+=item < [ command ]
 
 Set an action (Perl command) to happen before every debugger prompt.
 A multi-line command may be entered by backslashing the newlines.  If
 C<command> is missing, resets the list of actions.
 
-=item E<lt>E<lt> command
+=item << command
 
 Add an action (Perl command) to happen before every debugger prompt.
 A multi-line command may be entered by backslashing the newlines.
 
-=item E<gt> command
+=item > command
 
 Set an action (Perl command) to happen after the prompt when you've
 just given a command to return to executing the script.  A multi-line
 command may be entered by backslashing the newlines.  If C<command> is
 missing, resets the list of actions.
 
-=item E<gt>E<gt> command
+=item >> command
 
 Adds an action (Perl command) to happen after the prompt when you've
 just given a command to return to executing the script.  A multi-line
@@ -701,7 +701,7 @@ Listing given via different flavors of C<l> command looks like this:
 
 Note that the breakable lines are marked with C<:>, lines with
 breakpoints are marked by C<b>, with actions by C<a>, and the
-next executed line is marked by C<==E<gt>>.
+next executed line is marked by C<< ==> >>.
 
 =item Frame listing
 
@@ -979,14 +979,14 @@ application.
 
 =item *
 
-The array C<@{"_E<lt>$filename"}> is the line-by-line contents of
+The array C<@{"_<$filename"}> is the line-by-line contents of
 $filename for all the compiled files.  Same for C<eval>ed strings which
 contain subroutines, or which are currently executed.  The $filename
 for C<eval>ed strings looks like C<(eval 34)>.
 
 =item *
 
-The hash C<%{"_E<lt>$filename"}> contains breakpoints and action (it is
+The hash C<%{"_<$filename"}> contains breakpoints and action (it is
 keyed by line number), and individual entries are settable (as opposed
 to the whole hash).  Only true/false is important to Perl, though the
 values used by F<perl5db.pl> have the form
@@ -999,7 +999,7 @@ C<(eval 34)>.
 
 =item *
 
-The scalar C<${"_E<lt>$filename"}> contains C<"_E<lt>$filename">.  Same for
+The scalar C<${"_<$filename"}> contains C<"_<$filename">.  Same for
 evaluated strings which contain subroutines, or which are currently
 executed.  The $filename for C<eval>ed strings looks like C<(eval
 34)>.
@@ -1007,7 +1007,7 @@ executed.  The $filename for C<eval>ed strings looks like C<(eval
 =item *
 
 After each C<require>d file is compiled, but before it is executed,
-C<DB::postponed(*{"_E<lt>$filename"})> is called (if subroutine
+C<DB::postponed(*{"_<$filename"})> is called (if subroutine
 C<DB::postponed> exists).  Here the $filename is the expanded name of
 the C<require>d file (as found in values of %INC).
 
@@ -1031,7 +1031,7 @@ a breakpoint, a call to C<DB::DB()> is performed if any one of
 variables $DB::trace, $DB::single, or $DB::signal is true. (Note that
 these variables are not C<local>izable.) This feature is disabled when
 the control is inside C<DB::DB()> or functions called from it (unless
-C<$^D & (1E<lt>E<lt>30)>).
+C<$^D & (1<<30)>).
 
 =item *
 
@@ -1104,7 +1104,7 @@ C<line>.
 
 The function C<DB::print_trace(FH, skip[, count[, short]])> prints
 formatted info about caller frames.  The last two functions may be
-convenient as arguments to C<E<lt>>, C<E<lt>E<lt>> commands.
+convenient as arguments to C<< < >>, C<< << >> commands.
 
 =head2 Other resources
 

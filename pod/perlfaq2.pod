@@ -262,7 +262,7 @@ a star may be ordered from O'Reilly.
         by Ellen Siever, Stephan Spainhour, and Nathan Patwardhan
 
 =item Tutorials
-		
+
     *Learning Perl [2nd edition]
 	by Randal L. Schwartz and Tom Christiansen
 	    with foreword by Larry Wall

@@ -71,6 +71,7 @@
 #define avhv_delete_ent		Perl_avhv_delete_ent
 #define avhv_exists_ent		Perl_avhv_exists_ent
 #define avhv_fetch_ent		Perl_avhv_fetch_ent
+#define avhv_store_ent		Perl_avhv_store_ent
 #define avhv_iternext		Perl_avhv_iternext
 #define avhv_iterval		Perl_avhv_iterval
 #define avhv_keys		Perl_avhv_keys
@@ -825,6 +826,7 @@
 #endif
 #if defined(PERL_IN_AV_C) || defined(PERL_DECL_PROT)
 #define avhv_index_sv		S_avhv_index_sv
+#define avhv_index		S_avhv_index
 #endif
 #if defined(PERL_IN_DOOP_C) || defined(PERL_DECL_PROT)
 #define do_trans_CC_simple	S_do_trans_CC_simple
@@ -945,6 +947,8 @@
 #define qsortsv			S_qsortsv
 #endif
 #if defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
+#define do_maybe_phash		S_do_maybe_phash
+#define do_oddball		S_do_oddball
 #define get_db_sub		S_get_db_sub
 #define method_common		S_method_common
 #endif
@@ -1522,6 +1526,7 @@
 #define avhv_delete_ent(a,b,c,d)	Perl_avhv_delete_ent(aTHX_ a,b,c,d)
 #define avhv_exists_ent(a,b,c)	Perl_avhv_exists_ent(aTHX_ a,b,c)
 #define avhv_fetch_ent(a,b,c,d)	Perl_avhv_fetch_ent(aTHX_ a,b,c,d)
+#define avhv_store_ent(a,b,c,d)	Perl_avhv_store_ent(aTHX_ a,b,c,d)
 #define avhv_iternext(a)	Perl_avhv_iternext(aTHX_ a)
 #define avhv_iterval(a,b)	Perl_avhv_iterval(aTHX_ a,b)
 #define avhv_keys(a)		Perl_avhv_keys(aTHX_ a)
@@ -2249,6 +2254,7 @@
 #endif
 #if defined(PERL_IN_AV_C) || defined(PERL_DECL_PROT)
 #define avhv_index_sv(a)	S_avhv_index_sv(aTHX_ a)
+#define avhv_index(a,b,c)	S_avhv_index(aTHX_ a,b,c)
 #endif
 #if defined(PERL_IN_DOOP_C) || defined(PERL_DECL_PROT)
 #define do_trans_CC_simple(a)	S_do_trans_CC_simple(aTHX_ a)
@@ -2369,6 +2375,8 @@
 #define qsortsv(a,b,c)		S_qsortsv(aTHX_ a,b,c)
 #endif
 #if defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
+#define do_maybe_phash(a,b,c,d,e)	S_do_maybe_phash(aTHX_ a,b,c,d,e)
+#define do_oddball(a,b,c)	S_do_oddball(aTHX_ a,b,c)
 #define get_db_sub(a,b)		S_get_db_sub(aTHX_ a,b)
 #define method_common(a,b)	S_method_common(aTHX_ a,b)
 #endif
@@ -2958,6 +2966,8 @@
 #define avhv_exists_ent		Perl_avhv_exists_ent
 #define Perl_avhv_fetch_ent	CPerlObj::Perl_avhv_fetch_ent
 #define avhv_fetch_ent		Perl_avhv_fetch_ent
+#define Perl_avhv_store_ent	CPerlObj::Perl_avhv_store_ent
+#define avhv_store_ent		Perl_avhv_store_ent
 #define Perl_avhv_iternext	CPerlObj::Perl_avhv_iternext
 #define avhv_iternext		Perl_avhv_iternext
 #define Perl_avhv_iterval	CPerlObj::Perl_avhv_iterval
@@ -4404,6 +4414,8 @@
 #if defined(PERL_IN_AV_C) || defined(PERL_DECL_PROT)
 #define S_avhv_index_sv		CPerlObj::S_avhv_index_sv
 #define avhv_index_sv		S_avhv_index_sv
+#define S_avhv_index		CPerlObj::S_avhv_index
+#define avhv_index		S_avhv_index
 #endif
 #if defined(PERL_IN_DOOP_C) || defined(PERL_DECL_PROT)
 #define S_do_trans_CC_simple	CPerlObj::S_do_trans_CC_simple
@@ -4616,6 +4628,10 @@
 #define qsortsv			S_qsortsv
 #endif
 #if defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
+#define S_do_maybe_phash	CPerlObj::S_do_maybe_phash
+#define do_maybe_phash		S_do_maybe_phash
+#define S_do_oddball		CPerlObj::S_do_oddball
+#define do_oddball		S_do_oddball
 #define S_get_db_sub		CPerlObj::S_get_db_sub
 #define get_db_sub		S_get_db_sub
 #define S_method_common		CPerlObj::S_method_common

@@ -52,6 +52,7 @@ sections:
     perlfork		Perl fork() information
     perlthrtut		Perl threads tutorial
     perllexwarn		Perl warnings and their control
+    perlfilter		Perl source filters
     perldbmfilter	Perl DBM filters
 
     perlcompile		Perl compiler suite intro
@@ -245,12 +246,12 @@ http://www.perl.com/CPAN/src/index.html
         2) formerly known as MVS
         3) formerly known as Digital UNIX and before that DEC OSF/1     
         4) compilers: Borland, Cygwin, Mingw32 EGCS/GCC, VC++
-                                        
+
 The following platforms have been known to build Perl from source,
 but we haven't been able to verify their status for the current release,
 either because the hardware/software platforms are rare or
 because we don't have an active champion on these platforms--or both.
-					
+
         3b1             FPS             Plan 9
         AmigaOS         GENIX           PowerUX
         ConvexOS        Greenhills      RISC/os         

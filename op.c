@@ -3273,6 +3273,8 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 
     if (list_assignment(left)) {
 	dTHR;
+	OP *curop;
+
 	PL_modcount = 0;
 	PL_eval_start = right;	/* Grandfathering $[ assignment here.  Bletch.*/
 	left = mod(left, OP_AASSIGN);
@@ -3283,12 +3285,19 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	    op_free(right);
 	    return Nullop;
 	}
-	o = newBINOP(OP_AASSIGN, flags,
-		list(force_list(right)),
-		list(force_list(left)) );
+	curop = list(force_list(left));
+	o = newBINOP(OP_AASSIGN, flags, list(force_list(right)), curop);
 	o->op_private = 0 | (flags >> 8);
+	for (curop = ((LISTOP*)curop)->op_first;
+	     curop; curop = curop->op_sibling)
+	{
+	    if (curop->op_type == OP_RV2HV &&
+		((UNOP*)curop)->op_first->op_type != OP_GV) {
+		o->op_private |= OPpASSIGN_HASH;
+		break;
+	    }
+	}
 	if (!(left->op_private & OPpLVAL_INTRO)) {
-	    OP *curop;
 	    OP *lastop = o;
 	    PL_generation++;
 	    for (curop = LINKLIST(o); curop != o; curop = LINKLIST(curop)) {
@@ -3332,7 +3341,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 		lastop = curop;
 	    }
 	    if (curop != o)
-		o->op_private = OPpASSIGN_COMMON;
+		o->op_private |= OPpASSIGN_COMMON;
 	}
 	if (right && right->op_type == OP_SPLIT) {
 	    OP* tmpop;

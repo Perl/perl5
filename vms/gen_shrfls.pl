@@ -186,12 +186,6 @@ LINE: while (<CPP>) {
     print "opcode.h>> $_" if $debug > 2;
     if (/^OP \*\s/) { &scan_func($_); }
     if (/^\s*EXT/) { &scan_var($_); }
-    if (/^\s+OP_/) { &scan_enum($_); }
-    last LINE unless defined($_ = <CPP>);
-  }
-  while (/^typedef enum/ .. /^\s*\}/) {
-    print "global enum>> $_" if $debug > 2;
-    &scan_enum($_);
     last LINE unless defined($_ = <CPP>);
   }
   # Check for transition to new header file

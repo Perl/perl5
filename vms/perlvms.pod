@@ -463,7 +463,11 @@ is executed as a DCL command.  Otherwise, the first token on
 the command line is treated as the filespec of an image to 
 run, and an attempt is made to invoke it (using F<.Exe> and 
 the process defaults to expand the filespec) and pass the 
-rest of C<exec>'s argument to it as parameters.
+rest of C<exec>'s argument to it as parameters.  If the token
+has no file type, and matches a file with null type, then an
+attempt is made to determine whether the file is an executable
+image which should be invoked using C<MCR> or a text file which
+should be passed to DCL as a command procedure.
 
 You can use C<exec> in both ways within the same script, as 
 long as you call C<fork> and C<exec> in pairs.  Perl
@@ -558,9 +562,16 @@ specification (e.g. C<:> or C<]>), an attempt is made to expand it
 using  a default type of F<.Exe> and the process defaults, and if
 successful, the resulting file is invoked via C<MCR>. This allows you
 to invoke an image directly simply by passing the file specification
-to C<system>, a common Unixish idiom.  If LIST consists
-of the empty string, C<system> spawns an interactive DCL subprocess,
-in the same fashion as typiing B<SPAWN> at the DCL prompt.
+to C<system>, a common Unixish idiom.  If the token has no file type,
+and matches a file with null type, then an attempt is made to
+determine whether the file is an executable image which should be
+invoked using C<MCR> or a text file which should be passed to DCL
+as a command procedure.
+
+If LIST consists of the empty string, C<system> spawns an
+interactive DCL subprocess, in the same fashion as typiing
+B<SPAWN> at the DCL prompt.
+
 Perl waits for the subprocess to complete before continuing
 execution in the current process.  As described in L<perlfunc>,
 the return value of C<system> is a fake "status" which follows

@@ -67,7 +67,7 @@ Or is it?
 
 =head2 Introducing the method invocation arrow
 
-For now, let's say that C<Class-E<gt>method> invokes subroutine
+For now, let's say that C<< Class->method >> invokes subroutine
 C<method> in package C<Class>.  (Here, "Class" is used in its
 "category" meaning, not its "scholastic" meaning.) That's not
 completely accurate, but we'll do this one step at a time.  Now let's
@@ -176,8 +176,8 @@ This method provides the constant text for the sound itself.
       }
     }
 
-Now, when we call C<Cow-E<gt>speak>, we get a C<$class> of C<Cow> in
-C<speak>.  This in turn selects the C<Cow-E<gt>sound> method, which
+Now, when we call C<< Cow->speak >>, we get a C<$class> of C<Cow> in
+C<speak>.  This in turn selects the C<< Cow->sound >> method, which
 returns C<moooo>.  But how different would this be for the C<Horse>?
 
     { package Horse;
@@ -214,7 +214,7 @@ with the animal-specific sound:
 
 Note the added C<@ISA> array.  We'll get to that in a minute.
 
-But what happens when we invoke C<Cow-E<gt>speak> now?
+But what happens when we invoke C<< Cow->speak >> now?
 
 First, Perl constructs the argument list.  In this case, it's just
 C<Cow>.  Then Perl looks for C<Cow::speak>.  But that's not there, so
@@ -227,7 +227,7 @@ with the already frozen argument list.
 
 Inside the C<Animal::speak> subroutine, C<$class> becomes C<Cow> (the
 first argument).  So when we get to the step of invoking
-C<$class-E<gt>sound>, it'll be looking for C<Cow-E<gt>sound>, which
+C<< $class->sound >>, it'll be looking for C<< Cow->sound >>, which
 gets it on the first try without looking at C<@ISA>.  Success!
 
 =head2 A few notes about @ISA
@@ -295,13 +295,13 @@ which results in:
     a Mouse goes squeak!
     [but you can barely hear it!]
 
-Here, C<Mouse> has its own speaking routine, so C<Mouse-E<gt>speak>
-doesn't immediately invoke C<Animal-E<gt>speak>.  This is known as
+Here, C<Mouse> has its own speaking routine, so C<< Mouse->speak >>
+doesn't immediately invoke C<< Animal->speak >>.  This is known as
 "overriding".  In fact, we didn't even need to say that a C<Mouse> was
 an C<Animal> at all, since all of the methods needed for C<speak> are
 completely defined with C<Mouse>.
 
-But we've now duplicated some of the code from C<Animal-E<gt>speak>,
+But we've now duplicated some of the code from C<< Animal->speak >>,
 and this can once again be a maintenance headache.  So, can we avoid
 that?  Can we say somehow that a C<Mouse> does everything any other
 C<Animal> does, but add in the extra comment?  Sure!
@@ -322,7 +322,7 @@ First, we can invoke the C<Animal::speak> method directly:
 Note that we have to include the C<$class> parameter (almost surely
 the value of C<"Mouse">) as the first parameter to C<Animal::speak>,
 since we've stopped using the method arrow.  Why did we stop?  Well,
-if we invoke C<Animal-E<gt>speak> there, the first parameter to the
+if we invoke C<< Animal->speak >> there, the first parameter to the
 method will be C<"Animal"> not C<"Mouse">, and when time comes for it
 to call for the C<sound>, it won't have the right class to come back
 to this package.
@@ -429,7 +429,7 @@ and the C<Horse> class:
     sub sound { "neigh" }
   }
 
-This lets us invoke C<Horse-E<gt>speak> to ripple upward to
+This lets us invoke C<< Horse->speak >> to ripple upward to
 C<Animal::speak>, calling back to C<Horse::sound> to get the specific
 sound, and the output of:
 
@@ -506,7 +506,7 @@ the name:
       $$self;
     }
   }
-    
+
 Now we call for the name:
 
   print $talking->name, " says ", $talking->sound, "\n";
@@ -695,8 +695,8 @@ Let's make a sheep that has a name and a color:
 
   my $bad = bless { Name => "Evil", Color => "black" }, Sheep;
 
-so C<$bad-E<gt>{Name}> has C<Evil>, and C<$bad-E<gt>{Color}> has
-C<black>.  But we want to make C<$bad-E<gt>name> access the name, and
+so C<< $bad->{Name} >> has C<Evil>, and C<< $bad->{Color} >> has
+C<black>.  But we want to make C<< $bad->name >> access the name, and
 that's now messed up because it's expecting a scalar reference.  Not
 to worry, because that's pretty easy to fix up:
 

@@ -84,7 +84,7 @@ brackets:
 Here we've created a reference to an anonymous array of three elements
 whose final element is itself a reference to another anonymous array of three
 elements.  (The multidimensional syntax described later can be used to
-access this.  For example, after the above, C<$arrayref-E<gt>[2][1]> would have
+access this.  For example, after the above, C<< $arrayref->[2][1] >> would have
 the value "b".)
 
 Taking a reference to an enumerated list is not the same
@@ -357,7 +357,7 @@ syntactic sugar, the examples for method 2 may be written:
 
 The left side of the arrow can be any expression returning a reference,
 including a previous dereference.  Note that C<$array[$x]> is I<not> the
-same thing as C<$array-E<gt>[$x]> here:
+same thing as C<< $array->[$x] >> here:
 
     $array[$x]->{"foo"}->[0] = "January";
 
@@ -365,7 +365,7 @@ This is one of the cases we mentioned earlier in which references could
 spring into existence when in an lvalue context.  Before this
 statement, C<$array[$x]> may have been undefined.  If so, it's
 automatically defined with a hash reference so that we can look up
-C<{"foo"}> in it.  Likewise C<$array[$x]-E<gt>{"foo"}> will automatically get
+C<{"foo"}> in it.  Likewise C<< $array[$x]->{"foo"} >> will automatically get
 defined with an array reference so that we can look up C<[0]> in it.
 This process is called I<autovivification>.
 

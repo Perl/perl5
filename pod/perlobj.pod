@@ -96,8 +96,8 @@ so that your constructors may be inherited:
 	return $self;
     }
 
-Or if you expect people to call not just C<CLASS-E<gt>new()> but also
-C<$obj-E<gt>new()>, then use something like this.  The initialize()
+Or if you expect people to call not just C<< CLASS->new() >> but also
+C<< $obj->new() >>, then use something like this.  The initialize()
 method used will be of whatever $class we blessed the
 object into:
 
@@ -239,7 +239,7 @@ indirect object slot:
 
     display {find Critter "Fred"} 'Height', 'Weight';
 
-For C++ fans, there's also a syntax using -E<gt> notation that does exactly
+For C++ fans, there's also a syntax using -> notation that does exactly
 the same thing.  The parentheses are required if there are any arguments.
 
     $fred = Critter->find("Fred");
@@ -346,7 +346,7 @@ Rather than what you might have expected:
     $obj->{FIELD}->move();              # You should be so lucky.
     $ary[$i]->move;                     # Yeah, sure.
 
-The left side of ``-E<gt>'' is not so limited, because it's an infix operator,
+The left side of ``->'' is not so limited, because it's an infix operator,
 not a postfix operator.  
 
 As if that weren't bad enough, think about this: Perl must guess I<at
@@ -362,7 +362,7 @@ tries to cheat by remembering bareword C<require>s, but the grief if it
 messes up just isn't worth the years of debugging it would likely take
 you to track such subtle bugs down.
 
-The infix arrow notation using ``C<-E<gt>>'' doesn't suffer from either
+The infix arrow notation using ``C<< -> >>'' doesn't suffer from either
 of these disturbing ambiguities, so we recommend you use it exclusively.
 
 =head2 Default UNIVERSAL methods

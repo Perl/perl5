@@ -111,8 +111,8 @@ by up-casing the hash keys:
         PEERS => [ "Norbert", "Rhys", "Phineas"],
     };
 
-And so you could get at C<$rec-E<gt>{NAME}> to find "Jason", or
-C<@{ $rec-E<gt>{PEERS} }> to get at "Norbert", "Rhys", and "Phineas".
+And so you could get at C<< $rec->{NAME} >> to find "Jason", or
+C<< @{ $rec->{PEERS} } >> to get at "Norbert", "Rhys", and "Phineas".
 (Have you ever noticed how many 23-year-old programmers seem to
 be named "Jason" these days? :-)
 
@@ -542,7 +542,7 @@ and DESTROY methods as follows:
     }
 
 What happens if a derived class (which we'll call Employee) inherits
-methods from this Person base class?  Then C<Employee-E<gt>debug()>, when called
+methods from this Person base class?  Then C<< Employee->debug() >>, when called
 as a class method, manipulates $Person::Debugging not $Employee::Debugging.
 
 =head2 Class Destructors
@@ -816,7 +816,7 @@ What do we mean by the Person::new() function -- isn't that actually
 a method?  Well, in principle, yes.  A method is just a function that
 expects as its first argument a class name (package) or object
 (blessed reference).   Person::new() is the function that both the
-C<Person-E<gt>new()> method and the C<Employee-E<gt>new()> method end
+C<< Person->new() >> method and the C<< Employee->new() >> method end
 up calling.  Understand that while a method call looks a lot like a
 function call, they aren't really quite the same, and if you treat them
 as the same, you'll very soon be left with nothing but broken programs.

@@ -1024,7 +1024,7 @@ something to the server before fetching the server's response.
 The web server handing the "http" service, which is assumed to be at
 its standard port, number 80.  If your the web server you're trying to
 connect to is at a different port (like 1080 or 8080), you should specify
-as the named-parameter pair, C<PeerPort =E<gt> 8080>.  The C<autoflush>
+as the named-parameter pair, C<< PeerPort => 8080 >>.  The C<autoflush>
 method is used on the socket because otherwise the system would buffer
 up the output we sent it.  (If you're on a Mac, you'll also need to
 change every C<"\n"> in your code that sends data over the network to
@@ -1142,7 +1142,7 @@ well.
 As always, setting up a server is little bit more involved than running a client.
 The model is that the server creates a special kind of socket that
 does nothing but listen on a particular port for incoming connections.
-It does this by calling the C<IO::Socket::INET-E<gt>new()> method with
+It does this by calling the C<< IO::Socket::INET->new() >> method with
 slightly different arguments than the client did.
 
 =over

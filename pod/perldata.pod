@@ -109,14 +109,14 @@ list context to each of its arguments.  For example, if you say
 
     int( <STDIN> )
 
-the integer operation provides scalar context for the E<lt><gt>
+the integer operation provides scalar context for the <>
 operator, which responds by reading one line from STDIN and passing it
 back to the integer operation, which will then find the integer value
 of that line and return that.  If, on the other hand, you say
 
     sort( <STDIN> )
 
-then the sort operation provides list context for E<lt><gt>, which
+then the sort operation provides list context for <>, which
 will proceed to read every line available up to the end of file, and
 pass that list of lines back to the sort routine, which will then
 sort those lines and return them as a list to whatever the context
@@ -398,13 +398,13 @@ plain paranoid, you can force the correct interpretation with curly
 braces as above.
 
 A line-oriented form of quoting is based on the shell "here-document"
-syntax.  Following a C<E<lt>E<lt>> you specify a string to terminate
+syntax.  Following a C<< << >> you specify a string to terminate
 the quoted material, and all lines following the current line down to
 the terminating string are the value of the item.  The terminating
 string may be either an identifier (a word), or some quoted text.  If
 quoted, the type of quotes you use determines the treatment of the
 text, just as in regular quoting.  An unquoted identifier works like
-double quotes.  There must be no space between the C<E<lt>E<lt>> and
+double quotes.  There must be no space between the C<< << >> and
 the identifier.  (If you put a space it will be treated as a null
 identifier, which is valid, and matches the first empty line.)  The
 terminating string must appear by itself (unquoted and with no
@@ -576,8 +576,8 @@ hash.  Likewise, hashes included as parts of other lists (including
 parameters lists and return lists from functions) always flatten out into
 key/value pairs.  That's why it's good to use references sometimes.
 
-It is often more readable to use the C<=E<gt>> operator between key/value
-pairs.  The C<=E<gt>> operator is mostly just a more visually distinctive
+It is often more readable to use the C<< => >> operator between key/value
+pairs.  The C<< => >> operator is mostly just a more visually distinctive
 synonym for a comma, but it also arranges for its left-hand operand to be
 interpreted as a string--if it's a bareword that would be a legal identifier.
 This makes it nice for initializing hashes:

@@ -35,12 +35,12 @@ really type specifiers are:
     <> are used for inputting a record from a filehandle.
     \  takes a reference to something.
 
-Note that E<lt>FILEE<gt> is I<neither> the type specifier for files
-nor the name of the handle.  It is the C<E<lt>E<gt>> operator applied
+Note that <FILE> is I<neither> the type specifier for files
+nor the name of the handle.  It is the C<< <> >> operator applied
 to the handle FILE.  It reads one line (well, record - see
 L<perlvar/$/>) from the handle FILE in scalar context, or I<all> lines
 in list context.  When performing open, close, or any other operation
-besides C<E<lt>E<gt>> on files, or even talking about the handle, do
+besides C<< <> >> on files, or even talking about the handle, do
 I<not> use the brackets.  These are correct: C<eof(FH)>, C<seek(FH, 0,
 2)> and "copying from STDIN to FILE".
 
@@ -49,7 +49,7 @@ I<not> use the brackets.  These are correct: C<eof(FH)>, C<seek(FH, 0,
 Normally, a bareword doesn't need to be quoted, but in most cases
 probably should be (and must be under C<use strict>).  But a hash key
 consisting of a simple word (that isn't the name of a defined
-subroutine) and the left-hand operand to the C<=E<gt>> operator both
+subroutine) and the left-hand operand to the C<< => >> operator both
 count as though they were quoted:
 
     This                    is like this
@@ -307,10 +307,10 @@ you want to pass in a bit of code into a function:
     my $line;
     timeout( 30, sub { $line = <STDIN> } );
 
-If the code to execute had been passed in as a string, C<'$line =
-E<lt>STDINE<gt>'>, there would have been no way for the hypothetical
-timeout() function to access the lexical variable $line back in its
-caller's scope.
+If the code to execute had been passed in as a string,
+C<< '$line = <STDIN>' >>, there would have been no way for the
+hypothetical timeout() function to access the lexical variable
+$line back in its caller's scope.
 
 =head2 What is variable suicide and how can I prevent it?
 
@@ -581,10 +581,10 @@ However, dynamic variables (aka global, local, or package variables)
 are effectively shallowly bound.  Consider this just one more reason
 not to use them.  See the answer to L<"What's a closure?">.
 
-=head2 Why doesn't "my($foo) = E<lt>FILEE<gt>;" work right?
+=head2 Why doesn't "my($foo) = <FILE>;" work right?
 
 C<my()> and C<local()> give list context to the right hand side
-of C<=>.  The E<lt>FHE<gt> read operation, like so many of Perl's
+of C<=>.  The <FH> read operation, like so many of Perl's
 functions and operators, can tell which context it was called in and
 behaves appropriately.  In general, the scalar() function can help.
 This function does nothing to the data itself (contrary to popular myth)
@@ -766,7 +766,7 @@ before Perl has seen that such a package exists.  It's wisest to make
 sure your packages are all defined before you start using them, which
 will be taken care of if you use the C<use> statement instead of
 C<require>.  If not, make sure to use arrow notation (eg,
-C<Guru-E<gt>find("Samy")>) instead.  Object notation is explained in
+C<< Guru->find("Samy") >>) instead.  Object notation is explained in
 L<perlobj>.
 
 Make sure to read about creating modules in L<perlmod> and
