@@ -25,8 +25,12 @@ print "not ok 3\n" if system "echo", "ok", "3"; # directly called
 # these should probably be rewritten to match the examples in perlfunc.pod
 if (system "true") {print "not ok 4\n";} else {print "ok 4\n";}
 
-if ((system "/bin/sh -c 'exit 1'") != 256) { print "not "; }
-print "ok 5\n";
+if ($^O eq 'mpeix') {
+    print "ok 5 # skipped: status broken on MPE/iX\n";
+} else {
+    if ((system "/bin/sh -c 'exit 1'") != 256) { print "not "; }
+    print "ok 5\n";
+}
 
 $rc = system "lskdfj";
 if ($rc == 255 << 8 or $rc == -1 and

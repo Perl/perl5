@@ -169,20 +169,24 @@ $server = IO::Socket->new(Domain => AF_INET,
                           LocalAddr => 'localhost');
 $port = $server->sockport;
 
-if ($pid = fork()) {
-    my $buf;
-    $server->recv($buf, 100);
-    print $buf;
-} elsif (defined($pid)) {
-    #child
-    $sock = IO::Socket::INET->new(Proto => 'udp',
-                                  PeerAddr => "localhost:$port");
-    $sock->send("ok 12\n");
-    sleep(1);
-    $sock->send("ok 12\n");  # send another one to be sure
-    exit;
+if ($^O eq 'mpeix') {
+    print("ok 12 # skipped\n")
 } else {
-    die;
+    if ($pid = fork()) {
+        my $buf;
+        $server->recv($buf, 100);
+        print $buf;
+    } elsif (defined($pid)) {
+        #child
+        $sock = IO::Socket::INET->new(Proto => 'udp',
+                                      PeerAddr => "localhost:$port");
+        $sock->send("ok 12\n");
+        sleep(1);
+        $sock->send("ok 12\n");  # send another one to be sure
+        exit;
+    } else {
+        die;
+    }
 }
 
 print "not " unless $server->blocking;

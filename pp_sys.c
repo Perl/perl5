@@ -4728,7 +4728,7 @@ PP(pp_gpwuid)
 PP(pp_gpwent)
 {
     djSP;
-#if defined(HAS_PASSWD) && defined(HAS_GETPWENT)
+#ifdef HAS_PASSWD
     I32 which = PL_op->op_type;
     register SV *sv;
     struct passwd *pwent;
@@ -4742,7 +4742,11 @@ PP(pp_gpwent)
     else if (which == OP_GPWUID)
 	pwent = getpwuid(POPi);
     else
+#ifdef HAS_GETPWENT
 	pwent = (struct passwd *)getpwent();
+#else
+	DIE(aTHX_ PL_no_func, "getpwent");
+#endif
 
 #ifdef HAS_GETSPNAM
     if (which == OP_GPWNAM) {
@@ -4894,7 +4898,7 @@ PP(pp_ggrgid)
 PP(pp_ggrent)
 {
     djSP;
-#if defined(HAS_GROUP) && defined(HAS_GETGRENT)
+#ifdef HAS_GROUP
     I32 which = PL_op->op_type;
     register char **elem;
     register SV *sv;
@@ -4906,7 +4910,11 @@ PP(pp_ggrent)
     else if (which == OP_GGRGID)
 	grent = (struct group *)getgrgid(POPi);
     else
+#ifdef HAS_GETGRENT
 	grent = (struct group *)getgrent();
+#else
+        DIE(aTHX_ PL_no_func, "getgrent");
+#endif
 
     EXTEND(SP, 4);
     if (GIMME != G_ARRAY) {
