@@ -76,7 +76,11 @@ icc)# Apparently, SCO's cc gives rather verbose warnings
 	esac
 	;;
 
-*)	# Apparently, SCO's cc gives rather verbose warnings
+*)	# Apparently, miniperl core dumps if -O is used.
+	case "$optimize" in
+	'') optimize=none ;;
+	esac
+	# Apparently, SCO's cc gives rather verbose warnings
 	# Set -w0 to turn them off.
 	case $scorls in
 	3) ccflags="$ccflags -W0 -quiet -U M_XENIX" ;;
