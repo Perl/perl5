@@ -3203,7 +3203,7 @@ PP(pp_unpack)
     unsigned int auint;
     U32 aulong;
 #ifdef HAS_QUAD
-    unsigned Quad_t auquad;
+    Uquad_t auquad;
 #endif
     char *aptr;
     float afloat;
@@ -3760,11 +3760,11 @@ PP(pp_unpack)
 	    EXTEND(SP, len);
 	    EXTEND_MORTAL(len);
 	    while (len-- > 0) {
-		if (s + sizeof(unsigned Quad_t) > strend)
+		if (s + sizeof(Uquad_t) > strend)
 		    auquad = 0;
 		else {
-		    Copy(s, &auquad, 1, unsigned Quad_t);
-		    s += sizeof(unsigned Quad_t);
+		    Copy(s, &auquad, 1, Uquad_t);
+		    s += sizeof(Uquad_t);
 		}
 		sv = NEWSV(43, 0);
 		if (auquad <= UV_MAX)
@@ -4051,7 +4051,7 @@ PP(pp_pack)
     U32 aulong;
 #ifdef HAS_QUAD
     Quad_t aquad;
-    unsigned Quad_t auquad;
+    Uquad_t auquad;
 #endif
     char *aptr;
     float afloat;
@@ -4438,8 +4438,8 @@ PP(pp_pack)
 	case 'Q':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
-		auquad = (unsigned Quad_t)SvIV(fromstr);
-		sv_catpvn(cat, (char*)&auquad, sizeof(unsigned Quad_t));
+		auquad = (Uquad_t)SvIV(fromstr);
+		sv_catpvn(cat, (char*)&auquad, sizeof(Uquad_t));
 	    }
 	    break;
 	case 'q':

@@ -855,6 +855,7 @@ Free_t   Perl_free _((Malloc_t where));
 #ifndef Quad_t
 #    if LONGSIZE == 8
 #       define Quad_t  long
+#       define Uquad_t unsigned long
 #       define PERL_QUAD_IS_LONG
 #    endif
 #endif
@@ -862,6 +863,7 @@ Free_t   Perl_free _((Malloc_t where));
 #ifndef Quad_t
 #    if INTSIZE == 8
 #       define Quad_t  int
+#       define Uquad_t unsigned int
 #       define PERL_QUAD_IS_INT
 #    endif
 #endif
@@ -870,6 +872,7 @@ Free_t   Perl_free _((Malloc_t where));
 #    ifdef USE_LONG_LONG /* See above note about LP32. --jhi */
 #       if defined(HAS_LONG_LONG) && LONGLONGSIZE == 8
 #	    define Quad_t  long long
+#           define Uquad_t unsigned long long
 #           define PERL_QUAD_IS_LONG_LONG
 #       endif
 #    endif
@@ -886,8 +889,9 @@ Free_t   Perl_free _((Malloc_t where));
 #ifdef Quad_t
 #   define HAS_QUAD
 #   ifndef Uquad_t
-    /* Note that if your Quad_t is a typedef you *must* have defined
-     * also Uquad_t yourself because 'unsigned type' is illegal. */
+    /* Note that if your Quad_t is a typedef (not a #define) you *MUST*
+     * have defined by now Uquad_t yourself because 'unsigned type'
+     * is illegal. */
 #       define Uquad_t unsigned Quad_t
 #   endif
 #endif
