@@ -234,6 +234,7 @@ Time::HiRes
 Time::Local
 Time::Piece
 UNIVERSAL
+User::grent
 User::pwent
 XS::Typemap
 attrs

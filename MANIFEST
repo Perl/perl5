@@ -1669,6 +1669,7 @@ t/lib/u-reftype.t	Scalar::Util
 t/lib/u-sum.t		List::Util
 t/lib/u-tainted.t	Scalar::Util
 t/lib/u-weak.t		Scalar::Util
+t/lib/user-grent.t	See if User::grwent works
 t/lib/user-pwent.t	See if User::pwent works
 t/lib/xs-typemap.t	test that typemaps work
 t/op/64bitint.t		See if 64 bit integers work
