@@ -82,7 +82,8 @@ be used.
 
 	$ perl5 -d:DProf test.pl
 
-Then run dprofpp to analyze the profile.
+Then run dprofpp to analyze the profile.  The output of dprofpp depends
+on the flags to the program and the version of Perl you're using.
 
 	$ dprofpp -u
 	Total Elapsed Time =    1.67 Seconds
@@ -100,6 +101,44 @@ data.  The above two commands can be executed with one dprofpp command.
 	$ dprofpp -u -p test.pl
 
 Consult L<Devel::DProf/"PROFILE FORMAT"> for a description of the raw profile.
+
+=head1 OUTPUT
+
+Columns are:
+
+=over 4
+
+=item %Time
+
+Percentage of time spent in this routine.
+
+=item #Calls
+
+Number of calls to this routine.
+
+=item sec/call
+
+Average number of seconds per call to this routine.
+
+=item Name
+
+Name of routine.
+
+=item CumulS
+
+Time (in seconds) spent in this routine and routines called from it.
+
+=item ExclSec
+
+Time (in seconds) spent in this routine (not including those called
+from it).
+
+=item Csec/c
+
+Average time (in seconds) spent in each call of this routine
+(including those called from it).
+
+=back
 
 =head1 OPTIONS
 
