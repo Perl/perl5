@@ -87,7 +87,7 @@ sub Q ;
 
 # Global Constants
 
-$XSUBPP_version = "1.9505";
+$XSUBPP_version = "1.9506";
 
 my ($Is_VMS, $SymSet);
 if ($^O eq 'VMS') {
@@ -371,6 +371,10 @@ sub INPUT_handler {
 sub OUTPUT_handler {
     for (;  !/^$BLOCK_re/o;  $_ = shift(@line)) {
 	next unless /\S/;
+	if (/^\s*SETMAGIC\s*:\s*(ENABLE|DISABLE)\s*/) {
+	    $DoSetMagic = ($1 eq "ENABLE" ? 1 : 0);
+	    next;
+	}
 	my ($outarg, $outcode) = /^\s*(\S+)\s*(.*?)\s*$/s ;
 	blurt ("Error: duplicate OUTPUT argument '$outarg' ignored"), next
 	    if $outargs{$outarg} ++ ;
@@ -384,11 +388,12 @@ sub OUTPUT_handler {
 	    unless defined($args_match{$outarg});
 	blurt("Error: No input definition for OUTPUT argument '$outarg' - ignored"), next
 	    unless defined $var_types{$outarg} ;
+	$var_num = $args_match{$outarg};
 	if ($outcode) {
 	    print "\t$outcode\n";
+	    print "\tSvSETMAGIC(ST(" , $var_num-1 , "));\n" if $DoSetMagic;
 	} else {
-	    $var_num = $args_match{$outarg};
-	    &generate_output($var_types{$outarg}, $var_num, $outarg); 
+	    &generate_output($var_types{$outarg}, $var_num, $outarg, $DoSetMagic);
 	}
     }
 }
@@ -875,6 +880,7 @@ while (fetch_para()) {
     }
     $XSStack[$XSS_work_idx]{functions}{$Full_func_name} ++ ;
     %XsubAliases = %XsubAliasValues = ();
+    $DoSetMagic = 1;
 
     @args = split(/\s*,\s*/, $orig_args);
     if (defined($class)) {
@@ -1059,7 +1065,8 @@ EOF
 	if ($gotRETVAL && $RETVAL_code) {
 	    print "\t$RETVAL_code\n";
 	} elsif ($gotRETVAL || $wantRETVAL) {
-	    &generate_output($ret_type, 0, 'RETVAL');
+	    # RETVAL almost never needs SvSETMAGIC()
+	    &generate_output($ret_type, 0, 'RETVAL', 0);
 	}
 
 	# do cleanup
@@ -1283,7 +1290,7 @@ sub generate_init {
 }
 
 sub generate_output {
-    local($type, $num, $var) = @_;
+    local($type, $num, $var, $do_setmagic) = @_;
     local($arg) = "ST(" . ($num - ($num != 0)) . ")";
     local($argoff) = $num - 1;
     local($ntype);
@@ -1291,6 +1298,7 @@ sub generate_output {
     $type = TidyType($type) ;
     if ($type =~ /^array\(([^,]*),(.*)\)/) {
 	    print "\tsv_setpvn($arg, (char *)$var, $2 * sizeof($1)), XFree((char *)$var);\n";
+	    print "\tSvSETMAGIC($arg);\n" if $do_setmagic;
     } else {
 	    blurt("Error: '$type' not in typemap"), return
 		unless defined($type_kind{$type});
@@ -1312,6 +1320,7 @@ sub generate_output {
 		$subexpr =~ s/\n\t/\n\t\t/g;
 		$expr =~ s/DO_ARRAY_ELEM\n/$subexpr/;
 		eval "print qq\a$expr\a";
+		print "\t\tSvSETMAGIC(ST(ix_$var));\n" if $do_setmagic;
 	    }
 	    elsif ($var eq 'RETVAL') {
 		if ($expr =~ /^\t\$arg = new/) {
@@ -1319,6 +1328,7 @@ sub generate_output {
 		    # mortalize it.
 		    eval "print qq\a$expr\a";
 		    print "\tsv_2mortal(ST(0));\n";
+		    print "\tSvSETMAGIC(ST(0));\n" if $do_setmagic;
 		}
 		elsif ($expr =~ /^\s*\$arg\s*=/) {
 		    # We expect that $arg has refcnt >=1, so we need
@@ -1329,6 +1339,7 @@ sub generate_output {
 		    # ignored by REFCNT_dec. Builtin values have REFCNT==0.
 		    eval "print qq\a$expr\a";
 		    print "\tif (SvREFCNT(ST(0))) sv_2mortal(ST(0));\n";
+		    print "\tSvSETMAGIC(ST(0));\n" if $do_setmagic;
 		}
 		else {
 		    # Just hope that the entry would safely write it
@@ -1337,10 +1348,12 @@ sub generate_output {
 		    # works too.
 		    print "\tST(0) = sv_newmortal();\n";
 		    eval "print qq\a$expr\a";
+		    # new mortals don't have set magic
 		}
 	    }
 	    elsif ($arg =~ /^ST\(\d+\)$/) {
 		eval "print qq\a$expr\a";
+		print "\tSvSETMAGIC($arg);\n" if $do_setmagic;
 	    }
     }
 }

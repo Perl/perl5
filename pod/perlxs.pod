@@ -277,6 +277,17 @@ typemap.
           OUTPUT:
           timep sv_setnv(ST(1), (double)timep);
 
+B<xsubpp> emits an automatic C<SvSETMAGIC()> for all parameters in the
+OUTPUT section of the XSUB, except RETVAL.  This is the usually desired
+behavior, as it takes care of properly invoking 'set' magic on output
+parameters (needed for hash or array element parameters that must be
+created if they didn't exist).  If for some reason, this behavior is
+not desired, the OUTPUT section may contain a C<SETMAGIC: DISABLE> line
+to disable it for the remainder of the parameters in the OUTPUT section.
+Likewise,  C<SETMAGIC: ENABLE> can be used to reenable it for the
+remainder of the OUTPUT section.  See L<perlguts> for more details
+about 'set' magic.
+
 =head2 The CODE: Keyword
 
 This keyword is used in more complicated XSUBs which require
@@ -571,6 +582,9 @@ Now the rpcb_gettime() function can be used from Perl with
 the following statement.
 
      ($status, $timep) = rpcb_gettime("localhost");
+
+When handling output parameters with a PPCODE section, be sure to handle
+'set' magic properly.  See L<perlguts> for details about 'set' magic.
 
 =head2 Returning Undef And Empty Lists
 
