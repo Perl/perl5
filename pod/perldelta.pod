@@ -1264,7 +1264,7 @@ C<pod2html> now produces XHTML 1.0.
 
 =item *
 
-C<pod2html> now understands POD written using different line endings\
+C<pod2html> now understands POD written using different line endings
 (PC-like CRLF versus UNIX-like LF versus MacClassic-like CR).
 
 =item *
