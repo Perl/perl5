@@ -82,7 +82,7 @@ S_Slab_Free(pTHX_ void *op)
 
 #else
 #define NewOp(m, var, c, type) Newz(m, var, c, type)
-#define FreeOp(p) SafeFree(p)
+#define FreeOp(p) Safefree(p)
 #endif
 /*
  * In the following definition, the ", Nullop" is just to make the compiler
