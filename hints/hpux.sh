@@ -189,15 +189,13 @@ esac'
     case "$ccisgcc" in
     "$define") ;;
     *) # The strict ANSI mode (-Aa) doesn't like the LL suffixes.
+       ccflags=`echo " $ccflags "|sed 's@ -Aa @ @g'`
        case "$ccflags" in
-       *-Aa*)
-	    echo "(Changing from strict ANSI compilation to extended because of 64-bitness)"
-	    ccflags=`echo $ccflags|sed 's@ -Aa @ -Ae @'`
-	    ;;
+       *-Ae*) ;;
        *) ccflags="$ccflags -Ae" ;;
        esac
        ;;
-    esac    
+    esac
 
     set `echo " $libswanted " | sed -e 's@ dl @ @'`
     libswanted="$*"
@@ -395,13 +393,12 @@ case "$uselargefiles" in
 	ccflags="$ccflags -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
 
         # The strict ANSI mode (-Aa) doesn't like large files.
-	case "$ccflags" in
-	-Aa*)
-	    echo "(Changing from strict ANSI compilation to extended because of large files)"
-	    ccflags=`echo $ccflags|sed 's@ -Aa @ -Ae @'`
-	    ;;
-	*)  ccflags="$ccflags -Ae" ;;
-	esac
+        ccflags=`echo " $ccflags "|sed 's@ -Aa @ @g'`
+        case "$ccflags" in
+        *-Ae*) ;;
+        *) ccflags="$ccflags -Ae" ;;
+        esac
+
 	;;
 esac
 EOCBU
