@@ -657,6 +657,10 @@ perl_destruct(pTHXx)
     SvREFCNT_dec(PL_fdpid);		/* needed in io_close() */
     PL_fdpid = Nullav;
 
+#ifdef HAVE_INTERP_INTERN
+    sys_intern_clear();
+#endif
+
     /* Destruct the global string table. */
     {
 	/* Yell and reset the HeVAL() slots that are still holding refcounts,
