@@ -53,6 +53,7 @@ toroff=`
     $mandir/perltie.1	\
     $mandir/perlbot.1	\
     $mandir/perlipc.1	\
+    $mandir/perlthrtut.1	\
     $mandir/perldebug.1	\
     $mandir/perldiag.1	\
     $mandir/perlsec.1	\
@@ -101,6 +102,7 @@ toroff=`
     $libdir/constant.3	\
     $libdir/diagnostics.3	\
     $libdir/fields.3	\
+    $libdir/filetest.3	\
     $libdir/integer.3	\
     $libdir/less.3	\
     $libdir/lib.3	\
@@ -151,6 +153,7 @@ toroff=`
     $libdir/Devel::SelfStubber.3	\
     $libdir/DirHandle.3	\
     $libdir/DynaLoader.3	\
+    $libdir/Dumpvalue.3	\
     $libdir/English.3	\
     $libdir/Env.3	\
     $libdir/Errno.3	\
