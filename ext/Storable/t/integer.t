@@ -50,7 +50,7 @@ my @processes = (["dclone", \&do_clone],
                  ["freeze/thaw", \&freeze_and_thaw],
                  ["nfreeze/thaw", \&nfreeze_and_thaw],
                  ["store/retrieve", \&store_and_retrieve],
-                 ["nstore/retrieve", \&store_and_retrieve],
+                 ["nstore/retrieve", \&nstore_and_retrieve],
                 );
 my @numbers =
   (# IV bounds of 8 bits
