@@ -105,6 +105,150 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  7064] By: jhi                                   on 2000/09/12  14:54:54
+        Log: Retract #7062, the pod tests are not ready.
+     Branch: perl
+	   ! t/TEST t/harness
+____________________________________________________________________________
+[  7063] By: jhi                                   on 2000/09/12  14:25:41
+        Log: The #7054 truncated Configure badly.
+     Branch: metaconfig/U/perl
+	   ! End.U
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[  7062] By: jhi                                   on 2000/09/12  14:08:32
+        Log: Subject: [ID 20000911.009] t/pod/*.t tests not run by harness or make test
+             From: sthoenna@efn.org
+             Date: Mon, 11 Sep 2000 17:56:47 -0700 (PDT)
+             Message-Id: <200009120056.e8C0ulZ21635@garcia.efn.org>
+     Branch: perl
+	   ! t/TEST t/harness
+____________________________________________________________________________
+[  7061] By: jhi                                   on 2000/09/12  14:07:18
+        Log: Subject: [ID 20000911.011] misplaced typemap in perlxs.pod
+             From: sthoenna@efn.org
+             Date: Mon, 11 Sep 2000 22:07:21 -0700 (PDT)
+             Message-Id: <200009120507.e8C57LA02461@garcia.efn.org>
+     Branch: perl
+	   ! pod/perlxs.pod
+____________________________________________________________________________
+[  7060] By: jhi                                   on 2000/09/12  14:06:08
+        Log: Break up the myconfig lines a bit.
+             
+             Subject: perlbug/perl -V output format
+             From: sthoenna@efn.org
+             Date: Tue, 12 Sep 2000 00:04:11 -0700 (PDT)
+             Message-Id: <200009120704.e8C74BX10562@garcia.efn.org>
+     Branch: perl
+	   ! myconfig.SH
+____________________________________________________________________________
+[  7059] By: jhi                                   on 2000/09/12  14:05:04
+        Log: Test for the #7049.
+             
+             Subject: Re: [PATCH] Re: [ID 20000910.001] Not OK: perl v5.7.0 +DEVEL7044 on    i686-linux 2.2.16-raid (UNINSTALLED)
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 12 Sep 2000 06:42:01 +0200
+             Message-ID: <m3k8cigr1i.fsf@ak-71.mind.de>
+     Branch: perl
+	   ! t/op/my.t
+____________________________________________________________________________
+[  7058] By: jhi                                   on 2000/09/12  14:03:05
+        Log: Subject: [patch: perl@7045] vms updates
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Mon, 11 Sep 2000 18:41:48 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10009111840030.339348-100000@aspara.forte.com>
+     Branch: perl
+	   ! configure.com lib/ExtUtils/MM_VMS.pm vms/descrip_mms.template
+____________________________________________________________________________
+[  7057] By: jhi                                   on 2000/09/12  14:00:51
+        Log: Subject: [ID 20000911.008] Not OK: perl v5.7.0 +DEVEL7048 on os2-64int-ld 2.30 (UNINSTALLED)
+             From: sthoenna@efn.org
+             Date: Mon, 11 Sep 2000 16:28:13 -0700 (PDT)
+             Message-Id: <200009112328.e8BNSD616812@garcia.efn.org>
+     Branch: perl
+	   ! t/op/64bitint.t
+____________________________________________________________________________
+[  7056] By: jhi                                   on 2000/09/12  13:58:14
+        Log: Subject: [patch] perlfunc.pod -- POSIX::sigpause should be POSIX::pause
+             From: Jeff Pinyan <jeffp@crusoe.net>
+             Date: Sun, 10 Sep 2000 12:01:21 -0400 (EDT)
+             Message-ID: <Pine.GSO.4.21.0009101200190.12441-100000@crusoe.crusoe.net>
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[  7055] By: jhi                                   on 2000/09/12  13:56:32
+        Log: Do in VMS as the #7054 does.
+     Branch: perl
+	   ! configure.com
+____________________________________________________________________________
+[  7054] By: jhi                                   on 2000/09/12  13:50:31
+        Log: Subject: RE: [Patch 5.7.0] Removing -ldb from the core build
+             From: "Paul Marquess" <paul_marquess@yahoo.co.uk>
+             Date: Mon, 11 Sep 2000 08:33:09 +0100
+             Message-ID: <000e01c01bc2$88b2d2c0$0e14140a@bfs.phone.com>
+     Branch: metaconfig/U/perl
+	   ! End.U
+     Branch: perl
+	   ! Configure Makefile.SH config_h.SH lib/ExtUtils/Embed.pm
+	   ! lib/ExtUtils/Liblist.pm lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[  7053] By: jhi                                   on 2000/09/12  13:29:19
+        Log: Subject:  [PATCH] Perl 5.6.0, 5.7.0 ... vms/test.com to eliminate spurious NL's in test output
+             From: lane@DUPHY4.Physics.Drexel.Edu (Charles Lane)
+             Date:     Tue, 12 Sep 2000 08:35:59 EDT
+             Message-Id: <000912081130.13ca9@DUPHY4.Physics.Drexel.Edu>
+     Branch: perl
+	   ! vms/test.com
+____________________________________________________________________________
+[  7052] By: jhi                                   on 2000/09/11  23:01:50
+        Log: Document the SvUTF8*().
+     Branch: perl
+	   ! pod/perlapi.pod sv.h
+____________________________________________________________________________
+[  7051] By: gsar                                  on 2000/09/11  14:46:30
+        Log: C<@a = @b = split(...)> optimization coredumps under ithreads
+             (missed a spot when fixing up op_pmreplroot hack for ithreads)
+     Branch: perl
+	   ! op.c t/op/split.t
+____________________________________________________________________________
+[  7050] By: nick                                  on 2000/09/11  10:03:51
+        Log: Modern Borland C now seems to have anon unions for info.wProcessorArchitecture
+             
+             Subject: borland C++ win32.c tweak
+             From: Vadim Konovalov <vkonovalov@lucent.com>
+             Message-ID: <402099F49BEED211999700805FC7359F6FB379@ru0028exch01.spb.lucent.com>
+             Date: Mon, 11 Sep 2000 11:22:33 +0400
+     Branch: perl
+	   ! win32/win32.c
+____________________________________________________________________________
+[  7049] By: nick                                  on 2000/09/11  09:57:33
+        Log: Point fix for s/// on foreach (keys %xxx).
+     Branch: perl
+	   ! pp_hot.c
+____________________________________________________________________________
+[  7048] By: jhi                                   on 2000/09/10  23:37:09
+        Log: Silence t/pod/*.t about alternate quote-mappings now implemented
+             by Pod::Text, from Brad Appleton.
+     Branch: perl
+	   ! t/pod/testp2pt.pl
+____________________________________________________________________________
+[  7047] By: jhi                                   on 2000/09/10  14:32:53
+        Log: Upgrade to podlators-1.03 (Pod::Man 1.07 and Pod::Text 2.05),
+             by Russ Allbery.
+     Branch: perl
+	   ! lib/Pod/Man.pm lib/Pod/Text.pm pod/pod2man.PL pod/pod2text.PL
+____________________________________________________________________________
+[  7046] By: jhi                                   on 2000/09/10  14:15:08
+        Log: Upgrade to CPAN 1.57_65, from Andreas König.
+     Branch: perl
+	   ! lib/CPAN.pm lib/CPAN/FirstTime.pm
+____________________________________________________________________________
+[  7045] By: jhi                                   on 2000/09/08  21:36:32
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  7044] By: jhi                                   on 2000/09/08  21:29:56
         Log: Subject: [PATCH: 5.7.0] proper setting for isnan for DECC 5.3
              From: Peter Prymmer <pvhp@forte.com>
