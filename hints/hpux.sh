@@ -139,26 +139,57 @@ else
 	selecttype='int *'
 fi
 
-# Under 10.X, a threaded perl can be built, but it needs
-# libcma and OLD_PTHREADS_API.  Also <pthread.h> needs to
-# be #included before any other includes (in perl.h)
-if [ "$xxOsRevMajor" -eq 10 -a "X$usethreads" = "X$define" ]; then
+# This script UU/usethreads.cbu will get 'called-back' by Configure 
+# after it has prompted the user for whether to use threads.
+cat > UU/usethreads.cbu <<'EOCBU'
+case "$usethreads" in
+$define|true|[yY]*)
+        if [ "$xxOsRevMajor" -lt 10 ]; then
+            cat <<EOM >&4
+HP-UX $xxOsRevMajor cannot support POSIX threads.
+Consider upgrading to at least HP-UX 11.
+Cannot continue, aborting.
+EOM
+            exit 1
+        fi
+        case "$xxOsRevMajor" in
+        10)
+            # Under 10.X, a threaded perl can be built, but it needs
+            # libcma and OLD_PTHREADS_API.  Also <pthread.h> needs to
+            # be #included before any other includes (in perl.h)
+            if [ ! -f /usr/include/pthread.h -o ! -f /usr/lib/libcma.sl ]; then
+                cat <<EOM >&4
+In HP-UX 10.X for POSIX threads you need both of the files
+/usr/include/pthread.h and /usr/lib/libcma.sl.
+Either you must install the CMA package or you must upgrade to HP-UX 11.
+Cannot continue, aborting.
+EOM
+     	        exit 1
+            fi
 
-    # HP-UX 10.X uses the old pthreads API
-    case "$d_oldpthreads" in
-    '') d_oldpthreads="$define" ;;
-    esac
+            # HP-UX 10.X uses the old pthreads API
+            case "$d_oldpthreads" in
+            '') d_oldpthreads="$define" ;;
+            esac
 
-    # include libcma before all the others
-    libswanted="cma $libswanted"
+            # include libcma before all the others
+            libswanted="cma $libswanted"
 
-    # tell perl.h to include <pthread.h> before other include files
-    ccflags="$ccflags -DPTHREAD_H_FIRST"
+            # tell perl.h to include <pthread.h> before other include files
+            ccflags="$ccflags -DPTHREAD_H_FIRST"
 
-    # CMA redefines select to cma_select, and cma_select expects int *
-    # instead of fd_set * (just like 9.X)
-    selecttype='int *'
-fi
+            # CMA redefines select to cma_select, and cma_select expects int *
+            # instead of fd_set * (just like 9.X)
+            selecttype='int *'
+            ;;
+        11 | 12) # 12 may want upping the _POSIX_C_SOURCE
+            ccflags="$ccflags -D_POSIX_C_SOURCE=199506L"
+            libswanted="$libswanted pthread"
+	    ;;
+        esac
+	;;
+esac
+EOCBU
 
 # Remove bad libraries that will cause problems
 # (This doesn't remove libraries that don't actually exist)

@@ -71,32 +71,41 @@ lddlflags='-bhalt:4 -bM:SRE -bI:$(PERL_INC)/perl.exp -bE:$(BASEEXT).exp -b noent
 ;;
 esac
 
-if [ "X$usethreads" = "X$define" ]; then
-    ccflags="$ccflags -DNEED_PTHREAD_INIT"
-    case "$cc" in
-    xlc_r | cc_r)
-	;;
-    cc | '') 
-	cc=xlc_r # Let us be stricter.
-        ;;
-    *)
-	cat >&4 <<EOM
-Unknown C compiler '$cc'.
-For pthreads you should use the AIX C compilers xlc_r or cc_r.
+# This script UU/usethreads.cbu will get 'called-back' by Configure 
+# after it has prompted the user for whether to use threads.
+cat > UU/usethreads.cbu <<'EOCBU'
+case "$usethreads" in
+$define|true|[yY]*)
+        ccflags="$ccflags -DNEED_PTHREAD_INIT"
+        case "$cc" in
+        xlc_r) ;;
+        cc) 
+	    echo >&4 "Switching cc to xlc_r because of POSIX threads."
+	    cc=xlc_r
+            ;;
+        '' | cc_r) 
+	    cc=xlc_r
+            ;;
+        *)
+ 	    cat >&4 <<EOM
+For pthreads you should use the AIX C compiler xlc_r.
+(now your compiler was '$cc')
 Cannot continue, aborting.
 EOM
-	exit 1
+ 	    exit 1
+	    ;;
+        esac
+
+        # Add the POSIX threads library and the re-entrant libc.
+
+        lddlflags=`echo $lddlflags | sed 's/ -lc$/ -lpthreads -lc_r -lc/'`
+
+        # Add the c_r library to the list of wanted libraries.
+        # Make sure the c_r library is before the c library or
+        # make will fail.
+        set `echo X "$libswanted "| sed -e 's/ c / c_r c /'`
+        shift
+        libswanted="$*"
 	;;
-    esac
-
-    # Add the POSIX threads library and the re-entrant libc.
-
-    lddlflags=`echo $lddlflags | sed 's/ -lc$/ -lpthreads -lc_r -lc/'`
-
-    # Add the c_r library to the list of libraries wanted
-    # Make sure the c_r library is before the c library or
-    # make will fail.
-    set `echo X "$libswanted "| sed -e 's/ c / c_r c /'`
-    shift
-    libswanted="$*"
-fi
+esac
+EOCBU

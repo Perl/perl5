@@ -2408,23 +2408,18 @@ To do so, Configure must be run with -Dusethreads.
 (See README.threads for details.)
 EOM
 case "$usethreads" in
-$define|true|[yY]*)	dflt='y';;
+$define|true|[yY]*)     dflt='y';;
 *) dflt='n';;
 esac
 rp='Build a threading Perl?'
 . ./myread
 case "$ans" in
-y|Y)	val="$define" ;;     
+y|Y)    val="$define" ;;     
 *)      val="$undef" ;;
 esac
 set usethreads
 eval $setvar 
-: Look for a hint-file generated 'call-back-unit'.  Now that the
-: user has specified if a threading perl is to be built, we may need 
-: to set or change some other defaults.
-if $test -f usethreads.cbu; then
-    . ./usethreads.cbu
-fi
+
 case "$d_oldpthreads" in
 '')	: Configure tests would be welcome here.  For now, assume undef.
 	val="$undef" ;;
@@ -2432,6 +2427,32 @@ case "$d_oldpthreads" in
 esac
 set d_oldpthreads
 eval $setvar
+
+
+case "$usethreads" in
+"$define"|true|[yY]*)
+: Look for a hint-file generated 'call-back-unit'.  If the
+: user has specified that a threading perl is to be built,
+: we may need to set or change some other defaults.
+	if $test -f usethreads.cbu; then
+		. ./usethreads.cbu
+	fi
+	case "$osname" in
+	aix|dec_osf|dos_djgpp|freebsd|hpux|irix|linux|os2|solaris|vmesa)
+		# Known thread-capable platforms.
+		;;
+	*)
+	        cat >&4 <<EOM
+$osname is not known to support threads.
+Please let me (jhi@iki.fi) know how to do that.
+
+Cannot continue, aborting.
+EOM
+		exit 1
+	;;
+    	esac # $osname
+    ;;
+esac # $usethreads
 
 : determine the architecture name
 echo " "
