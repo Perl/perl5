@@ -305,10 +305,7 @@ ok ${^TAINT} == 0;
 # 5.6.1 had a bug: @+ and @- were not properly interpolated
 # into double-quoted strings
 # 20020414 mjd-perl-patch+@plover.com
-{
-    no warnings 'ambiguous';
-    "I like pie" =~ /(I) (like) (pie)/;
-    ok "@-" eq  "0 0 2 7";
-    ok "@+" eq "10 1 6 10";
-}
+"I like pie" =~ /(I) (like) (pie)/;
+ok "@-" eq  "0 0 2 7";
+ok "@+" eq "10 1 6 10";
 
