@@ -163,7 +163,8 @@ sub _tmpdir {
 
 sub tmpdir {
     return $tmpdir if defined $tmpdir;
-    $tmpdir = _tmpdir( $ENV{TMPDIR}, "/tmp" );
+    my $self = shift;
+    $tmpdir = $self->_tmpdir( $ENV{TMPDIR}, "/tmp" );
 }
 
 =item updir
