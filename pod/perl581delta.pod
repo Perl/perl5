@@ -162,9 +162,6 @@ interact at interfaces like I/O and for example the command line
 arguments.  See L<perlrun/-C> and L<perlrun/PERL_UNICODE> for more
 information.
 
-You can also now use safe signals with POSIX::SigAction.
-See L<POSIX/POSIX::SigAction>.
-
 =head2 Unsafe signals again available
 
 In Perl 5.8.0 the so-called "safe signals" were introduced.  This
@@ -185,6 +182,9 @@ Therefore perl 5.8.1 introduces a "backdoor" to restore the pre-5.8.0
 PERL_SIGNALS to C<unsafe>, and the old immediate (and unsafe)
 signal handling behaviour returns.  See L<perlrun/PERL_SIGNALS>
 and L<perlipc/"Deferred Signals (Safe Signals)">.
+
+In completely unrelated news, you can now use safe signals with
+POSIX::SigAction.  See L<POSIX/POSIX::SigAction>.
 
 =head2 Tied Arrays with Negative Array Indices
 
