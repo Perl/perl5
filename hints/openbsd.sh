@@ -112,6 +112,11 @@ $define|true|[yY]*)
 		libswanted="$*"
 	;;
 	esac
+	case "$osvers" in
+	[012].*|3.[0-3])
+        	# Broken at least up to OpenBSD 3.2, we'll see about 3.3.
+		d_getservbyname_r=$undef ;;
+	esac
 esac
 EOCBU
 
