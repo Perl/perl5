@@ -318,6 +318,7 @@ libswanted_uselargefiles="`getconf XBS5_ILP32_OFFBIG_LIBS 2>/dev/null|sed -e 's@
 		ccflags="`echo $ccflags | sed -e 's@ -b@ -Wl,-b@g'`"
 		ldflags="`echo ' '$ldflags | sed -e 's@ -b@ -Wl,-b@g'`"
 		lddlflags="`echo ' '$lddlflags | sed -e 's@ -b@ -Wl,-b@g'`"
+		lddlflags="`echo ' '$lddlflags | sed -e 's@ -G @ -Wl,-G @g'`"
 		ld='gcc'
 		echo >&4 "(using ccflags   $ccflags)"
 		echo >&4 "(using ldflags   $ldflags)"
