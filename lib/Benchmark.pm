@@ -40,7 +40,7 @@ Returns the current time.   Example:
     # ... your code here ...
     $t1 = new Benchmark;
     $td = timediff($t1, $t0);
-    print "the code took:",timestr($dt),"\n";
+    print "the code took:",timestr($td),"\n";
 
 =item debug
 
@@ -146,14 +146,14 @@ than a short test; try:
 
 The system time of the null loop might be slightly
 more than the system time of the loop with the actual
-code and therefore the difference might end up being < 0.
+code and therefore the difference might end up being E<lt> 0.
 
 More documentation is needed :-( especially for styles and formats.
 
 =head1 AUTHORS
 
-Jarkko Hietaniemi <Jarkko.Hietaniemi@hut.fi>,
-Tim Bunce <Tim.Bunce@ig.co.uk>
+Jarkko Hietaniemi E<lt>F<Jarkko.Hietaniemi@hut.fi>E<gt>,
+Tim Bunce E<lt>F<Tim.Bunce@ig.co.uk>E<gt>
 
 =head1 MODIFICATION HISTORY
 
