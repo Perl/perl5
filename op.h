@@ -1,6 +1,6 @@
 /*    op.h
  *
- *    Copyright (c) 1991-2000, Larry Wall
+ *    Copyright (c) 1991-2001, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -139,9 +139,6 @@ Deprecated.  Use C<GIMME_V> instead.
 /* Private for OP_REPEAT */
 #define OPpREPEAT_DOLIST	64	/* List replication. */
 
-/* Private for OP_LEAVELOOP */
-#define OPpLOOP_CONTINUE	64	/* a continue block is present */
-
 /* Private for OP_RV2?V, OP_?ELEM */
 #define OPpDEREF		(32|64)	/* Want ref to something: */
 #define OPpDEREF_AV		32	/*   Want ref to AV. */
@@ -250,6 +247,9 @@ struct pmop {
 #define PMdf_USED	0x01		/* pm has been used once already */
 #define PMdf_TAINTED	0x02		/* pm compiled from tainted pattern */
 #define PMdf_UTF8	0x04		/* pm compiled from utf8 data */
+#define PMdf_DYN_UTF8	0x08
+
+#define PMdf_CMP_UTF8	(PMdf_UTF8|PMdf_DYN_UTF8)
 
 #define PMf_RETAINT	0x0001		/* taint $1 etc. if target tainted */
 #define PMf_ONCE	0x0002		/* use pattern only once per reset */

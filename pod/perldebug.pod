@@ -82,7 +82,7 @@ recursively, unlike the real C<print> function in Perl.
 See L<Dumpvalue> if you'd like to do this yourself.
 
 The output format is governed by multiple options described under
-L<"Options">.
+L<"Configurable Options">.
 
 =item V [pkg [vars]]
 
@@ -308,8 +308,8 @@ For historical reasons, the C<=value> is optional, but defaults to
 1 only where it is safe to do so--that is, mostly for Boolean
 options.  It is always better to assign a specific value using C<=>.
 The C<option> can be abbreviated, but for clarity probably should
-not be.  Several options can be set together.  See L<"Options"> for
-a list of these.
+not be.  Several options can be set together.  See L<"Configurable Options"> 
+for a list of these.
 
 =item < ? 
 

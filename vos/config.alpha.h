@@ -1,19 +1,19 @@
 /*
  * This file was produced by running the config_h.SH script, which
- * gets its values from $CONFIG_SH, which is generally produced by
+ * gets its values from config.sh, which is generally produced by
  * running Configure.
  *
  * Feel free to modify any of this as the need arises.  Note, however,
  * that running config_h.SH again will wipe out any changes you've made.
- * For a more permanent change edit $CONFIG_SH and rerun config_h.SH.
+ * For a more permanent change edit config.sh and rerun config_h.SH.
  *
  * \$Id: Config_h.U,v 3.0.1.5 1997/02/28 14:57:43 ram Exp $
  */
 
 /*
  * Package name      : perl5
- * Source directory  : %es#lang/vos_ftp_site/pub/vos/alpha/perl
- * Configuration time: 2000-02-03 19:13 UCT
+ * Source directory  : /vos_ftp_site/pub/vos/posix/(alpha|ga)/perl
+ * Configuration time: 2000-10-23 18:48 UCT
  * Configured by     : Paul_Green@stratus.com
  * Target system     : VOS
  */
@@ -165,6 +165,19 @@
  */
 #define HAS_FCNTL		/**/
 
+/* HAS__FWALK:
+ *	This symbol, if defined, indicates that the _fwalk system call is
+ *	available to apply a function to all the file handles.
+ */
+/*#define HAS__FWALK		/ **/
+
+/* FCNTL_CAN_LOCK:
+ *	This symbol, if defined, indicates that fcntl() can be used
+ *	for file locking.  Normally on Unix systems this is defined.
+ *	It may be undefined on VMS.
+ */
+#define FCNTL_CAN_LOCK		/**/
+
 /* HAS_FGETPOS:
  *	This symbol, if defined, indicates that the fgetpos routine is
  *	available to get the file position indicator, similar to ftell().
@@ -212,6 +225,13 @@
  *	available to get the login name.
  */
 #define HAS_GETLOGIN		/**/
+
+/* HAS_GETPAGESIZE:
+ *	This symbol, if defined, indicates that the getpagesize system call
+ *	is available to get system page size, which is the granularity of
+ *	many memory management calls.
+ */
+/*#define HAS_GETPAGESIZE		/**/
 
 /* HAS_GETPGID:
  *	This symbol, if defined, indicates to the C program that 
@@ -1343,6 +1363,13 @@
  */
 /*#define HAS_FSTATFS		/**/
 
+/* HAS_FSYNC:
+ *	This symbol, if defined, indicates that the fsync routine is
+ *	available to write a file's modified data and attributes to
+ *	permanent storage.
+ */
+/*#define HAS_FSYNC		/**/
+
 /* HAS_FTELLO:
  *	This symbol, if defined, indicates that the ftello routine is
  *	available to ftell beyond 32 bits (useful for ILP32 hosts).
@@ -1614,7 +1641,7 @@
  *	This symbol, if defined, indicates that the isnan routine is
  *	available to check whether a double is a NaN.
  */
-#define HAS_ISNAN		/**/
+/*#define HAS_ISNAN		/**/
 
 /* HAS_ISNANL:
  *	This symbol, if defined, indicates that the isnanl routine is
@@ -1714,7 +1741,7 @@
  *	Usually set to 'void *' or 'cadd_t'.
  */
 /*#define HAS_MMAP		/**/
-#define Mmap_t $mmaptype	/**/
+#define Mmap_t void *	/**/
 
 /* HAS_MODFL:
  *	This symbol, if defined, indicates that the modfl routine is
@@ -1797,6 +1824,15 @@
  *	bits set.  If it is not defined, roll your own version.
  */
 #define HAS_SANE_MEMCMP	/**/
+
+/* HAS_SBRK_PROTO:
+ *	This symbol, if defined, indicates that the system provides
+ *	a prototype for the sbrk() function.  Otherwise, it is up
+ *	to the program to supply one.  Good guesses are
+ *		extern void* sbrk _((int));
+ *		extern void* sbrk _((size_t));
+ */
+/*#define	HAS_SBRK_PROTO	/ **/
 
 /* HAS_SEM:
  *	This symbol, if defined, indicates that the entire sem*(2) library is
@@ -2024,12 +2060,23 @@
  *	This symbol is defined if the FILE_cnt macro can be used as an
  *	lvalue.
  */
+/* STDIO_PTR_LVAL_SETS_CNT:
+ *	This symbol is defined if using the FILE_ptr macro as an lvalue
+ *	to increase the pointer by n has the side effect of decreasing the
+ *	value of File_cnt(fp) by n.
+ */
+/* STDIO_PTR_LVAL_NOCHANGE_CNT:
+ *	This symbol is defined if using the FILE_ptr macro as an lvalue
+ *	to increase the pointer by n leaves File_cnt(fp) unchanged.
+ */
 #define USE_STDIO_PTR 	/**/
 #ifdef USE_STDIO_PTR
 #define FILE_ptr(fp)	((fp)->_ptr)
 #define STDIO_PTR_LVALUE 		/**/
 #define FILE_cnt(fp)	((fp)->_cnt)
 #define STDIO_CNT_LVALUE 		/**/
+/*#define STDIO_PTR_LVAL_SETS_CNT	/**/
+/*#define STDIO_PTR_LVAL_NOCHANGE_CNT	/**/
 #endif
 
 /* USE_STDIO_BASE:
@@ -2088,6 +2135,18 @@
  *	available to convert strings to long longs.
  */
 /*#define HAS_STRTOLL		/**/
+
+/* HAS_STRTOQ:
+ *	This symbol, if defined, indicates that the strtouq routine is
+ *	available to convert strings to long longs (quads).
+ */
+/*#define HAS_STRTOQ		/**/
+
+/* HAS_STRTOQ:
+ *	This symbol, if defined, indicates that the strtouq routine is
+ *	available to convert strings to long longs (quads).
+ */
+/*#define HAS_STRTOQ		/**/
 
 /* HAS_STRTOULL:
  *	This symbol, if defined, indicates that the strtoull routine is
@@ -2276,7 +2335,7 @@
  *	This symbol, if defined, indicates to the C program that struct group
  *	in <grp.h> contains gr_passwd.
  */
-/*#define I_GRP		/**/
+#define I_GRP		/**/
 /*#define GRPASSWD	/**/
 
 /* I_ICONV:
@@ -2381,7 +2440,7 @@
  *	This symbol, if defined, indicates to the C program that struct passwd
  *	contains pw_passwd.
  */
-/*#define I_PWD		/**/
+#define I_PWD		/**/
 /*#define PWQUOTA	/**/
 /*#define PWAGE	/**/
 /*#define PWCHANGE	/**/
@@ -2511,8 +2570,8 @@
  */
 #define PERL_PRIfldbl	"Lf"	/**/
 #define PERL_PRIgldbl	"Lg"	/**/
-#define PERL_PRIeldbl	$sPRIeldbl	/**/
-# PERL_SCNfldbl	$sSCNfldbl	/**/
+#define PERL_PRIeldbl	"Le"	/**/
+#define PERL_SCNfldbl	"Lf"	/**/
 
 /* Off_t:
  *	This symbol holds the type used to declare offsets in the kernel.
@@ -2865,8 +2924,8 @@
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITEARCH ""		/**/
-#define SITEARCH_EXP ""		/**/
+/*#define SITEARCH ""		/**/
+/*#define SITEARCH_EXP ""		/**/
 
 /* SITELIB:
  *	This symbol contains the name of the private library for this package.
@@ -2888,8 +2947,8 @@
  *	removed.  The elements in inc_version_list (inc_version_list.U) can
  *	be tacked onto this variable to generate a list of directories to search.
  */
-#define SITELIB "/system/ported/perl/lib/site/5.005"		/**/
-#define SITELIB_EXP "/system/ported/perl/lib/site/5.005"		/**/
+#define SITELIB "/system/ported/perl/lib/site/5.7"		/**/
+#define SITELIB_EXP "/system/ported/perl/lib/site/5.7"		/**/
 #define SITELIB_STEM "/system/ported/perl/lib/site"		/**/
 
 /* Size_t_size:
@@ -3133,7 +3192,7 @@
  *	compatible with the present perl.  (That is, pure perl modules
  *	written for pm_apiversion will still work for the current
  *	version).  perl.c:incpush() and lib/lib.pm will automatically
- *	search in /system/ported/perl/lib/site/5.005 for older directories across major versions
+ *	search in /system/ported/perl/lib/site/5.7 for older directories across major versions
  *	back to pm_apiversion.  This is only useful if you have a perl
  *	library directory tree structured like the default one.  The
  *	versioned site_perl library was introduced in 5.005, so that's
@@ -3168,5 +3227,16 @@
  */
 /*#define HAS_SETPGRP		/**/
 /*#define USE_BSD_SETPGRP	/**/
+
+/* NEED_VA_COPY:
+ *	This symbol, if defined, indicates that the system stores
+ *	the variable argument list datatype, va_list, in a format
+ *	that cannot be copied by simple assignment, so that some
+ *	other means must be used when copying is required.
+ *	As such systems vary in their provision (or non-provision)
+ *	of copying mechanisms, handy.h defines a platform-
+ *	independent macro, Perl_va_copy(src, dst), to do the job.
+ */
+/*#define	NEED_VA_COPY		/ **/
 
 #endif

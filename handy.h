@@ -1,6 +1,6 @@
 /*    handy.h
  *
- *    Copyright (c) 1991-2000, Larry Wall
+ *    Copyright (c) 1991-2001, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -114,6 +114,10 @@ Null SV pointer.
 
 */
 
+#ifdef I_INTTYPES /* e.g. Linux has int64_t without <inttypes.h> */
+#   include <inttypes.h>
+#endif
+
 typedef I8TYPE I8;
 typedef U8TYPE U8;
 typedef I16TYPE I16;
@@ -122,16 +126,27 @@ typedef I32TYPE I32;
 typedef U32TYPE U32;
 #ifdef PERL_CORE
 #   ifdef HAS_QUAD
-#       if QUADKIND == QUAD_IS_INT64_T
-#           include <sys/types.h>
-#           ifdef I_INTTYPES /* e.g. Linux has int64_t without <inttypes.h> */
-#               include <inttypes.h>
-#           endif
-#       endif
 typedef I64TYPE I64;
 typedef U64TYPE U64;
 #   endif
 #endif /* PERL_CORE */
+
+#if defined(HAS_QUAD) && defined(USE_64_BIT_INT)
+#   ifndef UINT64_C /* usually from <inttypes.h> */
+#       if defined(HAS_LONG_LONG) && QUADKIND == QUAD_IS_LONG_LONG
+#           define INT64_C(c)	CAT2(c,LL)
+#           define UINT64_C(c)	CAT2(c,ULL)
+#       else
+#           if LONGSIZE == 8 && QUADKIND == QUAD_IS_LONG
+#               define INT64_C(c)	CAT2(c,L)
+#               define UINT64_C(c)	CAT2(c,UL)
+#           else
+#               define INT64_C(c)	((I64TYPE)(c))
+#               define UINT64_C(c)	((U64TYPE)(c))
+#           endif
+#       endif
+#   endif
+#endif
 
 /* Mention I8SIZE, U8SIZE, I16SIZE, U16SIZE, I32SIZE, U32SIZE,
    I64SIZE, and U64SIZE here so that metaconfig pulls them in. */
@@ -448,21 +463,21 @@ Converts the specified character to lowercase.
 #define isPSXSPC_utf8(c)	(isSPACE_utf8(c) ||(c) == '\f')
 #define isBLANK_utf8(c)		isBLANK(c) /* could be wrong */
 
-#define isALNUM_LC_utf8(p)	isALNUM_LC_uni(utf8_to_uv_chk(p, 0, 0))
-#define isIDFIRST_LC_utf8(p)	isIDFIRST_LC_uni(utf8_to_uv_chk(p, 0, 0))
-#define isALPHA_LC_utf8(p)	isALPHA_LC_uni(utf8_to_uv_chk(p, 0, 0))
-#define isSPACE_LC_utf8(p)	isSPACE_LC_uni(utf8_to_uv_chk(p, 0, 0))
-#define isDIGIT_LC_utf8(p)	isDIGIT_LC_uni(utf8_to_uv_chk(p, 0, 0))
-#define isUPPER_LC_utf8(p)	isUPPER_LC_uni(utf8_to_uv_chk(p, 0, 0))
-#define isLOWER_LC_utf8(p)	isLOWER_LC_uni(utf8_to_uv_chk(p, 0, 0))
-#define isALNUMC_LC_utf8(p)	isALNUMC_LC_uni(utf8_to_uv_chk(p, 0, 0))
-#define isCNTRL_LC_utf8(p)	isCNTRL_LC_uni(utf8_to_uv_chk(p, 0, 0))
-#define isGRAPH_LC_utf8(p)	isGRAPH_LC_uni(utf8_to_uv_chk(p, 0, 0))
-#define isPRINT_LC_utf8(p)	isPRINT_LC_uni(utf8_to_uv_chk(p, 0, 0))
-#define isPUNCT_LC_utf8(p)	isPUNCT_LC_uni(utf8_to_uv_chk(p, 0, 0))
-#define toUPPER_LC_utf8(p)	toUPPER_LC_uni(utf8_to_uv_chk(p, 0, 0))
-#define toTITLE_LC_utf8(p)	toTITLE_LC_uni(utf8_to_uv_chk(p, 0, 0))
-#define toLOWER_LC_utf8(p)	toLOWER_LC_uni(utf8_to_uv_chk(p, 0, 0))
+#define isALNUM_LC_utf8(p)	isALNUM_LC_uni(utf8_to_uv(p, UTF8_MAXLEN, 0, 0))
+#define isIDFIRST_LC_utf8(p)	isIDFIRST_LC_uni(utf8_to_uv(p, UTF8_MAXLEN, 0, 0))
+#define isALPHA_LC_utf8(p)	isALPHA_LC_uni(utf8_to_uv(p, UTF8_MAXLEN, 0, 0))
+#define isSPACE_LC_utf8(p)	isSPACE_LC_uni(utf8_to_uv(p, UTF8_MAXLEN, 0, 0))
+#define isDIGIT_LC_utf8(p)	isDIGIT_LC_uni(utf8_to_uv(p, UTF8_MAXLEN, 0, 0))
+#define isUPPER_LC_utf8(p)	isUPPER_LC_uni(utf8_to_uv(p, UTF8_MAXLEN, 0, 0))
+#define isLOWER_LC_utf8(p)	isLOWER_LC_uni(utf8_to_uv(p, UTF8_MAXLEN, 0, 0))
+#define isALNUMC_LC_utf8(p)	isALNUMC_LC_uni(utf8_to_uv(p, UTF8_MAXLEN, 0, 0))
+#define isCNTRL_LC_utf8(p)	isCNTRL_LC_uni(utf8_to_uv(p, UTF8_MAXLEN, 0, 0))
+#define isGRAPH_LC_utf8(p)	isGRAPH_LC_uni(utf8_to_uv(p, UTF8_MAXLEN, 0, 0))
+#define isPRINT_LC_utf8(p)	isPRINT_LC_uni(utf8_to_uv(p, UTF8_MAXLEN, 0, 0))
+#define isPUNCT_LC_utf8(p)	isPUNCT_LC_uni(utf8_to_uv(p, UTF8_MAXLEN, 0, 0))
+#define toUPPER_LC_utf8(p)	toUPPER_LC_uni(utf8_to_uv(p, UTF8_MAXLEN, 0, 0))
+#define toTITLE_LC_utf8(p)	toTITLE_LC_uni(utf8_to_uv(p, UTF8_MAXLEN, 0, 0))
+#define toLOWER_LC_utf8(p)	toLOWER_LC_uni(utf8_to_uv(p, UTF8_MAXLEN, 0, 0))
 
 #define isPSXSPC_LC_utf8(c)	(isSPACE_LC_utf8(c) ||(c) == '\f')
 #define isBLANK_LC_utf8(c)	isBLANK(c) /* could be wrong */
@@ -606,3 +621,14 @@ extern long lastxycount[MAXXCOUNT][MAXYCOUNT];
 #else
 #define StructCopy(s,d,t) Copy(s,d,1,t)
 #endif
+
+#ifdef NEED_VA_COPY
+# ifdef va_copy
+#  define Perl_va_copy(s, d) va_copy(d, s)
+# elif defined(__va_copy)
+#  define Perl_va_copy(s, d) __va_copy(d, s)
+# else
+#  define Perl_va_copy(s, d) Copy(s, d, 1, va_list)
+# endif
+#endif
+

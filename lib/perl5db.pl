@@ -25,7 +25,7 @@ $header = "perl5db.pl version $VERSION";
 # if caller() is called from the package DB, it provides some
 # additional data.
 #
-# The array @{$main::{'_<'.$filename} is the line-by-line contents of
+# The array @{$main::{'_<'.$filename}} is the line-by-line contents of
 # $filename.
 #
 # The hash %{'_<'.$filename} contains breakpoints and action (it is
@@ -401,6 +401,12 @@ if ($notty) {
     $console = "/dev/tty";
   } elsif ($^O eq 'dos' or -e "con" or $^O eq 'MSWin32') {
     $console = "con";
+  } elsif ($^O eq 'MacOS') {
+    if ($MacPerl::Version !~ /MPW/) {
+      $console = "Dev:Console:Perl Debug"; # Separate window for application
+    } else {
+      $console = "Dev:Console";
+    }
   } else {
     $console = "sys\$command";
   }

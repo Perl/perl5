@@ -9,6 +9,9 @@
 # we should test as many as we can.
 #
 
+# XXX known to leak scalars
+$ENV{PERL_DESTRUCT_LEVEL} = 0 unless $ENV{PERL_DESTRUCT_LEVEL} > 3;
+
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
@@ -16,7 +19,7 @@ BEGIN {
 
 use strict;
 
-print "1..110\n";
+print "1..124\n";
 
 my $i = 1;
 
@@ -340,6 +343,7 @@ sub sub_array (&@) {
 
 @array = (qw(O K)," ", $i++);
 sub_array { lc shift } @array;
+sub_array { lc shift } ('O', 'K', ' ', $i++);
 print "\n";
 
 ##
@@ -485,3 +489,17 @@ sub sreftest (\$$) {
     sreftest($helem{$i}, $i++);
     sreftest $aelem[0], $i++;
 }
+
+# test prototypes when they are evaled and there is a syntax error
+#
+for my $p ( "", qw{ () ($) ($@) ($%) ($;$) (&) (&\@) (&@) (%) (\%) (\@) } ) {
+  no warnings 'redefine';
+  my $eval = "sub evaled_subroutine $p { &void *; }";
+  eval $eval;
+  print "# eval[$eval]\nnot " unless $@ && $@ =~ /syntax error/;
+  print "ok ", $i++, "\n";
+}
+
+# Not $$;$;$
+print "not " unless prototype "CORE::substr" eq '$$;$$';
+print "ok ", $i++, "\n";

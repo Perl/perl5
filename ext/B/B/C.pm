@@ -1020,7 +1020,6 @@ sub output_all {
     print <<"EOT";
 static int $init_name()
 {
-	dTHR;
 	dTARG;
 	djSP;
 EOT
@@ -1338,7 +1337,7 @@ sub should_save
  # Now see if current package looks like an OO class this is probably too strong.
  foreach my $m (qw(new DESTROY TIESCALAR TIEARRAY TIEHASH TIEHANDLE)) 
   {
-   if ($package->can($m)) 
+   if (UNIVERSAL::can($package, $m))
     {
      warn "$package has method $m: saving package\n";#debug
      return mark_package($package);
@@ -1368,7 +1367,7 @@ sub walkpackages
    if ($sym =~ /::$/) 
     {
      $sym = $prefix . $sym;
-     if ($sym ne "main::" && &$recurse($sym)) 
+     if ($sym ne "main::" && $sym ne "<none>::" && &$recurse($sym)) 
       {
        walkpackages(\%glob, $recurse, $sym);
       }

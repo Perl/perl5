@@ -56,7 +56,7 @@ not_here(char *s)
 static void
 output_datum(pTHX_ SV *arg, char *str, int size)
 {
-#if !defined(MYMALLOC) || (defined(MYMALLOC) && defined(PERL_POLLUTE_MALLOC) && !defined(LEAKTEST))
+#if (!defined(MYMALLOC) || (defined(MYMALLOC) && defined(PERL_POLLUTE_MALLOC))) && !defined(LEAKTEST)
 	sv_usepvn(arg, str, size);
 #else
 	sv_setpvn(arg, str, size);

@@ -2,9 +2,7 @@ use ExtUtils::MakeMaker;
 use Config;
 use strict;
 
-use vars qw($VERSION);
-
-$VERSION = "1.111";
+our $VERSION = "1.111";
 
 my %err = ();
 
@@ -26,6 +24,12 @@ sub process_file {
     local *FH;
     if (($^O eq 'VMS') && ($Config{vms_cc_type} ne 'gnuc')) {
 	unless(open(FH," LIBRARY/EXTRACT=ERRNO/OUTPUT=SYS\$OUTPUT $file |")) {
+            warn "Cannot open '$file'";
+            return;
+	}     
+    } elsif ($Config{gccversion} ne '') { 
+	# With the -dM option, gcc outputs every #define it finds
+	unless(open(FH,"$Config{cc} -E -dM $file |")) {
             warn "Cannot open '$file'";
             return;
 	}     
@@ -79,6 +83,10 @@ sub get_files {
     } elsif ($^O eq 'vmesa') {
 	# OS/390 C compiler doesn't generate #file or #line directives
 	$file{'../../vmesa/errno.h'} = 1;
+    } elsif ($^O eq 'linux') {
+	# Some Linuxes have weird errno.hs which generate
+	# no #file or #line directives
+	$file{'/usr/include/errno.h'} = 1;
     } else {
 	open(CPPI,"> errno.c") or
 	    die "Cannot open errno.c";
@@ -175,7 +183,7 @@ sub write_errno_pm {
 #
 
 package Errno;
-use vars qw(\@EXPORT_OK \%EXPORT_TAGS \@ISA \$VERSION \%errno \$AUTOLOAD);
+our (\@EXPORT_OK,\%EXPORT_TAGS,\@ISA,\$VERSION,\%errno,\$AUTOLOAD);
 use Exporter ();
 use Config;
 use strict;

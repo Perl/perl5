@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 use warnings;
-print "1..57\n";
+print "1..58\n";
 
 # XXX known to leak scalars
 {
@@ -320,4 +320,11 @@ sub cxt_six { sort test_if_scalar 1,2 }
     print ("@b" eq '1 2 3 4' ? "ok 56\n" : "not ok 56\n");
     print "# x = '@b'\n";
     print !$def ? "ok 57\n" : "not ok 57\n";
+}
+
+# Bug 19991001.003
+{
+    sub routine { "one", "two" };
+    @a = sort(routine(1));
+    print "@a" eq "one two" ? "ok 58\n" : "not ok 58\n";
 }

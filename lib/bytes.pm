@@ -1,5 +1,7 @@
 package bytes;
 
+our $VERSION = '1.00';
+
 $bytes::hint_bits = 0x00000008;
 
 sub import {

@@ -1,4 +1,7 @@
 package charnames;
+
+our $VERSION = '1.00';
+
 use bytes ();		# for $bytes::hint_bits
 use warnings();
 $charnames::hint_bits = 0x20000;

@@ -142,6 +142,10 @@ eval 'my A $x : plugh plover;';
 mytest qr/^SCALAR package attributes may clash with future reserved words: ["']?plugh["']? /;
 BEGIN {++$ntests}
 
+eval 'package Cat; my Cat @socks;';
+mytest qr/^Can't declare class for non-scalar \@socks in "my"/;
+BEGIN {++$ntests}
+
 sub X::MODIFY_CODE_ATTRIBUTES { die "$_[0]" }
 sub X::foo { 1 }
 *Y::bar = \&X::foo;

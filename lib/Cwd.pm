@@ -70,7 +70,7 @@ use strict;
 
 use Carp;
 
-our $VERSION = '2.03';
+our $VERSION = '2.04';
 
 use base qw/ Exporter /;
 our @EXPORT = qw(cwd getcwd fastcwd fastgetcwd);
@@ -99,6 +99,9 @@ unless(defined &cwd) {
     }
 }
 
+# set a reasonable (and very safe) default for fastgetcwd, in case it
+# isn't redefined later (20001212 rspier)
+*fastgetcwd = \&cwd;
 
 # By Brandon S. Allbery
 #
@@ -188,7 +191,7 @@ sub chdir_init {
 }
 
 sub chdir {
-    my $newdir = @? ? shift : '';	# allow for no arg (chdir to HOME dir)
+    my $newdir = @_ ? shift : '';	# allow for no arg (chdir to HOME dir)
     $newdir =~ s|///*|/|g unless $^O eq 'MSWin32';
     chdir_init() unless $chdir_init;
     return 0 unless CORE::chdir $newdir;
@@ -408,7 +411,8 @@ sub _epoc_cwd {
         *abs_path	= \&fast_abs_path;
     }
     elsif ($^O eq 'epoc') {
-        *getcwd	= \&_epoc_cwd;
+        *cwd            = \&_epoc_cwd;
+        *getcwd	        = \&_epoc_cwd;
         *fastgetcwd	= \&_epoc_cwd;
         *fastcwd	= \&_epoc_cwd;
         *abs_path	= \&fast_abs_path;

@@ -1,5 +1,8 @@
 package I18N::Collate;
 
+use strict;
+our $VERSION = '1.00';
+
 =head1 NAME
 
 I18N::Collate - compare 8-bit scalar data according to the current locale
@@ -112,15 +115,18 @@ use warnings::register;
 
 require Exporter;
 
-@ISA = qw(Exporter);
-@EXPORT = qw(collate_xfrm setlocale LC_COLLATE);
-@EXPORT_OK = qw();
+our @ISA = qw(Exporter);
+our @EXPORT = qw(collate_xfrm setlocale LC_COLLATE);
+our @EXPORT_OK = qw();
 
 use overload qw(
 fallback	1
 cmp		collate_cmp
 );
 
+our($LOCALE, $C);
+
+our $please_use_I18N_Collate_even_if_deprecated = 0;
 sub new {
   my $new = $_[1];
 

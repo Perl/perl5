@@ -580,6 +580,12 @@ If adding a new module to a set, follow the original author's
 standards for naming modules and the interface to methods in
 those modules.
 
+If developing modules for private internal or project specific use,
+that will never be released to the public, then you should ensure
+that their names will not clash with any future public module. You
+can do this either by using the reserved Local::* category or by
+using a category name that includes an underscore like Foo_Corp::*.
+
 To be portable each component of a module name should be limited to
 11 characters. If it might be used on MS-DOS then try to ensure each is
 unique in the first 8 characters. Nested modules make this easier.

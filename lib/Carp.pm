@@ -1,5 +1,7 @@
 package Carp;
 
+our $VERSION = '1.00';
+
 =head1 NAME
 
 carp    - warn of errors (from perspective of caller)
@@ -67,6 +69,8 @@ $MaxEvalLen = 0;	# How much eval '...text...' to show. 0 = all.
 $MaxArgLen = 64;        # How much of each argument to print. 0 = all.
 $MaxArgNums = 8;        # How many arguments to print. 0 = all.
 $Verbose = 0;		# If true then make shortmess call longmess instead
+
+$CarpInternal{Carp}++;
 
 require Exporter;
 @ISA = ('Exporter');

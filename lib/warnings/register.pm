@@ -1,5 +1,7 @@
 package warnings::register ;
 
+our $VERSION = '1.00';
+
 =pod
 
 =head1 NAME

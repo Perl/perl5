@@ -334,7 +334,10 @@ operating systems put mandatory locks on such files.
 
 Don't count on a specific environment variable existing in C<%ENV>.
 Don't count on C<%ENV> entries being case-sensitive, or even
-case-preserving.
+case-preserving.  Don't try to clear %ENV by saying C<%ENV = ();>, or,
+if you really have to, make it conditional on C<$^O ne 'VMS'> since in
+VMS the C<%ENV> table is much more than a per-process key-value string
+table.
 
 Don't count on signals or C<%SIG> for anything.
 
@@ -683,7 +686,7 @@ The ActiveState Pages, http://www.activestate.com/
 =item *
 
 The Cygwin environment for Win32; F<README.cygwin> (installed 
-as L<perlcygwin>), http://sources.redhat.com/cygwin/
+as L<perlcygwin>), http://www.cygwin.com/
 
 =item *
 
@@ -890,9 +893,9 @@ vmsperl on the web, http://www.sidhe.org/vmsperl/index.html
 
 =head2 VOS
 
-Perl on VOS is discussed in F<README.vos> in the perl distribution.
-Perl on VOS can accept either VOS- or Unix-style file
-specifications as in either of the following:
+Perl on VOS is discussed in F<README.vos> in the perl distribution
+(installed as L<perlvos>).  Perl on VOS can accept either VOS- or
+Unix-style file specifications as in either of the following:
 
     $ perl -ne "print if /perl_setup/i" >system>notices
     $ perl -ne "print if /perl_setup/i" /system/notices
@@ -908,12 +911,11 @@ contain a slash character cannot be processed.  Such files must be
 renamed before they can be processed by Perl.  Note that VOS limits
 file names to 32 or fewer characters.
 
-The following C functions are unimplemented on VOS, and any attempt by
-Perl to use them will result in a fatal error message and an immediate
-exit from Perl:  dup, do_aspawn, do_spawn, fork, waitpid.  Once these
-functions become available in the VOS POSIX.1 implementation, you can
-either recompile and rebind Perl, or you can download a newer port from
-ftp.stratus.com.
+See F<README.vos> for restrictions that apply when Perl is built
+with the alpha version of VOS POSIX.1 support.
+
+Perl on VOS is built without any extensions and does not support
+dynamic loading.
 
 The value of C<$^O> on VOS is "VOS".  To determine the architecture that
 you are running on without resorting to loading all of C<%Config> you
@@ -1211,7 +1213,7 @@ A free perl5-based PERL.NLM for Novell Netware is available in
 precompiled binary and source code form from http://www.novell.com/
 as well as from CPAN.
 
-=item 
+=item  *
 
 Plan 9, F<README.plan9>
 
@@ -1995,9 +1997,9 @@ http://www.perl.com/CPAN/ports/index.html for binary distributions.
 
 =head1 SEE ALSO
 
-L<perlaix>, L<perlamiga>, L<perlcygwin>, L<perldos>, L<perlebcdic>,
-L<perlhpux>, L<perlos2>, L<perlos390>, L<perlposix-bc>, L<perlwin32>,
-L<perlvms>, and L<Win32>.
+L<perlaix>, L<perlamiga>, L<perlcygwin>, L<perldos>, L<perlepoc>,
+L<perlebcdic>, L<perlhpux>, L<perlos2>, L<perlos390>, L<perlposix-bc>,
+L<perlwin32>, L<perlvms>, L<perlvos>, and L<Win32>.
 
 =head1 AUTHORS / CONTRIBUTORS
 

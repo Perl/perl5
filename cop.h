@@ -1,6 +1,6 @@
 /*    cop.h
  *
- *    Copyright (c) 1991-2000, Larry Wall
+ *    Copyright (c) 1991-2001, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -21,6 +21,7 @@ struct cop {
     I32		cop_arybase;	/* array base this line was compiled with */
     line_t      cop_line;       /* line # of this command */
     SV *	cop_warnings;	/* lexical warnings bitmask */
+    SV *	cop_io;		/* lexical IO defaults */
 };
 
 #define Nullcop Null(COP*)

@@ -140,6 +140,7 @@ struct mstats_buffer
 void
 _fill_mstats(struct mstats_buffer *b, int level)
 {
+    dTHX;
     b->buffer.nfree  = b->buf;
     b->buffer.ntotal = b->buf + _NBUCKETS;
     b->buffer.bucket_mem_size = b->buf + 2*_NBUCKETS;
@@ -151,6 +152,7 @@ _fill_mstats(struct mstats_buffer *b, int level)
 void
 fill_mstats(SV *sv, int level)
 {
+    dTHX;
     int nbuckets;
     struct mstats_buffer buf;
 
@@ -166,6 +168,7 @@ fill_mstats(SV *sv, int level)
 void
 _mstats_to_hv(HV *hv, struct mstats_buffer *b, int level)
 {
+    dTHX;
     SV **svp;
     int type;
 

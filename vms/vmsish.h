@@ -709,6 +709,7 @@ int	Perl_rmscopy (pTHX_ char *, char *, int);
 #endif
 char *	my_getenv_len (const char *, unsigned long *, bool);
 int	vmssetenv (char *, char *, struct dsc$descriptor_s **);
+void	Perl_vmssetuserlnm(char *name, char *eqv);
 char *	my_crypt (const char *, const char *);
 Pid_t	my_waitpid (Pid_t, int *, int);
 char *	my_gconvert (double, int, int, char *);

@@ -1,5 +1,7 @@
 package File::Find;
+use strict;
 use 5.005_64;
+our $VERSION = '1.00';
 require Exporter;
 require Cwd;
 
@@ -187,8 +189,8 @@ in an unknown directory.
 
 =cut
 
-@ISA = qw(Exporter);
-@EXPORT = qw(find finddepth);
+our @ISA = qw(Exporter);
+our @EXPORT = qw(find finddepth);
 
 
 use strict;
@@ -759,7 +761,7 @@ if ($^O eq 'VMS') {
 
 $File::Find::dont_use_nlink = 1
     if $^O eq 'os2' || $^O eq 'dos' || $^O eq 'amigaos' || $^O eq 'MSWin32' ||
-       $^O eq 'cygwin';
+       $^O eq 'cygwin' || $^O eq 'epoc';
 
 # Set dont_use_nlink in your hint file if your system's stat doesn't
 # report the number of links in a directory as an indication

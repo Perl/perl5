@@ -1,17 +1,17 @@
+# -*- Mode: cperl; cperl-indent-level: 4 -*-
 package Test::Harness;
 
 use 5.005_64;
 use Exporter;
 use Benchmark;
 use Config;
-use FileHandle;
 use strict;
 
 our($VERSION, $verbose, $switches, $have_devel_corestack, $curtest,
     $columns, @ISA, @EXPORT, @EXPORT_OK);
 $have_devel_corestack = 0;
 
-$VERSION = "1.1604";
+$VERSION = "1.1607";
 
 $ENV{HARNESS_ACTIVE} = 1;
 
@@ -72,21 +72,20 @@ sub runtests {
 	$ml = "\r$blank\r$leader"
 	    if -t STDOUT and not $ENV{HARNESS_NOTTY} and not $verbose;
 	print $leader;
-	my $fh = new FileHandle;
-	$fh->open($test) or print "can't open $test. $!\n";
+	open(my $fh, $test) or print "can't open $test. $!\n";
 	my $first = <$fh>;
 	my $s = $switches;
 	$s .= " $ENV{'HARNESS_PERL_SWITCHES'}"
 	    if exists $ENV{'HARNESS_PERL_SWITCHES'};
 	$s .= join " ", q[ "-T"], map {qq["-I$_"]} @INC
 	    if $first =~ /^#!.*\bperl.*-\w*T/;
-	$fh->close or print "can't close $test. $!\n";
+	close($fh) or print "can't close $test. $!\n";
 	my $cmd = ($ENV{'HARNESS_COMPILE_TEST'})
 		? "./perl -I../lib ../utils/perlcc $test "
 		  . "-run 2>> ./compilelog |" 
 		: "$^X $s $test|";
 	$cmd = "MCR $cmd" if $^O eq 'VMS';
-	$fh->open($cmd) or print "can't run $test. $!\n";
+	open($fh, $cmd) or print "can't run $test. $!\n";
 	$ok = $next = $max = 0;
 	@failed = ();
 	my %todo = ();
@@ -120,7 +119,7 @@ sub runtests {
 			$ok++;
 			$totok++;
 		    }
-		} elsif (/^ok\s*(\d*)(\s*\#\s*[Ss]kip\S*(?:(?>\s+)(.+))?)?/) {
+		} elsif (/^ok\s*(\d*) *(\s*\#\s*[Ss]kip\S*(?:(?>\s+)(.+))?)?$/) {
 		    $this = $1 if $1 > 0;
 		    print "${ml}ok $this/$max" if $ml;
 		    $ok++;
@@ -137,6 +136,15 @@ sub runtests {
 		      $skip_reason = $reason;
 		    }
 		    $bonus++, $totbonus++ if $todo{$this};
+		} elsif (/^ok\s*(\d*)\s*\#([^\r]*)$/) {
+		    $this = $1 if $1 > 0;
+		    print "${ml}ok $this/$max" if $ml;
+		    $ok++;
+		    $totok++;
+		} else {
+		    # an ok or not ok not matching the 3 cases above...
+		    # just ignore it for compatibility with TEST
+		    next;
 		}
 		if ($this > $next) {
 		    # print "Test output counter mismatch [test $this]\n";
@@ -148,9 +156,11 @@ sub runtests {
 		    $next = $this;
 		}
 		$next = $this + 1;
-	    }
+	    } elsif (/^Bail out!\s*(.*)/i) { # magic words
+                die "FAILED--Further testing stopped" . ($1 ? ": $1\n" : ".\n");
+            }
 	}
-	$fh->close; # must close to reap child resource values
+	close($fh); # must close to reap child resource values
 	my $wstatus = $ignore_exitcode ? 0 : $?;	# Can trust $? ?
 	my $estatus;
 	$estatus = ($^O eq 'VMS'
@@ -249,7 +259,7 @@ sub runtests {
 	}
     }
     my $t_total = timediff(new Benchmark, $t_start);
-    
+
     if ($^O eq 'VMS') {
 	if (defined $old5lib) {
 	    $ENV{PERL5LIB} = $old5lib;
@@ -452,7 +462,7 @@ script supplies test numbers again. So the following test script
     ok
     END
 
-will generate 
+will generate
 
     FAILED tests 1, 3, 6
     Failed 3/6 tests, 50.00% okay
@@ -467,14 +477,25 @@ script(s). The default value is C<-w>.
 
 If the standard output line contains substring C< # Skip> (with
 variations in spacing and case) after C<ok> or C<ok NUMBER>, it is
-counted as a skipped test.  If the whole testscript succeeds, the
-count of skipped tests is included in the generated output.
+counted as a skipped test.  In no other circumstance is anything
+allowed to follow C<ok> or C<ok NUMBER>.  If the whole testscript
+succeeds, the count of skipped tests is included in the generated
+output.
 
-C<Test::Harness> reports the text after C< # Skip(whatever)> as a
-reason for skipping.  Similarly, one can include a similar explanation
-in a C<1..0> line emitted if the test is skipped completely:
+C<Test::Harness> reports the text after C< # Skip\S*\s+> as a reason
+for skipping.  Similarly, one can include a similar explanation in a
+C<1..0> line emitted if the test is skipped completely:
 
   1..0 # Skipped: no leverage found
+
+As an emergency measure, a test script can decide that further tests
+are useless (e.g. missing dependencies) and testing should stop
+immediately. In that case the test script prints the magic words
+
+  Bail out!
+
+to standard output. Any message after these words will be displayed by
+C<Test::Harness> as the reason why testing is stopped.
 
 =head1 EXPORT
 
@@ -505,6 +526,11 @@ printed in a message similar to the above.
 
 If not all tests were successful, the script dies with one of the
 above messages.
+
+=item C<FAILED--Further testing stopped%s>
+
+If a single subtest decides that further testing will not make sense,
+the script dies with this message.
 
 =back
 

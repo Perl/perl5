@@ -1,6 +1,6 @@
 /*    utf8.h
  *
- *    Copyright (c) 1998-2000, Larry Wall
+ *    Copyright (c) 1998-2001, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -29,29 +29,71 @@ END_EXTERN_C
 
 #define UTF8_MAXLEN 13 /* how wide can a single UTF8 encoded character become */
 
-/*#define IN_UTF8 (PL_curcop->op_private & HINT_UTF8)*/
+/* #define IN_UTF8 (PL_curcop->op_private & HINT_UTF8) */
 #define IN_BYTE (PL_curcop->op_private & HINT_BYTE)
 #define DO_UTF8(sv) (SvUTF8(sv) && !IN_BYTE)
 
+#define UTF8_ALLOW_EMPTY		0x0001
+#define UTF8_ALLOW_CONTINUATION		0x0002
+#define UTF8_ALLOW_NON_CONTINUATION	0x0004
+#define UTF8_ALLOW_FE_FF		0x0008
+#define UTF8_ALLOW_SHORT		0x0010
+#define UTF8_ALLOW_SURROGATE		0x0020
+#define UTF8_ALLOW_BOM			0x0040
+#define UTF8_ALLOW_FFFF			0x0080
+#define UTF8_ALLOW_LONG			0x0100
+#define UTF8_ALLOW_ANYUV		(UTF8_ALLOW_EMPTY|UTF8_ALLOW_FE_FF|\
+					 UTF8_ALLOW_SURROGATE|UTF8_ALLOW_BOM|\
+					 UTF8_ALLOW_FFFF|UTF8_ALLOW_LONG)
+#define UTF8_ALLOW_ANY			0x00ff
+#define UTF8_CHECK_ONLY			0x0100
+
+#define UNICODE_SURROGATE_FIRST		0xd800
+#define UNICODE_SURROGATE_LAST		0xdfff
+#define UNICODE_REPLACEMENT		0xfffd
+#define UNICODE_BYTER_ORDER_MARK	0xfffe
+#define UNICODE_ILLEGAL			0xffff
+
+#define UNICODE_IS_SURROGATE(c)		((c) >= UNICODE_SURROGATE_FIRST && \
+					 (c) <= UNICODE_SURROGATE_LAST)
+#define UNICODE_IS_REPLACEMENT(c)	((c) == UNICODE_REPLACMENT)
+#define UNICODE_IS_BYTE_ORDER_MARK(c)	((c) == UNICODE_BYTER_ORDER_MARK)
+#define UNICODE_IS_ILLEGAL(c)		((c) == UNICODE_ILLEGAL)
+
 #define UTF8SKIP(s) PL_utf8skip[*(U8*)s]
 
+#define UTF8_QUAD_MAX	UINT64_C(0x1000000000)
+
+#define UTF8_IS_ASCII(c) 		(((U8)c) <  0x80)
+#define UTF8_IS_START(c)		(((U8)c) >= 0xc0 && (((U8)c) <= 0xfd))
+#define UTF8_IS_CONTINUATION(c)		(((U8)c) >= 0x80 && (((U8)c) <= 0xbf))
+#define UTF8_IS_CONTINUED(c) 		(((U8)c) &  0x80)
+
+#define UTF8_CONTINUATION_MASK		((U8)0x3f)
+#define UTF8_ACCUMULATION_SHIFT		6
+#define UTF8_ACCUMULATE(old, new)	((old) << UTF8_ACCUMULATION_SHIFT | (((U8)new) & UTF8_CONTINUATION_MASK))
+
+#define UTF8_EIGHT_BIT_HI(c)	( (((U8)(c))>>6)      |0xc0)
+#define UTF8_EIGHT_BIT_LO(c)	(((((U8)(c))   )&0x3f)|0x80)
+
 #ifdef HAS_QUAD
-#define UTF8LEN(uv) ( (uv) < 0x80           ? 1 : \
+#define UNISKIP(uv) ( (uv) < 0x80           ? 1 : \
 		      (uv) < 0x800          ? 2 : \
 		      (uv) < 0x10000        ? 3 : \
 		      (uv) < 0x200000       ? 4 : \
 		      (uv) < 0x4000000      ? 5 : \
 		      (uv) < 0x80000000     ? 6 : \
-                      (uv) < 0x1000000000LL ? 7 : 13 ) 
+                      (uv) < UTF8_QUAD_MAX ? 7 : 13 ) 
 #else
 /* No, I'm not even going to *TRY* putting #ifdef inside a #define */
-#define UTF8LEN(uv) ( (uv) < 0x80           ? 1 : \
+#define UNISKIP(uv) ( (uv) < 0x80           ? 1 : \
 		      (uv) < 0x800          ? 2 : \
 		      (uv) < 0x10000        ? 3 : \
 		      (uv) < 0x200000       ? 4 : \
 		      (uv) < 0x4000000      ? 5 : \
 		      (uv) < 0x80000000     ? 6 : 7 )
 #endif
+
 
 /*
  * Note: we try to be careful never to call the isXXX_utf8() functions

@@ -27,11 +27,9 @@ do_spawnvp (const char *path, const char * const *argv)
     childpid = spawnvp(_P_NOWAIT,path,argv);
     if (childpid < 0) {
 	status = -1;
-	if(ckWARN(WARN_EXEC)) {
-	    dTHR;
+	if(ckWARN(WARN_EXEC))
 	    Perl_warner(aTHX_ WARN_EXEC,"Can't spawn \"%s\": %s",
 		    path,Strerror (errno));
-	}
     } else {
 	do {
 	    result = wait4pid(childpid, &status, 0);
@@ -146,7 +144,7 @@ XS(Cygwin_cwd)
 
     if(items != 0)
 	Perl_croak(aTHX_ "Usage: Cwd::cwd()");
-    if((cwd = getcwd(NULL, 0))) {
+    if((cwd = getcwd(NULL, -1))) {
 	ST(0) = sv_2mortal(newSVpv(cwd, 0));
 	safesysfree(cwd);
 	XSRETURN(1);

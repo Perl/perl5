@@ -170,7 +170,7 @@ END_EXTERN_C
 #define ALLOC_THREAD_KEY \
     STMT_START {							\
 	if ((PL_thr_key = TlsAlloc()) == TLS_OUT_OF_INDEXES) {		\
-	    fprintf(stderr,"panic: TlsAlloc");				\
+	    PerlIO_printf(PerlIO_stderr(),"panic: TlsAlloc");				\
 	    exit(1);							\
 	}								\
     } STMT_END

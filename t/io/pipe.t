@@ -11,7 +11,7 @@ BEGIN {
 }
 
 $| = 1;
-print "1..15\n";
+print "1..16\n";
 
 # External program 'tr' assumed.
 open(PIPE, "|-") || (exec 'tr', 'YX', 'ko');
@@ -99,12 +99,23 @@ else {
     local $SIG{PIPE} = 'IGNORE';
     open NIL, '|true'	or die "open failed: $!";
     sleep 5;
-    print NIL 'foo'	or die "print failed: $!";
-    if (close NIL) {
-	print "not ok 9\n";
+    if (print NIL 'foo') {
+	# If print was allowed we had better get an error on close
+	if (close NIL) {
+	    print "not ok 9\n";
+	}
+	else {
+	    print "ok 9\n";
+	}
     }
     else {
-	print "ok 9\n";
+	# If print failed, the close should be clean
+	if (close NIL) {
+	    print "ok 9\n";
+	}
+	else {
+	    print "not ok 9\n";
+	}
     }
 }
 
@@ -174,3 +185,20 @@ if ($? != 42) {
 }
 print "ok 15\n";
 $? = 0;
+
+# check that child is reaped if the piped program can't be executed
+{
+  open NIL, '/no_such_process |';
+  close NIL;
+
+  my $child = 0;
+  eval {
+    local $SIG{ALRM} = sub { die; };
+    alarm 2;
+    $child = wait;
+    alarm 0;
+  };
+
+  print "not " if $child != -1;
+  print "ok 16\n";
+}

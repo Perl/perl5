@@ -13,7 +13,7 @@ BEGIN {
     $ENV{PERL_DESTRUCT_LEVEL} = 0 unless $ENV{PERL_DESTRUCT_LEVEL} > 3;
 }
 $| = 1;
-print "1..22\n";
+print "1..74\n";
 use Thread 'yield';
 print "ok 1\n";
 
@@ -129,3 +129,79 @@ $thr1->join;
 $thr2->join;
 $thr3->join;
 print "ok 22\n";
+
+{
+    my $THRf_STATE_MASK = 7;
+    my $THRf_R_JOINABLE = 0;
+    my $THRf_R_JOINED = 1;
+    my $THRf_R_DETACHED = 2;
+    my $THRf_ZOMBIE = 3;
+    my $THRf_DEAD = 4;
+    my $THRf_DID_DIE = 8;
+    sub _test {
+	my($test, $t, $state, $die) = @_;
+	my $flags = $t->flags;
+	if (($flags & $THRf_STATE_MASK) == $state
+		&& !($flags & $THRf_DID_DIE) == !$die) {
+	    print "ok $test\n";
+	} else {
+	    print <<BAD;
+not ok $test\t# got flags $flags not @{[ $state + ($die ? $THRf_DID_DIE : 0) ]}
+BAD
+	}
+    }
+
+    my @t;
+    push @t, (
+	Thread->new(sub { sleep 4; die "thread die\n" }),
+	Thread->new(sub { die "thread die\n" }),
+	Thread->new(sub { sleep 4; 1 }),
+	Thread->new(sub { 1 }),
+    ) for 1, 2;
+    $_->detach for @t[grep $_ & 4, 0..$#t];
+
+    sleep 1;
+    my $test = 23;
+    for (0..7) {
+	my $t = $t[$_];
+	my $flags = ($_ & 1)
+	    ? ($_ & 4) ? $THRf_DEAD : $THRf_ZOMBIE
+	    : ($_ & 4) ? $THRf_R_DETACHED : $THRf_R_JOINABLE;
+	_test($test++, $t, $flags, (($_ & 3) != 1) ? 0 : $THRf_DID_DIE);
+	printf "%sok %s\n", !$t->done == !($_ & 1) ? "" : "not ", $test++;
+    }
+#   $test = 39;
+    for (grep $_ & 1, 0..$#t) {
+	next if $_ & 4;		# can't join detached threads
+	$t[$_]->eval;
+	my $die = ($_ & 2) ? "" : "thread die\n";
+	printf "%sok %s\n", $@ eq $die ? "" : "not ", $test++;
+    }
+#   $test = 41;
+    for (0..7) {
+	my $t = $t[$_];
+	my $flags = ($_ & 1)
+	    ? ($_ & 4) ? $THRf_DEAD : $THRf_DEAD
+	    : ($_ & 4) ? $THRf_R_DETACHED : $THRf_R_JOINABLE;
+	_test($test++, $t, $flags, (($_ & 3) != 1) ? 0 : $THRf_DID_DIE);
+	printf "%sok %s\n", !$t->done == !($_ & 1) ? "" : "not ", $test++;
+    }
+#   $test = 57;
+    for (grep !($_ & 1), 0..$#t) {
+	next if $_ & 4;		# can't join detached threads
+	$t[$_]->eval;
+	my $die = ($_ & 2) ? "" : "thread die\n";
+	printf "%sok %s\n", $@ eq $die ? "" : "not ", $test++;
+    }
+    sleep 1;	# make sure even the detached threads are done sleeping
+#   $test = 59;
+    for (0..7) {
+	my $t = $t[$_];
+	my $flags = ($_ & 1)
+	    ? ($_ & 4) ? $THRf_DEAD : $THRf_DEAD
+	    : ($_ & 4) ? $THRf_DEAD : $THRf_DEAD;
+	_test($test++, $t, $flags, ($_ & 2) ? 0 : $THRf_DID_DIE);
+	printf "%sok %s\n", $t->done ? "" : "not ", $test++;
+    }
+#   $test = 75;
+}

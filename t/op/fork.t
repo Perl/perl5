@@ -8,7 +8,9 @@ BEGIN {
     require Config; import Config;
     unless ($Config{'d_fork'}
 	    or ($^O eq 'MSWin32' and $Config{useithreads}
-		and $Config{ccflags} =~ /-DPERL_IMPLICIT_SYS/))
+		and $Config{ccflags} =~ /-DPERL_IMPLICIT_SYS/ 
+#               and !defined $Config{'useperlio'}
+               ))
     {
 	print "1..0 # Skip: no fork\n";
 	exit 0;
@@ -183,6 +185,28 @@ child 3
 -1- [2] -3-
 [1] -2- -3-
 -1- -2- -3-
+########
+$| = 1;
+foreach my $c (1,2,3) {
+    if (fork) {
+	print "parent $c\n";
+    }
+    else {
+	print "child $c\n";
+	exit;
+    }
+}
+while (wait() != -1) { print "waited\n" }
+EXPECT
+child 1
+child 2
+child 3
+parent 1
+parent 2
+parent 3
+waited
+waited
+waited
 ########
 use Config;
 $| = 1;

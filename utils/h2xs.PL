@@ -41,7 +41,7 @@ h2xs - convert .h C header files to Perl extensions
 
 =head1 SYNOPSIS
 
-B<h2xs> [B<-ACOPXacdfkmx>] [B<-F> addflags] [B<-M> fmask] [B<-n> module_name] [B<-o> tmask] [B<-p> prefix] [B<-s> subs] [B<-v> version] [headerfile ... [extra_libraries]]
+B<h2xs> [B<-ACOPXacdfkmx>] [B<-F> addflags] [B<-M> fmask] [B<-n> module_name] [B<-o> tmask] [B<-p> prefix] [B<-s> subs] [B<-v> version] [B<-b> compat_version] [headerfile ... [extra_libraries]]
 
 B<h2xs> B<-h>
 
@@ -403,7 +403,7 @@ See L<perlxs> and L<perlxstut> for additional details.
 use strict;
 
 
-my( $H2XS_VERSION ) = ' $Revision: 1.20 $ ' =~ /\$Revision:\s+([^\s]+)/;
+my( $H2XS_VERSION ) = ' $Revision: 1.21 $ ' =~ /\$Revision:\s+([^\s]+)/;
 my $TEMPLATE_VERSION = '0.01';
 my @ARGS = @ARGV;
 my $compat_version = $];
@@ -524,6 +524,8 @@ EOD
 my @path_h_ini = @path_h;
 my ($name, %fullpath, %prefix, %seen_define, %prefixless, %const_names);
 
+my $module = $opt_n;
+
 if( @path_h ){
     use Config;
     use File::Spec;
@@ -542,6 +544,15 @@ if( @path_h ){
     }
     foreach my $path_h (@path_h) {
         $name ||= $path_h;
+    $module ||= do {
+      $name =~ s/\.h$//;
+      if ( $name !~ /::/ ) {
+	$name =~ s#^.*/##;
+	$name = "\u$name";
+      }
+      $name;
+    };
+
     if( $path_h =~ s#::#/#g && $opt_n ){
 	warn "Nesting of headerfile ignored with -n\n";
     }
@@ -550,19 +561,36 @@ if( @path_h ){
     $path_h =~ s/,.*$// if $opt_x;
     $fullpath{$path_h} = $fullpath;
 
+    # Minor trickery: we can't chdir() before we processed the headers
+    # (so know the name of the extension), but the header may be in the
+    # extension directory...
+    my $tmp_path_h = $path_h;
+    my $rel_path_h = $path_h;
+    my @dirs = @paths;
     if (not -f $path_h) {
-      my $tmp_path_h = $path_h;
+      my $found;
       for my $dir (@paths) {
-	last if -f ($path_h = File::Spec->catfile($dir, $tmp_path_h));
+	$found++, last
+	  if -f ($path_h = File::Spec->catfile($dir, $tmp_path_h));
+      }
+      if ($found) {
+	$rel_path_h = $path_h;
+      } else {
+	(my $epath = $module) =~ s,::,/,g;
+	$epath = File::Spec->catdir('ext', $epath) if -d 'ext';
+	$rel_path_h = File::Spec->catfile($epath, $tmp_path_h);
+	$path_h = $tmp_path_h;	# Used during -x
+	push @dirs, $epath;
       }
     }
 
     if (!$opt_c) {
-      die "Can't find $path_h\n" if ( ! $opt_f && ! -f $path_h );
+      die "Can't find $tmp_path_h in @dirs\n" 
+	if ( ! $opt_f && ! -f "$rel_path_h" );
       # Scan the header file (we should deal with nested header files)
       # Record the names of simple #define constants into const_names
             # Function prototypes are processed below.
-      open(CH, "<$path_h") || die "Can't open $path_h: $!\n";
+      open(CH, "<$rel_path_h") || die "Can't open $rel_path_h: $!\n";
     defines:
       while (<CH>) {
 	if (/^[ \t]*#[ \t]*define\s+([\$\w]+)\b(?!\()\s*(?=[^" \t])(.*)/) {
@@ -603,14 +631,6 @@ if( @path_h ){
 }
 
 
-my $module = $opt_n || do {
-	$name =~ s/\.h$//;
-	if( $name !~ /::/ ){
-		$name =~ s#^.*/##;
-		$name = "\u$name";
-	}
-	$name;
-};
 
 my ($ext, $nested, @modparts, $modfname, $modpname);
 (chdir 'ext', $ext = 'ext/') if -d 'ext';
@@ -1023,7 +1043,7 @@ my $pod = <<"END" unless $opt_P;
 $exp_doc$meth_doc$revhist
 #=head1 AUTHOR
 #
-#$author, $email
+#$author, E<lt>${email}E<gt>
 #
 #=head1 SEE ALSO
 #
@@ -1697,6 +1717,9 @@ WriteMakefile(
     'NAME'		=> '$module',
     'VERSION_FROM'	=> '$modfname.pm', # finds \$VERSION
     'PREREQ_PM'		=> {}, # e.g., Module::Name => 1.1
+    (\$] >= 5.005 ?    ## Add these new keywords supported since 5.005
+      (ABSTRACT_FROM => '$modfname.pm', # retrieve abstract from module
+       AUTHOR     => '$author <$email>') : ()),
 END
 if (!$opt_X) { # print C stuff, unless XS is disabled
   $opt_F = '' unless defined $opt_F;
@@ -1725,32 +1748,75 @@ END
 print PL ");\n";
 close(PL) || die "Can't close $ext$modpname/Makefile.PL: $!\n";
 
+# Create a simple README since this is a CPAN requirement
+# and it doesnt hurt to have one
+warn "Writing $ext$modpname/README\n";
+open(RM, ">README") || die "Can't create $ext$modpname/README:$!\n";
+my $thisyear = (gmtime)[5] + 1900;
+my $rmhead = "$modpname version $TEMPLATE_VERSION";
+my $rmheadeq = "=" x length($rmhead);
+print RM <<_RMEND_;
+$rmhead
+$rmheadeq
+
+The README is used to introduce the module and provide instructions on
+how to install the module, any machine dependencies it may have (for
+example C compilers and installed libraries) and any other information
+that should be provided before the module is installed.
+
+A README file is required for CPAN modules since CPAN extracts the
+README file from a module distribution so that people browsing the
+archive can use it get an idea of the modules uses. It is usually a
+good idea to provide version information here so that people can
+decide whether fixes for the module are worth downloading.
+
+INSTALLATION
+
+To install this module type the following:
+
+   perl Makefile.PL
+   make
+   make test
+   make install
+
+DEPENDENCIES
+
+This module requires these other modules and libraries:
+
+  blah blah blah
+
+COPYRIGHT AND LICENCE
+
+Put the correct copyright and licence information here.
+
+Copyright (C) $thisyear $author blah blah blah
+
+_RMEND_
+close(RM) || die "Can't close $ext$modpname/README: $!\n";
+
 warn "Writing $ext$modpname/test.pl\n";
 open(EX, ">test.pl") || die "Can't create $ext$modpname/test.pl: $!\n";
 print EX <<'_END_';
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl test.pl'
 
-######################### We start with some black magic to print on failure.
+#########################
 
-# Change 1..1 below to 1..last_test_to_print .
-# (It may become useful if the test is moved to ./t subdirectory.)
+# change 'tests => 1' to 'tests => last_test_to_print';
 
-BEGIN { $| = 1; print "1..1\n"; }
-END {print "not ok 1\n" unless $loaded;}
+use Test;
+BEGIN { plan tests => 1 };
 _END_
 print EX <<_END_;
 use $module;
 _END_
 print EX <<'_END_';
-$loaded = 1;
-print "ok 1\n";
+ok(1); # If we made it this far, we're ok.
 
-######################### End of black magic.
+#########################
 
-# Insert your test code below (better if it prints "ok 13"
-# (correspondingly "not ok 13") depending on the success of chunk 13
-# of the test code):
+# Insert your test code below, the Test module is use()ed here so read
+# its man page ( perldoc Test ) for help writing this test script.
 
 _END_
 close(EX) || die "Can't close $ext$modpname/test.pl: $!\n";

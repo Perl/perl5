@@ -287,6 +287,19 @@ Returns the stash of the CV.
 =for hackers
 Found in file cv.h
 
+=item cv_const_sv
+
+If C<cv> is a constant sub eligible for inlining. returns the constant
+value returned by the sub.  Otherwise, returns NULL.
+
+Constant subs can be created with C<newCONSTSUB> or as described in
+L<perlsub/"Constant Functions">.
+
+	SV*	cv_const_sv(CV* cv)
+
+=for hackers
+Found in file op.c
+
 =item dMARK
 
 Declare a stack marker variable, C<mark>, for the XSUB.  See C<MARK> and
@@ -748,7 +761,7 @@ hash and returned to the caller.  The C<klen> is the length of the key.
 The C<flags> value will normally be zero; if set to G_DISCARD then NULL
 will be returned.
 
-	SV*	hv_delete(HV* tb, const char* key, U32 klen, I32 flags)
+	SV*	hv_delete(HV* tb, const char* key, I32 klen, I32 flags)
 
 =for hackers
 Found in file hv.c
@@ -770,7 +783,7 @@ Found in file hv.c
 Returns a boolean indicating whether the specified hash key exists.  The
 C<klen> is the length of the key.
 
-	bool	hv_exists(HV* tb, const char* key, U32 klen)
+	bool	hv_exists(HV* tb, const char* key, I32 klen)
 
 =for hackers
 Found in file hv.c
@@ -796,7 +809,7 @@ dereferencing it to a C<SV*>.
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
 
-	SV**	hv_fetch(HV* tb, const char* key, U32 klen, I32 lval)
+	SV**	hv_fetch(HV* tb, const char* key, I32 klen, I32 lval)
 
 =for hackers
 Found in file hv.c
@@ -907,7 +920,7 @@ the call, and decrementing it if the function returned NULL.
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
 
-	SV**	hv_store(HV* tb, const char* key, U32 klen, SV* val, U32 hash)
+	SV**	hv_store(HV* tb, const char* key, I32 klen, SV* val, U32 hash)
 
 =for hackers
 Found in file hv.c
@@ -1032,7 +1045,8 @@ Found in file scope.h
 =item looks_like_number
 
 Test if an the content of an SV looks like a number (or is a
-number).
+number). C<Inf> and C<Infinity> are treated as numbers (so will not
+issue a non-numeric warning), even if your atof() doesn't grok them.
 
 	I32	looks_like_number(SV* sv)
 
@@ -1162,7 +1176,7 @@ Found in file handy.h
 Creates a constant sub equivalent to Perl C<sub FOO () { 123 }> which is
 eligible for inlining at compile-time.
 
-	void	newCONSTSUB(HV* stash, char* name, SV* sv)
+	CV*	newCONSTSUB(HV* stash, char* name, SV* sv)
 
 =for hackers
 Found in file op.c
@@ -1270,7 +1284,7 @@ The idea here is that as string table is used for shared hash
 keys these strings will have SvPVX == HeKEY and hash lookup
 will avoid string compare.
 
-	SV*	newSVpvn_share(const char* s, STRLEN len, U32 hash)
+	SV*	newSVpvn_share(const char* s, I32 len, U32 hash)
 
 =for hackers
 Found in file sv.c
@@ -1430,7 +1444,7 @@ Found in file perl.c
 =item PL_DBsingle
 
 When Perl is run in debugging mode, with the B<-d> switch, this SV is a
-boolean which indicates whether subs are being single-stepped. 
+boolean which indicates whether subs are being single-stepped.
 Single-stepping is automatically turned on after every step.  This is the C
 variable which corresponds to Perl's $DB::single variable.  See
 C<PL_DBsub>.
@@ -1474,10 +1488,10 @@ Found in file intrpvar.h
 
 =item PL_modglobal
 
-C<PL_modglobal> is a general purpose, interpreter global HV for use by 
+C<PL_modglobal> is a general purpose, interpreter global HV for use by
 extensions that need to keep information on a per-interpreter basis.
-In a pinch, it can also be used as a symbol table for extensions 
-to share data among each other.  It is a good idea to use keys 
+In a pinch, it can also be used as a symbol table for extensions
+to share data among each other.  It is a good idea to use keys
 prefixed by the package name of the extension that owns the data.
 
 	HV*	PL_modglobal
@@ -2421,6 +2435,15 @@ Type flag for blessed scalars.  See C<svtype>.
 =for hackers
 Found in file sv.h
 
+=item SvUOK
+
+Returns a boolean indicating whether the SV contains an unsigned integer.
+
+	void	SvUOK(SV* sv)
+
+=for hackers
+Found in file sv.h
+
 =item SvUPGRADE
 
 Used to upgrade an SV to a more complex form.  Uses C<sv_upgrade> to
@@ -2559,8 +2582,9 @@ Found in file sv.c
 
 =item sv_catsv
 
-Concatenates the string from SV C<ssv> onto the end of the string in SV
-C<dsv>.  Handles 'get' magic, but not 'set' magic.  See C<sv_catsv_mg>.
+Concatenates the string from SV C<ssv> onto the end of the string in
+SV C<dsv>.  Modifies C<dsv> but not C<ssv>.  Handles 'get' magic, but
+not 'set' magic.  See C<sv_catsv_mg>.
 
 	void	sv_catsv(SV* dsv, SV* ssv)
 
@@ -3050,9 +3074,25 @@ Found in file sv.c
 
 Unsets the RV status of the SV, and decrements the reference count of
 whatever was being referenced by the RV.  This can almost be thought of
-as a reversal of C<newSVrv>.  See C<SvROK_off>.
+as a reversal of C<newSVrv>.  This is C<sv_unref_flags> with the C<flag>
+being zero.  See C<SvROK_off>.
 
 	void	sv_unref(SV* sv)
+
+=for hackers
+Found in file sv.c
+
+=item sv_unref_flags
+
+Unsets the RV status of the SV, and decrements the reference count of
+whatever was being referenced by the RV.  This can almost be thought of
+as a reversal of C<newSVrv>.  The C<cflags> argument can contain
+C<SV_IMMEDIATE_UNREF> to force the reference count to be decremented
+(otherwise the decrementing is conditional on the reference count being
+different from one or the reference being a readonly SV).
+See C<SvROK_off>.
+
+	void	sv_unref_flags(SV* sv, U32 flags)
 
 =for hackers
 Found in file sv.c
@@ -3190,6 +3230,44 @@ string, false otherwise.
 =for hackers
 Found in file utf8.c
 
+=item utf8_distance
+
+Returns the number of UTF8 characters between the UTF-8 pointers C<a>
+and C<b>.
+
+WARNING: use only if you *know* that the pointers point inside the
+same UTF-8 buffer.
+
+	IV	utf8_distance(U8 *a, U8 *b)
+
+=for hackers
+Found in file utf8.c
+
+=item utf8_hop
+
+Return the UTF-8 pointer C<s> displaced by C<off> characters, either
+forward or backward.
+
+WARNING: do not use the following unless you *know* C<off> is within
+the UTF-8 data pointed to by C<s> *and* that on entry C<s> is aligned
+on the first byte of character or just after the last byte of a character.
+
+	U8*	utf8_hop(U8 *s, I32 off)
+
+=for hackers
+Found in file utf8.c
+
+=item utf8_length
+
+Return the length of the UTF-8 char encoded string C<s> in characters.
+Stops at C<e> (inclusive).  If C<e E<lt> s> or if the scan would end
+up past C<e>, croaks.
+
+	STRLEN	utf8_length(U8* s, U8 *e)
+
+=for hackers
+Found in file utf8.c
+
 =item utf8_to_bytes
 
 Converts a string C<s> of length C<len> from UTF8 into byte encoding.
@@ -3205,32 +3283,35 @@ Found in file utf8.c
 =item utf8_to_uv
 
 Returns the character value of the first character in the string C<s>
-which is assumed to be in UTF8 encoding; C<retlen> will be set to the
-length, in bytes, of that character, and the pointer C<s> will be
-advanced to the end of the character.
+which is assumed to be in UTF8 encoding and no longer than C<curlen>;
+C<retlen> will be set to the length, in bytes, of that character.
 
-If C<s> does not point to a well-formed UTF8 character, an optional UTF8
-warning is produced.
+If C<s> does not point to a well-formed UTF8 character, the behaviour
+is dependent on the value of C<flags>: if it contains UTF8_CHECK_ONLY,
+it is assumed that the caller will raise a warning, and this function
+will silently just set C<retlen> to C<-1> and return zero.  If the
+C<flags> does not contain UTF8_CHECK_ONLY, warnings about
+malformations will be given, C<retlen> will be set to the expected
+length of the UTF-8 character in bytes, and zero will be returned.
 
-	U8* s	utf8_to_uv(I32 *retlen)
+The C<flags> can also contain various flags to allow deviations from
+the strict UTF-8 encoding (see F<utf8.h>).
+
+	U8* s	utf8_to_uv(STRLEN curlen, STRLEN *retlen, U32 flags)
 
 =for hackers
 Found in file utf8.c
 
-=item utf8_to_uv_chk
+=item utf8_to_uv_simple
 
 Returns the character value of the first character in the string C<s>
 which is assumed to be in UTF8 encoding; C<retlen> will be set to the
-length, in bytes, of that character, and the pointer C<s> will be
-advanced to the end of the character.
+length, in bytes, of that character.
 
-If C<s> does not point to a well-formed UTF8 character, the behaviour
-is dependent on the value of C<checking>: if this is true, it is
-assumed that the caller will raise a warning, and this function will
-set C<retlen> to C<-1> and return. If C<checking> is not true, an optional UTF8
-warning is produced.
+If C<s> does not point to a well-formed UTF8 character, zero is
+returned and retlen is set, if possible, to -1.
 
-	U8* s	utf8_to_uv_chk(I32 *retlen, I32 checking)
+	U8* s	utf8_to_uv_simple(STRLEN *retlen)
 
 =for hackers
 Found in file utf8.c

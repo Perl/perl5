@@ -2,6 +2,8 @@ package vars;
 
 require 5.002;
 
+our $VERSION = '1.00';
+
 # The following require can't be removed during maintenance
 # releases, sadly, because of the risk of buggy code that does
 # require Carp; Carp::croak "..."; without brackets dying
@@ -10,6 +12,7 @@ require 5.002;
 require Carp if $] < 5.00450;
 
 use warnings::register;
+require strict;
 
 sub import {
     my $callpack = caller;
@@ -26,6 +29,8 @@ sub import {
 		Carp::croak("Can't declare individual elements of hash or array");
 	    } elsif (warnings::enabled() and length($sym) == 1 and $sym !~ tr/a-zA-Z//) {
 		warnings::warn("No need to declare built-in vars");
+            } elsif  ( $^H &= strict::bits('vars') ) {
+              Carp::croak("'$ch$sym' is not a valid variable name under strict vars");
 	    }
 	}
         *{"${callpack}::$sym"} =

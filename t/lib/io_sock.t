@@ -30,7 +30,7 @@ BEGIN {
 }
 
 $| = 1;
-print "1..14\n";
+print "1..20\n";
 
 use IO::Socket;
 
@@ -70,17 +70,15 @@ if($pid = fork()) {
 
 } elsif(defined $pid) {
 
-    # This can fail if localhost is undefined or the
-    # special 'loopback' address 127.0.0.1 is not configured
-    # on your system. (/etc/rc.config.d/netconfig on HP-UX.)
-    # As a shortcut (not recommended) you could change 'localhost'
-    # here to be the name of this machine eg 'myhost.mycompany.com'.
-
     $sock = IO::Socket::INET->new(PeerPort => $port,
 				  Proto => 'tcp',
 				  PeerAddr => 'localhost'
 				 )
-	or die "$! (maybe your system does not have the 'localhost' address defined)";
+         || IO::Socket::INET->new(PeerPort => $port,
+				  Proto => 'tcp',
+				  PeerAddr => '127.0.0.1'
+				 )
+	or die "$! (maybe your system does not have a localhost at all, 'localhost' or 127.0.0.1)";
 
     $sock->autoflush(1);
 
@@ -114,7 +112,8 @@ if($pid = fork()) {
     $listen->close;
 } elsif (defined $pid) {
     # child, try various ways to connect
-    $sock = IO::Socket::INET->new("localhost:$port");
+    $sock = IO::Socket::INET->new("localhost:$port")
+         || IO::Socket::INET->new("127.0.0.1:$port");
     if ($sock) {
 	print "not " unless $sock->connected;
 	print "ok 6\n";
@@ -151,10 +150,14 @@ if($pid = fork()) {
     sleep(1);
 
     $sock = IO::Socket->new(Domain => AF_INET,
-                            PeerAddr => "localhost:$port");
+                            PeerAddr => "localhost:$port")
+         || IO::Socket->new(Domain => AF_INET,
+                            PeerAddr => "127.0.0.1:$port");
     if ($sock) {
        $sock->print("ok 11\n");
        $sock->print("quit\n");
+    } else {
+       print "not ok 11\n";
     }
     $sock = undef;
     sleep(1);
@@ -166,7 +169,10 @@ if($pid = fork()) {
 # Then test UDP sockets
 $server = IO::Socket->new(Domain => AF_INET,
                           Proto  => 'udp',
-                          LocalAddr => 'localhost');
+                          LocalAddr => 'localhost')
+       || IO::Socket->new(Domain => AF_INET,
+                          Proto  => 'udp',
+                          LocalAddr => '127.0.0.1');
 $port = $server->sockport;
 
 if ($^O eq 'mpeix') {
@@ -179,7 +185,9 @@ if ($^O eq 'mpeix') {
     } elsif (defined($pid)) {
         #child
         $sock = IO::Socket::INET->new(Proto => 'udp',
-                                      PeerAddr => "localhost:$port");
+                                      PeerAddr => "localhost:$port")
+             || IO::Socket::INET->new(Proto => 'udp',
+                                      PeerAddr => "127.0.0.1:$port");
         $sock->send("ok 12\n");
         sleep(1);
         $sock->send("ok 12\n");  # send another one to be sure
@@ -195,3 +203,131 @@ print "ok 13\n";
 $server->blocking(0);
 print "not " if $server->blocking;
 print "ok 14\n";
+
+### TEST 15
+### Set up some data to be transfered between the server and
+### the client. We'll use own source code ...
+#
+local @data;
+if( !open( SRC, "< $0")) {
+    print "not ok 15 - $!";
+} else {
+    @data = <SRC>;
+    close( SRC);
+}
+print "ok 15\n";
+
+### TEST 16
+### Start the server
+#
+my $listen = IO::Socket::INET->new( Listen => 2, Proto => 'tcp', Timeout => 15) ||
+    print "not ";
+print "ok 16\n";
+die if( !defined( $listen));
+my $serverport = $listen->sockport;
+
+my $server_pid = fork();
+if( $server_pid) {
+
+    ### TEST 17 Client/Server establishment
+    #
+    print "ok 17\n";
+
+    ### TEST 18
+    ### Get data from the server using a single stream
+    #
+    $sock = IO::Socket::INET->new("localhost:$serverport")
+         || IO::Socket::INET->new("127.0.0.1:$serverport");
+
+    if ($sock) {
+	$sock->print("send\n");
+
+	my @array = ();
+	while( <$sock>) {
+	    push( @array, $_);
+	}
+
+	$sock->print("done\n");
+	$sock->close;
+
+	print "not " if( @array != @data);
+    } else {
+	print "not ";
+    }
+    print "ok 18\n";
+
+    ### TEST 19
+    ### Get data from the server using a stream, which is
+    ### interrupted by eof calls.
+    ### On perl-5.7.0@7673 this failed in a SOCKS environment, because eof
+    ### did an getc followed by an ungetc in order to check for the streams
+    ### end. getc(3) got replaced by the SOCKS funktion, which ended up in
+    ### a recv(2) call on the socket, while ungetc(3) put back a character
+    ### to an IO buffer, which never again was read.
+    #
+    $sock = IO::Socket::INET->new("localhost:$serverport")
+         || IO::Socket::INET->new("127.0.0.1:$serverport");
+
+    if ($sock) {
+	$sock->print("send\n");
+
+	my @array = ();
+	while( !eof( $sock ) ){
+	    while( <$sock>) {
+		push( @array, $_);
+		last;
+	    }
+	}
+
+	$sock->print("done\n");
+	$sock->close;
+
+	print "not " if( @array != @data);
+    } else {
+	print "not ";
+    }
+    print "ok 19\n";
+
+    ### TEST 20
+    ### Stop the server
+    #
+    $sock = IO::Socket::INET->new("localhost:$serverport")
+         || IO::Socket::INET->new("127.0.0.1:$serverport");
+
+    if ($sock) {
+	$sock->print("done\n");
+	$sock->close;
+
+	print "not " if( 1 != kill 0, $server_pid);
+    } else {
+	print "not ";
+    }
+    print "ok 20\n";
+
+} elsif( defined( $server_pid)) {
+   
+    ### Child
+    #
+    SERVER_LOOP: while (1) {
+	last SERVER_LOOP unless $sock = $listen->accept;
+	while (<$sock>) {
+	    last SERVER_LOOP if /^quit/;
+	    last if /^done/;
+	    if( /^send/) {
+		print $sock @data;
+		last;
+	    }
+	    print;
+	}
+	$sock = undef;
+    }
+    $listen->close;
+
+} else {
+
+    ### Fork failed
+    #
+    print "not ok 17\n";
+    die;
+}
+

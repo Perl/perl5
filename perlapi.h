@@ -420,10 +420,8 @@ START_EXTERN_C
 #define PL_origenviron		(*Perl_Iorigenviron_ptr(aTHXo))
 #undef  PL_origfilename
 #define PL_origfilename		(*Perl_Iorigfilename_ptr(aTHXo))
-#undef  PL_ors
-#define PL_ors			(*Perl_Iors_ptr(aTHXo))
-#undef  PL_orslen
-#define PL_orslen		(*Perl_Iorslen_ptr(aTHXo))
+#undef  PL_ors_sv
+#define PL_ors_sv		(*Perl_Iors_sv_ptr(aTHXo))
 #undef  PL_osname
 #define PL_osname		(*Perl_Iosname_ptr(aTHXo))
 #undef  PL_pad_reset_pending
@@ -712,10 +710,8 @@ START_EXTERN_C
 #define PL_na			(*Perl_Tna_ptr(aTHXo))
 #undef  PL_nrs
 #define PL_nrs			(*Perl_Tnrs_ptr(aTHXo))
-#undef  PL_ofs
-#define PL_ofs			(*Perl_Tofs_ptr(aTHXo))
-#undef  PL_ofslen
-#define PL_ofslen		(*Perl_Tofslen_ptr(aTHXo))
+#undef  PL_ofs_sv
+#define PL_ofs_sv		(*Perl_Tofs_sv_ptr(aTHXo))
 #undef  PL_op
 #define PL_op			(*Perl_Top_ptr(aTHXo))
 #undef  PL_opsave

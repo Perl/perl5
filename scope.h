@@ -33,6 +33,7 @@
 #define SAVEt_I8		32
 #define SAVEt_COMPPAD		33
 #define SAVEt_GENERIC_PVREF	34
+#define SAVEt_PADSV		35
 
 #define SSCHECK(need) if (PL_savestack_ix + need > PL_savestack_max) savestack_grow()
 #define SSPUSHINT(i) (PL_savestack[PL_savestack_ix++].any_i32 = (I32)(i))
@@ -101,6 +102,7 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
 #define SAVESPTR(s)	save_sptr((SV**)&(s))
 #define SAVEPPTR(s)	save_pptr(SOFT_CAST(char**)&(s))
 #define SAVEVPTR(s)	save_vptr((void*)&(s))
+#define SAVEPADSV(s)	save_padsv(s)
 #define SAVEFREESV(s)	save_freesv((SV*)(s))
 #define SAVEFREEOP(o)	save_freeop(SOFT_CAST(OP*)(o))
 #define SAVEFREEPV(p)	save_freepv(SOFT_CAST(char*)(p))
@@ -173,11 +175,14 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
  * SSPTR() converts the index returned by SSNEW/SSNEWa() into a pointer.
  */
 
-#define SSNEW(size)             save_alloc(size, 0)
-#define SSNEWa(size,align)	save_alloc(size, \
+#define SSNEW(size)             Perl_save_alloc(aTHX_ (size), 0)
+#define SSNEWt(n,t)             SSNEW((n)*sizeof(t))
+#define SSNEWa(size,align)	Perl_save_alloc(aTHX_ (size), \
     (align - ((int)((caddr_t)&PL_savestack[PL_savestack_ix]) % align)) % align)
+#define SSNEWat(n,t,align)	SSNEWa((n)*sizeof(t), align)
 
-#define SSPTR(off,type)         ((type) ((char*)PL_savestack + off))
+#define SSPTR(off,type)         ((type)  ((char*)PL_savestack + off))
+#define SSPTRt(off,type)        ((type*) ((char*)PL_savestack + off))
 
 /* A jmpenv packages the state required to perform a proper non-local jump.
  * Note that there is a start_env initialized when perl starts, and top_env
@@ -286,7 +291,7 @@ typedef void *(CPERLscope(*protect_proc_t)) (pTHX_ volatile JMPENV *pcur_env,
 	OP_REG_TO_MEM;					\
     } STMT_END
 
-#define JMPENV_PUSH_INIT(THROWFUNC) JMPENV_PUSH_INIT_ENV(*(JMPENV*)pcur_env,THROWFUNC) 
+#define JMPENV_PUSH_INIT(THROWFUNC) JMPENV_PUSH_INIT_ENV(*(JMPENV*)pcur_env,THROWFUNC)
 
 #define JMPENV_POST_CATCH_ENV(ce) \
     STMT_START {					\
@@ -311,7 +316,7 @@ typedef void *(CPERLscope(*protect_proc_t)) (pTHX_ volatile JMPENV *pcur_env,
 	(v) = EXCEPT_GET_ENV(ce);				\
     } STMT_END
 
-#define JMPENV_PUSH(v) JMPENV_PUSH_ENV(*(JMPENV*)pcur_env,v) 
+#define JMPENV_PUSH(v) JMPENV_PUSH_ENV(*(JMPENV*)pcur_env,v)
 
 #define JMPENV_POP_ENV(ce) \
     STMT_START {						\
@@ -319,7 +324,7 @@ typedef void *(CPERLscope(*protect_proc_t)) (pTHX_ volatile JMPENV *pcur_env,
 	    PL_top_env = (ce).je_prev;				\
     } STMT_END
 
-#define JMPENV_POP  JMPENV_POP_ENV(*(JMPENV*)pcur_env) 
+#define JMPENV_POP  JMPENV_POP_ENV(*(JMPENV*)pcur_env)
 
 #define JMPENV_JUMP(v) \
     STMT_START {						\

@@ -1,9 +1,24 @@
-;# $Id: Storable.pm,v 1.0 2000/09/01 19:40:41 ram Exp $
+;# $Id: Storable.pm,v 1.0.1.7 2001/01/03 09:39:02 ram Exp $
 ;#
 ;#  Copyright (c) 1995-2000, Raphael Manfredi
 ;#  
 ;#  You may redistribute only under the same terms as Perl 5, as specified
 ;#  in the README file that comes with the distribution.
+;#
+;# $Log: Storable.pm,v $
+;# Revision 1.0.1.7  2001/01/03 09:39:02  ram
+;# patch7: added CAN_FLOCK to determine whether we can flock() or not
+;#
+;# Revision 1.0.1.6  2000/11/05 17:20:25  ram
+;# patch6: increased version number
+;#
+;# Revision 1.0.1.5  2000/10/26 17:10:18  ram
+;# patch5: documented that store() and retrieve() can return undef
+;# patch5: added paragraph explaining the auto require for thaw hooks
+;#
+;# Revision 1.0.1.4  2000/10/23 18:02:57  ram
+;# patch4: protected calls to flock() for dos platform
+;# patch4: added logcarp emulation if they don't have Log::Agent
 ;#
 ;# $Log: Storable.pm,v $
 ;# Revision 1.0  2000/09/01 19:40:41  ram
@@ -26,7 +41,7 @@ package Storable; @ISA = qw(Exporter DynaLoader);
 use AutoLoader;
 use vars qw($forgive_me $VERSION);
 
-$VERSION = '1.003';
+$VERSION = '1.007';
 *AUTOLOAD = \&AutoLoader::AUTOLOAD;		# Grrr...
 
 #
@@ -40,6 +55,10 @@ unless (defined @Log::Agent::EXPORT) {
 		sub logcroak {
 			require Carp;
 			Carp::croak(@_);
+		}
+		sub logcarp {
+			require Carp;
+			Carp::carp(@_);
 		}
 	};
 }
@@ -61,8 +80,24 @@ BEGIN {
 }
 
 sub logcroak;
+sub logcarp;
 
 sub retrieve_fd { &fd_retrieve }		# Backward compatibility
+
+#
+# Determine whether locking is possible, but only when needed.
+#
+
+my $CAN_FLOCK;
+
+sub CAN_FLOCK {
+	return $CAN_FLOCK if defined $CAN_FLOCK;
+	require Config; import Config;
+	return $CAN_FLOCK =
+		$Config{'d_flock'} ||
+		$Config{'d_fcntl_can_lock'} ||
+		$Config{'d_lockf'};
+}
 
 bootstrap Storable;
 1;
@@ -118,6 +153,10 @@ sub _store {
 	open(FILE, ">$file") || logcroak "can't create $file: $!";
 	binmode FILE;				# Archaic systems...
 	if ($use_locking) {
+		unless (&CAN_FLOCK) {
+			logcarp "Storable::lock_store: fcntl/flock emulation broken on $^O";
+			return undef;
+		}
 		flock(FILE, LOCK_EX) ||
 			logcroak "can't get exclusive lock on $file: $!";
 		truncate FILE, 0;
@@ -234,7 +273,12 @@ sub _retrieve {
 	my $self;
 	my $da = $@;							# Could be from exception handler
 	if ($use_locking) {
-		flock(FILE, LOCK_SH) || logcroak "can't get shared lock on $file: $!";
+		unless (&CAN_FLOCK) {
+			logcarp "Storable::lock_retrieve: fcntl/flock emulation broken on $^O";
+			return undef;
+		}
+		flock(FILE, LOCK_SH) ||
+			logcroak "can't get shared lock on $file: $!";
 		# Unlocking will happen when FILE is closed
 	}
 	eval { $self = pretrieve(*FILE) };		# Call C routine
@@ -435,6 +479,9 @@ those exceptions.
 When Storable croaks, it tries to report the error via the C<logcroak()>
 routine from the C<Log::Agent> package, if it is available.
 
+Normal errors are reported by having store() or retrieve() return C<undef>.
+Such errors are usually I/O errors (or truncated stream errors at retrieval).
+
 =head1 WIZARDS ONLY
 
 =head2 Hooks
@@ -513,6 +560,13 @@ is the serialized string you returned to the engine in C<STORABLE_freeze>,
 and there may be an optional list of references, in the same order you gave
 them at serialization time, pointing to the deserialized objects (which
 have been processed courtesy of the Storable engine).
+
+When the Storable engine does not find any C<STORABLE_thaw> hook routine,
+it tries to load the class by requiring the package dynamically (using
+the blessed package name), and then re-attempts the lookup.  If at that
+time the hook cannot be located, the engine croaks.  Note that this mechanism
+will fail if you define several classes in the same file, but perlmod(1)
+warned you.
 
 It is up to you to use these information to populate I<obj> the way you want.
 

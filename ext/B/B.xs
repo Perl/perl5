@@ -1229,6 +1229,12 @@ U16
 CvFLAGS(cv)
       B::CV   cv
 
+MODULE = B	PACKAGE = B::CV		PREFIX = cv_
+
+B::SV
+cv_const_sv(cv)
+	B::CV	cv
+
 
 MODULE = B	PACKAGE = B::HV		PREFIX = Hv
 

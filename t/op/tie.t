@@ -162,19 +162,28 @@ $C = $B = tied %H ;
 untie %H;
 EXPECT
 ########
-
-# verify no leak when underlying object is selfsame tied variable
-my ($a, $b);
+# Forbidden aggregate self-ties
+my ($a, $b) = (0, 0);
 sub Self::TIEHASH { bless $_[1], $_[0] }
-sub Self::DESTROY { $b = $_[0] + 0; }
+sub Self::DESTROY { $b = $_[0] + 1; }
 {
-    my %b5;
-    $a = \%b5 + 0;
-    tie %b5, 'Self', \%b5;
+    my %c = 42;
+    tie %c, 'Self', \%c;
 }
-die unless $a == $b;
 EXPECT
-Self-ties are not supported 
+Self-ties of arrays and hashes are not supported 
+########
+# Allowed scalar self-ties
+my ($a, $b) = (0, 0);
+sub Self::TIESCALAR { bless $_[1], $_[0] }
+sub Self::DESTROY   { $b = $_[0] + 1; }
+{
+    my $c = 42;
+    $a = $c + 0;
+    tie $c, 'Self', \$c;
+}
+die unless $a == 0 && $b == 43;
+EXPECT
 ########
 # Interaction of tie and vec
 

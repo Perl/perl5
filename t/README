@@ -1,4 +1,4 @@
-This is the perl test library.  To run all the tests, just type 'TEST'.
+This is the perl test library.  To run all the tests, just type './TEST'.
 
 To add new tests, just look at the current tests and do likewise.
 
@@ -14,3 +14,8 @@ will fail, you may want to use Test::Harness thusly:
 This method pinpoints failed tests automatically.
 
 If you come up with new tests, please send them to perlbug@perl.org.
+
+Tests in the base/ directory ought to be runnable with plain miniperl.
+That is, they should not require Config.pm nor should they require any
+extensions to have been built.  TEST will abort if any tests in the
+base/ directory fail.

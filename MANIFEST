@@ -13,7 +13,6 @@ Copying			The GNU General Public License
 EXTERN.h		Included before foreign .h files
 INSTALL			Detailed installation instructions
 INTERN.h		Included before domestic .h files
-MAINTAIN		Who maintains which files
 MANIFEST		This list of files
 Makefile.SH		A script that generates Makefile
 Makefile.micro		microperl Makefile
@@ -32,6 +31,7 @@ Porting/p4desc		Smarter 'p4 describe', outputs diffs for new files
 Porting/patching.pod	How to report changes made to Perl
 Porting/patchls		Flexible patch file listing utility
 Porting/pumpkin.pod	Guidelines and hints for Perl maintainers
+Porting/repository.pod	How to use the Perl repository
 README			The Instructions
 README.Y2K		Notes about Year 2000 concerns
 README.aix		Notes about AIX port
@@ -52,6 +52,7 @@ README.os390		Notes about OS/390 (nee MVS) port
 README.plan9		Notes about Plan9 port
 README.posix-bc		Notes about BS2000 POSIX port
 README.qnx		Notes about QNX port
+README.solaris		Notes about Solaris port
 README.threads		Notes about multithreading
 README.vmesa		Notes about VM/ESA port
 README.vms		Notes about installing the VMS port
@@ -191,10 +192,11 @@ ext/DynaLoader/hints/netbsd.pl	Hint for DynaLoader for named architecture
 ext/DynaLoader/hints/openbsd.pl	Hint for DynaLoader for named architecture
 ext/Encode/Encode.pm		Encode extension
 ext/Encode/Encode.xs		Encode extension
-ext/Encode/Makefile.PL		Encode extension
-ext/Encode/Todo			Encode extension
+ext/Encode/Encode/EncodeFormat.pod	Encoding table format
 ext/Encode/Encode/ascii.enc	Encoding tables
 ext/Encode/Encode/big5.enc	Encoding tables
+ext/Encode/Encode/cp1006.enc	Encoding tables
+ext/Encode/Encode/cp1047.enc	Encoding tables
 ext/Encode/Encode/cp1250.enc	Encoding tables
 ext/Encode/Encode/cp1251.enc	Encoding tables
 ext/Encode/Encode/cp1252.enc	Encoding tables
@@ -204,12 +206,15 @@ ext/Encode/Encode/cp1255.enc	Encoding tables
 ext/Encode/Encode/cp1256.enc	Encoding tables
 ext/Encode/Encode/cp1257.enc	Encoding tables
 ext/Encode/Encode/cp1258.enc	Encoding tables
+ext/Encode/Encode/cp37.enc	Encoding tables
+ext/Encode/Encode/cp424.enc	Encoding tables
 ext/Encode/Encode/cp437.enc	Encoding tables
 ext/Encode/Encode/cp737.enc	Encoding tables
 ext/Encode/Encode/cp775.enc	Encoding tables
 ext/Encode/Encode/cp850.enc	Encoding tables
 ext/Encode/Encode/cp852.enc	Encoding tables
 ext/Encode/Encode/cp855.enc	Encoding tables
+ext/Encode/Encode/cp856.enc	Encoding tables
 ext/Encode/Encode/cp857.enc	Encoding tables
 ext/Encode/Encode/cp860.enc	Encoding tables
 ext/Encode/Encode/cp861.enc	Encoding tables
@@ -231,10 +236,16 @@ ext/Encode/Encode/euc-kr.enc	Encoding tables
 ext/Encode/Encode/gb12345.enc	Encoding tables
 ext/Encode/Encode/gb1988.enc	Encoding tables
 ext/Encode/Encode/gb2312.enc	Encoding tables
+ext/Encode/Encode/gsm0338.enc		Encoding tables
 ext/Encode/Encode/iso2022-jp.enc	Encoding tables
 ext/Encode/Encode/iso2022-kr.enc	Encoding tables
 ext/Encode/Encode/iso2022.enc		Encoding tables
 ext/Encode/Encode/iso8859-1.enc		Encoding tables
+ext/Encode/Encode/iso8859-10.enc	Encoding tables
+ext/Encode/Encode/iso8859-13.enc	Encoding tables
+ext/Encode/Encode/iso8859-14.enc	Encoding tables
+ext/Encode/Encode/iso8859-15.enc	Encoding tables
+ext/Encode/Encode/iso8859-16.enc	Encoding tables
 ext/Encode/Encode/iso8859-2.enc		Encoding tables
 ext/Encode/Encode/iso8859-3.enc		Encoding tables
 ext/Encode/Encode/iso8859-4.enc		Encoding tables
@@ -260,8 +271,14 @@ ext/Encode/Encode/macRomania.enc	Encoding tables
 ext/Encode/Encode/macThai.enc		Encoding tables
 ext/Encode/Encode/macTurkish.enc	Encoding tables
 ext/Encode/Encode/macUkraine.enc	Encoding tables
+ext/Encode/Encode/posix-bc.enc		Encoding tables
 ext/Encode/Encode/shiftjis.enc		Encoding tables
 ext/Encode/Encode/symbol.enc		Encoding tables
+ext/Encode/Makefile.PL		Encode extension
+ext/Encode/Todo			Encode extension
+ext/Encode/compile		Encode extension
+ext/Encode/encengine.c		Encode extension
+ext/Encode/encode.h		Encode extension
 ext/Errno/ChangeLog		Errno perl module change log
 ext/Errno/Errno_pm.PL		Errno perl module create script
 ext/Errno/Makefile.PL		Errno extension makefile writer
@@ -275,6 +292,9 @@ ext/File/Glob/Makefile.PL	File::Glob extension makefile writer
 ext/File/Glob/TODO		File::Glob extension todo list
 ext/File/Glob/bsd_glob.c	File::Glob extension run time code
 ext/File/Glob/bsd_glob.h	File::Glob extension header file
+ext/Filter/Util/Call/Call.pm	Filter::Util::Call extension module
+ext/Filter/Util/Call/Call.xs	Filter::Util::Call extension external subroutines
+ext/Filter/Util/Call/Makefile.PL	Filter::Util::Call extension makefile writer
 ext/GDBM_File/GDBM_File.pm	GDBM extension Perl module
 ext/GDBM_File/GDBM_File.xs	GDBM extension external subroutines
 ext/GDBM_File/Makefile.PL	GDBM extension makefile writer
@@ -348,6 +368,7 @@ ext/POSIX/hints/netbsd.pl       Hint for POSIX for named architecture
 ext/POSIX/hints/next_3.pl       Hint for POSIX for named architecture
 ext/POSIX/hints/openbsd.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/sunos_4.pl	Hint for POSIX for named architecture
+ext/POSIX/hints/svr4.pl		Hint for POSIX for named architecture
 ext/POSIX/typemap		POSIX extension interface types
 ext/SDBM_File/Makefile.PL	SDBM extension makefile writer
 ext/SDBM_File/SDBM_File.pm	SDBM extension Perl module
@@ -382,8 +403,8 @@ ext/Socket/Makefile.PL	Socket extension makefile writer
 ext/Socket/Socket.pm	Socket extension Perl module
 ext/Socket/Socket.xs	Socket extension external subroutines
 ext/Storable/ChangeLog		Storable extension
-ext/Storable/Makefile.PL	Storable extension
 ext/Storable/MANIFEST		Storable extension
+ext/Storable/Makefile.PL	Storable extension
 ext/Storable/README		Storable extension
 ext/Storable/Storable.pm	Storable extension
 ext/Storable/Storable.xs	Storable extension
@@ -423,13 +444,14 @@ ext/attrs/Makefile.PL	attrs extension makefile writer
 ext/attrs/attrs.pm	attrs extension Perl module
 ext/attrs/attrs.xs	attrs extension external subroutines
 ext/re/Makefile.PL	re extension makefile writer
+ext/re/hints/aix.pl	Hints for re for named architecture
 ext/re/hints/mpeix.pl	Hints for re for named architecture
 ext/re/re.pm		re extension Perl module
 ext/re/re.xs		re extension external subroutines
 ext/util/make_ext	Used by Makefile to execute extension Makefiles
 ext/util/mkbootstrap	Turns ext/*/*_BS into bootstrap info
+fakesdio.h		stdio in terms of PerlIO
 fakethr.h		Fake threads header
-fix_pl			Fix up patchlevel.h for repository perls
 form.h			Public declarations for the above
 global.sym		Symbols that need hiding when embedded
 globals.c		File to declare global symbols (for shared library)
@@ -633,6 +655,7 @@ lib/ExtUtils/Embed.pm	Utilities for embedding Perl in C programs
 lib/ExtUtils/Install.pm	Handles 'make install' on extensions
 lib/ExtUtils/Installed.pm	Information on installed extensions
 lib/ExtUtils/Liblist.pm	Locates libraries
+lib/ExtUtils/MANIFEST.SKIP	The default MANIFEST.SKIP
 lib/ExtUtils/MM_Cygwin.pm	MakeMaker methods for Cygwin
 lib/ExtUtils/MM_OS2.pm		MakeMaker methods for OS/2
 lib/ExtUtils/MM_Unix.pm		MakeMaker base class for Unix
@@ -656,6 +679,7 @@ lib/File/DosGlob.pm	Win32 DOS-globbing module
 lib/File/Find.pm	Routines to do a find
 lib/File/Path.pm	Do things like `mkdir -p' and `rm -r'
 lib/File/Spec.pm	portable operations on file names
+lib/File/Spec/Epoc.pm	portable operations on EPOC file names
 lib/File/Spec/Functions.pm	Function interface to File::Spec object methods
 lib/File/Spec/Mac.pm	portable operations on Mac file names
 lib/File/Spec/OS2.pm	portable operations on OS2 file names
@@ -666,6 +690,7 @@ lib/File/Temp.pm	create safe temporary files and file handles
 lib/File/stat.pm	By-name interface to Perl's builtin stat
 lib/FileCache.pm	Keep more files open than the system permits
 lib/FileHandle.pm	Backward-compatible front end to IO extension
+lib/Filter/Simple.pm	Simple frontend to Filter::Util::Call
 lib/FindBin.pm		Find name of currently executing program
 lib/Getopt/Long.pm	Fetch command options (GetOptions)
 lib/Getopt/Std.pm	Fetch command options (getopt, getopts)
@@ -694,6 +719,7 @@ lib/Pod/Plainer.pm	Pod migration utility module
 lib/Pod/Select.pm	Pod-Parser - select portions of POD docs
 lib/Pod/Text.pm		Pod-Parser - convert POD data to formatted ASCII text
 lib/Pod/Text/Color.pm	Convert POD data to color ASCII text
+lib/Pod/Text/Overstrike.pm	Convert POD data to formatted overstrike text
 lib/Pod/Text/Termcap.pm	Convert POD data to ASCII text with format escapes
 lib/Pod/Usage.pm	Pod-Parser - print usage messages
 lib/Search/Dict.pm	Perform binary search on dictionaries
@@ -769,6 +795,7 @@ lib/open2.pl		Open a two-ended pipe (uses IPC::Open2)
 lib/open3.pl		Open a three-ended pipe (uses IPC::Open3)
 lib/overload.pm		Module for overloading perl operators
 lib/perl5db.pl		Perl debugging routines
+lib/perlio.pm		Perl IO interface pragma
 lib/pwd.pl		Routines to keep track of PWD environment variable
 lib/shellwords.pl	Perl library to split into words with shell quoting
 lib/sigtrap.pm		For trapping an abort and giving traceback
@@ -902,6 +929,7 @@ lib/unicode/Is/BidiRLE.pl			Unicode character database
 lib/unicode/Is/BidiRLO.pl			Unicode character database
 lib/unicode/Is/BidiS.pl				Unicode character database
 lib/unicode/Is/BidiWS.pl			Unicode character database
+lib/unicode/Is/Blank.pl				Unicode character database
 lib/unicode/Is/C.pl				Unicode character database
 lib/unicode/Is/Cc.pl				Unicode character database
 lib/unicode/Is/Cf.pl				Unicode character database
@@ -914,9 +942,9 @@ lib/unicode/Is/DCcompat.pl			Unicode character database
 lib/unicode/Is/DCfinal.pl			Unicode character database
 lib/unicode/Is/DCfont.pl			Unicode character database
 lib/unicode/Is/DCfraction.pl			Unicode character database
-lib/unicode/Is/DCinital.pl			Unicode character database
 lib/unicode/Is/DCinitial.pl			Unicode character database
 lib/unicode/Is/DCisolated.pl			Unicode character database
+lib/unicode/Is/DCmedial.pl			Unicode character database
 lib/unicode/Is/DCnarrow.pl			Unicode character database
 lib/unicode/Is/DCnoBreak.pl			Unicode character database
 lib/unicode/Is/DCsmall.pl			Unicode character database
@@ -990,6 +1018,7 @@ lib/unicode/Is/Sk.pl				Unicode character database
 lib/unicode/Is/Sm.pl				Unicode character database
 lib/unicode/Is/So.pl				Unicode character database
 lib/unicode/Is/Space.pl				Unicode character database
+lib/unicode/Is/SpacePerl.pl			Unicode character database
 lib/unicode/Is/SylA.pl				Unicode character database
 lib/unicode/Is/SylAA.pl				Unicode character database
 lib/unicode/Is/SylAAI.pl			Unicode character database
@@ -1043,6 +1072,7 @@ lib/unicode/To/Upper.pl				Unicode character database
 lib/unicode/UCD301.html				Unicode character database
 lib/unicode/UCDFF301.html			Unicode character database
 lib/unicode/Unicode.301				Unicode character database
+lib/unicode/distinct.pm		Perl pragma to strictly distinguish UTF8 data and non-UTF data
 lib/unicode/mktables.PL				Unicode character database generator
 lib/unicode/syllables.txt			Unicode character database
 lib/utf8.pm					Pragma to control Unicode support
@@ -1134,8 +1164,9 @@ perl.h			Global declarations
 perlapi.c		Perl API functions
 perlapi.h		Perl API function declarations
 perlio.c		C code for PerlIO abstraction
-perlio.h		compatibility stub
+perlio.h		PerlIO abstraction
 perlio.sym		Symbols for PerlIO abstraction
+perliol.h		PerlIO Layer definition
 perlsdio.h		Fake stdio using perlio
 perlsfio.h		Prototype sfio mapping for PerlIO
 perlsh			A poor man's perl shell
@@ -1275,6 +1306,7 @@ sv.h			Scalar value header
 t/README		Instructions for regression tests
 t/TEST			The regression tester
 t/UTEST			Run regression tests with -Mutf8
+t/base/commonsense.t	See if configuration meets basic needs
 t/base/cond.t		See if conditionals work
 t/base/if.t		See if if works
 t/base/lex.t		See if lexical items work
@@ -1314,6 +1346,7 @@ t/io/pipe.t		See if secure pipes work
 t/io/print.t		See if print commands work
 t/io/read.t		See if read works
 t/io/tell.t		See if file seeking works
+t/io/utf8.t		See if file seeking works
 t/lib/abbrev.t		See if Text::Abbrev works
 t/lib/ansicolor.t	See if Term::ANSIColor works
 t/lib/anydbm.t		See if AnyDBM_File works
@@ -1332,6 +1365,7 @@ t/lib/cgi-pretty.t	See if CGI.pm works
 t/lib/cgi-request.t	See if CGI.pm works
 t/lib/charnames.t	See if character names work
 t/lib/checktree.t	See if File::CheckTree works
+t/lib/class-struct.t	See if Class::Struct works
 t/lib/complex.t		See if Math::Complex works
 t/lib/db-btree.t	See if DB_File works
 t/lib/db-hash.t		See if DB_File works
@@ -1354,9 +1388,9 @@ t/lib/dprof/test6_t	Perl code profiler tests
 t/lib/dprof/test6_v	Perl code profiler tests
 t/lib/dumper-ovl.t	See if Data::Dumper works for overloaded data
 t/lib/dumper.t		See if Data::Dumper works
+t/lib/encode.t		See if Encode works
 t/lib/english.t		See if English works
 t/lib/env-array.t	See if Env works for arrays
-t/lib/encode.t		See if Encode works
 t/lib/env.t		See if Env works
 t/lib/errno.t		See if Errno works
 t/lib/fatal.t           See if Fatal works
@@ -1368,6 +1402,8 @@ t/lib/filefunc.t	See if File::Spec::Functions works
 t/lib/filehand.t	See if FileHandle works
 t/lib/filepath.t	See if File::Path works
 t/lib/filespec.t	See if File::Spec works
+t/lib/filter-util.pl	See if Filter::Util::Call works
+t/lib/filter-util.t	See if Filter::Util::Call works
 t/lib/findbin.t		See if FindBin works
 t/lib/ftmp-mktemp.t	See if File::Temp works
 t/lib/ftmp-posix.t	See if File::Temp works
@@ -1403,6 +1439,7 @@ t/lib/io_unix.t		See if UNIX socket-related methods from IO work
 t/lib/io_xs.t		See if XSUB methods from IO work
 t/lib/ipc_sysv.t	See if IPC::SysV works
 t/lib/ndbm.t		See if NDBM_File works
+t/lib/net-hostent.t	See if Net::hostent works
 t/lib/odbm.t		See if ODBM_File works
 t/lib/opcode.t		See if Opcode works
 t/lib/open2.t		See if IPC::Open2 works
@@ -1444,9 +1481,12 @@ t/lib/texttabs.t	See if Text::Tabs works
 t/lib/textwrap.t	See if Text::Wrap::wrap works
 t/lib/thr5005.t		Test 5.005-style threading (skipped if no use5005threads)
 t/lib/tie-push.t	Test for Tie::Array
+t/lib/tie-refhash.t	Test for Tie::RefHash and Tie::RefHash::Nestable
+t/lib/tie-splice.t	Test for Tie::Array::SPLICE
 t/lib/tie-stdarray.t	Test for Tie::StdArray
 t/lib/tie-stdhandle.t	Test for Tie::StdHandle
 t/lib/tie-stdpush.t	Test for Tie::StdArray
+t/lib/tie-substrhash.t	Test for Tie::SubstrHash
 t/lib/timelocal.t	See if Time::Local works
 t/lib/trig.t		See if Math::Trig works
 t/op/64bitint.t		See if 64 bit integers work
@@ -1464,6 +1504,7 @@ t/op/chars.t		See if character escapes work
 t/op/chop.t		See if chop works
 t/op/closure.t		See if closures work
 t/op/cmp.t		See if the various string and numeric compare work
+t/op/concat.t		See if string concatenation works
 t/op/cond.t		See if conditional expressions work
 t/op/context.t		See if context propagation works
 t/op/defins.t		See if auto-insert of defined() works
@@ -1492,6 +1533,7 @@ t/op/inc.t		See if inc/dec of integers near 32 bit limit work
 t/op/index.t		See if index works
 t/op/int.t		See if int works
 t/op/join.t		See if join works
+t/op/length.t		See if length works
 t/op/lex_assign.t	See if ops involving lexicals or pad temps work
 t/op/lfs.t		See if large files work for perlio
 t/op/list.t		See if array lists work
@@ -1524,6 +1566,7 @@ t/op/regexp.t		See if regular expressions work
 t/op/regexp_noamp.t	See if regular expressions work with optimizations
 t/op/regmesg.t		See if one can get regular expression errors
 t/op/repeat.t		See if x operator works
+t/op/reverse.t		See if reverse operator works
 t/op/runlevel.t		See if die() works from perl_call_*()
 t/op/sleep.t		See if sleep works
 t/op/sort.t		See if sort works
@@ -1546,6 +1589,7 @@ t/op/tr.t		See if tr works
 t/op/undef.t		See if undef works
 t/op/universal.t	See if UNIVERSAL class works
 t/op/unshift.t		See if unshift works
+t/op/utf8decode.t	See if UTF-8 decoding works
 t/op/vec.t		See if vectors work
 t/op/ver.t		See if v-strings and the %v format flag work
 t/op/wantarray.t	See if wantarray works
@@ -1691,10 +1735,13 @@ vms/writemain.pl	Generate perlmain.c from miniperlmain.c+extensions
 vos/Changes		Changes made to port Perl to the VOS operating system
 vos/build.cm		VOS command macro to build Perl
 vos/compile_perl.cm	VOS command macro to build multiple version of Perl
-vos/config.def		input for config.pl
-vos/config.h		config.h for VOS
+vos/config.alpha.def	definitions used by config.pl
+vos/config.alpha.h	config.h for use with alpha VOS POSIX.1 support
+vos/config.ga.def	definitions used by config.pl
+vos/config.ga.h		config.h for use with generally-available VOS POSIX.1 support
 vos/config.pl		script to convert a config_h.SH to a config.h
-vos/config_h.SH_orig	config_h.SH at the time config.h was created
+vos/configure_perl.cm	VOS command macro to configure perl before building
+vos/install_perl.cm	VOS command macro to install perl after building
 vos/perl.bind		VOS bind control file
 vos/test_vos_dummies.c	Test program for "vos_dummies.c"
 vos/vos_dummies.c	Wrappers to soak up undefined functions
@@ -1703,6 +1750,7 @@ warnings.h		The warning numbers
 warnings.pl		Program to write warnings.h and lib/warnings.pm
 win32/Makefile		Win32 makefile for NMAKE (Visual C++ build)
 win32/bin/exetype.pl	Set executable type to CONSOLE or WINDOWS
+win32/bin/mdelete.bat	multifile delete
 win32/bin/perlglob.pl	Win32 globbing
 win32/bin/pl2bat.pl	wrap perl scripts into batch files
 win32/bin/runperl.pl	run perl script via batch file namesake
@@ -1716,6 +1764,7 @@ win32/config_H.vc	Win32 config header (Visual C++ build)
 win32/config_h.PL	Perl code to convert Win32 config.sh to config.h
 win32/config_sh.PL	Perl code to update Win32 config.sh from Makefile
 win32/des_fcrypt.patch	Win32 port
+win32/distclean.bat	Remove _ALL_ files not listed here in MANIFEST
 win32/dl_win32.xs	Win32 port
 win32/genmk95.pl        Perl code to generate command.com-usable makefile.95
 win32/include/arpa/inet.h	Win32 port

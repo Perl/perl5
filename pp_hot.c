@@ -1,6 +1,6 @@
 /*    pp_hot.c
  *
- *    Copyright (c) 1991-2000, Larry Wall
+ *    Copyright (c) 1991-2001, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -18,10 +18,6 @@
 #include "EXTERN.h"
 #define PERL_IN_PP_HOT_C
 #include "perl.h"
-
-#ifdef I_UNISTD
-#include <unistd.h>
-#endif
 
 /* Hot code. */
 
@@ -82,6 +78,8 @@ PP(pp_stringify)
     sv_setpvn(TARG,s,len);
     if (SvUTF8(TOPs) && !IN_BYTE)
 	SvUTF8_on(TARG);
+    else
+	SvUTF8_off(TARG);
     SETTARG;
     RETURN;
 }
@@ -144,99 +142,52 @@ PP(pp_concat)
   djSP; dATARGET; tryAMAGICbin(concat,opASSIGN);
   {
     dPOPTOPssrl;
-    STRLEN len;
-    U8 *s;
-    bool left_utf;
-    bool right_utf;
+    SV* rcopy = Nullsv;
 
-    if (TARG == right && SvGMAGICAL(right))
-        mg_get(right);
     if (SvGMAGICAL(left))
         mg_get(left);
+    if (TARG == right && SvGMAGICAL(right))
+        mg_get(right);
 
-    left_utf  = DO_UTF8(left);
-    right_utf = DO_UTF8(right);
- 
-    if (left_utf != right_utf) {
-        if (TARG == right && !right_utf) {
-            sv_utf8_upgrade(TARG); /* Now straight binary copy */
-            SvUTF8_on(TARG);
-        }
-        else {
-            /* Set TARG to PV(left), then add right */
-            U8 *l, *c, *olds = NULL;
-            STRLEN targlen;
-	    s = (U8*)SvPV(right,len);
-	    right_utf |= DO_UTF8(right);
-            if (TARG == right) {
-		/* Take a copy since we're about to overwrite TARG */
-		olds = s = (U8*)savepvn((char*)s, len);
-	    }
-	    if (!SvOK(left) && SvTYPE(left) <= SVt_PVMG)
-		sv_setpv(left, "");	/* Suppress warning. */
-            l = (U8*)SvPV(left, targlen);
-	    left_utf |= DO_UTF8(left);
-            if (TARG != left)
-                sv_setpvn(TARG, (char*)l, targlen);
-            if (!left_utf)
-                sv_utf8_upgrade(TARG);
-            /* Extend TARG to length of right (s) */
-            targlen = SvCUR(TARG) + len;
-            if (!right_utf) {
-                /* plus one for each hi-byte char if we have to upgrade */
-                for (c = s; c < s + len; c++)  {
-                    if (*c & 0x80)
-                        targlen++;
-                }
-            }
-            SvGROW(TARG, targlen+1);
-            /* And now copy, maybe upgrading right to UTF8 on the fly */
-            for (c = (U8*)SvEND(TARG); len--; s++) {
-                 if (*s & 0x80 && !right_utf)
-                     c = uv_to_utf8(c, *s);
-                 else
-                     *c++ = *s;
-            }
-            SvCUR_set(TARG, targlen);
-            *SvEND(TARG) = '\0';
-            SvUTF8_on(TARG);
-            SETs(TARG);
-	    Safefree(olds);
-            RETURN;
-        }
-    }
+    if (TARG == right && left != right)
+	/* Clone since otherwise we cannot prepend. */
+	rcopy = sv_2mortal(newSVsv(right));
 
-    if (TARG != left) {
-	s = (U8*)SvPV(left,len);
-	if (TARG == right) {
-	    sv_insert(TARG, 0, 0, (char*)s, len);
-	    SETs(TARG);
-	    RETURN;
+    if (TARG != left)
+	sv_setsv(TARG, left);
+
+    if (TARG == right) {
+	if (left == right) {
+	    /*  $right = $right . $right; */
+	    STRLEN rlen;
+	    char *rpv = SvPV(right, rlen);
+
+	    sv_catpvn(TARG, rpv, rlen);
 	}
-	sv_setpvn(TARG, (char *)s, len);
+	else /* $right = $left  . $right; */
+	    sv_catsv(TARG, rcopy);
     }
-    else if (!SvOK(TARG) && SvTYPE(TARG) <= SVt_PVMG)
-	sv_setpv(TARG, "");	/* Suppress warning. */
-    s = (U8*)SvPV(right,len);
-    if (SvOK(TARG)) {
+    else {
+	if (!SvOK(TARG)) /* Avoid warning when concatenating to undef. */
+	    sv_setpv(TARG, "");
+	/* $other = $left . $right; */
+	/* $left  = $left . $right; */
+	sv_catsv(TARG, right);
+    }
+
 #if defined(PERL_Y2KWARN)
-	if ((SvIOK(right) || SvNOK(right)) && ckWARN(WARN_Y2K)) {
-	    STRLEN n;
-	    char *s = SvPV(TARG,n);
-	    if (n >= 2 && s[n-2] == '1' && s[n-1] == '9'
-		&& (n == 2 || !isDIGIT(s[n-3])))
-	    {
-		Perl_warner(aTHX_ WARN_Y2K, "Possible Y2K bug: %s",
-			    "about to append an integer to '19'");
-	    }
+    if ((SvIOK(right) || SvNOK(right)) && ckWARN(WARN_Y2K)) {
+	STRLEN n;
+	char *s = SvPV(TARG,n);
+	if (n >= 2 && s[n-2] == '1' && s[n-1] == '9'
+	    && (n == 2 || !isDIGIT(s[n-3])))
+	{
+	    Perl_warner(aTHX_ WARN_Y2K, "Possible Y2K bug: %s",
+			"about to append an integer to '19'");
 	}
-#endif
-	sv_catpvn(TARG, (char *)s, len);
     }
-    else
-	sv_setpvn(TARG, (char *)s, len);	/* suppress warning */
-    if (left_utf)
-	SvUTF8_on(TARG);
+#endif
+
     SETTARG;
     RETURN;
   }
@@ -279,6 +230,69 @@ PP(pp_readline)
 PP(pp_eq)
 {
     djSP; tryAMAGICbinSET(eq,0);
+#ifdef PERL_PRESERVE_IVUV
+    SvIV_please(TOPs);
+    if (SvIOK(TOPs)) {
+	/* Unless the left argument is integer in range we are going to have to
+	   use NV maths. Hence only attempt to coerce the right argument if
+	   we know the left is integer.  */
+      SvIV_please(TOPm1s);
+	if (SvIOK(TOPm1s)) {
+	    bool auvok = SvUOK(TOPm1s);
+	    bool buvok = SvUOK(TOPs);
+	
+	    if (!auvok && !buvok) { /* ## IV == IV ## */
+		IV aiv = SvIVX(TOPm1s);
+		IV biv = SvIVX(TOPs);
+		
+		SP--;
+		SETs(boolSV(aiv == biv));
+		RETURN;
+	    }
+	    if (auvok && buvok) { /* ## UV == UV ## */
+		UV auv = SvUVX(TOPm1s);
+		UV buv = SvUVX(TOPs);
+		
+		SP--;
+		SETs(boolSV(auv == buv));
+		RETURN;
+	    }
+	    {			/* ## Mixed IV,UV ## */
+		IV iv;
+		UV uv;
+		
+		/* == is commutative so swap if needed (save code) */
+		if (auvok) {
+		    /* swap. top of stack (b) is the iv */
+		    iv = SvIVX(TOPs);
+		    SP--;
+		    if (iv < 0) {
+			/* As (a) is a UV, it's >0, so it cannot be == */
+			SETs(&PL_sv_no);
+			RETURN;
+		    }
+		    uv = SvUVX(TOPs);
+		} else {
+		    iv = SvIVX(TOPm1s);
+		    SP--;
+		    if (iv < 0) {
+			/* As (b) is a UV, it's >0, so it cannot be == */
+			SETs(&PL_sv_no);
+			RETURN;
+		    }
+		    uv = SvUVX(*(SP+1)); /* Do I want TOPp1s() ? */
+		}
+		/* we know iv is >= 0 */
+		if (uv > (UV) IV_MAX) {
+		    SETs(&PL_sv_no);
+		    RETURN;
+		}
+		SETs(boolSV((UV)iv == uv));
+		RETURN;
+	    }
+	}
+    }
+#endif
     {
       dPOPnv;
       SETs(boolSV(TOPn == value));
@@ -297,7 +311,7 @@ PP(pp_preinc)
 	++SvIVX(TOPs);
 	SvFLAGS(TOPs) &= ~(SVp_NOK|SVp_POK);
     }
-    else
+    else /* Do all the PERL_PRESERVE_IVUV conditionals in sv_inc */
 	sv_inc(TOPs);
     SvSETMAGIC(TOPs);
     return NORMAL;
@@ -316,11 +330,125 @@ PP(pp_or)
 
 PP(pp_add)
 {
-    djSP; dATARGET; tryAMAGICbin(add,opASSIGN);
+    djSP; dATARGET; bool useleft; tryAMAGICbin(add,opASSIGN);
+    useleft = USE_LEFT(TOPm1s);
+#ifdef PERL_PRESERVE_IVUV
+    /* We must see if we can perform the addition with integers if possible,
+       as the integer code detects overflow while the NV code doesn't.
+       If either argument hasn't had a numeric conversion yet attempt to get
+       the IV. It's important to do this now, rather than just assuming that
+       it's not IOK as a PV of "9223372036854775806" may not take well to NV
+       addition, and an SV which is NOK, NV=6.0 ought to be coerced to
+       integer in case the second argument is IV=9223372036854775806
+       We can (now) rely on sv_2iv to do the right thing, only setting the
+       public IOK flag if the value in the NV (or PV) slot is truly integer.
+
+       A side effect is that this also aggressively prefers integer maths over
+       fp maths for integer values.  */
+    SvIV_please(TOPs);
+    if (SvIOK(TOPs)) {
+	/* Unless the left argument is integer in range we are going to have to
+	   use NV maths. Hence only attempt to coerce the right argument if
+	   we know the left is integer.  */
+	if (!useleft) {
+	    /* left operand is undef, treat as zero. + 0 is identity. */
+	    if (SvUOK(TOPs)) {
+		dPOPuv; /* Scary macros. Lets put a sequence point (;) here */
+		SETu(value);
+		RETURN;
+	    } else {
+		dPOPiv;
+		SETi(value);
+		RETURN;
+	    }
+	}
+	/* Left operand is defined, so is it IV? */
+	SvIV_please(TOPm1s);
+	if (SvIOK(TOPm1s)) {
+	    bool auvok = SvUOK(TOPm1s);
+	    bool buvok = SvUOK(TOPs);
+	
+	    if (!auvok && !buvok) { /* ## IV + IV ## */
+		IV aiv = SvIVX(TOPm1s);
+		IV biv = SvIVX(TOPs);
+		IV result = aiv + biv;
+		
+		if (biv >= 0 ? (result >= aiv) : (result < aiv)) {
+		    SP--;
+		    SETi( result );
+		    RETURN;
+		}
+		if (biv >=0 && aiv >= 0) {
+		    UV result = (UV)aiv + (UV)biv;
+		    /* UV + UV can only get bigger... */
+		    if (result >= (UV) aiv) {
+			SP--;
+			SETu( result );
+			RETURN;
+		    }
+		}
+		/* Overflow, drop through to NVs (beyond next if () else ) */
+	    } else if (auvok && buvok) {	/* ## UV + UV ## */
+		UV auv = SvUVX(TOPm1s);
+		UV buv = SvUVX(TOPs);
+		UV result = auv + buv;
+		if (result >= auv) {
+		    SP--;
+		    SETu( result );
+		    RETURN;
+		}
+		/* Overflow, drop through to NVs (beyond next if () else ) */
+	    } else {			/* ## Mixed IV,UV ## */
+		IV aiv;
+		UV buv;
+		
+		/* addition is commutative so swap if needed (save code) */
+		if (buvok) {
+		    aiv = SvIVX(TOPm1s);
+		    buv = SvUVX(TOPs);
+		} else {
+		    aiv = SvIVX(TOPs);
+		    buv = SvUVX(TOPm1s);
+		}
+	
+		if (aiv >= 0) {
+		    UV result = (UV)aiv + buv;
+		    if (result >= buv) {
+			SP--;
+			SETu( result );
+			RETURN;
+		    }
+		} else if (buv > (UV) IV_MAX) {
+		    /* assuming 2s complement means that IV_MIN == -IV_MIN,
+		       and (UV)-IV_MIN *is* the value -IV_MIN (or IV_MAX + 1)
+		       as buv > IV_MAX, it is >= (IV_MAX + 1), and therefore
+		       as the value we can be subtracting from it only lies in
+		       the range (-IV_MIN to -1) it can't overflow a UV */
+		    SP--;
+		    SETu( buv - (UV)-aiv );
+		    RETURN;
+		} else {
+		    IV result = (IV) buv + aiv;
+		    /* aiv < 0 so it must get smaller.  */
+		    if (result < (IV) buv) {
+			SP--;
+			SETi( result );
+			RETURN;
+		    }
+		}
+	    } /* end of IV+IV / UV+UV / mixed */
+	}
+    }
+#endif
     {
-      dPOPTOPnnrl_ul;
-      SETn( left + right );
-      RETURN;
+	dPOPnv;
+	if (!useleft) {
+	    /* left operand is undef, treat as zero. + 0.0 is identity. */
+	    SETn(value);
+	    RETURN;
+	}
+	SETn( value + TOPn );
+	RETURN;
     }
 }
 
@@ -406,7 +534,6 @@ PP(pp_print)
 	RETURN;
     }
     if (!(io = GvIO(gv))) {
-        dTHR;
         if ((GvEGV(gv)) && (mg = SvTIED_mg((SV*)GvEGV(gv),'q')))
             goto had_magic;
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
@@ -416,21 +543,8 @@ PP(pp_print)
     }
     else if (!(fp = IoOFP(io))) {
 	if (ckWARN2(WARN_CLOSED, WARN_IO))  {
-	    if (IoIFP(io)) {
-		/* integrate with report_evil_fh()? */
-	        char *name = NULL;
-		if (isGV(gv)) {
-		    SV* sv = sv_newmortal();
-		    gv_efullname4(sv, gv, Nullch, FALSE);
-		    name = SvPV_nolen(sv);
-		}
-		if (name && *name)
-		  Perl_warner(aTHX_ WARN_IO,
-			      "Filehandle %s opened only for input", name);
-		else
-		    Perl_warner(aTHX_ WARN_IO,
-				"Filehandle opened only for input");
-	    }
+	    if (IoIFP(io))
+		report_evil_fh(gv, io, OP_phoney_INPUT_ONLY);
 	    else if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
 		report_evil_fh(gv, io, PL_op->op_type);
 	}
@@ -439,13 +553,13 @@ PP(pp_print)
     }
     else {
 	MARK++;
-	if (PL_ofslen) {
+	if (PL_ofs_sv && SvOK(PL_ofs_sv)) {
 	    while (MARK <= SP) {
 		if (!do_print(*MARK, fp))
 		    break;
 		MARK++;
 		if (MARK <= SP) {
-		    if (PerlIO_write(fp, PL_ofs, PL_ofslen) == 0 || PerlIO_error(fp)) {
+		    if (!do_print(PL_ofs_sv, fp)) { /* $, */
 			MARK--;
 			break;
 		    }
@@ -462,8 +576,8 @@ PP(pp_print)
 	if (MARK <= SP)
 	    goto just_say_no;
 	else {
-	    if (PL_orslen)
-		if (PerlIO_write(fp, PL_ors, PL_orslen) == 0 || PerlIO_error(fp))
+	    if (PL_ors_sv && SvOK(PL_ors_sv))
+		if (!do_print(PL_ors_sv, fp)) /* $\ */
 		    goto just_say_no;
 
 	    if (IoFLAGS(io) & IOf_FLUSH)
@@ -1016,11 +1130,12 @@ PP(pp_match)
 	TARG = DEFSV;
 	EXTEND(SP,1);
     }
+    PL_reg_sv = TARG;
     PUTBACK;				/* EVAL blocks need stack_sp. */
     s = SvPV(TARG, len);
     strend = s + len;
     if (!s)
-	DIE(aTHX_ "panic: do_match");
+	DIE(aTHX_ "panic: pp_match");
     rxtainted = ((pm->op_pmdynflags & PMdf_TAINTED) ||
 		 (PL_tainted && (pm->op_pmflags & PMf_RETAINT)));
     TAINT_NOT;
@@ -1076,7 +1191,8 @@ play_it_again:
 	if (update_minmatch++)
 	    minmatch = had_zerolen;
     }
-    if (rx->reganch & RE_USE_INTUIT) {
+    if (rx->reganch & RE_USE_INTUIT &&
+	DO_UTF8(TARG) == ((rx->reganch & ROPT_UTF8) != 0)) {
 	s = CALLREG_INTUIT_START(aTHX_ rx, TARG, s, strend, r_flags, NULL);
 
 	if (!s)
@@ -1105,27 +1221,25 @@ play_it_again:
 	RX_MATCH_TAINTED_on(rx);
     TAINT_IF(RX_MATCH_TAINTED(rx));
     if (gimme == G_ARRAY) {
-	I32 iters, i, len;
+	I32 nparens, i, len;
 
-	iters = rx->nparens;
-	if (global && !iters)
+	nparens = rx->nparens;
+	if (global && !nparens)
 	    i = 1;
 	else
 	    i = 0;
 	SPAGAIN;			/* EVAL blocks could move the stack. */
-	EXTEND(SP, iters + i);
-	EXTEND_MORTAL(iters + i);
-	for (i = !i; i <= iters; i++) {
+	EXTEND(SP, nparens + i);
+	EXTEND_MORTAL(nparens + i);
+	for (i = !i; i <= nparens; i++) {
 	    PUSHs(sv_newmortal());
 	    /*SUPPRESS 560*/
 	    if ((rx->startp[i] != -1) && rx->endp[i] != -1 ) {
 		len = rx->endp[i] - rx->startp[i];
 		s = rx->startp[i] + truebase;
 		sv_setpvn(*SP, s, len);
-		if ((pm->op_pmdynflags & PMdf_UTF8) && !IN_BYTE) {
+		if (DO_UTF8(TARG))
 		    SvUTF8_on(*SP);
-		    sv_utf8_downgrade(*SP, TRUE);
-		}
 	    }
 	}
 	if (global) {
@@ -1135,7 +1249,7 @@ play_it_again:
 	    r_flags |= REXEC_IGNOREPOS | REXEC_NOT_FIRST;
 	    goto play_it_again;
 	}
-	else if (!iters)
+	else if (!nparens)
 	    XPUSHs(&PL_sv_yes);
 	LEAVE_SCOPE(oldsave);
 	RETURN;
@@ -1175,7 +1289,13 @@ yup:					/* Confirmed by INTUIT */
     if (global) {
 	rx->subbeg = truebase;
 	rx->startp[0] = s - truebase;
-	rx->endp[0] = s - truebase + rx->minlen;
+	if (DO_UTF8(PL_reg_sv)) {
+	    char *t = (char*)utf8_hop((U8*)s, rx->minlen);
+	    rx->endp[0] = t - truebase;
+	}
+	else {
+	    rx->endp[0] = s - truebase + rx->minlen;
+	}
 	rx->sublen = strend - truebase;
 	goto gotcha;
     }
@@ -1257,159 +1377,15 @@ Perl_do_readline(pTHX)
 		    (void)do_close(PL_last_in_gv, FALSE); /* now it does*/
 		}
 	    }
-	    else if (type == OP_GLOB) {
-		SV *tmpcmd = NEWSV(55, 0);
-		SV *tmpglob = POPs;
-		ENTER;
-		SAVEFREESV(tmpcmd);
-#ifdef VMS /* expand the wildcards right here, rather than opening a pipe, */
-           /* since spawning off a process is a real performance hit */
-		{
-#include <descrip.h>
-#include <lib$routines.h>
-#include <nam.h>
-#include <rmsdef.h>
-		    char rslt[NAM$C_MAXRSS+1+sizeof(unsigned short int)] = {'\0','\0'};
-		    char vmsspec[NAM$C_MAXRSS+1];
-		    char *rstr = rslt + sizeof(unsigned short int), *begin, *end, *cp;
-		    char tmpfnam[L_tmpnam] = "SYS$SCRATCH:";
-		    $DESCRIPTOR(dfltdsc,"SYS$DISK:[]*.*;");
-		    PerlIO *tmpfp;
-		    STRLEN i;
-		    struct dsc$descriptor_s wilddsc
-		       = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
-		    struct dsc$descriptor_vs rsdsc
-		       = {sizeof rslt, DSC$K_DTYPE_VT, DSC$K_CLASS_VS, rslt};
-		    unsigned long int cxt = 0, sts = 0, ok = 1, hasdir = 0, hasver = 0, isunix = 0;
-
-		    /* We could find out if there's an explicit dev/dir or version
-		       by peeking into lib$find_file's internal context at
-		       ((struct NAM *)((struct FAB *)cxt)->fab$l_nam)->nam$l_fnb
-		       but that's unsupported, so I don't want to do it now and
-		       have it bite someone in the future. */
-		    strcat(tmpfnam,PerlLIO_tmpnam(NULL));
-		    cp = SvPV(tmpglob,i);
-		    for (; i; i--) {
-		       if (cp[i] == ';') hasver = 1;
-		       if (cp[i] == '.') {
-		           if (sts) hasver = 1;
-		           else sts = 1;
-		       }
-		       if (cp[i] == '/') {
-		          hasdir = isunix = 1;
-		          break;
-		       }
-		       if (cp[i] == ']' || cp[i] == '>' || cp[i] == ':') {
-		           hasdir = 1;
-		           break;
-		       }
-		    }
-		    if ((tmpfp = PerlIO_open(tmpfnam,"w+","fop=dlt")) != NULL) {
-		        Stat_t st;
-		        if (!PerlLIO_stat(SvPVX(tmpglob),&st) && S_ISDIR(st.st_mode))
-		          ok = ((wilddsc.dsc$a_pointer = tovmspath(SvPVX(tmpglob),vmsspec)) != NULL);
-		        else ok = ((wilddsc.dsc$a_pointer = tovmsspec(SvPVX(tmpglob),vmsspec)) != NULL);
-		        if (ok) wilddsc.dsc$w_length = (unsigned short int) strlen(wilddsc.dsc$a_pointer);
-		        while (ok && ((sts = lib$find_file(&wilddsc,&rsdsc,&cxt,
-		                                    &dfltdsc,NULL,NULL,NULL))&1)) {
-		            end = rstr + (unsigned long int) *rslt;
-		            if (!hasver) while (*end != ';') end--;
-		            *(end++) = '\n';  *end = '\0';
-		            for (cp = rstr; *cp; cp++) *cp = _tolower(*cp);
-		            if (hasdir) {
-		              if (isunix) trim_unixpath(rstr,SvPVX(tmpglob),1);
-		              begin = rstr;
-		            }
-		            else {
-		                begin = end;
-		                while (*(--begin) != ']' && *begin != '>') ;
-		                ++begin;
-		            }
-		            ok = (PerlIO_puts(tmpfp,begin) != EOF);
-		        }
-		        if (cxt) (void)lib$find_file_end(&cxt);
-		        if (ok && sts != RMS$_NMF &&
-		            sts != RMS$_DNF && sts != RMS$_FNF) ok = 0;
-		        if (!ok) {
-		            if (!(sts & 1)) {
-		              SETERRNO((sts == RMS$_SYN ? EINVAL : EVMSERR),sts);
-		            }
-		            PerlIO_close(tmpfp);
-		            fp = NULL;
-		        }
-		        else {
-		           PerlIO_rewind(tmpfp);
-		           IoTYPE(io) = IoTYPE_RDONLY;
-		           IoIFP(io) = fp = tmpfp;
-		           IoFLAGS(io) &= ~IOf_UNTAINT;  /* maybe redundant */
-		        }
-		    }
-		}
-#else /* !VMS */
-#ifdef MACOS_TRADITIONAL
-		sv_setpv(tmpcmd, "glob ");
-		sv_catsv(tmpcmd, tmpglob);
-		sv_catpv(tmpcmd, " |");
-#else
-#ifdef DOSISH
-#ifdef OS2
-		sv_setpv(tmpcmd, "for a in ");
-		sv_catsv(tmpcmd, tmpglob);
-		sv_catpv(tmpcmd, "; do echo \"$a\\0\\c\"; done |");
-#else
-#ifdef DJGPP
-		sv_setpv(tmpcmd, "/dev/dosglob/"); /* File System Extension */
-		sv_catsv(tmpcmd, tmpglob);
-#else
-		sv_setpv(tmpcmd, "perlglob ");
-		sv_catsv(tmpcmd, tmpglob);
-		sv_catpv(tmpcmd, " |");
-#endif /* !DJGPP */
-#endif /* !OS2 */
-#else /* !DOSISH */
-#if defined(CSH)
-		sv_setpvn(tmpcmd, PL_cshname, PL_cshlen);
-		sv_catpv(tmpcmd, " -cf 'set nonomatch; glob ");
-		sv_catsv(tmpcmd, tmpglob);
-		sv_catpv(tmpcmd, "' 2>/dev/null |");
-#else
-		sv_setpv(tmpcmd, "echo ");
-		sv_catsv(tmpcmd, tmpglob);
-#if 'z' - 'a' == 25
-		sv_catpv(tmpcmd, "|tr -s ' \t\f\r' '\\012\\012\\012\\012'|");
-#else
-		sv_catpv(tmpcmd, "|tr -s ' \t\f\r' '\\n\\n\\n\\n'|");
-#endif
-#endif /* !CSH */
-#endif /* !DOSISH */
-#endif /* MACOS_TRADITIONAL */
-		(void)do_open(PL_last_in_gv, SvPVX(tmpcmd), SvCUR(tmpcmd),
-			      FALSE, O_RDONLY, 0, Nullfp);
-		fp = IoIFP(io);
-#endif /* !VMS */
-		LEAVE;
-	    }
+	    else if (type == OP_GLOB)
+		fp = Perl_start_glob(aTHX_ POPs, io);
 	}
 	else if (type == OP_GLOB)
 	    SP--;
 	else if (ckWARN(WARN_IO)	/* stdout/stderr or other write fh */
 		 && (IoTYPE(io) == IoTYPE_WRONLY || fp == PerlIO_stdout()
 		     || fp == PerlIO_stderr()))
-	{
-	    /* integrate with report_evil_fh()? */
-	    char *name = NULL;
-	    if (isGV(PL_last_in_gv)) { /* can this ever fail? */
-		SV* sv = sv_newmortal();
-		gv_efullname4(sv, PL_last_in_gv, Nullch, FALSE);
-		name = SvPV_nolen(sv);
-	    }
-	    if (name && *name)
-		Perl_warner(aTHX_ WARN_IO,
-			    "Filehandle %s opened only for output", name);
-	    else
-		Perl_warner(aTHX_ WARN_IO,
-			    "Filehandle opened only for output");
-	}
+	    report_evil_fh(PL_last_in_gv, io, OP_phoney_OUTPUT_ONLY);
     }
     if (!fp) {
 	if (ckWARN2(WARN_GLOB, WARN_CLOSED)
@@ -1446,6 +1422,13 @@ Perl_do_readline(pTHX)
 	offset = 0;
     }
 
+    /* This should not be marked tainted if the fp is marked clean */
+#define MAYBE_TAINT_LINE(io, sv) \
+    if (!(IoFLAGS(io) & IOf_UNTAINT)) { \
+	TAINT;				\
+	SvTAINTED_on(sv);		\
+    }
+
 /* delay EOF state for a snarfed empty file */
 #define SNARF_EOF(gimme,rs,io,sv) \
     (gimme != G_SCALAR || SvCUR(sv)					\
@@ -1474,13 +1457,10 @@ Perl_do_readline(pTHX)
 		(void)SvOK_off(TARG);
 		PUSHTARG;
 	    }
+	    MAYBE_TAINT_LINE(io, sv);
 	    RETURN;
 	}
-	/* This should not be marked tainted if the fp is marked clean */
-	if (!(IoFLAGS(io) & IOf_UNTAINT)) {
-	    TAINT;
-	    SvTAINTED_on(sv);
-	}
+	MAYBE_TAINT_LINE(io, sv);
 	IoLINES(io)++;
 	IoFLAGS(io) |= IOf_NOLINE;
 	SvSETMAGIC(sv);
@@ -1556,8 +1536,11 @@ PP(pp_helem)
     U32 defer = PL_op->op_private & OPpLVAL_DEFER;
     SV *sv;
     U32 hash = (SvFAKE(keysv) && SvREADONLY(keysv)) ? SvUVX(keysv) : 0;
+    I32 preeminent;
 
     if (SvTYPE(hv) == SVt_PVHV) {
+	if (PL_op->op_private & OPpLVAL_INTRO)
+	    preeminent = SvRMAGICAL(hv) ? 1 : hv_exists_ent(hv, keysv, 0);
 	he = hv_fetch_ent(hv, keysv, lval && !defer, hash);
 	svp = he ? &HeVAL(he) : 0;
     }
@@ -1590,8 +1573,14 @@ PP(pp_helem)
 	if (PL_op->op_private & OPpLVAL_INTRO) {
 	    if (HvNAME(hv) && isGV(*svp))
 		save_gp((GV*)*svp, !(PL_op->op_flags & OPf_SPECIAL));
-	    else
-		save_helem(hv, keysv, svp);
+	    else {
+		if (!preeminent) {
+		    STRLEN keylen;
+		    char *key = SvPV(keysv, keylen);
+		    save_delete(hv, key, keylen);
+		} else
+		    save_helem(hv, keysv, svp);
+            }
 	}
 	else if (PL_op->op_private & OPpDEREF)
 	    vivify_ref(*svp, PL_op->op_private & OPpDEREF);
@@ -1790,6 +1779,8 @@ PP(pp_subst)
     STRLEN len;
     int force_on_match = 0;
     I32 oldsave = PL_savestack_ix;
+    bool do_utf8;
+    STRLEN slen;
 
     /* known replacement string? */
     dstr = (pm->op_pmflags & PMf_CONST) ? POPs : Nullsv;
@@ -1799,6 +1790,8 @@ PP(pp_subst)
 	TARG = DEFSV;
 	EXTEND(SP,1);
     }
+    PL_reg_sv = TARG;
+    do_utf8 = DO_UTF8(PL_reg_sv);
     if (SvFAKE(TARG) && SvREADONLY(TARG))
 	sv_force_normal(TARG);
     if (SvREADONLY(TARG)
@@ -1818,12 +1811,13 @@ PP(pp_subst)
 
   force_it:
     if (!pm || !s)
-	DIE(aTHX_ "panic: do_subst");
+	DIE(aTHX_ "panic: pp_subst");
 
     strend = s + len;
-    maxiters = 2*(strend - s) + 10;	/* We can match twice at each
-					   position, once with zero-length,
-					   second time with non-zero. */
+    slen = do_utf8 ? utf8_length((U8*)s, (U8*)strend) : len;
+    maxiters = 2 * slen + 10;	/* We can match twice at each
+				   position, once with zero-length,
+				   second time with non-zero. */
 
     if (!rx->prelen && PL_curpm) {
 	pm = PL_curpm;
@@ -1964,6 +1958,8 @@ PP(pp_subst)
     if (CALLREGEXEC(aTHX_ rx, s, strend, orig, 0, TARG, NULL,
 		    r_flags | REXEC_CHECKED))
     {
+	bool isutf8;
+
 	if (force_on_match) {
 	    force_on_match = 0;
 	    s = SvPV_force(TARG, len);
@@ -1972,6 +1968,8 @@ PP(pp_subst)
 	rxtainted |= RX_MATCH_TAINTED(rx);
 	dstr = NEWSV(25, len);
 	sv_setpvn(dstr, m, s-m);
+	if (DO_UTF8(TARG))
+	    SvUTF8_on(dstr);
 	PL_curpm = pm;
 	if (!c) {
 	    register PERL_CONTEXT *cx;
@@ -1998,7 +1996,8 @@ PP(pp_subst)
 		sv_catpvn(dstr, c, clen);
 	    if (once)
 		break;
-	} while (CALLREGEXEC(aTHX_ rx, s, strend, orig, s == m, TARG, NULL, r_flags));
+	} while (CALLREGEXEC(aTHX_ rx, s, strend, orig, s == m,
+			     TARG, NULL, r_flags));
 	sv_catpvn(dstr, s, strend - s);
 
 	(void)SvOOK_off(TARG);
@@ -2006,6 +2005,7 @@ PP(pp_subst)
 	SvPVX(TARG) = SvPVX(dstr);
 	SvCUR_set(TARG, SvCUR(dstr));
 	SvLEN_set(TARG, SvLEN(dstr));
+	isutf8 = DO_UTF8(dstr);
 	SvPVX(dstr) = 0;
 	sv_free(dstr);
 
@@ -2014,6 +2014,8 @@ PP(pp_subst)
 	PUSHs(sv_2mortal(newSViv((I32)iters)));
 
 	(void)SvPOK_only(TARG);
+	if (isutf8)
+	    SvUTF8_on(TARG);
 	TAINT_IF(rxtainted);
 	SvSETMAGIC(TARG);
 	SvTAINT(TARG);
@@ -2284,7 +2286,6 @@ PP(pp_leavesublv)
 STATIC CV *
 S_get_db_sub(pTHX_ SV **svp, CV *cv)
 {
-    dTHR;
     SV *dbsv = GvSV(PL_DBsub);
 
     if (!PERLDB_SUB_NN) {
@@ -2781,12 +2782,15 @@ PP(pp_aelem)
 {
     djSP;
     SV** svp;
-    IV elem = POPi;
+    SV* elemsv = POPs;
+    IV elem = SvIV(elemsv);
     AV* av = (AV*)POPs;
     U32 lval = PL_op->op_flags & OPf_MOD;
     U32 defer = (PL_op->op_private & OPpLVAL_DEFER) && (elem > AvFILL(av));
     SV *sv;
 
+    if (SvROK(elemsv) && ckWARN(WARN_MISC))
+	Perl_warner(aTHX_ WARN_MISC, "Use of reference \"%s\" as array index", SvPV_nolen(elemsv));
     if (elem > 0)
 	elem -= PL_curcop->cop_arybase;
     if (SvTYPE(av) != SVt_PVAV)
@@ -2909,7 +2913,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	    !(ob=(SV*)GvIO(iogv)))
 	{
 	    if (!packname ||
-		((*(U8*)packname >= 0xc0 && DO_UTF8(sv))
+		((UTF8_IS_START(*packname) && DO_UTF8(sv))
 		    ? !isIDFIRST_utf8((U8*)packname)
 		    : !isIDFIRST(*packname)
 		))
@@ -2988,9 +2992,6 @@ static void
 unset_cvowner(pTHXo_ void *cvarg)
 {
     register CV* cv = (CV *) cvarg;
-#ifdef DEBUGGING
-    dTHR;
-#endif /* DEBUGGING */
 
     DEBUG_S((PerlIO_printf(Perl_debug_log, "%p unsetting CvOWNER of %p:%s\n",
 			   thr, cv, SvPEEK((SV*)cv))));

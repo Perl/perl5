@@ -84,8 +84,7 @@ PERLVAR(Tcurpm,		PMOP *)		/* what to do \ interps in REs from */
 PERLVAR(Tnrs,		SV *)
 PERLVAR(Trs,		SV *)		/* input record separator $/ */
 PERLVAR(Tlast_in_gv,	GV *)		/* GV used in last <FH> */
-PERLVAR(Tofs,		char *)		/* output field separator $, */
-PERLVAR(Tofslen,	STRLEN)
+PERLVAR(Tofs_sv,	SV *)		/* output field separator $, */
 PERLVAR(Tdefoutgv,	GV *)		/* default FH for output */
 PERLVARI(Tchopset,	char *,	" \n-")	/* $: */
 PERLVAR(Tformtarget,	SV *)
@@ -236,5 +235,5 @@ PERLVAR(i,		struct thread_intern)
 #endif
 
 PERLVAR(trailing_nul,	char)		/* For the sake of thrsv and oursv */
-
+PERLVAR(thr_done,	bool)		/* True when the thread has finished */
 #endif /* USE_THREADS */

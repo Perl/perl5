@@ -1,12 +1,16 @@
 package ExtUtils::MM_Cygwin;
 
+use strict;
+
+our $VERSION = '1.00';
+
 use Config;
 #use Cwd;
 #use File::Basename;
 require Exporter;
 
-Exporter::import('ExtUtils::MakeMaker',
-       qw( $Verbose &neatvalue));
+require ExtUtils::MakeMaker;
+ExtUtils::MakeMaker->import(qw( $Verbose &neatvalue));
 
 unshift @MM::ISA, 'ExtUtils::MM_Cygwin';
 
@@ -71,6 +75,8 @@ q[-e 'next if -e $$m{$$_} && -M $$m{$$_} < -M $$_ && -M $$m{$$_} < -M "],
 
     push(@m,"\n");
     if (%{$self->{MAN1PODS}} || %{$self->{MAN3PODS}}) {
+        grep { $self->{MAN1PODS}{$_} =~ s/::/./g } keys %{$self->{MAN1PODS}};
+        grep { $self->{MAN3PODS}{$_} =~ s/::/./g } keys %{$self->{MAN3PODS}};
         push @m, "\t$self->{NOECHO}\$(POD2MAN) \\\n\t";
         push @m, join " \\\n\t", %{$self->{MAN1PODS}}, %{$self->{MAN3PODS}};
     }

@@ -98,7 +98,6 @@ threadstart(void *arg)
     DEBUG_S(PerlIO_printf(Perl_debug_log, "new thread %p waiting to start\n",
 			  thr));
 
-    /* Don't call *anything* requiring dTHR until after PERL_SET_THX() */
     /*
      * Wait until our creator releases us. If we didn't do this, then
      * it would be potentially possible for out thread to carry on and
@@ -116,7 +115,6 @@ threadstart(void *arg)
      */
     PERL_SET_THX(thr);
 
-    /* Only now can we use SvPEEK (which calls sv_newmortal which does dTHR) */
     DEBUG_S(PerlIO_printf(Perl_debug_log, "new thread %p starting at %s\n",
 			  thr, SvPEEK(TOPs)));
 
@@ -177,7 +175,7 @@ threadstart(void *arg)
     Safefree(PL_savestack);
     Safefree(PL_retstack);
     Safefree(PL_tmps_stack);
-    Safefree(PL_ofs);
+    SvREFCNT_dec(PL_ofs_sv);
 
     SvREFCNT_dec(PL_rs);
     SvREFCNT_dec(PL_nrs);
@@ -191,6 +189,7 @@ threadstart(void *arg)
     Safefree(PL_reg_poscache);
 
     MUTEX_LOCK(&thr->mutex);
+    thr->thr_done = 1;
     DEBUG_S(PerlIO_printf(Perl_debug_log,
 			  "%p: threadstart finishing: state is %u\n",
 			  thr, ThrSTATE(thr)));
@@ -445,6 +444,14 @@ flags(t)
     PPCODE:
 #ifdef USE_THREADS
 	PUSHs(sv_2mortal(newSViv(t->flags)));
+#endif
+
+void
+done(t)
+	Thread	t
+    PPCODE:
+#ifdef USE_THREADS
+	PUSHs(t->thr_done ? &PL_sv_yes : &PL_sv_no);
 #endif
 
 void

@@ -68,6 +68,7 @@
 #endif
 #define amagic_call		Perl_amagic_call
 #define Gv_AMupdate		Perl_Gv_AMupdate
+#define gv_handler		Perl_gv_handler
 #define append_elem		Perl_append_elem
 #define append_list		Perl_append_list
 #define apply			Perl_apply
@@ -542,6 +543,7 @@
 #define ref			Perl_ref
 #define refkids			Perl_refkids
 #define regdump			Perl_regdump
+#define regclass_swash		Perl_regclass_swash
 #define pregexec		Perl_pregexec
 #define pregfree		Perl_pregfree
 #define pregcomp		Perl_pregcomp
@@ -597,6 +599,7 @@
 #define save_pptr		Perl_save_pptr
 #define save_vptr		Perl_save_vptr
 #define save_re_context		Perl_save_re_context
+#define save_padsv		Perl_save_padsv
 #define save_sptr		Perl_save_sptr
 #define save_svref		Perl_save_svref
 #define save_threadsv		Perl_save_threadsv
@@ -701,6 +704,7 @@
 #define sv_tainted		Perl_sv_tainted
 #define sv_unmagic		Perl_sv_unmagic
 #define sv_unref		Perl_sv_unref
+#define sv_unref_flags		Perl_sv_unref_flags
 #define sv_untaint		Perl_sv_untaint
 #define sv_upgrade		Perl_sv_upgrade
 #define sv_usepvn		Perl_sv_usepvn
@@ -725,12 +729,13 @@
 #define utilize			Perl_utilize
 #define utf16_to_utf8		Perl_utf16_to_utf8
 #define utf16_to_utf8_reversed	Perl_utf16_to_utf8_reversed
+#define utf8_length		Perl_utf8_length
 #define utf8_distance		Perl_utf8_distance
 #define utf8_hop		Perl_utf8_hop
 #define utf8_to_bytes		Perl_utf8_to_bytes
 #define bytes_to_utf8		Perl_bytes_to_utf8
+#define utf8_to_uv_simple	Perl_utf8_to_uv_simple
 #define utf8_to_uv		Perl_utf8_to_uv
-#define utf8_to_uv_chk		Perl_utf8_to_uv_chk
 #define uv_to_utf8		Perl_uv_to_utf8
 #define vivify_defelem		Perl_vivify_defelem
 #define vivify_ref		Perl_vivify_ref
@@ -744,7 +749,8 @@
 #define watch			Perl_watch
 #define whichsig		Perl_whichsig
 #define yyerror			Perl_yyerror
-#if defined(USE_PURE_BISON)
+#ifdef USE_PURE_BISON
+#define yylex_r			Perl_yylex_r
 #define yylex			Perl_yylex
 #else
 #define yylex			Perl_yylex
@@ -816,6 +822,7 @@
 #define sv_utf8_encode		Perl_sv_utf8_encode
 #define sv_utf8_decode		Perl_sv_utf8_decode
 #define sv_force_normal		Perl_sv_force_normal
+#define sv_force_normal_flags	Perl_sv_force_normal_flags
 #define tmps_grow		Perl_tmps_grow
 #define sv_rvweaken		Perl_sv_rvweaken
 #define magic_killbackrefs	Perl_magic_killbackrefs
@@ -989,7 +996,6 @@
 #define regbranch		S_regbranch
 #define reguni			S_reguni
 #define regclass		S_regclass
-#define regclassutf8		S_regclassutf8
 #define regcurly		S_regcurly
 #define reg_node		S_reg_node
 #define regpiece		S_regpiece
@@ -1019,13 +1025,14 @@
 #define regrepeat_hard		S_regrepeat_hard
 #define regtry			S_regtry
 #define reginclass		S_reginclass
-#define reginclassutf8		S_reginclassutf8
 #define regcppush		S_regcppush
 #define regcppop		S_regcppop
 #define regcp_set_to		S_regcp_set_to
 #define cache_re		S_cache_re
 #define reghop			S_reghop
+#define reghop3			S_reghop3
 #define reghopmaybe		S_reghopmaybe
+#define reghopmaybe3		S_reghopmaybe3
 #define find_byclass		S_find_byclass
 #endif
 #if defined(PERL_IN_RUN_C) || defined(PERL_DECL_PROT)
@@ -1082,6 +1089,10 @@
 #  if defined(DEBUGGING)
 #define del_sv			S_del_sv
 #  endif
+#  if !defined(NV_PRESERVES_UV)
+#define sv_2inuv_non_preserve	S_sv_2inuv_non_preserve
+#define sv_2iuv_non_preserve	S_sv_2iuv_non_preserve
+#  endif
 #endif
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
 #define check_uni		S_check_uni
@@ -1134,6 +1145,7 @@
 #define isa_lookup		S_isa_lookup
 #endif
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
+#define stdize_locale		S_stdize_locale
 #define mess_alloc		S_mess_alloc
 #  if defined(LEAKTEST)
 #define xstat			S_xstat
@@ -1550,6 +1562,7 @@
 #endif
 #define amagic_call(a,b,c,d)	Perl_amagic_call(aTHX_ a,b,c,d)
 #define Gv_AMupdate(a)		Perl_Gv_AMupdate(aTHX_ a)
+#define gv_handler(a,b)		Perl_gv_handler(aTHX_ a,b)
 #define append_elem(a,b,c)	Perl_append_elem(aTHX_ a,b,c)
 #define append_list(a,b,c)	Perl_append_list(aTHX_ a,b,c)
 #define apply(a,b,c)		Perl_apply(aTHX_ a,b,c)
@@ -2003,6 +2016,7 @@
 #define ref(a,b)		Perl_ref(aTHX_ a,b)
 #define refkids(a,b)		Perl_refkids(aTHX_ a,b)
 #define regdump(a)		Perl_regdump(aTHX_ a)
+#define regclass_swash(a,b,c)	Perl_regclass_swash(aTHX_ a,b,c)
 #define pregexec(a,b,c,d,e,f,g)	Perl_pregexec(aTHX_ a,b,c,d,e,f,g)
 #define pregfree(a)		Perl_pregfree(aTHX_ a)
 #define pregcomp(a,b,c)		Perl_pregcomp(aTHX_ a,b,c)
@@ -2058,6 +2072,7 @@
 #define save_pptr(a)		Perl_save_pptr(aTHX_ a)
 #define save_vptr(a)		Perl_save_vptr(aTHX_ a)
 #define save_re_context()	Perl_save_re_context(aTHX)
+#define save_padsv(a)		Perl_save_padsv(aTHX_ a)
 #define save_sptr(a)		Perl_save_sptr(aTHX_ a)
 #define save_svref(a)		Perl_save_svref(aTHX_ a)
 #define save_threadsv(a)	Perl_save_threadsv(aTHX_ a)
@@ -2068,7 +2083,7 @@
 #define scalarvoid(a)		Perl_scalarvoid(aTHX_ a)
 #define scan_bin(a,b,c)		Perl_scan_bin(aTHX_ a,b,c)
 #define scan_hex(a,b,c)		Perl_scan_hex(aTHX_ a,b,c)
-#define scan_num(a)		Perl_scan_num(aTHX_ a)
+#define scan_num(a,b)		Perl_scan_num(aTHX_ a,b)
 #define scan_oct(a,b,c)		Perl_scan_oct(aTHX_ a,b,c)
 #define scope(a)		Perl_scope(aTHX_ a)
 #define screaminstr(a,b,c,d,e,f)	Perl_screaminstr(aTHX_ a,b,c,d,e,f)
@@ -2160,6 +2175,7 @@
 #define sv_tainted(a)		Perl_sv_tainted(aTHX_ a)
 #define sv_unmagic(a,b)		Perl_sv_unmagic(aTHX_ a,b)
 #define sv_unref(a)		Perl_sv_unref(aTHX_ a)
+#define sv_unref_flags(a,b)	Perl_sv_unref_flags(aTHX_ a,b)
 #define sv_untaint(a)		Perl_sv_untaint(aTHX_ a)
 #define sv_upgrade(a,b)		Perl_sv_upgrade(aTHX_ a,b)
 #define sv_usepvn(a,b,c)	Perl_sv_usepvn(aTHX_ a,b,c)
@@ -2184,12 +2200,13 @@
 #define utilize(a,b,c,d,e)	Perl_utilize(aTHX_ a,b,c,d,e)
 #define utf16_to_utf8(a,b,c,d)	Perl_utf16_to_utf8(aTHX_ a,b,c,d)
 #define utf16_to_utf8_reversed(a,b,c,d)	Perl_utf16_to_utf8_reversed(aTHX_ a,b,c,d)
+#define utf8_length(a,b)	Perl_utf8_length(aTHX_ a,b)
 #define utf8_distance(a,b)	Perl_utf8_distance(aTHX_ a,b)
 #define utf8_hop(a,b)		Perl_utf8_hop(aTHX_ a,b)
 #define utf8_to_bytes(a,b)	Perl_utf8_to_bytes(aTHX_ a,b)
 #define bytes_to_utf8(a,b)	Perl_bytes_to_utf8(aTHX_ a,b)
-#define utf8_to_uv(a,b)		Perl_utf8_to_uv(aTHX_ a,b)
-#define utf8_to_uv_chk(a,b,c)	Perl_utf8_to_uv_chk(aTHX_ a,b,c)
+#define utf8_to_uv_simple(a,b)	Perl_utf8_to_uv_simple(aTHX_ a,b)
+#define utf8_to_uv(a,b,c,d)	Perl_utf8_to_uv(aTHX_ a,b,c,d)
 #define uv_to_utf8(a,b)		Perl_uv_to_utf8(aTHX_ a,b)
 #define vivify_defelem(a)	Perl_vivify_defelem(aTHX_ a)
 #define vivify_ref(a,b)		Perl_vivify_ref(aTHX_ a,b)
@@ -2201,7 +2218,8 @@
 #define watch(a)		Perl_watch(aTHX_ a)
 #define whichsig(a)		Perl_whichsig(aTHX_ a)
 #define yyerror(a)		Perl_yyerror(aTHX_ a)
-#if defined(USE_PURE_BISON)
+#ifdef USE_PURE_BISON
+#define yylex_r(a,b)		Perl_yylex_r(aTHX_ a,b)
 #define yylex(a,b)		Perl_yylex(aTHX_ a,b)
 #else
 #define yylex()			Perl_yylex(aTHX)
@@ -2269,6 +2287,7 @@
 #define sv_utf8_encode(a)	Perl_sv_utf8_encode(aTHX_ a)
 #define sv_utf8_decode(a)	Perl_sv_utf8_decode(aTHX_ a)
 #define sv_force_normal(a)	Perl_sv_force_normal(aTHX_ a)
+#define sv_force_normal_flags(a,b)	Perl_sv_force_normal_flags(aTHX_ a,b)
 #define tmps_grow(a)		Perl_tmps_grow(aTHX_ a)
 #define sv_rvweaken(a)		Perl_sv_rvweaken(aTHX_ a)
 #define magic_killbackrefs(a,b)	Perl_magic_killbackrefs(aTHX_ a,b)
@@ -2436,48 +2455,48 @@
 #  endif
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_DECL_PROT)
-#define reg(a,b)		S_reg(aTHX_ a,b)
-#define reganode(a,b)		S_reganode(aTHX_ a,b)
-#define regatom(a)		S_regatom(aTHX_ a)
-#define regbranch(a,b)		S_regbranch(aTHX_ a,b)
-#define reguni(a,b,c)		S_reguni(aTHX_ a,b,c)
-#define regclass()		S_regclass(aTHX)
-#define regclassutf8()		S_regclassutf8(aTHX)
+#define reg(a,b,c)		S_reg(aTHX_ a,b,c)
+#define reganode(a,b,c)		S_reganode(aTHX_ a,b,c)
+#define regatom(a,b)		S_regatom(aTHX_ a,b)
+#define regbranch(a,b,c)	S_regbranch(aTHX_ a,b,c)
+#define reguni(a,b,c,d)		S_reguni(aTHX_ a,b,c,d)
+#define regclass(a)		S_regclass(aTHX_ a)
 #define regcurly(a)		S_regcurly(aTHX_ a)
-#define reg_node(a)		S_reg_node(aTHX_ a)
-#define regpiece(a)		S_regpiece(aTHX_ a)
-#define reginsert(a,b)		S_reginsert(aTHX_ a,b)
-#define regoptail(a,b)		S_regoptail(aTHX_ a,b)
-#define regtail(a,b)		S_regtail(aTHX_ a,b)
+#define reg_node(a,b)		S_reg_node(aTHX_ a,b)
+#define regpiece(a,b)		S_regpiece(aTHX_ a,b)
+#define reginsert(a,b,c)	S_reginsert(aTHX_ a,b,c)
+#define regoptail(a,b,c)	S_regoptail(aTHX_ a,b,c)
+#define regtail(a,b,c)		S_regtail(aTHX_ a,b,c)
 #define regwhite(a,b)		S_regwhite(aTHX_ a,b)
-#define nextchar()		S_nextchar(aTHX)
+#define nextchar(a)		S_nextchar(aTHX_ a)
 #define dumpuntil(a,b,c,d,e)	S_dumpuntil(aTHX_ a,b,c,d,e)
 #define put_byte(a,b)		S_put_byte(aTHX_ a,b)
-#define scan_commit(a)		S_scan_commit(aTHX_ a)
-#define cl_anything(a)		S_cl_anything(aTHX_ a)
+#define scan_commit(a,b)	S_scan_commit(aTHX_ a,b)
+#define cl_anything(a,b)	S_cl_anything(aTHX_ a,b)
 #define cl_is_anything(a)	S_cl_is_anything(aTHX_ a)
-#define cl_init(a)		S_cl_init(aTHX_ a)
-#define cl_init_zero(a)		S_cl_init_zero(aTHX_ a)
+#define cl_init(a,b)		S_cl_init(aTHX_ a,b)
+#define cl_init_zero(a,b)	S_cl_init_zero(aTHX_ a,b)
 #define cl_and(a,b)		S_cl_and(aTHX_ a,b)
-#define cl_or(a,b)		S_cl_or(aTHX_ a,b)
-#define study_chunk(a,b,c,d,e)	S_study_chunk(aTHX_ a,b,c,d,e)
-#define add_data(a,b)		S_add_data(aTHX_ a,b)
-#define regpposixcc(a)		S_regpposixcc(aTHX_ a)
-#define checkposixcc()		S_checkposixcc(aTHX)
+#define cl_or(a,b,c)		S_cl_or(aTHX_ a,b,c)
+#define study_chunk(a,b,c,d,e,f)	S_study_chunk(aTHX_ a,b,c,d,e,f)
+#define add_data(a,b,c)		S_add_data(aTHX_ a,b,c)
+#define regpposixcc(a,b)	S_regpposixcc(aTHX_ a,b)
+#define checkposixcc(a)		S_checkposixcc(aTHX_ a)
 #endif
 #if defined(PERL_IN_REGEXEC_C) || defined(PERL_DECL_PROT)
 #define regmatch(a)		S_regmatch(aTHX_ a)
 #define regrepeat(a,b)		S_regrepeat(aTHX_ a,b)
 #define regrepeat_hard(a,b,c)	S_regrepeat_hard(aTHX_ a,b,c)
 #define regtry(a,b)		S_regtry(aTHX_ a,b)
-#define reginclass(a,b)		S_reginclass(aTHX_ a,b)
-#define reginclassutf8(a,b)	S_reginclassutf8(aTHX_ a,b)
+#define reginclass(a,b,c)	S_reginclass(aTHX_ a,b,c)
 #define regcppush(a)		S_regcppush(aTHX_ a)
 #define regcppop()		S_regcppop(aTHX)
 #define regcp_set_to(a)		S_regcp_set_to(aTHX_ a)
 #define cache_re(a)		S_cache_re(aTHX_ a)
 #define reghop(a,b)		S_reghop(aTHX_ a,b)
+#define reghop3(a,b,c)		S_reghop3(aTHX_ a,b,c)
 #define reghopmaybe(a,b)	S_reghopmaybe(aTHX_ a,b)
+#define reghopmaybe3(a,b,c)	S_reghopmaybe3(aTHX_ a,b,c)
 #define find_byclass(a,b,c,d,e,f)	S_find_byclass(aTHX_ a,b,c,d,e,f)
 #endif
 #if defined(PERL_IN_RUN_C) || defined(PERL_DECL_PROT)
@@ -2534,6 +2553,10 @@
 #  if defined(DEBUGGING)
 #define del_sv(a)		S_del_sv(aTHX_ a)
 #  endif
+#  if !defined(NV_PRESERVES_UV)
+#define sv_2inuv_non_preserve(a,b)	S_sv_2inuv_non_preserve(aTHX_ a,b)
+#define sv_2iuv_non_preserve(a,b)	S_sv_2iuv_non_preserve(aTHX_ a,b)
+#  endif
 #endif
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
 #define check_uni()		S_check_uni(aTHX)
@@ -2586,6 +2609,7 @@
 #define isa_lookup(a,b,c,d)	S_isa_lookup(aTHX_ a,b,c,d)
 #endif
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
+#define stdize_locale(a)	S_stdize_locale(aTHX_ a)
 #define mess_alloc()		S_mess_alloc(aTHX)
 #  if defined(LEAKTEST)
 #define xstat(a)		S_xstat(aTHX_ a)
@@ -3009,6 +3033,8 @@
 #define amagic_call		Perl_amagic_call
 #define Perl_Gv_AMupdate	CPerlObj::Perl_Gv_AMupdate
 #define Gv_AMupdate		Perl_Gv_AMupdate
+#define Perl_gv_handler		CPerlObj::Perl_gv_handler
+#define gv_handler		Perl_gv_handler
 #define Perl_append_elem	CPerlObj::Perl_append_elem
 #define append_elem		Perl_append_elem
 #define Perl_append_list	CPerlObj::Perl_append_list
@@ -3849,6 +3875,8 @@
 #define pad_swipe		Perl_pad_swipe
 #define Perl_peep		CPerlObj::Perl_peep
 #define peep			Perl_peep
+#define Perl_start_glob		CPerlObj::Perl_start_glob
+#define start_glob		Perl_start_glob
 #if defined(PERL_OBJECT)
 #define Perl_construct		CPerlObj::Perl_construct
 #define Perl_destruct		CPerlObj::Perl_destruct
@@ -3924,6 +3952,8 @@
 #define refkids			Perl_refkids
 #define Perl_regdump		CPerlObj::Perl_regdump
 #define regdump			Perl_regdump
+#define Perl_regclass_swash	CPerlObj::Perl_regclass_swash
+#define regclass_swash		Perl_regclass_swash
 #define Perl_pregexec		CPerlObj::Perl_pregexec
 #define pregexec		Perl_pregexec
 #define Perl_pregfree		CPerlObj::Perl_pregfree
@@ -4032,6 +4062,8 @@
 #define save_vptr		Perl_save_vptr
 #define Perl_save_re_context	CPerlObj::Perl_save_re_context
 #define save_re_context		Perl_save_re_context
+#define Perl_save_padsv		CPerlObj::Perl_save_padsv
+#define save_padsv		Perl_save_padsv
 #define Perl_save_sptr		CPerlObj::Perl_save_sptr
 #define save_sptr		Perl_save_sptr
 #define Perl_save_svref		CPerlObj::Perl_save_svref
@@ -4236,6 +4268,8 @@
 #define sv_unmagic		Perl_sv_unmagic
 #define Perl_sv_unref		CPerlObj::Perl_sv_unref
 #define sv_unref		Perl_sv_unref
+#define Perl_sv_unref_flags	CPerlObj::Perl_sv_unref_flags
+#define sv_unref_flags		Perl_sv_unref_flags
 #define Perl_sv_untaint		CPerlObj::Perl_sv_untaint
 #define sv_untaint		Perl_sv_untaint
 #define Perl_sv_upgrade		CPerlObj::Perl_sv_upgrade
@@ -4280,6 +4314,8 @@
 #define utf16_to_utf8		Perl_utf16_to_utf8
 #define Perl_utf16_to_utf8_reversed	CPerlObj::Perl_utf16_to_utf8_reversed
 #define utf16_to_utf8_reversed	Perl_utf16_to_utf8_reversed
+#define Perl_utf8_length	CPerlObj::Perl_utf8_length
+#define utf8_length		Perl_utf8_length
 #define Perl_utf8_distance	CPerlObj::Perl_utf8_distance
 #define utf8_distance		Perl_utf8_distance
 #define Perl_utf8_hop		CPerlObj::Perl_utf8_hop
@@ -4288,10 +4324,10 @@
 #define utf8_to_bytes		Perl_utf8_to_bytes
 #define Perl_bytes_to_utf8	CPerlObj::Perl_bytes_to_utf8
 #define bytes_to_utf8		Perl_bytes_to_utf8
+#define Perl_utf8_to_uv_simple	CPerlObj::Perl_utf8_to_uv_simple
+#define utf8_to_uv_simple	Perl_utf8_to_uv_simple
 #define Perl_utf8_to_uv		CPerlObj::Perl_utf8_to_uv
 #define utf8_to_uv		Perl_utf8_to_uv
-#define Perl_utf8_to_uv_chk	CPerlObj::Perl_utf8_to_uv_chk
-#define utf8_to_uv_chk		Perl_utf8_to_uv_chk
 #define Perl_uv_to_utf8		CPerlObj::Perl_uv_to_utf8
 #define uv_to_utf8		Perl_uv_to_utf8
 #define Perl_vivify_defelem	CPerlObj::Perl_vivify_defelem
@@ -4318,7 +4354,9 @@
 #define whichsig		Perl_whichsig
 #define Perl_yyerror		CPerlObj::Perl_yyerror
 #define yyerror			Perl_yyerror
-#if defined(USE_PURE_BISON)
+#ifdef USE_PURE_BISON
+#define Perl_yylex_r		CPerlObj::Perl_yylex_r
+#define yylex_r			Perl_yylex_r
 #define Perl_yylex		CPerlObj::Perl_yylex
 #define yylex			Perl_yylex
 #else
@@ -4449,6 +4487,8 @@
 #define sv_utf8_decode		Perl_sv_utf8_decode
 #define Perl_sv_force_normal	CPerlObj::Perl_sv_force_normal
 #define sv_force_normal		Perl_sv_force_normal
+#define Perl_sv_force_normal_flags	CPerlObj::Perl_sv_force_normal_flags
+#define sv_force_normal_flags	Perl_sv_force_normal_flags
 #define Perl_tmps_grow		CPerlObj::Perl_tmps_grow
 #define tmps_grow		Perl_tmps_grow
 #define Perl_sv_rvweaken	CPerlObj::Perl_sv_rvweaken
@@ -4751,8 +4791,6 @@
 #define reguni			S_reguni
 #define S_regclass		CPerlObj::S_regclass
 #define regclass		S_regclass
-#define S_regclassutf8		CPerlObj::S_regclassutf8
-#define regclassutf8		S_regclassutf8
 #define S_regcurly		CPerlObj::S_regcurly
 #define regcurly		S_regcurly
 #define S_reg_node		CPerlObj::S_reg_node
@@ -4809,8 +4847,6 @@
 #define regtry			S_regtry
 #define S_reginclass		CPerlObj::S_reginclass
 #define reginclass		S_reginclass
-#define S_reginclassutf8	CPerlObj::S_reginclassutf8
-#define reginclassutf8		S_reginclassutf8
 #define S_regcppush		CPerlObj::S_regcppush
 #define regcppush		S_regcppush
 #define S_regcppop		CPerlObj::S_regcppop
@@ -4821,8 +4857,12 @@
 #define cache_re		S_cache_re
 #define S_reghop		CPerlObj::S_reghop
 #define reghop			S_reghop
+#define S_reghop3		CPerlObj::S_reghop3
+#define reghop3			S_reghop3
 #define S_reghopmaybe		CPerlObj::S_reghopmaybe
 #define reghopmaybe		S_reghopmaybe
+#define S_reghopmaybe3		CPerlObj::S_reghopmaybe3
+#define reghopmaybe3		S_reghopmaybe3
 #define S_find_byclass		CPerlObj::S_find_byclass
 #define find_byclass		S_find_byclass
 #endif
@@ -4927,6 +4967,12 @@
 #define S_del_sv		CPerlObj::S_del_sv
 #define del_sv			S_del_sv
 #  endif
+#  if !defined(NV_PRESERVES_UV)
+#define S_sv_2inuv_non_preserve	CPerlObj::S_sv_2inuv_non_preserve
+#define sv_2inuv_non_preserve	S_sv_2inuv_non_preserve
+#define S_sv_2iuv_non_preserve	CPerlObj::S_sv_2iuv_non_preserve
+#define sv_2iuv_non_preserve	S_sv_2iuv_non_preserve
+#  endif
 #endif
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
 #define S_check_uni		CPerlObj::S_check_uni
@@ -5019,6 +5065,8 @@
 #define isa_lookup		S_isa_lookup
 #endif
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
+#define S_stdize_locale		CPerlObj::S_stdize_locale
+#define stdize_locale		S_stdize_locale
 #define S_mess_alloc		CPerlObj::S_mess_alloc
 #define mess_alloc		S_mess_alloc
 #  if defined(LEAKTEST)

@@ -150,8 +150,8 @@ C<"">.
 =item * Unknown command "I<CMD>"
 
 An invalid POD command has been found. Valid are C<=head1>, C<=head2>,
-C<=over>, C<=item>, C<=back>, C<=begin>, C<=end>, C<=for>, C<=pod>,
-C<=cut>
+C<=head3>, C<=head4>, C<=over>, C<=item>, C<=back>, C<=begin>, C<=end>,
+C<=for>, C<=pod>, C<=cut>
 
 =item * Unknown interior-sequence "I<SEQ>"
 
@@ -355,6 +355,8 @@ my %VALID_COMMANDS = (
     'cut'    =>  1,
     'head1'  =>  1,
     'head2'  =>  1,
+    'head3'  =>  1,
+    'head4'  =>  1,
     'over'   =>  1,
     'back'   =>  1,
     'item'   =>  1,

@@ -1,5 +1,7 @@
 package Tie::Hash;
 
+our $VERSION = '1.00';
+
 =head1 NAME
 
 Tie::Hash, Tie::StdHash - base class definitions for tied hashes

@@ -88,10 +88,10 @@ do_test( 5,
 
 do_test( 6,
         $c + $d,
-'SV = NV\\($ADDR\\) at $ADDR
+'SV = IV\\($ADDR\\) at $ADDR
   REFCNT = 1
-  FLAGS = \\(PADTMP,NOK,pNOK\\)
-  NV = 456');
+  FLAGS = \\(PADTMP,IOK,pIOK\\)
+  IV = 456');
 
 ($d = "789") += 0.1;
 
@@ -110,8 +110,8 @@ do_test( 8,
         0xabcd,
 'SV = IV\\($ADDR\\) at $ADDR
   REFCNT = 1
-  FLAGS = \\(.*IOK,READONLY,pIOK,IsUV\\)
-  UV = 43981');
+  FLAGS = \\(.*IOK,READONLY,pIOK\\)
+  IV = 43981');
 
 do_test( 9,
         undef,
@@ -154,12 +154,10 @@ do_test(11,
       FLAGS = \\(IOK,pIOK\\)
       IV = 123
     Elt No. 1
-    SV = PVNV\\($ADDR\\) at $ADDR
+    SV = IV\\($ADDR\\) at $ADDR
       REFCNT = 1
-      FLAGS = \\(IOK,NOK,pIOK,pNOK\\)
-      IV = 456
-      NV = 456
-      PV = 0');
+      FLAGS = \\(IOK,pIOK\\)
+      IV = 456');
 
 do_test(12,
        {$b=>$c},
@@ -180,12 +178,10 @@ do_test(12,
     RITER = -1
     EITER = 0x0
     Elt "123" HASH = $ADDR
-    SV = PVNV\\($ADDR\\) at $ADDR
+    SV = IV\\($ADDR\\) at $ADDR
       REFCNT = 1
-      FLAGS = \\(IOK,NOK,pIOK,pNOK\\)
-      IV = 456
-      NV = 456
-      PV = 0');
+      FLAGS = \\(IOK,pIOK\\)
+      IV = 456');
 
 do_test(13,
         sub(){@_},

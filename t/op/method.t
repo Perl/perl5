@@ -9,7 +9,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..53\n";
+print "1..54\n";
 
 @A::ISA = 'B';
 @B::ISA = 'C';
@@ -185,3 +185,8 @@ test(do { eval 'E->foo()';
 test(do { eval '$e = bless {}, "E"; $e->foo()';
 	  $@ =~ /^\QCan't locate object method "foo" via package "E" (perhaps / ? 1 : $@}, 1);
 
+# This is actually testing parsing of indirect objects and undefined subs
+#   print foo("bar") where foo does not exist is not an indirect object.
+#   print foo "bar"  where foo does not exist is an indirect object.
+eval { sub AUTOLOAD { "ok ", shift, "\n"; } };
+print nonsuch(++$cnt);

@@ -101,7 +101,6 @@ do_aspawn( pTHX_ SV *really,SV **mark,SV **sp) {
 int
 do_spawn (pTHX_ SV *really,SV **mark,SV **sp)
 {
-    dTHR;
     int  rc;
     char **a,*cmd,**ptr, *cmdline, **argv, *p2; 
     STRLEN n_a;

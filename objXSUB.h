@@ -35,6 +35,10 @@
 #define Perl_Gv_AMupdate	pPerl->Perl_Gv_AMupdate
 #undef  Gv_AMupdate
 #define Gv_AMupdate		Perl_Gv_AMupdate
+#undef  Perl_gv_handler
+#define Perl_gv_handler		pPerl->Perl_gv_handler
+#undef  gv_handler
+#define gv_handler		Perl_gv_handler
 #undef  Perl_apply_attrs_string
 #define Perl_apply_attrs_string	pPerl->Perl_apply_attrs_string
 #undef  apply_attrs_string
@@ -1259,6 +1263,10 @@
 #define Perl_regdump		pPerl->Perl_regdump
 #undef  regdump
 #define regdump			Perl_regdump
+#undef  Perl_regclass_swash
+#define Perl_regclass_swash	pPerl->Perl_regclass_swash
+#undef  regclass_swash
+#define regclass_swash		Perl_regclass_swash
 #undef  Perl_pregexec
 #define Perl_pregexec		pPerl->Perl_pregexec
 #undef  pregexec
@@ -1433,6 +1441,10 @@
 #define Perl_save_re_context	pPerl->Perl_save_re_context
 #undef  save_re_context
 #define save_re_context		Perl_save_re_context
+#undef  Perl_save_padsv
+#define Perl_save_padsv		pPerl->Perl_save_padsv
+#undef  save_padsv
+#define save_padsv		Perl_save_padsv
 #undef  Perl_save_sptr
 #define Perl_save_sptr		pPerl->Perl_save_sptr
 #undef  save_sptr
@@ -1777,6 +1789,10 @@
 #define Perl_sv_unref		pPerl->Perl_sv_unref
 #undef  sv_unref
 #define sv_unref		Perl_sv_unref
+#undef  Perl_sv_unref_flags
+#define Perl_sv_unref_flags	pPerl->Perl_sv_unref_flags
+#undef  sv_unref_flags
+#define sv_unref_flags		Perl_sv_unref_flags
 #undef  Perl_sv_untaint
 #define Perl_sv_untaint		pPerl->Perl_sv_untaint
 #undef  sv_untaint
@@ -1853,6 +1869,10 @@
 #define Perl_utf16_to_utf8_reversed	pPerl->Perl_utf16_to_utf8_reversed
 #undef  utf16_to_utf8_reversed
 #define utf16_to_utf8_reversed	Perl_utf16_to_utf8_reversed
+#undef  Perl_utf8_length
+#define Perl_utf8_length	pPerl->Perl_utf8_length
+#undef  utf8_length
+#define utf8_length		Perl_utf8_length
 #undef  Perl_utf8_distance
 #define Perl_utf8_distance	pPerl->Perl_utf8_distance
 #undef  utf8_distance
@@ -1869,14 +1889,14 @@
 #define Perl_bytes_to_utf8	pPerl->Perl_bytes_to_utf8
 #undef  bytes_to_utf8
 #define bytes_to_utf8		Perl_bytes_to_utf8
+#undef  Perl_utf8_to_uv_simple
+#define Perl_utf8_to_uv_simple	pPerl->Perl_utf8_to_uv_simple
+#undef  utf8_to_uv_simple
+#define utf8_to_uv_simple	Perl_utf8_to_uv_simple
 #undef  Perl_utf8_to_uv
 #define Perl_utf8_to_uv		pPerl->Perl_utf8_to_uv
 #undef  utf8_to_uv
 #define utf8_to_uv		Perl_utf8_to_uv
-#undef  Perl_utf8_to_uv_chk
-#define Perl_utf8_to_uv_chk	pPerl->Perl_utf8_to_uv_chk
-#undef  utf8_to_uv_chk
-#define utf8_to_uv_chk		Perl_utf8_to_uv_chk
 #undef  Perl_uv_to_utf8
 #define Perl_uv_to_utf8		pPerl->Perl_uv_to_utf8
 #undef  uv_to_utf8
@@ -1901,7 +1921,7 @@
 #define Perl_whichsig		pPerl->Perl_whichsig
 #undef  whichsig
 #define whichsig		Perl_whichsig
-#if defined(USE_PURE_BISON)
+#ifdef USE_PURE_BISON
 #else
 #endif
 #if defined(MYMALLOC)
@@ -2130,6 +2150,10 @@
 #define Perl_sv_force_normal	pPerl->Perl_sv_force_normal
 #undef  sv_force_normal
 #define sv_force_normal		Perl_sv_force_normal
+#undef  Perl_sv_force_normal_flags
+#define Perl_sv_force_normal_flags	pPerl->Perl_sv_force_normal_flags
+#undef  sv_force_normal_flags
+#define sv_force_normal_flags	Perl_sv_force_normal_flags
 #undef  Perl_tmps_grow
 #define Perl_tmps_grow		pPerl->Perl_tmps_grow
 #undef  tmps_grow
@@ -2275,6 +2299,8 @@
 #endif
 #if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 #  if defined(DEBUGGING)
+#  endif
+#  if !defined(NV_PRESERVES_UV)
 #  endif
 #endif
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)

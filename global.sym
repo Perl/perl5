@@ -21,6 +21,7 @@ Perl_get_context
 Perl_set_context
 Perl_amagic_call
 Perl_Gv_AMupdate
+Perl_gv_handler
 Perl_apply_attrs_string
 Perl_avhv_delete_ent
 Perl_avhv_exists_ent
@@ -315,6 +316,7 @@ Perl_pmflag
 Perl_pop_scope
 Perl_push_scope
 Perl_regdump
+Perl_regclass_swash
 Perl_pregexec
 Perl_pregfree
 Perl_pregcomp
@@ -358,6 +360,7 @@ Perl_save_scalar
 Perl_save_pptr
 Perl_save_vptr
 Perl_save_re_context
+Perl_save_padsv
 Perl_save_sptr
 Perl_save_svref
 Perl_save_threadsv
@@ -443,6 +446,7 @@ Perl_sv_taint
 Perl_sv_tainted
 Perl_sv_unmagic
 Perl_sv_unref
+Perl_sv_unref_flags
 Perl_sv_untaint
 Perl_sv_upgrade
 Perl_sv_usepvn
@@ -461,12 +465,13 @@ Perl_unlock_condpair
 Perl_unsharepvn
 Perl_utf16_to_utf8
 Perl_utf16_to_utf8_reversed
+Perl_utf8_length
 Perl_utf8_distance
 Perl_utf8_hop
 Perl_utf8_to_bytes
 Perl_bytes_to_utf8
+Perl_utf8_to_uv_simple
 Perl_utf8_to_uv
-Perl_utf8_to_uv_chk
 Perl_uv_to_utf8
 Perl_warn
 Perl_vwarn
@@ -527,6 +532,7 @@ Perl_sv_utf8_downgrade
 Perl_sv_utf8_encode
 Perl_sv_utf8_decode
 Perl_sv_force_normal
+Perl_sv_force_normal_flags
 Perl_tmps_grow
 Perl_sv_rvweaken
 Perl_newANONATTRSUB

@@ -302,6 +302,7 @@ extern  int	kill(int pid, int sig);
 extern  void	*sbrk(int need);
 extern	char *	getlogin(void);
 extern	int	chown(const char *p, uid_t o, gid_t g);
+extern  int	mkstemp(const char *path);
 
 #undef	 Stat
 #define  Stat		win32_stat
@@ -343,6 +344,7 @@ DllExport void		win32_get_child_IO(child_IO_table* ptr);
 extern FILE *		my_fdopen(int, char *);
 #endif
 extern int		my_fclose(FILE *);
+extern int		my_fstat(int fd, struct stat *sbufptr);
 extern int		do_aspawn(void *really, void **mark, void **sp);
 extern int		do_spawn(char *cmd);
 extern int		do_spawn_nowait(char *cmd);
@@ -543,11 +545,17 @@ EXTERN_C _CRTIMP ioinfo* __pioinfo[];
 #endif
 #endif
 
+#define PERLIO_NOT_STDIO 0
+
+#include "perlio.h"
+
 /*
  * This provides a layer of functions and macros to ensure extensions will
  * get to use the same RTL functions as the core.
  */
 #include "win32iop.h"
+
+#define EXEC_ARGV_CAST(x) ((const char *const *) x)
 
 #endif /* _INC_WIN32_PERL5 */
 

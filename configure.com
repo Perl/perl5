@@ -53,9 +53,19 @@ $ use_two_pot_malloc = "N"
 $ use_pack_malloc = "N"
 $ use_debugmalloc = "N"
 $ ccflags = ""
+$ static_ext = ""
 $ vms_default_directory_name = F$ENVIRONMENT("DEFAULT")
 $ max_allowed_dir_depth = 3  ! e.g. [A.B.PERLxxx] not [A.B.C.PERLxxx]
 $! max_allowed_dir_depth = 2 ! e.g. [A.PERLxxx] not [A.B.PERLxxx]
+$!
+$! Sebastian Bazley's request: close the CONFIG handle with /NOLOG
+$! qualifier "just in case" (configure.com is re @ed in a bad state).
+$! This construct was tested to be not a problem as far back as
+$! VMS V5.5-2, hopefully earlier versions are OK as well.
+$!
+$ CLOSE/NOLOG CONFIG
+$!
+$! Now keep track of open files
 $!
 $ vms_filcnt = F$GETJPI ("","FILCNT")
 $!
@@ -2061,6 +2071,10 @@ $   ans = F$EDIT(ans,"TRIM,COMPRESS,LOWERCASE")
 $   IF ans.eqs."decc" then Has_Dec_C_Sockets = "T"
 $   IF ans.eqs."socketshr" then Has_socketshr = "T"
 $ ENDIF
+$ IF Has_Dec_C_Sockets .or. Has_socketshr
+$ THEN
+$   static_ext = f$edit(static_ext+" "+"Socket","trim,compress")
+$ ENDIF
 $!
 $!
 $! Ask if they want to build with VMS_DEBUG perl
@@ -2367,8 +2381,8 @@ $ echo "you might, for example, want to build GDBM_File instead of"
 $ echo "SDBM_File if you have the GDBM library built on your machine."
 $ echo ""
 $ echo "Which modules do you want to build into perl?"
-$! dflt = "Fcntl Errno File::Glob IO Opcode Byteloader Devel::Peek Devel::DProf Data::Dumper attrs re VMS::Stdio VMS::DCLsym B SDBM_File"
-$ dflt = "re Fcntl Errno File::Glob IO Opcode Devel::Peek Devel::DProf Data::Dumper attrs VMS::Stdio VMS::DCLsym B SDBM_File Storable Thread Sys::Hostname"
+$! we need to add Byteloader to this list:
+$ dflt = "re Fcntl Encode Errno File::Glob Filter::Util::Call IO Opcode Devel::Peek Devel::DProf Data::Dumper attrs VMS::Stdio VMS::DCLsym B SDBM_File Storable Thread Sys::Hostname"
 $ IF Using_Dec_C .OR. using_cxx
 $ THEN
 $   dflt = dflt + " POSIX"
@@ -2594,6 +2608,39 @@ $     GOTO Clean_up
 $   ENDIF
 $ ENDIF
 $!
+$! PerlIO abstraction
+$!
+$ dflt = "n"
+$ IF F$TYPE(useperlio) .NES. ""
+$ THEN
+$   IF useperlio THEN dflt = "y"
+$   IF useperlio .EQS. "define" THEN dflt = "y"
+$ ENDIF
+$ IF .NOT. silent
+$ THEN
+$   echo "Previous version of ''package' used the standard IO mechanisms as"
+$   TYPE SYS$INPUT:
+$   DECK
+defined in <stdio.h>.  Versions 5.003_02 and later of perl allow
+alternate IO mechanisms via the PerlIO abstraction layer, but the
+stdio mechanism is still the default.  This abstraction layer can
+use AT&T's sfio (if you already have sfio installed) or regular stdio.
+Using PerlIO with sfio may cause problems with some extension modules.
+
+$   EOD
+$   echo "If this does not make any sense to you, just accept the default '" + dflt + "'."
+$ ENDIF
+$ rp = "Use the experimental PerlIO abstraction layer? [''dflt'] "
+$ GOSUB myread
+$ IF ans .EQS. "" THEN ans = dflt
+$ IF ans
+$ THEN
+$   useperlio = "define"
+$ ELSE
+$   echo "Ok, doing things the stdio way."
+$   useperlio = "undef"
+$ ENDIF
+$!
 $ echo ""
 $ echo4 "Checking the C run-time library."
 $!
@@ -2733,7 +2780,8 @@ $ ELSE d_mymalloc="undef"
 $ ENDIF
 $!
 $ usedl="define"
-$ startperl="""$ perl 'f$env(\""procedure\"")' 'p1' 'p2' 'p3' 'p4' 'p5' 'p6' 'p7' 'p8'  !\n$ exit++ + ++$status != 0 and $exit = $status = undef;"""
+$ startperl="""$ perl 'f$env(\""procedure\"")' \""'"+"'p1'\"" \""'"+"'p2'\"" \""'"+"'p3'\"" \""'"+"'p4'\"" \""'"+"'p5'\"" \""'"+"'p6'\"" \""'"+"'p7'\"" \""'"+"'p8'\""!\n"
+$ startperl=startperl + "$ exit++ + ++$status!=0 and $exit=$status=undef; while($#ARGV != -1 and $ARGV[$#ARGV] eq '"+"'){pop @ARGV;}"""
 $!
 $ IF ((Use_Threads) .AND. (vms_ver .LES. "6.2"))
 $ THEN
@@ -3475,6 +3523,54 @@ $ tmp = "fcntl"
 $ GOSUB inlibc
 $ d_fcntl = tmp
 $!
+$! Check for fcntl locking capability
+$!
+$ echo4 "Checking if fcntl-based file locking works... "
+$ tmp = "undef"
+$ IF d_fcntl .EQS. "define"
+$ THEN
+$   OS
+$   WS "#include <stdio.h>"
+$   WS "#if defined(__DECC) || defined(__DECCXX)"
+$   WS "#include <stdlib.h>"
+$   WS "#endif"
+$   WS "#include <fcntl.h>"
+$   WS "#include <unistd.h>"
+$   WS "int main() {"
+$   WS "#if defined(F_SETLK) && defined(F_SETLKW)"
+$   WS "     struct flock flock;"
+$   WS "     int retval, fd;"
+$   WS "     fd = open(""try.c"", O_RDONLY);"
+$   WS "     flock.l_type = F_RDLCK;"
+$   WS "     flock.l_whence = SEEK_SET;"
+$   WS "     flock.l_start = flock.l_len = 0;"
+$   WS "     retval = fcntl(fd, F_SETLK, &flock);"
+$   WS "     close(fd);"
+$   WS "     (retval < 0 ? printf(""undef\n"") : printf(""define\n""));"
+$   WS "#else"
+$   WS "     printf(""undef\n"");"
+$   WS "#endif"
+$   WS "}"
+$   CS
+$   GOSUB link_ok
+$   IF compile_status .EQ. good_compile .AND. link_status .EQ. good_link
+$   THEN
+$     GOSUB just_mcr_it
+$     IF tmp .EQS. "define"
+$     THEN
+$       echo4 "Yes, it seems to work."
+$     ELSE
+$       echo4 "Nope, it didn't work."
+$     ENDIF
+$   ELSE
+$     echo4 "I'm unable to compile the test program, so I'll assume not."
+$     tmp = "undef"
+$   ENDIF
+$ ELSE
+$   echo4 "Nope, since you don't even have fcntl()."
+$ ENDIF
+$ d_fcntl_can_lock = tmp
+$!
 $! Check for memchr
 $!
 $ OS
@@ -3546,6 +3642,42 @@ $ CS
 $ tmp = "strtoll"
 $ GOSUB inlibc
 $ d_strtoll = tmp
+$!
+$! Check for strtoq
+$!
+$ OS
+$ WS "#if defined(__DECC) || defined(__DECCXX)"
+$ WS "#include <stdlib.h>"
+$ WS "#endif"
+$ WS "#include <string.h>"
+$ WS "int main()"
+$ WS "{"
+$ WS "__int64 result;"
+$ WS "result = strtoq(""123123"", NULL, 10);"
+$ WS "exit(0);"
+$ WS "}"
+$ CS
+$ tmp = "strtoq"
+$ GOSUB inlibc
+$ d_strtoq = tmp
+$!
+$! Check for strtoq
+$!
+$ OS
+$ WS "#if defined(__DECC) || defined(__DECCXX)"
+$ WS "#include <stdlib.h>"
+$ WS "#endif"
+$ WS "#include <string.h>"
+$ WS "int main()"
+$ WS "{"
+$ WS "__int64 result;"
+$ WS "result = strtoq(""123123"", NULL, 10);"
+$ WS "exit(0);"
+$ WS "}"
+$ CS
+$ tmp = "strtoq"
+$ GOSUB inlibc
+$ d_strtoq = tmp
 $!
 $! Check for strtold
 $!
@@ -3763,6 +3895,43 @@ $ CS
 $ tmp = "setvbuf"
 $ GOSUB inlibc
 $ d_setvbuf = tmp
+$!
+$! see if sfio.h is available
+$! see if sfio library is available
+$! Ok, but do we want to use it.
+$! IF F$TYPE(usesfio) .EQS. "" THEN usesfio = "undef"
+$! IF val .EQS. "define"
+$! THEN
+$!   IF usesfio .EQS. "define"
+$!   THEN dflt = "y"
+$!   ELSE dflt = "n"
+$!   ENDIF
+$!   echo "''package' can use the sfio library, but it is experimental."
+$!   IF useperlio .EQS. "undef"
+$!   THEN
+$!     echo "For sfio also the PerlIO abstraction layer is needed."
+$!     echo "Earlier you said you would not want that."
+$!   ENDIF
+$!   rp="You seem to have sfio available, do you want to try using it? [''dflt'] "
+$!   GOSUB myread
+$!   IF ans .EQS. "" THEN ans = dflt
+$!   IF ans
+$!   THEN
+$!     echo "Ok, turning on both sfio and PerlIO, then."
+$!     useperlio="define"
+$!     val="define"
+$!   ELSE
+$!     echo "Ok, avoiding sfio this time.  I'll use stdio instead."
+$!     val="undef"
+$!   ENDIF
+$! ELSE
+$!   IF usesfio .EQS. "define"
+$!   THEN
+$!     echo4 "Sorry, cannot find sfio on this machine."
+$!     echo4 "Ignoring your setting of usesfio=''usesfio'."
+$!     val="undef"
+$!   ENDIF
+$! ENDIF
 $!
 $! Check for setenv
 $!
@@ -4401,6 +4570,8 @@ $   i_locale="undef"
 $   d_locconv="undef"
 $   d_setlocale="undef"
 $ ENDIF
+$ d_stdio_ptr_lval_sets_cnt="undef"
+$ d_stdio_ptr_lval_nochange_cnt="undef"
 $!
 $! Sockets?
 $ if Has_Socketshr .OR. Has_Dec_C_Sockets
@@ -4691,6 +4862,7 @@ $ WC "cppminus='" + cppminus + "'"
 $ WC "cpprun='" + cpprun + "'"
 $ WC "cppstdin='" + cppstdin + "'"
 $ WC "crosscompile='undef'"
+$ WC "d__fwalk='undef'"
 $ WC "d_Gconvert='my_gconvert(x,n,t,b)'"
 $ WC "d_PRId64='" + d_PRId64 + "'"
 $ WC "d_PRIEldbl='" + d_PRIEUldbl + "'"
@@ -4750,6 +4922,7 @@ $ WC "d_eunice='undef'"
 $ WC "d_fchmod='undef'"
 $ WC "d_fchown='undef'"
 $ WC "d_fcntl='" + d_fcntl + "'"
+$ WC "d_fcntl_can_lock='" + d_fcntl_can_lock + "'"
 $ WC "d_fd_set='" + d_fd_set + "'"
 $ WC "d_fgetpos='define'"
 $ WC "d_flexfnam='define'"
@@ -4763,6 +4936,7 @@ $ WC "d_fseeko='undef'"
 $ WC "d_fsetpos='define'"
 $ WC "d_fstatfs='undef'"
 $ WC "d_fstatvfs='undef'"
+$ WC "d_fsync='undef'"
 $ WC "d_ftello='undef'"
 $ WC "d_getcwd='undef'"
 $ WC "d_getespwnam='undef'"
@@ -4781,6 +4955,7 @@ $ WC "d_getnbyaddr='" + d_getnbyaddr + "'"
 $ WC "d_getnbyname='" + d_getnbyname + "'"
 $ WC "d_getnent='" + d_getnent + "'"
 $ WC "d_getnetprotos='" + d_getnetprotos + "'"
+$ WC "d_getpagsz='undef'"
 $ WC "d_getpbyname='" + d_getpbyname + "'"
 $ WC "d_getpbynumber='" + d_getpbynumber + "'"
 $ WC "d_getpent='" + d_getpent + "'"
@@ -4885,6 +5060,7 @@ $ WC "d_rmdir='define'"
 $ WC "d_safebcpy='undef'"
 $ WC "d_safemcpy='define'"
 $ WC "d_sanemcmp='define'"
+$ WC "d_sbrkproto='undef'"
 $ WC "d_sched_yield='" + d_sched_yield + "'"
 $ WC "d_scm_rights='undef'"
 $ WC "d_seekdir='define'"
@@ -4934,6 +5110,8 @@ $ WC "d_statfs_s='undef'"
 $ WC "d_statfsflags='undef'"
 $ WC "d_stdio_cnt_lval='" + d_stdio_cnt_lval + "'"
 $ WC "d_stdio_ptr_lval='" + d_stdio_ptr_lval + "'"
+$ WC "d_stdio_ptr_lval_sets_cnt='" + d_stdio_ptr_lval_sets_cnt + "'"
+$ WC "d_stdio_ptr_lval_nochange_cnt='" + d_stdio_ptr_lval_nochange_cnt + "'"
 $ WC "d_stdio_stream_array='undef'"
 $ WC "d_stdiobase='" + d_stdiobase + "'"
 $ WC "d_stdstdio='" + d_stdstdio + "'"
@@ -4946,6 +5124,7 @@ $ WC "d_strtod='define'"
 $ WC "d_strtol='define'"
 $ WC "d_strtold='" + d_strtold + "'"
 $ WC "d_strtoll='" + d_strtoll + "'"
+$ WC "d_strtoq='define'"
 $ WC "d_strtoul='define'"
 $ WC "d_strtoull='" + d_strtoull + "'"
 $ WC "d_strtouq='" + d_strtouq + "'"
@@ -4995,6 +5174,7 @@ $ WC "drand01='" + drand01 + "'"
 $ WC "dynamic_ext='" + extensions + "'"
 $ WC "eagain=' '"
 $ WC "ebcdic='undef'"
+$ WC "embedmymalloc='" + mymalloc + "'"
 $ WC "eunicefix=':'"
 $ WC "exe_ext='" + exe_ext + "'"
 $ WC "extensions='" + extensions + "'"
@@ -5131,6 +5311,7 @@ $ WC "multiarch='undef'"
 $ WC "mydomain='" + mydomain + "'"
 $ WC "myhostname='" + myhostname + "'"
 $ WC "myuname='" + myuname + "'"
+$ WC "need_va_copy='undef'"
 $ WC "netdb_hlen_type='" + netdb_hlen_type + "'"
 $ WC "netdb_host_type='" + netdb_host_type + "'"
 $ WC "netdb_name_type='" + netdb_name_type + "'"
@@ -5213,7 +5394,7 @@ $ WC "spitshell='write sys$output '"
 $ WC "src='" + src + "'"
 $ WC "ssizetype='int'"
 $ WC "startperl=" + startperl ! This one's special--no enclosing single quotes
-$ WC "static_ext='" + "'"
+$ WC "static_ext='" + static_ext + "'"
 $ WC "stdchar='" + stdchar + "'"
 $ WC "stdio_base='((*fp)->_base)'"
 $ WC "stdio_bufsiz='((*fp)->_cnt + (*fp)->_ptr - (*fp)->_base)'"
@@ -5238,6 +5419,7 @@ $ WC "uquadtype='" + uquadtype + "'"
 $ WC "use5005threads='" + use5005threads + "'"
 $ WC "use64bitall='" + use64bitall + "'"
 $ WC "use64bitint='" + use64bitint + "'"
+$ WC "usedebugging_perl='" + use_debugging_perl + "'"
 $ WC "usedl='" + usedl + "'"
 $ WC "useithreads='" + useithreads + "'"
 $ WC "uselargefiles='" + uselargefiles + "'"
@@ -5245,7 +5427,7 @@ $ WC "uselongdouble='" + uselongdouble + "'"
 $ WC "usemorebits='" + usemorebits + "'"
 $ WC "usemultiplicity='" + usemultiplicity + "'"
 $ WC "usemymalloc='" + usemymalloc + "'"
-$ WC "useperlio='undef'"
+$ WC "useperlio='" + useperlio + "'"
 $ WC "useposix='false'"
 $ WC "usesocks='undef'"
 $ WC "usethreads='" + usethreads + "'"

@@ -24,7 +24,7 @@ i_utime=undef
 # compile/link flags
 ldflags=-g
 optimize=-g
-static_ext="B Data/Dumper Fcntl IO IPC/SysV Opcode POSIX SDBM_File Socket Storable attrs"
+static_ext="B Data/Dumper Fcntl Filter::Util::Call IO IPC/SysV Opcode POSIX SDBM_File Socket Storable attrs"
 #static_ext=none
 # dynamic loading needs work
 usedl=undef

@@ -581,7 +581,6 @@ do_aspawn(void *vreally, void **vmark, void **vsp)
     }
     else {
 	if (status < 0) {
-    	    dTHR;
 	    if (ckWARN(WARN_EXEC))
 		Perl_warner(aTHX_ WARN_EXEC, "Can't spawn \"%s\": %s", argv[0], strerror(errno));
 	    status = 255 * 256;
@@ -674,7 +673,6 @@ do_spawn2(char *cmd, int exectype)
     }
     else {
 	if (status < 0) {
-    	    dTHR;
 	    if (ckWARN(WARN_EXEC))
 		Perl_warner(aTHX_ WARN_EXEC, "Can't %s \"%s\": %s",
 		     (exectype == EXECF_EXEC ? "exec" : "spawn"),
@@ -975,6 +973,31 @@ chown(const char *path, uid_t owner, gid_t group)
 {
     /* XXX noop */
     return 0;
+}
+
+/*
+ * XXX this needs strengthening  (for PerlIO)
+ *   -- BKS, 11-11-200
+*/
+int mkstemp(const char *path)
+{
+    dTHX;
+    char buf[MAX_PATH+1];
+    int i = 0, fd = -1;
+
+retry:
+    if (i++ > 10) { /* give up */
+	errno = ENOENT;
+	return -1;
+    }
+    if (!GetTempFileNameA((LPCSTR)path, "plr", 1, buf)) {
+	errno = ENOENT;
+	return -1;
+    }
+    fd = PerlLIO_open3(buf, O_CREAT|O_RDWR|O_EXCL, 0600);
+    if (fd == -1)
+	goto retry;
+    return fd;
 }
 
 static long
@@ -1850,7 +1873,6 @@ win32_crypt(const char *txt, const char *salt)
 {
     dTHXo;
 #ifdef HAVE_DES_FCRYPT
-    dTHR;
     return des_fcrypt(txt, salt, w32_crypt_buffer);
 #else
     Perl_croak(aTHX_ "The crypt() function is unimplemented due to excessive paranoia.");
@@ -2106,7 +2128,6 @@ win32_str_os_error(void *sv, DWORD dwErr)
     }
 }
 
-
 DllExport int
 win32_fprintf(FILE *fp, const char *format, ...)
 {
@@ -2329,7 +2350,7 @@ win32_fstat(int fd,struct stat *sbufptr)
     }
     return rc;
 #else
-    return fstat(fd,sbufptr);
+    return my_fstat(fd,sbufptr);
 #endif
 }
 
@@ -2341,9 +2362,11 @@ win32_pipe(int *pfd, unsigned int size, int mode)
 
 /*
  * a popen() clone that respects PERL5SHELL
+ *
+ * changed to return PerlIO* rather than FILE * by BKS, 11-11-2000
  */
 
-DllExport FILE*
+DllExport PerlIO*
 win32_popen(const char *command, const char *mode)
 {
 #ifdef USE_RTL_POPEN
@@ -2417,7 +2440,7 @@ win32_popen(const char *command, const char *mode)
     }
 
     /* we have an fd, return a file stream */
-    return (win32_fdopen(p[parent], (char *)mode));
+    return (PerlIO_fdopen(p[parent], (char *)mode));
 
 cleanup:
     /* we don't need to check for errors here */
@@ -2437,7 +2460,7 @@ cleanup:
  */
 
 DllExport int
-win32_pclose(FILE *pf)
+win32_pclose(PerlIO *pf)
 {
 #ifdef USE_RTL_POPEN
     return _pclose(pf);
@@ -2447,7 +2470,7 @@ win32_pclose(FILE *pf)
     SV *sv;
 
     LOCK_FDPID_MUTEX;
-    sv = *av_fetch(w32_fdpid, win32_fileno(pf), TRUE);
+    sv = *av_fetch(w32_fdpid, PerlIO_fileno(pf), TRUE);
 
     if (SvIOK(sv))
 	childpid = SvIVX(sv);
@@ -2459,7 +2482,11 @@ win32_pclose(FILE *pf)
         return -1;
     }
 
-    win32_fclose(pf);
+#ifdef USE_PERLIO
+    PerlIO_close(pf);
+#else
+    fclose(pf);
+#endif
     SvIVX(sv) = 0;
     UNLOCK_FDPID_MUTEX;
 
@@ -2721,10 +2748,13 @@ win32_open(const char *path, int flag, ...)
     return open(PerlDir_mapA(path), flag, pmode);
 }
 
+/* close() that understands socket */
+extern int my_close(int);	/* in win32sck.c */
+
 DllExport int
 win32_close(int fd)
 {
-    return close(fd);
+    return my_close(fd);
 }
 
 DllExport int
@@ -3838,6 +3868,8 @@ XS(w32_Spawn)
 {
     dXSARGS;
     char *cmd, *args;
+    void *env;
+    char *dir;
     PROCESS_INFORMATION stProcInfo;
     STARTUPINFO stStartInfo;
     BOOL bSuccess = FALSE;
@@ -3847,6 +3879,9 @@ XS(w32_Spawn)
 
     cmd = SvPV_nolen(ST(0));
     args = SvPV_nolen(ST(1));
+
+    env = PerlEnv_get_childenv();
+    dir = PerlEnv_get_childdir();
 
     memset(&stStartInfo, 0, sizeof(stStartInfo));   /* Clear the block */
     stStartInfo.cb = sizeof(stStartInfo);	    /* Set the structure size */
@@ -3860,8 +3895,8 @@ XS(w32_Spawn)
 		NULL,			/* Default thread security */
 		FALSE,			/* Must be TRUE to use std handles */
 		NORMAL_PRIORITY_CLASS,	/* No special scheduling */
-		NULL,			/* Inherit our environment block */
-		NULL,			/* Inherit our currrent directory */
+		env,			/* Inherit our environment block */
+		dir,			/* Inherit our currrent directory */
 		&stStartInfo,		/* -> Startup info */
 		&stProcInfo))		/* <- Process info (if OK) */
     {
@@ -3872,6 +3907,8 @@ XS(w32_Spawn)
 	CloseHandle(stProcInfo.hThread);/* library source code does this. */
 	bSuccess = TRUE;
     }
+    PerlEnv_free_childenv(env);
+    PerlEnv_free_childdir(dir);
     XSRETURN_IV(bSuccess);
 }
 

@@ -1,0 +1,164 @@
+=head1 NAME
+
+EncodeFormat - the format of encoding tables of the Encode extension
+
+=head1 DESCRIPTION
+
+I<The format used in the encoding tables of the Encode extension has
+been borrowed from Tcl, as has the following documentation been borrowed
+from the same.  The documentation has been reformatted as Perl pod.>
+
+Space would prohibit precompiling into Tcl every possible encoding
+algorithm, so many encodings are stored on disk as dynamically-loadable
+encoding files.  This behavior also allows the user to create additional
+encoding files that can be loaded using the same mechanism.  These
+encoding files contain information about the tables and/or escape
+sequences used to map between an external encoding and Unicode.  The
+external encoding may consist of single-byte, multi-byte, or double-byte
+characters.
+
+Each dynamically-loadable encoding is represented as a text file.  The
+initial line of the file, beginning with a ``#'' symbol, is a comment
+that provides a human-readable description of the file.  The next line
+identifies the type of encoding file.  It can be one of the following
+letters:
+
+=over 4
+
+=item [1]   B<S>
+
+A single-byte encoding, where one character is always one byte long in
+the encoding.  An example is B<iso8859-1>, used by many European languages.
+
+=item [2]   B<D>
+
+A double-byte encoding, where one character is always two bytes long in the
+encoding.  An example is B<big5>, used for Chinese text.
+
+=item [3]   B<M>
+
+A multi-byte encoding, where one character may be either one or two
+bytes long.  Certain bytes are a lead bytes, indicating that another
+byte must follow and that together the two bytes represent one
+character.  Other bytes are not lead bytes and represent themselves.
+An example is B<shiftjis>, used by many Japanese computers.
+
+=item [4]   B<E>
+
+An escape-sequence encoding, specifying that certain sequences of
+bytes do not represent characters, but commands that describe how
+following bytes should be interpreted.
+
+=back
+
+The rest of the lines in the file depend on the type.
+
+Cases [1], [2], and [3] are collectively referred to as table-based
+encoding files.  The lines in a table-based encoding file are in the
+same format as this example taken from the B<shiftjis> encoding (this
+is not the complete file):
+
+ # Encoding file: shiftjis, multi-byte
+ M
+ 003F 0 40
+ 00
+ 0000000100020003000400050006000700080009000A000B000C000D000E000F
+ 0010001100120013001400150016001700180019001A001B001C001D001E001F
+ 0020002100220023002400250026002700280029002A002B002C002D002E002F
+ 0030003100320033003400350036003700380039003A003B003C003D003E003F
+ 0040004100420043004400450046004700480049004A004B004C004D004E004F
+ 0050005100520053005400550056005700580059005A005B005C005D005E005F
+ 0060006100620063006400650066006700680069006A006B006C006D006E006F
+ 0070007100720073007400750076007700780079007A007B007C007D203E007F
+ 0080000000000000000000000000000000000000000000000000000000000000
+ 0000000000000000000000000000000000000000000000000000000000000000
+ 0000FF61FF62FF63FF64FF65FF66FF67FF68FF69FF6AFF6BFF6CFF6DFF6EFF6F
+ FF70FF71FF72FF73FF74FF75FF76FF77FF78FF79FF7AFF7BFF7CFF7DFF7EFF7F
+ FF80FF81FF82FF83FF84FF85FF86FF87FF88FF89FF8AFF8BFF8CFF8DFF8EFF8F
+ FF90FF91FF92FF93FF94FF95FF96FF97FF98FF99FF9AFF9BFF9CFF9DFF9EFF9F
+ 0000000000000000000000000000000000000000000000000000000000000000
+ 0000000000000000000000000000000000000000000000000000000000000000
+ 81
+ 0000000000000000000000000000000000000000000000000000000000000000
+ 0000000000000000000000000000000000000000000000000000000000000000
+ 0000000000000000000000000000000000000000000000000000000000000000
+ 0000000000000000000000000000000000000000000000000000000000000000
+ 300030013002FF0CFF0E30FBFF1AFF1BFF1FFF01309B309C00B4FF4000A8FF3E
+ FFE3FF3F30FD30FE309D309E30034EDD30053006300730FC20152010FF0F005C
+ 301C2016FF5C2026202520182019201C201DFF08FF0930143015FF3BFF3DFF5B
+ FF5D30083009300A300B300C300D300E300F30103011FF0B221200B100D70000
+ 00F7FF1D2260FF1CFF1E22662267221E22342642264000B0203220332103FFE5
+ FF0400A200A3FF05FF03FF06FF0AFF2000A72606260525CB25CF25CE25C725C6
+ 25A125A025B325B225BD25BC203B301221922190219121933013000000000000
+ 000000000000000000000000000000002208220B2286228722822283222A2229
+ 000000000000000000000000000000002227222800AC21D221D4220022030000
+ 0000000000000000000000000000000000000000222022A52312220222072261
+ 2252226A226B221A223D221D2235222B222C0000000000000000000000000000
+ 212B2030266F266D266A2020202100B6000000000000000025EF000000000000
+
+The third line of the file is three numbers.  The first number is the
+fallback character (in base 16) to use when converting from UTF-8 to
+this encoding.  The second number is a B<1> if this file represents
+the encoding for a symbol font, or B<0> otherwise.  The last number
+(in base 10) is how many pages of data follow.
+
+Subsequent lines in the example above are pages that describe how to
+map from the encoding into 2-byte Unicode.  The first line in a page
+identifies the page number.  Following it are 256 double-byte numbers,
+arranged as 16 rows of 16 numbers.  Given a character in the encoding,
+the high byte of that character is used to select which page, and the
+low byte of that character is used as an index to select one of the
+double-byte numbers in that page - the value obtained being the
+corresponding Unicode character.  By examination of the example above,
+one can see that the characters 0x7E and 0x8163 in B<shiftjis> map to
+203E and 2026 in Unicode, respectively.
+
+Following the first page will be all the other pages, each in the same
+format as the first: one number identifying the page followed by 256
+double-byte Unicode characters.  If a character in the encoding maps
+to the Unicode character 0000, it means that the character doesn't
+actually exist.  If all characters on a page would map to 0000, that
+page can be omitted.
+
+Case [4] is the escape-sequence encoding file.  The lines in an this
+type of file are in the same format as this example taken from the
+B<iso2022-jp> encoding:
+
+ # Encoding file: iso2022-jp, escape-driven
+ E
+ init		{}
+ final		{}
+ iso8859-1	\\x1b(B
+ jis0201		\\x1b(J
+ jis0208		\\x1b$@
+ jis0208		\\x1b$B
+ jis0212		\\x1b$(D
+ gb2312		\\x1b$A
+ ksc5601		\\x1b$(C
+
+In the file, the first column represents an option and the second
+column is the associated value.  B<init> is a string to emit or expect
+before the first character is converted, while B<final> is a string to
+emit or expect after the last character.  All other options are names
+of table-based encodings; the associated value is the escape-sequence
+that marks that encoding.  Tcl syntax is used for the values; in the
+above example, for instance, ``B<{}>'' represents the empty string and
+``B<\\x1b>'' represents character 27.
+
+B<Completely Tcl-specific paragraph, ignore in the context of Perl>
+When B<Tcl_GetEncoding> encounters an encoding I<name> that has not
+been loaded, it attempts to load an encoding file called
+I<name>B<.enc> from the B<encoding> subdirectory of each directory
+specified in the library path B<$tcl_libPath>.  If the encoding file
+exists, but is malformed, an error message will be left in I<interp>.
+
+=head1 KEYWORDS
+
+utf, encoding, convert
+
+=head1 COPYRIGHT
+
+  #  Copyright (c) 1997-1998 Sun Microsystems, Inc.
+  #  See the file "license.terms" for information on usage and redistribution
+  #  of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+  #  RCS: @(#) $Id: Encoding.3,v 1.7 1999/10/13 00:32:05 hobbs Exp $

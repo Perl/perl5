@@ -409,7 +409,11 @@ sub page {
     }
     else {
 	foreach my $pager (@pagers) {
+          if ($Is_VMS) {
+           last if system("$pager $tmp") == 0; # quoting prevents logical expansion
+          } else {
 	    last if system("$pager \"$tmp\"") == 0;
+          }
 	}
     }
 }

@@ -4,6 +4,8 @@ if (ord('A') != 193) { # make things more pragmatic for EBCDIC folk
 
 $utf8::hint_bits = 0x00800000;
 
+our $VERSION = '1.00';
+
 sub import {
     $^H |= $utf8::hint_bits;
     $enc{caller()} = $_[1] if $_[1];

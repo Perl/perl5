@@ -340,6 +340,10 @@ csh (Loc.U):
 	full pathname (if any) of the csh program.  After Configure runs,
 	the value is reset to a plain "csh" and is not useful.
 
+d__fwalk (d__fwalk.U):
+	This variable conditionally defines HAS__FWALK if _fwalk() is
+	available to apply a function to all the file handles.
+
 d_access (d_access.U):
 	This variable conditionally defines HAS_ACCESS if the access() system
 	call is available to check for access permissions using real IDs.
@@ -545,6 +549,10 @@ d_fcntl (d_fcntl.U):
 	This variable conditionally defines the HAS_FCNTL symbol, and indicates
 	whether the fcntl() function exists
 
+d_fcntl_can_lock (d_fcntl_can_lock.U):
+	This variable conditionally defines the FCNTL_CAN_LOCK symbol
+	and indicates whether file locking with fcntl() works.
+
 d_fd_macros (d_fd_set.U):
 	This variable contains the eventual value of the HAS_FD_MACROS symbol,
 	which indicates if your C compiler knows about the macros which
@@ -609,6 +617,10 @@ d_fstatfs (d_fstatfs.U):
 d_fstatvfs (d_statvfs.U):
 	This variable conditionally defines the HAS_FSTATVFS symbol, which
 	indicates to the C program that the fstatvfs() routine is available.
+
+d_fsync (d_fsync.U):
+	This variable conditionally defines the HAS_FSYNC symbol, which
+	indicates to the C program that the fsync() routine is available.
 
 d_ftello (d_ftello.U):
 	This variable conditionally defines the HAS_FTELLO symbol, which
@@ -710,6 +722,10 @@ d_getnetprotos (d_getnetprotos.U):
 	which indicates to the C program that <netdb.h> supplies
 	prototypes for the various getnet*() functions.  
 	See also netdbtype.U for probing for various netdb types.
+
+d_getpagsz (d_getpagsz.U):
+	This variable conditionally defines HAS_GETPAGESIZE if getpagesize()
+	is available to get the system page size.
 
 d_getpbyname (d_getprotby.U):
 	This variable conditionally defines the HAS_GETPROTOBYNAME 
@@ -1235,6 +1251,12 @@ d_sanemcmp (d_sanemcmp.U):
 	the memcpy() routine is available and can be used to compare relative
 	magnitudes of chars with their high bits set.
 
+d_sbrkproto (d_sbrkproto.U):
+	This variable conditionally defines the HAS_SBRK_PROTO symbol,
+	which indicates to the C program that the system provides
+	a prototype for the sbrk() function.  Otherwise, it is
+	up to the program to supply one.
+
 d_sched_yield (d_pthread_y.U):
 	This variable conditionally defines the HAS_SCHED_YIELD
 	symbol if the sched_yield routine is available to yield
@@ -1478,6 +1500,15 @@ d_stdio_ptr_lval (d_stdstdio.U):
 	This variable conditionally defines STDIO_PTR_LVALUE if the
 	FILE_ptr macro can be used as an lvalue.
 
+d_stdio_ptr_lval_nochange_cnt (d_stdstdio.U):
+	This symbol is defined if using the FILE_ptr macro as an lvalue
+	to increase the pointer by n leaves File_cnt(fp) unchanged.
+
+d_stdio_ptr_lval_sets_cnt (d_stdstdio.U):
+	This symbol is defined if using the FILE_ptr macro as an lvalue
+	to increase the pointer by n has the side effect of decreasing the
+	value of File_cnt(fp) by n.
+
 d_stdio_stream_array (stdio_streams.U):
 	This variable tells whether there is an array holding
 	the stdio streams.
@@ -1532,6 +1563,10 @@ d_strtold (d_strtold.U):
 d_strtoll (d_strtoll.U):
 	This variable conditionally defines the HAS_STRTOLL symbol, which
 	indicates to the C program that the strtoll() routine is available.
+
+d_strtoq (d_strtoq.U):
+	This variable conditionally defines the HAS_STRTOQ symbol, which
+	indicates to the C program that the strtoq() routine is available.
 
 d_strtoul (d_strtoul.U):
 	This variable conditionally defines the HAS_STRTOUL symbol, which
@@ -2408,6 +2443,11 @@ intsize (intsize.U):
 	This variable contains the value of the INTSIZE symbol, which
 	indicates to the C program how many bytes there are in an int.
 
+issymlink (issymlink.U):
+	This variable holds the switch of the test command to test
+	for a symbolic link (if they are supported).  Typical values
+	include '-h' and '-L'.
+
 ivdformat (perlxvf.U):
 	This variable contains the format string used for printing
 	a Perl IV as a signed decimal integer. 
@@ -2708,6 +2748,15 @@ n (n.U):
 	This variable contains the '-n' flag if that is what causes the echo
 	command to suppress newline.  Otherwise it is null.  Correct usage is
 	$echo $n "prompt for a question: $c".
+
+need_va_copy (need_va_copy.U):
+	This symbol, if defined, indicates that the system stores
+	the variable argument list datatype, va_list, in a format
+	that cannot be copied by simple assignment, so that some
+	other means must be used when copying is required.
+	As such systems vary in their provision (or non-provision)
+	of copying mechanisms, handy.h defines a platform-
+	independent macro, Perl_va_copy(src, dst), to do the job.
 
 netdb_hlen_type (netdbtype.U):
 	This variable holds the type used for the 2nd argument to

@@ -6,7 +6,7 @@
 #	Mingw32 with gcc-2.95.2 or better  **experimental**
 #
 # This is set up to build a perl.exe that runs off a shared library
-# (perl56.dll).  Also makes individual DLLs for the XS extensions.
+# (perl57.dll).  Also makes individual DLLs for the XS extensions.
 #
 
 ##
@@ -33,7 +33,7 @@ INST_TOP	*= $(INST_DRV)\perl
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-INST_VER	*= \5.6.0
+INST_VER	*= \5.7.0
 
 #
 # Comment this out if you DON'T want your perl installation to have
@@ -50,21 +50,21 @@ INST_ARCH	*= \$(ARCHNAME)
 # uncomment to enable multiple interpreters.  This is need for fork()
 # emulation.
 #
-#USE_MULTI	*= define
+USE_MULTI	*= define
 
 #
 # Beginnings of interpreter cloning/threads; still very incomplete.
 # This should be enabled to get the fork() emulation.  This needs
 # USE_MULTI as well.
 #
-#USE_ITHREADS	*= define
+USE_ITHREADS	*= define
 
 #
 # uncomment to enable the implicit "host" layer for all system calls
 # made by perl.  This needs USE_MULTI above.  This is also needed to
 # get fork().
 #
-#USE_IMP_SYS	*= define
+USE_IMP_SYS	*= define
 
 #
 # WARNING! This option is deprecated and will eventually go away (enable
@@ -89,17 +89,17 @@ INST_ARCH	*= \$(ARCHNAME)
 
 #
 # uncomment exactly one of the following
-# 
+#
 # Visual C++ 2.x
 #CCTYPE		*= MSVC20
 # Visual C++ > 2.x and < 6.x
 #CCTYPE		*= MSVC
 # Visual C++ >= 6.x
-#CCTYPE		*= MSVC60
+CCTYPE		*= MSVC60
 # Borland 5.02 or later
 #CCTYPE		*= BORLAND
 # mingw32+gcc-2.95.2 or better
-CCTYPE		*= GCC
+#CCTYPE		*= GCC
 
 #
 # uncomment this if you are compiling under Windows 95/98 and command.com
@@ -111,7 +111,7 @@ CCTYPE		*= GCC
 # If not enabled, we automatically try to use maximum optimization
 # with all compilers that are known to have a working optimizer.
 #
-#CFG		*= Debug
+CFG		*= Debug
 
 #
 # uncomment to enable use of PerlCRT.DLL when using the Visual C compiler.
@@ -165,7 +165,7 @@ CCTYPE		*= GCC
 #
 #CCHOME		*= c:\bc5
 #CCHOME		*= $(MSVCDIR)
-CCHOME		*= c:\gcc-2.95.2-msvcrt
+CCHOME		*= c:\gcc-2.95.2
 CCINCDIR	*= $(CCHOME)\include
 CCLIBDIR	*= $(CCHOME)\lib
 
@@ -290,11 +290,14 @@ ARCHNAME	!:= $(ARCHNAME)-thread
 
 # VC 6.0 can load the socket dll on demand.  Makes the test suite
 # run in about 10% less time.
-DELAYLOAD	*= -DELAYLOAD:wsock32.dll -DELAYLOAD:shell32.dll delayimp.lib 
+DELAYLOAD	*= -DELAYLOAD:wsock32.dll -DELAYLOAD:shell32.dll delayimp.lib
 
+.IF "$(CFG)" == "Debug"
+.ELSE
 # VC 6.0 seems capable of compiling perl correctly with optimizations
 # enabled.  Anything earlier fails tests.
 CFG		*= Optimize
+.ENDIF
 .ENDIF
 
 ARCHDIR		= ..\lib\$(ARCHNAME)
@@ -332,7 +335,7 @@ RSC		= rc
 # Options
 #
 INCLUDES	= -I$(COREDIR) -I.\include -I. -I.. -I"$(CCINCDIR)"
-#PCHFLAGS	= -H -Hc -H=c:\temp\bcmoduls.pch 
+#PCHFLAGS	= -H -Hc -H=c:\temp\bcmoduls.pch
 DEFINES		= -DWIN32 $(CRYPT_FLAG)
 LOCDEFS		= -DPERLDLL -DPERL_CORE
 SUBSYS		= console
@@ -346,7 +349,7 @@ OPTIMIZE	= -v -D_RTLDLL -DDEBUGGING
 LINK_DBG	= -v
 .ELSE
 OPTIMIZE	= -O2 -D_RTLDLL
-LINK_DBG	= 
+LINK_DBG	=
 .ENDIF
 
 CFLAGS		= -w -g0 -tWM -tWD $(INCLUDES) $(DEFINES) $(LOCDEFS) \
@@ -354,7 +357,7 @@ CFLAGS		= -w -g0 -tWM -tWD $(INCLUDES) $(DEFINES) $(LOCDEFS) \
 LINK_FLAGS	= $(LINK_DBG) -L"$(INST_COREDIR)" -L"$(CCLIBDIR)"
 OBJOUT_FLAG	= -o
 EXEOUT_FLAG	= -e
-LIBOUT_FLAG	= 
+LIBOUT_FLAG	=
 
 .ELIF "$(CCTYPE)" == "GCC"
 
@@ -364,6 +367,7 @@ LIB32		= ar rc
 IMPLIB		= dlltool
 RSC		= rc
 
+i = .i
 o = .o
 a = .a
 
@@ -371,7 +375,7 @@ a = .a
 # Options
 #
 
-INCLUDES	= -I$(COREDIR) -I.\include -I. -I..
+INCLUDES	= -I.\include -I. -I.. -I$(COREDIR)
 DEFINES		= -DWIN32 $(CRYPT_FLAG)
 LOCDEFS		= -DPERLDLL -DPERL_CORE
 SUBSYS		= console
@@ -387,18 +391,18 @@ LIBFILES	= $(CRYPT_LIB) $(LIBC) \
 		  -lwinmm -lversion -lodbc32
 
 .IF  "$(CFG)" == "Debug"
-OPTIMIZE	= -g -DDEBUGGING
+OPTIMIZE	= -g -O2 -DDEBUGGING
 LINK_DBG	= -g
 .ELSE
 OPTIMIZE	= -g -O2
-LINK_DBG	= 
+LINK_DBG	= -g
 .ENDIF
 
 CFLAGS		= $(INCLUDES) $(DEFINES) $(LOCDEFS) $(OPTIMIZE)
 LINK_FLAGS	= $(LINK_DBG) -L"$(INST_COREDIR)" -L"$(CCLIBDIR)"
 OBJOUT_FLAG	= -o
 EXEOUT_FLAG	= -o
-LIBOUT_FLAG	= 
+LIBOUT_FLAG	=
 
 # NOTE: we assume that GCC uses MSVCRT.DLL
 BUILDOPT	+= -fno-strict-aliasing -DPERL_MSVCRT_READFIX
@@ -415,7 +419,7 @@ RSC		= rc
 #
 
 INCLUDES	= -I$(COREDIR) -I.\include -I. -I..
-#PCHFLAGS	= -Fpc:\temp\vcmoduls.pch -YX 
+#PCHFLAGS	= -Fpc:\temp\vcmoduls.pch -YX
 DEFINES		= -DWIN32 -D_CONSOLE -DNO_STRICT $(CRYPT_FLAG)
 LOCDEFS		= -DPERLDLL -DPERL_CORE
 SUBSYS		= console
@@ -433,10 +437,14 @@ PERLDLL_RES	=
 .IF  "$(CFG)" == "Debug"
 .IF "$(CCTYPE)" == "MSVC20"
 OPTIMIZE	= -Od -MD -Z7 -DDEBUGGING
-.ELSE
-OPTIMIZE	= -Od -MD -Zi -DDEBUGGING
-.ENDIF
 LINK_DBG	= -debug -pdb:none
+.ELSE
+# -Zi requires .pdb file(s)
+#OPTIMIZE	= -Od -MD -Zi -DDEBUGGING
+#LINK_DBG	= -debug 
+OPTIMIZE	= -O1 -MD -Z7 -DDEBUGGING
+LINK_DBG	= -debug -debugtype:both -pdb:none
+.ENDIF
 .ELSE
 .IF "$(CFG)" == "Optimize"
 # -O1 yields smaller code, which turns out to be faster than -O2
@@ -496,12 +504,15 @@ LKPOST		= )
 
 #
 # Rules
-# 
+#
 
-.SUFFIXES : .c $(o) .dll $(a) .exe .rc .res
+.SUFFIXES : .c .i $(o) .dll $(a) .exe .rc .res
 
 .c$(o):
 	$(CC) -c $(null,$(<:d) $(NULL) -I$(<:d)) $(CFLAGS_O) $(OBJOUT_FLAG)$@ $<
+
+.c.i:
+	$(CC) -c $(null,$(<:d) $(NULL) -I$(<:d)) $(CFLAGS_O) -E $< >$@ 
 
 .y.c:
 	$(NOOP)
@@ -515,7 +526,7 @@ $(o).dll:
 	$(IMPLIB) --input-def $(*B).def --output-lib $(*B).a $@
 .ELSE
 	$(LINK32) -dll -subsystem:windows -implib:$(*B).lib -def:$(*B).def \
-	    -out:$@ $(BLINK_FLAGS) $(LIBFILES) $< $(LIBPERL)  
+	    -out:$@ $(BLINK_FLAGS) $(LIBFILES) $< $(LIBPERL)
 .ENDIF
 
 .rc.res:
@@ -531,6 +542,13 @@ GLOBEXE		= ..\perlglob.exe
 CONFIGPM	= ..\lib\Config.pm
 MINIMOD		= ..\lib\ExtUtils\Miniperl.pm
 X2P		= ..\x2p\a2p.exe
+
+# Nominate a target which causes extensions to be re-built
+# This used to be $(PERLEXE), but at worst it is the .dll that they depend
+# on and really only the interface - i.e. the .def file used to export symbols
+# from the .dll
+PERLDEP = perldll.def
+
 
 PL2BAT		= bin\pl2bat.pl
 GLOBBAT		= bin\perlglob.bat
@@ -570,7 +588,7 @@ CFGH_TMPL	= config_H.bc
 
 CFGSH_TMPL	= config.gc
 CFGH_TMPL	= config_H.gc
-PERLIMPLIB	= ..\libperl56$(a)
+PERLIMPLIB	= ..\libperl57$(a)
 
 .ELSE
 
@@ -579,8 +597,11 @@ CFGH_TMPL	= config_H.vc
 
 .ENDIF
 
-PERLIMPLIB	*= ..\perl56$(a)
-PERLDLL		= ..\perl56.dll
+# makedef.pl must be updated if this changes, and this should normally
+# only change when there is an incompatible revision of the public API.
+# XXX so why did we change it from perl56 to perl57?
+PERLIMPLIB	*= ..\perl57$(a)
+PERLDLL		= ..\perl57.dll
 
 XCOPY		= xcopy /f /r /i /d
 RCOPY		= xcopy /f /r /i /e /d
@@ -635,7 +656,7 @@ EXTRACORE_SRC	+= ..\perlio.c
 WIN32_SRC	=		\
 		.\win32.c	\
 		.\win32sck.c	\
-		.\win32thread.c 
+		.\win32thread.c
 
 .IF "$(CRYPT_SRC)" != ""
 WIN32_SRC	+= .\$(CRYPT_SRC)
@@ -712,7 +733,7 @@ SETARGV_OBJ	= setargv$(o)
 
 DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attrs Thread B re \
 		Data/Dumper Devel/Peek ByteLoader Devel/DProf File/Glob \
-		Sys/Hostname Storable
+		Sys/Hostname Storable Filter/Util/Call Encode
 STATIC_EXT	= DynaLoader
 NONXS_EXT	= Errno
 
@@ -735,6 +756,8 @@ DPROF		= $(EXTDIR)\Devel\DProf\DProf
 GLOB		= $(EXTDIR)\File\Glob\Glob
 HOSTNAME	= $(EXTDIR)\Sys\Hostname\Hostname
 STORABLE	= $(EXTDIR)\Storable\Storable
+FILTER		= $(EXTDIR)\Filter\Util\Call\Call
+ENCODE          = $(EXTDIR)\Encode\Encode
 
 SOCKET_DLL	= $(AUTODIR)\Socket\Socket.dll
 FCNTL_DLL	= $(AUTODIR)\Fcntl\Fcntl.dll
@@ -753,6 +776,8 @@ DPROF_DLL	= $(AUTODIR)\Devel\DProf\DProf.dll
 GLOB_DLL	= $(AUTODIR)\File\Glob\Glob.dll
 HOSTNAME_DLL	= $(AUTODIR)\Sys\Hostname\Hostname.dll
 STORABLE_DLL	= $(AUTODIR)\Storable\Storable.dll
+FILTER_DLL	= $(AUTODIR)\Filter\Util\Call\Call.dll
+ENCODE_DLL	= $(AUTODIR)\Encode\Encode.dll
 
 ERRNO_PM	= $(LIBDIR)\Errno.pm
 
@@ -773,7 +798,9 @@ EXTENSION_C	=		\
 		$(DPROF).c	\
 		$(GLOB).c	\
 		$(HOSTNAME).c	\
-		$(STORABLE).c
+		$(STORABLE).c	\
+		$(FILTER).c     \
+		$(ENCODE).c
 
 EXTENSION_DLL	=		\
 		$(SOCKET_DLL)	\
@@ -792,7 +819,9 @@ EXTENSION_DLL	=		\
 		$(DPROF_DLL)	\
 		$(GLOB_DLL)	\
 		$(HOSTNAME_DLL)	\
-		$(STORABLE_DLL)
+		$(STORABLE_DLL)	\
+		$(FILTER_DLL)   \
+		$(ENCODE_DLL)
 
 EXTENSION_PM	=		\
 		$(ERRNO_PM)
@@ -813,6 +842,7 @@ CFG_VARS	=					\
 		INST_ARCH=$(INST_ARCH)		~	\
 		archname=$(ARCHNAME)		~	\
 		cc=$(CC)			~	\
+		ld=$(LINK32)			~	\
 		ccflags=$(OPTIMIZE) $(DEFINES) $(BUILDOPT)	~	\
 		cf_email=$(EMAIL)		~	\
 		d_crypt=$(D_CRYPT)		~	\
@@ -845,7 +875,7 @@ RIGHTMAKE	= __switch_makefiles
 NOOP		= @rem
 .ELSE
 MK2		= __not_needed
-RIGHTMAKE	= __not_needed
+RIGHTMAKE	=
 .ENDIF
 
 #
@@ -901,7 +931,7 @@ __no_such_target:
 #--------------------- END Win95 SPECIFIC ---------------------
 
 # a blank target for when builds don't need to do certain things
-# this target added for Win95 port but used to keep the WinNT port able to 
+# this target added for Win95 port but used to keep the WinNT port able to
 # use this file
 __not_needed:
 	$(NOOP)
@@ -915,7 +945,7 @@ $(GLOBEXE) : perlglob$(o)
 	$(LINK32) $(BLINK_FLAGS) -mconsole -o $@ perlglob$(o) $(LIBFILES)
 .ELSE
 	$(LINK32) $(BLINK_FLAGS) $(LIBFILES) -out:$@ -subsystem:$(SUBSYS) \
-	    perlglob$(o) setargv$(o) 
+	    perlglob$(o) setargv$(o)
 .ENDIF
 
 perlglob$(o)  : perlglob.c
@@ -960,7 +990,7 @@ $(MINIPERL) : $(MINIDIR) $(MINI_OBJ) $(CRTIPMLIBS)
 	    @$(mktmp c0x32$(o) $(MINI_OBJ:s,\,\\),$(@:s,\,\\),,$(LIBFILES),)
 .ELIF "$(CCTYPE)" == "GCC"
 	$(LINK32) -v -mconsole -o $@ $(BLINK_FLAGS) \
-	    $(mktmp $(LKPRE) $(MINI_OBJ:s,\,\\) $(LIBFILES) $(LKPOST)) 
+	    $(mktmp $(LKPRE) $(MINI_OBJ:s,\,\\) $(LIBFILES) $(LKPOST))
 .ELSE
 	$(LINK32) -subsystem:console -out:$@ \
 	    @$(mktmp $(BLINK_FLAGS) $(LIBFILES) $(MINI_OBJ:s,\,\\))
@@ -1058,7 +1088,7 @@ $(X2P) : $(MINIPERL) $(X2P_OBJ)
 	    @$(mktmp $(BLINK_FLAGS) $(LIBFILES) $(X2P_OBJ:s,\,\\))
 .ENDIF
 
-perlmain.c : runperl.c 
+perlmain.c : runperl.c
 	copy runperl.c perlmain.c
 
 perlmain$(o) : perlmain.c
@@ -1079,7 +1109,7 @@ $(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ) $(PERLEXE_RES)
 .ENDIF
 	copy $(PERLEXE) $(WPERLEXE)
 	$(MINIPERL) -I..\lib bin\exetype.pl $(WPERLEXE) WINDOWS
-	copy splittree.pl .. 
+	copy splittree.pl ..
 	$(MINIPERL) -I..\lib ..\splittree.pl "../LIB" $(AUTODIR)
 
 $(DYNALOADER).c: $(MINIPERL) $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM)
@@ -1094,92 +1124,102 @@ $(DYNALOADER).c: $(MINIPERL) $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM)
 $(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
 	copy dl_win32.xs $(EXTDIR)\DynaLoader\dl_win32.xs
 
-$(DUMPER_DLL): $(PERLEXE) $(DUMPER).xs
+$(DUMPER_DLL): $(PERLDEP) $(DUMPER).xs
 	cd $(EXTDIR)\Data\$(*B) && \
 	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\Data\$(*B) && $(MAKE)
 
-$(DPROF_DLL): $(PERLEXE) $(DPROF).xs
+$(DPROF_DLL): $(PERLDEP) $(DPROF).xs
 	cd $(EXTDIR)\Devel\$(*B) && \
 	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\Devel\$(*B) && $(MAKE)
 
-$(GLOB_DLL): $(PERLEXE) $(GLOB).xs
+$(GLOB_DLL): $(PERLDEP) $(GLOB).xs
 	cd $(EXTDIR)\File\$(*B) && \
 	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\File\$(*B) && $(MAKE)
 
-$(PEEK_DLL): $(PERLEXE) $(PEEK).xs
+$(PEEK_DLL): $(PERLDEP) $(PEEK).xs
 	cd $(EXTDIR)\Devel\$(*B) && \
 	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\Devel\$(*B) && $(MAKE)
 
-$(RE_DLL): $(PERLEXE) $(RE).xs
+$(RE_DLL): $(PERLDEP) $(RE).xs
 	cd $(EXTDIR)\$(*B) && \
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\$(*B) && $(MAKE)
 
-$(B_DLL): $(PERLEXE) $(B).xs
+$(B_DLL): $(PERLDEP) $(B).xs
 	cd $(EXTDIR)\$(*B) && \
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\$(*B) && $(MAKE)
 
-$(THREAD_DLL): $(PERLEXE) $(THREAD).xs
+$(THREAD_DLL): $(PERLDEP) $(THREAD).xs
 	cd $(EXTDIR)\$(*B) && \
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\$(*B) && $(MAKE)
 
-$(ATTRS_DLL): $(PERLEXE) $(ATTRS).xs
+$(ATTRS_DLL): $(PERLDEP) $(ATTRS).xs
 	cd $(EXTDIR)\$(*B) && \
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\$(*B) && $(MAKE)
 
-$(POSIX_DLL): $(PERLEXE) $(POSIX).xs
+$(POSIX_DLL): $(PERLDEP) $(POSIX).xs
 	cd $(EXTDIR)\$(*B) && \
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\$(*B) && $(MAKE)
 
-$(IO_DLL): $(PERLEXE) $(IO).xs
+$(IO_DLL): $(PERLDEP) $(IO).xs
 	cd $(EXTDIR)\$(*B) && \
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\$(*B) && $(MAKE)
 
-$(SDBM_FILE_DLL) : $(PERLEXE) $(SDBM_FILE).xs
+$(SDBM_FILE_DLL) : $(PERLDEP) $(SDBM_FILE).xs
 	cd $(EXTDIR)\$(*B) && \
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\$(*B) && $(MAKE)
 
-$(FCNTL_DLL): $(PERLEXE) $(FCNTL).xs
+$(FCNTL_DLL): $(PERLDEP) $(FCNTL).xs
 	cd $(EXTDIR)\$(*B) && \
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\$(*B) && $(MAKE)
 
-$(OPCODE_DLL): $(PERLEXE) $(OPCODE).xs
+$(OPCODE_DLL): $(PERLDEP) $(OPCODE).xs
 	cd $(EXTDIR)\$(*B) && \
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\$(*B) && $(MAKE)
 
-$(SOCKET_DLL): $(PERLEXE) $(SOCKET).xs
+$(SOCKET_DLL): $(PERLDEP) $(SOCKET).xs
 	cd $(EXTDIR)\$(*B) && \
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\$(*B) && $(MAKE)
 
-$(HOSTNAME_DLL): $(PERLEXE) $(HOSTNAME).xs
+$(HOSTNAME_DLL): $(PERLDEP) $(HOSTNAME).xs
 	cd $(EXTDIR)\Sys\$(*B) && \
 	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\Sys\$(*B) && $(MAKE)
 
-$(BYTELOADER_DLL): $(PERLEXE) $(BYTELOADER).xs
+$(BYTELOADER_DLL): $(PERLDEP) $(BYTELOADER).xs
 	cd $(EXTDIR)\$(*B) && \
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\$(*B) && $(MAKE)
 
-$(STORABLE_DLL): $(PERLEXE) $(STORABLE).xs
+$(ENCODE_DLL): $(PERLDEP) $(ENCODE).xs
 	cd $(EXTDIR)\$(*B) && \
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\$(*B) && $(MAKE)
 
-$(ERRNO_PM): $(PERLEXE) $(ERRNO)_pm.PL
+$(STORABLE_DLL): $(PERLDEP) $(STORABLE).xs
+	cd $(EXTDIR)\$(*B) && \
+	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	cd $(EXTDIR)\$(*B) && $(MAKE)
+
+$(FILTER_DLL): $(PERLDEP) $(FILTER).xs
+	cd $(EXTDIR)\Filter\Util\Call && \
+	..\..\..\..\miniperl -I..\..\..\..\lib Makefile.PL INSTALLDIRS=perl
+	cd $(EXTDIR)\Filter\Util\Call && $(MAKE)
+
+$(ERRNO_PM): $(PERLDEP) $(ERRNO)_pm.PL
 	cd $(EXTDIR)\$(*B) && \
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\$(*B) && $(MAKE)
@@ -1220,10 +1260,13 @@ distclean: clean
 	-del /f $(LIBDIR)\Devel\Peek.pm $(LIBDIR)\Devel\DProf.pm
 	-del /f $(LIBDIR)\File\Glob.pm
 	-del /f $(LIBDIR)\Storable.pm
+	-del /f $(LIBDIR)\Filter\Util\Call\Call.pm
 	-if exist $(LIBDIR)\IO rmdir /s /q $(LIBDIR)\IO || rmdir /s $(LIBDIR)\IO
 	-if exist $(LIBDIR)\Thread rmdir /s /q $(LIBDIR)\Thread || rmdir /s $(LIBDIR)\Thread
 	-if exist $(LIBDIR)\B rmdir /s /q $(LIBDIR)\B || rmdir /s $(LIBDIR)\B
 	-if exist $(LIBDIR)\Data rmdir /s /q $(LIBDIR)\Data || rmdir /s $(LIBDIR)\Data
+	-if exist $(LIBDIR)\Filter\Util\Call rmdir /s /q $(LIBDIR)\Filter\Util\Call || rmdir /s $(LIBDIR)\Filter
+	-if exist $(LIBDIR)\Filter\Util rmdir /s /q $(LIBDIR)\Filter\Util || rmdir /s $(LIBDIR)\Filter
 	-del /f $(PODDIR)\*.html
 	-del /f $(PODDIR)\*.bat
 	-cd ..\utils && del /f h2ph splain perlbug pl2pm c2ph h2xs perldoc \
@@ -1249,7 +1292,7 @@ installhtml : doc
 	$(RCOPY) html\*.* $(INST_HTML)\*.*
 
 inst_lib : $(CONFIGPM)
-	copy splittree.pl .. 
+	copy splittree.pl ..
 	$(MINIPERL) -I..\lib ..\splittree.pl "../LIB" $(AUTODIR)
 	$(RCOPY) ..\lib $(INST_LIB)\*.*
 
@@ -1290,7 +1333,7 @@ test-wide-notty : test-prep
 	    set HARNESS_PERL_SWITCHES=-C && \
 	    cd ..\t && $(PERLEXE) -I..\lib harness
 
-clean : 
+clean :
 	-@erase miniperlmain$(o)
 	-@erase $(MINIPERL)
 	-@erase perlglob$(o)
@@ -1321,9 +1364,9 @@ ok: utils
 
 okfile: utils
 	$(PERLEXE) -I..\lib ..\utils\perlbug -ok -s "(UNINSTALLED)" -F perl.ok
- 
+
 nok: utils
 	$(PERLEXE) -I..\lib ..\utils\perlbug -nok -s "(UNINSTALLED)"
- 
+
 nokfile: utils
 	$(PERLEXE) -I..\lib ..\utils\perlbug -nok -s "(UNINSTALLED)" -F perl.nok

@@ -2,8 +2,10 @@ package Term::Complete;
 require 5.000;
 require Exporter;
 
-@ISA = qw(Exporter);
-@EXPORT = qw(Complete);
+use strict;
+our @ISA = qw(Exporter);
+our @EXPORT = qw(Complete);
+our $VERSION = '1.2';
 
 #      @(#)complete.pl,v1.2            (me@anywhere.EBay.Sun.COM) 09/23/91
 
@@ -64,6 +66,7 @@ Wayne Thompson
 
 =cut
 
+our($complete, $kill, $erase1, $erase2);
 CONFIG: {
     $complete = "\004";
     $kill     = "\025";
@@ -72,7 +75,7 @@ CONFIG: {
 }
 
 sub Complete {
-    my($prompt, @cmp_list, $cmp, $test, $l, @match);
+    my($prompt, @cmp_lst, $cmp, $test, $l, @match);
     my ($return, $r) = ("", 0);
 
     $return = "";

@@ -1,12 +1,16 @@
 package ExtUtils::MM_OS2;
 
+use strict;
+
+our $VERSION = '1.00';
+
 #use Config;
 #use Cwd;
 #use File::Basename;
 require Exporter;
 
-Exporter::import('ExtUtils::MakeMaker',
-       qw( $Verbose &neatvalue));
+require ExtUtils::MakeMaker;
+ExtUtils::MakeMaker->import(qw( $Verbose &neatvalue));
 
 unshift @MM::ISA, 'ExtUtils::MM_OS2';
 
@@ -34,7 +38,7 @@ $self->{BASEEXT}.def: Makefile.PL
      ', "DL_VARS" => ', neatvalue($vars), ');\'
 ');
     }
-    if (%{$self->{IMPORTS}}) {
+    if ($self->{IMPORTS} && %{$self->{IMPORTS}}) {
 	# Make import files (needed for static build)
 	-d 'tmp_imp' or mkdir 'tmp_imp', 0777 or die "Can't mkdir tmp_imp";
 	open IMP, '>tmpimp.imp' or die "Can't open tmpimp.imp";
@@ -57,7 +61,7 @@ $self->{BASEEXT}.def: Makefile.PL
 sub static_lib {
     my($self) = @_;
     my $old = $self->ExtUtils::MM_Unix::static_lib();
-    return $old unless %{$self->{IMPORTS}};
+    return $old unless $self->{IMPORTS} && %{$self->{IMPORTS}};
     
     my @chunks = split /\n{2,}/, $old;
     shift @chunks unless length $chunks[0]; # Empty lines at the start

@@ -605,12 +605,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_strtol HAS_STRTOL	/**/
 
-/* HAS_STRTOUL:
- *	This symbol, if defined, indicates that the strtoul routine is
- *	available to provide conversion of strings to unsigned long.
- */
-#$d_strtoul HAS_STRTOUL	/**/
-
 /* HAS_STRXFRM:
  *	This symbol, if defined, indicates that the strxfrm() routine is
  *	available to transform strings.
@@ -981,12 +975,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #define SH_PATH "$sh"  /**/
 
-/* STDCHAR:
- *	This symbol is defined to be the type of char used in stdio.h.
- *	It has the values "unsigned char" or "char".
- */
-#define STDCHAR $stdchar	/**/
-
 /* CROSSCOMPILE:
  *	This symbol, if defined, signifies that we our
  *	build process is a cross-compilation.
@@ -1228,6 +1216,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define CPPRUN "$cpprun"
 #define CPPLAST "$cpplast"
 
+/* HAS__FWALK:
+ *	This symbol, if defined, indicates that the _fwalk system call is
+ *	available to apply a function to all the file handles.
+ */
+#$d__fwalk HAS__FWALK		/**/
+
 /* HAS_ACCESS:
  *	This manifest constant lets the C program know that the access()
  *	system call is available to check for accessibility using real UID/GID.
@@ -1325,6 +1319,13 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_endsent HAS_ENDSERVENT		/**/
 
+/* FCNTL_CAN_LOCK:
+ *	This symbol, if defined, indicates that fcntl() can be used
+ *	for file locking.  Normally on Unix systems this is defined.
+ *	It may be undefined on VMS.
+ */
+#$d_fcntl_can_lock FCNTL_CAN_LOCK		/**/
+
 /* HAS_FD_SET:
  *	This symbol, when defined, indicates presence of the fd_set typedef
  *	in <sys/types.h>
@@ -1366,6 +1367,13 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	available to stat filesystems by file descriptors.
  */
 #$d_fstatfs HAS_FSTATFS		/**/
+
+/* HAS_FSYNC:
+ *	This symbol, if defined, indicates that the fsync routine is
+ *	available to write a file's modified data and attributes to
+ *	permanent storage.
+ */
+#$d_fsync HAS_FSYNC		/**/
 
 /* HAS_FTELLO:
  *	This symbol, if defined, indicates that the ftello routine is
@@ -1507,11 +1515,29 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_getnetprotos	HAS_GETNET_PROTOS	/**/
 
+/* HAS_GETPAGESIZE:
+ *	This symbol, if defined, indicates that the getpagesize system call
+ *	is available to get system page size, which is the granularity of
+ *	many memory management calls.
+ */
+#$d_getpagsz HAS_GETPAGESIZE		/**/
+
 /* HAS_GETPROTOENT:
  *	This symbol, if defined, indicates that the getprotoent() routine is
  *	available to look up protocols in some data base or another.
  */
 #$d_getpent HAS_GETPROTOENT		/**/
+
+/* HAS_GETPGRP:
+ *	This symbol, if defined, indicates that the getpgrp routine is
+ *	available to get the current process group.
+ */
+/* USE_BSD_GETPGRP:
+ *	This symbol, if defined, indicates that getpgrp needs one
+ *	arguments whereas USG one needs none.
+ */
+#$d_getpgrp HAS_GETPGRP		/**/
+#$d_bsdgetpgrp USE_BSD_GETPGRP	/**/
 
 /* HAS_GETPROTOBYNAME:
  *	This symbol, if defined, indicates that the getprotobyname()
@@ -1822,6 +1848,15 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_sanemcmp HAS_SANE_MEMCMP	/**/
 
+/* HAS_SBRK_PROTO:
+ *	This symbol, if defined, indicates that the system provides
+ *	a prototype for the sbrk() function.  Otherwise, it is up
+ *	to the program to supply one.  Good guesses are
+ *		extern void* sbrk _((int));
+ *		extern void* sbrk _((size_t));
+ */
+#$d_sbrkproto	HAS_SBRK_PROTO	/**/
+
 /* HAS_SEM:
  *	This symbol, if defined, indicates that the entire sem*(2) library is
  *	supported.
@@ -1858,6 +1893,18 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	available.
  */
 #$d_setpent HAS_SETPROTOENT		/**/
+
+/* HAS_SETPGRP:
+ *	This symbol, if defined, indicates that the setpgrp routine is
+ *	available to set the current process group.
+ */
+/* USE_BSD_SETPGRP:
+ *	This symbol, if defined, indicates that setpgrp needs two
+ *	arguments whereas USG one needs none.  See also HAS_SETPGID
+ *	for a POSIX interface.
+ */
+#$d_setpgrp HAS_SETPGRP		/**/
+#$d_bsdsetpgrp USE_BSD_SETPGRP	/**/
 
 /* HAS_SETPROCTITLE:
  *	This symbol, if defined, indicates that the setproctitle routine is
@@ -2048,12 +2095,23 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol is defined if the FILE_cnt macro can be used as an
  *	lvalue.
  */
+/* STDIO_PTR_LVAL_SETS_CNT:
+ *	This symbol is defined if using the FILE_ptr macro as an lvalue
+ *	to increase the pointer by n has the side effect of decreasing the
+ *	value of File_cnt(fp) by n.
+ */
+/* STDIO_PTR_LVAL_NOCHANGE_CNT:
+ *	This symbol is defined if using the FILE_ptr macro as an lvalue
+ *	to increase the pointer by n leaves File_cnt(fp) unchanged.
+ */
 #$d_stdstdio USE_STDIO_PTR 	/**/
 #ifdef USE_STDIO_PTR
 #define FILE_ptr(fp)	$stdio_ptr
 #$d_stdio_ptr_lval STDIO_PTR_LVALUE 		/**/
 #define FILE_cnt(fp)	$stdio_cnt
 #$d_stdio_cnt_lval STDIO_CNT_LVALUE 		/**/
+#$d_stdio_ptr_lval_sets_cnt STDIO_PTR_LVAL_SETS_CNT	/**/
+#$d_stdio_ptr_lval_nochange_cnt STDIO_PTR_LVAL_NOCHANGE_CNT	/**/
 #endif
 
 /* USE_STDIO_BASE:
@@ -2112,6 +2170,18 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	available to convert strings to long longs.
  */
 #$d_strtoll HAS_STRTOLL		/**/
+
+/* HAS_STRTOQ:
+ *	This symbol, if defined, indicates that the strtoq routine is
+ *	available to convert strings to long longs (quads).
+ */
+#$d_strtoq HAS_STRTOQ		/**/
+
+/* HAS_STRTOUL:
+ *	This symbol, if defined, indicates that the strtoul routine is
+ *	available to provide conversion of strings to unsigned long.
+ */
+#$d_strtoul HAS_STRTOUL	/**/
 
 /* HAS_STRTOULL:
  *	This symbol, if defined, indicates that the strtoull routine is
@@ -2603,6 +2673,17 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define RD_NODATA $rd_nodata
 #$d_eofnblk EOF_NONBLOCK
 
+/* NEED_VA_COPY:
+ *	This symbol, if defined, indicates that the system stores
+ *	the variable argument list datatype, va_list, in a format
+ *	that cannot be copied by simple assignment, so that some
+ *	other means must be used when copying is required.
+ *	As such systems vary in their provision (or non-provision)
+ *	of copying mechanisms, handy.h defines a platform-
+ *	independent macro, Perl_va_copy(src, dst), to do the job.
+ */
+#$need_va_copy	NEED_VA_COPY		/**/
+
 /* Netdb_host_t:
  *	This symbol holds the type used for the 1st argument
  *	to gethostbyaddr().
@@ -2952,6 +3033,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #define STARTPERL "$startperl"		/**/
 
+/* STDCHAR:
+ *	This symbol is defined to be the type of char used in stdio.h.
+ *	It has the values "unsigned char" or "char".
+ */
+#define STDCHAR $stdchar	/**/
+
 /* HAS_STDIO_STREAM_ARRAY:
  *	This symbol, if defined, tells that there is an array
  *	holding the stdio streams.
@@ -3169,29 +3256,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #define PERL_XS_APIVERSION "$xs_apiversion"
 #define PERL_PM_APIVERSION "$pm_apiversion"
-
-/* HAS_GETPGRP:
- *	This symbol, if defined, indicates that the getpgrp routine is
- *	available to get the current process group.
- */
-/* USE_BSD_GETPGRP:
- *	This symbol, if defined, indicates that getpgrp needs one
- *	arguments whereas USG one needs none.
- */
-#$d_getpgrp HAS_GETPGRP		/**/
-#$d_bsdgetpgrp USE_BSD_GETPGRP	/**/
-
-/* HAS_SETPGRP:
- *	This symbol, if defined, indicates that the setpgrp routine is
- *	available to set the current process group.
- */
-/* USE_BSD_SETPGRP:
- *	This symbol, if defined, indicates that setpgrp needs two
- *	arguments whereas USG one needs none.  See also HAS_SETPGID
- *	for a POSIX interface.
- */
-#$d_setpgrp HAS_SETPGRP		/**/
-#$d_bsdsetpgrp USE_BSD_SETPGRP	/**/
 
 #endif
 !GROK!THIS!

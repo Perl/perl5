@@ -1,54 +1,59 @@
 #!perl -w
 
+# use strict fails
+#Can't use string ("main::glob") as a symbol ref while "strict refs" in use at /usr/lib/perl5/5.005/File/DosGlob.pm line 191.
+
 #
 # Documentation at the __END__
 #
 
 package File::DosGlob;
 
+our $VERSION = '1.00';
+use strict;
+
 sub doglob {
     my $cond = shift;
     my @retval = ();
     #print "doglob: ", join('|', @_), "\n";
   OUTER:
-    for my $arg (@_) {
-        local $_ = $arg;
+    for my $pat (@_) {
 	my @matched = ();
 	my @globdirs = ();
 	my $head = '.';
 	my $sepchr = '/';
-	next OUTER unless defined $_ and $_ ne '';
+        my $tail;
+	next OUTER unless defined $pat and $pat ne '';
 	# if arg is within quotes strip em and do no globbing
-	if (/^"(.*)"\z/s) {
-	    $_ = $1;
-	    if ($cond eq 'd') { push(@retval, $_) if -d $_ }
-	    else              { push(@retval, $_) if -e $_ }
+	if ($pat =~ /^"(.*)"\z/s) {
+	    $pat = $1;
+	    if ($cond eq 'd') { push(@retval, $pat) if -d $pat }
+	    else              { push(@retval, $pat) if -e $pat }
 	    next OUTER;
 	}
 	# wildcards with a drive prefix such as h:*.pm must be changed
 	# to h:./*.pm to expand correctly
-	if (m|^([A-Za-z]:)[^/\\]|s) {
+	if ($pat =~ m|^([A-Za-z]:)[^/\\]|s) {
 	    substr($_,0,2) = $1 . "./";
 	}
-	if (m|^(.*)([\\/])([^\\/]*)\z|s) {
-	    my $tail;
+	if ($pat =~ m|^(.*)([\\/])([^\\/]*)\z|s) {
 	    ($head, $sepchr, $tail) = ($1,$2,$3);
 	    #print "div: |$head|$sepchr|$tail|\n";
-	    push (@retval, $_), next OUTER if $tail eq '';
+	    push (@retval, $pat), next OUTER if $tail eq '';
 	    if ($head =~ /[*?]/) {
 		@globdirs = doglob('d', $head);
 		push(@retval, doglob($cond, map {"$_$sepchr$tail"} @globdirs)),
 		    next OUTER if @globdirs;
 	    }
 	    $head .= $sepchr if $head eq '' or $head =~ /^[A-Za-z]:\z/s;
-	    $_ = $tail;
+	    $pat = $tail;
 	}
 	#
 	# If file component has no wildcards, we can avoid opendir
-	unless (/[*?]/) {
+	unless ($pat =~ /[*?]/) {
 	    $head = '' if $head eq '.';
 	    $head .= $sepchr unless $head eq '' or substr($head,-1) eq $sepchr;
-	    $head .= $_;
+	    $head .= $pat;
 	    if ($cond eq 'd') { push(@retval,$head) if -d $head }
 	    else              { push(@retval,$head) if -e $head }
 	    next OUTER;
@@ -60,14 +65,13 @@ sub doglob {
 	$head .= $sepchr unless $head eq '' or substr($head,-1) eq $sepchr;
 
 	# escape regex metachars but not glob chars
-	s:([].+^\-\${}[|]):\\$1:g;
+        $pat =~ s:([].+^\-\${}[|]):\\$1:g;
 	# and convert DOS-style wildcards to regex
-	s/\*/.*/g;
-	s/\?/.?/g;
+	$pat =~ s/\*/.*/g;
+	$pat =~ s/\?/.?/g;
 
-	#print "regex: '$_', head: '$head'\n";
-	my $matchsub = eval 'sub { $_[0] =~ m|^' . $_ . '\\z|ios }';
-	warn($@), next OUTER if $@;
+	#print "regex: '$pat', head: '$head'\n";
+	my $matchsub = sub { $_[0] =~ m|^$pat\z|is };
       INNER:
 	for my $e (@leaves) {
 	    next INNER if $e eq '.' or $e eq '..';
@@ -80,7 +84,7 @@ sub doglob {
 	    # has a dot *and* name is shorter than 9 chars.
 	    #
 	    if (index($e,'.') == -1 and length($e) < 9
-	        and index($_,'\\.') != -1) {
+	        and index($pat,'\\.') != -1) {
 		push(@matched, "$head$e"), next INNER if &$matchsub("$e.");
 	    }
 	}
@@ -100,8 +104,7 @@ my %iter;
 my %entries;
 
 sub glob {
-    my $pat = shift;
-    my $cxix = shift;
+    my($pat,$cxix) = @_;
     my @pat;
 
     # glob without args defaults to $_
@@ -116,6 +119,52 @@ sub glob {
 	push @pat, $pat;
     }
 
+    # Mike Mestnik: made to do abc{1,2,3} == abc1 abc2 abc3.
+    #   abc3 will be the original {3} (and drop the {}).
+    #   abc1 abc2 will be put in @appendpat.
+    # This was just the esiest way, not nearly the best.
+    REHASH: {
+	my @appendpat = ();
+	for (@pat) {
+	    # There must be a "," I.E. abc{efg} is not what we want.
+	    while ( /^(.*)(?<!\\)\{(.*?)(?<!\\)\,.*?(?<!\\)\}(.*)$/ ) {
+		my ($start, $match, $end) = ($1, $2, $3);
+		#print "Got: \n\t$start\n\t$match\n\t$end\n";
+		my $tmp = "$start$match$end";
+		while ( $tmp =~ s/^(.*?)(?<!\\)\{(?:.*(?<!\\)\,)?(.*\Q$match\E.*?)(?:(?<!\\)\,.*)?(?<!\\)\}(.*)$/$1$2$3/ ) {
+		    #print "Striped: $tmp\n";
+		    #  these expanshions will be preformed by the original,
+		    #  when we call REHASH.
+		}
+		push @appendpat, ("$tmp");
+		s/^\Q$start\E(?<!\\)\{\Q$match\E(?<!\\)\,/$start\{/;
+		if ( /^\Q$start\E(?<!\\)\{(?!.*?(?<!\\)\,.*?\Q$end\E$)(.*)(?<!\\)\}\Q$end\E$/ ) {
+		    $match = $1;
+		    #print "GOT: \n\t$start\n\t$match\n\t$end\n\n";
+		    $_ = "$start$match$end";
+		}
+	    }
+	    #print "Sould have "GOT" vs "Got"!\n";
+		#FIXME: There should be checking for this.
+		#  How or what should be done about failure is beond me.
+	}
+	if ( $#appendpat != -1
+		) {
+	    #print "LOOP\n";
+	    #FIXME: Max loop, no way! :")
+	    for ( @appendpat ) {
+	        push @pat, $_;
+	    }
+	    goto REHASH;
+	}
+    }
+    for ( @pat ) {
+	s/\\{/{/g;
+	s/\\}/}/g;
+	s/\\,/,/g;
+    }
+    #print join ("\n", @pat). "\n";
+ 
     # assume global context if not provided one
     $cxix = '_G_' unless defined $cxix;
     $iter{$cxix} = 0 unless exists $iter{$cxix};
@@ -143,14 +192,17 @@ sub glob {
     }
 }
 
-sub import {
+{
+    no strict 'refs';
+
+    sub import {
     my $pkg = shift;
     return unless @_;
     my $sym = shift;
     my $callpkg = ($sym =~ s/^GLOBAL_//s ? 'CORE::GLOBAL' : caller(0));
     *{$callpkg.'::'.$sym} = \&{$pkg.'::'.$sym} if $sym eq 'glob';
+    }
 }
-
 1;
 
 __END__

@@ -1,6 +1,6 @@
 /*    form.h
  *
- *    Copyright (c) 1991-2000, Larry Wall
+ *    Copyright (c) 1991-2001, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -23,4 +23,5 @@
 #define FF_NEWLINE	13
 #define FF_BLANK	14
 #define FF_MORE		15
+#define FF_0DECIMAL   16
 

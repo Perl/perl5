@@ -12,7 +12,7 @@ the class itself.
 
 Here are a few examples where class attributes might come in handy:
 
-=over
+=over 4
 
 =item *
 

@@ -44,7 +44,7 @@ use vars qw(
 # default routine without having to know under what OS
 # it's running.
 #
-@MM::ISA = qw[ExtUtils::MM_Unix ExtUtils::Liblist ExtUtils::MakeMaker];
+@MM::ISA = qw[ExtUtils::MM_Unix ExtUtils::Liblist::Kid ExtUtils::MakeMaker];
 
 #
 # Setup dummy package:
@@ -60,7 +60,7 @@ use vars qw(
 
 # "predeclare the package: we only load it via AUTOLOAD
 # but we have already mentioned it in @ISA
-package ExtUtils::Liblist;
+package ExtUtils::Liblist::Kid;
 
 package ExtUtils::MakeMaker;
 #
@@ -200,7 +200,8 @@ sub full_setup {
     PERL_MALLOC_OK
     NAME NEEDS_LINKING NOECHO NORECURS NO_VC OBJECT OPTIMIZE PERL PERLMAINCC
     PERL_ARCHLIB PERL_LIB PERL_SRC PERM_RW PERM_RWX
-    PL_FILES PM PMLIBDIRS POLLUTE PPM_INSTALL_EXEC PPM_INSTALL_SCRIPT PREFIX
+    PL_FILES PM PM_FILTER PMLIBDIRS POLLUTE PPM_INSTALL_EXEC
+	PPM_INSTALL_SCRIPT PREFIX
     PREREQ_PM SKIP TYPEMAPS VERSION VERSION_FROM XS XSOPT XSPROTOARG
     XS_VERSION clean depend dist dynamic_lib linkext macro realclean
     tool_autosplit
@@ -239,7 +240,6 @@ sub full_setup {
 
  dir_target libscan makeaperl needs_linking perm_rw perm_rwx
  subdir_x test_via_harness test_via_script
-
 			 ];
 
     push @MM_Sections, qw[
@@ -982,23 +982,39 @@ be
     perl Makefile.PL LIB=~/lib
 
 This will install the module's architecture-independent files into
-~/lib, the architecture-dependent files into ~/lib/$archname/auto.
+~/lib, the architecture-dependent files into ~/lib/$archname.
 
 Another way to specify many INSTALL directories with a single
 parameter is PREFIX.
 
     perl Makefile.PL PREFIX=~
 
-This will replace the string specified by $Config{prefix} in all
-$Config{install*} values.
+This will replace the string specified by C<$Config{prefix}> in all
+C<$Config{install*}> values.
 
 Note, that in both cases the tilde expansion is done by MakeMaker, not
-by perl by default, nor by make. Conflicts between parameters LIB,
-PREFIX and the various INSTALL* arguments are resolved so that 
-XXX
+by perl by default, nor by make.
+
+Conflicts between parameters LIB,
+PREFIX and the various INSTALL* arguments are resolved so that:
+
+=over 4
+
+=item *
+
+setting LIB overrides any setting of INSTALLPRIVLIB, INSTALLARCHLIB,
+INSTALLSITELIB, INSTALLSITEARCH (and they are not affected by PREFIX);
+
+=item *
+
+without LIB, setting PREFIX replaces the initial C<$Config{prefix}>
+part of those INSTALL* arguments, even if the latter are explicitly
+set (but are set to still start with C<$Config{prefix}>).
+
+=back
 
 If the user has superuser privileges, and is not working on AFS
-(Andrew File System) or relatives, then the defaults for
+or relatives, then the defaults for
 INSTALLPRIVLIB, INSTALLARCHLIB, INSTALLSCRIPT, etc. will be appropriate,
 and this incantation will be the best:
 
@@ -1145,11 +1161,6 @@ or as NAME=VALUE pairs on the command line:
 
 =over 2
 
-=item AUTHOR
-
-String containing name (and email address) of package author(s). Is used
-in PPD (Perl Package Description) files for PPM (Perl Package Manager).
-
 =item ABSTRACT
 
 One line description of the module. Will be included in PPD file.
@@ -1159,6 +1170,11 @@ One line description of the module. Will be included in PPD file.
 Name of the file that contains the package description. MakeMaker looks
 for a line in the POD matching /^($package\s-\s)(.*)/. This is typically
 the first line in the "=head1 NAME" section. $2 becomes the abstract.
+
+=item AUTHOR
+
+String containing name (and email address) of package author(s). Is used
+in PPD (Perl Package Description) files for PPM (Perl Package Manager).
 
 =item BINARY_LOCATION
 
@@ -1409,11 +1425,6 @@ to INSTALLBIN during 'make install'
 Old name for INST_SCRIPT. Deprecated. Please use INST_SCRIPT if you
 need to use it.
 
-=item INST_LIB
-
-Directory where we put library files of this extension while building
-it.
-
 =item INST_HTMLLIBDIR
 
 Directory to hold the man pages in HTML format at 'make' time
@@ -1421,6 +1432,11 @@ Directory to hold the man pages in HTML format at 'make' time
 =item INST_HTMLSCRIPTDIR
 
 Directory to hold the man pages in HTML format at 'make' time
+
+=item INST_LIB
+
+Directory where we put library files of this extension while building
+it.
 
 =item INST_MAN1DIR
 
@@ -1437,34 +1453,6 @@ Directory, where executable files should be installed during
 testing. make install will copy the files in INST_SCRIPT to
 INSTALLSCRIPT.
 
-=item PERL_MALLOC_OK
-
-defaults to 0.  Should be set to TRUE if the extension can work with
-the memory allocation routines substituted by the Perl malloc() subsystem.
-This should be applicable to most extensions with exceptions of those
-
-=over
-
-=item *
-
-with bugs in memory allocations which are caught by Perl's malloc();
-
-=item *
-
-which interact with the memory allocator in other ways than via
-malloc(), realloc(), free(), calloc(), sbrk() and brk();
-
-=item *
-
-which rely on special alignment which is not provided by Perl's malloc().
-
-=back
-
-B<NOTE.>  Negligence to set this flag in I<any one> of loaded extension
-nullifies many advantages of Perl's malloc(), such as better usage of
-system resources, error detection, memory usage reporting, catchable failure
-of memory allocations, etc.
-
 =item LDFROM
 
 defaults to "$(OBJECT)" and is used in the ld command to specify
@@ -1473,8 +1461,12 @@ specify ld flags)
 
 =item LIB
 
-LIB can only be set at C<perl Makefile.PL> time. It has the effect of
+LIB should only be set at C<perl Makefile.PL> time but is allowed as a
+MakeMaker argument. It has the effect of
 setting both INSTALLPRIVLIB and INSTALLSITELIB to that value regardless any
+explicit setting of those arguments (or of PREFIX).  
+INSTALLARCHLIB and INSTALLSITEARCH are set to the corresponding 
+architecture subdirectory.
 
 =item LIBPERL_A
 
@@ -1527,10 +1519,11 @@ at Configure time.
 
 =item MAN3PODS
 
-Hashref of .pm and .pod files. MakeMaker will default this to all
- .pod and any .pm files that include POD directives. The files listed
-here will be converted to man pages and installed as was requested
-at Configure time.
+Hashref that assigns to *.pm and *.pod files the files into which the
+manpages are to be written. MakeMaker parses all *.pod and *.pm files
+for POD directives. Files that contain POD will be the default keys of
+the MAN3PODS hashref. These will then be converted to man pages during
+C<make> and will be installed during C<make install>.
 
 =item MAP_TARGET
 
@@ -1578,6 +1571,8 @@ List of object files, defaults to '$(BASEEXT)$(OBJ_EXT)', but can be a long
 string containing all object files, e.g. "tkpBind.o
 tkpButton.o tkpCanvas.o"
 
+(Where BASEEXT is the last component of NAME, and OBJ_EXT is $Config{obj_ext}.)
+
 =item OPTIMIZE
 
 Defaults to C<-O>. Set it to C<-g> to turn debugging on. The flag is
@@ -1594,11 +1589,39 @@ to $(CC).
 
 =item PERL_ARCHLIB
 
-Same as above for architecture dependent files.
+Same as below, but for architecture dependent files.
 
 =item PERL_LIB
 
 Directory containing the Perl library to use.
+
+=item PERL_MALLOC_OK
+
+defaults to 0.  Should be set to TRUE if the extension can work with
+the memory allocation routines substituted by the Perl malloc() subsystem.
+This should be applicable to most extensions with exceptions of those
+
+=over 4
+
+=item *
+
+with bugs in memory allocations which are caught by Perl's malloc();
+
+=item *
+
+which interact with the memory allocator in other ways than via
+malloc(), realloc(), free(), calloc(), sbrk() and brk();
+
+=item *
+
+which rely on special alignment which is not provided by Perl's malloc().
+
+=back
+
+B<NOTE.>  Negligence to set this flag in I<any one> of loaded extension
+nullifies many advantages of Perl's malloc(), such as better usage of
+system resources, error detection, memory usage reporting, catchable failure
+of memory allocations, etc.
 
 =item PERL_SRC
 
@@ -1647,6 +1670,31 @@ Ref to array of subdirectories containing library files.  Defaults to
 they contain will be installed in the corresponding location in the
 library.  A libscan() method can be used to alter the behaviour.
 Defining PM in the Makefile.PL will override PMLIBDIRS.
+
+(Where BASEEXT is the last component of NAME.)
+
+=item PM_FILTER
+
+A filter program, in the traditional Unix sense (input from stdin, output
+to stdout) that is passed on each .pm file during the build (in the
+pm_to_blib() phase).  It is empty by default, meaning no filtering is done.
+
+Great care is necessary when defining the command if quoting needs to be
+done.  For instance, you would need to say:
+
+  {'PM_FILTER' => 'grep -v \\"^\\#\\"'}
+
+to remove all the leading coments on the fly during the build.  The
+extra \\ are necessary, unfortunately, because this variable is interpolated
+within the context of a Perl program built on the command line, and double
+quotes are what is used with the -e switch to build that command line.  The
+# is escaped for the Makefile, since what is going to be generated will then
+be:
+
+  PM_FILTER = grep -v \"^\#\"
+
+Without the \\ before the #, we'd have the start of a Makefile comment,
+and the macro would be incorrectly defined.
 
 =item POLLUTE
 
@@ -1725,12 +1773,15 @@ MakeMaker object. The following lines will be parsed o.k.:
     ( $VERSION ) = '$Revision: 1.222 $ ' =~ /\$Revision:\s+([^\s]+)/;
     $FOO::VERSION = '1.10';
     *FOO::VERSION = \'1.11';
+    our $VERSION = 1.2.3;	# new for perl5.6.0 
 
 but these will fail:
 
     my $VERSION = '1.01';
     local $VERSION = '1.02';
     local $FOO::VERSION = '1.30';
+
+(Putting C<my> or C<local> on the preceding line will work o.k.)
 
 The file named in VERSION_FROM is not added as a dependency to
 Makefile. This is not really correct, but it would be a major pain
@@ -1785,6 +1836,8 @@ part of the Makefile.
 =item depend
 
   {ANY_TARGET => ANY_DEPENDECY, ...}
+
+(ANY_TARGET must not be given a double-colon rule by MakeMaker.)
 
 =item dist
 
@@ -2030,10 +2083,10 @@ ExtUtils::Install, ExtUtils::Embed
 =head1 AUTHORS
 
 Andy Dougherty <F<doughera@lafcol.lafayette.edu>>, Andreas KE<ouml>nig
-<F<A.Koenig@franz.ww.TU-Berlin.DE>>, Tim Bunce <F<Tim.Bunce@ig.co.uk>>.
-VMS support by Charles Bailey <F<bailey@newman.upenn.edu>>.  OS/2
-support by Ilya Zakharevich <F<ilya@math.ohio-state.edu>>.  Contact the
-makemaker mailing list C<mailto:makemaker@franz.ww.tu-berlin.de>, if
-you have any questions.
+<F<andreas.koenig@mind.de>>, Tim Bunce <F<Tim.Bunce@ig.co.uk>>.  VMS
+support by Charles Bailey <F<bailey@newman.upenn.edu>>.  OS/2 support
+by Ilya Zakharevich <F<ilya@math.ohio-state.edu>>.
+
+Send patches and bug reports to <F<perlbug@perl.org>>.
 
 =cut

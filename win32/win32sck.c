@@ -11,6 +11,7 @@
 #define WIN32IO_IS_STDIO
 #define WIN32SCK_IS_STDSCK
 #define WIN32_LEAN_AND_MEAN
+#define PERLIO_NOT_STDIO 0
 #ifdef __GNUC__
 #define Win32_Winsock
 #endif
@@ -418,6 +419,41 @@ win32_socket(int af, int type, int protocol)
     return s;
 }
 
+/*
+ * close RTL fd while respecting sockets
+ * added as temporary measure until PerlIO has real
+ * Win32 native layer
+ *   -- BKS, 11-11-2000
+*/
+
+int my_close(int fd)
+{
+    int osf;
+    if (!wsock_started)		/* No WinSock? */
+	return(close(fd));	/* Then not a socket. */
+    osf = TO_SOCKET(fd);/* Get it now before it's gone! */
+    if (osf != -1) {
+	int err;
+	err = closesocket(osf);
+	if (err == 0) {
+#if defined(USE_FIXED_OSFHANDLE) || defined(PERL_MSVCRT_READFIX)
+            _set_osfhnd(fd, INVALID_HANDLE_VALUE);
+#endif
+	    (void)close(fd);	/* handle already closed, ignore error */
+	    return 0;
+	}
+	else if (err == SOCKET_ERROR) {
+	    err = WSAGetLastError();
+	    if (err != WSAENOTSOCK) {
+		(void)close(fd);
+		errno = err;
+		return EOF;
+	    }
+	}
+    }
+    return close(fd);
+}
+
 #undef fclose
 int
 my_fclose (FILE *pf)
@@ -425,14 +461,14 @@ my_fclose (FILE *pf)
     int osf;
     if (!wsock_started)		/* No WinSock? */
 	return(fclose(pf));	/* Then not a socket. */
-    osf = TO_SOCKET(fileno(pf));/* Get it now before it's gone! */
+    osf = TO_SOCKET(win32_fileno(pf));/* Get it now before it's gone! */
     if (osf != -1) {
 	int err;
 	win32_fflush(pf);
 	err = closesocket(osf);
 	if (err == 0) {
 #if defined(USE_FIXED_OSFHANDLE) || defined(PERL_MSVCRT_READFIX)
-            _set_osfhnd(fileno(pf), INVALID_HANDLE_VALUE);
+            _set_osfhnd(win32_fileno(pf), INVALID_HANDLE_VALUE);
 #endif
 	    (void)fclose(pf);	/* handle already closed, ignore error */
 	    return 0;
@@ -447,6 +483,41 @@ my_fclose (FILE *pf)
 	}
     }
     return fclose(pf);
+}
+
+#undef fstat
+int
+my_fstat(int fd, struct stat *sbufptr)
+{
+    /* This fixes a bug in fstat() on Windows 9x.  fstat() uses the
+     * GetFileType() win32 syscall, which will fail on Windows 9x.
+     * So if we recognize a socket on Windows 9x, we return the
+     * same results as on Windows NT/2000.
+     * XXX this should be extended further to set S_IFSOCK on
+     * sbufptr->st_mode.
+     */
+    int osf;
+    if (!wsock_started || IsWinNT())
+	return fstat(fd, sbufptr);
+
+    osf = TO_SOCKET(fd);
+    if (osf != -1) {
+	char sockbuf[256];
+	int optlen = sizeof(sockbuf);
+	int retval;
+
+	retval = getsockopt((SOCKET)osf, SOL_SOCKET, SO_TYPE, sockbuf, &optlen);
+	if (retval != SOCKET_ERROR || WSAGetLastError() != WSAENOTSOCK) {
+	    sbufptr->st_mode = _S_IFIFO;
+	    sbufptr->st_rdev = sbufptr->st_dev = (dev_t)fd;
+	    sbufptr->st_nlink = 1;
+	    sbufptr->st_uid = sbufptr->st_gid = sbufptr->st_ino = 0;
+	    sbufptr->st_atime = sbufptr->st_mtime = sbufptr->st_ctime = 0;
+	    sbufptr->st_size = (off_t)0;
+	    return 0;
+	}
+    }
+    return fstat(fd, sbufptr);
 }
 
 struct hostent *

@@ -3,12 +3,27 @@
  */
 
 /*
- * $Id: Storable.xs,v 1.0 2000/09/01 19:40:41 ram Exp $
+ * $Id: Storable.xs,v 1.0.1.6 2001/01/03 09:40:40 ram Exp $
  *
  *  Copyright (c) 1995-2000, Raphael Manfredi
  *  
  *  You may redistribute only under the same terms as Perl 5, as specified
  *  in the README file that comes with the distribution.
+ *
+ * $Log: Storable.xs,v $
+ * Revision 1.0.1.6  2001/01/03 09:40:40  ram
+ * patch7: prototype and casting cleanup
+ * patch7: trace offending package when overloading cannot be restored
+ * patch7: made context cleanup safer to avoid dup freeing
+ *
+ * Revision 1.0.1.5  2000/11/05 17:21:24  ram
+ * patch6: fixed severe "object lost" bug for STORABLE_freeze returns
+ *
+ * Revision 1.0.1.4  2000/10/26 17:11:04  ram
+ * patch5: auto requires module of blessed ref when STORABLE_thaw misses
+ *
+ * Revision 1.0.1.3  2000/09/29 19:49:57  ram
+ * patch3: avoid using "tainted" and "dirty" since Perl remaps them via cpp
  *
  * $Log: Storable.xs,v $
  * Revision 1.0  2000/09/01 19:40:41  ram
@@ -87,14 +102,21 @@ typedef double NV;			/* Older perls lack the NV type */
 #endif
 
 #ifdef DEBUGME
-#ifndef DASSERT
-#define DASSERT
-#endif
-#define TRACEME(x)	do { PerlIO_stdoutf x; PerlIO_stdoutf("\n"); } while (0)
+/*
+ * TRACEME() will only output things when the $Storable::DEBUGME is true.
+ */
+
+#define TRACEME(x)	do {									\
+	if (SvTRUE(perl_get_sv("Storable::DEBUGME", TRUE)))	\
+		{ PerlIO_stdoutf x; PerlIO_stdoutf("\n"); }			\
+} while (0)
 #else
 #define TRACEME(x)
 #endif
 
+#ifndef DASSERT
+#define DASSERT
+#endif
 #ifdef DASSERT
 #define ASSERT(x,y)	do {									\
 	if (!(x)) {												\
@@ -235,6 +257,7 @@ typedef struct stcxt {
 	int entry;			/* flags recursion */
 	int optype;			/* type of traversal operation */
     HV *hseen;			/* which objects have been seen, store time */
+    AV *hook_seen;		/* which SVs were returned by STORABLE_freeze() */
     AV *aseen;			/* which objects have been seen, retrieve time */
     HV *hclass;			/* which classnames have been seen, store time */
     AV *aclass;			/* which classnames have been seen, retrieve time */
@@ -652,7 +675,7 @@ static char magicstr[] = "pst0";			/* Used as a magic number */
 #define GETMARK(x) do {							\
 	if (!cxt->fio)								\
 		MBUF_GETC(x);							\
-	else if ((x = PerlIO_getc(cxt->fio)) == EOF)	\
+	else if ((int) (x = PerlIO_getc(cxt->fio)) == EOF)	\
 		return (SV *) 0;						\
 } while (0)
 
@@ -740,14 +763,14 @@ static int store_tied_item(stcxt_t *cxt, SV *sv);
 static int store_other(stcxt_t *cxt, SV *sv);
 static int store_blessed(stcxt_t *cxt, SV *sv, int type, HV *pkg);
 
-static int (*sv_store[])() = {
-	store_ref,			/* svis_REF */
-	store_scalar,		/* svis_SCALAR */
-	store_array,		/* svis_ARRAY */
-	store_hash,			/* svis_HASH */
-	store_tied,			/* svis_TIED */
-	store_tied_item,	/* svis_TIED_ITEM */
-	store_other,		/* svis_OTHER */
+static int (*sv_store[])(stcxt_t *cxt, SV *sv) = {
+	store_ref,										/* svis_REF */
+	store_scalar,									/* svis_SCALAR */
+	(int (*)(stcxt_t *cxt, SV *sv)) store_array,	/* svis_ARRAY */
+	(int (*)(stcxt_t *cxt, SV *sv)) store_hash,		/* svis_HASH */
+	store_tied,										/* svis_TIED */
+	store_tied_item,								/* svis_TIED_ITEM */
+	store_other,									/* svis_OTHER */
 };
 
 #define SV_STORE(x)	(*sv_store[x])
@@ -773,7 +796,7 @@ static SV *retrieve_tied_hash(stcxt_t *cxt);
 static SV *retrieve_tied_scalar(stcxt_t *cxt);
 static SV *retrieve_other(stcxt_t *cxt);
 
-static SV *(*sv_old_retrieve[])() = {
+static SV *(*sv_old_retrieve[])(stcxt_t *cxt) = {
 	0,			/* SX_OBJECT -- entry unused dynamically */
 	retrieve_lscalar,		/* SX_LSCALAR */
 	old_retrieve_array,		/* SX_ARRAY -- for pre-0.6 binaries */
@@ -814,7 +837,7 @@ static SV *retrieve_overloaded(stcxt_t *cxt);
 static SV *retrieve_tied_key(stcxt_t *cxt);
 static SV *retrieve_tied_idx(stcxt_t *cxt);
 
-static SV *(*sv_retrieve[])() = {
+static SV *(*sv_retrieve[])(stcxt_t *cxt) = {
 	0,			/* SX_OBJECT -- entry unused dynamically */
 	retrieve_lscalar,		/* SX_LSCALAR */
 	retrieve_array,			/* SX_ARRAY */
@@ -946,6 +969,15 @@ static void init_store_context(
 	 */
 
 	cxt->hook = newHV();			/* Table where hooks are cached */
+
+	/*
+	 * The `hook_seen' array keeps track of all the SVs returned by
+	 * STORABLE_freeze hooks for us to serialize, so that they are not
+	 * reclaimed until the end of the serialization process.  Each SV is
+	 * only stored once, the first time it is seen.
+	 */
+
+	cxt->hook_seen = newAV();		/* Lists SVs returned by STORABLE_freeze */
 }
 
 /*
@@ -975,16 +1007,41 @@ static void clean_store_context(stcxt_t *cxt)
 
 	/*
 	 * And now dispose of them...
+	 *
+	 * The surrounding if() protection has been added because there might be
+	 * some cases where this routine is called more than once, during
+	 * exceptionnal events.  This was reported by Marc Lehmann when Storable
+	 * is executed from mod_perl, and the fix was suggested by him.
+	 * 		-- RAM, 20/12/2000
 	 */
 
-	hv_undef(cxt->hseen);
-	sv_free((SV *) cxt->hseen);
+	if (cxt->hseen) {
+		HV *hseen = cxt->hseen;
+		cxt->hseen = 0;
+		hv_undef(hseen);
+		sv_free((SV *) hseen);
+	}
 
-	hv_undef(cxt->hclass);
-	sv_free((SV *) cxt->hclass);
+	if (cxt->hclass) {
+		HV *hclass = cxt->hclass;
+		cxt->hclass = 0;
+		hv_undef(hclass);
+		sv_free((SV *) hclass);
+	}
 
-	hv_undef(cxt->hook);
-	sv_free((SV *) cxt->hook);
+	if (cxt->hook) {
+		HV *hook = cxt->hook;
+		cxt->hook = 0;
+		hv_undef(hook);
+		sv_free((SV *) hook);
+	}
+
+	if (cxt->hook_seen) {
+		AV *hook_seen = cxt->hook_seen;
+		cxt->hook_seen = 0;
+		av_undef(hook_seen);
+		sv_free((SV *) hook_seen);
+	}
 
 	cxt->entry = 0;
 	cxt->s_dirty = 0;
@@ -1039,17 +1096,33 @@ static void clean_retrieve_context(stcxt_t *cxt)
 
 	ASSERT(cxt->optype & ST_RETRIEVE, ("was performing a retrieve()"));
 
-	av_undef(cxt->aseen);
-	sv_free((SV *) cxt->aseen);
+	if (cxt->aseen) {
+		AV *aseen = cxt->aseen;
+		cxt->aseen = 0;
+		av_undef(aseen);
+		sv_free((SV *) aseen);
+	}
 
-	av_undef(cxt->aclass);
-	sv_free((SV *) cxt->aclass);
+	if (cxt->aclass) {
+		AV *aclass = cxt->aclass;
+		cxt->aclass = 0;
+		av_undef(aclass);
+		sv_free((SV *) aclass);
+	}
 
-	hv_undef(cxt->hook);
-	sv_free((SV *) cxt->hook);
+	if (cxt->hook) {
+		HV *hook = cxt->hook;
+		cxt->hook = 0;
+		hv_undef(hook);
+		sv_free((SV *) hook);
+	}
 
-	if (cxt->hseen)
-		sv_free((SV *) cxt->hseen);		/* optional HV, for backward compat. */
+	if (cxt->hseen) {
+		HV *hseen = cxt->hseen;
+		cxt->hseen = 0;
+		hv_undef(hseen);
+		sv_free((SV *) hseen);		/* optional HV, for backward compat. */
+	}
 
 	cxt->entry = 0;
 	cxt->s_dirty = 0;
@@ -1071,6 +1144,8 @@ stcxt_t *cxt;
 		clean_retrieve_context(cxt);
 	else
 		clean_store_context(cxt);
+
+	ASSERT(!cxt->s_dirty, ("context is clean"));
 }
 
 /*
@@ -1220,6 +1295,19 @@ static void pkg_hide(
 {
 	(void) hv_store(cache,
 		HvNAME(pkg), strlen(HvNAME(pkg)), newSVsv(&PL_sv_undef), 0);
+}
+
+/*
+ * pkg_uncache
+ *
+ * Discard cached value: a whole fetch loop will be retried at next lookup.
+ */
+static void pkg_uncache(
+	HV *cache,
+	HV *pkg,
+	char *method)
+{
+	(void) hv_delete(cache, HvNAME(pkg), strlen(HvNAME(pkg)), G_DISCARD);
 }
 
 /*
@@ -2096,11 +2184,14 @@ static int store_hook(
 
 	for (i = 1; i < count; i++) {
 		SV **svh;
-		SV *xsv = ary[i];
+		SV *rsv = ary[i];
+		SV *xsv;
+		AV *av_hook = cxt->hook_seen;
 
-		if (!SvROK(xsv))
-			CROAK(("Item #%d from hook in %s is not a reference", i, class));
-		xsv = SvRV(xsv);		/* Follow ref to know what to look for */
+		if (!SvROK(rsv))
+			CROAK(("Item #%d returned by STORABLE_freeze "
+				"for %s is not a reference", i, class));
+		xsv = SvRV(rsv);		/* Follow ref to know what to look for */
 
 		/*
 		 * Look in hseen and see if we have a tag already.
@@ -2136,11 +2227,34 @@ static int store_hook(
 			CROAK(("Could not serialize item #%d from hook in %s", i, class));
 
 		/*
+		 * It was the first time we serialized `xsv'.
+		 *
+		 * Keep this SV alive until the end of the serialization: if we
+		 * disposed of it right now by decrementing its refcount, and it was
+		 * a temporary value, some next temporary value allocated during
+		 * another STORABLE_freeze might take its place, and we'd wrongly
+		 * assume that new SV was already serialized, based on its presence
+		 * in cxt->hseen.
+		 *
+		 * Therefore, push it away in cxt->hook_seen.
+		 */
+
+		av_store(av_hook, AvFILLp(av_hook)+1, SvREFCNT_inc(xsv));
+
+	sv_seen:
+		/*
+		 * Dispose of the REF they returned.  If we saved the `xsv' away
+		 * in the array of returned SVs, that will not cause the underlying
+		 * referenced SV to be reclaimed.
+		 */
+
+		ASSERT(SvREFCNT(xsv) > 1, ("SV will survive disposal of its REF"));
+		SvREFCNT_dec(rsv);			/* Dispose of reference */
+
+		/*
 		 * Replace entry with its tag (not a real SV, so no refcnt increment)
 		 */
 
-	sv_seen:
-		SvREFCNT_dec(xsv);
 		ary[i] = *svh;
 		TRACEME(("listed object %d at 0x%"UVxf" is tag #%"UVuf,
 			 i-1, PTR2UV(xsv), PTR2UV(*svh)));
@@ -3131,8 +3245,37 @@ static SV *retrieve_hook(stcxt_t *cxt)
 
 	BLESS(sv, class);
 	hook = pkg_can(cxt->hook, SvSTASH(sv), "STORABLE_thaw");
-	if (!hook)
-		CROAK(("No STORABLE_thaw defined for objects of class %s", class));
+	if (!hook) {
+		/*
+		 * Hook not found.  Maybe they did not require the module where this
+		 * hook is defined yet?
+		 *
+		 * If the require below succeeds, we'll be able to find the hook.
+		 * Still, it only works reliably when each class is defined in a
+		 * file of its own.
+		 */
+
+		SV *psv = newSVpvn("require ", 8);
+		sv_catpv(psv, class);
+
+		TRACEME(("No STORABLE_thaw defined for objects of class %s", class));
+		TRACEME(("Going to require module '%s' with '%s'", class, SvPVX(psv)));
+
+		perl_eval_sv(psv, G_DISCARD);
+		sv_free(psv);
+
+		/*
+		 * We cache results of pkg_can, so we need to uncache before attempting
+		 * the lookup again.
+		 */
+
+		pkg_uncache(cxt->hook, SvSTASH(sv), "STORABLE_thaw");
+		hook = pkg_can(cxt->hook, SvSTASH(sv), "STORABLE_thaw");
+
+		if (!hook)
+			CROAK(("No STORABLE_thaw defined for objects of class %s "
+					"(even after a \"require %s;\")", class, class));
+	}
 
 	/*
 	 * If we don't have an `av' yet, prepare one.
@@ -3273,9 +3416,10 @@ static SV *retrieve_overloaded(stcxt_t *cxt)
 
 	stash = (HV *) SvSTASH (sv);
 	if (!stash || !Gv_AMG(stash))
-		CROAK(("Cannot restore overloading on %s(0x%"UVxf")",
+		CROAK(("Cannot restore overloading on %s(0x%"UVxf") (package %s)",
 		       sv_reftype(sv, FALSE),
-		       PTR2UV(sv)));
+		       PTR2UV(sv),
+			   stash ? HvNAME(stash) : "<unknown>"));
 
 	SvAMAGIC_on(rv);
 

@@ -14,6 +14,11 @@ BEGIN {
 	require Fcntl; import Fcntl qw(/^O_/ /^SEEK_/);
 }
 
+use strict;
+
+our @s;
+our $fail;
+
 sub zap {
     close(BIG);
     unlink("big");
@@ -26,35 +31,42 @@ sub bye {
     exit(0);
 }
 
+my $explained;
+
 sub explain {
-    print <<EOM;
+    unless ($explained++) {
+	print <<EOM;
 #
-# If the lfs (large file support: large meaning larger than two gigabytes)
-# tests are skipped or fail, it may mean either that your process
-# (or process group) is not allowed to write large files (resource
-# limits) or that the file system you are running the tests on doesn't
-# let your user/group have large files (quota) or the filesystem simply
-# doesn't support large files.  You may even need to reconfigure your kernel.
-# (This is all very operating system and site-dependent.)
+# If the lfs (large file support: large meaning larger than two
+# gigabytes) tests are skipped or fail, it may mean either that your
+# process (or process group) is not allowed to write large files
+# (resource limits) or that the file system (the network filesystem?)
+# you are running the tests on doesn't let your user/group have large
+# files (quota) or the filesystem simply doesn't support large files.
+# You may even need to reconfigure your kernel.  (This is all very
+# operating system and site-dependent.)
 #
 # Perl may still be able to support large files, once you have
 # such a process, enough quota, and such a (file) system.
+# It is just that the test failed now.
 #
 EOM
+    }
+    print "1..0 # Skip: @_\n" if @_;
 }
 
 print "# checking whether we have sparse files...\n";
 
 # Known have-nots.
-if ($^O eq 'win32' || $^O eq 'vms') {
-    print "1..0 # Skip: no sparse files (because this is $^O) \n";
+if ($^O eq 'MSWin32' || $^O eq 'VMS') {
+    print "1..0 # Skip: no sparse files in $^O\n";
     bye();
 }
 
 # Known haves that have problems running this test
 # (for example because they do not support sparse files, like UNICOS)
 if ($^O eq 'unicos') {
-    print "1..0 # Skip: large files known to work but unable to test them here ($^O)\n";
+    print "1..0 # Skip: no sparse files in $^0, unable to test large files\n";
     bye();
 }
 
@@ -120,9 +132,8 @@ sysopen(BIG, "big", O_WRONLY|O_CREAT|O_TRUNC) or
 my $sysseek = sysseek(BIG, 5_000_000_000, SEEK_SET);
 unless (! $r && defined $sysseek && $sysseek == 5_000_000_000) {
     $sysseek = 'undef' unless defined $sysseek;
-    print "1..0 # Skip: seeking past 2GB failed: ",
-           $r ? 'signal '.($r & 0x7f) : "$! (sysseek returned $sysseek)", "\n";
-    explain();
+    explain("seeking past 2GB failed: ",
+	    $r ? 'signal '.($r & 0x7f) : "$! (sysseek returned $sysseek)");
     bye();
 }
 
@@ -135,11 +146,12 @@ my $close     = close BIG;
 print "# close failed: $!\n" unless $close;
 unless($syswrite && $close) {
     if ($! =~/too large/i) {
-	print "1..0 # Skip: writing past 2GB failed: process limits?\n";
+	explain("writing past 2GB failed: process limits?");
     } elsif ($! =~ /quota/i) {
-	print "1..0 # Skip: filesystem quota limits?\n";
+	explain("filesystem quota limits?");
+    } else {
+	explain("error: $!");
     }
-    explain();
     bye();
 }
 
@@ -148,8 +160,7 @@ unless($syswrite && $close) {
 print "# @s\n";
 
 unless ($s[7] == 5_000_000_003) {
-    print "1..0 # Skip: not configured to use large files?\n";
-    explain();
+    explain("kernel/fs not configured to use large files?");
     bye();
 }
 
@@ -158,9 +169,30 @@ sub fail () {
     $fail++;
 }
 
+sub offset ($$) {
+    my ($offset_will_be, $offset_want) = @_;
+    my $offset_is = eval $offset_will_be;
+    unless ($offset_is == $offset_want) {
+        print "# bad offset $offset_is, want $offset_want\n";
+	my ($offset_func) = ($offset_will_be =~ /^(\w+)/);
+	if (unpack("L", pack("L", $offset_want)) == $offset_is) {
+	    print "# 32-bit wraparound suspected in $offset_func() since\n";
+	    print "# $offset_want cast into 32 bits equals $offset_is.\n";
+	} elsif ($offset_want - unpack("L", pack("L", $offset_want)) - 1
+	         == $offset_is) {
+	    print "# 32-bit wraparound suspected in $offset_func() since\n";
+	    printf "# %s - unpack('L', pack('L', %s)) - 1 equals %s.\n",
+	        $offset_want,
+	        $offset_want,
+	        $offset_is;
+        }
+        fail;
+    }
+}
+
 print "1..17\n";
 
-my $fail = 0;
+$fail = 0;
 
 fail unless $s[7] == 5_000_000_003;	# exercizes pp_stat
 print "ok 1\n";
@@ -176,28 +208,28 @@ print "ok 4\n";
 
 sysopen(BIG, "big", O_RDONLY) or do { warn "sysopen failed: $!\n"; bye };
 
-fail unless sysseek(BIG, 4_500_000_000, SEEK_SET) == 4_500_000_000;
+offset('sysseek(BIG, 4_500_000_000, SEEK_SET)', 4_500_000_000);
 print "ok 5\n";
 
-fail unless sysseek(BIG, 0, SEEK_CUR) == 4_500_000_000;
+offset('sysseek(BIG, 0, SEEK_CUR)', 4_500_000_000);
 print "ok 6\n";
 
-fail unless sysseek(BIG, 1, SEEK_CUR) == 4_500_000_001;
+offset('sysseek(BIG, 1, SEEK_CUR)', 4_500_000_001);
 print "ok 7\n";
 
-fail unless sysseek(BIG, 0, SEEK_CUR) == 4_500_000_001;
+offset('sysseek(BIG, 0, SEEK_CUR)', 4_500_000_001);
 print "ok 8\n";
 
-fail unless sysseek(BIG, -1, SEEK_CUR) == 4_500_000_000;
+offset('sysseek(BIG, -1, SEEK_CUR)', 4_500_000_000);
 print "ok 9\n";
 
-fail unless sysseek(BIG, 0, SEEK_CUR) == 4_500_000_000;
+offset('sysseek(BIG, 0, SEEK_CUR)', 4_500_000_000);
 print "ok 10\n";
 
-fail unless sysseek(BIG, -3, SEEK_END) == 5_000_000_000;
+offset('sysseek(BIG, -3, SEEK_END)', 5_000_000_000);
 print "ok 11\n";
 
-fail unless sysseek(BIG, 0, SEEK_CUR) == 5_000_000_000;
+offset('sysseek(BIG, 0, SEEK_CUR)', 5_000_000_000);
 print "ok 12\n";
 
 my $big;
@@ -209,7 +241,9 @@ fail unless $big eq "big";
 print "ok 14\n";
 
 # 705_032_704 = (I32)5_000_000_000
-fail unless seek(BIG, 705_032_704, SEEK_SET);
+# See that we don't have "big" in the 705_... spot:
+# that would mean that we have a wraparound.
+fail unless sysseek(BIG, 705_032_704, SEEK_SET);
 print "ok 15\n";
 
 my $zero;
@@ -220,7 +254,7 @@ print "ok 16\n";
 fail unless $zero eq "\0\0\0";
 print "ok 17\n";
 
-explain if $fail;
+explain() if $fail;
 
 bye(); # does the necessary cleanup
 

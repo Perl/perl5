@@ -22,6 +22,10 @@ require Exporter;
        off_utf8
        utf_to_utf
        encodings
+       utf8_decode
+       utf8_encode
+       utf8_upgrade
+       utf8_downgrade
       );
 
 bootstrap Encode ();
@@ -340,9 +344,9 @@ sub from_to
  return length($_[0] = $string);
 }
 
-my %encoding = ( Unicode      => bless({},'Encode::Unicode'),
-                 'iso10646-1' => bless({},'Encode::iso10646_1'),
-               );
+# The global hash is declared in XS code
+$encoding{Unicode}    = bless({},'Encode::Unicode');
+$encoding{'iso10646-1'} = bless({},'Encode::iso10646_1');
 
 sub encodings
 {
@@ -378,6 +382,7 @@ sub loadEncoding
      last unless $type eq '#';
     }
    $class .= ('::'.(($type eq 'E') ? 'Escape' : 'Table'));
+   #warn "Loading $file";
    return $class->read($fh,$name,$type);
   }
  else
@@ -407,13 +412,20 @@ sub getEncoding
 
 package Encode::Unicode;
 
-# Dummy package that provides the encode interface
+# Dummy package that provides the encode interface but leaves data
+# as UTF-8 encoded. It is here so that from_to() works.
 
 sub name { 'Unicode' }
 
-sub toUnicode   { $_[1] }
+sub toUnicode
+{
+ my ($obj,$str,$chk) = @_;
+ Encode::utf8_upgrade($str);
+ $_[1] = '' if $chk;
+ return $str;
+}
 
-sub fromUnicode { $_[1] }
+*fromUnicode = \&toUnicode;
 
 package Encode::Table;
 
@@ -532,7 +544,9 @@ sub fromUnicode
  return $str;
 }
 
-package Encode::iso10646_1;#
+package Encode::iso10646_1;
+# Encoding is 16-bit network order Unicode
+# Used for X font encodings
 
 sub name { 'iso10646-1' }
 
@@ -546,6 +560,7 @@ sub toUnicode
    $uni .= chr($code);
   }
  $_[1] = $str if $chk;
+ Encode::utf8_upgrade($uni);
  return $uni;
 }
 
@@ -567,6 +582,7 @@ sub fromUnicode
  $_[1] = $uni if $chk;
  return $str;
 }
+
 
 package Encode::Escape;
 use Carp;

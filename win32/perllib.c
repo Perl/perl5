@@ -1,8 +1,7 @@
 /*
  * "The Road goes ever on and on, down from the door where it began."
  */
-
-
+#define PERLIO_NOT_STDIO 0
 #include "EXTERN.h"
 #include "perl.h"
 
@@ -371,6 +370,12 @@ DllMain(HANDLE hModule,		/* DLL module handle */
 	 * process termination or call to FreeLibrary.
 	 */
     case DLL_PROCESS_DETACH:
+        /* As long as we use TerminateProcess()/TerminateThread() etc. for mimicing kill()
+           anything here had better be harmless if:
+            A. Not called at all.
+            B. Called after memory allocation for Heap has been forcibly removed by OS.
+            PerlIO_cleanup() was done here but fails (B).
+         */     
 	EndSockets();
 #if defined(USE_THREADS) || defined(USE_ITHREADS)
 	if (PL_curinterp)

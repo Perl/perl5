@@ -91,7 +91,7 @@ Six such conversions are possible:
 
 These conversions are governed by the following general rules:
 
-=over
+=over 4
 
 =item *
 
@@ -141,7 +141,7 @@ argument as in modular arithmetic, e.g., C<mod 2**32> on a 32-bit
 architecture.  C<sprintf "%u", -1> therefore provides the same result as
 C<sprintf "%u", ~0>.
 
-=over
+=over 4
 
 =item Arithmetic operators except, C<no integer>
 

@@ -1,3 +1,4 @@
+# -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 package CPAN::Mirrored::By;
 
 sub new { 
@@ -16,7 +17,7 @@ use FileHandle ();
 use File::Basename ();
 use File::Path ();
 use vars qw($VERSION);
-$VERSION = substr q$Revision: 1.46 $, 10;
+$VERSION = substr q$Revision: 1.51 $, 10;
 
 =head1 NAME
 
@@ -174,6 +175,9 @@ disable the cache scanning with 'never'.
     } while ($ans ne 'atstart' && $ans ne 'never');
     $CPAN::Config->{scan_cache} = $ans;
 
+    #
+    # cache_metadata
+    #
     print qq{
 
 To considerably speed up the initial CPAN shell startup, it is
@@ -187,6 +191,30 @@ is not available, the normal index mechanism will be used.
         $ans = prompt("Cache metadata (yes/no)?", ($default ? 'yes' : 'no'));
     } while ($ans !~ /^\s*[yn]/i);
     $CPAN::Config->{cache_metadata} = ($ans =~ /^\s*y/i ? 1 : 0);
+
+    #
+    # term_is_latin
+    #
+    print qq{
+
+The next option deals with the charset your terminal supports. In
+general CPAN is English speaking territory, thus the charset does not
+matter much, but some of the aliens out there who upload their
+software to CPAN bear names that are outside the ASCII range. If your
+terminal supports UTF-8, you say no to the next question, if it
+supports ISO-8859-1 (also known as LATIN1) then you say yes, and if it
+supports neither nor, your answer does not matter, you will not be
+able to read the names of some authors anyway. If you answer no, nmes
+will be output in UTF-8.
+
+};
+
+    defined($default = $CPAN::Config->{term_is_latin}) or $default = 1;
+    do {
+        $ans = prompt("Your terminal expects ISO-8859-1 (yes/no)?",
+                      ($default ? 'yes' : 'no'));
+    } while ($ans !~ /^\s*[yn]/i);
+    $CPAN::Config->{term_is_latin} = ($ans =~ /^\s*y/i ? 1 : 0);
 
     #
     # prerequisites_policy
@@ -216,10 +244,11 @@ policy to one of the three values.
 
     print qq{
 
-The CPAN module will need a few external programs to work
-properly. Please correct me, if I guess the wrong path for a program.
-Don\'t panic if you do not have some of them, just press ENTER for
-those.
+The CPAN module will need a few external programs to work properly.
+Please correct me, if I guess the wrong path for a program. Don\'t
+panic if you do not have some of them, just press ENTER for those. To
+disable the use of a download program, you can type a space followed
+by ENTER.
 
 };
 
@@ -228,7 +257,7 @@ those.
     my(@path) = split /$Config{'path_sep'}/, $ENV{'PATH'};
     local $^W = $old_warn;
     my $progname;
-    for $progname (qw/gzip tar unzip make lynx ncftpget ncftp ftp/){
+    for $progname (qw/gzip tar unzip make lynx wget ncftpget ncftp ftp/){
       if ($^O eq 'MacOS') {
           $CPAN::Config->{$progname} = 'not_here';
           next;
@@ -286,9 +315,9 @@ those.
     print qq{
 
 Every Makefile.PL is run by perl in a separate process. Likewise we
-run \'make\' and \'make install\' in processes. If you have any parameters
-\(e.g. PREFIX, INSTALLPRIVLIB, UNINST or the like\) you want to pass to
-the calls, please specify them here.
+run \'make\' and \'make install\' in processes. If you have any
+parameters \(e.g. PREFIX, LIB, UNINST or the like\) you want to pass
+to the calls, please specify them here.
 
 If you don\'t understand this question, just press ENTER.
 
@@ -296,13 +325,29 @@ If you don\'t understand this question, just press ENTER.
 
     $default = $CPAN::Config->{makepl_arg} || "";
     $CPAN::Config->{makepl_arg} =
-	prompt("Parameters for the 'perl Makefile.PL' command?",$default);
+	prompt("Parameters for the 'perl Makefile.PL' command?
+Typical frequently used settings:
+
+    POLLUTE=1        increasing backwards compatibility
+    LIB=~/perl       non-root users (please see manual for more hints)
+
+Your choice: ",$default);
     $default = $CPAN::Config->{make_arg} || "";
-    $CPAN::Config->{make_arg} = prompt("Parameters for the 'make' command?",$default);
+    $CPAN::Config->{make_arg} = prompt("Parameters for the 'make' command?
+Typical frequently used setting:
+
+    -j3              dual processor system
+
+Your choice: ",$default);
 
     $default = $CPAN::Config->{make_install_arg} || $CPAN::Config->{make_arg} || "";
     $CPAN::Config->{make_install_arg} =
-	prompt("Parameters for the 'make install' command?",$default);
+	prompt("Parameters for the 'make install' command?
+Typical frequently used setting:
+
+    UNINST=1         to always uninstall potentially conflicting files
+
+Your choice: ",$default);
 
     #
     # Alarm period
@@ -376,8 +421,26 @@ sub conf_sites {
   }
   my $loopcount = 0;
   local $^T = time;
+  my $overwrite_local = 0;
+  if ($mby && -f $mby && -M _ <= 60 && -s _ > 0) {
+      my $mtime = localtime((stat _)[9]);
+      my $prompt = qq{Found $mby as of $mtime
+
+  I\'d use that as a database of CPAN sites. If that is OK for you,
+  please answer 'y', but if you want me to get a new database now,
+  please answer 'n' to the following question.
+
+  Shall I use the local database in $mby?};
+      my $ans = prompt($prompt,"y");
+      $overwrite_local = 1 unless $ans =~ /^y/i;
+  }
   while ($mby) {
-    if ( ! -f $mby ){
+    if ($overwrite_local) {
+      print qq{Trying to overwrite $mby
+};
+      $mby = CPAN::FTP->localize($m,$mby,3);
+      $overwrite_local = 0;
+    } elsif ( ! -f $mby ){
       print qq{You have no $mby
   I\'m trying to fetch one
 };
@@ -519,7 +582,8 @@ http: -- that host a CPAN mirror.
         }
     }
     push (@urls, map ("$_ (previous pick)", @previous_urls));
-    my $prompt = "Select as many URLs as you like";
+    my $prompt = "Select as many URLs as you like,
+put them on one line, separated by blanks";
     if (@previous_urls) {
        $default = join (' ', ((scalar @urls) - (scalar @previous_urls) + 1) ..
                              (scalar @urls));
@@ -547,11 +611,15 @@ Please enter your CPAN site:};
             $ans =~ s|/?\z|/|; # has to end with one slash
             $ans = "file:$ans" unless $ans =~ /:/; # without a scheme is a file:
             if ($ans =~ /^\w+:\/./) {
-               push @urls, $ans unless $seen{$ans}++;
+                push @urls, $ans unless $seen{$ans}++;
             } else {
-                print qq{"$ans" doesn\'t look like an URL at first sight.
-I\'ll ignore it for now.  You can add it to $INC{'CPAN/MyConfig.pm'}
-later if you\'re sure it\'s right.\n};
+                printf(qq{"%s" doesn\'t look like an URL at first sight.
+I\'ll ignore it for now.
+You can add it to your %s
+later if you\'re sure it\'s right.\n},
+                       $ans,
+                       $INC{'CPAN/MyConfig.pm'} || $INC{'CPAN/Config.pm'} || "configuration file",
+                      );
             }
         }
     } while $ans || !%seen;

@@ -97,7 +97,7 @@ C<PL_DBsingle>.
 
 =for apidoc Amn|SV *|PL_DBsingle
 When Perl is run in debugging mode, with the B<-d> switch, this SV is a
-boolean which indicates whether subs are being single-stepped. 
+boolean which indicates whether subs are being single-stepped.
 Single-stepping is automatically turned on after every step.  This is the C
 variable which corresponds to Perl's $DB::single variable.  See
 C<PL_DBsub>.
@@ -169,8 +169,7 @@ PERLVARI(Ilaststype,	I32,	OP_STAT)
 PERLVAR(Imess_sv,	SV *)
 
 /* XXX shouldn't these be per-thread? --GSAR */
-PERLVAR(Iors,		char *)		/* output record separator $\ */
-PERLVAR(Iorslen,	STRLEN)
+PERLVAR(Iors_sv,	SV *)		/* output record separator $\ */
 PERLVAR(Iofmt,		char *)		/* output format for numbers $# */
 
 /* interpreter atexit processing */
@@ -181,10 +180,10 @@ PERLVARI(Iexitlistlen,	I32, 0)		/* length of same */
 /*
 =for apidoc Amn|HV*|PL_modglobal
 
-C<PL_modglobal> is a general purpose, interpreter global HV for use by 
+C<PL_modglobal> is a general purpose, interpreter global HV for use by
 extensions that need to keep information on a per-interpreter basis.
-In a pinch, it can also be used as a symbol table for extensions 
-to share data among each other.  It is a good idea to use keys 
+In a pinch, it can also be used as a symbol table for extensions
+to share data among each other.  It is a good idea to use keys
 prefixed by the package name of the extension that owns the data.
 
 =cut

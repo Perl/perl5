@@ -91,7 +91,7 @@ functions, like some keywords and named operators)
 arranged by category.  Some functions appear in more
 than one place.
 
-=over
+=over 4
 
 =item Functions for SCALARs or strings
 
@@ -274,8 +274,8 @@ X<-S>X<-b>X<-c>X<-t>X<-u>X<-g>X<-k>X<-T>X<-B>X<-M>X<-A>X<-C>
     -O	File is owned by real uid.
 
     -e	File exists.
-    -z	File has zero size.
-    -s	File has nonzero size (returns size).
+    -z	File has zero size (is empty).
+    -s	File has nonzero size (returns size in bytes).
 
     -f	File is a plain file.
     -d	File is a directory.
@@ -923,7 +923,10 @@ element to return happens to be C<undef>.
 
 You may also use C<defined(&func)> to check whether subroutine C<&func>
 has ever been defined.  The return value is unaffected by any forward
-declarations of C<&foo>.
+declarations of C<&foo>.  Note that a subroutine which is not defined
+may still be callable: its package may have an C<AUTOLOAD> method that
+makes it spring into existence the first time that it is called -- see
+L<perlsub>.
 
 Use of C<defined> on aggregates (hashes and arrays) is deprecated.  It
 used to report whether memory for that aggregate has ever been
@@ -1193,7 +1196,7 @@ make your program I<appear> to run faster.
 
 When called in list context, returns a 2-element list consisting of the
 key and value for the next element of a hash, so that you can iterate over
-it.  When called in scalar context, returns the key for only the "next"
+it.  When called in scalar context, returns only the key for the next
 element in the hash.
 
 Entries are returned in an apparently random order.  The actual random
@@ -1208,7 +1211,14 @@ again.  There is a single iterator for each hash, shared by all C<each>,
 C<keys>, and C<values> function calls in the program; it can be reset by
 reading all the elements from the hash, or by evaluating C<keys HASH> or
 C<values HASH>.  If you add or delete elements of a hash while you're
-iterating over it, you may get entries skipped or duplicated, so don't.
+iterating over it, you may get entries skipped or duplicated, so
+don't.  Exception: It is always safe to delete the item most recently
+returned by C<each()>, which means that the following code will work:
+
+        while (($key, $value) = each %hash) {
+          print $key, "\n";
+          delete $hash{$key};   # This is safe
+        }
 
 The following prints out your environment like the printenv(1) program,
 only in a different order:
@@ -1472,7 +1482,10 @@ it exists, but the reverse doesn't necessarily hold true.
 Given an expression that specifies the name of a subroutine,
 returns true if the specified subroutine has ever been declared, even
 if it is undefined.  Mentioning a subroutine name for exists or defined
-does not count as declaring it.
+does not count as declaring it.  Note that a subroutine which does not
+exist may still be callable: its package may have an C<AUTOLOAD>
+method that makes it spring into existence the first time that it is
+called -- see L<perlsub>.
 
     print "Exists\n" 	if exists &subroutine;
     print "Defined\n" 	if defined &subroutine;
@@ -2341,8 +2354,8 @@ it succeeded, false otherwise.  See the example in L<perlipc/"Sockets: Client/Se
 =item local EXPR
 
 You really probably want to be using C<my> instead, because C<local> isn't
-what most people think of as "local".  See L<perlsub/"Private Variables
-via my()"> for details.
+what most people think of as "local".  See 
+L<perlsub/"Private Variables via my()"> for details.
 
 A local modifies the listed variables to be local to the enclosing
 block, file, or eval.  If more than one value is listed, the list must
@@ -2475,6 +2488,29 @@ it can cause bizarre results if the elements of LIST are not variables.
 Using a regular C<foreach> loop for this purpose would be clearer in
 most cases.  See also L</grep> for an array composed of those items of
 the original list for which the BLOCK or EXPR evaluates to true.
+
+C<{> starts both hash references and blocks, so C<map { ...> could be either
+the start of map BLOCK LIST or map EXPR, LIST. Because perl doesn't look
+ahead for the closing C<}> it has to take a guess at which its dealing with
+based what it finds just after the C<{>. Usually it gets it right, but if it
+doesn't it won't realize something is wrong until it gets to the C<}> and
+encounters the missing (or unexpected) comma. The syntax error will be
+reported close to the C<}> but you'll need to change something near the C<{>
+such as using a unary C<+> to give perl some help:
+
+    %hash = map {  "\L$_", 1  } @array  # perl guesses EXPR.  wrong
+    %hash = map { +"\L$_", 1  } @array  # perl guesses BLOCK. right
+    %hash = map { ("\L$_", 1) } @array  # this also works
+    %hash = map {  lc($_), 1  } @array  # as does this.
+    %hash = map +( lc($_), 1 ), @array  # this is EXPR and works!
+      
+    %hash = map  ( lc($_), 1 ), @array  # evaluates to (1, @array)
+
+or to force an anon hash constructor use C<+{>
+
+   @hashes = map +{ lc($_), 1 }, @array # EXPR, so needs , at end
+
+and you get list of anonymous hashes each with only 1 entry.
 
 =item mkdir FILENAME,MASK
 
@@ -2846,7 +2882,7 @@ another way to protect your filenames from interpretation.  For example:
     sysopen(HANDLE, $path, O_RDWR|O_CREAT|O_EXCL)
 	or die "sysopen $path: $!";
     $oldfh = select(HANDLE); $| = 1; select($oldfh);
-    print HANDLE "stuff $$\n");
+    print HANDLE "stuff $$\n";
     seek(HANDLE, 0, 0);
     print "File contains: ", <HANDLE>;
 
@@ -3470,12 +3506,13 @@ with the wrong number of RANDBITS.)
 =item read FILEHANDLE,SCALAR,LENGTH
 
 Attempts to read LENGTH bytes of data into variable SCALAR from the
-specified FILEHANDLE.  Returns the number of bytes actually read,
-C<0> at end of file, or undef if there was an error.  SCALAR will be grown
-or shrunk to the length actually read.  An OFFSET may be specified to
-place the read data at some other place than the beginning of the
-string.  This call is actually implemented in terms of stdio's fread(3)
-call.  To get a true read(2) system call, see C<sysread>.
+specified FILEHANDLE.  Returns the number of bytes actually read, C<0>
+at end of file, or undef if there was an error.  SCALAR will be grown
+or shrunk to the length actually read.  If SCALAR needs growing, the
+new bytes will be zero bytes.  An OFFSET may be specified to place
+the read data into some other place in SCALAR than the beginning.
+The call is actually implemented in terms of stdio's fread(3) call.
+To get a true read(2) system call, see C<sysread>.
 
 =item readdir DIRHANDLE
 
@@ -4258,9 +4295,9 @@ Examples:
 If you're using strict, you I<must not> declare $a
 and $b as lexicals.  They are package globals.  That means
 if you're in the C<main> package and type
-  
+
     @articles = sort {$b <=> $a} @files;
-  
+
 then C<$a> and C<$b> are C<$main::a> and C<$main::b> (or C<$::a> and C<$::b>),
 but if you're in the C<FooPack> package, it's the same as typing
 
@@ -4344,6 +4381,15 @@ characters at each point it matches that way.  For example:
     print join(':', split(/ */, 'hi there'));
 
 produces the output 'h:i:t:h:e:r:e'.
+
+Empty leading (or trailing) fields are produced when there positive width
+matches at the beginning (or end) of the string; a zero-width match at the
+beginning (or end) of the string does not produce an empty field.  For
+example:
+
+   print join(':', split(/(?=\w)/, 'hi there!'));
+
+produces the output 'h:i :t:h:e:r:e!'.
 
 The LIMIT parameter can be used to split a line partially
 
@@ -4478,13 +4524,31 @@ and the conversion letter:
    h       interpret integer as C type "short" or "unsigned short"
            If no flags, interpret integer as C type "int" or "unsigned"
 
+Perl supports parameter ordering, in other words, fetching the
+parameters in some explicitly specified "random" ordering as opposed
+to the default implicit sequential ordering.  The syntax is, instead
+of the C<%> and C<*>, to use C<%>I<digits>C<$> and C<*>I<digits>C<$>,
+where the I<digits> is the wanted index, from one upwards.  For example:
+
+   printf "%2\$d %1\$d\n", 12, 34;		# will print "34 12\n"
+   printf "%*2\$d\n",      12, 3;		# will print " 12\n"
+
+Note that using the reordering syntax does not interfere with the usual
+implicit sequential fetching of the parameters:
+
+   printf "%2\$d %d\n",    12, 34;		# will print "34 12\n"
+   printf "%2\$d %d %d\n", 12, 34;		# will print "34 12 34\n"
+   printf "%3\$d %d %d\n", 12, 34, 56;		# will print "56 12 34\n"
+   printf "%2\$*3\$d %d\n", 12, 34, 3;		# will print " 34 12\n"
+   printf "%*3\$2\$d %d\n", 12, 34, 3;		# will print " 34 12\n"
+
 There are also two Perl-specific flags:
 
-   V       interpret integer as Perl's standard integer type
-   v       interpret string as a vector of integers, output as
-           numbers separated either by dots, or by an arbitrary
-	   string received from the argument list when the flag
-	   is preceded by C<*>
+    V       interpret integer as Perl's standard integer type
+    v       interpret string as a vector of integers, output as
+            numbers separated either by dots, or by an arbitrary
+	    string received from the argument list when the flag
+	    is preceded by C<*>
 
 Where a number would appear in the flags, an asterisk (C<*>) may be
 used instead, in which case Perl uses the next item in the parameter
@@ -5043,9 +5107,13 @@ case the SCALAR is empty you can use OFFSET but only zero offset.
 
 =item tell
 
-Returns the current position for FILEHANDLE.  FILEHANDLE may be an
-expression whose value gives the name of the actual filehandle.  If
-FILEHANDLE is omitted, assumes the file last read.  
+Returns the current position for FILEHANDLE, or -1 on error.  FILEHANDLE
+may be an expression whose value gives the name of the actual filehandle.
+If FILEHANDLE is omitted, assumes the file last read.  
+
+The return value of tell() for the standard streams like the STDIN
+depends on the operating system: it may return -1 or something else.
+tell() on pipes, fifos, and sockets usually returns -1.
 
 There is no C<systell> function.  Use C<sysseek(FH, 0, 1)> for that.
 

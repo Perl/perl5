@@ -130,7 +130,6 @@ convretcode (pTHX_ int rc,char *prog,int fl)
 int
 do_aspawn (pTHX_ SV *really,SV **mark,SV **sp)
 {
-    dTHR;
     int  rc;
     char **a,*tmps,**argv; 
     STRLEN n_a;

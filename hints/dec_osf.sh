@@ -70,12 +70,13 @@ case "`$cc -v 2>&1 | grep cc`" in
 	if test "$1" -lt 2 -o \( "$1" -eq 2 -a \( "$2" -lt 95 -o \( "$2" -eq 95 -a "$3" -lt 2 \) \) \); then
 	    cat >&4 <<EOF
 
-*** Your cc seems to be gcc and its version seems to be less than 2.95.2.
-*** This is not a good idea since old versions of gcc are known to produce
-*** buggy code when compiling Perl (and no doubt for other programs, too).
+*** Your cc seems to be gcc and its version ($_gcc_version) seems to be
+*** less than 2.95.2.  This is not a good idea since old versions of gcc
+*** are known to produce buggy code when compiling Perl (and no doubt for
+*** other programs, too).
 ***
-*** Therefore, I strongly suggest upgrading your gcc.  (Why don't you
-*** use the vendor cc is also a good question.  It comes with the operating
+*** Therefore, I strongly suggest upgrading your gcc.  (Why don't you use
+*** the vendor cc is also a good question.  It comes with the operating
 *** system and produces good code.)
 
 Cannot continue, aborting.
@@ -88,10 +89,10 @@ EOF
 
 *** Note that as of gcc 2.95.2 (19991024) and Perl 5.6.0 (March 2000)
 *** if the said Perl is compiled with the said gcc the lib/sdbm test
-*** dumps core (meaning  that the SDBM_File is unusable).  As this core
-*** dump doesn't happen with the vendor cc, this is most probably
-*** a lingering bug in gcc.  Therefore unless you have a better gcc
-*** you are still better off using the vendor cc.
+*** may dump core (meaning that the SDBM_File extension is unusable).
+*** As this core dump never happens with the vendor cc, this is most
+*** probably a lingering bug in gcc.  Therefore unless you have a better
+*** gcc installation you are still better off using the vendor cc.
 
 Since you explicitly chose gcc, I assume that you know what are doing.
 

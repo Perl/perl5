@@ -1,5 +1,6 @@
 #!/usr/bin/perl
 
+chmod 0666, "opcode.h", "opnames.h";
 unlink "opcode.h", "opnames.h";
 open(OC, ">opcode.h") || die "Can't create opcode.h: $!\n";
 open(ON, ">opnames.h") || die "Can't create opnames.h: $!\n";
@@ -56,7 +57,9 @@ for (@ops) {
 }
 print ON "\t", &tab(3,"OP_max"), "\n";
 print ON "} opcode;\n";
-print ON "\n#define MAXO ", scalar @ops, "\n\n"; 
+print ON "\n#define MAXO ", scalar @ops, "\n";
+print ON "#define OP_phoney_INPUT_ONLY -1\n";
+print ON "#define OP_phoney_OUTPUT_ONLY -2\n\n";
 
 # Emit op names and descriptions.
 

@@ -37,25 +37,45 @@ Read on...
 
 =over 5
 
-L<Compiling your C program>
+=item *
 
-L<Adding a Perl interpreter to your C program>
+Compiling your C program
 
-L<Calling a Perl subroutine from your C program>
+=item *
 
-L<Evaluating a Perl statement from your C program>
+Adding a Perl interpreter to your C program
 
-L<Performing Perl pattern matches and substitutions from your C program>
+=item *
 
-L<Fiddling with the Perl stack from your C program>
+Calling a Perl subroutine from your C program
 
-L<Maintaining a persistent interpreter>
+=item *
 
-L<Maintaining multiple interpreter instances>
+Evaluating a Perl statement from your C program
 
-L<Using Perl modules, which themselves use C libraries, from your C program>
+=item *
 
-L<Embedding Perl under Win32>
+Performing Perl pattern matches and substitutions from your C program
+
+=item *
+
+Fiddling with the Perl stack from your C program
+
+=item *
+
+Maintaining a persistent interpreter
+
+=item *
+
+Maintaining multiple interpreter instances
+
+=item *
+
+Using Perl modules, which themselves use C libraries, from your C program
+
+=item *
+
+Embedding Perl under Win32
 
 =back 
 
@@ -258,9 +278,8 @@ and package C<END {}> blocks.
 If you want to pass arguments to the Perl subroutine, you can add
 strings to the C<NULL>-terminated C<args> list passed to
 I<call_argv>.  For other data types, or to examine return values,
-you'll need to manipulate the Perl stack.  That's demonstrated in the
-last section of this document: L<Fiddling with the Perl stack from
-your C program>.
+you'll need to manipulate the Perl stack.  That's demonstrated in
+L<Fiddling with the Perl stack from your C program>.
 
 =head2 Evaluating a Perl statement from your C program
 
@@ -948,7 +967,7 @@ B<ExtUtils::Embed> can also automate writing the I<xs_init> glue code.
 
 Consult L<perlxs>, L<perlguts>, and L<perlapi> for more details.
 
-=head1 Embedding Perl under Windows
+=head1 Embedding Perl under Win32
 
 In general, all of the source code shown here should work unmodified under
 Windows.

@@ -1,6 +1,6 @@
 /*    perl.h
  *
- *    Copyright (c) 1987-2000, Larry Wall
+ *    Copyright (c) 1987-2001, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -183,7 +183,7 @@ class CPerlObj;
 struct perl_thread;
 #    define pTHX	register struct perl_thread *thr
 #    define aTHX	thr
-#    define dTHR	dNOOP
+#    define dTHR	dNOOP /* only backward compatibility */
 #    define dTHXa(a)	pTHX = (struct perl_thread*)a
 #  else
 #    ifndef MULTIPLICITY
@@ -303,7 +303,7 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #endif
 
 #define WITH_THX(s) STMT_START { dTHX; s; } STMT_END
-#define WITH_THR(s) STMT_START { dTHR; s; } STMT_END
+#define WITH_THR(s) WITH_THX(s)
 
 /*
  * SOFT_CAST can be used for args to prototyped functions to retain some
@@ -496,10 +496,14 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #   include <sys/param.h>
 #endif
 
-
 /* Use all the "standard" definitions? */
 #if defined(STANDARD_C) && defined(I_STDLIB)
 #   include <stdlib.h>
+#endif
+
+/* If this causes problems, set i_unistd=undef in the hint file.  */
+#ifdef I_UNISTD
+#   include <unistd.h>
 #endif
 
 #ifdef PERL_MICRO /* Last chance to export Perl_my_swap */
@@ -709,10 +713,47 @@ typedef struct perl_mstats perl_mstats_t;
 #endif
 
 #include <errno.h>
-#ifdef HAS_SOCKET
-#   ifdef I_NET_ERRNO
-#     include <net/errno.h>
+
+#if defined(WIN32) && (defined(PERL_OBJECT) || defined(PERL_IMPLICIT_SYS) || defined(PERL_CAPI))
+#  define WIN32SCK_IS_STDSCK		/* don't pull in custom wsock layer */
+#endif
+
+#if defined(HAS_SOCKET) && !defined(VMS) /* VMS handles sockets via vmsish.h */
+# include <sys/socket.h>
+# if defined(USE_SOCKS) && defined(I_SOCKS)
+#   if !defined(INCLUDE_PROTOTYPES)
+#       define INCLUDE_PROTOTYPES /* for <socks.h> */
+#       define PERL_SOCKS_NEED_PROTOTYPES
 #   endif
+#   ifdef USE_THREADS
+#       define PERL_USE_THREADS /* store our value */
+#       undef USE_THREADS
+#   endif
+#   include <socks.h>
+#   ifdef USE_THREADS
+#       undef USE_THREADS /* socks.h does this on its own */
+#   endif
+#   ifdef PERL_USE_THREADS
+#       define USE_THREADS /* restore our value */
+#       undef PERL_USE_THREADS
+#   endif
+#   ifdef PERL_SOCKS_NEED_PROTOTYPES /* keep cpp space clean */
+#       undef INCLUDE_PROTOTYPES
+#       undef PERL_SOCKS_NEED_PROTOTYPES
+#   endif
+# endif 
+# ifdef I_NETDB
+#  include <netdb.h>
+# endif
+# ifndef ENOTSOCK
+#  ifdef I_NET_ERRNO
+#   include <net/errno.h>
+#  endif
+# endif
+#endif
+
+#ifdef SETERRNO
+# undef SETERRNO  /* SOCKS might have defined this */
 #endif
 
 #ifdef VMS
@@ -1043,6 +1084,11 @@ typedef UVTYPE UV;
 #define IV_DIG (BIT_DIGITS(IVSIZE * 8))
 #define UV_DIG (BIT_DIGITS(UVSIZE * 8))
 
+/* We like our integers to stay integers. */
+#ifndef NO_PERL_PRESERVE_IVUV
+#define PERL_PRESERVE_IVUV
+#endif
+
 /*   
  *  The macros INT2PTR and NUM2PTR are (despite their names)
  *  bi-directional: they will convert int/float to or from pointers.
@@ -1075,6 +1121,9 @@ typedef UVTYPE UV;
 #endif
   
 #ifdef USE_LONG_DOUBLE
+#  if defined(HAS_LONG_DOUBLE) && LONG_DOUBLESIZE == DOUBLESIZE
+#      define LONG_DOUBLE_EQUALS_DOUBLE
+#  endif
 #  if !(defined(HAS_LONG_DOUBLE) && (LONG_DOUBLESIZE > DOUBLESIZE))
 #     undef USE_LONG_DOUBLE /* Ouch! */
 #  endif
@@ -1440,6 +1489,7 @@ struct perl_mstats {
     UV *bucket_available_size;
     UV nbuckets;
 };
+struct RExC_state_t;
 
 typedef MEM_SIZE STRLEN;
 
@@ -1626,6 +1676,9 @@ typedef struct ptr_tbl PTR_TBL_t;
 #         else
 #           if defined(MACOS_TRADITIONAL)
 #             include "macos/macish.h"
+#	      ifndef NO_ENVIRON_ARRAY
+#               define NO_ENVIRON_ARRAY
+#             endif
 #           else
 #             include "unixish.h"
 #           endif
@@ -2105,6 +2158,7 @@ Gid_t getegid (void);
 #  else
 #    define DEBUG_S(a)
 #  endif
+#define DEBUG_T(a) if (PL_debug & (1<<17))	a
 #else
 #define DEB(a)
 #define DEBUG(a)
@@ -2125,6 +2179,7 @@ Gid_t getegid (void);
 #define DEBUG_X(a)
 #define DEBUG_D(a)
 #define DEBUG_S(a)
+#define DEBUG_T(a)
 #endif
 #define YYMAXDEPTH 300
 
@@ -2195,8 +2250,12 @@ char *crypt (const char*, const char*);
 #    ifndef getenv
 char *getenv (const char*);
 #    endif /* !getenv */
-#    if !defined(EPOC) && !(defined(__hpux) && defined(_FILE_OFFSET_BITS) && _FILE_OFFSET_BITS == 64) && !defined(HAS_LSEEK_PROTO)
+#    if !defined(HAS_LSEEK_PROTO) && !defined(EPOC) && !defined(__hpux)
+#      ifdef _FILE_OFFSET_BITS
+#        if _FILE_OFFSET_BITS == 64
 Off_t lseek (int,Off_t,int);
+#        endif
+#      endif
 #    endif
 #  endif /* !DONT_DECLARE_STD */
 char *getlogin (void);
@@ -2639,6 +2698,7 @@ enum {		/* pass one of these to get_vtbl */
 
 #define HINT_FILETEST_ACCESS	0x00400000
 #define HINT_UTF8		0x00800000
+#define HINT_UTF8_DISTINCT	0x01000000
 
 /* Various states of an input record separator SV (rs, nrs) */
 #define RsSNARF(sv)   (! SvOK(sv))
@@ -2657,10 +2717,6 @@ typedef char* (CPERLscope(*re_intuit_start_t)) (pTHX_ regexp *prog, SV *sv,
 						struct re_scream_pos_data_s *d);
 typedef SV*	(CPERLscope(*re_intuit_string_t)) (pTHX_ regexp *prog);
 typedef void	(CPERLscope(*regfree_t)) (pTHX_ struct regexp* r);
-
-#ifdef USE_PURE_BISON
-int Perl_yylex(pTHX_ YYSTYPE *lvalp, int *lcharp);
-#endif
 
 typedef void (*DESTRUCTORFUNC_NOCONTEXT_t) (void*);
 typedef void (*DESTRUCTORFUNC_t) (pTHXo_ void*);
@@ -3005,46 +3061,53 @@ enum {
   to_sv_amg,   to_av_amg,
   to_hv_amg,   to_gv_amg,
   to_cv_amg,   iter_amg,    
-  max_amg_code
+  DESTROY_amg, max_amg_code
   /* Do not leave a trailing comma here.  C9X allows it, C89 doesn't. */
 };
 
 #define NofAMmeth max_amg_code
+#define AMG_id2name(id) ((char*)PL_AMG_names[id]+1)
 
 #ifdef DOINIT
 EXTCONST char * PL_AMG_names[NofAMmeth] = {
-  "fallback",	"abs",			/* "fallback" should be the first. */
-  "bool",	"nomethod",
-  "\"\"",	"0+",
-  "+",		"+=",
-  "-",		"-=",
-  "*",		"*=",
-  "/",		"/=",
-  "%",		"%=",
-  "**",		"**=",
-  "<<",		"<<=",
-  ">>",		">>=",
-  "&",		"&=",
-  "|",		"|=",
-  "^",		"^=",
-  "<",		"<=",
-  ">",		">=",
-  "==",		"!=",
-  "<=>",	"cmp",
-  "lt",		"le",
-  "gt",		"ge",
-  "eq",		"ne",
-  "!",		"~",
-  "++",		"--",
-  "atan2",	"cos",
-  "sin",	"exp",
-  "log",	"sqrt",
-  "x",		"x=",
-  ".",		".=",
-  "=",		"neg",
-  "${}",	"@{}",
-  "%{}",	"*{}",
-  "&{}",	"<>",
+  /* Names kept in the symbol table.  fallback => "()", the rest has
+     "(" prepended.  The only other place in perl which knows about
+     this convention is AMG_id2name (used for debugging output and
+     'nomethod' only), the only other place which has it hardwired is
+     overload.pm.  */
+  "()",		"(abs",			/* "fallback" should be the first. */
+  "(bool",	"(nomethod",
+  "(\"\"",	"(0+",
+  "(+",		"(+=",
+  "(-",		"(-=",
+  "(*",		"(*=",
+  "(/",		"(/=",
+  "(%",		"(%=",
+  "(**",	"(**=",
+  "(<<",	"(<<=",
+  "(>>",	"(>>=",
+  "(&",		"(&=",
+  "(|",		"(|=",
+  "(^",		"(^=",
+  "(<",		"(<=",
+  "(>",		"(>=",
+  "(==",	"(!=",
+  "(<=>",	"(cmp",
+  "(lt",	"(le",
+  "(gt",	"(ge",
+  "(eq",	"(ne",
+  "(!",		"(~",
+  "(++",	"(--",
+  "(atan2",	"(cos",
+  "(sin",	"(exp",
+  "(log",	"(sqrt",
+  "(x",		"(x=",
+  "(.",		"(.=",
+  "(=",		"(neg",
+  "(${}",	"(@{}",
+  "(%{}",	"(*{}",
+  "(&{}",	"(<>",
+  "DESTROY",
 };
 #else
 EXTCONST char * PL_AMG_names[NofAMmeth];
@@ -3072,10 +3135,15 @@ typedef struct am_table_short AMTS;
 #define AMGfallYES	3
 
 #define AMTf_AMAGIC		1
+#define AMTf_OVERLOADED		2
 #define AMT_AMAGIC(amt)		((amt)->flags & AMTf_AMAGIC)
 #define AMT_AMAGIC_on(amt)	((amt)->flags |= AMTf_AMAGIC)
 #define AMT_AMAGIC_off(amt)	((amt)->flags &= ~AMTf_AMAGIC)
+#define AMT_OVERLOADED(amt)	((amt)->flags & AMTf_OVERLOADED)
+#define AMT_OVERLOADED_on(amt)	((amt)->flags |= AMTf_OVERLOADED)
+#define AMT_OVERLOADED_off(amt)	((amt)->flags &= ~AMTf_OVERLOADED)
 
+#define StashHANDLER(stash,meth)	gv_handler((stash),CAT2(meth,_amg))
 
 /*
  * some compilers like to redefine cos et alia as faster
@@ -3140,16 +3208,10 @@ typedef struct am_table_short AMTS;
 #ifdef USE_LOCALE_NUMERIC
 
 #define SET_NUMERIC_STANDARD() \
-    STMT_START {				\
-	if (! PL_numeric_standard)		\
-	    set_numeric_standard();		\
-    } STMT_END
+	set_numeric_standard();
 
 #define SET_NUMERIC_LOCAL() \
-    STMT_START {				\
-	if (! PL_numeric_local)			\
-	    set_numeric_local();		\
-    } STMT_END
+	set_numeric_local();
 
 #define IS_NUMERIC_RADIX(c)	\
 	((PL_hints & HINT_LOCALE) && \
@@ -3157,11 +3219,11 @@ typedef struct am_table_short AMTS;
 
 #define STORE_NUMERIC_LOCAL_SET_STANDARD() \
 	bool was_local = (PL_hints & HINT_LOCALE) && PL_numeric_local; \
-	if (!was_local) SET_NUMERIC_STANDARD();
+	if (was_local) SET_NUMERIC_STANDARD();
 
 #define STORE_NUMERIC_STANDARD_SET_LOCAL() \
-	bool was_standard = !(PL_hints & HINT_LOCALE) || PL_numeric_standard; \
-	if (!was_standard) SET_NUMERIC_LOCAL();
+	bool was_standard = (PL_hints & HINT_LOCALE) && PL_numeric_standard; \
+	if (was_standard) SET_NUMERIC_LOCAL();
 
 #define RESTORE_NUMERIC_LOCAL() \
 	if (was_local) SET_NUMERIC_LOCAL();
@@ -3191,6 +3253,9 @@ typedef struct am_table_short AMTS;
 #   if !defined(Strtol) && defined(HAS_STRTOLL)
 #       define Strtol	strtoll
 #   endif
+#    if !defined(Strtol) && defined(HAS_STRTOQ)
+#       define Strtol	strtoq
+#    endif
 /* is there atoq() anywhere? */
 #endif
 #if !defined(Strtol) && defined(HAS_STRTOL)
@@ -3400,6 +3465,10 @@ typedef struct am_table_short AMTS;
 
 #ifdef I_LIBUTIL
 #   include <libutil.h>		/* setproctitle() in some FreeBSDs */
+#endif
+
+#ifndef EXEC_ARGV_CAST
+#define EXEC_ARGV_CAST(x) x
 #endif
 
 /* and finally... */

@@ -1,17 +1,19 @@
 package ExtUtils::MM_Unix;
 
+use strict;
+
 use Exporter ();
 use Config;
 use File::Basename qw(basename dirname fileparse);
 use DirHandle;
 use strict;
-use vars qw($VERSION $Is_Mac $Is_OS2 $Is_VMS $Is_Win32 $Is_Dos $Is_PERL_OBJECT
-	    $Verbose %pm %static $Xsubpp_Version);
+our ($Is_Mac,$Is_OS2,$Is_VMS,$Is_Win32,$Is_Dos,$Is_PERL_OBJECT,
+	    $Verbose,%pm,%static,$Xsubpp_Version);
 
-$VERSION = substr q$Revision: 1.12603 $, 10;
-# $Id: MM_Unix.pm,v 1.126 1998/06/28 21:32:49 k Exp k $
+our $VERSION = '1.12603';
 
-Exporter::import('ExtUtils::MakeMaker', qw($Verbose &neatvalue));
+require ExtUtils::MakeMaker;
+ExtUtils::MakeMaker->import(qw($Verbose &neatvalue));
 
 $Is_OS2 = $^O eq 'os2';
 $Is_Mac = $^O eq 'MacOS';
@@ -264,6 +266,14 @@ sub c_o {
     my($self) = shift;
     return '' unless $self->needs_linking();
     my(@m);
+    if (my $cpp = $Config{cpprun}) {
+        my $cpp_cmd = $self->const_cccmd;
+        $cpp_cmd =~ s/^CCCMD\s*=\s*\$\(CC\)/$cpp/;
+        push @m, '
+.c.i:
+	'. $cpp_cmd . ' $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) $*.c > $*.i
+';
+    }
     push @m, '
 .c$(OBJ_EXT):
 	$(CCCMD) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) $*.c
@@ -580,7 +590,7 @@ MM_VERSION = $ExtUtils::MakeMaker::VERSION
 
     for $tmp (qw/
 	      FULLEXT BASEEXT PARENT_NAME DLBASE VERSION_FROM INC DEFINE OBJECT
-	      LDFROM LINKTYPE
+	      LDFROM LINKTYPE PM_FILTER
 	      /	) {
 	next unless defined $self->{$tmp};
 	push @m, "$tmp = $self->{$tmp}\n";
@@ -628,7 +638,7 @@ MAN3PODS = ".join(" \\\n\t", sort keys %{$self->{MAN3PODS}})."
 # work around a famous dec-osf make(1) feature(?):
 makemakerdflt: all
 
-.SUFFIXES: .xs .c .C .cpp .cxx .cc \$(OBJ_EXT)
+.SUFFIXES: .xs .c .C .cpp .i .cxx .cc \$(OBJ_EXT)
 
 # Nick wanted to get rid of .PRECIOUS. I don't remember why. I seem to recall, that
 # some make implementations will delete the Makefile when we rebuild it. Because
@@ -1073,6 +1083,14 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)/.exists 
     # The IRIX linker doesn't use LD_RUN_PATH
     $ldrun = qq{-rpath "$self->{LD_RUN_PATH}"}
 	if ($^O eq 'irix' && $self->{LD_RUN_PATH});
+
+    # For example in AIX the shared objects/libraries from previous builds
+    # linger quite a while in the shared dynalinker cache even when nobody
+    # is using them.  This is painful if one for instance tries to restart
+    # a failed build because the link command will fail unnecessarily 'cos
+    # the shared object/library is 'busy'.
+    push(@m,'	$(RM_F) $@
+');
 
     push(@m,'	LD_RUN_PATH="$(LD_RUN_PATH)" $(LD) -o $@ '.$ldrun.' $(LDDLFLAGS) '.$ldfrom.
 		' $(OTHERLDFLAGS) $(MYEXTLIB) $(PERL_ARCHIVE) $(LDLOADLIBS) $(EXPORT_LIST)');
@@ -1650,7 +1668,7 @@ sub init_main {
 
     unless ($self->{PERL_SRC}){
 	my($dir);
-	foreach $dir ($self->updir(),$self->catdir($self->updir(),$self->updir()),$self->catdir($self->updir(),$self->updir(),$self->updir())){
+	foreach $dir ($self->updir(),$self->catdir($self->updir(),$self->updir()),$self->catdir($self->updir(),$self->updir(),$self->updir()),$self->catdir($self->updir(),$self->updir(),$self->updir(),$self->updir())){
 	    if (
 		-f $self->catfile($dir,"config.sh")
 		&&
@@ -1702,6 +1720,7 @@ from the perl source tree.
 	$self->{PERL_INC}     = $self->catdir("$self->{PERL_ARCHLIB}","CORE"); # wild guess for now
 	my $perl_h;
 
+	no warnings 'uninitialized' ;
 	if (not -f ($perl_h = $self->catfile($self->{PERL_INC},"perl.h"))
 	    and not $old){
 	    # Maybe somebody tries to build an extension with an
@@ -2455,6 +2474,7 @@ MAP_PRELIBS   = $Config::Config{perllibs} $Config::Config{cryptlib}
     }
     unless ($libperl && -f $lperl) { # Ilya's code...
 	my $dir = $self->{PERL_SRC} || "$self->{PERL_ARCHLIB}/CORE";
+	$dir = "$self->{PERL_ARCHLIB}/.." if $self->{UNINSTALLED_PERL};
 	$libperl ||= "libperl$self->{LIB_EXT}";
 	$libperl   = "$dir/$libperl";
 	$lperl   ||= "libperl$self->{LIB_EXT}";
@@ -3030,7 +3050,7 @@ sub pm_to_blib {
 pm_to_blib: $(TO_INST_PM)
 	}.$self->{NOECHO}.q{$(PERL) "-I$(INST_ARCHLIB)" "-I$(INST_LIB)" \
 	"-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" -MExtUtils::Install \
-        -e "pm_to_blib({qw{$(PM_TO_BLIB)}},'}.$autodir.q{')"
+        -e "pm_to_blib({qw{$(PM_TO_BLIB)}},'}.$autodir.q{','$(PM_FILTER)')"
 	}.$self->{NOECHO}.q{$(TOUCH) $@
 };
 }
@@ -3141,8 +3161,22 @@ realclean purge ::  clean
         push(@m, "	$self->{RM_F} \$(INST_DYNAMIC) \$(INST_BOOT)\n");
         push(@m, "	$self->{RM_F} \$(INST_STATIC)\n");
     }
-    push(@m, "	$self->{RM_F} " . join(" ", values %{$self->{PM}}) . "\n")
-	if keys %{$self->{PM}};
+    # Issue a several little RM_F commands rather than risk creating a
+    # very long command line (useful for extensions such as Encode
+    # that have many files).
+    if (keys %{$self->{PM}}) {
+	my $line = "";
+	foreach (values %{$self->{PM}}) {
+	    if (length($line) + length($_) > 80) {
+		push @m, "\t$self->{RM_F} $line\n";
+		$line = $_;
+	    }
+	    else {
+		$line .= " $_"; 
+	    }
+	}
+    push @m, "\t$self->{RM_F} $line\n" if $line;
+    }
     my(@otherfiles) = ($self->{MAKEFILE},
 		       "$self->{MAKEFILE}.old"); # Makefiles last
     push(@otherfiles, $attribs{FILES}) if $attribs{FILES};
@@ -3287,8 +3321,9 @@ sub subdir_x {
     my($self, $subdir) = @_;
     my(@m);
     if ($Is_Win32 && Win32::IsWin95()) {
-	# XXX: dmake-specific, like rest of Win95 port
-	return <<EOT;
+	if ($Config{'make'} =~ /dmake/i) {
+	    # dmake-specific
+	    return <<EOT;
 subdirs ::
 @[
 	cd $subdir
@@ -3296,8 +3331,16 @@ subdirs ::
 	cd ..
 ]
 EOT
-    }
-    else {
+        } elsif ($Config{'make'} =~ /nmake/i) {
+	    # nmake-specific
+	    return <<EOT;
+subdirs ::
+	cd $subdir
+	\$(MAKE) all \$(PASTHRU)
+	cd ..
+EOT
+	}
+    } else {
 	return <<EOT;
 
 subdirs ::

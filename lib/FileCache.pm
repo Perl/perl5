@@ -1,5 +1,7 @@
 package FileCache;
 
+our $VERSION = '1.00';
+
 =head1 NAME
 
 FileCache - keep more files open than the system permits

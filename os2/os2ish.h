@@ -155,7 +155,6 @@ extern int rc;
 	    Perl_croak_nocontext("panic: COND_DESTROY, rc=%i", rc);	\
     } STMT_END
 /*#define THR ((struct thread *) TlsGetValue(PL_thr_key))
-#define dTHR struct thread *thr = THR
 */
 
 #ifdef USE_SLOW_THREAD_SPECIFIC

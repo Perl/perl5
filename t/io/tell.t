@@ -2,7 +2,7 @@
 
 # $RCSfile: tell.t,v $$Revision$$Date$
 
-print "1..21\n";
+print "1..23\n";
 
 $TST = 'tst';
 
@@ -82,3 +82,13 @@ if ($. == $curline) { print "ok 20\n"; } else { print "not ok 20\n"; }
     tell other;
     if ($. == 7) { print "ok 21\n"; } else { print "not ok 21\n"; }
 }
+
+close(other);
+if (tell(other) == -1)  { print "ok 22\n"; } else { print "not ok 22\n"; }
+
+if (tell(ether) == -1)  { print "ok 23\n"; } else { print "not ok 23\n"; }
+
+# ftell(STDIN) (or any std streams) is undefined, it can return -1 or
+# something else.  ftell() on pipes, fifos, and sockets is defined to
+# return -1.
+

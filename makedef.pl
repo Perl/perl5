@@ -73,7 +73,8 @@ if ($PLATFORM eq 'aix') {
 }
 elsif ($PLATFORM eq 'win32') {
     $CCTYPE = "MSVC" unless defined $CCTYPE;
-    foreach ($thrdvar_h, $intrpvar_h, $perlvars_h, $global_sym, $pp_sym, $globvar_sym) {
+    foreach ($thrdvar_h, $intrpvar_h, $perlvars_h, $global_sym,
+		$pp_sym, $globvar_sym, $perlio_sym) {
 	s!^!..\\!;
     }
 }
@@ -87,7 +88,7 @@ unless ($PLATFORM eq 'win32') {
 	}
 	if ($PLATFORM eq 'os2') {
 	    $CONFIG_ARGS = $1 if /^(?:config_args)='(.+)'$/;
-	    $ARCHNAME = $1 if /^(?:archname)='(.+)'$/;
+	    $ARCHNAME =    $1 if /^(?:archname)='(.+)'$/;
 	}
     }
     close(CFG);
@@ -96,12 +97,9 @@ unless ($PLATFORM eq 'win32') {
 open(CFG,$config_h) || die "Cannot open $config_h: $!\n";
 while (<CFG>) {
     $define{$1} = 1 if /^\s*#\s*define\s+(MYMALLOC)\b/;
-    $define{$1} = 1 if /^\s*#\s*define\s+(USE_5005THREADS)\b/;
-    $define{$1} = 1 if /^\s*#\s*define\s+(USE_ITHREADS)\b/;
-    $define{$1} = 1 if /^\s*#\s*define\s+(USE_PERLIO)\b/;
     $define{$1} = 1 if /^\s*#\s*define\s+(MULTIPLICITY)\b/;
-    $define{$1} = 1 if /^\s*#\s*define\s+(PERL_IMPLICIT_SYS)\b/;
-    $define{$1} = 1 if /^\s*#\s*define\s+(PERL_BINCOMPAT_5005)\b/;
+    $define{$1} = 1 if /^\s*#\s*define\s+(PERL_\w+)\b/;
+    $define{$1} = 1 if /^\s*#\s*define\s+(USE_\w+)\b/;
 }
 close(CFG);
 
@@ -134,7 +132,7 @@ if ($define{PERL_OBJECT}) {
 
 if ($PLATFORM eq 'win32') {
     warn join(' ',keys %define)."\n";
-    print "LIBRARY Perl56\n";
+    print "LIBRARY Perl57\n";
     print "DESCRIPTION 'Perl interpreter'\n";
     print "EXPORTS\n";
     if ($define{PERL_IMPLICIT_SYS}) {
@@ -145,16 +143,7 @@ if ($PLATFORM eq 'win32') {
 elsif ($PLATFORM eq 'os2') {
     ($v = $]) =~ s/(\d\.\d\d\d)(\d\d)$/$1_$2/;
     $v .= '-thread' if $ARCHNAME =~ /-thread/;
-    #$sum = 0;
-    #for (split //, $v) {
-    #	$sum = ($sum * 33) + ord;
-    #	$sum &= 0xffffff;
-    #}
-    #$sum += $sum >> 5;
-    #$sum &= 0xffff;
-    #$sum = printf '%X', $sum;
     ($dll = $define{PERL_DLL}) =~ s/\.dll$//i;
-    # print STDERR "'$dll' <= '$define{PERL_DLL}'\n";
     print <<"---EOP---";
 LIBRARY '$dll' INITINSTANCE TERMINSTANCE
 DESCRIPTION '\@#perl5-porters\@perl.org:$v#\@ Perl interpreter'
@@ -314,7 +303,6 @@ elsif ($PLATFORM eq 'os2') {
 
 unless ($define{'DEBUGGING'}) {
     skip_symbols [qw(
-		    Perl_deb
 		    Perl_deb_growlevel
 		    Perl_debop
 		    Perl_debprofdump
@@ -572,6 +560,8 @@ while (<DATA>) {
 
 if ($PLATFORM eq 'win32') {
     foreach my $symbol (qw(
+			    setuid
+			    setgid
 			    boot_DynaLoader
 			    Perl_init_os_extras
 			    Perl_thread_create
@@ -579,35 +569,6 @@ if ($PLATFORM eq 'win32') {
 			    RunPerl
 			    win32_errno
 			    win32_environ
-			    win32_stdin
-			    win32_stdout
-			    win32_stderr
-			    win32_ferror
-			    win32_feof
-			    win32_strerror
-			    win32_fprintf
-			    win32_printf
-			    win32_vfprintf
-			    win32_vprintf
-			    win32_fread
-			    win32_fwrite
-			    win32_fopen
-			    win32_fdopen
-			    win32_freopen
-			    win32_fclose
-			    win32_fputs
-			    win32_fputc
-			    win32_ungetc
-			    win32_getc
-			    win32_fileno
-			    win32_clearerr
-			    win32_fflush
-			    win32_ftell
-			    win32_fseek
-			    win32_fgetpos
-			    win32_fsetpos
-			    win32_rewind
-			    win32_tmpfile
 			    win32_abort
 			    win32_fstat
 			    win32_stat
@@ -678,17 +639,6 @@ if ($PLATFORM eq 'win32') {
 			    win32_getenv
 			    win32_putenv
 			    win32_perror
-			    win32_setbuf
-			    win32_setvbuf
-			    win32_flushall
-			    win32_fcloseall
-			    win32_fgets
-			    win32_gets
-			    win32_fgetc
-			    win32_putc
-			    win32_puts
-			    win32_getchar
-			    win32_putchar
 			    win32_malloc
 			    win32_calloc
 			    win32_realloc
@@ -720,6 +670,47 @@ if ($PLATFORM eq 'win32') {
 			    win32_getpid
 			    win32_crypt
 			    win32_dynaload
+
+			    win32_stdin
+			    win32_stdout
+			    win32_stderr
+			    win32_ferror
+			    win32_feof
+			    win32_strerror
+			    win32_fprintf
+			    win32_printf
+			    win32_vfprintf
+			    win32_vprintf
+			    win32_fread
+			    win32_fwrite
+			    win32_fopen
+			    win32_fdopen
+			    win32_freopen
+			    win32_fclose
+			    win32_fputs
+			    win32_fputc
+			    win32_ungetc
+			    win32_getc
+			    win32_fileno
+			    win32_clearerr
+			    win32_fflush
+			    win32_ftell
+			    win32_fseek
+			    win32_fgetpos
+			    win32_fsetpos
+			    win32_rewind
+			    win32_tmpfile
+			    win32_setbuf
+			    win32_setvbuf
+			    win32_flushall
+			    win32_fcloseall
+			    win32_fgets
+			    win32_gets
+			    win32_fgetc
+			    win32_putc
+			    win32_puts
+			    win32_getchar
+			    win32_putchar
 			   ))
     {
 	try_symbol($symbol);
@@ -797,3 +788,38 @@ perl_destruct
 perl_free
 perl_parse
 perl_run
+PerlIO_define_layer
+PerlIOBuf_set_ptrcnt
+PerlIOBuf_get_cnt
+PerlIOBuf_get_ptr
+PerlIOBuf_bufsiz
+PerlIOBuf_setlinebuf
+PerlIOBase_clearerr
+PerlIOBase_error
+PerlIOBase_eof
+PerlIOBuf_tell
+PerlIOBuf_seek
+PerlIOBuf_write
+PerlIOBuf_unread
+PerlIOBuf_read
+PerlIOBuf_reopen
+PerlIOBuf_open
+PerlIOBuf_fdopen
+PerlIOBase_fileno
+PerlIOBuf_pushed
+PerlIOBuf_fill
+PerlIOBuf_flush
+PerlIOBase_close
+PerlIO_define_layer
+PerlIO_pending
+PerlIO_unread
+PerlIO_push
+PerlIO_apply_layers
+perlsio_binmode
+PerlIO_binmode
+PerlIO_init
+PerlIO_tmpfile
+PerlIO_setpos
+PerlIO_getpos
+PerlIO_vsprintf
+PerlIO_sprintf

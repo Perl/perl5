@@ -1,5 +1,7 @@
 package DirHandle;
 
+our $VERSION = '1.00';
+
 =head1 NAME 
 
 DirHandle - supply object methods for directory handles

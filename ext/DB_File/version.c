@@ -17,6 +17,8 @@
 		Support for Berkeley DB 2/3's backward compatability mode.
         1.72 -  No change.
         1.73 -  Added support for threading
+        1.74 -  Added Perl core patch 7801.
+
 
 */
 
@@ -27,7 +29,11 @@
 #include <db.h>
 
 void
+#ifdef CAN_PROTOTYPE
+__getBerkeleyDBInfo(void)
+#else
 __getBerkeleyDBInfo()
+#endif
 {
 #ifdef dTHX	
     dTHX;

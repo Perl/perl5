@@ -1,6 +1,6 @@
 /*    pp_sys.c
  *
- *    Copyright (c) 1991-2000, Larry Wall
+ *    Copyright (c) 1991-2001, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -35,11 +35,6 @@
 #   include <shadow.h>
 #endif
 
-/* XXX If this causes problems, set i_unistd=undef in the hint file.  */
-#ifdef I_UNISTD
-# include <unistd.h>
-#endif
-
 #ifdef HAS_SYSCALL
 #ifdef __cplusplus
 extern "C" int syscall(unsigned long,...);
@@ -54,25 +49,10 @@ extern "C" int syscall(unsigned long,...);
 # include <sys/resource.h>
 #endif
 
-#if defined(HAS_SOCKET) && !defined(VMS) /* VMS handles sockets via vmsish.h */
-# include <sys/socket.h>
-# if defined(USE_SOCKS) && defined(I_SOCKS)
-#   include <socks.h>
-# endif
-# ifdef I_NETDB
-#  include <netdb.h>
-# endif
-# ifndef ENOTSOCK
-#  ifdef I_NET_ERRNO
-#   include <net/errno.h>
-#  endif
-# endif
-#endif
-
 #ifdef HAS_SELECT
-#ifdef I_SYS_SELECT
-#include <sys/select.h>
-#endif
+# ifdef I_SYS_SELECT
+#  include <sys/select.h>
+# endif
 #endif
 
 /* XXX Configure test needed.
@@ -142,7 +122,7 @@ extern int h_errno;
 #    include <fcntl.h>
 #  endif
 
-#  if defined(HAS_FCNTL) && defined(F_SETLK) && defined (F_SETLKW)
+#  if defined(HAS_FCNTL) && defined(FCNTL_CAN_LOCK)
 #    define FLOCK fcntl_emulate_flock
 #    define FCNTL_EMULATE_FLOCK
 #  else /* no flock() or fcntl(F_SETLK,...) */
@@ -317,6 +297,13 @@ PP(pp_backtick)
 	mode = "rt";
     fp = PerlProc_popen(tmps, mode);
     if (fp) {
+	char *type = NULL;
+	if (PL_curcop->cop_io) {
+	    type = SvPV_nolen(PL_curcop->cop_io);
+	}
+	if (type && *type)
+	    PerlIO_apply_layers(aTHX_ fp,mode,type);
+
 	if (gimme == G_VOID) {
 	    char tmpbuf[256];
 	    while (PerlIO_read(fp, tmpbuf, sizeof tmpbuf) > 0)
@@ -461,7 +448,7 @@ PP(pp_die)
     }
     else {
 	tmpsv = TOPs;
-	tmps = SvROK(tmpsv) ? Nullch : SvPV(tmpsv, len);
+        tmps = (SvROK(tmpsv) && PL_in_eval) ? Nullch : SvPV(tmpsv, len);
     }
     if (!tmps || !len) {
   	SV *error = ERRSV;
@@ -658,8 +645,15 @@ PP(pp_fileno)
 	RETURN;
     }
 
-    if (!gv || !(io = GvIO(gv)) || !(fp = IoIFP(io)))
+    if (!gv || !(io = GvIO(gv)) || !(fp = IoIFP(io))) {
+	/* Can't do this because people seem to do things like
+	   defined(fileno($foo)) to check whether $foo is a valid fh.
+	  if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
+	      report_evil_fh(gv, io, PL_op->op_type);
+	    */
 	RETPUSHUNDEF;
+    }
+
     PUSHi(PerlIO_fileno(fp));
     RETURN;
 }
@@ -697,11 +691,14 @@ PP(pp_binmode)
     PerlIO *fp;
     MAGIC *mg;
     SV *discp = Nullsv;
+    STRLEN len  = 0;
+    char *names = NULL;
 
     if (MAXARG < 1)
 	RETPUSHUNDEF;
-    if (MAXARG > 1)
+    if (MAXARG > 1) {
 	discp = POPs;
+    }
 
     gv = (GV*)POPs;
 
@@ -719,10 +716,18 @@ PP(pp_binmode)
     }
 
     EXTEND(SP, 1);
-    if (!(io = GvIO(gv)) || !(fp = IoIFP(io)))
-	RETPUSHUNDEF;
+    if (!(io = GvIO(gv)) || !(fp = IoIFP(io))) {
+	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
+	    report_evil_fh(gv, io, PL_op->op_type);
+        RETPUSHUNDEF;
+    }
 
-    if (do_binmode(fp,IoTYPE(io),mode_from_discipline(discp)))
+    if (discp) {
+	names = SvPV(discp,len);
+    }
+
+    if (PerlIO_binmode(aTHX_ fp,IoTYPE(io),mode_from_discipline(discp),
+                       (discp) ? SvPV_nolen(discp) : Nullch))
 	RETPUSHYES;
     else
 	RETPUSHUNDEF;
@@ -794,9 +799,12 @@ PP(pp_tie)
     POPSTACK;
     if (sv_isobject(sv)) {
 	sv_unmagic(varsv, how);
-	/* Croak if a self-tie is attempted */
-	if (varsv == SvRV(sv))
-	    Perl_croak(aTHX_ "Self-ties are not supported");
+	/* Croak if a self-tie on an aggregate is attempted. */
+	if (varsv == SvRV(sv) &&
+	    (SvTYPE(sv) == SVt_PVAV ||
+	     SvTYPE(sv) == SVt_PVHV))
+	    Perl_croak(aTHX_
+		       "Self-ties of arrays and hashes are not supported");
 	sv_magic(varsv, sv, how, Nullch, 0);
     }
     LEAVE;
@@ -1061,7 +1069,6 @@ PP(pp_sselect)
 void
 Perl_setdefout(pTHX_ GV *gv)
 {
-    dTHR;
     if (gv)
 	(void)SvREFCNT_inc(gv);
     if (PL_defoutgv)
@@ -1132,6 +1139,16 @@ PP(pp_getc)
     TAINT;
     sv_setpv(TARG, " ");
     *SvPVX(TARG) = PerlIO_getc(IoIFP(GvIOp(gv))); /* should never be EOF */
+    if (PerlIO_isutf8(IoIFP(GvIOp(gv)))) {
+	/* Find out how many bytes the char needs */
+	Size_t len = UTF8SKIP(SvPVX(TARG));
+	if (len > 1) {
+	    SvGROW(TARG,len+1);
+	    len = PerlIO_read(IoIFP(GvIOp(gv)),SvPVX(TARG)+1,len-1);
+	    SvCUR_set(TARG,1+len);
+	}
+	SvUTF8_on(TARG);
+    }
     PUSHTARG;
     RETURN;
 }
@@ -1144,7 +1161,6 @@ PP(pp_read)
 STATIC OP *
 S_doform(pTHX_ CV *cv, GV *gv, OP *retop)
 {
-    dTHR;
     register PERL_CONTEXT *cx;
     I32 gimme = GIMME_V;
     AV* padlist = CvPADLIST(cv);
@@ -1220,6 +1236,8 @@ PP(pp_leavewrite)
 
     DEBUG_f(PerlIO_printf(Perl_debug_log, "left=%ld, todo=%ld\n",
 	  (long)IoLINES_LEFT(io), (long)FmLINES(PL_formtarget)));
+    if (!io || !ofp)
+	goto forget_top;
     if (IoLINES_LEFT(io) < FmLINES(PL_formtarget) &&
 	PL_formtarget != PL_toptarget)
     {
@@ -1259,13 +1277,16 @@ PP(pp_leavewrite)
 		s++;
 	    }
 	    if (s) {
-		PerlIO_write(ofp, SvPVX(PL_formtarget), s - SvPVX(PL_formtarget));
+		STRLEN save = SvCUR(PL_formtarget);
+		SvCUR_set(PL_formtarget, s - SvPVX(PL_formtarget));
+		do_print(PL_formtarget, ofp);
+		SvCUR_set(PL_formtarget, save);
 		sv_chop(PL_formtarget, s);
 		FmLINES(PL_formtarget) -= IoLINES_LEFT(io);
 	    }
 	}
 	if (IoLINES_LEFT(io) >= 0 && IoPAGE(io) > 0)
-	    PerlIO_write(ofp, SvPVX(PL_formfeed), SvCUR(PL_formfeed));
+	    do_print(PL_formfeed, ofp);
 	IoLINES_LEFT(io) = IoPAGE_LEN(io);
 	IoPAGE(io)++;
 	PL_formtarget = PL_toptarget;
@@ -1326,8 +1347,7 @@ PP(pp_leavewrite)
 	    if (ckWARN(WARN_IO))
 		Perl_warner(aTHX_ WARN_IO, "page overflow");
 	}
-	if (!PerlIO_write(ofp, SvPVX(PL_formtarget), SvCUR(PL_formtarget)) ||
-		PerlIO_error(fp))
+	if (!do_print(PL_formtarget, fp))
 	    PUSHs(&PL_sv_no);
 	else {
 	    FmLINES(PL_formtarget) = 0;
@@ -1338,6 +1358,7 @@ PP(pp_leavewrite)
 	    PUSHs(&PL_sv_yes);
 	}
     }
+bad_ofp:
     PL_formtarget = PL_bodytarget;
     PUTBACK;
     return pop_return();
@@ -1380,7 +1401,6 @@ PP(pp_prtf)
 
     sv = NEWSV(0,0);
     if (!(io = GvIO(gv))) {
-        dTHR;
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
 	    report_evil_fh(gv, io, PL_op->op_type);
 	SETERRNO(EBADF,RMS$_IFI);
@@ -1467,10 +1487,14 @@ PP(pp_sysread)
     IO *io;
     char *buffer;
     SSize_t length;
+    SSize_t count;
     Sock_size_t bufsize;
     SV *bufsv;
     STRLEN blen;
     MAGIC *mg;
+    int fp_utf8;
+    Size_t got = 0;
+    Size_t wanted;
 
     gv = (GV*)*++MARK;
     if ((PL_op->op_type == OP_READ || PL_op->op_type == OP_SYSREAD) &&
@@ -1495,10 +1519,7 @@ PP(pp_sysread)
     bufsv = *++MARK;
     if (! SvOK(bufsv))
 	sv_setpvn(bufsv, "", 0);
-    buffer = SvPV_force(bufsv, blen);
     length = SvIVx(*++MARK);
-    if (length < 0)
-	DIE(aTHX_ "Negative length");
     SETERRNO(0,0);
     if (MARK < SP)
 	offset = SvIVx(*++MARK);
@@ -1507,6 +1528,18 @@ PP(pp_sysread)
     io = GvIO(gv);
     if (!io || !IoIFP(io))
 	goto say_undef;
+    if ((fp_utf8 = PerlIO_isutf8(IoIFP(io))) && !IN_BYTE) {
+	buffer = SvPVutf8_force(bufsv, blen);
+	/* UTF8 may not have been set if they are all low bytes */
+	SvUTF8_on(bufsv);
+    }
+    else {
+	buffer = SvPV_force(bufsv, blen);
+    }
+    if (length < 0)
+	DIE(aTHX_ "Negative length");
+    wanted = length;
+
 #ifdef HAS_SOCKET
     if (PL_op->op_type == OP_RECV) {
 	char namebuf[MAXPATHLEN];
@@ -1519,19 +1552,17 @@ PP(pp_sysread)
 	if (bufsize >= 256)
 	    bufsize = 255;
 #endif
-#ifdef OS2	/* At least Warp3+IAK: only the first byte of bufsize set */
-	if (bufsize >= 256)
-	    bufsize = 255;
-#endif
 	buffer = SvGROW(bufsv, length+1);
 	/* 'offset' means 'flags' here */
-	length = PerlSock_recvfrom(PerlIO_fileno(IoIFP(io)), buffer, length, offset,
+	count = PerlSock_recvfrom(PerlIO_fileno(IoIFP(io)), buffer, length, offset,
 			  (struct sockaddr *)namebuf, &bufsize);
-	if (length < 0)
+	if (count < 0)
 	    RETPUSHUNDEF;
-	SvCUR_set(bufsv, length);
+	SvCUR_set(bufsv, count);
 	*SvEND(bufsv) = '\0';
 	(void)SvPOK_only(bufsv);
+	if (fp_utf8)
+	    SvUTF8_on(bufsv);
 	SvSETMAGIC(bufsv);
 	/* This should not be marked tainted if the fp is marked clean */
 	if (!(IoFLAGS(io) & IOf_UNTAINT))
@@ -1545,27 +1576,38 @@ PP(pp_sysread)
     if (PL_op->op_type == OP_RECV)
 	DIE(aTHX_ PL_no_sock_func, "recv");
 #endif
+    if (DO_UTF8(bufsv)) {
+	/* offset adjust in characters not bytes */
+	blen = sv_len_utf8(bufsv);
+    }
     if (offset < 0) {
 	if (-offset > blen)
 	    DIE(aTHX_ "Offset outside string");
 	offset += blen;
     }
+    if (DO_UTF8(bufsv)) {
+	/* convert offset-as-chars to offset-as-bytes */
+	offset = utf8_hop((U8 *)buffer,offset) - (U8 *) buffer;
+    }
+ more_bytes:
     bufsize = SvCUR(bufsv);
-    buffer = SvGROW(bufsv, length+offset+1);
+    buffer  = SvGROW(bufsv, length+offset+1);
     if (offset > bufsize) { /* Zero any newly allocated space */
     	Zero(buffer+bufsize, offset-bufsize, char);
     }
+    buffer = buffer + offset;
+
     if (PL_op->op_type == OP_SYSREAD) {
 #ifdef PERL_SOCK_SYSREAD_IS_RECV
 	if (IoTYPE(io) == IoTYPE_SOCKET) {
-	    length = PerlSock_recv(PerlIO_fileno(IoIFP(io)),
-				   buffer+offset, length, 0);
+	    count = PerlSock_recv(PerlIO_fileno(IoIFP(io)),
+				   buffer, length, 0);
 	}
 	else
 #endif
 	{
-	    length = PerlLIO_read(PerlIO_fileno(IoIFP(io)),
-				  buffer+offset, length);
+	    count = PerlLIO_read(PerlIO_fileno(IoIFP(io)),
+				  buffer, length);
 	}
     }
     else
@@ -1577,18 +1619,18 @@ PP(pp_sysread)
 #else
 	bufsize = sizeof namebuf;
 #endif
-	length = PerlSock_recvfrom(PerlIO_fileno(IoIFP(io)), buffer+offset, length, 0,
+	count = PerlSock_recvfrom(PerlIO_fileno(IoIFP(io)), buffer, length, 0,
 			  (struct sockaddr *)namebuf, &bufsize);
     }
     else
 #endif
     {
-	length = PerlIO_read(IoIFP(io), buffer+offset, length);
-	/* fread() returns 0 on both error and EOF */
-	if (length == 0 && PerlIO_error(IoIFP(io)))
-	    length = -1;
+	count = PerlIO_read(IoIFP(io), buffer, length);
+	/* PerlIO_read() - like fread() returns 0 on both error and EOF */
+	if (count == 0 && PerlIO_error(IoIFP(io)))
+	    count = -1;
     }
-    if (length < 0) {
+    if (count < 0) {
 	if ((IoTYPE(io) == IoTYPE_WRONLY || IoIFP(io) == PerlIO_stdout()
 	    || IoIFP(io) == PerlIO_stderr()) && ckWARN(WARN_IO))
 	{
@@ -1608,15 +1650,43 @@ PP(pp_sysread)
 	}
 	goto say_undef;
     }
-    SvCUR_set(bufsv, length+offset);
+    SvCUR_set(bufsv, count+(buffer - SvPVX(bufsv)));
     *SvEND(bufsv) = '\0';
     (void)SvPOK_only(bufsv);
+    if (fp_utf8 && !IN_BYTE) {
+	/* Look at utf8 we got back and count the characters */
+	char *bend = buffer + count;
+	while (buffer < bend) {
+	    STRLEN skip = UTF8SKIP(buffer);
+	    if (buffer+skip > bend) {
+		/* partial character - try for rest of it */
+		length = skip - (bend-buffer);
+		offset = bend - SvPVX(bufsv);
+		goto more_bytes;
+	    }
+	    else {
+		got++;
+		buffer += skip;
+	    }
+        }
+	/* If we have not 'got' the number of _characters_ we 'wanted' get some more
+	   provided amount read (count) was what was requested (length)
+	 */
+	if (got < wanted && count == length) {
+	    length = (wanted-got);
+	    offset = bend - SvPVX(bufsv);
+	    goto more_bytes;
+	}
+	/* return value is character count */
+	count = got;
+	SvUTF8_on(bufsv);
+    }
     SvSETMAGIC(bufsv);
     /* This should not be marked tainted if the fp is marked clean */
     if (!(IoFLAGS(io) & IOf_UNTAINT))
 	SvTAINTED_on(bufsv);
     SP = ORIGMARK;
-    PUSHi(length);
+    PUSHi(count);
     RETURN;
 
   say_undef:
@@ -1647,7 +1717,6 @@ PP(pp_send)
     char *buffer;
     Size_t length;
     SSize_t retval;
-    IV offset;
     STRLEN blen;
     MAGIC *mg;
 
@@ -1669,7 +1738,6 @@ PP(pp_send)
     if (!gv)
 	goto say_undef;
     bufsv = *++MARK;
-    buffer = SvPV(bufsv, blen);
 #if Size_t_size > IVSIZE
     length = (Size_t)SvNVx(*++MARK);
 #else
@@ -1683,8 +1751,24 @@ PP(pp_send)
 	retval = -1;
 	if (ckWARN(WARN_CLOSED))
 	    report_evil_fh(gv, io, PL_op->op_type);
+	goto say_undef;
     }
-    else if (PL_op->op_type == OP_SYSWRITE) {
+
+    if (PerlIO_isutf8(IoIFP(io))) {
+	buffer = SvPVutf8(bufsv, blen);
+    }
+    else {
+	if (DO_UTF8(bufsv))
+	    sv_utf8_downgrade(bufsv, FALSE);
+	buffer = SvPV(bufsv, blen);
+    }
+
+    if (PL_op->op_type == OP_SYSWRITE) {
+	IV offset;
+	if (DO_UTF8(bufsv)) {
+	    /* length and offset are in chars */
+	    blen   = sv_len_utf8(bufsv);
+	}
 	if (MARK < SP) {
 	    offset = SvIVx(*++MARK);
 	    if (offset < 0) {
@@ -1697,17 +1781,24 @@ PP(pp_send)
 	    offset = 0;
 	if (length > blen - offset)
 	    length = blen - offset;
+	if (DO_UTF8(bufsv)) {
+	    buffer = (char*)utf8_hop((U8 *)buffer, offset);
+	    length = utf8_hop((U8 *)buffer, length) - (U8 *)buffer;
+	}
+	else {
+	    buffer = buffer+offset;
+	}
 #ifdef PERL_SOCK_SYSWRITE_IS_SEND
 	if (IoTYPE(io) == IoTYPE_SOCKET) {
 	    retval = PerlSock_send(PerlIO_fileno(IoIFP(io)),
-				   buffer+offset, length, 0);
+				   buffer, length, 0);
 	}
 	else
 #endif
 	{
 	    /* See the note at doio.c:do_print about filesize limits. --jhi */
 	    retval = PerlLIO_write(PerlIO_fileno(IoIFP(io)),
-				   buffer+offset, length);
+				   buffer, length);
 	}
     }
 #ifdef HAS_SOCKET
@@ -1715,12 +1806,13 @@ PP(pp_send)
 	char *sockbuf;
 	STRLEN mlen;
 	sockbuf = SvPVx(*++MARK, mlen);
+	/* length is really flags */
 	retval = PerlSock_sendto(PerlIO_fileno(IoIFP(io)), buffer, blen,
 				 length, (struct sockaddr *)sockbuf, mlen);
     }
     else
+	/* length is really flags */
 	retval = PerlSock_send(PerlIO_fileno(IoIFP(io)), buffer, blen, length);
-
 #else
     else
 	DIE(aTHX_ PL_no_sock_func, "send");
@@ -1971,9 +2063,11 @@ PP(pp_ioctl)
     char *s;
     IV retval;
     GV *gv = (GV*)POPs;
-    IO *io = GvIOn(gv);
+    IO *io = gv ? GvIOn(gv) : 0;
 
     if (!io || !argsv || !IoIFP(io)) {
+	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
+	    report_evil_fh(gv, io, PL_op->op_type);
 	SETERRNO(EBADF,RMS$_IFI);	/* well, sort of... */
 	RETPUSHUNDEF;
     }
@@ -2085,15 +2179,16 @@ PP(pp_socket)
     int fd;
 
     gv = (GV*)POPs;
+    io = gv ? GvIOn(gv) : NULL;
 
-    if (!gv) {
+    if (!gv || !io) {
+	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
+	    report_evil_fh(gv, io, PL_op->op_type);
+	if (IoIFP(io))
+	    do_close(gv, FALSE);
 	SETERRNO(EBADF,LIB$_INVARG);
 	RETPUSHUNDEF;
     }
-
-    io = GvIOn(gv);
-    if (IoIFP(io))
-	do_close(gv, FALSE);
 
     TAINT_PROPER("socket");
     fd = PerlSock_socket(domain, type, protocol);
@@ -2133,15 +2228,21 @@ PP(pp_sockpair)
 
     gv2 = (GV*)POPs;
     gv1 = (GV*)POPs;
-    if (!gv1 || !gv2)
+    io1 = gv1 ? GvIOn(gv1) : NULL;
+    io2 = gv2 ? GvIOn(gv2) : NULL;
+    if (!gv1 || !gv2 || !io1 || !io2) {
+	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED)) {
+	    if (!gv1 || !io1)
+		report_evil_fh(gv1, io1, PL_op->op_type);
+	    if (!gv2 || !io2)
+		report_evil_fh(gv1, io2, PL_op->op_type);
+	}
+	if (IoIFP(io1))
+	    do_close(gv1, FALSE);
+	if (IoIFP(io2))
+	    do_close(gv2, FALSE);
 	RETPUSHUNDEF;
-
-    io1 = GvIOn(gv1);
-    io2 = GvIOn(gv2);
-    if (IoIFP(io1))
-	do_close(gv1, FALSE);
-    if (IoIFP(io2))
-	do_close(gv2, FALSE);
+    }
 
     TAINT_PROPER("socketpair");
     if (PerlSock_socketpair(domain, type, protocol, fd) < 0)
@@ -2267,9 +2368,9 @@ PP(pp_listen)
 #ifdef HAS_SOCKET
     int backlog = POPi;
     GV *gv = (GV*)POPs;
-    register IO *io = GvIOn(gv);
+    register IO *io = gv ? GvIOn(gv) : NULL;
 
-    if (!io || !IoIFP(io))
+    if (!gv || !io || !IoIFP(io))
 	goto nuts;
 
     if (PerlSock_listen(PerlIO_fileno(IoIFP(io)), backlog) >= 0)
@@ -2546,9 +2647,15 @@ PP(pp_stat)
 
     if (PL_op->op_flags & OPf_REF) {
 	gv = cGVOP_gv;
-	if (PL_op->op_type == OP_LSTAT && ckWARN(WARN_IO))
-	    Perl_warner(aTHX_ WARN_IO,
+	if (PL_op->op_type == OP_LSTAT) {
+	    if (PL_laststype != OP_LSTAT)
+		Perl_croak(aTHX_ "The stat preceding lstat() wasn't an lstat");
+	    if (ckWARN(WARN_IO) && gv != PL_defgv)
+		Perl_warner(aTHX_ WARN_IO,
 			"lstat() on filehandle %s", GvENAME(gv));
+		/* Perl_my_lstat (-l) croak's on filehandle, why warn here? */
+	}
+
       do_fstat:
 	if (gv != PL_defgv) {
 	    PL_laststype = OP_STAT;
@@ -2558,7 +2665,6 @@ PP(pp_stat)
 		? PerlLIO_fstat(PerlIO_fileno(IoIFP(GvIOn(gv))), &PL_statcache) : -1);
 	}
 	if (PL_laststatval < 0) {
-	    dTHR;
 	    if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
 		report_evil_fh(gv, GvIO(gv), PL_op->op_type);
 	    max = 0;
@@ -3113,7 +3219,6 @@ PP(pp_fttext)
 		len = 512;
 	}
 	else {
-	    dTHR;
 	    if (ckWARN2(WARN_UNOPENED,WARN_CLOSED)) {
 		gv = cGVOP_gv;
 		report_evil_fh(gv, GvIO(gv), PL_op->op_type);
@@ -3138,7 +3243,7 @@ PP(pp_fttext)
 	    (void)PerlIO_close(fp);
 	    RETPUSHUNDEF;
 	}
-	do_binmode(fp, '<', O_BINARY);
+	PerlIO_binmode(aTHX_ fp, '<', O_BINARY, Nullch);
 	len = PerlIO_read(fp, tbuf, sizeof(tbuf));
 	(void)PerlIO_close(fp);
 	if (len <= 0) {
@@ -3173,12 +3278,12 @@ PP(pp_fttext)
 		continue;
 #endif
 	    /* utf8 characters don't count as odd */
-	    if (*s & 0x40) {
+	    if (UTF8_IS_START(*s)) {
 		int ulen = UTF8SKIP(s);
 		if (ulen < len - i) {
 		    int j;
 		    for (j = 1; j < ulen; j++) {
-			if ((s[j] & 0xc0) != 0x80)
+			if (!UTF8_IS_CONTINUATION(s[j]))
 			    goto not_utf8;
 		    }
 		    --ulen;	/* loop does extra increment */

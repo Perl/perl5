@@ -1,4 +1,4 @@
-print "1..46\n";
+print "1..49\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -334,8 +334,8 @@ print "# '$_'.\nnot "
   unless /Can\'t return a temporary from lvalue subroutine/;
 print "ok 38\n";
 
-sub xxx () { 'xxx' } # Not lvalue
-sub lv1tmpr : lvalue { xxx }			# is it a TEMP?
+sub yyy () { 'yyy' } # Const, not lvalue
+sub lv1tmpr : lvalue { yyy }			# is it read-only?
 
 $_ = undef;
 eval <<'EOE' or $_ = $@;
@@ -427,3 +427,25 @@ $a = \&lv1nn;
 $a->() = 8;
 print "# '$nnewvar'.\nnot " unless $nnewvar eq '8';
 print "ok 46\n";
+
+# This must happen at run time
+eval {
+    sub AUTOLOAD : lvalue { $newvar };
+};
+foobar() = 12;
+print "# '$newvar'.\nnot " unless $newvar eq "12";
+print "ok 47\n";
+
+# Testing DWIM of foo = bar;
+sub foo : lvalue {
+    $a;
+}
+$a = "not ok 48\n";
+foo = "ok 48\n";
+print $a;
+
+open bar, ">nothing" or die $!; 
+bar = *STDOUT;
+print bar "ok 49\n";
+unlink "nothing";
+
