@@ -392,7 +392,7 @@ or "U+" followed by hexadecimals.
 In addition to using the C<\p{In...}> and C<\P{In...}> constructs, you
 can also test whether a code point is in the I<range> as returned by
 L</charblock> and L</charscript> or as the values of the hash returned
-by L</charblocks> and </charscripts> by using charinrange():
+by L</charblocks> and L</charscripts> by using charinrange():
 
     use UnicodeCD qw(charscript charinrange);
 
@@ -541,16 +541,16 @@ true.  Case distinctions in the condition list are not significant.
 Conditions preceded by "NON_" represent the negation of the condition
 
 A I<locale> is defined as a 2-letter ISO 3166 country code, possibly
-followed by a "_" and a 2-letter ISO language code (, possibly followed
-by a "_" and a variant code).  You can find the list of those codes
-in L<Locale::Country> and L<Locale::Language>.
+followed by a "_" and a 2-letter ISO language code (possibly followed
+by a "_" and a variant code).  You can find the lists of those codes,
+see L<Locale::Country> and L<Locale::Language>.
 
 A I<context> is one of the following choices:
 
     FINAL            The letter is not followed by a letter of
                      general category L (e.g. Ll, Lt, Lu, Lm, or Lo)
     MODERN           The mapping is only used for modern text
-    AFTER_i          The last base character was "i" 0069
+    AFTER_i          The last base character was "i" (U+0069)
 
 For more information about case mappings see
 http://www.unicode.org/unicode/reports/tr21/
