@@ -1793,10 +1793,11 @@ $     echo "
 $     echo "If you're a casual user, you probably don't want
 $     echo "interpreter-threads at this time.  There doesn't yet exist
 $     echo "a way to create threads from within Perl in this model,
-$     echo "i.e., "use Thread;" will NOT work.
+$     echo "i.e., ""use Thread;"" will NOT work.
 $     echo "
 $     dflt = "n"
 $     rp = "Build with Interpreter threads? [''dflt']
+$     GOSUB myread
 $     if ans.eqs."" then ans = dflt
 $     if (f$extract(0, 1, "''ans'").eqs."Y").or.(f$extract(0, 1, "''ans'").eqs."y")
 $     THEN
@@ -1969,6 +1970,40 @@ $ ENDIF
 $ rp = "[''dflt'] "
 $ GOSUB myread
 $ if ans.eqs."" then ans = "''dflt'"
+$ a = ""
+$ j = 0
+$ xloop1:
+$   x = f$elem(j," ",ans)
+$   j = j + 1
+$   if x .eqs. " " then goto exloop1
+$   xloop2:
+$       k = f$locate("::",x)
+$       if k .ge. f$len(x) then goto exloop2
+$       x = f$extract(0,k,x) + "/" + f$extract(k+2,f$len(x)-2,x)
+$   goto xloop2
+$   exloop2:
+$   a = a + " " + x
+$ goto xloop1
+$ exloop1:
+$ ans = f$edit(a,"trim")
+$!
+$ a = ""
+$ j = 0
+$ xloop3:
+$   x = f$elem(j," ",dflt)
+$   j = j + 1
+$   if x .eqs. " " then goto exloop3
+$   xloop4:
+$       k = f$locate("::",x)
+$       if k .ge. f$len(x) then goto exloop4
+$       x = f$extract(0,k,x) + "/" + f$extract(k+2,f$len(x)-2,x)
+$   goto xloop4
+$   exloop4:
+$   a = a + " " + x
+$ goto xloop3
+$ exloop3:
+$ dflt = f$edit(a,"trim")
+$!
 $ extensions = "''ans'"
 $ perl_known_extensions = "''dflt'"
 $!

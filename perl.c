@@ -3249,51 +3249,43 @@ S_init_perllib(pTHX)
 #endif
 
 #ifdef SITEARCH_EXP
-#  if defined(WIN32)
-    incpush(SITEARCH_EXP, TRUE);
-#  else
+    /* sitearch is always relative to sitelib on Windows for
+     * DLL-based path intuition to work correctly */
+#  if !defined(WIN32)
     incpush(SITEARCH_EXP, FALSE);
 #  endif
 #endif
 
 #ifdef SITELIB_EXP
 #  if defined(WIN32)
-    incpush(SITELIB_EXP, TRUE);
+    incpush(SITELIB_EXP, TRUE);		/* this picks up sitearch as well */
 #  else
     incpush(SITELIB_EXP, FALSE);
 #  endif
 #endif
 
 #ifdef SITELIB_STEM /* Search for version-specific dirs below here */
-#  if defined(WIN32)
-    /* XXX Win32 needs inc_version_list support */
-#  else
     incpush(SITELIB_STEM, TRUE);
-#  endif
 #endif
 
 #ifdef PERL_VENDORARCH_EXP
-#  if defined(WIN32)
-    incpush(PERL_VENDORARCH_EXP, TRUE);
-#  else
+    /* vendorarch is always relative to vendorlib on Windows for
+     * DLL-based path intuition to work correctly */
+#  if !defined(WIN32)
     incpush(PERL_VENDORARCH_EXP, FALSE);
 #  endif
 #endif
 
 #ifdef PERL_VENDORLIB_EXP
 #  if defined(WIN32)
-    incpush(PERL_VENDORLIB_EXP, TRUE);
+    incpush(PERL_VENDORLIB_EXP, TRUE);	/* this picks up vendorarch as well */
 #  else
     incpush(PERL_VENDORLIB_EXP, FALSE);
 #  endif
 #endif
 
 #ifdef PERL_VENDORLIB_STEM /* Search for version-specific dirs below here */
-#  if defined(WIN32)
-    /* XXX Win32 needs inc_version_list support */
-#  else
     incpush(PERL_VENDORLIB_STEM, TRUE);
-#  endif
 #endif
 
     if (!PL_tainting)
@@ -3318,7 +3310,7 @@ S_incpush(pTHX_ char *p, int addsubdirs)
 {
     SV *subdir = Nullsv;
 
-    if (!p)
+    if (!p || !*p)
 	return;
 
     if (addsubdirs) {
