@@ -1374,9 +1374,18 @@ MAGIC* mg;
 	IoPAGE(GvIOp(defoutgv)) = (long)(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
 	break;
     case '|':
-	IoFLAGS(GvIOp(defoutgv)) &= ~IOf_FLUSH;
-	if ((SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv)) != 0) {
-	    IoFLAGS(GvIOp(defoutgv)) |= IOf_FLUSH;
+	{
+	    IO *io = GvIOp(defoutgv);
+	    if ((SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv)) == 0)
+		IoFLAGS(io) &= ~IOf_FLUSH;
+	    else {
+		if (!(IoFLAGS(io) & IOf_FLUSH)) {
+		    PerlIO *ofp = IoOFP(io);
+		    if (ofp)
+			(void)PerlIO_flush(ofp);
+		    IoFLAGS(io) |= IOf_FLUSH;
+		}
+	    }
 	}
 	break;
     case '*':
