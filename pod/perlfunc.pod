@@ -3496,10 +3496,12 @@ See L<perlop> for more details on unary operators and the comma operator.
 Sets FILEHANDLE's position, just like the C<fseek> call of C<stdio>.
 FILEHANDLE may be an expression whose value gives the name of the
 filehandle.  The values for WHENCE are C<0> to set the new position to
-POSITION, C<1> to set it to the current position plus POSITION, and C<2> to
-set it to EOF plus POSITION (typically negative).  For WHENCE you may
-use the constants C<SEEK_SET>, C<SEEK_CUR>, and C<SEEK_END> from either the
-C<IO::Seekable> or the POSIX module.  Returns C<1> upon success, C<0> otherwise.
+POSITION, C<1> to set it to the current position plus POSITION, and
+C<2> to set it to EOF plus POSITION (typically negative).  For WHENCE
+you may use the constants C<SEEK_SET>, C<SEEK_CUR>, and C<SEEK_END>
+(start of the file, current position, end of the file) from any of the
+modules Fcntl, C<IO::Seekable>, or POSIX.  Returns C<1> upon success,
+C<0> otherwise.
 
 If you want to position file for C<sysread> or C<syswrite>, don't use
 C<seek>--buffering makes its effect on the file's system position
@@ -4481,13 +4483,14 @@ for a return value for 0 to decide whether you're done.
 
 Sets FILEHANDLE's system position using the system call lseek(2).  It
 bypasses stdio, so mixing this with reads (other than C<sysread>),
-C<print>, C<write>, C<seek>, C<tell>, or C<eof> may cause
-confusion.  FILEHANDLE may be an expression whose value gives the name
-of the filehandle.  The values for WHENCE are C<0> to set the new
-position to POSITION, C<1> to set the it to the current position plus
-POSITION, and C<2> to set it to EOF plus POSITION (typically negative).
-For WHENCE, you may use the constants C<SEEK_SET>, C<SEEK_CUR>, and
-C<SEEK_END> from either the C<IO::Seekable> or the POSIX module.
+C<print>, C<write>, C<seek>, C<tell>, or C<eof> may cause confusion.
+FILEHANDLE may be an expression whose value gives the name of the
+filehandle.  The values for WHENCE are C<0> to set the new position to
+POSITION, C<1> to set the it to the current position plus POSITION,
+and C<2> to set it to EOF plus POSITION (typically negative).  For
+WHENCE, you may also use the constants C<SEEK_SET>, C<SEEK_CUR>, and
+C<SEEK_END> (start of the file, current position, end of the file)
+from any of the modules Fcntl, C<IO::Seekable>, or POSIX.
 
 Returns the new position, or the undefined value on failure.  A position
 of zero is returned as the string C<"0 but true">; thus C<sysseek> returns
