@@ -140,14 +140,14 @@ sub xclose {
     close $_[0] or croak "$Me: close($_[0]) failed: $!";
 }
 
-sub xfileno {
-    my ($fh) = @_;
-    return $1 if $fh =~ /^=?(\d+)$/;  # deal with $fh just being an fd
-    return fileno $fh;
+sub fh_is_fd {
+    return $_[0] =~ /\A=?(\d+)\z/;
 }
 
-sub fh_is_fd {
-    return $_[0] =~ /^=?\d+$/;
+sub xfileno {
+    my ($fh) = @_;
+    return $1 if =~ /\A=?(\d+)\z/;  # deal with $fh just being an fd
+    return fileno $fh;
 }
 
 my $do_spawn = $^O eq 'os2' || $^O eq 'MSWin32';
