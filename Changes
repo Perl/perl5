@@ -95,6 +95,52 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  6618] By: jhi                                   on 2000/08/14  14:09:34
+        Log: For now remove the mail code.
+     Branch: perl
+	   ! perl.c
+____________________________________________________________________________
+[  6617] By: jhi                                   on 2000/08/14  14:08:28
+        Log: Drop the eg/ mentions and also mention the recent suidperl thing.
+     Branch: perl
+	   ! jpl/README lib/ExtUtils/Embed.pm pod/perlcompile.pod
+	   ! pod/perlfaq8.pod pod/perlsec.pod
+____________________________________________________________________________
+[  6616] By: jhi                                   on 2000/08/14  14:00:11
+        Log: Subject: Re: [ID 20000807.003] [PATCH] Debugger treatment of condition "0"
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Mon, 14 Aug 2000 08:26:02 +0100
+             Message-Id: <E13OEdG-0007LT-00@libra.cus.cam.ac.uk>
+     Branch: perl
+	   ! lib/perl5db.pl
+____________________________________________________________________________
+[  6615] By: jhi                                   on 2000/08/14  13:58:45
+        Log: Subject: [PATCH] @+, @- readonly (was Re: @<punct> interpolating in "")
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Mon, 14 Aug 2000 08:04:22 +0100
+             Message-Id: <E13OEII-0007B2-00@libra.cus.cam.ac.uk>
+     Branch: perl
+	   ! gv.c mg.c t/op/pat.t
+____________________________________________________________________________
+[  6614] By: jhi                                   on 2000/08/14  13:56:45
+        Log: Subject: Test fails / warnings with perl-current #6612
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Mon, 14 Aug 2000 07:57:23 +0100
+             Message-Id: <E13OEBX-000776-00@libra.cus.cam.ac.uk>
+     Branch: perl
+	   ! t/lib/b.t t/lib/peek.t
+____________________________________________________________________________
+[  6613] By: jhi                                   on 2000/08/14  13:45:33
+        Log: VMS configure.com update continues.
+     Branch: perl
+	   - vms/configure.com
+	   ! MANIFEST configure.com
+____________________________________________________________________________
+[  6612] By: jhi                                   on 2000/08/13  22:13:35
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
 [  6611] By: jhi                                   on 2000/08/13  16:21:45
         Log: Upgrade to CGI 2.71, from Lincoln Stein.
      Branch: perl
