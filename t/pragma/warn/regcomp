@@ -54,7 +54,7 @@ no warnings 'regexp' ;
 $a =~ /a$x/ ;
 $b =~ /b$y/ ;
 EXPECT
-/a\m/: Unrecognized escape \m passed through at - line 4.
+/a\m/: Unrecognized escape \m passed through at - line 5.
 ########
 # regcomp.c [S_regpposixcc S_checkposixcc]
 BEGIN { $ENV{PERL_DESTRUCT_LEVEL} = 0 unless $ENV{PERL_DESTRUCT_LEVEL} > 3 }
