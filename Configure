@@ -10510,8 +10510,8 @@ while $test "$cont"; do
 	if set $ans val -f; eval $csym; $val; then
 		cont=''
 	else
-		dflt=n
-		rp="Function $ans does not exist. Use that name anyway?"
+                dflt=y
+                rp="I cannot find function $ans.  Use that name anyway?"
 		. ./myread
 		dflt=rand
 		case "$ans" in
