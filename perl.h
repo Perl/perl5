@@ -1731,14 +1731,6 @@ typedef pthread_key_t	perl_key;
 #  define PERL_GET_INTERP		(PL_curinterp)
 #endif
 
-#ifndef PERL_SET_CONTEXT
-#  define PERL_SET_CONTEXT(i)		PERL_SET_INTERP(i)
-#endif
-
-#ifndef PERL_GET_CONTEXT
-#  define PERL_GET_CONTEXT		PERL_GET_INTERP
-#endif
-
 #if defined(PERL_IMPLICIT_CONTEXT) && !defined(PERL_GET_THX)
 #  ifdef USE_THREADS
 #    define PERL_GET_THX		((struct perl_thread *)PERL_GET_CONTEXT)
@@ -1752,14 +1744,6 @@ typedef pthread_key_t	perl_key;
 #  endif
 #  endif
 #  define PERL_SET_THX(t)		PERL_SET_CONTEXT(t)
-#endif
-
-#ifndef PERL_GET_THX
-#  define PERL_GET_THX			((void*)NULL)
-#endif
-
-#ifndef PERL_SET_THX
-#  define PERL_SET_THX(t)		NOOP
 #endif
 
 #ifndef SVf
@@ -3123,6 +3107,23 @@ typedef struct am_table_short AMTS;
  */
 #undef printf
 #define printf PerlIO_stdoutf
+#endif
+
+/* if these never got defined, they need defaults */
+#ifndef PERL_SET_CONTEXT
+#  define PERL_SET_CONTEXT(i)		PERL_SET_INTERP(i)
+#endif
+
+#ifndef PERL_GET_CONTEXT
+#  define PERL_GET_CONTEXT		PERL_GET_INTERP
+#endif
+
+#ifndef PERL_GET_THX
+#  define PERL_GET_THX			((void*)NULL)
+#endif
+
+#ifndef PERL_SET_THX
+#  define PERL_SET_THX(t)		NOOP
 #endif
 
 #ifndef PERL_SCRIPT_MODE
