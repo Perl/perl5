@@ -112,6 +112,8 @@ class CPerlObj;
 #define _PERL_OBJECT_THIS ,this
 #define PERL_OBJECT_THIS_ this,
 #define CALLRUNOPS (this->*runops)
+#define CALLREGCOMP (this->*regcompp)
+#define CALLREGEXEC (this->*regexecp)
 
 #else /* !PERL_OBJECT */
 
@@ -126,6 +128,8 @@ class CPerlObj;
 #define _PERL_OBJECT_THIS
 #define PERL_OBJECT_THIS_
 #define CALLRUNOPS runops
+#define CALLREGCOMP (*regcompp)
+#define CALLREGEXEC (*regexecp)
 
 #endif /* PERL_OBJECT */
 
@@ -1833,10 +1837,23 @@ typedef enum {
 #define RsRECORD(sv)  (SvROK(sv) && (SvIV(SvRV(sv)) > 0))
 
 /* Enable variables which are pointers to functions */
+#ifdef PERL_OBJECT
+typedef regexp*(CPerlObj::*regcomp_t) _((char* exp, char* xend, PMOP* pm));
+typedef I32 (CPerlObj::*regexec_t) _((regexp* prog, char* stringarg,
+				      char* strend, char* strbeg,
+				      I32 minend, SV* screamer, void* data,
+				      U32 flags));
+#else
 typedef regexp*(*regcomp_t) _((char* exp, char* xend, PMOP* pm));
 typedef I32 (*regexec_t) _((regexp* prog, char* stringarg, char* strend, char*
 			    strbeg, I32 minend, SV* screamer, void* data, 
 			    U32 flags));
+
+EXT regexp*	pregcomp _((char* exp, char* xend, PMOP* pm));
+EXT I32		regexec_flags _((regexp* prog, char* stringarg, char* strend,
+			 char* strbeg, I32 minend, SV* screamer,
+			 void* data, U32 flags));
+#endif
 
 /* Set up PERLVAR macros for populating structs */
 #define PERLVAR(var,type) type var;

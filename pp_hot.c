@@ -905,7 +905,7 @@ play_it_again:
 	    rx->float_substr = Nullsv;
 	}
     }
-    if ((*regexecp)(rx, s, strend, truebase, minmatch,
+    if (CALLREGEXEC(rx, s, strend, truebase, minmatch,
 		      screamer, NULL, safebase))
     {
 	curpm = pm;
@@ -1624,7 +1624,7 @@ PP(pp_subst)
     /* can do inplace substitution? */
     if (c && clen <= rx->minlen && (once || !(safebase & REXEC_COPY_STR))
 	&& !(rx->reganch & ROPT_LOOKBEHIND_SEEN)) {
-	if (!(*regexecp)(rx, s, strend, orig, 0, screamer, NULL, safebase)) {
+	if (!CALLREGEXEC(rx, s, strend, orig, 0, screamer, NULL, safebase)) {
 	    SPAGAIN;
 	    PUSHs(&sv_no);
 	    LEAVE_SCOPE(oldsave);
@@ -1701,7 +1701,7 @@ PP(pp_subst)
 		    d += clen;
 		}
 		s = rx->endp[0];
-	    } while ((*regexecp)(rx, s, strend, orig, s == m,
+	    } while (CALLREGEXEC(rx, s, strend, orig, s == m,
 			      Nullsv, NULL, 0)); /* don't match same null twice */
 	    if (s != d) {
 		i = strend - s;
@@ -1724,7 +1724,7 @@ PP(pp_subst)
 	RETURN;
     }
 
-    if ((*regexecp)(rx, s, strend, orig, 0, screamer, NULL, safebase)) {
+    if (CALLREGEXEC(rx, s, strend, orig, 0, screamer, NULL, safebase)) {
 	if (force_on_match) {
 	    force_on_match = 0;
 	    s = SvPV_force(TARG, len);
@@ -1758,7 +1758,7 @@ PP(pp_subst)
 		sv_catpvn(dstr, c, clen);
 	    if (once)
 		break;
-	} while ((*regexecp)(rx, s, strend, orig, s == m, Nullsv, NULL, safebase));
+	} while (CALLREGEXEC(rx, s, strend, orig, s == m, Nullsv, NULL, safebase));
 	sv_catpvn(dstr, s, strend - s);
 
 	(void)SvOOK_off(TARG);

@@ -615,7 +615,6 @@
 #define pp_i_negate		Perl_pp_i_negate
 #define pp_i_subtract		Perl_pp_i_subtract
 #define pp_index		Perl_pp_index
-#define pp_indread		Perl_pp_indread
 #define pp_int			Perl_pp_int
 #define pp_interp		Perl_pp_interp
 #define pp_ioctl		Perl_pp_ioctl

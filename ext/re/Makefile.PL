@@ -11,11 +11,11 @@ WriteMakefile(
 sub MY::postamble {
     return <<'EOF';
 re_comp.c: ../../regcomp.c
-	-$(RM) $@
+	-$(RM_F) $@
 	$(CP) ../../regcomp.c $@
 
 re_exec.c: ../../regexec.c
-	-$(RM) $@
+	-$(RM_F) $@
 	$(CP) ../../regexec.c $@
 
 EOF

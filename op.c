@@ -2140,7 +2140,7 @@ pmruntime(OP *o, OP *expr, OP *repl)
 	    p = SvPV(pat, plen);
 	    pm->op_pmflags |= PMf_SKIPWHITE;
 	}
-	pm->op_pmregexp = (*regcompp)(p, p + plen, pm);
+	pm->op_pmregexp = CALLREGCOMP(p, p + plen, pm);
 	if (strEQ("\\s+", pm->op_pmregexp->precomp))
 	    pm->op_pmflags |= PMf_WHITE;
 	op_free(expr);

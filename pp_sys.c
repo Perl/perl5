@@ -264,11 +264,13 @@ PP(pp_glob)
     return result;
 }
 
+#if 0		/* XXX never used! */
 PP(pp_indread)
 {
     last_in_gv = gv_fetchpv(SvPVx(GvSV((GV*)(*stack_sp--)), na), TRUE,SVt_PVIO);
     return do_readline();
 }
+#endif
 
 PP(pp_rcatline)
 {

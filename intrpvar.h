@@ -240,9 +240,10 @@ PERLVARI(Iregindent,	int,	    0)	/* from regexec.c */
 
 PERLVAR(Iregcc,		CURCUR *)	/* from regexec.c */
 
-PERLVARI(Iregcompp,	regcomp_t, &pregcomp) /* Pointer to RE compiler */
-PERLVARI(Iregexecp,	regexec_t, &regexec_flags) /* Pointer to RE executer */
-
+PERLVARI(Iregcompp,	regcomp_t, FUNC_NAME_TO_PTR(pregcomp))
+					/* Pointer to RE compiler */
+PERLVARI(Iregexecp,	regexec_t, FUNC_NAME_TO_PTR(regexec_flags))
+					/* Pointer to RE executer */
 
 PERLVARI(Iin_clean_objs,bool,    FALSE)	/* from sv.c */
 PERLVARI(Iin_clean_all,	bool,    FALSE)	/* from sv.c */

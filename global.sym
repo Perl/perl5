@@ -682,7 +682,6 @@ pp_i_ne
 pp_i_negate
 pp_i_subtract
 pp_index
-pp_indread
 pp_int
 pp_interp
 pp_ioctl

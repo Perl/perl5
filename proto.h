@@ -430,12 +430,10 @@ VIRTUAL void	pop_scope _((void));
 VIRTUAL OP*	prepend_elem _((I32 optype, OP* head, OP* tail));
 VIRTUAL void	push_return _((OP* o));
 VIRTUAL void	push_scope _((void));
-VIRTUAL regexp*	pregcomp _((char* exp, char* xend, PMOP* pm));
 VIRTUAL OP*	ref _((OP* o, I32 type));
 VIRTUAL OP*	refkids _((OP* o, I32 type));
 VIRTUAL void	regdump _((regexp* r));
 VIRTUAL I32	pregexec _((regexp* prog, char* stringarg, char* strend, char* strbeg, I32 minend, SV* screamer, U32 nosave));
-VIRTUAL I32	regexec_flags _((regexp* prog, char* stringarg, char* strend, char* strbeg, I32 minend, SV* screamer, void* data, U32 flags));
 VIRTUAL void	pregfree _((struct regexp* r));
 VIRTUAL regnode* regnext _((regnode* p));
 VIRTUAL void	regprop _((SV* sv, regnode* o));
@@ -711,6 +709,12 @@ int div128 _((SV *pnum, bool *done));
 
 int runops_standard _((void));
 int runops_debug _((void));
+
+regexp*	pregcomp _((char* exp, char* xend, PMOP* pm));
+I32	regexec_flags _((regexp* prog, char* stringarg, char* strend,
+			 char* strbeg, I32 minend, SV* screamer,
+			 void* data, U32 flags));
+
 void check_uni _((void));
 void  force_next _((I32 type));
 char *force_version _((char *start));

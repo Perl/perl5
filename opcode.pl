@@ -211,6 +211,7 @@ close OC or die "Error closing opcode.h: $!";
 
 open PP, '>pp_proto.h' or die "Error creating pp_proto.h: $!";
 for (@ops) {
+    next if /^i_(pre|post)(inc|dec)$/;
     print PP "PPDEF(pp_$_)\n";
 }
 
