@@ -956,6 +956,7 @@ END
 static double
 constant(char *name, int len, int arg)
 {
+    errno = 0;
     if (strEQ(name + $offarg, "$list->[0]")) {	/* $pref removed */
 #ifdef $pref$list->[0]
 	return $protect$pref$list->[0];
@@ -994,6 +995,9 @@ END
 static double
 constant$npref(char *name, int len, int arg)
 {
+END
+
+  print $fh <<"END" if $npref eq '';
     errno = 0;
 END
 
