@@ -87,6 +87,7 @@ assertref(OP *o)
     if (type != OP_AELEM && type != OP_HELEM) {
 	yyerror(form("Can't use subscript on %s", op_desc[type]));
 	if (type == OP_ENTERSUB || type == OP_RV2HV || type == OP_PADHV) {
+	    dTHR;
 	    SV *msg = sv_2mortal(
 			newSVpvf("(Did you mean $ or @ instead of %c?)\n",
 				 type == OP_ENTERSUB ? '&' : '%'));
