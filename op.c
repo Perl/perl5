@@ -5971,7 +5971,8 @@ Perl_ck_fun(pTHX_ OP *o)
 			OP *newop = newGVOP(OP_GV, 0,
 			    gv_fetchpv(SvPVx(((SVOP*)kid)->op_sv, n_a), TRUE,
 					SVt_PVIO) );
-			if (kid == cLISTOPo->op_last)
+			if ((o->op_flags & OPf_KIDS) &&
+			    kid == cLISTOPo->op_last)
 			    cLISTOPo->op_last = newop;
 			op_free(kid);
 			kid = newop;
