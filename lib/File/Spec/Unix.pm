@@ -42,7 +42,12 @@ sub canonpath {
     if ( $^O =~ m/^(?:qnx|nto)$/ && $path =~ s:^(//[^/]+)(/|\z):/:s ) {
       $node = $1;
     }
-    $path =~ s|/+|/|g unless($^O eq 'cygwin');     # xx////xx  -> xx/xx
+    # This used to be
+    # $path =~ s|/+|/|g unless($^O eq 'cygwin');
+    # but that made tests 29, 30, 35, 46, and 213 (as of #13272) to fail
+    # (Mainly because trailing "" directories didn't get stripped).
+    # Why would cygwin avoid collapsing multiple slashes into one? --jhi
+    $path =~ s|/+|/|g;                             # xx////xx  -> xx/xx
     $path =~ s@(/\.)+(/|\Z(?!\n))@/@g;             # xx/././xx -> xx/xx
     $path =~ s|^(\./)+||s unless $path eq "./";    # ./xx      -> xx
     $path =~ s|^/(\.\./)+|/|s;                     # /../../xx -> xx
