@@ -1580,14 +1580,20 @@ Perl_vcroak(pTHX_ const char* pat, va_list *args)
     SV *msv;
     STRLEN msglen;
 
-    msv = vmess(pat, args);
-    if (PL_errors && SvCUR(PL_errors)) {
-	sv_catsv(PL_errors, msv);
-	message = SvPV(PL_errors, msglen);
-	SvCUR_set(PL_errors, 0);
+    if (pat) {
+	msv = vmess(pat, args);
+	if (PL_errors && SvCUR(PL_errors)) {
+	    sv_catsv(PL_errors, msv);
+	    message = SvPV(PL_errors, msglen);
+	    SvCUR_set(PL_errors, 0);
+	}
+	else
+	    message = SvPV(msv,msglen);
     }
-    else
-	message = SvPV(msv,msglen);
+    else {
+	message = Nullch;
+	msglen = 0;
+    }
 
     DEBUG_S(PerlIO_printf(Perl_debug_log, "croak: 0x%"UVxf" %s",
 			  PTR2UV(thr), message));
@@ -1606,9 +1612,14 @@ Perl_vcroak(pTHX_ const char* pat, va_list *args)
 
 	    ENTER;
 	    save_re_context();
-	    msg = newSVpvn(message, msglen);
-	    SvREADONLY_on(msg);
-	    SAVEFREESV(msg);
+	    if (message) {
+		msg = newSVpvn(message, msglen);
+		SvREADONLY_on(msg);
+		SAVEFREESV(msg);
+	    }
+	    else {
+		msg = ERRSV;
+	    }
 
 	    PUSHSTACKi(PERLSI_DIEHOOK);
 	    PUSHMARK(SP);
@@ -1655,9 +1666,16 @@ Perl_croak_nocontext(const char *pat, ...)
 /*
 =for apidoc croak
 
-This is the XSUB-writer's interface to Perl's C<die> function.  Use this
-function the same way you use the C C<printf> function.  See
-C<warn>.
+This is the XSUB-writer's interface to Perl's C<die> function.
+Normally use this function the same way you use the C C<printf>
+function.  See C<warn>.
+
+If you want to throw an exception object, assign the object to
+C<$@> and then pass C<Nullch> to croak():
+
+   errsv = get_sv("@", TRUE);
+   sv_setsv(errsv, exception_object);
+   croak(Nullch);
 
 =cut
 */
