@@ -34,7 +34,7 @@ sub SWASHNEW {
     } else {
 	$file =~ s#^(Is|To)([A-Z].*)#$1/$2#;
     }
-    $list ||= eval { $caller->$type(); }
+    $list ||= ($caller ne 'main' && eval { $caller->$type(); })
 	|| do "$file.pl"
 	|| do "$encoding/$file.pl"
 	|| do "$encoding/Is/${type}.pl"
