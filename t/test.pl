@@ -325,9 +325,9 @@ sub runperl {
 }
 
 
-sub BAILOUT {
-    print STDOUT "Bail out! @_\n";
-    exit;
+sub DIE {
+    print STDOUT "# @_\n";
+    exit 1;
 }
 
 # A somewhat safer version of the sometimes wrong $^X.

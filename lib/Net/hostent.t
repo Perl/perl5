@@ -20,9 +20,9 @@ BEGIN {
 BEGIN { use_ok 'Net::hostent' }
 
 # Remind me to add this to Test::More.
-sub BAILOUT {
-    print "Bail Out! @_\n";
-    exit;
+sub DIE {
+    print "# @_\n";
+    exit 1;
 }
 
 # test basic resolution of localhost <-> 127.0.0.1
@@ -30,13 +30,13 @@ use Socket;
 
 my $h = gethost('localhost');
 ok(defined $h,  "gethost('localhost')") ||
-  BAILOUT("Can't continue without working gethost: $!");
+  DIE("Can't continue without working gethost: $!");
 
 is( inet_ntoa($h->addr), "127.0.0.1",   'addr from gethost' );
 
 my $i = gethostbyaddr(inet_aton("127.0.0.1"));
 ok(defined $i,  "gethostbyaddr('127.0.0.1')") || 
-  BAILOUT("Can't continue without working gethostbyaddr: $!");
+  DIE("Can't continue without working gethostbyaddr: $!");
 
 is( inet_ntoa($i->addr), "127.0.0.1",   'addr from gethostbyaddr' );
 

@@ -36,10 +36,10 @@ my $tmpfile_link = $tmpfile.'2';
 
 
 unlink $tmpfile;
-open(FOO, ">$tmpfile") || BAILOUT("Can't open temp test file: $!");
+open(FOO, ">$tmpfile") || DIE("Can't open temp test file: $!");
 close FOO;
 
-open(FOO, ">$tmpfile") || BAILOUT("Can't open temp test file: $!");
+open(FOO, ">$tmpfile") || DIE("Can't open temp test file: $!");
 
 my($nlink, $mtime, $ctime) = (stat(FOO))[$NLINK, $MTIME, $CTIME];
 SKIP: {
@@ -109,13 +109,13 @@ DIAG
 }
 
 # truncate and touch $tmpfile.
-open(F, ">$tmpfile") || BAILOUT("Can't open temp test file: $!");
+open(F, ">$tmpfile") || DIE("Can't open temp test file: $!");
 close F;
 
 ok(-z $tmpfile,     '-z on empty file');
 ok(! -s $tmpfile,   '   and -s');
 
-open(F, ">$tmpfile") || BAILOUT("Can't open temp test file: $!");
+open(F, ">$tmpfile") || DIE("Can't open temp test file: $!");
 print F "hi\n";
 close F;
 
@@ -296,7 +296,7 @@ my $Null = File::Spec->devnull;
 SKIP: {
     skip "No null device to test with", 1 unless -e $Null;
 
-    open(NULL, $Null) or BAIL_OUT("Can't open $Null: $!");
+    open(NULL, $Null) or DIE("Can't open $Null: $!");
     ok(! -t NULL,   'null device is not a TTY');
     close(NULL);
 }
