@@ -1047,7 +1047,7 @@ to do this.
         tie = newRV_noinc((SV*)newHV());
         stash = gv_stashpv("MyTie", TRUE);
         sv_bless(tie, stash);
-        hv_magic(hash, tie, PERL_MAGIC_tied);
+        hv_magic(hash, (GV*)tie, PERL_MAGIC_tied);
         RETVAL = newRV_noinc(hash);
     OUTPUT:
         RETVAL
