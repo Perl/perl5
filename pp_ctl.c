@@ -2710,7 +2710,7 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, PAD** padp)
     PL_hints &= HINT_UTF8;
 
     /* we get here either during compilation, or via pp_regcomp at runtime */
-    runtime = PL_op && (PL_op->op_type == OP_REGCOMP);
+    runtime = (PL_curcop != &PL_compiling);
     if (runtime)
 	runcv = find_runcv(NULL);
 
