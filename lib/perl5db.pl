@@ -301,7 +301,7 @@ if ($notty) {
 
   #require Term::ReadLine;
 
-  if ($^O =~ /cygwin/) {
+  if ($^O eq 'cygwin') {
     # /dev/tty is binary. use stdin for textmode
     undef $console;
   } elsif (-e "/dev/tty") {

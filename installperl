@@ -14,7 +14,7 @@ BEGIN {
     $Is_VMS = $^O eq 'VMS';
     $Is_W32 = $^O eq 'MSWin32';
     $Is_OS2 = $^O eq 'os2';
-    $Is_Cygwin = $^O =~ /cygwin/i;
+    $Is_Cygwin = $^O eq 'cygwin';
     if ($Is_VMS) { eval 'use VMS::Filespec;' }
 }
 

@@ -368,6 +368,8 @@ sub _ccharness
 	my $lperl = $^O eq 'os2' ? '-llibperl' 
 	   : $^O eq 'MSWin32' ? "$Config{archlibexp}\\CORE\\perl.lib"
 	   : '-lperl';
+       ($lperl = $Config{libperl}) =~ s/lib(.*)\Q$Config{_a}\E/-l$1/
+	    if($^O eq 'cygwin');
 
 	$optimize = $Config{'optimize'} =~ /-O\d/ ? '' : $Config{'optimize'};
 
@@ -377,10 +379,10 @@ sub _ccharness
 
     my $libs = _getSharedObjects($sourceprog);
     @$libs = grep { !(/DynaLoader\.a$/ && ($dynaloader = $_)) } @$libs
-	if($^O =~ /cygwin/i);
+	if($^O eq 'cygwin');
 
     my $ccflags = $Config{ccflags};
-    $ccflags .= ' -DUSEIMPORTLIB' if $Config{osname} =~ /cygwin/i;
+    $ccflags .= ' -DUSEIMPORTLIB' if $^O eq 'cygwin';
     my $cccmd = "$Config{cc} $ccflags $optimize $incdir "
 		."@args $dynaloader $linkargs @$libs";
 

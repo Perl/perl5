@@ -9,27 +9,30 @@ case "$ldlibpthname" in
 '') ldlibpthname=PATH ;;
 esac
 
-# mandatory (overrides defaults)
+# mandatory (overrides incorrect defaults)
 test -z "$cc" && cc='gcc'
-if test -z "$libpth"
+if test -z "$plibpth"
 then
-    libpth=`gcc -print-file-name=libc.a`
-    libpth=`dirname $libpth`
-    libpth=`cd $libpth && pwd`
+    plibpth=`gcc -print-file-name=libc.a`
+    plibpth=`dirname $plibpth`
+    plibpth=`cd $plibpth && pwd`
 fi
 so='dll'
-libs='-lcygwin -lm -lkernel32'
+# - eliminate -lc, implied by gcc
+libswanted=`echo " $libswanted " | sed -e 's/ c / /g'`
+libswanted="$libswanted cygipc cygwin kernel32"
 ccflags="$ccflags -DCYGWIN"
+# - otherwise i686-cygwin
 archname='cygwin'
-cccdlflags=' '
+
+# dynamic loading
 ld='ld2'
+# - otherwise -fpic
+cccdlflags=' '
 
 # optional(ish)
 # - perl malloc needs to be unpolluted
 bincompat5005='undef'
-# - build shared libperl.dll
-useshrplib='true'
-libperl='libperl.a'
 
 # strip exe's and dll's
 #ldflags="$ldflags -s"

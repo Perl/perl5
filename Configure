@@ -5908,7 +5908,7 @@ $undef)
 	;;
 *)	case "$useshrplib" in
 	'')	case "$osname" in
-		svr4*|dgux|dynixptx|esix|powerux|beos)
+		svr4*|dgux|dynixptx|esix|powerux|beos|cygwin*)
 			dflt=y
 			also='Building a shared libperl is required for dynamic loading to work on your system.'
 			;;
@@ -5977,6 +5977,9 @@ true)
 			;;
 		linux*)  # ld won't link with a bare -lperl otherwise.
 			dflt=libperl.$so
+			;;
+		cygwin*) # include version
+			dflt=`echo libperl$version | sed -e 's/\./_/g'`$lib_ext
 			;;
 		*)	# Try to guess based on whether libc has major.minor.
 			case "$libc" in

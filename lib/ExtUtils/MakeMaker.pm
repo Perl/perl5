@@ -70,7 +70,7 @@ $Is_VMS   = $^O eq 'VMS';
 $Is_OS2   = $^O eq 'os2';
 $Is_Mac   = $^O eq 'MacOS';
 $Is_Win32 = $^O eq 'MSWin32';
-$Is_Cygwin= $^O =~ /cygwin/i;
+$Is_Cygwin= $^O eq 'cygwin';
 
 require ExtUtils::MM_Unix;
 
