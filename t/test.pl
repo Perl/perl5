@@ -148,6 +148,70 @@ sub isnt {
     _ok($pass, _where(), $name, @mess);
 }
 
+sub cmp_ok {
+    my($got, $type, $expected, $name, @mess) = @_;
+
+    my $pass;
+    {
+        local $^W = 0;
+        local($@,$!);   # don't interfere with $@
+                        # eval() sometimes resets $!
+        $pass = eval "\$got $type \$expected";
+    }
+    unless ($pass) {
+        # It seems Irix long doubles can have 2147483648 and 2147483648
+        # that stringify to the same thing but are acutally numerically
+        # different. Display the numbers if $type isn't a string operator,
+        # and the numbers are stringwise the same.
+        # (all string operators have alphabetic names, so tr/a-z// is true)
+        # This will also show numbers for some uneeded cases, but will
+        # definately be helpful for things such as == and <= that fail
+        if ($got eq $expected and $type !~ tr/a-z//) {
+            unshift @mess, "# $got - $expected = " . ($got - $expected) . "\n";
+        }
+        unshift(@mess, "#      got "._q($got)."\n",
+                       "# expected $type "._q($expected)."\n");
+    }
+    _ok($pass, _where(), $name, @mess);
+}
+
+# Check that $got is within $range of $expected
+# if $range is 0, then check it's exact
+# else if $expected is 0, then $range is an absolute value
+# otherwise $range is a fractional error.
+# Here $range must be numeric, >= 0
+# Non numeric ranges might be a useful future extension. (eg %)
+sub within {
+    my ($got, $expected, $range, $name, @mess) = @_;
+    my $pass;
+    if (!defined $got or !defined $expected or !defined $range) {
+        # This is a fail, but doesn't need extra diagnostics
+    } elsif ($got !~ tr/0-9// or $expected !~ tr/0-9// or $range !~ tr/0-9//) {
+        # This is a fail
+        unshift @mess, "# got, expected and range must be numeric\n";
+    } elsif ($range < 0) {
+        # This is also a fail
+        unshift @mess, "# range must not be negative\n";
+    } elsif ($range == 0) {
+        # Within 0 is ==
+        $pass = $got == $expected;
+    } elsif ($expected == 0) {
+        # If expected is 0, treat range as absolute
+        $pass = ($got <= $range) && ($got >= - $range);
+    } else {
+        my $diff = $got - $expected;
+        $pass = abs ($diff / $expected) < $range;
+    }
+    unless ($pass) {
+        if ($got eq $expected) {
+            unshift @mess, "# $got - $expected = " . ($got - $expected) . "\n";
+        }
+	unshift@mess, "#      got "._q($got)."\n",
+		      "# expected "._q($expected)." (within "._q($range).")\n";
+    }
+    _ok($pass, _where(), $name, @mess);
+}
+
 # Note: this isn't quite as fancy as Test::More::like().
 sub like {
     my ($got, $expected, $name, @mess) = @_;

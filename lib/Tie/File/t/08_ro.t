@@ -16,7 +16,7 @@ print "ok $N\n"; $N++;
 my @items = qw(Gold Frankincense Myrrh Ivory Apes Peacocks);
 init_file(join $:, @items, '');
 
-my $o = tie @a, 'Tie::File', $file, mode => O_RDONLY;
+my $o = tie @a, 'Tie::File', $file, mode => O_RDONLY, autochomp => 0;
 print $o ? "ok $N\n" : "not ok $N\n";
 $N++;
 

@@ -1,18 +1,17 @@
 #!/usr/bin/perl
 
 my $file = "tf$$.txt";
+$: = Tie::File::_default_recsep();
 
-print "1..62\n";
+print "1..71\n";
 
 my $N = 1;
 use Tie::File;
 print "ok $N\n"; $N++;
 
-my $o = tie @a, 'Tie::File', $file, autochomp => 0;
+my $o = tie @a, 'Tie::File', $file, autochomp => 1;
 print $o ? "ok $N\n" : "not ok $N\n";
 $N++;
-
-$: = $o->{recsep};
 
 # 3-5 create
 $a[0] = 'rec0';
@@ -70,6 +69,36 @@ check_contents();
 $a[3] = "rec3";
 check_contents("", "", "", "rec3");
 
+# (63-68) Test the ->autochomp() method
+@a = qw(Gold Frankincense Myrrh);
+my $ac;
+$ac = $o->autochomp();
+expect($ac);
+# See if that accidentally changed it
+$ac = $o->autochomp();
+expect($ac);
+# Now clear it
+$ac = $o->autochomp(0);
+expect($ac);
+expect(join("-", @a), "Gold$:-Frankincense$:-Myrrh$:");
+# Now set it again
+$ac = $o->autochomp(1);
+expect(!$ac);
+expect(join("-", @a), "Gold-Frankincense-Myrrh");
+
+# (69) Does 'splice' work correctly with autochomp?
+my @sr;
+@sr = splice @a, 0, 2;
+expect(join("-", @sr), "Gold-Frankincense");
+
+# (70-71) Didn't you forget that fetch may return an unchomped cached record?
+$a1 = $a[0];                    # populate cache
+$a2 = $a[0];
+expect($a1, "Myrrh");
+expect($a2, "Myrrh");
+# Actually no, you didn't---_fetch might return such a record, but 
+# the chomping is done by FETCH.
+
 use POSIX 'SEEK_SET';
 sub check_contents {
   my @c = @_;
@@ -93,8 +122,8 @@ sub check_contents {
   my $msg;
   for (0.. $#c) {
     my $aa = $a[$_];
-    unless ($aa eq "$c[$_]$:") {
-      $msg = "expected <$c[$_]$:>, got <$aa>";
+    unless ($aa eq $c[$_]) {
+      $msg = "expected <$c[$_]>, got <$aa>";
       ctrlfix($msg);
       $good = 0;
     }
@@ -104,6 +133,22 @@ sub check_contents {
 
   print $o->_check_integrity($file, $ENV{INTEGRITY}) 
       ? "ok $N\n" : "not ok $N\n";
+  $N++;
+}
+
+sub expect {
+  if (@_ == 1) {
+    print $_[0] ? "ok $N\n" : "not ok $N\n";
+  } elsif (@_ == 2) {
+    my ($a, $x) = @_;
+    if ($a eq $x) { print "ok $N\n" }
+    else {
+      ctrlfix(my $msg = "expected <$x>, got <$a>");
+      print "not ok $N # $msg\n";
+    }
+  } else {
+    die "expect() got ", scalar(@_), " args, should have been 1 or 2";
+  }
   $N++;
 }
 

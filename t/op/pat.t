@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..860\n";
+print "1..861\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2705,4 +2705,11 @@ print "# some Unicode properties\n";
 	    "ok $i\n" : "not ok $i # debug: $x\n";
  	$i++;
    }
+}
+
+{
+    print "# SEGV in s/// and UTF-8\n";
+    $s = "s#\x{100}" x 4;
+    $s =~ s/[^\w]/ /g;
+    print $s eq "s \x{100}" x 4 ? "ok 861\n" : "not ok 861\n";
 }

@@ -3024,7 +3024,7 @@ tryagain:
 
     default: {
 	    register STRLEN len;
-	    register UV ender = 0;
+	    register UV ender;
 	    register char *p;
 	    char *oldp, *s;
 	    STRLEN numlen;
@@ -3036,6 +3036,7 @@ tryagain:
 	    RExC_parse++;
 
 	defchar:
+	    ender = 0;
 	    ret = reg_node(pRExC_state, FOLD
 			  ? (LOC ? EXACTFL : EXACTF)
 			  : EXACT);

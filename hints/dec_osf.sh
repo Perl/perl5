@@ -283,6 +283,12 @@ $define|true|[yY]*)
 		usemymalloc='n'
 		;;
 	esac
+	# These symbols are renamed in <time.h> so
+	# that the Configure hasproto doesn't see them.
+	d_asctime_r_proto="$define"
+	d_ctime_r_proto="$define"
+	d_gmtime_r_proto="$define"
+	d_localtime_r_proto="$define"
 	;;
 esac
 EOCBU

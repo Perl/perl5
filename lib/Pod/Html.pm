@@ -1055,8 +1055,7 @@ sub process_head {
       print HTML "</p>\n";
     }
 
-    my $name = htmlify( depod( $heading ) );
-    $name =~ s/\s/_/g; # htmlify keeps spaces but we don't want them here...
+    my $name = anchorify( depod( $heading ) );
     my $convert = process_text( \$heading );
     print HTML "<h$level><a name=\"$name\">$convert</a></h$level>\n";
 }
@@ -1079,8 +1078,8 @@ sub emit_item_tag($$$){
     if ($items_named{$item}++) {
 	print HTML process_text( \$otext );
     } else {
-	my $name = 'item_' . $item;
-	$name =~ s/\s/_/g; # we don't want spaces here...
+        my $name = 'item_' . $item;
+        $name = anchorify($name);
 	print HTML qq{<a name="$name">}, process_text( \$otext ), '</a>';
     }
     print HTML "</strong><br />\n";
@@ -1733,7 +1732,7 @@ sub page_sect($$) {
     $page83=dosify($page);
     $page=$page83 if (defined $pages{$page83});
     if ($page eq "") {
-	$link = "#" . htmlify( $section );
+        $link = "#" . anchorify( $section );
     } elsif ( $page =~ /::/ ) {
 	$page =~ s,::,/,g;
 	# Search page cache for an entry keyed under the html page name,
@@ -1760,11 +1759,11 @@ sub page_sect($$) {
 
 	}
 	$link = "$htmlroot/$page.html";
-	$link .= "#" . htmlify( $section ) if ($section);
+	$link .= "#" . anchorify( $section ) if ($section);
     } elsif (!defined $pages{$page}) {
 	$link = "";
     } else {
-	$section = htmlify( $section ) if $section ne "";
+	$section = anchorify( $section ) if $section ne "";
         ### print STDERR "...section=$section\n";
 
 	# if there is a directory by the name of the page, then assume that an
@@ -1944,6 +1943,16 @@ sub htmlify {
     $heading =~ s/[-"?]//g;
     $heading = lc( $heading );
     return $heading;
+}
+
+#
+# similar to htmlify, but turns spaces into underscores
+#
+sub anchorify {
+    my ($anchor) = @_;
+    $anchor = htmlify($anchor);
+    $anchor =~ s/\s/_/g; # fixup spaces left by htmlify
+    return $anchor;
 }
 
 #

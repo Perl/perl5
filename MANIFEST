@@ -1444,6 +1444,8 @@ lib/Tie/File/t/18_rs_fixrec.t   Test for Tie::File.
 lib/Tie/File/t/19_cache.t       Test for Tie::File.
 lib/Tie/File/t/20_cache_full.t  Test for Tie::File.
 lib/Tie/File/t/21_win32.t       Test for Tie::File.
+lib/Tie/File/t/22_autochomp.t   Test for Tie::File.
+lib/Tie/File/t/23_rv_ac_splice.t  Test for Tie::File.
 lib/Tie/Handle.pm		Base class for tied handles
 lib/Tie/Handle/stdhandle.t	Test for Tie::StdHandle
 lib/Tie/Hash.pm			Base class for tied hashes
@@ -2352,6 +2354,7 @@ t/op/override.t			See if operator overriding works
 t/op/pack.t			See if pack and unpack work
 t/op/pat.t			See if esoteric patterns work
 t/op/pos.t			See if pos works
+t/op/pow.t			See if ** works
 t/op/push.t			See if push and pop work
 t/op/pwent.t			See if getpw*() functions work
 t/op/qq.t			See if qq works

@@ -5,7 +5,7 @@ use POSIX 'SEEK_SET';
 use Fcntl 'O_CREAT', 'O_RDWR', 'LOCK_EX';
 require 5.005;
 
-$VERSION = "0.19";
+$VERSION = "0.20";
 
 # Idea: The object will always contain an array of byte offsets
 # this will be filled in as is necessary and convenient.
@@ -22,7 +22,7 @@ $VERSION = "0.19";
 my $DEFAULT_MEMORY_SIZE = 1<<21;    # 2 megabytes
 
 my %good_opt = map {$_ => 1, "-$_" => 1} 
-               qw(memory dw_size mode recsep discipline);
+               qw(memory dw_size mode recsep discipline autochomp);
 
 sub TIEARRAY {
   if (@_ % 2 != 0) {
@@ -71,6 +71,8 @@ sub TIEARRAY {
     croak "Empty record separator not supported by $pack";
   }
 
+  $opts{autochomp} = 1 unless defined $opts{autochomp};
+
   my $mode = defined($opts{mode}) ? $opts{mode} : O_CREAT|O_RDWR;
   my $fh;
 
@@ -99,6 +101,32 @@ sub TIEARRAY {
 }
 
 sub FETCH {
+  my ($self, $n) = @_;
+  $self->_chomp1($self->_fetch($n));
+}
+
+# Chomp many records in-place; return nothing useful
+sub _chomp {
+  my $self = shift;
+  return unless $self->{autochomp};
+  if ($self->{autochomp}) {
+    for (@_) {
+      next unless defined;
+      substr($_, - $self->{recseplen}) = "";
+    }
+  }
+}
+
+# Chomp one record in-place; return modified record
+sub _chomp1 {
+  my ($self, $rec) = @_;
+  return $rec unless $self->{autochomp};
+  return unless defined $rec;
+  substr($rec, - $self->{recseplen}) = "";
+  $rec;
+}
+
+sub _fetch {
   my ($self, $n) = @_;
 
   # check the record cache
@@ -142,7 +170,7 @@ sub STORE {
   # We need this to decide whether the new record will fit
   # It incidentally populates the offsets table 
   # Note we have to do this before we alter the cache
-  my $oldrec = $self->FETCH($n);
+  my $oldrec = $self->_fetch($n);
 
   # _check_cache promotes record $n to MRU.  Is this correct behavior?
   if (my $cached = $self->_check_cache($n)) {
@@ -282,7 +310,12 @@ sub EXISTS {
 sub SPLICE {
   my $self = shift;
   $self->_flush if $self->{defer};
-  $self->_splice(@_);
+  if (wantarray) {
+    $self->_chomp(my @a = $self->_splice(@_));
+    @a;
+  } else {
+    $self->_chomp1(scalar $self->_splice(@_));
+  }
 }
 
 sub DESTROY {
@@ -323,7 +356,7 @@ sub _splice {
   # compute length of data being removed
   # Incidentally fills offsets table
   for ($pos .. $pos+$nrecs-1) {
-    my $rec = $self->FETCH($_);
+    my $rec = $self->_fetch($_);
     last unless defined $rec;
     push @result, $rec;
     $oldlen += length($rec);
@@ -638,6 +671,18 @@ sub defer {
   $self->{defer} = 1;
 }
 
+# Get/set autochomp option
+sub autochomp {
+  my $self = shift;
+  if (@_) {
+    my $old = $self->{autochomp};
+    $self->{autochomp} = shift;
+    $old;
+  } else {
+    $self->{autochomp};
+  }
+}
+
 # Flush deferred writes
 #
 # This could be better optimized to write the file in one pass, instead
@@ -773,7 +818,7 @@ Tie::File - Access the lines of a disk file via a Perl array
 
 =head1 SYNOPSIS
 
-	# This file documents Tie::File version 0.19
+	# This file documents Tie::File version 0.20
 
 	tie @array, 'Tie::File', filename or die ...;
 
@@ -825,21 +870,27 @@ contained the following data:
 
 then the C<@array> would appear to have four elements: 
 
-	"Curse thes"
-	"e pes"
-	"ky flies"
+	"Curse th"
+	"e p"
+	"ky fli"
 	"!\n"
 
 An undefined value is not permitted as a record separator.  Perl's
 special "paragraph mode" semantics (E<agrave> la C<$/ = "">) are not
 emulated.
 
-Records read from the tied array will have the record separator string
-on the end, just as if they were read from the C<E<lt>...E<gt>>
-operator.  Records stored into the array will have the record
-separator string appended before they are written to the file, if they
-don't have one already.  For example, if the record separator string
-is C<"\n">, then the following two lines do exactly the same thing:
+Records read from the tied array do not have the record separator
+string on the end; this is to allow 
+
+	$array[17] .= "extra";
+
+to work as expected.
+
+(See L<"autochomp">, below.)  Records stored into the array will have
+the record separator string appended before they are written to the
+file, if they don't have one already.  For example, if the record
+separator string is C<"\n">, then the following two lines do exactly
+the same thing:
 
 	$array[17] = "Cherry pie";
 	$array[17] = "Cherry pie\n";
@@ -857,6 +908,24 @@ whose trailing record separator string is missing.
 Inserting records that I<contain> the record separator string will
 produce a reasonable result, but if you can't foresee what this result
 will be, you'd better avoid doing this.
+
+=head2 C<autochomp>
+
+Normally, array elements have the record separator removed, so that if
+the file contains the text
+
+	Gold
+	Frankincense
+	Myrrh
+
+the tied array will appear to contain C<("Gold", "Frankincense", "Myrrh")>.
+If you set C<autochomp> to a false value, the record separator will not be removed.  If the file above was tied with
+
+	tie @gifts, "Tie::File", $gifts, autochomp => 0;
+
+then the array C<@gifts> would appear to contain C<("Gold\n",
+"Frankincense\n", "Myrrh\n")>, or (on Win32 systems) C<("Gold\r\n",
+"Frankincense\r\n", "Myrrh\r\n")>.
 
 =head2 C<mode>
 
@@ -950,7 +1019,16 @@ have a green light, that does not prevent the idiot coming the other
 way from plowing into you sideways; it merely guarantees to you that
 the idiot does not also have a green light at the same time.
 
-=head2 Tying to an already-opened filehandle
+=head2 C<autochomp>
+
+	my $old_value = $o->autochomp(0);    # disable autochomp option
+	my $old_value = $o->autochomp(1);    #  enable autochomp option
+
+	my $ac = $o->autochomp();   # recover current value
+
+See L<"autochomp">, above.
+
+=head1 Tying to an already-opened filehandle
 
 If C<$fh> is a filehandle, such as is returned by C<IO::File> or one
 of the other C<IO> modules, you may use:
@@ -1139,7 +1217,7 @@ C<mjd-perl-tiefile-subscribe@plover.com>.
 
 =head1 LICENSE
 
-C<Tie::File> version 0.19 is copyright (C) 2002 Mark Jason Dominus.
+C<Tie::File> version 0.20 is copyright (C) 2002 Mark Jason Dominus.
 
 This library is free software; you may redistribute it and/or modify
 it under the same terms as Perl itself.
@@ -1167,7 +1245,7 @@ For licensing inquiries, contact the author at:
 
 =head1 WARRANTY
 
-C<Tie::File> version 0.19 comes with ABSOLUTELY NO WARRANTY.
+C<Tie::File> version 0.20 comes with ABSOLUTELY NO WARRANTY.
 For details, see the license.
 
 =head1 THANKS

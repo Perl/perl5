@@ -2425,7 +2425,7 @@ S_regmatch(pTHX_ regnode *prog)
 		    sayNO_ANYOF;
 		if (locinput >= PL_regeol)
 		    sayNO;
-		locinput += inclasslen;
+		locinput += inclasslen ? inclasslen : 1;
 		nextchr = UCHARAT(locinput);
 		break;
 	    }

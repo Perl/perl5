@@ -877,10 +877,98 @@ PP(pp_postdec)
 PP(pp_pow)
 {
     dSP; dATARGET; tryAMAGICbin(pow,opASSIGN);
+#ifdef PERL_PRESERVE_IVUV
+    /* ** is implemented with pow. pow is floating point. Perl programmers
+       write 2 ** 31 and expect it to be 2147483648
+       pow never made any guarantee to deliver a result to 53 (or whatever)
+       bits of accuracy. Which is unfortunate, as perl programmers expect it
+       to, and on some platforms (eg Irix with long doubles) it doesn't in
+       a very visible case. (2 ** 31, which a regression test uses)
+       So we'll implement power-of-2 ** +ve integer with multiplies, to avoid
+       these problems.  */
     {
-      dPOPTOPnnrl;
-      SETn( Perl_pow( left, right) );
-      RETURN;
+        SvIV_please(TOPm1s);
+        if (SvIOK(TOPm1s)) {
+            bool baseuok = SvUOK(TOPm1s);
+            UV baseuv;
+
+            if (baseuok) {
+                baseuv = SvUVX(TOPm1s);
+            } else {
+                IV iv = SvIVX(TOPm1s);
+                if (iv >= 0) {
+                    baseuv = iv;
+                    baseuok = TRUE; /* effectively it's a UV now */
+                } else {
+                    baseuv = -iv; /* abs, baseuok == false records sign */
+                }
+            }
+            SvIV_please(TOPs);
+            if (SvIOK(TOPs)) {
+                UV power;
+
+                if (SvUOK(TOPs)) {
+                    power = SvUVX(TOPs);
+                } else {
+                    IV iv = SvIVX(TOPs);
+                    if (iv >= 0) {
+                        power = iv;
+                    } else {
+                        goto float_it; /* Can't do negative powers this way.  */
+                    }
+                }
+                /* now we have integer ** positive integer.
+                   foo & (foo - 1) is zero only for a power of 2.  */
+                if (!(baseuv & (baseuv - 1))) {
+                    /* We are raising power-of-2 to postive integer.
+                       The logic here will work for any base (even non-integer
+                       bases) but it can be less accurate than
+                       pow (base,power) or exp (power * log (base)) when the
+                       intermediate values start to spill out of the mantissa.
+                       With powers of 2 we know this can't happen.
+                       And powers of 2 are the favourite thing for perl
+                       programmers to notice ** not doing what they mean. */
+                    NV result = 1.0;
+                    NV base = baseuok ? baseuv : -(NV)baseuv;
+                    int n = 0;
+
+                    /* The logic is this.
+                       x ** n === x ** m1 * x ** m2 where n = m1 + m2
+                       so as 42 is 32 + 8 + 2
+                       x ** 42 can be written as
+                       x ** 32 * x ** 8 * x ** 2
+                       I can calculate x ** 2, x ** 4, x ** 8 etc trivially:
+                       x ** 2n is x ** n * x ** n
+                       So I loop round, squaring x each time
+                       (x, x ** 2, x ** 4, x ** 8) and multiply the result
+                       by the x-value whenever that bit is set in the power.
+                       To finish as soon as possible I zero bits in the power
+                       when I've done them, so that power becomes zero when
+                       I clear the last bit (no more to do), and the loop
+                       terminates.  */
+                    for (; power; base *= base, n++) {
+                        /* Do I look like I trust gcc with long longs here?
+                           Do I hell.  */
+                        UV bit = (UV)1 << (UV)n;
+                        if (power & bit) {
+                            result *= base;
+                            /* Only bother to clear the bit if it is set.  */
+                            power &= ~bit;
+                        }
+                    }
+                    SP--;
+                    SETn( result );
+                    RETURN;
+                }
+            }
+        }
+    }
+      float_it:
+#endif    
+    {
+        dPOPTOPnnrl;
+        SETn( Perl_pow( left, right) );
+        RETURN;
     }
 }
 

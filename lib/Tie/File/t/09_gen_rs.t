@@ -8,7 +8,7 @@ my $N = 1;
 use Tie::File;
 print "ok $N\n"; $N++;
 
-my $o = tie @a, 'Tie::File', $file, recsep => 'blah';
+my $o = tie @a, 'Tie::File', $file, recsep => 'blah', autochomp => 0;
 print $o ? "ok $N\n" : "not ok $N\n";
 $N++;
 
