@@ -2429,6 +2429,8 @@ typedef enum {
     XREF,
     XSTATE,
     XBLOCK,
+    XATTRBLOCK,
+    XATTRTERM,
     XTERMBLOCK
 } expectation;
 

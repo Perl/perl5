@@ -4779,6 +4779,41 @@ Perl_magic_killbackrefs(pTHXo_ SV *sv, MAGIC *mg)
 {
     return ((CPerlObj*)pPerl)->Perl_magic_killbackrefs(sv, mg);
 }
+
+#undef  Perl_newANONATTRSUB
+OP*
+Perl_newANONATTRSUB(pTHXo_ I32 floor, OP *proto, OP *attrs, OP *block)
+{
+    return ((CPerlObj*)pPerl)->Perl_newANONATTRSUB(floor, proto, attrs, block);
+}
+
+#undef  Perl_newATTRSUB
+CV*
+Perl_newATTRSUB(pTHXo_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
+{
+    return ((CPerlObj*)pPerl)->Perl_newATTRSUB(floor, o, proto, attrs, block);
+}
+
+#undef  Perl_newMYSUB
+void
+Perl_newMYSUB(pTHXo_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
+{
+    ((CPerlObj*)pPerl)->Perl_newMYSUB(floor, o, proto, attrs, block);
+}
+
+#undef  Perl_my_attrs
+OP *
+Perl_my_attrs(pTHXo_ OP *o, OP *attrs)
+{
+    return ((CPerlObj*)pPerl)->Perl_my_attrs(o, attrs);
+}
+
+#undef  Perl_boot_core_xsutils
+void
+Perl_boot_core_xsutils(pTHXo)
+{
+    ((CPerlObj*)pPerl)->Perl_boot_core_xsutils();
+}
 #if defined(PERL_OBJECT)
 #endif
 #if defined(PERL_IN_AV_C) || defined(PERL_DECL_PROT)
@@ -4833,6 +4868,8 @@ Perl_magic_killbackrefs(pTHXo_ SV *sv, MAGIC *mg)
 #  endif
 #endif
 #if defined(PERL_IN_UNIVERSAL_C) || defined(PERL_DECL_PROT)
+#endif
+#if defined(PERL_IN_XSUTILS_C) || defined(PERL_DECL_PROT)
 #endif
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 #  if defined(LEAKTEST)

@@ -11,7 +11,7 @@ use vars qw(
 	    $Verbose $Keep $Maxlen $CheckForAutoloader $CheckModTime
 	   );
 
-$VERSION = "1.0303";
+$VERSION = "1.0304";
 @ISA = qw(Exporter);
 @EXPORT = qw(&autosplit &autosplit_lib_modules);
 @EXPORT_OK = qw($Verbose $Keep $Maxlen $CheckForAutoloader $CheckModTime);
@@ -146,6 +146,13 @@ if (defined (&Dos::UseLFN)) {
      $maxflen = Dos::UseLFN() ? 255 : 11;
 }
 my $Is_VMS = ($^O eq 'VMS');
+
+# allow checking for valid ': attrlist' attachments
+my $nested;
+$nested = qr{ \( (?: (?> [^()]+ ) | (?p{ $nested }) )* \) }x;
+my $one_attr = qr{ (?> (?! \d) \w+ (?:$nested)? ) [\s,]* }x;
+my $attr_list = qr{ \s* : \s* (?: $one_attr )* }x;
+
 
 
 sub autosplit{
@@ -289,7 +296,7 @@ sub autosplit_file {
 	if (/^package\s+([\w:]+)\s*;/) {
 	    $this_package = $def_package = $1;
 	}
-	if (/^sub\s+([\w:]+)(\s*\(.*?\))?/) {
+	if (/^sub\s+([\w:]+)(\s*(?:\(.*?\))?(?:$attr_list)?)/) {
 	    print OUT "# end of $last_package\::$subname\n1;\n"
 		if $last_package;
 	    $subname = $1;
@@ -459,3 +466,6 @@ sub test6       { return join ":", __FILE__,__LINE__; }
 package Yet::Another::AutoSplit;
 sub testtesttesttest4_1 ($)  { "another test 4\n"; }
 sub testtesttesttest4_2 ($$) { "another duplicate test 4\n"; }
+package Yet::More::Attributes;
+sub test_a1 ($) : locked { 1; }
+sub test_a2 : locked { 1; }

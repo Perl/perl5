@@ -666,3 +666,8 @@ Perl_sv_force_normal
 Perl_tmps_grow
 Perl_sv_rvweaken
 Perl_magic_killbackrefs
+Perl_newANONATTRSUB
+Perl_newATTRSUB
+Perl_newMYSUB
+Perl_my_attrs
+Perl_boot_core_xsutils

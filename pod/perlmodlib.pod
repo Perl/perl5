@@ -46,9 +46,13 @@ The following pragmas are defined (and have their own documentation).
 
 =over 12
 
+=item attributes
+
+set/get the attributes of a subroutine or variable
+
 =item attrs
 
-set/get attributes of a subroutine
+set/get attributes of a subroutine (obsolescent)
 
 =item autouse
 

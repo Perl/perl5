@@ -729,6 +729,11 @@ VIRTUAL void	Perl_sv_force_normal(pTHX_ SV *sv);
 VIRTUAL void	Perl_tmps_grow(pTHX_ I32 n);
 VIRTUAL SV*	Perl_sv_rvweaken(pTHX_ SV *sv);
 VIRTUAL int	Perl_magic_killbackrefs(pTHX_ SV *sv, MAGIC *mg);
+VIRTUAL OP*	Perl_newANONATTRSUB(pTHX_ I32 floor, OP *proto, OP *attrs, OP *block);
+VIRTUAL CV*	Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block);
+VIRTUAL void	Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block);
+VIRTUAL OP *	Perl_my_attrs(pTHX_ OP *o, OP *attrs);
+VIRTUAL void	Perl_boot_core_xsutils(pTHX);
 #if defined(PERL_OBJECT)
 protected:
 #endif
@@ -784,6 +789,9 @@ STATIC bool	S_is_handle_constructor(pTHX_ OP *o, I32 argnum);
 STATIC char*	S_gv_ename(pTHX_ GV *gv);
 STATIC CV*	S_cv_clone2(pTHX_ CV *proto, CV *outside);
 STATIC bool	S_scalar_mod_type(pTHX_ OP *o, I32 type);
+STATIC OP *	S_my_kid(pTHX_ OP *o, OP *attrs);
+STATIC OP *	S_dup_attrlist(pTHX_ OP *o);
+STATIC void	S_apply_attrs(pTHX_ HV *stash, SV *target, OP *attrs);
 #  if defined(PL_OP_SLAB_ALLOC)
 STATIC void*	S_Slab_Alloc(pTHX_ int m, size_t sz);
 #  endif
@@ -938,7 +946,7 @@ STATIC char*	S_scan_heredoc(pTHX_ char *s);
 STATIC char*	S_scan_ident(pTHX_ char *s, char *send, char *dest, STRLEN destlen, I32 ck_uni);
 STATIC char*	S_scan_inputsymbol(pTHX_ char *start);
 STATIC char*	S_scan_pat(pTHX_ char *start, I32 type);
-STATIC char*	S_scan_str(pTHX_ char *start);
+STATIC char*	S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims);
 STATIC char*	S_scan_subst(pTHX_ char *start);
 STATIC char*	S_scan_trans(pTHX_ char *start);
 STATIC char*	S_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STRLEN *slp);
@@ -971,6 +979,9 @@ STATIC I32	S_win32_textfilter(pTHX_ int idx, SV *sv, int maxlen);
 #endif
 #if defined(PERL_IN_UNIVERSAL_C) || defined(PERL_DECL_PROT)
 STATIC SV*	S_isa_lookup(pTHX_ HV *stash, const char *name, int len, int level);
+#endif
+#if defined(PERL_IN_XSUTILS_C) || defined(PERL_DECL_PROT)
+STATIC int	S_modify_SV_attributes(pTHX_ SV *sv, SV **retlist, SV **attrlist, int numattrs);
 #endif
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 STATIC SV*	S_mess_alloc(pTHX);

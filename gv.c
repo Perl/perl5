@@ -677,6 +677,10 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	    }
 	}
 	break;
+    case 'V':
+	if (strEQ(name, "VERSION"))
+	    GvMULTI_on(gv);
+	break;
 
     case '&':
 	if (len > 1)

@@ -640,6 +640,7 @@ lib/User/grent.pm	By-name interface to Perl's builtin getgr*
 lib/User/pwent.pm	By-name interface to Perl's builtin getpw*
 lib/abbrev.pl		An abbreviation table builder
 lib/assert.pl		assertion and panic with stack trace
+lib/attributes.pm	For "sub foo : attrlist"
 lib/autouse.pm		Load and call a function only when it's used
 lib/base.pm		Establish IS-A relationship at compile time
 lib/bigfloat.pl		An arbitrary precision floating point package
@@ -1117,6 +1118,7 @@ t/io/read.t		See if read works
 t/io/tell.t		See if file seeking works
 t/lib/abbrev.t		See if Text::Abbrev works
 t/lib/anydbm.t		See if AnyDBM_File works
+t/lib/attrs.t		See if attrs works with C<sub : attrs>
 t/lib/autoloader.t	See if AutoLoader works
 t/lib/basename.t	See if File::Basename works
 t/lib/bigfloat.t	See if bigfloat.pl works
@@ -1218,6 +1220,7 @@ t/op/append.t		See if . works
 t/op/arith.t		See if arithmetic works
 t/op/array.t		See if array operations work
 t/op/assignwarn.t	See if OP= operators warn correctly for undef targets
+t/op/attrs.t		See if attributes on declarations work
 t/op/auto.t		See if autoincrement et all work
 t/op/avhv.t		See if pseudo-hashes work
 t/op/bop.t		See if bitops work
@@ -1496,3 +1499,4 @@ x2p/str.h		Public declarations for the above
 x2p/util.c		Utility routines
 x2p/util.h		Public declarations for the above
 x2p/walk.c		Parse tree walker
+xsutils.c		Additional bundled package methods not in UNIVERSAL::
