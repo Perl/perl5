@@ -21,9 +21,9 @@
 NAME = Compress::Zlib
 DISTNAME = Compress-Zlib
 NAME_SYM = Compress_Zlib
-VERSION = 1.13
-VERSION_SYM = 1_13
-XS_VERSION = 1.13
+VERSION = 1.14
+VERSION_SYM = 1_14
+XS_VERSION = 1.14
 INST_LIB = :::::lib
 INST_ARCHLIB = :::::lib
 PERL_LIB = :::::lib

@@ -49,6 +49,7 @@ foreach (@INC)
 $Perl = '' ;
 $Perl = ($ENV{'FULLPERL'} or $^X or 'perl') ;
 
+$Perl = "$Perl -MMac::err=unix" if $^O eq 'MacOS';
 $Perl = "$Perl -w" ;
 
 1;

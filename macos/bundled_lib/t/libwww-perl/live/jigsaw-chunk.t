@@ -15,6 +15,7 @@ print "not " unless $res->header("Transfer-Encoding") eq "chunked";
 print "ok 2\n";
 
 for (${$res->content_ref}) {
+    s/\015?\012/\n/g;
     /Below this line, is 1000 repeated lines of 0-9/ || die;
     s/^.*?-----+\n//s;
 

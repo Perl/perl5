@@ -33,6 +33,30 @@ eval { local $SIG{__DIE__}; require Net::LocalCfg };
     test_exist => 1,
 );
 
+#
+# Try to get as much configuration info as possible from InternetConfig
+#
+1 && eval <<'TRY_INTERNET_CONFIG';
+use Mac::InternetConfig;
+
+{
+my %nc = (
+    nntp_hosts      => [ $InternetConfig{ kICNNTPHost()} ],
+    pop3_hosts      => [ $InternetConfig{ kICMailAccount()} =~ /@(.*)/ ],
+    smtp_hosts      => [ $InternetConfig{ kICSMTPHost()} ],
+    ftp_testhost    => [ $InternetConfig{ kICFTPHost()}  ],
+    ph_hosts        => [ $InternetConfig{ kICPhHost()}   ],
+    ftp_ext_passive => $InternetConfig{"646F676F¥UsePassiveMode"} || 0,
+    ftp_int_passive => $InternetConfig{"646F676F¥UsePassiveMode"} || 0,
+    socks_hosts     => 
+    	$InternetConfig{kICUseSocks()}    ? [ $InternetConfig{kICSocksHost()}    ] : [],
+    ftp_firewall    => 
+    	$InternetConfig{kICUseFTPProxy()} ? [ $InternetConfig{kICFTPProxyHost()} ] : [],
+);
+@NetConfig{keys %nc} = values %nc;
+}
+TRY_INTERNET_CONFIG
+
 my $file = __FILE__;
 my $ref;
 $file =~ s/Config.pm/libnet.cfg/;
