@@ -1567,23 +1567,40 @@ yylex()
 	    if (*s == ':' && s[1] != ':') /* for csh execing sh scripts */
 		s++;
 	    if (!in_eval && *s == '#' && s[1] == '!') {
-#ifdef ARG_ZERO_IS_SCRIPT
 		/*
-		 * HP-UX (at least) sets argv[0] to the script
-		 * name, which makes $^X incorrect.
-		 * So, having found "#!", we'll set it right.
+		 * HP-UX (at least) sets argv[0] to the script name,
+		 * which makes $^X incorrect.  And Digital UNIX and Linux,
+		 * at least, set argv[0] to the basename of the Perl
+		 * interpreter. So, having found "#!", we'll set it right.
 		 */
-		GV *x = gv_fetchpv("\030", TRUE, SVt_PV);
-		if (sv_eq(GvSV(x), GvSV(curcop->cop_filegv))) {
-		    char *a = s + 2;
-		    while (*a == ' ' || *a == '\t')
-			a++;
-		    d = a;
-		    while (*d && !isSPACE(*d))
-			d++;
-		    sv_setpvn(GvSV(x), a, d - a);
+		SV *x = GvSV(gv_fetchpv("\030", TRUE, SVt_PV));
+		char *ipath;
+		char *ibase;
+
+		d = s + 2;
+		while (*d == ' ' || *d == '\t')
+		    d++;
+		ipath = d;
+		ibase = Nullch;
+		while (*d && !isSPACE(*d)) {
+		    if (*d++ == '/')
+			ibase = d;
 		}
-#endif /* ARG_ZERO_IS_SCRIPT */
+		assert(SvPOK(x) || SvGMAGICAL(x));
+		if (sv_eq(x, GvSV(curcop->cop_filegv))
+		    || (ibase
+			&& SvCUR(x) == (d - ibase)
+			&& strnEQ(SvPVX(x), ibase, d - ibase)))
+		    sv_setpvn(x, ipath, d - ipath);
+		/*
+		 * $^X is always tainted, but taintedness must be off
+		 * when parsing code, so forget we ever saw it.
+		 */
+		TAINT_NOT;
+
+		/*
+		 * Look for options.
+		 */
 		d = instr(s,"perl -");
 		if (!d)
 		    d = instr(s,"perl");

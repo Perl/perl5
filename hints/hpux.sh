@@ -113,11 +113,6 @@ usemymalloc='y'
 alignbytes=8
 selecttype='int *'
 
-# For no good reason, HP-UX sets argv[0] to the name of a script
-# executed with #!, which makes $^X wrong.  This macro enables a
-# workaround.
-toke_cflags='ccflags="$ccflags -DARG_ZERO_IS_SCRIPT"'
-
 # If your compile complains about FLT_MIN, uncomment the next line
 # POSIX_cflags='ccflags="$ccflags -DFLT_MIN=1.17549435E-38"'
 
