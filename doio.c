@@ -1518,7 +1518,9 @@ do_ipcctl(I32 optype, SV **mark, SV **sp)
 	    a = SvPV(astr, len);
 	    if (len != infosize)
 		croak("Bad arg length for %s, is %lu, should be %ld",
-			op_desc[optype], (unsigned long)len, (long)infosize);
+		      PL_op_desc[optype],
+		      (unsigned long)len,
+		      (long)infosize);
 	}
     }
     else
