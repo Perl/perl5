@@ -263,7 +263,7 @@ Useless use of rindex in void context at - line 22.
 Useless use of sprintf in void context at - line 23.
 Useless use of array element in void context at - line 24.
 Useless use of array slice in void context at - line 26.
-Useless use of hash elem in void context at - line 29.
+Useless use of hash element in void context at - line 29.
 Useless use of hash slice in void context at - line 30.
 Useless use of unpack in void context at - line 31.
 Useless use of pack in void context at - line 32.
@@ -593,16 +593,16 @@ EXPECT
 Applying pattern match (m//) to @array will act on scalar(@array) at - line 5.
 Applying substitution (s///) to @array will act on scalar(@array) at - line 6.
 Can't modify private array in substitution (s///) at - line 6, near "s/a/b/ ;"
-Applying character translation (tr///) to @array will act on scalar(@array) at - line 7.
+Applying transliteration (tr///) to @array will act on scalar(@array) at - line 7.
 Applying pattern match (m//) to @array will act on scalar(@array) at - line 8.
 Applying substitution (s///) to @array will act on scalar(@array) at - line 9.
-Applying character translation (tr///) to @array will act on scalar(@array) at - line 10.
+Applying transliteration (tr///) to @array will act on scalar(@array) at - line 10.
 Applying pattern match (m//) to %hash will act on scalar(%hash) at - line 11.
 Applying substitution (s///) to %hash will act on scalar(%hash) at - line 12.
-Applying character translation (tr///) to %hash will act on scalar(%hash) at - line 13.
+Applying transliteration (tr///) to %hash will act on scalar(%hash) at - line 13.
 Applying pattern match (m//) to %hash will act on scalar(%hash) at - line 14.
 Applying substitution (s///) to %hash will act on scalar(%hash) at - line 15.
-Applying character translation (tr///) to %hash will act on scalar(%hash) at - line 16.
+Applying transliteration (tr///) to %hash will act on scalar(%hash) at - line 16.
 BEGIN not safe after errors--compilation aborted at - line 18.
 ########
 # op.c

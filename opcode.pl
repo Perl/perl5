@@ -338,7 +338,7 @@ gelem		glob elem		ck_null		d2	S S
 padsv		private variable	ck_null		ds0
 padav		private array		ck_null		d0
 padhv		private hash		ck_null		d0
-padany		private something	ck_null		d0
+padany		private value		ck_null		d0
 
 pushre		push regexp		ck_null		d/
 
@@ -357,7 +357,7 @@ bless		bless			ck_fun		s@	S S?
 
 # Pushy I/O.
 
-backtick	quoted execution (``, qx)	ck_null		t%	
+backtick	backticks (``, qx)	ck_null		t%	
 # glob defaults its first arg to $_
 glob		glob			ck_glob		t@	S? S?
 readline	<HANDLE>		ck_null		t%	
@@ -365,14 +365,14 @@ rcatline	append I/O operator	ck_null		t%
 
 # Bindable operators.
 
-regcmaybe	regexp comp once		ck_fun		s1	S
-regcreset	regexp reset interpolation flag	ck_fun		s1	S
-regcomp		regexp compilation		ck_null		s|	S
-match		pattern match (m//)		ck_match	d/
-qr			pattern quote (qr//)	ck_match	s/
-subst		substitution (s///)		ck_null		dis/	S
-substcont	substitution cont		ck_null		dis|	
-trans		character translation (tr///)	ck_null		is"	S
+regcmaybe	regexp internal guard	ck_fun		s1	S
+regcreset	regexp internal reset	ck_fun		s1	S
+regcomp		regexp compilation	ck_null		s|	S
+match		pattern match (m//)	ck_match	d/
+qr		pattern quote (qr//)	ck_match	s/
+subst		substitution (s///)	ck_null		dis/	S
+substcont	substitution iterator	ck_null		dis|	
+trans		transliteration (tr///)	ck_null		is"	S
 
 # Lvalue operators.
 # sassign is special-cased for op class
@@ -382,8 +382,8 @@ aassign		list assignment		ck_null		t2	L L
 
 chop		chop			ck_spair	mTs%	L
 schop		scalar chop		ck_null		sTu%	S?
-chomp		safe chop		ck_spair	mTs%	L
-schomp		scalar safe chop	ck_null		sTu%	S?
+chomp		chomp			ck_spair	mTs%	L
+schomp		scalar chomp		ck_null		sTu%	S?
 defined		defined operator	ck_defined	isu%	S?
 undef		undef operator		ck_lfun		s%	S?
 study		study			ck_fun		su%	S?
@@ -402,7 +402,7 @@ i_postdec	integer postdecrement (--)	ck_lfun		disT1	S
 
 pow		exponentiation (**)	ck_null		fsT2	S S
 
-multiply	multiplication (*)		ck_null		IfsT2	S S
+multiply	multiplication (*)	ck_null		IfsT2	S S
 i_multiply	integer multiplication (*)	ck_null		ifsT2	S S
 divide		division (/)		ck_null		IfsT2	S S
 i_divide	integer division (/)	ck_null		ifsT2	S S
@@ -441,27 +441,27 @@ sle		string le		ck_scmp		ifs2	S S
 sge		string ge		ck_scmp		ifs2	S S
 seq		string eq		ck_null		ifs2	S S
 sne		string ne		ck_null		ifs2	S S
-scmp	string comparison (cmp)		ck_scmp		ifst2	S S
+scmp		string comparison (cmp)	ck_scmp		ifst2	S S
 
 bit_and		bitwise and (&)		ck_bitop	fsT2	S S
 bit_xor		bitwise xor (^)		ck_bitop	fsT2	S S
 bit_or		bitwise or (|)		ck_bitop	fsT2	S S
 
-negate		negate (-)		ck_null		IfsT1	S
-i_negate	integer negate (-)	ck_null		ifsT1	S
+negate		negation (-)		ck_null		IfsT1	S
+i_negate	integer negation (-)	ck_null		ifsT1	S
 not		not			ck_null		ifs1	S
 complement	1's complement (~)	ck_bitop	fsT1	S
 
 # High falutin' math.
 
-atan2		atan2		ck_fun		fsT@	S S
-sin		sin		ck_fun		fsTu%	S?
-cos		cos		ck_fun		fsTu%	S?
-rand		rand		ck_fun		sT%	S?
-srand		srand		ck_fun		s%	S?
-exp		exp		ck_fun		fsTu%	S?
-log		log		ck_fun		fsTu%	S?
-sqrt		sqrt		ck_fun		fsTu%	S?
+atan2		atan2			ck_fun		fsT@	S S
+sin		sin			ck_fun		fsTu%	S?
+cos		cos			ck_fun		fsTu%	S?
+rand		rand			ck_fun		sT%	S?
+srand		srand			ck_fun		s%	S?
+exp		exp			ck_fun		fsTu%	S?
+log		log			ck_fun		fsTu%	S?
+sqrt		sqrt			ck_fun		fsTu%	S?
 
 # Lowbrow math.
 
@@ -492,8 +492,8 @@ quotemeta	quotemeta		ck_fun		fsTu%	S?
 
 # Arrays.
 
-rv2av		array deref		ck_rvconst	dt1	
-aelemfast	known array element	ck_null		s*	A S
+rv2av		array dereference	ck_rvconst	dt1	
+aelemfast	constant array element	ck_null		s*	A S
 aelem		array element		ck_null		s2	A S
 aslice		array slice		ck_null		m@	A L
 
@@ -504,8 +504,8 @@ values		values			ck_fun		t%	H
 keys		keys			ck_fun		t%	H
 delete		delete			ck_delete	%	S
 exists		exists			ck_exists	is%	S
-rv2hv		hash deref		ck_rvconst	dt1	
-helem		hash elem		ck_null		s2@	H S
+rv2hv		hash dereference	ck_rvconst	dt1	
+helem		hash element		ck_null		s2@	H S
 hslice		hash slice		ck_null		m@	H L
 
 # Explosives and implosives.
@@ -530,11 +530,11 @@ unshift		unshift			ck_fun		imsT@	A L
 sort		sort			ck_sort		m@	C? L
 reverse		reverse			ck_fun		mt@	L
 
-grepstart	grep		ck_grep		dm@	C L
-grepwhile	grep iterator	ck_null		dt|	
+grepstart	grep			ck_grep		dm@	C L
+grepwhile	grep iterator		ck_null		dt|	
 
-mapstart	map		ck_grep		dm@	C L
-mapwhile	map iterator	ck_null		dt|
+mapstart	map			ck_grep		dm@	C L
+mapwhile	map iterator		ck_null		dt|
 
 # Range stuff.
 
@@ -545,9 +545,9 @@ flop		range (or flop)		ck_null		1
 # Control.
 
 and		logical and (&&)		ck_null		|	
-or		logical or (||)		ck_null		|	
-xor		logical xor		ck_null		fs2	S S	
-cond_expr	conditional operator (?:)	ck_null		d|	
+or		logical or (||)			ck_null		|	
+xor		logical xor			ck_null		fs2	S S	
+cond_expr	conditional expression		ck_null		d|	
 andassign	logical and assignment (&&=)	ck_null		s|	
 orassign	logical or assignment (||=)	ck_null		s|	
 
@@ -558,7 +558,7 @@ leavesublv	lvalue subroutine exit	ck_null		1
 caller		caller			ck_fun		t%	S?
 warn		warn			ck_fun		imst@	L
 die		die			ck_fun		dimst@	L
-reset		reset			ck_fun		is%	S?
+reset		symbol reset		ck_fun		is%	S?
 
 lineseq		line sequence		ck_null		@	
 nextstate	next statement		ck_null		s;	
@@ -580,8 +580,8 @@ goto		goto			ck_null		ds}
 exit		exit			ck_fun		ds%	S?
 # continued below
 
-#nswitch		numeric switch		ck_null		d	
-#cswitch		character switch	ck_null		d	
+#nswitch	numeric switch		ck_null		d	
+#cswitch	character switch	ck_null		d	
 
 # I/O.
 
@@ -748,11 +748,11 @@ semop		semop			ck_fun		imst@	S S
 
 require		require			ck_require	du%	S?
 dofile		do 'file'		ck_fun		d1	S
-entereval	eval "string"		ck_eval		d%	S
-leaveeval	eval exit		ck_null		1	S
+entereval	eval 'string'		ck_eval		d%	S
+leaveeval	eval 'string' exit	ck_null		1	S
 #evalonce	eval constant string	ck_null		d1	S
 entertry	eval {block}		ck_null		|	
-leavetry	eval block exit		ck_null		@	
+leavetry	eval {block} exit	ck_null		@	
 
 # Get system info.
 
@@ -794,7 +794,7 @@ syscall		syscall			ck_fun		imst@	S L
 
 # For multi-threading
 lock		lock			ck_rfun		s%	S
-threadsv	per-thread variable	ck_null		ds0
+threadsv	per-thread value	ck_null		ds0
 
 # Control (contd.)
 setstate	set statement info	ck_null		s;
