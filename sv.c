@@ -5316,7 +5316,9 @@ Perl_sv_free(pTHX_ SV *sv)
 	    return;
 	}
 	if (ckWARN_d(WARN_INTERNAL))
-	    Perl_warner(aTHX_ packWARN(WARN_INTERNAL), "Attempt to free unreferenced scalar");
+	    Perl_warner(aTHX_ packWARN(WARN_INTERNAL),
+                        "Attempt to free unreferenced scalar: SV 0x%"UVxf,
+                PTR2UV(sv));
 	return;
     }
     ATOMIC_DEC_AND_TEST(refcount_is_zero, SvREFCNT(sv));
