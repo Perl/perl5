@@ -159,6 +159,8 @@ PP(pp_rv2gv)
 		/* If this is a 'my' scalar and flag is set then vivify
 		 * NI-S 1999/05/07
 		 */
+		if (SvREADONLY(sv))
+		    Perl_croak(aTHX_ PL_no_modify);
 		if (PL_op->op_private & OPpDEREF) {
 		    char *name;
 		    GV *gv;
