@@ -9,7 +9,7 @@ use Cwd;
 
 =head1 NAME
 
-File::Spec::Unix - methods used by File::Spec
+File::Spec::Unix - File::Spec for Unix, base for other File::Spec modules
 
 =head1 SYNOPSIS
 
@@ -17,7 +17,9 @@ File::Spec::Unix - methods used by File::Spec
 
 =head1 DESCRIPTION
 
-Methods for manipulating file specifications.
+Methods for manipulating file specifications.  Other File::Spec
+modules, such as File::Spec::Mac, inherit from File::Spec::Unix and
+override specific methods.
 
 =head1 METHODS
 
@@ -26,7 +28,7 @@ Methods for manipulating file specifications.
 =item canonpath
 
 No physical check on the filesystem, but a logical cleanup of a
-path. On UNIX eliminate successive slashes and successive "/.".
+path. On UNIX eliminates successive slashes and successive "/.".
 
     $cpath = File::Spec->canonpath( $path ) ;
 
