@@ -3,6 +3,21 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
+
+}
+
+{
+    my $wide = v256;
+    use bytes;
+    my $ordwide = ord($wide);
+    printf "# under use bytes ord(v256) = 0x%02x\n", $ordwide;
+    if ($ordwide == 140) {
+	print "1..0 # Skip: UTF-EBCDIC (not UTF-8) used here\n";
+	exit 0;
+    }
+    elsif ($ordwide != 196) {
+	printf "# v256 starts with 0x%02x\n", $ordwide;
+    }
 }
 
 no utf8;
@@ -13,7 +28,7 @@ my $test = 1;
 
 # This table is based on Markus Kuhn's UTF-8 Decode Stress Tester,
 # http://www.cl.cam.ac.uk/~mgk25/ucs/examples/UTF-8-test.txt,
-# version dated 2000-09-02. 
+# version dated 2000-09-02.
 
 # We use the \x notation instead of raw binary bytes for \x00-\x1f\x7f-\xff
 # because e.g. many patch programs have issues with binary data.
@@ -21,7 +36,7 @@ my $test = 1;
 my @MK = split(/\n/, <<__EOMK__);
 1	Correct UTF-8
 1.1.1 y "\xce\xba\xe1\xbd\xb9\xcf\x83\xce\xbc\xce\xb5"	-		11	ce:ba:e1:bd:b9:cf:83:ce:bc:ce:b5	5
-2	Boundary conditions 
+2	Boundary conditions
 2.1	First possible sequence of certain length
 2.1.1 y "\x00"			0		1	00	1
 2.1.2 y "\xc2\x80"			80		2	c2:80	1
@@ -135,7 +150,7 @@ __EOMK__
     sub moan {
 	print "$id: @_";
     }
-    
+
     sub test_unpack_U {
 	$WARNCNT = 0;
 	$WARNMSG = "";
