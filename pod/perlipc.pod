@@ -374,7 +374,7 @@ write to the filehandle you opened and your kid will find it in his
 STDIN.  If you open a pipe I<from> minus, you can read from the filehandle
 you opened whatever your kid writes to his STDOUT.
 
-    use English;
+    use English '-no_match_vars';
     my $sleep_count = 0;
 
     do {

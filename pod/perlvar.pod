@@ -13,14 +13,20 @@ you need only say
 
     use English;
 
-at the top of your program.  This will alias all the short names to the
-long names in the current package.  Some even have medium names,
-generally borrowed from B<awk>.
+at the top of your program. This aliases all the short names to the long
+names in the current package. Some even have medium names, generally
+borrowed from B<awk>. In general, it's best to use the
 
-If you don't mind the performance hit, variables that depend on the
-currently selected filehandle may instead be set by calling an
-appropriate object method on the IO::Handle object.  (Summary lines
-below for this contain the word HANDLE.)  First you must say
+    use English '-no_match_vars';
+
+invocation if you don't need $PREMATCH, $MATCH, or $POSTMATCH, as it avoids
+a certain performance hit with the use of regular expressions. See
+L<English>.
+
+Variables that depend on the currently selected filehandle may be set by
+calling an appropriate object method on the IO::Handle object, although
+this is less efficient than using the regular built-in variables. (Summary
+lines below for this contain the word HANDLE.) First you must say
 
     use IO::Handle;
 
@@ -33,10 +39,11 @@ or more safely,
     HANDLE->method(EXPR)
 
 Each method returns the old value of the IO::Handle attribute.
-The methods each take an optional EXPR, which if supplied specifies the
+The methods each take an optional EXPR, which, if supplied, specifies the
 new value for the IO::Handle attribute in question.  If not supplied,
 most methods do nothing to the current value--except for
 autoflush(), which will assume a 1 for you, just to be different.
+
 Because loading in the IO::Handle class is an expensive operation, you should
 learn how to use the regular built-in variables.
 
