@@ -5244,10 +5244,15 @@ C<print>, C<write>, C<seek>, C<tell>, or C<eof> may cause confusion.
 FILEHANDLE may be an expression whose value gives the name of the
 filehandle.  The values for WHENCE are C<0> to set the new position to
 POSITION, C<1> to set the it to the current position plus POSITION,
-and C<2> to set it to EOF plus POSITION (typically negative).  For
-WHENCE, you may also use the constants C<SEEK_SET>, C<SEEK_CUR>, and
-C<SEEK_END> (start of the file, current position, end of the file)
-from the Fcntl module.
+and C<2> to set it to EOF plus POSITION (typically negative).
+
+For WHENCE, you may also use the constants C<SEEK_SET>, C<SEEK_CUR>,
+and C<SEEK_END> (start of the file, current position, end of the file)
+from the Fcntl module.  Use of the constants is also more portable
+than relying on 0, 1, and 2.  For example to define a "systell" function:
+
+	use Fnctl 'SEEK_CUR';
+	sub systell { sysseek($_[0], 0, SEEK_CUR) }
 
 Returns the new position, or the undefined value on failure.  A position
 of zero is returned as the string C<"0 but true">; thus C<sysseek> returns
