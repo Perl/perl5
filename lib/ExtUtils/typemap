@@ -231,7 +231,7 @@ T_DOUBLE
 T_PV
 	sv_setpv((SV*)$arg, $var);
 T_PTR
-	sv_setiv($arg, (IV)$var);
+	sv_setiv($arg, PTR2IV($var));
 T_PTRREF
 	sv_setref_pv($arg, Nullch, (void*)$var);
 T_REF_IV_REF

@@ -305,6 +305,9 @@ void *emx_realloc (void *, size_t);
 	 ? (--FILE_ptr(fp), ++FILE_cnt(fp), (int)c) : ungetc(c,fp))
 #endif
 
+/* ctermid is missing from emx0.9d */
+char *ctermid(char *s);
+
 #define OP_BINARY O_BINARY
 
 #define OS2_STAT_HACK 1
