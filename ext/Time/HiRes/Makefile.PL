@@ -11,8 +11,10 @@ use strict;
 
 my $VERBOSE = $ENV{VERBOSE};
 my $DEFINE;
-my $LIBS;
+my $LIBS = [];
 my $XSOPT;
+
+use vars qw($self); # Used in 'sourcing' the hints.
 
 my $ld_exeext = ($^O eq 'os2' and $Config{ldflags} =~ /-Zexe\b/) ? '.exe' : '';
 
@@ -212,46 +214,19 @@ EOM
     return 0;
 }
 
-sub unixinit {
-    $DEFINE = '';
-
-    $LIBS = [];
-
-    # this might break the link, try it if it can't find some things you 
-    # honestly think should be in there...
-    # $LIBS = ['-lucb -lbsd'];
-
-    # ... but ucb is poison for Solaris, and probably Linux. honest.
-    $LIBS = [] if $Config{'osname'} eq 'solaris';
-    $LIBS = [] if $Config{'osname'} eq 'linux';
-    $LIBS = ['-lm'] if $Config{'osname'} =~ /sco/i;
-    $LIBS = ['-lc'] if $Config{'osname'} =~ /dynixptx/i;
-
-    # For nanosleep
-    push @$LIBS, '-lrt' unless $Config{'osname'} =~ /^(?:irix|linux)$/;
-    push @$LIBS, '-lposix4';
-
-    my @goodlibs;
-
-    select(STDOUT);
-    $| = 1;
-
-    print "Checking for libraries...\n";
-    my $lib;
-    for $lib (@$LIBS) {
-	print "Checking for $lib... ";
-	$LIBS = [ $lib ];
-	if ($Config{libs} =~ /\b$lib\b/ || has_x("time(0)")) {
-	    push @goodlibs, $lib;
-	    print "found.\n";
-	} else {
-	    print "NOT found.\n";
+sub init {
+    my $hints = File::Spec->catfile("hints", "$^O.pl");
+    if (-f $hints) {
+	print "Using hints $hints...\n";
+	local $self;
+	do $hints;
+	if (exists $self->{LIBS}) {
+	    $LIBS = $self->{LIBS};
+	    print "Extra libraries: @$LIBS...\n";
 	}
     }
-    $LIBS = [ @goodlibs ];
-    print @$LIBS ?
-	  "You have extra libraries: @$LIBS.\n" :
-          "You have no applicable extra libraries.\n";
+
+    $DEFINE = '';
 
     print "Looking for gettimeofday()... ";
     my $has_gettimeofday;
@@ -360,9 +335,10 @@ EOD
     my $has_nanosleep;
     if ($Config{d_nanosleep}) {
 	$has_nanosleep++;
+	$DEFINE .= ' -DTIME_HIRES_NANOSLEEP';
     } elsif (has_x ("nanosleep (NULL, NULL)")) {
 	$has_nanosleep++;
-	$DEFINE .= ' -DHAS_NANOSLEEP';
+	$DEFINE .= ' -DTIME_HIRES_NANOSLEEP';
     }
 
     if ($has_nanosleep) {
@@ -452,9 +428,9 @@ sub main {
 
     if ($^O =~ /Win32/i) {
       $DEFINE = '-DSELECT_IS_BROKEN';
-      $LIBS = [''];
+      $LIBS = [];
     } else {
-      unixinit();
+      init();
     }
     doMakefile;
     doConstants;
