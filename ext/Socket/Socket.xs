@@ -217,6 +217,33 @@ inet_ntoa(ip_address_sv)
 	if (DO_UTF8(ip_address_sv) && !sv_utf8_downgrade(ip_address_sv, 1))
 	     croak("Wide character in Socket::inet_ntoa");
 	ip_address = SvPV(ip_address_sv,addrlen);
+	/* Bad assumptions here.
+	 *
+	 * Bad Assumption 1: struct in_addr has no other fields than
+	 * the s_addr (which is the field we really care about here).
+	 *
+	 * Bad Assumption 2: the s_addr field is the first field
+	 * in struct in_addr (the Copy() assumes that).
+	 *
+	 * Bad Assumption 3: the s_addr field is a simple type
+	 * (such as an int).  It can be a bit field, in which
+	 * case using & (address-of) on it or taking sizeof()
+	 * wouldn't go over too well.  (Those are not attempted
+	 * now but in case someone thinks to fix the below uses
+	 * of addr (both in the length check and the Copy())
+	 * by using addr.s_addr.
+	 *
+	 * These bad assumptions currently break UNICOS which has
+	 * struct in_addr struct { u_long  st_addr:32; } s_da;
+	 * #define s_addr          s_da.st_addr   
+	 *
+	 * and u_long is 64 bits.
+	 *
+	 * The bold soul attempting to fix this should also
+	 * fix pack_sockaddr_in() to agree.
+	 *
+	 * --jhi
+	 */
 	if (addrlen != sizeof(addr)) {
 	    croak("Bad arg length for %s, length is %d, should be %d",
 			"Socket::inet_ntoa",
