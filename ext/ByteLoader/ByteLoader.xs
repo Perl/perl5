@@ -4,12 +4,22 @@
 #include "XSUB.h"
 #include "byterun.h"
 
-#ifdef NEED_FGETC_PROTOTYPE
-extern int fgetc();
-#endif
-#ifdef NEED_FREAD_PROTOTYPE
-extern int fread();
-#endif
+static int
+xgetc(PerlIO *io)
+{
+    dTHX;
+    return PerlIO_getc(io);
+}
+
+static int
+xfread(char *buf, size_t size, size_t n, PerlIO *io)
+{
+    dTHX;
+    int i = PerlIO_read(io, buf, n * size);
+    if (i > 0)
+	i /= size;
+    return i;
+}
 
 static void
 freadpv(U32 len, void *data, XPV *pv)
@@ -30,8 +40,8 @@ byteloader_filter(pTHXo_ int idx, SV *buf_sv, int maxlen)
     struct bytestream bs;
 
     bs.data = PL_rsfp;
-    bs.pfgetc = (int(*) (void*))fgetc;
-    bs.pfread = (int(*) (char*,size_t,size_t,void*))fread;
+    bs.pfgetc = (int(*) (void*))xgetc;
+    bs.pfread = (int(*) (char*,size_t,size_t,void*))xfread;
     bs.pfreadpv = freadpv;
 
     byterun(aTHXo_ bs);
