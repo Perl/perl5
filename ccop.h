@@ -372,5 +372,8 @@ EXT char *ppnames[] = {
 	"pp_egrent",
 	"pp_getlogin",
 	"pp_syscall",
+#if PATCHLEVEL > 4 || (PATCHLEVEL == 4 && SUBVERSION > 50)
+	"pp_lock",
+#endif
 };
 #endif

@@ -542,6 +542,9 @@ static opclass (*ccopaddr[])_((OP *o)) = {
 	cc_baseop,		/* egrent */
 	cc_baseop,		/* getlogin */
 	cc_listop,		/* syscall */
+#if PATCHLEVEL > 4 || (PATCHLEVEL == 4 && SUBVERSION > 50)
+	cc_baseop_or_unop,	/* lock */
+#endif
 };
 
 opclass
