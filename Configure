@@ -5459,13 +5459,13 @@ fi
 
 cat <<EOM
 
-Previous version of $package used the standard IO mechanisms as defined in
-<stdio.h>.  Versions 5.003_02 and later of perl allow alternate IO
+Previous version of $package used the standard IO mechanisms as defined
+in <stdio.h>.  Versions 5.003_02 and later of perl allow alternate IO
 mechanisms via a "PerlIO" abstraction, but the stdio mechanism is still
-the default and is the only supported mechanism.  This abstraction
-layer can use AT&T's sfio (if you already have sfio installed) or
-fall back on standard IO.  This PerlIO abstraction layer is
-experimental and may cause problems with some extension modules.
+the default.  This abstraction layer can use AT&T's sfio (if you
+already have sfio installed) or regular stdio, although sfio may cause
+problems with some extension modules.  Using PerlIO with stdio is safe,
+but it is slower than plain stdio and therefore is not the default.
 
 If this doesn't make any sense to you, just accept the default 'n'.
 EOM
