@@ -1,9 +1,12 @@
 #!./perl
 
-# This test harness will (eventually) test the "tie" functionality
-# without the need for a *DBM* implementation.
-
-# Currently it only tests the untie warning 
+# Add new tests to the end with format:
+# "########\n# test description\nTest code\nEXPECT\nWarn or die msgs (if any)\n"
+#
+# This test script does NOT test the output of the test code.  It ONLY
+# checks warnings or croaks.  Todo tests should have TODO as the start
+# of the description.  Note also that warnings are not enabled:  if you
+# need to test a perl warning, enable its class in your test.
 
 chdir 't' if -d 't';
 @INC = '../lib';
@@ -24,7 +27,7 @@ for (@prgs){
     my($prog,$expected) = split(/\nEXPECT\n/, $_, 2);
     print("not ok $i # bad test format\n"), next
         unless defined $expected;
-    my ($testname) = $prog =~ /^(# .*)\n/;
+    my ($testname) = $prog =~ /^\n?(# .*)\n/;
     $testname ||= '';
     eval "$prog" ;
     $status = $?;
@@ -226,17 +229,11 @@ vec($b,1,1)=0;
 die unless $a eq $b;
 EXPECT
 ########
-# TODO An attempt at lvalueable barewords broke this
-
-tie FH, 'main';
-EXPECT
-
-########
 # correct unlocalisation of tied hashes (patch #16431)
 use Tie::Hash ;
 tie %tied, Tie::StdHash;
-{ local $hash{'foo'} } print "exist1\n" if exists $hash{'foo'};
-{ local $tied{'foo'} } print "exist2\n" if exists $tied{'foo'};
-{ local $ENV{'foo'}  } print "exist3\n" if exists $ENV{'foo'};
+{ local $hash{'foo'} } warn "plain hash bad unlocalize" if exists $hash{'foo'};
+{ local $tied{'foo'} } warn "tied hash bad unlocalize" if exists $tied{'foo'};
+{ local $ENV{'foo'}  } warn "%ENV bad unlocalize" if exists $ENV{'foo'};
 EXPECT
 

@@ -755,7 +755,7 @@ and build everything else from that with -DCHECK_FORMAT
 
     make clean
     make miniperl	
-    make all OPTIMIZE=-DCHECK_FORMAT >& make.log  
+    make all OPTIMIZE='-DCHECK_FORMAT -Wformat' >& make.log  
 		
 =item *
 

@@ -262,7 +262,7 @@ Perl_sharedsv_associate(pTHX_ SV **psv, SV *ssv, shared_sv *data)
 
     /* Try shared SV as 1st choice */
     if (!data && ssv && SvTYPE(ssv) >= SVt_PVMG) {
-	if (mg = mg_find(ssv, PERL_MAGIC_ext)) {
+	if( (mg = mg_find(ssv, PERL_MAGIC_ext)) ){
 	    data = (shared_sv *) mg->mg_ptr;
 	}
     }
@@ -916,7 +916,7 @@ CODE:
 	shared_sv *shared;
 	if(SvROK(ref))
 	    ref = SvRV(ref);
-	if (shared = Perl_sharedsv_find(aTHX_ ref)) {
+	if( (shared = Perl_sharedsv_find(aTHX_ ref)) ){
 	    ST(0) = sv_2mortal(newSViv(PTR2IV(shared)));
 	    XSRETURN(1);
 	}
@@ -930,17 +930,17 @@ CODE:
 	shared_sv *shared;
 	if(SvROK(ref))
 	    ref = SvRV(ref);
-	if (shared = Perl_sharedsv_find(aTHX_ ref)) {
+	if( (shared = Perl_sharedsv_find(aTHX_ ref)) ){
 	  if (SHAREDSvPTR(shared)) {
 	    ST(0) = sv_2mortal(newSViv(SvREFCNT(SHAREDSvPTR(shared))));
 	    XSRETURN(1);
 	  }
 	  else {
-	     Perl_warn(aTHX_ "%_ s=%p has no shared SV",ST(0),shared);
+	     Perl_warn(aTHX_ "%" SVf " s=%p has no shared SV",ST(0),shared);
 	  }
 	}
 	else {
-	     Perl_warn(aTHX_ "%_ is not shared",ST(0));
+	     Perl_warn(aTHX_ "%" SVf " is not shared",ST(0));
 	}
 	XSRETURN_UNDEF;
 

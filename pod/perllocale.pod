@@ -99,11 +99,11 @@ C<LC_COLLATE>.  sort() is also affected if used without an
 explicit comparison function, because it uses C<cmp> by default.
 
 B<Note:> C<eq> and C<ne> are unaffected by locale: they always
-perform a byte-by-byte comparison of their scalar operands.  What's
+perform a char-by-char comparison of their scalar operands.  What's
 more, if C<cmp> finds that its operands are equal according to the
 collation sequence specified by the current locale, it goes on to
-perform a byte-by-byte comparison, and only returns I<0> (equal) if the
-operands are bit-for-bit identical.  If you really want to know whether
+perform a char-by-char comparison, and only returns I<0> (equal) if the
+operands are char-for-char identical.  If you really want to know whether
 two strings--which C<eq> and C<cmp> may consider different--are equal
 as far as collation in the locale is concerned, see the discussion in
 L<Category LC_COLLATE: Collation>.
@@ -497,7 +497,7 @@ first example is useful for natural text.
 
 As noted in L<USING LOCALES>, C<cmp> compares according to the current
 collation locale when C<use locale> is in effect, but falls back to a
-byte-by-byte comparison for strings that the locale says are equal. You
+char-by-char comparison for strings that the locale says are equal. You
 can use POSIX::strcoll() if you don't want this fall-back:
 
         use POSIX qw(strcoll);
@@ -522,9 +522,9 @@ efficiency by using POSIX::strxfrm() in conjunction with C<eq>:
             if $xfrm_string eq strxfrm("mixed-case string");
 
 strxfrm() takes a string and maps it into a transformed string for use
-in byte-by-byte comparisons against other transformed strings during
+in char-by-char comparisons against other transformed strings during
 collation.  "Under the hood", locale-affected Perl comparison operators
-call strxfrm() for both operands, then do a byte-by-byte
+call strxfrm() for both operands, then do a char-by-char
 comparison of the transformed strings.  By calling strxfrm() explicitly
 and using a non locale-affected comparison, the example attempts to save
 a couple of transformations.  But in fact, it doesn't save anything: Perl

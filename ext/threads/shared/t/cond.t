@@ -21,13 +21,14 @@ my $lock : shared;
 sub foo {
     lock($lock);
     print "ok 1\n";
-    sleep 2;
-    print "ok 2\n";
+    my $tr2 = threads->create(\&bar);
     cond_wait($lock);
+    $tr2->join();
     print "ok 5\n";
 }
 
 sub bar {
+    print "ok 2\n";
     lock($lock);
     print "ok 3\n";
     cond_signal($lock);
@@ -35,7 +36,5 @@ sub bar {
 }
 
 my $tr  = threads->create(\&foo);
-my $tr2 = threads->create(\&bar);
 $tr->join();
-$tr2->join();
 

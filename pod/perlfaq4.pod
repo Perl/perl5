@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq4 - Data Manipulation ($Revision: 1.20 $, $Date: 2002/04/07 18:46:13 $)
+perlfaq4 - Data Manipulation ($Revision: 1.21 $, $Date: 2002/05/06 13:08:46 $)
 
 =head1 DESCRIPTION
 
@@ -135,7 +135,7 @@ functions is that it works with numbers of ANY size, that it is
 optimized for speed on some operations, and for at least some
 programmers the notation might be familiar.
 
-=item B<How do I convert Hexadecimal into decimal:>
+=item B<How do I convert hexadecimal into decimal:>
 
 Using perl's built in conversion of 0x notation:
 
@@ -213,6 +213,11 @@ Using Bit::Vector
     $oct = reverse join('', $vec->Chunk_List_Read(3));
 
 =item B<How do I convert from binary to decimal:>
+
+Perl 5.6 lets you write binary numbers directly with
+the 0b notation:
+
+	$number = 0b10110110;
 
 Using pack and ord
 

@@ -212,7 +212,7 @@ CODE:
 	    if (!issurrogate(ord)){
 		if (ucs2) {
 		    if (check) {
-			croak("%s:code point \"\\x{"UVxf"}\" too high",
+			croak("%s:code point \"\\x{%"UVxf"}\" too high",
 			      SvPV_nolen(
 				  *hv_fetch((HV *)SvRV(obj),"Name",4,0))
 			      ,ord);
