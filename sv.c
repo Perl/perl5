@@ -2605,6 +2605,12 @@ sv_magic(register SV *sv, SV *obj, int how, char *name, I32 namlen)
     case 'B':
 	mg->mg_virtual = &vtbl_bm;
 	break;
+    case 'D':
+	mg->mg_virtual = &vtbl_regdata;
+	break;
+    case 'd':
+	mg->mg_virtual = &vtbl_regdatum;
+	break;
     case 'E':
 	mg->mg_virtual = &vtbl_env;
 	break;

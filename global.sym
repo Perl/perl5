@@ -417,6 +417,8 @@ magic_getvec
 magic_len
 magic_mutexfree
 magic_nextpack
+magic_regdata_cnt
+magic_regdatum_get
 magic_set
 magic_set_all_env
 magic_setamagic

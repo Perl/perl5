@@ -729,6 +729,14 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
 	    }
 	}
 	goto magicalize;
+    case '-':
+	if (len > 1)
+	    break;
+	else {
+            AV* av = GvAVn(gv);
+            sv_magic((SV*)av, Nullsv, 'D', Nullch, 0);
+        }
+	goto magicalize;
     case '#':
     case '*':
 	if (ckWARN(WARN_DEPRECATED) && len == 1 && sv_type == SVt_PV)
@@ -738,7 +746,6 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
     case '^':
     case '~':
     case '=':
-    case '-':
     case '%':
     case '.':
     case '(':
@@ -763,8 +770,19 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
 	if (len > 1)
 	    break;
 	goto magicalize;
+    case '\023':
+	if (len > 1)
+	    break;
+	goto ro_magicalize;
 
     case '+':
+	if (len > 1)
+	    break;
+	else {
+            AV* av = GvAVn(gv);
+            sv_magic((SV*)av, (SV*)av, 'D', Nullch, 0);
+        }
+	/* FALL THROUGH */
     case '1':
     case '2':
     case '3':
@@ -774,7 +792,6 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
     case '7':
     case '8':
     case '9':
-    case '\023':
       ro_magicalize:
 	SvREADONLY_on(GvSV(gv));
       magicalize:

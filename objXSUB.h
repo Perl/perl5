@@ -1198,6 +1198,10 @@
 #define magic_mutexfree     pPerl->Perl_magic_mutexfree
 #undef  magic_nextpack
 #define magic_nextpack      pPerl->Perl_magic_nextpack
+#undef  magic_regdata_cnt
+#define magic_regdata_cnt   pPerl->Perl_magic_regdata_cnt
+#undef  magic_regdatum_get
+#define magic_regdatum_get  pPerl->Perl_magic_regdatum_get
 #undef  magic_set
 #define magic_set           pPerl->Perl_magic_set
 #undef  magic_set_all_env

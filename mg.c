@@ -282,6 +282,48 @@ mg_free(SV *sv)
 #include <signal.h>
 #endif
 
+int
+magic_regdata_cnt(SV *sv, MAGIC *mg)
+{
+    dTHR;
+    register char *s;
+    register I32 i;
+    register REGEXP *rx;
+    char *t;
+
+    if (PL_curpm && (rx = PL_curpm->op_pmregexp))
+	return rx->lastparen;
+    return -1;
+}
+
+int
+magic_regdatum_get(SV *sv, MAGIC *mg)
+{
+    dTHR;
+    register I32 paren;
+    register char *s;
+    register I32 i;
+    register REGEXP *rx;
+    char *t;
+
+    if (PL_curpm && (rx = PL_curpm->op_pmregexp)) {
+	paren = mg->mg_len;
+	if (paren < 0)
+	    return 0;
+	if (paren <= rx->nparens &&
+	    (s = rx->startp[paren]) &&
+	    (t = rx->endp[paren]))
+	    {
+		if (mg->mg_obj)		/* @+ */
+		    i = t - rx->subbase;
+		else			/* @- */
+		    i = s - rx->subbase;
+		sv_setiv(sv,i);
+	    }
+    }
+    return 0;
+}
+
 U32
 magic_len(SV *sv, MAGIC *mg)
 {

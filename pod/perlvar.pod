@@ -164,6 +164,18 @@ example:
 (Mnemonic: be positive and forward looking.)
 This variable is read-only.
 
+=item @+
+
+$+[0] is the offset of the end of the last successfull match.
+C<$+[>I<n>C<]> is the offset of the end of the substring matched by
+I<n>-th subpattern.  
+
+Thus after a match against $_, $& coincides with C<substr $_, $-[0],
+$+[0]>.  Similarly, C<$>I<n> coincides with C<substr $_, $-[>I<n>C<],
+$+[>I<0>C<]> if C<$-[>I<n>C<]> is defined, and $+ conincides with
+C<substr $_, $-[-1], $+[-1]>.  One can use C<$#+> to find the last
+matched subgroup in the last successful match.  Compare with L<"@-">.
+
 =item $MULTILINE_MATCHING
 
 =item $*
@@ -372,6 +384,18 @@ output channel.  Default is 60.  (Mnemonic: = has horizontal lines.)
 
 The number of lines left on the page of the currently selected output
 channel.  (Mnemonic: lines_on_page - lines_printed.)
+
+=item @-
+
+$-[0] is the offset of the start of the last successfull match.
+C<$-[>I<n>C<]> is the offset of the start of the substring matched by
+I<n>-th subpattern.  
+
+Thus after a match against $_, $& coincides with C<substr $_, $-[0],
+$+[0]>.  Similarly, C<$>I<n> coincides with C<substr $_, $-[>I<n>C<],
+$+[>I<0>C<]> if C<$-[>I<n>C<]> is defined, and $+ conincides with
+C<substr $_, $-[-1], $+[-1]>.  One can use C<$#-> to find the last
+matched subgroup in the last successful match.  Compare with L<"@+">.
 
 =item format_name HANDLE EXPR
 

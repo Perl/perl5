@@ -162,7 +162,7 @@ av_fetch(register AV *av, I32 key, I32 lval)
     }
 
     if (SvRMAGICAL(av)) {
-	if (mg_find((SV*)av,'P')) {
+	if (mg_find((SV*)av,'P') || mg_find((SV*)av,'D')) {
 	    dTHR;
 	    sv = sv_newmortal();
 	    mg_copy((SV*)av, sv, 0, key);

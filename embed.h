@@ -319,6 +319,8 @@
 #define magic_len		Perl_magic_len
 #define magic_mutexfree		Perl_magic_mutexfree
 #define magic_nextpack		Perl_magic_nextpack
+#define magic_regdata_cnt	Perl_magic_regdata_cnt
+#define magic_regdatum_get	Perl_magic_regdatum_get
 #define magic_set		Perl_magic_set
 #define magic_set_all_env	Perl_magic_set_all_env
 #define magic_setamagic		Perl_magic_setamagic

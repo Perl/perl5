@@ -267,6 +267,8 @@ VIRTUAL U32	magic_len	_((SV* sv, MAGIC* mg));
 VIRTUAL int	magic_mutexfree	_((SV* sv, MAGIC* mg));
 #endif /* USE_THREADS */
 VIRTUAL int	magic_nextpack	_((SV* sv, MAGIC* mg, SV* key));
+VIRTUAL int	magic_regdata_cnt	_((SV* sv, MAGIC* mg));
+VIRTUAL int	magic_regdatum_get	_((SV* sv, MAGIC* mg));
 VIRTUAL int	magic_set	_((SV* sv, MAGIC* mg));
 #ifdef OVERLOAD
 VIRTUAL int	magic_setamagic	_((SV* sv, MAGIC* mg));

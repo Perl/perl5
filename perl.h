@@ -2179,6 +2179,8 @@ EXT MGVTBL vtbl_defelem = {magic_getdefelem,magic_setdefelem,
 					0,	0,	0};
 
 EXT MGVTBL vtbl_regexp = {0,0,0,0, magic_freeregexp};
+EXT MGVTBL vtbl_regdata = {0, 0, magic_regdata_cnt, 0, 0};
+EXT MGVTBL vtbl_regdatum = {magic_regdatum_get, 0, 0, 0, 0};
 
 #ifdef USE_LOCALE_COLLATE
 EXT MGVTBL vtbl_collxfrm = {0,
@@ -2223,6 +2225,8 @@ EXT MGVTBL vtbl_mutex;
 
 EXT MGVTBL vtbl_defelem;
 EXT MGVTBL vtbl_regexp;
+EXT MGVTBL vtbl_regdata;
+EXT MGVTBL vtbl_regdatum;
 
 #ifdef USE_LOCALE_COLLATE
 EXT MGVTBL vtbl_collxfrm;

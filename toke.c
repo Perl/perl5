@@ -2612,7 +2612,7 @@ yylex(void)
 	    }
 	}
 
-	if (s[1] == '#' && (isALPHA(s[2]) || strchr("_{$:", s[2]))) {
+	if (s[1] == '#' && (isALPHA(s[2]) || strchr("_{$:+-", s[2]))) {
 	    if (PL_expect == XOPERATOR)
 		no_op("Array length", PL_bufptr);
 	    PL_tokenbuf[0] = '@';

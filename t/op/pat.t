@@ -4,7 +4,7 @@
 # the format supported by op/regexp.t.  If you want to add a test
 # that does fit that format, add it to op/re_tests, not here.
 
-print "1..141\n";
+print "1..158\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -592,6 +592,82 @@ $test++;
 
 @_ = /(bbb)/g;
 print "not " if @_;
+print "ok $test\n";
+$test++;
+
+/a(?=.$)/;
+print "not " if $#+ != 0 or $#- != 0;
+print "ok $test\n";
+$test++;
+
+print "not " if $+[0] != 2 or $-[0] != 1;
+print "ok $test\n";
+$test++;
+
+print "not " 
+   if defined $+[1] or defined $-[1] or defined $+[2] or defined $-[2];
+print "ok $test\n";
+$test++;
+
+/a(a)(a)/;
+print "not " if $#+ != 2 or $#- != 2;
+print "ok $test\n";
+$test++;
+
+print "not " if $+[0] != 3 or $-[0] != 0;
+print "ok $test\n";
+$test++;
+
+print "not " if $+[1] != 2 or $-[1] != 1;
+print "ok $test\n";
+$test++;
+
+print "not " if $+[2] != 3 or $-[2] != 2;
+print "ok $test\n";
+$test++;
+
+print "not " 
+   if defined $+[3] or defined $-[3] or defined $+[4] or defined $-[4];
+print "ok $test\n";
+$test++;
+
+/.(a)(b)?(a)/;
+print "not " if $#+ != 3 or $#- != 3;
+print "ok $test\n";
+$test++;
+
+print "not " if $+[0] != 3 or $-[0] != 0;
+print "ok $test\n";
+$test++;
+
+print "not " if $+[1] != 2 or $-[1] != 1;
+print "ok $test\n";
+$test++;
+
+print "not " if $+[3] != 3 or $-[3] != 2;
+print "ok $test\n";
+$test++;
+
+print "not " 
+   if defined $+[2] or defined $-[2] or defined $+[4] or defined $-[4];
+print "ok $test\n";
+$test++;
+
+/.(a)/;
+print "not " if $#+ != 1 or $#- != 1;
+print "ok $test\n";
+$test++;
+
+print "not " if $+[0] != 2 or $-[0] != 0;
+print "ok $test\n";
+$test++;
+
+print "not " if $+[1] != 2 or $-[1] != 1;
+print "ok $test\n";
+$test++;
+
+print "not " 
+   if defined $+[2] or defined $-[2] or defined $+[3] or defined $-[3];
 print "ok $test\n";
 $test++;
 
