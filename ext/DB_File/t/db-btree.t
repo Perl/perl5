@@ -24,7 +24,7 @@ BEGIN {
 	&& $Config{db_version_patch} == 0) {
 	warn <<EOM;
 #
-# This test is known to crash in Mac OS X versions 10.1.4 (or earlier)
+# This test is known to crash in Mac OS X versions 10.2 (or earlier)
 # because of the buggy Berkeley DB version included with the OS.
 #
 EOM

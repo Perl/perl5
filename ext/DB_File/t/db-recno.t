@@ -112,7 +112,7 @@ EOM
 	    && $Config{db_version_patch} == 0) {
 	    print STDERR <<EOM ;
 #
-# For example Mac OS X 10.1.4 (or earlier) has such an old
+# For example Mac OS X 10.2 (or earlier) has such an old
 # version of Berkeley DB.
 EOM
 	}
