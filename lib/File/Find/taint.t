@@ -8,13 +8,31 @@ my $symlink_exists = eval { symlink("",""); 1 };
 my $cwd;
 my $cwd_untainted;
 
+use Config;
+
 BEGIN {
     chdir 't' if -d 't';
     unshift @INC => '../lib';
 
     for (keys %ENV) { # untaint ENV
-    ($ENV{$_}) = $ENV{$_} =~ /(.*)/;
+	($ENV{$_}) = $ENV{$_} =~ /(.*)/;
     }
+
+    # Remove insecure directories from PATH
+    my @path;
+    my $sep = $Config{path_sep};
+    foreach my $dir (split(/\Q$sep/,$ENV{'PATH'}))
+    {
+	##
+	## Match the directory taint tests in mg.c::Perl_magic_setenv()
+	##
+	push(@path,$dir) unless (length($dir) >= 256
+				 or
+				 substr($dir,0,1) ne "/"
+				 or
+				 (stat $dir)[2] & 002);
+    }
+    $ENV{'PATH'} = join($sep,@path);
 }
 
 
@@ -24,16 +42,7 @@ else                   { print "1..27\n";  }
 use File::Find;
 use File::Spec;
 use Cwd;
-use Config;
 
-# Remove insecure directories from PATH
-my @path;
-my $sep = $Config{path_sep};
-foreach my $dir (split(/$sep/,$ENV{'PATH'}))
- {
-  push(@path,$dir) unless (stat $dir)[2] & 0002;
- }
-$ENV{'PATH'} = join($sep,@path);
 
 my $NonTaintedCwd = $^O eq 'MSWin32' || $^O eq 'cygwin';
 
