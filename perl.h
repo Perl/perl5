@@ -752,7 +752,7 @@ typedef struct perl_mstats perl_mstats_t;
 #  define _SOCKADDR_LEN
 #endif
 
-#if defined(HAS_SOCKET) && !defined(VMS) /* VMS handles sockets via vmsish.h */
+#if defined(HAS_SOCKET) && !defined(VMS) && !defined(WIN32) /* VMS/WIN32 handle sockets via vmsish.h/win32.h */
 # include <sys/socket.h>
 # if defined(USE_SOCKS) && defined(I_SOCKS)
 #   if !defined(INCLUDE_PROTOTYPES)
@@ -1754,10 +1754,12 @@ typedef struct ptr_tbl PTR_TBL_t;
 #      include <floatingpoint.h>
 #    endif
 #    define PERL_FPU_INIT fpsetmask(0);
-#  elif PERL_IGNORE_FPUSIG
-#    define PERL_FPU_INIT signal(PERL_IGNORE_FPUSIG, SIG_IGN);
 #  else
-#    define PERL_FPU_INIT
+#    if defined(SIGFPE) && defined(SIG_IGN)
+#      define PERL_FPU_INIT signal(SIGFPE, SIG_IGN);
+#    else
+#      define PERL_FPU_INIT
+#    endif
 #  endif
 #endif
 

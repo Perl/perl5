@@ -151,7 +151,7 @@ my $lastnext;
 
 my %opclass = ('OP' => "0", 'UNOP' => "1", 'BINOP' => "2", 'LOGOP' => "|",
 	       'LISTOP' => "@", 'PMOP' => "/", 'SVOP' => "\$", 'GVOP' => "*",
-	       'PVOP' => '"', 'LOOP' => "{", 'COP' => ";");
+	       'PVOP' => '"', 'LOOP' => "{", 'COP' => ";", 'PADOP' => "#");
 
 no warnings 'qw'; # "Possible attempt to put comments..."
 my @linenoise =
@@ -845,6 +845,7 @@ The numeric value of the OP's type, in decimal.
     "      PVOP             An OP with a string
     {      LOOP             An OP that holds pointers for a loop
     ;      COP              An OP that marks the start of a statement
+    #      PADOP            An OP with a GV on the pad
 
 =head1 Using B::Concise outside of the O framework
 

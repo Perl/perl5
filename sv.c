@@ -2054,7 +2054,7 @@ Perl_sv_2iv(pTHX_ register SV *sv)
 		) {
 		SvIOK_on(sv);  /* Can this go wrong with rounding? NWC */
 		DEBUG_c(PerlIO_printf(Perl_debug_log,
-				      "0x%"UVxf" iv(%g => %"IVdf") (precise)\n",
+				      "0x%"UVxf" iv(%"NVgf" => %"IVdf") (precise)\n",
 				      PTR2UV(sv),
 				      SvNVX(sv),
 				      SvIVX(sv)));
@@ -2065,7 +2065,7 @@ Perl_sv_2iv(pTHX_ register SV *sv)
 		   that PV->IV would be better than PV->NV->IV
 		   flags already correct - don't set public IOK.  */
 		DEBUG_c(PerlIO_printf(Perl_debug_log,
-				      "0x%"UVxf" iv(%g => %"IVdf") (imprecise)\n",
+				      "0x%"UVxf" iv(%"NVgf" => %"IVdf") (imprecise)\n",
 				      PTR2UV(sv),
 				      SvNVX(sv),
 				      SvIVX(sv)));
@@ -2348,7 +2348,7 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 		) {
 		SvIOK_on(sv);  /* Can this go wrong with rounding? NWC */
 		DEBUG_c(PerlIO_printf(Perl_debug_log,
-				      "0x%"UVxf" uv(%g => %"IVdf") (precise)\n",
+				      "0x%"UVxf" uv(%"NVgf" => %"IVdf") (precise)\n",
 				      PTR2UV(sv),
 				      SvNVX(sv),
 				      SvIVX(sv)));
@@ -2359,7 +2359,7 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 		   that PV->IV would be better than PV->NV->IV
 		   flags already correct - don't set public IOK.  */
 		DEBUG_c(PerlIO_printf(Perl_debug_log,
-				      "0x%"UVxf" uv(%g => %"IVdf") (imprecise)\n",
+				      "0x%"UVxf" uv(%"NVgf" => %"IVdf") (imprecise)\n",
 				      PTR2UV(sv),
 				      SvNVX(sv),
 				      SvIVX(sv)));
@@ -8403,6 +8403,10 @@ Perl_re_dup(pTHX_ REGEXP *r, clone_params *param)
 		ret->regstclass = (regnode*)d->data[i];
 		break;
 	    case 'o':
+		/* Compiled op trees are readonly, and can thus be
+		   shared without duplication. */
+		d->data[i] = (void*)OpREFCNT_inc((OP*)r->data->data[i]);
+		break;
 	    case 'n':
 		d->data[i] = r->data->data[i];
 		break;
@@ -9086,6 +9090,11 @@ Perl_sv_dup(pTHX_ SV *sstr, clone_params* param)
 	CvROOT(dstr)	= OpREFCNT_inc(CvROOT(sstr));
 	CvXSUB(dstr)	= CvXSUB(sstr);
 	CvXSUBANY(dstr)	= CvXSUBANY(sstr);
+	if (CvCONST(sstr)) {
+	    CvXSUBANY(dstr).any_ptr = GvUNIQUE(CvGV(sstr)) ?
+                SvREFCNT_inc(CvXSUBANY(sstr).any_ptr) :
+                sv_dup_inc(CvXSUBANY(sstr).any_ptr, param);
+	}
 	CvGV(dstr)	= gv_dup(CvGV(sstr), param);
 	if (param->flags & CLONEf_COPY_STACKS) {
 	  CvDEPTH(dstr)	= CvDEPTH(sstr);
@@ -9927,7 +9936,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_origalen		= proto_perl->Iorigalen;
     PL_pidstatus	= newHV();			/* XXX flag for cloning? */
     PL_osname		= SAVEPV(proto_perl->Iosname);
-    PL_sh_path		= SAVEPV(proto_perl->Ish_path);
+    PL_sh_path		= proto_perl->Ish_path; /* XXX never deallocated */
     PL_sighandlerp	= proto_perl->Isighandlerp;
 
 
@@ -9937,7 +9946,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
 #ifdef CSH
     PL_cshlen		= proto_perl->Icshlen;
-    PL_cshname		= SAVEPVN(proto_perl->Icshname, PL_cshlen);
+    PL_cshname		= proto_perl->Icshname; /* XXX never deallocated */
 #endif
 
     PL_lex_state	= proto_perl->Ilex_state;

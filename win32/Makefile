@@ -457,6 +457,7 @@ UTILS		=			\
 		..\utils\h2xs		\
 		..\utils\perldoc	\
 		..\utils\perlcc		\
+		..\utils\perlivp	\
 		..\utils\libnetcfg	\
 		..\pod\checkpods	\
 		..\pod\pod2html		\
@@ -1032,7 +1033,7 @@ distclean: clean
 	    perlwin32.pod pod2html pod2latex pod2man pod2text pod2usage \
 	    podchecker podselect
 	cd ..\utils
-	-del /f h2ph splain perlbug pl2pm c2ph h2xs perldoc dprofpp
+	-del /f h2ph splain perlbug pl2pm c2ph h2xs perldoc perlivp dprofpp
 	-del /f *.bat
 	cd ..\win32
 	cd ..\x2p

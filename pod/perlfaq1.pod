@@ -316,10 +316,8 @@ but the most recommendable way is to upgrade to at least Perl 5.6.1.
 Copyright (c) 1997, 1998, 1999, 2000, 2001 Tom Christiansen and Nathan
 Torkington.  All rights reserved.
 
-When included as an integrated part of the Standard Distribution
-of Perl or of its documentation (printed or otherwise), this works is
-covered under Perl's Artistic Licence.  For separate distributions of
-all or part of this FAQ outside of that, see L<perlfaq>.
+This documentation is free; you can redistribute it and/or modify it
+under the same terms as Perl itself.
 
 Irrespective of its distribution, all code examples here are in the public
 domain.  You are permitted and encouraged to use this code and any

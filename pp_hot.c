@@ -1328,7 +1328,7 @@ play_it_again:
 		len = rx->endp[i] - rx->startp[i];
 		s = rx->startp[i] + truebase;
 		sv_setpvn(*SP, s, len);
-		if (DO_UTF8(TARG))
+		if (DO_UTF8(TARG) && is_utf8_string((U8*)s, len))
 		    SvUTF8_on(*SP);
 	    }
 	}
@@ -2444,6 +2444,8 @@ PP(pp_entersub)
 	    }
 	    if (SvGMAGICAL(sv)) {
 		mg_get(sv);
+		if (SvROK(sv))
+		    goto got_rv;
 		sym = SvPOKp(sv) ? SvPVX(sv) : Nullch;
 	    }
 	    else
@@ -2455,6 +2457,7 @@ PP(pp_entersub)
 	    cv = get_cv(sym, TRUE);
 	    break;
 	}
+  got_rv:
 	{
 	    SV **sp = &sv;		/* Used in tryAMAGICunDEREF macro. */
 	    tryAMAGICunDEREF(to_cv);

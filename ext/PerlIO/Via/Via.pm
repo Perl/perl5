@@ -22,8 +22,13 @@ following methods. In the method descriptions below I<$fh> will be
 a reference to a glob which can be treated as a perl file handle.
 It refers to the layer below. I<$fh> is not passed if the layer
 is at the bottom of the stack, for this reason and to maintain
-some level of "compatibility" with TIEHANDLE classes it is passed
-last.
+some level of "compatibility" with TIEHANDLE classes it is passed last.
+
+As an example, in Perl release 5.8.0 the MIME::QuotedPrint module
+defines the required TIEHANDLE methods so that you can say
+
+	use MIME::QuotedPrint;
+	open(my $fh, ">Via(MIME::QuotedPrint)", "qp");
 
 =over 4
 

@@ -1180,36 +1180,72 @@ Perl_newHV(pTHX)
 HV *
 Perl_newHVhv(pTHX_ HV *ohv)
 {
-    register HV *hv;
-    STRLEN hv_max = ohv ? HvMAX(ohv) : 0;
-    STRLEN hv_fill = ohv ? HvFILL(ohv) : 0;
+    HV *hv = newHV();
+    STRLEN hv_max, hv_fill;
 
-    hv = newHV();
-    while (hv_max && hv_max + 1 >= hv_fill * 2)
-	hv_max = hv_max / 2;	/* Is always 2^n-1 */
-    HvMAX(hv) = hv_max;
-    if (!hv_fill)
+    if (!ohv || (hv_fill = HvFILL(ohv)) == 0)
 	return hv;
+    hv_max = HvMAX(ohv);
 
-#if 0
-    if (! SvTIED_mg((SV*)ohv, PERL_MAGIC_tied)) {
-	/* Quick way ???*/
+    if (!SvMAGICAL((SV *)ohv)) {
+	/* It's an ordinary hash, so copy it fast. AMS 20010804 */
+	int i, shared = !!HvSHAREKEYS(ohv);
+	HE **ents, **oents = (HE **)HvARRAY(ohv);
+	char *a;
+	New(0, a, PERL_HV_ARRAY_ALLOC_BYTES(hv_max+1), char);
+	ents = (HE**)a;
+
+	/* In each bucket... */
+	for (i = 0; i <= hv_max; i++) {
+	    HE *prev = NULL, *ent = NULL, *oent = oents[i];
+
+	    if (!oent) {
+		ents[i] = NULL;
+		continue;
+	    }
+
+	    /* Copy the linked list of entries. */
+	    for (oent = oents[i]; oent; oent = HeNEXT(oent)) {
+		U32 hash   = HeHASH(oent);
+		char *key  = HeKEY(oent);
+		STRLEN len = HeKLEN_UTF8(oent);
+
+		ent = new_HE();
+		HeVAL(ent)     = newSVsv(HeVAL(oent));
+		HeKEY_hek(ent) = shared ? share_hek(key, len, hash)
+					:  save_hek(key, len, hash);
+		if (prev)
+		    HeNEXT(prev) = ent;
+		else
+		    ents[i] = ent;
+		prev = ent;
+		HeNEXT(ent) = NULL;
+	    }
+	}
+
+	HvMAX(hv)   = hv_max;
+	HvFILL(hv)  = hv_fill;
+	HvKEYS(hv)  = HvKEYS(ohv);
+	HvARRAY(hv) = ents;
     }
-    else
-#endif
-    {
+    else {
+	/* Iterate over ohv, copying keys and values one at a time. */
 	HE *entry;
-	I32 hv_riter = HvRITER(ohv);	/* current root of iterator */
-	HE *hv_eiter = HvEITER(ohv);	/* current entry of iterator */
-	
-	/* Slow way */
+	I32 riter = HvRITER(ohv);
+	HE *eiter = HvEITER(ohv);
+
+	/* Can we use fewer buckets? (hv_max is always 2^n-1) */
+	while (hv_max && hv_max + 1 >= hv_fill * 2)
+	    hv_max = hv_max / 2;
+	HvMAX(hv) = hv_max;
+
 	hv_iterinit(ohv);
 	while ((entry = hv_iternext(ohv))) {
 	    hv_store(hv, HeKEY(entry), HeKLEN_UTF8(entry),
 		     newSVsv(HeVAL(entry)), HeHASH(entry));
 	}
-	HvRITER(ohv) = hv_riter;
-	HvEITER(ohv) = hv_eiter;
+	HvRITER(ohv) = riter;
+	HvEITER(ohv) = eiter;
     }
 
     return hv;

@@ -32,7 +32,7 @@ $PERL = ($Is_MSWin32 ? '.\perl' : ($Is_NetWare ? 'perl' : './perl'));
 print "1..41\n";
 
 eval '$ENV{"FOO"} = "hi there";';	# check that ENV is inited inside eval
-if ($Is_MSWin32) { ok 1, `cmd /x /c set FOO` eq "FOO=hi there\n"; }
+if ($Is_MSWin32) { ok 1, `set FOO` eq "FOO=hi there\n"; }
 else             { ok 1, `echo \$FOO` eq "hi there\n"; }
 
 unlink 'ajslkdfpqjsjfk';
@@ -196,12 +196,12 @@ else {
 	%ENV = ();
 	$ENV{PATH} = $PATH;
 	$ENV{PERL_DESTRUCT_LEVEL} = $PDL || 0;
-	ok 29, ($Is_MSWin32 ? (`cmd /x /c set foo 2>NUL` eq "")
+	ok 29, ($Is_MSWin32 ? (`set foo 2>NUL` eq "")
 				: (`echo \$foo` eq "\n") );
 
 	$ENV{__NoNeSuCh} = "foo";
 	$0 = "bar";
-	ok 30, ($Is_MSWin32 ? (`cmd /x /c set __NoNeSuCh` eq "__NoNeSuCh=foo\n")
+	ok 30, ($Is_MSWin32 ? (`set __NoNeSuCh` eq "__NoNeSuCh=foo\n")
 			    : (`echo \$__NoNeSuCh` eq "foo\n") );
 }
 

@@ -25,8 +25,6 @@ case "$ld" in
 esac
 
 # -DMAXSIG=38 maximum signal number
-# -DPERL_IGNORE_FPUSIG=SIGFPE allows Perl to be cavalier with FP overflow
-#   (particularly in numeric.c:S_mulexp10())
 # -DOEMVS is used in place of #ifdef __MVS__ in certain places.
 # -D_OE_SOCKETS alters system headers.
 # -D_XOPEN_SOURCE_EXTENDEDA alters system headers.
@@ -35,8 +33,8 @@ esac
 # -DEBCDIC should come from Configure and need not be mentioned here.
 # Prepend your favorites with Configure -Dccflags=your_favorites
 case "$ccflags" in
-'') ccflags='-DMAXSIG=38 -DPERL_IGNORE_FPUSIG=SIGFPE -DOEMVS -D_OE_SOCKETS -D_XOPEN_SOURCE_EXTENDED -D_ALL_SOURCE -DYYDYNAMIC' ;;
-*) ccflags="$ccflags -DMAXSIG=38 -DPERL_IGNORE_FPUSIG=SIGFPE -DOEMVS -D_OE_SOCKETS -D_XOPEN_SOURCE_EXTENDED -D_ALL_SOURCE -DYYDYNAMIC" ;;
+'') ccflags='-DMAXSIG=38 -DOEMVS -D_OE_SOCKETS -D_XOPEN_SOURCE_EXTENDED -D_ALL_SOURCE -DYYDYNAMIC' ;;
+*) ccflags="$ccflags -DMAXSIG=38 -DOEMVS -D_OE_SOCKETS -D_XOPEN_SOURCE_EXTENDED -D_ALL_SOURCE -DYYDYNAMIC" ;;
 esac
 
 # Turning on optimization breaks perl.

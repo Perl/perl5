@@ -85,6 +85,12 @@ $opt{'usemymalloc'} = 'y' if $opt{'d_mymalloc'} eq 'define';
 $opt{libpth} = mungepath($opt{libpth}) if exists $opt{libpth};
 $opt{incpath} = mungepath($opt{incpath}) if exists $opt{incpath};
 
+# some functions are not available on Win9x
+if (defined(&Win32::IsWin95) && Win32::IsWin95()) {
+    $opt{d_flock} = 'undef';
+    $opt{d_link} = 'undef';
+}
+
 while (<>) {
     s/~([\w_]+)~/$opt{$1}/g;
     if (/^([\w_]+)=(.*)$/) {
@@ -100,4 +106,3 @@ while (<>) {
     }
     print;
 }
-

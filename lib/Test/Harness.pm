@@ -575,8 +575,7 @@ sub _show_results {
     my $bonusmsg = _bonusmsg($tot);
 
     if ($tot->{bad} == 0 && $tot->{max}) {
-#	print "All tests successful$bonusmsg.\n";
-	print "All tests successful.\n";
+	print "All tests successful$bonusmsg.\n";
     } elsif ($tot->{tests}==0){
 	die "FAILED--no tests were run for some reason.\n";
     } elsif ($tot->{max} == 0) {

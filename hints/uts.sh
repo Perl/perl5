@@ -1,7 +1,7 @@
 archname='s390'
 archobjs='uts/strtol_wrap.o uts/sprintf_wrap.o'
 cc='cc -Xa'
-ccflags='-XTSTRINGS=1500000 -DStrtol=strtol_wrap32 -DStrtoul=strtoul_wrap32 -DPERL_IGNORE_FPUSIG=SIGFPE -DSPRINTF_E_BUG'
+ccflags='-XTSTRINGS=1500000 -DStrtol=strtol_wrap32 -DStrtoul=strtoul_wrap32 -DSPRINTF_E_BUG'
 cccdlflags='-pic'
 d_bincompat3='undef'
 d_csh='undef' 

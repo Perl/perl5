@@ -466,6 +466,36 @@ perl_destruct(pTHXx)
     }
 #endif
 
+#ifdef USE_ITHREADS
+    /* the syntax tree is shared between clones
+     * so op_free(PL_main_root) only ReREFCNT_dec's
+     * REGEXPs in the parent interpreter
+     * we need to manually ReREFCNT_dec for the clones
+     */
+    {
+        I32 i = AvFILLp(PL_regex_padav) + 1;
+        SV **ary = AvARRAY(PL_regex_padav);
+
+        while (i) {
+            SV *resv = ary[--i];
+            REGEXP *re = (REGEXP *)SvIVX(resv);
+
+            if (SvFLAGS(resv) & SVf_BREAK) {
+                /* this is PL_reg_curpm, already freed
+                 * flag is set in regexec.c:S_regtry
+                 */
+                SvFLAGS(resv) &= ~SVf_BREAK;
+            }
+            else {
+                ReREFCNT_dec(re);
+            }
+        }
+    }
+    SvREFCNT_dec(PL_regex_padav);
+    PL_regex_padav = Nullav;
+    PL_regex_pad = NULL;
+#endif
+
     /* loosen bonds of global variables */
 
     if(PL_rsfp) {
@@ -498,6 +528,11 @@ perl_destruct(pTHXx)
 	SvREFCNT_dec(PL_e_script);
 	PL_e_script = Nullsv;
     }
+
+    while (--PL_origargc >= 0) {
+        Safefree(PL_origargv[PL_origargc]);
+    }
+    Safefree(PL_origargv);
 
     /* magical thingies */
 
@@ -895,8 +930,21 @@ setuid perl scripts securely.\n");
 	("__environ", (unsigned long *) &environ_pointer, NULL);
 #endif /* environ */
 
-    PL_origargv = argv;
     PL_origargc = argc;
+    {
+        /* we copy rather than point to argv
+         * since perl_clone will copy and perl_destruct
+         * has no way of knowing if we've made a copy or 
+         * just point to argv
+         */
+        int i = PL_origargc;
+        New(0, PL_origargv, i+1, char*);
+        PL_origargv[i] = '\0';
+        while (i-- > 0) {
+            PL_origargv[i] = savepv(argv[i]);
+        }
+    }
+
 #ifdef  USE_ENVIRON_ARRAY
     PL_origenviron = environ;
 #endif
@@ -3812,7 +3860,7 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 
     while (AvFILL(paramList) >= 0) {
 	cv = (CV*)av_shift(paramList);
-	if ((PL_minus_c & 0x10) && (paramList == PL_beginav)) {
+	if (PL_savebegin && (paramList == PL_beginav)) {
 		/* save PL_beginav for compiler */
 	    if (! PL_beginav_save)
 		PL_beginav_save = newAV();

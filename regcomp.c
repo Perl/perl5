@@ -2013,8 +2013,8 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	r->reganch |= ROPT_LOOKBEHIND_SEEN;
     if (RExC_seen & REG_SEEN_EVAL)
 	r->reganch |= ROPT_EVAL_SEEN;
-    if (RExC_seen & REG_SEEN_SANY)
-	r->reganch |= ROPT_SANY_SEEN;
+    if (RExC_seen & REG_SEEN_CANY)
+	r->reganch |= ROPT_CANY_SEEN;
     Newz(1002, r->startp, RExC_npar, I32);
     Newz(1002, r->endp, RExC_npar, I32);
     PL_regdata = r->data; /* for regprop() */
@@ -2138,6 +2138,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
 		    ENTER;
 		    Perl_save_re_context(aTHX);
 		    rop = sv_compile_2op(sv, &sop, "re", &av);
+		    sop->op_private |= OPpREFCOUNTED;
+		    /* re_dup will OpREFCNT_inc */
+		    OpREFCNT_set(sop, 1);
 		    LEAVE;
 
 		    n = add_data(pRExC_state, 3, "nop");
@@ -2801,8 +2804,8 @@ tryagain:
             Set_Node_Length(ret, 2); /* MJD */
 	    break;
 	case 'C':
-	    ret = reg_node(pRExC_state, SANY);
-	    RExC_seen |= REG_SEEN_SANY;
+	    ret = reg_node(pRExC_state, CANY);
+	    RExC_seen |= REG_SEEN_CANY;
 	    *flagp |= HASWIDTH|SIMPLE;
 	    nextchar(pRExC_state);
             Set_Node_Length(ret, 2); /* MJD */
@@ -4609,7 +4612,11 @@ Perl_pregfree(pTHX_ struct regexp *r)
 		}
 		else
 		    PL_curpad = NULL;
-		op_free((OP_4tree*)r->data->data[n]);
+
+		if (!OpREFCNT_dec((OP_4tree*)r->data->data[n])) {
+                    op_free((OP_4tree*)r->data->data[n]);
+		}
+
 		PL_comppad = old_comppad;
 		PL_curpad = old_curpad;
 		SvREFCNT_dec((SV*)new_comppad);

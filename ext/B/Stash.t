@@ -23,6 +23,7 @@ my $Is_VMS = $^O eq 'VMS';
 my $Is_MacOS = $^O eq 'MacOS';
 
 my $path = join " ", map { qq["-I$_"] } @INC;
+$path = '"-I../lib" "-Iperl_root:[lib]"' if $Is_VMS;   # gets too long otherwise
 my $redir = $Is_MacOS ? "" : "2>&1";
 
 
@@ -45,8 +46,7 @@ if ($Is_VMS) {
     no strict 'vars';
     use vars '$OS2::is_aout';
 }
-if (($Config{static_ext} eq ' ' ||
-     ($Config{static_ext} eq 'Socket' && $Is_VMS))
+if ((($Config{static_ext} eq ' ') || ($Config{static_ext} eq ''))
     && !($^O eq 'os2' and $OS2::is_aout)
 	) {
     if (ord('A') == 193) { # EBCDIC sort order is qw(a A) not qw(A a)

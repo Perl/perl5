@@ -528,7 +528,7 @@ minus_c()
 void
 save_BEGINs()
     CODE:
-	PL_minus_c |= 0x10;
+	PL_savebegin = TRUE;
 
 SV *
 cstring(sv)

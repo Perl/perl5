@@ -24,6 +24,7 @@ GPOS		GPOS,   no	Matches where last m//g left off.
 # [Special] alternatives
 REG_ANY		REG_ANY,    no	Match any one character (except newline).
 SANY		REG_ANY,    no	Match any one character.
+CANY		REG_ANY,    no	Match any one byte.
 ANYOF		ANYOF,  sv	Match character in (or not in) this class.
 ALNUM		ALNUM,  no	Match any alphanumeric character
 ALNUML		ALNUM,  no	Match any alphanumeric char in locale

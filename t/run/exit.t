@@ -55,5 +55,13 @@ if ($^O ne 'VMS') {
   is( $exit >> 8, 4,             'fatal error exit' );
 }
 
-$exit = run('END { $? = 42 }');
-is( $exit >> 8, 42,             'Changing $? in END block' );
+$exit_arg = 42;
+$exit = run("END { \$? = $exit_arg }");
+
+# On VMS, in the child process the actual exit status will be SS$_ABORT, 
+# which is what you get from any non-zero value of $? that has been 
+# dePOSIXified by STATUS_POSIX_SET.  In the parent process, all we'll 
+# see are the severity bits (0-2) shifted left by 8.
+$exit_arg = (44 & 7) if $^O eq 'VMS';  
+
+is( $exit >> 8, $exit_arg,             'Changing $? in END block' );

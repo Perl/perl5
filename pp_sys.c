@@ -748,6 +748,7 @@ PP(pp_tie)
     switch(SvTYPE(varsv)) {
 	case SVt_PVHV:
 	    methname = "TIEHASH";
+	    HvEITER((HV *)varsv) = Null(HE *);
 	    break;
 	case SVt_PVAV:
 	    methname = "TIEARRAY";

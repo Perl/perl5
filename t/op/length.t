@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..13\n";
+print "1..15\n";
 
 print "not " unless length("")    == 0;
 print "ok 1\n";
@@ -113,5 +113,23 @@ print "ok 3\n";
       print "not " unless $a eq "\xc2\x80\xc4\x80" && length($a) == 4;
      }
     print "ok 13\n";
+    $test++;
+}
+
+# Now for Unicode with magical vtbls
+
+{
+    require Tie::Scalar;
+    my $a;
+    tie $a, 'Tie::StdScalar';  # makes $a magical
+    $a = "\x{263A}";
+    
+    print "not " unless length($a) == 1;
+    print "ok 14\n";
+    $test++;
+
+    use bytes;
+    print "not " unless length($a) == 3;
+    print "ok 15\n";
     $test++;
 }

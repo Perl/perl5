@@ -1319,12 +1319,8 @@ worth checking out.
 Copyright (c) 1999 Tom Christiansen.
 All rights reserved.
 
-When included as part of the Standard Version of Perl, or as part of
-its complete documentation whether printed or otherwise, this work
-may be distributed only under the terms of Perl's Artistic License.
-Any distribution of this file or derivatives thereof I<outside>
-of that package require that special arrangements be made with
-copyright holder.
+This documentation is free; you can redistribute it and/or modify it
+under the same terms as Perl itself.
 
 Irrespective of its distribution, all code examples in this file
 are hereby placed into the public domain.  You are permitted and
@@ -1334,7 +1330,7 @@ credit would be courteous but is not required.
 
 =head1 ACKNOWLEDGEMENTS
 
-Russ Albery, Jon Orwant, Randy Ray, Larry Rosler, Nat Torkington,
+Russ Allbery, Jon Orwant, Randy Ray, Larry Rosler, Nat Torkington,
 and Stephen Warren all contributed suggestions and corrections to this
 piece.  Thanks especially to Damian Conway for his ideas and feedback,
 and without whose indirect prodding I might never have taken the time

@@ -93,13 +93,13 @@ else             { `touch Op.stat.tmp` }
 if (-z 'Op.stat.tmp') {print "ok 5\n";} else {print "not ok 5\n";}
 if (! -s 'Op.stat.tmp') {print "ok 6\n";} else {print "not ok 6\n";}
 
-$Is_MSWin32 ? `cmd /c echo hi > Op.stat.tmp` : `echo hi >Op.stat.tmp`;
+`echo hi >Op.stat.tmp`;
 if (! -z 'Op.stat.tmp') {print "ok 7\n";} else {print "not ok 7\n";}
 if (-s 'Op.stat.tmp') {print "ok 8\n";} else {print "not ok 8\n";}
 
 unlink 'Op.stat.tmp' or print "# unlink failed: $!\n";
 $olduid = $>;		# can't test -r if uid == 0
-$Is_MSWin32 ? `cmd /c echo hi > Op.stat.tmp` : `echo hi >Op.stat.tmp`;
+`echo hi >Op.stat.tmp`;
 chmod 0,'Op.stat.tmp';
 eval '$> = 1;';		# so switch uid (may not be implemented)
 if (!$> || $Is_Dos || $Is_Cygwin || ! -r 'Op.stat.tmp') {print "ok 9\n";} else {print "not ok 9\n";}

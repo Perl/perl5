@@ -472,6 +472,8 @@ START_EXTERN_C
 #define PL_rsfp_filters		(*Perl_Irsfp_filters_ptr(aTHXo))
 #undef  PL_runops
 #define PL_runops		(*Perl_Irunops_ptr(aTHXo))
+#undef  PL_savebegin
+#define PL_savebegin		(*Perl_Isavebegin_ptr(aTHXo))
 #undef  PL_sawampersand
 #define PL_sawampersand		(*Perl_Isawampersand_ptr(aTHXo))
 #undef  PL_sh_path
