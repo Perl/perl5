@@ -660,6 +660,7 @@ ext/threads/t/libc.t            testing libc functions for threadsafetyness
 ext/threads/t/stress_cv.t	Test with multiple threads, coderef cv argument.
 ext/threads/t/stress_re.t	Test with multiple threads, string cv argument and regexes.
 ext/threads/t/stress_string.t	Test with multiple threads, string cv argument.
+ext/threads/t/thread.t		General ithread tests from thr5005
 ext/threads/threads.pm          ithreads
 ext/threads/threads.xs		ithreads
 ext/threads/typemap		ithreads

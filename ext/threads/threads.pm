@@ -99,6 +99,8 @@ threads->self->tid();
 
 $thread->tid();
 
+threads->yield();
+
 =head1 DESCRIPTION
 
 Perl 5.6 introduced something called interpreter threads.  Interpreter
@@ -148,6 +150,11 @@ This will return the object for the current thread.
 
 This will return the id of the thread.  threads->self->tid() is a
 quick way to get current thread id.
+
+=item threads->yield();
+
+This will tell the OS to let this thread yield CPU time to other threads.
+However this is highly depending on the underlying thread implmentation.
 
 =back
 
