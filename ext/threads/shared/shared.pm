@@ -16,6 +16,11 @@ BEGIN {
 	*lock = \&lock_disabled;
     } else {
 	*share = \&share_enabled;
+	*cond_wait = \&cond_wait_enabled;
+	*cond_signal = \&cond_signal_enabled;
+	*cond_broadcast = \&cond_broadcast_enabled;
+	*unlock = \&unlock_enabled;
+	*lock = \&lock_enabled;
     }
 }
 

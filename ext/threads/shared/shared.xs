@@ -191,6 +191,75 @@ _thrcnt_dec(ref)
            croak("thrcnt can only be used on shared values");
 	Perl_sharedsv_thrcnt_dec(aTHX_ shared);
 
+void 
+unlock_enabled(ref)
+	SV* ref
+	PROTOTYPE: \$
+	CODE:
+	shared_sv* shared;
+	if(SvROK(ref))
+	    ref = SvRV(ref);
+	shared = Perl_sharedsv_find(aTHX, ref);
+        if(!shared)
+           croak("unlock can only be used on shared values");
+	SHAREDSvUNLOCK(shared);
+
+void
+lock_enabled(ref)
+        SV* ref
+        PROTOTYPE: \$
+        CODE:
+        shared_sv* shared;
+        if(SvROK(ref))
+            ref = SvRV(ref);
+        shared = Perl_sharedsv_find(aTHX, ref);
+        if(!shared)
+           croak("lock can only be used on shared values");
+        SHAREDSvLOCK(shared);
+
+
+void
+cond_wait_enabled(ref)
+	SV* ref
+	CODE:
+	shared_sv* shared;
+	int locks;
+	if(SvROK(ref))
+	    ref = SvRV(ref);
+	shared = Perl_sharedsv_find(aTHX_ ref);
+	if(!shared)
+	    croak("cond_wait can only be used on shared values");
+	if(shared->owner != PERL_GET_CONTEXT)
+	    croak("You need a lock before you can cond_wait");
+	MUTEX_LOCK(&shared->mutex);
+	shared->owner = NULL;
+	locks = shared->locks = 0;
+	COND_WAIT(&shared->user_cond, &shared->mutex);
+	shared->owner = PERL_GET_CONTEXT;
+	shared->locks = locks;
+
+void cond_signal_enabled(ref)
+	SV* ref
+	CODE:
+	shared_sv* shared;
+	if(SvROK(ref))
+	    ref = SvRV(ref);
+	shared = Perl_sharedsv_find(aTHX_ ref);
+	if(!shared)
+	    croak("cond_signal can only be used on shared values");
+	COND_SIGNAL(&shared->user_cond);
+
+
+void cond_broadcast_enabled(ref)
+	SV* ref
+	CODE:
+	shared_sv* shared;
+	if(SvROK(ref))
+	    ref = SvRV(ref);
+	shared = Perl_sharedsv_find(aTHX_ ref);
+	if(!shared)
+	    croak("cond_broadcast can only be used on shared values");
+	COND_BROADCAST(&shared->user_cond);
 
 MODULE = threads::shared		PACKAGE = threads::shared::sv		
 
