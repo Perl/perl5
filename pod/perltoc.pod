@@ -348,6 +348,8 @@ regular expressions
 
 =item Lvalue subroutines
 
+Lvalue subroutines are EXPERIMENTAL
+
 =item Passing Symbol Table Entries (typeglobs)
 
 =item When to Still Use local()
@@ -1719,7 +1721,10 @@ safe subprocesses, sockets, and semaphores)
 
 =over 4
 
-=item WARNING
+=item Deferred Signals
+
+Long running opcodes, Interrupting IO, Signals as "faults", Signals
+triggered by operating system state
 
 =back
 
@@ -1939,6 +1944,8 @@ string
 =item A Complete Example
 
 =item Performance considerations
+
+=item Threadsafety of System Libraries
 
 =item Conclusion
 
@@ -2339,7 +2346,7 @@ LC_NUMERIC, LC_TIME, LANG
 
 =item SEE ALSO
 
-=item ACKNOWLEDGEMENTS
+=item ACKNOWLEDGMENTS
 
 =item AUTHOR, COPYRIGHT, AND LICENSE
 
@@ -2358,17 +2365,17 @@ LC_NUMERIC, LC_TIME, LANG
 Input and Output Disciplines, Regular Expressions, C<use utf8> still needed
 to enable UTF-8/UTF-EBCDIC in scripts
 
-=item Byte and Character semantics
+=item Byte and Character Semantics
 
-=item Effects of character semantics
+=item Effects of Character Semantics
 
 =item Scripts
 
 =item Blocks
 
-=item User-defined Character Properties
+=item User-Defined Character Properties
 
-=item Character encodings for input and output
+=item Character Encodings for Input and Output
 
 =item Unicode Regular Expression Support Level
 
@@ -2388,11 +2395,11 @@ to enable UTF-8/UTF-EBCDIC in scripts
 
 =over 4
 
-=item Interaction with locales
+=item Interaction with Locales
 
-=item Interaction with extensions
+=item Interaction with Extensions
 
-=item speed
+=item Speed
 
 =back
 
@@ -2664,10 +2671,11 @@ Storable, Switch, Symbol, Term::ANSIColor, Term::Cap, Term::Complete,
 Term::ReadLine, Test, Test::Builder, Test::Harness, Test::Harness::Assert,
 Test::Harness::Iterator, Test::Harness::Straps, Test::More, Test::Simple,
 Test::Tutorial, Text::Abbrev, Text::Balanced, Text::ParseWords,
-Text::Soundex, Text::Tabs, Text::Wrap, Thread, Tie::Array, Tie::File,
-Tie::Handle, Tie::Hash, Tie::Memoize, Tie::RefHash, Tie::Scalar,
-Tie::SubstrHash, Time::Local, Time::gmtime, Time::localtime, Time::tm,
-UNIVERSAL, Unicode::Collate, Unicode::UCD, User::grent, User::pwent, Win32
+Text::Soundex, Text::Tabs, Text::Wrap, Thread, Thread::Queue,
+Thread::Semaphore, Tie::Array, Tie::File, Tie::Handle, Tie::Hash,
+Tie::Memoize, Tie::RefHash, Tie::Scalar, Tie::SubstrHash, Time::Local,
+Time::gmtime, Time::localtime, Time::tm, UNIVERSAL, Unicode::Collate,
+Unicode::UCD, User::grent, User::pwent, Win32
 
 =item Extension Modules
 
@@ -3033,8 +3041,8 @@ my C program; what am I doing wrong?
 
 =back
 
-=head2 perlfaq4 - Data Manipulation ($Revision: 1.21 $, $Date: 2002/05/06
-13:08:46 $)
+=head2 perlfaq4 - Data Manipulation ($Revision: 1.24 $, $Date: 2002/05/20
+16:50:08 $)
 
 =over 4
 
@@ -3175,8 +3183,6 @@ intersection of two arrays?
 
 =item How do I process/modify each element of an array?
 
-=item How do I select a random element from an array?
-
 =item How do I permute N elements of a list?
 
 =item How do I sort an array by (anything)?
@@ -3250,8 +3256,8 @@ array of hashes or arrays?
 
 =back
 
-=head2 perlfaq5 - Files and Formats ($Revision: 1.15 $, $Date: 2002/04/12
-02:02:05 $)
+=head2 perlfaq5 - Files and Formats ($Revision: 1.17 $, $Date: 2002/05/23
+19:33:50 $)
 
 =over 4
 
@@ -3343,8 +3349,8 @@ protected files?  Isn't this a bug in Perl?
 
 =back
 
-=head2 perlfaq6 - Regular Expressions ($Revision: 1.10 $, $Date: 2002/04/07
-18:32:57 $)
+=head2 perlfaq6 - Regular Expressions ($Revision: 1.11 $, $Date: 2002/05/23
+15:47:37 $)
 
 =over 4
 
@@ -3489,8 +3495,8 @@ is in scope?
 
 =back
 
-=head2 perlfaq8 - System Interaction ($Revision: 1.7 $, $Date: 2002/04/18
-14:23:15 $)
+=head2 perlfaq8 - System Interaction ($Revision: 1.8 $, $Date: 2002/05/16
+12:41:42 $)
 
 =over 4
 
@@ -4483,8 +4489,8 @@ SvSetSV, SvSetSV_nosteal, SvSHARE
 
 =item Memory Management
 
-Copy, Move, New, Newc, NEWSV, Newz, Renew, Renewc, Safefree, savepv,
-savepvn, savesharedpv, StructCopy, Zero
+Copy, Move, New, Newc, NEWSV, Newz, Poison, Renew, Renewc, Safefree,
+savepv, savepvn, savesharedpv, StructCopy, Zero
 
 =item Miscellaneous Functions
 
@@ -4724,11 +4730,9 @@ PerlIO_apply_layers(f,mode,layers), PerlIO_binmode(f,ptype,imode,layers),
 
 =item Unicode
 
-=item use Thread for iThreads
-
-=item make perl_clone optionally clone ops
-
 =item Work out exit/die semantics for threads
+
+=item Better support for nonpreemptive threading systems like GNU pth
 
 =item Typed lexicals for compiler
 
@@ -4753,8 +4757,6 @@ PerlIO_apply_layers(f,mode,layers), PerlIO_binmode(f,ptype,imode,layers),
 =item Long double conversion
 
 =item Locales
-
-=item Thread-safe regexes
 
 =item Arithmetic on non-Arabic numerals
 
@@ -4827,8 +4829,6 @@ PerlIO_apply_layers(f,mode,layers), PerlIO_binmode(f,ptype,imode,layers),
 =item Rewrite regexp parser
 
 =item Cache recently used regexps
-
-=item Re-entrant functions
 
 =item Cross-compilation support
 
@@ -5163,7 +5163,7 @@ ucheck.third, test.torture torturetest, utest ucheck test.utf8 check.utf8
 
 DEFINES, USE_MULTI = define, #PERL_MALLOC = define, CFG = Debug
 
-=item Compaq's/Digital's Third Degree
+=item Compaq's/Digital's/HP's Third Degree
 
 =item PERL_DESTRUCT_LEVEL
 
@@ -5221,8 +5221,6 @@ I<The Road goes ever on and on, down from the door where it began.>
 =item THE KEEPERS OF THE RECORDS
 
 =back
-
-=head2 perldelta - what is new for perl v5.8.0
 
 =over 4
 
@@ -5322,7 +5320,9 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item AIX
 
-=item Amiga Perl Invoking Mystery
+=item BeOS
+
+=item ext/threads/t/libc
 
 =item FreeBSD Failing locale Test 117 For ISO8859-15 Locales
 
@@ -5341,6 +5341,10 @@ I<The Road goes ever on and on, down from the door where it began.>
 =item op/sprintf tests 91, 129, and 130
 
 =item Solaris 2.5
+
+=item Stratus VOS
+
+=item Term::ReadKey not working on Win32
 
 =item Failure of Thread (5.005-style) tests
 
@@ -5366,7 +5370,7 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item Unicode Support on EBCDIC Still Spotty
 
-=item The Compiler Suite Is Still Experimental
+=item The Compiler Suite Is Still Very Experimental
 
 =item The Long Double Support Is Still Experimental
 
@@ -7021,7 +7025,7 @@ R4 x86, R4 PPC
 
 =item Contact Information
 
-=item Update 2002-03-02
+=item Update 2002-05-25
 
 =back
 
@@ -7120,7 +7124,7 @@ C<PATH>, I<nroff>, Permissions
 =item Optional Libraries for Perl on Cygwin
 
 C<-lcrypt>, C<-lgdbm> (C<use GDBM_File>), C<-ldb> (C<use DB_File>),
-C<-lcygipc> (C<use IPC::SysV>)
+C<-lcygipc> (C<use IPC::SysV>), C<-lutil>
 
 =item Configure-time Options for Perl on Cygwin
 
@@ -7194,6 +7198,50 @@ Source, Compiled Module Source, Perl Modules/Scripts
 =item Testing Perl on DG/UX
 
 =item Installing the built perl on DG/UX
+
+=back
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
+=head2 perldos - Perl under DOS, W31, W95.
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Prerequisites for Compiling Perl on DOS
+
+DJGPP, Pthreads
+
+=item Shortcomings of Perl under DOS
+
+=item Building Perl on DOS
+
+=item Testing Perl on DOS
+
+=item Installation of Perl on DOS
+
+=back
+
+=item BUILDING AND INSTALLING MODULES ON DOS
+
+=over 4
+
+=item Building Prerequisites for Perl on DOS
+
+=item Unpacking CPAN Modules on DOS
+
+=item Building Non-XS Modules on DOS
+
+=item Building XS Modules on DOS
 
 =back
 
@@ -7410,7 +7458,7 @@ public_html/feedback.cgi, src/perl-5.6.0-mpe
 
 =item Setup
 
-Buildtype.bat, SetNWBld.bat, MPKBuild.bat
+SetNWDef.bat, Custom Build Environment, Buildtype.bat, SetNWBld.bat
 
 =item Make
 
@@ -7423,8 +7471,6 @@ Buildtype.bat, SetNWBld.bat, MPKBuild.bat
 =item Install
 
 =item Build new extensions
-
-=item Known Issues
 
 =item Acknowledgements
 
@@ -7915,6 +7961,8 @@ Digital UNIX formerly known as DEC OSF/1) systems
 
 =item ext/ODBM_File/odbm Test Failing With Static Builds
 
+=item Perl Fails Because Of Unresolved Symbol sockatmark
+
 =item AUTHOR
 
 =back
@@ -8074,13 +8122,61 @@ LIST, waitpid PID,FLAGS
 
 =item Restrictions of Perl on VOS
 
+=item Handling of underflow and overflow
+
 =back
+
+=item TEST STATUS
 
 =item SUPPORT STATUS
 
 =item AUTHOR
 
 =item LAST UPDATE
+
+=back
+
+=head2 perlwin32 - Perl under Windows
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Setting Up Perl on Win32
+
+Make, Command Shell, Borland C++, Microsoft Visual C++, Microsoft Platform
+SDK 64-bit Compiler, Mingw32 with GCC
+
+=item Building
+
+=item Testing Perl on Win32
+
+=item Installation of Perl on Win32
+
+=item Usage Hints for Perl on Win32
+
+Environment Variables, File Globbing, Using perl from the command line,
+Building Extensions, Command-line Wildcard Expansion, Win32 Specific
+Extensions, Notes on 64-bit Windows, Running Perl Scripts, Miscellaneous
+Things
+
+=back
+
+=item BUGS AND CAVEATS
+
+=item AUTHORS
+
+Gary Ng E<lt>71564.1743@CompuServe.COME<gt>, Gurusamy Sarathy
+E<lt>gsar@activestate.comE<gt>, Nick Ing-Simmons
+E<lt>nick@ing-simmons.netE<gt>
+
+=item SEE ALSO
+
+=item HISTORY
 
 =back
 
@@ -8152,8 +8248,8 @@ data structures between threads
 
 =item FUNCTIONS
 
-share VARIABLE, lock VARIABLE, unlock VARIABLE, cond_wait VARIABLE,
-cond_signal VARIABLE, cond_broadcast VARIABLE
+share VARIABLE, lock VARIABLE, cond_wait VARIABLE, cond_signal VARIABLE,
+cond_broadcast VARIABLE
 
 =item NOTES
 
@@ -8427,7 +8523,7 @@ escapes
 
 =item charnames::viacode(code)
 
-=item charnames::vianame(code)
+=item charnames::vianame(name)
 
 =item ALIASES
 
@@ -8847,7 +8943,7 @@ BLOCK;
 
 =item WARNINGS
 
-Cleanup skipped %d active threads
+A thread exited while %d other threads were still running
 
 =item BUGS / TODO
 
@@ -8873,8 +8969,8 @@ structures between threads
 
 =item FUNCTIONS
 
-share VARIABLE, lock VARIABLE, unlock VARIABLE, cond_wait VARIABLE,
-cond_signal VARIABLE, cond_broadcast VARIABLE
+share VARIABLE, lock VARIABLE, cond_wait VARIABLE, cond_signal VARIABLE,
+cond_broadcast VARIABLE
 
 =item NOTES
 
