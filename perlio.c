@@ -1020,33 +1020,58 @@ PerlIOPop_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg)
 }
 
 IV
+PerlIOBase_binmode(pTHX_ PerlIO *f)
+{
+   if (PerlIOValid(f)) {
+	/* Is layer suitable for raw stream ? */
+	if (PerlIOBase(f)->tab->kind & PERLIO_K_RAW) {
+	    /* Yes - turn off UTF-8-ness, to undo UTF-8 locale effects */
+	    PerlIOBase(f)->flags &= ~PERLIO_F_UTF8;
+	}
+	else {
+	    /* Not suitable - pop it */
+	    PerlIO_pop(aTHX_ f);
+	}
+	return 0;
+   }
+   return -1;
+}
+
+IV
 PerlIORaw_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg)
 {
-    /*
-     * Remove the dummy layer
-     */
-    PerlIO_pop(aTHX_ f);
-    /*
-     * Pop back to bottom layer
-     */
+
     if (PerlIOValid(f)) {
+	PerlIO *t;
+	PerlIOl *l;
+	PerlIO_pop(aTHX_ f);     /* Remove the dummy layer */
 	PerlIO_flush(f);
-	while (!(PerlIOBase(f)->tab->kind & PERLIO_K_RAW)) {
-	    if (*PerlIONext(f)) {
-		PerlIO_pop(aTHX_ f);
+	/*
+	 * Strip all layers that are not suitable for a raw stream
+	 */
+	t = f;
+	while (t && (l = *t)) {
+	    if (l->tab->Binmode) {
+		/* Has a handler - normal case */
+		if ((*l->tab->Binmode)(aTHX_ f) == 0) {
+		    if (*t == l) {
+			/* Layer still there - move down a layer */
+			t = PerlIONext(t);
+		    }
+		}
+		else {
+		    return -1;
+		}
 	    }
 	    else {
-		/*
-		 * Nothing bellow - push unix on top then remove it
-		 */
-		if (PerlIO_push(aTHX_ f, PerlIO_default_btm(), mode, arg)) {
-		    PerlIO_pop(aTHX_ PerlIONext(f));
-		}
-		break;
+		/* No handler - pop it */
+		PerlIO_pop(aTHX_ t);
 	    }
 	}
-	PerlIO_debug(":raw f=%p :%s\n", (void*)f, PerlIOBase(f)->tab->name);
-	return 0;
+	if (PerlIOValid(f)) {
+	    PerlIO_debug(":raw f=%p :%s\n", (void*)f, PerlIOBase(f)->tab->name);
+	    return 0;
+	}
     }
     return -1;
 }
@@ -1105,22 +1130,17 @@ PerlIO_binmode(pTHX_ PerlIO *f, int iotype, int mode, const char *names)
 	return PerlIO_apply_layers(aTHX_ f, NULL, names) == 0 ? TRUE : FALSE;
     }
     else {
-	if (*f) {
-	    /* Turn off UTF-8-ness, to undo UTF-8 locale effects
-	       This may be too simplistic!
-	     */
-	    PerlIOBase(f)->flags &= ~PERLIO_F_UTF8;
-	}
-	/* FIXME?: Looking down the layer stack seems wrong,
-	   but is a way of reaching past (say) an encoding layer
-	   to flip CRLF-ness of the layer(s) below
-	 */
+	/* Fake 5.6 legacy of using this call to turn ON O_TEXT */
 #ifdef PERLIO_USING_CRLF
 	/* Legacy binmode only has meaning if O_TEXT has a value distinct from
 	   O_BINARY so we can look for it in mode.
 	 */
 	if (!(mode & O_BINARY)) {
 	    /* Text mode */
+	    /* FIXME?: Looking down the layer stack seems wrong,
+	       but is a way of reaching past (say) an encoding layer
+	       to flip CRLF-ness of the layer(s) below
+	     */
 	    while (*f) {
 		/* Perhaps we should turn on bottom-most aware layer
 		   e.g. Ilya's idea that UNIX TTY could serve
@@ -1143,31 +1163,10 @@ PerlIO_binmode(pTHX_ PerlIO *f, int iotype, int mode, const char *names)
 	    return FALSE;
 	}
 #endif
-	/* Either asked for BINMODE or that is normal on this platform
-	   see if any CRLF aware layers are present and turn off the flag
-	   and possibly remove layer.
+	/* Legacy binmode is now _defined_ as being equivalent to pushing :raw
+	   So code that used to be here is now in PerlIORaw_pushed().
 	 */
-	while (*f) {
-	    if (PerlIOBase(f)->tab->kind & PERLIO_K_CANCRLF) {
-		if ((PerlIOBase(f)->flags & PERLIO_F_CRLF)) {
-		    /* In text mode - flush any pending stuff and flip it */
-		    PerlIO_flush(f);
-		    PerlIOBase(f)->flags &= ~PERLIO_F_CRLF;
-#ifndef PERLIO_USING_CRLF
-		    /* CRLF is unusual case - if this is just the :crlf layer pop it */
-		    if (PerlIOBase(f)->tab == &PerlIO_crlf) {
-			PerlIO_pop(aTHX_ f);
-		    }
-#endif
-		    /* Normal case is only one layer doing this, so exit on first
-		       abnormal case can always do multiple binmode calls
-		     */
-		    return TRUE;
-		}
-	    }
-	    f = PerlIONext(f);
-	}
-	return TRUE;
+	return PerlIO_push(aTHX_ f, &PerlIO_raw, Nullch, Nullsv) ? TRUE : FALSE;
     }
 }
 
@@ -2373,6 +2372,7 @@ PerlIO_funcs PerlIO_unix = {
     PerlIOUnix_pushed,
     PerlIOBase_popped,
     PerlIOUnix_open,
+    PerlIOBase_binmode,         /* binmode */
     NULL,
     PerlIOUnix_fileno,
     PerlIOUnix_dup,
@@ -2923,10 +2923,11 @@ PerlIOStdio_fill(pTHX_ PerlIO *f)
 PerlIO_funcs PerlIO_stdio = {
     "stdio",
     sizeof(PerlIOStdio),
-    PERLIO_K_BUFFERED,
+    PERLIO_K_BUFFERED|PERLIO_K_RAW,
     PerlIOBase_pushed,
     PerlIOBase_popped,
     PerlIOStdio_open,
+    PerlIOBase_binmode,         /* binmode */
     NULL,
     PerlIOStdio_fileno,
     PerlIOStdio_dup,
@@ -3473,10 +3474,11 @@ PerlIOBuf_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
 PerlIO_funcs PerlIO_perlio = {
     "perlio",
     sizeof(PerlIOBuf),
-    PERLIO_K_BUFFERED,
+    PERLIO_K_BUFFERED|PERLIO_K_RAW,
     PerlIOBuf_pushed,
     PerlIOBuf_popped,
     PerlIOBuf_open,
+    PerlIOBase_binmode,         /* binmode */
     NULL,
     PerlIOBase_fileno,
     PerlIOBuf_dup,
@@ -3594,10 +3596,11 @@ PerlIOPending_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 PerlIO_funcs PerlIO_pending = {
     "pending",
     sizeof(PerlIOBuf),
-    PERLIO_K_BUFFERED,
+    PERLIO_K_BUFFERED|PERLIO_K_RAW,  /* not sure about RAW here */
     PerlIOPending_pushed,
     PerlIOBuf_popped,
     NULL,
+    PerlIOBase_binmode,         /* binmode */
     NULL,
     PerlIOBase_fileno,
     PerlIOBuf_dup,
@@ -3884,13 +3887,30 @@ PerlIOCrlf_flush(pTHX_ PerlIO *f)
     return PerlIOBuf_flush(aTHX_ f);
 }
 
+IV
+PerlIOCrlf_binmode(pTHX_ PerlIO *f)
+{
+    if ((PerlIOBase(f)->flags & PERLIO_F_CRLF)) {
+	/* In text mode - flush any pending stuff and flip it */
+	PerlIOBase(f)->flags &= ~PERLIO_F_CRLF;
+#ifndef PERLIO_USING_CRLF
+	/* CRLF is unusual case - if this is just the :crlf layer pop it */
+	if (PerlIOBase(f)->tab == &PerlIO_crlf) {
+		PerlIO_pop(aTHX_ f);
+	}
+#endif
+    }
+    return 0;
+}
+
 PerlIO_funcs PerlIO_crlf = {
     "crlf",
     sizeof(PerlIOCrlf),
-    PERLIO_K_BUFFERED | PERLIO_K_CANCRLF,
+    PERLIO_K_BUFFERED | PERLIO_K_CANCRLF | PERLIO_K_RAW,
     PerlIOCrlf_pushed,
     PerlIOBuf_popped,         /* popped */
     PerlIOBuf_open,
+    PerlIOCrlf_binmode,       /* binmode */
     NULL,
     PerlIOBase_fileno,
     PerlIOBuf_dup,
@@ -4202,10 +4222,11 @@ PerlIOMmap_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
 PerlIO_funcs PerlIO_mmap = {
     "mmap",
     sizeof(PerlIOMmap),
-    PERLIO_K_BUFFERED,
+    PERLIO_K_BUFFERED|PERLIO_K_RAW,
     PerlIOBuf_pushed,
     PerlIOBuf_popped,
     PerlIOBuf_open,
+    PerlIOBase_binmode,         /* binmode */
     NULL,
     PerlIOBase_fileno,
     PerlIOMmap_dup,
