@@ -4941,14 +4941,16 @@ Perl_sv_realpath(pTHX_ SV *sv, char *path, STRLEN len)
     char name[MAXPATHLEN] = { 0 }, *s;
     STRLEN pathlen, namelen;
 
+    /* Don't use strlen() to avoid running off the end. */
+    s = memchr(path, '\0', MAXPATHLEN);
+    pathlen = s ? s - path : MAXPATHLEN;
+
 #ifdef HAS_REALPATH
+
     /* Be paranoid about the use of realpath(),
      * it is an infamous source of buffer overruns. */
 
-    /* Is the source buffer too long?
-     * Don't use strlen() to avoid running off the end. */
-    s = memchr(path, '\0', MAXPATHLEN);
-    pathlen = s ? s - path : MAXPATHLEN;
+    /* Is the source buffer too long? */
     if (pathlen == MAXPATHLEN) {
         Perl_warn(aTHX_ "sv_realpath: realpath(\"%s\"): %c= (MAXPATHLEN = %d)",
                   path, s ? '=' : '>', MAXPATHLEN);

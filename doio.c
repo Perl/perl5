@@ -1395,7 +1395,6 @@ Perl_do_exec3(pTHX_ char *cmd, int fd, int do_report)
 {
     register char **a;
     register char *s;
-    char flags[10];
 
     while (*cmd && isSPACE(*cmd))
 	cmd++;
@@ -1403,28 +1402,32 @@ Perl_do_exec3(pTHX_ char *cmd, int fd, int do_report)
     /* save an extra exec if possible */
 
 #ifdef CSH
-    if (strnEQ(cmd,PL_cshname,PL_cshlen) && strnEQ(cmd+PL_cshlen," -c",3)) {
-	strcpy(flags,"-c");
-	s = cmd+PL_cshlen+3;
-	if (*s == 'f') {
-	    s++;
-	    strcat(flags,"f");
-	}
-	if (*s == ' ')
-	    s++;
-	if (*s++ == '\'') {
-	    char *ncmd = s;
+    {
+        char flags[10];
+	if (strnEQ(cmd,PL_cshname,PL_cshlen) &&
+	    strnEQ(cmd+PL_cshlen," -c",3)) {
+	  strcpy(flags,"-c");
+	  s = cmd+PL_cshlen+3;
+	  if (*s == 'f') {
+	      s++;
+	      strcat(flags,"f");
+	  }
+	  if (*s == ' ')
+	      s++;
+	  if (*s++ == '\'') {
+	      char *ncmd = s;
 
-	    while (*s)
-		s++;
-	    if (s[-1] == '\n')
-		*--s = '\0';
-	    if (s[-1] == '\'') {
-		*--s = '\0';
-		PerlProc_execl(PL_cshname,"csh", flags,ncmd,(char*)0);
-		*s = '\'';
-		return FALSE;
-	    }
+	      while (*s)
+		  s++;
+	      if (s[-1] == '\n')
+		  *--s = '\0';
+	      if (s[-1] == '\'') {
+		  *--s = '\0';
+		  PerlProc_execl(PL_cshname,"csh", flags, ncmd, (char*)0);
+		  *s = '\'';
+		  return FALSE;
+	      }
+	  }
 	}
     }
 #endif /* CSH */
@@ -1442,7 +1445,8 @@ Perl_do_exec3(pTHX_ char *cmd, int fd, int do_report)
 	goto doshell;
 
     for (s = cmd; *s; s++) {
-	if (*s != ' ' && !isALPHA(*s) && strchr("$&*(){}[]'\";\\|?<>~`\n",*s)) {
+	if (*s != ' ' && !isALPHA(*s) &&
+	    strchr("$&*(){}[]'\";\\|?<>~`\n",*s)) {
 	    if (*s == '\n' && !s[1]) {
 		*s = '\0';
 		break;

@@ -70,7 +70,6 @@ PerlIOVia_method(pTHX_ PerlIO *f,char *method,CV **save,int flags,...)
    IV count;
    dSP;
    SV *arg;
-   int i = 0;
    ENTER;
    PUSHMARK(sp);
    XPUSHs(s->obj);

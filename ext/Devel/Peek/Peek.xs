@@ -151,7 +151,6 @@ void
 fill_mstats(SV *sv, int level)
 {
     dTHX;
-    int nbuckets;
     struct mstats_buffer buf;
 
     if (SvREADONLY(sv))
@@ -216,7 +215,7 @@ _mstats_to_hv(HV *hv, struct mstats_buffer *b, int level)
 	warn("FIXME: internal mstats buffer too short");
     
     for (type = 0; type < (level ? 4 : 2); type++) {
-	UV *p, *p1;
+	UV *p = 0, *p1 = 0;
 	AV *av;
 	int i;
 	static const char *types[4] = { 
@@ -229,7 +228,7 @@ _mstats_to_hv(HV *hv, struct mstats_buffer *b, int level)
 	    croak("Unexpected value for the key '%s' in the mstats hash", types[type]);
 	if (!SvOK(*svp)) {
 	    av = newAV();
-	    SvUPGRADE(*svp, SVt_RV);
+	    (void)SvUPGRADE(*svp, SVt_RV);
 	    SvRV(*svp) = (SV*)av;
 	    SvROK_on(*svp);
 	} else

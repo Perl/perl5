@@ -1496,12 +1496,12 @@ my @names = (qw(AF_802 AF_APPLETALK AF_CCITT AF_CHAOS AF_DATAKIT AF_DECnet
 	       SO_SNDBUF SO_SNDLOWAT SO_SNDTIMEO SO_TYPE SO_USELOOPBACK
 	       TCP_KEEPALIVE TCP_MAXRT TCP_MAXSEG TCP_NODELAY TCP_STDURG
 	       UIO_MAXIOV MSG_URG),
-            {name=>"MSG_CTRUNC", type=>"IV", macro=>["#if defined(MSG_CTRUNC) || defined(HAS_MSG_CTRUNC) /* might be an enum *" . "/\n", "#endif\n"]},
-            {name=>"MSG_DONTROUTE", type=>"IV", macro=>["#if defined(MSG_DONTROUTE) || defined(HAS_MSG_DONTROUTE) /* might be an enum *" . "/\n", "#endif\n"]},
-            {name=>"MSG_OOB", type=>"IV", macro=>["#if defined(MSG_OOB) || defined(HAS_MSG_OOB) /* might be an enum *" . "/\n", "#endif\n"]},
-            {name=>"MSG_PEEK", type=>"IV", macro=>["#if defined(MSG_PEEK) || defined(HAS_MSG_PEEK) /* might be an enum *" . "/\n", "#endif\n"]},
-            {name=>"MSG_PROXY", type=>"IV", macro=>["#if defined(MSG_PROXY) || defined(HAS_MSG_PROXY) /* might be an enum *" . "/\n", "#endif\n"]},
-            {name=>"SCM_RIGHTS", type=>"IV", macro=>["#if defined(SCM_RIGHTS) || defined(HAS_SCM_RIGHTS) /* might be an enum *" . "/\n", "#endif\n"]},
+            {name=>"MSG_CTRUNC", type=>"IV", macro=>["#if defined(MSG_CTRUNC) || defined(HAS_MSG_CTRUNC) /" . "* might be an enum *" . "/\n", "#endif\n"]},
+            {name=>"MSG_DONTROUTE", type=>"IV", macro=>["#if defined(MSG_DONTROUTE) || defined(HAS_MSG_DONTROUTE) /" . "* might be an enum *" . "/\n", "#endif\n"]},
+            {name=>"MSG_OOB", type=>"IV", macro=>["#if defined(MSG_OOB) || defined(HAS_MSG_OOB) /" . "* might be an enum *" . "/\n", "#endif\n"]},
+            {name=>"MSG_PEEK", type=>"IV", macro=>["#if defined(MSG_PEEK) || defined(HAS_MSG_PEEK) /" . "* might be an enum *" . "/\n", "#endif\n"]},
+            {name=>"MSG_PROXY", type=>"IV", macro=>["#if defined(MSG_PROXY) || defined(HAS_MSG_PROXY) /" . "* might be an enum *" . "/\n", "#endif\n"]},
+            {name=>"SCM_RIGHTS", type=>"IV", macro=>["#if defined(SCM_RIGHTS) || defined(HAS_SCM_RIGHTS) /" . "* might be an enum *" . "/\n", "#endif\n"]},
             {name=>"SHUT_RD", type=>"IV", default=>["IV", "0"]},
             {name=>"SHUT_RDWR", type=>"IV", default=>["IV", "2"]},
             {name=>"SHUT_WR", type=>"IV", default=>["IV", "1"]});

@@ -1988,9 +1988,6 @@ PP(pp_truncate)
      * at least as wide as size_t, so using an off_t should be okay. */
     /* XXX Configure probe for the length type of *truncate() needed XXX */
     Off_t len;
-    int result = 1;
-    GV *tmpgv;
-    STRLEN n_a;
 
 #if Size_t_size > IVSIZE
     len = (Off_t)POPn;
@@ -2002,60 +1999,67 @@ PP(pp_truncate)
     /* XXX Configure probe for the signedness of the length type of *truncate() needed? XXX */
     SETERRNO(0,0);
 #if defined(HAS_TRUNCATE) || defined(HAS_CHSIZE) || defined(F_FREESP)
-    if (PL_op->op_flags & OPf_SPECIAL) {
-	tmpgv = gv_fetchpv(POPpx, FALSE, SVt_PVIO);
-    do_ftruncate:
-	TAINT_PROPER("truncate");
-	if (!GvIO(tmpgv) || !IoIFP(GvIOp(tmpgv)))
-	    result = 0;
-	else {
-	    PerlIO_flush(IoIFP(GvIOp(tmpgv)));
-#ifdef HAS_TRUNCATE
-	    if (ftruncate(PerlIO_fileno(IoIFP(GvIOn(tmpgv))), len) < 0)
-#else
-	    if (my_chsize(PerlIO_fileno(IoIFP(GvIOn(tmpgv))), len) < 0)
-#endif
-		result = 0;
-	}
-    }
-    else {
-	SV *sv = POPs;
-	char *name;
-	STRLEN n_a;
+    {
+        STRLEN n_a;
+	int result = 1;
+	GV *tmpgv;
+	
+	if (PL_op->op_flags & OPf_SPECIAL) {
+	    tmpgv = gv_fetchpv(POPpx, FALSE, SVt_PVIO);
 
-	if (SvTYPE(sv) == SVt_PVGV) {
-	    tmpgv = (GV*)sv;		/* *main::FRED for example */
-	    goto do_ftruncate;
-	}
-	else if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVGV) {
-	    tmpgv = (GV*) SvRV(sv);	/* \*main::FRED for example */
-	    goto do_ftruncate;
-	}
-
-	name = SvPV(sv, n_a);
-	TAINT_PROPER("truncate");
-#ifdef HAS_TRUNCATE
-	if (truncate(name, len) < 0)
-	    result = 0;
-#else
-	{
-	    int tmpfd;
-	    if ((tmpfd = PerlLIO_open(name, O_RDWR)) < 0)
-		result = 0;
+	do_ftruncate:
+	    TAINT_PROPER("truncate");
+	    if (!GvIO(tmpgv) || !IoIFP(GvIOp(tmpgv)))
+	        result = 0;
 	    else {
-		if (my_chsize(tmpfd, len) < 0)
+	        PerlIO_flush(IoIFP(GvIOp(tmpgv)));
+#ifdef HAS_TRUNCATE
+		if (ftruncate(PerlIO_fileno(IoIFP(GvIOn(tmpgv))), len) < 0)
+#else
+		if (my_chsize(PerlIO_fileno(IoIFP(GvIOn(tmpgv))), len) < 0)
+#endif
 		    result = 0;
-		PerlLIO_close(tmpfd);
 	    }
 	}
-#endif
-    }
+	else {
+	    SV *sv = POPs;
+	    char *name;
+	  
+	    if (SvTYPE(sv) == SVt_PVGV) {
+	        tmpgv = (GV*)sv;		/* *main::FRED for example */
+		goto do_ftruncate;
+	    }
+	    else if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVGV) {
+	        tmpgv = (GV*) SvRV(sv);	/* \*main::FRED for example */
+		goto do_ftruncate;
+	    }
 
-    if (result)
-	RETPUSHYES;
-    if (!errno)
-	SETERRNO(EBADF,RMS$_IFI);
-    RETPUSHUNDEF;
+	    name = SvPV(sv, n_a);
+	    TAINT_PROPER("truncate");
+#ifdef HAS_TRUNCATE
+	    if (truncate(name, len) < 0)
+	        result = 0;
+#else
+	    {
+	        int tmpfd;
+
+		if ((tmpfd = PerlLIO_open(name, O_RDWR)) < 0)
+		    result = 0;
+		else {
+		    if (my_chsize(tmpfd, len) < 0)
+		        result = 0;
+		    PerlLIO_close(tmpfd);
+		}
+	    }
+#endif
+	}
+
+	if (result)
+	    RETPUSHYES;
+	if (!errno)
+	    SETERRNO(EBADF,RMS$_IFI);
+	RETPUSHUNDEF;
+    }
 #else
     DIE(aTHX_ "truncate not implemented");
 #endif
@@ -3396,10 +3400,9 @@ PP(pp_chown)
 PP(pp_chroot)
 {
     dSP; dTARGET;
-    char *tmps;
 #ifdef HAS_CHROOT
     STRLEN n_a;
-    tmps = POPpx;
+    char *tmps = POPpx;
     TAINT_PROPER("chroot");
     PUSHi( chroot(tmps) >= 0 );
     RETURN;
@@ -4207,11 +4210,9 @@ PP(pp_setpgrp)
 PP(pp_getpriority)
 {
     dSP; dTARGET;
-    int which;
-    int who;
 #ifdef HAS_GETPRIORITY
-    who = POPi;
-    which = TOPi;
+    int who = POPi;
+    int which = TOPi;
     SETi( getpriority(which, who) );
     RETURN;
 #else
@@ -4222,13 +4223,10 @@ PP(pp_getpriority)
 PP(pp_setpriority)
 {
     dSP; dTARGET;
-    int which;
-    int who;
-    int niceval;
 #ifdef HAS_SETPRIORITY
-    niceval = POPi;
-    who = POPi;
-    which = TOPi;
+    int niceval = POPi;
+    int who = POPi;
+    int which = TOPi;
     TAINT_PROPER("setpriority");
     SETi( setpriority(which, who, niceval) >= 0 );
     RETURN;
