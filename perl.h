@@ -21,7 +21,11 @@
 #endif /* PERL_FOR_X2P */
 
 #define VOIDUSED 1
-#include "config.h"
+#ifdef PERL_MICRO 
+#   include "uconfig.h"
+#else
+#   include "config.h"
+#endif
 
 #if defined(USE_ITHREADS) && defined(USE_5005THREADS)
 #  include "error: USE_ITHREADS and USE_5005THREADS are incompatible"
@@ -460,6 +464,10 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #undef METHOD
 #endif
 
+#ifdef PERL_MICRO
+#   define NO_LOCALE
+#endif
+
 #ifdef I_LOCALE
 #   include <locale.h>
 #endif
@@ -593,6 +601,7 @@ struct perl_mstats {
 #    endif
 #  endif
 #else
+#  undef  memset
 #  define memset(d,c,l) my_memset(d,c,l)
 #endif /* HAS_MEMSET */
 
@@ -809,6 +818,12 @@ struct perl_mstats {
 #		include <sys/dir.h>
 #	    endif
 #	endif
+#   endif
+#endif
+
+#ifdef PERL_MICRO
+#   ifndef DIR
+#      define DIR void
 #   endif
 #endif
 
@@ -1596,6 +1611,11 @@ typedef struct ptr_tbl PTR_TBL_t;
 #   endif
 # endif
 #endif         
+
+#ifdef PERL_MICRO
+#   undef HAS_PASSWD
+#   undef HAS_GROUP
+#endif
 
 #ifndef PERL_SYS_INIT3
 #  define PERL_SYS_INIT3(argvp,argcp,envp) PERL_SYS_INIT(argvp,argcp)

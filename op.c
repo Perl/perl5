@@ -2645,12 +2645,13 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	}
 	if (!squash) {
 	    if (to_utf && from_utf) {	/* only counting characters */
-		if (t == r || (tlen == rlen && memEQ(t, r, tlen)))
+		if (t == r ||
+		    (tlen == rlen && memEQ((char *)t, (char *)r, tlen)))
 		    o->op_private |= OPpTRANS_IDENTICAL;
 	    }
 	    else {	/* straight latin-1 translation */
-		if (tlen == 4 && memEQ(t, "\0\377\303\277", 4) &&
-		    rlen == 4 && memEQ(r, "\0\377\303\277", 4))
+		if (tlen == 4 && memEQ((char *)t, "\0\377\303\277", 4) &&
+		    rlen == 4 && memEQ((char *)r, "\0\377\303\277", 4))
 		    o->op_private |= OPpTRANS_IDENTICAL;
 	    }
 	}

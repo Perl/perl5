@@ -1,0 +1,9 @@
+microperl is supposed to be able a really minimal perl, even more
+minimal than miniperl.  No Configure is needed to build microperl,
+on the other hand this means that interfaces between Perl and your
+operating system are left very -- minimal.
+
+All this is experimental.  If you don't know what to do with microperl
+you probably shouldn't.
+
+

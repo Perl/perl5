@@ -1,0 +1,15 @@
+- make creating uconfig.sh automatic (by pumpkin)
+
+- make creating Makefile.micro automatic (by pumpkin)
+
+- clean up compilation warnings as much as possible:
+  most of them seem to stem from not including enough headers (this is okay)
+  to have enough prototypes, these may be correctible with some simple casts
+
+- do away with signals? (not very portable outside UNIX lands)
+  (missing signal API prototypes cause the majority of the compilation
+   warnings anyway) do away with fork?
+
+- some of the micro/config.sh really needs to be probed in buildtime:
+  (uConfigure? :-) native datatype widths and endianness come to mind
+

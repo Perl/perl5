@@ -87,7 +87,7 @@ Perl_safesysmalloc(MEM_SIZE size)
     if ((long)size < 0)
 	Perl_croak_nocontext("panic: malloc");
 #endif
-    ptr = PerlMem_malloc(size?size:1);	/* malloc(0) is NASTY on our system */
+    ptr = (Malloc_t)PerlMem_malloc(size?size:1);	/* malloc(0) is NASTY on our system */
     PERL_ALLOC_CHECK(ptr);
     DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) malloc %ld bytes\n",PTR2UV(ptr),(long)PL_an++,(long)size));
     if (ptr != Nullch)
@@ -131,7 +131,7 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
     if ((long)size < 0)
 	Perl_croak_nocontext("panic: realloc");
 #endif
-    ptr = PerlMem_realloc(where,size);
+    ptr = (Malloc_t)PerlMem_realloc(where,size);
     PERL_ALLOC_CHECK(ptr);
  
     DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) rfree\n",PTR2UV(where),(long)PL_an++));
@@ -184,7 +184,7 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
 	Perl_croak_nocontext("panic: calloc");
 #endif
     size *= count;
-    ptr = PerlMem_malloc(size?size:1);	/* malloc(0) is NASTY on our system */
+    ptr = (Malloc_t)PerlMem_malloc(size?size:1);	/* malloc(0) is NASTY on our system */
     PERL_ALLOC_CHECK(ptr);
     DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) calloc %ld x %ld bytes\n",PTR2UV(ptr),(long)PL_an++,(long)count,(long)size));
     if (ptr != Nullch) {
@@ -1000,7 +1000,8 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 	if ( SvTAIL(littlestr) 
 	     && (bigend - big == littlelen - 1)
 	     && (littlelen == 1 
-		 || (*big == *little && memEQ(big, little, littlelen - 1))))
+		 || (*big == *little &&
+		     memEQ((char *)big, (char *)little, littlelen - 1))))
 	    return (char*)big;
 	return Nullch;
     }
@@ -1168,7 +1169,8 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 	}
       check_end:
 	if ( s == bigend && (table[-1] & FBMcf_TAIL)
-	     && memEQ(bigend - littlelen, oldlittle - littlelen, littlelen) )
+	     && memEQ((char *)(bigend - littlelen),
+		      (char *)(oldlittle - littlelen), littlelen) )
 	    return (char*)bigend - littlelen;
 	return Nullch;
     }
@@ -1283,7 +1285,8 @@ Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift
 	return (char*)big;
     big -= stop_pos;
     if (*big == first
-	&& ((stop_pos == 1) || memEQ(big + 1, little, stop_pos - 1)))
+	&& ((stop_pos == 1) ||
+	    memEQ((char *)(big + 1), (char *)little, stop_pos - 1)))
 	return (char*)big;
     return Nullch;
 }
@@ -3661,7 +3664,7 @@ Perl_get_opargs(pTHX)
 PPADDR_t*
 Perl_get_ppaddr(pTHX)
 {
- return &PL_ppaddr;
+ return (PPADDR_t*)PL_ppaddr;
 }
 
 #ifndef HAS_GETENV_LEN
