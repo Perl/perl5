@@ -41,6 +41,42 @@
 #define RUN() runops()
 #endif
 
+#if PATCHLEVEL > 3
+/* Anyone using eval "" deserves this mess */
+#define PP_EVAL(ppaddr, nxt) do {		\
+	dJMPENV;				\
+	int ret;				\
+	PUTBACK;				\
+	JMPENV_PUSH(ret);			\
+	switch (ret) {				\
+	case 0:					\
+	    op = ppaddr();			\
+	    retstack[retstack_ix - 1] = Nullop;	\
+	    if (op != nxt) RUN();		\
+	    JMPENV_POP;				\
+	    break;				\
+	case 1: JMPENV_POP; JMPENV_JUMP(1);	\
+	case 2: JMPENV_POP; JMPENV_JUMP(2);	\
+	case 3:					\
+	    JMPENV_POP;				\
+	    if (restartop != nxt)		\
+		JMPENV_JUMP(3);			\
+	}					\
+	op = nxt;				\
+	SPAGAIN;				\
+    } while (0)
+
+#define PP_ENTERTRY(jmpbuf,label) do {		\
+	dJMPENV;				\
+	int ret;				\
+	JMPENV_PUSH(ret);			\
+	switch (ret) {				\
+	case 1: JMPENV_POP; JMPENV_JUMP(1);	\
+	case 2: JMPENV_POP; JMPENV_JUMP(2);	\
+	case 3: JMPENV_POP; SPAGAIN; goto label;\
+	}					\
+    } while (0)
+#else
 /* Anyone using eval "" deserves this mess */
 #define PP_EVAL(ppaddr, nxt) do {		\
 	Sigjmp_buf oldtop;			\
@@ -72,3 +108,4 @@
 	case 3: Copy(jmpbuf,top_env,1,Sigjmp_buf); SPAGAIN; goto label;	\
 	}					\
     } while (0)
+#endif
