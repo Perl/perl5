@@ -100,7 +100,7 @@ case "$optimize" in
 '') # If we have modern enough gcc and well-supported enough CPU,
     # crank up the optimization level.
     case "`${cc:-gcc} -v 2>&1`" in
-    *gcc-2.95*|*gcc-3.*)
+    *"gcc version 2.95"*|*"gcc version 3."*)
         case "`arch 2>&1`" in
         i?86|ppc) optimize='-O3' ;;
         esac
