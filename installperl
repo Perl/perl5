@@ -56,7 +56,7 @@ while (@ARGV) {
     $versiononly = 1 if $ARGV[0] eq '-v';
     $silent = 1 if $ARGV[0] eq '-S';
     $otherperls = 0 if $ARGV[0] eq '-o';
-    $verbose = 1 if $ARGV[0] eq '-V';
+    $verbose = 1 if $ARGV[0] eq '-V' || $ARGV [0] eq '-n';
     shift;
 }
 

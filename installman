@@ -49,9 +49,8 @@ $opts{man3dir} = $Config{'installman3dir'}
 $opts{man3ext} = $Config{'man3ext'}
     unless defined($opts{man3ext}); 
 $opts{silent} ||= $opts{S};
-$opts{verbose} ||= $opts{V};
-
 $opts{notify} ||= $opts{n};
+$opts{verbose} ||= $opts{V} || $opts{notify};
 
 #Sanity checks
 
