@@ -435,6 +435,13 @@ Perl_magic_len(pTHX_ SV *sv, MAGIC *mg)
 		goto getparen;
 	}
 	return 0;
+    case '\016': /* ^N */
+	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
+	    paren = rx->lastcloseparen;
+	    if (paren)
+		goto getparen;
+	}
+	return 0;
     case '`':
 	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
 	    if (rx->startp[0] != -1) {
@@ -655,6 +662,14 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     case '+':
 	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
 	    paren = rx->lastparen;
+	    if (paren)
+		goto getparen;
+	}
+	sv_setsv(sv,&PL_sv_undef);
+	break;
+    case '\016':		/* ^N */
+	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
+	    paren = rx->lastcloseparen;
 	    if (paren)
 		goto getparen;
 	}
@@ -2163,7 +2178,7 @@ Perl_magic_mutexfree(pTHX_ SV *sv, MAGIC *mg)
 {
     DEBUG_S(PerlIO_printf(Perl_debug_log,
 			  "0x%"UVxf": magic_mutexfree 0x%"UVxf"\n",
-			  PTR2UV(thr), PTR2UV(sv));)
+			  PTR2UV(thr), PTR2UV(sv)));
     if (MgOWNER(mg))
 	Perl_croak(aTHX_ "panic: magic_mutexfree");
     MUTEX_DESTROY(MgMUTEXP(mg));

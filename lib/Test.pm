@@ -9,7 +9,7 @@ use vars (qw($VERSION @ISA @EXPORT @EXPORT_OK $ntest $TestLevel), #public-ish
 	  qw($TESTOUT $ONFAIL %todo %history $planned @FAILDETAIL)#private-ish
          );
 
-$VERSION = '1.18';
+$VERSION = '1.17_00';
 require Exporter;
 @ISA=('Exporter');
 

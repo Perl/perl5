@@ -2848,7 +2848,7 @@ Perl_condpair_magic(pTHX_ SV *sv)
 	    mg->mg_len = sizeof(cp);
 	    UNLOCK_CRED_MUTEX;		/* XXX need separate mutex? */
 	    DEBUG_S(WITH_THR(PerlIO_printf(Perl_debug_log,
-					   "%p: condpair_magic %p\n", thr, sv));)
+					   "%p: condpair_magic %p\n", thr, sv)));
 	}
     }
     return mg;
@@ -2875,7 +2875,7 @@ Perl_sv_lock(pTHX_ SV *osv)
 	MgOWNER(mg) = thr;
 	DEBUG_S(PerlIO_printf(Perl_debug_log,
 			      "0x%"UVxf": Perl_lock lock 0x%"UVxf"\n",
-			      PTR2UV(thr), PTR2UV(sv));)
+			      PTR2UV(thr), PTR2UV(sv)));
 	MUTEX_UNLOCK(MgMUTEXP(mg));
 	SAVEDESTRUCTOR_X(Perl_unlock_condpair, sv);
     }

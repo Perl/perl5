@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..639\n";
+print "1..660\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -1854,3 +1854,38 @@ print "ok 638\n";
 print "not " unless " " =~ /[[:print:]]/;
 print "ok 639\n";
 
+##
+## Test basic $^N usage outside of a regex
+##
+$x = "abcdef";
+$T="ok 640\n";if ($x =~ /cde/ and not defined $^N)         {print $T} else {print "not $T"};
+$T="ok 641\n";if ($x =~ /(cde)/          and $^N eq "cde") {print $T} else {print "not $T"};
+$T="ok 642\n";if ($x =~ /(c)(d)(e)/      and $^N eq   "e") {print $T} else {print "not $T"};
+$T="ok 643\n";if ($x =~ /(c(d)e)/        and $^N eq "cde") {print $T} else {print "not $T"};
+$T="ok 644\n";if ($x =~ /(foo)|(c(d)e)/  and $^N eq "cde") {print $T} else {print "not $T"};
+$T="ok 645\n";if ($x =~ /(c(d)e)|(foo)/  and $^N eq "cde") {print $T} else {print "not $T"};
+$T="ok 646\n";if ($x =~ /(c(d)e)|(abc)/  and $^N eq "abc") {print $T} else {print "not $T"};
+$T="ok 647\n";if ($x =~ /(c(d)e)|(abc)x/ and $^N eq "cde") {print $T} else {print "not $T"};
+$T="ok 648\n";if ($x =~ /(c(d)e)(abc)?/  and $^N eq "cde") {print $T} else {print "not $T"};
+$T="ok 649\n";if ($x =~ /(?:c(d)e)/      and $^N eq  "d" ) {print $T} else {print "not $T"};
+$T="ok 650\n";if ($x =~ /(?:c(d)e)(?:f)/ and $^N eq  "d" ) {print $T} else {print "not $T"};
+$T="ok 651\n";if ($x =~ /(?:([abc])|([def]))*/ and $^N eq  "f" ){print $T} else {print "not $T"};
+$T="ok 652\n";if ($x =~ /(?:([ace])|([bdf]))*/ and $^N eq  "f" ){print $T} else {print "not $T"};
+$T="ok 653\n";if ($x =~ /(([ace])|([bd]))*/    and $^N eq  "e" ){print $T} else {print "not $T"};
+{
+ $T="ok 654\n";if($x =~ /(([ace])|([bdf]))*/   and $^N eq  "f" ){print $T} else {print "not $T"};
+}
+## test to see if $^N is automatically localized -- it should now
+## have the value set in test 653
+$T="ok 655\n";if ($^N eq  "e" ){print $T} else {print "not $T"};
+
+##
+## Now test inside (?{...})
+##
+$T="ok 656\n";if ($x =~ /a([abc])(?{$y=$^N})c/      and $y eq "b" ){print $T} else {print "not $T"};
+$T="ok 657\n";if ($x =~ /a([abc]+)(?{$y=$^N})d/     and $y eq "bc"){print $T} else {print "not $T"};
+$T="ok 658\n";if ($x =~ /a([abcdefg]+)(?{$y=$^N})d/ and $y eq "bc"){print $T} else {print "not $T"};
+$T="ok 659\n";if ($x =~ /(a([abcdefg]+)(?{$y=$^N})d)(?{$z=$^N})e/ and $y eq "bc" and $z eq "abcd")
+              {print $T} else {print "not $T"};
+$T="ok 660\n";if ($x =~ /(a([abcdefg]+)(?{$y=$^N})de)(?{$z=$^N})/ and $y eq "bc" and $z eq "abcde")
+              {print $T} else {print "not $T"};

@@ -31,6 +31,153 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 11025] By: jhi                                   on 2001/06/29  13:07:57
+        Log: Subject: Re: perl@10967, File::Find, and Cwd
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Fri, 29 Jun 2001 14:56:49 +0100
+             Message-Id: <E15FylN-0004LT-00@draco.cus.cam.ac.uk>
+     Branch: perl
+	   ! lib/File/Find/taint.t
+____________________________________________________________________________
+[ 11024] By: jhi                                   on 2001/06/29  12:39:23
+        Log: Update the sv_pvprintify() spec.
+     Branch: perl
+	   ! pod/perltodo.pod
+____________________________________________________________________________
+[ 11023] By: jhi                                   on 2001/06/29  12:33:33
+        Log: Known test failures update.
+     Branch: perl
+	   ! pod/perl572delta.pod
+____________________________________________________________________________
+[ 11022] By: jhi                                   on 2001/06/29  12:24:32
+        Log: Based on
+             
+             Subject: [PATCH @11016] More );) fixes
+             From: Richard Soderberg <rs@crystalflame.net>
+             Date: Fri, 29 Jun 2001 04:09:24 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.21.0106290408200.12037-100000@oregonnet.com> 
+     Branch: perl
+	   ! ext/Thread/Thread.xs ext/Thread/typemap
+____________________________________________________________________________
+[ 11021] By: jhi                                   on 2001/06/29  12:21:51
+        Log: Subject: [PATCH @11016] Fixes compile errors in four files
+             From: Richard Soderberg <rs@crystalflame.net>
+             Date: Fri, 29 Jun 2001 03:35:11 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.21.0106290333270.9768-100000@oregonnet.com>
+     Branch: perl
+	   ! mg.c pp.c pp_hot.c util.c
+____________________________________________________________________________
+[ 11020] By: jhi                                   on 2001/06/29  12:05:54
+        Log: AIX hints tweaking continues, from Merijn Brand.
+     Branch: perl
+	   ! hints/aix.sh
+____________________________________________________________________________
+[ 11019] By: jhi                                   on 2001/06/29  12:05:10
+        Log: HP-UX needs gccversion sooner, from Merijn Brand.
+     Branch: perl
+	   ! hints/hpux.sh
+____________________________________________________________________________
+[ 11018] By: jhi                                   on 2001/06/29  11:52:31
+        Log: Subject: [PATCH 5.6.1] OS/2 docs
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Fri, 29 Jun 2001 02:34:12 -0400
+             Message-ID: <20010629023412.A6033@math.ohio-state.edu>
+     Branch: perl
+	   ! README.os2 os2/Changes
+____________________________________________________________________________
+[ 11017] By: nick                                  on 2001/06/29  10:20:30
+        Log: Integrate mainline
+     Branch: perlio
+	  +> (branch 37 files)
+	   - ext/ODBM_File/sdbm.t
+	  !> (integrate 211 files)
+____________________________________________________________________________
+[ 11016] By: jhi                                   on 2001/06/29  03:38:56
+        Log: Bump up the VERSIONs of modules that have changed since 5.6.0,
+             the modules found using a script written by Larry Schatzer Jr.
+     Branch: perl
+	   ! ext/IO/lib/IO/Dir.pm ext/IO/lib/IO/Handle.pm
+	   ! ext/IO/lib/IO/Seekable.pm ext/IO/lib/IO/Select.pm
+	   ! ext/IO/lib/IO/Socket/INET.pm ext/IO/lib/IO/Socket/UNIX.pm
+	   ! ext/IPC/SysV/Msg.pm ext/IPC/SysV/Semaphore.pm
+	   ! ext/IPC/SysV/SysV.pm ext/Opcode/Opcode.pm ext/Opcode/Safe.pm
+	   ! ext/Thread/Thread.pm ext/attrs/attrs.pm ext/re/re.pm
+	   ! lib/AutoSplit.pm lib/Benchmark.pm lib/CGI/Pretty.pm
+	   ! lib/CPAN/Nox.pm lib/Exporter.pm lib/ExtUtils/Command.pm
+	   ! lib/ExtUtils/MakeMaker.pm lib/ExtUtils/Packlist.pm
+	   ! lib/File/Compare.pm lib/FileHandle.pm lib/Math/Complex.pm
+	   ! lib/Math/Trig.pm lib/Pod/Html.pm lib/Symbol.pm
+	   ! lib/Text/ParseWords.pm lib/Text/Soundex.pm lib/Text/Tabs.pm
+	   ! lib/Tie/Array.pm lib/attributes.pm lib/autouse.pm lib/base.pm
+	   ! lib/constant.pm lib/fields.pm lib/strict.pm
+____________________________________________________________________________
+[ 11015] By: jhi                                   on 2001/06/29  02:55:58
+        Log: The latest JPL from the anoncvs.
+     Branch: perl
+	   ! jpl/JNI/JNI.pm jpl/JNI/JNI.xs jpl/JNI/Makefile.PL
+____________________________________________________________________________
+[ 11014] By: jhi                                   on 2001/06/29  02:16:55
+        Log: In EBCDIC assume UTF-EBCDIC, not UTF-8.
+     Branch: perl
+	   ! t/op/pat.t
+____________________________________________________________________________
+[ 11013] By: jhi                                   on 2001/06/28  23:14:53
+        Log: Worrying about insecure directories now is a bit too late.
+     Branch: perl
+	   ! lib/File/Find/taint.t
+____________________________________________________________________________
+[ 11012] By: jhi                                   on 2001/06/28  21:36:36
+        Log: Cannot DIE() in a void function,
+             from Richard Hatch <rhatch@austin.ibm.com>.
+     Branch: perl
+	   ! ext/IPC/SysV/SysV.xs
+____________________________________________________________________________
+[ 11011] By: jhi                                   on 2001/06/28  19:32:13
+        Log: Subject: [PATCH: perl@11006] s/qdiv/div/ in Time::HiRes for VAX
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Thu, 28 Jun 2001 13:00:18 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10106281125220.508935-100000@aspara.forte.com>
+             
+             (unfinished: time/hires tests 3, 5, 14 failing, but better
+             than wholesale failure)
+     Branch: perl
+	   ! ext/Time/HiRes/HiRes.xs
+____________________________________________________________________________
+[ 11010] By: jhi                                   on 2001/06/28  19:10:54
+        Log: Subject: [PATCH 5.6.1] OS/2 improvements
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Thu, 28 Jun 2001 16:03:14 -0400
+             Message-ID: <20010628160314.A17906@math.ohio-state.edu>
+     Branch: perl
+	   + os2/os2_base.t
+	   ! MANIFEST hints/os2.sh makedef.pl os2/OS2/PrfDB/PrfDB.xs
+	   ! os2/OS2/Process/Process.pm os2/OS2/Process/Process.xs
+	   ! os2/OS2/REXX/REXX.xs os2/dl_os2.c os2/dlfcn.h os2/os2.c
+	   ! os2/os2ish.h
+____________________________________________________________________________
+[ 11009] By: jhi                                   on 2001/06/28  18:54:14
+        Log: Subject: Incrementing Extutils::Manifest's $VERSION
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Thu, 28 Jun 2001 13:13:49 -0400
+             Message-ID: <20010628131349.A14738@blackrider>
+     Branch: maint-5.6/perl
+	   ! lib/ExtUtils/Manifest.pm
+____________________________________________________________________________
+[ 11008] By: jhi                                   on 2001/06/28  18:52:20
+        Log: AIX tweak from Merijn Brand.
+     Branch: perl
+	   ! hints/aix.sh
+____________________________________________________________________________
+[ 11007] By: jhi                                   on 2001/06/28  17:46:27
+        Log: Create the macperl branch.
+     Branch: maint-5.6/macperl
+	  +> (branch 1728 files)
+____________________________________________________________________________
+[ 11006] By: jhi                                   on 2001/06/28  14:46:21
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 11005] By: jhi                                   on 2001/06/28  14:40:11
         Log: More Perforce lore.
      Branch: perl

@@ -24,7 +24,7 @@ package ExtUtils::Liblist::Kid;
 use 5.005_64;
 # Broken out of MakeMaker from version 4.11
 
-our $VERSION = substr q$Revision: 1.26 $, 10;
+our $VERSION = substr q$Revision: 1.27 $, 10;
 
 use Config;
 use Cwd 'cwd';

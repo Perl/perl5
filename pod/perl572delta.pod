@@ -83,8 +83,8 @@ B<between digits>.
 
 =item *
 
-GMAGIC (right-hand side magic) could in many cases such as concatenation
-of string be invoked too many times.
+GMAGIC (right-hand side magic) could in many cases such as string
+concatenation be invoked too many times.
 
 =item *
 
@@ -103,13 +103,12 @@ Lvalue subroutines can now return C<undef> in list context.
 
 =item *
 
-The MAGIC constants (e.g. C<'P'>) have been macrofied
-(e.g. C<PERL_MAGIC_TIED>) for better source code readability
-and maintainability.
+The C<op_clear> and C<op_null> are now exported.
 
 =item *
 
-The C<op_clear> and C<op_null> are now exported.
+A new special regular expression variable has been introduced:
+C<$^N>, which contains the most-recently closed group (submatch).
 
 =item *
 
@@ -308,11 +307,6 @@ Use of the F<gprof> tool to profile Perl has been documented in
 L<perlhack>.  There is a make target "perl.gprof" for generating a
 gprofiled Perl executable.
 
-=item *
-
-(Code documentation) F<perly.c> and F<sv.c> have now been extensively
-commented.
-
 =back
 
 =head1 Installation and Configuration Improvements
@@ -358,13 +352,6 @@ The Amdahl UTS UNIX mainframe platform is now supported.
 =head2 Generic Improvements
 
 =over 4
-
-=item *
-
-The C code has been made much more C<gcc -Wall> clean.  Some warning
-messages still remain, though, so if you are compiling with gcc you
-will see some warnings about dubious practices.  The warnings are
-being worked on.
 
 =item *
 
@@ -467,7 +454,17 @@ deprecated for a while.  Now you will get an optional warning.
 
 =back
 
-=head1 Changed Internals
+=head1 Source Code Enhancements
+
+=head2 MAGIC constants
+
+The MAGIC constants (e.g. C<'P'>) have been macrofied
+(e.g. C<PERL_MAGIC_TIED>) for better source code readability
+and maintainability.
+
+=head2 Better commented code
+
+F<perly.c>, F<sv.c>, and F<sv.h> have now been extensively commented.
 
 =head2 Regex pre-/post-compilation items matched up
 
@@ -476,6 +473,13 @@ the compiled bytecode with the corresponding syntactic features of the
 original regex expression.  The information is attached to the new
 C<offsets> member of the C<struct regexp>. See L<perldebguts> for more
 complete information.
+
+=head2 gcc -Wall
+
+The C code has been made much more C<gcc -Wall> clean.  Some warning
+messages still remain, though, so if you are compiling with gcc you
+will see some warnings about dubious practices.  The warnings are
+being worked on.
 
 =head1 New Tests
 
@@ -604,13 +608,35 @@ No known fix.
 
 Many floating point inaccuracies:
 
-  op/numconvert            511,657,658,659,665-667,831,991,1151
-  op/pack                  10,22,149,156
-  op/sprintf               8,10,13,102-107,134-135,146-153,159-162
-  lib/Math/BigInt/bigintpm 1145,1183
-  lib/Math/Complex         250,257,514,521,722-724,
-                           934,935,945,949,955,956,975,976
-  ext/POSIX/POSIX          14
+  op/numconvert              511,657,658,659,665-667,831,991,1151
+  op/pack                    10,22,149,156
+  op/sprintf                 8,10,13,102-107,134-135,146-153,159-162
+  lib/Math/BigInt/bigintpm   1145,1183
+  lib/Math/Complex           250,257,514,521,722-724,
+                             934,935,945,949,955,956,975,976
+  ext/POSIX/POSIX            14
+
+=head2 VMS
+
+DEC C V5.3-006 on OpenVMS VAX V6.2
+ 
+  [-.ext.list.util.t]tainted..............FAILED on test 3
+  [-.ext.posix]sigaction..................FAILED on test 7
+  [-.ext.time.hires]hires.................FAILED on test 14
+  [-.lib.file.find]taint..................FAILED on test 17
+  [-.lib.math.bigint.t]bigintpm...........FAILED on test 1183
+  [-.lib.test.simple.t]exit...............FAILED on test 1
+  [.lib]vmsish............................FAILED on test 13
+  [.op]sprintf............................FAILED on test 12
+  Failed 8/399 tests, 91.23% okay.
+
+DEC C V6.0-001 on OpenVMS Alpha V7.2-1 
+
+  [-.ext.list.util.t]tainted..............FAILED on test 3 
+  [-.lib.file.find]taint..................FAILED on test 17
+  [-.lib.test.simple.t]exit...............FAILED on test 1
+  [.lib]vmsish............................FAILED on test 13
+  Failed 4/399 tests, 92.48% okay.
 
 =head2 Localising a Tied Variable Leaks Memory
 

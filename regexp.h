@@ -37,6 +37,7 @@ typedef struct regexp {
 	I32 prelen;		/* length of precomp */
 	U32 nparens;		/* number of parentheses */
 	U32 lastparen;		/* last paren matched */
+	U32 lastcloseparen;	/* last paren matched */
 	U32 reganch;		/* Internal use only +
 				   Tainted information used by regexec? */
 	regnode program[1];	/* Unwarranted chumminess with compiler. */

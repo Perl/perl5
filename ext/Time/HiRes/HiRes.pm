@@ -12,7 +12,7 @@ use XSLoader;
 @EXPORT_OK = qw (usleep sleep ualarm alarm gettimeofday time tv_interval
 		 getitimer setitimer ITIMER_REAL ITIMER_VIRTUAL ITIMER_PROF);
 
-$VERSION = '1.21';
+$VERSION = '1.20_00';
 
 sub AUTOLOAD {
     my $constname;

@@ -63,18 +63,25 @@ case "$prefix" in
 case `$cc -v 2>&1`"" in
     *gcc*)  ccisgcc="$define"
 	    ccflags="$cc_cppflags"
+	    if [ "X$gccversion" = "X" ]; then
+		# Done too late in Configure if hinted
+		gccversion=`$cc --version`
+		fi
 	    case "`getconf KERNEL_BITS 2>/dev/null`" in
 		*64*)
-		    echo "main(){}">try.c
-		    # gcc with gas will not accept +DA2.0
-		    case "`$cc -c -Wa,+DA2.0 try.c 2>&1`" in
-			*"+DA2.0"*)		# gas
-			    gnu_as=yes
+		    case "$gccversion" in
+			3*) ccflags="$ccflags -mpa-risc-2-0"
 			    ;;
-			*)			# HPas
-                           case "$gccversion" in
-                               [12]*) ccflags="$ccflags -Wa,+DA2.0" ;;
-                               esac
+			*)  echo "main(){}">try.c
+			    # gcc with gas will not accept +DA2.0
+			    case "`$cc -c -Wa,+DA2.0 try.c 2>&1`" in
+				*"+DA2.0"*)		# gas
+				    gnu_as=yes
+				    ;;
+				*)			# HPas
+				    ccflags="$ccflags -Wa,+DA2.0"
+				    ;;
+				esac
 			    ;;
 			esac
 		    # gcc with gld will not accept +vnocompatwarnings
@@ -189,8 +196,11 @@ EOM
 		# anyway. Expect auto-detection of 64-bit enabled gcc on
 		# HP-UX soon, including a user-friendly exit
 		case $gcc_64native in
-		    no) ccflags="$ccflags -mlp64"
-			ldflags="$ldflags -Wl,+DD64"
+		    no) case "$gccversion" in
+			    [12]*)  ccflags="$ccflags -mlp64"
+				    ldflags="$ldflags -Wl,+DD64"
+				    ;;
+			    esac
 			;;
 		    esac
 		;;

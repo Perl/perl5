@@ -53,13 +53,21 @@ esac
 
 # AIX 4.3.* and above default to using nm for symbol extraction
 case "$osvers" in
-   3.*|4.1.*|4.2.*|4.3.0.*)
-      usenm='undef'
-      usenativedlopen='false'
+   3.*|4.1.*|4.2.*)
+      case "$usenm" in
+	  '') usenm='undef'
+	  esac
+      case "$usenativedlopen" in
+	  '') usenativedlopen='false'
+	  esac
       ;;
    *)
-      usenm='true'
-      usenativedlopen='true'
+      case "$usenm" in
+	  '') usenm='true'
+	  esac
+      case "$usenativedlopen" in
+	  '') usenativedlopen='true'
+	  esac
       ;;
 esac
 
@@ -249,11 +257,11 @@ EOM
 	lddlflags="$*"
 
 	# Insert pthreads to libswanted, before any libc or libC.
-	set `echo X "$libswanted "| sed -e 's/ \([cC]\) / pthreads \1 /'`
+	set `echo X "$libswanted "| sed -e 's/ \([cC]_r\) / pthreads \1 /'`
 	shift
 	libswanted="$*"
 	# Insert pthreads to lddlflags, before any libc or libC.
-	set `echo X "$lddlflags " | sed -e 's/ \(-l[cC]\) / -lpthreads \1 /'`
+	set `echo X "$lddlflags " | sed -e 's/ \(-l[cC]_r\) / -lpthreads \1 /'`
 	shift
 	lddlflags="$*"
 
@@ -343,6 +351,11 @@ EOM
 		exit 1
 		;;
 	    esac
+	    # XXX In 64-bit AIX 5L (oslevel 5.1.0.0, ccversion 5.0.2.0)
+	    # the Configure library symbol probe mysteriously finds all
+	    # symbols but these two --jhi XXX
+	    d_pipe='define'
+	    d_times='define'
 	    ;;
 esac
 EOCBU

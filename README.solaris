@@ -47,7 +47,7 @@ L<ftp://ftp.cs.toronto.edu/pub/jdd/sun-managers/faq> under
 
 =head1 RESOURCES
 
-There are many, many source for Solaris information.  A few of the
+There are many, many sources for Solaris information.  A few of the
 important ones for perl:
 
 =over 4
@@ -63,11 +63,11 @@ L<ftp://ftp.cs.toronto.edu/pub/jdd/sun-managers/faq>
 =item Precompiled Binaries
 
 Precompiled binaries, links to many sites, and much, much more is
-available at L<http://www.sunfreeware.com>.
+available at L<http://www.sunfreeware.com/>.
 
 =item Solaris Documentation
 
-All Solaris documentation is available on-line at L<http://docs.sun.com>.
+All Solaris documentation is available on-line at L<http://docs.sun.com/>.
 
 =back
 
@@ -81,7 +81,7 @@ for SunOS4 on Solaris.  (GNU tar compiled for Solaris should be fine.)
 When you run SunOS4 binaries on Solaris, the run-time system magically
 alters pathnames matching m#lib/locale# so that when tar tries to create
 lib/locale.pm, a file named lib/oldlocale.pm gets created instead.
-If you found this advice it too late and used a SunOS4-compiled tar
+If you found this advice too late and used a SunOS4-compiled tar
 anyway, you must find the incorrectly renamed file and move it back
 to lib/locale.pm.
 
@@ -258,7 +258,7 @@ that supports both 64-bit integers (long long) and largefiles (> 2GB),
 and this is the default for perl-5.6.0.
 
 For a more complete explanation of 64-bit issues, see the Solaris 64-bit
-Developer's Guide at http://docs.sun.com:80/ab2/coll.45.13/SOL64TRANS/
+Developer's Guide at L<http://docs.sun.com:80/ab2/coll.45.13/SOL64TRANS/>
 
 You can detect the OS mode using "isainfo -v", e.g.
 
@@ -270,7 +270,7 @@ By default, perl will be compiled as a 32-bit application.  Unless you
 want to allocate more than ~ 4GB of memory inside Perl, you probably
 don't need Perl to be a 64-bit app.
 
-=head3 Large File Suppprt
+=head3 Large File Support
 
 For Solaris 2.6 and onwards, there are two different ways for 32-bit
 applications to manipulate large files (files whose size is > 2GByte).
@@ -385,7 +385,7 @@ and Configure the build with
 You should not use perl's malloc if you are building with gcc.  There
 are reports of core dumps, especially in the PDL module.  The problem
 appears to go away under -DDEBUGGING, so it has been difficult to
-track down.  Sun's compiler appears to be ok with or without perl's
+track down.  Sun's compiler appears to be okay with or without perl's
 malloc. [XXX further investigation is needed here.]
 
 =head1 MAKE PROBLEMS.
@@ -483,13 +483,13 @@ under the correct environment.  Everything should then be OK as long as
 Proc::ProcessTable doesn't try to share off_t's with the rest of perl,
 or if it does they should be explicitly specified as off64_t.
 
-=head2 BSD::Resource on Solairs
+=head2 BSD::Resource on Solaris
 
 BSD::Resource versions earlier than 1.09 do not compile on Solaris
 with perl 5.6.0 and higher, for the same reasons as Proc::ProcessTable.
 BSD::Resource versions starting from 1.09 have a workaround for the problem.
 
-=head2 Net::SSLeay on Soalris
+=head2 Net::SSLeay on Solaris
 
 Net::SSLeay requires a /dev/urandom to be present. This device is not
 part of Solaris. You can either get the package SUNWski (packaged with

@@ -4325,7 +4325,7 @@ Perl_unlock_condpair(pTHX_ void *svv)
     MgOWNER(mg) = 0;
     COND_SIGNAL(MgOWNERCONDP(mg));
     DEBUG_S(PerlIO_printf(Perl_debug_log, "0x%"UVxf": unlock 0x%"UVxf"\n",
-			  PTR2UV(thr), PTR2UV(svv));)
+			  PTR2UV(thr), PTR2UV(svv)));
     MUTEX_UNLOCK(MgMUTEXP(mg));
 }
 #endif /* USE_THREADS */

@@ -204,20 +204,40 @@ for my $num_chain (1..$max_chain) {
 	      print "# ok, as string ++ of max_uv is \"$max_uv_pp\", numeric is $max_uv_p1\n"
 	    } elsif ($opnames[$last] eq 'I' and $ans[1] eq "-1"
 		     and $ans[0] eq $max_uv_p1_as_iv) {
+              # Max UV plus 1 is NV. This NV may stringify in E notation.
+              # And the number of decimal digits shown in E notation will depend
+              # on the binary digits in the mantissa. And it may be that
+              # (say)  18446744073709551616 in E notation is truncated to
+              # (say) 1.8446744073709551e+19 (say) which gets converted back
+              # as    1.8446744073709551000e+19
+              # ie    18446744073709551000
+              # which isn't the integer we first had.
+              # But each step of conversion is correct. So it's not an error.
+              # (Only shows up for 64 bit UVs and NVs with 64 bit mantissas,
+              #  and on Crays (64 bit integers, 48 bit mantissas) IIRC)
 	      print "# ok, \"$max_uv_p1\" correctly converts to IV \"$max_uv_p1_as_iv\"\n";
 	    } elsif ($opnames[$last] eq 'U' and $ans[1] eq ~0
 		     and $ans[0] eq $max_uv_p1_as_uv) {
+              # as aboce
 	      print "# ok, \"$max_uv_p1\" correctly converts to UV \"$max_uv_p1_as_uv\"\n";
 	    } elsif (grep {/^N$/} @opnames[@{$curops[0]}]
-		     and $ans[0] == $ans[1] and $ans[0] <= ~0) {
+		     and $ans[0] == $ans[1] and $ans[0] <= ~0
+                     # First must be in E notation (ie not just digits) and
+                     # second must still be an integer.
+                     # I can't remember why there isn't symmetry in this
+                     # exception, ie why only the first ops are tested for 'N'
+                     and $ans[0] !~ /^-?\d+$/ and $ans[0] !~ /^-?\d+$/) {
 	      print "# ok, numerically equal - notation changed due to adding zero\n";
 	    } else {
 	      $nok++,
 	    }
 	  }
 	}
-	print "not " if $nok;
-	print "ok $test\n";
+        if ($nok) {
+          print "not ok $test\n";
+        } else {
+          print "ok $test\n";
+        }
 	#print $txt if $nok;
 	$test++;
       }

@@ -12,7 +12,7 @@
  *                 platform specific function
  * Author       :  SGP
  * Date	Created :  June 12th 2001.
- * Date Modified:  June 26th 2001.
+ * Date Modified:  June 30th 2001.
  */
 
 #ifndef ___NWPerlSys_H___
@@ -20,6 +20,7 @@
 
 
 #include "iperlsys.h"
+#include "nwstdio.h"
 
 #include "nw5iop.h"
 #include <fcntl.h>

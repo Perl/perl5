@@ -1,0 +1,12 @@
+# Encoding file: 7bit-jis, escape-driven
+E
+name		7bit-jis
+init		{}
+final		{}
+ascii		\x1b(B
+ascii		\x1b(J
+7bit-kana	\x1b(I
+jis0208		\x1b$B
+jis0208		\x1b$@
+jis0208		\x1b&@\x1b$B
+jis0212		\x1b$(D

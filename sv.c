@@ -8440,6 +8440,18 @@ Perl_mg_dup(pTHX_ MAGIC *mg, clone_params* param)
 	if (mg->mg_type == PERL_MAGIC_qr) {
 	    nmg->mg_obj	= (SV*)re_dup((REGEXP*)mg->mg_obj);
 	}
+	else if(mg->mg_type == PERL_MAGIC_backref) {
+	     AV *av = (AV*) mg->mg_obj;
+	     SV **svp;
+	     I32 i;
+	     nmg->mg_obj = (SV*)newAV();
+	     svp = AvARRAY(av);
+	     i = AvFILLp(av);
+	     while (i >= 0) {
+		  av_push((AV*)nmg->mg_obj,sv_dup(svp[i],param));
+		  i--;
+	     }
+	}
 	else {
 	    nmg->mg_obj	= (mg->mg_flags & MGf_REFCOUNTED)
 			      ? sv_dup_inc(mg->mg_obj, param)
@@ -8714,7 +8726,7 @@ Perl_sv_dup(pTHX_ SV *sstr, clone_params* param)
 	break;
     case SVt_RV:
 	SvANY(dstr)	= new_XRV();
-	SvRV(dstr)	= SvRV(sstr) && SvWEAKREF(SvRV(sstr))
+    SvRV(dstr)    = SvRV(sstr) && SvWEAKREF(sstr)
 			? sv_dup(SvRV(sstr), param)
 			: sv_dup_inc(SvRV(sstr), param);
 	break;
@@ -8723,7 +8735,7 @@ Perl_sv_dup(pTHX_ SV *sstr, clone_params* param)
 	SvCUR(dstr)	= SvCUR(sstr);
 	SvLEN(dstr)	= SvLEN(sstr);
 	if (SvROK(sstr))
-	    SvRV(dstr)	= SvWEAKREF(SvRV(sstr))
+        SvRV(dstr)    = SvWEAKREF(sstr)
 			? sv_dup(SvRV(sstr), param)
 			: sv_dup_inc(SvRV(sstr), param);
 	else if (SvPVX(sstr) && SvLEN(sstr))
@@ -8737,7 +8749,7 @@ Perl_sv_dup(pTHX_ SV *sstr, clone_params* param)
 	SvLEN(dstr)	= SvLEN(sstr);
 	SvIVX(dstr)	= SvIVX(sstr);
 	if (SvROK(sstr))
-	    SvRV(dstr)	= SvWEAKREF(SvRV(sstr))
+        SvRV(dstr)    = SvWEAKREF(sstr)
 			? sv_dup(SvRV(sstr), param)
 			: sv_dup_inc(SvRV(sstr), param);
 	else if (SvPVX(sstr) && SvLEN(sstr))
@@ -8752,7 +8764,7 @@ Perl_sv_dup(pTHX_ SV *sstr, clone_params* param)
 	SvIVX(dstr)	= SvIVX(sstr);
 	SvNVX(dstr)	= SvNVX(sstr);
 	if (SvROK(sstr))
-	    SvRV(dstr)	= SvWEAKREF(SvRV(sstr))
+        SvRV(dstr)    = SvWEAKREF(sstr)
 			? sv_dup(SvRV(sstr), param)
 			: sv_dup_inc(SvRV(sstr), param);
 	else if (SvPVX(sstr) && SvLEN(sstr))
@@ -8769,7 +8781,7 @@ Perl_sv_dup(pTHX_ SV *sstr, clone_params* param)
 	SvMAGIC(dstr)	= mg_dup(SvMAGIC(sstr), param);
 	SvSTASH(dstr)	= hv_dup_inc(SvSTASH(sstr), param);
 	if (SvROK(sstr))
-	    SvRV(dstr)	= SvWEAKREF(SvRV(sstr))
+        SvRV(dstr)    = SvWEAKREF(sstr)
 			? sv_dup(SvRV(sstr), param)
 			: sv_dup_inc(SvRV(sstr), param);
 	else if (SvPVX(sstr) && SvLEN(sstr))
@@ -8786,7 +8798,7 @@ Perl_sv_dup(pTHX_ SV *sstr, clone_params* param)
 	SvMAGIC(dstr)	= mg_dup(SvMAGIC(sstr), param);
 	SvSTASH(dstr)	= hv_dup_inc(SvSTASH(sstr), param);
 	if (SvROK(sstr))
-	    SvRV(dstr)	= SvWEAKREF(SvRV(sstr))
+        SvRV(dstr)    = SvWEAKREF(sstr)
 			? sv_dup(SvRV(sstr), param)
 			: sv_dup_inc(SvRV(sstr), param);
 	else if (SvPVX(sstr) && SvLEN(sstr))
@@ -8806,7 +8818,7 @@ Perl_sv_dup(pTHX_ SV *sstr, clone_params* param)
 	SvMAGIC(dstr)	= mg_dup(SvMAGIC(sstr), param);
 	SvSTASH(dstr)	= hv_dup_inc(SvSTASH(sstr), param);
 	if (SvROK(sstr))
-	    SvRV(dstr)	= SvWEAKREF(SvRV(sstr))
+        SvRV(dstr)    = SvWEAKREF(sstr)
 			? sv_dup(SvRV(sstr), param)
 			: sv_dup_inc(SvRV(sstr), param);
 	else if (SvPVX(sstr) && SvLEN(sstr))
@@ -8839,7 +8851,7 @@ Perl_sv_dup(pTHX_ SV *sstr, clone_params* param)
 	SvMAGIC(dstr)	= mg_dup(SvMAGIC(sstr), param);
 	SvSTASH(dstr)	= hv_dup_inc(SvSTASH(sstr), param);
 	if (SvROK(sstr))
-	    SvRV(dstr)	= SvWEAKREF(SvRV(sstr))
+        SvRV(dstr)    = SvWEAKREF(sstr)
 			? sv_dup(SvRV(sstr), param)
 			: sv_dup_inc(SvRV(sstr), param);
 	else if (SvPVX(sstr) && SvLEN(sstr))
@@ -8862,7 +8874,7 @@ Perl_sv_dup(pTHX_ SV *sstr, clone_params* param)
 	SvMAGIC(dstr)	= mg_dup(SvMAGIC(sstr), param);
 	SvSTASH(dstr)	= hv_dup_inc(SvSTASH(sstr), param);
 	if (SvROK(sstr))
-	    SvRV(dstr)	= SvWEAKREF(SvRV(sstr))
+        SvRV(dstr)    = SvWEAKREF(sstr)
 			? sv_dup(SvRV(sstr), param)
 			: sv_dup_inc(SvRV(sstr), param);
 	else if (SvPVX(sstr) && SvLEN(sstr))
