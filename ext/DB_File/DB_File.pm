@@ -1,8 +1,8 @@
 # DB_File.pm -- Perl 5 interface to Berkeley DB 
 #
 # written by Paul Marquess (Paul.Marquess@btinternet.com)
-# last modified 26th April 2001
-# version 1.77
+# last modified 30th July 2001
+# version 1.78
 #
 #     Copyright (c) 1995-2001 Paul Marquess. All rights reserved.
 #     This program is free software; you can redistribute it and/or
@@ -151,7 +151,7 @@ use vars qw($VERSION @ISA @EXPORT $AUTOLOAD $DB_BTREE $DB_HASH $DB_RECNO
 use Carp;
 
 
-$VERSION = "1.77" ;
+$VERSION = "1.78" ;
 
 #typedef enum { DB_BTREE, DB_HASH, DB_RECNO } DBTYPE;
 $DB_BTREE = new DB_File::BTREEINFO ;
@@ -942,6 +942,35 @@ The new compare function must be specified when you create the database.
 You cannot change the ordering once the database has been created. Thus
 you must use the same compare function every time you access the
 database.
+
+=item 3
+
+Duplicate keys are entirely defined by the comparison function.
+In the case-insensitive example above, the keys: 'KEY' and 'key'
+would be considered duplicates, and assigning to the second one
+would overwirte the first. If duplicates are allowed for (with the
+R_DUPS flag discussed below), only a single copy of duplicate keys
+is stored in the database --- so (again with example above) assigning
+three values to the keys: 'KEY', 'Key', and 'key' would leave just
+the first key: 'KEY' in the database with three values. For some
+situations this results in information loss, so care should be taken
+to provide fully qualified comparison functions when necessary.
+For example, the above comparison routine could be modified to
+additionally compare case-sensitively if two keys are equal in the
+case insensitive comparison:
+
+    sub compare {
+        my($key1, $key2) = @_;
+        lc $key1 cmp lc $key2 ||
+        $key1 cmp $key2;
+    }
+
+And now you will only have duplicates when the keys themselves
+are truly the same. (note: in versions of the db library prior to
+about November 1996, such duplicate keys were retained so it was
+possible to recover the original keys in sets of keys that
+compared as equal).
+
 
 =back 
 
