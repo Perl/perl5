@@ -2346,6 +2346,7 @@ $ WC "sig_name='" + perl_sig_name + "'"
 $ WC "sig_num='" + perl_sig_num + "'"
 $ tempsym = "sig_name_init='" + perl_sig_name_with_commas + "'"
 $ WC/symbol tempsym
+$ WC "sig_num_init='" + perl_sig_num_with_commas + "'"
 $ WC "modetype='" + perl_modetype + "'"
 $ WC "ssizetype='" + perl_ssizetype + "'"
 $ WC "o_nonblock='" + perl_o_nonblock + "'"
