@@ -3115,12 +3115,15 @@ S_init_perllib(pTHX)
 
 #ifdef SITELIB_EXP
     {
-	char buf[MAXPATHLEN];
+	char *path = SITELIB_EXP;
 
-	strcpy(buf,SITELIB_EXP);
-	if (strrchr(buf,'/'))		/* XXX Hack, Configure var needed */
-	    *strrchr(buf,'/') = '\0';
-	incpush(buf, TRUE);
+	if (path) {
+	    char buf[1024];
+	    strcpy(buf,path);
+	    if (strrchr(buf,'/'))	/* XXX Hack, Configure var needed */
+		*strrchr(buf,'/') = '\0';
+	    incpush(buf, TRUE);
+	}
     }
 #endif
 #if defined(PERL_VENDORLIB_EXP)
