@@ -1361,19 +1361,19 @@ Perl_warner(pTHX_ U32  err, const char* pat,...)
 void
 Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
 {
-    char *message;
-    HV *stash;
-    GV *gv;
-    CV *cv;
-    SV *msv;
-    STRLEN msglen;
-    I32 utf8 = 0;
-
-    msv = vmess(pat, args);
-    message = SvPV(msv, msglen);
-    utf8 = SvUTF8(msv);
-
     if (ckDEAD(err)) {
+	char *message;
+	HV *stash;
+	GV *gv;
+	CV *cv;
+	SV *msv;
+	STRLEN msglen;
+	I32 utf8 = 0;
+
+	msv = vmess(pat, args);
+	message = SvPV(msv, msglen);
+	utf8 = SvUTF8(msv);
+
 	if (PL_diehook) {
 	    /* sv_2cv might call Perl_croak() */
 	    SV *olddiehook = PL_diehook;
@@ -1411,36 +1411,7 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
 	my_failure_exit();
     }
     else {
-	if (PL_warnhook) {
-	    /* sv_2cv might call Perl_warn() */
-	    SV *oldwarnhook = PL_warnhook;
-	    ENTER;
-	    SAVESPTR(PL_warnhook);
-	    PL_warnhook = Nullsv;
-	    cv = sv_2cv(oldwarnhook, &stash, &gv, 0);
-	    LEAVE;
-	    if (cv && !CvDEPTH(cv) && (CvROOT(cv) || CvXSUB(cv))) {
-		dSP;
-		SV *msg;
-
-		ENTER;
-		save_re_context();
-		msg = newSVpvn(message, msglen);
-		SvFLAGS(msg) |= utf8;
-		SvREADONLY_on(msg);
-		SAVEFREESV(msg);
-
-		PUSHSTACKi(PERLSI_WARNHOOK);
-		PUSHMARK(sp);
-		XPUSHs(msg);
-		PUTBACK;
-		call_sv((SV*)cv, G_DISCARD);
-		POPSTACK;
-		LEAVE;
-		return;
-	    }
-	}
-	write_to_stderr(message, msglen);
+	Perl_vwarn(aTHX_ pat, args);
     }
 }
 
