@@ -2498,6 +2498,8 @@ s	|void	|xstat		|int
 #  endif
 #endif
 
+Arp	|SV*	|lock		|SV *sv
+
 #if defined(PERL_OBJECT)
 };
 #endif

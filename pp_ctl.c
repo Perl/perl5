@@ -891,6 +891,10 @@ PP(pp_sort)
 		    PL_secondgv = gv_fetchpv("b", TRUE, SVt_PV);
 		    PL_sortstash = stash;
 		}
+#ifdef USE_THREADS
+		Perl_lock(aTHX_ (SV *)PL_firstgv);
+		Perl_lock(aTHX_ (SV *)PL_secondgv);
+#endif
 		SAVESPTR(GvSV(PL_firstgv));
 		SAVESPTR(GvSV(PL_secondgv));
 	    }

@@ -1129,6 +1129,7 @@
 #define xstat			S_xstat
 #  endif
 #endif
+#define lock			Perl_lock
 #if defined(PERL_OBJECT)
 #endif
 #define ck_anoncode		Perl_ck_anoncode
@@ -2570,6 +2571,7 @@
 #define xstat(a)		S_xstat(aTHX_ a)
 #  endif
 #endif
+#define lock(a)			Perl_lock(aTHX_ a)
 #if defined(PERL_OBJECT)
 #endif
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
@@ -4986,6 +4988,8 @@
 #define xstat			S_xstat
 #  endif
 #endif
+#define Perl_lock		CPerlObj::Perl_lock
+#define lock			Perl_lock
 #if defined(PERL_OBJECT)
 #endif
 #define Perl_ck_anoncode	CPerlObj::Perl_ck_anoncode
