@@ -2,8 +2,8 @@
  *
  * VMS-specific routines for perl5
  *
- * Last revised: 21-Jun-1996 by Charles Bailey  bailey@genetics.upenn.edu
- * Version: 5.2.2
+ * Last revised: 18-Jul-1996 by Charles Bailey  bailey@genetics.upenn.edu
+ * Version: 5.3.1
  */
 
 #include <acedef.h>
@@ -33,6 +33,13 @@
 #include <uaidef.h>
 #include <uicdef.h>
 
+#ifndef SS$_NOSUCHOBJECT  /* Older versions of ssdef.h don't have this */
+#  define SS$_NOSUCHOBJECT 2696
+#endif
+
+/* Don't intercept calls to vfork, since my_vfork below needs to
+ * get to the underlying CRTL routine. */
+#define __DONT_MASK_VFORK
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
@@ -75,6 +82,9 @@ my_trnlnm(char *lnm, char *eqv, unsigned long int idx)
                                  {LNM$C_NAMLENGTH, LNM$_STRING, 0,    &eqvlen},
                                  {0, 0, 0, 0}};
 
+    if (!lnm || idx > LNM$_MAX_INDEX) {
+      set_errno(EINVAL); set_vaxc_errno(SS$_BADPARAM); return 0;
+    }
     if (!eqv) eqv = __my_trnlnm_eqv;
     lnmlst[1].bufadr = (void *)eqv;
     lnmdsc.dsc$a_pointer = lnm;
@@ -334,10 +344,13 @@ kill_file(char *name)
     }
 
     yourroom:
-    if (rmsts) {
-      fndsts = sys$change_acl(0,&type,&fildsc,ulklst,0,0,0);
-      if (aclsts & 1) aclsts = fndsts;
-    }
+    fndsts = sys$change_acl(0,&type,&fildsc,ulklst,0,0,0);
+    /* We just deleted it, so of course it's not there.  Some versions of
+     * VMS seem to return success on the unlock operation anyhow (after all
+     * the unlock is successful), but others don't.
+     */
+    if (fndsts == RMS$_FNF || fndsts == SS$_NOSUCHOBJECT) fndsts == SS$_NORMAL;
+    if (aclsts & 1) aclsts = fndsts;
     if (!(aclsts & 1)) {
       set_errno(EVMSERR);
       set_vaxc_errno(aclsts);
@@ -786,7 +799,7 @@ static char *do_tounixspec(char *, char *, int);
 static char *do_fileify_dirspec(char *dir,char *buf,int ts)
 {
     static char __fileify_retbuf[NAM$C_MAXRSS+1];
-    unsigned long int dirlen, retlen, addmfd = 0;
+    unsigned long int dirlen, retlen, addmfd = 0, hasfilename = 0;
     char *retspec, *cp1, *cp2, *lastdir;
     char trndir[NAM$C_MAXRSS+1], vmsdir[NAM$C_MAXRSS+1];
 
@@ -822,7 +835,24 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
       dir[dirlen-1] = ']';
     }
 
-    if (!strpbrk(dir,"]:>")) { /* Unix-style path or plain dir name */
+    if ((cp1 = strrchr(dir,']')) != NULL || (cp1 = strrchr(dir,'>')) != NULL) {
+      /* If we've got an explicit filename, we can just shuffle the string. */
+      if (*(cp1+1)) hasfilename = 1;
+      /* Similarly, we can just back up a level if we've got multiple levels
+         of explicit directories in a VMS spec which ends with directories. */
+      else {
+        for (cp2 = cp1; cp2 > dir; cp2--) {
+          if (*cp2 == '.') {
+            *cp2 = *cp1; *cp1 = '\0';
+            hasfilename = 1;
+            break;
+          }
+          if (*cp2 == '[' || *cp2 == '<') break;
+        }
+      }
+    }
+
+    if (hasfilename || !strpbrk(dir,"]:>")) { /* Unix-style path or filename */
       if (dir[0] == '.') {
         if (dir[1] == '\0' || (dir[1] == '/' && dir[2] == '\0'))
           return do_fileify_dirspec("[]",buf,ts);
@@ -849,25 +879,22 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
         } while ((cp1 = strstr(cp1,"/.")) != NULL);
       }
       else {
-        if (!(lastdir = cp1 = strrchr(dir,'/'))) cp1 = dir;
+        if ( !(lastdir = cp1 = strrchr(dir,'/')) &&
+             !(lastdir = cp1 = strrchr(dir,']')) &&
+             !(lastdir = cp1 = strrchr(dir,'>'))) cp1 = dir;
         if ((cp2 = strchr(cp1,'.'))) {  /* look for explicit type */
-          if (toupper(*(cp2+1)) == 'D' &&    /* Yep.  Is it .dir? */
-              toupper(*(cp2+2)) == 'I' &&
-              toupper(*(cp2+3)) == 'R') {
-            if ((cp1 = strchr(cp2,';')) || (cp1 = strchr(cp2+1,'.'))) {
-              if (*(cp1+1) != '1' || *(cp1+2) != '\0') { /* Version is not ;1 */
-                set_errno(ENOTDIR);                      /* Bzzt. */
-                set_vaxc_errno(RMS$_DIR);
-                return NULL;
-              }
-            }
-            dirlen = cp2 - dir;
-          }
-          else {   /* There's a type, and it's not .dir.  Bzzt. */
-            set_errno(ENOTDIR); 
+          int ver; char *cp3;
+          if (!*(cp2+1) || toupper(*(cp2+1)) != 'D' ||  /* Wrong type. */
+              !*(cp2+2) || toupper(*(cp2+2)) != 'I' ||  /* Bzzt. */
+              !*(cp2+3) || toupper(*(cp2+3)) != 'R' ||
+              (*(cp2+4) && ((*(cp2+4) != ';' && *(cp2+4) != '.')  ||
+              (*(cp2+5) && ((ver = strtol(cp2+5,&cp3,10)) != 1 &&
+                            (ver || *cp3)))))) {
+            set_errno(ENOTDIR);
             set_vaxc_errno(RMS$_DIR);
             return NULL;
           }
+          dirlen = cp2 - dir;
         }
       }
       /* If we lead off with a device or rooted logical, add the MFD
@@ -1082,23 +1109,27 @@ static char *do_pathify_dirspec(char *dir,char *buf, int ts)
     }
     dir = trndir;
 
-    if (!strpbrk(dir,"]:>")) { /* Unix-style path or plain dir name */
+    if (!strpbrk(dir,"]:>")) { /* Unix-style path or plain name */
       if (*dir == '.' && (*(dir+1) == '\0' ||
                           (*(dir+1) == '.' && *(dir+2) == '\0')))
         retlen = 2 + (*(dir+1) != '\0');
       else {
-        if (!(cp1 = strrchr(dir,'/'))) cp1 = dir;
-        if ((cp2 = strchr(cp1,'.')) && (*(cp2+1) != '.' && *(cp2+1) != '\0')) {
-          if (toupper(*(cp2+1)) == 'D' &&  /* They specified .dir. */
-              toupper(*(cp2+2)) == 'I' &&  /* Trim it off. */
-              toupper(*(cp2+3)) == 'R') {
-            retlen = cp2 - dir + 1;
-          }
-          else {  /* Some other file type.  Bzzt. */
+        if ( !(cp1 = strrchr(dir,'/')) &&
+             !(cp1 = strrchr(dir,']')) &&
+             !(cp1 = strrchr(dir,'>')) ) cp1 = dir;
+        if ((cp2 = strchr(cp1,'.')) != NULL) {
+          int ver; char *cp3;
+          if (!*(cp2+1) || toupper(*(cp2+1)) != 'D' ||  /* Wrong type. */
+              !*(cp2+2) || toupper(*(cp2+2)) != 'I' ||  /* Bzzt. */
+              !*(cp2+3) || toupper(*(cp2+3)) != 'R' ||
+              (*(cp2+4) && ((*(cp2+4) != ';' && *(cp2+4) != '.')  ||
+              (*(cp2+5) && ((ver = strtol(cp2+5,&cp3,10)) != 1 &&
+                            (ver || *cp3)))))) {
             set_errno(ENOTDIR);
             set_vaxc_errno(RMS$_DIR);
             return NULL;
           }
+          retlen = cp2 - dir + 1;
         }
         else {  /* No file type present.  Treat the filename as a directory. */
           retlen = strlen(dir) + 1;
@@ -1120,6 +1151,30 @@ static char *do_pathify_dirspec(char *dir,char *buf, int ts)
       struct FAB dirfab = cc$rms_fab;
       struct NAM savnam, dirnam = cc$rms_nam;
 
+      /* If we've got an explicit filename, we can just shuffle the string. */
+      if ( ( (cp1 = strrchr(dir,']')) != NULL ||
+             (cp1 = strrchr(dir,'>')) != NULL     ) && *(cp1+1)) {
+        if ((cp2 = strchr(cp1,'.')) != NULL) {
+          int ver; char *cp3;
+          if (!*(cp2+1) || toupper(*(cp2+1)) != 'D' ||  /* Wrong type. */
+              !*(cp2+2) || toupper(*(cp2+2)) != 'I' ||  /* Bzzt. */
+              !*(cp2+3) || toupper(*(cp2+3)) != 'R' ||
+              (*(cp2+4) && ((*(cp2+4) != ';' && *(cp2+4) != '.')  ||
+              (*(cp2+5) && ((ver = strtol(cp2+5,&cp3,10)) != 1 &&
+                            (ver || *cp3)))))) {
+            set_errno(ENOTDIR);
+            set_vaxc_errno(RMS$_DIR);
+            return NULL;
+          }
+        }
+        else {  /* No file type, so just draw name into directory part */
+          for (cp2 = cp1; *cp2; cp2++) ;
+        }
+        *cp2 = *cp1;
+        *(cp2+1) = '\0';  /* OK; trndir is guaranteed to be long enough */
+        *cp1 = '.';
+        /* We've now got a VMS 'path'; fall through */
+      }
       dirfab.fab$b_fns = strlen(dir);
       dirfab.fab$l_fna = dir;
       if (dir[dirfab.fab$b_fns-1] == ']' ||
@@ -1343,7 +1398,7 @@ static char *do_tovmsspec(char *path, char *buf, int ts) {
     int islnm, rooted;
     STRLEN trnend;
 
-    while (*(++cp2) == '/') ;  /* Skip multiple /s */
+    while (*(cp2+1) == '/') cp2++;  /* Skip multiple /s */
     while (*(++cp2) != '/' && *cp2) *(cp1++) = *cp2;
     *cp1 = '\0';
     islnm =  my_trnlnm(rslt,trndev,0);
@@ -1604,7 +1659,7 @@ getredirection(int *ac, char ***av)
 	    {
 	    if (j+1 >= argc)
 		{
-		fprintf(stderr,"No input file after < on command line");
+		fprintf(Perl_debug_log,"No input file after < on command line");
 		exit(LIB$_WRONUMARG);
 		}
 	    in = argv[++j];
@@ -1619,7 +1674,7 @@ getredirection(int *ac, char ***av)
 	    {
 	    if (j+1 >= argc)
 		{
-		fprintf(stderr,"No output file after > on command line");
+		fprintf(Perl_debug_log,"No output file after > on command line");
 		exit(LIB$_WRONUMARG);
 		}
 	    out = argv[++j];
@@ -1639,7 +1694,7 @@ getredirection(int *ac, char ***av)
 		out = 1 + ap;
 	    if (j >= argc)
 		{
-		fprintf(stderr,"No output file after > or >> on command line");
+		fprintf(Perl_debug_log,"No output file after > or >> on command line");
 		exit(LIB$_WRONUMARG);
 		}
 	    continue;
@@ -1661,7 +1716,7 @@ getredirection(int *ac, char ***av)
 		    err = 2 + ap;
 	    if (j >= argc)
 		{
-		fprintf(stderr,"No output file after 2> or 2>> on command line");
+		fprintf(Perl_debug_log,"No output file after 2> or 2>> on command line");
 		exit(LIB$_WRONUMARG);
 		}
 	    continue;
@@ -1670,7 +1725,7 @@ getredirection(int *ac, char ***av)
 	    {
 	    if (j+1 >= argc)
 		{
-		fprintf(stderr,"No command into which to pipe on command line");
+		fprintf(Perl_debug_log,"No command into which to pipe on command line");
 		exit(LIB$_WRONUMARG);
 		}
 	    cmargc = argc-(j+1);
@@ -1701,7 +1756,7 @@ getredirection(int *ac, char ***av)
 	{
 	if (out != NULL)
 	    {
-	    fprintf(stderr,"'|' and '>' may not both be specified on command line");
+	    fprintf(Perl_debug_log,"'|' and '>' may not both be specified on command line");
 	    exit(LIB$_INVARGORD);
 	    }
 	pipe_and_fork(cmargv);
@@ -1734,38 +1789,41 @@ getredirection(int *ac, char ***av)
 	freopen(mbxname, "rb", stdin);
 	if (errno != 0)
 	    {
-	    fprintf(stderr,"Can't reopen input pipe (name: %s) in binary mode",mbxname);
+	    fprintf(Perl_debug_log,"Can't reopen input pipe (name: %s) in binary mode",mbxname);
 	    exit(vaxc$errno);
 	    }
 	}
     if ((in != NULL) && (NULL == freopen(in, "r", stdin, "mbc=32", "mbf=2")))
 	{
-	fprintf(stderr,"Can't open input file %s as stdin",in);
+	fprintf(Perl_debug_log,"Can't open input file %s as stdin",in);
 	exit(vaxc$errno);
 	}
     if ((out != NULL) && (NULL == freopen(out, outmode, stdout, "mbc=32", "mbf=2")))
 	{	
-	fprintf(stderr,"Can't open output file %s as stdout",out);
+	fprintf(Perl_debug_log,"Can't open output file %s as stdout",out);
 	exit(vaxc$errno);
 	}
     if (err != NULL) {
 	FILE *tmperr;
 	if (NULL == (tmperr = fopen(err, errmode, "mbc=32", "mbf=2")))
 	    {
-	    fprintf(stderr,"Can't open error file %s as stderr",err);
+	    fprintf(Perl_debug_log,"Can't open error file %s as stderr",err);
 	    exit(vaxc$errno);
 	    }
 	    fclose(tmperr);
-	    if (NULL == freopen(err, "a", stderr, "mbc=32", "mbf=2"))
+	    if (NULL == freopen(err, "a", Perl_debug_log, "mbc=32", "mbf=2"))
 		{
 		exit(vaxc$errno);
 		}
 	}
 #ifdef ARGPROC_DEBUG
-    fprintf(stderr, "Arglist:\n");
+    fprintf(Perl_debug_log, "Arglist:\n");
     for (j = 0; j < *ac;  ++j)
-	fprintf(stderr, "argv[%d] = '%s'\n", j, argv[j]);
+	fprintf(Perl_debug_log, "argv[%d] = '%s'\n", j, argv[j]);
 #endif
+   /* Clear errors we may have hit expanding wildcards, so they don't
+      show up in Perl's $! later */
+   set_errno(0); set_vaxc_errno(1);
 }  /* end of getredirection() */
 /*}}}*/
 
@@ -1805,7 +1863,7 @@ $DESCRIPTOR(defaultspec, "SYS$DISK:[]");
 $DESCRIPTOR(resultspec, "");
 unsigned long int zero = 0, sts;
 
-    if (strcspn(item, "*%") == strlen(item))
+    if (strcspn(item, "*%") == strlen(item) || strchr(item,' ') != NULL)
 	{
 	add_item(head, tail, item, count);
 	return;
@@ -1862,6 +1920,7 @@ unsigned long int zero = 0, sts;
 	switch (sts)
 	    {
 	    case RMS$_FNF:
+	    case RMS$_DNF:
 	    case RMS$_DIR:
 		set_errno(ENOENT); break;
 	    case RMS$_DEV:
@@ -1871,13 +1930,13 @@ unsigned long int zero = 0, sts;
 	    case RMS$_PRV:
 		set_errno(EACCES); break;
 	    default:
-		_ckvmssts(sts);
+		_ckvmssts_noperl(sts);
 	    }
 	}
     if (expcount == 0)
 	add_item(head, tail, item, count);
-    _ckvmssts(lib$sfree1_dd(&resultspec));
-    _ckvmssts(lib$find_file_end(&context));
+    _ckvmssts_noperl(lib$sfree1_dd(&resultspec));
+    _ckvmssts_noperl(lib$find_file_end(&context));
 }
 
 static int child_st[2];/* Event Flag set when child process completes	*/
@@ -1891,7 +1950,7 @@ short iosb[4];
     if (0 == child_st[0])
 	{
 #ifdef ARGPROC_DEBUG
-	fprintf(stderr, "Waiting for Child Process to Finish . . .\n");
+	fprintf(Perl_debug_log, "Waiting for Child Process to Finish . . .\n");
 #endif
 	fflush(stdout);	    /* Have to flush pipe for binary data to	*/
 			    /* terminate properly -- <tp@mccall.com>	*/
@@ -1906,7 +1965,7 @@ short iosb[4];
 static void sig_child(int chan)
 {
 #ifdef ARGPROC_DEBUG
-    fprintf(stderr, "Child Completion AST\n");
+    fprintf(Perl_debug_log, "Child Completion AST\n");
 #endif
     if (child_st[0] == 0)
 	child_st[0] = 1;
@@ -1942,19 +2001,19 @@ static void pipe_and_fork(char **cmargv)
 
 	create_mbx(&child_chan,&mbxdsc);
 #ifdef ARGPROC_DEBUG
-    fprintf(stderr, "Pipe Mailbox Name = '%s'\n", mbxdsc.dsc$a_pointer);
-    fprintf(stderr, "Sub Process Command = '%s'\n", cmddsc.dsc$a_pointer);
+    fprintf(Perl_debug_log, "Pipe Mailbox Name = '%s'\n", mbxdsc.dsc$a_pointer);
+    fprintf(Perl_debug_log, "Sub Process Command = '%s'\n", cmddsc.dsc$a_pointer);
 #endif
-    _ckvmssts(lib$spawn(&cmddsc, &mbxdsc, 0, &one,
-    					0, &pid, child_st, &zero, sig_child,
-    					&child_chan));
+    _ckvmssts_noperl(lib$spawn(&cmddsc, &mbxdsc, 0, &one,
+                               0, &pid, child_st, &zero, sig_child,
+                               &child_chan));
 #ifdef ARGPROC_DEBUG
-    fprintf(stderr, "Subprocess's Pid = %08X\n", pid);
+    fprintf(Perl_debug_log, "Subprocess's Pid = %08X\n", pid);
 #endif
     sys$dclexh(&exit_block);
     if (NULL == freopen(mbxname, "wb", stdout))
 	{
-	fprintf(stderr,"Can't open output pipe (name %s)",mbxname);
+	fprintf(Perl_debug_log,"Can't open output pipe (name %s)",mbxname);
 	}
 }
 
@@ -1979,19 +2038,19 @@ unsigned long int flags = 17, one = 1, retsts;
 	}
     value.dsc$a_pointer = command;
     value.dsc$w_length = strlen(value.dsc$a_pointer);
-    _ckvmssts(lib$set_symbol(&cmd, &value));
+    _ckvmssts_noperl(lib$set_symbol(&cmd, &value));
     retsts = lib$spawn(&cmd, &null, 0, &flags, 0, &pid);
     if (retsts == 0x38250) { /* DCL-W-NOTIFY - We must be BATCH, so retry */
-	_ckvmssts(lib$spawn(&cmd, &null, 0, &one, 0, &pid));
+	_ckvmssts_noperl(lib$spawn(&cmd, &null, 0, &one, 0, &pid));
     }
     else {
-	_ckvmssts(retsts);
+	_ckvmssts_noperl(retsts);
     }
 #ifdef ARGPROC_DEBUG
-    fprintf(stderr, "%s\n", command);
+    fprintf(Perl_debug_log, "%s\n", command);
 #endif
     sprintf(pidstring, "%08X", pid);
-    fprintf(stderr, "%s\n", pidstring);
+    fprintf(Perl_debug_log, "%s\n", pidstring);
     pidstr.dsc$a_pointer = pidstring;
     pidstr.dsc$w_length = strlen(pidstr.dsc$a_pointer);
     lib$set_symbol(&pidsymbol, &pidstr);
@@ -3114,9 +3173,6 @@ cando_by_name(I32 bit, I32 effective, char *fname)
   }
 
   retsts = sys$check_access(&objtyp,&namdsc,&usrdsc,armlst);
-#ifndef SS$_NOSUCHOBJECT  /* Older versions of ssdef.h don't have this */
-#  define SS$_NOSUCHOBJECT 2696
-#endif
   if (retsts == SS$_NOPRIV || retsts == SS$_NOSUCHOBJECT ||
       retsts == RMS$_FNF   || retsts == RMS$_DIR         ||
       retsts == RMS$_DEV) {
@@ -3145,13 +3201,15 @@ cando_by_name(I32 bit, I32 effective, char *fname)
 
 
 /*{{{ int flex_fstat(int fd, struct stat *statbuf)*/
+#undef stat
 int
-flex_fstat(int fd, struct stat *statbuf)
+flex_fstat(int fd, struct mystat *statbufp)
 {
-  char fspec[NAM$C_MAXRSS+1];
-
-  if (!getname(fd,fspec,1)) return -1;
-  return flex_stat(fspec,statbuf);
+  if (!fstat(fd,(stat_t *) statbufp)) {
+    statbufp->st_dev = encode_dev(statbufp->st_devnam);
+    return 0;
+  }
+  return -1;
 
 }  /* end of flex_fstat() */
 /*}}}*/
@@ -3162,7 +3220,6 @@ flex_fstat(int fd, struct stat *statbuf)
  * to the system version here, since we're actually calling their
  * stat().
  */
-#undef stat
 int
 flex_stat(char *fspec, struct mystat *statbufp)
 {
@@ -3206,6 +3263,29 @@ flex_stat(char *fspec, struct mystat *statbufp)
 /* Reset definition for later calls */
 #define stat mystat
 /*}}}*/
+
+/* Insures that no carriage-control translation will be done on a file. */
+/*{{{FILE *my_binmode(FILE *fp, char iotype)*/
+FILE *
+my_binmode(FILE *fp, char iotype)
+{
+    char filespec[NAM$C_MAXRSS], *acmode;
+    fpos_t pos;
+
+    if (!fgetname(fp,filespec)) return NULL;
+    if (fgetpos(fp,&pos) == -1) return NULL;
+    switch (iotype) {
+      case '<': case 'r':           acmode = "rb";                      break;
+      case '>': case 'w':           acmode = "wb";                      break;
+      case '+': case '|': case 's': acmode = "rb+";                     break;
+      case 'a':                     acmode = "ab";                      break;
+      case '-':                     acmode = fileno(fp) ? "wb" : "rb";  break;
+    }
+    if (freopen(filespec,acmode,fp) == NULL) return NULL;
+    if (fsetpos(fp,&pos) == -1) return NULL;
+}  /* end of my_binmode() */
+/*}}}*/
+
 
 /*{{{char *my_getlogin()*/
 /* VMS cuserid == Unix getlogin, except calling sequence */
@@ -3351,7 +3431,13 @@ rmscopy(char *spec_in, char *spec_out, int preserve_dates)
     if (preserve_dates & 2) {
       /* sys$close() will process xabrdt, not xabdat */
       xabrdt = cc$rms_xabrdt;
+#ifndef __GNUC__
       xabrdt.xab$q_rdt = xabdat.xab$q_rdt;
+#else
+      /* gcc doesn't like the assignment, since its prototype for xab$q_rdt
+       * is unsigned long[2], while DECC & VAXC use a struct */
+      memcpy(xabrdt.xab$q_rdt,xabdat.xab$q_rdt,sizeof xabrdt.xab$q_rdt);
+#endif
       fab_out.fab$l_xab = (void *) &xabrdt;
     }
 
@@ -3418,9 +3504,16 @@ rmsexpand_fromperl(CV *cv)
   STRLEN speclen;
   unsigned long int retsts, haslower = 0;
 
+  if (items > 2) croak("Usage: VMS::Filespec::rmsexpand(spec[,defspec])");
+
   myfab.fab$l_fna = SvPV(ST(0),speclen);
   myfab.fab$b_fns = speclen;
   myfab.fab$l_nam = &mynam;
+
+  if (items == 2) {
+    myfab.fab$l_dna = SvPV(ST(1),speclen);
+    myfab.fab$b_dns = speclen;
+  }
 
   mynam.nam$l_esa = esa;
   mynam.nam$b_ess = sizeof esa;
@@ -3429,6 +3522,11 @@ rmsexpand_fromperl(CV *cv)
 
   retsts = sys$parse(&myfab,0,0);
   if (!(retsts & 1)) {
+    if (retsts == RMS$_DNF) {
+      mynam.nam$b_nop |= NAM$M_SYNCHK;
+      retsts = sys$parse(&myfab,0,0);
+      if (retsts & 1) goto expanded;
+    }  
     set_vaxc_errno(retsts);
     if      (retsts == RMS$_PRV) set_errno(EACCES);
     else if (retsts == RMS$_DEV) set_errno(ENODEV);
@@ -3443,8 +3541,10 @@ rmsexpand_fromperl(CV *cv)
     else                         set_errno(EVMSERR);
     XSRETURN_UNDEF;
   }
+
   /* If the input filespec contained any lowercase characters,
    * downcase the result for compatibility with Unix-minded code. */
+  expanded:
   for (out = myfab.fab$l_fna; *out; out++)
     if (islower(*out)) { haslower = 1; break; }
   if (mynam.nam$b_rsl) { out = rsa; speclen = mynam.nam$b_rsl; }
