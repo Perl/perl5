@@ -209,6 +209,7 @@ tr=''
 troff=''
 uname=''
 uniq=''
+usethreads=''
 uuname=''
 vi=''
 zcat=''
@@ -2085,7 +2086,12 @@ case "$archname" in
 esac
 rp='What is your architecture name'
 . ./myread
-archname="$ans"
+case "$usethreads" in
+$define)  archname="$ans-thread"
+          echo "usethreads selected... architecture name is now $archname." >&4
+          ;;
+*)        archname="$ans" ;;
+esac
 myarchname="$tarch"
 
 : is AFS running?
