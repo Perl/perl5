@@ -742,6 +742,18 @@ is not extensible beyond 0xFFFF, because it does not use surrogates.
 A seven-bit safe (non-eight-bit) encoding, useful if the
 transport/storage is not eight-bit safe.  Defined by RFC 2152.
 
+=head2 Security Implications of Malformed UTF-8
+
+Unfortunately, the specification of UTF-8 leaves some room for
+interpretation of how many bytes of encoded output one should generate
+from one input Unicode character.  Strictly speaking, one is supposed
+to always generate the shortest possible sequence of UTF-8 bytes,
+because otherwise there is potential for input buffer overflow at the
+receiving end of a UTF-8 connection.  Perl always generates the shortest
+length UTF-8, and with warnings on (C<-w> or C<use warnings;>) Perl will
+warn about non-shortest length UTF-8 (and other malformations, too,
+such as the surrogates, which are not real character code points.)
+
 =head2 Unicode in Perl on EBCDIC
 
 The way Unicode is handled on EBCDIC platforms is still rather
