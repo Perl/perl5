@@ -1,8 +1,8 @@
 # DB_File.pm -- Perl 5 interface to Berkeley DB 
 #
 # written by Paul Marquess (pmarquess@bfsec.bt.co.uk)
-# last modified 3rd Dec 1996
-# version 1.08
+# last modified 18th Dec 1996
+# version 1.09
 #
 #     Copyright (c) 1995, 1996 Paul Marquess. All rights reserved.
 #     This program is free software; you can redistribute it and/or
@@ -92,16 +92,16 @@ sub EXISTS
 
 sub NotHere
 {
-    my $pkg = shift ;
+    my $self = shift ;
     my $method = shift ;
 
-    croak "${pkg} does not define the method ${method}" ;
+    croak ref($self) . " does not define the method ${method}" ;
 }
 
 sub DESTROY  { undef %{$_[0]} }
-sub FIRSTKEY { my $self = shift ; $self->NotHere(ref $self, "FIRSTKEY") }
-sub NEXTKEY  { my $self = shift ; $self->NotHere(ref $self, "NEXTKEY") }
-sub CLEAR    { my $self = shift ; $self->NotHere(ref $self, "CLEAR") }
+sub FIRSTKEY { my $self = shift ; $self->NotHere("FIRSTKEY") }
+sub NEXTKEY  { my $self = shift ; $self->NotHere("NEXTKEY") }
+sub CLEAR    { my $self = shift ; $self->NotHere("CLEAR") }
 
 package DB_File::RECNOINFO ;
 
@@ -146,7 +146,7 @@ use vars qw($VERSION @ISA @EXPORT $AUTOLOAD $DB_BTREE $DB_HASH $DB_RECNO) ;
 use Carp;
 
 
-$VERSION = "1.08" ;
+$VERSION = "1.09" ;
 
 #typedef enum { DB_BTREE, DB_HASH, DB_RECNO } DBTYPE;
 $DB_BTREE = new DB_File::BTREEINFO ;
@@ -217,10 +217,10 @@ sub AUTOLOAD {
 sub import {
     my $pkg = shift;
     my $callpkg = caller;
-    Exporter::export $pkg, $callpkg;
+    Exporter::export $pkg, $callpkg, @_;
     eval {
         require Fcntl;
-        Exporter::export 'Fcntl', $callpkg;
+        Exporter::export 'Fcntl', $callpkg, '/^O_/';
     };
 }
 
@@ -507,7 +507,7 @@ common file format used, the call:
 
 is equivalent to:
 
-    tie %A, "DB_File", "filename", O_CREAT|O_RDWR, 0640, $DB_HASH ;
+    tie %A, "DB_File", "filename", O_CREAT|O_RDWR, 0666, $DB_HASH ;
 
 It is also possible to omit the filename parameter as well, so the
 call:
@@ -516,7 +516,7 @@ call:
 
 is equivalent to:
 
-    tie %A, "DB_File", undef, O_CREAT|O_RDWR, 0640, $DB_HASH ;
+    tie %A, "DB_File", undef, O_CREAT|O_RDWR, 0666, $DB_HASH ;
 
 See L<In Memory Databases> for a discussion on the use of C<undef>
 in place of a filename.
@@ -1556,6 +1556,13 @@ Fixed bug with RECNO, where bval wasn't defaulting to "\n".
 =item 1.08
 
 Documented operation of bval.
+
+=item 1.09
+
+Minor bug fix in DB_File::HASHINFO, DB_File::RECNOINFO and
+DB_File::BTREEINFO.
+
+Changed default mode to 0666.
 
 =back
 

@@ -3,8 +3,8 @@
  DB_File.xs -- Perl 5 interface to Berkeley DB 
 
  written by Paul Marquess (pmarquess@bfsec.bt.co.uk)
- last modified 3rd Dec 1996
- version 1.08
+ last modified 18th Dec 1996
+ version 1.09
 
  All comments/suggestions/problems are welcome
 
@@ -34,6 +34,7 @@
 	1.06 -  Minor namespace cleanup: Localized PrintBtree.
 	1.07 -  Fixed bug with RECNO, where bval wasn't defaulting to "\n". 
 	1.08 -  No change to DB_File.xs
+	1.09 -  Default mode for dbopen changed to 0666
 
 */
 
@@ -768,7 +769,7 @@ constant(name,arg)
 
 
 DB_File
-db_DoTie_(dbtype, name=undef, flags=O_CREAT|O_RDWR, mode=0640, type=DB_HASH)
+db_DoTie_(dbtype, name=undef, flags=O_CREAT|O_RDWR, mode=0666, type=DB_HASH)
 	char *		dbtype
 	int		flags
 	int		mode
