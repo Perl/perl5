@@ -2040,8 +2040,23 @@ regclass(void)
 	    }
 	}
 	if (!SIZE_ONLY) {
-	    for ( ; lastclass <= Class; lastclass++)
-		ANYOF_SET(opnd, lastclass);
+#ifndef ASCIIish
+	    if ((isLOWER(lastvalue) && isLOWER(value)) ||
+		(isUPPER(lastvalue) && isUPPER(value))) {
+ 		if (isLOWER(lastvalue)) {
+ 		    for (i = lastvalue; i <= value; i++)
+			if (isLOWER(i))
+			    ANYOF_SET(opnd, i);
+ 		} else {
+ 		    for (i = lastvalue; i <= value; i++)
+			if (isUPPER(i))
+			    ANYOF_SET(opnd, i);
+		}
+	    }
+	    else
+#endif
+		for ( ; lastclass <= Class; lastclass++)
+		    ANYOF_SET(opnd, lastclass);
 	}
 	lastclass = Class;
     }

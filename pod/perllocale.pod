@@ -710,7 +710,7 @@ case-mapping with C<\l>, C<\L>,C<\u> or C<\U>.
 
 =item B<In-memory formatting function> (sprintf()):
 
-Result is tainted if "use locale" is in effect.
+Result is tainted if C<use locale> is in effect.
 
 =item B<Output formatting functions> (printf() and write()):
 

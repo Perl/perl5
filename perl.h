@@ -209,6 +209,12 @@ register struct op *op asm(stringify(OP_IN_REGISTER));
 #   define LIBERAL 1
 #endif
 
+#if 'A' == 65 && 'I' == 73 && 'J' == 74 && 'Z' == 90
+#define ASCIIish
+#else
+#undef  ASCIIish
+#endif
+
 /*
  * The following contortions are brought to you on behalf of all the
  * standards, semi-standards, de facto standards, not-so-de-facto standards
