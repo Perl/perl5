@@ -57,13 +57,14 @@ for my $a (@action) {
   my($depotfile) = $file =~ m|^(.+)#\d+\z|;
   die "Panic: Could not parse file[$file]" unless $number;
   $path = "" unless defined $path;
-  my($d1,$d2,$prev,$prevchange,$prevfile);
+  my($d1,$d2,$prev,$prevchange,$prevfile,$doadd);
   $prev = $number-1;
   $prevchange = $CHANGE-1;
   # can't assume previous rev == $number-1 due to obliterated revisions
   $prevfile = "$depotfile\@$prevchange";
   if ($number == 1 or $action =~ /^(add|branch)$/) {
     $d1 = "/dev/null";
+    ++$doadd;
   } elsif ($action =~ /^(edit|integrate)$/) {
     $d1 = "$path$basename-$prevchange";
     warn "==> $d1 <==\n" if $OPT{v};
@@ -96,13 +97,13 @@ for my $a (@action) {
   chmod 0644, "$tempdir/$d2";
   $type =~ m|^//.*\((.+)\)$| or next;
   $type = $1;
-  if (File::Compare::compare("$tempdir/$d1", "$tempdir/$d2")) {
+  if ($doadd or File::Compare::compare("$tempdir/$d1", "$tempdir/$d2")) {
     print "\n==== $file ($type) ====\n";
     unless ($type =~ /text/) {
       next;
     }
     print "Index: $path$basename\n";
-    correctmtime($prevfile,$prev,"$tempdir/$d1");
+    correctmtime($prevfile,$prev,"$tempdir/$d1") unless $doadd;
     correctmtime($file,$number,"$tempdir/$d2");
     chdir $tempdir or warn "Could not chdir '$tempdir': $!";
     $system = qq[$OPT{D} -$OPT{d} "$d1" "$d2"];
@@ -117,8 +118,8 @@ print "End of Patch.\n";
 
 sub correctmtime ($$$) {
   my($depotfile,$nr,$localfile) = @_;
-  my %fstat = map { /^\.\.\. (\w+) (.*)$/ } `p4 @P4opt fstat "$depotfile"`;
-  return unless $fstat{headRev} == $nr;
+  my %fstat = map { /^\.\.\. (\w+) (.*)$/ } `p4 @P4opt fstat -s "$depotfile"`;
+  return unless exists($fstat{headRev}) and $fstat{headRev} == $nr;
   utime $fstat{headTime}, $fstat{headTime}, $localfile;
 }
 
