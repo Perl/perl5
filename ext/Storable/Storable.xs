@@ -3,7 +3,7 @@
  */
 
 /*
- * $Id: Storable.xs,v 1.0.1.9 2001/07/01 11:25:02 ram Exp $
+ * $Id: Storable.xs,v 1.0.1.10 2001/08/28 21:52:14 ram Exp $
  *
  *  Copyright (c) 1995-2000, Raphael Manfredi
  *  
@@ -11,6 +11,9 @@
  *  in the README file that comes with the distribution.
  *
  * $Log: Storable.xs,v $
+ * Revision 1.0.1.10  2001/08/28 21:52:14  ram
+ * patch13: removed spurious debugging messages
+ *
  * Revision 1.0.1.9  2001/07/01 11:25:02  ram
  * patch12: fixed memory corruption on croaks during thaw()
  * patch12: made code compile cleanly with -Wall (Jarkko Hietaniemi)
@@ -1260,9 +1263,6 @@ stcxt_t *parent_cxt;
 	Newz(0, cxt, 1, stcxt_t);
 	cxt->prev = parent_cxt;
 	SET_STCXT(cxt);
-
-	TRACEME(("kbuf has %d bytes at 0x%x", ksiz, kbuf));
-	TRACEME(("mbuf has %d bytes at 0x%x", msiz, mbase));
 
 	ASSERT(!cxt->s_dirty, ("clean context"));
 

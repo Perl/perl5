@@ -1,3 +1,12 @@
+Tue Aug 28 23:53:20 MEST 2001   Raphael Manfredi <Raphael_Manfredi@pobox.com>
+
+. Description:
+
+	Fixed truncation race with lock_retrieve() in lock_store().
+	The file has to be truncated only once the exclusive lock is held.
+
+	Removed spurious debugging messages in .xs file.
+
 Sun Jul  1 13:27:32 MEST 2001   Raphael Manfredi <Raphael_Manfredi@pobox.com>
 
 . Description:

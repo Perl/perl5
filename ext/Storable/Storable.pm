@@ -1,4 +1,4 @@
-;# $Id: Storable.pm,v 1.0.1.11 2001/07/01 11:22:14 ram Exp $
+;# $Id: Storable.pm,v 1.0.1.12 2001/08/28 21:51:51 ram Exp $
 ;#
 ;#  Copyright (c) 1995-2000, Raphael Manfredi
 ;#  
@@ -6,6 +6,9 @@
 ;#  in the README file that comes with the distribution.
 ;#
 ;# $Log: Storable.pm,v $
+;# Revision 1.0.1.12  2001/08/28 21:51:51  ram
+;# patch13: fixed truncation race with lock_retrieve() in lock_store()
+;#
 ;# Revision 1.0.1.11  2001/07/01 11:22:14  ram
 ;# patch12: systematically use "=over 4" for POD linters
 ;# patch12: updated version number
@@ -63,7 +66,7 @@ package Storable; @ISA = qw(Exporter DynaLoader);
 use AutoLoader;
 use vars qw($forgive_me $VERSION);
 
-$VERSION = '1.012';
+$VERSION = '1.013';
 *AUTOLOAD = \&AutoLoader::AUTOLOAD;		# Grrr...
 
 #
@@ -172,9 +175,8 @@ sub _store {
 	logcroak "not a reference" unless ref($self);
 	logcroak "wrong argument number" unless @_ == 2;	# No @foo in arglist
 	local *FILE;
-	open(FILE, ">$file") || logcroak "can't create $file: $!";
-	binmode FILE;				# Archaic systems...
 	if ($use_locking) {
+		open(FILE, ">>$file") || logcroak "can't write into $file: $!";
 		unless (&CAN_FLOCK) {
 			logcarp "Storable::lock_store: fcntl/flock emulation broken on $^O";
 			return undef;
@@ -183,7 +185,10 @@ sub _store {
 			logcroak "can't get exclusive lock on $file: $!";
 		truncate FILE, 0;
 		# Unlocking will happen when FILE is closed
+	} else {
+		open(FILE, ">$file") || logcroak "can't create $file: $!";
 	}
+	binmode FILE;				# Archaic systems...
 	my $da = $@;				# Don't mess if called from exception handler
 	my $ret;
 	# Call C routine nstore or pstore, depending on network order
