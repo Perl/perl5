@@ -135,7 +135,7 @@ untie %h;
 EXPECT
 ########
 
-# strict error behaviour, with 2 extra references 
+# strict error behaviour, with 2 extra references
 use warnings 'untie';
 use Tie::Hash ;
 $a = tie %h, Tie::StdHash;
@@ -184,13 +184,17 @@ EXPECT
 
 # Allowed glob self-ties
 my $destroyed = 0;
+my $printed   = 0;
 sub Self2::TIEHANDLE { bless $_[1], $_[0] }
 sub Self2::DESTROY   { $destroyed = 1; }
+sub Self2::PRINT     { $printed = 1; }
 {
     use Symbol;
     my $c = gensym;
     tie *$c, 'Self2', $c;
+    print $c 'Hello';
 }
+die "self-tied glob not PRINTed" unless $printed == 1;
 die "self-tied glob not DESTROYd" unless $destroyed == 1;
 EXPECT
 ########
