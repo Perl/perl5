@@ -8,7 +8,7 @@ BEGIN {
 	    exit 0;
 	}
 	require Config;
-	if (($Config::Config{'extensions'} !~ /\bList::Util\b/) ){
+	if (($Config::Config{'extensions'} !~ m!\bList/Util\b!) ){
 	    print "1..0 # Skip -- Perl configured without List::Util module\n";
 	    exit 0;
 	}
