@@ -1,3 +1,14 @@
+BEGIN {
+    eval { require Config; import Config };
+    if ($@) {
+	print "1..0 # Skip: no Config\n";
+	exit(0);
+    }
+    if ($Config{extensions} !~ m!\bIPC/SysV\b!) {
+	print "1..0 # Skip: no SysV IPC\n";
+	exit(0);
+    }
+}
 
 use IPC::SysV qw(
 	SETALL
