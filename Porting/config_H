@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : /m/fs/work/work/permanent/perl/pp4/perl
- * Configuration time: Thu Nov 16 03:24:59 EET 2000
+ * Configuration time: Thu Nov 16 16:43:36 EET 2000
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -3210,5 +3210,14 @@
  *	permanent storage.
  */
 #define HAS_FSYNC		/**/
+
+/* HAS_SBRK_PROTO:
+ *	This symbol, if defined, indicates that the system provides
+ *	a prototype for the sbrk() function.  Otherwise, it is up
+ *	to the program to supply one.  Good guesses are
+ *		extern void* sbrk _((int));
+ *		extern void* sbrk _((size_t));
+ */
+#define	HAS_SBRK_PROTO	/**/
 
 #endif

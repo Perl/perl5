@@ -8,7 +8,7 @@
 
 # Package name      : perl5
 # Source directory  : /m/fs/work/work/permanent/perl/pp4/perl
-# Configuration time: Thu Nov 16 03:24:59 EET 2000
+# Configuration time: Thu Nov 16 16:43:36 EET 2000
 # Configured by     : jhi
 # Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
 
@@ -62,7 +62,7 @@ ccsymbols='__alpha=1 __LANGUAGE_C__=1 __osf__=1 __unix__=1 _LONGLONG=1 _SYSTYPE_
 ccversion='V5.6-082'
 cf_by='jhi'
 cf_email='yourname@yourhost.yourplace.com'
-cf_time='Thu Nov 16 03:24:59 EET 2000'
+cf_time='Thu Nov 16 16:43:36 EET 2000'
 charsize='1'
 chgrp=''
 chmod=''
@@ -286,6 +286,7 @@ d_rmdir='define'
 d_safebcpy='define'
 d_safemcpy='undef'
 d_sanemcmp='define'
+d_sbrkproto='define'
 d_sched_yield='define'
 d_scm_rights='define'
 d_seekdir='define'
