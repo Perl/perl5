@@ -294,7 +294,7 @@ ARCHNAME	= $(ARCHNAME)-thread
 
 # VC 6.0 can load the socket dll on demand.  Makes the test suite
 # run in about 10% less time.
-DELAYLOAD	= -DELAYLOAD:wsock32.dll delayimp.lib 
+DELAYLOAD	= -DELAYLOAD:wsock32.dll -DELAYLOAD:shell32.dll delayimp.lib 
 
 # VC 6.0 seems capable of compiling perl correctly with optimizations
 # enabled.  Anything earlier fails tests.
@@ -818,7 +818,7 @@ perldll.def : $(MINIPERL) $(CONFIGPM) ..\global.sym ..\pp.sym ..\makedef.pl
 
 $(PERLDLL): perldll.def $(PERLDLL_OBJ) $(PERLDLL_RES)
 	$(LINK32) -dll -def:perldll.def -out:$@ @<<
-		$(LINK_FLAGS) $(LIBFILES) $(PERLDLL_OBJ) $(PERLDLL_RES)
+		$(LINK_FLAGS) /base:0x28000000 $(LIBFILES) $(PERLDLL_OBJ) $(PERLDLL_RES)
 <<
 	$(XCOPY) $(PERLIMPLIB) $(COREDIR)
 
