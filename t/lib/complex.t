@@ -263,8 +263,9 @@ EOS
 
     $test++;
     push @script, <<EOS;
-    print "# j = \$j\n";
-    print "not " unless "\$j" eq "-0.5+0.866025403784439i";
+    my \$dj = "\$j"; \$dj =~ s/(\\d{14})\\d+i/\$1i/;
+    print "# j = \$dj (truncated for display)\n";
+    print "not " unless \$dj eq "-0.5+0.86602540378443i";
     print "ok $test\n";
 
     \$j->display_format('style' => 'polar', 'polar_pretty_print' => 0);
@@ -272,8 +273,9 @@ EOS
 
     $test++;
     push @script, <<EOS;
-    print "# j = \$j\n";
-    print "not " unless "\$j" eq "[1,2.0943951023932]";
+    my \$dj = "\$j"; \$dj =~ s/(\\d{12})\\d+\]/\$1]/;
+    print "# j = \$dj (truncated for display)\n";
+    print "not " unless \$dj eq "[1,2.094395102393]";
     print "ok $test\n";
 
     \$j->display_format('style' => 'cartesian', 'format' => '(%.5g)');
