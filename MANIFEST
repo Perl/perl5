@@ -852,6 +852,7 @@ lib/constant.t			See if compile-time constants work
 lib/CPAN.pm			Interface to Comprehensive Perl Archive Network
 lib/CPAN/FirstTime.pm		Utility for creating CPAN config files
 lib/CPAN/Nox.pm			Runs CPAN while avoiding compiled extensions
+lib/CPAN/t/Nox.t		See if CPAN::Nox works
 lib/CPAN/t/loadme.t		See if CPAN the module works
 lib/CPAN/t/vcmp.t		See if CPAN the module works
 lib/ctime.pl			A ctime workalike
