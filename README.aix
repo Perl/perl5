@@ -23,8 +23,8 @@ for which you have to pay: B<xlC> and B<vac>. If you decide to use either
 of these two (which is quite a lot easier than using gcc), be sure to
 upgrade to the latest available patch level. Currently:
 
-    xlC.C     3.1.4.8 or 3.6.6.0
-    vac.C     4.4.0.3 or 5.0.2.3
+    xlC.C     3.1.4.10 or 3.6.6.0 or 5.0.2.6
+    vac.C     4.4.0.3  or 5.0.2.4
 
 Perl can be compiled with either IBM's ANSI C compiler or with gcc.
 The former is recommended, as not only can it compile Perl with no
@@ -46,9 +46,8 @@ team.
 
 Before installing the patches to the IBM C-compiler you need to know the
 level of patching for the Operating System. IBM's command 'oslevel' will
-show the base, but is not always complete:
-
-For AIX 4.3:
+show the base, but is not always complete (in this example oslevel shows
+4.3.NULL, whereas the system might run most of 4.3.THREE):
 
     # oslevel
     4.3.0.0
@@ -57,29 +56,13 @@ For AIX 4.3:
     bos.rte            4.3.2.0  COMMITTED  Base Operating System Runtime
     #
 
-For AIX 5.1:
-
-    # oslevel
-    5.1.0.0
-    # lslpp -l | grep 'bos.rte '
-    bos.rte           5.1.0.25  COMMITTED  Base Operating System Runtime
-    bos.rte           5.1.0.25  COMMITTED  Base Operating System Runtime
-
-As a side note, perl cannot be built without bos.adt.syscalls and
-bos.adt.libm installed.
-
-For AIX 4.3:
-
-    # lslpp -l | egrep "syscalls|libm"
-    bos.adt.libm      4.3.3.50  COMMITTED  Base Application Development
-    bos.adt.syscalls  4.3.3.51  COMMITTED  System Calls Application
-    #
-  
-For AIX 5.1:
+The same might happen to AIX 5.1 or other OS levels. As a side note, perl
+cannot be built without bos.adt.syscalls and bos.adt.libm installed
 
     # lslpp -l | egrep "syscalls|libm"
     bos.adt.libm      5.1.0.25  COMMITTED  Base Application Development
     bos.adt.syscalls  5.1.0.25  COMMITTED  System Calls Application
+    #
 
 =head2 Building Dynamic Extensions on AIX
 
@@ -106,7 +89,9 @@ All defaults for Configure can be used.
 
 If you've chosen to use vac 4, be sure to run 4.4.0.3. Older versions
 will turn up nasty later on. For vac 5 be sure to run at least 5.0.1.0,
-but vac 5.0.2.1 or up is highly recommended.
+but vac 5.0.2.3 or up is highly recommended. Note that since IBM has
+removed vac 5.0.2.1 and 5.0.2.2 from the software depot, these versions
+should be considered obsolete.
 
 Here's a brief lead of how to upgrade the compiler to the latest
 level.  Of course this is subject to changes.  You can only upgrade
@@ -164,21 +149,22 @@ On AIX 4.2 using xlC, we continue:
 
 On AIX 4.3 using vac, we continue:
 
- # lslpp -l | fgrep 'vac.C '
-   vac.C                      4.4.0.2  COMMITTED  C for AIX Compiler
-   vac.C                      4.4.0.0  COMMITTED  C for AIX Compiler
- # grep 'vac.C.4.4.0.*.bff' other.ll
- -rw-rw-r--   1 45776101 1        13466624 May 26 1999  vac.C.4.4.0.1.bff
- -rw-rw-r--   1 45776101 1        13473792 Aug 31 1999  vac.C.4.4.0.2.bff
- -rw-rw-r--   1 45776101 1        13480960 May 19 20:32 vac.C.4.4.0.3.bff
- # wget ftp://ftp.software.ibm.com/aix/fixes/v4/other/vac.C.4.4.0.3.bff
+ # lslpp -l | grep 'vac.C '
+  vac.C                      5.0.2.2  COMMITTED  C for AIX Compiler
+  vac.C                      5.0.2.0  COMMITTED  C for AIX Compiler
+ # grep 'vac.C.5.0.2.*.bff' other.ll
+ -rw-rw-r--   1 45776101 1        13592576 Apr 16 2001  vac.C.5.0.2.0.bff
+ -rw-rw-r--   1 45776101 1        14133248 Apr  9 2002  vac.C.5.0.2.3.bff
+ -rw-rw-r--   1 45776101 1        14173184 May 20 2002  vac.C.5.0.2.4.bff
+ # wget ftp://ftp.software.ibm.com/aix/fixes/v4/other/vac.C.5.0.2.4.bff
  #
 
-Then execute the following command, and fill in its choices
+Likewise on all other OS levels. Then execute the following command, and
+fill in its choices
 
  # smit install_update
   -> Install and Update from LATEST Available Software
-  * INPUT device / directory for software [ vac.C.4.4.0.3.bff    ]
+  * INPUT device / directory for software [ vac.C.5.0.2.4.bff    ]
   [ OK ]
   [ OK ]
 
@@ -221,6 +207,6 @@ H.Merijn Brand <h.m.brand@hccnet.nl>
 
 =head1 DATE
 
-Version 0.0.5: 21 May 2002
+Version 0.0.5: 22 May 2002
 
 =cut

@@ -45,9 +45,12 @@ my $line = <$fh>;
 is($line,"&#8364;0.02\n","HTML escapes");
 close($fh);
 
-open($fh,">$file") || die "File cannot be re-opened";
-print $fh "£0.02\n";
-close($fh);
+{
+    no utf8;
+    open($fh,">$file") || die "File cannot be re-opened";
+    print $fh "£0.02\n";
+    close($fh);
+}
 
 ok(open($fh,"<encoding(US-ASCII)",$file),"Opened as ASCII");
 my $line = <$fh>;
