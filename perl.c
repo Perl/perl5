@@ -189,6 +189,14 @@ register PerlInterpreter *sv_interp;
 	/* The exit() function will do everything that needs doing. */
 	return;
     }
+
+    /* unhook hooks which may now point to, or use, broken code	*/
+    if (warnhook && SvREFCNT(warnhook))
+	SvREFCNT_dec(warnhook);
+    if (diehook && SvREFCNT(diehook))
+	SvREFCNT_dec(diehook);
+    if (parsehook && SvREFCNT(parsehook))
+	SvREFCNT_dec(parsehook);
     
     /* Prepare to destruct main symbol table.  */
     hv = defstash;
@@ -1294,7 +1302,7 @@ char *s;
 	printf("MS-DOS port Copyright (c) 1989, 1990, Diomidis Spinellis\n");
 #endif
 #ifdef OS2
-	printf("OS/2 port Copyright (c) 1990, 1991, Raymond Chen, Kai Uwe Rommel\n"
+	printf("\n\nOS/2 port Copyright (c) 1990, 1991, Raymond Chen, Kai Uwe Rommel\n"
 	    "Version 5 port Copyright (c) 1994-1996, Andreas Kaiser, Ilya Zakharevich\n");
 #endif
 #ifdef atarist
@@ -1589,6 +1597,9 @@ sed %s -e \"/^[^#]/b\" \
 #if defined(HAS_FCNTL) && defined(F_SETFD)
 	fcntl(PerlIO_fileno(rsfp),F_SETFD,1);	/* ensure close-on-exec */
 #endif
+    }
+    if (e_tmpname) {
+	e_fp = rsfp;
     }
     if ((PerlIO*)rsfp == Nullfp) {
 #ifdef DOSUID
