@@ -2013,16 +2013,7 @@ s	|char*|regwhite	|char *|char *
 s	|char*|nextchar
 s	|regnode*|dumpuntil	|regnode *start|regnode *node \
 				|regnode *last|SV* sv|I32 l
-s	|void	|put_byte	|SV* sv|int c
 s	|void	|scan_commit	|struct scan_data_t *data
-s	|void	|cl_anything	|struct regnode_charclass_class *cl
-s	|int	|cl_is_anything	|struct regnode_charclass_class *cl
-s	|void	|cl_init	|struct regnode_charclass_class *cl
-s	|void	|cl_init_zero	|struct regnode_charclass_class *cl
-s	|void	|cl_and		|struct regnode_charclass_class *cl \
-				|struct regnode_charclass_class *and_with
-s	|void	|cl_or		|struct regnode_charclass_class *cl \
-				|struct regnode_charclass_class *or_with
 s	|I32	|study_chunk	|regnode **scanp|I32 *deltap \
 				|regnode *last|struct scan_data_t *data \
 				|U32 flags

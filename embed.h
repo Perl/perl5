@@ -934,14 +934,7 @@
 #define regwhite		S_regwhite
 #define nextchar		S_nextchar
 #define dumpuntil		S_dumpuntil
-#define put_byte		S_put_byte
 #define scan_commit		S_scan_commit
-#define cl_anything		S_cl_anything
-#define cl_is_anything		S_cl_is_anything
-#define cl_init			S_cl_init
-#define cl_init_zero		S_cl_init_zero
-#define cl_and			S_cl_and
-#define cl_or			S_cl_or
 #define study_chunk		S_study_chunk
 #define add_data		S_add_data
 #define re_croak2		S_re_croak2
@@ -2326,14 +2319,7 @@
 #define regwhite(a,b)		S_regwhite(aTHX_ a,b)
 #define nextchar()		S_nextchar(aTHX)
 #define dumpuntil(a,b,c,d,e)	S_dumpuntil(aTHX_ a,b,c,d,e)
-#define put_byte(a,b)		S_put_byte(aTHX_ a,b)
 #define scan_commit(a)		S_scan_commit(aTHX_ a)
-#define cl_anything(a)		S_cl_anything(aTHX_ a)
-#define cl_is_anything(a)	S_cl_is_anything(aTHX_ a)
-#define cl_init(a)		S_cl_init(aTHX_ a)
-#define cl_init_zero(a)		S_cl_init_zero(aTHX_ a)
-#define cl_and(a,b)		S_cl_and(aTHX_ a,b)
-#define cl_or(a,b)		S_cl_or(aTHX_ a,b)
 #define study_chunk(a,b,c,d,e)	S_study_chunk(aTHX_ a,b,c,d,e)
 #define add_data(a,b)		S_add_data(aTHX_ a,b)
 #define regpposixcc(a)		S_regpposixcc(aTHX_ a)
@@ -4535,22 +4521,8 @@
 #define nextchar		S_nextchar
 #define S_dumpuntil		CPerlObj::S_dumpuntil
 #define dumpuntil		S_dumpuntil
-#define S_put_byte		CPerlObj::S_put_byte
-#define put_byte		S_put_byte
 #define S_scan_commit		CPerlObj::S_scan_commit
 #define scan_commit		S_scan_commit
-#define S_cl_anything		CPerlObj::S_cl_anything
-#define cl_anything		S_cl_anything
-#define S_cl_is_anything	CPerlObj::S_cl_is_anything
-#define cl_is_anything		S_cl_is_anything
-#define S_cl_init		CPerlObj::S_cl_init
-#define cl_init			S_cl_init
-#define S_cl_init_zero		CPerlObj::S_cl_init_zero
-#define cl_init_zero		S_cl_init_zero
-#define S_cl_and		CPerlObj::S_cl_and
-#define cl_and			S_cl_and
-#define S_cl_or			CPerlObj::S_cl_or
-#define cl_or			S_cl_or
 #define S_study_chunk		CPerlObj::S_study_chunk
 #define study_chunk		S_study_chunk
 #define S_add_data		CPerlObj::S_add_data

@@ -79,6 +79,107 @@ Version 5.005_63        Development release working toward 5.6
 ----------------
 
 ____________________________________________________________________________
+[  4621] By: gsar                                  on 1999/12/02  22:24:53
+        Log: caveat about thread-safety of extensions
+     Branch: perl
+	   ! pod/perlfork.pod
+____________________________________________________________________________
+[  4620] By: gsar                                  on 1999/12/02  20:31:02
+        Log: XS documentation patches suggested by Ilya, severally adjusted
+     Branch: perl
+	   ! pod/perlxs.pod pod/perlxstut.pod
+____________________________________________________________________________
+[  4619] By: gsar                                  on 1999/12/02  17:52:50
+        Log: re-add missing Unicode database master
+     Branch: perl
+	   + lib/unicode/Unicode.300
+____________________________________________________________________________
+[  4618] By: gsar                                  on 1999/12/02  06:56:18
+        Log: applied suggested patch with prototype changes
+             From:    Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date:    Tue, 23 Nov 1999 22:55:55 EST
+             Message-Id: <199911240355.WAA23033@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.005_62] First char cognizance
+     Branch: perl
+	   ! embed.h embed.pl perl.h proto.h regcomp.c regcomp.h
+____________________________________________________________________________
+[  4617] By: gsar                                  on 1999/12/02  06:04:57
+        Log: fixes for bugs in change#4586 and OS/2 pod tweak, from Ilya
+     Branch: perl
+	   ! os2/OS2/REXX/REXX.pm regexec.c t/op/re_tests
+____________________________________________________________________________
+[  4616] By: gsar                                  on 1999/12/02  04:30:22
+        Log: various documentation tweaks suggested by M. J. T. Guy
+     Branch: perl
+	   ! INSTALL lib/strict.pm pod/perlfunc.pod pod/perlsyn.pod
+____________________________________________________________________________
+[  4615] By: gsar                                  on 1999/12/02  04:17:43
+        Log: various File::Glob fixes for DOSISH platforms
+             From: "Moore, Paul" <Paul.Moore@uk.origin-it.com>
+             Date: Tue, 02 Nov 1999 11:11:25 GMT
+             Message-Id: <714DFA46B9BBD0119CD000805FC1F53BDC38E3@UKRUX002.rundc.uk.origin-it.com>
+             Subject: File::Glob again. Final patch, honest!
+     Branch: perl
+	   + t/lib/glob-case.t
+	   ! MANIFEST ext/File/Glob/Changes ext/File/Glob/Glob.pm
+	   ! ext/File/Glob/Glob.xs ext/File/Glob/bsd_glob.c
+	   ! ext/File/Glob/bsd_glob.h op.c t/lib/glob-global.t
+____________________________________________________________________________
+[  4614] By: gsar                                  on 1999/12/02  03:42:55
+        Log: allow XSUBs and prototyped subroutines to be used with sort() (tweaked
+             variant of patch suggested by Peter Haworth <pmh@edison.ioppublishing.com>)
+     Branch: perl
+	   ! pod/perldelta.pod pod/perlfunc.pod pp_ctl.c t/op/sort.t
+____________________________________________________________________________
+[  4613] By: gsar                                  on 1999/12/02  01:59:19
+        Log: ignore yet another known scalar leak
+     Branch: perl
+	   ! t/pragma/warn/regcomp
+____________________________________________________________________________
+[  4612] By: gsar                                  on 1999/12/02  01:15:02
+        Log: avoid potential stack extension bug in pp_unpack() (spotted by Ilya)
+     Branch: perl
+	   ! pp.c
+____________________________________________________________________________
+[  4611] By: gsar                                  on 1999/12/02  00:31:43
+        Log: a somewhat tweaked version of suggested patch
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Wed, 27 Oct 1999 18:57:41 -0400 (EDT)
+             Message-Id: <199910272257.SAA29928@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.005_62] Another round of pack/vec docs patches
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[  4610] By: gsar                                  on 1999/12/01  19:09:31
+        Log: more accurate require() pseudocode (from James P. Williams
+             <James.P.Williams@USAHQ.UnitedSpaceAlliance.com>)
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[  4609] By: gsar                                  on 1999/12/01  18:43:49
+        Log: avoid "Callback called exit" error on intentional exit()
+     Branch: perl
+	   ! embedvar.h intrpvar.h objXSUB.h perl.c perl.h pp_ctl.c
+____________________________________________________________________________
+[  4608] By: gsar                                  on 1999/12/01  18:42:38
+        Log: find_byclass() prototype was incoherent
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[  4607] By: gsar                                  on 1999/12/01  05:45:10
+        Log: better documentation for goto &NAME (from M. J. T. Guy)
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[  4606] By: gsar                                  on 1999/12/01  05:33:14
+        Log: integrate cfgperl contents into mainline
+     Branch: perl
+	  +> lib/unicode/Jamo.txt lib/unicode/NamesList.html
+	  +> lib/unicode/UCD300.html lib/unicode/Unicode3.html
+	   - lib/unicode/Jamo-2.txt lib/unicode/Unicode.html
+	   ! Changes
+	  !> (integrate 210 files)
+____________________________________________________________________________
 [  4605] By: gsar                                  on 1999/12/01  05:15:27
         Log: avoid PTR->IV cast warnings
      Branch: perl

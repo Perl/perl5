@@ -151,7 +151,6 @@ typedef struct scan_data_t {
     I32 offset_float_max;
     I32 flags;
     I32 whilem_c;
-    struct regnode_charclass_class *start_class;
 } scan_data_t;
 
 /*
@@ -159,7 +158,7 @@ typedef struct scan_data_t {
  */
 
 static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-				      0, 0, 0, 0, 0 };
+				      0, 0, 0, 0 };
 
 #define SF_BEFORE_EOL		(SF_BEFORE_SEOL|SF_BEFORE_MEOL)
 #define SF_BEFORE_SEOL		0x1
@@ -185,9 +184,6 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 #define SF_IN_PAR		0x100
 #define SF_HAS_EVAL		0x200
 #define SCF_DO_SUBSTR		0x400
-#define SCF_DO_STCLASS_AND	0x0800
-#define SCF_DO_STCLASS_OR	0x1000
-#define SCF_DO_STCLASS		(SCF_DO_STCLASS_AND|SCF_DO_STCLASS_OR)
 
 #define RF_utf8		8
 #define UTF (PL_reg_flags & RF_utf8)
@@ -205,10 +201,6 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 #define REGC(c,s) STMT_START { if (!SIZE_ONLY) *(s) = (c); else (s);} STMT_END
 
 static void clear_re(pTHXo_ void *r);
-
-/* Mark that we cannot extend a found fixed substring at this point.
-   Updata the longest found anchored substring and the longest found
-   floating substrings if needed. */
 
 STATIC void
 S_scan_commit(pTHX_ scan_data_t *data)
@@ -244,135 +236,6 @@ S_scan_commit(pTHX_ scan_data_t *data)
     data->flags &= ~SF_BEFORE_EOL;
 }
 
-/* Can match anything (initialization) */
-STATIC void
-S_cl_anything(pTHX_ struct regnode_charclass_class *cl)
-{
-    int value;
-
-    ANYOF_CLASS_ZERO(cl);
-    for (value = 0; value < 256; ++value)
-	ANYOF_BITMAP_SET(cl, value);
-    cl->flags = ANYOF_EOS;
-    if (LOC)
-	cl->flags |= ANYOF_LOCALE;
-}
-
-/* Can match anything (initialization) */
-STATIC int
-S_cl_is_anything(pTHX_ struct regnode_charclass_class *cl)
-{
-    int value;
-
-    for (value = 0; value < ANYOF_MAX; value += 2)
-	if (ANYOF_CLASS_TEST(cl, value) && ANYOF_CLASS_TEST(cl, value + 1))
-	    return 1;
-    for (value = 0; value < 256; ++value)
-	if (!ANYOF_BITMAP_TEST(cl, value))
-	    return 0;
-    return 1;
-}
-
-/* Can match anything (initialization) */
-STATIC void
-S_cl_init(pTHX_ struct regnode_charclass_class *cl)
-{
-    cl->type = ANYOF;
-    cl_anything(cl);
-}
-
-STATIC void
-S_cl_init_zero(pTHX_ struct regnode_charclass_class *cl)
-{
-    cl->type = ANYOF;
-    cl_anything(cl);
-    ANYOF_CLASS_ZERO(cl);
-    ANYOF_BITMAP_ZERO(cl);
-    if (LOC)
-	cl->flags |= ANYOF_LOCALE;
-}
-
-/* 'And' a given class with another one.  Can create false positives */
-/* We assume that cl is not inverted */
-STATIC void
-S_cl_and(pTHX_ struct regnode_charclass_class *cl,
-	 struct regnode_charclass_class *and_with)
-{
-    int value;
-
-    if (!(and_with->flags & ANYOF_CLASS)
-	&& !(cl->flags & ANYOF_CLASS)
-	&& (and_with->flags & ANYOF_LOCALE) == (cl->flags & ANYOF_LOCALE)
-	&& !(and_with->flags & ANYOF_FOLD)
-	&& !(cl->flags & ANYOF_FOLD)) {
-	int i;
-
-	if (and_with->flags & ANYOF_INVERT)
-	    for (i = 0; i < ANYOF_BITMAP_SIZE; i++)
-		cl->bitmap[i] &= ~and_with->bitmap[i];
-	else
-	    for (i = 0; i < ANYOF_BITMAP_SIZE; i++)
-		cl->bitmap[i] &= and_with->bitmap[i];
-    } /* XXXX: logic is complicated otherwise, leave it along for a moment. */
-    if (!(and_with->flags & ANYOF_EOS))
-	cl->flags &= ~ANYOF_EOS;
-}
-
-/* 'OR' a given class with another one.  Can create false positives */
-/* We assume that cl is not inverted */
-STATIC void
-S_cl_or(pTHX_ struct regnode_charclass_class *cl, struct regnode_charclass_class *or_with)
-{
-    int value;
-
-    if (or_with->flags & ANYOF_INVERT) {
-	/* We do not use
-	 * (B1 | CL1) | (!B2 & !CL2) = (B1 | !B2 & !CL2) | (CL1 | (!B2 & !CL2))
-	 *   <= (B1 | !B2) | (CL1 | !CL2)
-	 * which is wasteful if CL2 is small, but we ignore CL2:
-	 *   (B1 | CL1) | (!B2 & !CL2) <= (B1 | CL1) | !B2 = (B1 | !B2) | CL1
-	 * XXXX Can we handle case-fold?  Unclear:
-	 *   (OK1(i) | OK1(i')) | !(OK1(i) | OK1(i')) =
-	 *   (OK1(i) | OK1(i')) | (!OK1(i) & !OK1(i'))
-	 */
-	if ( (or_with->flags & ANYOF_LOCALE) == (cl->flags & ANYOF_LOCALE)
-	     && !(or_with->flags & ANYOF_FOLD)
-	     && !(cl->flags & ANYOF_FOLD) ) {
-	    int i;
-
-	    for (i = 0; i < ANYOF_BITMAP_SIZE; i++)
-		cl->bitmap[i] |= ~or_with->bitmap[i];
-	} /* XXXX: logic is complicated otherwise */
-	else {
-	    cl_anything(cl);
-	}
-    } else {
-	/* (B1 | CL1) | (B2 | CL2) = (B1 | B2) | (CL1 | CL2)) */
-	if ( (or_with->flags & ANYOF_LOCALE) == (cl->flags & ANYOF_LOCALE)
-	     && (!(or_with->flags & ANYOF_FOLD) 
-		 || (cl->flags & ANYOF_FOLD)) ) {
-	    int i;
-
-	    /* OR char bitmap and class bitmap separately */
-	    for (i = 0; i < ANYOF_BITMAP_SIZE; i++)
-		cl->bitmap[i] |= or_with->bitmap[i];
-	    if (or_with->flags & ANYOF_CLASS) {
-		for (i = 0; i < ANYOF_CLASSBITMAP_SIZE; i++)
-		    cl->classflags[i] |= or_with->classflags[i];
-		cl->flags |= ANYOF_CLASS;
-	    }
-	}
-	else { /* XXXX: logic is complicated, leave it along for a moment. */
-	    cl_anything(cl);
-	}
-    }
-    if (or_with->flags & ANYOF_EOS)
-	cl->flags |= ANYOF_EOS;
-}
-
-/* REx optimizer.  Converts nodes into quickier variants "in place".
-   Finds fixed substrings.  */
-
 /* Stops at toplevel WHILEM as well as at `last'. At end *scanp is set
    to the position after last scanned or to NULL. */
 
@@ -390,13 +253,11 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
     int is_inf_internal = 0;		/* The studied chunk is infinite */
     I32 is_par = OP(scan) == OPEN ? ARG(scan) : 0;
     scan_data_t data_fake;
-    struct regnode_charclass_class and_with; /* Valid if flags & SCF_DO_STCLASS_OR */
     
     while (scan && OP(scan) != END && scan < last) {
 	/* Peephole optimizer: */
 
 	if (PL_regkind[(U8)OP(scan)] == EXACT) {
-	    /* Merge several consecutive EXACTish nodes into one. */
 	    regnode *n = regnext(scan);
 	    U32 stringok = 1;
 #ifdef DEBUGGING
@@ -444,16 +305,19 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 	    /* Allow dumping */
 	    n = scan + NODE_SZ_STR(scan);
 	    while (n <= stop) {
+		/* Purify reports a benign UMR here sometimes, because we
+		 * don't initialize the OP() slot of a node when that node
+		 * is occupied by just the trailing null of the string in
+		 * an EXACT node */
 		if (PL_regkind[(U8)OP(n)] != NOTHING || OP(n) == NOTHING) {
 		    OP(n) = OPTIMIZED;
 		    NEXT_OFF(n) = 0;
 		}
 		n++;
 	    }
-#endif
+#endif 
+
 	}
-	/* Follow the next-chain of the current node and optimize
-	   away all the NOTHINGs from it.  */
 	if (OP(scan) != CURLYX) {
 	    int max = (reg_off_by_arg[OP(scan)]
 		       ? I32_MAX
@@ -474,8 +338,6 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 	    else 
 		NEXT_OFF(scan) = off;
 	}
-	/* The principal pseudo-switch.  Cannot be a switch, since we
-	   look into several different things.  */
 	if (OP(scan) == BRANCH || OP(scan) == BRANCHJ 
 		   || OP(scan) == IFTHEN || OP(scan) == SUSPEND) {
 	    next = regnext(scan);
@@ -483,15 +345,11 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 	    
 	    if (OP(next) == code || code == IFTHEN || code == SUSPEND) { 
 		I32 max1 = 0, min1 = I32_MAX, num = 0;
-		struct regnode_charclass_class accum;
 		
-		if (flags & SCF_DO_SUBSTR) /* XXXX Add !SUSPEND? */
-		    scan_commit(data);	/* Cannot merge strings after this. */
-		if (flags & SCF_DO_STCLASS)
-		    cl_init_zero(&accum);
+		if (flags & SCF_DO_SUBSTR)
+		    scan_commit(data);
 		while (OP(scan) == code) {
-		    I32 deltanext, minnext, f = 0;
-		    struct regnode_charclass_class this_class;
+		    I32 deltanext, minnext;
 
 		    num++;
 		    data_fake.flags = 0;
@@ -501,14 +359,9 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		    scan = NEXTOPER(scan);
 		    if (code != BRANCH)
 			scan = NEXTOPER(scan);
-		    if (flags & SCF_DO_STCLASS) {
-			cl_init(&this_class);
-			data_fake.start_class = &this_class;
-			f = SCF_DO_STCLASS_AND;
-		    }		    
-		    /* we suppose the run is continuous, last=next...*/
+		    /* We suppose the run is continuous, last=next...*/
 		    minnext = study_chunk(&scan, &deltanext, next,
-					  &data_fake, f);
+					  &data_fake, 0);
 		    if (min1 > minnext) 
 			min1 = minnext;
 		    if (max1 < minnext + deltanext)
@@ -522,8 +375,6 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 			data->flags |= SF_HAS_EVAL;
 		    if (data)
 			data->whilem_c = data_fake.whilem_c;
-		    if (flags & SCF_DO_STCLASS)
-			cl_or(&accum, &this_class);
 		    if (code == SUSPEND) 
 			break;
 		}
@@ -537,18 +388,6 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		}
 		min += min1;
 		delta += max1 - min1;
-		if (flags & SCF_DO_STCLASS_OR) {
-		    cl_or(data->start_class, &accum);
-		    if (min1) {
-			cl_and(data->start_class, &and_with);
-			flags &= ~SCF_DO_STCLASS;
-		    }
-		}
-		else if (flags & SCF_DO_STCLASS_AND) {
-		    cl_and(data->start_class, &accum);
-		    if (min1)
-			flags &= ~SCF_DO_STCLASS;
-		}
 	    }
 	    else if (code == BRANCHJ)	/* single branch is optimized. */
 		scan = NEXTOPER(NEXTOPER(scan));
@@ -582,34 +421,9 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		data->pos_min += l; /* As in the first entry. */
 		data->flags &= ~SF_BEFORE_EOL;
 	    }
-	    if (flags & SCF_DO_STCLASS_AND) {
-		/* Check whether it is compatible with what we know already! */
-		int compat = 1;
-
-		if (!(data->start_class->flags & (ANYOF_CLASS | ANYOF_LOCALE)) 
-		    && !ANYOF_BITMAP_TEST(data->start_class, *STRING(scan))
-		    && (!(data->start_class->flags & ANYOF_FOLD)
-			|| !ANYOF_BITMAP_TEST(data->start_class,
-					      PL_fold[*STRING(scan)])))
-		    compat = 0;
-		ANYOF_CLASS_ZERO(data->start_class);
-		ANYOF_BITMAP_ZERO(data->start_class);
-		if (compat)
-		    ANYOF_BITMAP_SET(data->start_class, *STRING(scan));
-		data->start_class->flags &= ~ANYOF_EOS;
-	    }
-	    else if (flags & SCF_DO_STCLASS_OR) {
-		/* false positive possible if the class is case-folded */
-		ANYOF_BITMAP_SET(data->start_class, *STRING(scan));	
-		data->start_class->flags &= ~ANYOF_EOS;
-		cl_and(data->start_class, &and_with);
-	    }
-	    flags &= ~SCF_DO_STCLASS;
 	}
-	else if (PL_regkind[(U8)OP(scan)] == EXACT) { /* But OP != EXACT! */
+	else if (PL_regkind[(U8)OP(scan)] == EXACT) {
 	    I32 l = STR_LEN(scan);
-
-	    /* Search for fixed substrings supports EXACT only. */
 	    if (flags & SCF_DO_SUBSTR) 
 		scan_commit(data);
 	    if (UTF) {
@@ -625,51 +439,19 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 	    min += l;
 	    if (data && (flags & SCF_DO_SUBSTR))
 		data->pos_min += l;
-	    if (flags & SCF_DO_STCLASS_AND) {
-		/* Check whether it is compatible with what we know already! */
-		int compat = 1;
-
-		if (!(data->start_class->flags & (ANYOF_CLASS | ANYOF_LOCALE)) 
-		    && !ANYOF_BITMAP_TEST(data->start_class, *STRING(scan))
-		    && !ANYOF_BITMAP_TEST(data->start_class, 
-					  PL_fold[*STRING(scan)]))
-		    compat = 0;
-		ANYOF_CLASS_ZERO(data->start_class);
-		ANYOF_BITMAP_ZERO(data->start_class);
-		if (compat) {
-		    ANYOF_BITMAP_SET(data->start_class, *STRING(scan));
-		    data->start_class->flags &= ~ANYOF_EOS;
-		    data->start_class->flags |= ANYOF_FOLD;
-		    if (OP(scan) == EXACTFL)
-			data->start_class->flags |= ANYOF_LOCALE;
-		}
-	    }
-	    else if (flags & SCF_DO_STCLASS_OR) {
-		if (data->start_class->flags & ANYOF_FOLD) {
-		    /* false positive possible if the class is case-folded.
-		       Assume that the locale settings are the same... */
-		    ANYOF_BITMAP_SET(data->start_class, *STRING(scan));	
-		    data->start_class->flags &= ~ANYOF_EOS;
-		}
-		cl_and(data->start_class, &and_with);
-	    }
-	    flags &= ~SCF_DO_STCLASS;
 	}
 	else if (strchr((char*)PL_varies,OP(scan))) {
 	    I32 mincount, maxcount, minnext, deltanext, pos_before, fl;
-	    I32 f = flags;
 	    regnode *oscan = scan;
-	    struct regnode_charclass_class this_class;
-	    struct regnode_charclass_class *oclass = NULL;
-
+	    
 	    switch (PL_regkind[(U8)OP(scan)]) {
-	    case WHILEM:		/* End of (?:...)* . */
+	    case WHILEM:
 		scan = NEXTOPER(scan);
 		goto finish;
 	    case PLUS:
-		if (flags & (SCF_DO_SUBSTR | SCF_DO_STCLASS)) {
+		if (flags & SCF_DO_SUBSTR) {
 		    next = NEXTOPER(scan);
-		    if (OP(next) == EXACT || (flags & SCF_DO_STCLASS)) {
+		    if (OP(next) == EXACT) {
 			mincount = 1; 
 			maxcount = REG_INFTY; 
 			next = regnext(scan);
@@ -682,17 +464,10 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		min++;
 		/* Fall through. */
 	    case STAR:
-		if (flags & SCF_DO_STCLASS) {
-		    mincount = 0;
-		    maxcount = REG_INFTY; 
-		    next = regnext(scan);
-		    scan = NEXTOPER(scan);
-		    goto do_curly;
-		}
 		is_inf = is_inf_internal = 1; 
 		scan = regnext(scan);
 		if (flags & SCF_DO_SUBSTR) {
-		    scan_commit(data);	/* Cannot extend fixed substrings */
+		    scan_commit(data);
 		    data->longest = &(data->longest_float);
 		}
 		goto optimize_curly_tail;
@@ -703,7 +478,7 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		scan = NEXTOPER(scan) + EXTRA_STEP_2ARGS;
 	      do_curly:
 		if (flags & SCF_DO_SUBSTR) {
-		    if (mincount == 0) scan_commit(data); /* Cannot extend fixed substrings */
+		    if (mincount == 0) scan_commit(data);
 		    pos_before = data->pos_min;
 		}
 		if (data) {
@@ -712,45 +487,10 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		    if (is_inf)
 			data->flags |= SF_IS_INF;
 		}
-		if (flags & SCF_DO_STCLASS) {
-		    cl_init(&this_class);
-		    oclass = data->start_class;
-		    data->start_class = &this_class;
-		    f |= SCF_DO_STCLASS_AND;
-		    f &= ~SCF_DO_STCLASS_OR;
-		}
-
 		/* This will finish on WHILEM, setting scan, or on NULL: */
 		minnext = study_chunk(&scan, &deltanext, last, data, 
 				      mincount == 0 
-					? (f & ~SCF_DO_SUBSTR) : f);
-
-		if (flags & SCF_DO_STCLASS)
-		    data->start_class = oclass;
-		if (mincount == 0 || minnext == 0) {
-		    if (flags & SCF_DO_STCLASS_OR) {
-			cl_or(data->start_class, &this_class);
-		    }
-		    else if (flags & SCF_DO_STCLASS_AND) {
-			/* Switch to OR mode: cache the old value of 
-			 * data->start_class */
-			StructCopy(data->start_class, &and_with,
-				   struct regnode_charclass_class);
-			flags &= ~SCF_DO_STCLASS_AND;
-			StructCopy(&this_class, data->start_class,
-				   struct regnode_charclass_class);
-			flags |= SCF_DO_STCLASS_OR;
-			data->start_class->flags |= ANYOF_EOS;
-		    }
-		} else {		/* Non-zero len */
-		    if (flags & SCF_DO_STCLASS_OR) {
-			cl_or(data->start_class, &this_class);
-			cl_and(data->start_class, &and_with);
-		    }
-		    else if (flags & SCF_DO_STCLASS_AND)
-			cl_and(data->start_class, &this_class);
-		    flags &= ~SCF_DO_STCLASS;
-		}
+					? (flags & ~SCF_DO_SUBSTR) : flags);
 		if (!scan) 		/* It was not CURLYX, but CURLY. */
 		    scan = next;
 		if (ckWARN(WARN_UNSAFE) && (minnext + deltanext == 0) 
@@ -900,8 +640,6 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		    data->pos_delta += - counted * deltanext +
 			(minnext + deltanext) * maxcount - minnext * mincount;
 		    if (mincount != maxcount) {
-			 /* Cannot extend fixed substrings found inside
-			    the group.  */
 			scan_commit(data);
 			if (mincount && last_str) {
 			    sv_setsv(data->last_found, last_str);
@@ -926,258 +664,39 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 			NEXT_OFF(oscan) += NEXT_OFF(next);
 		}
 		continue;
-	    default:			/* REF and CLUMP only? */
+	    default:			/* REF only? */
 		if (flags & SCF_DO_SUBSTR) {
-		    scan_commit(data);	/* Cannot expect anything... */
+		    scan_commit(data);
 		    data->longest = &(data->longest_float);
 		}
 		is_inf = is_inf_internal = 1;
-		if (flags & SCF_DO_STCLASS_OR)
-		    cl_anything(data->start_class);
-		flags &= ~SCF_DO_STCLASS;
 		break;
 	    }
 	}
 	else if (strchr((char*)PL_simple,OP(scan)) || PL_regkind[(U8)OP(scan)] == ANYUTF8) {
-	    int value;
-
 	    if (flags & SCF_DO_SUBSTR) {
 		scan_commit(data);
 		data->pos_min++;
 	    }
 	    min++;
-	    if (flags & SCF_DO_STCLASS) {
-		data->start_class->flags &= ~ANYOF_EOS;	/* No match on empty */
-
-		/* Some of the logic below assumes that switching
-		   locale on will only add false positives. */
-		switch (PL_regkind[(U8)OP(scan)]) {
-		case ANYUTF8:
-		case SANY:
-		case SANYUTF8:
-		case ALNUMUTF8:
-		case ANYOFUTF8:
-		case ALNUMLUTF8:
-		case NALNUMUTF8:
-		case NALNUMLUTF8:
-		case SPACEUTF8:
-		case NSPACEUTF8:
-		case SPACELUTF8:
-		case NSPACELUTF8:
-		case DIGITUTF8:
-		case NDIGITUTF8:
-		default:
-		  do_default:
-		    /* Perl_croak(aTHX_ "panic: unexpected simple REx opcode %d", OP(scan)); */
-		    if (flags & SCF_DO_STCLASS_OR) /* Allow everything */
-			cl_anything(data->start_class);
-		    break;
-		case REG_ANY:
-		    if (OP(scan) == SANY)
-			goto do_default;
-		    if (flags & SCF_DO_STCLASS_OR) { /* Everything but \n */
-			value = (ANYOF_BITMAP_TEST(data->start_class,'\n')
-				 || (data->start_class->flags & ANYOF_CLASS));
-			cl_anything(data->start_class);
-		    }
-		    if (flags & SCF_DO_STCLASS_AND || !value)
-			ANYOF_BITMAP_CLEAR(data->start_class,'\n');
-		    break;
-		case ANYOF:
-		    if (flags & SCF_DO_STCLASS_AND)
-			cl_and(data->start_class,
-			       (struct regnode_charclass_class*)scan);
-		    else
-			cl_or(data->start_class,
-			      (struct regnode_charclass_class*)scan);
-		    break;
-		case ALNUM:
-		    if (flags & SCF_DO_STCLASS_AND) {
-			if (!(data->start_class->flags & ANYOF_LOCALE)) {
-			    ANYOF_CLASS_CLEAR(data->start_class,ANYOF_NALNUM);
-			    for (value = 0; value < 256; value++)
-				if (!isALNUM(value))
-				    ANYOF_BITMAP_CLEAR(data->start_class, value);
-			}
-		    }
-		    else {
-			if (data->start_class->flags & ANYOF_LOCALE)
-			    ANYOF_CLASS_SET(data->start_class,ANYOF_ALNUM);
-			else {
-			    for (value = 0; value < 256; value++)
-				if (isALNUM(value))
-				    ANYOF_BITMAP_SET(data->start_class, value);			    
-			}
-		    }
-		    break;
-		case ALNUML:
-		    if (flags & SCF_DO_STCLASS_AND) {
-			if (data->start_class->flags & ANYOF_LOCALE)
-			    ANYOF_CLASS_CLEAR(data->start_class,ANYOF_NALNUM);
-		    }
-		    else {
-			ANYOF_CLASS_SET(data->start_class,ANYOF_ALNUM);
-			data->start_class->flags |= ANYOF_LOCALE;
-		    }
-		    break;
-		case NALNUM:
-		    if (flags & SCF_DO_STCLASS_AND) {
-			if (!(data->start_class->flags & ANYOF_LOCALE)) {
-			    ANYOF_CLASS_CLEAR(data->start_class,ANYOF_ALNUM);
-			    for (value = 0; value < 256; value++)
-				if (isALNUM(value))
-				    ANYOF_BITMAP_CLEAR(data->start_class, value);
-			}
-		    }
-		    else {
-			if (data->start_class->flags & ANYOF_LOCALE)
-			    ANYOF_CLASS_SET(data->start_class,ANYOF_NALNUM);
-			else {
-			    for (value = 0; value < 256; value++)
-				if (!isALNUM(value))
-				    ANYOF_BITMAP_SET(data->start_class, value);			    
-			}
-		    }
-		    break;
-		case NALNUML:
-		    if (flags & SCF_DO_STCLASS_AND) {
-			if (data->start_class->flags & ANYOF_LOCALE)
-			    ANYOF_CLASS_CLEAR(data->start_class,ANYOF_ALNUM);
-		    }
-		    else {
-			data->start_class->flags |= ANYOF_LOCALE;
-			ANYOF_CLASS_SET(data->start_class,ANYOF_NALNUM);
-		    }
-		    break;
-		case SPACE:
-		    if (flags & SCF_DO_STCLASS_AND) {
-			if (!(data->start_class->flags & ANYOF_LOCALE)) {
-			    ANYOF_CLASS_CLEAR(data->start_class,ANYOF_NSPACE);
-			    for (value = 0; value < 256; value++)
-				if (!isSPACE(value))
-				    ANYOF_BITMAP_CLEAR(data->start_class, value);
-			}
-		    }
-		    else {
-			if (data->start_class->flags & ANYOF_LOCALE)
-			    ANYOF_CLASS_SET(data->start_class,ANYOF_SPACE);
-			else {
-			    for (value = 0; value < 256; value++)
-				if (isSPACE(value))
-				    ANYOF_BITMAP_SET(data->start_class, value);			    
-			}
-		    }
-		    break;
-		case SPACEL:
-		    if (flags & SCF_DO_STCLASS_AND) {
-			if (data->start_class->flags & ANYOF_LOCALE)
-			    ANYOF_CLASS_CLEAR(data->start_class,ANYOF_NSPACE);
-		    }
-		    else {
-			data->start_class->flags |= ANYOF_LOCALE;
-			ANYOF_CLASS_SET(data->start_class,ANYOF_SPACE);
-		    }
-		    break;
-		case NSPACE:
-		    if (flags & SCF_DO_STCLASS_AND) {
-			if (!(data->start_class->flags & ANYOF_LOCALE)) {
-			    ANYOF_CLASS_CLEAR(data->start_class,ANYOF_SPACE);
-			    for (value = 0; value < 256; value++)
-				if (isSPACE(value))
-				    ANYOF_BITMAP_CLEAR(data->start_class, value);
-			}
-		    }
-		    else {
-			if (data->start_class->flags & ANYOF_LOCALE)
-			    ANYOF_CLASS_SET(data->start_class,ANYOF_NSPACE);
-			else {
-			    for (value = 0; value < 256; value++)
-				if (!isSPACE(value))
-				    ANYOF_BITMAP_SET(data->start_class, value);			    
-			}
-		    }
-		    break;
-		case NSPACEL:
-		    if (flags & SCF_DO_STCLASS_AND) {
-			if (data->start_class->flags & ANYOF_LOCALE) {
-			    ANYOF_CLASS_CLEAR(data->start_class,ANYOF_SPACE);
-			    for (value = 0; value < 256; value++)
-				if (!isSPACE(value))
-				    ANYOF_BITMAP_CLEAR(data->start_class, value);
-			}
-		    }
-		    else {
-			data->start_class->flags |= ANYOF_LOCALE;
-			ANYOF_CLASS_SET(data->start_class,ANYOF_NSPACE);
-		    }
-		    break;
-		case DIGIT:
-		    if (flags & SCF_DO_STCLASS_AND) {
-			ANYOF_CLASS_CLEAR(data->start_class,ANYOF_NDIGIT);
-			for (value = 0; value < 256; value++)
-			    if (!isDIGIT(value))
-				ANYOF_BITMAP_CLEAR(data->start_class, value);
-		    }
-		    else {
-			if (data->start_class->flags & ANYOF_LOCALE)
-			    ANYOF_CLASS_SET(data->start_class,ANYOF_DIGIT);
-			else {
-			    for (value = 0; value < 256; value++)
-				if (isDIGIT(value))
-				    ANYOF_BITMAP_SET(data->start_class, value);			    
-			}
-		    }
-		    break;
-		case NDIGIT:
-		    if (flags & SCF_DO_STCLASS_AND) {
-			ANYOF_CLASS_CLEAR(data->start_class,ANYOF_DIGIT);
-			for (value = 0; value < 256; value++)
-			    if (isDIGIT(value))
-				ANYOF_BITMAP_CLEAR(data->start_class, value);
-		    }
-		    else {
-			if (data->start_class->flags & ANYOF_LOCALE)
-			    ANYOF_CLASS_SET(data->start_class,ANYOF_NDIGIT);
-			else {
-			    for (value = 0; value < 256; value++)
-				if (!isDIGIT(value))
-				    ANYOF_BITMAP_SET(data->start_class, value);			    
-			}
-		    }
-		    break;
-		}
-		if (flags & SCF_DO_STCLASS_OR)
-		    cl_and(data->start_class, &and_with);
-		flags &= ~SCF_DO_STCLASS;
-	    }
 	}
 	else if (PL_regkind[(U8)OP(scan)] == EOL && flags & SCF_DO_SUBSTR) {
 	    data->flags |= (OP(scan) == MEOL
 			    ? SF_BEFORE_MEOL
 			    : SF_BEFORE_SEOL);
 	}
-	else if (  PL_regkind[(U8)OP(scan)] == BRANCHJ
-		 /* Lookbehind, or need to calculate parens/evals/stclass: */
-		   && (scan->flags || data || (flags & SCF_DO_STCLASS))
+	else if (PL_regkind[(U8)OP(scan)] == BRANCHJ
+		   && (scan->flags || data)
 		   && (OP(scan) == IFMATCH || OP(scan) == UNLESSM)) {
-	    /* Lookahead/lookbehind */
 	    I32 deltanext, minnext;
 	    regnode *nscan;
-	    struct regnode_charclass_class intrnl;
-	    int f = 0;
 
 	    data_fake.flags = 0;
 	    if (data)
 		data_fake.whilem_c = data->whilem_c;
-	    if ( flags & SCF_DO_STCLASS && !scan->flags
-		 && OP(scan) == IFMATCH ) { /* Lookahead */
-		cl_init(&intrnl);
-		data_fake.start_class = &intrnl;
-		f = SCF_DO_STCLASS_AND;
-	    }
 	    next = regnext(scan);
 	    nscan = NEXTOPER(NEXTOPER(scan));
-	    minnext = study_chunk(&nscan, &deltanext, last, &data_fake, f);
+	    minnext = study_chunk(&nscan, &deltanext, last, &data_fake, 0);
 	    if (scan->flags) {
 		if (deltanext) {
 		    FAIL("variable length lookbehind not implemented");
@@ -1193,13 +712,6 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		data->flags |= SF_HAS_EVAL;
 	    if (data)
 		data->whilem_c = data_fake.whilem_c;
-	    if (f) {
-		int was = (data->start_class->flags & ANYOF_EOS);
-
-		cl_and(data->start_class, &intrnl);
-		if (was)
-		    data->start_class->flags |= ANYOF_EOS;
-	    }
 	}
 	else if (OP(scan) == OPEN) {
 	    pars++;
@@ -1220,8 +732,6 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		    data->longest = &(data->longest_float);
 		}
 		is_inf = is_inf_internal = 1;
-		if (flags & SCF_DO_STCLASS_OR) /* Allow everything */
-		    cl_anything(data->start_class);
 	}
 	/* Else: zero-length, ignore. */
 	scan = regnext(scan);
@@ -1242,8 +752,6 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 	data->flags |= SF_HAS_PAR;
 	data->flags &= ~SF_IN_PAR;
     }
-    if (flags & SCF_DO_STCLASS_OR)
-	cl_and(data->start_class, &and_with);
     return min;
 }
 
@@ -1416,21 +924,16 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     Newz(1004, r->substrs, 1, struct reg_substr_data);
 
     StructCopy(&zero_scan_data, &data, scan_data_t);
-    /* XXXX Should not we check for something else?  Usually it is OPEN1... */
     if (OP(scan) != BRANCH) {	/* Only one top-level choice. */
 	I32 fake;
 	STRLEN longest_float_length, longest_fixed_length;
-	struct regnode_charclass_class ch_class;
-	int stclass_flag;
 
 	first = scan;
 	/* Skip introductions and multiplicators >= 1. */
 	while ((OP(first) == OPEN && (sawopen = 1)) ||
-	       /* An OR of *one* alternative - should not happen now. */
 	    (OP(first) == BRANCH && OP(regnext(first)) != BRANCH) ||
 	    (OP(first) == PLUS) ||
 	    (OP(first) == MINMOD) ||
-	       /* An {n,m} with n>0 */
 	    (PL_regkind[(U8)OP(first)] == CURLY && ARG1(first) > 0) ) {
 		if (OP(first) == PLUS)
 		    sawplus = 1;
@@ -1441,13 +944,13 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 
 	/* Starting-point info. */
       again:
-	if (PL_regkind[(U8)OP(first)] == EXACT) {
+	if (PL_regkind[(U8)OP(first) == EXACT]) {
 	    if (OP(first) == EXACT);	/* Empty, get anchored substr later. */
 	    else if ((OP(first) == EXACTF || OP(first) == EXACTFL)
 		     && !UTF)
 		r->regstclass = first;
 	}
-	else if (strchr((char*)PL_simple,OP(first)))
+	else if (strchr((char*)PL_simple+4,OP(first)))
 	    r->regstclass = first;
 	else if (PL_regkind[(U8)OP(first)] == BOUND ||
 		 PL_regkind[(U8)OP(first)] == NBOUND)
@@ -1508,15 +1011,9 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	data.last_found = newSVpvn("",0);
 	data.longest = &(data.longest_fixed);
 	first = scan;
-	if (!r->regstclass) {
-	    cl_init(&ch_class);
-	    data.start_class = &ch_class;
-	    stclass_flag = SCF_DO_STCLASS_AND;
-	} else				/* XXXX Check for BOUND? */
-	    stclass_flag = 0;
-
+	
 	minlen = study_chunk(&first, &fake, scan + PL_regsize, /* Up to end */
-			     &data, SCF_DO_SUBSTR | stclass_flag);
+			     &data, SCF_DO_SUBSTR);
 	if ( PL_regnpar == 1 && data.longest == &(data.longest_fixed)
 	     && data.last_start_min == 0 && data.last_end > 0 
 	     && !PL_seen_zerolen
@@ -1571,28 +1068,6 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	    SvREFCNT_dec(data.longest_fixed);
 	    longest_fixed_length = 0;
 	}
-	if (r->regstclass 
-	    && (OP(r->regstclass) == REG_ANY || OP(r->regstclass) == ANYUTF8
-		|| OP(r->regstclass) == SANYUTF8 || OP(r->regstclass) == SANY))
-	    r->regstclass = NULL;
-	if ((!r->anchored_substr || r->anchored_offset) && stclass_flag
-	    && !(data.start_class->flags & ANYOF_EOS)
-	    && !cl_is_anything(data.start_class)) {
-	    SV *sv;
-	    I32 n = add_data(1, "f");
-
-	    New(1006, PL_regcomp_rx->data->data[n], 1, 
-		struct regnode_charclass_class);
-	    StructCopy(data.start_class,
-		       (struct regnode_charclass_class*)PL_regcomp_rx->data->data[n],
-		       struct regnode_charclass_class);
-	    r->regstclass = (regnode*)PL_regcomp_rx->data->data[n];
-	    r->reganch &= ~ROPT_SKIP;	/* Used in find_byclass(). */
-	    DEBUG_r((sv = sv_newmortal(),
-		     regprop(sv, (regnode*)data.start_class),
-		     PerlIO_printf(Perl_debug_log, "synthetic stclass.\n",
-				   SvPVX(sv))));
-	}
 
 	/* A temporary algorithm prefers floated substr to fixed one to dig more info. */
 	if (longest_fixed_length > longest_float_length) {
@@ -1617,31 +1092,11 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     else {
 	/* Several toplevels. Best we can is to set minlen. */
 	I32 fake;
-	struct regnode_charclass_class ch_class;
 	
 	DEBUG_r(PerlIO_printf(Perl_debug_log, "\n"));
 	scan = r->program + 1;
-	cl_init(&ch_class);
-	data.start_class = &ch_class;
-	minlen = study_chunk(&scan, &fake, scan + PL_regsize, &data, SCF_DO_STCLASS_AND);
+	minlen = study_chunk(&scan, &fake, scan + PL_regsize, &data, 0);
 	r->check_substr = r->anchored_substr = r->float_substr = Nullsv;
-	if (!(data.start_class->flags & ANYOF_EOS)
-	    && !cl_is_anything(data.start_class)) {
-	    SV *sv;
-	    I32 n = add_data(1, "f");
-
-	    New(1006, PL_regcomp_rx->data->data[n], 1, 
-		struct regnode_charclass_class);
-	    StructCopy(data.start_class,
-		       (struct regnode_charclass_class*)PL_regcomp_rx->data->data[n],
-		       struct regnode_charclass_class);
-	    r->regstclass = (regnode*)PL_regcomp_rx->data->data[n];
-	    r->reganch &= ~ROPT_SKIP;	/* Used in find_byclass(). */
-	    DEBUG_r((sv = sv_newmortal(),
-		     regprop(sv, (regnode*)data.start_class),
-		     PerlIO_printf(Perl_debug_log, "synthetic stclass.\n",
-				   SvPVX(sv))));
-	}
     }
 
     r->minlen = minlen;
@@ -3855,17 +3310,6 @@ Perl_regdump(pTHX_ regexp *r)
 #endif	/* DEBUGGING */
 }
 
-STATIC void
-S_put_byte(pTHX_ SV *sv, int c)
-{
-    if (c <= ' ' || c == 127 || c == 255)
-	Perl_sv_catpvf(aTHX_ sv, "\\%o", c);
-    else if (c == '-' || c == ']' || c == '\\' || c == '^')
-	Perl_sv_catpvf(aTHX_ sv, "\\%c", c);
-    else
-	Perl_sv_catpvf(aTHX_ sv, "%c", c);
-}
-
 /*
 - regprop - printable representation of opcode
 */
@@ -3897,67 +3341,6 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 	Perl_sv_catpvf(aTHX_ sv, "%d", ARG(o));	/* Parenth number */
     else if (k == LOGICAL)
 	Perl_sv_catpvf(aTHX_ sv, "[%d]", o->flags);	/* 2: embedded, otherwise 1 */
-    else if (k == ANYOF) {
-	int i, rangestart = -1;
-	const char * const out[] = {	/* Should be syncronized with
-					   a table in regcomp.h */
-	    "\\w",
-	    "\\W",
-	    "\\s",
-	    "\\S",
-	    "\\d",
-	    "\\D",
-	    "[:alnum:]",
-	    "[:^alnum:]",
-	    "[:alpha:]",
-	    "[:^alpha:]",
-	    "[:ascii:]",
-	    "[:^ascii:]",
-	    "[:ctrl:]",
-	    "[:^ctrl:]",
-	    "[:graph:]",
-	    "[:^graph:]",
-	    "[:lower:]",
-	    "[:^lower:]",
-	    "[:print:]",
-	    "[:^print:]",
-	    "[:punct:]",
-	    "[:^punct:]",
-	    "[:upper:]",
-	    "[:!upper:]",
-	    "[:xdigit:]",
-	    "[:^xdigit:]"
-	};
-
-	if (o->flags & ANYOF_LOCALE)
-	    sv_catpv(sv, "{loc}");
-	if (o->flags & ANYOF_FOLD)
-	    sv_catpv(sv, "{i}");
-	Perl_sv_catpvf(aTHX_ sv, "[%s", PL_colors[0]);
-	if (o->flags & ANYOF_INVERT)
-	    sv_catpv(sv, "^");
-	for (i = 0; i <= 256; i++) {
-	    if (i < 256 && ANYOF_BITMAP_TEST(o,i)) {
-		if (rangestart == -1)
-		    rangestart = i;
-	    } else if (rangestart != -1) {
-		if (i <= rangestart + 3)
-		    for (; rangestart < i; rangestart++)
-			put_byte(sv, rangestart);
-		else {
-		    put_byte(sv, rangestart);
-		    sv_catpv(sv, "-");
-		    put_byte(sv, i - 1);
-		}
-		rangestart = -1;
-	    }
-	}
-	if (o->flags & ANYOF_CLASS)
-	    for (i = 0; i < sizeof(out)/sizeof(char*); i++)
-		if (ANYOF_CLASS_TEST(o,i))
-		    sv_catpv(sv, out[i]);
-	Perl_sv_catpvf(aTHX_ sv, "%s]", PL_colors[1]);
-    }
     else if (k == BRANCHJ && (OP(o) == UNLESSM || OP(o) == IFMATCH))
 	Perl_sv_catpvf(aTHX_ sv, "[-%d]", o->flags);
 #endif	/* DEBUGGING */
@@ -4018,9 +3401,6 @@ Perl_pregfree(pTHX_ struct regexp *r)
 	    switch (r->data->what[n]) {
 	    case 's':
 		SvREFCNT_dec((SV*)r->data->data[n]);
-		break;
-	    case 'f':
-		Safefree(r->data->data[n]);
 		break;
 	    case 'p':
 		new_comppad = (AV*)r->data->data[n];

@@ -1748,7 +1748,6 @@ struct _sublex_info {
 typedef struct magic_state MGS;	/* struct magic_state defined in mg.c */
 
 struct scan_data_t;		/* Used in S_* functions in regcomp.c */
-struct regnode_charclass_class;	/* Used in S_* functions in regcomp.c */
 
 typedef I32 CHECKPOINT;
 
