@@ -581,8 +581,22 @@ sub _div_use_mul
         # fit's into one Perl scalar, so result can be computed directly
         # cannot use int() here, because it rounds wrongly on some systems
         #$x->[0] = int($x->[-1] / $yorg->[-1]);
-        # round to 8 digits, then truncate result to integer
-        $x->[0] = int ( sprintf ("%.8f", $x->[-1] / $yorg->[-1]) );
+
+ 	# Due to chopping up the number into parts, the two first parts
+	# may have only one or two digits. So we use more from the second
+	# parts (it always has at least two parts) for more accuracy:
+        # Round to 8 digits, then truncate result to integer:
+	my $x0 = $x->[-1];
+	my $y0 = $yorg->[-1];
+	if (length ($x0) < $BASE_LEN)		# len($x0) == len($y0)!
+	  {
+          $x0 .= substr('0' x $BASE_LEN . $x->[-2], -$BASE_LEN, $BASE_LEN);
+          $x0 = substr($x0,0,$BASE_LEN);
+          $y0 .= substr('0' x $BASE_LEN . $yorg->[-2], -$BASE_LEN, $BASE_LEN);
+          $y0 = substr($y0,0,$BASE_LEN);
+	  }
+        $x->[0] = int ( sprintf ("%.8f", $x0 / $y0 ) );
+
         splice(@$x,1);			# keep single element
         return $x;
         }
@@ -782,8 +796,22 @@ sub _div_use_div
         # fit's into one Perl scalar, so result can be computed directly
         # cannot use int() here, because it rounds wrongly on some systems
         #$x->[0] = int($x->[-1] / $yorg->[-1]);
-        # round to 8 digits, then truncate result to integer
-        $x->[0] = int ( sprintf ("%.8f", $x->[-1] / $yorg->[-1]) );
+
+ 	# Due to chopping up the number into parts, the two first parts
+	# may have only one or two digits. So we use more from the second
+	# parts (it always has at least two parts) for more accuracy:
+        # Round to 8 digits, then truncate result to integer:
+	my $x0 = $x->[-1];
+	my $y0 = $yorg->[-1];
+	if (length ($x0) < $BASE_LEN)		# len($x0) == len($y0)!
+	  {
+          $x0 .= substr('0' x $BASE_LEN . $x->[-2], -$BASE_LEN, $BASE_LEN);
+          $x0 = substr($x0,0,$BASE_LEN);
+          $y0 .= substr('0' x $BASE_LEN . $yorg->[-2], -$BASE_LEN, $BASE_LEN);
+          $y0 = substr($y0,0,$BASE_LEN);
+	  }
+        $x->[0] = int ( sprintf ("%.8f", $x0 / $y0 ) );
+
         splice(@$x,1);			# keep single element
         return $x;
         }
@@ -958,7 +986,7 @@ sub _digit
   
   my $elem = int($n / $BASE_LEN);	# which array element
   my $digit = $n % $BASE_LEN;		# which digit in this element
-  $elem = '0000000'.@$x[$elem];		# get element padded with 0's
+  $elem = '0' x $BASE_LEN . @$x[$elem];	# get element padded with 0's
   substr($elem,-$digit-1,1);
   }
 
