@@ -1494,8 +1494,10 @@ Perl_do_readline(pTHX)
 	}
 	if (gimme == G_SCALAR) {
 	    /* undef TARG, and push that undefined value */
-	    SV_CHECK_THINKFIRST_COW_DROP(TARG);
-	    (void)SvOK_off(TARG);
+	    if (type != OP_RCATLINE) {
+		SV_CHECK_THINKFIRST_COW_DROP(TARG);
+		SvOK_off(TARG);
+	    }
 	    PUSHTARG;
 	}
 	RETURN;
@@ -1556,8 +1558,10 @@ Perl_do_readline(pTHX)
 		}
 	    }
 	    if (gimme == G_SCALAR) {
-		SV_CHECK_THINKFIRST_COW_DROP(TARG);
-		(void)SvOK_off(TARG);
+		if (type != OP_RCATLINE) {
+		    SV_CHECK_THINKFIRST_COW_DROP(TARG);
+		    SvOK_off(TARG);
+		}
 		SPAGAIN;
 		PUSHTARG;
 	    }
