@@ -421,7 +421,7 @@ Perl_sharedsv_share(pTHX_ SV *sv)
 #if defined(WIN32) || defined(OS2)
 #  define ABS2RELMILLI(abs)        \
     do {                                \
-        abs -= (double)time(NULL)       \
+        abs -= (double)time(NULL);      \
         if (abs > 0) { abs *= 1000; }   \
         else         { abs  = 0;    }   \
     } while (0)
@@ -450,7 +450,7 @@ Perl_sharedsv_cond_timedwait(perl_cond *cond, perl_mutex *mut, double abs)
             break;
     }
     MUTEX_LOCK(mut);
-    c->waiters--;
+    cond->waiters--;
     return got_it;
 #  else
 #    ifdef OS2
