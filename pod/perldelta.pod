@@ -2208,6 +2208,17 @@ subtest 9 failed.
 
 No known fix.
 
+=head2 Mac OS X
+
+The following tests are known to fail:
+
+ Failed Test                 Stat Wstat Total Fail  Failed  List of Failed
+ -------------------------------------------------------------------------
+ ../ext/DB_File/t/db-btree.t    0    11    ??   ??       %  ??
+ ../ext/DB_File/t/db-recno.t              149    3   2.01%  61 63 65
+ ../ext/POSIX/t/posix.t                    31    1   3.23%  10
+ ../lib/warnings.t                        450    1   0.22%  316
+
 =head2 OS/390
 
 OS/390 has rather many test failures but the situation is actually
