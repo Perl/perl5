@@ -493,7 +493,7 @@ package DB;
 use IO::Handle;
 
 # Debugger for Perl 5.00x; perl5db.pl patch level:
-$VERSION = 1.26;
+$VERSION = 1.27;
 
 $header = "perl5db.pl version $VERSION";
 
@@ -914,6 +914,11 @@ sub eval {
 #   + whitespace and assertions call cleanup across versions 
 #   + H * deletes (resets) history
 #   + i now handles Class + blessed objects
+# Changes: 1.27: May 09, 2004 Richard Foley <richard.foley@rfi.net>
+#   + updated pod page references - clunky.
+#   + removed windowid restriction for forking into an xterm.
+#   + more whitespace again.
+#   + wrapped restart and enabled rerun [-n] (go back n steps) command.
 ####################################################################
 
 =head1 DEBUGGER INITIALIZATION
@@ -1371,10 +1376,9 @@ if (
     and defined $ENV{TERM}       # and we know what kind
                                  # of terminal this is,
     and $ENV{TERM} eq 'xterm'    # and it's an xterm,
-    and defined $ENV{WINDOWID}   # and we know what
-                                 # window this is,
-    and defined $ENV{DISPLAY}
-  )                              # and what display it's on,
+#   and defined $ENV{WINDOWID}   # and we know what window this is, <- wrong metric
+    and defined $ENV{DISPLAY}    # and what display it's on,
+  )
 {
     *get_fork_TTY = \&xterm_get_fork_TTY;    # use the xterm version
 } ## end if (not defined &get_fork_TTY...
@@ -2690,213 +2694,6 @@ appropriately, and force us out of the command loop.
                     last CMD;
                 };
 
-=head4 C<R> - restart
-
-Restarting the debugger is a complex operation that occurs in several phases.
-First, we try to reconstruct the command line that was used to invoke Perl
-and the debugger.
-
-=cut
-
-                # R - restart execution.
-                $cmd =~ /^R$/ && do {
-
-                    # I may not be able to resurrect you, but here goes ...
-                    print $OUT
-"Warning: some settings and command-line options may be lost!\n";
-                    my ( @script, @flags, $cl );
-
-                    # If warn was on before, turn it on again.
-                    push @flags, '-w' if $ini_warn;
-                    if ( $ini_assertion and @{^ASSERTING} ) {
-                        push @flags,
-                          ( map { /\:\^\(\?\:(.*)\)\$\)/ ? "-A$1" : "-A$_" }
-                              @{^ASSERTING} );
-                    }
-
-                    # Rebuild the -I flags that were on the initial
-                    # command line.
-                    for (@ini_INC) {
-                        push @flags, '-I', $_;
-                    }
-
-                    # Turn on taint if it was on before.
-                    push @flags, '-T' if ${^TAINT};
-
-                    # Arrange for setting the old INC:
-                    # Save the current @init_INC in the environment.
-                    set_list( "PERLDB_INC", @ini_INC );
-
-                    # If this was a perl one-liner, go to the "file"
-                    # corresponding to the one-liner read all the lines
-                    # out of it (except for the first one, which is going
-                    # to be added back on again when 'perl -d' runs: that's
-                    # the 'require perl5db.pl;' line), and add them back on
-                    # to the command line to be executed.
-                    if ( $0 eq '-e' ) {
-                        for ( 1 .. $#{'::_<-e'} ) {  # The first line is PERL5DB
-                            chomp( $cl = ${'::_<-e'}[$_] );
-                            push @script, '-e', $cl;
-                        }
-                    } ## end if ($0 eq '-e')
-
-                    # Otherwise we just reuse the original name we had
-                    # before.
-                    else {
-                        @script = $0;
-                    }
-
-=pod
-
-After the command line  has been reconstructed, the next step is to save
-the debugger's status in environment variables. The C<DB::set_list> routine
-is used to save aggregate variables (both hashes and arrays); scalars are
-just popped into environment variables directly.
-
-=cut
-
-                    # If the terminal supported history, grab it and
-                    # save that in the environment.
-                    set_list( "PERLDB_HIST",
-                          $term->Features->{getHistory}
-                        ? $term->GetHistory
-                        : @hist );
-
-                    # Find all the files that were visited during this
-                    # session (i.e., the debugger had magic hashes
-                    # corresponding to them) and stick them in the environment.
-                    my @had_breakpoints = keys %had_breakpoints;
-                    set_list( "PERLDB_VISITED", @had_breakpoints );
-
-                    # Save the debugger options we chose.
-                    set_list( "PERLDB_OPT", %option );
-                    # set_list( "PERLDB_OPT", options2remember() );
-
-                    # Save the break-on-loads.
-                    set_list( "PERLDB_ON_LOAD", %break_on_load );
-
-=pod 
-
-The most complex part of this is the saving of all of the breakpoints. They
-can live in an awful lot of places, and we have to go through all of them,
-find the breakpoints, and then save them in the appropriate environment
-variable via C<DB::set_list>.
-
-=cut
-
-                    # Go through all the breakpoints and make sure they're
-                    # still valid.
-                    my @hard;
-                    for ( 0 .. $#had_breakpoints ) {
-
-                        # We were in this file.
-                        my $file = $had_breakpoints[$_];
-
-                        # Grab that file's magic line hash.
-                        *dbline = $main::{ '_<' . $file };
-
-                        # Skip out if it doesn't exist, or if the breakpoint
-                        # is in a postponed file (we'll do postponed ones
-                        # later).
-                        next unless %dbline or $postponed_file{$file};
-
-                        # In an eval. This is a little harder, so we'll
-                        # do more processing on that below.
-                        ( push @hard, $file ), next
-                          if $file =~ /^\(\w*eval/;
-
-                        # XXX I have no idea what this is doing. Yet.
-                        my @add;
-                        @add = %{ $postponed_file{$file} }
-                          if $postponed_file{$file};
-
-                        # Save the list of all the breakpoints for this file.
-                        set_list( "PERLDB_FILE_$_", %dbline, @add );
-                    } ## end for (0 .. $#had_breakpoints)
-
-                    # The breakpoint was inside an eval. This is a little
-                    # more difficult. XXX and I don't understand it.
-                    for (@hard) {
-                        # Get over to the eval in question.
-                        *dbline = $main::{ '_<' . $_ };
-                        my ( $quoted, $sub, %subs, $line ) = quotemeta $_;
-                        for $sub ( keys %sub ) {
-                            next unless $sub{$sub} =~ /^$quoted:(\d+)-(\d+)$/;
-                            $subs{$sub} = [ $1, $2 ];
-                        }
-                        unless (%subs) {
-                            print $OUT
-                              "No subroutines in $_, ignoring breakpoints.\n";
-                            next;
-                        }
-                      LINES: for $line ( keys %dbline ) {
-
-                            # One breakpoint per sub only:
-                            my ( $offset, $sub, $found );
-                          SUBS: for $sub ( keys %subs ) {
-                                if (
-                                    $subs{$sub}->[1] >=
-                                    $line    # Not after the subroutine
-                                    and (
-                                        not defined $offset    # Not caught
-                                        or $offset < 0
-                                    )
-                                  )
-                                {                              # or badly caught
-                                    $found  = $sub;
-                                    $offset = $line - $subs{$sub}->[0];
-                                    $offset = "+$offset", last SUBS
-                                      if $offset >= 0;
-                                } ## end if ($subs{$sub}->[1] >=...
-                            } ## end for $sub (keys %subs)
-                            if ( defined $offset ) {
-                                $postponed{$found} =
-                                  "break $offset if $dbline{$line}";
-                            }
-                            else {
-                                print $OUT
-"Breakpoint in $_:$line ignored: after all the subroutines.\n";
-                            }
-                        } ## end for $line (keys %dbline)
-                    } ## end for (@hard)
-
-                    # Save the other things that don't need to be
-                    # processed.
-                    set_list( "PERLDB_POSTPONE",  %postponed );
-                    set_list( "PERLDB_PRETYPE",   @$pretype );
-                    set_list( "PERLDB_PRE",       @$pre );
-                    set_list( "PERLDB_POST",      @$post );
-                    set_list( "PERLDB_TYPEAHEAD", @typeahead );
-
-                    # We are oficially restarting.
-                    $ENV{PERLDB_RESTART} = 1;
-
-                    # We are junking all child debuggers.
-                    delete $ENV{PERLDB_PIDS};    # Restore ini state
-
-                    # Set this back to the initial pid.
-                    $ENV{PERLDB_PIDS} = $ini_pids if defined $ini_pids;
-
-=pod 
-
-After all the debugger status has been saved, we take the command we built
-up and then C<exec()> it. The debugger will spot the C<PERLDB_RESTART>
-environment variable and realize it needs to reload its state from the
-environment.
-
-=cut
-
-                    # And run Perl again. Add the "-d" flag, all the
-                    # flags we built up, the script (whether a one-liner
-                    # or a file), add on the -emacs flag for a slave editor,
-                    # and then the old arguments. We use exec() to keep the
-                    # PID stable (and that way $ini_pids is still valid).
-                    exec( $^X, '-d', @flags, @script,
-                        ( $slave_editor ? '-emacs' : () ), @ARGS )
-                      || print $OUT "exec failed: $!\n";
-                    last CMD;
-                };
-
 =head4 C<T> - stack trace
 
 Just calls C<DB::print_trace>.
@@ -3194,11 +2991,11 @@ Prints the contents of C<@hist> (if any).
 
 =cut
 
-				$cmd =~ /^H\b\s*\*/ && do {
-					@hist = @truehist = ();
-					print $OUT "History cleansed\n";
-					next CMD;
-				};
+                $cmd =~ /^H\b\s*\*/ && do {
+                    @hist = @truehist = ();
+                    print $OUT "History cleansed\n";
+                    next CMD;
+                };
 
                 $cmd =~ /^H\b\s*(-(\d+))?/ && do {
 
@@ -3371,6 +3168,28 @@ Note that all C<^(save|source)>'s are commented out with a view to minimise recu
                         &warn("Can't save debugger commands in '$1': $!\n");
                     }
                     next CMD;
+                };
+
+=head4 C<R> - restart
+
+Restart the debugger session. 
+
+=head4 C<rerun> - rerun the current session
+
+Return to any given position in the B<true>-history list
+
+=cut
+
+                # R - restart execution.
+                # rerun - controlled restart execution.
+                $cmd =~ /^(R|rerun\s*(.*))$/ && do {
+                    my @args = ($1 eq 'R' ? restart() : rerun($2));
+
+                    # And run Perl again.  We use exec() to keep the
+                    # PID stable (and that way $ini_pids is still valid).
+                    exec(@args) || print $OUT "exec failed: $!\n";
+
+                    last CMD;
                 };
 
 =head4 C<|, ||> - pipe output through the pager.
@@ -4763,8 +4582,8 @@ sub cmd_i {
     else {
       ISA:
         foreach my $isa ( split( /\s+/, $line ) ) {
-        	$evalarg = $isa;
-			($isa) = &eval;
+            $evalarg = $isa;
+            ($isa) = &eval;
             no strict 'refs';
             print join(
                 ', ',
@@ -5312,25 +5131,25 @@ Something to do with assertions
 =cut
 
 sub cmd_P {
-	unless ($ini_assertion) {
-		print $OUT "Assertions not supported in this Perl interpreter\n";
-	} else {
-		if ( $cmd =~ /^.\b\s*([+-]?)\s*(~?)\s*(\w+(\s*\|\s*\w+)*)\s*$/ ) {
-			my ( $how, $neg, $flags ) = ( $1, $2, $3 );
-			my $acu = parse_DollarCaretP_flags($flags);
-			if ( defined $acu ) {
-				$acu = ~$acu if $neg;
-				if ( $how eq '+' ) { $^P |= $acu }
-				elsif ( $how eq '-' ) { $^P &= ~$acu }
-				else { $^P = $acu }
-			}
+    unless ($ini_assertion) {
+        print $OUT "Assertions not supported in this Perl interpreter\n";
+    } else {
+        if ( $cmd =~ /^.\b\s*([+-]?)\s*(~?)\s*(\w+(\s*\|\s*\w+)*)\s*$/ ) {
+            my ( $how, $neg, $flags ) = ( $1, $2, $3 );
+            my $acu = parse_DollarCaretP_flags($flags);
+            if ( defined $acu ) {
+                $acu = ~$acu if $neg;
+                if ( $how eq '+' ) { $^P |= $acu }
+                elsif ( $how eq '-' ) { $^P &= ~$acu }
+                else { $^P = $acu }
+            }
 
-			# else { print $OUT "undefined acu\n" }
-		}
-		my $expanded = expand_DollarCaretP_flags($^P);
-		print $OUT "Internal Perl debugger flags:\n\$^P=$expanded\n";
-		$expanded;
-	}
+            # else { print $OUT "undefined acu\n" }
+        }
+        my $expanded = expand_DollarCaretP_flags($^P);
+        print $OUT "Internal Perl debugger flags:\n\$^P=$expanded\n";
+        $expanded;
+    }
 }
 
 =head2 save
@@ -7149,8 +6968,11 @@ B<$psh$psh> I<cmd>      Run cmd in a subprocess (reads from DB::IN, writes to DB
 B<$psh> [I<cmd>] Run I<cmd> in subshell (forces \"\$SHELL -c 'cmd'\")."
       ) . "
         See 'B<O> I<shellBang>' too.
-B<source> I<file>        Execute I<file> containing debugger commands (may nest).
+B<source> I<file>     Execute I<file> containing debugger commands (may nest).
 B<save> I<file>       Save current debugger session (actual history) to I<file>.
+B<rerun>           Rerun session to current position.
+B<rerun> I<n>         Rerun session to numbered command.
+B<rerun> I<-n>        Rerun session to number'th-to-last command.
 B<H> I<-number>    Display last number commands (default all).
 B<H> I<*>          Delete complete history.
 B<p> I<expr>        Same as \"I<print {DB::OUT} expr>\" in current package.
@@ -7966,19 +7788,139 @@ sub runman {
       )
     {
         unless ( $page =~ /^perl\w/ ) {
-            if (
-                grep { $page eq $_ }
-                qw{
-                5004delta 5005delta amiga api apio book boot bot call compile
-                cygwin data dbmfilter debug debguts delta diag doc dos dsc embed
-                faq faq1 faq2 faq3 faq4 faq5 faq6 faq7 faq8 faq9 filter fork
-                form func guts hack hist hpux intern ipc lexwarn locale lol mod
-                modinstall modlib number obj op opentut os2 os390 pod port
-                ref reftut run sec style sub syn thrtut tie toc todo toot tootc
-                trap unicode var vms win32 xs xstut
-                }
-              )
-            {
+# do it this way because its easier to slurp in to keep up to date - clunky though.
+my @pods = qw(
+    5004delta
+    5005delta
+    561delta
+    56delta
+    570delta
+    571delta
+    572delta
+    573delta
+    58delta
+    aix
+    amiga
+    apio
+    api
+    apollo
+    artistic
+    beos
+    book
+    boot
+    bot
+    bs2000
+    call
+    ce
+    cheat
+    clib
+    cn
+    compile
+    cygwin
+    data
+    dbmfilter
+    debguts
+    debtut
+    debug
+    delta
+    dgux
+    diag
+    doc
+    dos
+    dsc
+    ebcdic
+    embed
+    epoc
+    faq1
+    faq2
+    faq3
+    faq4
+    faq5
+    faq6
+    faq7
+    faq8
+    faq9
+    faq
+    filter
+    fork
+    form
+    freebsd
+    func
+    gpl
+    guts
+    hack
+    hist
+    hpux
+    hurd
+    intern
+    intro
+    iol
+    ipc
+    irix
+    jp
+    ko
+    lexwarn
+    locale
+    lol
+    machten
+    macos
+    macosx
+    mint
+    modinstall
+    modlib
+    mod
+    modstyle
+    mpeix
+    netware
+    newmod
+    number
+    obj
+    opentut
+    op
+    os2
+    os390
+    os400
+    othrtut
+    packtut
+    plan9
+    pod
+    podspec
+    port
+    qnx
+    ref
+    reftut
+    re
+    requick
+    reref
+    retut
+    run
+    sec
+    solaris
+    style
+    sub
+    syn
+    thrtut
+    tie
+    toc
+    todo
+    tooc
+    toot
+    trap
+    tru64
+    tw
+    unicode
+    uniintro
+    util
+    uts
+    var
+    vmesa
+    vms
+    vos
+    win32
+    xs
+    xstut
+);
+            if (grep { $page eq $_ } @pods) {
                 $page =~ s/^/perl/;
                 CORE::system( $doccmd,
                     ( ( $manpath && !$nopathopt ) ? ( "-M", $manpath ) : () ),
@@ -8526,6 +8468,243 @@ sub expand_DollarCaretP_flags {
     return @bits ? join( '|', @bits ) : 0;
 }
 
+=item rerun
+
+Rerun the current session to:
+
+    rerun        current position
+
+    rerun 4      command number 4
+
+    rerun -4     current command minus 4 (go back 4 steps)
+
+Whether this always makes sense, in the current context is unknowable, and is
+in part left as a useful exersize for the reader.  This sub returns the
+appropriate arguments to rerun the current session.
+
+=cut
+
+sub rerun {
+    my $i = shift; 
+    my @args;
+    pop(@truehist);                      # strim
+    unless (defined $truehist[$i]) {
+        print "Unable to return to non-existent command: $i\n";
+    } else {
+        $#truehist = ($i < 0 ? $#truehist + $i : $i > 0 ? $i : $#truehist);
+        my @temp = @truehist;            # store
+        push(@DB::typeahead, @truehist); # saved
+        @truehist = @hist = ();          # flush
+        @args = &restart();              # setup
+        &get_list("PERLDB_HIST");        # clean
+        &set_list("PERLDB_HIST", @temp); # reset
+    }
+    return @args;
+}
+
+=item restart
+
+Restarting the debugger is a complex operation that occurs in several phases.
+First, we try to reconstruct the command line that was used to invoke Perl
+and the debugger.
+
+=cut
+
+sub restart {
+    # I may not be able to resurrect you, but here goes ...
+    print $OUT
+"Warning: some settings and command-line options may be lost!\n";
+    my ( @script, @flags, $cl );
+
+    # If warn was on before, turn it on again.
+    push @flags, '-w' if $ini_warn;
+    if ( $ini_assertion and @{^ASSERTING} ) {
+        push @flags,
+          ( map { /\:\^\(\?\:(.*)\)\$\)/ ? "-A$1" : "-A$_" }
+              @{^ASSERTING} );
+    }
+
+    # Rebuild the -I flags that were on the initial
+    # command line.
+    for (@ini_INC) {
+        push @flags, '-I', $_;
+    }
+
+    # Turn on taint if it was on before.
+    push @flags, '-T' if ${^TAINT};
+
+    # Arrange for setting the old INC:
+    # Save the current @init_INC in the environment.
+    set_list( "PERLDB_INC", @ini_INC );
+
+    # If this was a perl one-liner, go to the "file"
+    # corresponding to the one-liner read all the lines
+    # out of it (except for the first one, which is going
+    # to be added back on again when 'perl -d' runs: that's
+    # the 'require perl5db.pl;' line), and add them back on
+    # to the command line to be executed.
+    if ( $0 eq '-e' ) {
+        for ( 1 .. $#{'::_<-e'} ) {  # The first line is PERL5DB
+            chomp( $cl = ${'::_<-e'}[$_] );
+            push @script, '-e', $cl;
+        }
+    } ## end if ($0 eq '-e')
+
+    # Otherwise we just reuse the original name we had
+    # before.
+    else {
+        @script = $0;
+    }
+
+=pod
+
+After the command line  has been reconstructed, the next step is to save
+the debugger's status in environment variables. The C<DB::set_list> routine
+is used to save aggregate variables (both hashes and arrays); scalars are
+just popped into environment variables directly.
+
+=cut
+
+    # If the terminal supported history, grab it and
+    # save that in the environment.
+    set_list( "PERLDB_HIST",
+          $term->Features->{getHistory}
+        ? $term->GetHistory
+        : @hist );
+
+    # Find all the files that were visited during this
+    # session (i.e., the debugger had magic hashes
+    # corresponding to them) and stick them in the environment.
+    my @had_breakpoints = keys %had_breakpoints;
+    set_list( "PERLDB_VISITED", @had_breakpoints );
+
+    # Save the debugger options we chose.
+    set_list( "PERLDB_OPT", %option );
+    # set_list( "PERLDB_OPT", options2remember() );
+
+    # Save the break-on-loads.
+    set_list( "PERLDB_ON_LOAD", %break_on_load );
+
+=pod 
+
+The most complex part of this is the saving of all of the breakpoints. They
+can live in an awful lot of places, and we have to go through all of them,
+find the breakpoints, and then save them in the appropriate environment
+variable via C<DB::set_list>.
+
+=cut
+
+    # Go through all the breakpoints and make sure they're
+    # still valid.
+    my @hard;
+    for ( 0 .. $#had_breakpoints ) {
+
+        # We were in this file.
+        my $file = $had_breakpoints[$_];
+
+        # Grab that file's magic line hash.
+        *dbline = $main::{ '_<' . $file };
+
+        # Skip out if it doesn't exist, or if the breakpoint
+        # is in a postponed file (we'll do postponed ones
+        # later).
+        next unless %dbline or $postponed_file{$file};
+
+        # In an eval. This is a little harder, so we'll
+        # do more processing on that below.
+        ( push @hard, $file ), next
+          if $file =~ /^\(\w*eval/;
+
+        # XXX I have no idea what this is doing. Yet.
+        my @add;
+        @add = %{ $postponed_file{$file} }
+          if $postponed_file{$file};
+
+        # Save the list of all the breakpoints for this file.
+        set_list( "PERLDB_FILE_$_", %dbline, @add );
+    } ## end for (0 .. $#had_breakpoints)
+
+    # The breakpoint was inside an eval. This is a little
+    # more difficult. XXX and I don't understand it.
+    for (@hard) {
+        # Get over to the eval in question.
+        *dbline = $main::{ '_<' . $_ };
+        my ( $quoted, $sub, %subs, $line ) = quotemeta $_;
+        for $sub ( keys %sub ) {
+            next unless $sub{$sub} =~ /^$quoted:(\d+)-(\d+)$/;
+            $subs{$sub} = [ $1, $2 ];
+        }
+        unless (%subs) {
+            print $OUT
+              "No subroutines in $_, ignoring breakpoints.\n";
+            next;
+        }
+      LINES: for $line ( keys %dbline ) {
+
+            # One breakpoint per sub only:
+            my ( $offset, $sub, $found );
+          SUBS: for $sub ( keys %subs ) {
+                if (
+                    $subs{$sub}->[1] >=
+                    $line    # Not after the subroutine
+                    and (
+                        not defined $offset    # Not caught
+                        or $offset < 0
+                    )
+                  )
+                {                              # or badly caught
+                    $found  = $sub;
+                    $offset = $line - $subs{$sub}->[0];
+                    $offset = "+$offset", last SUBS
+                      if $offset >= 0;
+                } ## end if ($subs{$sub}->[1] >=...
+            } ## end for $sub (keys %subs)
+            if ( defined $offset ) {
+                $postponed{$found} =
+                  "break $offset if $dbline{$line}";
+            }
+            else {
+                print $OUT
+"Breakpoint in $_:$line ignored: after all the subroutines.\n";
+            }
+        } ## end for $line (keys %dbline)
+    } ## end for (@hard)
+
+    # Save the other things that don't need to be
+    # processed.
+    set_list( "PERLDB_POSTPONE",  %postponed );
+    set_list( "PERLDB_PRETYPE",   @$pretype );
+    set_list( "PERLDB_PRE",       @$pre );
+    set_list( "PERLDB_POST",      @$post );
+    set_list( "PERLDB_TYPEAHEAD", @typeahead );
+
+    # We are oficially restarting.
+    $ENV{PERLDB_RESTART} = 1;
+
+    # We are junking all child debuggers.
+    delete $ENV{PERLDB_PIDS};    # Restore ini state
+
+    # Set this back to the initial pid.
+    $ENV{PERLDB_PIDS} = $ini_pids if defined $ini_pids;
+
+=pod 
+
+After all the debugger status has been saved, we take the command we built up
+and then return it, so we can C<exec()> it. The debugger will spot the
+C<PERLDB_RESTART> environment variable and realize it needs to reload its state
+from the environment.
+
+=cut
+
+    # And run Perl again. Add the "-d" flag, all the
+    # flags we built up, the script (whether a one-liner
+    # or a file), add on the -emacs flag for a slave editor,
+    # and then the old arguments. 
+
+    return ($^X, '-d', @flags, @script, ($slave_editor ? '-emacs' : ()), @ARGS);
+
+};  # end restart
+
 =head1 END PROCESSING - THE C<END> BLOCK
 
 Come here at the very end of processing. We want to go into a 
@@ -8988,4 +9167,5 @@ sub at_exit {
 package DB;    # Do not trace this 1; below!
 
 1;
+
 
