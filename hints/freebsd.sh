@@ -94,6 +94,15 @@ esac
 # out here to avoid duplicating them everywhere.
 case "$osvers" in
 0.*|1.0*) ;;
+
+3.0*)   if [ -e /usr/lib/aout ]; then
+            libpth="/usr/lib/aout /usr/local/lib /usr/lib"
+            glibpth="/usr/lib/aout /usr/local/lib /usr/lib"
+        fi
+        cccdlflags='-DPIC -fpic'
+        lddlflags='-Bshareable'
+        ;;
+
 *)	cccdlflags='-DPIC -fpic'
 	lddlflags="-Bshareable $lddlflags"
 	;;
@@ -115,31 +124,30 @@ EOM
 cat > UU/usethreads.cbu <<'EOSH'
 case "$usethreads" in
 $define)
-    if [ ! -r /usr/lib/libc_r.a ]; then
-        cat <<'EOM' >&4
-
-The re-entrant C library /usr/lib/libc_r.a does not exist; cannot build
-threaded Perl.  Consider upgrading to a newer FreeBSD snapshot or release:
-at least the FreeBSD 3.0-971225-SNAP is known to have the libc_r.a.
-
+    case "$osvers" in  
+        3.0*) ldflags="-pthread $ldflags"
+              ;;
+        2.2*) if [ ! -r /usr/lib/libc_r ]; then
+                cat <<'EOM' >&4
+POSIX threads are not supported by default on FreeBSD $uname_r.  Follow the
+instructions in 'man pthread' to build and install the needed libraries.
 EOM
-        exit 1
-    fi
-    # Patches to libc_r may be required.
-    # Print out a note about them here.
-
-    # These checks by Andy Dougherty <doughera@lafcol.lafayette.edu>
-    # Please update or change them as you learn more!
-    # -lc_r must REPLACE -lc.  AD  03/10/1998
-    set `echo X "$libswanted "| sed -e 's/ c / c_r /'`
-    shift
-    libswanted="$*"
-    # Configure will probably pick the wrong libc to use for nm scan.
-    # The safest quick-fix is just to not use nm at all.
-    usenm=false
-    # Is vfork buggy in 3.0?
-    case "$osvers" in
-	3.0) usevfork=false ;;
+                 exit 1
+              fi
+              set `echo X "$libswanted "| sed -e 's/ c / c_r /'`
+              shift
+              libswanted="$*"
+              # Configure will probably pick the wrong libc to use for nm
+              # scan.
+              # The safest quick-fix is just to not use nm at all.
+              usenm=false
+              ;;
+         *)   cat <<'EOM' >&4
+It is not known if FreeBSD $uname_r supports POSIX threads or not.  Consider
+upgrading to the latest STABLE release.
+EOM
+              exit 1
+              ;;
     esac
     ;;
 esac
