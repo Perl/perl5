@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Jan 28 20:12:30 EET 2002 [metaconfig 3.0 PL70]
+# Generated on Tue Jan 29 00:57:08 EET 2002 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -1036,8 +1036,14 @@ if test -f /etc/unixtovms.exe; then
 	eunicefix=/etc/unixtovms.exe
 fi
 
+: Set executable suffix now -- needed before hints available
+: maybe Stratus VOS
 if test -f "/system/gnu_library/bin/ar.pm"; then
-     _exe=".pm"
+    _exe=".pm"
+fi
+: maybe dos djgpp
+if test -n "$DJGPP"; then
+    _exe=".exe"
 fi
 
 i_whoami=''
