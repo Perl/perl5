@@ -189,6 +189,7 @@
 #define PL_incgv		(PL_curinterp->Iincgv)
 #define PL_initav		(PL_curinterp->Iinitav)
 #define PL_inplace		(PL_curinterp->Iinplace)
+#define PL_iv_overflows		(PL_curinterp->Iiv_overflows)
 #define PL_last_proto		(PL_curinterp->Ilast_proto)
 #define PL_lastfd		(PL_curinterp->Ilastfd)
 #define PL_lastsize		(PL_curinterp->Ilastsize)
@@ -213,6 +214,8 @@
 #define PL_modglobal		(PL_curinterp->Imodglobal)
 #define PL_multiline		(PL_curinterp->Imultiline)
 #define PL_mystrk		(PL_curinterp->Imystrk)
+#define PL_obj_list		(PL_curinterp->Iobj_list)
+#define PL_obj_list_fill	(PL_curinterp->Iobj_list_fill)
 #define PL_ofmt			(PL_curinterp->Iofmt)
 #define PL_oldlastpm		(PL_curinterp->Ioldlastpm)
 #define PL_oldname		(PL_curinterp->Ioldname)
@@ -231,6 +234,7 @@
 #define PL_preambled		(PL_curinterp->Ipreambled)
 #define PL_preprocess		(PL_curinterp->Ipreprocess)
 #define PL_profiledata		(PL_curinterp->Iprofiledata)
+#define PL_pv			(PL_curinterp->Ipv)
 #define PL_replgv		(PL_curinterp->Ireplgv)
 #define PL_rightgv		(PL_curinterp->Irightgv)
 #define PL_rsfp			(PL_curinterp->Irsfp)
@@ -247,6 +251,7 @@
 #define PL_strtab		(PL_curinterp->Istrtab)
 #define PL_sub_generation	(PL_curinterp->Isub_generation)
 #define PL_sublex_info		(PL_curinterp->Isublex_info)
+#define PL_sv			(PL_curinterp->Isv)
 #define PL_sv_arenaroot		(PL_curinterp->Isv_arenaroot)
 #define PL_sv_count		(PL_curinterp->Isv_count)
 #define PL_sv_objcount		(PL_curinterp->Isv_objcount)
@@ -318,6 +323,7 @@
 #define PL_Iincgv		PL_incgv
 #define PL_Iinitav		PL_initav
 #define PL_Iinplace		PL_inplace
+#define PL_Iiv_overflows	PL_iv_overflows
 #define PL_Ilast_proto		PL_last_proto
 #define PL_Ilastfd		PL_lastfd
 #define PL_Ilastsize		PL_lastsize
@@ -342,6 +348,8 @@
 #define PL_Imodglobal		PL_modglobal
 #define PL_Imultiline		PL_multiline
 #define PL_Imystrk		PL_mystrk
+#define PL_Iobj_list		PL_obj_list
+#define PL_Iobj_list_fill	PL_obj_list_fill
 #define PL_Iofmt		PL_ofmt
 #define PL_Ioldlastpm		PL_oldlastpm
 #define PL_Ioldname		PL_oldname
@@ -360,6 +368,7 @@
 #define PL_Ipreambled		PL_preambled
 #define PL_Ipreprocess		PL_preprocess
 #define PL_Iprofiledata		PL_profiledata
+#define PL_Ipv			PL_pv
 #define PL_Ireplgv		PL_replgv
 #define PL_Irightgv		PL_rightgv
 #define PL_Irsfp		PL_rsfp
@@ -376,6 +385,7 @@
 #define PL_Istrtab		PL_strtab
 #define PL_Isub_generation	PL_sub_generation
 #define PL_Isublex_info		PL_sublex_info
+#define PL_Isv			PL_sv
 #define PL_Isv_arenaroot	PL_sv_arenaroot
 #define PL_Isv_count		PL_sv_count
 #define PL_Isv_objcount		PL_sv_objcount
@@ -858,9 +868,13 @@
 #define curcop			PL_curcop
 #define curstash		PL_curstash
 #define debstash		PL_debstash
+#define defgv			PL_defgv
 #define dowarn			PL_dowarn
+#define errgv			PL_errgv
 #define na			PL_na
+#define perldb			PL_perldb
 #define rsfp			PL_rsfp
+#define rsfp_filters		PL_rsfp_filters
 #define stack_base		PL_stack_base
 #define stack_sp		PL_stack_sp
 #define stdingv			PL_stdingv

@@ -201,6 +201,12 @@ PERLVAR(Ithrsv,		SV *)		/* struct perl_thread for main thread */
 PERLVARI(Ithreadnum,	U32,	0)	/* incremented each thread creation */
 #endif /* USE_THREADS */
 
+PERLVARI(Iiv_overflows,	int,	0);	/* from bytecode.h */
+PERLVAR(Isv,		SV *);
+PERLVAR(Ipv,		XPV);
+PERLVAR(Iobj_list,	void **);
+PERLVARI(Iobj_list_fill, I32,	-1);
+
 #ifdef PERL_OBJECT
 PERLVARI(piMem,		IPerlMem*,  NULL)
 PERLVARI(piENV,		IPerlEnv*,  NULL)

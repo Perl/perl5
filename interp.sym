@@ -73,6 +73,7 @@ in_eval
 incgv
 initav
 inplace
+iv_overflows
 sys_intern
 last_in_gv
 last_proto
@@ -106,6 +107,8 @@ modcount
 multiline
 mystrk
 nrs
+obj_list
+obj_list_fill
 ofmt
 ofs
 ofslen
@@ -126,6 +129,7 @@ preambled
 preambleav
 preprocess
 profiledata
+pv
 reg_eval_set
 reg_flags
 reg_start_tmp
@@ -188,6 +192,7 @@ strchop
 strtab
 sub_generation
 sublex_info
+sv
 sv_count
 sv_objcount
 sv_root

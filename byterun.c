@@ -15,14 +15,14 @@
 void *
 bset_obj_store(void *obj, I32 ix)
 {
-    if (ix > obj_list_fill) {
-	if (obj_list_fill == -1)
-	    New(666, obj_list, ix + 1, void*);
+    if (ix > PL_obj_list_fill) {
+	if (PL_obj_list_fill == -1)
+	    New(666, PL_obj_list, ix + 1, void*);
 	else
-	    Renew(obj_list, ix + 1, void*);
-	obj_list_fill = ix;
+	    Renew(PL_obj_list, ix + 1, void*);
+	PL_obj_list_fill = ix;
     }
-    obj_list[ix] = obj;
+    PL_obj_list[ix] = obj;
     return obj;
 }
 
@@ -56,7 +56,7 @@ void byterun(PerlIO *fp)
 	    {
 		svindex arg;
 		BGET_svindex(arg);
-		sv = arg;
+		PL_sv = arg;
 		break;
 	    }
 	  case INSN_LDOP:		/* 2 */
@@ -70,7 +70,7 @@ void byterun(PerlIO *fp)
 	    {
 		U32 arg;
 		BGET_U32(arg);
-		BSET_OBJ_STORE(sv, arg);
+		BSET_OBJ_STORE(PL_sv, arg);
 		break;
 	    }
 	  case INSN_STOP:		/* 4 */
@@ -84,14 +84,14 @@ void byterun(PerlIO *fp)
 	    {
 		U8 arg;
 		BGET_U8(arg);
-		BSET_ldspecsv(sv, arg);
+		BSET_ldspecsv(PL_sv, arg);
 		break;
 	    }
 	  case INSN_NEWSV:		/* 6 */
 	    {
 		U8 arg;
 		BGET_U8(arg);
-		BSET_newsv(sv, arg);
+		BSET_newsv(PL_sv, arg);
 		break;
 	    }
 	  case INSN_NEWOP:		/* 7 */
@@ -118,486 +118,486 @@ void byterun(PerlIO *fp)
 	    {
 		STRLEN arg;
 		BGET_U32(arg);
-		pv.xpv_cur = arg;
+		PL_pv.xpv_cur = arg;
 		break;
 	    }
 	  case INSN_PV_FREE:		/* 12 */
 	    {
-		BSET_pv_free(pv);
+		BSET_pv_free(PL_pv);
 		break;
 	    }
 	  case INSN_SV_UPGRADE:		/* 13 */
 	    {
 		char arg;
 		BGET_U8(arg);
-		BSET_sv_upgrade(sv, arg);
+		BSET_sv_upgrade(PL_sv, arg);
 		break;
 	    }
 	  case INSN_SV_REFCNT:		/* 14 */
 	    {
 		U32 arg;
 		BGET_U32(arg);
-		SvREFCNT(sv) = arg;
+		SvREFCNT(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_SV_REFCNT_ADD:		/* 15 */
 	    {
 		I32 arg;
 		BGET_I32(arg);
-		BSET_sv_refcnt_add(SvREFCNT(sv), arg);
+		BSET_sv_refcnt_add(SvREFCNT(PL_sv), arg);
 		break;
 	    }
 	  case INSN_SV_FLAGS:		/* 16 */
 	    {
 		U32 arg;
 		BGET_U32(arg);
-		SvFLAGS(sv) = arg;
+		SvFLAGS(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_XRV:		/* 17 */
 	    {
 		svindex arg;
 		BGET_svindex(arg);
-		SvRV(sv) = arg;
+		SvRV(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_XPV:		/* 18 */
 	    {
-		BSET_xpv(sv);
+		BSET_xpv(PL_sv);
 		break;
 	    }
 	  case INSN_XIV32:		/* 19 */
 	    {
 		I32 arg;
 		BGET_I32(arg);
-		SvIVX(sv) = arg;
+		SvIVX(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_XIV64:		/* 20 */
 	    {
 		IV64 arg;
 		BGET_IV64(arg);
-		SvIVX(sv) = arg;
+		SvIVX(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_XNV:		/* 21 */
 	    {
 		double arg;
 		BGET_double(arg);
-		SvNVX(sv) = arg;
+		SvNVX(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_XLV_TARGOFF:		/* 22 */
 	    {
 		STRLEN arg;
 		BGET_U32(arg);
-		LvTARGOFF(sv) = arg;
+		LvTARGOFF(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_XLV_TARGLEN:		/* 23 */
 	    {
 		STRLEN arg;
 		BGET_U32(arg);
-		LvTARGLEN(sv) = arg;
+		LvTARGLEN(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_XLV_TARG:		/* 24 */
 	    {
 		svindex arg;
 		BGET_svindex(arg);
-		LvTARG(sv) = arg;
+		LvTARG(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_XLV_TYPE:		/* 25 */
 	    {
 		char arg;
 		BGET_U8(arg);
-		LvTYPE(sv) = arg;
+		LvTYPE(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_XBM_USEFUL:		/* 26 */
 	    {
 		I32 arg;
 		BGET_I32(arg);
-		BmUSEFUL(sv) = arg;
+		BmUSEFUL(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_XBM_PREVIOUS:		/* 27 */
 	    {
 		U16 arg;
 		BGET_U16(arg);
-		BmPREVIOUS(sv) = arg;
+		BmPREVIOUS(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_XBM_RARE:		/* 28 */
 	    {
 		U8 arg;
 		BGET_U8(arg);
-		BmRARE(sv) = arg;
+		BmRARE(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_XFM_LINES:		/* 29 */
 	    {
 		I32 arg;
 		BGET_I32(arg);
-		FmLINES(sv) = arg;
+		FmLINES(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_XIO_LINES:		/* 30 */
 	    {
 		long arg;
 		BGET_I32(arg);
-		IoLINES(sv) = arg;
+		IoLINES(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_XIO_PAGE:		/* 31 */
 	    {
 		long arg;
 		BGET_I32(arg);
-		IoPAGE(sv) = arg;
+		IoPAGE(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_XIO_PAGE_LEN:		/* 32 */
 	    {
 		long arg;
 		BGET_I32(arg);
-		IoPAGE_LEN(sv) = arg;
+		IoPAGE_LEN(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_XIO_LINES_LEFT:		/* 33 */
 	    {
 		long arg;
 		BGET_I32(arg);
-		IoLINES_LEFT(sv) = arg;
+		IoLINES_LEFT(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_XIO_TOP_NAME:		/* 34 */
 	    {
 		pvcontents arg;
 		BGET_pvcontents(arg);
-		IoTOP_NAME(sv) = arg;
+		IoTOP_NAME(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_XIO_TOP_GV:		/* 36 */
 	    {
 		svindex arg;
 		BGET_svindex(arg);
-		*(SV**)&IoTOP_GV(sv) = arg;
+		*(SV**)&IoTOP_GV(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_XIO_FMT_NAME:		/* 37 */
 	    {
 		pvcontents arg;
 		BGET_pvcontents(arg);
-		IoFMT_NAME(sv) = arg;
+		IoFMT_NAME(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_XIO_FMT_GV:		/* 38 */
 	    {
 		svindex arg;
 		BGET_svindex(arg);
-		*(SV**)&IoFMT_GV(sv) = arg;
+		*(SV**)&IoFMT_GV(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_XIO_BOTTOM_NAME:		/* 39 */
 	    {
 		pvcontents arg;
 		BGET_pvcontents(arg);
-		IoBOTTOM_NAME(sv) = arg;
+		IoBOTTOM_NAME(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_XIO_BOTTOM_GV:		/* 40 */
 	    {
 		svindex arg;
 		BGET_svindex(arg);
-		*(SV**)&IoBOTTOM_GV(sv) = arg;
+		*(SV**)&IoBOTTOM_GV(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_XIO_SUBPROCESS:		/* 41 */
 	    {
 		short arg;
 		BGET_U16(arg);
-		IoSUBPROCESS(sv) = arg;
+		IoSUBPROCESS(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_XIO_TYPE:		/* 42 */
 	    {
 		char arg;
 		BGET_U8(arg);
-		IoTYPE(sv) = arg;
+		IoTYPE(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_XIO_FLAGS:		/* 43 */
 	    {
 		char arg;
 		BGET_U8(arg);
-		IoFLAGS(sv) = arg;
+		IoFLAGS(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_XCV_STASH:		/* 44 */
 	    {
 		svindex arg;
 		BGET_svindex(arg);
-		*(SV**)&CvSTASH(sv) = arg;
+		*(SV**)&CvSTASH(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_XCV_START:		/* 45 */
 	    {
 		opindex arg;
 		BGET_opindex(arg);
-		CvSTART(sv) = arg;
+		CvSTART(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_XCV_ROOT:		/* 46 */
 	    {
 		opindex arg;
 		BGET_opindex(arg);
-		CvROOT(sv) = arg;
+		CvROOT(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_XCV_GV:		/* 47 */
 	    {
 		svindex arg;
 		BGET_svindex(arg);
-		*(SV**)&CvGV(sv) = arg;
+		*(SV**)&CvGV(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_XCV_FILEGV:		/* 48 */
 	    {
 		svindex arg;
 		BGET_svindex(arg);
-		*(SV**)&CvFILEGV(sv) = arg;
+		*(SV**)&CvFILEGV(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_XCV_DEPTH:		/* 49 */
 	    {
 		long arg;
 		BGET_I32(arg);
-		CvDEPTH(sv) = arg;
+		CvDEPTH(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_XCV_PADLIST:		/* 50 */
 	    {
 		svindex arg;
 		BGET_svindex(arg);
-		*(SV**)&CvPADLIST(sv) = arg;
+		*(SV**)&CvPADLIST(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_XCV_OUTSIDE:		/* 51 */
 	    {
 		svindex arg;
 		BGET_svindex(arg);
-		*(SV**)&CvOUTSIDE(sv) = arg;
+		*(SV**)&CvOUTSIDE(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_XCV_FLAGS:		/* 52 */
 	    {
 		U8 arg;
 		BGET_U8(arg);
-		CvFLAGS(sv) = arg;
+		CvFLAGS(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_AV_EXTEND:		/* 53 */
 	    {
 		SSize_t arg;
 		BGET_I32(arg);
-		BSET_av_extend(sv, arg);
+		BSET_av_extend(PL_sv, arg);
 		break;
 	    }
 	  case INSN_AV_PUSH:		/* 54 */
 	    {
 		svindex arg;
 		BGET_svindex(arg);
-		BSET_av_push(sv, arg);
+		BSET_av_push(PL_sv, arg);
 		break;
 	    }
 	  case INSN_XAV_FILL:		/* 55 */
 	    {
 		SSize_t arg;
 		BGET_I32(arg);
-		AvFILLp(sv) = arg;
+		AvFILLp(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_XAV_MAX:		/* 56 */
 	    {
 		SSize_t arg;
 		BGET_I32(arg);
-		AvMAX(sv) = arg;
+		AvMAX(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_XAV_FLAGS:		/* 57 */
 	    {
 		U8 arg;
 		BGET_U8(arg);
-		AvFLAGS(sv) = arg;
+		AvFLAGS(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_XHV_RITER:		/* 58 */
 	    {
 		I32 arg;
 		BGET_I32(arg);
-		HvRITER(sv) = arg;
+		HvRITER(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_XHV_NAME:		/* 59 */
 	    {
 		pvcontents arg;
 		BGET_pvcontents(arg);
-		HvNAME(sv) = arg;
+		HvNAME(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_HV_STORE:		/* 60 */
 	    {
 		svindex arg;
 		BGET_svindex(arg);
-		BSET_hv_store(sv, arg);
+		BSET_hv_store(PL_sv, arg);
 		break;
 	    }
 	  case INSN_SV_MAGIC:		/* 61 */
 	    {
 		char arg;
 		BGET_U8(arg);
-		BSET_sv_magic(sv, arg);
+		BSET_sv_magic(PL_sv, arg);
 		break;
 	    }
 	  case INSN_MG_OBJ:		/* 62 */
 	    {
 		svindex arg;
 		BGET_svindex(arg);
-		SvMAGIC(sv)->mg_obj = arg;
+		SvMAGIC(PL_sv)->mg_obj = arg;
 		break;
 	    }
 	  case INSN_MG_PRIVATE:		/* 63 */
 	    {
 		U16 arg;
 		BGET_U16(arg);
-		SvMAGIC(sv)->mg_private = arg;
+		SvMAGIC(PL_sv)->mg_private = arg;
 		break;
 	    }
 	  case INSN_MG_FLAGS:		/* 64 */
 	    {
 		U8 arg;
 		BGET_U8(arg);
-		SvMAGIC(sv)->mg_flags = arg;
+		SvMAGIC(PL_sv)->mg_flags = arg;
 		break;
 	    }
 	  case INSN_MG_PV:		/* 65 */
 	    {
 		pvcontents arg;
 		BGET_pvcontents(arg);
-		BSET_mg_pv(SvMAGIC(sv), arg);
+		BSET_mg_pv(SvMAGIC(PL_sv), arg);
 		break;
 	    }
 	  case INSN_XMG_STASH:		/* 66 */
 	    {
 		svindex arg;
 		BGET_svindex(arg);
-		*(SV**)&SvSTASH(sv) = arg;
+		*(SV**)&SvSTASH(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_GV_FETCHPV:		/* 67 */
 	    {
 		strconst arg;
 		BGET_strconst(arg);
-		BSET_gv_fetchpv(sv, arg);
+		BSET_gv_fetchpv(PL_sv, arg);
 		break;
 	    }
 	  case INSN_GV_STASHPV:		/* 68 */
 	    {
 		strconst arg;
 		BGET_strconst(arg);
-		BSET_gv_stashpv(sv, arg);
+		BSET_gv_stashpv(PL_sv, arg);
 		break;
 	    }
 	  case INSN_GP_SV:		/* 69 */
 	    {
 		svindex arg;
 		BGET_svindex(arg);
-		GvSV(sv) = arg;
+		GvSV(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_GP_REFCNT:		/* 70 */
 	    {
 		U32 arg;
 		BGET_U32(arg);
-		GvREFCNT(sv) = arg;
+		GvREFCNT(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_GP_REFCNT_ADD:		/* 71 */
 	    {
 		I32 arg;
 		BGET_I32(arg);
-		BSET_gp_refcnt_add(GvREFCNT(sv), arg);
+		BSET_gp_refcnt_add(GvREFCNT(PL_sv), arg);
 		break;
 	    }
 	  case INSN_GP_AV:		/* 72 */
 	    {
 		svindex arg;
 		BGET_svindex(arg);
-		*(SV**)&GvAV(sv) = arg;
+		*(SV**)&GvAV(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_GP_HV:		/* 73 */
 	    {
 		svindex arg;
 		BGET_svindex(arg);
-		*(SV**)&GvHV(sv) = arg;
+		*(SV**)&GvHV(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_GP_CV:		/* 74 */
 	    {
 		svindex arg;
 		BGET_svindex(arg);
-		*(SV**)&GvCV(sv) = arg;
+		*(SV**)&GvCV(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_GP_FILEGV:		/* 75 */
 	    {
 		svindex arg;
 		BGET_svindex(arg);
-		*(SV**)&GvFILEGV(sv) = arg;
+		*(SV**)&GvFILEGV(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_GP_IO:		/* 76 */
 	    {
 		svindex arg;
 		BGET_svindex(arg);
-		*(SV**)&GvIOp(sv) = arg;
+		*(SV**)&GvIOp(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_GP_FORM:		/* 77 */
 	    {
 		svindex arg;
 		BGET_svindex(arg);
-		*(SV**)&GvFORM(sv) = arg;
+		*(SV**)&GvFORM(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_GP_CVGEN:		/* 78 */
 	    {
 		U32 arg;
 		BGET_U32(arg);
-		GvCVGEN(sv) = arg;
+		GvCVGEN(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_GP_LINE:		/* 79 */
 	    {
 		line_t arg;
 		BGET_U16(arg);
-		GvLINE(sv) = arg;
+		GvLINE(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_GP_SHARE:		/* 80 */
 	    {
 		svindex arg;
 		BGET_svindex(arg);
-		BSET_gp_share(sv, arg);
+		BSET_gp_share(PL_sv, arg);
 		break;
 	    }
 	  case INSN_XGV_FLAGS:		/* 81 */
 	    {
 		U8 arg;
 		BGET_U8(arg);
-		GvFLAGS(sv) = arg;
+		GvFLAGS(PL_sv) = arg;
 		break;
 	    }
 	  case INSN_OP_NEXT:		/* 82 */
