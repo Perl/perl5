@@ -30,7 +30,7 @@ sub near ($$;$) {
     $_[1] ? (abs($_[0]/$_[1] - 1) < $e) : abs($_[0]) < $e;
 }
 
-print "1..23\n";
+print "1..26\n";
 
 $x = 0.9;
 print 'not ' unless (near(tan($x), sin($x) / cos($x)));
@@ -174,6 +174,27 @@ use Math::Trig ':radial';
     my $posit_degrees = rad2deg(-10000, 1);
     print "not " unless near($posit_degrees, -10000*$R2D);
     print "ok 23\n";
+}
+
+{
+    use Math::Trig 'great_circle_direction';
+
+    print 'not '
+	unless (near(great_circle_direction(0, 0, 0, pi/2), pi));
+    print "ok 24\n";
+
+    print 'not '
+	unless (near(great_circle_direction(0, 0, pi, pi), -pi/2));
+    print "ok 25\n";
+
+    # London to Tokyo.
+    my @L = (deg2rad(-0.5), deg2rad(90 - 51.3));
+    my @T = (deg2rad(139.8),deg2rad(90 - 35.7));
+
+    my $rad = great_circle_direction(@L, @T);
+
+    print 'not ' unless (near($rad, -0.546644569997376));
+    print "ok 26\n";
 }
 
 # eof
