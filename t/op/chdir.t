@@ -8,8 +8,13 @@ BEGIN {
 
 # Might be a little early in the testing process to start using these,
 # but I can't think of a way to write this test without them.
-use Cwd qw(abs_path cwd);
-use File::Spec::Functions qw(:DEFAULT splitdir);
+use File::Spec::Functions qw(:DEFAULT splitdir rel2abs);
+
+# Can't use Cwd::abs_path() because it has different ideas about
+# path seperators than File::Spec.
+sub abs_path {
+    rel2abs(curdir);
+}
 
 use Test::More tests => 25;
 
