@@ -6,8 +6,8 @@
 # This file supports:
 # 	\p{Hanunoo} (and fuzzy permutations)
 # 
-# Meaning: Script 'HANUNOO'
+# Meaning: Script 'Hanunoo'
 #
 return <<'END';
-1720	1734	HANUNOO
+1720	1734	Hanunoo
 END

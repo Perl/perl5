@@ -6,18 +6,18 @@
 # This file supports:
 # 	\p{Malayalam} (and fuzzy permutations)
 # 
-# Meaning: Script 'MALAYALAM'
+# Meaning: Script 'Malayalam'
 #
 return <<'END';
-0D02	0D03	MALAYALAM
-0D05	0D0C	MALAYALAM
-0D0E	0D10	MALAYALAM
-0D12	0D28	MALAYALAM
-0D2A	0D39	MALAYALAM
-0D3E	0D43	MALAYALAM
-0D46	0D48	MALAYALAM
-0D4A	0D4D	MALAYALAM
-0D57		MALAYALAM
-0D60	0D61	MALAYALAM
-0D66	0D6F	MALAYALAM
+0D02	0D03	Malayalam
+0D05	0D0C	Malayalam
+0D0E	0D10	Malayalam
+0D12	0D28	Malayalam
+0D2A	0D39	Malayalam
+0D3E	0D43	Malayalam
+0D46	0D48	Malayalam
+0D4A	0D4D	Malayalam
+0D57		Malayalam
+0D60	0D61	Malayalam
+0D66	0D6F	Malayalam
 END

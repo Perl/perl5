@@ -164,7 +164,7 @@ is($charinfo->{upper},          '');
 is($charinfo->{lower},          '');
 is($charinfo->{title},          '');
 is($charinfo->{block},          'Mathematical Alphanumeric Symbols');
-is($charinfo->{script},         undef);
+is($charinfo->{script},         'Common');
 
 use Unicode::UCD qw(charblock charscript);
 
@@ -191,7 +191,7 @@ is($charinfo->{upper},          '');
 is($charinfo->{lower},          '');
 is($charinfo->{title},          '');
 is($charinfo->{block},          'Latin-1 Supplement');
-is($charinfo->{script},         undef);
+is($charinfo->{script},         'Common');
 
 use Unicode::UCD qw(charblocks charscripts);
 
@@ -221,8 +221,8 @@ is($charscript, 'Ethiopic');
 my $ranges;
 
 $ranges = charscript('Ogham');
-is($ranges->[0]->[0], hex('1681'), 'Ogham charscript');
-is($ranges->[0]->[1], hex('169a'));
+is($ranges->[1]->[0], hex('1681'), 'Ogham charscript');
+is($ranges->[1]->[1], hex('169a'));
 
 use Unicode::UCD qw(charinrange);
 
@@ -232,7 +232,7 @@ ok( charinrange($ranges, "13a0"));
 ok( charinrange($ranges, "13f4"));
 ok(!charinrange($ranges, "13f5"));
 
-is(Unicode::UCD::UnicodeVersion, '4.0.0', 'UnicodeVersion');
+is(Unicode::UCD::UnicodeVersion, '4.0.1', 'UnicodeVersion');
 
 use Unicode::UCD qw(compexcl);
 

@@ -2044,6 +2044,8 @@ lib/unicore/lib/InYiRadi.pl	Unicode character database
 lib/unicore/lib/InYiSyll.pl	Unicode character database
 lib/unicore/lib/JoinCont.pl	Unicode character database
 lib/unicore/lib/Kannada.pl	Unicode character database
+lib/unicore/lib/Katakan2.pl	Unicode character database
+lib/unicore/lib/Khmer.pl	Unicode character database
 lib/unicore/lib/Katakana.pl	Unicode character database
 lib/unicore/lib/Khmer.pl	Unicode character database
 lib/unicore/lib/Lao.pl		Unicode character database
@@ -2108,6 +2110,7 @@ lib/unicore/lib/So.pl		Unicode character database
 lib/unicore/lib/SpacePer.pl	Unicode character database
 lib/unicore/lib/Space.pl	Unicode character database
 lib/unicore/lib/S.pl		Unicode character database
+lib/unicore/lib/Sterm.pl	Unicode character database
 lib/unicore/lib/Syriac.pl	Unicode character database
 lib/unicore/lib/Tagalog.pl	Unicode character database
 lib/unicore/lib/Tagbanwa.pl	Unicode character database
@@ -2123,6 +2126,7 @@ lib/unicore/lib/Ugaritic.pl	Unicode character database
 lib/unicore/lib/UnifiedI.pl	Unicode character database
 lib/unicore/lib/Uppercas.pl	Unicode character database
 lib/unicore/lib/Upper.pl	Unicode character database
+lib/unicore/lib/Variatio.pl	Unicode character database
 lib/unicore/lib/WhiteSpa.pl	Unicode character database
 lib/unicore/lib/Word.pl		Unicode character database
 lib/unicore/lib/XDigit.pl	Unicode character database

@@ -6,9 +6,9 @@
 # This file supports:
 # 	\p{Georgian} (and fuzzy permutations)
 # 
-# Meaning: Script 'GEORGIAN'
+# Meaning: Script 'Georgian'
 #
 return <<'END';
-10A0	10C5	GEORGIAN
-10D0	10F8	GEORGIAN
+10A0	10C5	Georgian
+10D0	10F8	Georgian
 END

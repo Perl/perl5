@@ -6,9 +6,10 @@
 # This file supports:
 # 	\p{Syriac} (and fuzzy permutations)
 # 
-# Meaning: Script 'SYRIAC'
+# Meaning: Script 'Syriac'
 #
 return <<'END';
-0710	074A	SYRIAC
-074D	074F	SYRIAC
+0700	070D	Syriac
+070F	074A	Syriac
+074D	074F	Syriac
 END

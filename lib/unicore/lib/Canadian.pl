@@ -6,9 +6,8 @@
 # This file supports:
 # 	\p{CanadianAboriginal} (and fuzzy permutations)
 # 
-# Meaning: Script 'CANADIAN_ABORIGINAL'
+# Meaning: Script 'Canadian_Aboriginal'
 #
 return <<'END';
-1401	166C	CANADIAN_ABORIGINAL
-166F	1676	CANADIAN_ABORIGINAL
+1401	1676	Canadian_Aboriginal
 END

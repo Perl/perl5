@@ -6,17 +6,19 @@
 # This file supports:
 # 	\p{Hangul} (and fuzzy permutations)
 # 
-# Meaning: Script 'HANGUL'
+# Meaning: Script 'Hangul'
 #
 return <<'END';
-1100	1159	HANGUL
-115F	11A2	HANGUL
-11A8	11F9	HANGUL
-3131	318E	HANGUL
-AC00	D7A3	HANGUL
-FFA0	FFBE	HANGUL
-FFC2	FFC7	HANGUL
-FFCA	FFCF	HANGUL
-FFD2	FFD7	HANGUL
-FFDA	FFDC	HANGUL
+1100	1159	Hangul
+115F	11A2	Hangul
+11A8	11F9	Hangul
+3131	318E	Hangul
+3200	321E	Hangul
+3260	327D	Hangul
+AC00	D7A3	Hangul
+FFA0	FFBE	Hangul
+FFC2	FFC7	Hangul
+FFCA	FFCF	Hangul
+FFD2	FFD7	Hangul
+FFDA	FFDC	Hangul
 END

@@ -6,12 +6,12 @@
 # This file supports:
 # 	\p{Katakana} (and fuzzy permutations)
 # 
-# Meaning: Script 'KATAKANA'
+# Meaning: Script 'Katakana'
 #
 return <<'END';
-30A1	30FA	KATAKANA
-30FD	30FF	KATAKANA
-31F0	31FF	KATAKANA
-FF66	FF6F	KATAKANA
-FF71	FF9D	KATAKANA
+30A1	30FA	Katakana
+30FD	30FF	Katakana
+31F0	31FF	Katakana
+FF66	FF6F	Katakana
+FF71	FF9D	Katakana
 END

@@ -6,18 +6,18 @@
 # This file supports:
 # 	\p{Sinhala} (and fuzzy permutations)
 # 
-# Meaning: Script 'SINHALA'
+# Meaning: Script 'Sinhala'
 #
 return <<'END';
-0D82	0D83	SINHALA
-0D85	0D96	SINHALA
-0D9A	0DB1	SINHALA
-0DB3	0DBB	SINHALA
-0DBD		SINHALA
-0DC0	0DC6	SINHALA
-0DCA		SINHALA
-0DCF	0DD4	SINHALA
-0DD6		SINHALA
-0DD8	0DDF	SINHALA
-0DF2	0DF3	SINHALA
+0D82	0D83	Sinhala
+0D85	0D96	Sinhala
+0D9A	0DB1	Sinhala
+0DB3	0DBB	Sinhala
+0DBD		Sinhala
+0DC0	0DC6	Sinhala
+0DCA		Sinhala
+0DCF	0DD4	Sinhala
+0DD6		Sinhala
+0DD8	0DDF	Sinhala
+0DF2	0DF4	Sinhala
 END

@@ -6,9 +6,9 @@
 # This file supports:
 # 	\p{Bopomofo} (and fuzzy permutations)
 # 
-# Meaning: Script 'BOPOMOFO'
+# Meaning: Script 'Bopomofo'
 #
 return <<'END';
-3105	312C	BOPOMOFO
-31A0	31B7	BOPOMOFO
+3105	312C	Bopomofo
+31A0	31B7	Bopomofo
 END

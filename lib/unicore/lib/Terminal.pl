@@ -17,6 +17,7 @@ return <<'END';
 037E		Terminal_Punctuation
 0387		Terminal_Punctuation
 0589		Terminal_Punctuation
+05C3		Terminal_Punctuation
 060C		Terminal_Punctuation
 061B		Terminal_Punctuation
 061F		Terminal_Punctuation
@@ -25,6 +26,8 @@ return <<'END';
 070C		Terminal_Punctuation
 0964	0965	Terminal_Punctuation
 0E5A	0E5B	Terminal_Punctuation
+0F08		Terminal_Punctuation
+0F0D	0F12	Terminal_Punctuation
 104A	104B	Terminal_Punctuation
 1361	1368	Terminal_Punctuation
 166D	166E	Terminal_Punctuation

@@ -6,10 +6,9 @@
 # This file supports:
 # 	\p{Thai} (and fuzzy permutations)
 # 
-# Meaning: Script 'THAI'
+# Meaning: Script 'Thai'
 #
 return <<'END';
-0E01	0E3A	THAI
-0E40	0E4E	THAI
-0E50	0E59	THAI
+0E01	0E3A	Thai
+0E40	0E5B	Thai
 END

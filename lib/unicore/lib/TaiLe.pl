@@ -6,9 +6,9 @@
 # This file supports:
 # 	\p{TaiLe} (and fuzzy permutations)
 # 
-# Meaning: Script 'TAI_LE'
+# Meaning: Script 'Tai_Le'
 #
 return <<'END';
-1950	196D	TAI_LE
-1970	1974	TAI_LE
+1950	196D	Tai_Le
+1970	1974	Tai_Le
 END

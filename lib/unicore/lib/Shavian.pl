@@ -6,8 +6,8 @@
 # This file supports:
 # 	\p{Shavian} (and fuzzy permutations)
 # 
-# Meaning: Script 'SHAVIAN'
+# Meaning: Script 'Shavian'
 #
 return <<'END';
-10450	1047F	SHAVIAN
+10450	1047F	Shavian
 END

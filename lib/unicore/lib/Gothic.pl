@@ -6,8 +6,8 @@
 # This file supports:
 # 	\p{Gothic} (and fuzzy permutations)
 # 
-# Meaning: Script 'GOTHIC'
+# Meaning: Script 'Gothic'
 #
 return <<'END';
-10330	1034A	GOTHIC
+10330	1034A	Gothic
 END

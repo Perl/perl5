@@ -6,9 +6,9 @@
 # This file supports:
 # 	\p{Yi} (and fuzzy permutations)
 # 
-# Meaning: Script 'YI'
+# Meaning: Script 'Yi'
 #
 return <<'END';
-A000	A48C	YI
-A490	A4C6	YI
+A000	A48C	Yi
+A490	A4C6	Yi
 END

@@ -6,9 +6,9 @@
 # This file supports:
 # 	\p{Hiragana} (and fuzzy permutations)
 # 
-# Meaning: Script 'HIRAGANA'
+# Meaning: Script 'Hiragana'
 #
 return <<'END';
-3041	3096	HIRAGANA
-309D	309F	HIRAGANA
+3041	3096	Hiragana
+309D	309F	Hiragana
 END
