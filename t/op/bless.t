@@ -13,7 +13,8 @@ sub expected {
 	ref($object) eq $package
 	&& "$object" =~ /^\Q$package\E=(\w+)\(0x([0-9a-f]+)\)$/
 	&& $1 eq $type
-	&& hex($2) == $object
+	# in 64-bit platforms hex warns for 32+ -bit values
+	&& do { no warnings 'portable'; hex($2) == $object }
     );
     print "# $object $package $type\n";
     return "not ";
