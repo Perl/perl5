@@ -22,7 +22,7 @@ topfiles="`echo ' ' *.y *.c *.h ' ' | sed 's/ embed.h / /'`"
 subdirfiles="`( find ./*/* -name '*.[cy]' -print | sort ; find ./*/* -name '*.[hH]' -print | sort )`"
 xsfiles="`find . -name '*.xs' -print | sort`"
 
-# What is `etags -d'?
+# etags -d : process defineds too (default now)
 
 # These are example lines for global variables and PP-code:
 ## IEXT SV *       Iparsehook;
@@ -49,6 +49,18 @@ etags -o TAGS.tmp \
 etags -o TAGS.tmp -a "$@" $topfiles
 etags -o TAGS.tmp -a -D -l none -r '/#define.*\t\(Perl_.*\)/\1/' embed.h
 
+perl -w014pe 'if (s/^( [^\n\x7F\x1]*\b	# 1:   TAG group
+	               (\w+)		#   2: word
+		       [^\w\x7X\x1\n]*	#      Most anything
+		       \x7F		#      End of description
+		     )
+		     (\d+,\d+\n)	# 3:   TAGS Trail
+		   /$1$2\x1$3/mgx) {	# Add specific marking
+		  $chars = chomp;
+		  s/^((\n.+,)\d+)/ $2 . (length($_) - length($1) - 1) /e;
+		  $_ .= ("\f" x $chars);
+	      }' TAGS.tmp > TAGS.tm1 && mv TAGS.tm1 TAGS.tmp
+
 # Add MODULE lines to TAG files (to be postprocessed later),
 #   and BOOT: lines (in DynaLoader processed twice?)
 
@@ -71,7 +83,7 @@ etags -o TAGS.tmp -a -d -l c \
 
 etags -o TAGS.tmp -a "$@" $subdirfiles
 
-if ! test -f emacs/cperl-mode.elc ; then
+if test ! -f emacs/cperl-mode.elc ; then
     ( cd emacs; emacs -batch -q -no-site-file -f batch-byte-compile cperl-mode.el )
 fi
 
