@@ -641,8 +641,16 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
                 /* need to close fp without closing underlying fd */
                 int ofd = PerlIO_fileno(fp);
                 int dupfd = PerlLIO_dup(ofd);
+#if defined(HAS_FCNTL) && defined(F_SETFD)
+		/* Assume if we have F_SETFD we have F_GETFD */
+                int coe = fcntl(ofd,F_GETFD);
+#endif
                 PerlIO_close(fp);
                 PerlLIO_dup2(dupfd,ofd);
+#if defined(HAS_FCNTL) && defined(F_SETFD)
+		/* The dup trick has lost close-on-exec on ofd */
+		fcntl(ofd,F_SETFD, coe);
+#endif
                 PerlLIO_close(dupfd);
 	    }
             else
