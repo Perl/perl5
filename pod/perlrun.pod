@@ -368,8 +368,7 @@ As an alternative, specify a number instead of list of letters (e.g.,
 B<-D14> is equivalent to B<-Dtls>):
 
         1  p  Tokenizing and parsing (with v, displays parse stack)
-        2  s  Stack snapshots
-                with v, displays all stacks
+        2  s  Stack snapshots (with v, displays all stacks)
         4  l  Context (loop) stack processing
         8  t  Trace execution
        16  o  Method and overloading resolution
@@ -391,7 +390,7 @@ B<-D14> is equivalent to B<-Dtls>):
   1048576  v  Verbose: use in conjunction with other flags
   2097152  C  Copy On Write
   4194304  A  Consistency checks on internal structures
-  8388608  q  quiet - currently only suppressed the "EXECUTING" message
+  8388608  q  quiet - currently only suppresses the "EXECUTING" message
 
 All these flags require B<-DDEBUGGING> when you compile the Perl
 executable (but see L<Devel::Peek>, L<re> which may change this).

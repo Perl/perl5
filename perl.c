@@ -2378,7 +2378,7 @@ Perl_get_debug_opts(pTHX_ char **s)
     static char *usage_msgd[] = {
       " Debugging flag values: (see also -d)",
       "  p  Tokenizing and parsing (with v, displays parse stack)",
-      "  s  Stack snapshots. with v, displays all stacks",
+      "  s  Stack snapshots (with v, displays all stacks)",
       "  l  Context (loop) stack processing",
       "  t  Trace execution",
       "  o  Method and overloading resolution",
@@ -2388,7 +2388,7 @@ Perl_get_debug_opts(pTHX_ char **s)
       "  f  Format processing",
       "  r  Regular expression parsing and execution",
       "  x  Syntax tree dump",
-      "  u  Tainting checks (Obsolete, previously used for LEAKTEST)",
+      "  u  Tainting checks",
       "  H  Hash dump -- usurps values()",
       "  X  Scratchpad allocation",
       "  D  Cleaning up",
@@ -2399,7 +2399,7 @@ Perl_get_debug_opts(pTHX_ char **s)
       "  v  Verbose: use in conjunction with other flags",
       "  C  Copy On Write",
       "  A  Consistency checks on internal structures",
-      "  q  quiet - currently only suppressed the 'EXECUTING' message",
+      "  q  quiet - currently only suppresses the 'EXECUTING' message",
       NULL
     };
     int i = 0;
