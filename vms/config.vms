@@ -1910,6 +1910,17 @@
  */
 #define Netdb_hlen_t		int
 
+/* HAS_GETPROTOBYNAME:
+ *	This symbol, if defined, indicates that the getprotobyname()
+ *	routine is available to look up protocols by their name.
+ */
+/* HAS_GETPROTOBYNUMBER:
+ *	This symbol, if defined, indicates that the getprotobynumber()
+ *	routine is available to look up protocols by their number.
+ */
+#define HAS_GETPROTOBYNAME		/**/
+#define HAS_GETPROTOBYNUMBER		/**/
+
 /* HAS_GETHOSTBYNAME:
  *	This symbol, if defined, indicates that the gethostbyname routine is
  *	available to lookup hosts by their DNS names.
