@@ -858,4 +858,10 @@ Devel::DebugInit also needs to be extended to support threads.
 See p5p archives for late May/early June 2001 for a recent discussion
 on this topic.
 
+=head2 truncate to the people
+
+One can emulate ftruncate() using F_FREESP and F_CHSIZ fcntls
+(see the UNIX FAQ for details).  This needs to go somewhere near
+pp_sys.c:pp_truncate().
+
 =cut
