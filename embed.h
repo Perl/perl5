@@ -1088,6 +1088,8 @@
 #define reghopmaybe		S_reghopmaybe
 #define reghopmaybe3		S_reghopmaybe3
 #define find_byclass		S_find_byclass
+#define to_utf8_substr		S_to_utf8_substr
+#define to_byte_substr		S_to_byte_substr
 #endif
 #if defined(PERL_IN_DUMP_C) || defined(PERL_DECL_PROT)
 #define deb_curcv		S_deb_curcv
@@ -2639,6 +2641,8 @@
 #define reghopmaybe(a,b)	S_reghopmaybe(aTHX_ a,b)
 #define reghopmaybe3(a,b,c)	S_reghopmaybe3(aTHX_ a,b,c)
 #define find_byclass(a,b,c,d,e,f)	S_find_byclass(aTHX_ a,b,c,d,e,f)
+#define to_utf8_substr(a)	S_to_utf8_substr(aTHX_ a)
+#define to_byte_substr(a)	S_to_byte_substr(aTHX_ a)
 #endif
 #if defined(PERL_IN_DUMP_C) || defined(PERL_DECL_PROT)
 #define deb_curcv(a)		S_deb_curcv(aTHX_ a)

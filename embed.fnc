@@ -1167,6 +1167,8 @@ s	|U8*	|reghop3	|U8 *pos|I32 off|U8 *lim
 s	|U8*	|reghopmaybe	|U8 *pos|I32 off
 s	|U8*	|reghopmaybe3	|U8 *pos|I32 off|U8 *lim
 s	|char*	|find_byclass	|regexp * prog|regnode *c|char *s|char *strend|char *startpos|I32 norun
+s	|void	|to_utf8_substr	|regexp * prog
+s	|void	|to_byte_substr	|regexp * prog
 #endif
 
 #if defined(PERL_IN_DUMP_C) || defined(PERL_DECL_PROT)

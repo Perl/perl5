@@ -386,7 +386,8 @@ struct reg_data {
 struct reg_substr_datum {
     I32 min_offset;
     I32 max_offset;
-    SV *substr;
+    SV *substr;		/* non-utf8 variant */
+    SV *utf8_substr;	/* utf8 variant */
 };
 
 struct reg_substr_data {
@@ -394,10 +395,13 @@ struct reg_substr_data {
 };
 
 #define anchored_substr substrs->data[0].substr
+#define anchored_utf8 substrs->data[0].utf8_substr
 #define anchored_offset substrs->data[0].min_offset
 #define float_substr substrs->data[1].substr
+#define float_utf8 substrs->data[1].utf8_substr
 #define float_min_offset substrs->data[1].min_offset
 #define float_max_offset substrs->data[1].max_offset
 #define check_substr substrs->data[2].substr
+#define check_utf8 substrs->data[2].utf8_substr
 #define check_offset_min substrs->data[2].min_offset
 #define check_offset_max substrs->data[2].max_offset
