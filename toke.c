@@ -235,16 +235,18 @@ win32_textfilter(int idx, SV *sv, int maxlen)
 }
 #endif
 
+#ifndef PERL_OBJECT
+
 STATIC I32
 utf16_textfilter(int idx, SV *sv, int maxlen)
 {
     I32 count = FILTER_READ(idx+1, sv, maxlen);
     if (count) {
-	char* tmps;
-	char* tend;
-	New(898, tmps, SvCUR(sv) * 3 / 2 + 1, char);
+	U8* tmps;
+	U8* tend;
+	New(898, tmps, SvCUR(sv) * 3 / 2 + 1, U8);
 	tend = utf16_to_utf8((U16*)SvPVX(sv), tmps, SvCUR(sv));
-	sv_usepvn(sv, tmps, tend - tmps);
+	sv_usepvn(sv, (char*)tmps, tend - tmps);
     
     }
     return count;
@@ -255,15 +257,17 @@ utf16rev_textfilter(int idx, SV *sv, int maxlen)
 {
     I32 count = FILTER_READ(idx+1, sv, maxlen);
     if (count) {
-	char* tmps;
-	char* tend;
-	New(898, tmps, SvCUR(sv) * 3 / 2 + 1, char);
+	U8* tmps;
+	U8* tend;
+	New(898, tmps, SvCUR(sv) * 3 / 2 + 1, U8);
 	tend = utf16_to_utf8_reversed((U16*)SvPVX(sv), tmps, SvCUR(sv));
-	sv_usepvn(sv, tmps, tend - tmps);
+	sv_usepvn(sv, (char*)tmps, tend - tmps);
     
     }
     return count;
 }
+
+#endif
 
 void
 lex_start(SV *line)
@@ -985,7 +989,7 @@ scan_const(char *start)
 	if (*s & 0x80 && thisutf) {
 	    dTHR;			/* only for ckWARN */
 	    if (ckWARN(WARN_UTF8)) {
-		(void)utf8_to_uv(s, &len);	/* could cvt latin-1 to utf8 here... */
+		(void)utf8_to_uv((U8*)s, &len);	/* could cvt latin-1 to utf8 here... */
 		if (len) {
 		    while (len--)
 			*d++ = *s++;
@@ -1059,7 +1063,8 @@ scan_const(char *start)
 				   "Use of \\x{} without utf8 declaration");
 		    }
 		    /* note: utf always shorter than hex */
-		    d = uv_to_utf8(d, scan_hex(s + 1, e - s - 1, &len));
+		    d = (char*)uv_to_utf8((U8*)d,
+					  scan_hex(s + 1, e - s - 1, &len));
 		    s = e + 1;
 			
 		}
@@ -1068,7 +1073,7 @@ scan_const(char *start)
 		    if (utf && PL_lex_inwhat == OP_TRANS &&
 			utf != (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF))
 		    {
-			d = uv_to_utf8(d, uv);		/* doing a CU or UC */
+			d = (char*)uv_to_utf8((U8*)d, uv);	/* doing a CU or UC */
 		    }
 		    else {
 			if (uv >= 127 && UTF) {
@@ -1836,7 +1841,7 @@ yylex(void)
 	 * routines unnecessarily.  You will see this not just here but throughout this file.
 	 */
 	if (UTF && (*s & 0xc0) == 0x80) {
-	    if (isIDFIRST_utf8(s))
+	    if (isIDFIRST_utf8((U8*)s))
 		goto keylookup;
 	}
 	croak("Unrecognized character \\x%02X", *s & 255);
@@ -4963,9 +4968,9 @@ scan_word(register char *s, char *dest, STRLEN destlen, int allow_package, STRLE
 	    *d++ = *s++;
 	    *d++ = *s++;
 	}
-	else if (UTF && (*s & 0xc0) == 0x80 && isALNUM_utf8(s)) {
+	else if (UTF && (*s & 0xc0) == 0x80 && isALNUM_utf8((U8*)s)) {
 	    char *t = s + UTF8SKIP(s);
-	    while (*t & 0x80 && is_utf8_mark(t))
+	    while (*t & 0x80 && is_utf8_mark((U8*)t))
 		t += UTF8SKIP(t);
 	    if (d + (t - s) > e)
 		croak(ident_too_long);
@@ -5017,9 +5022,9 @@ scan_ident(register char *s, register char *send, char *dest, STRLEN destlen, I3
 		*d++ = *s++;
 		*d++ = *s++;
 	    }
-	    else if (UTF && (*s & 0xc0) == 0x80 && isALNUM_utf8(s)) {
+	    else if (UTF && (*s & 0xc0) == 0x80 && isALNUM_utf8((U8*)s)) {
 		char *t = s + UTF8SKIP(s);
-		while (*t & 0x80 && is_utf8_mark(t))
+		while (*t & 0x80 && is_utf8_mark((U8*)t))
 		    t += UTF8SKIP(t);
 		if (d + (t - s) > e)
 		    croak(ident_too_long);
@@ -5069,13 +5074,13 @@ scan_ident(register char *s, register char *send, char *dest, STRLEN destlen, I3
 		}
 	    }
 	}
-	if (isIDFIRST(*d) || (UTF && (*d & 0xc0) == 0x80 && isIDFIRST_utf8(d))) {
+	if (isIDFIRST(*d) || (UTF && (*d & 0xc0) == 0x80 && isIDFIRST_utf8((U8*)d))) {
 	    d++;
 	    if (UTF) {
 		e = s;
 		while (e < send && (isALNUM(*e) || ((*e & 0xc0) == 0x80 && isALNUM_utf8((U8*)e)) || *e == ':')) {
 		    e += UTF8SKIP(e);
-		    while (e < send && *e & 0x80 && is_utf8_mark(e))
+		    while (e < send && *e & 0x80 && is_utf8_mark((U8*)e))
 			e += UTF8SKIP(e);
 		}
 		Copy(s, d, e - s, char);

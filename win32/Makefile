@@ -431,6 +431,7 @@ CORE_NOCFG_H	=		\
 		..\unixish.h	\
 		..\utf8.h	\
 		..\util.h	\
+		..\warning.h	\
 		..\XSUB.h	\
 		..\EXTERN.h	\
 		..\perlvars.h	\

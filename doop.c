@@ -42,7 +42,6 @@ do_trans(SV *sv, OP *arg)
 	UV final;
 	register UV uv;
 	UV puv;
-	char *dst;
 	register I32 from_utf = PL_op->op_private & OPpTRANS_FROM_UTF;
 	register I32 to_utf = PL_op->op_private & OPpTRANS_TO_UTF;
 
@@ -155,7 +154,7 @@ do_trans(SV *sv, OP *arg)
 	    }
 	    else {
 		while (s < send) {
-		    char tmpbuf[10];
+		    U8 tmpbuf[10];
 		    uv_to_utf8(tmpbuf, *s);	/* XXX suboptimal */
 		    if (swash_fetch(rv, tmpbuf) < none)
 			matches++;
@@ -175,7 +174,7 @@ do_trans(SV *sv, OP *arg)
 	    if (svp)
 		final = SvUV(*svp);
 
-	    Newz(801, d, len * (bits >> 3) + 1, char);
+	    Newz(801, d, len * (bits >> 3) + 1, U8);
 	    dst = d;
 
 	    puv = 0xfeedface;
@@ -184,7 +183,7 @@ do_trans(SV *sv, OP *arg)
 		    if (from_utf)
 			uv = swash_fetch(rv, s);
 		    else {
-			char tmpbuf[10];
+			U8 tmpbuf[10];
 			uv_to_utf8(tmpbuf, *s);	/* XXX suboptimal */
 			uv = swash_fetch(rv, tmpbuf);
 		    }
@@ -233,7 +232,7 @@ do_trans(SV *sv, OP *arg)
 		    if (from_utf)
 			uv = swash_fetch(rv, s);
 		    else {
-			char tmpbuf[10];
+			U8 tmpbuf[10];
 			uv_to_utf8(tmpbuf, *s);	/* XXX suboptimal */
 			uv = swash_fetch(rv, tmpbuf);
 		    }
@@ -272,7 +271,7 @@ do_trans(SV *sv, OP *arg)
 		    s += UTF8SKIP(s);
 		}
 	    }
-	    sv_usepvn_mg(sv, dst, d - dst);
+	    sv_usepvn_mg(sv, (char*)dst, d - dst);
 	}
 	return matches;
     }

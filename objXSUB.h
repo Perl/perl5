@@ -1076,6 +1076,58 @@
 #define intuit_more         pPerl->Perl_intuit_more
 #undef  invert
 #define invert              pPerl->Perl_invert
+
+#undef  is_uni_alnum
+#define is_uni_alnum        pPerl->Perl_is_uni_alnum
+#undef  is_uni_alnum_lc
+#define is_uni_alnum_lc     pPerl->Perl_is_uni_alnum_lc
+#undef  is_uni_alpha
+#define is_uni_alpha        pPerl->Perl_is_uni_alpha
+#undef  is_uni_alpha_lc
+#define is_uni_alpha_lc     pPerl->Perl_is_uni_alpha_lc
+#undef  is_uni_digit
+#define is_uni_digit        pPerl->Perl_is_uni_digit
+#undef  is_uni_digit_lc
+#define is_uni_digit_lc     pPerl->Perl_is_uni_digit_lc
+#undef  is_uni_idfirst
+#define is_uni_idfirst      pPerl->Perl_is_uni_idfirst
+#undef  is_uni_idfirst_lc
+#define is_uni_idfirst_lc   pPerl->Perl_is_uni_idfirst_lc
+#undef  is_uni_lower
+#define is_uni_lower        pPerl->Perl_is_uni_lower
+#undef  is_uni_lower_lc
+#define is_uni_lower_lc     pPerl->Perl_is_uni_lower_lc
+#undef  is_uni_print
+#define is_uni_print        pPerl->Perl_is_uni_print
+#undef  is_uni_print_lc
+#define is_uni_print_lc     pPerl->Perl_is_uni_print_lc
+#undef  is_uni_space
+#define is_uni_space        pPerl->Perl_is_uni_space
+#undef  is_uni_space_lc
+#define is_uni_space_lc     pPerl->Perl_is_uni_space_lc
+#undef  is_uni_upper
+#define is_uni_upper        pPerl->Perl_is_uni_upper
+#undef  is_uni_upper_lc
+#define is_uni_upper_lc     pPerl->Perl_is_uni_upper_lc
+#undef  is_utf8_alnum
+#define is_utf8_alnum       pPerl->Perl_is_utf8_alnum
+#undef  is_utf8_alpha
+#define is_utf8_alpha       pPerl->Perl_is_utf8_alpha
+#undef  is_utf8_digit
+#define is_utf8_digit       pPerl->Perl_is_utf8_digit
+#undef  is_utf8_idfirst
+#define is_utf8_idfirst     pPerl->Perl_is_utf8_idfirst
+#undef  is_utf8_lower
+#define is_utf8_lower       pPerl->Perl_is_utf8_lower
+#undef  is_utf8_mark
+#define is_utf8_mark        pPerl->Perl_is_utf8_mark
+#undef  is_utf8_print
+#define is_utf8_print       pPerl->Perl_is_utf8_print
+#undef  is_utf8_space
+#define is_utf8_space       pPerl->Perl_is_utf8_space
+#undef  is_utf8_upper
+#define is_utf8_upper       pPerl->Perl_is_utf8_upper
+
 #undef  io_close
 #define io_close            pPerl->Perl_io_close
 #undef  ioctl
@@ -1601,6 +1653,8 @@
 #define save_scalar         pPerl->Perl_save_scalar
 #undef  save_pptr
 #define save_pptr           pPerl->Perl_save_pptr
+#undef  save_re_context
+#define save_re_context     pPerl->Perl_save_re_context
 #undef  save_sptr
 #define save_sptr           pPerl->Perl_save_sptr
 #undef  save_svref
@@ -1741,6 +1795,12 @@
 #define sv_iv		    pPerl->Perl_sv_iv
 #undef  sv_len
 #define sv_len		    pPerl->Perl_sv_len
+#undef  sv_len_utf8
+#define sv_len_utf8	    pPerl->Perl_sv_len_utf8
+#undef  sv_pos_u2b
+#define sv_pos_u2b	    pPerl->Perl_sv_pos_u2b
+#undef  sv_pos_b2u
+#define sv_pos_b2u	    pPerl->Perl_sv_pos_b2u
 #undef  sv_magic
 #define sv_magic	    pPerl->Perl_sv_magic
 #undef  sv_mortalcopy
@@ -1811,12 +1871,36 @@
 #define sv_vcatpvfn	    pPerl->Perl_sv_vcatpvfn
 #undef  sv_vsetpvfn
 #define sv_vsetpvfn	    pPerl->Perl_sv_vsetpvfn
+#undef  swash_init
+#define swash_init	    pPerl->Perl_swash_init
+#undef  swash_fetch
+#define swash_fetch	    pPerl->Perl_swash_fetch
 #undef  taint_env
 #define taint_env	    pPerl->Perl_taint_env
 #undef  taint_not
 #define taint_not	    pPerl->Perl_taint_not
 #undef  taint_proper
 #define taint_proper	    pPerl->Perl_taint_proper
+
+#undef  to_uni_lower
+#define to_uni_lower        pPerl->Perl_to_uni_lower
+#undef  to_uni_lower_lc
+#define to_uni_lower_lc     pPerl->Perl_to_uni_lower_lc
+#undef  to_uni_title
+#define to_uni_title        pPerl->Perl_to_uni_title
+#undef  to_uni_title_lc
+#define to_uni_title_lc     pPerl->Perl_to_uni_title_lc
+#undef  to_uni_upper
+#define to_uni_upper        pPerl->Perl_to_uni_upper
+#undef  to_uni_upper_lc
+#define to_uni_upper_lc     pPerl->Perl_to_uni_upper_lc
+#undef  to_utf8_lower
+#define to_utf8_lower       pPerl->Perl_to_utf8_lower
+#undef  to_utf8_title
+#define to_utf8_title       pPerl->Perl_to_utf8_title
+#undef  to_utf8_upper
+#define to_utf8_upper       pPerl->Perl_to_utf8_upper
+
 #undef  too_few_arguments
 #define too_few_arguments   pPerl->Perl_too_few_arguments
 #undef  too_many_arguments
@@ -1831,6 +1915,20 @@
 #define unsharepvn          pPerl->Perl_unsharepvn
 #undef  utilize
 #define utilize             pPerl->Perl_utilize
+
+#undef  utf16_to_utf8
+#define utf16_to_utf8       pPerl->Perl_utf16_to_utf8
+#undef  utf16_to_utf8_reversed
+#define utf16_to_utf8_reversed    pPerl->Perl_utf16_to_utf8_reversed
+#undef  utf8_distance
+#define utf8_distance       pPerl->Perl_utf8_distance
+#undef  utf8_hop
+#define utf8_hop            pPerl->Perl_utf8_hop
+#undef  utf8_to_uv
+#define utf8_to_uv          pPerl->Perl_utf8_to_uv
+#undef  uv_to_utf8
+#define uv_to_utf8          pPerl->Perl_uv_to_utf8
+
 #undef  vivify_defelem
 #define vivify_defelem      pPerl->Perl_vivify_defelem
 #undef  vivify_ref
@@ -1839,6 +1937,8 @@
 #define wait4pid            pPerl->Perl_wait4pid
 #undef  warn
 #define warn    	    pPerl->Perl_warn
+#undef  warner
+#define warner    	    pPerl->Perl_warner
 #undef  watch
 #define watch    	    pPerl->Perl_watch
 #undef  whichsig

@@ -10,6 +10,8 @@
 __END__
 # regexec.c
 use warning 'unsafe' ;
+print("SKIPPED\n# win32 can't increase stacksize in shell\n"),exit
+    if $^O eq 'MSWin32';
 $_ = 'a' x (2**15+1); 
 /^()(a\1)*$/ ;
 #
@@ -28,10 +30,12 @@ $_ = 'a' x (2**15+1);
 #    % limit stacksize 16000
 #
 EXPECT
-Complex regular subexpression recursion limit (32766) exceeded at - line 4.
+Complex regular subexpression recursion limit (32766) exceeded at - line 6.
 ########
 # regexec.c
 use warning 'unsafe' ;
+print("SKIPPED\n# win32 can't increase stacksize in shell\n"),exit
+    if $^O eq 'MSWin32';
 $_ = 'a' x (2**15+1);
 /^()(a\1)*?$/ ;
 #
@@ -50,4 +54,4 @@ $_ = 'a' x (2**15+1);
 #    % limit stacksize 16000
 #
 EXPECT
-Complex regular subexpression recursion limit (32766) exceeded at - line 4.
+Complex regular subexpression recursion limit (32766) exceeded at - line 6.

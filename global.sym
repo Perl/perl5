@@ -952,6 +952,7 @@ save_long
 save_nogv
 save_op
 save_pptr
+save_re_context
 save_scalar
 save_sptr
 save_svref
@@ -1031,6 +1032,8 @@ sv_isobject
 sv_iv
 sv_len
 sv_len_utf8
+sv_pos_u2b
+sv_pos_b2u
 sv_magic
 sv_mortalcopy
 sv_newmortal

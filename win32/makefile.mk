@@ -199,7 +199,7 @@ OPTIMIZE	= -O2 $(RUNTIME)
 LINK_DBG	= 
 .ENDIF
 
-CFLAGS		= -K -w -d -tWM -tWD $(INCLUDES) $(DEFINES) $(LOCDEFS) \
+CFLAGS		= -w -g0 -d -tWM -tWD $(INCLUDES) $(DEFINES) $(LOCDEFS) \
 		$(PCHFLAGS) $(OPTIMIZE)
 LINK_FLAGS	= $(LINK_DBG) -L$(CCLIBDIR) $(EXTRALIBDIRS:^"-L")
 OBJOUT_FLAG	= -o
@@ -548,6 +548,7 @@ CORE_NOCFG_H	=		\
 		..\unixish.h	\
 		..\utf8.h	\
 		..\util.h	\
+		..\warning.h	\
 		..\XSUB.h	\
 		..\EXTERN.h	\
 		..\perlvars.h	\

@@ -185,10 +185,10 @@ readlink 1;		# OP_READLINK
 time ;			# OP_TIME
 localtime ;		# OP_LOCALTIME
 gmtime ;		# OP_GMTIME
-getgrnam 1;		# OP_GGRNAM
-getgrgid 1 ;		# OP_GGRGID
-getpwnam 1;		# OP_GPWNAM
-getpwuid 1;		# OP_GPWUID
+eval { getgrnam 1 };	# OP_GGRNAM
+eval { getgrgid 1 };	# OP_GGRGID
+eval { getpwnam 1 };	# OP_GPWNAM
+eval { getpwuid 1 };	# OP_GPWUID
 EXPECT
 Useless use of repeat in void context at - line 3.
 Useless use of wantarray in void context at - line 5.
@@ -361,6 +361,10 @@ getprotoent ;		# OP_GPROTOENT
 getservbyname 1,2;	# OP_GSBYNAME
 getservbyport 1,2;	# OP_GSBYPORT
 getservent ;		# OP_GSERVENT
+INIT {
+   # some functions may not be there, so we exit without running
+   exit;
+}
 EXPECT
 Useless use of getsockname in void context at - line 24.
 Useless use of getpeername in void context at - line 25.
@@ -528,7 +532,7 @@ Hash %FRED missing the % in argument 1 of keys() at - line 3.
 ########
 # op.c
 use warning 'syntax' ;
-exec "true" ; 
+exec "$^X -e 1" ; 
 my $a
 EXPECT
 Statement unlikely to be reached at - line 4.

@@ -38,7 +38,7 @@
 __END__
 # doio.c
 use warning 'io' ;
-open(F, "|true|")
+open(F, "|$^X -e 1|")
 EXPECT
 Can't do bidirectional pipe at - line 3.
 ########
@@ -83,7 +83,7 @@ Unsuccessful stat on filename containing newline at - line 4.
 ########
 # doio.c
 use warning 'io' ;
-exec "lskdjfalksdjfdjfkls" ;
+exec "lskdjfalksdjfdjfkls","" ;
 EXPECT
 Can't exec "lskdjfalksdjfdjfkls": No such file or directory at - line 3.
 ########

@@ -302,7 +302,7 @@ the strings?).
  Graham   5.005_03      1998-           
 
  Sarathy  5.005_50      1998-Jul-26     The 5.006 development track.
-          5.005_51      1998-Aug-09
+          5.005_51      1998-Aug-10
 
 =head2 SELECTED RELEASE SIZES
 

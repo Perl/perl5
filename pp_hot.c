@@ -888,7 +888,7 @@ play_it_again:
 		if (PL_screamfirst[BmRARE(rx->check_substr)] < 0)
 		    goto nope;
 
-		b = HOP((U8*)s, rx->check_offset_min);
+		b = (char*)HOP((U8*)s, rx->check_offset_min);
 		if (!(s = screaminstr(TARG, rx->check_substr, b - s, 0, &p, 0)))
 		    goto nope;
 
@@ -904,7 +904,7 @@ play_it_again:
 		goto yup;
 	    if (s && rx->check_offset_max < s - t) {
 		++BmUSEFUL(rx->check_substr);
-		s = HOP((U8*)s, -rx->check_offset_max);
+		s = (char*)HOP((U8*)s, -rx->check_offset_max);
 	    }
 	    else
 		s = t;
@@ -913,7 +913,7 @@ play_it_again:
 	   beginning of match, and the match is anchored at s. */
 	else if (!PL_multiline) {	/* Anchored near beginning of string. */
 	    I32 slen;
-	    char *b = HOP((U8*)s, rx->check_offset_min);
+	    char *b = (char*)HOP((U8*)s, rx->check_offset_min);
 	    if (*SvPVX(rx->check_substr) != *b
 		|| ((slen = SvCUR(rx->check_substr)) > 1
 		    && memNE(SvPVX(rx->check_substr), b, slen)))
@@ -1637,7 +1637,7 @@ PP(pp_subst)
 		if (PL_screamfirst[BmRARE(rx->check_substr)] < 0)
 		    goto nope;
 
-		b = HOP((U8*)s, rx->check_offset_min);
+		b = (char*)HOP((U8*)s, rx->check_offset_min);
 		if (!(s = screaminstr(TARG, rx->check_substr, b - s, 0, &p, 0)))
 		    goto nope;
 	    }
@@ -1647,7 +1647,7 @@ PP(pp_subst)
 		goto nope;
 	    if (s && rx->check_offset_max < s - m) {
 		++BmUSEFUL(rx->check_substr);
-		s = HOP((U8*)s, -rx->check_offset_max);
+		s = (char*)HOP((U8*)s, -rx->check_offset_max);
 	    }
 	    else
 		s = m;
@@ -1656,7 +1656,7 @@ PP(pp_subst)
 	   beginning of match, and the match is anchored at s. */
 	else if (!PL_multiline) { /* Anchored at beginning of string. */
 	    I32 slen;
-	    char *b = HOP((U8*)s, rx->check_offset_min);
+	    char *b = (char*)HOP((U8*)s, rx->check_offset_min);
 	    if (*SvPVX(rx->check_substr) != *b
 		|| ((slen = SvCUR(rx->check_substr)) > 1
 		    && memNE(SvPVX(rx->check_substr), b, slen)))

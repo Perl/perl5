@@ -515,6 +515,57 @@
 #define intuit_more       CPerlObj::Perl_intuit_more
 #undef  invert
 #define invert            CPerlObj::Perl_invert
+#undef  is_uni_alnum
+#define is_uni_alnum        CPerlObj::Perl_is_uni_alnum
+#undef  is_uni_alnum_lc
+#define is_uni_alnum_lc     CPerlObj::Perl_is_uni_alnum_lc
+#undef  is_uni_alpha
+#define is_uni_alpha        CPerlObj::Perl_is_uni_alpha
+#undef  is_uni_alpha_lc
+#define is_uni_alpha_lc     CPerlObj::Perl_is_uni_alpha_lc
+#undef  is_uni_digit
+#define is_uni_digit        CPerlObj::Perl_is_uni_digit
+#undef  is_uni_digit_lc
+#define is_uni_digit_lc     CPerlObj::Perl_is_uni_digit_lc
+#undef  is_uni_idfirst
+#define is_uni_idfirst      CPerlObj::Perl_is_uni_idfirst
+#undef  is_uni_idfirst_lc
+#define is_uni_idfirst_lc   CPerlObj::Perl_is_uni_idfirst_lc
+#undef  is_uni_lower
+#define is_uni_lower        CPerlObj::Perl_is_uni_lower
+#undef  is_uni_lower_lc
+#define is_uni_lower_lc     CPerlObj::Perl_is_uni_lower_lc
+#undef  is_uni_print
+#define is_uni_print        CPerlObj::Perl_is_uni_print
+#undef  is_uni_print_lc
+#define is_uni_print_lc     CPerlObj::Perl_is_uni_print_lc
+#undef  is_uni_space
+#define is_uni_space        CPerlObj::Perl_is_uni_space
+#undef  is_uni_space_lc
+#define is_uni_space_lc     CPerlObj::Perl_is_uni_space_lc
+#undef  is_uni_upper
+#define is_uni_upper        CPerlObj::Perl_is_uni_upper
+#undef  is_uni_upper_lc
+#define is_uni_upper_lc     CPerlObj::Perl_is_uni_upper_lc
+#undef  is_utf8_alnum
+#define is_utf8_alnum       CPerlObj::Perl_is_utf8_alnum
+#undef  is_utf8_alpha
+#define is_utf8_alpha       CPerlObj::Perl_is_utf8_alpha
+#undef  is_utf8_digit
+#define is_utf8_digit       CPerlObj::Perl_is_utf8_digit
+#undef  is_utf8_idfirst
+#define is_utf8_idfirst     CPerlObj::Perl_is_utf8_idfirst
+#undef  is_utf8_lower
+#define is_utf8_lower       CPerlObj::Perl_is_utf8_lower
+#undef  is_utf8_mark
+#define is_utf8_mark        CPerlObj::Perl_is_utf8_mark
+#undef  is_utf8_print
+#define is_utf8_print       CPerlObj::Perl_is_utf8_print
+#undef  is_utf8_space
+#define is_utf8_space       CPerlObj::Perl_is_utf8_space
+#undef  is_utf8_upper
+#define is_utf8_upper       CPerlObj::Perl_is_utf8_upper
+
 #undef  io_close
 #define io_close          CPerlObj::Perl_io_close
 #undef  is_an_int
@@ -1001,18 +1052,28 @@
 #define regbranch         CPerlObj::regbranch
 #undef  regc
 #define regc              CPerlObj::regc
+#undef  reguni
+#define reguni            CPerlObj::reguni
 #undef  regcurly
 #define regcurly          CPerlObj::regcurly
 #undef  regcppush
 #define regcppush         CPerlObj::regcppush
 #undef  regcppop
 #define regcppop          CPerlObj::regcppop
+#undef  reghop
+#define reghop            CPerlObj::reghop
+#undef  reghopmaybe
+#define reghopmaybe       CPerlObj::reghopmaybe
 #undef  regclass
 #define regclass          CPerlObj::regclass
+#undef  regclassutf8
+#define regclassutf8      CPerlObj::regclassutf8
 #undef  regexec_flags
 #define regexec_flags     CPerlObj::Perl_regexec_flags
 #undef  reginclass
 #define reginclass        CPerlObj::reginclass
+#undef  reginclassutf8
+#define reginclassutf8    CPerlObj::reginclassutf8
 #undef  reginsert
 #define reginsert         CPerlObj::reginsert
 #undef  regmatch
@@ -1135,6 +1196,8 @@
 #define save_scalar_at    CPerlObj::save_scalar_at
 #undef  save_pptr
 #define save_pptr         CPerlObj::Perl_save_pptr
+#undef  save_re_context
+#define save_re_context   CPerlObj::Perl_save_re_context
 #undef  save_sptr
 #define save_sptr         CPerlObj::Perl_save_sptr
 #undef  save_svref
@@ -1305,6 +1368,12 @@
 #define sv_iv             CPerlObj::Perl_sv_iv
 #undef  sv_len
 #define sv_len            CPerlObj::Perl_sv_len
+#undef  sv_len_utf8
+#define sv_len_utf8       CPerlObj::Perl_sv_len_utf8
+#undef  sv_pos_u2b
+#define sv_pos_u2b        CPerlObj::Perl_sv_pos_u2b
+#undef  sv_pos_b2u
+#define sv_pos_b2u        CPerlObj::Perl_sv_pos_b2u
 #undef  sv_magic
 #define sv_magic          CPerlObj::Perl_sv_magic
 #undef  sv_mortalcopy
@@ -1397,6 +1466,10 @@
 #define sv_vcatpvfn       CPerlObj::Perl_sv_vcatpvfn
 #undef  sv_vsetpvfn
 #define sv_vsetpvfn       CPerlObj::Perl_sv_vsetpvfn
+#undef  swash_init
+#define swash_init        CPerlObj::Perl_swash_init
+#undef  swash_fetch
+#define swash_fetch       CPerlObj::Perl_swash_fetch
 #undef  taint_env
 #define taint_env         CPerlObj::Perl_taint_env
 #undef  taint_not
@@ -1405,6 +1478,26 @@
 #define taint_proper      CPerlObj::Perl_taint_proper
 #undef  tokeq
 #define tokeq             CPerlObj::tokeq
+
+#undef  to_uni_lower
+#define to_uni_lower        CPerlObj::Perl_to_uni_lower
+#undef  to_uni_lower_lc
+#define to_uni_lower_lc     CPerlObj::Perl_to_uni_lower_lc
+#undef  to_uni_title
+#define to_uni_title        CPerlObj::Perl_to_uni_title
+#undef  to_uni_title_lc
+#define to_uni_title_lc     CPerlObj::Perl_to_uni_title_lc
+#undef  to_uni_upper
+#define to_uni_upper        CPerlObj::Perl_to_uni_upper
+#undef  to_uni_upper_lc
+#define to_uni_upper_lc     CPerlObj::Perl_to_uni_upper_lc
+#undef  to_utf8_lower
+#define to_utf8_lower       CPerlObj::Perl_to_utf8_lower
+#undef  to_utf8_title
+#define to_utf8_title       CPerlObj::Perl_to_utf8_title
+#undef  to_utf8_upper
+#define to_utf8_upper       CPerlObj::Perl_to_utf8_upper
+
 #undef  too_few_arguments
 #define too_few_arguments CPerlObj::Perl_too_few_arguments
 #undef  too_many_arguments
@@ -1421,6 +1514,22 @@
 #define usage             CPerlObj::usage
 #undef  utilize
 #define utilize           CPerlObj::Perl_utilize
+
+
+#undef  utf16_to_utf8
+#define utf16_to_utf8       CPerlObj::Perl_utf16_to_utf8
+#undef  utf16_to_utf8_reversed
+#define utf16_to_utf8_reversed    CPerlObj::Perl_utf16_to_utf8_reversed
+#undef  utf8_distance
+#define utf8_distance       CPerlObj::Perl_utf8_distance
+#undef  utf8_hop
+#define utf8_hop            CPerlObj::Perl_utf8_hop
+#undef  utf8_to_uv
+#define utf8_to_uv          CPerlObj::Perl_utf8_to_uv
+#undef  uv_to_utf8
+#define uv_to_utf8          CPerlObj::Perl_uv_to_utf8
+
+
 #undef  validate_suid
 #define validate_suid     CPerlObj::validate_suid
 #undef  visit
@@ -1433,6 +1542,8 @@
 #define wait4pid          CPerlObj::Perl_wait4pid
 #undef  warn
 #define warn              CPerlObj::Perl_warn
+#undef  warner
+#define warner            CPerlObj::Perl_warner
 #undef  watch
 #define watch             CPerlObj::Perl_watch
 #undef  whichsig

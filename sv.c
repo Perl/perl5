@@ -3082,8 +3082,8 @@ sv_len(register SV *sv)
 STRLEN
 sv_len_utf8(register SV *sv)
 {
-    unsigned char *s;
-    unsigned char *send;
+    U8 *s;
+    U8 *send;
     STRLEN len;
 
     if (!sv)
@@ -3094,7 +3094,7 @@ sv_len_utf8(register SV *sv)
 	len = mg_length(sv);
     else
 #endif
-	s = SvPV(sv, len);
+	s = (U8*)SvPV(sv, len);
     send = s + len;
     len = 0;
     while (s < send) {
@@ -3107,16 +3107,16 @@ sv_len_utf8(register SV *sv)
 void
 sv_pos_u2b(register SV *sv, I32* offsetp, I32* lenp)
 {
-    unsigned char *start;
-    unsigned char *s;
-    unsigned char *send;
+    U8 *start;
+    U8 *s;
+    U8 *send;
     I32 uoffset = *offsetp;
     STRLEN len;
 
     if (!sv)
 	return;
 
-    start = s = SvPV(sv, len);
+    start = s = (U8*)SvPV(sv, len);
     send = s + len;
     while (s < send && uoffset--)
 	s += UTF8SKIP(s);
@@ -3134,14 +3134,14 @@ sv_pos_u2b(register SV *sv, I32* offsetp, I32* lenp)
 void
 sv_pos_b2u(register SV *sv, I32* offsetp)
 {
-    unsigned char *s;
-    unsigned char *send;
+    U8 *s;
+    U8 *send;
     STRLEN len;
 
     if (!sv)
 	return;
 
-    s = SvPV(sv, len);
+    s = (U8*)SvPV(sv, len);
     if (len < *offsetp)
 	croak("panic: bad byte offset");
     send = s + *offsetp;
@@ -4529,7 +4529,7 @@ sv_vcatpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, 
 	STRLEN precis = 0;
 
 	char esignbuf[4];
-	char utf8buf[10];
+	U8 utf8buf[10];
 	STRLEN esignlen = 0;
 
 	char *eptr = Nullch;
@@ -4664,8 +4664,8 @@ sv_vcatpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, 
 		else
 		    uv = (svix < svmax) ? SvIVx(svargs[svix++]) : 0;
 
-		eptr = utf8buf;
-		elen = uv_to_utf8(eptr, uv) - utf8buf;
+		eptr = (char*)utf8buf;
+		elen = uv_to_utf8((U8*)eptr, uv) - utf8buf;
 		goto string;
 	    }
 	    if (args)

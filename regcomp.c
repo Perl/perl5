@@ -1707,7 +1707,7 @@ tryagain:
 	    *flagp |= HASWIDTH;
 	    nextchar();
 	    if (UTF && !PL_utf8_mark)
-		is_utf8_mark("~");	/* preload table */
+		is_utf8_mark((U8*)"~");		/* preload table */
 	    break;
 	case 'w':
 	    ret = reg_node(
@@ -1717,7 +1717,7 @@ tryagain:
 	    *flagp |= HASWIDTH|SIMPLE;
 	    nextchar();
 	    if (UTF && !PL_utf8_alnum)
-		is_utf8_alnum("a");	/* preload table */
+		is_utf8_alnum((U8*)"a");	/* preload table */
 	    break;
 	case 'W':
 	    ret = reg_node(
@@ -1727,7 +1727,7 @@ tryagain:
 	    *flagp |= HASWIDTH|SIMPLE;
 	    nextchar();
 	    if (UTF && !PL_utf8_alnum)
-		is_utf8_alnum("a");	/* preload table */
+		is_utf8_alnum((U8*)"a");	/* preload table */
 	    break;
 	case 'b':
 	    PL_seen_zerolen++;
@@ -1738,7 +1738,7 @@ tryagain:
 	    *flagp |= SIMPLE;
 	    nextchar();
 	    if (UTF && !PL_utf8_alnum)
-		is_utf8_alnum("a");	/* preload table */
+		is_utf8_alnum((U8*)"a");	/* preload table */
 	    break;
 	case 'B':
 	    PL_seen_zerolen++;
@@ -1749,7 +1749,7 @@ tryagain:
 	    *flagp |= SIMPLE;
 	    nextchar();
 	    if (UTF && !PL_utf8_alnum)
-		is_utf8_alnum("a");	/* preload table */
+		is_utf8_alnum((U8*)"a");	/* preload table */
 	    break;
 	case 's':
 	    ret = reg_node(
@@ -1759,7 +1759,7 @@ tryagain:
 	    *flagp |= HASWIDTH|SIMPLE;
 	    nextchar();
 	    if (UTF && !PL_utf8_space)
-		is_utf8_space(" ");	/* preload table */
+		is_utf8_space((U8*)" ");	/* preload table */
 	    break;
 	case 'S':
 	    ret = reg_node(
@@ -1769,21 +1769,21 @@ tryagain:
 	    *flagp |= HASWIDTH|SIMPLE;
 	    nextchar();
 	    if (UTF && !PL_utf8_space)
-		is_utf8_space(" ");	/* preload table */
+		is_utf8_space((U8*)" ");	/* preload table */
 	    break;
 	case 'd':
 	    ret = reg_node(UTF ? DIGITUTF8 : DIGIT);
 	    *flagp |= HASWIDTH|SIMPLE;
 	    nextchar();
 	    if (UTF && !PL_utf8_digit)
-		is_utf8_digit("1");	/* preload table */
+		is_utf8_digit((U8*)"1");	/* preload table */
 	    break;
 	case 'D':
 	    ret = reg_node(UTF ? NDIGITUTF8 : NDIGIT);
 	    *flagp |= HASWIDTH|SIMPLE;
 	    nextchar();
 	    if (UTF && !PL_utf8_digit)
-		is_utf8_digit("1");	/* preload table */
+		is_utf8_digit((U8*)"1");	/* preload table */
 	    break;
 	case 'p':
 	case 'P':
@@ -1981,7 +1981,7 @@ tryagain:
 		default:
 		  normal_default:
 		    if ((*p & 0xc0) == 0xc0 && UTF) {
-			ender = utf8_to_uv(p, &numlen);
+			ender = utf8_to_uv((U8*)p, &numlen);
 			p += numlen;
 		    }
 		    else
@@ -2297,7 +2297,7 @@ regclassutf8(void)
 
     while (PL_regcomp_parse < PL_regxend && *PL_regcomp_parse != ']') {
        skipcond:
-	value = utf8_to_uv(PL_regcomp_parse, &numlen);
+	value = utf8_to_uv((U8*)PL_regcomp_parse, &numlen);
 	PL_regcomp_parse += numlen;
 
 	if (value == '[' && PL_regcomp_parse + 1 < PL_regxend &&
@@ -2327,7 +2327,7 @@ regclassutf8(void)
 	}
 
 	if (value == '\\') {
-	    value = utf8_to_uv(PL_regcomp_parse, &numlen);
+	    value = utf8_to_uv((U8*)PL_regcomp_parse, &numlen);
 	    PL_regcomp_parse += numlen;
 	    switch (value) {
 	    case 'w':
@@ -2357,7 +2357,7 @@ regclassutf8(void)
 			flags |= ANYOF_SPACEL;
 		    sv_catpvf(listsv, "+utf8::IsSpace\n");
 		    if (!PL_utf8_space)
-			is_utf8_space(" ");
+			is_utf8_space((U8*)" ");
 		}
 		lastvalue = 123456;
 		continue;
@@ -2368,7 +2368,7 @@ regclassutf8(void)
 		    sv_catpvf(listsv,
 			"!utf8::IsSpace\n");
 		    if (!PL_utf8_space)
-			is_utf8_space(" ");
+			is_utf8_space((U8*)" ");
 		}
 		lastvalue = 123456;
 		continue;
@@ -2575,11 +2575,11 @@ reguni(UV uv, char* s, I32* lenp)
 {
     dTHR;
     if (SIZE_ONLY) {
-	char tmpbuf[10];
+	U8 tmpbuf[10];
 	*lenp = uv_to_utf8(tmpbuf, uv) - tmpbuf;
     }
     else
-	*lenp = uv_to_utf8(s, uv) - s;
+	*lenp = uv_to_utf8((U8*)s, uv) - (U8*)s;
 
 }
 

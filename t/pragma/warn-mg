@@ -16,6 +16,9 @@ No such signal: SIGFRED at - line 3.
 ########
 # mg.c
 use warning 'signal' ;
+if ($^O eq 'MSWin32') {
+    print "SKIPPED\n# win32, can't kill() to raise()\n"; exit;
+}
 $|=1;
 $SIG{"INT"} = "fred"; kill "INT",$$;
 EXPECT

@@ -897,6 +897,7 @@
 #define save_nogv		Perl_save_nogv
 #define save_op			Perl_save_op
 #define save_pptr		Perl_save_pptr
+#define save_re_context		Perl_save_re_context
 #define save_scalar		Perl_save_scalar
 #define save_sptr		Perl_save_sptr
 #define save_svref		Perl_save_svref
@@ -998,6 +999,8 @@
 #define sv_newref		Perl_sv_newref
 #define sv_nv			Perl_sv_nv
 #define sv_peek			Perl_sv_peek
+#define sv_pos_b2u		Perl_sv_pos_b2u
+#define sv_pos_u2b		Perl_sv_pos_u2b
 #define sv_pvn			Perl_sv_pvn
 #define sv_pvn_force		Perl_sv_pvn_force
 #define sv_ref			Perl_sv_ref
@@ -1101,6 +1104,7 @@
 #define warn_nosemi		Perl_warn_nosemi
 #define warn_reserved		Perl_warn_reserved
 #define warn_uninit		Perl_warn_uninit
+#define warner			Perl_warner
 #define watch			Perl_watch
 #define watchaddr		Perl_watchaddr
 #define watchok			Perl_watchok

@@ -78,6 +78,11 @@ Version 5.005_51        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  1776] By: gsar                                  on 1998/08/09  17:53:48
+        Log: fix coredump with MULTIPLICITY (ckWARN() needs early curcop init)
+     Branch: perl
+           ! Changes MANIFEST perl.c pod/perlhist.pod
+____________________________________________________________________________
 [  1775] By: gsar                                  on 1998/08/09  14:35:33
         Log: tweak warning test
      Branch: perl

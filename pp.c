@@ -2098,7 +2098,7 @@ PP(pp_ord)
 {
     djSP; dTARGET;
     I32 value;
-    char *tmps = POPp;
+    U8 *tmps = (U8*)POPp;
     I32 retlen;
 
     if (IN_UTF8 && (*tmps & 0x80))
@@ -2120,7 +2120,7 @@ PP(pp_chr)
     if (IN_UTF8 && value >= 128) {
 	SvGROW(TARG,8);
 	tmps = SvPVX(TARG);
-	tmps = uv_to_utf8(tmps, (UV)value);
+	tmps = (char*)uv_to_utf8((U8*)tmps, (UV)value);
 	SvCUR_set(TARG, tmps - SvPVX(TARG));
 	*tmps = '\0';
 	(void)SvPOK_only(TARG);
@@ -2163,7 +2163,7 @@ PP(pp_ucfirst)
     register U8 *s;
     STRLEN slen;
 
-    if (IN_UTF8 && (s = SvPV(sv, slen)) && slen && (*s & 0xc0) == 0xc0) {
+    if (IN_UTF8 && (s = (U8*)SvPV(sv, slen)) && slen && (*s & 0xc0) == 0xc0) {
 	I32 ulen;
 	U8 tmpbuf[10];
 	U8 *tend;
@@ -2181,12 +2181,12 @@ PP(pp_ucfirst)
 
 	if (!SvPADTMP(sv) || tend - tmpbuf != ulen) {
 	    dTARGET;
-	    sv_setpvn(TARG, tmpbuf, tend - tmpbuf);
-	    sv_catpvn(TARG, s + ulen, slen - ulen);
+	    sv_setpvn(TARG, (char*)tmpbuf, tend - tmpbuf);
+	    sv_catpvn(TARG, (char*)(s + ulen), slen - ulen);
 	    SETs(TARG);
 	}
 	else {
-	    s = SvPV_force(sv, slen);
+	    s = (U8*)SvPV_force(sv, slen);
 	    Copy(tmpbuf, s, ulen, U8);
 	}
 	RETURN;
@@ -2198,7 +2198,7 @@ PP(pp_ucfirst)
 	sv = TARG;
 	SETs(sv);
     }
-    s = SvPV_force(sv, PL_na);
+    s = (U8*)SvPV_force(sv, PL_na);
     if (*s) {
 	if (PL_op->op_private & OPpLOCALE) {
 	    TAINT;
@@ -2219,7 +2219,7 @@ PP(pp_lcfirst)
     register U8 *s;
     STRLEN slen;
 
-    if (IN_UTF8 && (s = SvPV(sv, slen)) && slen && (*s & 0xc0) == 0xc0) {
+    if (IN_UTF8 && (s = (U8*)SvPV(sv, slen)) && slen && (*s & 0xc0) == 0xc0) {
 	I32 ulen;
 	U8 tmpbuf[10];
 	U8 *tend;
@@ -2237,12 +2237,12 @@ PP(pp_lcfirst)
 
 	if (!SvPADTMP(sv) || tend - tmpbuf != ulen) {
 	    dTARGET;
-	    sv_setpvn(TARG, tmpbuf, tend - tmpbuf);
-	    sv_catpvn(TARG, s + ulen, slen - ulen);
+	    sv_setpvn(TARG, (char*)tmpbuf, tend - tmpbuf);
+	    sv_catpvn(TARG, (char*)(s + ulen), slen - ulen);
 	    SETs(TARG);
 	}
 	else {
-	    s = SvPV_force(sv, slen);
+	    s = (U8*)SvPV_force(sv, slen);
 	    Copy(tmpbuf, s, ulen, U8);
 	}
 	RETURN;
@@ -2254,7 +2254,7 @@ PP(pp_lcfirst)
 	sv = TARG;
 	SETs(sv);
     }
-    s = SvPV_force(sv, PL_na);
+    s = (U8*)SvPV_force(sv, PL_na);
     if (*s) {
 	if (PL_op->op_private & OPpLOCALE) {
 	    TAINT;
@@ -2282,7 +2282,7 @@ PP(pp_uc)
 	register U8 *d;
 	U8 *send;
 
-	s = SvPV(sv,len);
+	s = (U8*)SvPV(sv,len);
 	if (!len) {
 	    sv_setpvn(TARG, "", 0);
 	    SETs(TARG);
@@ -2292,7 +2292,7 @@ PP(pp_uc)
 	(void)SvUPGRADE(TARG, SVt_PV);
 	SvGROW(TARG, (len * 2) + 1);
 	(void)SvPOK_only(TARG);
-	d = SvPVX(TARG);
+	d = (U8*)SvPVX(TARG);
 	send = s + len;
 	if (PL_op->op_private & OPpLOCALE) {
 	    TAINT;
@@ -2321,7 +2321,7 @@ PP(pp_uc)
 	SETs(sv);
     }
 
-    s = SvPV_force(sv, len);
+    s = (U8*)SvPV_force(sv, len);
     if (len) {
 	register U8 *send = s + len;
 
@@ -2352,7 +2352,7 @@ PP(pp_lc)
 	register U8 *d;
 	U8 *send;
 
-	s = SvPV(sv,len);
+	s = (U8*)SvPV(sv,len);
 	if (!len) {
 	    sv_setpvn(TARG, "", 0);
 	    SETs(TARG);
@@ -2362,7 +2362,7 @@ PP(pp_lc)
 	(void)SvUPGRADE(TARG, SVt_PV);
 	SvGROW(TARG, (len * 2) + 1);
 	(void)SvPOK_only(TARG);
-	d = SvPVX(TARG);
+	d = (U8*)SvPVX(TARG);
 	send = s + len;
 	if (PL_op->op_private & OPpLOCALE) {
 	    TAINT;
@@ -2391,7 +2391,7 @@ PP(pp_lc)
 	SETs(sv);
     }
 
-    s = SvPV_force(sv, len);
+    s = (U8*)SvPV_force(sv, len);
     if (len) {
 	register U8 *send = s + len;
 
@@ -3043,17 +3043,17 @@ PP(pp_reverse)
 	up = SvPV_force(TARG, len);
 	if (len > 1) {
 	    if (IN_UTF8) {	/* first reverse each character */
-		unsigned char* s = SvPVX(TARG);
-		unsigned char* send = s + len;
+		U8* s = (U8*)SvPVX(TARG);
+		U8* send = (U8*)(s + len);
 		while (s < send) {
 		    if (*s < 0x80) {
 			s++;
 			continue;
 		    }
 		    else {
-			up = s;
+			up = (char*)s;
 			s += UTF8SKIP(s);
-			down = s - 1;
+			down = (char*)(s - 1);
 			if (s > send || !((*down & 0xc0) == 0x80)) {
 			    warn("Malformed UTF-8 character");
 			    break;
@@ -3395,7 +3395,7 @@ PP(pp_unpack)
 		len = strend - s;
 	    if (checksum) {
 		while (len-- > 0 && s < strend) {
-		    auint = utf8_to_uv(s, &along);
+		    auint = utf8_to_uv((U8*)s, &along);
 		    s += along;
 		    culong += auint;
 		}
@@ -3404,7 +3404,7 @@ PP(pp_unpack)
 		EXTEND(SP, len);
 		EXTEND_MORTAL(len);
 		while (len-- > 0 && s < strend) {
-		    auint = utf8_to_uv(s, &along);
+		    auint = utf8_to_uv((U8*)s, &along);
 		    s += along;
 		    sv = NEWSV(37, 0);
 		    sv_setiv(sv, (IV)auint);
@@ -4213,7 +4213,8 @@ PP(pp_pack)
 		fromstr = NEXTFROM;
 		auint = SvUV(fromstr);
 		SvGROW(cat, SvCUR(cat) + 10);
-		SvCUR_set(cat, uv_to_utf8(SvEND(cat), auint) - SvPVX(cat));
+		SvCUR_set(cat, (char*)uv_to_utf8((U8*)SvEND(cat),auint)
+			       - SvPVX(cat));
 	    }
 	    *SvEND(cat) = '\0';
 	    break;

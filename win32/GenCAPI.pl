@@ -141,10 +141,14 @@ while () {
             @args = split(',', $args);
             if ($args[$#args] =~ /\s*\.\.\.\s*/) {
                 if(($name eq "croak") or ($name eq "deb") or ($name eq "die")
-		        or ($name eq "form") or ($name eq "warn")) {
+		        or ($name eq "form") or ($name eq "warn")
+		        or ($name eq "warner")) {
                     print OUTFILE "\n#ifdef $name" . "_defined" unless ($separateObj == 0);
-                    $args[0] =~ /(\w+)\W*$/; 
-                    $arg = $1;
+                    for (@args) { $_ = $1 if /(\w+)\W*$/; }
+                    $arg = $args[$#args-1];
+		    my $start = '';
+		    $start = join(', ',@args[0 .. ($#args - 2)]) if @args > 2;
+		    $start .= ', ' if $start;
                     print OUTFILE <<ENDCODE;
 
 #undef $name
@@ -157,7 +161,7 @@ extern "C" $type $funcName ($args)
     pmsg = pPerl->Perl_mess($arg, &args);
     New(0, pstr, strlen(pmsg)+1, char);
     strcpy(pstr, pmsg);
-$return pPerl->Perl_$name(pstr);
+$return pPerl->Perl_$name($start pstr);
     va_end(args);
 }
 ENDCODE

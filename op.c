@@ -2133,11 +2133,11 @@ pmtrans(OP *o, OP *expr, OP *repl)
 		diff = val - nextmin;
 		if (diff > 0) {
 		    t = uv_to_utf8(tmpbuf,nextmin);
-		    sv_catpvn(transv, tmpbuf, t - tmpbuf);
+		    sv_catpvn(transv, (char*)tmpbuf, t - tmpbuf);
 		    if (diff > 1) {
 			t = uv_to_utf8(tmpbuf, val - 1);
 			sv_catpvn(transv, "\377", 1);
-			sv_catpvn(transv, tmpbuf, t - tmpbuf);
+			sv_catpvn(transv, (char*)tmpbuf, t - tmpbuf);
 		    }
 	        }
 		if (*s == 0xff)
@@ -2146,11 +2146,11 @@ pmtrans(OP *o, OP *expr, OP *repl)
 		    nextmin = val + 1;
 	    }
 	    t = uv_to_utf8(tmpbuf,nextmin);
-	    sv_catpvn(transv, tmpbuf, t - tmpbuf);
+	    sv_catpvn(transv, (char*)tmpbuf, t - tmpbuf);
 	    t = uv_to_utf8(tmpbuf, 0x7fffffff);
 	    sv_catpvn(transv, "\377", 1);
-	    sv_catpvn(transv, tmpbuf, t - tmpbuf);
-	    t = SvPVX(transv);
+	    sv_catpvn(transv, (char*)tmpbuf, t - tmpbuf);
+	    t = (U8*)SvPVX(transv);
 	    tlen = SvCUR(transv);
 	    tend = t + tlen;
 	}
