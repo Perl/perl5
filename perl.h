@@ -901,9 +901,10 @@ Free_t   Perl_mfree (Malloc_t where);
     --Andy Dougherty	August 1996
 */
 
-#if defined(USE_64_BITS) && defined(Quad_t)
-   typedef Quad_t  IV;
-   typedef Uquad_t UV;
+typdef IVTYPE IV;
+typdef UVTYPE UV;
+
+#ifdef USE_64_BITS
 #  if QUADCASE == 4 && defined(INT64_MAX) /* quad is int64_t */
 #    define IV_MAX INT64_MAX
 #    define IV_MIN INT64_MIN
@@ -918,14 +919,10 @@ Free_t   Perl_mfree (Malloc_t where);
 #    define UV_MAX PERL_UQUAD_MAX
 #    define UV_MIN PERL_UQUAD_MIN
 #  endif
-#  define IVSIZE 8
-#  define UVSIZE 8
 #  define IV_IS_QUAD
 #  define UV_IS_QUAD
 #else
-   typedef long          IV;
-   typedef unsigned long UV;
-#  if defined(INT32_MAX) && LONGSIZE == 4
+#  if defined(INT32_MAX) && IVSIZE == 4
 #    define IV_MAX INT32_MAX
 #    define IV_MIN INT32_MIN
 #    ifndef UINT32_MAX_BROKEN /* e.g. HP-UX with gcc messes this up */
@@ -943,15 +940,13 @@ Free_t   Perl_mfree (Malloc_t where);
 #    define UV_MAX PERL_ULONG_MAX
 #    define UV_MIN PERL_ULONG_MIN
 #  endif
-#  if LONGSIZE == 8
+#  if IVSIZE == 8
 #    define IV_IS_QUAD
 #    define UV_IS_QUAD
 #  else
 #    undef IV_IS_QUAD
 #    undef UV_IS_QUAD
 #  endif
-#  define UVSIZE LONGSIZE
-#  define IVSIZE LONGSIZE
 #endif
 
 #define IV_DIG (BIT_DIGITS(IVSIZE * 8))
@@ -1053,9 +1048,9 @@ Free_t   Perl_mfree (Malloc_t where);
 # endif
 #endif
 
+typdef NVTYPE NV;
+
 #ifdef USE_LONG_DOUBLE
-    typedef long double NV;
-#   define NVSIZE LONG_DOUBLESIZE
 #   define NV_DIG LDBL_DIG
 #   ifdef HAS_SQRTL
 #       define Perl_modf modfl
@@ -1071,8 +1066,6 @@ Free_t   Perl_mfree (Malloc_t where);
 #       define Perl_fmod fmodl
 #   endif
 #else
-    typedef double NV;
-#   define NVSIZE DOUBLESIZE
 #   define NV_DIG DBL_DIG
 #   define Perl_modf modf
 #   define Perl_frexp frexp
@@ -1831,6 +1824,7 @@ typedef I32 CHECKPOINT;
 #define NV_WITHIN_IV(nv) (I_V(nv) >= IV_MIN && I_V(nv) <= IV_MAX)
 #define NV_WITHIN_UV(nv) ((nv)>=0.0 && U_V(nv) >= UV_MIN && U_V(nv) <= UV_MAX)
 
+/* The correct way: a Configure test where (UV)~0 is cast to NV and back. */
 /* Believe. */
 #define IV_FITS_IN_NV
 /* Doubt. */
@@ -1851,38 +1845,7 @@ typedef I32 CHECKPOINT;
 #   endif
 #endif
 
-#ifdef IV_IS_QUAD
-#  define UVuf PERL_PRIu64
-#  define IVdf PERL_PRId64
-#  define UVof PERL_PRIo64
-#  define UVxf PERL_PRIx64
-#else
-#   if IVSIZE == LONGSIZE
-#       define UVuf "lu"
-#       define IVdf "ld"
-#       define UVof "lo"
-#       define UVxf "lx"
-#   else
-#       if IVSIZE == INTSIZE
-#           define UVuf "u"
-#           define IVdf "d"
-#           define UVof "o"
-#           define UVxf "x"
-#       else
-#           if IVSIZE == SHORTSIZE /* weird */
-#               define UVuf "hu"
-#               define IVdf "hd"
-#               define UVof "ho"
-#               define UVxf "hx"
-#           else
-	        /* well, any good ideas? */
-#           endif
-#       endif
-#   endif
-#endif
-
-/* The Uid_t_f and Gid_t_f definitely look like a job for metaconfig,
- * as do the UVuf, IVdf, UVof, and UVxf above. */
+/* The Uid_t_f and Gid_t_f definitely look like a job for metaconfig. */
 
 #if Uid_t_SIGN == -1
 #   if Uid_t_SIZE == IVSIZE

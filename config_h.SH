@@ -2385,26 +2385,89 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$d_PRIfldbl PERL_PRIfldbl	$sPRIfldbl	/**/
 #$d_PRIgldbl PERL_PRIgldbl	$sPRIgldbl	/**/
 
-/* PERL_PRId64:
- *	This symbol, if defined, contains the string used by stdio to
- *	format 64-bit decimal numbers (format 'd') for output.
+/* IVTYPE:
+ *	This symbol defines the C type used for Perl's IV.
  */
-/* PERL_PRIu64:
- *	This symbol, if defined, contains the string used by stdio to
- *	format 64-bit unsigned decimal numbers (format 'u') for output.
+/* UVTYPE:
+ *	This symbol defines the C type used for Perl's UV.
  */
-/* PERL_PRIo64:
- *	This symbol, if defined, contains the string used by stdio to
- *	format 64-bit octal numbers (format 'o') for output.
+/* I8TYPE:
+ *	This symbol defines the C type used for Perl's I8.
  */
-/* PERL_PRIx64:
- *	This symbol, if defined, contains the string used by stdio to
- *	format 64-bit hexadecimal numbers (format 'x') for output.
+/* U8TYPE:
+ *	This symbol defines the C type used for Perl's U8.
  */
-#$d_PRId64 PERL_PRId64	$sPRId64	/**/
-#$d_PRIu64 PERL_PRIu64	$sPRIu64	/**/
-#$d_PRIo64 PERL_PRIo64	$sPRIo64	/**/
-#$d_PRIx64 PERL_PRIx64	$sPRIx64	/**/
+/* I16TYPE:
+ *	This symbol defines the C type used for Perl's I16.
+ */
+/* U16TYPE:
+ *	This symbol defines the C type used for Perl's U16.
+ */
+/* I32TYPE:
+ *	This symbol defines the C type used for Perl's I32.
+ */
+/* U32TYPE:
+ *	This symbol defines the C type used for Perl's U32.
+ */
+/* I64TYPE:
+ *	This symbol defines the C type used for Perl's I64.
+ */
+/* U64TYPE:
+ *	This symbol defines the C type used for Perl's U64.
+ */
+/* NVTYPE:
+ *	This symbol defines the C type used for Perl's NV.
+ */
+/* IVSIZE:
+ *	This symbol contains the sizeof(IV).
+ */
+/* UVSIZE:
+ *	This symbol contains the sizeof(UV).
+ */
+/* NVSIZE:
+ *	This symbol contains the sizeof(NV).
+ */
+#define	IVTYPE		$ivtype		/**/
+#define	UVTYPE		$uvtype		/**/
+#define	I8TYPE		$i8type		/**/
+#define	U8TYPE		$u8type		/**/
+#define	I16TYPE		$i16type	/**/
+#define	U16TYPE		$u16type	/**/
+#define	I32TYPE		$i32type	/**/
+#define	U32TYPE		$u32type	/**/
+#ifdef Quad_t
+#define	I64TYPE		$i64type	/**/
+#define	U64TYPE		$u64type	/**/
+#endif
+#define	NVTYPE		$nvtype		/**/
+#define	IVSIZE		$ivsize		/**/
+#define	UVSIZE		$uvsize		/**/
+#ifdef Quad_t
+#define	I64SIZE		$i64size	/**/
+#define	U64SIZE		$u64size	/**/
+#endif
+#define	NVSIZE		$nvsize		/**/
+
+/* IVdf:
+ *	This symbol defines the format string used for printing a Perl IV
+ *	as a signed decimal integer.
+ */
+/* UVuf:
+ *	This symbol defines the format string used for printing a Perl UV
+ *	as an unsigned decimal integer.
+ */
+/* UVof:
+ *	This symbol defines the format string used for printing a Perl UV
+ *	as an unsigned octal integer.
+ */
+/* UVxf:
+ *	This symbol defines the format string used for printing a Perl UV
+ *	as an unsigned hexadecimal integer.
+ */
+#define	IVdf		$ivdformat		/**/
+#define	UVuf		$uvuformat		/**/
+#define	UVof		$uvoformat		/**/
+#define	UVxf		$uvxformat		/**/
 
 /* SELECT_MIN_BITS:
  *	This symbol holds the minimum number of bits operated by select.
