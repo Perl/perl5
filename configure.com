@@ -4050,6 +4050,29 @@ $ tmp = "mkdtemp"
 $ GOSUB inlibc
 $ d_mkdtemp = tmp
 $!
+$! Check for poll
+$!
+$ if i_poll .eqs. "define"
+$ then
+$   OS
+$   WS "#if defined(__DECC) || defined(__DECCXX)"
+$   WS "#include <stdlib.h>"
+$   WS "#endif"
+$   WS "#include <poll.h>"
+$   WS "int main()"
+$   WS "{"
+$   WS "struct pollfd pfd;"
+$   WS "int count=poll(&pfd,1,0);"
+$   WS "exit(0);"
+$   WS "}"
+$   CS
+$   tmp = "poll"
+$   GOSUB inlibc
+$   d_poll = tmp
+$ else
+$   d_poll = "undef"
+$ endif
+$!
 $! Check for setvbuf
 $!
 $ OS
@@ -5356,7 +5379,7 @@ $ WC "d_pause='define'"
 $ WC "d_perl_otherlibdirs='undef'"
 $ WC "d_phostname='" + d_phostname + "'"
 $ WC "d_pipe='define'"
-$ WC "d_poll='undef'"
+$ WC "d_poll='" + d_poll + "'"
 $ WC "d_procselfexe='undef'"
 $ WC "d_pthread_atfork='undef'"
 $ WC "d_pthread_yield='" + d_pthread_yield + "'"
