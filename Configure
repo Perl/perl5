@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sat Oct 30 14:59:39 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Sun Nov  7 02:39:34 EET 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -6833,7 +6833,8 @@ case "$doublesize" in
 #include <stdio.h>
 int main()
 {
-	printf("%d\n", sizeof(double));
+    printf("%d\n", (int)sizeof(double));
+    return(0);
 }
 EOCP
 	set try
@@ -7245,9 +7246,9 @@ case "$intsize" in
 #include <stdio.h>
 int main()
 {
-	printf("intsize=%d;\n", sizeof(int));
-	printf("longsize=%d;\n", sizeof(long));
-	printf("shortsize=%d;\n", sizeof(short));
+	printf("intsize=%d;\n", (int)sizeof(int));
+	printf("longsize=%d;\n", (int)sizeof(long));
+	printf("shortsize=%d;\n", (int)sizeof(short));
 	exit(0);
 }
 EOCP
@@ -7936,6 +7937,28 @@ set d_open3
 eval $setvar
 $rm -f open3*
 
+: see which of string.h or strings.h is needed
+echo " "
+strings=`./findhdr string.h`
+if $test "$strings" && $test -r "$strings"; then
+	echo "Using <string.h> instead of <strings.h>." >&4
+	val="$define"
+else
+	val="$undef"
+	strings=`./findhdr strings.h`
+	if $test "$strings" && $test -r "$strings"; then
+		echo "Using <strings.h> instead of <string.h>." >&4
+	else
+		echo "No string header found -- You'll surely have problems." >&4
+	fi
+fi
+set i_string
+eval $setvar
+case "$i_string" in
+"$undef") strings=`./findhdr strings.h`;;
+*)	  strings=`./findhdr string.h`;;
+esac
+
 : check for non-blocking I/O stuff
 case "$h_sysfile" in
 true) echo "#include <sys/file.h>" > head.c;;
@@ -7952,6 +7975,7 @@ case "$o_nonblock" in
 '')
 	$cat head.c > try.c
 	$cat >>try.c <<'EOCP'
+#include <stdio.h>
 int main() {
 #ifdef O_NONBLOCK
 	printf("O_NONBLOCK\n");
@@ -7992,9 +8016,18 @@ case "$eagain" in
 #include <errno.h>
 #include <sys/types.h>
 #include <signal.h>
+#include <stdio.h> 
 #define MY_O_NONBLOCK $o_nonblock
 #ifndef errno  /* XXX need better Configure test */
 extern int errno;
+#endif
+#ifdef $i_unistd
+#include <unistd.h>
+#endif
+#ifdef $i_string
+#include <string.h>
+#else
+#include <strings.h>
 #endif
 $signal_t blech(x) int x; { exit(3); }
 EOCP
@@ -8476,7 +8509,8 @@ $cat >try.c <<EOCP
 #include <stdio.h>
 int main()
 {
-	printf("%d\n", sizeof($lseektype));
+    printf("%d\n", (int)sizeof($lseektype));
+    return(0); 
 }
 EOCP
 set try
@@ -8508,7 +8542,8 @@ cat > try.c <<EOCP
 #include <sys/types.h>
 #include <stdio.h>
 int main() {
-    printf("%d\n", sizeof($fpostype));
+    printf("%d\n", (int)sizeof($fpostype));
+    return(0);
 }
 EOCP
 set try
@@ -8938,28 +8973,6 @@ esac
 set d_htonl
 eval $setvar
 
-: see which of string.h or strings.h is needed
-echo " "
-strings=`./findhdr string.h`
-if $test "$strings" && $test -r "$strings"; then
-	echo "Using <string.h> instead of <strings.h>." >&4
-	val="$define"
-else
-	val="$undef"
-	strings=`./findhdr strings.h`
-	if $test "$strings" && $test -r "$strings"; then
-		echo "Using <strings.h> instead of <string.h>." >&4
-	else
-		echo "No string header found -- You'll surely have problems." >&4
-	fi
-fi
-set i_string
-eval $setvar
-case "$i_string" in
-"$undef") strings=`./findhdr strings.h`;;
-*)	  strings=`./findhdr string.h`;;
-esac
-
 : index or strchr
 echo " "
 if set index val -f; eval $csym; $val; then
@@ -9152,7 +9165,7 @@ eval $inlibc
 : check for long long
 echo " "
 $echo $n "Checking to see if your system supports long long..." $c >&4
-echo 'int main() { long long x = 7; }' > try.c
+echo 'int main() { long long x = 7; return 0; }' > try.c
 set try
 if eval $compile; then
 	val="$define"
@@ -9174,7 +9187,8 @@ $define)
 #include <stdio.h>
 int main()
 {
-	printf("%d\n", sizeof(long long));
+    printf("%d\n", (int)sizeof(long long));
+    return(0);
 }
 EOCP
 	set try
@@ -10956,7 +10970,8 @@ struct foobar {
 } try_algn;
 int main()
 {
-	printf("%d\n", (char *)&try_algn.bar - (char *)&try_algn.foo);
+    printf("%d\n", (int)((char *)&try_algn.bar - (char *)&try_algn.foo));
+    return(0);
 }
 EOCP
 		set try
@@ -11742,7 +11757,8 @@ cat > try.c <<EOCP
 #include <sys/types.h>
 #include <stdio.h>
 int main() {
-    printf("%d\n", sizeof($gidtype));
+    printf("%d\n", (int)sizeof($gidtype));
+    return(0);
 }
 EOCP
 set try
@@ -11808,7 +11824,8 @@ case "$charsize" in
 #include <stdio.h>
 int main()
 {
-	printf("%d\n", sizeof(char));
+    printf("%d\n", (int)sizeof(char));
+    return(0);
 }
 EOCP
 	set try
@@ -12522,8 +12539,8 @@ case "$ptrsize" in
 #include <stdio.h>
 int main()
 {
-	printf("%d\n", sizeof(VOID_PTR));
-	exit(0);
+    printf("%d\n", (int)sizeof(VOID_PTR));
+    return(0);
 }
 EOCP
 	set try
@@ -13087,7 +13104,8 @@ cat > try.c <<EOCP
 #include <sys/types.h>
 #include <stdio.h>
 int main() {
-    printf("%d\n", sizeof($uidtype));
+    printf("%d\n", (int)sizeof($uidtype));
+    return(0);
 }
 EOCP
 set try
