@@ -155,6 +155,7 @@ extern  int	setgid(gid_t gid);
 extern  int	kill(int pid, int sig);
 extern  void	*sbrk(int need);
 extern	char *	getlogin(void);
+extern	int	chown(const char *p, uid_t o, gid_t g);
 
 #undef	 Stat
 #define  Stat		win32_stat

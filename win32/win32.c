@@ -681,9 +681,12 @@ getlogin(void)
     return (char*)NULL;
 }
 
-/*
- * pretended kill
- */
+int
+chown(const char *path, uid_t owner, gid_t group)
+{
+    /* XXX noop */
+}
+
 int
 kill(int pid, int sig)
 {
