@@ -10,7 +10,7 @@ use Exporter;
 use SelfLoader;
 use vars qw { $VERSION @ISA %EXPORT_TAGS };
 
-$VERSION = '1.83';
+$VERSION = '1.84';
 @ISA		= qw ( Exporter );
 		     
 %EXPORT_TAGS	= ( ALL => [ qw(
@@ -233,7 +233,7 @@ sub _match_bracketed($$$$$$)	# $textref, $pre, $ldel, $qdel, $quotelike, $rdel
 		}
 		elsif ($qdel && $$textref =~ m/\G([$qdel])/gc)
 		{
-			$$textref =~ m/\G[^\\$1]*(?:\\.[^\\$1]*)*(\Q$1\E)/gc and next;
+			$$textref =~ m/\G[^\\$1]*(?:\\.[^\\$1]*)*(\Q$1\E)/gsc and next;
 			_failmsg "Unmatched embedded quote ($1)",
 				 pos $$textref;
 			pos $$textref = $startpos;
@@ -667,7 +667,7 @@ sub _match_quotelike($$$$)	# ($textref, $prepat, $allow_raw_match)
 		     || $rawmatch && $initial =~ m|^/|
 		     || $qmark && $initial =~ m|^\?|)
 	{
-		unless ($$textref =~ m/ \Q$initial\E [^\\$initial]* (\\.[^\\$initial]*)* \Q$initial\E /gcx)
+		unless ($$textref =~ m/ \Q$initial\E [^\\$initial]* (\\.[^\\$initial]*)* \Q$initial\E /gcsx)
 		{
 			_failmsg qq{Did not find closing delimiter to match '$initial' at "} .
 				     substr($$textref, $oppos, 20) .
@@ -720,7 +720,7 @@ sub _match_quotelike($$$$)	# ($textref, $prepat, $allow_raw_match)
 		elsif ($$textref =~ m{ \G ' ([^'\\]* (?:\\.[^'\\]*)*) '
 				     | \G " ([^"\\]* (?:\\.[^"\\]*)*) "
 				     | \G ` ([^`\\]* (?:\\.[^`\\]*)*) `
-				     }gcx) {
+				     }gcsx) {
 			$label = $+;
 		}
 		else {
@@ -776,7 +776,7 @@ sub _match_quotelike($$$$)	# ($textref, $prepat, $allow_raw_match)
 	}
 	else
 	{
-		$$textref =~ /$ldel1[^\\$ldel1]*(\\.[^\\$ldel1]*)*$ldel1/gc
+		$$textref =~ /$ldel1[^\\$ldel1]*(\\.[^\\$ldel1]*)*$ldel1/gcs
 		|| do { pos $$textref = $startpos; return };
 	}
 	$ld2pos = $rd1pos = pos($$textref)-1;
@@ -811,7 +811,7 @@ sub _match_quotelike($$$$)	# ($textref, $prepat, $allow_raw_match)
 		}
 		else
 		{
-			$$textref =~ /[^\\$ldel2]*(\\.[^\\$ldel2]*)*$ldel2/gc
+			$$textref =~ /[^\\$ldel2]*(\\.[^\\$ldel2]*)*$ldel2/gcs
 			|| do { pos $$textref = $startpos; return };
 		}
 		$rd2pos = pos($$textref)-1;
