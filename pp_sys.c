@@ -243,6 +243,8 @@ PP(pp_open)
     else
 	DIE(no_usym, "filehandle");
     gv = (GV*)POPs;
+    if (IoFLAGS(GvIOn(gv)) & IOf_UNTAINT) /* This GV has UNTAINT previously set */
+	IoFLAGS(GvIOp(gv)) &= ~IOf_UNTAINT; /* Clear it. We don't carry that over */
     tmps = SvPV(sv, len);
     if (do_open(gv, tmps, len, FALSE, 0, 0, Nullfp)) {
 	IoLINES(GvIOp(gv)) = 0;
@@ -751,7 +753,7 @@ PP(pp_select)
     else {
 	GV **gvp = (GV**)hv_fetch(hv, GvNAME(egv), GvNAMELEN(egv), FALSE);
 	if (gvp && *gvp == egv)
-	    gv_efullname(TARG, defoutgv, Nullch);
+	    gv_efullname3(TARG, defoutgv, Nullch);
 	else
 	    sv_setsv(TARG, sv_2mortal(newRV((SV*)egv)));
 	XPUSHTARG;
@@ -845,7 +847,7 @@ PP(pp_enterwrite)
     if (!cv) {
 	if (fgv) {
 	    SV *tmpsv = sv_newmortal();
-	    gv_efullname(tmpsv, fgv, Nullch);
+	    gv_efullname3(tmpsv, fgv, Nullch);
 	    DIE("Undefined format \"%s\" called",SvPVX(tmpsv));
 	}
 	DIE("Not a format reference");
@@ -924,7 +926,7 @@ PP(pp_leavewrite)
 	cv = GvFORM(fgv);
 	if (!cv) {
 	    SV *tmpsv = sv_newmortal();
-	    gv_efullname(tmpsv, fgv, Nullch);
+	    gv_efullname3(tmpsv, fgv, Nullch);
 	    DIE("Undefined top format \"%s\" called",SvPVX(tmpsv));
 	}
 	return doform(cv,gv,op);
@@ -981,7 +983,7 @@ PP(pp_prtf)
 	gv = defoutgv;
     if (!(io = GvIO(gv))) {
 	if (dowarn) {
-	    gv_fullname(sv, gv, Nullch);
+	    gv_fullname3(sv, gv, Nullch);
 	    warn("Filehandle %s never opened", SvPV(sv,na));
 	}
 	SETERRNO(EBADF,RMS$_IFI);
@@ -989,7 +991,7 @@ PP(pp_prtf)
     }
     else if (!(fp = IoOFP(io))) {
 	if (dowarn)  {
-	    gv_fullname(sv, gv, Nullch);
+	    gv_fullname3(sv, gv, Nullch);
 	    if (IoIFP(io))
 		warn("Filehandle %s opened only for input", SvPV(sv,na));
 	    else
@@ -1087,7 +1089,8 @@ PP(pp_sysread)
 	*SvEND(bufsv) = '\0';
 	(void)SvPOK_only(bufsv);
 	SvSETMAGIC(bufsv);
-	if (tainting)
+	/* This should not be marked tainted if the fp is marked clean */
+	if (tainting && !(IoFLAGS(io) & IOf_UNTAINT))
 	    sv_magic(bufsv, Nullsv, 't', Nullch, 0);
 	SP = ORIGMARK;
 	sv_setpvn(TARG, buf, bufsize);
@@ -1122,7 +1125,8 @@ PP(pp_sysread)
     *SvEND(bufsv) = '\0';
     (void)SvPOK_only(bufsv);
     SvSETMAGIC(bufsv);
-    if (tainting)
+    /* This should not be marked tainted if the fp is marked clean */
+    if (tainting && !(IoFLAGS(io) & IOf_UNTAINT))
 	sv_magic(bufsv, Nullsv, 't', Nullch, 0);
     SP = ORIGMARK;
     PUSHi(length);
