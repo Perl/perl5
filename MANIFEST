@@ -2376,6 +2376,7 @@ Porting/patching.pod	How to report changes made to Perl
 Porting/patchls		Flexible patch file listing utility
 Porting/pumpkin.pod	Guidelines and hints for Perl maintainers
 Porting/repository.pod	How to use the Perl repository
+Porting/sort_perldiag.pl	Keep our diagnostics orderly
 Porting/testall.atom	Cumulative profile of the test suite with Third Degree
 Porting/thirdclean	Cleanup Third Degree reports
 pp.c				Push/Pop code
