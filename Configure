@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Dec  3 10:57:23 EET 1998 [metaconfig 3.0 PL70]
+# Generated on Thu Jan  7 13:54:35 EET 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by jhi@iki.fi)
 
 cat >/tmp/c1$$ <<EOF
@@ -902,6 +902,7 @@ defvoidused=15
 useposix=true
 : set useopcode=false in your hint file to disable the Opcode extension.
 useopcode=true
+: set use64bits on the Configure command line to enable 64 bit support.
 : set usemultiplicity on the Configure command line to enable multiplicity.
 : set usethreads on the Configure command line to enable threads.
 : List of libraries we want.
@@ -2458,30 +2459,16 @@ $undef$define) . ./whoa; eval "$var=\$tu";;
 *) eval "$var=$val";;
 esac'
 
-cat <<EOM
-
-Perl can be built to take advantage of threads, on some systems.
-To do so, Configure must be run with -Dusethreads.
-(See README.threads for details.)
-EOM
+: Look for a hint-file generated 'call-back-unit'.  If the
+: user has specified that a threading perl is to be built,
+: we may need to set or change some other defaults.
 case "$usethreads" in
-$define|true|[yY]*)	dflt='y';;
-*) dflt='n';;
+$define|true|[yY]*)
+	if $test -f usethreads.cbu; then
+		. ./usethreads.cbu
+	fi
+	;;
 esac
-rp='Build a threading Perl?'
-. ./myread
-case "$ans" in
-y|Y)	val="$define" ;;     
-*)      val="$undef" ;;
-esac
-set usethreads
-eval $setvar 
-: Look for a hint-file generated 'call-back-unit'.  Now that the
-: user has specified if a threading perl is to be built, we may need 
-: to set or change some other defaults.
-if $test -f usethreads.cbu; then
-    . ./usethreads.cbu
-fi
 case "$d_oldpthreads" in
 '')	: Configure tests would be welcome here.  For now, assume undef.
 	val="$undef" ;;
@@ -2490,51 +2477,14 @@ esac
 set d_oldpthreads
 eval $setvar
 
-cat <<EOM
-
-Perl can be built so that multiple Perl interpreters can coexist
-within the same Perl executable.  To do so, Configure must be run with
--Dusemultiplicity.
-
-Normally you do not need this and you should answer no.
-
-EOM
 case "$usemultiplicity" in
-$define|true|[yY]*)	dflt='y';;
-*) dflt='n';;
+$define|true|[yY]*)	usemultiplicity="$define" ;;
+*) 			usemultiplicity="$undef"  ;;
 esac
-rp='Build Perl for multiplicity?'
-. ./myread
-case "$ans" in
-y|Y)	val="$define" ;;     
-*)      val="$undef" ;;
-esac
-set usemultiplicity
-eval $setvar 
-
-cat <<EOM
-
-Perl can be built to take advantage of explicit 64-bit interfaces,
-on some systems.  To do so, Configure must be run with -Duse64bits.
-
-If this doesn't make any sense to you, just accept the default 'n'.
-EOM
 case "$use64bits" in
-$define|true|[yY]*)	dflt='y';;
-*) dflt='n';;
+$define|true|[yY]*)	use64bits="$define" ;;
+*) 			use64bits="$undef"  ;;
 esac
-rp='Try to use explicit 64-bit interfaces, if available?'
-. ./myread
-case "$ans" in
-y|Y) 
-	val="$define"
-	;;     
-*)      
-	val="$undef"
-	;;
-esac
-set use64bits
-eval $setvar
 
 archname64=''
 
@@ -4392,7 +4342,7 @@ $rm -f malloc.[co]
 echo " "
 echo "Checking out function prototypes..." >&4
 $cat >prototype.c <<'EOCP'
-main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
 	exit(0);}
 EOCP
 if $cc $ccflags -c prototype.c >prototype.out 2>&1 ; then
@@ -4476,8 +4426,7 @@ echo " "
 echo "Checking for GNU C Library..." >&4
 cat >gnulibc.c <<EOM
 #include <stdio.h>
-int
-main()
+int main()
 {
 #ifdef __GLIBC__
     exit(0);
@@ -5038,7 +4987,7 @@ EOM
 /* Test for whether ELF binaries are produced */
 #include <fcntl.h>
 #include <stdlib.h>
-main() {
+int main() {
 	char b[4];
 	int i = open("a.out",O_RDONLY);
 	if(i == -1) 
@@ -6177,8 +6126,7 @@ char *got;
 	}
 }
 
-int
-main()
+int main()
 { 
 	char buf[64]; 
 	buf[63] = '\0';
@@ -6344,7 +6292,7 @@ case "$d_getpgrp" in
 #ifdef I_UNISTD
 #  include <unistd.h>
 #endif
-main()
+int main()
 {
 	if (getuid() == 0) {
 		printf("(I see you are running Configure as super-user...)\n");
@@ -6406,7 +6354,7 @@ case "$d_setpgrp" in
 #ifdef I_UNISTD
 #  include <unistd.h>
 #endif
-main()
+int main()
 {
 	if (getuid() == 0) {
 		printf("(I see you are running Configure as super-user...)\n");
@@ -6899,7 +6847,7 @@ echo " "
 echo 'Checking to see if your C compiler knows about "const"...' >&4
 $cat >const.c <<'EOCP'
 typedef struct spug { int drokk; } spug;
-main()
+int main()
 {
 	const char *foo;
 	const spug y;
@@ -7303,7 +7251,7 @@ $cat >fred.c<<EOM
 
 extern int fred() ;
 
-main()
+int main()
 {
     void * handle ;
     void * symbol ;
@@ -8236,7 +8184,7 @@ eval $inlibc
 echo " "
 $cat >try.c <<EOCP
 #include <inttypes.h>
-main() {
+int main() {
 	static int32_t foo32 = 0x12345678;
 }
 EOCP
@@ -8403,7 +8351,7 @@ $define)
 	$echo $n "Checking to see how big your long doubles are...$c" >&4
 	$cat >try.c <<'EOCP'
 #include <stdio.h>
-main()
+int main()
 {
 	printf("%d\n", sizeof(long double));
 }
@@ -8449,7 +8397,7 @@ $define)
 	$echo $n "Checking to see how big your long longs are...$c" >&4
 	$cat >try.c <<'EOCP'
 #include <stdio.h>
-main()
+int main()
 {
 	printf("%d\n", sizeof(long long));
 }
@@ -8646,7 +8594,7 @@ eval $inlibc
 $cat >try.c <<EOP
 #include <pthread.h>
 #include <stdio.h>
-main() {
+int main() {
 #ifdef SCHED_YIELD
 	sched_yield();
 #else
@@ -9722,7 +9670,7 @@ eval $inlibc
 echo " "
 echo "Checking to see if your C compiler can copy structs..." >&4
 $cat >try.c <<'EOCP'
-main()
+int main()
 {
 	struct blurfl {
 		int dyick;
@@ -10030,7 +9978,7 @@ $rm -f closedir*
 echo " "
 echo 'Checking to see if your C compiler knows about "volatile"...' >&4
 $cat >try.c <<'EOCP'
-main()
+int main()
 {
 	typedef struct _goo_struct goo_struct;
 	goo_struct * volatile goo = ((goo_struct *)0);
@@ -10698,7 +10646,7 @@ $echo $n "Checking to see how big your file offsets are...$c" >&4
 $cat >try.c <<EOCP
 #include <sys/types.h>
 #include <stdio.h>
-main()
+int main()
 {
 	printf("%d\n", sizeof($lseektype));
 }
