@@ -1049,10 +1049,6 @@ setuid perl scripts securely.\n");
     oldscope = PL_scopestack_ix;
     PL_dowarn = G_WARN_OFF;
 
-#ifdef USE_ITHREADS
-    MUTEX_INIT(&PL_dollarzero_mutex);
-#endif
-
 #ifdef PERL_FLEXIBLE_EXCEPTIONS
     CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_vparse_body), env, xsinit);
 #else
