@@ -220,11 +220,8 @@ If the word C<while> is replaced by the word C<until>, the sense of the
 test is reversed, but the conditional is still tested before the first
 iteration.
 
-In either the C<if> or the C<while> statement, you may replace "(EXPR)"
-with a BLOCK, and the conditional is true if the value of the last
-statement in that block is true.  While this "feature" continues to work in 
-version 5, it has been deprecated, so please change any occurrences of "if BLOCK" to
-"if (do BLOCK)".
+The form C<while/if BLOCK BLOCK>, available in Perl 4, is no longer
+available.   Replace any occurrence of C<if BLOCK> by C<if (do BLOCK)>.
 
 =head2 For Loops
 
