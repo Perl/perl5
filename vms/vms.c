@@ -712,7 +712,7 @@ I32 my_pclose(FILE *fp)
       unsigned long int chan, iosb[2], retsts, retsts2;
       struct dsc$descriptor devdsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, devnam};
 
-      if (fgetname(info->fp,devnam)) {
+      if (fgetname(info->fp,devnam,1)) {
         /* It oughta be a mailbox, so fgetname should give just the device
          * name, but just in case . . . */
         if ((cp = strrchr(devnam,':')) != NULL) *(cp+1) = '\0';
@@ -4161,7 +4161,7 @@ my_binmode(FILE *fp, char iotype)
     int ret = 0, saverrno = errno, savevmserrno = vaxc$errno;
     fpos_t pos;
 
-    if (!fgetname(fp,filespec)) return NULL;
+    if (!fgetname(fp,filespec,1)) return NULL;
     for (s = filespec; *s; s++) {
       if (*s == ':') colon = s;
       else if (*s == ']' || *s == '>') dirend = s;
@@ -4519,7 +4519,7 @@ candelete_fromperl(CV *cv)
 
   mysv = SvROK(ST(0)) ? SvRV(ST(0)) : ST(0);
   if (SvTYPE(mysv) == SVt_PVGV) {
-    if (!(io = GvIOp(mysv)) || !fgetname(IoIFP(io),fspec)) {
+    if (!(io = GvIOp(mysv)) || !fgetname(IoIFP(io),fspec,1)) {
       set_errno(EINVAL); set_vaxc_errno(LIB$_INVARG);
       ST(0) = &PL_sv_no;
       XSRETURN(1);
@@ -4556,7 +4556,7 @@ rmscopy_fromperl(CV *cv)
 
   mysv = SvROK(ST(0)) ? SvRV(ST(0)) : ST(0);
   if (SvTYPE(mysv) == SVt_PVGV) {
-    if (!(io = GvIOp(mysv)) || !fgetname(IoIFP(io),inspec)) {
+    if (!(io = GvIOp(mysv)) || !fgetname(IoIFP(io),inspec,1)) {
       set_errno(EINVAL); set_vaxc_errno(LIB$_INVARG);
       ST(0) = &PL_sv_no;
       XSRETURN(1);
@@ -4572,7 +4572,7 @@ rmscopy_fromperl(CV *cv)
   }
   mysv = SvROK(ST(1)) ? SvRV(ST(1)) : ST(1);
   if (SvTYPE(mysv) == SVt_PVGV) {
-    if (!(io = GvIOp(mysv)) || !fgetname(IoIFP(io),outspec)) {
+    if (!(io = GvIOp(mysv)) || !fgetname(IoIFP(io),outspec,1)) {
       set_errno(EINVAL); set_vaxc_errno(LIB$_INVARG);
       ST(0) = &PL_sv_no;
       XSRETURN(1);
