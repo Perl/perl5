@@ -1282,6 +1282,8 @@ this:
 
     sub invalid { die "/$_[0]/: invalid escape '\\$_[1]'"}
 
+    # We must also take care of not escaping the legitimate \\Y|
+    # sequence, hence the presence of '\\' in the conversion rules.
     my %rules = ( '\\' => '\\\\', 
 		  'Y|' => qr/(?=\S)(?<!\S)|(?!\S)(?<=\S)/ );
     sub convert {
