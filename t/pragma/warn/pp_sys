@@ -397,4 +397,4 @@ my $a = sysread(F, $a,10) ;
 close F ;
 unlink $file ;
 EXPECT
-Filehandle F opened only for output at - line 5.
+Filehandle F opened only for output at - line 12.
