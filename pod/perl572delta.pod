@@ -29,12 +29,14 @@ for more information.
 
 =head1 Incompatible Changes
 
+=head2 64-bit platforms and malloc
+
 If your pointers are 64 bits wide, the Perl malloc is no more being
 used because it simply does not work with 8-byte pointers.  Also,
 usually the system malloc on such platforms are much better optimized
 for such large memory models than the Perl malloc.
 
-=head1 Future Deprecations
+=head2 Future Deprecations
 
 The current user-visible implementation of pseudo-hashes (the weird
 use of the first array element) is deprecated starting from Perl 5.8.0
@@ -84,6 +86,11 @@ The C<op_clear> and C<op_null> are now exported.
 
 =item *
 
+L<utime> now supports C<utime undef, undef, @files> to change the
+times to the current time.
+
+=item *
+
 The Perl parser has been stress tested using both random input and
 Markov chain input.
 
@@ -91,41 +98,53 @@ Markov chain input.
 
 =head1 Modules and Pragmata
 
-=head2 New Modules
+=head2 New Modules and Distribution
 
 =over 4
 
 =item *
 
-Attribute::Handlers - Simpler definition of attribute handlers
+L<Attribute::Handlers> - Simpler definition of attribute handlers
 
 =item *
 
-ExtUtils::Constant - generate XS code to import C header constants
+L<ExtUtils::Constant> - generate XS code to import C header constants
 
 =item *
 
-I18N::LangTags - functions for dealing with RFC3066-style language tags
+L<I18N::LangTags> - functions for dealing with RFC3066-style language tags
 
 =item *
 
-List::Util - selection of general-utility list subroutines
+L<libnet> - a collection of perl5 modules related to network programming
 
 =item *
 
-Locale::Maketext - framework for localization
+L<List::Util> - selection of general-utility list subroutines
 
 =item *
 
-NEXT - pseudo-class for method redispatch
+L<Locale::Maketext> - framework for localization
 
 =item *
 
-Scalar::Util - selection of general-utility scalar subroutines
+L<Memoize> - Make your functions faster by trading space for time
 
 =item *
 
-Time::HiRes - high resolution ualarm, usleep, and gettimeofday
+L<NEXT> - pseudo-class for method redispatch
+
+=item *
+
+L<Scalar::Util> - selection of general-utility scalar subroutines
+
+=item *
+
+L<Time::HiRes> - high resolution ualarm, usleep, and gettimeofday
+
+=item *
+
+L<Time::Piece> - Object Oriented time objects
 
 =back
 
@@ -159,16 +178,27 @@ new-style constant dispatch section (see L<ExtUtils::Constant>).
 
 =item *
 
+L<File::Find> is now (again) reentrant.  It also has been made
+more portable.
+
+=item *
+
 L<File::Glob> now supports C<GLOB_LIMIT> constant to limit the
 size of the returned list of filenames.
 
-=back
+=item *
 
-=head1 Performance Enhancements
+L<vars> now supports declaring qualified variables.
+
+=back
 
 =head1 Utility Changes
 
 =over 4
+
+=item *
+
+The F<emacs/e2ctags.pl> is now much faster.
 
 =item *
 
@@ -183,7 +213,7 @@ extension code (the new scheme makes regenerating easy).
 
 =item *
 
-The F<emacs/e2ctags.pl> is now much faster.
+L<libnetcfg> has been added to configure the libnet.
 
 =item *
 
@@ -207,7 +237,8 @@ kind permission.
 More README.$PLATFORM files have been converted into pod, which also
 means that they also be installed as perl$PLATFORM documentation
 files.  The new files are L<perlapollo>, L<perlbeos>, L<perldgux>,
-L<perlhurd>, L<perlmint>, L<perlplan9>, L<perlqnx>, and L<perltru64>.
+L<perlhurd>, L<perlmint>, L<perlnetware>, L<perlplan9>, L<perlqnx>,
+and L<perltru64>.
 
 =item *
 
@@ -240,16 +271,18 @@ DG/UX platform now supports the 5.005-style threads.
 
 =item *
 
-MacOS (Classic) [HOPEFULLY]
+Several MacOS (Classic) portability patches have been applied.
+We hope to get a fully working port by 5.8.0.  (The remaining
+problems relate to the changed IO model of Perl.)
 
 =item *
 
-MacOS X (or Darwin) should now be able to build Perl even on HFS+ filesystem.
-(The case-insensitivity confused the Perl build process.)
+MacOS X (or Darwin) should now be able to build Perl even on HFS+
+filesystems.  (The case-insensitivity confused the Perl build process.)
 
 =item *
 
-Netware [HOPEFULLY]
+NetWare from Novell is now supported.
 
 =item *
 
@@ -284,9 +317,9 @@ DB_VERSION_PATCH_CFG> from C.
 
 =item *
 
-The Thread extension is not built at all under ithreads (C<Configure
--Duseithreads>) because it wouldn't work anyway (the Thread extension
-requires being Configured with C<-Duse5005threads>).
+The Thread extension is now not built at all under ithreads
+(C<Configure -Duseithreads>) because it wouldn't work anyway (the
+Thread extension requires being Configured with C<-Duse5005threads>).
 
 =item *
 
@@ -297,6 +330,35 @@ make target has been added to help in further testing: C<make test.deparse>.
 =back
 
 =head1 Selected Bug Fixes
+
+=over 5
+
+=item *
+
+The autouse pragma didn't work for Multi::Part::Function::Names.
+
+=item *
+
+The behaviour of non-decimal but numeric string constants such as
+"0x23" was platform-dependent: in some platforms that was seen as 35,
+in some as 0, in some as a floating point number (don't ask).  This
+was caused by Perl using the operating system libraries in a situation
+where the result of the string to number conversion is undefined: now
+Perl consistently handles such strings as zero in numeric contexts.
+
+=item *
+
+L<dprofpp> -R didn't work.
+
+=item *
+
+PERL5OPT with embedded spaces didn't work.
+
+=item *
+
+L<Sys::Syslog> ignored the C<LOG_AUTH> constant.
+
+=back
 
 =head2 Platform Specific Changes and Fixes
 
@@ -354,9 +416,9 @@ complete information.
 
 Several new tests have been added, especially for the F<lib> subsection.
 
-=back
-
-The test F<camel-III/vstring> has been merged with F<op/ver>.
+The tests are now reported in a different order than in earlier Perls.
+(This happens because the test scripts from under t/lib have been moved
+to be closer to the library/extension they are testing.)
 
 =head1 Known Problems
 
@@ -445,6 +507,11 @@ Self-tying of arrays and hashes is broken in rather deep and
 hard-to-fix ways.  As a stop-gap measure to avoid people from getting
 frustrated at the mysterious results (core dumps, most often) it is
 for now forbidden (you will get a fatal error even from an attempt).
+
+=head2 Variable Attributes are not Currently Usable for Tieing
+
+This limitation will hopefully be fixed in future.  (Subroutine
+attributes work fine for tieing, see L<Attribute::Handlers>).
 
 =head2 Building Extensions Can Fail Because Of Largefiles
 
