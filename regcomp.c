@@ -467,6 +467,9 @@ I32 *flagp;
 		nextchar();
 		*flagp = TRYAGAIN;
 		return NULL;
+            case 0:
+                croak("Sequence (? incomplete");
+                break;
 	    default:
 		--regparse;
 		while (*regparse && strchr("iogcmsx", *regparse))

@@ -2070,6 +2070,10 @@ or possibly some other missing operator, such as a comma.
 (W) The filehandle you're sending to got itself closed sometime before now.
 Check your logic flow.
 
+=item Sequence (? incomplete
+(F) A regular expression ended with an incomplete extension (?.
+See L<perlre>.
+
 =item Sequence (?#... not terminated
 
 (F) A regular expression comment must be terminated by a closing

@@ -14,7 +14,7 @@
 # 	n	expect no match
 # 	c	expect an error
 #
-# Columns 4 and 5 are used only of column 3 contains C<y>.
+# Columns 4 and 5 are used only if column 3 contains C<y> or C<c>.
 #
 # Column 4 contains a string, usually C<$&>.
 #
@@ -35,11 +35,11 @@ TEST:
 while (<TESTS>) {
     ($pat, $subject, $result, $repl, $expect) = split(/[\t\n]/,$_);
     $input = join(':',$pat,$subject,$result,$repl,$expect);
-    $pat = "'$pat'" unless $pat =~ /^'/;
+    $pat = "'$pat'" unless $pat =~ /^[:']/;
     for $study ("", "study \$subject") {
 	eval "$study; \$match = (\$subject =~ m$pat); \$got = \"$repl\";";
 	if ($result eq 'c') {
-	    if ($@ eq '') { print "not ok $.\n"; next TEST }
+	    if ($@ !~ m!^\Q$expect!) { print "not ok $.\n"; next TEST }
 	    last;  # no need to study a syntax error
 	}
 	elsif ($result eq 'n') {
