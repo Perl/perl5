@@ -805,7 +805,8 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	}
 	break;
     case '^':
-	s = IoTOP_NAME(GvIOp(PL_defoutgv));
+	if (GvIOp(PL_defoutgv))
+	    s = IoTOP_NAME(GvIOp(PL_defoutgv));
 	if (s)
 	    sv_setpv(sv,s);
 	else {
@@ -814,20 +815,24 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	}
 	break;
     case '~':
-	s = IoFMT_NAME(GvIOp(PL_defoutgv));
+	if (GvIOp(PL_defoutgv))
+	    s = IoFMT_NAME(GvIOp(PL_defoutgv));
 	if (!s)
 	    s = GvENAME(PL_defoutgv);
 	sv_setpv(sv,s);
 	break;
 #ifndef lint
     case '=':
-	sv_setiv(sv, (IV)IoPAGE_LEN(GvIOp(PL_defoutgv)));
+	if (GvIOp(PL_defoutgv))
+	    sv_setiv(sv, (IV)IoPAGE_LEN(GvIOp(PL_defoutgv)));
 	break;
     case '-':
-	sv_setiv(sv, (IV)IoLINES_LEFT(GvIOp(PL_defoutgv)));
+	if (GvIOp(PL_defoutgv))
+	    sv_setiv(sv, (IV)IoLINES_LEFT(GvIOp(PL_defoutgv)));
 	break;
     case '%':
-	sv_setiv(sv, (IV)IoPAGE(GvIOp(PL_defoutgv)));
+	if (GvIOp(PL_defoutgv))
+	    sv_setiv(sv, (IV)IoPAGE(GvIOp(PL_defoutgv)));
 	break;
 #endif
     case ':':
@@ -838,7 +843,8 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	WITH_THR(sv_setiv(sv, (IV)PL_curcop->cop_arybase));
 	break;
     case '|':
-	sv_setiv(sv, (IV)(IoFLAGS(GvIOp(PL_defoutgv)) & IOf_FLUSH) != 0 );
+	if (GvIOp(PL_defoutgv))
+	    sv_setiv(sv, (IV)(IoFLAGS(GvIOp(PL_defoutgv)) & IOf_FLUSH) != 0 );
 	break;
     case ',':
 	break;
