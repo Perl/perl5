@@ -523,7 +523,7 @@ sub _run_all_tests {
                 $failedtests{$tfile}{name} = $tfile;
             }
             elsif($results{seen}) {
-                if (@{$test{failed}}) {
+                if (@{$test{failed}} and $test{max}) {
                     my ($txt, $canon) = canonfailed($test{max},$test{skipped},
                                                     @{$test{failed}});
                     print "$test{ml}$txt";

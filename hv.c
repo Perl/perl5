@@ -1707,27 +1707,25 @@ Perl_hv_clear(pTHX_ HV *hv)
 
     if (SvREADONLY(hv)) {
 	/* restricted hash: convert all keys to placeholders */
-	HE* he;
-
-	hv_iterinit(hv);
-	while ((he = hv_iternext_flags(hv, HV_ITERNEXT_WANTPLACEHOLDERS))) {
-	    SV *val;
-	    
-	    val = hv_iterval(hv, he);
-	    if (val != &PL_sv_undef) { /* not already placeholder */
-		 if (val && SvREADONLY(val)) {
-		      SV* keysv = hv_iterkeysv(he);
-
-		      Perl_croak(aTHX_
-				 "Attempt to delete readonly key '%"SVf"' from a restricted hash",
-				 keysv);
-		 }
-		 SvREFCNT_dec(val);
-		 HeVAL(he) = &PL_sv_undef;
-		 xhv->xhv_placeholders++; /* HvPLACEHOLDERS(hv)++ */
+	I32 i;
+	HE* entry;
+	for (i = 0; i <= (I32) xhv->xhv_max; i++) {
+	    entry = ((HE**)xhv->xhv_array)[i];
+	    for (; entry; entry = HeNEXT(entry)) {
+		/* not already placeholder */
+		if (HeVAL(entry) != &PL_sv_undef) {
+		    if (HeVAL(entry) && SvREADONLY(HeVAL(entry))) {
+			SV* keysv = hv_iterkeysv(entry);
+			Perl_croak(aTHX_
+	"Attempt to delete readonly key '%"SVf"' from a restricted hash",
+				   keysv);
+		    }
+		    SvREFCNT_dec(HeVAL(entry));
+		    HeVAL(entry) = &PL_sv_undef;
+		    xhv->xhv_placeholders++; /* HvPLACEHOLDERS(hv)++ */
+		}
 	    }
 	}
-	hv_iterinit(hv);
 	return;
     }
 

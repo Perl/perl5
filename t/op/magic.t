@@ -36,7 +36,7 @@ sub skip {
     return 1;
 }
 
-print "1..52\n";
+print "1..53\n";
 
 $Is_MSWin32 = $^O eq 'MSWin32';
 $Is_NetWare = $^O eq 'NetWare';
@@ -286,10 +286,23 @@ else {
 	    open CMDLINE, "/proc/$$/cmdline") {
 	    chomp(my $line = scalar <CMDLINE>);
 	    my $me = (split /\0/, $line)[0];
-	    ok($me eq $0, 'altering $0 is effective');
+	    ok($me eq $0, 'altering $0 is effective (testing with /proc/)');
 	    close CMDLINE;
+            # perlbug #22811
+            my $mydollarzero = sub {
+              my($arg) = shift;
+              $0 = $arg if defined $arg;
+              my $ps = `ps -o command= -p $$`;
+              return if $?;
+              chomp $ps;
+              printf "# 0[%s]ps[%s]\n", $0, $ps;
+              $ps;
+            };
+            my $ps = $mydollarzero->("x");
+            ok(!$ps ||   # we allow that something goes wrong with the ps command
+               $ps eq "x", 'altering $0 is effective (testing with `ps`)');
 	} else {
-	    skip("\$0 check only on Linux and FreeBSD with /proc");
+	    skip("\$0 check only on Linux and FreeBSD") for 0,1;
 	}
 }
 

@@ -341,13 +341,8 @@ EOF
 	esac
 
 	case "$usemymalloc" in
-	''|'n')	usemymalloc='n'
-		;;
-	*)	# The FILLCHECK_DEADBEEF() are failing.
-		case "$ccflags" in
-		*-DFILL_CHECK_DEFAULT=*) ;;
-		*) ccflags="$ccflags -DFILL_CHECK_DEFAULT=0" ;;
-		esac
+	'')
+		usemymalloc='n'
 		;;
 	esac
 	# These symbols are renamed in <time.h> so

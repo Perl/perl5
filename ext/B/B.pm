@@ -370,7 +370,7 @@ which can then be followed with the other access methods.
 
 Returns the SV object corresponding to the C variable C<amagic_generation>.
 
-=item C<init_av>
+=item init_av
 
 Returns the AV object (i.e. in class B::AV) representing INIT blocks.
 
@@ -394,7 +394,7 @@ Returns the AV object (i.e. in class B::AV) of the global comppadlist.
 
 Only when perl was compiled with ithreads.
 
-=item C<main_cv>
+=item main_cv
 
 Return the (faked) CV corresponding to the main part of the Perl
 program.

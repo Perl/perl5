@@ -21,6 +21,7 @@ perl_destruct
 perl_free
 perl_run
 perl_parse
+Perl_doing_taint
 perl_clone
 perl_clone_using
 Perl_malloc

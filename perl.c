@@ -933,6 +933,60 @@ setuid perl scripts securely.\n");
     PL_origargc = argc;
     PL_origargv = argv;
 
+    {
+	/* Set PL_origalen be the sum of the contiguous argv[]
+	 * elements plus the size of the env in case that it is
+	 * contiguous with the argv[].  This is used in mg.c:mg_set()
+	 * as the maximum modifiable length of $0.  In the worst case
+	 * the area we are able to modify is limited to the size of
+	 * the original argv[0].
+	 * --jhi */
+	 char *s;
+	 int i;
+	 UV mask =
+	   ~(UV)(PTRSIZE == 4 ? 3 : PTRSIZE == 8 ? 7 : PTRSIZE == 16 ? 15 : 0);
+
+	 /* See if all the arguments are contiguous in memory.
+	  * Note that 'contiguous' is a loose term because some
+	  * platforms align the argv[] and the envp[].  We just check
+	  * that they are within aligned PTRSIZE bytes.  As long as no
+	  * system has something bizarre like the argv[] interleaved
+	  * with some other data, we are fine.  (Did I just evoke
+	  * Murphy's Law?) --jhi */
+	 s = PL_origargv[0];
+	 while (*s) s++;
+	 for (i = 1; i < PL_origargc; i++) {
+	      if (PL_origargv[i] >  s &&
+		  PL_origargv[i] <=
+		  INT2PTR(char *, PTR2UV(s + PTRSIZE) & mask)) {
+		   s = PL_origargv[i];
+		   while (*s) s++;
+	      }
+	      else
+		   break;
+	 }
+	 /* Can we grab env area too to be used as the area for $0? */
+	 if (PL_origenviron &&
+	     PL_origenviron[0] >  s &&
+	     PL_origenviron[0] <=
+	     INT2PTR(char *, PTR2UV(s + PTRSIZE) & mask)) {
+	      s = PL_origenviron[0];
+	      while (*s) s++;
+	      my_setenv("NoNe  SuCh", Nullch);
+	      /* Force copy of environment. */
+	      for (i = 1; PL_origenviron[i]; i++)
+		   if (PL_origenviron[i] >  s &&
+		       PL_origenviron[i] <=
+		       INT2PTR(char *, PTR2UV(s + PTRSIZE) & mask)) {
+			s = PL_origenviron[i];
+			while (*s) s++;
+		   }
+		   else
+			break;
+	 }
+	 PL_origalen = s - PL_origargv[0];
+    }
+
     if (PL_do_undump) {
 
 	/* Come here if running an undumped a.out. */
@@ -2196,6 +2250,40 @@ NULL
 	PerlIO_printf(PerlIO_stdout(), "\n  %s", *p++);
 }
 
+/* convert a string of -D options (or digits) into an int.
+ * sets *s to point to the char after the options */
+
+#ifdef DEBUGGING
+int
+Perl_get_debug_opts(pTHX_ char **s)
+{
+    int i = 0;
+    if (isALPHA(**s)) {
+	/* if adding extra options, remember to update DEBUG_MASK */
+	static char debopts[] = "psltocPmfrxu HXDSTRJvC";
+
+	for (; isALNUM(**s); (*s)++) {
+	    char *d = strchr(debopts,**s);
+	    if (d)
+		i |= 1 << (d - debopts);
+	    else if (ckWARN_d(WARN_DEBUGGING))
+		Perl_warner(aTHX_ packWARN(WARN_DEBUGGING),
+		    "invalid option -D%c\n", **s);
+	}
+    }
+    else {
+	i = atoi(*s);
+	for (; isALNUM(**s); (*s)++) ;
+    }
+#  ifdef EBCDIC
+    if ((i & DEBUG_p_FLAG) && ckWARN_d(WARN_DEBUGGING))
+	Perl_warner(aTHX_ packWARN(WARN_DEBUGGING),
+		"-Dp not implemented on this platform\n");
+#  endif
+    return i;
+}
+#endif
+
 /* This routine handles any switches that can be given during run */
 
 char *
@@ -2295,24 +2383,8 @@ Perl_moreswitches(pTHX_ char *s)
     {	
 #ifdef DEBUGGING
 	forbid_setid("-D");
-	if (isALPHA(s[1])) {
-	    /* if adding extra options, remember to update DEBUG_MASK */
-	    static char debopts[] = "psltocPmfrxu HXDSTRJvC";
-	    char *d;
-
-	    for (s++; *s && (d = strchr(debopts,*s)); s++)
-		PL_debug |= 1 << (d - debopts);
-	}
-	else {
-	    PL_debug = atoi(s+1);
-	    for (s++; isDIGIT(*s); s++) ;
-	}
-#ifdef EBCDIC
-	if (DEBUG_p_TEST_ && ckWARN_d(WARN_DEBUGGING))
-	    Perl_warner(aTHX_ packWARN(WARN_DEBUGGING),
-		    "-Dp not implemented on this platform\n");
-#endif
-	PL_debug |= DEBUG_TOP_FLAG;
+	s++;
+	PL_debug = get_debug_opts(&s) | DEBUG_TOP_FLAG;
 #else /* !DEBUGGING */
 	if (ckWARN_d(WARN_DEBUGGING))
 	    Perl_warner(aTHX_ packWARN(WARN_DEBUGGING),

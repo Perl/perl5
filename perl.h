@@ -499,7 +499,7 @@ int usleep(unsigned int);
 		  panic_write2("panic: tainting with $ENV{PERL_MALLOC_OPT}\n");\
 		  exit(1); })
 #  define MALLOC_CHECK_TAINT(argc,argv,env)	STMT_START {	\
-	if (PL_earlytaint)) {					\
+	if (PL_earlytaint) {					\
 		MallocCfg_ptr[MallocCfg_skip_cfg_env] = 1;	\
     }} STMT_END;
 #else  /* MYMALLOC */
@@ -1942,6 +1942,23 @@ typedef struct clone_params CLONE_PARAMS;
 #  endif
 #endif
 
+/* The PL_earlytaint is to be used instead PL_tainting before
+ * perl_parse() has had the chance to set up PL_tainting. */
+
+#ifndef EARLY_INIT3
+#  define EARLY_INIT3(argcp,argvp,envp) \
+	STMT_START {		\
+		PL_earlytaint = doing_taint(argcp, argvp, envp); \
+	} STMT_END;
+#endif
+
+#ifndef EARLY_INIT2
+#  define EARLY_INIT2(argcp,argvp) \
+	STMT_START {		\
+		PL_earlytaint = doing_taint(argcp, argvp, 0); \
+	} STMT_END;
+#endif
+
 #ifndef PERL_SYS_INIT3
 #  define PERL_SYS_INIT3(argvp,argcp,envp) PERL_SYS_INIT(argvp,argcp)
 #endif
@@ -2626,6 +2643,13 @@ Gid_t getegid (void);
 #  define DEBUG_v(a)
 #  define DEBUG_C(a)
 #endif /* DEBUGGING */
+
+
+#define DEBUG_SCOPE(where) \
+    DEBUG_l(WITH_THR(Perl_deb(aTHX_ "%s scope %ld at %s:%d\n",	\
+		    where, PL_scopestack_ix, __FILE__, __LINE__)));
+
+
 
 
 /* These constants should be used in preference to raw characters

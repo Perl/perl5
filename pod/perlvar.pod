@@ -838,16 +838,21 @@ and C<$)> can be swapped only on machines supporting setregid().
 
 =item $0
 
-Contains the name of the program being executed.  On some operating
-systems assigning to C<$0> modifies the argument area that the B<ps>
-program sees.  This is more useful as a way of indicating the current
+Contains the name of the program being executed.  On some (read: not
+all) operating systems assigning to C<$0> modifies the argument area
+that the C<ps> program sees.  On some platforms you may have to use
+special C<ps> options or a different C<ps> to see the changes.
+Modifying the $0 is more useful as a way of indicating thecurrent
 program state than it is for hiding the program you're running.
 (Mnemonic: same as B<sh> and B<ksh>.)
 
+Note that there are platform specific limitations on the the maximum
+length of C<$0>.  In the most extreme case it may be limited to the
+space occupied by the original C<$0>.
+
 Note for BSD users: setting C<$0> does not completely remove "perl"
 from the ps(1) output.  For example, setting C<$0> to C<"foobar"> will
-result in C<"perl: foobar (perl)">.  This is an operating system
-feature.
+result in C<"perl: foobar (perl)">.  This is an operating system feature.
 
 In multithreaded scripts Perl coordinates the threads so that any
 thread may modify its copy of the C<$0> and the change becomes visible
@@ -902,7 +907,8 @@ C<$^C = 1> is similar to calling C<B::minus_c>.
 =item $^D
 
 The current value of the debugging flags.  (Mnemonic: value of B<-D>
-switch.)
+switch.) May be read or set. Like its command-line equivalent, you can use
+numeric or symbolic values, eg C<$^D = 10> or C<$^D = "st">.
 
 =item $SYSTEM_FD_MAX
 
