@@ -1,8 +1,3 @@
-BEGIN {
-        chdir 't' if -d 't';
-        @INC = '../lib';
-}
-
 # Digest::MD5 2.07 and older used to trigger a core dump when
 # passed an illegal file handle that failed to open.
 

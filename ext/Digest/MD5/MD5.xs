@@ -1,3 +1,5 @@
+/* $Id: MD5.xs,v 1.34 2002/05/01 23:30:28 gisle Exp $ */
+
 /* 
  * This library is free software; you can redistribute it and/or
  * modify it under the same terms as Perl itself.
@@ -42,7 +44,27 @@ extern "C" {
 }
 #endif
 
-#ifndef SvPVbyte
+#include "patchlevel.h"
+#if PATCHLEVEL <= 4 && !defined(PL_dowarn)
+   #define PL_dowarn dowarn
+#endif
+
+#ifdef SvPVbyte
+   #if PERL_REVISION == 5 && PERL_VERSION < 7
+       /* SvPVbyte does not work in perl-5.6.1, borrowed version for 5.7.3 */
+       #undef SvPVbyte
+       #define SvPVbyte(sv, lp) \
+	  ((SvFLAGS(sv) & (SVf_POK|SVf_UTF8)) == (SVf_POK) \
+     	   ? ((lp = SvCUR(sv)), SvPVX(sv)) : my_sv_2pvbyte(aTHX_ sv, &lp))
+
+       static char *
+       my_sv_2pvbyte(pTHX_ register SV *sv, STRLEN *lp)
+       {
+	   sv_utf8_downgrade(sv,0);
+           return SvPV(sv,*lp);
+       }
+   #endif
+#else
    #define SvPVbyte SvPV
 #endif
 
@@ -619,14 +641,31 @@ md5(...)
 	unsigned char digeststr[16];
     PPCODE:
 	MD5Init(&ctx);
-	if (PL_dowarn && items > 1) {
-	    data = (unsigned char *)SvPVbyte(ST(0), len);
-	    if (len == 11 && memEQ("Digest::MD5", data, 11)) {
-	         char *f = (ix == F_BIN) ? "md5" :
-                           (ix == F_HEX) ? "md5_hex" : "md5_base64";
-	         warn("&Digest::MD5::%s function probably called as method", f);
-            }
+
+	if (PL_dowarn) {
+            char *msg = 0;
+	    if (items == 1) {
+		if (SvROK(ST(0))) {
+                    SV* sv = SvRV(ST(0));
+		    if (SvOBJECT(sv) && strEQ(HvNAME(SvSTASH(sv)), "Digest::MD5"))
+		        msg = "probably called as method";
+		    else
+			msg = "called with reference argument";
+		}
+	    }
+	    else if (items > 1) {
+		data = (unsigned char *)SvPVbyte(ST(0), len);
+		if (len == 11 && memEQ("Digest::MD5", data, 11)) {
+		    msg = "probably called as class method";
+		}
+	    }
+	    if (msg) {
+		char *f = (ix == F_BIN) ? "md5" :
+                          (ix == F_HEX) ? "md5_hex" : "md5_base64";
+	        warn("&Digest::MD5::%s function %s", f, msg);
+	    }
 	}
+
 	for (i = 0; i < items; i++) {
 	    data = (unsigned char *)(SvPVbyte(ST(i), len));
 	    MD5Update(&ctx, data, len);
