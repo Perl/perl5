@@ -750,6 +750,7 @@ lib/Search/Dict.pm	Perform binary search on dictionaries
 lib/SelectSaver.pm	Enforce proper select scoping
 lib/SelfLoader.pm	Load functions only on demand
 lib/Shell.pm		Make AUTOLOADed system() calls
+lib/Switch.pm		Switch for Perl
 lib/Symbol.pm		Symbol table manipulation routines
 lib/Term/ANSIColor.pm	Perl module supporting termcap usage
 lib/Term/Cap.pm		Perl module supporting termcap usage
@@ -758,6 +759,8 @@ lib/Term/ReadLine.pm	Stub readline library
 lib/Test.pm		A simple framework for writing test scripts
 lib/Test/Harness.pm	A test harness
 lib/Text/Abbrev.pm	An abbreviation table builder
+lib/Text/Balanced.pm	Text::Balanced
+lib/Text/Balanced.pod	Text::Balanced
 lib/Text/ParseWords.pm	Perl module to split words on arbitrary delimiter
 lib/Text/Soundex.pm	Perl module to implement Soundex
 lib/Text/Tabs.pm	Do expand and unexpand
@@ -1088,8 +1091,8 @@ lib/unicode/PropList.txt			Unicode character database
 lib/unicode/README.Ethiopic			Unicode character database
 lib/unicode/README.perl				Unicode character database
 lib/unicode/ReadMe.txt				Unicode character database info
-lib/unicode/SpecCase.txt			Unicode character database
 lib/unicode/Scripts.txt				Unicode character database
+lib/unicode/SpecCase.txt			Unicode character database
 lib/unicode/To/Digit.pl				Unicode character database
 lib/unicode/To/Lower.pl				Unicode character database
 lib/unicode/To/Title.pl				Unicode character database
@@ -1520,9 +1523,18 @@ t/lib/st-tied.t		See if Storable works
 t/lib/st-tiedhook.t	See if Storable works
 t/lib/st-tieditems.t	See if Storable works
 t/lib/st-utf8.t		See if Storable works
+t/lib/switch.t		Test whether switch works
 t/lib/symbol.t		See if Symbol works
 t/lib/syslfs.t		See if large files work for sysio
 t/lib/syslog.t		See if Sys::Syslog works
+t/lib/tb-genxt.t	See if Text::Balanced works
+t/lib/tb-xbrak.t	See if Text::Balanced works
+t/lib/tb-xcode.t	See if Text::Balanced works
+t/lib/tb-xdeli.t	See if Text::Balanced works
+t/lib/tb-xmult.t	See if Text::Balanced works
+t/lib/tb-xquot.t	See if Text::Balanced works
+t/lib/tb-xtagg.t	See if Text::Balanced works
+t/lib/tb-xvari.t	See if Text::Balanced works
 t/lib/test-harness.t    See if Test::Harness works
 t/lib/textfill.t	See if Text::Wrap::fill works
 t/lib/texttabs.t	See if Text::Tabs works
@@ -1858,13 +1870,3 @@ x2p/util.c		Utility routines
 x2p/util.h		Public declarations for the above
 x2p/walk.c		Parse tree walker
 xsutils.c		Additional bundled package methods not in UNIVERSAL::
-lib/Text/Balanced.pm	Text::Balanced
-lib/Text/Balanced.pod	Text::Balanced
-t/lib/tb-genxt.t	See if Text::Balanced works
-t/lib/tb-xbrak.t	See if Text::Balanced works
-t/lib/tb-xcode.t	See if Text::Balanced works
-t/lib/tb-xdeli.t	See if Text::Balanced works
-t/lib/tb-xmult.t	See if Text::Balanced works
-t/lib/tb-xquot.t	See if Text::Balanced works
-t/lib/tb-xtagg.t	See if Text::Balanced works
-t/lib/tb-xvari.t	See if Text::Balanced works
