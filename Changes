@@ -79,6 +79,168 @@ Version 5.005_55        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  2943] By: gsar                                  on 1999/02/15  11:54:08
+        Log: #include patchlevel.h by default, provide
+             PERL_{REVISION,VERSION,SUBVERSION}
+     Branch: perl
+           ! patchlevel.h perl.h
+____________________________________________________________________________
+[  2942] By: gsar                                  on 1999/02/15  10:26:59
+        Log: allow /0|NaN/ on some bigfloatpm.t tests for portability; other
+             misc fixes
+     Branch: perl
+           ! Makefile.SH t/io/argv.t t/lib/bigfloatpm.t t/lib/h2ph.t
+____________________________________________________________________________
+[  2941] By: gsar                                  on 1999/02/15  10:24:37
+        Log: broken URLs fixed (from Michael G Schwern <schwern@pobox.com>)
+             Message-ID: <19990207002851.B9185@toldyouso.com>
+             Message-ID: <19990207212152.A9765@toldyouso.com>
+             Message-ID: <19990207212041.A9622@toldyouso.com>
+             Message-ID: <19990207213127.A10244@toldyouso.com>
+             Message-ID: <19990207212559.A9950@toldyouso.com>
+             Message-ID: <19990207212842.A9994@toldyouso.com>
+             Message-ID: <19990207212500.A9860@toldyouso.com>
+             Message-ID: <19990207213013.A10105@toldyouso.com>
+     Branch: perl
+	   ! pod/perldiag.pod pod/perlembed.pod pod/perlfaq3.pod
+	   ! pod/perlfaq4.pod pod/perlfaq9.pod pod/perlmodinstall.pod
+           ! pod/perlmodlib.pod pod/perltoc.pod
+____________________________________________________________________________
+[  2940] By: gsar                                  on 1999/02/15  10:07:08
+        Log: enable dynaloading in C.pm-compiled programs (non-conflicting part
+             of suggested patch)
+             From: "Vishal Bhatia" <vishalb@my-dejanews.com>
+             Date: Mon, 08 Feb 1999 01:14:41 -0000
+             Message-ID: <DHIDFFOPMEFDBAAA@my-dejanews.com>
+             Subject: [PATCH 5.005_54] some pending C.pm stuff 
+     Branch: perl
+           ! ext/B/B/C.pm
+____________________________________________________________________________
+[  2939] By: jhi                                   on 1999/02/15  08:40:18
+        Log: Integrate from mainperl.
+     Branch: cfgperl
+          +> t/lib/bigfloat.t t/lib/bigfloatpm.t
+           - lib/File/PathConvert.pm
+          !> (integrate 81 files)
+____________________________________________________________________________
+[  2938] By: gsar                                  on 1999/02/15  06:56:39
+        Log: change#2839 was bogus, redo
+     Branch: perl
+          !> t/lib/h2ph.pht
+____________________________________________________________________________
+[  2937] By: gsar                                  on 1999/02/15  06:38:15
+        Log: support Win32::GetFullPathName() and Win32::SetLastError()
+             From: jan.dubois@ibm.net (Jan Dubois)
+             Date: Tue, 09 Feb 1999 22:27:31 +0100
+             Message-ID: <36c1a2ed.8007554@smtp1.ibm.net>
+             Subject: [PATCH _54] Win32::GetFullPathName (Re: File::Spec::Win32 and UNCs)
+     Branch: perl
+           ! win32/win32.c
+____________________________________________________________________________
+[  2936] By: gsar                                  on 1999/02/15  06:26:39
+        Log: support native integers, pack("L_",...) etc. (via private mail)
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Wed, 10 Feb 1999 00:04:52 +0200 (EET)
+             Message-Id: <199902092204.AAA29065@alpha.hut.fi>
+             Subject: the "packnative" patch
+     Branch: perl
+	   ! pod/perldelta.pod pod/perldiag.pod pod/perlfunc.pod pp.c
+           ! t/lib/ipc_sysv.t t/op/pack.t
+____________________________________________________________________________
+[  2935] By: gsar                                  on 1999/02/15  06:04:02
+        Log: From: Michael G Schwern <schwern@pobox.com>
+             Date: Tue, 9 Feb 1999 04:13:12 -0500
+             Message-ID: <19990209041312.A15788@toldyouso.com>
+             Subject: [PATCH]5.005_03-MAINT_TRIAL_5 utils/h2xs fixing -A & more
+     Branch: perl
+           ! utils/h2xs.PL
+____________________________________________________________________________
+[  2934] By: gsar                                  on 1999/02/15  05:30:13
+        Log: fix bugs in the handling of negative numbers, among other things
+             From: Steven Knight <knight@theopera.baldmt.citilink.com>
+             Date: Mon, 8 Feb 1999 01:16:24 -0600
+             Message-Id: <199902080716.BAA24652@theopera.baldmt.citilink.com>
+             Subject: Math::BigFloat and Math::BigInt
+     Branch: perl
+           + t/lib/bigfloat.t t/lib/bigfloatpm.t
+	   ! lib/Math/BigFloat.pm lib/Math/BigInt.pm lib/bigfloat.pl
+           ! t/lib/bigintpm.t
+____________________________________________________________________________
+[  2933] By: gsar                                  on 1999/02/15  04:57:52
+        Log: From: "J. van Krieken" <John.van.Krieken@ATComputing.nl>
+             Date: Thu, 4 Feb 1999 17:25:25 +0100 (MET)
+             Message-Id: <199902041625.RAA14489@atcmpg.ATComputing.nl>
+             Subject: s2p incorrectly handles hold space commands
+     Branch: perl
+           ! x2p/s2p.PL
+____________________________________________________________________________
+[  2932] By: gsar                                  on 1999/02/15  04:45:55
+        Log: clarify what a "line" is
+     Branch: perl
+           ! pod/perlfunc.pod pod/perlvar.pod
+____________________________________________________________________________
+[  2931] By: gsar                                  on 1999/02/15  04:23:29
+        Log: backout change#2811 and add newer version based on File::Spec
+             From: Barrie Slaymaker <rbs@telerama.com>
+             Date: Thu, 11 Feb 1999 16:29:24 -0500
+             Message-ID: <36C34BB4.A62090E0@telerama.com>
+             Subject: [PATCH]5.005_54 (pod2html) Relative URLs using new File::Spec
+     Branch: perl
+           - lib/File/PathConvert.pm
+           ! MANIFEST installhtml lib/Pod/Html.pm
+____________________________________________________________________________
+[  2930] By: gsar                                  on 1999/02/15  04:16:25
+        Log: From: Barrie Slaymaker <rbs@telerama.com>
+             Date: Thu, 11 Feb 1999 19:39:48 -0500
+             Message-ID: <36C37854.707D139@telerama.com>
+             Subject: [PATCH] 5.005_54 #2 Merging File::PathConvert in to File::Spec
+     Branch: perl
+           ! lib/File/Spec/Unix.pm lib/File/Spec/Win32.pm
+____________________________________________________________________________
+[  2929] By: gsar                                  on 1999/02/15  04:06:50
+        Log: patches suggested by John Bley <jbb6@acpub.duke.edu> (with minor edits)
+             Date: Wed, 3 Feb 1999 05:24:55 -0500 (EST)
+             Message-ID: <Pine.SOL.3.91.990203051924.302A-100000@soc11.acpub.duke.edu>
+             Subject: [PATCH]5.005_54 (DOC) fix many typos
+             --
+             Date: Wed, 3 Feb 1999 08:53:53 -0500 (EST)
+             Message-ID: <Pine.SOL.3.91.990203085157.895A-100000@soc11.acpub.duke.edu>
+             Subject: [PATCH]5.005_54 (DOC) typos
+     Branch: perl
+	   ! pod/perl5004delta.pod pod/perl5005delta.pod pod/perlcall.pod
+	   ! pod/perldebug.pod pod/perlfaq1.pod pod/perlfaq2.pod
+	   ! pod/perlfaq3.pod pod/perlfaq4.pod pod/perlfaq5.pod
+	   ! pod/perlfaq6.pod pod/perlfaq7.pod pod/perlfaq8.pod
+	   ! pod/perlfaq9.pod pod/perlfunc.pod pod/perlguts.pod
+	   ! pod/perllol.pod pod/perlmod.pod pod/perlref.pod
+	   ! pod/perlrun.pod pod/perlsub.pod pod/perltoc.pod
+           ! pod/perlvar.pod pod/perlxs.pod
+____________________________________________________________________________
+[  2928] By: gsar                                  on 1999/02/15  03:39:53
+        Log: allow the Carp routines to pass through exception objects
+     Branch: perl
+           ! lib/Carp.pm
+____________________________________________________________________________
+[  2927] By: gsar                                  on 1999/02/15  03:22:57
+        Log: mention Proc::Daemon (suggested by Michael G Schwern <schwern@pobox.com>)
+     Branch: perl
+           ! pod/perlfaq8.pod
+____________________________________________________________________________
+[  2926] By: gsar                                  on 1999/02/15  03:19:39
+        Log: integrate h2ph.PL fixes from change#2809 (change#2838 was supposed to
+             have done that, but didn't)
+     Branch: perl
+          !> utils/h2ph.PL
+____________________________________________________________________________
+[  2925] By: gsar                                  on 1999/02/15  03:17:01
+        Log: integrate cfgperl changes into mainline
+     Branch: perl
+           ! Changes
+	  !> Configure Porting/Glossary Porting/config.sh Porting/config_H
+	  !> config_h.SH hints/openbsd.sh hints/ultrix_4.sh
+	  !> pod/perlport.pod t/lib/h2ph.pht utils/h2ph.PL
+          !> vms/subconfigure.com
+____________________________________________________________________________
 [  2924] By: gsar                                  on 1999/02/15  03:07:08
         Log: add const qualifier to most char* prototypes, handle ripple effect
      Branch: perl
