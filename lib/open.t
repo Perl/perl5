@@ -3,6 +3,7 @@
 BEGIN {
 	chdir 't' if -d 't';
 	@INC = '../lib';
+	require Config; import Config;
 }
 
 use Test::More tests => 13;
@@ -67,14 +68,21 @@ is( ${^OPEN}, ":raw :crlf\0:raw :crlf",
 	'should set multi types, multi disciplines' );
 is( $^H{'open_IO'}, 'crlf', 'should record last layer set in %^H' );
 
+SKIP: {
+    skip("no perlio, no :utf8", 1) unless $Config{'useperlio'};
 # the special :utf8 layer
-use open ':utf8';
-open(O, ">utf8");
-print O chr(0x100);
-close O;
-open(I, "<utf8");
-is(ord(<I>), 0x100, ":utf8");
-close I;
+    use open ':utf8';
+    open(O, ">utf8");
+    print O chr(0x100);
+    close O;
+    open(I, "<utf8");
+    is(ord(<I>), 0x100, ":utf8");
+    close I;
+}
+
+END {
+    1 while unlink "utf8";
+}
 
 # the test cases beyond __DATA__ need to be executed separately
 
