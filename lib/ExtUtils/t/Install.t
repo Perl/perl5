@@ -17,7 +17,7 @@ use TieOut;
 use File::Path;
 use File::Spec;
 
-use Test::More tests => 18;
+use Test::More tests => 21;
 
 BEGIN { use_ok('ExtUtils::Install') }
 
@@ -46,6 +46,14 @@ ok( -r 'blib/lib/Big/Dummy.pm', '  .pm file still there' );
 ok( -r 'blib/lib/auto',         '  autosplit still there' );
 is( $stdout->read, "Skip blib/lib/Big/Dummy.pm (unchanged)\n" );
 
+install( { 'blib/lib' => 'install-test/lib/perl',
+           read   => 'install-test/packlist',
+           write  => 'install-test/packlist'
+         },
+       0, 1);
+ok( ! -d 'install-test/lib/perl',                 'install made dir - dry run' );
+ok( ! -r 'install-test/lib/perl/Big/Dummy.pm',    '  .pm file installed - dry run' );
+ok( ! -r 'install-test/packlist',                 '  packlist exists - dry run' );
 
 install( { 'blib/lib' => 'install-test/lib/perl',
            read   => 'install-test/packlist',
