@@ -20,9 +20,13 @@
 */
 
 #ifdef IN_XSUB_RE
+/* We *really* need to overwrite these symbols: */
 #  define Perl_pregcomp my_regcomp
 #  define Perl_regdump my_regdump
 #  define Perl_regprop my_regprop
+/* *These* symbols are masked to allow static link. */
+#  define Perl_pregfree my_regfree
+#  define Perl_regnext my_regnext
 #endif 
 
 /*SUPPRESS 112*/
@@ -61,7 +65,10 @@
  */
 #include "EXTERN.h"
 #include "perl.h"
-#include "INTERN.h"
+
+#ifndef IN_XSUB_RE
+#  include "INTERN.h"
+#endif
 
 #define REG_COMP_C
 #include "regcomp.h"

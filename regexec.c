@@ -20,9 +20,12 @@
 */
 
 #ifdef IN_XSUB_RE
+/* We *really* need to overwrite these symbols: */
 #  define Perl_regexec_flags my_regexec
 #  define Perl_regdump my_regdump
 #  define Perl_regprop my_regprop
+/* *These* symbols are masked to allow static link. */
+#  define Perl_pregexec my_pregexec
 #endif 
 
 /*SUPPRESS 112*/
