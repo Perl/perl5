@@ -155,7 +155,7 @@ This is identical to Perl's builtin C<chown()> function.
 
 =item clearerr
 
-Use method C<FileHandle::clearerr()> instead.
+Use method C<IO::Handle::clearerr()> instead.
 
 =item clock
 
@@ -277,7 +277,7 @@ This is identical to Perl's builtin C<abs()> function.
 
 =item fclose
 
-Use method C<FileHandle::close()> instead.
+Use method C<IO::Handle::close()> instead.
 
 =item fcntl
 
@@ -285,35 +285,35 @@ This is identical to Perl's builtin C<fcntl()> function.
 
 =item fdopen
 
-Use method C<FileHandle::new_from_fd()> instead.
+Use method C<IO::Handle::new_from_fd()> instead.
 
 =item feof
 
-Use method C<FileHandle::eof()> instead.
+Use method C<IO::Handle::eof()> instead.
 
 =item ferror
 
-Use method C<FileHandle::error()> instead.
+Use method C<IO::Handle::error()> instead.
 
 =item fflush
 
-Use method C<FileHandle::flush()> instead.
+Use method C<IO::Handle::flush()> instead.
 
 =item fgetc
 
-Use method C<FileHandle::getc()> instead.
+Use method C<IO::Handle::getc()> instead.
 
 =item fgetpos
 
-Use method C<FileHandle::getpos()> instead.
+Use method C<IO::Seekable::getpos()> instead.
 
 =item fgets
 
-Use method C<FileHandle::gets()> instead.
+Use method C<IO::Handle::gets()> instead.
 
 =item fileno
 
-Use method C<FileHandle::fileno()> instead.
+Use method C<IO::Handle::fileno()> instead.
 
 =item floor
 
@@ -325,7 +325,7 @@ This is identical to the C function C<fmod()>.
 
 =item fopen
 
-Use method C<FileHandle::open()> instead.
+Use method C<IO::File::open()> instead.
 
 =item fork
 
@@ -380,11 +380,11 @@ fscanf() is C-specific--use <> and regular expressions instead.
 
 =item fseek
 
-Use method C<FileHandle::seek()> instead.
+Use method C<IO::Seekable::seek()> instead.
 
 =item fsetpos
 
-Use method C<FileHandle::setpos()> instead.
+Use method C<IO::Seekable::setpos()> instead.
 
 =item fstat
 
@@ -397,7 +397,7 @@ Perl's builtin C<stat> function.
 
 =item ftell
 
-Use method C<FileHandle::tell()> instead.
+Use method C<IO::Seekable::tell()> instead.
 
 =item fwrite
 
@@ -1204,7 +1204,7 @@ seconds.
 
 =item tmpfile
 
-Use method C<FileHandle::new_tmpfile()> instead.
+Use method C<IO::File::new_tmpfile()> instead.
 
 =item tmpnam
 
@@ -1247,7 +1247,7 @@ Get name of current operating system.
 
 =item ungetc
 
-Use method C<FileHandle::ungetc()> instead.
+Use method C<IO::Handle::ungetc()> instead.
 
 =item unlink
 
@@ -1314,9 +1314,10 @@ Creates a new C<POSIX::SigAction> object which corresponds to the C
 C<struct sigaction>.  This object will be destroyed automatically when it is
 no longer needed.  The first parameter is the fully-qualified name of a sub
 which is a signal-handler.  The second parameter is a C<POSIX::SigSet>
-object.  The third parameter contains the C<sa_flags>.
+object, it defaults to the empty set.  The third parameter contains the
+C<sa_flags>, it defaults to 0.
 
-	$sigset = POSIX::SigSet->new;
+	$sigset = POSIX::SigSet->new(SIGINT, SIGQUIT);
 	$sigaction = POSIX::SigAction->new( 'main::handler', $sigset, &POSIX::SA_NOCLDSTOP );
 
 This C<POSIX::SigAction> object should be used with the C<POSIX::sigaction()>

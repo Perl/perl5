@@ -95,7 +95,6 @@ ext/DynaLoader/dl_dlopen.xs	BSD/SunOS4&5 dlopen() style implementation
 ext/DynaLoader/dl_hpux.xs	HP-UX implementation
 ext/DynaLoader/dl_next.xs	Next implementation
 ext/DynaLoader/dl_none.xs	Stub implementation
-ext/DynaLoader/dl_os2.xs	OS/2 implementation
 ext/DynaLoader/dl_vms.xs	VMS implementation
 ext/DynaLoader/dlutils.c	Dynamic loader utilities for dl_*.xs files
 ext/Fcntl/Fcntl.pm		Fcntl extension Perl module
@@ -205,6 +204,7 @@ hints/altos486.sh	Hints for named architecture
 hints/amigaos.sh	Hints for named architecture
 hints/apollo.sh		Hints for named architecture
 hints/aux.sh		Hints for named architecture
+hints/broken-db.msg	Warning message for systems with broken DB library
 hints/bsdos.sh		Hints for named architecture
 hints/convexos.sh	Hints for named architecture
 hints/cxux.sh		Hints for named architecture
@@ -565,6 +565,7 @@ t/comp/cpp.t		See if C preprocessor works
 t/comp/decl.t		See if declarations work
 t/comp/multiline.t	See if multiline strings work
 t/comp/package.t	See if packages work
+t/comp/proto.t		See if function prototypes work
 t/comp/redef.t		See if we get correct warnings on redefined subs
 t/comp/script.t		See if script invokation works
 t/comp/term.t		See if more terms work
@@ -696,7 +697,7 @@ t/pragma/strict-subs	Tests of "use strict 'subs'" for strict.t
 t/pragma/strict-vars	Tests of "use strict 'vars'" for strict.t
 t/pragma/strict.t	See if strictures work
 t/pragma/subs.t		See if subroutine pseudo-importation works
-t/pragma/warn-global	Tests of global warnings for warning.t
+t/pragma/warn-1global	Tests of global warnings for warning.t
 t/pragma/warning.t	See if warning controls work
 taint.c			Tainting code
 toke.c			The tokener

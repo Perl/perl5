@@ -2,8 +2,9 @@
 #
 # Improved by Jake Hamby <jehamby@lightside.com> to support both Apple CC
 # and GNU CC.  Tested on A/UX 3.1.1 with GCC 2.6.3.
+# Now notifies of problem with version of dbm shipped with A/UX
 # Last modified 
-# Fri May  5 10:59:43 EDT 1995
+# Sun Jan  5 11:16:41 WET 1997
 
 case "$cc" in
 *gcc*)	optimize='-O2'
@@ -18,3 +19,4 @@ case "$cc" in
 	echo "./Configure -Dcc=gcc"
 	;;
 esac
+test -r ./broken-db.msg && . ./broken-db.msg

@@ -9,6 +9,174 @@ releases.)
 
 
 ----------------
+Version 5.003_20
+----------------
+
+The only language change in this release is the recension of support
+for named closures:  Now, no subroutine declared "sub foo {}" can be
+a closure.  (This is a return to the behavior of 5.003.)  In addition,
+there are new warnings triggered by any apparent attempt to use named
+functions as closures.
+
+And, as usual, there are the usual little fixes, documentation
+updates, and expanded tests.  This is good stuff.  "I love you, man!"
+
+ CORE LANGUAGE CHANGES
+
+  Title:  "Rescind named closures"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  Makefile.SH op.c perly.c perly.c.diff perly.y pp_hot.c
+
+  Title:  "Fix: empty @_ when calling empty-proto subs without parens"
+   From:  Graham Barr <bodg@tiuk.ti.com>
+ Msg-ID:  <32CE30F0.7E8425A5@tiuk.ti.com>
+   Date:  Sat, 04 Jan 1997 10:29:04 +0000
+  Files:  perly.c perly.y
+
+ CORE PORTABILITY
+
+  Title:  "Fix $^X on systems that set it to Perl's basename"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  hints/hpux.sh toke.c
+
+  Title:  "Configure/perl5/Compartmented Mode Workstation (fwd)"
+   From:  Andy Dougherty <doughera@fractal.phys.lafayette.edu>
+ Msg-ID:  <Pine.SOL.3.95.970106131505.1662C-100000@fractal.lafayette.ed
+   Date:  Mon, 06 Jan 1997 13:15:38 -0500 (EST)
+  Files:  Configure hints/dec_osf.sh
+
+  Title:  "Remove obsolete file "dl_os2.xs"."
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+  Files:  MANIFEST
+
+ OTHER CORE CHANGES
+
+  Title:  "Fix C< sub foo (&@); sub bar (&); foo {}, bar {}, bar {} >"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  perly.c perly.c.diff perly.y
+
+  Title:  "plug for safe/opcode leaks"
+   From:  Doug MacEachern <dougm@osf.org>
+ Msg-ID:  <199701072220.RAA02117@postman.osf.org>
+   Date:  Tue, 07 Jan 1997 17:20:46 -0500
+  Files:  op.c
+
+  Title:  "Finish OP= warnings: none on ^="
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  doop.c pp.c t/op/assignwarn.t
+
+  Title:  "Fix Dynaloader failures with DProf"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199701061718.MAA26909@aatma.engin.umich.edu>
+   Date:  Mon, 06 Jan 1997 12:18:46 -0500
+  Files:  pp_hot.c
+
+ BUILD PROCESS
+
+  Title:  "Make Configure default to the first domain in /etc/resolv.conf"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  Configure
+
+  Title:  "Start all helper scripts with $startsh"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  Configure
+
+  Title:  "Support libperl.so under FreeBSD"
+   From:  roberto@keltia.freenix.fr (Ollivier Robert)
+ Msg-ID:  <Mutt.19970105224149.roberto@keltia.freenix.fr>
+   Date:  Sun, 5 Jan 1997 22:41:49 +0100
+  Files:  Configure Makefile.SH
+
+ TESTS
+
+  Title:  "New test: comp/proto.t"
+   From:  Graham Barr <bodg@tiuk.ti.com>
+ Msg-ID:  <32D0C21F.3FB28D51@tiuk.ti.com>
+   Date:  Mon, 06 Jan 1997 09:13:03 +0000
+  Files:  MANIFEST t/comp/proto.t
+
+  Title:  "More magic variable tests"
+   From:  Roderick Schertler <roderick@gate.net>
+ Msg-ID:  <7043.852565192@eeyore.ibcinc.com>
+   Date:  Mon, 06 Jan 1997 10:39:52 -0500
+  Files:  t/harness t/op/magic.t
+
+ LIBRARY AND EXTENSIONS
+
+  Title:  "File::Basename::dirname bugs"
+   From:  Robin Barker <rmb@cise.npl.co.uk>
+ Msg-ID:  <12393.9701071719@tempest.cise.npl.co.uk>
+   Date:  Tue, 7 Jan 97 17:19:59 GMT
+  Files:  lib/File/Basename.pm t/lib/basename.t
+
+  Title:  "sigaction() problems"
+   From:  Roderick Schertler <roderick@gate.net>
+ Msg-ID:  <12808.852583324@eeyore.ibcinc.com>
+   Date:  Mon, 06 Jan 1997 15:42:04 -0500
+  Files:  ext/POSIX/POSIX.pm ext/POSIX/POSIX.pod
+
+  Title:  "Fix importation of FileHandle methods; fix POSIX docs"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  ext/POSIX/POSIX.pm ext/POSIX/POSIX.pod lib/FileHandle.pm
+
+  Title:  "Patch: make hints files warn about db-recno failures"
+   From:  Dominic Dunlop <domo@slipper.ip.lu>
+ Msg-ID:  <v03010d00aef53ac4d18a@[194.51.248.68]>
+   Date:  Sun, 5 Jan 1997 12:34:25 +0100
+  Files:  MANIFEST hints/aux.sh hints/broken-db.msg hints/freebsd.sh
+
+ UTILITIES
+
+  Title:  "pod2html.PL patch (for 5.003-19)"
+   From:  Fabien TASSIN <tassin@eerie.fr>
+ Msg-ID:  <199701052347.AAA21297@solar5>
+   Date:  Mon, 6 Jan 1997 00:47:01 +0100
+  Files:  pod/pod2html.PL
+
+ DOCUMENTATION
+
+  Title:  "tiny doc patches"
+   From:  Roderick Schertler <roderick@gate.net>
+ Msg-ID:  <23338.852394333@eeyore.ibcinc.com>
+   Date:  Sat, 04 Jan 1997 11:12:13 -0500
+  Files:  pod/perlapio.pod pod/perlnews.pod pod/perltoc.pod
+
+  Title:  "doc patch for defined on perlfunc.pod"
+   From:  Roderick Schertler <roderick@gate.net>
+ Msg-ID:  <pz91686ek1.fsf@eeyore.ibcinc.com>
+   Date:  04 Jan 1997 21:28:30 -0500
+  Files:  pod/perlfunc.pod
+
+  Title:  "doc patch: perldsc"
+   From:  Roderick Schertler <roderick@gate.net>
+ Msg-ID:  <pzafqo6eo9.fsf@eeyore.ibcinc.com>
+   Date:  04 Jan 1997 21:25:58 -0500
+  Files:  pod/perldsc.pod pod/perltoc.pod
+
+  Title:  "Re: constant function inlining"
+   From:  Roderick Schertler <roderick@gate.net>
+ Msg-ID:  <pzk9pp1b95.fsf@eeyore.ibcinc.com>
+   Date:  07 Jan 1997 15:27:50 -0500
+  Files:  pod/perldiag.pod pod/perlsub.pod
+
+  Title:  "scalar caller doc fix"
+   From:  Roderick Schertler <roderick@gate.net>
+ Msg-ID:  <18245.852608060@eeyore.ibcinc.com>
+   Date:  Mon, 06 Jan 1997 22:34:20 -0500
+  Files:  pod/perlfunc.pod
+
+  Title:  "perlpod.pod possible patches"
+   From:  lvirden@cas.org (Larry W. Virden, x2487)
+ Msg-ID:  <9701070756.AA1185@cas.org>
+   Date:  Tue, 7 Jan 1997 07:56:30 -0500
+  Files:  pod/perlpod.pod
+
+  Title:  "Misc perlfunc updates"
+   From:  Tom Christiansen <tchrist@mox.perl.com>
+  Files:  pod/perlfunc.pod pod/perltoc.pod
+
+
+----------------
 Version 5.003_19
 ----------------
 

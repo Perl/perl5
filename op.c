@@ -26,8 +26,10 @@
  * think the expression is of the right type: croak actually does a Siglongjmp.
  */
 #define CHECKOP(type,op) \
-    ((op_mask && op_mask[type]) \
-     ? (croak("%s trapped by operation mask", op_desc[type]), (OP*)op) \
+    ((op_mask && op_mask[type])					\
+     ? ( op_free((OP*)op),					\
+	 croak("%s trapped by operation mask", op_desc[type]),	\
+	 Nullop )						\
      : (*check[type])((OP*)op))
 #else
 #define CHECKOP(type,op) (*check[type])(op)
@@ -210,14 +212,28 @@ pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix)
 		    SvNVX(sv) = (double)curcop->cop_seq;
 		    SvIVX(sv) = 999999999;	/* A ref, intro immediately */
 		    SvFLAGS(sv) |= SVf_FAKE;
-		    /* "It's closures all the way down." */
-		    CvCLONE_on(compcv);
-		    if (cv != startcv) {
-			CV *bcv;
-			for (bcv = startcv;
-			     bcv && bcv != cv && !CvCLONE(bcv);
-			     bcv = CvOUTSIDE(bcv))
-			    CvCLONE_on(bcv);
+		    if (CvANON(compcv)) {
+			/* "It's closures all the way down." */
+			CvCLONE_on(compcv);
+			if (cv != startcv) {
+			    CV *bcv;
+			    for (bcv = startcv;
+				 bcv && bcv != cv && !CvCLONE(bcv);
+				 bcv = CvOUTSIDE(bcv)) {
+				if (CvANON(bcv))
+				    CvCLONE_on(bcv);
+				else {
+				    if (dowarn)
+					warn("Value of %s may be unavailable",
+					     name);
+				    break;
+				}
+			    }
+			}
+		    }
+		    else {
+			if (dowarn && !CvUNIQUE(cv))
+			    warn("Value of %s will not stay shared", name);
 		    }
 		}
 		av_store(comppad, newoff, SvREFCNT_inc(oldsv));
@@ -3006,7 +3022,6 @@ OP *block;
     char *name = op ? SvPVx(cSVOP->op_sv, na) : "__ANON__";
     GV* gv = gv_fetchpv(name, GV_ADDMULTI, SVt_PVCV);
     AV* av;
-    char *s;
     I32 ix;
 
     if (op) {
@@ -3020,8 +3035,9 @@ OP *block;
 	    cv = 0;
 	}
 	else if (CvROOT(cv) || CvXSUB(cv) || GvASSUMECV(gv)) {
-	    SV* const_sv = cv_const_sv(cv);
+	    /* already defined (or promised) */
 
+	    SV* const_sv = cv_const_sv(cv);
 	    char *p = proto ? SvPVx(((SVOP*)proto)->op_sv, na) : Nullch;
 
 	    if((!proto != !SvPOK(cv)) || (p && strNE(SvPV((SV*)cv,na), p))) {
@@ -3029,8 +3045,7 @@ OP *block;
 			SvPOK(cv) ? SvPV((SV*)cv,na) : "none",
 			p ? p : "none");
 	    }
-
-	    if ((const_sv || dowarn) && strNE(name, "BEGIN")) {/* already defined (or promised)? */
+	    if ((const_sv || dowarn) && strNE(name, "BEGIN")) {
 		line_t oldline = curcop->cop_line;
 
 		curcop->cop_line = copline;
@@ -3079,10 +3094,6 @@ OP *block;
 	return cv;
     }
 
-    /* XXX: Named functions at file scope cannot be closures */
-    if (op && CvUNIQUE(CvOUTSIDE(cv)))
-	CvCLONE_off(cv);
-
     av = newAV();			/* Will be @_ */
     av_extend(av, 0);
     av_store(comppad, 0, (SV*)av);
@@ -3101,34 +3112,37 @@ OP *block;
     CvROOT(cv)->op_next = 0;
     peep(CvSTART(cv));
 
-    if (s = strrchr(name,':'))
-	s++;
-    else
-	s = name;
-    if (strEQ(s, "BEGIN") && !error_count) {
-	ENTER;
-	SAVESPTR(compiling.cop_filegv);
-	SAVEI16(compiling.cop_line);
-	SAVEI32(perldb);
-	save_svref(&rs);
-	sv_setsv(rs, nrs);
+    if (op) {
+	char *s = strrchr(name,':');
+	if (s)
+	    s++;
+	else
+	    s = name;
+	if (strEQ(s, "BEGIN") && !error_count) {
+	    ENTER;
+	    SAVESPTR(compiling.cop_filegv);
+	    SAVEI16(compiling.cop_line);
+	    SAVEI32(perldb);
+	    save_svref(&rs);
+	    sv_setsv(rs, nrs);
 
-	if (!beginav)
-	    beginav = newAV();
-	DEBUG_x( dump_sub(gv) );
-	av_push(beginav, (SV *)cv);
-	GvCV(gv) = 0;
-	calllist(beginav);
+	    if (!beginav)
+		beginav = newAV();
+	    DEBUG_x( dump_sub(gv) );
+	    av_push(beginav, (SV *)cv);
+	    GvCV(gv) = 0;
+	    calllist(beginav);
 
-	curcop = &compiling;
-	LEAVE;
-    }
-    else if (strEQ(s, "END") && !error_count) {
-	if (!endav)
-	    endav = newAV();
-	av_unshift(endav, 1);
-	av_store(endav, 0, (SV *)cv);
-	GvCV(gv) = 0;
+	    curcop = &compiling;
+	    LEAVE;
+	}
+	else if (strEQ(s, "END") && !error_count) {
+	    if (!endav)
+		endav = newAV();
+	    av_unshift(endav, 1);
+	    av_store(endav, 0, (SV *)cv);
+	    GvCV(gv) = 0;
+	}
     }
 
     if (perldb && curstash != debstash) {
@@ -3159,10 +3173,9 @@ OP *block;
 	}
     }
 
-    if (!op) {
+    if (!op)
 	GvCV(gv) = 0;	/* Will remember in SVOP instead. */
-	CvANON_on(cv);
-    }
+
     copline = NOLINE;
     LEAVE_SCOPE(floor);
     return cv;
@@ -3191,7 +3204,6 @@ char *filename;
 {
     register CV *cv;
     GV *gv = gv_fetchpv((name ? name : "__ANON__"), GV_ADDMULTI, SVt_PVCV);
-    char *s;
 
     if (name)
 	sub_generation++;
@@ -3223,24 +3235,25 @@ char *filename;
     GvCVGEN(gv) = 0;
     CvFILEGV(cv) = gv_fetchfile(filename);
     CvXSUB(cv) = subaddr;
-    if (!name)
-	s = "__ANON__";
-    else if (s = strrchr(name,':'))
-	s++;
-    else
-	s = name;
-    if (strEQ(s, "BEGIN")) {
-	if (!beginav)
-	    beginav = newAV();
-	av_push(beginav, SvREFCNT_inc(gv));
+    if (name) {
+	char *s = strrchr(name,':');
+	if (s)
+	    s++;
+	else
+	    s = name;
+	if (strEQ(s, "BEGIN")) {
+	    if (!beginav)
+		beginav = newAV();
+	    av_push(beginav, SvREFCNT_inc(gv));
+	}
+	else if (strEQ(s, "END")) {
+	    if (!endav)
+		endav = newAV();
+	    av_unshift(endav, 1);
+	    av_store(endav, 0, SvREFCNT_inc(gv));
+	}
     }
-    else if (strEQ(s, "END")) {
-	if (!endav)
-	    endav = newAV();
-	av_unshift(endav, 1);
-	av_store(endav, 0, SvREFCNT_inc(gv));
-    }
-    if (!name) {
+    else {
 	GvCV(gv) = 0;	/* Will remember elsewhere instead. */
 	CvANON_on(cv);
     }

@@ -958,7 +958,11 @@ silent=''
 extractsh=''
 override=''
 knowitall=''
+
 rm -f optdef.sh
+cat >optdef.sh <<EOS
+$startsh
+EOS
 
 : option parsing
 while test $# -gt 0; do
@@ -1192,6 +1196,7 @@ esac"
 
 : now set up to do reads with possible shell escape and default assignment
 cat <<EOSC >myread
+$startsh
 xxxm=\$dflt
 $myecho
 ans='!'
@@ -1770,7 +1775,7 @@ EOM
 		ultrix) osname=ultrix
 			osvers="$3"
 			;;
-		osf1)	case "$5" in
+		osf1|mls+)	case "$5" in
 				alpha)
 					osname=dec_osf
 					osvers=`echo "$3" | sed 's/^[vt]//'`
@@ -2117,7 +2122,10 @@ chmod +x filexp
 $eunicefix filexp
 
 : now set up to get a file name
-cat <<'EOSC' >getfile
+cat <<EOS >getfile
+$startsh
+EOS
+cat <<'EOSC' >>getfile
 tilde=''
 fullpath=''
 already=''
@@ -2516,7 +2524,10 @@ else
 fi
 
 : set up the script used to warn in case of inconsistency
-cat <<'EOSC' >whoa
+cat <<EOS >whoa
+$startsh
+EOS
+cat <<'EOSC' >>whoa
 dflt=y
 echo " "
 echo "*** WHOA THERE!!! ***" >&4
@@ -4679,6 +4690,9 @@ if "$useshrplib"; then
 	solaris|netbsd)
 		xxx="-R $shrpdir"
 		;;
+	freebsd)
+		xxx="-Wl,-R,$shrpdir"
+		;;
 	linux|irix*)
 		xxx="-Wl,-rpath,$shrpdir"
 		;;
@@ -5134,11 +5148,11 @@ case "$myhostname" in
 				: Why was there an Egrep here, when Sed works?
 				: Look for either a search or a domain directive.
 				dflt=.`$sed -n -e 's/	/ /g' \
-				  -e 's/^search.* \([^ ]*\) *$/\1/p' $tans \
+				  -e 's/^search  *\([^ ]*\).*/\1/p' $tans \
 				  | ./tr '[A-Z]' '[a-z]' 2>/dev/null`
 				case "$dflt" in
 				.) dflt=.`$sed -n -e 's/	/ /g' \
-				     -e 's/^domain.* \([^ ]*\) *$/\1/p' $tans \
+				     -e 's/^domain  *\([^ ]*\).*/\1/p' $tans \
 				     | ./tr '[A-Z]' '[a-z]' 2>/dev/null`
 					;;
 				esac
@@ -6400,7 +6414,9 @@ main()
 }
 EOCP
 	if $cc $ccflags $ldflags try.c -o try >/dev/null 2>&1; then
-		echo "$startsh" >mtry
+		cat <<EOS >mtry
+$startsh
+EOS
 		echo "./try >try.out 2>try.ret 3>try.err || exit 4" >>mtry
 		chmod +x mtry
 		./mtry >/dev/null 2>&1
@@ -6436,7 +6452,7 @@ EOCP
 		*) echo "However, your read() returns '$status' on EOF??";;
 		esac
 		val="$define"
-		if test "$status" -eq "$rd_nodata"; then
+		if test "$status" = "$rd_nodata"; then
 			echo "WARNING: you can't distinguish between EOF and no data!"
 			val="$undef"
 		fi

@@ -34,7 +34,7 @@ true)
 		-compatibility_version 1 -current_version $(PATCHLEVEL) \
 		-prebind -seg1addr 0x27000000 -install_name $(SHRPDIR)/$@'
 		;;
-	sunos*)
+	sunos*|freebsd[23]*)
 		linklibperl="-lperl"
 		;;
 	esac
@@ -290,7 +290,7 @@ quantperl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs
 # has been invoked correctly.
 
 suidperl: $& sperl$(OBJ_EXT) perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs
-	$(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o suidperl perlmain$(OBJ_EXT) sperl$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LIBPERL) `cat ext.libs` $(libs)
+	$(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o suidperl perlmain$(OBJ_EXT) sperl$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
 !NO!SUBS!
 
@@ -344,7 +344,7 @@ install.man:	all installman
 # normally shouldn't remake perly.[ch].
 
 run_byacc:	FORCE
-	@ echo 'Expect' 130 shift/reduce and 1 reduce/reduce conflict
+	@ echo 'Expect' 113 shift/reduce and 1 reduce/reduce conflict
 	$(BYACC) -d perly.y
 	sh $(shellflags) ./perly.fixer y.tab.c perly.c
 	sed -e 's/fprintf *( *stderr *,/PerlIO_printf(Perl_debug_log,/g' \

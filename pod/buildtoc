@@ -26,7 +26,7 @@ $/ = '';
 	=head1 DESCRIPTION
 
 	This page provides a brief table of contents for the rest of the Perl
-	documentation set.  It is meant to be bescanned quickly or grepped
+	documentation set.  It is meant to be scanned quickly or grepped
 	through to locate the proper section you're looking for.
 
 	=head1 BASIC DOCUMENTATION

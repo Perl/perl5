@@ -1685,7 +1685,6 @@ PP(pp_entersub)
     register CONTEXT *cx;
     I32 gimme;
     bool hasargs = (op->op_flags & OPf_STACKED) != 0;
-    bool may_clone = TRUE;
 
     if (!sv)
 	DIE("Not a CODE reference");
@@ -1705,26 +1704,20 @@ PP(pp_entersub)
 	    break;
 	}
 	cv = (CV*)SvRV(sv);
-	if (SvTYPE(cv) == SVt_PVCV) {
-	    may_clone = FALSE;
+	if (SvTYPE(cv) == SVt_PVCV)
 	    break;
-	}
 	/* FALL THROUGH */
     case SVt_PVHV:
     case SVt_PVAV:
 	DIE("Not a CODE reference");
     case SVt_PVCV:
 	cv = (CV*)sv;
-	may_clone = FALSE;
 	break;
     case SVt_PVGV:
 	if (!(cv = GvCVu((GV*)sv)))
 	    cv = sv_2cv(sv, &stash, &gv, TRUE);
 	break;
     }
-
-    if (may_clone && cv && CvCLONE(cv))
-	cv = (CV*)sv_2mortal((SV*)cv_clone(cv));
 
     ENTER;
     SAVETMPS;
@@ -1757,7 +1750,7 @@ PP(pp_entersub)
     }
 
     gimme = GIMME;
-    if ((op->op_private & OPpENTERSUB_DB) && !CvNODEBUG(cv)) {
+    if ((op->op_private & OPpENTERSUB_DB) && GvCV(DBsub) && !CvNODEBUG(cv)) {
 	SV *oldsv = sv;
 	sv = GvSV(DBsub);
 	save_item(sv);

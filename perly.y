@@ -46,12 +46,13 @@ dep()
 %token <ival> DOLSHARP DO HASHBRACK NOAMP
 %token LOCAL MY
 
-%type <ival> prog decl local format startsub remember mremember '&'
+%type <ival> prog decl local format startsub startanonsub
+%type <ival> remember mremember '&'
 %type <opval> block mblock lineseq line loop cond else
 %type <opval> expr term scalar ary hsh arylen star amper sideff
 %type <opval> argexpr nexpr texpr iexpr mexpr mnexpr mtexpr miexpr
 %type <opval> listexpr listexprcom indirob
-%type <opval> listop method proto cont my_scalar
+%type <opval> listop method subname proto subbody cont my_scalar
 %type <pval> label
 
 %left <ival> OROP
@@ -269,19 +270,32 @@ format	:	FORMAT startsub WORD block
 			{ newFORM($2, Nullop, $3); }
 	;
 
-subrout	:	SUB startsub WORD proto block
+subrout	:	SUB startsub subname proto subbody
 			{ newSUB($2, $3, $4, $5); }
-	|	SUB startsub WORD proto ';'
-			{ newSUB($2, $3, $4, Nullop); expect = XSTATE; }
+	;
+
+startsub:	/* NULL */	/* start a subroutine scope */
+			{ $$ = start_subparse(); }
+	;
+
+startanonsub:	/* NULL */	/* start an anonymous subroutine scope */
+			{ $$ = start_subparse();
+			  CvANON_on(compcv); }
+	;
+
+subname	:	WORD	{ char *name = SvPVx(((SVOP*)$1)->op_sv, na);
+			  if (strEQ(name, "BEGIN") || strEQ(name, "END"))
+			      CvUNIQUE_on(compcv);
+			  $$ = $1; }
 	;
 
 proto	:	/* NULL */
 			{ $$ = Nullop; }
 	|	THING
 	;
-		
-startsub:	/* NULL */	/* start a subroutine scope */
-			{ $$ = start_subparse(); }
+
+subbody	:	block	{ $$ = $1; }
+	|	';'	{ $$ = Nullop; expect = XSTATE; }
 	;
 
 package :	PACKAGE WORD ';'
@@ -290,8 +304,10 @@ package :	PACKAGE WORD ';'
 			{ package(Nullop); }
 	;
 
-use	:	USE startsub WORD WORD listexpr ';'
-			{ utilize($1, $2, $3, $4, $5); }
+use	:	USE startsub
+			{ CvUNIQUE_on(compcv); /* It's a BEGIN {} */ }
+		    WORD WORD listexpr ';'
+			{ utilize($1, $2, $4, $5, $6); }
 	;
 
 expr	:	expr ANDOP expr
@@ -333,11 +349,12 @@ listop	:	LSTOP indirob argexpr
 			{ $$ = convert($1, 0, $2); }
 	|	FUNC '(' listexprcom ')'
 			{ $$ = convert($1, 0, $3); }
-	|	LSTOPSUB startsub block listexpr	%prec LSTOP
+	|	LSTOPSUB startanonsub block
+			{ $3 = newANONSUB($2, 0, $3); }
+		    listexpr		%prec LSTOP
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
-			    append_elem(OP_LIST,
-			      prepend_elem(OP_LIST, newANONSUB($2, 0, $3), $4),
-			      $1)); }
+				 append_elem(OP_LIST,
+				   prepend_elem(OP_LIST, $3, $5), $1)); }
 	;
 
 method	:	METHOD
@@ -411,7 +428,7 @@ term	:	term ASSIGNOP term
 			{ $$ = newANONHASH($2); }
 	|	HASHBRACK ';' '}'				%prec '('
 			{ $$ = newANONHASH(Nullop); }
-	|	ANONSUB startsub proto block			%prec '('
+	|	ANONSUB startanonsub proto block		%prec '('
 			{ $$ = newANONSUB($2, $3, $4); }
 	|	scalar	%prec '('
 			{ $$ = $1; }
@@ -528,7 +545,7 @@ term	:	term ASSIGNOP term
 	|	FUNC0 '(' ')'
 			{ $$ = newOP($1, 0); }
 	|	FUNC0SUB
-			{ $$ = newUNOP(OP_ENTERSUB, 0,
+			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
 				scalar($1)); }
 	|	FUNC1 '(' ')'
 			{ $$ = newOP($1, OPf_SPECIAL); }

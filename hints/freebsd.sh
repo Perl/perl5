@@ -64,16 +64,7 @@ case "$osvers" in
 	d_setreuid='define'
 	d_setegid='undef'
 	d_seteuid='undef'
-	cat <<EOF
-
-Unless you've upgraded your DB library manually you will see failures in
-db-recno tests 51, 53 and 55.  The behavior these tests are checking is
-broken in the DB library which is included with the OS.  You can ignore
-the errors if you're never going to use the broken functionality (recno
-databases with a modified bval), otherwise you'll have to upgrade your
-DB library or OS.
-
-EOF
+	test -r ./broken-db.msg && . ./broken-db.msg
 	;;
 #
 # 2.2 and above have phkmalloc(3).

@@ -7,5 +7,12 @@ case "$optimize" in
     esac
     ;;
 esac
+
 ccflags="$ccflags -DSTANDARD_C"
-lddlflags='-shared -expect_unresolved "*" -s -hidden'
+
+# Check if it's a CMW version of OSF1
+if test `uname -s` = "MLS+"; then
+    lddlflags='-shared -expect_unresolved "*" -s'
+else
+    lddlflags='-shared -expect_unresolved "*" -s -hidden'
+fi

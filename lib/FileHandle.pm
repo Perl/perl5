@@ -44,15 +44,22 @@ import IO::Handle grep { !defined(&$_) } @EXPORT, @EXPORT_OK;
 #
 {
     no strict 'refs';
-    for my $f (qw(DESTROY new_from_fd fdopen close fileno getc ungetc gets eof
-		  setbuf setvbuf _open_mode_string)) {
-	*{$f} = \&{"IO::Handle::$f"} or die "$f missing";
-    }
-    for my $f (qw(seek tell fgetpos fsetpos fflush ferror clearerr)) {
-	*{$f} = \&{"IO::Seekable::$f"} or die "$f missing";
-    }
-    for my $f (qw(new new_tmpfile open)) {
-	*{$f} = \&{"IO::File::$f"} or die "$f missing";
+
+    my %import = (
+	'IO::Handle' =>
+	    [qw(DESTROY new_from_fd fdopen close fileno getc ungetc gets
+		eof flush error clearerr setbuf setvbuf _open_mode_string)],
+	'IO::Seekable' =>
+	    [qw(seek tell getpos setpos)],
+	'IO::File' =>
+	    [qw(new new_tmpfile open)]
+    );
+    for my $pkg (keys %import) {
+	for my $func (@{$import{$pkg}}) {
+	    my $c = *{"${pkg}::$func"}{CODE}
+		or die "${pkg}::$func missing";
+	    *$func = $c;
+	}
     }
 }
 

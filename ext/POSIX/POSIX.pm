@@ -231,7 +231,7 @@ sub unimpl {
 package POSIX::SigAction;
 
 sub new {
-    bless {HANDLER => $_[1], MASK => $_[2], FLAGS => $_[3]};
+    bless {HANDLER => $_[1], MASK => $_[2], FLAGS => $_[3] || 0}, $_[0];
 }
 
 ############################
@@ -385,35 +385,35 @@ sub offsetof {
 }
 
 sub clearerr {
-    redef "FileHandle::clearerr()";
+    redef "IO::Handle::clearerr()";
 }
 
 sub fclose {
-    redef "FileHandle::close()";
+    redef "IO::Handle::close()";
 }
 
 sub fdopen {
-    redef "FileHandle::new_from_fd()";
+    redef "IO::Handle::new_from_fd()";
 }
 
 sub feof {
-    redef "FileHandle::eof()";
+    redef "IO::Handle::eof()";
 }
 
 sub fgetc {
-    redef "FileHandle::getc()";
+    redef "IO::Handle::getc()";
 }
 
 sub fgets {
-    redef "FileHandle::gets()";
+    redef "IO::Handle::gets()";
 }
 
 sub fileno {
-    redef "FileHandle::fileno()";
+    redef "IO::Handle::fileno()";
 }
 
 sub fopen {
-    redef "FileHandle::open()";
+    redef "IO::File::open()";
 }
 
 sub fprintf {
@@ -441,27 +441,27 @@ sub fscanf {
 }
 
 sub fseek {
-    redef "FileHandle::seek()";
+    redef "IO::Seekable::seek()";
 }
 
 sub ferror {
-    redef "FileHandle::error()";
+    redef "IO::Handle::error()";
 }
 
 sub fflush {
-    redef "FileHandle::flush()";
+    redef "IO::Handle::flush()";
 }
 
 sub fgetpos {
-    redef "FileHandle::getpos()";
+    redef "IO::Seekable::getpos()";
 }
 
 sub fsetpos {
-    redef "FileHandle::setpos()";
+    redef "IO::Seekable::setpos()";
 }
 
 sub ftell {
-    redef "FileHandle::tell()";
+    redef "IO::Seekable::tell()";
 }
 
 sub fwrite {
@@ -534,11 +534,11 @@ sub sscanf {
 }
 
 sub tmpfile {
-    redef "FileHandle::new_tmpfile()";
+    redef "IO::File::new_tmpfile()";
 }
 
 sub ungetc {
-    redef "FileHandle::ungetc()";
+    redef "IO::Handle::ungetc()";
 }
 
 sub vfprintf {

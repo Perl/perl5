@@ -40,7 +40,7 @@ are still supported for backwards compatibility
 C<use IO::Handle> (or C<IO::Seekable> or C<IO::File>) and
 C<*STDOUT{IO}> are the way of the future.
 
-=head2 Internal Change: PerlIO internal IO abstraction interface.
+=head2 Internal Change: PerlIO internal IO abstraction interface
 
 It is now possible to build Perl with AT&T's sfio IO package
 instead of stdio.  See L<perlapio> for more details, and

@@ -281,8 +281,8 @@ file, or a file at EOF when testing a filehandle.  Because you have to
 read a file to do the C<-T> test, on most occasions you want to use a C<-f>
 against the file first, as in C<next unless -f $file && -T $file>.
 
-If any of the file tests (or either the stat() or lstat() operators) are given the
-special filehandle consisting of a solitary underline, then the stat
+If any of the file tests (or either the stat() or lstat() operators) are given
+the special filehandle consisting of a solitary underline, then the stat
 structure of the previous file test (or stat operator) is used, saving
 a system call.  (This doesn't work with C<-t>, and you need to remember
 that lstat() and C<-l> will leave values in the stat structure for the
@@ -338,7 +338,7 @@ fail with $! set to EINTR because Perl sets up signal handlers to
 restart system calls on some systems.  Using eval/die always works.
 
     eval {
-    	local $SIG{ALRM} = sub { die "alarm\n" };	# NB \n required
+	local $SIG{ALRM} = sub { die "alarm\n" };	# NB \n required
 	alarm $timeout;
 	$nread = sysread SOCKET, $buffer, $size;
 	alarm 0;
@@ -354,6 +354,11 @@ restart system calls on some systems.  Using eval/die always works.
 =item atan2 Y,X
 
 Returns the arctangent of Y/X in the range -PI to PI.
+
+For the tangent operation, you may use the POSIX::tan()
+function, or use the familiar relation:
+
+    sub tan { sin($_[0]) / cos($_[0])  }
 
 =item bind SOCKET,NAME
 
@@ -380,7 +385,7 @@ is taken as the name of the filehandle.
 
 =item bless REF
 
-This function tells the referenced object (passed as REF) that it is now
+This function tells the thingy referenced by REF that it is now
 an object in the CLASSNAME package--or the current package if no CLASSNAME
 is specified, which is often the case.  It returns the reference for
 convenience, because a bless() is often the last thing in a constructor.
@@ -393,8 +398,9 @@ blessing (and blessings) of objects.
 =item caller
 
 Returns the context of the current subroutine call.  In a scalar context,
-returns TRUE if there is a caller, that is, if we're in a subroutine or
-eval() or require(), and FALSE otherwise.  In a list context, returns
+returns the caller's package name if there is a caller, that is, if
+we're in a subroutine or eval() or require(), and the undefined value
+otherwise.  In a list context, returns
 
     ($package, $filename, $line) = caller;
 
@@ -403,7 +409,7 @@ print a stack trace.  The value of EXPR indicates how many call frames
 to go back before the current one.
 
     ($package, $filename, $line,
-     $subroutine, $hasargs, $wantargs) = caller($i);
+     $subroutine, $hasargs, $wantarray) = caller($i);
 
 Furthermore, when called from within the DB package, caller returns more
 detailed information: it sets the list variable @DB::args to be the
@@ -432,12 +438,12 @@ number.  Returns the number of files successfully changed.
 
 This is a slightly safer version of chop (see below).  It removes any
 line ending that corresponds to the current value of C<$/> (also known as
-$INPUT_RECORD_SEPARATOR in the C<English> module).  It returns the number
-of characters removed.  It's often used to remove the newline from the
-end of an input record when you're worried that the final record may be
-missing its newline.  When in paragraph mode (C<$/ = "">), it removes all
-trailing newlines from the string.  If VARIABLE is omitted, it chomps
-$_.  Example:
+$INPUT_RECORD_SEPARATOR in the C<English> module).  It returns the total
+number of characters removed from all its arguments.  It's often used to
+remove the newline from the end of an input record when you're worried
+that the final record may be missing its newline.  When in paragraph mode
+(C<$/ = "">), it removes all trailing newlines from the string.  If
+VARIABLE is omitted, it chomps $_.  Example:
 
     while (<>) {
 	chomp;	# avoid \n on last field
@@ -525,7 +531,7 @@ If NUMBER is omitted, uses $_.
 This function works as the system call by the same name: it makes the
 named directory the new root directory for all further pathnames that
 begin with a "/" by your process and all of its children.  (It doesn't
-change your current working directory is unaffected.)  For security
+change your current working directory, which is unaffected.)  For security
 reasons, this call is restricted to the superuser.  If FILENAME is
 omitted, does chroot to $_.
 
@@ -574,6 +580,11 @@ statement).
 
 Returns the cosine of EXPR (expressed in radians).  If EXPR is omitted
 takes cosine of $_.
+
+For the inverse cosine operation, you may use the POSIX::acos()
+function, or use this relation:
+
+    sub acos { atan2( sqrt(1 - $_[0] * $_[0]), $_[0] ) }
 
 =item crypt PLAINTEXT,SALT
 
@@ -689,6 +700,24 @@ you should use defined() only when you're questioning the integrity
 of what you're trying to do.  At other times, a simple comparison to
 0 or "" is what you want.
 
+Another surprise is that using defined() on an entire array or 
+hash reports whether memory for that aggregate has ever been
+allocated.  So an array you set to the empty list appears undefined
+initially, and one that once was full and that you then set to 
+the empty list still appears defined.  You should instead use a 
+simple test for size:
+
+    if (@an_array) { print "has array elements\n" }
+    if (%a_hash)   { print "has hash members\n"   }
+
+Using undef() on these, however, does clear their memory and then report
+them as not defined anymore, but you shoudln't do that unless you don't
+plan to use them again, because it saves time when you load them up
+again to have memory already ready to be filled.
+
+This counter-intuitive behaviour of defined() on aggregates may be
+changed, fixed, or broken in a future release of Perl.
+
 =item delete EXPR
 
 Deletes the specified key(s) and their associated values from a hash
@@ -719,10 +748,10 @@ hash element lookup or hash slice:
 
 Outside of an eval(), prints the value of LIST to C<STDERR> and exits with
 the current value of C<$!> (errno).  If C<$!> is 0, exits with the value of
-C<($? E<gt>E<gt> 8)> (back-tick `command` status).  If C<($? E<gt>E<gt> 8)> is 0,
-exits with 255.  Inside an eval(), the error message is stuffed into C<$@>,
-and the eval() is terminated with the undefined value; this makes die()
-the way to raise an exception.
+C<($? E<gt>E<gt> 8)> (back-tick `command` status).  If C<($? E<gt>E<gt> 8)>
+is 0, exits with 255.  Inside an eval(), the error message is stuffed into
+C<$@>, and the eval() is terminated with the undefined value; this makes
+die() the way to raise an exception.
 
 Equivalent examples:
 
@@ -998,6 +1027,10 @@ are called before exit.)  Example:
 
 See also die().  If EXPR is omitted, exits with 0 status.
 
+You shouldn't use exit() to abort a subroutine if there's any chance that
+someone might want to trap whatever error happened.  Use die() instead,
+which can be trapped by an eval().
+
 =item exp EXPR
 
 =item exp 
@@ -1086,8 +1119,8 @@ See also L<DB_File> for other flock() examples.
 Does a fork(2) system call.  Returns the child pid to the parent process
 and 0 to the child process, or C<undef> if the fork is unsuccessful.
 Note: unflushed buffers remain unflushed in both processes, which means
-you may need to set C<$|> ($AUTOFLUSH in English) or call the 
-autoflush() FileHandle method to avoid duplicate output.
+you may need to set C<$|> ($AUTOFLUSH in English) or call the autoflush()
+method of IO::Handle to avoid duplicate output.
 
 If you fork() without ever waiting on your children, you will accumulate
 zombies:
@@ -1111,6 +1144,11 @@ fork() returns omitted);
 
 See also L<perlipc> for more examples of forking and reaping
 moribund children.
+
+Note that if your forked child inherits system file descriptors like
+STDIN and STDOUT that are actually connected by a pipe or socket, even
+if you exit, the remote server (such as, say, httpd or rsh) won't think
+you're done.  You should reopen those to /dev/null if it's any issue.
 
 =item format
 
@@ -1178,8 +1216,10 @@ single-characters, however.  For that, try something more like:
 Determination of whether to whether $BSD_STYLE should be set 
 is left as an exercise to the reader.  
 
+The POSIX::getattr() function can do this more portably on systems
+alleging POSIX compliance.
 See also the C<Term::ReadKey> module from your nearest CPAN site;
-details on CPAN can be found on L<perlmod/CPAN> 
+details on CPAN can be found on L<perlmod/CPAN>.  
 
 =item getlogin
 
@@ -1922,7 +1962,7 @@ If you want a "real" C open() (see L<open(2)> on your system), then
 you should use the sysopen() function.  This is another way to
 protect your filenames from interpretation.  For example:
 
-    use FileHandle;
+    use IO::Handle;
     sysopen(HANDLE, $path, O_RDWR|O_CREAT|O_EXCL, 0700)
 	or die "sysopen $path: $!";
     HANDLE->autoflush(1);
@@ -2074,6 +2114,8 @@ for examples of such things.
 
 =item pop ARRAY
 
+=item pop 
+
 Pops and returns the last value of the array, shortening the array by
 1.  Has a similar effect to
 
@@ -2129,6 +2171,10 @@ Equivalent to C<print FILEHANDLE sprintf(FORMAT, LIST)>.  The first argument
 of the list will be interpreted as the printf format.  If C<use locale> is
 in effect, the character used for the decimal point in formatted real numbers
 is affected by the LC_NUMERIC locale.  See L<perllocale>.
+
+Don't fall into the trap of using a printf() when a simple
+print() would do.  The print() is more efficient, and less
+error prone.
 
 =item prototype FUNCTION
 
@@ -2485,7 +2531,7 @@ actual filehandle.  Thus:
 Some programmers may prefer to think of filehandles as objects with
 methods, preferring to write the last example as:
 
-    use FileHandle;
+    use IO::Handle;
     STDERR->autoflush(1);
 
 =item select RBITS,WBITS,EBITS,TIMEOUT
@@ -2640,6 +2686,11 @@ has the same interpretation as in the system call of the same name.
 
 Returns the sine of EXPR (expressed in radians).  If EXPR is omitted,
 returns sine of $_.
+
+For the inverse sine operation, you may use the POSIX::sin()
+function, or use this relation:
+
+    sub asin { atan2($_[0], sqrt(1 - $_[0] * $_[0])) }
 
 =item sleep EXPR
 
@@ -2932,12 +2983,39 @@ root of $_.
 
 Sets the random number seed for the C<rand> operator.  If EXPR is omitted,
 uses a semi-random value based on the current time and process ID, among
-other things.  Of course, you'd need something much more random than that for
-cryptographic purposes, because it's easy to guess the current time.
-Checksumming the compressed output of rapidly changing operating system
-status programs is the usual method.  Examples are posted regularly to
-the comp.security.unix newsgroup.
+other things.
 
+Simply seeding with time() and the process ID isn't particularly random,
+especially if they vary together.
+
+Try something like this instead:
+
+    srand( time() ^ ($$ + ($$ << 15)) );
+
+Of course, you'd need something much more random than that for
+serious cryptographic purposes, since it's easy to guess the current time.
+Checksumming the compressed output of one or more rapidly changing operating
+system status programs is the usual method. For example:
+
+    srand (time ^ $$ ^ unpack "%L*", `ps axww | gzip`);
+
+Do I<not>fP call srand() multiple times in your program unless you know
+exactly what you're doing and why you're doing it.  The point of the
+function is to "seed" the rand() function so that rand() can produce
+a different sequence each time you run your program.  Just do it once at the
+top of your program, or you I<won't> get random numbers out of rand()!
+
+Frequently called programs (like CGI scripts) that simply use 
+
+    time ^ $$
+
+for a seed can fall prey to the mathematical property that 
+
+    a^b == (a+1)^(b+1)
+
+one-third of the time.  If you're particularly concerned with this,
+see the Math::TrulyRandom module in CPAN.
+  
 =item stat FILEHANDLE
 
 =item stat EXPR
@@ -3120,6 +3198,9 @@ the value of PERMS specifies the permissions of the newly created
 file.  If PERMS is omitted, the default value is 0666, which allows
 read and write for all.  This default is reasonable: see C<umask>.
 
+The IO::File module provides a more object-oriented approach, if you're
+into that kind of thing.
+
 =item sysread FILEHANDLE,SCALAR,LENGTH,OFFSET
 
 =item sysread FILEHANDLE,SCALAR,LENGTH
@@ -3146,9 +3227,42 @@ Note that argument processing varies depending on the number of
 arguments.  The return value is the exit status of the program as
 returned by the wait() call.  To get the actual exit value divide by
 256.  See also L</exec>.  This is I<NOT> what you want to use to capture 
-the output from a command, for that you should use merely back-ticks, as
-described in L<perlop/"`STRING`">.
+the output from a command, for that you should use merely back-ticks or
+qx//, as described in L<perlop/"`STRING`">.
 
+Because system() and back-ticks block SIGINT and SIGQUIT, killing the
+program they're running doesn't actually interrupt your program.
+
+    @args = ("command", "arg1", "arg2");
+    system(@args) == 0 
+	 or die "system @args failed: $?" 
+
+Here's a more elaborate example of analysing the return value from
+system() on a UNIX system to check for all possibilities, including for
+signals and coredumps.
+
+    $rc = 0xffff & system @args;
+    printf "system(%s) returned %#04x: ", "@args", $rc;
+    if ($rc == 0) {
+	print "ran with normal exit\n";
+    } 
+    elsif ($rc == 0xff00) {
+	print "command failed: $!\n";
+    } 
+    elsif ($rc > 0x80) {
+	$rc >>= 8;
+	print "ran with non-zero exit status $rc\n";
+    } 
+    else {
+	print "ran with ";
+	if ($rc &   0x80) {
+	    $rc &= ~0x80;
+	    print "coredump from ";
+	} 
+	print "signal $rc\n"
+    } 
+    $ok = ($rc != 0);
+  
 =item syswrite FILEHANDLE,SCALAR,LENGTH,OFFSET
 
 =item syswrite FILEHANDLE,SCALAR,LENGTH
