@@ -1077,6 +1077,14 @@ PP(pp_caller)
 	cxix = dopoptosub(cxix - 1);
     }
     cx = &cxstack[cxix];
+    if (cxstack[cxix].cx_type == CXt_SUB) {
+        dbcxix = dopoptosub(cxix - 1);
+	/* We expect that cxstack[dbcxix] is CXt_SUB, anyway, the
+	   field below is defined for any cx. */
+	if (DBsub && dbcxix >= 0 && cxstack[dbcxix].blk_sub.cv == GvCV(DBsub))
+	    cx = &cxstack[dbcxix];
+    }
+
     if (GIMME != G_ARRAY) {
 	dTARGET;
 
@@ -1084,16 +1092,13 @@ PP(pp_caller)
 	PUSHs(TARG);
 	RETURN;
     }
-    dbcxix = dopoptosub(cxix - 1);
-    if (DBsub && dbcxix >= 0 && cxstack[dbcxix].blk_sub.cv == GvCV(DBsub))
-	cx = &cxstack[dbcxix];
 
     PUSHs(sv_2mortal(newSVpv(HvNAME(cx->blk_oldcop->cop_stash), 0)));
     PUSHs(sv_2mortal(newSVpv(SvPVX(GvSV(cx->blk_oldcop->cop_filegv)), 0)));
     PUSHs(sv_2mortal(newSViv((I32)cx->blk_oldcop->cop_line)));
     if (!MAXARG)
 	RETURN;
-    if (cx->cx_type == CXt_SUB) {
+    if (cx->cx_type == CXt_SUB) { /* So is cxstack[dbcxix]. */
 	sv = NEWSV(49, 0);
 	gv_efullname(sv, CvGV(cxstack[cxix].blk_sub.cv));
 	PUSHs(sv_2mortal(sv));
@@ -1105,8 +1110,15 @@ PP(pp_caller)
     }
     PUSHs(sv_2mortal(newSViv((I32)cx->blk_gimme)));
     if (cx->cx_type == CXt_EVAL) {
-	if (cx->blk_eval.old_op_type == OP_ENTEREVAL)
+	if (cx->blk_eval.old_op_type == OP_ENTEREVAL) {
 	    PUSHs(cx->blk_eval.cur_text);
+	    PUSHs(&sv_no);
+	} 
+	else if (cx->blk_eval.old_name) { /* Try blocks have old_name == 0. */
+	    /* Require, put the name. */
+	    PUSHs(sv_2mortal(newSVpv(cx->blk_eval.old_name, 0)));
+	    PUSHs(&sv_yes);
+	}
     }
     else if (cx->cx_type == CXt_SUB &&
 	    cx->blk_sub.hasargs &&
@@ -1232,7 +1244,7 @@ PP(pp_dbstate)
 	if (!cv)
 	    DIE("No DB::DB routine defined");
 
-	if (CvDEPTH(cv) >= 1)		/* don't do recursive DB::DB call */
+	if (CvDEPTH(cv) >= 1 && !(debug & (1<<30))) /* don't do recursive DB::DB call */
 	    return NORMAL;
 
 	ENTER;
