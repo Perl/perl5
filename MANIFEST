@@ -95,6 +95,7 @@ ext/B/C/C.xs		Compiler C backend external subroutines
 ext/B/C/Makefile.PL	Compiler C backend makefile writer
 ext/B/defsubs_h.PL	Generator for constant subroutines
 ext/B/hints/darwin.pl	Hints for named architecture
+ext/B/hints/openbsd.pl	Hints for named architecture
 ext/B/Makefile.PL	Compiler backend makefile writer
 ext/B/NOTES		Compiler backend notes
 ext/B/O.pm		Compiler front-end module (-MO=...)
