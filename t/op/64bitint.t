@@ -16,7 +16,7 @@ BEGIN {
 # 32+ bit integers don't cause noise
 no warnings qw(overflow portable);
 
-print "1..55\n";
+print "1..57\n";
 
 my $q = 12345678901;
 my $r = 23456789012;
@@ -293,5 +293,31 @@ print "ok 54\n";
 $q = 18446744073709551615;
 print "# $q ne\n# 18446744073709551615\nnot " unless "$q" eq "18446744073709551615";
 print "ok 55\n";
+
+# Test that sv_2nv then sv_2iv is the same as sv_2iv direct
+# fails if whatever Atol is defined as can't actually cope with >32 bits.
+my $num = 4294967297;
+my $string = "4294967297";
+{
+  use integer;
+  $num += 0;
+  $string += 0;
+}
+if ($num eq $string) {
+  print "ok 56\n";
+} else {
+  print "not ok 56 # \"$num\" ne \"$string\"\n";
+}
+
+# Test that sv_2nv then sv_2uv is the same as sv_2uv direct
+$num = 4294967297;
+$string = "4294967297";
+$num &= 0;
+$string &= 0;
+if ($num eq $string) {
+  print "ok 57\n";
+} else {
+  print "not ok 57 # \"$num\" ne \"$string\"\n";
+}
 
 # eof
