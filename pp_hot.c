@@ -521,7 +521,8 @@ PP(pp_add)
 PP(pp_aelemfast)
 {
     dSP;
-    AV *av = GvAV(cGVOP_gv);
+    AV *av = PL_op->op_flags & OPf_SPECIAL ?
+		(AV*)PAD_SV(PL_op->op_targ) : GvAV(cGVOP_gv);
     U32 lval = PL_op->op_flags & OPf_MOD;
     SV** svp = av_fetch(av, PL_op->op_private, lval);
     SV *sv = (svp ? *svp : &PL_sv_undef);

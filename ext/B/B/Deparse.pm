@@ -2690,13 +2690,20 @@ sub pp_gv {
 sub pp_aelemfast {
     my $self = shift;
     my($op, $cx) = @_;
-    my $gv = $self->gv_or_padgv($op);
-    my $name = $self->gv_name($gv);
-    $name = $self->{'curstash'}."::$name"
-	if $name !~ /::/ && $self->lex_in_scope('@'.$name);
+    my $name;
+    if ($op->flags & OPf_SPECIAL) { # optimised PADAV
+	$name = $self->padname($op->targ);
+	$name =~ s/^@/\$/;
+    }
+    else {
+	my $gv = $self->gv_or_padgv($op);
+	$name = $self->gv_name($gv);
+	$name = $self->{'curstash'}."::$name"
+	    if $name !~ /::/ && $self->lex_in_scope('@'.$name);
+	$name = '$' . $name;
+    }
 
-    return "\$" . $name . "[" .
-		  ($op->private + $self->{'arybase'}) . "]";
+    return $name . "[" .  ($op->private + $self->{'arybase'}) . "]";
 }
 
 sub rv2x {
