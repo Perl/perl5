@@ -89,7 +89,9 @@ a list of references!
     @list = \($a, @b, %c);	# same thing!
 
 As a special case, C<\(@foo)> returns a list of references to the contents
-of C<@foo>, not a reference to C<@foo> itself.  Likewise for C<%foo>.
+of C<@foo>, not a reference to C<@foo> itself.  Likewise for C<%foo>,
+except that the key references are to copies (since the keys are just
+strings rather than full-fledged scalars).
 
 =item 3.
 

@@ -254,7 +254,6 @@ Perl developers, please write to <F<perl-thanks@perl.org>>.
 
 =head1 FILES
 
- "/tmp/perl-e$$"	temporary file for -e commands
  "@INC"			locations of perl libraries
 
 =head1 SEE ALSO

@@ -776,7 +776,7 @@ See L<perlre/(?{ code })>.
 (W) You are blessing a reference to a zero length string.  This has
 the effect of blessing the reference into the package main.  This is
 usually not what you want.  Consider providing a default target
-package, e.g. bless($ref, $p or 'MyPackage');
+package, e.g. bless($ref, $p || 'MyPackage');
 
 =item Illegal hex digit ignored
 

@@ -799,15 +799,16 @@ the message body to majordomo@list.stratagy.com.
 =head2 EBCDIC Platforms
 
 Recent versions of Perl have been ported to platforms such as OS/400 on
-AS/400 minicomputers as well as OS/390 for IBM Mainframes.  Such computers
-use EBCDIC character sets internally (usually Character Code Set ID 00819
-for OS/400 and IBM-1047 for OS/390).  Note that on the mainframe perl
-currently works under the "Unix system services for OS/390" (formerly
-known as OpenEdition).
+AS/400 minicomputers as well as OS/390 & VM/ESA for IBM Mainframes.  Such
+computers use EBCDIC character sets internally (usually Character Code
+Set ID 00819 for OS/400 and IBM-1047 for OS/390 & VM/ESA).  Note that on
+the mainframe perl currently works under the "Unix system services
+for OS/390" (formerly known as OpenEdition) and VM/ESA OpenEdition.
 
-As of R2.5 of USS for OS/390 that Unix sub-system did not support the
-C<#!> shebang trick for script invocation.  Hence, on OS/390 perl scripts
-can executed with a header similar to the following simple script:
+As of R2.5 of USS for OS/390 and Version 2.3 of VM/ESA these Unix
+sub-systems do not support the C<#!> shebang trick for script invocation.
+Hence, on OS/390 and VM/ESA perl scripts can be executed with a header
+similar to the following simple script:
 
     : # use perl
         eval 'exec /usr/local/bin/perl -S $0 ${1+"$@"}'
@@ -825,12 +826,13 @@ and C<|>, not to mention dealing with socket interfaces to ASCII computers
 
 Fortunately, most web servers for the mainframe will correctly translate
 the C<\n> in the following statement to its ASCII equivalent (note that
-C<\r> is the same under both Unix and OS/390):
+C<\r> is the same under both Unix and OS/390 & VM/ESA):
 
     print "Content-type: text/html\r\n\r\n";
 
 The value of C<$^O> on OS/390 is "os390".
 
+The value of C<$^O> on VM/ESA is "vmesa".
 Some simple tricks for determining if you are running on an EBCDIC
 platform could include any of the following (perhaps all):
 
@@ -1094,7 +1096,7 @@ Does nothing, but won't fail. (Win32)
 
 =item chroot
 
-Not implemented. (S<Mac OS>, Win32, VMS, Plan9, S<RISC OS>, VOS)
+Not implemented. (S<Mac OS>, Win32, VMS, Plan9, S<RISC OS>, VOS, VM/ESA)
 
 =item crypt PLAINTEXT,SALT
 
@@ -1123,6 +1125,7 @@ Invokes VMS debugger. (VMS)
 
 Not implemented. (S<Mac OS>)
 
+Implemented via Spawn. (VM/ESA)
 =item fcntl FILEHANDLE,FUNCTION,SCALAR
 
 Not implemented. (Win32, VMS)
@@ -1135,7 +1138,7 @@ Available only on Windows NT (not on Windows 95). (Win32)
 
 =item fork
 
-Not implemented. (S<Mac OS>, Win32, AmigaOS, S<RISC OS>, VOS)
+Not implemented. (S<Mac OS>, Win32, AmigaOS, S<RISC OS>, VOS, VM/ESA)
 
 =item getlogin
 
@@ -1151,7 +1154,7 @@ Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>)
 
 =item getpriority WHICH,WHO
 
-Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>, VOS)
+Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>, VOS, VM/ESA)
 
 =item getpwnam NAME
 
@@ -1191,11 +1194,11 @@ Not implemented. (S<Mac OS>)
 
 =item getpwent
 
-Not implemented. (S<Mac OS>, Win32)
+Not implemented. (S<Mac OS>, Win32, VM/ESA)
 
 =item getgrent
 
-Not implemented. (S<Mac OS>, Win32, VMS)
+Not implemented. (S<Mac OS>, Win32, VMS, VM/ESA)
 
 =item gethostent
 
@@ -1239,11 +1242,11 @@ Not implemented. (Plan9, Win32, S<RISC OS>)
 
 =item endpwent
 
-Not implemented. (S<Mac OS>, Win32)
+Not implemented. (S<Mac OS>, Win32, VM/ESA)
 
 =item endgrent
 
-Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>)
+Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>, VM/ESA)
 
 =item endhostent
 
@@ -1379,7 +1382,7 @@ Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>, VOS)
 
 =item socketpair SOCKET1,SOCKET2,DOMAIN,TYPE,PROTOCOL
 
-Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>, VOS)
+Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>, VOS, VM/ESA)
 
 =item stat FILEHANDLE
 
@@ -1403,14 +1406,14 @@ Not implemented. (Win32, VMS, S<RISC OS>)
 
 =item syscall LIST
 
-Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>, VOS)
+Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>, VOS, VM/ESA)
 
 =item sysopen FILEHANDLE,FILENAME,MODE,PERMS
 
 The traditional "0", "1", and "2" MODEs are implemented with different
 numeric values on some systems.  The flags exported by C<Fcntl>
 (O_RDONLY, O_WRONLY, O_RDWR) should work everywhere though.  (S<Mac
-OS>, OS/390)
+OS>, OS/390, VM/ESA)
 
 =item system LIST
 
@@ -1519,8 +1522,10 @@ Tom Christiansen E<lt>tchrist@perl.comE<gt>,
 Nicholas Clark E<lt>Nicholas.Clark@liverpool.ac.ukE<gt>,
 Andy Dougherty E<lt>doughera@lafcol.lafayette.eduE<gt>,
 Dominic Dunlop E<lt>domo@vo.luE<gt>,
+Neale Ferguson E<lt>neale@mailbox.tabnsw.com.auE<gt>
 Paul Green E<lt>Paul_Green@stratus.comE<gt>,
 M.J.T. Guy E<lt>mjtg@cus.cam.ac.ukE<gt>,
+Jarkko Hietaniemi E<lt>jhi@iki.fi<gt>,
 Luther Huffman E<lt>lutherh@stratcom.comE<gt>,
 Nick Ing-Simmons E<lt>nick@ni-s.u-net.comE<gt>,
 Andreas J. KE<ouml>nig E<lt>koenig@kulturbox.deE<gt>,
@@ -1542,6 +1547,4 @@ This document is maintained by Chris Nandor.
 =head1 VERSION
 
 Version 1.35, last modified 09 September 1998.
-
-
 
