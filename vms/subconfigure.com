@@ -21,12 +21,15 @@ $!
 $! This .COM file expects to be called by configure.com, and thus expects
 $! a few symbols in the environment. Notably:
 $!
-$!  One of: Using_Dec_C, Using_Vax_C, Using_Gnu_C set to "YES"
+$!  One of: Using_Dec_C, Using_Gnu_C set to "YES"
 $!  Dec_C_Version set to the Dec C version (defaults to 0 if not specified)
 $!  Has_Socketshr set to "T" if using socketshr
 $!  Has_Dec_C_Sockets set to "T" if using Dec C sockets
 $!  Use_Threads set to "T" if they're using threads
 $!  C_Compiler_Invoke is the command needed to invoke the C compiler
+$!
+$! We'll be playing with Sys$Output; don't clutter it
+$ Set NoVerify
 $!
 $! Set Dec_C_Version to something
 $ WRITE_RESULT := "WRITE SYS$OUTPUT ""%CONFIG-I-RESULT "" + "
@@ -533,13 +536,10 @@ $ WS := "write SOURCECHAN"
 $ CS := "close SOURCECHAN"
 $ DS := "delete/nolog []temp.*;*"
 $ Needs_Opt := "No"
-$ if ("''using_vax_c'".eqs."Yes").or.("''using_gnu_c'".eqs."Yes")
+$ if ("''using_gnu_c'".eqs."Yes")
 $ THEN
 $   open/write OPTCHAN []temp.opt
-$   IF ("''using_gnu_c'".eqs."Yes")
-$   THEN
-$     write OPTCHAN "Gnu_CC:[000000]gcclib.olb/library"
-$   endif
+$   write OPTCHAN "Gnu_CC:[000000]gcclib.olb/library"
 $   write OPTCHAN "Sys$Share:VAXCRTL/Share"
 $   Close OPTCHAN
 $   Needs_Opt := "Yes"
@@ -1177,7 +1177,7 @@ $   DEASSIGN SYS$ERROR
 $   if (teststatus.nes."1")
 $   THEN
 $!   Okay, compile failed. Must not have it
-$     perl_dgethname = "undef"
+$     perl_d_gethname = "undef"
 $   ELSE
 $     If (Needs_Opt.eqs."Yes")
 $     THEN
@@ -3337,12 +3337,6 @@ $ perl_d_locconv="undef"
 $ perl_d_setlocale="undef"
 $ ENDIF
 $!
-$! Vax C stuff
-$ if ("''Using_Vax_C'".EQS."Yes")
-$ THEN
-$ perl_vms_cc_type="vaxc"
-$ ENDIF
-$!
 $! Sockets?
 $ if ("''Has_Socketshr'".EQS."T").OR.("''Has_Dec_C_Sockets'".EQS."T")
 $ THEN
@@ -3539,15 +3533,21 @@ $ size_name = "u32size"
 $ gosub type_size_check
 $ perl_u32size="''line'"
 $
-$ type = "''perl_i64type'"
-$ size_name = "i64size"
-$ gosub type_size_check
-$ perl_i64size="''line'"
+$ If use_64bitint
+$ Then
+$   type = "''perl_i64type'"
+$   size_name = "i64size"
+$   gosub type_size_check
+$   perl_i64size="''line'"
 $
-$ type = "''perl_u64type'"
-$ size_name = "u64size"
-$ gosub type_size_check
-$ perl_u64size="''line'"
+$   type = "''perl_u64type'"
+$   size_name = "u64size"
+$   gosub type_size_check
+$   perl_u64size="''line'"
+$ Else
+$   perl_i64size="undef"
+$   perl_u64size="undef"
+$ EndIf
 $!
 $ perl_ivdformat="""ld"""
 $ perl_uvuformat="""lu"""
@@ -3571,11 +3571,6 @@ $ perl_sitearch="''perl_prefix':[lib.site_perl.''perl_arch']"
 $ if "''Using_Dec_C'" .eqs. "Yes"
 $ THEN
 $ perl_ccflags="/Include=[]/Standard=Relaxed_ANSI/Prefix=All/Obj=''perl_obj_ext'/NoList''cc_flags'"
-$ ELSE
-$   IF "''Using_Vax_C'" .eqs. "Yes"
-$   THEN
-$     perl_ccflags="/Include=[]/Obj=''perl_obj_ext'/NoList''cc_flags'"
-$   ENDIF
 $ ENDIF
 $ if use_vmsdebug_perl .eqs. "Y"
 $ then
