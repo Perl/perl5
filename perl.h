@@ -226,11 +226,7 @@ struct perl_thread;
 #endif
 
 #define NOOP (void)0
-#ifdef HASATTRIBUTE
 #define dNOOP extern int Perl___notused __attribute__ ((unused))
-#else
-#define dNOOP extern int Perl___notused
-#endif
 
 #ifndef pTHX
 #  define pTHX		void
