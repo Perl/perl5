@@ -3033,6 +3033,34 @@ typedef struct am_table_short AMTS;
 #endif
 
 /*
+ * Some operating systems are stingy with stack allocation,
+ * so perl may have to guard against stack overflow.
+ */
+#ifndef PERL_STACK_OVERFLOW_CHECK
+#define PERL_STACK_OVERFLOW_CHECK()  0
+#endif
+
+/*
+ * Some nonpreemptive operating systems find it convenient to
+ * check for asynchronous conditions after each op execution.
+ * Keep this check simple, or it may slow down execution
+ * massively.
+ */
+#ifndef PERL_ASYNC_CHECK
+#define PERL_ASYNC_CHECK()  0
+#endif
+
+/*
+ * On some operating systems, a memory allocation may succeed,
+ * but put the process too close to the system's comfort limit.
+ * In this case, PERL_ALLOC_CHECK frees the pointer and sets
+ * it to NULL.
+ */
+#ifndef PERL_ALLOC_CHECK
+#define PERL_ALLOC_CHECK(p)  0
+#endif
+
+/*
  * nice_chunk and nice_chunk size need to be set
  * and queried under the protection of sv_mutex
  */

@@ -5204,6 +5204,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		eptr = va_arg(*args, char*);
 		if (eptr)
 #ifdef MACOS_TRADITIONAL
+		  /* On MacOS, %#s format is used for Pascal strings */
 		  if (alt)
 		    elen = *eptr++;
 		  else

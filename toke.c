@@ -456,9 +456,7 @@ S_incline(pTHX_ char *s)
     char ch;
     int sawline = 0;
 
-#ifdef MACOS_TRADITIONAL
-    MACPERL_DO_ASYNC_TASKS();
-#endif	
+    PERL_ASYNC_CHECK();
     PL_curcop->cop_line++;
     if (*s++ != '#')
 	return;
@@ -2558,7 +2556,7 @@ Perl_yylex(pTHX)
 #endif
     case ' ': case '\t': case '\f': case 013:
 #ifdef MACOS_TRADITIONAL
-    case '\312':
+    case '\312': /* Them nonbreaking spaces again */
 #endif
 	s++;
 	goto retry;
@@ -6996,35 +6994,20 @@ Perl_yyerror(pTHX_ char *s)
 	    Perl_sv_catpvf(aTHX_ where_sv, "\\%03o", yychar & 255);
 	where = SvPVX(where_sv);
     }
-#ifdef MACOS_TRADITIONAL
-    msg = sv_2mortal(newSVpv("# ", 0));
-    sv_catpvf(msg, "%s, ", s);
-#else
     msg = sv_2mortal(newSVpv(s, 0));
     Perl_sv_catpvf(aTHX_ msg, " at %_ line %"IVdf", ",
               GvSV(PL_curcop->cop_filegv), (IV)PL_curcop->cop_line);
-#endif
     if (context)
 	Perl_sv_catpvf(aTHX_ msg, "near \"%.*s\"\n", contlen, context);
     else
 	Perl_sv_catpvf(aTHX_ msg, "%s\n", where);
     if (PL_multi_start < PL_multi_end &&
 	(U32)(PL_curcop->cop_line - PL_multi_end) <= 1) {
-#ifdef MACOS_TRADITIONAL
-        Perl_sv_catpvf(aTHX_ msg,
-        "#   (Might be a runaway multi-line %c%c string starting on line %"IVdf")\n",
-                (int)PL_multi_open,(int)PL_multi_close,(IV)PL_multi_start);
-#else
         Perl_sv_catpvf(aTHX_ msg,
         "   (Might be a runaway multi-line %c%c string starting on line %"IVdf")\n",
                 (int)PL_multi_open,(int)PL_multi_close,(IV)PL_multi_start);
-#endif
         PL_multi_end = 0;
     }
-#ifdef MACOS_TRADITIONAL
-    MacPosIndication(msg, SvPVX(GvSV(PL_curcop->cop_filegv)), PL_curcop->cop_line);
-    sv_catpvn(msg, "\n", 1);
-#endif
     if (PL_in_eval & EVAL_WARNONLY)
 	Perl_warn(aTHX_ "%_", msg);
     else

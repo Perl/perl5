@@ -2112,9 +2112,7 @@ PP(pp_goto)
 		if (CvDEPTH(cv) < 2)
 		    (void)SvREFCNT_inc(cv);
 		else {	/* save temporaries on recursion? */
-#ifdef MACOS_TRADITIONAL
-		    MacStackAttack();
-#endif
+		    PERL_STACK_OVERFLOW_CHECK();
 		    if (CvDEPTH(cv) == 100 && ckWARN(WARN_RECURSION))
 			sub_crush_depth(cv);
 		    if (CvDEPTH(cv) > AvFILLp(padlist)) {

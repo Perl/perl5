@@ -1131,7 +1131,7 @@ S_run_body(pTHX_ va_list args)
 
 	if (PL_minus_c) {
 #ifdef MACOS_TRADITIONAL
-	    PerlIO_printf(PerlIO_stderr(), "# %s syntax OK\n", MPWFileName(PL_origfilename));
+	    PerlIO_printf(PerlIO_stderr(), "%s syntax OK\n", MPWFileName(PL_origfilename));
 #else
 	    PerlIO_printf(Perl_error_log, "%s syntax OK\n", PL_origfilename);
 #endif	    

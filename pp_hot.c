@@ -2477,9 +2477,7 @@ try_autoload:
 	if (CvDEPTH(cv) < 2)
 	    (void)SvREFCNT_inc(cv);
 	else {	/* save temporaries on recursion? */
-#ifdef MACOS_TRADITIONAL
-	    MacStackAttack();
-#endif
+	    PERL_STACK_OVERFLOW_CHECK();
 	    if (CvDEPTH(cv) > AvFILLp(padlist)) {
 		AV *av;
 		AV *newpad = newAV();
