@@ -1081,7 +1081,12 @@ Perl_gv_check(pTHX_ HV *stash)
 		 * module, don't bother warning */
 		if (file
 		    && PERL_FILE_IS_ABSOLUTE(file)
-		    && (instr(file, "/lib/") || instr(file, ".pm")))
+#ifdef MACOS_TRADITIONAL
+		    && (instr(file, ":lib:")
+#else
+		    && (instr(file, "/lib/")
+#endif
+		    || instr(file, ".pm")))
 		{
 		    continue;
 		}
