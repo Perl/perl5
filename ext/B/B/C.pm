@@ -65,6 +65,7 @@ my $anonsub_index = 0;
 my $initsub_index = 0;
 
 my %symtable;
+my %xsub;
 my $warn_undefined_syms;
 my $verbose;
 my %unused_sub_packages;
@@ -82,7 +83,7 @@ my ($init, $decl, $symsect, $binopsect, $condopsect, $copsect,
     $gvopsect, $listopsect, $logopsect, $loopsect, $opsect, $pmopsect,
     $pvopsect, $svopsect, $unopsect, $svsect, $xpvsect, $xpvavsect,
     $xpvhvsect, $xpvcvsect, $xpvivsect, $xpvnvsect, $xpvmgsect, $xpvlvsect,
-    $xrvsect, $xpvbmsect, $xpviosect, $bootstrap);
+    $xrvsect, $xpvbmsect, $xpviosect );
 
 sub walk_and_save_optree;
 my $saveoptree_callback = \&walk_and_save_optree;
@@ -590,6 +591,16 @@ sub B::CV::save {
 	return $sym;
     }
     # Reserve a place in svsect and xpvcvsect and record indices
+    my $gv = $cv->GV;
+    my $cvstashname = $gv->STASH->NAME;
+    my $cvname = $gv->NAME;
+    my $root = $cv->ROOT;
+    my $cvxsub = $cv->XSUB;
+    if ($cvxsub) {
+	my $egv = $gv->EGV;
+	my $stashname = $egv->STASH->NAME;
+	$xsub{$stashname}='Static' unless  $xsub{$stashname};
+    }
     my $sv_ix = $svsect->index + 1;
     $svsect->add("svix$sv_ix");
     my $xpvcv_ix = $xpvcvsect->index + 1;
@@ -597,11 +608,6 @@ sub B::CV::save {
     # Save symbol now so that GvCV() doesn't recurse back to us via CvGV()
     $sym = savesym($cv, "&sv_list[$sv_ix]");
     warn sprintf("saving CV 0x%x as $sym\n", $$cv) if $debug_cv;
-    my $gv = $cv->GV;
-    my $cvstashname = $gv->STASH->NAME;
-    my $cvname = $gv->NAME;
-    my $root = $cv->ROOT;
-    my $cvxsub = $cv->XSUB;
     if (!$$root && !$cvxsub) {
 	if (try_autoload($cvstashname, $cvname)) {
 	    # Recalculate root and xsub
@@ -649,17 +655,6 @@ sub B::CV::save {
 	    warn sprintf("done saving PADLIST 0x%x for CV 0x%x\n",
 			 $$padlist, $$cv) if $debug_cv;
 	}
-    }
-    elsif ($cvxsub) {
-	$xsubany = sprintf("ANYINIT((void*)0x%x)", $cv->XSUBANY);
-	# Try to find out canonical name of XSUB function from EGV.
-	# XXX Doesn't work for XSUBs with PREFIX set (or anyone who
-	# calls newXS() manually with weird arguments).
-	my $egv = $gv->EGV;
-	my $stashname = $egv->STASH->NAME;
-	$stashname =~ s/::/__/g;
-	$xsub = sprintf("XS_%s_%s", $stashname, $egv->NAME);
-	$decl->add("void $xsub (CV*));";
     }
     else {
 	warn sprintf("No definition for sub %s::%s (unable to autoload)\n",
@@ -760,11 +755,21 @@ sub B::GV::save {
 #	    warn "GV::save \%$name\n"; # debug
 	}
 	my $gvcv = $gv->CV;
-	if ($$gvcv && !$skip_cv) {
-	    $gvcv->save;
-	    $init->add(sprintf("GvCV($sym) = (CV*)s\\_%x;", $$gvcv));
-#	    warn "GV::save &$name\n"; # debug
-	}
+	if ($$gvcv && !$skip_cv && !$gvcv->XSUB) { #not XSUB
+            $gvcv->save;
+            $init->add(sprintf("GvCV($sym) = (CV*)s\\_%x;", $$gvcv));
+#           warn "GV::save &$name\n"; # debug
+        }elsif ($$gvcv && $gvcv->XSUB && $name ne 
+               (my $origname=cstring($gvcv->GV->EGV->STASH->NAME .
+		 "::" . $gvcv->GV->EGV->NAME))) { #XSUB alias
+
+                $init->add("{ CV *cv;");
+                $init->add("\tcv=GvCV(gv_fetchpv($origname,FALSE,SVt_PV));");
+                $init->add("\tGvCV($sym)=cv;");
+                $init->add("\tSvREFCNT_inc((SV *)cv);");
+                $init->add("}");
+
+        }     
 	my $gvfilegv = $gv->FILEGV;
 	if ($$gvfilegv) {
 	    $gvfilegv->save;
@@ -927,7 +932,6 @@ sub output_all {
 		    $loopsect, $copsect, $svsect, $xpvsect,
 		    $xpvavsect, $xpvhvsect, $xpvcvsect, $xpvivsect, $xpvnvsect,
 		    $xpvmgsect, $xpvlvsect, $xrvsect, $xpvbmsect, $xpviosect);
-    $bootstrap->output(\*STDOUT, "/* bootstrap %s */\n");
     $symsect->output(\*STDOUT, "#define %s\n");
     print "\n";
     output_declarations();
@@ -956,6 +960,8 @@ sub output_all {
 static int $init_name()
 {
 	dTHR;
+	dTARG;
+	djSP;
 EOT
     $init->output(\*STDOUT, "\t%s\n");
     print "\treturn 0;\n}\n";
@@ -1109,12 +1115,35 @@ static void
 xs_init()
 {
     char *file = __FILE__;
-    dXSUB_SYS;
-        newXS("DynaLoader::boot_DynaLoader", boot_DynaLoader, file);
-}                                                                              
+    dTARG;
+    djSP;
 EOT
-}
+    print "\n#ifdef USE_DYNAMIC_LOADING";
+    print qq/\n\tnewXS("DynaLoader::boot_DynaLoader", boot_DynaLoader, file);/;
+    print "\n#endif\n" ;
+    delete $xsub{'DynaLoader'}; 
+    delete $xsub{'UNIVERSAL'}; 
+    print("/* bootstrapping code*/\nSAVETMPS;\n");
+    print("\ttarg=sv_newmortal();\n");
+    foreach my $stashname (keys %xsub ){
+	my $stashxsub=$stashname;
+	$stashxsub  =~ s/::/__/g; 
+	if ($xsub{$stashname} eq 'Dynamic') {
+           print "#ifdef DYNALOADER_BOOTSTRAP\n";
+	   warn "bootstrapping $stashname added to xs_init\n";
+	   print qq/\n\t{\n\tchar *args[]={"$stashxsub", NULL};/;
+           print qq/\n\t\tperl_call_argv("${stashxsub}::bootstrap",G_DISCARD,args);\n\t}/;
+           print "\n#else\n";
+	}
+	print "\tPUSHMARK(sp);\n";
+   	print qq/\tXPUSHp("$stashname",strlen("$stashname")+1);\n/;
+	print "\tboot_$stashxsub(NULL);\n";
+        print "#endif\n" if ($xsub{$stashname} eq 'Dynamic');
+    }
 
+    print("\tFREETMPS;\n/* end bootstrapping code */\n");
+    print "\n}";
+}
 sub dump_symtable {
     # For debugging
     my ($sym, $val);
@@ -1155,10 +1184,10 @@ sub B::GV::savecv
    if ($name eq "bootstrap" && $cv->XSUB) 
     {
      my $file = $cv->FILEGV->SV->PV;
-     $bootstrap->add($file);
      my $name = $gv->STASH->NAME.'::'.$name;
      no strict 'refs';
      *{$name} = \&Dummy_BootStrap;   
+     $xsub{$gv->STASH->NAME}='Dynamic';
      $cv = $gv->CV;
     }
    warn sprintf("saving extra CV &%s::%s (0x%x) from GV 0x%x\n",
@@ -1340,7 +1369,7 @@ sub init_sections {
 		    xpviv => \$xpvivsect, xpvnv => \$xpvnvsect,
 		    xpvmg => \$xpvmgsect, xpvlv => \$xpvlvsect,
 		    xrv => \$xrvsect, xpvbm => \$xpvbmsect,
-		    xpvio => \$xpviosect, bootstrap => \$bootstrap);
+		    xpvio => \$xpviosect);
     my ($name, $sectref);
     while (($name, $sectref) = splice(@sections, 0, 2)) {
 	$$sectref = new B::C::Section $name, \%symtable, 0;
