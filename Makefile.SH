@@ -238,7 +238,8 @@ lintflags = -hbvxac
 	$(CCCMD) $(PLDLFLAGS) $*.c
 
 all: $(FIRSTMAKEFILE) miniperl $(private) $(plextract) $(public) $(dynamic_ext) $(nonxs_ext)
-	@echo " "; echo "	Everything is up to date."
+	@echo " ";
+	@echo "	Everything is up to date. 'make test' to run test suite."
 
 compile: all
 	echo "testing compilation" > testcompile;
