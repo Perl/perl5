@@ -1100,22 +1100,24 @@ sub sub {
     if (wantarray) {
 	@ret = &$sub;
 	$single |= pop(@stack);
-	print ($OUT "list context return from $sub:\n"), dumpit( \@ret ),
-	  $doret = -2 if $doret eq $#stack;
 	($frame & 4 
 	 ? ( (print $LINEINFO ' ' x $#stack, "out "), 
 	     print_trace($LINEINFO, -1, 1, 1, "$sub$al") )
 	 : print $LINEINFO ' ' x $#stack, "exited $sub$al\n") if $frame & 2;
+	print ($OUT ($frame & 16 ? ' ' x $#stack : ""),
+		    "list context return from $sub:\n"), dumpit( \@ret ),
+	  $doret = -2 if $doret eq $#stack or $frame & 16;
 	@ret;
     } else {
 	$ret = &$sub;
 	$single |= pop(@stack);
-	print ($OUT "scalar context return from $sub: "), dumpit( $ret ),
-	  $doret = -2 if $doret eq $#stack;
 	($frame & 4 
 	 ? ( (print $LINEINFO ' ' x $#stack, "out "), 
 	      print_trace($LINEINFO, -1, 1, 1, "$sub$al") )
 	 : print $LINEINFO ' ' x $#stack, "exited $sub$al\n") if $frame & 2;
+	print ($OUT ($frame & 16 ? ' ' x $#stack : ""),
+		    "scalar context return from $sub: "), dumpit( $ret ),
+	  $doret = -2 if $doret eq $#stack or $frame & 16;
 	$ret;
     }
 }
