@@ -5478,38 +5478,6 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 
 	    eptr = PL_efloatbuf;
 	    elen = strlen(PL_efloatbuf);
-
-#ifdef USE_LOCALE_NUMERIC
-	    /*
-	     * User-defined locales may include arbitrary characters.
-	     * And, unfortunately, some (broken) systems may allow the
-	     * "C" locale to be overridden by a malicious user.
-	     * XXX This is an extreme way to cope with broken systems.
-	     */
-	    if (maybe_tainted && PL_tainting) {
-		/* safe if it matches /[-+]?\d*(\.\d*)?([eE][-+]?\d*)?/ */
-		if (*eptr == '-' || *eptr == '+')
-		    ++eptr;
-		while (isDIGIT(*eptr))
-		    ++eptr;
-		if (*eptr == '.') {
-		    ++eptr;
-		    while (isDIGIT(*eptr))
-			++eptr;
-		}
-		if (*eptr == 'e' || *eptr == 'E') {
-		    ++eptr;
-		    if (*eptr == '-' || *eptr == '+')
-			++eptr;
-		    while (isDIGIT(*eptr))
-			++eptr;
-		}
-		if (*eptr)
-		    *maybe_tainted = TRUE;	/* results are suspect */
-		eptr = PL_efloatbuf;
-	    }
-#endif /* USE_LOCALE_NUMERIC */
-
 	    break;
 
 	    /* SPECIAL */
