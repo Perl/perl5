@@ -14,7 +14,7 @@ $caller[1] line $caller[2]:
 This Perl hasn't been configured and built properly for the threads
 module to work.  (The 'useithreads' configuration option hasn't been used.)
 
-Having threads support requires all of Perl and all of the modules in
+Having threads support requires all of Perl and all of the XS modules in
 the Perl installation to be rebuilt, it is not just a question of adding
 the threads module.  (In other words, threaded and non-threaded Perls
 are binary incompatible.)
@@ -200,10 +200,10 @@ Arthur Bergman E<lt>arthur at contiller.seE<gt>
 
 threads::shared is released under the same license as Perl
 
-Documentation borrowed from Thread.pm
+Documentation borrowed from the old Thread.pm
 
 =head1 SEE ALSO
 
-L<threads>, L<perlthrtut>
+L<threads>, L<perlthrtut>, L<http://www.perl.com/pub/a/2002/06/11/threads.html>
 
 =cut

@@ -1048,6 +1048,9 @@ Management: Proc. of the International Workshop IWMM 92, St. Malo,
 France, September 1992, Yves Bekkers and Jacques Cohen, eds. Springer,
 1992, ISBN 3540-55940-X (real-life thread applications).
 
+Artur Bergman, "Where Wizards Fear To Tread", June 11, 2002,
+L<http://www.perl.com/pub/a/2002/06/11/threads.html>
+
 =head1 Acknowledgements
 
 Thanks (in no particular order) to Chaim Frenkel, Steve Fink, Gurusamy
