@@ -124,7 +124,7 @@ sub output_runtime {
     print qq(#include "cc_runtime.h"\n);
     foreach $ppdata (@pp_list) {
 	my ($name, $runtime, $declare) = @$ppdata;
-	print "\nstatic\nPP($name)\n{\n";
+	print "\nstatic\nCCPP($name)\n{\n";
 	my ($type, $varlist, $line);
 	while (($type, $varlist) = each %$declare) {
 	    print "\t$type ", join(", ", @$varlist), ";\n";
