@@ -475,7 +475,7 @@ sub _find_opt {
 	$pre_process, $post_process, $dangling_symlinks);
     local($dir, $name, $fullname, $prune);
 
-    my $cwd            = $wanted->{bydepth} ? Cwd::fastcwd() : Cwd::getcwd();
+    my $cwd            = $wanted->{bydepth} ? Cwd::fastcwd() : Cwd::cwd();
     my $cwd_untainted  = $cwd;
     my $check_t_cwd    = 1;
     $wanted_callback   = $wanted->{wanted};
