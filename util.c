@@ -1417,7 +1417,8 @@ Perl_mess(pTHX_ const char *pat, va_list *args)
 		      (long)IoLINES(GvIOp(PL_last_in_gv)));
 	}
 #ifdef USE_THREADS
-	sv_catpvf(sv, " thread %ld", thr->tid);
+	if (thr->tid)
+	    Perl_sv_catpvf(aTHX_ sv, " thread %ld", thr->tid);
 #endif
 	sv_catpv(sv, PL_dirty ? dgd : ".\n");
     }
