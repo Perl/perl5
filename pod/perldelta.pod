@@ -2597,11 +2597,12 @@ These tests fail because of yet unresolved floating point inaccuracies.
 
 =back
 
-=head2 UNICOS/mk
+=head2 UNICOS and UNICOS/mk
 
-The io/fs test #31 is failing because in UNICOS/mk truncate() cannot
-be used to grow the size of filehandles, only to reduce the size.
-The workaround is to truncate files instead of filehandles.
+The io/fs test #31 is failing because in UNICOS and UNICOS/mk
+truncate() cannot be used to grow the size of filehandles, only
+to reduce the size.  The workaround is to truncate files instead
+of filehandles.
 
 =head2 UTS
 
