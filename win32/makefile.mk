@@ -901,7 +901,7 @@ $(MINIDIR) :
 	if not exist "$(MINIDIR)" mkdir "$(MINIDIR)"
 
 $(MINICORE_OBJ) : $(CORE_NOCFG_H)
-	$(CC) -c $(CFLAGS) $(OBJOUT_FLAG)$@ ..\$(*B).c
+	$(CC) -c $(CFLAGS) -DPERL_EXTERNAL_GLOB $(OBJOUT_FLAG)$@ ..\$(*B).c
 
 $(MINIWIN32_OBJ) : $(CORE_NOCFG_H)
 	$(CC) -c $(CFLAGS) $(OBJOUT_FLAG)$@ $(*B).c

@@ -760,7 +760,7 @@ $(MINIDIR) :
 	if not exist "$(MINIDIR)" mkdir "$(MINIDIR)"
 
 $(MINICORE_OBJ) : $(CORE_NOCFG_H)
-	$(CC) -c $(CFLAGS) $(OBJOUT_FLAG)$@ ..\$(*F).c
+	$(CC) -c $(CFLAGS) -DPERL_EXTERNAL_GLOB $(OBJOUT_FLAG)$@ ..\$(*F).c
 
 $(MINIWIN32_OBJ) : $(CORE_NOCFG_H)
 	$(CC) -c $(CFLAGS) $(OBJOUT_FLAG)$@ $(*F).c
