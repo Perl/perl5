@@ -279,7 +279,9 @@ xstat()
 
 #endif /* LEAKTEST */
 
-/* copy a string up to some (non-backslashed) delimiter, if any */
+/* copy a string up to some (non-backslashed) delimiter, if any;
+   If the delimiter is ';', then do not consider backslashes - 
+   used only for PATH on DOSISH systems. */
 
 char *
 delimcpy(to, toend, from, fromend, delim, retlen)
@@ -292,7 +294,7 @@ I32 *retlen;
 {
     register I32 tolen;
     for (tolen = 0; from < fromend; from++, tolen++) {
-	if (*from == '\\') {
+	if (*from == '\\' && delim != ';') {
 	    if (from[1] == delim)
 		from++;
 	    else {
