@@ -301,9 +301,11 @@ See L<perldebug>.
 sets debugging flags.  To watch how it executes your program, use
 B<-Dtls>.  (This works only if debugging is compiled into your
 Perl.)  Another nice value is B<-Dx>, which lists your compiled
-syntax tree.  And B<-Dr> displays compiled regular expressions. As an
-alternative, specify a number instead of list of letters (e.g., B<-D14> is
-equivalent to B<-Dtls>):
+syntax tree.  And B<-Dr> displays compiled regular expressions;
+the format of the output is explained in L<perldebguts>. 
+
+As an alternative, specify a number instead of list of letters (e.g.,
+B<-D14> is equivalent to B<-Dtls>):
 
         1  p  Tokenizing and parsing
         2  s  Stack snapshots
