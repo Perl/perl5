@@ -356,12 +356,12 @@ was simply wrong because there are no "[] ranges" in tr///.
 
 Self-explanatory.
 
-=head2 "Newline in left-justified string for %s"
+=head2 New "Newline in left-justified string for %s"
 
 The padding spaces would appear after the newline, which is
 probably not what you had in mind.
 
-=head2 "Possible precedence problem on bitwise %c operator"
+=head2 New "Possible precedence problem on bitwise %c operator"
 
 If you think this
 
