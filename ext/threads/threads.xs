@@ -388,7 +388,7 @@ Perl_ithread_create(pTHX_ SV *obj, char* classname, SV* init_function, SV* param
 
 
 	MUTEX_LOCK(&create_destruct_mutex);
-	thread = PerlMemShared_malloc(sizeof(ithread));
+	thread = (ithread *) PerlMemShared_malloc(sizeof(ithread));
 	if (!thread) {	
 	    MUTEX_UNLOCK(&create_destruct_mutex);
 	    PerlLIO_write(PerlIO_fileno(Perl_error_log),
@@ -760,7 +760,7 @@ BOOT:
 	MUTEX_INIT(&create_destruct_mutex);
 	MUTEX_LOCK(&create_destruct_mutex);
 	PL_threadhook = &Perl_ithread_hook;
-	thread  = PerlMemShared_malloc(sizeof(ithread));
+	thread  = (ithread *) PerlMemShared_malloc(sizeof(ithread));
 	if (!thread) {
 	    PerlLIO_write(PerlIO_fileno(Perl_error_log),
 			  PL_no_mem, strlen(PL_no_mem));

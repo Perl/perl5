@@ -11030,7 +11030,7 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	if (CvCONST(sstr)) {
 	    CvXSUBANY(dstr).any_ptr = GvUNIQUE(CvGV(sstr)) ?
                 SvREFCNT_inc(CvXSUBANY(sstr).any_ptr) :
-                sv_dup_inc(CvXSUBANY(sstr).any_ptr, param);
+                sv_dup_inc((SV *)CvXSUBANY(sstr).any_ptr, param);
 	}
 	/* don't dup if copying back - CvGV isn't refcounted, so the
 	 * duped GV may never be freed. A bit of a hack! DAPM */
