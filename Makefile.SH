@@ -658,6 +658,8 @@ case "$ebcdic" in
 $define)
     xxx=''
     echo "This is an EBCDIC system, checking if any parser files need regenerating." >&4
+case "$osname" in
+os390)
     rm -f y.tab.c y.tab.h
     yacc -d perly.y >/dev/null 2>&1
     if cmp -s y.tab.c perly.c; then
@@ -713,6 +715,10 @@ $define)
         xxx="$xxx a2p.h"
     fi
     cd ..
+    ;;
+vmesa)
+    # Do nothing in VM/ESA.
+    ;;
     case "$xxx" in
     '') echo "No parser files were regenerated.  That's okay." >&2 ;;
     esac

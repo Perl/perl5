@@ -12,4 +12,5 @@
 # define YIELD pthread_yield(NULL)
 # define pthread_mutexattr_default NULL
 # define pthread_condattr_default NULL
+ typedef void * pthread_addr_t;
 #endif

@@ -126,7 +126,7 @@ do_aspawn(SV* really, SV **mark, SV **sp)
        while (++mark <= sp)
        {
            if (*mark)
-              *a++ = SvPVx(*mark, na);
+              *a++ = SvPVx(*mark, PL_na);
            else
               *a++ = "";
        }
@@ -142,7 +142,7 @@ do_aspawn(SV* really, SV **mark, SV **sp)
        /*-----------------------------------------------------*/
        if (*PL_Argv[0] != '/')
            TAINT_ENV();
-       if (really && *(tmps = SvPV(really, na)))
+       if (really && *(tmps = SvPV(really, PL_na)))
            pid = spawnp(tmps, nFd, fdMap, &inherit,
                         (const char **) PL_Argv,
                         (const char **) environ);
@@ -476,33 +476,6 @@ my_pclose(FILE *fp)
    return (rc);
 
 }
-
-/*===================== End of my_pclose ===================*/
-
-/************************************************************/
-/*                                                          */
-/* Name      - getTHR.                                      */
-/*                                                          */
-/* Function  - Use pclose to terminate a piped command      */
-/*             file stream.                                 */
-/*                                                          */
-/* On Exit   - Thread specific data returned.               */
-/*                                                          */
-/************************************************************/
-
-struct perl_thread *
-getTHR()
-{
- int status;
- struct perl_thread *pThread;
-
-   status = pthread_getspecific(PL_thr_key, (void **) &pThread);
-   if (status != 0)
-      pThread = NULL;
-   return (pThread);
-}
-
-/*===================== End of getTHR ======================*/
 
 /************************************************************/
 /*                                                          */
