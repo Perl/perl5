@@ -1,6 +1,6 @@
 /*    sv.c
  *
- *    Copyright (c) 1991-1997, Larry Wall
+ *    Copyright (c) 1991-1999, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -3176,7 +3176,13 @@ sv_gets(register SV *sv, register PerlIO *fp, I32 append)
     I32 i;
 
     SV_CHECK_THINKFIRST(sv);
-    (void)SvUPGRADE(sv, SVt_PV);
+    if (SvTYPE(sv) >= SVt_PV) {
+	if (SvFAKE(sv) && SvTYPE(sv) == SVt_PVGV)
+	    sv_unglob(sv);
+    }
+    else
+	sv_upgrade(sv, SVt_PV);
+
     SvSCREAM_off(sv);
 
     if (RsSNARF(PL_rs)) {

@@ -146,7 +146,11 @@ case "`uname -r`" in
 *[123].*)	# old loader
 		lddlflags="$lddlflags -O3"
 		;;
-*)		lddlflags="$lddlflags $optimize -msym"
+*)            if $test "X$optimize" = "X$undef"; then
+                      lddlflags="$lddlflags -msym"
+              else
+                      lddlflags="$lddlflags $optimize -msym"
+              fi
 		# -msym: If using a sufficiently recent /sbin/loader,
 		# keep the module symbols with the modules.
 		;;

@@ -1,6 +1,6 @@
 /*    perl.c
  *
- *    Copyright (c) 1987-1998 Larry Wall
+ *    Copyright (c) 1987-1999 Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -1737,41 +1737,41 @@ moreswitches(char *s)
 		LOCAL_PATCH_COUNT, (LOCAL_PATCH_COUNT!=1) ? "es" : "");
 #endif
 
-	printf("\n\nCopyright 1987-1998, Larry Wall\n");
+	printf("\n\nCopyright 1987-1999, Larry Wall\n");
 #ifdef MSDOS
 	printf("\nMS-DOS port Copyright (c) 1989, 1990, Diomidis Spinellis\n");
 #endif
 #ifdef DJGPP
 	printf("djgpp v2 port (jpl5003c) by Hirofumi Watanabe, 1996\n");
-	printf("djgpp v2 port (perl5004+) by Laszlo Molnar, 1997-1998\n");
+	printf("djgpp v2 port (perl5004+) by Laszlo Molnar, 1997-1999\n");
 #endif
 #ifdef OS2
 	printf("\n\nOS/2 port Copyright (c) 1990, 1991, Raymond Chen, Kai Uwe Rommel\n"
-	    "Version 5 port Copyright (c) 1994-1998, Andreas Kaiser, Ilya Zakharevich\n");
+	    "Version 5 port Copyright (c) 1994-1999, Andreas Kaiser, Ilya Zakharevich\n");
 #endif
 #ifdef atarist
 	printf("atariST series port, ++jrb  bammi@cadence.com\n");
 #endif
 #ifdef __BEOS__
-	printf("BeOS port Copyright Tom Spindler, 1997-1998\n");
+	printf("BeOS port Copyright Tom Spindler, 1997-1999\n");
 #endif
 #ifdef MPE
-	printf("MPE/iX port Copyright by Mark Klein and Mark Bixby, 1996-1998\n");
+	printf("MPE/iX port Copyright by Mark Klein and Mark Bixby, 1996-1999\n");
 #endif
 #ifdef OEMVS
-	printf("MVS (OS390) port by Mortice Kern Systems, 1997-1998\n");
+	printf("MVS (OS390) port by Mortice Kern Systems, 1997-1999\n");
 #endif
 #ifdef __VOS__
-	printf("Stratus VOS port by Paul_Green@stratus.com, 1997-1998\n");
+	printf("Stratus VOS port by Paul_Green@stratus.com, 1997-1999\n");
 #endif
 #ifdef __OPEN_VM
-	printf("VM/ESA port by Neale Ferguson, 1998\n");
+	printf("VM/ESA port by Neale Ferguson, 1998-1999\n");
 #endif
 #ifdef POSIX_BC
-	printf("BS2000 (POSIX) port by Start Amadeus GmbH, 1998\n");
+	printf("BS2000 (POSIX) port by Start Amadeus GmbH, 1998-1999\n");
 #endif
 #ifdef __MINT__
-	printf("MiNT port by Guido Flohr, 1997\n");
+	printf("MiNT port by Guido Flohr, 1997-1999\n");
 #endif
 #ifdef BINARY_BUILD_NOTICE
 	BINARY_BUILD_NOTICE;

@@ -4,7 +4,7 @@
 # various typeglob tests
 #
 
-print "1..29\n";
+print "1..30\n";
 
 # type coersion on assignment
 $foo = 'foo';
@@ -121,3 +121,13 @@ print {*x{FILEHANDLE}} "ok 23\n";
     ++$test; &{$a};
 }
 
+# does pp_readline() handle glob-ness correctly?
+
+{
+    my $g = *foo;
+    $g = <DATA>;
+    print $g;
+}
+
+__END__
+ok 30
