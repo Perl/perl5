@@ -3614,6 +3614,24 @@ $ tmp = "strtoq"
 $ GOSUB inlibc
 $ d_strtoq = tmp
 $!
+$! Check for strtoq
+$!
+$ OS
+$ WS "#if defined(__DECC) || defined(__DECCXX)"
+$ WS "#include <stdlib.h>"
+$ WS "#endif"
+$ WS "#include <string.h>"
+$ WS "int main()"
+$ WS "{"
+$ WS "__int64 result;"
+$ WS "result = strtoq(""123123"", NULL, 10);"
+$ WS "exit(0);"
+$ WS "}"
+$ CS
+$ tmp = "strtoq"
+$ GOSUB inlibc
+$ d_strtoq = tmp
+$!
 $! Check for strtold
 $!
 $ OS

@@ -2142,6 +2142,12 @@
  */
 /*#define HAS_STRTOQ		/**/
 
+/* HAS_STRTOQ:
+ *	This symbol, if defined, indicates that the strtouq routine is
+ *	available to convert strings to long longs (quads).
+ */
+/*#define HAS_STRTOQ		/**/
+
 /* HAS_STRTOULL:
  *	This symbol, if defined, indicates that the strtoull routine is
  *	available to convert strings to unsigned long longs.

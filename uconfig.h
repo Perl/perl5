@@ -2101,6 +2101,12 @@
  */
 # HAS_STRTOQ		/**/
 
+/* HAS_STRTOQ:
+ *	This symbol, if defined, indicates that the strtoq routine is
+ *	available to convert strings to long longs (quads).
+ */
+# HAS_STRTOQ		/**/
+
 /* HAS_STRTOULL:
  *	This symbol, if defined, indicates that the strtoull routine is
  *	available to convert strings to unsigned long longs.
@@ -3180,6 +3186,18 @@
  */
 /*#define HAS_SETPGRP		/ **/
 /*#define USE_BSD_SETPGRP	/ **/
+
+/* HAS_STRTOUL:
+ *	This symbol, if defined, indicates that the strtoul routine is
+ *	available to provide conversion of strings to unsigned long.
+ */
+/*#define HAS_STRTOUL	/ **/
+
+/* STDCHAR:
+ *	This symbol is defined to be the type of char used in stdio.h.
+ *	It has the values "unsigned char" or "char".
+ */
+#define STDCHAR char	/**/
 
 /* HAS_STRTOUL:
  *	This symbol, if defined, indicates that the strtoul routine is

@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : /m/fs/work/work/permanent/perl/pp4/perl
- * Configuration time: Fri Dec 15 04:43:47 EET 2000
+ * Configuration time: Fri Dec 15 20:33:12 EET 2000
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -3189,7 +3189,7 @@
  *	This symbol, if defined, indicates that the strtoul routine is
  *	available to provide conversion of strings to unsigned long.
  */
-/*#define HAS_STRTOUL	/ **/
+#define HAS_STRTOUL	/**/
 
 /* STDCHAR:
  *	This symbol is defined to be the type of char used in stdio.h.

@@ -607,6 +607,12 @@
  */
 /*#define HAS_STRTOQ		/**/
 
+/* HAS_STRTOQ:
+ *	This symbol, if defined, indicates that the strtouq routine is
+ *	available to convert strings to long longs (quads).
+ */
+/*#define HAS_STRTOQ		/**/
+
 /* HAS_STRTOUL:
  *	This symbol, if defined, indicates that the strtoul routine is
  *	available to provide conversion of strings to unsigned long.

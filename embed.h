@@ -1088,6 +1088,10 @@
 #  if defined(DEBUGGING)
 #define del_sv			S_del_sv
 #  endif
+#  if !defined(NV_PRESERVES_UV)
+#define sv_2inuv_non_preserve	S_sv_2inuv_non_preserve
+#define sv_2iuv_non_preserve	S_sv_2iuv_non_preserve
+#  endif
 #endif
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
 #define check_uni		S_check_uni
@@ -2546,6 +2550,10 @@
 #define sv_del_backref(a)	S_sv_del_backref(aTHX_ a)
 #  if defined(DEBUGGING)
 #define del_sv(a)		S_del_sv(aTHX_ a)
+#  endif
+#  if !defined(NV_PRESERVES_UV)
+#define sv_2inuv_non_preserve(a,b)	S_sv_2inuv_non_preserve(aTHX_ a,b)
+#define sv_2iuv_non_preserve(a,b)	S_sv_2iuv_non_preserve(aTHX_ a,b)
 #  endif
 #endif
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
@@ -4954,6 +4962,12 @@
 #  if defined(DEBUGGING)
 #define S_del_sv		CPerlObj::S_del_sv
 #define del_sv			S_del_sv
+#  endif
+#  if !defined(NV_PRESERVES_UV)
+#define S_sv_2inuv_non_preserve	CPerlObj::S_sv_2inuv_non_preserve
+#define sv_2inuv_non_preserve	S_sv_2inuv_non_preserve
+#define S_sv_2iuv_non_preserve	CPerlObj::S_sv_2iuv_non_preserve
+#define sv_2iuv_non_preserve	S_sv_2iuv_non_preserve
 #  endif
 #endif
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
