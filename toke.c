@@ -6287,6 +6287,8 @@ S_scan_ident(pTHX_ register char *s, register char *send, char *dest, STRLEN des
 			funny, dest, funny, dest);
 		}
 	    }
+	    if (PL_lex_inwhat == OP_STRINGIFY)
+		PL_expect = XREF;
 	}
 	else {
 	    s = bracket;		/* let the parser handle it */

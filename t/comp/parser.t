@@ -9,7 +9,7 @@ BEGIN {
 }
 
 require "./test.pl";
-plan( tests => 12 );
+plan( tests => 15 );
 
 eval '%@x=0;';
 like( $@, qr/^Can't modify hash dereference in repeat \(x\)/, '%@x=0' );
@@ -66,3 +66,11 @@ eval {
 }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 };
 is( $@, '', 'PL_lex_brackstack' );
+
+{
+     undef $a;
+     undef @b;
+     my $a="a"; is("${a}{", "a{", "scope error #20716");
+     my $a="a"; is("${a}[", "a[", "scope error #20716");
+     my @b=("b"); is("@{b}{", "b{", "scope error #20716");
+}
