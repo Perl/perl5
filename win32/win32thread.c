@@ -18,8 +18,8 @@ void
 init_thread_intern(struct thread *thr)
 {
 #ifdef USE_THREADS
-    /* GetCurrentThread() retrurns a pseudo handle, need
-       this to convert it into a handle another thread can use
+    /* Set thr->self.  GetCurrentThread() retrurns a pseudo handle, need
+       this to convert it into a handle another thread can use.
      */
     DuplicateHandle(GetCurrentProcess(),
 		    GetCurrentThread(),
@@ -28,6 +28,7 @@ init_thread_intern(struct thread *thr)
 		    0,
 		    FALSE,
 		    DUPLICATE_SAME_ACCESS);
+    /* XXX init thr->i here */
 #endif
 }
 
