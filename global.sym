@@ -66,6 +66,7 @@ hexdigit
 hints
 in_my
 inc_amg
+io_close
 know_next
 last_lop
 last_lop_op
@@ -145,6 +146,7 @@ pow_amg
 pow_ass_amg
 ppaddr
 profiledata
+provide_ref
 qrt_amg
 rcsid
 reall_srchlen
