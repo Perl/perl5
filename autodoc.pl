@@ -209,7 +209,8 @@ The listing is alphabetical, case insensitive.
 _EOB_
 
 my $key;
-for $key (sort { uc($a) cmp uc($b); } keys %apidocs) { # case insensitive sort
+# case insensitive sort, with fallback for determinacy
+for $key (sort { uc($a) cmp uc($b) || $a cmp $b } keys %apidocs) {
     my $section = $apidocs{$key}; 
     print DOC "\n=head1 $key\n\n=over 8\n\n";
     for my $key (sort { uc($a) cmp uc($b); } keys %$section) {
