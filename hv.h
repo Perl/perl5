@@ -52,7 +52,7 @@ struct xpvhv {
 /* (http://burtleburtle.net/bob/hash/doobs.html) */
 #define PERL_HASH(hash,str,len) \
      STMT_START	{ \
-	register const char *s_PeRlHaSh = str; \
+	register const unsigned char *s_PeRlHaSh = str; \
 	register I32 i_PeRlHaSh = len; \
 	register U32 hash_PeRlHaSh = 0; \
 	while (i_PeRlHaSh--) { \
