@@ -9,6 +9,10 @@ $VERSION = '1.3';
 @ISA = qw(File::Spec::Unix);
 
 use Cwd;
+my $macfiles;
+if ($^O eq 'MacOS') {
+	$macfiles = eval { require Mac::Files };
+}
 
 =head1 NAME
 
@@ -339,6 +343,8 @@ concept, although other volumes aren't rooted there. The name has a
 trailing ":", because that's the correct specification for a volume
 name on Mac OS.
 
+If Mac::Files could not be loaded, the empty string is returned.
+
 =cut
 
 sub rootdir {
@@ -346,9 +352,9 @@ sub rootdir {
 #  There's no real root directory on Mac OS. The name of the startup
 #  volume is returned, since that's the closest in concept.
 #
-    require Mac::Files;
-    my $system =  Mac::Files::FindFolder(&Mac::Files::kOnSystemDisk,
-					 &Mac::Files::kSystemFolderType);
+    return '' unless $macfiles;
+    my $system = Mac::Files::FindFolder(&Mac::Files::kOnSystemDisk,
+	&Mac::Files::kSystemFolderType);
     $system =~ s/:.*\Z(?!\n)/:/s;
     return $system;
 }
