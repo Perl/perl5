@@ -498,7 +498,7 @@ sub yn {
     my($prompt) = @_;
     my($answer);
     my($default) = $prompt =~ m/\[([yn])\]\s*$/i;
-    warn $prompt;
+    print STDERR $prompt;
     chop($answer = <STDIN>);
     $answer = $default if $answer =~ m/^\s*$/;
     ($answer =~ m/^[yY]/);
