@@ -31,6 +31,173 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 11522] By: jhi                                   on 2001/07/31  15:25:35
+        Log: Regen perlapi.
+     Branch: perl
+	   ! pod/perlapi.pod
+____________________________________________________________________________
+[ 11521] By: jhi                                   on 2001/07/31  15:19:01
+        Log: Subject: Re: [PATCH sv.c] mortal doc thinko
+             From: Dave Mitchell <davem@fdgroup.co.uk>
+             Date: Tue, 31 Jul 2001 11:52:42 +0100 (BST)
+             Message-Id: <200107311052.LAA14427@gizmo.fdgroup.co.uk>
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 11520] By: jhi                                   on 2001/07/31  15:17:43
+        Log: Regen toc.
+     Branch: perl
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[ 11519] By: jhi                                   on 2001/07/31  15:17:17
+        Log: Regen Porting stuff.
+     Branch: perl
+	   ! Porting/Glossary Porting/config.sh Porting/config_H
+____________________________________________________________________________
+[ 11518] By: jhi                                   on 2001/07/31  14:16:08
+        Log: Subject: [PATCH 5.7.2] Allow for GNU-isms in h2xs
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Tue, 31 Jul 2001 05:34:38 -0400
+             Message-ID: <20010731053438.A1754@math.ohio-state.edu>
+     Branch: perl
+	   ! utils/h2xs.PL
+____________________________________________________________________________
+[ 11517] By: jhi                                   on 2001/07/31  14:15:01
+        Log: Metaconfig unit change for #11516.	
+     Branch: metaconfig/U/perl
+	   ! gccvers.U
+____________________________________________________________________________
+[ 11516] By: jhi                                   on 2001/07/31  14:14:35
+        Log: Add -Wall in cflags, not in Configure.
+             (This way -Wall affects only the core and the core XS,
+             not user modules' XS.  Concern from Paul Marquess,
+             implementation idea from Andy Dougherty.)
+     Branch: perl
+	   ! Configure cflags.SH
+____________________________________________________________________________
+[ 11515] By: jhi                                   on 2001/07/31  13:57:15
+        Log: Metaconfig unit changes for #11514.
+     Branch: metaconfig
+	   + U/modified/sysman.U
+	   ! U/installdirs/man1dir.U
+____________________________________________________________________________
+[ 11514] By: jhi                                   on 2001/07/31  13:56:26
+        Log: Subject: Configure's detection of system manual
+             From: Sean Dague <sean@dague.net> 
+             Date: Sun, 13 May 2001 15:53:15 -0400
+             Message-ID: <20010513155315.A15833@underhill.dague.net>
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 11513] By: jhi                                   on 2001/07/31  03:23:01
+        Log: Subject: [ID 20010621.004] Typo in perlobj.pod
+             From: Autrijus Tang <autrijus@autrijus.org> 
+             Date: Thu, 21 Jun 2001 23:56:48 +0800
+             Message-Id: <20010621235648.A57340@not.autrijus.org>
+     Branch: perl
+	   ! pod/perlobj.pod
+____________________________________________________________________________
+[ 11512] By: jhi                                   on 2001/07/31  03:13:35
+        Log: Subject: Typo in DB_File.pm
+             From: "Philip Newton" <Philip.Newton@gmx.net>
+             Date: Tue, 31 Jul 2001 06:19:35 +0200
+             Message-Id: <200107310413.f6V4DmL11900@chaos.wustl.edu>
+     Branch: perl
+	   ! ext/DB_File/DB_File.pm
+____________________________________________________________________________
+[ 11511] By: jhi                                   on 2001/07/31  03:01:49
+        Log: Subject: Re: [ID 20010529.002] typos in man page perlre 
+             From: "Stephen P. Potter" <spp@spotter.yi.org>
+             Date: Wed, 30 May 2001 13:59:34 -0400
+             Message-Id: <20010530175939.59DEC729E1@belgarath.spotter.yi.org>
+     Branch: perl
+	   ! pod/perlre.pod
+____________________________________________________________________________
+[ 11510] By: jhi                                   on 2001/07/31  02:13:58
+        Log: eval "format foo=" would loop indefinitely; reported in
+             
+             Subject: A load of old rubbish
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Mon, 14 May 2001 16:12:22 +0100
+             Message-Id: <E14zK1G-0003a2-00@virgo.cus.cam.ac.uk>
+             
+             (The core dumps reported in there already fixed.)
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[ 11509] By: jhi                                   on 2001/07/31  00:37:49
+        Log: Upgrade to Switch 2.04, now with Perl 6 given+when.
+     Branch: perl
+	   + lib/Switch/Changes lib/Switch/README lib/Switch/t/given_when.t
+	   + lib/Switch/t/switch_case.t
+	   - lib/Switch/test.pl
+	   ! MANIFEST lib/Switch.pm
+____________________________________________________________________________
+[ 11508] By: jhi                                   on 2001/07/31  00:17:38
+        Log: Subject: [PATCH @11505] DB_File-1.78
+             From: "Paul Marquess" <Paul_Marquess@Yahoo.co.uk>
+             Date: Mon, 30 Jul 2001 22:54:37 +0100
+             Message-ID: <AIEAJICLCBDNAAOLLOKLGELNCLAA.Paul_Marquess@Yahoo.co.uk>
+     Branch: perl
+	   ! ext/DB_File/Changes ext/DB_File/DB_File.pm
+	   ! ext/DB_File/DB_File.xs ext/DB_File/version.c
+____________________________________________________________________________
+[ 11507] By: jhi                                   on 2001/07/30  23:11:10
+        Log: Explain in more detail why -pipe and -fno-common are good.
+     Branch: perl
+	   ! hints/darwin.sh
+____________________________________________________________________________
+[ 11506] By: nick                                  on 2001/07/30  14:32:23
+        Log: Integrate mainline
+     Branch: perlio
+	  !> INSTALL Makefile.SH doio.c hints/darwin.sh
+____________________________________________________________________________
+[ 11505] By: jhi                                   on 2001/07/30  14:14:39
+        Log: Perl hasn't been putting man pages into $prefix/lib for
+             a long time now; pointed out by Andy Dougherty. 
+     Branch: perl
+	   ! hints/darwin.sh
+____________________________________________________________________________
+[ 11504] By: jhi                                   on 2001/07/30  14:13:15
+        Log: Document the extras Configure option.
+     Branch: perl
+	   ! INSTALL
+____________________________________________________________________________
+[ 11503] By: jhi                                   on 2001/07/30  13:52:14
+        Log: Integrate change #11051 from macperl; O_RDONLY is not zero
+             everywhere.
+     Branch: perl
+	  !> doio.c
+____________________________________________________________________________
+[ 11502] By: jhi                                   on 2001/07/30  13:45:27
+        Log: Doubly guard against invoking CPAN if no extras defined,
+             pointed out by H. Merijn Brand.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[ 11501] By: pudge                                 on 2001/07/30  12:57:56
+        Log: Fix O_RDONLY check to check for O_RDONLY.
+     Branch: maint-5.6/macperl
+	   ! doio.c
+____________________________________________________________________________
+[ 11500] By: pudge                                 on 2001/07/30  12:41:11
+        Log: Integrate miscellaneous changes from maint-5.6/perl.
+     Branch: maint-5.6/macperl
+	  !> MANIFEST t/TEST t/harness t/pod/testp2pt.pl t/run/runenv.t
+____________________________________________________________________________
+[ 11499] By: nick                                  on 2001/07/30  06:52:42
+        Log: Integrate mainline
+     Branch: perlio
+	  +> macos/MacPerlTests.cmd macos/xsubpp.patch os2/perlrexx.c
+	  +> win32/sync_ext.pl
+	   - win32/sncfnmcs.pl
+	  !> (integrate 71 files)
+____________________________________________________________________________
+[ 11498] By: jhi                                   on 2001/07/30  03:53:34
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 11497] By: jhi                                   on 2001/07/30  03:45:32
         Log: Now Configure -Dextras=Foo::Bar and "make install" will
              fetch and install Foo::Bar.
