@@ -286,8 +286,6 @@ find \&getpods => qw(../lib ../ext);
 
 sub getpods {
     if (/\.p(od|m)$/) {
-	# Skip .pm files that have corresponding .pod files, and Functions.pm.
-	return if /(.*)\.pm$/ && -f "$1.pod";
 	my $file = $File::Find::name;
 	return if $file eq '../lib/Pod/Functions.pm'; # Used only by pod itself
         return if $file =~ m!lib/Attribute/Handlers/demo/!;

@@ -944,10 +944,10 @@ B<-w>, B<-W>, B<-X>
 
 =item Debugger Commands
 
-h [command], p expr, x expr, V [pkg [vars]], X [vars], T, s [expr], n
-[expr], r, <CR>, c [line|sub], l, l min+incr, l min-max, l line, l subname,
--, w [line], f filename, /pattern/, ?pattern?, L, S [[!]regex], t, t expr,
-b [line] [condition], b subname [condition], b postpone subname
+h [command], p expr, x [maxdepth] expr, V [pkg [vars]], X [vars], T, s
+[expr], n [expr], r, <CR>, c [line|sub], l, l min+incr, l min-max, l line,
+l subname, -, w [line], f filename, /pattern/, ?pattern?, L, S [[!]regex],
+t, t expr, b [line] [condition], b subname [condition], b postpone subname
 [condition], b load filename, b compile subname, d [line], D, a [line]
 command, a [line], A, W expr, W, O booloption .., O anyoption? .., O
 option=value .., < ?, < [ command ], << command, > ?, > command, >>
@@ -960,9 +960,10 @@ cmd, @ file, H -number, q or ^D, R, |dbcmd, ||dbcmd, command, m expr, man
 C<recallCommand>, C<ShellBang>, C<pager>, C<tkRunning>, C<signalLevel>,
 C<warnLevel>, C<dieLevel>, C<AutoTrace>, C<LineInfo>, C<inhibit_exit>,
 C<PrintRet>, C<ornaments>, C<frame>, C<maxTraceLen>, C<windowSize>,
-C<arrayDepth>, C<hashDepth>, C<compactDump>, C<veryCompact>, C<globPrint>,
-C<DumpDBFiles>, C<DumpPackages>, C<DumpReused>, C<quote>, C<HighBit>,
-C<undefPrint>, C<UsageOnly>, C<TTY>, C<noTTY>, C<ReadLine>, C<NonStop>
+C<arrayDepth>, C<hashDepth>, C<dumpDepth>, C<compactDump>, C<veryCompact>,
+C<globPrint>, C<DumpDBFiles>, C<DumpPackages>, C<DumpReused>, C<quote>,
+C<HighBit>, C<undefPrint>, C<UsageOnly>, C<TTY>, C<noTTY>, C<ReadLine>,
+C<NonStop>
 
 =item Debugger input/output
 
@@ -2817,8 +2818,8 @@ References, Tutorials, Task-Oriented, Special Topics
 
 =back
 
-=head2 perlfaq3 - Programming Tools ($Revision: 1.13 $, $Date: 2002/02/08
-22:32:47 $)
+=head2 perlfaq3 - Programming Tools ($Revision: 1.15 $, $Date: 2002/02/11
+19:29:52 $)
 
 =over 4
 
@@ -3117,8 +3118,8 @@ array of hashes or arrays?
 
 =back
 
-=head2 perlfaq5 - Files and Formats ($Revision: 1.8 $, $Date: 2002/01/28
-04:17:26 $)
+=head2 perlfaq5 - Files and Formats ($Revision: 1.9 $, $Date: 2002/02/11
+19:30:21 $)
 
 =over 4
 
@@ -4372,12 +4373,12 @@ svtype, SVt_IV, SVt_NV, SVt_PV, SVt_PVAV, SVt_PVCV, SVt_PVHV, SVt_PVMG
 get_sv, looks_like_number, newRV_inc, newRV_noinc, newSV, newSViv, newSVnv,
 newSVpv, newSVpvf, newSVpvn, newSVpvn_share, newSVrv, newSVsv, newSVuv,
 new_vstring, SvCUR, SvCUR_set, SvEND, SvGROW, SvIOK, SvIOKp, SvIOK_notUV,
-SvIOK_off, SvIOK_on, SvIOK_only, SvIOK_only_UV, SvIOK_UV, SvIV, SvIVx,
-SvIVX, SvLEN, SvNIOK, SvNIOKp, SvNIOK_off, SvNOK, SvNOKp, SvNOK_off,
-SvNOK_on, SvNOK_only, SvNV, SvNVX, SvNVx, SvOK, SvOOK, SvPOK, SvPOKp,
+SvIOK_off, SvIOK_on, SvIOK_only, SvIOK_only_UV, SvIOK_UV, SvIV, SvIVX,
+SvIVx, SvLEN, SvNIOK, SvNIOKp, SvNIOK_off, SvNOK, SvNOKp, SvNOK_off,
+SvNOK_on, SvNOK_only, SvNV, SvNVx, SvNVX, SvOK, SvOOK, SvPOK, SvPOKp,
 SvPOK_off, SvPOK_on, SvPOK_only, SvPOK_only_UTF8, SvPV, SvPVbyte,
 SvPVbytex, SvPVbytex_force, SvPVbyte_force, SvPVbyte_nolen, SvPVutf8,
-SvPVutf8x, SvPVutf8x_force, SvPVutf8_force, SvPVutf8_nolen, SvPVx, SvPVX,
+SvPVutf8x, SvPVutf8x_force, SvPVutf8_force, SvPVutf8_nolen, SvPVX, SvPVx,
 SvPV_force, SvPV_force_nomg, SvPV_nolen, SvREFCNT, SvREFCNT_dec,
 SvREFCNT_inc, SvROK, SvROK_off, SvROK_on, SvRV, SvSTASH, SvTAINT,
 SvTAINTED, SvTAINTED_off, SvTAINTED_on, SvTRUE, SvTYPE, SvUNLOCK, SvUOK,
@@ -7944,6 +7945,8 @@ LIST, waitpid PID,FLAGS
 
 =over 4
 
+=item Multiple methods to build perl for VOS
+
 =item Stratus POSIX Support
 
 =back
@@ -8329,6 +8332,20 @@ new, phash
 =item subpragma access
 
 =back
+
+=back
+
+=head2 if - C<use> a Perl module if a condition holds
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item BUGS
+
+=item AUTHOR
 
 =back
 
@@ -13599,7 +13616,7 @@ EXPR, tainted EXPR, weaken REF
 
 =item SEE ALSO
 
-Locale::Language, Locale::Country, Locale::Currency
+Locale::Language, Locale::Country, Locale::Script, Locale::Currency
 
 =item AUTHOR
 
@@ -13613,40 +13630,20 @@ Locale::Language, Locale::Country, Locale::Currency
 
 =item SYNOPSIS
 
-=back
-
-=over 4
-
 =item DESCRIPTION
 
 B<alpha-2>, B<alpha-3>, B<numeric>
-
-=back
-
-=over 4
 
 =item CONVERSION ROUTINES
 
 code2country( CODE, [ CODESET ] ), country2code( STRING, [ CODESET ] ),
 country_code2code( CODE, CODESET, CODESET )
 
-=back
-
-=over 4
-
 =item QUERY ROUTINES
 
 C<all_country_codes( [ CODESET ] )>, C<all_country_names( [ CODESET ] )>
 
-=back
-
-=over 4
-
 =item CODE ALIASING
-
-=back
-
-=over 4
 
 =item EXAMPLES
 
@@ -13656,7 +13653,7 @@ C<all_country_codes( [ CODESET ] )>, C<all_country_names( [ CODESET ] )>
 
 =item SEE ALSO
 
-Locale::Language, Locale::Currency, ISO 3166,
+Locale::Language, Locale::Script, Locale::Currency, ISO 3166,
 http://www.din.de/gremien/nas/nabd/iso3166ma/,
 http://www.egt.ie/standards/iso3166/iso3166-1-en.html,
 http://www.cia.gov/cia/publications/factbook/docs/app-f.html
@@ -13674,33 +13671,17 @@ identification (ISO 4217)
 
 =item SYNOPSIS
 
-=back
-
-=over 4
-
 =item DESCRIPTION
 
 XTS, XXX
-
-=back
-
-=over 4
 
 =item CONVERSION ROUTINES
 
 code2currency(), currency2code()
 
-=back
-
-=over 4
-
 =item QUERY ROUTINES
 
 C<all_currency_codes()>, C<all_currency_names()>
-
-=back
-
-=over 4
 
 =item EXAMPLES
 
@@ -13708,7 +13689,8 @@ C<all_currency_codes()>, C<all_currency_names()>
 
 =item SEE ALSO
 
-Locale::Country, ISO 4217:1995, http://www.bsi-global.com/iso4217currency
+Locale::Country, Locale::Script, ISO 4217:1995,
+http://www.bsi-global.com/iso4217currency
 
 =item AUTHOR
 
@@ -13723,31 +13705,15 @@ Locale::Country, ISO 4217:1995, http://www.bsi-global.com/iso4217currency
 
 =item SYNOPSIS
 
-=back
-
-=over 4
-
 =item DESCRIPTION
-
-=back
-
-=over 4
 
 =item CONVERSION ROUTINES
 
 code2language(), language2code()
 
-=back
-
-=over 4
-
 =item QUERY ROUTINES
 
 C<all_language_codes()>, C<all_language_names()>
-
-=back
-
-=over 4
 
 =item EXAMPLES
 
@@ -13755,7 +13721,7 @@ C<all_language_codes()>, C<all_language_names()>
 
 =item SEE ALSO
 
-Locale::Country, Locale::Currency, ISO 639:1988 (E/F),
+Locale::Country, Locale::Script, Locale::Currency, ISO 639:1988 (E/F),
 http://lcweb.loc.gov/standards/iso639-2/langhome.html
 
 =item AUTHOR
@@ -13850,6 +13816,46 @@ $language->language_tag(), $language->encoding()
 =item References
 
 =back
+
+=back
+
+=head2 Locale::Script - ISO codes for script identification (ISO 15924)
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+B<alpha-2>, B<alpha-3>, B<numeric>
+
+=over 4
+
+=item SPECIAL CODES
+
+=back
+
+=item CONVERSION ROUTINES
+
+code2script( CODE, [ CODESET ] ), script2code( STRING, [ CODESET ] ),
+script_code2code( CODE, CODESET, CODESET )
+
+=item QUERY ROUTINES
+
+C<all_script_codes ( [ CODESET ] )>, C<all_script_names ( [ CODESET ] )>
+
+=item EXAMPLES
+
+=item KNOWN BUGS AND LIMITATIONS
+
+=item SEE ALSO
+
+Locale::Language, Locale::Currency, Locale::Country, ISO 15924,
+http://www.evertype.com/standards/iso15924/
+
+=item AUTHOR
+
+=item COPYRIGHT
 
 =back
 
@@ -17472,7 +17478,8 @@ EOF this, TELL this, SEEK this, offset, whence, DESTROY this
 
 =back
 
-=head2 Tie::Hash, Tie::StdHash - base class definitions for tied hashes
+=head2 Tie::Hash, Tie::StdHash, Tie::ExtraHash - base class definitions for
+tied hashes
 
 =over 4
 
@@ -17483,9 +17490,31 @@ EOF this, TELL this, SEEK this, offset, whence, DESTROY this
 TIEHASH classname, LIST, STORE this, key, value, FETCH this, key, FIRSTKEY
 this, NEXTKEY this, lastkey, EXISTS this, key, DELETE this, key, CLEAR this
 
-=item CAVEATS
+=item Inheriting from B<Tie::StdHash>
+
+=item Inheriting from B<Tie::ExtraHash>
+
+=item C<UNTIE> and C<DESTROY>
 
 =item MORE INFORMATION
+
+=back
+
+=head2 Tie::Memoize - add data to hash when needed
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item Inheriting from B<Tie::Memoize>
+
+=item EXAMPLE
+
+=item BUGS
+
+=item AUTHOR
 
 =back
 
@@ -17860,9 +17889,10 @@ Win32::IsWinNT(), Win32::IsWin95(), Win32::LoadLibrary(LIBNAME),
 Win32::LoginName(), Win32::LookupAccountName(SYSTEM, ACCOUNT, DOMAIN, SID,
 SIDTYPE), Win32::LookupAccountSID(SYSTEM, SID, ACCOUNT, DOMAIN, SIDTYPE),
 Win32::MsgBox(MESSAGE [, FLAGS [, TITLE]]), Win32::NodeName(),
-Win32::RegisterServer(LIBRARYNAME), Win32::SetCwd(NEWDIRECTORY),
-Win32::SetLastError(ERROR), Win32::Sleep(TIME), Win32::Spawn(COMMAND, ARGS,
-PID), Win32::UnregisterServer(LIBRARYNAME)
+Win32::RegisterServer(LIBRARYNAME), Win32::SetChildShowWindow(SHOWWINDOW),
+Win32::SetCwd(NEWDIRECTORY), Win32::SetLastError(ERROR),
+Win32::Sleep(TIME), Win32::Spawn(COMMAND, ARGS, PID),
+Win32::UnregisterServer(LIBRARYNAME)
 
 =back
 
