@@ -189,12 +189,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_fgetpos HAS_FGETPOS	/**/
 
-/* FLEXFILENAMES:
- *	This symbol, if defined, indicates that the system supports filenames
- *	longer than 14 characters.
- */
-#$d_flexfnam	FLEXFILENAMES		/**/
-
 /* HAS_FLOCK:
  *	This symbol, if defined, indicates that the flock routine is
  *	available to do file locking.
@@ -3081,6 +3075,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	link).
  */
 #$d_lchown HAS_LCHOWN		/**/
+
+/* FLEXFILENAMES:
+ *	This symbol, if defined, indicates that the system supports filenames
+ *	longer than 14 characters.
+ */
+#$d_flexfnam	FLEXFILENAMES		/**/
 
 #endif
 !GROK!THIS!

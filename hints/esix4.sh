@@ -21,8 +21,8 @@ d_suidsafe=define
 usevfork='false'
 if test "$osvers" = "3.0"; then
 	d_gconvert='undef'
-	grep 'define[ 	]*AF_OSI[ 	]' /usr/include/sys/socket.h | grep '/\*[^*]*$' >/tmp/esix$$
-	if test -s /tmp/esix$$; then
+	grep 'define[ 	]*AF_OSI[ 	]' /usr/include/sys/socket.h | grep '/\*[^*]*$' >esix$$
+	if test -s esix$$; then
 		cat <<EOM >&2
 
 WARNING: You are likely to have problems compiling the Socket extension
@@ -31,6 +31,6 @@ unless you fix the unterminated comment for AF_OSI in the file
 
 EOM
 	fi
-	rm -f /tmp/esix$$
+	rm -f esix$$
 fi
 

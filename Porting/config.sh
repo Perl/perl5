@@ -8,7 +8,7 @@
 
 # Package name      : perl5
 # Source directory  : .
-# Configuration time: Mon Mar  6 00:00:30 EET 2000
+# Configuration time: Thu Mar 16 01:18:36 EET 2000
 # Configured by     : jhi
 # Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
 
@@ -59,7 +59,7 @@ ccflags='-pthread -std -DLANGUAGE_C'
 ccsymbols='__alpha=1 __LANGUAGE_C__=1 __osf__=1 __unix__=1 _LONGLONG=1 _SYSTYPE_BSD=1 SYSTYPE_BSD=1 unix=1'
 cf_by='jhi'
 cf_email='yourname@yourhost.yourplace.com'
-cf_time='Mon Mar  6 00:00:30 EET 2000'
+cf_time='Thu Mar 16 01:18:36 EET 2000'
 charsize='1'
 chgrp=''
 chmod=''
@@ -781,13 +781,13 @@ zcat=''
 zip='zip'
 # Configure command line arguments.
 config_arg0='Configure'
-config_args='-Dprefix=/opt/perl -Doptimize=-O -Dusethreads -Duse64bitint -Duselfs -Dcf_by=yourname -Dcf_email=yourname@yourhost.yourplace.com -Dperladmin=yourname@yourhost.yourplace.com -Dmydomain=.yourplace.com -Dmyhostname=yourhost -dE'
+config_args='-Dprefix=/opt/perl -Doptimize=-O -Dusethreads -Duse64bitint -Duselargefiles -Dcf_by=yourname -Dcf_email=yourname@yourhost.yourplace.com -Dperladmin=yourname@yourhost.yourplace.com -Dmydomain=.yourplace.com -Dmyhostname=yourhost -dE'
 config_argc=11
 config_arg1='-Dprefix=/opt/perl'
 config_arg2='-Doptimize=-O'
 config_arg3='-Dusethreads'
 config_arg4='-Duse64bitint'
-config_arg5='-Duselfs'
+config_arg5='-Duselargefiles'
 config_arg6='-Dcf_by=yourname'
 config_arg7='-Dcf_email=yourname@yourhost.yourplace.com'
 config_arg8='-Dperladmin=yourname@yourhost.yourplace.com'
