@@ -3944,10 +3944,10 @@ Perl_cv_undef(pTHX_ CV *cv)
     }
 }
 
-#ifdef DEBUGGING
 STATIC void
 S_cv_dump(pTHX_ CV *cv)
 {
+#ifdef DEBUGGING
     CV *outside = CvOUTSIDE(cv);
     AV* padlist = CvPADLIST(cv);
     AV* pad_name;
@@ -3988,8 +3988,8 @@ S_cv_dump(pTHX_ CV *cv)
 			  (IV)I_32(SvNVX(pname[ix])),
 			  SvIVX(pname[ix]));
     }
-}
 #endif /* DEBUGGING */
+}
 
 STATIC CV *
 S_cv_clone2(pTHX_ CV *proto, CV *outside)

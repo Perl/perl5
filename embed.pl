@@ -1451,11 +1451,11 @@ no	|int	|perl_parse	|XSINIT_t xsinit \
 				|int argc|char** argv|char** env
 #else
 no	|PerlInterpreter*	|perl_alloc
-no	|void	|perl_construct	|PerlInterpreter* sv_interp
-no	|void	|perl_destruct	|PerlInterpreter* sv_interp
-no	|void	|perl_free	|PerlInterpreter* sv_interp
-no	|int	|perl_run	|PerlInterpreter* sv_interp
-no	|int	|perl_parse	|PerlInterpreter* sv_interp|XSINIT_t xsinit \
+no	|void	|perl_construct	|PerlInterpreter* interp
+no	|void	|perl_destruct	|PerlInterpreter* interp
+no	|void	|perl_free	|PerlInterpreter* interp
+no	|int	|perl_run	|PerlInterpreter* interp
+no	|int	|perl_parse	|PerlInterpreter* interp|XSINIT_t xsinit \
 				|int argc|char** argv|char** env
 #if defined(USE_THREADS)
 p	|struct perl_thread*	|new_struct_thread|struct perl_thread *t
@@ -1784,10 +1784,16 @@ p	|SV*	|sv_dup		|SV* sstr
 p	|void	|sys_intern_dup	|struct interp_intern* src \
 				|struct interp_intern* dst
 #endif
-p	|SVTBL*	|sv_table_new
-p	|SV*	|sv_table_fetch	|SVTBL *tbl|SV *sv
-p	|void	|sv_table_store	|SVTBL *tbl|SV *oldsv|SV *newsv
-p	|void	|sv_table_split	|SVTBL *tbl
+p	|PTR_TBL_t*|ptr_table_new
+p	|void*	|ptr_table_fetch|PTR_TBL_t *tbl|void *sv
+p	|void	|ptr_table_store|PTR_TBL_t *tbl|void *oldsv|void *newsv
+p	|void	|ptr_table_split|PTR_TBL_t *tbl
+no	|PerlInterpreter*|perl_clone|PerlInterpreter* interp, UV flags
+no	|PerlInterpreter*|perl_clone_using|PerlInterpreter *interp|UV flags \
+				|struct IPerlMem* m|struct IPerlEnv* e \
+				|struct IPerlStdIO* io|struct IPerlLIO* lio \
+				|struct IPerlDir* d|struct IPerlSock* s \
+				|struct IPerlProc* p
 #endif
 
 #if defined(PERL_OBJECT)
@@ -1850,6 +1856,7 @@ s	|OP*	|new_logop	|I32 type|I32 flags|OP **firstp|OP **otherp
 s	|void	|simplify_sort	|OP *o
 s	|bool	|is_handle_constructor	|OP *o|I32 argnum
 s	|char*	|gv_ename	|GV *gv
+s	|void	|cv_dump	|CV *cv
 s	|CV*	|cv_clone2	|CV *proto|CV *outside
 s	|bool	|scalar_mod_type|OP *o|I32 type
 s	|OP *	|my_kid		|OP *o|OP *attrs

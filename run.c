@@ -47,7 +47,8 @@ Perl_runops_debug(pTHX)
 	    if (PL_watchaddr != 0 && *PL_watchaddr != PL_watchok)
 		PerlIO_printf(Perl_debug_log,
 			      "WARNING: %"UVxf" changed from %"UVxf" to %"UVxf"\n",
-			      PTR2UV(PL_watchaddr), PTR2UV(PL_watchok), (UV)*PL_watchaddr);
+			      PTR2UV(PL_watchaddr), PTR2UV(PL_watchok),
+			      PTR2UV(*PL_watchaddr));
 	    DEBUG_s(debstack());
 	    DEBUG_t(debop(PL_op));
 	    DEBUG_P(debprof(PL_op));

@@ -380,5 +380,5 @@ PERLVAR(IProc,		struct IPerlProc*)
 #endif
 
 #if defined(USE_ITHREADS)
-PERLVAR(Isv_table,	SVTBL*)
+PERLVAR(Iptr_table,	PTR_TBL_t*)
 #endif

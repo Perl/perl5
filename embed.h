@@ -774,10 +774,10 @@
 #if defined(HAVE_INTERP_INTERN)
 #define sys_intern_dup		Perl_sys_intern_dup
 #endif
-#define sv_table_new		Perl_sv_table_new
-#define sv_table_fetch		Perl_sv_table_fetch
-#define sv_table_store		Perl_sv_table_store
-#define sv_table_split		Perl_sv_table_split
+#define ptr_table_new		Perl_ptr_table_new
+#define ptr_table_fetch		Perl_ptr_table_fetch
+#define ptr_table_store		Perl_ptr_table_store
+#define ptr_table_split		Perl_ptr_table_split
 #endif
 #if defined(PERL_OBJECT)
 #endif
@@ -831,6 +831,7 @@
 #define simplify_sort		S_simplify_sort
 #define is_handle_constructor	S_is_handle_constructor
 #define gv_ename		S_gv_ename
+#define cv_dump			S_cv_dump
 #define cv_clone2		S_cv_clone2
 #define scalar_mod_type		S_scalar_mod_type
 #define my_kid			S_my_kid
@@ -2143,10 +2144,10 @@
 #if defined(HAVE_INTERP_INTERN)
 #define sys_intern_dup(a,b)	Perl_sys_intern_dup(aTHX_ a,b)
 #endif
-#define sv_table_new()		Perl_sv_table_new(aTHX)
-#define sv_table_fetch(a,b)	Perl_sv_table_fetch(aTHX_ a,b)
-#define sv_table_store(a,b,c)	Perl_sv_table_store(aTHX_ a,b,c)
-#define sv_table_split(a)	Perl_sv_table_split(aTHX_ a)
+#define ptr_table_new()		Perl_ptr_table_new(aTHX)
+#define ptr_table_fetch(a,b)	Perl_ptr_table_fetch(aTHX_ a,b)
+#define ptr_table_store(a,b,c)	Perl_ptr_table_store(aTHX_ a,b,c)
+#define ptr_table_split(a)	Perl_ptr_table_split(aTHX_ a)
 #endif
 #if defined(PERL_OBJECT)
 #endif
@@ -2200,6 +2201,7 @@
 #define simplify_sort(a)	S_simplify_sort(aTHX_ a)
 #define is_handle_constructor(a,b)	S_is_handle_constructor(aTHX_ a,b)
 #define gv_ename(a)		S_gv_ename(aTHX_ a)
+#define cv_dump(a)		S_cv_dump(aTHX_ a)
 #define cv_clone2(a,b)		S_cv_clone2(aTHX_ a,b)
 #define scalar_mod_type(a,b)	S_scalar_mod_type(aTHX_ a,b)
 #define my_kid(a,b)		S_my_kid(aTHX_ a,b)
@@ -4222,14 +4224,16 @@
 #define Perl_sys_intern_dup	CPerlObj::Perl_sys_intern_dup
 #define sys_intern_dup		Perl_sys_intern_dup
 #endif
-#define Perl_sv_table_new	CPerlObj::Perl_sv_table_new
-#define sv_table_new		Perl_sv_table_new
-#define Perl_sv_table_fetch	CPerlObj::Perl_sv_table_fetch
-#define sv_table_fetch		Perl_sv_table_fetch
-#define Perl_sv_table_store	CPerlObj::Perl_sv_table_store
-#define sv_table_store		Perl_sv_table_store
-#define Perl_sv_table_split	CPerlObj::Perl_sv_table_split
-#define sv_table_split		Perl_sv_table_split
+#define Perl_ptr_table_new	CPerlObj::Perl_ptr_table_new
+#define ptr_table_new		Perl_ptr_table_new
+#define Perl_ptr_table_fetch	CPerlObj::Perl_ptr_table_fetch
+#define ptr_table_fetch		Perl_ptr_table_fetch
+#define Perl_ptr_table_store	CPerlObj::Perl_ptr_table_store
+#define ptr_table_store		Perl_ptr_table_store
+#define Perl_ptr_table_split	CPerlObj::Perl_ptr_table_split
+#define ptr_table_split		Perl_ptr_table_split
+#define perl_clone		CPerlObj::perl_clone
+#define perl_clone_using	CPerlObj::perl_clone_using
 #endif
 #if defined(PERL_OBJECT)
 #endif
@@ -4322,6 +4326,8 @@
 #define is_handle_constructor	S_is_handle_constructor
 #define S_gv_ename		CPerlObj::S_gv_ename
 #define gv_ename		S_gv_ename
+#define S_cv_dump		CPerlObj::S_cv_dump
+#define cv_dump			S_cv_dump
 #define S_cv_clone2		CPerlObj::S_cv_clone2
 #define cv_clone2		S_cv_clone2
 #define S_scalar_mod_type	CPerlObj::S_scalar_mod_type
