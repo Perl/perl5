@@ -1349,6 +1349,7 @@
 #define sv_root			(curinterp->Isv_root)
 #define tainted			(curinterp->Itainted)
 #define tainting		(curinterp->Itainting)
+#define thrsv			(curinterp->Ithrsv)
 #define tmps_floor		(curinterp->Itmps_floor)
 #define tmps_ix			(curinterp->Itmps_ix)
 #define tmps_max		(curinterp->Itmps_max)
@@ -1500,6 +1501,7 @@
 #define Isv_root		sv_root
 #define Itainted		tainted
 #define Itainting		tainting
+#define Ithrsv			thrsv
 #define Itmps_floor		tmps_floor
 #define Itmps_ix		tmps_ix
 #define Itmps_max		tmps_max
@@ -1658,6 +1660,7 @@
 #define sv_objcount		Perl_sv_objcount
 #define sv_root			Perl_sv_root
 #define tainted			Perl_tainted
+#define thrsv			Perl_thrsv
 #define tmps_floor		Perl_tmps_floor
 #define tmps_ix			Perl_tmps_ix
 #define tmps_max		Perl_tmps_max

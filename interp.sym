@@ -138,6 +138,7 @@ sv_root
 sv_arenaroot
 tainted
 tainting
+thrsv
 tmps_floor
 tmps_ix
 tmps_max

@@ -1957,6 +1957,11 @@ IEXT int	Ilaststatval IINIT(-1);
 IEXT I32	Ilaststype IINIT(OP_STAT);
 IEXT SV *	Imess_sv;
 
+#ifdef USE_THREADS
+/* threads stuff */
+IEXT SV *	Ithrsv;		/* holds struct thread for main thread */
+#endif /* USE_THREADS */
+
 #undef IEXT
 #undef IINIT
 

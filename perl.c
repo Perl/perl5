@@ -121,10 +121,13 @@ register PerlInterpreter *sv_interp;
    /* Init the real globals (and main thread)? */
     if (!linestr) {
 #ifdef USE_THREADS
+	XPV *xpv;
+
     	INIT_THREADS;
 	New(53, thr, 1, struct thread);
 	MUTEX_INIT(&malloc_mutex);
 	MUTEX_INIT(&sv_mutex);
+	/* Safe to use SVs from now on */
 	MUTEX_INIT(&eval_mutex);
 	COND_INIT(&eval_cond);
 	MUTEX_INIT(&threads_mutex);
@@ -137,6 +140,18 @@ register PerlInterpreter *sv_interp;
 	thr->next = thr;
 	thr->prev = thr;
 	thr->tid = 0;
+
+	/* Handcraft thrsv similarly to mess_sv */
+    	New(53, thrsv, 1, SV);
+	Newz(53, xpv, 1, XPV);
+	SvFLAGS(thrsv) = SVt_PV;
+	SvANY(thrsv) = (void*)xpv;
+	SvREFCNT(thrsv) = 1 << 30;	/* practically infinite */
+	SvPVX(thrsv) = (char*)thr;
+	SvCUR_set(thrsv, sizeof(thr));
+	SvLEN_set(thrsv, sizeof(thr));
+	*SvEND(thrsv) = '\0';		/* in the trailing_nul field */
+	oursv = thrsv;
 #ifdef HAVE_THREAD_INTERN
 	init_thread_intern(thr);
 #else
@@ -241,7 +256,8 @@ register PerlInterpreter *sv_interp;
 
 #ifdef USE_THREADS
 #ifndef FAKE_THREADS
-    /* Join with any remaining non-detached threads */
+    /* Pass 1 on any remaining threads: detach joinables, join zombies */
+  retry_cleanup:
     MUTEX_LOCK(&threads_mutex);
     DEBUG_L(PerlIO_printf(PerlIO_stderr(),
 			  "perl_destruct: waiting for %d threads...\n",
@@ -256,13 +272,19 @@ register PerlInterpreter *sv_interp;
 	    ThrSETSTATE(t, THRf_DEAD);
 	    MUTEX_UNLOCK(&t->mutex);
 	    nthreads--;
+	    /*
+	     * The SvREFCNT_dec below may take a long time (e.g. av
+	     * may contain an object scalar whose destructor gets
+	     * called) so we have to unlock threads_mutex and start
+	     * all over again.
+	     */
 	    MUTEX_UNLOCK(&threads_mutex);
 	    if (pthread_join(t->Tself, (void**)&av))
 		croak("panic: pthread_join failed during global destruction");
 	    SvREFCNT_dec((SV*)av);
 	    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
 				  "perl_destruct: joined zombie %p OK\n", t));
-	    break;
+	    goto retry_cleanup;
 	case THRf_R_JOINABLE:
 	    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
 				  "perl_destruct: detaching thread %p\n", t));
@@ -276,17 +298,18 @@ register PerlInterpreter *sv_interp;
 	    MUTEX_UNLOCK(&threads_mutex);
 	    DETACH(t);
 	    MUTEX_UNLOCK(&t->mutex);
-	    break;
+	    goto retry_cleanup;
 	default:
 	    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
 				  "perl_destruct: ignoring %p (state %u)\n",
 				  t, ThrSTATE(t)));
 	    MUTEX_UNLOCK(&t->mutex);
-	    MUTEX_UNLOCK(&threads_mutex);
 	    /* fall through and out */
 	}
     }
-    /* Now wait for the thread count nthreads to drop to one */
+    /* We leave the above "Pass 1" loop with threads_mutex still locked */
+
+    /* Pass 2 on remaining threads: wait for the thread count to drop to one */
     while (nthreads > 1)
     {
 	DEBUG_L(PerlIO_printf(PerlIO_stderr(),
@@ -556,8 +579,14 @@ register PerlInterpreter *sv_interp;
     MUTEX_DESTROY(&malloc_mutex);
     MUTEX_DESTROY(&eval_mutex);
     COND_DESTROY(&eval_cond);
-#endif /* USE_THREADS */
 
+    /* As the penultimate thing, free the non-arena SV for thrsv */
+    Safefree(SvPVX(thrsv));
+    Safefree(SvANY(thrsv));
+    Safefree(thrsv);
+    thrsv = Nullsv;
+#endif /* USE_THREADS */
+    
     /* As the absolutely last thing, free the non-arena SV for mess() */
 
     if (mess_sv) {
