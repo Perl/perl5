@@ -125,15 +125,26 @@ and edit win32/config.vc to change "make=nmake" into "make=dmake".  The
 latter step is only essential if you want to use dmake as your default
 make for building extensions using MakeMaker.
 
-=item Mingw32 with GCC
+=item MinGW32 with gcc
 
-GCC-2.95.2 binaries can be downloaded from:
+The latest release of MinGW (at the time of writing) is 2.0.0, which comes 
+with gcc-3.2, and can be downloaded here:
 
-    ftp://ftp.xraylith.wisc.edu/pub/khan/gnu-win32/mingw32/
+    http://sourceforge.net/projects/mingw
+
+Perl compiles with earlier releases of gcc (2.95 and up) that can be
+downloaded from the same place. If you use gcc-3.2, comment out the
+line:
+
+    USE_GCC_V3_2	*= define
+
+in win32\makefile.mk
 
 You also need dmake.  See L</"Make"> above on how to get it.
 
-The GCC-2.95.2 bundle comes with Mingw32 libraries and headers.
+=item MinGW release 1
+
+The MinGW-1.1 bundle comes with gcc-2.95.3.
 
 Make sure you install the binaries that work with MSVCRT.DLL as indicated
 in the README for the GCC bundle.  You may need to set up a few environment

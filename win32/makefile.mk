@@ -37,6 +37,9 @@ INST_TOP	*= $(INST_DRV)\perl
 #CCTYPE		*= BORLAND
 # mingw32+gcc-2.95.2 or better
 CCTYPE		*= GCC
+# Uncomment this if you are using the latest MinGW release (2.0.0)
+# with gcc3.2
+#USE_GCC_V3_2	*= define
 
 #
 # uncomment this if your Borland compiler is older than v5.4.
@@ -410,6 +413,9 @@ LINK_FLAGS	+= -L"$(CCLIBDIR)\Release"
 
 CC		= gcc
 LINK32		= gcc
+.IF "$(USE_GCC_V3_2)" == "define"
+LINK32		= g++
+.END
 LIB32		= ar rc
 IMPLIB		= dlltool
 RSC		= rc

@@ -15,7 +15,8 @@
 #define Win32_Winsock
 #endif
 #include <windows.h>
-#ifndef __MINGW32__	/* GCC/Mingw32-2.95.2 forgot the WINAPI on CommandLineToArgvW() */
+/* GCC-2.95.2/Mingw32-1.1 forgot the WINAPI on CommandLineToArgvW() */
+#if defined(__MINGW32__) && (__MINGW32_MAJOR_VERSION==1)	
 #  include <shellapi.h>
 #else
    LPWSTR* WINAPI CommandLineToArgvW(LPCWSTR lpCommandLine, int * pNumArgs);
@@ -60,8 +61,8 @@
 int _CRT_glob = 0;
 #endif
 
-#if defined(__MINGW32__)
-/* Mingw32 is missing some prototypes */
+#if defined(__MINGW32__) && (__MINGW32_MAJOR_VERSION==1)	
+/* Mingw32-1.1 is missing some prototypes */
 FILE * _wfopen(LPCWSTR wszFileName, LPCWSTR wszMode);
 FILE * _wfdopen(int nFd, LPCWSTR wszMode);
 FILE * _freopen(LPCWSTR wszFileName, LPCWSTR wszMode, FILE * pOldStream);
