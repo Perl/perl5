@@ -210,7 +210,7 @@ ok(!isweak($x->{Z}));
 # Case 7: test weaken on a read only ref
 #
 
-if ($] < 5.009) {
+if ($] < 5.008003) {
     # Doesn't work for older perls, see bug [perl #24506]
     print "# Skip next 5 tests on perl $]\n";
     for (1..5) {
