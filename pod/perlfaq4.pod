@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq4 - Data Manipulation ($Revision: 1.43 $, $Date: 2003/02/23 20:25:09 $)
+perlfaq4 - Data Manipulation ($Revision: 1.44 $, $Date: 2003/07/28 17:35:21 $)
 
 =head1 DESCRIPTION
 
@@ -761,6 +761,19 @@ This is sometimes referred to as putting something into "title
 case", but that's not quite accurate.  Consider the proper
 capitalization of the movie I<Dr. Strangelove or: How I Learned to
 Stop Worrying and Love the Bomb>, for example.
+
+Damian Conway's L<Text::Autoformat> module provides some smart
+case transformations:
+
+    use Text::Autoformat;
+    my $x = "Dr. Strangelove or: How I Learned to Stop ".
+      "Worrying and Love the Bomb";
+
+    print $x, "\n";
+    for my $style (qw( sentence title highlight ))
+    {
+        print autoformat($x, { case => $style }), "\n";
+    }
 
 =head2 How can I split a [character] delimited string except when inside [character]?
 
