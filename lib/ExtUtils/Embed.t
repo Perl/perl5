@@ -36,7 +36,7 @@ if ($^O eq 'MSWin32') {
 	push(@cmd,'-link',"-libpath:$lib",$Config{'libperl'},$Config{'libc'});
     }
     else {
-	push(@cmd,"-L$lib",'-lperl',$Config{'libc'});
+	push(@cmd,"-L$lib",File::Spec->catfile($lib,$Config{'libperl'}),$Config{'libc'});
     }
 }
 else {
