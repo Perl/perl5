@@ -163,19 +163,15 @@ EOT
 
 	$test = $OVER{$test} if exists $OVER{$test};
 
-	open(SCRIPT,"<$test") or die "Can't run $test.\n";
-	$_ = <SCRIPT>;
-	close(SCRIPT) unless ($type eq 'deparse');
-	if (/#!.*perl(.*)$/) {
-	    $switch = $1;
-	    if ($^O eq 'VMS') {
-		# Must protect uppercase switches with "" on command line
-		$switch =~ s/-([A-Z]\S*)/"-$1"/g;
-	    }
-	}
-	else {
-	    $switch = '';
-	}
+ 	open(SCRIPT,"<$test") or die "Can't run $test.\n";
+ 	$_ = <SCRIPT>;
+ 	close(SCRIPT) unless ($type eq 'deparse');
+ 	if (/#!.*\bperl.*-\w*T/) {
+ 	    $switch = '"-T"';
+ 	}
+ 	else {
+ 	    $switch = '';
+ 	}
 
 	my $file_opts = "";
 	if ($type eq 'deparse') {
