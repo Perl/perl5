@@ -1265,13 +1265,16 @@ PP(pp_leavewrite)
 		s++;
 	    }
 	    if (s) {
-		PerlIO_write(ofp, SvPVX(PL_formtarget), s - SvPVX(PL_formtarget));
+		STRLEN save = SvCUR(PL_formtarget);
+		SvCUR_set(PL_formtarget, s - SvPVX(PL_formtarget));
+		do_print(PL_formtarget, ofp);
+		SvCUR_set(PL_formtarget, save);
 		sv_chop(PL_formtarget, s);
 		FmLINES(PL_formtarget) -= IoLINES_LEFT(io);
 	    }
 	}
 	if (IoLINES_LEFT(io) >= 0 && IoPAGE(io) > 0)
-	    PerlIO_write(ofp, SvPVX(PL_formfeed), SvCUR(PL_formfeed));
+	    do_print(PL_formfeed, ofp);
 	IoLINES_LEFT(io) = IoPAGE_LEN(io);
 	IoPAGE(io)++;
 	PL_formtarget = PL_toptarget;
@@ -1332,8 +1335,7 @@ PP(pp_leavewrite)
 	    if (ckWARN(WARN_IO))
 		Perl_warner(aTHX_ WARN_IO, "page overflow");
 	}
-	if (!PerlIO_write(ofp, SvPVX(PL_formtarget), SvCUR(PL_formtarget)) ||
-		PerlIO_error(fp))
+	if (!do_print(PL_formtarget, fp))
 	    PUSHs(&PL_sv_no);
 	else {
 	    FmLINES(PL_formtarget) = 0;
