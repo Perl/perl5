@@ -2,7 +2,7 @@ package DB;
 
 # Debugger for Perl 5.00x; perl5db.pl patch level:
 
-$VERSION = 0.9904;
+$VERSION = 0.9905;
 $header = "perl5db.pl patch level $VERSION";
 
 # Enhanced by ilya@math.ohio-state.edu (Ilya Zakharevich)
@@ -1086,8 +1086,8 @@ sub DB {
 
 sub sub {
     my ($al, $ret, @ret) = "";
-    if ($sub =~ /(.*)::AUTOLOAD$/) {
-      $al = " for $ {$1 . '::AUTOLOAD'}";
+    if (length($sub) > 10 && substr($sub, -10, 10) eq '::AUTOLOAD') {
+	$al = " for $$sub";
     }
     push(@stack, $single);
     $single &= 1;
