@@ -51,10 +51,10 @@ no useful value.  See L<perlmod>.
 (F) The "use" keyword is recognized and executed at compile time, and returns
 no useful value.  See L<perlmod>.
 
-=item '_' allowed only after types %s
+=item '!' allowed only after types %s
 
-(F) The '_' is allowed in pack() and unpack() only after certain types.
-See L<perlfunc>.
+(F) The '!' is allowed in pack() and unpack() only after certain types.
+See L<perlfunc/pack>.
 
 =item % may only be used in unpack
 

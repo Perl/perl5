@@ -115,17 +115,17 @@ if($Config{'d_semget'} eq 'define' &&
 
     my $nsem = 10;
 
-    semctl($sem,0,SETALL,pack("s_*",(0) x $nsem)) or print "not ";
+    semctl($sem,0,SETALL,pack("s!*",(0) x $nsem)) or print "not ";
     print "ok 10\n";
 
     $data = "";
     semctl($sem,0,GETALL,$data) or print "not ";
     print "ok 11\n";
 
-    print "not " unless length($data) == length(pack("s_*",(0) x $nsem));
+    print "not " unless length($data) == length(pack("s!*",(0) x $nsem));
     print "ok 12\n";
 
-    my @data = unpack("s_*",$data);
+    my @data = unpack("s!*",$data);
 
     my $adata = "0" x $nsem;
 
@@ -135,14 +135,14 @@ if($Config{'d_semget'} eq 'define' &&
     my $poke = 2;
 
     $data[$poke] = 1;
-    semctl($sem,0,SETALL,pack("s_*",@data)) or print "not ";
+    semctl($sem,0,SETALL,pack("s!*",@data)) or print "not ";
     print "ok 14\n";
     
     $data = "";
     semctl($sem,0,GETALL,$data) or print "not ";
     print "ok 15\n";
 
-    @data = unpack("s_*",$data);
+    @data = unpack("s!*",$data);
 
     my $bdata = "0" x $poke . "1" . "0" x ($nsem-$poke-1);
 

@@ -3274,7 +3274,7 @@ PP(pp_unpack)
 #endif
 	if (isSPACE(datumtype))
 	    continue;
-	if (*pat == '_') {
+	if (*pat == '!') {
 	    char *natstr = "sSiIlL";
 
 	    if (strchr(natstr, datumtype)) {
@@ -3284,7 +3284,7 @@ PP(pp_unpack)
 		pat++;
 	    }
 	    else
-		croak("'_' allowed only after types %s", natstr);
+		croak("'!' allowed only after types %s", natstr);
 	}
 	if (pat >= patend)
 	    len = 1;
@@ -4294,7 +4294,7 @@ PP(pp_pack)
 #endif
 	if (isSPACE(datumtype))
 	    continue;
-        if (*pat == '_') {
+        if (*pat == '!') {
 	    char *natstr = "sSiIlL";
 
 	    if (strchr(natstr, datumtype)) {
@@ -4304,7 +4304,7 @@ PP(pp_pack)
 		pat++;
 	    }
 	    else
-		croak("'_' allowed only after types %s", natstr);
+		croak("'!' allowed only after types %s", natstr);
 	}
 	if (*pat == '*') {
 	    len = strchr("@Xxu", datumtype) ? 0 : items;
