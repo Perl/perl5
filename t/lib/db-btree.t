@@ -52,10 +52,11 @@ ok(3, $dbh->{psize} == 0) ;
 ok(4, $dbh->{lorder} == 0) ;
 ok(5, $dbh->{minkeypage} == 0) ;
 ok(6, $dbh->{maxkeypage} == 0) ;
-$^W = 0 ;
-ok(7, $dbh->{compare} == undef) ;
-ok(8, $dbh->{prefix} == undef) ;
-$^W = 1 ;
+{
+  local $^W = 0 ;
+  ok(7, $dbh->{compare} == undef) ;
+  ok(8, $dbh->{prefix} == undef) ;
+}
 
 $dbh->{flags} = 3000 ;
 ok(9, $dbh->{flags} == 3000) ;
@@ -240,10 +241,8 @@ $status = $X->del('') ;
 ok(42, $status == 0 );
 
 # Make sure that the key deleted, cannot be retrieved
-$^W = 0 ;
-ok(43, $h{'q'} eq undef) ;
-ok(44, $h{''} eq undef) ;
-$^W = 1 ;
+ok(43, ! defined $h{'q'}) ;
+ok(44, ! defined $h{''}) ;
 
 undef $X ;
 untie %h ;
@@ -430,7 +429,8 @@ $Dfile2 = "btree2" ;
 $Dfile3 = "btree3" ;
  
 $dbh1 = new DB_File::BTREEINFO ;
-$dbh1->{compare} = sub { $_[0] <=> $_[1] } ;
+{ local $^W = 0 ;
+  $dbh1->{compare} = sub { $_[0] <=> $_[1] } ; }
  
 $dbh2 = new DB_File::BTREEINFO ;
 $dbh2->{compare} = sub { $_[0] cmp $_[1] } ;
@@ -444,16 +444,14 @@ tie(%g, 'DB_File',$Dfile2, O_RDWR|O_CREAT, 0640, $dbh2 ) ;
 tie(%k, 'DB_File',$Dfile3, O_RDWR|O_CREAT, 0640, $dbh3 ) ;
  
 @Keys = qw( 0123 12 -1234 9 987654321 def  ) ;
-$^W = 0 ;
-@srt_1 = sort { $a <=> $b } @Keys ;
-$^W = 1 ;
+{ local $^W = 0 ;
+  @srt_1 = sort { $a <=> $b } @Keys ; }
 @srt_2 = sort { $a cmp $b } @Keys ;
 @srt_3 = sort { length $a <=> length $b } @Keys ;
  
 foreach (@Keys) {
-    $^W = 0 ; 
-    $h{$_} = 1 ; 
-    $^W = 1 ;
+    { local $^W = 0 ; 
+      $h{$_} = 1 ; }
     $g{$_} = 1 ;
     $k{$_} = 1 ;
 }

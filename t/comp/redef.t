@@ -1,9 +1,8 @@
-#!./perl
+#!./perl -w
 #
 # Contributed by Graham Barr <Graham.Barr@tiuk.ti.com>
 
 BEGIN {
-    $^W = 1;
     $warn = "";
     $SIG{__WARN__} = sub { $warn .= join("",@_) }
 }

@@ -244,36 +244,35 @@ sub _msdos_cwd {
     return $ENV{'PWD'};
 }
 
-my($oldw) = $^W;
-$^W = 0;  # assignments trigger 'subroutine redefined' warning
-if ($^O eq 'VMS') {
+{
+    local $^W = 0;	# assignments trigger 'subroutine redefined' warning
 
-    *cwd        = \&_vms_cwd;
-    *getcwd     = \&_vms_cwd;
-    *fastcwd    = \&_vms_cwd;
-    *fastgetcwd = \&_vms_cwd;
+    if ($^O eq 'VMS') {
+        *cwd        = \&_vms_cwd;
+        *getcwd     = \&_vms_cwd;
+        *fastcwd    = \&_vms_cwd;
+        *fastgetcwd = \&_vms_cwd;
+    }
+    elsif ($^O eq 'NT' or $^O eq 'MSWin32') {
+        # We assume that &_NT_cwd is defined as an XSUB or in the core.
+        *getcwd     = \&_NT_cwd;
+        *fastcwd    = \&_NT_cwd;
+        *fastgetcwd = \&_NT_cwd;
+    }
+    elsif ($^O eq 'os2') {
+        # sys_cwd may keep the builtin command
+        *cwd	 = defined &sys_cwd ? \&sys_cwd : \&_os2_cwd;
+        *getcwd	 = defined &sys_cwd ? \&sys_cwd : \&_os2_cwd;
+        *fastgetcwd	 = defined &sys_cwd ? \&sys_cwd : \&_os2_cwd;
+        *fastcwd	 = defined &sys_cwd ? \&sys_cwd : \&_os2_cwd;
+    }
+    elsif ($^O eq 'msdos') {
+        *cwd     = \&_msdos_cwd;
+        *getcwd     = \&_msdos_cwd;
+        *fastgetcwd = \&_msdos_cwd;
+        *fastcwd = \&_msdos_cwd;
+    }
 }
-elsif ($^O eq 'NT' or $^O eq 'MSWin32') {
-
-    # We assume that &_NT_cwd is defined as an XSUB or in the core.
-    *getcwd     = \&_NT_cwd;
-    *fastcwd    = \&_NT_cwd;
-    *fastgetcwd = \&_NT_cwd;
-}
-elsif ($^O eq 'os2') {
-    # sys_cwd may keep the builtin command
-    *cwd	 = defined &sys_cwd ? \&sys_cwd : \&_os2_cwd;
-    *getcwd	 = defined &sys_cwd ? \&sys_cwd : \&_os2_cwd;
-    *fastgetcwd	 = defined &sys_cwd ? \&sys_cwd : \&_os2_cwd;
-    *fastcwd	 = defined &sys_cwd ? \&sys_cwd : \&_os2_cwd;
-}
-elsif ($^O eq 'msdos') {
-    *cwd     = \&_msdos_cwd;
-    *getcwd     = \&_msdos_cwd;
-    *fastgetcwd = \&_msdos_cwd;
-    *fastcwd = \&_msdos_cwd;
-}
-$^W = $oldw;
 
 # package main; eval join('',<DATA>) || die $@;	# quick test
 
