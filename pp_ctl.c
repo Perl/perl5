@@ -1777,6 +1777,20 @@ PP(pp_goto)
 		AvREAL_off(av);
 		av_clear(av);
 	    }
+	    else if (CvXSUB(cv)) {	/* put GvAV(defgv) back onto stack */
+		AV* av;
+		int i;
+#ifdef USE_THREADS
+		av = (AV*)curpad[0];
+#else
+		av = GvAV(defgv);
+#endif
+		items = AvFILLp(av) + 1;
+		stack_sp++;
+		EXTEND(stack_sp, items); /* @_ could have been extended. */
+		Copy(AvARRAY(av), stack_sp, items, SV*);
+		stack_sp += items;
+	    }
 	    if (cx->cx_type == CXt_SUB &&
 		!(CvDEPTH(cx->blk_sub.cv) = cx->blk_sub.olddepth))
 		SvREFCNT_dec(cx->blk_sub.cv);
@@ -1799,8 +1813,16 @@ PP(pp_goto)
 		    SP = stack_base + items;
 		}
 		else {
+		    SV **newsp;
+		    I32 gimme;
+
 		    stack_sp--;		/* There is no cv arg. */
+		    /* Push a mark for the start of arglist */
+		    PUSHMARK(mark); 
 		    (void)(*CvXSUB(cv))(cv _PERL_OBJECT_THIS);
+		    /* Pop the current context like a decent sub should */
+		    POPBLOCK(cx, curpm);
+		    /* Do _not_ use PUTBACK, keep the XSUB's return stack! */
 		}
 		LEAVE;
 		return pop_return();
