@@ -42,8 +42,9 @@ UNIMPLEMENTED(_encoded_utf8_to_bytes, I32)
 #include "perliol.h"
 typedef struct {
     PerlIOBuf base;		/* PerlIOBuf stuff */
-    SV *bufsv;
-    SV *enc;
+    SV *bufsv;			/* buffer seen by layers above */
+    SV *dataSV;			/* data we have read from layer below */
+    SV *enc;			/* the encoding object */
 } PerlIOEncode;
 
 SV *
@@ -115,6 +116,10 @@ PerlIOEncode_popped(pTHX_ PerlIO * f)
 	SvREFCNT_dec(e->bufsv);
 	e->bufsv = Nullsv;
     }
+    if (e->dataSV) {
+	SvREFCNT_dec(e->dataSV);
+	e->bufsv = Nullsv;
+    }
     return 0;
 }
 
@@ -160,45 +165,129 @@ PerlIOEncode_fill(pTHX_ PerlIO * f)
 {
     PerlIOEncode *e = PerlIOSelf(f, PerlIOEncode);
     dSP;
-    IV code;
-    code = PerlIOBuf_fill(aTHX_ f);
-    if (code == 0) {
+    IV code = 0;
+    PerlIO *n;
+    SSize_t avail;
+    if (PerlIO_flush(f) != 0)
+	return -1;
+    n  = PerlIONext(f);
+    if (!PerlIO_fast_gets(n)) {
+	/* Things get too messy if we don't have a buffer layer
+	   push a :perlio to do the job */
+	char mode[8];
+	n  = PerlIO_push(aTHX_ n, &PerlIO_perlio, PerlIO_modestr(f,mode), Nullsv);
+	if (!n) {
+	    Perl_die(aTHX_ "panic: cannot push :perlio for %p",f);
+	}
+    }
+    ENTER;
+    SAVETMPS;
+  retry:
+    avail = PerlIO_get_cnt(n);
+    if (avail <= 0) {
+	avail = PerlIO_fill(n);
+	if (avail == 0) {
+	    avail = PerlIO_get_cnt(n);
+	}
+	else {
+	    if (!PerlIO_error(n) && PerlIO_eof(n))
+		avail = 0;
+	}
+    }
+    if (avail > 0) {
+	STDCHAR *ptr = PerlIO_get_ptr(n);
+	SSize_t use  = avail;
 	SV *uni;
-	STRLEN len;
 	char *s;
-	/* Set SV that is the buffer to be buf..ptr */
-	SvCUR_set(e->bufsv, e->base.end - e->base.buf);
-	SvUTF8_off(e->bufsv);
-	ENTER;
-	SAVETMPS;
+	STRLEN len = 0;
+	e->base.ptr = e->base.end = (STDCHAR *) Nullch;
+	(void) PerlIOEncode_get_base(aTHX_ f);
+	if (!e->dataSV)
+	    e->dataSV = newSV(0);
+	if (SvTYPE(e->dataSV) < SVt_PV) {
+	    sv_upgrade(e->dataSV,SVt_PV);
+	}
+	if (SvCUR(e->dataSV)) {
+	    /* something left over from last time - create a normal
+	       SV with new data appended
+	     */
+	    if (use + SvCUR(e->dataSV) > e->base.bufsiz) {
+	       use = e->base.bufsiz - SvCUR(e->dataSV);
+	    }
+	    sv_catpvn(e->dataSV,ptr,use);
+	}
+	else {
+	    /* Create a "dummy" SV to represent the available data from layer below */
+	    if (SvLEN(e->dataSV) && SvPVX(e->dataSV)) {
+		Safefree(SvPVX(e->dataSV));
+	    }
+	    if (use > e->base.bufsiz) {
+	       use = e->base.bufsiz;
+	    }
+	    SvPVX(e->dataSV) = (char *) ptr;
+	    SvLEN(e->dataSV) = 0;  /* Hands off sv.c - it isn't yours */
+	    SvCUR_set(e->dataSV,use);
+	    SvPOK_on(e->dataSV);
+	}
+	SvUTF8_off(e->dataSV);
 	PUSHMARK(sp);
 	XPUSHs(e->enc);
-	XPUSHs(e->bufsv);
+	XPUSHs(e->dataSV);
 	XPUSHs(&PL_sv_yes);
 	PUTBACK;
-	if (perl_call_method("decode", G_SCALAR) != 1)
-	    code = -1;
+	if (perl_call_method("decode", G_SCALAR) != 1) {
+	    Perl_die(aTHX_ "panic: decode did not return a value");
+	}
 	SPAGAIN;
 	uni = POPs;
 	PUTBACK;
-	/* Now get translated string (forced to UTF-8) and copy back to buffer
-	   don't use sv_setsv as that may "steal" PV from returned temp
-	   and so free() our known-large-enough buffer.
-	   sv_setpvn() should do but let us do it long hand.
-	 */
-	s = SvPVutf8(uni, len);
-	if (s != SvPVX(e->bufsv)) {
-	    e->base.buf = (STDCHAR *) SvGROW(e->bufsv, len);
-	    Move(s, e->base.buf, len, char);
-	    SvCUR_set(e->bufsv, len);
+	/* Now get translated string (forced to UTF-8) and use as buffer */
+	if (SvPOK(uni)) {
+	    s = SvPVutf8(uni, len);
+	    if (len && !is_utf8_string(s,len)) {
+		Perl_warn(aTHX_ "panic: decode did not return UTF-8 '%.*s'",(int) len,s);
+	    }
 	}
-	SvUTF8_on(e->bufsv);
-	e->base.end = e->base.buf + len;
-	e->base.ptr = e->base.buf;
+	if (len > 0) {
+	    /* Got _something */
+	    /* if decode gave us back dataSV then data may vanish when
+	       we do ptrcnt adjust - so take our copy now.
+	       (The copy is a pain - need a put-it-here option for decode.)
+	     */
+	    sv_setpvn(e->bufsv,s,len);
+	    e->base.ptr = e->base.buf = SvPVX(e->bufsv);
+	    e->base.end = e->base.ptr + SvCUR(e->bufsv);
+	    PerlIOBase(f)->flags |= PERLIO_F_RDBUF;
+	    SvUTF8_on(e->bufsv);
+
+	    /* Adjust ptr/cnt not taking anything which
+	       did not translate - not clear this is a win */
+	    /* compute amount we took */
+	    use -= SvCUR(e->dataSV);
+	    PerlIO_set_ptrcnt(n, ptr+use, (avail-use));
+	    /* and as we did not take it it isn't pending */
+	    SvCUR_set(e->dataSV,0);
+	} else {
+	    /* Got nothing - assume partial character so we need some more */
+	    /* Make sure e->dataSV is a normal SV before re-filling as
+	       buffer alias will change under us
+	     */
+	    s = SvPV(e->dataSV,len);
+	    sv_setpvn(e->dataSV,s,len);
+	    PerlIO_set_ptrcnt(n, ptr+use, (avail-use));
+	    goto retry;
+	}
 	FREETMPS;
 	LEAVE;
+	return code;
     }
-    return code;
+    else {
+	if (avail == 0)
+	    PerlIOBase(f)->flags |= PERLIO_F_EOF;
+	else
+	    PerlIOBase(f)->flags |= PERLIO_F_ERROR;
+	return -1;
+    }
 }
 
 IV
@@ -206,50 +295,84 @@ PerlIOEncode_flush(pTHX_ PerlIO * f)
 {
     PerlIOEncode *e = PerlIOSelf(f, PerlIOEncode);
     IV code = 0;
-    if (e->bufsv
-	&& (PerlIOBase(f)->flags & (PERLIO_F_RDBUF | PERLIO_F_WRBUF))
-	&& (e->base.ptr > e->base.buf)
-	) {
+    if (e->bufsv && (e->base.ptr > e->base.buf)) {
 	dSP;
 	SV *str;
 	char *s;
 	STRLEN len;
-	SSize_t left = 0;
-	if (PerlIOBase(f)->flags & PERLIO_F_RDBUF) {
-	    /* This is really just a flag to see if we took all the data, if
-	       we did PerlIOBase_flush avoids a seek to lower layer.
-	       Need to revisit if we start getting clever with unreads or seeks-in-buffer
-	     */
-	    left = e->base.end - e->base.ptr;
+	SSize_t count = 0;
+	if (PerlIOBase(f)->flags & PERLIO_F_WRBUF) {
+	    /* Write case encode the buffer and write() to layer below */
+	    ENTER;
+	    SAVETMPS;
+	    PUSHMARK(sp);
+	    XPUSHs(e->enc);
+	    SvCUR_set(e->bufsv, e->base.ptr - e->base.buf);
+	    SvUTF8_on(e->bufsv);
+	    Perl_warn(aTHX_ "flush %_",e->bufsv);
+	    XPUSHs(e->bufsv);
+	    XPUSHs(&PL_sv_yes);
+	    PUTBACK;
+	    if (perl_call_method("encode", G_SCALAR) != 1)
+		code = -1;
+	    SPAGAIN;
+	    str = POPs;
+	    PUTBACK;
+	    s = SvPV(str, len);
+	    count = PerlIO_write(PerlIONext(f),s,len);
+	    if (count != len) {
+		code = -1;
+	    }
+	    FREETMPS;
+	    LEAVE;
+	    if (PerlIO_flush(PerlIONext(f)) != 0) {
+		code = -1;
+	    }
 	}
-	ENTER;
-	SAVETMPS;
-	PUSHMARK(sp);
-	XPUSHs(e->enc);
-	SvCUR_set(e->bufsv, e->base.ptr - e->base.buf);
-	SvUTF8_on(e->bufsv);
-	XPUSHs(e->bufsv);
-	XPUSHs(&PL_sv_yes);
-	PUTBACK;
-	if (perl_call_method("encode", G_SCALAR) != 1)
-	    code = -1;
-	SPAGAIN;
-	str = POPs;
-	PUTBACK;
-	s = SvPV(str, len);
-	if (s != SvPVX(e->bufsv)) {
-	    e->base.buf = (STDCHAR *) SvGROW(e->bufsv, len);
-	    Move(s, e->base.buf, len, char);
-	    SvCUR_set(e->bufsv, len);
+	else if (PerlIOBase(f)->flags & PERLIO_F_RDBUF) {
+	    /* read case */
+	    /* if we have any untranslated stuff then unread that first */
+	    if (e->dataSV && SvCUR(e->dataSV)) {
+		s = SvPV(e->dataSV, len);
+		count = PerlIO_unread(PerlIONext(f),s,len);
+		if (count != len) {
+		    code = -1;
+		}
+	    }
+	    /* See if there is anything left in the buffer */
+	    if (e->base.ptr < e->base.end) {
+		/* Bother - have unread data.
+		   re-encode and unread() to layer below
+		 */
+		ENTER;
+		SAVETMPS;
+		str = sv_newmortal();
+		sv_upgrade(str, SVt_PV);
+		SvPVX(str) = e->base.ptr;
+		SvLEN(str) = 0;
+		SvCUR_set(str, e->base.end - e->base.ptr);
+		SvUTF8_on(str);
+		PUSHMARK(sp);
+		XPUSHs(e->enc);
+		XPUSHs(str);
+		XPUSHs(&PL_sv_yes);
+		PUTBACK;
+		if (perl_call_method("encode", G_SCALAR) != 1)
+		    code = -1;
+		SPAGAIN;
+		str = POPs;
+		PUTBACK;
+		s = SvPV(str, len);
+		count = PerlIO_unread(PerlIONext(f),s,len);
+		if (count != len) {
+		    code = -1;
+		}
+		FREETMPS;
+		LEAVE;
+	    }
 	}
-	SvUTF8_off(e->bufsv);
-	e->base.ptr = e->base.buf + len;
-	/* restore end != ptr as inequality is used by PerlIOBuf_flush in read case */
-	e->base.end = e->base.ptr + left;
-	FREETMPS;
-	LEAVE;
-	if (PerlIOBuf_flush(aTHX_ f) != 0)
-	    code = -1;
+	e->base.ptr = e->base.end = e->base.buf;
+	PerlIOBase(f)->flags &= ~(PERLIO_F_RDBUF | PERLIO_F_WRBUF);
     }
     return code;
 }
@@ -274,30 +397,11 @@ Off_t
 PerlIOEncode_tell(pTHX_ PerlIO * f)
 {
     PerlIOBuf *b = PerlIOSelf(f, PerlIOBuf);
-    /* Unfortunately the only way to get a postion is to back-translate,
-       the UTF8-bytes we have buf..ptr and adjust accordingly.
-       But we will try and save any unread data in case stream
-       is un-seekable.
+    /* Unfortunately the only way to get a postion is to (re-)translate,
+       the UTF8 we have in bufefr and then ask layer below
      */
-    if ((PerlIOBase(f)->flags & PERLIO_F_RDBUF) && b->ptr < b->end) {
-	Size_t count = b->end - b->ptr;
-	PerlIO_push(aTHX_ f, &PerlIO_pending, "r", Nullsv);
-	/* Save what we have left to read */
-	PerlIOSelf(f, PerlIOBuf)->bufsiz = count;
-	PerlIO_unread(f, b->ptr, count);
-	/* There isn't any unread data - we just saved it - so avoid the lower seek */
-	b->end = b->ptr;
-	/* Flush ourselves - now one layer down,
-	   this does the back translate and adjusts position
-	 */
-	PerlIO_flush(PerlIONext(f));
-	/* Set position of the saved data */
-	PerlIOSelf(f, PerlIOBuf)->posn = b->posn;
-    }
-    else {
-	PerlIO_flush(f);
-    }
-    return b->posn;
+    PerlIO_flush(f);
+    return PerlIO_tell(PerlIONext(f));
 }
 
 PerlIO *
@@ -373,29 +477,42 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 {
     STRLEN slen;
     U8 *s = (U8 *) SvPV(src, slen);
-    SV *dst = sv_2mortal(newSV(2 * slen + 1));
+    STRLEN tlen = slen;
+    SV *dst = sv_2mortal(newSV(slen+1));
     if (slen) {
-	U8 *d = (U8 *) SvGROW(dst, 2 * slen + 1);
-	STRLEN dlen = SvLEN(dst);
+	U8 *d = (U8 *) SvPVX(dst);
+	STRLEN dlen = SvLEN(dst)-1;
 	int code;
 	while ((code = do_encode(dir, s, &slen, d, dlen, &dlen, !check))) {
 	    SvCUR_set(dst, dlen);
 	    SvPOK_on(dst);
 
-	    if (code == ENCODE_FALLBACK)
+#if 0
+	    Perl_warn(aTHX_ "code=%d @ s=%d/%d d=%d",code,slen,tlen,dlen);
+#endif
+	
+	    if (code == ENCODE_FALLBACK || code == ENCODE_PARTIAL)
 		break;
 
 	    switch (code) {
 	    case ENCODE_NOSPACE:
 		{
-		    STRLEN need = dlen + UTF8_MAXLEN * 128;	/* 128 is too big or small? */
+		    STRLEN done = tlen-slen;
+		    STRLEN need ;
+		    if (done) {
+			need = (tlen*dlen)/done+1;
+		    }
+		    else {
+			need = dlen + UTF8_MAXLEN;
+		    }
+		
 		    d = (U8 *) SvGROW(dst, need);
 		    if (dlen >= SvLEN(dst)) {
 			Perl_croak(aTHX_
 				   "Destination couldn't be grown (the need may be miscalculated).");
 		    }
 		    dlen = SvLEN(dst);
-		    slen = SvCUR(src);
+		    slen = tlen;
 		    break;
 		}
 
@@ -427,14 +544,6 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 		}
 		break;
 
-	    case ENCODE_PARTIAL:
-		if (!check && ckWARN_d(WARN_UTF8)) {
-		    Perl_warner(aTHX_ WARN_UTF8, "Partial %s character",
-				(dir ==
-				 enc->f_utf8) ? "UTF-8" : enc->name[0]);
-		}
-		return &PL_sv_undef;
-
 	    default:
 		Perl_croak(aTHX_ "Unexpected code %d converting %s %s",
 			   code, (dir == enc->f_utf8) ? "to" : "from",
@@ -449,12 +558,14 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 		Move(s + slen, s, SvCUR(src) - slen, U8);
 	    }
 	    SvCUR_set(src, SvCUR(src) - slen);
+	    *SvEND(src) = '\0';
 	}
     }
     else {
-	SvCUR_set(dst, slen);
+	SvCUR_set(dst, 0);
 	SvPOK_on(dst);
     }
+    *SvEND(dst) = '\0';
     return dst;
 }
 

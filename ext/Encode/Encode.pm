@@ -1,6 +1,6 @@
 package Encode;
 use strict;
-our $VERSION = do {my @r=(q$Revision: 0.30 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r};
+our $VERSION = '0.30';
 
 require DynaLoader;
 require Exporter;
@@ -125,7 +125,7 @@ define_alias( qr/^iso8859(\d+)$/i => '"iso-8859-$1"' );
 # More HP stuff.
 define_alias( qr/^(?:hp-)?(arabic|greek|hebrew|kana|roman|thai|turkish)8$/i => '"${1}8"' );
 
-# The Official name of ASCII. 
+# The Official name of ASCII.
 define_alias( qr/^ANSI[-_]?X3\.4[-_]?1968$/i => '"ascii"' );
 
 # This is a font issue, not an encoding issue.
@@ -444,7 +444,7 @@ As of Perl 5.8.0, at least the following encodings are recognized
 
 The Unicode:
 
-  UTF-8   
+  UTF-8
   UTF-16
   UCS-2
 
@@ -461,7 +461,7 @@ The ISO 8859 and KOI:
 
   Latin1  => 8859-1  Latin6  => 8859-10
   Latin2  => 8859-2  Latin7  => 8859-13
-  Latin3  => 8859-3  Latin8  => 8859-14 
+  Latin3  => 8859-3  Latin8  => 8859-14
   Latin4  => 8859-4  Latin9  => 8859-15
   Latin5  => 8859-9  Latin10 => 8859-16
 
@@ -470,14 +470,14 @@ The ISO 8859 and KOI:
   Greek    => 8859-7
   Hebrew   => 8859-8
   Thai     => 8859-11
-  TIS620   => 8859-11 
+  TIS620   => 8859-11
 
 The CJKV: Chinese, Japanese, Korean, Vietnamese:
 
-  ISO 2022     ISO 2022 JP-1  JIS 0201  GB 1988   Big5       EUC-CN       
-  ISO 2022 CN  ISO 2022 JP-2  JIS 0208  GB 2312   HZ         EUC-JP     
+  ISO 2022     ISO 2022 JP-1  JIS 0201  GB 1988   Big5       EUC-CN
+  ISO 2022 CN  ISO 2022 JP-2  JIS 0208  GB 2312   HZ         EUC-JP
   ISO 2022 JP  ISO 2022 KR    JIS 0210  GB 12345  CNS 11643  EUC-JP-0212
-  Shift-JIS                                                  EUC-KR     
+  Shift-JIS                                                  EUC-KR
   VISCII
 
 The PC codepages:
@@ -502,13 +502,13 @@ The PC codepages:
 
 The Mac codepages:
 
-  MacCentralEuropean   MacJapanese        
-  MacCroatian          MacRoman           
-  MacCyrillic          MacRumanian        
-  MacDingbats          MacSami            
-  MacGreek             MacThai            
-  MacIcelandic         MacTurkish         
-                       MacUkraine         
+  MacCentralEuropean   MacJapanese
+  MacCroatian          MacRoman
+  MacCyrillic          MacRumanian
+  MacDingbats          MacSami
+  MacGreek             MacThai
+  MacIcelandic         MacTurkish
+                       MacUkraine
 
 Miscellaneous:
 
