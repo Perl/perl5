@@ -1306,8 +1306,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 			} else {
 			    /* start offset must point into the last copy */
 			    data->last_start_min += minnext * (mincount - 1);
-			    data->last_start_max += is_inf ? 0 : (maxcount - 1)
-				* (minnext + data->pos_delta);
+			    data->last_start_max += is_inf ? I32_MAX
+				: (maxcount - 1) * (minnext + data->pos_delta);
 			}
 		    }
 		    /* It is counted once already... */
@@ -3304,25 +3304,27 @@ tryagain:
     /* If the encoding pragma is in effect recode the text of
      * any EXACT-kind nodes. */
     if (PL_encoding && PL_regkind[(U8)OP(ret)] == EXACT) {
-	 STRLEN oldlen = STR_LEN(ret);
-	 SV *sv        = sv_2mortal(newSVpvn(STRING(ret), oldlen));
+	STRLEN oldlen = STR_LEN(ret);
+	SV *sv        = sv_2mortal(newSVpvn(STRING(ret), oldlen));
 
-	 if (RExC_utf8)
-	      SvUTF8_on(sv);
-	 if (sv_utf8_downgrade(sv, TRUE)) {
-	      char *s       = sv_recode_to_utf8(sv, PL_encoding);
-	      STRLEN newlen = SvCUR(sv);
-	 
-	      if (!SIZE_ONLY) {
-		   DEBUG_r(PerlIO_printf(Perl_debug_log, "recode %*s to %*s\n",
-					 (int)oldlen, STRING(ret),
-					 (int)newlen, s));
-		   Copy(s, STRING(ret), newlen, char);
-		   STR_LEN(ret) += newlen - oldlen;
-		   RExC_emit += STR_SZ(newlen) - STR_SZ(oldlen);
-	      } else
-		   RExC_size += STR_SZ(newlen) - STR_SZ(oldlen);
-	 }
+	if (RExC_utf8)
+	    SvUTF8_on(sv);
+	if (sv_utf8_downgrade(sv, TRUE)) {
+	    char *s       = sv_recode_to_utf8(sv, PL_encoding);
+	    STRLEN newlen = SvCUR(sv);
+
+	    if (SvUTF8(sv))
+		RExC_utf8 = 1;
+	    if (!SIZE_ONLY) {
+		DEBUG_r(PerlIO_printf(Perl_debug_log, "recode %*s to %*s\n",
+				      (int)oldlen, STRING(ret),
+				      (int)newlen, s));
+		Copy(s, STRING(ret), newlen, char);
+		STR_LEN(ret) += newlen - oldlen;
+		RExC_emit += STR_SZ(newlen) - STR_SZ(oldlen);
+	    } else
+		RExC_size += STR_SZ(newlen) - STR_SZ(oldlen);
+	}
     }
 
     return(ret);
@@ -4224,11 +4226,11 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	SV *rv;
 
 	/* The 0th element stores the character class description
-	 * in its textual form: used later (regexec.c:Perl_regclass_swatch())
+	 * in its textual form: used later (regexec.c:Perl_regclass_swash())
 	 * to initialize the appropriate swash (which gets stored in
 	 * the 1st element), and also useful for dumping the regnode.
 	 * The 2nd element stores the multicharacter foldings,
-	 * used later (regexec.c:s_reginclasslen()). */
+	 * used later (regexec.c:S_reginclass()). */
 	av_store(av, 0, listsv);
 	av_store(av, 1, NULL);
 	av_store(av, 2, (SV*)unicode_alternate);

@@ -28,7 +28,7 @@ require ODBM_File;
 #If Fcntl is not available, try 0x202 or 0x102 for O_RDWR|O_CREAT
 use Fcntl;
 
-print "1..72\n";
+print "1..78\n";
 
 unlink <Op.dbmx*>;
 
@@ -466,6 +466,50 @@ EOM
     unlink <Op.dbmx*>;
 }
 
+
+{
+   # Check that DBM Filter can cope with read-only $_
+
+   use warnings ;
+   use strict ;
+   my %h ;
+   unlink <Op.dbmx*>;
+
+   ok(73, my $db = tie(%h, 'ODBM_File','Op.dbmx', O_RDWR|O_CREAT, 0640)) ;
+
+   $db->filter_fetch_key   (sub { }) ;
+   $db->filter_store_key   (sub { }) ;
+   $db->filter_fetch_value (sub { }) ;
+   $db->filter_store_value (sub { }) ;
+
+   $_ = "original" ;
+
+   $h{"fred"} = "joe" ;
+   ok(74, $h{"fred"} eq "joe");
+
+   eval { grep { $h{$_} } (1, 2, 3) };
+   ok (75, ! $@);
+
+
+   # delete the filters
+   $db->filter_fetch_key   (undef);
+   $db->filter_store_key   (undef);
+   $db->filter_fetch_value (undef);
+   $db->filter_store_value (undef);
+
+   $h{"fred"} = "joe" ;
+
+   ok(76, $h{"fred"} eq "joe");
+
+   ok(77, $db->FIRSTKEY() eq "fred") ;
+   
+   eval { grep { $h{$_} } (1, 2, 3) };
+   ok (78, ! $@);
+
+   undef $db ;
+   untie %h;
+   unlink <Op.dbmx*>;
+}
 exit ;
 if ($^O eq 'hpux') {
     print <<EOM;

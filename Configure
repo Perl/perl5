@@ -1116,6 +1116,7 @@ defvoidused=''
 voidflags=''
 pm_apiversion=''
 xs_apiversion=''
+gccansipedantic=''
 yacc=''
 yaccflags=''
 CONFIG=''
@@ -2152,11 +2153,12 @@ for dir in \$*; do
 	elif test -f \$dir/\$thing.exe; then
 		if test -n "$DJGPP"; then
 			echo \$dir/\$thing.exe
-		else
+			exit 0
+		elif test "$eunicefix" != ":"; then
 			: on Eunice apparently
 			echo \$dir/\$thing
+			exit 0
 		fi
-		exit 0
 	fi
 	;;
 	esac
@@ -3852,14 +3854,17 @@ case "$ccname" in
 '') ccname="$cc" ;;
 esac
 
-# gcc 3.1 complains about adding -Idirectories that it already knows about,
+# gcc 3.* complain about adding -Idirectories that they already know about,
 # so we will take those off from locincpth.
 case "$gccversion" in
 3*)
     echo "main(){}">try.c
-    for incdir in `$cc -v -c try.c 2>&1 | \
-       sed '1,/^#include <\.\.\.>/d;/^End of search list/,$d;s/^ //'` ; do
-       locincpth=`echo $locincpth | sed s!$incdir!!`
+    for incdir in $locincpth; do
+       warn=`$cc $ccflags -I$incdir -c try.c 2>&1 | \
+             grep '^cc1: warning: changing search order '`
+       if test "X$warn" != X; then
+           locincpth=`echo " $locincpth " | sed "s! $incdir ! !"`
+       fi
     done
     $rm -f try try.*
 esac
@@ -5417,7 +5422,7 @@ case "$usenm" in
 	esac
 	case "$dflt" in
 	'') 
-		if $test "$osname" = aix -a ! -f /lib/syscalls.exp; then
+		if $test "$osname" = aix -a "X$PASE" != "$Xdefine" -a ! -f /lib/syscalls.exp; then
 			echo " "
 			echo "Whoops!  This is an AIX system without /lib/syscalls.exp!" >&4
 			echo "'nm' won't be sufficient on this sytem." >&4
@@ -5764,11 +5769,19 @@ else
 	fi
 fi
 nm_extract="$com"
-if $test -f /lib/syscalls.exp; then
+case "$PASE" in
+define)
+    echo " "
+    echo "Since you are compiling for PASE, extracting more symbols from libc.a...">&4
+    dump -Tv /lib/libc.a | awk '$7 == "/unix" {print $5 " " $8}' | grep "^SV" | awk '{print $2}' >> libc.list
+    ;;
+*)  if $test -f /lib/syscalls.exp; then
 	echo " "
 	echo "Also extracting names from /lib/syscalls.exp for good ole AIX..." >&4
 	$sed -n 's/^\([^ 	]*\)[ 	]*syscall[0-9]*[ 	]*$/\1/p' /lib/syscalls.exp >>libc.list
-fi
+    fi
+    ;;
+esac
 ;;
 esac
 $rm -f libnames libpath
@@ -6355,9 +6368,9 @@ else
 $cat <<EOM
 
 In some special cases, particularly when building $package for distribution,
-it is convenient to distinguish between the directory in which files should 
-be installed from the directory ($prefix) in which they 
-will eventually reside.  For most users, these two directories are the same.
+it is convenient to distinguish the directory in which files should be
+installed from the directory ($prefix) in which they will
+eventually reside.  For most users, these two directories are the same.
 
 EOM
 	case "$installprefix" in
@@ -7385,13 +7398,33 @@ echo " "
 if $test -d /usr/bin -a "X$installbin" != X/usr/bin; then
 	$cat <<EOM
 Many scripts expect perl to be installed as /usr/bin/perl.
-I can install the perl you are about to compile also as /usr/bin/perl
-(in addition to $installbin/perl).
+
+If you want to, I can install the perl you are about to compile
+as /usr/bin/perl (in addition to $bin/perl).
 EOM
-	case "$installusrbinperl" in
-	"$undef"|[nN]*)	dflt='n';;
-	*)		dflt='y';;
-	esac
+	if test -f /usr/bin/perl; then
+	    $cat <<EOM
+
+However, please note that because you already have a /usr/bin/perl,
+overwriting that with a new Perl would very probably cause problems.
+Therefore I'm assuming you don't want to do that (unless you insist).
+
+EOM
+	    case "$installusrbinperl" in
+	    "$define"|[yY]*)	dflt='y';;
+	    *)		 	dflt='n';;
+	    esac
+	else
+	    $cat <<EOM
+
+Since you don't have a /usr/bin/perl I'm assuming creating one is okay. 
+
+EOM
+	    case "$installusrbinperl" in
+	    "$undef"|[nN]*)	dflt='n';;
+	    *)		 	dflt='y';;
+	    esac
+    	fi
 	rp="Do you want to install perl as /usr/bin/perl?"
 	. ./myread
 	case "$ans" in
@@ -19424,7 +19457,19 @@ Note that DynaLoader is always built and need not be mentioned here.
 
 EOM
 	case "$dynamic_ext" in
-	'') dflt="$avail_ext" ;;
+	'')
+		: Exclude those listed in static_ext
+		dflt=''
+		for xxx in $avail_ext; do
+			case " $static_ext " in
+			*" $xxx "*) ;;
+			*) dflt="$dflt $xxx" ;;
+			esac
+		done
+		set X $dflt
+		shift
+		dflt="$*"
+		;;
 	*)	dflt="$dynamic_ext"
 		# Perhaps we are reusing an old out-of-date config.sh.
 		case "$hint" in
@@ -20579,6 +20624,7 @@ vi='$vi'
 voidflags='$voidflags'
 xlibpth='$xlibpth'
 xs_apiversion='$xs_apiversion'
+gccansipedantic='$gccansipedantic'
 yacc='$yacc'
 yaccflags='$yaccflags'
 zcat='$zcat'

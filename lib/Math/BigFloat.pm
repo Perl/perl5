@@ -12,12 +12,10 @@ package Math::BigFloat;
 #   _p: precision
 #   _f: flags, used to signal MBI not to touch our private parts
 
-$VERSION = '1.35';
+$VERSION = '1.38';
 require 5.005;
 use Exporter;
-use File::Spec;
-# use Math::BigInt;
-@ISA =       qw( Exporter Math::BigInt);
+@ISA =       qw(Exporter Math::BigInt);
 
 use strict;
 use vars qw/$AUTOLOAD $accuracy $precision $div_scale $round_mode $rnd_mode/;
@@ -307,9 +305,10 @@ sub bsstr
     return $x->{sign} unless $x->{sign} eq '+inf';      # -inf, NaN
     return 'inf';                                       # +inf
     }
-  my $sign = $x->{_e}->{sign}; $sign = '' if $sign eq '-';
-  my $sep = 'e'.$sign;
-  $x->{_m}->bstr().$sep.$x->{_e}->bstr();
+  my $esign = $x->{_e}->{sign}; $esign = '' if $esign eq '-';
+  my $sep = 'e'.$esign;
+  my $sign = $x->{sign}; $sign = '' if $sign eq '+';
+  $sign . $x->{_m}->bstr() . $sep . $x->{_e}->bstr();
   }
     
 sub numify 
@@ -343,6 +342,9 @@ sub bcmp
     {
     ($self,$x,$y) = objectify(2,@_);
     }
+
+  return $upgrade->bcmp($x,$y) if defined $upgrade &&
+    ((!$x->isa($self)) || (!$y->isa($self)));
 
   if (($x->{sign} !~ /^[+-]$/) || ($y->{sign} !~ /^[+-]$/))
     {
@@ -406,6 +408,9 @@ sub bacmp
     {
     ($self,$x,$y) = objectify(2,@_);
     }
+
+  return $upgrade->bacmp($x,$y) if defined $upgrade &&
+    ((!$x->isa($self)) || (!$y->isa($self)));
 
   # handle +-inf and NaN's
   if ($x->{sign} !~ /^[+-]$/ || $y->{sign} !~ /^[+-]$/)
@@ -656,7 +661,7 @@ sub blog
   return $x->bone('+',@params) if $x->bcmp($base) == 0;
 
   # when user set globals, they would interfere with our calculation, so
-  # disable then and later re-enable them
+  # disable them and later re-enable them
   no strict 'refs';
   my $abr = "$self\::accuracy"; my $ab = $$abr; $$abr = undef;
   my $pbr = "$self\::precision"; my $pb = $$pbr; $$pbr = undef;
@@ -915,7 +920,6 @@ sub bdiv
     # promote BigInts and it's subclasses (except when already a BigFloat)
     $y = $self->new($y) unless $y->isa('Math::BigFloat'); 
 
-    #print "bdiv $y ",ref($y),"\n";
     # need to disable $upgrade in BigInt, to avoid deep recursion
     local $Math::BigInt::upgrade = undef; 	# should be parent class vs MBI
 
@@ -931,10 +935,12 @@ sub bdiv
   # shortcut to not run trough _find_round_parameters again
   if (defined $params[1])
     {
+    $x->{_a} = undef; 				# clear before round
     $x->bround($params[1],$params[3]);		# then round accordingly
     }
   else
     {
+    $x->{_p} = undef; 				# clear before round
     $x->bfround($params[2],$params[3]);		# then round accordingly
     }
   if ($fallback)
@@ -1066,7 +1072,8 @@ sub bsqrt
   my @params = $x->_find_round_parameters($a,$p,$r);
 
   # no rounding at all, so must use fallback
-  if (scalar @params == 1)
+  if ((scalar @params == 1) ||
+      (!defined($params[1] || $params[2])))
     {
     # simulate old behaviour
     $params[1] = $self->div_scale();	# and round to it as accuracy
@@ -1078,7 +1085,7 @@ sub bsqrt
     {
     # the 4 below is empirical, and there might be cases where it is not
     # enough...
-    $scale = abs($params[1] || $params[2]) + 4;	# take whatever is defined
+    $scale = abs($params[1] || $params[2]) + 4; # take whatever is defined
     }
 
   # when user set globals, they would interfere with our calculation, so
@@ -1095,7 +1102,6 @@ sub bsqrt
   my $xas = $x->as_number();
   my $gs = $xas->copy()->bsqrt();	# some guess
 
-#  print "guess $gs\n";
   if (($x->{_e}->{sign} ne '-')		# guess can't be accurate if there are
 					# digits after the dot
    && ($xas->bacmp($gs * $gs) == 0))	# guess hit the nail on the head?
@@ -1120,29 +1126,37 @@ sub bsqrt
     ${"$self\::accuracy"} = $ab; ${"$self\::precision"} = $pb;
     return $x;
     }
-  $gs = $self->new( $gs );		# BigInt to BigFloat
+ 
+  # sqrt(2) = 1.4 because sqrt(2*100) = 1.4*10; so we can increase the accuracy
+  # of the result by multipyling the input by 100 and then divide the integer
+  # result of sqrt(input) by 10. Rounding afterwards returns the real result.
+  # this will transform 123.456 (in $x) into 123456 (in $y1)
+  my $y1 = $x->{_m}->copy();
+  # We now make sure that $y1 has the same odd or even number of digits than
+  # $x had. So when _e of $x is odd, we must shift $y1 by one digit left,
+  # because we always must multiply by steps of 100 (sqrt(100) is 10) and not
+  # steps of 10. The length of $x does not count, since an even or odd number
+  # of digits before the dot is not changed by adding an even number of digits
+  # after the dot (the result is still odd or even digits long).
+  $y1->bmul(10) if $x->{_e}->is_odd();
+  # now calculate how many digits the result of sqrt(y1) would have
+  my $digits = int($y1->length() / 2);
+  # but we need at least $scale digits, so calculate how many are missing
+  my $shift = $scale - $digits;
+  # that should never happen (we take care of integer guesses above)
+  # $shift = 0 if $shift < 0; 
+  # multiply in steps of 100, by shifting left two times the "missing" digits
+  $y1->blsft($shift*2,10);
+  # now take the square root and truncate to integer
+  $y1->bsqrt();
+  # By "shifting" $y1 right (by creating a negative _e) we calculate the final
+  # result, which is than later rounded to the desired scale.
+  $x->{_m} = $y1;
+  # gs->length() is the number of digits before the dot. Since gs is always
+  # truncated (9.99 => 9), it is always right (if gs was rounded, it would be
+  # '10' and thus gs->length() == 2, which would be wrong).
+  $x->{_e} = $MBI->new(- $y1->length() + $gs->length());
 
-  my $lx = $x->{_m}->length();
-  $scale = $lx if $scale < $lx;
-  my $e = $self->new("1E-$scale");	# make test variable
-
-  my $y = $x->copy();
-  my $two = $self->new(2);
-  my $diff = $e;
-  # promote BigInts and it's subclasses (except when already a BigFloat)
-  $y = $self->new($y) unless $y->isa('Math::BigFloat'); 
-
-  my $rem;
-  while ($diff->bacmp($e) >= 0)
-    {
-    $rem = $y->copy()->bdiv($gs,$scale);
-    $rem = $y->copy()->bdiv($gs,$scale)->badd($gs)->bdiv($two,$scale);
-    $diff = $rem->copy()->bsub($gs);
-    $gs = $rem->copy();
-    }
-  # copy over to modify $x
-  $x->{_m} = $rem->{_m}; $x->{_e} = $rem->{_e};
-  
   # shortcut to not run trough _find_round_parameters again
   if (defined $params[1])
     {
@@ -1210,7 +1224,7 @@ sub _pow2
     }
 
   # when user set globals, they would interfere with our calculation, so
-  # disable then and later re-enable them
+  # disable them and later re-enable them
   no strict 'refs';
   my $abr = "$self\::accuracy"; my $ab = $$abr; $$abr = undef;
   my $pbr = "$self\::precision"; my $pb = $$pbr; $$pbr = undef;
@@ -1320,7 +1334,7 @@ sub _pow
     }
 
   # when user set globals, they would interfere with our calculation, so
-  # disable then and later re-enable them
+  # disable them and later re-enable them
   no strict 'refs';
   my $abr = "$self\::accuracy"; my $ab = $$abr; $$abr = undef;
   my $pbr = "$self\::precision"; my $pb = $$pbr; $$pbr = undef;
@@ -1752,7 +1766,6 @@ sub import
   my $lib = ''; my @a;
   for ( my $i = 0; $i < $l ; $i++)
     {
-#    print "at $_[$i] (",$_[$i+1]||'undef',")\n";
     if ( $_[$i] eq ':constant' )
       {
       # this rest causes overlord er load to step in
@@ -1852,7 +1865,44 @@ sub bnorm
   } 
  
 ##############################################################################
-# internal calculation routines
+
+sub as_hex
+  {
+  # return number as hexadecimal string (only for integers defined)
+  my ($self,$x) = ref($_[0]) ? (ref($_[0]),$_[0]) : objectify(1,@_);
+
+  return $x->bstr() if $x->{sign} !~ /^[+-]$/;  # inf, nan etc
+  return '0x0' if $x->is_zero();
+
+  return 'NaN' if $x->{_e}->{sign} ne '+';	# how to do 1e-1 in hex!?
+
+  my $z = $x->{_m}->copy();
+  if (!$x->{_e}->is_zero())		# > 0 
+    {
+    $z->blsft($x->{_e},10);
+    }
+  $z->{sign} = $x->{sign};
+  $z->as_hex();
+  }
+
+sub as_bin
+  {
+  # return number as binary digit string (only for integers defined)
+  my ($self,$x) = ref($_[0]) ? (ref($_[0]),$_[0]) : objectify(1,@_);
+
+  return $x->bstr() if $x->{sign} !~ /^[+-]$/;  # inf, nan etc
+  return '0b0' if $x->is_zero();
+
+  return 'NaN' if $x->{_e}->{sign} ne '+';	# how to do 1e-1 in hex!?
+
+  my $z = $x->{_m}->copy();
+  if (!$x->{_e}->is_zero())		# > 0 
+    {
+    $z->blsft($x->{_e},10);
+    }
+  $z->{sign} = $x->{sign};
+  $z->as_bin();
+  }
 
 sub as_number
   {

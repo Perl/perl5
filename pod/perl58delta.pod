@@ -1012,10 +1012,11 @@ in quoted-printable encoding, as defined in RFC 2045 - I<MIME
 
     use MIME::QuotedPrint;
 
-    $encoded = encode_qp("Smiley in Unicode: \x{263a}");
+    $encoded = encode_qp("\xDE\xAD\xBE\xEF");
     $decoded = decode_qp($encoded);
 
-    print $encoded, "\n"; # "Smiley in Unicode: =263A"
+    print $encoded, "\n"; # "=DE=AD=BE=EF\n"
+    print $decoded, "\n"; # "\xDE\xAD\xBE\xEF\n"
 
 See also L<PerlIO::via::QuotedPrint>.
 
@@ -2903,11 +2904,11 @@ Using negative offset for vec() in lvalue context is now a warnable offense.
 
 =item *
 
-Odd number of arguments to oveload::constant now elicits a warning.
+Odd number of arguments to overload::constant now elicits a warning.
 
 =item *
 
-Odd number of elements to in anonymous hash now elicits a warning.
+Odd number of elements in anonymous hash now elicits a warning.
 
 =item *
 
@@ -3399,6 +3400,10 @@ failures are expected:
  run/fresh_perl.t                          97    1   1.03%  91
 
 NDBM_File fails and ODBM_File just coredumps.
+
+If you intend to run only on FAT (or if using AnyDBM_File on FAT),
+run Configure with the -Ui_ndbm and -Ui_dbm options to prevent
+NDBM_File and ODBM_File being built.
 
 =head2 DJGPP Failures
 

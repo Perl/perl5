@@ -614,6 +614,10 @@ open FOO || time;
 EXPECT
 Precedence problem: open FOO should be open(FOO) at - line 2.
 ########
+# toke.c (and [perl #16184])
+open FOO => "<&0"; close FOO;
+EXPECT
+########
 # toke.c
 $^W = 0 ;
 open FOO || time;

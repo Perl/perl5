@@ -398,9 +398,9 @@ written to the stream. For example, the following snippet copies the
 contents of the file "text.jis" (encoded as ISO-2022-JP, aka JIS) to
 the file "text.utf8", encoded as UTF-8:
 
-    open(my $nihongo, '<:encoding(iso2022-jp)', 'text.jis');
-    open(my $unicode, '>:utf8',                 'text.utf8');
-    while (<$nihongo>) { print $unicode }
+    open(my $nihongo, '<:encoding(iso-2022-jp)', 'text.jis');
+    open(my $unicode, '>:utf8',                  'text.utf8');
+    while (<$nihongo>) { print $unicode $_ }
 
 The naming of encodings, both by the C<open()> and by the C<open>
 pragma, is similar to the C<encoding> pragma in that it allows for
@@ -862,7 +862,7 @@ If you have the GNU recode installed, you can also use the
 Perl front-end C<Convert::Recode> for character conversions.
 
 The following are fast conversions from ISO 8859-1 (Latin-1) bytes
-to UTF-8 bytes, the code works even with older Perl 5 versions.
+to UTF-8 bytes and back, the code works even with older Perl 5 versions.
 
     # ISO 8859-1 to UTF-8
     s/([\x80-\xFF])/chr(0xC0|ord($1)>>6).chr(0x80|ord($1)&0x3F)/eg;

@@ -14,7 +14,7 @@ require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(struct);
 
-$VERSION = '0.61';
+$VERSION = '0.63';
 
 ## Tested on 5.002 and 5.003 without class membership tests:
 my $CHECK_CLASS_MEMBERSHIP = ($] >= 5.003_95);
@@ -456,26 +456,26 @@ See Example 3 below for an example of initialization.
 =item Example 1
 
 Giving a struct element a class type that is also a struct is how
-structs are nested.  Here, C<timeval> represents a time (seconds and
-microseconds), and C<rusage> has two elements, each of which is of
-type C<timeval>.
+structs are nested.  Here, C<Timeval> represents a time (seconds and
+microseconds), and C<Rusage> has two elements, each of which is of
+type C<Timeval>.
 
     use Class::Struct;
 
-    struct( rusage => {
-        ru_utime => timeval,  # seconds
-        ru_stime => timeval,  # microseconds
+    struct( Rusage => {
+        ru_utime => 'Timeval',  # user time used
+        ru_stime => 'Timeval',  # system time used
     });
 
-    struct( timeval => [
-        tv_secs  => '$',
-        tv_usecs => '$',
+    struct( Timeval => [
+        tv_secs  => '$',        # seconds
+        tv_usecs => '$',        # microseconds
     ]);
 
         # create an object:
-    my $t = new rusage;
+    my $t = Rusage->new(ru_utime=>Timeval->new(), ru_stime=>Timeval->new());
 
-        # $t->ru_utime and $t->ru_stime are objects of type timeval.
+        # $t->ru_utime and $t->ru_stime are objects of type Timeval.
         # set $t->ru_utime to 100.0 sec and $t->ru_stime to 5.0 sec.
     $t->ru_utime->tv_secs(100);
     $t->ru_utime->tv_usecs(0);
@@ -500,10 +500,10 @@ accessor accordingly.
         my $self = shift;
         if ( @_ ) {
             die 'count must be nonnegative' if $_[0] < 0;
-            $self->{'count'} = shift;
+            $self->{'MyObj::count'} = shift;
             warn "Too many args to count" if @_;
         }
-        return $self->{'count'};
+        return $self->{'MyObj::count'};
     }
 
     package main;

@@ -836,7 +836,7 @@ PP(pp_mapwhile)
 	}
 	/* copy the new items down to the destination list */
 	dst = PL_stack_base + (PL_markstack_ptr[-2] += items) - 1;
-	while (items--)
+	while (items-- > 0)
 	    *dst-- = SvTEMP(TOPs) ? POPs : sv_mortalcopy(POPs);
     }
     LEAVE;					/* exit inner scope */
@@ -943,10 +943,14 @@ PP(pp_flop)
 	if (SvGMAGICAL(right))
 	    mg_get(right);
 
+	/* This code tries to decide if "$left .. $right" should use the
+	   magical string increment, or if the range is numeric (we make
+	   an exception for .."0" [#18165]). AMS 20021031. */
+
 	if (SvNIOKp(left) || !SvPOKp(left) ||
 	    SvNIOKp(right) || !SvPOKp(right) ||
 	    (looks_like_number(left) && *SvPVX(left) != '0' &&
-	     looks_like_number(right) && *SvPVX(right) != '0'))
+	     looks_like_number(right)))
 	{
 	    if (SvNV(left) < IV_MIN || SvNV(right) > IV_MAX)
 		DIE(aTHX_ "Range iterator outside integer range");
@@ -3188,7 +3192,7 @@ PP(pp_require)
 	RETPUSHUNDEF;
     }
     else
-	SETERRNO(0, SS$_NORMAL);
+	SETERRNO(0, SS_NORMAL);
 
     /* Assume success here to prevent recursive requirement. */
     len = strlen(name);

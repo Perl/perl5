@@ -188,9 +188,9 @@ The Unix column assumes that you are not accessing a serial line
 "\n", and "\n" on output becomes CRLF.
 
 These are just the most common definitions of C<\n> and C<\r> in Perl.
-There may well be others.  For example, on an EBCDIC implementation such
-as z/OS or OS/400 the above material is similar to "Unix" but the code
-numbers change:
+There may well be others.  For example, on an EBCDIC implementation
+such as z/OS (OS/390) or OS/400 (using the ILE, the PASE is ASCII-based)
+the above material is similar to "Unix" but the code numbers change:
 
     LF  eq  \025  eq  \x15  eq           chr(21)  eq  CP-1047 21
     LF  eq  \045  eq  \x25  eq  \cU  eq  chr(37)  eq  CP-0037 37
@@ -1156,7 +1156,9 @@ Character Code Set ID 0037 for OS/400 and either 1047 or POSIX-BC for S/390
 systems).  On the mainframe perl currently works under the "Unix system
 services for OS/390" (formerly known as OpenEdition), VM/ESA OpenEdition, or
 the BS200 POSIX-BC system (BS2000 is supported in perl 5.6 and greater).
-See L<perlos390> for details.  
+See L<perlos390> for details.  Note that for OS/400 there is also a port of
+Perl 5.8.1/5.9.0 or later to the PASE which is ASCII-based (as opposed to
+ILE which is EBCDIC-based), see L<perlos400>. 
 
 As of R2.5 of USS for OS/390 and Version 2.3 of VM/ESA these Unix
 sub-systems do not support the C<#!> shebang trick for script invocation.
@@ -2069,7 +2071,7 @@ First public release with perl5.005.
 
 =head1 Supported Platforms
 
-As of June 2002 (the Perl release 5.8.0), the following platforms are
+As of July 2002 (the Perl release 5.8.0), the following platforms are
 able to build Perl from the standard source code distribution
 available at http://www.cpan.org/src/index.html
 
@@ -2094,6 +2096,7 @@ available at http://www.cpan.org/src/index.html
         OpenBSD
         OpenVMS         (VMS)
         OS/2
+        OS/400          (using the PASE) (since Perl 5.8.1/5.9.0)
         PowerUX
         POSIX-BC        (BS2000)
         QNX
@@ -2177,7 +2180,7 @@ binaries available via http://www.cpan.org/ports/
 
                                 Perl release
 
-        OS/400                  5.005_02
+        OS/400 (ILE)            5.005_02
         Tandem Guardian         5.004
 
 The following platforms have only binaries available via
@@ -2200,9 +2203,10 @@ L<perlaix>, L<perlamiga>, L<perlapollo>, L<perlbeos>, L<perlbs2000>,
 L<perlce>, L<perlcygwin>, L<perldgux>, L<perldos>, L<perlepoc>,
 L<perlebcdic>, L<perlfreebsd>, L<perlhurd>, L<perlhpux>, L<perlirix>,
 L<perlmachten>, L<perlmacos>, L<perlmint>, L<perlmpeix>,
-L<perlnetware>, L<perlos2>, L<perlos390>, L<perlplan9>, L<perlqnx>,
-L<perlsolaris>, L<perltru64>, L<perlunicode>, L<perlvmesa>,
-L<perlvms>, L<perlvos>, L<perlwin32>, and L<Win32>.
+L<perlnetware>, L<perlos2>, L<perlos390>, L<perlos400>,
+L<perlplan9>, L<perlqnx>, L<perlsolaris>, L<perltru64>,
+L<perlunicode>, L<perlvmesa>, L<perlvms>, L<perlvos>,
+L<perlwin32>, and L<Win32>.
 
 =head1 AUTHORS / CONTRIBUTORS
 

@@ -2,6 +2,8 @@
 
 my $version = ${"$class\::VERSION"};
 
+use strict;
+
 ##############################################################################
 # for testing inheritance of _swap
 
@@ -63,22 +65,18 @@ while (<DATA>)
     $try = "\$x = $class->bnorm(\"$args[0]\");";
   # some is_xxx tests
    } elsif ($f =~ /^is_(zero|one|odd|even|negative|positive|nan|int)$/) {
-    $try .= "\$x->$f();";
-   } elsif ($f eq "as_hex") {
-    $try .= '$x->as_hex();';
-   } elsif ($f eq "as_bin") {
-    $try .= '$x->as_bin();';
+    $try .= "\$x->$f() || 0;";
    } elsif ($f eq "is_inf") {
     $try .= "\$x->is_inf('$args[1]');";
    } elsif ($f eq "binf") {
     $try .= "\$x->binf('$args[1]');";
    } elsif ($f eq "bone") {
     $try .= "\$x->bone('$args[1]');";
-   # some unary ops
+  # some unary ops
    } elsif ($f =~ /^b(nan|floor|ceil|sstr|neg|abs|inc|dec|not|sqrt|fac)$/) {
     $try .= "\$x->$f();";
-   } elsif ($f eq "length") {
-    $try .= '$x->length();';
+   } elsif ($f =~ /^(numify|length|stringify|as_hex|as_bin)$/) {
+    $try .= "\$x->$f();";
    } elsif ($f eq "exponent"){
     # ->bstr() to see if an object is returned
     $try .= '$x = $x->exponent()->bstr();';
@@ -92,6 +90,7 @@ while (<DATA>)
     $try .= '$e = $e->bstr(); $e = "NaN" if !defined $e;';
     $try .= '"$m,$e";';
    } else {
+    # binary ops
     $try .= "\$y = $class->new('$args[1]');";
     if ($f eq "bcmp")
       {
@@ -430,6 +429,29 @@ $z = 1e+129;			# definitely a float (may fail on UTS)
 $x = $class->new($z); ok ($x->bsstr(),'1e+129');
 
 ###############################################################################
+# test for whitespace inlcuding newlines to be handled correctly
+
+# ok ($Math::BigInt::strict,1);		# the default
+
+foreach my $c (
+  qw/1 12 123 1234 12345 123456 1234567 12345678 123456789 1234567890/)
+  {
+  my $m = $class->new($c);
+  ok ($class->new("$c"),$m);
+  ok ($class->new(" $c"),$m);
+  ok ($class->new("$c "),$m);
+  ok ($class->new(" $c "),$m);
+  ok ($class->new("\n$c"),$m);
+  ok ($class->new("$c\n"),$m);
+  ok ($class->new("\n$c\n"),$m);
+  ok ($class->new(" \n$c\n"),$m);
+  ok ($class->new(" \n$c \n"),$m);
+  ok ($class->new(" \n$c\n "),$m);
+  ok ($class->new(" \n$c\n1"),'NaN');
+  ok ($class->new("1 \n$c\n1"),'NaN');
+  }
+
+###############################################################################
 # prime number tests, also test for **= and length()
 # found on: http://www.utm.edu/research/primes/notes/by_year.html
 
@@ -481,9 +503,10 @@ $x = $class->new('+inf'); ok ($x,'inf');
 
 ###############################################################################
 ###############################################################################
-# the followin tests only make sense with Math::BigInt::Calc or BareCalc
+# the followin tests only make sense with Math::BigInt::Calc or BareCalc or
+# FastCalc
 
-exit if $CALC !~ /^Math::BigInt::(Calc|BareCalc)$/; # for Pari et al.
+exit if $CALC !~ /^Math::BigInt::(|Bare|Fast)Calc$/; # for Pari et al.
 
 ###############################################################################
 # check proper length of internal arrays
@@ -736,86 +759,6 @@ NaN:inf:
 -inf:NaN:
 NaN:-inf:
 &bnorm
--0\n:0
--123\n:-123
--1234\n:-1234
--12345\n:-12345
--123456\n:-123456
--1234567\n:-1234567
--12345678\n:-12345678
--123456789\n:-123456789
--1234567890\n:-1234567890
--12345678901\n:-12345678901
-0\n:0
-123\n:123
-1234\n:1234
-12345\n:12345
-123456\n:123456
-1234567\n:1234567
-12345678\n:12345678
-123456789\n:123456789
-1234567890\n:1234567890
-12345678901\n:12345678901
-\n0:0
-\n123:123
-\n1234:1234
-\n12345:12345
-\n123456:123456
-\n1234567:1234567
-\n12345678:12345678
-\n123456789:123456789
-\n1234567890:1234567890
-\n12345678901:12345678901
-\n0\n:0
-\n123\n:123
-\n1234\n:1234
-\n12345\n:12345
-\n123456\n:123456
-\n1234567\n:1234567
-\n12345678\n:12345678
-\n123456789\n:123456789
-\n1234567890\n:1234567890
-\n12345678901\n:12345678901
-\t0\n:0
-\t123\n:123
-\t1234\n:1234
-\t12345\n:12345
-\t123456\n:123456
-\t1234567\n:1234567
-\t12345678\n:12345678
-\t123456789\n:123456789
-\t1234567890\n:1234567890
-\t12345678901\n:12345678901
-\n0\t:0
-\n123\t:123
-\n1234\t:1234
-\n12345\t:12345
-\n123456\t:123456
-\n1234567\t:1234567
-\n12345678\t:12345678
-\n123456789\t:123456789
-\n1234567890\t:1234567890
-\n12345678901\t:12345678901
-0\n\n:0
-123\n\n:123
-1234\n\n:1234
-12345\n\n:12345
-123456\n\n:123456
-1234567\n\n:1234567
-12345678\n\n:12345678
-123456789\n\n:123456789
-1234567890\n\n:1234567890
-12345678901\n\n:12345678901
-\n\n0:0
-\n\n123:123
-\n\n1234:1234
-\n\n12345:12345
-\n\n123456:123456
-\n\n1234567:1234567
-\n\n12345678:12345678
-\n\n123456789:123456789
-\n\n1234567890:1234567890
-\n\n12345678901:12345678901
 123:123
 # binary input
 0babc:NaN
@@ -1102,10 +1045,22 @@ abc:abc:NaN
 -820265627:1:2:-410132814
 -205066405:1:2:-102533203
 &bsstr
++inf:inf
+-inf:-inf
 1e+34:1e+34
 123.456E3:123456e+0
 100:1e+2
-abc:NaN
+bsstrabc:NaN
+-5:-5e+0
+-100:-1e+2
+&numify
+numifyabc:NaN
++inf:inf
+-inf:-inf
+5:5
+-5:-5
+100:100
+-100:-100
 &bneg
 bnegNaN:NaN
 +inf:-inf
@@ -1499,6 +1454,8 @@ abc:5:NaN
 3:5:2
 -2:5:2
 8:5033:4404
+1234567891:13:6
+-1234567891:13:7
 324958749843759385732954874325984357439658735983745:2348249874968739:1741662881064902
 ## bmodinv Error cases / useless use of function
 3:-5:NaN

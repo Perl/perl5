@@ -1,5 +1,5 @@
 #
-# $Id: mime-header.t,v 1.5 2002/05/23 19:10:10 dankogai Exp $
+# $Id: mime-header.t,v 1.6 2002/10/21 19:47:47 dankogai Exp $
 # This script is written in utf8
 #
 BEGIN {
@@ -23,7 +23,7 @@ no utf8;
 
 use strict;
 #use Test::More qw(no_plan);
-use Test::More tests => 6;
+use Test::More tests => 7;
 use_ok("Encode::MIME::Header");
 
 my $eheader =<<'EOS';
@@ -41,9 +41,20 @@ CC: Andr\xE9 Pirard <PIRARD\@vm1.ulg.ac.be>
 Subject: If you can read this you understand the example.
 EOS
 
-is(Encode::decode('MIME-Header', $eheader), $dheader, "decode (RFC2047)");
+is(Encode::decode('MIME-Header', $eheader), $dheader, "decode ASCII (RFC2047)");
 
 use utf8;
+
+my $uheader =<<'EOS';
+From: =?US-ASCII?Q?Keith_Moore?= <moore@cs.utk.edu>
+To: =?ISO-8859-1?Q?Keld_J=F8rn_Simonsen?= <keld@dkuug.dk>
+CC: =?ISO-8859-1?Q?Andr=E9?= Pirard <PIRARD@vm1.ulg.ac.be>
+Subject: =?ISO-8859-1?B?SWYgeW91IGNhbiByZWFkIHRoaXMgeW8=?=
+ =?ISO-8859-2?B?dSB1bmRlcnN0YW5kIHRoZSBleGFtcGxlLg==?=
+EOS
+
+is(Encode::decode('MIME-Header', $uheader), $dheader, "decode UTF-8 (RFC2047)");
+
 
 $dheader=<<'EOS';
 From: 小飼 弾 <dankogai@dan.co.jp>

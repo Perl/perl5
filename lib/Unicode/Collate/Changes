@@ -1,5 +1,30 @@
 Revision history for Perl extension Unicode::Collate.
 
+0.23  Wed Sep 04 19:25:20 2002
+    - fix: scalar match() no longer returns an lvalue substr ref.
+    - fix: "Ignorable after variable" should be made level 3 ignorable
+           even if alternate => 'blanked'.
+    - Now a grapheme may contain trailing level 2, level 3,
+      and completely ignorable characters.
+
+0.22  Mon Sep 02 23:15:14 2002
+    - New File: index.t.
+      (The new test.t excludes tests for index.)
+    - tweak on index(). POSITION is supported.
+    - add match, gmatch, subst, gsubst methods.
+    - fix: ignorable after variable in 'shift'-variable weight.
+
+0.21  Sat Aug 03 10:24:00 2002
+    - upgrade keys.txt and t/test.t for UCA Version 9.
+
+0.20  Fri Jul 26 02:15:25 2002
+    - now UCA Version 9.
+    - U+FDD0..U+FDEF are new non-characters.
+    - fix: whitespace characters before @backwards etc. in a table file.
+    - now values for 'alternate', 'backwards', etc.,
+      which are explicitly specified via new(),
+      are preferred to those specified in a table file.
+
 0.12  Sun May 05 09:43:10 2002
     - add new methods, ->UCA_Version and ->Base_Unicode_Version.
     - test fix: removed the needless requirement of Unicode::Normalize.

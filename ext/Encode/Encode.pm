@@ -1,9 +1,9 @@
 #
-# $Id: Encode.pm,v 1.75 2002/06/01 18:07:42 dankogai Exp $
+# $Id: Encode.pm,v 1.80 2002/10/21 20:38:45 dankogai Exp $
 #
 package Encode;
 use strict;
-our $VERSION = do { my @r = (q$Revision: 1.75 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.80 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG = 0;
 use XSLoader ();
 XSLoader::load(__PACKAGE__, $VERSION);
@@ -243,21 +243,7 @@ sub predefine_encodings{
 	# was in Encode::utf8
 	package Encode::utf8;
 	push @Encode::utf8::ISA, 'Encode::Encoding';
-	*decode = sub{
-	    my ($obj,$octets,$chk) = @_;
-	    my $str = Encode::decode_utf8($octets);
-	    if (defined $str) {
-		$_[1] = '' if $chk;
-		return $str;
-	    }
-	    return undef;
-	};
-	*encode = sub {
-	    my ($obj,$string,$chk) = @_;
-	    my $octets = Encode::encode_utf8($string);
-	    $_[1] = '' if $chk;
-	    return $octets;
-	};
+	# encode and decode methods now in Encode.xs
 	$Encode::Encoding{utf8} =
 	    bless {Name => "utf8"} => "Encode::utf8";
     }

@@ -148,6 +148,8 @@ Perl_reentrant_init(pTHX) {
 #ifdef HAS_CRYPT_R
 #ifdef __GLIBC__
 	PL_reentrant_buffer->_crypt_struct.initialized = 0;
+	/* work around glibc-2.2.5 bug */
+	PL_reentrant_buffer->_crypt_struct.current_saltbits = 0;
 #endif
 #endif /* HAS_CRYPT_R */
 #ifdef HAS_CTIME_R
@@ -314,15 +316,17 @@ Perl_reentrant_retry(const char *f, ...)
 
     va_start(ap, f);
 
-#define REENTRANTHALFMAXSIZE 32768 /* The maximum may end up twice this. */
-
     switch (PL_op->op_type) {
 #ifdef USE_HOSTENT_BUFFER
     case OP_GHBYADDR:
     case OP_GHBYNAME:
     case OP_GHOSTENT:
 	{
-	    if (PL_reentrant_buffer->_hostent_size <= REENTRANTHALFMAXSIZE) {
+#ifdef PERL_REENTRANT_MAXSIZE
+	    if (PL_reentrant_buffer->_hostent_size <=
+		PERL_REENTRANT_MAXSIZE / 2)
+#endif
+	    {
 		PL_reentrant_buffer->_hostent_size *= 2;
 		Renew(PL_reentrant_buffer->_hostent_buffer,
 		      PL_reentrant_buffer->_hostent_size, char);
@@ -341,6 +345,7 @@ Perl_reentrant_retry(const char *f, ...)
 		    break;
 	        }
 	    }
+	    SETERRNO(ERANGE, LIB_INVARG);
 	}
 	break;
 #endif
@@ -349,7 +354,11 @@ Perl_reentrant_retry(const char *f, ...)
     case OP_GGRGID:
     case OP_GGRENT:
 	{
-	    if (PL_reentrant_buffer->_grent_size <= REENTRANTHALFMAXSIZE) {
+#ifdef PERL_REENTRANT_MAXSIZE
+	    if (PL_reentrant_buffer->_grent_size <=
+		PERL_REENTRANT_MAXSIZE / 2)
+#endif
+	    {
 		Gid_t gid;
 		PL_reentrant_buffer->_grent_size *= 2;
 		Renew(PL_reentrant_buffer->_grent_buffer,
@@ -367,6 +376,7 @@ Perl_reentrant_retry(const char *f, ...)
 		    break;
 	        }
 	    }
+	    SETERRNO(ERANGE, LIB_INVARG);
 	}
 	break;
 #endif
@@ -375,7 +385,11 @@ Perl_reentrant_retry(const char *f, ...)
     case OP_GNBYNAME:
     case OP_GNETENT:
 	{
-	    if (PL_reentrant_buffer->_netent_size <= REENTRANTHALFMAXSIZE) {
+#ifdef PERL_REENTRANT_MAXSIZE
+	    if (PL_reentrant_buffer->_netent_size <=
+		PERL_REENTRANT_MAXSIZE / 2)
+#endif
+	    {
 		Netdb_net_t net;
 		PL_reentrant_buffer->_netent_size *= 2;
 		Renew(PL_reentrant_buffer->_netent_buffer,
@@ -394,6 +408,7 @@ Perl_reentrant_retry(const char *f, ...)
 		    break;
 	        }
 	    }
+	    SETERRNO(ERANGE, LIB_INVARG);
 	}
 	break;
 #endif
@@ -402,7 +417,11 @@ Perl_reentrant_retry(const char *f, ...)
     case OP_GPWUID:
     case OP_GPWENT:
 	{
-	    if (PL_reentrant_buffer->_pwent_size <= REENTRANTHALFMAXSIZE) {
+#ifdef PERL_REENTRANT_MAXSIZE
+	    if (PL_reentrant_buffer->_pwent_size <=
+		PERL_REENTRANT_MAXSIZE / 2)
+#endif
+	    {
 		Uid_t uid;
 		PL_reentrant_buffer->_pwent_size *= 2;
 		Renew(PL_reentrant_buffer->_pwent_buffer,
@@ -428,7 +447,11 @@ Perl_reentrant_retry(const char *f, ...)
     case OP_GPBYNUMBER:
     case OP_GPROTOENT:
 	{
-	    if (PL_reentrant_buffer->_protoent_size <= REENTRANTHALFMAXSIZE) {
+#ifdef PERL_REENTRANT_MAXSIZE
+	    if (PL_reentrant_buffer->_protoent_size <=
+		PERL_REENTRANT_MAXSIZE / 2)
+#endif
+	    {
 		PL_reentrant_buffer->_protoent_size *= 2;
 		Renew(PL_reentrant_buffer->_protoent_buffer,
 		      PL_reentrant_buffer->_protoent_size, char);
@@ -445,6 +468,7 @@ Perl_reentrant_retry(const char *f, ...)
 		    break;
 	        }
 	    }
+	    SETERRNO(ERANGE, LIB_INVARG);
 	}
 	break;
 #endif
@@ -453,7 +477,11 @@ Perl_reentrant_retry(const char *f, ...)
     case OP_GSBYPORT:
     case OP_GSERVENT:
 	{
-	    if (PL_reentrant_buffer->_servent_size <= REENTRANTHALFMAXSIZE) {
+#ifdef PERL_REENTRANT_MAXSIZE
+	    if (PL_reentrant_buffer->_servent_size <=
+		PERL_REENTRANT_MAXSIZE / 2)
+#endif
+	    {
 		PL_reentrant_buffer->_servent_size *= 2;
 		Renew(PL_reentrant_buffer->_servent_buffer,
 		      PL_reentrant_buffer->_servent_size, char);
@@ -472,6 +500,7 @@ Perl_reentrant_retry(const char *f, ...)
 		    break;
 	        }
 	    }
+	    SETERRNO(ERANGE, LIB_INVARG);
 	}
 	break;
 #endif

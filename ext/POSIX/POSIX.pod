@@ -1391,7 +1391,7 @@ Returns C<undef> on failure.
 =item tcflush
 
 This is similar to the C function C<tcflush()> for flushing
-the I/O buffers of its argumeny stream.
+the I/O buffers of its argument stream.
 
 Returns C<undef> on failure.
 
@@ -1591,6 +1591,21 @@ C<sa_flags>, it defaults to 0.
 
 This C<POSIX::SigAction> object should be used with the C<POSIX::sigaction()>
 function.
+
+=back
+
+=over 8
+
+=item handler
+
+=item mask
+
+=item flags
+
+accessor functions to get/set the values of a SigAction object.
+
+	$sigset = $sigaction->mask;
+	$sigaction->flags(&POSIX::SA_RESTART);
 
 =back
 

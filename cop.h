@@ -111,7 +111,7 @@ struct block_sub {
     AV *	savearray;
 #endif /* USE_5005THREADS */
     AV *	argarray;
-    U16		olddepth;
+    long	olddepth;
     U8		hasargs;
     U8		lval;		/* XXX merge lval and hasargs? */
     SV **	oldcurpad;
@@ -119,7 +119,7 @@ struct block_sub {
 
 #define PUSHSUB(cx)							\
 	cx->blk_sub.cv = cv;						\
-	cx->blk_sub.olddepth = (U16)CvDEPTH(cv);			\
+	cx->blk_sub.olddepth = CvDEPTH(cv);				\
 	cx->blk_sub.hasargs = hasargs;					\
 	cx->blk_sub.lval = PL_op->op_private &                          \
 	                      (OPpLVAL_INTRO|OPpENTERSUB_INARGS);

@@ -2892,7 +2892,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 {
     register char *s;
     int olderrno;
-    SV *tsv;
+    SV *tsv, *origsv;
     char tbuf[64];	/* Must fit sprintf/Gconvert of longest IV/NV */
     char *tmpbuf = tbuf;
 
@@ -2933,8 +2933,15 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	if (SvROK(sv)) {
 	    SV* tmpstr;
             if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,string)) &&
-                (SvTYPE(tmpstr) != SVt_RV || (SvRV(tmpstr) != SvRV(sv))))
-		return SvPV(tmpstr,*lp);
+                (SvTYPE(tmpstr) != SVt_RV || (SvRV(tmpstr) != SvRV(sv)))) {
+                char *pv = SvPV(tmpstr, *lp);
+                if (SvUTF8(tmpstr))
+                    SvUTF8_on(sv);
+                else
+                    SvUTF8_off(sv);
+                return pv;
+            }
+	    origsv = sv;
 	    sv = (SV*)SvRV(sv);
 	    if (!sv)
 		s = "NULLREF";
@@ -2946,7 +2953,6 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 		    if ( ((SvFLAGS(sv) &
 			   (SVs_OBJECT|SVf_OK|SVs_GMG|SVs_SMG|SVs_RMG))
 			  == (SVs_OBJECT|SVs_RMG))
-			 && strEQ(s=HvNAME(SvSTASH(sv)), "Regexp")
 			 && (mg = mg_find(sv, PERL_MAGIC_qr))) {
 			regexp *re = (regexp *)mg->mg_obj;
 
@@ -3002,6 +3008,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
                                            need a newline */
                                         mg->mg_len++; /* save space for it */
                                         need_newline = 1; /* note to add it */
+					break;
                                     }
                                 }
                             }
@@ -3017,6 +3024,11 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 			    mg->mg_ptr[mg->mg_len] = 0;
 			}
 			PL_reginterp_cnt += re->program[0].next_off;
+
+			if (re->reganch & ROPT_UTF8)
+			    SvUTF8_on(origsv);
+			else
+			    SvUTF8_off(origsv);
 			*lp = mg->mg_len;
 			return mg->mg_ptr;
 		    }
@@ -3192,28 +3204,14 @@ would lose the UTF-8'ness of the PV.
 void
 Perl_sv_copypv(pTHX_ SV *dsv, register SV *ssv)
 {
-    SV *tmpsv;
-
-    if ( SvTHINKFIRST(ssv) && SvROK(ssv) && SvAMAGIC(ssv) &&
-	 (tmpsv = AMG_CALLun(ssv,string))) {
-	if (SvTYPE(tmpsv) != SVt_RV || (SvRV(tmpsv) != SvRV(ssv))) {
-	    SvSetSV(dsv,tmpsv);
-	    return;
-	}
-    } else {
-        tmpsv = sv_newmortal();
-    }
-    {
-	STRLEN len;
-	char *s;
-	s = SvPV(ssv,len);
-	sv_setpvn(tmpsv,s,len);
-	if (SvUTF8(ssv))
-	    SvUTF8_on(tmpsv);
-	else
-	    SvUTF8_off(tmpsv);
-	SvSetSV(dsv,tmpsv);
-    }
+    STRLEN len;
+    char *s;
+    s = SvPV(ssv,len);
+    sv_setpvn(dsv,s,len);
+    if (SvUTF8(ssv))
+	SvUTF8_on(dsv);
+    else
+	SvUTF8_off(dsv);
 }
 
 /*
@@ -7706,7 +7704,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
     }
 
     if (!args && svix < svmax && DO_UTF8(*svargs))
-        has_utf8 = TRUE;
+	has_utf8 = TRUE;
 
     patend = (char*)pat + patlen;
     for (p = (char*)pat; p < patend; p = q) {
@@ -7723,7 +7721,12 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	bool has_precis = FALSE;
 	STRLEN precis = 0;
 	bool is_utf8 = FALSE;  /* is this item utf8?   */
-	
+#ifdef HAS_LDBL_SPRINTF_BUG
+	/* This is to try to fix a bug with irix/nonstop-ux/powerux and
+	   with sfio - Allen <allens@cpan.org> */
+	bool fix_ldbl_sprintf_bug = FALSE;
+#endif
+
 	char esignbuf[4];
 	U8 utf8buf[UTF8_MAXLEN+1];
 	STRLEN esignlen = 0;
@@ -7734,7 +7737,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	 * NV_DIG: mantissa takes than many decimal digits.
 	 * Plus 32: Playing safe. */
 	char ebuf[IV_DIG * 4 + NV_DIG + 32];
-        /* large enough for "%#.#f" --chip */
+	/* large enough for "%#.#f" --chip */
 	/* what about long double NVs? --jhi */
 
 	SV *vecsv = Nullsv;
@@ -7943,7 +7946,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 #endif
 	case 'l':
 #if defined(HAS_QUAD) || defined(HAS_LONG_DOUBLE)
-             if (*(q + 1) == 'l') {	/* lld, llf */
+	    if (*(q + 1) == 'l') {	/* lld, llf */
 		intsize = 'q';
 		q += 2;
 		break;
@@ -8291,10 +8294,10 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    nv = (args && !vectorize) ?
 #if LONG_DOUBLESIZE > DOUBLESIZE
 		intsize == 'q' ?
-	            va_arg(*args, long double) :
-	            va_arg(*args, double)
+		    va_arg(*args, long double) :
+		    va_arg(*args, double)
 #else
-	            va_arg(*args, double)
+		    va_arg(*args, double)
 #endif
 		: SvNVx(argsv);
 
@@ -8311,8 +8314,75 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		    need = BIT_DIGITS(i);
 	    }
 	    need += has_precis ? precis : 6; /* known default */
+
 	    if (need < width)
 		need = width;
+
+#ifdef HAS_LDBL_SPRINTF_BUG
+	    /* This is to try to fix a bug with irix/nonstop-ux/powerux and
+	       with sfio - Allen <allens@cpan.org> */
+
+#  ifdef DBL_MAX
+#    define MY_DBL_MAX DBL_MAX
+#  else /* XXX guessing! HUGE_VAL may be defined as infinity, so not using */
+#    if DOUBLESIZE >= 8
+#      define MY_DBL_MAX 1.7976931348623157E+308L
+#    else
+#      define MY_DBL_MAX 3.40282347E+38L
+#    endif
+#  endif
+
+#  ifdef HAS_LDBL_SPRINTF_BUG_LESS1 /* only between -1L & 1L - Allen */
+#    define MY_DBL_MAX_BUG 1L
+#  else
+#    define MY_DBL_MAX_BUG MY_DBL_MAX
+#  endif
+
+#  ifdef DBL_MIN
+#    define MY_DBL_MIN DBL_MIN
+#  else  /* XXX guessing! -Allen */
+#    if DOUBLESIZE >= 8
+#      define MY_DBL_MIN 2.2250738585072014E-308L
+#    else
+#      define MY_DBL_MIN 1.17549435E-38L
+#    endif
+#  endif
+
+	    if ((intsize == 'q') && (c == 'f') &&
+		((nv < MY_DBL_MAX_BUG) && (nv > -MY_DBL_MAX_BUG)) &&
+		(need < DBL_DIG)) {
+		/* it's going to be short enough that
+		 * long double precision is not needed */
+
+		if ((nv <= 0L) && (nv >= -0L))
+		    fix_ldbl_sprintf_bug = TRUE; /* 0 is 0 - easiest */
+		else {
+		    /* would use Perl_fp_class as a double-check but not
+		     * functional on IRIX - see perl.h comments */
+
+		    if ((nv >= MY_DBL_MIN) || (nv <= -MY_DBL_MIN)) {
+			/* It's within the range that a double can represent */
+#if defined(DBL_MAX) && !defined(DBL_MIN)
+			if ((nv >= ((long double)1/DBL_MAX)) ||
+			    (nv <= (-(long double)1/DBL_MAX)))
+#endif
+			fix_ldbl_sprintf_bug = TRUE;
+		    }
+		}
+		if (fix_ldbl_sprintf_bug == TRUE) {
+		    double temp;
+
+		    intsize = 0;
+		    temp = (double)nv;
+		    nv = (NV)temp;
+		}
+	    }
+
+#  undef MY_DBL_MAX
+#  undef MY_DBL_MAX_BUG
+#  undef MY_DBL_MIN
+
+#endif /* HAS_LDBL_SPRINTF_BUG */
 
 	    need += 20; /* fudge factor */
 	    if (PL_efloatsize < need) {
@@ -10030,6 +10100,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     PL_beginav		= av_dup_inc(proto_perl->Ibeginav, param);
     PL_beginav_save	= av_dup_inc(proto_perl->Ibeginav_save, param);
+    PL_checkav_save	= av_dup_inc(proto_perl->Icheckav_save, param);
     PL_endav		= av_dup_inc(proto_perl->Iendav, param);
     PL_checkav		= av_dup_inc(proto_perl->Icheckav, param);
     PL_initav		= av_dup_inc(proto_perl->Iinitav, param);
@@ -10546,16 +10617,17 @@ char *
 Perl_sv_recode_to_utf8(pTHX_ SV *sv, SV *encoding)
 {
     if (SvPOK(sv) && !DO_UTF8(sv) && SvROK(encoding)) {
-	  SV *uni;
-	  STRLEN len;
-	  char *s;
-	  dSP;
-	  ENTER;
-	  SAVETMPS;
-	  PUSHMARK(sp);
-	  EXTEND(SP, 3);
-	  XPUSHs(encoding);
-	  XPUSHs(sv);
+	int vary = FALSE;
+	SV *uni;
+	STRLEN len;
+	char *s;
+	dSP;
+	ENTER;
+	SAVETMPS;
+	PUSHMARK(sp);
+	EXTEND(SP, 3);
+	XPUSHs(encoding);
+	XPUSHs(sv);
 /* 
   NI-S 2002/07/09
   Passing sv_yes is wrong - it needs to be or'ed set of constants
@@ -10564,23 +10636,32 @@ Perl_sv_recode_to_utf8(pTHX_ SV *sv, SV *encoding)
 
   Both will default the value - let them.
   
-	  XPUSHs(&PL_sv_yes);
+	XPUSHs(&PL_sv_yes);
 */
-	  PUTBACK;
-	  call_method("decode", G_SCALAR);
-	  SPAGAIN;
-	  uni = POPs;
-	  PUTBACK;
-	  s = SvPV(uni, len);
-	  if (s != SvPVX(sv)) {
-	       SvGROW(sv, len + 1);
-	       Move(s, SvPVX(sv), len, char);
-	       SvCUR_set(sv, len);
-	       SvPVX(sv)[len] = 0;	
-	  }
-	  FREETMPS;
-	  LEAVE;
-	  SvUTF8_on(sv);
+	PUTBACK;
+	call_method("decode", G_SCALAR);
+	SPAGAIN;
+	uni = POPs;
+	PUTBACK;
+	s = SvPV(uni, len);
+	{
+	    U8 *t = (U8 *)s, *e = (U8 *)s + len;
+	    while (t < e) {
+		if ((vary = !UTF8_IS_INVARIANT(*t++)))
+		    break;
+	    }
+	}
+	if (s != SvPVX(sv)) {
+	    SvGROW(sv, len + 1);
+	    Move(s, SvPVX(sv), len, char);
+	    SvCUR_set(sv, len);
+	    SvPVX(sv)[len] = 0;	
+	}
+	FREETMPS;
+	LEAVE;
+	if (vary)
+	    SvUTF8_on(sv);
+	SvUTF8_on(sv);
     }
     return SvPVX(sv);
 }

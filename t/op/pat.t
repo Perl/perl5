@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..922\n";
+print "1..941\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2902,3 +2902,97 @@ print "e" =~ /\P{InConsonant}/ ? "ok $test\n" : "not ok $test\n"; $test++;
 }
 
 $test = 923;
+
+$a = bless qr/foo/, 'Foo';
+print(('goodfood' =~ $a ? '' : 'not '),
+	"ok $test\t# reblessed qr// matches\n");
+++$test;
+
+print(($a eq '(?-xism:foo)' ? '' : 'not '),
+	"ok $test\t# reblessed qr// stringizes\n");
+++$test;
+
+$x = "\x{3fe}";
+$z=$y = "\317\276"; # $y is byte representation of $x
+
+$a = qr/$x/;
+print(($x =~ $a ? '' : 'not '), "ok $test - utf8 interpolation in qr//\n");
+++$test;
+
+print(("a$a" =~ $x ? '' : 'not '),
+      "ok $test - stringifed qr// preserves utf8\n");
+++$test;
+
+print(("a$x" =~ /^a$a\z/ ? '' : 'not '),
+      "ok $test - interpolated qr// preserves utf8\n");
+++$test;
+
+print(("a$x" =~ /^a(??{$a})\z/ ? '' : 'not '),
+      "ok $test - postponed interpolation of qr// preserves utf8\n");
+++$test;
+
+print((length(qr/##/x) == 12 ? '' : 'not '),
+      "ok $test - ## in qr// doesn't corrupt memory [perl #17776]\n");
+++$test;
+
+{ use re 'eval';
+
+print(("$x$x" =~ /^$x(??{$x})\z/ ? '' : 'not '),
+      "ok $test - postponed utf8 string in utf8 re matches utf8\n");
+++$test;
+
+print(("$y$x" =~ /^$y(??{$x})\z/ ? '' : 'not '),
+      "ok $test - postponed utf8 string in non-utf8 re matches utf8\n");
+++$test;
+
+print(("$y$x" !~ /^$y(??{$y})\z/ ? '' : 'not '),
+      "ok $test - postponed non-utf8 string in non-utf8 re doesn't match utf8\n");
+++$test;
+
+print(("$x$x" !~ /^$x(??{$y})\z/ ? '' : 'not '),
+      "ok $test - postponed non-utf8 string in utf8 re doesn't match utf8\n");
+++$test;
+
+print(("$y$y" =~ /^$y(??{$y})\z/ ? '' : 'not '),
+      "ok $test - postponed non-utf8 string in non-utf8 re matches non-utf8\n");
+++$test;
+
+print(("$x$y" =~ /^$x(??{$y})\z/ ? '' : 'not '),
+      "ok $test - postponed non-utf8 string in utf8 re matches non-utf8\n");
+++$test;
+$y = $z; # reset $y after upgrade
+
+print(("$x$y" !~ /^$x(??{$x})\z/ ? '' : 'not '),
+      "ok $test - postponed utf8 string in utf8 re doesn't match non-utf8\n");
+++$test;
+$y = $z; # reset $y after upgrade
+
+print(("$y$y" !~ /^$y(??{$x})\z/ ? '' : 'not '),
+      "ok $test - postponed utf8 string in non-utf8 re doesn't match non-utf8\n");
+++$test;
+
+} # no re 'eval'
+
+print "# more user-defined character properties\n";
+
+sub IsSyriac1 {
+    return <<'END';
+0712	072C
+0730	074A
+END
+}
+
+print "\x{0712}" =~ /\p{IsSyriac1}/ ? "ok $test\n" : "not ok $test\n"; $test++;
+print "\x{072F}" =~ /\P{IsSyriac1}/ ? "ok $test\n" : "not ok $test\n"; $test++;
+
+sub Syriac1 {
+    return <<'END';
+0712	072C
+0730	074A
+END
+}
+
+print "\x{0712}" =~ /\p{Syriac1}/ ? "ok $test\n" : "not ok $test\n"; $test++;
+print "\x{072F}" =~ /\P{Syriac1}/ ? "ok $test\n" : "not ok $test\n"; $test++;
+
+# last test 940

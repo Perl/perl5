@@ -26,6 +26,18 @@ char *nw_get_sitelib(const char *pl);
 #include <unistd.h>
 #endif
 
+#ifdef __BEOS__
+#  define HZ 1000000
+#endif
+
+#ifndef HZ
+#  ifdef CLK_TCK
+#    define HZ CLK_TCK
+#  else
+#    define HZ 60
+#  endif
+#endif
+
 #if !defined(STANDARD_C) && !defined(HAS_GETENV_PROTOTYPE) && !defined(PERL_MICRO)
 char *getenv (char *); /* Usually in <stdlib.h> */
 #endif
@@ -294,6 +306,14 @@ perl_construct(pTHXx)
 #ifdef  USE_ENVIRON_ARRAY
     PL_origenviron = environ;
 #endif
+
+    /* Use sysconf(_SC_CLK_TCK) if available, if not
+     * available or if the sysconf() fails, use the HZ. */
+#if defined(HAS_SYSCONF) && defined(_SC_CLK_TCK)
+    PL_clocktick = sysconf(_SC_CLK_TCK);
+    if (PL_clocktick <= 0)
+#endif
+	 PL_clocktick = HZ;
 
     ENTER;
 }
@@ -628,11 +648,13 @@ perl_destruct(pTHXx)
     SvREFCNT_dec(PL_beginav_save);
     SvREFCNT_dec(PL_endav);
     SvREFCNT_dec(PL_checkav);
+    SvREFCNT_dec(PL_checkav_save);
     SvREFCNT_dec(PL_initav);
     PL_beginav = Nullav;
     PL_beginav_save = Nullav;
     PL_endav = Nullav;
     PL_checkav = Nullav;
+    PL_checkav_save = Nullav;
     PL_initav = Nullav;
 
     /* shortcuts just get cleared */
@@ -1158,7 +1180,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #ifdef MACOS_TRADITIONAL
 	    /* ignore -e for Dev:Pseudo argument */
 	    if (argv[1] && !strcmp(argv[1], "Dev:Pseudo"))
-	    	break;
+		break;
 #endif
 	    if (PL_euid != PL_uid || PL_egid != PL_gid)
 		Perl_croak(aTHX_ "No -e allowed in setuid scripts");
@@ -1319,6 +1341,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
 	}
     }
   switch_end:
+    sv_setsv(get_sv("/", TRUE), PL_rs);
 
     if (
 #ifndef SECURE_INTERNAL_GETENV
@@ -1504,7 +1527,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
 
     /* now parse the script */
 
-    SETERRNO(0,SS$_NORMAL);
+    SETERRNO(0,SS_NORMAL);
     PL_error_count = 0;
 #ifdef MACOS_TRADITIONAL
     if (gMacPerl_SyntaxError = (yyparse() || PL_error_count)) {
@@ -1532,12 +1555,6 @@ print \"  \\@INC:\\n    @INC\\n\";");
 	SvREFCNT_dec(PL_e_script);
 	PL_e_script = Nullsv;
     }
-
-/*
-   Not sure that this is still the right place to do this now that we
-   no longer use PL_nrs. HVDS 2001/09/09
-*/
-    sv_setsv(get_sv("/", TRUE), PL_rs);
 
     if (PL_do_undump)
 	my_unexec();
@@ -3274,6 +3291,9 @@ STATIC void
 S_find_beginning(pTHX)
 {
     register char *s, *s2;
+#ifdef MACOS_TRADITIONAL
+    int maclines = 0;
+#endif
 
     /* skip forward in input to the real script? */
 
@@ -3285,16 +3305,16 @@ S_find_beginning(pTHX)
 	if ((s = sv_gets(PL_linestr, PL_rsfp, 0)) == Nullch) {
 	    if (!gMacPerl_AlwaysExtract)
 		Perl_croak(aTHX_ "No Perl script found in input\n");
-		
+
 	    if (PL_doextract)			/* require explicit override ? */
 		if (!OverrideExtract(PL_origfilename))
 		    Perl_croak(aTHX_ "User aborted script\n");
 		else
 		    PL_doextract = FALSE;
-		
+
 	    /* Pater peccavi, file does not have #! */
 	    PerlIO_rewind(PL_rsfp);
-	
+
 	    break;
 	}
 #else
@@ -3317,7 +3337,18 @@ S_find_beginning(pTHX)
 			;
 	    }
 #ifdef MACOS_TRADITIONAL
+	    /* We are always searching for the #!perl line in MacPerl,
+	     * so if we find it, still keep the line count correct
+	     * by counting lines we already skipped over
+	     */
+	    for (; maclines > 0 ; maclines--)
+		PerlIO_ungetc(PL_rsfp, '\n');
+
 	    break;
+
+	/* gMacPerl_AlwaysExtract is false in MPW tool */
+	} else if (gMacPerl_AlwaysExtract) {
+	    ++maclines;
 #endif
 	}
     }
@@ -3637,6 +3668,9 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	sv_setiv(GvSV(tmpgv), (IV)PerlProc_getpid());
         SvREADONLY_on(GvSV(tmpgv));
     }
+#ifdef THREADS_HAVE_PIDS
+    PL_ppid = (IV)getppid();
+#endif
 
     /* touch @F array to prevent spurious warnings 20020415 MJD */
     if (PL_minus_a) {
@@ -3990,11 +4024,19 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 
     while (AvFILL(paramList) >= 0) {
 	cv = (CV*)av_shift(paramList);
-	if (PL_savebegin && (paramList == PL_beginav)) {
+	if (PL_savebegin) {
+	    if (paramList == PL_beginav) {
 		/* save PL_beginav for compiler */
-	    if (! PL_beginav_save)
-		PL_beginav_save = newAV();
-	    av_push(PL_beginav_save, (SV*)cv);
+		if (! PL_beginav_save)
+		    PL_beginav_save = newAV();
+		av_push(PL_beginav_save, (SV*)cv);
+	    }
+	    else if (paramList == PL_checkav) {
+		/* save PL_checkav for compiler */
+		if (! PL_checkav_save)
+		    PL_checkav_save = newAV();
+		av_push(PL_checkav_save, (SV*)cv);
+	    }
 	} else {
 	    SAVEFREESV(cv);
 	}

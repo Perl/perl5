@@ -121,7 +121,8 @@ The following standard quantifiers are recognized:
     {n,m}  Match at least n but not more than m times
 
 (If a curly bracket occurs in any other context, it is treated
-as a regular character.)  The "*" modifier is equivalent to C<{0,}>, the "+"
+as a regular character.  In particular, the lower bound
+is not optional.)  The "*" modifier is equivalent to C<{0,}>, the "+"
 modifier to C<{1,}>, and the "?" modifier to C<{0,1}>.  n and m are limited
 to integral values less than a preset limit defined when perl is built.
 This is usually 32766 on the most common platforms.  The actual limit can

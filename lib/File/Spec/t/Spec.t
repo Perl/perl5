@@ -50,7 +50,11 @@ if ($^O eq 'MacOS') {
 @tests = (
 # [ Function          ,            Expected          ,         Platform ]
 
-[ "Unix->catfile('a','b','c')", 'a/b/c'  ],
+[ "Unix->catfile('a','b','c')",         'a/b/c'  ],
+[ "Unix->catfile('a','b','./c')",       'a/b/c'  ],
+[ "Unix->catfile('./a','b','c')",       'a/b/c'  ],
+[ "Unix->catfile('c')",                 'c' ],
+[ "Unix->catfile('./c')",               'c' ],
 
 [ "Unix->splitpath('file')",            ',,file'            ],
 [ "Unix->splitpath('/d1/d2/d3/')",      ',/d1/d2/d3/,'      ],
@@ -86,8 +90,6 @@ if ($^O eq 'MacOS') {
 [ "Unix->catdir('d1','d2','d3','')",    'd1/d2/d3'  ],
 [ "Unix->catdir('','d1','d2','d3')",    '/d1/d2/d3' ],
 [ "Unix->catdir('d1','d2','d3')",       'd1/d2/d3'  ],
-
-[ "Unix->catfile('a','b','c')", 'a/b/c' ],
 
 [ "Unix->canonpath('')",                                      ''          ],
 [ "Unix->canonpath('///../../..//./././a//b/.././c/././')",   '/a/b/../c' ],
@@ -184,7 +186,12 @@ if ($^O eq 'MacOS') {
 [ "Win32->catdir('A:/d1','B:/d2','d3','')", 'A:\\d1\\B:\\d2\\d3' ],
 [ "Win32->catdir('A:/')",                   'A:\\'               ],
 
-[ "Win32->catfile('a','b','c')", 'a\\b\\c' ],
+[ "Win32->catfile('a','b','c')",        'a\\b\\c' ],
+[ "Win32->catfile('a','b','.\\c')",      'a\\b\\c'  ],
+[ "Win32->catfile('.\\a','b','c')",      'a\\b\\c'  ],
+[ "Win32->catfile('c')",                'c' ],
+[ "Win32->catfile('.\\c')",              'c' ],
+
 
 [ "Win32->canonpath('')",               ''                    ],
 [ "Win32->canonpath('a:')",             'A:'                  ],
@@ -195,8 +202,12 @@ if ($^O eq 'MacOS') {
 [ "Win32->canonpath('////')",           '\\\\\\'              ],
 [ "Win32->canonpath('//')",             '\\'                  ],
 [ "Win32->canonpath('/.')",             '\\.'                 ],
-[ "Win32->canonpath('//a/b/../../c')",  '\\\\a\\b\\..\\..\\c' ],
-[ "Win32->canonpath('//a/../../c')",    '\\\\a\\..\\..\\c'    ],
+[ "Win32->canonpath('//a/b/../../c')",  '\\\\a\\b\\c'         ],
+[ "Win32->canonpath('//a/b/c/../d')",   '\\\\a\\b\\d'         ],
+[ "Win32->canonpath('//a/b/c/../../d')",'\\\\a\\b\\d'         ],
+[ "Win32->canonpath('//a/b/c/.../d')",  '\\\\a\\b\\d'         ],
+[ "Win32->canonpath('/a/b/c/../../d')", '\\a\\d'              ],
+[ "Win32->canonpath('/a/b/c/.../d')",   '\\a\\d'              ],
 
 ## Hmmm, we should test missing and relative base paths some day...
 ## would need to cd to a known place, get the cwd() and use it I
@@ -219,12 +230,18 @@ if ($^O eq 'MacOS') {
 [ "Win32->rel2abs('temp','C:/')",                       'C:\\temp'                        ],
 [ "Win32->rel2abs('temp','C:/a')",                      'C:\\a\\temp'                     ],
 [ "Win32->rel2abs('temp','C:/a/')",                     'C:\\a\\temp'                     ],
-[ "Win32->rel2abs('../','C:/')",                        'C:\\..'                          ],
-[ "Win32->rel2abs('../','C:/a')",                       'C:\\a\\..'                       ],
+[ "Win32->rel2abs('../','C:/')",                        'C:\\'                            ],
+[ "Win32->rel2abs('../','C:/a')",                       'C:\\'                            ],
 [ "Win32->rel2abs('temp','//prague_main/work/')",       '\\\\prague_main\\work\\temp'     ],
-[ "Win32->rel2abs('../temp','//prague_main/work/')",    '\\\\prague_main\\work\\..\\temp' ],
+[ "Win32->rel2abs('../temp','//prague_main/work/')",    '\\\\prague_main\\work\\temp'     ],
 [ "Win32->rel2abs('temp','//prague_main/work')",        '\\\\prague_main\\work\\temp'     ],
-[ "Win32->rel2abs('../','//prague_main/work')",         '\\\\prague_main\\work\\..'       ],
+[ "Win32->rel2abs('../','//prague_main/work')",         '\\\\prague_main\\work'           ],
+
+[ "VMS->catfile('a','b','c')",         '[.a.b]c'  ],
+[ "VMS->catfile('a','b','[]c')",       '[.a.b]c'  ],
+[ "VMS->catfile('[.a]','b','c')",       '[.a.b]c'  ],
+[ "VMS->catfile('c')",                 'c' ],
+[ "VMS->catfile('[]c')",               'c' ],
 
 [ "VMS->splitpath('file')",                                       ',,file'                                   ],
 [ "VMS->splitpath('[d1.d2.d3]')",                                 ',[d1.d2.d3],'                               ],
@@ -294,7 +311,12 @@ if ($^O eq 'MacOS') {
 [ "VMS->rel2abs('[t1]','[t1.t2.t3]')",           '[t1]'             ],
 
 [ "OS2->catdir('A:/d1','B:/d2','d3','')", 'A:/d1/B:/d2/d3' ],
+
 [ "OS2->catfile('a','b','c')",            'a/b/c'          ],
+[ "OS2->catfile('a','b','./c')",          'a/b/c'  ],
+[ "OS2->catfile('./a','b','c')",          'a/b/c'  ],
+[ "OS2->catfile('c')",                    'c' ],
+[ "OS2->catfile('./c')",                  'c' ],
 
 
 [ "Mac->catpath('','','')",              ''                ],

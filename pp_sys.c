@@ -457,7 +457,7 @@ PP(pp_die)
     }
     else {
 	tmpsv = TOPs;
-        tmps = (SvROK(tmpsv) && PL_in_eval) ? Nullch : SvPV(tmpsv, len);
+        tmps = SvROK(tmpsv) ? Nullch : SvPV(tmpsv, len);
     }
     if (!tmps || !len) {
   	SV *error = ERRSV;
@@ -1447,7 +1447,7 @@ PP(pp_prtf)
     if (!(io = GvIO(gv))) {
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
 	    report_evil_fh(gv, io, PL_op->op_type);
-	SETERRNO(EBADF,RMS$_IFI);
+	SETERRNO(EBADF,RMS_IFI);
 	goto just_say_no;
     }
     else if (!(fp = IoOFP(io))) {
@@ -1469,7 +1469,7 @@ PP(pp_prtf)
 	    else if (ckWARN(WARN_CLOSED))
 		report_evil_fh(gv, io, PL_op->op_type);
 	}
-	SETERRNO(EBADF,IoIFP(io)?RMS$_FAC:RMS$_IFI);
+	SETERRNO(EBADF,IoIFP(io)?RMS_FAC:RMS_IFI);
 	goto just_say_no;
     }
     else {
@@ -2121,7 +2121,7 @@ PP(pp_truncate)
 	if (result)
 	    RETPUSHYES;
 	if (!errno)
-	    SETERRNO(EBADF,RMS$_IFI);
+	    SETERRNO(EBADF,RMS_IFI);
 	RETPUSHUNDEF;
     }
 #else
@@ -2148,7 +2148,7 @@ PP(pp_ioctl)
     if (!io || !argsv || !IoIFP(io)) {
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
 	    report_evil_fh(gv, io, PL_op->op_type);
-	SETERRNO(EBADF,RMS$_IFI);	/* well, sort of... */
+	SETERRNO(EBADF,RMS_IFI);	/* well, sort of... */
 	RETPUSHUNDEF;
     }
 
@@ -2236,7 +2236,7 @@ PP(pp_flock)
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
 	    report_evil_fh(gv, io, PL_op->op_type);
 	value = 0;
-	SETERRNO(EBADF,RMS$_IFI);
+	SETERRNO(EBADF,RMS_IFI);
     }
     PUSHi(value);
     RETURN;
@@ -2266,7 +2266,7 @@ PP(pp_socket)
 	    report_evil_fh(gv, io, PL_op->op_type);
 	if (IoIFP(io))
 	    do_close(gv, FALSE);
-	SETERRNO(EBADF,LIB$_INVARG);
+	SETERRNO(EBADF,LIB_INVARG);
 	RETPUSHUNDEF;
     }
 
@@ -2417,7 +2417,7 @@ PP(pp_bind)
 nuts:
     if (ckWARN(WARN_CLOSED))
 	report_evil_fh(gv, io, PL_op->op_type);
-    SETERRNO(EBADF,SS$_IVCHAN);
+    SETERRNO(EBADF,SS_IVCHAN);
     RETPUSHUNDEF;
 #else
     DIE(aTHX_ PL_no_sock_func, "bind");
@@ -2447,7 +2447,7 @@ PP(pp_connect)
 nuts:
     if (ckWARN(WARN_CLOSED))
 	report_evil_fh(gv, io, PL_op->op_type);
-    SETERRNO(EBADF,SS$_IVCHAN);
+    SETERRNO(EBADF,SS_IVCHAN);
     RETPUSHUNDEF;
 #else
     DIE(aTHX_ PL_no_sock_func, "connect");
@@ -2473,7 +2473,7 @@ PP(pp_listen)
 nuts:
     if (ckWARN(WARN_CLOSED))
 	report_evil_fh(gv, io, PL_op->op_type);
-    SETERRNO(EBADF,SS$_IVCHAN);
+    SETERRNO(EBADF,SS_IVCHAN);
     RETPUSHUNDEF;
 #else
     DIE(aTHX_ PL_no_sock_func, "listen");
@@ -2540,7 +2540,7 @@ PP(pp_accept)
 nuts:
     if (ckWARN(WARN_CLOSED))
 	report_evil_fh(ggv, ggv ? GvIO(ggv) : 0, PL_op->op_type);
-    SETERRNO(EBADF,SS$_IVCHAN);
+    SETERRNO(EBADF,SS_IVCHAN);
 
 badexit:
     RETPUSHUNDEF;
@@ -2567,7 +2567,7 @@ PP(pp_shutdown)
 nuts:
     if (ckWARN(WARN_CLOSED))
 	report_evil_fh(gv, io, PL_op->op_type);
-    SETERRNO(EBADF,SS$_IVCHAN);
+    SETERRNO(EBADF,SS_IVCHAN);
     RETPUSHUNDEF;
 #else
     DIE(aTHX_ PL_no_sock_func, "shutdown");
@@ -2646,7 +2646,7 @@ PP(pp_ssockopt)
 nuts:
     if (ckWARN(WARN_CLOSED))
 	report_evil_fh(gv, io, optype);
-    SETERRNO(EBADF,SS$_IVCHAN);
+    SETERRNO(EBADF,SS_IVCHAN);
 nuts2:
     RETPUSHUNDEF;
 
@@ -2719,7 +2719,7 @@ PP(pp_getpeername)
 nuts:
     if (ckWARN(WARN_CLOSED))
 	report_evil_fh(gv, io, optype);
-    SETERRNO(EBADF,SS$_IVCHAN);
+    SETERRNO(EBADF,SS_IVCHAN);
 nuts2:
     RETPUSHUNDEF;
 
@@ -3325,7 +3325,7 @@ PP(pp_fttext)
 		gv = cGVOP_gv;
 		report_evil_fh(gv, GvIO(gv), PL_op->op_type);
 	    }
-	    SETERRNO(EBADF,RMS$_IFI);
+	    SETERRNO(EBADF,RMS_IFI);
 	    RETPUSHUNDEF;
 	}
     }
@@ -3654,21 +3654,21 @@ S_dooneliner(pTHX_ char *cmd, char *filename)
 #define EACCES EPERM
 #endif
 	    if (instr(s, "cannot make"))
-		SETERRNO(EEXIST,RMS$_FEX);
+		SETERRNO(EEXIST,RMS_FEX);
 	    else if (instr(s, "existing file"))
-		SETERRNO(EEXIST,RMS$_FEX);
+		SETERRNO(EEXIST,RMS_FEX);
 	    else if (instr(s, "ile exists"))
-		SETERRNO(EEXIST,RMS$_FEX);
+		SETERRNO(EEXIST,RMS_FEX);
 	    else if (instr(s, "non-exist"))
-		SETERRNO(ENOENT,RMS$_FNF);
+		SETERRNO(ENOENT,RMS_FNF);
 	    else if (instr(s, "does not exist"))
-		SETERRNO(ENOENT,RMS$_FNF);
+		SETERRNO(ENOENT,RMS_FNF);
 	    else if (instr(s, "not empty"))
-		SETERRNO(EBUSY,SS$_DEVOFFLINE);
+		SETERRNO(EBUSY,SS_DEVOFFLINE);
 	    else if (instr(s, "cannot access"))
-		SETERRNO(EACCES,RMS$_PRV);
+		SETERRNO(EACCES,RMS_PRV);
 	    else
-		SETERRNO(EPERM,RMS$_PRV);
+		SETERRNO(EPERM,RMS_PRV);
 	    return 0;
 	}
 	else {	/* some mkdirs return no failure indication */
@@ -3678,7 +3678,7 @@ S_dooneliner(pTHX_ char *cmd, char *filename)
 	    if (anum)
 		SETERRNO(0,0);
 	    else
-		SETERRNO(EACCES,RMS$_PRV);	/* a guess */
+		SETERRNO(EACCES,RMS_PRV);	/* a guess */
 	}
 	return anum;
     }
@@ -3714,7 +3714,7 @@ PP(pp_mkdir)
      * -d, chdir(), chmod(), chown(), chroot(), fcntl()?,
      * (mkdir()), opendir(), rename(), rmdir(), stat(). --jhi */
     if (len > 1 && tmps[len-1] == '/') {
-	while (tmps[len] == '/' && len > 1)
+	while (tmps[len-1] == '/' && len > 1)
 	    len--;
 	tmps = savepvn(tmps, len);
 	copy = TRUE;
@@ -3772,7 +3772,7 @@ PP(pp_open_dir)
     RETPUSHYES;
 nope:
     if (!errno)
-	SETERRNO(EBADF,RMS$_DIR);
+	SETERRNO(EBADF,RMS_DIR);
     RETPUSHUNDEF;
 #else
     DIE(aTHX_ PL_no_dir_func, "opendir");
@@ -3827,7 +3827,7 @@ PP(pp_readdir)
 
 nope:
     if (!errno)
-	SETERRNO(EBADF,RMS$_ISI);
+	SETERRNO(EBADF,RMS_ISI);
     if (GIMME == G_ARRAY)
 	RETURN;
     else
@@ -3858,7 +3858,7 @@ PP(pp_telldir)
     RETURN;
 nope:
     if (!errno)
-	SETERRNO(EBADF,RMS$_ISI);
+	SETERRNO(EBADF,RMS_ISI);
     RETPUSHUNDEF;
 #else
     DIE(aTHX_ PL_no_dir_func, "telldir");
@@ -3881,7 +3881,7 @@ PP(pp_seekdir)
     RETPUSHYES;
 nope:
     if (!errno)
-	SETERRNO(EBADF,RMS$_ISI);
+	SETERRNO(EBADF,RMS_ISI);
     RETPUSHUNDEF;
 #else
     DIE(aTHX_ PL_no_dir_func, "seekdir");
@@ -3902,7 +3902,7 @@ PP(pp_rewinddir)
     RETPUSHYES;
 nope:
     if (!errno)
-	SETERRNO(EBADF,RMS$_ISI);
+	SETERRNO(EBADF,RMS_ISI);
     RETPUSHUNDEF;
 #else
     DIE(aTHX_ PL_no_dir_func, "rewinddir");
@@ -3932,7 +3932,7 @@ PP(pp_closedir)
     RETPUSHYES;
 nope:
     if (!errno)
-	SETERRNO(EBADF,RMS$_IFI);
+	SETERRNO(EBADF,RMS_IFI);
     RETPUSHUNDEF;
 #else
     DIE(aTHX_ PL_no_dir_func, "closedir");
@@ -3960,6 +3960,9 @@ PP(pp_fork)
 	    sv_setiv(GvSV(tmpgv), (IV)PerlProc_getpid());
             SvREADONLY_on(GvSV(tmpgv));
         }
+#ifdef THREADS_HAVE_PIDS
+	PL_ppid = (IV)getppid();
+#endif
 	hv_clear(PL_pidstatus);	/* no kids, so don't wait for 'em */
     }
     PUSHi(childpid);
@@ -4048,24 +4051,14 @@ PP(pp_system)
     I32 did_pipes = 0;
 
     if (PL_tainting) {
-	int some_arg_tainted = 0;
 	TAINT_ENV();
 	while (++MARK <= SP) {
 	    (void)SvPV_nolen(*MARK);      /* stringify for taint check */
-	    if (PL_tainted) {
-		some_arg_tainted = 1;
+	    if (PL_tainted)
 		break;
-	    }
 	}
 	MARK = ORIGMARK;
-	/* XXX Remove warning at end of deprecation cycle --RD 2002-02  */
-	if (SP - MARK == 1) {
-	    TAINT_PROPER("system");
-	}
-	else if (some_arg_tainted && ckWARN2(WARN_TAINT, WARN_DEPRECATED)) {
-	    Perl_warner(aTHX_ packWARN2(WARN_TAINT, WARN_DEPRECATED),
-		"Use of tainted arguments in %s is deprecated", "system");
-	}
+	TAINT_PROPER("system");
     }
     PERL_FLUSHALL_FOR_CHILD;
 #if (defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(OS2) || defined(PERL_MICRO)
@@ -4186,24 +4179,14 @@ PP(pp_exec)
     STRLEN n_a;
 
     if (PL_tainting) {
-	int some_arg_tainted = 0;
 	TAINT_ENV();
 	while (++MARK <= SP) {
 	    (void)SvPV_nolen(*MARK);      /* stringify for taint check */
-	    if (PL_tainted) {
-		some_arg_tainted = 1;
+	    if (PL_tainted)
 		break;
-	    }
 	}
 	MARK = ORIGMARK;
-	/* XXX Remove warning at end of deprecation cycle --RD 2002-02  */
-	if (SP - MARK == 1) {
-	    TAINT_PROPER("exec");
-	}
-	else if (some_arg_tainted && ckWARN2(WARN_TAINT, WARN_DEPRECATED)) {
-	    Perl_warner(aTHX_ packWARN2(WARN_TAINT, WARN_DEPRECATED),
-		"Use of tainted arguments in %s is deprecated", "exec");
-	}
+	TAINT_PROPER("exec");
     }
     PERL_FLUSHALL_FOR_CHILD;
     if (PL_op->op_flags & OPf_STACKED) {
@@ -4259,7 +4242,11 @@ PP(pp_getppid)
 {
 #ifdef HAS_GETPPID
     dSP; dTARGET;
+#   ifdef THREADS_HAVE_PIDS
+    XPUSHi( PL_ppid );
+#   else
     XPUSHi( getppid() );
+#   endif
     RETURN;
 #else
     DIE(aTHX_ PL_no_func, "getppid");
@@ -4364,26 +4351,6 @@ PP(pp_time)
     RETURN;
 }
 
-/* XXX The POSIX name is CLK_TCK; it is to be preferred
-   to HZ.  Probably.  For now, assume that if the system
-   defines HZ, it does so correctly.  (Will this break
-   on VMS?)
-   Probably we ought to use _sysconf(_SC_CLK_TCK), if
-   it's supported.    --AD  9/96.
-*/
-
-#ifdef __BEOS__
-#  define HZ 1000000
-#endif
-
-#ifndef HZ
-#  ifdef CLK_TCK
-#    define HZ CLK_TCK
-#  else
-#    define HZ 60
-#  endif
-#endif
-
 PP(pp_tms)
 {
 #ifdef HAS_TIMES
@@ -4397,11 +4364,11 @@ PP(pp_tms)
                                                    /* is returned.                   */
 #endif
 
-    PUSHs(sv_2mortal(newSVnv(((NV)PL_timesbuf.tms_utime)/HZ)));
+    PUSHs(sv_2mortal(newSVnv(((NV)PL_timesbuf.tms_utime)/(NV)PL_clocktick)));
     if (GIMME == G_ARRAY) {
-	PUSHs(sv_2mortal(newSVnv(((NV)PL_timesbuf.tms_stime)/HZ)));
-	PUSHs(sv_2mortal(newSVnv(((NV)PL_timesbuf.tms_cutime)/HZ)));
-	PUSHs(sv_2mortal(newSVnv(((NV)PL_timesbuf.tms_cstime)/HZ)));
+	PUSHs(sv_2mortal(newSVnv(((NV)PL_timesbuf.tms_stime)/(NV)PL_clocktick)));
+	PUSHs(sv_2mortal(newSVnv(((NV)PL_timesbuf.tms_cutime)/(NV)PL_clocktick)));
+	PUSHs(sv_2mortal(newSVnv(((NV)PL_timesbuf.tms_cstime)/(NV)PL_clocktick)));
     }
     RETURN;
 #else

@@ -170,6 +170,10 @@ fill in its choices
 
 Follow the messages ... and you're done.
 
+If you like a more web-like approach, a good start point can be
+http://www14.software.ibm.com/webapp/download/downloadaz.jsp and click
+"C for AIX", and follow the instructions.
+
 =head2 Using GNU's gcc for building perl
 
 Using gcc-3.0 (tested with 3.0.4) now works out of the box, as do

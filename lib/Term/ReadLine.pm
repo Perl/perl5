@@ -1,7 +1,7 @@
 =head1 NAME
 
-Term::ReadLine - Perl interface to various C<readline> packages. If
-no real package is found, substitutes stubs instead of basic functions.
+Term::ReadLine - Perl interface to various C<readline> packages.
+If no real package is found, substitutes stubs instead of basic functions.
 
 =head1 SYNOPSIS
 

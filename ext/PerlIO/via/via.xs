@@ -143,11 +143,15 @@ PerlIOVia_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg,
 		s->stash = gv_stashpvn(SvPVX(s->obj), pkglen + 13, FALSE);
 	    }
 	    if (s->stash) {
-		SV *modesv =
-		    (mode) ? sv_2mortal(newSVpvn(mode, strlen(mode))) :
-		    Nullsv;
-		SV *result =
-		    PerlIOVia_method(aTHX_ f, MYMethod(PUSHED), G_SCALAR,
+		char lmode[8];
+		SV *modesv;
+		SV *result;
+		if (!mode) {
+		    /* binmode() passes NULL - so find out what mode is */
+		    mode = PerlIO_modestr(f,lmode);
+		}
+		modesv = sv_2mortal(newSVpvn(mode, strlen(mode)));
+		result = PerlIOVia_method(aTHX_ f, MYMethod(PUSHED), G_SCALAR,
 				     modesv, Nullsv);
 		if (result) {
 		    if (sv_isobject(result)) {

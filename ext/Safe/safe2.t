@@ -38,7 +38,7 @@ $cpt = new Safe or die;
 $cpt = new Safe "Root";
 
 $cpt->reval(q{ system("echo not ok 1"); });
-if ($@ =~ /^system trapped by operation mask/) {
+if ($@ =~ /^'system' trapped by operation mask/) {
     print "ok 1\n";
 } else {
     print "#$@" if $@;

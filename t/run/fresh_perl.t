@@ -616,9 +616,11 @@ for (@locales) {
 }
 EXPECT
 ########
+# [ID 20001202.002] and change #8066 added 'at -e line 1';
+# reversed again as a result of [perl #17763]
 die qr(x)
 EXPECT
-(?-xism:x) at - line 1.
+(?-xism:x)
 ########
 # 20001210.003 mjd@plover.com
 format REMITOUT_TOP =
@@ -844,3 +846,17 @@ ok 1
 ######## [ID 20020623.009] nested eval/sub segfaults
 $eval = eval 'sub { eval "sub { %S }" }';
 $eval->({});
+######## [perl #17951] Strange UTF error
+-W
+# From: "John Kodis" <kodis@mail630.gsfc.nasa.gov>
+# Newsgroups: comp.lang.perl.moderated
+# Subject: Strange UTF error
+# Date: Fri, 11 Oct 2002 16:19:58 -0400
+# Message-ID: <pan.2002.10.11.20.19.48.407190@mail630.gsfc.nasa.gov>
+$_ = "foobar\n";
+utf8::upgrade($_); # the original code used a UTF-8 locale (affects STDIN)
+# matching is actually irrelevant: avoiding several dozen of these
+# Illegal hexadecimal digit '	' ignored at /usr/lib/perl5/5.8.0/utf8_heavy.pl line 152
+# is what matters.
+/^([[:digit:]]+)/;
+EXPECT

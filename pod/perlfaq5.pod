@@ -81,6 +81,31 @@ proper text file, so this may report one fewer line than you expect.
 
 This assumes no funny games with newline translations.
 
+=head2 How can I use Perl's C<-i> option from within a program?
+
+C<-i> sets the value of Perl's C<$^I> variable, which in turn affects
+the behavior of C<< <> >>; see L<perlrun> for more details.  By
+modifying the appropriate variables directly, you can get the same
+behavior within a larger program.  For example:
+
+     # ...
+     {
+        local($^I, @ARGV) = ('.orig', glob("*.c"));
+        while (<>) {
+           if ($. == 1) {
+               print "This line should appear at the top of each file\n";
+           }
+           s/\b(p)earl\b/${1}erl/i;        # Correct typos, preserving case
+           print;
+           close ARGV if eof;              # Reset $.
+        }
+     }
+     # $^I and @ARGV return to their old values here
+
+This block modifies all the C<.c> files in the current directory,
+leaving a backup of the original data from each file in a new
+C<.c.orig> file.
+
 =head2 How do I make a temporary file name?
 
 Use the File::Temp module, see L<File::Temp> for more information.

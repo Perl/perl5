@@ -843,13 +843,15 @@ Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, MAGIC *mg, I32 nest, I32 maxne
 
         if (mg->mg_flags) {
             Perl_dump_indent(aTHX_ level, file, "    MG_FLAGS = 0x%02X\n", mg->mg_flags);
-	    if (mg->mg_flags & MGf_TAINTEDDIR)
+	    if (mg->mg_type == PERL_MAGIC_envelem &&
+		mg->mg_flags & MGf_TAINTEDDIR)
 	        Perl_dump_indent(aTHX_ level, file, "      TAINTEDDIR\n");
 	    if (mg->mg_flags & MGf_REFCOUNTED)
 	        Perl_dump_indent(aTHX_ level, file, "      REFCOUNTED\n");
             if (mg->mg_flags & MGf_GSKIP)
 	        Perl_dump_indent(aTHX_ level, file, "      GSKIP\n");
-	    if (mg->mg_flags & MGf_MINMATCH)
+	    if (mg->mg_type == PERL_MAGIC_regex_global &&
+		mg->mg_flags & MGf_MINMATCH)
 	        Perl_dump_indent(aTHX_ level, file, "      MINMATCH\n");
         }
 	if (mg->mg_obj) {

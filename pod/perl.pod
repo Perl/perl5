@@ -128,6 +128,7 @@ For ease of access, the Perl manual has been split up into several sections.
 
     perlhist		Perl history records
     perldelta		Perl changes since previous version
+    perl573delta	Perl changes in version 5.7.3
     perl572delta	Perl changes in version 5.7.2
     perl571delta	Perl changes in version 5.7.1
     perl570delta	Perl changes in version 5.7.0
@@ -166,6 +167,7 @@ For ease of access, the Perl manual has been split up into several sections.
     perlnetware		Perl notes for NetWare
     perlos2		Perl notes for OS/2
     perlos390		Perl notes for OS/390
+    perlos400		Perl notes for OS/400
     perlplan9		Perl notes for Plan 9
     perlqnx		Perl notes for QNX
     perlsolaris 	Perl notes for Solaris
@@ -262,7 +264,8 @@ L<perlguts>, and L<xsubpp>.
 
 =item *
 
-roll-your-own magic variables (including multiple simultaneous DBM implementations)
+roll-your-own magic variables (including multiple simultaneous DBM
+implementations)
 
 Described in L<perltie> and L<AnyDBM_File>.
 
@@ -287,21 +290,15 @@ and L<perlbot>.
 
 =item *
 
-compilability into C code or Perl bytecode
-
-Described in L<B> and L<B::Bytecode>.
-
-=item *
-
 support for light-weight processes (threads)
 
-Described in L<perlthrtut> and L<Thread>.
+Described in L<perlthrtut> and L<threads>.
 
 =item *
 
-support for internationalization, localization, and Unicode 
+support for Unicode, internationalization, and localization
 
-Described in L<perllocale> and L<utf8>.
+Described in L<perluniintro>, L<perllocale> and L<Locale::Maketext>.
 
 =item *
 

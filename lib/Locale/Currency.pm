@@ -108,6 +108,7 @@ sub all_currency_names
     my $code;
     my $currency;
 
+    local $_;
 
     while (<DATA>)
     {

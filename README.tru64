@@ -63,6 +63,24 @@ patch is expected sometime after perl 5.8.0 is released.  If your libc
 has not yet been patched, you'll get a warning from Configure when
 selecting long doubles.
 
+=head2 db-hash.t failing on Tru64
+
+The Berkeley DB 1.85 coming with the Tru64 is unfortunately buggy.
+In general in Tru64 V4.* it seemed to be more stable, but in V5.*
+something broke (even though the DB stayed at release 1.85) and
+the DB_File extension test db-hash.t may fail by dumping core after
+the subtest 21.  There really is no good cure as of Tru64 V5.1A expect
+installing a newer Berkeley DB and supplying the right directories for
+-Dlocincpth=/some/include and -Dloclibpth=/some/lib when running Configure.
+
+You can also work around the problem by disabling the DB_File by
+specifying -Ui_db to Configure, and then using the BerkeleyFile module
+from CPAN instead of DB_File.  The BerkeleyFile works with Berkeley DB
+versions 2.* or greater.
+
+The Berkeley DB 4.0.14 has been tested with Tru64 V5.1A and found
+to work.  The latest Berkeley DB can be found from F<http://www.sleepycat.com>.
+
 =head2 64-bit Perl on Tru64
 
 In Tru64 Perl's integers are automatically 64-bit wide, there is

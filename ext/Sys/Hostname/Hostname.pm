@@ -47,7 +47,7 @@ sub hostname {
 
     # rats!
     $host = '';
-    Carp::croak "Cannot get host name of local machine";  
+    croak "Cannot get host name of local machine";  
 
   }
   elsif ($^O eq 'MSWin32') {
@@ -110,7 +110,7 @@ sub hostname {
     }
 
     # bummer
-    || Carp::croak "Cannot get host name of local machine";  
+    || croak "Cannot get host name of local machine";  
 
     # remove garbage 
     $host =~ tr/\0\r\n//d;

@@ -165,6 +165,11 @@ or a hash or array slice, such as:
 name, and not a subroutine call.  C<exists &sub()> will generate this
 error.
 
+=item '%s' trapped by operation mask
+
+(F) You tried to use an operator from a Safe compartment in which it's
+disallowed. See L<Safe>.
+
 =item Argument "%s" isn't numeric%s
 
 (W numeric) The indicated string was fed as an argument to an operator
@@ -466,6 +471,24 @@ subroutine definition ahead of the call to get proper prototype
 checking.  Alternatively, if you are certain that you're calling the
 function correctly, you may put an ampersand before the name to avoid
 the warning.  See L<perlsub>.
+
+=item Can only compress unsigned integers
+
+(F) An argument to pack("w",...) was not an integer.  The BER compressed
+integer format can only be used with positive integers, and you attempted
+to compress something else.  See L<perlfunc/pack>.
+
+=item Cannot compress integer
+
+(F) An argument to pack("w",...) was too large to compress.  The BER
+compressed integer format can only be used with positive integers, and you
+attempted to compress Infinity or a very large number (> 1e308).
+See L<perlfunc/pack>.
+
+=item Cannot compress negative numbers
+
+(F) An argument to pack("w",...) was negative.  The BER compressed integer
+format can only be used with positive integers.  See L<perlfunc/pack>.
 
 =item / cannot take a count
 
@@ -1498,12 +1521,6 @@ PDP-11 or something?
 to be a read-write filehandle, you needed to open it with "+<" or "+>"
 or "+>>" instead of with "<" or nothing.  If you intended only to write
 the file, use ">" or ">>".  See L<perlfunc/open>.
-The warning will also occur if STDOUT (file descriptor 1) or STDERR
-(file descriptor 2) is opened for input, this is a pre-emptive warning in
-case some other part of your program or a child process is expecting STDOUT
-and STDERR to be writable. This can happen accidentally if you
-C<close(STDOUT)> or STDERR and then C<open> an unrelated handle which
-will resuse the lowest numbered available descriptor.
 
 =item Filehandle %s opened only for output
 
@@ -1511,12 +1528,17 @@ will resuse the lowest numbered available descriptor.
 If you intended it to be a read/write filehandle, you needed to open it
 with "+<" or "+>" or "+>>" instead of with "<" or nothing.  If you
 intended only to read from the file, use "<".  See L<perlfunc/open>.
-The warning will also occur if STDIN (file descriptor 0) is opened
-for output - this is a pre-emptive warning in case some other part of your
-program or a child process is expecting STDIN to be readable.
-This can happen accidentally if you C<close(STDIN)> and then C<open> an
-unrelated handle which will resuse the lowest numbered available
-descriptor.
+
+=item Filehandle %s reopened as %s only for input
+
+(W io) You opened for reading a filehandle that got the same filehandle id
+as STDOUT or STDERR. This occured because you closed STDOUT or STDERR
+previously.
+
+=item Filehandle STDIN reopened as %s only for output
+
+(W io) You opened for writing a filehandle that got the same filehandle id
+as STDIN. This occured because you closed STDIN previously.
 
 =item Final $ should be \$ or $name
 
@@ -1705,6 +1727,11 @@ to your Perl administrator.
 (W syntax) An illegal character was found in a prototype declaration.  Legal
 characters in prototypes are $, @, %, *, ;, [, ], &, and \.
 
+=item Illegal declaration of anonymous subroutine
+
+(F) When using the C<sub> keyword to construct an anonymous subroutine,
+you must always specify a block of code. See L<perlsub>.
+
 =item Illegal division by zero
 
 (F) You tried to divide a number by 0.  Either something was wrong in
@@ -1858,7 +1885,7 @@ C<{}> from your ending C<\x{}> - C<\x> without the curly braces can go only
 up to C<ff>.  The <-- HERE shows in the regular expression about where the
 problem was discovered.  See L<perlre>.
 
-=item Invalid [] range "%s" in transliteration operator
+=item Invalid range "%s" in transliteration operator
 
 (F) The range specified in the tr/// or y/// operator had a minimum
 character greater than the maximum character.  See L<perlop>.
@@ -2954,6 +2981,18 @@ commas if you don't want them to appear in your data:
 Perl guesses a reasonable buffer size, but puts a sentinel byte at the
 end of the buffer just in case.  This sentinel byte got clobbered, and
 Perl assumes that memory is now corrupted.  See L<perlfunc/ioctl>.
+
+=item Possible precedence problem on bitwise %c operator
+
+(W precedence) Your program uses a bitwise logical operator in conjunction
+with a numeric comparison operator, like this :
+
+    if ($x & $y == 0) { ... }
+
+This expression is actually equivalent to C<$x & ($y == 0)>, due to the
+higher precedence of C<==>. This is probably not what you want. (If you
+really meant to write this, disable the warning, or, better, write
+C<$x & ($y == 0 ? 1 : 0)>).
 
 =item Possible unintended interpolation of %s in string
 

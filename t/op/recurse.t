@@ -8,7 +8,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = qw(. ../lib);
     require "test.pl";
-    plan(tests => 26);
+    plan(tests => 28);
 }
 
 use strict;
@@ -112,6 +112,9 @@ is(takeuchi($x, $y, $z), $z + 1, "takeuchi($x, $y, $z) == $z + 1");
     is(sillysum(1000), 1000*1001/2, "recursive sum of 1..1000");
 }
 
-
-
-
+# check ok for recursion depth > 65536
+is(runperl(
+	nolib => 1,
+	prog => q{$d=0; $e=1; sub c { ++$d; if ($d > 66000) { $e=0 } else { c(); c() unless $d % 32768 } --$d } c(); exit $e},
+), '', "64K deep recursion - no output expected");
+is($?, 0, "64K deep recursion - no coredump expected");

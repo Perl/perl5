@@ -51,7 +51,8 @@ esac
 # Intuiting the existence of system calls under AIX is difficult,
 # at best; the safest technique is to find them empirically.
 
-# AIX 4.3.* and above default to using nm for symbol extraction
+# AIX 4.3.* and above default to letting Configure test if nm
+# extraction will work.
 case "$osvers" in
    3.*|4.1.*|4.2.*)
       case "$usenm" in
@@ -62,9 +63,6 @@ case "$osvers" in
 	  esac
       ;;
    *)
-      case "$usenm" in
-	  '') usenm='true'
-	  esac
       case "$usenativedlopen" in
 	  '') usenativedlopen='true'
 	  esac
@@ -210,6 +208,28 @@ regcomp_cflags='optimize='
 esac
 # the required -bE:$installarchlib/CORE/perl.exp is added by
 # libperl.U (Configure) later.
+
+case "$cc" in
+*gcc*) ;;
+cc*|xlc*) # cc should've been set by line 116 or so if empty.
+	if test ! -x /usr/bin/$cc -a -x /usr/vac/bin/$cc; then
+		case ":$PATH:" in
+		*:/usr/vac/bin:*) ;;
+		*) cat <<EOF
+
+***
+*** You either implicitly or explicitly specified an IBM C compiler,
+*** but you do not seem to have one in /usr/bin, but you seem to have
+*** the VAC installed in /usr/vac, but you do not have the /usr/vac/bin
+*** in your PATH.  I suggest adding that and retrying Configure.
+***
+EOF
+		   exit 1
+		   ;;
+		esac
+	fi
+	;;
+esac
 
 case "$ldlibpthname" in
 '') ldlibpthname=LIBPATH ;;
@@ -514,5 +534,38 @@ else
 	    fi
 	esac
 fi
+
+case "$PASE" in
+define)
+	case "$prefix" in
+	'') prefix=/QOpenSys/perl ;;
+	esac
+	cat >&4 <<EOF
+
+***
+*** You seem to be compiling in AIX for the OS/400 PASE environment.
+*** I'm not going to use the AIX bind, nsl, and possible util libraries, then.
+*** I'm also not going to install perl as /usr/bin/perl.
+*** Perl will be installed under $prefix.
+*** For instructions how to install this build from AIX to PASE,
+*** see the file README.os400.  Accept the "aix" for the question
+*** about "Operating system name".
+***
+EOF
+	set `echo " $libswanted " | sed -e 's@ bind @ @' -e 's@ nsl @ @' -e 's@ util @ @'`
+	shift
+	libswanted="$*"
+	installusrbinperl="$undef"
+
+	# V5R1 doesn't have this (V5R2 does), without knowing
+	# which one we have it's safer to be pessimistic.
+	# Cwd will work fine even without fchdir(), but if
+	# V5R1 tries to use code compiled assuming fchdir(),
+	# lots of grief will issue forth from Cwd.
+	case "$d_fchdir" in
+	'') d_fchdir="$undef" ;;
+	esac
+	;;
+esac
 
 # EOF

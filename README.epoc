@@ -16,7 +16,7 @@ EPOC is an OS for palmtops and mobile phones. For more informations look at:
 http://www.symbian.com/
 
 This is a port of perl to the epocemx SDK by Eberhard Mattes, which
-itselfs uses the SDK by symbian. Essentially epocemx it is a POSIX
+itself uses the SDK by symbian. Essentially epocemx it is a POSIX
 look alike environment for the EPOC OS. For more informations look at: 
 http://www.windhager.de/~mattes/epocemx/
 
@@ -91,7 +91,7 @@ binmode does not exist. (No CR LF to LF translation for text files)
 
 EPOC does not handle the notion of current drive and current
 directory very well (i.e. not at all, but it tries hard to emulate
-one) See PATH.
+one). See PATH.
 
 =item *
 

@@ -210,6 +210,8 @@
 #define PL_bufend		(PERL_GET_INTERP->Ibufend)
 #define PL_bufptr		(PERL_GET_INTERP->Ibufptr)
 #define PL_checkav		(PERL_GET_INTERP->Icheckav)
+#define PL_checkav_save		(PERL_GET_INTERP->Icheckav_save)
+#define PL_clocktick		(PERL_GET_INTERP->Iclocktick)
 #define PL_collation_ix		(PERL_GET_INTERP->Icollation_ix)
 #define PL_collation_name	(PERL_GET_INTERP->Icollation_name)
 #define PL_collation_standard	(PERL_GET_INTERP->Icollation_standard)
@@ -512,6 +514,8 @@
 #define PL_bufend		(vTHX->Ibufend)
 #define PL_bufptr		(vTHX->Ibufptr)
 #define PL_checkav		(vTHX->Icheckav)
+#define PL_checkav_save		(vTHX->Icheckav_save)
+#define PL_clocktick		(vTHX->Iclocktick)
 #define PL_collation_ix		(vTHX->Icollation_ix)
 #define PL_collation_name	(vTHX->Icollation_name)
 #define PL_collation_standard	(vTHX->Icollation_standard)
@@ -817,6 +821,8 @@
 #define PL_Ibufend		PL_bufend
 #define PL_Ibufptr		PL_bufptr
 #define PL_Icheckav		PL_checkav
+#define PL_Icheckav_save	PL_checkav_save
+#define PL_Iclocktick		PL_clocktick
 #define PL_Icollation_ix	PL_collation_ix
 #define PL_Icollation_name	PL_collation_name
 #define PL_Icollation_standard	PL_collation_standard
@@ -1375,6 +1381,7 @@
 #define PL_malloc_mutex		(PL_Vars.Gmalloc_mutex)
 #define PL_op_mutex		(PL_Vars.Gop_mutex)
 #define PL_patleave		(PL_Vars.Gpatleave)
+#define PL_ppid			(PL_Vars.Gppid)
 #define PL_runops_dbg		(PL_Vars.Grunops_dbg)
 #define PL_runops_std		(PL_Vars.Grunops_std)
 #define PL_sharehook		(PL_Vars.Gsharehook)
@@ -1393,6 +1400,7 @@
 #define PL_Gmalloc_mutex	PL_malloc_mutex
 #define PL_Gop_mutex		PL_op_mutex
 #define PL_Gpatleave		PL_patleave
+#define PL_Gppid		PL_ppid
 #define PL_Grunops_dbg		PL_runops_dbg
 #define PL_Grunops_std		PL_runops_std
 #define PL_Gsharehook		PL_sharehook

@@ -434,6 +434,15 @@ __DATA__
 #    define aTHX_
 #endif         
 
+/* IV could also be a quad (say, a long long), but Perls
+ * capable of those should have IVSIZE already. */
+#if !defined(IVSIZE) && defined(LONGSIZE)
+#   define IVSIZE LONGSIZE
+#endif
+#ifndef IVSIZE
+#   define IVSIZE 4 /* A bold guess, but the best we can make. */
+#endif
+
 #ifndef UVSIZE
 #   define UVSIZE IVSIZE
 #endif
@@ -649,7 +658,6 @@ SV *sv;
 
 #else /* single interpreter */
 
-
 #define START_MY_CXT	static my_cxt_t my_cxt;
 #define dMY_CXT_SV	dNOOP
 #define dMY_CXT		dNOOP
@@ -718,6 +726,18 @@ SV *sv;
 #   endif
 #else
 #   define SvPVbyte SvPV
+#endif
+
+#ifndef SvPV_nolen
+#   define SvPV_nolen(sv) \
+        ((SvFLAGS(sv) & (SVf_POK)) == SVf_POK \
+         ? SvPVX(sv) : sv_2pv_nolen(sv))
+    static char *
+    sv_2pv_nolen(pTHX_ register SV *sv)
+    {   
+        STRLEN n_a;
+        return sv_2pv(sv, &n_a);
+    }
 #endif
 
 #endif /* _P_P_PORTABILITY_H_ */

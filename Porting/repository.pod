@@ -199,7 +199,7 @@ the section above on the B<-L 1666:127.0.0.1:1666> option to ssh.
 
 The value of this is the name by which Perforce knows your
 host's workspace. You need to pick a name (normally, your
-Perforce username, a dash, and your hostname)
+Perforce username, a dash, and your host's short name)
 when you first start using the perl repository and then
 stick with it.
 
@@ -258,9 +258,10 @@ The C<p4 users> command lists all currently known users.
 Once these three environment variables are set, you can use the
 perforce p4 client exactly as described in its documentation.
 After setting these variables and connecting to the repository
-for the first time, you should use the C<p4 user> and
-C<p4 client> commands to tell perforce the details of your
-new username and your new client workspace specifications.
+for the first time, you should use the C<p4 user> command to
+set a valid email address for yourself.  Also use the C<p4 client>
+command to specify your workspace specifications for each
+individual client from which you will interact with the repository.
 
 =head1 Ending a Repository Session
 

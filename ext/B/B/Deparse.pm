@@ -553,9 +553,10 @@ sub compile {
 	    print qq(BEGIN { \$/ = $fs; \$\\ = $bs; }\n);
 	}
 	my @BEGINs  = B::begin_av->isa("B::AV") ? B::begin_av->ARRAY : ();
+	my @CHECKs  = B::check_av->isa("B::AV") ? B::check_av->ARRAY : ();
 	my @INITs   = B::init_av->isa("B::AV") ? B::init_av->ARRAY : ();
 	my @ENDs    = B::end_av->isa("B::AV") ? B::end_av->ARRAY : ();
-	for my $block (@BEGINs, @INITs, @ENDs) {
+	for my $block (@BEGINs, @CHECKs, @INITs, @ENDs) {
 	    $self->todo($block, 0);
 	}
 	$self->stash_subs();
@@ -2415,7 +2416,7 @@ BEGIN { eval "sub OP_LIST () {" . opnumber("list") . "}" }
 
 sub pp_null {
     my $self = shift;
-    my($op, $cx) = @_;
+    my($op, $cx, $flags) = @_;
     if (class($op) eq "OP") {
 	# old value is lost
 	return $self->{'ex_const'} if $op->targ == OP_CONST;
@@ -2438,7 +2439,12 @@ sub pp_null {
 				   . $self->deparse($op->first->sibling, 20),
 				   $cx, 20);
     } elsif ($op->flags & OPf_SPECIAL && $cx == 0 && !$op->targ) {
-	return "do {\n\t". $self->deparse($op->first, $cx) ."\n\b};";
+	if ($flags) {
+	    return $self->deparse($op->first, $cx);
+	}
+	else {
+	    return "do {\n\t". $self->deparse($op->first, $cx) ."\n\b};";
+	}
     } elsif (!null($op->first->sibling) and
 	     $op->first->sibling->name eq "null" and
 	     class($op->first->sibling) eq "UNOP" and
@@ -3010,7 +3016,7 @@ sub re_uninterp {
           | \\[uUlLQE]
           )
 
-	/length($4) ? "$1$2$4" : "$1$2\\$3"/xeg;
+	/defined($4) && length($4) ? "$1$2$4" : "$1$2\\$3"/xeg;
 
     return $str;
 }
@@ -3038,7 +3044,7 @@ sub re_uninterp_extended {
           | \\[uUlLQE]
           )
 
-	/length($4) ? "$1$2$4" : "$1$2\\$3"/xeg;
+	/defined($4) && length($4) ? "$1$2$4" : "$1$2\\$3"/xeg;
 
     return $str;
 }
@@ -3732,7 +3738,7 @@ sub pp_subst {
 	    $flags .= "e";
 	}
 	if ($op->pmflags & PMf_EVAL) {
-	    $repl = $self->deparse($repl, 0);
+	    $repl = $self->deparse($repl, 0, 1);
 	} else {
 	    $repl = $self->dq($repl);	
 	}

@@ -71,30 +71,31 @@ sub import {
 
     my %names;
     foreach (reverse @_) {
-	if ($_ eq '') {
+	my $path = $_;		# we'll be modifying it, so break the alias
+	if ($path eq '') {
 	    require Carp;
 	    Carp::carp("Empty compile time value given to use lib");
 	}
 
-	local $_ = _nativize($_);
+	$path = _nativize($path);
 
-	if (-e && ! -d _) {
+	if (-e $path && ! -d _) {
 	    require Carp;
 	    Carp::carp("Parameter to use lib must be directory, not file");
 	}
-	unshift(@INC, $_);
+	unshift(@INC, $path);
 	# Add any previous version directories we found at configure time
 	foreach my $incver (@inc_version_list)
 	{
 	    my $dir = $Is_MacOS
-		? File::Spec->catdir( $_, $incver )
-		: "$_/$incver";
+		? File::Spec->catdir( $path, $incver )
+		: "$path/$incver";
 	    unshift(@INC, $dir) if -d $dir;
 	}
-	# Put a corresponding archlib directory in front of $_ if it
-	# looks like $_ has an archlib directory below it.
+	# Put a corresponding archlib directory in front of $path if it
+	# looks like $path has an archlib directory below it.
 	my($arch_auto_dir, $arch_dir, $version_dir, $version_arch_dir)
-	    = _get_dirs($_);
+	    = _get_dirs($path);
 	unshift(@INC, $arch_dir)         if -d $arch_auto_dir;
 	unshift(@INC, $version_dir)      if -d $version_dir;
 	unshift(@INC, $version_arch_dir) if -d $version_arch_dir;

@@ -1,8 +1,10 @@
 #!./perl -w
 
 BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
+    if ($ENV{PERL_CORE}) {
+	chdir 't' if -d 't';
+	@INC = '../lib';
+    }
 }
 
 BEGIN { $| = 1; print "1..25\n"; }
@@ -28,6 +30,13 @@ import Time::HiRes 'ualarm'		if $have_ualarm;
 
 use Config;
 
+my $xdefine; 
+
+if (open(XDEFINE, "xdefine")) {
+    chomp($xdefine = <XDEFINE>);
+    close(XDEFINE);
+}
+
 # Ideally, we'd like to test that the timers are rather precise.
 # However, if the system is busy, there are no guarantees on how
 # quickly we will return.  This limit used to be 10%, but that
@@ -41,7 +50,7 @@ use Config;
 my $limit = 0.20; # 20% is acceptable slosh for testing timers
 
 sub skip {
-    map { print "ok $_ (skipped)\n" } @_;
+    map { print "ok $_ # skipped\n" } @_;
 }
 
 sub ok {
@@ -130,14 +139,14 @@ else {
     my $tick = 0;
     local $SIG{ALRM} = sub { $tick++ };
 
-    my $one = time; $tick = 0; ualarm(10_000); sleep until $tick;
-    my $two = time; $tick = 0; ualarm(10_000); sleep until $tick;
+    my $one = time; $tick = 0; ualarm(10_000); while ($tick == 0) { sleep }
+    my $two = time; $tick = 0; ualarm(10_000); while ($tick == 0) { sleep }
     my $three = time;
     ok 12, $one == $two || $two == $three, "slept too long, $one $two $three";
 
     $tick = 0;
     ualarm(10_000, 10_000);
-    sleep until $tick >= 3;
+    while ($tick < 3) { sleep }
     ok 13, 1;
     ualarm(0);
 }
@@ -158,12 +167,16 @@ if (!$have_time) {
  print "# s = $s, n = $n, s/n = ", $s/$n, "\n";
 }
 
-unless (defined &Time::HiRes::gettimeofday
+my $has_ualarm = $Config{d_ualarm};
+
+$has_ualarm ||= $xdefine =~ /-DHAS_UALARM/;
+
+unless (   defined &Time::HiRes::gettimeofday
 	&& defined &Time::HiRes::ualarm
 	&& defined &Time::HiRes::usleep
-	&& $Config{d_ualarm}) {
+	&& $has_ualarm) {
     for (15..17) {
-	print "ok $_ # skipped\n";
+	print "ok $_ # Skip: no gettimeofday or no ualarm or no usleep\n";
     }
 } else {
     use Time::HiRes qw (time alarm sleep);
@@ -194,7 +207,7 @@ unless (defined &Time::HiRes::gettimeofday
 	# from the alarm.  If this happens, let's just skip
 	# this particular test.  --jhi
 	if (abs($ival/3.3 - 1) < $limit) {
-	    $ok = "Skip: your select() seems to get restarted by your SIGALRM";
+	    $ok = "Skip: your select() may get restarted by your SIGALRM (or just retry test)";
 	    undef $not;
 	    last;
 	}
@@ -227,9 +240,9 @@ unless (defined &Time::HiRes::gettimeofday
     print $not ? "not ok 17 # $not\n" : "ok 17 # $ok\n";
 }
 
-unless (defined &Time::HiRes::setitimer
+unless (   defined &Time::HiRes::setitimer
 	&& defined &Time::HiRes::getitimer
-	&& exists &Time::HiRes::ITIMER_VIRTUAL
+	&& eval    'Time::HiRes::ITIMER_VIRTUAL'
 	&& $Config{d_select}
 	&& $Config{sig_name} =~ m/\bVTALRM\b/) {
     for (18..19) {
@@ -255,7 +268,8 @@ unless (defined &Time::HiRes::setitimer
     print "# getitimer: ", join(" ", getitimer(ITIMER_VIRTUAL)), "\n";
 
     while (getitimer(ITIMER_VIRTUAL)) {
-	my $j; $j++ for 1..1000; # Can't be unbreakable, must test getitimer().
+	my $j;
+	for (1..1000) { $j++ } # Can't be unbreakable, must test getitimer().
     }
 
     print "# getitimer: ", join(" ", getitimer(ITIMER_VIRTUAL)), "\n";
