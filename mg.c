@@ -47,6 +47,7 @@ SV* sv;
 	if (vtbl && vtbl->svt_len)
 	    return (*vtbl->svt_len)(sv, mg);
     }
+    mg_get(sv);
     if (!SvPOK(sv) && SvNIOK(sv))
 	sv_2pv(sv);
     if (SvPOK(sv))
@@ -67,6 +68,20 @@ SV* sv;
     return 0;
 }
 
+MAGIC*
+mg_find(sv, type)
+SV* sv;
+char type;
+{
+    MAGIC* mg;
+    MAGIC** mgp = &SvMAGIC(sv);
+    for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
+	if (mg->mg_type == type)
+	    return mg;
+    }
+    return 0;
+}
+
 int
 mg_free(sv, type)
 SV* sv;
@@ -80,7 +95,7 @@ char type;
 	    *mgp = mg->mg_moremagic;
 	    if (vtbl && vtbl->svt_free)
 		(*vtbl->svt_free)(sv, mg);
-	    if (mg->mg_ptr)
+	    if (mg->mg_ptr && mg->mg_type != 'g')
 		Safefree(mg->mg_ptr);
 	    Safefree(mg);
 	}
@@ -101,7 +116,7 @@ SV* sv;
 	moremagic = mg->mg_moremagic;
 	if (vtbl && vtbl->svt_free)
 	    (*vtbl->svt_free)(sv, mg);
-	if (mg->mg_ptr)
+	if (mg->mg_ptr && mg->mg_type != 'g')
 	    Safefree(mg->mg_ptr);
 	Safefree(mg);
     }
@@ -120,6 +135,77 @@ SV* sv;
 #endif
 
 static handlertype sighandler();
+
+U32
+magic_len(sv, mg)
+SV *sv;
+MAGIC *mg;
+{
+    register I32 paren;
+    register char *s;
+    register I32 i;
+
+    switch (*mg->mg_ptr) {
+    case '1': case '2': case '3': case '4':
+    case '5': case '6': case '7': case '8': case '9': case '&':
+	if (curpm) {
+	    paren = atoi(mg->mg_ptr);
+	  getparen:
+	    if (curpm->op_pmregexp &&
+	      paren <= curpm->op_pmregexp->nparens &&
+	      (s = curpm->op_pmregexp->startp[paren]) ) {
+		i = curpm->op_pmregexp->endp[paren] - s;
+		if (i >= 0)
+		    return i;
+		else
+		    return 0;
+	    }
+	    else
+		return 0;
+	}
+	break;
+    case '+':
+	if (curpm) {
+	    paren = curpm->op_pmregexp->lastparen;
+	    goto getparen;
+	}
+	break;
+    case '`':
+	if (curpm) {
+	    if (curpm->op_pmregexp &&
+	      (s = curpm->op_pmregexp->subbeg) ) {
+		i = curpm->op_pmregexp->startp[0] - s;
+		if (i >= 0)
+		    return i;
+		else
+		    return 0;
+	    }
+	    else
+		return 0;
+	}
+	break;
+    case '\'':
+	if (curpm) {
+	    if (curpm->op_pmregexp &&
+	      (s = curpm->op_pmregexp->endp[0]) ) {
+		return (STRLEN) (curpm->op_pmregexp->subend - s);
+	    }
+	    else
+		return 0;
+	}
+	break;
+    case ',':
+	return (STRLEN)ofslen;
+    case '\\':
+	return (STRLEN)orslen;
+    }
+    magic_get(sv,mg);
+    if (!SvPOK(sv) && SvNIOK(sv))
+	sv_2pv(sv);
+    if (SvPOK(sv))
+	return SvCUR(sv);
+    return 0;
+}
 
 int
 magic_get(sv, mg)
@@ -360,7 +446,7 @@ MAGIC* mg;
 	(void)signal(i,SIG_DFL);
     else {
 	(void)signal(i,sighandler);
-	if (!index(s,'\'')) {
+	if (!strchr(s,'\'')) {
 	    sprintf(tokenbuf, "main'%s",s);
 	    sv_setpv(sv,tokenbuf);
 	}
@@ -391,12 +477,8 @@ MAGIC* mg;
     gv = DBline;
     i = SvTRUE(sv);
     svp = av_fetch(GvAV(gv),atoi(mg->mg_ptr), FALSE);
-    if (svp && SvMAGICAL(*svp) && (o = (OP*)SvMAGIC(*svp)->mg_ptr)) {
-#ifdef NOTDEF
-	cmd->cop_flags &= ~COPf_OPTIMIZE;
-	cmd->cop_flags |= i? COPo_D1 : COPo_D0;
-#endif
-    }
+    if (svp && SvIOK(*svp) && (o = (OP*)SvSTASH(*svp)))
+	o->op_private = i;
     else
 	warn("Can't break at that line\n");
     return 0;
@@ -475,6 +557,16 @@ SV* sv;
 MAGIC* mg;
 {
     do_vecset(sv);	/* XXX slurp this routine */
+    return 0;
+}
+
+int
+magic_setmglob(sv,mg)
+SV* sv;
+MAGIC* mg;
+{
+    mg->mg_ptr = 0;
+    mg->mg_len = 0;
     return 0;
 }
 
@@ -578,17 +670,17 @@ MAGIC* mg;
 	break;
     case '/':
 	if (SvPOK(sv)) {
-	    rs = SvPV(sv);
-	    rslen = SvCUR(sv);
+	    nrs = rs = SvPV(sv);
+	    nrslen = rslen = SvCUR(sv);
 	    if (rspara = !rslen) {
-		rs = "\n\n";
-		rslen = 2;
+		nrs = rs = "\n\n";
+		nrslen = rslen = 2;
 	    }
-	    rschar = rs[rslen - 1];
+	    nrschar = rschar = rs[rslen - 1];
 	}
 	else {
-	    rschar = 0777;	/* fake a non-existent char */
-	    rslen = 1;
+	    nrschar = rschar = 0777;	/* fake a non-existent char */
+	    nrslen = rslen = 1;
 	}
 	break;
     case '\\':
@@ -827,65 +919,3 @@ I32 sig;
 
     return;
 }
-
-#ifdef OLD
-    if (sv->sv_magic && !sv->sv_rare) {
-	GV *gv = sv->sv_magic->sv_u.sv_gv;
-
-	switch (*SvPV(gv->sv_magic)) {
-	case '1': case '2': case '3': case '4':
-	case '5': case '6': case '7': case '8': case '9': case '&':
-	    if (curpm) {
-		paren = atoi(GvENAME(gv));
-	      getparen:
-		if (curpm->op_pmregexp &&
-		  paren <= curpm->op_pmregexp->nparens &&
-		  (s = curpm->op_pmregexp->startp[paren]) ) {
-		    i = curpm->op_pmregexp->endp[paren] - s;
-		    if (i >= 0)
-			return i;
-		    else
-			return 0;
-		}
-		else
-		    return 0;
-	    }
-	    break;
-	case '+':
-	    if (curpm) {
-		paren = curpm->op_pmregexp->lastparen;
-		goto getparen;
-	    }
-	    break;
-	case '`':
-	    if (curpm) {
-		if (curpm->op_pmregexp &&
-		  (s = curpm->op_pmregexp->subbeg) ) {
-		    i = curpm->op_pmregexp->startp[0] - s;
-		    if (i >= 0)
-			return i;
-		    else
-			return 0;
-		}
-		else
-		    return 0;
-	    }
-	    break;
-	case '\'':
-	    if (curpm) {
-		if (curpm->op_pmregexp &&
-		  (s = curpm->op_pmregexp->endp[0]) ) {
-		    return (STRLEN) (curpm->op_pmregexp->subend - s);
-		}
-		else
-		    return 0;
-	    }
-	    break;
-	case ',':
-	    return (STRLEN)ofslen;
-	case '\\':
-	    return (STRLEN)orslen;
-	}
-	sv = gv_str(sv);
-    }
-#endif

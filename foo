@@ -1,0 +1,4 @@
+#!./perl
+
+BEGIN { $/ = "" }
+print while <>;

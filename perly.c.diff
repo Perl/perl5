@@ -1,0 +1,170 @@
+*** perly.c.byacc	Tue Oct  5 15:44:31 1993
+--- perly.c	Tue Oct  5 16:23:53 1993
+***************
+*** 1396,1408 ****
+  int yynerrs;
+  int yyerrflag;
+  int yychar;
+- short *yyssp;
+- YYSTYPE *yyvsp;
+  YYSTYPE yyval;
+  YYSTYPE yylval;
+- short yyss[YYSTACKSIZE];
+- YYSTYPE yyvs[YYSTACKSIZE];
+- #define yystacksize YYSTACKSIZE
+  #line 573 "perly.y"
+   /* PROGRAM */
+  #line 1409 "y.tab.c"
+--- 1396,1403 ----
+***************
+*** 1413,1418 ****
+--- 1408,1426 ----
+  yyparse()
+  {
+      register int yym, yyn, yystate;
++     register short *yyssp;
++     register YYSTYPE *yyvsp;
++     short* yyss;
++     YYSTYPE* yyvs;
++     unsigned yystacksize = YYSTACKSIZE;
++     int oldyydebug	= yydebug;
++     int oldyynerrs	= yynerrs;
++     int oldyyerrflag	= yyerrflag;
++     int oldyychar	= yychar;
++     YYSTYPE oldyyval	= yyval;
++     YYSTYPE oldyylval	= yylval;
++     int retval = 0;
++ 
+  #if YYDEBUG
+      register char *yys;
+      extern char *getenv();
+***************
+*** 1429,1434 ****
+--- 1437,1450 ----
+      yyerrflag = 0;
+      yychar = (-1);
+  
++     /*
++     ** Initialize private stacks (yyparse may be called from an action)
++     */
++     yyss = (short*)malloc(yystacksize*sizeof(short));
++     yyvs = (YYSTYPE*)malloc(yystacksize*sizeof(YYSTYPE));
++     if (!yyvs || !yyss)
++ 	goto yyoverflow;
++ 
+      yyssp = yyss;
+      yyvsp = yyvs;
+      *yyssp = yystate = 0;
+***************
+*** 1459,1465 ****
+  #endif
+          if (yyssp >= yyss + yystacksize - 1)
+          {
+!             goto yyoverflow;
+          }
+          *++yyssp = yystate = yytable[yyn];
+          *++yyvsp = yylval;
+--- 1475,1493 ----
+  #endif
+          if (yyssp >= yyss + yystacksize - 1)
+          {
+! 	    /*
+! 	    ** reallocate and recover.  Note that pointers
+! 	    ** have to be reset, or bad things will happen
+! 	    */
+! 	    int yyps_index = (yyssp - yyss);
+! 	    int yypv_index = (yyvsp - yyvs);
+! 	    yystacksize += YYSTACKSIZE;
+! 	    yyvs = (YYSTYPE*)realloc((char*)yyvs,yystacksize * sizeof(YYSTYPE));
+! 	    yyss = (short*)realloc((char*)yyss,yystacksize * sizeof(short));
+! 	    if (!yyvs || !yyss)
+! 		goto yyoverflow;
+! 	    yyssp = yyss + yyps_index;
+! 	    yyvsp = yyvs + yypv_index;
+          }
+          *++yyssp = yystate = yytable[yyn];
+          *++yyvsp = yylval;
+***************
+*** 1500,1506 ****
+  #endif
+                  if (yyssp >= yyss + yystacksize - 1)
+                  {
+!                     goto yyoverflow;
+                  }
+                  *++yyssp = yystate = yytable[yyn];
+                  *++yyvsp = yylval;
+--- 1528,1548 ----
+  #endif
+                  if (yyssp >= yyss + yystacksize - 1)
+                  {
+! 		    /*
+! 		    ** reallocate and recover.  Note that pointers
+! 		    ** have to be reset, or bad things will happen
+! 		    */
+! 		    int yyps_index = (yyssp - yyss);
+! 		    int yypv_index = (yyvsp - yyvs);
+! 		    yystacksize += YYSTACKSIZE;
+! 		    yyvs = (YYSTYPE*)realloc((char*)yyvs,
+! 			yystacksize * sizeof(YYSTYPE));
+! 		    yyss = (short*)realloc((char*)yyss,
+! 			yystacksize * sizeof(short));
+! 		    if (!yyvs || !yyss)
+! 			goto yyoverflow;
+! 		    yyssp = yyss + yyps_index;
+! 		    yyvsp = yyvs + yypv_index;
+                  }
+                  *++yyssp = yystate = yytable[yyn];
+                  *++yyvsp = yylval;
+***************
+*** 2281,2295 ****
+  #endif
+      if (yyssp >= yyss + yystacksize - 1)
+      {
+!         goto yyoverflow;
+      }
+      *++yyssp = yystate;
+      *++yyvsp = yyval;
+      goto yyloop;
+  yyoverflow:
+!     yyerror("yacc stack overflow");
+  yyabort:
+!     return (1);
+  yyaccept:
+!     return (0);
+  }
+--- 2323,2357 ----
+  #endif
+      if (yyssp >= yyss + yystacksize - 1)
+      {
+! 	/*
+! 	** reallocate and recover.  Note that pointers
+! 	** have to be reset, or bad things will happen
+! 	*/
+! 	int yyps_index = (yyssp - yyss);
+! 	int yypv_index = (yyvsp - yyvs);
+! 	yystacksize += YYSTACKSIZE;
+! 	yyvs = (YYSTYPE*)realloc((char*)yyvs,yystacksize * sizeof(YYSTYPE));
+! 	yyss = (short*)realloc((char*)yyss,yystacksize * sizeof(short));
+! 	if (!yyvs || !yyss)
+! 	    goto yyoverflow;
+! 	yyssp = yyss + yyps_index;
+! 	yyvsp = yyvs + yypv_index;
+      }
+      *++yyssp = yystate;
+      *++yyvsp = yyval;
+      goto yyloop;
+  yyoverflow:
+!     yyerror("Out of memory for yacc stack");
+  yyabort:
+!     retval = 1;
+  yyaccept:
+!     if (yyss) free(yyss);
+!     if (yyvs) free(yyvs);
+!     yydebug	= oldyydebug;
+!     yynerrs	= oldyynerrs;
+!     yyerrflag	= oldyyerrflag;
+!     yychar	= oldyychar;
+!     yyval	= oldyyval;
+!     yylval	= oldyylval;
+!     return retval;
+  }

@@ -236,7 +236,7 @@ I32 fold;
 			else
 				sv_upgrade(r->regstart, SVt_PVBM);
 		}
-		else if ((exp = index(simple,OP(first))) && exp > simple)
+		else if ((exp = strchr(simple,OP(first))) && exp > simple)
 			r->regstclass = first;
 		else if (OP(first) == BOUND || OP(first) == NBOUND)
 			r->regstclass = first;
@@ -309,7 +309,7 @@ I32 fold;
 			    else
 				curback += *OPERAND(first);
 			}
-			else if (index(varies,OP(scan))) {
+			else if (strchr(varies,OP(scan))) {
 			    curback = -30000;
 			    len = 0;
 			    if (SvCUR(longish) > SvCUR(longest)) {
@@ -318,13 +318,13 @@ I32 fold;
 			    }
 			    sv_setpvn(longish,"",0);
 			    if (OP(scan) == PLUS &&
-			      index(simple,OP(NEXTOPER(scan))))
+			      strchr(simple,OP(NEXTOPER(scan))))
 				minlen++;
 			    else if (OP(scan) == CURLY &&
-			      index(simple,OP(NEXTOPER(scan)+4)))
+			      strchr(simple,OP(NEXTOPER(scan)+4)))
 				minlen += ARG1(scan);
 			}
-			else if (index(simple,OP(scan))) {
+			else if (strchr(simple,OP(scan))) {
 			    curback++;
 			    minlen++;
 			    len = 0;

@@ -22,6 +22,10 @@ echo "Extracting find2perl (with variable substitutions)"
 rm -f find2perl
 $spitshell >find2perl <<!GROK!THIS!
 #!$bin/perl
+# 
+# Modified September 26, 1993 to provide proper handling of years after 1999
+#   Tom Link <tml+@pitt.edu>
+#   University of Pittsburgh
 
 eval 'exec $bin/perl -S \$0 \${1+"\$@"}'
 	if \$running_under_some_shell;
@@ -346,7 +350,7 @@ sub ls {
     ($sec,$min,$hour,$mday,$mon,$year) = localtime($mtime);
     $moname = $moname[$mon];
     if (-M _ > 365.25 / 2) {
-	$timeyear = '19' . $year;
+	$timeyear = $year + 1900;
     }
     else {
 	$timeyear = sprintf("%02d:%02d", $hour, $min);

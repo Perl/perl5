@@ -31,7 +31,7 @@ struct he {
     HE		*hent_next;
     char	*hent_key;
     SV		*hent_val;
-    I32		hent_hash;
+    U32		hent_hash;
     I32		hent_klen;
 };
 

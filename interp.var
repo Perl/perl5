@@ -12,6 +12,7 @@ argvgv
 argvoutgv
 arybase
 basetime
+beginav
 bodytarget
 cddir
 chopset
@@ -46,6 +47,7 @@ dowarn
 dumplvl
 e_fp
 e_tmpname
+endav
 envgv
 eval_root
 eval_start
@@ -57,14 +59,10 @@ formfeed
 formtarget
 freestrroot
 gensym
-hint
 in_eval
 incgv
 inplace
-last_elen
-last_eval
 last_in_gv
-last_root
 lastfd
 lastretstr
 lastscream
@@ -104,6 +102,8 @@ origargv
 origfilename
 ors
 orslen
+pad
+padname
 patchlevel
 perldb
 pidstatus

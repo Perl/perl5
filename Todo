@@ -1,18 +1,31 @@
-Set KEEP on constant split
-Optimize foreach on array.
-Execute all BEGINs and ENDs.
-Make a good way to determine if *.pl is being executed directly.
-Make specialized allocators.
-Optimize switches.
-Do debugger
-Cache eval tree
-Implement eval once
-Cache m//g state
-rcatmaybe
-Fix length($&)
-eval {} coredump
+POSIX compatibility
+hash binding
+pack(P)
+fix gv refcnts
 
+/\Afoo/ (beginning of string, or where previous g match left off)
+/foo\Z/ (end of string only)
+Make specialized allocators
+Optimize switch statements
+Optimize foreach on array
+Optimize foreach (1..1000000)
+Set KEEP on constant split
+Cache eval tree (unless lexical outer scope used (mark in &compiling?))
+rcatmaybe
+Cache method lookup
+Shrink opcode tables via multiple implementations selected in peep
+Straighten out the RS stuff in BEGIN
+Make yyparse recursion longjmp() proof.
+
+sub mysplice(@, $, $, ...)?
+pretty function?  (or is it, as I suspect, a lib routine?)
+perlex function?
+X Perl?  Motif Perl?
+give DOG $bone?
+Nested destructors?
 make tr/// return histogram in list context?
-Do anything with "hint"?
+Implement eval once?  (Unnecessary with cache?)
 When does split() go to @_?
 undef wantarray in void context?
+goto &coroutine?
+filehandle references?

@@ -43,7 +43,6 @@ oldbufptr
 oldoldbufptr
 origalen
 origenviron
-pad
 padix
 patleave
 regbol

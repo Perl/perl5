@@ -44,7 +44,7 @@ sub ctime {
     }
     $TZ .= ' ' unless $TZ eq '';
 
-    $year += ($year < 70) ? 2000 : 1900;
+    $year += 1900;
     sprintf("%s %s %2d %2d:%02d:%02d %s%4d\n",
       $DoW[$wday], $MoY[$mon], $mday, $hour, $min, $sec, $TZ, $year);
 }

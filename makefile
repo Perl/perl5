@@ -26,8 +26,10 @@
 # 
 # 
 
+# I now supply perly.c with the kits, so don't remake perly.c without byacc
+YACC = ../perl-byacc1.8.2/byacc
+
 CC = cc
-YACC = /bin/yacc
 bin = /usr/local/bin
 scriptdir = /usr/local/bin
 privlib = /usr/local/lib/perl
@@ -302,11 +304,11 @@ perly.h: perly.c
 embed.h: embed_h.SH global.var interp.var
 	sh embed_h.SH
 
-perly.c: perly.y perly.fixer
+perly.c:
 	@ \
 case "$(YACC)" in \
-    *bison*) echo 'Expect' 25 shift/reduce and 53 reduce/reduce conflicts;; \
-    *) echo 'Expect' 27 shift/reduce and 51 reduce/reduce conflicts;; \
+    *bison*) echo 'Expect' 19 shift/reduce and 58 reduce/reduce conflicts;; \
+    *) echo 'Expect' 21 shift/reduce and 56 reduce/reduce conflicts;; \
 esac
 	$(YACC) -d perly.y
 	sh $(shellflags) ./perly.fixer y.tab.c perly.c
@@ -1504,6 +1506,25 @@ usersub.o: sv.h
 usersub.o: unixish.h
 usersub.o: usersub.c
 usersub.o: util.h
+mg.o: EXTERN.h
+mg.o: av.h
+mg.o: config.h
+mg.o: cop.h
+mg.o: embed.h
+mg.o: form.h
+mg.o: gv.h
+mg.o: handy.h
+mg.o: mg.c
+mg.o: hv.h
+mg.o: op.h
+mg.o: opcode.h
+mg.o: perl.h
+mg.o: pp.h
+mg.o: proto.h
+mg.o: regexp.h
+mg.o: sv.h
+mg.o: unixish.h
+mg.o: util.h
 Makefile: Makefile.SH config.sh ; /bin/sh Makefile.SH
 makedepend: makedepend.SH config.sh ; /bin/sh makedepend.SH
 h2ph: h2ph.SH config.sh ; /bin/sh h2ph.SH

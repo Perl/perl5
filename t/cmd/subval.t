@@ -35,32 +35,32 @@ sub foo6 {
 
 print "1..34\n";
 
-if (do foo1(0) eq '0') {print "ok 1\n";} else {print "not ok 1 $foo\n";}
-if (do foo1(1) eq 'true2') {print "ok 2\n";} else {print "not ok 2\n";}
-if (do foo2(0) eq 'true3') {print "ok 3\n";} else {print "not ok 3\n";}
-if (do foo2(1) eq 'true2') {print "ok 4\n";} else {print "not ok 4\n";}
+if (&foo1(0) eq '0') {print "ok 1\n";} else {print "not ok 1 $foo\n";}
+if (&foo1(1) eq 'true2') {print "ok 2\n";} else {print "not ok 2\n";}
+if (&foo2(0) eq 'true3') {print "ok 3\n";} else {print "not ok 3\n";}
+if (&foo2(1) eq 'true2') {print "ok 4\n";} else {print "not ok 4\n";}
 
-if (do foo3(0) eq 'true2') {print "ok 5\n";} else {print "not ok 5\n";}
-if (do foo3(1) eq '1') {print "ok 6\n";} else {print "not ok 6\n";}
-if (do foo4(0) eq 'true2') {print "ok 7\n";} else {print "not ok 7\n";}
-if (do foo4(1) eq 'true3') {print "ok 8\n";} else {print "not ok 8\n";}
+if (&foo3(0) eq 'true2') {print "ok 5\n";} else {print "not ok 5\n";}
+if (&foo3(1) eq '1') {print "ok 6\n";} else {print "not ok 6\n";}
+if (&foo4(0) eq 'true2') {print "ok 7\n";} else {print "not ok 7\n";}
+if (&foo4(1) eq 'true3') {print "ok 8\n";} else {print "not ok 8\n";}
 
-if (do foo5(0) eq '0') {print "ok 9\n";} else {print "not ok 9\n";}
-if (do foo5(1) eq 'true2') {print "ok 10\n";} else {print "not ok 10\n";}
-if (do foo6(0) eq 'true2') {print "ok 11\n";} else {print "not ok 11\n";}
-if (do foo6(1) eq '1') {print "ok 12\n";} else {print "not ok 12 $x\n";}
+if (&foo5(0) eq '0') {print "ok 9\n";} else {print "not ok 9\n";}
+if (&foo5(1) eq 'true2') {print "ok 10\n";} else {print "not ok 10\n";}
+if (&foo6(0) eq 'true2') {print "ok 11\n";} else {print "not ok 11\n";}
+if (&foo6(1) eq '1') {print "ok 12\n";} else {print "not ok 12 $x\n";}
 
 # Now test to see that recursion works using a Fibonacci number generator
 
 sub fib {
-    local($arg) = @_;
-    local($foo);
+    my($arg) = @_;
+    my($foo);
     $level++;
     if ($arg <= 2) {
 	$foo = 1;
     }
     else {
-	$foo = do fib($arg-1) + do fib($arg-2);
+	$foo = &fib($arg-1) + &fib($arg-2);
     }
     $level--;
     $foo;
@@ -70,7 +70,7 @@ sub fib {
 
 for ($i = 1; $i <= 10; $i++) {
     $foo = $i + 12;
-    if (do fib($i) == $good[$i]) {
+    if (&fib($i) == $good[$i]) {
 	print "ok $foo\n";
     }
     else {

@@ -10,6 +10,13 @@ input=$1
 output=$2
 tmp=/tmp/f$$
 
+if test -f perly.c.diff; then
+    cp $input $output
+    patch -F3 <perly.c.diff
+    rm -rf $input
+    exit
+fi
+
 plan="unknown"
 
 #  Test for BSD 4.3 version.

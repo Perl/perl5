@@ -187,6 +187,10 @@ reinit_lexer()
     lex_inwhat = 0;
     oldoldbufptr = oldbufptr = bufptr = SvPVn(linestr);
     bufend = bufptr + SvCUR(linestr);
+    rs = "\n";
+    rslen = 1;
+    rschar = '\n';
+    rspara = 0;
 }
 
 char *
@@ -403,7 +407,7 @@ sublex_done()
 {
     if (!lex_starts++) {
 	expect = XOPERATOR;
-	yylval.opval = (OP*)newSVOP(OP_CONST, 0, NEWSV(94,1));
+	yylval.opval = (OP*)newSVOP(OP_CONST, 0, newSVpv("",0));
 	return THING;
     }
 
@@ -494,7 +498,7 @@ char *start;
 		*d++ = *s++;
 		continue;
 	    }
-	    if (*s && index(leave, *s)) {
+	    if (*s && strchr(leave, *s)) {
 		*d++ = '\\';
 		*d++ = *s++;
 		continue;
@@ -505,7 +509,7 @@ char *start;
 		*--s = '$';
 		break;
 	    }
-	    if (lex_inwhat != OP_TRANS && *s && index("lLuUE", *s)) {
+	    if (lex_inwhat != OP_TRANS && *s && strchr("lLuUE", *s)) {
 		--s;
 		break;
 	    }
@@ -617,7 +621,7 @@ register char *s;
 	int weight = 2;		/* let's weigh the evidence */
 	char seen[256];
 	unsigned char un_char = 0, last_un_char;
-	char *send = index(s,']');
+	char *send = strchr(s,']');
 	char tmpbuf[512];
 
 	if (!send)		/* has to be an expression */
@@ -650,8 +654,8 @@ register char *s;
 			weight -= 10;
 		}
 		else if (*s == '$' && s[1] &&
-		  index("[#!%*<>()-=",s[1])) {
-		    if (/*{*/ index("])} =",s[2]))
+		  strchr("[#!%*<>()-=",s[1])) {
+		    if (/*{*/ strchr("])} =",s[2]))
 			weight -= 10;
 		    else
 			weight -= 1;
@@ -660,11 +664,11 @@ register char *s;
 	    case '\\':
 		un_char = 254;
 		if (s[1]) {
-		    if (index("wds]",s[1]))
+		    if (strchr("wds]",s[1]))
 			weight += 100;
 		    else if (seen['\''] || seen['"'])
 			weight += 1;
-		    else if (index("rnftbxcav",s[1]))
+		    else if (strchr("rnftbxcav",s[1]))
 			weight += 40;
 		    else if (isDIGIT(s[1])) {
 			weight += 40;
@@ -678,13 +682,13 @@ register char *s;
 	    case '-':
 		if (s[1] == '\\')
 		    weight += 50;
-		if (index("aA01! ",last_un_char))
+		if (strchr("aA01! ",last_un_char))
 		    weight += 30;
-		if (index("zZ79~",s[1]))
+		if (strchr("zZ79~",s[1]))
 		    weight += 30;
 		break;
 	    default:
-		if (!isALNUM(last_un_char) && !index("$@&",last_un_char) &&
+		if (!isALNUM(last_un_char) && !strchr("$@&",last_un_char) &&
 			isALPHA(*s) && s[1] && isALPHA(s[1])) {
 		    char *d = tmpbuf;
 		    while (isALPHA(*s))
@@ -856,7 +860,7 @@ yylex()
 
   retry:
     DEBUG_p( {
-	if (index(s,'\n'))
+	if (strchr(s,'\n'))
 	    fprintf(stderr,"Tokener at %s",s);
 	else
 	    fprintf(stderr,"Tokener at %s\n",s);
@@ -897,10 +901,10 @@ yylex()
 	    if (perldb) {
 		char *pdb = getenv("PERLDB");
 
+		sv_catpv(linestr,"BEGIN{");
 		sv_catpv(linestr, pdb ? pdb : "require 'perldb.pl'");
-		sv_catpv(linestr, ";");
+		sv_catpv(linestr, "}");
 	    }
-	    sv_catpv(linestr, "&BEGIN if defined &BEGIN;");
 	    if (minus_n || minus_p) {
 		sv_catpv(linestr, "LINE: while (<>) {");
 		if (minus_l)
@@ -947,6 +951,7 @@ yylex()
 	if (perldb) {
 	    SV *sv = NEWSV(85,0);
 
+	    sv_upgrade(sv, SVt_PVMG);
 	    sv_setsv(sv,linestr);
 	    av_store(GvAV(curcop->cop_filegv),(I32)curcop->cop_line,sv);
 	}
@@ -1140,8 +1145,29 @@ yylex()
 
     case '%':
 	if (expect != XOPERATOR) {
-	    s = scan_ident(s, bufend, tokenbuf, TRUE);
-	    force_ident(tokenbuf);
+	    s = scan_ident(s, bufend, tokenbuf + 1, TRUE);
+	    if (tokenbuf[1]) {
+		tokenbuf[0] = '%';
+		if (in_my) {
+		    if (strchr(tokenbuf,'\''))
+			fatal("\"my\" variable %s can't be in a package",tokenbuf);
+		    nextval[nexttoke].opval = newOP(OP_PADHV, 0);
+		    nextval[nexttoke].opval->op_targ = pad_allocmy(tokenbuf);
+		    force_next(PRIVATEREF);
+		    TERM('%');
+		}
+		if (!strchr(tokenbuf,'\'')) {
+		    if (tmp = pad_findmy(tokenbuf)) {
+			nextval[nexttoke].opval = newOP(OP_PADHV, 0);
+			nextval[nexttoke].opval->op_targ = tmp;
+			force_next(PRIVATEREF);
+			TERM('%');
+		    }
+		}
+		force_ident(tokenbuf + 1);
+	    }
+	    else
+		PREREF('%');
 	    TERM('%');
 	}
 	++s;
@@ -1184,10 +1210,13 @@ yylex()
 	lex_brackets++;
 	if (expect == XTERM)
 	    OPERATOR(HASHBRACK);
+	else if (expect == XREF)
+	    expect = XTERM;
+	else
+	    expect = XBLOCK;
 	yylval.ival = curcop->cop_line;
 	if (isSPACE(*s) || *s == '#')
 	    copline = NOLINE;   /* invalidate current command line number */
-	expect = XBLOCK;
 	TOKEN('{');
     case '}':
       rightbracket:
@@ -1256,7 +1285,7 @@ yylex()
 	OPERATOR('!');
     case '<':
 	if (expect != XOPERATOR) {
-	    if (s[1] != '<' && !index(s,'>'))
+	    if (s[1] != '<' && !strchr(s,'>'))
 		check_uni();
 	    if (s[1] == '<')
 		s = scan_heredoc(s);
@@ -1295,9 +1324,47 @@ yylex()
 	    force_ident(tokenbuf);
 	    TERM(DOLSHARP);
 	}
-	s = scan_ident(s, bufend, tokenbuf, FALSE);
-	if (*tokenbuf)
-	    force_ident(tokenbuf);
+	s = scan_ident(s, bufend, tokenbuf+1, FALSE);
+	if (tokenbuf[1]) {
+	    tokenbuf[0] = '$';
+	    if (dowarn && *s == '[') {
+		char *t;
+		for (t = s+1; isSPACE(*t) || isALNUM(*t) || *t == '$'; t++) ;
+		if (*t++ == ',') {
+		    bufptr = skipspace(bufptr);
+		    while (t < bufend && *t != ']') t++;
+		    warn("Multidimensional syntax %.*s not supported",
+			t-bufptr+1, bufptr);
+		}
+	    }
+	    if (in_my) {
+		if (strchr(tokenbuf,'\''))
+		    fatal("\"my\" variable %s can't be in a package",tokenbuf);
+		nextval[nexttoke].opval = newOP(OP_PADSV, 0);
+		nextval[nexttoke].opval->op_targ = pad_allocmy(tokenbuf);
+		force_next(PRIVATEREF);
+	    }
+	    else if (!strchr(tokenbuf,'\'')) {
+		I32 optype = OP_PADSV;
+		if (*s == '[') {
+		    tokenbuf[0] = '@';
+		    optype = OP_PADAV;
+		}
+		else if (*s == '{') {
+		    tokenbuf[0] = '%';
+		    optype = OP_PADHV;
+		}
+		if (tmp = pad_findmy(tokenbuf)) {
+		    nextval[nexttoke].opval = newOP(optype, 0);
+		    nextval[nexttoke].opval->op_targ = tmp;
+		    force_next(PRIVATEREF);
+		}
+		else
+		    force_ident(tokenbuf+1);
+	    }
+	    else
+		force_ident(tokenbuf+1);
+	}
 	else
 	    PREREF('$');
 	expect = XOPERATOR;
@@ -1311,20 +1378,52 @@ yylex()
 	    while (isSPACE(*oldoldbufptr))
 		oldoldbufptr++;
 	    if (*oldoldbufptr == 'p' && strnEQ(oldoldbufptr,"print",5)) {
-		if (index("&*<%", *s) && isIDFIRST(s[1]))
+		if (strchr("&*<%", *s) && isIDFIRST(s[1]))
 		    expect = XTERM;		/* e.g. print $fh &sub */
 		else if (*s == '.' && isDIGIT(s[1]))
 		    expect = XTERM;		/* e.g. print $fh .3 */
-		else if (index("/?-+", *s) && !isSPACE(s[1]))
+		else if (strchr("/?-+", *s) && !isSPACE(s[1]))
 		    expect = XTERM;		/* e.g. print $fh -1 */
 	    }
 	}
 	TOKEN('$');
 
     case '@':
-	s = scan_ident(s, bufend, tokenbuf, FALSE);
-	if (*tokenbuf)
-	    force_ident(tokenbuf);
+	s = scan_ident(s, bufend, tokenbuf+1, FALSE);
+	if (tokenbuf[1]) {
+	    tokenbuf[0] = '@';
+	    if (in_my) {
+		if (strchr(tokenbuf,'\''))
+		    fatal("\"my\" variable %s can't be in a package",tokenbuf);
+		nextval[nexttoke].opval = newOP(OP_PADAV, 0);
+		nextval[nexttoke].opval->op_targ = pad_allocmy(tokenbuf);
+		force_next(PRIVATEREF);
+		TERM('@');
+	    }
+	    else if (!strchr(tokenbuf,'\'')) {
+		I32 optype = OP_PADAV;
+		if (*s == '{') {
+		    tokenbuf[0] = '%';
+		    optype = OP_PADHV;
+		}
+		if (tmp = pad_findmy(tokenbuf)) {
+		    nextval[nexttoke].opval = newOP(optype, 0);
+		    nextval[nexttoke].opval->op_targ = tmp;
+		    force_next(PRIVATEREF);
+		    TERM('@');
+		}
+	    }
+	    if (dowarn && *s == '[') {
+		char *t;
+		for (t = s+1; isSPACE(*t) || isALNUM(*t) || *t == '$'; t++) ;
+		if (*t++ == ']') {
+		    bufptr = skipspace(bufptr);
+		    warn("Scalar value %.*s better written as $%.*s",
+			t-bufptr, bufptr, t-bufptr-1, bufptr+1);
+		}
+	    }
+	    force_ident(tokenbuf+1);
+	}
 	else
 	    PREREF('@');
 	TERM('@');
@@ -1440,60 +1539,69 @@ yylex()
 	switch (tmp = keyword(tokenbuf, d - tokenbuf)) {
 
 	default:			/* not a keyword */
-	  just_a_word:
-	    while (*s == '\'' && isIDFIRST(s[1])) {
-		*d++ = *s++;
-		SNARFWORD;
-	    }
-	    if (expect == XBLOCK) {	/* special case: start of statement */
-		yylval.pval = savestr(tokenbuf);
-		while (isSPACE(*s)) s++;
-		if (*s == ':') {
+	  just_a_word: {
+		GV *gv;
+		while (*s == '\'' && isIDFIRST(s[1])) {
+		    *d++ = *s++;
+		    SNARFWORD;
+		}
+		if (expect == XBLOCK) {	/* special case: start of statement */
+		    while (isSPACE(*s)) s++;
+		    if (*s == ':') {
+			yylval.pval = savestr(tokenbuf);
+			s++;
+			CLINE;
+			TOKEN(LABEL);
+		    }
+		}
+		gv = gv_fetchpv(tokenbuf,FALSE);
+		if (gv && GvCV(gv)) {
+		    nextval[nexttoke].opval =
+			(OP*)newSVOP(OP_CONST, 0, newSVpv(tokenbuf,0));
+		    nextval[nexttoke].opval->op_private = OPpCONST_BARE;
+		    force_next(WORD);
+		    TERM(NOAMP);
+		}
+		expect = XOPERATOR;
+		if (oldoldbufptr && oldoldbufptr < bufptr) {
+		    if (oldoldbufptr == last_lop) {
+			expect = XTERM;
+			CLINE;
+			yylval.opval = (OP*)newSVOP(OP_CONST, 0,
+			    newSVpv(tokenbuf,0));
+			yylval.opval->op_private = OPpCONST_BARE;
+			for (d = tokenbuf; *d && isLOWER(*d); d++) ;
+			if (dowarn && !*d)
+			    warn(
+			      "\"%s\" may clash with future reserved word",
+			      tokenbuf );
+			TOKEN(WORD);
+		    }
+		}
+		while (s < bufend && isSPACE(*s))
 		    s++;
+		if (*s == '(') {
 		    CLINE;
-		    OPERATOR(LABEL);
+		    nextval[nexttoke].opval =
+			(OP*)newSVOP(OP_CONST, 0, newSVpv(tokenbuf,0));
+		    nextval[nexttoke].opval->op_private = OPpCONST_BARE;
+		    force_next(WORD);
+		    TERM('&');
 		}
-	    }
-	    expect = XOPERATOR;
-	    if (oldoldbufptr && oldoldbufptr < bufptr) {
-		if (oldoldbufptr == last_lop) {
-		    expect = XTERM;
-		    CLINE;
-		    yylval.opval = (OP*)newSVOP(OP_CONST, 0,
-			newSVpv(tokenbuf,0));
-		    yylval.opval->op_private = OPpCONST_BARE;
-		    for (d = tokenbuf; *d && isLOWER(*d); d++) ;
-		    if (dowarn && !*d)
-			warn(
-			  "\"%s\" may clash with future reserved word",
-			  tokenbuf );
-		    TOKEN(WORD);
-		}
-	    }
-	    while (s < bufend && isSPACE(*s))
-		s++;
-#ifdef OLD
-	    if (*s == '(') {
 		CLINE;
-		nextval[nexttoke].opval = (OP*)newSVOP(OP_CONST, 0, newSVpv(tokenbuf,0));
-		nextval[nexttoke].opval->op_private = OPpCONST_BARE;
-		force_next(WORD);
-		LOP( OP_ENTERSUBR );
+		yylval.opval = (OP*)newSVOP(OP_CONST, 0, newSVpv(tokenbuf,0));
+		yylval.opval->op_private = OPpCONST_BARE;
+
+		if (*s == '$' || *s == '{')
+		    PREBLOCK(METHOD);
+
+		for (d = tokenbuf; *d && isLOWER(*d); d++) ;
+		if (dowarn && !*d)
+		    warn(
+		      "\"%s\" may clash with future reserved word",
+		      tokenbuf );
+		TOKEN(WORD);
 	    }
-#endif
-	    CLINE;
-	    yylval.opval = (OP*)newSVOP(OP_CONST, 0, newSVpv(tokenbuf,0));
-	    yylval.opval->op_private = OPpCONST_BARE;
-
-	    if (*s == '$' || *s == '{')
-		PREBLOCK(METHOD);
-
-	    for (d = tokenbuf; *d && isLOWER(*d); d++) ;
-	    if (dowarn && !*d)
-		warn(
-		  "\"%s\" may clash with future reserved word",
-		  tokenbuf );
-	    TOKEN(WORD);
 
 	case KEY___LINE__:
 	case KEY___FILE__: {
@@ -1533,11 +1641,9 @@ yylex()
 	case KEY_BEGIN:
 	case KEY_END:
 	    s = skipspace(s);
-	    if (minus_p || minus_n || *s == '{' ) {
-		nextval[nexttoke].opval =
-		    (OP*)newSVOP(OP_CONST, 0, newSVpv(tokenbuf,0));
-		force_next(WORD);
-		OPERATOR(SUB);
+	    if (expect == XBLOCK && (minus_p || minus_n || *s == '{' )) {
+		s = bufptr;
+		goto really_sub;
 	    }
 	    goto just_a_word;
 
@@ -1589,6 +1695,9 @@ yylex()
 	    LOP(OP_CRYPT);
 
 	case KEY_chmod:
+	    s = skipspace(s);
+	    if (dowarn && *s != '0' && isDIGIT(*s))
+		warn("chmod: mode argument is missing initial 0");
 	    LOP(OP_CHMOD);
 
 	case KEY_chown:
@@ -1796,6 +1905,9 @@ yylex()
 	case KEY_getlogin:
 	    FUN0(OP_GETLOGIN);
 
+	case KEY_glob:
+	    UNI(OP_GLOB);
+
 	case KEY_hex:
 	    UNI(OP_HEX);
 
@@ -1831,6 +1943,7 @@ yylex()
 	    UNI(OP_LCFIRST);
 
 	case KEY_local:
+	    yylval.ival = 0;
 	    OPERATOR(LOCAL);
 
 	case KEY_length:
@@ -1876,6 +1989,11 @@ yylex()
 	case KEY_msgsnd:
 	    LOP(OP_MSGSND);
 
+	case KEY_my:
+	    in_my = TRUE;
+	    yylval.ival = 1;
+	    OPERATOR(LOCAL);
+
 	case KEY_next:
 	    LOOPX(OP_NEXT);
 
@@ -1883,6 +2001,15 @@ yylex()
 	    Eop(OP_SNE);
 
 	case KEY_open:
+	    s = skipspace(s);
+	    if (isIDFIRST(*s)) {
+		char *t;
+		for (d = s; isALNUM(*d); d++) ;
+		t = skipspace(d);
+		if (strchr("|&*+-=!?:.", *t))
+		    warn("Precedence problem: open %.*s should be open(%.*s)",
+			d-s,s, d-s,s);
+	    }
 	    LOP(OP_OPEN);
 
 	case KEY_ord:
@@ -1972,6 +2099,14 @@ yylex()
 
 	case KEY_readdir:
 	    UNI(OP_READDIR);
+
+	case KEY_readline:
+	    set_csh();
+	    UNI(OP_READLINE);
+
+	case KEY_readpipe:
+	    set_csh();
+	    UNI(OP_BACKTICK);
 
 	case KEY_rewinddir:
 	    UNI(OP_REWINDDIR);
@@ -2118,13 +2253,18 @@ yylex()
 
 	case KEY_format:
 	case KEY_sub:
+	  really_sub:
 	    yylval.ival = savestack_ix; /* restore stuff on reduce */
 	    save_I32(&subline);
 	    save_item(subname);
 	    SAVEINT(padix);
 	    SAVESPTR(curpad);
 	    SAVESPTR(comppad);
+	    SAVESPTR(comppadname);
+	    SAVEINT(comppadnamefill);
 	    comppad = newAV();
+	    comppadname = newAV();
+	    comppadnamefill = -1;
 	    av_push(comppad, Nullsv);
 	    curpad = AvARRAY(comppad);
 	    padix = 0;
@@ -2145,7 +2285,7 @@ yylex()
 	    else
 		sv_setpv(subname,"?");
 
-	    if (tmp == KEY_sub)
+	    if (tmp != KEY_format)
 		PREBLOCK(SUB);
 
 	    in_format = 2;
@@ -2214,6 +2354,9 @@ yylex()
 	    LOP(OP_UTIME);
 
 	case KEY_umask:
+	    s = skipspace(s);
+	    if (dowarn && *s != '0' && isDIGIT(*s))
+		warn("umask: argument is missing initial 0");
 	    UNI(OP_UMASK);
 
 	case KEY_unshift:
@@ -2278,6 +2421,7 @@ I32 len;
 	break;
     case 'B':
 	if (strEQ(d,"BEGIN"))			return KEY_BEGIN;
+	break;
     case 'b':
 	if (strEQ(d,"bless"))			return KEY_bless;
 	if (strEQ(d,"bind"))			return KEY_bind;
@@ -2467,6 +2611,7 @@ I32 len;
 	    if (strEQ(d,"grep"))		return KEY_grep;
 	    if (strEQ(d,"goto"))		return KEY_goto;
 	    if (strEQ(d,"getc"))		return KEY_getc;
+	    if (strEQ(d,"glob"))		return KEY_glob;
 	    break;
 	case 6:
 	    if (strEQ(d,"gmtime"))		return KEY_gmtime;
@@ -2538,6 +2683,9 @@ I32 len;
     case 'm':
 	switch (len) {
 	case 1:					return KEY_m;
+	case 2:
+	    if (strEQ(d,"my"))			return KEY_my;
+	    break;
 	case 5:
 	    if (strEQ(d,"mkdir"))		return KEY_mkdir;
 	    break;
@@ -2625,6 +2773,8 @@ I32 len;
 	    break;
 	case 8:
 	    if (strEQ(d,"readlink"))		return KEY_readlink;
+	    if (strEQ(d,"readline"))		return KEY_readline;
+	    if (strEQ(d,"readpipe"))		return KEY_readpipe;
 	    break;
 	case 9:
 	    if (strEQ(d,"rewinddir"))		return KEY_rewinddir;
@@ -2823,10 +2973,10 @@ char *what;
     char *w;
 
     if (dowarn && *s == ' ' && s[1] == '(') {
-	w = index(s,')');
+	w = strchr(s,')');
 	if (w)
 	    for (w++; *w && isSPACE(*w); w++) ;
-	if (!w || !*w || !index(";|}", *w))	/* an advisory hack only... */
+	if (!w || !*w || !strchr(";|}", *w))	/* an advisory hack only... */
 	    warn("%s (...) interpreted as function",name);
     }
     while (s < bufend && isSPACE(*s))
@@ -2895,10 +3045,10 @@ I32 ck_uni;
     }
     else if (ck_uni)
 	check_uni();
-    if (s < send);
+    if (s < send)
 	*d = *s++;
     d[1] = '\0';
-    if (*d == '^' && (isUPPER(*s) || index("[\\]^_?", *s))) {
+    if (*d == '^' && (isUPPER(*s) || strchr("[\\]^_?", *s))) {
 	if (*s == 'D')
 	    debug |= 32768;
 	*d = *s++ ^ 64;
@@ -2925,7 +3075,7 @@ I32 ck_uni;
 	}
 	else {
 	    s = bracket;		/* let the parser handle it */
-	    *d = '\0';
+	    *dest = '\0';
 	}
     }
     else if (lex_state == LEX_INTERPNORMAL && !lex_brackets && !intuit_more(s))
@@ -2968,7 +3118,7 @@ I32 len;
 	    e = d;
 	    break;
 	case '\\':
-	    if (d[1] && index("wWbB0123456789sSdDlLuUExc",d[1])) {
+	    if (d[1] && strchr("wWbB0123456789sSdDlLuUExc",d[1])) {
 		e = d;
 		break;
 	    }
@@ -3196,7 +3346,7 @@ char *start;
     if (s[-1] == *start)
 	s--;
 
-    s = scan_str(s, SCAN_TR|SCAN_REPL);
+    s = scan_str(s);
     if (!s) {
 	if (lex_stuff)
 	    sv_free(lex_stuff);
@@ -3242,7 +3392,7 @@ register char *s;
     d = tokenbuf;
     if (!rsfp)
 	*d++ = '\n';
-    if (*s && index("`'\"",*s)) {
+    if (*s && strchr("`'\"",*s)) {
 	term = *s++;
 	s = cpytill(d,s,bufend,term,&len);
 	if (s < bufend)
@@ -3306,6 +3456,7 @@ register char *s;
 	if (perldb) {
 	    SV *sv = NEWSV(88,0);
 
+	    sv_upgrade(sv, SVt_PVMG);
 	    sv_setsv(sv,linestr);
 	    av_store(GvAV(curcop->cop_filegv),
 	      (I32)curcop->cop_line,sv);
@@ -3392,23 +3543,53 @@ char *
 scan_str(start)
 char *start;
 {
-    SV *tmpstr;
+    SV *sv;
     char *tmps;
     register char *s = start;
     register char term = *s;
+    register char *to;
+    I32 brackets = 1;
 
     CLINE;
     multi_start = curcop->cop_line;
     multi_open = term;
-    if (term && (tmps = index("([{< )]}> )]}>",term)))
+    if (term && (tmps = strchr("([{< )]}> )]}>",term)))
 	term = tmps[5];
     multi_close = term;
 
-    tmpstr = NEWSV(87,80);
-    SvSTORAGE(tmpstr) = term;
-    s = sv_append_till(tmpstr, s+1, bufend, term, Nullch);
+    sv = NEWSV(87,80);
+    sv_upgrade(sv, SVt_PV);
+    SvSTORAGE(sv) = term;
+    SvPOK_only(sv);		/* validate pointer */
+    s++;
+    for (;;) {
+	SvGROW(sv, SvCUR(sv) + (bufend - s) + 1);
+	to = SvPV(sv)+SvCUR(sv);
+	if (multi_open == multi_close) {
+	    for (; s < bufend; s++,to++) {
+		if (*s == '\\' && s+1 < bufend && term != '\\')
+		    *to++ = *s++;
+		else if (*s == term)
+		    break;
+		*to = *s;
+	    }
+	}
+	else {
+	    for (; s < bufend; s++,to++) {
+		if (*s == '\\' && s+1 < bufend && term != '\\')
+		    *to++ = *s++;
+		else if (*s == term && --brackets <= 0)
+		    break;
+		else if (*s == multi_open)
+		    brackets++;
+		*to = *s;
+	    }
+	}
+	*to = '\0';
+	SvCUR_set(sv, to - SvPV(sv));
 
-    while (s >= bufend) {	/* multiple line string? */
+    if (s < bufend) break;	/* string ends on this line? */
+
 	if (!rsfp ||
 	 !(oldoldbufptr = oldbufptr = s = sv_gets(linestr, rsfp, 0))) {
 	    curcop->cop_line = multi_start;
@@ -3418,23 +3599,23 @@ char *start;
 	if (perldb) {
 	    SV *sv = NEWSV(88,0);
 
+	    sv_upgrade(sv, SVt_PVMG);
 	    sv_setsv(sv,linestr);
 	    av_store(GvAV(curcop->cop_filegv),
 	      (I32)curcop->cop_line, sv);
 	}
 	bufend = SvPV(linestr) + SvCUR(linestr);
-	s = sv_append_till(tmpstr, s, bufend, term, Nullch);
     }
     multi_end = curcop->cop_line;
     s++;
-    if (SvCUR(tmpstr) + 5 < SvLEN(tmpstr)) {
-	SvLEN_set(tmpstr, SvCUR(tmpstr) + 1);
-	Renew(SvPV(tmpstr), SvLEN(tmpstr), char);
+    if (SvCUR(sv) + 5 < SvLEN(sv)) {
+	SvLEN_set(sv, SvCUR(sv) + 1);
+	Renew(SvPV(sv), SvLEN(sv), char);
     }
     if (lex_stuff)
-	lex_repl = tmpstr;
+	lex_repl = sv;
     else
-	lex_stuff = tmpstr;
+	lex_stuff = sv;
     return s;
 }
 
@@ -3448,6 +3629,7 @@ char *start;
     double value;
     SV *sv;
     I32 floatit;
+    char *lastub = 0;
 
     switch (*s) {
     default:
@@ -3506,11 +3688,16 @@ char *start;
 	d = tokenbuf;
 	floatit = FALSE;
 	while (isDIGIT(*s) || *s == '_') {
-	    if (*s == '_')
-		s++;
+	    if (*s == '_') {
+		if (dowarn && lastub && s - lastub != 3)
+		    warn("Misplaced _");
+		lastub = ++s;
+	    }
 	    else
 		*d++ = *s++;
 	}
+	if (dowarn && lastub && s - lastub != 3)
+	    warn("Misplaced _");
 	if (*s == '.' && s[1] != '.') {
 	    floatit = TRUE;
 	    *d++ = *s++;
@@ -3521,7 +3708,7 @@ char *start;
 		    *d++ = *s++;
 	    }
 	}
-	if (*s && index("eE",*s) && index("+-0123456789",s[1])) {
+	if (*s && strchr("eE",*s) && strchr("+-0123456789",s[1])) {
 	    floatit = TRUE;
 	    s++;
 	    *d++ = 'e';		/* At least some Mach atof()s don't grok 'E' */
@@ -3563,7 +3750,7 @@ register char *s;
 		break;
 	}
 	if (in_eval && !rsfp) {
-	    eol = index(s,'\n');
+	    eol = strchr(s,'\n');
 	    if (!eol++)
 		eol = bufend;
 	}

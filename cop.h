@@ -49,6 +49,7 @@ struct cop {
 	struct ccop ccop;	/* compound command */
 	struct scop scop;	/* switch command */
     } uop;
+    U32		cop_seq;	/* parse sequence number */
     short	cop_slen;	/* len of cop_short, if not null */
     VOL short	cop_flags;	/* optimization flags--see above */
     HV *	cop_stash;	/* package line was compiled in */
@@ -70,6 +71,7 @@ struct block_sub {
     GV *	defgv;
     AV *	savearray;
     AV *	argarray;
+    AV *	comppad;
     U16		olddepth;
     U8		hasargs;
 };

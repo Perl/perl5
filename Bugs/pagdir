@@ -1,0 +1,24 @@
+Article 433 of comp.os.386bsd.apps:
+Path: netlabs!news.cerf.net!usc!howland.reston.ans.net!spool.mu.edu!bloom-beacon.mit.edu!ai-lab!life.ai.mit.edu!mycroft
+From: mycroft@trinity.gnu.ai.mit.edu (Charles Hannum)
+Newsgroups: comp.os.386bsd.apps
+Subject: Re: Perl-4.036?
+Date: 06 Sep 1993 19:01:10 GMT
+Organization: MIT Artificial Intelligence Lab
+Lines: 9
+Message-ID: <MYCROFT.93Sep6150110@trinity.gnu.ai.mit.edu>
+References: <26fptu$1q1@terminator.rs.itd.umich.edu> <26fve4$ivf@homer.cs.mcgill.ca>
+NNTP-Posting-Host: trinity.gnu.ai.mit.edu
+In-reply-to: storm@cs.mcgill.ca's message of 6 Sep 1993 18:27:16 GMT
+
+
+   Perl 4.036 comipled without a single hitch under NetBSD 0.9 last
+   week.  It failed the db test, but I suspect that is due to the new
+   db stuff under NetBSD and the like...
+
+Yes.  The perl test seems to expect the database to be put in
+`foo.pag' and `foo.dir', which isn't the case any more.  I suspect
+lwall will fix this soon.
+
+
+

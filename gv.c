@@ -43,6 +43,8 @@
 #include "EXTERN.h"
 #include "perl.h"
 
+extern char* rcsid;
+
 GV *
 gv_AVadd(gv)
 register GV *gv;
@@ -72,7 +74,7 @@ char *name;
     gv = gv_fetchpv(tmpbuf, TRUE);
     sv_setpv(GvSV(gv), name);
     if (perldb)
-	(void)gv_HVadd(gv_AVadd(gv));
+	hv_magic(GvHVn(gv_AVadd(gv)), gv, 'L');
     return gv;
 }
 
@@ -188,6 +190,8 @@ I32 add;
 	name = sawquote+1;
 	*sawquote = '\'';
     }
+    if (!stash)
+	fatal("Global symbol \"%s\" requires explicit package name", name);
     len = namend - name;
     gvp = (GV**)hv_fetch(stash,name,len,add);
     if (!gvp || *gvp == (GV*)&sv_undef)
@@ -197,26 +201,112 @@ I32 add;
 	SvMULTI_on(gv);
 	return gv;
     }
-    else {
-	sv_upgrade(gv, SVt_PVGV);
-	if (SvLEN(gv))
-	    Safefree(SvPV(gv));
-	Newz(602,gp, 1, GP);
-	GvGP(gv) = gp;
-	GvREFCNT(gv) = 1;
-	GvSV(gv) = NEWSV(72,0);
-	GvLINE(gv) = curcop->cop_line;
-	GvEGV(gv) = gv;
-	sv_magic((SV*)gv, (SV*)gv, '*', name, len);
-	GvSTASH(gv) = stash;
-	GvNAME(gv) = nsavestr(name, len);
-	GvNAMELEN(gv) = len;
-	if (isDIGIT(*name) && *name != '0')
-	    sv_magic(GvSV(gv), (SV*)gv, 0, name, len);
-	if (add & 2)
-	    SvMULTI_on(gv);
-	return gv;
+
+    /* Adding a new symbol */
+
+    sv_upgrade(gv, SVt_PVGV);
+    if (SvLEN(gv))
+	Safefree(SvPV(gv));
+    Newz(602,gp, 1, GP);
+    GvGP(gv) = gp;
+    GvREFCNT(gv) = 1;
+    GvSV(gv) = NEWSV(72,0);
+    GvLINE(gv) = curcop->cop_line;
+    GvEGV(gv) = gv;
+    sv_magic((SV*)gv, (SV*)gv, '*', name, len);
+    GvSTASH(gv) = stash;
+    GvNAME(gv) = nsavestr(name, len);
+    GvNAMELEN(gv) = len;
+    if (isDIGIT(*name) && *name != '0')
+	sv_magic(GvSV(gv), (SV*)gv, 0, name, len);
+    if (add & 2)
+	SvMULTI_on(gv);
+
+    /* set up magic where warranted */
+    switch (*name) {
+    case 'S':
+	if (strEQ(name, "SIG")) {
+	    HV *hv;
+	    siggv = gv;
+	    SvMULTI_on(siggv);
+	    hv = GvHVn(siggv);
+	    hv_magic(hv, siggv, 'S');
+
+	    /* initialize signal stack */
+	    signalstack = newAV();
+	    av_store(signalstack, 32, Nullsv);
+	    av_clear(signalstack);
+	    AvREAL_off(signalstack);
+	}
+	break;
+
+    case '&':
+	ampergv = gv;
+	sawampersand = TRUE;
+	goto magicalize;
+
+    case '`':
+	leftgv = gv;
+	sawampersand = TRUE;
+	goto magicalize;
+
+    case '\'':
+	rightgv = gv;
+	sawampersand = TRUE;
+	goto magicalize;
+
+    case ':':
+	sv_setpv(GvSV(gv),chopset);
+	goto magicalize;
+
+    case '!':
+    case '#':
+    case '?':
+    case '^':
+    case '~':
+    case '=':
+    case '-':
+    case '%':
+    case '.':
+    case '+':
+    case '*':
+    case '(':
+    case ')':
+    case '<':
+    case '>':
+    case ',':
+    case '\\':
+    case '/':
+    case '[':
+    case '|':
+    case '\004':
+    case '\t':
+    case '\020':
+    case '\024':
+    case '\027':
+    case '\006':
+      magicalize:
+	sv_magic(GvSV(gv), (SV*)gv, 0, name, 1);
+	break;
+
+    case '\014':
+	sv_setpv(GvSV(gv),"\f");
+	formfeed = GvSV(gv);
+	break;
+    case ';':
+	sv_setpv(GvSV(gv),"\034");
+	break;
+    case ']': {
+	    SV *sv;
+	    sv = GvSV(gv);
+	    sv_upgrade(sv, SVt_PVNV);
+	    sv_setpv(sv,rcsid);
+	    SvNV(sv) = atof(patchlevel);
+	    SvNOK_on(sv);
+	}
+	break;
     }
+    return gv;
 }
 
 void

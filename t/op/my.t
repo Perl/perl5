@@ -5,11 +5,12 @@
 print "1..20\n";
 
 sub foo {
-    local($a, $b) = @_;
-    local($c, $d);
+    my($a, $b) = @_;
+    my $c;
+    my $d;
     $c = "ok 3\n";
     $d = "ok 4\n";
-    { local($a,$c) = ("ok 9\n", "ok 10\n"); ($x, $y) = ($a, $c); }
+    { my($a,$c) = ("ok 9\n", "ok 10\n"); ($x, $y) = ($a, $c); }
     print $a, $b;
     $c . $d;
 }
@@ -26,11 +27,11 @@ print $a,$b,$c,$d,$x,$y;
 # same thing, only with arrays and associative arrays
 
 sub foo2 {
-    local($a, @b) = @_;
-    local(@c, %d);
+    my($a, @b) = @_;
+    my(@c, %d);
     @c = "ok 13\n";
     $d{''} = "ok 14\n";
-    { local($a,@c) = ("ok 19\n", "ok 20\n"); ($x, $y) = ($a, @c); }
+    { my($a,@c) = ("ok 19\n", "ok 20\n"); ($x, $y) = ($a, @c); }
     print $a, @b;
     $c[0] . $d{''};
 }

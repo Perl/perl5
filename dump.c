@@ -29,45 +29,36 @@
 static void dump();
 
 void
-dump_sequence(op)
-register OP *op;
+dump_all()
 {
-    extern I32 op_seq;
+    register I32 i;
+    register HE *entry;
 
-    for (; op; op = op->op_next) {
-	if (op->op_seq)
-	    return;
-	op->op_seq = ++op_seq;
+    setlinebuf(stderr);
+    if (main_root)
+	dump_op(main_root);
+    for (i = 0; i <= 127; i++) {
+	for (entry = HvARRAY(defstash)[i]; entry; entry = entry->hent_next)
+	    dump_sub((GV*)entry->hent_val);
     }
 }
 
 void
-dump_all()
+dump_sub(gv)
+GV* gv;
 {
-    register I32 i;
-    register GV *gv;
-    register HE *entry;
     SV *sv = sv_mortalcopy(&sv_undef);
-
-    setlinebuf(stderr);
-    dump_sequence(main_start);
-    dump_op(main_root);
-    for (i = 0; i <= 127; i++) {
-	for (entry = HvARRAY(defstash)[i]; entry; entry = entry->hent_next) {
-	    gv = (GV*)entry->hent_val;
-	    if (GvCV(gv)) {
-		gv_fullname(sv,gv);
-		dump("\nSUB %s = ", SvPV(sv));
-		if (CvUSERSUB(GvCV(gv)))
-		    dump("(usersub 0x%x %d)\n",
-			(long)CvUSERSUB(GvCV(gv)),
-			CvUSERINDEX(GvCV(gv)));
-		else {
-		    dump_sequence(CvSTART(GvCV(gv)));
-		    dump_op(CvROOT(GvCV(gv)));
-		}
-	    }
-	}
+    if (GvCV(gv)) {
+	gv_fullname(sv,gv);
+	dump("\nSUB %s = ", SvPV(sv));
+	if (CvUSERSUB(GvCV(gv)))
+	    dump("(usersub 0x%x %d)\n",
+		(long)CvUSERSUB(GvCV(gv)),
+		CvUSERINDEX(GvCV(gv)));
+	else if (CvROOT(GvCV(gv)))
+	    dump_op(CvROOT(GvCV(gv)));
+	else
+	    dump("<undef>\n");
     }
 }
 
@@ -78,7 +69,6 @@ dump_eval()
     register GV *gv;
     register HE *entry;
 
-    dump_sequence(eval_start);
     dump_op(eval_root);
 }
 
@@ -88,13 +78,18 @@ register OP *op;
 {
     SV *tmpsv;
 
-    if (!op->op_seq)
-	dump_sequence(op);
     dump("{\n");
-    fprintf(stderr, "%-4d", op->op_seq);
+    if (op->op_seq)
+	fprintf(stderr, "%-4d", op->op_seq);
+    else
+	fprintf(stderr, "    ");
     dump("TYPE = %s  ===> ", op_name[op->op_type]);
-    if (op->op_next)
-	fprintf(stderr, "%d\n", op->op_next->op_seq);
+    if (op->op_next) {
+	if (op->op_seq)
+	    fprintf(stderr, "%d\n", op->op_next->op_seq);
+	else
+	    fprintf(stderr, "(%d)\n", op->op_next->op_seq);
+    }
     else
 	fprintf(stderr, "DONE\n");
     dumplvl++;
@@ -121,8 +116,8 @@ register OP *op;
 	    (void)strcat(buf,"STACKED,");
 	if (op->op_flags & OPf_LVAL)
 	    (void)strcat(buf,"LVAL,");
-	if (op->op_flags & OPf_LOCAL)
-	    (void)strcat(buf,"LOCAL,");
+	if (op->op_flags & OPf_INTRO)
+	    (void)strcat(buf,"INTRO,");
 	if (op->op_flags & OPf_SPECIAL)
 	    (void)strcat(buf,"SPECIAL,");
 	if (*buf)
@@ -170,6 +165,7 @@ register OP *op;
     }
 
     switch (op->op_type) {
+    case OP_GVSV:
     case OP_GV:
 	if (cGVOP->op_gv) {
 	    tmpsv = NEWSV(0,0);
@@ -183,7 +179,8 @@ register OP *op;
     case OP_CONST:
 	dump("SV = %s\n", SvPEEK(cSVOP->op_sv));
 	break;
-    case OP_CURCOP:
+    case OP_NEXTSTATE:
+    case OP_DBSTATE:
 	if (cCOP->cop_line)
 	    dump("LINE = %d\n",cCOP->cop_line);
 	if (cCOP->cop_label)
@@ -191,40 +188,30 @@ register OP *op;
 	break;
     case OP_ENTERLOOP:
 	dump("REDO ===> ");
-	if (cLOOP->op_redoop) {
-	    dump_sequence(cLOOP->op_redoop);
+	if (cLOOP->op_redoop)
 	    fprintf(stderr, "%d\n", cLOOP->op_redoop->op_seq);
-	}
 	else
 	    fprintf(stderr, "DONE\n");
 	dump("NEXT ===> ");
-	if (cLOOP->op_nextop) {
-	    dump_sequence(cLOOP->op_nextop);
+	if (cLOOP->op_nextop)
 	    fprintf(stderr, "%d\n", cLOOP->op_nextop->op_seq);
-	}
 	else
 	    fprintf(stderr, "DONE\n");
 	dump("LAST ===> ");
-	if (cLOOP->op_lastop) {
-	    dump_sequence(cLOOP->op_lastop);
+	if (cLOOP->op_lastop)
 	    fprintf(stderr, "%d\n", cLOOP->op_lastop->op_seq);
-	}
 	else
 	    fprintf(stderr, "DONE\n");
 	break;
     case OP_COND_EXPR:
 	dump("TRUE ===> ");
-	if (cCONDOP->op_true) {
-	    dump_sequence(cCONDOP->op_true);
+	if (cCONDOP->op_true)
 	    fprintf(stderr, "%d\n", cCONDOP->op_true->op_seq);
-	}
 	else
 	    fprintf(stderr, "DONE\n");
 	dump("FALSE ===> ");
-	if (cCONDOP->op_false) {
-	    dump_sequence(cCONDOP->op_false);
+	if (cCONDOP->op_false)
 	    fprintf(stderr, "%d\n", cCONDOP->op_false->op_seq);
-	}
 	else
 	    fprintf(stderr, "DONE\n");
 	break;
@@ -233,10 +220,8 @@ register OP *op;
     case OP_AND:
     case OP_METHOD:
 	dump("OTHER ===> ");
-	if (cLOGOP->op_other) {
-	    dump_sequence(cLOGOP->op_other);
+	if (cLOGOP->op_other)
 	    fprintf(stderr, "%d\n", cLOGOP->op_other->op_seq);
-	}
 	else
 	    fprintf(stderr, "DONE\n");
 	break;

@@ -575,7 +575,7 @@ typedef struct loop LOOP;
 
 typedef struct Outrec Outrec;
 typedef struct lstring Lstring;
-typedef struct interpreter Interpreter;
+typedef struct interpreter PerlInterpreter;
 typedef struct ff FF;
 typedef struct io IO;
 typedef struct sv SV;
@@ -784,7 +784,7 @@ double atof P((const char*));
 /* All of these are in stdlib.h or time.h for ANSI C */
 long time();
 struct tm *gmtime(), *localtime();
-char *index(), *rindex();
+char *strchr(), *strrchr();
 char *strcpy(), *strcat();
 #endif /* ! STANDARD_C */
 
@@ -849,7 +849,7 @@ int unlnk P((char*));
 /****************/
 
 /* global state */
-EXT Interpreter *curinterp;	/* currently running interpreter */
+EXT PerlInterpreter *curinterp;	/* currently running interpreter */
 extern char **	environ;	/* environment variables supplied via exec */
 EXT int		uid;		/* current real user id */
 EXT int		euid;		/* current effective user id */
@@ -857,6 +857,8 @@ EXT int		gid;		/* current real group id */
 EXT int		egid;		/* current effective group id */
 EXT bool	nomemok;	/* let malloc context handle nomem */
 EXT U32		an;		/* malloc sequence number */
+EXT U32		cop_seq;	/* statement sequence number */
+EXT U32		op_seq;		/* op sequence number */
 EXT char **	origenviron;
 EXT U32		origalen;
 
@@ -906,17 +908,29 @@ EXT char *	dc;
 EXT char *	Yes INIT("1");
 EXT char *	No INIT("");
 EXT char *	hexdigit INIT("0123456789abcdef0123456789ABCDEFx");
-EXT char *	warn_nl INIT("Unsuccessful %s on filename containing newline");
-EXT char	no_modify[] INIT("Modification of a read-only value attempted");
-EXT char	no_mem[] INIT("Out of memory!\n");
-EXT char	no_security[] INIT("Insecure dependency in %s");
-EXT char	no_sock_func[]
-			INIT("Unsupported socket function \"%s\" called");
-EXT char	no_dir_func[]
-			INIT("Unsupported directory function \"%s\" called");
-EXT char	no_func[] INIT("The %s function is unimplemented");
 EXT char *	patleave INIT("\\.^$@dDwWsSbB+*?|()-nrtfeaxc0123456789[{]}");
 EXT char *	vert INIT("|");
+
+EXT char *	warn_nl
+  INIT("Unsuccessful %s on filename containing newline");
+EXT char	no_usym[]
+  INIT("Can't use an undefined value to create a symbol");
+EXT char	no_aelem[]
+  INIT("Modification of non-creatable array value attempted, subscript %d");
+EXT char	no_helem[]
+  INIT("Modification of non-creatable hash value attempted, subscript \"%s\"");
+EXT char	no_modify[]
+  INIT("Modification of a read-only value attempted");
+EXT char	no_mem[]
+  INIT("Out of memory!\n");
+EXT char	no_security[]
+  INIT("Insecure dependency in %s");
+EXT char	no_sock_func[]
+  INIT("Unsupported socket function \"%s\" called");
+EXT char	no_dir_func[]
+  INIT("Unsupported directory function \"%s\" called");
+EXT char	no_func[]
+  INIT("The %s function is unimplemented");
 
 EXT SV		sv_undef;
 EXT SV		sv_no;
@@ -1055,8 +1069,9 @@ EXT I32		error_count;	/* how many errors so far, max 10 */
 EXT I32		subline;	/* line this subroutine began on */
 EXT SV *	subname;	/* name of current subroutine */
 
-EXT AV *	pad;		/* storage for lexically scoped temporaries */
-EXT AV *	comppad;	/* same for currently compiling routine */
+EXT AV *	comppad;	/* storage for lexically scoped temporaries */
+EXT AV *	comppadname;	/* variable names for "my" variables */
+EXT I32		comppadnamefill;/* last "introduced" variable offset */
 EXT I32		padix;		/* max used index in current "register" pad */
 EXT COP		compiling;
 
@@ -1065,6 +1080,7 @@ EXT I32		thisexpr;	/* name id for nothing_in_common() */
 EXT char *	last_uni;	/* position of last named-unary operator */
 EXT char *	last_lop;	/* position of last list operator */
 EXT bool	in_format;	/* we're compiling a run_format */
+EXT bool	in_my;		/* we're compiling a "my" declaration */
 #ifdef FCRYPT
 EXT I32		cryptseen;	/* has fast crypt() been initialized? */
 #endif
@@ -1180,7 +1196,6 @@ IEXT GV *	Ileftgv;
 IEXT GV *	Iampergv;
 IEXT GV *	Irightgv;
 IEXT PMOP *	Icurpm;		/* what to do \ interps from */
-IEXT char *	Ihint;		/* hint from cop_exec to do_match et al */
 IEXT I32 *	Iscreamfirst;
 IEXT I32 *	Iscreamnext;
 IEXT I32	Imaxscream IINIT(-1);
@@ -1201,6 +1216,10 @@ IEXT HV *	Idefstash;	/* main symbol table */
 IEXT HV *	Icurstash;	/* symbol table for current package */
 IEXT HV *	Idebstash;	/* symbol table for perldb package */
 IEXT SV *	Icurstname;	/* name of current package */
+IEXT AV *	Ibeginav;	/* names of BEGIN subroutines */
+IEXT AV *	Iendav;		/* names of END subroutines */
+IEXT AV *	Ipad;		/* storage for lexically scoped temporaries */
+IEXT AV *	Ipadname;	/* variable names for "my" variables */
 
 /* memory management */
 IEXT SV *	Ifreestrroot;
@@ -1240,9 +1259,6 @@ IEXT OP * VOL	Imain_root;
 IEXT OP * VOL	Imain_start;
 IEXT OP * VOL	Ieval_root;
 IEXT OP * VOL	Ieval_start;
-IEXT OP *	Ilast_root;
-IEXT char *	Ilast_eval;
-IEXT I32	Ilast_elen;
 
 /* runtime control stuff */
 IEXT COP * VOL	Icurcop IINIT(&compiling);
@@ -1265,7 +1281,7 @@ IEXT SV *	bodytarget;
 IEXT SV *	toptarget;
 
 /* statics moved here for shared library purposes */
-IEXT SV	Istrchop;	/* return value from chop */
+IEXT SV		Istrchop;	/* return value from chop */
 IEXT int	Ifilemode;	/* so nextargv() can preserve mode */
 IEXT int	Ilastfd;	/* what to preserve mode on */
 IEXT char *	Ioldname;	/* what to preserve mode on */
@@ -1309,10 +1325,10 @@ extern "C" {
 };
 #endif
 
-/* The follow must follow proto.h */
+/* The following must follow proto.h */
 
 #ifdef DOINIT
-MGVTBL vtbl_sv =	{magic_get, magic_set, 0, 0, 0};
+MGVTBL vtbl_sv =	{magic_get, magic_set, magic_len, 0, 0};
 MGVTBL vtbl_env =	{0,		0,		 0, 0, 0};
 MGVTBL vtbl_envelem =	{0,		magic_setenv,    0, 0, 0};
 MGVTBL vtbl_sig =	{0,		0,		 0, 0, 0};
@@ -1322,6 +1338,7 @@ MGVTBL vtbl_dbmelem =	{0,		magic_setdbm,    0, 0, 0};
 MGVTBL vtbl_dbline =	{0,		magic_setdbline, 0, 0, 0};
 MGVTBL vtbl_arylen =	{magic_getarylen,magic_setarylen, 0, 0, 0};
 MGVTBL vtbl_glob =	{magic_getglob,	magic_setglob,   0, 0, 0};
+MGVTBL vtbl_mglob =	{0,		magic_setmglob,  0, 0, 0};
 MGVTBL vtbl_substr =	{0,		magic_setsubstr, 0, 0, 0};
 MGVTBL vtbl_vec =	{0,		magic_setvec,    0, 0, 0};
 MGVTBL vtbl_bm =	{0,		magic_setbm,     0, 0, 0};
@@ -1337,6 +1354,7 @@ EXT MGVTBL vtbl_dbmelem;
 EXT MGVTBL vtbl_dbline;
 EXT MGVTBL vtbl_arylen;
 EXT MGVTBL vtbl_glob;
+EXT MGVTBL vtbl_mglob;
 EXT MGVTBL vtbl_substr;
 EXT MGVTBL vtbl_vec;
 EXT MGVTBL vtbl_bm;

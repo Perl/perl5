@@ -1,0 +1,41 @@
+    SV *sv;
+    GV* tmpgv;
+
+    /* initialize everything that won't change if we undump */
+
+    if (siggv = gv_fetchpv("SIG",allgvs)) {
+	HV *hv;
+	SvMULTI_on(siggv);
+	hv = GvHVn(siggv);
+	hv_magic(hv, siggv, 'S');
+
+	/* initialize signal stack */
+        signalstack = newAV();
+        av_store(signalstack, 32, Nullsv);
+        av_clear(signalstack);
+        AvREAL_off(signalstack);
+    }
+
+    magicalize("!#?^~=-%.+&*()<>,\\/[|`':\004\t\020\024\027\006");
+
+    ampergv = gv_fetchpv("&",allgvs);
+    leftgv = gv_fetchpv("`",allgvs);
+    rightgv = gv_fetchpv("'",allgvs);
+    sawampersand = (ampergv || leftgv || rightgv);
+    if (tmpgv = gv_fetchpv(":",allgvs))
+	sv_setpv(GvSV(tmpgv),chopset);
+
+    /* these aren't necessarily magical */
+    if (tmpgv = gv_fetchpv("\014",allgvs)) {
+	sv_setpv(GvSV(tmpgv),"\f");
+	formfeed = GvSV(tmpgv);
+    }
+    if (tmpgv = gv_fetchpv(";",allgvs))
+	sv_setpv(GvSV(tmpgv),"\034");
+    if (tmpgv = gv_fetchpv("]",allgvs)) {
+	sv = GvSV(tmpgv);
+	sv_upgrade(sv, SVt_PVNV);
+	sv_setpv(sv,rcsid);
+	SvNV(sv) = atof(patchlevel);
+	SvNOK_on(sv);
+    }

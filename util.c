@@ -24,14 +24,14 @@
  * 
  * Revision 4.0.1.3  91/11/05  19:18:26  lwall
  * patch11: safe malloc code now integrated into Perl's malloc when possible
- * patch11: index("little", "longer string") could visit faraway places
+ * patch11: strchr("little", "longer string") could visit faraway places
  * patch11: warn '-' x 10000 dumped core
  * patch11: forked exec on non-existent program now issues a warning
  * 
  * Revision 4.0.1.2  91/06/07  12:10:42  lwall
  * patch4: new copyright notice
  * patch4: made some allowances for "semi-standard" C
- * patch4: index() could blow up searching for null string
+ * patch4: strchr() could blow up searching for null string
  * patch4: taintchecks could improperly modify parent in vfork()
  * patch4: exec would close files even if you cleared close-on-exec flag
  * 
@@ -1501,8 +1501,8 @@ same_dirent(a,b)
 char *a;
 char *b;
 {
-    char *fa = rindex(a,'/');
-    char *fb = rindex(b,'/');
+    char *fa = strrchr(a,'/');
+    char *fb = strrchr(b,'/');
     struct stat tmpstatbuf1;
     struct stat tmpstatbuf2;
 #ifndef MAXPATHLEN
@@ -1564,7 +1564,7 @@ I32 *retlen;
     register unsigned long retval = 0;
     char *tmp;
 
-    while (len-- && *s && (tmp = index(hexdigit, *s))) {
+    while (len-- && *s && (tmp = strchr(hexdigit, *s))) {
 	retval <<= 4;
 	retval |= (tmp - hexdigit) & 15;
 	s++;

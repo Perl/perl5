@@ -363,6 +363,8 @@ struct xpvfm {
 	do { assert(SvTYPE(sv) >= SVt_PV); \
 		(((XPV*)  SvANY(sv))->xpv_cur = val - SvPV(sv)); } while (0)
 
+#define SvCUROK(sv) (SvPOK(sv) ? SvCUR(sv) : 0)
+
 #define BmRARE(sv)	((XPVBM*)  SvANY(sv))->xbm_rare
 #define BmUSEFUL(sv)	((XPVBM*)  SvANY(sv))->xbm_useful
 #define BmPREVIOUS(sv)	((XPVBM*)  SvANY(sv))->xbm_previous

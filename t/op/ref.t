@@ -81,14 +81,14 @@ $refref = \%whatever;
 $refref->{"key"} = $ref;
 print $refref->{"key"}->[2]->[0] == 3 ? "ok 20\n" : "not ok 20\n";
 
-# Test to see if anonymous subarrays sprint into existence.
+# Test to see if anonymous subarrays spring into existence.
 
 $spring[5]->[0] = 123;
 $spring[5]->[1] = 456;
 push(@{$spring[5]}, 789);
 print join(':',@{$spring[5]}) eq "123:456:789" ? "ok 21\n" : "not ok 21\n";
 
-# Test to see if anonymous subhashes sprint into existence.
+# Test to see if anonymous subhashes spring into existence.
 
 @{$spring2{"foo"}} = (1,2,3);
 $spring2{"foo"}->[3] = 4;

@@ -155,19 +155,22 @@ __END__
 # Nothing.
 
 null		null operation		ck_null		0	
-scalar		null operation		ck_null		s	
+stub		stub			ck_null		0
+scalar		scalar			ck_fun		s	S
 
 # Pushy stuff.
 
 pushmark	pushmark		ck_null		s	
 wantarray	wantarray		ck_null		is	
 
-word		bare word		ck_null		s	
 const		constant item		ck_null		s	
 interp		interpreted string	ck_null		0	
 
 gvsv		scalar variable		ck_null		ds	
 gv		glob value		ck_null		ds	
+padsv		private variable	ck_null		0
+padav		private array		ck_null		0
+padhv		private hash		ck_null		0
 
 pushre		push regexp		ck_null		0
 
@@ -352,7 +355,8 @@ die		die			ck_fun		dimst	L
 reset		reset			ck_fun		is	S?
 
 lineseq		line sequence		ck_null		0	
-curcop		next statement		ck_null		s	
+nextstate	next statement		ck_null		s	
+dbstate		debug next statement	ck_null		s	
 unstack		unstack			ck_null		s
 enter		block entry		ck_null		0	
 leave		block exit		ck_null		0	
@@ -550,14 +554,14 @@ gprotoent	getprotoent		ck_null		0
 gsbyname	getservbyname		ck_fun		0	S S
 gsbyport	getservbyport		ck_fun		0	S S
 gservent	getservent		ck_null		0	
-shostent	sethostent		ck_fun		ist	S
-snetent		setnetent		ck_fun		ist	S
-sprotoent	setprotoent		ck_fun		ist	S
-sservent	setservent		ck_fun		ist	S
-ehostent	endhostent		ck_null		ist	
-enetent		endnetent		ck_null		ist	
-eprotoent	endprotoent		ck_null		ist	
-eservent	endservent		ck_null		ist	
+shostent	sethostent		ck_fun		is	S
+snetent		setnetent		ck_fun		is	S
+sprotoent	setprotoent		ck_fun		is	S
+sservent	setservent		ck_fun		is	S
+ehostent	endhostent		ck_null		is	
+enetent		endnetent		ck_null		is	
+eprotoent	endprotoent		ck_null		is	
+eservent	endservent		ck_null		is	
 gpwnam		getpwnam		ck_fun		0	S
 gpwuid		getpwuid		ck_fun		0	S
 gpwent		getpwent		ck_null		0	

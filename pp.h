@@ -79,7 +79,7 @@
 #define TOPp		(SvPVn(TOPs))
 #define TOPn		(SvNVn(TOPs))
 #define TOPi		((int)SvIVn(TOPs))
-#define TOPl		((long)SvNVn(TOPs))
+#define TOPl		((long)SvIVn(TOPs))
 
 /* Go to some pains in the rare event that we must extend the stack. */
 #define EXTEND(p,n)	do { if (stack_max - p < (n)) {		  	    \

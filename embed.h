@@ -49,7 +49,6 @@
 #define oldoldbufptr	PERLoldoldbufptr
 #define origalen	PERLorigalen
 #define origenviron	PERLorigenviron
-#define pad		PERLpad
 #define padix		PERLpadix
 #define patleave	PERLpatleave
 #define regbol		PERLregbol
@@ -102,6 +101,7 @@
 #define argvoutgv	(curinterp->Iargvoutgv)
 #define arybase		(curinterp->Iarybase)
 #define basetime	(curinterp->Ibasetime)
+#define beginav		(curinterp->Ibeginav)
 #define bodytarget	(curinterp->Ibodytarget)
 #define cddir		(curinterp->Icddir)
 #define chopset		(curinterp->Ichopset)
@@ -136,6 +136,7 @@
 #define dumplvl		(curinterp->Idumplvl)
 #define e_fp		(curinterp->Ie_fp)
 #define e_tmpname	(curinterp->Ie_tmpname)
+#define endav		(curinterp->Iendav)
 #define envgv		(curinterp->Ienvgv)
 #define eval_root	(curinterp->Ieval_root)
 #define eval_start	(curinterp->Ieval_start)
@@ -147,14 +148,10 @@
 #define formtarget	(curinterp->Iformtarget)
 #define freestrroot	(curinterp->Ifreestrroot)
 #define gensym		(curinterp->Igensym)
-#define hint		(curinterp->Ihint)
 #define in_eval		(curinterp->Iin_eval)
 #define incgv		(curinterp->Iincgv)
 #define inplace		(curinterp->Iinplace)
-#define last_elen	(curinterp->Ilast_elen)
-#define last_eval	(curinterp->Ilast_eval)
 #define last_in_gv	(curinterp->Ilast_in_gv)
-#define last_root	(curinterp->Ilast_root)
 #define lastfd		(curinterp->Ilastfd)
 #define lastretstr	(curinterp->Ilastretstr)
 #define lastscream	(curinterp->Ilastscream)
@@ -194,6 +191,8 @@
 #define origfilename	(curinterp->Iorigfilename)
 #define ors		(curinterp->Iors)
 #define orslen		(curinterp->Iorslen)
+#define pad		(curinterp->Ipad)
+#define padname		(curinterp->Ipadname)
 #define patchlevel	(curinterp->Ipatchlevel)
 #define perldb		(curinterp->Iperldb)
 #define pidstatus	(curinterp->Ipidstatus)
@@ -250,6 +249,7 @@
 #define Iargvoutgv	argvoutgv
 #define Iarybase	arybase
 #define Ibasetime	basetime
+#define Ibeginav	beginav
 #define Ibodytarget	bodytarget
 #define Icddir		cddir
 #define Ichopset	chopset
@@ -284,6 +284,7 @@
 #define Idumplvl	dumplvl
 #define Ie_fp		e_fp
 #define Ie_tmpname	e_tmpname
+#define Iendav		endav
 #define Ienvgv		envgv
 #define Ieval_root	eval_root
 #define Ieval_start	eval_start
@@ -295,14 +296,10 @@
 #define Iformtarget	formtarget
 #define Ifreestrroot	freestrroot
 #define Igensym		gensym
-#define Ihint		hint
 #define Iin_eval	in_eval
 #define Iincgv		incgv
 #define Iinplace	inplace
-#define Ilast_elen	last_elen
-#define Ilast_eval	last_eval
 #define Ilast_in_gv	last_in_gv
-#define Ilast_root	last_root
 #define Ilastfd		lastfd
 #define Ilastretstr	lastretstr
 #define Ilastscream	lastscream
@@ -342,6 +339,8 @@
 #define Iorigfilename	origfilename
 #define Iors		ors
 #define Iorslen		orslen
+#define Ipad		pad
+#define Ipadname	padname
 #define Ipatchlevel	patchlevel
 #define Iperldb		perldb
 #define Ipidstatus	pidstatus

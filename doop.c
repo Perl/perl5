@@ -89,7 +89,7 @@ OP *arg;
 
     tbl = (short*) cPVOP->op_pv;
     s = SvPVn(sv);
-    send = s + SvCUR(sv);
+    send = s + SvCUROK(sv);
     if (!tbl || !s)
 	fatal("panic: do_trans");
     DEBUG_t( deb("2.TBL\n"));
@@ -139,7 +139,7 @@ register SV **sp;
     register I32 items = sp - mark;
     register char *delim = SvPVn(del);
     register STRLEN len;
-    I32 delimlen = SvCUR(del);
+    I32 delimlen = SvCUROK(del);
 
     mark++;
     len = (items > 0 ? (delimlen * (items - 1) ) : 0);
@@ -207,7 +207,7 @@ register SV **sarg;
     sv_setpv(sv,"");
     len--;			/* don't count pattern string */
     t = s = SvPVn(*sarg);
-    send = s + SvCUR(*sarg);
+    send = s + SvCUROK(*sarg);
     sarg++;
     for ( ; ; len--) {
 
@@ -316,7 +316,7 @@ register SV **sarg;
 		    break;		/* so handle simple cases */
 		}
 		else if (f[1] == '-') {
-		    char *mp = index(f, '.');
+		    char *mp = strchr(f, '.');
 		    I32 min = atoi(f+2);
 
 		    if (mp) {
@@ -330,7 +330,7 @@ register SV **sarg;
 		    break;
 		}
 		else if (isDIGIT(f[1])) {
-		    char *mp = index(f, '.');
+		    char *mp = strchr(f, '.');
 		    I32 min = atoi(f+1);
 
 		    if (mp) {
@@ -438,7 +438,7 @@ register SV *sv;
 	return;
     }
     tmps = SvPVn(sv);
-    if (tmps && SvCUR(sv)) {
+    if (tmps && SvCUROK(sv)) {
 	tmps += SvCUR(sv) - 1;
 	sv_setpvn(astr,tmps,1);	/* remember last char */
 	*tmps = '\0';				/* wipe it out */
@@ -466,10 +466,10 @@ SV *right;
     register char *lc = SvPVn(left);
     register char *rc = SvPVn(right);
     register I32 len;
+    I32 leftlen = SvCUROK(left);
+    I32 rightlen = SvCUROK(right);
 
-    len = SvCUR(left);
-    if (len > SvCUR(right))
-	len = SvCUR(right);
+    len = leftlen < rightlen ? leftlen : rightlen;
     if (SvTYPE(sv) < SVt_PV)
 	sv_upgrade(sv, SVt_PV);
     if (SvCUR(sv) > len)
@@ -545,10 +545,10 @@ SV *right;
 	    *dc++ = *lc++ | *rc++;
       mop_up:
 	len = SvCUR(sv);
-	if (SvCUR(right) > len)
-	    sv_catpvn(sv,SvPV(right)+len,SvCUR(right) - len);
-	else if (SvCUR(left) > len)
-	    sv_catpvn(sv,SvPV(left)+len,SvCUR(left) - len);
+	if (rightlen > len)
+	    sv_catpvn(sv, SvPV(right) + len, rightlen - len);
+	else if (leftlen > len)
+	    sv_catpvn(sv, SvPV(left) + len, leftlen - len);
 	break;
     }
 }

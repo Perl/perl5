@@ -1,8 +1,0 @@
-#!./perl
-
-$_ = 'aaabbbccc';
-if (/(a+b+c+)/ && $1 eq 'aaabbbccc') {
-	print "ok 14\n";
-} else {
-	print "not ok 14\n";
-}

@@ -7,7 +7,7 @@ char **argv;
 char **env;
 {
     int exitstatus;
-    Interpreter *my_perl;
+    PerlInterpreter *my_perl;
 
     my_perl = perl_alloc();
     if (!my_perl)

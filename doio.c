@@ -236,7 +236,7 @@ I32 len;
 	}
     }
     if (!fp) {
-	if (dowarn && io->type == '<' && index(name, '\n'))
+	if (dowarn && io->type == '<' && strchr(name, '\n'))
 	    warn(warn_nl, "open");
 	Safefree(myname);
 	goto say_false;
@@ -909,7 +909,7 @@ dARGS
 	sv_setpv(statname,SvPVn(sv));
 	laststype = OP_STAT;
 	laststatval = stat(SvPVn(sv),&statcache);
-	if (laststatval < 0 && dowarn && index(SvPVn(sv), '\n'))
+	if (laststatval < 0 && dowarn && strchr(SvPVn(sv), '\n'))
 	    warn(warn_nl, "stat");
 	return laststatval;
     }
@@ -941,7 +941,7 @@ dARGS
 #else
     laststatval = stat(SvPVn(sv),&statcache);
 #endif
-    if (laststatval < 0 && dowarn && index(SvPVn(sv), '\n'))
+    if (laststatval < 0 && dowarn && strchr(SvPVn(sv), '\n'))
 	warn(warn_nl, "lstat");
     return laststatval;
 }
@@ -1033,7 +1033,7 @@ char *cmd;
     if (*s == '=')
 	goto doshell;
     for (s = cmd; *s; s++) {
-	if (*s != ' ' && !isALPHA(*s) && index("$&*(){}[]'\";\\|?<>~`\n",*s)) {
+	if (*s != ' ' && !isALPHA(*s) && strchr("$&*(){}[]'\";\\|?<>~`\n",*s)) {
 	    if (*s == '\n' && !s[1]) {
 		*s = '\0';
 		break;

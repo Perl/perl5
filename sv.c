@@ -293,6 +293,7 @@ U32 mt;
 	SvNV(sv)	= nv;
 	SvMAGIC(sv)	= magic;
 	SvSTASH(sv)	= stash;
+	GvGP(sv)	= 0;
 	GvNAME(sv)	= 0;
 	GvNAMELEN(sv)	= 0;
 	GvSTASH(sv)	= 0;
@@ -354,10 +355,14 @@ register SV *sv;
 	    break;
 
 	case SVt_NULL:
-	    return "UNDEF";
+	    strcpy(t,"UNDEF");
+	    return tokenbuf;
 	case SVt_REF:
-	    strcpy(t, "\\");
-	    t += strlen(t);
+	    *t++ = '\\';
+	    if (t - tokenbuf > 10) {
+		strcpy(tokenbuf + 3,"...");
+		return tokenbuf;
+	    }
 	    sv = (SV*)SvANY(sv);
 	    goto retry;
 	case SVt_IV:
@@ -538,8 +543,15 @@ register SV *sv;
 	sv_upgrade(sv, SVt_PVIV);
     if (SvNOK(sv))
 	SvIV(sv) = (I32)SvNV(sv);
-    else if (SvPOK(sv) && SvLEN(sv))
+    else if (SvPOK(sv) && SvLEN(sv)) {
+	if (dowarn && !looks_like_number(sv)) {
+	    if (op)
+		warn("Argument wasn't numeric for \"%s\"",op_name[op->op_type]);
+	    else
+		warn("Argument wasn't numeric");
+	}
 	SvIV(sv) = atol(SvPV(sv));
+    }
     else  {
 	if (dowarn)
 	    warn("Use of uninitialized variable");
@@ -573,10 +585,20 @@ register SV *sv;
     }
     else if (SvTYPE(sv) < SVt_PVNV)
 	sv_upgrade(sv, SVt_PVNV);
-    if (SvPOK(sv) && SvLEN(sv))
-	SvNV(sv) = atof(SvPV(sv));
-    else if (SvIOK(sv))
+    if (SvIOK(sv) &&
+	    (!SvPOK(sv) || !strchr(SvPV(sv),'.') || !looks_like_number(sv)))
+    {
 	SvNV(sv) = (double)SvIV(sv);
+    }
+    else if (SvPOK(sv) && SvLEN(sv)) {
+	if (dowarn && !SvIOK(sv) && !looks_like_number(sv)) {
+	    if (op)
+		warn("Argument wasn't numeric for \"%s\"",op_name[op->op_type]);
+	    else
+		warn("Argument wasn't numeric");
+	}
+	SvNV(sv) = atof(SvPV(sv));
+    }
     else  {
 	if (dowarn)
 	    warn("Use of uninitialized variable");
@@ -946,45 +968,6 @@ register char *ptr;
     SvTDOWN(sv);
 }
 
-char *
-sv_append_till(sv,from,fromend,delim,keeplist)
-register SV *sv;
-register char *from;
-register char *fromend;
-register I32 delim;
-char *keeplist;
-{
-    register char *to;
-    register STRLEN len;
-
-    if (SvREADONLY(sv))
-	fatal(no_modify);
-    if (!from)
-	return Nullch;
-    len = fromend - from;
-    if (!SvUPGRADE(sv, SVt_PV))
-	return 0;
-    SvGROW(sv, SvCUR(sv) + len + 1);
-    SvPOK_only(sv);		/* validate pointer */
-    to = SvPV(sv)+SvCUR(sv);
-    for (; from < fromend; from++,to++) {
-	if (*from == '\\' && from+1 < fromend && delim != '\\') {
-	    if (!keeplist)
-		*to++ = *from++;
-	    else if (from[1] && index(keeplist,from[1]))
-		*to++ = *from++;
-	    else
-		from++;
-	}
-	else if (*from == delim)
-	    break;
-	*to = *from;
-    }
-    *to = '\0';
-    SvCUR_set(sv, to - SvPV(sv));
-    return from;
-}
-
 SV *
 #ifdef LEAKTEST
 newSV(x,len)
@@ -1049,7 +1032,13 @@ STRLEN namlen;
     case 'e':
 	mg->mg_virtual = &vtbl_envelem;
 	break;
+    case 'g':
+	mg->mg_virtual = &vtbl_mglob;
+	break;
     case 'L':
+	mg->mg_virtual = 0;
+	break;
+    case 'l':
 	mg->mg_virtual = &vtbl_dbline;
 	break;
     case 'S':
@@ -1174,6 +1163,13 @@ register SV *nsv;
 	fatal(no_modify);
     if (SvREFCNT(nsv) != 1)
 	warn("Reference miscount in sv_replace()");
+    if (SvMAGICAL(sv)) {
+	SvUPGRADE(nsv, SVt_PVMG);
+	SvMAGIC(nsv) = SvMAGIC(sv);
+	SvMAGICAL_on(nsv);
+	SvMAGICAL_off(sv);
+	SvMAGIC(sv) = 0;
+    }
     SvREFCNT(sv) = 0;
     sv_clear(sv);
     StructCopy(nsv,sv,SV);
@@ -1358,7 +1354,7 @@ register SV *sv;
 	return 0;
 
     if (SvMAGICAL(sv))
-	return mg_len(sv, SvMAGIC(sv));
+	return mg_len(sv);
 
     if (!(SvPOK(sv))) {
 	(void)sv_2pv(sv);
@@ -1527,9 +1523,11 @@ I32 append;
     ptr = fp->_ptr;
     for (;;) {
       screamer:
-	while (--cnt >= 0) {			/* this */	/* eat */
-	    if ((*bp++ = *ptr++) == newline)	/* really */	/* dust */
-		goto thats_all_folks;		/* screams */	/* sed :-) */ 
+	if (cnt > 0) {
+	    while (--cnt >= 0) {		 /* this */	/* eat */
+		if ((*bp++ = *ptr++) == newline) /* really */	/* dust */
+		    goto thats_all_folks;	 /* screams */	/* sed :-) */ 
+	    }
 	}
 	
 	if (shortbuffered) {			/* oh well, must extend */
@@ -1957,7 +1955,7 @@ I32 lref;
     CV *cv;
 
     if (!sv)
-	return Nullcv;
+	return *gvp = Nullgv, Nullcv;
     switch (SvTYPE(sv)) {
     case SVt_REF:
 	cv = (CV*)SvANY(sv);

@@ -91,7 +91,7 @@ GV *gv;
     SSPUSHINT(SAVEt_SV);
 
     sv = GvSV(gv) = NEWSV(0,0);
-    if (SvTYPE(osv) >= SVt_PVMG && SvMAGIC(sv)) {
+    if (SvTYPE(osv) >= SVt_PVMG && SvMAGIC(osv)) {
 	sv_upgrade(sv, SvTYPE(osv));
 	SvMAGIC(sv) = SvMAGIC(osv);
 	localizing = TRUE;

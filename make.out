@@ -1,6 +1,6 @@
 make: Warning: Both `makefile' and `Makefile' exists
-`sh  cflags perl.o` perl.c
-	  CCCMD =  cc -c  -I/usr/include/sun -I/usr/ucbinclude -DDEBUGGING -g  
+`sh  cflags op.o` op.c
+	  CCCMD =  cc -c -DDEBUGGING -g  
 cc -Bstatic   main.o perly.o perl.o av.o scope.o op.o doop.o doio.o dolist.o dump.o malloc.o mg.o pp.o regcomp.o regexec.o gv.o sv.o toke.o util.o deb.o run.o hv.o usersub.o -ldbm -lm -lposix -o perl
 echo ""
 

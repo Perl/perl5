@@ -51,7 +51,7 @@ typedef U16 PADOFFSET;
 #define OPf_PARENS	8	/* This operator was parenthesized. */
 #define OPf_STACKED	16	/* Some arg is arriving on the stack. */
 #define OPf_LVAL	32	/* Certified reference (lvalue). */
-#define OPf_LOCAL	64	/* Lvalue must be localized */
+#define OPf_INTRO	64	/* Lvalue must be localized */
 #define OPf_SPECIAL	128	/* Do something weird for this op: */
 				/*  On local LVAL, don't init local value. */
 				/*  On OP_SORT, subroutine is inlined. */

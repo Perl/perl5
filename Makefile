@@ -360,6 +360,7 @@ shlist:
 # AUTOMATICALLY GENERATED MAKE DEPENDENCIES--PUT NOTHING BELOW THIS LINE
 $(obj) hv.o:
 	@ echo "You haven't done a "'"make depend" yet!'; exit 1
+
 makedepend: makedepend.SH
 	/bin/sh $(shellflags) makedepend.SH
 

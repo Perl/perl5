@@ -56,14 +56,14 @@
 
 %token <ival> '{' ')'
 
-%token <opval> WORD METHOD THING PMFUNC
+%token <opval> WORD METHOD THING PMFUNC PRIVATEREF
 %token <pval> LABEL
 %token <ival> FORMAT SUB PACKAGE
 %token <ival> WHILE UNTIL IF UNLESS ELSE ELSIF CONTINUE FOR
 %token <ival> LOOPEX DOTDOT
 %token <ival> FUNC0 FUNC1 FUNC
 %token <ival> RELOP EQOP MULOP ADDOP
-%token <ival> DOLSHARP DO LOCAL DELETE HASHBRACK
+%token <ival> DOLSHARP DO LOCAL DELETE HASHBRACK NOAMP
 
 %type <ival> prog decl format remember crp crb crhb
 %type <opval> block lineseq line loop cond nexpr else
@@ -111,7 +111,7 @@ prog	:	/* NULL */
 				peep(eval_start);
 			    }
 			    else
-				main_root = block_head(scalar($2), &main_start);
+				main_root = block_head($2, &main_start);
 			}
 	;
 
@@ -119,13 +119,13 @@ block	:	'{' remember lineseq '}'
 			{ $$ = scalarseq($3);
 			  if (copline > (line_t)$1)
 			      copline = $1;
-			  if (savestack_ix > $2)
-			    leave_scope($2);
+			  leave_scope($2);
+			  pad_leavemy(comppadnamefill);
 			  expect = XBLOCK; }
 	;
 
 remember:	/* NULL */	/* in case they push a package name */
-			{ $$ = savestack_ix; }
+			{ $$ = savestack_ix; SAVEINT(comppadnamefill); }
 	;
 
 lineseq	:	/* NULL */
@@ -162,9 +162,9 @@ sideff	:	error
 	|	expr UNLESS expr
 			{ $$ = newLOGOP(OP_OR, 0, $3, $1); }
 	|	expr WHILE expr
-			{ $$ = newLOOPOP(0, 1, scalar($3), $1, Nullop); }
+			{ $$ = newLOOPOP(0, 1, scalar($3), $1); }
 	|	expr UNTIL expr
-			{ $$ = newLOOPOP(0, 1, invert(scalar($3)), $1, Nullop);}
+			{ $$ = newLOOPOP(0, 1, invert(scalar($3)), $1);}
 	;
 
 else	:	/* NULL */
@@ -266,10 +266,14 @@ format	:	FORMAT WORD block
 
 subrout	:	SUB WORD block
 			{ newSUB($1, $2, $3); }
+	|	SUB WORD ';'
+			{ newSUB($1, $2, Nullop); }
 	;
 
 package :	PACKAGE WORD ';'
 			{ package($2); }
+	|	PACKAGE ';'
+			{ package(Nullop); }
 	;
 
 expr	:	expr ',' sexpr
@@ -386,7 +390,7 @@ term	:	'-' term %prec UMINUS
 			{ $$ = newUNOP(OP_PREDEC, 0,
 					ref(scalar($2), OP_PREDEC)); }
 	|	LOCAL sexpr	%prec UNIOP
-			{ $$ = localize($2); }
+			{ $$ = localize($2,$1); }
 	|	'(' expr crp
 			{ $$ = sawparens($2); }
 	|	'(' ')'
@@ -458,6 +462,10 @@ term	:	'-' term %prec UMINUS
 	|	amper '(' expr crp
 			{ $$ = newUNOP(OP_ENTERSUBR, OPf_STACKED,
 			    list(prepend_elem(OP_LIST, scalar($1), $3))); }
+	|	NOAMP WORD listexpr
+			{ $$ = newUNOP(OP_ENTERSUBR, OPf_STACKED,
+			    list(prepend_elem(OP_LIST,
+				newCVREF(scalar($2)), $3))); }
 	|	DO sexpr	%prec UNIOP
 			{ $$ = newUNOP(OP_DOFILE, 0, scalar($2));
 			  allgvs = TRUE;}
@@ -546,6 +554,8 @@ indirob	:	WORD
 	|	block
 			{ $$ = scalar(scope($1)); }
 
+	|	PRIVATEREF
+			{ $$ = $1; }
 	;
 
 crp	:	',' ')'

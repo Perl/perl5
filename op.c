@@ -32,8 +32,6 @@ extern int yychar;
 #define OA_SCALARREF 7
 #define OA_OPTIONAL 8
 
-I32 op_seq;
-
 void
 cpy7bit(d,s,l)
 register char *d;
@@ -122,6 +120,112 @@ OP *op;
 }
 
 /* "register" allocation */
+
+PADOFFSET
+pad_allocmy(name)
+char *name;
+{
+    PADOFFSET off = pad_alloc(OP_PADSV, 'M');
+    SV *sv = NEWSV(0,0);
+    sv_upgrade(sv, SVt_PVNV);
+    sv_setpv(sv, name);
+    av_store(comppadname, off, sv);
+    SvNV(sv) = (double)cop_seq;
+    SvIV(sv) = 99999999;
+    if (*name == '@')
+	av_store(comppad, off, newAV());
+    else if (*name == '%')
+	av_store(comppad, off, newHV(COEFFSIZE));
+    return off;
+}
+
+PADOFFSET
+pad_findmy(name)
+char *name;
+{
+    I32 off;
+    SV *sv;
+    SV **svp = AvARRAY(comppadname);
+    register I32 i;
+    register CONTEXT *cx;
+    bool saweval;
+    AV *curlist;
+    AV *curname;
+    CV *cv;
+    I32 seq = cop_seq;
+
+    for (off = comppadnamefill; off > 0; off--) {
+	if ((sv = svp[off]) &&
+	    seq <= SvIV(sv) &&
+	    seq > (I32)SvNV(sv) &&
+	    strEQ(SvPV(sv), name))
+	{
+	    return (PADOFFSET)off;
+	}
+    }
+
+    /* Nothing in current lexical context--try eval's context, if any.
+     * This is necessary to let the perldb get at lexically scoped variables.
+     * XXX This will also probably interact badly with eval tree caching.
+     */
+
+    saweval = FALSE;
+    for (i = cxstack_ix; i >= 0; i--) {
+	cx = &cxstack[i];
+	switch (cx->cx_type) {
+	default:
+	    break;
+	case CXt_EVAL:
+	    saweval = TRUE;
+	    break;
+	case CXt_SUB:
+	    if (!saweval)
+		return 0;
+	    cv = cx->blk_sub.cv;
+	    if (debstash && CvSTASH(cv) == debstash)	/* ignore DB'* scope */
+		continue;
+	    seq = cxstack[i+1].blk_oldcop->cop_seq;
+	    curlist = CvPADLIST(cv);
+	    curname = (AV*)*av_fetch(curlist, 0, FALSE);
+	    svp = AvARRAY(curname);
+	    for (off = AvFILL(curname); off > 0; off--) {
+		if ((sv = svp[off]) &&
+		    seq <= SvIV(sv) &&
+		    seq > (I32)SvNV(sv) &&
+		    strEQ(SvPV(sv), name))
+		{
+		    PADOFFSET newoff = pad_alloc(OP_PADSV, 'M');
+		    AV *oldpad = (AV*)*av_fetch(curlist, CvDEPTH(cv), FALSE);
+		    SV *oldsv = *av_fetch(oldpad, off, TRUE);
+		    SV *sv = NEWSV(0,0);
+		    sv_upgrade(sv, SVt_PVNV);
+		    sv_setpv(sv, name);
+		    av_store(comppadname, newoff, sv);
+		    SvNV(sv) = (double)curcop->cop_seq;
+		    SvIV(sv) = 99999999;
+		    av_store(comppad, newoff, sv_ref(oldsv));
+		    return newoff;
+		}
+	    }
+	    return 0;
+	}
+    }
+
+    return 0;
+}
+
+void
+pad_leavemy(fill)
+I32 fill;
+{
+    I32 off;
+    SV **svp = AvARRAY(comppadname);
+    SV *sv;
+    for (off = AvFILL(comppadname); off > fill; off--) {
+	if (sv = svp[off])
+	    SvIV(sv) = cop_seq;
+    }
+}
 
 PADOFFSET
 pad_alloc(optype,tmptype)	
@@ -314,6 +418,7 @@ OP *op;
 	    else
 		scalar(kid);
 	}
+	curcop = &compiling;
 	return op;
     case OP_LIST:
 	op = prepend_elem(OP_LIST, newOP(OP_PUSHMARK, 0), op);
@@ -339,7 +444,13 @@ OP *op;
 
     switch (op->op_type) {
     default:
+	if (dowarn && (opargs[op->op_type] & OA_FOLDCONST))
+	    warn("Useless use of %s", op_name[op->op_type]);
 	return op;
+
+    case OP_NEXTSTATE:
+	curcop = ((COP*)op);		/* for warning above */
+	break;
 
     case OP_CONST:
 	op->op_type = OP_NULL;		/* don't execute a constant */
@@ -442,6 +553,7 @@ OP *op;
 	    else
 		list(kid);
 	}
+	curcop = &compiling;
 	break;
     }
     return op;
@@ -462,6 +574,7 @@ OP *op;
 	    if (kid->op_sibling)
 		scalarvoid(kid);
 	}
+	curcop = &compiling;
     }
     return op;
 }
@@ -496,10 +609,10 @@ I32 type;
     case OP_ENTERSUBR:
 	if ((type == OP_DEFINED || type == OP_UNDEF || type == OP_REFGEN) &&
 	  !(op->op_flags & OPf_STACKED)) {
-	    op->op_type = OP_NULL;			/* disable entersubr */
-	    op->op_ppaddr = ppaddr[OP_NULL];
-	    cLISTOP->op_first->op_type = OP_NULL;	/* disable pushmark */
-	    cLISTOP->op_first->op_ppaddr = ppaddr[OP_NULL];
+	    op->op_type = OP_RV2CV;		/* entersubr => rv2cv */
+	    op->op_ppaddr = ppaddr[OP_RV2CV];
+	    cUNOP->op_first->op_type = OP_NULL;	/* disable pushmark */
+	    cUNOP->op_first->op_ppaddr = ppaddr[OP_NULL];
 	    break;
 	}
 	/* FALL THROUGH */
@@ -521,14 +634,18 @@ I32 type;
     case OP_RV2AV:
     case OP_RV2HV:
     case OP_RV2GV:
-	ref(cUNOP->op_first, type ? type : op->op_type);
+	ref(cUNOP->op_first, op->op_type);
 	/* FALL THROUGH */
     case OP_AASSIGN:
     case OP_ASLICE:
     case OP_HSLICE:
-    case OP_CURCOP:
+    case OP_NEXTSTATE:
+    case OP_DBSTATE:
 	refcount = 10000;
 	break;
+    case OP_PADSV:
+    case OP_PADAV:
+    case OP_PADHV:
     case OP_UNDEF:
     case OP_GV:
     case OP_RV2SV:
@@ -559,7 +676,8 @@ I32 type;
     case OP_AELEM:
     case OP_HELEM:
 	ref(cBINOP->op_first, type ? type : op->op_type);
-	op->op_private = type;
+	if (type == OP_RV2AV || type == OP_RV2HV)
+	    op->op_private = type;
 	break;
 
     case OP_LEAVE:
@@ -577,10 +695,39 @@ I32 type;
     op->op_flags |= OPf_LVAL;
     if (!type) {
 	op->op_flags &= ~OPf_SPECIAL;
-	op->op_flags |= OPf_LOCAL;
+	op->op_flags |= OPf_INTRO;
     }
     else if (type == OP_AASSIGN || type == OP_SASSIGN)
 	op->op_flags |= OPf_SPECIAL;
+    return op;
+}
+
+OP *
+my(op)
+OP *op;
+{
+    OP *kid;
+    SV *sv;
+    I32 type;
+
+    if (!op)
+	return op;
+
+    type = op->op_type;
+    if (type == OP_LIST) {
+	for (kid = cLISTOP->op_first; kid; kid = kid->op_sibling)
+	    my(kid);
+    }
+    else if (type != OP_PADSV &&
+	     type != OP_PADAV &&
+	     type != OP_PADHV &&
+	     type != OP_PUSHMARK)
+    {
+	sprintf(tokenbuf, "Can't declare %s in my", op_name[op->op_type]);
+	yyerror(tokenbuf);
+	return op;
+    }
+    op->op_flags |= OPf_LVAL|OPf_INTRO;
     return op;
 }
 
@@ -659,14 +806,19 @@ OP **startp;
 }
 
 OP *
-localize(o)
+localize(o, lex)
 OP *o;
+I32 lex;
 {
     if (o->op_flags & OPf_PARENS)
 	list(o);
     else
 	scalar(o);
-    return ref(o, Nullop);	/* a bit kludgey */
+    in_my = FALSE;
+    if (lex)
+	return my(o);
+    else
+	return ref(o, OP_NULL);		/* a bit kludgey */
 }
 
 OP *
@@ -699,7 +851,10 @@ register OP *o;
 	goto nope;
 
     for (curop = LINKLIST(o); curop != o; curop = LINKLIST(curop)) {
-	if (curop->op_type != OP_CONST && curop->op_type != OP_LIST) {
+	if (curop->op_type != OP_CONST &&
+		curop->op_type != OP_LIST &&
+		curop->op_type != OP_SCALAR &&
+		curop->op_type != OP_PUSHMARK) {
 	    goto nope;
 	}
     }
@@ -956,6 +1111,9 @@ OP* first;
 	    return newBINOP(type, flags, newOP(OP_PUSHMARK, 0), first);
     }
 
+    if (!first)
+	first = newOP(OP_STUB, 0); 
+
     Newz(1101, unop, 1, UNOP);
     unop->op_type = type;
     unop->op_ppaddr = ppaddr[type];
@@ -1114,7 +1272,7 @@ OP *repl;
 	SV *pat = ((SVOP*)expr)->op_sv;
 	char *p = SvPVn(pat);
 	if ((op->op_flags & OPf_SPECIAL) && strEQ(p, " ")) {
-	    sv_setpv(pat, "\\s+", 3);
+	    sv_setpvn(pat, "\\s+", 3);
 	    p = SvPVn(pat);
 	    pm->op_pmflags |= PMf_SKIPWHITE;
 	}
@@ -1153,7 +1311,7 @@ OP *repl;
 		if (opargs[curop->op_type] & OA_DANGEROUS) {
 		    if (curop->op_type == OP_GV) {
 			GV *gv = ((GVOP*)curop)->op_gv;
-			if (index("&`'123456789+", *GvENAME(gv)))
+			if (strchr("&`'123456789+", *GvENAME(gv)))
 			    break;
 		    }
 		    else if (curop->op_type == OP_RV2CV)
@@ -1285,21 +1443,29 @@ OP *op;
 {
     char tmpbuf[256];
     GV *tmpgv;
-    SV *sv = cSVOP->op_sv;
-    char *name = SvPVn(sv);
+    SV *sv;
+    char *name;
 
     save_hptr(&curstash);
     save_item(curstname);
-    sv_setpv(curstname,name);
-    sprintf(tmpbuf,"'_%s",name);
-    tmpgv = gv_fetchpv(tmpbuf,TRUE);
-    if (!GvHV(tmpgv))
-	GvHV(tmpgv) = newHV(0);
-    curstash = GvHV(tmpgv);
-    if (!HvNAME(curstash))
-	HvNAME(curstash) = savestr(name);
-    HvCOEFFSIZE(curstash) = 0;
-    op_free(op);
+    if (op) {
+	sv = cSVOP->op_sv;
+	name = SvPVn(sv);
+	sv_setpv(curstname,name);
+	sprintf(tmpbuf,"'_%s",name);
+	tmpgv = gv_fetchpv(tmpbuf,TRUE);
+	if (!GvHV(tmpgv))
+	    GvHV(tmpgv) = newHV(0);
+	curstash = GvHV(tmpgv);
+	if (!HvNAME(curstash))
+	    HvNAME(curstash) = savestr(name);
+	HvCOEFFSIZE(curstash) = 0;
+	op_free(op);
+    }
+    else {
+	sv_setpv(curstname,"<none>");
+	curstash = Nullhv;
+    }
     copline = NOLINE;
     expect = XBLOCK;
 }
@@ -1339,6 +1505,9 @@ register OP *op;
     if (op->op_type == OP_LIST || op->op_flags & OPf_PARENS ||
 	op->op_type == OP_RV2AV || op->op_type == OP_RV2HV ||
 	op->op_type == OP_ASLICE || op->op_type == OP_HSLICE)
+	return TRUE;
+
+    if (op->op_type == OP_PADAV || op->op_type == OP_PADHV)
 	return TRUE;
 
     if (op->op_type == OP_RV2SV)
@@ -1383,7 +1552,7 @@ OP *right;
 		list(prepend_elem(OP_LIST, newOP(OP_PUSHMARK, 0), right)),
 		list(prepend_elem(OP_LIST, newOP(OP_PUSHMARK, 0), left)) );
 	op->op_private = 0;
-	if (!(left->op_flags & OPf_LOCAL)) {
+	if (!(left->op_flags & OPf_INTRO)) {
 	    static int generation = 0;
 	    OP *curop;
 	    OP *lastop = op;
@@ -1436,14 +1605,17 @@ OP *op;
 {
     register COP *cop;
 
+    comppadnamefill = AvFILL(comppadname);	/* introduce my variables */
+
     Newz(1101, cop, 1, COP);
-    cop->op_type = OP_CURCOP;
-    cop->op_ppaddr = ppaddr[OP_CURCOP];
+    cop->op_type = OP_NEXTSTATE;
+    cop->op_ppaddr = ppaddr[ perldb ? OP_DBSTATE : OP_NEXTSTATE ];
     cop->op_flags = flags;
     cop->op_private = 0;
     cop->op_next = (OP*)cop;
 
     cop->cop_label = label;
+    cop->cop_seq = cop_seq++;
 
     if (copline == NOLINE)
         cop->cop_line = curcop->cop_line;
@@ -1453,6 +1625,15 @@ OP *op;
     }
     cop->cop_filegv = curcop->cop_filegv;
     cop->cop_stash = curstash;
+
+    if (perldb) {
+	SV **svp = av_fetch(GvAV(curcop->cop_filegv),(I32)cop->cop_line, FALSE);
+	if (svp && *svp != &sv_undef && !SvIOK(*svp)) {
+	    SvIV(*svp) = 1;
+	    SvIOK_on(*svp);
+	    SvSTASH(*svp) = (HV*)cop;
+	}
+    }
 
     return prepend_elem(OP_LINESEQ, (OP*)cop, op);
 }
@@ -1484,6 +1665,8 @@ OP* other;
 	}
     }
     if (first->op_type == OP_CONST) {
+	if (dowarn && (first->op_private & OPpCONST_BARE))
+	    warn("Probable precedence problem on %s", op_name[type]);
 	if ((type == OP_AND) == (SvTRUE(((SVOP*)first)->op_sv))) {
 	    op_free(first);
 	    return other;
@@ -1632,7 +1815,12 @@ OP *expr;
 OP *block;
 {
     OP* listop = append_elem(OP_LINESEQ, block, newOP(OP_UNSTACK, 0));
-    OP* op = newLOGOP(OP_AND, 0, expr, listop);
+    OP* op;
+
+    if (expr && (expr->op_type == OP_READLINE || expr->op_type == OP_GLOB))
+	expr = newASSIGNOP(0, newSVREF(newGVOP(OP_GV, 0, defgv)), expr);
+
+    op = newLOGOP(OP_AND, 0, expr, listop);
     ((LISTOP*)listop)->op_last->op_next = LINKLIST(op);
 
     if (block->op_flags & OPf_SPECIAL &&  /* skip conditional on do {} ? */
@@ -1736,7 +1924,7 @@ OP*cont;
 	    prepend_elem(OP_LIST, newOP(OP_PUSHMARK, 0), expr),
 	    scalar(sv))));
     return newSTATEOP(0, label, newWHILEOP(flags, 1,
-	loop, newOP(OP_ITER), block, cont));
+	loop, newOP(OP_ITER, 0), block, cont));
 }
 
 void
@@ -1776,7 +1964,7 @@ OP *block;
 	if (CvDEPTH(cv))
 	    CvDELETED(cv) = TRUE;	/* probably an autoloader */
 	else {
-	    if (dowarn) {
+	    if (dowarn && CvROOT(cv)) {
 		line_t oldline = curcop->cop_line;
 
 		curcop->cop_line = copline;
@@ -1793,15 +1981,56 @@ OP *block;
 
     av = newAV();
     AvREAL_off(av);
+    if (AvFILL(comppadname) < AvFILL(comppad))
+	av_store(comppadname, AvFILL(comppad), Nullsv);
+    av_store(av, 0, (SV*)comppadname);
     av_store(av, 1, (SV*)comppad);
     AvFILL(av) = 1;
     CvPADLIST(cv) = av;
+    comppadname = newAV();
 
+    if (!block) {
+	CvROOT(cv) = 0;
+	op_free(op);
+	copline = NOLINE;
+	leave_scope(floor);
+	return;
+    }
     CvROOT(cv) = newUNOP(OP_LEAVESUBR, 0, scalarseq(block));
     CvSTART(cv) = LINKLIST(CvROOT(cv));
     CvROOT(cv)->op_next = 0;
+    CvSTASH(cv) = curstash;
     peep(CvSTART(cv));
     CvDELETED(cv) = FALSE;
+    if (strEQ(name, "BEGIN")) {
+	line_t oldline = curcop->cop_line;
+	GV* oldfile = curcop->cop_filegv;
+
+	if (!beginav)
+	    beginav = newAV();
+	av_push(beginav, sv_ref(gv));
+	DEBUG_x( dump_sub(gv) );
+	rs = nrs;
+	rslen = nrslen;
+	rschar = nrschar;
+	rspara = (nrslen == 2);
+	calllist(beginav);
+	cv_free(cv);
+	rs = "\n";
+	rslen = 1;
+	rschar = '\n';
+	rspara = 0;
+	GvCV(gv) = 0;
+	curcop = &compiling;
+	curcop->cop_line = oldline;	/* might have compiled something */
+	curcop->cop_filegv = oldfile;	/* recursively, clobbering these */
+    }
+    else if (strEQ(name, "END")) {
+	if (!endav)
+	    endav = newAV();
+	av_unshift(endav, 1);
+	av_store(endav, 0, sv_ref(gv));
+    }
     if (perldb) {
 	SV *sv;
 	SV *tmpstr = sv_mortalcopy(&sv_undef);
@@ -1847,6 +2076,17 @@ char *filename;
     CvUSERSUB(cv) = subaddr;
     CvUSERINDEX(cv) = ix;
     CvDELETED(cv) = FALSE;
+    if (strEQ(name, "BEGIN")) {
+	if (!beginav)
+	    beginav = newAV();
+	av_push(beginav, sv_ref(gv));
+    }
+    else if (strEQ(name, "END")) {
+	if (!endav)
+	    endav = newAV();
+	av_unshift(endav, 1);
+	av_store(endav, 0, sv_ref(gv));
+    }
 }
 
 void
@@ -1919,20 +2159,24 @@ OP *
 newANONLIST(op)
 OP* op;
 {
-    return newUNOP(OP_REFGEN, 0, ref(list(convert(OP_ANONLIST, 0, op))));
+    return newUNOP(OP_REFGEN, 0,
+	ref(list(convert(OP_ANONLIST, 0, op)), OP_REFGEN));
 }
 
 OP *
 newANONHASH(op)
 OP* op;
 {
-    return newUNOP(OP_REFGEN, 0, ref(list(convert(OP_ANONHASH, 0, op))));
+    return newUNOP(OP_REFGEN, 0,
+	ref(list(convert(OP_ANONHASH, 0, op)), OP_REFGEN));
 }
 
 OP *
 oopsAV(o)
 OP *o;
 {
+    if (o->op_type == OP_PADAV)
+	return o;
     if (o->op_type == OP_RV2SV) {
 	o->op_type = OP_RV2AV;
 	o->op_ppaddr = ppaddr[OP_RV2AV];
@@ -1947,6 +2191,8 @@ OP *
 oopsHV(o)
 OP *o;
 {
+    if (o->op_type == OP_PADHV)
+	return o;
     if (o->op_type == OP_RV2SV || o->op_type == OP_RV2AV) {
 	o->op_type = OP_RV2HV;
 	o->op_ppaddr = ppaddr[OP_RV2HV];
@@ -1961,6 +2207,8 @@ OP *
 newAVREF(o)
 OP *o;
 {
+    if (o->op_type == OP_PADAV)
+	return o;
     return newUNOP(OP_RV2AV, 0, scalar(o));
 }
 
@@ -1975,6 +2223,8 @@ OP *
 newHVREF(o)
 OP *o;
 {
+    if (o->op_type == OP_PADHV)
+	return o;
     return newUNOP(OP_RV2HV, 0, scalar(o));
 }
 
@@ -1998,6 +2248,8 @@ OP *
 newSVREF(o)
 OP *o;
 {
+    if (o->op_type == OP_PADSV)
+	return o;
     return newUNOP(OP_RV2SV, 0, scalar(o));
 }
 
@@ -2063,11 +2315,10 @@ OP *op;
     if (op->op_flags & OPf_KIDS) {
 	SVOP *kid = (SVOP*)cUNOP->op_first;
 
-	if (kid->op_type == OP_CONST) {
-#ifdef NOTDEF
-	    op->op_type = OP_EVALONCE;
-	    op->op_ppaddr = ppaddr[OP_EVALONCE];
-#endif
+	if (!kid) {
+	    op->op_flags &= ~OPf_KIDS;
+	    op->op_type = OP_NULL;
+	    op->op_ppaddr = ppaddr[OP_NULL];
 	}
 	else if (kid->op_type == OP_LINESEQ) {
 	    LOGOP *enter;
@@ -2306,7 +2557,10 @@ OP *op;
     LOGOP *gwop;
     OP *kid;
 
-    op->op_flags &= ~OPf_STACKED;	/* XXX do we need to scope() it? */
+    if (op->op_flags & OPf_STACKED) {
+	op = ck_sort(op);
+	op->op_flags &= ~OPf_STACKED;
+    }
     op = ck_fun(op);
     if (error_count)
 	return op;
@@ -2363,7 +2617,7 @@ OP *op;
     
     kid = cLISTOP->op_first;
     if (!kid) {
-	prepend_elem(op->op_type, newOP(OP_PUSHMARK), op);
+	prepend_elem(op->op_type, newOP(OP_PUSHMARK, 0), op);
 	kid = cLISTOP->op_first;
     }
     if (kid->op_type == OP_PUSHMARK)
@@ -2545,7 +2799,16 @@ OP *
 ck_subr(op)
 OP *op;
 {
+    OP *o = ((cUNOP->op_first->op_sibling)
+	     ? cUNOP : ((UNOP*)cUNOP->op_first))->op_first->op_sibling;
+
+    if (o->op_type == OP_RV2CV) {
+	o->op_type = OP_NULL;		/* disable rv2cv */
+	o->op_ppaddr = ppaddr[OP_NULL];
+    }
     op->op_private = 0;
+    if (perldb)
+	op->op_private |= OPpSUBR_DB;
     return op;
 }
 
@@ -2575,6 +2838,7 @@ register OP* op;
 	switch (op->op_type) {
 	case OP_NULL:
 	case OP_SCALAR:
+	case OP_LINESEQ:
 	    if (oldop) {
 		oldop->op_next = op->op_next;
 		continue;
@@ -2586,7 +2850,7 @@ register OP* op;
 	    if (op->op_next->op_type == OP_RV2SV) {
 		op->op_next->op_type = OP_NULL;
 		op->op_next->op_ppaddr = ppaddr[OP_NULL];
-		op->op_flags |= op->op_next->op_flags & OPf_LOCAL;
+		op->op_flags |= op->op_next->op_flags & OPf_INTRO;
 		op->op_next = op->op_next->op_next;
 		op->op_type = OP_GVSV;
 		op->op_ppaddr = ppaddr[OP_GVSV];

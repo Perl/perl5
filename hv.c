@@ -119,7 +119,7 @@ HV *hv;
 char *key;
 U32 klen;
 SV *val;
-register I32 hash;
+register U32 hash;
 {
     register XPVHV* xhv;
     register char *s;
