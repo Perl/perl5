@@ -1,21 +1,23 @@
 package ExtUtils::Manifest;
 
-
 require Exporter;
-@ISA=('Exporter');
-@EXPORT_OK = ('mkmanifest', 'manicheck', 'fullcheck', 'filecheck', 
-	      'skipcheck', 'maniread', 'manicopy');
-
 use Config;
 use File::Find;
 use File::Copy 'copy';
 use Carp;
+use strict;
+
+use vars qw(@ISA @EXPORT_OK $VERSION $Debug $Verbose $Is_VMS $Quiet $MANIFEST $found);
+
+@ISA=('Exporter');
+@EXPORT_OK = ('mkmanifest', 'manicheck', 'fullcheck', 'filecheck', 
+	      'skipcheck', 'maniread', 'manicopy');
 
 $Debug = 0;
 $Verbose = 1;
 $Is_VMS = $^O eq 'VMS';
 
-$VERSION = $VERSION = substr(q$Revision: 1.24 $,10,4);
+$VERSION = substr(q$Revision: 1.27 $,10,4);
 
 $Quiet = 0;
 
@@ -181,7 +183,7 @@ sub manicopy {
 }
 
 sub cp_if_diff {
-    my($from,$to, $how)=@_;
+    my($from, $to, $how)=@_;
     -f $from || carp "$0: $from not found";
     my($diff) = 0;
     local(*F,*T);
@@ -197,7 +199,11 @@ sub cp_if_diff {
 	if (-e $to) {
 	    unlink($to) or confess "unlink $to: $!";
 	}
-	&$how($from, $to);
+	STRICT_SWITCH: {
+	      best($from,$to), last STRICT_SWITCH if $how eq 'best';
+	        cp($from,$to), last STRICT_SWITCH if $how eq 'cp';
+	        ln($from,$to), last STRICT_SWITCH if $how eq 'ln';
+	  }
     }
 }
 
