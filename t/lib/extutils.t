@@ -237,6 +237,9 @@ if ($?) {
   # make[1]: `perl' is up to date.
   $makeout =~ s/^\w*?make.+perl.+?is up to date.*?\n//mig;
 
+  # echo of running the test script
+  $makeout =~ s/^MCR.+test.pl\n//mig if $^O eq 'VMS';
+
   print $makeout;
   print "ok 10\n";
 }
