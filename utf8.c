@@ -357,8 +357,8 @@ Perl_utf8_to_uv_simple(pTHX_ U8* s, STRLEN* retlen)
 =for apidoc|utf8_length|U8 *s|U8 *e
 
 Return the length of the UTF-8 char encoded string C<s> in characters.
-Stops at string C<e>.  If C<e E<lt> s> or if the scan would end up 
-past C<e>, return -1.
+Stops at C<e> (inclusive).  If C<e E<lt> s> or if the scan would end
+up past C<e>, croaks.
 
 =cut
 */
@@ -369,12 +369,12 @@ Perl_utf8_length(pTHX_ U8* s, U8* e)
     STRLEN len = 0;
 
     if (e < s)
-	return -1;
+	Perl_croak(aTHX_ "panic: utf8_length: unexpected end");
     while (s < e) {
-	STRLEN t = UTF8SKIP(s);
+	U8 t = UTF8SKIP(s);
 
 	if (e - s < t)
-	    return -1;
+	    Perl_croak(aTHX_ "panic: utf8_length: unaligned end");
 	s += t;
 	len++;
     }
@@ -385,22 +385,32 @@ Perl_utf8_length(pTHX_ U8* s, U8* e)
 /* utf8_distance(a,b) returns the number of UTF8 characters between
    the pointers a and b							*/
 
-I32
+IV
 Perl_utf8_distance(pTHX_ U8 *a, U8 *b)
 {
-    I32 off = 0;
+    IV off = 0;
+
     if (a < b) {
 	while (a < b) {
-	    a += UTF8SKIP(a);
+	    U8 c = UTF8SKIP(a);
+
+	    if (b - a < c)
+		Perl_croak(aTHX_ "panic: utf8_distance: unaligned end");
+	    a += c;
 	    off--;
 	}
     }
     else {
 	while (b < a) {
-	    b += UTF8SKIP(b);
+	    U8 c = UTF8SKIP(b);
+
+	    if (a - b < c)
+		Perl_croak(aTHX_ "panic: utf8_distance: unaligned end");
+	    b += c;
 	    off++;
 	}
     }
+
     return off;
 }
 
