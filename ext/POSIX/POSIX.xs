@@ -1517,6 +1517,11 @@ constant(char *name, int arg)
 	break;
     case 'H':
 	if (strEQ(name, "HUGE_VAL"))
+#if defined(USE_LONG_DOUBLE) && defined(HUGE_VALL)
+	  /* HUGE_VALL is admittedly non-POSIX but if are using long doubles
+	   * we might as well use long doubles. --jhi */
+	    return HUGE_VALL;
+#endif
 #ifdef HUGE_VAL
 	    return HUGE_VAL;
 #else

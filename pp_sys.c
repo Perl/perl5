@@ -4769,50 +4769,40 @@ PP(pp_gpwent)
 #ifdef HAS_PASSWD
     I32 which = PL_op->op_type;
     register SV *sv;
-    struct passwd *pwent;
     STRLEN n_a;
-#  if defined(HAS_GETSPENT) || defined(HAS_GETSPNAM)
-    struct spwd *spwent = NULL;
-#  endif
+    struct passwd *pwent  = NULL;
+/* We do not use HAS_GETSPENT in pp_gpwent() but leave it here in the case
+ * somebody wants to write an XS to access the shadow passwords. --jhi */
+#   ifdef HAS_GETSPNAM
+    struct spwd   *spwent = NULL;
+#   endif
 
-    if (which == OP_GPWNAM)
-	pwent = getpwnam(POPpx);
-    else if (which == OP_GPWUID)
-	pwent = getpwuid(POPi);
-    else
-#  ifdef HAS_GETPWENT
-	pwent = (struct passwd *)getpwent();
-#  else
+    switch (which) {
+    case OP_GPWNAM:
+	pwent  = getpwnam(POPpx);
+	break;
+    case OP_GPWUID:
+	pwent = getpwuid((Uid_t)POPi);
+	break;
+    case OP_GPWENT:
+#   ifdef HAS_GETPWENT
+	pwent  = getpwent();
+#   else
 	DIE(aTHX_ PL_no_func, "getpwent");
-#  endif
-
-#  ifdef HAS_GETSPNAM
-    if (which == OP_GPWNAM) {
-	if (pwent)
-	    spwent = getspnam(pwent->pw_name);
+#   endif
+	break;
     }
-#    ifdef HAS_GETSPUID /* AFAIK there isn't any anywhere. --jhi */ 
-    else if (which == OP_GPWUID) {
-	if (pwent)
-	    spwent = getspnam(pwent->pw_name);
-    }
-#    endif
-#    ifdef HAS_GETSPENT
-    else
-	spwent = (struct spwd *)getspent();
-#    endif
-#  endif
 
     EXTEND(SP, 10);
     if (GIMME != G_ARRAY) {
 	PUSHs(sv = sv_newmortal());
 	if (pwent) {
 	    if (which == OP_GPWNAM)
-#  if Uid_t_sign <= 0
+#   if Uid_t_sign <= 0
 		sv_setiv(sv, (IV)pwent->pw_uid);
-#  else
+#   else
 		sv_setuv(sv, (UV)pwent->pw_uid);
-#  endif
+#   endif
 	    else
 		sv_setpv(sv, pwent->pw_name);
 	}
@@ -4824,81 +4814,80 @@ PP(pp_gpwent)
 	sv_setpv(sv, pwent->pw_name);
 
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
-#  ifdef PWPASSWD
-#    if defined(HAS_GETSPENT) || defined(HAS_GETSPNAM)
-      if (spwent)
-              sv_setpv(sv, spwent->sp_pwdp);
-      else
-              sv_setpv(sv, pwent->pw_passwd);
-#    else
+#   ifdef HAS_GETSPNAM
+	spwent = getspnam(pwent->pw_name);
+	if (spwent)
+	    sv_setpv(sv, spwent->sp_pwdp);
+	else
+	    sv_setpv(sv, pwent->pw_passwd);
+#   else
 	sv_setpv(sv, pwent->pw_passwd);
-#    endif
-#  endif
-#  ifndef INCOMPLETE_TAINTS
+#   endif
+#   ifndef INCOMPLETE_TAINTS
 	/* passwd is tainted because user himself can diddle with it. */
 	SvTAINTED_on(sv);
-#  endif
+#   endif
 
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
-#  if Uid_t_sign <= 0
+#   if Uid_t_sign <= 0
 	sv_setiv(sv, (IV)pwent->pw_uid);
-#  else
+#   else
 	sv_setuv(sv, (UV)pwent->pw_uid);
-#  endif
+#   endif
 
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
-#  if Uid_t_sign <= 0
+#   if Uid_t_sign <= 0
 	sv_setiv(sv, (IV)pwent->pw_gid);
-#  else
+#   else
 	sv_setuv(sv, (UV)pwent->pw_gid);
-#  endif
+#   endif
 	/* pw_change, pw_quota, and pw_age are mutually exclusive. */
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
-#  ifdef PWCHANGE
+#   ifdef PWCHANGE
 	sv_setiv(sv, (IV)pwent->pw_change);
-#  else
-#    ifdef PWQUOTA
+#   else
+#       ifdef PWQUOTA
 	sv_setiv(sv, (IV)pwent->pw_quota);
-#    else
-#      ifdef PWAGE
+#       else
+#           ifdef PWAGE
 	sv_setpv(sv, pwent->pw_age);
-#      endif
-#    endif
-#  endif
+#           endif
+#       endif
+#   endif
 
 	/* pw_class and pw_comment are mutually exclusive. */
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
-#  ifdef PWCLASS
+#   ifdef PWCLASS
 	sv_setpv(sv, pwent->pw_class);
-#  else
-#    ifdef PWCOMMENT
+#   else
+#       ifdef PWCOMMENT
 	sv_setpv(sv, pwent->pw_comment);
-#    endif
-#  endif
+#       endif
+#   endif
 
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
-#  ifdef PWGECOS
+#   ifdef PWGECOS
 	sv_setpv(sv, pwent->pw_gecos);
-#  endif
-#  ifndef INCOMPLETE_TAINTS
+#   endif
+#   ifndef INCOMPLETE_TAINTS
 	/* pw_gecos is tainted because user himself can diddle with it. */
 	SvTAINTED_on(sv);
-#  endif
+#   endif
 
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setpv(sv, pwent->pw_dir);
 
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setpv(sv, pwent->pw_shell);
-#  ifndef INCOMPLETE_TAINTS
+#   ifndef INCOMPLETE_TAINTS
 	/* pw_shell is tainted because user himself can diddle with it. */
 	SvTAINTED_on(sv);
-#  endif
+#   endif
 
-#  ifdef PWEXPIRE
+#   ifdef PWEXPIRE
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setiv(sv, (IV)pwent->pw_expire);
-#  endif
+#   endif
     }
     RETURN;
 #else
@@ -4911,9 +4900,9 @@ PP(pp_spwent)
     djSP;
 #if defined(HAS_PASSWD) && defined(HAS_SETPWENT)
     setpwent();
-#  ifdef HAS_SETSPENT
+#   ifdef HAS_SETSPENT
     setspent();
-#  endif
+#   endif
     RETPUSHYES;
 #else
     DIE(aTHX_ PL_no_func, "setpwent");
@@ -4925,9 +4914,9 @@ PP(pp_epwent)
     djSP;
 #if defined(HAS_PASSWD) && defined(HAS_ENDPWENT)
     endpwent();
-#  ifdef HAS_ENDSPENT
+#   ifdef HAS_ENDSPENT
     endspent();
-#  endif
+#   endif
     RETPUSHYES;
 #else
     DIE(aTHX_ PL_no_func, "endpwent");

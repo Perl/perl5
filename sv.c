@@ -1359,6 +1359,7 @@ S_not_a_number(pTHX_ SV *sv)
 #define IS_NUMBER_TO_INT_BY_ATOF 0x02 /* atol() may be != atof() */
 #define IS_NUMBER_NOT_IV	 0x04 /* (IV)atof() may be != atof() */
 #define IS_NUMBER_NEG		 0x08 /* not good to cache UV */
+#define IS_NUMBER_INFINITY	 0x10 /* this is big */
 
 /* Actually, ISO C leaves conversion of UV to IV undefined, but
    until proven guilty, assume that things are not that bad... */
@@ -1813,6 +1814,7 @@ S_asUV(pTHX_ SV *sv)
  * IS_NUMBER_TO_INT_BY_ATOL				123
  * IS_NUMBER_TO_INT_BY_ATOL | IS_NUMBER_NOT_IV		123.1
  * IS_NUMBER_TO_INT_BY_ATOF | IS_NUMBER_NOT_IV		123e0
+ * IS_NUMBER_INFINITY
  * with a possible addition of IS_NUMBER_NEG.
  */
 
@@ -1833,6 +1835,7 @@ Perl_looks_like_number(pTHX_ SV *sv)
     register char *sbegin;
     register char *nbegin;
     I32 numtype = 0;
+    I32 sawinf  = 0;
     STRLEN len;
 
     if (SvPOK(sv)) {
@@ -1862,7 +1865,7 @@ Perl_looks_like_number(pTHX_ SV *sv)
      * (int)atof().
      */
 
-    /* next must be digit or the radix separator */
+    /* next must be digit or the radix separator or beginning of infinity */
     if (isDIGIT(*s)) {
         do {
 	    s++;
@@ -1900,23 +1903,38 @@ Perl_looks_like_number(pTHX_ SV *sv)
         else
 	    return 0;
     }
+    else if (*s == 'I' || *s == 'i') {
+	s++; if (*s != 'N' && *s != 'n') return 0;
+	s++; if (*s != 'F' && *s != 'f') return 0;
+	s++; if (*s == 'I' || *s == 'i') {
+	    s++; if (*s != 'N' && *s != 'n') return 0;
+	    s++; if (*s != 'I' && *s != 'i') return 0;
+	    s++; if (*s != 'T' && *s != 't') return 0;
+	    s++; if (*s != 'Y' && *s != 'y') return 0;
+	}
+	sawinf = 1;
+    }
     else
         return 0;
 
-    /* we can have an optional exponent part */
-    if (*s == 'e' || *s == 'E') {
-	numtype &= ~IS_NUMBER_NEG;
-	numtype |= IS_NUMBER_TO_INT_BY_ATOF | IS_NUMBER_NOT_IV;
-	s++;
-	if (*s == '+' || *s == '-')
+    if (sawinf)
+	numtype = IS_NUMBER_INFINITY;
+    else {
+	/* we can have an optional exponent part */
+	if (*s == 'e' || *s == 'E') {
+	    numtype &= ~IS_NUMBER_NEG;
+	    numtype |= IS_NUMBER_TO_INT_BY_ATOF | IS_NUMBER_NOT_IV;
 	    s++;
-        if (isDIGIT(*s)) {
-            do {
-                s++;
-            } while (isDIGIT(*s));
-        }
-        else
-            return 0;
+	    if (*s == '+' || *s == '-')
+		s++;
+	    if (isDIGIT(*s)) {
+		do {
+		    s++;
+		} while (isDIGIT(*s));
+	    }
+	    else
+		return 0;
+	}
     }
     while (isSPACE(*s))
 	s++;
