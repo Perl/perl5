@@ -28,6 +28,32 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 19732] By: jhi                                   on 2003/06/09  20:52:02
+        Log: Integrate:
+             [ 19729]
+             Subject: [PATCH] Re: nitpick with \(0..2)
+             From: Steve Grazzini <grazz@pobox.com>
+             Date: Fri, 6 Jun 2003 01:42:59 -0400
+             Message-ID: <20030606054259.GA30249@grazzini.net>
+             
+             [ 19730]
+             Subject: [PATCH] Annoyingly unhelpful messages from lib/File/Temp/t/security.t
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Mon, 9 Jun 2003 14:45:38 -0400 (EDT)
+             Message-ID: <Pine.SOL.4.53.0306091323300.4467@maxwell.phys.lafayette.edu>
+             
+             [ 19731]
+             On a real multicpu box the child thread could still be running
+             when the parent thread was already testing.
+     Branch: maint-5.8/perl
+	  !> INSTALL ext/threads/shared/t/hv_refs.t op.c pod/perlop.pod
+	  !> t/op/ref.t
+____________________________________________________________________________
+[ 19728] By: jhi                                   on 2003/06/09  19:09:09
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 19727] By: jhi                                   on 2003/06/09  18:53:58
         Log: Integrate:
              [ 19723]
