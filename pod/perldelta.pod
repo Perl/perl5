@@ -1120,6 +1120,12 @@ The Test module has been significantly enhanced.
 
 =item *
 
+Time::Local::timelocal() does not handle fractional seconds anymore.
+The rationale is that neither does localtime(), and timelocal() and
+localtime() are supposed to be inverses of each other.
+
+=item *
+
 The vars pragma now supports declaring fully qualified variables.
 (Something that C<our()> does not and will not support.)
 
