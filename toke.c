@@ -14,6 +14,9 @@
 #include "EXTERN.h"
 #include "perl.h"
 
+#define yychar	PL_yychar
+#define yylval	PL_yylval
+
 #ifndef PERL_OBJECT
 static void check_uni _((void));
 static void  force_next _((I32 type));

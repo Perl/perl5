@@ -139,23 +139,17 @@ warn_reserved
 warn_uninit
 watchaddr
 watchok
-yychar
 yycheck
-yydebug
 yydefred
 yydgoto
-yyerrflag
 yygindex
 yylen
 yylhs
-yylval
 yyname
-yynerrs
 yyrindex
 yyrule
 yysindex
 yytable
-yyval
 
 # Functions
 

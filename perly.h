@@ -62,4 +62,3 @@ typedef union {
     OP *opval;
     GV *gvval;
 } YYSTYPE;
-extern YYSTYPE yylval;

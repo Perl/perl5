@@ -1112,27 +1112,21 @@
 #define watchaddr		Perl_watchaddr
 #define watchok			Perl_watchok
 #define whichsig		Perl_whichsig
-#define yychar			Perl_yychar
 #define yycheck			Perl_yycheck
-#define yydebug			Perl_yydebug
 #define yydefred		Perl_yydefred
 #define yydestruct		Perl_yydestruct
 #define yydgoto			Perl_yydgoto
-#define yyerrflag		Perl_yyerrflag
 #define yyerror			Perl_yyerror
 #define yygindex		Perl_yygindex
 #define yylen			Perl_yylen
 #define yylex			Perl_yylex
 #define yylhs			Perl_yylhs
-#define yylval			Perl_yylval
 #define yyname			Perl_yyname
-#define yynerrs			Perl_yynerrs
 #define yyparse			Perl_yyparse
 #define yyrindex		Perl_yyrindex
 #define yyrule			Perl_yyrule
 #define yysindex		Perl_yysindex
 #define yytable			Perl_yytable
-#define yyval			Perl_yyval
 #define yywarn			Perl_yywarn
 
 #endif /* EMBED */

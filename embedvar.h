@@ -766,6 +766,14 @@
 #define PL_xnv_root		(PL_Vars.Gxnv_root)
 #define PL_xpv_root		(PL_Vars.Gxpv_root)
 #define PL_xrv_root		(PL_Vars.Gxrv_root)
+#define PL_yychar		(PL_Vars.Gyychar)
+#define PL_yydebug		(PL_Vars.Gyydebug)
+#define PL_yyerrflag		(PL_Vars.Gyyerrflag)
+#define PL_yylval		(PL_Vars.Gyylval)
+#define PL_yynerrs		(PL_Vars.Gyynerrs)
+#define PL_yyssp		(PL_Vars.Gyyssp)
+#define PL_yyval		(PL_Vars.Gyyval)
+#define PL_yyvsp		(PL_Vars.Gyyvsp)
 
 #else /* !PERL_GLOBAL_STRUCT */
 
@@ -892,6 +900,14 @@
 #define PL_Gxnv_root		PL_xnv_root
 #define PL_Gxpv_root		PL_xpv_root
 #define PL_Gxrv_root		PL_xrv_root
+#define PL_Gyychar		PL_yychar
+#define PL_Gyydebug		PL_yydebug
+#define PL_Gyyerrflag		PL_yyerrflag
+#define PL_Gyylval		PL_yylval
+#define PL_Gyynerrs		PL_yynerrs
+#define PL_Gyyssp		PL_yyssp
+#define PL_Gyyval		PL_yyval
+#define PL_Gyyvsp		PL_yyvsp
 
 #ifdef EMBED
 

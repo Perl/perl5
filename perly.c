@@ -6,6 +6,15 @@ static char yysccsid[] = "@(#)yaccpar 1.8 (Berkeley) 01/20/91";
 #include "EXTERN.h"
 #include "perl.h"
 
+#define yydebug	    PL_yydebug
+#define yynerrs	    PL_yynerrs
+#define yyerrflag   PL_yyerrflag
+#define yychar	    PL_yychar
+#define yyssp	    PL_yyssp
+#define yyvsp	    PL_yyvsp
+#define yyval	    PL_yyval
+#define yylval	    PL_yylval
+
 #ifdef PERL_OBJECT
 static void
 Dep(CPerlObj *pPerl)
@@ -1276,14 +1285,6 @@ char *yyrule[] = {
 #define YYMAXDEPTH 500
 #endif
 #endif
-int yydebug;
-int yynerrs;
-int yyerrflag;
-int yychar;
-short *yyssp;
-YYSTYPE *yyvsp;
-YYSTYPE yyval;
-YYSTYPE yylval;
 #line 643 "perly.y"
  /* PROGRAM */
 #line 1353 "perly.c"
@@ -1405,9 +1406,9 @@ yyloop:
 	    int yypv_index = (yyvsp - yyvs);
 	    yystacksize += YYSTACKSIZE;
 	    ysave->yyvs = yyvs =
-		(YYSTYPE*)realloc((char*)yyvs,yystacksize * sizeof(YYSTYPE));
+		(YYSTYPE*)PerlMem_realloc((char*)yyvs,yystacksize * sizeof(YYSTYPE));
 	    ysave->yyss = yyss =
-		(short*)realloc((char*)yyss,yystacksize * sizeof(short));
+		(short*)PerlMem_realloc((char*)yyss,yystacksize * sizeof(short));
 	    if (!yyvs || !yyss)
 		goto yyoverflow;
 	    yyssp = yyss + yyps_index;
@@ -1460,9 +1461,9 @@ yyinrecovery:
 		    int yyps_index = (yyssp - yyss);
 		    int yypv_index = (yyvsp - yyvs);
 		    yystacksize += YYSTACKSIZE;
-		    ysave->yyvs = yyvs = (YYSTYPE*)realloc((char*)yyvs,
+		    ysave->yyvs = yyvs = (YYSTYPE*)PerlMem_realloc((char*)yyvs,
 			yystacksize * sizeof(YYSTYPE));
-		    ysave->yyss = yyss = (short*)realloc((char*)yyss,
+		    ysave->yyss = yyss = (short*)PerlMem_realloc((char*)yyss,
 			yystacksize * sizeof(short));
 		    if (!yyvs || !yyss)
 			goto yyoverflow;
@@ -2346,9 +2347,9 @@ break;
 	int yypv_index = (yyvsp - yyvs);
 	yystacksize += YYSTACKSIZE;
 	ysave->yyvs = yyvs =
-	    (YYSTYPE*)realloc((char*)yyvs,yystacksize * sizeof(YYSTYPE));
+	    (YYSTYPE*)PerlMem_realloc((char*)yyvs,yystacksize * sizeof(YYSTYPE));
 	ysave->yyss = yyss =
-	    (short*)realloc((char*)yyss,yystacksize * sizeof(short));
+	    (short*)PerlMem_realloc((char*)yyss,yystacksize * sizeof(short));
 	if (!yyvs || !yyss)
 	    goto yyoverflow;
 	yyssp = yyss + yyps_index;
