@@ -5,7 +5,8 @@ BEGIN {
     @INC = '../lib';
     require Config; import Config;
     if ($Config{'extensions'} !~ m!\bI18N/Langinfo\b! ||
-	$Config{'extensions'} !~ m!\bPOSIX\b!)
+	$Config{'extensions'} !~ m!\bPOSIX\b! ||
+	$^O eq 'dos') # DJGPP has langinfo() but it seems to largely be a dummy
     {
 	print "1..0 # skip: I18N::Langinfo or POSIX unavailable\n";
 	exit 0;
