@@ -6,7 +6,7 @@ use strict;
 use vars qw($VERSION $VMS_TERMCAP);
 use vars qw($termpat $state $first $entry);
 
-$VERSION = '1.06';
+$VERSION = '1.07';
 
 # Version undef: Thu Dec 14 20:02:42 CST 1995 by sanders@bsdi.com
 # Version 1.00:  Thu Nov 30 23:34:29 EST 2000 by schwern@pobox.com
@@ -26,6 +26,9 @@ $VERSION = '1.06';
 # Version 1.06:  Thu Dec  6 18:43:22 GMT 2001
 #       Preload the default VMS termcap from Charles Lane
 #       Don't carp at setting OSPEED unless warnings are on.
+# Version 1.07:  Wed Jan  2 21:35:09 GMT 2002
+#       Sanity check on infocmp output from Norton Allen
+#       Repaired INSTALLDIRS thanks to Michael Schwern
 
 # TODO:
 # support Berkeley DB termcaps
@@ -213,15 +216,16 @@ sub Tgetent { ## public -- static method
           $entry = $VMS_TERMCAP;
         }
         else {
-	  if ( grep { -x "$_/infocmp" } split /:/, $ENV{PATH} ) {
-           eval
-           {
-	     $foo = `infocmp -C 2>/dev/null`;
-	     if (($foo !~ m:^/:s) && ($foo =~ m/(^|\|)${termpat}[:|]/s)) {
-		$entry = $foo;
-	     }
+           if ( grep { -x "$_/infocmp" } split /:/, $ENV{PATH} ) {
+              eval
+              {
+                my $tmp = `infocmp -C 2>/dev/null`;
+
+                if (( $tmp !~ m%^/%s ) && ( $tmp =~ /(^|\|)${termpat}[:|]/s)) {
+                   $entry = $tmp;
+                }
+              };
            }
-	  }
         }
     }
 
