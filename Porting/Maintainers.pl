@@ -32,13 +32,12 @@ package Maintainers;
 	'lstein'	=> 'Lincoln D. Stein <lds@cpan.org>',
 	'marekr'	=> 'Marek Rouchal <marekr@cpan.org>',
 	'mhx'		=> 'Marcus Holland-Moritz <mhx@cpan.org>',
-	'mjd'		=> 'Mark-Jason Dominus <mjd@cpan.org>',
+	'mjd'		=> 'Mark-Jason Dominus <mjd@plover.com>',
 	'muir'		=> 'David Muir Sharnoff <muir@cpan.org>',
 	'neilb'		=> 'Neil Bowers <neilb@cpan.org>',
 	'ni-s'		=> 'Nick Ing-Simmons <nick@ing-simmons.net>',
 	'p5p'		=> 'perl5-porters <perl5-porters@perl.org>',
 	'perlfaq'	=> 'perlfaq-workers <perlfaq-workers@perl.org>',
-	'perlref'	=> 'Mark-Jason Dominus <mjd@cpan.org>',
 	'petdance'	=> 'Andy Lester <petdance@cpan.org>',
 	'pmqs'		=> 'Paul Marquess <pmqs@cpan.org>',
 	'pvhp'		=> 'Peter Prymmer <pvhp@best.com>',
@@ -355,10 +354,10 @@ package Maintainers;
 		'CPAN'		=> 1,
 		},
 
-	'perlref' =>
+	'perlreftut' =>
 		{
 		'MAINTAINER'	=> 'mjd',
-		'FILES'		=> q[pod/perlref.pod],
+		'FILES'		=> q[pod/perlreftut.pod],
 		'CPAN'		=> 0,
 		},
 
