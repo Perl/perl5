@@ -140,9 +140,7 @@ Static_Lib_Mac	= \
 # sync all extensions with both config.sh and macperl/Makefile.mk!
 ########
 Static_Ext_Xtr =	\
-	Compress:Zlib:Zlib Digest:MD5:MD5 Filter:Util:Call:Call \
-	HTML:Parser:Parser List:Util:Util MIME:Base64:Base64 \
-	Storable:Storable Time:HiRes:HiRes
+	Compress:Zlib:Zlib HTML:Parser:Parser
 Static_Ext_Mac	= 	\
 	MacPerl:MacPerl 
 #	Mac:err:err				\
@@ -177,16 +175,21 @@ Static_Ext_Mac	= 	\
 #	Mac:Windows:Windows
 
 Static_Ext_Std	= 	\
-	B:B ByteLoader:ByteLoader Data:Dumper:Dumper DB_File:DB_File \
-	Devel:DProf:DProf Devel:Peek:Peek DynaLoader:DynaLoader \
-	Fcntl:Fcntl File:Glob:Glob IO:IO \
-	NDBM_File:NDBM_File Opcode:Opcode POSIX:POSIX \
-	Socket:Socket Sys:Hostname:Hostname \
- 	attrs:attrs re:re
+	B:B ByteLoader:ByteLoader DB_File:DB_File Data:Dumper:Dumper \
+	Devel:DProf:DProf Devel:PPPort:PPPort Devel:Peek:Peek \
+	Digest:MD5:MD5 DynaLoader:DynaLoader Fcntl:Fcntl File:Glob:Glob \
+	Filter:Util:Call:Call I18N:Langinfo:Langinfo IO:IO List:Util:Util \
+	MIME:Base64:Base64 NDBM_File:NDBM_File Opcode:Opcode POSIX:POSIX \
+	PerlIO:Scalar:Scalar PerlIO:Via:Via PerlIO:encoding:encoding \
+	Socket:Socket Storable:Storable	Sys:Hostname:Hostname \
+	Time:HiRes:HiRes Unicode:Normalize:Normalize XS:Typemap:Typemap \
+	attrs:attrs re:re
+
 	# Errno:Errno done, in from :macos:lib:
-	# not going to be built:
-	# GDBM_File:GDBM_File ODBM_File:ODBM_File IPC:IPC:SysV
-	# SDBM_File:SDBM_File Sys:Syslog:Syslog Thread:Thread
+	# not going to be built for the time being:
+	# Cwd:Cwd Encode:Encode GDBM_File:GDBM_File ODBM_File:ODBM_File \
+	# IPC:IPC:SysV SDBM_File:SDBM_File Sys:Syslog:Syslog \
+	# Thread:Thread threads:threads  
 
 Static_Ext_AutoInit	= 	$(Static_Ext_Mac) $(Static_Ext_Std) $(Static_Ext_Xtr)
 More_Static_Ext		= 	OSA XL
@@ -216,9 +219,9 @@ h = $(h1) $(h2) $(h3) $(h4)
 
 c1 = $(mallocsrc) av.c scope.c op.c doop.c doio.c dump.c hv.c mg.c perlapi.c
 c2 = perl.c perly.c pp.c pp_hot.c pp_ctl.c pp_sys.c regcomp.c regexec.c xsutils.c
-c3 = gv.c sv.c taint.c toke.c util.c deb.c run.c globals.c perlio.c utf8.c universal.c
-# for 5.7/8:
-# numeric.c locale.c pp_pack.c
+c3 = gv.c sv.c taint.c toke.c util.c deb.c run.c globals.c perlio.c utf8.c universal.c \
+	numeric.c locale.c pp_pack.c pp_sort.c reentr.c
+
 cm = SubLaunch.c crypt.c
 # HandleSocket.cp 
 mf = DirectoryCopy.c FileCopy.c FSpCompat.c FullPath.c IterateDirectory.c MoreDesktopMgr.c \

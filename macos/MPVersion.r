@@ -44,11 +44,11 @@
  *
  */
 
-#define MPVersionStr	"5.6.1r1"
+#define MPVersionStr	"5.7.3a1"
 #define MPRevision	0x05
-#define MPVersion	0x61
+#define MPVersion	0x73
 #define MPBuild		0x01
-#define MPState		release
+#define MPState		alpha
 #define MPCopyright	"ported by Matthias Neeracher, maintained by Chris Nandor"
 #define MPDate		$$Format("%4.4d-%2.2d-%2.2d", $$Year,  $$Month, $$Day)
 
