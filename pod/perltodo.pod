@@ -217,6 +217,8 @@ with Config.pm. We could use a syntax of ... for location of current binary?
 
 =head2 make HTML install work
 
+And look at the splitting of perlfunc in chunks. It needs fixing.
+
 =head2 put patchlevel in -v
 
 Currently perl from p4/rsync ships with a patchlevel.h file that usually
