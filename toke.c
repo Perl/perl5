@@ -2872,8 +2872,8 @@ Perl_yylex(pTHX)
 		/* Assume it was a minus followed by a one-letter named
 		 * subroutine call (or a -bareword), then. */
 		DEBUG_T( { PerlIO_printf(Perl_debug_log,
-			"### %c looked like a file test but was not\n",
-			(int)ftst);
+			"### '-%c' looked like a file test but was not\n",
+			tmp);
 		} );
 		s -= 2;
 	    }

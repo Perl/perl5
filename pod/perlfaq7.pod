@@ -725,32 +725,27 @@ not necessarily the same as the one in which you were compiled):
 
 =head2 How can I comment out a large block of perl code?
 
-You can use embedded POD to discard it.  The =for directive
-lasts until the next paragraph (two consecutive newlines).
+You can use embedded POD to discard it.  Enclose the blocks you want
+to comment out in POD markers, for example C<=for nobody> and C<=cut>
+(which marks ends of POD blocks).
 
     # program is here
 
     =for nobody
-    This paragraph is commented out
-
-    # program continues
-
-The =begin and =end directives can contain multiple
-paragraphs.
-
-    =begin comment text
 
     all of this stuff
 
     here will be ignored
     by everyone
 
-    =end comment text
+    =cut
+
+    # program continues
 
 The pod directives cannot go just anywhere.  You must put a
 pod directive where the parser is expecting a new statement,
 not just in the middle of an expression or some other
-arbitrary s grammar production.
+arbitrary grammar production.
 
 See L<perlpod> for more details.
 

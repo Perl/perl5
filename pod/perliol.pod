@@ -733,10 +733,46 @@ The application (or layer above) must ensure they are consistent.
 
 =back
 
+=head2 Utilities
+
+To ask for the next layer down use PerlIONext(PerlIO *f).
+
+To check that a PerlIO* is valid use PerlIOValid(PerlIO *f).  (All
+this does is really just to check that the pointer is non-NULL and
+that the pointer behind that is non-NULL.)
+
+PerlIOBase(PerlIO *f) returns the "Base" pointer, or in other words,
+the C<PerlIOl*> pointer.
+
+PerlIOSelf(PerlIO* f, type) return the PerlIOBase cast to a type.
+
+Perl_PerlIO_or_Base(PerlIO* f, callback, base, failure, args) either
+calls the I<callback> from the functions of the layer I<f> (just by
+the name of the IO function, like "Read") with the I<args>, or if
+there is no such callback, calls the I<base> version of the callback
+with the same args, or if the f is invalid, set errno to EBADF and
+return I<failure>.
+
+Perl_PerlIO_or_fail(PerlIO* f, callback, failure, args) either calls
+the I<callback> of the functions of the layer I<f> with the I<args>,
+or if there is no such callback, set errno to EINVAL.  Or if the f is
+invalid, set errno to EBADF and return I<failure>.
+
+Perl_PerlIO_or_Base_void(PerlIO* f, callback, base, args) either calls
+the I<callback> of the functions of the layer I<f> with the I<args>,
+or if there is no such callback, calls the I<base> version of the
+callback with the same args, or if the f is invalid, set errno to
+EBADF.
+
+Perl_PerlIO_or_fail_void(PerlIO* f, callback, args) either calls the
+I<callback> of the functions of the layer I<f> with the I<args>, or if
+there is no such callback, set errno to EINVAL.  Or if the f is
+invalid, set errno to EBADF.
+
 =head2 Implementing PerlIO Layers
 
 If you find the implementation document unclear or not sufficient,
-look at the existing perlio layer implementations, which include:
+look at the existing PerlIO layer implementations, which include:
 
 =over
 
