@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..9\n";
+print "1..11\n";
 
 # test various operations on @_
 
@@ -74,9 +74,6 @@ for (1..5) { try() }
 ++$ord;
 print "ok $ord\n";
 
-# These tests disabled because the change #19064 was retracted.
-# http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2003-08/msg01485.html
-if (0) {
 # bug #21542 local $_[0] causes reify problems and coredumps
 
 sub local1 { local $_[0] }
@@ -89,4 +86,3 @@ sub local2 { local $_[0]; last L }
 L: { local2 }
 $ord++;
 print "ok $ord\n";
-}

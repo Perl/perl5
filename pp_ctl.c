@@ -1883,6 +1883,7 @@ PP(pp_return)
     switch (CxTYPE(cx)) {
     case CXt_SUB:
 	popsub2 = TRUE;
+	cxstack_ix++; /* preserve cx entry on stack for use by POPSUB */
 	break;
     case CXt_EVAL:
 	if (!(PL_in_eval & EVAL_KEEPERR))
@@ -1942,15 +1943,16 @@ PP(pp_return)
     }
     PL_stack_sp = newsp;
 
+    LEAVE;
     /* Stack values are safe: */
     if (popsub2) {
+	cxstack_ix--;
 	POPSUB(cx,sv);	/* release CV and @_ ... */
     }
     else
 	sv = Nullsv;
     PL_curpm = newpm;	/* ... and pop $1 et al */
 
-    LEAVE;
     LEAVESUB(sv);
     if (clear_errsv)
 	sv_setpv(ERRSV,"");
@@ -1985,6 +1987,7 @@ PP(pp_last)
 	dounwind(cxix);
 
     POPBLOCK(cx,newpm);
+    cxstack_ix++; /* temporarily protect top context */
     mark = newsp;
     switch (CxTYPE(cx)) {
     case CXt_LOOP:
@@ -2026,6 +2029,8 @@ PP(pp_last)
     SP = newsp;
     PUTBACK;
 
+    LEAVE;
+    cxstack_ix--;
     /* Stack values are safe: */
     switch (pop2) {
     case CXt_LOOP:
@@ -2038,7 +2043,6 @@ PP(pp_last)
     }
     PL_curpm = newpm;	/* ... and pop $1 et al */
 
-    LEAVE;
     LEAVESUB(sv);
     return nextop;
 }
