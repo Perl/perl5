@@ -48,7 +48,7 @@ require Exporter;
 @EXPORT = qw(pod2text);
 
 use vars qw($VERSION);
-$VERSION = "1.0201";
+$VERSION = "1.0202";
 
 $termcap=0;
 
@@ -101,7 +101,7 @@ POD_DIRECTIVE: while (<IN>) {
              $begun = "";
         }
         elsif ($begun eq "text") {
-            print STDOUT $_;
+            print OUTPUT $_;
         }
         next;
     }
@@ -119,7 +119,7 @@ POD_DIRECTIVE: while (<IN>) {
 
     if (/^=for\s+(\S+)\s*(.*)/s) {
         if ($1 eq "text") {
-            print STDOUT $2,"";
+            print OUTPUT $2,"";
         } else {
             # ignore unknown for
         }
@@ -128,7 +128,7 @@ POD_DIRECTIVE: while (<IN>) {
     elsif (/^=begin\s+(\S+)\s*(.*)/s) {
         $begun = $1;
         if ($1 eq "text") {
-            print STDOUT $2."";
+            print OUTPUT $2."";
         }
         next;
     }
@@ -210,6 +210,9 @@ sub prepare_for_output {
 	# clear_noremap(1);
 	if ($Cmd eq 'cut') {
 	    $cutting = 1;
+	}
+	elsif ($Cmd eq 'pod') {
+	    $cutting = 0;
 	}
 	elsif ($Cmd eq 'head1') {
 	    makespace();
