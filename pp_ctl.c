@@ -2380,20 +2380,20 @@ sv_compile_2op(SV *sv, OP** startop, char *code, AV** avp)
     PL_hints = 0;
 
     PL_op = &dummy;
-    PL_op->op_type = 0;			/* Avoid uninit warning. */
+    PL_op->op_type = OP_ENTEREVAL;
     PL_op->op_flags = 0;			/* Avoid uninit warning. */
     PUSHBLOCK(cx, CXt_EVAL, SP);
     PUSHEVAL(cx, 0, PL_compiling.cop_filegv);
     rop = doeval(G_SCALAR, startop);
-    POPBLOCK(cx,PL_curpm);
     POPEVAL(cx);
+    POPBLOCK(cx,PL_curpm);
 
     (*startop)->op_type = OP_NULL;
     (*startop)->op_ppaddr = ppaddr[OP_NULL];
     lex_end();
     *avp = (AV*)SvREFCNT_inc(PL_comppad);
     LEAVE;
-    if (curcop = &PL_compiling)
+    if (PL_curcop == &PL_compiling)
 	PL_compiling.op_private = PL_hints;
 #ifdef OP_IN_REGISTER
     op = PL_opsave;
