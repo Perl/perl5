@@ -819,6 +819,7 @@ regen_headers:	FORCE
 	-perl bytecode.pl
 	-perl regcomp.pl
 	-perl warnings.pl
+	-perl autodoc.pl
 
 regen_pods:	FORCE
 	-cd pod; $(LDLIBPTH) make regen_pods
