@@ -1576,8 +1576,10 @@ regmatch(regnode *prog)
 		logical = 0;
 		sw = 1;
 	    }
-	    if (OP(scan) == SUSPEND)
+	    if (OP(scan) == SUSPEND) {
 		locinput = reginput;
+		nextchar = UCHARAT(locinput);
+	    }
 	    /* FALL THROUGH. */
 	case LONGJMP:
 	  do_longjump:
