@@ -8,48 +8,73 @@ BEGIN {
 use strict;
 use warnings;
 use Config;
-use File::Find;
 
 my %Core_Modules;
 
-find(sub {
-        if ($File::Find::name =~ m!^lib\W+(.+)\.pm$!i) {
-	    my $module = $1;
-	    $module =~ s/[^\w-]/::/g;
-	    $Core_Modules{$module}++;
-	}
-    }, "lib");
+unless (open(MANIFEST, "MANIFEST")) {
+    die "$0: failed to open 'MANIFEST': $!\n";
+}
+
+sub add_by_name {
+    $Core_Modules{$_[0]}++;
+}
+
+while (<MANIFEST>) {
+    next unless m!^lib/(\S+?)\.pm!;
+    my $module = $1;
+    $module =~ s!/!::!g;
+    add_by_name($module);
+}
+
+close(MANIFEST);
 
 # Delete stuff that can't be tested here.
 
-sub delete_unless_in_extensions {
-    delete $Core_Modules{$_[0]} unless $Config{extensions} =~ /\b$_[0]\b/;
+sub delete_by_name {
+    delete $Core_Modules{$_[0]};
+}
+
+sub has_extension {
+    $Config{extensions} =~ /\b$_[0]\b/i;
+}
+
+sub delete_unless_has_extension {
+    delete $Core_Modules{$_[0]} unless has_extension($_[0]);
 }
 
 foreach my $known_extension (split(' ', $Config{known_extensions})) {
-    delete_unless_in_extensions($known_extension);
+    delete_unless_has_extension($known_extension);
 }
 
 sub delete_by_prefix {
-    delete @Core_Modules{grep { /^$_[0]/ } keys %Core_Modules};
+    for my $match (grep { /^$_[0]/ } keys %Core_Modules) {
+	delete_by_name($match);
+    }
 }
 
-delete $Core_Modules{'CGI::Fast'}; # won't load without FCGI
+delete_by_name('CGI::Fast');		# won't load without FCGI
 
-delete $Core_Modules{'Devel::DProf'}; # needs to be run as -d:DProf
+delete_by_name('Devel::DProf');		# needs to be run as -d:DProf
 
 delete_by_prefix('ExtUtils::MM_');	# ExtUtils::MakeMaker's domain
 
 delete_by_prefix('File::Spec::');	# File::Spec's domain
-$Core_Modules{'File::Spec::Functions'}++;	# put this back
+add_by_name('File::Spec::Functions');	# put this back
 
-unless ($Config{extensions} =~ /\bThread\b/) {
-    delete $Core_Modules{Thread};
+sub using_feature {
+    my $use = "use$_[0]";
+    exists $Config{$use} &&
+	defined $Config{$use} &&
+	$Config{$use} eq 'define';
+}
+
+unless (using_feature('threads') && has_extension('Thread')) {
+    delete_by_name('Thread');
     delete_by_prefix('Thread::');
 }
 
 delete_by_prefix('unicode::');
-$Core_Modules{'unicode::distinct'}++;	# put this back
+add_by_name('unicode::distinct');	# put this back
 
 # Okay, this is the list.
 
@@ -65,11 +90,10 @@ foreach my $module (@Core_Modules) {
     $test_num++;
 }
 
-
-# We do this as a separate process else we'll blow the hell out of our
-# namespace.
+# We do this as a separate process else we'll blow the hell
+# out of our namespace.
 sub compile_module {
-    my($module) = @_;
+    my ($module) = $_[0];
     
     return scalar `./perl -Ilib t/lib/compmod.pl $module` =~ /^ok/;
 }

@@ -1131,6 +1131,7 @@
 #define filter_gets		S_filter_gets
 #define find_in_my_stash	S_find_in_my_stash
 #define new_constant		S_new_constant
+#define tokereport		S_tokereport
 #define ao			S_ao
 #define depcom			S_depcom
 #define incl_perldb		S_incl_perldb
@@ -2600,6 +2601,7 @@
 #define filter_gets(a,b,c)	S_filter_gets(aTHX_ a,b,c)
 #define find_in_my_stash(a,b)	S_find_in_my_stash(aTHX_ a,b)
 #define new_constant(a,b,c,d,e,f)	S_new_constant(aTHX_ a,b,c,d,e,f)
+#define tokereport(a,b,c)	S_tokereport(aTHX_ a,b,c)
 #define ao(a)			S_ao(aTHX_ a)
 #define depcom()		S_depcom(aTHX)
 #define incl_perldb()		S_incl_perldb(aTHX)
@@ -5058,6 +5060,8 @@
 #define find_in_my_stash	S_find_in_my_stash
 #define S_new_constant		CPerlObj::S_new_constant
 #define new_constant		S_new_constant
+#define S_tokereport		CPerlObj::S_tokereport
+#define tokereport		S_tokereport
 #define S_ao			CPerlObj::S_ao
 #define ao			S_ao
 #define S_depcom		CPerlObj::S_depcom

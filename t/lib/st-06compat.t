@@ -86,15 +86,27 @@ sub obj { $_[0]->{obj} }
 
 package main;
 
+my $Is_EBCDIC = (ord('A') == 193) ? 1 : 0;
+
 my $r = ROOT->make;
 
 my $data = '';
 while (<DATA>) {
-	next if /^#/;
-	$data .= unpack("u", $_);
+	if (!$Is_EBCDIC) {
+	    next if /^#/;
+	    $data .= unpack("u", $_);
+	}
+	else {
+	    next if /^#$/;
+	    next if /^#\s+/;
+	    next if /^[^#]/;
+	    s/^#//;
+	    $data .= unpack("u", $_);
+	}
 }
 
-ok 1, length $data == 278;
+my $expected_length = $Is_EBCDIC ? 217 : 278;
+ok 1, length $data == $expected_length;
 
 my $y = thaw($data);
 ok 2, 1;
@@ -130,3 +142,12 @@ M6%A8`````6$$`@````4$`@````$(@%AB!E-)35!,15A8!`(````!"(%88@93
 M24U03$586`0"`````0B"6&(&4TE-4$Q%6%@$`@````$(@UAB!E-)35!,15A8
 M!`(````!"(188@9324U03$586%A8`````V]B:@0,!``````*6%A8`````W)E
 (9F($4D]/5%@`
+#
+# using Storable-1.007, output of: print '#' . pack("u", nfreeze(ROOT->make));
+# on OS/390 (cp 1047) original size: 217 bytes
+#
+#M!0,1!-G6UN,#````!00,!!$)X\G%Q&W(P>+(`P````(*!*6!D_$````$DH6H
+#M\0H$I8&3\@````22A:CR`````YF%A@0"````!@B!"(`(?0H(8/-+\?3Q]?D)
+#M```!R`H#]$OU`````Y6DE`0"````!001!N+)U-?3Q0(````!"(`$$@("````
+#M`0B!!!("`@````$(@@02`@(````!"(,$$@("`````0B$`````Y:"D00`````
+#E!`````&(!`(````#"@:BHYF)E8<$``````0$```````````!@0``

@@ -2576,7 +2576,7 @@ PP(pp_sqrt)
 
 PP(pp_int)
 {
-    djSP; dTARGET;
+    djSP; dTARGET; tryAMAGICun(int);
     {
       NV value;
       IV iv = TOPi; /* attempt to convert to IV if possible. */
