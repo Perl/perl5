@@ -31,6 +31,157 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 13384] By: jhi                                   on 2001/11/30  14:00:55
+        Log: Cannot test if cppstdin has not yet been installed.
+     Branch: perl
+	   ! t/run/switchPx.t
+____________________________________________________________________________
+[ 13383] By: jhi                                   on 2001/11/30  13:59:18
+        Log: Subject: [PATCH perl.c ...] -P on VMS.  Evicting sed
+             From: Michael G Schwern <schwern@pobox.com> 
+             Date: Thu, 29 Nov 2001 22:05:11 -0500
+             Message-ID: <20011129220510.A18869@blackrider>
+             
+             TODO 1: if cppstdin is used and not yet installed,
+             the Px.t will fail (must do the same as in cpp.t)
+             
+             TODO 2: does this work if no Perl whatsoever has
+             yet been installed?  That is, we should be using
+             the Perl we are building to execute the one-liner.
+     Branch: perl
+	   + t/run/switchPx.aux t/run/switchPx.t
+	   ! MANIFEST configure.com perl.c t/comp/cpp.aux t/comp/cpp.t
+	   ! vms/test.com
+____________________________________________________________________________
+[ 13382] By: jhi                                   on 2001/11/30  13:41:15
+        Log: Upgrade to Unicode::Normalize 0.12.
+     Branch: perl
+	   ! ext/Unicode/Normalize/Changes
+	   ! ext/Unicode/Normalize/Normalize.pm
+	   ! ext/Unicode/Normalize/Normalize.xs
+	   ! ext/Unicode/Normalize/README ext/Unicode/Normalize/mkheader
+	   ! ext/Unicode/Normalize/t/func.t ext/Unicode/Normalize/t/norm.t
+	   ! ext/Unicode/Normalize/t/test.t
+____________________________________________________________________________
+[ 13381] By: jhi                                   on 2001/11/30  13:23:06
+        Log: Subject: [ID 20011130.164] Not OK: perl v5.7.2 +DEVEL13363 on i686-linux 2.4.8-26mdk
+             From: jpeacock@dsl092-147-156.wdc1.dsl.speakeasy.net
+             Date: 30 Nov 2001 11:41:53 -0000             
+             Message-Id: <20011130114153.24600.qmail@dsl092-147-156.wdc1.dsl.speakeasy.net>
+             
+             No need to die if we have high-paranoia (non-chdirable)
+             system directories.
+     Branch: perl
+	   ! t/op/stat.t
+____________________________________________________________________________
+[ 13380] By: jhi                                   on 2001/11/30  04:49:56
+        Log: Paragraph rewrapping.
+     Branch: perl
+	   ! pod/perliol.pod
+____________________________________________________________________________
+[ 13379] By: jhi                                   on 2001/11/30  04:38:34
+        Log: Subject: [patch pod/perliol.pod] s/SvPV/SvPV_nolen/
+             From: Stas Bekman <stas@stason.org>
+             Date: Fri, 30 Nov 2001 13:23:34 +0800 (SGT)       
+             Message-ID: <Pine.LNX.4.40.0111301321220.4595-100000@hope.stason.org>
+     Branch: perl
+	   ! pod/perliol.pod
+____________________________________________________________________________
+[ 13378] By: jhi                                   on 2001/11/30  04:34:40
+        Log: Whether select() gets restarted on signals is
+             implementation dependent.
+     Branch: perl
+	   ! ext/Time/HiRes/HiRes.t
+____________________________________________________________________________
+[ 13377] By: jhi                                   on 2001/11/30  01:24:29
+        Log: More forgotten checkins.
+     Branch: perl
+	   ! embed.h embed.pl proto.h
+____________________________________________________________________________
+[ 13376] By: jhi                                   on 2001/11/30  01:16:22
+        Log: Add a note about folding vs lowercase.
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[ 13375] By: jhi                                   on 2001/11/30  01:09:17
+        Log: Use to_uni_fold (and add changed global.sym)
+     Branch: perl
+	   ! global.sym utf8.c
+____________________________________________________________________________
+[ 13374] By: jhi                                   on 2001/11/30  00:49:35
+        Log: Make to Unicode character functions to use UVs
+             instead of U32s and add to_uni_fold().
+     Branch: perl
+	   ! embed.pl proto.h utf8.c
+____________________________________________________________________________
+[ 13373] By: jhi                                   on 2001/11/29  22:34:44
+        Log: Subject: Re: DRAFT perlpacktut.pod v0.0
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Thu, 29 Nov 2001 22:47:32 +0000
+             Message-ID: <20011129224732.W37621@plum.flirble.org>
+     Branch: perl
+	   ! pod/perlpacktut.pod
+____________________________________________________________________________
+[ 13372] By: jhi                                   on 2001/11/29  22:32:49
+        Log: README.vos updates from Paul Green.
+     Branch: perl
+	   ! README.vos
+____________________________________________________________________________
+[ 13371] By: jhi                                   on 2001/11/29  21:01:31
+        Log: Subject: [PATCH Perl@13343] VMS pre7 default signal handling
+             From: lane@DUPHY4.Physics.Drexel.Edu (Charles Lane)
+             Date: Thu, 29 Nov 2001 14:18:51 EST
+             Message-Id: <011129141454.666c6@DUPHY4.Physics.Drexel.Edu>
+     Branch: perl
+	   ! mg.c vms/vms.c vms/vmsish.h
+____________________________________________________________________________
+[ 13370] By: jhi                                   on 2001/11/29  20:59:35
+        Log: Subject: [PATCH README.vms] Fwd: [craigberry@mac.com: RE: Broken URL in README.vms]
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Thu, 29 Nov 2001 13:12:31 -0500
+             Message-ID: <20011129131231.E11300@blackrider>
+     Branch: perl
+	   ! README.vms
+____________________________________________________________________________
+[ 13369] By: jhi                                   on 2001/11/29  20:58:10
+        Log: BGET_IV was missing.
+     Branch: perl
+	   ! ext/ByteLoader/bytecode.h
+____________________________________________________________________________
+[ 13368] By: jhi                                   on 2001/11/29  15:40:40
+        Log: Subject: [PATCH lib/Term/Cap.pm] (was Re: warnings from  [PATCH Perl@13013] Term::Cap and VMS )
+             From: Jonathan Stowe <gellyfish@gellyfish.com>
+             Date: Thu, 29 Nov 2001 16:31:24 +0000 (GMT)        
+             Message-ID: <Pine.LNX.4.33.0111291628540.20888-100000@orpheus.gellyfish.com>
+     Branch: perl
+	   ! lib/Term/Cap.pm
+____________________________________________________________________________
+[ 13367] By: jhi                                   on 2001/11/29  15:11:43
+        Log: Porting/checkURL.pl was missing.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 13366] By: jhi                                   on 2001/11/29  15:03:52
+        Log: Subject: INSTALL and READMEs should be reviewed
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Thu, 29 Nov 2001 16:49:36 +0100
+             Message-ID: <20011129164936.A17492@rafael>         
+     Branch: perl
+	   ! README.cygwin
+____________________________________________________________________________
+[ 13365] By: jhi                                   on 2001/11/29  14:39:01
+        Log: Subject: Re: [PATCH README.os390] URL fixes and "Tools and Toys" link
+             From: Peter Prymmer <pvhp@pvhp.best.vwh.net>
+             Date: Thu, 29 Nov 2001 15:37:42 +0000 (GMT)
+             Message-ID: <Pine.BSF.4.10.10111291529080.98343-100000@pvhp.best.vwh.net>
+     Branch: perl
+	   ! README.os390
+____________________________________________________________________________
+[ 13364] By: jhi                                   on 2001/11/29  14:34:18
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 13363] By: jhi                                   on 2001/11/29  14:26:48
         Log: The changes to the curliffed files didn't stick in #13348.
      Branch: perl
