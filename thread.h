@@ -136,12 +136,26 @@ struct perl_thread *getTHR _((void));
 #  endif
 #endif
 
+#ifdef __hpux
+#  define MUTEX_INIT_NEEDS_MUTEX_ZEROED
+#endif
+
 #ifndef MUTEX_INIT
+#ifdef MUTEX_INIT_NEEDS_MUTEX_ZEROED
+    /* Temporary workaround, true bug is deeper. --jhi 1999-02-25 */
+#define MUTEX_INIT(m)						\
+    STMT_START {						\
+	Zero((m), 1, perl_mutex);                               \
+ 	if (pthread_mutex_init((m), pthread_mutexattr_default))	\
+	    croak("panic: MUTEX_INIT");				\
+    } STMT_END
+#else
 #define MUTEX_INIT(m)						\
     STMT_START {						\
 	if (pthread_mutex_init((m), pthread_mutexattr_default))	\
 	    croak("panic: MUTEX_INIT");				\
     } STMT_END
+#endif
 #define MUTEX_LOCK(m)				\
     STMT_START {				\
 	if (pthread_mutex_lock((m)))		\

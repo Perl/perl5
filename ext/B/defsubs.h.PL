@@ -1,5 +1,6 @@
 #!perl
-my ($out) = __FILE__ =~ /(^.*)\.PL/;
+my ($out) = __FILE__ =~ /(^.*)[._]PL/i;
+if ($^O eq 'VMS') { $out =~ s/(^.*)[._](.*$)/$1.$2/;}
 open(OUT,">$out") || die "Cannot open $file:$!";
 foreach my $const (qw(AVf_REAL 
 		      HEf_SVKEY

@@ -569,7 +569,7 @@ void	init_os_extras _(());
 /* prototype section start marker; `typedef' passes through cpp */
 typedef char  __VMS_PROTOTYPES__;
 int	my_trnlnm _((char *, char *, unsigned long int));
-char *	my_getenv _((char *));
+char *	my_getenv _((const char *));
 char *	my_crypt _((const char *, const char *));
 Pid_t	my_waitpid _((Pid_t, int *, int));
 char *	my_gconvert _((double, int, int, char *));

@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Feb 25 22:44:22 EET 1999 [metaconfig 3.0 PL70]
+# Generated on Thu Mar  4 00:05:11 EET 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -601,6 +601,7 @@ i_neterrno=''
 i_niin=''
 i_sysin=''
 i_poll=''
+i_pthread=''
 d_pwage=''
 d_pwchange=''
 d_pwclass=''
@@ -8768,8 +8769,18 @@ eval $inlibc
 set nice d_nice
 eval $inlibc
 
-: how to create joinable pthreads
+: see if POSIX threads are available
 if test "X$usethreads" = "X$define"; then
+	set pthread.h i_pthread
+	eval $inhdr
+else
+	i_pthread="$undef"
+fi
+
+
+
+: how to create joinable pthreads
+if test "X$usethreads" = "X$define" -a "X$i_pthread" = "X$define"; then
 	echo " "
 	echo "Checking what constant to use for creating joinable pthreads..." >&4 
 	$cat >try.c <<'EOCP'
@@ -11959,12 +11970,16 @@ $eunicefix Cppsym
 ./Cppsym -l $al | $sort | $grep -v '^$' >Cppsym.true
 
 : now check the C compiler for additional symbols
+postprocess_cc_v=''
+case "$osname" in
+aix) postprocess_cc_v="|$tr , ' '" ;;
+esac
 $cat >ccsym <<EOS
 $startsh
 $cat >tmp.c <<EOF
 extern int foo;
 EOF
-for i in \`$cc -v -c tmp.c 2>&1\`
+for i in \`$cc -v -c tmp.c 2>&1 $postprocess_cc_v\`
 do
 	case "\$i" in
 	-D*) echo "\$i" | $sed 's/^-D//';;
@@ -11973,6 +11988,7 @@ do
 done
 $rm -f try.c
 EOS
+unset postprocess_cc_v
 chmod +x ccsym
 $eunicefix ccsym
 ./ccsym > ccsym1.raw
@@ -12980,6 +12996,7 @@ i_netdb='$i_netdb'
 i_neterrno='$i_neterrno'
 i_niin='$i_niin'
 i_poll='$i_poll'
+i_pthread='$i_pthread'
 i_pwd='$i_pwd'
 i_rpcsvcdbm='$i_rpcsvcdbm'
 i_sfio='$i_sfio'

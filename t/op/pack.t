@@ -248,22 +248,22 @@ print "ok ", $test++, "\n";
 
 # 73..78: packing native shorts/ints/longs
 
-print "not " unless length(pack("s_", 0)) == $Config{shortsize};
+print "not " unless length(pack("s!", 0)) == $Config{shortsize};
 print "ok ", $test++, "\n";
 
-print "not " unless length(pack("i_", 0)) == $Config{intsize};
+print "not " unless length(pack("i!", 0)) == $Config{intsize};
 print "ok ", $test++, "\n";
 
-print "not " unless length(pack("l_", 0)) == $Config{longsize};
+print "not " unless length(pack("l!", 0)) == $Config{longsize};
 print "ok ", $test++, "\n";
 
-print "not " unless length(pack("s_", 0)) <= length(pack("i_", 0));
+print "not " unless length(pack("s!", 0)) <= length(pack("i!", 0));
 print "ok ", $test++, "\n";
 
-print "not " unless length(pack("i_", 0)) <= length(pack("l_", 0));
+print "not " unless length(pack("i!", 0)) <= length(pack("l!", 0));
 print "ok ", $test++, "\n";
 
-print "not " unless length(pack("i_", 0)) == length(pack("i", 0));
+print "not " unless length(pack("i!", 0)) == length(pack("i", 0));
 print "ok ", $test++, "\n";
 
 # 79..138: pack <-> unpack bijectionism

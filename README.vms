@@ -1,4 +1,4 @@
-Last Revised 21-July-1998 by Dan Sugalski <sugalskd@ous.edu>
+Last Revised 01-March-1999 by Dan Sugalski <sugalskd@ous.edu>
 Originally by Charles Bailey <bailey@newman.upenn.edu>
 
 * Important safety tip
@@ -122,11 +122,11 @@ compile Perl and add the word "test" to the end, like this:
 
 Compile Command:
 
-$MMS/Macro=("__AXP__=1","decc=1","DECCRTL_SOCKETS=1")
+$MMS
 
 Test Command:
 
-$MMS/Macro=("__AXP__=1","decc=1","DECCRTL_SOCKETS=1") test
+$MMS test
 
 MMS will run all the tests. This may take some time, as there are a lot of
 tests. If any tests fail, there will be a note made on-screen. At the end
@@ -171,11 +171,11 @@ compile and add "realclean" at the end, like this:
 
 Compile Command:
 
-$MMS/Macro=("__AXP__=1","decc=1","DECCRTL_SOCKETS=1")
+$MMS
 
 Cleanup Command:
 
-$MMS/Macro=("__AXP__=1","decc=1","DECCRTL_SOCKETS=1") realclean
+$MMS realclean
 
 If you don't do this, things may behave erratically. They might not, too,
 so it's best to be sure and do it.
