@@ -475,21 +475,25 @@ then
       *)     ldflags="$ldflags -brtl" ;;
       esac
 else
-    # If the C++ libraries, libC and libC_r, are available we will prefer them
-    # over the vanilla libc, because the libC contain loadAndInit() and
-    # terminateAndUnload() which work correctly with C++ statics while libc
-    # load() and unload() do not.  See ext/DynaLoader/dl_aix.xs.
-    # The C-to-C_r switch is done by usethreads.cbu, if needed.
-    if test -f /lib/libC.a -a X"`$cc -v 2>&1 | grep gcc`" = X; then
-	# Cify libswanted.
-	set `echo X "$libswanted "| sed -e 's/ c / C c /'`
-	shift
-	libswanted="$*"
-	# Cify lddlflags.
-	set `echo X "$lddlflags "| sed -e 's/ -lc / -lC -lc /'`
-	shift
-	lddlflags="$*"
-    fi
+    case `oslevel` in
+	4.2.*)	;;	# libC_r has broke gettimeofday
+        *)  # If the C++ libraries, libC and libC_r, are available we will
+	    # prefer them over the vanilla libc, because the libC contain
+	    # loadAndInit() and terminateAndUnload() which work correctly
+	    # with C++ statics while libc load() and unload() do not. See
+	    # ext/DynaLoader/dl_aix.xs. The C-to-C_r switch is done by
+	    # usethreads.cbu, if needed.
+	    if test -f /lib/libC.a -a X"`$cc -v 2>&1 | grep gcc`" = X; then
+		# Cify libswanted.
+		set `echo X "$libswanted "| sed -e 's/ c / C c /'`
+		shift
+		libswanted="$*"
+		# Cify lddlflags.
+		set `echo X "$lddlflags "| sed -e 's/ -lc / -lC -lc /'`
+		shift
+		lddlflags="$*"
+	    fi
+	esac
 fi
 
 # EOF
