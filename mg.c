@@ -813,7 +813,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	break;
     case '\\':
 	if (PL_ors_sv)
-	    sv_setpv(sv,SvPVX(PL_ors_sv));
+	    sv_copypv(sv, PL_ors_sv);
 	break;
     case '#':
 	sv_setpv(sv,PL_ofmt);

@@ -36,7 +36,7 @@ sub skip {
     return 1;
 }
 
-print "1..48\n";
+print "1..50\n";
 
 $Is_MSWin32 = $^O eq 'MSWin32';
 $Is_NetWare = $^O eq 'NetWare';
@@ -324,3 +324,20 @@ ok ${^TAINT} == 0;
 ok "@-" eq  "0 0 2 7";
 ok "@+" eq "10 1 6 10";
 
+# Tests for the magic get of $\
+{
+    my $ok = 0;
+    # [perl #19330]
+    {
+	local $\ = undef;
+	$\++; $\++;
+	$ok = $\ eq 2;
+    }
+    ok $ok;
+    $ok = 0;
+    {
+	local $\ = "a\0b";
+	$ok = "a$\b" eq "aa\0bb";
+    }
+    ok $ok;
+}
