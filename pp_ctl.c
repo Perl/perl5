@@ -1537,11 +1537,7 @@ PP(pp_caller)
 	PUSHs(&PL_sv_undef);
     else
 	PUSHs(sv_2mortal(newSVpv(stashname, 0)));
-#ifdef MACOS_TRADITIONAL
-    PUSHs(sv_2mortal(newSVpv(MacPerl_MPWFileName(CopFILE(cx->blk_oldcop)), 0)));
-#else
-    PUSHs(sv_2mortal(newSVpv(CopFILE(cx->blk_oldcop), 0)));
-#endif
+    PUSHs(sv_2mortal(newSVpv(OutCopFILE(cx->blk_oldcop), 0)));
     PUSHs(sv_2mortal(newSViv((I32)CopLINE(cx->blk_oldcop))));
     if (!MAXARG)
 	RETURN;

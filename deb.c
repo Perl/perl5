@@ -45,11 +45,7 @@ void
 Perl_vdeb(pTHX_ const char *pat, va_list *args)
 {
 #ifdef DEBUGGING
-#ifdef MACOS_TRADITIONAL
-    char* file = MacPerl_MPWFileName(CopFILE(PL_curcop));
-#else
-    char* file = CopFILE(PL_curcop);
-#endif
+    char* file = OutCopFILE(PL_curcop);
 
 #ifdef USE_THREADS
     PerlIO_printf(Perl_debug_log, "0x%"UVxf" (%s:%ld)\t",
