@@ -2019,6 +2019,7 @@ t/op/cmp.t			See if the various string and numeric compare work
 t/op/concat.t			See if string concatenation works
 t/op/cond.t			See if conditional expressions work
 t/op/context.t			See if context propagation works
+t/op/crypt.t			See if crypt works
 t/op/defins.t			See if auto-insert of defined() works
 t/op/delete.t			See if delete works
 t/op/die.t			See if die works

@@ -3095,12 +3095,28 @@ PP(pp_crypt)
     dSP; dTARGET; dPOPTOPssrl;
     STRLEN n_a;
 #ifdef HAS_CRYPT
-    char *tmps = SvPV(left, n_a);
+    STRLEN len;
+    char *tmps = SvPV(left, len);
+    char *t    = 0;
+    if (DO_UTF8(left)) {
+         /* If Unicode take the crypt() of the low 8 bits
+	  * of the characters of the string. */
+	 char *s    = tmps;
+	 char *send = tmps + len;
+	 STRLEN i   = 0;
+	 Newz(688, t, len, char);
+	 while (s < send) {
+	      t[i++] = utf8_to_uvchr((U8*)s, 0) & 0xFF;
+	      s += UTF8SKIP(s);
+	 }
+	 tmps = t;
+    }
 #ifdef FCRYPT
     sv_setpv(TARG, fcrypt(tmps, SvPV(right, n_a)));
 #else
     sv_setpv(TARG, PerlProc_crypt(tmps, SvPV(right, n_a)));
 #endif
+    Safefree(t);
 #else
     DIE(aTHX_
       "The crypt() function is unimplemented due to excessive paranoia.");

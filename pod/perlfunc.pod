@@ -806,17 +806,29 @@ extirpated as a potential munition).  This can prove useful for checking
 the password file for lousy passwords, amongst other things.  Only the
 guys wearing white hats should do this.
 
-Note that C<crypt> is intended to be a one-way function, much like breaking
-eggs to make an omelette.  There is no (known) corresponding decrypt
-function.  As a result, this function isn't all that useful for
+Note that C<crypt> is intended to be a one-way function, much like
+breaking eggs to make an omelette.  There is no (known) corresponding
+decrypt function (in other words, the crypt() is a one-way hash
+function).  As a result, this function isn't all that useful for
 cryptography.  (For that, see your nearby CPAN mirror.)
 
-When verifying an existing encrypted string you should use the encrypted
-text as the salt (like C<crypt($plain, $crypted) eq $crypted>).  This
-allows your code to work with the standard C<crypt> and with more
-exotic implementations.  When choosing a new salt create a random two
-character string whose characters come from the set C<[./0-9A-Za-z]>
-(like C<join '', ('.', '/', 0..9, 'A'..'Z', 'a'..'z')[rand 64, rand 64]>).
+When verifying an existing encrypted string you should use the
+encrypted text as the salt (like C<crypt($plain, $crypted) eq
+$crypted>).  This allows your code to work with the standard C<crypt>
+and with more exotic implementations.  In other words, do not assume
+anything about the returned string itself, or how many bytes in
+the encrypted string matter.
+
+Traditionally the result is a string of 13 bytes: two first bytes of
+the salt, followed by 11 bytes from the set C<[./0-9A-Za-z]>, and only
+the first eight bytes of the encrypted string mattered, but
+alternative hashing schemes (like MD5), higher level security schemes
+(like C2), and implementations on non-UNIX platforms may produce
+different strings.
+
+When choosing a new salt create a random two character string whose
+characters come from the set C<[./0-9A-Za-z]> (like C<join '', ('.',
+'/', 0..9, 'A'..'Z', 'a'..'z')[rand 64, rand 64]>).
 
 Here's an example that makes sure that whoever runs this program knows
 their own password:
@@ -843,6 +855,11 @@ of data, not least of all because you can't get the information
 back.  Look at the F<by-module/Crypt> and F<by-module/PGP> directories
 on your favorite CPAN mirror for a slew of potentially useful
 modules.
+
+If using crypt() on an Unicode string (which potentially has
+characters with codepoints above 255), Perl tries to make sense of
+the situation by using only the low eight bits of the characters when
+calling crypt().
 
 =item dbmclose HASH
 
