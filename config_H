@@ -1554,6 +1554,11 @@
  */
 #define STARTPERL "#!/usr/local/bin/perl"		/**/
 
+/* BIN_SH:
+ *	This variable contains the path to the shell.
+ */
+#define BIN_SH "/bin/sh"		/**/
+
 /* VOIDFLAGS:
  *	This symbol indicates how much support of the void type is given by this
  *	compiler.  What various bits mean:
