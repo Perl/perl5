@@ -92,9 +92,15 @@ else {
     #print "\@a = ", array(@a);
     rmdir $dir;
     if (scalar(@a) != 0 || GLOB_ERROR == 0) {
-	print "not ";
+	if ($^O eq 'vos') {
+	    print "not ok 6 -- hit VOS bug posix-956\n";
+	} else {
+	    print "not ok 6\n";
+	}
     }
-    print "ok 6\n";
+    else {
+	print "ok 6\n";
+    }
 }
 
 # check for csh style globbing
