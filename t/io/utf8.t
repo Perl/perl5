@@ -9,7 +9,7 @@ BEGIN {
     }
 }
 
-no utf8; # so that the naked 8-bit chars won't gripe under use utf8
+no utf8; # needed for use utf8 not griping about the raw octets
 
 $| = 1;
 my $total_tests = 25;

@@ -28,7 +28,6 @@ my $test = 4;
     $_ = $dx = "\x{10f2}";
     s/($dx)/$dx$1/;
     {
-	use bytes;
 	print "not " unless $_ eq "$dx$dx";
 	print "ok $test\n";
 	$test++;
@@ -37,7 +36,6 @@ my $test = 4;
     $_ = $dx = "\x{10f2}";
     s/($dx)/$1$dx/;
     {
-	use bytes;
 	print "not " unless $_ eq "$dx$dx";
 	print "ok $test\n";
 	$test++;
@@ -47,7 +45,6 @@ my $test = 4;
     $_  = "\x{10f2}\x{10f2}";
     s/($dx)($dx)/$1$2/;
     {
-	use bytes;
 	print "not " unless $_ eq "$dx$dx";
 	print "ok $test\n";
 	$test++;

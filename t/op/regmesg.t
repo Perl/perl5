@@ -61,7 +61,7 @@ my @death =
 
  '/\p{x/' => 'Missing right brace on \p{} in regex; marked by {#} in m/\p{{#}x/',
 
- 'use utf8; /[\p{x]/' => 'Missing right brace on \p{} in regex; marked by {#} in m/[\p{{#}x]/',
+ '/[\p{x]/' => 'Missing right brace on \p{} in regex; marked by {#} in m/[\p{{#}x]/',
 
  '/(x)\2/' => 'Reference to nonexistent group in regex; marked by {#} in m/(x)\2{#}/',
 
@@ -69,7 +69,7 @@ my @death =
 
  '/\x{1/' => 'Missing right brace on \x{} in regex; marked by {#} in m/\x{{#}1/',
 
- 'use utf8; /[\x{X]/' => 'Missing right brace on \x{} in regex; marked by {#} in m/[\x{{#}X]/',
+ '/[\x{X]/' => 'Missing right brace on \x{} in regex; marked by {#} in m/[\x{{#}X]/',
 
  '/[[:barf:]]/' => 'POSIX class [:barf:] unknown in regex; marked by {#} in m/[[:barf:]{#}]/',
 

@@ -158,27 +158,23 @@ print "not " if exists $b{$A};
 print "ok 21\n";
 print "not " if exists $u{$a};
 print "ok 22\n";
-print "#$b{$_}\n" for keys %b; # Used to core dump before change #8056.
+print "# $b{$_}\n" for keys %b; # Used to core dump before change #8056.
 print "ok 23\n";
-print "#$u{$_}\n" for keys %u; # Used to core dump before change #8056.
+print "# $u{$_}\n" for keys %u; # Used to core dump before change #8056.
 print "ok 24\n";
-
-use bytes ();
 
 # on EBCDIC chars are mapped differently so pick something that needs encoding
 # there too.
 $d = pack("U*", 0xe3, 0x81, 0xAF);
-$ol = bytes::length($d);
+{ use bytes; $ol = bytes::length($d) }
 print "not " unless $ol > 3;
 print "ok 25\n";
 %u = ($d => "downgrade");
 for (keys %u) {
-    use bytes;
     print "not " if length ne 3 or $_ ne "\xe3\x81\xAF";
     print "ok 26\n";
 }
 {
-    use bytes;
-    print "not " if length($d) != $ol;
+    { use bytes; print "not " if bytes::length($d) != $ol }
     print "ok 27\n";
 }

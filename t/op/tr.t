@@ -80,9 +80,6 @@ else {
 print "ok 10\n";
 
 {
-if (ord("\t") == 9) { # ASCII
-    use utf8;
-}
 # 11 - changing UTF8 characters in a UTF8 string, same length.
 my $l = chr(300); my $r = chr(400);
 $x = 200.300.400;
