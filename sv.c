@@ -63,7 +63,7 @@ static void do_clean_all(pTHXo_ SV *sv);
 #define del_SV(p) \
     STMT_START {					\
 	LOCK_SV_MUTEX;					\
-	if (PL_debug & 32768)				\
+	if (DEBUG_D_TEST)				\
 	    del_sv(p);					\
 	else						\
 	    plant_SV(p);				\
@@ -73,7 +73,7 @@ static void do_clean_all(pTHXo_ SV *sv);
 STATIC void
 S_del_sv(pTHX_ SV *p)
 {
-    if (PL_debug & 32768) {
+    if (DEBUG_D_TEST) {
 	SV* sva;
 	SV* sv;
 	SV* svend;

@@ -1743,7 +1743,8 @@ PP(pp_dbstate)
 	if (!cv)
 	    DIE(aTHX_ "No DB::DB routine defined");
 
-	if (CvDEPTH(cv) >= 1 && !(PL_debug & (1<<30))) /* don't do recursive DB::DB call */
+	if (CvDEPTH(cv) >= 1 && !(PL_debug & DEBUG_DB_RECURSE_FLAG))
+	    /* don't do recursive DB::DB call */
 	    return NORMAL;
 
 	ENTER;

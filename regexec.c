@@ -1401,7 +1401,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 
     cache_re(prog);
 #ifdef DEBUGGING
-    PL_regnarrate = PL_debug & 512;
+    PL_regnarrate = DEBUG_r_TEST;
 #endif
 
     /* Be paranoid... */

@@ -2136,7 +2136,7 @@ Perl_moreswitches(pTHX_ char *s)
 	    PL_debug = atoi(s+1);
 	    for (s++; isDIGIT(*s); s++) ;
 	}
-	PL_debug |= 0x80000000;
+	PL_debug |= DEBUG_TOP_FLAG;
 #else
 	if (ckWARN_d(WARN_DEBUGGING))
 	    Perl_warner(aTHX_ WARN_DEBUGGING,

@@ -125,7 +125,7 @@ static void yydestruct(pTHXo_ void *ptr);
 prog	:	/* NULL */
 		{
 #if defined(YYDEBUG) && defined(DEBUGGING)
-		    yydebug = (PL_debug & 1);
+		    yydebug = (DEBUG_p_TEST);
 #endif
 		    PL_expect = XSTATE;
 		}

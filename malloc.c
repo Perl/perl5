@@ -351,7 +351,7 @@
 #  undef DEBUG_m
 #  define DEBUG_m(a)  \
     STMT_START {							\
-	if (PERL_GET_INTERP) { dTHX; if (PL_debug & 128) { a; } }	\
+	if (PERL_GET_INTERP) { dTHX; if (DEBUG_m_TEST) { a; } }	\
     } STMT_END
 #endif
 

@@ -2131,64 +2131,137 @@ Gid_t getegid (void);
 				 : PerlIO_stderr())
 #endif
 
+
+#define DEBUG_p_FLAG		0x00000001 /*      1 */
+#define DEBUG_s_FLAG		0x00000002 /*      2 */
+#define DEBUG_l_FLAG		0x00000004 /*      4 */
+#define DEBUG_t_FLAG		0x00000008 /*      8 */
+#define DEBUG_o_FLAG		0x00000010 /*     16 */
+#define DEBUG_c_FLAG		0x00000020 /*     32 */
+#define DEBUG_P_FLAG		0x00000040 /*     64 */
+#define DEBUG_m_FLAG		0x00000080 /*    128 */
+#define DEBUG_f_FLAG		0x00000100 /*    256 */
+#define DEBUG_r_FLAG		0x00000200 /*    512 */
+#define DEBUG_x_FLAG		0x00000400 /*   1024 */
+#define DEBUG_u_FLAG		0x00000800 /*   2048 */
+#define DEBUG_L_FLAG		0x00001000 /*   4096 */
+#define DEBUG_H_FLAG		0x00002000 /*   8192 */
+#define DEBUG_X_FLAG		0x00004000 /*  16384 */
+#define DEBUG_D_FLAG		0x00008000 /*  32768 */
+#define DEBUG_S_FLAG		0x00010000 /*  65536 */
+#define DEBUG_T_FLAG		0x00020000 /* 131072 */
+#define DEBUG_MASK		0x0003FFFF /* mask of all the standard flags */
+
+#define DEBUG_DB_RECURSE_FLAG	0x40000000
+#define DEBUG_TOP_FLAG		0x80000000 /* XXX what's this for ??? */
+
+
 #ifdef DEBUGGING
-#undef  YYDEBUG
-#define YYDEBUG 1
-#define DEB(a)     			a
-#define DEBUG(a)   if (PL_debug)		a
-#define DEBUG_p(a) if (PL_debug & 1)	a
-#define DEBUG_s(a) if (PL_debug & 2)	a
-#define DEBUG_l(a) if (PL_debug & 4)	a
-#define DEBUG_t(a) if (PL_debug & 8)	a
-#define DEBUG_o(a) if (PL_debug & 16)	a
-#define DEBUG_c(a) if (PL_debug & 32)	a
-#define DEBUG_P(a) if (PL_debug & 64)	a
+
+#  undef  YYDEBUG
+#  define YYDEBUG 1
+
+#  define DEBUG_p_TEST (PL_debug & DEBUG_p_FLAG)
+#  define DEBUG_s_TEST (PL_debug & DEBUG_s_FLAG)
+#  define DEBUG_l_TEST (PL_debug & DEBUG_l_FLAG)
+#  define DEBUG_t_TEST (PL_debug & DEBUG_t_FLAG)
+#  define DEBUG_o_TEST (PL_debug & DEBUG_o_FLAG)
+#  define DEBUG_c_TEST (PL_debug & DEBUG_c_FLAG)
+#  define DEBUG_P_TEST (PL_debug & DEBUG_P_FLAG)
+#  define DEBUG_m_TEST (PL_debug & DEBUG_m_FLAG)
+#  define DEBUG_f_TEST (PL_debug & DEBUG_f_FLAG)
+#  define DEBUG_r_TEST (PL_debug & DEBUG_r_FLAG)
+#  define DEBUG_x_TEST (PL_debug & DEBUG_x_FLAG)
+#  define DEBUG_u_TEST (PL_debug & DEBUG_u_FLAG)
+#  define DEBUG_L_TEST (PL_debug & DEBUG_L_FLAG)
+#  define DEBUG_H_TEST (PL_debug & DEBUG_H_FLAG)
+#  define DEBUG_X_TEST (PL_debug & DEBUG_X_FLAG)
+#  define DEBUG_D_TEST (PL_debug & DEBUG_D_FLAG)
+#  define DEBUG_S_TEST (PL_debug & DEBUG_S_FLAG)
+#  define DEBUG_T_TEST (PL_debug & DEBUG_T_FLAG)
+
+#  define DEB(a)     a
+#  define DEBUG(a)   if (PL_debug)   a
+#  define DEBUG_p(a) if (DEBUG_p_TEST) a
+#  define DEBUG_s(a) if (DEBUG_s_TEST) a
+#  define DEBUG_l(a) if (DEBUG_l_TEST) a
+#  define DEBUG_t(a) if (DEBUG_t_TEST) a
+#  define DEBUG_o(a) if (DEBUG_o_TEST) a
+#  define DEBUG_c(a) if (DEBUG_c_TEST) a
+#  define DEBUG_P(a) if (DEBUG_P_TEST) a
+
 #  if defined(PERL_OBJECT)
-#    define DEBUG_m(a) if (PL_debug & 128)	a
+#    define DEBUG_m(a) if (DEBUG_m_TEST) a
 #  else
      /* Temporarily turn off memory debugging in case the a
       * does memory allocation, either directly or indirectly. */
 #    define DEBUG_m(a)  \
     STMT_START {							\
-        if (PERL_GET_INTERP) { dTHX; if (PL_debug & 128) {PL_debug&=~128; a; PL_debug|=128;} } \
+        if (PERL_GET_INTERP) { dTHX; if (DEBUG_m_TEST) {PL_debug&=~DEBUG_m_FLAG; a; PL_debug|=DEBUG_m_FLAG;} } \
     } STMT_END
 #  endif
-#define DEBUG_f(a) if (PL_debug & 256)	a
-#define DEBUG_r(a) if (PL_debug & 512)	a
-#define DEBUG_x(a) if (PL_debug & 1024)	a
-#define DEBUG_u(a) if (PL_debug & 2048)	a
-#define DEBUG_L(a) if (PL_debug & 4096)	a
-#define DEBUG_H(a) if (PL_debug & 8192)	a
-#define DEBUG_X(a) if (PL_debug & 16384)	a
-#define DEBUG_D(a) if (PL_debug & 32768)	a
+
+#  define DEBUG_f(a) if (DEBUG_f_TEST) a
+#  define DEBUG_r(a) if (DEBUG_r_TEST) a
+#  define DEBUG_x(a) if (DEBUG_x_TEST) a
+#  define DEBUG_u(a) if (DEBUG_u_TEST) a
+#  define DEBUG_L(a) if (DEBUG_L_TEST) a
+#  define DEBUG_H(a) if (DEBUG_H_TEST) a
+#  define DEBUG_X(a) if (DEBUG_X_TEST) a
+#  define DEBUG_D(a) if (DEBUG_D_TEST) a
+
 #  ifdef USE_THREADS
-#    define DEBUG_S(a) if (PL_debug & (1<<16))	a
+#    define DEBUG_S(a) if (DEBUG_S_TEST) a
 #  else
 #    define DEBUG_S(a)
 #  endif
-#define DEBUG_T(a) if (PL_debug & (1<<17))	a
-#else
-#define DEB(a)
-#define DEBUG(a)
-#define DEBUG_p(a)
-#define DEBUG_s(a)
-#define DEBUG_l(a)
-#define DEBUG_t(a)
-#define DEBUG_o(a)
-#define DEBUG_c(a)
-#define DEBUG_P(a)
-#define DEBUG_m(a)
-#define DEBUG_f(a)
-#define DEBUG_r(a)
-#define DEBUG_x(a)
-#define DEBUG_u(a)
-#define DEBUG_S(a)
-#define DEBUG_H(a)
-#define DEBUG_X(a)
-#define DEBUG_D(a)
-#define DEBUG_S(a)
-#define DEBUG_T(a)
-#endif
+
+#  define DEBUG_T(a) if (DEBUG_T_TEST) a
+
+#else /* DEBUGGING */
+
+#  define DEBUG_p_TEST (0)
+#  define DEBUG_s_TEST (0)
+#  define DEBUG_l_TEST (0)
+#  define DEBUG_t_TEST (0)
+#  define DEBUG_o_TEST (0)
+#  define DEBUG_c_TEST (0)
+#  define DEBUG_P_TEST (0)
+#  define DEBUG_m_TEST (0)
+#  define DEBUG_f_TEST (0)
+#  define DEBUG_r_TEST (0)
+#  define DEBUG_x_TEST (0)
+#  define DEBUG_u_TEST (0)
+#  define DEBUG_L_TEST (0)
+#  define DEBUG_H_TEST (0)
+#  define DEBUG_X_TEST (0)
+#  define DEBUG_D_TEST (0)
+#  define DEBUG_S_TEST (0)
+#  define DEBUG_T_TEST (0)
+
+#  define DEB(a)
+#  define DEBUG(a)
+#  define DEBUG_p(a)
+#  define DEBUG_s(a)
+#  define DEBUG_l(a)
+#  define DEBUG_t(a)
+#  define DEBUG_o(a)
+#  define DEBUG_c(a)
+#  define DEBUG_P(a)
+#  define DEBUG_m(a)
+#  define DEBUG_f(a)
+#  define DEBUG_r(a)
+#  define DEBUG_x(a)
+#  define DEBUG_u(a)
+#  define DEBUG_L(a)
+#  define DEBUG_H(a)
+#  define DEBUG_X(a)
+#  define DEBUG_D(a)
+#  define DEBUG_S(a)
+#  define DEBUG_T(a)
+#endif /* DEBUGGING */
+
+
 #define YYMAXDEPTH 300
 
 #ifndef assert  /* <assert.h> might have been included somehow */
