@@ -247,6 +247,11 @@ The usual Unix backslash rules apply for making characters such as
 newline, tab, etc., as well as some more exotic forms.  See
 L<perlop/Quote and Quotelike Operators> for a list.
 
+Octal or hex representations in string literals (eg, '0xffff') are not
+automatically converted to their integer representation.  The hex()
+and oct() functions make these conversions for you.  See
+L<perlfunc/hex> and L<perlfunc/oct> for more details.
+
 You can also embed newlines directly in your strings, i.e., they can end
 on a different line than they begin.  This is nice, but if you forget
 your trailing quote, the error will not be reported until Perl finds
@@ -439,6 +444,11 @@ put the list in parentheses to avoid ambiguity.  Examples:
 
     # A "reverse comma operator".
     return (pop(@foo),pop(@foo))[0];
+
+C<undef> can be assigned to.  This is useful for throwing away some of
+the return values of a function:
+
+    ($dev, $ino, undef, undef, $uid, $gid) = stat($file);
 
 Lists may be assigned to if and only if each element of the list
 is legal to assign to:

@@ -213,6 +213,9 @@ delimit line boundaries when quoting poetry.)
     $_ = <FH>; 		# whole file now here
     s/\n[ \t]+/ /g;
 
+Remember: the value of $/ is a string, not a regexp.  AWK has to be
+better for something :-)
+
 =item autoflush HANDLE EXPR
 
 =item $OUTPUT_AUTOFLUSH

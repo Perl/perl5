@@ -1437,8 +1437,10 @@ Returns the socket option requested, or undefined if there is an error.
 =item glob
 
 Returns the value of EXPR with filename expansions such as a shell
-would do.  This is the internal function implementing the <*.c>
-operator, except it's easier to use.  If EXPR is omitted, $_ is used.
+would do.  This is the internal function implementing the
+C<E<lt>*.cE<gt>> operator, except it's easier to use.  If EXPR is
+omitted, $_ is used.  The E<lt>E<gt> operator is discussed in more
+detail in L<perlop/"I/O Operators">.
 
 =item gmtime EXPR
 
