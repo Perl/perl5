@@ -45,11 +45,11 @@ README.mpeix		Notes about MPE/iX port
 README.os2		Notes about OS/2 port
 README.os390		Notes about OS/390 (nee MVS) port
 README.plan9		Notes about Plan9 port
-README.posix-bc		Notes about BC2000 POSIX port
+README.posix-bc		Notes about BS2000 POSIX port
 README.qnx		Notes about QNX port
 README.threads		Notes about multithreading
 README.vmesa		Notes about VM/ESA port
-README.vms		Notes about VMS port
+README.vms		Notes about installing the VMS port
 README.vos		Notes about Stratus VOS port
 README.win32		Notes about Win32 port
 Todo			The Wishlist
@@ -1445,6 +1445,7 @@ t/pragma/warn/5nolint	Tests for -X switch
 t/pragma/warn/6default	Tests default warnings
 t/pragma/warn/7fatal	Tests fatal warnings
 t/pragma/warn/8signal	Tests warnings + __WARN__ and __DIE__
+t/pragma/warn/9enabled	Tests warnings
 t/pragma/warn/av	Tests for av.c for warnings.t
 t/pragma/warn/doio	Tests for doio.c for warnings.t
 t/pragma/warn/doop	Tests for doop.c for warnings.t

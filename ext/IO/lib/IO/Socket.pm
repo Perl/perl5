@@ -14,6 +14,7 @@ use Carp;
 use strict;
 our(@ISA, $VERSION);
 use Exporter;
+use Errno;
 
 # legacy
 
@@ -22,7 +23,7 @@ require IO::Socket::UNIX if ($^O ne 'epoc');
 
 @ISA = qw(IO::Handle);
 
-$VERSION = "1.252";
+$VERSION = "1.26";
 
 sub import {
     my $pkg = shift;
@@ -100,35 +101,36 @@ sub connect {
     my $sock = shift;
     my $addr = shift;
     my $timeout = ${*$sock}{'io_socket_timeout'};
-
+    my $err;
     my $blocking;
     $blocking = $sock->blocking(0) if $timeout;
 
-    eval {
-    	croak 'connect: Bad address'
-    	    if(@_ == 2 && !defined $_[1]);
+    if (!connect($sock, $addr)) {
+	if ($timeout && exists(&IO::EINPROGRESS) && ($! == &IO::EINPROGRESS)) {
+	    require IO::Select;
 
-	unless(connect($sock, $addr)) {
-	    if($timeout && ($! == &IO::EINPROGRESS)) {
-		require IO::Select;
+	    my $sel = new IO::Select $sock;
 
-		my $sel = new IO::Select $sock;
-
-		unless($sel->can_write($timeout) && defined($sock->peername)) {
-		    croak "connect: timeout";
-		}
+	    if (!$sel->can_write($timeout)) {
+		$err = $! || (exists &Errno::ETIMEDOUT ? &Errno::ETIMEDOUT : 1);
+		$@ = "connect: timeout";
 	    }
-	    else {
-		croak "connect: $!";
+	    elsif(!connect($sock,$addr)) {
+		$err = $!;
+		$@ = "connect: $!";
 	    }
 	}
-    };
+	else {
+	    $err = $!;
+	    $@ = "connect: $!";
+	}
+    }
 
-    my $ret = $@ ? undef : $sock;
+    $sock->blocking(1) if $blocking;
 
-    $sock->blocking($blocking) if $timeout;
+    $! = $err if $err;
 
-    $ret;
+    $err ? undef : $sock;
 }
 
 sub bind {
@@ -158,23 +160,23 @@ sub accept {
     my $new = $pkg->new(Timeout => $timeout);
     my $peer = undef;
 
-    eval {
-    	if($timeout) {
-	    require IO::Select;
+    if($timeout) {
+	require IO::Select;
 
-	    my $sel = new IO::Select $sock;
+	my $sel = new IO::Select $sock;
 
-    	    croak "accept: timeout"
-    	    	unless $sel->can_read($timeout);
-    	}
-    	$peer = accept($new,$sock) || undef;
-    };
-    croak "$@" if $@ and $sock;
+	unless ($sel->can_read($timeout)) {
+	    $@ = 'accept: timeout';
+	    $! = (exists &Errno::ETIMEDOUT ? &Errno::ETIMEDOUT : 1);
+	    return;
+	}
+    }
 
-    return wantarray ? defined $peer ? ($new, $peer)
-    	    	    	    	     : () 
-    	      	     : defined $peer ? $new
-    	    	    	    	     : undef;
+    $peer = accept($new,$sock)
+	or return;
+
+    return wantarray ? ($new, $peer)
+    	      	     : $new;
 }
 
 sub sockname {

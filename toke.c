@@ -1339,8 +1339,8 @@ S_scan_const(pTHX_ char *start)
 	    default:
 	        {
 		    dTHR;
-		    if (ckWARN(WARN_UNSAFE) && isALPHA(*s))
-			Perl_warner(aTHX_ WARN_UNSAFE, 
+		    if (ckWARN(WARN_MISC) && isALPHA(*s))
+			Perl_warner(aTHX_ WARN_MISC, 
 			       "Unrecognized escape \\%c passed through",
 			       *s);
 		    /* default action is to copy the quoted character */
@@ -3627,8 +3627,8 @@ Perl_yylex(pTHX)
 		if (len > 2 &&
 		    PL_tokenbuf[len - 2] == ':' && PL_tokenbuf[len - 1] == ':')
 		{
-		    if (ckWARN(WARN_UNSAFE) && ! gv_fetchpv(PL_tokenbuf, FALSE, SVt_PVHV))
-			Perl_warner(aTHX_ WARN_UNSAFE, 
+		    if (ckWARN(WARN_BAREWORD) && ! gv_fetchpv(PL_tokenbuf, FALSE, SVt_PVHV))
+			Perl_warner(aTHX_ WARN_BAREWORD, 
 		  	    "Bareword \"%s\" refers to nonexistent package",
 			     PL_tokenbuf);
 		    len -= 2;
@@ -3951,11 +3951,11 @@ Perl_yylex(pTHX)
 	    LOP(OP_CRYPT,XTERM);
 
 	case KEY_chmod:
-	    if (ckWARN(WARN_OCTAL)) {
+	    if (ckWARN(WARN_CHMOD)) {
 		for (d = s; d < PL_bufend && (isSPACE(*d) || *d == '('); d++) ;
 		if (*d != '0' && isDIGIT(*d))
-		    Perl_warner(aTHX_ WARN_OCTAL,
-		    		"chmod: mode argument is missing initial 0");
+		    Perl_warner(aTHX_ WARN_CHMOD,
+		    		"chmod() mode argument is missing initial 0");
 	    }
 	    LOP(OP_CHMOD,XTERM);
 
@@ -4325,8 +4325,8 @@ Perl_yylex(pTHX)
 		char *t;
 		for (d = s; isALNUM_lazy_if(d,UTF); d++) ;
 		t = skipspace(d);
-		if (strchr("|&*+-=!?:.", *t) && ckWARN_d(WARN_AMBIGUOUS))
-		    Perl_warner(aTHX_ WARN_AMBIGUOUS,
+		if (strchr("|&*+-=!?:.", *t) && ckWARN_d(WARN_PRECEDENCE))
+		    Perl_warner(aTHX_ WARN_PRECEDENCE,
 			   "Precedence problem: open %.*s should be open(%.*s)",
 			    d-s,s, d-s,s);
 	    }
@@ -4398,15 +4398,15 @@ Perl_yylex(pTHX)
 		    for (; isSPACE(*d) && len; --len, ++d) ;
 		    if (len) {
 			char *b = d;
-			if (!warned && ckWARN(WARN_SYNTAX)) {
+			if (!warned && ckWARN(WARN_QW)) {
 			    for (; !isSPACE(*d) && len; --len, ++d) {
 				if (*d == ',') {
-				    Perl_warner(aTHX_ WARN_SYNTAX,
+				    Perl_warner(aTHX_ WARN_QW,
 					"Possible attempt to separate words with commas");
 				    ++warned;
 				}
 				else if (*d == '#') {
-				    Perl_warner(aTHX_ WARN_SYNTAX,
+				    Perl_warner(aTHX_ WARN_QW,
 					"Possible attempt to put comments in qw() list");
 				    ++warned;
 				}
@@ -4813,10 +4813,10 @@ Perl_yylex(pTHX)
 	    LOP(OP_UTIME,XTERM);
 
 	case KEY_umask:
-	    if (ckWARN(WARN_OCTAL)) {
+	    if (ckWARN(WARN_UMASK)) {
 		for (d = s; d < PL_bufend && (isSPACE(*d) || *d == '('); d++) ;
 		if (*d != '0' && isDIGIT(*d)) 
-		    Perl_warner(aTHX_ WARN_OCTAL,
+		    Perl_warner(aTHX_ WARN_UMASK,
 		    		"umask: argument is missing initial 0");
 	    }
 	    UNI(OP_UMASK);

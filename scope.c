@@ -16,6 +16,7 @@
 #define PERL_IN_SCOPE_C
 #include "perl.h"
 
+#if defined(PERL_FLEXIBLE_EXCEPTIONS)
 void *
 Perl_default_protect(pTHX_ volatile JMPENV *pcur_env, int *excpt,
 		     protect_body_t body, ...)
@@ -36,8 +37,6 @@ Perl_vdefault_protect(pTHX_ volatile JMPENV *pcur_env, int *excpt,
     int ex;
     void *ret;
 
-    DEBUG_l(Perl_deb(aTHX_ "Setting up local jumplevel %p, was %p\n",
-		pcur_env, PL_top_env));
     JMPENV_PUSH(ex);
     if (ex)
 	ret = NULL;
@@ -47,6 +46,7 @@ Perl_vdefault_protect(pTHX_ volatile JMPENV *pcur_env, int *excpt,
     JMPENV_POP;
     return ret;
 }
+#endif
 
 SV**
 Perl_stack_grow(pTHX_ SV **sp, SV **p, int n)

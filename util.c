@@ -3488,7 +3488,9 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
     /* parent thread's data needs to be locked while we make copy */
     MUTEX_LOCK(&t->mutex);
 
+#ifdef PERL_FLEXIBLE_EXCEPTIONS
     PL_protect = t->Tprotect;
+#endif
 
     PL_curcop = t->Tcurcop;       /* XXX As good a guess as any? */
     PL_defstash = t->Tdefstash;   /* XXX maybe these should */

@@ -1009,7 +1009,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
     else {
 	i = whichsig(s);	/* ...no, a brick */
 	if (!i) {
-	    if (ckWARN(WARN_SIGNAL) || strEQ(s,"ALARM"))
+	    if (ckWARN(WARN_SIGNAL))
 		Perl_warner(aTHX_ WARN_SIGNAL, "No such signal: SIG%s", s);
 	    return 0;
 	}

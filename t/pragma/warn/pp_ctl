@@ -81,14 +81,14 @@ EXPECT
 1
 ########
 # pp_ctl.c
-use warnings 'unsafe' ;
+use warnings 'exiting' ;
 $_ = "abc" ;
  
 while ($i ++ == 0)
 {
     s/ab/last/e ;
 }
-no warnings 'unsafe' ;
+no warnings 'exiting' ;
 while ($i ++ == 0)
 {
     s/ab/last/e ;
@@ -97,10 +97,10 @@ EXPECT
 Exiting substitution via last at - line 7.
 ########
 # pp_ctl.c
-use warnings 'unsafe' ;
+use warnings 'exiting' ;
 sub fred { last }
 { fred() }
-no warnings 'unsafe' ;
+no warnings 'exiting' ;
 sub joe { last }
 { joe() }
 EXPECT
@@ -108,35 +108,35 @@ Exiting subroutine via last at - line 3.
 ########
 # pp_ctl.c
 {
-  eval "use warnings 'unsafe' ; last;" 
+  eval "use warnings 'exiting' ; last;" 
 }
 print STDERR $@ ;
 {
-  eval "no warnings 'unsafe' ;last;" 
+  eval "no warnings 'exiting' ;last;" 
 } 
 print STDERR $@ ;
 EXPECT
 Exiting eval via last at (eval 1) line 1.
 ########
 # pp_ctl.c
-use warnings 'unsafe' ;
+use warnings 'exiting' ;
 @a = (1,2) ;
 @b = sort { last } @a ;
-no warnings 'unsafe' ;
+no warnings 'exiting' ;
 @b = sort { last } @a ;
 EXPECT
 Exiting pseudo-block via last at - line 4.
 Can't "last" outside a loop block at - line 4.
 ########
 # pp_ctl.c
-use warnings 'unsafe' ;
+use warnings 'exiting' ;
 $_ = "abc" ;
 fred: 
 while ($i ++ == 0)
 {
     s/ab/last fred/e ;
 }
-no warnings 'unsafe' ;
+no warnings 'exiting' ;
 while ($i ++ == 0)
 {
     s/ab/last fred/e ;
@@ -145,10 +145,10 @@ EXPECT
 Exiting substitution via last at - line 7.
 ########
 # pp_ctl.c
-use warnings 'unsafe' ;
+use warnings 'exiting' ;
 sub fred { last joe }
 joe: { fred() }
-no warnings 'unsafe' ;
+no warnings 'exiting' ;
 sub Fred { last Joe }
 Joe: { Fred() }
 EXPECT
@@ -156,19 +156,19 @@ Exiting subroutine via last at - line 3.
 ########
 # pp_ctl.c
 joe:
-{ eval "use warnings 'unsafe' ; last joe;" }
+{ eval "use warnings 'exiting' ; last joe;" }
 print STDERR $@ ;
 Joe:
-{ eval "no warnings 'unsafe' ; last Joe;" }
+{ eval "no warnings 'exiting' ; last Joe;" }
 print STDERR $@ ;
 EXPECT
 Exiting eval via last at (eval 1) line 1.
 ########
 # pp_ctl.c
-use warnings 'unsafe' ;
+use warnings 'exiting' ;
 @a = (1,2) ;
 fred: @b = sort { last fred } @a ;
-no warnings 'unsafe' ;
+no warnings 'exiting' ;
 Fred: @b = sort { last Fred } @a ;
 EXPECT
 Exiting pseudo-block via last at - line 4.
@@ -198,7 +198,7 @@ fred()
 EXPECT
 ########
 # pp_ctl.c
-use warnings 'unsafe' ;
+use warnings 'misc' ;
 package Foo;
 DESTROY { die "@{$_[0]} foo bar" }
 { bless ['A'], 'Foo' for 1..10 }
@@ -208,7 +208,7 @@ EXPECT
 	(in cleanup) B foo bar at - line 4.
 ########
 # pp_ctl.c
-no warnings 'unsafe' ;
+no warnings 'misc' ;
 package Foo;
 DESTROY { die "@{$_[0]} foo bar" }
 { bless ['A'], 'Foo' for 1..10 }

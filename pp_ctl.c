@@ -1075,28 +1075,28 @@ S_dopoptolabel(pTHX_ char *label)
 	cx = &cxstack[i];
 	switch (CxTYPE(cx)) {
 	case CXt_SUBST:
-	    if (ckWARN(WARN_UNSAFE))
-		Perl_warner(aTHX_ WARN_UNSAFE, "Exiting substitution via %s", 
+	    if (ckWARN(WARN_EXITING))
+		Perl_warner(aTHX_ WARN_EXITING, "Exiting substitution via %s", 
 			PL_op_name[PL_op->op_type]);
 	    break;
 	case CXt_SUB:
-	    if (ckWARN(WARN_UNSAFE))
-		Perl_warner(aTHX_ WARN_UNSAFE, "Exiting subroutine via %s", 
+	    if (ckWARN(WARN_EXITING))
+		Perl_warner(aTHX_ WARN_EXITING, "Exiting subroutine via %s", 
 			PL_op_name[PL_op->op_type]);
 	    break;
 	case CXt_FORMAT:
-	    if (ckWARN(WARN_UNSAFE))
-		Perl_warner(aTHX_ WARN_UNSAFE, "Exiting format via %s", 
+	    if (ckWARN(WARN_EXITING))
+		Perl_warner(aTHX_ WARN_EXITING, "Exiting format via %s", 
 			PL_op_name[PL_op->op_type]);
 	    break;
 	case CXt_EVAL:
-	    if (ckWARN(WARN_UNSAFE))
-		Perl_warner(aTHX_ WARN_UNSAFE, "Exiting eval via %s", 
+	    if (ckWARN(WARN_EXITING))
+		Perl_warner(aTHX_ WARN_EXITING, "Exiting eval via %s", 
 			PL_op_name[PL_op->op_type]);
 	    break;
 	case CXt_NULL:
-	    if (ckWARN(WARN_UNSAFE))
-		Perl_warner(aTHX_ WARN_UNSAFE, "Exiting pseudo-block via %s", 
+	    if (ckWARN(WARN_EXITING))
+		Perl_warner(aTHX_ WARN_EXITING, "Exiting pseudo-block via %s", 
 			PL_op_name[PL_op->op_type]);
 	    return -1;
 	case CXt_LOOP:
@@ -1201,28 +1201,28 @@ S_dopoptoloop(pTHX_ I32 startingblock)
 	cx = &cxstack[i];
 	switch (CxTYPE(cx)) {
 	case CXt_SUBST:
-	    if (ckWARN(WARN_UNSAFE))
-		Perl_warner(aTHX_ WARN_UNSAFE, "Exiting substitution via %s", 
+	    if (ckWARN(WARN_EXITING))
+		Perl_warner(aTHX_ WARN_EXITING, "Exiting substitution via %s", 
 			PL_op_name[PL_op->op_type]);
 	    break;
 	case CXt_SUB:
-	    if (ckWARN(WARN_UNSAFE))
-		Perl_warner(aTHX_ WARN_UNSAFE, "Exiting subroutine via %s", 
+	    if (ckWARN(WARN_EXITING))
+		Perl_warner(aTHX_ WARN_EXITING, "Exiting subroutine via %s", 
 			PL_op_name[PL_op->op_type]);
 	    break;
 	case CXt_FORMAT:
-	    if (ckWARN(WARN_UNSAFE))
-		Perl_warner(aTHX_ WARN_UNSAFE, "Exiting format via %s", 
+	    if (ckWARN(WARN_EXITING))
+		Perl_warner(aTHX_ WARN_EXITING, "Exiting format via %s", 
 			PL_op_name[PL_op->op_type]);
 	    break;
 	case CXt_EVAL:
-	    if (ckWARN(WARN_UNSAFE))
-		Perl_warner(aTHX_ WARN_UNSAFE, "Exiting eval via %s", 
+	    if (ckWARN(WARN_EXITING))
+		Perl_warner(aTHX_ WARN_EXITING, "Exiting eval via %s", 
 			PL_op_name[PL_op->op_type]);
 	    break;
 	case CXt_NULL:
-	    if (ckWARN(WARN_UNSAFE))
-		Perl_warner(aTHX_ WARN_UNSAFE, "Exiting pseudo-block via %s", 
+	    if (ckWARN(WARN_EXITING))
+		Perl_warner(aTHX_ WARN_EXITING, "Exiting pseudo-block via %s", 
 			PL_op_name[PL_op->op_type]);
 	    return -1;
 	case CXt_LOOP:
@@ -1347,9 +1347,9 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 		    SvGROW(err, SvCUR(err)+sizeof(prefix)+msglen);
 		    sv_catpvn(err, prefix, sizeof(prefix)-1);
 		    sv_catpvn(err, message, msglen);
-		    if (ckWARN(WARN_UNSAFE)) {
+		    if (ckWARN(WARN_MISC)) {
 			STRLEN start = SvCUR(err)-msglen-sizeof(prefix)+1;
-			Perl_warner(aTHX_ WARN_UNSAFE, SvPVX(err)+start);
+			Perl_warner(aTHX_ WARN_MISC, SvPVX(err)+start);
 		    }
 		}
 	    }
@@ -1456,7 +1456,7 @@ PP(pp_caller)
 
     if (MAXARG)
 	count = POPi;
-    EXTEND(SP, 7);
+    EXTEND(SP, 10);
     for (;;) {
 	/* we may be in a higher stacklevel, so dig down deeper */
 	while (cxix < 0 && top_si->si_type != PERLSI_MAIN) {
@@ -1561,6 +1561,17 @@ PP(pp_caller)
      * use the global PL_hints) */
     PUSHs(sv_2mortal(newSViv((I32)cx->blk_oldcop->op_private &
 			     HINT_PRIVATE_MASK)));
+    {
+	SV * mask ;
+	SV * old_warnings = cx->blk_oldcop->cop_warnings ;
+	if  (old_warnings == WARN_NONE || old_warnings == WARN_STD)
+            mask = newSVpvn(WARN_NONEstring, WARNsize) ;
+        else if (old_warnings == WARN_ALL)
+            mask = newSVpvn(WARN_ALLstring, WARNsize) ;
+        else
+            mask = newSVsv(old_warnings);
+        PUSHs(sv_2mortal(mask));
+    }
     RETURN;
 }
 
@@ -2521,8 +2532,16 @@ S_save_lines(pTHX_ AV *array, SV *sv)
     }
 }
 
+#ifdef PERL_FLEXIBLE_EXCEPTIONS
 STATIC void *
 S_docatch_body(pTHX_ va_list args)
+{
+    return docatch_body();
+}
+#endif
+
+STATIC void *
+S_docatch_body(pTHX)
 {
     CALLRUNOPS(aTHX);
     return NULL;
@@ -2541,10 +2560,18 @@ S_docatch(pTHX_ OP *o)
     assert(CATCH_GET == TRUE);
 #endif
     PL_op = o;
+#ifdef PERL_FLEXIBLE_EXCEPTIONS
  redo_body:
     CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_docatch_body));
+#else
+    JMPENV_PUSH(ret);
+#endif
     switch (ret) {
     case 0:
+#ifndef PERL_FLEXIBLE_EXCEPTIONS
+ redo_body:
+	docatch_body();
+#endif
 	break;
     case 3:
 	if (PL_restartop && cursi == PL_curstackinfo) {
@@ -2554,10 +2581,12 @@ S_docatch(pTHX_ OP *o)
 	}
 	/* FALL THROUGH */
     default:
+	JMPENV_POP;
 	PL_op = oldop;
 	JMPENV_JUMP(ret);
 	/* NOTREACHED */
     }
+    JMPENV_POP;
     PL_op = oldop;
     return Nullop;
 }

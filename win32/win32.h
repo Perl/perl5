@@ -301,6 +301,14 @@ DllExport int		RunPerl(int argc, char **argv, char **env);
 DllExport bool		SetPerlInterpreter(void* interp);
 DllExport void*		GetPerlInterpreter(void);
 
+typedef struct {
+    HANDLE	childStdIn;
+    HANDLE	childStdOut;
+    HANDLE	childStdErr;
+} child_IO_table;
+
+DllExport void		win32_get_child_IO(child_IO_table* ptr);
+
 #ifndef USE_SOCKETS_AS_HANDLES
 extern FILE *		my_fdopen(int, char *);
 #endif

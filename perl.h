@@ -215,7 +215,10 @@ struct perl_thread;
 #define CALLREG_INTUIT_START CALL_FPTR(PL_regint_start)
 #define CALLREG_INTUIT_STRING CALL_FPTR(PL_regint_string)
 #define CALLREGFREE CALL_FPTR(PL_regfree)
-#define CALLPROTECT CALL_FPTR(PL_protect)
+
+#ifdef PERL_FLEXIBLE_EXCEPTIONS
+#  define CALLPROTECT CALL_FPTR(PL_protect)
+#endif
 
 #define NOOP (void)0
 #define dNOOP extern int Perl___notused

@@ -176,16 +176,16 @@ This variable is read-only and dynamically scoped to the current BLOCK.
 
 =item @+
 
-$+[0] is the offset of the end of the last successful match.
-C<$+[>I<n>C<]> is the offset of the end of the substring matched by
-I<n>-th subpattern, or undef if the subpattern did not match.
-
-Thus after a match against $_, $& coincides with C<substr $_, $-[0],
-$+[0] - $-[0]>.  Similarly, C<$>I<n> coincides with C<substr $_, $-[>I<n>C<],
-$+[>I<n>C<] - $-[>I<n>C<]> if C<$-[>I<n>C<]> is defined, and $+ coincides with
-C<substr $_, $-[$#-], $+[$#-]>.  One can use C<$#+> to find the number
-of subgroups in the last successful match.  Contrast with
-C<$#E<45>>, the last I<matched> subgroup.  Compare with C<@E<45>>.
+This array holds the offsets of the ends of the last successful
+submatches in the currently active dynamic scope.  C<$+[0]> is
+the offset into the string of the end of the entire match.  This
+is the same value as what the C<pos> function returns when called
+on the variable that was matched against.  The I<n>th element
+of this array holds the offset of the I<n>th submatch, so
+C<$+[1]> is the offset past where $1 ends, C<$+[2]> the offset
+past where $2 ends, and so on.  You can use C<$#+> to determine
+how many subgroups were in the last successful match.  See the
+examples given for the C<@-> variable.
 
 =item $MULTILINE_MATCHING
 
@@ -425,6 +425,33 @@ C<substr $_, $-[$#-], $+[$#-]>.  One can use C<$#E<45>> to find the last
 matched subgroup in the last successful match.  Contrast with
 C<$#+>, the number of subgroups in the regular expression.  Compare
 with C<@+>.
+
+This array holds the offsets of the beginnings of the last
+successful submatches in the currently active dynamic scope.
+C<$-[0]> is the offset into the string of the beginning of the
+entire match.  The I<n>th element of this array holds the offset
+of the I<n>th submatch, so C<$+[1]> is the offset where $1
+begins, C<$+[2]> the offset where $2 begins, and so on.
+You can use C<$#-> to determine how many subgroups were in the
+last successful match.  Compare with the C<@+> variable.
+
+After a match against some variable $var:
+
+=over 5
+
+=item C<$`> is the same as C<substr($var, 0, $-[0]>)
+
+=item C<$&> is the same as C<substr($var, $-[0], $+[0] - $-[0]>) 
+
+=item C<$'> is the same as C<substr($var, $+[0]>)
+
+=item C<$1> is the same as C<substr($var, $-[1], $+[1] - $-[1])>  
+
+=item C<$2> is the same as C<substr($var, $-[2], $+[2] - $-[2])>
+
+=item C<$3> is the same as C<substr $var, $-[3], $+[3] - $-[3]>) 
+
+=back
 
 =item format_name HANDLE EXPR
 

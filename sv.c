@@ -107,7 +107,7 @@ Perl_sv_add_arena(pTHX_ char *ptr, U32 size, U32 flags)
     SV* sva = (SV*)ptr;
     register SV* sv;
     register SV* svend;
-    Zero(sva, size, char);
+    Zero(ptr, size, char);
 
     /* The first SV in an arena isn't an SV. */
     SvANY(sva) = (void *) PL_sv_arenaroot;		/* ptr to next arena */
@@ -2662,16 +2662,11 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 				    Perl_croak(aTHX_ 
 				    "Can't redefine active sort subroutine %s",
 					  GvENAME((GV*)dstr));
-				if (ckWARN(WARN_REDEFINE) || (const_changed && const_sv)) {
-				    if (!(CvGV(cv) && GvSTASH(CvGV(cv))
-					  && HvNAME(GvSTASH(CvGV(cv)))
-					  && strEQ(HvNAME(GvSTASH(CvGV(cv))),
-						   "autouse")))
-					Perl_warner(aTHX_ WARN_REDEFINE, const_sv ? 
+				if ((const_changed || const_sv) && ckWARN(WARN_REDEFINE))
+				    Perl_warner(aTHX_ WARN_REDEFINE, const_sv ? 
 					     "Constant subroutine %s redefined"
 					     : "Subroutine %s redefined", 
 					     GvENAME((GV*)dstr));
-				}
 			    }
 			    cv_ckproto(cv, (GV*)dstr,
 				       SvPOK(sref) ? SvPVX(sref) : Nullch);
@@ -2812,8 +2807,8 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
     }
     else {
 	if (dtype == SVt_PVGV) {
-	    if (ckWARN(WARN_UNSAFE))
-		Perl_warner(aTHX_ WARN_UNSAFE, "Undefined value assigned to typeglob");
+	    if (ckWARN(WARN_MISC))
+		Perl_warner(aTHX_ WARN_MISC, "Undefined value assigned to typeglob");
 	}
 	else
 	    (void)SvOK_off(dstr);
@@ -6153,13 +6148,13 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		break;
 	    default:		/* it had better be ten or less */
 #if defined(PERL_Y2KWARN)
-		if (ckWARN(WARN_MISC)) {
+		if (ckWARN(WARN_Y2K)) {
 		    STRLEN n;
 		    char *s = SvPV(sv,n);
 		    if (n >= 2 && s[n-2] == '1' && s[n-1] == '9'
 			&& (n == 2 || !isDIGIT(s[n-3])))
 		    {
-			Perl_warner(aTHX_ WARN_MISC,
+			Perl_warner(aTHX_ WARN_Y2K,
 				    "Possible Y2K bug: %%%c %s",
 				    c, "format string following '19'");
 		    }
@@ -7853,7 +7848,9 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_dirty		= proto_perl->Tdirty;
     PL_localizing	= proto_perl->Tlocalizing;
 
+#ifdef PERL_FLEXIBLE_EXCEPTIONS
     PL_protect		= proto_perl->Tprotect;
+#endif
     PL_errors		= sv_dup_inc(proto_perl->Terrors);
     PL_av_fetch_sv	= Nullsv;
     PL_hv_fetch_sv	= Nullsv;

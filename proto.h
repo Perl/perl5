@@ -876,8 +876,10 @@ PERL_CALLCONV void	Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o);
 PERL_CALLCONV void	Perl_do_pmop_dump(pTHX_ I32 level, PerlIO *file, PMOP *pm);
 PERL_CALLCONV void	Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bool dumpops, STRLEN pvlim);
 PERL_CALLCONV void	Perl_magic_dump(pTHX_ MAGIC *mg);
+#if defined(PERL_FLEXIBLE_EXCEPTIONS)
 PERL_CALLCONV void*	Perl_default_protect(pTHX_ volatile JMPENV *je, int *excpt, protect_body_t body, ...);
 PERL_CALLCONV void*	Perl_vdefault_protect(pTHX_ volatile JMPENV *je, int *excpt, protect_body_t body, va_list *args);
+#endif
 PERL_CALLCONV void	Perl_reginitcolors(pTHX);
 PERL_CALLCONV char*	Perl_sv_2pv_nolen(pTHX_ SV* sv);
 PERL_CALLCONV char*	Perl_sv_2pvutf8_nolen(pTHX_ SV* sv);
@@ -1011,11 +1013,16 @@ STATIC void	S_validate_suid(pTHX_ char *, char*, int);
 #  if defined(IAMSUID)
 STATIC int	S_fd_on_nosuid_fs(pTHX_ int fd);
 #  endif
-STATIC void*	S_parse_body(pTHX_ va_list args);
-STATIC void*	S_run_body(pTHX_ va_list args);
-STATIC void*	S_call_body(pTHX_ va_list args);
-STATIC void	S_call_xbody(pTHX_ OP *myop, int is_eval);
-STATIC void*	S_call_list_body(pTHX_ va_list args);
+STATIC void*	S_parse_body(pTHX_ char **env, XSINIT_t xsinit);
+STATIC void*	S_run_body(pTHX_ I32 oldscope);
+STATIC void	S_call_body(pTHX_ OP *myop, int is_eval);
+STATIC void*	S_call_list_body(pTHX_ CV *cv);
+#if defined(PERL_FLEXIBLE_EXCEPTIONS)
+STATIC void*	S_vparse_body(pTHX_ va_list args);
+STATIC void*	S_vrun_body(pTHX_ va_list args);
+STATIC void*	S_vcall_body(pTHX_ va_list args);
+STATIC void*	S_vcall_list_body(pTHX_ va_list args);
+#endif
 #  if defined(USE_THREADS)
 STATIC struct perl_thread *	S_init_main_thread(pTHX);
 #  endif
@@ -1032,7 +1039,10 @@ STATIC int	S_div128(pTHX_ SV *pnum, bool *done);
 
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
 STATIC OP*	S_docatch(pTHX_ OP *o);
-STATIC void*	S_docatch_body(pTHX_ va_list args);
+STATIC void*	S_docatch_body(pTHX);
+#if defined(PERL_FLEXIBLE_EXCEPTIONS)
+STATIC void*	S_vdocatch_body(pTHX_ va_list args);
+#endif
 STATIC OP*	S_dofindlabel(pTHX_ OP *o, char *label, OP **opstack, OP **oplimit);
 STATIC void	S_doparseform(pTHX_ SV *sv);
 STATIC I32	S_dopoptoeval(pTHX_ I32 startingblock);

@@ -3589,6 +3589,7 @@ Perl_magic_dump(pTHXo_ MAGIC *mg)
 {
     ((CPerlObj*)pPerl)->Perl_magic_dump(mg);
 }
+#if defined(PERL_FLEXIBLE_EXCEPTIONS)
 
 #undef  Perl_default_protect
 void*
@@ -3609,6 +3610,7 @@ Perl_vdefault_protect(pTHXo_ volatile JMPENV *je, int *excpt, protect_body_t bod
 {
     return ((CPerlObj*)pPerl)->Perl_vdefault_protect(je, excpt, body, args);
 }
+#endif
 
 #undef  Perl_reginitcolors
 void
@@ -3864,12 +3866,16 @@ Perl_ptr_table_split(pTHXo_ PTR_TBL_t *tbl)
 #if defined(PERL_IN_PERL_C) || defined(PERL_DECL_PROT)
 #  if defined(IAMSUID)
 #  endif
+#if defined(PERL_FLEXIBLE_EXCEPTIONS)
+#endif
 #  if defined(USE_THREADS)
 #  endif
 #endif
 #if defined(PERL_IN_PP_C) || defined(PERL_DECL_PROT)
 #endif
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
+#if defined(PERL_FLEXIBLE_EXCEPTIONS)
+#endif
 #endif
 #if defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
 #endif

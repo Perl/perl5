@@ -688,7 +688,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		? s + (prog->minlen? cl_l : 0)
 		: (prog->float_substr ? check_at - start_shift + cl_l
 				      : strend) ;
-	char *startpos = sv ? strend - SvCUR(sv) : s;
+	char *startpos = sv && SvPOK(sv) ? strend - SvCUR(sv) : s;
 
 	t = s;
 	if (prog->reganch & ROPT_UTF8) {	
@@ -2663,10 +2663,10 @@ S_regmatch(pTHX_ regnode *prog)
 		    PL_regcc = cc;
 
 		    if (n >= cc->max) {	/* Maximum greed exceeded? */
-			if (ckWARN(WARN_UNSAFE) && n >= REG_INFTY 
+			if (ckWARN(WARN_REGEXP) && n >= REG_INFTY 
 			    && !(PL_reg_flags & RF_warned)) {
 			    PL_reg_flags |= RF_warned;
-			    Perl_warner(aTHX_ WARN_UNSAFE, "%s limit (%d) exceeded",
+			    Perl_warner(aTHX_ WARN_REGEXP, "%s limit (%d) exceeded",
 				 "Complex regular subexpression recursion",
 				 REG_INFTY - 1);
 			}
@@ -2715,10 +2715,10 @@ S_regmatch(pTHX_ regnode *prog)
 				      REPORT_CODE_OFF+PL_regindent*2, "")
 			);
 		}
-		if (ckWARN(WARN_UNSAFE) && n >= REG_INFTY 
+		if (ckWARN(WARN_REGEXP) && n >= REG_INFTY 
 			&& !(PL_reg_flags & RF_warned)) {
 		    PL_reg_flags |= RF_warned;
-		    Perl_warner(aTHX_ WARN_UNSAFE, "%s limit (%d) exceeded",
+		    Perl_warner(aTHX_ WARN_REGEXP, "%s limit (%d) exceeded",
 			 "Complex regular subexpression recursion",
 			 REG_INFTY - 1);
 		}

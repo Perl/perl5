@@ -2713,7 +2713,12 @@ _fixed_read(int fh, void *buf, unsigned cnt)
 	return -1;
     }
 
-    EnterCriticalSection(&(_pioinfo(fh)->lock));  /* lock file */
+    /*
+     * If lockinitflag is FALSE, assume fd is device
+     * lockinitflag is set to TRUE by open.
+     */
+    if (_pioinfo(fh)->lockinitflag)
+	EnterCriticalSection(&(_pioinfo(fh)->lock));  /* lock file */
 
     bytes_read = 0;                 /* nothing read yet */
     buffer = (char*)buf;
@@ -2861,7 +2866,8 @@ _fixed_read(int fh, void *buf, unsigned cnt)
     }
 
 functionexit:	
-    LeaveCriticalSection(&(_pioinfo(fh)->lock));    /* unlock file */
+    if (_pioinfo(fh)->lockinitflag)
+	LeaveCriticalSection(&(_pioinfo(fh)->lock));    /* unlock file */
 
     return bytes_read;
 }
@@ -3123,6 +3129,7 @@ win32_spawnvp(int mode, const char *cmdname, const char *const *argv)
     int ret;
     void* env;
     char* dir;
+    child_IO_table tbl;
     STARTUPINFO StartupInfo;
     PROCESS_INFORMATION ProcessInformation;
     DWORD create = 0;
@@ -3151,9 +3158,10 @@ win32_spawnvp(int mode, const char *cmdname, const char *const *argv)
     }
     memset(&StartupInfo,0,sizeof(StartupInfo));
     StartupInfo.cb = sizeof(StartupInfo);
-    StartupInfo.hStdInput  = GetStdHandle(STD_INPUT_HANDLE);
-    StartupInfo.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
-    StartupInfo.hStdError  = GetStdHandle(STD_ERROR_HANDLE);
+    PerlEnv_get_child_IO(&tbl);
+    StartupInfo.hStdInput  = tbl.childStdIn;
+    StartupInfo.hStdOutput = tbl.childStdOut;
+    StartupInfo.hStdError  = tbl.childStdErr;
     if (StartupInfo.hStdInput != INVALID_HANDLE_VALUE &&
 	StartupInfo.hStdOutput != INVALID_HANDLE_VALUE &&
 	StartupInfo.hStdError != INVALID_HANDLE_VALUE)
@@ -3963,6 +3971,15 @@ Perl_win32_init(int *argcp, char ***argvp)
 #endif
     MALLOC_INIT;
 }
+
+void
+win32_get_child_IO(child_IO_table* ptbl)
+{
+    ptbl->childStdIn	= GetStdHandle(STD_INPUT_HANDLE);
+    ptbl->childStdOut	= GetStdHandle(STD_OUTPUT_HANDLE);
+    ptbl->childStdErr	= GetStdHandle(STD_ERROR_HANDLE);
+}
+
 
 #ifdef USE_ITHREADS
 

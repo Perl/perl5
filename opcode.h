@@ -1477,7 +1477,7 @@ EXT U32 PL_opargs[] = {
 	0x0001368c,	/* ref */
 	0x00122804,	/* bless */
 	0x00001608,	/* backtick */
-	0x00132808,	/* glob */
+	0x00012808,	/* glob */
 	0x00001608,	/* readline */
 	0x00001608,	/* rcatline */
 	0x00002204,	/* regcmaybe */
@@ -1725,7 +1725,7 @@ EXT U32 PL_opargs[] = {
 	0x0002291c,	/* link */
 	0x0002291c,	/* symlink */
 	0x0001368c,	/* readlink */
-	0x0002291c,	/* mkdir */
+	0x0012291c,	/* mkdir */
 	0x0001379c,	/* rmdir */
 	0x0002c814,	/* open_dir */
 	0x0000d600,	/* readdir */

@@ -155,7 +155,9 @@ perl_construct(pTHXx)
 	thr = init_main_thread();
 #endif /* USE_THREADS */
 
+#ifdef PERL_FLEXIBLE_EXCEPTIONS
 	PL_protect = MEMBER_TO_FPTR(Perl_default_protect); /* for exceptions */
+#endif
 
 	PL_curcop = &PL_compiling;	/* needed by ckWARN, right away */
 
@@ -800,13 +802,20 @@ setuid perl scripts securely.\n");
     oldscope = PL_scopestack_ix;
     PL_dowarn = G_WARN_OFF;
 
-    CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_parse_body),
-		env, xsinit);
+#ifdef PERL_FLEXIBLE_EXCEPTIONS
+    CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_vparse_body), env, xsinit);
+#else
+    JMPENV_PUSH(ret);
+#endif
     switch (ret) {
     case 0:
+#ifndef PERL_FLEXIBLE_EXCEPTIONS
+	parse_body(env,xsinit);
+#endif
 	if (PL_checkav)
 	    call_list(oldscope, PL_checkav);
-	return 0;
+	ret = 0;
+	break;
     case 1:
 	STATUS_ALL_FAILURE;
 	/* FALL THROUGH */
@@ -818,21 +827,34 @@ setuid perl scripts securely.\n");
 	PL_curstash = PL_defstash;
 	if (PL_checkav)
 	    call_list(oldscope, PL_checkav);
-	return STATUS_NATIVE_EXPORT;
+	ret = STATUS_NATIVE_EXPORT;
+	break;
     case 3:
 	PerlIO_printf(Perl_error_log, "panic: top_env\n");
-	return 1;
+	ret = 1;
+	break;
     }
-    return 0;
+    JMPENV_POP;
+    return ret;
 }
 
+#ifdef PERL_FLEXIBLE_EXCEPTIONS
 STATIC void *
-S_parse_body(pTHX_ va_list args)
+S_vparse_body(pTHX_ va_list args)
+{
+    char **env = va_arg(args, char**);
+    XSINIT_t xsinit = va_arg(args, XSINIT_t);
+
+    return parse_body(env, xsinit);
+}
+#endif
+
+STATIC void *
+S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 {
     dTHR;
     int argc = PL_origargc;
     char **argv = PL_origargv;
-    char **env = va_arg(args, char**);
     char *scriptname = NULL;
     int fdscript = -1;
     VOL bool dosearch = FALSE;
@@ -841,8 +863,6 @@ S_parse_body(pTHX_ va_list args)
     register SV *sv;
     register char *s;
     char *cddir = Nullch;
-
-    XSINIT_t xsinit = va_arg(args, XSINIT_t);
 
     sv_setpvn(PL_linestr,"",0);
     sv = newSVpvn("",0);		/* first used for -I flags */
@@ -1230,7 +1250,7 @@ perl_run(pTHXx)
 {
     dTHR;
     I32 oldscope;
-    int ret;
+    int ret = 0;
     dJMPENV;
 #ifdef USE_THREADS
     dTHX;
@@ -1238,14 +1258,23 @@ perl_run(pTHXx)
 
     oldscope = PL_scopestack_ix;
 
+#ifdef PERL_FLEXIBLE_EXCEPTIONS
  redo_body:
-    CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_run_body), oldscope);
+    CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_vrun_body), oldscope);
+#else
+    JMPENV_PUSH(ret);
+#endif
     switch (ret) {
     case 1:
 	cxstack_ix = -1;		/* start context stack again */
 	goto redo_body;
-    case 0:  /* normal completion */
-    case 2:  /* my_exit() */
+    case 0:				/* normal completion */
+#ifndef PERL_FLEXIBLE_EXCEPTIONS
+ redo_body:
+	run_body(oldscope);
+#endif
+	/* FALL THROUGH */
+    case 2:				/* my_exit() */
 	while (PL_scopestack_ix > oldscope)
 	    LEAVE;
 	FREETMPS;
@@ -1256,7 +1285,8 @@ perl_run(pTHXx)
 	if (PerlEnv_getenv("PERL_DEBUG_MSTATS"))
 	    dump_mstats("after execution:  ");
 #endif
-	return STATUS_NATIVE_EXPORT;
+	ret = STATUS_NATIVE_EXPORT;
+	break;
     case 3:
 	if (PL_restartop) {
 	    POPSTACK_TO(PL_mainstack);
@@ -1264,18 +1294,29 @@ perl_run(pTHXx)
 	}
 	PerlIO_printf(Perl_error_log, "panic: restartop\n");
 	FREETMPS;
-	return 1;
+	ret = 1;
+	break;
     }
 
-    /* NOTREACHED */
-    return 0;
+    JMPENV_POP;
+    return ret;
 }
 
+#ifdef PERL_FLEXIBLE_EXCEPTIONS
 STATIC void *
-S_run_body(pTHX_ va_list args)
+S_vrun_body(pTHX_ va_list args)
+{
+    I32 oldscope = va_arg(args, I32);
+
+    return run_body(oldscope);
+}
+#endif
+
+
+STATIC void *
+S_run_body(pTHX_ I32 oldscope)
 {
     dTHR;
-    I32 oldscope = va_arg(args, I32);
 
     DEBUG_r(PerlIO_printf(Perl_debug_log, "%s $` $& $' support.\n",
                     PL_sawampersand ? "Enabling" : "Omitting"));
@@ -1543,7 +1584,7 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
 
     if (!(flags & G_EVAL)) {
 	CATCH_SET(TRUE);
-	call_xbody((OP*)&myop, FALSE);
+	call_body((OP*)&myop, FALSE);
 	retval = PL_stack_sp - (PL_stack_base + oldmark);
 	CATCH_SET(oldcatch);
     }
@@ -1571,11 +1612,19 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
 	}
 	PL_markstack_ptr++;
 
-  redo_body:
-	CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_call_body),
+#ifdef PERL_FLEXIBLE_EXCEPTIONS
+ redo_body:
+	CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_vcall_body),
 		    (OP*)&myop, FALSE);
+#else
+	JMPENV_PUSH(ret);
+#endif
 	switch (ret) {
 	case 0:
+#ifndef PERL_FLEXIBLE_EXCEPTIONS
+ redo_body:
+	    call_body((OP*)&myop, FALSE);
+#endif
 	    retval = PL_stack_sp - (PL_stack_base + oldmark);
 	    if (!(flags & G_KEEPERR))
 		sv_setpv(ERRSV,"");
@@ -1587,6 +1636,7 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
 	    /* my_exit() was called */
 	    PL_curstash = PL_defstash;
 	    FREETMPS;
+	    JMPENV_POP;
 	    if (PL_statusvalue && !(PL_exit_flags & PERL_EXIT_EXPECTED))
 		Perl_croak(aTHX_ "Callback called exit");
 	    my_exit_jump();
@@ -1620,6 +1670,7 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
 	    PL_curpm = newpm;
 	    LEAVE;
 	}
+	JMPENV_POP;
     }
 
     if (flags & G_DISCARD) {
@@ -1632,18 +1683,20 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
     return retval;
 }
 
+#ifdef PERL_FLEXIBLE_EXCEPTIONS
 STATIC void *
-S_call_body(pTHX_ va_list args)
+S_vcall_body(pTHX_ va_list args)
 {
     OP *myop = va_arg(args, OP*);
     int is_eval = va_arg(args, int);
 
-    call_xbody(myop, is_eval);
+    call_body(myop, is_eval);
     return NULL;
 }
+#endif
 
 STATIC void
-S_call_xbody(pTHX_ OP *myop, int is_eval)
+S_call_body(pTHX_ OP *myop, int is_eval)
 {
     dTHR;
 
@@ -1703,11 +1756,19 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
     if (flags & G_KEEPERR)
 	myop.op_flags |= OPf_SPECIAL;
 
+#ifdef PERL_FLEXIBLE_EXCEPTIONS
  redo_body:
-    CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_call_body),
+    CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_vcall_body),
 		(OP*)&myop, TRUE);
+#else
+    JMPENV_PUSH(ret);
+#endif
     switch (ret) {
     case 0:
+#ifndef PERL_FLEXIBLE_EXCEPTIONS
+ redo_body:
+	call_body((OP*)&myop,TRUE);
+#endif
 	retval = PL_stack_sp - (PL_stack_base + oldmark);
 	if (!(flags & G_KEEPERR))
 	    sv_setpv(ERRSV,"");
@@ -1719,6 +1780,7 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
 	/* my_exit() was called */
 	PL_curstash = PL_defstash;
 	FREETMPS;
+	JMPENV_POP;
 	if (PL_statusvalue && !(PL_exit_flags & PERL_EXIT_EXPECTED))
 	    Perl_croak(aTHX_ "Callback called exit");
 	my_exit_jump();
@@ -1739,6 +1801,7 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
 	break;
     }
 
+    JMPENV_POP;
     if (flags & G_DISCARD) {
 	PL_stack_sp = PL_stack_base + oldmark;
 	retval = 0;
@@ -3373,9 +3436,16 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
     while (AvFILL(paramList) >= 0) {
 	cv = (CV*)av_shift(paramList);
 	SAVEFREESV(cv);
-	CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_call_list_body), cv);
+#ifdef PERL_FLEXIBLE_EXCEPTIONS
+	CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_vcall_list_body), cv);
+#else
+	JMPENV_PUSH(ret);
+#endif
 	switch (ret) {
 	case 0:
+#ifndef PERL_FLEXIBLE_EXCEPTIONS
+	    call_list_body(cv);
+#endif
 	    atsv = ERRSV;
 	    (void)SvPV(atsv, len);
 	    if (len) {
@@ -3392,6 +3462,7 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 				   : "END");
 		while (PL_scopestack_ix > oldscope)
 		    LEAVE;
+		JMPENV_POP;
 		Perl_croak(aTHX_ "%s", SvPVx(atsv, n_a));
 	    }
 	    break;
@@ -3406,6 +3477,7 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 	    PL_curstash = PL_defstash;
 	    PL_curcop = &PL_compiling;
 	    CopLINE_set(PL_curcop, oldline);
+	    JMPENV_POP;
 	    if (PL_statusvalue && !(PL_exit_flags & PERL_EXIT_EXPECTED)) {
 		if (paramList == PL_beginav)
 		    Perl_croak(aTHX_ "BEGIN failed--compilation aborted");
@@ -3427,15 +3499,22 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 	    FREETMPS;
 	    break;
 	}
+	JMPENV_POP;
     }
 }
 
+#ifdef PERL_FLEXIBLE_EXCEPTIONS
 STATIC void *
-S_call_list_body(pTHX_ va_list args)
+S_vcall_list_body(pTHX_ va_list args)
 {
-    dTHR;
     CV *cv = va_arg(args, CV*);
+    return call_list_body(cv);
+}
+#endif
 
+STATIC void *
+S_call_list_body(pTHX_ CV *cv)
+{
     PUSHMARK(PL_stack_sp);
     call_sv((SV*)cv, G_EVAL|G_DISCARD);
     return NULL;

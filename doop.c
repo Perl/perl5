@@ -956,6 +956,7 @@ Perl_do_chop(pTHX_ register SV *astr, register SV *sv)
 	sv_setpvn(astr, s, 1);
 	*s = '\0';
 	SvCUR_set(sv, len);
+	SvUTF8_off(sv);
 	SvNIOK_off(sv);
     }
     else
