@@ -18,8 +18,8 @@ if [ "$xxOsRevMajor" -ge 10 ]; then
     # up to date with new CPU/OS releases.
     xxcpu=`getconf CPU_VERSION`; # Get the number.
     xxcpu=`printf '0x%x' $xxcpu`; # convert to hex
-    archname=`sed -n -e "s/^#[ \t]*define[ \t]*CPU_//p" /usr/include/sys/unistd.h |
-	sed -n -e "s/[ \t]*$xxcpu[ \t].*//p" |
+    archname=`sed -n -e "s/^#[[:space:]]*define[[:space:]]*CPU_//p" /usr/include/sys/unistd.h |
+	sed -n -e "s/[[:space:]]*$xxcpu[[:space:]].*//p" |
 	sed -e s/_RISC/-RISC/ -e s/HP_// -e s/_/./ -e "s/[[:space:]]*//g"`;
 else
     # This system is running <= 9.x
