@@ -770,7 +770,7 @@ PERL_CALLCONV I32	Perl_sv_cmp_locale(pTHX_ SV* sv1, SV* sv2);
 #if defined(USE_LOCALE_COLLATE)
 PERL_CALLCONV char*	Perl_sv_collxfrm(pTHX_ SV* sv, STRLEN* nxp);
 #endif
-PERL_CALLCONV OP*	Perl_sv_compile_2op(pTHX_ SV* sv, OP** startp, char* code, AV** avp);
+PERL_CALLCONV OP*	Perl_sv_compile_2op(pTHX_ SV* sv, OP** startp, char* code, PAD** padp);
 PERL_CALLCONV int	Perl_getcwd_sv(pTHX_ SV* sv);
 PERL_CALLCONV void	Perl_sv_dec(pTHX_ SV* sv);
 PERL_CALLCONV void	Perl_sv_dump(pTHX_ SV* sv);
@@ -1140,7 +1140,7 @@ STATIC I32	S_dopoptoloop(pTHX_ I32 startingblock);
 STATIC I32	S_dopoptosub(pTHX_ I32 startingblock);
 STATIC I32	S_dopoptosub_at(pTHX_ PERL_CONTEXT* cxstk, I32 startingblock);
 STATIC void	S_save_lines(pTHX_ AV *array, SV *sv);
-STATIC OP*	S_doeval(pTHX_ int gimme, OP** startop);
+STATIC OP*	S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq);
 STATIC PerlIO *	S_doopen_pmc(pTHX_ const char *name, const char *mode);
 STATIC bool	S_path_is_absolute(pTHX_ char *name);
 #endif
@@ -1388,7 +1388,7 @@ STATIC void	S_deb_stack_n(pTHX_ SV** stack_base, I32 stack_min, I32 stack_max, I
 #endif
 
 PERL_CALLCONV PADLIST*	Perl_pad_new(pTHX_ int flags);
-PERL_CALLCONV void	Perl_pad_undef(pTHX_ CV* cv, CV* outercv);
+PERL_CALLCONV void	Perl_pad_undef(pTHX_ CV* cv);
 PERL_CALLCONV PADOFFSET	Perl_pad_add_name(pTHX_ char *name, HV* typestash, HV* ourstash, bool clone);
 PERL_CALLCONV PADOFFSET	Perl_pad_add_anon(pTHX_ SV* sv, OPCODE op_type);
 PERL_CALLCONV void	Perl_pad_check_dup(pTHX_ char* name, bool is_our, HV* ourstash);
@@ -1403,12 +1403,13 @@ PERL_CALLCONV void	Perl_pad_fixup_inner_anons(pTHX_ PADLIST *padlist, CV *old_cv
 PERL_CALLCONV void	Perl_pad_push(pTHX_ PADLIST *padlist, int depth, int has_args);
 
 #if defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
-STATIC PADOFFSET	S_pad_findlex(pTHX_ char* name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix, I32 saweval, U32 flags);
+STATIC PADOFFSET	S_pad_findlex(pTHX_ char* name, PADOFFSET newoff, CV* innercv);
 #  if defined(DEBUGGING)
 STATIC void	S_cv_dump(pTHX_ CV *cv, char *title);
 #  endif
 STATIC CV*	S_cv_clone2(pTHX_ CV *proto, CV *outside);
 #endif
+PERL_CALLCONV CV*	Perl_find_runcv(pTHX_ U32 *db_seqp);
 
 
 

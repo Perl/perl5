@@ -5265,7 +5265,9 @@ S_pending_ident(pTHX)
             return PRIVATEREF;
         }
 #endif /* USE_5005THREADS */
-        if ((tmp = pad_findmy(PL_tokenbuf)) != NOT_IN_PAD) {
+	if (!PL_in_my)
+	    tmp = pad_findmy(PL_tokenbuf);
+        if (tmp != NOT_IN_PAD) {
             /* might be an "our" variable" */
             if (PAD_COMPNAME_FLAGS(tmp) & SVpad_OUR) {
                 /* build ops for a bareword */
@@ -7635,6 +7637,7 @@ Perl_start_subparse(pTHX_ I32 is_format, U32 flags)
     PL_subline = CopLINE(PL_curcop);
     CvPADLIST(PL_compcv) = pad_new(padnew_SAVE|padnew_SAVESUB);
     CvOUTSIDE(PL_compcv) = (CV*)SvREFCNT_inc(outsidecv);
+    CvOUTSIDE_SEQ(PL_compcv) = PL_cop_seqmax;
 #ifdef USE_5005THREADS
     CvOWNER(PL_compcv) = 0;
     New(666, CvMUTEXP(PL_compcv), 1, perl_mutex);

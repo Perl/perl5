@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-print "1..6\n";
+print "1..7\n";
 
 {
     package TieAll;
@@ -48,3 +48,13 @@ is(TieAll->calls, '', 'our @x has no runtime effect');
 
 {our (@x);}
 is(TieAll->calls, '', 'our (@x) has no runtime effect');
+
+
+$y = 1;
+{
+    my $y = 2;
+    {
+	our $y = $y;
+	is($y, 2, 'our shouldnt be visible until introduced')
+    }
+}

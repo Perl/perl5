@@ -206,7 +206,7 @@ do_test(13,
   RV = $ADDR
   SV = PVCV\\($ADDR\\) at $ADDR
     REFCNT = 2
-    FLAGS = \\(PADBUSY,PADMY,POK,pPOK,ANON\\)
+    FLAGS = \\(PADBUSY,PADMY,POK,pPOK,ANON,WEAKOUTSIDE\\)
     IV = 0
     NV = 0
     PROTOTYPE = ""
@@ -220,7 +220,8 @@ do_test(13,
     DEPTH = 0
 (?:    MUTEXP = $ADDR
     OWNER = $ADDR
-)?    FLAGS = 0x4
+)?    FLAGS = 0x404
+    OUTSIDE_SEQ = \\d+
     PADLIST = $ADDR
     PADNAME = $ADDR\\($ADDR\\) PAD = $ADDR\\($ADDR\\)
     OUTSIDE = $ADDR \\(MAIN\\)');
@@ -247,11 +248,12 @@ do_test(14,
 (?:    MUTEXP = $ADDR
     OWNER = $ADDR
 )?    FLAGS = 0x0
+    OUTSIDE_SEQ = \\d+
     PADLIST = $ADDR
     PADNAME = $ADDR\\($ADDR\\) PAD = $ADDR\\($ADDR\\)
-       \\d+\\. $ADDR<\\d+>      \\(\\d+,\\d+\\) "\\$pattern"
-      \\d+\\. $ADDR<\\d+> FAKE \\(\\d+,\\d+\\) "\\$DEBUG"
-      \\d+\\. $ADDR<\\d+>      \\(\\d+,\\d+\\) "\\$dump"
+       \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$pattern"
+      \\d+\\. $ADDR<\\d+> FAKE "\\$DEBUG"
+      \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$dump"
     OUTSIDE = $ADDR \\(MAIN\\)');
 
 do_test(15,

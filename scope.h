@@ -162,15 +162,9 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
 
 #define SAVECOMPPAD() \
     STMT_START {						\
-	if (PL_comppad && PL_curpad == AvARRAY(PL_comppad)) {	\
-	    SSCHECK(2);						\
-	    SSPUSHPTR((SV*)PL_comppad);				\
-	    SSPUSHINT(SAVEt_COMPPAD);				\
-	}							\
-	else {							\
-	    SAVEVPTR(PL_curpad);				\
-	    SAVESPTR(PL_comppad);				\
-	}							\
+	SSCHECK(2);						\
+	SSPUSHPTR((SV*)PL_comppad);				\
+	SSPUSHINT(SAVEt_COMPPAD);				\
     } STMT_END
 
 #ifdef USE_ITHREADS

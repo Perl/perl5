@@ -2822,13 +2822,13 @@ S_regmatch(pTHX_ regnode *prog)
 	    dSP;
 	    OP_4tree *oop = PL_op;
 	    COP *ocurcop = PL_curcop;
-	    SV **ocurpad = PL_curpad;
+	    PAD *old_comppad;
 	    SV *ret;
 	
 	    n = ARG(scan);
 	    PL_op = (OP_4tree*)PL_regdata->data[n];
 	    DEBUG_r( PerlIO_printf(Perl_debug_log, "  re_eval 0x%"UVxf"\n", PTR2UV(PL_op)) );
-	    PL_curpad = AvARRAY((AV*)PL_regdata->data[n + 2]);
+	    PAD_SAVE_LOCAL(old_comppad, (PAD*)PL_regdata->data[n + 2]);
 	    PL_regendp[0] = PL_reg_magic->mg_len = locinput - PL_bostr;
 
 	    {
@@ -2844,7 +2844,7 @@ S_regmatch(pTHX_ regnode *prog)
 	    }
 
 	    PL_op = oop;
-	    PL_curpad = ocurpad;
+	    PAD_RESTORE_LOCAL(old_comppad);
 	    PL_curcop = ocurcop;
 	    if (logical) {
 		if (logical == 2) {	/* Postponed subexpression. */

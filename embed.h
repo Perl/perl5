@@ -2139,6 +2139,9 @@
 #define cv_clone2		S_cv_clone2
 #endif
 #endif
+#ifdef PERL_CORE
+#define find_runcv		Perl_find_runcv
+#endif
 #define ck_anoncode		Perl_ck_anoncode
 #define ck_bitop		Perl_ck_bitop
 #define ck_concat		Perl_ck_concat
@@ -4032,7 +4035,7 @@
 #define save_lines(a,b)		S_save_lines(aTHX_ a,b)
 #endif
 #ifdef PERL_CORE
-#define doeval(a,b)		S_doeval(aTHX_ a,b)
+#define doeval(a,b,c,d)		S_doeval(aTHX_ a,b,c,d)
 #endif
 #ifdef PERL_CORE
 #define doopen_pmc(a,b)		S_doopen_pmc(aTHX_ a,b)
@@ -4567,7 +4570,7 @@
 #define pad_new(a)		Perl_pad_new(aTHX_ a)
 #endif
 #ifdef PERL_CORE
-#define pad_undef(a,b)		Perl_pad_undef(aTHX_ a,b)
+#define pad_undef(a)		Perl_pad_undef(aTHX_ a)
 #endif
 #ifdef PERL_CORE
 #define pad_add_name(a,b,c,d)	Perl_pad_add_name(aTHX_ a,b,c,d)
@@ -4600,7 +4603,7 @@
 #endif
 #if defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
-#define pad_findlex(a,b,c,d,e,f,g)	S_pad_findlex(aTHX_ a,b,c,d,e,f,g)
+#define pad_findlex(a,b,c)	S_pad_findlex(aTHX_ a,b,c)
 #endif
 #  if defined(DEBUGGING)
 #ifdef PERL_CORE
@@ -4610,6 +4613,9 @@
 #ifdef PERL_CORE
 #define cv_clone2(a,b)		S_cv_clone2(aTHX_ a,b)
 #endif
+#endif
+#ifdef PERL_CORE
+#define find_runcv(a)		Perl_find_runcv(aTHX_ a)
 #endif
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
 #define ck_bitop(a)		Perl_ck_bitop(aTHX_ a)

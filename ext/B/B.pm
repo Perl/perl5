@@ -843,6 +843,8 @@ IoIFP($io) == PerlIO_stdin() ).
 
 =item OUTSIDE
 
+=item OUTSIDE_SEQ
+
 =item XSUB
 
 =item XSUBANY

@@ -5,6 +5,11 @@
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
  *
+ * Control ops (cops) are one of the three ops OP_NEXTSTATE, OP_DBSTATE,
+ * and OP_SETSTATE that (loosely speaking) separate statements. They hold
+ * imformation important for lexical state and error reporting. At run
+ * time, PL_curcop is set to point to the most recently executed cop,
+ * and thus can be used to determine our current state.
  */
 
 struct cop {
@@ -114,7 +119,7 @@ struct block_sub {
     long	olddepth;
     U8		hasargs;
     U8		lval;		/* XXX merge lval and hasargs? */
-    PAD		oldcurpad;
+    PAD		*oldcomppad;
 };
 
 /* base for the next two macros. Don't use directly */
@@ -230,7 +235,7 @@ struct block_loop {
     OP *	last_op;
 #ifdef USE_ITHREADS
     void *	iterdata;
-    PAD		oldcurpad;
+    PAD		*oldcomppad;
 #else
     SV **	itervar;
 #endif

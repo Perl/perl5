@@ -9714,10 +9714,11 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	  CvDEPTH(dstr) = 0;
 	}
 	PAD_DUP(CvPADLIST(dstr), CvPADLIST(sstr), param);
-	if (!CvANON(sstr) || CvCLONED(sstr))
-	    CvOUTSIDE(dstr)	= cv_dup_inc(CvOUTSIDE(sstr), param);
-	else
-	    CvOUTSIDE(dstr)	= cv_dup(CvOUTSIDE(sstr), param);
+	CvOUTSIDE_SEQ(dstr) = CvOUTSIDE_SEQ(sstr);
+	CvOUTSIDE(dstr)	=
+		CvWEAKOUTSIDE(sstr)
+			? cv_dup(    CvOUTSIDE(sstr), param)
+			: cv_dup_inc(CvOUTSIDE(sstr), param);
 	CvFLAGS(dstr)	= CvFLAGS(sstr);
 	CvFILE(dstr) = CvXSUB(sstr) ? CvFILE(sstr) : SAVEPV(CvFILE(sstr));
 	break;
@@ -9795,9 +9796,9 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 		ncx->blk_loop.iterdata	= (CxPADLOOP(cx)
 					   ? cx->blk_loop.iterdata
 					   : gv_dup((GV*)cx->blk_loop.iterdata, param));
-		ncx->blk_loop.oldcurpad
-		    = (SV**)ptr_table_fetch(PL_ptr_table,
-					    cx->blk_loop.oldcurpad);
+		ncx->blk_loop.oldcomppad
+		    = (PAD*)ptr_table_fetch(PL_ptr_table,
+					    cx->blk_loop.oldcomppad);
 		ncx->blk_loop.itersave	= sv_dup_inc(cx->blk_loop.itersave, param);
 		ncx->blk_loop.iterlval	= sv_dup_inc(cx->blk_loop.iterlval, param);
 		ncx->blk_loop.iterary	= av_dup_inc(cx->blk_loop.iterary, param);

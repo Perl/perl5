@@ -2816,8 +2816,8 @@ try_autoload:
 	CvDEPTH(cv)++;
 	/* XXX This would be a natural place to set C<PL_compcv = cv> so
 	 * that eval'' ops within this sub know the correct lexical space.
-	 * Owing the speed considerations, we choose to search for the cv
-	 * in doeval() instead.
+	 * Owing the speed considerations, we choose instead to search for
+	 * the cv using find_runcv() when calling doeval().
 	 */
 	if (CvDEPTH(cv) < 2)
 	    (void)SvREFCNT_inc(cv);

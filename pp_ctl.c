@@ -2557,7 +2557,7 @@ S_docatch(pTHX_ OP *o)
 }
 
 OP *
-Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, AV** avp)
+Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, PAD** padp)
 /* sv Text to convert to OP tree. */
 /* startop op_free() this to undo. */
 /* code Short string id of the caller. */
@@ -2572,6 +2572,8 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, AV** avp)
     char tbuf[TYPE_DIGITS(long) + 12 + 10];
     char *tmpbuf = tbuf;
     char *safestr;
+    int runtime;
+    CV* runcv = Nullcv;	/* initialise to avoid compiler warnings */
 
     ENTER;
     lex_start(sv);
@@ -2610,19 +2612,29 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, AV** avp)
 #endif
     PL_hints &= HINT_UTF8;
 
+    /* we get here either during compilation, or via pp_regcomp at runtime */
+    runtime = PL_op && (PL_op->op_type == OP_REGCOMP);
+    if (runtime)
+	runcv = find_runcv(NULL);
+
     PL_op = &dummy;
     PL_op->op_type = OP_ENTEREVAL;
     PL_op->op_flags = 0;			/* Avoid uninit warning. */
     PUSHBLOCK(cx, CXt_EVAL|(PL_curcop == &PL_compiling ? 0 : CXp_REAL), SP);
     PUSHEVAL(cx, 0, Nullgv);
-    rop = doeval(G_SCALAR, startop);
+
+    if (runtime)
+	rop = doeval(G_SCALAR, startop, runcv, PL_curcop->cop_seq);
+    else
+	rop = doeval(G_SCALAR, startop, PL_compcv, PL_cop_seqmax);
     POPBLOCK(cx,PL_curpm);
     POPEVAL(cx);
 
     (*startop)->op_type = OP_NULL;
     (*startop)->op_ppaddr = PL_ppaddr[OP_NULL];
     lex_end();
-    *avp = (AV*)SvREFCNT_inc(PL_comppad);
+    /* XXX DAPM do this properly one year */
+    *padp = (AV*)SvREFCNT_inc(PL_comppad);
     LEAVE;
     if (PL_curcop == &PL_compiling)
 	PL_compiling.op_private = (U8)(PL_hints & HINT_PRIVATE_MASK);
@@ -2632,31 +2644,66 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, AV** avp)
     return rop;
 }
 
+
+/*
+=for apidoc find_runcv
+
+Locate the CV corresponding to the currently executing sub or eval.
+If db_seqp is non_null, skip CVs that are in the DB package and populate
+*db_seqp with the cop sequence number at the point that the DB:: code was
+entered. (allows debuggers to eval in the scope of the breakpoint rather
+than in in the scope of the debuger itself).
+
+=cut
+*/
+
+CV*
+Perl_find_runcv(pTHX_ U32 *db_seqp)
+{
+    I32		 ix;
+    PERL_SI	 *si;
+    PERL_CONTEXT *cx;
+
+    if (db_seqp)
+	*db_seqp = PL_curcop->cop_seq;
+    for (si = PL_curstackinfo; si; si = si->si_prev) {
+	for (ix = si->si_cxix; ix >= 0; ix--) {
+	    cx = &(si->si_cxstack[ix]);
+	    if (CxTYPE(cx) == CXt_SUB || CxTYPE(cx) == CXt_FORMAT) {
+		CV *cv = cx->blk_sub.cv;
+		/* skip DB:: code */
+		if (db_seqp && PL_debstash && CvSTASH(cv) == PL_debstash) {
+		    *db_seqp = cx->blk_oldcop->cop_seq;
+		    continue;
+		}
+		return cv;
+	    }
+	    else if (CxTYPE(cx) == CXt_EVAL && !CxTRYBLOCK(cx))
+		return PL_compcv;
+	}
+    }
+    return PL_main_cv;
+}
+
+
+/* Compile a require/do, an eval '', or a /(?{...})/.
+ * In the last case, startop is non-null, and contains the address of
+ * a pointer that should be set to the just-compiled code.
+ * outside is the lexically enclosing CV (if any) that invoked us.
+ */
+
 /* With USE_5005THREADS, eval_owner must be held on entry to doeval */
 STATIC OP *
-S_doeval(pTHX_ int gimme, OP** startop)
+S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 {
     dSP;
     OP *saveop = PL_op;
-    CV *caller;
-    I32 i;
 
     PL_in_eval = ((saveop && saveop->op_type == OP_REQUIRE)
 		  ? (EVAL_INREQUIRE | (PL_in_eval & EVAL_INEVAL))
 		  : EVAL_INEVAL);
 
     PUSHMARK(SP);
-
-    caller = PL_compcv;
-    for (i = cxstack_ix - 1; i >= 0; i--) {
-	PERL_CONTEXT *cx = &cxstack[i];
-	if (CxTYPE(cx) == CXt_EVAL)
-	    break;
-	else if (CxTYPE(cx) == CXt_SUB || CxTYPE(cx) == CXt_FORMAT) {
-	    caller = cx->blk_sub.cv;
-	    break;
-	}
-    }
 
     SAVESPTR(PL_compcv);
     PL_compcv = (CV*)NEWSV(1104,0);
@@ -2671,15 +2718,13 @@ S_doeval(pTHX_ int gimme, OP** startop)
     MUTEX_INIT(CvMUTEXP(PL_compcv));
 #endif /* USE_5005THREADS */
 
+    CvOUTSIDE_SEQ(PL_compcv) = seq;
+    CvOUTSIDE(PL_compcv) = (CV*)SvREFCNT_inc(outside);
+
     /* set up a scratch pad */
 
     CvPADLIST(PL_compcv) = pad_new(padnew_SAVE);
 
-    if (!saveop ||
-	(saveop->op_type != OP_REQUIRE && saveop->op_type != OP_DOFILE))
-    {
-	CvOUTSIDE(PL_compcv) = (CV*)SvREFCNT_inc(caller);
-    }
 
     SAVEMORTALIZESV(PL_compcv);	/* must remain until end of current statement */
 
@@ -2754,8 +2799,6 @@ S_doeval(pTHX_ int gimme, OP** startop)
     CopLINE_set(&PL_compiling, 0);
     if (startop) {
 	*startop = PL_eval_root;
-	SvREFCNT_dec(CvOUTSIDE(PL_compcv));
-	CvOUTSIDE(PL_compcv) = Nullcv;
     } else
 	SAVEFREEOP(PL_eval_root);
     if (gimme & G_VOID)
@@ -3193,7 +3236,7 @@ PP(pp_require)
     encoding = PL_encoding;
     PL_encoding = Nullsv;
 
-    op = DOCATCH(doeval(gimme, NULL));
+    op = DOCATCH(doeval(gimme, NULL, Nullcv, PL_curcop->cop_seq));
     
     /* Restore encoding. */
     PL_encoding = encoding;
@@ -3217,6 +3260,8 @@ PP(pp_entereval)
     char *safestr;
     STRLEN len;
     OP *ret;
+    CV* runcv;
+    U32 seq;
 
     if (!SvPV(sv,len))
 	RETPUSHUNDEF;
@@ -3264,6 +3309,12 @@ PP(pp_entereval)
         PL_compiling.cop_io = newSVsv(PL_curcop->cop_io);
         SAVEFREESV(PL_compiling.cop_io);
     }
+    /* special case: an eval '' executed within the DB package gets lexically
+     * placed in the first non-DB CV rather than the current CV - this
+     * allows the debugger to execute code, find lexicals etc, in the
+     * scope of the code being debugged. Passing &seq gets find_runcv
+     * to do the dirty work for us */
+    runcv = find_runcv(&seq);
 
     push_return(PL_op->op_next);
     PUSHBLOCK(cx, (CXt_EVAL|CXp_REAL), SP);
@@ -3282,7 +3333,7 @@ PP(pp_entereval)
     PL_eval_owner = thr;
     MUTEX_UNLOCK(&PL_eval_mutex);
 #endif /* USE_5005THREADS */
-    ret = doeval(gimme, NULL);
+    ret = doeval(gimme, NULL, runcv, seq);
     if (PERLDB_INTER && was != (I32)PL_sub_generation /* Some subs defined here. */
 	&& ret != PL_op->op_next) {	/* Successive compilation. */
 	strcpy(safestr, "_<(eval )");	/* Anything fake and short. */

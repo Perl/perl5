@@ -17,7 +17,7 @@
  * so hide the type. Ditto a pad.  */
 
 typedef AV PADLIST;
-typedef SV** PAD;
+typedef AV PAD;
 
 
 /* offsets within a pad */
@@ -46,22 +46,42 @@ typedef enum {
 	padtidy_FORMAT		/* or a format */
 } padtidy_type;
 
+/* ASSERT_CURPAD_LEGAL and ASSERT_CURPAD_ACTIVE respectively determine
+ * whether PL_comppad and PL_curpad are consistent and whether they have
+ * active values */
 
-/* Note: the following four macros are actually defined in scope.h, but
+#ifdef DEBUGGING
+#  define ASSERT_CURPAD_LEGAL(label) \
+    if (PL_comppad ? (AvARRAY(PL_comppad) != PL_curpad) : (PL_curpad != 0))  \
+	Perl_croak(aTHX_ "panic: illegal pad in %s: 0x%"UVxf"[0x%"UVxf"]",\
+	    label, PTR2UV(PL_comppad), PTR2UV(PL_curpad));
+
+
+#  define ASSERT_CURPAD_ACTIVE(label) \
+    if (!PL_comppad || (AvARRAY(PL_comppad) != PL_curpad))		  \
+	Perl_croak(aTHX_ "panic: invalid pad in %s: 0x%"UVxf"[0x%"UVxf"]",\
+	    label, PTR2UV(PL_comppad), PTR2UV(PL_curpad));
+#else
+#  define ASSERT_CURPAD_LEGAL(label)
+#  define ASSERT_CURPAD_ACTIVE(label)
+#endif
+
+
+
+/* Note: the following three macros are actually defined in scope.h, but
  * they are documented here for completeness, since they directly or
  * indirectly affect pads.
 
 =for apidoc m|void|SAVEPADSV	|PADOFFSET po
 Save a pad slot (used to restore after an iteration)
 
+XXX DAPM it would make more sense to make the arg a PADOFFSET
 =for apidoc m|void|SAVECLEARSV	|SV **svp
 Clear the pointed to pad value on scope exit. (ie the runtime action of 'my')
 
 =for apidoc m|void|SAVECOMPPAD
 save PL_comppad and PL_curpad
 
-=for apidoc m|void|SAVEFREEOP	|OP *o
-Free the op on scope exit. At the same time, reset PL_curpad
 
 
 
@@ -88,8 +108,12 @@ the previous current pad.
 =for apidoc m|void|PAD_SAVE_SETNULLPAD
 Save the current pad then set it to null.
 
-=for apidoc m|void|PAD_UPDATE_CURPAD
-Set PL_curpad from the value of PL_comppad.
+=for apidoc m|void|PAD_SAVE_LOCAL|PAD *opad|PAD *npad
+Save the current pad to the local variable opad, then make the
+current pad equal to npad
+
+=for apidoc m|void|PAD_RESTORE_LOCAL|PAD *opad
+Restore the old pad saved into the local variable opad by PAD_SAVE_LOCAL()
 
 =cut
 */
@@ -110,28 +134,47 @@ Set PL_curpad from the value of PL_comppad.
     
 
 #define PAD_SET_CUR(padlist,n) \
-	SAVEVPTR(PL_curpad);   \
-	PL_curpad = AvARRAY((AV*)*av_fetch((padlist),(n),FALSE))
+	SAVECOMPPAD();						\
+	PL_comppad = (PAD*) (AvARRAY(padlist)[n]);		\
+	PL_curpad = AvARRAY(PL_comppad);			\
+	DEBUG_Xv(PerlIO_printf(Perl_debug_log,			\
+	      "Pad 0x%"UVxf"[0x%"UVxf"] set_cur    depth=%d\n",	\
+	      PTR2UV(PL_comppad), PTR2UV(PL_curpad), (int)(n)));
 
-#define PAD_SAVE_SETNULLPAD	SAVEVPTR(PL_curpad); PL_curpad = 0;
 
-#define PAD_UPDATE_CURPAD \
-    PL_curpad = PL_comppad ? AvARRAY(PL_comppad) : Null(PAD)
+#define PAD_SAVE_SETNULLPAD()	SAVECOMPPAD(); \
+	PL_comppad = Null(PAD*); PL_curpad = Null(SV**);	\
+	DEBUG_Xv(PerlIO_printf(Perl_debug_log, "Pad set_null\n"));
+
+#define PAD_SAVE_LOCAL(opad,npad) \
+	opad = PL_comppad;					\
+	PL_comppad = (npad);					\
+	PL_curpad =  PL_comppad ? AvARRAY(PL_comppad) : Null(SV**); \
+	DEBUG_Xv(PerlIO_printf(Perl_debug_log,			\
+	      "Pad 0x%"UVxf"[0x%"UVxf"] save_local\n",		\
+	      PTR2UV(PL_comppad), PTR2UV(PL_curpad)));
+
+#define PAD_RESTORE_LOCAL(opad) \
+	PL_comppad = opad;					\
+	PL_curpad =  PL_comppad ? AvARRAY(PL_comppad) : Null(SV**); \
+	DEBUG_Xv(PerlIO_printf(Perl_debug_log,			\
+	      "Pad 0x%"UVxf"[0x%"UVxf"] restore_local\n",	\
+	      PTR2UV(PL_comppad), PTR2UV(PL_curpad)));
 
 
 /*
 =for apidoc m|void|CX_CURPAD_SAVE|struct context
 Save the current pad in the given context block structure.
 
-=for apidoc m|PAD *|CX_CURPAD_SV|struct context|PADOFFSET po
+=for apidoc m|SV *|CX_CURPAD_SV|struct context|PADOFFSET po
 Access the SV at offset po in the saved current pad in the given
 context block structure (can be used as an lvalue).
 
 =cut
 */
 
-#define CX_CURPAD_SAVE(block)  (block).oldcurpad = PL_curpad
-#define CX_CURPAD_SV(block,po) ((block).oldcurpad[po])
+#define CX_CURPAD_SAVE(block)  (block).oldcomppad = PL_comppad
+#define CX_CURPAD_SV(block,po) (AvARRAY((AV*)((block).oldcomppad))[po])
 
 
 /*
@@ -197,13 +240,20 @@ Clone the state variables associated with running and compiling pads.
     else							\
 	(dstpad) = av_dup_inc((srcpad), param);			
 
+/* NB - we set PL_comppad to null unless it points at a value that
+ * has already been dup'ed, ie it points to part of an active padlist.
+ * Otherwise PL_comppad ends up being a leaked scalar in code like
+ * the following:
+ *     threads->create(sub { threads->create(sub {...} ) } );
+ * where the second thread dups the outer sub's comppad but not the
+ * sub's CV or padlist. */
+
 #define PAD_CLONE_VARS(proto_perl, param)				\
-    PL_comppad			= av_dup(proto_perl->Icomppad, param);	\
+    PL_comppad = ptr_table_fetch(PL_ptr_table, proto_perl->Icomppad);	\
+    PL_curpad = PL_comppad ?  AvARRAY(PL_comppad) : Null(SV**);		\
     PL_comppad_name		= av_dup(proto_perl->Icomppad_name, param); \
     PL_comppad_name_fill	= proto_perl->Icomppad_name_fill;	\
     PL_comppad_name_floor	= proto_perl->Icomppad_name_floor;	\
-    PL_curpad			= (SV**)ptr_table_fetch(PL_ptr_table,	\
-						proto_perl->Tcurpad);	\
     PL_min_intro_pending	= proto_perl->Imin_intro_pending;	\
     PL_max_intro_pending	= proto_perl->Imax_intro_pending;	\
     PL_padix			= proto_perl->Ipadix;			\
