@@ -13,7 +13,7 @@
 /*
  * Package name      : perl5
  * Source directory  : 
- * Configuration time: Sat Dec 29 19:19:05 2001
+ * Configuration time: Tue Jan  8 21:51:07 2002
  * Configured by     : nick
  * Target system     : 
  */
@@ -30,7 +30,7 @@
  *	This symbol, if defined, indicates that the alarm routine is
  *	available.
  */
-/*#define HAS_ALARM		/**/
+#define HAS_ALARM		/**/
 
 /* HASATTRIBUTE:
  *	This symbol indicates the C compiler can check for function attributes,

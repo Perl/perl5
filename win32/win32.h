@@ -382,8 +382,13 @@ struct interp_intern {
 #ifndef USE_5005THREADS
     struct thread_intern	thr_intern;
 #endif
+    UINT	timerid;
+    HANDLE	msg_event;
 };
 
+DllExport int win32_async_check(pTHX);
+
+#define PERL_ASYNC_CHECK() if (w32_do_async || PL_sig_pending) win32_async_check(aTHX)
 
 #define w32_perlshell_tokens	(PL_sys_intern.perlshell_tokens)
 #define w32_perlshell_vec	(PL_sys_intern.perlshell_vec)
@@ -399,6 +404,8 @@ struct interp_intern {
 #define w32_pseudo_child_pids		(w32_pseudo_children->pids)
 #define w32_pseudo_child_handles	(w32_pseudo_children->handles)
 #define w32_internal_host		(PL_sys_intern.internal_host)
+#define w32_timerid			(PL_sys_intern.timerid)
+#define w32_do_async			(w32_timerid != 0)
 #ifdef USE_5005THREADS
 #  define w32_strerror_buffer	(thr->i.Wstrerror_buffer)
 #  define w32_getlogin_buffer	(thr->i.Wgetlogin_buffer)
@@ -517,4 +524,5 @@ EXTERN_C _CRTIMP ioinfo* __pioinfo[];
 #endif
 
 #endif /* _INC_WIN32_PERL5 */
+
 
