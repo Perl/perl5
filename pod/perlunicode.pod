@@ -243,7 +243,7 @@ Because scripts differ in their directionality (for example Hebrew is
 written right to left), Unicode supplies these properties:
 
     Property    Meaning
-  
+
     BidiL       Left-to-Right
     BidiLRE     Left-to-Right Embedding
     BidiLRO     Left-to-Right Override
@@ -375,7 +375,7 @@ For more about blocks, see:
    http://www.unicode.org/Public/UNIDATA/Blocks.txt
 
 Blocks names are given with the C<In> prefix. For example, the
-Katakana block is referenced via C<\p{InKatakana}. The C<In>
+Katakana block is referenced via C<\p{InKatakana}>. The C<In>
 prefix may be omitted if there is no nameing conflict with a script
 or any other property, but it is recommended that C<In> always be used
 to avoid confusion.

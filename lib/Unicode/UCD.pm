@@ -453,8 +453,8 @@ any of the 256 code points in the Tibetan block).
 
 =head2 Code Point Arguments
 
-A <code point argument> is either a decimal or a hexadecimal scalar
-designating a Unicode character, or "U+" followed by hexadecimals
+A I<code point argument> is either a decimal or a hexadecimal scalar
+designating a Unicode character, or C<U+> followed by hexadecimals
 designating a Unicode character.  Note that Unicode is B<not> limited
 to 16 bits (the number of Unicode characters is open-ended, in theory
 unlimited): you may have more than 4 hexdigits.
