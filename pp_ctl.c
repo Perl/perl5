@@ -176,8 +176,9 @@ PP(pp_substcont)
 				      : (REXEC_COPY_STR|REXEC_IGNOREPOS|REXEC_NOT_FIRST))))
 	{
 	    SV *targ = cx->sb_targ;
-	    sv_catpvn(dstr, s, cx->sb_strend - s);
+	    bool isutf8;
 
+	    sv_catpvn(dstr, s, cx->sb_strend - s);
 	    cx->sb_rxtainted |= RX_MATCH_TAINTED(rx);
 
 	    (void)SvOOK_off(targ);
@@ -185,6 +186,7 @@ PP(pp_substcont)
 	    SvPVX(targ) = SvPVX(dstr);
 	    SvCUR_set(targ, SvCUR(dstr));
 	    SvLEN_set(targ, SvLEN(dstr));
+	    isutf8 = DO_UTF8(dstr);
 	    SvPVX(dstr) = 0;
 	    sv_free(dstr);
 
@@ -192,6 +194,8 @@ PP(pp_substcont)
 	    PUSHs(sv_2mortal(newSViv((I32)cx->sb_iters - 1)));
 
 	    (void)SvPOK_only(targ);
+	    if (isutf8)
+		SvUTF8_on(targ);
 	    TAINT_IF(cx->sb_rxtainted);
 	    SvSETMAGIC(targ);
 	    SvTAINT(targ);

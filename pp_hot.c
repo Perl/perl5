@@ -1766,7 +1766,7 @@ PP(pp_subst)
     djSP; dTARG;
     register PMOP *pm = cPMOP;
     PMOP *rpm = pm;
-    register SV *dstr;
+    register SV *dstr, *rstr;
     register char *s;
     char *strend;
     register char *m;
@@ -1788,7 +1788,7 @@ PP(pp_subst)
     STRLEN slen;
 
     /* known replacement string? */
-    dstr = (pm->op_pmflags & PMf_CONST) ? POPs : Nullsv;
+    rstr = (pm->op_pmflags & PMf_CONST) ? POPs : Nullsv;
     if (PL_op->op_flags & OPf_STACKED)
 	TARG = POPs;
     else {
@@ -1855,10 +1855,11 @@ PP(pp_subst)
     once = !(rpm->op_pmflags & PMf_GLOBAL);
 
     /* known replacement string? */
-    c = dstr ? SvPV(dstr, clen) : Nullch;
+    c = rstr ? SvPV(rstr, clen) : Nullch;
 
     /* can do inplace substitution? */
     if (c && clen <= rx->minlen && (once || !(r_flags & REXEC_COPY_STR))
+	&& do_utf8 == DO_UTF8(rstr)
 	&& !(rx->reganch & ROPT_LOOKBEHIND_SEEN)) {
 	if (!CALLREGEXEC(aTHX_ rx, s, strend, orig, 0, TARG, NULL,
 			 r_flags | REXEC_CHECKED))
@@ -1972,6 +1973,8 @@ PP(pp_subst)
 	rxtainted |= RX_MATCH_TAINTED(rx);
 	dstr = NEWSV(25, len);
 	sv_setpvn(dstr, m, s-m);
+	if (do_utf8)
+	    SvUTF8_on(dstr);
 	PL_curpm = pm;
 	if (!c) {
 	    register PERL_CONTEXT *cx;
@@ -1995,7 +1998,7 @@ PP(pp_subst)
 	    sv_catpvn(dstr, s, m-s);
 	    s = rx->endp[0] + orig;
 	    if (clen)
-		sv_catpvn(dstr, c, clen);
+		sv_catsv(dstr, rstr);
 	    if (once)
 		break;
 	} while (CALLREGEXEC(aTHX_ rx, s, strend, orig, s == m, TARG, NULL, r_flags));
