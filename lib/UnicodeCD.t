@@ -3,7 +3,7 @@ use UnicodeCD;
 use Test;
 use strict;
 
-BEGIN { plan tests => 111 };
+BEGIN { plan tests => 111 + 17 * 3};
 
 use UnicodeCD 'charinfo';
 
@@ -92,6 +92,70 @@ ok($charinfo->{lower},          '');
 ok($charinfo->{title},          '');
 ok($charinfo->{block},          'Hebrew');
 ok($charinfo->{script},         'Hebrew');
+
+# an open syllable in Hangul
+
+$charinfo = charinfo(0xAC00);
+
+ok($charinfo->{code},           'AC00');
+ok($charinfo->{name},           'HANGUL SYLLABLE GA');
+ok($charinfo->{category},       'Lo');
+ok($charinfo->{combining},      '0');
+ok($charinfo->{bidi},           'L');
+ok($charinfo->{decomposition},  '1100 1161');
+ok($charinfo->{decimal},        '');
+ok($charinfo->{digit},          '');
+ok($charinfo->{numeric},        '');
+ok($charinfo->{mirrored},       'N');
+ok($charinfo->{unicode10},      '');
+ok($charinfo->{comment},        '');
+ok($charinfo->{upper},          '');
+ok($charinfo->{lower},          '');
+ok($charinfo->{title},          '');
+ok($charinfo->{block},          'Hangul Syllables');
+ok($charinfo->{script},         'Hangul');
+
+# a close syllable in Hangul
+
+$charinfo = charinfo(0xAE00);
+
+ok($charinfo->{code},           'AE00');
+ok($charinfo->{name},           'HANGUL SYLLABLE GEUL');
+ok($charinfo->{category},       'Lo');
+ok($charinfo->{combining},      '0');
+ok($charinfo->{bidi},           'L');
+ok($charinfo->{decomposition},  '1100 1173 11AF');
+ok($charinfo->{decimal},        '');
+ok($charinfo->{digit},          '');
+ok($charinfo->{numeric},        '');
+ok($charinfo->{mirrored},       'N');
+ok($charinfo->{unicode10},      '');
+ok($charinfo->{comment},        '');
+ok($charinfo->{upper},          '');
+ok($charinfo->{lower},          '');
+ok($charinfo->{title},          '');
+ok($charinfo->{block},          'Hangul Syllables');
+ok($charinfo->{script},         'Hangul');
+
+$charinfo = charinfo(0x1D400);
+
+ok($charinfo->{code},           '1D400');
+ok($charinfo->{name},           'MATHEMATICAL BOLD CAPITAL A');
+ok($charinfo->{category},       'Lu');
+ok($charinfo->{combining},      '0');
+ok($charinfo->{bidi},           'L');
+ok($charinfo->{decomposition},  '<font> 0041');
+ok($charinfo->{decimal},        '');
+ok($charinfo->{digit},          '');
+ok($charinfo->{numeric},        '');
+ok($charinfo->{mirrored},       'N');
+ok($charinfo->{unicode10},      '');
+ok($charinfo->{comment},        '');
+ok($charinfo->{upper},          '');
+ok($charinfo->{lower},          '');
+ok($charinfo->{title},          '');
+ok($charinfo->{block},          'Mathematical Alphanumeric Symbols');
+ok($charinfo->{script},         undef);
 
 use UnicodeCD qw(charblock charscript);
 
