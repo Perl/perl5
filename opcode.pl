@@ -597,7 +597,7 @@ next		next			ck_null		ds}
 redo		redo			ck_null		ds}	
 dump		dump			ck_null		ds}	
 goto		goto			ck_null		ds}	
-exit		exit			ck_fun		ds%	S?
+exit		exit			ck_exit		ds%	S?
 # continued below
 
 #nswitch	numeric switch		ck_null		d	

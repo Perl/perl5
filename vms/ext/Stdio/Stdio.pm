@@ -637,6 +637,6 @@ it encounters an error.
 =head1 REVISION
 
 This document was last revised on 13-Oct-1998, for Perl 5.004, 5.005, and
-5.006.
+5.6.0.
 
 =cut

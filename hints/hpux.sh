@@ -179,32 +179,26 @@ EOM
 *LP64*|*PA-RISC2.0*) ;;
 *) xxx=/no/64-bit$xxx ;;
 esac'
-    case "$ccisgcc" in
-    "$define") ld=$cc ;;
-    *) ld=/usr/bin/ld ;;
-    esac
+    if test -n "$ccisgcc" -o -n "$gccversion"; then
+	ld="$cc"
+    else	
+	ld=/usr/bin/ld
+    fi
     ar=/usr/bin/ar
     full_ar=$ar
 
-    case "$ccisgcc" in
-    "$define") ;;
-    *) # The strict ANSI mode (-Aa) doesn't like the LL suffixes.
+    if test -z "$ccisgcc" -a -z "$gccversion"; then
+       # The strict ANSI mode (-Aa) doesn't like the LL suffixes.
+       ccflags=`echo " $ccflags "|sed 's@ -Aa @ @g'`
        case "$ccflags" in
-       *-Aa*)
-	    echo "(Changing from strict ANSI compilation to extended because of 64-bitness)"
-	    ccflags=`echo $ccflags|sed 's@ -Aa @ -Ae @'`
-	    ;;
+       *-Ae*) ;;
        *) ccflags="$ccflags -Ae" ;;
        esac
-       ;;
-    esac    
+    fi
 
     set `echo " $libswanted " | sed -e 's@ dl @ @'`
     libswanted="$*"
 
-    case "$ccisgcc" in
-    "$define") ;;
-    esac
     ;;
 esac
 
@@ -213,7 +207,6 @@ case "$ccisgcc" in
 "$define") test -d /lib/pa1.1 && ccflags="$ccflags -L/lib/pa1.1" ;;
 esac
     
-
 case "$ccisgcc" in
 "$define") ;;
 *)  case "`getconf KERNEL_BITS 2>/dev/null`" in
@@ -247,7 +240,10 @@ libswanted="$*"
 # ccdlflags="-Wl,-E -Wl,-B,immediate,-B,nonfatal $ccdlflags"
 ccdlflags="-Wl,-E -Wl,-B,deferred $ccdlflags"
 
-usemymalloc='y'
+case "$usemymalloc" in
+'') usemymalloc='y' ;;
+esac
+
 alignbytes=8
 # For native nm, you need "-p" to produce BSD format output.
 nm_opt='-p'
@@ -394,14 +390,15 @@ case "$uselargefiles" in
 	# but we cheat for now.
 	ccflags="$ccflags -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
 
-        # The strict ANSI mode (-Aa) doesn't like large files.
-	case "$ccflags" in
-	-Aa*)
-	    echo "(Changing from strict ANSI compilation to extended because of large files)"
-	    ccflags=`echo $ccflags|sed 's@ -Aa @ -Ae @'`
-	    ;;
-	*)  ccflags="$ccflags -Ae" ;;
-	esac
+        if test -z "$ccisgcc" -a -z "$gccversion"; then
+           # The strict ANSI mode (-Aa) doesn't like large files.
+           ccflags=`echo " $ccflags "|sed 's@ -Aa @ @g'`
+           case "$ccflags" in
+           *-Ae*) ;;
+           *) ccflags="$ccflags -Ae" ;;
+           esac
+	fi
+
 	;;
 esac
 EOCBU

@@ -5,7 +5,7 @@ BEGIN {
     unshift @INC, '../lib' if -d '../lib';
 }
 
-BEGIN {$^W |= 1}		# Insist upon warnings
+use warnings;
 use vars qw{ @warnings };
 BEGIN {				# ...and save 'em for later
     $SIG{'__WARN__'} = sub { push @warnings, @_ }
@@ -14,7 +14,7 @@ END { print @warnings }
 
 ######################### We start with some black magic to print on failure.
 
-BEGIN { $| = 1; print "1..58\n"; }
+BEGIN { $| = 1; print "1..73\n"; }
 END {print "not ok 1\n" unless $loaded;}
 use constant 1.01;
 $loaded = 1;
@@ -96,11 +96,8 @@ test 23, length(MESS) == 8;
 
 use constant TRAILING	=> '12 cats';
 {
-    my $save_warn;
-    local $^W;
-    BEGIN { $save_warn = $^W; $^W = 0 }
+    no warnings 'numeric';
     test 24, TRAILING == 12;
-    BEGIN { $^W = $save_warn }
 }
 test 25, TRAILING eq '12 cats';
 
@@ -138,7 +135,7 @@ test 37, @warnings &&
     shift @warnings;
 
 test 38, @warnings == 0, "unexpected warning";
-test 39, $^W & 1, "Who disabled the warnings?";
+test 39, 1;
 
 use constant CSCALAR	=> \"ok 40\n";
 use constant CHASH	=> { foo => "ok 41\n" };
@@ -194,3 +191,40 @@ test 52, !$constant::declared{'main::PIE'};
 
 test 57, declared 'Other::IN_OTHER_PACK';
 test 58, $constant::declared{'Other::IN_OTHER_PACK'};
+
+@warnings = ();
+eval q{
+    no warnings;
+    use warnings 'constant';
+    use constant 'BEGIN' => 1 ;
+    use constant 'INIT' => 1 ;
+    use constant 'CHECK' => 1 ;
+    use constant 'END' => 1 ;
+    use constant 'DESTROY' => 1 ;
+    use constant 'AUTOLOAD' => 1 ;
+    use constant 'STDIN' => 1 ;
+    use constant 'STDOUT' => 1 ;
+    use constant 'STDERR' => 1 ;
+    use constant 'ARGV' => 1 ;
+    use constant 'ARGVOUT' => 1 ;
+    use constant 'ENV' => 1 ;
+    use constant 'INC' => 1 ;
+    use constant 'SIG' => 1 ;
+};
+
+test 59, @warnings == 14 ;
+test 60, (shift @warnings) =~ /^Constant name 'BEGIN' is a Perl keyword at/;
+test 61, (shift @warnings) =~ /^Constant name 'INIT' is a Perl keyword at/;
+test 62, (shift @warnings) =~ /^Constant name 'CHECK' is a Perl keyword at/;
+test 63, (shift @warnings) =~ /^Constant name 'END' is a Perl keyword at/;
+test 64, (shift @warnings) =~ /^Constant name 'DESTROY' is a Perl keyword at/;
+test 65, (shift @warnings) =~ /^Constant name 'AUTOLOAD' is a Perl keyword at/;
+test 66, (shift @warnings) =~ /^Constant name 'STDIN' is forced into package main:: a/;
+test 67, (shift @warnings) =~ /^Constant name 'STDOUT' is forced into package main:: at/;
+test 68, (shift @warnings) =~ /^Constant name 'STDERR' is forced into package main:: at/;
+test 69, (shift @warnings) =~ /^Constant name 'ARGV' is forced into package main:: at/;
+test 70, (shift @warnings) =~ /^Constant name 'ARGVOUT' is forced into package main:: at/;
+test 71, (shift @warnings) =~ /^Constant name 'ENV' is forced into package main:: at/;
+test 72, (shift @warnings) =~ /^Constant name 'INC' is forced into package main:: at/;
+test 73, (shift @warnings) =~ /^Constant name 'SIG' is forced into package main:: at/;
+@warnings = ();

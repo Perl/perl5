@@ -4,7 +4,7 @@
 # the format supported by op/regexp.t.  If you want to add a test
 # that does fit that format, add it to op/re_tests, not here.
 
-print "1..211\n";
+print "1..213\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -573,8 +573,8 @@ sub must_warn_pat {
 
 sub must_warn {
     my ($warn_pat, $code) = @_;
-    local $^W; local %SIG;
-    eval 'BEGIN { $^W = 1; $SIG{__WARN__} = $warn_pat };' . $code;
+    local %SIG;
+    eval 'BEGIN { use warnings; $SIG{__WARN__} = $warn_pat };' . $code;
     print "ok $test\n";
     $test++;
 }
@@ -993,5 +993,22 @@ print "ok $test\n";
 $test++;
 
 "\n\n" =~ /\n+ $ \n/x or print "not ";
+print "ok $test\n";
+$test++;
+
+[] =~ /^ARRAY/ or print "# [] \nnot ";
+print "ok $test\n";
+$test++;
+
+eval << 'EOE';
+{
+ package S;
+ use overload '""' => sub { 'Object S' };
+ sub new { bless [] }
+}
+$a = 'S'->new;
+EOE
+
+$a and $a =~ /^Object\sS/ or print "# '$a' \nnot ";
 print "ok $test\n";
 $test++;

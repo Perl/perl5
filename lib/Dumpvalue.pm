@@ -227,9 +227,9 @@ sub unwrap {
     if ($self->{compactDump} && !grep(ref $_, @{$v})) {
       if ($#$v >= 0) {
 	$short = $sp . "0..$#{$v}  " .
-	  join(" ",
-	       map {$self->stringify($_)} @{$v}[0..$tArrayDepth])
-	    . "$shortmore";
+	  join(" ", 
+	       map {exists $v->[$_] ? $self->stringify($v->[$_]) : "empty"} ($[..$tArrayDepth)
+	      ) . "$shortmore";
       } else {
 	$short = $sp . "empty array";
       }
@@ -238,7 +238,11 @@ sub unwrap {
     for my $num ($[ .. $tArrayDepth) {
       return if $DB::signal and $self->{stopDbSignal};
       print "$sp$num  ";
-      $self->DumpElem($v->[$num], $s);
+      if (exists $v->[$num]) {
+        $self->DumpElem($v->[$num], $s);
+      } else {
+	print "empty slot\n";
+      }
     }
     print "$sp  empty array\n" unless @$v;
     print "$sp$more" if defined $more ;
@@ -404,7 +408,8 @@ sub dumpvars {
     next if @vars && !grep( matchvar($key, $_), @vars );
     if ($self->{usageOnly}) {
       $self->globUsage(\$val, $key)
-	unless $package eq 'Dumpvalue' and $key eq 'stab';
+	if ($package ne 'Dumpvalue' or $key ne 'stab')
+	   and ref(\$val) eq 'GLOB';
     } else {
       $self->dumpglob($package, 0,$key, $val);
     }

@@ -146,11 +146,11 @@ C<goto>, C<last>, C<next>, C<redo>, C<return>, C<sub>, C<wantarray>
 
 =item Keywords related to scoping
 
-C<caller>, C<import>, C<local>, C<my>, C<package>, C<use>
+C<caller>, C<import>, C<local>, C<my>, C<our>, C<package>, C<use>
 
 =item Miscellaneous functions
 
-C<defined>, C<dump>, C<eval>, C<formline>, C<local>, C<my>, C<reset>,
+C<defined>, C<dump>, C<eval>, C<formline>, C<local>, C<my>, C<our>, C<reset>,
 C<scalar>, C<undef>, C<wantarray>
 
 =item Functions for processes and process groups
@@ -200,8 +200,8 @@ C<gmtime>, C<localtime>, C<time>, C<times>
 =item Functions new in perl5
 
 C<abs>, C<bless>, C<chomp>, C<chr>, C<exists>, C<formline>, C<glob>,
-C<import>, C<lc>, C<lcfirst>, C<map>, C<my>, C<no>, C<prototype>, C<qx>,
-C<qw>, C<readline>, C<readpipe>, C<ref>, C<sub*>, C<sysopen>, C<tie>,
+C<import>, C<lc>, C<lcfirst>, C<map>, C<my>, C<no>, C<our>, C<prototype>, 
+C<qx>, C<qw>, C<readline>, C<readpipe>, C<ref>, C<sub*>, C<sysopen>, C<tie>,
 C<tied>, C<uc>, C<ucfirst>, C<untie>, C<use>
 
 * - C<sub> was a keyword in perl4, but in perl5 it is an
@@ -488,7 +488,7 @@ files, but it can be disastrous for binary files.
 Another consequence of using binmode() (on some systems) is that
 special end-of-file markers will be seen as part of the data stream.
 For systems from the Microsoft family this means that if your binary
-data contains C<\cZ>, the I/O subsystem will ragard it as the end of
+data contains C<\cZ>, the I/O subsystem will regard it as the end of
 the file, unless you use binmode().
 
 binmode() is not only important for readline() and print() operations,
@@ -539,9 +539,10 @@ Here $subroutine may be C<(eval)> if the frame is not a subroutine
 call, but an C<eval>.  In such a case additional elements $evaltext and
 C<$is_require> are set: C<$is_require> is true if the frame is created by a
 C<require> or C<use> statement, $evaltext contains the text of the
-C<eval EXPR> statement.  In particular, for a C<eval BLOCK> statement,
+C<eval EXPR> statement.  In particular, for an C<eval BLOCK> statement,
 $filename is C<(eval)>, but $evaltext is undefined.  (Note also that
 each C<use> statement creates a C<require> frame inside an C<eval EXPR>)
+frame.  C<$hasargs> is true if a new instance of C<@_> was set up for the
 frame.  C<$hints> and C<$bitmask> contain pragmatic hints that the caller
 was compiled with.  The C<$hints> and C<$bitmask> values are subject to
 change between versions of Perl, and are not meant for external use.
@@ -1055,7 +1056,7 @@ If C<$@> is empty then the string C<"Died"> is used.
 die() can also be called with a reference argument.  If this happens to be
 trapped within an eval(), $@ contains the reference.  This behavior permits
 a more elaborate exception handling implementation using objects that
-maintain arbitary state about the nature of the exception.  Such a scheme
+maintain arbitrary state about the nature of the exception.  Such a scheme
 is sometimes preferable to matching particular string values of $@ using
 regular expressions.  Here's an example:
 
@@ -1432,6 +1433,12 @@ program, passing it C<"surprise"> an argument.  The second version
 didn't--it tried to run a program literally called I<"echo surprise">,
 didn't find it, and set C<$?> to a non-zero value indicating failure.
 
+Beginning with v5.6.0, Perl will attempt to flush all files opened for
+output before the exec, but this may not be supported on some platforms
+(see L<perlport>).  To be safe, you may need to set C<$|> ($AUTOFLUSH
+in English) or call the C<autoflush()> method of C<IO::Handle> on any
+open handles in order to avoid lost output.
+
 Note that C<exec> will not call your C<END> blocks, nor will it call
 any C<DESTROY> methods in your objects.
 
@@ -1650,7 +1657,11 @@ fork(), great care has gone into making it extremely efficient (for
 example, using copy-on-write technology on data pages), making it the
 dominant paradigm for multitasking over the last few decades.
 
-All files opened for output are flushed before forking the child process.
+Beginning with v5.6.0, Perl will attempt to flush all files opened for
+output before forking the child process, but this may not be supported
+on some platforms (see L<perlport>).  To be safe, you may need to set
+C<$|> ($AUTOFLUSH in English) or call the C<autoflush()> method of
+C<IO::Handle> on any open handles in order to avoid duplicate output.
 
 If you C<fork> without ever waiting on your children, you will
 accumulate zombies.  On some systems, you can avoid this by setting
@@ -1849,6 +1860,14 @@ various get routines are as follows:
 
 (If the entry doesn't exist you get a null list.)
 
+The exact meaning of the $gcos field varies but it usually contains
+the real name of the user (as opposed to the login name) and other
+information pertaining to the user.  Beware, however, that in many
+system users are able to change this information and therefore it
+cannot be trusted and therefore the $gcos is tainted (see
+L<perlsec>).  The $passwd and $shell, user's encrypted password and
+login shell, are also tainted, because of the same reason.
+
 In scalar context, you get the name, unless the function was a
 lookup by name, in which case you get the other thing, whatever it is.
 (If the entry doesn't exist you get the undefined value.)  For example:
@@ -1861,26 +1880,27 @@ lookup by name, in which case you get the other thing, whatever it is.
     $name  = getgrent();
     #etc.
 
-In I<getpw*()> the fields $quota, $comment, and $expire are
-special cases in the sense that in many systems they are unsupported.
-If the $quota is unsupported, it is an empty scalar.  If it is
-supported, it usually encodes the disk quota.  If the $comment
-field is unsupported, it is an empty scalar.  If it is supported it
-usually encodes some administrative comment about the user.  In some
-systems the $quota field may be $change or $age, fields that have
-to do with password aging.  In some systems the $comment field may
-be $class.  The $expire field, if present, encodes the expiration
-period of the account or the password.  For the availability and the
-exact meaning of these fields in your system, please consult your
-getpwnam(3) documentation and your F<pwd.h> file.  You can also find
-out from within Perl what your $quota and $comment fields mean
-and whether you have the $expire field by using the C<Config> module
-and the values C<d_pwquota>, C<d_pwage>, C<d_pwchange>, C<d_pwcomment>,
-and C<d_pwexpire>.  Shadow password files are only supported if your
-vendor has implemented them in the intuitive fashion that calling the
-regular C library routines gets the shadow versions if you're running
-under privilege.  Those that incorrectly implement a separate library
-call are not supported.
+In I<getpw*()> the fields $quota, $comment, and $expire are special
+cases in the sense that in many systems they are unsupported.  If the
+$quota is unsupported, it is an empty scalar.  If it is supported, it
+usually encodes the disk quota.  If the $comment field is unsupported,
+it is an empty scalar.  If it is supported it usually encodes some
+administrative comment about the user.  In some systems the $quota
+field may be $change or $age, fields that have to do with password
+aging.  In some systems the $comment field may be $class.  The $expire
+field, if present, encodes the expiration period of the account or the
+password.  For the availability and the exact meaning of these fields
+in your system, please consult your getpwnam(3) documentation and your
+F<pwd.h> file.  You can also find out from within Perl what your
+$quota and $comment fields mean and whether you have the $expire field
+by using the C<Config> module and the values C<d_pwquota>, C<d_pwage>,
+C<d_pwchange>, C<d_pwcomment>, and C<d_pwexpire>.  Shadow password
+files are only supported if your vendor has implemented them in the
+intuitive fashion that calling the regular C library routines gets the
+shadow versions if you're running under privilege or if there exists
+the shadow(3) functions as found in System V ( this includes Solaris
+and Linux.)  Those systems which implement a proprietary shadow password
+facility are unlikely to be supported.
 
 The $members value returned by I<getgr*()> is a space separated list of
 the login names of the members of the group.
@@ -1966,7 +1986,7 @@ itself, in the range C<0..11> with 0 indicating January and 11
 indicating December.  $year is the number of years since 1900.  That
 is, $year is C<123> in year 2023.  $wday is the day of the week, with
 0 indicating Sunday and 3 indicating Wednesday.  $yday is the day of
-the year, in the range C<1..365> (or C<1..366> in leap years.)  
+the year, in the range C<0..364> (or C<0..365> in leap years.)  
 
 Note that the $year element is I<not> simply the last two digits of
 the year.  If you assume it is, then you create non-Y2K-compliant
@@ -2197,6 +2217,9 @@ or how about sorted by key:
 	print $key, '=', $ENV{$key}, "\n";
     }
 
+The returned values are copies of the original keys in the hash, so
+modifying them will not affect the original hash.  Compare L</values>.
+
 To sort a hash by value, you'll need to use a C<sort> function.
 Here's a descending numeric sort of a hash by its values:
 
@@ -2334,7 +2357,7 @@ itself, in the range C<0..11> with 0 indicating January and 11
 indicating December.  $year is the number of years since 1900.  That
 is, $year is C<123> in year 2023.  $wday is the day of the week, with
 0 indicating Sunday and 3 indicating Wednesday.  $yday is the day of
-the year, in the range C<1..365> (or C<1..366> in leap years.)  $isdst
+the year, in the range C<0..364> (or C<0..365> in leap years.)  $isdst
 is true if the specified time occurs during daylight savings time,
 false otherwise.
 
@@ -2480,22 +2503,25 @@ Calls the System V IPC function msgget(2).  Returns the message queue
 id, or the undefined value if there is an error.  See also C<IPC::SysV>
 and C<IPC::Msg> documentation.
 
-=item msgsnd ID,MSG,FLAGS
-
-Calls the System V IPC function msgsnd to send the message MSG to the
-message queue ID.  MSG must begin with the native long integer message
-type, which may be created with C<pack("l!", $type)>.  Returns true if
-successful, or false if there is an error.  See also C<IPC::SysV> and
-C<IPC::SysV::Msg> documentation.
-
 =item msgrcv ID,VAR,SIZE,TYPE,FLAGS
 
 Calls the System V IPC function msgrcv to receive a message from
 message queue ID into variable VAR with a maximum message size of
-SIZE.  Note that if a message is received, the message type will be
-the first thing in VAR, and the maximum length of VAR is SIZE plus the
-size of the message type.  Returns true if successful, or false if
-there is an error.  See also C<IPC::SysV> and C<IPC::SysV::Msg> documentation.
+SIZE.  Note that when a message is received, the message type as a
+native long integer will be the first thing in VAR, followed by the
+actual message.  This packing may be opened with C<unpack("l! a*")>.
+Taints the variable.  Returns true if successful, or false if there is
+an error.  See also C<IPC::SysV> and C<IPC::SysV::Msg> documentation.
+
+=item msgsnd ID,MSG,FLAGS
+
+Calls the System V IPC function msgsnd to send the message MSG to the
+message queue ID.  MSG must begin with the native long integer message
+type, and be followed by the length of the actual message, and finally
+the message itself.  This kind of packing can be achieved with
+C<pack("l! a*", $type, $message)>.  Returns true if successful,
+or false if there is an error.  See also C<IPC::SysV>
+and C<IPC::SysV::Msg> documentation.
 
 =item my EXPR
 
@@ -2567,7 +2593,10 @@ conversion assumes base 10.)
 
 Opens the file whose filename is given by EXPR, and associates it with
 FILEHANDLE.  If FILEHANDLE is an expression, its value is used as the
-name of the real filehandle wanted.  If EXPR is omitted, the scalar
+name of the real filehandle wanted.  (This is considered a symbolic
+reference, so C<use strict 'refs'> should I<not> be in effect.)
+
+If EXPR is omitted, the scalar
 variable of the same name as the FILEHANDLE contains the filename.
 (Note that lexical variables--those declared with C<my>--will not work
 for this purpose; so if you're using C<my>, specify EXPR in your call
@@ -2599,7 +2628,8 @@ C<'|'>, the filename is interpreted as a command which pipes output to
 us.  See L<perlipc/"Using open() for IPC">
 for more examples of this.  (You are not allowed to C<open> to a command
 that pipes both in I<and> out, but see L<IPC::Open2>, L<IPC::Open3>,
-and L<perlipc/"Bidirectional Communication"> for alternatives.)
+and L<perlipc/"Bidirectional Communication with Another Process">
+for alternatives.)
 
 If MODE is C<'|-'>, the filename is interpreted as a
 command to which output is to be piped, and if MODE is
@@ -2753,8 +2783,13 @@ The following triples are more or less equivalent:
 
 See L<perlipc/"Safe Pipe Opens"> for more examples of this.
 
-NOTE: On any operation that may do a fork, all files opened for output
-are flushed before the fork is attempted.  On systems that support a
+Beginning with v5.6.0, Perl will attempt to flush all files opened for
+output before any operation that may do a fork, but this may not be
+supported on some platforms (see L<perlport>).  To be safe, you may need
+to set C<$|> ($AUTOFLUSH in English) or call the C<autoflush()> method
+of C<IO::Handle> on any open handles.
+
+On systems that support a
 close-on-exec flag on files, the flag will be set for the newly opened
 file descriptor as determined by the value of $^F.  See L<perlvar/$^F>.
 
@@ -2781,7 +2816,7 @@ otherwise it's necessary to protect any leading and trailing whitespace:
     open(FOO, "< $file\0");
 
 (this may not work on some bizzare filesystems).  One should
-conscientiously choose between the the I<magic> and 3-arguments form
+conscientiously choose between the I<magic> and 3-arguments form
 of open():
 
     open IN, $ARGV[0];
@@ -2894,7 +2929,7 @@ sequence of characters that give the order and type of values, as
 follows:
 
     a	A string with arbitrary binary data, will be null padded.
-    A	An ascii string, will be space padded.
+    A	An ASCII string, will be space padded.
     Z	A null terminated (asciz) string, will be null padded.
 
     b	A bit string (ascending bit order inside each byte, like vec()).
@@ -3898,7 +3933,7 @@ GETALL, then ARG must be a variable which will hold the returned
 semid_ds structure or semaphore value array.  Returns like C<ioctl>:
 the undefined value for error, "C<0 but true>" for zero, or the actual
 return value otherwise.  The ARG must consist of a vector of native
-short integers, which may may be created with C<pack("s!",(0)x$nsem)>.
+short integers, which may be created with C<pack("s!",(0)x$nsem)>.
 See also C<IPC::SysV> and C<IPC::Semaphore> documentation.
 
 =item semget KEY,NSEMS,FLAGS
@@ -3967,7 +4002,7 @@ C<@ARGV> array at file scopes or within the lexical scopes established by
 the C<eval ''>, C<BEGIN {}>, C<INIT {}>, C<CHECK {}>, and C<END {}>
 constructs.
 
-See also C<unshift>, C<push>, and C<pop>.  C<Shift()> and C<unshift> do the
+See also C<unshift>, C<push>, and C<pop>.  C<shift()> and C<unshift> do the
 same thing to the left end of an array that C<pop> and C<push> do to the
 right end.
 
@@ -3999,8 +4034,8 @@ detaching from it.  When reading, VAR must be a variable that will
 hold the data read.  When writing, if STRING is too long, only SIZE
 bytes are used; if STRING is too short, nulls are written to fill out
 SIZE bytes.  Return true if successful, or false if there is an error.
-See also C<IPC::SysV> documentation and the C<IPC::Shareable> module
-from CPAN.
+shmread() taints the variable. See also C<IPC::SysV> documentation and
+the C<IPC::Shareable> module from CPAN.
 
 =item shutdown SOCKET,HOW
 
@@ -4103,9 +4138,9 @@ of a SUBNAME, you can provide a BLOCK as an anonymous, in-line sort
 subroutine.
 
 If the subroutine's prototype is C<($$)>, the elements to be compared
-are passed by reference in C<@_>, as for a normal subroutine.  If not,
-the normal calling code for subroutines is bypassed in the interests of
-efficiency, and the elements to be compared are passed into the subroutine
+are passed by reference in C<@_>, as for a normal subroutine.  This is
+slower than unprototyped subroutines, where the elements to be
+compared are passed into the subroutine
 as the package global variables $a and $b (see example below).  Note that
 in the latter case, it is usually counter-productive to declare $a and
 $b as lexicals.
@@ -4625,7 +4660,7 @@ The commonly available S_IF* constants are
 
 and the S_IF* functions are
 
-    S_IFMODE($mode)	the part of $mode containg the permission bits
+    S_IFMODE($mode)	the part of $mode containing the permission bits
 			and the setuid/setgid/sticky bits
 
     S_IFMT($mode)	the part of $mode containing the file type
@@ -4910,7 +4945,11 @@ platforms).  If there are no shell metacharacters in the argument,
 it is split into words and passed directly to C<execvp>, which is
 more efficient.
 
-All files opened for output are flushed before attempting the exec().
+Beginning with v5.6.0, Perl will attempt to flush all files opened for
+output before any operation that may do a fork, but this may not be
+supported on some platforms (see L<perlport>).  To be safe, you may need
+to set C<$|> ($AUTOFLUSH in English) or call the C<autoflush()> method
+of C<IO::Handle> on any open handles.
 
 The return value is the exit status of the program as
 returned by the C<wait> call.  To get the actual exit value divide by
@@ -5382,12 +5421,11 @@ subject to change in future versions of perl, but it is guaranteed to
 be the same order as either the C<keys> or C<each> function would
 produce on the same (unmodified) hash.
 
-Note that you cannot modify the values of a hash this way, because the
-returned list is just a copy.  You need to use a hash slice for that, 
-since it's lvaluable in a way that values() is not.
+Note that the values are not copied, which means modifying them will
+modify the contents of the hash:
 
-    for (values %hash) 	    { s/foo/bar/g }   # FAILS!
-    for (@hash{keys %hash}) { s/foo/bar/g }   # ok
+    for (values %hash) 	    { s/foo/bar/g }   # modifies %hash values
+    for (@hash{keys %hash}) { s/foo/bar/g }   # same
 
 As a side effect, calling values() resets the HASH's internal iterator.
 See also C<keys>, C<each>, and C<sort>.

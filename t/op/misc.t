@@ -59,12 +59,12 @@ $a = ":="; split /($a)/o, "a:=b:=c"; print "@_"
 EXPECT
 a := b := c
 ########
-use integer;
 $cusp = ~0 ^ (~0 >> 1);
+use integer;
 $, = " ";
-print +($cusp - 1) % 8, $cusp % 8, -$cusp % 8, ($cusp + 1) % 8, "!\n";
+print +($cusp - 1) % 8, $cusp % 8, -$cusp % 8, 8 | (($cusp + 1) % 8 + 7), "!\n";
 EXPECT
--1 0 0 1 !
+7 0 0 8 !
 ########
 $foo=undef; $foo->go;
 EXPECT
@@ -545,3 +545,16 @@ ucfirst - World
 lcfirst - world
 uc - WORLD
 lc - world
+########
+sub f { my $a = 1; my $b = 2; my $c = 3; my $d = 4; next }
+my $x = "foo";
+{ f } continue { print $x, "\n" }
+EXPECT
+foo
+########
+sub C () { 1 }
+sub M { $_[0] = 2; }
+eval "C";
+M(C);
+EXPECT
+Modification of a read-only value attempted at - line 2.

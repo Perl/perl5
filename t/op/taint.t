@@ -24,6 +24,10 @@ BEGIN {
       $ENV{PATH} = $ENV{PATH};
       $ENV{TERM} = $ENV{TERM} ne ''? $ENV{TERM} : 'dummy';
   }
+  if ($Config{d_shm} || $Config{d_msg}) {
+     require IPC::SysV;
+     IPC::SysV->import(qw(IPC_PRIVATE IPC_RMID IPC_CREAT S_IRWXU));
+  }
 }
 
 my $Is_VMS = $^O eq 'VMS';
@@ -94,7 +98,7 @@ print PROG 'print "@ARGV\n"', "\n";
 close PROG;
 my $echo = "$Invoke_Perl $ECHO";
 
-print "1..149\n";
+print "1..151\n";
 
 # First, let's make sure that Perl is checking the dangerous
 # environment variables. Maybe they aren't set yet, so we'll
@@ -547,14 +551,14 @@ else {
 	my @getpwent = getpwent();
 	die "getpwent: $!\n" unless (@getpwent);
 	test 142,(    not tainted $getpwent[0]
-	          and not tainted $getpwent[1]
+	          and     tainted $getpwent[1]
 	          and not tainted $getpwent[2]
 	          and not tainted $getpwent[3]
 	          and not tainted $getpwent[4]
 	          and not tainted $getpwent[5]
-	          and     tainted $getpwent[6] # gecos
+	          and     tainted $getpwent[6]		# ge?cos
 	          and not tainted $getpwent[7]
-		  and not tainted $getpwent[8]);
+		  and     tainted $getpwent[8]);	# shell
 	endpwent();
     } else {
 	for (142) { print "ok $_ # Skipped: getpwent() is not available\n" }
@@ -605,3 +609,74 @@ else {
     $why =~ s/e/'-'.$$/ge;
     test 149,     tainted $why;
 }
+
+# test shmread
+{
+    if ($Config{d_shm}) {
+	no strict 'subs';
+	my $sent = "foobar";
+	my $rcvd;
+	my $size = 2000;
+	my $id = shmget(IPC_PRIVATE, $size, S_IRWXU) ||
+	    warn "# shmget failed: $!\n";
+	if (defined $id) {
+	    if (shmwrite($id, $sent, 0, 60)) {
+		if (shmread($id, $rcvd, 0, 60)) {
+		    substr($rcvd, index($rcvd, "\0")) = '';
+		} else {
+		    warn "# shmread failed: $!\n";
+		}
+	    } else {
+		warn "# shmwrite failed: $!\n";
+	    }
+	    shmctl($id, IPC_RMID, 0) || warn "# shmctl failed: $!\n";
+	} else {
+	    warn "# shmget failed: $!\n";
+	}
+
+	if ($rcvd eq $sent) {
+	    test 150, tainted $rcvd;
+	} else {
+	    print "ok 150 # Skipped: SysV shared memory operation failed\n";
+	}
+    } else {
+	print "ok 150 # Skipped: SysV shared memory is not available\n";
+    }
+}
+
+# test msgrcv
+{
+    if ($Config{d_msg}) {
+	no strict 'subs';
+	my $id = msgget(IPC_PRIVATE, IPC_CREAT | S_IRWXU);
+
+	my $sent      = "message";
+	my $type_sent = 1234;
+	my $rcvd;
+	my $type_rcvd;
+
+	if (defined $id) {
+	    if (msgsnd($id, pack("l! a*", $type_sent, $sent), 0)) {
+		if (msgrcv($id, $rcvd, 60, 0, 0)) {
+		    ($type_rcvd, $rcvd) = unpack("l! a*", $rcvd);
+		} else {
+		    warn "# msgrcv failed\n";
+		}
+	    } else {
+		warn "# msgsnd failed\n";
+	    }
+	    msgctl($id, IPC_RMID, 0) || warn "# msgctl failed: $!\n";
+	} else {
+	    warn "# msgget failed\n";
+	}
+
+	if ($rcvd eq $sent && $type_sent == $type_rcvd) {
+	    test 151, tainted $rcvd;
+	} else {
+	    print "ok 151 # Skipped: SysV message queue operation failed\n";
+	}
+    } else {
+	print "ok 151 # Skipped: SysV message queues are not available\n";
+    }
+}
+

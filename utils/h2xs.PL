@@ -105,8 +105,14 @@ XS-based.  C<-c> and C<-f> are implicitly enabled.
 Generate an accessor method for each element of structs and unions. The
 generated methods are named after the element name; will return the current
 value of the element if called without additional arguments; and will set
-the element to the supplied value (and return the old value) if called with
-an additional argument.
+the element to the supplied value (and return the new value) if called with
+an additional argument. Embedded structures and unions are returned as a
+pointer rather than the complete structure, to facilitate chained calls.
+
+These methods all apply to the Ptr type for the structure; additionally
+two methods are constructed for the structure type itself, C<_to_ptr>
+which returns a Ptr type pointing to the same structure, and a C<new>
+method to construct and return a new structure, initialised to zeroes.
 
 =item B<-c>
 
@@ -125,6 +131,16 @@ not found in standard include directories.
 =item B<-h>
 
 Print the usage, help and version for this h2xs and exit.
+
+=item B<-k>
+
+For function arguments declared as C<const>, omit the const attribute in the
+generated XS code.
+
+=item B<-m>
+
+B<Experimental>: for each variable declared in the header file(s), declare
+a perl variable of the same name magically tied to the C variable.
 
 =item B<-n> I<module_name>
 
@@ -335,6 +351,8 @@ version: $H2XS_VERSION
     -d   Turn on debugging messages.
     -f   Force creation of the extension even if the C header does not exist.
     -h   Display this help message
+    -k   Omit 'const' attribute on function arguments (used with -x).
+    -m   Generate tied variables for access to declared variables.
     -n   Specify a name to use for the extension (recommended).
     -o   Regular expression for \"opaque\" types.
     -p   Specify a prefix which should be removed from the Perl function names.
@@ -348,9 +366,9 @@ extra_libraries
 }
 
 
-getopts("ACF:M:OPXacdfhn:o:p:s:v:x") || usage;
-use vars qw($opt_A $opt_C $opt_F $opt_M $opt_O $opt_P $opt_X $opt_a $opt_c
-	    $opt_d $opt_f $opt_h $opt_n $opt_o $opt_p $opt_s $opt_v $opt_x);
+getopts("ACF:M:OPXacdfhkmn:o:p:s:v:x") || usage;
+use vars qw($opt_A $opt_C $opt_F $opt_M $opt_O $opt_P $opt_X $opt_a $opt_c $opt_d
+	    $opt_f $opt_h $opt_k $opt_m $opt_n $opt_o $opt_p $opt_s $opt_v $opt_x);
 
 usage if $opt_h;
 
@@ -397,6 +415,14 @@ EOD
     $C::Scan::VERSION >= 0.70
       or die <<EOD;
 C::Scan v. 0.70 or later required unless you use -o . option.
+You have version $C::Scan::VERSION installed as $INC{'C/Scan.pm'}.
+To install C::Scan, execute
+   perl -MCPAN -e "install C::Scan"
+EOD
+  }
+  if (($opt_m || $opt_a) && $C::Scan::VERSION < 0.73) {
+    die <<EOD;
+C::Scan v. 0.73 or later required to use -m or -a options.
 You have version $C::Scan::VERSION installed as $INC{'C/Scan.pm'}.
 To install C::Scan, execute
    perl -MCPAN -e "install C::Scan"
@@ -543,6 +569,8 @@ my %structs;
 
 my @fnames;
 my @fnames_no_prefix;
+my %vdecl_hash;
+my @vdecls;
 
 if( ! $opt_X ){  # use XS, unless it was disabled
   open(XS, ">$modfname.xs") || die "Can't create $ext$modpname/$modfname.xs: $!\n";
@@ -576,6 +604,22 @@ if( ! $opt_X ){  # use XS, unless it was disabled
 	@structs{keys %$structs} = values %$structs;
       }
 
+      if ($opt_m) {
+	%vdecl_hash = %{ $c->get('vdecl_hash') };
+	@vdecls = sort keys %vdecl_hash;
+	for (local $_ = 0; $_ < @vdecls; ++$_) {
+	  my $var = $vdecls[$_];
+	  my($type, $post) = @{ $vdecl_hash{$var} };
+	  if (defined $post) {
+	    warn "Can't handle variable '$type $var $post', skipping.\n";
+	    splice @vdecls, $_, 1;
+	    redo;
+	  }
+	  $type = normalize_type($type);
+	  $vdecl_hash{$var} = $type;
+	}
+      }
+
       unless ($tmask_all) {
 	warn "Scanning $filename for typedefs...\n";
 	my $td = $c->get('typedef_hash');
@@ -586,7 +630,7 @@ if( ! $opt_X ){  # use XS, unless it was disabled
       }
     }
     { local $" = '|';
-      $typedef_rex = qr(\b(?<!struct )(?:@good_td)\b);
+      $typedef_rex = qr(\b(?<!struct )(?:@good_td)\b) if @good_td;
     }
     %known_fnames = map @$_[1,3], @$fdecls_parsed; # [1,3] is NAME, FULLTEXT
     if ($fmask) {
@@ -646,6 +690,7 @@ package $module;
 
 require 5.005_62;
 use strict;
+use warnings;
 END
 
 unless( $opt_X || $opt_c || $opt_A ){
@@ -682,7 +727,7 @@ $myISA .= ' DynaLoader' 	unless $opt_X;  # no XS
 $myISA .= ');';
 print PM "\n$myISA\n\n";
 
-my @exported_names = (@const_names, @fnames_no_prefix);
+my @exported_names = (@const_names, @fnames_no_prefix, map '$'.$_, @vdecls);
 
 print PM<<"END";
 # Items to export into callers namespace by default. Note: do not export
@@ -704,6 +749,10 @@ our \@EXPORT = qw(
 our \$VERSION = '$TEMPLATE_VERSION';
 
 END
+
+if (@vdecls) {
+    printf PM "our(@{[ join ', ', map '$'.$_, @vdecls ]});\n\n";
+}
 
 print PM <<"END" unless $opt_c or $opt_X;
 sub AUTOLOAD {
@@ -743,6 +792,16 @@ END
 if( ! $opt_X ){ # print bootstrap, unless XS is disabled
 	print PM <<"END";
 bootstrap $module \$VERSION;
+END
+}
+
+# tying the variables can happen only after bootstrap
+if (@vdecls) {
+    printf PM <<END;
+{
+@{[ join "\n", map "    _tievar_$_(\$$_);", @vdecls ]}
+}
+
 END
 }
 
@@ -901,7 +960,7 @@ sub td_is_struct {
   my $out = $struct_typedefs{$type};
   return $out if defined $out;
   my $otype = $type;
-  $out = ($type =~ /^struct\b/) && !td_is_pointer($type);
+  $out = ($type =~ /^(struct|union)\b/) && !td_is_pointer($type);
   # This converts only the guys which do not have trailing part in the typedef
   if (not $out
       and $typedef_rex and $type =~ s/($typedef_rex)/$typedefs_pre{$1}/go) {
@@ -1082,6 +1141,8 @@ END
   write_const(\*XS, '', 0, \@const_names);
 }
 
+print_tievar_subs(\*XS, $_, $vdecl_hash{$_}) for @vdecls;
+
 my $prefix;
 $prefix = "PREFIX = $opt_p" if defined $opt_p;
 
@@ -1140,6 +1201,9 @@ sub print_decl {
 
   my @argnames = map {$_->[1]} @$args;
   my @argtypes = map { normalize_type( $_->[0], 1 ) } @$args;
+  if ($opt_k) {
+    s/^\s*const\b\s*// for @argtypes;
+  }
   my @argarrays = map { $_->[4] || '' } @$args;
   my $numargs = @$args;
   if ($numargs and $argtypes[-1] eq '...') {
@@ -1162,12 +1226,99 @@ EOP
   }
 }
 
+sub print_tievar_subs {
+  my($fh, $name, $type) = @_;
+  print $fh <<END;
+I32
+_get_$name(IV index, SV *sv) {
+    dSP;
+    PUSHMARK(SP);
+    XPUSHs(sv);
+    PUTBACK;
+    (void)call_pv("$module\::_get_$name", G_DISCARD);
+    return (I32)0;
+}
+
+I32
+_set_$name(IV index, SV *sv) {
+    dSP;
+    PUSHMARK(SP);
+    XPUSHs(sv);
+    PUTBACK;
+    (void)call_pv("$module\::_set_$name", G_DISCARD);
+    return (I32)0;
+}
+
+END
+}
+
+sub print_tievar_xsubs {
+  my($fh, $name, $type) = @_;
+  print $fh <<END;
+void
+_tievar_$name(sv)
+	SV* sv
+    PREINIT:
+	struct ufuncs uf;
+    CODE:
+	uf.uf_val = &_get_$name;
+	uf.uf_set = &_set_$name;
+	uf.uf_index = (IV)&_get_$name;
+	sv_magic(sv, 0, 'U', (char*)&uf, sizeof(uf));
+
+void
+_get_$name(THIS)
+	$type THIS = NO_INIT
+    CODE:
+	THIS = $name;
+    OUTPUT:
+	SETMAGIC: DISABLE
+	THIS
+
+void
+_set_$name(THIS)
+	$type THIS
+    CODE:
+	$name = THIS;
+
+END
+}
+
 sub print_accessors {
   my($fh, $name, $struct) = @_;
   return unless defined $struct && $name !~ /\s|_ANON/;
   $name = normalize_type($name);
   my $ptrname = normalize_type("$name *");
-  printf $fh <<"EOF";
+  print $fh <<"EOF";
+
+MODULE = $module		PACKAGE = ${name}		$prefix
+
+$name *
+_to_ptr(THIS)
+	$name THIS = NO_INIT
+    PROTOTYPE: \$
+    CODE:
+	if (sv_derived_from(ST(0), "$name")) {
+	    STRLEN len;
+	    char *s = SvPV((SV*)SvRV(ST(0)), len);
+	    if (len != sizeof(THIS))
+		croak("Size \%d of packed data != expected \%d",
+			len, sizeof(THIS));
+	    RETVAL = ($name *)s;
+	}   
+	else
+	    croak("THIS is not of type $name");
+    OUTPUT:
+	RETVAL
+
+$name
+new(CLASS)
+	char *CLASS = NO_INIT
+    PROTOTYPE: \$
+    CODE:
+	Zero((void*)&RETVAL, sizeof(RETVAL), char);
+    OUTPUT:
+	RETVAL
 
 MODULE = $module		PACKAGE = ${name}Ptr		$prefix
 
@@ -1176,25 +1327,28 @@ EOF
   while (@items) {
     my $item = shift @items;
     if ($item->[0] =~ /_ANON/) {
-      if (defined $item->[1]) {
+      if (defined $item->[2]) {
 	push @items, map [
-	  $_->[0], "$item->[1]_$_->[1]", "$item->[1].$_->[1]"
+	  @$_[0, 1], "$item->[2]_$_->[2]", "$item->[2].$_->[2]",
 	], @{ $structs{$item->[0]} };
       } else {
 	push @items, @{ $structs{$item->[0]} };
       }
     } else {
       my $type = normalize_type($item->[0]);
+      my $ttype = $structs{$type} ? normalize_type("$type *") : $type;
       print $fh <<"EOF";
-$type
-$item->[1](THIS, __value = NO_INIT)
+$ttype
+$item->[2](THIS, __value = NO_INIT)
 	$ptrname THIS
 	$type __value
     PROTOTYPE: \$;\$
     CODE:
-	RETVAL = THIS->$item->[-1];
 	if (items > 1)
 	    THIS->$item->[-1] = __value;
+	RETVAL = @{[
+	    $type eq $ttype ? "THIS->$item->[-1]" : "&(THIS->$item->[-1])"
+	]};
     OUTPUT:
 	RETVAL
 
@@ -1293,13 +1447,17 @@ sub assign_typemap_entry {
   return $entry;
 }
 
+for (@vdecls) {
+  print_tievar_xsubs(\*XS, $_, $vdecl_hash{$_});
+}
+
 if ($opt_x) {
-    for my $decl (@$fdecls_parsed) { print_decl(\*XS, $decl) }
-    if ($opt_a) {
-	while (my($name, $struct) = each %structs) {
-	    print_accessors(\*XS, $name, $struct);
-	}
+  for my $decl (@$fdecls_parsed) { print_decl(\*XS, $decl) }
+  if ($opt_a) {
+    while (my($name, $struct) = each %structs) {
+      print_accessors(\*XS, $name, $struct);
     }
+  }
 }
 
 close XS;

@@ -54,9 +54,9 @@ BEGIN {
     }
 }
 
-# By now GR filehandle should be open and full of juicy group entries.
+# By now the GR filehandle should be open and full of juicy group entries.
 
-print "1..1\n";
+print "1..2\n";
 
 # Go through at most this many groups.
 # (note that the first entry has been read away by now)
@@ -67,6 +67,7 @@ my $tst = 1;
 my %perfect;
 my %seen;
 
+setgrent();
 while (<GR>) {
     chomp;
     my @s = split /:/;
@@ -111,6 +112,8 @@ while (<GR>) {
     $n++;
 }
 
+endgrent();
+
 if (keys %perfect == 0) {
     $max++;
     print <<EOEX;
@@ -135,5 +138,30 @@ EOEX
 print "ok ", $tst++;
 print "\t# (not necessarily serious: run t/op/grent.t by itself)" if $not;
 print "\n";
+
+# Test both the scalar and array contexts.
+
+my @gr1;
+
+setgrent();
+for (1..$max) {
+    my $gr = scalar getgrent();
+    last unless defined $gr;
+    push @gr1, $gr;
+}
+endgrent();
+
+my @gr2;
+
+setgrent();
+for (1..$max) {
+    my ($gr) = (getgrent());
+    last unless defined $gr;
+    push @gr2, $gr;
+}
+endgrent();
+
+print "not " unless "@gr1" eq "@gr2";
+print "ok ", $tst++, "\n";
 
 close(GR);

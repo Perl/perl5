@@ -146,22 +146,36 @@ PP(pp_concat)
     dPOPTOPssrl;
     STRLEN len;
     char *s;
+    bool left_utf = DO_UTF8(left);
+    bool right_utf = DO_UTF8(right);
 
     if (TARG != left) {
+	if (right_utf && !left_utf)
+	    sv_utf8_upgrade(left);
 	s = SvPV(left,len);
+	SvUTF8_off(TARG);
 	if (TARG == right) {
+	    if (left_utf && !right_utf)
+		sv_utf8_upgrade(right);
 	    sv_insert(TARG, 0, 0, s, len);
+	    if (left_utf || right_utf)
+		SvUTF8_on(TARG);
 	    SETs(TARG);
 	    RETURN;
 	}
 	sv_setpvn(TARG,s,len);
     }
-    else if (SvGMAGICAL(TARG))
+    else if (SvGMAGICAL(TARG)) {
 	mg_get(TARG);
+	if (right_utf && !left_utf)
+	    sv_utf8_upgrade(left);
+    }
     else if (!SvOK(TARG) && SvTYPE(TARG) <= SVt_PVMG) {
 	sv_setpv(TARG, "");	/* Suppress warning. */
 	s = SvPV_force(TARG, len);
     }
+    if (left_utf && !right_utf)
+	sv_utf8_upgrade(right);
     s = SvPV(right,len);
     if (SvOK(TARG)) {
 #if defined(PERL_Y2KWARN)
@@ -176,19 +190,12 @@ PP(pp_concat)
 	    }
 	}
 #endif
-	if (DO_UTF8(right))
-	    sv_utf8_upgrade(TARG);
 	sv_catpvn(TARG,s,len);
-	if (!IN_BYTE) {
-	    if (SvUTF8(right))
-		SvUTF8_on(TARG);
-	}
-	else if (!SvUTF8(right)) {
-	    SvUTF8_off(TARG);
-	}
     }
     else
 	sv_setpvn(TARG,s,len);	/* suppress warning */
+    if (left_utf || right_utf)
+	SvUTF8_on(TARG);
     SETTARG;
     RETURN;
   }
@@ -653,7 +660,7 @@ S_do_maybe_phash(pTHX_ AV *ary, SV **lelem, SV **firstlelem, SV **relem,
 	    sv_setsv(tmpstr,relem[1]);	/* value */
 	    relem[1] = tmpstr;
 	    if (avhv_store_ent(ary,relem[0],tmpstr,0))
-		SvREFCNT_inc(tmpstr);
+		(void)SvREFCNT_inc(tmpstr);
 	    if (SvMAGICAL(ary) != 0 && SvSMAGICAL(tmpstr))
 		mg_set(tmpstr);
 	    relem += 2;
@@ -687,7 +694,7 @@ S_do_oddball(pTHX_ HV *hash, SV **relem, SV **firstrelem)
 	    /* pseudohash */
 	    tmpstr = sv_newmortal();
 	    if (avhv_store_ent((AV*)hash,*relem,tmpstr,0))
-		SvREFCNT_inc(tmpstr);
+		(void)SvREFCNT_inc(tmpstr);
 	    if (SvMAGICAL(hash) && SvSMAGICAL(tmpstr))
 		mg_set(tmpstr);
 	}
@@ -1021,7 +1028,8 @@ play_it_again:
 	     && !PL_sawampersand 
 	     && ((rx->reganch & ROPT_NOSCAN)
 		 || !((rx->reganch & RE_INTUIT_TAIL)
-		      && (r_flags & REXEC_SCREAM))))
+		      && (r_flags & REXEC_SCREAM)))
+	     && !SvROK(TARG))	/* Cannot trust since INTUIT cannot guess ^ */
 	    goto yup;
     }
     if (CALLREGEXEC(aTHX_ rx, s, strend, truebase, minmatch, TARG, NULL, r_flags))
@@ -1057,6 +1065,10 @@ play_it_again:
 		len = rx->endp[i] - rx->startp[i];
 		s = rx->startp[i] + truebase;
 		sv_setpvn(*SP, s, len);
+		if ((pm->op_pmdynflags & PMdf_UTF8) && !IN_BYTE) {
+		    SvUTF8_on(*SP);
+		    sv_utf8_downgrade(*SP, TRUE);
+		}
 	    }
 	}
 	if (global) {
@@ -2012,8 +2024,10 @@ PP(pp_leavesub)
 		    sv_2mortal(*MARK);
 		}
 		else {
+		    sv = SvREFCNT_inc(TOPs);	/* FREETMPS could clobber it */
 		    FREETMPS;
-		    *MARK = sv_mortalcopy(TOPs);
+		    *MARK = sv_mortalcopy(sv);
+		    SvREFCNT_dec(sv);
 		}
 	    }
 	    else
@@ -2161,8 +2175,10 @@ PP(pp_leavesublv)
 			sv_2mortal(*MARK);
 		    }
 		    else {
+			sv = SvREFCNT_inc(TOPs); /* FREETMPS could clobber it */
 			FREETMPS;
-			*MARK = sv_mortalcopy(TOPs);
+			*MARK = sv_mortalcopy(sv);
+			SvREFCNT_dec(sv);
 		    }
 		}
 		else

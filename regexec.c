@@ -346,7 +346,9 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	    I32 slen;
 
 	    if ( !(prog->reganch & ROPT_ANCH_GPOS) /* Checked by the caller */
-		 && (sv && (strpos + SvCUR(sv) != strend)) ) {
+		 /* SvCUR is not set on references: SvRV and SvPVX overlap */
+		 && sv && !SvROK(sv)
+		 && (strpos + SvCUR(sv) != strend)) {
 		DEBUG_r(PerlIO_printf(Perl_debug_log, "Not at start...\n"));
 		goto fail;
 	    }
@@ -638,7 +640,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
       try_at_start:
 	/* Even in this situation we may use MBOL flag if strpos is offset
 	   wrt the start of the string. */
-	if (ml_anch && sv
+	if (ml_anch && sv && !SvROK(sv)	/* See prev comment on SvROK */
 	    && (strpos + SvCUR(sv) != strend) && strpos[-1] != '\n'
 	    /* May be due to an implicit anchor of m{.*foo}  */
 	    && !(prog->reganch & ROPT_IMPLICIT))
@@ -1432,9 +1434,14 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	/* we have /x+whatever/ */
 	/* it must be a one character string (XXXX Except UTF?) */
 	char ch = SvPVX(prog->anchored_substr)[0];
+#ifdef DEBUGGING
+	int did_match = 0;
+#endif
+
 	if (UTF) {
 	    while (s < strend) {
 		if (*s == ch) {
+		    DEBUG_r( did_match = 1 );
 		    if (regtry(prog, s)) goto got_it;
 		    s += UTF8SKIP(s);
 		    while (s < strend && *s == ch)
@@ -1446,6 +1453,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	else {
 	    while (s < strend) {
 		if (*s == ch) {
+		    DEBUG_r( did_match = 1 );
 		    if (regtry(prog, s)) goto got_it;
 		    s++;
 		    while (s < strend && *s == ch)
@@ -1454,6 +1462,9 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 		s++;
 	    }
 	}
+	DEBUG_r(did_match ||
+		PerlIO_printf(Perl_debug_log,
+			      "Did not find anchored character...\n"));
     }
     /*SUPPRESS 560*/
     else if (prog->anchored_substr != Nullsv
@@ -1469,6 +1480,9 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 			  -(I32)(CHR_SVLEN(must)
 				 - (SvTAIL(must) != 0) + back_min));
 	char *last1;		/* Last position checked before */
+#ifdef DEBUGGING
+	int did_match = 0;
+#endif
 
 	if (s > PL_bostr)
 	    last1 = HOPc(s, -1);
@@ -1487,6 +1501,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 		 : (s = fbm_instr((unsigned char*)HOP(s, back_min),
 				  (unsigned char*)strend, must, 
 				  PL_multiline ? FBMrf_MULTILINE : 0))) ) {
+	    DEBUG_r( did_match = 1 );
 	    if (HOPc(s, -back_max) > last1) {
 		last1 = HOPc(s, -back_min);
 		s = HOPc(s, -back_max);
@@ -1512,6 +1527,14 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 		}
 	    }
 	}
+	DEBUG_r(did_match ||
+		PerlIO_printf(Perl_debug_log, "Did not find %s substr `%s%.*s%s'%s...\n",
+			      ((must == prog->anchored_substr)
+			       ? "anchored" : "floating"),
+			      PL_colors[0],
+			      (int)(SvCUR(must) - (SvTAIL(must)!=0)),
+			      SvPVX(must),
+			      PL_colors[1], (SvTAIL(must) ? "$" : "")));
 	goto phooey;
     }
     else if ((c = prog->regstclass)) {
@@ -1520,6 +1543,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	    strend = HOPc(strend, -(minlen - 1));
   	if (find_byclass(prog, c, s, strend, startpos, 0))
 	    goto got_it;
+	DEBUG_r(PerlIO_printf(Perl_debug_log, "Contradicts stclass...\n"));
     }
     else {
 	dontbother = 0;
@@ -1552,7 +1576,12 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 			last = strend;	/* matching `$' */
 		}
 	    }
-	    if (last == NULL) goto phooey; /* Should not happen! */
+	    if (last == NULL) {
+		DEBUG_r(PerlIO_printf(Perl_debug_log,
+				      "%sCan't trim the tail, match fails (should not happen)%s\n",
+				      PL_colors[4],PL_colors[5]));
+		goto phooey; /* Should not happen! */
+	    }
 	    dontbother = strend - last + prog->float_min_offset;
 	}
 	if (minlen && (dontbother < minlen))
@@ -1614,6 +1643,8 @@ got_it:
     return 1;
 
 phooey:
+    DEBUG_r(PerlIO_printf(Perl_debug_log, "%sMatch failed%s\n",
+			  PL_colors[4],PL_colors[5]));
     if (PL_reg_eval_set)
 	restore_pos(aTHXo_ 0);
     return 0;

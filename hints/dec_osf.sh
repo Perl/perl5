@@ -65,10 +65,34 @@ cc=${cc:-cc}
 	# reset
 	_DEC_cc_style=
 case "`$cc -v 2>&1 | grep cc`" in
-*gcc*)	;; # pass
+*gcc*)	_gcc_version=`$cc -v 2>&1 | grep "gcc version" | sed 's%^gcc version \([0-9]*\)\.\([0-9]*\) .*%\1 \2%'`
+	set $_gcc_version
+	if test "$1" -lt 2 -o \( "$1" -eq 2 -a "$2" -lt 95 \); then
+	    cat >&4 <<EOF
+
+Your cc seems to be gcc and its version seems to be less than 2.95.
+This is not a good idea since old versions of gcc are known to produce
+buggy code when compiling Perl (and no doubt for other programs, too).
+
+Therefore, I strongly suggest upgrading your gcc.  (Why don't you
+use the vendor cc is also a good question.  It comes with the operating
+system and produces good code.)
+
+Note that as of gcc 2.95 (19990728) and Perl 5.6.0 (end of March 2000)
+if the said Perl is compiled with the said gcc the lib/sdbm test will 
+dump core.  As this doesn't happen with the vendor cc, this is
+most probably a lingering bug in gcc.  Therefore unless you have
+a better gcc you are still better off using the vendor cc.
+
+Cannot continue, aborting.
+
+EOF
+	    exit 1
+	fi
+        ;;
 *)	# compile something small: taint.c is fine for this.
     	# the main point is the '-v' flag of 'cc'.
-       	case "`cc -v -I. -c taint.c -o /tmp/taint$$.o 2>&1`" in
+       	case "`cc -v -I. -c taint.c -o taint$$.o 2>&1`" in
 	*/gemc_cc*)	# we have the new DEC GEM CC
 			_DEC_cc_style=new
 			;;
@@ -77,7 +101,7 @@ case "`$cc -v 2>&1 | grep cc`" in
 			;;
 	esac
 	# cleanup
-	rm -f /tmp/taint$$.o
+	rm -f taint$$.o
 	;;
 esac
 

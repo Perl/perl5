@@ -30,7 +30,7 @@ print "not " unless @a == 0;
 print "ok 3\n";
 
 # Test the explicit use of the GLOB_NOCASE flag
-@a = File::Glob::glob("lib/G*.t", GLOB_NOCASE);
+@a = bsd_glob("lib/G*.t", GLOB_NOCASE);
 print "not " unless @a >= 3;
 print "ok 4\n";
 
@@ -47,7 +47,7 @@ else {
     rmdir "[]";
     print "# returned @a\nnot " unless @a == 1;
     print "ok 6\n";
-    @a = File::Glob::glob("lib\\*", GLOB_QUOTE);
+    @a = bsd_glob("lib\\*", GLOB_QUOTE);
     print "not " if @a == 0;
     print "ok 7\n";
 }

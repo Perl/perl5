@@ -98,7 +98,7 @@ print((unpack("p",pack("p",$test)) == $test ? "ok " : "not ok "),$test++,"\n");
 # temps
 sub foo { my $a = "a"; return $a . $a++ . $a++ }
 {
-  local $^W = 1;
+  use warnings;
   my $last = $test;
   local $SIG{__WARN__} = sub {
 	print "ok ",$test++,"\n" if $_[0] =~ /temporary val/
@@ -372,8 +372,9 @@ print $@ eq '' && $y eq 'z' ? "ok $test\n" : "not ok $test\n"; $test++;
 
 eval { ($x) = pack '/a*','hello' };
 print 'not ' unless $@; print "ok $test\n"; $test++;
-$z = pack 'n/a* w/A*','string','etc';
-print 'not ' unless $z eq "\000\006string\003etc"; print "ok $test\n"; $test++;
+$z = pack 'n/a* N/Z* w/A*','string','hi there ','etc';
+print 'not ' unless $z eq "\000\006string\0\0\0\012hi there \000\003etc";
+print "ok $test\n"; $test++;
 
 eval { ($x) = unpack 'a/a*/a*', '212ab345678901234567' };
 print $@ eq '' && $x eq 'ab3456789012' ? "ok $test\n" : "#$x,$@\nnot ok $test\n";

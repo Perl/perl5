@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Mon Mar  6 00:00:30 EET 2000
+ * Configuration time: Fri Apr 28 23:34:47 EET DST 2000
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -174,12 +174,6 @@
  *	available to get the file position indicator, similar to ftell().
  */
 #define HAS_FGETPOS	/**/
-
-/* FLEXFILENAMES:
- *	This symbol, if defined, indicates that the system supports filenames
- *	longer than 14 characters.
- */
-#define	FLEXFILENAMES		/**/
 
 /* HAS_FLOCK:
  *	This symbol, if defined, indicates that the flock routine is
@@ -1133,7 +1127,7 @@
 #define BIN_EXP "/opt/perl/bin"	/**/
 
 /* PERL_BINCOMPAT_5005:
- *	This symbol, if defined, indicates that Perl 5.006 should be
+ *	This symbol, if defined, indicates that this version of Perl should be
  *	binary-compatible with Perl 5.005.  This is impossible for builds
  *	that use features like threads and multiplicity it is always 
  *	for those versions.
@@ -1204,7 +1198,7 @@
 #  define STRINGIFY(a)	PeRl_StGiFy(a)
 #endif
 #if 42 != 1 && 42 != 42
-#include "Bletch: How does this C preprocessor catenate tokens?"
+#   include "Bletch: How does this C preprocessor catenate tokens?"
 #endif
 
 /* CPPSTDIN:
@@ -1346,10 +1340,23 @@
  */
 #define HAS_FD_SET	/**/
 
+/* FLEXFILENAMES:
+ *	This symbol, if defined, indicates that the system supports filenames
+ *	longer than 14 characters.
+ */
+#define	FLEXFILENAMES		/**/
+
 /* HAS_FPOS64_T:
  *	This symbol will be defined if the C compiler supports fpos64_t.
  */
 /*#define	HAS_FPOS64_T    	/ **/
+
+/* HAS_FREXPL:
+ *	This symbol, if defined, indicates that the frexpl routine is
+ *	available to break a long double floating-point number into
+ *	a normalized fraction and an integral power of 2.
+ */
+#define HAS_FREXPL		/**/
 
 /* HAS_STRUCT_FS_DATA:
  *	This symbol, if defined, indicates that the struct fs_data
@@ -1397,6 +1404,12 @@
  *	available to get the current working directory.
  */
 #define HAS_GETCWD		/**/
+
+/* HAS_GETFSSTAT:
+ *	This symbol, if defined, indicates that the getfsstat routine is
+ *	available to stat filesystems in bulk.
+ */
+#define HAS_GETFSSTAT		/**/
 
 /* HAS_GETGRENT:
  *	This symbol, if defined, indicates that the getgrent routine is
@@ -1624,6 +1637,18 @@
  */
 #define HAS_ISASCII		/**/
 
+/* HAS_ISNAN:
+ *	This symbol, if defined, indicates that the isnan routine is
+ *	available to check whether a double is a NaN.
+ */
+#define HAS_ISNAN		/**/
+
+/* HAS_ISNANL:
+ *	This symbol, if defined, indicates that the isnanl routine is
+ *	available to check whether a long double is a NaN.
+ */
+#define HAS_ISNANL		/**/
+
 /* HAS_LCHOWN:
  *	This symbol, if defined, indicates that the lchown routine is
  *	available to operate on a symbolic link (instead of following the
@@ -1665,6 +1690,14 @@
 #ifdef HAS_LONG_LONG
 #define LONGLONGSIZE 8		/**/
 #endif
+
+/* HAS_LSEEK_PROTO:
+ *	This symbol, if defined, indicates that the system provides
+ *	a prototype for the lseek() function.  Otherwise, it is up
+ *	to the program to supply one.  A good guess is
+ *		extern off_t lseek(int, off_t, int);
+ */
+#define	HAS_LSEEK_PROTO	/**/
 
 /* HAS_MADVISE:
  *	This symbol, if defined, indicates that the madvise system call is
@@ -2203,6 +2236,12 @@
  */
 #define	Gid_t_f		"u"		/**/
 
+/* Gid_t_sign:
+ *	This symbol holds the signedess of a Gid_t.
+ *	1 for unsigned, -1 for signed.
+ */
+#define Gid_t_sign	1		/* GID sign */
+
 /* Gid_t_size:
  *	This symbol holds the size of a Gid_t in bytes.
  */
@@ -2212,19 +2251,19 @@
  *	This symbol holds the return type of getgid() and the type of
  *	argument to setrgid() and related functions.  Typically,
  *	it is the type of group ids in the kernel. It can be int, ushort,
- *	uid_t, etc... It may be necessary to include <sys/types.h> to get
+ *	gid_t, etc... It may be necessary to include <sys/types.h> to get
  *	any typedef'ed information.
  */
 #define Gid_t gid_t		/* Type for getgid(), etc... */
 
 /* Groups_t:
  *	This symbol holds the type used for the second argument to
- *	getgroups() and setgropus().  Usually, this is the same as
+ *	getgroups() and setgroups().  Usually, this is the same as
  *	gidtype (gid_t) , but sometimes it isn't.
- *	It can be int, ushort, uid_t, etc... 
+ *	It can be int, ushort, gid_t, etc... 
  *	It may be necessary to include <sys/types.h> to get any 
  *	typedef'ed information.  This is only required if you have
- *	getgroups() or setgropus()..
+ *	getgroups() or setgroups()..
  */
 #if defined(HAS_GETGROUPS) || defined(HAS_SETGROUPS)
 #define Groups_t gid_t	/* Type for 2nd arg to [sg]etgroups() */
@@ -2259,6 +2298,12 @@
  *	should be included.
  */
 #define	I_ICONV		/**/
+
+/* I_IEEEFP:
+ *	This symbol, if defined, indicates that <ieeefp.h> exists and
+ *	should be included.
+ */
+/*#define	I_IEEEFP		/ **/
 
 /* I_INTTYPES:
  *     This symbol, if defined, indicates to the C program that it should
@@ -2547,6 +2592,16 @@
 #define Netdb_name_t		const char * /**/
 #define Netdb_net_t		int /**/
 
+/* PERL_OTHERLIBDIRS:
+ *	This variable contains a colon-separated set of paths for the perl
+ *	binary to search for additional library files or modules.
+ *	These directories will be tacked to the end of @INC.
+ *	Perl will automatically search below each path for version-
+ *	and architecture-specific directories.  See PERL_INC_VERSION_LIST
+ *	for more details.
+ */
+/*#define PERL_OTHERLIBDIRS " "		/ **/
+
 /* IVTYPE:
  *	This symbol defines the C type used for Perl's IV.
  */
@@ -2610,6 +2665,9 @@
 /* U64SIZE:
  *	This symbol contains the sizeof(U64).
  */
+/* NVSIZE:
+ *	This symbol contains the sizeof(NV).
+ */
 /* NV_PRESERVES_UV:
  *	This symbol, if defined, indicates that a variable of type NVTYPE
  *	can preserve all the bit of a variable of type UVSIZE.
@@ -2639,6 +2697,7 @@
 #define	I64SIZE		8	/**/
 #define	U64SIZE		8	/**/
 #endif
+#define	NVSIZE		8		/**/
 #undef	NV_PRESERVES_UV
 
 /* IVdf:
@@ -2805,6 +2864,11 @@
 #define SITELIB_EXP "/opt/perl/lib/site_perl/5.6.0"		/**/
 #define SITELIB_STEM "/opt/perl/lib/site_perl"		/**/
 
+/* Size_t_size:
+ *	This symbol holds the size of a Size_t in bytes.
+ */
+#define Size_t_size 8		/* */
+
 /* Size_t:
  *	This symbol holds the type used to declare length parameters
  *	for string functions.  It is usually size_t, but may be
@@ -2812,6 +2876,12 @@
  *	<sys/types.h> to get any typedef'ed information.
  */
 #define Size_t size_t	 /* length paramater for string functions */
+
+/* Sock_size_t:
+ *	This symbol holds the type used for the size argument of
+ *	various socket calls (just the base type, not the pointer-to).
+ */
+#define Sock_size_t		int /**/
 
 /* SSize_t:
  *	This symbol holds the type used by functions that return
@@ -2845,6 +2915,12 @@
  *	This symbol defines the format string used for printing a Uid_t.
  */
 #define	Uid_t_f		"u"		/**/
+
+/* Uid_t_sign:
+ *	This symbol holds the signedess of a Uid_t.
+ *	1 for unsigned, -1 for signed.
+ */
+#define Uid_t_sign	1		/* UID sign */
 
 /* Uid_t_size:
  *	This symbol holds the size of a Uid_t in bytes.
@@ -2952,10 +3028,22 @@
 #endif
 /*#define	OLD_PTHREADS_API		/ **/
 
+/* PERL_VENDORARCH:
+ *	If defined, this symbol contains the name of a private library.
+ *	The library is private in the sense that it needn't be in anyone's
+ *	execution path, but it should be accessible by the world.
+ *	It may have a ~ on the front. 
+ *	The standard distribution will put nothing in this directory.
+ *	Vendors who distribute perl may wish to place their own
+ *	architecture-dependent modules and extensions in this directory with
+ *		MakeMaker Makefile.PL INSTALLDIRS=vendor 
+ *	or equivalent.  See INSTALL for details.
+ */
 /* PERL_VENDORARCH_EXP:
  *	This symbol contains the ~name expanded version of PERL_VENDORARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
+/*#define PERL_VENDORARCH ""		/ **/
 /*#define PERL_VENDORARCH_EXP ""		/ **/
 
 /* PERL_VENDORLIB_EXP:
@@ -3030,30 +3118,11 @@
 #define PERL_XS_APIVERSION "5.6.0"
 #define PERL_PM_APIVERSION "5.005"
 
-/* HAS_GETFSSTAT:
- *	This symbol, if defined, indicates that the getfsstat routine is
- *	available to stat filesystems in bulk.
+/* HAS_MODFL:
+ *	This symbol, if defined, indicates that the modfl routine is
+ *	available to split a long double x into a fractional part f and
+ *	an integer part i such that |f| < 1.0 and (f + i) = x.
  */
-#define HAS_GETFSSTAT		/**/
-
-/* I_IEEEFP:
- *	This symbol, if defined, indicates that <ieeefp.h> exists and
- *	should be included.
- */
-/*#define	I_IEEEFP		/ **/
-
-/* HAS_LSEEK_PROTO:
- *	This symbol, if defined, indicates that the system provides
- *	a prototype for the lseek() function.  Otherwise, it is up
- *	to the program to supply one.  A good guess is
- *		extern off_t lseek(int, off_t, int);
- */
-#define	HAS_LSEEK_PROTO	/**/
-
-/* Sock_size_t:
- *	This symbol holds the type used for the size argument of
- *	various socket calls (just the base type, not the pointer-to).
- */
-#define Sock_size_t		int /**/
+#define HAS_MODFL		/**/
 
 #endif

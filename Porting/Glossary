@@ -131,8 +131,8 @@ bin (bin.U):
 	this variable must be prepared to deal with ~name substitution.
 
 bincompat5005 (bincompat5005.U):
-	This variable contains y if Perl 5.006 should be binary-compatible
-	with Perl 5.005.
+	This variable contains y if this version of Perl should be
+	binary-compatible with Perl 5.005.
 
 binexp (bin.U):
 	This is the same as the bin variable, but is filename expanded at
@@ -194,6 +194,8 @@ ccflags (ccflags.U):
 
 ccsymbols (Cppsym.U):
 	The variable contains the symbols defined by the C compiler alone.
+	The symbols defined by cpp or by cc when it calls cpp are not in
+	this list, see cppsymbols and cppccsymbols.
 	The list is a space-separated list of symbol=value tokens.
 
 cf_by (cf_who.U):
@@ -267,9 +269,9 @@ cpp_stuff (cpp_stuff.U):
 	used by the C preprocessor.
 
 cppccsymbols (Cppsym.U):
-	The variable contains the symbols defined by both
-	the bare C compiler and during a compilation that
-	includes stdio.h.
+	The variable contains the symbols defined by the C compiler
+	when it calls cpp.  The symbols defined by the cc alone or cpp
+	alone are not in this list, see ccsymbols and cppsymbols.
 	The list is a space-separated list of symbol=value tokens.
 
 cppflags (ccflags.U):
@@ -301,8 +303,9 @@ cppstdin (cppstdin.U):
 	preprocessor symbols.
 
 cppsymbols (Cppsym.U):
-	The variable contains the symbols during a compilation
-	that includes stdio.h.
+	The variable contains the symbols defined by the C preprocessor
+	alone.  The symbols defined by cc or by cc when it calls cpp are
+	not in this list, see ccsymbols and cppccsymbols.
 	The list is a space-separated list of symbol=value tokens.
 
 crosscompile (crosscompile.U):
@@ -360,9 +363,10 @@ d_bcopy (d_bcopy.U):
 
 d_bincompat5005 (bincompat5005.U):
 	This variable conditionally defines BINCOMPAT5005 so that embed.h
-	can take special action if Perl 5.006 should be binary-compatible
-	with Perl 5.005.  This is impossible for builds that use features
-	like threads and multiplicity it is always $undef for those versions.
+	can take special action if this version of Perl should be
+	binary-compatible with Perl 5.005.  This is impossible for builds
+	that use features like threads and multiplicity it is always $undef
+	for those versions.
 
 d_bsd (Guess.U):
 	This symbol conditionally defines the symbol BSD when running on a
@@ -568,6 +572,10 @@ d_fpathconf (d_pathconf.U):
 
 d_fpos64_t (d_fpos64_t.U):
 	This symbol will be defined if the C compiler supports fpos64_t.
+
+d_frexpl (d_frexpl.U):
+	This variable conditionally defines the HAS_FREXPL symbol, which
+	indicates to the C program that the frexpl() routine is available.
 
 d_fs_data_s (d_fs_data_s.U):
 	This variable conditionally defines the HAS_STRUCT_FS_DATA symbol,
@@ -807,6 +815,14 @@ d_isascii (d_isascii.U):
 	This variable conditionally defines the HAS_ISASCII constant,
 	which indicates to the C program that isascii() is available.
 
+d_isnan (d_isnan.U):
+	This variable conditionally defines the HAS_ISNAN symbol, which
+	indicates to the C program that the isnan() routine is available.
+
+d_isnanl (d_isnanl.U):
+	This variable conditionally defines the HAS_ISNANL symbol, which
+	indicates to the C program that the isnanl() routine is available.
+
 d_killpg (d_killpg.U):
 	This variable conditionally defines the HAS_KILLPG symbol, which
 	indicates to the C program that the killpg() routine is available
@@ -929,6 +945,10 @@ d_mmap (d_mmap.U):
 	This variable conditionally defines HAS_MMAP if mmap() is
 	available to map a file into memory.
 
+d_modfl (d_modfl.U):
+	This variable conditionally defines the HAS_MODFL symbol, which
+	indicates to the C program that the modfl() routine is available.
+
 d_mprotect (d_mprotect.U):
 	This variable conditionally defines HAS_MPROTECT if mprotect() is
 	available to modify the access protection of a memory mapped file.
@@ -1031,6 +1051,11 @@ d_pause (d_pause.U):
 	This variable conditionally defines the HAS_PAUSE symbol, which
 	indicates to the C program that the pause() routine is available
 	to suspend a process until a signal is received.
+
+d_perl_otherlibdirs (otherlibdirs.U):
+	This variable conditionally defines PERL_OTHERLIBDIRS, which
+	contains a colon-separated set of paths for the perl binary to
+	include in @INC.  See also otherlibdirs.
 
 d_phostname (d_gethname.U):
 	This variable conditionally defines the HAS_PHOSTNAME symbol, which
@@ -2737,6 +2762,16 @@ osvers (Oldconfig.U):
 	same for this package, hints files might just be os_4.0 or
 	os_4.1, etc., not keeping separate files for each little release.
 
+otherlibdirs (otherlibdirs.U):
+	This variable contains a colon-separated set of paths for the perl
+	binary to search for additional library files or modules.
+	These directories will be tacked to the end of @INC.
+	Perl will automatically search below each path for version-
+	and architecture-specific directories.  See inc_version_list
+	for more details.
+	A value of ' ' means 'none' and is used to preserve this value
+	for the next run through Configure.
+
 package (package.U):
 	This variable contains the name of the package being constructed.
 	It is primarily intended for the use of later Configure units.
@@ -3093,6 +3128,9 @@ siteprefix (siteprefix.U):
 siteprefixexp (siteprefix.U):
 	This variable holds the full absolute path of the directory below
 	which the user will install add-on packages.  Derived from siteprefix.
+
+sizesize (sizesize.U):
+	This variable contains the size of a sizetype in bytes.
 
 sizetype (sizetype.U):
 	This variable defines sizetype to be something like size_t, 

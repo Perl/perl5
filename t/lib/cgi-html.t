@@ -9,7 +9,7 @@ BEGIN {
     require Config; import Config;
 }
 
-BEGIN {$| = 1; print "1..20\n"; }
+BEGIN {$| = 1; print "1..24\n"; }
 END {print "not ok 1\n" unless $loaded;}
 use CGI (':standard','-no_debug','*h3','start_table');
 $loaded = 1;
@@ -41,12 +41,13 @@ test(7,h1({-align=>'CENTER'},['fred','agnes']) eq
     test(8,h1('fred','agnes','maura') eq '<H1>fred-agnes-maura</H1>',"open/close tag \$\" interpolation");
 }
 
-test(9,header() eq "Content-Type: text/html$crlf$crlf","header()");
-test(10,header(-type=>'image/gif') eq "Content-Type: image/gif$crlf$crlf","header()");
-test(11,header(-type=>'image/gif',-status=>'500 Sucks') eq "Status: 500 Sucks${crlf}Content-Type: image/gif$crlf$crlf","header()");
-test(12,header(-nph=>1) eq "HTTP/1.0 200 OK${crlf}Content-Type: text/html$crlf$crlf","header()");
+test(9,header() eq "Content-Type: text/html; charset=ISO-8859-1$crlf$crlf","header()");
+test(10,header(-type=>'image/gif') eq "Content-Type: image/gif; charset=ISO-8859-1$crlf$crlf","header()");
+test(11,header(-type=>'image/gif',-status=>'500 Sucks') eq "Status: 500 Sucks${crlf}Content-Type: image/gif; charset=ISO-8859-1$crlf$crlf","header()");
+test(12,header(-nph=>1) eq "HTTP/1.0 200 OK${crlf}Content-Type: text/html; charset=ISO-8859-1$crlf$crlf","header()");
 test(13,start_html() ."\n" eq <<END,"start_html()");
-<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+	"http://www.w3.org/TR/html4/loose.dtd">
 <HTML><HEAD><TITLE>Untitled Document</TITLE>
 </HEAD><BODY>
 END
@@ -58,7 +59,8 @@ test(14,start_html(-dtd=>"-//IETF//DTD HTML 3.2//FR") ."\n" eq <<END,"start_html
 END
     ;
 test(15,start_html(-Title=>'The world of foo') ."\n" eq <<END,"start_html()");
-<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+	"http://www.w3.org/TR/html4/loose.dtd">
 <HTML><HEAD><TITLE>The world of foo</TITLE>
 </HEAD><BODY>
 END
@@ -70,6 +72,9 @@ test(17,header(-Cookie=>$cookie) =~ m!^Set-Cookie: fred=chocolate&chip\; path=/$
 test(18,start_h3 eq '<H3>');
 test(19,end_h3 eq '</H3>');
 test(20,start_table({-border=>undef}) eq '<TABLE BORDER>');
-
-
-
+test(21,h1(escapeHTML("this is <not> \x8bright\x9b")) eq '<H1>this is &lt;not&gt; &#139;right&#155;</H1>');
+charset('utf-8');
+test(22,h1(escapeHTML("this is <not> \x8bright\x9b")) eq '<H1>&#116;&#104;&#105;&#115;&#32;&#105;&#115;&#32;&#60;&#110;&#111;&#116;&#62;&#32;&#139;&#114;&#105;&#103;&#104;&#116;&#155;</H1>');
+test(23,i(p('hello there')) eq '<I><P>hello there</P></I>');
+my $q = new CGI;
+test(24,$q->h1('hi') eq '<H1>hi</H1>');

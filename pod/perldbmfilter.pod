@@ -86,6 +86,7 @@ sure you have already guessed, this is a problem that DBM Filters can
 fix very easily.
 
     use strict ;
+    use warnings ;
     use SDBM_File ;
     use Fcntl ;
 
@@ -99,7 +100,8 @@ fix very easily.
     # Install DBM Filters
     $db->filter_fetch_key  ( sub { s/\0$//    } ) ;
     $db->filter_store_key  ( sub { $_ .= "\0" } ) ;
-    $db->filter_fetch_value( sub { s/\0$//    } ) ;
+    $db->filter_fetch_value( 
+        sub { no warnings 'uninitialized' ;s/\0$// } ) ;
     $db->filter_store_value( sub { $_ .= "\0" } ) ;
 
     $hash{"abc"} = "def" ;
@@ -132,6 +134,7 @@ when reading.
 Here is a DBM Filter that does it:
 
     use strict ;
+    use warnings ;
     use DB_File ;
     my %hash ;
     my $filename = "/tmp/filt" ;

@@ -15,6 +15,7 @@ BEGIN {
 }
 
 use strict;
+use warnings;
 use vars qw($DEBUG);
 
 package B1;

@@ -4,6 +4,13 @@
 # various typeglob tests
 #
 
+BEGIN {
+    chdir 't' if -d 't';
+    unshift @INC, '../lib';
+}   
+
+use warnings;
+
 print "1..30\n";
 
 # type coersion on assignment
@@ -62,7 +69,7 @@ if (defined $baa) {
 #        fact that %X::Y:: is stored in %X:: isn't documented.
 #        (I hope.)
 
-{ package Foo::Bar; $test=1; }
+{ package Foo::Bar; no warnings 'once'; $test=1; }
 print exists $Foo::{'Bar::'} ? "ok 12\n" : "not ok 12\n";
 print $Foo::{'Bar::'} eq '*Foo::Bar::' ? "ok 13\n" : "not ok 13\n";
 
@@ -77,7 +84,7 @@ print +($foo || @foo || %foo) ? "not ok" : "ok", " 14\n";
 {
     my $msg;
     local $SIG{__WARN__} = sub { $msg = $_[0] };
-    local $^W = 1;
+    use warnings;
     *foo = 'bar';
     print $msg ? "not ok" : "ok", " 15\n";
     *foo = undef;

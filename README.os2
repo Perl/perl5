@@ -1481,7 +1481,7 @@ this works as well under DOS if you use DOS-enabled port of pdksh
 
 B<Disadvantages:> currently F<sh.exe> of pdksh calls external programs
 via fork()/exec(), and there is I<no> functioning exec() on
-OS/2. exec() is emulated by EMX by asyncroneous call while the caller
+OS/2. exec() is emulated by EMX by asynchronous call while the caller
 waits for child completion (to pretend that the C<pid> did not change). This
 means that 1 I<extra> copy of F<sh.exe> is made active via fork()/exec(),
 which may lead to some resources taken from the system (even if we do
@@ -1525,8 +1525,8 @@ as when processing B<-S> command-line switch.
 
 Perl uses its own malloc() under OS/2 - interpreters are usually malloc-bound
 for speed, but perl is not, since its malloc is lightning-fast.
-Perl-memory-usage-tuned benchmarks show that Perl's malloc is 5 times quickier
-than EMX one.  I do not have convincing data about memory footpring, but
+Perl-memory-usage-tuned benchmarks show that Perl's malloc is 5 times quicker
+than EMX one.  I do not have convincing data about memory footprint, but
 a (pretty random) benchmark showed that Perl one is 5% better.
 
 Combination of perl's malloc() and rigid DLL name resolution creates

@@ -11,9 +11,10 @@ mkdir "To", 0777;
 @todo = (
 # typical
 
-    ['IsWord',  '$cat =~ /^L[ulo]|^Nd/ or $code eq "005F"',	''],
-    ['IsAlnum', '$cat =~ /^L[ulo]|^Nd/',	''],
-    ['IsAlpha',  '$cat =~ /^L[ulo]/',	''],
+    ['IsWord',  '$cat =~ /^L[ulot]|^Nd/ or $code eq "005F"',	''],
+    ['IsAlnum', '$cat =~ /^L[ulot]|^Nd/',	''],
+    ['IsAlpha',  '$cat =~ /^L[ulot]/',	''],
+    # XXX broken: recursive definition (/\s/ will look up IsSpace in future)
     ['IsSpace',  '$cat =~ /^Z/ or $code lt "0020" and chr(hex $code) =~ /^\s/',	''],
     ['IsDigit',  '$cat =~ /^Nd$/',	''],
     ['IsUpper',  '$cat =~ /^Lu$/',	''],
@@ -166,6 +167,40 @@ mkdir "To", 0777;
     ['IsSylWA',	'$syl eq "A"',		''],
     ['IsSylWE',	'$syl eq "E"',		''],
     ['IsSylWC',	'$syl eq "C"',		''],
+    
+# Line break properties - Normative
+
+    ['IsLbrkBK','$brk eq "BK"',		''],	# Mandatory Break
+    ['IsLbrkCR','$brk eq "CR"',		''],	# Carriage Return
+    ['IsLbrkLF','$brk eq "LF"',		''],	# Line Feed
+    ['IsLbrkCM','$brk eq "CM"',		''],	# Attached Characters and Combining Marks
+    ['IsLbrkSG','$brk eq "SG"',		''],	# Surrogates
+    ['IsLbrkGL','$brk eq "GL"',		''],	# Non-breaking (Glue)
+    ['IsLbrkCB','$brk eq "CB"',		''],	# Contingent Break Opportunity
+    ['IsLbrkSP','$brk eq "SP"',		''],	# Space
+    ['IsLbrkZW','$brk eq "ZW"',		''],	# Zero Width Space
+
+# Line break properties - Informative
+    ['IsLbrkXX','$brk eq "XX"',		''],	# Unknown
+    ['IsLbrkOP','$brk eq "OP"',		''],	# Opening Punctuation
+    ['IsLbrkCL','$brk eq "CL"',		''],	# Closing Punctuation
+    ['IsLbrkQU','$brk eq "QU"',		''],	# Ambiguous Quotation
+    ['IsLbrkNS','$brk eq "NS"',		''],	# Non Starter
+    ['IsLbrkEX','$brk eq "EX"',		''],	# Exclamation/Interrogation
+    ['IsLbrkSY','$brk eq "SY"',		''],	# Symbols Allowing Breaks
+    ['IsLbrkIS','$brk eq "IS"',		''],	# Infix Separator (Numeric)
+    ['IsLbrkPR','$brk eq "PR"',		''],	# Prefix (Numeric)
+    ['IsLbrkPO','$brk eq "PO"',		''],	# Postfix (Numeric)
+    ['IsLbrkNU','$brk eq "NU"',		''],	# Numeric
+    ['IsLbrkAL','$brk eq "AL"',		''],	# Ordinary Alphabetic and Symbol Characters
+    ['IsLbrkID','$brk eq "ID"',		''],	# Ideographic
+    ['IsLbrkIN','$brk eq "IN"',		''],	# Inseparable
+    ['IsLbrkHY','$brk eq "HY"',		''],	# Hyphen
+    ['IsLbrkBB','$brk eq "BB"',		''],	# Break Opportunity Before
+    ['IsLbrkBA','$brk eq "BA"',		''],	# Break Opportunity After
+    ['IsLbrkSA','$brk eq "SA"',		''],	# Complex Context (South East Asian)
+    ['IsLbrkAI','$brk eq "AI"',		''],	# Ambiguous (Alphabetic or Ideographic)
+    ['IsLbrkB2','$brk eq "B2"',		''],	# Break Opportunity Before and After
 );
 
 # This is not written for speed...
@@ -256,6 +291,11 @@ sub proplist {
 	open(UD, "syllables.txt") or warn "Can't open $table: $!";
 
 	$split = '($code, $short, $syl) = split(/; */); $code =~ s/^U\+//;';
+    }
+    elsif ($table =~ /^IsLbrk/) {
+	open(UD, "LineBrk.txt") or warn "Can't open $table: $!";
+
+	$split = '($code, $brk, $name) = split(/;/);';
     }
     else {
 	open(UD, $UnicodeData) or warn "Can't open $UnicodeData: $!";

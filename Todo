@@ -1,6 +1,11 @@
 Always check out the latest perl5-porters discussions on these subjects
 before embarking on an implementation tour.
 
+Bugs
+	remove recursion in regular expression engine
+	fix memory leaks during compile failures
+	make signal handling safe
+
 Tie Modules
 	VecArray		Implement array using vec()
 	SubstrArray		Implement array using substr()
@@ -22,6 +27,11 @@ Would be nice to have
 	support in perlmain to rerun debugger
 	regression tests using __DIE__ hook
 	lexically scoped functions: my sub foo { ... }
+		the basic concept is easy and sound,
+		the difficulties begin with self-referential
+		and mutually referential lexical subs: how to
+		declare the subs?
+	lexically scoped typeglobs? (lexical I/O handles work now)
         wantlvalue?  more generalized want()/caller()?
 	named prototypes: sub foo ($foo, @bar) { ... } ?
 	regression/sanity tests for suidperl
@@ -41,6 +51,15 @@ Would be nice to have
 	    an extension (Devel::MProf?) that would return the malloc
 	    stats in a nice Perl datastructure (also a simple interface
 	    to return just the grand total would be good)
+	cross-compilation support
+	    host vs target: compile in the host, get the executable to
+	    the target, get the possible input files to the target,
+	    execute in the target (and do not assume a UNIXish shell
+	    in the target! e.g. no command redirection can be assumed),
+	    get possible output files back to to host.  this needs to work
+	    both during Configure and during the build.  You cannot assume
+	    shared filesystems between the host and the target (you may need
+	    e.g. ftp), executing the target executable may involve e.g. rsh
 	a way to make << and >> to shift bitvectors instead of numbers
 
 Possible pragmas

@@ -172,12 +172,6 @@ Variables begin with "$", "@" or "%" in Perl.
 
 =item *
 
-C<printf()> does not implement the "*" format for interpolating
-field widths, but it's trivial to use interpolation of double-quoted
-strings to achieve the same effect.
-
-=item *
-
 Comments begin with "#", not "/*".
 
 =item *
@@ -392,8 +386,9 @@ Everything else.
 =back
 
 If you find an example of a conversion trap that is not listed here,
-please submit it to Bill Middleton <F<wjm@best.com>> for inclusion.
-Also note that at least some of these can be caught with B<-w>.
+please submit it to <F<perlbug@perl.org>> for inclusion.
+Also note that at least some of these can be caught with the
+C<use warnings> pragma or the B<-w> switch.
 
 =head2 Discontinuance, Deprecation, and BugFix traps
 

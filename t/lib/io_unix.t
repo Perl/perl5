@@ -5,11 +5,6 @@ BEGIN {
         chdir 't' if -d 't';
         unshift @INC, '../lib' if -d '../lib';
     }
-    # ``use IO::Socket'' executes too early below in the os2 block
-    if ($^O eq 'dos') {
-        print "1..0 # Skip: no fork\n";
-	exit 0;
-    }
 }
 
 use Config;
@@ -27,7 +22,7 @@ BEGIN {
 	    $reason = 'IO extension unavailable';
 	}
 	elsif ($^O eq 'os2') {
-	    use IO::Socket;
+	    require IO::Socket;
 
 	    eval {IO::Socket::pack_sockaddr_un('/tmp/foo') || 1}
 	      or $@ !~ /not implemented/ or

@@ -98,7 +98,7 @@ if ($Config{d_sfio} || $^O eq 'machten' || $^O eq 'beos' || $^O eq 'posix-bc') {
 else {
     local $SIG{PIPE} = 'IGNORE';
     open NIL, '|true'	or die "open failed: $!";
-    sleep 4;
+    sleep 5;
     print NIL 'foo'	or die "print failed: $!";
     if (close NIL) {
 	print "not ok 9\n";

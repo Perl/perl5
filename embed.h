@@ -9,6 +9,9 @@
 
 /* provide binary compatible (but inconsistent) names */
 #if defined(PERL_BINCOMPAT_5005)
+#  define  Perl_call_atexit		perl_atexit
+#  define  Perl_eval_sv			perl_eval_sv
+#  define  Perl_eval_pv			perl_eval_pv
 #  define  Perl_call_argv		perl_call_argv
 #  define  Perl_call_method		perl_call_method
 #  define  Perl_call_pv			perl_call_pv
@@ -300,6 +303,7 @@
 #define to_uni_upper_lc		Perl_to_uni_upper_lc
 #define to_uni_title_lc		Perl_to_uni_title_lc
 #define to_uni_lower_lc		Perl_to_uni_lower_lc
+#define is_utf8_char		Perl_is_utf8_char
 #define is_utf8_alnum		Perl_is_utf8_alnum
 #define is_utf8_alnumc		Perl_is_utf8_alnumc
 #define is_utf8_idfirst		Perl_is_utf8_idfirst
@@ -467,6 +471,7 @@
 #define newSVREF		Perl_newSVREF
 #define newSVOP			Perl_newSVOP
 #define newSViv			Perl_newSViv
+#define newSVuv			Perl_newSVuv
 #define newSVnv			Perl_newSVnv
 #define newSVpv			Perl_newSVpv
 #define newSVpvn		Perl_newSVpvn
@@ -825,6 +830,9 @@
 #define ptr_table_store		Perl_ptr_table_store
 #define ptr_table_split		Perl_ptr_table_split
 #endif
+#if defined(HAVE_INTERP_INTERN)
+#define sys_intern_init		Perl_sys_intern_init
+#endif
 #if defined(PERL_OBJECT)
 #else
 #endif
@@ -1129,6 +1137,7 @@
 #define ck_eval			Perl_ck_eval
 #define ck_exec			Perl_ck_exec
 #define ck_exists		Perl_ck_exists
+#define ck_exit			Perl_ck_exit
 #define ck_ftst			Perl_ck_ftst
 #define ck_fun			Perl_ck_fun
 #define ck_fun_locale		Perl_ck_fun_locale
@@ -1744,6 +1753,7 @@
 #define to_uni_upper_lc(a)	Perl_to_uni_upper_lc(aTHX_ a)
 #define to_uni_title_lc(a)	Perl_to_uni_title_lc(aTHX_ a)
 #define to_uni_lower_lc(a)	Perl_to_uni_lower_lc(aTHX_ a)
+#define is_utf8_char(a)		Perl_is_utf8_char(aTHX_ a)
 #define is_utf8_alnum(a)	Perl_is_utf8_alnum(aTHX_ a)
 #define is_utf8_alnumc(a)	Perl_is_utf8_alnumc(aTHX_ a)
 #define is_utf8_idfirst(a)	Perl_is_utf8_idfirst(aTHX_ a)
@@ -1909,6 +1919,7 @@
 #define newSVREF(a)		Perl_newSVREF(aTHX_ a)
 #define newSVOP(a,b,c)		Perl_newSVOP(aTHX_ a,b,c)
 #define newSViv(a)		Perl_newSViv(aTHX_ a)
+#define newSVuv(a)		Perl_newSVuv(aTHX_ a)
 #define newSVnv(a)		Perl_newSVnv(aTHX_ a)
 #define newSVpv(a,b)		Perl_newSVpv(aTHX_ a,b)
 #define newSVpvn(a,b)		Perl_newSVpvn(aTHX_ a,b)
@@ -2258,6 +2269,9 @@
 #define ptr_table_store(a,b,c)	Perl_ptr_table_store(aTHX_ a,b,c)
 #define ptr_table_split(a)	Perl_ptr_table_split(aTHX_ a)
 #endif
+#if defined(HAVE_INTERP_INTERN)
+#define sys_intern_init()	Perl_sys_intern_init(aTHX)
+#endif
 #if defined(PERL_OBJECT)
 #else
 #endif
@@ -2561,6 +2575,7 @@
 #define ck_eval(a)		Perl_ck_eval(aTHX_ a)
 #define ck_exec(a)		Perl_ck_exec(aTHX_ a)
 #define ck_exists(a)		Perl_ck_exists(aTHX_ a)
+#define ck_exit(a)		Perl_ck_exit(aTHX_ a)
 #define ck_ftst(a)		Perl_ck_ftst(aTHX_ a)
 #define ck_fun(a)		Perl_ck_fun(aTHX_ a)
 #define ck_fun_locale(a)	Perl_ck_fun_locale(aTHX_ a)
@@ -3420,6 +3435,8 @@
 #define to_uni_title_lc		Perl_to_uni_title_lc
 #define Perl_to_uni_lower_lc	CPerlObj::Perl_to_uni_lower_lc
 #define to_uni_lower_lc		Perl_to_uni_lower_lc
+#define Perl_is_utf8_char	CPerlObj::Perl_is_utf8_char
+#define is_utf8_char		Perl_is_utf8_char
 #define Perl_is_utf8_alnum	CPerlObj::Perl_is_utf8_alnum
 #define is_utf8_alnum		Perl_is_utf8_alnum
 #define Perl_is_utf8_alnumc	CPerlObj::Perl_is_utf8_alnumc
@@ -3736,6 +3753,8 @@
 #define newSVOP			Perl_newSVOP
 #define Perl_newSViv		CPerlObj::Perl_newSViv
 #define newSViv			Perl_newSViv
+#define Perl_newSVuv		CPerlObj::Perl_newSVuv
+#define newSVuv			Perl_newSVuv
 #define Perl_newSVnv		CPerlObj::Perl_newSVnv
 #define newSVnv			Perl_newSVnv
 #define Perl_newSVpv		CPerlObj::Perl_newSVpv
@@ -4428,6 +4447,10 @@
 #define Perl_ptr_table_split	CPerlObj::Perl_ptr_table_split
 #define ptr_table_split		Perl_ptr_table_split
 #endif
+#if defined(HAVE_INTERP_INTERN)
+#define Perl_sys_intern_init	CPerlObj::Perl_sys_intern_init
+#define sys_intern_init		Perl_sys_intern_init
+#endif
 #if defined(PERL_OBJECT)
 #else
 #endif
@@ -4971,6 +4994,8 @@
 #define ck_exec			Perl_ck_exec
 #define Perl_ck_exists		CPerlObj::Perl_ck_exists
 #define ck_exists		Perl_ck_exists
+#define Perl_ck_exit		CPerlObj::Perl_ck_exit
+#define ck_exit			Perl_ck_exit
 #define Perl_ck_ftst		CPerlObj::Perl_ck_ftst
 #define ck_ftst			Perl_ck_ftst
 #define Perl_ck_fun		CPerlObj::Perl_ck_fun

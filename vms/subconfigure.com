@@ -69,14 +69,18 @@ $ myname = myhostname
 $ IF myname .EQS. "" THEN myname = F$TRNLNM("SYS$NODE")
 $!
 $! ##ADD NEW CONSTANTS HERE##
+$ perl_d_isnan= = "define"
+$ perl_sizesize = "4"
 $ perl_shmattype = ""
 $ perl_mmaptype = ""
 $ perl_gidformat = "lu"
 $ perl_gidsize = "4"
+$ perl_gidsign = "1"
 $ perl_groupstype = "Gid_t"
 $ perl_stdio_stream_array = ""
 $ perl_uidformat = "lu"
 $ perl_uidsize = "4"
+$ perl_uidsign = "1"
 $ perl_d_getcwd = "undef"
 $ perl_d_nv_preserves_uv = "define"
 $ perl_d_fs_data_s = "undef"
@@ -397,6 +401,8 @@ $ perl_lseektype="int"
 $ perl_i_values="undef"
 $ perl_malloctype="void *"
 $ perl_freetype="void"
+$ perl_d_perl_otherlibdirs="undef"
+$ perl_otherlibdirs=""
 $ IF mymalloc
 $ THEN
 $ perl_d_mymalloc="define"
@@ -483,6 +489,9 @@ $   perl_d_quad = "define"
 $   perl_quadtype = "long long"
 $   perl_uquadtype = "unsigned long long"
 $   perl_quadkind  = "QUAD_IS_LONG_LONG"
+$   perl_d_frexpl = "define"
+$   perl_d_isnanl = "define"
+$   perl_d_modfl = "define"
 $ ELSE
 $   perl_d_PRIfldbl = "undef"
 $   perl_d_PRIgldbl = "undef"
@@ -500,6 +509,9 @@ $   perl_d_quad = "undef"
 $   perl_quadtype = "long"
 $   perl_uquadtype = "unsigned long"
 $   perl_quadkind  = "QUAD_IS_LONG"
+$   perl_d_frexpl = "undef"
+$   perl_d_isnanl = "undef"
+$   perl_d_modfl = "undef"
 $ ENDIF
 $!
 $! Now some that we build up
@@ -3205,6 +3217,49 @@ $
 $ perl_ptrsize=line
 $ WRITE_RESULT "ptrsize is ''perl_ptrsize'"
 $!
+$! Check for size_t size
+$!
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <stdio.h>
+$ WS "int main()
+$ WS "{"
+$ WS "int foo;
+$ WS "foo = sizeof(size_t);
+$ WS "printf(""%d\n"", foo);
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$   DEFINE SYS$ERROR _NLA0:
+$   DEFINE SYS$OUTPUT _NLA0:
+$   ON ERROR THEN CONTINUE
+$   ON WARNING THEN CONTINUE
+$   'Checkcc' temp.c
+$   If Needs_Opt
+$   THEN
+$     link temp.obj,temp.opt/opt
+$   else
+$     link temp.obj
+$   endif
+$   OPEN/WRITE TEMPOUT [-.uu]tempout.lis
+$   DEASSIGN SYS$OUTPUT
+$   DEASSIGN SYS$ERROR
+$   DEFINE SYS$ERROR TEMPOUT
+$   DEFINE SYS$OUTPUT TEMPOUT
+$   mcr []temp
+$   CLOSE TEMPOUT
+$   DEASSIGN SYS$OUTPUT
+$   DEASSIGN SYS$ERROR
+$   OPEN/READ TEMPOUT [-.uu]tempout.lis
+$   READ TEMPOUT line
+$   CLOSE TEMPOUT
+$ DELETE/NOLOG [-.uu]tempout.lis;
+$ 
+$ perl_sizesize=line
+$ WRITE_RESULT "sizesize is ''perl_sizesize'"
+$!
 $! Check rand48 and its ilk
 $!
 $ OS
@@ -3767,6 +3822,8 @@ $ WC "d_mkdir='" + perl_d_mkdir + "'"
 $ WC "d_msg='" + perl_d_msg + "'"
 $ WC "d_open3='" + perl_d_open3 + "'"
 $ WC "d_poll='" + perl_d_poll + "'"
+$ WC "d_perl_otherlibdirs='" + perl_d_perl_otherlibdirs + "'"
+$ WC "otherlibdirs='" + perl_otherlibdirs + "'"
 $ WC "d_readdir='" + perl_d_readdir + "'"
 $ WC "d_seekdir='" + perl_d_seekdir + "'"
 $ WC "d_telldir='" + perl_d_telldir + "'"
@@ -3963,13 +4020,21 @@ $ WC "libs='" + perl_libs + "'"
 $ WC "libc='" + perl_libc + "'"
 $ WC "xs_apiversion='" + version + "'"
 $ WC "pm_apiversion='" + version + "'"
+$ WC "version='" + version + "'"
+$ WC "revision='" + revision + "'"
+$ WC "patchlevel='" + patchlevel + "'"
+$ WC "subversion='" + subversion + "'"
+$ WC "PERL_VERSION='" + patchlevel + "'"
+$ WC "PERL_SUBVERSION='" + subversion + "'"
 $ WC "pager='" + perl_pager + "'"
 $ WC "uidtype='" + perl_uidtype + "'"
 $ WC "uidformat='" + perl_uidformat + "'"
 $ WC "uidsize='" + perl_uidsize + "'"
+$ WC "uidsign='" + perl_uidsign + "'"
 $ WC "gidtype='" + perl_gidtype + "'"
 $ WC "gidformat='" + perl_gidformat + "'"
 $ WC "gidsize='" + perl_gidsize + "'"
+$ WC "gidsign='" + perl_gidsign + "'"
 $ WC "usethreads='" + perl_usethreads + "'"
 $ WC "d_pthread_yield='" + perl_d_pthread_yield + "'"
 $ WC "d_pthreads_created_joinable='" + perl_d_pthreads_created_joinable + "'"
@@ -4195,6 +4260,11 @@ $ WC "uvuformat='" + perl_uvuformat + "'"
 $ WC "uvoformat='" + perl_uvoformat + "'"
 $ WC "uvxformat='" + perl_uvxformat + "'"
 $ WC "d_vms_case_sensitive_symbols='" + d_vms_be_case_sensitive + "'"
+$ WC "sizesize='" + perl_sizesize + "'"
+$ WC "d_frexpl='" + perl_d_frexpl + "'"
+$ WC "d_isnan='" + perl_d_isnan + "'"
+$ WC "d_isnanl='" + perl_d_isnanl + "'"
+$ WC "d_modfl='" + perl_d_modfl + "'"
 $!
 $! ##WRITE NEW CONSTANTS HERE##
 $!

@@ -1941,7 +1941,10 @@ $ echo "default file types, however, you can configure Perl to try default"
 $ echo "file types of nothing, .pl, and .com, in that order (e.g. typing"
 $ echo """$ perl foo"" would cause Perl to look for foo., then foo.pl, and"
 $ echo "finally foo.com)."
-$ dflt = "y"
+$ echo ""
+$ echo "This is currently broken in some configurations. Only enable it if
+$ echo "you know what you're doing. "
+$ dflt = "N"
 $ rp = "Always use default file types? [''dflt'] "
 $ GOSUB myread
 $ if ans.eqs."" then ans="''dflt'"

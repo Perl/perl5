@@ -662,7 +662,8 @@ which uses C<< (?>...) >> matches exactly when the one above does (verifying
 this yourself would be a productive exercise), but finishes in a fourth
 the time when used on a similar string with 1000000 C<a>s.  Be aware,
 however, that this pattern currently triggers a warning message under
-B<-w> saying it C<"matches the null string many times">):
+the C<use warnings> pragma or B<-w> switch saying it
+C<"matches the null string many times">):
 
 On simple groups, such as the pattern C<< (?> [^()]+ ) >>, a comparable
 effect may be achieved by negative look-ahead, as in C<[^()]+ (?! [^()] )>.
@@ -672,7 +673,7 @@ The "grab all you can, and do not give anything back" semantic is desirable
 in many situations where on the first sight a simple C<()*> looks like
 the correct solution.  Suppose we parse text with comments being delimited
 by C<#> followed by some optional (horizontal) whitespace.  Contrary to
-its appearence, C<#[ \t]*> I<is not> the correct subexpression to match
+its appearance, C<#[ \t]*> I<is not> the correct subexpression to match
 the comment delimiter, because it may "give up" some whitespace if
 the remainder of the pattern can be made to match that way.  The correct
 answer is either one of these:

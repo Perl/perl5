@@ -103,9 +103,9 @@ This is why all the back ends print:
 
 before producing any other output.
 
-=head2 The Cross Referencing Back End (B::Xref)
+=head2 The Cross Referencing Back End
 
-The cross referencing back end produces a report on your program,
+The cross referencing back end (B::Xref) produces a report on your program,
 breaking down declarations and uses of subroutines and variables (and
 formats) by file and subroutine.  For instance, here's part of the
 report from the I<pod2man> program that comes with Perl:
@@ -203,11 +203,11 @@ The B<-p> option adds parentheses where normally they are omitted:
 
 See L<B::Deparse> for more information on the formatting options.
 
-=head2 The Lint Back End (B::Lint)
+=head2 The Lint Back End
 
-The lint back end inspects programs for poor style.  One programmer's
-bad style is another programmer's useful tool, so options let you
-select what is complained about.
+The lint back end (B::Lint) inspects programs for poor style.  One
+programmer's bad style is another programmer's useful tool, so options
+let you select what is complained about.
 
 To run the style checker across your source code:
 
@@ -306,8 +306,9 @@ I<assemble> program that produces bytecode.
 
 =item B::Bblock
 
-This module is used by the B::CC back end.  It walks "basic blocks",
-whatever they may be.
+This module is used by the B::CC back end.  It walks "basic blocks".
+A basic block is a series of operations which is known to execute from
+start to finish, with no possibility of branching or halting.
 
 =item B::Bytecode
 
@@ -368,12 +369,12 @@ can identify.  See L</"The Lint Back End"> for details about usage.
 =item B::Showlex
 
 This module prints out the my() variables used in a function or a
-file.  To gt a list of the my() variables used in the subroutine
+file.  To get a list of the my() variables used in the subroutine
 mysub() defined in the file myperlprogram:
 
   $ perl -MO=Showlex,mysub myperlprogram
 
-To gt a list of the my() variables used in the file myperlprogram:
+To get a list of the my() variables used in the file myperlprogram:
 
   $ perl -MO=Showlex myperlprogram
 
@@ -418,7 +419,7 @@ names.
 
 The optimized C backend outputs code for more modules than it should
 (e.g., DirHandle).  It also has little hope of properly handling
-C<goto LABEL> outside the running subroutine (C<goto &sub> is ok).
+C<goto LABEL> outside the running subroutine (C<goto &sub> is okay).
 C<goto LABEL> currently does not work at all in this backend.
 It also creates a huge initialization function that gives
 C compilers headaches.  Splitting the initialization function gives

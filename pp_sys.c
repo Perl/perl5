@@ -198,7 +198,6 @@ static char zero_but_true[ZBTLEN + 1] = "0 but true";
 #   if defined(I_SYS_SECURITY)
 #       include <sys/security.h>
 #   endif
-    /* XXX Configure test needed for eaccess */
 #   ifdef ACC_SELF
         /* HP SecureWare */
 #       define PERL_EFF_ACCESS_R_OK(p) (eaccess((p), R_OK, ACC_SELF))
@@ -470,7 +469,7 @@ PP(pp_die)
 		GV *gv = gv_fetchmethod(stash, "PROPAGATE");
 		if (gv) {
 		    SV *file = sv_2mortal(newSVpv(CopFILE(PL_curcop),0));
-		    SV *line = sv_2mortal(newSViv(CopLINE(PL_curcop)));
+		    SV *line = sv_2mortal(newSVuv(CopLINE(PL_curcop)));
 		    EXTEND(SP, 3);
 		    PUSHMARK(SP);
 		    PUSHs(error);
@@ -864,9 +863,9 @@ PP(pp_dbmopen)
     PUSHs(sv);
     PUSHs(left);
     if (SvIV(right))
-	PUSHs(sv_2mortal(newSViv(O_RDWR|O_CREAT)));
+	PUSHs(sv_2mortal(newSVuv(O_RDWR|O_CREAT)));
     else
-	PUSHs(sv_2mortal(newSViv(O_RDWR)));
+	PUSHs(sv_2mortal(newSVuv(O_RDWR)));
     PUSHs(right);
     PUTBACK;
     call_sv((SV*)GvCV(gv), G_SCALAR);
@@ -877,7 +876,7 @@ PP(pp_dbmopen)
 	PUSHMARK(SP);
 	PUSHs(sv);
 	PUSHs(left);
-	PUSHs(sv_2mortal(newSViv(O_RDONLY)));
+	PUSHs(sv_2mortal(newSVuv(O_RDONLY)));
 	PUSHs(right);
 	PUTBACK;
 	call_sv((SV*)GvCV(gv), G_SCALAR);
@@ -1588,10 +1587,11 @@ PP(pp_send)
     djSP; dMARK; dORIGMARK; dTARGET;
     GV *gv;
     IO *io;
-    Off_t offset;
     SV *bufsv;
     char *buffer;
-    Off_t length;
+    Size_t length;
+    SSize_t retval;
+    IV offset;
     STRLEN blen;
     MAGIC *mg;
 
@@ -1614,17 +1614,17 @@ PP(pp_send)
 	goto say_undef;
     bufsv = *++MARK;
     buffer = SvPV(bufsv, blen);
-#if Off_t_SIZE > IVSIZE
-    length = SvNVx(*++MARK);
+#if Size_t_size > IVSIZE
+    length = (Size_t)SvNVx(*++MARK);
 #else
-    length = SvIVx(*++MARK);
+    length = (Size_t)SvIVx(*++MARK);
 #endif
-    if (length < 0)
+    if ((SSize_t)length < 0)
 	DIE(aTHX_ "Negative length");
     SETERRNO(0,0);
     io = GvIO(gv);
     if (!io || !IoIFP(io)) {
-	length = -1;
+	retval = -1;
 	if (ckWARN(WARN_CLOSED)) {
 	    if (PL_op->op_type == OP_SYSWRITE)
 		report_closed_fh(gv, io, "syswrite", "filehandle");
@@ -1634,11 +1634,7 @@ PP(pp_send)
     }
     else if (PL_op->op_type == OP_SYSWRITE) {
 	if (MARK < SP) {
-#if Off_t_SIZE > IVSIZE
-	    offset = SvNVx(*++MARK);
-#else
 	    offset = SvIVx(*++MARK);
-#endif
 	    if (offset < 0) {
 		if (-offset > blen)
 		    DIE(aTHX_ "Offset outside string");
@@ -1651,14 +1647,14 @@ PP(pp_send)
 	    length = blen - offset;
 #ifdef PERL_SOCK_SYSWRITE_IS_SEND
 	if (IoTYPE(io) == 's') {
-	    length = PerlSock_send(PerlIO_fileno(IoIFP(io)),
+	    retval = PerlSock_send(PerlIO_fileno(IoIFP(io)),
 				   buffer+offset, length, 0);
 	}
 	else
 #endif
 	{
 	    /* See the note at doio.c:do_print about filesize limits. --jhi */
-	    length = PerlLIO_write(PerlIO_fileno(IoIFP(io)),
+	    retval = PerlLIO_write(PerlIO_fileno(IoIFP(io)),
 				   buffer+offset, length);
 	}
     }
@@ -1667,20 +1663,24 @@ PP(pp_send)
 	char *sockbuf;
 	STRLEN mlen;
 	sockbuf = SvPVx(*++MARK, mlen);
-	length = PerlSock_sendto(PerlIO_fileno(IoIFP(io)), buffer, blen, length,
-				(struct sockaddr *)sockbuf, mlen);
+	retval = PerlSock_sendto(PerlIO_fileno(IoIFP(io)), buffer, blen,
+				 length, (struct sockaddr *)sockbuf, mlen);
     }
     else
-	length = PerlSock_send(PerlIO_fileno(IoIFP(io)), buffer, blen, length);
+	retval = PerlSock_send(PerlIO_fileno(IoIFP(io)), buffer, blen, length);
 
 #else
     else
 	DIE(aTHX_ PL_no_sock_func, "send");
 #endif
-    if (length < 0)
+    if (retval < 0)
 	goto say_undef;
     SP = ORIGMARK;
-    PUSHi(length);
+#if Size_t_size > IVSIZE
+    PUSHn(retval);
+#else
+    PUSHi(retval);
+#endif
     RETURN;
 
   say_undef:
@@ -1792,9 +1792,9 @@ PP(pp_sysseek)
 #if LSEEKSIZE > IVSIZE
 	XPUSHs(sv_2mortal(newSVnv((NV) offset)));
 #else
-	XPUSHs(sv_2mortal(newSViv((IV) offset)));
+	XPUSHs(sv_2mortal(newSViv(offset)));
 #endif
-	XPUSHs(sv_2mortal(newSViv((IV) whence)));
+	XPUSHs(sv_2mortal(newSViv(whence)));
 	PUTBACK;
 	ENTER;
 	call_method("SEEK", G_SCALAR);
@@ -1806,15 +1806,15 @@ PP(pp_sysseek)
     if (PL_op->op_type == OP_SEEK)
 	PUSHs(boolSV(do_seek(gv, offset, whence)));
     else {
-	Off_t n = do_sysseek(gv, offset, whence);
-        if (n < 0)
+	Off_t sought = do_sysseek(gv, offset, whence);
+        if (sought < 0)
             PUSHs(&PL_sv_undef);
         else {
-            SV* sv = n ?
+            SV* sv = sought ?
 #if LSEEKSIZE > IVSIZE
-                newSVnv((NV)n)
+                newSVnv((NV)sought)
 #else
-                newSViv((IV)n)
+                newSViv(sought)
 #endif
                 : newSVpvn(zero_but_true, ZBTLEN);
             PUSHs(sv_2mortal(sv));
@@ -1826,11 +1826,24 @@ PP(pp_sysseek)
 PP(pp_truncate)
 {
     djSP;
-    Off_t len = (Off_t)POPn;
+    /* There seems to be no consensus on the length type of truncate()
+     * and ftruncate(), both off_t and size_t have supporters. In
+     * general one would think that when using large files, off_t is
+     * at least as wide as size_t, so using an off_t should be okay. */
+    /* XXX Configure probe for the length type of *truncate() needed XXX */
+    Off_t len;
     int result = 1;
     GV *tmpgv;
     STRLEN n_a;
 
+#if Size_t_size > IVSIZE
+    len = (Off_t)POPn;
+#else
+    len = (Off_t)POPi;
+#endif
+    /* Checking for length < 0 is problematic as the type might or
+     * might not be signed: if it is not, clever compilers will moan. */ 
+    /* XXX Configure probe for the signedness of the length type of *truncate() needed? XXX */
     SETERRNO(0,0);
 #if defined(HAS_TRUNCATE) || defined(HAS_CHSIZE) || defined(F_FREESP)
     if (PL_op->op_flags & OPf_SPECIAL) {
@@ -2527,17 +2540,25 @@ PP(pp_stat)
 	EXTEND_MORTAL(max);
 	PUSHs(sv_2mortal(newSViv(PL_statcache.st_dev)));
 	PUSHs(sv_2mortal(newSViv(PL_statcache.st_ino)));
-	PUSHs(sv_2mortal(newSViv(PL_statcache.st_mode)));
-	PUSHs(sv_2mortal(newSViv(PL_statcache.st_nlink)));
+	PUSHs(sv_2mortal(newSVuv(PL_statcache.st_mode)));
+	PUSHs(sv_2mortal(newSVuv(PL_statcache.st_nlink)));
 #if Uid_t_size > IVSIZE
 	PUSHs(sv_2mortal(newSVnv(PL_statcache.st_uid)));
 #else
+#   if Uid_t_sign <= 0
 	PUSHs(sv_2mortal(newSViv(PL_statcache.st_uid)));
+#   else
+	PUSHs(sv_2mortal(newSVuv(PL_statcache.st_uid)));
+#   endif
 #endif
 #if Gid_t_size > IVSIZE 
 	PUSHs(sv_2mortal(newSVnv(PL_statcache.st_gid)));
 #else
+#   if Gid_t_sign <= 0
 	PUSHs(sv_2mortal(newSViv(PL_statcache.st_gid)));
+#   else
+	PUSHs(sv_2mortal(newSVuv(PL_statcache.st_gid)));
+#   endif
 #endif
 #ifdef USE_STAT_RDEV
 	PUSHs(sv_2mortal(newSViv(PL_statcache.st_rdev)));
@@ -2559,8 +2580,8 @@ PP(pp_stat)
 	PUSHs(sv_2mortal(newSViv(PL_statcache.st_ctime)));
 #endif
 #ifdef USE_STAT_BLOCKS
-	PUSHs(sv_2mortal(newSViv(PL_statcache.st_blksize)));
-	PUSHs(sv_2mortal(newSViv(PL_statcache.st_blocks)));
+	PUSHs(sv_2mortal(newSVuv(PL_statcache.st_blksize)));
+	PUSHs(sv_2mortal(newSVuv(PL_statcache.st_blocks)));
 #else
 	PUSHs(sv_2mortal(newSVpvn("", 0)));
 	PUSHs(sv_2mortal(newSVpvn("", 0)));
@@ -3056,7 +3077,7 @@ PP(pp_fttext)
 	    (void)PerlIO_close(fp);
 	    RETPUSHUNDEF;
 	}
-	do_binmode(fp, '<', TRUE);
+	do_binmode(fp, '<', O_BINARY);
 	len = PerlIO_read(fp, tbuf, sizeof(tbuf));
 	(void)PerlIO_close(fp);
 	if (len <= 0) {
@@ -3658,6 +3679,8 @@ PP(pp_fork)
     EXTEND(SP, 1);
     PERL_FLUSHALL_FOR_CHILD;
     childpid = PerlProc_fork();
+    if (childpid == -1)
+	RETSETUNDEF;
     PUSHi(childpid);
     RETURN;
 #  else
@@ -3721,7 +3744,7 @@ PP(pp_system)
 	}
     }
     PERL_FLUSHALL_FOR_CHILD;
-#if (defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(OS2)
+#if (defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(OS2) && !defined(__CYGWIN__)
     if (PerlProc_pipe(pp) >= 0)
 	did_pipes = 1;
     while ((childpid = vfork()) == -1) {
@@ -4748,46 +4771,40 @@ PP(pp_gpwent)
 #ifdef HAS_PASSWD
     I32 which = PL_op->op_type;
     register SV *sv;
-    struct passwd *pwent;
     STRLEN n_a;
-#if defined(HAS_GETSPENT) || defined(HAS_GETSPNAM)
-    struct spwd *spwent = NULL;
-#endif
+    struct passwd *pwent  = NULL;
+/* We do not use HAS_GETSPENT in pp_gpwent() but leave it here in the case
+ * somebody wants to write an XS to access the shadow passwords. --jhi */
+#   ifdef HAS_GETSPNAM
+    struct spwd   *spwent = NULL;
+#   endif
 
-    if (which == OP_GPWNAM)
-	pwent = getpwnam(POPpx);
-    else if (which == OP_GPWUID)
-	pwent = getpwuid(POPi);
-    else
-#ifdef HAS_GETPWENT
-	pwent = (struct passwd *)getpwent();
-#else
+    switch (which) {
+    case OP_GPWNAM:
+	pwent  = getpwnam(POPpx);
+	break;
+    case OP_GPWUID:
+	pwent = getpwuid((Uid_t)POPi);
+	break;
+    case OP_GPWENT:
+#   ifdef HAS_GETPWENT
+	pwent  = getpwent();
+#   else
 	DIE(aTHX_ PL_no_func, "getpwent");
-#endif
-
-#ifdef HAS_GETSPNAM
-    if (which == OP_GPWNAM) {
-	if (pwent)
-	    spwent = getspnam(pwent->pw_name);
+#   endif
+	break;
     }
-#  ifdef HAS_GETSPUID /* AFAIK there isn't any anywhere. --jhi */ 
-    else if (which == OP_GPWUID) {
-	if (pwent)
-	    spwent = getspnam(pwent->pw_name);
-    }
-#  endif
-#  ifdef HAS_GETSPENT
-    else
-	spwent = (struct spwd *)getspent();
-#  endif
-#endif
 
     EXTEND(SP, 10);
     if (GIMME != G_ARRAY) {
 	PUSHs(sv = sv_newmortal());
 	if (pwent) {
 	    if (which == OP_GPWNAM)
+#   if Uid_t_sign <= 0
 		sv_setiv(sv, (IV)pwent->pw_uid);
+#   else
+		sv_setuv(sv, (UV)pwent->pw_uid);
+#   endif
 	    else
 		sv_setpv(sv, pwent->pw_name);
 	}
@@ -4799,66 +4816,80 @@ PP(pp_gpwent)
 	sv_setpv(sv, pwent->pw_name);
 
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
-#ifdef PWPASSWD
-#   if defined(HAS_GETSPENT) || defined(HAS_GETSPNAM)
-      if (spwent)
-              sv_setpv(sv, spwent->sp_pwdp);
-      else
-              sv_setpv(sv, pwent->pw_passwd);
+#   ifdef HAS_GETSPNAM
+	spwent = getspnam(pwent->pw_name);
+	if (spwent)
+	    sv_setpv(sv, spwent->sp_pwdp);
+	else
+	    sv_setpv(sv, pwent->pw_passwd);
 #   else
 	sv_setpv(sv, pwent->pw_passwd);
 #   endif
-#endif
+#   ifndef INCOMPLETE_TAINTS
+	/* passwd is tainted because user himself can diddle with it. */
+	SvTAINTED_on(sv);
+#   endif
 
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
+#   if Uid_t_sign <= 0
 	sv_setiv(sv, (IV)pwent->pw_uid);
+#   else
+	sv_setuv(sv, (UV)pwent->pw_uid);
+#   endif
 
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
+#   if Uid_t_sign <= 0
 	sv_setiv(sv, (IV)pwent->pw_gid);
-
+#   else
+	sv_setuv(sv, (UV)pwent->pw_gid);
+#   endif
 	/* pw_change, pw_quota, and pw_age are mutually exclusive. */
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
-#ifdef PWCHANGE
+#   ifdef PWCHANGE
 	sv_setiv(sv, (IV)pwent->pw_change);
-#else
-#   ifdef PWQUOTA
-	sv_setiv(sv, (IV)pwent->pw_quota);
 #   else
-#       ifdef PWAGE
+#       ifdef PWQUOTA
+	sv_setiv(sv, (IV)pwent->pw_quota);
+#       else
+#           ifdef PWAGE
 	sv_setpv(sv, pwent->pw_age);
+#           endif
 #       endif
 #   endif
-#endif
 
 	/* pw_class and pw_comment are mutually exclusive. */
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
-#ifdef PWCLASS
+#   ifdef PWCLASS
 	sv_setpv(sv, pwent->pw_class);
-#else
-#   ifdef PWCOMMENT
+#   else
+#       ifdef PWCOMMENT
 	sv_setpv(sv, pwent->pw_comment);
+#       endif
 #   endif
-#endif
 
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
-#ifdef PWGECOS
+#   ifdef PWGECOS
 	sv_setpv(sv, pwent->pw_gecos);
-#endif
-#ifndef INCOMPLETE_TAINTS
+#   endif
+#   ifndef INCOMPLETE_TAINTS
 	/* pw_gecos is tainted because user himself can diddle with it. */
 	SvTAINTED_on(sv);
-#endif
+#   endif
 
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setpv(sv, pwent->pw_dir);
 
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setpv(sv, pwent->pw_shell);
+#   ifndef INCOMPLETE_TAINTS
+	/* pw_shell is tainted because user himself can diddle with it. */
+	SvTAINTED_on(sv);
+#   endif
 
-#ifdef PWEXPIRE
+#   ifdef PWEXPIRE
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setiv(sv, (IV)pwent->pw_expire);
-#endif
+#   endif
     }
     RETURN;
 #else

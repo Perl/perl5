@@ -1,8 +1,11 @@
 package File::Spec::Mac;
 
 use strict;
-use vars qw(@ISA);
+use vars qw(@ISA $VERSION);
 require File::Spec::Unix;
+
+$VERSION = '1.1';
+
 @ISA = qw(File::Spec::Unix);
 
 =head1 NAME
@@ -79,9 +82,9 @@ sub catdir {
     shift;
     my @args = @_;
     my $result = shift @args;
-    $result =~ s/:\z//;
+    $result =~ s/:\Z(?!\n)//;
     foreach (@args) {
-	s/:\z//;
+	s/:\Z(?!\n)//;
 	s/^://s;
 	$result .= ":$_";
     }
@@ -150,7 +153,7 @@ sub rootdir {
     require Mac::Files;
     my $system =  Mac::Files::FindFolder(&Mac::Files::kOnSystemDisk,
 					 &Mac::Files::kSystemFolderType);
-    $system =~ s/:.*\z/:/s;
+    $system =~ s/:.*\Z(?!\n)/:/s;
     return $system;
 }
 
@@ -228,7 +231,7 @@ sub splitpath {
     my ($volume,$directory,$file) = ('','','');
 
     if ( $nofile ) {
-        ( $volume, $directory ) = $path =~ m@((?:[^:]+(?::|\z))?)(.*)@s;
+        ( $volume, $directory ) = $path =~ m@((?:[^:]+(?::|\Z(?!\n)))?)(.*)@s;
     }
     else {
         $path =~ 
@@ -242,8 +245,8 @@ sub splitpath {
     }
 
     # Make sure non-empty volumes and directories end in ':'
-    $volume    .= ':' if $volume    =~ m@[^:]\z@ ;
-    $directory .= ':' if $directory =~ m@[^:]\z@ ;
+    $volume    .= ':' if $volume    =~ m@[^:]\Z(?!\n)@ ;
+    $directory .= ':' if $directory =~ m@[^:]\Z(?!\n)@ ;
     return ($volume,$directory,$file);
 }
 
@@ -259,7 +262,7 @@ sub splitdir {
     # check to be sure that there will not be any before handling the
     # simple case.
     #
-    if ( $directories !~ m@:\z@ ) {
+    if ( $directories !~ m@:\Z(?!\n)@ ) {
         return split( m@:@, $directories );
     }
     else {
@@ -286,11 +289,11 @@ sub catpath {
 
     my $segment ;
     for $segment ( @_ ) {
-        if ( $result =~ m@[^/]\z@ && $segment =~ m@^[^/]@s ) {
+        if ( $result =~ m@[^/]\Z(?!\n)@ && $segment =~ m@^[^/]@s ) {
             $result .= "/$segment" ;
         }
-        elsif ( $result =~ m@/\z@ && $segment =~ m@^/@s ) {
-            $result  =~ s@/+\z@/@;
+        elsif ( $result =~ m@/\Z(?!\n)@ && $segment =~ m@^/@s ) {
+            $result  =~ s@/+\Z(?!\n)@/@;
             $segment =~ s@^/+@@s;
             $result  .= "$segment" ;
         }

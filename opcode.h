@@ -1284,7 +1284,7 @@ EXT OP * (CPERLscope(*PL_check)[]) (pTHX_ OP *op) = {
 	MEMBER_TO_FPTR(Perl_ck_null),	/* redo */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* dump */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* goto */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* exit */
+	MEMBER_TO_FPTR(Perl_ck_exit),	/* exit */
 	MEMBER_TO_FPTR(Perl_ck_open),	/* open */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* close */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* pipe_op */

@@ -95,8 +95,8 @@ line?, Why don't perl one-liners work on my DOS/Mac/VMS system?, Where can
 I learn about CGI or Web programming in Perl?, Where can I learn about
 object-oriented Perl programming?, Where can I learn about linking C with
 Perl? [h2xs, xsubpp], I've read perlembed, perlguts, etc., but I can't
-embed perl inmy C program, what am I doing wrong?, When I tried to run my
-script, I got this message. What does itmean?, What's MakeMaker?,
+embed perl in my C program, what am I doing wrong?, When I tried to run my
+script, I got this message. What does it mean?, What's MakeMaker?,
 L<perlfaq4>: Data Manipulation, Why am I getting long decimals (eg,
 19.9499999999999) instead of the numbers I should be getting (eg, 19.95)?,
 Why isn't my octal data interpreted correctly?, Does Perl have a round()
@@ -121,10 +121,10 @@ How do I strip blank space from the beginning/end of a string?, How do I
 pad a string with blanks or pad a number with zeroes?, How do I extract
 selected columns from a string?, How do I find the soundex value of a
 string?, How can I expand variables in text strings?, What's wrong with
-always quoting "$vars"?, Why don't my E<lt>E<lt>HERE documents work?, What
-is the difference between a list and an array?, What is the difference
-between $array[1] and @array[1]?, How can I remove duplicate elements from
-a list or array?, How can I tell whether a list or array contains a certain
+always quoting "$vars"?, Why don't my <<HERE documents work?, What is the
+difference between a list and an array?, What is the difference between
+$array[1] and @array[1]?, How can I remove duplicate elements from a list
+or array?, How can I tell whether a list or array contains a certain
 element?, How do I compute the difference of two arrays?  How do I compute
 the intersection of two arrays?, How do I test whether two arrays or hashes
 are equal?, How do I find the first array element for which a condition is
@@ -161,16 +161,16 @@ How can I use a filehandle indirectly?, How can I set up a footer format to
 be used with write()?, How can I write() into a string?, How can I output
 my numbers with commas added?, How can I translate tildes (~) in a
 filename?, How come when I open a file read-write it wipes it out?, Why do
-I sometimes get an "Argument list too long" when I use E<lt>*E<gt>?, Is
-there a leak/bug in glob()?, How can I open a file with a leading "E<gt>"
-or trailing blanks?, How can I reliably rename a file?, How can I lock a
-file?, Why can't I just open(FH, ">file.lock")?, I still don't get locking.
- I just want to increment the number in the file.  How can I do this?, How
-do I randomly update a binary file?, How do I get a file's timestamp in
-perl?, How do I set a file's timestamp in perl?, How do I print to more
-than one file at once?, How can I read in an entire file all at once?, How
-can I read in a file by paragraphs?, How can I read a single character from
-a file?  From the keyboard?, How can I tell whether there's a character
+I sometimes get an "Argument list too long" when I use <*>?, Is there a
+leak/bug in glob()?, How can I open a file with a leading ">" or trailing
+blanks?, How can I reliably rename a file?, How can I lock a file?, Why
+can't I just open(FH, ">file.lock")?, I still don't get locking.  I just
+want to increment the number in the file.  How can I do this?, How do I
+randomly update a binary file?, How do I get a file's timestamp in perl?,
+How do I set a file's timestamp in perl?, How do I print to more than one
+file at once?, How can I read in an entire file all at once?, How can I
+read in a file by paragraphs?, How can I read a single character from a
+file?  From the keyboard?, How can I tell whether there's a character
 waiting on a filehandle?, How do I do a C<tail -f> in perl?, How do I dup()
 a filehandle in Perl?, How do I close a file descriptor by number?, Why
 can't I use "C:\temp\foo" in DOS paths?  What doesn't `C:\temp\foo.exe`
@@ -210,10 +210,10 @@ Array, Hash, Method, Regex}?, How do I create a static variable?, What's
 the difference between dynamic and lexical (static) scoping?  Between
 local() and my()?, How can I access a dynamic variable while a similarly
 named lexical is in scope?, What's the difference between deep and shallow
-binding?, Why doesn't "my($foo) = E<lt>FILEE<gt>;" work right?, How do I
-redefine a builtin function, operator, or method?, What's the difference
-between calling a function as &foo and foo()?, How do I create a switch or
-case statement?, How can I catch accesses to undefined
+binding?, Why doesn't "my($foo) = <FILE>;" work right?, How do I redefine a
+builtin function, operator, or method?, What's the difference between
+calling a function as &foo and foo()?, How do I create a switch or case
+statement?, How can I catch accesses to undefined
 variables/functions/methods?, Why can't a method included in this same file
 be found?, How can I find out my current package?, How can I comment out a
 large block of perl code?, How do I clear a package?, How can I use a
@@ -382,10 +382,7 @@ What does CPAN/src/... mean?
 
 =item Perl Books
 
-References, Tutorials		
-    *Learning Perl [2nd edition]
-	by Randal L. Schwartz and Tom Christiansen
-	    with foreword by Larry Wall, Task-Oriented, Special Topics
+References, Tutorials, Task-Oriented, Special Topics
 
 =item Perl in Magazines
 
@@ -585,7 +582,7 @@ string?
 
 =item What's wrong with always quoting "$vars"?
 
-=item Why don't my E<lt>E<lt>HERE documents work?
+=item Why don't my <<HERE documents work?
 
 1. There must be no space after the << part, 2. There (probably) should be
 a semicolon at the end, 3. You can't (easily) have any space in front of
@@ -736,12 +733,11 @@ filehandles between subroutines?  How do I make an array of filehandles?
 
 =item How come when I open a file read-write it wipes it out?
 
-=item Why do I sometimes get an "Argument list too long" when I use
-E<lt>*E<gt>?
+=item Why do I sometimes get an "Argument list too long" when I use <*>?
 
 =item Is there a leak/bug in glob()?
 
-=item How can I open a file with a leading "E<gt>" or trailing blanks?
+=item How can I open a file with a leading ">" or trailing blanks?
 
 =item How can I reliably rename a file?
 
@@ -911,7 +907,7 @@ is in scope?
 
 =item What's the difference between deep and shallow binding?
 
-=item Why doesn't "my($foo) = E<lt>FILEE<gt>;" work right?
+=item Why doesn't "my($foo) = <FILE>;" work right?
 
 =item How do I redefine a builtin function, operator, or method?
 
@@ -1133,42 +1129,181 @@ CGI script to do bad things?
 
 =back
 
-=head2 perldelta - what's new for perl v5.6 (as of v5.005_64)
+=head2 perldelta - what's new for perl v5.6.0
 
 =over
 
 =item DESCRIPTION
 
-=item Incompatible Changes
+=item Core Enhancements
 
 =over
 
-=item Perl Source Incompatibilities
+=item Interpreter cloning, threads, and concurrency
 
-CHECK is a new keyword, Treatment of list slices of undef has changed
+=item Lexically scoped warning categories
 
-=item Perl's version numbering has changed
+=item Unicode and UTF-8 support
 
-Literals of the form C<1.2.3> parse differently, Possibly changed
-pseudo-random number generator, Hashing function for hash keys has changed,
-C<undef> fails on read only values, Close-on-exec bit may be set on pipe
-and socket handles, Writing C<"$$1"> to mean C<"${$}1"> is unsupported,
-delete(), values() and C<\(%h)> operate on aliases to values, not copies,
-vec(EXPR,OFFSET,BITS) enforces powers-of-two BITS, Text of some diagnostic
-output has changed, C<%@> has been removed, Parenthesized not() behaves
-like a list operator, Semantics of bareword prototype C<(*)> have changed
+=item Support for interpolating named characters
 
-=item On 64-bit platforms the semantics of bit operators have changed
+=item "our" declarations
 
-=item C Source Incompatibilities
+=item Support for strings represented as a vector of ordinals
 
-C<PERL_POLLUTE>, C<PERL_IMPLICIT_CONTEXT>, C<PERL_POLLUTE_MALLOC>
+=item Improved Perl version numbering system
 
-=item Compatible C Source API Changes
+=item New syntax for declaring subroutine attributes
 
-C<PATCHLEVEL> is now C<PERL_VERSION>, Support for C++ exceptions
+=item File and directory handles can be autovivified
 
-=item Binary Incompatibilities
+=item open() with more than two arguments
+
+=item 64-bit support
+
+=item Large file support
+
+=item Long doubles
+
+=item "more bits"
+
+=item Enhanced support for sort() subroutines
+
+=item C<sort $coderef @foo> allowed
+
+=item File globbing implemented internally
+
+Support for CHECK blocks
+
+=item POSIX character class syntax [: :] supported
+
+Better pseudo-random number generator
+
+=item Improved C<qw//> operator
+
+Better worst-case behavior of hashes
+
+=item pack() format 'Z' supported
+
+=item pack() format modifier '!' supported
+
+=item pack() and unpack() support counted strings
+
+=item Comments in pack() templates
+
+=item Weak references
+
+=item Binary numbers supported
+
+=item Lvalue subroutines
+
+=item Some arrows may be omitted in calls through references
+
+=item Boolean assignment operators are legal lvalues
+
+=item exists() is supported on subroutine names
+
+=item exists() and delete() are supported on array elements
+
+=item Pseudo-hashes work better
+
+=item Automatic flushing of output buffers
+
+=item Better diagnostics on meaningless filehandle operations
+
+=item Where possible, buffered data discarded from duped input filehandle
+
+=item eof() has the same old magic as <>
+
+=item binmode() can be used to set :crlf and :raw modes
+
+=item C<-T> filetest recognizes UTF-8 encoded files as "text"
+
+=item system(), backticks and pipe open now reflect exec() failure
+
+=item Improved diagnostics
+
+=item Diagnostics follow STDERR
+
+More consistent close-on-exec behavior
+
+=item syswrite() ease-of-use
+
+=item Better syntax checks on parenthesized unary operators
+
+=item Bit operators support full native integer width
+
+=item Improved security features
+
+More functional bareword prototype (*)
+
+=item C<require> and C<do> may be overridden
+
+=item $^X variables may now have names longer than one character
+
+=item New variable $^C reflects C<-c> switch
+
+=item New variable $^V contains Perl version as a string
+
+=item Optional Y2K warnings
+
+=back
+
+=item Modules and Pragmata
+
+=over
+
+=item Modules
+
+attributes, B, Benchmark, ByteLoader, constant, charnames, Data::Dumper,
+DB, DB_File, Devel::DProf, Devel::Peek, Dumpvalue, DynaLoader, English,
+Env, Fcntl, File::Compare, File::Find, File::Glob, File::Spec,
+File::Spec::Functions, Getopt::Long, IO, JPL, lib, Math::BigInt,
+Math::Complex, Math::Trig, Pod::Parser, Pod::InputObjects, Pod::Checker,
+podchecker, Pod::ParseUtils, Pod::Find, Pod::Select, podselect, Pod::Usage,
+pod2usage, Pod::Text and Pod::Man, SDBM_File, Sys::Syslog, Sys::Hostname,
+Term::ANSIColor, Time::Local, Win32, XSLoader, DBM Filters
+
+=item Pragmata
+
+=back
+
+=item Utility Changes
+
+=over
+
+=item dprofpp
+
+=item find2perl
+
+=item h2xs
+
+=item perlcc
+
+=item perldoc
+
+=item The Perl Debugger
+
+=back
+
+=item Improved Documentation
+
+perlapi.pod, perlboot.pod, perlcompile.pod, perldbmfilter.pod,
+perldebug.pod, perldebguts.pod, perlfork.pod, perlfilter.pod, perlhack.pod,
+perlintern.pod, perllexwarn.pod, perlnumber.pod, perlopentut.pod,
+perlreftut.pod, perltootc.pod, perltodo.pod, perlunicode.pod
+
+=item Performance enhancements
+
+=over
+
+=item Simple sort() using { $a <=> $b } and the like are optimized
+
+=item Optimized assignments to lexical variables
+
+=item Faster subroutine calls
+
+delete(), each(), values() and hash iteration are faster
 
 =back
 
@@ -1198,83 +1333,19 @@ C<PATCHLEVEL> is now C<PERL_VERSION>, Support for C++ exceptions
 
 =back
 
-=item Core Changes
+=item Platform specific changes
 
 =over
 
-=item Unicode and UTF-8 support
+=item Supported platforms
 
-=item Interpreter cloning, threads, and concurrency
+=item DOS
 
-=item Lexically scoped warning categories
+=item OS390 (OpenEdition MVS)
 
-=item Lvalue subroutines
+=item VMS
 
-=item "our" declarations
-
-=item Support for strings represented as a vector of ordinals
-
-=item Weak references
-
-=item File globbing implemented internally
-
-=item Binary numbers supported
-
-=item Some arrows may be omitted in calls through references
-
-=item exists() is supported on subroutine names
-
-=item exists() and delete() are supported on array elements
-
-=item syswrite() ease-of-use
-
-=item File and directory handles can be autovivified
-
-=item 64-bit support
-
-=item Large file support
-
-=item Long doubles
-
-=item "more bits"
-
-=item Enhanced support for sort() subroutines
-
-=item Better syntax checks on parenthesized unary operators
-
-=item POSIX character class syntax [: :] supported
-
-=item Improved C<qw//> operator
-
-=item pack() format 'Z' supported
-
-=item pack() format modifier '!' supported
-
-=item pack() and unpack() support counted strings
-
-=item Comments in pack() templates
-
-=item $^X variables may now have names longer than one character
-
-=item C<use attrs> implicit in subroutine attributes
-
-=item Regular expression improvements
-
-=item Overloading improvements
-
-=item open() with more than two arguments
-
-=item Support for interpolating named characters
-
-=item Experimental support for user-hooks in @INC
-
-=item C<require> and C<do> may be overridden
-
-=item New variable $^C reflects C<-c> switch
-
-=item New variable $^V contains Perl version in v5.6.0 format
-
-=item Optional Y2K warnings
+=item Win32
 
 =back
 
@@ -1282,35 +1353,21 @@ C<PATCHLEVEL> is now C<PERL_VERSION>, Support for C++ exceptions
 
 =over
 
-=item E<lt>HANDLEE<gt> on empty files
+=item <HANDLE> on empty files
 
 =item C<eval '...'> improvements
 
 =item All compilation errors are true errors
 
-=item Automatic flushing of output buffers
-
-=item Better diagnostics on meaningless filehandle operations
-
-=item Where possible, buffered data discarded from duped input filehandle
-
-=item eof() has the same old magic as <>
-
-=item system(), backticks and pipe open now reflect exec() failure
-
 =item Implicitly closed filehandles are safer
 
-=item C<(\$)> prototype and C<$foo{a}>
+=item Behavior of list slices is more consistent
 
-=item Pseudo-hashes work better
+=item C<(\$)> prototype and C<$foo{a}>
 
 =item C<goto &sub> and AUTOLOAD
 
 =item C<-bareword> allowed under C<use integer>
-
-=item Boolean assignment operators are legal lvalues
-
-=item C<sort $coderef @foo> allowed
 
 =item Failures in DESTROY()
 
@@ -1320,92 +1377,13 @@ C<PATCHLEVEL> is now C<PERL_VERSION>, Support for C++ exceptions
 
 =item Spurious subroutine stubs after failed subroutine calls
 
-=item Consistent numeric conversions
-
 =item Taint failures under C<-U>
 
 =item END blocks and the C<-c> switch
 
 =item Potential to leak DATA filehandles
 
-=item Diagnostics follow STDERR
-
-=item Other fixes for better diagnostics
-
 =back
-
-=item Performance enhancements
-
-=over
-
-=item Simple sort() using { $a <=> $b } and the like are optimized
-
-=item Optimized assignments to lexical variables
-
-=item Method lookups optimized
-
-=item Faster mechanism to invoke XSUBs
-
-=item Perl_malloc() improvements
-
-=item Faster subroutine calls
-
-=back
-
-=item Platform specific changes
-
-=over
-
-=item Additional supported platforms
-
-=item DOS
-
-=item OS/2
-
-=item VMS
-
-=item Win32
-
-=back
-
-=item New tests
-
-=item Modules and Pragmata
-
-=over
-
-=item Modules
-
-attributes, B, ByteLoader, constant, charnames, Data::Dumper, DB, DB_File,
-Devel::DProf, Dumpvalue, Benchmark, Devel::Peek, English,
-ExtUtils::MakeMaker, Fcntl, File::Compare, File::Find, File::Glob,
-File::Spec, File::Spec::Functions, Getopt::Long, IO, JPL, lib,
-Math::BigInt, Math::Complex, Math::Trig, Pod::Parser, Pod::InputObjects,
-Pod::Checker, podchecker, Pod::ParseUtils, Pod::Find, Pod::Select,
-podselect, Pod::Usage, pod2usage, Pod::Text and Pod::Man, SDBM_File,
-Sys::Syslog, Sys::Hostname, Time::Local, Win32, DBM Filters
-
-=item Pragmata
-
-=back
-
-=item Utility Changes
-
-=over
-
-=item h2ph
-
-=item perlcc
-
-=item h2xs
-
-=back
-
-=item Documentation Changes
-
-perlapi.pod, perlcompile.pod, perlfilter.pod, perlhack.pod, perlintern.pod,
-perlopentut.pod, perlreftut.pod, perlboot.pod, perltootc.pod,
-perlunicode.pod
 
 =item New or Changed Diagnostics
 
@@ -1418,46 +1396,114 @@ passed through, /%s/ should probably be written as "%s", %s() called too
 early to check prototype, %s argument is not a HASH or ARRAY element, %s
 argument is not a HASH or ARRAY element or slice, %s argument is not a
 subroutine name, %s package attribute may clash with future reserved word:
-%s,	    (in cleanup) %s, <> should be quotes, Attempt to join self, Bad
-evalled substitution pattern, Bad realloc() ignored, Bareword found in
-conditional, Binary number > 0b11111111111111111111111111111111
-non-portable, Bit vector size > 32 non-portable, Buffer overflow in
-prime_env_iter: %s, Can't check filesystem of script "%s", Can't declare
-class for non-scalar %s in "%s", Can't declare %s in "%s", Can't ignore
-signal CHLD, forcing to default, Can't modify non-lvalue subroutine call,
-Can't read CRTL environ, Can't remove %s: %s, skipping file, Can't return
-%s from lvalue subroutine, Can't weaken a nonreference, Character class
-[:%s:] unknown, Character class syntax [%s] belongs inside character
-classes, Constant is not %s reference, constant(%s): %%^H is not localized,
-constant(%s): %s, defined(@array) is deprecated, defined(%hash) is
-deprecated, Did not produce a valid header, Did you mean "local" instead of
-"our"?, Document contains no data, entering effective %s failed, false []
-range "%s" in regexp, Filehandle %s opened only for output, flock() on
-closed filehandle %s, Global symbol "%s" requires explicit package name,
-Hexadecimal number > 0xffffffff non-portable, Ill-formed CRTL environ value
-"%s", Ill-formed message in prime_env_iter: |%s|, Illegal binary digit %s,
-Illegal binary digit %s ignored, Illegal number of bits in vec, Integer
-overflow in %s number, Invalid %s attribute: %s, Invalid %s attributes: %s,
-invalid [] range "%s" in regexp, Invalid separator character %s in
-attribute list, Invalid separator character %s in subroutine attribute
-list, leaving effective %s failed, Lvalue subs returning %s not implemented
-yet, Method %s not permitted, Missing %sbrace%s on \N{}, Missing command in
-piped open, Missing name in "my sub", No %s specified for -%c, No package
-name allowed for variable %s in "our", No space allowed after -%c, no UTC
-offset information; assuming local time is UTC, Octal number > 037777777777
-non-portable, panic: del_backref, panic: kid popen errno read, panic:
-magic_killbackrefs, Parentheses missing around "%s" list, Possible Y2K bug:
-%s, Premature end of script headers, Repeat count in pack overflows, Repeat
-count in unpack overflows, realloc() of freed memory ignored, Reference is
-already weak, setpgrp can't take arguments, Strange *+?{} on zero-length
-expression, switching effective %s is not implemented, This Perl can't
-reset CRTL environ elements (%s), This Perl can't set CRTL environ elements
-(%s=%s), Unknown open() mode '%s', Unknown process %x sent message to
-prime_env_iter: %s, Unrecognized escape \\%c passed through, Unterminated
-attribute parameter in attribute list, Unterminated attribute list,
-Unterminated attribute parameter in subroutine attribute list, Unterminated
-subroutine attribute list, Value of CLI symbol "%s" too long, Version
-number must be a constant number
+%s, (in cleanup) %s, <> should be quotes, Attempt to join self, Bad evalled
+substitution pattern, Bad realloc() ignored, Bareword found in conditional,
+Binary number > 0b11111111111111111111111111111111 non-portable, Bit vector
+size > 32 non-portable, Buffer overflow in prime_env_iter: %s, Can't check
+filesystem of script "%s", Can't declare class for non-scalar %s in "%s",
+Can't declare %s in "%s", Can't ignore signal CHLD, forcing to default,
+Can't modify non-lvalue subroutine call, Can't read CRTL environ, Can't
+remove %s: %s, skipping file, Can't return %s from lvalue subroutine, Can't
+weaken a nonreference, Character class [:%s:] unknown, Character class
+syntax [%s] belongs inside character classes, Constant is not %s reference,
+constant(%s): %s, CORE::%s is not a keyword, defined(@array) is deprecated,
+defined(%hash) is deprecated, Did not produce a valid header, (Did you mean
+"local" instead of "our"?), Document contains no data, entering effective
+%s failed, false [] range "%s" in regexp, Filehandle %s opened only for
+output, flock() on closed filehandle %s, Global symbol "%s" requires
+explicit package name, Hexadecimal number > 0xffffffff non-portable,
+Ill-formed CRTL environ value "%s", Ill-formed message in prime_env_iter:
+|%s|, Illegal binary digit %s, Illegal binary digit %s ignored, Illegal
+number of bits in vec, Integer overflow in %s number, Invalid %s attribute:
+%s, Invalid %s attributes: %s, invalid [] range "%s" in regexp, Invalid
+separator character %s in attribute list, Invalid separator character %s in
+subroutine attribute list, leaving effective %s failed, Lvalue subs
+returning %s not implemented yet, Method %s not permitted, Missing
+%sbrace%s on \N{}, Missing command in piped open, Missing name in "my sub",
+No %s specified for -%c, No package name allowed for variable %s in "our",
+No space allowed after -%c, no UTC offset information; assuming local time
+is UTC, Octal number > 037777777777 non-portable, panic: del_backref,
+panic: kid popen errno read, panic: magic_killbackrefs, Parentheses missing
+around "%s" list, Possible Y2K bug: %s, pragma "attrs" is deprecated, use
+"sub NAME : ATTRS" instead, Premature end of script headers, Repeat count
+in pack overflows, Repeat count in unpack overflows, realloc() of freed
+memory ignored, Reference is already weak, setpgrp can't take arguments,
+Strange *+?{} on zero-length expression, switching effective %s is not
+implemented, This Perl can't reset CRTL environ elements (%s), This Perl
+can't set CRTL environ elements (%s=%s), Too late to run %s block, Unknown
+open() mode '%s', Unknown process %x sent message to prime_env_iter: %s,
+Unrecognized escape \\%c passed through, Unterminated attribute parameter
+in attribute list, Unterminated attribute list, Unterminated attribute
+parameter in subroutine attribute list, Unterminated subroutine attribute
+list, Value of CLI symbol "%s" too long, Version number must be a constant
+number
+
+=item New tests
+
+=item Incompatible Changes
+
+=over
+
+=item Perl Source Incompatibilities
+
+CHECK is a new keyword, Treatment of list slices of undef has changed
+
+=item Format of $English::PERL_VERSION is different
+
+Literals of the form C<1.2.3> parse differently, Possibly changed
+pseudo-random number generator, Hashing function for hash keys has changed,
+C<undef> fails on read only values, Close-on-exec bit may be set on pipe
+and socket handles, Writing C<"$$1"> to mean C<"${$}1"> is unsupported,
+delete(), values() and C<\(%h)> operate on aliases to values, not copies,
+vec(EXPR,OFFSET,BITS) enforces powers-of-two BITS, Text of some diagnostic
+output has changed, C<%@> has been removed, Parenthesized not() behaves
+like a list operator, Semantics of bareword prototype C<(*)> have changed
+
+=item Semantics of bit operators may have changed on 64-bit platforms
+
+=item More builtins taint their results
+
+=item C Source Incompatibilities
+
+C<PERL_POLLUTE>, C<PERL_IMPLICIT_CONTEXT>, C<PERL_POLLUTE_MALLOC>
+
+=item Compatible C Source API Changes
+
+C<PATCHLEVEL> is now C<PERL_VERSION>
+
+=item Binary Incompatibilities
+
+=back
+
+=item Known Problems
+
+=over
+
+=item Thread test failures
+
+=item EBCDIC platforms not supported
+
+=item In 64-bit HP-UX the lib/io_multihomed test may hang
+
+=item NEXTSTEP 3.3 POSIX test failure
+
+=item Tru64 (aka Digital UNIX, aka DEC OSF/1) lib/sdbm test failure with
+gcc
+
+=item UNICOS/mk CC failures during Configure run
+
+=item Arrow operator and arrays
+
+=item Windows 2000
+
+=item Experimental features
+
+Threads, Unicode, 64-bit support, Lvalue subroutines, Weak references, The
+pseudo-hash data type, The Compiler suite, Internal implementation of file
+globbing, The DB module, The regular expression constructs C<(?{ code })>
+and C<(??{ code })>
+
+=back
 
 =item Obsolete Diagnostics
 
@@ -1465,7 +1511,7 @@ Character class syntax [: :] is reserved for future extensions, Ill-formed
 logical name |%s| in prime_env_iter, Probable precedence problem on %s,
 regexp too big, Use of "$$<digit>" to mean "${$}<digit>" is deprecated
 
-=item BUGS
+=item Reporting Bugs
 
 =item SEE ALSO
 
@@ -1618,8 +1664,6 @@ regular expressions
 
 =item Bitwise String Operators
 
-=item Strings of Character
-
 =item Integer Arithmetic
 
 =item Floating-point Arithmetic
@@ -1647,8 +1691,8 @@ cntrl, graph, print, punct, xdigit
 =item Extended Patterns
 
 C<(?#text)>, C<(?imsx-imsx)>, C<(?:pattern)>, C<(?imsx-imsx:pattern)>,
-C<(?=pattern)>, C<(?!pattern)>, C<(?E<lt>=pattern)>, C<(?<!pattern)>, C<(?{
-code })>, C<(??{ code })>, C<(?E<gt>pattern)>,
+C<(?=pattern)>, C<(?!pattern)>, C<(?<=pattern)>, C<(?<!pattern)>, C<(?{
+code })>, C<(??{ code })>, C<< (?>pattern) >>,
 C<(?(condition)yes-pattern|no-pattern)>, C<(?(condition)yes-pattern)>
 
 =item Backtracking
@@ -1662,7 +1706,7 @@ C<(?(condition)yes-pattern|no-pattern)>, C<(?(condition)yes-pattern)>
 =item Combining pieces together
 
 C<ST>, C<S|T>, C<S{REPEAT_COUNT}>, C<S{min,max}>, C<S{min,max}?>, C<S?>,
-C<S*>, C<S+>, C<S??>, C<S*?>, C<S+?>, C<(?E<gt>S)>, C<(?=S)>, C<(?<=S)>,
+C<S*>, C<S+>, C<S??>, C<S*?>, C<S+?>, C<< (?>S) >>, C<(?=S)>, C<(?<=S)>,
 C<(?!S)>, C<(?<!S)>, C<(??{ EXPR })>,
 C<(?(condition)yes-pattern|no-pattern)>
 
@@ -1739,45 +1783,45 @@ in perl5
 
 I<-X> FILEHANDLE, I<-X> EXPR, I<-X>, abs VALUE, abs, accept
 NEWSOCKET,GENERICSOCKET, alarm SECONDS, alarm, atan2 Y,X, bind SOCKET,NAME,
-binmode FILEHANDLE, bless REF,CLASSNAME, bless REF, caller EXPR, caller,
-chdir EXPR, chmod LIST, chomp VARIABLE, chomp LIST, chomp, chop VARIABLE,
-chop LIST, chop, chown LIST, chr NUMBER, chr, chroot FILENAME, chroot,
-close FILEHANDLE, close, closedir DIRHANDLE, connect SOCKET,NAME, continue
-BLOCK, cos EXPR, crypt PLAINTEXT,SALT, dbmclose HASH, dbmopen
-HASH,DBNAME,MASK, defined EXPR, defined, delete EXPR, die LIST, do BLOCK,
-do SUBROUTINE(LIST), do EXPR, dump LABEL, dump, each HASH, eof FILEHANDLE,
-eof (), eof, eval EXPR, eval BLOCK, exec LIST, exec PROGRAM LIST, exists
-EXPR, exit EXPR, exp EXPR, exp, fcntl FILEHANDLE,FUNCTION,SCALAR, fileno
-FILEHANDLE, flock FILEHANDLE,OPERATION, fork, format, formline
-PICTURE,LIST, getc FILEHANDLE, getc, getlogin, getpeername SOCKET, getpgrp
-PID, getppid, getpriority WHICH,WHO, getpwnam NAME, getgrnam NAME,
-gethostbyname NAME, getnetbyname NAME, getprotobyname NAME, getpwuid UID,
-getgrgid GID, getservbyname NAME,PROTO, gethostbyaddr ADDR,ADDRTYPE,
-getnetbyaddr ADDR,ADDRTYPE, getprotobynumber NUMBER, getservbyport
-PORT,PROTO, getpwent, getgrent, gethostent, getnetent, getprotoent,
-getservent, setpwent, setgrent, sethostent STAYOPEN, setnetent STAYOPEN,
-setprotoent STAYOPEN, setservent STAYOPEN, endpwent, endgrent, endhostent,
-endnetent, endprotoent, endservent, getsockname SOCKET, getsockopt
-SOCKET,LEVEL,OPTNAME, glob EXPR, glob, gmtime EXPR, goto LABEL, goto EXPR,
-goto &NAME, grep BLOCK LIST, grep EXPR,LIST, hex EXPR, hex, import, index
-STR,SUBSTR,POSITION, index STR,SUBSTR, int EXPR, int, ioctl
+binmode FILEHANDLE, DISCIPLINE, binmode FILEHANDLE, bless REF,CLASSNAME,
+bless REF, caller EXPR, caller, chdir EXPR, chmod LIST, chomp VARIABLE,
+chomp LIST, chomp, chop VARIABLE, chop LIST, chop, chown LIST, chr NUMBER,
+chr, chroot FILENAME, chroot, close FILEHANDLE, close, closedir DIRHANDLE,
+connect SOCKET,NAME, continue BLOCK, cos EXPR, crypt PLAINTEXT,SALT,
+dbmclose HASH, dbmopen HASH,DBNAME,MASK, defined EXPR, defined, delete
+EXPR, die LIST, do BLOCK, do SUBROUTINE(LIST), do EXPR, dump LABEL, dump,
+each HASH, eof FILEHANDLE, eof (), eof, eval EXPR, eval BLOCK, exec LIST,
+exec PROGRAM LIST, exists EXPR, exit EXPR, exp EXPR, exp, fcntl
+FILEHANDLE,FUNCTION,SCALAR, fileno FILEHANDLE, flock FILEHANDLE,OPERATION,
+fork, format, formline PICTURE,LIST, getc FILEHANDLE, getc, getlogin,
+getpeername SOCKET, getpgrp PID, getppid, getpriority WHICH,WHO, getpwnam
+NAME, getgrnam NAME, gethostbyname NAME, getnetbyname NAME, getprotobyname
+NAME, getpwuid UID, getgrgid GID, getservbyname NAME,PROTO, gethostbyaddr
+ADDR,ADDRTYPE, getnetbyaddr ADDR,ADDRTYPE, getprotobynumber NUMBER,
+getservbyport PORT,PROTO, getpwent, getgrent, gethostent, getnetent,
+getprotoent, getservent, setpwent, setgrent, sethostent STAYOPEN, setnetent
+STAYOPEN, setprotoent STAYOPEN, setservent STAYOPEN, endpwent, endgrent,
+endhostent, endnetent, endprotoent, endservent, getsockname SOCKET,
+getsockopt SOCKET,LEVEL,OPTNAME, glob EXPR, glob, gmtime EXPR, goto LABEL,
+goto EXPR, goto &NAME, grep BLOCK LIST, grep EXPR,LIST, hex EXPR, hex,
+import, index STR,SUBSTR,POSITION, index STR,SUBSTR, int EXPR, int, ioctl
 FILEHANDLE,FUNCTION,SCALAR, join EXPR,LIST, keys HASH, kill SIGNAL, LIST,
 last LABEL, last, lc EXPR, lc, lcfirst EXPR, lcfirst, length EXPR, length,
 link OLDFILE,NEWFILE, listen SOCKET,QUEUESIZE, local EXPR, localtime EXPR,
 lock, log EXPR, log, lstat FILEHANDLE, lstat EXPR, lstat, m//, map BLOCK
 LIST, map EXPR,LIST, mkdir FILENAME,MASK, mkdir FILENAME, msgctl
-ID,CMD,ARG, msgget KEY,FLAGS, msgsnd ID,MSG,FLAGS, msgrcv
-ID,VAR,SIZE,TYPE,FLAGS, my EXPR, my EXPR : ATTRIBUTES, next LABEL, next, no
-Module LIST, oct EXPR, oct, open FILEHANDLE,MODE,EXPR, open
-FILEHANDLE,EXPR, open FILEHANDLE, opendir DIRHANDLE,EXPR, ord EXPR, ord,
-our EXPR, pack TEMPLATE,LIST, package, package NAMESPACE, pipe
-READHANDLE,WRITEHANDLE, pop ARRAY, pop, pos SCALAR, pos, print FILEHANDLE
-LIST, print LIST, print, printf FILEHANDLE FORMAT, LIST, printf FORMAT,
-LIST, prototype FUNCTION, push ARRAY,LIST, q/STRING/, qq/STRING/,
-qr/STRING/, qx/STRING/, qw/STRING/, quotemeta EXPR, quotemeta, rand EXPR,
-rand, read FILEHANDLE,SCALAR,LENGTH,OFFSET, read FILEHANDLE,SCALAR,LENGTH,
-readdir DIRHANDLE, readline EXPR, readlink EXPR, readlink, readpipe EXPR,
-recv SOCKET,SCALAR,LENGTH,FLAGS, redo LABEL, redo, ref EXPR, ref, rename
+ID,CMD,ARG, msgget KEY,FLAGS, msgrcv ID,VAR,SIZE,TYPE,FLAGS, msgsnd
+ID,MSG,FLAGS, my EXPR, my EXPR : ATTRIBUTES, next LABEL, next, no Module
+LIST, oct EXPR, oct, open FILEHANDLE,MODE,LIST, open FILEHANDLE,EXPR, open
+FILEHANDLE, opendir DIRHANDLE,EXPR, ord EXPR, ord, our EXPR, pack
+TEMPLATE,LIST, package, package NAMESPACE, pipe READHANDLE,WRITEHANDLE, pop
+ARRAY, pop, pos SCALAR, pos, print FILEHANDLE LIST, print LIST, print,
+printf FILEHANDLE FORMAT, LIST, printf FORMAT, LIST, prototype FUNCTION,
+push ARRAY,LIST, q/STRING/, qq/STRING/, qr/STRING/, qx/STRING/, qw/STRING/,
+quotemeta EXPR, quotemeta, rand EXPR, rand, read
+FILEHANDLE,SCALAR,LENGTH,OFFSET, read FILEHANDLE,SCALAR,LENGTH, readdir
+DIRHANDLE, readline EXPR, readlink EXPR, readlink, readpipe EXPR, recv
+SOCKET,SCALAR,LENGTH,FLAGS, redo LABEL, redo, ref EXPR, ref, rename
 OLDNAME,NEWNAME, require VERSION, require EXPR, require, reset EXPR, reset,
 return EXPR, return, reverse LIST, rewinddir DIRHANDLE, rindex
 STR,SUBSTR,POSITION, rindex STR,SUBSTR, rmdir FILENAME, rmdir, s///, scalar
@@ -1824,7 +1868,7 @@ LIST, write FILEHANDLE, write EXPR, write, y///
 
 =item Predefined Names
 
-$ARG, $_, $E<lt>I<digits>E<gt>, $MATCH, $&, $PREMATCH, $`, $POSTMATCH, $',
+$ARG, $_, $<I<digits>>, $MATCH, $&, $PREMATCH, $`, $POSTMATCH, $',
 $LAST_PAREN_MATCH, $+, @+, $MULTILINE_MATCHING, $*, input_line_number
 HANDLE EXPR, $INPUT_LINE_NUMBER, $NR, $, input_record_separator HANDLE
 EXPR, $INPUT_RECORD_SEPARATOR, $RS, $/, autoflush HANDLE EXPR,
@@ -2152,7 +2196,7 @@ localization)
 
 =item Permanently fixing locale problems
 
-=item Permanently fixing your locale configuration
+=item Permanently fixing your system's locale configuration
 
 =item Fixing system locale configuration
 
@@ -2843,24 +2887,28 @@ B<filter_fetch_value>
 =item Debugger Commands
 
 h [command], p expr, x expr, V [pkg [vars]], X [vars], T, s [expr], n
-[expr], E<lt>CRE<gt>, c [line|sub], l, l min+incr, l min-max, l line, l
-subname, -, w [line], f filename, /pattern/, ?pattern?, L, S [[!]pattern],
-t, t expr, b [line] [condition], b subname [condition], b postpone subname
+[expr], r, <CR>, c [line|sub], l, l min+incr, l min-max, l line, l subname,
+-, w [line], f filename, /pattern/, ?pattern?, L, S [[!]regex], t, t expr,
+b [line] [condition], b subname [condition], b postpone subname
 [condition], b load filename, b compile subname, d [line], D, a [line]
-command, A, W [expr], W, O [opt[=val]] [opt"val"] [opt?]..,
+command, a [line], A, W expr, W, O booloption .., O anyoption? .., O
+option=value .., < ?, < [ command ], << command, > ?, > command, >>
+command, { ?, { [ command ], {{ command, ! number, ! -number, ! pattern, !!
+cmd, H -number, q or ^D, R, |dbcmd, ||dbcmd, command, m expr, man [manpage]
+
+=item Configurable Options
+
 C<recallCommand>, C<ShellBang>, C<pager>, C<tkRunning>, C<signalLevel>,
 C<warnLevel>, C<dieLevel>, C<AutoTrace>, C<LineInfo>, C<inhibit_exit>,
 C<PrintRet>, C<ornaments>, C<frame>, C<maxTraceLen>, C<arrayDepth>,
 C<hashDepth>, C<compactDump>, C<veryCompact>, C<globPrint>, C<DumpDBFiles>,
 C<DumpPackages>, C<DumpReused>, C<quote>, C<HighBit>, C<undefPrint>,
-C<UsageOnly>, C<TTY>, C<noTTY>, C<ReadLine>, C<NonStop>, E<lt> [ command ],
-E<lt>E<lt> command, E<gt> command, E<gt>E<gt> command, { [ command ], {{
-command, ! number, ! -number, ! pattern, !! cmd, H -number, q or ^D, R,
-|dbcmd, ||dbcmd, command, m expr, m package
+C<UsageOnly>, C<TTY>, C<noTTY>, C<ReadLine>, C<NonStop>
 
 =item Debugger input/output
 
-Prompt, Multiline commands, Stack backtrace, Listing, Frame listing
+Prompt, Multiline commands, Stack backtrace, Line Listing Format, Frame
+listing
 
 =item Debugging compile-time statements
 
@@ -2872,54 +2920,15 @@ Prompt, Multiline commands, Stack backtrace, Listing, Frame listing
 
 =item The Perl Profiler
 
-=item Debugger support in perl
-
-=item Debugger Internals
-
-=item Other resources
-
-=item BUGS
-
-=back
-
-=item Debugging Perl memory usage
-
-=over
-
-=item Using C<$ENV{PERL_DEBUG_MSTATS}>
-
-C<buckets SMALLEST(APPROX)..GREATEST(APPROX)>, Free/Used, C<Total sbrk():
-SBRKed/SBRKs:CONTINUOUS>, C<pad: 0>, C<heads: 2192>, C<chain: 0>, C<tail:
-6144>
-
-=item Example of using B<-DL> switch
-
-C<717>, C<002>, C<054>, C<602>, C<702>, C<704>
-
-=item B<-DL> details
-
-C<!!!>, C<!!>, C<!>
-
-=item Limitations of B<-DL> statistic
-
 =back
 
 =item Debugging regular expressions
 
-=over
+=item Debugging memory usage
 
-=item Compile-time output
+=item SEE ALSO
 
-C<anchored> I<STRING> C<at> I<POS>, C<floating> I<STRING> C<at>
-I<POS1..POS2>, C<matching floating/anchored>, C<minlen>, C<stclass>
-I<TYPE>, C<noscan>, C<isall>, C<GPOS>, C<plus>, C<implicit>, C<with eval>,
-C<anchored(TYPE)>
-
-=item Types of nodes
-
-=item Run-time output
-
-=back
+=item BUGS
 
 =back
 
@@ -2943,6 +2952,65 @@ integer>, Operators which expect an integer, Operators which expect a
 string
 
 =item AUTHOR
+
+=item SEE ALSO
+
+=back
+
+=head2 perldebguts - Guts of Perl debugging 
+
+=over
+
+=item DESCRIPTION
+
+=item Debugger Internals
+
+=over
+
+=item Writing Your Own Debugger
+
+=back
+
+=item Frame Listing Output Examples
+
+=item Debugging regular expressions
+
+=over
+
+=item Compile-time output
+
+C<anchored> I<STRING> C<at> I<POS>, C<floating> I<STRING> C<at>
+I<POS1..POS2>, C<matching floating/anchored>, C<minlen>, C<stclass>
+I<TYPE>, C<noscan>, C<isall>, C<GPOS>, C<plus>, C<implicit>, C<with eval>,
+C<anchored(TYPE)>
+
+=item Types of nodes
+
+=item Run-time output
+
+=back
+
+=item Debugging Perl memory usage
+
+=over
+
+=item Using C<$ENV{PERL_DEBUG_MSTATS}>
+
+C<buckets SMALLEST(APPROX)..GREATEST(APPROX)>, Free/Used, C<Total sbrk():
+SBRKed/SBRKs:CONTINUOUS>, C<pad: 0>, C<heads: 2192>, C<chain: 0>, C<tail:
+6144>
+
+=item Example of using B<-DL> switch
+
+C<717>, C<002>, C<054>, C<602>, C<702>, C<704>
+
+=item B<-DL> details
+
+C<!!!>, C<!!>, C<!>
+
+=item Limitations of B<-DL> statistics
+
+=back
 
 =item SEE ALSO
 
@@ -3109,7 +3177,7 @@ portable
 =item CPAN Testers
 
 Mailing list: cpan-testers@perl.org, Testing results:
-C<http://testers.cpan.org/>
+http://testers.cpan.org/
 
 =item PLATFORMS
 
@@ -3119,48 +3187,19 @@ C<http://testers.cpan.org/>
 
 =item DOS and Derivatives
 
-The djgpp environment for DOS, C<http://www.delorie.com/djgpp/>, The EMX
-environment for DOS, OS/2, etc.
-C<emx@iaehv.nl>,C<http://www.leo.org/pub/comp/os/os2/leo/gnu/emx+gcc/index.
-html> or
-C<ftp://hobbes.nmsu.edu/pub/os2/dev/emx>, Build instructions for Win32,
-L<perlwin32>, The ActiveState Pages, C<http://www.activestate.com/>, The
-Cygwin environment for Win32; F<README.cygwin> (installed as
-L<perlcygwin>), C<http://sourceware.cygnus.com/cygwin/>, The U/WIN
-environment for Win32,C<http://www.research.att.com/sw/tools/uwin/>
+Build instructions for OS/2, L<perlos2>
 
 =item S<Mac OS>
 
-The MacPerl Pages, C<http://www.macperl.com/>, The MacPerl mailing lists,
-C<http://www.macperl.org/>, MacPerl Module Porters,
-C<http://pudge.net/mmp/>
-
 =item VMS
-
-F<README.vms> (installed as L<README_vms>), L<perlvms>, vmsperl list,
-C<majordomo@perl.org>, vmsperl on the web,
-C<http://www.sidhe.org/vmsperl/index.html>
 
 =item VOS
 
-F<README.vos>, VOS mailing list, VOS Perl on the web at
-C<http://ftp.stratus.com/pub/vos/vos.html>
-
 =item EBCDIC Platforms
-
-F<README.os390>, F<README.posix-bc>, F<README.vmesa>, perl-mvs list, AS/400
-Perl information at C<http://as400.rochester.ibm.com/>as well as on CPAN in
-the F<ports/> directory
 
 =item Acorn RISC OS
 
 =item Other perls
-
-Amiga, F<README.amiga> (installed as L<perlamiga>), Atari, F<README.mint>
-and Guido Flohr's web pageC<http://stud.uni-sb.de/~gufl0000/>, Be OS,
-F<README.beos>, HP 300 MPE/iX, F<README.mpeix> and Mark Bixby's web
-pageC<http://www.cccd.edu/~markb/perlix.html>, Novell Netware, Plan 9,
-F<README.plan9>
 
 =back
 
@@ -3170,22 +3209,22 @@ F<README.plan9>
 
 =item Alphabetical Listing of Perl Functions
 
--I<X> FILEHANDLE, -I<X> EXPR, -I<X>, binmode FILEHANDLE, chmod LIST, chown
-LIST, chroot FILENAME, chroot, crypt PLAINTEXT,SALT, dbmclose HASH, dbmopen
-HASH,DBNAME,MODE, dump LABEL, exec LIST, fcntl FILEHANDLE,FUNCTION,SCALAR,
-flock FILEHANDLE,OPERATION, fork, getlogin, getpgrp PID, getppid,
-getpriority WHICH,WHO, getpwnam NAME, getgrnam NAME, getnetbyname NAME,
-getpwuid UID, getgrgid GID, getnetbyaddr ADDR,ADDRTYPE, getprotobynumber
-NUMBER, getservbyport PORT,PROTO, getpwent, getgrent, gethostent,
-getnetent, getprotoent, getservent, setpwent, setgrent, sethostent
-STAYOPEN, setnetent STAYOPEN, setprotoent STAYOPEN, setservent STAYOPEN,
-endpwent, endgrent, endhostent, endnetent, endprotoent, endservent,
-getsockopt SOCKET,LEVEL,OPTNAME, glob EXPR, glob, ioctl
-FILEHANDLE,FUNCTION,SCALAR, kill SIGNAL, LIST, link OLDFILE,NEWFILE, lstat
-FILEHANDLE, lstat EXPR, lstat, msgctl ID,CMD,ARG, msgget KEY,FLAGS, msgsnd
-ID,MSG,FLAGS, msgrcv ID,VAR,SIZE,TYPE,FLAGS, open FILEHANDLE,EXPR, open
-FILEHANDLE, pipe READHANDLE,WRITEHANDLE, readlink EXPR, readlink, select
-RBITS,WBITS,EBITS,TIMEOUT, semctl ID,SEMNUM,CMD,ARG, semget
+-I<X> FILEHANDLE, -I<X> EXPR, -I<X>, alarm SECONDS, alarm, binmode
+FILEHANDLE, chmod LIST, chown LIST, chroot FILENAME, chroot, crypt
+PLAINTEXT,SALT, dbmclose HASH, dbmopen HASH,DBNAME,MODE, dump LABEL, exec
+LIST, fcntl FILEHANDLE,FUNCTION,SCALAR, flock FILEHANDLE,OPERATION, fork,
+getlogin, getpgrp PID, getppid, getpriority WHICH,WHO, getpwnam NAME,
+getgrnam NAME, getnetbyname NAME, getpwuid UID, getgrgid GID, getnetbyaddr
+ADDR,ADDRTYPE, getprotobynumber NUMBER, getservbyport PORT,PROTO, getpwent,
+getgrent, gethostent, getnetent, getprotoent, getservent, setpwent,
+setgrent, sethostent STAYOPEN, setnetent STAYOPEN, setprotoent STAYOPEN,
+setservent STAYOPEN, endpwent, endgrent, endhostent, endnetent,
+endprotoent, endservent, getsockopt SOCKET,LEVEL,OPTNAME, glob EXPR, glob,
+ioctl FILEHANDLE,FUNCTION,SCALAR, kill SIGNAL, LIST, link OLDFILE,NEWFILE,
+lstat FILEHANDLE, lstat EXPR, lstat, msgctl ID,CMD,ARG, msgget KEY,FLAGS,
+msgsnd ID,MSG,FLAGS, msgrcv ID,VAR,SIZE,TYPE,FLAGS, open FILEHANDLE,EXPR,
+open FILEHANDLE, pipe READHANDLE,WRITEHANDLE, readlink EXPR, readlink,
+select RBITS,WBITS,EBITS,TIMEOUT, semctl ID,SEMNUM,CMD,ARG, semget
 KEY,NSEMS,FLAGS, semop KEY,OPSTRING, setgrent, setpgrp PID,PGRP,
 setpriority WHICH,WHO,PRIORITY, setpwent, setsockopt
 SOCKET,LEVEL,OPTNAME,OPTVAL, shmctl ID,CMD,ARG, shmget KEY,SIZE,FLAGS,
@@ -3200,11 +3239,16 @@ wait, waitpid PID,FLAGS
 
 =item CHANGES
 
-v1.46, 12 February 2000, v1.45, 20 December 1999, v1.44, 19 July 1999,
-v1.43, 24 May 1999, v1.42, 22 May 1999, v1.41, 19 May 1999, v1.40, 11 April
-1999, v1.39, 11 February 1999, v1.38, 31 December 1998, v1.37, 19 December
-1998, v1.36, 9 September 1998, v1.35, 13 August 1998, v1.33, 06 August
-1998, v1.32, 05 August 1998, v1.30, 03 August 1998, v1.23, 10 July 1998
+v1.47, 22 March 2000, v1.46, 12 February 2000, v1.45, 20 December 1999,
+v1.44, 19 July 1999, v1.43, 24 May 1999, v1.42, 22 May 1999, v1.41, 19 May
+1999, v1.40, 11 April 1999, v1.39, 11 February 1999, v1.38, 31 December
+1998, v1.37, 19 December 1998, v1.36, 9 September 1998, v1.35, 13 August
+1998, v1.33, 06 August 1998, v1.32, 05 August 1998, v1.30, 03 August 1998,
+v1.23, 10 July 1998
+
+=item Supported Platforms
+
+=item SEE ALSO
 
 =item AUTHORS / CONTRIBUTORS
 
@@ -3738,13 +3782,13 @@ B::Bytecode, B::C, B::CC, B::Lint, B::Deparse, B::Xref
 
 =over
 
-=item The Cross Referencing Back End (B::Xref)
+=item The Cross Referencing Back End
 
 i, &, s, r
 
 =item The Decompiling Back End
 
-=item The Lint Back End (B::Lint)
+=item The Lint Back End
 
 =item The Simple C Back End
 
@@ -3785,33 +3829,34 @@ isDIGIT, isLOWER, isSPACE, isUPPER, items, ix, LEAVE, looks_like_number,
 MARK, mg_clear, mg_copy, mg_find, mg_free, mg_get, mg_length, mg_magical,
 mg_set, Move, New, newAV, Newc, newCONSTSUB, newHV, newRV_inc, newRV_noinc,
 NEWSV, newSViv, newSVnv, newSVpv, newSVpvf, newSVpvn, newSVrv, newSVsv,
-newXS, newXSproto, Newz, Nullav, Nullch, Nullcv, Nullhv, Nullsv, ORIGMARK,
-perl_alloc, perl_construct, perl_destruct, perl_free, perl_parse, perl_run,
-PL_DBsingle, PL_DBsub, PL_DBtrace, PL_dowarn, PL_modglobal, PL_na,
-PL_sv_no, PL_sv_undef, PL_sv_yes, POPi, POPl, POPn, POPp, POPs, PUSHi,
-PUSHMARK, PUSHn, PUSHp, PUSHs, PUSHu, PUTBACK, Renew, Renewc, require_pv,
-RETVAL, Safefree, savepv, savepvn, SAVETMPS, SP, SPAGAIN, ST, strEQ, strGE,
-strGT, strLE, strLT, strNE, strnEQ, strnNE, StructCopy, SvCUR, SvCUR_set,
-SvEND, SvGETMAGIC, SvGROW, SvIOK, SvIOKp, SvIOK_off, SvIOK_on, SvIOK_only,
-SvIV, SvIVX, SvLEN, SvNIOK, SvNIOKp, SvNIOK_off, SvNOK, SvNOKp, SvNOK_off,
-SvNOK_on, SvNOK_only, SvNV, SvNVX, SvOK, SvOOK, SvPOK, SvPOKp, SvPOK_off,
-SvPOK_on, SvPOK_only, SvPV, SvPVX, SvPV_force, SvPV_nolen, SvREFCNT,
-SvREFCNT_dec, SvREFCNT_inc, SvROK, SvROK_off, SvROK_on, SvRV, SvSETMAGIC,
-SvSetSV, SvSetSV_nosteal, SvSTASH, SvTAINT, SvTAINTED, SvTAINTED_off,
-SvTAINTED_on, SvTRUE, SvTYPE, svtype, SVt_IV, SVt_NV, SVt_PV, SVt_PVAV,
-SVt_PVCV, SVt_PVHV, SVt_PVMG, SvUPGRADE, SvUV, SvUVX, sv_2mortal, sv_bless,
-sv_catpv, sv_catpvf, sv_catpvf_mg, sv_catpvn, sv_catpvn_mg, sv_catpv_mg,
-sv_catsv, sv_catsv_mg, sv_chop, sv_cmp, sv_dec, sv_derived_from, sv_eq,
-sv_grow, sv_inc, sv_insert, sv_isa, sv_isobject, sv_len, sv_magic,
-sv_mortalcopy, sv_newmortal, sv_setiv, sv_setiv_mg, sv_setnv, sv_setnv_mg,
-sv_setpv, sv_setpvf, sv_setpvf_mg, sv_setpviv, sv_setpviv_mg, sv_setpvn,
-sv_setpvn_mg, sv_setpv_mg, sv_setref_iv, sv_setref_nv, sv_setref_pv,
-sv_setref_pvn, sv_setsv, sv_setsv_mg, sv_setuv, sv_setuv_mg, sv_unref,
-sv_upgrade, sv_usepvn, sv_usepvn_mg, sv_vcatpvfn, sv_vsetpvfn, THIS,
-toLOWER, toUPPER, warn, XPUSHi, XPUSHn, XPUSHp, XPUSHs, XPUSHu, XS,
-XSRETURN, XSRETURN_EMPTY, XSRETURN_IV, XSRETURN_NO, XSRETURN_NV,
-XSRETURN_PV, XSRETURN_UNDEF, XSRETURN_YES, XST_mIV, XST_mNO, XST_mNV,
-XST_mPV, XST_mUNDEF, XST_mYES, XS_VERSION, XS_VERSION_BOOTCHECK, Zero
+newSVuv, newXS, newXSproto, Newz, Nullav, Nullch, Nullcv, Nullhv, Nullsv,
+ORIGMARK, perl_alloc, perl_construct, perl_destruct, perl_free, perl_parse,
+perl_run, PL_DBsingle, PL_DBsub, PL_DBtrace, PL_dowarn, PL_modglobal,
+PL_na, PL_sv_no, PL_sv_undef, PL_sv_yes, POPi, POPl, POPn, POPp, POPs,
+PUSHi, PUSHMARK, PUSHn, PUSHp, PUSHs, PUSHu, PUTBACK, Renew, Renewc,
+require_pv, RETVAL, Safefree, savepv, savepvn, SAVETMPS, SP, SPAGAIN, ST,
+strEQ, strGE, strGT, strLE, strLT, strNE, strnEQ, strnNE, StructCopy,
+SvCUR, SvCUR_set, SvEND, SvGETMAGIC, SvGROW, SvIOK, SvIOKp, SvIOK_off,
+SvIOK_on, SvIOK_only, SvIV, SvIVX, SvLEN, SvNIOK, SvNIOKp, SvNIOK_off,
+SvNOK, SvNOKp, SvNOK_off, SvNOK_on, SvNOK_only, SvNV, SvNVX, SvOK, SvOOK,
+SvPOK, SvPOKp, SvPOK_off, SvPOK_on, SvPOK_only, SvPV, SvPVX, SvPV_force,
+SvPV_nolen, SvREFCNT, SvREFCNT_dec, SvREFCNT_inc, SvROK, SvROK_off,
+SvROK_on, SvRV, SvSETMAGIC, SvSetSV, SvSetSV_nosteal, SvSTASH, SvTAINT,
+SvTAINTED, SvTAINTED_off, SvTAINTED_on, SvTRUE, SvTYPE, svtype, SVt_IV,
+SVt_NV, SVt_PV, SVt_PVAV, SVt_PVCV, SVt_PVHV, SVt_PVMG, SvUPGRADE, SvUV,
+SvUVX, sv_2mortal, sv_bless, sv_catpv, sv_catpvf, sv_catpvf_mg, sv_catpvn,
+sv_catpvn_mg, sv_catpv_mg, sv_catsv, sv_catsv_mg, sv_chop, sv_cmp, sv_dec,
+sv_derived_from, sv_eq, sv_grow, sv_inc, sv_insert, sv_isa, sv_isobject,
+sv_len, sv_magic, sv_mortalcopy, sv_newmortal, sv_setiv, sv_setiv_mg,
+sv_setnv, sv_setnv_mg, sv_setpv, sv_setpvf, sv_setpvf_mg, sv_setpviv,
+sv_setpviv_mg, sv_setpvn, sv_setpvn_mg, sv_setpv_mg, sv_setref_iv,
+sv_setref_nv, sv_setref_pv, sv_setref_pvn, sv_setsv, sv_setsv_mg, sv_setuv,
+sv_setuv_mg, sv_unref, sv_upgrade, sv_usepvn, sv_usepvn_mg, sv_vcatpvfn,
+sv_vsetpvfn, THIS, toLOWER, toUPPER, warn, XPUSHi, XPUSHn, XPUSHp, XPUSHs,
+XPUSHu, XS, XSRETURN, XSRETURN_EMPTY, XSRETURN_IV, XSRETURN_NO,
+XSRETURN_NV, XSRETURN_PV, XSRETURN_UNDEF, XSRETURN_YES, XST_mIV, XST_mNO,
+XST_mNV, XST_mPV, XST_mUNDEF, XST_mYES, XS_VERSION, XS_VERSION_BOOTCHECK,
+Zero
 
 =item AUTHORS
 
@@ -4081,13 +4126,6 @@ new, phash
 
 =item SYNOPSIS
 
-    $can_perhaps_read = -r "file";	# use the mode bits
-    {
-	use filetest 'access';		# intuit harder
-	$can_really_read = -r "file";
-    }
-    $can_perhaps_read = -r "file";	# use the mode bits again
-
 =item DESCRIPTION
 
 =over
@@ -4151,6 +4189,20 @@ operations
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+=back
+
+=head2 open - perl pragma to set default disciplines for input and output
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item UNIMPLEMENTED FUNCTIONALITY
+
+=item SEE ALSO
 
 =back
 
@@ -4354,7 +4406,8 @@ C<strict refs>, C<strict vars>, C<strict subs>
 
 =item DESCRIPTION
 
-warnings::enabled($category), warnings::warn($category, $message)
+use warnings::register, warnings::enabled([$category]),
+warnings::warn([$category,] $message)
 
 =back
 
@@ -5124,8 +5177,7 @@ parameters in the B<header()> and B<redirect()>  statements:
 
 =item Server Push
 
-multipart_init()     
-  multipart_init(-boundary=>$boundary);, multipart_start(), multipart_end()
+multipart_init(), multipart_start(), multipart_end()
 
 =item Avoiding Denial of Service Attacks
 
@@ -5564,45 +5616,46 @@ C<d_getspent>, C<d_getspnam>, C<d_gettimeod>, C<d_gnulibc>, C<d_grpasswd>,
 C<d_hasmntopt>, C<d_htonl>, C<d_iconv>, C<d_index>, C<d_inetaton>,
 C<d_int64_t>, C<d_isascii>, C<d_killpg>, C<d_lchown>, C<d_ldbl_dig>,
 C<d_link>, C<d_locconv>, C<d_lockf>, C<d_longdbl>, C<d_longlong>,
-C<d_lseekproto>, C<d_lstat>, C<d_mblen>, C<d_mbstowcs>, C<d_mbtowc>,
-C<d_memchr>, C<d_memcmp>, C<d_memcpy>, C<d_memmove>, C<d_memset>,
-C<d_mkdir>, C<d_mkdtemp>, C<d_mkfifo>, C<d_mkstemp>, C<d_mkstemps>,
-C<d_mktime>, C<d_mmap>, C<d_mprotect>, C<d_msg>, C<d_msg_ctrunc>,
-C<d_msg_dontroute>, C<d_msg_oob>, C<d_msg_peek>, C<d_msg_proxy>,
-C<d_msgctl>, C<d_msgget>, C<d_msgrcv>, C<d_msgsnd>, C<d_msync>,
-C<d_munmap>, C<d_mymalloc>, C<d_nice>, C<d_nv_preserves_uv>, C<d_off64_t>,
-C<d_old_pthread_create_joinable>, C<d_oldpthreads>, C<d_oldsock>,
-C<d_open3>, C<d_pathconf>, C<d_pause>, C<d_phostname>, C<d_pipe>,
-C<d_poll>, C<d_portable>, C<d_PRId64>, C<d_PRIeldbl>, C<d_PRIEldbl>,
-C<d_PRIfldbl>, C<d_PRIFldbl>, C<d_PRIgldbl>, C<d_PRIGldbl>, C<d_PRIi64>,
-C<d_PRIo64>, C<d_PRIu64>, C<d_PRIx64>, C<d_PRIX64>, C<d_pthread_yield>,
-C<d_pwage>, C<d_pwchange>, C<d_pwclass>, C<d_pwcomment>, C<d_pwexpire>,
-C<d_pwgecos>, C<d_pwpasswd>, C<d_pwquota>, C<d_quad>, C<d_readdir>,
-C<d_readlink>, C<d_rename>, C<d_rewinddir>, C<d_rmdir>, C<d_safebcpy>,
-C<d_safemcpy>, C<d_sanemcmp>, C<d_sched_yield>, C<d_scm_rights>,
-C<d_seekdir>, C<d_select>, C<d_sem>, C<d_semctl>, C<d_semctl_semid_ds>,
-C<d_semctl_semun>, C<d_semget>, C<d_semop>, C<d_setegid>, C<d_seteuid>,
-C<d_setgrent>, C<d_setgrps>, C<d_sethent>, C<d_setlinebuf>, C<d_setlocale>,
-C<d_setnent>, C<d_setpent>, C<d_setpgid>, C<d_setpgrp2>, C<d_setpgrp>,
-C<d_setprior>, C<d_setpwent>, C<d_setregid>, C<d_setresgid>,
-C<d_setresuid>, C<d_setreuid>, C<d_setrgid>, C<d_setruid>, C<d_setsent>,
-C<d_setsid>, C<d_setspent>, C<d_setvbuf>, C<d_sfio>, C<d_shm>, C<d_shmat>,
-C<d_shmatprototype>, C<d_shmctl>, C<d_shmdt>, C<d_shmget>, C<d_sigaction>,
-C<d_sigsetjmp>, C<d_socket>, C<d_socklen_t>, C<d_sockpair>, C<d_sqrtl>,
-C<d_statblks>, C<d_statfs_f_flags>, C<d_statfs_s>, C<d_statvfs>,
-C<d_stdio_cnt_lval>, C<d_stdio_ptr_lval>, C<d_stdio_stream_array>,
-C<d_stdiobase>, C<d_stdstdio>, C<d_strchr>, C<d_strcoll>, C<d_strctcpy>,
-C<d_strerrm>, C<d_strerror>, C<d_strtod>, C<d_strtol>, C<d_strtold>,
-C<d_strtoll>, C<d_strtoul>, C<d_strtoull>, C<d_strtouq>, C<d_strxfrm>,
-C<d_suidsafe>, C<d_symlink>, C<d_syscall>, C<d_sysconf>, C<d_sysernlst>,
-C<d_syserrlst>, C<d_system>, C<d_tcgetpgrp>, C<d_tcsetpgrp>, C<d_telldir>,
+C<d_lseekproto>, C<d_lstat>, C<d_madvise>, C<d_mblen>, C<d_mbstowcs>,
+C<d_mbtowc>, C<d_memchr>, C<d_memcmp>, C<d_memcpy>, C<d_memmove>,
+C<d_memset>, C<d_mkdir>, C<d_mkdtemp>, C<d_mkfifo>, C<d_mkstemp>,
+C<d_mkstemps>, C<d_mktime>, C<d_mmap>, C<d_mprotect>, C<d_msg>,
+C<d_msg_ctrunc>, C<d_msg_dontroute>, C<d_msg_oob>, C<d_msg_peek>,
+C<d_msg_proxy>, C<d_msgctl>, C<d_msgget>, C<d_msgrcv>, C<d_msgsnd>,
+C<d_msync>, C<d_munmap>, C<d_mymalloc>, C<d_nice>, C<d_nv_preserves_uv>,
+C<d_off64_t>, C<d_old_pthread_create_joinable>, C<d_oldpthreads>,
+C<d_oldsock>, C<d_open3>, C<d_pathconf>, C<d_pause>, C<d_phostname>,
+C<d_pipe>, C<d_poll>, C<d_portable>, C<d_PRId64>, C<d_PRIeldbl>,
+C<d_PRIEldbl>, C<d_PRIfldbl>, C<d_PRIFldbl>, C<d_PRIgldbl>, C<d_PRIGldbl>,
+C<d_PRIi64>, C<d_PRIo64>, C<d_PRIu64>, C<d_PRIx64>, C<d_PRIX64>,
+C<d_pthread_yield>, C<d_pwage>, C<d_pwchange>, C<d_pwclass>,
+C<d_pwcomment>, C<d_pwexpire>, C<d_pwgecos>, C<d_pwpasswd>, C<d_pwquota>,
+C<d_qgcvt>, C<d_quad>, C<d_readdir>, C<d_readlink>, C<d_rename>,
+C<d_rewinddir>, C<d_rmdir>, C<d_safebcpy>, C<d_safemcpy>, C<d_sanemcmp>,
+C<d_sched_yield>, C<d_scm_rights>, C<d_seekdir>, C<d_select>, C<d_sem>,
+C<d_semctl>, C<d_semctl_semid_ds>, C<d_semctl_semun>, C<d_semget>,
+C<d_semop>, C<d_setegid>, C<d_seteuid>, C<d_setgrent>, C<d_setgrps>,
+C<d_sethent>, C<d_setlinebuf>, C<d_setlocale>, C<d_setnent>, C<d_setpent>,
+C<d_setpgid>, C<d_setpgrp2>, C<d_setpgrp>, C<d_setprior>, C<d_setpwent>,
+C<d_setregid>, C<d_setresgid>, C<d_setresuid>, C<d_setreuid>, C<d_setrgid>,
+C<d_setruid>, C<d_setsent>, C<d_setsid>, C<d_setspent>, C<d_setvbuf>,
+C<d_sfio>, C<d_shm>, C<d_shmat>, C<d_shmatprototype>, C<d_shmctl>,
+C<d_shmdt>, C<d_shmget>, C<d_sigaction>, C<d_sigsetjmp>, C<d_socket>,
+C<d_socklen_t>, C<d_sockpair>, C<d_sqrtl>, C<d_statblks>,
+C<d_statfs_f_flags>, C<d_statfs_s>, C<d_statvfs>, C<d_stdio_cnt_lval>,
+C<d_stdio_ptr_lval>, C<d_stdio_stream_array>, C<d_stdiobase>,
+C<d_stdstdio>, C<d_strchr>, C<d_strcoll>, C<d_strctcpy>, C<d_strerrm>,
+C<d_strerror>, C<d_strtod>, C<d_strtol>, C<d_strtold>, C<d_strtoll>,
+C<d_strtoul>, C<d_strtoull>, C<d_strtouq>, C<d_strxfrm>, C<d_suidsafe>,
+C<d_symlink>, C<d_syscall>, C<d_sysconf>, C<d_sysernlst>, C<d_syserrlst>,
+C<d_system>, C<d_tcgetpgrp>, C<d_tcsetpgrp>, C<d_telldir>,
 C<d_telldirproto>, C<d_time>, C<d_times>, C<d_truncate>, C<d_tzname>,
-C<d_umask>, C<d_uname>, C<d_union_semun>, C<d_ustat>, C<d_vendorbin>,
-C<d_vendorlib>, C<d_vfork>, C<d_void_closedir>, C<d_voidsig>, C<d_voidtty>,
-C<d_volatile>, C<d_vprintf>, C<d_wait4>, C<d_waitpid>, C<d_wcstombs>,
-C<d_wctomb>, C<d_xenix>, C<date>, C<db_hashtype>, C<db_prefixtype>,
-C<defvoidused>, C<direntrytype>, C<dlext>, C<dlsrc>, C<doublesize>,
-C<drand01>, C<dynamic_ext>
+C<d_umask>, C<d_uname>, C<d_union_semun>, C<d_ustat>, C<d_vendorarch>,
+C<d_vendorbin>, C<d_vendorlib>, C<d_vfork>, C<d_void_closedir>,
+C<d_voidsig>, C<d_voidtty>, C<d_volatile>, C<d_vprintf>, C<d_wait4>,
+C<d_waitpid>, C<d_wcstombs>, C<d_wctomb>, C<d_xenix>, C<date>,
+C<db_hashtype>, C<db_prefixtype>, C<defvoidused>, C<direntrytype>,
+C<dlext>, C<dlsrc>, C<doublesize>, C<drand01>, C<dynamic_ext>
 
 =item e
 
@@ -5628,24 +5681,25 @@ C<h_fcntl>, C<h_sysfile>, C<hint>, C<hostcat>, C<huge>
 C<i16size>, C<i16type>, C<i32size>, C<i32type>, C<i64size>, C<i64type>,
 C<i8size>, C<i8type>, C<i_arpainet>, C<i_bsdioctl>, C<i_db>, C<i_dbm>,
 C<i_dirent>, C<i_dld>, C<i_dlfcn>, C<i_fcntl>, C<i_float>, C<i_gdbm>,
-C<i_grp>, C<i_iconv>, C<i_inttypes>, C<i_limits>, C<i_locale>,
+C<i_grp>, C<i_iconv>, C<i_ieeefp>, C<i_inttypes>, C<i_limits>, C<i_locale>,
 C<i_machcthr>, C<i_malloc>, C<i_math>, C<i_memory>, C<i_mntent>, C<i_ndbm>,
 C<i_netdb>, C<i_neterrno>, C<i_netinettcp>, C<i_niin>, C<i_poll>,
 C<i_pthread>, C<i_pwd>, C<i_rpcsvcdbm>, C<i_sfio>, C<i_sgtty>, C<i_shadow>,
 C<i_socks>, C<i_stdarg>, C<i_stddef>, C<i_stdlib>, C<i_string>,
-C<i_sysaccess>, C<i_sysdir>, C<i_sysfile>, C<i_sysfilio>, C<i_sysin>,
-C<i_sysioctl>, C<i_syslog>, C<i_sysmman>, C<i_sysmode>, C<i_sysmount>,
-C<i_sysndir>, C<i_sysparam>, C<i_sysresrc>, C<i_syssecrt>, C<i_sysselct>,
-C<i_syssockio>, C<i_sysstat>, C<i_sysstatfs>, C<i_sysstatvfs>,
-C<i_systime>, C<i_systimek>, C<i_systimes>, C<i_systypes>, C<i_sysuio>,
-C<i_sysun>, C<i_sysutsname>, C<i_sysvfs>, C<i_syswait>, C<i_termio>,
-C<i_termios>, C<i_time>, C<i_unistd>, C<i_ustat>, C<i_utime>, C<i_values>,
-C<i_varargs>, C<i_varhdr>, C<i_vfork>, C<ignore_versioned_solibs>,
-C<inc_version_list>, C<inc_version_list_init>, C<incpath>, C<inews>,
-C<installarchlib>, C<installbin>, C<installman1dir>, C<installman3dir>,
-C<installprefix>, C<installprefixexp>, C<installprivlib>, C<installscript>,
-C<installsitearch>, C<installsitebin>, C<installsitelib>, C<installstyle>,
-C<installusrbinperl>, C<installvendorbin>, C<installvendorlib>, C<intsize>,
+C<i_sunmath>, C<i_sysaccess>, C<i_sysdir>, C<i_sysfile>, C<i_sysfilio>,
+C<i_sysin>, C<i_sysioctl>, C<i_syslog>, C<i_sysmman>, C<i_sysmode>,
+C<i_sysmount>, C<i_sysndir>, C<i_sysparam>, C<i_sysresrc>, C<i_syssecrt>,
+C<i_sysselct>, C<i_syssockio>, C<i_sysstat>, C<i_sysstatfs>,
+C<i_sysstatvfs>, C<i_systime>, C<i_systimek>, C<i_systimes>, C<i_systypes>,
+C<i_sysuio>, C<i_sysun>, C<i_sysutsname>, C<i_sysvfs>, C<i_syswait>,
+C<i_termio>, C<i_termios>, C<i_time>, C<i_unistd>, C<i_ustat>, C<i_utime>,
+C<i_values>, C<i_varargs>, C<i_varhdr>, C<i_vfork>,
+C<ignore_versioned_solibs>, C<inc_version_list>, C<inc_version_list_init>,
+C<incpath>, C<inews>, C<installarchlib>, C<installbin>, C<installman1dir>,
+C<installman3dir>, C<installprefix>, C<installprefixexp>,
+C<installprivlib>, C<installscript>, C<installsitearch>, C<installsitebin>,
+C<installsitelib>, C<installstyle>, C<installusrbinperl>,
+C<installvendorarch>, C<installvendorbin>, C<installvendorlib>, C<intsize>,
 C<ivdformat>, C<ivsize>, C<ivtype>
 
 =item k
@@ -5712,15 +5766,15 @@ C<selectminbits>, C<selecttype>, C<sendmail>, C<sh>, C<shar>, C<sharpbang>,
 C<shmattype>, C<shortsize>, C<shrpenv>, C<shsharp>, C<sig_count>,
 C<sig_name>, C<sig_name_init>, C<sig_num>, C<sig_num_init>, C<signal_t>,
 C<sitearch>, C<sitearchexp>, C<sitebin>, C<sitebinexp>, C<sitelib>,
-C<sitelibexp>, C<siteprefix>, C<siteprefixexp>, C<sizetype>, C<sleep>,
-C<smail>, C<small>, C<so>, C<sockethdr>, C<socketlib>, C<socksizetype>,
-C<sort>, C<spackage>, C<spitshell>, C<split>, C<sPRId64>, C<sPRIeldbl>,
-C<sPRIEldbl>, C<sPRIfldbl>, C<sPRIFldbl>, C<sPRIgldbl>, C<sPRIGldbl>,
-C<sPRIi64>, C<sPRIo64>, C<sPRIu64>, C<sPRIx64>, C<sPRIX64>, C<src>,
-C<ssizetype>, C<startperl>, C<startsh>, C<static_ext>, C<stdchar>,
-C<stdio_base>, C<stdio_bufsiz>, C<stdio_cnt>, C<stdio_filbuf>,
-C<stdio_ptr>, C<stdio_stream_array>, C<strings>, C<submit>, C<subversion>,
-C<sysman>
+C<sitelib_stem>, C<sitelibexp>, C<siteprefix>, C<siteprefixexp>,
+C<sizesize>, C<sizetype>, C<sleep>, C<smail>, C<small>, C<so>,
+C<sockethdr>, C<socketlib>, C<socksizetype>, C<sort>, C<spackage>,
+C<spitshell>, C<split>, C<sPRId64>, C<sPRIeldbl>, C<sPRIEldbl>,
+C<sPRIfldbl>, C<sPRIFldbl>, C<sPRIgldbl>, C<sPRIGldbl>, C<sPRIi64>,
+C<sPRIo64>, C<sPRIu64>, C<sPRIx64>, C<sPRIX64>, C<src>, C<ssizetype>,
+C<startperl>, C<startsh>, C<static_ext>, C<stdchar>, C<stdio_base>,
+C<stdio_bufsiz>, C<stdio_cnt>, C<stdio_filbuf>, C<stdio_ptr>,
+C<stdio_stream_array>, C<strings>, C<submit>, C<subversion>, C<sysman>
 
 =item t
 
@@ -5741,8 +5795,9 @@ C<uvxformat>
 
 =item v
 
-C<vendorbin>, C<vendorbinexp>, C<vendorlib>, C<vendorlibexp>,
-C<vendorprefix>, C<vendorprefixexp>, C<version>, C<vi>, C<voidflags>
+C<vendorarch>, C<vendorarchexp>, C<vendorbin>, C<vendorbinexp>,
+C<vendorlib>, C<vendorlib_stem>, C<vendorlibexp>, C<vendorprefix>,
+C<vendorprefixexp>, C<version>, C<vi>, C<voidflags>
 
 =item x
 
@@ -5954,14 +6009,13 @@ printing and C<eval>
 =item Methods
 
 I<PACKAGE>->new(I<ARRAYREF [>, I<ARRAYREF]>), I<$OBJ>->Dump  I<or> 
-I<PACKAGE>->Dump(I<ARRAYREF [>, I<ARRAYREF]>), I<$OBJ>->Dumpxs	I<or> 
-I<PACKAGE>->Dumpxs(I<ARRAYREF [>, I<ARRAYREF]>),
-I<$OBJ>->Seen(I<[HASHREF]>), I<$OBJ>->Values(I<[ARRAYREF]>),
-I<$OBJ>->Names(I<[ARRAYREF]>), I<$OBJ>->Reset
+I<PACKAGE>->Dump(I<ARRAYREF [>, I<ARRAYREF]>), I<$OBJ>->Seen(I<[HASHREF]>),
+I<$OBJ>->Values(I<[ARRAYREF]>), I<$OBJ>->Names(I<[ARRAYREF]>),
+I<$OBJ>->Reset
 
 =item Functions
 
-Dumper(I<LIST>), DumperX(I<LIST>)
+Dumper(I<LIST>)
 
 =item Configuration Variables or Methods
 
@@ -6114,7 +6168,7 @@ veryCompact, set, get
 
 @dl_library_path, @dl_resolve_using, @dl_require_symbols, @dl_librefs,
 @dl_modules, dl_error(), $dl_debug, dl_findfile(), dl_expandspec(),
-dl_load_file(), dl_loadflags(), dl_find_symbol(),
+dl_load_file(), dl_unload_file(), dl_loadflags(), dl_find_symbol(),
 dl_find_symbol_anywhere(), dl_undef_symbols(), dl_install_xsub(),
 bootstrap()
 
@@ -6148,13 +6202,16 @@ variables
 
 =back
 
-=head2 Env - perl module that imports environment variables
+=head2 Env - perl module that imports environment variables as scalars or
+arrays
 
 =over
 
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+=item LIMITATIONS
 
 =item AUTHOR
 
@@ -7254,9 +7311,9 @@ splitdir (override)
 
 catpath (override)
 
-splitpath
+abs2rel (override)
 
-splitdir
+rel2abs (override)
 
 =over
 
@@ -7372,8 +7429,7 @@ $fh->print, $fh->printf, $fh->getline, $fh->getlines
 
 =back
 
-=head2 Getopt::Long, GetOptions - extended processing of command line
-options
+=head2 Getopt::Long - Extended processing of command line options
 
 =over
 
@@ -7381,36 +7437,72 @@ options
 
 =item DESCRIPTION
 
-!, +, :s, :i, :f
+=item Command Line Options, an Introduction
+
+=item Getting Started with Getopt::Long
 
 =over
 
-=item Linkage specification
+=item Simple options
 
-=item Aliases and abbreviations
+=item A little bit less simple options
 
-=item Non-option call-back routine
+=item Mixing command line option with other arguments
 
-=item Option starters
+=item Options with values
 
-=item Return values and Errors
+=item Options with multiple values
+
+=item Options with hash values
+
+=item User-defined subroutines to handle options
+
+=item Options with multiple names
+
+=item Case and abbreviations
+
+=item Summary of Option Specifications
+
+!, +, s, i, f, : I<type> [ I<desttype> ]
 
 =back
 
-=item COMPATIBILITY
+=item Advanced Possibilities
 
-=item EXAMPLES
+=over
 
-=item CONFIGURATION OPTIONS
+=item Documentation and help texts
+
+=item Storing options in a hash
+
+=item Bundling
+
+=item The lonesome dash
+
+=item Argument call-back
+
+=back
+
+=item Configuring Getopt::Long
 
 default, auto_abbrev, getopt_compat, require_order, permute, bundling
 (default: reset), bundling_override (default: reset), ignore_case 
 (default: set), ignore_case_always (default: reset), pass_through (default:
 reset), prefix, prefix_pattern, debug (default: reset)
 
-=item OTHER USEFUL VARIABLES
+=item Return values and Errors
 
-$Getopt::Long::VERSION, $Getopt::Long::error
+=item Legacy
+
+=over
+
+=item Default destinations
+
+=item Alternative option starters
+
+=item Configuration variables
+
+=back
 
 =item AUTHOR
 
@@ -8096,33 +8188,6 @@ Canonical notation, Input, Output
 
 =back
 
-=head2 Math::Complex - complex numbers and associated mathematical
-functions
-
-=over
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item OPERATIONS
-
-=item CREATION
-
-=item STRINGIFICATION
-
-=item USAGE
-
-=item ERRORS DUE TO DIVISION BY ZERO OR LOGARITHM OF ZERO
-
-=item ERRORS DUE TO INDIGESTIBLE ARGUMENTS
-
-=item BUGS
-
-=item AUTHORS
-
-=back
-
 =head2 Math::Trig - trigonometric functions
 
 =over
@@ -8617,9 +8682,9 @@ B<-verbose>, B<-perl>, B<-script>, B<-inc>
 
 =item ARGUMENTS
 
-help, htmldir, htmlroot, infile, outfile, podroot, podpath, libpods,
-netscape, nonetscape, index, noindex, recurse, norecurse, title, css,
-verbose, quiet
+backlink, css, flush, header, help, htmldir, htmlroot, index, infile,
+libpods, netscape, outfile, podpath, podroot, quiet, recurse, title,
+verbose
 
 =item EXAMPLE
 
@@ -8881,8 +8946,6 @@ EE<lt>%sE<gt>, Unknown sequence %s, Unmatched =back
 
 =item BUGS
 
-=item NOTES
-
 =item SEE ALSO
 
 =item AUTHOR
@@ -9009,7 +9072,8 @@ idx()
 
 =item PARSING OPTIONS
 
-B<-want_nonPODs> (default: unset), B<-process_cut_cmd> (default: unset)
+B<-want_nonPODs> (default: unset), B<-process_cut_cmd> (default: unset),
+B<-warnings> (default: unset)
 
 =back
 
@@ -9228,6 +9292,26 @@ I<code-ref>|I<method-name>
 =item SEE ALSO
 
 =item AUTHOR
+
+=back
+
+=head2 Pod::Plainer - Perl extension for converting Pod to old style Pod.
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over
+
+=item EXPORT
+
+=back
+
+=item AUTHOR
+
+=item SEE ALSO
 
 =back
 
@@ -9605,6 +9689,26 @@ closelog
 =item SEE ALSO
 
 =item AUTHOR
+
+=back
+
+=head2 Term::ANSIColor - Color screen output using ANSI escape sequences
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item DIAGNOSTICS
+
+Invalid attribute name %s, Identifier %s used only once: possible typo, No
+comma allowed after filehandle, Bareword %s not allowed while "strict subs"
+in use
+
+=item RESTRICTIONS
+
+=item AUTHORS
 
 =back
 
@@ -10065,9 +10169,19 @@ functions
 
 =item DESCRIPTION
 
+=over
+
+=item System Specifics
+
+=back
+
 =item NOTE
 
 =item AUTHOR
+
+=item HISTORY
+
+March 18th, 2000
 
 =back
 

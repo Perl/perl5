@@ -109,6 +109,7 @@
 #define do_rmdir		Perl_do_rmdir
 #define kill_file		Perl_kill_file
 #define my_mkdir		Perl_my_mkdir
+#define my_chdir		Perl_my_chdir
 #define my_utime		Perl_my_utime
 #define rmsexpand	Perl_rmsexpand
 #define rmsexpand_ts	Perl_rmsexpand_ts
@@ -232,7 +233,6 @@
 #define TEST_VMSISH(h)	(PL_curcop->op_private & ((h) >> HINT_V_VMSISH))
 #define VMSISH_HUSHED	TEST_VMSISH(HINT_M_VMSISH_HUSHED)
 #define VMSISH_STATUS	TEST_VMSISH(HINT_M_VMSISH_STATUS)
-#define VMSISH_EXIT	TEST_VMSISH(HINT_M_VMSISH_EXIT)
 #define VMSISH_TIME	TEST_VMSISH(HINT_M_VMSISH_TIME)
 
 /* Flags for vmstrnenv() */
@@ -449,8 +449,9 @@ struct utimbuf {
 /* Ditto for sys$hash_passwrod() . . . */
 #define crypt  my_crypt
 
-/* Tweak arg to mkdir first, so we can tolerate trailing /. */
+/* Tweak arg to mkdir & chdir first, so we can tolerate trailing /. */
 #define Mkdir(dir,mode) my_mkdir((dir),(mode))
+#define Chdir(dir) my_chdir((dir))
 
 /* Use our own stat() clones, which handle Unix-style directory names */
 #define Stat(name,bufptr) flex_stat(name,bufptr)
@@ -640,6 +641,7 @@ char *	my_gconvert (double, int, int, char *);
 int	do_rmdir (char *);
 int	kill_file (char *);
 int	my_mkdir (char *, Mode_t);
+int	my_chdir (char *);
 int	my_utime (char *, struct utimbuf *);
 char *	rmsexpand (char *, char *, char *, unsigned);
 char *	rmsexpand_ts (char *, char *, char *, unsigned);

@@ -11,7 +11,11 @@ my $PLATFORM;
 my $CCTYPE;
 
 my %bincompat5005 =
-      (Perl_call_argv		=>	"perl_call_argv",
+      (
+       Perl_call_atexit		=>	"perl_atexit",
+       Perl_eval_sv		=>	"perl_eval_sv",
+       Perl_eval_pv		=>	"perl_eval_pv",
+       Perl_call_argv		=>	"perl_call_argv",
        Perl_call_method		=>	"perl_call_method",
        Perl_call_pv		=>	"perl_call_pv",
        Perl_call_sv		=>	"perl_call_sv",
@@ -34,7 +38,8 @@ my %bincompat5005 =
        Perl_malloc		=>	"malloc",
        Perl_mfree		=>	"free",
        Perl_realloc		=>	"realloc",
-       Perl_calloc		=>	"calloc",);
+       Perl_calloc		=>	"calloc",
+      );
 
 my $bincompat5005 = join("|", keys %bincompat5005);
 
@@ -255,6 +260,7 @@ elsif ($PLATFORM eq 'aix') {
 		     Perl_same_dirent
 		     Perl_unlnk
 		     Perl_sys_intern_dup
+		     Perl_sys_intern_init
 		     PL_cryptseen
 		     PL_opsave
 		     PL_statusvalue_vms
@@ -383,9 +389,14 @@ else {
 		    )];
 }
 
-unless ($define{'USE_5005THREADS'}) {
+unless ($define{'USE_5005THREADS'} || $define{'USE_ITHREADS'}) {
     skip_symbols [qw(
 		    PL_thr_key
+		    )];
+}
+
+unless ($define{'USE_5005THREADS'}) {
+    skip_symbols [qw(
 		    PL_sv_mutex
 		    PL_strtab_mutex
 		    PL_svref_mutex

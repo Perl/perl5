@@ -10,6 +10,7 @@ BEGIN {
    import TestCompare;
    my $PARENTDIR = dirname $THISDIR;
    push @INC, map { File::Spec->catfile($_, 'lib') } ($PARENTDIR, $THISDIR);
+   require VMS::Filespec if $^O eq 'VMS';
 }
 
 use Pod::Checker;
@@ -30,8 +31,15 @@ sub stripname( $ ) {
 }
 
 sub msgcmp( $ $ ) {
+   ## filter out platform-dependent aspects of error messages
    my ($line1, $line2) = @_;
-   return $line1 ne $line2;
+   for ($line1, $line2) {
+      ## remove filenames from error messages to avoid any
+      ## filepath naming differences between OS platforms
+      s/(at line \S+ in file) .*\W(\w+\.[tT])\s*$/$1 \L$2\E/;
+      s/.*\W(\w+\.[tT]) (has \d+ pod syntax error)/\L$1\E $2/;
+   }
+   return ($line1 ne $line2);
 }
 
 sub testpodcheck( @ ) {
@@ -51,6 +59,11 @@ sub testpodcheck( @ ) {
 
    print "# Running podchecker for '$testname'...\n";
    ## Compare the output against the expected result
+   if ($^O eq 'VMS') {
+      for ($infile, $outfile, $cmpfile) {
+         $_ = VMS::Filespec::unixify($_)  unless  ref;
+      }
+   }
    podchecker($infile, $outfile);
    if ( testcmp({'-cmplines' => \&msgcmp}, $outfile, $cmpfile) ) {
        $different = "$outfile is different from $cmpfile";

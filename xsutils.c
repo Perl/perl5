@@ -253,11 +253,9 @@ usage:
 
     rv = ST(0);
     ST(0) = TARG;
-    if (!SvOK(rv)) {
-	ST(0) = &PL_sv_no;
-	XSRETURN(1);
-    }
-    if (!SvROK(rv))
+    if (SvGMAGICAL(rv))
+	mg_get(rv);
+    if (!(SvOK(rv) && SvROK(rv)))
 	goto usage;
     sv = SvRV(rv);
     sv_setpv(TARG, sv_reftype(sv, 0));

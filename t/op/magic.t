@@ -1,12 +1,13 @@
 #!./perl
 
 BEGIN {
-    $^W = 1;
     $| = 1;
     chdir 't' if -d 't';
     unshift @INC, '../lib';
     $SIG{__WARN__} = sub { die "Dying on warning: ", @_ };
 }
+
+use warnings;
 
 sub ok {
     my ($n, $result, $info) = @_;

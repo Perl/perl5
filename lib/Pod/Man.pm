@@ -1,5 +1,5 @@
 # Pod::Man -- Convert POD data to formatted *roff input.
-# $Id: Man.pm,v 1.0 2000/03/06 10:16:31 eagle Exp $
+# $Id: Man.pm,v 1.4 2000/04/26 04:03:41 eagle Exp $
 #
 # Copyright 1999, 2000 by Russ Allbery <rra@stanford.edu>
 #
@@ -38,7 +38,7 @@ use vars qw(@ISA %ESCAPES $PREAMBLE $VERSION);
 # Perl core and too many things could munge CVS magic revision strings.
 # This number should ideally be the same as the CVS revision in podlators,
 # however.
-$VERSION = 1.00;
+$VERSION = 1.04;
 
 
 ############################################################################
@@ -110,7 +110,7 @@ $PREAMBLE = <<'----END OF PREAMBLE----';
 .if \nF \{\
 .    de IX
 .    tm Index:\\$1\t\\n%\t"\\$2"
-.    .
+..
 .    nr % 0
 .    rr F
 .\}
@@ -264,13 +264,13 @@ $PREAMBLE = <<'----END OF PREAMBLE----';
 # Static helper functions
 ############################################################################
 
-# Protect leading quotes and periods against interpretation as commands.  A
-# leading *roff font escape apparently still leaves a period interpretable
-# as a command by some *roff implementations, so look for a period even
-# after one of those.
+# Protect leading quotes and periods against interpretation as commands.
+# Also protect anything starting with a backslash, since it could expand
+# or hide something that *roff would interpret as a command.  This is
+# overkill, but it's much simpler than trying to parse *roff here.
 sub protect {
     local $_ = shift;
-    s{ ^ ( (?: \\f(?:.|\(..) )* [.\'] ) } {\\&$1}xmg;
+    s/^([.\'\\])/\\&$1/mg;
     $_;
 }
                     
@@ -396,7 +396,8 @@ sub begin_pod {
             #     */lib/*perl*      standard or site_perl module
             #     */*perl*/lib      from -D prefix=/opt/perl
             #     */*perl*/         random module hierarchy
-            # which works.  Should be fixed to use File::Spec.
+            # which works.  Should be fixed to use File::Spec.  Also handle
+            # a leading lib/ since that's what ExtUtils::MakeMaker creates.
             for ($name) {
                 s%//+%/%g;
                 if (     s%^.*?/lib/[^/]*perl[^/]*/%%si
@@ -405,6 +406,7 @@ sub begin_pod {
                     s%^(.*-$^O|$^O-.*)/%%so;  # arch
                     s%^\d+\.\d+%%s;           # version
                 }
+                s%^lib/%%;
                 s%/%::%g;
             }
         }
@@ -548,8 +550,11 @@ sub sequence {
         return bless \ "$tmp", 'Pod::Man::String';
     }
 
-    # C<>, L<>, X<>, and E<> don't apply guesswork to their contents.
-    local $_ = $self->collapse ($seq->parse_tree, $command =~ /^[CELX]$/);
+    # C<>, L<>, X<>, and E<> don't apply guesswork to their contents.  C<>
+    # needs some additional special handling.
+    my $literal = ($command =~ /^[CELX]$/);
+    $literal++ if $command eq 'C';
+    local $_ = $self->collapse ($seq->parse_tree, $literal);
 
     # Handle E<> escapes.
     if ($command eq 'E') {
@@ -574,8 +579,6 @@ sub sequence {
     } elsif ($command eq 'I') {
         return bless \ ('\f(IS' . $_ . '\f(IE'), 'Pod::Man::String';
     } elsif ($command eq 'C') {
-        s/-/\\-/g;
-        s/__/_\\|_/g;
         return bless \ ('\f(FS\*(C`' . $_ . "\\*(C'\\f(FE"),
             'Pod::Man::String';
     }
@@ -669,11 +672,14 @@ sub cmd_back {
 # An individual list item.  Emit an index entry for anything that's
 # interesting, but don't emit index entries for things like bullets and
 # numbers.  rofficate bullets too while we're at it (so for nice output, use
-# * for your lists rather than o or . or - or some other thing).
+# * for your lists rather than o or . or - or some other thing).  Newlines
+# in an item title are turned into spaces since *roff can't handle them
+# embedded.
 sub cmd_item {
     my $self = shift;
     local $_ = $self->parse (@_);
     s/\s+$//;
+    s/\s*\n\s*/ /g;
     my $index;
     if (/\w/ && !/^\w[.\)]\s*$/) {
         $index = $_;
@@ -825,8 +831,10 @@ sub parse {
 # text (not call guesswork on it), and returns the concatenation of all of
 # the text strings in that parse tree.  If the literal flag isn't true,
 # guesswork() will be called on all plain scalars in the parse tree.
-# Assumes that everything in the parse tree is either a scalar or a
-# reference to a scalar.
+# Otherwise, just escape backslashes in the normal case.  If collapse is
+# being called on a C<> sequence, literal is set to 2, and we do some
+# additional cleanup.  Assumes that everything in the parse tree is either a
+# scalar or a reference to a scalar.
 sub collapse {
     my ($self, $ptree, $literal) = @_;
     if ($literal) {
@@ -835,6 +843,8 @@ sub collapse {
                 $$_;
             } else {
                 s/\\/\\e/g;
+                s/-/\\-/g    if $literal > 1;
+                s/__/_\\|_/g if $literal > 1;
                 $_;
             }
         } $ptree->children);

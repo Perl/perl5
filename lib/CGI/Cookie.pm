@@ -13,9 +13,9 @@ package CGI::Cookie;
 # wish, but if you redistribute a modified version, please attach a note
 # listing the modifications you have made.
 
-$CGI::Cookie::VERSION='1.12';
+$CGI::Cookie::VERSION='1.16';
 
-use CGI qw(-no_debug);
+use CGI::Util qw(rearrange unescape escape);
 use overload '""' => \&as_string,
     'cmp' => \&compare,
     'fallback'=>1;
@@ -63,8 +63,11 @@ sub parse {
     my(@pairs) = split("; ",$raw_cookie);
     foreach (@pairs) {
 	my($key,$value) = split("=");
-	my(@values) = map CGI::unescape($_),split('&',$value);
-	$key = CGI::unescape($key);
+	my(@values) = map unescape($_),split('&',$value);
+	$key = unescape($key);
+	# Some foreign cookies are not in name=value format, so ignore
+	# them.
+	next if !defined($value);
 	# A bug in Netscape can cause several cookies with same name to
 	# appear.  The FIRST one in HTTP_COOKIE is the most recent version.
 	$results{$key} ||= $self->new(-name=>$key,-value=>\@values);
@@ -77,7 +80,7 @@ sub new {
     my $class = shift;
     $class = ref($class) if ref($class);
     my($name,$value,$path,$domain,$secure,$expires) =
-	CGI->rearrange([NAME,[VALUE,VALUES],PATH,DOMAIN,SECURE,EXPIRES],@_);
+      rearrange([NAME,[VALUE,VALUES],PATH,DOMAIN,SECURE,EXPIRES],@_);
 
     # Pull out our parameters.
     my @values;
@@ -97,7 +100,7 @@ sub new {
 	},$class;
 
     # IE requires the path and domain to be present for some reason.
-    $path   = CGI::url(-absolute=>1) unless defined $path;
+    $path   ||= '/';
 # however, this breaks networks which use host tables without fully qualified
 # names, so we comment it out.
 #    $domain = CGI::virtual_host()    unless defined $domain;
@@ -120,8 +123,8 @@ sub as_string {
     push(@constant_values,"expires=$expires") if $expires = $self->expires;
     push(@constant_values,'secure') if $secure = $self->secure;
 
-    my($key) = CGI::escape($self->name);
-    my($cookie) = join("=",$key,join("&",map CGI::escape($_),$self->value));
+    my($key) = escape($self->name);
+    my($cookie) = join("=",$key,join("&",map escape($_),$self->value));
     return join("; ",$cookie,@constant_values);
 }
 
@@ -163,7 +166,7 @@ sub secure {
 sub expires {
     my $self = shift;
     my $expires = shift;
-    $self->{'expires'} = CGI::expires($expires,'cookie') if defined $expires;
+    $self->{'expires'} = CGI::Util::expires($expires,'cookie') if defined $expires;
     return $self->{'expires'};
 }
 
@@ -252,8 +255,8 @@ against your script's URL before returning the cookie.  For example,
 if you specify the path "/cgi-bin", then the cookie will be returned
 to each of the scripts "/cgi-bin/tally.pl", "/cgi-bin/order.pl", and
 "/cgi-bin/customer_service/complain.pl", but not to the script
-"/cgi-private/site_admin.pl".  By default, the path is set to your
-script, so that only it will receive the cookie.
+"/cgi-private/site_admin.pl".  By default, the path is set to "/", so
+that all scripts at your site will receive the cookie.
 
 =item B<4. secure flag>
 

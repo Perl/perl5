@@ -1,6 +1,9 @@
 package File::Spec::Unix;
 
 use strict;
+use vars qw($VERSION);
+
+$VERSION = '1.1';
 
 use Cwd;
 
@@ -35,7 +38,7 @@ sub canonpath {
     $path =~ s|(/\.)+/|/|g;                        # xx/././xx -> xx/xx
     $path =~ s|^(\./)+||s unless $path eq "./";    # ./xx      -> xx
     $path =~ s|^/(\.\./)+|/|s;                     # /../../xx -> xx
-    $path =~ s|/\z|| unless $path eq "/";          # xx/       -> xx
+    $path =~ s|/\Z(?!\n)|| unless $path eq "/";          # xx/       -> xx
     return $path;
 }
 
@@ -146,7 +149,7 @@ directory. (Does not strip symlinks, only '.', '..', and equivalents.)
 
 sub no_upwards {
     my $self = shift;
-    return grep(!/^\.{1,2}\z/s, @_);
+    return grep(!/^\.{1,2}\Z(?!\n)/s, @_);
 }
 
 =item case_tolerant
@@ -223,7 +226,7 @@ sub splitpath {
         $directory = $path;
     }
     else {
-        $path =~ m|^ ( (?: .* / (?: \.\.?\z )? )? ) ([^/]*) |xs;
+        $path =~ m|^ ( (?: .* / (?: \.\.?\Z(?!\n) )? )? ) ([^/]*) |xs;
         $directory = $1;
         $file      = $2;
     }
@@ -242,11 +245,13 @@ $directories must be only the directory portion of the path on systems
 that have the concept of a volume or that have path syntax that differentiates
 files from directories.
 
-Unlike just splitting the directories on the separator, leading empty and 
-trailing directory entries can be returned, because these are significant
-on some OSs. So,
+Unlike just splitting the directories on the separator, empty
+directory names (C<''>) can be returned, because these are significant
+on some OSs (e.g. MacOS).
 
-    File::Spec->splitdir( "/a/b/c" );
+On Unix,
+
+    File::Spec->splitdir( "/a/b//c/" );
 
 Yields:
 
@@ -261,7 +266,7 @@ sub splitdir {
     # check to be sure that there will not be any before handling the
     # simple case.
     #
-    if ( $directories !~ m|/\z| ) {
+    if ( $directories !~ m|/\Z(?!\n)| ) {
         return split( m|/|, $directories );
     }
     else {

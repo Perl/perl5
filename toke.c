@@ -819,7 +819,7 @@ Perl_str_to_version(pTHX_ SV *sv)
     NV nshift = 1.0;
     STRLEN len;
     char *start = SvPVx(sv,len);
-    bool utf = SvUTF8(sv);
+    bool utf = SvUTF8(sv) ? TRUE : FALSE;
     char *end = start + len;
     while (start < end) {
 	I32 skip;
@@ -896,7 +896,7 @@ S_tokeq(pTHX_ SV *sv)
 	goto finish;
 
     s = SvPV_force(sv, len);
-    if (SvIVX(sv) == -1)
+    if (SvTYPE(sv) >= SVt_PVIV && SvIVX(sv) == -1)
 	goto finish;
     send = s + len;
     while (s < send && *s != '\\')
@@ -1377,7 +1377,7 @@ S_scan_const(pTHX_ char *start)
 	    default:
 	        {
 		    dTHR;
-		    if (ckWARN(WARN_MISC) && isALPHA(*s))
+		    if (ckWARN(WARN_MISC) && isALNUM(*s))
 			Perl_warner(aTHX_ WARN_MISC, 
 			       "Unrecognized escape \\%c passed through",
 			       *s);
@@ -1389,6 +1389,7 @@ S_scan_const(pTHX_ char *start)
 	    /* \132 indicates an octal constant */
 	    case '0': case '1': case '2': case '3':
 	    case '4': case '5': case '6': case '7':
+		len = 0;	/* disallow underscores */
 		uv = (UV)scan_oct(s, 3, &len);
 		s += len;
 		goto NUM_ESCAPE_INSERT;
@@ -1402,10 +1403,12 @@ S_scan_const(pTHX_ char *start)
 			yyerror("Missing right brace on \\x{}");
 			e = s;
 		    }
+		    len = 1;		/* allow underscores */
                     uv = (UV)scan_hex(s + 1, e - s - 1, &len);
                     s = e + 1;
 		}
 		else {
+		    len = 0;		/* disallow underscores */
 		    uv = (UV)scan_hex(s, 2, &len);
 		    s += len;
 		}
@@ -1479,6 +1482,14 @@ S_scan_const(pTHX_ char *start)
 		    res = new_constant( Nullch, 0, "charnames", 
 					res, Nullsv, "\\N{...}" );
 		    str = SvPV(res,len);
+		    if (!has_utf && SvUTF8(res)) {
+			char *ostart = SvPVX(sv);
+			SvCUR_set(sv, d - ostart);
+			SvPOK_on(sv);
+			sv_utf8_upgrade(sv);
+			d = SvPVX(sv) + SvCUR(sv);
+			has_utf = TRUE;
+		    }
 		    if (len > e - s + 4) {
 			char *odest = SvPVX(sv);
 
@@ -1502,7 +1513,8 @@ S_scan_const(pTHX_ char *start)
 		*d = *s++;
 		if (isLOWER(*d))
 		   *d = toUPPER(*d);
-		*d++ = toCTRL(*d); 
+		*d = toCTRL(*d); 
+		d++;
 #else
 		len = *s++;
 		*d++ = toCTRL(len);
@@ -2639,7 +2651,7 @@ Perl_yylex(pTHX)
 #ifdef PERL_STRICT_CR
 	Perl_warn(aTHX_ "Illegal character \\%03o (carriage return)", '\r');
 	Perl_croak(aTHX_ 
-      "(Maybe you didn't strip carriage returns after a network transfer?)\n");
+      "\t(Maybe you didn't strip carriage returns after a network transfer?)\n");
 #endif
     case ' ': case '\t': case '\f': case 013:
 	s++;
@@ -2647,6 +2659,11 @@ Perl_yylex(pTHX)
     case '#':
     case '\n':
 	if (PL_lex_state != LEX_NORMAL || (PL_in_eval && !PL_rsfp)) {
+	    if (*s == '#' && s == PL_linestart && PL_in_eval && !PL_rsfp) {
+		/* handle eval qq[#line 1 "foo"\n ...] */
+		CopLINE_dec(PL_curcop);
+		incline(s);
+	    }
 	    d = PL_bufend;
 	    while (s < d && *s != '\n')
 		s++;
@@ -3276,7 +3293,7 @@ Perl_yylex(pTHX)
 	/* This kludge not intended to be bulletproof. */
 	if (PL_tokenbuf[1] == '[' && !PL_tokenbuf[2]) {
 	    yylval.opval = newSVOP(OP_CONST, 0,
-				   newSViv((IV)PL_compiling.cop_arybase));
+				   newSViv(PL_compiling.cop_arybase));
 	    yylval.opval->op_private = OPpCONST_ARYBASE;
 	    TERM(THING);
 	}
@@ -3610,7 +3627,7 @@ Perl_yylex(pTHX)
 	tmp = keyword(PL_tokenbuf, len);
 
 	/* Is this a word before a => operator? */
-	if (strnEQ(d,"=>",2)) {
+	if (*d == '=' && d[1] == '>') {
 	    CLINE;
 	    yylval.opval = (OP*)newSVOP(OP_CONST, 0, newSVpv(PL_tokenbuf,0));
 	    yylval.opval->op_private = OPpCONST_BARE;
@@ -3765,10 +3782,18 @@ Perl_yylex(pTHX)
 		    }
 		}
 
-		/* If followed by a paren, it's certainly a subroutine. */
 
 		PL_expect = XOPERATOR;
 		s = skipspace(s);
+
+		/* Is this a word before a => operator? */
+		if (*s == '=' && s[1] == '>') {
+		    CLINE;
+		    sv_setpv(((SVOP*)yylval.opval)->op_sv, PL_tokenbuf);
+		    TERM(WORD);
+		}
+
+		/* If followed by a paren, it's certainly a subroutine. */
 		if (*s == '(') {
 		    CLINE;
 		    if (gv && GvCVu(gv)) {
@@ -4487,7 +4512,7 @@ Perl_yylex(pTHX)
 			    for (; !isSPACE(*d) && len; --len, ++d) ;
 			}
 			words = append_elem(OP_LIST, words,
-					    newSVOP(OP_CONST, 0, newSVpvn(b, d-b)));
+					    newSVOP(OP_CONST, 0, tokeq(newSVpvn(b, d-b))));
 		    }
 		}
 		if (words) {
@@ -5646,30 +5671,28 @@ S_new_constant(pTHX_ char *s, STRLEN len, const char *key, SV *sv, SV *pv,
     SV *res;
     SV **cvp;
     SV *cv, *typesv;
-    const char *why, *why1, *why2;
+    const char *why1, *why2, *why3;
     
-    if (!(PL_hints & HINT_LOCALIZE_HH)) {
+    if (!table || !(PL_hints & HINT_LOCALIZE_HH)) {
 	SV *msg;
 	
-	why = "%^H is not localized";
-    report_short:
-	why1 = why2 = "";
+	why1 = "%^H is not consistent";
+	why2 = strEQ(key,"charnames")
+	       ? " (missing \"use charnames ...\"?)"
+	       : "";
+	why3 = "";
     report:
 	msg = Perl_newSVpvf(aTHX_ "constant(%s): %s%s%s", 
-			    (type ? type: "undef"), why1, why2, why);
+			    (type ? type: "undef"), why1, why2, why3);
 	yyerror(SvPVX(msg));
  	SvREFCNT_dec(msg);
   	return sv;
     }
-    if (!table) {
-	why = "%^H is not defined";
-	goto report_short;
-    }
     cvp = hv_fetch(table, key, strlen(key), FALSE);
     if (!cvp || !SvOK(*cvp)) {
-	why = "} is not defined";
 	why1 = "$^H{";
 	why2 = key;
+	why3 = "} is not defined";
 	goto report;
     }
     sv_2mortal(sv);			/* Parent created it permanently */
@@ -5717,9 +5740,9 @@ S_new_constant(pTHX_ char *s, STRLEN len, const char *key, SV *sv, SV *pv,
     POPSTACK;
     
     if (!SvOK(res)) {
- 	why = "}} did not return a defined value";
  	why1 = "Call to &{$^H{";
  	why2 = key;
+ 	why3 = "}} did not return a defined value";
  	sv = res;
  	goto report;
     }
@@ -6682,7 +6705,7 @@ Perl_scan_num(pTHX_ char *start)
     register char *s = start;		/* current position in buffer */
     register char *d;			/* destination in temp buffer */
     register char *e;			/* end of temp buffer */
-    NV value;				/* number read, as a double */
+    NV nv;				/* number read, as a double */
     SV *sv = Nullsv;			/* place to put the converted number */
     bool floatit;			/* boolean: int or float? */
     char *lastub = 0;			/* position of last underbar */
@@ -6939,39 +6962,8 @@ Perl_scan_num(pTHX_ char *start)
 	/* make an sv from the string */
 	sv = NEWSV(92,0);
 
-	/* unfortunately this monster needs to be on one line or
-	   makedepend will be confused. */
-#if (defined(USE_64_BIT_INT) && (!defined(HAS_STRTOLL)|| !defined(HAS_STRTOULL))) || (!defined(USE_64_BIT_INT) && (!defined(HAS_STRTOL) || !defined(HAS_STRTOUL)))
+#if defined(Strtol) && defined(Strtoul)
 
-	/*
-	   No working strto[u]l[l]. Since atoi() doesn't do range checks,
-	   we need to do this the hard way.
-	 */
-
-	value = Atof(PL_tokenbuf);
-
-	/* 
-	   See if we can make do with an integer value without loss of
-	   precision.  We use I_V to cast to an int, because some
-	   compilers have issues.  Then we try casting it back and see
-	   if it was the same.  We only do this if we know we
-	   specifically read an integer.
-
-	   Note: if floatit is true, then we don't need to do the
-	   conversion at all.
-	*/
-	{
-	    UV tryuv = U_V(value);
-	    if (!floatit && (NV)tryuv == value) {
-		if (tryuv <= IV_MAX)
-		    sv_setiv(sv, (IV)tryuv);
-		else
-		    sv_setuv(sv, tryuv);
-	    }
-	    else
-		sv_setnv(sv, value);
-	}
-#else
 	/*
 	   strtol/strtoll sets errno to ERANGE if the number is too big
 	   for an integer. We try to do an integer conversion first
@@ -6983,25 +6975,67 @@ Perl_scan_num(pTHX_ char *start)
     	    UV uv;
 	    errno = 0;
 	    if (*PL_tokenbuf == '-')
-		iv = Atol(PL_tokenbuf);
+		iv = Strtol(PL_tokenbuf, (char**)NULL, 10);
 	    else
-		uv = Atoul(PL_tokenbuf);
+		uv = Strtoul(PL_tokenbuf, (char**)NULL, 10);
 	    if (errno)
-	    	floatit = TRUE; /* probably just too large */
+	    	floatit = TRUE; /* Probably just too large. */
 	    else if (*PL_tokenbuf == '-')
 	    	sv_setiv(sv, iv);
+	    else if (uv <= IV_MAX)
+		sv_setiv(sv, uv); /* Prefer IVs over UVs. */
 	    else
 	    	sv_setuv(sv, uv);
 	}
 	if (floatit) {
-	    char *tp;
-	    errno = 0;
-	    value = Atof(PL_tokenbuf);
-	    if (errno)
-		Perl_die(aTHX_ "unparseable float");
+	    nv = Atof(PL_tokenbuf);
+	    sv_setnv(sv, nv);
+	}
+#else
+	/*
+	   No working strtou?ll?.
+
+	   Unfortunately atol() doesn't do range checks (returning
+	   LONG_MIN/LONG_MAX, and setting errno to ERANGE on overflows)
+	   everywhere [1], so we cannot use use atol() (or atoll()).
+	   If we could, they would be used, as Atol(), very much like
+	   Strtol() and Strtoul() are used above.
+
+	   [1] XXX Configure test needed to check for atol()
+	           (and atoll() overflow behaviour) XXX --jhi
+
+	   We need to do this the hard way.  */
+
+	nv = Atof(PL_tokenbuf);
+
+	/* See if we can make do with an integer value without loss of
+	   precision.  We use U_V to cast to a UV, because some
+	   compilers have issues.  Then we try casting it back and see
+	   if it was the same [1].  We only do this if we know we
+	   specifically read an integer.  If floatit is true, then we
+	   don't need to do the conversion at all. 
+
+	   [1] Note that this is lossy if our NVs cannot preserve our
+	   UVs.  There is a metaconfig define, NV_PRESERVES_UV, but we
+	   really do hope all such platforms have strtou?ll? to do a
+	   lossless IV/UV conversion.
+	   XXX Configure test needed to check how many UV bits
+	       do our NVs preserve, really (the current test checks
+	       for the roundtrip of ~0) XXX --jhi
+	       Maybe do some tricks with DBL_MANT_DIG and LDBL_MANT_DIG,
+	       and DBL_DIG, LDBL_DIG (this is already available as NV_DIG)?
+	   */
+	{
+	    UV uv = U_V(nv);
+	    if (!floatit && (NV)uv == nv) {
+		if (uv <= IV_MAX)
+		    sv_setiv(sv, uv); /* Prefer IVs over UVs. */
+		else
+		    sv_setuv(sv, uv);
+	    }
 	    else
-	    	sv_setnv(sv, value);
-	} 
+		sv_setnv(sv, nv);
+	}
 #endif
 	if ( floatit ? (PL_hints & HINT_NEW_FLOAT) :
 	               (PL_hints & HINT_NEW_INTEGER) )
@@ -7307,8 +7341,14 @@ Perl_yyerror(pTHX_ char *s)
 	Perl_warn(aTHX_ "%"SVf, msg);
     else
 	qerror(msg);
-    if (PL_error_count >= 10)
-	Perl_croak(aTHX_ "%s has too many errors.\n", CopFILE(PL_curcop));
+    if (PL_error_count >= 10) {
+	if (PL_in_eval && SvCUR(ERRSV))
+	    Perl_croak(aTHX_ "%_%s has too many errors.\n",
+		       ERRSV, CopFILE(PL_curcop));
+	else
+	    Perl_croak(aTHX_ "%s has too many errors.\n",
+		       CopFILE(PL_curcop));
+    }
     PL_in_my = 0;
     PL_in_my_stash = Nullhv;
     return 0;

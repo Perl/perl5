@@ -6,7 +6,7 @@
 #	Mingw32 with gcc-2.95.2 or better  **experimental**
 #
 # This is set up to build a perl.exe that runs off a shared library
-# (perl.dll).  Also makes individual DLLs for the XS extensions.
+# (perl56.dll).  Also makes individual DLLs for the XS extensions.
 #
 
 ##
@@ -52,8 +52,6 @@ INST_ARCH	*= \$(ARCHNAME)
 #
 #USE_MULTI	*= define
 
-#
-# XXX WARNING! This option is still very experimental.  May be broken.
 #
 # Beginnings of interpreter cloning/threads; still very incomplete.
 # This should be enabled to get the fork() emulation.  This needs
@@ -197,11 +195,6 @@ CCLIBDIR	*= $(CCHOME)\lib
 #BUILDOPT	+= -DPERL_TEXTMODE_SCRIPTS
 
 #
-# This should normally be disabled.  Enabling it runs a cloned toplevel
-# interpreter (*EXPERIMENTAL*, fails tests)
-#BUILDOPT	+= -DTOP_CLONE
-
-#
 # specify semicolon-separated list of extra directories that modules will
 # look for libraries (spaces in path names need not be quoted)
 #
@@ -338,7 +331,6 @@ RSC		= rc
 #
 # Options
 #
-RUNTIME		= -D_RTLDLL
 INCLUDES	= -I$(COREDIR) -I.\include -I. -I.. -I"$(CCINCDIR)"
 #PCHFLAGS	= -H -Hc -H=c:\temp\bcmoduls.pch 
 DEFINES		= -DWIN32 $(CRYPT_FLAG)
@@ -350,10 +342,10 @@ LIBC		= cw32mti.lib
 LIBFILES	= $(CRYPT_LIB) import32.lib $(LIBC) odbc32.lib odbccp32.lib
 
 .IF  "$(CFG)" == "Debug"
-OPTIMIZE	= -v $(RUNTIME) -DDEBUGGING
+OPTIMIZE	= -v -D_RTLDLL -DDEBUGGING
 LINK_DBG	= -v
 .ELSE
-OPTIMIZE	= -O2 $(RUNTIME)
+OPTIMIZE	= -O2 -D_RTLDLL
 LINK_DBG	= 
 .ENDIF
 
@@ -379,7 +371,6 @@ a = .a
 # Options
 #
 
-RUNTIME		=
 INCLUDES	= -I$(COREDIR) -I.\include -I. -I..
 DEFINES		= -DWIN32 $(CRYPT_FLAG)
 LOCDEFS		= -DPERLDLL -DPERL_CORE
@@ -396,10 +387,10 @@ LIBFILES	= $(CRYPT_LIB) $(LIBC) \
 		  -lwinmm -lversion -lodbc32
 
 .IF  "$(CFG)" == "Debug"
-OPTIMIZE	= -g $(RUNTIME) -DDEBUGGING
+OPTIMIZE	= -g -DDEBUGGING
 LINK_DBG	= -g
 .ELSE
-OPTIMIZE	= -g -O2 $(RUNTIME)
+OPTIMIZE	= -g -O2
 LINK_DBG	= 
 .ENDIF
 
@@ -423,7 +414,6 @@ RSC		= rc
 # Options
 #
 
-RUNTIME		= -MD
 INCLUDES	= -I$(COREDIR) -I.\include -I. -I..
 #PCHFLAGS	= -Fpc:\temp\vcmoduls.pch -YX 
 DEFINES		= -DWIN32 -D_CONSOLE -DNO_STRICT $(CRYPT_FLAG)
@@ -432,47 +422,33 @@ SUBSYS		= console
 CXX_FLAG	= -TP -GX
 
 .IF "$(USE_PERLCRT)" != "define"
-.IF  "$(CFG)" == "Debug"
-PERLCRTLIBC	= msvcrtd.lib
+LIBC	= msvcrt.lib
 .ELSE
-PERLCRTLIBC	= msvcrt.lib
-.ENDIF
-.ELSE
-.IF  "$(CFG)" == "Debug"
-PERLCRTLIBC	= PerlCRTD.lib
-.ELSE
-PERLCRTLIBC	= PerlCRT.lib
-.ENDIF
+LIBC	= PerlCRT.lib
 .ENDIF
 
 PERLEXE_RES	=
 PERLDLL_RES	=
 
-.IF "$(RUNTIME)" == "-MD"
-LIBC		= $(PERLCRTLIBC)
-.ELSE
-LIBC		= libcmt.lib
-.ENDIF
-
 .IF  "$(CFG)" == "Debug"
 .IF "$(CCTYPE)" == "MSVC20"
-OPTIMIZE	= -Od $(RUNTIME) -Z7 -D_DEBUG -DDEBUGGING
+OPTIMIZE	= -Od -MD -Z7 -DDEBUGGING
 .ELSE
-OPTIMIZE	= -Od $(RUNTIME)d -Zi -D_DEBUG -DDEBUGGING
+OPTIMIZE	= -Od -MD -Zi -DDEBUGGING
 .ENDIF
 LINK_DBG	= -debug -pdb:none
 .ELSE
 .IF "$(CFG)" == "Optimize"
 # -O1 yields smaller code, which turns out to be faster than -O2
-#OPTIMIZE	= -O2 $(RUNTIME) -DNDEBUG
-OPTIMIZE	= -O1 $(RUNTIME) -DNDEBUG
+#OPTIMIZE	= -O2 -MD -DNDEBUG
+OPTIMIZE	= -O1 -MD -DNDEBUG
 .ELSE
-OPTIMIZE	= -Od $(RUNTIME) -DNDEBUG
+OPTIMIZE	= -Od -MD -DNDEBUG
 .ENDIF
 LINK_DBG	= -release
 .ENDIF
 
-LIBBASEFILES	= $(DELAYLOAD) $(CRYPT_LIB) \
+LIBBASEFILES	= $(CRYPT_LIB) \
 		oldnames.lib kernel32.lib user32.lib gdi32.lib winspool.lib \
 		comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib \
 		netapi32.lib uuid.lib wsock32.lib mpr.lib winmm.lib \
@@ -828,7 +804,7 @@ POD2TEXT	= $(PODDIR)\pod2text
 #	-- BKS 10-17-1999
 CFG_VARS	=					\
 		INST_DRV=$(INST_DRV)		~	\
-		INST_TOP=$(INST_TOP)		~	\
+		INST_TOP=$(INST_TOP:s/\/\\/)	~	\
 		INST_VER=$(INST_VER:s/\/\\/)	~	\
 		INST_ARCH=$(INST_ARCH)		~	\
 		archname=$(ARCHNAME)		~	\
@@ -838,9 +814,9 @@ CFG_VARS	=					\
 		d_crypt=$(D_CRYPT)		~	\
 		d_mymalloc=$(PERL_MALLOC)	~	\
 		libs=$(LIBFILES:f)		~	\
-		incpath=$(CCINCDIR)		~	\
+		incpath=$(CCINCDIR:s/\/\\/)	~	\
 		libperl=$(PERLIMPLIB:f)		~	\
-		libpth=$(CCLIBDIR);$(EXTRALIBDIRS)		~	\
+		libpth=$(CCLIBDIR:s/\/\\/);$(EXTRALIBDIRS:s/\/\\/)	~	\
 		libc=$(LIBC)			~	\
 		make=dmake			~	\
 		_o=$(o)	obj_ext=$(o)		~	\
@@ -1041,7 +1017,8 @@ $(PERLDLL): perldll.def $(PERLDLL_OBJ) $(PERLDLL_RES)
 		perl.exp $(LKPOST))
 .ELSE
 	$(LINK32) -dll -def:perldll.def -out:$@ \
-	    @$(mktmp $(BLINK_FLAGS) $(LIBFILES) /base:0x28000000 $(PERLDLL_RES) $(PERLDLL_OBJ:s,\,\\))
+	    @$(mktmp -base:0x28000000 $(BLINK_FLAGS) $(DELAYLOAD) $(LIBFILES) \
+	        $(PERLDLL_RES) $(PERLDLL_OBJ:s,\,\\))
 .ENDIF
 	$(XCOPY) $(PERLIMPLIB) $(COREDIR)
 
@@ -1093,8 +1070,8 @@ $(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ) $(PERLEXE_RES)
 	$(LINK32) -mconsole -o $@ $(BLINK_FLAGS)  \
 	    $(PERLEXE_OBJ) $(PERLIMPLIB) $(LIBFILES)
 .ELSE
-	$(LINK32) -subsystem:console -out:$@ $(BLINK_FLAGS) $(LIBFILES) \
-	    $(PERLEXE_OBJ) $(SETARGV_OBJ) $(PERLIMPLIB) $(PERLEXE_RES)
+	$(LINK32) -subsystem:console -out:$@ -stack:0x1000000 $(BLINK_FLAGS) \
+	    $(LIBFILES) $(PERLEXE_OBJ) $(SETARGV_OBJ) $(PERLIMPLIB) $(PERLEXE_RES)
 .ENDIF
 	copy $(PERLEXE) $(WPERLEXE)
 	$(MINIPERL) -I..\lib bin\exetype.pl $(WPERLEXE) WINDOWS
@@ -1205,7 +1182,14 @@ doc: $(PERLEXE)
 
 utils: $(PERLEXE) $(X2P)
 	cd ..\utils && $(MAKE) PERL=$(MINIPERL)
-	copy ..\README.win32 ..\pod\perlwin32.pod
+	copy ..\README.amiga ..\pod\perlamiga.pod
+	copy ..\README.cygwin ..\pod\perlcygwin.pod
+	copy ..\README.dos ..\pod\perldos.pod
+	copy ..\README.hpux ..\pod\perlhpux.pod
+	copy ..\README.machten ..\pod\perlmachten.pod
+	copy ..\README.os2 ..\pod\perlos2.pod
+	copy ..\README.os2 ..\pod\perlos2.pod
+	copy ..\vms\perlvms.pod ..\pod\perlvms.pod
 	cd ..\pod && $(MAKE) -f ..\win32\pod.mak converters
 	$(PERLEXE) $(PL2BAT) $(UTILS)
 

@@ -171,7 +171,8 @@ statements C<next>, C<last>, and C<redo>.
 If the LABEL is omitted, the loop control statement
 refers to the innermost enclosing loop.  This may include dynamically
 looking back your call-stack at run time to find the LABEL.  Such
-desperate behavior triggers a warning if you use the B<-w> flag.
+desperate behavior triggers a warning if you use the C<use warnings>
+pragma or the B<-w> flag.
 Unlike a C<foreach> statement, a C<while> statement never implicitly
 localises any variables.
 
@@ -323,7 +324,7 @@ Examples:
 
     for (@ary) { s/foo/bar/ }
 
-    foreach my $elem (@elements) {
+    for my $elem (@elements) {
 	$elem *= 2;
     }
 
@@ -352,8 +353,8 @@ Here's how a C programmer might code up a particular algorithm in Perl:
 Whereas here's how a Perl programmer more comfortable with the idiom might
 do it:
 
-    OUTER: foreach my $wid (@ary1) {
-    INNER:   foreach my $jet (@ary2) {
+    OUTER: for my $wid (@ary1) {
+    INNER:   for my $jet (@ary2) {
 		next OUTER if $wid > $jet;
 		$wid += $jet;
 	     }
@@ -482,7 +483,7 @@ Or
 
 Or if you are certainly that all the C<&&> clauses are true, you can use
 something like this, which "switches" on the value of the
-C<HTTP_USER_AGENT> envariable.
+C<HTTP_USER_AGENT> environment variable.
 
     #!/usr/bin/perl 
     # pick out jargon file page based on browser
@@ -524,7 +525,7 @@ The C<goto>-EXPR form expects a label name, whose scope will be resolved
 dynamically.  This allows for computed C<goto>s per FORTRAN, but isn't
 necessarily recommended if you're optimizing for maintainability:
 
-    goto ("FOO", "BAR", "GLARCH")[$i];
+    goto(("FOO", "BAR", "GLARCH")[$i]);
 
 The C<goto>-&NAME form is highly magical, and substitutes a call to the
 named subroutine for the currently running subroutine.  This is used by

@@ -660,12 +660,9 @@ Perl_do_join(pTHX_ register SV *sv, SV *del, register SV **mark, register SV **s
     if (items-- > 0) {
 	char *s;
 
-	if (*mark) {
-	    s = SvPV(*mark, tmplen);
-	    sv_setpvn(sv, s, tmplen);
-	}
-	else
-	    sv_setpv(sv, "");
+	sv_setpv(sv, "");
+	if (*mark)
+	    sv_catsv(sv, *mark);
 	mark++;
     }
     else

@@ -2,7 +2,7 @@
 # Makefile to build perl on Windows NT using Microsoft NMAKE.
 #
 # This is set up to build a perl.exe that runs off a shared library
-# (perl.dll).  Also makes individual DLLs for the XS extensions.
+# (perl56.dll).  Also makes individual DLLs for the XS extensions.
 #
 
 ##
@@ -48,8 +48,6 @@ INST_ARCH	= \$(ARCHNAME)
 #
 #USE_MULTI	= define
 
-#
-# XXX WARNING! This option is still very experimental.  May be broken.
 #
 # Beginnings of interpreter cloning/threads; still very incomplete.
 # This should be enabled to get the fork() emulation.  This needs
@@ -176,11 +174,6 @@ CCLIBDIR	= $(CCHOME)\lib
 # This should normally be disabled.  Enabling it causes perl to read scripts
 # in text mode (which is the 5.005 behavior) and will break ByteLoader.
 #BUILDOPT	= $(BUILDOPT) -DPERL_TEXTMODE_SCRIPTS
-
-#
-# This should normally be disabled.  Enabling it runs a cloned toplevel
-# interpreter (*EXPERIMENTAL*, fails tests)
-#BUILDOPT	= $(BUILDOPT) -DTOP_CLONE
 
 #
 # specify semicolon-separated list of extra directories that modules will
@@ -333,7 +326,6 @@ RSC		= rc
 # Options
 #
 
-RUNTIME		= -MD
 INCLUDES	= -I$(COREDIR) -I.\include -I. -I..
 #PCHFLAGS	= -Fpc:\temp\vcmoduls.pch -YX 
 DEFINES		= -DWIN32 -D_CONSOLE -DNO_STRICT $(CRYPT_FLAG)
@@ -342,42 +334,28 @@ SUBSYS		= console
 CXX_FLAG	= -TP -GX
 
 !IF "$(USE_PERLCRT)" != "define"
-!   IF  "$(CFG)" == "Debug"
-PERLCRTLIBC	= msvcrtd.lib
-!   ELSE
-PERLCRTLIBC	= msvcrt.lib
-!   ENDIF
+LIBC	= msvcrt.lib
 !ELSE
-!   IF  "$(CFG)" == "Debug"
-PERLCRTLIBC	= PerlCRTD.lib
-!   ELSE
-PERLCRTLIBC	= PerlCRT.lib
-!   ENDIF
+LIBC	= PerlCRT.lib
 !ENDIF
 
 PERLEXE_RES	=
 PERLDLL_RES	=
 
-!IF "$(RUNTIME)" == "-MD"
-LIBC		= $(PERLCRTLIBC)
-!ELSE
-LIBC		= libcmt.lib
-!ENDIF
-
 !IF  "$(CFG)" == "Debug"
 !  IF "$(CCTYPE)" == "MSVC20"
-OPTIMIZE	= -Od $(RUNTIME) -Z7 -D_DEBUG -DDEBUGGING
+OPTIMIZE	= -Od -MD -Z7 -DDEBUGGING
 !  ELSE
-OPTIMIZE	= -Od $(RUNTIME)d -Zi -D_DEBUG -DDEBUGGING
+OPTIMIZE	= -Od -MD -Zi -DDEBUGGING
 !  ENDIF
 LINK_DBG	= -debug -pdb:none
 !ELSE
 !  IF  "$(CFG)" == "Optimize"
 # -O1 yields smaller code, which turns out to be faster than -O2
-#OPTIMIZE	= -O2 $(RUNTIME) -DNDEBUG
-OPTIMIZE	= -O1 $(RUNTIME) -DNDEBUG
+#OPTIMIZE	= -O2 -MD -DNDEBUG
+OPTIMIZE	= -O1 -MD -DNDEBUG
 !  ELSE
-OPTIMIZE	= -Od $(RUNTIME) -DNDEBUG
+OPTIMIZE	= -Od -MD -DNDEBUG
 !  ENDIF
 LINK_DBG	= -release
 !ENDIF
@@ -391,7 +369,7 @@ BUILDOPT	= $(BUILDOPT) -DPERL_OBJECT
 BUILDOPT	= $(BUILDOPT) -DPERL_MSVCRT_READFIX
 !ENDIF
 
-LIBBASEFILES	= $(DELAYLOAD) $(CRYPT_LIB) \
+LIBBASEFILES	= $(CRYPT_LIB) \
 		oldnames.lib kernel32.lib user32.lib gdi32.lib winspool.lib \
 		comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib \
 		netapi32.lib uuid.lib wsock32.lib mpr.lib winmm.lib \
@@ -815,8 +793,8 @@ perldll.def : $(MINIPERL) $(CONFIGPM) ..\global.sym ..\pp.sym ..\makedef.pl
 	    CCTYPE=$(CCTYPE) > perldll.def
 
 $(PERLDLL): perldll.def $(PERLDLL_OBJ) $(PERLDLL_RES)
-	$(LINK32) -dll -def:perldll.def -out:$@ @<<
-		$(LINK_FLAGS) /base:0x28000000 $(LIBFILES) $(PERLDLL_OBJ) $(PERLDLL_RES)
+	$(LINK32) -dll -def:perldll.def -base:0x28000000 -out:$@ @<<
+		$(LINK_FLAGS) $(DELAYLOAD) $(LIBFILES) $(PERLDLL_OBJ) $(PERLDLL_RES)
 <<
 	$(XCOPY) $(PERLIMPLIB) $(COREDIR)
 
@@ -852,8 +830,8 @@ perlmain$(o) : perlmain.c
 	$(CC) $(CFLAGS_O) -UPERLDLL $(OBJOUT_FLAG)$@ -c perlmain.c
 
 $(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ) $(PERLEXE_RES)
-	$(LINK32) -subsystem:console -out:$@ $(LINK_FLAGS) $(LIBFILES) \
-	    $(PERLEXE_OBJ) $(SETARGV_OBJ) $(PERLIMPLIB) $(PERLEXE_RES)
+	$(LINK32) -subsystem:console -out:$@ -stack:0x1000000 $(LINK_FLAGS) \
+	    $(LIBFILES) $(PERLEXE_OBJ) $(SETARGV_OBJ) $(PERLIMPLIB) $(PERLEXE_RES)
 	copy $(PERLEXE) $(WPERLEXE)
 	$(MINIPERL) -I..\lib bin\exetype.pl $(WPERLEXE) WINDOWS
 	copy splittree.pl .. 
@@ -985,6 +963,13 @@ utils: $(PERLEXE) $(X2P)
 	cd ..\utils
 	$(MAKE) PERL=$(MINIPERL)
 	cd ..\pod
+	copy ..\README.amiga .\perlamiga.pod
+	copy ..\README.cygwin .\perlcygwin.pod
+	copy ..\README.dos .\perldos.pod
+	copy ..\README.hpux .\perlhpux.pod
+	copy ..\README.machten .\perlmachten.pod
+	copy ..\README.os2 .\perlos2.pod
+	copy ..\vms\perlvms.pod .\perlvms.pod
 	copy ..\README.win32 .\perlwin32.pod
 	$(MAKE) -f ..\win32\pod.mak converters
 	cd ..\win32

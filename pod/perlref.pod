@@ -528,7 +528,8 @@ makes it more than a bareword:
     $array{ +shift }
     $array{ shift @_ }
 
-The B<-w> switch will warn you if it interprets a reserved word as a string.
+The C<use warnings> pragma or the B<-w> switch will warn you if it
+interprets a reserved word as a string.
 But it will no longer warn you about using lowercase words, because the
 string is effectively quoted.
 

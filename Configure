@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sat Mar 11 20:26:09 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Fri Apr 28 23:33:15 EET DST 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -355,6 +355,7 @@ d_flexfnam=''
 d_flock=''
 d_fork=''
 d_fpos64_t=''
+d_frexpl=''
 d_fs_data_s=''
 d_fseeko=''
 d_fsetpos=''
@@ -406,6 +407,8 @@ d_iconv=''
 d_inetaton=''
 d_int64_t=''
 d_isascii=''
+d_isnan=''
+d_isnanl=''
 d_killpg=''
 d_lchown=''
 d_ldbl_dig=''
@@ -435,6 +438,7 @@ d_mkstemps=''
 d_mktime=''
 d_mmap=''
 mmaptype=''
+d_modfl=''
 d_mprotect=''
 d_msg=''
 d_msgctl=''
@@ -775,6 +779,8 @@ hostcat=''
 passcat=''
 orderlib=''
 ranlib=''
+d_perl_otherlibdirs=''
+otherlibdirs=''
 package=''
 spackage=''
 pager=''
@@ -868,6 +874,7 @@ sitelib_stem=''
 sitelibexp=''
 siteprefix=''
 siteprefixexp=''
+sizesize=''
 sizetype=''
 so=''
 socksizetype=''
@@ -1336,10 +1343,15 @@ esac
 case "$fastread$alldone" in
 yescont|yesexit) ;;
 *)
-	if test ! -t 0; then
-		echo "Say 'sh Configure', not 'sh <Configure'"
-		exit 1
-	fi
+	case "$extractsh" in
+	true) ;;
+	*)
+		if test ! -t 0; then
+			echo "Say 'sh Configure', not 'sh <Configure'"
+			exit 1
+		fi
+		;;
+	esac
 	;;
 esac
 
@@ -3311,13 +3323,15 @@ while test "$type"; do
 			Directory)
 				for fp in $gfpth; do
 					if test "X$fp" = X.; then
-					    pf="$ansexp"
+					    dir="$ans"
+					    direxp="$ansexp"
 					else    
-					    pf="$fp/$ansexp"
+					    dir="$fp/$ansexp"
+					    direxp="$fp/$ansexp"
 					fi
-					if test -d "$pf"; then
+					if test -d "$direxp"; then
 						type=''
-						value="$pf"
+						value="$dir"
 						break
 					fi
 				done
@@ -4914,9 +4928,9 @@ case "$usethreads$usemultiplicity" in
 	;;
 *)	$cat <<EOM
 
-Perl 5.006 can be compiled for binary compatibility with 5.005.
-If you decide to do so, you will be able to continue using most
-of the extensions that were compiled for Perl 5.005.
+This version of Perl can be compiled for binary compatibility with 5.005.
+If you decide to do so, you will be able to continue using most of the
+extensions that were compiled for Perl 5.005.
 
 EOM
 	case "$bincompat5005$d_bincompat5005" in
@@ -5240,6 +5254,108 @@ echo "Your system uses $freetype free(), it would seem." >&4
 $rm -f malloc.[co]
 $cat <<EOM
 
+After $package is installed, you may wish to install various
+add-on modules and utilities.  Typically, these add-ons will
+be installed under $prefix with the rest
+of this package.  However, you may wish to install such add-ons
+elsewhere under a different prefix.
+
+If you do not wish to put everything under a single prefix, that's
+ok.  You will be prompted for the individual locations; this siteprefix
+is only used to suggest the defaults.
+
+The default should be fine for most people.
+
+EOM
+fn=d~+
+rp='Installation prefix to use for add-on modules and utilities?'
+: XXX Here might be another good place for an installstyle setting.
+case "$siteprefix" in
+'') dflt=$prefix ;;
+*)  dflt=$siteprefix ;;
+esac
+. ./getfile
+: XXX Prefixit unit does not yet support siteprefix and vendorprefix
+oldsiteprefix=''
+case "$siteprefix" in
+'') ;;
+*)	case "$ans" in
+	"$prefix") ;;
+	*) oldsiteprefix="$prefix";;
+	esac
+	;;
+esac
+siteprefix="$ans"
+siteprefixexp="$ansexp"
+
+: determine where site specific libraries go.
+: Usual default is /usr/local/lib/perl5/site_perl/$version
+: The default "style" setting is made in installstyle.U
+: XXX No longer works with Prefixit stuff.
+prog=`echo $package | $sed 's/-*[0-9.]*$//'`
+case "$sitelib" in
+'') case "$installstyle" in
+	*lib/perl5*) dflt=$siteprefix/lib/$package/site_$prog/$version ;;
+	*)	 dflt=$siteprefix/lib/site_$prog/$version ;;
+	esac
+	;;
+*)	dflt="$sitelib"
+	;;
+esac
+$cat <<EOM
+
+The installation process will create a directory for
+site-specific extensions and modules.  Most users find it convenient
+to place all site-specific files in this directory rather than in the
+main distribution directory.
+
+EOM
+fn=d~+
+rp='Pathname for the site-specific library files?'
+. ./getfile
+sitelib="$ans"
+sitelibexp="$ansexp"
+sitelib_stem=`echo "$sitelibexp" | sed "s,/$version$,,"`
+: Change installation prefix, if necessary.
+if $test X"$prefix" != X"$installprefix"; then
+	installsitelib=`echo $sitelibexp | $sed "s#^$prefix#$installprefix#"`
+else
+	installsitelib="$sitelibexp"
+fi
+
+: determine where site specific architecture-dependent libraries go.
+: sitelib  default is /usr/local/lib/perl5/site_perl/$version
+: sitearch default is /usr/local/lib/perl5/site_perl/$version/$archname
+: sitelib may have an optional trailing /share.
+case "$sitearch" in
+'')	dflt=`echo $sitelib | $sed 's,/share$,,'`
+	dflt="$dflt/$archname"
+	;;
+*)	dflt="$sitearch"
+	;;
+esac
+set sitearch sitearch none
+eval $prefixit
+$cat <<EOM
+
+The installation process will also create a directory for
+architecture-dependent site-specific extensions and modules.
+
+EOM
+fn=d~+
+rp='Pathname for the site-specific architecture-dependent library files?'
+. ./getfile
+sitearch="$ans"
+sitearchexp="$ansexp"
+: Change installation prefix, if necessary.
+if $test X"$prefix" != X"$installprefix"; then
+	installsitearch=`echo $sitearchexp | sed "s#^$prefix#$installprefix#"`
+else
+	installsitearch="$sitearchexp"
+fi
+
+$cat <<EOM
+
 The installation process will also create a directory for
 vendor-supplied add-ons.  Vendors who supply perl with their system
 may find it convenient to place all vendor-supplied files in this
@@ -5358,6 +5474,41 @@ else
 	installvendorarch="$vendorarchexp"
 fi
 
+: Final catch-all directories to search
+$cat <<EOM
+
+Lastly, you can have perl look in other directories for extensions and
+modules in addition to those already specified.
+These directories will be searched after 
+	$sitearch 
+	$sitelib 
+EOM
+test X"$vendorlib" != "X" && echo '	' $vendorlib
+test X"$vendorarch" != "X" && echo '	' $vendorarch
+echo ' '
+case "$otherlibdirs" in
+''|' ') dflt='none' ;;
+*)	dflt="$otherlibdirs" ;;
+esac
+$cat <<EOM
+Enter a colon-separated set of extra paths to include in perl's @INC
+search path, or enter 'none' for no extra paths.
+
+EOM
+
+rp='Colon-separated list of additional directories for perl to search?'
+. ./myread
+case "$ans" in
+' '|''|none)	otherlibdirs=' ' ;;     
+*)	otherlibdirs="$ans" ;;
+esac
+case "$otherlibdirs" in
+' ') val=$undef ;;
+*)	val=$define ;;
+esac
+set d_perl_otherlibdirs
+eval $setvar
+
 : Cruising for prototypes
 echo " "
 echo "Checking out function prototypes..." >&4
@@ -5441,90 +5592,18 @@ case "$perl5" in
 *)	echo "Using $perl5." ;;
 esac
 
-$cat <<EOM
-
-After $package is installed, you may wish to install various
-add-on modules and utilities.  Typically, these add-ons will
-be installed under $prefix with the rest
-of this package.  However, you may wish to install such add-ons
-elsewhere under a different prefix.
-
-If you do not wish to put everything under a single prefix, that's
-ok.  You will be prompted for the individual locations; this siteprefix
-is only used to suggest the defaults.
-
-The default should be fine for most people.
-
-EOM
-fn=d~+
-rp='Installation prefix to use for add-on modules and utilities?'
-: XXX Here might be another good place for an installstyle setting.
-case "$siteprefix" in
-'') dflt=$prefix ;;
-*)  dflt=$siteprefix ;;
-esac
-. ./getfile
-: XXX Prefixit unit does not yet support siteprefix and vendorprefix
-oldsiteprefix=''
-case "$siteprefix" in
-'') ;;
-*)	case "$ans" in
-	"$prefix") ;;
-	*) oldsiteprefix="$prefix";;
-	esac
-	;;
-esac
-siteprefix="$ans"
-siteprefixexp="$ansexp"
-
-: determine where site specific libraries go.
-: Usual default is /usr/local/lib/perl5/site_perl/$version
-: The default "style" setting is made in installstyle.U
-: XXX No longer works with Prefixit stuff.
-prog=`echo $package | $sed 's/-*[0-9.]*$//'`
-case "$sitelib" in
-'') case "$installstyle" in
-	*lib/perl5*) dflt=$siteprefix/lib/$package/site_$prog/$version ;;
-	*)	 dflt=$siteprefix/lib/site_$prog/$version ;;
-	esac
-	;;
-*)	dflt="$sitelib"
-	;;
-esac
-$cat <<EOM
-
-The installation process will create a directory for
-site-specific extensions and modules.  Most users find it convenient
-to place all site-specific files in this directory rather than in the
-main distribution directory.
-
-EOM
-fn=d~+
-rp='Pathname for the site-specific library files?'
-. ./getfile
-sitelib="$ans"
-sitelibexp="$ansexp"
-sitelib_stem=`echo "$sitelibexp" | sed "s,/$version$,,"`
-: Change installation prefix, if necessary.
-if $test X"$prefix" != X"$installprefix"; then
-	installsitelib=`echo $sitelibexp | $sed "s#^$prefix#$installprefix#"`
-else
-	installsitelib="$sitelibexp"
-fi
-
 : Determine list of previous versions to include in @INC
 $cat > getverlist <<EOPL
 #!$perl5 -w
 use File::Basename;
 \$api_versionstring = "$api_versionstring";
 \$version = "$version";
-\$sitelib = "$sitelib";
+\$stem = "$sitelib_stem";
 \$archname = "$archname";
 EOPL
 	$cat >> getverlist <<'EOPL'
 # Can't have leading @ because metaconfig interprets it as a command!
 ;@inc_version_list=();
-$stem=dirname($sitelib);
 # XXX Redo to do opendir/readdir? 
 if (-d $stem) {
     chdir($stem);
@@ -5543,10 +5622,10 @@ else {
 foreach $d (@candidates) {
     if ($d lt $version) {
 	if ($d ge $api_versionstring) {
-	    unshift(@inc_version_list, "$d/$archname", $d);
+	    unshift(@inc_version_list, grep { -d } "$d/$archname", $d);
 	}
 	elsif ($d ge "5.005") {
-	    unshift(@inc_version_list, $d);
+	    unshift(@inc_version_list, grep { -d } $d);
 	}
     }
     else {
@@ -6616,46 +6695,26 @@ esac
 
 : see if we can have long filenames
 echo " "
-rmlist="$rmlist /tmp/cf$$"
-$test -d /tmp/cf$$ || mkdir /tmp/cf$$
 first=123456789abcdef
-second=/tmp/cf$$/$first
-$rm -f $first $second
+$rm -f $first
 if (echo hi >$first) 2>/dev/null; then
 	if $test -f 123456789abcde; then
 		echo 'You cannot have filenames longer than 14 characters.  Sigh.' >&4
 		val="$undef"
 	else
-		if (echo hi >$second) 2>/dev/null; then
-			if $test -f /tmp/cf$$/123456789abcde; then
-				$cat <<'EOM'
-That's peculiar... You can have filenames longer than 14 characters, but only
-on some of the filesystems.  Maybe you are using NFS.  Anyway, to avoid problems
-I shall consider your system cannot support long filenames at all.
-EOM
-				val="$undef"
-			else
-				echo 'You can have filenames longer than 14 characters.' >&4
-				val="$define"
-			fi
-		else
-			$cat <<'EOM'
-How confusing! Some of your filesystems are sane enough to allow filenames
-longer than 14 characters but some others like /tmp can't even think about them.
-So, for now on, I shall assume your kernel does not allow them at all.
-EOM
-			val="$undef"
-		fi
+ 		echo 'You can have filenames longer than 14 characters.'>&4
+ 		val="$define"
 	fi
 else
 	$cat <<'EOM'
-You can't have filenames longer than 14 chars.  You can't even think about them!
+You can't have filenames longer than 14 chars.
+You can't even think about them!
 EOM
 	val="$undef"
 fi 
 set d_flexfnam
 eval $setvar
-$rm -rf /tmp/cf$$ 123456789abcde*
+$rm -rf 123456789abcde*
 
 : determine where library module manual pages go
 set man3dir man3dir none
@@ -6688,7 +6747,7 @@ esac
 echo "If you don't want the manual sources installed, answer 'none'."
 prog=`echo $package | $sed 's/-*[0-9.]*$//'`
 case "$man3dir" in
-'')	dflt=`echo $man1dir | $sed -e 's/man1/man3/g' -e 's/man\.1/man\.3/g'`
+'')	dflt=`echo "$man1dir" | $sed -e 's/man1/man3/g' -e 's/man\.1/man\.3/g'`
 	if $test -d "$privlib/man/man3"; then
 		cat <<EOM >&4
 
@@ -6706,8 +6765,10 @@ EOM
 		esac
     fi
 	;;
-' ') dflt=none;;
 *)	dflt="$man3dir" ;;
+esac
+case "$dflt" in
+' ') dflt=none ;;
 esac
 echo " "
 fn=dn+~
@@ -6715,7 +6776,7 @@ rp="Where do the $package library man pages (source) go?"
 . ./getfile
 man3dir="$ans"
 man3direxp="$ansexp"
-case "$man1dir" in
+case "$man3dir" in
 '')	man3dir=' '
 	installman3dir='';;
 esac
@@ -7158,37 +7219,6 @@ if $test X"$prefix" != X"$installprefix"; then
 	installscript=`echo $scriptdirexp | sed "s#^$prefix#$installprefix#"`
 else
 	installscript="$scriptdirexp"
-fi
-
-: determine where site specific architecture-dependent libraries go.
-: sitelib  default is /usr/local/lib/perl5/site_perl/$version
-: sitearch default is /usr/local/lib/perl5/site_perl/$version/$archname
-: sitelib may have an optional trailing /share.
-case "$sitearch" in
-'')	dflt=`echo $sitelib | $sed 's,/share$,,'`
-	dflt="$dflt/$archname"
-	;;
-*)	dflt="$sitearch"
-	;;
-esac
-set sitearch sitearch none
-eval $prefixit
-$cat <<EOM
-
-The installation process will also create a directory for
-architecture-dependent site-specific extensions and modules.
-
-EOM
-fn=d~+
-rp='Pathname for the site-specific architecture-dependent library files?'
-. ./getfile
-sitearch="$ans"
-sitearchexp="$ansexp"
-: Change installation prefix, if necessary.
-if $test X"$prefix" != X"$installprefix"; then
-	installsitearch=`echo $sitearchexp | sed "s#^$prefix#$installprefix#"`
-else
-	installsitearch="$sitearchexp"
 fi
 
 : determine where add-on public executables go
@@ -9077,6 +9107,10 @@ $rm -f try.* try
 set d_fpos64_t
 eval $setvar
 
+: see if frexpl exists
+set frexpl d_frexpl
+eval $inlibc
+
 hasstruct='varname=$1; struct=$2; shift; shift;
 while $test $# -ge 2; do
 	case "$1" in
@@ -9567,6 +9601,14 @@ set d_isascii
 eval $setvar
 $rm -f isascii*
 
+: see if isnan exists
+set isnan d_isnan
+eval $inlibc
+
+: see if isnanl exists
+set isnanl d_isnanl
+eval $inlibc
+
 : see if killpg exists
 set killpg d_killpg
 eval $inlibc
@@ -9785,6 +9827,10 @@ END
 esac
 
 
+
+: see if modfl exists
+set modfl d_modfl
+eval $inlibc
 
 : see if mprotect exists
 set mprotect d_mprotect
@@ -13806,6 +13852,37 @@ echo $sig_name | $awk \
 }'
 $rm -f signal signal.c signal.awk signal.lst signal_cmd 
 
+echo " "
+case "$sizetype" in
+*_t) zzz="$sizetype"	;;
+*)   zzz="filesize"	;;
+esac
+echo "Checking the size of $zzz..." >&4 
+cat > try.c <<EOCP
+#include <sys/types.h>
+#include <stdio.h>
+int main() {
+    printf("%d\n", (int)sizeof($sizetype));
+    exit(0);
+}
+EOCP
+set try
+if eval $compile_ok; then
+	yyy=`./try`
+	case "$yyy" in
+	'')	sizesize=4
+		echo "(I can't execute the test program--guessing $sizesize.)" >&4
+		;;
+	*)	sizesize=$yyy
+		echo "Your $zzz size is $sizesize bytes."
+		;;
+	esac
+else
+	sizesize=4
+	echo "(I can't compile the test program--guessing $sizesize.)" >&4
+fi
+
+
 : check for socklen_t
 echo " "
 echo "Checking to see if you have socklen_t..." >&4
@@ -13825,7 +13902,7 @@ else
 	val="$undef"
 	echo "You do not have socklen_t."
 	case "$sizetype" in
-	size_t) echo "(You do have size_t, that might work.)" ;;
+	size_t) echo "(You do have size_t, that might work. Some people are happy with just an int.)" ;;
 	esac
 fi
 $rm -f try try.*
@@ -13844,7 +13921,7 @@ EOM
 	case "$d_socklen_t" in
 	"$define") yyy="$yyy socklen_t"
 	esac
-	yyy="$yyy $sizetype int long"
+	yyy="$yyy $sizetype int long unsigned"
 	for xxx in $yyy; do
 		case "$socksizetype" in
 		'')	try="extern int accept(int, struct sockaddr *, $xxx *);"
@@ -13864,8 +13941,8 @@ EOM
 		;;
 	esac
 	;;
-*)	: no sockets, so pick relatively harmless defaults
-	socksizetype='char *'
+*)	: no sockets, so pick relatively harmless default
+	socksizetype='int'
 	;;
 esac
 
@@ -15161,6 +15238,7 @@ d_flock='$d_flock'
 d_fork='$d_fork'
 d_fpathconf='$d_fpathconf'
 d_fpos64_t='$d_fpos64_t'
+d_frexpl='$d_frexpl'
 d_fs_data_s='$d_fs_data_s'
 d_fseeko='$d_fseeko'
 d_fsetpos='$d_fsetpos'
@@ -15210,6 +15288,8 @@ d_index='$d_index'
 d_inetaton='$d_inetaton'
 d_int64_t='$d_int64_t'
 d_isascii='$d_isascii'
+d_isnan='$d_isnan'
+d_isnanl='$d_isnanl'
 d_killpg='$d_killpg'
 d_lchown='$d_lchown'
 d_ldbl_dig='$d_ldbl_dig'
@@ -15236,6 +15316,7 @@ d_mkstemp='$d_mkstemp'
 d_mkstemps='$d_mkstemps'
 d_mktime='$d_mktime'
 d_mmap='$d_mmap'
+d_modfl='$d_modfl'
 d_mprotect='$d_mprotect'
 d_msg='$d_msg'
 d_msg_ctrunc='$d_msg_ctrunc'
@@ -15259,6 +15340,7 @@ d_oldsock='$d_oldsock'
 d_open3='$d_open3'
 d_pathconf='$d_pathconf'
 d_pause='$d_pause'
+d_perl_otherlibdirs='$d_perl_otherlibdirs'
 d_phostname='$d_phostname'
 d_pipe='$d_pipe'
 d_poll='$d_poll'
@@ -15617,6 +15699,7 @@ optimize='$optimize'
 orderlib='$orderlib'
 osname='$osname'
 osvers='$osvers'
+otherlibdirs='$otherlibdirs'
 package='$package'
 pager='$pager'
 passcat='$passcat'
@@ -15692,6 +15775,7 @@ sitelib_stem='$sitelib_stem'
 sitelibexp='$sitelibexp'
 siteprefix='$siteprefix'
 siteprefixexp='$siteprefixexp'
+sizesize='$sizesize'
 sizetype='$sizetype'
 sleep='$sleep'
 smail='$smail'

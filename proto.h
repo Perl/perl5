@@ -217,7 +217,7 @@ PERL_CALLCONV OP*	Perl_die_where(pTHX_ char* message, STRLEN msglen);
 PERL_CALLCONV void	Perl_dounwind(pTHX_ I32 cxix);
 PERL_CALLCONV bool	Perl_do_aexec(pTHX_ SV* really, SV** mark, SV** sp);
 PERL_CALLCONV bool	Perl_do_aexec5(pTHX_ SV* really, SV** mark, SV** sp, int fd, int flag);
-PERL_CALLCONV int	Perl_do_binmode(pTHX_ PerlIO *fp, int iotype, int flag);
+PERL_CALLCONV int	Perl_do_binmode(pTHX_ PerlIO *fp, int iotype, int mode);
 PERL_CALLCONV void	Perl_do_chop(pTHX_ SV* asv, SV* sv);
 PERL_CALLCONV bool	Perl_do_close(pTHX_ GV* gv, bool not_implicit);
 PERL_CALLCONV bool	Perl_do_eof(pTHX_ GV* gv);
@@ -365,6 +365,7 @@ PERL_CALLCONV bool	Perl_is_uni_xdigit_lc(pTHX_ U32 c);
 PERL_CALLCONV U32	Perl_to_uni_upper_lc(pTHX_ U32 c);
 PERL_CALLCONV U32	Perl_to_uni_title_lc(pTHX_ U32 c);
 PERL_CALLCONV U32	Perl_to_uni_lower_lc(pTHX_ U32 c);
+PERL_CALLCONV int	Perl_is_utf8_char(pTHX_ U8 *p);
 PERL_CALLCONV bool	Perl_is_utf8_alnum(pTHX_ U8 *p);
 PERL_CALLCONV bool	Perl_is_utf8_alnumc(pTHX_ U8 *p);
 PERL_CALLCONV bool	Perl_is_utf8_idfirst(pTHX_ U8 *p);
@@ -540,6 +541,7 @@ PERL_CALLCONV SV*	Perl_newSV(pTHX_ STRLEN len);
 PERL_CALLCONV OP*	Perl_newSVREF(pTHX_ OP* o);
 PERL_CALLCONV OP*	Perl_newSVOP(pTHX_ I32 type, I32 flags, SV* sv);
 PERL_CALLCONV SV*	Perl_newSViv(pTHX_ IV i);
+PERL_CALLCONV SV*	Perl_newSVuv(pTHX_ UV u);
 PERL_CALLCONV SV*	Perl_newSVnv(pTHX_ NV n);
 PERL_CALLCONV SV*	Perl_newSVpv(pTHX_ const char* s, STRLEN len);
 PERL_CALLCONV SV*	Perl_newSVpvn(pTHX_ const char* s, STRLEN len);
@@ -935,6 +937,9 @@ PERL_CALLCONV PTR_TBL_t*	Perl_ptr_table_new(pTHX);
 PERL_CALLCONV void*	Perl_ptr_table_fetch(pTHX_ PTR_TBL_t *tbl, void *sv);
 PERL_CALLCONV void	Perl_ptr_table_store(pTHX_ PTR_TBL_t *tbl, void *oldsv, void *newsv);
 PERL_CALLCONV void	Perl_ptr_table_split(pTHX_ PTR_TBL_t *tbl);
+#endif
+#if defined(HAVE_INTERP_INTERN)
+PERL_CALLCONV void	Perl_sys_intern_init(pTHX);
 #endif
 
 #if defined(PERL_OBJECT)

@@ -788,8 +788,8 @@ If "'" is the delimiter, no interpolation is performed on the PATTERN.
 
 PATTERN may contain variables, which will be interpolated (and the
 pattern recompiled) every time the pattern search is evaluated, except
-for when the delimiter is a single quote.  (Note that C<$)> and C<$|>
-might not be interpolated because they look like end-of-string tests.)
+for when the delimiter is a single quote.  (Note that C<$(>, C<$)>, and
+C<$|> are not interpolated because they look like end-of-string tests.)
 If you want such a pattern to be compiled only once, add a C</o> after
 the trailing delimiter.  This avoids expensive run-time recompilations,
 and is useful when the value you are interpolating won't change over
@@ -1051,6 +1051,12 @@ multiple commands in a single line by separating them with the command
 separator character, if your shell supports that (e.g. C<;> on many Unix
 shells; C<&> on the Windows NT C<cmd> shell).
 
+Beginning with v5.6.0, Perl will attempt to flush all files opened for
+output before starting the child process, but this may not be supported
+on some platforms (see L<perlport>).  To be safe, you may need to set
+C<$|> ($AUTOFLUSH in English) or call the C<autoflush()> method of
+C<IO::Handle> on any open handles.
+
 Beware that some command shells may place restrictions on the length
 of the command line.  You must ensure your strings don't exceed this
 limit after any necessary interpolations.  See the platform-specific
@@ -1091,8 +1097,8 @@ Some frequently seen examples:
 
 A common mistake is to try to separate the words with comma or to
 put comments into a multi-line C<qw>-string.  For this reason, the
-B<-w> switch (that is, the C<$^W> variable) produces warnings if
-the STRING contains the "," or the "#" character.
+C<use warnings> pragma and the B<-w> switch (that is, the C<$^W> variable) 
+produces warnings if the STRING contains the "," or the "#" character.
 
 =item s/PATTERN/REPLACEMENT/egimosx
 
@@ -1134,9 +1140,10 @@ text is not evaluated as a command.  If the
 PATTERN is delimited by bracketing quotes, the REPLACEMENT has its own
 pair of quotes, which may or may not be bracketing quotes, e.g.,
 C<s(foo)(bar)> or C<< s<foo>/bar/ >>.  A C</e> will cause the
-replacement portion to be interpreted as a full-fledged Perl expression
-and eval()ed right then and there.  It is, however, syntax checked at
-compile-time.
+replacement portion to be treated as a full-fledged Perl expression
+and evaluated right then and there.  It is, however, syntax checked at
+compile-time. A second C<e> modifier will cause the replacement portion
+to be C<eval>ed before being run as a Perl expression.
 
 Examples:
 
@@ -1163,8 +1170,12 @@ Examples:
     # symbolic dereferencing
     s/\$(\w+)/${$1}/g;
 
-    # /e's can even nest;  this will expand
-    # any embedded scalar variable (including lexicals) in $_
+    # Add one to the value of any numbers in the string
+    s/(\d+)/1 + $1/eg;
+
+    # This will expand any embedded scalar variable
+    # (including lexicals) in $_ : First $1 is interpolated
+    # to the variable name, and then evaluated
     s/(\$\w+)/$1/eeg;
 
     # Delete (most) C comments.
@@ -1213,6 +1224,12 @@ For B<sed> devotees, C<y> is provided as a synonym for C<tr>.  If the
 SEARCHLIST is delimited by bracketing quotes, the REPLACEMENTLIST has
 its own pair of quotes, which may or may not be bracketing quotes,
 e.g., C<tr[A-Z][a-z]> or C<tr(+\-*/)/ABCD/>.
+
+Note that C<tr> does B<not> do regular expression character classes
+such as C<\d> or C<[:lower:]>.  The <tr> operator is not equivalent to
+the tr(1) utility.  If you want to map strings between lower/upper
+cases, see L<perlfunc/lc> and L<perlfunc/uc>, and in general consider
+using the C<s> operator if you need regular expressions.
 
 Note also that the whole range idea is rather unportable between
 character sets--and even within character sets they may cause results
@@ -1401,7 +1418,7 @@ as C<"\\\t"> (since TAB is not alphanumeric).  Note also that:
 may be closer to the conjectural I<intention> of the writer of C<"\Q\t\E">.
 
 Interpolated scalars and arrays are converted internally to the C<join> and
-C<.> catentation operations.  Thus, C<"$foo XXX '@arr'"> becomes:
+C<.> catenation operations.  Thus, C<"$foo XXX '@arr'"> becomes:
 
   $foo . " XXX '" . (join $", @arr) . "'";
 
@@ -1452,8 +1469,8 @@ the result is not predictable.
 It is at this step that C<\1> is begrudgingly converted to C<$1> in
 the replacement text of C<s///> to correct the incorrigible
 I<sed> hackers who haven't picked up the saner idiom yet.  A warning
-is emitted if the B<-w> command-line flag (that is, the C<$^W> variable)
-was set.
+is emitted if the C<use warnings> pragma or the B<-w> command-line flag
+(that is, the C<$^W> variable) was set.
 
 The lack of processing of C<\\> creates specific restrictions on
 the post-processed text.  If the delimiter is C</>, one cannot get
@@ -1514,7 +1531,7 @@ terminator of a C<{}>-delimited construct.
 It is possible to inspect both the string given to RE engine and the
 resulting finite automaton.  See the arguments C<debug>/C<debugcolor>
 in the C<use L<re>> pragma, as well as Perl's B<-Dr> command-line
-switch documented in L<perlrun/Switches>.
+switch documented in L<perlrun/"Command Switches">.
 
 =item Optimization of regular expressions
 
@@ -1591,7 +1608,8 @@ to terminate the loop, they should be tested for explicitly:
     while (<STDIN>) { last unless $_; ... }
 
 In other boolean contexts, C<< <I<filehandle>> >> without an
-explicit C<defined> test or comparison elicit a warning if the B<-w>
+explicit C<defined> test or comparison elicit a warning if the 
+C<use warnings> pragma or the B<-w>
 command-line switch (the C<$^W> variable) is in effect.
 
 The filehandles STDIN, STDOUT, and STDERR are predefined.  (The
@@ -1719,7 +1737,7 @@ A (file)glob evaluates its (embedded) argument only when it is
 starting a new list.  All values must be read before it will start
 over.  In list context, this isn't important because you automatically
 get them all anyway.  However, in scalar context the operator returns
-the next value each time it's called, or C
+the next value each time it's called, or C<undef> when the list has
 run out.  As with filehandle reads, an automatic C<defined> is
 generated when the glob occurs in the test part of a C<while>,
 because legal glob returns (e.g. a file called F<0>) would otherwise

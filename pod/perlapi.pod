@@ -237,7 +237,7 @@ NOTE: the perl_ form of this function is deprecated.
 =item EXTEND
 
 Used to extend the argument stack for an XSUB's return values. Once
-used, guarrantees that there is room for at least C<nitems> to be pushed
+used, guarantees that there is room for at least C<nitems> to be pushed
 onto the stack.
 
 	void	EXTEND(SP, int nitems)
@@ -381,17 +381,17 @@ C<call_sv> apply equally to these functions.
 
 =item gv_stashpv
 
-Returns a pointer to the stash for a specified package.  If C<create> is
-set then the package will be created if it does not already exist.  If
-C<create> is not set and the package does not exist then NULL is
-returned.
+Returns a pointer to the stash for a specified package.  C<name> should
+be a valid UTF-8 string.  If C<create> is set then the package will be
+created if it does not already exist.  If C<create> is not set and the
+package does not exist then NULL is returned.
 
 	HV*	gv_stashpv(const char* name, I32 create)
 
 =item gv_stashsv
 
-Returns a pointer to the stash for a specified package.  See
-C<gv_stashpv>.
+Returns a pointer to the stash for a specified package, which must be a
+valid UTF-8 string.  See C<gv_stashpv>.
 
 	HV*	gv_stashsv(SV* sv, I32 create)
 
@@ -662,21 +662,21 @@ Undefines the hash.
 
 =item isALNUM
 
-Returns a boolean indicating whether the C C<char> is an ascii alphanumeric
+Returns a boolean indicating whether the C C<char> is an ASCII alphanumeric
 character or digit.
 
 	bool	isALNUM(char ch)
 
 =item isALPHA
 
-Returns a boolean indicating whether the C C<char> is an ascii alphabetic
+Returns a boolean indicating whether the C C<char> is an ASCII alphabetic
 character.
 
 	bool	isALPHA(char ch)
 
 =item isDIGIT
 
-Returns a boolean indicating whether the C C<char> is an ascii
+Returns a boolean indicating whether the C C<char> is an ASCII
 digit.
 
 	bool	isDIGIT(char ch)
@@ -896,6 +896,13 @@ reference count is 1.
 Creates a new SV which is an exact duplicate of the original SV.
 
 	SV*	newSVsv(SV* old)
+
+=item newSVuv
+
+Creates a new SV and copies an unsigned integer into it.
+The reference count for the SV is set to 1.
+
+	SV*	newSVuv(UV u)
 
 =item newXS
 
@@ -1256,7 +1263,7 @@ wrapper for C<strncmp>).
 
 =item StructCopy
 
-This is an architecture-independant macro to copy one structure to another.
+This is an architecture-independent macro to copy one structure to another.
 
 	void	StructCopy(type src, type dest, type)
 
@@ -1590,16 +1597,16 @@ false, defined or undefined.  Does not handle 'get' magic.
 
 	bool	SvTRUE(SV* sv)
 
+=item svtype
+
+An enum of flags for Perl types.  These are found in the file B<sv.h> 
+in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
+
 =item SvTYPE
 
 Returns the type of the SV.  See C<svtype>.
 
 	svtype	SvTYPE(SV* sv)
-
-=item svtype
-
-An enum of flags for Perl types.  These are found in the file B<sv.h> 
-in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
 
 =item SVt_IV
 

@@ -1,6 +1,3 @@
-Bugs
-    fix small memory leaks on compile-time failures
-
 Unicode support
     finish byte <-> utf8 and localencoding <-> utf8 conversions
     make substr($bytestr,0,0,$charstr) do the right conversion
@@ -13,7 +10,6 @@ Unicode support
 	- a way to set default disciplines for all handle constructors:
 	    use open IN => ":any", OUT => ":utf8", SYS => ":utf16"
     eliminate need for "use utf8;"
-    autoload utf8_heavy.pl's swash routines in swash_init()
     autoload byte.pm when byte:: is seen by the parser
     check uv_to_utf8() calls for buffer overflow
     (see also "Locales", "Regexen", and "Miscellaneous")
@@ -43,13 +39,17 @@ Namespace cleanup
     API-space:    complete the list of things that constitute public api
 
 Configure
+    fix the vicious cyclic multidependency of cc <-> libpth <-> loclibpth
+	libswanted <-> usethreads <-> use64bitint <-> use64bitall <->
+  	uselargefiles <-> ...  
     make configuring+building away from source directory work (VPATH et al)
-    _r support
-    cross-compilation configuring
+	this is related to: cross-compilation configuring (see Todo)
+    _r support (see Todo for mode detailed description)
     POSIX 1003.1 1996 Edition support--realtime stuff:
 	POSIX semaphores, message queues, shared memory, realtime clocks,
 	timers, signals (the metaconfig units mostly already exist for these)
     UNIX98 support: reader-writer locks, realtime/asynchronous IO
+    IPv6 support: see RFC2292, RFC2553
 
 Long doubles
     figure out where the PV->NV->PV conversion gets it wrong at least
@@ -82,6 +82,18 @@ Locales
 
 Regexen
    make RE engine thread-safe
+   a way to do full character set arithmetics: now one can do
+	addition, negate a whole class, and negate certain subclasses
+	(e.g. \D, [:^digit:]), but a more generic way to add/subtract/
+	intersect characters/classes, like described in the Unicode technical
+	report on Regular Expression Guidelines,
+	http://www.unicode.org/unicode/reports/tr18/
+	(amusingly, the TR notes that difference and intersection
+	 can be done using "Perl-style look-ahead")
+	difference syntax?  maybe [[:alpha:][^abc]] meaning
+	"all alphabetic expect a, b, and c"? or [[:alpha:]-[abc]]?
+	(maybe bad, as we explicitly disallow such 'ranges')
+	intersection syntax? maybe [[..]&[...]]?
    POSIX [=bar=] and [.zap.] would nice too but there's no API for them
    	=bar= could be done with Unicode, though, see the Unicode TR #15 about
 	normalization forms:
@@ -113,12 +125,14 @@ Miscellaneous
 	Configure doesn't yet probe for usleep/nanosleep/ualarm but
 	the units exist)
     floating point handling: nans, infinities, fp exception masks, etc.
-	at least the following interfaces exist: fp_classify(), fp_class(),
-	class(), isnan(), isinf(), isfinite(), finite(), isnormal(),
-	ordered(), fp_setmask(), fp_getmask(), fp_setround(), fp_getround(), 
-	ieeefp.h, fp_class.h.  There are metaconfig units for most of these.
-        Search for ifdef __osf__ in pp.c to find a temporary fix that
-	needs to be done right.
+	At least the following interfaces exist: fp_classify(), fp_class(),
+	class(), isinf(), isfinite(), finite(), isnormal(), unordered(),
+	<ieeefp.h>, <fp_class.h> (there are metaconfig units for all these),
+	fp_setmask(), fp_getmask(), fp_setround(), fp_getround()
+	(no metaconfig units yet for these).
+        Don't forget finitel(), fp_classl(), fp_class_l(), (yes, both do,
+	unfortunately, exist), and unorderedl().
+	As of 5.6.1 there is cpp macro Perl_isnan().
     fix the basic arithmetics (+ - * / %) to preserve IVness/UVness if
 	both arguments are IVs/UVs
     replace pod2html with new PodtoHtml? (requires other modules from CPAN)

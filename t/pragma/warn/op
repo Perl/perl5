@@ -84,16 +84,16 @@
 	keys joe ;
  
      Statement unlikely to be reached
-     (Maybe you meant system() when you said exec()?
+     	(Maybe you meant system() when you said exec()?
  	exec "true" ; my $a
 
      defined(@array) is deprecated
-     (Maybe you should just omit the defined()?)
+     	(Maybe you should just omit the defined()?)
 	my @a ; defined @a ;
 	defined (@a = (1,2,3)) ;
 
      defined(%hash) is deprecated
-     (Maybe you should just omit the defined()?)
+     	(Maybe you should just omit the defined()?)
 	my %h ; defined %h ;
     
      /---/ should probably be written as "---"
@@ -140,6 +140,17 @@ Variable "$x" will not stay shared at - line 7.
 no warnings 'closure' ;
 sub x {
       my $x;
+      sub y {
+         $x
+      }
+   }
+EXPECT
+
+########
+# op.c
+use warnings 'closure' ;
+sub x {
+      our $x;
       sub y {
          $x
       }
@@ -592,7 +603,6 @@ my $a ; my @a = () ; my %a = () ; my $b = \@a ; my $c = \%a ;
 EXPECT
 Applying pattern match (m//) to @array will act on scalar(@array) at - line 5.
 Applying substitution (s///) to @array will act on scalar(@array) at - line 6.
-Can't modify private array in substitution (s///) at - line 6, near "s/a/b/ ;"
 Applying transliteration (tr///) to @array will act on scalar(@array) at - line 7.
 Applying pattern match (m//) to @array will act on scalar(@array) at - line 8.
 Applying substitution (s///) to @array will act on scalar(@array) at - line 9.
@@ -603,6 +613,7 @@ Applying transliteration (tr///) to %hash will act on scalar(%hash) at - line 13
 Applying pattern match (m//) to %hash will act on scalar(%hash) at - line 14.
 Applying substitution (s///) to %hash will act on scalar(%hash) at - line 15.
 Applying transliteration (tr///) to %hash will act on scalar(%hash) at - line 16.
+Can't modify private array in substitution (s///) at - line 6, near "s/a/b/ ;"
 BEGIN not safe after errors--compilation aborted at - line 18.
 ########
 # op.c
@@ -738,28 +749,28 @@ exec "$^X -e 1" ;
 my $a
 EXPECT
 Statement unlikely to be reached at - line 4.
-(Maybe you meant system() when you said exec()?)
+	(Maybe you meant system() when you said exec()?)
 ########
 # op.c
 use warnings 'deprecated' ;
 my @a; defined(@a);
 EXPECT
 defined(@array) is deprecated at - line 3.
-(Maybe you should just omit the defined()?)
+	(Maybe you should just omit the defined()?)
 ########
 # op.c
 use warnings 'deprecated' ;
 defined(@a = (1,2,3));
 EXPECT
 defined(@array) is deprecated at - line 3.
-(Maybe you should just omit the defined()?)
+	(Maybe you should just omit the defined()?)
 ########
 # op.c
 use warnings 'deprecated' ;
 my %h; defined(%h);
 EXPECT
 defined(%hash) is deprecated at - line 3.
-(Maybe you should just omit the defined()?)
+	(Maybe you should just omit the defined()?)
 ########
 # op.c
 no warnings 'syntax' ;
@@ -808,3 +819,54 @@ joe() ;
 sub joe ($$) {}
 EXPECT
 main::fred() called too early to check prototype at - line 3.
+########
+# op.c [Perl_newATTRSUB]
+--FILE-- abc.pm
+use warnings 'void' ;
+BEGIN { $| = 1; print "in begin\n"; }
+CHECK { print "in check\n"; }
+INIT { print "in init\n"; }
+END { print "in end\n"; }
+print "in mainline\n";
+1;
+--FILE--
+use abc;
+delete $INC{"abc.pm"};
+require abc;
+do "abc.pm";
+EXPECT
+in begin
+in mainline
+in check
+in init
+in begin
+Too late to run CHECK block at abc.pm line 3.
+Too late to run INIT block at abc.pm line 4.
+in mainline
+in begin
+Too late to run CHECK block at abc.pm line 3.
+Too late to run INIT block at abc.pm line 4.
+in mainline
+in end
+in end
+in end
+########
+# op.c [Perl_newATTRSUB]
+--FILE-- abc.pm
+no warnings 'void' ;
+BEGIN { $| = 1; print "in begin\n"; }
+CHECK { print "in check\n"; }
+INIT { print "in init\n"; }
+END { print "in end\n"; }
+print "in mainline\n";
+1;
+--FILE--
+require abc;
+do "abc.pm";
+EXPECT
+in begin
+in mainline
+in begin
+in mainline
+in end
+in end

@@ -129,7 +129,8 @@ assignment to an array or hash evaluates the righthand side in list
 context.  Assignment to a list (or slice, which is just a list
 anyway) also evaluates the righthand side in list context.
 
-When you use Perl's B<-w> command-line option, you may see warnings
+When you use the C<use warnings> pragma or Perl's B<-w> command-line 
+option, you may see warnings
 about useless uses of constants or functions in "void context".
 Void context just means the value has been discarded, such as a
 statement containing only C<"fred";> or C<getpwuid(0);>.  It still
@@ -274,7 +275,6 @@ integer formats:
     0xff                # hex
     0377                # octal
     0b011011            # binary
-    v102.111.111        # string (made of characters "f", "o", "o")
 
 String literals are usually delimited by either single or double
 quotes.  They work much like quotes in the standard Unix shells:
@@ -282,7 +282,7 @@ double-quoted string literals are subject to backslash and variable
 substitution; single-quoted strings are not (except for C<\'> and
 C<\\>).  The usual C-style backslash rules apply for making
 characters such as newline, tab, etc., as well as some more exotic
-forms.  See L<perlop/"Quote and Quotelike Operators"> for a list.
+forms.  See L<perlop/"Quote and Quote-like Operators"> for a list.
 
 Hexadecimal, octal, or binary, representations in string literals
 (e.g. '0xff') are not automatically converted to their integer
@@ -331,7 +331,13 @@ readable interpolation form C<"\x{1}\x{14}\x{12c}\x{fa0}">.  This is useful
 for representing Unicode strings, and for comparing version "numbers"
 using the string comparison operators, C<cmp>, C<gt>, C<lt> etc.
 If there are two or more dots in the literal, the leading C<v> may be
-omitted.  Such literals are accepted by both C<require> and C<use> for
+omitted.
+
+    print v9786;              # prints UTF-8 encoded SMILEY, "\x{263a}"
+    print v102.111.111;       # prints "foo"
+    print 102.111.111;        # same
+
+Such literals are accepted by both C<require> and C<use> for
 doing a version check.  The C<$^V> special variable also contains the
 running Perl interpreter's version in this form.  See L<perlvar/$^V>.
 
@@ -366,7 +372,8 @@ A word that has no other interpretation in the grammar will
 be treated as if it were a quoted string.  These are known as
 "barewords".  As with filehandles and labels, a bareword that consists
 entirely of lowercase letters risks conflict with future reserved
-words, and if you use the B<-w> switch, Perl will warn you about any
+words, and if you use the C<use warnings> pragma or the B<-w> switch, 
+Perl will warn you about any
 such words.  Some people may wish to outlaw barewords entirely.  If you
 say
 
@@ -742,6 +749,28 @@ new file and directory handles into or out of functions. That's because
 C<*HANDLE{IO}> only works if HANDLE has already been used as a handle.
 In other words, C<*FH> must be used to create new symbol table entries;
 C<*foo{THING}> cannot.  When in doubt, use C<*FH>.
+
+All functions that are capable of creating filehandles (open(),
+opendir(), pipe(), socketpair(), sysopen(), socket(), and accept())
+automatically create an anonymous filehandle if the handle passed to
+them is an uninitialized scalar variable. This allows the constructs
+such as C<open(my $fh, ...)> and C<open(local $fh,...)> to be used to
+create filehandles that will conveniently be closed automatically when
+the scope ends, provided there are no other references to them. This
+largely eliminates the need for typeglobs when opening filehandles
+that must be passed around, as in the following example:
+
+    sub myopen {
+        open my $fh, "@_"
+	     or die "Can't open '@_': $!";
+	return $fh;
+    }
+
+    {
+        my $f = myopen("</etc/motd");
+	print <$f>;
+	# $f implicitly closed here
+    }
 
 Another way to create anonymous filehandles is with the Symbol
 module or with the IO::Handle module and its ilk.  These modules

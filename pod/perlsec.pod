@@ -32,17 +32,19 @@ program more secure than the corresponding C program.
 You may not use data derived from outside your program to affect
 something else outside your program--at least, not by accident.  All
 command line arguments, environment variables, locale information (see
-L<perllocale>), results of certain system calls (readdir, readlink,
-the gecos field of getpw* calls), and all file input are marked as
-"tainted".  Tainted data may not be used directly or indirectly in any
-command that invokes a sub-shell, nor in any command that modifies
-files, directories, or processes. (B<Important exception>: If you pass
-a list of arguments to either C<system> or C<exec>, the elements of
-that list are B<NOT> checked for taintedness.) Any variable set
-to a value derived from tainted data will itself be tainted,
-even if it is logically impossible for the tainted data
-to alter the variable.  Because taintedness is associated with each
-scalar value, some elements of an array can be tainted and others not.
+L<perllocale>), results of certain system calls (readdir(),
+readlink(), the variable of shmread(), the messages returned by
+msgrcv(), the password, gcos and shell fields returned by the
+getpwxxx() calls), and all file input are marked as "tainted".
+Tainted data may not be used directly or indirectly in any command
+that invokes a sub-shell, nor in any command that modifies files,
+directories, or processes. (B<Important exception>: If you pass a list
+of arguments to either C<system> or C<exec>, the elements of that list
+are B<NOT> checked for taintedness.) Any variable set to a value
+derived from tainted data will itself be tainted, even if it is
+logically impossible for the tainted data to alter the variable.
+Because taintedness is associated with each scalar value, some
+elements of an array can be tainted and others not.
 
 For example:
 

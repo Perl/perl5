@@ -56,12 +56,12 @@ When they are eventually supported, this pragma will serve as one of
 the interfaces to declare default disciplines for all I/O.
 
 In future, any default disciplines declared by this pragma will be
-available by the special discipline name ":def", and could be used
+available by the special discipline name ":DEFAULT", and could be used
 within handle constructors that allow disciplines to be specified.
 This would make it possible to stack new disciplines over the default
 ones.
 
-    open FH, "<:para :def", $file or die "can't open $file: $!";
+    open FH, "<:para :DEFAULT", $file or die "can't open $file: $!";
 
 Socket and directory handles will also support disciplines in
 future.

@@ -154,7 +154,7 @@ of changing them in place:
     }
 
 Notice how this (unprototyped) function doesn't care whether it was
-passed real scalars or arrays.  Perl sees all arugments as one big,
+passed real scalars or arrays.  Perl sees all arguments as one big,
 long, flat parameter list in C<@_>.  This is one area where
 Perl's simple argument-passing style shines.  The C<upcase()>
 function would work perfectly well without changing the C<upcase()>
@@ -1270,7 +1270,7 @@ see L<attributes>.
 
 See L<perlref/"Function Templates"> for more about references and closures.
 See L<perlxs> if you'd like to learn about calling C subroutines from Perl.  
-See L<perlembed> if you'd like to learn about calling PErl subroutines from C.  
+See L<perlembed> if you'd like to learn about calling Perl subroutines from C.  
 See L<perlmod> to learn about bundling up your functions in separate files.
 See L<perlmodlib> to learn what library modules come standard on your system.
 See L<perltoot> to learn how to make object method calls.

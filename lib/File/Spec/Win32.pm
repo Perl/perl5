@@ -2,8 +2,11 @@ package File::Spec::Win32;
 
 use strict;
 use Cwd;
-use vars qw(@ISA);
+use vars qw(@ISA $VERSION);
 require File::Spec::Unix;
+
+$VERSION = '1.1';
+
 @ISA = qw(File::Spec::Unix);
 
 =head1 NAME
@@ -105,8 +108,8 @@ sub canonpath {
     $path =~ s|([^\\])\\+|$1\\|g;                  # xx////xx  -> xx/xx
     $path =~ s|(\\\.)+\\|\\|g;                     # xx/././xx -> xx/xx
     $path =~ s|^(\.\\)+||s unless $path eq ".\\";  # ./xx      -> xx
-    $path =~ s|\\\z||
-             unless $path =~ m#^([A-Z]:)?\\\z#s;   # xx/       -> xx
+    $path =~ s|\\\Z(?!\n)||
+             unless $path =~ m#^([A-Z]:)?\\\Z(?!\n)#s;   # xx/       -> xx
     return $path;
 }
 
@@ -146,7 +149,7 @@ sub splitpath {
                       (?:\\\\|//)[^\\/]+[\\/][^\\/]+
                   )?
                 )
-                ( (?:.*[\\\\/](?:\.\.?\z)?)? )
+                ( (?:.*[\\\\/](?:\.\.?\Z(?!\n))?)? )
                 (.*)
              }xs;
         $volume    = $1;
@@ -187,7 +190,7 @@ sub splitdir {
     # check to be sure that there will not be any before handling the
     # simple case.
     #
-    if ( $directories !~ m|[\\/]\z| ) {
+    if ( $directories !~ m|[\\/]\Z(?!\n)| ) {
         return split( m|[\\/]|, $directories );
     }
     else {
@@ -216,7 +219,7 @@ sub catpath {
     # If it's UNC, make sure the glue separator is there, reusing
     # whatever separator is first in the $volume
     $volume .= $1
-        if ( $volume =~ m@^([\\/])[\\/][^\\/]+[\\/][^\\/]+\z@s &&
+        if ( $volume =~ m@^([\\/])[\\/][^\\/]+[\\/][^\\/]+\Z(?!\n)@s &&
              $directory =~ m@^[^\\/]@s
            ) ;
 
@@ -224,8 +227,8 @@ sub catpath {
 
     # If the volume is not just A:, make sure the glue separator is 
     # there, reusing whatever separator is first in the $volume if possible.
-    if ( $volume !~ m@^[a-zA-Z]:\z@s &&
-         $volume =~ m@[^\\/]\z@      &&
+    if ( $volume !~ m@^[a-zA-Z]:\Z(?!\n)@s &&
+         $volume =~ m@[^\\/]\Z(?!\n)@      &&
          $file   =~ m@[^\\/]@
        ) {
         $volume =~ m@([\\/])@ ;
@@ -293,8 +296,7 @@ sub abs2rel {
     my ( $path_volume, $path_directories, $path_file ) =
         $self->splitpath( $path, 1 ) ;
 
-    my ( undef, $base_directories, undef ) =
-        $self->splitpath( $base, 1 ) ;
+    my $base_directories = ($self->splitpath( $base, 1 ))[1] ;
 
     # Now, remove all leading components that are the same
     my @pathchunks = $self->splitdir( $path_directories );
@@ -378,10 +380,10 @@ sub rel2abs($;$;) {
             $base = $self->canonpath( $base ) ;
         }
 
-        my ( undef, $path_directories, $path_file ) =
-            $self->splitpath( $path, 1 ) ;
+        my ( $path_directories, $path_file ) =
+            ($self->splitpath( $path, 1 ))[1,2] ;
 
-        my ( $base_volume, $base_directories, undef ) =
+        my ( $base_volume, $base_directories ) =
             $self->splitpath( $base, 1 ) ;
 
         $path = $self->catpath( 

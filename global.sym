@@ -68,6 +68,8 @@ Perl_sv_setpvf_nocontext
 Perl_sv_catpvf_mg_nocontext
 Perl_sv_setpvf_mg_nocontext
 Perl_fprintf_nocontext
+Perl_cv_const_sv
+Perl_cv_undef
 Perl_cx_dump
 Perl_filter_add
 Perl_filter_del
@@ -85,6 +87,8 @@ Perl_delimcpy
 Perl_die
 Perl_dounwind
 Perl_do_binmode
+Perl_do_close
+Perl_do_join
 Perl_do_open
 Perl_do_open9
 Perl_dowantarray
@@ -180,6 +184,7 @@ Perl_is_uni_xdigit_lc
 Perl_to_uni_upper_lc
 Perl_to_uni_title_lc
 Perl_to_uni_lower_lc
+Perl_is_utf8_char
 Perl_is_utf8_alnum
 Perl_is_utf8_alnumc
 Perl_is_utf8_idfirst
@@ -268,6 +273,7 @@ Perl_newSV
 Perl_newSVREF
 Perl_newSVOP
 Perl_newSViv
+Perl_newSVuv
 Perl_newSVnv
 Perl_newSVpv
 Perl_newSVpvn
@@ -315,6 +321,7 @@ Perl_regexec_flags
 Perl_regnext
 Perl_repeatcpy
 Perl_rninstr
+Perl_rsignal
 Perl_savepv
 Perl_savepvn
 Perl_savestack_grow
@@ -458,6 +465,7 @@ Perl_warn
 Perl_vwarn
 Perl_warner
 Perl_vwarner
+Perl_whichsig
 Perl_dump_mstats
 Perl_get_mstats
 Perl_safesysmalloc
@@ -532,3 +540,4 @@ Perl_ptr_table_new
 Perl_ptr_table_fetch
 Perl_ptr_table_store
 Perl_ptr_table_split
+Perl_sys_intern_init

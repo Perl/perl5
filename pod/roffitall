@@ -56,6 +56,7 @@ toroff=`
     $mandir/perlbot.1	\
     $mandir/perlipc.1	\
     $mandir/perlthrtut.1	\
+    $mandir/perldebguts.1	\
     $mandir/perldebug.1	\
     $mandir/perlnumber.1	\
     $mandir/perldiag.1	\

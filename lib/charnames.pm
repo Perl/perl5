@@ -2,7 +2,6 @@ package charnames;
 use bytes ();		# for $bytes::hint_bits
 $charnames::hint_bits = 0x20000;
 
-my $fname = 'unicode/UnicodeData-Latest.txt';
 my $txt;
 
 # This is not optimized in any way yet

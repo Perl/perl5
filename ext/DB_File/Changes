@@ -291,3 +291,8 @@
      to David Harris for spotting the underlying problem, contributing
      the updates to the documentation and writing DB_File::Lock (available
      on CPAN).
+
+1.73 27th April 2000
+
+   * Added support in version.c for building with threaded Perl.
+

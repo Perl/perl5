@@ -55,6 +55,7 @@ README.cygwin			cygwin
 README.dos			dos
 README.hpux			hpux
 README.lexwarn			lexwarn
+README.machten			machten
 README.mpeix			mpeix
 README.os2			os2
 README.os390			mvs
@@ -411,6 +412,7 @@ lib/File/Spec/Mac.pm		schinder
 lib/File/Spec/OS2.pm		ilya
 lib/File/Spec/VMS.pm		vms
 lib/File/Spec/Win32.pm		win32
+lib/File/Temp.pm		tjenness
 lib/File/stat.pm		tchrist
 lib/FileCache.pm	
 lib/FileHandle.pm	
@@ -594,6 +596,8 @@ pod/perlport.pod		pudge
 pod/perlre.pod			regex
 pod/perlref.pod	
 pod/perlreftut.pod		mjd
+pod/perlrequick.pod		mkvale
+pod/perlretut.pod		mkvale
 pod/perlrun.pod	
 pod/perlsec.pod	
 pod/perlstyle.pod	
@@ -704,6 +708,7 @@ t/lib/filehand.t
 t/lib/filepath.t	
 t/lib/filespec.t		kjahds
 t/lib/findbin.t	
+t/lib/ftmp-*.t			tjenness
 t/lib/gdbm.t	
 t/lib/getopt.t			jvromans
 t/lib/h2ph*			kstar
@@ -730,7 +735,7 @@ t/lib/symbol.t
 t/lib/texttabs.t		muir
 t/lib/textfill.t		muir
 t/lib/textwrap.t	
-t/lib/thread.t	
+t/lib/thr5005.t	
 t/lib/tie-push.t	
 t/lib/tie-stdarray.t	
 t/lib/tie-stdpush.t	
@@ -779,7 +784,7 @@ t/op/method.t
 t/op/misc.t	
 t/op/mkdir.t	
 t/op/my.t	
-t/op/nothread.t	
+t/op/nothr5005.t	
 t/op/oct.t	
 t/op/ord.t	
 t/op/pack.t	

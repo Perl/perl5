@@ -10,6 +10,7 @@
 #ifndef ___PerlHost_H___
 #define ___PerlHost_H___
 
+#include <signal.h>
 #include "iperlsys.h"
 #include "vmem.h"
 #include "vdir.h"
@@ -1639,7 +1640,7 @@ PerlProcWaitpid(struct IPerlProc* piPerl, int pid, int *status, int flags)
 Sighandler_t
 PerlProcSignal(struct IPerlProc* piPerl, int sig, Sighandler_t subcode)
 {
-    return 0;
+    return signal(sig, subcode);
 }
 
 #ifdef USE_ITHREADS
@@ -1719,6 +1720,13 @@ restart:
 	PL_main_root = Nullop;
     }
 
+    /* close the std handles to avoid fd leaks */
+    {
+	do_close(gv_fetchpv("STDIN", TRUE, SVt_PVIO), FALSE);
+	do_close(gv_fetchpv("STDOUT", TRUE, SVt_PVIO), FALSE);
+	do_close(gv_fetchpv("STDERR", TRUE, SVt_PVIO), FALSE);
+    }
+
     /* destroy everything (waits for any pseudo-forked children) */
     perl_destruct(my_perl);
     perl_free(my_perl);
@@ -1763,8 +1771,10 @@ PerlProcFork(struct IPerlProc* piPerl)
 			  (LPVOID)new_perl, 0, &id);
 #    endif
     PERL_SET_THX(aTHXo);	/* XXX perl_clone*() set TLS */
-    if (!handle)
-	Perl_croak(aTHX_ "panic: pseudo fork() failed");
+    if (!handle) {
+	errno = EAGAIN;
+	return -1;
+    }
     w32_pseudo_child_handles[w32_num_pseudo_children] = handle;
     w32_pseudo_child_pids[w32_num_pseudo_children] = id;
     ++w32_num_pseudo_children;

@@ -883,14 +883,17 @@ PP(pp_sort)
 
 	    CATCH_SET(TRUE);
 	    PUSHSTACKi(PERLSI_SORT);
-	    if (PL_sortstash != stash) {
-		PL_firstgv = gv_fetchpv("a", TRUE, SVt_PV);
-		PL_secondgv = gv_fetchpv("b", TRUE, SVt_PV);
-		PL_sortstash = stash;
+	    if (!hasargs && !is_xsub) {
+		if (PL_sortstash != stash || !PL_firstgv || !PL_secondgv) {
+		    SAVESPTR(PL_firstgv);
+		    SAVESPTR(PL_secondgv);
+		    PL_firstgv = gv_fetchpv("a", TRUE, SVt_PV);
+		    PL_secondgv = gv_fetchpv("b", TRUE, SVt_PV);
+		    PL_sortstash = stash;
+		}
+		SAVESPTR(GvSV(PL_firstgv));
+		SAVESPTR(GvSV(PL_secondgv));
 	    }
-
-	    SAVESPTR(GvSV(PL_firstgv));
-	    SAVESPTR(GvSV(PL_secondgv));
 
 	    PUSHBLOCK(cx, CXt_NULL, PL_stack_base);
 	    if (!(PL_op->op_flags & OPf_SPECIAL)) {
@@ -1521,14 +1524,20 @@ PP(pp_caller)
     else
 	PUSHs(sv_2mortal(newSViv(gimme & G_ARRAY)));
     if (CxTYPE(cx) == CXt_EVAL) {
+	/* eval STRING */
 	if (cx->blk_eval.old_op_type == OP_ENTEREVAL) {
 	    PUSHs(cx->blk_eval.cur_text);
 	    PUSHs(&PL_sv_no);
 	}
-	/* try blocks have old_namesv == 0 */
+	/* require */
 	else if (cx->blk_eval.old_namesv) {
 	    PUSHs(sv_2mortal(newSVsv(cx->blk_eval.old_namesv)));
 	    PUSHs(&PL_sv_yes);
+	}
+	/* eval BLOCK (try blocks have old_namesv == 0) */
+	else {
+	    PUSHs(&PL_sv_undef);
+	    PUSHs(&PL_sv_undef);
 	}
     }
     else {
@@ -1562,9 +1571,9 @@ PP(pp_caller)
     {
 	SV * mask ;
 	SV * old_warnings = cx->blk_oldcop->cop_warnings ;
-	if  (old_warnings == WARN_NONE || old_warnings == WARN_STD)
+	if  (old_warnings == pWARN_NONE || old_warnings == pWARN_STD)
             mask = newSVpvn(WARN_NONEstring, WARNsize) ;
-        else if (old_warnings == WARN_ALL)
+        else if (old_warnings == pWARN_ALL)
             mask = newSVpvn(WARN_ALLstring, WARNsize) ;
         else
             mask = newSVsv(old_warnings);
@@ -1848,15 +1857,21 @@ PP(pp_return)
 			*++newsp = SvREFCNT_inc(*SP);
 			FREETMPS;
 			sv_2mortal(*newsp);
-		    } else {
-			FREETMPS;
-			*++newsp = sv_mortalcopy(*SP);
 		    }
-		} else
+		    else {
+			sv = SvREFCNT_inc(*SP);	/* FREETMPS could clobber it */
+			FREETMPS;
+			*++newsp = sv_mortalcopy(sv);
+			SvREFCNT_dec(sv);
+		    }
+		}
+		else
 		    *++newsp = (SvTEMP(*SP)) ? *SP : sv_mortalcopy(*SP);
-	    } else
+	    }
+	    else
 		*++newsp = sv_mortalcopy(*SP);
-	} else
+	}
+	else
 	    *++newsp = &PL_sv_undef;
     }
     else if (gimme == G_ARRAY) {
@@ -1973,7 +1988,7 @@ PP(pp_next)
 {
     I32 cxix;
     register PERL_CONTEXT *cx;
-    I32 oldsave;
+    I32 inner;
 
     if (PL_op->op_flags & OPf_SPECIAL) {
 	cxix = dopoptoloop(cxstack_ix);
@@ -1988,13 +2003,12 @@ PP(pp_next)
     if (cxix < cxstack_ix)
 	dounwind(cxix);
 
+    /* clear off anything above the scope we're re-entering, but
+     * save the rest until after a possible continue block */
+    inner = PL_scopestack_ix;
     TOPBLOCK(cx);
-
-    /* clean scope, but only if there's no continue block */
-    if (!(cx->blk_loop.last_op->op_private & OPpLOOP_CONTINUE)) {
-	oldsave = PL_scopestack[PL_scopestack_ix - 1];
-	LEAVE_SCOPE(oldsave);
-    }
+    if (PL_scopestack_ix < inner)
+	leave_scope(PL_scopestack[PL_scopestack_ix]);
     return cx->blk_loop.next_op;
 }
 
@@ -2457,8 +2471,8 @@ PP(pp_exit)
 	anum = 0;
     else {
 	anum = SvIVx(POPs);
-#ifdef VMSISH_EXIT
-	if (anum == 1 && VMSISH_EXIT)
+#ifdef VMS
+        if (anum == 1 && (PL_op->op_private & OPpEXIT_VMSISH))
 	    anum = 0;
 #endif
     }
@@ -2751,6 +2765,7 @@ S_doeval(pTHX_ int gimme, OP** startop)
     SAVESPTR(PL_beginav);
     PL_beginav = newAV();
     SAVEFREESV(PL_beginav);
+    SAVEI32(PL_error_count);
 
     /* try to compile it */
 
@@ -2904,8 +2919,8 @@ PP(pp_require)
 
     sv = POPs;
     if (SvNIOKp(sv)) {
-	UV rev, ver, sver;
-	if (SvPOKp(sv)) {		/* require v5.6.1 */
+	if (SvPOK(sv) && SvNOK(sv)) {		/* require v5.6.1 */
+	    UV rev = 0, ver = 0, sver = 0;
 	    I32 len;
 	    U8 *s = (U8*)SvPVX(sv);
 	    U8 *end = (U8*)SvPVX(sv) + SvCUR(sv);
@@ -2917,24 +2932,19 @@ PP(pp_require)
 		    s += len;
 		    if (s < end)
 			sver = utf8_to_uv(s, &len);
-		    else
-			sver = 0;
 		}
-		else
-		    ver = 0;
 	    }
-	    else
-		rev = 0;
 	    if (PERL_REVISION < rev
 		|| (PERL_REVISION == rev
 		    && (PERL_VERSION < ver
 			|| (PERL_VERSION == ver
 			    && PERL_SUBVERSION < sver))))
 	    {
-		DIE(aTHX_ "Perl v%"UVuf".%"UVuf".%"UVuf" required--this is only version "
+		DIE(aTHX_ "Perl v%"UVuf".%"UVuf".%"UVuf" required--this is only "
 		    "v%d.%d.%d, stopped", rev, ver, sver, PERL_REVISION,
 		    PERL_VERSION, PERL_SUBVERSION);
 	    }
+	    RETPUSHYES;
 	}
 	else if (!SvPOKp(sv)) {			/* require 5.005_03 */
 	    if ((NV)PERL_REVISION + ((NV)PERL_VERSION/(NV)1000)
@@ -2948,12 +2958,23 @@ PP(pp_require)
 		NV nsver = (nver - ver) * 1000;
 		UV sver = (UV)(nsver + 0.0009);
 
-		DIE(aTHX_ "Perl v%"UVuf".%"UVuf".%"UVuf" required--this is only version "
-		    "v%d.%d.%d, stopped", rev, ver, sver, PERL_REVISION,
-		    PERL_VERSION, PERL_SUBVERSION);
+		/* help out with the "use 5.6" confusion */
+		if (sver == 0 && (rev > 5 || (rev == 5 && ver >= 100))) {
+		    DIE(aTHX_ "Perl v%"UVuf".%"UVuf".%"UVuf" required--"
+			"this is only v%d.%d.%d, stopped"
+			" (did you mean v%"UVuf".%"UVuf".0?)",
+			rev, ver, sver, PERL_REVISION, PERL_VERSION,
+			PERL_SUBVERSION, rev, ver/100);
+		}
+		else {
+		    DIE(aTHX_ "Perl v%"UVuf".%"UVuf".%"UVuf" required--"
+			"this is only v%d.%d.%d, stopped",
+			rev, ver, sver, PERL_REVISION, PERL_VERSION,
+			PERL_SUBVERSION);
+		}
 	    }
+	    RETPUSHYES;
 	}
-	RETPUSHYES;
     }
     name = SvPV(sv, len);
     if (!(name && len > 0 && *name))
@@ -3161,11 +3182,11 @@ PP(pp_require)
     PL_hints = 0;
     SAVESPTR(PL_compiling.cop_warnings);
     if (PL_dowarn & G_WARN_ALL_ON)
-        PL_compiling.cop_warnings = WARN_ALL ;
+        PL_compiling.cop_warnings = pWARN_ALL ;
     else if (PL_dowarn & G_WARN_ALL_OFF)
-        PL_compiling.cop_warnings = WARN_NONE ;
+        PL_compiling.cop_warnings = pWARN_NONE ;
     else 
-        PL_compiling.cop_warnings = WARN_STD ;
+        PL_compiling.cop_warnings = pWARN_STD ;
 
     if (filter_sub || filter_child_proc) {
 	SV *datasv = filter_add(run_user_filter, Nullsv);
@@ -3244,9 +3265,11 @@ PP(pp_entereval)
     SAVEHINTS();
     PL_hints = PL_op->op_targ;
     SAVESPTR(PL_compiling.cop_warnings);
-    if (!specialWARN(PL_compiling.cop_warnings)) {
-        PL_compiling.cop_warnings = newSVsv(PL_compiling.cop_warnings) ;
-        SAVEFREESV(PL_compiling.cop_warnings) ;
+    if (specialWARN(PL_curcop->cop_warnings))
+        PL_compiling.cop_warnings = PL_curcop->cop_warnings;
+    else {
+        PL_compiling.cop_warnings = newSVsv(PL_curcop->cop_warnings);
+        SAVEFREESV(PL_compiling.cop_warnings);
     }
 
     push_return(PL_op->op_next);

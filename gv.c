@@ -448,10 +448,10 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
 /*
 =for apidoc gv_stashpv
 
-Returns a pointer to the stash for a specified package.  If C<create> is
-set then the package will be created if it does not already exist.  If
-C<create> is not set and the package does not exist then NULL is
-returned.
+Returns a pointer to the stash for a specified package.  C<name> should
+be a valid UTF-8 string.  If C<create> is set then the package will be
+created if it does not already exist.  If C<create> is not set and the
+package does not exist then NULL is returned.
 
 =cut
 */
@@ -494,8 +494,8 @@ Perl_gv_stashpvn(pTHX_ const char *name, U32 namelen, I32 create)
 /*
 =for apidoc gv_stashsv
 
-Returns a pointer to the stash for a specified package.  See
-C<gv_stashpv>.
+Returns a pointer to the stash for a specified package, which must be a
+valid UTF-8 string.  See C<gv_stashpv>.
 
 =cut
 */
@@ -520,7 +520,6 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
     I32 len;
     register const char *namend;
     HV *stash = 0;
-    U32 add_gvflags = 0;
 
     if (*name == '*' && isALPHA(name[1])) /* accidental stringify on a GV? */
 	name++;
@@ -631,7 +630,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 			    sv_type == SVt_PVHV ? '%' : '$',
 			    name);
 			if (GvCVu(*gvp))
-			    Perl_warn(aTHX_ "(Did you mean &%s instead?)\n", name);
+			    Perl_warn(aTHX_ "\t(Did you mean &%s instead?)\n", name);
 			stash = 0;
 		    }
 		}
@@ -653,8 +652,10 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 		  : sv_type == SVt_PVAV ? "@"
 		  : sv_type == SVt_PVHV ? "%"
 		  : ""), name));
+	    stash = PL_nullstash;
 	}
-	return Nullgv;
+	else
+	    return Nullgv;
     }
 
     if (!SvREFCNT(stash))	/* symbol table under destruction */
@@ -680,7 +681,6 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	Perl_warner(aTHX_ WARN_INTERNAL, "Had to create %s unexpectedly", nambeg);
     gv_init(gv, stash, name, len, add & GV_ADDMULTI);
     gv_init_sv(gv, sv_type);
-    GvFLAGS(gv) |= add_gvflags;
 
     if (isLEXWARN_on && isALPHA(name[0]) && ! ckWARN(WARN_ONCE))
         GvMULTI_on(gv) ;

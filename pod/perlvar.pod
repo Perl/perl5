@@ -174,6 +174,8 @@ example:
 (Mnemonic: be positive and forward looking.)
 This variable is read-only and dynamically scoped to the current BLOCK.
 
+=item @LAST_MATCH_END
+
 =item @+
 
 This array holds the offsets of the ends of the last successful
@@ -412,6 +414,8 @@ channel.
 Used with formats.
 (Mnemonic: lines_on_page - lines_printed.)
 
+=item @LAST_MATCH_START
+
 =item @-
 
 $-[0] is the offset of the start of the last successful match.
@@ -439,17 +443,17 @@ After a match against some variable $var:
 
 =over 5
 
-=item C<$`> is the same as C<substr($var, 0, $-[0]>)
+=item C<$`> is the same as C<substr($var, 0, $-[0])>
 
-=item C<$&> is the same as C<substr($var, $-[0], $+[0] - $-[0]>) 
+=item C<$&> is the same as C<substr($var, $-[0], $+[0] - $-[0])>
 
-=item C<$'> is the same as C<substr($var, $+[0]>)
+=item C<$'> is the same as C<substr($var, $+[0])>
 
 =item C<$1> is the same as C<substr($var, $-[1], $+[1] - $-[1])>  
 
 =item C<$2> is the same as C<substr($var, $-[2], $+[2] - $-[2])>
 
-=item C<$3> is the same as C<substr $var, $-[3], $+[3] - $-[3]>) 
+=item C<$3> is the same as C<substr $var, $-[3], $+[3] - $-[3])>
 
 =back
 
@@ -814,7 +818,7 @@ Then
 
     $^M = 'a' x (1 << 16);
 
-would allocate a 64K buffer for use when in emergency.  See the
+would allocate a 64K buffer for use in an emergency.  See the
 F<INSTALL> file in the Perl distribution for information on how to
 enable this option.  To discourage casual use of this advanced
 feature, there is no L<English> long name for this variable.

@@ -181,6 +181,7 @@ struct block_loop {
     OP *	last_op;
 #ifdef USE_ITHREADS
     void *	iterdata;
+    SV **	oldcurpad;
 #else
     SV **	itervar;
 #endif
@@ -195,10 +196,11 @@ struct block_loop {
 #  define CxITERVAR(c)							\
 	((c)->blk_loop.iterdata						\
 	 ? (CxPADLOOP(cx) 						\
-	    ? &PL_curpad[(PADOFFSET)(c)->blk_loop.iterdata]		\
+	    ? &((c)->blk_loop.oldcurpad)[(PADOFFSET)(c)->blk_loop.iterdata]	\
 	    : &GvSV((GV*)(c)->blk_loop.iterdata))			\
 	 : (SV**)NULL)
 #  define CX_ITERDATA_SET(cx,idata)					\
+	cx->blk_loop.oldcurpad = PL_curpad;				\
 	if ((cx->blk_loop.iterdata = (idata)))				\
 	    cx->blk_loop.itersave = SvREFCNT_inc(*CxITERVAR(cx));
 #else

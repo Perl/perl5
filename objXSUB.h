@@ -229,6 +229,14 @@
 #undef  fprintf_nocontext
 #define fprintf_nocontext	Perl_fprintf_nocontext
 #endif
+#undef  Perl_cv_const_sv
+#define Perl_cv_const_sv	pPerl->Perl_cv_const_sv
+#undef  cv_const_sv
+#define cv_const_sv		Perl_cv_const_sv
+#undef  Perl_cv_undef
+#define Perl_cv_undef		pPerl->Perl_cv_undef
+#undef  cv_undef
+#define cv_undef		Perl_cv_undef
 #undef  Perl_cx_dump
 #define Perl_cx_dump		pPerl->Perl_cx_dump
 #undef  cx_dump
@@ -297,10 +305,18 @@
 #define Perl_do_binmode		pPerl->Perl_do_binmode
 #undef  do_binmode
 #define do_binmode		Perl_do_binmode
+#undef  Perl_do_close
+#define Perl_do_close		pPerl->Perl_do_close
+#undef  do_close
+#define do_close		Perl_do_close
 #if !defined(WIN32)
 #endif
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
 #endif
+#undef  Perl_do_join
+#define Perl_do_join		pPerl->Perl_do_join
+#undef  do_join
+#define do_join			Perl_do_join
 #undef  Perl_do_open
 #define Perl_do_open		pPerl->Perl_do_open
 #undef  do_open
@@ -687,6 +703,10 @@
 #define Perl_to_uni_lower_lc	pPerl->Perl_to_uni_lower_lc
 #undef  to_uni_lower_lc
 #define to_uni_lower_lc		Perl_to_uni_lower_lc
+#undef  Perl_is_utf8_char
+#define Perl_is_utf8_char	pPerl->Perl_is_utf8_char
+#undef  is_utf8_char
+#define is_utf8_char		Perl_is_utf8_char
 #undef  Perl_is_utf8_alnum
 #define Perl_is_utf8_alnum	pPerl->Perl_is_utf8_alnum
 #undef  is_utf8_alnum
@@ -1057,6 +1077,10 @@
 #define Perl_newSViv		pPerl->Perl_newSViv
 #undef  newSViv
 #define newSViv			Perl_newSViv
+#undef  Perl_newSVuv
+#define Perl_newSVuv		pPerl->Perl_newSVuv
+#undef  newSVuv
+#define newSVuv			Perl_newSVuv
 #undef  Perl_newSVnv
 #define Perl_newSVnv		pPerl->Perl_newSVnv
 #undef  newSVnv
@@ -1259,6 +1283,10 @@
 #define Perl_rninstr		pPerl->Perl_rninstr
 #undef  rninstr
 #define rninstr			Perl_rninstr
+#undef  Perl_rsignal
+#define Perl_rsignal		pPerl->Perl_rsignal
+#undef  rsignal
+#define rsignal			Perl_rsignal
 #if !defined(HAS_RENAME)
 #endif
 #undef  Perl_savepv
@@ -1841,6 +1869,10 @@
 #define Perl_vwarner		pPerl->Perl_vwarner
 #undef  vwarner
 #define vwarner			Perl_vwarner
+#undef  Perl_whichsig
+#define Perl_whichsig		pPerl->Perl_whichsig
+#undef  whichsig
+#define whichsig		Perl_whichsig
 #if defined(USE_PURE_BISON)
 #else
 #endif
@@ -2151,6 +2183,12 @@
 #define Perl_ptr_table_split	pPerl->Perl_ptr_table_split
 #undef  ptr_table_split
 #define ptr_table_split		Perl_ptr_table_split
+#endif
+#if defined(HAVE_INTERP_INTERN)
+#undef  Perl_sys_intern_init
+#define Perl_sys_intern_init	pPerl->Perl_sys_intern_init
+#undef  sys_intern_init
+#define sys_intern_init		Perl_sys_intern_init
 #endif
 #if defined(PERL_OBJECT)
 #else

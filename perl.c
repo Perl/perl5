@@ -272,10 +272,15 @@ perl_construct(pTHXx)
     PL_localpatches = local_patches;	/* For possible -v */
 #endif
 
+#ifdef HAVE_INTERP_INTERN
+    sys_intern_init();
+#endif
+
     PerlIO_init();			/* Hook to IO system */
 
     PL_fdpid = newAV();			/* for remembering popen pids by fd */
     PL_modglobal = newHV();		/* pointers to per-interpreter module globals */
+    PL_errors = newSVpvn("",0);
 
     ENTER;
 }
@@ -683,12 +688,12 @@ perl_destruct(pTHXx)
     SvREFCNT(&PL_sv_yes) = 0;
     sv_clear(&PL_sv_yes);
     SvANY(&PL_sv_yes) = NULL;
-    SvREADONLY_off(&PL_sv_yes);
+    SvFLAGS(&PL_sv_yes) = 0;
 
     SvREFCNT(&PL_sv_no) = 0;
     sv_clear(&PL_sv_no);
     SvANY(&PL_sv_no) = NULL;
-    SvREADONLY_off(&PL_sv_no);
+    SvFLAGS(&PL_sv_no) = 0;
 
     SvREFCNT(&PL_sv_undef) = 0;
     SvREADONLY_off(&PL_sv_undef);
@@ -764,7 +769,13 @@ perl_free(pTHXx)
 #if defined(PERL_OBJECT)
     PerlMem_free(this);
 #else
+#  if defined(PERL_IMPLICIT_SYS) && defined(WIN32)
+    void *host = w32_internal_host;
     PerlMem_free(aTHXx);
+    win32_delete_internal_host(host);
+#  else
+    PerlMem_free(aTHXx);
+#  endif
 #endif
 }
 
@@ -1932,7 +1943,7 @@ S_usage(pTHX_ char *name)		/* XXX move this out into a module ? */
 "-0[octal]       specify record separator (\\0, if no argument)",
 "-a              autosplit mode with -n or -p (splits $_ into @F)",
 "-C              enable native wide character system interfaces",
-"-c              check syntax only (runs BEGIN and END blocks)",
+"-c              check syntax only (runs BEGIN and CHECK blocks)",
 "-d[:debugger]   run program under debugger",
 "-D[number/list] set debugging flags (argument is a bit mask or alphabets)",
 "-e 'command'    one line of program (several -e's allowed, omit programfile)",
@@ -1960,9 +1971,11 @@ NULL
 };
     char **p = usage_msg;
 
-    printf("\nUsage: %s [switches] [--] [programfile] [arguments]", name);
+    PerlIO_printf(PerlIO_stdout(),
+		  "\nUsage: %s [switches] [--] [programfile] [arguments]",
+		  name);
     while (*p)
-	printf("\n  %s", *p++);
+	PerlIO_printf(PerlIO_stdout(), "\n  %s", *p++);
 }
 
 /* This routine handles any switches that can be given during run */
@@ -1977,6 +1990,7 @@ Perl_moreswitches(pTHX_ char *s)
     case '0':
     {
 	dTHR;
+	numlen = 0;			/* disallow underscores */
 	rschar = (U32)scan_oct(s, 4, &numlen);
 	SvREFCNT_dec(PL_nrs);
 	if (rschar & ~((U8)~0))
@@ -2092,6 +2106,7 @@ Perl_moreswitches(pTHX_ char *s)
 	if (isDIGIT(*s)) {
 	    PL_ors = savepv("\n");
 	    PL_orslen = 1;
+	    numlen = 0;			/* disallow underscores */
 	    *PL_ors = (char)scan_oct(s, 3 + (*s == '0'), &numlen);
 	    s += numlen;
 	}
@@ -2129,6 +2144,9 @@ Perl_moreswitches(pTHX_ char *s)
 		    sv_catpv( sv, " ()");
 		}
 	    } else {
+                if (s == start)
+                    Perl_croak(aTHX_ "Module name required with -%c option",
+			       s[-1]);
 		sv_catpvn(sv, start, s-start);
 		sv_catpv(sv, " split(/,/,q{");
 		sv_catpv(sv, ++s);
@@ -2169,57 +2187,75 @@ Perl_moreswitches(pTHX_ char *s)
 	s++;
 	return s;
     case 'v':
-	printf(Perl_form(aTHX_ "\nThis is perl, v%vd built for %s",
-			 PL_patchlevel, ARCHNAME));
+	PerlIO_printf(PerlIO_stdout(),
+		      Perl_form(aTHX_ "\nThis is perl, v%vd built for %s",
+				PL_patchlevel, ARCHNAME));
 #if defined(LOCAL_PATCH_COUNT)
 	if (LOCAL_PATCH_COUNT > 0)
-	    printf("\n(with %d registered patch%s, see perl -V for more detail)",
-		(int)LOCAL_PATCH_COUNT, (LOCAL_PATCH_COUNT!=1) ? "es" : "");
+	    PerlIO_printf(PerlIO_stdout(),
+			  "\n(with %d registered patch%s, "
+			  "see perl -V for more detail)",
+			  (int)LOCAL_PATCH_COUNT,
+			  (LOCAL_PATCH_COUNT!=1) ? "es" : "");
 #endif
 
-	printf("\n\nCopyright 1987-2000, Larry Wall\n");
+	PerlIO_printf(PerlIO_stdout(),
+		      "\n\nCopyright 1987-2000, Larry Wall\n");
 #ifdef MSDOS
-	printf("\nMS-DOS port Copyright (c) 1989, 1990, Diomidis Spinellis\n");
+	PerlIO_printf(PerlIO_stdout(),
+		      "\nMS-DOS port Copyright (c) 1989, 1990, Diomidis Spinellis\n");
 #endif
 #ifdef DJGPP
-	printf("djgpp v2 port (jpl5003c) by Hirofumi Watanabe, 1996\n");
-	printf("djgpp v2 port (perl5004+) by Laszlo Molnar, 1997-1999\n");
+	PerlIO_printf(PerlIO_stdout(),
+		      "djgpp v2 port (jpl5003c) by Hirofumi Watanabe, 1996\n"
+		      "djgpp v2 port (perl5004+) by Laszlo Molnar, 1997-1999\n");
 #endif
 #ifdef OS2
-	printf("\n\nOS/2 port Copyright (c) 1990, 1991, Raymond Chen, Kai Uwe Rommel\n"
-	    "Version 5 port Copyright (c) 1994-1999, Andreas Kaiser, Ilya Zakharevich\n");
+	PerlIO_printf(PerlIO_stdout(),
+		      "\n\nOS/2 port Copyright (c) 1990, 1991, Raymond Chen, Kai Uwe Rommel\n"
+		      "Version 5 port Copyright (c) 1994-1999, Andreas Kaiser, Ilya Zakharevich\n");
 #endif
 #ifdef atarist
-	printf("atariST series port, ++jrb  bammi@cadence.com\n");
+	PerlIO_printf(PerlIO_stdout(),
+		      "atariST series port, ++jrb  bammi@cadence.com\n");
 #endif
 #ifdef __BEOS__
-	printf("BeOS port Copyright Tom Spindler, 1997-1999\n");
+	PerlIO_printf(PerlIO_stdout(),
+		      "BeOS port Copyright Tom Spindler, 1997-1999\n");
 #endif
 #ifdef MPE
-	printf("MPE/iX port Copyright by Mark Klein and Mark Bixby, 1996-1999\n");
+	PerlIO_printf(PerlIO_stdout(),
+		      "MPE/iX port Copyright by Mark Klein and Mark Bixby, 1996-1999\n");
 #endif
 #ifdef OEMVS
-	printf("MVS (OS390) port by Mortice Kern Systems, 1997-1999\n");
+	PerlIO_printf(PerlIO_stdout(),
+		      "MVS (OS390) port by Mortice Kern Systems, 1997-1999\n");
 #endif
 #ifdef __VOS__
-	printf("Stratus VOS port by Paul_Green@stratus.com, 1997-1999\n");
+	PerlIO_printf(PerlIO_stdout(),
+		      "Stratus VOS port by Paul_Green@stratus.com, 1997-1999\n");
 #endif
 #ifdef __OPEN_VM
-	printf("VM/ESA port by Neale Ferguson, 1998-1999\n");
+	PerlIO_printf(PerlIO_stdout(),
+		      "VM/ESA port by Neale Ferguson, 1998-1999\n");
 #endif
 #ifdef POSIX_BC
-	printf("BS2000 (POSIX) port by Start Amadeus GmbH, 1998-1999\n");
+	PerlIO_printf(PerlIO_stdout(),
+		      "BS2000 (POSIX) port by Start Amadeus GmbH, 1998-1999\n");
 #endif
 #ifdef __MINT__
-	printf("MiNT port by Guido Flohr, 1997-1999\n");
+	PerlIO_printf(PerlIO_stdout(),
+		      "MiNT port by Guido Flohr, 1997-1999\n");
 #endif
 #ifdef EPOC
-	printf("EPOC port by Olaf Flebbe, 1999-2000\n");
+	PerlIO_printf(PerlIO_stdout(),
+		      "EPOC port by Olaf Flebbe, 1999-2000\n");
 #endif
 #ifdef BINARY_BUILD_NOTICE
 	BINARY_BUILD_NOTICE;
 #endif
-	printf("\n\
+	PerlIO_printf(PerlIO_stdout(),
+		      "\n\
 Perl may be copied only under the terms of either the Artistic License or the\n\
 GNU General Public License, which may be found in the Perl 5.0 source kit.\n\n\
 Complete documentation for Perl, including FAQ lists, should be found on\n\
@@ -2233,12 +2269,12 @@ Internet, point your browser at http://www.perl.com/, the Perl Home Page.\n\n");
 	return s;
     case 'W':
 	PL_dowarn = G_WARN_ALL_ON|G_WARN_ON; 
-	PL_compiling.cop_warnings = WARN_ALL ;
+	PL_compiling.cop_warnings = pWARN_ALL ;
 	s++;
 	return s;
     case 'X':
 	PL_dowarn = G_WARN_ALL_OFF; 
-	PL_compiling.cop_warnings = WARN_NONE ;
+	PL_compiling.cop_warnings = pWARN_NONE ;
 	s++;
 	return s;
     case '*':
@@ -2419,6 +2455,7 @@ S_init_main_stash(pTHX)
     CopSTASH_set(&PL_compiling, PL_defstash);
     PL_debstash = GvHV(gv_fetchpv("DB::", GV_ADDMULTI, SVt_PVHV));
     PL_globalstash = GvHV(gv_fetchpv("CORE::GLOBAL::", GV_ADDMULTI, SVt_PVHV));
+    PL_nullstash = GvHV(gv_fetchpv("<none>::", GV_ADDMULTI, SVt_PVHV));
     /* We must init $/ before switches are processed. */
     sv_setpvn(get_sv("/", TRUE), "\n", 1);
 }
@@ -2472,7 +2509,7 @@ S_open_script(pTHX_ char *scriptname, bool dosearch, SV *sv, int *fdscript)
 	sv_catpvn(sv, "-I", 2);
 	sv_catpv(sv,PRIVLIB_EXP);
 
-#ifdef MSDOS
+#if defined(MSDOS) || defined(WIN32)
 	Perl_sv_setpvf(aTHX_ cmd, "\
 sed %s -e \"/^[^#]/b\" \
  -e \"/^#[ 	]*include[ 	]/b\" \
@@ -2602,72 +2639,85 @@ S_fd_on_nosuid_fs(pTHX_ int fd)
  * an irrelevant filesystem while trying to reach the right one.
  */
 
-#   ifdef HAS_FSTATVFS
+#undef FD_ON_NOSUID_CHECK_OKAY  /* found the syscalls to do the check? */
+
+#   if !defined(FD_ON_NOSUID_CHECK_OKAY) && \
+        defined(HAS_FSTATVFS)
+#   define FD_ON_NOSUID_CHECK_OKAY
     struct statvfs stfs;
+
     check_okay = fstatvfs(fd, &stfs) == 0;
     on_nosuid  = check_okay && (stfs.f_flag  & ST_NOSUID);
-#   else
-#       ifdef PERL_MOUNT_NOSUID
-#           if defined(HAS_FSTATFS) && \
-	       defined(HAS_STRUCT_STATFS) && \
-	       defined(HAS_STRUCT_STATFS_F_FLAGS)
+#   endif /* fstatvfs */
+ 
+#   if !defined(FD_ON_NOSUID_CHECK_OKAY) && \
+        defined(PERL_MOUNT_NOSUID)	&& \
+        defined(HAS_FSTATFS) 		&& \
+        defined(HAS_STRUCT_STATFS)	&& \
+        defined(HAS_STRUCT_STATFS_F_FLAGS)
+#   define FD_ON_NOSUID_CHECK_OKAY
     struct statfs  stfs;
+
     check_okay = fstatfs(fd, &stfs)  == 0;
     on_nosuid  = check_okay && (stfs.f_flags & PERL_MOUNT_NOSUID);
-#           else
-#               if defined(HAS_FSTAT) && \
-		   defined(HAS_USTAT) && \
-		   defined(HAS_GETMNT) && \
-		   defined(HAS_STRUCT_FS_DATA) && \
-		   defined(NOSTAT_ONE)
+#   endif /* fstatfs */
+
+#   if !defined(FD_ON_NOSUID_CHECK_OKAY) && \
+        defined(PERL_MOUNT_NOSUID)	&& \
+        defined(HAS_FSTAT)		&& \
+        defined(HAS_USTAT)		&& \
+        defined(HAS_GETMNT)		&& \
+        defined(HAS_STRUCT_FS_DATA)	&& \
+        defined(NOSTAT_ONE)
+#   define FD_ON_NOSUID_CHECK_OKAY
     struct stat fdst;
+
     if (fstat(fd, &fdst) == 0) {
-	struct ustat us;
-	if (ustat(fdst.st_dev, &us) == 0) {
-	    struct fs_data fsd;
-	    /* NOSTAT_ONE here because we're not examining fields which
-	     * vary between that case and STAT_ONE. */
+        struct ustat us;
+        if (ustat(fdst.st_dev, &us) == 0) {
+            struct fs_data fsd;
+            /* NOSTAT_ONE here because we're not examining fields which
+             * vary between that case and STAT_ONE. */
             if (getmnt((int*)0, &fsd, (int)0, NOSTAT_ONE, us.f_fname) == 0) {
-		size_t cmplen = sizeof(us.f_fname);
-		if (sizeof(fsd.fd_req.path) < cmplen)
-		    cmplen = sizeof(fsd.fd_req.path);
-		if (strnEQ(fsd.fd_req.path, us.f_fname, cmplen) &&
-		    fdst.st_dev == fsd.fd_req.dev) {
-			check_okay = 1;
-			on_nosuid = fsd.fd_req.flags & PERL_MOUNT_NOSUID;
-		    }
-		}
-	    }
-	}
+                size_t cmplen = sizeof(us.f_fname);
+                if (sizeof(fsd.fd_req.path) < cmplen)
+                    cmplen = sizeof(fsd.fd_req.path);
+                if (strnEQ(fsd.fd_req.path, us.f_fname, cmplen) &&
+                    fdst.st_dev == fsd.fd_req.dev) {
+                        check_okay = 1;
+                        on_nosuid = fsd.fd_req.flags & PERL_MOUNT_NOSUID;
+                    }
+                }
+            }
+        }
     }
-#               endif /* fstat+ustat+getmnt */
-#           endif /* fstatfs */
-#       else
-#           if defined(HAS_GETMNTENT) && \
-	       defined(HAS_HASMNTOPT) && \
-	       defined(MNTOPT_NOSUID)
-    FILE		*mtab = fopen("/etc/mtab", "r");
-    struct mntent	*entry;
-    struct stat		stb, fsb;
+#   endif /* fstat+ustat+getmnt */
+
+#   if !defined(FD_ON_NOSUID_CHECK_OKAY) && \
+        defined(HAS_GETMNTENT)		&& \
+        defined(HAS_HASMNTOPT)		&& \
+        defined(MNTOPT_NOSUID)
+#   define FD_ON_NOSUID_CHECK_OKAY
+    FILE                *mtab = fopen("/etc/mtab", "r");
+    struct mntent       *entry;
+    struct stat         stb, fsb;
 
     if (mtab && (fstat(fd, &stb) == 0)) {
-	while (entry = getmntent(mtab)) {
-	    if (stat(entry->mnt_dir, &fsb) == 0
-		&& fsb.st_dev == stb.st_dev)
-	    {
-		/* found the filesystem */
-		check_okay = 1;
-		if (hasmntopt(entry, MNTOPT_NOSUID))
-		    on_nosuid = 1;
-		break;
-	    } /* A single fs may well fail its stat(). */
-	}
+        while (entry = getmntent(mtab)) {
+            if (stat(entry->mnt_dir, &fsb) == 0
+                && fsb.st_dev == stb.st_dev)
+            {
+                /* found the filesystem */
+                check_okay = 1;
+                if (hasmntopt(entry, MNTOPT_NOSUID))
+                    on_nosuid = 1;
+                break;
+            } /* A single fs may well fail its stat(). */
+        }
     }
     if (mtab)
-	fclose(mtab);
-#           endif /* getmntent+hasmntopt */
-#       endif /* PERL_MOUNT_NOSUID: fstatfs or fstat+ustat+statfs */
-#   endif /* statvfs */
+        fclose(mtab);
+#   endif /* getmntent+hasmntopt */
 
     if (!check_okay) 
 	Perl_croak(aTHX_ "Can't check filesystem of script \"%s\" for nosuid", PL_origfilename);
@@ -3174,7 +3224,7 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	    SV *sv = newSVpv(argv[0],0);
 	    av_push(GvAVn(PL_argvgv),sv);
 	    if (PL_widesyscalls)
-		sv_utf8_upgrade(sv);
+		(void)sv_utf8_decode(sv);
 	}
     }
     if ((PL_envgv = gv_fetchpv("ENV",TRUE, SVt_PVHV))) {
@@ -3299,6 +3349,10 @@ S_init_perllib(pTHX)
 
 #ifdef PERL_VENDORLIB_STEM /* Search for version-specific dirs below here */
     incpush(PERL_VENDORLIB_STEM, FALSE, TRUE);
+#endif
+
+#ifdef PERL_OTHERLIBDIRS
+    incpush(PERL_OTHERLIBDIRS, TRUE, TRUE);
 #endif
 
     if (!PL_tainting)

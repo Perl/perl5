@@ -479,6 +479,20 @@ Perl_sv_setpvf_mg_nocontext(SV* sv, const char* pat, ...)
 #undef  Perl_fprintf_nocontext
 #endif
 
+#undef  Perl_cv_const_sv
+SV*
+Perl_cv_const_sv(pTHXo_ CV* cv)
+{
+    return ((CPerlObj*)pPerl)->Perl_cv_const_sv(cv);
+}
+
+#undef  Perl_cv_undef
+void
+Perl_cv_undef(pTHXo_ CV* cv)
+{
+    ((CPerlObj*)pPerl)->Perl_cv_undef(cv);
+}
+
 #undef  Perl_cx_dump
 void
 Perl_cx_dump(pTHXo_ PERL_CONTEXT* cs)
@@ -602,14 +616,28 @@ Perl_dounwind(pTHXo_ I32 cxix)
 
 #undef  Perl_do_binmode
 int
-Perl_do_binmode(pTHXo_ PerlIO *fp, int iotype, int flag)
+Perl_do_binmode(pTHXo_ PerlIO *fp, int iotype, int mode)
 {
-    return ((CPerlObj*)pPerl)->Perl_do_binmode(fp, iotype, flag);
+    return ((CPerlObj*)pPerl)->Perl_do_binmode(fp, iotype, mode);
+}
+
+#undef  Perl_do_close
+bool
+Perl_do_close(pTHXo_ GV* gv, bool not_implicit)
+{
+    return ((CPerlObj*)pPerl)->Perl_do_close(gv, not_implicit);
 }
 #if !defined(WIN32)
 #endif
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
 #endif
+
+#undef  Perl_do_join
+void
+Perl_do_join(pTHXo_ SV* sv, SV* del, SV** mark, SV** sp)
+{
+    ((CPerlObj*)pPerl)->Perl_do_join(sv, del, mark, sp);
+}
 
 #undef  Perl_do_open
 bool
@@ -1288,6 +1316,13 @@ Perl_to_uni_lower_lc(pTHXo_ U32 c)
     return ((CPerlObj*)pPerl)->Perl_to_uni_lower_lc(c);
 }
 
+#undef  Perl_is_utf8_char
+int
+Perl_is_utf8_char(pTHXo_ U8 *p)
+{
+    return ((CPerlObj*)pPerl)->Perl_is_utf8_char(p);
+}
+
 #undef  Perl_is_utf8_alnum
 bool
 Perl_is_utf8_alnum(pTHXo_ U8 *p)
@@ -1935,6 +1970,13 @@ Perl_newSViv(pTHXo_ IV i)
     return ((CPerlObj*)pPerl)->Perl_newSViv(i);
 }
 
+#undef  Perl_newSVuv
+SV*
+Perl_newSVuv(pTHXo_ UV u)
+{
+    return ((CPerlObj*)pPerl)->Perl_newSVuv(u);
+}
+
 #undef  Perl_newSVnv
 SV*
 Perl_newSVnv(pTHXo_ NV n)
@@ -2307,6 +2349,13 @@ char*
 Perl_rninstr(pTHXo_ const char* big, const char* bigend, const char* little, const char* lend)
 {
     return ((CPerlObj*)pPerl)->Perl_rninstr(big, bigend, little, lend);
+}
+
+#undef  Perl_rsignal
+Sighandler_t
+Perl_rsignal(pTHXo_ int i, Sighandler_t t)
+{
+    return ((CPerlObj*)pPerl)->Perl_rsignal(i, t);
 }
 #if !defined(HAS_RENAME)
 #endif
@@ -3331,6 +3380,13 @@ Perl_vwarner(pTHXo_ U32 err, const char* pat, va_list* args)
 {
     ((CPerlObj*)pPerl)->Perl_vwarner(err, pat, args);
 }
+
+#undef  Perl_whichsig
+I32
+Perl_whichsig(pTHXo_ char* sig)
+{
+    return ((CPerlObj*)pPerl)->Perl_whichsig(sig);
+}
 #if defined(USE_PURE_BISON)
 #else
 #endif
@@ -3885,6 +3941,15 @@ void
 Perl_ptr_table_split(pTHXo_ PTR_TBL_t *tbl)
 {
     ((CPerlObj*)pPerl)->Perl_ptr_table_split(tbl);
+}
+#endif
+#if defined(HAVE_INTERP_INTERN)
+
+#undef  Perl_sys_intern_init
+void
+Perl_sys_intern_init(pTHXo)
+{
+    ((CPerlObj*)pPerl)->Perl_sys_intern_init();
 }
 #endif
 #if defined(PERL_OBJECT)

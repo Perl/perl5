@@ -382,6 +382,8 @@ START_EXTERN_C
 #define PL_nthreads		(*Perl_Inthreads_ptr(aTHXo))
 #undef  PL_nthreads_cond
 #define PL_nthreads_cond	(*Perl_Inthreads_cond_ptr(aTHXo))
+#undef  PL_nullstash
+#define PL_nullstash		(*Perl_Inullstash_ptr(aTHXo))
 #undef  PL_numeric_local
 #define PL_numeric_local	(*Perl_Inumeric_local_ptr(aTHXo))
 #undef  PL_numeric_name

@@ -114,6 +114,7 @@ The file Mytest.pm should start with something like this:
 	package Mytest;
 
 	use strict;
+        use warnings;
 
 	require Exporter;
 	require DynaLoader;
@@ -475,7 +476,7 @@ section on the argument stack.
 In general, it's not a good idea to write extensions that modify their input
 parameters, as in Example 3.  Instead, you should probably return multiple
 values in an array and let the caller handle them (we'll do this in a later
-example).  However, in order to better accomodate calling pre-existing C
+example).  However, in order to better accommodate calling pre-existing C
 routines, which often do modify their input parameters, this behavior is
 tolerated.
 
@@ -905,7 +906,7 @@ to assist in making the interface between Perl and your extension simpler
 or easier to understand.  These routines should live in the .pm file.
 Whether they are automatically loaded when the extension itself is loaded
 or only loaded when called depends on where in the .pm file the subroutine
-definition is placed.  You can also consult L<Autoloader> for an alternate
+definition is placed.  You can also consult L<AutoLoader> for an alternate
 way to store and load your extra subroutines.
 
 =head2 Documenting your Extension

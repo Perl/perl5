@@ -289,7 +289,7 @@ than the PERL_BADLANG approach, but setting LC_ALL (or
 other locale variables) may affect other programs as well, not just
 Perl.  In particular, external programs run from within Perl will see
 these changes.  If you make the new settings permanent (read on), all
-programs you run see the changes.  See L<ENVIRONMENT> for for
+programs you run see the changes.  See L<ENVIRONMENT> for
 the full list of relevant environment variables and L<USING LOCALES>
 for their effects in Perl.  Effects in other programs are 
 easily deducible.  For example, the variable LC_COLLATE may well affect
@@ -332,9 +332,9 @@ Second, if using the listed commands you see something B<exactly>
 (prefix matches do not count and case usually counts) like "En_US"
 without the quotes, then you should be okay because you are using a
 locale name that should be installed and available in your system.
-In this case, see L<Permanently fixing system locale configuration>.
+In this case, see L<Permanently fixing your system's locale configuration>.
 
-=head2 Permanently fixing your locale configuration
+=head2 Permanently fixing your system's locale configuration
 
 This is when you see something like:
 

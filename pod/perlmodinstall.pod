@@ -91,6 +91,11 @@ While still in that directory, type:
 Make sure you have appropriate permissions to install the module
 in your Perl 5 library directory.  Often, you'll need to be root.
 
+Perl maintains a record of all module installations.  To look at
+this list, simply type:
+
+      perldoc perllocal
+
 That's all you need to do on Unix systems with dynamic linking.
 Most Unix systems have dynamic linking--if yours doesn't, or if for
 another reason you have a statically-linked perl, I<and> the
@@ -183,7 +188,7 @@ A. DECOMPRESS
 In general, all Macintosh decompression utilities mentioned here
 can be found in the Info-Mac Hyperarchive
 ( http://hyperarchive.lcs.mit.edu/HyperArchive.html ).
-Specificly the "Commpress & Translate" listing
+Specifically the "Compress & Translate" listing
 ( http://hyperarchive.lcs.mit.edu/HyperArchive/Abstracts/cmp/HyperArchive.html ).
 
 

@@ -1,8 +1,13 @@
 #!./perl
 
+BEGIN {
+    chdir 't' if -d 't';
+    unshift @INC, '../lib';
+}    
+
 # $RCSfile$    
 $|  = 1;
-$^W = 1;
+use warnings;
 $Is_VMS = $^O eq 'VMS';
 
 print "1..66\n";

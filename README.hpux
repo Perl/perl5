@@ -14,9 +14,9 @@ runs.
 
 =head2 Compiling Perl 5 on HP-UX
 
-When compiling Perl, the use of an ANSI C compiler is highly recommended.
-The C compiler that ships with all HP-UX systems is a K&R compiler that
-should only be used to build new kernels.
+An ANSI C compiler is required to build Perl.  The C compiler that ships
+with all HP-UX systems is a K&R compiler that can only be used to build
+new kernels.
 
 Perl can be compiled with either HP's ANSI C compiler or with gcc.  The
 former is recommended, as not only can it compile Perl with no difficulty,
@@ -69,7 +69,7 @@ The following systems contain PA-RISC 2.0 chips (this is very likely to be
 out of date):
 
     D270, D280, D370, D380, K250, K260, K370, K380, K450, K460, K570, K580,
-    T600, V2200
+    T600, V2200, N-class
 
 A complete list of models at the time the OS was built is in the file
 /opt/langtools/lib/sched.models.
@@ -116,7 +116,7 @@ If these dependent libraries are not listed at shared library creation
 time, you will get fatal "Unresolved symbol" errors at run time when the
 library is loaded.
 
-You may create a shared library that referers to another library, which
+You may create a shared library that refers to another library, which
 may be either an archive library or a shared library.  If it is a
 shared library, this is called a "dependent library".
 The dependent library's name is recorded in the main shared library,
@@ -144,19 +144,21 @@ Beginning with HP-UX version 10.20, files larger than 2GB (2^31) may be
 created and manipulated.
 Three separate methods of doing this are available.
 Of these methods,
-the best method for Perl is to compile using the -D_FILE_OFFSET_BITS=64
-compiler flag.
+the best method for Perl is to compile using the -Duselargefiles
+flag to Configure.
+This will cause the -D_FILE_OFFSET_BITS=64 compiler flag to be used
+when building Perl.
 This causes Perl to be compiled using structures and functions in which
 these are 64 bits wide, rather than 32 bits wide.
+(Note that this will only work with HP's ANSI C compiler.
+If you want to compile Perl using gcc, you will have to get a version
+of the compiler that support 64-bit operations.)
 
-There are only two drawbacks to this approach:
-the first is that the seek and tell functions (both the builtin version
-and the POSIX module's version) will not correctly
-function for these large files
-(the offset arguments in seek and tell are implemented as type long).
-The second is that any extension which calls any file-manipulating C function
-will need to be recompiled using the above-mentioned -D_FILE_OFFSET_BITS=64
-flag.
+The one drawback to this approach is that
+any extension which calls any file-manipulating C function
+will need to be recompiled
+(just follow the usual "perl Makefile.PL; make; make test; make install"
+procedure).
 The list of functions that will need to recompiled is:
 creat,		fgetpos,	fopen,
 freopen,	fsetpos,	fstat,
@@ -178,7 +180,8 @@ Ensure that the -D_POSIX_C_SOURCE=199506L compiler flag is automatically
 added to the list of flags.  Also make sure that -lpthread is listed before
 -lc in the list of libraries to link Perl with.
 
-As of the date of this document, Perl threads are not fully supported on HP-UX.
+As of the date of this document,
+Perl threads are not fully supported on HP-UX.
 
 =head2 64-bit Perl
 
@@ -193,12 +196,25 @@ numbers larger than 2^32 with complete precision.
 As of the date of this document, Perl is not 64-bit compliant on HP-UX.
 
 Should a user wish to experiment with compiling Perl in the LP64 environment,
-the following steps must be taken: libraries must be searched only within
-/lib/pa20_64, the compiler flag +DD64 must be used, and the C library is
-now located at /lib/pa20_64/libc.sl.
+use the -Duse64bitall flag to Configure.
+This will force Perl to be compiled in a pure LP64 environment (via the
++DD64 flag).
 
-On the brighter side, the large file problem goes away, as longs are now
-64 bits wide.
+You can also use the -Duse64bitint flag to Configure.
+Although there are some minor differences between compiling Perl with
+this flag versus the -Duse64bitall flag,
+they should not be noticeable from a Perl user's perspective.
+
+In both cases, it is strongly recommended that you use these flags
+when you run Configure.
+If you do not use them, but answer the questions about 64-bit numbers
+when Configure asks you,
+you may get a configuration that cannot be compiled, or that does
+not function as expected.
+
+(Note that these Configure flags will only work with HP's ANSI C compiler.
+If you want to compile Perl using gcc, you will have to get a version
+of the compiler that support 64-bit operations.)
 
 =head2 GDBM and Threads
 
@@ -221,6 +237,6 @@ With much assistance regarding shared libraries from Marc Sabatella.
 
 =head1 DATE
 
-Version 0.2: 1999/03/01
+Version 0.3: 2000/03/31
 
 =cut

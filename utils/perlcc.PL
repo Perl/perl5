@@ -390,10 +390,16 @@ sub _ccharness
     @$libs = grep { !(/DynaLoader\.a$/ && ($dynaloader = $_)) } @$libs
 	if($^O eq 'cygwin');
 
+    my $args = "@args";
+    if ($^O eq 'MSWin32' && $Config{cc} =~ /^bcc/i) {
+        # BC++ cmd line syntax does not allow space between -[oexz...] and arg
+        $args =~ s/(^|\s+)-([oe])\s+/$1-$2/g;
+    }
+
     my $ccflags = $Config{ccflags};
     $ccflags .= ' -DUSEIMPORTLIB' if $^O eq 'cygwin';
     my $cccmd = "$Config{cc} $ccflags $optimize $incdir "
-		."@args $dynaloader $linkargs @$libs";
+		."$args $dynaloader $linkargs @$libs";
 
     _print ("$cccmd\n", 36);
     _run("$cccmd", 18 );

@@ -130,6 +130,7 @@ L<perlref/Pseudo-hashes: Using an array as a hash>
 use 5.005_64;
 use strict;
 no strict 'refs';
+use warnings::register;
 our(%attr, $VERSION);
 
 $VERSION = "1.01";
@@ -171,7 +172,8 @@ sub import {
 	if ($fno and $fno != $next) {
 	    require Carp;
             if ($fno < $fattr->[0]) {
-                Carp::carp("Hides field '$f' in base class") if $^W;
+                warnings::warn("Hides field '$f' in base class") 
+		    if warnings::enabled();
             } else {
                 Carp::croak("Field name '$f' already in use");
             }

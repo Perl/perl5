@@ -46,7 +46,7 @@ constant(char *name, int arg)
     errno = 0;
     switch (*name) {
     case '_':
-	if (strEQ(name, "_S_IFMT")) /* Yes, _S_IFMT. */
+	if (strEQ(name, "_S_IFMT")) /* Yes, on name _S_IFMT return S_IFMT. */
 #ifdef S_IFMT
 	  return S_IFMT;
 #else
@@ -476,9 +476,27 @@ constant(char *name, int arg)
 #else
 	        goto not_there;
 #endif
+	    if (strEQ(name, "O_NOINHERIT"))
+#ifdef O_NOINHERIT
+	        return O_NOINHERIT;
+#else
+	        goto not_there;
+#endif
 	    if (strEQ(name, "O_NONBLOCK"))
 #ifdef O_NONBLOCK
 	        return O_NONBLOCK;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "O_RANDOM"))
+#ifdef O_RANDOM
+	        return O_RANDOM;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "O_RAW"))
+#ifdef O_RAW
+	        return O_RAW;
 #else
 	        goto not_there;
 #endif
@@ -497,6 +515,12 @@ constant(char *name, int arg)
 	    if (strEQ(name, "O_RSYNC"))
 #ifdef O_RSYNC
 	        return O_RSYNC;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "O_SEQUENTIAL"))
+#ifdef O_SEQUENTIAL
+	        return O_SEQUENTIAL;
 #else
 	        goto not_there;
 #endif

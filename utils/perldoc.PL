@@ -38,6 +38,7 @@ INIT { eval { umask(0077) } }   # doubtless someone has no mask
 
 my \@pagers = ();
 push \@pagers, "$Config{'pager'}" if -x "$Config{'pager'}";
+my \$bindir = "$Config{installscript}";
 
 !GROK!THIS!
 
@@ -48,6 +49,7 @@ print OUT <<'!NO!SUBS!';
 use Fcntl;    # for sysopen
 use Getopt::Std;
 use Config '%Config';
+use File::Spec::Functions qw(catfile splitdir);
 
 #
 # Perldoc revision #1 -- look up a piece of documentation in .pod format that
@@ -80,14 +82,6 @@ my $Is_VMS = $^O eq 'VMS';
 my $Is_MSWin32 = $^O eq 'MSWin32';
 my $Is_Dos = $^O eq 'dos';
 
-# refuse to run if we should be tainting and aren't
-# (but regular users deserve protection too, though!)
-if (!($Is_VMS || $Is_MSWin32 || $Is_Dos) && ($> == 0 || $< == 0)
-     && !am_taint_checking()) 
-{ 
-    die "Superuser must not run $0 without security audit and taint checks.\n";
-} 
-
 sub usage{
     warn "@_\n" if @_;
     # Erase evidence of previous errors (if any), so exit status is simple.
@@ -111,6 +105,7 @@ Options:
     -v	 Verbosely describe what's going on
     -X	 use index if present (looks for pod.idx at $Config{archlib})
     -q   Search the text of questions (not answers) in perlfaq[1-9]
+    -U	 Run in insecure mode (superuser only)
 
 PageName|ModuleName...
          is the name of a piece of documentation that you want to look at. You
@@ -140,7 +135,7 @@ if (defined $ENV{"PERLDOC"}) {
 }
 !NO!SUBS!
 
-my $getopts = "mhtluvriFf:Xq:n:";
+my $getopts = "mhtluvriFf:Xq:n:U";
 print OUT <<"!GET!OPTS!";
 
 use vars qw( @{[map "\$opt_$_", ($getopts =~ /\w/g)]} );
@@ -151,6 +146,25 @@ getopts("$getopts") || usage;
 print OUT <<'!NO!SUBS!';
 
 usage if $opt_h;
+
+# refuse to run if we should be tainting and aren't
+# (but regular users deserve protection too, though!)
+if (!($Is_VMS || $Is_MSWin32 || $Is_Dos) && ($> == 0 || $< == 0)
+     && !am_taint_checking()) 
+{{
+    if ($opt_U) {
+        my $id = eval { getpwnam("nobody") };
+           $id = eval { getpwnam("nouser") } unless defined $id;
+           $id = -2 unless defined $id;
+        eval {
+            $> = $id;  # must do this one first!
+            $< = $id;
+        };
+        last if !$@ && $< && $>;
+    }
+    die "Superuser must not run $0 without security audit and taint checks.\n";
+}}
+
 $opt_n = "nroff" if !$opt_n;
 
 my $podidx;
@@ -190,7 +204,8 @@ if (-f "Makefile.PL") {
 
     # don't add if superuser
     if ($< && $>) {   # don't be looking too hard now!
-	eval q{ use blib; 1 } or die;
+	eval q{ use blib; 1 };
+	warn $@ if $@ && $opt_v;
     }
 }
 
@@ -211,7 +226,7 @@ sub containspod {
 
 sub minus_f_nocase {
      my($dir,$file) = @_;
-     my $path = join('/',$dir,$file);	# XXX: dirseps
+     my $path = catfile($dir,$file);
      return $path if -f $path and -r _;
      if (!$opt_i or $Is_VMS or $Is_MSWin32 or $Is_Dos or $^O eq 'os2') {
         # on a case-forgiving file system or if case is important
@@ -225,13 +240,13 @@ sub minus_f_nocase {
      local($")="/";
      my @p = ($dir);
      my($p,$cip);
-     foreach $p (split(m!/!, $file)){	# XXX: dirseps
-	my $try = "@p/$p";
+     foreach $p (splitdir $file){
+	my $try = catfile @p, $p;
 	stat $try;
  	if (-d _) {
  	    push @p, $p;
 	    if ( $p eq $global_target) {
-		my $tmp_path = join ('/', @p);  # XXX: dirseps
+		my $tmp_path = catfile @p;
 		my $path_f = 0;
 		for (@global_found) {
 		    $path_f = 1 if $_ eq $tmp_path;
@@ -290,7 +305,7 @@ sub searchfor {
     my $ret;
     my $i;
     my $dir;
-    $global_target = (split(m!/!, $s))[-1];   # XXX: dirseps
+    $global_target = (splitdir $s)[-1];   # XXX: why not use File::Basename?
     for ($i=0; $i<@dirs; $i++) {
 	$dir = $dirs[$i];
 	($dir = VMS::Filespec::unixpath($dir)) =~ s!/\z!! if $Is_VMS;
@@ -313,10 +328,10 @@ sub searchfor {
 
 	if ($recurse) {
 	    opendir(D,$dir)	or die "Can't opendir $dir: $!";
-	    my @newdirs = map "$dir/$_", grep {  # XXX: dirseps
+	    my @newdirs = map catfile($dir, $_), grep {
 		not /^\.\.?\z/s and
 		not /^auto\z/s  and   # save time! don't search auto dirs
-		-d  "$dir/$_"  # XXX: dirseps
+		-d  catfile($dir, $_)
 	    } readdir D;
 	    closedir(D)		or die "Can't closedir $dir: $!";
 	    next unless @newdirs;
@@ -350,7 +365,7 @@ sub printout {
 	close OUT   or die "can't close $tmp: $!";
     }
     elsif (not $opt_u) {
-	my $cmd = "pod2man --lax $file | $opt_n -man";
+	my $cmd = catfile($bindir, 'pod2man') . " --lax $file | $opt_n -man";
 	$cmd .= " | col -x" if $^O =~ /hpux/;
 	my $rslt = `$cmd`;
 	$rslt = filter_nroff($rslt) if $filter;
@@ -413,8 +428,7 @@ sub cleanup {
 my @found;
 foreach (@pages) {
     if ($podidx && open(PODIDX, $podidx)) {
-	my $searchfor = $_;
-	$searchfor =~ s,::,/,g;	    # XXX: dirseps
+	my $searchfor = catfile split '::';
 	print STDERR "Searching for '$searchfor' in $podidx\n" if $opt_v;
 	local $_;
 	while (<PODIDX>) {
@@ -742,6 +756,15 @@ The B<-X> option looks for a entry whose basename matches the name given on the
 command line in the file C<$Config{archlib}/pod.idx>.  The pod.idx file should
 contain fully qualified filenames, one per line.
 
+=item B<-U> run insecurely
+
+Because B<perldoc> does not run properly tainted, and is known to
+have security issues, it will not normally execute as the superuser.
+If you use the B<-U> flag, it will do so, but only after setting
+the effective and real IDs to nobody's or nouser's account, or -2
+if unavailable.  If it cannot relinguish its privileges, it will not
+run.  
+
 =item B<PageName|ModuleName|ProgramName>
 
 The item you want to look up.  Nested modules (such as C<File::Basename>)
@@ -769,7 +792,7 @@ One useful value for C<PERLDOC_PAGER> is C<less -+C -E>.
 
 =head1 VERSION
 
-This is perldoc v2.01.
+This is perldoc v2.03.
 
 =head1 AUTHOR
 
@@ -781,6 +804,12 @@ and others.
 =cut
 
 #
+# Version 2.03: Sun Apr 23 16:56:34 BST 2000
+#	Hugo van der Sanden <hv@crypt0.demon.co.uk>
+#	don't die when 'use blib' fails
+# Version 2.02: Mon Mar 13 18:03:04 MST 2000
+#       Tom Christiansen <tchrist@perl.com>
+#	Added -U insecurity option
 # Version 2.01: Sat Mar 11 15:22:33 MST 2000 
 #       Tom Christiansen <tchrist@perl.com>, querulously.
 #       Security and correctness patches.

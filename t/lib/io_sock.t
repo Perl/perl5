@@ -148,7 +148,7 @@ if($pid = fork()) {
     }
 
     # some machines seem to suffer from a race condition here
-#    sleep(1);
+    sleep(1);
 
     $sock = IO::Socket->new(Domain => AF_INET,
                             PeerAddr => "localhost:$port");

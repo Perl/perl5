@@ -1515,6 +1515,7 @@ Perl_vdie(pTHX_ const char* pat, va_list *args)
 	    SV *msg;
 
 	    ENTER;
+	    save_re_context();
 	    if (message) {
 		msg = newSVpvn(message, msglen);
 		SvREADONLY_on(msg);
@@ -1604,6 +1605,7 @@ Perl_vcroak(pTHX_ const char* pat, va_list *args)
 	    SV *msg;
 
 	    ENTER;
+	    save_re_context();
 	    msg = newSVpvn(message, msglen);
 	    SvREADONLY_on(msg);
 	    SAVEFREESV(msg);
@@ -1697,6 +1699,7 @@ Perl_vwarn(pTHX_ const char* pat, va_list *args)
 	    SV *msg;
 
 	    ENTER;
+	    save_re_context();
 	    msg = newSVpvn(message, msglen);
 	    SvREADONLY_on(msg);
 	    SAVEFREESV(msg);
@@ -1810,15 +1813,17 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
                 SV *msg;
  
                 ENTER;
+		save_re_context();
                 msg = newSVpvn(message, msglen);
                 SvREADONLY_on(msg);
                 SAVEFREESV(msg);
  
+		PUSHSTACKi(PERLSI_DIEHOOK);
                 PUSHMARK(sp);
                 XPUSHs(msg);
                 PUTBACK;
                 call_sv((SV*)cv, G_DISCARD);
- 
+		POPSTACK;
                 LEAVE;
             }
         }
@@ -1843,21 +1848,23 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
             SAVESPTR(PL_warnhook);
             PL_warnhook = Nullsv;
             cv = sv_2cv(oldwarnhook, &stash, &gv, 0);
-                LEAVE;
+	    LEAVE;
             if (cv && !CvDEPTH(cv) && (CvROOT(cv) || CvXSUB(cv))) {
                 dSP;
                 SV *msg;
  
                 ENTER;
+		save_re_context();
                 msg = newSVpvn(message, msglen);
                 SvREADONLY_on(msg);
                 SAVEFREESV(msg);
  
+		PUSHSTACKi(PERLSI_WARNHOOK);
                 PUSHMARK(sp);
                 XPUSHs(msg);
                 PUTBACK;
                 call_sv((SV*)cv, G_DISCARD);
- 
+		POPSTACK;
                 LEAVE;
                 return;
             }
@@ -2870,9 +2877,13 @@ Perl_scan_bin(pTHX_ char *start, I32 len, I32 *retlen)
 
     for (; len-- && *s; s++) {
 	if (!(*s == '0' || *s == '1')) {
-	    if (*s == '_')
-		continue; /* Note: does not check for __ and the like. */
-	    if (seenb == FALSE && *s == 'b' && ruv == 0) {
+	    if (*s == '_' && len && *retlen
+		&& (s[1] == '0' || s[1] == '1'))
+	    {
+		--len;
+		++s;
+	    }
+	    else if (seenb == FALSE && *s == 'b' && ruv == 0) {
 		/* Disallow 0bbb0b0bbb... */
 		seenb = TRUE;
 		continue;
@@ -2895,7 +2906,8 @@ Perl_scan_bin(pTHX_ char *start, I32 len, I32 *retlen)
 		if (ckWARN_d(WARN_OVERFLOW))
 		    Perl_warner(aTHX_ WARN_OVERFLOW,
 				"Integer overflow in binary number");
-	    } else
+	    }
+	    else
 		ruv = xuv | (*s - '0');
 	}
 	if (overflowed) {
@@ -2935,8 +2947,12 @@ Perl_scan_oct(pTHX_ char *start, I32 len, I32 *retlen)
 
     for (; len-- && *s; s++) {
 	if (!(*s >= '0' && *s <= '7')) {
-	    if (*s == '_')
-		continue; /* Note: does not check for __ and the like. */
+	    if (*s == '_' && len && *retlen
+		&& (s[1] >= '0' && s[1] <= '7'))
+	    {
+		--len;
+		++s;
+	    }
 	    else {
 		/* Allow \octal to work the DWIM way (that is, stop scanning
 		 * as soon as non-octal characters are seen, complain only iff
@@ -2960,7 +2976,8 @@ Perl_scan_oct(pTHX_ char *start, I32 len, I32 *retlen)
 		if (ckWARN_d(WARN_OVERFLOW))
 		    Perl_warner(aTHX_ WARN_OVERFLOW,
 				"Integer overflow in octal number");
-	    } else
+	    }
+	    else
 		ruv = xuv | (*s - '0');
 	}
 	if (overflowed) {
@@ -3003,9 +3020,13 @@ Perl_scan_hex(pTHX_ char *start, I32 len, I32 *retlen)
     for (; len-- && *s; s++) {
 	hexdigit = strchr((char *) PL_hexdigit, *s);
 	if (!hexdigit) {
-	    if (*s == '_')
-		continue; /* Note: does not check for __ and the like. */
-	    if (seenx == FALSE && *s == 'x' && ruv == 0) {
+	    if (*s == '_' && len && *retlen && s[1]
+		&& (hexdigit = strchr((char *) PL_hexdigit, s[1])))
+	    {
+		--len;
+		++s;
+	    }
+	    else if (seenx == FALSE && *s == 'x' && ruv == 0) {
 		/* Disallow 0xxx0x0xxx... */
 		seenx = TRUE;
 		continue;
@@ -3028,7 +3049,8 @@ Perl_scan_hex(pTHX_ char *start, I32 len, I32 *retlen)
 		if (ckWARN_d(WARN_OVERFLOW))
 		    Perl_warner(aTHX_ WARN_OVERFLOW,
 				"Integer overflow in hexadecimal number");
-	    } else
+	    }
+	    else
 		ruv = xuv | ((hexdigit - PL_hexdigit) & 15);
 	}
 	if (overflowed) {
@@ -3570,7 +3592,7 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
 }
 #endif /* USE_THREADS */
 
-#ifdef HUGE_VAL
+#if defined(HUGE_VAL) || (defined(USE_LONG_DOUBLE) && defined(HUGE_VALL))
 /*
  * This hack is to force load of "huge" support from libm.a
  * So it is in perl for (say) POSIX to use. 
@@ -3579,7 +3601,10 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
 NV 
 Perl_huge(void)
 {
- return HUGE_VAL;
+#   if defined(USE_LONG_DOUBLE) && defined(HUGE_VALL)
+    return HUGE_VALL;
+#   endif
+    return HUGE_VAL;
 }
 #endif
 
@@ -3817,6 +3842,6 @@ Perl_report_closed_fh(pTHX_ GV *gv, IO *io, const char *func, const char *obj)
 
     if (io && IoDIRP(io))
 	Perl_warner(aTHX_ WARN_CLOSED,
-		    "(Are you trying to call %s() on dirhandle %s?)\n",
+		    "\t(Are you trying to call %s() on dirhandle %s?)\n",
 		    func, name);
 }

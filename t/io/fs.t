@@ -21,7 +21,7 @@ print "1..29\n";
 $wd = (($^O eq 'MSWin32') ? `cd` : `pwd`);
 chop($wd);
 
-if ($^O eq 'MSWin32') { `del tmp 2>nul`; `mkdir tmp`; }
+if ($^O eq 'MSWin32') { `rmdir /s /q tmp 2>nul`; `mkdir tmp`; }
 else {  `rm -f tmp 2>/dev/null; mkdir tmp 2>/dev/null`; }
 chdir './tmp';
 `/bin/rm -rf a b c x` if -x '/bin/rm';
@@ -104,6 +104,7 @@ if (rename('a','b')) {print "ok 14\n";} else {print "not ok 14\n";}
     $blksize,$blocks) = stat('a');
 if ($ino == 0) {print "ok 15\n";} else {print "not ok 15\n";}
 $delta = $Is_Dosish ? 2 : 1;	# Granularity of time on the filesystem
+chmod 0777, 'b';
 $foo = (utime 500000000,500000000 + $delta,'b');
 if ($foo == 1) {print "ok 16\n";} else {print "not ok 16 $foo\n";}
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,

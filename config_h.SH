@@ -189,12 +189,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_fgetpos HAS_FGETPOS	/**/
 
-/* FLEXFILENAMES:
- *	This symbol, if defined, indicates that the system supports filenames
- *	longer than 14 characters.
- */
-#$d_flexfnam	FLEXFILENAMES		/**/
-
 /* HAS_FLOCK:
  *	This symbol, if defined, indicates that the flock routine is
  *	available to do file locking.
@@ -1147,7 +1141,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #define BIN_EXP "$binexp"	/**/
 
 /* PERL_BINCOMPAT_5005:
- *	This symbol, if defined, indicates that Perl 5.006 should be
+ *	This symbol, if defined, indicates that this version of Perl should be
  *	binary-compatible with Perl 5.005.  This is impossible for builds
  *	that use features like threads and multiplicity it is always $undef
  *	for those versions.
@@ -1218,7 +1212,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #  define STRINGIFY(a)	PeRl_StGiFy(a)
 #endif
 #if $cpp_stuff != 1 && $cpp_stuff != 42
-#include "Bletch: How does this C preprocessor catenate tokens?"
+#   include "Bletch: How does this C preprocessor catenate tokens?"
 #endif
 
 /* CPPSTDIN:
@@ -1360,10 +1354,23 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_fd_set HAS_FD_SET	/**/
 
+/* FLEXFILENAMES:
+ *	This symbol, if defined, indicates that the system supports filenames
+ *	longer than 14 characters.
+ */
+#$d_flexfnam	FLEXFILENAMES		/**/
+
 /* HAS_FPOS64_T:
  *	This symbol will be defined if the C compiler supports fpos64_t.
  */
 #$d_fpos64_t	HAS_FPOS64_T    	/**/
+
+/* HAS_FREXPL:
+ *	This symbol, if defined, indicates that the frexpl routine is
+ *	available to break a long double floating-point number into
+ *	a normalized fraction and an integral power of 2.
+ */
+#$d_frexpl HAS_FREXPL		/**/
 
 /* HAS_STRUCT_FS_DATA:
  *	This symbol, if defined, indicates that the struct fs_data
@@ -1643,6 +1650,25 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	is available.
  */
 #$d_isascii HAS_ISASCII		/**/
+
+/* HAS_ISNAN:
+ *	This symbol, if defined, indicates that the isnan routine is
+ *	available to check whether a double is a NaN.
+ */
+#$d_isnan HAS_ISNAN		/**/
+
+/* HAS_ISNANL:
+ *	This symbol, if defined, indicates that the isnanl routine is
+ *	available to check whether a long double is a NaN.
+ */
+#$d_isnanl HAS_ISNANL		/**/
+
+/* HAS_LCHOWN:
+ *	This symbol, if defined, indicates that the lchown routine is
+ *	available to operate on a symbolic link (instead of following the
+ *	link).
+ */
+#$d_lchown HAS_LCHOWN		/**/
 
 /* HAS_LDBL_DIG:
  *	This symbol, if defined, indicates that this system's <float.h>
@@ -2224,6 +2250,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #define	Gid_t_f		$gidformat		/**/
 
+/* Gid_t_sign:
+ *	This symbol holds the signedess of a Gid_t.
+ *	1 for unsigned, -1 for signed.
+ */
+#define Gid_t_sign	$gidsign		/* GID sign */
+
 /* Gid_t_size:
  *	This symbol holds the size of a Gid_t in bytes.
  */
@@ -2233,19 +2265,19 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	This symbol holds the return type of getgid() and the type of
  *	argument to setrgid() and related functions.  Typically,
  *	it is the type of group ids in the kernel. It can be int, ushort,
- *	uid_t, etc... It may be necessary to include <sys/types.h> to get
+ *	gid_t, etc... It may be necessary to include <sys/types.h> to get
  *	any typedef'ed information.
  */
 #define Gid_t $gidtype		/* Type for getgid(), etc... */
 
 /* Groups_t:
  *	This symbol holds the type used for the second argument to
- *	getgroups() and setgropus().  Usually, this is the same as
+ *	getgroups() and setgroups().  Usually, this is the same as
  *	gidtype (gid_t) , but sometimes it isn't.
- *	It can be int, ushort, uid_t, etc... 
+ *	It can be int, ushort, gid_t, etc... 
  *	It may be necessary to include <sys/types.h> to get any 
  *	typedef'ed information.  This is only required if you have
- *	getgroups() or setgropus()..
+ *	getgroups() or setgroups()..
  */
 #if defined(HAS_GETGROUPS) || defined(HAS_SETGROUPS)
 #define Groups_t $groupstype	/* Type for 2nd arg to [sg]etgroups() */
@@ -2574,6 +2606,16 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #define Netdb_name_t		$netdb_name_type /**/
 #define Netdb_net_t		$netdb_net_type /**/
 
+/* PERL_OTHERLIBDIRS:
+ *	This variable contains a colon-separated set of paths for the perl
+ *	binary to search for additional library files or modules.
+ *	These directories will be tacked to the end of @INC.
+ *	Perl will automatically search below each path for version-
+ *	and architecture-specific directories.  See PERL_INC_VERSION_LIST
+ *	for more details.
+ */
+#$d_perl_otherlibdirs PERL_OTHERLIBDIRS "$otherlibdirs"		/**/
+
 /* IVTYPE:
  *	This symbol defines the C type used for Perl's IV.
  */
@@ -2637,6 +2679,9 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 /* U64SIZE:
  *	This symbol contains the sizeof(U64).
  */
+/* NVSIZE:
+ *	This symbol contains the sizeof(NV).
+ */
 /* NV_PRESERVES_UV:
  *	This symbol, if defined, indicates that a variable of type NVTYPE
  *	can preserve all the bit of a variable of type UVSIZE.
@@ -2666,6 +2711,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #define	I64SIZE		$i64size	/**/
 #define	U64SIZE		$u64size	/**/
 #endif
+#define	NVSIZE		$nvsize		/**/
 #$d_nv_preserves_uv	NV_PRESERVES_UV
 
 /* IVdf:
@@ -2832,6 +2878,11 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #define SITELIB_EXP "$sitelibexp"		/**/
 #define SITELIB_STEM "$sitelib_stem"		/**/
 
+/* Size_t_size:
+ *	This symbol holds the size of a Size_t in bytes.
+ */
+#define Size_t_size $sizesize		/* */
+
 /* Size_t:
  *	This symbol holds the type used to declare length parameters
  *	for string functions.  It is usually size_t, but may be
@@ -2878,6 +2929,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	This symbol defines the format string used for printing a Uid_t.
  */
 #define	Uid_t_f		$uidformat		/**/
+
+/* Uid_t_sign:
+ *	This symbol holds the signedess of a Uid_t.
+ *	1 for unsigned, -1 for signed.
+ */
+#define Uid_t_sign	$uidsign		/* UID sign */
 
 /* Uid_t_size:
  *	This symbol holds the size of a Uid_t in bytes.
@@ -3075,12 +3132,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #define PERL_XS_APIVERSION "$xs_apiversion"
 #define PERL_PM_APIVERSION "$pm_apiversion"
 
-/* HAS_LCHOWN:
- *	This symbol, if defined, indicates that the lchown routine is
- *	available to operate on a symbolic link (instead of following the
- *	link).
+/* HAS_MODFL:
+ *	This symbol, if defined, indicates that the modfl routine is
+ *	available to split a long double x into a fractional part f and
+ *	an integer part i such that |f| < 1.0 and (f + i) = x.
  */
-#$d_lchown HAS_LCHOWN		/**/
+#$d_modfl HAS_MODFL		/**/
 
 #endif
 !GROK!THIS!
