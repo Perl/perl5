@@ -34,11 +34,9 @@ typedef U64TYPE PADOFFSET;
 
 /* flags for the pad_new() function */
 
-typedef enum {
-	padnew_CLONE	= 1,	/* this pad is for a cloned CV */
-	padnew_SAVE	= 2,	/* save old globals */
-	padnew_SAVESUB	= 4	/* also save extra stuff for start of sub */
-} padnew_flags;
+#define padnew_CLONE	1	/* this pad is for a cloned CV */
+#define padnew_SAVE	2	/* save old globals */
+#define padnew_SAVESUB	4	/* also save extra stuff for start of sub */
 
 /* values for the pad_tidy() function */
 

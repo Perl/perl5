@@ -111,7 +111,7 @@ can be OR'ed together:
 */
 
 PADLIST *
-Perl_pad_new(pTHX_ padnew_flags flags)
+Perl_pad_new(pTHX_ int flags)
 {
     AV *padlist, *padname, *pad, *a0;
 

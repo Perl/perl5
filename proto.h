@@ -1359,7 +1359,7 @@ PERL_CALLCONV void	Perl_deb_stack_all(pTHX);
 STATIC void	S_deb_stack_n(pTHX_ SV** stack_base, I32 stack_min, I32 stack_max, I32 mark_min, I32 mark_max);
 #endif
 
-PERL_CALLCONV PADLIST*	Perl_pad_new(pTHX_ padnew_flags flags);
+PERL_CALLCONV PADLIST*	Perl_pad_new(pTHX_ int flags);
 PERL_CALLCONV void	Perl_pad_undef(pTHX_ CV* cv);
 PERL_CALLCONV PADOFFSET	Perl_pad_add_name(pTHX_ char *name, HV* typestash, HV* ourstash, bool clone);
 PERL_CALLCONV PADOFFSET	Perl_pad_add_anon(pTHX_ SV* sv, OPCODE op_type);

@@ -652,7 +652,7 @@ can be OR'ed together:
     padnew_SAVE		save old globals
     padnew_SAVESUB	also save extra stuff for start of sub
 
-	PADLIST*	pad_new(padnew_flags flags)
+	PADLIST*	pad_new(int flags)
 
 =for hackers
 Found in file pad.c

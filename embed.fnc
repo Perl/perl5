@@ -1328,7 +1328,7 @@ s	|void	|deb_stack_n	|SV** stack_base|I32 stack_min \
 				|I32 stack_max|I32 mark_min|I32 mark_max
 #endif
 
-pd	|PADLIST*|pad_new	|padnew_flags flags
+pd	|PADLIST*|pad_new	|int flags
 pd	|void	|pad_undef	|CV* cv
 pd	|PADOFFSET|pad_add_name	|char *name\
 				|HV* typestash|HV* ourstash \
