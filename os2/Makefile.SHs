@@ -96,9 +96,12 @@ perl.linkexp: perl.exports perl.map  os2/os2.sym
 
 # We link miniperl statically, since .DLL depends on $(DYNALOADER) 
 
-miniperl.map miniperl: $(obj) perl$(OBJ_EXT) miniperlmain$(OBJ_EXT)
-	$(CC) $(LARGE) $(CLDFLAGS) -o miniperl miniperlmain$(OBJ_EXT) perl$(OBJ_EXT) $(obj) $(libs) -Zmap -Zlinker /map
-	@./miniperl -w -Ilib -MExporter -e 0 || $(MAKE) minitest
+opmini$(OBJ_EXT) : op.c
+	$(CCCMD) $(PLDLFLAGS) -DPERL_EXTERNAL_GLOB -o opmini$(OBJ_EXT) op.c
+
+miniperl.map miniperl: $(obj) perl$(OBJ_EXT) miniperlmain$(OBJ_EXT) opmini$(OBJ_EXT)
+	$(CC) $(LARGE) $(CLDFLAGS) -o miniperl miniperlmain$(OBJ_EXT) perl$(OBJ_EXT) `echo $(obj)|sed -e 's/\bop\./opmini./g'` $(libs) -Zmap -Zlinker /map/PM:VIO
+	@./miniperl -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
 
 depend: os2ish.h dlfcn.h os2thread.h os2.c
 
@@ -162,6 +165,9 @@ $(AOUT_LIBPERL) : $(aout_obj) perl$(AOUT_OBJ_EXT)
 .c$(AOUT_OBJ_EXT):
 	$(AOUT_CCCMD) $(PLDLFLAGS) -c $*.c
 
+opmini$(AOUT_OBJ_EXT): op.c
+	$(AOUT_CCCMD) $(PLDLFLAGS) -DPERL_EXTERNAL_GLOB -o opmini$(AOUT_OBJ_EXT) -c op.c
+
 perlmain(AOUT_OBJ_EXT): perlmain.c
 	$(AOUT_CCCMD_DLL) $(PLDLFLAGS) -c perlmain.c
 
@@ -169,8 +175,8 @@ aout_perlmain.c: miniperlmain.c config.sh makefile $(static_ext_autoinit)
 	sh writemain $(DYNALOADER) $(aout_static_lib) > tmp
 	sh mv-if-diff tmp aout_perlmain.c
 
-miniperl_: $& miniperlmain$(AOUT_OBJ_EXT) $(AOUT_LIBPERL)
-	$(CC) $(LARGE) $(AOUT_CLDFLAGS) $(CCDLFLAGS) -o miniperl_ miniperlmain$(AOUT_OBJ_EXT) $(AOUT_LIBPERL) $(libs)
+miniperl_: $& miniperlmain$(AOUT_OBJ_EXT) $(AOUT_LIBPERL) opmini$(AOUT_OBJ_EXT)
+	$(CC) $(LARGE) $(AOUT_CLDFLAGS) $(CCDLFLAGS) -o miniperl_ miniperlmain$(AOUT_OBJ_EXT) opmini$(AOUT_OBJ_EXT) $(AOUT_LIBPERL) $(libs)
 
 perl_: $& aout_perlmain$(AOUT_OBJ_EXT) $(AOUT_LIBPERL) $(AOUT_DYNALOADER) $(aout_static_ext) ext.libs
 	$(CC) $(LARGE) $(AOUT_CLDFLAGS) $(CCDLFLAGS) -o perl_ aout_perlmain$(AOUT_OBJ_EXT) $(AOUT_DYNALOADER) $(aout_static_ext) $(AOUT_LIBPERL) `cat ext.libs` $(libs)
