@@ -9,6 +9,7 @@ require Exporter;
 $VERSION = 96.041801;
 
 use vars qw($VERSION $columns $debug);
+use strict;
 
 BEGIN	{
 	$columns = 76;  # <= screen width
@@ -16,7 +17,6 @@ BEGIN	{
 }
 
 use Text::Tabs;
-use strict;
 
 sub wrap
 {
@@ -63,6 +63,7 @@ sub wrap
 	return $r;
 }
 
+
 1;
 __DATA__
 
@@ -82,7 +83,7 @@ Text::Wrap - line wrapping to form simple paragraphs
 
 =head1 DESCRIPTION
 
-Text::Wrap is a very simple paragraph formatter.  It formats a
+Text::Wrap::wrap() is a very simple paragraph formatter.  It formats a
 single paragraph at a time by breaking lines at word boundries.
 Indentation is controlled for the first line ($initial_tab) and
 all subsquent lines ($subsequent_tab) independently.  $Text::Wrap::columns
@@ -95,6 +96,38 @@ should be set to the full width of your output device.
 
 =head1 AUTHOR
 
-David Muir Sharnoff E<lt>F<muir@idiom.com>E<gt>
+David Muir Sharnoff <muir@idiom.com> with help from Tim Pierce and
+others.
 
 =cut
+
+	print fill($initial_tab, $subsequent_tab, @text);
+
+	print fill("", "", `cat book`);
+
+Text::Wrap::fill() is a simple multi-paragraph formatter.  It formats
+each paragraph separately and then joins them together when it's done.  It
+will destory any whitespace in the original text.  It breaks text into
+paragraphs by looking for whitespace after a newline.  In other respects
+it acts like wrap().
+
+# Tim Pierce did a faster version of this:
+
+sub fill 
+{
+	my ($ip, $xp, @raw) = @_;
+	my @para;
+	my $pp;
+
+	for $pp (split(/\n\s+/, join("\n",@raw))) {
+		$pp =~ s/\s+/ /g;
+		my $x = wrap($ip, $xp, $pp);
+		push(@para, $x);
+	}
+
+	# if paragraph_indent is the same as line_indent, 
+	# separate paragraphs with blank lines
+
+	return join ($ip eq $xp ? "\n\n" : "\n", @para);
+}
+
