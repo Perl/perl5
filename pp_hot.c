@@ -863,9 +863,9 @@ PP(pp_match)
 	    }
 	}
     }
-    safebase = (((gimme == G_ARRAY) || global || !rx->nparens)
-		&& !PL_sawampersand);
-    safebase = safebase ? 0  : REXEC_COPY_STR ;
+    safebase = ((gimme != G_ARRAY && !global && rx->nparens)
+		|| SvTEMP(TARG) || PL_sawampersand)
+		? REXEC_COPY_STR : 0;
     if (pm->op_pmflags & (PMf_MULTILINE|PMf_SINGLELINE)) {
 	SAVEINT(PL_multiline);
 	PL_multiline = pm->op_pmflags & PMf_MULTILINE;
@@ -1626,7 +1626,8 @@ PP(pp_subst)
 		  && SvTYPE(rx->check_substr) == SVt_PVBM
 		  && SvVALID(rx->check_substr)) 
 		? TARG : Nullsv);
-    safebase = (!rx->nparens && !PL_sawampersand) ? 0 : REXEC_COPY_STR;
+    safebase = (rx->nparens || SvTEMP(TARG) || PL_sawampersand)
+		? REXEC_COPY_STR : 0;
     if (pm->op_pmflags & (PMf_MULTILINE|PMf_SINGLELINE)) {
 	SAVEINT(PL_multiline);
 	PL_multiline = pm->op_pmflags & PMf_MULTILINE;

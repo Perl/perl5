@@ -692,3 +692,8 @@ print "not "
 print "ok $test\n";
 $test++;
 
+# see if matching against temporaries (created via pp_helem()) is safe
+{ foo => "ok $test\n".$^X }->{foo} =~ /^(.*)\n/g;
+print "$1\n";
+$test++;
+
