@@ -2337,6 +2337,9 @@ I32 *retlen;
 	retval = n | (tmp - hexdigit) & 15;
 	s++;
     }
+    if (dowarn && len && ! strchr(hexdigit, *s)) {
+	warn("Illegal hex digit ignored");
+    }
     *retlen = s - start;
     return retval;
 }
