@@ -211,7 +211,7 @@ unshift @tm, qw(../../../../lib/ExtUtils/typemap ../../../lib/ExtUtils/typemap
                 ../../lib/ExtUtils/typemap ../../../typemap ../../typemap
                 ../typemap typemap);
 foreach $typemap (@tm) {
-    next unless -e $typemap ;
+    next unless -f $typemap ;
     # skip directories, binary files etc.
     warn("Warning: ignoring non-text typemap file '$typemap'\n"), next 
 	unless -T $typemap ;
