@@ -46,7 +46,8 @@ typedef long long __int64;
 #define DllExport
 #else
 #if defined(PERLDLL) || defined(WIN95FIX)
-#define DllExport __declspec(dllexport)
+#define DllExport
+/*#define DllExport __declspec(dllexport)*/	/* noises with VC5+sp3 */
 #else 
 #define DllExport __declspec(dllimport)
 #endif

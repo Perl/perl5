@@ -1116,7 +1116,7 @@ realloc(void *mp, size_t nbytes)
 #endif
 	    ) goto hard_way;
 	else if (incr == 0) {
-	  inplace:
+	  inplace_label:
 #ifdef RCHECK
 		/*
 		 * Record new allocated size of block and
@@ -1203,7 +1203,7 @@ realloc(void *mp, size_t nbytes)
 	    nmalloc[pow * BUCKETS_PER_POW2]++;
 #endif 	    
 	    *(cp - M_OVERHEAD) = pow * BUCKETS_PER_POW2; /* Fill index. */
-	    goto inplace;
+	    goto inplace_label;
 	} else {
 	  hard_way:
 	    MUTEX_UNLOCK(&malloc_mutex);

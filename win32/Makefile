@@ -242,7 +242,7 @@ NULL		=
 XSUBPP		= ..\$(MINIPERL) -I..\..\lib ..\$(EXTUTILSDIR)\xsubpp \
 		-C++ -prototypes
 
-CORE_SRC	=		\
+MICROCORE_SRC	=		\
 		..\av.c		\
 		..\byterun.c	\
 		..\deb.c	\
@@ -271,15 +271,15 @@ CORE_SRC	=		\
 		..\util.c
 
 !IF "$(CRYPT_SRC)" != ""
-CORE_SRC	= $(CORE_SRC) ..\$(CRYPT_SRC)
+MICROCORE_SRC	= $(MICROCORE_SRC) ..\$(CRYPT_SRC)
 !ENDIF
 
 !IF "$(PERL_MALLOC)" == "define"
-CORE_SRC	= $(CORE_SRC) ..\malloc.c
+EXTRACORE_SRC	= $(EXTRACORE_SRC) ..\malloc.c
 !ENDIF
 
 !IF "$(OBJECT)" == ""
-CORE_SRC	= $(CORE_SRC) ..\perlio.c
+EXTRACORE_SRC	= $(EXTRACORE_SRC) ..\perlio.c
 !ENDIF
 
 WIN32_SRC	=		\
@@ -313,7 +313,7 @@ X2P_SRC		=		\
 		..\x2p\util.c	\
 		..\x2p\walk.c
 
-CORE_H		=		\
+CORE_NOCFG_H	=		\
 		..\av.h		\
 		..\byterun.h	\
 		..\bytecode.h	\
@@ -343,7 +343,6 @@ CORE_H		=		\
 		..\unixish.h	\
 		..\util.h	\
 		..\XSUB.h	\
-		.\config.h	\
 		..\EXTERN.h	\
 		..\perlvars.h	\
 		..\intrpvar.h	\
@@ -353,18 +352,19 @@ CORE_H		=		\
 		.\include\sys\socket.h	\
 		.\win32.h
 
-CORE_OBJ	= $(CORE_SRC:.c=.obj)
+CORE_H		= $(CORE_NOCFG_H) .\config.h
+
+MICROCORE_OBJ	= $(MICROCORE_SRC:.c=.obj)
+CORE_OBJ	= $(MICROCORE_OBJ) $(EXTRACORE_SRC:.c=.obj)
 WIN32_OBJ	= $(WIN32_SRC:.c=.obj)
-MINICORE_OBJ	= $(CORE_OBJ:..\=.\mini\) $(MINIDIR)\miniperlmain$(o)
+MINICORE_OBJ	= $(MICROCORE_OBJ:..\=.\mini\)	\
+		  $(MINIDIR)\miniperlmain$(o)	\
+		  $(MINIDIR)\perlio$(o)
 MINIWIN32_OBJ	= $(WIN32_OBJ:.\=.\mini\)
 MINI_OBJ	= $(MINICORE_OBJ) $(MINIWIN32_OBJ)
 PERL95_OBJ	= $(PERL95_SRC:.c=.obj)
 DLL_OBJ		= $(DLL_SRC:.c=.obj)
 X2P_OBJ		= $(X2P_SRC:.c=.obj)
-
-!IF "$(OBJECT)" != ""
-MINICORE_OBJ	= $(MINICORE_OBJ) $(MINIDIR)\perlio$(o)
-!ENDIF
 
 PERLDLL_OBJ	= $(CORE_OBJ)
 PERLEXE_OBJ	= perlmain$(o)
@@ -458,8 +458,8 @@ CFG_VARS	=					\
 # Top targets
 #
 
-all : $(GLOBEXE) $(MINIMOD) $(CONFIGPM) $(PERLEXE) $(PERL95EXE) $(CAPILIB) $(X2P) \
-	$(EXTENSION_DLL)
+all : .\config.h $(GLOBEXE) $(MINIMOD) $(CONFIGPM) $(PERLEXE) $(PERL95EXE) \
+	$(CAPILIB) $(X2P) $(EXTENSION_DLL)
 
 $(DYNALOADER)$(o) : $(DYNALOADER).c $(CORE_H) $(EXTDIR)\DynaLoader\dlutils.c
 
@@ -512,15 +512,18 @@ $(MINIPERL) : $(MINIDIR) $(MINI_OBJ)
 $(MINIDIR) :
 	if not exist "$(MINIDIR)" mkdir "$(MINIDIR)"
 
-$(MINICORE_OBJ) : $(CORE_H)
+$(MINICORE_OBJ) : $(CORE_NOCFG_H)
 	$(CC) -c $(CFLAGS) $(OBJOUT_FLAG)$@ ..\$(*F).c
 
-$(MINIWIN32_OBJ) : $(CORE_H)
+$(MINIWIN32_OBJ) : $(CORE_NOCFG_H)
 	$(CC) -c $(CFLAGS) $(OBJOUT_FLAG)$@ $(*F).c
+
+# 1. we don't want to rebuild miniperl.exe when config.h changes
+# 2. we don't want to rebuild miniperl.exe with non-default config.h
+$(MINI_OBJ)	: $(CORE_NOCFG_H)
 
 $(WIN32_OBJ)	: $(CORE_H)
 $(CORE_OBJ)	: $(CORE_H)
-$(MINI_OBJ)	: $(CORE_H)
 $(DLL_OBJ)	: $(CORE_H)
 $(PERL95_OBJ)	: $(CORE_H)
 $(X2P_OBJ)	: $(CORE_H)
