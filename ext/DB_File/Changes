@@ -343,8 +343,8 @@
 
 1.77 26th April 2001
 
-   * AIX is reported to need -lpthreads, so Makefile.PL now checks for AIX and
-     adds it to the link options.
+   * AIX is reported to need -lpthreads, so Makefile.PL now checks for
+     AIX and adds it to the link options.
 
    * Minor documentation updates.
 
@@ -368,9 +368,23 @@
 
 1.79 22nd October 2001
 
-   * Added a "local $SIG{__DIE__}" inside the eval that checks for the presence
-     of XSLoader s suggested by Andrew Hryckowin.
+   * Added a "local $SIG{__DIE__}" inside the eval that checks for
+     the presence of XSLoader s suggested by Andrew Hryckowin.
 
    * merged core patch 12277.
 
    * Changed NEXTKEY to not initialise the input key. It isn't used anyway.
+
+1.79 22nd October 2001
+
+   * Fixed test harness for cygwin
+
+
+1.800 23rd November 2001
+
+   * use pport.h for perl backward compatability code.
+
+   * use new  ExtUtils::Constant module to generate XS constants.
+
+   * upgrade Makefile.PL upgrade/downgrade code to toggle "our" with
+     "use vars"

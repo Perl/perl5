@@ -619,7 +619,7 @@ unlink $Dfile1 ;
 
    use warnings ;
    use strict ;
-   use vars qw( @ISA @EXPORT) ;
+   our (@ISA, @EXPORT);
 
    require Exporter ;
    use DB_File;
@@ -957,7 +957,7 @@ EOM
     use strict ;
     use DB_File ;
 
-    use vars qw($filename %h ) ;
+    our ($filename, %h);
 
     $filename = "tree" ;
     unlink $filename ;
@@ -1009,7 +1009,7 @@ EOM
     use strict ;
     use DB_File ;
  
-    use vars qw($filename $x %h $status $key $value) ;
+    our ($filename, $x, %h, $status, $key, $value);
 
     $filename = "tree" ;
     unlink $filename ;
@@ -1065,7 +1065,7 @@ EOM
     use strict ;
     use DB_File ;
  
-    use vars qw($filename $x %h ) ;
+    our ($filename, $x, %h);
 
     $filename = "tree" ;
  
@@ -1114,9 +1114,9 @@ EOM
     use strict ;
     use DB_File ;
  
-    use vars qw($filename $x %h $found) ;
+    our ($filename, $x, %h, $found);
 
-    my $filename = "tree" ;
+    $filename = "tree" ;
  
     # Enable duplicate records
     $DB_BTREE->{'flags'} = R_DUP ;
@@ -1149,9 +1149,9 @@ EOM
     use strict ;
     use DB_File ;
  
-    use vars qw($filename $x %h $found) ;
+    our ($filename, $x, %h, $found);
 
-    my $filename = "tree" ;
+    $filename = "tree" ;
  
     # Enable duplicate records
     $DB_BTREE->{'flags'} = R_DUP ;
@@ -1185,7 +1185,7 @@ EOM
     use DB_File ;
     use Fcntl ;
 
-    use vars qw($filename $x %h $st $key $value) ;
+    our ($filename, $x, %h, $st, $key, $value);
 
     sub match
     {
