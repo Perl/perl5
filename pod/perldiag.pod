@@ -467,6 +467,21 @@ already occurred.  Since the intended environment for the C<BEGIN {}>
 could not be guaranteed (due to the errors), and since subsequent code
 likely depends on its correct operation, Perl just gave up.
 
+=item Binary number > 0b11111111111111111111111111111111 non-portable
+
+(W) The binary number you specified is larger than 2**32-1 and
+therefore non-portable between systems.  If you know that your code is
+always going to be used only in systems that have more than 32-bit
+integers (which means that Perl should be able to use such), you can
+silence this warning by
+
+	{
+	    no warning 'unsafe';
+	    .... your code here ...
+	}
+
+See also L<perlport> for writing portable code.
+
 =item bind() on closed fd
 
 (W) You tried to do a bind on a closed socket.  Did you forget to check
@@ -1414,6 +1429,21 @@ an emergency basis to prevent a core dump.
 (D) Really old Perl let you omit the % on hash names in some spots.  This
 is now heavily deprecated.
 
+=item Hexadecimal number > 0xffffffff non-portable
+
+(W) The hexadecimal number you specified is larger than 2**32-1 and
+therefore non-portable between systems.  If you know that your code is
+always going to be used only in systems that have more than 32-bit
+integers (which means that Perl should be able to use such), you can
+silence this warning by
+
+	{
+	    no warning 'unsafe';
+	    .... your code here ...
+	}
+
+See also L<perlport> for writing portable code.
+
 =item Identifier too long
 
 (F) Perl limits identifiers (names for variables, functions, etc.) to
@@ -1483,8 +1513,8 @@ of the octal number stopped before the 8 or 9.
 
 =item Illegal hexadecimal digit %s ignored
 
-(W) You may have tried to use a character other than 0 - 9 or A - F in a
-hexadecimal number.  Interpretation of the hexadecimal number stopped
+(W) You may have tried to use a character other than 0 - 9 or A - F, a - f
+in a hexadecimal number.  Interpretation of the hexadecimal number stopped
 before the illegal character.
 
 =item Illegal switch in PERL5OPT: %s
@@ -1528,14 +1558,18 @@ known value, using trustworthy data.  See L<perlsec>.
 
 =item Integer overflow in %s number
 
-(S) The literal hexadecimal, octal or binary number you have specified
-is too big for your architecture. On a 32-bit architecture the largest
-literal hex, octal or binary number representable without overflow
-is 0xFFFFFFFF, 037777777777, or 0b11111111111111111111111111111111
-respectively.  Note that Perl transparently promotes decimal literals
-to a floating point representation internally--subject to loss of
-precision errors in subsequent operations--so this limit usually
-doesn't apply to decimal literals.
+(F,X) The hexadecimal, octal or binary number you have specified
+either as a literal in your code or as a scalar is too big for your
+architecture. On a 32-bit architecture the largest literal hex, octal
+or binary number representable without overflow is 0xFFFFFFFF,
+037777777777, or 0b11111111111111111111111111111111 respectively.
+Note that Perl transparently promotes decimal literals to a floating
+point representation internally--subject to loss of precision errors
+in subsequent operations--so this limit usually doesn't apply to
+decimal literals.  If the overflow is in a literal of your code, the
+error is untrappable (there is no way the code could work safely in
+your system), if the overflow happens in hex() or oct() the error is
+trappable.
 
 =item Internal inconsistency in tracking vforks
 
@@ -1959,6 +1993,21 @@ supplied it an uninitialized value.  See L<perlform>.
 about 250 characters.  You've exceeded that length.  Future versions of
 Perl are likely to eliminate this arbitrary limitation.  In the meantime,
 try using scientific notation (e.g. "1e6" instead of "1_000_000").
+
+=item Octal number > 037777777777 non-portable
+
+(W) The octal number you specified is larger than 2**32-1 and
+therefore non-portable between systems.  If you know that your code is
+always going to be used only in systems that have more than 32-bit
+integers (which means that Perl should be able to use such), you can
+silence this warning by
+
+	{
+	    no warning 'unsafe';
+	    .... your code here ...
+	}
+
+See also L<perlport> for writing portable code.
 
 =item Odd number of elements in hash assignment
 

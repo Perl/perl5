@@ -11,24 +11,23 @@ Integer overflow in octal number at - line 3.
 no warning ;
 my $a = oct "7777777777777777777777777777777777779" ;
 EXPECT
+Integer overflow in octal number at - line 3.
 ########
 # all warning should be displayed 
 use warning ;
-my $a = oct "7777777777777777777777777777777777779" ;
+my $a = oct "77777777797";
 EXPECT
-Integer overflow in octal number at - line 3.
 Illegal octal digit '9' ignored at - line 3.
 ########
 # check scope
 use warning ;
-my $a = oct "7777777777777777777777777777777777779" ;
+my $a = oct "77777777797";
 {
     no warning ;
-    my $a = oct "7777777777777777777777777777777777779" ;
+    my $b = oct "77777777797";
 }    
 my $c = oct "7777777777777777777777777777777777779" ;
 EXPECT
-Integer overflow in octal number at - line 3.
 Illegal octal digit '9' ignored at - line 3.
+Octal number > 037777777777 non-portable at - line 8.
 Integer overflow in octal number at - line 8.
-Illegal octal digit '9' ignored at - line 8.

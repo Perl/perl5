@@ -871,7 +871,6 @@ S_scan_const(pTHX_ char *start)
     I32 thisutf = (PL_lex_inwhat == OP_TRANS && PL_sublex_info.sub_op)
 	? (PL_sublex_info.sub_op->op_private & (PL_lex_repl ? OPpTRANS_FROM_UTF : OPpTRANS_TO_UTF))
 	: UTF;
-
     /* leaveit is the set of acceptably-backslashed characters */
     char *leaveit =
 	PL_lex_inpat
@@ -1074,7 +1073,6 @@ S_scan_const(pTHX_ char *start)
 		    d = (char*)uv_to_utf8((U8*)d,
 					  scan_hex(s + 1, e - s - 1, &len));
 		    s = e + 1;
-			
 		}
 		else {
 		    UV uv = (UV)scan_hex(s, 2, &len);
@@ -5978,7 +5976,6 @@ Perl_scan_num(pTHX_ char *start)
     	    dTHR;
 	    UV u;
 	    I32 shift;
-	    bool overflowed = FALSE;
 
 	    /* check for hex */
 	    if (s[1] == 'x') {
@@ -6045,15 +6042,13 @@ Perl_scan_num(pTHX_ char *start)
 
 		  digit:
 		    n = u << shift;	/* make room for the digit */
-		    if (!overflowed && (n >> shift) != u
+		    if ((n >> shift) != u
 			&& !(PL_hints & HINT_NEW_BINARY))
 		    {
-			if (ckWARN_d(WARN_UNSAFE))
-			    Perl_warner(aTHX_ WARN_UNSAFE,
-					"Integer overflow in %s number",
-					(shift == 4) ? "hex"
-					    : ((shift == 3) ? "octal" : "binary"));
-			overflowed = TRUE;
+			Perl_croak(aTHX_
+				   "Integer overflow in %s number",
+				   (shift == 4) ? "hexadecimal"
+				   : ((shift == 3) ? "octal" : "binary"));
 		    }
 		    u = n | b;		/* add the digit to the end */
 		    break;

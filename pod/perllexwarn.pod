@@ -50,11 +50,12 @@ warnings: mandatory and optional.
 
 As its name suggests, if your code tripped a mandatory warning, you
 would get a warning whether you wanted it or not.
-For example, the code below would always produce an C<"integer overflow">
-warning.
+For example, the code below would always produce an C<"isn't numeric">
+warning about the "2:".
 
-    my $a = oct "777777777777777777777777777777777777" ;
+    my $a = "2:" + 3;
 
+though the result will be 5.
 
 With the introduction of lexical warnings, mandatory warnings now become
 I<default> warnings. The difference is that although the previously
@@ -63,9 +64,9 @@ subsequently enabled or disabled with the lexical warning pragma. For
 example, in the code below, an C<"integer overflow"> warning will only
 be reported for the C<$a> variable.
 
-    my $a = oct "777777777777777777777777777777777777" ;
+    my $a = "2:" + 3;
     no warning ;
-    my $b = oct "777777777777777777777777777777777777" ;
+    my $b = "2:" + 3;
 
 Note that neither the B<-w> flag or the C<$^W> can be used to
 disable/enable default warnings. They are still mandatory in this case.
@@ -206,7 +207,7 @@ to change.
 
 =head2 Category Hierarchy
  
-A tentative hierarchy of "categories" have been defined to allow groups
+A B<tentative> hierarchy of "categories" have been defined to allow groups
 of warnings to be enabled/disabled in isolation.  The current
 hierarchy is:
 
@@ -312,6 +313,9 @@ The experimental features need bottomed out.
     around the limitations of C<$^W>. Now that those limitations are gone,
     the module should be revisited.
 
+  octal
+    'octal' controls illegal octal characters warning but 'unsafe'
+    illegal hexadecimal and binary characters warning.  
 
 =head1 SEE ALSO
 
