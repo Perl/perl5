@@ -2496,9 +2496,7 @@ PerlIOStdio_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
 	    int fd = PerlLIO_dup(fileno(stdio));
 	    if (fd >= 0) {
 		char mode[8];
-		int omode = fcntl(fd, F_GETFL);
-		PerlIO_intmode2str(omode,mode,NULL);
-		stdio = fdopen(fd, mode);
+		stdio = fdopen(fd, PerlIO_modestr(o,mode));
 	    }
 	    else {
 		/* FIXME: To avoid messy error recovery if dup fails
