@@ -115,14 +115,17 @@ EOT
     $total = @tests;
     $files  = 0;
     $totmax = 0;
-    $maxlen = 0;
-    foreach (@tests) {
-	$len = length;
-	$maxlen = $len if $len > $maxlen;
+    my $maxlen = 0;
+    my $maxsuflen = 0;
+    foreach (@tests) { # The same code in lib/Test/Harness.pm:_run_all_tests
+	my $suf    = /\.(\w+)$/ ? $1 : '';
+	my $len    = length;
+	my $suflen = length $suf;
+	$maxlen    = $len    if $len    > $maxlen;
+	$maxsuflen = $suflen if $suflen > $maxsuflen;
     }
-    # +3 : we want three dots between the test name and the "ok"
-    # -2 : the .t suffix
-    $dotdotdot = $maxlen + 3 - 2;
+    # + 3 : we want three dots between the test name and the "ok"
+    $dotdotdot = $maxlen + 3 - $maxsuflen;
     while ($test = shift @tests) {
 
 	if ( $infinite{$test} && $type eq 'compile' ) {

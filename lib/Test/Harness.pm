@@ -396,13 +396,16 @@ sub _run_all_tests {
     my $t_start = new Benchmark;
 
     my $maxlen = 0;
-    foreach (@tests) {
-	my $len = length;
-	$maxlen = $len if $len > $maxlen;
+    my $maxsuflen = 0;
+    foreach (@tests) { # The same code in t/TEST
+	my $suf    = /\.(\w+)$/ ? $1 : '';
+	my $len    = length;
+	my $suflen = length $suf;
+	$maxlen    = $len    if $len    > $maxlen;
+	$maxsuflen = $suflen if $suflen > $maxsuflen;
     }
-    # +3 : we want three dots between the test name and the "ok"
-    # -2 : the .t suffix
-    my $width = $maxlen + 3 - 2;
+    # + 3 : we want three dots between the test name and the "ok"
+    my $width = $maxlen + 3 - $maxsuflen;
     foreach my $tfile (@tests) {
         my($leader, $ml) = _mk_leader($tfile, $width);
         print $leader;
