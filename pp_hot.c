@@ -421,7 +421,7 @@ PP(pp_add)
 		    buv = (UV)-biv;
 	    }
 	    /* ?uvok if value is >= 0. basically, flagged as UV if it's +ve,
-	       else "IV" now, independant of how it came in.
+	       else "IV" now, independent of how it came in.
 	       if a, b represents positive, A, B negative, a maps to -A etc
 	       a + b =>  (a + b)
 	       A + b => -(a - b)
