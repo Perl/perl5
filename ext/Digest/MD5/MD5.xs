@@ -633,12 +633,8 @@ addfile(self, fh)
 	        n = PerlIO_read(fh, buffer, missing);
 		if (n >= 0)
 	 	    MD5Update(context, buffer, n);
-	        else {
-		    if (PerlIO_error(fh)) {
-		        croak("Reading from filehandle failed");
-		    }
+	        else
 		    XSRETURN(1);  /* self */
-		}
 	    }
 
 	    /* Process blocks until EOF or error */
@@ -646,7 +642,7 @@ addfile(self, fh)
 	        MD5Update(context, buffer, n);
 	    }
 
-	    if (PerlIO_error(fh)) {
+	    if (n < 0 && PerlIO_error(fh)) {
 		croak("Reading from filehandle failed");
 	    }
 	}
