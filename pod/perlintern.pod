@@ -27,6 +27,13 @@ allow selecting particular classes of magical variable.
 =for hackers
 Found in file gv.c
 
+=item LVRET
+
+True if this op will be the return value of an lvalue subroutine
+
+=for hackers
+Found in file pp.h
+
 =item PL_DBsingle
 
 When Perl is run in debugging mode, with the B<-d> switch, this SV is a

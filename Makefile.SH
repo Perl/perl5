@@ -635,7 +635,8 @@ AUTOGEN_FILES = keywords.h opcode.h opnames.h pp_proto.h pp.sym proto.h \
 		pod/perlintern.pod pod/perlapi.pod \
 		objXSUB.h perlapi.h perlapi.c ext/ByteLoader/byterun.h \
 		ext/ByteLoader/byterun.c ext/B/B/Asmdata.pm regnodes.h \
-		warnings.h lib/warnings.pm
+		warnings.h lib/warnings.pm \
+		vms/perly_c.vms vms/perly_h.vms
 
 regen_headers:	FORCE
 	-$(CHMOD_W) $(AUTOGEN_FILES)
