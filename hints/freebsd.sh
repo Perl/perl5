@@ -131,6 +131,15 @@ problem.  Try
 
 EOM
 
+# From: Anton Berezin <tobez@plab.ku.dk>
+# To: perl5-porters@perl.org
+# Subject: [PATCH 5.005_54] Configure - hints/freebsd.sh signal handler type
+# Date: 30 Nov 1998 19:46:24 +0100
+# Message-ID: <864srhhvcv.fsf@lion.plab.ku.dk>
+
+signal_t='void'
+d_voidsig='define'
+
 # This script UU/usethreads.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use threads.
 cat > UU/usethreads.cbu <<'EOCBU'
@@ -151,23 +160,23 @@ EOM
 	      fi
 	      ldflags="-pthread $ldflags"
 	      ;;
-        2.2*) if [ ! -r "$lc_r" ]; then
+        2.2*) 
               cat <<EOM >&4
-POSIX threads are not supported by default on FreeBSD $osvers.
+POSIX threads are not supported well by FreeBSD $osvers.
 
-Please consider upgrading to at least FreeBSD 2.2.8.
+Please consider upgrading to at least FreeBSD 2.2.8,
+or preferably to 3.something.
 
 (While 2.2.7 does have pthreads, it has some problems
  with the combination of threads and pipes and therefore
  many Perl tests will either hang or fail.)
 EOM
-		 exit 1
-	      fi
+	      exit 1
 	      ;;
 	 *)   cat <<EOM >&4
 I did not know that FreeBSD $osvers supports POSIX threads.
 
-Feel free to tell me (perlbug@perl.com) otherwise.
+Feel free to tell perlbug@perl.com otherwise.
 EOM
 	      exit 1
 	      ;;
