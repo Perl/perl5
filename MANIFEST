@@ -1354,6 +1354,7 @@ lib/unicore/In/168.pl		Unicode character database
 lib/unicore/In/169.pl		Unicode character database
 lib/unicore/In/17.pl		Unicode character database
 lib/unicore/In/170.pl		Unicode character database
+lib/unicore/In/171.pl		Unicode character database
 lib/unicore/In/18.pl		Unicode character database
 lib/unicore/In/19.pl		Unicode character database
 lib/unicore/In/2.pl		Unicode character database
@@ -1558,6 +1559,7 @@ lib/unicore/Is/Sm.pl		Unicode character database
 lib/unicore/Is/So.pl		Unicode character database
 lib/unicore/Is/Space.pl		Unicode character database
 lib/unicore/Is/SpacePerl.pl	Unicode character database
+lib/unicore/Is/Title.pl		Unicode character database
 lib/unicore/Is/Upper.pl		Unicode character database
 lib/unicore/Is/Word.pl		Unicode character database
 lib/unicore/Is/XDigit.pl	Unicode character database
@@ -1567,6 +1569,7 @@ lib/unicore/Is/Zp.pl		Unicode character database
 lib/unicore/Is/Zs.pl		Unicode character database
 lib/unicore/Jamo.txt		Unicode character database
 lib/unicore/JamoShort.pl	Unicode character database
+lib/unicore/Lbrk.pl		Unicode character database
 lib/unicore/LineBrk.txt		Unicode character database
 lib/unicore/Makefile		Unicode character database
 lib/unicore/mktables		Unicode character database generator
