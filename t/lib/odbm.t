@@ -215,6 +215,8 @@ EOM
    sub checkOutput
    {
        my($fk, $sk, $fv, $sv) = @_ ;
+       print "# ", join('|', $fetch_key, $fk, $store_key, $sk,
+			$fetch_value, $fv, $store_value, $sv, $_), "\n";
        return
            $fetch_key eq $fk && $store_key eq $sk && 
 	   $fetch_value eq $fv && $store_value eq $sv &&
