@@ -1628,7 +1628,6 @@ PP(pp_dbstate)
 	PUSHBLOCK(cx, CXt_SUB, SP);
 	PUSHSUB_DB(cx);
 	CvDEPTH(cv)++;
-	(void)SvREFCNT_inc(cv);
 	PAD_SET_CUR(CvPADLIST(cv),1);
 	RETURNOP(CvSTART(cv));
     }
