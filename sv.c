@@ -3442,10 +3442,13 @@ sv_inc(register SV *sv)
 		croak(no_modify);
 	}
 	if (SvROK(sv)) {
+	    IV i;
 #ifdef OVERLOAD
-	  if (SvAMAGIC(sv) && AMG_CALLun(sv,inc)) return;
+	    if (SvAMAGIC(sv) && AMG_CALLun(sv,inc)) return;
 #endif /* OVERLOAD */
-	  sv_unref(sv);
+	    i = (IV)SvRV(sv);
+	    sv_unref(sv);
+	    sv_setiv(sv, i);
 	}
     }
     if (SvGMAGICAL(sv))
@@ -3519,10 +3522,13 @@ sv_dec(register SV *sv)
 		croak(no_modify);
 	}
 	if (SvROK(sv)) {
+	    IV i;
 #ifdef OVERLOAD
-	  if (SvAMAGIC(sv) && AMG_CALLun(sv,dec)) return;
+	    if (SvAMAGIC(sv) && AMG_CALLun(sv,dec)) return;
 #endif /* OVERLOAD */
-	  sv_unref(sv);
+	    i = (IV)SvRV(sv);
+	    sv_unref(sv);
+	    sv_setiv(sv, i);
 	}
     }
     if (SvGMAGICAL(sv))
