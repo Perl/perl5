@@ -4369,7 +4369,7 @@ Perl_sv_clear(pTHX_ register SV *sv)
 
     if (SvOBJECT(sv)) {
 	if (PL_defstash) {		/* Still have a symbol table? */
-	    djSP;
+	    dSP;
 	    CV* destructor;
 	    SV tmpref;
 

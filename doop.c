@@ -1195,7 +1195,7 @@ finish:
 OP *
 Perl_do_kv(pTHX)
 {
-    djSP;
+    dSP;
     HV *hv = (HV*)POPs;
     HV *keys;
     register HE *entry;

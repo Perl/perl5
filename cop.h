@@ -500,7 +500,7 @@ typedef struct stackinfo PERL_SI;
  * PUTBACK/SPAGAIN to flush/refresh any local SP that may be active */
 #define POPSTACK \
     STMT_START {							\
-	djSP;								\
+	dSP;								\
 	PERL_SI *prev = PL_curstackinfo->si_prev;			\
 	if (!prev) {							\
 	    PerlIO_printf(Perl_error_log, "panic: POPSTACK\n");		\

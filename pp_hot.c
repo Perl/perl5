@@ -27,7 +27,7 @@ static void unset_cvowner(pTHXo_ void *cvarg);
 
 PP(pp_const)
 {
-    djSP;
+    dSP;
     XPUSHs(cSVOP_sv);
     RETURN;
 }
@@ -43,7 +43,7 @@ PP(pp_nextstate)
 
 PP(pp_gvsv)
 {
-    djSP;
+    dSP;
     EXTEND(SP,1);
     if (PL_op->op_private & OPpLVAL_INTRO)
 	PUSHs(save_scalar(cGVOP_gv));
@@ -71,7 +71,7 @@ PP(pp_pushmark)
 
 PP(pp_stringify)
 {
-    djSP; dTARGET;
+    dSP; dTARGET;
     STRLEN len;
     char *s;
     s = SvPV(TOPs,len);
@@ -86,14 +86,14 @@ PP(pp_stringify)
 
 PP(pp_gv)
 {
-    djSP;
+    dSP;
     XPUSHs((SV*)cGVOP_gv);
     RETURN;
 }
 
 PP(pp_and)
 {
-    djSP;
+    dSP;
     if (!SvTRUE(TOPs))
 	RETURN;
     else {
@@ -104,7 +104,7 @@ PP(pp_and)
 
 PP(pp_sassign)
 {
-    djSP; dPOPTOPssrl;
+    dSP; dPOPTOPssrl;
 
     if (PL_op->op_private & OPpASSIGN_BACKWARDS) {
 	SV *temp;
@@ -119,7 +119,7 @@ PP(pp_sassign)
 
 PP(pp_cond_expr)
 {
-    djSP;
+    dSP;
     if (SvTRUEx(POPs))
 	RETURNOP(cLOGOP->op_other);
     else
@@ -139,7 +139,7 @@ PP(pp_unstack)
 
 PP(pp_concat)
 {
-  djSP; dATARGET; tryAMAGICbin(concat,opASSIGN);
+  dSP; dATARGET; tryAMAGICbin(concat,opASSIGN);
   {
     dPOPTOPssrl;
     SV* rcopy = Nullsv;
@@ -195,7 +195,7 @@ PP(pp_concat)
 
 PP(pp_padsv)
 {
-    djSP; dTARGET;
+    dSP; dTARGET;
     XPUSHs(TARG);
     if (PL_op->op_flags & OPf_MOD) {
 	if (PL_op->op_private & OPpLVAL_INTRO)
@@ -229,7 +229,7 @@ PP(pp_readline)
 
 PP(pp_eq)
 {
-    djSP; tryAMAGICbinSET(eq,0);
+    dSP; tryAMAGICbinSET(eq,0);
 #ifdef PERL_PRESERVE_IVUV
     SvIV_please(TOPs);
     if (SvIOK(TOPs)) {
@@ -302,7 +302,7 @@ PP(pp_eq)
 
 PP(pp_preinc)
 {
-    djSP;
+    dSP;
     if (SvREADONLY(TOPs) || SvTYPE(TOPs) > SVt_PVLV)
 	DIE(aTHX_ PL_no_modify);
     if (SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
@@ -319,7 +319,7 @@ PP(pp_preinc)
 
 PP(pp_or)
 {
-    djSP;
+    dSP;
     if (SvTRUE(TOPs))
 	RETURN;
     else {
@@ -330,7 +330,7 @@ PP(pp_or)
 
 PP(pp_add)
 {
-    djSP; dATARGET; bool useleft; tryAMAGICbin(add,opASSIGN);
+    dSP; dATARGET; bool useleft; tryAMAGICbin(add,opASSIGN);
     useleft = USE_LEFT(TOPm1s);
 #ifdef PERL_PRESERVE_IVUV
     /* We must see if we can perform the addition with integers if possible,
@@ -492,7 +492,7 @@ PP(pp_add)
 
 PP(pp_aelemfast)
 {
-    djSP;
+    dSP;
     AV *av = GvAV(cGVOP_gv);
     U32 lval = PL_op->op_flags & OPf_MOD;
     SV** svp = av_fetch(av, PL_op->op_private, lval);
@@ -506,7 +506,7 @@ PP(pp_aelemfast)
 
 PP(pp_join)
 {
-    djSP; dMARK; dTARGET;
+    dSP; dMARK; dTARGET;
     MARK++;
     do_join(TARG, *MARK, MARK, SP);
     SP = MARK;
@@ -516,7 +516,7 @@ PP(pp_join)
 
 PP(pp_pushre)
 {
-    djSP;
+    dSP;
 #ifdef DEBUGGING
     /*
      * We ass_u_me that LvTARGOFF() comes first, and that two STRLENs
@@ -537,7 +537,7 @@ PP(pp_pushre)
 
 PP(pp_print)
 {
-    djSP; dMARK; dORIGMARK;
+    dSP; dMARK; dORIGMARK;
     GV *gv;
     IO *io;
     register PerlIO *fp;
@@ -634,7 +634,7 @@ PP(pp_print)
 
 PP(pp_rv2av)
 {
-    djSP; dTOPss;
+    dSP; dTOPss;
     AV *av;
 
     if (SvROK(sv)) {
@@ -758,7 +758,7 @@ PP(pp_rv2av)
 
 PP(pp_rv2hv)
 {
-    djSP; dTOPss;
+    dSP; dTOPss;
     HV *hv;
 
     if (SvROK(sv)) {
@@ -963,7 +963,7 @@ S_do_oddball(pTHX_ HV *hash, SV **relem, SV **firstrelem)
 
 PP(pp_aassign)
 {
-    djSP;
+    dSP;
     SV **lastlelem = PL_stack_sp;
     SV **lastrelem = PL_stack_base + POPMARK;
     SV **firstrelem = PL_stack_base + POPMARK + 1;
@@ -1174,7 +1174,7 @@ PP(pp_aassign)
 
 PP(pp_qr)
 {
-    djSP;
+    dSP;
     register PMOP *pm = cPMOP;
     SV *rv = sv_newmortal();
     SV *sv = newSVrv(rv, "Regexp");
@@ -1184,7 +1184,7 @@ PP(pp_qr)
 
 PP(pp_match)
 {
-    djSP; dTARG;
+    dSP; dTARG;
     register PMOP *pm = cPMOP;
     register char *t;
     register char *s;
@@ -1583,7 +1583,7 @@ Perl_do_readline(pTHX)
 
 PP(pp_enter)
 {
-    djSP;
+    dSP;
     register PERL_CONTEXT *cx;
     I32 gimme = OP_GIMME(PL_op, -1);
 
@@ -1604,7 +1604,7 @@ PP(pp_enter)
 
 PP(pp_helem)
 {
-    djSP;
+    dSP;
     HE* he;
     SV **svp;
     SV *keysv = POPs;
@@ -1677,7 +1677,7 @@ PP(pp_helem)
 
 PP(pp_leave)
 {
-    djSP;
+    dSP;
     register PERL_CONTEXT *cx;
     register SV **mark;
     SV **newsp;
@@ -1733,7 +1733,7 @@ PP(pp_leave)
 
 PP(pp_iter)
 {
-    djSP;
+    dSP;
     register PERL_CONTEXT *cx;
     SV* sv;
     AV* av;
@@ -1835,7 +1835,7 @@ PP(pp_iter)
 
 PP(pp_subst)
 {
-    djSP; dTARG;
+    dSP; dTARG;
     register PMOP *pm = cPMOP;
     PMOP *rpm = pm;
     register SV *dstr;
@@ -2111,7 +2111,7 @@ ret_no:
 
 PP(pp_grepwhile)
 {
-    djSP;
+    dSP;
 
     if (SvTRUEx(POPs))
 	PL_stack_base[PL_markstack_ptr[-1]++] = PL_stack_base[*PL_markstack_ptr];
@@ -2152,7 +2152,7 @@ PP(pp_grepwhile)
 
 PP(pp_leavesub)
 {
-    djSP;
+    dSP;
     SV **mark;
     SV **newsp;
     PMOP *newpm;
@@ -2210,7 +2210,7 @@ PP(pp_leavesub)
  * get any slower by more conditions */
 PP(pp_leavesublv)
 {
-    djSP;
+    dSP;
     SV **mark;
     SV **newsp;
     PMOP *newpm;
@@ -2399,7 +2399,7 @@ S_get_db_sub(pTHX_ SV **svp, CV *cv)
 
 PP(pp_entersub)
 {
-    djSP; dPOPss;
+    dSP; dPOPss;
     GV *gv;
     HV *stash;
     register CV *cv;
@@ -2857,7 +2857,7 @@ Perl_sub_crush_depth(pTHX_ CV *cv)
 
 PP(pp_aelem)
 {
-    djSP;
+    dSP;
     SV** svp;
     SV* elemsv = POPs;
     IV elem = SvIV(elemsv);
@@ -2933,7 +2933,7 @@ Perl_vivify_ref(pTHX_ SV *sv, U32 to_what)
 
 PP(pp_method)
 {
-    djSP;
+    dSP;
     SV* sv = TOPs;
 
     if (SvROK(sv)) {
@@ -2950,7 +2950,7 @@ PP(pp_method)
 
 PP(pp_method_named)
 {
-    djSP;
+    dSP;
     SV* sv = cSVOP->op_sv;
     U32 hash = SvUVX(sv);
 
