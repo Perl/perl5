@@ -824,7 +824,7 @@ byterun(pTHX_ register struct byteloader_state *bstate)
 	    {
 		PADOFFSET arg;
 		BGET_U32(arg);
-		(PADOFFSET)cPMOP->op_pmreplroot = arg;
+		cPMOP->op_pmreplroot = (OP*)arg;
 		break;
 	    }
 #else

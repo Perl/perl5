@@ -143,6 +143,10 @@ while (<DATA>) {
 	next;
     }
     ($insn, $lvalue, $argtype, $flags) = split;
+    my $rvalcast = '';
+    if ($argtype =~ m:(.+)/(.+):) {
+	($rvalcast, $argtype) = ("($1)", $2);
+    }
     $insn_name[$insn_num] = $insn;
     $fundtype = $alias_from{$argtype} || $argtype;
 
@@ -162,7 +166,7 @@ while (<DATA>) {
 	print BYTERUN_C "\t\tBSET_OBJ_STORE($lvalue$optarg);\n";
     }
     elsif ($optarg && $lvalue ne "none") {
-	print BYTERUN_C "\t\t$lvalue = arg;\n";
+	print BYTERUN_C "\t\t$lvalue = ${rvalcast}arg;\n";
     }
     print BYTERUN_C "\t\tbreak;\n\t    }\n";
 
@@ -337,6 +341,8 @@ nop		none			none
 # ret so that \0-terminated strings can be read properly as bytecode.
 %number 0
 #
+# The argtype is either a single type or "rightvaluecast/argtype".
+#
 #opcode		lvalue					argtype		flags	
 #
 ret		none					none		x
@@ -447,7 +453,7 @@ op_pmreplstart	cPMOP->op_pmreplstart			opindex
 op_pmnext	*(OP**)&cPMOP->op_pmnext		opindex
 #ifdef USE_ITHREADS
 op_pmstashpv	cPMOP->op_pmstashpv			pvindex
-op_pmreplrootpo	(PADOFFSET)cPMOP->op_pmreplroot		PADOFFSET
+op_pmreplrootpo	cPMOP->op_pmreplroot			OP*/PADOFFSET
 #else
 op_pmstash	*(SV**)&cPMOP->op_pmstash		svindex
 op_pmreplrootgv	*(SV**)&cPMOP->op_pmreplroot		svindex
