@@ -3898,14 +3898,13 @@ sub xs_o {	# many makes are too dumb to use xs_c then c_o
 =item perl_archive
 
 This is internal method that returns path to libperl.a equivalent
-to be linked to dynamic extensions. UNIX does not have one but OS2
-and Win32 do.
+to be linked to dynamic extensions. UNIX does not have one but other
+OSs might have one.
 
 =cut 
 
 sub perl_archive
 {
- return '$(PERL_INC)' . "/$Config{libperl}" if $^O eq "beos";
  return "";
 }
 
