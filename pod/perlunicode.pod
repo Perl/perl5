@@ -177,6 +177,10 @@ You can also use negation in both C<\p{}> and C<\P{}> by introducing a caret
 (^) between the first brace and the property name: C<\p{^Tamil}> is
 equal to C<\P{Tamil}>.
 
+B<NOTE: the properties, scripts, and blocks listed here are as of
+Unicode 3.2.0, March 2002, or Perl 5.8.0, July 2002.  Unicode 4.0.0
+came out in April 2003, and Perl 5.8.1 in September 2003.>
+
 Here are the basic Unicode General Category properties, followed by their
 long form.  You can use either; C<\p{Lu}> and C<\p{UppercaseLetter}>,
 for instance, are identical.
