@@ -3225,8 +3225,15 @@ Perl_vload_module(pTHX_ U32 flags, SV *name, SV *ver, va_list *args)
 	    sv = va_arg(*args, SV*);
 	}
     }
-    utilize(!(flags & PERL_LOADMOD_DENY), start_subparse(FALSE, 0),
-	    veop, modname, imop);
+    {
+	line_t ocopline = PL_copline;
+	int oexpect = PL_expect;
+
+	utilize(!(flags & PERL_LOADMOD_DENY), start_subparse(FALSE, 0),
+		veop, modname, imop);
+	PL_expect = oexpect;
+	PL_copline = ocopline;
+    }
 }
 
 OP *
