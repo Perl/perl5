@@ -33,9 +33,9 @@ sub canonpath {
     my ($self,$path) = @_;
     $path =~ s|/+|/|g unless($^O eq 'cygwin');     # xx////xx  -> xx/xx
     $path =~ s|(/\.)+/|/|g;                        # xx/././xx -> xx/xx
-    $path =~ s|^(\./)+|| unless $path eq "./";     # ./xx      -> xx
-    $path =~ s|^/(\.\./)+|/|;                      # /../../xx -> xx
-    $path =~ s|/$|| unless $path eq "/";           # xx/       -> xx
+    $path =~ s|^(\./)+||s unless $path eq "./";    # ./xx      -> xx
+    $path =~ s|^/(\.\./)+|/|s;                     # /../../xx -> xx
+    $path =~ s|/\z|| unless $path eq "/";          # xx/       -> xx
     return $path;
 }
 
@@ -146,7 +146,7 @@ directory. (Does not strip symlinks, only '.', '..', and equivalents.)
 
 sub no_upwards {
     my $self = shift;
-    return grep(!/^\.{1,2}$/, @_);
+    return grep(!/^\.{1,2}\z/s, @_);
 }
 
 =item case_tolerant
@@ -168,7 +168,7 @@ Takes as argument a path and returns true, if it is an absolute path.
 
 sub file_name_is_absolute {
     my ($self,$file) = @_;
-    return scalar($file =~ m:^/:);
+    return scalar($file =~ m:^/:s);
 }
 
 =item path
@@ -223,7 +223,7 @@ sub splitpath {
         $directory = $path;
     }
     else {
-        $path =~ m|^ ( (?: .* / (?: \.\.?$ )? )? ) ([^/]*) |x;
+        $path =~ m|^ ( (?: .* / (?: \.\.?\z )? )? ) ([^/]*) |xs;
         $directory = $1;
         $file      = $2;
     }
@@ -261,7 +261,7 @@ sub splitdir {
     # check to be sure that there will not be any before handling the
     # simple case.
     #
-    if ( $directories !~ m|/$| ) {
+    if ( $directories !~ m|/\z| ) {
         return split( m|/|, $directories );
     }
     else {

@@ -65,7 +65,7 @@ sub case_tolerant {
 
 sub file_name_is_absolute {
     my ($self,$file) = @_;
-    return scalar($file =~ m{^([a-z]:)?[\\/]}i);
+    return scalar($file =~ m{^([a-z]:)?[\\/]}is);
 }
 
 =item catfile
@@ -100,13 +100,13 @@ path. On UNIX eliminated successive slashes and successive "/.".
 
 sub canonpath {
     my ($self,$path) = @_;
-    $path =~ s/^([a-z]:)/\u$1/;
+    $path =~ s/^([a-z]:)/\u$1/s;
     $path =~ s|/|\\|g;
     $path =~ s|([^\\])\\+|$1\\|g;                  # xx////xx  -> xx/xx
     $path =~ s|(\\\.)+\\|\\|g;                     # xx/././xx -> xx/xx
-    $path =~ s|^(\.\\)+|| unless $path eq ".\\";   # ./xx      -> xx
-    $path =~ s|\\$||
-             unless $path =~ m#^([A-Z]:)?\\$#;     # xx/       -> xx
+    $path =~ s|^(\.\\)+||s unless $path eq ".\\";  # ./xx      -> xx
+    $path =~ s|\\\z||
+             unless $path =~ m#^([A-Z]:)?\\\z#s;   # xx/       -> xx
     return $path;
 }
 
@@ -136,7 +136,7 @@ sub splitpath {
         $path =~ 
             m{^( (?:[a-zA-Z]:|(?:\\\\|//)[^\\/]+[\\/][^\\/]+)? ) 
                  (.*)
-             }x;
+             }xs;
         $volume    = $1;
         $directory = $2;
     }
@@ -146,9 +146,9 @@ sub splitpath {
                       (?:\\\\|//)[^\\/]+[\\/][^\\/]+
                   )?
                 )
-                ( (?:.*[\\\\/](?:\.\.?$)?)? )
+                ( (?:.*[\\\\/](?:\.\.?\z)?)? )
                 (.*)
-             }x;
+             }xs;
         $volume    = $1;
         $directory = $2;
         $file      = $3;
@@ -187,7 +187,7 @@ sub splitdir {
     # check to be sure that there will not be any before handling the
     # simple case.
     #
-    if ( $directories !~ m|[\\/]$| ) {
+    if ( $directories !~ m|[\\/]\z| ) {
         return split( m|[\\/]|, $directories );
     }
     else {
@@ -216,16 +216,16 @@ sub catpath {
     # If it's UNC, make sure the glue separator is there, reusing
     # whatever separator is first in the $volume
     $volume .= $1
-        if ( $volume =~ m@^([\\/])[\\/][^\\/]+[\\/][^\\/]+$@ &&
-             $directory =~ m@^[^\\/]@
+        if ( $volume =~ m@^([\\/])[\\/][^\\/]+[\\/][^\\/]+\z@s &&
+             $directory =~ m@^[^\\/]@s
            ) ;
 
     $volume .= $directory ;
 
     # If the volume is not just A:, make sure the glue separator is 
     # there, reusing whatever separator is first in the $volume if possible.
-    if ( $volume !~ m@^[a-zA-Z]:$@ &&
-         $volume =~ m@[^\\/]$@      &&
+    if ( $volume !~ m@^[a-zA-Z]:\z@s &&
+         $volume =~ m@[^\\/]\z@      &&
          $file   =~ m@[^\\/]@
        ) {
         $volume =~ m@([\\/])@ ;
@@ -330,7 +330,7 @@ sub abs2rel {
     }
 
     # It makes no sense to add a relative path to a UNC volume
-    $path_volume = '' unless $path_volume =~ m{^[A-Z]:}i ;
+    $path_volume = '' unless $path_volume =~ m{^[A-Z]:}is ;
 
     return $self->canonpath( 
         $self->catpath($path_volume, $path_directories, $path_file ) 

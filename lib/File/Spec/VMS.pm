@@ -55,7 +55,7 @@ sub eliminate_macros {
                     $complex = 1;
                 }
             }
-            else { ($macro = unixify($self->{$macro})) =~ s#/$##; }
+            else { ($macro = unixify($self->{$macro})) =~ s#/\z##; }
             $npath = "$head$macro$tail";
         }
     }
@@ -85,18 +85,18 @@ sub fixpath {
     $self = bless {} unless ref $self;
     my($fixedpath,$prefix,$name);
 
-    if ($path =~ m#^\$\([^\)]+\)$# || $path =~ m#[/:>\]]#) { 
-        if ($force_path or $path =~ /(?:DIR\)|\])$/) {
+    if ($path =~ m#^\$\([^\)]+\)\z#s || $path =~ m#[/:>\]]#) { 
+        if ($force_path or $path =~ /(?:DIR\)|\])\z/) {
             $fixedpath = vmspath($self->eliminate_macros($path));
         }
         else {
             $fixedpath = vmsify($self->eliminate_macros($path));
         }
     }
-    elsif ((($prefix,$name) = ($path =~ m#^\$\(([^\)]+)\)(.+)#)) && $self->{$prefix}) {
+    elsif ((($prefix,$name) = ($path =~ m#^\$\(([^\)]+)\)(.+)#s)) && $self->{$prefix}) {
         my($vmspre) = $self->eliminate_macros("\$($prefix)");
         # is it a dir or just a name?
-        $vmspre = ($vmspre =~ m|/| or $prefix =~ /DIR$/) ? vmspath($vmspre) : '';
+        $vmspre = ($vmspre =~ m|/| or $prefix =~ /DIR\z/) ? vmspath($vmspre) : '';
         $fixedpath = ($vmspre ? $vmspre : $self->{$prefix}) . $name;
         $fixedpath = vmspath($fixedpath) if $force_path;
     }
@@ -165,19 +165,19 @@ sub catdir {
     if (@dirs) {
 	my $path = (@dirs == 1 ? $dirs[0] : $self->catdir(@dirs));
 	my ($spath,$sdir) = ($path,$dir);
-	$spath =~ s/.dir$//; $sdir =~ s/.dir$//; 
-	$sdir = $self->eliminate_macros($sdir) unless $sdir =~ /^[\w\-]+$/;
+	$spath =~ s/.dir\z//; $sdir =~ s/.dir\z//; 
+	$sdir = $self->eliminate_macros($sdir) unless $sdir =~ /^[\w\-]+\z/s;
 	$rslt = $self->fixpath($self->eliminate_macros($spath)."/$sdir",1);
 
     # Special case for VMS absolute directory specs: these will have had device
     # prepended during trip through Unix syntax in eliminate_macros(), since
     # Unix syntax has no way to express "absolute from the top of this device's
     # directory tree".
-    if ($spath =~ /^[\[<][^.\-]/) { $rslt =~ s/^[^\[<]+//; }
+    if ($spath =~ /^[\[<][^.\-]/s) { $rslt =~ s/^[^\[<]+//s; }
     }
     else {
-	if ($dir =~ /^\$\([^\)]+\)$/) { $rslt = $dir; }
-	else                          { $rslt = vmspath($dir); }
+	if ($dir =~ /^\$\([^\)]+\)\z/s) { $rslt = $dir; }
+	else                            { $rslt = vmspath($dir); }
     }
     return $rslt;
 }
@@ -197,8 +197,8 @@ sub catfile {
     if (@files) {
 	my $path = (@files == 1 ? $files[0] : $self->catdir(@files));
 	my $spath = $path;
-	$spath =~ s/.dir$//;
-	if ($spath =~ /^[^\)\]\/:>]+\)$/ && basename($file) eq $file) {
+	$spath =~ s/.dir\z//;
+	if ($spath =~ /^[^\)\]\/:>]+\)\z/s && basename($file) eq $file) {
 	    $rslt = "$spath$file";
 	}
 	else {
@@ -305,8 +305,8 @@ Checks for VMS directory spec as well as Unix separators.
 sub file_name_is_absolute {
     my ($self,$file) = @_;
     # If it's a logical name, expand it.
-    $file = $ENV{$file} while $file =~ /^[\w\$\-]+$/ && $ENV{$file};
-    return scalar($file =~ m!^/!              ||
+    $file = $ENV{$file} while $file =~ /^[\w\$\-]+\z/s && $ENV{$file};
+    return scalar($file =~ m!^/!s             ||
 		  $file =~ m![<\[][^.\-\]>]!  ||
 		  $file =~ /:[^<\[]/);
 }
@@ -321,7 +321,7 @@ sub splitpath {
     my($self,$path) = @_;
     my($dev,$dir,$file) = ('','','');
 
-    vmsify($path) =~ /(.+:)?([\[<].*[\]>])?(.*)/;
+    vmsify($path) =~ /(.+:)?([\[<].*[\]>])?(.*)/s;
     return ($1 || '',$2 || '',$3);
 }
 
@@ -335,7 +335,7 @@ sub splitdir {
     my($self,$dirspec) = @_;
     $dirspec =~ s/\]\[//g;  $dirspec =~ s/\-\-/-.-/g;
     my(@dirs) = split('\.', vmspath($dirspec));
-    $dirs[0] =~ s/^[\[<]//;  $dirs[-1] =~ s/[\]>]$//;
+    $dirs[0] =~ s/^[\[<]//s;  $dirs[-1] =~ s/[\]>]\z//s;
     @dirs;
 }
 
@@ -379,7 +379,7 @@ sub splitpath {
             m{^ ( (?: /[^/]* )? )
                 ( (?: .*/(?:[^/]+.dir)? )? )
                 (.*)
-             }x;
+             }xs;
         $volume    = $1;
         $directory = $2;
         $file      = $3;
@@ -389,14 +389,14 @@ sub splitpath {
             m{^ ( (?: (?: (?: [\w\$-]+ (?: "[^"]*")?:: )? [\w\$-]+: )? ) )
                 ( (?:\[.*\])? )
                 (.*)
-             }x;
+             }xs;
         $volume    = $1;
         $directory = $2;
         $file      = $3;
     }
 
     $directory = $1
-        if $directory =~ /^\[(.*)\]$/ ;
+        if $directory =~ /^\[(.*)\]\z/s ;
 
     return ($volume,$directory,$file);
 }
@@ -422,14 +422,14 @@ sub splitdir {
     return File::Spec::Unix::splitdir( $self, @_ )
         if ( $directories =~ m{/} ) ;
 
-    $directories =~ s/^\[(.*)\]$/$1/ ;
+    $directories =~ s/^\[(.*)\]\z/$1/s ;
 
     #
     # split() likes to forget about trailing null fields, so here we
     # check to be sure that there will not be any before handling the
     # simple case.
     #
-    if ( $directories !~ m{\.$} ) {
+    if ( $directories !~ m{\.\z} ) {
         return split( m{\.}, $directories );
     }
     else {
@@ -453,13 +453,13 @@ sub catpath {
     my ($volume,$directory,$file) = @_;
 
     $volume .= ':'
-        if $volume =~ /[^:]$/ ;
+        if $volume =~ /[^:]\z/ ;
 
     $directory = "[$directory"
-        if $directory =~ /^[^\[]/ ;
+        if $directory =~ /^[^\[]/s ;
 
     $directory .= ']'
-        if $directory =~ /[^\]]$/ ;
+        if $directory =~ /[^\]]\z/ ;
 
     return "$volume$directory$file" ;
 }
@@ -500,13 +500,13 @@ sub abs2rel {
         $self->splitpath( $path, 1 ) ;
 
     $path_directories = $1
-        if $path_directories =~ /^\[(.*)\]$/ ;
+        if $path_directories =~ /^\[(.*)\]\z/s ;
 
     my ( undef, $base_directories, undef ) =
         $self->splitpath( $base, 1 ) ;
 
     $base_directories = $1
-        if $base_directories =~ /^\[(.*)\]$/ ;
+        if $base_directories =~ /^\[(.*)\]\z/s ;
 
     # Now, remove all leading components that are the same
     my @pathchunks = $self->splitdir( $path_directories );
@@ -523,7 +523,7 @@ sub abs2rel {
     # @basechunks now contains the directories to climb out of,
     # @pathchunks now has the directories to descend in to.
     $path_directories = '-.' x @basechunks . join( '.', @pathchunks ) ;
-    $path_directories =~ s{\.$}{} ;
+    $path_directories =~ s{\.\z}{} ;
     return $self->catpath( '', $path_directories, $path_file ) ;
 }
 
@@ -556,8 +556,8 @@ sub rel2abs($;$;) {
 
         my $sep = '' ;
         $sep = '.'
-            if ( $base_directories =~ m{[^.]$} &&
-                 $path_directories =~ m{^[^.]}
+            if ( $base_directories =~ m{[^.]\z} &&
+                 $path_directories =~ m{^[^.]}s
             ) ;
         $base_directories = "$base_directories$sep$path_directories" ;
 

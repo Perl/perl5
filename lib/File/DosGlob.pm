@@ -61,7 +61,7 @@ sub doglob {
 	s/\?/.?/g;
 
 	#print "regex: '$_', head: '$head'\n";
-	my $matchsub = eval 'sub { $_[0] =~ m|^' . $_ . '$|io }';
+	my $matchsub = eval 'sub { $_[0] =~ m|^' . $_ . '\\z|ios }';
 	warn($@), next OUTER if $@;
       INNER:
 	for my $e (@leaves) {

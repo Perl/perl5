@@ -79,10 +79,10 @@ sub catdir {
     shift;
     my @args = @_;
     my $result = shift @args;
-    $result =~ s/:$//;
+    $result =~ s/:\z//;
     foreach (@args) {
-	s/:$//;
-	s/^://;
+	s/:\z//;
+	s/^://s;
 	$result .= ":$_";
     }
     return "$result:";
@@ -110,7 +110,7 @@ sub catfile {
     my $file = pop @_;
     return $file unless @_;
     my $dir = $self->catdir(@_);
-    $file =~ s/^://;
+    $file =~ s/^://s;
     return $dir.$file;
 }
 
@@ -150,7 +150,7 @@ sub rootdir {
     require Mac::Files;
     my $system =  Mac::Files::FindFolder(&Mac::Files::kOnSystemDisk,
 					 &Mac::Files::kSystemFolderType);
-    $system =~ s/:.*$/:/;
+    $system =~ s/:.*\z/:/;
     return $system;
 }
 
@@ -194,7 +194,7 @@ distinguish unambiguously.
 sub file_name_is_absolute {
     my ($self,$file) = @_;
     if ($file =~ /:/) {
-	return ($file !~ m/^:/);
+	return ($file !~ m/^:/s);
     } else {
 	return (! -e ":$file");
     }
@@ -228,22 +228,22 @@ sub splitpath {
     my ($volume,$directory,$file) = ('','','');
 
     if ( $nofile ) {
-        ( $volume, $directory ) = $path =~ m@((?:[^:]+(?::|$))?)(.*)@;
+        ( $volume, $directory ) = $path =~ m@((?:[^:]+(?::|\z))?)(.*)@;
     }
     else {
         $path =~ 
             m@^( (?: [^:]+: )? ) 
                 ( (?: .*: )? )
                 ( .* )
-             @x;
+             @xs;
         $volume    = $1;
         $directory = $2;
         $file      = $3;
     }
 
     # Make sure non-empty volumes and directories end in ':'
-    $volume    .= ':' if $volume    =~ m@[^:]$@ ;
-    $directory .= ':' if $directory =~ m@[^:]$@ ;
+    $volume    .= ':' if $volume    =~ m@[^:]\z@ ;
+    $directory .= ':' if $directory =~ m@[^:]\z@ ;
     return ($volume,$directory,$file);
 }
 
@@ -259,7 +259,7 @@ sub splitdir {
     # check to be sure that there will not be any before handling the
     # simple case.
     #
-    if ( $directories !~ m@:$@ ) {
+    if ( $directories !~ m@:\z@ ) {
         return split( m@:@, $directories );
     }
     else {
@@ -282,16 +282,16 @@ sub catpath {
     my $self = shift ;
 
     my $result = shift ;
-    $result =~ s@^([^/])@/$1@ ;
+    $result =~ s@^([^/])@/$1@s ;
 
     my $segment ;
     for $segment ( @_ ) {
-        if ( $result =~ m@[^/]$@ && $segment =~ m@^[^/]@ ) {
+        if ( $result =~ m@[^/]\z@ && $segment =~ m@^[^/]@s ) {
             $result .= "/$segment" ;
         }
-        elsif ( $result =~ m@/$@ && $segment =~ m@^/@ ) {
-            $result  =~ s@/+$@/@;
-            $segment =~ s@^/+@@;
+        elsif ( $result =~ m@/\z@ && $segment =~ m@^/@s ) {
+            $result  =~ s@/+\z@/@;
+            $segment =~ s@^/+@@s;
             $result  .= "$segment" ;
         }
         else {
