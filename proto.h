@@ -837,6 +837,7 @@ PERL_CALLCONV int	Perl_yylex(pTHX_ YYSTYPE *lvalp, int *lcharp);
 #else
 PERL_CALLCONV int	Perl_yylex(pTHX);
 #endif
+STATIC int	S_syylex(pTHX);
 PERL_CALLCONV int	Perl_yyparse(pTHX);
 PERL_CALLCONV int	Perl_yywarn(pTHX_ char* s);
 #if defined(MYMALLOC)

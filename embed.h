@@ -749,6 +749,7 @@
 #else
 #define yylex			Perl_yylex
 #endif
+#define syylex			S_syylex
 #define yyparse			Perl_yyparse
 #define yywarn			Perl_yywarn
 #if defined(MYMALLOC)
@@ -2206,6 +2207,7 @@
 #else
 #define yylex()			Perl_yylex(aTHX)
 #endif
+#define syylex()		S_syylex(aTHX)
 #define yyparse()		Perl_yyparse(aTHX)
 #define yywarn(a)		Perl_yywarn(aTHX_ a)
 #if defined(MYMALLOC)
@@ -4325,6 +4327,8 @@
 #define Perl_yylex		CPerlObj::Perl_yylex
 #define yylex			Perl_yylex
 #endif
+#define S_syylex		CPerlObj::S_syylex
+#define syylex			S_syylex
 #define Perl_yyparse		CPerlObj::Perl_yyparse
 #define yyparse			Perl_yyparse
 #define Perl_yywarn		CPerlObj::Perl_yywarn

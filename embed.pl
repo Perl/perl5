@@ -2094,6 +2094,7 @@ p	|int	|yylex		|YYSTYPE *lvalp|int *lcharp
 #else
 p	|int	|yylex
 #endif
+sp	|int	|syylex
 p	|int	|yyparse
 p	|int	|yywarn		|char* s
 #if defined(MYMALLOC)

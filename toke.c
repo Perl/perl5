@@ -80,15 +80,19 @@ static I32 utf16rev_textfilter(pTHXo_ int idx, SV *sv, int maxlen);
 #endif
 
 #ifdef USE_PURE_BISON
-YYSTYPE* yylval_pointer = NULL;
-int* yychar_pointer = NULL;
+#ifndef YYMAXLEVEL
+#define YYMAXLEVEL 100
+#endif
+YYSTYPE* yylval_pointer[YYMAXLEVEL];
+int* yychar_pointer[YYMAXLEVEL];
+int yyactlevel = 0;
 #  undef yylval
 #  undef yychar
-#  define yylval (*yylval_pointer)
-#  define yychar (*yychar_pointer)
-#  define PERL_YYLEX_PARAM yylval_pointer,yychar_pointer
-#  undef yylex
-#  define yylex()	Perl_yylex(aTHX_ yylval_pointer, yychar_pointer)
+#  define yylval (*yylval_pointer[yyactlevel])
+#  define yychar (*yychar_pointer[yyactlevel])
+#  define PERL_YYLEX_PARAM yylval_pointer[yyactlevel],yychar_pointer[yyactlevel]
+#  undef yylex 
+#  define yylex()      Perl_yylex(aTHX_ yylval_pointer[yyactlevel],yychar_pointer[yyactlevel])
 #endif
 
 #include "keywords.h"
@@ -2067,6 +2071,34 @@ Perl_yylex(pTHX_ YYSTYPE *lvalp, int *lcharp)
 Perl_yylex(pTHX)
 #endif
 {
+
+    int r;
+
+#ifdef USE_PURE_BISON
+/* increment level and store the argument pointers */
+    yyactlevel++;
+    if (yyactlevel >= YYMAXLEVEL) {
+/* What to do ??? */
+    }
+    yylval_pointer[yyactlevel] = lvalp;
+    yychar_pointer[yyactlevel] = lcharp;
+    /* Save last pointer at the bottom */
+    yylval_pointer[0] = lvalp;
+    yychar_pointer[0] = lcharp;
+#endif
+
+    r = S_syylex(aTHX);
+
+#ifdef USE_PURE_BISON
+    yyactlevel--;
+#endif
+
+    return r;
+}
+
+STATIC int
+S_syylex(pTHX) /* need to be separate from yylex for reentrancy */
+{
     dTHR;
     register char *s;
     register char *d;
@@ -2074,11 +2106,6 @@ Perl_yylex(pTHX)
     STRLEN len;
     GV *gv = Nullgv;
     GV **gvp = 0;
-
-#ifdef USE_PURE_BISON
-    yylval_pointer = lvalp;
-    yychar_pointer = lcharp;
-#endif
 
     /* check if there's an identifier for us to look at */
     if (PL_pending_ident) {
