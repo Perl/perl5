@@ -7,6 +7,36 @@ perldelta - what is new for perl v5.8.0
 This document describes differences between the 5.6.0 release and the
 5.8.0 release.
 
+=head1 Highlights
+
+=over 4
+
+=item *
+
+Better Unicode support
+
+=item *
+
+New Thread Implementation
+
+=item *
+
+Many New Modules
+
+=item *
+
+Better Numeric Accuracy
+
+=item *
+
+Safe Signals
+
+=item *
+
+More Extensive Regression Testing
+
+=back
+
 =head1 Incompatible Changes
 
 =head2 64-bit platforms and malloc
@@ -888,7 +918,13 @@ handlers, installing new handlers was not atomic.
 
 =item *
 
-C<%INC> now localised in a Safe compartment so that use/require work.
+In C<Safe> the C<%INC> now localised in a Safe compartment so that
+use/require work.
+
+=item *
+
+In C<Search::Dict> one can now have a pre-processing hook for the
+lines being searched.
 
 =item *
 
@@ -2093,7 +2129,18 @@ such as sudo (see http://www.courtesan.com/sudo/).
 
 =head1 New Tests
 
-Several new tests have been added, especially for the F<lib> subsection.
+Several new tests have been added, especially for the F<lib>
+subsection.  There are now about 34 000 individual tests (spread over
+about 530 test scripts), in the regression suite (5.6.1 has about
+11700 tests, in 258 test scripts) Many of the new tests are introduced
+by the new modules, but still in general Perl is now more thoroughly
+tested.
+
+Because of the large number of tests, running the regression suite
+will take considerably longer time than it used to: expect the suite
+to take up to 4-5 times longer to run than in perl 5.6.  In a really
+fast machine you can hope to finish the suite in about 5 minutes
+(wallclock time).
 
 The tests are now reported in a different order than in earlier Perls.
 (This happens because the test scripts from under t/lib have been moved
