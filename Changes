@@ -31,6 +31,148 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 14041] By: jhi                                   on 2002/01/03  15:57:42
+        Log: Missed the =head1 additions.
+     Branch: perl
+	   ! XSUB.h av.c av.h cop.h cv.h doio.c gv.c gv.h handy.h hv.h
+	   ! intrpvar.h mg.c numeric.c op.c op.h perl.c pp.h pp_sort.c
+	   ! scope.h sharedsv.c sv.c sv.h thrdvar.h universal.c utf8.c
+	   ! util.c
+____________________________________________________________________________
+[ 14040] By: jhi                                   on 2002/01/03  15:05:06
+        Log: Subject: [PATCH lib/Carp/Heavy.pm lib/Carp.t] obscure warning from Carp::Heavy
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Thu, 3 Jan 2002 15:26:20 GMT
+             Message-Id: <200201031526.PAA06095@tempest.npl.co.uk>            
+     Branch: perl
+	   ! lib/Carp.t lib/Carp/Heavy.pm
+____________________________________________________________________________
+[ 14039] By: jhi                                   on 2002/01/03  15:02:12
+        Log: Subject: [PATCH hv.c] 
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Thu, 3 Jan 2002 14:49:06 GMT
+             Message-Id: <200201031449.OAA26137@tempest.npl.co.uk>            
+             
+             -Wformat check.
+     Branch: perl
+	   ! hv.c
+____________________________________________________________________________
+[ 14038] By: jhi                                   on 2002/01/03  15:01:09
+        Log: NetWare tweaks from Ananth Kesari.
+     Branch: perl
+	   ! NetWare/t/NWScripts.pl lib/File/Find.pm
+____________________________________________________________________________
+[ 14037] By: jhi                                   on 2002/01/03  13:41:38
+        Log: Cast.
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[ 14036] By: ams                                   on 2002/01/03  12:12:31
+        Log: Grammar fix suggested by Gwyn Judd.
+     Branch: perl
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[ 14033] By: ams                                   on 2002/01/03  08:24:24
+        Log: Subject: Not ok 14031: PPPort Makefile.PL
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 03 Jan 2002 10:17:46 +0100
+             Message-Id: <m3sn9n94jp.fsf@anima.de>
+     Branch: perl
+	   ! ext/Devel/PPPort/Makefile.PL
+____________________________________________________________________________
+[ 14031] By: jhi                                   on 2002/01/03  01:52:04
+        Log: Off-by-one is my middle name.
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[ 14030] By: ams                                   on 2002/01/02  23:56:37
+        Log: Subject: [PATCH @14015] threads::shared disabling
+             From: Andy Bussey <andybussey@yahoo.co.uk>
+             Date: Thu, 3 Jan 2002 00:46:58 +0000 (GMT)
+             Message-Id: <20020103004658.97969.qmail@web21006.mail.yahoo.com>
+     Branch: perl
+	   + ext/threads/shared/t/no_share.t
+	   ! MANIFEST ext/threads/shared/shared.pm ext/threads/threads.pm
+____________________________________________________________________________
+[ 14029] By: jhi                                   on 2002/01/02  23:40:08
+        Log: Simon's new perlapi scheme, I hope I got all the pieces.
+     Branch: perl
+	   + autodoc.pl embed.fnc
+	   ! MANIFEST Makefile.SH embed.pl pod/perlapi.pod
+____________________________________________________________________________
+[ 14028] By: jhi                                   on 2002/01/02  23:29:03
+        Log: Integrate perlio; more PPPort Makefile source dependence removal
+     Branch: perl
+	  !> ext/Devel/PPPort/Makefile.PL perl.h
+____________________________________________________________________________
+[ 14027] By: ams                                   on 2002/01/02  21:42:50
+        Log: Subject: [PATCH perldiag] errors caused by the "my Dog $spot" syntax
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Wed, 2 Jan 2002 23:09:13 +0100
+             Message-Id: <20020102230913.A17373@rafael>
+     Branch: perl
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[ 14026] By: ams                                   on 2002/01/02  21:38:34
+        Log: Subject: Re: PATCH: lib/Term/Cap.pm
+             From: Jonathan Stowe <gellyfish@gellyfish.com>
+             Date: Wed, 2 Jan 2002 21:50:36 +0000 (GMT)
+             Message-Id: <Pine.LNX.4.33.0201022144370.6042-100000@orpheus.gellyfish.com>
+     Branch: perl
+	   ! lib/Term/Cap.pm
+____________________________________________________________________________
+[ 14025] By: ams                                   on 2002/01/02  18:34:26
+        Log: Subject: [PATCH] Bad prototype detection changed from error to warning
+             From: Sam Tregar <sam@tregar.com>
+             Date: Wed, 2 Jan 2002 14:04:26 -0500 (EST)
+             Message-Id: <Pine.LNX.4.33.0201021400110.15420-200000@localhost.localdomain>
+     Branch: perl
+	   ! pod/perldiag.pod t/comp/proto.t toke.c
+____________________________________________________________________________
+[ 14024] By: ams                                   on 2002/01/02  18:16:12
+        Log: Subject: PATCH: lib/Term/Cap.pm
+             From: Norton Allen <allen@huarp.harvard.edu>
+             Date: Wed, 2 Jan 2002 14:22:09 -0500 (est)
+             Message-Id: <200201021922.OAA18505@bottesini.harvard.edu>
+     Branch: perl
+	   ! lib/Term/Cap.pm
+____________________________________________________________________________
+[ 14023] By: ams                                   on 2002/01/02  18:12:31
+        Log: Subject: PATCH: lib/Cwd.pm for QNX4
+             From: Norton Allen <allen@huarp.harvard.edu>
+             Date: Wed, 2 Jan 2002 14:19:42 -0500 (est)
+             Message-Id: <200201021919.OAA18012@bottesini.harvard.edu>
+     Branch: perl
+	   ! lib/Cwd.pm
+____________________________________________________________________________
+[ 14020] By: ams                                   on 2002/01/02  17:06:27
+        Log: Fix misplaced application of #14016.
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[ 14019] By: jhi                                   on 2002/01/02  16:51:38
+        Log: Integrate perlio; avoid uninit debug_pad.
+     Branch: perl
+	  !> sv.c
+____________________________________________________________________________
+[ 14018] By: jhi                                   on 2002/01/02  16:50:22
+        Log: makedepend VOS fix from Paul Green.
+     Branch: perl
+	   ! makedepend.SH
+____________________________________________________________________________
+[ 14016] By: ams                                   on 2002/01/02  15:58:11
+        Log: Subject: [PATCH] random crash in B::LISTOP::last
+             From: "Mattia Barbon" <mbarbon@dsi.unive.it>
+             Date: Wed, 2 Jan 2002 17:37:28 +0100
+             Message-Id: <3C334558.3906.19CB98D@localhost>
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[ 14015] By: jhi                                   on 2002/01/02  15:21:12
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 14014] By: jhi                                   on 2002/01/02  15:12:57
         Log: One more iteration of the ibcmp_utf8() interface,
              hopefully this is a convergent iteration...
