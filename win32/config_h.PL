@@ -54,8 +54,7 @@ while (<SH>)
    }
   print H;
  }
-print H "#include <win32.h>
-";
+print H "#include <win32.h>\n";
 close(H);
 close(SH);
 
@@ -72,6 +71,11 @@ if (compare("$file.new",$file))
   rename("$file.new",$file);
   #chmod(0444,$file);
   exit(1);
+ }
+else
+ {
+  unlink ("$file.new");
+  exit(0);
  }
 
 sub Config

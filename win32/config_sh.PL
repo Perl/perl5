@@ -5,6 +5,8 @@ while (@ARGV && $ARGV[0] =~ /^([\w_]+)=(.*)$/)
   shift(@ARGV);
  }
 
+$opt{VERSION} = $];
+$opt{INST_VER} =~ s|~VERSION~|$]|g;
 if ($] =~ /\.(\d\d\d)?(\d\d)?$/) { # should always be true
   $opt{PATCHLEVEL} = int($1 || 0);
   $opt{SUBVERSION} = $2 || '00';
@@ -13,6 +15,7 @@ if ($] =~ /\.(\d\d\d)?(\d\d)?$/) { # should always be true
 $opt{'cf_by'} = $ENV{USERNAME} unless $opt{'cf_by'};
 $opt{'cf_email'} = $opt{'cf_by'} . '@' . (gethostbyname('localhost'))[0]
 	unless $opt{'cf_email'};
+$opt{'usemymalloc'} = 'y' if $opt{'d_mymalloc'} eq 'define';
 
 while (<>)
  {

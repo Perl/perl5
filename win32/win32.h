@@ -18,9 +18,6 @@ typedef long long __int64;
 #define __declspec(x)
 #define PERL_GLOBAL_STRUCT
 #define MULTIPLICITY
-#ifndef TLS_OUT_OF_INDEXES
-#define TLS_OUT_OF_INDEXES (DWORD)0xFFFFFFFF
-#endif
 #endif
 
 /* Define DllExport akin to perl's EXT, 
@@ -30,7 +27,8 @@ typedef long long __int64;
  */
 
 #if defined(PERLDLL) || defined(WIN95FIX)
-#define DllExport __declspec(dllexport)
+#define DllExport
+/*#define DllExport __declspec(dllexport)*/	/* noises with VC5+sp3 */
 #else 
 #define DllExport __declspec(dllimport)
 #endif
@@ -40,8 +38,11 @@ typedef long long __int64;
 
 #ifdef   WIN32_LEAN_AND_MEAN		/* C file is NOT a Perl5 original. */
 #define  CONTEXT	PERL_CONTEXT	/* Avoid conflict of CONTEXT defs. */
-#define  index		strchr		/* Why 'index'? */
 #endif /*WIN32_LEAN_AND_MEAN */
+
+#ifndef TLS_OUT_OF_INDEXES
+#define TLS_OUT_OF_INDEXES (DWORD)0xFFFFFFFF
+#endif
 
 #include <dirent.h>
 #include <io.h>
@@ -61,6 +62,7 @@ struct tms {
 };
 
 #ifndef START_EXTERN_C
+#undef EXTERN_C
 #ifdef __cplusplus
 #  define START_EXTERN_C extern "C" {
 #  define END_EXTERN_C }
@@ -93,8 +95,12 @@ struct tms {
 
 #define ENV_IS_CASELESS
 
-#ifndef VER_PLATFORM_WIN32_WINDOWS	/* VC-2.0 headers dont have this */
+#ifndef VER_PLATFORM_WIN32_WINDOWS	/* VC-2.0 headers don't have this */
 #define VER_PLATFORM_WIN32_WINDOWS	1
+#endif
+
+#ifndef FILE_SHARE_DELETE		/* VC-4.0 headers don't have this */
+#define FILE_SHARE_DELETE		0x00000004
 #endif
 
 /* Compiler-specific stuff. */
@@ -121,6 +127,11 @@ struct tms {
 
 #define USE_RTL_WAIT	/* Borland has a working wait() */
 
+/* Borland is picky about a bare member function name used as its ptr */
+#ifdef PERL_OBJECT
+#define FUNC_NAME_TO_PTR(name)	&(name)
+#endif
+
 #endif
 
 #ifdef _MSC_VER			/* Microsoft Visual C++ */
@@ -138,6 +149,13 @@ typedef long		gid_t;
 #define _environ	environ
 #define flushall	_flushall
 #define fcloseall	_fcloseall
+
+#ifndef _O_NOINHERIT
+#  define _O_NOINHERIT	0x0080
+#  ifndef _NO_OLDNAMES
+#    define O_NOINHERIT	_O_NOINHERIT
+#  endif
+#endif
 
 #ifndef _O_NOINHERIT
 #  define _O_NOINHERIT	0x0080

@@ -25,7 +25,7 @@
 
 /* thanks to Beverly Brown	(beverly@datacube.com) */
 #ifdef USE_SOCKETS_AS_HANDLES
-#	define OPEN_SOCKET(x)	_open_osfhandle(x,O_RDWR|O_BINARY)
+#	define OPEN_SOCKET(x)	win32_open_osfhandle(x,O_RDWR|O_BINARY)
 #	define TO_SOCKET(x)	_get_osfhandle(x)
 #else
 #	define OPEN_SOCKET(x)	(x)
@@ -298,8 +298,11 @@ win32_select(int nfds, Perl_fd_set* rd, Perl_fd_set* wr, Perl_fd_set* ex, const 
      * so do the (millisecond) sleep as a special case
      */
     if (!(rd || wr || ex)) {
-	Sleep(timeout->tv_sec  * 1000 +
-	      timeout->tv_usec / 1000);		/* do the best we can */
+	if (timeout)
+	    Sleep(timeout->tv_sec  * 1000 +
+		  timeout->tv_usec / 1000);	/* do the best we can */
+	else
+	    Sleep(UINT_MAX);
 	return 0;
     }
     StartSockets();
@@ -638,7 +641,7 @@ win32_savecopyservent(struct servent*d, struct servent*s, const char *proto)
 	d->s_proto = s->s_proto;
     else
 #endif
-	if (proto && strlen(proto))
+    if (proto && strlen(proto))
 	d->s_proto = (char *)proto;
     else
 	d->s_proto = "tcp";
