@@ -87,7 +87,7 @@ push @files, "test.h";
 open FH, ">$header" or die "open >$header: $!\n";
 print FH <<"EOT";
 #define FIVE 5
-#define OK6 "ok 6\n"
+#define OK6 "ok 6\\n"
 #define OK7 1
 #define FARTHING 0.25
 #define NOT_ZERO 1
