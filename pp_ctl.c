@@ -1551,7 +1551,7 @@ PP(pp_caller)
 
     if (MAXARG)
 	count = POPi;
-    EXTEND(SP, 10);
+
     for (;;) {
 	/* we may be in a higher stacklevel, so dig down deeper */
 	while (cxix < 0 && top_si->si_type != PERLSI_MAIN) {
@@ -1560,8 +1560,10 @@ PP(pp_caller)
 	    cxix = dopoptosub_at(ccstack, top_si->si_cxix);
 	}
 	if (cxix < 0) {
-	    if (GIMME != G_ARRAY)
+	    if (GIMME != G_ARRAY) {
+		EXTEND(SP, 1);
 		RETPUSHUNDEF;
+            }
 	    RETURN;
 	}
 	if (PL_DBsub && cxix >= 0 &&
@@ -1583,6 +1585,7 @@ PP(pp_caller)
 
     stashname = CopSTASHPV(cx->blk_oldcop);
     if (GIMME != G_ARRAY) {
+        EXTEND(SP, 1);
 	if (!stashname)
 	    PUSHs(&PL_sv_undef);
 	else {
@@ -1592,6 +1595,8 @@ PP(pp_caller)
 	}
 	RETURN;
     }
+
+    EXTEND(SP, 10);
 
     if (!stashname)
 	PUSHs(&PL_sv_undef);
