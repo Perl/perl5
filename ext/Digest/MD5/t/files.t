@@ -15,13 +15,19 @@ use Digest::MD5 qw(md5 md5_hex md5_base64);
 #
 my $EXPECT;
 
+# To update the EBCDIC section even on a Latin 1 platform,
+# run this script with $ENV{EBCDIC_MD5SUM} set to a true value.
+# (You'll need to have Perl 5.7.3 or later, to have the Encode installed.)
+# (And remember that under the Perl core distribution you should
+#  also have the $ENV{PERL_CORE} set to a true value.)
+
 if (ord "A" == 193) { # EBCDIC
     $EXPECT = <<EOT;
-23cafa2de11474f0df8f808cc588bcc9  Changes
-3519f3d02c7c91158f732f0f00064657  README
-0268931475ae2a2e843ff58504cfa3f0  MD5.pm
-1be293491bba726810f8e87671ee0328  MD5.xs
-754b9db19f79dbc4992f7166eb0f37ce  rfc1321.txt
+a1ee2b18d1e05bdde3a93009e7f9dfda  Changes
+5a591a47e8c40fe4b78c744111511c45  README
+c9c83e6dbad5f41722338e67d4428077  MD5.pm
+4850753428db9422e8e5f97b401d5a13  MD5.xs
+276da0aa4e9a08b7fe09430c9c5690aa  rfc1321.txt
 EOT
 } else {
     $EXPECT = <<EOT;
@@ -48,8 +54,9 @@ if ($@) {
 
 for (split /^/, $EXPECT) {
      my($md5hex, $file) = split ' ';
+     my $base = $file;
      if ($ENV{PERL_CORE}) {
-         if ($file eq 'rfc1321.txt') { # Don't have it in core.
+         if ($file eq 'rfc1x321.txt') { # Don't have it in core.
 	     print "ok ", ++$testno, " # Skip: PERL_CORE\n";
 	     next;
 	 }
@@ -62,6 +69,17 @@ for (split /^/, $EXPECT) {
 	 $file = File::Spec->catfile($path, $file);
      }
 #     print "# file = $file\n";
+     unless (-f $file) {
+	warn "No such file: $file\n";
+	next;
+     }
+     if ($ENV{EBCDIC_MD5SUM}) {
+         use Encode 'from_to';
+	 my $data = cat_file($file);	
+	 from_to($data, 'latin1', 'cp1047');
+	 print md5_hex($data), " $base\n";
+	 next;
+     }
      my $md5bin = pack("H*", $md5hex);
      my $md5b64;
      if ($B64) {
