@@ -2,36 +2,62 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = "../lib" if -d "../lib";
+    unshift @INC, "../lib" if -d "../lib";
     eval { require Config; import Config; };
 
-    my $GR = "/etc/group";
+    unless (defined $Config{'i_grp'} &&
+	            $Config{'i_grp'} eq 'define' &&
+	    -f "/etc/group" ) { # Play safe.
+	print "1..0\n";
+	exit 0;
+    }
 
-    $where = $GR;
-
-    if (-x "/usr/bin/nidump") { # nidump is not just NeXT/OpenStep
-	if (open(GR, "nidump group . |")) {
-	    $where = "NetInfo group";
-	} else {
-	    print "1..0\n";
-	    exit 0;
+    if (not defined $where) {	# Try NIS.
+	foreach my $ypcat (qw(/usr/bin/ypcat /bin/ypcat /etc/ypcat)) {
+	    if (-x $ypcat &&
+		open(GR, "$ypcat group 2>/dev/null |") &&
+		defined(<GR>)) {
+		$where = "NIS group";
+		last;
+	    }
 	}
-    } elsif ((defined $Config{'i_grp'} and $Config{'i_grp'} ne 'define')
-	     or not -f $GR or not open(GR, $GR)
-	    ) {
+    }
+
+    if (not defined $where) {	# Try NetInfo.
+	foreach my $nidump (qw(/usr/bin/nidump)) {
+	    if (-x $nidump &&
+		open(GR, "$nidump group . 2>/dev/null |") &&
+		defined(<GR>)) {
+		$where = "NetInfo group";
+		last;
+	    }
+	}
+    }
+
+    if (not defined $where) {	# Try local.
+	my $GR = "/etc/group";
+	if (-f $GR && open(GR, $GR) && defined(<GR>)) {
+	    $where = $GR;
+	}
+    }
+
+    if (not defined $where) {	# Give up.
 	print "1..0\n";
 	exit 0;
     }
 }
 
+# By now GR filehandle should be open and full of juicy group entries.
+
 print "1..1\n";
 
 # Go through at most this many groups.
+# (note that the first entry has been read away by now)
 my $max = 25;
 
 my $n   = 0;
 my $tst = 1;
-my %suspect;
+my %perfect;
 my %seen;
 
 while (<GR>) {
@@ -44,7 +70,7 @@ while (<GR>) {
 	warn "# Your $where line $. is empty.\n";
 	next;
     }
-    next if $n == $max;
+    last if $n == $max;
     # In principle we could whine if @s != 4 but do we know enough
     # of group file formats everywhere?
     if (@s == 4) {
@@ -61,31 +87,42 @@ while (<GR>) {
 	    ($name,$passwd,$gid,$members) = @n;
 	    next if $name_s ne $name;
 	}
+	# NOTE: group names *CAN* contain whitespace.
 	$members =~ s/\s+/,/g;
-	$suspect{$name_s}++
-	    if $name    ne $name_s    or
-# Shadow passwords confuse this.
+	# what about different orders of members?
+	$perfect{$name_s}++
+	    if $name    eq $name_s    and
+# Do not compare passwords: think shadow passwords.
 # Not that group passwords are used much but better not assume anything.
-#              $passwd  ne $passwd_s  or
-               $gid     ne $gid_s     or
-               $members ne $members_s;
+               $gid     eq $gid_s     and
+               $members eq $members_s;
     }
     $n++;
 }
 
-# Drop the multiply defined groups.
-
-foreach (sort keys %seen) {
-    my $times = @{ $seen{$_} };
-    if ($times > 1) {
-	# Multiply defined groups are rarely intentional.
-	local $" = ", ";
-	print "# Group '$_' defined multiple times in $where, lines: @{$seen{$_}}.\n";
-	delete $suspect{$_};
-    }
+if (keys %perfect == 0) {
+    $max++;
+    print <<EOEX;
+#
+# The failure of op/grent test is not necessarily serious.
+# It may fail due to local group administration conventions.
+# If you are for example using both NIS and local groups,
+# test failure is possible.  Any distributed group scheme
+# can cause such failures.
+#
+# What the grent test is doing is that it compares the $max first
+# entries of $where
+# with the results of getgrgid() and getgrnam() call.  If it finds no
+# matches at all, it suspects something is wrong.
+# 
+EOEX
+    print "not ";
+    $not = 1;
+} else {
+    $not = 0;
 }
-
-print "not " if keys %suspect;
-print "ok ", $tst++, "\n";
+print "ok ", $tst++;
+print "\t# (not necessarily serious: run t/op/grent.t by itself)" if $not;
+print "\n";
 
 close(GR);
