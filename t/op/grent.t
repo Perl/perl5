@@ -9,9 +9,9 @@ BEGIN {
 
     $where = $GR;
 
-    if (-x "/usr/bin/nidump") {
+    if (-x "/usr/bin/nidump") { # nidump is not just NeXT/OpenStep
 	if (open(GR, "nidump group . |")) {
-	    $where = "NetInfo";
+	    $where = "NetInfo group";
 	} else {
 	    print "1..0\n";
 	    exit 0;

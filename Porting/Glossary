@@ -4,6 +4,11 @@ programs (e.g. I_UNISTD) are already described in config_h.SH.  [`configpm'
 generates pod documentation for Config.pm from this file--please try to keep
 the formatting regular.]
 
+Mcc (Loc.U):
+	This variable is be used internally by Configure to determine the
+	full pathname (if any) of the Mcc program.  After Configure runs,
+	the value is reset to a plain "Mcc" and is not useful.
+
 _a (Unix.U):
 	This variable defines the extension used for ordinary libraries.
 	For unix, it is '.a'.  The '.' is included.  Other possible
@@ -251,6 +256,15 @@ csh (Loc.U):
 	This variable is be used internally by Configure to determine the
 	full pathname (if any) of the csh program.  After Configure runs,
 	the value is reset to a plain "csh" and is not useful.
+
+d_Gconvert (d_gconvert.U):
+	This variable holds what Gconvert is defined as to convert
+	floating point numbers into strings. It could be 'gconvert'
+	or a more complex macro emulating gconvert with gcvt() or sprintf.
+	Possible values are:
+		d_Gconvert='gconvert((x),(n),(t),(b))'
+		d_Gconvert='gcvt((x),(n),(b))'
+		d_Gconvert='sprintf((b),"%.*g",(n),(x))'
 
 d_access (d_access.U):
 	This variable conditionally defines HAS_ACCESS if the access() system
@@ -566,15 +580,6 @@ d_ftime (d_ftime.U):
 d_ftruncate64 (io64.U):
 	This variable conditionally defines the HAS_FTRUNCATE64 symbol, which
 	indicates to the C program that the ftruncate64() routine is available.
-
-d_Gconvert (d_gconvert.U):
-	This variable holds what Gconvert is defined as to convert
-	floating point numbers into strings. It could be 'gconvert'
-	or a more complex macro emulating gconvert with gcvt() or sprintf.
-	Possible values are:
-		d_Gconvert='gconvert((x),(n),(t),(b))'
-		d_Gconvert='gcvt((x),(n),(b))'
-		d_Gconvert='sprintf((b),"%.*g",(n),(x))'
 
 d_getgrent (d_getgrent.U):
 	This variable conditionally defines the HAS_GETGRENT symbol, which
@@ -1743,6 +1748,10 @@ i_niin (i_niin.U):
 	to the C program that it should include <netinet/in.h>. Otherwise,
 	you may try <sys/in.h>.
 
+i_poll (i_poll.U):
+	This variable conditionally defines the I_POLL symbol, and indicates
+	whether a C program should include <poll.h>.
+
 i_pwd (i_pwd.U):
 	This variable conditionally defines I_PWD, which indicates
 	to the C program that it should include <pwd.h>.
@@ -2166,11 +2175,6 @@ man3ext (man3dir.U):
 	This variable contains the extension that the manual page should
 	have: one of 'n', 'l', or '3'.  The Makefile must supply the '.'.
 	See man3dir.
-
-Mcc (Loc.U):
-	This variable is be used internally by Configure to determine the
-	full pathname (if any) of the Mcc program.  After Configure runs,
-	the value is reset to a plain "Mcc" and is not useful.
 
 medium (models.U):
 	This variable contains a flag which will tell the C compiler and loader

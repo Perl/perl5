@@ -9,9 +9,9 @@ BEGIN {
 
     $where = $PW;
 
-    if (-x "/usr/bin/nidump") {
+    if (-x "/usr/bin/nidump") { # nidump is not just NeXT/OpenStep
 	if (open(PW, "nidump passwd . |")) {
-	    $where = "NetInfo";
+	    $where = "NetInfo passwd";
 	} else {
 	    print "1..0\n";
 	    exit 0;

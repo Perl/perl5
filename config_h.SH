@@ -2124,6 +2124,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$i_inttypes   I_INTTYPES                /**/
 #$d_int64t     HAS_INT64_T               /**/
 
+/* I_POLL:
+ *	This symbol, if defined, indicates that <poll.h> exists and
+ *	should be included.
+ */
+#$i_poll	I_POLL		/**/
+
 /* HAS_FSTAT64:
  *	This symbol, if defined, indicates that the fstat64 routine is
  *	available to stat files (fds) larger than 2 gigabytes.

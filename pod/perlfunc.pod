@@ -1902,8 +1902,11 @@ Enter BLOCKs conditionally.  The first EXPR to return true
 causes the corresponding BLOCK to be entered, or, in the case
 of C<else>, the fall-through default BLOCK.
 
-Take notice: Perl wants BLOCKS, expressions (like e.g. in C, C++, or
-Pascal) won't do.
+Note 1: Perl wants BLOCKS, expressions won't do (like they do
+e.g. in C, C++, Java, Pascal).
+
+Note 2: It's C<elsif>, not C<elseif>.  You can have as many
+C<elsif>s as you want.
 
 See L<perlsyn> for more details.  See also C<unless>.
 
