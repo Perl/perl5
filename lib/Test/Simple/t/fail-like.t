@@ -33,11 +33,12 @@ sub ok ($;$) {
 
 
 package main;
+
 require Test::More;
 
-@INC = ('../lib', 'lib/Test/More');
-require Catch;
-my($out, $err) = Catch::caught();
+push @INC, 't/lib';
+require Test::Simple::Catch::More;
+my($out, $err) = Test::Simple::Catch::More::caught();
 
 Test::More->import(tests => 1);
 

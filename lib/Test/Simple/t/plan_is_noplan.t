@@ -30,9 +30,9 @@ package main;
 
 require Test::Simple;
 
-@INC = ('../lib', 'lib/Test/Simple');
-require Catch;
-my($out, $err) = Catch::caught();
+push @INC, 't/lib';
+require Test::Simple::Catch::More;
+my($out, $err) = Test::Simple::Catch::More::caught();
 
 
 Test::Simple->import('no_plan');

@@ -1,18 +1,10 @@
 package Test::More;
 
+use 5.004;
+
 use strict;
-
-
-# Special print function to guard against $\ and -l munging.
-sub _print (*@) {
-    my($fh, @args) = @_;
-
-    local $\;
-    print $fh @args;
-}
-
-sub print { die "DON'T USE PRINT!  Use _print instead" }
-
+use Carp;
+use Test::Utils;
 
 BEGIN {
     require Test::Simple;
@@ -22,26 +14,39 @@ BEGIN {
 
 require Exporter;
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION = '0.07';
+$VERSION = '0.18';
 @ISA    = qw(Exporter);
 @EXPORT = qw(ok use_ok require_ok
              is isnt like
              skip todo
              pass fail
              eq_array eq_hash eq_set
+             skip
+             $TODO
+             plan
+             can_ok  isa_ok
             );
 
 
 sub import {
     my($class, $plan, @args) = @_;
 
-    if( $plan eq 'skip_all' ) {
-        $Test::Simple::Skip_All = 1;
-        _print *TESTOUT, "1..0\n";
-        exit(0);
+    if( defined $plan ) {
+        if( $plan eq 'skip_all' ) {
+            $Test::Simple::Skip_All = 1;
+            my $out = "1..0";
+            $out .= " # Skip @args" if @args;
+            $out .= "\n";
+
+            my_print *TESTOUT, $out;
+            exit(0);
+        }
+        else {
+            Test::Simple->import($plan => @args);
+        }
     }
     else {
-        Test::Simple->import($plan => @args);
+        Test::Simple->import;
     }
 
     __PACKAGE__->_export_to_level(1, __PACKAGE__);
@@ -68,7 +73,7 @@ Test::More - yet another framework for writing test scripts
   # or
   use Test::More qw(no_plan);
   # or
-  use Test::More qw(skip_all);
+  use Test::More skip_all => $reason;
 
   BEGIN { use_ok( 'Some::Module' ); }
   require_ok( 'Some::Module' );
@@ -80,15 +85,22 @@ Test::More - yet another framework for writing test scripts
   isnt($this, $that,    $test_name);
   like($this, qr/that/, $test_name);
 
-  skip {                        # UNIMPLEMENTED!!!
-      ok( foo(),       $test_name );
-      is( foo(42), 23, $test_name );
-  } $how_many, $why;
+  SKIP: {
+      skip $why, $how_many unless $have_some_feature;
 
-  todo {                        # UNIMPLEMENTED!!!
       ok( foo(),       $test_name );
       is( foo(42), 23, $test_name );
-  } $how_many, $why;
+  };
+
+  TODO: {
+      local $TODO = $why;
+
+      ok( foo(),       $test_name );
+      is( foo(42), 23, $test_name );
+  };
+
+  can_ok($module, @methods);
+  isa_ok($object, $class);
 
   pass($test_name);
   fail($test_name);
@@ -101,11 +113,15 @@ Test::More - yet another framework for writing test scripts
   # UNIMPLEMENTED!!!
   my @status = Test::More::status;
 
+  # UNIMPLEMENTED!!!
+  BAIL_OUT($why);
+
 
 =head1 DESCRIPTION
 
 If you're just getting started writing tests, have a look at
-Test::Simple first.
+Test::Simple first.  This is a drop in replacement for Test::Simple
+which you can switch to once you get the hang of basic testing.
 
 This module provides a very wide range of testing utilities.  Various
 ways to say "ok", facilities to skip tests, test future features
@@ -130,10 +146,11 @@ have no plan.  (Try to avoid using this as it weakens your test.)
 
 In some cases, you'll want to completely skip an entire testing script.
 
-  use Test::More qw(skip_all);
+  use Test::More skip_all => $skip_reason;
 
-Your script will declare a skip and exit immediately with a zero
-(success).  L<Test::Harness> for details.
+Your script will declare a skip with the reason why you skipped and
+exit immediately with a zero (success).  See L<Test::Harness> for
+details.
 
 
 =head2 Test names
@@ -212,9 +229,9 @@ This is actually Test::Simple's ok() routine.
   is  ( $this, $that, $test_name );
   isnt( $this, $that, $test_name );
 
-Similar to ok(), is() and isnt() compare their two arguments with
-C<eq> and C<ne> respectively and use the result of that to determine
-if the test succeeded or failed.  So these:
+Similar to ok(), is() and isnt() compare their two arguments
+with C<eq> and C<ne> respectively and use the result of that to
+determine if the test succeeded or failed.  So these:
 
     # Is the ultimate answer 42?
     is( ultimate_answer(), 42,          "Meaning of Life" );
@@ -232,7 +249,7 @@ are similar to these:
 So why use these?  They produce better diagnostics on failure.  ok()
 cannot know what you are testing for (beyond the name), but is() and
 isnt() know what the test was and why it failed.  For example this
- test:
+test:
 
     my $foo = 'waffle';  my $bar = 'yarblokos';
     is( $foo, $bar,   'Is foo the same as bar?' );
@@ -259,21 +276,28 @@ In these cases, use ok().
 
   ok( $pope->isa('Catholic') ),         'Is the Pope Catholic?' );
 
-For those grammatical pedants out there, there's an isn't() function
-which is an alias of isnt().
+For those grammatical pedants out there, there's an C<isn't()>
+function which is an alias of isnt().
 
 =cut
 
 sub is ($$;$) {
     my($this, $that, $name) = @_;
 
-    my $ok = @_ == 3 ? ok($this eq $that, $name)
-                     : ok($this eq $that);
+    my $test;
+    {
+        local $^W = 0;   # so is(undef, undef) works quietly.
+        $test = $this eq $that;
+    }
+    my $ok = @_ == 3 ? ok($test, $name)
+                     : ok($test);
 
     unless( $ok ) {
-        _print *TESTERR, <<DIAGNOSTIC;
-#          got: '$this'
-#     expected: '$that'
+        $this = defined $this ? "'$this'" : 'undef';
+        $that = defined $that ? "'$that'" : 'undef';
+        my_print *TESTERR, sprintf <<DIAGNOSTIC, $this, $that;
+#          got: %s
+#     expected: %s
 DIAGNOSTIC
 
     }
@@ -284,12 +308,20 @@ DIAGNOSTIC
 sub isnt ($$;$) {
     my($this, $that, $name) = @_;
 
-    my $ok = @_ == 3 ? ok($this ne $that, $name)
-                     : ok($this ne $that);
+    my $test;
+    {
+        local $^W = 0;   # so isnt(undef, undef) works quietly.
+        $test = $this ne $that;
+    }
+
+    my $ok = @_ == 3 ? ok($test, $name)
+                     : ok($test);
 
     unless( $ok ) {
-        _print *TESTERR, <<DIAGNOSTIC;
-#     it should not be '$that'
+        $that = defined $that ? "'$that'" : 'undef';
+
+        my_print *TESTERR, sprintf <<DIAGNOSTIC, $that;
+#     it should not be %s
 #     but it is.
 DIAGNOSTIC
 
@@ -318,7 +350,7 @@ is similar to:
 (Mnemonic "This is like that".)
 
 The second argument is a regular expression.  It may be given as a
-regex reference (ie. qr//) or (for better compatibility with older
+regex reference (ie. C<qr//>) or (for better compatibility with older
 perls) as a string that looks like a regex (alternative delimiters are
 currently not supported):
 
@@ -336,11 +368,13 @@ sub like ($$;$) {
 
     my $ok = 0;
     if( ref $regex eq 'Regexp' ) {
+        local $^W = 0;
         $ok = @_ == 3 ? ok( $this =~ $regex ? 1 : 0, $name )
                       : ok( $this =~ $regex ? 1 : 0 );
     }
     # Check if it looks like '/foo/i'
     elsif( my($re, $opts) = $regex =~ m{^ /(.*)/ (\w*) $ }sx ) {
+        local $^W = 0;
         $ok = @_ == 3 ? ok( $this =~ /(?$opts)$re/ ? 1 : 0, $name )
                       : ok( $this =~ /(?$opts)$re/ ? 1 : 0 );
     }
@@ -349,7 +383,7 @@ sub like ($$;$) {
         my $ok = @_ == 3 ? ok(0, $name )
                          : ok(0);
 
-        _print *TESTERR, <<ERR;
+        my_print *TESTERR, <<ERR;
 #     '$regex' doesn't look much like a regex to me.  Failing the test.
 ERR
 
@@ -357,8 +391,9 @@ ERR
     }
 
     unless( $ok ) {
-        _print *TESTERR, <<DIAGNOSTIC;
-#                   '$this'
+        $this = defined $this ? "'$this'" : 'undef';
+        my_print *TESTERR, sprintf <<DIAGNOSTIC, $this;
+#                   %s
 #     doesn't match '$regex'
 DIAGNOSTIC
 
@@ -366,6 +401,96 @@ DIAGNOSTIC
 
     return $ok;
 }
+
+=item B<can_ok>
+
+  can_ok($module, @methods);
+  can_ok($object, @methods);
+
+Checks to make sure the $module or $object can do these @methods
+(works with functions, too).
+
+    can_ok('Foo', qw(this that whatever));
+
+is almost exactly like saying:
+
+    ok( Foo->can('this') && 
+        Foo->can('that') && 
+        Foo->can('whatever') 
+      );
+
+only without all the typing and with a better interface.  Handy for
+quickly testing an interface.
+
+=cut
+
+sub can_ok ($@) {
+    my($proto, @methods) = @_;
+    my $class= ref $proto || $proto;
+
+    my @nok = ();
+    foreach my $method (@methods) {
+        my $test = "$class->can('$method')";
+        eval $test || push @nok, $method;
+    }
+
+    my $name;
+    $name = @methods == 1 ? "$class->can($methods[0])" 
+                          : "$class->can(...)";
+    
+    ok( !@nok, $name );
+
+    my_print *TESTERR, map "#     $class->can('$_') failed\n", @nok;
+
+    return !@nok;
+}
+
+=item B<isa_ok>
+
+  isa_ok($object, $class);
+
+Checks to see if the given $object->isa($class).  Also checks to make
+sure the object was defined in the first place.  Handy for this sort
+of thing:
+
+    my $obj = Some::Module->new;
+    isa_ok( $obj, 'Some::Module' );
+
+where you'd otherwise have to write
+
+    my $obj = Some::Module->new;
+    ok( defined $obj && $obj->isa('Some::Module') );
+
+to safeguard against your test script blowing up.
+
+=cut
+
+sub isa_ok ($$) {
+    my($object, $class) = @_;
+
+    my $diag;
+    my $name = "object->isa('$class')";
+    if( !defined $object ) {
+        $diag = "The object isn't defined";
+    }
+    elsif( !ref $object ) {
+        $diag = "The object isn't a reference";
+    }
+    elsif( !$object->isa($class) ) {
+        $diag = "The object isn't a '$class'";
+    }
+
+    if( $diag ) {
+        ok( 0, $name );
+        my_print *TESTERR, "#     $diag\n";
+        return 0;
+    }
+    else {
+        ok( 1, $name );
+        return 1;
+    }
+}
+
 
 =item B<pass>
 
@@ -384,13 +509,13 @@ Use these very, very, very sparingly.
 
 =cut
 
-sub pass ($) {
+sub pass (;$) {
     my($name) = @_;
     return @_ == 1 ? ok(1, $name)
                    : ok(1);
 }
 
-sub fail ($) {
+sub fail (;$) {
     my($name) = @_;
     return @_ == 1 ? ok(0, $name)
                    : ok(0);
@@ -408,33 +533,41 @@ C<use_ok> and C<require_ok>.
 
 =item B<use_ok>
 
-=item B<require_ok>
-
    BEGIN { use_ok($module); }
-   require_ok($module);
+   BEGIN { use_ok($module, @imports); }
 
-These simply use or require the given $module and test to make sure
-the load happened ok.  Its recommended that you run use_ok() inside a
-BEGIN block so its functions are exported at compile-time and
-prototypes are properly honored.
+These simply use the given $module and test to make sure the load
+happened ok.  Its recommended that you run use_ok() inside a BEGIN
+block so its functions are exported at compile-time and prototypes are
+properly honored.
+
+If @imports are given, they are passed through to the use.  So this:
+
+   BEGIN { use_ok('Some::Module', qw(foo bar)) }
+
+is like doing this:
+
+   use Some::Module qw(foo bar);
+
 
 =cut
 
-sub use_ok ($) {
-    my($module) = shift;
+sub use_ok ($;@) {
+    my($module, @imports) = @_;
+    @imports = () unless @imports;
 
     my $pack = caller;
 
     eval <<USE;
 package $pack;
 require $module;
-$module->import;
+$module->import(\@imports);
 USE
 
     my $ok = ok( !$@, "use $module;" );
 
     unless( $ok ) {
-        _print *TESTERR, <<DIAGNOSTIC;
+        my_print *TESTERR, <<DIAGNOSTIC;
 #     Tried to use '$module'.
 #     Error:  $@
 DIAGNOSTIC
@@ -444,6 +577,13 @@ DIAGNOSTIC
     return $ok;
 }
 
+=item B<require_ok>
+
+   require_ok($module);
+
+Like use_ok(), except it requires the $module.
+
+=cut
 
 sub require_ok ($) {
     my($module) = shift;
@@ -458,7 +598,7 @@ REQUIRE
     my $ok = ok( !$@, "require $module;" );
 
     unless( $ok ) {
-        _print *TESTERR, <<DIAGNOSTIC;
+        my_print *TESTERR, <<DIAGNOSTIC;
 #     Tried to require '$module'.
 #     Error:  $@
 DIAGNOSTIC
@@ -468,70 +608,122 @@ DIAGNOSTIC
     return $ok;
 }
 
+=back
 
 =head2 Conditional tests
+
+B<WARNING!> The following describes an I<experimental> interface that
+is subject to change B<WITHOUT NOTICE>!  Use at your peril.
 
 Sometimes running a test under certain conditions will cause the
 test script to die.  A certain function or method isn't implemented
 (such as fork() on MacOS), some resource isn't available (like a 
-net connection) or a module isn't available.  In these cases its
-necessary to skip test, or declare that they are supposed to fail
+net connection) or a module isn't available.  In these cases it's
+necessary to skip tests, or declare that they are supposed to fail
 but will work in the future (a todo test).
 
-For more details on skip and todo tests, L<Test::Harness>.
+For more details on skip and todo tests see L<Test::Harness>.
+
+The way Test::More handles this is with a named block.  Basically, a
+block of tests which can be skipped over or made todo.  It's best if I
+just show you...
 
 =over 4
 
-=item B<skip>   * UNIMPLEMENTED *
+=item B<SKIP: BLOCK>
 
-  skip BLOCK $how_many, $why, $if;
+  SKIP: {
+      skip $why, $how_many if $condition;
 
-B<NOTE> Should that be $if or $unless?
+      ...normal testing code goes here...
+  }
 
-This declares a block of tests to skip, why and under what conditions
-to skip them.  An example is the easiest way to illustrate:
+This declares a block of tests to skip, $how_many tests there are,
+$why and under what $condition to skip them.  An example is the
+easiest way to illustrate:
 
-    skip {
-        ok( head("http://www.foo.com"),     "www.foo.com is alive" );
-        ok( head("http://www.foo.com/bar"), "  and has bar" );
-    } 2, "LWP::Simple not installed",
-    !eval { require LWP::Simple;  LWP::Simple->import;  1 };
+    SKIP: {
+        skip "Pigs don't fly here", 2 unless Pigs->can('fly');
 
-The $if condition is optional, but $why is not.
+        my $pig = Pigs->new;
+        $pig->takeoff;
+
+        ok( $pig->altitude > 0,         'Pig is airborne' );
+        ok( $pig->airspeed > 0,         '  and moving'    );
+    }
+
+If pigs cannot fly, the whole block of tests will be skipped
+completely.  Test::More will output special ok's which Test::Harness
+interprets as skipped tests.  Its important to include $how_many tests
+are in the block so the total number of tests comes out right (unless
+you're using C<no_plan>).
+
+You'll typically use this when a feature is missing, like an optional
+module is not installed or the operating system doesn't have some
+feature (like fork() or symlinks) or maybe you need an Internet
+connection and one isn't available.
+
+=for _Future
+See L</Why are skip and todo so weird?>
 
 =cut
 
+#'#
 sub skip {
-    die "skip() is UNIMPLEMENTED!";
+    my($why, $how_many) = @_;
+    unless( $how_many >= 1 ) {
+        # $how_many can only be avoided when no_plan is in use.
+        carp "skip() needs to know \$how_many tests are in the block"
+          if $Test::Simple::Planned_Tests;
+        $how_many = 1;
+    }
+
+    for( 1..$how_many ) {
+        Test::Simple::_skipped($why);
+    }
+
+    local $^W = 0;
+    last SKIP;
 }
 
-=item B<todo>  * UNIMPLEMENTED *
 
-  todo BLOCK $how_many, $why;
-  todo BLOCK $how_many, $why, $until;
+=item B<TODO: BLOCK>
 
-Declares a block of tests you expect to fail and why.  Perhaps its
-because you haven't fixed a bug:
+    TODO: {
+        local $TODO = $why;
 
-  todo { is( $Gravitational_Constant, 0 ) }  1,
-    "Still tinkering with physics --God";
+        ...normal testing code goes here...
+    }
 
-If you have a set of functionality yet to implement, you can make the
-whole suite dependent on that new feature.
+Declares a block of tests you expect to fail and $why.  Perhaps it's
+because you haven't fixed a bug or haven't finished a new feature:
 
-  todo {
-      $pig->takeoff;
-      ok( $pig->altitude > 0 );
-      ok( $pig->mach > 2 );
-      ok( $pig->serve_peanuts );
-  } 1, "Pigs are still safely grounded",
-  Pigs->can('fly');
+    TODO: {
+        local $TODO = "URI::Geller not finished";
 
-=cut
+        my $card = "Eight of clubs";
+        is( URI::Geller->your_card, $card, 'Is THIS your card?' );
 
-sub todo {
-    die "todo() is UNIMPLEMENTED!";
-}
+        my $spoon;
+        URI::Geller->bend_spoon;
+        is( $spoon, 'bent',    "Spoon bending, that's original" );
+    }
+
+With a todo block, the tests inside are expected to fail.  Test::More
+will run the tests normally, but print out special flags indicating
+they are "todo".  Test::Harness will interpret failures as being ok.
+Should anything succeed, it will report it as an unexpected success.
+
+The nice part about todo tests, as opposed to simply commenting out a
+block of tests, is it's like having a programatic todo list.  You know
+how much work is left to be done, you're aware of what bugs there are,
+and you'll know immediately when they're fixed.
+
+Once a todo test starts succeeding, simply move it outside the block.
+When the block is empty, delete it.
+
+
+=back
 
 =head2 Comparision functions
 
@@ -572,24 +764,31 @@ sub _deep_check {
     my($e1, $e2) = @_;
     my $ok = 0;
 
-    if($e1 eq $e2) {
-        $ok = 1;
-    }
-    else {
-        if( UNIVERSAL::isa($e1, 'ARRAY') and
-            UNIVERSAL::isa($e2, 'ARRAY') )
-        {
-            $ok = eq_array($e1, $e2);
-        }
-        elsif( UNIVERSAL::isa($e1, 'HASH') and
-               UNIVERSAL::isa($e2, 'HASH') )
-        {
-            $ok = eq_hash($e1, $e2);
+    my $eq;
+    {
+        # Quiet unintialized value warnings when comparing undefs.
+        local $^W = 0; 
+
+        if( $e1 eq $e2 ) {
+            $ok = 1;
         }
         else {
-            $ok = 0;
+            if( UNIVERSAL::isa($e1, 'ARRAY') and
+                UNIVERSAL::isa($e2, 'ARRAY') )
+            {
+                $ok = eq_array($e1, $e2);
+            }
+            elsif( UNIVERSAL::isa($e1, 'HASH') and
+                   UNIVERSAL::isa($e2, 'HASH') )
+            {
+                $ok = eq_hash($e1, $e2);
+            }
+            else {
+                $ok = 0;
+            }
         }
     }
+
     return $ok;
 }
 
@@ -631,7 +830,7 @@ applies to the top level.
 # We must make sure that references are treated neutrally.  It really
 # doesn't matter how we sort them, as long as both arrays are sorted
 # with the same algorithm.
-sub _bogus_sort { ref $a ? 0 : $a cmp $b }
+sub _bogus_sort { local $^W = 0;  ref $a ? 0 : $a cmp $b }
 
 sub eq_set  {
     my($a1, $a2) = @_;
@@ -644,19 +843,49 @@ sub eq_set  {
 
 =back
 
+=head1 NOTES
+
+Test::More is B<explicitly> tested all the way back to perl 5.004.
+
 =head1 BUGS and CAVEATS
 
-The eq_* family have some caveats.
+=over 4
 
-todo() and skip() are unimplemented.
+=item Making your own ok()
 
-The no_plan feature depends on new Test::Harness feature.  If you're going
-to distribute tests that use no_plan your end-users will have to upgrade
-Test::Harness to the latest one on CPAN.
+This will not do what you mean:
+
+    sub my_ok {
+        ok( @_ );
+    }
+
+    my_ok( 2 + 2 == 5, 'Basic addition' );
+
+since ok() takes it's arguments as scalars, it will see the length of
+@_ (2) and always pass the test.  You want to do this instead:
+
+    sub my_ok {
+        ok( $_[0], $_[1] );
+    }
+
+The other functions act similiarly.
+
+=item The eq_* family have some caveats.
+
+=item Test::Harness upgrades
+
+no_plan and todo depend on new Test::Harness features and fixes.  If
+you're going to distribute tests that use no_plan your end-users will
+have to upgrade Test::Harness to the latest one on CPAN.
+
+If you simply depend on Test::More, it's own dependencies will cause a
+Test::Harness upgrade.
+
+=back
 
 =head1 AUTHOR
 
-Michael G Schwern <schwern@pobox.com> with much inspiration from
+Michael G Schwern E<lt>schwern@pobox.comE<gt> with much inspiration from
 Joshua Pritikin's Test module and lots of discussion with Barrie
 Slaymaker and the perl-qa gang.
 
@@ -664,7 +893,7 @@ Slaymaker and the perl-qa gang.
 =head1 HISTORY
 
 This is a case of convergent evolution with Joshua Pritikin's Test
-module.  I was actually largely unware of its existance when I'd first
+module.  I was largely unware of its existence when I'd first
 written my own ok() routines.  This module exists because I can't
 figure out how to easily wedge test names into Test's interface (along
 with a few other problems).

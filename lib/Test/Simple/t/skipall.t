@@ -1,3 +1,5 @@
+use strict;
+
 # Can't use Test.pm, that's a 5.005 thing.
 package My::Test;
 
@@ -18,28 +20,16 @@ sub ok ($;$) {
 
 
 package main;
-
 require Test::More;
 
-@INC = ('../lib', 'lib/Test/More');
-require Catch;
-my($out, $err) = Catch::caught();
+push @INC, 't/lib';
+require Test::Simple::Catch::More;
+my($out, $err) = Test::Simple::Catch::More::caught();
 
-
-Test::More->import('no_plan');
-
-ok(1, 'foo');
+Test::More->import('skip_all');
 
 
 END {
-    My::Test::ok($$out eq <<OUT);
-ok 1 - foo
-1..1
-OUT
-
-    My::Test::ok($$err eq <<ERR);
-ERR
-
-    # Prevent Test::More from exiting with non zero
-    exit 0;
+    My::Test::ok($$out eq "1..0\n");
+    My::Test::ok($$err eq "");
 }

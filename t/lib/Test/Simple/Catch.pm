@@ -1,8 +1,8 @@
 # For testing Test::Simple;
-package Catch;
+package Test::Simple::Catch;
 
-my $out = tie *Test::Simple::TESTOUT, 'Catch';
-my $err = tie *Test::Simple::TESTERR, 'Catch';
+my $out = tie *Test::Simple::TESTOUT, __PACKAGE__;
+my $err = tie *Test::Simple::TESTERR, __PACKAGE__;
 
 # We have to use them to shut up a "used only once" warning.
 () = (*Test::Simple::TESTOUT, *Test::Simple::TESTERR);

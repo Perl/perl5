@@ -17,29 +17,32 @@ sub ok ($;$) {
 
 package main;
 
+my $IsVMS = $^O eq 'VMS';
+
+print "# Ahh!  I see you're running VMS.\n" if $IsVMS;
+
 my %Tests = (
-             'success.plx'              => 0,
-             'one_fail.plx'             => 1,
-             'two_fail.plx'             => 2,
-             'five_fail.plx'            => 5,
-             'extras.plx'               => 3,
-             'too_few.plx'              => 4,
-             'death.plx'                => 255,
-             'last_minute_death.plx'    => 255,
-             'death_in_eval.plx'        => 0,
-             'require.plx'              => 0,
+             #                      Everyone Else   VMS
+             'success.plx'              => [0,      0],
+             'one_fail.plx'             => [1,      4],
+             'two_fail.plx'             => [2,      4],
+             'five_fail.plx'            => [5,      4],
+             'extras.plx'               => [3,      4],
+             'too_few.plx'              => [4,      4],
+             'death.plx'                => [255,    4],
+             'last_minute_death.plx'    => [255,    4],
+             'death_in_eval.plx'        => [0,      0],
+             'require.plx'              => [0,      0],
             );
 
 print "1..".keys(%Tests)."\n";
 
-chdir 't' if -d 't';
-use File::Spec;
-my $lib = File::Spec->catdir('lib', 'Test', 'Simple', 'sample_tests');
-while( my($test_name, $exit_code) = each %Tests ) {
-    my $file = File::Spec->catfile($lib, $test_name);
-    my $wait_stat = system(qq{$^X -"I../lib" -"Ilib/Test/Simple" $file});
-    My::Test::ok( $wait_stat >> 8 == $exit_code, 
-                  "$test_name exited with $exit_code" );
+while( my($test_name, $exit_codes) = each %Tests ) {
+    my($exit_code) = $exit_codes->[$IsVMS ? 1 : 0];
+
+    my $wait_stat = system(qq{$^X t/lib/Test/Simple/sample_tests/$test_name});
+    my $actual_exit = $wait_stat >> 8;
+
+    My::Test::ok( $actual_exit == $exit_code, 
+                  "$test_name exited with $actual_exit (expected $exit_code)");
 }
-
-

@@ -1,8 +1,8 @@
 require Test::Simple;
 
-push @INC, 't', '.';
-require Catch;
-my($out, $err) = Catch::caught();
+push @INC, 't/lib';
+require Test::Simple::Catch;
+my($out, $err) = Test::Simple::Catch::caught();
 
 Test::Simple->import(tests => 5);
 close STDERR;

@@ -21,9 +21,9 @@ package main;
 
 require Test::Simple;
 
-@INC = ('../lib', 'lib/Test/Simple');
-require Catch;
-my($out, $err) = Catch::caught();
+push @INC, 't/lib/';
+require Test::Simple::Catch;
+my($out, $err) = Test::Simple::Catch::caught();
 
 Test::Simple->import(tests => 3);
 
