@@ -59,3 +59,7 @@ PERLVARI(Gsh_path,	char *,	SH_PATH)/* full path of shell */
  * See perl.h macros PERL_FPU_INIT and PERL_FPU_{PRE,POST}_EXEC. */
 PERLVAR(Gsigfpe_saved,	Sighandler_t)
 
+/* Restricted hashes placeholder value.
+ * The contents are never used, only the address. */
+PERLVAR(Gsv_placeholder, SV)
+

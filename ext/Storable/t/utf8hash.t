@@ -8,6 +8,7 @@ sub BEGIN {
     if ($ENV{PERL_CORE}){
 	chdir('t') if -d 't';
 	@INC = ('.', '../lib');
+	use vars qw($MacPerl::Architecture);
 	push @INC, "::lib:$MacPerl::Architecture:" if $^O eq 'MacOS';
     } else {
 	unshift @INC, 't';

@@ -25,7 +25,7 @@ BEGIN {
     if (!eval q{
 	use Test;
 	use B::Deparse 0.61;
-	use 5.6.0;
+	use 5.006;
 	1;
     }) {
 	print "1..0 # skip: tests only work with B::Deparse 0.61 and at least perl 5.6.0\n";
@@ -54,6 +54,8 @@ $blessed_code = bless sub { "blessed" }, "Some::Package";
     no strict; # to make the life for Safe->reval easier
     sub code { "JAPH" }
 }
+
+local *FOO;
 
 @obj =
     ([\&code,                   # code reference
