@@ -246,7 +246,6 @@ EONT_EONT
 
 checkOptree ( name	=> 'sub {my $a=()}',
 	      code	=> sub {my $a=()},
-              todo	=> 'apparently done, by patch #?',
 	      bcopts	=> '-exec',
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 1  <;> nextstate(main -439 optree.t:105) v
@@ -300,7 +299,6 @@ EONT_EONT
 
 checkOptree ( name	=> 'my $a=()',
 	      prog	=> 'my $a=()',
-              todo	=> 'apparently done, by patch #?',
 	      bcopts	=> '-exec',
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 1  <0> enter 

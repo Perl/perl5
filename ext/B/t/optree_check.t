@@ -60,6 +60,10 @@ checkOptree ( name	=> 'test skip itself',
 	      expect	=> 'dont-care, skipping',
 	      expect_nt	=> 'this insures failure');
 
+# This test 'unexpectedly succeeds', but that is "expected".  Theres
+# no good way to expect a successful todo, and inducing a failure
+# causes the harness to print verbose errors, which is NOT helpful.
+
 checkOptree ( name	=> 'test todo itself',
 	      todo	=> "your excuse here ;-)",
 	      bcopts	=> '-exec',
@@ -159,11 +163,10 @@ EOT_EOT
 # 3  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
 
-checkOptree ( name	=> 'fixup square-bracket args',
+checkOptree ( name	=> 'fixup opcode args',
 	      bcopts	=> '-exec',
-	      todo	=> 'not done in rexpedant mode',
+	      #fail	=> 1, # uncomment to see real padsv args: [$a:491,492] 
 	      code	=> sub {my $a},
-	      #skip	=> 1,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # 1  <;> nextstate(main 56 optree_concise.t:96) v
 # 2  <0> padsv[$a:56,57] M/LVINTRO
