@@ -1539,9 +1539,9 @@ S_scan_const(pTHX_ char *start)
 			    res = newSVpvn(s, (uv >> 8) + 1); /* filler */
 			    str = (char *)uv_to_utf8((U8*)SvPVX(res), uv);
 			    SvCUR_set(res, str - SvPVX(res));
-			    *str = 0;
+			    *str = '\0';
 			    if (uv > 0x7f)
-				has_utf8 = TRUE;
+				SvUTF8_on(res);
 			}
 			else {
 			    yyerror("Illegal hexadecimal code on \\N{U+...}");
