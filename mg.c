@@ -2240,9 +2240,14 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 #ifdef HAS_SETRESUID
       (void)setresuid((Uid_t)PL_uid, (Uid_t)-1, (Uid_t)-1);
 #else
-	if (PL_uid == PL_euid)		/* special case $< = $> */
+	if (PL_uid == PL_euid) {		/* special case $< = $> */
+#ifdef PERL_DARWIN
+	    /* workaround for Darwin's setuid peculiarity, cf [perl #24122] */
+	    if (PL_uid != 0 && PerlProc_getuid() == 0)
+		(void)PerlProc_setuid(0);
+#endif
 	    (void)PerlProc_setuid(PL_uid);
-	else {
+	} else {
 	    PL_uid = PerlProc_getuid();
 	    Perl_croak(aTHX_ "setruid() not implemented");
 	}
