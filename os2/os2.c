@@ -21,19 +21,111 @@
 
 /*****************************************************************************/
 /* priorities */
+static signed char priors[] = {0, 1, 3, 2}; /* Last two interchanged,
+					       self inverse. */
+#define QSS_INI_BUFFER 1024
 
-int setpriority(int which, int pid, int val)
+PQTOPLEVEL
+get_sysinfo(ULONG pid, ULONG flags)
 {
-  return DosSetPriority((pid < 0) ? PRTYS_PROCESSTREE : PRTYS_PROCESS,
-			val >> 8, val & 0xFF, abs(pid));
+    char *pbuffer;
+    ULONG rc, buf_len = QSS_INI_BUFFER;
+
+    New(1022, pbuffer, buf_len, char);
+    /* QSS_PROCESS | QSS_MODULE | QSS_SEMAPHORES | QSS_SHARED */
+    rc = QuerySysState(flags, pid, pbuffer, buf_len);
+    while (rc == ERROR_BUFFER_OVERFLOW) {
+	Renew(pbuffer, buf_len *= 2, char);
+	rc = QuerySysState(QSS_PROCESS, pid, pbuffer, buf_len);
+    }
+    if (rc) {
+	FillOSError(rc);
+	Safefree(pbuffer);
+	return 0;
+    }
+    return (PQTOPLEVEL)pbuffer;
 }
 
-int getpriority(int which /* ignored */, int pid)
+#define PRIO_ERR 0x1111
+
+static ULONG
+sys_prio(pid)
+{
+  ULONG prio;
+  PQTOPLEVEL psi;
+
+  psi = get_sysinfo(pid, QSS_PROCESS);
+  if (!psi) {
+      return PRIO_ERR;
+  }
+  if (pid != psi->procdata->pid) {
+      Safefree(psi);
+      croak("panic: wrong pid in sysinfo");
+  }
+  prio = psi->procdata->threads->priority;
+  Safefree(psi);
+  return prio;
+}
+
+int 
+setpriority(int which, int pid, int val)
+{
+  ULONG rc, prio;
+  PQTOPLEVEL psi;
+
+  prio = sys_prio(pid);
+
+  if (priors[(32 - val) >> 5] + 1 == (prio >> 8)) {
+      /* Do not change class. */
+      return CheckOSError(DosSetPriority((pid < 0) 
+					 ? PRTYS_PROCESSTREE : PRTYS_PROCESS,
+					 0, 
+					 (32 - val) % 32 - (prio & 0xFF), 
+					 abs(pid)))
+      ? -1 : 0;
+  } else /* if ((32 - val) % 32 == (prio & 0xFF)) */ {
+      /* Documentation claims one can change both class and basevalue,
+       * but I find it wrong. */
+      /* Change class, but since delta == 0 denotes absolute 0, correct. */
+      if (CheckOSError(DosSetPriority((pid < 0) 
+				      ? PRTYS_PROCESSTREE : PRTYS_PROCESS,
+				      priors[(32 - val) >> 5] + 1, 
+				      0, 
+				      abs(pid)))) 
+	  return -1;
+      if ( ((32 - val) % 32) == 0 ) return 0;
+      return CheckOSError(DosSetPriority((pid < 0) 
+					 ? PRTYS_PROCESSTREE : PRTYS_PROCESS,
+					 0, 
+					 (32 - val) % 32, 
+					 abs(pid)))
+	  ? -1 : 0;
+  } 
+/*   else return CheckOSError(DosSetPriority((pid < 0)  */
+/* 					  ? PRTYS_PROCESSTREE : PRTYS_PROCESS, */
+/* 					  priors[(32 - val) >> 5] + 1,  */
+/* 					  (32 - val) % 32 - (prio & 0xFF),  */
+/* 					  abs(pid))) */
+/*       ? -1 : 0; */
+}
+
+int 
+getpriority(int which /* ignored */, int pid)
 {
   TIB *tib;
   PIB *pib;
-  DosGetInfoBlocks(&tib, &pib);
-  return tib->tib_ptib2->tib2_ulpri;
+  ULONG rc, ret;
+
+  /* DosGetInfoBlocks has old priority! */
+/*   if (CheckOSError(DosGetInfoBlocks(&tib, &pib))) return -1; */
+/*   if (pid != pib->pib_ulpid) { */
+  ret = sys_prio(pid);
+  if (ret == PRIO_ERR) {
+      return -1;
+  }
+/*   } else */
+/*       ret = tib->tib_ptib2->tib2_ulpri; */
+  return (1 - priors[((ret >> 8) - 1)])*32 - (ret & 0xFF);
 }
 
 /*****************************************************************************/
@@ -135,7 +227,7 @@ char *cmd;
        have a shell which will not change between computers with the
        same architecture, to avoid "action on a distance". 
        And to have simple build, this shell should be sh. */
-    shell = "sh.exe";
+    shell = SH_PATH;
     copt = "-c";
 #endif 
 
@@ -194,6 +286,7 @@ char *cmd;
     return rc;
 }
 
+#ifndef HAS_FORK
 FILE *
 my_popen(cmd,mode)
 char	*cmd;
@@ -202,11 +295,12 @@ char	*mode;
     char *shell = getenv("EMXSHELL");
     FILE *res;
     
-    my_setenv("EMXSHELL", "sh.exe");
+    my_setenv("EMXSHELL", SH_PATH);
     res = popen(cmd, mode);
     my_setenv("EMXSHELL", shell);
     return res;
 }
+#endif
 
 /*****************************************************************************/
 
@@ -357,12 +451,67 @@ XS(XS_File__Copy_syscopy)
 	    flag = (unsigned long)SvIV(ST(2));
 	}
 
-	errno = DosCopy(src, dst, flag);
-	RETVAL = !errno;
+	RETVAL = !CheckOSError(DosCopy(src, dst, flag));
 	ST(0) = sv_newmortal();
 	sv_setiv(ST(0), (IV)RETVAL);
     }
     XSRETURN(1);
+}
+
+char *
+mod2fname(sv)
+     SV   *sv;
+{
+    static char fname[9];
+    int pos = 7;
+    int len;
+    AV  *av;
+    SV  *svp;
+    char *s;
+
+    if (!SvROK(sv)) croak("Not a reference given to mod2fname");
+    sv = SvRV(sv);
+    if (SvTYPE(sv) != SVt_PVAV) 
+      croak("Not array reference given to mod2fname");
+    if (av_len((AV*)sv) < 0) 
+      croak("Empty array reference given to mod2fname");
+    s = SvPV(*av_fetch((AV*)sv, av_len((AV*)sv), FALSE), na);
+    strncpy(fname, s, 8);
+    if ((len=strlen(s)) < 7) pos = len;
+    fname[pos] = '_';
+    fname[pos + 1] = '\0';
+    return (char *)fname;
+}
+
+XS(XS_DynaLoader_mod2fname)
+{
+    dXSARGS;
+    if (items != 1)
+	croak("Usage: DynaLoader::mod2fname(sv)");
+    {
+	SV *	sv = ST(0);
+	char *	RETVAL;
+
+	RETVAL = mod2fname(sv);
+	ST(0) = sv_newmortal();
+	sv_setpv((SV*)ST(0), RETVAL);
+    }
+    XSRETURN(1);
+}
+
+char *
+os2error(int rc)
+{
+	static char buf[300];
+	ULONG len;
+
+	if (rc == 0)
+		return NULL;
+	if (DosGetMessage(NULL, 0, buf, sizeof buf - 1, rc, "OSO001.MSG", &len))
+		sprintf(buf, "OS/2 system error code %d=0x%x", rc, rc);
+	else
+		buf[len] = '\0';
+	return buf;
 }
 
 OS2_Perl_data_t OS2_Perl_data;
@@ -372,13 +521,31 @@ Xs_OS2_init()
 {
     char *file = __FILE__;
     {
+	GV *gv;
+	
         newXS("File::Copy::syscopy", XS_File__Copy_syscopy, file);
+        newXS("DynaLoader::mod2fname", XS_DynaLoader_mod2fname, file);
+#ifdef PERL_IS_AOUT
+	gv = gv_fetchpv("OS2::is_aout", TRUE, SVt_PV);
+	GvMULTI_on(gv);
+	sv_setiv(GvSV(gv), 1);
+#endif 
     }
 }
 
 void
 Perl_OS2_init()
 {
+    char *shell;
+
     settmppath();
     OS2_Perl_data.xs_init = &Xs_OS2_init;
+    if ( (shell = getenv("PERL_SH_DRIVE")) ) {
+	sh_path[0] = shell[0];
+    }
 }
+
+char sh_path[33] = BIN_SH;
+
+extern void dlopen();
+void *fakedl = &dlopen;		/* Pull in dynaloading part. */
