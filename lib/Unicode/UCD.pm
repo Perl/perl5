@@ -194,17 +194,7 @@ sub charblock {
     my $charscript = charscript(0x41);
 
 charscript() returns the script the character belongs to, e.g.
-C<Latin>, C<Greek>, C<Han>.  Note that not all the character positions
-within all scripts are defined.  
-
-The difference between a character block and a script is that script
-names are closer to the linguistic notion of a set of characters,
-while block is more of an artifact of the Unicode character numbering.
-For example the Latin B<script> is spread over several B<blocks>.
-
-Note also that the script names are all in uppercase, e.g. C<HEBREW>,
-while the block names are Capitalized and with intermixed spaces,
-e.g. C<Yi Syllables>.
+C<Latin>, C<Greek>, C<Han>.
 
 Unfortunately, currently (Perl 5.8.0) there is no regular expression
 notation for matching scripts as there is for blocks (C<\p{In...}>.
@@ -231,10 +221,31 @@ sub charscript {
     _search(\@SCRIPTS, 0, $#SCRIPTS, $code);
 }
 
+=head2 charblock versus charscript
+
+The difference between a character block and a script is that scripts
+are closer to the linguistic notion of a set of characters required to
+present languages, while block is more of an artifact of the Unicode
+character numbering.  For example the Latin B<script> is spread over
+several B<blocks>, such as C<Basic Latin>, C<Latin 1 Supplement>,
+C<Latin Extended-A>, and C<Latin Extended-B>.  On the other hand, the
+Latin script does not contain all the characters of the C<Basic Latin>
+block (also known as the ASCII): it includes only the letters, not for
+example the digits or the punctuation.
+
+For block see http://www.unicode.org/Public/UNIDATA/Blocks.txt
+
+For scripts see UTR #24: http://www.unicode.org/unicode/reports/tr24/
+
+Note also that the script names are all in uppercase, e.g. C<HEBREW>,
+while the block names are Capitalized and with intermixed spaces,
+e.g. C<Yi Syllables>.
+
 =head1 IMPLEMENTATION NOTE
 
-The first use of L<charinfo> opens a read-only filehandle to the Unicode
-Character Database.  The filehandle is kept open for further queries.
+The first use of charinfo() opens a read-only filehandle to the Unicode
+Character Database (the database is included in the Perl distribution).
+The filehandle is then kept open for further queries.
 
 =head1 AUTHOR
 
