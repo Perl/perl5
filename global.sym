@@ -114,6 +114,7 @@ Perl_gv_autoload4
 Perl_gv_check
 Perl_gv_efullname
 Perl_gv_efullname3
+Perl_gv_efullname4
 Perl_gv_fetchfile
 Perl_gv_fetchmeth
 Perl_gv_fetchmethod
@@ -121,6 +122,7 @@ Perl_gv_fetchmethod_autoload
 Perl_gv_fetchpv
 Perl_gv_fullname
 Perl_gv_fullname3
+Perl_gv_fullname4
 Perl_gv_init
 Perl_gv_stashpv
 Perl_gv_stashpvn
