@@ -1207,16 +1207,6 @@ S_scan_const(pTHX_ char *start)
 		I32 min;			/* first character in range */
 		I32 max;			/* last character in range */
 
-		if (utf) {
-		    char *c = (char*)utf8_hop((U8*)d, -1);
-		    char *e = d++;
-		    while (e-- > c)
-			*(e + 1) = *e;
-		    *c = (char)0xff;
-		    /* mark the range as done, and continue */
-		    dorange = FALSE;
-		    continue;
-		}
 		i = d - SvPVX(sv);		/* remember current offset */
 		SvGROW(sv, SvLEN(sv) + 256);	/* never more than 256 chars in a range */
 		d = SvPVX(sv) + i;		/* refresh d after realloc */
@@ -1431,7 +1421,7 @@ S_scan_const(pTHX_ char *start)
 			    char *src, *dst;
 			  
 			    d = SvGROW(sv,
-				       SvLEN(sv) + hicount + 1) +
+				       SvCUR(sv) + hicount + 1) +
 				         (d - old_pvx);
 
 			    src = d - 1;
@@ -1504,7 +1494,7 @@ S_scan_const(pTHX_ char *start)
 		    if (len > e - s + 4) {
 			char *odest = SvPVX(sv);
 
-			SvGROW(sv, (SvLEN(sv) + len - (e - s + 4)));
+			SvGROW(sv, (SvCUR(sv) + len - (e - s + 4)));
 			d = SvPVX(sv) + (d - odest);
 		    }
 		    Copy(str, d, len, char);
@@ -6279,6 +6269,9 @@ S_scan_trans(pTHX_ char *start)
 	Perl_croak(aTHX_ "Transliteration replacement not terminated");
     }
 
+    New(803,tbl,256,short);
+    o = newPVOP(OP_TRANS, 0, (char*)tbl);
+
     complement = del = squash = 0;
     while (strchr("cds", *s)) {
 	if (*s == 'c')
@@ -6289,9 +6282,6 @@ S_scan_trans(pTHX_ char *start)
 	    squash = OPpTRANS_SQUASH;
 	s++;
     }
-
-    New(803, tbl, complement&&!del?258:256, short);
-    o = newPVOP(OP_TRANS, 0, (char*)tbl);
     o->op_private = del|squash|complement|
       (DO_UTF8(PL_lex_stuff)? OPpTRANS_FROM_UTF : 0)|
       (DO_UTF8(PL_lex_repl) ? OPpTRANS_TO_UTF   : 0);
