@@ -1,0 +1,331 @@
+##
+## This file created by ./mktables
+## List of built-in \p{...}/\P{...} properties.
+##
+## '*' means name may be 'fuzzy'
+##
+
+  \p{ASCII}                                  [[:ASCII:]]
+* \p{All}                                    Alias for \p{Any} ([\x{0000}-\x{10FFFF}])
+  \p{Alnum}                                  [[:Alnum:]]
+* \p{Alphabetic}                             [\p{L}\p{OtherAlphabetic}]
+  \p{Alpha}                                  [[:Alpha:]]
+* \p{Any}                                    [\x{0000}-\x{10FFFF}]
+* \p{Arabic}                                 Script 'ARABIC'
+* \p{Armenian}                               Script 'ARMENIAN'
+* \p{AsciiHexDigit}                          Extended property 'ASCII_Hex_Digit'
+* \p{Assigned}                               All assigned code points
+* \p{Bengali}                                Script 'BENGALI'
+  \p{BidiAL}                                 Bi-directional category 'AL'
+  \p{BidiAN}                                 Bi-directional category 'AN'
+  \p{BidiBN}                                 Bi-directional category 'BN'
+  \p{BidiB}                                  Bi-directional category 'B'
+  \p{BidiCS}                                 Bi-directional category 'CS'
+* \p{BidiControl}                            Extended property 'Bidi_Control'
+  \p{BidiEN}                                 Bi-directional category 'EN'
+  \p{BidiES}                                 Bi-directional category 'ES'
+  \p{BidiET}                                 Bi-directional category 'ET'
+  \p{BidiLRE}                                Bi-directional category 'LRE'
+  \p{BidiLRO}                                Bi-directional category 'LRO'
+  \p{BidiL}                                  Bi-directional category 'L'
+  \p{BidiNSM}                                Bi-directional category 'NSM'
+  \p{BidiON}                                 Bi-directional category 'ON'
+  \p{BidiPDF}                                Bi-directional category 'PDF'
+  \p{BidiRLE}                                Bi-directional category 'RLE'
+  \p{BidiRLO}                                Bi-directional category 'RLO'
+  \p{BidiR}                                  Bi-directional category 'R'
+  \p{BidiS}                                  Bi-directional category 'S'
+  \p{BidiWS}                                 Bi-directional category 'WS'
+  \p{Blank}                                  [[:Blank:]]
+* \p{Bopomofo}                               Script 'BOPOMOFO'
+* \p{CanadianAboriginal}                     Script 'CANADIAN-ABORIGINAL'
+  \p{Canon}                                  Decomposes to multiple characters
+  \p{Cc}                                     General Category 'Cc'
+  \p{Cf}                                     General Category 'Cf'
+* \p{Cherokee}                               Script 'CHEROKEE'
+* \p{ClosePunctuation}                       Alias for \p{Pe} (General Category 'Pe')
+  \p{Cntrl}                                  [[:Cntrl:]]
+  \p{Cn}                                     General Category 'Cn' [not functional in Perl]
+* \p{Common}                                 Pseudo-Script of codepoints not in other Unicode scripts
+  \p{Compat}                                 Compatible with a more-basic character
+* \p{ConnectorPunctuation}                   Alias for \p{Pc} (General Category 'Pc')
+* \p{Control}                                Alias for \p{Cc} (General Category 'Cc')
+  \p{Co}                                     General Category 'Co'
+  \p{Cs}                                     General Category 'Cs'
+* \p{CurrencySymbol}                         Alias for \p{Sc} (General Category 'Sc')
+* \p{Cyrillic}                               Script 'CYRILLIC'
+  \p{C}                                      Major Category 'C'
+  \p{DCcircle}                               Compatible with 'circle'
+  \p{DCcompat}                               Compatible with 'compat'
+  \p{DCfinal}                                Compatible with 'final'
+  \p{DCfont}                                 Compatible with 'font'
+  \p{DCfraction}                             Compatible with 'fraction'
+  \p{DCinitial}                              Compatible with 'initial'
+  \p{DCisolated}                             Compatible with 'isolated'
+  \p{DCmedial}                               Compatible with 'medial'
+  \p{DCnarrow}                               Compatible with 'narrow'
+  \p{DCnoBreak}                              Compatible with 'noBreak'
+  \p{DCsmall}                                Compatible with 'small'
+  \p{DCsquare}                               Compatible with 'square'
+  \p{DCsub}                                  Compatible with 'sub'
+  \p{DCsuper}                                Compatible with 'super'
+  \p{DCvertical}                             Compatible with 'vertical'
+  \p{DCwide}                                 Compatible with 'wide'
+* \p{DashPunctuation}                        Alias for \p{Pd} (General Category 'Pd')
+* \p{Dash}                                   Extended property 'Dash'
+* \p{DecimalNumber}                          Alias for \p{Nd} (General Category 'Nd')
+* \p{Deseret}                                Script 'DESERET'
+* \p{Devanagari}                             Script 'DEVANAGARI'
+* \p{Diacritic}                              Extended property 'Diacritic'
+  \p{Digit}                                  [[:Digit:]]
+* \p{EnclosingMark}                          Alias for \p{Me} (General Category 'Me')
+* \p{Ethiopic}                               Script 'ETHIOPIC'
+* \p{Extender}                               Extended property 'Extender'
+* \p{FinalPunctuation}                       Alias for \p{Pf} (General Category 'Pf')
+* \p{Format}                                 Alias for \p{Cf} (General Category 'Cf')
+* \p{Georgian}                               Script 'GEORGIAN'
+* \p{Gothic}                                 Script 'GOTHIC'
+  \p{Graph}                                  [[:Graph:]]
+* \p{Greek}                                  Script 'GREEK'
+* \p{Gujarati}                               Script 'GUJARATI'
+* \p{Gurmukhi}                               Script 'GURMUKHI'
+* \p{Hangul}                                 Script 'HANGUL'
+* \p{Han}                                    Script 'HAN'
+* \p{Hebrew}                                 Script 'HEBREW'
+* \p{HexDigit}                               Extended property 'Hex_Digit'
+* \p{Hiragana}                               Script 'HIRAGANA'
+* \p{Hyphen}                                 Extended property 'Hyphen'
+* \p{IdContinue}                             [\p{ID_Start}\p{Mn}\p{Mc}\p{Nd}\p{Pc}]
+* \p{IdStart}                                [\p{Ll}\p{Lu}\p{Lt}\p{Lm}\p{Lo}\p{Nl}]
+* \p{Ideographic}                            Extended property 'Ideographic'
+* \p{InAlphabeticPresentationForms}          Block 'Alphabetic Presentation Forms'
+* \p{InArabicPresentationFormsA}             Block 'Arabic Presentation Forms-A'
+* \p{InArabicPresentationFormsB}             Block 'Arabic Presentation Forms-B'
+* \p{InArabic}                               Block 'Arabic'
+* \p{InArmenian}                             Block 'Armenian'
+* \p{InArrows}                               Block 'Arrows'
+* \p{InBasicLatin}                           Block 'Basic Latin'
+* \p{InBengali}                              Block 'Bengali'
+* \p{InBlockElements}                        Block 'Block Elements'
+* \p{InBopomofoExtended}                     Block 'Bopomofo Extended'
+* \p{InBopomofo}                             Block 'Bopomofo'
+* \p{InBoxDrawing}                           Block 'Box Drawing'
+* \p{InBraillePatterns}                      Block 'Braille Patterns'
+* \p{InByzantineMusicalSymbols}              Block 'Byzantine Musical Symbols'
+* \p{InCherokee}                             Block 'Cherokee'
+* \p{InCjkCompatibilityForms}                Block 'CJK Compatibility Forms'
+* \p{InCjkCompatibilityIdeographsSupplement} Block 'CJK Compatibility Ideographs Supplement'
+* \p{InCjkCompatibilityIdeographs}           Block 'CJK Compatibility Ideographs'
+* \p{InCjkCompatibility}                     Block 'CJK Compatibility'
+* \p{InCjkRadicalsSupplement}                Block 'CJK Radicals Supplement'
+* \p{InCjkSymbolsAndPunctuation}             Block 'CJK Symbols and Punctuation'
+* \p{InCjkUnifiedIdeographsExtensionA}       Block 'CJK Unified Ideographs Extension A'
+* \p{InCjkUnifiedIdeographsExtensionB}       Block 'CJK Unified Ideographs Extension B'
+* \p{InCjkUnifiedIdeographs}                 Block 'CJK Unified Ideographs'
+* \p{InCombiningDiacriticalMarks}            Block 'Combining Diacritical Marks'
+* \p{InCombiningHalfMarks}                   Block 'Combining Half Marks'
+* \p{InCombiningMarksForSymbols}             Block 'Combining Marks for Symbols'
+* \p{InControlPictures}                      Block 'Control Pictures'
+* \p{InCurrencySymbols}                      Block 'Currency Symbols'
+* \p{InCyrillic}                             Block 'Cyrillic'
+* \p{InDeseret}                              Block 'Deseret'
+* \p{InDevanagari}                           Block 'Devanagari'
+* \p{InDingbats}                             Block 'Dingbats'
+* \p{InEnclosedAlphanumerics}                Block 'Enclosed Alphanumerics'
+* \p{InEnclosedCjkLettersAndMonths}          Block 'Enclosed CJK Letters and Months'
+* \p{InEthiopic}                             Block 'Ethiopic'
+* \p{InGeneralPunctuation}                   Block 'General Punctuation'
+* \p{InGeometricShapes}                      Block 'Geometric Shapes'
+* \p{InGeorgian}                             Block 'Georgian'
+* \p{InGothic}                               Block 'Gothic'
+* \p{InGreekExtended}                        Block 'Greek Extended'
+* \p{InGreek}                                Block 'Greek'
+* \p{InGujarati}                             Block 'Gujarati'
+* \p{InGurmukhi}                             Block 'Gurmukhi'
+* \p{InHalfwidthAndFullwidthForms}           Block 'Halfwidth and Fullwidth Forms'
+* \p{InHangulCompatibilityJamo}              Block 'Hangul Compatibility Jamo'
+* \p{InHangulJamo}                           Block 'Hangul Jamo'
+* \p{InHangulSyllables}                      Block 'Hangul Syllables'
+* \p{InHebrew}                               Block 'Hebrew'
+* \p{InHighPrivateUseSurrogates}             Block 'High Private Use Surrogates'
+* \p{InHighSurrogates}                       Block 'High Surrogates'
+* \p{InHiragana}                             Block 'Hiragana'
+* \p{InIdeographicDescriptionCharacters}     Block 'Ideographic Description Characters'
+* \p{InIpaExtensions}                        Block 'IPA Extensions'
+* \p{InKanbun}                               Block 'Kanbun'
+* \p{InKangxiRadicals}                       Block 'Kangxi Radicals'
+* \p{InKannada}                              Block 'Kannada'
+* \p{InKatakana}                             Block 'Katakana'
+* \p{InKhmer}                                Block 'Khmer'
+* \p{InLao}                                  Block 'Lao'
+* \p{InLatin1Supplement}                     Block 'Latin-1 Supplement'
+* \p{InLatinExtendedAdditional}              Block 'Latin Extended Additional'
+* \p{InLatinExtendedA}                       Block 'Latin Extended-A'
+* \p{InLatinExtendedB}                       Block 'Latin Extended-B'
+* \p{InLetterlikeSymbols}                    Block 'Letterlike Symbols'
+* \p{InLowSurrogates}                        Block 'Low Surrogates'
+* \p{InMalayalam}                            Block 'Malayalam'
+* \p{InMathematicalAlphanumericSymbols}      Block 'Mathematical Alphanumeric Symbols'
+* \p{InMathematicalOperators}                Block 'Mathematical Operators'
+* \p{InMiscellaneousSymbols}                 Block 'Miscellaneous Symbols'
+* \p{InMiscellaneousTechnical}               Block 'Miscellaneous Technical'
+* \p{InMongolian}                            Block 'Mongolian'
+* \p{InMusicalSymbols}                       Block 'Musical Symbols'
+* \p{InMyanmar}                              Block 'Myanmar'
+* \p{InNumberForms}                          Block 'Number Forms'
+* \p{InOgham}                                Block 'Ogham'
+* \p{InOldItalic}                            Block 'Old Italic'
+* \p{InOpticalCharacterRecognition}          Block 'Optical Character Recognition'
+* \p{InOriya}                                Block 'Oriya'
+* \p{InPrivateUse}                           Block 'Private Use'
+* \p{InRunic}                                Block 'Runic'
+* \p{InSinhala}                              Block 'Sinhala'
+* \p{InSmallFormVariants}                    Block 'Small Form Variants'
+* \p{InSpacingModifierLetters}               Block 'Spacing Modifier Letters'
+* \p{InSpecials}                             Block 'Specials'
+* \p{InSuperscriptsAndSubscripts}            Block 'Superscripts and Subscripts'
+* \p{InSyriac}                               Block 'Syriac'
+* \p{InTags}                                 Block 'Tags'
+* \p{InTamil}                                Block 'Tamil'
+* \p{InTelugu}                               Block 'Telugu'
+* \p{InThaana}                               Block 'Thaana'
+* \p{InThai}                                 Block 'Thai'
+* \p{InTibetan}                              Block 'Tibetan'
+* \p{InUnifiedCanadianAboriginalSyllabics}   Block 'Unified Canadian Aboriginal Syllabics'
+* \p{InYiRadicals}                           Block 'Yi Radicals'
+* \p{InYiSyllables}                          Block 'Yi Syllables'
+* \p{Inherited}                              Script 'INHERITED'
+* \p{InitialPunctuation}                     Alias for \p{Pi} (General Category 'Pi')
+* \p{JoinControl}                            Extended property 'Join_Control'
+* \p{Kannada}                                Script 'KANNADA'
+* \p{Katakana}                               Script 'KATAKANA'
+* \p{Khmer}                                  Script 'KHMER'
+  \p{L&}                                     [\p{Ll}\p{Lu}\p{Lt}]
+* \p{Lao}                                    Script 'LAO'
+* \p{Latin}                                  Script 'LATIN'
+  \p{LbrkAI}                                 Linebreak category 'AI'
+  \p{LbrkAL}                                 Linebreak category 'AL'
+  \p{LbrkB2}                                 Linebreak category 'B2'
+  \p{LbrkBA}                                 Linebreak category 'BA'
+  \p{LbrkBB}                                 Linebreak category 'BB'
+  \p{LbrkBK}                                 Linebreak category 'BK'
+  \p{LbrkCB}                                 Linebreak category 'CB'
+  \p{LbrkCL}                                 Linebreak category 'CL'
+  \p{LbrkCM}                                 Linebreak category 'CM'
+  \p{LbrkCR}                                 Linebreak category 'CR'
+  \p{LbrkEX}                                 Linebreak category 'EX'
+  \p{LbrkGL}                                 Linebreak category 'GL'
+  \p{LbrkHY}                                 Linebreak category 'HY'
+  \p{LbrkID}                                 Linebreak category 'ID'
+  \p{LbrkIN}                                 Linebreak category 'IN'
+  \p{LbrkIS}                                 Linebreak category 'IS'
+  \p{LbrkLF}                                 Linebreak category 'LF'
+  \p{LbrkNS}                                 Linebreak category 'NS'
+  \p{LbrkNU}                                 Linebreak category 'NU'
+  \p{LbrkOP}                                 Linebreak category 'OP'
+  \p{LbrkPO}                                 Linebreak category 'PO'
+  \p{LbrkPR}                                 Linebreak category 'PR'
+  \p{LbrkQU}                                 Linebreak category 'QU'
+  \p{LbrkSA}                                 Linebreak category 'SA'
+  \p{LbrkSG}                                 Linebreak category 'SG'
+  \p{LbrkSP}                                 Linebreak category 'SP'
+  \p{LbrkSY}                                 Linebreak category 'SY'
+  \p{LbrkXX}                                 Linebreak category 'XX'
+  \p{LbrkZW}                                 Linebreak category 'ZW'
+* \p{LetterNumber}                           Alias for \p{Nl} (General Category 'Nl')
+* \p{Letter}                                 Alias for \p{L} (Major Category 'L')
+* \p{LineSeparator}                          Alias for \p{Zl} (General Category 'Zl')
+  \p{Ll}                                     General Category 'Ll'
+  \p{Lm}                                     General Category 'Lm'
+* \p{LowercaseLetter}                        Alias for \p{Ll} (General Category 'Ll')
+* \p{Lowercase}                              [\p{Ll}\p{OtherLowercase}]
+  \p{Lower}                                  [[:Lower:]]
+  \p{Lo}                                     General Category 'Lo'
+  \p{Lt}                                     General Category 'Lt'
+  \p{Lu}                                     General Category 'Lu'
+  \p{L}                                      Major Category 'L'
+* \p{Malayalam}                              Script 'MALAYALAM'
+* \p{Mark}                                   Alias for \p{M} (Major Category 'M')
+* \p{MathSymbol}                             Alias for \p{Sm} (General Category 'Sm')
+* \p{Math}                                   [\p{Sm}\p{OtherMath}]
+  \p{Mc}                                     General Category 'Mc'
+  \p{Me}                                     General Category 'Me'
+  \p{Mirrored}                               Mirrored in bidirectional text
+  \p{Mn}                                     General Category 'Mn'
+* \p{ModifierLetter}                         Alias for \p{Lm} (General Category 'Lm')
+* \p{ModifierSymbol}                         Alias for \p{Sk} (General Category 'Sk')
+* \p{Mongolian}                              Script 'MONGOLIAN'
+* \p{Myanmar}                                Script 'MYANMAR'
+  \p{M}                                      Major Category 'M'
+  \p{Nd}                                     General Category 'Nd'
+  \p{Nl}                                     General Category 'Nl'
+* \p{NonSpacingMark}                         Alias for \p{Mn} (General Category 'Mn')
+* \p{NoncharacterCodePoint}                  Extended property 'Noncharacter_Code_Point'
+  \p{No}                                     General Category 'No'
+* \p{Number}                                 Alias for \p{N} (Major Category 'N')
+  \p{N}                                      Major Category 'N'
+* \p{Ogham}                                  Script 'OGHAM'
+* \p{OldItalic}                              Script 'OLD-ITALIC'
+* \p{OpenPunctuation}                        Alias for \p{Ps} (General Category 'Ps')
+* \p{Oriya}                                  Script 'ORIYA'
+* \p{OtherAlphabetic}                        Extended property 'Other_Alphabetic'
+* \p{OtherLetter}                            Alias for \p{Lo} (General Category 'Lo')
+* \p{OtherLowercase}                         Extended property 'Other_Lowercase'
+* \p{OtherMath}                              Extended property 'Other_Math'
+* \p{OtherNumber}                            Alias for \p{No} (General Category 'No')
+* \p{OtherPunctuation}                       Alias for \p{Po} (General Category 'Po')
+* \p{OtherSymbol}                            Alias for \p{So} (General Category 'So')
+* \p{OtherUppercase}                         Extended property 'Other_Uppercase'
+* \p{Other}                                  Alias for \p{C} (Major Category 'C')
+* \p{ParagraphSeparator}                     Alias for \p{Zp} (General Category 'Zp')
+  \p{Pc}                                     General Category 'Pc'
+  \p{Pd}                                     General Category 'Pd'
+  \p{Pe}                                     General Category 'Pe'
+  \p{Pf}                                     General Category 'Pf'
+  \p{Pi}                                     General Category 'Pi'
+  \p{Po}                                     General Category 'Po'
+  \p{Print}                                  [[:Print:]]
+* \p{PrivateUse}                             Alias for \p{Co} (General Category 'Co')
+  \p{Ps}                                     General Category 'Ps'
+* \p{Punctuation}                            Alias for \p{P} (Major Category 'P')
+  \p{Punct}                                  [[:Punct:]]
+  \p{P}                                      Major Category 'P'
+* \p{QuotationMark}                          Extended property 'Quotation_Mark'
+* \p{Runic}                                  Script 'RUNIC'
+  \p{Sc}                                     General Category 'Sc'
+* \p{Separator}                              Alias for \p{Z} (Major Category 'Z')
+* \p{Sinhala}                                Script 'SINHALA'
+  \p{Sk}                                     General Category 'Sk'
+  \p{Sm}                                     General Category 'Sm'
+  \p{So}                                     General Category 'So'
+  \p{SpacePerl}                              \s
+* \p{SpaceSeparator}                         Alias for \p{Zs} (General Category 'Zs')
+  \p{Space}                                  [[:Space:]]
+* \p{SpacingMark}                            Alias for \p{Mc} (General Category 'Mc')
+* \p{Surrogate}                              Alias for \p{Cs} (General Category 'Cs')
+* \p{Symbol}                                 Alias for \p{S} (Major Category 'S')
+* \p{Syriac}                                 Script 'SYRIAC'
+  \p{S}                                      Major Category 'S'
+* \p{Tamil}                                  Script 'TAMIL'
+* \p{Telugu}                                 Script 'TELUGU'
+* \p{TerminalPunctuation}                    Extended property 'Terminal_Punctuation'
+* \p{Thaana}                                 Script 'THAANA'
+* \p{Thai}                                   Script 'THAI'
+* \p{Tibetan}                                Script 'TIBETAN'
+* \p{TitlecaseLetter}                        Alias for \p{Lt} (General Category 'Lt')
+  \p{Title}                                  [[:Title:]]
+* \p{Unassigned}                             Alias for \p{Cn} (General Category 'Cn' [not functional in Perl])
+* \p{UppercaseLetter}                        Alias for \p{Lu} (General Category 'Lu')
+* \p{Uppercase}                              [\p{Lu}\p{Other_Uppercase}]
+  \p{Upper}                                  [[:Upper:]]
+* \p{WhiteSpace}                             Extended property 'White_space'
+  \p{Word}                                   [[:Word:]]
+  \p{XDigit}                                 [[:XDigit:]]
+* \p{Yi}                                     Script 'YI'
+  \p{Zl}                                     General Category 'Zl'
+  \p{Zp}                                     General Category 'Zp'
+  \p{Zs}                                     General Category 'Zs'
+  \p{Z}                                      Major Category 'Z'
+  \p{_CanonDCIJ}                             (for internal casefolding use)
+  \p{_CaseIgnorable}                         (for internal casefolding use)
+  \p{_CombAbove}                             (for internal casefolding use)
