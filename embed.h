@@ -99,6 +99,7 @@
 #define markstack	Perl_markstack
 #define markstack_max	Perl_markstack_max
 #define markstack_ptr	Perl_markstack_ptr
+#define maxo		Perl_maxo
 #define max_intro_pending	Perl_max_intro_pending
 #define min_intro_pending	Perl_min_intro_pending
 #define mod_amg		Perl_mod_amg
@@ -182,6 +183,7 @@
 #define rsfp_filters	Perl_rsfp_filters
 #define rshift_amg	Perl_rshift_amg
 #define rshift_ass_amg	Perl_rshift_ass_amg
+#define save_pptr	Perl_save_pptr
 #define savestack	Perl_savestack
 #define savestack_ix	Perl_savestack_ix
 #define savestack_max	Perl_savestack_max
