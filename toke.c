@@ -6688,8 +6688,12 @@ retval:
 	Renew(SvPVX(tmpstr), SvLEN(tmpstr), char);
     }
     SvREFCNT_dec(herewas);
-    if (UTF && !IN_BYTES && is_utf8_string((U8*)SvPVX(tmpstr), SvCUR(tmpstr)))
-	SvUTF8_on(tmpstr);
+    if (!IN_BYTES) {
+	if (UTF && is_utf8_string((U8*)SvPVX(tmpstr), SvCUR(tmpstr)))
+	    SvUTF8_on(tmpstr);
+	else if (PL_encoding)
+	    sv_recode_to_utf8(tmpstr, PL_encoding);
+    }
     PL_lex_stuff = tmpstr;
     yylval.ival = op_type;
     return s;
