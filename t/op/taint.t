@@ -16,7 +16,7 @@ use strict;
 use Config;
 
 my $test = 177;
-sub ok {
+sub ok ($;$) {
     my($ok, $name) = @_;
 
     # You have to do it this way or VMS will get confused.

@@ -77,6 +77,7 @@ sub _where {
     return "at $caller[1] line $caller[2]";
 }
 
+# DON'T use this for matches. Use like() instead.
 sub ok {
     my ($pass, $name, @mess) = @_;
     _ok($pass, _where(), $name, @mess);

@@ -336,14 +336,14 @@ SKIP: {
     ok(! -B FOO,    '   !-B');
 
     $_ = <FOO>;
-    ok(/perl/,      'after readline');
+    like($_, qr/perl/, 'after readline');
     ok(-T FOO,      '   still -T');
     ok(! -B FOO,    '   still -B');
     close(FOO);
 
     open(FOO,'op/stat.t');
     $_ = <FOO>;
-    ok(/perl/,      'reopened and after readline');
+    like($_, qr/perl/,      'reopened and after readline');
     ok(-T FOO,      '   still -T');
     ok(! -B FOO,    '   still !-B');
 

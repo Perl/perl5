@@ -191,7 +191,7 @@ SKIP: {
     my $ip   = v2004.148.0.1;
     my $host;
     eval { $host = gethostbyaddr($ip,Socket::AF_INET) };
-    ok($@ =~ /Wide character/,"Non-bytes leak to gethostbyaddr");
+    like($@, qr/Wide character/, "Non-bytes leak to gethostbyaddr");
 }
 
 # Chapter 28, pp671
