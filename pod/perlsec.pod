@@ -36,7 +36,9 @@ L<perllocale>), results of certain system calls (readdir, readlink,
 the gecos field of getpw* calls), and all file input are marked as
 "tainted".  Tainted data may not be used directly or indirectly in any
 command that invokes a sub-shell, nor in any command that modifies
-files, directories, or processes.  Any variable set
+files, directories, or processes. (B<Important exception>: If you pass
+a list of arguments to either C<system> or C<exec>, the elements of
+that list are B<NOT> checked for taintedness.) Any variable set
 to a value derived from tainted data will itself be tainted,
 even if it is logically impossible for the tainted data
 to alter the variable.  Because taintedness is associated with each
@@ -88,7 +90,7 @@ For example:
 If you try to do something insecure, you will get a fatal error saying
 something like "Insecure dependency" or "Insecure PATH".  Note that you
 can still write an insecure B<system> or B<exec>, but only by explicitly
-doing something like the last example above.
+doing something like the "considered secure" example above.
 
 =head2 Laundering and Detecting Tainted Data
 
@@ -172,6 +174,14 @@ you didn't set it to something that was safe.  Because Perl can't
 guarantee that the executable in question isn't itself going to turn
 around and execute some other program that is dependent on your PATH, it
 makes sure you set the PATH.
+
+The PATH isn't the only environment variable which can cause problems.
+Because some shells may use the variables IFS, CDPATH, ENV, and
+BASH_ENV, Perl checks that those are either empty or untainted when
+starting subprocesses. You may wish to add something like this to your
+setid and taint-checking scripts.
+
+    delete @ENV{qw(IFS CDPATH ENV BASH_ENV)};   # Make %ENV safer
 
 It's also possible to get into trouble with other operations that don't
 care whether they use tainted values.  Make judicious use of the file

@@ -51,6 +51,7 @@ To change the value of an *already-existing* SV, there are seven routines:
     void  sv_setpv(SV*, char*);
     void  sv_setpvn(SV*, char*, int)
     void  sv_setpvf(SV*, const char*, ...);
+    void  sv_setpvfn(SV*, const char*, STRLEN, va_list *, SV **, I32, bool);
     void  sv_setsv(SV*, SV*);
 
 Notice that you can choose to specify the length of the string to be
@@ -58,13 +59,25 @@ assigned by using C<sv_setpvn>, C<newSVpvn>, or C<newSVpv>, or you may
 allow Perl to calculate the length by using C<sv_setpv> or by specifying
 0 as the second argument to C<newSVpv>.  Be warned, though, that Perl will
 determine the string's length by using C<strlen>, which depends on the
-string terminating with a NUL character.  The arguments of C<sv_setpvf>
-are processed like C<sprintf>, and the formatted output becomes the value.
+string terminating with a NUL character.
+
+The arguments of C<sv_setpvf> are processed like C<sprintf>, and the
+formatted output becomes the value.
+
+C<sv_setpvfn> is an analogue of C<vsprintf>, but it allows you to specify
+either a pointer to a variable argument list or the address and length of
+an array of SVs.  The last argument points to a boolean; on return, if that
+boolean is true, then locale-specific information has been used to format
+the string, and the string's contents are therefore untrustworty (see
+L<perlsec>).  This pointer may be NULL if that information is not
+important.  Note that this function requires you to specify the length of
+the format.
+
 The C<sv_set*()> functions are not generic enough to operate on values
 that have "magic".  See L<Magic Virtual Tables> later in this document.
 
-All SVs that will contain strings should, but need not, be terminated
-with a NUL character.  If it is not NUL-terminated there is a risk of
+All SVs that contain strings should be terminated with a NUL character.
+If it is not NUL-terminated there is a risk of
 core dumps and corruptions from code which passes the string to C
 functions or system calls which expect a NUL-terminated string.
 Perl's own functions typically add a trailing NUL for this reason.
@@ -127,16 +140,20 @@ you can use the following functions:
     void  sv_catpv(SV*, char*);
     void  sv_catpvn(SV*, char*, int);
     void  sv_catpvf(SV*, const char*, ...);
+    void  sv_catpvfn(SV*, const char*, STRLEN, va_list *, SV **, I32, bool);
     void  sv_catsv(SV*, SV*);
 
 The first function calculates the length of the string to be appended by
 using C<strlen>.  In the second, you specify the length of the string
 yourself.  The third function processes its arguments like C<sprintf> and
-appends the formatted output.  The fourth function extends the string
-stored in the first SV with the string stored in the second SV.  It also
-forces the second SV to be interpreted as a string.  The C<sv_cat*()>
-functions are not generic enough to operate on values that have "magic".
-See L<Magic Virtual Tables> later in this document.
+appends the formatted output.  The fourth function works like C<vsprintf>.
+You can specify the address and length of an array of SVs instead of the
+va_list argument. The fifth function extends the string stored in the first
+SV with the string stored in the second SV.  It also forces the second SV
+to be interpreted as a string.
+
+The C<sv_cat*()> functions are not generic enough to operate on values that
+have "magic".  See L<Magic Virtual Tables> later in this document.
 
 If you know the name of a scalar variable, you can get a pointer to its SV
 by using the following:
@@ -473,8 +490,25 @@ Perl calculate the string length.  SV is blessed if C<classname> is non-null.
 
 	SV* sv_setref_pvn(SV* rv, char* classname, PV iv, int length);
 
-	int sv_isa(SV* sv, char* name);
-	int sv_isobject(SV* sv);
+Tests whether the SV is blessed into the specified class.  It does not
+check inheritance relationships.
+
+	int  sv_isa(SV* sv, char* name);
+
+Tests whether the SV is a reference to a blessed object.
+
+	int  sv_isobject(SV* sv);
+
+Tests whether the SV is derived from the specified class. SV can be either
+a reference to a blessed object or a string containing a class name. This
+is the function implementing the C<UNIVERSAL::isa> functionality.
+
+	bool sv_derived_from(SV* sv, char* name);
+
+To check if you've got an object derived from a specific class you have 
+to write:
+
+	if (sv_isobject(sv) && sv_derived_from(sv, class)) { ... }
 
 =head2 Creating New Variables
 
@@ -580,8 +614,7 @@ including (but not limited to) the following:
     Scalar Value
     Array Value
     Hash Value
-    File Handle
-    Directory Handle
+    I/O Handle
     Format
     Subroutine
 
@@ -1393,7 +1426,7 @@ created.
 =head2 Compile pass 2: context propagation
 
 When a context for a part of compile tree is known, it is propagated
-down through the tree.  Aat this time the context can have 5 values
+down through the tree.  At this time the context can have 5 values
 (instead of 2 for runtime context): void, boolean, scalar, list, and
 lvalue.  In contrast with the pass 1 this pass is processed from top
 to bottom: a node's context determines the context for its children.
@@ -1589,6 +1622,13 @@ to indicate the number of items on the stack.
 
 Sets up the C<ix> variable for an XSUB which has aliases.  This is usually
 handled automatically by C<xsubpp>.
+
+=item do_binmode
+
+Switches filehandle to binmode.  C<iotype> is what C<IoTYPE(io)> would
+contain.
+
+	do_binmode(fp, iotype, TRUE);
 
 =item ENTER
 
@@ -1888,10 +1928,13 @@ Prepares a starting point to traverse a hash table.
 
 	I32	hv_iterinit (HV* tb)
 
-Note that hv_iterinit I<currently> returns the number of I<buckets> in
-the hash and I<not> the number of keys (as indicated in the Advanced
-Perl Programming book). This may change in future. Use the HvKEYS(hv)
-macro to find the number of keys in a hash.
+Returns the number of keys in the hash (i.e. the same as C<HvKEYS(tb)>).
+The return value is currently only meaningful for hashes without tie
+magic.
+
+NOTE: Before version 5.004_65, C<hv_iterinit> used to return the number
+of hash buckets that happen to be in use.  If you still need that
+esoteric value, you can get it through the macro C<HvFILL(tb)>.
 
 =item hv_iterkey
 
@@ -2667,6 +2710,14 @@ specified class.
 
 	int     sv_derived_from(SV* sv, char* class)
 
+=item sv_derived_from
+
+Returns a boolean indicating whether the SV is derived from the specified
+class.  This is the function that implements C<UNIVERSAL::isa>.  It works
+for class names as well as for objects.
+
+	bool	sv_derived_from _((SV* sv, char* name));
+
 =item SvEND
 
 Returns a pointer to the last character in the string which is in the SV.
@@ -2751,7 +2802,7 @@ B<private> setting.  Use C<SvIOK>.
 =item sv_isa
 
 Returns a boolean indicating whether the SV is blessed into the specified
-class.  This does not know how to check for subtype, so it doesn't work in
+class.  This does not check for subtypes; use C<sv_derived_from> to verify
 an inheritance relationship.
 
 	int	sv_isa (SV* sv, char* name)
@@ -2768,8 +2819,8 @@ will return false.
 
 Returns the integer which is in the SV.
 
-	int	SvIV (SV* sv)
-
+	int SvIV (SV* sv)
+  
 =item SvIVX
 
 Returns the integer which is stored in the SV.
@@ -3280,6 +3331,25 @@ See C<sv_usepvn_mg>.
 Like C<sv_usepvn>, but also handles 'set' magic.
 
 	void	sv_usepvn_mg (SV* sv, char* ptr, STRLEN len)
+
+=item sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale)
+
+Processes its arguments like C<vsprintf> and appends the formatted output
+to an SV.  Uses an array of SVs if the C style variable argument list is
+missing (NULL).  Indicates if locale information has been used for formatting.
+
+	void	sv_catpvfn _((SV* sv, const char* pat, STRLEN patlen,
+			      va_list *args, SV **svargs, I32 svmax,
+			      bool *used_locale));
+
+=item sv_vsetpvfn(sv, pat, patlen, args, svargs, svmax, used_locale)
+
+Works like C<vcatpvfn> but copies the text into the SV instead of
+appending it.
+
+	void	sv_setpvfn _((SV* sv, const char* pat, STRLEN patlen,
+			      va_list *args, SV **svargs, I32 svmax,
+			      bool *used_locale));
 
 =item SvUV
 

@@ -841,7 +841,7 @@ hv_free_ent(HV *hv, register HE *entry)
     if (!entry)
 	return;
     val = HeVAL(entry);
-    if (isGV(val) && GvCVu(val) && HvNAME(hv))
+    if (val && isGV(val) && GvCVu(val) && HvNAME(hv))
 	sub_generation++;	/* may be deletion of method from stash */
     SvREFCNT_dec(val);
     if (HeKLEN(entry) == HEf_SVKEY) {
@@ -966,7 +966,7 @@ hv_iterinit(HV *hv)
     }
     xhv->xhv_riter = -1;
     xhv->xhv_eiter = Null(HE*);
-    return xhv->xhv_fill;	/* should be xhv->xhv_keys? May change later */
+    return xhv->xhv_keys;	/* used to be xhv->xhv_fill before 5.004_65 */
 }
 
 HE *

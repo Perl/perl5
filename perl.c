@@ -208,9 +208,10 @@ perl_construct(register PerlInterpreter *sv_interp)
     localpatches = local_patches;	/* For possible -v */
 #endif
 
-    PerlIO_init();      /* Hook to IO system */
+    PerlIO_init();			/* Hook to IO system */
 
-    fdpid = newAV();	/* for remembering popen pids by fd */
+    fdpid = newAV();			/* for remembering popen pids by fd */
+    modglobal = newHV();		/* pointers to per-interpreter module globals */
 
     DEBUG( {
 	New(51,debname,128,char);
@@ -327,6 +328,7 @@ perl_destruct(register PerlInterpreter *sv_interp)
 	op_free(main_root);
 	main_root = Nullop;
     }
+    curcop = &compiling;
     main_start = Nullop;
     SvREFCNT_dec(main_cv);
     main_cv = Nullcv;
@@ -349,6 +351,12 @@ perl_destruct(register PerlInterpreter *sv_interp)
     diehook = Nullsv;
     SvREFCNT_dec(parsehook);
     parsehook = Nullsv;
+
+    /* call exit list functions */
+    while (exitlistlen-- > 0)
+	exitlist[exitlistlen].fn(exitlist[exitlistlen].ptr);
+
+    Safefree(exitlist);
 
     if (destruct_level == 0){
 
@@ -549,6 +557,15 @@ perl_free(PerlInterpreter *sv_interp)
     if (!(curinterp = sv_interp))
 	return;
     Safefree(sv_interp);
+}
+
+void
+perl_atexit(void (*fn) (void *), void *ptr)
+{
+    Renew(exitlist, exitlistlen+1, PerlExitListEntry);
+    exitlist[exitlistlen].fn = fn;
+    exitlist[exitlistlen].ptr = ptr;
+    ++exitlistlen;
 }
 
 int
@@ -1193,7 +1210,8 @@ perl_call_sv(SV *sv, I32 flags)
 	  && (DBcv || (DBcv = GvCV(DBsub)))
 	   /* Try harder, since this may have been a sighandler, thus
 	    * curstash may be meaningless. */
-	  && (SvTYPE(sv) != SVt_PVCV || CvSTASH((CV*)sv) != debstash))
+	  && (SvTYPE(sv) != SVt_PVCV || CvSTASH((CV*)sv) != debstash)
+	  && !(flags & G_NODEBUG))
 	op->op_private |= OPpENTERSUB_DB;
 
     if (flags & G_EVAL) {
@@ -1451,7 +1469,7 @@ usage(char *name)		/* XXX move this out into a module ? */
 "-T              turn on tainting checks",
 "-u              dump core after parsing script",
 "-U              allow unsafe operations",
-"-v              print version number and patchlevel of perl",
+"-v              print version number, patchlevel plus VERY IMPORTANT perl info",
 "-V[:variable]   print perl configuration information",
 "-w              TURN WARNINGS ON FOR COMPILATION OF YOUR SCRIPT. Recommended.",
 "-x[directory]   strip off text before #!perl line and perhaps cd to directory",
@@ -1678,7 +1696,10 @@ moreswitches(char *s)
 #endif
 	printf("\n\
 Perl may be copied only under the terms of either the Artistic License or the\n\
-GNU General Public License, which may be found in the Perl 5.0 source kit.\n\n");
+GNU General Public License, which may be found in the Perl 5.0 source kit.\n\n\
+Complete documentation for Perl, including FAQ lists, should be found on\n\
+this system using `man perl' or `perldoc perl'.  If you have access to the\n\
+Internet, point your browser at http://www.perl.com/, the Perl Home Page.\n\n");
 	PerlProc_exit(0);
     case 'w':
 	dowarn = TRUE;
@@ -1785,201 +1806,9 @@ static void
 open_script(char *scriptname, bool dosearch, SV *sv)
 {
     dTHR;
-    char *xfound = Nullch;
-    char *xfailed = Nullch;
     register char *s;
-    I32 len;
-    int retval;
-#if defined(DOSISH) && !defined(OS2) && !defined(atarist)
-#  define SEARCH_EXTS ".bat", ".cmd", NULL
-#  define MAX_EXT_LEN 4
-#endif
-#ifdef OS2
-#  define SEARCH_EXTS ".cmd", ".btm", ".bat", ".pl", NULL
-#  define MAX_EXT_LEN 4
-#endif
-#ifdef VMS
-#  define SEARCH_EXTS ".pl", ".com", NULL
-#  define MAX_EXT_LEN 4
-#endif
-    /* additional extensions to try in each dir if scriptname not found */
-#ifdef SEARCH_EXTS
-    char *ext[] = { SEARCH_EXTS };
-    int extidx = 0, i = 0;
-    char *curext = Nullch;
-#else
-#  define MAX_EXT_LEN 0
-#endif
 
-    /*
-     * If dosearch is true and if scriptname does not contain path
-     * delimiters, search the PATH for scriptname.
-     *
-     * If SEARCH_EXTS is also defined, will look for each
-     * scriptname{SEARCH_EXTS} whenever scriptname is not found
-     * while searching the PATH.
-     *
-     * Assuming SEARCH_EXTS is C<".foo",".bar",NULL>, PATH search
-     * proceeds as follows:
-     *   If DOSISH or VMSISH:
-     *     + look for ./scriptname{,.foo,.bar}
-     *     + search the PATH for scriptname{,.foo,.bar}
-     *
-     *   If !DOSISH:
-     *     + look *only* in the PATH for scriptname{,.foo,.bar} (note
-     *       this will not look in '.' if it's not in the PATH)
-     */
-
-#ifdef VMS
-#  ifdef ALWAYS_DEFTYPES
-    len = strlen(scriptname);
-    if (!(len == 1 && *scriptname == '-') && scriptname[len-1] != ':') {
-	int hasdir, idx = 0, deftypes = 1;
-	bool seen_dot = 1;
-
-	hasdir = !dosearch || (strpbrk(scriptname,":[</") != Nullch) ;
-#  else
-    if (dosearch) {
-	int hasdir, idx = 0, deftypes = 1;
-	bool seen_dot = 1;
-
-	hasdir = (strpbrk(scriptname,":[</") != Nullch) ;
-#  endif
-	/* The first time through, just add SEARCH_EXTS to whatever we
-	 * already have, so we can check for default file types. */
-	while (deftypes ||
-	       (!hasdir && my_trnlnm("DCL$PATH",tokenbuf,idx++)) )
-	{
-	    if (deftypes) {
-		deftypes = 0;
-		*tokenbuf = '\0';
-	    }
-	    if ((strlen(tokenbuf) + strlen(scriptname)
-		 + MAX_EXT_LEN) >= sizeof tokenbuf)
-		continue;	/* don't search dir with too-long name */
-	    strcat(tokenbuf, scriptname);
-#else  /* !VMS */
-
-#ifdef DOSISH
-    if (strEQ(scriptname, "-"))
- 	dosearch = 0;
-    if (dosearch) {		/* Look in '.' first. */
-	char *cur = scriptname;
-#ifdef SEARCH_EXTS
-	if ((curext = strrchr(scriptname,'.')))	/* possible current ext */
-	    while (ext[i])
-		if (strEQ(ext[i++],curext)) {
-		    extidx = -1;		/* already has an ext */
-		    break;
-		}
-	do {
-#endif
-	    DEBUG_p(PerlIO_printf(Perl_debug_log,
-				  "Looking for %s\n",cur));
-	    if (PerlLIO_stat(cur,&statbuf) >= 0) {
-		dosearch = 0;
-		scriptname = cur;
-#ifdef SEARCH_EXTS
-		break;
-#endif
-	    }
-#ifdef SEARCH_EXTS
-	    if (cur == scriptname) {
-		len = strlen(scriptname);
-		if (len+MAX_EXT_LEN+1 >= sizeof(tokenbuf))
-		    break;
-		cur = strcpy(tokenbuf, scriptname);
-	    }
-	} while (extidx >= 0 && ext[extidx]	/* try an extension? */
-		 && strcpy(tokenbuf+len, ext[extidx++]));
-#endif
-    }
-#endif
-
-    if (dosearch && !strchr(scriptname, '/')
-#ifdef DOSISH
-		 && !strchr(scriptname, '\\')
-#endif
-		 && (s = PerlEnv_getenv("PATH"))) {
-	bool seen_dot = 0;
-	
-	bufend = s + strlen(s);
-	while (s < bufend) {
-#if defined(atarist) || defined(DOSISH)
-	    for (len = 0; *s
-#  ifdef atarist
-		    && *s != ','
-#  endif
-		    && *s != ';'; len++, s++) {
-		if (len < sizeof tokenbuf)
-		    tokenbuf[len] = *s;
-	    }
-	    if (len < sizeof tokenbuf)
-		tokenbuf[len] = '\0';
-#else  /* ! (atarist || DOSISH) */
-	    s = delimcpy(tokenbuf, tokenbuf + sizeof tokenbuf, s, bufend,
-			':',
-			&len);
-#endif /* ! (atarist || DOSISH) */
-	    if (s < bufend)
-		s++;
-	    if (len + 1 + strlen(scriptname) + MAX_EXT_LEN >= sizeof tokenbuf)
-		continue;	/* don't search dir with too-long name */
-	    if (len
-#if defined(atarist) || defined(DOSISH)
-		&& tokenbuf[len - 1] != '/'
-		&& tokenbuf[len - 1] != '\\'
-#endif
-	       )
-		tokenbuf[len++] = '/';
-	    if (len == 2 && tokenbuf[0] == '.')
-		seen_dot = 1;
-	    (void)strcpy(tokenbuf + len, scriptname);
-#endif  /* !VMS */
-
-#ifdef SEARCH_EXTS
-	    len = strlen(tokenbuf);
-	    if (extidx > 0)	/* reset after previous loop */
-		extidx = 0;
-	    do {
-#endif
-	    	DEBUG_p(PerlIO_printf(Perl_debug_log, "Looking for %s\n",tokenbuf));
-		retval = PerlLIO_stat(tokenbuf,&statbuf);
-#ifdef SEARCH_EXTS
-	    } while (  retval < 0		/* not there */
-		    && extidx>=0 && ext[extidx]	/* try an extension? */
-		    && strcpy(tokenbuf+len, ext[extidx++])
-		);
-#endif
-	    if (retval < 0)
-		continue;
-	    if (S_ISREG(statbuf.st_mode)
-		&& cando(S_IRUSR,TRUE,&statbuf)
-#ifndef DOSISH
-		&& cando(S_IXUSR,TRUE,&statbuf)
-#endif
-		)
-	    {
-		xfound = tokenbuf;              /* bingo! */
-		break;
-	    }
-	    if (!xfailed)
-		xfailed = savepv(tokenbuf);
-	}
-#ifndef DOSISH
-	if (!xfound && !seen_dot && !xfailed && (PerlLIO_stat(scriptname,&statbuf) < 0))
-#endif
-	    seen_dot = 1;			/* Disable message. */
-	if (!xfound)
-	    croak("Can't %s %s%s%s",
-		  (xfailed ? "execute" : "find"),
-		  (xfailed ? xfailed : scriptname),
-		  (xfailed ? "" : " on PATH"),
-		  (xfailed || seen_dot) ? "" : ", '.' not in PATH");
-	if (xfailed)
-	    Safefree(xfailed);
-	scriptname = xfound;
-    }
+    scriptname = find_script(scriptname, dosearch, NULL, 0);
 
     if (strnEQ(scriptname, "/dev/fd/", 8) && isDIGIT(scriptname[8]) ) {
 	char *s = scriptname + 8;
@@ -2491,7 +2320,7 @@ nuke_stacks(void)
 	curstackinfo = curstackinfo->si_next;
     while (curstackinfo) {
 	PERL_SI *p = curstackinfo->si_prev;
-	SvREFCNT_dec(curstackinfo->si_stack);
+	/* curstackinfo->si_stack got nuked by sv_free_arenas() */
 	Safefree(curstackinfo->si_cxstack);
 	Safefree(curstackinfo);
 	curstackinfo = p;
@@ -2668,7 +2497,7 @@ init_perllib(void)
     ARCHLIB PRIVLIB SITEARCH and SITELIB 
 */
 #ifdef APPLLIB_EXP
-    incpush(APPLLIB_EXP, FALSE);
+    incpush(APPLLIB_EXP, TRUE);
 #endif
 
 #ifdef ARCHLIB_EXP
@@ -2819,7 +2648,6 @@ init_main_thread()
     SvLEN_set(thrsv, sizeof(thr));
     *SvEND(thrsv) = '\0';	/* in the trailing_nul field */
     thr->oursv = thrsv;
-    curcop = &compiling;
     chopset = " \n-";
 
     MUTEX_LOCK(&threads_mutex);
@@ -2967,10 +2795,16 @@ my_failure_exit(void)
 	    STATUS_NATIVE_SET(vaxc$errno);
     }
 #else
+    int exitstatus;
     if (errno & 255)
 	STATUS_POSIX_SET(errno);
-    else if (STATUS_POSIX == 0)
-	STATUS_POSIX_SET(255);
+    else {
+	exitstatus = STATUS_POSIX >> 8; 
+	if (exitstatus & 255)
+	    STATUS_POSIX_SET(exitstatus);
+	else
+	    STATUS_POSIX_SET(255);
+    }
 #endif
     my_exit_jump();
 }
@@ -2978,7 +2812,7 @@ my_failure_exit(void)
 static void
 my_exit_jump(void)
 {
-    dTHR;
+    dSP;
     register PERL_CONTEXT *cx;
     I32 gimme;
     SV **newsp;
@@ -2993,6 +2827,7 @@ my_exit_jump(void)
 	e_tmpname = Nullch;
     }
 
+    POPSTACK_TO(mainstack);
     if (cxstack_ix >= 0) {
 	if (cxstack_ix > 0)
 	    dounwind(0);

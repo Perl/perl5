@@ -27,7 +27,7 @@ AOUT_CLDFLAGS	= $aout_ldflags
 
 AOUT_LIBPERL_DLL	= libperl_dll$aout_lib_ext
 AOUT_CCCMD_DLL	= \$(CC) -DDOSISH -DOS2=2 -DEMBED -I. -DPACK_MALLOC -DDEBUGGING_MSTATS -DTWO_POT_OPTIMIZE -DPERL_EMERGENCY_SBRK
-AOUT_CLDFLAGS_DLL	= -Zexe -Zmt -Zcrtdll
+AOUT_CLDFLAGS_DLL	= -Zexe -Zmt -Zcrtdll -Zstack 32000
 
 LD_OPT		= $optimize
 
@@ -97,19 +97,19 @@ depend: os2ish.h dlfcn.h os2thread.h os2.c
 os2$(OBJ_EXT) : os2.c
 
 os2.c: os2/os2.c os2ish.h
-	cp $< $@
+	cp -f $< $@
 
 dl_os2.c: os2/dl_os2.c os2ish.h
-	cp $< $@
+	cp -f $< $@
 
 os2ish.h: os2/os2ish.h
-	cp $< $@
+	cp -f $< $@
 
 os2thread.h: os2/os2thread.h
-	cp $< $@
+	cp -f $< $@
 
 dlfcn.h: os2/dlfcn.h
-	cp $< $@
+	cp -f $< $@
 
 # This one is compiled OMF, so cannot fork():
 

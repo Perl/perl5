@@ -24,6 +24,7 @@ dec_amg
 di
 div_amg
 div_ass_amg
+do_binmode
 ds
 eq_amg
 exp_amg
@@ -308,6 +309,7 @@ fetch_io
 filter_add
 filter_del
 filter_read
+find_script
 find_threadsv
 fold_constants
 force_ident

@@ -45,7 +45,12 @@ else {
 if ($Is_MSWin32 || $Is_Dos || $Config{dont_use_nlink} || $nlink == 2)
     {print "ok 3\n";} else {print "# \$nlink is |$nlink|\nnot ok 3\n";}
 
-if ($Is_MSWin32 || $Is_Dos || ($mtime && $mtime != $ctime) || $cwd =~ m#/afs/# || $^O eq 'amigaos') {
+if (   ($mtime && $mtime != $ctime)
+	|| $Is_MSWin32
+	|| $Is_Dos
+	|| ($cwd eq '/tmp' and $mtime && $mtime==$ctime) # Solaris tmpfs bug
+	|| $cwd =~ m#/afs/#
+	|| $^O eq 'amigaos') {
     print "ok 4\n";
 }
 else {
@@ -53,7 +58,7 @@ else {
     print "#4 If test op/stat.t fails test 4, check if you are on a tmpfs\n";
     print "#4 of some sort.  Building in /tmp sometimes has this problem.\n";
 }
-print "#4	:$mtime: != :$ctime:\n";
+print "#4	:$mtime: should != :$ctime:\n";
 
 unlink "Op.stat.tmp";
 if ($Is_MSWin32) {  open F, '>Op.stat.tmp' and close F }

@@ -1239,6 +1239,7 @@ mod(OP *o, I32 type)
     else if (!type) {
 	o->op_private |= OPpLVAL_INTRO;
 	o->op_flags &= ~OPf_SPECIAL;
+	hints |= HINT_BLOCK_SCOPE;
     }
     else if (type != OP_GREPSTART && type != OP_ENTERSUB)
 	o->op_flags |= OPf_REF;
@@ -3481,7 +3482,6 @@ newSUB(I32 floor, OP *o, OP *proto, OP *block)
 	    ENTER;
 	    SAVESPTR(compiling.cop_filegv);
 	    SAVEI16(compiling.cop_line);
-	    SAVEI32(perldb);
 	    save_svref(&rs);
 	    sv_setsv(rs, nrs);
 
@@ -4876,6 +4876,8 @@ peep(register OP *o)
 	    o->op_seq = op_seqmax++;
 	    if (dowarn && o->op_next && o->op_next->op_type == OP_NEXTSTATE) {
 		if (o->op_next->op_sibling &&
+			o->op_next->op_sibling->op_type != OP_EXIT &&
+			o->op_next->op_sibling->op_type != OP_WARN &&
 			o->op_next->op_sibling->op_type != OP_DIE) {
 		    line_t oldline = curcop->cop_line;
 

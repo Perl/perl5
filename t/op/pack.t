@@ -2,7 +2,7 @@
 
 # $RCSfile: pack.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:11 $
 
-print "1..29\n";
+print "1..30\n";
 
 $format = "c2 x5 C C x s d i l a6";
 # Need the expression in here to force ary[5] to be numeric.  This avoids
@@ -99,4 +99,10 @@ sub foo { my $a = "a"; return $a . $a++ . $a++ }
 
 # undef should give null pointer
 print((pack("p", undef) =~ /^\0+/ ? "ok " : "not ok "),$test++,"\n");
+
+# Check for optimizer bug (e.g.  Digital Unix GEM cc with -O4 on DU V4.0B gives
+#                                4294967295 instead of -1)
+#				 see #ifdef __osf__ in pp.c pp_unpack
+# Test 30:
+print( ((unpack("i",pack("i",-1))) == -1 ? "ok " : "not ok "),$test++,"\n");
 

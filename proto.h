@@ -90,6 +90,7 @@ OP*	die _((const char* pat,...));
 OP*	die_where _((char* message));
 void	dounwind _((I32 cxix));
 bool	do_aexec _((SV* really, SV** mark, SV** sp));
+int	do_binmode _((PerlIO *fp, int iotype, int flag));
 void    do_chop _((SV* asv, SV* sv));
 bool	do_close _((GV* gv, bool not_implicit));
 bool	do_eof _((GV* gv));
@@ -139,6 +140,7 @@ void	dump_packsubs _((HV* stash));
 void	dump_sub _((GV* gv));
 void	fbm_compile _((SV* sv, U32 flags));
 char*	fbm_instr _((unsigned char* big, unsigned char* bigend, SV* littlesv));
+char*	find_script _((char *scriptname, bool dosearch, char **search_ext, I32 flags));
 #ifdef USE_THREADS
 PADOFFSET	find_threadsv _((char *name));
 #endif
@@ -367,6 +369,7 @@ void	pad_reset _((void));
 void	pad_swipe _((PADOFFSET po));
 void	peep _((OP* o));
 PerlInterpreter*	perl_alloc _((void));
+void    perl_atexit _((void(*fn)(void *), void*));
 I32	perl_call_argv _((char* subname, I32 flags, char** argv));
 I32	perl_call_method _((char* methname, I32 flags));
 I32	perl_call_pv _((char* subname, I32 flags));

@@ -400,6 +400,10 @@ sv_free_arenas(void)
 	    Safefree((void *)sva);
     }
 
+    if (nice_chunk)
+	Safefree(nice_chunk);
+    nice_chunk = Nullch;
+    nice_chunk_size = 0;
     sv_arenaroot = 0;
     sv_root = 0;
 }
@@ -1902,8 +1906,11 @@ sv_setsv(SV *dstr, register SV *sstr)
 
     switch (stype) {
     case SVt_NULL:
-	(void)SvOK_off(dstr);
-	return;
+	if (dtype != SVt_PVGV) {
+	    (void)SvOK_off(dstr);
+	    return;
+	}
+	break;
     case SVt_IV:
 	if (dtype != SVt_IV && dtype < SVt_PVIV) {
 	    if (dtype < SVt_IV)
@@ -2205,7 +2212,12 @@ sv_setsv(SV *dstr, register SV *sstr)
 	SvIVX(dstr) = SvIVX(sstr);
     }
     else {
-	(void)SvOK_off(dstr);
+	if (dtype == SVt_PVGV) {
+	    if (dowarn)
+		warn("Undefined value assigned to typeglob");
+	}
+	else
+	    (void)SvOK_off(dstr);
     }
     SvTAINT(dstr);
 }
@@ -4111,6 +4123,10 @@ sv_unglob(SV *sv)
     SvFAKE_off(sv);
     if (GvGP(sv))
 	gp_free((GV*)sv);
+    if (GvSTASH(sv)) {
+	SvREFCNT_dec(GvSTASH(sv));
+	GvSTASH(sv) = Nullhv;
+    }
     sv_unmagic(sv, '*');
     Safefree(GvNAME(sv));
     GvMULTI_off(sv);

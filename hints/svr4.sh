@@ -68,12 +68,17 @@ fi
 
 # UnixWare has a broken csh.  The undocumented -X argument to uname is probably
 # a reasonable way of detecting UnixWare.  Also in 2.1.1 the fields in
-# FILE* got renamed!
-#
+# FILE* got renamed! Plus 1.1 can't cast large floats to 32-bit ints.
 #	Leave leading tabs so Configure doesn't propagate these variables
-#	to config.sh
 	uw_ver=`uname -v`
 	uw_isuw=`uname -X 2>&1 | grep Release`
+if [ "$uw_isuw" = "Release = 4.2" ]; then
+   case $uw_ver in
+   1.1)
+      d_casti32='undef'
+      ;;
+   esac
+fi
 if [ "$uw_isuw" = "Release = 4.2MP" ]; then
    case $uw_ver in
    2.1)

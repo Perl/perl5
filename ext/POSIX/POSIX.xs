@@ -1,3 +1,6 @@
+#ifdef WIN32
+#define _POSIX_
+#endif
 #include "EXTERN.h"
 #define PERLIO_NOT_STDIO 1
 #include "perl.h"
@@ -40,7 +43,9 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <time.h>
+#ifdef I_UNISTD
 #include <unistd.h>	/* see hints/sunos_4_1.sh */
+#endif
 #include <fcntl.h>
 
 #if defined(__VMS) && !defined(__POSIX_SOURCE)
@@ -91,6 +96,28 @@
    }
 #  define times(t) vms_times(t)
 #else
+#if defined (WIN32)
+#  undef mkfifo  /* #defined in perl.h */
+#  define mkfifo(a,b) not_here("mkfifo")
+#  define ttyname(a) not_here("ttyname")
+#  define sigset_t long
+#  define pid_t long
+#  ifdef __BORLANDC__
+#    define tzname _tzname
+#  endif
+#  ifdef _MSC_VER
+#    define mode_t short
+#  endif
+#  define sigaction(a,b,c)	not_here("sigaction")
+#  define sigpending(a)		not_here("sigpending")
+#  define sigprocmask(a,b,c)	not_here("sigprocmask")
+#  define sigsuspend(a)		not_here("sigsuspend")
+#  define sigemptyset(a)	not_here("sigemptyset")
+#  define sigaddset(a,b)	not_here("sigaddset")
+#  define sigdelset(a,b)	not_here("sigdelset")
+#  define sigfillset(a)		not_here("sigfillset")
+#  define sigismember(a,b)	not_here("sigismember")
+#else
 #  include <grp.h>
 #  include <sys/times.h>
 #  ifdef HAS_UNAME
@@ -100,7 +127,8 @@
 #  ifdef I_UTIME
 #    include <utime.h>
 #  endif
-#endif
+#endif /* WIN32 */
+#endif /* __VMS */
 
 typedef int SysRet;
 typedef long SysRetLong;
@@ -227,10 +255,12 @@ unsigned long strtoul _((const char *, char **, int));
 #define localeconv() not_here("localeconv")
 #endif
 
+#ifndef WIN32
 #ifdef HAS_TZNAME
 extern char *tzname[];
 #else
 char *tzname[] = { "" , "" };
+#endif
 #endif
 
 /* XXX struct tm on some systems (SunOS4/BSD) contains extra (non POSIX)
@@ -2259,55 +2289,55 @@ constant(char *name, int arg)
     case '_':
 	if (strnEQ(name, "_PC_", 4)) {
 	    if (strEQ(name, "_PC_CHOWN_RESTRICTED"))
-#ifdef _PC_CHOWN_RESTRICTED
+#if defined(_PC_CHOWN_RESTRICTED) || HINT_SC_EXIST
 		return _PC_CHOWN_RESTRICTED;
 #else
 		goto not_there;
 #endif
 	    if (strEQ(name, "_PC_LINK_MAX"))
-#ifdef _PC_LINK_MAX
+#if defined(_PC_LINK_MAX) || HINT_SC_EXIST
 		return _PC_LINK_MAX;
 #else
 		goto not_there;
 #endif
 	    if (strEQ(name, "_PC_MAX_CANON"))
-#ifdef _PC_MAX_CANON
+#if defined(_PC_MAX_CANON) || HINT_SC_EXIST
 		return _PC_MAX_CANON;
 #else
 		goto not_there;
 #endif
 	    if (strEQ(name, "_PC_MAX_INPUT"))
-#ifdef _PC_MAX_INPUT
+#if defined(_PC_MAX_INPUT) || HINT_SC_EXIST
 		return _PC_MAX_INPUT;
 #else
 		goto not_there;
 #endif
 	    if (strEQ(name, "_PC_NAME_MAX"))
-#ifdef _PC_NAME_MAX
+#if defined(_PC_NAME_MAX) || HINT_SC_EXIST
 		return _PC_NAME_MAX;
 #else
 		goto not_there;
 #endif
 	    if (strEQ(name, "_PC_NO_TRUNC"))
-#ifdef _PC_NO_TRUNC
+#if defined(_PC_NO_TRUNC) || HINT_SC_EXIST
 		return _PC_NO_TRUNC;
 #else
 		goto not_there;
 #endif
 	    if (strEQ(name, "_PC_PATH_MAX"))
-#ifdef _PC_PATH_MAX
+#if defined(_PC_PATH_MAX) || HINT_SC_EXIST
 		return _PC_PATH_MAX;
 #else
 		goto not_there;
 #endif
 	    if (strEQ(name, "_PC_PIPE_BUF"))
-#ifdef _PC_PIPE_BUF
+#if defined(_PC_PIPE_BUF) || HINT_SC_EXIST
 		return _PC_PIPE_BUF;
 #else
 		goto not_there;
 #endif
 	    if (strEQ(name, "_PC_VDISABLE"))
-#ifdef _PC_VDISABLE
+#if defined(_PC_VDISABLE) || HINT_SC_EXIST
 		return _PC_VDISABLE;
 #else
 		goto not_there;
@@ -2433,61 +2463,61 @@ constant(char *name, int arg)
 	}
 	if (strnEQ(name, "_SC_", 4)) {
 	    if (strEQ(name, "_SC_ARG_MAX"))
-#ifdef _SC_ARG_MAX
+#if defined(_SC_ARG_MAX) || HINT_SC_EXIST
 		return _SC_ARG_MAX;
 #else
 		goto not_there;
 #endif
 	    if (strEQ(name, "_SC_CHILD_MAX"))
-#ifdef _SC_CHILD_MAX
+#if defined(_SC_CHILD_MAX) || HINT_SC_EXIST
 		return _SC_CHILD_MAX;
 #else
 		goto not_there;
 #endif
 	    if (strEQ(name, "_SC_CLK_TCK"))
-#ifdef _SC_CLK_TCK
+#if defined(_SC_CLK_TCK) || HINT_SC_EXIST
 		return _SC_CLK_TCK;
 #else
 		goto not_there;
 #endif
 	    if (strEQ(name, "_SC_JOB_CONTROL"))
-#ifdef _SC_JOB_CONTROL
+#if defined(_SC_JOB_CONTROL) || HINT_SC_EXIST
 		return _SC_JOB_CONTROL;
 #else
 		goto not_there;
 #endif
 	    if (strEQ(name, "_SC_NGROUPS_MAX"))
-#ifdef _SC_NGROUPS_MAX
+#if defined(_SC_NGROUPS_MAX) || HINT_SC_EXIST
 		return _SC_NGROUPS_MAX;
 #else
 		goto not_there;
 #endif
 	    if (strEQ(name, "_SC_OPEN_MAX"))
-#ifdef _SC_OPEN_MAX
+#if defined(_SC_OPEN_MAX) || HINT_SC_EXIST
 		return _SC_OPEN_MAX;
 #else
 		goto not_there;
 #endif
 	    if (strEQ(name, "_SC_SAVED_IDS"))
-#ifdef _SC_SAVED_IDS
+#if defined(_SC_SAVED_IDS) || HINT_SC_EXIST
 		return _SC_SAVED_IDS;
 #else
 		goto not_there;
 #endif
 	    if (strEQ(name, "_SC_STREAM_MAX"))
-#ifdef _SC_STREAM_MAX
+#if defined(_SC_STREAM_MAX) || HINT_SC_EXIST
 		return _SC_STREAM_MAX;
 #else
 		goto not_there;
 #endif
 	    if (strEQ(name, "_SC_TZNAME_MAX"))
-#ifdef _SC_TZNAME_MAX
+#if defined(_SC_TZNAME_MAX) || HINT_SC_EXIST
 		return _SC_TZNAME_MAX;
 #else
 		goto not_there;
 #endif
 	    if (strEQ(name, "_SC_VERSION"))
-#ifdef _SC_VERSION
+#if defined(_SC_VERSION) || HINT_SC_EXIST
 		return _SC_VERSION;
 #else
 		goto not_there;
@@ -3102,7 +3132,9 @@ sigaction(sig, action, oldaction = 0)
 	POSIX::SigAction	action
 	POSIX::SigAction	oldaction
     CODE:
-
+#ifdef WIN32
+	RETVAL = not_here("sigaction");
+#else
 # This code is really grody because we're trying to make the signal
 # interface look beautiful, which is hard.
 
@@ -3181,6 +3213,7 @@ sigaction(sig, action, oldaction = 0)
 		sv_setiv(*svp, oact.sa_flags);
 	    }
 	}
+#endif
     OUTPUT:
 	RETVAL
 

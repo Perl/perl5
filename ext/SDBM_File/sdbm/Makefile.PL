@@ -1,7 +1,7 @@
 use ExtUtils::MakeMaker;
 
 $define = '-DSDBM -DDUFF';
-$define .= ' -DWIN32' if ($^O eq 'MSWin32');
+$define .= ' -DWIN32 -DPERL_STATIC_SYMS' if ($^O eq 'MSWin32');
 
 if ($^O eq 'VMS') {  # Old VAXC compiler can't handle Duff's device
     require Config;
@@ -37,5 +37,11 @@ config ::
 
 lint:
 	lint -abchx $(LIBSRCS)
+
+# This is a workaround, the problem is that our old GNU make exports
+# variables into the environment so $(MYEXTLIB) is set in here to this
+# value which can not be built.
+sdbm/libsdbm.a:
+	true
 ';
 }

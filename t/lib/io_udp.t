@@ -30,9 +30,13 @@ use IO::Socket qw(AF_INET SOCK_DGRAM INADDR_ANY);
     # This can fail if localhost is undefined or the
     # special 'loopback' address 127.0.0.1 is not configured
     # on your system. (/etc/rc.config.d/netconfig on HP-UX.)
+    # As a shortcut (not recommended) you could change 'localhost'
+    # here to be the name of this machine eg 'myhost.mycompany.com'.
 
-$udpa = IO::Socket::INET->new(Proto => 'udp', LocalAddr => 'localhost');
-$udpb = IO::Socket::INET->new(Proto => 'udp', LocalAddr => 'localhost');
+$udpa = IO::Socket::INET->new(Proto => 'udp', LocalAddr => 'localhost')
+    or die "$! (maybe your system does not have the 'localhost' address defined)";
+$udpb = IO::Socket::INET->new(Proto => 'udp', LocalAddr => 'localhost')
+    or die "$! (maybe your system does not have the 'localhost' address defined)";
 
 print "ok 1\n";
 

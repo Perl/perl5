@@ -1538,15 +1538,14 @@ Hashref of .pm files and *.pl files to be installed.  e.g.
 
   {'name_of_file.pm' => '$(INST_LIBDIR)/install_as.pm'}
 
-By default this will include *.pm and *.pl. If a lib directory
-exists and is not listed in DIR (above) then any *.pm and *.pl files
-it contains will also be included by default.  Defining PM in the
+By default this will include *.pm and *.pl and the files found in
+the PMLIBDIRS directories.  Defining PM in the
 Makefile.PL will override PMLIBDIRS.
 
 =item PMLIBDIRS
 
 Ref to array of subdirectories containing library files.  Defaults to
-[ 'lib', $(BASEEXT) ]. The directories will be scanned and any files
+[ 'lib', $(BASEEXT) ]. The directories will be scanned and I<any> files
 they contain will be installed in the corresponding location in the
 library.  A libscan() method can be used to alter the behaviour.
 Defining PM in the Makefile.PL will override PMLIBDIRS.

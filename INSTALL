@@ -125,7 +125,7 @@ L<"Site-wide Policy settings"> below.
 Configure will figure out various things about your system.  Some
 things Configure will figure out for itself, other things it will ask
 you about.  To accept the default, just press RETURN.   The default
-is almost always ok.  At any Configure prompt, you can type  &-d
+is almost always okay.  At any Configure prompt, you can type  &-d
 and Configure will use the defaults from then on.
 
 After it runs, Configure will perform variable substitution on all the
@@ -161,6 +161,14 @@ then Configure will suggest /opt/perl/lib instead of
 NOTE:  You must not specify an installation directory that is below
 your perl source directory.  If you do, installperl will attempt
 infinite recursion.
+
+It may seem obvious to say, but Perl is useful only when users can
+easily find it. When possible, it's good for both /usr/bin/perl and
+/usr/local/bin/perl to be symlinks to the actual binary. If that can't
+be done, system administrators are strongly encouraged to put
+(symlinks to) perl and its accompanying utilities, such as perldoc,
+into a directory typically found along a user's PATH, or in another
+obvious and convenient place.
 
 By default, Configure will compile perl to use dynamic loading if
 your system supports it.  If you want to force perl to be compiled
@@ -759,7 +767,7 @@ you probably want to do
 This will do two independent things:  First, it will force compilation
 to use cc -g so that you can use your system's debugger on the
 executable.  (Note:  Your system may actually require something like
-cc -g2.  Check you man pages for cc(1) and also any hint file for your
+cc -g2.  Check your man pages for cc(1) and also any hint file for your
 system.)  Second, it will add -DDEBUGGING to your ccflags variable in
 config.sh so that you can use B<perl -D> to access perl's internal
 state.  (Note: Configure will only add -DDEBUGGING by

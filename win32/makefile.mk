@@ -49,6 +49,9 @@ PERL_MALLOC	*= define
 
 #
 # set the install locations of the compiler include/libraries
+# (you'll need to quote the value if it contains spaces: i.e.
+#     CCHOME    *= "f:\Program Files\vc"
+#
 #CCHOME		*= f:\msdev\vc
 CCHOME		*= C:\bc5
 #CCHOME		*= D:\packages\mingw32
@@ -63,28 +66,28 @@ CCLIBDIR	*= $(CCHOME)\lib
 #
 # set this to your email address (perl will guess a value from
 # from your loginname and your hostname, which may not be right)
-#EMAIL *= 
+#EMAIL		*= 
 
 ##################### CHANGE THESE ONLY IF YOU MUST #####################
 
 .IF "$(CRYPT_SRC)$(CRYPT_LIB)" == ""
-D_CRYPT=undef
+D_CRYPT		= undef
 .ELSE
-D_CRYPT=define
-CRYPT_FLAG=-DHAVE_DES_FCRYPT
+D_CRYPT		= define
+CRYPT_FLAG	= -DHAVE_DES_FCRYPT
 .ENDIF
 
-.IF "$(PERL_MALLOC)" == ""
-PERL_MALLOC	*= undef
+.IF "$(OBJECT)" != ""
+PERL_MALLOC	!= undef
 .ENDIF
+
+PERL_MALLOC	*= undef
+
+USE_THREADS	*= undef
 
 #BUILDOPT	*= -DMULTIPLICITY 
 #BUILDOPT	*= -DPERL_GLOBAL_STRUCT -DMULTIPLICITY 
 # -DUSE_PERLIO -D__STDC__=1 -DUSE_SFIO -DI_SFIO -I\sfio97\include
-
-.IF "$(USE_THREADS)" == ""
-USE_THREADS	= undef
-.ENDIF
 
 .IMPORT .IGNORE : PROCESSOR_ARCHITECTURE
 
@@ -98,6 +101,7 @@ ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)
 
 ARCHDIR		= ..\lib\$(ARCHNAME)
 COREDIR		= ..\lib\CORE
+AUTODIR		= ..\lib\auto
 
 #
 # Programs to compile, build .lib files and link
@@ -107,132 +111,145 @@ COREDIR		= ..\lib\CORE
 
 .IF "$(CCTYPE)" == "BORLAND"
 
-CC = bcc32
-LINK32 = tlink32
-LIB32 = tlib
-IMPLIB = implib -c
+CC		= bcc32
+LINK32		= tlink32
+LIB32		= tlib
+IMPLIB		= implib -c
 
 #
 # Options
 #
-RUNTIME  = -D_RTLDLL
-INCLUDES = -I.\include -I. -I.. -I$(CCINCDIR)
-#PCHFLAGS = -H -Hc -H=c:\temp\bcmoduls.pch 
-DEFINES  = -DWIN32 $(BUILDOPT) $(CRYPT_FLAG)
-LOCDEFS  = -DPERLDLL -DPERL_CORE
-SUBSYS   = console
-LIBC = cw32mti.lib
-LIBFILES = $(CRYPT_LIB) import32.lib $(LIBC) odbc32.lib odbccp32.lib
+RUNTIME		= -D_RTLDLL
+INCLUDES	= -I.\include -I. -I.. -I$(CCINCDIR)
+#PCHFLAGS	= -H -Hc -H=c:\temp\bcmoduls.pch 
+DEFINES		= -DWIN32 $(BUILDOPT) $(CRYPT_FLAG)
+LOCDEFS		= -DPERLDLL -DPERL_CORE
+SUBSYS		= console
+CXX_FLAG	= -P
 
-WINIOMAYBE =
+LIBC		= cw32mti.lib
+LIBFILES	= $(CRYPT_LIB) import32.lib $(LIBC) odbc32.lib odbccp32.lib
 
 .IF  "$(CFG)" == "Debug"
-OPTIMIZE = -v $(RUNTIME) -DDEBUGGING
-LINK_DBG = -v
+OPTIMIZE	= -v $(RUNTIME) -DDEBUGGING
+LINK_DBG	= -v
 .ELSE
-OPTIMIZE = -5 -O2 $(RUNTIME)
-LINK_DBG = 
+OPTIMIZE	= -O2 $(RUNTIME)
+LINK_DBG	= 
 .ENDIF
 
-CFLAGS   = -w -d -tWM -tWD $(INCLUDES) $(DEFINES) $(LOCDEFS) $(PCHFLAGS) $(OPTIMIZE)
-LINK_FLAGS  = $(LINK_DBG) -L$(CCLIBDIR)
-OBJOUT_FLAG = -o
-EXEOUT_FLAG = -e
+CFLAGS		= -w -d -tWM -tWD $(INCLUDES) $(DEFINES) $(LOCDEFS) \
+		$(PCHFLAGS) $(OPTIMIZE)
+LINK_FLAGS	= $(LINK_DBG) -L$(CCLIBDIR)
+OBJOUT_FLAG	= -o
+EXEOUT_FLAG	= -e
 
 .ELIF "$(CCTYPE)" == "GCC"
 
-CC = gcc -pipe
-LINK32 = gcc -pipe
-LIB32 = ar
-IMPLIB = dlltool
+CC		= gcc -pipe
+LINK32		= gcc -pipe
+LIB32		= ar
+IMPLIB		= dlltool
 
 o = .o
 
 #
 # Options
 #
-RUNTIME  =
-INCLUDES = -I.\include -I. -I..
-DEFINES  = -DWIN32 $(BUILDOPT) $(CRYPT_FLAG)
-LOCDEFS  = -DPERLDLL -DPERL_CORE
-SUBSYS   = console
-LIBC	 = -lcrtdll
-LIBFILES = $(CRYPT_LIB) -ladvapi32 -luser32 -lnetapi32 -lwsock32 -lmingw32 \
-	-lgcc -lmoldname $(LIBC) -lkernel32
+RUNTIME		=
+INCLUDES	= -I.\include -I. -I..
+DEFINES		= -DWIN32 $(BUILDOPT) $(CRYPT_FLAG)
+LOCDEFS		= -DPERLDLL -DPERL_CORE
+SUBSYS		= console
+CXX_FLAG	= -xc++
 
-WINIOMAYBE =
+LIBC		= -lcrtdll
+LIBFILES	= $(CRYPT_LIB) -ladvapi32 -luser32 -lnetapi32 -lwsock32 -lmingw32 \
+		-lgcc -lmoldname $(LIBC) -lkernel32
 
 .IF  "$(CFG)" == "Debug"
-OPTIMIZE = -g -O2 $(RUNTIME) -DDEBUGGING
-LINK_DBG = -g
+OPTIMIZE	= -g -O2 $(RUNTIME) -DDEBUGGING
+LINK_DBG	= -g
 .ELSE
-OPTIMIZE = -g -O2 $(RUNTIME)
-LINK_DBG = 
+OPTIMIZE	= -g -O2 $(RUNTIME)
+LINK_DBG	= 
 .ENDIF
 
-CFLAGS   = $(INCLUDES) $(DEFINES) $(LOCDEFS) $(OPTIMIZE)
-LINK_FLAGS  = $(LINK_DBG) -L$(CCLIBDIR)
-OBJOUT_FLAG = -o
-EXEOUT_FLAG = -o
+CFLAGS		= $(INCLUDES) $(DEFINES) $(LOCDEFS) $(OPTIMIZE)
+LINK_FLAGS	= $(LINK_DBG) -L$(CCLIBDIR)
+OBJOUT_FLAG	= -o
+EXEOUT_FLAG	= -o
 
 .ELSE
 
-CC=cl.exe
-LINK32=link.exe
-LIB32=$(LINK32) -lib
+CC		= cl.exe
+LINK32		= link.exe
+LIB32		= $(LINK32) -lib
+
 #
 # Options
 #
+
 .IF "$(RUNTIME)" == ""
-RUNTIME  = -MD
+RUNTIME		= -MD
 .ENDIF
-INCLUDES = -I.\include -I. -I..
-#PCHFLAGS = -Fpc:\temp\vcmoduls.pch -YX 
-DEFINES  = -DWIN32 -D_CONSOLE $(BUILDOPT) $(CRYPT_FLAG)
-LOCDEFS  = -DPERLDLL -DPERL_CORE
-SUBSYS   = console
+
+INCLUDES	= -I.\include -I. -I..
+#PCHFLAGS	= -Fpc:\temp\vcmoduls.pch -YX 
+DEFINES		= -DWIN32 -D_CONSOLE $(BUILDOPT) $(CRYPT_FLAG)
+LOCDEFS		= -DPERLDLL -DPERL_CORE
+SUBSYS		= console
+CXX_FLAG	= -TP -GX
 
 .IF "$(RUNTIME)" == "-MD"
-LIBC = msvcrt.lib
-WINIOMAYBE =
+LIBC		= msvcrt.lib
 .ELSE
-LIBC = libcmt.lib
-WINIOMAYBE =
+LIBC		= libcmt.lib
 .ENDIF
 
 .IF  "$(CFG)" == "Debug"
 .IF "$(CCTYPE)" == "MSVC20"
-OPTIMIZE = -Od $(RUNTIME) -Z7 -D_DEBUG -DDEBUGGING
+OPTIMIZE	= -Od $(RUNTIME) -Z7 -D_DEBUG -DDEBUGGING
 .ELSE
-OPTIMIZE = -Od $(RUNTIME)d -Z7 -D_DEBUG -DDEBUGGING
+OPTIMIZE	= -Od $(RUNTIME)d -Z7 -D_DEBUG -DDEBUGGING
 .ENDIF
-LINK_DBG = -debug -pdb:none
+LINK_DBG	= -debug -pdb:none
 .ELSE
 .IF "$(CCTYPE)" == "MSVC20"
-OPTIMIZE = -O1 $(RUNTIME) -DNDEBUG
+OPTIMIZE	= -Od $(RUNTIME) -DNDEBUG
 .ELSE
-OPTIMIZE = -O1 $(RUNTIME) -DNDEBUG
+OPTIMIZE	= -Od $(RUNTIME) -DNDEBUG
 .ENDIF
-LINK_DBG = -release
+LINK_DBG	= -release
 .ENDIF
 
-# we don't add LIBC here, the compiler do it based on -MD/-MT
-LIBFILES = $(CRYPT_LIB) oldnames.lib kernel32.lib user32.lib gdi32.lib \
-	winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib \
-	oleaut32.lib netapi32.lib uuid.lib wsock32.lib mpr.lib winmm.lib \
-	version.lib odbc32.lib odbccp32.lib
+# we don't add LIBC here, the compiler does it based on -MD/-MT
+LIBFILES	= $(CRYPT_LIB) oldnames.lib kernel32.lib user32.lib gdi32.lib \
+		winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib \
+		oleaut32.lib netapi32.lib uuid.lib wsock32.lib mpr.lib winmm.lib \
+		version.lib odbc32.lib odbccp32.lib
 
-CFLAGS   = -nologo -Gf -W3 $(INCLUDES) $(DEFINES) $(LOCDEFS) $(PCHFLAGS) $(OPTIMIZE)
-LINK_FLAGS  = -nologo $(LINK_DBG) -machine:$(PROCESSOR_ARCHITECTURE)
-OBJOUT_FLAG = -Fo
-EXEOUT_FLAG = -Fe
+CFLAGS		= -nologo -Gf -W3 $(INCLUDES) $(DEFINES) $(LOCDEFS) \
+		$(PCHFLAGS) $(OPTIMIZE)
+LINK_FLAGS	= -nologo $(LINK_DBG) -machine:$(PROCESSOR_ARCHITECTURE)
+OBJOUT_FLAG	= -Fo
+EXEOUT_FLAG	= -Fe
 
 .ENDIF
+
+.IF "$(OBJECT)" != ""
+OPTIMIZE	+= $(CXX_FLAG)
+.ENDIF
+
+CFLAGS_O	= $(CFLAGS) $(OBJECT)
 
 #################### do not edit below this line #######################
 ############# NO USER-SERVICEABLE PARTS BEYOND THIS POINT ##############
 
 o *= .obj
+
+LKPRE		= INPUT (
+LKPOST		= )
 
 #
 # Rules
@@ -241,7 +258,7 @@ o *= .obj
 .SUFFIXES : .c $(o) .dll .lib .exe .a
 
 .c$(o):
-	$(CC) -c $(null,$(<:d) $(NULL) -I$(<:d)) $(CFLAGS) $(OBJOUT_FLAG)$@ $<
+	$(CC) -c $(null,$(<:d) $(NULL) -I$(<:d)) $(CFLAGS_O) $(OBJOUT_FLAG)$@ $<
 
 .y.c:
 	$(NOOP)
@@ -259,256 +276,274 @@ $(o).dll:
 .ENDIF
 
 #
-INST_BIN=$(INST_TOP)\bin
-INST_LIB=$(INST_TOP)\lib
-INST_POD=$(INST_LIB)\pod
-INST_HTML=$(INST_POD)\html
-LIBDIR=..\lib
-EXTDIR=..\ext
-PODDIR=..\pod
-EXTUTILSDIR=$(LIBDIR)\extutils
+INST_BIN	= $(INST_TOP)\bin
+INST_LIB	= $(INST_TOP)\lib
+INST_POD	= $(INST_LIB)\pod
+INST_HTML	= $(INST_POD)\html
+LIBDIR		= ..\lib
+EXTDIR		= ..\ext
+PODDIR		= ..\pod
+EXTUTILSDIR	= $(LIBDIR)\extutils
 
 #
 # various targets
-PERLIMPLIB=..\perl.lib
-MINIPERL=..\miniperl.exe
-PERLDLL=..\perl.dll
-PERLEXE=..\perl.exe
-GLOBEXE=..\perlglob.exe
-CONFIGPM=..\lib\Config.pm
-MINIMOD=..\lib\ExtUtils\Miniperl.pm
-X2P=..\x2p\a2p.exe
+.IF "$(OBJECT)" == "-DPERL_OBJECT"
+PERLIMPLIB	= ..\perlcore.lib
+PERLDLL		= ..\perlcore.dll
+.ELSE
+PERLIMPLIB	= ..\perl.lib
+PERLDLL		= ..\perl.dll
+.ENDIF
 
-PL2BAT=bin\pl2bat.pl
-GLOBBAT = bin\perlglob.bat
+MINIPERL	= ..\miniperl.exe
+MINIDIR		= .\mini
+PERLEXE		= ..\perl.exe
+GLOBEXE		= ..\perlglob.exe
+CONFIGPM	= ..\lib\Config.pm
+MINIMOD		= ..\lib\ExtUtils\Miniperl.pm
+X2P		= ..\x2p\a2p.exe
+
+PL2BAT		= bin\pl2bat.pl
+GLOBBAT		= bin\perlglob.bat
 
 .IF "$(CCTYPE)" == "BORLAND"
 
-CFGSH_TMPL = config.bc
-CFGH_TMPL = config_H.bc
+CFGSH_TMPL	= config.bc
+CFGH_TMPL	= config_H.bc
 
 .ELIF "$(CCTYPE)" == "GCC"
 
-CFGSH_TMPL = config.gc
-CFGH_TMPL = config_H.gc
+CFGSH_TMPL	= config.gc
+CFGH_TMPL	= config_H.gc
 
 .ELSE
 
-CFGSH_TMPL = config.vc
-CFGH_TMPL = config_H.vc
-PERL95EXE=..\perl95.exe
+CFGSH_TMPL	= config.vc
+CFGH_TMPL	= config_H.vc
+PERL95EXE	= ..\perl95.exe
 
 .ENDIF
 
-XCOPY=xcopy /f /r /i /d
-RCOPY=xcopy /f /r /i /e /d
-NOOP=@echo
-#NULL=
-
-.IF "$(CRYPT_SRC)" != ""
-CRYPT_OBJ=$(CRYPT_SRC:db:+$(o))
-.ENDIF
-
-.IF "$(PERL_MALLOC)" == "define"
-MALLOC_SRC	= ..\malloc.c
-MALLOC_OBJ	= ..\malloc$(o)
-.ENDIF
+XCOPY		= xcopy /f /r /i /d
+RCOPY		= xcopy /f /r /i /e /d
+NOOP		= @echo
 
 #
 # filenames given to xsubpp must have forward slashes (since it puts
 # full pathnames in #line strings)
-XSUBPP=..\$(MINIPERL) -I..\..\lib ..\$(EXTUTILSDIR)\xsubpp -C++ -prototypes
+XSUBPP		= ..\$(MINIPERL) -I..\..\lib ..\$(EXTUTILSDIR)\xsubpp \
+		-C++ -prototypes
 
-CORE_C=	..\av.c		\
-	..\byterun.c	\
-	..\deb.c	\
-	..\doio.c	\
-	..\doop.c	\
-	..\dump.c	\
-	..\globals.c	\
-	..\gv.c		\
-	..\hv.c		\
-	..\mg.c		\
-	..\op.c		\
-	..\perl.c	\
-	..\perlio.c	\
-	..\perly.c	\
-	..\pp.c		\
-	..\pp_ctl.c	\
-	..\pp_hot.c	\
-	..\pp_sys.c	\
-	..\regcomp.c	\
-	..\regexec.c	\
-	..\run.c	\
-	..\scope.c	\
-	..\sv.c		\
-	..\taint.c	\
-	..\toke.c	\
-	..\universal.c	\
-	..\util.c	\
-	$(MALLOC_SRC)	\
-	$(CRYPT_SRC)
+CORE_SRC	=		\
+		..\av.c		\
+		..\byterun.c	\
+		..\deb.c	\
+		..\doio.c	\
+		..\doop.c	\
+		..\dump.c	\
+		..\globals.c	\
+		..\gv.c		\
+		..\hv.c		\
+		..\mg.c		\
+		..\op.c		\
+		..\perl.c	\
+		..\perly.c	\
+		..\pp.c		\
+		..\pp_ctl.c	\
+		..\pp_hot.c	\
+		..\pp_sys.c	\
+		..\regcomp.c	\
+		..\regexec.c	\
+		..\run.c	\
+		..\scope.c	\
+		..\sv.c		\
+		..\taint.c	\
+		..\toke.c	\
+		..\universal.c	\
+		..\util.c
 
-CORE_OBJ= ..\av$(o)	\
-	..\byterun$(o)	\
-	..\deb$(o)	\
-	..\doio$(o)	\
-	..\doop$(o)	\
-	..\dump$(o)	\
-	..\globals$(o)	\
-	..\gv$(o)	\
-	..\hv$(o)	\
-	..\mg$(o)	\
-	..\op$(o)	\
-	..\perl$(o)	\
-	..\perlio$(o)	\
-	..\perly$(o)	\
-	..\pp$(o)	\
-	..\pp_ctl$(o)	\
-	..\pp_hot$(o)	\
-	..\pp_sys$(o)	\
-	..\regcomp$(o)	\
-	..\regexec$(o)	\
-	..\run$(o)	\
-	..\scope$(o)	\
-	..\sv$(o)	\
-	..\taint$(o)	\
-	..\toke$(o)	\
-	..\universal$(o)\
-	..\util$(o)	\
-	$(MALLOC_OBJ)	\
-	$(CRYPT_OBJ)
+CORE_SRC	+= $(CRYPT_SRC)
 
-WIN32_C = perllib.c \
-	win32.c \
-	win32sck.c \
-	win32thread.c 
+.IF "$(PERL_MALLOC)" == "define"
+CORE_SRC	+= ..\malloc.c
+.ENDIF
 
-WIN32_OBJ = win32$(o) \
-	win32sck$(o) \
-	win32thread$(o)
+.IF "$(OBJECT)" == ""
+CORE_SRC	+= ..\perlio.c
+.ENDIF
 
-PERL95_OBJ = perl95$(o) \
-	win32mt$(o) \
-	win32sckmt$(o) \
-	$(CRYPT_OBJ)
+WIN32_SRC	=		\
+		.\win32.c	\
+		.\win32sck.c
 
-DLL_OBJ = perllib$(o) $(DYNALOADER)$(o)
+.IF "$(USE_THREADS)" == "define"
+WIN32_SRC	+= .\win32thread.c 
+.ENDIF
 
-X2P_OBJ = ..\x2p\a2p$(o)	\
-	..\x2p\hash$(o)		\
-	..\x2p\str$(o)		\
-	..\x2p\util$(o)		\
-	..\x2p\walk$(o)
+PERL95_SRC	=		\
+		perl95.c	\
+		win32mt.c	\
+		win32sckmt.c
 
-CORE_H = ..\av.h	\
-	..\byterun.h	\
-	..\bytecode.h	\
-	..\cop.h	\
-	..\cv.h		\
-	..\dosish.h	\
-	..\embed.h	\
-	..\form.h	\
-	..\gv.h		\
-	..\handy.h	\
-	..\hv.h		\
-	..\mg.h		\
-	..\nostdio.h	\
-	..\op.h		\
-	..\opcode.h	\
-	..\perl.h	\
-	..\perlio.h	\
-	..\perlsdio.h	\
-	..\perlsfio.h	\
-	..\perly.h	\
-	..\pp.h		\
-	..\proto.h	\
-	..\regexp.h	\
-	..\scope.h	\
-	..\sv.h		\
-	..\thread.h	\
-	..\unixish.h	\
-	..\util.h	\
-	..\XSUB.h	\
-	.\config.h	\
-	..\EXTERN.h	\
-	..\perlvars.h	\
-	..\intrpvar.h	\
-	..\thrdvar.h	\
-	.\include\dirent.h	\
-	.\include\netdb.h	\
-	.\include\sys\socket.h	\
-	.\win32.h
+DLL_SRC		= $(DYNALOADER).c
 
-DYNAMIC_EXT=Socket IO Fcntl Opcode SDBM_File attrs Thread B
-STATIC_EXT=DynaLoader
 
-DYNALOADER=$(EXTDIR)\DynaLoader\DynaLoader
-SOCKET=$(EXTDIR)\Socket\Socket
-FCNTL=$(EXTDIR)\Fcntl\Fcntl
-OPCODE=$(EXTDIR)\Opcode\Opcode
-SDBM_FILE=$(EXTDIR)\SDBM_File\SDBM_File
-IO=$(EXTDIR)\IO\IO
-ATTRS=$(EXTDIR)\attrs\attrs
-THREAD=$(EXTDIR)\Thread\Thread
-B=$(EXTDIR)\B\B
+.IF "$(OBJECT)" == ""
+DLL_SRC		+= perllib.c
+.ENDIF
 
-SOCKET_DLL=..\lib\auto\Socket\Socket.dll
-FCNTL_DLL=..\lib\auto\Fcntl\Fcntl.dll
-OPCODE_DLL=..\lib\auto\Opcode\Opcode.dll
-SDBM_FILE_DLL=..\lib\auto\SDBM_File\SDBM_File.dll
-IO_DLL=..\lib\auto\IO\IO.dll
-ATTRS_DLL=..\lib\auto\attrs\attrs.dll
-THREAD_DLL=..\lib\auto\Thread\Thread.dll
-B_DLL=..\lib\auto\B\B.dll
+X2P_SRC		=		\
+		..\x2p\a2p.c	\
+		..\x2p\hash.c	\
+		..\x2p\str.c	\
+		..\x2p\util.c	\
+		..\x2p\walk.c
 
-STATICLINKMODULES=DynaLoader
-DYNALOADMODULES=	\
-	$(SOCKET_DLL)	\
-	$(FCNTL_DLL)	\
-	$(OPCODE_DLL)	\
-	$(SDBM_FILE_DLL)\
-	$(IO_DLL)	\
-	$(ATTRS_DLL)	\
-	$(THREAD_DLL)	\
-	$(B_DLL)
+CORE_H		=		\
+		..\av.h		\
+		..\byterun.h	\
+		..\bytecode.h	\
+		..\cop.h	\
+		..\cv.h		\
+		..\dosish.h	\
+		..\embed.h	\
+		..\form.h	\
+		..\gv.h		\
+		..\handy.h	\
+		..\hv.h		\
+		..\mg.h		\
+		..\nostdio.h	\
+		..\op.h		\
+		..\opcode.h	\
+		..\perl.h	\
+		..\perlio.h	\
+		..\perlsdio.h	\
+		..\perlsfio.h	\
+		..\perly.h	\
+		..\pp.h		\
+		..\proto.h	\
+		..\regexp.h	\
+		..\scope.h	\
+		..\sv.h		\
+		..\thread.h	\
+		..\unixish.h	\
+		..\util.h	\
+		..\XSUB.h	\
+		.\config.h	\
+		..\EXTERN.h	\
+		..\perlvars.h	\
+		..\intrpvar.h	\
+		..\thrdvar.h	\
+		.\include\dirent.h	\
+		.\include\netdb.h	\
+		.\include\sys\socket.h	\
+		.\win32.h
 
-POD2HTML=$(PODDIR)\pod2html
-POD2MAN=$(PODDIR)\pod2man
-POD2LATEX=$(PODDIR)\pod2latex
-POD2TEXT=$(PODDIR)\pod2text
+CORE_OBJ	= $(CORE_SRC:db:+$(o))
+WIN32_OBJ	= $(WIN32_SRC:db:+$(o))
+MINICORE_OBJ	= $(MINIDIR)\{$(CORE_OBJ:f) miniperlmain$(o)}
+MINIWIN32_OBJ	= $(MINIDIR)\{$(WIN32_OBJ:f)}
+MINI_OBJ	= $(MINICORE_OBJ) $(MINIWIN32_OBJ)
+PERL95_OBJ	= $(PERL95_SRC:db:+$(o))
+DLL_OBJ		= $(DLL_SRC:db:+$(o))
+X2P_OBJ		= $(X2P_SRC:db:+$(o))
 
-CFG_VARS=   "INST_DRV=$(INST_DRV)"		\
-	    "INST_TOP=$(INST_TOP)"		\
-	    "archname=$(ARCHNAME)"		\
-	    "cc=$(CC)"				\
-	    "ccflags=$(OPTIMIZE) $(DEFINES)"	\
-	    "cf_email=$(EMAIL)"			\
-	    "d_crypt=$(D_CRYPT)"		\
-	    "d_mymalloc=$(PERL_MALLOC)"		\
-	    "libs=$(LIBFILES:f)"		\
-	    "incpath=$(CCINCDIR)"		\
-	    "libpth=$(strip $(CCLIBDIR) $(LIBFILES:d))" \
-	    "libc=$(LIBC)"			\
-	    "make=dmake"			\
-	    "static_ext=$(STATIC_EXT)"		\
-	    "dynamic_ext=$(DYNAMIC_EXT)"	\
-	    "usethreads=$(USE_THREADS)"		\
-	    "LINK_FLAGS=$(LINK_FLAGS)"		\
-	    "optimize=$(OPTIMIZE)"
+.IF "$(OBJECT)" != ""
+MINICORE_OBJ	+= $(MINIDIR)\perlio$(o)
+.ENDIF
+
+PERLDLL_OBJ	= $(CORE_OBJ)
+PERLEXE_OBJ	= perlmain$(o)
+
+.IF "$(OBJECT)" == ""
+PERLDLL_OBJ	+= $(WIN32_OBJ) $(DLL_OBJ)
+.ELSE
+PERLEXE_OBJ	+= $(WIN32_OBJ) $(DLL_OBJ)
+.ENDIF
+
+DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attrs Thread B
+STATIC_EXT	= DynaLoader
+
+DYNALOADER	= $(EXTDIR)\DynaLoader\DynaLoader
+SOCKET		= $(EXTDIR)\Socket\Socket
+FCNTL		= $(EXTDIR)\Fcntl\Fcntl
+OPCODE		= $(EXTDIR)\Opcode\Opcode
+SDBM_FILE	= $(EXTDIR)\SDBM_File\SDBM_File
+IO		= $(EXTDIR)\IO\IO
+POSIX		= $(EXTDIR)\POSIX\POSIX
+ATTRS		= $(EXTDIR)\attrs\attrs
+THREAD		= $(EXTDIR)\Thread\Thread
+B		= $(EXTDIR)\B\B
+
+SOCKET_DLL	= $(AUTODIR)\Socket\Socket.dll
+FCNTL_DLL	= $(AUTODIR)\Fcntl\Fcntl.dll
+OPCODE_DLL	= $(AUTODIR)\Opcode\Opcode.dll
+SDBM_FILE_DLL	= $(AUTODIR)\SDBM_File\SDBM_File.dll
+IO_DLL		= $(AUTODIR)\IO\IO.dll
+POSIX_DLL	= $(AUTODIR)\POSIX\POSIX.dll
+ATTRS_DLL	= $(AUTODIR)\attrs\attrs.dll
+THREAD_DLL	= $(AUTODIR)\Thread\Thread.dll
+B_DLL		= $(AUTODIR)\B\B.dll
+
+EXTENSION_C	= 		\
+		$(SOCKET).c	\
+		$(FCNTL).c	\
+		$(OPCODE).c	\
+		$(SDBM_FILE).c	\
+		$(IO).c		\
+		$(POSIX).c	\
+		$(ATTRS).c	\
+		$(THREAD).c	\
+		$(B).c
+
+EXTENSION_DLL	= 		\
+		$(SOCKET_DLL)	\
+		$(FCNTL_DLL)	\
+		$(OPCODE_DLL)	\
+		$(SDBM_FILE_DLL)\
+		$(IO_DLL)	\
+		$(POSIX_DLL)	\
+		$(ATTRS_DLL)	\
+		$(THREAD_DLL)	\
+		$(B_DLL)
+
+POD2HTML	= $(PODDIR)\pod2html
+POD2MAN		= $(PODDIR)\pod2man
+POD2LATEX	= $(PODDIR)\pod2latex
+POD2TEXT	= $(PODDIR)\pod2text
+
+CFG_VARS	=					\
+		"INST_DRV=$(INST_DRV)"			\
+		"INST_TOP=$(INST_TOP)"			\
+		"archname=$(ARCHNAME)"			\
+		"cc=$(CC)"				\
+		"ccflags=$(OPTIMIZE) $(DEFINES)"	\
+		"cf_email=$(EMAIL)"			\
+		"d_crypt=$(D_CRYPT)"			\
+		"d_mymalloc=$(PERL_MALLOC)"		\
+		"libs=$(LIBFILES:f)"			\
+		"incpath=$(CCINCDIR)"			\
+		"libpth=$(strip $(CCLIBDIR) $(LIBFILES:d))" \
+		"libc=$(LIBC)"				\
+		"make=dmake"				\
+		"static_ext=$(STATIC_EXT)"		\
+		"dynamic_ext=$(DYNAMIC_EXT)"		\
+		"usethreads=$(USE_THREADS)"		\
+		"LINK_FLAGS=$(LINK_FLAGS)"		\
+		"optimize=$(OPTIMIZE)"
 
 #
 # Top targets
 #
 
-all: $(PERLEXE) $(PERL95EXE) $(GLOBEXE) $(DYNALOADMODULES) $(MINIMOD) \
-	$(X2P)
+all : $(GLOBEXE) $(MINIMOD) $(CONFIGPM) $(PERLEXE) $(PERL95EXE) $(X2P) \
+	$(EXTENSION_DLL)
 
 $(DYNALOADER)$(o) : $(DYNALOADER).c $(CORE_H) $(EXTDIR)\DynaLoader\dlutils.c
 
 #------------------------------------------------------------
 
-$(GLOBEXE): perlglob$(o)
+$(GLOBEXE) : perlglob$(o)
 .IF "$(CCTYPE)" == "BORLAND"
 	$(CC) -c -w -v -tWM -I$(CCINCDIR) perlglob.c
 	$(LINK32) -Tpe -ap $(LINK_FLAGS) c0x32$(o) perlglob$(o) \
@@ -521,8 +556,6 @@ $(GLOBEXE): perlglob$(o)
 .ENDIF
 
 perlglob$(o)  : perlglob.c
-
-..\miniperlmain$(o) : ..\miniperlmain.c $(CORE_H)
 
 config.w32 : $(CFGSH_TMPL)
 	copy $(CFGSH_TMPL) config.w32
@@ -554,58 +587,60 @@ $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
 	$(RCOPY) include $(COREDIR)\*.*
 	$(MINIPERL) -I..\lib config_h.PL || $(MAKE) $(MAKEMACROS) $(CONFIGPM)
 
-LKPRE = INPUT (
-LKPOST = )
-
-$(MINIPERL) : ..\miniperlmain$(o) $(CORE_OBJ) $(WIN32_OBJ)
+$(MINIPERL) : $(MINIDIR) $(MINI_OBJ)
 .IF "$(CCTYPE)" == "BORLAND"
 	$(LINK32) -Tpe -ap $(LINK_FLAGS) \
-	    @$(mktmp c0x32$(o) ..\miniperlmain$(o) \
-		$(CORE_OBJ:s,\,\\) $(WIN32_OBJ:s,\,\\),$(@:s,\,\\),,$(LIBFILES),)
+	    @$(mktmp c0x32$(o) $(MINI_OBJ:s,\,\\),$(@:s,\,\\),,$(LIBFILES),)
 .ELIF "$(CCTYPE)" == "GCC"
 	$(LINK32) -v -o $@ $(LINK_FLAGS) \
-	    $(mktmp $(LKPRE) ..\miniperlmain$(o) \
-		$(CORE_OBJ:s,\,\\) $(WIN32_OBJ:s,\,\\) $(LIBFILES) $(LKPOST))
+	    $(mktmp $(LKPRE) $(MINI_OBJ:s,\,\\) $(LIBFILES) $(LKPOST))
 .ELSE
 	$(LINK32) -subsystem:console -out:$@ \
-	    @$(mktmp $(LINK_FLAGS) $(LIBFILES) ..\miniperlmain$(o) \
-		$(CORE_OBJ:s,\,\\) $(WIN32_OBJ:s,\,\\))
+	    @$(mktmp $(LINK_FLAGS) $(LIBFILES) $(MINI_OBJ:s,\,\\))
 .ENDIF
 
-$(WIN32_OBJ) : $(CORE_H)
-$(CORE_OBJ)  : $(CORE_H)
-$(DLL_OBJ)   : $(CORE_H) 
-$(X2P_OBJ)   : $(CORE_H) 
+$(MINIDIR) :
+	if not exist "$(MINIDIR)" mkdir "$(MINIDIR)"
+
+$(MINICORE_OBJ) : $(CORE_H)
+	$(CC) -c $(CFLAGS) $(OBJOUT_FLAG)$@ ..\$(*B).c
+
+$(MINIWIN32_OBJ) : $(CORE_H)
+	$(CC) -c $(CFLAGS) $(OBJOUT_FLAG)$@ $(*B).c
+
+$(WIN32_OBJ)	: $(CORE_H)
+$(CORE_OBJ)	: $(CORE_H)
+$(MINI_OBJ)	: $(CORE_H)
+$(DLL_OBJ)	: $(CORE_H)
+$(PERL95_OBJ)	: $(CORE_H)
+$(X2P_OBJ)	: $(CORE_H)
 
 perldll.def : $(MINIPERL) $(CONFIGPM) ..\global.sym makedef.pl
-	$(MINIPERL) -w makedef.pl $(OPTIMIZE) $(DEFINES) \
+	$(MINIPERL) -w makedef.pl $(OPTIMIZE) $(DEFINES) $(OBJECT) \
 	    CCTYPE=$(CCTYPE) > perldll.def
 
-$(PERLDLL): perldll.def $(CORE_OBJ) $(WIN32_OBJ) $(DLL_OBJ)
+$(PERLDLL): perldll.def $(PERLDLL_OBJ)
 .IF "$(CCTYPE)" == "BORLAND"
 	$(LINK32) -Tpd -ap $(LINK_FLAGS) \
-	    @$(mktmp c0d32$(o) $(CORE_OBJ:s,\,\\) \
-		$(WIN32_OBJ:s,\,\\) $(DLL_OBJ:s,\,\\)\n \
+	    @$(mktmp c0d32$(o) $(PERLDLL_OBJ:s,\,\\)\n \
 		$@,\n \
 		$(LIBFILES)\n \
 		perldll.def\n)
 	$(IMPLIB) $*.lib $@
 .ELIF "$(CCTYPE)" == "GCC"
 	$(LINK32) -mdll -o $@ -Wl,--base-file -Wl,perl.base $(LINK_FLAGS) \
-	    $(mktmp $(LKPRE) $(CORE_OBJ:s,\,\\) $(WIN32_OBJ:s,\,\\) \
-	        $(DLL_OBJ:s,\,\\) $(LIBFILES) $(LKPOST))
+	    $(mktmp $(LKPRE) $(PERLDLL_OBJ:s,\,\\) $(LIBFILES) $(LKPOST))
 	dlltool --output-lib $(PERLIMPLIB) \
                 --dllname perl.dll \
                 --def perldll.def \
                 --base-file perl.base \
                 --output-exp perl.exp
 	$(LINK32) -mdll -o $@ $(LINK_FLAGS) \
-	    $(mktmp $(LKPRE) $(CORE_OBJ:s,\,\\) $(WIN32_OBJ:s,\,\\) \
-	        $(DLL_OBJ:s,\,\\) $(LIBFILES) perl.exp $(LKPOST))
+	    $(mktmp $(LKPRE) $(PERLDLL_OBJ:s,\,\\) $(LIBFILES) \
+		perl.exp $(LKPOST))
 .ELSE
 	$(LINK32) -dll -def:perldll.def -out:$@ \
-	    @$(mktmp $(LINK_FLAGS) $(LIBFILES) $(CORE_OBJ:s,\,\\) \
-		$(WIN32_OBJ:s,\,\\) $(DLL_OBJ:s,\,\\))
+	    @$(mktmp $(LINK_FLAGS) $(LIBFILES) $(PERLDLL_OBJ:s,\,\\))
 .ENDIF
 	$(XCOPY) $(PERLIMPLIB) $(COREDIR)
 
@@ -615,7 +650,22 @@ perl.def  : $(MINIPERL) makeperldef.pl
 $(MINIMOD) : $(MINIPERL) ..\minimod.pl
 	cd .. && miniperl minimod.pl > lib\ExtUtils\Miniperl.pm
 
-$(X2P) : $(X2P_OBJ)
+..\x2p\a2p$(o) : ..\x2p\a2p.c
+	$(CC) -I..\x2p $(CFLAGS) $(OBJOUT_FLAG)$@ -c ..\x2p\a2p.c
+
+..\x2p\hash$(o) : ..\x2p\hash.c
+	$(CC) -I..\x2p  $(CFLAGS) $(OBJOUT_FLAG)$@ -c ..\x2p\hash.c
+
+..\x2p\str$(o) : ..\x2p\str.c
+	$(CC) -I..\x2p  $(CFLAGS) $(OBJOUT_FLAG)$@ -c ..\x2p\str.c
+
+..\x2p\util$(o) : ..\x2p\util.c
+	$(CC) -I..\x2p  $(CFLAGS) $(OBJOUT_FLAG)$@ -c ..\x2p\util.c
+
+..\x2p\walk$(o) : ..\x2p\walk.c
+	$(CC) -I..\x2p  $(CFLAGS) $(OBJOUT_FLAG)$@ -c ..\x2p\walk.c
+
+$(X2P) : $(MINIPERL) $(X2P_OBJ)
 	$(MINIPERL) ..\x2p\find2perl.PL
 	$(MINIPERL) ..\x2p\s2p.PL
 .IF "$(CCTYPE)" == "BORLAND"
@@ -633,23 +683,23 @@ perlmain.c : runperl.c
 	copy runperl.c perlmain.c
 
 perlmain$(o) : perlmain.c
-	$(CC) $(CFLAGS) -UPERLDLL $(EXEOUT_FLAG)$@ -c perlmain.c
+	$(CC) $(CFLAGS_O) -UPERLDLL $(EXEOUT_FLAG)$@ -c perlmain.c
 
-$(PERLEXE): $(PERLDLL) $(CONFIGPM) perlmain$(o)  
+$(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ)
 .IF "$(CCTYPE)" == "BORLAND"
 	$(LINK32) -Tpe -ap $(LINK_FLAGS) \
-	    @$(mktmp c0x32$(o) perlmain$(o) $(WINIOMAYBE)\n \
+	    @$(mktmp c0x32$(o) $(PERLEXE_OBJ)\n \
 	    $@,\n \
 	    $(PERLIMPLIB) $(LIBFILES)\n)
 .ELIF "$(CCTYPE)" == "GCC"
 	$(LINK32) -o $@ $(LINK_FLAGS)  \
-	    perlmain.o $(WINIOMAYBE) $(PERLIMPLIB) $(LIBFILES)
+	    $(PERLEXE_OBJ) $(PERLIMPLIB) $(LIBFILES)
 .ELSE
 	$(LINK32) -subsystem:console -out:$@ $(LINK_FLAGS) $(LIBFILES) \
-	    perlmain$(o) $(WINIOMAYBE) $(PERLIMPLIB) 
+	    $(PERLEXE_OBJ) $(PERLIMPLIB) 
 .ENDIF
 	copy splittree.pl .. 
-	$(MINIPERL) -I..\lib ..\splittree.pl "../LIB" "../LIB/auto"
+	$(MINIPERL) -I..\lib ..\splittree.pl "../LIB" $(AUTODIR)
 
 .IF "$(CCTYPE)" != "BORLAND"
 .IF "$(CCTYPE)" != "GCC"
@@ -658,23 +708,25 @@ perl95.c : runperl.c
 	copy runperl.c perl95.c
 
 perl95$(o) : perl95.c
-	$(CC) $(CFLAGS) -MT -UPERLDLL -DWIN95FIX -c perl95.c
+	$(CC) $(CFLAGS_O) -MT -UPERLDLL -DWIN95FIX -c perl95.c
 
 win32sckmt$(o) : win32sck.c
-	$(CC) $(CFLAGS) -MT -UPERLDLL -DWIN95FIX -c $(OBJOUT_FLAG)win32sckmt$(o) win32sck.c
+	$(CC) $(CFLAGS_O) -MT -UPERLDLL -DWIN95FIX -c \
+	    $(OBJOUT_FLAG)win32sckmt$(o) win32sck.c
 
 win32mt$(o) : win32.c
-	$(CC) $(CFLAGS) -MT -UPERLDLL -DWIN95FIX -c $(OBJOUT_FLAG)win32mt$(o) win32.c
+	$(CC) $(CFLAGS_O) -MT -UPERLDLL -DWIN95FIX -c \
+	    $(OBJOUT_FLAG)win32mt$(o) win32.c
 
 $(PERL95EXE): $(PERLDLL) $(CONFIGPM) $(PERL95_OBJ)
-	$(LINK32) -subsystem:console -out:$@ $(LINK_FLAGS) $(LIBFILES) \
-	    $(PERL95_OBJ) $(PERLIMPLIB) 
+	$(LINK32) -subsystem:console -nodefaultlib -out:$@ $(LINK_FLAGS) \
+	    $(LIBFILES) $(PERL95_OBJ) $(PERLIMPLIB) libcmt.lib
 
 .ENDIF
 .ENDIF
 
 $(DYNALOADER).c: $(MINIPERL) $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM)
-	if not exist ..\lib\auto mkdir ..\lib\auto
+	if not exist $(AUTODIR) mkdir $(AUTODIR)
 	$(XCOPY) $(EXTDIR)\$(*B)\$(*B).pm $(LIBDIR)\$(NULL)
 	cd $(EXTDIR)\$(*B) && $(XSUBPP) dl_win32.xs > $(*B).c
 	$(XCOPY) $(EXTDIR)\$(*B)\dlutils.c .
@@ -693,6 +745,11 @@ $(THREAD_DLL): $(PERLEXE) $(THREAD).xs
 	cd $(EXTDIR)\$(*B) && $(MAKE)
 
 $(ATTRS_DLL): $(PERLEXE) $(ATTRS).xs
+	cd $(EXTDIR)\$(*B) && \
+	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	cd $(EXTDIR)\$(*B) && $(MAKE)
+
+$(POSIX_DLL): $(PERLEXE) $(POSIX).xs
 	cd $(EXTDIR)\$(*B) && \
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\$(*B) && $(MAKE)
@@ -743,34 +800,50 @@ distclean: clean
 	-del /f $(MINIPERL) $(PERLEXE) $(PERL95EXE) $(PERLDLL) $(GLOBEXE) \
 		$(PERLIMPLIB) ..\miniperl.lib $(MINIMOD)
 	-del /f *.def *.map
-	-del /f $(SOCKET_DLL) $(IO_DLL) $(SDBM_FILE_DLL) $(FCNTL_DLL) \
-		$(OPCODE_DLL) $(ATTRS_DLL) $(THREAD_DLL) $(B_DLL)
-	-del /f $(SOCKET).c $(IO).c $(SDBM_FILE).c $(FCNTL).c $(OPCODE).c \
-		$(DYNALOADER).c $(ATTRS).c $(THREAD).c $(B).c
+	-del /f $(EXTENSION_DLL)
+	-del /f $(EXTENSION_C) $(DYNALOADER).c
+	-del /f $(EXTDIR)\DynaLoader\dl_win32.xs
+	-del /f $(LIBDIR)\.exists $(LIBDIR)\attrs.pm $(LIBDIR)\DynaLoader.pm
+	-del /f $(LIBDIR)\Fcntl.pm $(LIBDIR)\IO.pm $(LIBDIR)\Opcode.pm
+	-del /f $(LIBDIR)\ops.pm $(LIBDIR)\Safe.pm $(LIBDIR)\Thread.pm
+	-del /f $(LIBDIR)\SDBM_File.pm $(LIBDIR)\Socket.pm $(LIBDIR)\POSIX.pm
+	-del /f $(LIBDIR)\B.pm $(LIBDIR)\O.pm
+	-rmdir /s /q $(LIBDIR)\IO || rmdir /s $(LIBDIR)\IO
+	-rmdir /s /q $(LIBDIR)\Thread || rmdir /s $(LIBDIR)\Thread
+	-rmdir /s /q $(LIBDIR)\B || rmdir /s $(LIBDIR)\B
 	-del /f $(PODDIR)\*.html
 	-del /f $(PODDIR)\*.bat
+	-cd ..\utils && del /f h2ph splain perlbug pl2pm c2ph h2xs perldoc pstruct *.bat
+	-cd ..\x2p && del /f find2perl s2p *.bat
 	-del /f ..\config.sh ..\splittree.pl perlmain.c dlutils.c config.h.new
+	-del /f $(CONFIGPM)
 .IF "$(PERL95EXE)" != ""
 	-del /f perl95.c
 .ENDIF
 	-del /f bin\*.bat
 	-cd $(EXTDIR) && del /s *.lib *.def *.map *.bs Makefile *$(o) pm_to_blib
-	-rmdir /s /q ..\lib\auto || rmdir /s ..\lib\auto
+	-rmdir /s /q $(AUTODIR) || rmdir /s $(AUTODIR)
 	-rmdir /s /q $(COREDIR) || rmdir /s $(COREDIR)
 
-install : all doc utils
+install : all installbare installutils installhtml
+
+installbare :
 	$(PERLEXE) ..\installperl
 .IF "$(PERL95EXE)" != ""
 	$(XCOPY) $(PERL95EXE) $(INST_BIN)\*.*
 .ENDIF
+
+installutils : utils
 	$(XCOPY) $(GLOBEXE) $(INST_BIN)\*.*
 	$(XCOPY) bin\*.bat $(INST_BIN)\*.*
 	$(XCOPY) ..\pod\*.bat $(INST_BIN)\*.*
+
+installhtml : doc
 	$(RCOPY) html\*.* $(INST_HTML)\*.*
 
 inst_lib : $(CONFIGPM)
 	copy splittree.pl .. 
-	$(MINIPERL) -I..\lib ..\splittree.pl "../LIB" "../LIB/auto"
+	$(MINIPERL) -I..\lib ..\splittree.pl "../LIB" $(AUTODIR)
 	$(RCOPY) ..\lib $(INST_LIB)\*.*
 
 minitest : $(MINIPERL) $(GLOBEXE) $(CONFIGPM) utils
@@ -812,6 +885,7 @@ clean :
 	-@erase $(PERLEXE)
 	-@erase $(PERLDLL)
 	-@erase $(CORE_OBJ)
+	-rmdir /s /q $(MINIDIR) || rmdir /s $(MINIDIR)
 	-@erase $(WIN32_OBJ)
 	-@erase $(DLL_OBJ)
 	-@erase $(X2P_OBJ)
@@ -820,5 +894,3 @@ clean :
 	-@erase ..\x2p\*.exe ..\x2p\*.bat
 	-@erase *.ilk
 	-@erase *.pdb
-
-

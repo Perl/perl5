@@ -152,6 +152,15 @@ PERLVAR(Iors,		char *)		/* $\ */
 PERLVAR(Iorslen,	STRLEN)		
 PERLVAR(Iofmt,		char *)		/* $# */
 
+/* interpreter atexit processing */
+PERLVARI(Iexitlist,	PerlExitListEntry *, NULL)	/* list of exit functions */
+PERLVARI(Iexitlistlen,	I32, 0)				/* length of same */
+PERLVAR(Imodglobal,	HV *)				/* per-interp module data */
+
+#ifdef HAVE_INTERP_INTERN
+PERLVAR(Isys_intern,	struct interp_intern)		/* platform internals */
+#endif
+
 #ifdef USE_THREADS
 PERLVAR(Ithrsv,		SV *)		/* holds struct perl_thread for main thread */
 PERLVARI(Ithreadnum,	U32,	0)	/* incremented each thread creation */

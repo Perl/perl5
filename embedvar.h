@@ -115,6 +115,8 @@
 #define errgv			(curinterp->Ierrgv)
 #define eval_root		(curinterp->Ieval_root)
 #define eval_start		(curinterp->Ieval_start)
+#define exitlist		(curinterp->Iexitlist)
+#define exitlistlen		(curinterp->Iexitlistlen)
 #define fdpid			(curinterp->Ifdpid)
 #define filemode		(curinterp->Ifilemode)
 #define firstgv			(curinterp->Ifirstgv)
@@ -125,6 +127,7 @@
 #define incgv			(curinterp->Iincgv)
 #define initav			(curinterp->Iinitav)
 #define inplace			(curinterp->Iinplace)
+#define sys_intern		(curinterp->Isys_intern)
 #define lastfd			(curinterp->Ilastfd)
 #define lastscream		(curinterp->Ilastscream)
 #define lastsize		(curinterp->Ilastsize)
@@ -146,6 +149,7 @@
 #define minus_l			(curinterp->Iminus_l)
 #define minus_n			(curinterp->Iminus_n)
 #define minus_p			(curinterp->Iminus_p)
+#define modglobal		(curinterp->Imodglobal)
 #define multiline		(curinterp->Imultiline)
 #define mystrk			(curinterp->Imystrk)
 #define ofmt			(curinterp->Iofmt)
@@ -231,6 +235,8 @@
 #define Ierrgv			errgv
 #define Ieval_root		eval_root
 #define Ieval_start		eval_start
+#define Iexitlist		exitlist
+#define Iexitlistlen		exitlistlen
 #define Ifdpid			fdpid
 #define Ifilemode		filemode
 #define Ifirstgv		firstgv
@@ -241,6 +247,7 @@
 #define Iincgv			incgv
 #define Iinitav			initav
 #define Iinplace		inplace
+#define Isys_intern		sys_intern
 #define Ilastfd			lastfd
 #define Ilastscream		lastscream
 #define Ilastsize		lastsize
@@ -262,6 +269,7 @@
 #define Iminus_l		minus_l
 #define Iminus_n		minus_n
 #define Iminus_p		minus_p
+#define Imodglobal		modglobal
 #define Imultiline		multiline
 #define Imystrk			mystrk
 #define Iofmt			ofmt
@@ -408,6 +416,8 @@
 #define errgv			Perl_errgv
 #define eval_root		Perl_eval_root
 #define eval_start		Perl_eval_start
+#define exitlist		Perl_exitlist
+#define exitlistlen		Perl_exitlistlen
 #define fdpid			Perl_fdpid
 #define filemode		Perl_filemode
 #define firstgv			Perl_firstgv
@@ -418,6 +428,7 @@
 #define incgv			Perl_incgv
 #define initav			Perl_initav
 #define inplace			Perl_inplace
+#define sys_intern		Perl_sys_intern
 #define lastfd			Perl_lastfd
 #define lastscream		Perl_lastscream
 #define lastsize		Perl_lastsize
@@ -439,6 +450,7 @@
 #define minus_l			Perl_minus_l
 #define minus_n			Perl_minus_n
 #define minus_p			Perl_minus_p
+#define modglobal		Perl_modglobal
 #define multiline		Perl_multiline
 #define mystrk			Perl_mystrk
 #define ofmt			Perl_ofmt

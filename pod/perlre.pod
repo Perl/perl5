@@ -278,16 +278,16 @@ matches a word followed by a tab, without including the tab in C<$&>.
 A zero-width negative lookahead assertion.  For example C</foo(?!bar)/>
 matches any occurrence of "foo" that isn't followed by "bar".  Note
 however that lookahead and lookbehind are NOT the same thing.  You cannot
-use this for lookbehind: C</(?!foo)bar/> will not find an occurrence of
-"bar" that is preceded by something which is not "foo".  That's because
+use this for lookbehind.  If you are looking for a "bar" which isn't preceeded
+"foo", C</(?!foo)bar/> will not do what you want.  That's because
 the C<(?!foo)> is just saying that the next thing cannot be "foo"--and
 it's not, it's a "bar", so "foobar" will match.  You would have to do
 something like C</(?!foo)...bar/> for that.   We say "like" because there's
 the case of your "bar" not having three characters before it.  You could
-cover that this way: C</(?:(?!foo)...|^..?)bar/>.  Sometimes it's still
+cover that this way: C</(?:(?!foo)...|^.{0,2})bar/>.  Sometimes it's still
 easier just to say:
 
-    if (/foo/ && $` =~ /bar$/)
+    if (/bar/ && $` !~ /foo$/)
 
 For lookbehind see below.
 
@@ -653,9 +653,18 @@ first alternative includes everything from the last pattern delimiter
 the last alternative contains everything from the last "|" to the next
 pattern delimiter.  For this reason, it's common practice to include
 alternatives in parentheses, to minimize confusion about where they
-start and end.  Note however that "|" is interpreted as a literal with
-square brackets, so if you write C<[fee|fie|foe]> you're really only
-matching C<[feio|]>.
+start and end.
+
+Note that alternatives are tried from left to right, so the first
+alternative found for which the entire expression matches, is the one that
+is chosen. This means that alternatives are not necessarily greedy. For
+example: when mathing C<foo|foot> against "barefoot", only the "foo"
+part will match, as that is the first alternative tried, and it successfully
+matches the target string. (This might not seem important, but it is
+important when you are capturing matched text using parentheses.)
+
+Also note that "|" is interpreted as a literal within square brackets,
+so if you write C<[fee|fie|foe]> you're really only matching C<[feio|]>.
 
 Within a pattern, you may designate subpatterns for later reference by
 enclosing them in parentheses, and you may refer back to the I<n>th
@@ -694,5 +703,11 @@ with the operation of matching a backreference.  Certainly they mean two
 different things on the I<left> side of the C<s///>.
 
 =head2 SEE ALSO
+
+L<perlop/"Regexp Quote-Like Operators">.
+
+L<perlfunc/pos>.
+
+L<perllocale>.
 
 "Mastering Regular Expressions" (see L<perlbook>) by Jeffrey Friedl.

@@ -1040,7 +1040,7 @@
  *	have select(), of course.
  */
 #if defined(__DECC) && defined(__DECC_VER) && (__DECC_VER >= 50200000) && defined(DECCRTL_SOCKETS)
-#define Select_fd_set_t		fd_set *	/**/
+#define Select_fd_set_t		fd_set *	/* config-skip */
 #else
 #define Select_fd_set_t		int *		/* config-skip */
 #endif

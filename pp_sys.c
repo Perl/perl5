@@ -485,40 +485,10 @@ PP(pp_binmode)
     if (!(io = GvIO(gv)) || !(fp = IoIFP(io)))
 	RETPUSHUNDEF;
 
-#ifdef DOSISH
-#ifdef atarist
-    if (!PerlIO_flush(fp) && (fp->_flag |= _IOBIN))
+    if (do_binmode(fp,IoTYPE(io),TRUE)) 
 	RETPUSHYES;
     else
 	RETPUSHUNDEF;
-#else
-    if (PerlLIO_setmode(PerlIO_fileno(fp), OP_BINARY) != -1) {
-#if defined(WIN32) && defined(__BORLANDC__)
-	/* The translation mode of the stream is maintained independent
-	 * of the translation mode of the fd in the Borland RTL (heavy
-	 * digging through their runtime sources reveal).  User has to
-	 * set the mode explicitly for the stream (though they don't
-	 * document this anywhere). GSAR 97-5-24
-	 */
-	PerlIO_seek(fp,0L,0);
-	fp->flags |= _F_BIN;
-#endif
-	RETPUSHYES;
-    }
-    else
-	RETPUSHUNDEF;
-#endif
-#else
-#if defined(USEMYBINMODE)
-    if (my_binmode(fp,IoTYPE(io)) != NULL)
-	RETPUSHYES;
-	else
-	RETPUSHUNDEF;
-#else
-    RETPUSHYES;
-#endif
-#endif
-
 }
 
 
@@ -2603,6 +2573,13 @@ PP(pp_chdir)
 	if (svp)
 	    tmps = SvPV(*svp, na);
     }
+#ifdef VMS
+    if (!tmps || !*tmps) {
+       svp = hv_fetch(GvHVn(envgv), "SYS$LOGIN", 9, FALSE);
+       if (svp)
+           tmps = SvPV(*svp, na);
+    }
+#endif
     TAINT_PROPER("chdir");
     PUSHi( PerlDir_chdir(tmps) >= 0 );
 #ifdef VMS

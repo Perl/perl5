@@ -768,6 +768,12 @@ sublex_done(void)
   processing a pattern (lex_inpat is true), a transliteration
   (lex_inwhat & OP_TRANS is true), or a double-quoted string.
 
+  Returns a pointer to the character scanned up to. Iff this is
+  advanced from the start pointer supplied (ie if anything was
+  successfully parsed), will leave an OP for the substring scanned
+  in yylval. Caller must intuit reason for not parsing further
+  by looking at the next characters herself.
+
   In patterns:
     backslashes:
       double-quoted style: \r and \n
@@ -835,17 +841,11 @@ scan_const(char *start)
     bool dorange = FALSE;			/* are we in a translit range? */
     I32 len;					/* ? */
 
-    /*
-      leave is the set of acceptably-backslashed characters.
-
-      I do *not* understand why there's the double hook here.
-    */
+    /* leaveit is the set of acceptably-backslashed characters */
     char *leaveit =
 	lex_inpat
 	    ? "\\.^$@AGZdDwWsSbB+*?|()-nrtfeaxc0123456789[{]} \t\n\r\f\v#"
-	    : (lex_inwhat & OP_TRANS)
-		? ""
-		: "";
+	    : "";
 
     while (s < send || dorange) {
         /* get transliterations out of the way (they're most literal) */
@@ -1032,7 +1032,7 @@ scan_const(char *start)
 	Renew(SvPVX(sv), SvLEN(sv), char);
     }
 
-    /* ??? */
+    /* return the substring (via yylval) only if we parsed anything */
     if (s > bufptr)
 	yylval.opval = (OP*)newSVOP(OP_CONST, 0, sv);
     else

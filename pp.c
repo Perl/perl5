@@ -442,8 +442,13 @@ PP(pp_refgen)
 {
     djSP; dMARK;
     if (GIMME != G_ARRAY) {
-	MARK[1] = *SP;
-	SP = MARK + 1;
+	if (++MARK <= SP)
+	    *MARK = *SP;
+	else
+	    *MARK = &sv_undef;
+	*MARK = refto(*MARK);
+	SP = MARK;
+	RETURN;
     }
     EXTEND_MORTAL(SP - MARK);
     while (++MARK <= SP)
@@ -769,7 +774,17 @@ PP(pp_undef)
 	break;
     case SVt_PVGV:
 	if (SvFAKE(sv))
-	    sv_setsv(sv, &sv_undef);
+	    SvSetMagicSV(sv, &sv_undef);
+	else {
+	    GP *gp;
+	    gp_free((GV*)sv);
+	    Newz(602, gp, 1, GP);
+	    GvGP(sv) = gp_ref(gp);
+	    GvSV(sv) = NEWSV(72,0);
+	    GvLINE(sv) = curcop->cop_line;
+	    GvEGV(sv) = (GV*)sv;
+	    GvMULTI_on(sv);
+	}
 	break;
     default:
 	if (SvTYPE(sv) >= SVt_PV && SvPVX(sv) && SvLEN(sv)) {
@@ -1776,6 +1791,7 @@ PP(pp_substr)
     char *tmps;
     I32 arybase = curcop->cop_arybase;
 
+    SvTAINTED_off(TARG);			/* decontaminate */
     if (MAXARG > 2)
 	len = POPi;
     pos = POPi;
@@ -1864,6 +1880,7 @@ PP(pp_vec)
     unsigned long retnum;
     I32 len;
 
+    SvTAINTED_off(TARG);			/* decontaminate */
     offset *= size;		/* turn into bit offset */
     len = (offset + size + 7) / 8;
     if (offset < 0 || size < 1)
@@ -3211,6 +3228,13 @@ PP(pp_unpack)
 		    Copy(s, &aint, 1, int);
 		    s += sizeof(int);
 		    sv = NEWSV(40, 0);
+#ifdef __osf__
+                    /* Without the dummy below unpack("i", pack("i",-1))
+                     * return 0xFFffFFff instead of -1 for Digital Unix V4.0
+                     * cc with optimization turned on */
+                    (aint) ?
+		    	sv_setiv(sv, (IV)aint) :
+#endif
 		    sv_setiv(sv, (IV)aint);
 		    PUSHs(sv_2mortal(sv));
 		}

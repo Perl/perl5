@@ -172,7 +172,7 @@ ext/DB_File/DB_File.xs		Berkeley DB extension external subroutines
 ext/DB_File/DB_File_BS		Berkeley DB extension mkbootstrap fodder
 ext/DB_File/Makefile.PL		Berkeley DB extension makefile writer
 ext/DB_File/typemap		Berkeley DB extension interface types
-ext/DynaLoader/DynaLoader.pm	Dynamic Loader perl module
+ext/DynaLoader/DynaLoader.pm.PL	Dynamic Loader perl module
 ext/DynaLoader/Makefile.PL	Dynamic Loader makefile writer
 ext/DynaLoader/README		Dynamic Loader notes and intro
 ext/DynaLoader/dl_aix.xs	AIX implementation
@@ -366,6 +366,7 @@ hints/newsos4.sh	Hints for named architecture
 hints/next_3.sh		Hints for named architecture
 hints/next_3_0.sh	Hints for named architecture
 hints/next_4.sh		Hints for named architecture
+hints/openbsd.sh	Hints for named architecture
 hints/opus.sh		Hints for named architecture
 hints/os2.sh		Hints for named architecture
 hints/os390.sh		Hints for named architecture
@@ -825,6 +826,7 @@ t/op/closure.t		See if closures work
 t/op/cmp.t		See if the various string and numeric compare work
 t/op/cond.t		See if conditional expressions work
 t/op/delete.t		See if delete works
+t/op/die_exit.t		See if die and exit status interaction works
 t/op/do.t		See if subroutines work
 t/op/each.t		See if hash iterators work
 t/op/eval.t		See if eval operator works
@@ -840,6 +842,8 @@ t/op/hashwarn.t		See if warnings for bad hash assignments work
 t/op/inc.t		See if inc/dec of integers near 32 bit limit work
 t/op/index.t		See if index works
 t/op/int.t		See if int works
+t/op/ipcmsg.t		See if msg* ops work
+t/op/ipcsem.t		See if sem* ops work
 t/op/join.t		See if join works
 t/op/list.t		See if array lists work
 t/op/local.t		See if local works
@@ -853,6 +857,7 @@ t/op/oct.t		See if oct and hex work
 t/op/ord.t		See if ord works
 t/op/pack.t		See if pack and unpack work
 t/op/pat.t		See if esoteric patterns work
+t/op/pos.t		See if pos works
 t/op/push.t		See if push and pop work
 t/op/quotemeta.t	See if quotemeta works
 t/op/rand.t		See if rand works
@@ -958,7 +963,7 @@ win32/bin/search.pl	Win32 port
 win32/bin/webget.pl	Win32 port
 win32/bin/www.pl	Win32 port
 win32/config.bc		Win32 base line config.sh (Borland C++ build)
-win32/config.gc		Win32 base line config.sh (GNU build)?
+win32/config.gc		Win32 base line config.sh (mingw32/gcc build)
 win32/config.vc		Win32 base line config.sh (Visual C++ build)
 win32/config_H.bc	Win32 config header (Borland C++ build)
 win32/config_H.gc	Win32 config header (GNU build)?

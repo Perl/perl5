@@ -200,6 +200,8 @@ if ($define{'MYMALLOC'})
 unless ($define{'USE_THREADS'})
  {
   skip_symbols [qw(
+Perl_getTHR
+Perl_setTHR
 Perl_condpair_magic
 Perl_thr_key
 Perl_sv_mutex
@@ -373,6 +375,7 @@ __DATA__
 perl_init_i18nl10n
 perl_init_ext
 perl_alloc
+perl_atexit
 perl_construct
 perl_destruct
 perl_free
@@ -389,6 +392,11 @@ perl_call_sv
 perl_require_pv
 perl_eval_pv
 perl_eval_sv
+perl_new_ctype
+perl_new_collate
+perl_new_numeric
+perl_set_numeric_standard
+perl_set_numeric_local
 boot_DynaLoader
 Perl_thread_create
 win32_errno

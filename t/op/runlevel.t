@@ -188,6 +188,8 @@ sub sortfn {
 print "---- ".join(', ', @x)."\n";
 EXPECT
 sortfn 4, 5, 6
+sortfn 4, 5, 6
+sortfn 4, 5, 6
 ---- 1, 2, 3
 ########
 @a = (3, 2, 1);

@@ -44,6 +44,8 @@ envgv
 errgv
 eval_root
 eval_start
+exitlist
+exitlistlen
 fdpid
 filemode
 firstgv
@@ -56,6 +58,7 @@ in_eval
 incgv
 initav
 inplace
+sys_intern
 last_in_gv
 lastfd
 lastscream
@@ -80,6 +83,7 @@ minus_c
 minus_l
 minus_n
 minus_p
+modglobal
 multiline
 mystrk
 nrs

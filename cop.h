@@ -285,6 +285,7 @@ struct context {
 #define G_EVAL		4	/* Assume eval {} around subroutine call. */
 #define G_NOARGS	8	/* Don't construct a @_ array. */
 #define G_KEEPERR      16	/* Append errors to $@, don't overwrite it */
+#define G_NODEBUG      32	/* Disable debugging at toplevel.  */
 
 /* Support for switching (stack and block) contexts.
  * This ensures magic doesn't invalidate local stack and cx pointers.
@@ -297,10 +298,8 @@ struct context {
 #define SI_SIGNAL	4
 #define SI_OVERLOAD	5
 #define SI_DESTROY	6
-/* XXX todo
 #define SI_WARNHOOK	7
 #define SI_DIEHOOK	8
-*/
 
 struct stackinfo {
     AV *		si_stack;	/* stack for current runlevel */
@@ -357,6 +356,8 @@ typedef struct stackinfo PERL_SI;
 
 #define POPSTACK_TO(s) \
     STMT_START {							\
-	while (curstack != s)						\
+	while (curstack != s) {						\
+	    dounwind(-1);						\
 	    POPSTACK();							\
+	}								\
     } STMT_END

@@ -86,11 +86,10 @@ PP(pp_regcomp) {
     else {
 	t = SvPV(tmpstr, len);
 
-	/* JMR: Check against the last compiled regexp
-	   To know for sure, we'd need the length of precomp.
-	   But we don't have it, so we must ... take a guess. */
+	/* Check against the last compiled regexp. */
 	if (!pm->op_pmregexp || !pm->op_pmregexp->precomp ||
-	    memNE(pm->op_pmregexp->precomp, t, len + 1))
+	    pm->op_pmregexp->prelen != len ||
+	    memNE(pm->op_pmregexp->precomp, t, len))
 	{
 	    if (pm->op_pmregexp) {
 		ReREFCNT_dec(pm->op_pmregexp);
@@ -652,8 +651,9 @@ PP(pp_sort)
 	RETPUSHUNDEF;
     }
 
+    ENTER;
+    SAVEPPTR(sortcop);
     if (op->op_flags & OPf_STACKED) {
-	ENTER;
 	if (op->op_flags & OPf_SPECIAL) {
 	    OP *kid = cLISTOP->op_first->op_sibling;	/* pass pushmark */
 	    kid = kUNOP->op_first;			/* pass rv2gv */
@@ -740,7 +740,6 @@ PP(pp_sort)
 	    POPSTACK();
 	    CATCH_SET(oldcatch);
 	}
-	LEAVE;
     }
     else {
 	if (max > 1) {
@@ -749,6 +748,7 @@ PP(pp_sort)
 		  (op->op_private & OPpLOCALE) ? sv_cmp_locale : sv_cmp);
 	}
     }
+    LEAVE;
     stack_sp = ORIGMARK + max;
     return nextop;
 }
@@ -1059,8 +1059,10 @@ die_where(char *message)
 	else
 	    sv_setpv(ERRSV, message);
 	
-	while ((cxix = dopoptoeval(cxstack_ix)) < 0 && curstackinfo->si_prev)
+	while ((cxix = dopoptoeval(cxstack_ix)) < 0 && curstackinfo->si_prev) {
+	    dounwind(-1);
 	    POPSTACK();
+	}
 
 	if (cxix >= 0) {
 	    I32 optype;
@@ -1874,14 +1876,26 @@ PP(pp_goto)
 			mark++;
 		    }
 		}
-		if (PERLDB_SUB && curstash != debstash) {
+		if (PERLDB_SUB) {	/* Checking curstash breaks DProf. */
 		    /*
 		     * We do not care about using sv to call CV;
 		     * it's for informational purposes only.
 		     */
 		    SV *sv = GvSV(DBsub);
-		    save_item(sv);
-		    gv_efullname3(sv, CvGV(cv), Nullch);
+		    CV *gotocv;
+		    
+		    if (PERLDB_SUB_NN) {
+			SvIVX(sv) = (IV)cv; /* Already upgraded, saved */
+		    } else {
+			save_item(sv);
+			gv_efullname3(sv, CvGV(cv), Nullch);
+		    }
+		    if (  PERLDB_GOTO
+			  && (gotocv = perl_get_cv("DB::goto", FALSE)) ) {
+			PUSHMARK( stack_sp );
+			perl_call_sv((SV*)gotocv, G_SCALAR | G_NODEBUG);
+			stack_sp--;
+		    }
 		}
 		RETURNOP(CvSTART(cv));
 	    }

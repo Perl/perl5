@@ -863,7 +863,9 @@ is just like
 except that it's more efficient, more concise, keeps track of the
 current filename for error messages, and searches all the B<-I>
 libraries if the file isn't in the current directory (see also the @INC
-array in L<perlvar/Predefined Names>).  It's the same, however, in that it does
+array in L<perlvar/Predefined Names>).  It is also different in how
+code evaluated with C<do FILENAME> doesn't see lexicals in the enclosing
+scope like C<eval STRING> does.  It's the same, however, in that it does
 reparse the file every time you call it, so you probably don't want to
 do this inside a loop.
 
@@ -1074,6 +1076,8 @@ in case 6.
 
 =item exec LIST
 
+=item exec PROGRAM LIST
+
 The exec() function executes a system command I<AND NEVER RETURNS> -
 use system() instead of exec() if you want it to return. It fails and
 returns FALSE only if the command does not exist I<and> it is executed
@@ -1181,6 +1185,12 @@ success, FALSE on failure.  Produces a fatal error if used on a machine
 that doesn't implement flock(2), fcntl(2) locking, or lockf(3).  flock()
 is Perl's portable file locking interface, although it locks only entire
 files, not records.
+
+On many platforms (including most versions or clones of Unix), locks
+established by flock() are B<merely advisory>.  This means that files
+locked with flock() may be modified by programs which do not also use
+flock().  Windows NT and OS/2, however, are among the platforms which
+supply mandatory locking.  See your local documentation for details.
 
 OPERATION is one of LOCK_SH, LOCK_EX, or LOCK_UN, possibly combined with
 LOCK_NB.  These constants are traditionally valued 1, 2, 8 and 4, but
@@ -1827,10 +1837,18 @@ In a scalar context, returns the ctime(3) value:
 
     $now_string = localtime;  # e.g., "Thu Oct 13 04:54:34 1994"
 
-This scalar value is B<not> locale dependent, see L<perllocale>,
-but instead a Perl builtin.
-Also see the Time::Local module, and the strftime(3) and mktime(3)
-function available via the POSIX module.
+This scalar value is B<not> locale dependent, see L<perllocale>, but
+instead a Perl builtin.  Also see the Time::Local module, and the
+strftime(3) and mktime(3) function available via the POSIX module.  To
+get somewhat similar but locale dependent date strings, set up your
+locale environment variables appropriately (please see L<perllocale>)
+and try for example
+
+	use POSIX qw(strftime)
+	$now_string = strftime "%a %b %e %H:%M:%S %Y", localtime;
+
+Note that the C<%a> and C<%b>, the short forms of the day of the week
+and the month of the year, may not necessarily be three characters wide.
 
 =item log EXPR
 
@@ -2375,7 +2393,8 @@ you will have to use a block returning its value instead:
 
 =item printf FORMAT, LIST
 
-Equivalent to C<print FILEHANDLE sprintf(FORMAT, LIST)>.  The first argument
+Equivalent to C<print FILEHANDLE sprintf(FORMAT, LIST)>, except that $\
+(the output record separator) is not appended.  The first argument
 of the list will be interpreted as the printf format.  If C<use locale> is
 in effect, the character used for the decimal point in formatted real numbers
 is affected by the LC_NUMERIC locale.  See L<perllocale>.
@@ -2506,7 +2525,7 @@ operator is discussed in more detail in L<perlop/"I/O Operators">.
 
 Receives a message on a socket.  Attempts to receive LENGTH bytes of
 data into variable SCALAR from the specified SOCKET filehandle.
-Actually does a C recvfrom(), so that it can returns the address of the
+Actually does a C recvfrom(), so that it can return the address of the
 sender.  Returns the undefined value if there's an error.  SCALAR will
 be grown or shrunk to the length actually read.  Takes the same flags
 as the system call of the same name.
@@ -3110,10 +3129,12 @@ sanity checks in the interest of speed.
 =item splice ARRAY,OFFSET
 
 Removes the elements designated by OFFSET and LENGTH from an array, and
-replaces them with the elements of LIST, if any.  Returns the elements
-removed from the array.  The array grows or shrinks as necessary.  If
-LENGTH is omitted, removes everything from OFFSET onward.  The
-following equivalences hold (assuming C<$[ == 0>):
+replaces them with the elements of LIST, if any.  In a list context,
+returns the elements removed from the array.  In a scalar context,
+returns the last element removed, or C<undef> if no elements are
+removed.  The array grows or shrinks as necessary.  If LENGTH is
+omitted, removes everything from OFFSET onward.  The following
+equivalences hold (assuming C<$[ == 0>):
 
     push(@a,$x,$y)	splice(@a,$#a+1,0,$x,$y)
     pop(@a)		splice(@a,-1)
@@ -3268,7 +3289,7 @@ and the conversion letter:
    +       prefix positive number with a plus sign
    -       left-justify within the field
    0       use zeros, not spaces, to right-justify
-   #       prefix octal with "0", hex with "0x"
+   #       prefix non-zero octal with "0", non-zero hex with "0x"
    number  minimum field width
    .number "precision": digits after decimal point for floating-point,
            max length for string, minimum length for integer
@@ -3494,13 +3515,17 @@ unimplemented, produces a fatal error.  The arguments are interpreted
 as follows: if a given argument is numeric, the argument is passed as
 an int.  If not, the pointer to the string value is passed.  You are
 responsible to make sure a string is pre-extended long enough to
-receive any result that might be written into a string.  If your
+receive any result that might be written into a string.  You can't use a
+string literal (or other read-only string) as an argument to syscall()
+because Perl has to assume that any string pointer might be written
+through.  If your
 integer arguments are not literals and have never been interpreted in a
 numeric context, you may need to add 0 to them to force them to look
 like numbers.
 
     require 'syscall.ph';		# may need to run h2ph
-    syscall(&SYS_write, fileno(STDOUT), "hi there\n", 9);
+    $s = "hi there\n";
+    syscall(&SYS_write, fileno(STDOUT), $s, length $s);
 
 Note that Perl supports passing of up to only 14 arguments to your system call,
 which in practice should usually suffice.
@@ -3578,6 +3603,8 @@ the new position.
 
 =item system LIST
 
+=item system PROGRAM LIST
+
 Does exactly the same thing as "exec LIST" except that a fork is done
 first, and the parent process waits for the child process to complete.
 Note that argument processing varies depending on the number of
@@ -3586,6 +3613,9 @@ returned by the wait() call.  To get the actual exit value divide by
 256.  See also L</exec>.  This is I<NOT> what you want to use to capture
 the output from a command, for that you should use merely backticks or
 qx//, as described in L<perlop/"`STRING`">.
+
+Like exec(), system() allows you to lie to a program about its name if
+you use the "system PROGRAM LIST" syntax.  Again, see L</exec>.
 
 Because system() and backticks block SIGINT and SIGQUIT, killing the
 program they're running doesn't actually interrupt your program.
@@ -3744,7 +3774,8 @@ The transliteration operator.  Same as y///. See L<perlop>.
 
 Truncates the file opened on FILEHANDLE, or named by EXPR, to the
 specified length.  Produces a fatal error if truncate isn't implemented
-on your system.
+on your system.  Returns TRUE if successful, the undefined value
+otherwise.
 
 =item uc EXPR
 
@@ -3780,19 +3811,21 @@ digits.  See also L</oct>, if all you have is a string.
 =item undef
 
 Undefines the value of EXPR, which must be an lvalue.  Use only on a
-scalar value, an entire array, an entire hash, or a subroutine name (using
-"&").  (Using undef() will probably not do what you expect on most
-predefined variables or DBM list values, so don't do that.)  Always
-returns the undefined value.  You can omit the EXPR, in which case
-nothing is undefined, but you still get an undefined value that you
-could, for instance, return from a subroutine, assign to a variable or
-pass as a parameter.  Examples:
+scalar value, an array (using "@"), a hash (using "%"), a subroutine
+(using "&"), or a typeglob (using "*").  (Saying C<undef $hash{$key}>
+will probably not do what you expect on most predefined variables or
+DBM list values, so don't do that; see L<delete>.)  Always returns the
+undefined value.  You can omit the EXPR, in which case nothing is
+undefined, but you still get an undefined value that you could, for
+instance, return from a subroutine, assign to a variable or pass as a
+parameter.  Examples:
 
     undef $foo;
     undef $bar{'blurfl'};             # Compare to: delete $bar{'blurfl'};
     undef @ary;
     undef %hash;
     undef &mysub;
+    undef *xyz;       # destroys $xyz, @xyz, %xyz, &xyz, etc.
     return (wantarray ? (undef, $errmsg) : undef) if $they_blew_it;
     select undef, undef, undef, 0.25;
     ($a, $b, undef, $c) = &foo;       # Ignore third value returned
@@ -3941,7 +3974,8 @@ Changes the access and modification times on each file of a list of
 files.  The first two elements of the list must be the NUMERICAL access
 and modification times, in that order.  Returns the number of files
 successfully changed.  The inode modification time of each file is set
-to the current time.  Example of a "touch" command:
+to the current time.  This code has the same effect as the "touch"
+command if the files already exist:
 
     #!/usr/bin/perl
     $now = time;
@@ -4015,6 +4049,13 @@ for no value (void context).
 
 Produces a message on STDERR just like die(), but doesn't exit or throw
 an exception.
+
+If LIST is empty and $@ already contains a value (typically from a
+previous eval) that value is used after appending "\t...caught"
+to $@. This is useful for staying almost, but not entirely similar to
+die().
+
+If $@ is empty then the string "Warning: Something's wrong" is used.
 
 No message is printed if there is a C<$SIG{__WARN__}> handler
 installed.  It is the handler's responsibility to deal with the message

@@ -1304,11 +1304,12 @@ die(pat, va_alist)
 	    SvREADONLY_on(msg);
 	    SAVEFREESV(msg);
 
+	    PUSHSTACK(SI_DIEHOOK);
 	    PUSHMARK(SP);
 	    XPUSHs(msg);
 	    PUTBACK;
 	    perl_call_sv((SV*)cv, G_DISCARD);
-
+	    POPSTACK();
 	    LEAVE;
 	}
     }
@@ -1369,11 +1370,12 @@ croak(pat, va_alist)
 	    SvREADONLY_on(msg);
 	    SAVEFREESV(msg);
 
+	    PUSHSTACK(SI_DIEHOOK);
 	    PUSHMARK(SP);
 	    XPUSHs(msg);
 	    PUTBACK;
 	    perl_call_sv((SV*)cv, G_DISCARD);
-
+	    POPSTACK();
 	    LEAVE;
 	}
     }
@@ -1428,11 +1430,12 @@ warn(pat,va_alist)
 	    SvREADONLY_on(msg);
 	    SAVEFREESV(msg);
 
+	    PUSHSTACK(SI_WARNHOOK);
 	    PUSHMARK(SP);
 	    XPUSHs(msg);
 	    PUTBACK;
 	    perl_call_sv((SV*)cv, G_DISCARD);
-
+	    POPSTACK();
 	    LEAVE;
 	    return;
 	}
@@ -1831,6 +1834,46 @@ VTOH(vtohs,short)
 #if defined(HAS_VTOHL) && !defined(vtohl)
 VTOH(vtohl,long)
 #endif
+
+int
+do_binmode(PerlIO *fp, int iotype, int flag)
+{
+    if (flag != TRUE)
+	croak("panic: unsetting binmode"); /* Not implemented yet */
+#ifdef DOSISH
+#ifdef atarist
+    if (!PerlIO_flush(fp) && (fp->_flag |= _IOBIN))
+	return 1;
+    else
+	return 0;
+#else
+    if (PerlLIO_setmode(PerlIO_fileno(fp), OP_BINARY) != -1) {
+#if defined(WIN32) && defined(__BORLANDC__)
+	/* The translation mode of the stream is maintained independent
+	 * of the translation mode of the fd in the Borland RTL (heavy
+	 * digging through their runtime sources reveal).  User has to
+	 * set the mode explicitly for the stream (though they don't
+	 * document this anywhere). GSAR 97-5-24
+	 */
+	PerlIO_seek(fp,0L,0);
+	fp->flags |= _F_BIN;
+#endif
+	return 1;
+    }
+    else
+	return 0;
+#endif
+#else
+#if defined(USEMYBINMODE)
+    if (my_binmode(fp,iotype) != NULL)
+	return 1;
+    else
+	return 0;
+#else
+    return 1;
+#endif
+#endif
+}
 
     /* VMS' my_popen() is in VMS.c, same with OS/2. */
 #if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS)
@@ -2400,6 +2443,211 @@ scan_hex(char *start, I32 len, I32 *retlen)
     *retlen = s - start;
     return retval;
 }
+
+char*
+find_script(char *scriptname, bool dosearch, char **search_ext, I32 flags)
+{
+    dTHR;
+    char *xfound = Nullch;
+    char *xfailed = Nullch;
+    register char *s;
+    I32 len;
+    int retval;
+#if defined(DOSISH) && !defined(OS2) && !defined(atarist)
+#  define SEARCH_EXTS ".bat", ".cmd", NULL
+#  define MAX_EXT_LEN 4
+#endif
+#ifdef OS2
+#  define SEARCH_EXTS ".cmd", ".btm", ".bat", ".pl", NULL
+#  define MAX_EXT_LEN 4
+#endif
+#ifdef VMS
+#  define SEARCH_EXTS ".pl", ".com", NULL
+#  define MAX_EXT_LEN 4
+#endif
+    /* additional extensions to try in each dir if scriptname not found */
+#ifdef SEARCH_EXTS
+    char *exts[] = { SEARCH_EXTS };
+    char **ext = search_ext ? search_ext : exts;
+    int extidx = 0, i = 0;
+    char *curext = Nullch;
+#else
+#  define MAX_EXT_LEN 0
+#endif
+
+    /*
+     * If dosearch is true and if scriptname does not contain path
+     * delimiters, search the PATH for scriptname.
+     *
+     * If SEARCH_EXTS is also defined, will look for each
+     * scriptname{SEARCH_EXTS} whenever scriptname is not found
+     * while searching the PATH.
+     *
+     * Assuming SEARCH_EXTS is C<".foo",".bar",NULL>, PATH search
+     * proceeds as follows:
+     *   If DOSISH or VMSISH:
+     *     + look for ./scriptname{,.foo,.bar}
+     *     + search the PATH for scriptname{,.foo,.bar}
+     *
+     *   If !DOSISH:
+     *     + look *only* in the PATH for scriptname{,.foo,.bar} (note
+     *       this will not look in '.' if it's not in the PATH)
+     */
+
+#ifdef VMS
+#  ifdef ALWAYS_DEFTYPES
+    len = strlen(scriptname);
+    if (!(len == 1 && *scriptname == '-') && scriptname[len-1] != ':') {
+	int hasdir, idx = 0, deftypes = 1;
+	bool seen_dot = 1;
+
+	hasdir = !dosearch || (strpbrk(scriptname,":[</") != Nullch) ;
+#  else
+    if (dosearch) {
+	int hasdir, idx = 0, deftypes = 1;
+	bool seen_dot = 1;
+
+	hasdir = (strpbrk(scriptname,":[</") != Nullch) ;
+#  endif
+	/* The first time through, just add SEARCH_EXTS to whatever we
+	 * already have, so we can check for default file types. */
+	while (deftypes ||
+	       (!hasdir && my_trnlnm("DCL$PATH",tokenbuf,idx++)) )
+	{
+	    if (deftypes) {
+		deftypes = 0;
+		*tokenbuf = '\0';
+	    }
+	    if ((strlen(tokenbuf) + strlen(scriptname)
+		 + MAX_EXT_LEN) >= sizeof tokenbuf)
+		continue;	/* don't search dir with too-long name */
+	    strcat(tokenbuf, scriptname);
+#else  /* !VMS */
+
+#ifdef DOSISH
+    if (strEQ(scriptname, "-"))
+ 	dosearch = 0;
+    if (dosearch) {		/* Look in '.' first. */
+	char *cur = scriptname;
+#ifdef SEARCH_EXTS
+	if ((curext = strrchr(scriptname,'.')))	/* possible current ext */
+	    while (ext[i])
+		if (strEQ(ext[i++],curext)) {
+		    extidx = -1;		/* already has an ext */
+		    break;
+		}
+	do {
+#endif
+	    DEBUG_p(PerlIO_printf(Perl_debug_log,
+				  "Looking for %s\n",cur));
+	    if (PerlLIO_stat(cur,&statbuf) >= 0) {
+		dosearch = 0;
+		scriptname = cur;
+#ifdef SEARCH_EXTS
+		break;
+#endif
+	    }
+#ifdef SEARCH_EXTS
+	    if (cur == scriptname) {
+		len = strlen(scriptname);
+		if (len+MAX_EXT_LEN+1 >= sizeof(tokenbuf))
+		    break;
+		cur = strcpy(tokenbuf, scriptname);
+	    }
+	} while (extidx >= 0 && ext[extidx]	/* try an extension? */
+		 && strcpy(tokenbuf+len, ext[extidx++]));
+#endif
+    }
+#endif
+
+    if (dosearch && !strchr(scriptname, '/')
+#ifdef DOSISH
+		 && !strchr(scriptname, '\\')
+#endif
+		 && (s = PerlEnv_getenv("PATH"))) {
+	bool seen_dot = 0;
+	
+	bufend = s + strlen(s);
+	while (s < bufend) {
+#if defined(atarist) || defined(DOSISH)
+	    for (len = 0; *s
+#  ifdef atarist
+		    && *s != ','
+#  endif
+		    && *s != ';'; len++, s++) {
+		if (len < sizeof tokenbuf)
+		    tokenbuf[len] = *s;
+	    }
+	    if (len < sizeof tokenbuf)
+		tokenbuf[len] = '\0';
+#else  /* ! (atarist || DOSISH) */
+	    s = delimcpy(tokenbuf, tokenbuf + sizeof tokenbuf, s, bufend,
+			':',
+			&len);
+#endif /* ! (atarist || DOSISH) */
+	    if (s < bufend)
+		s++;
+	    if (len + 1 + strlen(scriptname) + MAX_EXT_LEN >= sizeof tokenbuf)
+		continue;	/* don't search dir with too-long name */
+	    if (len
+#if defined(atarist) || defined(DOSISH)
+		&& tokenbuf[len - 1] != '/'
+		&& tokenbuf[len - 1] != '\\'
+#endif
+	       )
+		tokenbuf[len++] = '/';
+	    if (len == 2 && tokenbuf[0] == '.')
+		seen_dot = 1;
+	    (void)strcpy(tokenbuf + len, scriptname);
+#endif  /* !VMS */
+
+#ifdef SEARCH_EXTS
+	    len = strlen(tokenbuf);
+	    if (extidx > 0)	/* reset after previous loop */
+		extidx = 0;
+	    do {
+#endif
+	    	DEBUG_p(PerlIO_printf(Perl_debug_log, "Looking for %s\n",tokenbuf));
+		retval = PerlLIO_stat(tokenbuf,&statbuf);
+#ifdef SEARCH_EXTS
+	    } while (  retval < 0		/* not there */
+		    && extidx>=0 && ext[extidx]	/* try an extension? */
+		    && strcpy(tokenbuf+len, ext[extidx++])
+		);
+#endif
+	    if (retval < 0)
+		continue;
+	    if (S_ISREG(statbuf.st_mode)
+		&& cando(S_IRUSR,TRUE,&statbuf)
+#ifndef DOSISH
+		&& cando(S_IXUSR,TRUE,&statbuf)
+#endif
+		)
+	    {
+		xfound = tokenbuf;              /* bingo! */
+		break;
+	    }
+	    if (!xfailed)
+		xfailed = savepv(tokenbuf);
+	}
+#ifndef DOSISH
+	if (!xfound && !seen_dot && !xfailed && (PerlLIO_stat(scriptname,&statbuf) < 0))
+#endif
+	    seen_dot = 1;			/* Disable message. */
+	if (!xfound) 
+	    scriptname = NULL;
+/*	    croak("Can't %s %s%s%s",
+		  (xfailed ? "execute" : "find"),
+		  (xfailed ? xfailed : scriptname),
+		  (xfailed ? "" : " on PATH"),
+		  (xfailed || seen_dot) ? "" : ", '.' not in PATH"); */
+	if (xfailed)
+	    Safefree(xfailed);
+	scriptname = xfound;
+    }
+    return scriptname;
+}
+
 
 #ifdef USE_THREADS
 #ifdef FAKE_THREADS

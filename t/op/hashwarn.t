@@ -1,7 +1,8 @@
 #!./perl
+
 BEGIN {
     chdir 't' if -d 't';
-    @INC =  qw(../lib);
+    @INC = '../lib';
 }
 
 use strict;

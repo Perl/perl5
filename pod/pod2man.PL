@@ -315,7 +315,7 @@ $cutting = 1;
 # We try first to get the version number from a local binary, in case we're
 # running an installed version of Perl to produce documentation from an
 # uninstalled newer version's pod files.
-if ($^O ne 'plan9' && $^O ne 'dos') {
+if ($^O ne 'plan9' and $^O ne 'dos' and $^O ne 'os2' and $^O ne 'MSWin32') {
   ($version,$patch) =
     `\PATH=.:..:\$PATH; perl -v` =~ /version (\d\.\d{3})(?:_(\d{2}))?/;
 }

@@ -41,6 +41,14 @@ case "$osvers" in
 	esac
 	;;
 esac
+# netbsd 1.3 linker warns about setr[gu]id being deprecated.
+# (setregid, setreuid, preferred?)
+case "$osvers" in
+1.3|1.3*)
+	d_setrgid="$undef"
+	d_setruid="$undef"
+	;;
+esac
 
 # netbsd had these but they don't really work as advertised, in the
 # versions listed below.  if they are defined, then there isn't a

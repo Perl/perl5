@@ -16,6 +16,8 @@ use strict subs;
 $| = 1;
 print "1..18\n";
 
+$Is_W32 = $^O eq 'MSWin32';
+
 $testfd = open("TEST", O_RDONLY, 0) and print "ok 1\n";
 read($testfd, $buffer, 9) if $testfd > 2;
 print $buffer eq "#!./perl\n" ? "ok 2\n" : "not ok 2\n";
@@ -31,6 +33,12 @@ close $writer;
 print <$reader>;
 close $reader;
 
+if ($Is_W32) {
+    for (6..11) {
+	print "ok $_ # skipped, no sigaction support on win32\n";
+    }
+}
+else {
 $sigset = new POSIX::SigSet 1,3;
 delset $sigset 1;
 if (!ismember $sigset 1) { print "ok 6\n" }
@@ -52,6 +60,7 @@ sub SigHUP {
 
 sub SigINT {
     print "ok 10\n";
+}
 }
 
 print &_POSIX_OPEN_MAX > $fds[1] ? "ok 12\n" : "not ok 12\n";

@@ -77,14 +77,17 @@ See L<perlmod/Pragmatic Modules>.
 
 =cut
 
+$strict::VERSION = "1.01";
+
+my %bitmask = (
+refs => 0x00000002,
+subs => 0x00000200,
+vars => 0x00000400
+);
+
 sub bits {
     my $bits = 0;
-    my $sememe;
-    foreach $sememe (@_) {
-	$bits |= 0x00000002, next if $sememe eq 'refs';
-	$bits |= 0x00000200, next if $sememe eq 'subs';
-	$bits |= 0x00000400, next if $sememe eq 'vars';
-    }
+    foreach my $s (@_){ $bits |= $bitmask{$s} || 0; };
     $bits;
 }
 
