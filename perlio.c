@@ -32,6 +32,10 @@
 int
 PerlIO_apply_layers(pTHX_ PerlIO *f, const char *mode, const char *names)
 {
+ if (!names || !*names || strEQ(names,":crlf") || strEQ(names,":raw"))
+  {
+   return 0;
+  } 
  Perl_croak(aTHX_ "Cannot apply \"%s\" in non-PerlIO perl",names);
  /* NOTREACHED */
  return -1; 
