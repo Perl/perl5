@@ -24,7 +24,7 @@ and all the various auxiliary files that are part of the distribution.
 
 The Comprehensive Perl Archive Network (or CPAN) is the place to go.
 There are many mirrors, but the easiest thing to use is probably
-http://www.perl.com/CPAN, which automatically points you to a
+http://www.perl.com/CPAN/README.html , which automatically points you to a
 mirror site "close" to you.
 
 =head2 Perl5-porters mailing list
@@ -43,20 +43,29 @@ to perl5-porters-request@perl.org .
 
 =head1 How are Perl Releases Numbered?
 
-Perl version numbers are floating point numbers, such as 5.004.  The
-major version number is 5, the minor version is '0', and '03' is the
-patchlevel.  The version number is available as the magic variable $],
+Perl version numbers are floating point numbers, such as 5.004.
+(Observations about the imprecision of floating point numbers for
+representing reality probably have more relevance than you might
+imagine :-) The major version number is 5 and the '004' is the
+patchlevel.  (Questions such as whether or not '004' is really a minor
+version number can safely be ignored.:)
+
+The version number is available as the magic variable $],
 and can be used in comparisons, e.g.
 
 	print "You've got an old perl\n" if $] < 5.002;
 
-(Observations about the imprecision of floating point numbers for
-representing reality probably have more relevance than you might
-imagine :-)
-
 You can also require particular version (or later) with
 
 	use 5.002;
+
+At some point in the future, we may need to decide what to call the
+next big revision.  In the .package file used by metaconfig to
+generate Configure, there are two variables that might be relevant:
+$baserev=5.0 and $package=perl5.   At various times, I have suggested
+we might change them to $baserev=5.1 and $package=perl5.1 if want
+to signify a fairly major update.  Or, we might want to jump to perl6.
+Let's worry about that problem when we get there.
 
 =head2 Subversions
 
@@ -71,21 +80,35 @@ also might not.  Sub-versions are allowed to be subversive.
 These sub-versions can also be used as floating point numbers, so
 you can do things such as
 
-	print "You've got an unstable perl\n" if $] == 5.00403;
+	print "You've got an unstable perl\n" if $] == 5.00303;
 
 You can also require particular version (or later) with
 
-	use 5.004_03;    # the "_" is optional
+	use 5.003_03;    # the "_" is optional
 
 Sub-versions produced by the members of perl5-porters are usually
 available on CPAN in the F<src/5.0/unsupported> directory.
+
+=head2 Maintenance and Development Subversions
+
+As an experiment, starting with version 5.004, subversions _01 through
+_49 will be reserved for bug-fix maintenance releases, and subversions
+_50 through _99 will be available for unstable development versions.
+
+The separate bug-fix track is being established to allow us an easy
+way to distribute important bug fixes without waiting for the
+developers to untangle all the other problems in the current
+developer's release.
+
+Watch for announcements of maintenance subversions in
+comp.lang.perl.announce.
 
 =head2 Why such a complicated scheme?
 
 Two reasons, really.  At least.
 
-First, we need some way to identify releases that are known to
-have new features that need testing and exploration.  The
+First, we need some way to identify and release collections of patches
+that are known to have new features that need testing and exploration.  The
 subversion scheme does that nicely while fitting into the
 C<use 5.004;> mold.
 
@@ -128,7 +151,16 @@ have tried to follow as I apply patches to the perl sources.
 
 =head2 Solve problems as generally as possible
 
-(I still have to think of a good example here.)
+Never implement a specific restricted solution to a problem when you
+can solve the same problem in a more general, flexible way.
+
+For example, for dynamic loading to work on some SVR4 systems, we had
+to build a shared libperl.so library.  In order to build "FAT" binaries
+on NeXT 4.0 systems, we had to build a special libperl library.  Rather
+than continuing to build a contorted nest of special cases, I
+generalized the process of building libperl so that NeXT and SVR4 users
+could still get their work done, but others could build a shared
+libperl if they wanted to as well.
 
 =head2 Seek consensus on major changes
 
@@ -142,7 +174,7 @@ that the documentation is in sync with your changes.  Be sure to
 check all the files F<pod/*.pod> and also the F<INSTALL> document.
 
 Consider writing the appropriate documentation first and then
-implementing it to correspond to the documentation.
+implementing your change to correspond to the documentation.
 
 =head2 Avoid machine-specific #ifdef's
 
@@ -157,7 +189,7 @@ may help out folks on another platform who have the same problem.
 We should never release a main version without testing it as a
 subversion first.
 
-=head2 Automate generatation of derivative files
+=head2 Automate generation of derivative files
 
 The F<embed.h>, F<keywords.h>, F<opcode.h>, and F<perltoc.pod> files
 are all automatically generated by perl scripts.  In general, don't
@@ -192,8 +224,8 @@ bug fixes and documentation improvements that are posted while he or
 she has the pumpkin, but there might also be larger issues at stake.
 
 One of the precepts of the subversion idea is that we shouldn't give
-it to anyone unless we have some idea what you're going to do with
-it.
+the patch pumpkin to anyone unless we have some idea what he or she
+is going to do with it.
 
 =head2 refresh pod/perltoc.pod
 
@@ -225,7 +257,9 @@ available the same place you found this file.  On CPAN, look under my
 directory F<id/ANDYD/> for a file such as F<5.003_07-02.U.tar.gz>.
 That file should be unpacked in your main perl source directory.  It
 contains the files needed to run B<metaconfig> to reproduce Perl's
-Configure script.
+Configure script.  (Those units are for 5.003_07.  There have been
+changes since then; please contact me if you want more recent
+versions, and I will try to point you in the right direction.)
 
 Alternatively, do consider if the F<*ish.h> files might be a better
 place for your changes.
@@ -337,7 +371,7 @@ Some additional notes from Larry on this:
 
 Don't forget to regenerate perly.c.diff.
 
-    byacc perly.y
+    byacc -d perly.y
     mv y.tab.c perly.c
     patch perly.c <perly.c.diff
     # manually apply any failed hunks
@@ -375,7 +409,7 @@ I used to include rules like the following in the makefile:
 	    - perl keywords.pl
 
 
-However, I got lots of mail consisting of people worrying because the
+However, I got B<lots> of mail consisting of people worrying because the
 command failed.  I eventually decided that I would save myself time
 and effort by manually running C<make regen_headers> myself rather
 than answering all the questions and complaints about the failing
@@ -420,6 +454,9 @@ diffs against B<Configure>.  If you make changes to Configure, you may
 want to consider regenerating this diff file to save trouble for the
 OS/2 maintainer.
 
+You can also consider the OS/2 diffs as reminders of portability
+things that need to be fixed in Configure.
+
 =head2 VMS-specific updates
 
 If you have changed F<perly.y>, then you may want to update
@@ -444,7 +481,7 @@ do something like the following
 
 I find the F<makepatch> utility quite handy for making patches.
 You can obtain it from any CPAN archive under
-http://www.perl.com/CPAN/authors/Johan_Vromans/.  The only
+http://www.perl.com/CPAN/authors/Johan_Vromans/ .  The only
 difference between my version and the standard one is that I have mine
 do a
 
@@ -483,10 +520,10 @@ shell commands at the top of the patch.  Next, I delete all the patch parts
 of perl5.004_08.pat, leaving just the shell commands.  Then, I do the
 following:
 
-	cd perl5.003_07
-	sh ../perl5.003_08.pat
+	cd perl5.004_07
+	sh ../perl5.004_08.pat
 	cd ..
-	makepatch perl5.003_07 perl5.003_08 >> perl5.003_08.pat
+	makepatch perl5.004_07 perl5.004_08 >> perl5.004_08.pat
 
 (Note the append to preserve my shell commands.)
 Now, my patch will line up with what the end users are going to do.
@@ -496,13 +533,13 @@ Now, my patch will line up with what the end users are going to do.
 It seems obvious, but be sure to test your patch.  That is, verify that
 it produces exactly the same thing as your full distribution.
 
-	rm -rf perl5.003_07
-	gzip -d -c perl5.003_07.tar.gz | tar -xf -
-	cd perl5.003_07
-	sh ../perl5.003_08.pat
-	patch -p1 -N < ../perl5.003_08.pat
+	rm -rf perl5.004_07
+	gzip -d -c perl5.004_07.tar.gz | tar -xf -
+	cd perl5.004_07
+	sh ../perl5.004_08.pat
+	patch -p1 -N < ../perl5.004_08.pat
 	cd ..
-	gdiff -r perl5.003_07 perl5.003_08
+	gdiff -r perl5.004_07 perl5.004_08
 
 where B<gdiff> is GNU diff.  Other diff's may also do recursive checking.
 
@@ -976,7 +1013,7 @@ and the full tar file, e.g. F<perl5.004_08.tar.gz>.
 
 If you want your patch to appear in the F<src/5.0/unsupported>
 directory on CPAN, send e-mail to the CPAN master librarian.  (Check
-out http://www.perl.com/CPAN/CPAN.html).
+out http://www.perl.com/CPAN/CPAN.html ).
 
 =head1 Help Save the World
 
@@ -1119,4 +1156,4 @@ All opinions expressed herein are those of the authorZ<>(s).
 
 =head1 LAST MODIFIED
 
-$Id: pumpkin.pod,v 1.8 1997/02/18 18:19:20 chip Released $
+$Id: pumpkin.pod,v 1.9 1997/02/24 20:37:43 doughera Released $
