@@ -1184,7 +1184,7 @@ token; if not, the DATA filehandle will be left open in binary mode.
 Earlier versions always opened the DATA filehandle in text mode.
 
 The glob() operator is implemented via the L<File::Glob> extension,
-which supports glob syntax of the C<csh>.  This increases the flexibility
+which supports glob syntax of the C shell.  This increases the flexibility
 of the glob() operator, but there may be compatibility issues for
 programs that relied on the older globbing syntax.  If you want to
 preserve compatibility with the older syntax, you might want to put
@@ -1586,10 +1586,6 @@ backward-compatibility.  It's been replaced by the C<sub : attributes>
 syntax.  See L<perlsub/"Subroutine Attributes"> and L<attributes>.
 
 C<use utf8> to enable UTF-8 and Unicode support.
-
-C<use caller 'encoding'> allows modules to inherit pragmatic attributes
-from the caller's context.  C<encoding> is currently the only supported
-attribute.
 
 Lexical warnings pragma, C<use warnings;>, to control optional warnings.
 See L<perllexwarn>.

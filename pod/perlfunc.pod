@@ -523,8 +523,8 @@ C<eval EXPR> statement.  In particular, for a C<eval BLOCK> statement,
 $filename is C<(eval)>, but $evaltext is undefined.  (Note also that
 each C<use> statement creates a C<require> frame inside an C<eval EXPR>)
 frame.  C<$hints> contains pragmatic hints that the caller was
-compiled with.  It currently only reflects the hint corresponding to
-C<use utf8>.
+compiled with.  The C<$hints> value is subject to change between versions
+of Perl, and is not meant for external use.
 
 Furthermore, when called from within the DB package, caller returns more
 detailed information: it sets the list variable C<@DB::args> to be the
