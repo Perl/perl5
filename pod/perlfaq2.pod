@@ -383,7 +383,7 @@ I<Linux Magazine> ( http://www.linuxmagazine.com/ ),
 and Usenix's newsletter/magazine to its members, I<login:>
 ( http://www.usenix.org/ )
 
-The Perl columns of Randal L. Schwarz are available on the web at
+The Perl columns of Randal L. Schwartz are available on the web at
 http://www.stonehenge.com/merlyn/WebTechniques/ ,
 http://www.stonehenge.com/merlyn/UnixReview/ , and
 http://www.stonehenge.com/merlyn/LinuxMag/ .
