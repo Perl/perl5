@@ -2,10 +2,10 @@ BEGIN {require 5.004;}
 
 package ExtUtils::MakeMaker;
 
-$VERSION = "5.55_02";
+$VERSION = "5.90_01";
 $Version_OK = "5.49";   # Makefiles older than $Version_OK will die
                         # (Will be checked from MakeMaker version 4.13 onwards)
-($Revision = substr(q$Revision: 1.33 $, 10)) =~ s/\s+$//;
+($Revision = substr(q$Revision: 1.37 $, 10)) =~ s/\s+$//;
 
 require Exporter;
 use Config;
@@ -117,19 +117,22 @@ sub full_setup {
     EXCLUDE_EXT EXE_FILES FIRST_MAKEFILE 
     FULLPERL FULLPERLRUN FULLPERLRUNINST
     FUNCLIST H IMPORTS
-    INC INCLUDE_EXT INSTALLARCHLIB INSTALLBIN INSTALLDIRS
-    INSTALLMAN1DIR
-    INSTALLMAN3DIR INSTALLPRIVLIB INSTALLSCRIPT INSTALLSITEARCH
-    INSTALLSITELIB INST_ARCHLIB INST_BIN INST_LIB
-    INST_MAN1DIR INST_MAN3DIR INST_SCRIPT LDFROM LIB LIBPERL_A LIBS
+    INST_ARCHLIB INST_SCRIPT INST_BIN INST_LIB
+    INSTALLDIRS
+    PREFIX          SITEPREFIX      VENDORPREFIX
+    INSTALLPRIVLIB  INSTALLSITELIB  INSTALLVENDORLIB
+    INSTALLARCHLIB  INSTALLSITEARCH INSTALLVENDORARCH
+    INSTALLBIN      INSTALLSITEBIN  INSTALLVENDORBIN  INSTALLSCRIPT 
+    PERL_LIB        PERL_ARCHLIB 
+    SITELIBEXP      SITEARCHEXP 
+    INC INCLUDE_EXT LDFROM LIB LIBPERL_A LIBS
     LINKTYPE MAKEAPERL MAKEFILE MAN1PODS MAN3PODS MAP_TARGET MYEXTLIB
     PERL_MALLOC_OK
     NAME NEEDS_LINKING NOECHO NORECURS NO_VC OBJECT OPTIMIZE PERL PERLMAINCC
-    PERLRUN PERLRUNINST PERL_ARCHLIB PERL_CORE
-    PERL_LIB PERL_SRC PERM_RW PERM_RWX
+    PERLRUN PERLRUNINST PERL_CORE
+    PERL_SRC PERM_RW PERM_RWX
     PL_FILES PM PM_FILTER PMLIBDIRS POLLUTE PPM_INSTALL_EXEC
-    PPM_INSTALL_SCRIPT PREFIX
-    PREREQ_FATAL PREREQ_PM PREREQ_PRINT PRINT_PREREQ
+    PPM_INSTALL_SCRIPT PREREQ_FATAL PREREQ_PM PREREQ_PRINT PRINT_PREREQ
     SKIP TYPEMAPS VERSION VERSION_FROM XS XSOPT XSPROTOARG
     XS_VERSION clean depend dist dynamic_lib linkext macro realclean
     tool_autosplit
@@ -915,14 +918,15 @@ counterparts. Which counterparts are chosen depends on the setting of
 INSTALLDIRS according to the following table:
 
                                  INSTALLDIRS set to
-                              perl                site
+                           perl        site          vendor
 
-    INST_ARCHLIB        INSTALLARCHLIB        INSTALLSITEARCH
-    INST_LIB            INSTALLPRIVLIB        INSTALLSITELIB
-    INST_BIN                      INSTALLBIN
-    INST_SCRIPT                   INSTALLSCRIPT
-    INST_MAN1DIR                  INSTALLMAN1DIR
-    INST_MAN3DIR                  INSTALLMAN3DIR
+                 PREFIX          SITEPREFIX          VENDORPREFIX
+  INST_ARCHLIB   INSTALLARCHLIB  INSTALLSITEARCH     INSTALLVENDORARCH
+  INST_LIB       INSTALLPRIVLIB  INSTALLSITELIB      INSTALLVENDORLIB
+  INST_BIN       INSTALLBIN      INSTALLSITEBIN      INSTALLVENDORBIN
+  INST_SCRIPT    INSTALLSCRIPT   INSTALLSCRIPT       INSTALLSCRIPT
+  INST_MAN1DIR   INSTALLMAN1DIR  INSTALLSITEMAN1DIR  INSTALLVENDORMAN1DIR
+  INST_MAN3DIR   INSTALLMAN3DIR  INSTALLSITEMAN3DIR  INSTALLVENDORMAN3DIR
 
 The INSTALL... macros in turn default to their %Config
 ($Config{installprivlib}, $Config{installarchlib}, etc.) counterparts.
@@ -1306,33 +1310,29 @@ directory if INSTALLDIRS is set to perl.
 
 =item INSTALLBIN
 
-Directory to install binary files (e.g. tkperl) into.
+Directory to install binary files (e.g. tkperl) into if
+INSTALLDIRS=perl.
 
 =item INSTALLDIRS
 
-Determines which of the two sets of installation directories to
-choose: installprivlib and installarchlib versus installsitelib and
-installsitearch. The first pair is chosen with INSTALLDIRS=perl, the
-second with INSTALLDIRS=site. Default is site.
+Determines which of the sets of installation directories to choose:
+perl, site or vendor.  Defaults to site.
 
 =item INSTALLMAN1DIR
 
-This directory gets the man pages at 'make install' time. Defaults to
-$Config{installman1dir}.
-
-If set to 'none', no man 1 pages will be installed.
-
 =item INSTALLMAN3DIR
 
-This directory gets the man pages at 'make install' time. Defaults to
-$Config{installman3dir}.
+These directories get the man pages at 'make install' time if
+INSTALLDIRS=perl.  Defaults to $Config{installman*dir}.
 
-If set to 'none', no man 3 pages will be installed.
+If set to 'none', no man pages will be installed.
 
 =item INSTALLPRIVLIB
 
 Used by 'make install', which copies files from INST_LIB to this
 directory if INSTALLDIRS is set to perl.
+
+Defaults to $Config{installprivlib}.
 
 =item INSTALLSCRIPT
 
@@ -1344,10 +1344,49 @@ directory.
 Used by 'make install', which copies files from INST_ARCHLIB to this
 directory if INSTALLDIRS is set to site (default).
 
+=item INSTALLSITEBIN
+
+Used by 'make install', which copies files from INST_BIN to this
+directory if INSTALLDIRS is set to site (default).
+
 =item INSTALLSITELIB
 
 Used by 'make install', which copies files from INST_LIB to this
 directory if INSTALLDIRS is set to site (default).
+
+=item INSTALLSITEMAN1DIR
+
+=item INSTALLSITEMAN3DIR
+
+These directories get the man pages at 'make install' time if
+INSTALLDIRS=site (default).  Defaults to 
+$(SITEPREFIX)/man/man$(MAN*EXT).
+
+If set to 'none', no man pages will be installed.
+
+=item INSTALLVENDORARCH
+
+Used by 'make install', which copies files from INST_ARCHLIB to this
+directory if INSTALLDIRS is set to vendor.
+
+=item INSTALLVENDORBIN
+
+Used by 'make install', which copies files from INST_BIN to this
+directory if INSTALLDIRS is set to vendor.
+
+=item INSTALLVENDORLIB
+
+Used by 'make install', which copies files from INST_LIB to this
+directory if INSTALLDIRS is set to vendor.
+
+=item INSTALLVENDORMAN1DIR
+
+=item INSTALLVENDORMAN3DIR
+
+These directories get the man pages at 'make install' time if
+INSTALLDIRS=vendor.  Defaults to $(VENDORPREFIX)/man/man$(MAN*EXT).
+
+If set to 'none', no man pages will be installed.
 
 =item INST_ARCHLIB
 
@@ -1676,6 +1715,8 @@ which should be sensible for your platform.
 If you specify LIB or any INSTALL* variables they will not be effected
 by the PREFIX.
 
+Defaults to $Config{installprefixexp}.
+
 =item PREREQ_PM
 
 Hashref: Names of modules that need to be available to run this
@@ -1714,6 +1755,12 @@ RedHatism for C<PREREQ_PRINT>.  The output format is different, though:
 
     perl(A::B)>=Vers1 perl(C::D)>=Vers2 ...
 
+=item SITEPREFIX
+
+Like PREFIX, but only for the site install locations.
+
+Defaults to PREFIX (if set) or $Config{siteprefixexp}
+
 =item SKIP
 
 Arrayref. E.g. [qw(name1 name2)] skip (do not write) sections of the
@@ -1729,6 +1776,12 @@ not named B<typemap>.  The last typemap in the list takes
 precedence.  A typemap in the current directory has highest
 precedence, even if it isn't listed in TYPEMAPS.  The default system
 typemap has lowest precedence.
+
+=item VENDORPREFIX
+
+Like PREFIX, but only for the vendor install locations.
+
+Defaults to PREFIX (if set) or $Config{vendorprefixexp}
 
 =item VERSION
 
@@ -1751,7 +1804,7 @@ MakeMaker object. The following lines will be parsed o.k.:
 
     $VERSION = '1.00';
     *VERSION = \'1.01';
-    ( $VERSION ) = '$Revision: 1.33 $ ' =~ /\$Revision:\s+([^\s]+)/;
+    ( $VERSION ) = '$Revision: 1.37 $ ' =~ /\$Revision:\s+([^\s]+)/;
     $FOO::VERSION = '1.10';
     *FOO::VERSION = \'1.11';
     our $VERSION = 1.2.3;       # new for perl5.6.0 

@@ -15,7 +15,7 @@ use Test::More;
 
 BEGIN {
 	if ($^O =~ /cygwin/i) {
-		plan tests => 15;
+		plan tests => 13;
 	} else {
 		plan skip_all => "This is not cygwin";
 	}
@@ -57,15 +57,11 @@ my $ccflags = $Config{useshrplib} eq 'true' ? ' -DUSEIMPORTLIB' : '';
     $args->cflags(<<FLAGS);
 OPTIMIZE = opt
 PERLTYPE  =pt
-LARGE= lg
-SPLIT=split
 FLAGS
 }
 
 like( $args->{CFLAGS}, qr/OPTIMIZE = opt/, '... should set OPTIMIZE' );
 like( $args->{CFLAGS}, qr/PERLTYPE = pt/, '... should set PERLTYPE' );
-like( $args->{CFLAGS}, qr/LARGE = lg/, '... should set LARGE' );
-like( $args->{CFLAGS}, qr/SPLIT = split/, '... should set SPLIT' );
 like( $args->{CFLAGS}, qr/CCFLAGS = $ccflags/, '... should set CCFLAGS' );
 
 # test manifypods

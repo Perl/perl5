@@ -19,6 +19,6 @@ my $mm = bless {}, 'MM';
 
 my $default = File::Spec->catdir(qw(this that));
 $mm->prefixify('installbin', 'wibble', 'something', $default);
-               
+
 is( $mm->{INSTALLBIN}, File::Spec->catdir('something', $default),
                                             'prefixify w/defaults');

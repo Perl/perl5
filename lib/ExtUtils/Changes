@@ -1,3 +1,31 @@
+5.90_01 Thu Apr 11 01:11:54 EDT 2002
+    [[ API Changes ]]
+    * Implementation of the new PREFIX logic.
+    * Added new INSTALL targets:
+        INSTALLSITEBIN
+        INSTALLSITEMAN1DIR   INSTALLSITEMAN3DIR 
+        INSTALLVENDORMAN1DIR INSTALLVENDORMAN3DIR
+        INSTALLVENDORBIN INSTALLVENDORLIB INSTALLVENDORARCH
+        SITEPREFIX VENDORPREFIX
+    * INSTALLDIRS=site now properly using $Config{siteprefixexp}
+      (Thieved from Debian.  Thanks!)
+    * Added INSTALLDIRS=vendor & support for vendor directories
+      (Thieved from Debian.  Thanks!)
+
+    [[ Bug Fixes ]]
+    - nmake syntax nits from Mattia Barbon
+    - ExtUtils::Packlist fix for files with spaces in them from Jan Dubois
+      (bleadperl@15800)
+    - Old, old, old dmake bug in MM_Win32->pm_to_blib fixed by Nick
+      (bleadperl 15847)
+
+    [[ Internals ]]
+    - Purging leftover PDP compiler flags.
+
+5.55_03 Sat Apr  6 21:57:01 EST 2002
+    - Reversing "fix" for RT 444.  It wasn't really fixed and it
+      caused havoc with Compress::Zlib and Tk.
+
 5.55_02 Sat Apr  6 03:09:15 EST 2002
     [[ Bug Fixes ]]
     - Craig Berry fixed install on VMS (again, I munged the last patch)
@@ -6,10 +34,12 @@
     - For some reason MM_VMS was using $Config{arch} instead of
       $Config{archname}
     - Fix (well, hack) for creating ABSPERL on VMS.
+    - Quieting some warnings revealed by ExtUtils::Constant
+    - test_via_script had a typo and forgot INST_ARCHLIB
 
     [[ Test Fixes ]]
     - INST.t has to tell MakeMaker it's in the PERL_CORE
-    - INST_LIB doesn't change if it's in the core
+    - Fixing expected values of INST_* when building the core.
 
 5.55_01 Thu Apr  4 23:58:06 EST 2002
     [[ API Changes ]]
@@ -219,7 +249,7 @@
 5.48_04 Mon Jan 21 19:28:38 EST 2002
     - No longer requiring Test::More
     - Now tested to work with a clean 5.6.1
-    - Stripped out $Revision: 1.48 $ based $VERSIONs.
+    - Stripped out $Revision based $VERSIONs.
     - Rolled in patches from p5p, vmsperl & VOS (14325, 14338, 14360, 14364)
     * hint files now run in a safer context.  Only $self is available.
     - ExtUtils::testlib now provides absolute paths into @INC.

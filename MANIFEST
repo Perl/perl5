@@ -1016,6 +1016,7 @@ lib/ExtUtils/t/Embed.t		See if ExtUtils::Embed and embedding works
 lib/ExtUtils/t/hints.t          See if hint files are honored.
 lib/ExtUtils/t/Installed.t	See if ExtUtils::Installed works
 lib/ExtUtils/t/INST.t           Check MakeMaker INST_* macros 
+lib/ExtUtils/t/INST_PREFIX.t    See if MakeMaker can apply PREFIXs
 lib/ExtUtils/t/Manifest.t	See if ExtUtils::Manifest works
 lib/ExtUtils/t/Mkbootstrap.t	See if ExtUtils::Mkbootstrap works
 lib/ExtUtils/t/MM_BeOS.t	See if ExtUtils::MM_BeOS works

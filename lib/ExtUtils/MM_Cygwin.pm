@@ -27,8 +27,6 @@ sub cflags {
 CCFLAGS = $self->{CCFLAGS}
 OPTIMIZE = $self->{OPTIMIZE}
 PERLTYPE = $self->{PERLTYPE}
-LARGE = $self->{LARGE}
-SPLIT = $self->{SPLIT}
 };
 
 }

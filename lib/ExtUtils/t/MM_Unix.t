@@ -18,7 +18,7 @@ BEGIN {
         plan skip_all => 'Non-Unix platform';
     }
     else {
-        plan tests => 107;
+        plan tests => 108;
     }
 }
 
@@ -142,7 +142,7 @@ ok ( join (' ', $class->dist_basics()), 'distclean :: realclean distcheck');
 ###############################################################################
 # has_link_code tests
 
-my $t = {}; bless $t,$class;
+my $t = bless { NAME => "Foo" }, $class;
 $t->{HAS_LINK_CODE} = 1; 
 is ($t->has_link_code(),1,'has_link_code'); is ($t->{HAS_LINK_CODE},1);
 
@@ -220,4 +220,15 @@ foreach (qw/ export_list perl_archive perl_archive_after/)
   is ($t->$_(),'',"$_() is empty string on Unix"); 
   }
 
+
+{
+    $t->{CCFLAGS} = '-DMY_THING';
+    $t->{LIBPERL_A} = 'libperl.a';
+    $t->{LIB_EXT}   = '.a';
+    local $t->{NEEDS_LINKING} = 1;
+    $t->cflags();
+
+    # Brief bug where CCFLAGS was being blown away
+    is( $t->{CCFLAGS}, '-DMY_THING',    'cflags retains CCFLAGS' );
+}
 
