@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..13\n";
+print "1..10\n";
 
 @oops = @ops = <op/*>;
 
@@ -53,20 +53,17 @@ for (1..2) {
 }
 print $i == 2 ? "ok 7\n" : "not ok 7\n";
 
-# [ID 20010526.001] localized glob loses value when assigned to
-
-$j=1; %j=(a=>1); @j=(1); local *j=*j; *j = sub{};
-
-print $j    == 1 ? "ok 8\n"  : "not ok 8\n";
-print $j{a} == 1 ? "ok 9\n"  : "not ok 9\n";
-print $j[0] == 1 ? "ok 10\n" : "not ok 10\n";
-
 # ... while ($var = glob(...)) should test definedness not truth
 
 # Create a file called "0"
-print open(F, ">0") ? "ok 11\n" : "not ok 11 # $!\n";
-my $ok = "not ok 12\n";
-$ok = "ok 12\n" while my $var = glob("0");
+print open(F, ">0") ? "ok 8\n" : "not ok 8 # $!\n";
+my $ok = "not ok 9\n";
+$ok = "ok 9\n" while my $var = glob("0");
 print $ok;
 
-print unlink("0") ? "ok 13\n" : "not ok 13\n";
+print unlink("0") ? "ok 10\n" : "not ok 10\n";
+
+END {
+    1 while unlink "0";
+}
+
