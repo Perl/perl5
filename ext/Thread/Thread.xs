@@ -175,7 +175,7 @@ threadstart(void *arg)
     Safefree(PL_savestack);
     Safefree(PL_retstack);
     Safefree(PL_tmps_stack);
-    Safefree(PL_ofs);
+    SvREFCNT_dec(PL_ofs_sv);
 
     SvREFCNT_dec(PL_rs);
     SvREFCNT_dec(PL_nrs);
