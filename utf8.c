@@ -1578,6 +1578,11 @@ Perl_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 minbits
     HV *stash = gv_stashpvn(pkg, pkg_len, FALSE);
     SV* errsv_save;
 
+    PUSHSTACKi(PERLSI_MAGIC);
+    ENTER;
+    SAVEI32(PL_hints);
+    PL_hints = 0;
+    save_re_context();
     if (!gv_fetchmeth(stash, "SWASHNEW", 8, -1)) {	/* demand load utf8 */
 	ENTER;
 	errsv_save = newSVsv(ERRSV);
@@ -1589,7 +1594,6 @@ Perl_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 minbits
 	LEAVE;
     }
     SPAGAIN;
-    PUSHSTACKi(PERLSI_MAGIC);
     PUSHMARK(SP);
     EXTEND(SP,5);
     PUSHs(sv_2mortal(newSVpvn(pkg, pkg_len)));
@@ -1598,10 +1602,6 @@ Perl_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 minbits
     PUSHs(sv_2mortal(newSViv(minbits)));
     PUSHs(sv_2mortal(newSViv(none)));
     PUTBACK;
-    ENTER;
-    SAVEI32(PL_hints);
-    PL_hints = 0;
-    save_re_context();
     if (IN_PERL_COMPILETIME) {
 	/* XXX ought to be handled by lex_start */
 	SAVEI32(PL_in_my);
