@@ -8,7 +8,7 @@ case "$optimize" in
 esac
 # The default is to die on math overflows with an runtime error.
 # Let's not do that. --jhi
-ccflags="$ccflags -h matherr=errno" 
+ccflags="$ccflags -h matherror=errno" 
 # Avoid an optimizer bug where a volatile variables
 # isn't correctly saved and restored --Mark P. Lutz 
 pp_ctl_cflags='ccflags="$ccflags -h scalar0 -h vector0"'
