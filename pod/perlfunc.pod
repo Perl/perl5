@@ -2473,10 +2473,10 @@ This function places an advisory lock on a variable, subroutine,
 or referenced object contained in I<THING> until the lock goes out
 of scope.
 
-lock() is a "weak keyword" : that means that if you've defined a
-function by this name, this function will be called instead.
-(However, if you've said C<use Thread>, lock() is always a keyword.)
-See L<Thread>.
+lock() is a "weak keyword" : this means that if you've defined a function
+by this name, (before any calls to it), that function will be called
+instead. (However, if you've said C<use Thread>, lock() is always a
+keyword.) See L<Thread>.
 
 =item log EXPR
 
