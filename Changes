@@ -32,6 +32,235 @@ Version v5.7.1		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  8481] By: jhi                                   on 2001/01/19  14:41:24
+        Log: Subject: Re: new feature: s?printf parameter reordering 
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Thu, 11 Jan 2001 17:09:03 +0000
+             Message-Id: <200101111709.RAA23756@crypt.compulink.co.uk>
+             
+             - support reordering for all parameters: %, *v, *, .*
+             - lay down that the reordering specification must immediately
+             follow that parameter: %3$, *v3$, *3$, .*3$
+             - fix vectorisation of a zero-length string
+             - factor out the code choosing the argument to format
+             
+             Possibly unwanted side-effects:
+             - the special format specifiers ' +-0' must now precede any
+             vectorisation specifier. Tests in op/sprintf and op/ver
+             have been changed to reflect this.
+             - sprintf.t test #214 changed its expectations because in many
+             cases, the next parameter has already been consumed when an
+             invalid type letter is detected.
+             
+             Probably wanted side-effects:
+             - attempts to format a non-existent parameter will warn as if C<undef>
+             - attempt to write to non-existent parameter with '%n' will complain
+             of "attempt to modify read-only value" instead of being silent
+     Branch: perl
+	   ! sv.c t/op/sprintf.t t/op/ver.t
+____________________________________________________________________________
+[  8480] By: jhi                                   on 2001/01/19  14:08:37
+        Log: Subject: PATCH pragma/locale.t
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 18 Jan 2001 09:45:37 +0100
+             Message-ID: <m3lms98czy.fsf@ak-71.mind.de>
+     Branch: perl
+	   ! t/pragma/locale.t
+____________________________________________________________________________
+[  8479] By: jhi                                   on 2001/01/19  13:19:58
+        Log: Add tracing for debugging extensions builds in VMS, from Charles Lane.
+     Branch: perl
+	   ! configure.com
+____________________________________________________________________________
+[  8478] By: jhi                                   on 2001/01/19  02:12:35
+        Log: Automate 1_compile.t.
+     Branch: perl
+	   ! t/lib/1_compile.t
+____________________________________________________________________________
+[  8477] By: jhi                                   on 2001/01/19  01:49:56
+        Log: Integrate perlio.
+     Branch: perl
+	  !> sv.c win32/config.bc win32/config.gc win32/config.vc
+	  !> win32/config_H.bc win32/config_H.gc win32/config_H.vc
+____________________________________________________________________________
+[  8476] By: nick                                  on 2001/01/18  21:51:52
+        Log: Integrate mainline
+     Branch: perlio
+	  +> t/lib/1_compile.t t/lib/compmod.pl
+	  !> MANIFEST configure.com lib/unicode/distinct.pm
+____________________________________________________________________________
+[  8475] By: nick                                  on 2001/01/18  21:48:02
+        Log: Win32 "safe signals" co-existance fix.
+             Fix SIG_SIZE value.
+             Clear PL_sig_pending when cloning (fork).
+     Branch: perlio
+	   ! sv.c win32/config.bc win32/config.gc win32/config.vc
+	   ! win32/config_H.bc win32/config_H.gc win32/config_H.vc
+____________________________________________________________________________
+[  8474] By: jhi                                   on 2001/01/18  14:40:57
+        Log: It's Pod::Text::Overstrike, not Pod::Overstrike.
+     Branch: perl
+	   ! t/lib/1_compile.t
+____________________________________________________________________________
+[  8473] By: gsar                                  on 2001/01/18  11:42:31
+        Log: unsubmitted trial1 change
+     Branch: maint-5.6/perl
+	   ! Changes
+____________________________________________________________________________
+[  8472] By: jhi                                   on 2001/01/18  04:30:24
+        Log: The first bug found by 1_compile.t.
+     Branch: perl
+	   ! lib/unicode/distinct.pm
+____________________________________________________________________________
+[  8471] By: jhi                                   on 2001/01/18  04:29:42
+        Log: Add Schwern's 1_compile test.  The compile_module script renamed
+             to be a bit shorter for the 8.3 people.
+     Branch: perl
+	   + t/lib/1_compile.t t/lib/compmod.pl
+	   ! MANIFEST
+____________________________________________________________________________
+[  8470] By: jhi                                   on 2001/01/18  04:16:00
+        Log: Subject: [PATCH: perl@8453] Re: subversion undef on VMS (was Re: [ID 20001218.033] Not OK: perl v5.6.1 +v5.6.1-TRIAL1 on   VMS_AXP V7.2-1)
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Wed, 17 Jan 2001 13:07:11 -0800 (PST)
+             Message-ID: <Pine.OSF.4.10.10101171255380.289071-100000@aspara.forte.com>
+             Replace #8463.
+     Branch: maint-5.6/perl
+	   ! configure.com
+____________________________________________________________________________
+[  8469] By: jhi                                   on 2001/01/18  04:13:02
+        Log: Subject: [PATCH: perl@8453] Re: subversion undef on VMS (was Re: [ID 20001218.033] Not OK: perl v5.6.1 +v5.6.1-TRIAL1 on   VMS_AXP V7.2-1)
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Wed, 17 Jan 2001 13:07:11 -0800 (PST)
+             Message-ID: <Pine.OSF.4.10.10101171255380.289071-100000@aspara.forte.com>
+             Replace #8462.
+     Branch: perl
+	   ! configure.com
+____________________________________________________________________________
+[  8468] By: jhi                                   on 2001/01/18  03:42:08
+        Log: Integrate perlio.
+     Branch: perl
+	  !> gv.c mg.c perlio.c util.c
+____________________________________________________________________________
+[  8467] By: nick                                  on 2001/01/17  22:41:10
+        Log: "Safe" signals - trial implementation.
+             gv.c tweaked to zero PL_sig_pend array
+             perlio.c tweaked to PERL_ASYNC_CHECK() on EINTR
+             util.c tweaked to not set SA_RESTART to give perlio.c a chance.
+             Odd thing is that it "works" with PERLIO=stdio as well (linux).
+     Branch: perlio
+	   ! gv.c mg.c perlio.c util.c
+____________________________________________________________________________
+[  8466] By: nick                                  on 2001/01/17  20:40:20
+        Log: Integrate mainline.
+     Branch: perlio
+	  !> Configure Porting/Glossary Porting/config.sh Porting/config_H
+	  !> config_h.SH configure.com epoc/config.sh gv.c pod/perltoc.pod
+	  !> pp.c pp_sys.c sv.c t/op/int.t uconfig.h uconfig.sh
+	  !> vos/config.alpha.def vos/config.alpha.h vos/config.ga.def
+	  !> vos/config.ga.h win32/config.bc win32/config.gc
+	  !> win32/config.vc
+____________________________________________________________________________
+[  8465] By: jhi                                   on 2001/01/17  18:37:13
+        Log: Subject: [PATCH] Re: [PATCH: perl@8429]  lib/tie-substrhash.t FAILED at test 11
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Wed, 17 Jan 2001 17:31:33 +0000
+             Message-ID: <20010117173133.I2633@plum.flirble.org>
+     Branch: perl
+	   ! t/op/int.t
+____________________________________________________________________________
+[  8464] By: jhi                                   on 2001/01/17  14:43:17
+        Log: Subject: [PATCH: perl@8429]  lib/tie-substrhash.t FAILED at test 11
+             From: "Roca, Ignasi" <ignasi.roca@fujitsu.siemens.es>
+             Date: Wed, 17 Jan 2001 15:16:43 +0100
+             Message-ID: <5930DC161690D2119667009027157547038C8A85@madt009a.siemens.es> 
+             
+             pp_int() was dropping an NV to the floor,
+             int(279964589018079/59) either returned not an integer
+             4745162525730.15, or one got "Attempt to free unreferenced scalar."
+     Branch: perl
+	   ! pp.c
+____________________________________________________________________________
+[  8463] By: jhi                                   on 2001/01/17  06:12:42
+        Log: (Replaced by #8470)
+             
+             Subject: subversion undef on VMS (was Re: [ID 20001218.033] Not OK: perl v5.6.1 +v5.6.1-TRIAL1 on   VMS_AXP V7.2-1)
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Tue, 16 Jan 2001 23:38:46 -0600
+             Message-Id: <p04330103b68ad8cfcbfd@[172.16.52.1]>
+     Branch: maint-5.6/perl
+	   ! configure.com
+____________________________________________________________________________
+[  8462] By: jhi                                   on 2001/01/17  06:11:31
+        Log: (Replaced by #8469)
+             
+             Subject: subversion undef on VMS (was Re: [ID 20001218.033] Not OK: perl v5.6.1 +v5.6.1-TRIAL1 on   VMS_AXP V7.2-1)
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Tue, 16 Jan 2001 23:38:46 -0600
+             Message-Id: <p04330103b68ad8cfcbfd@[172.16.52.1]>
+     Branch: perl
+	   ! configure.com
+____________________________________________________________________________
+[  8461] By: jhi                                   on 2001/01/17  05:56:12
+        Log: Allow for one trailing slash in the directory of mkdir().
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[  8460] By: jhi                                   on 2001/01/17  03:26:01
+        Log: Metaconfig unit changes for #8459.
+     Branch: metaconfig
+	   ! U/modified/Loc.U U/modified/sig_name.U
+____________________________________________________________________________
+[  8459] By: jhi                                   on 2001/01/17  03:24:48
+        Log: Define SIG_SIZE, the number of elements in the sig_name and
+             sig_num arrays, including the final NULL entry.
+     Branch: perl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH configure.com epoc/config.sh gv.c pod/perltoc.pod
+	   ! sv.c uconfig.h uconfig.sh vos/config.alpha.def
+	   ! vos/config.alpha.h vos/config.ga.def vos/config.ga.h
+	   ! win32/config.bc win32/config.gc win32/config.vc
+____________________________________________________________________________
+[  8458] By: jhi                                   on 2001/01/17  01:41:33
+        Log: Integrate perlio.
+     Branch: perl
+	  !> embed.h embed.pl embedvar.h gv.c intrpvar.h mg.c perl.c perl.h
+	  !> perlapi.h proto.h sv.c
+____________________________________________________________________________
+[  8457] By: nick                                  on 2001/01/16  22:07:26
+        Log: Provide infrastructure for PERL_ASYNC_CHECK() style safe signals.
+             Provides all the "cost" but no benefit yet - it is to allow cost
+             to be measured, and implementation experiments (just in mg.c?).
+     Branch: perlio
+	   ! embed.h embed.pl embedvar.h gv.c intrpvar.h mg.c perl.c perl.h
+	   ! perlapi.h proto.h sv.c
+____________________________________________________________________________
+[  8456] By: nick                                  on 2001/01/16  21:07:07
+        Log: Integrate mainline.
+     Branch: perlio
+	  !> (integrate 51 files)
+____________________________________________________________________________
+[  8455] By: jhi                                   on 2001/01/16  18:13:43
+        Log: Subject: [PATCH] regcomp.c old feature removal
+             From: mjd@plover.com
+             Date: 16 Jan 2001 14:43:18 -0000 
+             Message-ID: <20010116144318.7140.qmail@plover.com> 
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[  8454] By: jhi                                   on 2001/01/16  16:12:39
+        Log: Subject: [PATCH: perl-5.6.1-TRIAL1] Win32 Makefile fixes - v2
+             From: "Indy Singh" <indy@nusphere.com>
+             Date: Wed, 10 Jan 2001 20:17:49 -0500
+             Message-ID: <003001c07b6c$524630b0$00957018@roadhog>
+     Branch: maint-5.6/perl
+	   ! win32/Makefile
+____________________________________________________________________________
+[  8453] By: jhi                                   on 2001/01/16  16:09:33
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  8452] By: jhi                                   on 2001/01/16  15:42:04
         Log: Subject: Re: API Cleanup
              To: perl5-porters@perl.org
