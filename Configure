@@ -17229,9 +17229,9 @@ esac
 : set the base revision
 baserev=5.0
 
-: how do we catenate cpp tokens here?
+: how do we concatenate cpp tokens here?
 echo " "
-echo "Checking to see how your cpp does stuff like catenate tokens..." >&4
+echo "Checking to see how your cpp does stuff like concatenate tokens..." >&4
 $cat >cpp_stuff.c <<'EOCP'
 #define RCAT(a,b)a/**/b
 #define ACAT(a,b)a ## b
@@ -17250,8 +17250,8 @@ elif $contains 'Reiser' cpp_stuff.out >/dev/null 2>&1; then
 	cpp_stuff=1
 else
 	$cat >&4 <<EOM
-Hmm, I don't seem to be able to catenate tokens with your cpp.  You're going
-to have to edit the values of CAT[2-5] in config.h...
+Hmm, I don't seem to be able to concatenate tokens with your cpp.
+You're going to have to edit the values of CAT[2-5] in config.h...
 EOM
 	cpp_stuff="/* Help! How do we handle cpp_stuff? */*/"
 fi

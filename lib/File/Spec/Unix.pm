@@ -326,7 +326,7 @@ sub splitdir {
 =item catpath()
 
 Takes volume, directory and file portions and returns an entire path. Under
-Unix, $volume is ignored, and directory and file are catenated.  A '/' is
+Unix, $volume is ignored, and directory and file are concatenated.  A '/' is
 inserted if needed (though if the directory portion doesn't start with
 '/' it is not added).  On other OSs, $volume is significant.
 
