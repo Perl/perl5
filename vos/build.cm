@@ -83,8 +83,6 @@
 &if (command_status) ^= 0 &then &return
 !cc <<dump.c -suppress_diag 2006 &cpu& &cflags&
 &if (command_status) ^= 0 &then &return
-!cc <<ebcdic.c -suppress_diag 2006 &cpu& &cflags&
-&if (command_status) ^= 0 &then &return
 !cc <<globals.c -suppress_diag 2006 &cpu& &cflags&
 &if (command_status) ^= 0 &then &return
 !cc <<gv.c -suppress_diag 2006 2065 &cpu& &cflags&
