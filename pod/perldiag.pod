@@ -2515,7 +2515,7 @@ reference.
 (P) We popped the context stack to an eval context, and then discovered
 it wasn't an eval context.
 
-=item panic: pp_match
+=item panic: pp_match%s
 
 (P) The internal pp_match() routine was called with invalid operational
 data.

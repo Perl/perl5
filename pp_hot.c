@@ -1322,6 +1322,9 @@ play_it_again:
 	    /*SUPPRESS 560*/
 	    if ((rx->startp[i] != -1) && rx->endp[i] != -1 ) {
 		len = rx->endp[i] - rx->startp[i];
+	        if (rx->endp[i] < 0 || rx->startp[i] < 0 ||
+		    len < 0 || len > strend - s)
+		    DIE(aTHX_ "panic: pp_match start/end pointers");
 		s = rx->startp[i] + truebase;
 		sv_setpvn(*SP, s, len);
 		if (DO_UTF8(TARG) && is_utf8_string((U8*)s, len))
