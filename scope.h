@@ -35,6 +35,10 @@
 #define SAVEt_GENERIC_PVREF	34
 #define SAVEt_PADSV		35
 
+#ifndef SCOPE_SAVES_SIGNAL_MASK
+#define SCOPE_SAVES_SIGNAL_MASK 1
+#endif
+
 #define SSCHECK(need) if (PL_savestack_ix + need > PL_savestack_max) savestack_grow()
 #define SSPUSHINT(i) (PL_savestack[PL_savestack_ix++].any_i32 = (I32)(i))
 #define SSPUSHLONG(i) (PL_savestack[PL_savestack_ix++].any_long = (long)(i))
@@ -307,7 +311,7 @@ typedef void *(CPERLscope(*protect_proc_t)) (pTHX_ volatile JMPENV *pcur_env,
 	    DEBUG_l(Perl_deb(aTHX_ "Setting up jumplevel %p, was %p\n",	\
 			     ce, PL_top_env));			\
 	    JMPENV_PUSH_INIT_ENV(ce,NULL);			\
-	    EXCEPT_SET_ENV(ce,PerlProc_setjmp((ce).je_buf, 1));\
+	    EXCEPT_SET_ENV(ce,PerlProc_setjmp((ce).je_buf, SCOPE_SAVES_SIGNAL_MASK));\
 	    (ce).je_noset = 1;					\
 	}							\
 	else							\
@@ -356,7 +360,7 @@ typedef void *(CPERLscope(*protect_proc_t)) (pTHX_ volatile JMPENV *pcur_env,
 			 &cur_env, PL_top_env));			\
 	cur_env.je_prev = PL_top_env;					\
 	OP_REG_TO_MEM;							\
-	cur_env.je_ret = PerlProc_setjmp(cur_env.je_buf, 1);		\
+	cur_env.je_ret = PerlProc_setjmp(cur_env.je_buf, SCOPE_SAVES_SIGNAL_MASK);		\
 	OP_MEM_TO_REG;							\
 	PL_top_env = &cur_env;						\
 	cur_env.je_mustcatch = FALSE;					\
