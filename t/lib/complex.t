@@ -262,7 +262,7 @@ EOS
     $test++;
     push @script, <<EOS;
     print "# j = \$j\n";
-    print "not " unless "\$j" =~ /^-0(?:\\.50000\\d+\\|\\.49999\\d+)+0.86602540\\d+i\$/;
+    print "not " unless "\$j" =~ /^-0(?:\\.5(?:0000\\d+)?|\\.49999\\d+)\\+0.86602540\\d+i\$/;
     print "ok $test\n";
 
     \$j->display_format('style' => 'polar', 'polar_pretty_print' => 0);
