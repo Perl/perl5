@@ -1,0 +1,13 @@
+Thread		T_IVOBJ
+Thread::Cond	T_IVOBJ
+
+INPUT
+T_IVOBJ
+	if (sv_isobject($arg))
+	    $var = ($type) SvIV((SV*)SvRV($arg));
+	else
+	    croak(\"$var is not an object\")
+
+OUTPUT
+T_IVOBJ	
+	sv_setref_iv($arg, \"${ntype}\", (IV)($var));
