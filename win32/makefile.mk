@@ -1257,17 +1257,16 @@ inst_lib : $(CONFIGPM)
 	$(RCOPY) ..\lib $(INST_LIB)\*.*
 
 minitest : $(MINIPERL) $(GLOBEXE) $(CONFIGPM) utils
-	$(XCOPY) $(MINIPERL) ..\t\$(NULL)
-	if exist ..\t\perl.exe del /f ..\t\perl.exe
-	rename ..\t\miniperl.exe perl.exe
+	$(XCOPY) $(MINIPERL) ..\t\perl.exe
 .IF "$(CCTYPE)" == "BORLAND"
 	$(XCOPY) $(GLOBBAT) ..\t\$(NULL)
 .ELSE
 	$(XCOPY) $(GLOBEXE) ..\t\$(NULL)
 .ENDIF
 	attrib -r ..\t\*.*
+	copy test ..\t
 	cd ..\t && \
-	$(MINIPERL) -I..\lib harness base/*.t comp/*.t cmd/*.t io/*.t op/*.t pragma/*.t
+	$(MINIPERL) -I..\lib test base/*.t comp/*.t cmd/*.t io/*.t op/*.t pragma/*.t
 
 test-prep : all utils
 	$(XCOPY) $(PERLEXE) ..\t\$(NULL)

@@ -1124,13 +1124,13 @@ inst_lib : $(CONFIGPM)
 	$(RCOPY) ..\lib $(INST_LIB)\*.*
 
 minitest : $(MINIPERL) $(GLOBEXE) $(CONFIGPM) utils
-	$(XCOPY) $(MINIPERL) ..\t\$(NULL)
-	if exist ..\t\perl.exe del /f ..\t\perl.exe
-	rename ..\t\miniperl.exe perl.exe
+	$(XCOPY) $(MINIPERL) ..\t\perl.exe
 	$(XCOPY) $(GLOBEXE) ..\t\$(NULL)
 	attrib -r ..\t\*.*
-	cd ..\t && \
-	$(MINIPERL) -I..\lib harness base/*.t comp/*.t cmd/*.t io/*.t op/*.t pragma/*.t
+	copy test ..\t
+	cd ..\t
+	$(MINIPERL) -I..\lib test base/*.t comp/*.t cmd/*.t io/*.t op/*.t pragma/*.t
+	cd ..\win32
 
 test-prep : all utils
 	$(XCOPY) $(PERLEXE) ..\t\$(NULL)
