@@ -1,24 +1,18 @@
 #!./perl -- -*- mode: cperl; cperl-indent-level: 4 -*-
 
 BEGIN {
-    require Config; import Config;
-    if (!$Config{'d_fork'}
-       # open2/3 supported on win32 (but not Borland due to CRT bugs)
-       && (($^O ne 'MSWin32' && $^O ne 'NetWare') || $Config{'cc'} =~ /^bcc/i))
-    {
-	print "1..0\n";
-	exit 0;
-    }
     chdir 't' if -d 't';
     @INC = '../lib';
     $ENV{PERL5LIB} = '../lib';    # so children will see it too
+    if ($^O eq 'VMS') {
+	print "1..0 # skip on $^O, no piped open\n";
+	exit 0;
+    }
 }
 
 use strict;
-use IPC::Open3 qw(open3);
-use IO::Select;
 
-$|=1;
+$| = 1;
 
 my @prgs;
 
@@ -34,25 +28,22 @@ plan tests => scalar @prgs;
 
 require "dumpvar.pl";
 
+use File::Temp qw/tempfile/;
+
+our ($tmpfh, $tmpfile) = tempfile();
+
 $ENV{PERLDB_OPTS} = "TTY=0";
-my($ornament1,$ornament2,$wtrfh,$rdrfh);
-open3 $wtrfh, $rdrfh, 0, $^X, "-de0";
-my $ios = IO::Select->new();
-$ios->add($rdrfh);
+my($ornament1,$ornament2);
 for (@prgs){
-    my($prog,$expected) = split(/\nEXPECT\n?/, $_);
-    print $wtrfh $prog, "\n";
-    my $got;
-    while (not defined $got) {
-	while ($ios->can_read(0.25)) {
-	    sysread $rdrfh, $got, 1024, length($got);
-	}
-    }
+    my($prog, $expected) = split(/\nEXPECT\n?/, $_);
+    open my $select, "| $^X -de0 2> $tmpfile" or die $!;
+    print $select $prog;
+    close $select;
+    my $got = do { open my($fh), $tmpfile or die; local $/; <$fh>; };
     $got =~ s/^\s*Loading.*\nEditor.*\n\nEnter.*\n\nmain::\(-e:1\):\s0\n//;
     unless (defined $ornament1) {
-         $got =~ s/^\s*Loading.*\nEditor.*\n\nEnter.*\n\nmain::\(-e:1\):\s0\n//;
-         ($ornament1,$ornament2) = $got =~
-             /(.*?)0\s+'reserved example for calibrating the ornaments'\n(.*)/
+        ($ornament1, $ornament2) = $got =~
+            /(.*?)0\s+'reserved example for calibrating the ornaments'\n(.*)/
     }
     $got =~ s/^\Q$ornament1\E//;
     $got =~ s/\Q$ornament2\E\z//;

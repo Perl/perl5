@@ -3,10 +3,6 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
-    unless (find PerlIO::Layer 'perlio') { # PerlIO::scalar
-	print "1..0 # Skip: not perlio\n";
-	exit 0;
-    }
 }
 
 use strict;
@@ -50,21 +46,35 @@ for (@prgs) {
     # TODO: dumpvar::stringify() is controlled by a pile of package
     # dumpvar variables: $printUndef, $unctrl, $quoteHighBit, $bareStringify,
     # and so forth.  We need to test with various settings of those.
-    open my $select, ">", \my $got or die;
-    select $select;
+    my $out = tie *STDOUT, 'TieOut';
     eval $prog;
     my $ERR = $@;
-    close $select;
-    select STDOUT;
+    untie $out;
     if ($ERR) {
         ok(0, "$prog - $ERR");
     } else {
 	if ($expected =~ m:^/:) {
-	    like($got, $expected, $prog);
+	    like($$out, $expected, $prog);
 	} else {
-	    is($got, $expected, $prog);
+	    is($$out, $expected, $prog);
 	}
     }
+}
+
+package TieOut;
+
+sub TIEHANDLE {
+    bless( \(my $self), $_[0] );
+}
+
+sub PRINT {
+    my $self = shift;
+    $$self .= join('', @_);
+}
+
+sub read {
+    my $self = shift;
+    substr( $$self, 0, length($$self), '' );
 }
 
 __END__
