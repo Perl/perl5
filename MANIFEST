@@ -435,6 +435,7 @@ hints/unisysdynix.sh	Hints for named architecture
 hints/utekv.sh		Hints for named architecture
 hints/uts.sh		Hints for named architecture
 hints/uwin.sh		Hints for named architecture
+hints/vmesa.sh		Hints for named architecture
 hv.c			Hash value code
 hv.h			Hash value header
 installhtml		Perl script to install html files for pods
@@ -1178,6 +1179,9 @@ utils/perlcc.PL		Front-end for compiler
 utils/perldoc.PL	A simple tool to find & display perl's documentation
 utils/pl2pm.PL		A pl to pm translator
 utils/splain.PL		Stand-alone version of diagnostics.pm
+vmesa/Makefile		VM/ESA Makefile
+vmesa/vmesa.c		VM/ESA-specific C code for Perl core
+vmesa/vmesaish.h	VM/ESA-specific C header for Perl core
 vms/descrip_mms.template		Template MM[SK] description file for build
 vms/ext/DCLsym/0README.txt	ReadMe file for VMS::DCLsym
 vms/ext/DCLsym/DCLsym.pm	Perl access to CLI symbols
