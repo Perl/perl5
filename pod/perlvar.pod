@@ -472,10 +472,8 @@ This array holds the offsets of the beginnings of the last
 successful submatches in the currently active dynamic scope.
 C<$-[0]> is the offset into the string of the beginning of the
 entire match.  The I<n>th element of this array holds the offset
-of the I<n>th submatch, so C<$+[1]> is the offset where $1
-begins, C<$+[2]> the offset where $2 begins, and so on.
-You can use C<$#-> to determine how many subgroups were in the
-last successful match.  Compare with the C<@+> variable.
+of the I<n>th submatch, so C<$-[1]> is the offset where $1
+begins, C<$-[2]> the offset where $2 begins, and so on.
 
 After a match against some variable $var:
 
