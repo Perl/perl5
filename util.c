@@ -2013,6 +2013,9 @@ PerlIO *ptr;
 #ifdef VMS
     int saved_vaxc_errno;
 #endif
+#ifdef WIN32
+    int saved_win32_errno;
+#endif
 
     svp = av_fetch(fdpid,PerlIO_fileno(ptr),TRUE);
     pid = (int)SvIVX(*svp);
@@ -2027,6 +2030,9 @@ PerlIO *ptr;
 	saved_errno = errno;
 #ifdef VMS
 	saved_vaxc_errno = vaxc$errno;
+#endif
+#ifdef WIN32
+	saved_win32_errno = GetLastError();
 #endif
     }
 #ifdef UTS
