@@ -263,3 +263,11 @@ gMacPerl_Perl5DB
 gMacPerl_ErrorFormat
 # added Wed, Dec 19, 2001 00:07:51
 #OpenHandle
+# Symbols added from sfio Tue, Feb 19, 2002 22:49:06
+_stdprintf
+_stdscanf
+sfsscanf
+sfscanf
+printf
+scanf
+fscanf
