@@ -1,4 +1,4 @@
-/* $Header: walk.c,v 3.0.1.1 89/11/11 05:09:33 lwall Locked $
+/* $Header: walk.c,v 3.0.1.2 89/11/17 15:53:00 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	walk.c,v $
+ * Revision 3.0.1.2  89/11/17  15:53:00  lwall
+ * patch5: on Pyramids, index(s, '}' + 128) doesn't find meta-}
+ * 
  * Revision 3.0.1.1  89/11/11  05:09:33  lwall
  * patch2: in a2p, awk script with no line actions still needs main loop
  * 
@@ -1419,10 +1422,12 @@ sub Pick {\n\
 	if (!s)
 	    fatal("Illegal for loop: %s",d);
 	*s++ = '\0';
-	t = index(s,'}' + 128);
-	if (!t)
-	    t = index(s,']' + 128);
-	if (t)
+	for (t = s; i = *t; t++) {
+	    i &= 127;
+	    if (i == '}' || i == ']')
+		break;
+	}
+	if (*t)
 	    *t = '\0';
 	str = str_new(0);
 	str_set(str,d+1);

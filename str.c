@@ -1,4 +1,4 @@
-/* $Header: str.c,v 3.0.1.2 89/11/11 04:56:22 lwall Locked $
+/* $Header: str.c,v 3.0.1.3 89/11/17 15:38:23 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	str.c,v $
+ * Revision 3.0.1.3  89/11/17  15:38:23  lwall
+ * patch5: some machines typedef unchar too
+ * patch5: substitution on leading components occasionally caused <> corruption
+ * 
  * Revision 3.0.1.2  89/11/11  04:56:22  lwall
  * patch2: uchar gives Crays fits
  * 
@@ -666,6 +670,7 @@ int append;
 	bpx = bp - str->str_ptr;	/* prepare for possible relocation */
 	if (get_paragraph && oldbp)
 	    obpx = oldbp - str->str_ptr;
+	str->str_cur = bpx;
 	STR_GROW(str, bpx + cnt + 2);
 	bp = str->str_ptr + bpx;	/* reconstitute our pointer */
 	if (get_paragraph && oldbp)
@@ -843,7 +848,7 @@ STR *src;
 		    else if (*d == '[' && s[-1] == ']') { /* char class? */
 			int weight = 2;		/* let's weigh the evidence */
 			char seen[256];
-			unsigned char unchar = 0, lastunchar;
+			unsigned char un_char = 0, last_un_char;
 
 			Zero(seen,256,char);
 			*--s = '\0';
@@ -860,12 +865,12 @@ STR *src;
 				weight -= 100;
 			}
 			for (d++; d < s; d++) {
-			    lastunchar = unchar;
-			    unchar = (unsigned char)*d;
+			    last_un_char = un_char;
+			    un_char = (unsigned char)*d;
 			    switch (*d) {
 			    case '&':
 			    case '$':
-				weight -= seen[unchar] * 10;
+				weight -= seen[un_char] * 10;
 				if (isalpha(d[1]) || isdigit(d[1]) ||
 				  d[1] == '_') {
 				    d = scanreg(d,s,tokenbuf);
@@ -883,7 +888,7 @@ STR *src;
 				}
 				break;
 			    case '\\':
-				unchar = 254;
+				un_char = 254;
 				if (d[1]) {
 				    if (index("wds",d[1]))
 					weight += 100;
@@ -901,8 +906,8 @@ STR *src;
 				    weight += 100;
 				break;
 			    case '-':
-				if (lastunchar < d[1] || d[1] == '\\') {
-				    if (index("aA01! ",lastunchar))
+				if (last_un_char < d[1] || d[1] == '\\') {
+				    if (index("aA01! ",last_un_char))
 					weight += 30;
 				    if (index("zZ79~",d[1]))
 					weight += 30;
@@ -916,12 +921,12 @@ STR *src;
 					weight -= 150;
 				    d = bufptr;
 				}
-				if (unchar == lastunchar + 1)
+				if (un_char == last_un_char + 1)
 				    weight += 5;
-				weight -= seen[unchar];
+				weight -= seen[un_char];
 				break;
 			    }
-			    seen[unchar]++;
+			    seen[un_char]++;
 			}
 #ifdef DEBUGGING
 			if (debug & 512)

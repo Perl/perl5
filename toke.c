@@ -1,4 +1,4 @@
-/* $Header: toke.c,v 3.0.1.2 89/11/11 05:04:42 lwall Locked $
+/* $Header: toke.c,v 3.0.1.3 89/11/17 15:43:15 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,11 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	toke.c,v $
+ * Revision 3.0.1.3  89/11/17  15:43:15  lwall
+ * patch5: IBM PC/RT compiler can't deal with UNI() and LOP() macros
+ * patch5: } misadjusted expection of subsequent term or operator
+ * patch5: y/abcde// didn't work
+ * 
  * Revision 3.0.1.2  89/11/11  05:04:42  lwall
  * patch2: fixed a CLINE macro conflict
  * 
@@ -77,6 +82,52 @@ register char *s;
 	s++;
     return s;
 }
+
+#ifdef CRIPPLED_CC
+
+#undef UNI
+#undef LOP
+#define UNI(f) return uni(f,s)
+#define LOP(f) return lop(f,s)
+
+int
+uni(f,s)
+int f;
+char *s;
+{
+    yylval.ival = f;
+    expectterm = TRUE;
+    bufptr = s;
+    if (*s == '(')
+	return FUNC1;
+    s = skipspace(s);
+    if (*s == '(')
+	return FUNC1;
+    else
+	return UNIOP;
+}
+
+int
+lop(f,s)
+int f;
+char *s;
+{
+    if (*s != '(')
+	s = skipspace(s);
+    if (*s == '(') {
+	*s = META('(');
+	bufptr = oldbufptr;
+	return '(';
+    }
+    else {
+	yylval.ival=f;
+	expectterm = TRUE;
+	bufptr = s;
+	return LISTOP;
+    }
+}
+
+#endif /* CRIPPLED_CC */
 
 yylex()
 {
@@ -309,11 +360,7 @@ yylex()
 	TERM(tmp);
     case '}':
 	tmp = *s++;
-	for (d = s; *d == ' ' || *d == '\t'; d++) ;
-	if (*d == '\n' || *d == '#')
-	    OPERATOR(tmp);		/* block end */
-	else
-	    TERM(tmp);			/* associative array end */
+	RETURN(tmp);
     case '&':
 	s++;
 	tmp = *s++;
@@ -1547,7 +1594,7 @@ register char *s;
     yylval.arg = arg;
     if (!*r) {
 	Safefree(r);
-	r = t;
+	r = t; rlen = tlen;
     }
     for (i = 0, j = 0; i < tlen; i++,j++) {
 	if (j >= rlen)

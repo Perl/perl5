@@ -28,9 +28,13 @@ $spitshell >s2p <<!GROK!THIS!
 : In the following dollars and backticks do not need the extra backslash.
 $spitshell >>s2p <<'!NO!SUBS!'
 
-# $Header: s2p.SH,v 3.0.1.1 89/11/11 05:08:25 lwall Locked $
+# $Header: s2p.SH,v 3.0.1.2 89/11/17 15:51:27 lwall Locked $
 #
 # $Log:	s2p.SH,v $
+# Revision 3.0.1.2  89/11/17  15:51:27  lwall
+# patch5: in s2p, line labels without a subsequent statement were done wrong
+# patch5: s2p left residue in /tmp
+# 
 # Revision 3.0.1.1  89/11/11  05:08:25  lwall
 # patch2: in s2p, + within patterns needed backslashing
 # patch2: s2p was printing out some debugging info to the output file
@@ -109,7 +113,11 @@ line: while (<>) {
 	    $toplabel = $label;
 	}
 	$_ = "$label:";
-	if ($lastlinewaslabel++) {$_ .= "\t;";}
+	if ($lastlinewaslabel++) {
+	    $indent += 4;
+	    print body "\t" x ($indent / 8), ' ' x ($indent % 8), ";\n";
+	    $indent -= 4;
+	}
 	if ($indent >= 2) {
 	    $indent -= 2;
 	    $indmod = 2;
@@ -198,6 +206,11 @@ line: while (<>) {
 	redo line;
     }
 }
+if ($lastlinewaslabel++) {
+    $indent += 4;
+    print body "\t" x ($indent / 8), ' ' x ($indent % 8), ";\n";
+    $indent -= 4;
+}
 
 print body "}\n";
 if ($appendseen || $tseen || !$assumen) {
@@ -259,10 +272,10 @@ eval \"exec $bin/perl -S \$0 \$*\"
     }
 }
 
-unlink "/tmp/sperl$$", "/tmp/sperl2$$";
+unlink "/tmp/sperl$$", "/tmp/sperl2$$", "/tmp/sperl2$$.c";
 
 sub Die {
-    unlink "/tmp/sperl$$", "/tmp/sperl2$$";
+    unlink "/tmp/sperl$$", "/tmp/sperl2$$", "/tmp/sperl2$$.c";
     die $_[0];
 }
 sub make_filehandle {

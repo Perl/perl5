@@ -1,4 +1,4 @@
-/* $Header: util.c,v 3.0.1.1 89/11/11 05:06:13 lwall Locked $
+/* $Header: util.c,v 3.0.1.2 89/11/17 15:46:35 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	util.c,v $
+ * Revision 3.0.1.2  89/11/17  15:46:35  lwall
+ * patch5: BZERO separate from BCOPY now
+ * patch5: byteorder now is a hex value
+ * 
  * Revision 3.0.1.1  89/11/11  05:06:13  lwall
  * patch2: made dup2 a little better
  * 
@@ -911,8 +915,8 @@ char *f;
 }
 #endif
 
-#ifndef BCOPY
 #ifndef MEMCPY
+#ifndef BCOPY
 char *
 bcopy(from,to,len)
 register char *from;
@@ -925,7 +929,9 @@ register int len;
 	*to++ = *from++;
     return retval;
 }
+#endif
 
+#ifndef BZERO
 char *
 bzero(loc,len)
 register char *loc;
@@ -979,7 +985,7 @@ char *pat, *args;
 #endif /* VARARGS */
 
 #ifdef MYSWAP
-#if BYTEORDER != 04321
+#if BYTEORDER != 0x4321
 short
 my_swap(s)
 short s;
@@ -1000,24 +1006,24 @@ register long l;
 {
     union {
 	long result;
-	char c[4];
+	char c[sizeof(long)];
     } u;
 
-#if BYTEORDER == 01234
+#if BYTEORDER == 0x1234
     u.c[0] = (l >> 24) & 255;
     u.c[1] = (l >> 16) & 255;
     u.c[2] = (l >> 8) & 255;
     u.c[3] = l & 255;
     return u.result;
 #else
-#if ((BYTEORDER - 01111) & 0444) || !(BYTEORDER & 7)
+#if ((BYTEORDER - 0x1111) & 0x444) || !(BYTEORDER & 0xf)
     fatal("Unknown BYTEORDER\n");
 #else
     register int o;
     register int s;
 
-    for (o = BYTEORDER - 01111, s = 0; s < 32; o >>= 3, s += 8) {
-	u.c[o & 7] = (l >> s) & 255;
+    for (o = BYTEORDER - 0x1111, s = 0; s < (sizeof(long)*8); o >>= 4, s += 8) {
+	u.c[o & 0xf] = (l >> s) & 255;
     }
     return u.result;
 #endif
@@ -1030,17 +1036,17 @@ register long l;
 {
     union {
 	long l;
-	char c[4];
+	char c[sizeof(long)];
     } u;
 
-#if BYTEORDER == 01234
+#if BYTEORDER == 0x1234
     u.c[0] = (l >> 24) & 255;
     u.c[1] = (l >> 16) & 255;
     u.c[2] = (l >> 8) & 255;
     u.c[3] = l & 255;
     return u.l;
 #else
-#if ((BYTEORDER - 01111) & 0444) || !(BYTEORDER & 7)
+#if ((BYTEORDER - 0x1111) & 0x444) || !(BYTEORDER & 0xf)
     fatal("Unknown BYTEORDER\n");
 #else
     register int o;
@@ -1048,15 +1054,15 @@ register long l;
 
     u.l = l;
     l = 0;
-    for (o = BYTEORDER - 01111, s = 0; s < 32; o >>= 3, s += 8) {
-	l |= (u.c[o & 7] & 255) << s;
+    for (o = BYTEORDER - 0x1111, s = 0; s < (sizeof(long)*8); o >>= 4, s += 8) {
+	l |= (u.c[o & 0xf] & 255) << s;
     }
     return l;
 #endif
 #endif
 }
 
-#endif /* BYTEORDER != 04321 */
+#endif /* BYTEORDER != 0x4321 */
 #endif /* HTONS */
 
 FILE *

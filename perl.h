@@ -1,4 +1,4 @@
-/* $Header: perl.h,v 3.0.1.2 89/11/11 04:39:38 lwall Locked $
+/* $Header: perl.h,v 3.0.1.3 89/11/17 15:28:57 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	perl.h,v $
+ * Revision 3.0.1.3  89/11/17  15:28:57  lwall
+ * patch5: byteorder now is a hex value
+ * patch5: Configure now looks for <time.h> including <sys/time.h>
+ * 
  * Revision 3.0.1.2  89/11/11  04:39:38  lwall
  * patch2: Configure may now set -DDEBUGGING
  * patch2: netinet/in.h needed sys/types.h some places
@@ -35,7 +39,7 @@
 #   define vfork fork
 #endif
 
-#if defined(MEMCMP) && defined(mips) && BYTEORDER == 01234
+#if defined(MEMCMP) && defined(mips) && BYTEORDER == 0x1234
 #undef MEMCMP
 #endif
 
@@ -67,11 +71,14 @@ extern char *memcpy(), *memset();
 
 #if defined(TMINSYS) || defined(I_SYSTIME)
 #include <sys/time.h>
-#ifdef TIMETOO
+#ifdef I_TIMETOO
 #include <time.h>
 #endif
 #else
 #include <time.h>
+#ifdef I_SYSTIMETOO
+#include <time.h>
+#endif
 #endif
 
 #include <sys/times.h>
@@ -238,7 +245,7 @@ EXT STR *Str;
 #define STR_GROW(str,len) if ((str)->str_len < (len)) str_grow(str,len)
 
 #ifndef BYTEORDER
-#define BYTEORDER 01234
+#define BYTEORDER 0x1234
 #endif
 
 #if defined(htonl) && !defined(HTONL)
@@ -254,7 +261,7 @@ EXT STR *Str;
 #define NTOHS
 #endif
 #ifndef HTONL
-#if (BYTEORDER != 04321) && (BYTEORDER != 087654321)
+#if (BYTEORDER != 0x4321) && (BYTEORDER != 0x87654321)
 #define HTONS
 #define HTONL
 #define NTOHS
@@ -266,7 +273,7 @@ EXT STR *Str;
 #define ntohl my_ntohl
 #endif
 #else
-#if (BYTEORDER == 04321) || (BYTEORDER == 087654321)
+#if (BYTEORDER == 0x4321) || (BYTEORDER == 0x87654321)
 #undef HTONS
 #undef HTONL
 #undef NTOHS

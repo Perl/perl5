@@ -1,7 +1,10 @@
 .rn '' }`
-''' $Header: perl.man.1,v 3.0.1.1 89/11/11 04:41:22 lwall Locked $
+''' $Header: perl.man.1,v 3.0.1.2 89/11/17 15:30:03 lwall Locked $
 ''' 
 ''' $Log:	perl.man.1,v $
+''' Revision 3.0.1.2  89/11/17  15:30:03  lwall
+''' patch5: fixed some manual typos and indent problems
+''' 
 ''' Revision 3.0.1.1  89/11/11  04:41:22  lwall
 ''' patch2: explained about sh and ${1+"$@"}
 ''' patch2: documented that space must separate word and '' string
@@ -413,7 +416,7 @@ scalar variables and values are interpreted as strings or numbers
 as appropriate to the context.
 A scalar is interpreted as TRUE in the boolean sense if it is not the null
 string or 0.
-Booleans returned by operators are 1 for true and \'0\' or \'\' (the null
+Booleans returned by operators are 1 for true and 0 or \'\' (the null
 string) for false.
 .PP
 There are actually two varieties of null string: defined and undefined.
@@ -831,7 +834,7 @@ The only things that need to be declared in
 .I perl
 are report formats and subroutines.
 See the sections below for more information on those declarations.
-All uninitialized objects user-created objects are assumed to
+All uninitialized user-created objects are assumed to
 start with a null or 0 value until they
 are defined by some explicit operation such as assignment.
 The sequence of commands is executed just once, unlike in
@@ -1031,9 +1034,9 @@ In addition to the above, you could write
 
 .ne 6
 	foo: {
-		$abc = 1, last foo	if /^abc/;
-		$def = 1, last foo	if /^def/;
-		$xyz = 1, last foo	if /^xyz/;
+		$abc = 1, last foo  if /^abc/;
+		$def = 1, last foo  if /^def/;
+		$xyz = 1, last foo  if /^xyz/;
 		$nothing = 1;
 	}
 

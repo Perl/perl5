@@ -1,4 +1,4 @@
-char rcsid[] = "$Header: perly.c,v 3.0.1.1 89/11/11 04:50:04 lwall Locked $\nPatch level: ###\n";
+char rcsid[] = "$Header: perly.c,v 3.0.1.2 89/11/17 15:34:42 lwall Locked $\nPatch level: ###\n";
 /*
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@ char rcsid[] = "$Header: perly.c,v 3.0.1.1 89/11/11 04:50:04 lwall Locked $\nPat
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	perly.c,v $
+ * Revision 3.0.1.2  89/11/17  15:34:42  lwall
+ * patch5: fixed possible confusion about current effective gid
+ * 
  * Revision 3.0.1.1  89/11/11  04:50:04  lwall
  * patch2: moved yydebug to where its type didn't matter
  * 
@@ -426,7 +429,7 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 	    fatal("Can't do setuid\n");
 	}
 
-	if (statbuf.st_mode & S_ISGID && statbuf.st_gid != getegid())
+	if (statbuf.st_mode & S_ISGID && statbuf.st_gid != egid)
 #ifdef SETEGID
 	    (void)setegid(statbuf.st_gid);
 #else
@@ -458,7 +461,10 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 	    setuid((UIDTYPE)uid);
 #endif
 #endif
+	uid = (int)getuid();
 	euid = (int)geteuid();
+	gid = (int)getgid();
+	egid = (int)getegid();
 	if (!cando(S_IEXEC,TRUE,&statbuf))
 	    fatal("Permission denied\n");	/* they can't do this */
     }

@@ -1,7 +1,11 @@
 ''' Beginning of part 3
-''' $Header: perl.man.3,v 3.0.1.1 89/11/11 04:45:06 lwall Locked $
+''' $Header: perl.man.3,v 3.0.1.2 89/11/17 15:31:05 lwall Locked $
 '''
 ''' $Log:	perl.man.3,v $
+''' Revision 3.0.1.2  89/11/17  15:31:05  lwall
+''' patch5: fixed some manual typos and indent problems
+''' patch5: added warning about print making an array context
+''' 
 ''' Revision 3.0.1.1  89/11/11  04:45:06  lwall
 ''' patch2: made some line breaks depend on troff vs. nroff
 ''' 
@@ -288,6 +292,9 @@ If LIST is also omitted, prints $_ to
 To set the default output channel to something other than
 .I STDOUT
 use the select operation.
+Note that, because print takes a LIST, anything in the LIST is evaluated
+in an array context, and any subroutine that you call will have one or more
+of its expressions evaluated in an array context.
 .Ip "printf(FILEHANDLE LIST)" 8 10
 .Ip "printf(LIST)" 8
 .Ip "printf FILEHANDLE LIST" 8
@@ -699,7 +706,7 @@ For example:
 
 .fi
 produces the output \*(L'h:i:t:h:e:r:e\*(R'.
-.P
+.Sp
 The NUM parameter can be used to partially split a line
 .nf
 

@@ -1,7 +1,10 @@
 ''' Beginning of part 2
-''' $Header: perl.man.2,v 3.0.1.1 89/11/11 04:43:10 lwall Locked $
+''' $Header: perl.man.2,v 3.0.1.2 89/11/17 15:30:16 lwall Locked $
 '''
 ''' $Log:	perl.man.2,v $
+''' Revision 3.0.1.2  89/11/17  15:30:16  lwall
+''' patch5: fixed some manual typos and indent problems
+''' 
 ''' Revision 3.0.1.1  89/11/11  04:43:10  lwall
 ''' patch2: made some line breaks depend on troff vs. nroff
 ''' patch2: example of unshift had args backwards
@@ -140,7 +143,7 @@ Here's an example of looking up non-numeric uids:
 		$uid{$login} = $uid;
 		$gid{$login} = $gid;
 	}
-	@ary = <$pattern>;	# get filenames
+	@ary = <${pattern}>;	# get filenames
 	if ($uid{$user} eq \'\') {
 		die "$user not in passwd file";
 	}
