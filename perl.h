@@ -1789,7 +1789,11 @@ typedef struct clone_params CLONE_PARAMS;
 #endif
 
 #if defined(__VOS__)
-#   include "./vos/vosish.h"
+#   ifdef __GNUC__
+#     include "./vos/vosish.h"
+#   else
+#     include "vos/vosish.h"
+#   endif
 #   define ISHISH "vos"
 #endif
 
