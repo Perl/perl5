@@ -1839,6 +1839,8 @@ PP(pp_substr)
 	else
 	    curlen = utfcurlen;
     }
+    else
+	utfcurlen = 0;
 
     if (pos >= arybase) {
 	pos -= arybase;
