@@ -65,7 +65,7 @@ cc=${cc:-cc}
 	# reset
 	_DEC_cc_style=
 case "`$cc -v 2>&1 | grep cc`" in
-*gcc*)	_gcc_version=`$cc -v 2>&1 | grep "gcc version" | sed 's%^gcc version \([0-9]*\)\.\([0-9]*\) .*%\1 \2%'`
+*gcc*)	_gcc_version=`$cc --version 2>&1 | tr . ' '`
 	set $_gcc_version
 	if test "$1" -lt 2 -o \( "$1" -eq 2 -a "$2" -lt 95 \); then
 	    cat >&4 <<EOF
