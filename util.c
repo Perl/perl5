@@ -14,6 +14,7 @@
 
 #include "EXTERN.h"
 #include "perl.h"
+#include "perlmem.h"
 
 #if !defined(NSIG) || defined(M_UNIX) || defined(M_XENIX)
 #include <signal.h>

@@ -423,6 +423,7 @@ hv_delete(HV *hv, char *key, U32 klen, I32 flags)
     register U32 hash;
     register HE *entry;
     register HE **oentry;
+    SV **svp;
     SV *sv;
 
     if (!hv)
@@ -432,8 +433,8 @@ hv_delete(HV *hv, char *key, U32 klen, I32 flags)
 	bool needs_store;
 	hv_magic_check (hv, &needs_copy, &needs_store);
 
-	if (needs_copy) {
-	    sv = *hv_fetch(hv, key, klen, TRUE);
+	if (needs_copy && (svp = hv_fetch(hv, key, klen, TRUE))) {
+	    sv = *svp;
 	    mg_clear(sv);
 	    if (!needs_store) {
 		if (mg_find(sv, 'p')) {
@@ -501,8 +502,7 @@ hv_delete_ent(HV *hv, SV *keysv, I32 flags, U32 hash)
 	bool needs_store;
 	hv_magic_check (hv, &needs_copy, &needs_store);
 
-	if (needs_copy) {
-	    entry = hv_fetch_ent(hv, keysv, TRUE, hash);
+	if (needs_copy && (entry = hv_fetch_ent(hv, keysv, TRUE, hash))) {
 	    sv = HeVAL(entry);
 	    mg_clear(sv);
 	    if (!needs_store) {

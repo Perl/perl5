@@ -436,7 +436,7 @@ void
 av_unshift(register AV *av, register I32 num)
 {
     register I32 i;
-    register SV **sstr,**dstr;
+    register SV **ary;
     MAGIC* mg;
 
     if (!av || num <= 0)
@@ -471,22 +471,15 @@ av_unshift(register AV *av, register I32 num)
 	AvFILLp(av) += i;
 	SvPVX(av) = (char*)(AvARRAY(av) - i);
     }
-    if (num) {
-	av_extend(av,AvFILLp(av)+num);
+    if (num) {     
+	i = AvFILLp(av);
+	av_extend(av, i + num);
 	AvFILLp(av) += num;
-	dstr = AvARRAY(av) + AvFILLp(av);
-	sstr = dstr - num;
-#ifdef BUGGY_MSC5
- # pragma loop_opt(off)	/* don't loop-optimize the following code */
-#endif /* BUGGY_MSC5 */
-	for (i = AvFILLp(av) - num; i >= 0; --i) {
-	    *dstr-- = *sstr--;
-#ifdef BUGGY_MSC5
- # pragma loop_opt()	/* loop-optimization back to command-line setting */
-#endif /* BUGGY_MSC5 */
-	}
-	while (num)
-	    AvARRAY(av)[--num] = &sv_undef;
+	ary = AvARRAY(av);
+	Move(ary, ary + num, i + 1, SV*);
+	do {
+	    ary[--num] = &sv_undef;
+	} while (num);
     }
 }
 
