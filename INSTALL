@@ -806,9 +806,10 @@ in the hints/ directory.  If one of them matches your system, Configure
 will offer to use that hint file.
 
 Several of the hint files contain additional important information.
-If you have any problems, it is a good idea to read the relevant hint
-file for further information.  See hints/solaris_2.sh for an
-extensive example.
+If you have any problems, it is a good idea to read the relevant hint file
+for further information.  See hints/solaris_2.sh for an extensive example.
+More information about writing good hints is in the hints/README.hints
+file.
 
 =item *** WHOA THERE!!! ***
 
@@ -893,9 +894,11 @@ toke.c and put the command optimize='-g' before the ;; .  You
 can also edit cflags directly, but beware that your changes will be
 lost the next time you run Configure.
 
-To change the C flags for all the files, edit config.sh
-and change either $ccflags or $optimize,
-and then re-run
+To explore various ways of changing ccflags from within a hint file,
+see the file hints/README.hints.
+
+To change the C flags for all the files, edit config.sh and change either
+$ccflags or $optimize, and then re-run
 
 	sh Configure -S
 	make depend
@@ -1516,7 +1519,7 @@ Please include the output of the ./myconfig shell script that comes with
 the distribution.  Alternatively, you can use the perlbug program that
 comes with the perl distribution, but you need to have perl compiled
 before you can use it.  (If you have not installed it yet, you need to
-run C<./perlbug -Ilib> instead of a plain C<perlbug>.)
+run C<./perl -Ilib utils/perlbug> instead of a plain C<perlbug>.)
 
 You might also find helpful information in the Porting directory of the
 perl distribution.
@@ -1550,9 +1553,18 @@ Original author:  Andy Dougherty doughera@lafayette.edu , borrowing very
 heavily from the original README by Larry Wall, with lots of helpful
 feedback and additions from the perl5-porters@perl.org folks.
 
-If you have problems or questions, please see L<"Reporting Problems">
-above.
+If you have problems, corrections, or questions, please see
+L<"Reporting Problems"> above.
+
+=head1 REDISTRIBUTION
+
+This document is part of the Perl package and may be distributed under
+the same terms as perl itself.
+
+If you are distributing a modified version of perl (perhaps as part of
+a larger package) please do modify these installation instructions and
+the contact information to match your distribution.
 
 =head1 LAST MODIFIED
 
-$Id: INSTALL,v 1.38 1998/06/30 16:59:52 doughera Released $
+$Id: INSTALL,v 1.39 1998/07/02 15:41:45 doughera Released $
