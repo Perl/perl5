@@ -47,7 +47,7 @@
  *	where library files may be held under a private library, for
  *	instance.
  */
-#define ARCHNAME "MSWin32-x86-thread"		/**/
+#define ARCHNAME "MSWin32-x86"		/**/
 
 /* BIN:
  *	This symbol holds the path of the bin directory where the package will
@@ -311,35 +311,80 @@
  */
 /*#define HAS_GETHOSTENT		/**/
 
-/* HAS_GETHBADD:
+/* HAS_GETHOSTBYADDR:
  *	This symbol, if defined, indicates that the gethostbyaddr routine is
- *	available to lookup host names by their IP addresses.
+ *	available to lookup hosts by their IP addresses.
  */
-/*#define HAS_GETHBADD		/**/
+#define HAS_GETHOSTBYADDR		/**/
 
-/* Gethbadd_addr_t:
+/* Netdb_host_t:
  *	This symbol holds the type used for the 1st argument
  *	to gethostbyaddr().
  */
-#define Gethbadd_addr_t		char *
+#define Netdb_host_t		char *
 
-/* Gethbadd_alen_t:
+/* Netdb_hlen_t:
  *	This symbol holds the type used for the 2nd argument
  *	to gethostbyaddr().
  */
-#define Gethbadd_alen_t		int
+#define Netdb_hlen_t		int
 
-/* HAS_GETNBADD:
+/* HAS_GETHOSTBYNAME:
+ *	This symbol, if defined, indicates that the gethostbyname routine is
+ *	available to lookup hosts by their DNS names.
+ */
+#define HAS_GETHOSTBYNAME		/**/
+
+/* Netdb_name_t:
+ *	This symbol holds the type used for the 1st argument
+ *	to gethostbyname(), the 1st argument to getnetbyname(),
+ *	the 1st argument to getprotobyname(), the 1st argument to
+ *	getservbyname(), the 2nd argument to getservbyname(),
+ *	and the 2nd argument to getservbyport().
+ */
+#define Netdb_name_t		char *
+
+/* HAS_GETNETBYADDR:
  *	This symbol, if defined, indicates that the getnetbyaddr routine is
  *	available to lookup networks by their IP addresses.
  */
-/*#define HAS_GETNBADD		/**/
+/*#define HAS_GETNETBYADDR		/**/
 
-/* Gethbadd_net_t:
+/* Netdb_net_t:
  *	This symbol holds the type used for the 1st argument
  *	to getnetbyaddr().
  */
-#define Getnbadd_net_t		long
+#define Netdb_net_t		long
+
+/* HAS_GETNETBYNAME:
+ *	This symbol, if defined, indicates that the getnetbyname routine is
+ *	available to lookup networks by their names.
+ */
+/*#define HAS_GETNETBYNAME		/**/
+
+/* HAS_GETPROTOBYNAME:
+ *	This symbol, if defined, indicates that the getprotobyname routine is
+ *	available to lookup protocols by their names.
+ */
+#define HAS_GETPROTOBYNAME		/**/
+
+/* HAS_GETPROTOBYNUMBER:
+ *	This symbol, if defined, indicates that the getprotobynumber routine is
+ *	available to lookup protocols by their numbers.
+ */
+#define HAS_GETPROTOBYNUMBER		/**/
+
+/* HAS_GETSERVBYNAME:
+ *	This symbol, if defined, indicates that the getservbyname routine is
+ *	available to lookup services by their names.
+ */
+#define HAS_GETSERVBYNAME		/**/
+
+/* HAS_GETSERVBYPORT:
+ *	This symbol, if defined, indicates that the getservbyport routine is
+ *	available to lookup services by their ports.
+ */
+#define HAS_GETSERVBYPORT		/**/
 
 /* HAS_UNAME:
  *	This symbol, if defined, indicates that the C program may use the
@@ -548,12 +593,24 @@
  */
 /*#define HAS_POLL		/**/
 
+/* HAS_PTHREAD_YIELD:
+ *	This symbol, if defined, indicates that the pthread_yield routine is
+ *	available to yield the execution of the current thread.
+ */
+#undef HAS_PTHREAD_YIELD
+
 /* HAS_READDIR:
  *	This symbol, if defined, indicates that the readdir routine is
  *	available to read directory entries. You may have to include
  *	<dirent.h>. See I_DIRENT.
  */
 #define HAS_READDIR		/**/
+
+/* HAS_SCHED_YIELD:
+ *	This symbol, if defined, indicates that the sched_yield
+ *	routine is available to yield the execution of the current thread.
+ */
+#undef HAS_SCHED_YIELD
 
 /* HAS_SEEKDIR:
  *	This symbol, if defined, indicates that the seekdir routine is
@@ -1466,7 +1523,7 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define ARCHLIB "c:\\perl\\lib\\MSWin32-x86-thread"		/**/
+#define ARCHLIB "c:\\perl\\lib\\MSWin32-x86"		/**/
 #define ARCHLIB_EXP (win32_perllib_path(ARCHNAME,NULL))	/**/
 
 /* BINCOMPAT3:
@@ -1605,6 +1662,12 @@
  *	be used.
  */
 /*#define	USE_SFIO		/**/
+
+/* PTHREADS_CREATED_JOINABLE:
+ *	This symbol, if defined, indicates that pthreads are created
+ *	in the joinable (aka undetached) state.
+ */
+/*#define	PTHREADS_CREATED_JOINABLE		/**/
 
 /* Sigjmp_buf:
  *	This is the buffer type to be used with Sigsetjmp and Siglongjmp.
@@ -1769,7 +1832,7 @@
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITEARCH "c:\\perl\\lib\\site"		/**/
+#define SITEARCH "c:\\perl\\lib\\site\\MSWin32-x86"		/**/
 #define SITEARCH_EXP (win32_perllib_path("site",ARCHNAME,NULL))	/**/
 
 /* SITELIB:
@@ -1829,6 +1892,3 @@
 
 #endif
 #include <win32.h>
-#ifndef DEBUGGING
-#define DEBUGGING
-#endif

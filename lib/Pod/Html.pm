@@ -770,13 +770,15 @@ sub scan_headings {
 	    chomp($title);
 	    $$sections{htmlify(0,$title)} = 1;
 
-	    if ($which_head > $listdepth) {
-		$index .= "\n" . ("\t" x $listdepth) . "<UL>\n";
-	    } elsif ($which_head < $listdepth) {
-		$listdepth--;
-		$index .= "\n" . ("\t" x $listdepth) . "</UL>\n";
+	    while ($which_head != $listdepth) {
+		if ($which_head > $listdepth) {
+		    $index .= "\n" . ("\t" x $listdepth) . "<UL>\n";
+		    $listdepth++;
+		} elsif ($which_head < $listdepth) {
+		    $listdepth--;
+		    $index .= "\n" . ("\t" x $listdepth) . "</UL>\n";
+		}
 	    }
-	    $listdepth = $which_head;
 
 	    $index .= "\n" . ("\t" x $listdepth) . "<LI>" .
 	              "<A HREF=\"#" . htmlify(0,$title) . "\">" .
@@ -1116,7 +1118,7 @@ sub process_text {
 	# parse through the string, stopping each time we find a
 	# pod-escape.  once the string has been throughly processed
 	# we can output it.
-	while ($rest) {
+	while (length $rest) {
 	    # check to see if there are any possible pod directives in
 	    # the remaining part of the text.
 	    if ($rest =~ m/[BCEIFLSZ]</) {

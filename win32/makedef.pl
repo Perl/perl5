@@ -79,12 +79,6 @@ Perl_chsize
 Perl_ck_aelem
 Perl_cryptseen
 Perl_cx_dump
-Perl_deb
-Perl_deb_growlevel
-Perl_debop
-Perl_debprofdump
-Perl_debstack
-Perl_debstackptrs
 Perl_do_ipcctl
 Perl_do_ipcget
 Perl_do_msgrcv
@@ -164,7 +158,6 @@ Perl_timesbuf
 Perl_too_few_arguments
 Perl_too_many_arguments
 Perl_unlnk
-Perl_wait4pid
 Perl_watch
 Perl_yyname
 Perl_yyrule
@@ -275,6 +268,12 @@ if ($define{'PERL_GLOBAL_STRUCT'})
 unless ($define{'DEBUGGING'})
  {
   skip_symbols [qw(
+    Perl_deb
+    Perl_deb_growlevel
+    Perl_debop
+    Perl_debprofdump
+    Perl_debstack
+    Perl_debstackptrs
     Perl_runops_debug
     Perl_sv_peek
     Perl_watchaddr

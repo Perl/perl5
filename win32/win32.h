@@ -133,6 +133,9 @@ typedef long		gid_t;
 
 typedef long		uid_t;
 typedef long		gid_t;
+#define _environ	environ
+#define flushall	_flushall
+#define fcloseall	_fcloseall
 
 #endif /* __MINGW32__ */
 
@@ -161,7 +164,7 @@ extern	char *	getlogin(void);
 
 DllExport void		Perl_win32_init(int *argcp, char ***argvp);
 DllExport void		Perl_init_os_extras(void);
-DllExport void		win32_str_os_error(struct sv *s, DWORD err);
+DllExport void		win32_str_os_error(void *sv, DWORD err);
 
 #ifndef USE_SOCKETS_AS_HANDLES
 extern FILE *		my_fdopen(int, char *);

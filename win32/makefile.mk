@@ -44,7 +44,7 @@ CCTYPE		*= BORLAND
 # set the install locations of the compiler include/libraries
 #CCHOME		*= f:\msdev\vc
 CCHOME		*= C:\bc5
-#CCHOME		*= C:\mingw32
+#CCHOME		*= D:\packages\mingw32
 CCINCDIR	*= $(CCHOME)\include
 CCLIBDIR	*= $(CCHOME)\lib
 
@@ -128,7 +128,7 @@ EXEOUT_FLAG = -e
 .ELIF "$(CCTYPE)" == "GCC"
 
 CC = gcc -pipe
-LINK32 = gcc
+LINK32 = gcc -pipe
 LIB32 = ar
 IMPLIB = dlltool
 
@@ -195,9 +195,9 @@ OPTIMIZE = -Od $(RUNTIME)d -Z7 -D_DEBUG -DDEBUGGING
 LINK_DBG = -debug -pdb:none
 .ELSE
 .IF "$(CCTYPE)" == "MSVC20"
-OPTIMIZE = -Od $(RUNTIME) -DNDEBUG
+OPTIMIZE = -O1 $(RUNTIME) -DNDEBUG
 .ELSE
-OPTIMIZE = -Od $(RUNTIME) -DNDEBUG
+OPTIMIZE = -O1 $(RUNTIME) -DNDEBUG
 .ENDIF
 LINK_DBG = -release
 .ENDIF
@@ -227,7 +227,7 @@ o *= .obj
 .SUFFIXES : .c $(o) .dll .lib .exe .a
 
 .c$(o):
-	$(CC) -c -I$(<:d) $(CFLAGS) $(OBJOUT_FLAG)$@ $<
+	$(CC) -c $(null,$(<:d) $(NULL) -I$(<:d)) $(CFLAGS) $(OBJOUT_FLAG)$@ $<
 
 .y.c:
 	$(NOOP)
@@ -552,7 +552,7 @@ $(PERLDLL): perldll.def $(CORE_OBJ) $(WIN32_OBJ) $(DLL_OBJ)
 		perldll.def\n)
 	$(IMPLIB) $*.lib $@
 .ELIF "$(CCTYPE)" == "GCC"
-	$(LINK32) -dll -o $@ -Wl,--base-file -Wl,perl.base $(LINK_FLAGS) \
+	$(LINK32) -mdll -o $@ -Wl,--base-file -Wl,perl.base $(LINK_FLAGS) \
 	    $(mktmp $(LKPRE) $(CORE_OBJ:s,\,\\) $(WIN32_OBJ:s,\,\\) \
 	        $(DLL_OBJ:s,\,\\) $(LIBFILES) $(LKPOST))
 	dlltool --output-lib $(PERLIMPLIB) \
@@ -560,7 +560,7 @@ $(PERLDLL): perldll.def $(CORE_OBJ) $(WIN32_OBJ) $(DLL_OBJ)
                 --def perldll.def \
                 --base-file perl.base \
                 --output-exp perl.exp
-	$(LINK32) -dll -o $@ $(LINK_FLAGS) \
+	$(LINK32) -mdll -o $@ $(LINK_FLAGS) \
 	    $(mktmp $(LKPRE) $(CORE_OBJ:s,\,\\) $(WIN32_OBJ:s,\,\\) \
 	        $(DLL_OBJ:s,\,\\) $(LIBFILES) perl.exp $(LKPOST))
 .ELSE
