@@ -89,7 +89,7 @@ begin with C<perl> be referenced with a C<Perl_> prefix.  The bare function
 names without the C<Perl_> prefix are supported with macros, but this
 support may cease in a future release.
 
-See L<perlguts/"API LISTING">.
+See L<perlapi>.
 
 =item *
 
