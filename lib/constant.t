@@ -14,7 +14,7 @@ END { print STDERR @warnings }
 
 
 use strict;
-use Test::More tests => 80;
+use Test::More tests => 81;
 my $TB = Test::More->builder;
 
 BEGIN { use_ok('constant'); }
@@ -243,3 +243,12 @@ is PHFAM->[3], AGES->{FAMILY->[2]};
 is @{+PHFAM}, SPIT->(THREE+1);
 is THREE**3, SPIT->(@{+FAMILY}**3);
 is AGES->{FAMILY->[THREE-1]}, PHFAM->[THREE];
+
+# Allow name of digits/underscores only if it begins with underscore
+{
+    use warnings FATAL => 'constant';
+    eval q{
+        use constant _1_2_3 => 'allowed';
+    };
+    ok( $@ eq '' );
+}
