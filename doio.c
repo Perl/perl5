@@ -1429,10 +1429,12 @@ Perl_do_aexec5(pTHX_ SV *really, register SV **mark, register SV **sp,
 	if ((!really && *PL_Argv[0] != '/') ||
 	    (really && *tmps != '/'))		/* will execvp use PATH? */
 	    TAINT_ENV();		/* testing IFS here is overkill, probably */
+	PERL_FPU_PRE_EXEC
 	if (really && *tmps)
 	    PerlProc_execvp(tmps,EXEC_ARGV_CAST(PL_Argv));
 	else
 	    PerlProc_execvp(PL_Argv[0],EXEC_ARGV_CAST(PL_Argv));
+	PERL_FPU_POST_EXEC
 	if (ckWARN(WARN_EXEC))
 	    Perl_warner(aTHX_ packWARN(WARN_EXEC), "Can't exec \"%s\": %s",
 		(really ? tmps : PL_Argv[0]), Strerror(errno));
@@ -1502,7 +1504,9 @@ Perl_do_exec3(pTHX_ char *cmd, int fd, int do_report)
 		  *--s = '\0';
 	      if (s[-1] == '\'') {
 		  *--s = '\0';
+		  PERL_FPU_PRE_EXEC
 		  PerlProc_execl(PL_cshname,"csh", flags, ncmd, (char*)0);
+		  PERL_FPU_POST_EXEC
 		  *s = '\'';
 		  return FALSE;
 	      }
@@ -1545,7 +1549,9 @@ Perl_do_exec3(pTHX_ char *cmd, int fd, int do_report)
 		}
 	    }
 	  doshell:
+	    PERL_FPU_PRE_EXEC
 	    PerlProc_execl(PL_sh_path, "sh", "-c", cmd, (char*)0);
+	    PERL_FPU_POST_EXEC
 	    return FALSE;
 	}
     }
@@ -1563,7 +1569,9 @@ Perl_do_exec3(pTHX_ char *cmd, int fd, int do_report)
     }
     *a = Nullch;
     if (PL_Argv[0]) {
+	PERL_FPU_PRE_EXEC
 	PerlProc_execvp(PL_Argv[0],PL_Argv);
+	PERL_FPU_POST_EXEC
 	if (errno == ENOEXEC) {		/* for system V NIH syndrome */
 	    do_execfree();
 	    goto doshell;

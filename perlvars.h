@@ -55,3 +55,7 @@ PERLVAR(Gdollarzero_mutex, perl_mutex)	/* Modifying $0 */
 /* This is constant on most architectures, a global on OS/2 */
 PERLVARI(Gsh_path,	char *,	SH_PATH)/* full path of shell */
 
+/* If Perl has to ignore SIGPFE, this is its saved state.
+ * See perl.h macros PERL_FPU_INIT and PERL_FPU_{PRE,POST}_EXEC. */
+PERLVAR(Gsigfpe_saved,	Sighandler_t)
+
