@@ -1640,8 +1640,12 @@ PP(pp_enteriter)
     SAVETMPS;
 
 #ifdef USE_THREADS
-    if (PL_op->op_flags & OPf_SPECIAL)
-	svp = save_threadsv(PL_op->op_targ);	/* per-thread variable */
+    if (PL_op->op_flags & OPf_SPECIAL) {
+	dTHR;
+	svp = &THREADSV(PL_op->op_targ);	/* per-thread variable */
+	SAVEGENERICSV(*svp);
+	*svp = NEWSV(0,0);
+    }
     else
 #endif /* USE_THREADS */
     if (PL_op->op_targ) {
@@ -1649,9 +1653,9 @@ PP(pp_enteriter)
 	SAVESPTR(*svp);
     }
     else {
-	GV *gv = (GV*)POPs;
-	(void)save_scalar(gv);
-	svp = &GvSV(gv);			/* symbol table variable */
+	svp = &GvSV((GV*)POPs);			/* symbol table variable */
+	SAVEGENERICSV(*svp);
+	*svp = NEWSV(0,0);
     }
 
     ENTER;
