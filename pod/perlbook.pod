@@ -11,27 +11,23 @@ web-connected, you can even mosey on over to http://www.ora.com/ for
 an online order form.
 
 I<Programming Perl, Second Edition> is a reference work that covers
-nearly all of Perl, while I<Learning Perl> is a tutorial that covers
-the most frequently used subset of the language.  You might also check
-out the very handy, inexpensive, and compact I<Perl 5 Desktop
-Reference>, especially when the thought of lugging the 676-page Camel
-around doesn't make much sense.  I<Mastering Regular Expressions>, by
-Jeffrey Friedl, is a reference work that covers the art and implementation 
-of regular expressions in various languages including Perl.
+nearly all of Perl, while I<Learning Perl, Second Edition> is a
+tutorial that covers the most frequently used subset of the language.
+You might also check out the very handy, inexpensive, and compact
+I<Perl 5 Desktop Reference>, especially when the thought of lugging
+the 676-page Camel around doesn't make much sense.  I<Mastering
+Regular Expressions>, by Jeffrey Friedl, is a reference work that
+covers the art and implementation of regular expressions in various
+languages including Perl.
 
     Programming Perl, Second Edition (the Camel Book):
 	ISBN 1-56592-149-6	(English)
 
-    Learning Perl (the Llama Book):
-	ISBN 1-56592-042-2      (English)
-	ISBN 4-89502-678-1      (Japanese)
-	ISBN 2-84177-005-2      (French)
-	ISBN 3-930673-08-8      (German)
+    Learning Perl, Second Edition (the Llama Book):
+	ISBN 1-56592-284-0      (English)
 
     Perl 5 Desktop Reference (the reference card):
 	ISBN 1-56592-187-9	(brief English)
 
     Mastering Regular Expressions (the Hip Owl Book):
 	ISBN 1-56592-257-3      (English)
-
-A new edition of Learning Perl is due mid/late 1997.
