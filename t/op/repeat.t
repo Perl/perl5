@@ -6,15 +6,21 @@ BEGIN {
 }
 
 require './test.pl';
-plan(tests => 33);
+plan(tests => 45);
+
+use Config;
 
 # compile time
 
 is('-' x 5, '-----',    'compile time x');
+is('-' x 3.1, '---',    'compile time 3.1');
+is('-' x 3.9, '---',    'compile time 3.9');
 is('-' x 1, '-',        '  x 1');
 is('-' x 0, '',         '  x 0');
 is('-' x -1, '',        '  x -1');
 is('-' x undef, '',     '  x undef');
+is('-' x "foo", '',     '  x "foo"');
+is('-' x "3rd", '---',  '  x "3rd"');
 
 is('ab' x 3, 'ababab',  '  more than one char');
 
@@ -22,10 +28,14 @@ is('ab' x 3, 'ababab',  '  more than one char');
 
 $a = '-';
 is($a x 5, '-----',     'run time x');
+is($a x 3.1, '---',     '  x 3.1');
+is($a x 3.9, '---',     '  x 3.9');
 is($a x 1, '-',         '  x 1');
 is($a x 0, '',          '  x 0');
 is($a x -3, '',         '  x -3');
 is($a x undef, '',      '  x undef');
+is($a x "foo", '',      '  x "foo"');
+is($a x "3rd", '---',   '  x "3rd"');
 
 $a = 'ab';
 is($a x 3, 'ababab',    '  more than one char');
@@ -142,5 +152,39 @@ is(77, scalar ((1,7)x2),    'stack truncation');
 	$y .= chop;
     }
     is($y, 'abcdabcd');
+}
+
+# Test the "malloc wrappage" guards introduced in Perl 5.8.4.
+
+# Note that the guards do not catch everything: for example
+# "0"x0x7f...f is fine because it will attempt to allocate
+# "only" 0x7f...f+1 bytes: no wrappage there.
+
+if ($Config{ptrsize} == 4) {
+    eval '@a=(0)x0x7fffffff';
+    like($@, qr/Out of memory during list extend/,   "list extend");
+
+    eval '@a=(0)x0x80000000';
+    like($@, qr/Out of memory during list extend/,   "list extend");
+
+    eval '$a="012"x0x7fffffff';
+    like($@, qr/Out of memory during string extend/, "string extend");
+
+    eval '$a="012"x0x80000000';
+    like($@, qr/Out of memory during string extend/, "string extend");
+} elsif ($Config{ptrsize} == 8) {
+    eval '@a=(0)x0x7fffffffffffffff';
+    like($@, qr/Out of memory during list extend/,   "list extend");
+
+    eval '@a=(0)x0x8000000000000000';
+    like($@, qr/Out of memory during list extend/,   "list extend");
+
+    eval '$a="012"x0x7fffffffffffffff';
+    like($@, qr/Out of memory during string extend/, "string extend");
+
+    eval '$a="012"x0x8000000000000000';
+    like($@, qr/Out of memory during string extend/, "string extend");
+} else {
+    die "\$Config{ptrsize} == $Config{ptrsize}?";
 }
 

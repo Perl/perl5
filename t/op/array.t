@@ -1,12 +1,13 @@
 #!./perl
 
-
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
 }
 
-print "1..73\n";
+print "1..84\n";
+
+use Config;
 
 #
 # @foo, @bar, and @ary are also used from tie-stdarray after tie-ing them
@@ -272,3 +273,48 @@ my $got = runperl (
 $got =~ s/\n/ /g;
 print "# $got\nnot " unless $got eq '';
 print "ok 73\n";
+
+# Test negative and funky indices.
+
+{
+    my @a = 0..4;
+    print $a[-1] == 4 ? "ok 74\n" : "not ok 74\n";
+    print $a[-2] == 3 ? "ok 75\n" : "not ok 75\n";
+    print $a[-5] == 0 ? "ok 76\n" : "not ok 76\n";
+    print defined $a[-6] ? "not ok 77\n" : "ok 77\n";
+
+    print $a[2.1]   == 2 ? "ok 78\n" : "not ok 78\n";
+    print $a[2.9]   == 2 ? "ok 79\n" : "not ok 79\n";
+    print $a[undef] == 0 ? "ok 80\n" : "not ok 80\n";
+    print $a["3rd"] == 3 ? "ok 81\n" : "not ok 81\n";
+}
+
+sub kindalike { # TODO: test.pl-ize the array.t.
+    my ($s, $r, $m, $n) = @_;
+    print $s =~ /$r/ ? "ok $n - $m\n" : "not ok $n - $m ($s)\n";
+}
+
+{
+    my @a;
+    eval '$a[-1] = 0';
+    kindalike($@, qr/Modification of non-creatable array value attempted, subscript -1/, "\$a[-1] = 0", 82);
+}
+
+# Test the "malloc wrappage" guard introduced in Perl 5.8.4.
+
+if ($Config{ptrsize} == 4) {
+    eval '$a[0x7fffffff]=0';
+    kindalike($@, qr/Out of memory during array extend/,   "array extend", 83);
+
+    eval '$a[0x80000000]=0';
+    kindalike($@, qr/Out of memory during array extend/,   "array extend", 84);
+} elsif ($Config{ptrsize} == 8) {
+    eval '$a[0x7fffffffffffffff]=0';
+    kindalike($@, qr/Out of memory during array extend/,   "array extend", 83);
+
+    eval '$a[0x8000000000000000]=0';
+    kindalike($@, qr/Out of memory during array extend/,   "array extend", 84);
+} else {
+    die "\$Config{ptrsize} == $Config{ptrsize}?";
+}
+

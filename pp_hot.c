@@ -2879,6 +2879,18 @@ PP(pp_aelem)
 	RETPUSHUNDEF;
     svp = av_fetch(av, elem, lval && !defer);
     if (lval) {
+#ifdef PERL_MALLOC_WRAP
+	 static const char oom_array_extend[] =
+	      "Out of memory during array extend"; /* Duplicated in av.c */
+	 if (SvUOK(elemsv)) {
+	      UV uv = SvUV(elemsv);
+	      elem = uv > IV_MAX ? IV_MAX : uv;
+	 }
+	 else if (SvNOK(elemsv))
+	      elem = (IV)SvNV(elemsv);
+	 if (elem > 0)
+	      MEM_WRAP_CHECK_1(elem,SV*,oom_array_extend);
+#endif
 	if (!svp || *svp == &PL_sv_undef) {
 	    SV* lv;
 	    if (!defer)

@@ -2643,6 +2643,11 @@ remaining memory (or virtual memory) to satisfy the request. However,
 the request was judged large enough (compile-time default is 64K), so a
 possibility to shut down by trapping this error is granted.
 
+=item Out of memory during %s extend
+
+(X) An attempt was made to extend an array, a list, or a string beyond
+the largest possible memory allocation.
+
 =item Out of memory during request for %s
 
 (X|F) The malloc() function returned 0, indicating there was
@@ -2693,11 +2698,6 @@ page.  See L<perlform>.
 =item panic: %s
 
 (P) An internal error.
-
-=item panic: array extend
-
-(P) An attempt was made to extend an array beyond the largest possible
-memory allocation.
 
 =item panic: ck_grep
 
@@ -2774,11 +2774,6 @@ scope.
 
 (P) The savestack probably got out of sync.  At least, there was an
 invalid enum on the top of it.
-
-=item panic: list extend
-
-(P) An attempt was made to extend a list beyond the largest possible
-memory allocation.
 
 =item panic: magic_killbackrefs
 
@@ -2863,11 +2858,6 @@ then discovered it wasn't a subroutine or eval context.
 =item panic: scan_num
 
 (P) scan_num() got called on something that wasn't a number.
-
-=item panic: string extend
-
-(P) An attempt was made to extend a string beyond the largest possible
-memory allocation.
 
 =item panic: sv_insert
 

@@ -100,6 +100,11 @@ Perl_av_extend(pTHX_ AV *av, I32 key)
 	    }
 	}
 	else {
+#ifdef PERL_MALLOC_WRAP
+	    static const char oom_array_extend[] =
+	      "Out of memory during array extend"; /* Duplicated in pp_hot.c */
+#endif
+
 	    if (AvALLOC(av)) {
 #if !defined(STRANGE_MALLOC) && !defined(MYMALLOC)
 		MEM_SIZE bytes;
@@ -114,7 +119,7 @@ Perl_av_extend(pTHX_ AV *av, I32 key)
 #endif 
 		newmax = key + AvMAX(av) / 5;
 	      resize:
-		MEM_WRAP_CHECK_1(newmax+1, SV*, "panic: array extend");
+		MEM_WRAP_CHECK_1(newmax+1, SV*, oom_array_extend);
 #if defined(STRANGE_MALLOC) || defined(MYMALLOC)
 		Renew(AvALLOC(av),newmax+1, SV*);
 #else
@@ -149,7 +154,7 @@ Perl_av_extend(pTHX_ AV *av, I32 key)
 	    }
 	    else {
 		newmax = key < 3 ? 3 : key;
-		MEM_WRAP_CHECK_1(newmax+1, SV*, "panic: array extend");
+		MEM_WRAP_CHECK_1(newmax+1, SV*, oom_array_extend);
 		New(2,AvALLOC(av), newmax+1, SV*);
 		ary = AvALLOC(av) + 1;
 		tmp = newmax;

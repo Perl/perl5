@@ -1391,19 +1391,46 @@ PP(pp_repeat)
 {
   dSP; dATARGET; tryAMAGICbin(repeat,opASSIGN);
   {
-    register IV count = POPi;
-    if (count < 0)
-	count = 0;
+    register IV count;
+    dPOPss;
+    if (SvGMAGICAL(sv))
+	 mg_get(sv);
+    if (SvIOKp(sv)) {
+	 if (SvUOK(sv)) {
+	      UV uv = SvUV(sv);
+	      if (uv > IV_MAX)
+		   count = IV_MAX; /* The best we can do? */
+	      else
+		   count = uv;
+	 } else {
+	      IV iv = SvIV(sv);
+	      if (iv < 0)
+		   count = 0;
+	      else
+		   count = iv;
+	 }
+    }
+    else if (SvNOKp(sv)) {
+	 NV nv = SvNV(sv);
+	 if (nv < 0.0)
+	      count = 0;
+	 else
+	      count = (IV)nv;
+    }
+    else
+	 count = SvIVx(sv);
     if (GIMME == G_ARRAY && PL_op->op_private & OPpREPEAT_DOLIST) {
 	dMARK;
 	I32 items = SP - MARK;
 	I32 max;
-	static const char list_extend[] = "panic: list extend";
+	static const char oom_list_extend[] =
+	  "Out of memory during list extend";
 
 	max = items * count;
-	MEM_WRAP_CHECK_1(max, SV*, list_extend);
+	MEM_WRAP_CHECK_1(max, SV*, oom_list_extend);
+	/* Did the max computation overflow? */
 	if (items > 0 && max > 0 && (max < items || max < count))
-	   Perl_croak(aTHX_ list_extend);
+	   Perl_croak(aTHX_ oom_list_extend);
 	MEXTEND(MARK, max);
 	if (count > 1) {
 	    while (SP > MARK) {
@@ -1448,6 +1475,8 @@ PP(pp_repeat)
 	SV *tmpstr = POPs;
 	STRLEN len;
 	bool isutf;
+	static const char oom_string_extend[] =
+	  "Out of memory during string extend";
 
 	SvSetSV(TARG, tmpstr);
 	SvPV_force(TARG, len);
@@ -1456,7 +1485,10 @@ PP(pp_repeat)
 	    if (count < 1)
 		SvCUR_set(TARG, 0);
 	    else {
-	        MEM_WRAP_CHECK_1(count, len, "panic: string extend");
+		IV max = count * len;
+		if (len > ((MEM_SIZE)~0)/count)
+		     Perl_croak(aTHX_ oom_string_extend);
+	        MEM_WRAP_CHECK_1(max, char, oom_string_extend);
 		SvGROW(TARG, (count * len) + 1);
 		repeatcpy(SvPVX(TARG) + len, SvPVX(TARG), len, count - 1);
 		SvCUR(TARG) *= count;
