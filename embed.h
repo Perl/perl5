@@ -4639,7 +4639,7 @@
 #define save_set_svflags(a,b,c)	Perl_save_set_svflags(aTHX_ a,b,c)
 #if defined(PERL_IN_HV_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
-#define hv_delete_common(a,b,c,d,e,f)	S_hv_delete_common(aTHX_ a,b,c,d,e,f)
+#define hv_delete_common(a,b,c,d,e,f,g)	S_hv_delete_common(aTHX_ a,b,c,d,e,f,g)
 #endif
 #ifdef PERL_CORE
 #define hv_exists_common(a,b,c,d,e)	S_hv_exists_common(aTHX_ a,b,c,d,e)

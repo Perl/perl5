@@ -738,9 +738,18 @@ will be returned.
 */
 
 SV *
-Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen, I32 flags)
+Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen_i32, I32 flags)
 {
-    return hv_delete_common(hv, NULL, key, klen, flags, 0);
+    STRLEN klen;
+    int k_flags = 0;
+
+    if (klen_i32 < 0) {
+	klen = -klen_i32;
+	k_flags |= HVhek_UTF8;
+    } else {
+	klen = klen_i32;
+    }
+    return hv_delete_common(hv, NULL, key, klen, k_flags, flags, 0);
 }
 
 /*
@@ -757,21 +766,19 @@ precomputed hash value, or 0 to ask for it to be computed.
 SV *
 Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
 {
-    return hv_delete_common(hv, keysv, NULL, 0, flags, hash);
+    return hv_delete_common(hv, keysv, NULL, 0, 0, flags, hash);
 }
 
 SV *
-S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, I32 klen_i32,
-		   I32 flags, U32 hash)
+S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
+		   int k_flags, I32 d_flags, U32 hash)
 {
     register XPVHV* xhv;
     register I32 i;
-    STRLEN klen;
     register HE *entry;
     register HE **oentry;
     SV *sv;
     bool is_utf8;
-    int k_flags = 0;
     const char *keysave;
     int masked_flags;
 
@@ -780,15 +787,10 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, I32 klen_i32,
 
     if (keysv) {
 	key = SvPV(keysv, klen);
+	k_flags = 0;
 	is_utf8 = (SvUTF8(keysv) != 0);
     } else {
-	if (klen_i32 < 0) {
-	    klen = -klen_i32;
-	    is_utf8 = TRUE;
-	} else {
-	    klen = klen_i32;
-	    is_utf8 = FALSE;
-	}
+	is_utf8 = ((k_flags & HVhek_UTF8) ? TRUE : FALSE);
     }
     keysave = key;
 
@@ -821,6 +823,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, I32 klen_i32,
 		keysv = sv_2mortal(newSVpvn(key,klen));
 		keysave = key = strupr(SvPVX(keysv));
 		is_utf8 = 0;
+		k_flags = 0;
 		hash = 0;
 	    }
 #endif
@@ -832,10 +835,20 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, I32 klen_i32,
 
     if (is_utf8) {
 	key = (char*)bytes_from_utf8((U8*)key, &klen, &is_utf8);
+
+	if (k_flags & HVhek_FREEKEY) {
+	    /* This shouldn't happen if our caller does what we expect,
+	       but strictly the API allows it.  */
+	    Safefree(keysave);
+	}
+
         if (is_utf8)
-            k_flags = HVhek_UTF8;
+            k_flags |= HVhek_UTF8;
+	else
+            k_flags &= ~HVhek_UTF8;
         if (key != keysave)
-            k_flags |= HVhek_FREEKEY;
+            k_flags |= HVhek_WASUTF8 | HVhek_FREEKEY;
+        HvHASKFLAGS_on((SV*)hv);
     }
 
     if (HvREHASH(hv)) {
@@ -893,7 +906,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, I32 klen_i32,
 			    );
 	}
 
-	if (flags & G_DISCARD)
+	if (d_flags & G_DISCARD)
 	    sv = Nullsv;
 	else {
 	    sv = sv_2mortal(HeVAL(entry));
