@@ -1,6 +1,6 @@
 archname='s390'
 cc='cc'
-cflags='-Xa -XTSTRINGS=1500000'
+ccflags='-Xa -XTSTRINGS=1500000'
 cccdlflags='-pic'
 d_bincompat3='undef'        
 d_csh='undef'       
