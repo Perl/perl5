@@ -39,6 +39,7 @@
 /* *These* symbols are masked to allow static link. */
 #  define Perl_pregexec my_pregexec
 #  define Perl_reginitcolors my_reginitcolors 
+#  define Perl_regclass_swash my_regclass_swash
 
 #  define PERL_NO_GET_CONTEXT
 #endif 
