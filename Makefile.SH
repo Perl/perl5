@@ -401,6 +401,7 @@ install.perl:	all installperl
 		cd utils; $(MAKE) compile; \
 		cd ../x2p; $(MAKE) compile; \
 		cd ../pod; $(MAKE) compile; \
+	else :; \
 	fi
 	$(LDLIBPTH) ./perl installperl
 
