@@ -345,7 +345,7 @@ sub compile {
 	    %check = ();
 	}
 	else {
-	    if ($opt =~ s/^no-//) {
+	    if ($opt =~ s/^no_//) {
 		$check{$opt} = 0;
 	    }
 	    else {
