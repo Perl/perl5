@@ -143,7 +143,7 @@ operators found within the lexical scope of this pragma will use the
 declared defaults.
 
 With the C<IN> subpragma you can declare the default layers
-of input sterams, and with the C<OUT> subpragma you can declare
+of input streams, and with the C<OUT> subpragma you can declare
 the default layers of output streams.  With the C<IO>  subpragma
 you can control both input and output streams simultaneously.
 
