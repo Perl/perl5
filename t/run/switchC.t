@@ -25,11 +25,18 @@ $r = runperl( switches => [ '-CO', '-w' ],
               stderr   => 1 );
 is( $r, "\xC4\x80", '-CO: no warning on UTF-8 output' );
 
-$r = runperl( switches => [ '-CI', '-w' ],
-	      prog     => 'print ord(<STDIN>)',
-              stderr   => 1,
-	      stdin    => chr(256) );
-is( $r, 256, '-CI: read in UTF-8 output' );
+SKIP: {
+    for my $l (qw(LC_ALL LC_CTYPE LANG)) {
+	skip("cannot easily test under UTF-8 locale", 1)
+	    if $ENV{$l} =~ /utf-?8/i;
+    }
+    $r = runperl( switches => [ '-CI', '-w' ],
+		  prog     => 'print ord(<STDIN>)',
+		  stderr   => 1,
+		  verbose  => 1,
+		  stdin    => "\xC4\x80" );
+    is( $r, 256, '-CI: read in UTF-8 input' );
+}
 
 $r = runperl( switches => [ '-CE', '-w' ],
 	      prog     => 'warn chr(256), qq(\n)',

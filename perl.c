@@ -1357,14 +1357,15 @@ print \"  \\@INC:\\n    @INC\\n\";");
      * PL_utf8locale is conditionally turned on by
      * locale.c:Perl_init_i18nl10n() if the environment
      * look like the user wants to use UTF-8. */
-    if (PL_unicode) { /* Requires init_predump_symbols(). */
-	 IO* io;
-	 PerlIO* fp;
-	 SV* sv;
-
+    if (PL_unicode) {
+	 /* Requires init_predump_symbols(). */
 	 if (!(PL_unicode & PERL_UNICODE_LOCALE_FLAG) || PL_utf8locale) {
+	      IO* io;
+	      PerlIO* fp;
+	      SV* sv;
+
 	      /* Turn on UTF-8-ness on STDIN, STDOUT, STDERR
-	       * and the default open discipline. */
+	       * and the default open disciplines. */
 	      if ((PL_unicode & PERL_UNICODE_STDIN_FLAG) &&
 		  PL_stdingv  && (io = GvIO(PL_stdingv)) &&
 		  (fp = IoIFP(io)))
