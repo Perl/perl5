@@ -2,8 +2,8 @@
 BEGIN { warn "Running ".__FILE__."\n" };
 BEGIN 
  {
-  require "../lib/Config.pm";
-  die "../Config.pm:$@" if $@;
+  require "Config.pm";
+  die "Config.pm:$@" if $@;
   Config::->import;
  }
 use File::Compare qw(compare);

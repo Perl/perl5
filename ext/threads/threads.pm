@@ -45,7 +45,7 @@ require DynaLoader;
 
 our @ISA = qw(Exporter DynaLoader);
 
-our %EXPORT_TAGS = ( all => [qw()]);
+our %EXPORT_TAGS = ( all => [qw(yield)]);
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
@@ -162,6 +162,9 @@ to get current thread id if you don't have your thread handy.
 
 This will tell the OS to let this thread yield CPU time to other threads.
 However this is highly depending on the underlying thread implementation.
+
+You may do C<use threads qw(yield)> then use just a bare C<yield> in your
+code.
 
 =item threads->list();
 

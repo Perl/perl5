@@ -1348,7 +1348,7 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, char *norma
 	 HE *he;
 	 SV *val;
 	
-#if defined(UNDER_CE) && defined(MIPS)
+#if defined(UNDER_CE)
 /*strange: compiler complaints that I redefine macro UVXf and points where
            it was first defined. I copied line from there without any changes.
            Nothing should change.

@@ -1286,7 +1286,6 @@ S_qsortsvu(pTHX_ SV ** array, size_t num_elts, SVCOMPARE_t compare)
  * dictated by the indirect array.
  */
 
-static SVCOMPARE_t RealCmp;
 
 static I32
 cmpindir(pTHX_ gptr a, gptr b)
@@ -1295,7 +1294,7 @@ cmpindir(pTHX_ gptr a, gptr b)
     gptr *ap = (gptr *)a;
     gptr *bp = (gptr *)b;
 
-    if ((sense = RealCmp(aTHX_ *ap, *bp)) == 0)
+    if ((sense = PL_sort_RealCmp(aTHX_ *ap, *bp)) == 0)
 	 sense = (ap > bp) ? 1 : ((ap < bp) ? -1 : 0);
     return sense;
 }
@@ -1319,8 +1318,8 @@ S_qsortsv(pTHX_ gptr *list1, size_t nmemb, SVCOMPARE_t cmp)
 	 /* Copy pointers to original array elements into indirect array */
 	 for (n = nmemb, pp = indir, q = list1; n--; ) *pp++ = q++;
 
-	 savecmp = RealCmp;	/* Save current comparison routine, if any */
-	 RealCmp = cmp;	/* Put comparison routine where cmpindir can find it */
+	 savecmp = PL_sort_RealCmp;	/* Save current comparison routine, if any */
+	 PL_sort_RealCmp = cmp;	/* Put comparison routine where cmpindir can find it */
 
 	 /* sort, with indirection */
 	 S_qsortsvu(aTHX_ (gptr *)indir, nmemb, cmpindir);
@@ -1365,7 +1364,7 @@ S_qsortsv(pTHX_ gptr *list1, size_t nmemb, SVCOMPARE_t cmp)
 	/* free iff allocated */
 	 if (indir != small) { Safefree(indir); }
 	 /* restore prevailing comparison routine */
-	 RealCmp = savecmp;
+	 PL_sort_RealCmp = savecmp;
     } else {
 	 S_qsortsvu(aTHX_ list1, nmemb, cmp);
     }

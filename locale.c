@@ -29,6 +29,8 @@
 #   include <langinfo.h>
 #endif
 
+#include "reentr.h"
+
 /*
  * Standardize the locale name from a string returned by 'setlocale'.
  *

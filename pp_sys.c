@@ -173,6 +173,8 @@ static char zero_but_true[ZBTLEN + 1] = "0 but true";
 #  define FD_CLOEXEC 1		/* NeXT needs this */
 #endif
 
+#include "reentr.h"
+
 #undef PERL_EFF_ACCESS_R_OK	/* EFFective uid/gid ACCESS R_OK */
 #undef PERL_EFF_ACCESS_W_OK
 #undef PERL_EFF_ACCESS_X_OK

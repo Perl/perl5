@@ -132,11 +132,17 @@ Wait for ever.
 
 http://archive.develooper.com/perl5-porters@perl.org/msg79618.html
 
-=head2 Better support for nonpreemptive threading systems like PTH
+=head2 Better support for nonpreemptive threading systems like GNU pth
 
-Perhaps do yield() before blocking calls, exchange calls to non blocking
-calls specific for those libraries (for example GNUpth has a pth_sleep
-which is a non pth aware version of sleep).
+To better support nonpreemptive threading systems, perhaps some of the
+blocking functions internally in Perl should do a yield() before a
+blocking call.  (Now certain threads tests ({basic,list,thread.t})
+simply do a yield() before they sleep() to give nonpreemptive thread
+implementations a chance).
+
+In some cases, like the GNU pth, which has replacement functions that
+are nonblocking (pth_select instead of select), maybe Perl should be
+using them instead when built for threading.
 
 =head2 Typed lexicals for compiler
 
@@ -413,12 +419,6 @@ This is to speed up
 
 C<qr//> already gives us a way of saving compiled regexps, but it should
 be done automatically.
-
-=head2 Re-entrant functions
-
-Add configure probes for C<_r> forms of system calls and fit them to the
-core. Unfortunately, calling conventions for these functions and not
-standardised.
 
 =head2 Cross-compilation support
 

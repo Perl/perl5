@@ -76,12 +76,17 @@ case `$cc -v 2>&1`"" in
 	    ccflags="$cc_cppflags"
 	    if [ "X$gccversion" = "X" ]; then
 		# Done too late in Configure if hinted
-		gccversion=`$cc --version`
+               gccversion=`$cc --version | sed 's/.*(GCC) *//`
 		fi
 	    case "$gccversion" in
 		[012]*) # HP-UX and gcc-2.* break UINT32_MAX :-(
 			ccflags="$ccflags -DUINT32_MAX_BROKEN"
 			;;
+               3*)     # GCC (both 32bit and 64bit) will define __STDC_EXT__
+                       # by default when using GCC 3.0 and newer versions of
+                       # the compiler.
+                       cppflags="$cc_cppflags"
+                       ;;
 		esac
 	    case "`getconf KERNEL_BITS 2>/dev/null`" in
 		*64*)
@@ -131,9 +136,9 @@ case `$cc -v 2>&1`"" in
     *)      ccisgcc=''
 	    ccversion=`which cc | xargs what | awk '/Compiler/{print $2}'`
 	    case "$ccflags" in
-	    "-Ae "*) ;;
-	    *) ccflags="-Ae $cc_cppflags -Wl,+vnocompatwarnings" ;;
-	    esac
+               "-Ae "*) ;;
+               *) ccflags="-Ae $cc_cppflags -Wl,+vnocompatwarnings" ;;
+               esac
 	    # Needed because cpp does only support -Aa (not -Ae)
 	    cpplast='-'
 	    cppminus='-'

@@ -17,6 +17,8 @@
 #include "perl.h"
 #include "keywords.h"
 
+#include "reentr.h"
+
 /* variations on pp_null */
 
 /* XXX I can't imagine anyone who doesn't have this actually _needs_
