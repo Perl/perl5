@@ -275,7 +275,7 @@ for example POSIX passes Exporter some very memory hungry data structures.
 
 =head2 Optimize away @_
 
-The old perltodo notes "Look at the "reification" code in C<av.c>"
+The old perltodo notes "Look at the "reification" code in C<av.c>".
 
 =head2 switch ops
 
@@ -297,3 +297,9 @@ be useful to have a reasonable general benchmarking suite that roughly
 represented what current perl programs do, and measurably reported whether
 tweaks to the core improve, degrade or don't really affect performance, to
 guide people attempting to optimise the guts of perl.
+
+=head2 readpipe(LIST)
+
+system() accepts a LIST syntax (and a PROGRAM LIST syntax) to avoid
+running a shell. readpipe() (the function behind qx//) could be similarly
+extended.
