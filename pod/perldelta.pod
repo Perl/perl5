@@ -376,6 +376,12 @@ $Config{byteorder} is now computed dynamically (this is more robust
 with "fat binaries" where an executable image contains binaries for
 more than one binary platform.)
 
+=item *
+
+Configure no longer included the DBM libraries (dbm, gdbm, db, ndbm)
+when building the Perl binary. The only exception to this is SunOS 4.x,
+which needs them.
+
 =back
 
 =head1 Selected Bug Fixes
