@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 1476;
+plan tests => 1477;
 
 use strict;
 use warnings;
@@ -116,6 +116,12 @@ sub list_eq ($$) {
 
     is(scalar(@y), 2);
     is($y[1], 130);
+    $x = pack('w*', 5000000000); $y = '';
+    eval {
+    use Math::BigInt;
+    $y = pack('w*', Math::BigInt::->new(5000000000));
+    };
+    is($x, $y);
 }
 
 

@@ -475,18 +475,6 @@ EOM
 esac
 EOCBU
 
-cat > UU/uselongdouble.cbu <<'EOCBU'
-# This script UU/uselongdouble.cbu will get 'called-back' by Configure 
-# after it has prompted the user for whether to use long doubles.
-case "$uselongdouble" in
-$define|true|[yY]*)
-        # -qlongdouble for cc taken out on 20010522 cause it
-        # causes more trouble than it does any good --hmb
-        d_Gconvert='sprintf((b),"%.*llg",((int)(n)),(x))'
-	;;
-esac
-EOCBU
-
 if test $usenativedlopen = 'true'
 then
     ccflags="$ccflags -DUSE_NATIVE_DLOPEN"

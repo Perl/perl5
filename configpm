@@ -420,20 +420,25 @@ $text = 0;
 $/ = '';
 
 sub process {
-  s/\A(\w*)\s+\(([\w.]+)\):\s*\n(\t?)/=item C<$1>\n\nFrom F<$2>:\n\n/m;
-  my $c = substr $1, 0, 1;
-  unless ($seen{$c}++) {
-    print CONFIG <<EOF if $text;
+  if (s/\A(\w*)\s+\(([\w.]+)\):\s*\n(\t?)/=item C<$1>\n\nFrom F<$2>:\n\n/m) {
+    my $c = substr $1, 0, 1;
+    unless ($seen{$c}++) {
+      print CONFIG <<EOF if $text;
 =back
 
 EOF
-    print CONFIG <<EOF;
+      print CONFIG <<EOF;
 =head2 $c
 
 =over 4
 
 EOF
-    $text = 1;
+     $text = 1;
+    }
+  }
+  elsif (!$text || !/\A\t/) {
+    warn "Expected a Configure variable header",
+      ($text ? " or another paragraph of description" : () );
   }
   s/n't/n\00t/g;		# leave can't, won't etc untouched
   s/^\t\s+(.*)/\n\t$1\n/gm;	# Indented lines ===> paragraphs

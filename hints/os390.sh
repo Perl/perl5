@@ -208,7 +208,7 @@ fi
 # a trivial Perl demonstration snippet is 'print 0.1'.
 # The -W 0,float(ieee) seems to be the switch breaking gcvt().
 # sprintf() seems to get things right(er).
-d_Gconvert='sprintf((b),"%.*g",(n),(x))'
+gconvert_preference=sprintf
 
 cat >config.arch<<'__CONFIG_ARCH__'
 # The '-W 0,float(ieee)' cannot be used during Configure as ldflags.

@@ -501,7 +501,7 @@ Don't forget to regenerate perly_c.diff.
     mv y.tab.c perly.c
     patch perly.c <perly_c.diff
     # manually apply any failed hunks
-    diff -c2 perly.c.orig perly.c >perly_c.diff
+    diff -c perly.c.orig perly.c >perly_c.diff
 
 One chunk of lines that often fails begins with
 

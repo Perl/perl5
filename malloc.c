@@ -3,6 +3,10 @@
  */
 
 /*
+ * "'The Chamber of Records,' said Gimli. 'I guess that is where we now stand.'"
+ */
+
+/*
   Here are some notes on configuring Perl's malloc.  (For non-perl
   usage see below.)
  

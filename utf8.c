@@ -1341,8 +1341,10 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, char *norma
 			}
 		   }
 		   else {
-			while (t < tend)
-			     d = uvchr_to_utf8(d, UNI_TO_NATIVE(*t++));
+			while (t < tend) {
+			     d = uvchr_to_utf8(d, UNI_TO_NATIVE(*t));
+			     t++;
+			}
 		   }
 		   len = d - tmpbuf;
 		   Copy(tmpbuf, ustrp, len, U8);

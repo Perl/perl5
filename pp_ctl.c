@@ -158,6 +158,7 @@ PP(pp_substcont)
     register REGEXP *rx = cx->sb_rx;
 
     rxres_restore(&cx->sb_rxres, rx);
+    PL_reg_match_utf8 = SvUTF8(cx->sb_targ) ? 1 : 0;
 
     if (cx->sb_iters++) {
 	I32 saviters = cx->sb_iters;

@@ -31,6 +31,243 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 14791] By: jhi                                   on 2002/02/20  15:24:19
+        Log: Integrate change #14778 from maintperl.
+     Branch: perl
+	   ! t/lib/strict/subs
+	  !> op.c
+____________________________________________________________________________
+[ 14790] By: jhi                                   on 2002/02/20  15:08:06
+        Log: Subject: Re: [ID 20020220.001] pack w with objects
+             From: Ulrich Pfeifer <upf@de.uu.net>
+             Date: 20 Feb 2002 11:21:15 +0100
+             Message-ID: <p5g03wcv38.fsf@de.uu.net>
+     Branch: perl
+	   ! t/op/pack.t
+____________________________________________________________________________
+[ 14789] By: jhi                                   on 2002/02/20  15:05:54
+        Log: Subject: Re: [PATCH] go faster for Encode's compile
+             From: Nicholas Clark <nick@unfortu.net> 
+             Date: Tue, 19 Feb 2002 23:38:36 +0000
+             Message-ID: <20020219233836.GG464@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! ext/Encode/compile
+____________________________________________________________________________
+[ 14788] By: jhi                                   on 2002/02/20  15:02:31
+        Log: Regen Glossary.
+     Branch: perl
+	   ! Porting/Glossary Porting/config.sh Porting/config_H
+____________________________________________________________________________
+[ 14787] By: jhi                                   on 2002/02/20  14:57:37
+        Log: metaconfig unit change for #14786 (not visible yet,
+             since Glossary needs regenerating)
+     Branch: metaconfig
+	   ! U/compline/d_gconvert.U
+____________________________________________________________________________
+[ 14786] By: jhi                                   on 2002/02/20  14:56:55
+        Log: Subject: d_Gconvert hints and Glossary
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Tue, 19 Feb 2002 11:55:36 -0800
+             Message-ID: <42qc8gzkgOFN092yn@efn.org> 
+     Branch: perl
+	   ! Configure config_h.SH configpm hints/aix.sh hints/dec_osf.sh
+	   ! hints/newsos4.sh hints/os2.sh hints/os390.sh hints/svr4.sh
+	   ! hints/svr5.sh
+____________________________________________________________________________
+[ 14785] By: jhi                                   on 2002/02/20  14:38:45
+        Log: metaconfig unit changes for #14784.
+     Branch: metaconfig
+	   ! U/modified/Chk_MANI.U U/modified/Signal.U U/modified/libs.U
+____________________________________________________________________________
+[ 14784] By: jhi                                   on 2002/02/20  14:38:14
+        Log: Subject: [ID 20020220.002] Perl 5.7.2 porting patches for POSIX 1003.1-2001 hosts 
+             From: Paul Eggert <eggert@twinsun.com>              
+             Date: Wed, 20 Feb 2002 03:03:51 -0800 (PST) 
+             Message-Id: <200202201103.g1KB3p427665@sic.twinsun.com>
+     Branch: perl
+	   ! Configure Porting/pumpkin.pod hints/freebsd.sh hints/irix_6.sh
+	   ! pod/perlhack.pod
+____________________________________________________________________________
+[ 14783] By: jhi                                   on 2002/02/20  14:21:32
+        Log: metaconfig unit change for #14782.
+     Branch: metaconfig/U/perl
+	   ! Mksymlinks.U
+____________________________________________________________________________
+[ 14782] By: jhi                                   on 2002/02/20  14:20:33
+        Log: Subject: [patch] Configure problem on Cygwin (was: Re: dubious configure error on cygwin)
+             From: "Gerrit P. Haase" <gp@familiehaase.de>
+             Date: Wed, 20 Feb 2002 00:23:29 +0100
+             Message-ID: <70348722516.20020220002329@familiehaase.de>
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 14781] By: jhi                                   on 2002/02/20  13:58:16
+        Log: Subject: Re: Lexical scoping bug with EXPR for EXPR?
+             From: Nicholas Clark <nick@unfortu.net> 
+             Date: Tue, 19 Feb 2002 19:27:42 +0000
+             Message-ID: <20020219192740.GF12268@Bagpuss.unfortu.net>
+             
+             (with modifications)
+     Branch: perl
+	   ! pod/perlsub.pod
+____________________________________________________________________________
+[ 14780] By: jhi                                   on 2002/02/20  13:49:44
+        Log: NetWare tweak from Ananth Kesari.
+     Branch: perl
+	   ! lib/ExtUtils/MakeMaker.pm
+____________________________________________________________________________
+[ 14779] By: ams                                   on 2002/02/20  06:51:55
+        Log: Fix suggested by Anton Tagunov <tagunov@motor.ru>.
+     Branch: perl
+	   ! pod/perlfaq4.pod
+____________________________________________________________________________
+[ 14778] By: gsar                                  on 2002/02/20  04:17:22
+        Log: constant folding on the range operator had the effect of disabling
+             peephole optimizations in all the siblings of the range OP; the
+             effect of this was that barewords could escape strictures when
+             they were hiding in such places
+     Branch: maint-5.6/perl
+	   ! op.c t/pragma/strict-subs
+____________________________________________________________________________
+[ 14777] By: ams                                   on 2002/02/20  00:56:21
+        Log: Subject: [PATCH] Re: Cannot handle date (0, 0, 0, 2, 0, 1970)
+             From: Graham Barr <gbarr@pobox.com>
+             Date: Tue, 19 Feb 2002 23:08:47 +0000
+             Message-Id: <20020219230847.G66560@pobox.com>
+     Branch: perl
+	   ! lib/Time/Local.pm
+____________________________________________________________________________
+[ 14776] By: ams                                   on 2002/02/19  17:20:28
+        Log: Subject: [DOCPATCH] C<< >> in Tie::Hash
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Tue, 19 Feb 2002 16:23:22 +0000
+             Message-Id: <20020219162322.GB12268@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! lib/Tie/Hash.pm
+____________________________________________________________________________
+[ 14775] By: jhi                                   on 2002/02/19  15:20:52
+        Log: Regen doc, regen toc.
+     Branch: perl
+	   ! pod/buildtoc.PL pod/perlapi.pod pod/perltoc.pod
+____________________________________________________________________________
+[ 14774] By: jhi                                   on 2002/02/19  15:18:03
+        Log: Subject: Re: {PATCH] Re: Lexical scoping bug with EXPR for EXPR?
+             From: Dave Mitchell <davem@fdgroup.co.uk>
+             Date: Tue, 19 Feb 2002 16:07:52 +0000 (GMT) 
+             Message-Id: <200202191607.QAA25164@gizmo.fdgroup.co.uk>           
+     Branch: perl
+	   ! pod/perlsub.pod
+____________________________________________________________________________
+[ 14773] By: jhi                                   on 2002/02/19  15:13:57
+        Log: Detypo.
+     Branch: perl
+	   ! lib/Tie/Memoize.pm
+____________________________________________________________________________
+[ 14772] By: jhi                                   on 2002/02/19  15:01:25
+        Log: UTF-8 C API doc tweaks.
+     Branch: perl
+	   ! pod/perlunicode.pod
+____________________________________________________________________________
+[ 14771] By: jhi                                   on 2002/02/19  14:03:08
+        Log: Mention that the case-switchers know about Unicode, too.
+     Branch: perl
+	   ! pod/perlop.pod
+____________________________________________________________________________
+[ 14770] By: jhi                                   on 2002/02/19  13:49:52
+        Log: Upgrade to Locale::Codes 2.01.
+     Branch: perl
+	   + lib/Locale/Constants.pod lib/Locale/Country.pod
+	   + lib/Locale/Currency.pod lib/Locale/Language.pod
+	   + lib/Locale/Script.pod
+	   ! MANIFEST lib/Locale/Codes/ChangeLog lib/Locale/Codes/README
+	   ! lib/Locale/Constants.pm lib/Locale/Country.pm
+	   ! lib/Locale/Currency.pm lib/Locale/Language.pm
+	   ! lib/Locale/Maketext.pm lib/Locale/Script.pm
+____________________________________________________________________________
+[ 14769] By: jhi                                   on 2002/02/19  13:34:16
+        Log: Subject: {PATCH] Re: Lexical scoping bug with EXPR for EXPR?
+             From: Dave Mitchell <davem@fdgroup.co.uk>
+             Date: Tue, 19 Feb 2002 10:30:30 +0000 (GMT) 
+             Message-Id: <200202191030.KAA24180@gizmo.fdgroup.co.uk>
+     Branch: perl
+	   ! pod/perlsub.pod
+____________________________________________________________________________
+[ 14768] By: jhi                                   on 2002/02/19  13:32:32
+        Log: Subject: [PATCH] Clarify SvPV and SvPV_force api docs
+             From: Sam Tregar <sam@tregar.com> 
+             Date: Mon, 18 Feb 2002 23:09:22 -0500 (EST) 
+             Message-ID: <Pine.LNX.4.44.0202182305350.10037-100000@localhost.localdomain>   
+     Branch: perl
+	   ! sv.h
+____________________________________________________________________________
+[ 14767] By: jhi                                   on 2002/02/19  13:29:04
+        Log: The test requires perlio.
+     Branch: perl
+	   ! ext/Encode/t/JP.t
+____________________________________________________________________________
+[ 14766] By: jhi                                   on 2002/02/19  04:57:59
+        Log: Misplaced block end.
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[ 14765] By: jhi                                   on 2002/02/19  04:53:30
+        Log: The POSIX extensions are deadly.
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[ 14764] By: jhi                                   on 2002/02/19  04:44:41
+        Log: Let's not overdo the growth.
+     Branch: perl
+	   ! pp.c
+____________________________________________________________________________
+[ 14763] By: jhi                                   on 2002/02/19  04:19:21
+        Log: Third time makes the charm.
+     Branch: perl
+	   ! README.os390
+____________________________________________________________________________
+[ 14762] By: jhi                                   on 2002/02/19  04:03:46
+        Log: Oops.
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[ 14761] By: jhi                                   on 2002/02/19  03:49:34
+        Log: Add back the new casing tests.
+     Branch: perl
+	   + t/uni/case.pl t/uni/lower.t t/uni/title.t t/uni/upper.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 14760] By: jhi                                   on 2002/02/19  03:49:16
+        Log: Prefer special case mappings.
+     Branch: perl
+	   ! lib/unicore/To/Lower.pl lib/unicore/To/Title.pl
+	   ! lib/unicore/To/Upper.pl lib/unicore/mktables
+____________________________________________________________________________
+[ 14759] By: jhi                                   on 2002/02/19  03:48:46
+        Log: Try special casing first.
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[ 14758] By: jhi                                   on 2002/02/19  01:55:14
+        Log: Not extending enough.
+     Branch: perl
+	   ! pp.c utf8.h
+____________________________________________________________________________
+[ 14757] By: jhi                                   on 2002/02/19  00:21:07
+        Log: No need to store identity mappings.
+     Branch: perl
+	   ! lib/unicore/To/Lower.pl lib/unicore/To/Title.pl
+	   ! lib/unicore/mktables
+____________________________________________________________________________
+[ 14756] By: ams                                   on 2002/02/18  20:21:17
+        Log: Forward port #14704 from maint-5.6.
+     Branch: perl
+	   ! doio.c
+____________________________________________________________________________
+[ 14755] By: jhi                                   on 2002/02/18  20:16:40
+        Log: Regen Changes.
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
 [ 14754] By: ams                                   on 2002/02/18  19:01:09
         Log: Subject: [PATCH] VMS cando_by_name and current process privs
              From: "Craig A. Berry" <craigberry@mac.com>

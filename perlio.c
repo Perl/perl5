@@ -5,6 +5,11 @@
  */
 
 /*
+ * Hour after hour for nearly three weary days he had jogged up and down,
+ * over passes, and through long dales, and across many streams.
+ */
+
+/*
  * If we have ActivePerl-like PERL_IMPLICIT_SYS then we need a dTHX to get
  * at the dispatch tables, even when we do not need it for other reasons.
  * Invent a dSYS macro to abstract this out
