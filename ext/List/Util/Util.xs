@@ -180,7 +180,7 @@ CODE:
 	GvSV(agv) = ret;
 	GvSV(bgv) = ST(index);
 	PL_op = reducecop;
-	CALLRUNOPS();
+	CALLRUNOPS(aTHX);
 	ret = *PL_stack_sp;
     }
     ST(0) = ret;
@@ -216,7 +216,7 @@ CODE:
     for(index = 1 ; index < items ; index++) {
 	GvSV(PL_defgv) = ST(index);
 	PL_op = reducecop;
-	CALLRUNOPS();
+	CALLRUNOPS(aTHX);
 	if (SvTRUE(*PL_stack_sp)) {
 	  ST(0) = ST(index);
 	  XSRETURN(1);
