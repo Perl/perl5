@@ -177,19 +177,29 @@ into DCLTABLES" for more info), or put the image in a directory that's in
 your DCL$PATH (if you're using VMS 6.2 or higher).
 
 4) Optionally define the command PERLDOC as 
-PERLDOC :== $PERL_ROOT:[000000]PERL PERL_ROOT:[LIB.POD]PERLDOC.COM -T
+PERLDOC :== "$PERL_ROOT:[000000]PERL PERL_ROOT:[LIB.POD]PERLDOC.COM -T"
 Note that if you wish to use most as a pager please see
 ftp://space.mit.edu/pub/davis/ for both most and slang.
 
 5) Optionally define the command PERLBUG (the Perl bug report generator) as
-PERLBUG :== $PERL_ROOT:[000000]PERL PERL_ROOT:[LIB]PERLBUG.COM"
+PERLBUG :== "$PERL_ROOT:[000000]PERL PERL_ROOT:[LIB]PERLBUG.COM"
 
 6) Optionally define the command POD2MAN (Converts POD files to nroff
 source suitable for converting to man pages. Also quiets complaints during
 module builds) as
 
 DEFINE/NOLOG POD2MAN PERL_ROOT:[LIB.POD]POD2MAN.COM
-POD2MAN :== $PERL_ROOT:[000000]PERL POD2MAN
+POD2MAN :== "$PERL_ROOT:[000000]PERL POD2MAN"
+
+7) Optionally define the command POD2TEXT (Converts POD files to text,
+which is required for perldoc -f to work properly) as
+
+DEFINE/NOLOG POD2TEXT PERL_ROOT:[LIB.POD]POD2TEXT.COM
+POD2TEXT :== "$PERL_ROOT:[000000]PERL POD2TEXT"
+
+In all these cases, if you've got PERL defined as a foreign command, you
+can replace $PERL_ROOT:[000000]PERL with ''perl'. If you've installed perl
+into DCLTABLES, replace it with just perl.
 
 * Installing Perl into DCLTABLES
 

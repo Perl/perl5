@@ -373,7 +373,12 @@ $ perl_arch = "''perl_arch'-thread"
 $ perl_archname = "''perl_archname'-thread"
 $ ENDIF
 $ perl_osvers=f$edit(osvers, "TRIM")
+$ if (perl_subversion + 0).eq.0
+$ THEN
+$ LocalPerlVer = "5_" + Perl_PATCHLEVEL
+$ ELSE
 $ LocalPerlVer = "5_" + Perl_PATCHLEVEL + perl_subversion
+$ ENDIF
 $!
 $! Some that we need to invoke the compiler for
 $ OS := "open/write SOURCECHAN []temp.c"
@@ -2455,7 +2460,7 @@ $ ENDIF
 $ WRITE_RESULT "Writing DESCRIP.MMS"
 $!set ver
 $ define/user sys$output [-]descrip.mms
-$ mcr []munchconfig [-]config.sh descrip_mms.template "''DECC_REPLACE'" "''ARCH_TYPE'" "''GNUC_REPLACE'" "''SOCKET_REPLACE'" "''THREAD_REPLACE'" "''C_Compiler_Replace'" "''MALLOC_REPLACE'" "''Thread_Live_Dangerously'"
+$ mcr []munchconfig [-]config.sh descrip_mms.template "''DECC_REPLACE'" "''ARCH_TYPE'" "''GNUC_REPLACE'" "''SOCKET_REPLACE'" "''THREAD_REPLACE'" "''C_Compiler_Replace'" "''MALLOC_REPLACE'" "''Thread_Live_Dangerously'" "PV=''LocalPerlVer'"
 $! set nover
 $!
 $! Clean up after ourselves

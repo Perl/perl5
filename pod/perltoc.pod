@@ -898,6 +898,12 @@ improvements, Incompatible changes
 
 =item Reliable stack pointers
 
+=item More generous treatment of carriage returns
+
+=item Memory leaks
+
+=item Better support for multiple interpreters
+
 =item Behavior of local() on array and hash elements is now well-defined
 
 =item C<%!> is transparently tied to the L<Errno> module
@@ -1493,9 +1499,8 @@ can then be reduced to a small
 
 =item PREAMBLE
 
-B<DECOMPRESS> the file=item B<UNPACK> the file into a directory
-=item B<BUILD> the module (sometimes unnecessary)
-=item B<INSTALL> the module
+B<DECOMPRESS> the file, B<UNPACK> the file into a directory, B<BUILD> the
+module (sometimes unnecessary), B<INSTALL> the module
 
 =back
 

@@ -299,6 +299,34 @@ because all reentrancy of the runtime is handled using a "stack of stacks".
 This should improve reliability of cached stack pointers in the internals
 and in XSUBs.
 
+=head2 More generous treatment of carriage returns
+
+Perl used to complain if it encountered carriage returns in scripts.  Now
+they are treated like whitespace.  Literal carriage returns inside
+string literals and here documents are ignored if they are paired with
+newlines, or treated like newlines if they stand alone.  This behavior
+means that literal carriage returns in files should be avoided.  You
+can get the older, more compatible (but less generous) behavior by
+defining the preprocessor symbol C<TMP_CRLF_PATCH> when building perl.
+
+Note that this doesn't somehow magically allow you to keep all text files
+in DOS format.  The generous treatment only applies to files that perl
+itself parses.  If your C compiler doesn't allow carriage returns in
+files, you may still be unable to build modules that need a C compiler.
+
+=head2 Memory leaks
+
+C<substr>, C<pos> and C<vec> don't leak memory anymore when used in lvalue
+context.  Many small leaks that impacted applications that embed multiple
+interpreters have been fixed.
+
+=head2 Better support for multiple interpreters
+
+The build-time option C<-DMULTIPLICITY> has had many of the details
+reworked.  Some previously global variables that should have been
+per-interpreter now are.  With care, this allows interpreters to call
+each other.  See the C<PerlInterp> extension on CPAN.
+
 =head2 Behavior of local() on array and hash elements is now well-defined
 
 See L<perlsub/"Temporary Values via local()">.
@@ -591,11 +619,17 @@ Keeps better time.
 
 =head1 Utility Changes
 
-h2ph and related utilities have been vastly overhauled.
+C<h2ph> and related utilities have been vastly overhauled.
 
-perlcc, a new experimental front end for the compiler is available.
+C<perlcc>, a new experimental front end for the compiler is available.
 
-The crude GNU configure emulator is now called configure.gnu.
+The crude GNU C<configure> emulator is now called C<configure.gnu> to
+avoid trampling on C<Configure> under case-insensitive filesystems.
+
+C<perldoc> used to be rather slow.  The slower features are now optional.
+In particular, case-insensitive searches need the C<-i> switch, and
+recursive searches need C<-r>.  You can set these switches in the
+C<PERLDOC> environment variable to get the old behavior.
 
 =head1 Documentation Changes
 
