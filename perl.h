@@ -1935,7 +1935,7 @@ typedef struct clone_params CLONE_PARAMS;
 #    define PERL_FPU_INIT fpsetmask(0);
 #  else
 #    if defined(SIGFPE) && defined(SIG_IGN)
-#      define PERL_FPU_INIT       PL_sigfpe_saved = signal(SIGFPE, SIG_IGN)
+#      define PERL_FPU_INIT       PL_sigfpe_saved = signal(SIGFPE, SIG_IGN);
 #      define PERL_FPU_PRE_EXEC   { Sigsave_t xfpe; rsignal_save(SIGFPE, PL_sigfpe_saved, &xfpe);
 #      define PERL_FPU_POST_EXEC    rsignal_restore(SIGFPE, &xfpe); }
 #    else
