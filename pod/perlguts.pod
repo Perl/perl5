@@ -1006,6 +1006,65 @@ destination starting points.  Perl will move, copy, or zero out C<number>
 instances of the size of the C<type> data structure (using the C<sizeof>
 function).
 
+=head1 Scratchpads
+
+=head2 Putting a C value on Perl stack
+
+A lot of opcodes (this is an elementary operation in the internal perl
+stack machine) put an SV* on the stack. However, as an optimization
+the corresponding SV is (usually) not recreated each time. The opcodes
+reuse specially assigned SVs (I<target>s) which are (as a corollary)
+not constantly freed/created.
+
+Each of the targets is created only once (but see 
+L<Scratchpads and recursion> below), and when an opcode needs to put
+an integer, a double, or a string on stack, it just sets the
+corresponding parts of its I<target> and puts the I<target> on stack.
+
+The macro to put this target on stack is C<PUSHTARG>, and it is
+directly used in some opcodes, as well as indirectly in zillions of
+others, which use it via C<(X)PUSH[pni]>.
+
+=head2 Scratchpads
+
+The question remains on when the SVs which are I<target>s for opcodes
+are created. The answer is that they are created when the current unit
+- a subroutine or a file (for opcodes for statements outside of
+subroutines) - is compiled. During this time a special anonymous Perl
+array is created, which is called a scratchpad for the current
+unit.
+
+Scratchpad keeps SVs which are lexicals for the current unit and are
+targets for opcodes. One can deduce that an SV lives on a scratchpad
+by looking on its flags: lexicals have C<SVs_PADMY> set, and
+I<target>s have C<SVs_PADTMP> set.
+
+The correspondence between OPs and I<target>s is not 1-to-1. Different
+OPs in the compile tree of the unit can use the same target, if this
+would not conflict with the expected life of the temporary.
+
+=head2 Scratchpads and recursions
+
+In fact it is not 100% true that a compiled unit contains a pointer to
+the scratchpad AV. In fact it contains a pointer to an AV of
+(initially) one element, and this element is the scratchpad AV. Why do
+we need an extra level of indirection?
+
+The answer is B<recursion>, and maybe (sometime soon) B<threads>. Both
+these can create several execution pointers going into the same
+subroutine. For the subroutine-child not write over the temporaries
+for the subroutine-parent (lifespan of which covers the call to the
+child), the parent and the child should have different
+scratchpads. (I<And> the lexicals should be separate anyway!)
+
+So each subroutine is born with an array of scratchpads (of length
+1). On each entry to the subroutine it is checked that the current
+depth of the recursion is not more than the length of this array, and
+if it is, new scratchpad is created and pushed into the array.
+
+The I<target>s on this scratchpad are C<undef>s, but they are already
+marked with correct flags.
+
 =head1 API LISTING
 
 This is a listing of functions, macros, flags, and variables that may be
