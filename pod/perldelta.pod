@@ -3387,6 +3387,28 @@ failures are expected:
 
 NDBM_File fails and ODBM_File just coredumps.
 
+=head2 DJGPP Failures
+
+ t/op/stat............................FAILED at test 29
+ lib/File/Find/t/find.................FAILED at test 1
+ lib/File/Find/t/taint................FAILED at test 1
+ lib/h2xs.............................FAILED at test 15
+ lib/Pod/t/eol........................FAILED at test 1
+ lib/Test/Harness/t/strap-analyze.....FAILED at test 8
+ lib/Test/Harness/t/test-harness......FAILED at test 23
+ lib/Test/Simple/t/exit...............FAILED at test 1
+
+The above failures are known as of 5.8.0 with native builds with long
+filenames, but there are a few more if running under dosemu because of
+limitations (and maybe bugs) of dosemu:
+
+ t/comp/cpp...........................FAILED at test 3
+ t/op/inccode.........................(crash)
+
+and a few lib/ExtUtils tests, and several hundred Encode/t/Aliases.t
+failures that work fine with long filenames.  So you really might
+prefer native builds and long filenames.
+
 =head2 FreeBSD built with ithreads coredumps reading large directories
 
 This is a known bug in FreeBSD 4.5's readdir_r(), it has been fixed in
