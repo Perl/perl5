@@ -220,6 +220,7 @@ sub ExtUtils::MM_Unix::postamble ;
 sub ExtUtils::MM_Unix::ppd ;
 sub ExtUtils::MM_Unix::prefixify ;
 sub ExtUtils::MM_Unix::processPL ;
+sub ExtUtils::MM_Unix::quote_paren ;
 sub ExtUtils::MM_Unix::realclean ;
 sub ExtUtils::MM_Unix::replace_manpage_separator ;
 sub ExtUtils::MM_Unix::static ;
@@ -397,8 +398,8 @@ sub cflags {
 	$pollute = '$(PERL_MALLOC_DEF)';
     }
 
-    $self->{CCFLAGS}  =~ s/([()])/\\$1/g;
-    $self->{OPTIMIZE} =~ s/([()])/\\$1/g;
+    $self->{CCFLAGS}  = quote_paren($self->{CCFLAGS});
+    $self->{OPTIMIZE} = quote_paren($self->{CCFLAGS});
 
     return $self->{CFLAGS} = qq{
 CCFLAGS = $self->{CCFLAGS}
@@ -505,8 +506,7 @@ sub const_config {
     foreach $m (@{$self->{CONFIG}}){
 	# SITE*EXP macros are defined in &constants; avoid duplicates here
 	next if $once_only{$m} or $m eq 'sitelibexp' or $m eq 'sitearchexp';
-	$self->{uc $m} =~ s/([()])/\\$1/g;
-	push @m, "\U$m\E = ".$self->{uc $m}."\n";
+	push @m, uc($m) , ' = ' , quote_paren($self->{uc $m}), "\n";
 	$once_only{$m} = 1;
     }
     join('', @m);
@@ -3158,6 +3158,22 @@ $target :: $plfile
 	}
     }
     join "", @m;
+}
+
+=item quote_paren
+
+Backslashes parentheses C<()> in command line arguments.
+Doesn't handle recursive Makefile C<$(...)> constructs,
+but handles simple ones.
+
+=cut
+
+sub quote_paren {
+    local $_ = shift;
+    s/\$\((.+?)\)/\$\\\\($1\\\\)/g;	# protect $(...)
+    s/(?<!\\)([()])/\\$1/g;		# quote unprotected
+    s/\$\\\\\((.+?)\\\\\)/\$($1)/g;	# unprotect $(...)
+    return $_;
 }
 
 =item realclean (o)
