@@ -312,6 +312,11 @@ d_index (d_strchr.U):
 	This variable conditionally defines HAS_INDEX if index() and
 	rindex() are available for string searching.
 
+d_inetaton (d_inetaton.U):
+	This variable conditionally defines the HAS_INET_ATON symbol, which
+	indicates to the C program that the inet_aton() function is available
+	to parse IP address "dotted-quad" strings.
+
 d_isascii (d_isascii.U):
 	This variable conditionally defines the HAS_ISASCII constant,
 	which indicates to the C program that isascii() is available.

@@ -1484,6 +1484,13 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$d_getpgrp HAS_GETPGRP		/**/
 #$d_bsdgetpgrp USE_BSD_GETPGRP	/**/
 
+/* HAS_INET_ATON:
+ *	This symbol, if defined, indicates to the C program that the
+ *	inet_aton() function is available to parse IP address "dotted-quad"
+ *	strings.
+ */
+#$d_inetaton HAS_INET_ATON		/**/
+
 /* HAS_SETPGID:
  *	This symbol, if defined, indicates to the C program that 
  *	the setpgid(pid, gpid) function is available to set the

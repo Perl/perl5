@@ -1,0 +1,24 @@
+?RCS: Copyright (c) 1996, Spider Boardman
+?RCS:
+?RCS: You may distribute under the terms of either the GNU General Public
+?RCS: License or the Artistic License, as specified in the README file.
+?RCS:
+?MAKE:d_inetaton: Inlibc
+?MAKE:	-pick add $@ %<
+?S:d_inetaton:
+?S:	This variable conditionally defines the HAS_INET_ATON symbol, which
+?S:	indicates to the C program that the inet_aton() function is available
+?S:	to parse IP address "dotted-quad" strings.
+?S:.
+?C:HAS_INET_ATON:
+?C:	This symbol, if defined, indicates to the C program that the
+?C:	inet_aton() function is available to parse IP address "dotted-quad"
+?C:	strings.
+?C:.
+?H:#$d_inetaton HAS_INET_ATON		/**/
+?H:.
+?LINT:set d_inetaton
+: check whether inet_aton exists
+set inet_aton d_inetaton
+eval $inlibc
+
