@@ -40,10 +40,10 @@
 /* *These* symbols are masked to allow static link. */
 #  define Perl_regnext my_regnext
 #  define Perl_save_re_context my_save_re_context
-#  define Perl_reginitcolors my_reginitcolors 
+#  define Perl_reginitcolors my_reginitcolors
 
 #  define PERL_NO_GET_CONTEXT
-#endif 
+#endif
 
 /*SUPPRESS 112*/
 /*
@@ -194,7 +194,7 @@ typedef struct scan_data_t {
  * Forward declarations for pregcomp()'s friends.
  */
 
-static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 				      0, 0, 0, 0, 0, 0};
 
 #define SF_BEFORE_EOL		(SF_BEFORE_SEOL|SF_BEFORE_MEOL)
@@ -247,7 +247,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
  */
 #define MARKER1 "HERE"      /* marker as it appears in the description */
 #define MARKER2 " << HERE "  /* marker as it appears within the regex */
-   
+
 #define REPORT_LOCATION " before " MARKER1 " mark in regex m/%.*s" MARKER2 "%s/"
 
 /*
@@ -428,24 +428,24 @@ S_scan_commit(pTHX_ RExC_state_t *pRExC_state, scan_data_t *data)
 {
     STRLEN l = CHR_SVLEN(data->last_found);
     STRLEN old_l = CHR_SVLEN(*data->longest);
-    
+
     if ((l >= old_l) && ((l > old_l) || (data->flags & SF_BEFORE_EOL))) {
 	sv_setsv(*data->longest, data->last_found);
 	if (*data->longest == data->longest_fixed) {
 	    data->offset_fixed = l ? data->last_start_min : data->pos_min;
 	    if (data->flags & SF_BEFORE_EOL)
-		data->flags 
+		data->flags
 		    |= ((data->flags & SF_BEFORE_EOL) << SF_FIX_SHIFT_EOL);
 	    else
 		data->flags &= ~SF_FIX_BEFORE_EOL;
 	}
 	else {
 	    data->offset_float_min = l ? data->last_start_min : data->pos_min;
-	    data->offset_float_max = (l 
-				      ? data->last_start_max 
+	    data->offset_float_max = (l
+				      ? data->last_start_max
 				      : data->pos_min + data->pos_delta);
 	    if (data->flags & SF_BEFORE_EOL)
-		data->flags 
+		data->flags
 		    |= ((data->flags & SF_BEFORE_EOL) << SF_FL_SHIFT_EOL);
 	    else
 		data->flags &= ~SF_FL_BEFORE_EOL;
@@ -569,7 +569,7 @@ S_cl_or(pTHX_ RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, str
     } else {
 	/* (B1 | CL1) | (B2 | CL2) = (B1 | B2) | (CL1 | CL2)) */
 	if ( (or_with->flags & ANYOF_LOCALE) == (cl->flags & ANYOF_LOCALE)
-	     && (!(or_with->flags & ANYOF_FOLD) 
+	     && (!(or_with->flags & ANYOF_FOLD)
 		 || (cl->flags & ANYOF_FOLD)) ) {
 	    int i;
 
@@ -620,7 +620,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
     I32 is_par = OP(scan) == OPEN ? ARG(scan) : 0;
     scan_data_t data_fake;
     struct regnode_charclass_class and_with; /* Valid if flags & SCF_DO_STCLASS_OR */
-    
+
     while (scan && OP(scan) != END && scan < last) {
 	/* Peephole optimizer: */
 
@@ -630,12 +630,12 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 	    U32 stringok = 1;
 #ifdef DEBUGGING
 	    regnode *stop = scan;
-#endif 
+#endif
 
 	    next = scan + NODE_SZ_STR(scan);
 	    /* Skip NOTHING, merge EXACT*. */
 	    while (n &&
-		   ( PL_regkind[(U8)OP(n)] == NOTHING || 
+		   ( PL_regkind[(U8)OP(n)] == NOTHING ||
 		     (stringok && (OP(n) == OP(scan))))
 		   && NEXT_OFF(n)
 		   && NEXT_OFF(scan) + NEXT_OFF(n) < I16_MAX) {
@@ -647,14 +647,14 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 #ifdef DEBUGGING
 		    if (stringok)
 			stop = n;
-#endif 
+#endif
 		    n = regnext(n);
 		}
 		else {
 		    int oldl = STR_LEN(scan);
 		    regnode *nnext = regnext(n);
-		    
-		    if (oldl + STR_LEN(n) > U8_MAX) 
+		
+		    if (oldl + STR_LEN(n) > U8_MAX)
 			break;
 		    NEXT_OFF(scan) += NEXT_OFF(n);
 		    STR_LEN(scan) += STR_LEN(n);
@@ -665,7 +665,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 #ifdef DEBUGGING
 		    if (stringok)
 			stop = next - 1;
-#endif 
+#endif
 		    n = nnext;
 		}
 	    }
@@ -691,7 +691,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 	    int off = (reg_off_by_arg[OP(scan)] ? ARG(scan) : NEXT_OFF(scan));
 	    int noff;
 	    regnode *n = scan;
-	    
+	
 	    /* Skip NOTHING and LONGJMP. */
 	    while ((n = regnext(n))
 		   && ((PL_regkind[(U8)OP(n)] == NOTHING && (noff = NEXT_OFF(n)))
@@ -700,17 +700,17 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		off += noff;
 	    if (reg_off_by_arg[OP(scan)])
 		ARG(scan) = off;
-	    else 
+	    else
 		NEXT_OFF(scan) = off;
 	}
 	/* The principal pseudo-switch.  Cannot be a switch, since we
 	   look into several different things.  */
-	if (OP(scan) == BRANCH || OP(scan) == BRANCHJ 
+	if (OP(scan) == BRANCH || OP(scan) == BRANCHJ
 		   || OP(scan) == IFTHEN || OP(scan) == SUSPEND) {
 	    next = regnext(scan);
 	    code = OP(scan);
-	    
-	    if (OP(next) == code || code == IFTHEN || code == SUSPEND) { 
+	
+	    if (OP(next) == code || code == IFTHEN || code == SUSPEND) {
 		I32 max1 = 0, min1 = I32_MAX, num = 0;
 		struct regnode_charclass_class accum;
 		
@@ -724,7 +724,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 
 		    num++;
 		    data_fake.flags = 0;
-		    if (data) {		    
+		    if (data) {		
 			data_fake.whilem_c = data->whilem_c;
 			data_fake.last_closep = data->last_closep;
 		    }
@@ -738,13 +738,13 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 			cl_init(pRExC_state, &this_class);
 			data_fake.start_class = &this_class;
 			f = SCF_DO_STCLASS_AND;
-		    }		    
+		    }		
 		    if (flags & SCF_WHILEM_VISITED_POS)
 			f |= SCF_WHILEM_VISITED_POS;
 		    /* we suppose the run is continuous, last=next...*/
 		    minnext = study_chunk(pRExC_state, &scan, &deltanext,
 					  next, &data_fake, f);
-		    if (min1 > minnext) 
+		    if (min1 > minnext)
 			min1 = minnext;
 		    if (max1 < minnext + deltanext)
 			max1 = minnext + deltanext;
@@ -759,7 +759,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 			data->whilem_c = data_fake.whilem_c;
 		    if (flags & SCF_DO_STCLASS)
 			cl_or(pRExC_state, &accum, &this_class);
-		    if (code == SUSPEND) 
+		    if (code == SUSPEND)
 			break;
 		}
 		if (code == IFTHEN && num < 2) /* Empty ELSE branch */
@@ -785,7 +785,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 			flags &= ~SCF_DO_STCLASS;
 		    }
 		    else {
-			/* Switch to OR mode: cache the old value of 
+			/* Switch to OR mode: cache the old value of
 			 * data->start_class */
 			StructCopy(data->start_class, &and_with,
 				   struct regnode_charclass_class);
@@ -818,7 +818,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		if (data->last_end == -1) { /* Update the start info. */
 		    data->last_start_min = data->pos_min;
  		    data->last_start_max = is_inf
- 			? I32_MAX : data->pos_min + data->pos_delta; 
+ 			? I32_MAX : data->pos_min + data->pos_delta;
 		}
 		sv_catpvn(data->last_found, STRING(scan), STR_LEN(scan));
 		data->last_end = data->pos_min + l;
@@ -830,7 +830,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		int compat = 1;
 
 		if (uc >= 0x100 ||
-		    !(data->start_class->flags & (ANYOF_CLASS | ANYOF_LOCALE)) 
+		    !(data->start_class->flags & (ANYOF_CLASS | ANYOF_LOCALE))
 		    && !ANYOF_BITMAP_TEST(data->start_class, uc)
 		    && (!(data->start_class->flags & ANYOF_FOLD)
 			|| !ANYOF_BITMAP_TEST(data->start_class, PL_fold[uc])))
@@ -859,7 +859,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 	    UV uc = *((U8*)STRING(scan));
 
 	    /* Search for fixed substrings supports EXACT only. */
-	    if (flags & SCF_DO_SUBSTR) 
+	    if (flags & SCF_DO_SUBSTR)
 		scan_commit(pRExC_state, data);
 	    if (UTF) {
 		U8 *s = (U8 *)STRING(scan);
@@ -874,7 +874,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		int compat = 1;
 
 		if (uc >= 0x100 ||
-		    !(data->start_class->flags & (ANYOF_CLASS | ANYOF_LOCALE)) 
+		    !(data->start_class->flags & (ANYOF_CLASS | ANYOF_LOCALE))
 		    && !ANYOF_BITMAP_TEST(data->start_class, uc)
 		    && !ANYOF_BITMAP_TEST(data->start_class, PL_fold[uc]))
 		    compat = 0;
@@ -915,8 +915,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		if (flags & (SCF_DO_SUBSTR | SCF_DO_STCLASS)) {
 		    next = NEXTOPER(scan);
 		    if (OP(next) == EXACT || (flags & SCF_DO_STCLASS)) {
-			mincount = 1; 
-			maxcount = REG_INFTY; 
+			mincount = 1;
+			maxcount = REG_INFTY;
 			next = regnext(scan);
 			scan = NEXTOPER(scan);
 			goto do_curly;
@@ -929,12 +929,12 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 	    case STAR:
 		if (flags & SCF_DO_STCLASS) {
 		    mincount = 0;
-		    maxcount = REG_INFTY; 
+		    maxcount = REG_INFTY;
 		    next = regnext(scan);
 		    scan = NEXTOPER(scan);
 		    goto do_curly;
 		}
-		is_inf = is_inf_internal = 1; 
+		is_inf = is_inf_internal = 1;
 		scan = regnext(scan);
 		if (flags & SCF_DO_SUBSTR) {
 		    scan_commit(pRExC_state, data); /* Cannot extend fixed substrings */
@@ -942,7 +942,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		}
 		goto optimize_curly_tail;
 	    case CURLY:
-		mincount = ARG1(scan); 
+		mincount = ARG1(scan);
 		maxcount = ARG2(scan);
 		next = regnext(scan);
 		if (OP(scan) == CURLYX) {
@@ -972,15 +972,15 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		/* These are the cases when once a subexpression
 		   fails at a particular position, it cannot succeed
 		   even after backtracking at the enclosing scope.
-		   
+		
 		   XXXX what if minimal match and we are at the
 		        initial run of {n,m}? */
 		if ((mincount != maxcount - 1) && (maxcount != REG_INFTY))
 		    f &= ~SCF_WHILEM_VISITED_POS;
 
 		/* This will finish on WHILEM, setting scan, or on NULL: */
-		minnext = study_chunk(pRExC_state, &scan, &deltanext, last, data, 
-				      mincount == 0 
+		minnext = study_chunk(pRExC_state, &scan, &deltanext, last, data,
+				      mincount == 0
 					? (f & ~SCF_DO_SUBSTR) : f);
 
 		if (flags & SCF_DO_STCLASS)
@@ -990,7 +990,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 			cl_or(pRExC_state, data->start_class, &this_class);
 		    }
 		    else if (flags & SCF_DO_STCLASS_AND) {
-			/* Switch to OR mode: cache the old value of 
+			/* Switch to OR mode: cache the old value of
 			 * data->start_class */
 			StructCopy(data->start_class, &and_with,
 				   struct regnode_charclass_class);
@@ -1011,7 +1011,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		}
 		if (!scan) 		/* It was not CURLYX, but CURLY. */
 		    scan = next;
-		if (ckWARN(WARN_REGEXP) && (minnext + deltanext == 0) 
+		if (ckWARN(WARN_REGEXP) && (minnext + deltanext == 0)
 		    && !(data->flags & (SF_HAS_PAR|SF_IN_PAR))
 		    && maxcount <= REG_INFTY/3) /* Complement check for big count */
 		{
@@ -1020,14 +1020,14 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		}
 
 		min += minnext * mincount;
-		is_inf_internal |= ((maxcount == REG_INFTY 
+		is_inf_internal |= ((maxcount == REG_INFTY
 				     && (minnext + deltanext) > 0)
 				    || deltanext == I32_MAX);
 		is_inf |= is_inf_internal;
 		delta += (minnext + deltanext) * maxcount - minnext * mincount;
 
 		/* Try powerful optimization CURLYX => CURLYN. */
-		if (  OP(oscan) == CURLYX && data 
+		if (  OP(oscan) == CURLYX && data
 		      && data->flags & SF_IN_PAR
 		      && !(data->flags & SF_HAS_EVAL)
 		      && !deltanext && minnext == 1 ) {
@@ -1039,11 +1039,11 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		    nxt = regnext(nxt);
 		    if (!strchr((char*)PL_simple,OP(nxt))
 			&& !(PL_regkind[(U8)OP(nxt)] == EXACT
-			     && STR_LEN(nxt) == 1)) 
+			     && STR_LEN(nxt) == 1))
 			goto nogo;
 		    nxt2 = nxt;
 		    nxt = regnext(nxt);
-		    if (OP(nxt) != CLOSE) 
+		    if (OP(nxt) != CLOSE)
 			goto nogo;
 		    /* Now we know that nxt2 is the only contents: */
 		    oscan->flags = ARG(nxt);
@@ -1056,12 +1056,12 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		    OP(nxt) = OPTIMIZED;	/* was CLOSE. */
 		    OP(nxt + 1) = OPTIMIZED; /* was count. */
 		    NEXT_OFF(nxt+ 1) = 0; /* just for consistancy. */
-#endif 
+#endif
 		}
 	      nogo:
 
 		/* Try optimization CURLYX => CURLYM. */
-		if (  OP(oscan) == CURLYX && data 
+		if (  OP(oscan) == CURLYX && data
 		      && !(data->flags & SF_HAS_PAR)
 		      && !(data->flags & SF_HAS_EVAL)
 		      && !deltanext  ) {
@@ -1072,7 +1072,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 
 		    OP(oscan) = CURLYM;
 		    while ( (nxt2 = regnext(nxt)) /* skip over embedded stuff*/
-			    && (OP(nxt2) != WHILEM)) 
+			    && (OP(nxt2) != WHILEM))
 			nxt = nxt2;
 		    OP(nxt2)  = SUCCEED; /* Whas WHILEM */
 		    /* Need to optimize away parenths. */
@@ -1080,7 +1080,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 			/* Set the parenth number.  */
 			regnode *nxt1 = NEXTOPER(oscan) + EXTRA_STEP_2ARGS; /* OPEN*/
 
-			if (OP(nxt) != CLOSE) 
+			if (OP(nxt) != CLOSE)
 			    FAIL("Panic opt close");
 			oscan->flags = ARG(nxt);
 			OP(nxt1) = OPTIMIZED;	/* was OPEN. */
@@ -1090,11 +1090,11 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 			OP(nxt + 1) = OPTIMIZED; /* was count. */
 			NEXT_OFF(nxt1 + 1) = 0; /* just for consistancy. */
 			NEXT_OFF(nxt + 1) = 0; /* just for consistancy. */
-#endif 
+#endif
 #if 0
 			while ( nxt1 && (OP(nxt1) != WHILEM)) {
 			    regnode *nnxt = regnext(nxt1);
-			    
+			
 			    if (nnxt == nxt) {
 				if (reg_off_by_arg[OP(nxt1)])
 				    ARG_SET(nxt1, nxt2 - nxt1);
@@ -1107,7 +1107,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 			}
 #endif
 			/* Optimize again: */
-			study_chunk(pRExC_state, &nxt1, &deltanext, nxt, 
+			study_chunk(pRExC_state, &nxt1, &deltanext, nxt,
 				    NULL, 0);
 		    }
 		    else
@@ -1129,14 +1129,14 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		    PREVOPER(nxt)->flags = data->whilem_c
 			| (RExC_whilem_seen << 4); /* On WHILEM */
 		}
-		if (data && fl & (SF_HAS_PAR|SF_IN_PAR)) 
+		if (data && fl & (SF_HAS_PAR|SF_IN_PAR))
 		    pars++;
 		if (flags & SCF_DO_SUBSTR) {
 		    SV *last_str = Nullsv;
 		    int counted = mincount != 0;
 
 		    if (data->last_end > 0 && mincount != 0) { /* Ends with a string. */
-			I32 b = pos_before >= data->last_start_min 
+			I32 b = pos_before >= data->last_start_min
 			    ? pos_before : data->last_start_min;
 			STRLEN l;
 			char *s = SvPV(data->last_found, l);
@@ -1152,11 +1152,11 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 			    /* What was added is a constant string */
 			    if (mincount > 1) {
 				SvGROW(last_str, (mincount * l) + 1);
-				repeatcpy(SvPVX(last_str) + l, 
+				repeatcpy(SvPVX(last_str) + l,
 					  SvPVX(last_str), l, mincount - 1);
 				SvCUR(last_str) *= mincount;
 				/* Add additional parts. */
-				SvCUR_set(data->last_found, 
+				SvCUR_set(data->last_found,
 					  SvCUR(data->last_found) - l);
 				sv_catsv(data->last_found, last_str);
 				data->last_end += l * (mincount - 1);
@@ -1179,10 +1179,10 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 			if (mincount && last_str) {
 			    sv_setsv(data->last_found, last_str);
 			    data->last_end = data->pos_min;
-			    data->last_start_min = 
+			    data->last_start_min =
 				data->pos_min - CHR_SVLEN(last_str);
-			    data->last_start_max = is_inf 
-				? I32_MAX 
+			    data->last_start_max = is_inf
+				? I32_MAX
 				: data->pos_min + data->pos_delta
 				- CHR_SVLEN(last_str);
 			}
@@ -1266,7 +1266,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 			else {
 			    for (value = 0; value < 256; value++)
 				if (isALNUM(value))
-				    ANYOF_BITMAP_SET(data->start_class, value);			    
+				    ANYOF_BITMAP_SET(data->start_class, value);			
 			}
 		    }
 		    break;
@@ -1295,7 +1295,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 			else {
 			    for (value = 0; value < 256; value++)
 				if (!isALNUM(value))
-				    ANYOF_BITMAP_SET(data->start_class, value);			    
+				    ANYOF_BITMAP_SET(data->start_class, value);			
 			}
 		    }
 		    break;
@@ -1324,7 +1324,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 			else {
 			    for (value = 0; value < 256; value++)
 				if (isSPACE(value))
-				    ANYOF_BITMAP_SET(data->start_class, value);			    
+				    ANYOF_BITMAP_SET(data->start_class, value);			
 			}
 		    }
 		    break;
@@ -1353,7 +1353,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 			else {
 			    for (value = 0; value < 256; value++)
 				if (!isSPACE(value))
-				    ANYOF_BITMAP_SET(data->start_class, value);			    
+				    ANYOF_BITMAP_SET(data->start_class, value);			
 			}
 		    }
 		    break;
@@ -1384,7 +1384,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 			else {
 			    for (value = 0; value < 256; value++)
 				if (isDIGIT(value))
-				    ANYOF_BITMAP_SET(data->start_class, value);			    
+				    ANYOF_BITMAP_SET(data->start_class, value);			
 			}
 		    }
 		    break;
@@ -1401,7 +1401,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 			else {
 			    for (value = 0; value < 256; value++)
 				if (!isDIGIT(value))
-				    ANYOF_BITMAP_SET(data->start_class, value);			    
+				    ANYOF_BITMAP_SET(data->start_class, value);			
 			}
 		    }
 		    break;
@@ -1427,7 +1427,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 	    int f = 0;
 
 	    data_fake.flags = 0;
-	    if (data) {		    
+	    if (data) {		
 		data_fake.whilem_c = data->whilem_c;
 		data_fake.last_closep = data->last_closep;
 	    }
@@ -1501,7 +1501,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
   finish:
     *scanp = scan;
     *deltap = is_inf_internal ? I32_MAX : delta;
-    if (flags & SCF_DO_SUBSTR && is_inf) 
+    if (flags & SCF_DO_SUBSTR && is_inf)
 	data->pos_delta = I32_MAX - data->pos_min;
     if (is_par > U8_MAX)
 	is_par = 0;
@@ -1522,8 +1522,8 @@ STATIC I32
 S_add_data(pTHX_ RExC_state_t *pRExC_state, I32 n, char *s)
 {
     if (RExC_rx->data) {
-	Renewc(RExC_rx->data, 
-	       sizeof(*RExC_rx->data) + sizeof(void*) * (RExC_rx->data->count + n - 1), 
+	Renewc(RExC_rx->data,
+	       sizeof(*RExC_rx->data) + sizeof(void*) * (RExC_rx->data->count + n - 1),
 	       char, struct reg_data);
 	Renew(RExC_rx->data->what, RExC_rx->data->count + n, U8);
 	RExC_rx->data->count += n;
@@ -1543,7 +1543,7 @@ Perl_reginitcolors(pTHX)
 {
     int i = 0;
     char *s = PerlEnv_getenv("PERL_RE_COLORS");
-	    
+	
     if (s) {
 	PL_colors[0] = s = savepv(s);
 	while (++i < 6) {
@@ -1556,7 +1556,7 @@ Perl_reginitcolors(pTHX)
 		PL_colors[i] = s = "";
 	}
     } else {
-	while (i < 6) 
+	while (i < 6)
 	    PL_colors[i++] = "";
     }
     PL_colorset = 1;
@@ -1760,13 +1760,13 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	    first = NEXTOPER(first);
 	    goto again;
 	}
-	if (sawplus && (!sawopen || !RExC_sawback) 
+	if (sawplus && (!sawopen || !RExC_sawback)
 	    && !(RExC_seen & REG_SEEN_EVAL)) /* May examine pos and $& */
 	    /* x+ must match at the 1st pos of run of x's */
 	    r->reganch |= ROPT_SKIP;
 
 	/* Scan is after the zeroth branch, first is atomic matcher. */
-	DEBUG_r(PerlIO_printf(Perl_debug_log, "first at %"IVdf"\n", 
+	DEBUG_r(PerlIO_printf(Perl_debug_log, "first at %"IVdf"\n",
 			      (IV)(first - scan + 1)));
 	/*
 	* If there's something expensive in the r.e., find the
@@ -1797,7 +1797,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	minlen = study_chunk(pRExC_state, &first, &fake, scan + RExC_size, /* Up to end */
 			     &data, SCF_DO_SUBSTR | SCF_WHILEM_VISITED_POS | stclass_flag);
 	if ( RExC_npar == 1 && data.longest == &(data.longest_fixed)
-	     && data.last_start_min == 0 && data.last_end > 0 
+	     && data.last_start_min == 0 && data.last_end > 0
 	     && !RExC_seen_zerolen
 	     && (!(RExC_seen & REG_SEEN_GPOS) || (r->reganch & ROPT_ANCH_GPOS)))
 	    r->reganch |= ROPT_CHECK_ALL;
@@ -1850,7 +1850,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	    SvREFCNT_dec(data.longest_fixed);
 	    longest_fixed_length = 0;
 	}
-	if (r->regstclass 
+	if (r->regstclass
 	    && (OP(r->regstclass) == REG_ANY || OP(r->regstclass) == SANY))
 	    r->regstclass = NULL;
 	if ((!r->anchored_substr || r->anchored_offset) && stclass_flag
@@ -1859,7 +1859,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	    SV *sv;
 	    I32 n = add_data(pRExC_state, 1, "f");
 
-	    New(1006, RExC_rx->data->data[n], 1, 
+	    New(1006, RExC_rx->data->data[n], 1,
 		struct regnode_charclass_class);
 	    StructCopy(data.start_class,
 		       (struct regnode_charclass_class*)RExC_rx->data->data[n],
@@ -1911,7 +1911,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	    SV *sv;
 	    I32 n = add_data(pRExC_state, 1, "f");
 
-	    New(1006, RExC_rx->data->data[n], 1, 
+	    New(1006, RExC_rx->data->data[n], 1,
 		struct regnode_charclass_class);
 	    StructCopy(data.start_class,
 		       (struct regnode_charclass_class*)RExC_rx->data->data[n],
@@ -1926,7 +1926,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     }
 
     r->minlen = minlen;
-    if (RExC_seen & REG_SEEN_GPOS) 
+    if (RExC_seen & REG_SEEN_GPOS)
 	r->reganch |= ROPT_GPOS_SEEN;
     if (RExC_seen & REG_SEEN_LOOKBEHIND)
 	r->reganch |= ROPT_LOOKBEHIND_SEEN;
@@ -1977,9 +1977,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
 	    switch (paren) {
 	    case '<':
 		RExC_seen |= REG_SEEN_LOOKBEHIND;
-		if (*RExC_parse == '!') 
+		if (*RExC_parse == '!')
 		    paren = ',';
-		if (*RExC_parse != '=' && *RExC_parse != '!') 
+		if (*RExC_parse != '=' && *RExC_parse != '!')
 		    goto unknown;
 		RExC_parse++;
 	    case '=':
@@ -2021,21 +2021,21 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
 		while (count && (c = *RExC_parse)) {
 		    if (c == '\\' && RExC_parse[1])
 			RExC_parse++;
-		    else if (c == '{') 
+		    else if (c == '{')
 			count++;
-		    else if (c == '}') 
+		    else if (c == '}')
 			count--;
 		    RExC_parse++;
 		}
 		if (*RExC_parse != ')')
 		{
-		    RExC_parse = s;		    
+		    RExC_parse = s;		
 		    vFAIL("Sequence (?{...}) not terminated or not {}-balanced");
 		}
 		if (!SIZE_ONLY) {
 		    AV *av;
-		    
-		    if (RExC_parse - 1 - s) 
+		
+		    if (RExC_parse - 1 - s)
 			sv = newSVpvn(s, RExC_parse - 1 - s);
 		    else
 			sv = newSVpvn("", 0);
@@ -2074,8 +2074,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
 	    case '(':
 	    {
 		if (RExC_parse[0] == '?') {
-		    if (RExC_parse[1] == '=' || RExC_parse[1] == '!' 
-			|| RExC_parse[1] == '<' 
+		    if (RExC_parse[1] == '=' || RExC_parse[1] == '!'
+			|| RExC_parse[1] == '<'
 			|| RExC_parse[1] == '{') { /* Lookahead or eval. */
 			I32 flag;
 			
@@ -2084,7 +2084,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
 			    ret->flags = 1;
 			regtail(pRExC_state, ret, reg(pRExC_state, 1, &flag));
 			goto insert_if;
-		    } 
+		    }
 		}
 		else if (RExC_parse[0] >= '1' && RExC_parse[0] <= '9' ) {
 		    parno = atoi(RExC_parse++);
@@ -2300,18 +2300,18 @@ S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first)
     register regnode *latest;
     I32 flags = 0, c = 0;
 
-    if (first) 
+    if (first)
 	ret = NULL;
     else {
-	if (!SIZE_ONLY && RExC_extralen) 
+	if (!SIZE_ONLY && RExC_extralen)
 	    ret = reganode(pRExC_state, BRANCHJ,0);
 	else
 	    ret = reg_node(pRExC_state, BRANCH);
     }
 	
-    if (!first && SIZE_ONLY) 
+    if (!first && SIZE_ONLY)
 	RExC_extralen += 1;			/* BRANCHJ */
-    
+
     *flagp = WORST;			/* Tentatively. */
 
     RExC_parse--;
@@ -2466,7 +2466,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp)
 
     if (!(flags&HASWIDTH) && op != '?')
       vFAIL("Regexp *+ operand could be empty");
-#endif 
+#endif
 
     nextchar(pRExC_state);
 
@@ -2546,7 +2546,7 @@ tryagain:
 	break;
     case '$':
 	nextchar(pRExC_state);
-	if (*RExC_parse) 
+	if (*RExC_parse)
 	    RExC_seen_zerolen++;
 	if (RExC_flags16 & PMf_MULTILINE)
 	    ret = reg_node(pRExC_state, MEOL);
@@ -2872,7 +2872,7 @@ tryagain:
 		    case 'x':
 			if (*++p == '{') {
 			    char* e = strchr(p, '}');
-	 
+	
 			    if (!e) {
 				RExC_parse = p + 1;
 				vFAIL("Missing right brace on \\x{}");
@@ -3028,7 +3028,7 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value)
 	 *RExC_parse == '.')) {
 	char  c = *RExC_parse;
 	char* s = RExC_parse++;
-	    
+	
 	while (RExC_parse < RExC_end && *RExC_parse != c)
 	    RExC_parse++;
 	if (RExC_parse == RExC_end)
@@ -3292,7 +3292,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	    case 'x':
 		if (*RExC_parse == '{') {
 		    e = strchr(RExC_parse++, '}');
-                    if (!e) 
+                    if (!e)
                         vFAIL("Missing right brace on \\x{}");
 		    numlen = 1;		/* allow underscores */
 		    value = (UV)scan_hex(RExC_parse,
@@ -3813,7 +3813,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	ANYOF_FLAGS(ret) = ANYOF_UNICODE_ALL;
     }
 
-    if (!SIZE_ONLY) { 
+    if (!SIZE_ONLY) {
 	AV *av = newAV();
 	SV *rv;
 
@@ -3926,7 +3926,7 @@ S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode *opnd)
     register regnode *dst;
     register regnode *place;
     register int offset = regarglen[(U8)op];
-    
+
 /* (PL_regkind[(U8)op] == CURLY ? EXTRA_STEP_2ARGS : 0); */
 
     if (SIZE_ONLY) {
@@ -4039,13 +4039,13 @@ S_dumpuntil(pTHX_ regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
 		      (int)(2*l + 1), "", SvPVX(sv));
 	if (next == NULL)		/* Next ptr. */
 	    PerlIO_printf(Perl_debug_log, "(0)");
-	else 
+	else
 	    PerlIO_printf(Perl_debug_log, "(%"IVdf")", (IV)(next - start));
 	(void)PerlIO_putc(Perl_debug_log, '\n');
       after_print:
 	if (PL_regkind[(U8)op] == BRANCHJ) {
-	    register regnode *nnode = (OP(next) == LONGJMP 
-				       ? regnext(next) 
+	    register regnode *nnode = (OP(next) == LONGJMP
+				       ? regnext(next)
 				       : next);
 	    if (last && nnode > last)
 		nnode = last;
@@ -4101,25 +4101,25 @@ Perl_regdump(pTHX_ regexp *r)
     /* Header fields of interest. */
     if (r->anchored_substr)
 	PerlIO_printf(Perl_debug_log,
-		      "anchored `%s%.*s%s'%s at %"IVdf" ", 
+		      "anchored `%s%.*s%s'%s at %"IVdf" ",
 		      PL_colors[0],
 		      (int)(SvCUR(r->anchored_substr) - (SvTAIL(r->anchored_substr)!=0)),
-		      SvPVX(r->anchored_substr), 
+		      SvPVX(r->anchored_substr),
 		      PL_colors[1],
 		      SvTAIL(r->anchored_substr) ? "$" : "",
 		      (IV)r->anchored_offset);
     if (r->float_substr)
 	PerlIO_printf(Perl_debug_log,
-		      "floating `%s%.*s%s'%s at %"IVdf"..%"UVuf" ", 
+		      "floating `%s%.*s%s'%s at %"IVdf"..%"UVuf" ",
 		      PL_colors[0],
-		      (int)(SvCUR(r->float_substr) - (SvTAIL(r->float_substr)!=0)), 
+		      (int)(SvCUR(r->float_substr) - (SvTAIL(r->float_substr)!=0)),
 		      SvPVX(r->float_substr),
 		      PL_colors[1],
 		      SvTAIL(r->float_substr) ? "$" : "",
 		      (IV)r->float_min_offset, (UV)r->float_max_offset);
     if (r->check_substr)
-	PerlIO_printf(Perl_debug_log, 
-		      r->check_substr == r->float_substr 
+	PerlIO_printf(Perl_debug_log,
+		      r->check_substr == r->float_substr
 		      ? "(checking floating" : "(checking anchored");
     if (r->reganch & ROPT_NOSCAN)
 	PerlIO_printf(Perl_debug_log, " noscan");
@@ -4274,12 +4274,12 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 	{
 	    SV *lv;
 	    SV *sw = regclass_swash(o, FALSE, &lv);
-	    
+	
 	    if (lv) {
 		if (sw) {
 		    UV i;
 		    U8 s[UTF8_MAXLEN+1];
-		    
+		
 		    for (i = 0; i <= 256; i++) { /* just the first 256 */
 			U8 *e = uv_to_utf8(s, i);
 			
@@ -4288,7 +4288,7 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 				rangestart = i;
 			} else if (rangestart != -1) {
 			    U8 *p;
-			    
+			
 			    if (i <= rangestart + 3)
 				for (; rangestart < i; rangestart++) {
 				    for(e = uv_to_utf8(s, rangestart), p = s; p < e; p++)
@@ -4311,9 +4311,9 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 		{
 		    char *s = savepv(SvPVX(lv));
 		    char *origs = s;
-		    
+		
 		    while(*s && *s != '\n') s++;
-		    
+		
 		    if (*s == '\n') {
 			char *t = ++s;
 			
@@ -4327,7 +4327,7 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 			
 			sv_catpv(sv, t);
 		    }
-		    
+		
 		    Safefree(origs);
 		}
 	    }
@@ -4492,7 +4492,7 @@ S_re_croak2(pTHX_ const char* pat1,const char* pat2,...)
 
 void
 Perl_save_re_context(pTHX)
-{                   
+{
 #if 0
     SAVEPPTR(RExC_precomp);		/* uncompiled string. */
     SAVEI32(RExC_npar);		/* () count. */
@@ -4517,9 +4517,8 @@ Perl_save_re_context(pTHX)
     SAVEVPTR(PL_reglastparen);		/* Similarly for lastparen. */
     SAVEPPTR(PL_regtill);		/* How far we are required to go. */
     SAVEI8(PL_regprev);			/* char before regbol, \n if none */
-    SAVEVPTR(PL_reg_start_tmp);		/* from regexec.c */
+    SAVEGENERICPV(PL_reg_start_tmp);		/* from regexec.c */
     PL_reg_start_tmp = 0;
-    SAVEFREEPV(PL_reg_start_tmp);
     SAVEI32(PL_reg_start_tmpl);		/* from regexec.c */
     PL_reg_start_tmpl = 0;
     SAVEVPTR(PL_regdata);
@@ -4539,7 +4538,7 @@ Perl_save_re_context(pTHX)
     SAVEVPTR(PL_reg_curpm);		/* from regexec.c */
     SAVEI32(PL_regnpar);		/* () count. */
 #ifdef DEBUGGING
-    SAVEPPTR(PL_reg_starttry);		/* from regexec.c */    
+    SAVEPPTR(PL_reg_starttry);		/* from regexec.c */
 #endif
 }
 
