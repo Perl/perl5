@@ -88,13 +88,15 @@ SKIP: {
 
 	# avoid warning and death by localizing glob
 	local *ExtUtils::Installed::Config;
+    my $fake_mod_dir = File::Spec->catdir(cwd(), 'auto', 'FakeMod');
 	%ExtUtils::Installed::Config = (
-		archlib		=> cwd(),
-		sitearch	=> cwd() . 'auto/FakeMod',
+		archlib		   => cwd(),
+        installarchlib => cwd(),
+		sitearch	   => $fake_mod_dir,
 	);
 
 	# necessary to fool new()
-	push @INC, cwd() . '/auto/FakeMod';
+	push @INC, $fake_mod_dir;
 
 	my $realei = ExtUtils::Installed->new();
 	ok( exists $realei->{FakeMod}, 'new() should find modules with .packlists');
@@ -111,9 +113,9 @@ is( join(' ', $ei->modules()), 'abc def ghi',
 # files
 $ei->{goodmod} = { 
 	packlist => { 
-		$Config{installman1dir} . '/foo' => 1,
-		$Config{installman3dir} . '/bar' => 1,
-		$Config{prefix} . '/foobar' => 1,
+		File::Spec->catdir($Config{installman1dir}, 'foo') => 1,
+		File::Spec->catdir($Config{installman3dir}, 'bar') => 1,
+		File::Spec->catdir($Config{prefix}, 'foobar') => 1,
 		foobaz	=> 1,
 	},
 };
