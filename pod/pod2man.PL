@@ -678,8 +678,24 @@ $indent = 0;
 
 $begun = "";
 
-# Unrolling [^-=A-Z>]|[A-Z](?!<)|[-=][\x00-\xFF] gives:    // MRE pp 165.
-my $nonest = '(?:[^-=A-Z>]*(?:(?:[-=][\x00-\xFF]|[A-Z](?!<))[^-=A-Z>]*)*)';
+# Unrolling [^-=A-Z>]|[A-Z](?!<)|[-=](?![A-Z]<)[\x00-\xFF] gives: // MRE pp 165.
+my $nonest = '(?x)              # Turn on /x mode.
+              (?:               # Group
+                [^-=A-Z>]*      # Anything that isn't a dash, equal sign or
+                                # closing hook isn't special. Eat as much as
+                                # we can.
+                (?:             # Group.
+                  (?:           # Group.
+                    [-=]        # We want to recognize -> and =>.
+                    (?![A-Z]<)  # So, as long as it isn't followed by markup
+                    [\x00-\xFF] # anything may follow - and =
+                    |
+                    [A-Z]       # Capitals are fine too,
+                    (?!<)       # But not if they start markup.
+                  )             # End of special sequences.
+                  [^-=A-Z>]*    # Followed by zero or more non-special chars. 
+                )*              # And we can repeat this as often as we can.
+              )';               # That's all folks.
 
 while (<>) {
     if ($cutting) {

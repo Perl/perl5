@@ -5110,6 +5110,11 @@ ck_sort(OP *o)
 	o->op_private |= OPpLOCALE;
 #endif
 
+    if (o->op_type == OP_SORT) {
+        GvMULTI_on(gv_fetchpv("a", TRUE, SVt_PV)); 
+        GvMULTI_on(gv_fetchpv("b", TRUE, SVt_PV)); 
+    }
+
     if (o->op_flags & OPf_STACKED)
 	simplify_sort(o);
     if (o->op_flags & OPf_STACKED) {		     /* may have been cleared */

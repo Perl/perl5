@@ -2598,7 +2598,7 @@ follows:
 
     i	A signed integer value.
     I	An unsigned integer value.
-	  (This 'integer' is _at_least_ 32 bits wide.  Its exact
+	  (This 'integer' is _at least_ 32 bits wide.  Its exact
            size depends on what a local C compiler calls 'int',
            and may even be larger than the 'long' described in
            the next item.)
@@ -2679,16 +2679,16 @@ C<"P"> is C<undef>.
 =item *
 
 The integer types C<"s">, C<"S">, C<"l">, and C<"L"> may be
-immediately followed by a C<"_"> to signify native shorts or longs--as
+immediately followed by a C<"!"> to signify native shorts or longs--as
 you can see from above for example a bare C<"l"> does mean exactly 32
 bits, the native C<long> (as seen by the local C compiler) may be
 larger.  This is an issue mainly in 64-bit platforms.  You can see
-whether using C<"_"> makes any difference by
+whether using C<"!"> makes any difference by
 
-	print length(pack("s")), " ", length(pack("s_")), "\n";
-	print length(pack("l")), " ", length(pack("l_")), "\n";
+	print length(pack("s")), " ", length(pack("s!")), "\n";
+	print length(pack("l")), " ", length(pack("l!")), "\n";
 
-C<"i_"> and C<"I_"> also work but only because of completeness;
+C<"i!"> and C<"I!"> also work but only because of completeness;
 they are identical to C<"i"> and C<"I">.
 
 The actual sizes (in bytes) of native shorts, ints, and longs on

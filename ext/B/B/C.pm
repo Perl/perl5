@@ -1301,12 +1301,6 @@ sub descend_marked_unused {
     }
 }
 
-sub descend_marked_unused {
-    foreach my $pack (keys %unused_sub_packages)
-    {
-    	mark_package($pack);
-    }
-}
  
 sub save_main {
     warn "Starting compile\n";

@@ -44,7 +44,7 @@ $port = $listen->sockport;
 
 if($pid = fork()) {
 
-    $sock = $listen->accept();
+    $sock = $listen->accept() or die "accept failed: $!";
     print "ok 2\n";
 
     $sock->autoflush(1);

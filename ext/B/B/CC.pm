@@ -8,10 +8,10 @@
 package B::CC;
 use strict;
 use B qw(main_start main_root class comppadlist peekop svref_2object
-	timing_info init_av  
+	timing_info init_av  sv_undef
 	OPf_WANT_LIST OPf_WANT OPf_MOD OPf_STACKED OPf_SPECIAL
 	OPpASSIGN_BACKWARDS OPpLVAL_INTRO OPpDEREF_AV OPpDEREF_HV
-	OPpDEREF OPpFLIP_LINENUM G_ARRAY     
+	OPpDEREF OPpFLIP_LINENUM G_ARRAY G_SCALAR    
 	CXt_NULL CXt_SUB CXt_EVAL CXt_LOOP CXt_SUBST CXt_BLOCK
 	);
 use B::C qw(save_unused_subs objsym init_sections mark_unused
@@ -444,7 +444,7 @@ sub doop {
 sub gimme {
     my $op = shift;
     my $flags = $op->flags;
-    return (($flags & OPf_WANT) ? ($flags & OPf_WANT_LIST) : "dowantarray()");
+    return (($flags & OPf_WANT) ? (($flags & OPf_WANT)== OPf_WANT_LIST? G_ARRAY:G_SCALAR) : "dowantarray()");
 }
 
 #
@@ -459,10 +459,12 @@ sub pp_null {
 sub pp_stub {
     my $op = shift;
     my $gimme = gimme($op);
-    if ($gimme != 1) {
+    if ($gimme != G_ARRAY) {
+	my $obj= new B::Stackobj::Const(sv_undef);
+    	push(@stack, $obj);
 	# XXX Change to push a constant sv_undef Stackobj onto @stack
-	write_back_stack();
-	runtime("if ($gimme != G_ARRAY) XPUSHs(&PL_sv_undef);");
+	#write_back_stack();
+	#runtime("if ($gimme != G_ARRAY) XPUSHs(&PL_sv_undef);");
     }
     return $op->next;
 }
@@ -921,7 +923,7 @@ sub pp_list {
     my $op = shift;
     write_back_stack();
     my $gimme = gimme($op);
-    if ($gimme == 1) { # sic
+    if ($gimme == G_ARRAY) { # sic
 	runtime("POPMARK;"); # need this even though not a "full" pp_list
     } else {
 	runtime("PP_LIST($gimme);");
@@ -939,6 +941,20 @@ sub pp_entersub {
     runtime("SPAGAIN;}");
     $know_op = 0;
     invalidate_lexicals(REGISTER|TEMPORARY);
+    return $op->next;
+}
+sub pp_formline {
+    my $op = shift;
+    my $ppname = $op->ppaddr;
+    write_label($op);
+    write_back_lexicals() unless $skip_lexicals{$ppname};
+    write_back_stack() unless $skip_stack{$ppname};
+    my $sym=doop($op);
+    # See comment in pp_grepwhile to see why!
+    $init->add("((LISTOP*)$sym)->op_first = $sym;");    
+    runtime("if  (PL_op != ($sym)->op_next && PL_op != (OP*)0 ){");
+    runtime( sprintf("goto %s;",label($op)));
+    runtime("}");
     return $op->next;
 }
 
@@ -996,10 +1012,17 @@ sub pp_entertry {
     write_back_stack();
     my $sym = doop($op);
     my $jmpbuf = sprintf("jmpbuf%d", $jmpbuf_ix++);
-    declare("Sigjmp_buf", $jmpbuf);
+    declare("JMPENV", $jmpbuf);
     runtime(sprintf("PP_ENTERTRY(%s,%s);", $jmpbuf, label($op->other->next)));
     invalidate_lexicals(REGISTER|TEMPORARY);
     return $op->next;
+}
+
+sub pp_leavetry{
+	my $op=shift;
+	default_pp($op);
+	runtime("PP_LEAVETRY;");
+    	return $op->next;
 }
 
 sub pp_grepstart {

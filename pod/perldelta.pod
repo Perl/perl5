@@ -156,7 +156,7 @@ now correctly prints "3|a", instead of "2|a".
 The new format type 'Z' is useful for packing and unpacking null-terminated
 strings.  See L<perlfunc/"pack">.
 
-=head2 pack() format modifier '_' supported
+=head2 pack() format modifier '!' supported
 
 The new format type modifer '!' is useful for packing and unpacking
 native shorts, ints, and longs.  See L<perlfunc/"pack">.

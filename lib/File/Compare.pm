@@ -23,7 +23,7 @@ sub compare {
       unless(@_ == 2 || @_ == 3);
 
     my ($from,$to,$size) = @_;
-    my $text_mode = defined($size) && $size < 0;
+    my $text_mode = defined($size) && (ref($size) eq 'CODE' || $size < 0);
 
     my ($fromsize,$closefrom,$closeto);
     local (*FROM, *TO);
@@ -65,8 +65,12 @@ sub compare {
 	local $/ = "\n";
 	my ($fline,$tline);
 	while (defined($fline = <FROM>)) {
-	    unless (defined($tline = <TO>) && $fline eq $tline) {
-		goto fail_inner;
+	    goto fail_inner unless defined($tline = <TO>);
+	    if (ref $size) {
+		# $size contains ref to comparison function
+		goto fail_inner if &$size($fline, $tline);
+	    } else {
+		goto fail_inner if $fline ne $tline;
 	    }
 	}
 	goto fail_inner if defined($tline = <TO>);
@@ -113,8 +117,17 @@ sub compare {
 
 *cmp = \&compare;
 
-# Using a negative buffer size puts compare into text_mode
-sub compare_text { compare(@_[0..1], -1) }
+sub compare_text {
+    my ($from,$to,$cmp) = @_;
+    croak("Usage: compare_text( file1, file2 [, cmp-function])")
+	unless @_ == 2 || @_ == 3;
+    croak("Third arg to compare_text() function must be a code reference")
+	if @_ == 3 && ref($cmp) ne 'CODE';
+
+    # Using a negative buffer size puts compare into text_mode too
+    $cmp = -1 unless defined $cmp;
+    compare($from, $to, $cmp);
+}
 
 1;
 
@@ -142,7 +155,16 @@ File::Compare::cmp is a synonym for File::Compare::compare.  It is
 exported from File::Compare only by request.
 
 File::Compare::compare_text does a line by line comparison of the two
-files. It stops as soon as a difference is detected.
+files. It stops as soon as a difference is detected. compare_text()
+accepts an optional third argument: This must be a CODE reference to
+a line comparison function, which returns 0 when both lines are considered
+equal. For example:
+
+    compare_text($file1, $file2)
+
+is basically equivalent to
+
+    compare_text($file1, $file2, sub {$_[0] ne $_[1]} )
 
 =head1 RETURN
 

@@ -36,7 +36,7 @@ README.amiga		Notes about AmigaOS port
 README.beos		Notes about BeOS port
 README.cygwin32		Notes about Cygwin32 port
 README.dos		Notes about dos/djgpp port
-README.hpux		Notes about HP/UX port
+README.hpux		Notes about HP-UX port
 README.lexwarn		Notes about lexical warnings
 README.mint		Notes about Atari MiNT port
 README.mpeix		Notes about MPE/iX port
@@ -170,6 +170,7 @@ ext/B/B/Disassembler.pm	Compiler Disassembler backend
 ext/B/B/Lint.pm		Compiler Lint backend
 ext/B/B/Showlex.pm	Compiler Showlex backend
 ext/B/B/Stackobj.pm	Compiler stack objects support functions
+ext/B/B/Stash.pm	Compiler module to identify stashes
 ext/B/B/Terse.pm	Compiler Terse backend
 ext/B/B/Xref.pm		Compiler Xref backend
 ext/B/B/assemble	Assemble compiler bytecode
