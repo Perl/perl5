@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Feb 12 13:46:36 EET 1999 [metaconfig 3.0 PL70]
+# Generated on Thu Feb 18 00:56:58 EET 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -2075,8 +2075,8 @@ EOM
 		[23]100) osname=mips ;;
 		next*) osname=next ;;
 		i386*)
-			tmp=`/bin/uname -X 2>/dev/null|awk -e '/3\.2v[45]/{ print $(NF) }'`
-			if $test "$tmp" != "" -a "$3" = "3.2" -a test -e '/etc/systemid'; then
+			tmp=`/bin/uname -X 2>/dev/null|awk '/3\.2v[45]/{ print $(NF) }'`
+			if $test "$tmp" != "" -a "$3" = "3.2" -a -f '/etc/systemid'; then
 				osname='sco'
 				osvers=$tmp
 			elif $test -f /etc/kconfig; then
@@ -2487,12 +2487,7 @@ cat <<EOM
 
 Perl can be built to take advantage of threads, on some systems.
 To do so, Configure must be run with -Dusethreads.
-
-Note that threading is a highly experimental feature, and
-some known race conditions still remain.  If you choose to try
-it, be very sure to not actually deploy it for production
-purposes.  README.threads has more details, and is required
-reading if you enable threads.
+(See README.threads for details.)
 EOM
 case "$usethreads" in
 $define|true|[yY]*)     dflt='y';;
@@ -3029,8 +3024,8 @@ baserev=5.0
 echo " "
 echo "Getting the current patchlevel..." >&4
 if $test -r $rsrc/patchlevel.h;then
-	patchlevel=`awk '/define[ 	]+PERL_VERSION/ {print $3}' $rsrc/patchlevel.h`
-	subversion=`awk '/define[ 	]+PERL_SUBVERSION/ {print $3}' $rsrc/patchlevel.h`
+	patchlevel=`awk '/define[ 	]+PATCHLEVEL/ {print $3}' $rsrc/patchlevel.h`
+	subversion=`awk '/define[ 	]+SUBVERSION/ {print $3}' $rsrc/patchlevel.h`
 else
 	patchlevel=0
 	subversion=0
@@ -4965,7 +4960,7 @@ nm_extract="$com"
 if $test -f /lib/syscalls.exp; then
 	echo " "
 	echo "Also extracting names from /lib/syscalls.exp for good ole AIX..." >&4
-	$sed -n 's/^\([^ 	]*\)[ 	]*syscall$/\1/p' /lib/syscalls.exp >>libc.list
+	$sed -n 's/^\([^ 	]*\)[ 	]*syscall[0-9]*$/\1/p' /lib/syscalls.exp >>libc.list
 fi
 ;;
 esac
@@ -8770,7 +8765,7 @@ int main() {
 EOCP
 	set try -DJOINABLE=PTHREAD_CREATE_JOINABLE
 	if eval $compile; then
-		echo "You seem to use PTHREAD_CREATE_JOINABLE." >&2
+		echo "You seem to use PTHREAD_CREATE_JOINABLE." >&4
 		val="$undef" # Yes, undef.
 		set d_old_pthread_create_joinable
 		eval $setvar
@@ -8780,7 +8775,7 @@ EOCP
 	else
 		set try -DJOINABLE=PTHREAD_CREATE_UNDETACHED
 		if eval $compile; then
-			echo "You seem to use PTHREAD_CREATE_UNDETACHED." >&2
+			echo "You seem to use PTHREAD_CREATE_UNDETACHED." >&4
 			val="$define"
 			set d_old_pthread_create_joinable
 			eval $setvar
@@ -8790,7 +8785,7 @@ EOCP
 		else		
 			set try -DJOINABLE=__UNDETACHED
 			if eval $compile; then
-				echo "You seem to use __UNDETACHED." >&2
+				echo "You seem to use __UNDETACHED." >&4
 				val="$define"
 				set d_old_pthread_create_joinable
 				eval $setvar
@@ -8798,7 +8793,7 @@ EOCP
 				set old_pthread_create_joinable
 				eval $setvar
 			else
-				echo "Egads, nothing obvious found.  Guessing that you use 0." >&2
+				echo "Egads, nothing obvious found.  Guessing that you use 0." >&4
 				val="$define"
 				set d_old_pthread_create_joinable
 				eval $setvar
@@ -13164,7 +13159,7 @@ $test -f UU/cmdline.opt && $cat UU/cmdline.opt >> config.sh
 
 : add special variables
 $test -f $src/patchlevel.h && \
-awk '/^#define[ 	]+PERL_/ {printf "%s=%s\n",$2,$3}' $src/patchlevel.h >>config.sh
+awk '/^#define/ {printf "%s=%s\n",$2,$3}' $src/patchlevel.h >>config.sh
 echo "CONFIG=true" >>config.sh
 
 : propagate old symbols
