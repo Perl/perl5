@@ -932,9 +932,10 @@ while (fetch_para()) {
 
     $func_header = shift(@line);
     blurt ("Error: Cannot parse function definition from '$func_header'"), next PARAGRAPH
-	unless $func_header =~ /^(?:([\w:]*)::)?(\w+)\s*\(\s*(.*?)\s*\)\s*$/s;
+	unless $func_header =~ /^(?:([\w:]*)::)?(\w+)\s*\(\s*(.*?)\s*\)\s*(const)?\s*$/s;
 
     ($class, $func_name, $orig_args) =  ($1, $2, $3) ;
+    $class = "$4 $class" if $4;
     ($pname = $func_name) =~ s/^($Prefix)?/$Packprefix/;
     ($clean_func_name = $func_name) =~ s/^$Prefix//;
     $Full_func_name = "${Packid}_$clean_func_name";
