@@ -124,8 +124,8 @@ my $foo = $deparse->coderef2text(sub { { 234; }});
 print "not " unless $foo =~ /{.*{.*234;.*}.*}/sm;
 ok;
 $foo = $deparse->coderef2text(sub { { 234; } continue { 123; } });
-unless ($foo =~ /{\s*{\s*234\s*}\s*continue\s*{\s*123;\s*}/sm) {
-  print "# [$foo]\n\# vs expected\n# [sub { { 234 } continue { 123; } }]\n";
+unless ($foo =~ /{\s*{\s*234;\s*}\s*continue\s*{\s*123;\s*}/sm) {
+  print "# [$foo]\n\# vs expected\n# [sub { { 234; } continue { 123; } }]\n";
   print "not ";
 }
 ok;
