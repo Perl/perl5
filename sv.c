@@ -3596,6 +3596,8 @@ sv_inc(register SV *sv)
 
     if (!sv)
 	return;
+    if (SvGMAGICAL(sv))
+	mg_get(sv);
     if (SvTHINKFIRST(sv)) {
 	if (SvREADONLY(sv)) {
 	    dTHR;
@@ -3612,8 +3614,6 @@ sv_inc(register SV *sv)
 	    sv_setiv(sv, i);
 	}
     }
-    if (SvGMAGICAL(sv))
-	mg_get(sv);
     flags = SvFLAGS(sv);
     if (flags & SVp_NOK) {
 	(void)SvNOK_only(sv);
@@ -3690,6 +3690,8 @@ sv_dec(register SV *sv)
 
     if (!sv)
 	return;
+    if (SvGMAGICAL(sv))
+	mg_get(sv);
     if (SvTHINKFIRST(sv)) {
 	if (SvREADONLY(sv)) {
 	    dTHR;
@@ -3706,8 +3708,6 @@ sv_dec(register SV *sv)
 	    sv_setiv(sv, i);
 	}
     }
-    if (SvGMAGICAL(sv))
-	mg_get(sv);
     flags = SvFLAGS(sv);
     if (flags & SVp_NOK) {
 	SvNVX(sv) -= 1.0;
