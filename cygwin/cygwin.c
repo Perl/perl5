@@ -146,7 +146,7 @@ XS(Cygwin_cwd)
 
     if(items != 0)
 	Perl_croak(aTHX_ "Usage: Cwd::cwd()");
-    if((cwd = getcwd(NULL, 0))) {
+    if((cwd = getcwd(NULL, -1))) {
 	ST(0) = sv_2mortal(newSVpv(cwd, 0));
 	safesysfree(cwd);
 	XSRETURN(1);

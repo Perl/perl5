@@ -686,7 +686,7 @@ The ActiveState Pages, http://www.activestate.com/
 =item *
 
 The Cygwin environment for Win32; F<README.cygwin> (installed 
-as L<perlcygwin>), http://sources.redhat.com/cygwin/
+as L<perlcygwin>), http://www.cygwin.com/
 
 =item *
 

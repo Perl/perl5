@@ -1981,7 +1981,7 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
 
 #ifdef USE_ENVIRON_ARRAY
        /* VMS' and EPOC's my_setenv() is in vms.c and epoc.c */
-#if !defined(WIN32) && !defined(__CYGWIN__)
+#if !defined(WIN32)
 void
 Perl_my_setenv(pTHX_ char *nam, char *val)
 {
@@ -2023,50 +2023,19 @@ Perl_my_setenv(pTHX_ char *nam, char *val)
     (void)sprintf(environ[i],"%s=%s",nam,val);/* all that work just for this */
 
 #else   /* PERL_USE_SAFE_PUTENV */
+#   if defined(__CYGWIN__)
+    setenv(nam, val, 1);
+#   else
     char *new_env;
 
     new_env = (char*)safesysmalloc((strlen(nam) + strlen(val) + 2) * sizeof(char));
     (void)sprintf(new_env,"%s=%s",nam,val);/* all that work just for this */
     (void)putenv(new_env);
+#   endif /* __CYGWIN__ */
 #endif  /* PERL_USE_SAFE_PUTENV */
 }
 
-#else /* WIN32 || __CYGWIN__ */
-#if defined(__CYGWIN__)
-/*
- * Save environ of perl.exe, currently Cygwin links in separate environ's
- * for each exe/dll.  Probably should be a member of impure_ptr.
- */
-static char ***Perl_main_environ;
-
-EXTERN_C void
-Perl_my_setenv_init(char ***penviron)
-{
-    Perl_main_environ = penviron;
-}
-
-void
-Perl_my_setenv(pTHX_ char *nam, char *val)
-{
-    /* You can not directly manipulate the environ[] array because
-     * the routines do some additional work that syncs the Cygwin
-     * environment with the Windows environment.
-     */
-    char *oldstr = environ[setenv_getix(nam)];
-
-    if (!val) {
-       if (!oldstr)
-           return;
-       unsetenv(nam);
-       safesysfree(oldstr);
-       return;
-    }
-    setenv(nam, val, 1);
-    environ = *Perl_main_environ; /* environ realloc can occur in setenv */
-    if(oldstr && environ[setenv_getix(nam)] != oldstr)
-       safesysfree(oldstr);
-}
-#else /* if WIN32 */
+#else /* WIN32 */
 
 void
 Perl_my_setenv(pTHX_ char *nam,char *val)
@@ -2127,7 +2096,6 @@ Perl_my_setenv(pTHX_ char *nam,char *val)
 }
 
 #endif /* WIN32 */
-#endif
 
 I32
 Perl_setenv_getix(pTHX_ char *nam)
