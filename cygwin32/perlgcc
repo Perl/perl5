@@ -60,13 +60,6 @@ $libdir =~ s/libcygwin\.a//g;
 $crt0   =~ s:\\:/:g;
 $libdir =~  s:\\:/:g;
 
-# when $crt0 and $libdir get used in the system calls below, the \'s
-# from the gcc -print-file-name get used to create special characters,
-# such as \n, \t.  Replace the \'s with /'s so that this does not
-# happen:
-$crt0   =~ s:\\:/:g;
-$libdir =~ s:\\:/:g;
-
 # Link exe:
 $command = "ld --base-file perl.base -o perl.exe $crt0 $obsString $libstring -L$libdir $libflagString";
 print "$command\n";
