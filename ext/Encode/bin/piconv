@@ -1,5 +1,5 @@
 #!./perl
-# $Id: piconv,v 1.22 2002/04/16 23:35:00 dankogai Exp $
+# $Id: piconv,v 1.23 2002/04/19 05:36:43 dankogai Exp $
 #
 use 5.7.3;
 use strict;
@@ -19,7 +19,7 @@ my $to   = $Opt{t} || $locale or help("to_encoding unspecified");
 $Opt{s} and Encode::from_to($Opt{s}, $from, $to) and print $Opt{s} and exit;
 my $scheme = exists $Scheme{$Opt{S}} ? $Opt{S} :  'from_to';
 $Opt{C} ||= $Opt{c};
-$Opt{p} and $Opt{C} = -1;
+$Opt{p} and $Opt{C} = Encode::FB_PERLQQ;
 
 if ($Opt{D}){
     my $cfrom = Encode->getEncoding($from)->name;

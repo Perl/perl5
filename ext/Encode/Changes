@@ -1,9 +1,48 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.42 2002/04/17 03:01:20 dankogai Exp dankogai $
+# $Id: Changes,v 1.50 2002/04/19 06:13:02 dankogai Exp $
 #
+1.50 $Date: 2002/04/19 06:13:02 $
+! ! Encode.pm Encode.xs Encode/encoding.h
++ t/fallback.pm
+  New Fallback API imlemented and documented.  See "perldoc Encode"
+  for details
+! lib/Encode/JP/JIS7.pm Encode.pm
++ lib/Encode/PerlIO.pod t/perlio.t
+  API compliance met.  However, it still does not work unless perlio
+  implements line buffer.  See BUGS section in perldoc Encode::PerlIO
+  As a sensible workaround, perlio_ok() added to Encode.
+! encoding.pm
+! lib/Encode/Supported.pod
+  Doc fixes from jhi
+  Message-Id: <20020418174647.J8466@alpha.hut.fi>
+! CN/CN.pm
+  Doc fixes from Autrijus
+  Message-Id: <20020418144131.GA10987@not.autrijus.org>
+! Encode.pm
+  perlqq mode documented
+! t/JP.t
++ t/jisx0201.euc t/jisx0201.ref
+! t/jisx0208.euc t/jisx0208.ref
+  t/JP.t tests more rigorously and with other encodings
+  t/jisx0201.* added to test JIS7 encodings.  jisx0208 is now PURELY
+  in jis0208 (used to contain jisx0201 part).
+! Encode/Makefile_PL.e2x
+  The resulting Makefile.PL that "enc2xs -M" creates now auto-discovers 
+  enc2xs and encode.h rather than hard-coded.  This allows the resulting
+  module fully CPANizable.
+! encoding.pm t/JP.t t/KR.t
+  PerlIO detection simplified (checks %INC instead of eval{})
+! Encode.xs Encode/encode.h
++ Unicode/Makefile.PL Unicode/Unicode.pm Unicode/Unicode.xs
+- lib/Encode/Unicode.pm
+  (en|de)code_xs relocated to where it belongs.  Source reindented
+  to my taste
+! bin/enc2xs
+  Additional (U8 *) cast added as suggested by jhi
+  Message-Id: <20020417165916.A28599@alpha.hut.fi>
 
-1.42 $Date: 2002/04/17 03:01:20 $
+1.42 Date: 2002/04/17
 - lib/Encode/XS.pm
   no-op module;  Thought of adding a pod there but enc2xs has
   one so gone.
@@ -335,7 +374,7 @@
   Typo fixes and improvements by jhi
   Message-Id: <200204010201.FAA03564@alpha.hut.fi>, et al.
 
-1.11  $Date: 2002/04/17 03:01:20 $
+1.11  $Date: 2002/04/19 06:13:02 $
 + t/encoding.t
 + t/jperl.t
 ! MANIFEST

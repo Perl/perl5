@@ -3,41 +3,10 @@ package Encode::Unicode;
 use strict;
 use warnings;
 
-our $VERSION = do { my @r = (q$Revision: 1.31 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.32 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
-#
-# Aux. subs & constants
-#
-
-sub FBCHAR(){ 0xFFFd }
-sub BOM_BE(){ 0xFeFF }
-sub BOM16LE(){ 0xFFFe }
-sub BOM32LE(){ 0xFFFe0000 }
-
-sub valid_ucs2($){
-    return 
-	(0 <= $_[0] && $_[0] < 0xD800) 
-	    || 	( 0xDFFF < $_[0] && $_[0] <= 0xFFFF);
-}
-
-sub issurrogate($){   0xD800 <= $_[0]  && $_[0] <= 0xDFFF }
-sub isHiSurrogate($){ 0xD800 <= $_[0]  && $_[0] <  0xDC00 }
-sub isLoSurrogate($){ 0xDC00 <= $_[0]  && $_[0] <= 0xDFFF }
-
-sub ensurrogate($){
-    use integer; # we have divisions
-    my $uni = shift;
-    my  $hi = ($uni - 0x10000) / 0x400 + 0xD800;
-    my  $lo = ($uni - 0x10000) % 0x400 + 0xDC00;
-    return ($hi, $lo);
-}
-
-sub desurrogate($$){
-    my ($hi, $lo) = @_;
-    return 0x10000 + ($hi - 0xD800)*0x400 + ($lo - 0xDC00);
-}
-
-sub Mask { {2 => 0xffff,  4 => 0xffffffff} }
+use XSLoader;
+XSLoader::load(__PACKAGE__,$VERSION);
 
 #
 # Object Generator 8 transcoders all at once!
@@ -103,6 +72,40 @@ sub set_transcoder{
 }
 
 set_transcoder("xs");
+
+#
+# Aux. subs & constants
+#
+
+sub FBCHAR(){ 0xFFFd }
+sub BOM_BE(){ 0xFeFF }
+sub BOM16LE(){ 0xFFFe }
+sub BOM32LE(){ 0xFFFe0000 }
+
+sub valid_ucs2($){
+    return 
+	(0 <= $_[0] && $_[0] < 0xD800) 
+	    || 	( 0xDFFF < $_[0] && $_[0] <= 0xFFFF);
+}
+
+sub issurrogate($){   0xD800 <= $_[0]  && $_[0] <= 0xDFFF }
+sub isHiSurrogate($){ 0xD800 <= $_[0]  && $_[0] <  0xDC00 }
+sub isLoSurrogate($){ 0xDC00 <= $_[0]  && $_[0] <= 0xDFFF }
+
+sub ensurrogate($){
+    use integer; # we have divisions
+    my $uni = shift;
+    my  $hi = ($uni - 0x10000) / 0x400 + 0xD800;
+    my  $lo = ($uni - 0x10000) % 0x400 + 0xDC00;
+    return ($hi, $lo);
+}
+
+sub desurrogate($$){
+    my ($hi, $lo) = @_;
+    return 0x10000 + ($hi - 0xD800)*0x400 + ($lo - 0xDC00);
+}
+
+sub Mask { {2 => 0xffff,  4 => 0xffffffff} }
 
 #
 # *_modern are much faster but guzzle more memory

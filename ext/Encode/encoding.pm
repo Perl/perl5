@@ -1,5 +1,5 @@
 package encoding;
-our $VERSION = do { my @r = (q$Revision: 1.28 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.30 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode;
 use strict;
@@ -11,15 +11,8 @@ BEGIN {
     }
 }
 
-our $HAS_PERLIO_ENCODING;
-
-eval { require PerlIO::encoding; };
-if ($@){
-    $HAS_PERLIO_ENCODING = 0;
-}else{
-    $HAS_PERLIO_ENCODING = 1;
-    binmode(STDIN);
-}
+our $HAS_PERLIO = exists $INC{"PerlIO/encoding.pm"};
+$HAS_PERLIO or binmode(STDIN);
 
 sub import {
     my $class = shift;
@@ -34,7 +27,7 @@ sub import {
     }
     unless ($arg{Filter}){
 	${^ENCODING} = $enc; # this is all you need, actually.
-	$HAS_PERLIO_ENCODING or return 1;
+	$HAS_PERLIO or return 1;
 	for my $h (qw(STDIN STDOUT)){
 	    if ($arg{$h}){
 		unless (defined find_encoding($arg{$h})) {
@@ -85,6 +78,7 @@ sub unimport{
 
 1;
 __END__
+
 =pod
 
 =head1 NAME

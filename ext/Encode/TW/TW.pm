@@ -4,7 +4,7 @@ BEGIN {
 	die "Encode::TW not supported on EBCDIC\n";
     }
 }
-our $VERSION = do { my @r = (q$Revision: 1.21 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.22 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode;
 use XSLoader;
@@ -43,14 +43,14 @@ To find how to use this module in detail, see L<Encode>.
 
 =head1 NOTES
 
-Due to size concerns, C<EUC-TW> (Extended Unix Character) and C<BIG5PLUS>
+Due to size concerns, C<EUC-TW> (Extended Unix Character), C<CCCII>
+(Chinese Character Code for Information Interchange) and C<BIG5PLUS>
 (CMEX's Big5+) are distributed separately on CPAN, under the name
 L<Encode::HanExtra>. That module also contains extra China-based encodings.
 
 =head1 BUGS
 
-The C<CNS11643> encoding files are not complete (only the first two planes,
-C<11643-1> and C<11643-2>, exist in the distribution). For common CNS11643
+The C<CNS11643> encoding files are not complete. For common C<CNS11643>
 manipulation, please use C<EUC-TW> in L<Encode::HanExtra>, which contains
 plane 1-7.
 
@@ -63,6 +63,6 @@ to find why it is implemented that way.
 
 =head1 SEE ALSO
 
-L<Encode>,L<Encode::CJKguide>
+L<Encode>
 
 =cut

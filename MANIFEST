@@ -224,6 +224,9 @@ ext/Encode/Symbol/Makefile.PL     Encode extension
 ext/Encode/Symbol/Symbol.pm       Encode extension
 ext/Encode/TW/Makefile.PL	Encode extension
 ext/Encode/TW/TW.pm		Encode extension
+ext/Encode/Unicode/Makefile.PL	Encode extension
+ext/Encode/Unicode/Unicode.pm	Encode extension
+ext/Encode/Unicode/Unicode.xs	Encode extension
 ext/Encode/bin/enc2xs	Encode module generator
 ext/Encode/bin/piconv	iconv by perl
 ext/Encode/bin/ucm2table	Table Generator for testing
@@ -240,8 +243,8 @@ ext/Encode/lib/Encode/Encoding.pm	Encode extension
 ext/Encode/lib/Encode/JP/H2Z.pm		Encode extension
 ext/Encode/lib/Encode/JP/JIS7.pm	Encode extension
 ext/Encode/lib/Encode/KR/2022_KR.pm	 Encode extension
-ext/Encode/lib/Encode/Supported.pod	Documents supported encodings
-ext/Encode/lib/Encode/Unicode.pm	Encode extension
+ext/Encode/lib/Encode/PerlIO.pod	Documents for Encode & PerlIO
+ext/Encode/lib/Encode/Supported.pod	Documents for supported encodings
 ext/Encode/t/Aliases.t	Encode extension test
 ext/Encode/t/CN.t		Encode extension test
 ext/Encode/t/Encode.t		Encode extension test
@@ -252,9 +255,12 @@ ext/Encode/t/TW.t		Encode extension test
 ext/Encode/t/Unicode.t	Encode extension test
 ext/Encode/t/bogus.ucm	Sample data for ucmlint
 ext/Encode/t/encoding.t	encoding extension test
+ext/Encode/t/fallback.t	Encode extension test
 ext/Encode/t/gb2312.euc	test data
 ext/Encode/t/gb2312.ref	test data
 ext/Encode/t/grow.t	Encode extension test
+ext/Encode/t/jisx0201.euc	test data
+ext/Encode/t/jisx0201.ref	test data
 ext/Encode/t/jisx0208.euc	test data
 ext/Encode/t/jisx0208.ref	test data
 ext/Encode/t/jisx0212.euc	test data
@@ -262,6 +268,7 @@ ext/Encode/t/jisx0212.ref	test data
 ext/Encode/t/jperl.t	encoding extension test
 ext/Encode/t/ksc5601.euc	test data
 ext/Encode/t/ksc5601.ref	test data
+ext/Encode/t/perlio.t
 ext/Encode/t/unibench.pl	Unicode benchmark
 ext/Encode/ucm/8859-1.ucm	Unicode Character Map
 ext/Encode/ucm/8859-10.ucm	Unicode Character Map
