@@ -2137,7 +2137,8 @@ Perl_moreswitches(pTHX_ char *s)
 		}
 	    } else {
                 if (s == start)
-                    Perl_croak(aTHX_ "Module name required with -M option");
+                    Perl_croak(aTHX_ "Module name required with -%c option",
+			       s[-1]);
 		sv_catpvn(sv, start, s-start);
 		sv_catpv(sv, " split(/,/,q{");
 		sv_catpv(sv, ++s);
