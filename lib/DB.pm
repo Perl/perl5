@@ -406,8 +406,7 @@ sub _find_subline {
   $name = "main" . $name if substr($name,0,2) eq "::";
   my($fname, $from, $to) = ($DB::sub{$name} =~ /^(.*):(\d+)-(\d+)$/);
   if ($from) {
-    # XXX this needs local()-ization of some sort
-    *DB::dbline = "::_<$fname";
+    local *DB::dbline = "::_<$fname";
     ++$from while $DB::dbline[$from] == 0 && $from < $to;
     return $from;
   }
