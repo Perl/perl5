@@ -84,7 +84,7 @@ on the build partition.
 b) when extraction perl5.*.tar.gz you need to extract perl5.*/Configure
 separately, since by default perl5.001m/configure may overwrite it;
 	like this:
-		tar vzxf perl5.004.tar.gz perl5.004/Configure
+		tar vzxf perl5.004.tar.gz --case-sensitive perl5.004/Configure
 
 c) Necessary manual intervention when compiling on OS/2:
 
@@ -212,13 +212,14 @@ cannot test it.
 OS/2 extensions
 ~~~~~~~~~~~~~~~
 I include 3 extensions by Andread Kaiser, OS2::REXX, OS2::UPM, and OS2::FTP, 
-with minor changes needed to compile them by standard tools. I cannot 
+into my ftp directory, mirrored on CPAN. I made
+some minor changes needed to compile them by standard tools. I cannot 
 test UPM and FTP, so I will appreciate your feedback.
 
 The -R switch of older perl is deprecated. If you need to call a REXX code
 which needs access to variables, include the call into a REXX compartment
 created by 
-	REXX_call {block};
+	REXX_call {...block...};
 
 Two new functions are supported by REXX code, 
 	REXX_eval 'string';

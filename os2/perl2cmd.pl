@@ -22,7 +22,7 @@ foreach $file (<$idir/*.>) {
   $base =~ s|.*/||;
   $file =~ s|/|\\|g ;
   print "Processing $file => $dir\\$base.cmd\n";
-  system "echo extproc perl -S > $dir\\$base.cmd";
-  system "type $file >> $dir\\$base.cmd";
+  system 'cmd.exe', '/c', "echo extproc perl -Sx > $dir\\$base.cmd";
+  system 'cmd.exe', '/c', "type $file >> $dir\\$base.cmd";
 }
 

@@ -19,7 +19,8 @@ perl5.def: perl.linkexp
 	echo DATA LOADONCALL NONSHARED MULTIPLE		>>$@
 	echo EXPORTS					>>$@
 	echo '  "ctermid"'				>>$@
-	echo '  "settmppath"'				>>$@
+	echo '  "Perl_OS2_init"'			>>$@
+	echo '  "OS2_Perl_data"'			>>$@
 !NO!SUBS!
 
 if [ ! -z "$myttyname" ] ; then
