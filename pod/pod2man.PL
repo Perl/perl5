@@ -8,6 +8,7 @@ use File::Basename qw(&basename &dirname);
 # have to mention them as if they were shell variables, not
 # %Config entries.  Thus you write
 #  $startperl
+#  $man3ext
 # to ensure Configure will look for $Config{startperl}.
 
 # This forces PL files to create target in same directory as PL file.
@@ -27,6 +28,8 @@ print OUT <<"!GROK!THIS!";
 $Config{startperl}
     eval 'exec $Config{perlpath} -S \$0 \${1+"\$@"}'
 	if \$running_under_some_shell;
+
+\$DEF_PM_SECTION = '$Config{man3ext}' || '3';
 !GROK!THIS!
 
 # In the following, perl variables are not expanded during extraction.
@@ -367,7 +370,8 @@ usage("Usage error!") unless $uok;
 usage() if $opt_help;
 usage("Need one and only one podpage argument") unless @ARGV == 1;
 
-$section = $opt_section || ($ARGV[0] =~ /\.pm$/ ? 3 : $DEF_SECTION);
+$section = $opt_section || ($ARGV[0] =~ /\.pm$/
+				? $DEF_PM_SECTION : $DEF_SECTION);
 $RP = $opt_release || $DEF_RELEASE;
 $center = $opt_center || ($opt_official ? $STD_CENTER : $DEF_CENTER);
 $lax = $opt_lax || $DEF_LAX;
@@ -384,7 +388,6 @@ else {
     die "roff font should be 1 or 2 chars, not `$CFont_embed'";
 }
 
-$section = $opt_section || $DEF_SECTION;
 $date = $opt_date || $DEF_DATE;
 
 for (qw{NAME DESCRIPTION}) {
