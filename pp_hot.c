@@ -321,11 +321,26 @@ PP(pp_print)
     GV *gv;
     IO *io;
     register PerlIO *fp;
+    MAGIC *mg;
 
     if (op->op_flags & OPf_STACKED)
 	gv = (GV*)*++MARK;
     else
 	gv = defoutgv;
+    if (SvMAGICAL(gv) && (mg = mg_find((SV*)gv, 'q'))) {
+	SV *sv;
+
+	PUSHMARK(MARK-1);
+	*MARK = mg->mg_obj;
+	ENTER;
+	perl_call_method("PRINT", G_SCALAR);
+	LEAVE;
+	SPAGAIN;
+	sv = POPs;
+	SP = ORIGMARK;
+	PUSHs(sv);
+	RETURN;
+    }
     if (!(io = GvIO(gv))) {
 	if (dowarn) {
 	    SV* sv = sv_newmortal();
@@ -822,7 +837,7 @@ play_it_again:
 	}
 	else if (!multiline) {
 	    if (*SvPVX(pm->op_pmshort) != *s ||
-	      bcmp(SvPVX(pm->op_pmshort), s, pm->op_pmslen) ) {
+	      memcmp(SvPVX(pm->op_pmshort), s, pm->op_pmslen) ) {
 		if (pm->op_pmflags & PMf_FOLD) {
 		    if (ibcmp((U8*)SvPVX(pm->op_pmshort), (U8*)s, pm->op_pmslen) )
 			goto nope;
@@ -1386,7 +1401,7 @@ PP(pp_subst)
 	}
 	else if (!multiline) {
 	    if (*SvPVX(pm->op_pmshort) != *s ||
-	      bcmp(SvPVX(pm->op_pmshort), s, pm->op_pmslen) ) {
+	      memcmp(SvPVX(pm->op_pmshort), s, pm->op_pmslen) ) {
 		if (pm->op_pmflags & PMf_FOLD) {
 		    if (ibcmp((U8*)SvPVX(pm->op_pmshort), (U8*)s, pm->op_pmslen) )
 			goto nope;
