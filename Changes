@@ -69,14 +69,14 @@ Version 5.004_05        Maintenance release 5 for 5.004
   HEADLINES FOR THIS MAINTENANCE RELEASE
 
     Better security
-      - tainting bugs fixed.
-      - "perl -e" no longer uses a temporary file.
+      - Tainting bugs fixed.
+      - Temporary file not created for "perl -e".
     Better documentation
-      - many significant updates and clarifications.
+      - Many significant updates and clarifications.
     Better performance
-      - many improvements including a very fast/safe built-in qsort.
+      - Many improvements including a very fast/safe built-in qsort.
     Better perl portability
-      - builds more easily on more systems.
+      - Easier builds on more systems.
     Better script portability
       - Scripts with CR LF line endings (Win32) work on UNIX.
     Better version portability
@@ -85,13 +85,165 @@ Version 5.004_05        Maintenance release 5 for 5.004
       - Some 5.005 internals/XS features added such as
         new ERRSV, ERRHV, DEFSV, SAVE_DEFSV and dTHR macros.
     Better utilities
-      - many enhancements for h2ph, perldoc, perlbug etc.
+      - Many enhancements for h2ph, perldoc, perlbug etc.
     Better warnings / fewer warnings
-      - No longer warns for $x{shift}, ne => 1, or -f => 1.
-      - No longer warns for while($x=<>) (implicit defined added).
+      - No more warnings on $x{shift}, ne => 1, or -f => 1.
+      - Implicit defined() added in while($x=<>).
     Better code
-      - many bugs and all known run-time memory leaks fixed.
+      - Almost all known run-time memory leaks fixed.
+      - Many other bugs fixed.
 
+
+Change 3277 by chip@perlsupport.com on 1999/04/26 22:54:27
+
+	Update Changes and patchlevel.h for maint trial 9.
+
+Change 3276 by chip@perlsupport.com on 1999/04/26 22:34:36
+
+	Make porting scripts executable.
+
+Change 3275 by chip@perlsupport.com on 1999/04/26 22:21:43
+
+	Merge most of Porting directory from mainline.
+
+Change 3253 by chip@perlsupport.com on 1999/04/13 04:57:52
+
+	Explain next/last/redo a bit more in perlfunc.
+	(from M.J.T. Guy <mjtg@cus.cam.ac.uk>)
+
+Change 3252 by chip@perlsupport.com on 1999/04/13 04:33:25
+
+	Rebuild embed.h.  (Forgot.)
+
+Change 3251 by chip@perlsupport.com on 1999/04/13 04:31:50
+
+	Eliminate false Configure warning about LD_LIBRARY_PATH.
+	(It's now set automatically during the build process.)
+
+Change 3250 by chip@perlsupport.com on 1999/04/13 04:30:57
+
+	Fix check for glibc, so it'll work with 2.1.
+	(back-formation from 5.006-to-be)
+
+Change 3249 by chip@perlsupport.com on 1999/04/13 04:30:22
+
+	Refresh hints for FreeBSD.
+
+Change 3248 by chip@perlsupport.com on 1999/04/13 04:29:59
+
+	Automatically set LD_LIBRARY_PATH (or equivalent) during the
+	build process.  (back-formation from 5.006-to-be)
+
+Change 3247 by chip@perlsupport.com on 1999/04/13 04:29:08
+
+	New config variable $ignore_versioned_solibs, for Linux.
+
+Change 3246 by chip@perlsupport.com on 1999/04/13 04:28:17
+
+	Don't use 'nm' under AIX.
+
+Change 3245 by chip@perlsupport.com on 1999/04/13 04:27:49
+
+	Make AutoSplit harder to fool.
+
+Change 3244 by chip@perlsupport.com on 1999/04/13 04:27:17
+
+	Fix some broken document links.  (from Tom Christiansen)
+
+Change 3243 by chip@perlsupport.com on 1999/04/13 04:26:21
+
+	Refresh Text::Wrap to 98.112902.
+
+Change 3242 by chip@perlsupport.com on 1999/04/13 04:25:10
+
+	Use locale in Pod::Html and Pod::Text.
+	Fix typos in Pod::Text.
+
+Change 3241 by chip@perlsupport.com on 1999/04/13 04:21:49
+
+	Revert argument list change in export_to_level.
+
+Change 3240 by chip@perlsupport.com on 1999/04/13 04:21:18
+
+	Add 'no_modify' to list of variables in 5.005.
+
+Change 3239 by chip@perlsupport.com on 1999/04/13 04:20:23
+
+	Refresh perlport to 1.39.  (from Chris Nandor)
+
+Change 3238 by chip@perlsupport.com on 1999/04/13 04:19:38
+
+	Fix typo in perlxstut.
+
+Change 3237 by chip@perlsupport.com on 1999/04/13 04:19:10
+
+	Clear errno on successful C<require>.
+
+Change 3236 by chip@perlsupport.com on 1999/04/13 04:17:50
+
+	Add test of C<goto> interaction with AUTOLOAD.
+
+Change 3235 by chip@perlsupport.com on 1999/04/13 04:15:51
+
+	Make Text::ParseWords handle some delimiters with spaces.
+	(The full fix, using /(?-x:$foo)/, can't work in 5.004.)
+
+Change 3234 by chip@perlsupport.com on 1999/04/13 04:14:22
+
+	Properly handle tainted operations when -U is set.
+
+Change 3233 by chip@perlsupport.com on 1999/04/13 04:13:02
+
+	New config variable $installusrbinperl, defaulting 'undef'
+	for NetBSD.  (from Jarkko)
+
+Change 3232 by chip@perlsupport.com on 1999/04/13 04:09:05
+
+	Update NetBSD hints.
+
+Change 3231 by chip@perlsupport.com on 1999/04/13 04:07:41
+
+	Refresh Getopt::Long to 2.19.
+
+Change 3230 by chip@perlsupport.com on 1999/04/13 04:06:19
+
+	Properly diagnose missing roots in rmtree().
+
+Change 3229 by chip@perlsupport.com on 1999/04/13 04:04:14
+
+	Preserve errno from importunities of sfio.
+
+Change 3228 by chip@perlsupport.com on 1999/04/13 04:02:33
+
+	Fix longstanding bug: searches for lexicals originating within
+	eval'' weren't stopping at the subroutine boundary correctly.
+	(back-formation from change 3037)
+
+Change 3227 by chip@perlsupport.com on 1999/04/13 04:00:47
+
+	Record Linux libc version.
+
+Change 3222 by chip@perlsupport.com on 1999/04/06 19:32:40
+
+	Disable setuid execution if 'nosuid' mount option specified.
+	(Original fix from Jarkko; hand-hackery of Configure by Chip.)
+
+Change 3221 by chip@perlsupport.com on 1999/04/06 19:27:50
+
+	Set CDPATH="." only if it's already set to something else.
+
+Change 2447 by gsar@aatma on 1998/12/04 03:47:42
+
+	Update README.win32 in maint-5.004.
+
+Change 2446 by TimBunce@ig.co.uk on 1998/12/03 15:52:59
+
+	Update MANIFEST for dna.small.gif.uu (change 2445)
+
+Change 2445 by TimBunce@ig.co.uk on 1998/12/03 15:49:32
+
+	Ship dna.small.gif uuencoded.
+	Update Changes and patchlevel.h for maint trial 8.
 
 Change 2442 on 1998/12/03 by TimBunce@ig.co.uk
 
