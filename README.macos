@@ -22,7 +22,7 @@ pieces. Support for Mac OS is now in the perl core, and MacPerl will be
 able to, in the future, keep in closer sync with regular perl releases.
 
 At this time, though, it is very buggy, and is under development.  An
-alpha release is coming very soon.
+alpha release is available, with work progressing toward a beta.
 
 To build perl for Mac OS (as an MPW tool), you will need the addition
 of the "macos" subdirectory, distributed separately.  It includes extra
@@ -33,10 +33,13 @@ To build the MacPerl application, you will also need the "macperl"
 directory, which includes the source files for creating the
 application itself.
 
-All of this is also available from the SourceForge site, via
-HTTP, FTP, and anonymous CVS.
+All of this is available from the development site, via
+HTTP and anonymous CVS.
 
-	http://macperl.sourceforge.net/
+	http://dev.macperl.org/
+
+The source is also in the main perl repository in the maint-5.6/macperl
+branch.
 
 You will also need compilers and libraries, all of them freely
 available.  These are linked to from the SourceForge site. Go that site
@@ -53,4 +56,4 @@ Nandor E<lt>pudge@pobox.comE<gt>.
 
 =head1 DATE
 
-Last modified 2001.04.05.
+Last modified 2001.07.19.

@@ -795,15 +795,15 @@ Also see:
 
 =item *
 
+MacPerl Development, http://dev.macperl.org/ .
+
+=item *
+
 The MacPerl Pages, http://www.macperl.com/ .
 
 =item *
 
-The MacPerl mailing lists, http://www.macperl.org/ .
-
-=item *
-
-MacPerl Module Porters, http://pudge.net/mmp/ .
+The MacPerl mailing lists, http://lists.perl.org/ .
 
 =back
 
@@ -1535,9 +1535,6 @@ Not implemented. (S<Mac OS>, Plan9)
 
 =item glob
 
-Globbing built-in, but only C<*> and C<?> metacharacters are supported.
-(S<Mac OS>)
-
 This operator is implemented via the File::Glob extension on most
 platforms.  See L<File::Glob> for portability information.
 
@@ -1552,8 +1549,10 @@ Available only for socket handles. (S<RISC OS>)
 
 =item kill SIGNAL, LIST
 
-Not implemented, hence not useful for taint checking. (S<Mac OS>,
-S<RISC OS>)
+C<kill(0, LIST)> is implemented for the sake of taint checking;
+use with other signals is unimplemented. (S<Mac OS>)
+
+Not implemented, hence not useful for taint checking. (S<RISC OS>)
 
 C<kill()> doesn't have the semantics of C<raise()>, i.e. it doesn't send
 a signal to the identified process like it does on Unix platforms.
@@ -1605,8 +1604,6 @@ Opening a process does not automatically flush output handles on some
 platforms.  (SunOS, Solaris, HP-UX)
 
 =item pipe READHANDLE,WRITEHANDLE
-
-Not implemented. (S<Mac OS>)
 
 Very limited functionality. (MiNT)
 
@@ -1669,7 +1666,7 @@ be implemented even in UNIX platforms.
 
 =item socketpair SOCKET1,SOCKET2,DOMAIN,TYPE,PROTOCOL
 
-Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>, VOS, VM/ESA)
+Not implemented. (Win32, VMS, S<RISC OS>, VOS, VM/ESA)
 
 =item stat FILEHANDLE
 
@@ -1921,8 +1918,8 @@ distribution available at http://www.perl.com/CPAN/src/index.html
         1) in DOS mode either the DOS or OS/2 ports can be used
         2) Mac OS Classic (pre-X) is almost 5.6.1-ready; building from
 	   the source does work with 5.6.1, but additional MacOS specific
-           source code is needed for a complete build.  Contact the mailing
-           list macperl-porters@macperl.org for more information.
+           source code is needed for a complete build.  See the web
+           site http://dev.macperl.org/ for more information.
         3) compilers: Borland, Cygwin, Mingw32 EGCS/GCC, VC++
 
 The following platforms worked for the previous releases (5.6.0 and 5.7.0),
