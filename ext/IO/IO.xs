@@ -199,6 +199,23 @@ clearerr(handle)
     OUTPUT:
 	RETVAL
 
+int
+untaint(handle)
+       SV *	handle
+    CODE:
+	IO * io;
+	io = sv_2io(handle);
+	if (io) {
+	    IoFLAGS(io) |= IOf_UNTAINT;
+	    RETVAL = 0;
+	}
+        else {
+	    RETVAL = -1;
+	    errno = EINVAL;
+	}
+    OUTPUT:
+	RETVAL
+
 SysRet
 fflush(handle)
 	OutputStream	handle
