@@ -231,8 +231,8 @@ __END__
 >%.0f<      >0<           >0<
 >%.0f<      >2**38<       >274877906944<   >Should have exact int'l rep'n<
 >%.0f<      >0.1<         >0<
->%.0f<      >0.6<         >1<              >Known to fail with sfio and nonstop-ux<
->%.0f<      >-0.6<        >-1<             >Known to fail with sfio and nonstop-ux<
+>%.0f<      >0.6<         >1<              >Known to fail with sfio and (irix|nonstop-ux|powerux)<
+>%.0f<      >-0.6<        >-1<             >Known to fail with sfio and (irix|nonstop-ux|powerux)<
 >%.0f<      >1<           >1<
 >%#.0f<     >1<           >1.<
 >%g<        >12345.6789<  >12345.7<
