@@ -16,8 +16,10 @@ use Fcntl;
 
 print "1..12\n";
 
-$Is_Dosish = ($^O eq 'amigaos' || $^O eq 'MSWin32' || $^O eq 'NetWare' or $^O eq 'dos' or
-	      $^O eq 'os2' or $^O eq 'mint');
+$Is_Dosish = ($^O eq 'amigaos' || $^O eq 'MSWin32' ||
+	      $^O eq 'NetWare' || $^O eq 'dos' ||
+	      $^O eq 'os2' || $^O eq 'mint' ||
+	      $^O eq 'cygwin');
 
 unlink <Op_dbmx*>;
 
