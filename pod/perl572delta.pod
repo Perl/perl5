@@ -160,7 +160,7 @@ VMS now works under PerlIO.
 
 =head1 Modules and Pragmata
 
-=head2 New Modules and Distribution
+=head2 New Modules and Distributions
 
 =over 4
 
@@ -219,6 +219,14 @@ L<Time::HiRes> - high resolution ualarm, usleep, and gettimeofday
 L<Time::Piece> - Object Oriented time objects
 
 (Previously known as L<Time::Object>.)
+
+=item *
+
+L<Time::Seconds> - a simple API to convert seconds to other date values
+
+=item *
+
+L<Unicode::UCD> - Unicode Character Database
 
 =back
 
