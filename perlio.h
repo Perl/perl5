@@ -346,6 +346,8 @@ extern char *PerlIO_getname(PerlIO *, char *);
 
 extern void PerlIO_destruct(pTHX);
 
+extern int PerlIO_intmode2str(int rawmode, char *mode, int *writing);
+
 #ifndef PERLIO_IS_STDIO
 
 extern void PerlIO_cleanup(void);
