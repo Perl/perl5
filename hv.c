@@ -689,7 +689,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	if (env) {
 	    sv = newSVpvn(env,len);
 	    SvTAINTED_on(sv);
-	    return hv_fetch_common(hv,keysv,key,keylen,HV_FETCH_ISSTORE,sv,
+	    return hv_fetch_common(hv,keysv,key,klen,flags,HV_FETCH_ISSTORE,sv,
 				   hash);
 	}
     }
