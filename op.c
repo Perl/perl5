@@ -3531,7 +3531,7 @@ newCONSTSUB(HV *stash, char *name, SV *sv)
 	curstash = curcop->cop_stash = stash;
 
     newSUB(
-	MY_start_subparse(FALSE, 0),
+	start_subparse(FALSE, 0),
 	newSVOP(OP_CONST, 0, newSVpv(name,0)),
 	newSVOP(OP_CONST, 0, &sv_no),	/* SvPV(&sv_no) == "" -- GMB */
 	newSTATEOP(0, Nullch, newSVOP(OP_CONST, 0, sv))
