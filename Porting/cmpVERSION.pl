@@ -45,8 +45,9 @@ find(
 		    my $version1 = eval {MM->parse_version($_)};
 		    my $version2 = eval {MM->parse_version($file2)};
 		    push @wanted, $File::Find::name
-			if $version1 eq $version2
+			if defined $version1 &&
+			   defined $version2 &&
+                           $version1 eq $version2
 		} }, curdir);
 print map { $_, "\n" } sort @wanted;
-
 
