@@ -522,14 +522,13 @@ __END__
 }
 
 static void
-restore_sigmask(SV *osset_sv)
+restore_sigmask(pTHX_ SV *osset_sv)
 {
      /* Fortunately, restoring the signal mask can't fail, because
       * there's nothing we can do about it if it does -- we're not
       * supposed to return -1 from sigaction unless the disposition
       * was unaffected.
       */
-     dTHX;
      sigset_t *ossetp = (sigset_t *) SvPV_nolen( osset_sv );
      (void)sigprocmask(SIG_SETMASK, ossetp, (sigset_t *)0);
 }
@@ -1220,7 +1219,7 @@ sigaction(sig, optaction, oldaction = 0)
 	    /* Restore signal mask no matter how we exit this block. */
 	    osset_sv = newSVpv((char *)(&osset), sizeof(sigset_t));
 	    SAVEFREESV( osset_sv );
-	    SAVEDESTRUCTOR(restore_sigmask, osset_sv);
+	    SAVEDESTRUCTOR_X(restore_sigmask, osset_sv);
 
 	    RETVAL=-1; /* In case both oldaction and action are 0. */
 
