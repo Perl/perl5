@@ -8,5 +8,7 @@ if ($Config{libs} =~ /-lC/ && -f '/lib/libC.a') {
 	$self->{CCFLAGS} .= ' -DUSE_ibmcxx_load_h';
     } elsif (-f '/usr/lpp/xlC/include/load.h') {
 	$self->{CCFLAGS} .= ' -DUSE_xlC_load_h';
+    } elsif (!-f '/usr/include/load.h') {
+	$self->{CCFLAGS} = $Config{ccflags}; # Remove again, no <load.h>
     }
 }
