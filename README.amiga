@@ -101,24 +101,16 @@ easier to use your script under *nix.)
 Perl under AmigaOS lacks some features of perl under UNIX because of
 deficiencies in the UNIX-emulation, most notably:
 
-=over 4
+=over 6
 
-=item * 
+=item fork()
 
-fork()
+=item some features of the UNIX filesystem regarding link count and file dates
 
-=item *
+=item inplace operation (the -i switch) without backup file
 
-some features of the UNIX filesystem regarding link count and file dates
-
-=item *
-
-inplace operation (the -i switch) without backup file
-
-=item *
-
-umask() works, but the correct permissions are only set when the file is
-finally close()d
+=item umask() works, but the correct permissions are only set when the file is
+      finally close()d
 
 =back
 
@@ -213,60 +205,23 @@ is normal and expected. (There is a conflict with a similarly-named file
 F<configure>, but it causes no harm.)
 
 =head2 Making
-
-=over 4
-
-=item *
-
-remember to use a healthy sized stack (I used 2000000)
-
-=item *
-
-your PATH environment variable must include /bin (e.g. ".:/bin" is good)
-(or, more precisely, it must include the directory where you have your
-basic UNIX utilities like test, cat, sed, and so on)
-
-=item *
 	
-  sh Configure -Dprefix=/ade -Dloclibpth=/ade/lib
+	remember to use a hefty wad of stack (I use 2000000)
 
-=item *
+  sh configure.gnu --prefix=/gg
 
-fix makedepend
+	the makedepend script has to be edited if it fails
+	
+	change $cat to /bin/cat at line 75
+	change cat to /bin/cat at line 163
+	change cat to /bin/cat at line 176 (both)
+	change $cat to /bin/cat at line 190
 
-	In the file 'makedepend' there are three spots like this `$cat ...`:
-	a for loop near line 75, an egrep near line 161, and a for loop near
-	line 175.  In all those spots using an editor change the $cat to
-	/bin/cat.
-
-=item *
-
-now type make depend
-
-	When the make depend has ended load the gnumakefile into
-	an editor and go to the end of the file.
-
-	Move upwards in the file until you reach av.o: EXTERN.h
-	and delete all lines down to # WARNING: Put....
-
-=item *
-
-now go to the x2p directory
-
-	Load the gnumakefile into an editor.
-
-	Go to the end moveup until you reach hash.o: EXTERN.h
-	and delete all lines dowonwards until you reach a line saying
-
-	# WARNING: Put nothing....
-
-=item *
+	now type make depend
 
 Now!
 
   make
-
-=back
 
 =head2 Testing
 

@@ -7,62 +7,13 @@
 package List::Util;
 
 require Exporter;
+require DynaLoader;
 
-@ISA = qw(Exporter);
-@EXPORT_OK = qw(first min max minstr maxstr reduce sum);
-$VERSION = $VERSION = "1.02";
+our @ISA       = qw(Exporter DynaLoader);
+our @EXPORT_OK = qw(first min max minstr maxstr reduce sum);
+our $VERSION   = "1.02";
 
-eval {
-  require DynaLoader;
-  local @ISA = qw(DynaLoader);
-  bootstrap List::Util $VERSION;
-  1
-};
-
-eval <<'ESQ' unless defined &reduce;
-
-# This code is only compiled if the XS did not load
-
-use vars qw($a $b);
-
-sub reduce (&@) {
-  my $code = shift;
-
-  return shift unless @_ > 1;
-
-  my $caller = caller;
-  local(*{$caller."::a"}) = \my $a;
-  local(*{$caller."::b"}) = \my $b;
-
-  $a = shift;
-  foreach (@_) {
-    $b = $_;
-    $a = &{$code}();
-  }
-
-  $a;
-}
-
-sub sum (@) { reduce { $a + $b } @_ }
-
-sub min (@) { reduce { $a < $b ? $a : $b } @_ }
-
-sub max (@) { reduce { $a > $b ? $a : $b } @_ }
-
-sub minstr (@) { reduce { $a lt $b ? $a : $b } @_ }
-
-sub maxstr (@) { reduce { $a gt $b ? $a : $b } @_ }
-
-sub first (&@) {
-  my $code = shift;
-
-  foreach (@_) {
-    return $_ if &{$code}();
-  }
-
-  undef;
-}
-ESQ
+bootstrap List::Util $VERSION;
 
 1;
 

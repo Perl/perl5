@@ -127,6 +127,7 @@ DB_File
 Data::Dumper
 Devel::DProf
 Devel::Peek
+Devel::SelfStubber
 Digest
 Digest::MD5
 DirHandle

@@ -59,12 +59,12 @@ will be used, with the first character capitalized.
 
 If the extension might need extra libraries, they should be included
 here.  The extension Makefile.PL will take care of checking whether
-the libraries actually exist and how they should be loaded.
-The extra libraries should be specified in the form -lm -lposix, etc,
-just as on the cc command line.  By default, the Makefile.PL will
-search through the library path determined by Configure.  That path
-can be augmented by including arguments of the form B<-L/another/library/path>
-in the extra-libraries argument.
+the libraries actually exist and how they should be loaded.  The extra
+libraries should be specified in the form -lm -lposix, etc, just as on
+the cc command line.  By default, the Makefile.PL will search through
+the library path determined by Configure.  That path can be augmented
+by including arguments of the form B<-L/another/library/path> in the
+extra-libraries argument.
 
 =head1 OPTIONS
 
@@ -72,8 +72,8 @@ in the extra-libraries argument.
 
 =item B<-A>
 
-Omit all autoload facilities.  This is the same as B<-c> but also removes the
-S<C<use AutoLoader>> statement from the .pm file.
+Omit all autoload facilities.  This is the same as B<-c> but also
+removes the S<C<use AutoLoader>> statement from the .pm file.
 
 =item B<-C>
 
@@ -157,7 +157,8 @@ from typemaps.  Should not be used without B<-x>.
 This may be useful since, say, types which are C<typedef>-equivalent
 to integers may represent OS-related handles, and one may want to work
 with these handles in OO-way, as in C<$handle-E<gt>do_something()>.
-Use C<-o .> if you want to handle all the C<typedef>ed types as opaque types.
+Use C<-o .> if you want to handle all the C<typedef>ed types as opaque
+types.
 
 The type-to-match is whitewashed (except for commas, which have no
 whitespace before them, and multiple C<*> which have no whitespace
@@ -165,14 +166,17 @@ between them).
 
 =item B<-p> I<prefix>
 
-Specify a prefix which should be removed from the Perl function names, e.g., S<-p sec_rgy_> 
-This sets up the XS B<PREFIX> keyword and removes the prefix from functions that are
-autoloaded via the C<constant()> mechanism.
+Specify a prefix which should be removed from the Perl function names,
+e.g., S<-p sec_rgy_> This sets up the XS B<PREFIX> keyword and removes
+the prefix from functions that are autoloaded via the C<constant()>
+mechanism.
 
 =item B<-s> I<sub1,sub2>
 
-Create a perl subroutine for the specified macros rather than autoload with the constant() subroutine.
-These macros are assumed to have a return type of B<char *>, e.g., S<-s sec_rgy_wildcard_name,sec_rgy_wildcard_sid>.
+Create a perl subroutine for the specified macros rather than autoload
+with the constant() subroutine.  These macros are assumed to have a
+return type of B<char *>, e.g.,
+S<-s sec_rgy_wildcard_name,sec_rgy_wildcard_sid>.
 
 =item B<-v> I<version>
 
@@ -184,8 +188,9 @@ to the templates.  The default is 0.01.
 Automatically generate XSUBs basing on function declarations in the
 header file.  The package C<C::Scan> should be installed. If this
 option is specified, the name of the header file may look like
-C<NAME1,NAME2>. In this case NAME1 is used instead of the specified string,
-but XSUBs are emitted only for the declarations included from file NAME2.
+C<NAME1,NAME2>. In this case NAME1 is used instead of the specified
+string, but XSUBs are emitted only for the declarations included from
+file NAME2.
 
 Note that some types of arguments/return-values for functions may
 result in XSUB-declarations/typemap-entries which need
@@ -664,11 +669,11 @@ else {
 if( $nested ){
 	my $modpath = "";
 	foreach (@modparts){
-		mkdir("$modpath$_", 0777);
+		-d "$modpath$_" || mkdir("$modpath$_", 0777);
 		$modpath .= "$_/";
 	}
 }
-mkdir($modpname, 0777);
+-d "$modpname"   || mkdir($modpname, 0777);
 chdir($modpname) || die "Can't chdir $ext$modpname: $!\n";
 
 my %types_seen;
@@ -1077,7 +1082,7 @@ $exp_doc$meth_doc$revhist
 #
 #=head1 COPYRIGHT AND LICENSE
 #
-#Copyright YEAR(S) by YOUR NAME(s)
+#Copyright ${\(1900 + (localtime) [5])} by $author
 #
 #This library is free software; you can redistribute it and/or modify
 #it under the same terms as Perl itself. 
@@ -1180,7 +1185,7 @@ sub write_const {
 
   if (@$list == 0) {		# Can happen on the initial iteration only
     print $fh <<"END";
-static double
+static NV
 constant(char *name, int len, int arg)
 {
     errno = EINVAL;
@@ -1194,11 +1199,11 @@ END
     my $protect = protect_convert_to_double("$pref$list->[0]");
 
     print $fh <<"END";
-static double
+static NV
 constant(char *name, int len, int arg)
 {
     errno = 0;
-    if (strEQ(name + $offarg, "$list->[0]")) {	/* $pref removed */
+    if (strEQ(name + $offarg, "$list->[0]")) {	/* \"$pref\" removed */
 #ifdef $pref$list->[0]
 	return $protect$pref$list->[0];
 #else
@@ -1233,7 +1238,7 @@ END
   $npref = '' if $pref eq '';
 
   print $fh <<"END";
-static double
+static NV
 constant$npref(char *name, int len, int arg)
 {
 END
@@ -1242,12 +1247,25 @@ END
     errno = 0;
 END
 
-  print $fh <<"END" if $off;
-    if ($offarg + $off >= len ) {
+  if ($off) {
+      my $null = 0;
+
+      foreach my $letter (keys %leading) {
+	  if ($letter eq '') {
+	      $null = 1;
+	      last;
+	  }
+      }
+
+      my $cmp = $null ? '>' : '>=';
+
+      print $fh <<"END"
+    if ($offarg + $off $cmp len ) {
 	errno = EINVAL;
 	return 0;
     }
 END
+  }
 
   print $fh <<"END";
     switch (name[$offarg + $off]) {
@@ -1278,7 +1296,7 @@ EOP
 	= protect_convert_to_double("$pref$leader$letter$leading{$letter}[0]");
 
       print $fh <<EOP;
-	if (strEQ(name + $offarg, "$leader$letter$leading{$letter}[0]")) {	/* $pref removed */
+	if (strEQ(name + $offarg, "$leader$letter$leading{$letter}[0]")) {	/* \"$pref\" removed */
 #ifdef $pref$leader$letter$leading{$letter}[0]
 	    return $protect$pref$leader$letter$leading{$letter}[0];
 #else
@@ -1349,7 +1367,7 @@ END
 # XS declaration:
 print XS <<"END" unless $opt_c;
 
-double
+NV
 constant(sv,arg)
     PREINIT:
 	STRLEN		len;
@@ -1606,7 +1624,7 @@ sub get_typemap {
   my $proto_re = "[" . quotemeta('\$%&*@;') . "]" ;
 
   # Start with useful default values
-  $typemap{float} = 'T_DOUBLE';
+  $typemap{float} = 'T_NV';
 
   foreach my $typemap (@tm) {
     next unless -e $typemap ;
@@ -1821,16 +1839,24 @@ COPYRIGHT AND LICENCE
 
 Put the correct copyright and licence information here.
 
-Copyright (C) $thisyear $author blah blah blah
+Copyright (C) $thisyear $author
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself. 
 
 _RMEND_
 close(RM) || die "Can't close $ext$modpname/README: $!\n";
 
-warn "Writing $ext$modpname/test.pl\n";
-open(EX, ">test.pl") || die "Can't create $ext$modpname/test.pl: $!\n";
+my $testdir  = "t";
+my $testfile = "$testdir/1.t";
+unless (-d "$testdir") {
+  mkdir "$testdir" or die "Cannot mkdir $testdir: $!\n";
+}
+warn "Writing $ext$modpname/$testfile\n";
+open EX, ">$testfile" or die "Can't create $ext$modpname/$testfile: $!\n";
 print EX <<'_END_';
 # Before `make install' is performed this script should be runnable with
-# `make test'. After `make install' it should work as `perl test.pl'
+# `make test'. After `make install' it should work as `perl 1.t'
 
 #########################
 
@@ -1851,7 +1877,7 @@ ok(1); # If we made it this far, we're ok.
 # its man page ( perldoc Test ) for help writing this test script.
 
 _END_
-close(EX) || die "Can't close $ext$modpname/test.pl: $!\n";
+close(EX) || die "Can't close $ext$modpname/$testfile: $!\n";
 
 unless ($opt_C) {
   warn "Writing $ext$modpname/Changes\n";
@@ -1871,7 +1897,7 @@ EOP
 
 warn "Writing $ext$modpname/MANIFEST\n";
 open(MANI,'>MANIFEST') or die "Can't create MANIFEST: $!";
-my @files = <*>;
+my @files = grep { -f } (<*>, <t/*>);
 if (!@files) {
   eval {opendir(D,'.');};
   unless ($@) { @files = readdir(D); closedir(D); }

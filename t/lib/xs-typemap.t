@@ -162,7 +162,7 @@ ok( T_U_CHAR(300) != 300);
 print "# T_FLOAT\n";
 
 # limited precision
-ok( sprintf("%6.3f",T_FLOAT(52.345)), 52.345);
+ok( sprintf("%6.3f",T_FLOAT(52.345)), sprintf("%6.3f",52.345));
 
 # T_NV
 print "# T_NV\n";
@@ -172,7 +172,7 @@ ok( T_NV(52.345), 52.345);
 # T_DOUBLE
 print "# T_DOUBLE\n";
 
-ok( T_DOUBLE(52.345), 52.345);
+ok( sprintf("%6.3f",T_DOUBLE(52.345)), sprintf("%6.3f",52.345));
 
 # T_PV
 print "# T_PV\n";

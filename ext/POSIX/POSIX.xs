@@ -64,6 +64,16 @@
 #endif
 #include <fcntl.h>
 
+#ifdef HAS_TZNAME
+#  if !defined(WIN32) && !defined(__CYGWIN__)
+extern char *tzname[];
+#  endif
+#else
+#if !defined(WIN32) || (defined(__MINGW32__) && !defined(tzname))
+char *tzname[] = { "" , "" };
+#endif
+#endif
+
 #if defined(__VMS) && !defined(__POSIX_SOURCE)
 #  include <libdef.h>       /* LIB$_INVARG constant */
 #  include <lib$routines.h> /* prototype for lib$ediv() */

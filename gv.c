@@ -163,7 +163,7 @@ S_gv_init_sv(pTHX_ GV *gv, I32 sv_type)
 
 Returns the glob with the given C<name> and a defined subroutine or
 C<NULL>.  The glob lives in the given C<stash>, or in the stashes
-accessible via @ISA and @UNIVERSAL.
+accessible via @ISA and UNIVERSAL::.
 
 The argument C<level> should be either 0 or -1.  If C<level==0>, as a
 side-effect creates a glob with the given C<name> in the given C<stash>
@@ -190,6 +190,8 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
 
     if (!stash)
 	return 0;
+    if (!HvNAME(stash))
+        Perl_croak(aTHX_ "Can't use anonymous symbol table for method lookup");
     if ((level > 100) || (level < -100))
 	Perl_croak(aTHX_ "Recursive inheritance detected while looking for method '%s' in package '%s'",
 	      name, HvNAME(stash));

@@ -1580,6 +1580,7 @@ t/lib/sdbm.t		See if SDBM_File works
 t/lib/searchdict.t	See if Search::Dict works
 t/lib/selectsaver.t	See if SelectSaver works
 t/lib/selfloader.t	See if SelfLoader works
+t/lib/selfstubber.t	See if Devel::SelfStubber works
 t/lib/sigaction.t       See if POSIX::sigaction works
 t/lib/socket.t		See if Socket works
 t/lib/soundex.t		See if Soundex works

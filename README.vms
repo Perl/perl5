@@ -180,6 +180,8 @@ troublesome logicals and symbols are:
     T    "LOGICAL"
     FOO  "LOGICAL"
     EXT  "LOGICAL"
+    SOME_LOGICAL_NAME_NOT_LIKELY "LOGICAL"
+    DOWN_LOGICAL_NAME_NOT_LIKELY "LOGICAL"
     TEST "SYMBOL"
 
 As a handy shortcut, the command:

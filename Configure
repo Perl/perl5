@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Apr 19 03:28:20 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Wed Apr 25 03:57:52 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -4062,7 +4062,10 @@ none) ccflags='';;
 esac
 
 : the following weeds options from ccflags that are of no interest to cpp
-cppflags="$ccflags"
+case "$cppflags" in
+'') cppflags="$ccflags" ;;
+*)  cppflags="$cppflags $ccflags" ;;
+esac
 case "$gccversion" in
 1*) cppflags="$cppflags -D__GNUC__"
 esac

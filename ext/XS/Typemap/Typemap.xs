@@ -37,11 +37,11 @@ struct t_opaqueptr {
 typedef struct t_opaqueptr astruct;
 
 /* Some static memory for the tests */
-I32 anint;
-intRef anintref;
-intObj anintobj;
-intRefIv anintrefiv;
-intOpq anintopq;
+static I32 xst_anint;
+static intRef xst_anintref;
+static intObj xst_anintobj;
+static intRefIv xst_anintrefiv;
+static intOpq xst_anintopq;
 
 /* Helper functions */
 
@@ -414,8 +414,8 @@ void *
 T_PTR_OUT( in )
   int in;
  CODE:
-  anint = in;
-  RETVAL = &anint;
+  xst_anint = in;
+  RETVAL = &xst_anint;
  OUTPUT:
   RETVAL
 
@@ -448,8 +448,8 @@ intRef *
 T_PTRREF_OUT( in )
   intRef in;
  CODE:
-  anintref = in;
-  RETVAL = &anintref;
+  xst_anintref = in;
+  RETVAL = &xst_anintref;
  OUTPUT:
   RETVAL
 
@@ -486,8 +486,8 @@ intObj *
 T_PTROBJ_OUT( in )
   intObj in;
  CODE:
-  anintobj = in;
-  RETVAL = &anintobj;
+  xst_anintobj = in;
+  RETVAL = &xst_anintobj;
  OUTPUT:
   RETVAL
 
@@ -529,8 +529,8 @@ intRefIv *
 T_REF_IV_PTR_OUT( in )
   intRefIv in;
  CODE:
-  anintrefiv = in;
-  RETVAL = &anintrefiv;
+  xst_anintrefiv = in;
+  RETVAL = &xst_anintrefiv;
  OUTPUT:
   RETVAL
 
@@ -585,8 +585,8 @@ intOpq *
 T_OPAQUEPTR_IN( val )
   intOpq val
  CODE:
-  anintopq = val;
-  RETVAL = &anintopq;
+  xst_anintopq = val;
+  RETVAL = &xst_anintopq;
  OUTPUT:
   RETVAL
 
@@ -637,8 +637,9 @@ This can be used to store data from non-pointer types in the string
 part of an SV. It is similar to T_OPAQUEPTR except that the
 typemap retrieves the pointer directly rather than assuming it
 is being supplied. For example if an integer is imported into
-Perl using T_OPAQUE rather than T_IV the underlying bytes representing the integer will be stored in the SV but the actual integer value will not be
-available. i.e. The data is opaque to perl.
+Perl using T_OPAQUE rather than T_IV the underlying bytes representing
+the integer will be stored in the SV but the actual integer value will not
+be available. i.e. The data is opaque to perl.
 
 The data may be retrieved using the C<unpack> function if the
 underlying type of the byte stream is known.

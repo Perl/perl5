@@ -110,7 +110,6 @@ use warnings ();
 # - version using op_next instead of op_first/sibling?
 # - avoid string copies (pass arrays, one big join?)
 # - here-docs?
-# - <DATA>?
 
 # Tests that will always fail:
 # comp/redef.t -- all (redefinition happens at compile time)
@@ -222,6 +221,7 @@ sub null {
 sub todo {
     my $self = shift;
     my($cv, $is_form) = @_;
+    return unless ($cv->FILE eq $0 || exists $self->{files}{$cv->FILE});
     my $seq;
     if (!null($cv->START) and is_state($cv->START)) {
 	$seq = $cv->START->cop_seq;
@@ -239,7 +239,7 @@ sub next_todo {
     my $name = $self->gv_name($gv);
     if ($ent->[2]) {
 	return "format $name =\n"
-	    . $self->deparse_format($ent->[1]->FORM). "\n";
+	    . $self->deparse_format($ent->[1]). "\n";
     } else {
 	$self->{'subs_declared'}{$name} = 1;
 	if ($name eq "BEGIN") {
@@ -249,7 +249,13 @@ sub next_todo {
 		return $use_dec;
 	    }
 	}
-        return "sub $name " . $self->deparse_sub($cv);
+	my $l = '';
+	if ($self->{'linenums'}) {
+	    my $line = $gv->LINE;
+	    my $file = $gv->FILE;
+	    $l = "\n\f#line $line \"$file\"\n";
+	}
+        return "${l}sub $name " . $self->deparse_sub($cv);
     }
 }
 
@@ -341,44 +347,6 @@ sub begin_is_use {
     }
 }
 
-sub walk_tree {
-    my($op, $sub) = @_;
-    $sub->($op);
-    if ($op->flags & OPf_KIDS) {
-	my $kid;
-	for ($kid = $op->first; not null $kid; $kid = $kid->sibling) {
-	    walk_tree($kid, $sub);
-	}
-    }
-}
-
-sub walk_sub {
-    my $self = shift;
-    my $cv = shift;
-    my $op = $cv->ROOT;
-    $op = shift if null $op;
-    return if !$op or null $op;
-    walk_tree($op, sub {
-	my $op = shift;
-	if ($op->name eq "gv") {
-	    my $gv = $self->gv_or_padgv($op);
-	    if ($op->next->name eq "entersub") {
-		return if $self->{'subs_done'}{$$gv}++;
-		return if class($gv->CV) eq "SPECIAL";
-		$self->todo($gv->CV, 0);
-		$self->walk_sub($gv->CV);
-	    } elsif ($op->next->name eq "enterwrite"
-		     or ($op->next->name eq "rv2gv"
-			 and $op->next->next->name eq "enterwrite")) {
-		return if $self->{'forms_done'}{$$gv}++;
-		return if class($gv->FORM) eq "SPECIAL";
-		$self->todo($gv->FORM, 1);
-		$self->walk_sub($gv->FORM);
-	    }
-	}
-    });
-}
-
 sub stash_subs {
     my ($self, $pack) = @_;
     my (@ret, $stash);
@@ -394,26 +362,37 @@ sub stash_subs {
     my %stash = svref_2object($stash)->ARRAY;
     while (my ($key, $val) = each %stash) {
 	next if $key eq 'main::';	# avoid infinite recursion
-	next if $key eq 'B::';		# don't automatically scan B
 	my $class = class($val);
 	if ($class eq "PV") {
-	    # Just a prototype
+	    # Just a prototype. As an ugly but fairly effective way
+	    # to find out if it belongs here is to see if the AUTOLOAD
+	    # (if any) for the stash was defined in one of our files.
+	    my $A = $stash{"AUTOLOAD"};
+	    if (defined ($A) && class($A) eq "GV" && defined($A->CV)
+		&& class($A->CV) eq "CV") {
+		my $AF = $A->FILE;
+		next unless $AF eq $0 || exists $self->{'files'}{$AF};
+	    }
 	    push @{$self->{'protos_todo'}}, [$pack . $key, $val->PV];
 	} elsif ($class eq "IV") {
-	    # Just a name
+	    # Just a name. As above.
+	    my $A = $stash{"AUTOLOAD"};
+	    if (defined ($A) && class($A) eq "GV" && defined($A->CV)
+		&& class($A->CV) eq "CV") {
+		my $AF = $A->FILE;
+		next unless $AF eq $0 || exists $self->{'files'}{$AF};
+	    }
 	    push @{$self->{'protos_todo'}}, [$pack . $key, undef];	    
 	} elsif ($class eq "GV") {
 	    if (class(my $cv = $val->CV) ne "SPECIAL") {
-		next unless $cv->FILE eq $0 || $self->{'files'}{$cv->FILE};
 		next if $self->{'subs_done'}{$$val}++;
-		next if ${$cv->GV} != $$val;
+		next if $$val != ${$cv->GV};   # Ignore imposters
 		$self->todo($cv, 0);
-		$self->walk_sub($cv);
 	    }
-	    if (class($val->FORM) ne "SPECIAL") {
+	    if (class(my $cv = $val->FORM) ne "SPECIAL") {
 		next if $self->{'forms_done'}{$$val}++;
-		$self->todo($val->FORM, 1);
-		$self->walk_sub($val->FORM);
+		next if $$val != ${$cv->GV};   # Ignore imposters
+		$self->todo($cv, 1);
 	    }
 	    if (class($val->HV) ne "SPECIAL" && $key =~ /::$/) {
 		$self->stash_subs($pack . $key);
@@ -472,7 +451,7 @@ sub new {
     $self->{'ex_const'} = "'???'";
 
     $self->{'ambient_arybase'} = 0;
-    $self->{'ambient_warnings'} = "\0"x12;
+    $self->{'ambient_warnings'} = undef; # Assume no lexical warnings
     $self->{'ambient_hints'} = 0;
     $self->init();
 
@@ -506,7 +485,9 @@ sub init {
     my $self = shift;
 
     $self->{'arybase'}  = $self->{'ambient_arybase'};
-    $self->{'warnings'} = $self->{'ambient_warnings'} & WARN_MASK;
+    $self->{'warnings'} = defined ($self->{'ambient_warnings'})
+				? $self->{'ambient_warnings'} & WARN_MASK
+				: undef;
     $self->{'hints'}    = $self->{'ambient_hints'} & 0xFF;
 
     # also a convenient place to clear out subs_declared
@@ -521,15 +502,11 @@ sub compile {
 	my @INITs   = B::init_av->isa("B::AV") ? B::init_av->ARRAY : ();
 	my @ENDs    = B::end_av->isa("B::AV") ? B::end_av->ARRAY : ();
 	for my $block (@BEGINs, @INITs, @ENDs) {
-	    if ($block->FILE eq $0 || $self->{'files'}{$block->FILE}) {
-		$self->todo($block, 0);
-		$self->walk_sub($block);
-	    }
+	    $self->todo($block, 0);
 	}
 	$self->stash_subs();
 	$self->{'curcv'} = main_cv;
 	$self->{'curcvlex'} = undef;
-	$self->walk_sub(main_cv, main_start);
 	print $self->print_protos;
 	@{$self->{'subs_todo'}} =
 	  sort {$a->[0] <=> $b->[0]} @{$self->{'subs_todo'}};
@@ -540,6 +517,13 @@ sub compile {
 	    push @text, $self->next_todo;
 	}
 	print $self->indent(join("", @text)), "\n" if @text;
+
+	# Print __DATA__ section, if necessary
+	no strict 'refs';
+	if (defined *{$self->{'curstash'}."::DATA"}{IO}) {
+	    print "__DATA__\n";
+	    print readline(*{$self->{'curstash'}."::DATA"});
+	}
     }
 }
 
@@ -554,7 +538,7 @@ sub coderef2text {
 
 sub ambient_pragmas {
     my $self = shift;
-    my ($arybase, $hint_bits, $warning_bits) = (0, 0, "\0"x12);
+    my ($arybase, $hint_bits, $warning_bits) = (0, 0);
 
     while (@_ > 1) {
 	my $name = shift();
@@ -631,6 +615,7 @@ sub ambient_pragmas {
 		@names = split/\s+/, $val;
 	    }
 
+	    $warning_bits = "\0"x12 if !defined ($warning_bits);
 	    $warning_bits |= warnings::bits(@names);
 	}
 
@@ -742,15 +727,15 @@ sub deparse_format {
 	$op = $op->sibling; # skip nextstate
 	my @exprs;
 	$kid = $op->first->sibling; # skip pushmark
-	push @text, $self->const_sv($kid)->PV;
+	push @text, "\f".$self->const_sv($kid)->PV;
 	$kid = $kid->sibling;
 	for (; not null $kid; $kid = $kid->sibling) {
 	    push @exprs, $self->deparse($kid, 0);
 	}
-	push @text, join(", ", @exprs)."\n" if @exprs;
+	push @text, "\f".join(", ", @exprs)."\n" if @exprs;
 	$op = $op->sibling;
     }
-    return join("", @text) . ".";
+    return join("", @text) . "\f.";
 }
 
 sub is_scope {
@@ -808,9 +793,16 @@ sub maybe_parens_unop {
     my $self = shift;
     my($name, $kid, $cx) = @_;
     if ($cx > 16 or $self->{'parens'}) {
-	return "$name(" . $self->deparse($kid, 1) . ")";
+	$kid =  $self->deparse($kid, 1);
+ 	if ($name eq "umask" && $kid =~ /^\d+$/) {
+	    $kid = sprintf("%#o", $kid);
+	}
+	return "$name($kid)";
     } else {
 	$kid = $self->deparse($kid, 16);
+ 	if ($name eq "umask" && $kid =~ /^\d+$/) {
+	    $kid = sprintf("%#o", $kid);
+	}
 	if (substr($kid, 0, 1) eq "\cS") {
 	    # use kid's parens
 	    return $name . substr($kid, 1);
@@ -974,7 +966,10 @@ sub lineseq {
 	if (is_state $ops[$i]) {
 	    $expr = $self->deparse($ops[$i], 0);
 	    $i++;
-	    last if $i > $#ops;
+	    if ($i > $#ops) {
+		push @exprs, $expr;
+		last;
+	    }
 	}
 	if (!is_state $ops[$i] and $ops[$i+1] and !null($ops[$i+1]) and
 	    $ops[$i+1]->name eq "leaveloop" and $self->{'expand'} < 3)
@@ -984,10 +979,10 @@ sub lineseq {
 	    next;
 	}
 	$expr .= $self->deparse($ops[$i], 0);
-	push @exprs, $expr if length $expr;
+	$expr =~ s/;\n?\z//;
+	push @exprs, $expr;
     }
-    for(@exprs[0..@exprs-1]) { s/;\n\z// }
-    return join(";\n", @exprs);
+    return join(";\n", grep {length} @exprs);
 }
 
 sub scopeop {
@@ -1156,9 +1151,9 @@ sub pp_nextstate {
     my($op, $cx) = @_;
     $self->{'curcop'} = $op;
     my @text;
-    @text = $op->label . ": " if $op->label;
 #push @text, "# ", $op->cop_seq, "\n";
     push @text, $self->cop_subs($op);
+    push @text, $op->label . ": " if $op->label;
     my $stash = $op->stashpv;
     if ($stash ne $self->{'curstash'}) {
 	push @text, "package $stash;\n";
@@ -1179,14 +1174,18 @@ sub pp_nextstate {
     if ($warnings->isa("B::SPECIAL") && $$warnings == 4) {
 	$warning_bits = $warnings::Bits{"all"};
     }
-    elsif ($warnings->isa("B::SPECIAL")) {
+    elsif ($warnings->isa("B::SPECIAL") && $$warnings == 5) {
         $warning_bits = "\0"x12;
+    }
+    elsif ($warnings->isa("B::SPECIAL")) {
+	$warning_bits = undef;
     }
     else {
 	$warning_bits = $warnings->PV & WARN_MASK;
     }
 
-    if ($self->{'warnings'} ne $warning_bits) {
+    if (defined ($warning_bits) and
+       !defined($self->{warnings}) || $self->{'warnings'} ne $warning_bits) {
 	push @text, declare_warnings($self->{'warnings'}, $warning_bits);
 	$self->{'warnings'} = $warning_bits;
     }
@@ -1212,8 +1211,25 @@ sub declare_warnings {
 
 sub declare_hints {
     my ($from, $to) = @_;
-    my $bits = $to;
-    return sprintf "BEGIN {\$^H &= ~0xFF; \$^H |= %x}\n", $bits;
+    my $use = $to   & ~$from;
+    my $no  = $from & ~$to;
+    my $decls = "";
+    for my $pragma (hint_pragmas($use)) {
+	$decls .= "use $pragma;\n";
+    }
+    for my $pragma (hint_pragmas($no)) {
+        $decls .= "no $pragma;\n";
+    }
+    return $decls;
+}
+
+sub hint_pragmas {
+    my ($bits) = @_;
+    my @pragmas;
+    push @pragmas, "integer" if $bits & 0x1;
+    push @pragmas, "strict 'refs'" if $bits & 0x2;
+    push @pragmas, "bytes" if $bits & 0x8;
+    return @pragmas;
 }
 
 sub pp_dbstate { pp_nextstate(@_) }
@@ -1227,7 +1243,16 @@ sub baseop {
     return $name;
 }
 
-sub pp_stub { baseop(@_, "()") }
+sub pp_stub {
+    my $self = shift;
+    my($op, $cx, $name) = @_;
+    if ($cx) {
+	return "()";
+    }
+    else {
+	return "();";
+    }
+}
 sub pp_wantarray { baseop(@_, "wantarray") }
 sub pp_fork { baseop(@_, "fork") }
 sub pp_wait { maybe_targmy(@_, \&baseop, "wait") }
@@ -1303,6 +1328,12 @@ sub unop {
     my $kid;
     if ($op->flags & OPf_KIDS) {
 	$kid = $op->first;
+	if (defined prototype("CORE::$name") 
+	   && prototype("CORE::$name") =~ /^;?\*/
+	   && $kid->name eq "rv2gv") {
+	    $kid = $kid->first;
+	}
+
 	return $self->maybe_parens_unop($name, $kid, $cx);
     } else {
 	return $name .  ($op->flags & OPf_SPECIAL ? "()" : "");       
@@ -1515,7 +1546,8 @@ sub pp_readline {
     my($op, $cx) = @_;
     my $kid = $op->first;
     $kid = $kid->first if $kid->name eq "rv2gv"; # <$fh>
-    return "<" . $self->deparse($kid, 1) . ">";
+    return "<" . $self->deparse($kid, 1) . ">" if is_scalar($kid);
+    return $self->unop($op, $cx, "readline");
 }
 
 # Unary operators that can occur as pseudo-listops inside double quotes
@@ -1579,8 +1611,8 @@ sub pp_ftrread { ftst(@_, "-R") }
 sub pp_ftrwrite { ftst(@_, "-W") }
 sub pp_ftrexec { ftst(@_, "-X") }
 sub pp_fteread { ftst(@_, "-r") }
-sub pp_ftewrite { ftst(@_, "-r") }
-sub pp_fteexec { ftst(@_, "-r") }
+sub pp_ftewrite { ftst(@_, "-w") }
+sub pp_fteexec { ftst(@_, "-x") }
 sub pp_ftis { ftst(@_, "-e") }
 sub pp_fteowned { ftst(@_, "-O") }
 sub pp_ftrowned { ftst(@_, "-o") }
@@ -1605,6 +1637,7 @@ sub pp_ftbinary { ftst(@_, "-B") }
 
 sub SWAP_CHILDREN () { 1 }
 sub ASSIGN () { 2 } # has OP= variant
+sub LIST_CONTEXT () { 4 } # Assignment is in list context
 
 my(%left, %right);
 
@@ -1707,6 +1740,7 @@ sub binop {
 	($left, $right) = ($right, $left);
     }
     $left = $self->deparse_binop_left($op, $left, $prec);
+    $left = "($left)" if $flags & LIST_CONTEXT && $left =~ /^\$/;
     $right = $self->deparse_binop_right($op, $right, $prec);
     return $self->maybe_parens("$left $opname$eq $right", $cx, $prec);
 }
@@ -1753,7 +1787,7 @@ sub pp_sle { binop(@_, "le", 15) }
 sub pp_scmp { binop(@_, "cmp", 14) }
 
 sub pp_sassign { binop(@_, "=", 7, SWAP_CHILDREN) }
-sub pp_aassign { binop(@_, "=", 7, SWAP_CHILDREN) }
+sub pp_aassign { binop(@_, "=", 7, SWAP_CHILDREN | LIST_CONTEXT) }
 
 # `.' is special because concats-of-concats are optimized to save copying
 # by making all but the first concat stacked. The effect is as if the
@@ -1876,7 +1910,18 @@ sub listop {
     my $parens = ($cx >= 5) || $self->{'parens'};
     my $kid = $op->first->sibling;
     return $name if null $kid;
-    my $first = $self->deparse($kid, 6);
+    my $first;
+    if (defined prototype("CORE::$name")
+	&& prototype("CORE::$name") =~ /^;?\*/
+	&& $kid->name eq "rv2gv") {
+	$first = $self->deparse($kid->first, 6);
+    }
+    else {
+	$first = $self->deparse($kid, 6);
+    }
+    if ($name eq "chmod" && $first =~ /^\d+$/) {
+	$first = sprintf("%#o", $first);
+    }
     $first = "+$first" if not $parens and substr($first, 0, 1) eq "(";
     push @exprs, $first;
     $kid = $kid->sibling;
@@ -2170,7 +2215,7 @@ sub loop_common {
     my $out_seq = $self->{'curcop'}->cop_seq;;
     if ($kid->name eq "lineseq") { # bare or infinite loop 
 	if (is_state $kid->last) { # infinite
-	    $head = "for (;;) "; # shorter than while (1)
+	    $head = "while (1) "; # Can't use for(;;) if there's a continue
 	    $cond = "";
 	} else {
 	    $bare = 1;
@@ -2252,6 +2297,7 @@ sub loop_common {
 	$cont = "\cK";
 	$body = $self->deparse($body, 0);
     }
+    $body =~ s/;?$/;/;
     $body .= "\n";
     # If we have say C<{my $x=2; sub x{$x}}>, the sub must go inside
     # the loop. So we insert any subs which are due here.
@@ -2720,6 +2766,10 @@ sub pp_entersub {
     # Doesn't matter how many prototypes there are, if
     # they haven't happened yet!
     my $declared = exists $self->{'subs_declared'}{$kid};
+    if (!$declared && defined($proto)) {
+	# Avoid "too early to check prototype" warning
+	($amper, $proto) = ('&');
+    }
 
     my $args;
     if ($declared and defined $proto and not $amper) {
@@ -2770,15 +2820,14 @@ sub pp_enterwrite { unop(@_, "write") }
 # but not character escapes
 sub uninterp {
     my($str) = @_;
-    $str =~ s/(^|[^\\])([\$\@]|\\[uUlLQE])/$1\\$2/g;
+    $str =~ s/(^|\G|[^\\])((?:\\\\)*)([\$\@]|\\[uUlLQE])/$1$2\\$3/g;
     return $str;
 }
 
-# the same, but treat $|, $), and $ at the end of the string differently
+# the same, but treat $|, $), $( and $ at the end of the string differently
 sub re_uninterp {
     my($str) = @_;
-    $str =~ s/(^|[^\\])(\@|\\[uUlLQE])/$1\\$2/g;
-    $str =~ s/(^|[^\\])(\$[^)|])/$1\\$2/g;
+    $str =~ s/(^|\G|[^\\])((?:\\\\)*)([\$\@](?!\||\)|\(|$)|\\[uUlLQE])/$1$2\\$3/g;
     return $str;
 }
 

@@ -1,5 +1,8 @@
 package Math::BigInt;
-$VERSION='0.01';
+require Exporter;
+@ISA = qw(Exporter);
+
+$VERSION='0.02';
 
 use overload
 '+'	=>	sub {new Math::BigInt &badd},
@@ -45,10 +48,16 @@ sub numify { 0 + "${$_[0]}" }	# Not needed, additional overhead
 				# comparing to direct compilation based on
 				# stringify
 sub import {
-  shift;
+  my $self = shift;
   return unless @_;
-  die "unknown import: @_" unless @_ == 1 and $_[0] eq ':constant';
-  overload::constant integer => sub {Math::BigInt->new(shift)};
+  for ( my $i; $i < @_ ; $i++ ) {
+	  if ( $_[$i] eq ':constant' ) {
+		  overload::constant integer => sub {Math::BigInt->new(shift)};
+		  splice @_, $i, 1;
+		  last;
+	  }
+  }
+  $self->SUPER::import(@_); 
 }
 
 $zero = 0;

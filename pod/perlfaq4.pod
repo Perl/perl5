@@ -227,22 +227,22 @@ L<perlfunc/"localtime">):
 
     $day_of_year = (localtime(time()))[7];
 
-or more legibly (in 5.004 or higher):
+or more legibly (in 5.7.1 or higher):
 
-    use Time::localtime;
-    $day_of_year = localtime(time())->yday;
+    use Time::Piece;
+    $day_of_year = localtime->day_of_year();
 
-You can find the week of the year by dividing this by 7:
+You can find the week of the year by using Time::Piece's strftime():
 
-    $week_of_year = int($day_of_year / 7);
+    $week_of_year = localtime->strftime("%U");
+    $iso_week = localtime->strftime("%V");
 
-Of course, this believes that weeks start at zero.  The Date::Calc
-module from CPAN has a lot of date calculation functions, including
-day of the year, week of the year, and so on.   Note that not
-all businesses consider ``week 1'' to be the same; for example,
-American businesses often consider the first week with a Monday
-in it to be Work Week #1, despite ISO 8601, which considers
-WW1 to be the first week with a Thursday in it.
+The difference between %U and %V is that %U assumes that the first day
+of week 1 is the first Sunday of the year, whereas ISO 8601:1988 uses
+the first week that has at least 4 days in the current year, and with
+Monday as the first day of the week. You can also use %W, which will
+return the week of the year with Monday as the first day of week 1. See
+your strftime(3) man page for more details.
 
 =head2 How do I find the current century or millennium?
 
@@ -273,6 +273,10 @@ your dates, then you should probably use either of the Date::Manip and
 Date::Calc modules from CPAN before you go hacking up your own parsing
 routine to handle arbitrary date formats.
 
+Also note that the core module Time::Piece overloads the addition and
+subtraction operators to provide date calculation options. See
+L<Time::Piece/Date Calculations>.
+
 =head2 How can I take a string and turn it into epoch seconds?
 
 If it's a regular enough string that it always has the same format,
@@ -282,24 +286,30 @@ and Date::Manip modules from CPAN.
 
 =head2 How can I find the Julian Day?
 
-Use the Time::JulianDay module (part of the Time-modules bundle
-available from CPAN.)
+Use Time::Piece as follows:
 
-Before you immerse yourself too deeply in this, be sure to verify that it
-is the I<Julian> Day you really want.  Are you really just interested in
-a way of getting serial days so that they can do date arithmetic?  If you
+    use Time::Piece;
+    my $julian_day = localtime->julian_day;
+    my $mjd = localtime->mjd; # modified julian day
+
+Before you immerse yourself too deeply in this, be sure to verify that
+it is the I<Julian> Day you really want.  Are you interested in a way
+of getting serial days so that you just can tell how many days they
+are apart or so that you can do also other date arithmetic?  If you
 are interested in performing date arithmetic, this can be done using
-either Date::Manip or Date::Calc, without converting to Julian Day first.
+Time::Piece (standard module since Perl 5.8), or by modules
+Date::Manip or Date::Calc.
 
-There is too much confusion on this issue to cover in this FAQ, but the
-term is applied (correctly) to a calendar now supplanted by the Gregorian
-Calendar, with the Julian Calendar failing to adjust properly for leap
-years on centennial years (among other annoyances).  The term is also used
-(incorrectly) to mean: [1] days in the Gregorian Calendar; and [2] days
-since a particular starting time or `epoch', usually 1970 in the Unix
-world and 1980 in the MS-DOS/Windows world.  If you find that it is not
-the first meaning that you really want, then check out the Date::Manip
-and Date::Calc modules.  (Thanks to David Cassell for most of this text.)
+There is too many details and much confusion on this issue to cover in
+this FAQ, but the term is applied (correctly) to a calendar now
+supplanted by the Gregorian Calendar, with the Julian Calendar failing
+to adjust properly for leap years on centennial years (among other
+annoyances).  The term is also used (incorrectly) to mean: [1] days in
+the Gregorian Calendar; and [2] days since a particular starting time
+or `epoch', usually 1970 in the Unix world and 1980 in the
+MS-DOS/Windows world.  If you find that it is not the first meaning
+that you really want, then check out the Date::Manip and Date::Calc
+modules.  (Thanks to David Cassell for most of this text.)
 
 =head2 How do I find yesterday's date?
 
@@ -310,6 +320,14 @@ epoch.  Take twenty-four hours off that:
 
 Then you can pass this to C<localtime()> and get the individual year,
 month, day, hour, minute, seconds values.
+
+Alternatively, you can use Time::Piece to subtract a day from the value
+returned from C<localtime()>:
+
+    use Time::Piece;
+    use Time::Seconds; # imports seconds constants, like ONE_DAY
+    my $today = localtime();
+    my $yesterday = $today - ONE_DAY;
 
 Note very carefully that the code above assumes that your days are
 twenty-four hours each.  For most people, there are two days a year

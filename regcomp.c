@@ -3888,6 +3888,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
     }
 
     if (need_class) {
+	ANYOF_FLAGS(ret) |= ANYOF_LARGE;
 	if (SIZE_ONLY)
 	    RExC_size += ANYOF_CLASS_ADD_SKIP;
 	else
@@ -4218,7 +4219,10 @@ S_dumpuntil(pTHX_ regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
 	    node = dumpuntil(start, NEXTOPER(node), NEXTOPER(node) + 1, sv, l + 1);
 	}
 	else if (op == ANYOF) {
-            node = next;
+	    /* arglen 1 + class block */
+	    node += 1 + ((ANYOF_FLAGS(node) & ANYOF_LARGE)
+		    ? ANYOF_CLASS_SKIP : ANYOF_SKIP);
+	    node = NEXTOPER(node);
 	}
 	else if (PL_regkind[(U8)op] == EXACT) {
             /* Literal string, where present. */

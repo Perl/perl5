@@ -231,10 +231,6 @@ XSUBPP = $(MINIPERL) "-I[.ext.re]" [.lib.extutils]xsubpp -noprototypes
 # life easier for those who modify Perl and rebuild it.
 INSTPERL = perl
 
-# Space-separated list of "dynamic" extensions which should be built for
-# run-time dynamic loading.
-dynamic_ext = $extensions
-
 # Space-separated list of "static" extensions to build into perlshr (case counts).
 MYEXT = DynaLoader
 # object files for these extensions; the trailing comma is required if
@@ -388,7 +384,9 @@ pod18 = [.lib.pod]perlthrtut.pod [.lib.pod]perltie.pod [.lib.pod]perltoc.pod
 pod19 = [.lib.pod]perltodo.pod [.lib.pod]perltoot.pod [.lib.pod]perltootc.pod
 pod20 = [.lib.pod]perltrap.pod [.lib.pod]perlunicode.pod [.lib.pod]perlvar.pod
 pod21 = [.lib.pod]perlxs.pod [.lib.pod]perlxstut.pod [.lib.pod]win32.pod [.lib.pod]perlvms.pod
-pod = $(pod0) $(pod1) $(pod2) $(pod3) $(pod4) $(pod5) $(pod6) $(pod7) $(pod8) $(pod9) $(pod10) $(pod11) $(pod12) $(pod13) $(pod14) $(pod15) $(pod16) $(pod17) $(pod18) $(pod19) $(pod20) $(pod21)
+pod22 = [.lib.pod]perldebguts.pod [.lib.pod]perldebtut.pod [.lib.pod]perlebcdic.pod [.lib.pod]perliol.pod
+pod23 = [.lib.pod]perlnewmod.pod [.lib.pod]perlnumber.pod [.lib.pod]perlrequick.pod [.lib.pod]perlretut.pod [.lib.pod]perlutil.pod
+pod = $(pod0) $(pod1) $(pod2) $(pod3) $(pod4) $(pod5) $(pod6) $(pod7) $(pod8) $(pod9) $(pod10) $(pod11) $(pod12) $(pod13) $(pod14) $(pod15) $(pod16) $(pod17) $(pod18) $(pod19) $(pod20) $(pod21) $(pod22) $(pod23)
 
 perlpods : $(pod)
 	@ $(NOOP)
@@ -497,7 +495,7 @@ $(ARCHDIR)vmspipe.com : vmspipe.com
 	@ Rename/Log xsloader.pm [.ext.dynaloader]
 
 dynext : $(LIBPREREQ) $(DBG)perlshr$(E)
-	@make_ext "$(dynamic_ext)" "$(MINIPERL_EXE)" "$(MMS)"
+	@make_ext "$(MINIPERL_EXE)" "$(MMS)"
 
 [.lib]vmsish.pm : [.vms.ext]vmsish.pm
 	Copy/Log/NoConfirm $(MMS$SOURCE) $(MMS$TARGET)
@@ -659,6 +657,12 @@ preplibrary : $(MINIPERL_EXE) $(LIBPREREQ) $(SOCKPM)
 [.lib.pod]perldebug.pod : [.pod]perldebug.pod
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+[.lib.pod]perldebguts.pod : [.pod]perldebguts.pod
+	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+[.lib.pod]perldebtut.pod : [.pod]perldebtut.pod
+	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 [.lib.pod]perldelta.pod : [.pod]perldelta.pod
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
@@ -666,6 +670,9 @@ preplibrary : $(MINIPERL_EXE) $(LIBPREREQ) $(SOCKPM)
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 [.lib.pod]perldsc.pod : [.pod]perldsc.pod
+	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+[.lib.pod]perlebcdic.pod : [.pod]perlebcdic.pod
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 [.lib.pod]perlembed.pod : [.pod]perlembed.pod
@@ -725,6 +732,9 @@ preplibrary : $(MINIPERL_EXE) $(LIBPREREQ) $(SOCKPM)
 [.lib.pod]perlintern.pod : [.pod]perlintern.pod
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+[.lib.pod]perliol.pod : [.pod]perliol.pod
+	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 [.lib.pod]perlipc.pod : [.pod]perlipc.pod
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
@@ -744,6 +754,12 @@ preplibrary : $(MINIPERL_EXE) $(LIBPREREQ) $(SOCKPM)
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 [.lib.pod]perlmodlib.pod : [.pod]perlmodlib.pod
+	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+[.lib.pod]perlnewmod.pod : [.pod]perlnewmod.pod
+	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+[.lib.pod]perlnumber.pod : [.pod]perlnumber.pod
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 [.lib.pod]perlobj.pod : [.pod]perlobj.pod
@@ -768,6 +784,12 @@ preplibrary : $(MINIPERL_EXE) $(LIBPREREQ) $(SOCKPM)
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 [.lib.pod]perlreftut.pod : [.pod]perlreftut.pod
+	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+[.lib.pod]perlrequick.pod : [.pod]perlrequick.pod
+	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+[.lib.pod]perlretut.pod : [.pod]perlretut.pod
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 [.lib.pod]perlrun.pod : [.pod]perlrun.pod
@@ -807,6 +829,9 @@ preplibrary : $(MINIPERL_EXE) $(LIBPREREQ) $(SOCKPM)
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 [.lib.pod]perlunicode.pod : [.pod]perlunicode.pod
+	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+[.lib.pod]perlutil.pod : [.pod]perlutil.pod
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 [.lib.pod]perlvar.pod : [.pod]perlvar.pod
@@ -1255,7 +1280,7 @@ tidy : cleanlis
 	- If F$Search("[.lib.pod]*.com;-1").nes."" Then Purge/NoConfirm/Log [.lib.pod]*.com
 
 clean : tidy cleantest
-	- @make_ext "$(dynamic_ext)" "$(MINIPERL_EXE)" "$(MMS)" clean
+	- @make_ext "$(MINIPERL_EXE)" "$(MMS)" clean
 	- If F$Search("*.Opt").nes."" Then Delete/NoConfirm/Log *.Opt;*/Exclude=PerlShr_*.Opt
 	- If F$Search("[...]*$(O);*") .nes."" Then Delete/NoConfirm/Log [...]*$(O);*
 	- If F$Search(F$Parse("Sys$Disk:[]","$(SOCKH)")).nes."" Then Delete/NoConfirm/Log $(SOCKH);*
@@ -1281,7 +1306,7 @@ clean : tidy cleantest
 	- @extra_pods CLEAN
 
 realclean : clean
-	- @make_ext "$(dynamic_ext)" "$(MINIPERL_EXE)" "$(MMS)" realclean
+	- @make_ext "$(MINIPERL_EXE)" "$(MMS)" realclean
 	- If F$Search("*$(OLB)").nes."" Then Delete/NoConfirm/Log *$(OLB);*
 	- If F$Search("*.Opt").nes."" Then Delete/NoConfirm/Log *.Opt;*
 	- If F$Search("Config.H").nes."" Then Delete/NoConfirm/Log Config.H;*

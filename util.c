@@ -4126,16 +4126,6 @@ Perl_ebcdic_control(pTHX_ int ch)
 }
 #endif
 
-#ifdef HAS_TZNAME
-#  if !defined(WIN32) && !defined(__CYGWIN__)
-extern char *tzname[];
-#  endif
-#else
-#if !defined(WIN32) || (defined(__MINGW32__) && !defined(tzname))
-char *tzname[] = { "" , "" };
-#endif
-#endif
-
 /* XXX struct tm on some systems (SunOS4/BSD) contains extra (non POSIX)
  * fields for which we don't have Configure support yet:
  *   char *tm_zone;   -- abbreviation of timezone name

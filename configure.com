@@ -583,32 +583,87 @@ $! after finding MANIFEST (see above)
 $!: Configure runs within the UU subdirectory 
 $!
 $!: compute the number of columns on the terminal for proper question formatting
-$! (sfn, will assume 80-ish)
+$ IF F$MODE() .EQS. "BATCH"
+$! else it winds up being 512 in batch
+$ THEN COLUMNS = 80
+$ ELSE COLUMNS = F$GETDVI("SYS$OUTPUT","DEVBUFSIZ")
+$ ENDIF
+$! "-des" sets SYS$OUTPUT to NL: with a DEVBUFSIZ too large (512 again)
+$ IF COLUMNS .GT. 210 THEN COLUMNS = 80
+$! not sure if this would actually be needed - it hopefully will not hurt
+$ IF COLUMNS .LT. 40 THEN COLUMNS = 40
 $!
 $!: set up the echo used in my read              !sfn
 $!: now set up to do reads with possible shell escape and default assignment !sfn
 $ GOTO Beyond_myread
 $!
+$! The sub_rp splitting is intended to handle long symbols such as the dflt for
+$! extensions.
+$!
 $myread:
 $ ans = ""
+$ len_rp = F$LENGTH(rp)
 $ If (fastread)
 $ Then
-$   echo4 "''rp'"
+$   IF len_rp .GT. 210
+$   THEN
+$     i_rp = 0
+$     fastread_rp_loop:
+$       sub_rp = F$EXTRACT(i_rp,COLUMNS,rp)
+$       echo4 "''sub_rp'"
+$       i_rp = i_rp + COLUMNS
+$       IF i_rp .LT. len_rp THEN GOTO fastread_rp_loop
+$   ELSE
+$     echo4 "''rp'"
+$   ENDIF
 $ Else
 $   If (.NOT. silent) Then echo ""
-$   READ SYS$COMMAND/PROMPT="''rp'" ans
+$   IF len_rp .GT. 210
+$   THEN
+$     i_rp = 0
+$     firstread_rp_loop:
+$       sub_rp = F$EXTRACT(i_rp,COLUMNS,rp)
+$       echo4 "''sub_rp'"
+$       i_rp = i_rp + COLUMNS
+$       IF i_rp .LT. len_rp THEN GOTO firstread_rp_loop
+$     READ SYS$COMMAND/PROMPT="''sub_rp'" ans
+$   ELSE
+$     READ SYS$COMMAND/PROMPT="''rp'" ans
+$   ENDIF
 $   IF (ans .EQS. "&-d")
 $   THEN
 $     echo4 "(OK, I will run with -d after this question.)"
 $     IF (.NOT. silent) THEN echo ""
-$     READ SYS$COMMAND/PROMPT="''rp'" ans
+$     IF len_rp .GT. 210
+$     THEN
+$       i_rp = 0
+$       secondread_rp_loop:
+$         sub_rp = F$EXTRACT(i_rp,COLUMNS,rp)
+$         echo4 "''sub_rp'"
+$         i_rp = i_rp + COLUMNS
+$         IF i_rp .LT. len_rp THEN GOTO secondread_rp_loop
+$       READ SYS$COMMAND/PROMPT="''sub_rp'" ans
+$     ELSE
+$       READ SYS$COMMAND/PROMPT="''rp'" ans
+$     ENDIF
 $     fastread := yes
 $   ENDIF
 $   IF (ans .EQS. "&-s")
 $   THEN
 $     echo4 "(OK, I will run with -s after this question.)"
 $     echo ""
-$     READ SYS$COMMAND/PROMPT="''rp'" ans
+$     IF len_rp .GT. 210
+$     THEN
+$       i_rp = 0
+$       thirdread_rp_loop:
+$         sub_rp = F$EXTRACT(i_rp,COLUMNS,rp)
+$         echo4 "''sub_rp'"
+$         i_rp = i_rp + COLUMNS
+$         IF i_rp .LT. len_rp THEN GOTO thirdread_rp_loop
+$       READ SYS$COMMAND/PROMPT="''sub_rp'" ans
+$     ELSE
+$       READ SYS$COMMAND/PROMPT="''rp'" ans
+$     ENDIF
 $     silent := true
 $     GOSUB Shut_up
 $   ENDIF
@@ -1141,9 +1196,12 @@ $   ENDIF
 $!
 $ ENDIF !%Config-I-VMS, skip remaining "where install" questions
 $!
-$ perl_symbol = "true"
-$ perl_verb = ""
-$ dflt = "y"
+$ IF F$TYPE(perl_symbol) .EQS. "" THEN perl_symbol := true
+$ IF F$TYPE(perl_verb) .EQS. "" THEN perl_verb = ""
+$ IF perl_symbol
+$ THEN dflt = "y"
+$ ELSE dflt = "n"
+$ ENDIF
 $ IF .NOT.silent 
 $ THEN 
 $   echo ""
@@ -1154,11 +1212,15 @@ $   echo "process or the system wide level."
 $ ENDIF
 $ rp = "Invoke perl as a global symbol foreign command? [''dflt'] "
 $ GOSUB myread
-$ IF (.NOT.ans).AND.(ans.NES."") THEN perl_symbol = "false"
+$ IF (ans.EQS."") THEN ans = dflt
+$ IF (.NOT.ans) THEN perl_symbol = "false"
 $!
 $ IF (.NOT.perl_symbol)
 $ THEN
-$   dflt = "y"
+$   IF perl_verb .EQS. "DCLTABLES"
+$   THEN dflt = "n"
+$   ELSE dflt = "y"
+$   ENDIF
 $   IF .NOT.silent 
 $   THEN 
 $     echo ""
@@ -1168,7 +1230,8 @@ $     echo "would require write privilege)."
 $   ENDIF
 $   rp = "Invoke perl as a per process command verb? [ ''dflt' ] "
 $   GOSUB myread
-$   IF (.NOT.ans).AND.(ans.NES."")
+$   IF (ans.EQS."") THEN ans = dflt
+$   IF (.NOT.ans)
 $   THEN perl_verb = "DCLTABLES"
 $   ELSE perl_verb = "PROCESS"
 $   ENDIF
@@ -2387,6 +2450,43 @@ $   if ans.eqs."TWO_POT" then use_two_pot_malloc = "Y"
 $   if ans.eqs."PACK_MALLOC" then use_pack_malloc = "Y"
 $ ENDIF
 $!
+$ known_extensions = ""
+$ xxx = ""
+$ OPEN/READ CONFIG 'manifestfound'
+$ext_loop:
+$   READ/END_OF_FILE=end_ext/ERROR=end_ext CONFIG line
+$   IF F$EXTRACT(0,4,line) .NES. "ext/" .AND. -
+       F$EXTRACT(0,8,line) .NES. "vms/ext/" THEN goto ext_loop
+$   line = F$EDIT(line,"COMPRESS")
+$   line = F$ELEMENT(0," ",line)
+$   line_len = F$LENGTH(line)
+$   IF F$EXTRACT(line_len - 12,12,line) .NES. "/Makefile.PL" THEN goto ext_loop
+$   IF F$EXTRACT(0,4,line) .EQS. "ext/" THEN -
+      xxx = F$EXTRACT(4,line_len - 16,line)
+$   IF xxx .EQS. "DynaLoader" THEN goto ext_loop     ! omit
+$   IF xxx .EQS. "SDBM_File/sdbm" THEN goto ext_loop ! sub extension - omit
+$   IF F$EXTRACT(0,8,line) .EQS. "vms/ext/" THEN -
+      xxx = "VMS/" + F$EXTRACT(8,line_len - 20,line)
+$   known_extensions = known_extensions + " ''xxx'"
+$   goto ext_loop
+$end_ext:
+$ close CONFIG
+$ DELETE/SYMBOL xxx
+$ known_extensions = F$EDIT(known_extensions,"TRIM,COMPRESS")
+$ dflt = known_extensions
+$ IF ccname .NES. "DEC" .AND. ccname .NES. "CXX"
+$ THEN
+$   dflt = dflt - "POSIX"             ! not with VAX C or GCC
+$ ENDIF
+$ dflt = dflt - "ByteLoader"          ! needs to be ported
+$ dflt = dflt - "DB_File"             ! needs to be ported
+$ dflt = dflt - "GDBM_File"           ! needs porting/special library
+$ dflt = dflt - "IPC/SysV"            ! needs to be ported
+$ dflt = dflt - "NDBM_File"           ! needs porting/special library
+$ dflt = dflt - "ODBM_File"           ! needs porting/special library
+$ dflt = dflt - "Socket"              ! on VMS is optional static extension
+$ dflt = F$EDIT(dflt,"TRIM,COMPRESS")
+$!
 $! Ask for their default list of extensions to build
 $ echo ""
 $ echo "It is time to specify which modules you want to build into"
@@ -2395,51 +2495,10 @@ $ echo "you might, for example, want to build GDBM_File instead of"
 $ echo "SDBM_File if you have the GDBM library built on your machine."
 $ echo ""
 $ echo "Which modules do you want to build into perl?"
-$! we need to add Byteloader to this list:
-$ dflt = "B Data::Dumper Devel::DProf Devel::Peek Digest::MD5 Encode Errno Fcntl File::Glob Filter::Util::Call IO List::Util MIME::Base64 Opcode PerlIO::Scalar SDBM_File Storable Sys::Hostname Thread Time::HiRes Time::Piece VMS::DCLsym VMS::Stdio XS::Typemap attrs re"
-$ IF ccname .EQS. "DEC" .OR. ccname .EQS. "CXX"
-$ THEN
-$   dflt = dflt + " POSIX"
-$ ENDIF
 $ rp = "[''dflt'] "
 $ GOSUB myread
-$ if ans.eqs."" then ans = "''dflt'"
-$ a = ""
-$ j = 0
-$ xloop1:
-$   x = f$elem(j," ",ans)
-$   j = j + 1
-$   if x .eqs. " " then goto exloop1
-$   xloop2:
-$       k = f$locate("::",x)
-$       if k .ge. f$len(x) then goto exloop2
-$       x = f$extract(0,k,x) + "/" + f$extract(k+2,f$len(x)-2,x)
-$   goto xloop2
-$   exloop2:
-$   a = a + " " + x
-$ goto xloop1
-$ exloop1:
-$ ans = f$edit(a,"trim")
-$!
-$ a = ""
-$ j = 0
-$ xloop3:
-$   x = f$elem(j," ",dflt)
-$   j = j + 1
-$   if x .eqs. " " then goto exloop3
-$   xloop4:
-$       k = f$locate("::",x)
-$       if k .ge. f$len(x) then goto exloop4
-$       x = f$extract(0,k,x) + "/" + f$extract(k+2,f$len(x)-2,x)
-$   goto xloop4
-$   exloop4:
-$   a = a + " " + x
-$ goto xloop3
-$ exloop3:
-$ dflt = f$edit(a,"trim")
-$!
-$ extensions = "''ans'"
-$ known_extensions = "''dflt'"
+$ if ans .eqs. "" then ans = "''dflt'"
+$ extensions = F$EDIT(ans,"TRIM,COMPRESS")
 $!
 $! %Config-I-VMS, determine build/make utility here (make gmake mmk mms)
 $ echo ""
@@ -2665,7 +2724,6 @@ $!  - use built config.sh to take config_h.SH -> config.h
 $!  - also take vms/descrip_mms.template -> descrip.mms (VMS Makefile)
 $!              vms/Makefile.in -> Makefile. (VMS GNU Makefile?)
 $!              vms/Makefile.SH -> Makefile. (VMS GNU Makefile?)
-$!  - build make_ext.com extension builder procedure.
 $!
 $! Note for folks from other platforms changing things in here:
 $!
@@ -4553,6 +4611,22 @@ $   d_fpathconf="undef"
 $   d_sysconf="undef"
 $   d_sigsetjmp="undef"
 $ ENDIF
+$!: see if tzname[] exists
+$ OS
+$ WS "#include <stdio.h>"
+$ WS "#include <time.h>"
+$ WS "int main() { extern short tzname[]; printf(""%hd"", tzname[0]); }"
+$ CS
+$ GOSUB compile_ok
+$ IF compile_status .EQ. good_compile
+$ THEN
+$   d_tzname = "undef"
+$   echo4 "tzname[] NOT found."
+$ ELSE
+$   d_tzname = "define"
+$   echo4 "tzname[] found."
+$ ENDIF
+$ IF F$SEARCH("try.obj") .NES. "" THEN DELETE/NOLOG/NOCONFIRM try.obj;
 $!
 $ IF d_gethname .EQS. "undef" .AND. d_uname .EQS. "undef"
 $ THEN
@@ -5180,7 +5254,7 @@ $ WC "d_telldir='define'"
 $ WC "d_telldirproto='define'"
 $ WC "d_times='define'"
 $ WC "d_truncate='" + d_truncate + "'"
-$ WC "d_tzname='undef'"
+$ WC "d_tzname='" + d_tzname + "'"
 $ WC "d_u32align='define'"
 $ WC "d_ualarm='undef'"
 $ WC "d_umask='define'"
@@ -5213,13 +5287,23 @@ $ WC "dlobj='" + dlobj + "'"
 $ WC "dlsrc='dl_vms.c'"
 $ WC "doublesize='" + doublesize + "'"
 $ WC "drand01='" + drand01 + "'"
-$ WC "dynamic_ext='" + extensions + "'"
+$!
+$! The extensions symbol may be quite long
+$!
+$ tmp = "dynamic_ext='" + extensions + "'"
+$ WC/symbol tmp
+$ DELETE/SYMBOL tmp
 $ WC "eagain=' '"
 $ WC "ebcdic='undef'"
 $ WC "embedmymalloc='" + mymalloc + "'"
 $ WC "eunicefix=':'"
 $ WC "exe_ext='" + exe_ext + "'"
-$ WC "extensions='" + extensions + "'"
+$!
+$! The extensions symbol may be quite long
+$!
+$ tmp = "extensions='" + extensions + "'"
+$ WC/symbol tmp
+$ DELETE/SYMBOL tmp
 $ WC "fflushNULL='define'"
 $ WC "fflushall='undef'"
 $ WC "fpostype='fpos_t'"
@@ -5330,7 +5414,12 @@ $ WC "intsize='" + intsize + "'"
 $ WC "ivdformat='" + ivdformat + "'"
 $ WC "ivsize='" + ivsize + "'"
 $ WC "ivtype='" + ivtype + "'"
-$ WC "known_extensions='" + known_extensions + "'"
+$!
+$! The known_extensions symbol may be quite long
+$!
+$ tmp = "known_extensions='" + known_extensions + "'"
+$ WC/symbol tmp
+$ DELETE/SYMBOL tmp
 $ WC "ld='" + ld + "'"
 $ WC "lddlflags='/Share'"
 $ WC "ldflags='" + ldflags + "'"
@@ -5659,6 +5748,7 @@ $ mcr []munchconfig 'config_sh' 'Makefile_SH' "''DECC_REPLACE'" -
  "''Thread_Live_Dangerously'" "PV=''version'" "FLAGS=FLAGS=''extra_flags'"
 $! Clean up after ourselves
 $ DELETE/NOLOG/NOCONFIRM []munchconfig.exe;
+$!
 $ echo4 "Extracting make_ext.com (without variable substitutions)"
 $ Create Sys$Disk:[-]make_ext.com
 $ Deck/Dollar="$EndOfTpl$"
@@ -5667,17 +5757,31 @@ $!   NOTE: This file is extracted as part of the VMS configuration process.
 $!   Any changes made to it directly will be lost.  If you need to make any
 $!   changes, please edit the template in Configure.Com instead.
 $    def = F$Environment("Default")
-$    exts1 = F$Edit(p1,"Compress")
-$    p2 = F$Edit(p2,"Upcase,Compress,Trim")
-$    If F$Locate("MCR ",p2).eq.0 Then p2 = F$Extract(3,255,p2)
-$    miniperl = "$" + F$Search(F$Parse(p2,".Exe"))
-$    makeutil = p3
-$    if f$type('p3') .nes. "" then makeutil = 'p3'
-$    targ = F$Edit(p4,"Lowercase")
+$!   p1 - how to invoke miniperl (passed in from descrip.mms)
+$    p1 = F$Edit(p1,"Upcase,Compress,Trim")
+$    If F$Locate("MCR ",p1).eq.0 Then p1 = F$Extract(3,255,p1)
+$    miniperl = "$" + F$Search(F$Parse(p1,".Exe"))
+$!   p2 - how to invoke local make utility (passed in from descrip.mms)
+$    makeutil = p2
+$    if f$type('p2') .nes. "" then makeutil = 'p2'
+$!   p3 - make target (passed in from descrip.mms)
+$    targ = F$Edit(p3,"Lowercase")
+$    sts = 1
+$    extensions = ""
+$    open/read CONFIG config.sh
+$ find_ext_loop:
+$    read/end=end_ext_loop CONFIG line
+$    if (f$extract(0,12,line) .NES. "extensions='")
+$    then goto find_ext_loop
+$    else extensions = f$extract(12,f$length(line),line) - "'"
+$    endif
+$ end_ext_loop:
+$    close CONFIG
+$    extensions = f$edit(extensions,"TRIM,COMPRESS")
 $    i = 0
 $ next_ext:
-$    ext = F$Element(i," ",p1)
-$    If ext .eqs. " " Then Goto done
+$    ext = f$element(i," ",extensions)
+$    If ext .eqs. " " .or. ext .eqs. "" Then Goto done
 $    Define/User_mode Perl_Env_Tables CLISYM_LOCAL
 $    miniperl
 $    deck
@@ -5812,6 +5916,8 @@ $ CALL Bad_environment "LIB"
 $ CALL Bad_environment "T"
 $ CALL Bad_environment "FOO"
 $ CALL Bad_environment "EXT"
+$ CALL Bad_environment "SOME_LOGICAL_NAME_NOT_LIKELY"
+$ CALL Bad_environment "DOWN_LOGICAL_NAME_NOT_LIKELY"
 $ CALL Bad_environment "TEST" "SYMBOL"
 $ IF f$search("config.msg") .eqs. "" THEN echo "OK."
 $!

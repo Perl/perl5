@@ -43,7 +43,7 @@ install(pTHX)
     PL_regint_string = &my_re_intuit_string;
     PL_regfree = &my_regfree;
     oldfl = PL_debug & DEBUG_r_FLAG;
-    PL_debug |= ~DEBUG_r_FLAG;
+    PL_debug |= DEBUG_r_FLAG;
 }
 
 MODULE = re	PACKAGE = re
