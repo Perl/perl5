@@ -95,6 +95,22 @@ Version v5.5.660        Development release working toward v5.6
 ----------------
 
 ____________________________________________________________________________
+[  5198] By: gsar                                  on 2000/02/22  10:45:54
+        Log: PodParser-1.093 update (from Brad Appleton's site)
+     Branch: perl
+	   ! lib/Pod/Checker.pm lib/Pod/Find.pm lib/Pod/InputObjects.pm
+	   ! lib/Pod/ParseUtils.pm lib/Pod/Parser.pm lib/Pod/Select.pm
+	   ! lib/Pod/Usage.pm t/pod/poderrs.t t/pod/poderrs.xr
+	   ! t/pod/special_seqs.t t/pod/special_seqs.xr
+____________________________________________________________________________
+[  5197] By: gsar                                  on 2000/02/22  10:24:13
+        Log: integrate cfgperl contents into mainline, update Changes
+     Branch: perl
+	   ! Changes pod/perlhist.pod
+	  !> Configure Porting/Glossary Porting/config.sh Porting/config_H
+	  !> config_h.SH hints/solaris_2.sh malloc.c perl.h
+	  !> pod/perldelta.pod
+____________________________________________________________________________
 [  5196] By: gsar                                  on 2000/02/22  10:10:36
         Log: dos-djgpp updates (from Laszlo Molnar <laszlo.molnar@eth.ericsson.se>)
      Branch: perl
