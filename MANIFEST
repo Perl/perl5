@@ -245,6 +245,8 @@ ext/Encode/Encode/iso8859-1.enc	Encoding tables
 ext/Encode/Encode/iso8859-1.ucm	Encoding tables
 ext/Encode/Encode/iso8859-10.enc	Encoding tables
 ext/Encode/Encode/iso8859-10.ucm	Encoding tables
+ext/Encode/Encode/iso8859-11.enc	Encoding tables
+ext/Encode/Encode/iso8859-11.ucm	Encoding tables
 ext/Encode/Encode/iso8859-13.enc	Encoding tables
 ext/Encode/Encode/iso8859-13.ucm	Encoding tables
 ext/Encode/Encode/iso8859-14.enc	Encoding tables
@@ -273,8 +275,12 @@ ext/Encode/Encode/isoir-197.enc	Encoding tables
 ext/Encode/Encode/jis0201.enc	Encoding tables
 ext/Encode/Encode/jis0208.enc	Encoding tables
 ext/Encode/Encode/jis0212.enc	Encoding tables
+ext/Encode/Encode/koi8-f.enc	Encoding tables
+ext/Encode/Encode/koi8-f.ucm	Encoding tables
 ext/Encode/Encode/koi8-r.enc	Encoding tables
 ext/Encode/Encode/koi8-r.ucm	Encoding tables
+ext/Encode/Encode/koi8-u.enc	Encoding tables
+ext/Encode/Encode/koi8-u.ucm	Encoding tables
 ext/Encode/Encode/ksc5601.enc	Encoding tables
 ext/Encode/Encode/macCentEuro.enc	Encoding tables
 ext/Encode/Encode/macCroatian.enc	Encoding tables
@@ -289,11 +295,17 @@ ext/Encode/Encode/macSami.enc	Encoding tables
 ext/Encode/Encode/macThai.enc	Encoding tables
 ext/Encode/Encode/macTurkish.enc	Encoding tables
 ext/Encode/Encode/macUkraine.enc	Encoding tables
+ext/Encode/Encode/nextstep.enc	Encoding tables
+ext/Encode/Encode/nextstep.ucm	Encoding tables
 ext/Encode/Encode/posix-bc.enc	Encoding tables
 ext/Encode/Encode/posix-bc.ucm	Encoding tables
+ext/Encode/Encode/roman8.enc	Encoding tables
+ext/Encode/Encode/roman8.ucm	Encoding tables
 ext/Encode/Encode/shiftjis.enc	Encoding tables
 ext/Encode/Encode/symbol.enc	Encoding tables
 ext/Encode/Encode/symbol.ucm	Encoding tables
+ext/Encode/Encode/viscii.enc	Encoding tables
+ext/Encode/Encode/viscii.ucm	Encoding tables
 ext/Encode/Encode/Tcl.pm	Handler for .enc encodings
 ext/Encode/Encode/Tcl.t	See if Encode::Tcl works
 ext/Encode/Makefile.PL	Encode extension

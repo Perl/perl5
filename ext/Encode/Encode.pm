@@ -42,9 +42,22 @@ use Carp;
 our %encoding;
 my @alias;  # ordered matching list
 my %alias;  # cached known aliases
+
                      # 0  1  2  3  4  5   6   7   8   9  10
 our @latin2iso_num = ( 0, 1, 2, 3, 4, 9, 10, 13, 14, 15, 16 );
 
+our %winlatin2cp   = (
+		      'Latin1'     => 1252,
+		      'Latin2'     => 1250,
+		      'Cyrillic'   => 1251,
+		      'Baltic'     => 1257,
+		      'Greek'      => 1253,
+		      'Turkish'    => 1254,
+		      'Hebrew'     => 1255,
+		      'Arabic'     => 1256,
+		      'Baltic'     => 1257,
+		      'Vietnamese' => 1258,
+		     );
 
 sub encodings
 {
@@ -105,6 +118,9 @@ define_alias( qr/^iso[-_]?(\d+)[-_](\d+)$/i => '"iso-$1-$2"' );
 # At least HP-UX has these.
 define_alias( qr/^iso8859(\d+)$/i => '"iso-8859-$1"' );
 
+# More HP stuff.
+define_alias( qr/^(?:hp-)?(arabic|greek|hebrew|kana|roman|thai|turkish)8$/i => '"${1}8"' );
+
 # This is a font issue, not an encoding issue.
 # (The currency symbol of the Latin 1 upper half
 #  has been redefined as the euro symbol.)
@@ -113,12 +129,18 @@ define_alias( qr/^(.+)\@euro$/i => '"$1"' );
 # Allow latin-1 style names as well
 define_alias( qr/^(?:iso[-_]?)?latin[-_]?(\d+)$/i => '"iso-8859-$latin2iso_num[$1]"' );
 
+# Allow winlatin1 style names as well
+define_alias( qr/^win(latin[12]|cyrillic|baltic|greek|turkish|hebrew|arabic|baltic|vietnamese)$/i => '"cp$winlatin2cp{$1}"' );
+
 # Common names for non-latin prefered MIME names
 define_alias( 'ascii'    => 'US-ascii',
               'cyrillic' => 'iso-8859-5',
               'arabic'   => 'iso-8859-6',
               'greek'    => 'iso-8859-7',
-              'hebrew'   => 'iso-8859-8');
+              'hebrew'   => 'iso-8859-8',
+              'thai'     => 'iso-8859-11',
+              'tis620'   => 'iso-8859-11',
+	    );
 
 # At least AIX has IBM-NNN (surprisingly...) instead of cpNNN.
 define_alias( qr/^ibm[-_]?(\d\d\d\d?)$/i => '"cp$1"');
@@ -126,11 +148,24 @@ define_alias( qr/^ibm[-_]?(\d\d\d\d?)$/i => '"cp$1"');
 # Standardize on the dashed versions.
 define_alias( qr/^utf8$/i  => 'utf-8' );
 define_alias( qr/^koi8r$/i => 'koi8-r' );
+define_alias( qr/^koi8u$/i => 'koi8-u' );
 
-# TODO: the HP-UX '8' encodings:  arabic8 greek8 hebrew8 roman8 turkish8
-# TODO: the Thai Encoding tis620
-# TODO: the Chinese Encoding gb18030
-# TODO: what is the Japanese 'ujis' encoding seen in some Linuxes?
+# TODO: HP-UX '8' encodings arabic8 greek8 hebrew8 kana8 thai8 turkish8
+# TODO: HP-UX '15' encodings japanese15 korean15 roi15
+# TODO: Cyrillic encoding ISO-IR-111 (useful?)
+# TODO: Chinese encodings GB18030 GBK Big5-HSKCS EUC-TW
+# TODO: Armenian encoding ARMSCII-8
+# TODO: Hebrew encoding ISO-8859-8-1
+# TODO: Thai encoding TCVN
+# TODO: Korean encoding Johab
+# TODO: Vietnamese encodings VISCII VPS
+# TODO: Japanese encoding JIS (not the same as SJIS)
+# TODO: Mac Asian+African encodings: Arabic Armenian Bengali Burmese
+#       ChineseSimp ChineseTrad Devanagari Ethiopic ExtArabic
+#       Farsi Georgian Gujarati Gurmukhi Hebrew Japanese
+#       Kannada Khmer Korean Laotian Malayalam Mongolian
+#       Oriya Sinhalese Symbol Tamil Telugu Tibetan Vietnamese
+# TODO: what is the Japanese 'UJIS' encoding seen in some Linuxes?
 
 # Map white space and _ to '-'
 define_alias( qr/^(\S+)[\s_]+(.*)$/i => '"$1-$2"' );
