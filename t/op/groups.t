@@ -1,9 +1,8 @@
 #!./perl
 
-if (! -x ($groups = '/usr/ucb/groups') &&
-    ! -x ($groups = '/usr/bin/groups') &&
-    ! -x ($groups = '/bin/groups')
-) {
+$ENV{PATH} = '/bin:/usr/bin:/usr/ucb:/usr/xpg4/bin';
+
+unless (($groups = `(id -Gn || groups) 2>/dev/null`) ne '') {
     print "1..0\n";
     exit 0;
 }
@@ -27,13 +26,13 @@ for (split(' ', $()) {
     }
 } 
 
-if ($^O eq "uwin") {
+if ($^O eq "uwin") { # Or anybody else who can have spaces in group names.
 	$gr1 = join(' ', grep(!$did{$_}++, sort split(' ', join(' ', @gr))));
 } else {
 	$gr1 = join(' ', sort @gr);
 }
 
-$gr2 = join(' ', grep(!$basegroup{$_}++, sort split(' ',`$groups`)));
+$gr2 = join(' ', grep(!$basegroup{$_}++, sort split(' ',$groups)));
 
 if ($gr1 eq $gr2) {
     print "ok 1\n";

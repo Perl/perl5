@@ -23,10 +23,9 @@ close PIPE;
 
 if ($^O eq 'vmesa') {
     # Doesn't work, yet.
-    print "ok 3\n";
-    print "ok 4\n";
-    print "ok 5\n";
-    print "ok 6\n";
+    for (3..6) {
+	print "ok $_ # skipped\n";
+    }
 } else {
     if (open(PIPE, "-|")) {
 	while(<PIPE>) {
@@ -82,10 +81,10 @@ print "ok 8\n";
 # STDOUT.  Someone should modify tests #9 to #12 to work with VMS.
 
 if ($^O eq 'VMS') {
-    print "ok 9\n";
-    print "ok 10\n";
-    print "ok 11\n";
-    print "ok 12\n";
+    print "ok 9 # skipped\n";
+    print "ok 10 # skipped\n";
+    print "ok 11 # skipped\n";
+    print "ok 12 # skipped\n";
     exit;
 }
 
@@ -95,7 +94,7 @@ if ($Config{d_sfio} || $^O eq 'machten' || $^O eq 'beos' || $^O eq 'posix-bc') {
     # but won't write to broken pipes, so nothing's pending at close.
     # BeOS will not write to broken pipes, either.
     # Nor does POSIX-BC.
-    print "ok 9\n";
+    print "ok 9 # skipped\n";
 }
 else {
     local $SIG{PIPE} = 'IGNORE';
@@ -112,9 +111,9 @@ else {
 
 if ($^O eq 'vmesa') {
     # These don't work, yet.
-    print "ok 10\n";
-    print "ok 11\n";
-    print "ok 12\n";
+    print "ok 10 # skipped\n";
+    print "ok 11 # skipped\n";
+    print "ok 12 # skipped\n";
     exit;
 }
 

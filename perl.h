@@ -309,12 +309,6 @@ register struct op *op asm(stringify(OP_IN_REGISTER));
 #  include <pthread.h>
 #endif
 
-/* HP-UX 10.X CMA (Common Multithreaded Architecure) insists that
-   pthread.h must be included before all other header files.
-*/
-#if defined(USE_THREADS) && defined(PTHREAD_H_FIRST)
-#  include <pthread.h>
-#endif
 #ifndef _TYPES_		/* If types.h defines this it's easy. */
 #   ifndef major		/* Does everyone's types.h define this? */
 #	include <sys/types.h>
@@ -1381,17 +1375,22 @@ typedef I32 (*filter_t) _((int, SV *, int));
 #      ifdef OS2
 #        include "os2thread.h"
 #      else
-#        include <pthread.h>
-typedef pthread_t perl_os_thread;
-typedef pthread_mutex_t perl_mutex;
-typedef pthread_cond_t perl_cond;
-typedef pthread_key_t perl_key;
+#        ifdef I_MACH_CTHREADS
+typedef cthread_t	perl_os_thread;
+typedef mutex_t		perl_mutex;
+typedef condition_t	perl_cond;
+typedef void *		perl_key;
+#        else /* Posix threads */
+#          include <pthread.h>
+typedef pthread_t	perl_os_thread;
+typedef pthread_mutex_t	perl_mutex;
+typedef pthread_cond_t	perl_cond;
+typedef pthread_key_t	perl_key;
+#        endif /* I_MACH_CTHREADS */
 #      endif /* OS2 */
 #    endif /* WIN32 */
 #  endif /* FAKE_THREADS */
 #endif /* USE_THREADS */
-
-
   
 #ifdef VMS
 #   define STATUS_NATIVE	PL_statusvalue_vms

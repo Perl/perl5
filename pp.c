@@ -2469,6 +2469,13 @@ PP(pp_quotemeta)
 		*d++ = *s++;
 	    }
 	}
+	else {
+	    while (len--) {
+		if (!isALNUM(*s))
+		    *d++ = '\\';
+		*d++ = *s++;
+	    }
+ 	}
 	*d = '\0';
 	SvCUR_set(TARG, d - SvPVX(TARG));
 	(void)SvPOK_only(TARG);

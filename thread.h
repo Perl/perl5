@@ -50,6 +50,68 @@ struct perl_thread *getTHR _((void));
 #  define PTHREAD_ATTR_SETDETACHSTATE(a,s) pthread_attr_setdetachstate(a,s)
 #endif
 
+#ifdef I_MACH_CTHREADS
+
+/* cthreads interface */
+
+/* #include <mach/cthreads.h> is in perl.h #ifdef I_MACH_CTHREADS */
+
+#define MUTEX_INIT(m)					\
+	STMT_START {					\
+		*m = mutex_alloc();			\
+		if (*m) {				\
+			mutex_init(*m);			\
+		} else {				\
+			croak("panic: MUTEX_INIT");	\
+		}					\
+	} STMT_END
+
+#define MUTEX_LOCK(m)		mutex_lock(*m)
+#define MUTEX_UNLOCK(m)		mutex_unlock(*m)
+#define MUTEX_DESTROY(m)				\
+	STMT_START {					\
+		mutex_free(*m);				\
+		*m = 0;					\
+	} STMT_END
+
+#define COND_INIT(c)					\
+	STMT_START {					\
+		*c = condition_alloc();			\
+		if (*c) {				\
+			condition_init(*c);		\
+		} else {				\
+			croak("panic: COND_INIT");	\
+		}					\
+	} STMT_END
+
+#define COND_SIGNAL(c)		condition_signal(*c)
+#define COND_BROADCAST(c)	condition_broadcast(*c)
+#define COND_WAIT(c, m)		condition_wait(*c, *m)
+#define COND_DESTROY(c)				\
+	STMT_START {				\
+		condition_free(*c);		\
+		*c = 0;				\
+	} STMT_END
+
+#define THREAD_CREATE(thr, f)	(thr->self = cthread_fork(f, thr), 0)
+#define THREAD_POST_CREATE(thr)
+
+#define THREAD_RET_TYPE		any_t
+#define THREAD_RET_CAST(x)	((any_t) x)
+
+#define DETACH(t)		cthread_detach(t->self)
+#define JOIN(t, avp)		(*(avp) = (AV *)cthread_join(t->self))
+
+#define SET_THR(thr)		cthread_set_data(cthread_self(), thr)
+#define THR			cthread_data(cthread_self())
+
+#define INIT_THREADS		cthread_init()
+#define YIELD			cthread_yield()
+#define ALLOC_THREAD_KEY
+#define SET_THREAD_SELF(thr)	(thr->self = cthread_self())
+
+#endif /* I_MACH_CTHREADS */
+
 #ifndef YIELD
 #  ifdef SCHED_YIELD
 #    define YIELD SCHED_YIELD
@@ -66,16 +128,14 @@ struct perl_thread *getTHR _((void));
 #  endif
 #endif
 
-#ifdef PTHREADS_CREATED_JOINABLE
+#if !defined(ATTR_JOINABLE) && defined(PTHREAD_CREATE_JOINABLE)
 #  define ATTR_JOINABLE PTHREAD_CREATE_JOINABLE
-#else
-#  ifdef PTHREAD_CREATE_UNDETACHED
-#    define ATTR_JOINABLE PTHREAD_CREATE_UNDETACHED
-#  else
-#    ifdef __UNDETACHED
-#      define ATTR_JOINABLE __UNDETACHED
-#    endif
-#  endif
+#endif
+#if !defined(ATTR_JOINABLE) && defined(PTHREAD_CREATE_UNDETACHED)
+#  define ATTR_JOINABLE PTHREAD_CREATE_UNDETACHED
+#endif
+#if !defined(ATTR_JOINABLE) && defined(__UNDETACHED)
+#  define ATTR_JOINABLE __UNDETACHED
 #endif
 
 #ifndef MUTEX_INIT

@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Oct 22 10:24:53 EET DST 1998 [metaconfig 3.0 PL70]
+# Generated on Wed Oct 28 11:58:44 EET 1998 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by jhi@iki.fi)
 
 cat >/tmp/c1$$ <<EOF
@@ -412,7 +412,6 @@ d_portable=''
 d_pthread_yield=''
 d_sched_yield=''
 sched_yield=''
-d_pthreads_created_joinable=''
 d_readdir=''
 d_rewinddir=''
 d_seekdir=''
@@ -558,6 +557,7 @@ d_int64t=''
 i_inttypes=''
 i_limits=''
 i_locale=''
+i_machcthr=''
 i_malloc=''
 i_math=''
 i_memory=''
@@ -716,6 +716,7 @@ sh=''
 sig_name=''
 sig_name_init=''
 sig_num=''
+sig_num_init=''
 installsitearch=''
 sitearch=''
 sitearchexp=''
@@ -7827,8 +7828,21 @@ set inet_aton d_inetaton
 eval $inlibc
 
 : see if inttypes.h is available
-set inttypes.h i_inttypes
-eval $inhdr
+: we want a real compile instead of Inhdr because some systems
+: have an inttypes.h which includes non-existent headers
+$cat >try.c <<EOCP
+#include <inttypes.h>
+extern int foo;
+EOCP
+set try
+if eval $compile; then
+	val="$define"
+else
+	val="$undef"
+fi
+set i_inttypes
+eval $setvar
+
 : check for int64_t
 case "$use64bits" in
 "$define" )
@@ -8233,59 +8247,6 @@ case "$sched_yield" in
 esac
 
 $rm -f try try.*
-
-: test whether pthreads are created in joinable -- aka undetached -- state
-if test "X$usethreads" = "X$define"; then
-	echo $n "Checking whether pthreads are created joinable. $c" >&4 
-	$cat >try.c <<'EOCP'
-#include <pthread.h>
-#include <stdio.h>
-int main() {
-    pthread_attr_t attr;
-    int detachstate;
-    printf("%s\n",
-	pthread_attr_init(&attr) == 0 &&
-#if PTHREAD_ATTR_GETDETACHSTATE_INT
-        pthread_attr_getdetachstate(&attr) == 0 &&
-#else
-        pthread_attr_getdetachstate(&attr, &detachstate) == 0 &&
-#endif
-        detachstate == PTHREAD_CREATE_DETACHED ?
-        "detached" : "joinable");
-    exit(0);
-}
-EOCP
-	set try
-	if eval $compile; then
-		yyy=`./try`
-		case "$yyy" in
-			detached) echo "Nope, they aren't." >&4 ;;
-			*) echo "Yup, they are." >&4 ;;
-		esac
-	else
-		set try -DPTHREAD_ATTR_GETDETACHSTATE_INT
-		if eval $compile; then
-			yyy=`./try`
-			case "$yyy" in
-				detached) echo "Nope, they aren't." >&4 ;;
-				*) echo "Yup, they are." >&4 ;;
-			esac
-		else		
-			echo " "
-			echo "(I can't execute the test program--assuming they are.)" >&4
-			yyy=joinable
-		fi
-	fi
-	$rm -f try try.*
-	case "$yyy" in
-		detached) val="$undef" ;;
-		*) val="$define" ;;
-	esac
-	set d_pthreads_created_joinable
-	eval $setvar
-else
-    d_pthreads_created_joinable="$undef"
-fi
 
 : see if this is a pwd.h system
 set pwd.h i_pwd
@@ -8846,9 +8807,9 @@ END
     eval $setvar
     case "$d_semctl_semid_ds" in
     $define)
-        echo "You can $also use struct semid_ds * for semctl IPC_STAT." >&4
+        echo "You can $also use struct semid_ds* for semctl IPC_STAT." >&4
         ;;
-    *)  echo "You cannot use struct semid_ds * for semctl IPC_STAT." >&4
+    *)  echo "You cannot use struct semid_ds* for semctl IPC_STAT." >&4
         ;;
     esac
     $rm -f try.h
@@ -10864,7 +10825,9 @@ EOM
 		: The first arg can be int, unsigned, or size_t
 		: The last arg may or may not be 'const'
 		val=''
-		for xxx in 'fd_set *' 'int *' 'void *'; do
+		: void pointer has been seen but using that
+		: breaks the selectminbits test
+		for xxx in 'fd_set *' 'int *'; do
 			for nfd in 'int' 'size_t' 'unsigned long' 'unsigned' ; do
 				for tmo in 'struct timeval *' 'const struct timeval *'; do
 					case "$val" in
@@ -11199,7 +11162,13 @@ $eunicefix signal_cmd
 : generate list of signal names
 echo " "
 case "$sig_name_init" in
-'')
+'') doinit=yes ;;
+*)  case "$sig_num_init" in
+    ''|*,*) doinit=yes ;;
+    esac ;;
+esac
+case "$doinit" in
+yes)
 	echo "Generating a list of signal names and numbers..." >&4
 	. ./signal_cmd
 	sig_name=`$awk '{printf "%s ", $1}' signal.lst`
@@ -11207,7 +11176,9 @@ case "$sig_name_init" in
 	sig_name_init=`$awk 'BEGIN { printf "\"ZERO\", " }
 						{ printf "\"%s\", ", $1 }
 						END { printf "0\n" }' signal.lst`
-	sig_num=`$awk 'BEGIN { printf "0, " }
+	sig_num=`$awk '{printf "%d ", $2}' signal.lst`
+	sig_num="0 $sig_num"
+	sig_num_init=`$awk 'BEGIN { printf "0, " }
 					{ printf "%d, ", $2}
 					END { printf "0\n"}' signal.lst`
 	;;
@@ -11408,6 +11379,10 @@ eval $setvar
 
 : see if locale.h is available
 set locale.h i_locale
+eval $inhdr
+
+: see if mach cthreads are available
+set mach/cthreads.h i_machcthr
 eval $inhdr
 
 : see if this is a math.h system
@@ -12325,7 +12300,6 @@ d_pipe='$d_pipe'
 d_poll='$d_poll'
 d_portable='$d_portable'
 d_pthread_yield='$d_pthread_yield'
-d_pthreads_created_joinable='$d_pthreads_created_joinable'
 d_pwage='$d_pwage'
 d_pwchange='$d_pwchange'
 d_pwclass='$d_pwclass'
@@ -12486,6 +12460,7 @@ i_grp='$i_grp'
 i_inttypes='$i_inttypes'
 i_limits='$i_limits'
 i_locale='$i_locale'
+i_machcthr='$i_machcthr'
 i_malloc='$i_malloc'
 i_math='$i_math'
 i_memory='$i_memory'
@@ -12656,6 +12631,7 @@ shsharp='$shsharp'
 sig_name='$sig_name'
 sig_name_init='$sig_name_init'
 sig_num='$sig_num'
+sig_num_init='$sig_num_init'
 signal_t='$signal_t'
 sitearch='$sitearch'
 sitearchexp='$sitearchexp'

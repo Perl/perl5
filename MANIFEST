@@ -1068,6 +1068,7 @@ t/op/each.t		See if hash iterators work
 t/op/eval.t		See if eval operator works
 t/op/exec.t		See if exec and system work
 t/op/exp.t		See if math functions work
+t/op/filetest.t		See if file tests work
 t/op/flip.t		See if range operator works
 t/op/fork.t		See if fork works
 t/op/glob.t		See if <*> works
