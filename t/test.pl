@@ -15,22 +15,22 @@ sub plan {
 	my %plan = @_;
 	$n = $plan{tests}; 
     }
-    print "1..$n\n";
+    print STDOUT "1..$n\n";
     $planned = $n;
 }
 
 END {
     my $ran = $test - 1;
     if (defined $planned && $planned != $ran) {
-	print "# Looks like you planned $planned tests but ran $ran.\n";
+	print STDOUT "# Looks like you planned $planned tests but ran $ran.\n";
     }
 }
 
 sub skip_all {
     if (@_) {
-	print "1..0 - @_\n";
+	print STDOUT "1..0 - @_\n";
     } else {
-	print "1..0\n";
+	print STDOUT "1..0\n";
     }
     exit(0);
 }
@@ -47,15 +47,15 @@ sub _ok {
     }
 
     $out .= " # TODO $TODO" if $TODO;
-    print "$out\n";
+    print STDOUT "$out\n";
 
     unless ($pass) {
-	print "# Failed $where\n";
+	print STDOUT "# Failed $where\n";
     }
 
     # Ensure that the message is properly escaped.
-    print map { /^#/ ? "$_\n" : "# $_\n" } 
-          map { split /\n/ } @mess if @mess;
+    print STDOUT map { /^#/ ? "$_\n" : "# $_\n" } 
+                 map { split /\n/ } @mess if @mess;
 
     $test++;
 
@@ -127,6 +127,10 @@ sub fail {
     _ok(0, _where(), @_);
 }
 
+sub curr_test {
+    return $test;
+}
+
 sub next_test {
     $test++
 }
@@ -137,7 +141,7 @@ sub skip {
     my $why = shift;
     my $n    = @_ ? shift : 1;
     for (1..$n) {
-	print "ok $test # skip: $why\n";
+        print STDOUT "ok $test # skip: $why\n";
         $test++;
     }
     local $^W = 0;
@@ -245,7 +249,7 @@ sub runperl {
     if ($args{verbose}) {
 	my $runperldisplay = $runperl;
 	$runperldisplay =~ s/\n/\n\#/g;
-	print "# $runperldisplay\n";
+	print STDOUT "# $runperldisplay\n";
     }
     my $result = `$runperl`;
     $result =~ s/\n\n/\n/ if $is_vms; # XXX pipes sometimes double these
@@ -254,7 +258,7 @@ sub runperl {
 
 
 sub BAILOUT {
-    print "Bail out! @_\n";
+    print STDOUT "Bail out! @_\n";
     exit;
 }
 

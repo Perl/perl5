@@ -3,304 +3,228 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
+    require './test.pl';
 }
 
-# $RCSfile$
 $|  = 1;
 use warnings;
 $Is_VMS = $^O eq 'VMS';
-$Is_Dos = $^O eq 'dos';
 
-print "1..70\n";
+plan tests => 95;
 
-my $test = 1;
-
-sub ok { print "ok $test\n"; $test++ }
-
-# my $file tests
-
-# 1..9
 {
     unlink("afile") if -f "afile";
-    print "$!\nnot " unless open(my $f,"+>afile");
-    ok;
+
+    $! = 0;  # the -f above will set $! if 'afile' doesn't exist.
+    ok( open(my $f,"+>afile"),  'open(my $f, "+>...")' );
+
     binmode $f;
-    print "not " unless -f "afile";
-    ok;
-    print "not " unless print $f "SomeData\n";
-    ok;
-    print "not " unless tell($f) == 9;
-    ok;
-    print "not " unless seek($f,0,0);
-    ok;
+    ok( -f "afile",             '       its a file');
+    ok( (print $f "SomeData\n"),  '       we can print to it');
+    is( tell($f), 9,            '       tell()' );
+    ok( seek($f,0,0),           '       seek set' );
+
     $b = <$f>;
-    print "not " unless $b eq "SomeData\n";
-    ok;
-    print "not " unless -f $f;
-    ok;
+    is( $b, "SomeData\n",       '       readline' );
+    ok( -f $f,                  '       still a file' );
+
     eval  { die "Message" };
-    # warn $@;
-    print "not " unless $@ =~ /<\$f> line 1/;
-    ok;
-    print "not " unless close($f);
-    ok;
-    unlink("afile");
+    like( $@, qr/<\$f> line 1/, '       die message correct' );
+    
+    ok( close($f),              '       close()' );
+    ok( unlink("afile"),        '       unlink()' );
 }
 
-# 10..12
 {
-    print "# \$!='$!'\nnot " unless open(my $f,'>', 'afile');
-    ok;
-    print $f "a row\n";
-    print "not " unless close($f);
-    ok;
-    print "not " unless -s 'afile' < 10;
-    ok;
+    ok( open(my $f,'>', 'afile'),       "open(my \$f, '>', 'afile')" );
+    ok( (print $f "a row\n"),           '       print');
+    ok( close($f),                      '       close' );
+    ok( -s 'afile' < 10,                '       -s' );
 }
 
-# 13..15
 {
-    print "# \$!='$!'\nnot " unless open(my $f,'>>', 'afile');
-    ok;
-    print $f "a row\n";
-    print "not " unless close($f);
-    ok;
-    print "not " unless -s 'afile' > 10;
-    ok;
+    ok( open(my $f,'>>', 'afile'),      "open(my \$f, '>>', 'afile')" );
+    ok( (print $f "a row\n"),           '       print' );
+    ok( close($f),                      '       close' );
+    ok( -s 'afile' > 10,                '       -s'    );
 }
 
-# 16..18
 {
-    print "# \$!='$!'\nnot " unless open(my $f, '<', 'afile');
-    ok;
-    @rows = <$f>;
-    print "not " unless @rows == 2;
-    ok;
-    print "not " unless close($f);
-    ok;
+    ok( open(my $f, '<', 'afile'),      "open(my \$f, '<', 'afile')" );
+    my @rows = <$f>;
+    is( scalar @rows, 2,                '       readline, list context' );
+    is( $rows[0], "a row\n",            '       first line read' );
+    is( $rows[1], "a row\n",            '       second line' );
+    ok( close($f),                      '       close' );
 }
 
-# 19..23
 {
-    print "not " unless -s 'afile' < 20;
-    ok;
-    print "# \$!='$!'\nnot " unless open(my $f, '+<', 'afile');
-    ok;
-    @rows = <$f>;
-    print "not " unless @rows == 2;
-    ok;
-    seek $f, 0, 1;
-    print $f "yet another row\n";
-    print "not " unless close($f);
-    ok;
-    print "not " unless -s 'afile' > 20;
-    ok;
+    ok( -s 'afile' < 20,                '-s' );
+
+    ok( open(my $f, '+<', 'afile'),     'open +<' );
+    my @rows = <$f>;
+    is( scalar @rows, 2,                '       readline, list context' );
+    ok( seek($f, 0, 1),                 '       seek cur' );
+    ok( (print $f "yet another row\n"), '       print' );
+    ok( close($f),                      '       close' );
+    ok( -s 'afile' > 20,                '       -s' );
 
     unlink("afile");
 }
 
-# 24..26
-if ($Is_VMS) {
-    for (24..26) { print "ok $_ # skipped: not Unix fork\n"; $test++;}
-}
-else {
-    print "# \$!='$!'\nnot " unless open(my $f, '-|', <<'EOC');
-    ./perl -e "print qq(a row\n); print qq(another row\n)"
+SKIP: {
+    skip "open -| busted and noisy on VMS", 3 if $Is_VMS;
+
+    ok( open(my $f, '-|', <<EOC),     'open -|' );
+    $^X -e "print qq(a row\n); print qq(another row\n)"
 EOC
-    ok;
-    @rows = <$f>;
-    print "not " unless @rows == 2;
-    ok;
-    print "not " unless close($f);
-    ok;
+
+    my @rows = <$f>;
+    is( scalar @rows, 2,                '       readline, list context' );
+    ok( close($f),                      '       close' );
 }
 
-# 27..30
-if ($Is_VMS) {
-    for (27..30) { print "ok $_ # skipped: not Unix fork\n"; $test++;}
-}
-else {
-    print "# \$!='$!'\nnot " unless open(my $f, '|-', <<'EOC');
-    ./perl -pe "s/^not //"
+{
+    ok( open(my $f, '|-', <<EOC),     'open |-' );
+    $^X -pe "s/^not //"
 EOC
-    ok;
-    @rows = <$f>;
-    print $f "not ok $test\n"; $test++;
-    print $f "not ok $test\n"; $test++;
-    print "#\nnot " unless close($f);
+
+    my @rows = <$f>;
+    my $test = curr_test;
+    print $f "not ok $test - piped in\n";
+    next_test;
+
+    $test = curr_test;
+    print $f "not ok $test - piped in\n";
+    next_test;
+    ok( close($f),                      '       close' );
     sleep 1;
-    ok;
+    pass('flushing');
 }
 
-# 31..32
-eval <<'EOE' and print "not ";
-open my $f, '<&', 'afile';
-1;
-EOE
-ok;
-$@ =~ /Bad filehandle:\s+afile/ or print "not ";
-ok;
+
+ok( !eval { open my $f, '<&', 'afile'; 1; },    '<& on a non-filehandle' );
+like( $@, qr/Bad filehandle:\s+afile/,          '       right error' );
+
 
 # local $file tests
-
-# 33..41
 {
     unlink("afile") if -f "afile";
-    print "$!\nnot " unless open(local $f,"+>afile");
-    ok;
+
+    ok( open(local $f,"+>afile"),       'open local $f, "+>", ...' );
     binmode $f;
-    print "not " unless -f "afile";
-    ok;
-    print "not " unless print $f "SomeData\n";
-    ok;
-    print "not " unless tell($f) == 9;
-    ok;
-    print "not " unless seek($f,0,0);
-    ok;
+
+    ok( -f "afile",                     '       -f' );
+    ok( (print $f "SomeData\n"),        '       print' );
+    is( tell($f), 9,                    '       tell' );
+    ok( seek($f,0,0),                   '       seek set' );
+
     $b = <$f>;
-    print "not " unless $b eq "SomeData\n";
-    ok;
-    print "not " unless -f $f;
-    ok;
+    is( $b, "SomeData\n",               '       readline' );
+    ok( -f $f,                          '       still a file' );
+
     eval  { die "Message" };
-    # warn $@;
-    print "not " unless $@ =~ /<\$f> line 1/;
-    ok;
-    print "not " unless close($f);
-    ok;
-    unlink("afile");
-}
-
-# 42..44
-{
-    print "# \$!='$!'\nnot " unless open(local $f,'>', 'afile');
-    ok;
-    print $f "a row\n";
-    print "not " unless close($f);
-    ok;
-    print "not " unless -s 'afile' < 10;
-    ok;
-}
-
-# 45..47
-{
-    print "# \$!='$!'\nnot " unless open(local $f,'>>', 'afile');
-    ok;
-    print $f "a row\n";
-    print "not " unless close($f);
-    ok;
-    print "not " unless -s 'afile' > 10;
-    ok;
-}
-
-# 48..50
-{
-    print "# \$!='$!'\nnot " unless open(local $f, '<', 'afile');
-    ok;
-    @rows = <$f>;
-    print "not " unless @rows == 2;
-    ok;
-    print "not " unless close($f);
-    ok;
-}
-
-# 51..55
-{
-    print "not " unless -s 'afile' < 20;
-    ok;
-    print "# \$!='$!'\nnot " unless open(local $f, '+<', 'afile');
-    ok;
-    @rows = <$f>;
-    print "not " unless @rows == 2;
-    ok;
-    seek $f, 0, 1;
-    print $f "yet another row\n";
-    print "not " unless close($f);
-    ok;
-    print "not " unless -s 'afile' > 20;
-    ok;
+    like( $@, qr/<\$f> line 1/,         '       proper die message' );
+    ok( close($f),                      '       close' );
 
     unlink("afile");
 }
 
-# 56..58
-if ($Is_VMS) {
-    for (56..58) { print "ok $_ # skipped: not Unix fork\n"; $test++;}
-}
-else {
-    print "# \$!='$!'\nnot " unless open(local $f, '-|', <<'EOC');
-    ./perl -e "print qq(a row\n); print qq(another row\n)"
-EOC
-    ok;
-    @rows = <$f>;
-    print "not " unless @rows == 2;
-    ok;
-    print "not " unless close($f);
-    ok;
+{
+    ok( open(local $f,'>', 'afile'),    'open local $f, ">", ...' );
+    ok( (print $f "a row\n"),           '       print');
+    ok( close($f),                      '       close');
+    ok( -s 'afile' < 10,                '       -s' );
 }
 
-# 59..62
-if ($Is_VMS) {
-    for (59..62) { print "ok $_ # skipped: not Unix fork\n"; $test++;}
+{
+    ok( open(local $f,'>>', 'afile'),   'open local $f, ">>", ...' );
+    ok( (print $f "a row\n"),           '       print');
+    ok( close($f),                      '       close');
+    ok( -s 'afile' > 10,                '       -s' );
 }
-else {
-    print "# \$!='$!'\nnot " unless open(local $f, '|-', <<'EOC');
-    ./perl -pe "s/^not //"
+
+{
+    ok( open(local $f, '<', 'afile'),   'open local $f, "<", ...' );
+    my @rows = <$f>;
+    is( scalar @rows, 2,                '       readline list context' );
+    ok( close($f),                      '       close' );
+}
+
+ok( -s 'afile' < 20,                '       -s' );
+
+{
+    ok( open(local $f, '+<', 'afile'),  'open local $f, "+<", ...' );
+    my @rows = <$f>;
+    is( scalar @rows, 2,                '       readline list context' );
+    ok( seek($f, 0, 1),                 '       seek cur' );
+    ok( (print $f "yet another row\n"), '       print' );
+    ok( close($f),                      '       close' );
+    ok( -s 'afile' > 20,                '       -s' );
+
+    unlink("afile");
+}
+
+SKIP: {
+    skip "open -| busted and noisy on VMS", 3 if $Is_VMS;
+
+    ok( open(local $f, '-|', <<EOC),  'open local $f, "-|", ...' );
+    $^X -e "print qq(a row\n); print qq(another row\n)"
 EOC
-    ok;
-    @rows = <$f>;
-    print $f "not ok $test\n"; $test++;
-    print $f "not ok $test\n"; $test++;
-    print "#\nnot " unless close($f);
+    my @rows = <$f>;
+
+    is( scalar @rows, 2,                '       readline list context' );
+    ok( close($f),                      '       close' );
+}
+
+{
+    ok( open(local $f, '|-', <<EOC),  'open local $f, "|-", ...' );
+    $^X -pe "s/^not //"
+EOC
+
+    my @rows = <$f>;
+    my $test = curr_test;
+    print $f "not ok $test - piping\n";
+    next_test;
+
+    $test = curr_test;
+    print $f "not ok $test - piping\n";
+    next_test;
+    ok( close($f),                      '       close' );
     sleep 1;
-    ok;
+    pass("Flush");
 }
 
-# 63..64
-eval <<'EOE' and print "not ";
-open local $f, '<&', 'afile';
-1;
-EOE
-ok;
-$@ =~ /Bad filehandle:\s+afile/ or print "not ";
-ok;
 
-# 65..66
+ok( !eval { open local $f, '<&', 'afile'; 1 },  'local <& on non-filehandle');
+like( $@, qr/Bad filehandle:\s+afile/,          '       right error' );
+
+
 {
     local *F;
     for (1..2) {
-        if ($Is_Dos) {
-        open(F, "echo \\#foo|") or print "not ";
-        } else {
-            open(F, "echo #foo|") or print "not ";
-        }
-	print <F>;
-	close F;
+        ok( open(F, qq{$^X -le "print 'ok'"|}), 'open to pipe' );
+	is(scalar <F>, "ok\n",  '       readline');
+        ok( close F,            '       close' );
     }
-    ok;
+
     for (1..2) {
-        if ($Is_Dos) {
-	open(F, "-|", "echo \\#foo") or print "not ";
-        } else {
-            open(F, "-|", "echo #foo") or print "not ";
-        }
-	print <F>;
-	close F;
+        ok( open(F, "-|", qq{$^X -le "print 'ok'"}), 'open -|');
+        is( scalar <F>, "ok\n", '       readline');
+	ok( close F,            '       close' );
     }
-    ok;
 }
 
-# 67..70 - magic temporary file via 3 arg open with undef
+# magic temporary file via 3 arg open with undef
 {
-    open(my $x,"+<",undef) or print "not ";
-    ok;
-    print "not " unless defined(fileno($x));
-    ok;
+    ok( open(my $x,"+<",undef), 'magic temp file via 3 arg open with undef');
+    ok( defined fileno($x),     '       fileno' );
+
     select $x;
-    ok;   # goes to $x
+    ok( (print "ok\n"),         '       print' );
+
     select STDOUT;
-    seek($x,0,0);
-    print <$x>;
-    print "not " unless tell($x) > 3;
-    ok;
+    ok( seek($x,0,0),           '       seek' );
+    is( scalar <$x>, "ok\n",    '       readline' );
+    ok( tell($x) >= 3,          '       tell' );
 }

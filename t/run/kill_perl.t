@@ -69,17 +69,11 @@ foreach my $prog (@prgs) {
     close TEST or die "Cannot close $tmpfile: $!";
 
     my $results;
-    if ($^O eq 'MSWin32') {
-        $results = `.\\perl -I../lib $switch $tmpfile 2>&1`;
-    }
-    elsif ($^O eq 'NetWare') {
-        $results = `perl -I../lib $switch $tmpfile 2>&1`;
-    }
-    elsif ($^O eq 'MacOS') {
-	$results = `$^X -I::lib -MMac::err=unix $switch $tmpfile`;
+    if ($^O eq 'MacOS') {
+        $results = `$^X -I::lib -MMac::err=unix $switch $tmpfile`;
     }
     else {
-      $results = `./perl "-I../lib" $switch $tmpfile 2>&1`;
+        $results = `$^X "-I../lib" $switch $tmpfile 2>&1`;
     }
     my $status = $?;
 
