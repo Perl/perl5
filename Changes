@@ -75,7 +75,380 @@ indicator:
 
 
 ----------------
-Version 5.005_53        Development release working toward 5.006
+Version 5.005_54        Development release working toward 5.006
+----------------
+
+____________________________________________________________________________
+[  2230] By: jhi                                   on 1998/11/12  17:07:45
+        Log: Allow hints file override for d_socket
+             (based on Sequent-induced change #2229).
+     Branch: cfgperl
+           ! Configure
+____________________________________________________________________________
+[  2229] By: jhi                                   on 1998/11/12  16:32:33
+        Log: 
+             From: "Martin J. Bligh" <mbligh@sequent.com>
+             To: jhi@iki.fi
+             cc: gbarr@ti.com, gbarr@pobox.com, gsar@umich.edu
+             Subject: Re: Making Perl work on DYNIX/ptx
+             Date: Tue, 10 Nov 1998 16:24:26 -0800
+             Message-ID: <181999655.910715066@w-186d219.rhe.sequent.com>
+     Branch: cfgperl
+           ! hints/dynixptx.sh
+____________________________________________________________________________
+[  2228] By: jhi                                   on 1998/11/12  11:40:37
+        Log: From: "Martin J. Bligh" <mbligh@sequent.com>
+             Message-ID: <187803647.910720870@w-186d219.rhe.sequent.com>
+             To: jhi@iki.fi
+             cc: gbarr@ti.com, gbarr@pobox.com, gsar@umich.edu
+             Subject: Re: Making Perl work on DYNIX/ptx
+             Date: Tue, 10 Nov 1998 18:01:10 -0800
+     Branch: cfgperl
+           + ext/DB_File/hints/dynixptx.pl ext/POSIX/hints/dynixptx.pl
+____________________________________________________________________________
+[  2227] By: jhi                                   on 1998/11/12  11:17:42
+        Log: Integrate from mainperl.
+     Branch: cfgperl
+	  !> Changes XSUB.h av.c embed.h embed.pl embedvar.h
+	  !> ext/IPC/SysV/Msg.pm global.sym hv.c lib/Text/Wrap.pm objXSUB.h
+	  !> perl.c perl.h pod/perlfunc.pod pod/perlvar.pod pp_sys.c
+	  !> proto.h regexec.c t/op/array.t util.c win32/makedef.pl
+          !> win32/win32.c x2p/s2p.PL
+____________________________________________________________________________
+[  2226] By: gsar                                  on 1998/11/11  21:05:42
+        Log: provide -DPERL_POLLUTE
+     Branch: perl
+           ! embed.pl embedvar.h
+____________________________________________________________________________
+[  2225] By: jhi                                   on 1998/11/09  07:45:12
+        Log: From: Hans Mulder <hansm@icgroup.nl>
+             To: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Cc: gsar@engin.umich.edu (Gurusamy Sarathy), jhi@iki.fi,
+             perl5-porters@perl.org
+             Subject: Re: [PATCH] Re: Not OK: perl 5.00553 on OPENSTEP-Mach 4_1
+             (UNINSTALLED)
+             Date: Sun,  8 Nov 98 22:20:23 +0100
+             Message-Id: <9811082119.AA11802@icgned.icgroup.nl>
+     Branch: cfgperl
+           ! malloc.c perl.h
+____________________________________________________________________________
+[  2224] By: gsar                                  on 1998/11/09  03:13:14
+        Log: avoid endless loops in Text::Wrap (from a suggestion by Lupe
+             Christoph <lupe@alanya.m.isar.de>)
+     Branch: perl
+           ! lib/Text/Wrap.pm
+____________________________________________________________________________
+[  2223] By: gsar                                  on 1998/11/09  02:09:06
+        Log: fix misplaced brace in s2p (as suggested by Lionel Fourquaux
+             <lionel.fourquaux@wanadoo.fr>)
+     Branch: perl
+           ! x2p/s2p.PL
+____________________________________________________________________________
+[  2222] By: gsar                                  on 1998/11/09  01:56:24
+        Log: patches from Hugo van der Sanden <hv@crypt.compulink.co.uk>
+             Date: Wed, 04 Nov 1998 12:19:44 +0000
+             Message-Id: <199811041219.MAA05451@crypt.compulink.co.uk>
+             Subject: [PATCH] Re: [5.005_53] read overflow? 
+             --
+             Date: Wed, 04 Nov 1998 13:15:18 +0000
+             Message-Id: <199811041315.NAA05711@crypt.compulink.co.uk>
+             Subject: [PATCH 5.005_53] perl -V fix
+     Branch: perl
+           ! perl.c regexec.c
+____________________________________________________________________________
+[  2221] By: gsar                                  on 1998/11/09  01:34:56
+        Log: From: jan.dubois@ibm.net (Jan Dubois)
+             Date: Sun, 01 Nov 1998 00:05:01 +0100
+             Message-ID: <364294bd.18052307@smtp1.ibm.net>
+             Subject: [PATCH v5.5.53, WIN32] PL_block_type undefined unless DEBUGGING
+     Branch: perl
+           ! Changes win32/makedef.pl
+____________________________________________________________________________
+[  2220] By: gsar                                  on 1998/11/08  21:13:07
+        Log: integrate changes#2120,2168,2218 from maint-5.005;
+             add new vtbls; s/\bvtbl_/PL_vtbl_/; remove trailing comma in
+             enum; make regen_headers
+     Branch: perl
+	   ! XSUB.h embed.h embedvar.h ext/IPC/SysV/Msg.pm global.sym
+	   ! objXSUB.h perl.h pod/perlfunc.pod proto.h util.c win32/win32.c
+____________________________________________________________________________
+[  2219] By: gsar                                  on 1998/11/08  19:42:57
+        Log: integrate cfgperl changes into mainline
+     Branch: perl
+          +> README.vmesa
+	  !> Configure MANIFEST Porting/Glossary Porting/config.sh
+	  !> Porting/config_H config_h.SH ext/Thread/Thread.xs
+	  !> hints/hpux.sh hints/vmesa.sh lib/Math/Complex.pm malloc.c
+	  !> perl.h pod/perlfunc.pod pod/perllocale.pod pod/perlport.pod
+	  !> pp_sys.c sv.c t/lib/complex.t t/op/groups.t t/op/lex_assign.t
+          !> thread.h vms/subconfigure.com vos/config.h
+____________________________________________________________________________
+[  2218] By: gbarr                                 on 1998/11/08  16:48:44
+        Log: From: Graham Barr <gbarr@ti.com>
+             Date: Mon, 2 Nov 1998 07:38:52 -0600
+             Message-ID: <19981102073852.A12751@asic.sc.ti.com>
+             Subject: [PATCH 5.005_*] Re: IPC::Msg 1.03
+     Branch: maint-5.005/perl
+           ! ext/IPC/SysV/Msg.pm
+____________________________________________________________________________
+[  2215] By: gsar                                  on 1998/11/08  02:52:52
+        Log: set close-on-exec bit on pipe() FDs
+     Branch: perl
+           ! pod/perlfunc.pod pod/perlvar.pod pp_sys.c
+____________________________________________________________________________
+[  2214] By: gsar                                  on 1998/11/08  02:27:57
+        Log: typo in newHVhv()
+     Branch: perl
+           ! hv.c
+____________________________________________________________________________
+[  2211] By: jhi                                   on 1998/11/07  21:14:18
+        Log: Finalize the Mach CThreads support.
+             
+             From: Hans Mulder <hansm@icgroup.nl>
+             Date: Sat,  7 Nov 98 22:06:20 +0100
+             To: Gurusamy Sarathy <gsar@engin.umich.edu>
+             Cc: jhi@iki.fi, perl5-porters@perl.org
+             Subject: [PATCH] Re: Not OK: perl 5.00553 on OPENSTEP-Mach 4_1 (UNINSTALLED) 
+             Message-Id: <9811072105.AA07794@icgned.icgroup.nl>
+     Branch: cfgperl
+           ! malloc.c perl.h
+____________________________________________________________________________
+[  2210] By: gsar                                  on 1998/11/06  20:36:50
+        Log: fix AvREALISH bogusness
+     Branch: perl
+           ! av.c t/op/array.t
+____________________________________________________________________________
+[  2209] By: jhi                                   on 1998/11/06  08:05:31
+        Log: Renamed malloc.c ASSERT() macro to P_ASSERT() because
+             ASSERT() causes problems in {NeXTStep,OpenStep}.
+             
+             From: Hans Mulder <hansm@icgroup.nl>
+             To: Jarkko Hietaniemi <jhi@cc.hut.fi>
+             Subject: Re: Not OK: perl 5.00553 on OPENSTEP-Mach 4_1 (UNINSTALLED)
+             Date: Fri,  6 Nov 98 01:27:41 +0100
+             Message-Id: <9811060025.AA27389@icgned.icgroup.nl>
+             
+             and
+             
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Subject: Re: ASSERT() in malloc.c
+             To: jhi@iki.fi
+             Date: Fri, 6 Nov 1998 02:59:29 -0500 (EST)
+             Message-Id: <199811060759.CAA18915@monk.mps.ohio-state.edu>
+     Branch: cfgperl
+           ! malloc.c
+____________________________________________________________________________
+[  2208] By: jhi                                   on 1998/11/06  07:55:38
+        Log: Mach CThreads needs #include <mach/cthreads.h>.
+     Branch: cfgperl
+           ! perl.h
+____________________________________________________________________________
+[  2206] By: jhi                                   on 1998/11/05  14:54:52
+        Log: PERL_BADLANG wrongly documented.
+             
+             From: ts <decoux@moulon.inra.fr>
+             To: jhi@cc.hut.fi
+             Subject: Re: Locale warning messages
+             Date: Thu, 5 Nov 1998 14:34:19 +0100 (MET)
+             Message-Id: <199811051334.OAA24863@moulon.inra.fr>
+             
+             and
+             
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Subject: Re: PERL_BADLANG
+             To: jhi@iki.fi
+             Subject: Re: PERL_BADLANG
+             Date: Thu, 5 Nov 1998 09:49:00 -0500 (EST)
+             Message-Id: <199811051449.JAA04238@monk.mps.ohio-state.edu>
+     Branch: cfgperl
+           ! pod/perllocale.pod
+____________________________________________________________________________
+[  2205] By: jhi                                   on 1998/11/05  14:24:33
+        Log: Document all the control flow keywords in perlfunc
+             so that "perlfunc -f while" works.
+     Branch: cfgperl
+           ! pod/perlfunc.pod
+____________________________________________________________________________
+[  2204] By: jhi                                   on 1998/11/05  12:46:02
+        Log: Configure update.  Remove last trace of PTHREADS_CREATED_JOINABLE
+             (from vos/config.h).  Update Porting/{Glossary,config*}.
+     Branch: cfgperl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+           ! config_h.SH vos/config.h
+____________________________________________________________________________
+[  2203] By: jhi                                   on 1998/11/05  08:34:39
+        Log: VM/ESA and VMS sig_num_init (change#2101) catchup.
+     Branch: cfgperl
+           ! hints/vmesa.sh vms/subconfigure.com
+____________________________________________________________________________
+[  2202] By: jhi                                   on 1998/11/05  08:03:20
+        Log: Integrate from mainperl.
+     Branch: cfgperl
+	  !> Changes cop.h doop.c gv.c mg.c perl.c pp_ctl.c sv.c util.c
+          !> win32/Makefile win32/makefile.mk win32/win32.c
+____________________________________________________________________________
+[  2201] By: gsar                                  on 1998/11/05  04:40:44
+        Log: another POPSTACK victim
+     Branch: perl
+           ! cop.h sv.c
+____________________________________________________________________________
+[  2196] By: gsar                                  on 1998/11/05  02:07:54
+        Log: fix a location affected by change#2191, add note about POPSTACK
+     Branch: perl
+           ! cop.h gv.c pp_ctl.c
+____________________________________________________________________________
+[  2195] By: gsar                                  on 1998/11/05  02:04:45
+        Log: makefile notes
+     Branch: perl
+           ! win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[  2192] By: gsar                                  on 1998/11/04  23:48:53
+        Log: indeterminate order-of-evaluation fixes
+     Branch: perl
+           ! mg.c
+____________________________________________________________________________
+[  2191] By: gsar                                  on 1998/11/04  23:02:16
+        Log: refetch local stack pointer in POPSTACK
+     Branch: perl
+           ! cop.h perl.c
+____________________________________________________________________________
+[  2190] By: jhi                                   on 1998/11/04  08:50:40
+        Log: Configure update.
+             Sequent DYNIX/ptx updates: osvers=$4 (instead of $3) of uname -a,
+             
+             From: Andy Dougherty <doughera@lafcol.lafayette.edu>
+             To: Martin Bligh <mbligh@sequent.com>
+             Cc: Jarkko Hietaniemi <jhi@iki.fi>
+             Subject: Re: Perl 5's configure on DYNIX/ptx
+             Message-Id: <Pine.SUN.3.96.981103090824.5533B-100000@newton.phys>
+             Date: Tue, 3 Nov 1998 09:35:26 -0500 (EST)
+             
+             find sockets also from libsocket, not just libnet.
+             OS390: $compile_ok instead of $compile for <inttypes.h>,
+             
+             From: pvhp@forte.com (Peter Prymmer)
+             To: Thomas.Dorner@start.de, jhi@iki.fi, neale@VMA.TABNSW.COM.AU
+             Subject: _53 not OK on os390 but looking better than ever
+             Date: Tue, 3 Nov 98 17:33:22 PST
+             Message-Id: <9811040133.AA09450@forte.com>
+     Branch: cfgperl
+           ! Configure
+____________________________________________________________________________
+[  2189] By: jhi                                   on 1998/11/04  07:43:58
+        Log: sysio.t failure: fix undefined order of evaluation, from
+             
+             From: Spider Boardman <spider@web.zk3.dec.com>
+             Subject: Not OK: perl 5.00553 on alpha-thread 5.0 [PATCH]
+             To: perlbug@perl.com
+             Date: 4 Nov 1998 01:22:30 +0200
+             Message-ID: <MLIST_199811032227.RAA143892@web.zk3.dec.com>
+     Branch: cfgperl
+           ! pp_sys.c
+____________________________________________________________________________
+[  2188] By: gsar                                  on 1998/11/04  02:59:16
+        Log: fix return value of win32_pclose()
+     Branch: perl
+           ! win32/win32.c
+____________________________________________________________________________
+[  2187] By: gsar                                  on 1998/11/04  02:56:34
+        Log: s/sv_upgrade/SvUPGRADE/ a couple of places
+     Branch: perl
+           ! Changes doop.c gv.c util.c
+____________________________________________________________________________
+[  2186] By: jhi                                   on 1998/11/03  08:17:52
+        Log: Document quads in pack.
+     Branch: cfgperl
+           ! pod/perlfunc.pod
+____________________________________________________________________________
+[  2185] By: jhi                                   on 1998/11/03  07:49:35
+        Log: (IV) vs (I32) vs I_V()
+             
+             Subject: [PATCH 5.005_53] Reverting typecast in sv_upgrade()
+             From: Anton Berezin <tobez@plab.ku.dk> 
+             To: "p5p" <perl5-porters@perl.org> 
+             Date: 01 Nov 1998 15:09:11 +0100 
+             Message-ID: <86hfwjtshk.fsf@lion.plab.ku.dk>
+             
+             and
+             
+             From: Andy Dougherty <doughera@lafcol.lafayette.edu> 
+             Date: Mon, 2 Nov 1998 10:17:34 -0500 (EST) 
+             Message-Id: <Pine.SUN.3.96.981102101433.4479B-100000@newton.phys>
+     Branch: cfgperl
+           ! sv.c
+____________________________________________________________________________
+[  2184] By: jhi                                   on 1998/11/03  07:42:46
+        Log: VM/ESA updates.
+     Branch: cfgperl
+           + README.vmesa
+           ! MANIFEST pod/perlfunc.pod pod/perlport.pod
+____________________________________________________________________________
+[  2183] By: jhi                                   on 1998/11/02  12:58:13
+        Log: The id(1)-parsing is real fun.
+     Branch: cfgperl
+           ! t/op/groups.t
+____________________________________________________________________________
+[  2182] By: jhi                                   on 1998/11/02  12:07:43
+        Log: Decommission the symlink test.
+     Branch: cfgperl
+           ! t/op/lex_assign.t
+____________________________________________________________________________
+[  2181] By: jhi                                   on 1998/11/02  12:03:08
+        Log: Replace ATTR_JOINABLE with true Configure probe
+             for PTHREAD_CREATE_JOINABLE (or equivalent:
+             PTHREAD_CREATE_UNDETACHED or __UNDETACHED).
+             Remove ATTR_JOINABLE itself: Thread.xs uses
+             PTHREAD_CREATE_JOINABLE (or equivalent) directly.
+             
+             Really scan for <mach/cthreads.h> only if usethreads.
+     Branch: cfgperl
+           ! Configure config_h.SH ext/Thread/Thread.xs thread.h
+____________________________________________________________________________
+[  2180] By: jhi                                   on 1998/11/02  11:07:34
+        Log: In HP-UX 10.X usethreads only if the required files are present.
+     Branch: cfgperl
+           ! hints/hpux.sh
+____________________________________________________________________________
+[  2179] By: jhi                                   on 1998/11/02  09:10:33
+        Log: Prefer groups(1).
+             id -Gn can be broken.
+             id -a can save the day.
+     Branch: cfgperl
+           ! t/op/groups.t
+____________________________________________________________________________
+[  2178] By: jhi                                   on 1998/11/02  08:35:29
+        Log: Detrail enum comma.
+     Branch: cfgperl
+           ! perl.h
+____________________________________________________________________________
+[  2177] By: jhi                                   on 1998/11/02  08:24:12
+        Log: 0**0 = 1, from
+             
+             From: d-lewart@uiuc.edu (Daniel S. Lewart)
+             Subject: Math::Complex 0**0 patches
+             Date: Sun, 1 Nov 1998 19:21:48 -0600 (CST)
+             Message-Id: <199811020121.TAA28310@staff2.cso.uiuc.edu>
+             To: jhi@iki.fi (Jarkko Hietaniemi),
+             Raphael_Manfredi@grenoble.hp.com (Raphael Manfredi)
+     Branch: cfgperl
+           ! lib/Math/Complex.pm t/lib/complex.t
+____________________________________________________________________________
+[  2168] By: gbarr                                 on 1998/11/01  01:58:58
+        Log: From: jan.dubois@ibm.net (Jan Dubois)   
+             Date: Fri, 09 Oct 1998 23:28:31 +0200
+             Message-ID: <36217b7f.3193091@smtp1.ibm.net>
+             Subject: [PATCH 5.005_02] Allow XS access to vtbl_*s when compiled with PERL_OBJECT
+     Branch: maint-5.005/perl
+           ! XSUB.h
+____________________________________________________________________________
+[  2164] By: jhi                                   on 1998/10/31  15:50:02
+        Log: Integrate from mainperl.
+     Branch: cfgperl
+          +> t/op/lex_assign.t
+          !> (integrate 45 files)
+
+----------------
+Version 5.005_53
 ----------------
 
 ____________________________________________________________________________
