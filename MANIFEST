@@ -328,7 +328,7 @@ ext/Encode/Encode/symbol.enc		Encode table
 ext/Encode/Encode/symbol.ucm		Encode table
 ext/Encode/Encode/viscii.enc		Encode table
 ext/Encode/Encode/viscii.ucm		Encode table
-ext/Encode/lib/Encode.pm		Encode extension
+ext/Encode/Encode.pm			Encode extension
 ext/Encode/lib/Encode/Encoding.pm	Encode extension
 ext/Encode/lib/Encode/Internal.pm	Encode extension
 ext/Encode/lib/Encode/iso10646_1.pm	Encode extension

@@ -20,7 +20,7 @@ closedir(ENC);
 
 WriteMakefile(
 	      NAME		=> "Encode",
-	      VERSION_FROM	=> 'lib/Encode.pm',
+	      VERSION_FROM	=> 'Encode.pm',
 	      OBJECT		=> '$(O_FILES)',
 	      'dist'		=> {
 		  COMPRESS	=> 'gzip -9f',
@@ -56,7 +56,7 @@ sub post_initialize
     my @files;
     foreach my $table (keys %tables)
     {
-	foreach my $ext (qw($(OBJ_EXT) .c .h .def .fnm))
+	foreach my $ext (qw($(OBJ_EXT) .c .h _def.h .fnm))
     {
 	push (@files,$table.$ext);
     }
@@ -69,7 +69,7 @@ sub postamble
 {
     my $self = shift;
     my $dir  = $self->catdir($self->curdir,'Encode');
-    my $str  = "# Encode\$(OBJ_EXT) depends on .h and .def files not .c files - but all written by compile\n";
+    my $str  = "# Encode\$(OBJ_EXT) depends on .h and _def.h files not .c files - but all written by compile\n";
     $str  .= 'Encode$(OBJ_EXT) :';
     foreach my $table (keys %tables)
     {

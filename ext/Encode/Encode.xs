@@ -662,7 +662,7 @@ BOOT:
 #if defined(USE_PERLIO) && !defined(USE_SFIO)
  PerlIO_define_layer(aTHX_ &PerlIO_encode);
 #endif
-#include "8859.def"
-#include "EBCDIC.def"
-#include "Symbols.def"
+#include "8859_def.h"
+#include "EBCDIC_def.h"
+#include "Symbols_def.h"
 }
