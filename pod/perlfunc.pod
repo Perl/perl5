@@ -1265,11 +1265,11 @@ there was an error.
 In the first form, the return value of EXPR is parsed and executed as if it
 were a little Perl program.  The value of the expression (which is itself
 determined within scalar context) is first parsed, and if there weren't any
-errors, executed in the context of the current Perl program, so that any
-variable settings or subroutine and format definitions remain afterwards.
-Note that the value is parsed every time the eval executes.  If EXPR is
-omitted, evaluates C<$_>.  This form is typically used to delay parsing
-and subsequent execution of the text of EXPR until run time.
+errors, executed in the lexical context of the current Perl program, so
+that any variable settings or subroutine and format definitions remain
+afterwards.  Note that the value is parsed every time the eval executes.
+If EXPR is omitted, evaluates C<$_>.  This form is typically used to
+delay parsing and subsequent execution of the text of EXPR until run time.
 
 In the second form, the code within the BLOCK is parsed only once--at the
 same time the code surrounding the eval itself was parsed--and executed
