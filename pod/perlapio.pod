@@ -111,12 +111,12 @@ The USE_PERLIO implementation is described in L<perliol>.
 
 =back
 
-Because "perlio.h" is a thing layer (for efficiency) the semantics of these functions are
-somewhat dependent on the the underlying implementation. Where these variations are
-understood they are noted below.
+Because "perlio.h" is a thing layer (for efficiency) the semantics of
+these functions are somewhat dependent on the underlying implementation.
+Where these variations are understood they are noted below.
 
-Unless otherwise noted, functions return 0 on success, or a negative value (usually
-C<EOF> which is usually -1) and set C<errno> on error.
+Unless otherwise noted, functions return 0 on success, or a negative
+value (usually C<EOF> which is usually -1) and set C<errno> on error.
 
 =over 4
 
