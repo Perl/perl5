@@ -60,12 +60,12 @@ fi
 mf=$firstmakefile
 if test -f $mf; then
     defrule=`<$mf sed -n		\
-	-e '/^\.c\(\$(OBJ_EXT)\|\.o\):.*;/{'	\
+	-e '/^\.c\$(OBJ_EXT):.*;/{'	\
 	-e    's/\$\*\.c//'		\
 	-e    's/^[^;]*;[	 ]*//p'	\
 	-e    q				\
 	-e '}'				\
-	-e '/^\.c\(\$(OBJ_EXT)\|\.o\): *$/{'	\
+	-e '/^\.c\$(OBJ_EXT): *$/{'	\
 	-e    N				\
 	-e    's/\$\*\.c//'		\
 	-e    's/^.*\n[	 ]*//p'		\
@@ -137,7 +137,7 @@ if $test -s .deptmp; then
     $echo "Updating $mf..."
     $echo "# If this runs make out of memory, delete /usr/include lines." \
 	>> $mf.new
-    $sed 's|^\(.*\(\$(OBJ_EXT)\|\.o\):\) *\(.*/.*\.c\) *$|\1 \3; '"$defrule \2|" .deptmp \
+    $sed 's|^\(.*\$(OBJ_EXT):\) *\(.*/.*\.c\) *$|\1 \2; '"$defrule \2|" .deptmp \
        >>$mf.new
 else
     $MAKE hlist || ($echo "Searching for .h files..."; \
