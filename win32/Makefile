@@ -614,7 +614,7 @@ SETARGV_OBJ	= setargv$(o)
 
 DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attrs Thread B re \
 		Data/Dumper Devel/Peek ByteLoader Devel/DProf File/Glob \
-		Sys/Hostname Storable Filter/Util/Call
+		Sys/Hostname Storable Filter/Util/Call Encode
 STATIC_EXT	= DynaLoader
 NONXS_EXT	= Errno
 
@@ -638,6 +638,7 @@ GLOB		= $(EXTDIR)\File\Glob\Glob
 HOSTNAME	= $(EXTDIR)\Sys\Hostname\Hostname
 STORABLE	= $(EXTDIR)\Storable\Storable
 FILTER		= $(EXTDIR)\Filter\Util\Call\Call
+ENCODE		= $(EXTDIR)\Encode\Encode
 
 SOCKET_DLL	= $(AUTODIR)\Socket\Socket.dll
 FCNTL_DLL	= $(AUTODIR)\Fcntl\Fcntl.dll
@@ -656,7 +657,8 @@ DPROF_DLL	= $(AUTODIR)\Devel\DProf\DProf.dll
 GLOB_DLL	= $(AUTODIR)\File\Glob\Glob.dll
 HOSTNAME_DLL	= $(AUTODIR)\Sys\Hostname\Hostname.dll
 STORABLE_DLL	= $(AUTODIR)\Storable\Storable.dll
-FILTER_DLL	= $(EXTDIR)\Filter\Util\Call\Call.dll
+FILTER_DLL	= $(AUTODIR)\Filter\Util\Call\Call.dll
+ENCODE_DLL	= $(AUTODIR)\Encode\Encode.dll
 
 ERRNO_PM	= $(LIBDIR)\Errno.pm
 
@@ -678,7 +680,8 @@ EXTENSION_C	= 		\
 		$(GLOB).c	\
 		$(HOSTNAME).c	\
 		$(STORABLE).c	\
-		$(FILTER).c
+		$(FILTER).c	\
+		$(ENCODE).c	
 
 EXTENSION_DLL	= 		\
 		$(SOCKET_DLL)	\
@@ -698,7 +701,8 @@ EXTENSION_DLL	= 		\
 		$(GLOB_DLL)	\
 		$(HOSTNAME_DLL)	\
 		$(STORABLE_DLL)	\
-		$(FILTER_DLL)
+		$(FILTER_DLL)   \
+		$(ENCODE_DLL)
 
 EXTENSION_PM	=		\
 		$(ERRNO_PM)
@@ -992,6 +996,12 @@ $(FILTER_DLL): $(PERLEXE) $(FILTER).xs
 	..\..\..\..\miniperl -I..\..\..\..\lib Makefile.PL INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\..\..\win32
+
+$(ENCODE_DLL): $(PERLEXE) $(ENCODE).xs
+	cd $(EXTDIR)\$(*B)
+	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	$(MAKE)
+	cd ..\..\win32
 
 $(ERRNO_PM): $(PERLEXE) $(ERRNO)_pm.PL
 	cd $(EXTDIR)\$(*B)

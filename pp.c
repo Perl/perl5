@@ -1268,7 +1268,7 @@ PP(pp_subtract)
 	    if (SvIOK(TOPm1s)) {
 		bool auvok = SvUOK(TOPm1s);
 		bool buvok = SvUOK(TOPs);
-	    
+	
 		if (!auvok && !buvok) { /* ## IV - IV ## */
 		    IV aiv = SvIVX(TOPm1s);
 		    IV biv = SvIVX(TOPs);
@@ -1298,7 +1298,7 @@ PP(pp_subtract)
 		    UV auv = SvUVX(TOPm1s);
 		    UV buv = SvUVX(TOPs);
 		    IV result;
-		    
+		
 		    if (auv >= buv) {
 			SP--;
 			SETu( auv - buv );
@@ -1415,7 +1415,7 @@ PP(pp_lt)
 	if (SvIOK(TOPm1s)) {
 	    bool auvok = SvUOK(TOPm1s);
 	    bool buvok = SvUOK(TOPs);
-	    
+	
 	    if (!auvok && !buvok) { /* ## IV < IV ## */
 		IV aiv = SvIVX(TOPm1s);
 		IV biv = SvIVX(TOPs);
@@ -1493,7 +1493,7 @@ PP(pp_gt)
 	if (SvIOK(TOPm1s)) {
 	    bool auvok = SvUOK(TOPm1s);
 	    bool buvok = SvUOK(TOPs);
-	    
+	
 	    if (!auvok && !buvok) { /* ## IV > IV ## */
 		IV aiv = SvIVX(TOPm1s);
 		IV biv = SvIVX(TOPs);
@@ -1571,7 +1571,7 @@ PP(pp_le)
 	if (SvIOK(TOPm1s)) {
 	    bool auvok = SvUOK(TOPm1s);
 	    bool buvok = SvUOK(TOPs);
-	    
+	
 	    if (!auvok && !buvok) { /* ## IV <= IV ## */
 		IV aiv = SvIVX(TOPm1s);
 		IV biv = SvIVX(TOPs);
@@ -1649,7 +1649,7 @@ PP(pp_ge)
 	if (SvIOK(TOPm1s)) {
 	    bool auvok = SvUOK(TOPm1s);
 	    bool buvok = SvUOK(TOPs);
-	    
+	
 	    if (!auvok && !buvok) { /* ## IV >= IV ## */
 		IV aiv = SvIVX(TOPm1s);
 		IV biv = SvIVX(TOPs);
@@ -1727,7 +1727,7 @@ PP(pp_ne)
 	if (SvIOK(TOPm1s)) {
 	    bool auvok = SvUOK(TOPm1s);
 	    bool buvok = SvUOK(TOPs);
-	    
+	
 	    if (!auvok && !buvok) { /* ## IV <=> IV ## */
 		IV aiv = SvIVX(TOPm1s);
 		IV biv = SvIVX(TOPs);
@@ -2621,7 +2621,7 @@ PP(pp_abs)
     {
       /* This will cache the NV value if string isn't actually integer  */
       IV iv = TOPi;
-      
+
       if (SvIOK(TOPs)) {
 	/* IVX is precise  */
 	if (SvIsUV(TOPs)) {
@@ -2637,7 +2637,7 @@ PP(pp_abs)
 		 IV_MIN and -IV_MIN should both be %100...00 and NV-able  */
 	      SETu(IV_MIN);
 	    }
-	  } 
+	  }
 	}
       } else{
 	NV value = TOPn;
@@ -2968,6 +2968,9 @@ PP(pp_chr)
 	SvUTF8_on(TARG);
 	XPUSHs(TARG);
 	RETURN;
+    }
+    else {
+	SvUTF8_off(TARG);
     }
 
     SvGROW(TARG,2);
@@ -3535,7 +3538,7 @@ PP(pp_hslice)
 		    DIE(aTHX_ PL_no_helem, SvPV(keysv, n_a));
 		}
 		if (PL_op->op_private & OPpLVAL_INTRO) {
-		    if (preeminent) 
+		    if (preeminent)
 		        save_helem(hv, keysv, svp);
 		    else {
 			STRLEN keylen;
