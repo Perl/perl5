@@ -374,6 +374,10 @@ Exporter guts
 
 Utilities to replace common UNIX commands in Makefiles etc.
 
+=item ExtUtils::Constant
+
+Generate XS code to import C header constants
+
 =item ExtUtils::Embed
 
 Utilities for embedding Perl in C/C++ applications
@@ -538,6 +542,14 @@ Process single-character switches with switch clustering
 
 Compare 8-bit scalar data according to the current locale
 
+=item I18N::LangTags
+
+Functions for dealing with RFC3066-style language tags
+
+=item I18N::LangTags::List
+
+List of tags for human languages
+
 =item IO
 
 Load various IO modules
@@ -565,6 +577,14 @@ ISO three letter codes for currency identification (ISO 4217)
 =item Locale::Language
 
 ISO two letter codes for language identification (ISO 639)
+
+=item Locale::Maketext
+
+Framework for localization
+
+=item Locale::Maketext::TPJ13
+
+Article about software localization
 
 =item Math::BigFloat
 
