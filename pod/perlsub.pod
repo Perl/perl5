@@ -1223,6 +1223,9 @@ the argument C<"Foo/Bar.pm"> in @_.  See L<perlfunc/require>.
 And, as you'll have noticed from the previous example, if you override
 C<glob>, the C<E<lt>*E<gt>> glob operator is overridden as well.
 
+In a similar fashion, overriding the C<readline> function also overrides
+the equivalent I/O operator C<< <FILEHANDLE> >>.
+
 Finally, some built-ins (e.g. C<exists> or C<grep>) can't be overridden.
 
 =head2 Autoloading

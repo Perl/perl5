@@ -6,7 +6,7 @@ BEGIN {
     push @INC, '../lib';
 }
 
-print "1..11\n";
+print "1..17\n";
 
 #
 # This file tries to test builtin override using CORE::GLOBAL
@@ -70,3 +70,21 @@ print "ok 10\n";
     print "not " if $r or $@ !~ /^Can't locate NoNeXiSt/i;
     print "ok 11\n";
 }
+
+#
+# readline() has special behaviour too
+#
+
+$r = 11;
+BEGIN { *CORE::GLOBAL::readline = sub (;*) { ++$r }; }
+print <FH>	== 12 ? "ok 12\n" : "not ok 12\n";
+print <$fh>	== 13 ? "ok 13\n" : "not ok 13\n";
+my $pad_fh;
+print <$pad_fh>	== 14 ? "ok 14\n" : "not ok 14\n";
+
+# Non-global readline() override
+BEGIN { *Rgs::readline = sub (;*) { --$r }; }
+package Rgs;
+print <FH>	== 13 ? "ok 15\n" : "not ok 15\n";
+print <$fh>	== 12 ? "ok 16\n" : "not ok 16\n";
+print <$pad_fh>	== 11 ? "ok 17\n" : "not ok 17\n";
