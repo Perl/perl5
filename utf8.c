@@ -116,13 +116,7 @@ Perl_is_utf8_char(pTHX_ U8 *s)
     if (!(u & 0x40))
 	return 0;
 
-    if      (!(u & 0x20))	{ len = 2; }
-    else if (!(u & 0x10))	{ len = 3; }
-    else if (!(u & 0x08))	{ len = 4; }
-    else if (!(u & 0x04))	{ len = 5; }
-    else if (!(u & 0x02))	{ len = 6; }
-    else if (!(u & 0x01))	{ len = 7; }
-    else 			{ len = 13; } /* whoa! */
+    len = UTF8SKIP(u);
 
     slen = len - 1;
     s++;
