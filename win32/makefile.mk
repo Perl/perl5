@@ -1127,6 +1127,7 @@ doc: $(PERLEXE)
 
 utils: $(PERLEXE) $(X2P)
 	cd ..\utils && $(MAKE) PERL=$(MINIPERL)
+	cd ..\pod
 	copy ..\README.aix      .\perlaix.pod
 	copy ..\README.amiga    .\perlamiga.pod
 	copy ..\README.apollo   .\perlapollo.pod
@@ -1164,7 +1165,7 @@ utils: $(PERLEXE) $(X2P)
 	copy ..\README.vos      .\perlvos.pod
 	copy ..\README.win32    .\perlwin32.pod
 	copy ..\vms\perlvms.pod	..\pod\perlvms.pod
-	cd ..\pod && $(MAKE) -f ..\win32\pod.mak converters
+	$(MAKE) -f ..\win32\pod.mak converters
 	cd ..\lib && $(PERLEXE) lib_pm.PL
 	$(PERLEXE) $(PL2BAT) $(UTILS)
 
