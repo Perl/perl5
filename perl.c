@@ -1,6 +1,6 @@
 /*    perl.c
  *
- *    Copyright (c) 1987-2002 Larry Wall
+ *    Copyright (c) 1987-2003 Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -2444,7 +2444,7 @@ Perl_moreswitches(pTHX_ char *s)
 #endif
 
 	PerlIO_printf(PerlIO_stdout(),
-		      "\n\nCopyright 1987-2002, Larry Wall\n");
+		      "\n\nCopyright 1987-2003, Larry Wall\n");
 #ifdef MACOS_TRADITIONAL
 	PerlIO_printf(PerlIO_stdout(),
 		      "\nMac OS port Copyright 1991-2002, Matthias Neeracher;\n"
