@@ -1278,6 +1278,7 @@ $   got_sub   = "false"
 $   got_api_revision   = "false"
 $   got_api_version    = "false"
 $   got_api_subversion = "false"
+$   got_perl_patchlevel= "false"
 $   OPEN/READONLY CONFIG 'patchlevel_h' 
 $Patchlevel_h_loop:
 $   READ/END_Of_File=Close_patch/ERROR=Close_patch CONFIG line
@@ -1311,11 +1312,19 @@ $     line = F$EDIT(line,"COMPRESS, TRIM")
 $     api_subversion = F$ELEMENT(2," ",line)
 $     got_api_subversion = "true"
 $   ENDIF
+$   IF ((F$LOCATE("""DEVEL",line).NE.F$LENGTH(line)).AND.(.NOT.got_perl_patchlevel))
+$   THEN
+$     line = F$EDIT(line,"COMPRESS, TRIM")
+$     perl_patchlevel = F$ELEMENT(1,"""",line)
+$     perl_patchlevel = perl_patchlevel - "DEVEL"
+$     got_perl_patchlevel = "true"
+$   ENDIF
 $   IF (.NOT. got_patch) .OR. -
        (.NOT. got_sub) .OR. - 
        (.NOT. got_api_revision) .OR. -
        (.NOT. got_api_version) .OR. -
-       (.NOT. got_api_subversion) -
+       (.NOT. got_api_subversion) .OR. -
+       (.NOT. got_perl_patchlevel) -
       THEN GOTO Patchlevel_h_loop
 $Close_patch:
 $   CLOSE CONFIG
@@ -1325,13 +1334,14 @@ $   subversion="0"
 $   api_revision="0"
 $   api_version="0"
 $   api_subversion="0"
+$   perl_patchlevel="0"
 $ ENDIF
-$ IF (F$STRING(subversion) .NES. "0")
+$ version_patchlevel_string = "version ''patchlevel' subversion ''subversion'"
+$ IF got_perl_patchlevel .AND. perl_patchlevel .NES. "0"
 $ THEN
-$   echo "(You have ''package' revision ''revision' patchlevel ''patchlevel' subversion ''subversion'.)"
-$ ELSE
-$   echo "(You have ''package' revision ''revision' patchlevel ''patchlevel'.)"
+$   version_patchlevel_string = "''version_patchlevel_string' patch ''perl_patchlevel'"
 $ ENDIF
+$ echo "(You have ''package' ''version_patchlevel_string'.)"
 $!
 $ version = revision + "_" + patchlevel + "_" + subversion
 $!
@@ -5706,6 +5716,7 @@ $ WC "vendorarchexp='" + "'"
 $ WC "vendorlib_stem='" + "'"
 $ WC "vendorlibexp='" + "'"
 $ WC "version='" + version + "'"
+$ WC "version_patchlevel_string='" + version_patchlevel_string + "'"
 $ WC "vms_cc_type='" + vms_cc_type + "'" ! VMS specific
 $ WC "vms_prefix='" + vms_prefix + "'" ! VMS specific
 $ WC "vms_ver='" + vms_ver + "'" ! VMS specific
