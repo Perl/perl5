@@ -122,7 +122,8 @@ sub charinfo {
 		     upper lower title
 		    )} = split(/;/, $line, -1);
 	    if ($prop{code} eq $hexk) {
-		$prop{block} = charblock($code);
+		$prop{block}  = charblock($code);
+		$prop{script} = charscript($code);
 		return %prop;
 	    }
 	}
@@ -138,7 +139,7 @@ sub _search { # Binary search in a [[lo,hi,prop],[...],...] table.
     my $mid = int(($lo+$hi) / 2);
 
     if ($table->[$mid]->[0] < $code) {
-	if ($table->[$mid]->[1] >= $code) {
+	if (defined $table->[$mid]->[1] && $table->[$mid]->[1] >= $code) {
 	    return $table->[$mid]->[2];
 	} else {
 	    _search($table, $mid + 1, $hi, $code);

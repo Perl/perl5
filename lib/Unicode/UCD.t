@@ -3,7 +3,7 @@ use Unicode::UCD 3.1.0;
 use Test;
 use strict;
 
-BEGIN { plan tests => 81 };
+BEGIN { plan tests => 87 };
 
 use Unicode::UCD 'charinfo';
 
@@ -27,6 +27,7 @@ ok($charinfo{upper},          '');
 ok($charinfo{lower},          '0061');
 ok($charinfo{title},          '');
 ok($charinfo{block},          'Basic Latin');
+ok($charinfo{script},         'LATIN');
 
 %charinfo = charinfo(0x100);
 
@@ -46,6 +47,9 @@ ok($charinfo{upper},          '');
 ok($charinfo{lower},          '0101');
 ok($charinfo{title},          '');
 ok($charinfo{block},          'Latin Extended-A');
+ok($charinfo{script},         'LATIN');
+
+# 0x0590 is in the Hebrew block but unused.
 
 %charinfo = charinfo(0x590);
 
@@ -65,6 +69,9 @@ ok($charinfo{upper},         undef);
 ok($charinfo{lower},         undef);
 ok($charinfo{title},         undef);
 ok($charinfo{block},         undef);
+ok($charinfo{script},        undef);
+
+# 0x05d0 is in the Hebrew block and used.
 
 %charinfo = charinfo(0x5d0);
 
@@ -84,10 +91,14 @@ ok($charinfo{upper},          '');
 ok($charinfo{lower},          '');
 ok($charinfo{title},          '');
 ok($charinfo{block},          'Hebrew');
+ok($charinfo{script},         'HEBREW');
 
-use Unicode::UCD 'charblock';
+use Unicode::UCD qw(charblock charscript);
+
+# 0x0590 is in the Hebrew block but unused.
 
 ok(charblock(0x590),          'Hebrew');
+ok(charscript(0x590),         undef);
 
 %charinfo = charinfo(0xbe);
 
@@ -107,4 +118,4 @@ ok($charinfo{upper},          '');
 ok($charinfo{lower},          '');
 ok($charinfo{title},          '');
 ok($charinfo{block},          'Latin-1 Supplement');
-
+ok($charinfo{script},         undef);
