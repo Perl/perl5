@@ -82,13 +82,13 @@ ops_to_mask(...)
 void
 opname(...)
     PPCODE:
-	int i, opcode;
+	int i, myopcode;
 	for (i = 0; i < items; i++)
 	{
-	    opcode = SvIV(ST(i));
-	    if (opcode < 0 || opcode >= maxo)
+	    myopcode = SvIV(ST(i));
+	    if (myopcode < 0 || myopcode >= maxo)
 		croak("opcode out of range");
-	    XPUSHs(sv_2mortal(newSVpv(op_name[opcode], 0)));
+	    XPUSHs(sv_2mortal(newSVpv(op_name[myopcode], 0)));
 	}
 
 void
