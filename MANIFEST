@@ -744,8 +744,8 @@ lib/Attribute/Handlers/demo/demo_range.pl	Attribute::Handlers demo
 lib/Attribute/Handlers/demo/demo_rawdata.pl	Attribute::Handlers demo
 lib/Attribute/Handlers/demo/Descriptions.pm	Attribute::Handlers demo
 lib/Attribute/Handlers/demo/MyClass.pm	Attribute::Handlers demo
-lib/Attribute/Handlers/README	Attribute::Handlers
-lib/Attribute/Handlers/test.pl		See if Attribute::Handlers works
+lib/Attribute/Handlers/README		Attribute::Handlers
+lib/Attribute/Handlers/t/multi.t	See if Attribute::Handlers works
 lib/attributes.pm		For "sub foo : attrlist"
 lib/AutoLoader.pm		Autoloader base class
 lib/AutoLoader.t		See if AutoLoader works
@@ -910,7 +910,9 @@ lib/FileHandle.pm		Backward-compatible front end to IO extension
 lib/FileHandle.t		See if FileHandle works
 lib/filetest.pm			For "use filetest"
 lib/Filter/Simple.pm		Simple frontend to Filter::Util::Call
-lib/Filter/Simple/test.pl	See if Filter::Simple works
+lib/Filter/Simple/Changes	Filter::Simple
+lib/Filter/Simple/README	Filter::Simple
+lib/Filter/Simple/t/filter.t	See if Filter::Simple works
 lib/find.pl			A find emulator--used by find2perl
 lib/FindBin.pm			Find name of currently executing program
 lib/FindBin.t			See if FindBin works
@@ -1053,7 +1055,9 @@ lib/Net/t/require.t		libnet
 lib/Net/t/smtp.t		libnet
 lib/Net/Time.pm			libnet
 lib/newgetopt.pl		A perl library supporting long option parsing
-lib/NEXT.pm		Pseudo-class NEXT for method redispatch
+lib/NEXT.pm			Pseudo-class NEXT for method redispatch
+lib/NEXT/Changes		NEXT
+lib/NEXT/README			NEXT
 lib/NEXT/test.pl		See if NEXT works
 lib/open.pm			Pragma to specify default I/O disciplines
 lib/open2.pl			Open a two-ended pipe (uses IPC::Open2)
@@ -1096,10 +1100,11 @@ lib/strict.t			See if strictures work
 lib/subs.pm			Declare overriding subs
 lib/subs.t			See if subroutine pseudo-importation works
 lib/Switch.pm			Switch for Perl
-lib/Switch/Changes	Switch for Perl
-lib/Switch/README	Switch for Perl
-lib/Switch/t/given_when.t	See if Perl 6 given (switch) works
-lib/Switch/t/switch_case.t	See if Perl 5 switch works
+lib/Switch/Changes		Switch
+lib/Switch/README		Switch
+lib/Switch/t/given.t		See if Perl 6 given (switch) works
+lib/Switch/t/nested.t		See if nested switch works
+lib/Switch/t/switch.t		See if Perl 5 switch works
 lib/Symbol.pm			Symbol table manipulation routines
 lib/Symbol.t			See if Symbol works
 lib/syslog.pl			Perl library supporting syslogging
@@ -1141,15 +1146,16 @@ lib/Test/t/todo.t		See if Test works
 lib/Text/Abbrev.pm		An abbreviation table builder
 lib/Text/Abbrev.t		Test Text::Abbrev
 lib/Text/Balanced.pm		Text::Balanced
-lib/Text/Balanced.pod		Text::Balanced
-lib/Text/Balanced/t/genxt.t	See if Text::Balanced works
-lib/Text/Balanced/t/xbrak.t	See if Text::Balanced works
-lib/Text/Balanced/t/xcode.t	See if Text::Balanced works
-lib/Text/Balanced/t/xdeli.t	See if Text::Balanced works
-lib/Text/Balanced/t/xmult.t	See if Text::Balanced works
-lib/Text/Balanced/t/xquot.t	See if Text::Balanced works
-lib/Text/Balanced/t/xtagg.t	See if Text::Balanced works
-lib/Text/Balanced/t/xvari.t	See if Text::Balanced works
+lib/Text/Balanced/Changes	Text::Balanced
+lib/Text/Balanced/README	Text::Balanced
+lib/Text/Balanced/t/gentag.t	See if Text::Balanced works
+lib/Text/Balanced/t/extbrk.t	See if Text::Balanced works
+lib/Text/Balanced/t/extcbk.t	See if Text::Balanced works
+lib/Text/Balanced/t/extdel.t	See if Text::Balanced works
+lib/Text/Balanced/t/extmul.t	See if Text::Balanced works
+lib/Text/Balanced/t/extqlk.t	See if Text::Balanced works
+lib/Text/Balanced/t/exttag.t	See if Text::Balanced works
+lib/Text/Balanced/t/extvar.t	See if Text::Balanced works
 lib/Text/ParseWords.pm		Perl module to split words on arbitrary delimiter
 lib/Text/ParseWords.t		See if Text::ParseWords works
 lib/Text/Soundex.pm		Perl module to implement Soundex

@@ -2,8 +2,8 @@ package Attribute::Handlers;
 use 5.006;
 use Carp;
 use warnings;
-$VERSION = '0.70';
-$DB::single=1;
+$VERSION = '0.75';
+# $DB::single=1;
 
 my %symcache;
 sub findsym {
@@ -36,19 +36,23 @@ sub _usage_AH_ {
 	croak "Usage: use $_[0] autotie => {AttrName => TieClassName,...}";
 }
 
+my $qual_id = qr/^[_a-z]\w*(::[_a-z]\w*)*$/i;
+
 sub import {
     my $class = shift @_;
     return unless $class eq "Attribute::Handlers";
     while (@_) {
 	my $cmd = shift;
-        if ($cmd eq 'autotie') {
+        if ($cmd =~ /^autotie((?:ref)?)$/) {
+	    my $tiedata = '($was_arrayref ? $data : @$data)';
+	       $tiedata = ($1 ? '$ref, ' : '') . $tiedata;
             my $mapping = shift;
 	    _usage_AH_ $class unless ref($mapping) eq 'HASH';
 	    while (my($attr, $tieclass) = each %$mapping) {
-		$tieclass =~ s/^([_a-z]\w*(::[_a-z]\w*))(.*)/$1/is;
+                $tieclass =~ s/^([_a-z]\w*(::[_a-z]\w*)*)(.*)/$1/is;
 		my $args = $3||'()';
-		usage $class unless $attr =~ m/^[_a-z]\w*(::[_a-z]\w*)*$/i
-		                 && $tieclass =~ m/^[_a-z]\w*(::[_a-z]\w*)/i
+		_usage_AH_ $class unless $attr =~ $qual_id
+		                 && $tieclass =~ $qual_id
 		                 && eval "use base $tieclass; 1";
 	        if ($tieclass->isa('Exporter')) {
 		    local $Exporter::ExportLevel = 2;
@@ -59,14 +63,12 @@ sub import {
 	        eval qq{
 	            sub $attr : ATTR(VAR) {
 			my (\$ref, \$data) = \@_[2,4];
-			\$data = [ \$data ] unless ref \$data eq 'ARRAY';
-			# print \$ref, ": ";
-			# use Data::Dumper 'Dumper';
-			# print Dumper [ [\$ref, \$data] ];
+			my \$was_arrayref = ref \$data eq 'ARRAY';
+			\$data = [ \$data ] unless \$was_arrayref;
 			my \$type = ref(\$ref)||"value (".(\$ref||"<undef>").")";
-			 (\$type eq 'SCALAR')? tie \$\$ref,'$tieclass',\@\$data
-			:(\$type eq 'ARRAY') ? tie \@\$ref,'$tieclass',\@\$data
-			:(\$type eq 'HASH')  ? tie \%\$ref,'$tieclass',\@\$data
+			 (\$type eq 'SCALAR')? tie \$\$ref,'$tieclass',$tiedata
+			:(\$type eq 'ARRAY') ? tie \@\$ref,'$tieclass',$tiedata
+			:(\$type eq 'HASH')  ? tie \%\$ref,'$tieclass',$tiedata
 			: die "Can't autotie a \$type\n"
 	            } 1
 	        } or die "Internal error: $@";
@@ -91,10 +93,10 @@ sub _resolve_lastattr {
 }
 
 sub AUTOLOAD {
-	my ($class) = @_;
-	$AUTOLOAD =~ /_ATTR_(.*?)_(.*)/ or
+	my ($class) = $AUTOLOAD =~ m/(.*)::/g;
+	$AUTOLOAD =~ m/_ATTR_(.*?)_(.*)/ or
 	    croak "Can't locate class method '$AUTOLOAD' via package '$class'";
-	croak "Attribute handler '$2' doesn't handle $1 attributes";
+	croak "Attribute handler '$3' doesn't handle $2 attributes";
 }
 
 sub DESTROY {}
@@ -106,7 +108,7 @@ sub _gen_handler_AH_() {
 	    _resolve_lastattr;
 	    my ($pkg, $ref, @attrs) = @_;
 	    foreach (@attrs) {
-		my ($attr, $data) = /^([a-z_]\w*)(?:[(](.*)[)])?$/i or next;
+		my ($attr, $data) = /^([a-z_]\w*)(?:[(](.*)[)])?$/is or next;
 		if ($attr eq 'ATTR') {
 			$data ||= "ANY";
 			$raw{$ref} = $data =~ s/\s*,?\s*RAWDATA\s*,?\s*//;
@@ -185,8 +187,8 @@ Attribute::Handlers - Simpler definition of attribute handlers
 
 =head1 VERSION
 
-This document describes version 0.70 of Attribute::Handlers,
-released June  3, 2001.
+This document describes version 0.75 of Attribute::Handlers,
+released September  3, 2001.
 
 =head1 SYNOPSIS
 
@@ -546,10 +548,35 @@ C<__CALLER__>, which may be specified as the qualifier of an attribute:
 
         package Tie::Me::Kangaroo:Down::Sport;
 
-        use Attribute::Handler autotie => { __CALLER__::Roo => __PACKAGE__ };
+        use Attribute::Handlers autotie => { __CALLER__::Roo => __PACKAGE__ };
 
 This causes Attribute::Handlers to define the C<Roo> attribute in the package
 that imports the Tie::Me::Kangaroo:Down::Sport module.
+
+=head3 Passing the tied object to C<tie>
+
+Occasionally it is important to pass a reference to the object being tied
+to the TIESCALAR, TIEHASH, etc. that ties it. 
+
+The C<autotie> mechanism supports this too. The following code:
+
+	use Attribute::Handlers autotieref => { Selfish => Tie::Selfish };
+	my $var : Selfish(@args);
+
+has the same effect as:
+
+	tie my $var, 'Tie::Selfish', @args;
+
+But when C<"autotieref"> is used instead of C<"autotie">:
+
+	use Attribute::Handlers autotieref => { Selfish => Tie::Selfish };
+	my $var : Selfish(@args);
+
+the effect is to pass the C<tie> call an extra reference to the variable
+being tied:
+
+        tie my $var, 'Tie::Selfish', \$var, @args;
+
 
 
 =head1 EXAMPLES
@@ -752,5 +779,4 @@ Bug reports and other feedback are most welcome.
 
          Copyright (c) 2001, Damian Conway. All Rights Reserved.
        This module is free software. It may be used, redistributed
-      and/or modified under the terms of the Perl Artistic License
-            (see http://www.perl.com/perl/misc/Artistic.html)
+           and/or modified under the same terms as Perl itself.

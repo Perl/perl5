@@ -1,13 +1,5 @@
-#!./perl
-
-BEGIN {
-    chdir('t') if -d 't';    
-    @INC = 'lib';
-}
-
+use FilterTest qr/not ok/ => "ok", fail => "ok";
 print "1..6\n";
-
-use MyFilter qr/not ok/ => "ok", fail => "ok";
 
 sub fail { print "fail ", $_[0], "\n" }
 
@@ -20,7 +12,7 @@ fail(3);
 print "not " unless "whatnot okapi" eq "whatokapi";
 print "ok 5\n";
 
-no MyFilter;
+no FilterTest;
 
 print "not " unless "not ok" =~ /^not /;
 print "ok 6\n";

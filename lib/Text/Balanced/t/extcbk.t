@@ -1,8 +1,3 @@
-BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
-}
-
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl test.pl'
 
@@ -11,7 +6,7 @@ BEGIN {
 # Change 1..1 below to 1..last_test_to_print .
 # (It may become useful if the test is moved to ./t subdirectory.)
 
-BEGIN { $| = 1; print "1..37\n"; }
+BEGIN { $| = 1; print "1..41\n"; }
 END {print "not ok 1\n" unless $loaded;}
 use Text::Balanced qw ( extract_codeblock );
 $loaded = 1;
@@ -56,6 +51,12 @@ while (defined($str = <DATA>))
 }
 
 __DATA__
+
+# USING: extract_codeblock($str);
+{ $data[4] =~ /['"]/; };
+
+# USING: extract_codeblock($str,'(){}',undef,'()');
+(Foo(')'));
 
 # USING: extract_codeblock($str,'<>');
 < %x = ( try => "this") >;

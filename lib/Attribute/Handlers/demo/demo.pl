@@ -4,7 +4,7 @@ use v5.6.0;
 use base Demo;
 
 my $y : Demo :This($this) = sub : Demo(1,2,3) {};
-sub x : Demo(4,5,6) :Multi {}
+sub x : Demo(4, 5, 6) :Multi {}
 my %z : Demo(hash) :Multi(method,maybe);
 # my %a : NDemo(hash);
 

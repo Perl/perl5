@@ -1,0 +1,32 @@
+Revision history for Perl extension Filter::Simple
+
+0.01  Tue Sep 19 20:18:44 2000
+	- original version; created by h2xs 1.18
+
+0.01	Tue Sep 26 09:30:14 2000
+
+	- Changed module name to Filter::Simple
+
+
+0.60	Wed May  2 07:38:18 2001
+
+	- Fixed POD nit (thanks Dean)
+
+	- Added optional second argument to import to allow
+	  terminator to be changed (thanks Brad)
+
+	- Fixed bug when empty filtered text was appended to (thanks Brad)
+
+	- Added FILTER as the normal mechanism for specifying filters
+
+
+0.61	Mon Sep  3 08:25:21 2001
+
+	- Added a real test suite (thanks Jarkko)
+
+	- Changed licence to facilitate inclusion in
+	  core distribution
+
+	- Added documentation for using F::S and Exporter together
+
+

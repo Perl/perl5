@@ -1,0 +1,22 @@
+Revision history for Perl extension NEXT.pm.
+
+0.01	Tue Apr 10 18:27:00 EST 2001
+
+	- original version 
+
+
+0.01	Thu Apr 12 17:06:49 2001
+
+	- Documented the difference between NEXT and SUPER (thanks Ken)
+
+
+
+0.01	Thu Apr 12 17:15:42 2001
+
+
+
+0.02	Mon Sep  3 07:52:27 2001
+
+	- Fixed setting of $AUTOLOAD in NEXT'd AUTOLOADS (thanks Leonid)
+
+	- Changed licence for inclusion in core distribution

@@ -43,8 +43,8 @@ Revision history for Perl extension Switch.
 	- Added support for Perl 6 given..when syntax
 
 
-2.04	Mon Jul 30 13:17:35 2001
+2.05	Mon Sep  3 08:13:25 2001
 
-	- Suppressed 'undef value' warning under -w (thanks Michael)
+	- Changed licence for inclusion in core distribution
 
-	- Added support for Perl 6 given..when syntax
+	- Added new test file for non-fallthrough and nested switches

@@ -26,7 +26,7 @@ Revision history for Perl extension Attribute::Handlers
 	- Critical doc patch
 
 
-0.65	Sun Jun  3 07:40:03 2001
+0.70	Sun Jun  3 07:40:03 2001
 
 	- Added __CALLER__ pseudo class for 'autotie'
 
@@ -44,3 +44,20 @@ Revision history for Perl extension Attribute::Handlers
 
 	- Cleaned up interactions with other class hierarchies
 	  (due to being base class of UNIVERSAL)
+
+
+0.75	Mon Sep  3 09:07:08 2001
+
+	- Cleaned up AUTOLOAD
+
+	- Numerous bug fixes (thanks Pete)
+
+	- Fixed handling of attribute data that includes a newline (thanks Pete)
+
+	- Added "autotieref" option (thanks Pete)
+
+	- Switched off $DB::single
+
+	- Changed licence for inclusion in core distribution
+
+	- Fixed 'autotie' for tied classes with multi-level names (thanks Jeff)

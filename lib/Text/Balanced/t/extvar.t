@@ -1,8 +1,3 @@
-BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
-}
-
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl test.pl'
 
@@ -11,9 +6,9 @@ BEGIN {
 # Change 1..1 below to 1..last_test_to_print .
 # (It may become useful if the test is moved to ./t subdirectory.)
 
-BEGIN { $| = 1; print "1..19\n"; }
+BEGIN { $| = 1; print "1..81\n"; }
 END {print "not ok 1\n" unless $loaded;}
-use Text::Balanced qw ( extract_bracketed );
+use Text::Balanced qw ( extract_variable );
 $loaded = 1;
 print "ok 1\n";
 $count=2;
@@ -35,10 +30,11 @@ while (defined($str = <DATA>))
 	debug "\tUsing: $cmd\n";
 	debug "\t   on: [$str]\n";
 
-	$var = eval "() = $cmd";
-	debug "\t list got: [$var]\n";
+	my @res;
+	$var = eval "\@res = $cmd";
+	debug "\t list got: [" . join("|",@res) . "]\n";
 	debug "\t list left: [$str]\n";
-	print "not " if (substr($str,pos($str),1) eq ';')==$neg;
+	print "not " if (substr($str,pos($str)||0,1) eq ';')==$neg;
 	print "ok ", $count++;
 	print " ($@)" if $@ && $DEBUG;
 	print "\n";
@@ -56,26 +52,51 @@ while (defined($str = <DATA>))
 
 __DATA__
 
-# USING: extract_bracketed($str);
-{a nested { and } are okay as are () and <> pairs and escaped \}'s };
-{a nested\n{ and } are okay as are\n() and <> pairs and escaped \}'s };
+# USING: extract_variable($str);
+# THESE SHOULD FAIL
+$a->;
+$a (1..3) { print $a };
 
-# USING: extract_bracketed($str,'{}');
-{a nested { and } are okay as are unbalanced ( and < pairs and escaped \}'s };
+# USING: extract_variable($str);
+*var;
+*$var;
+*{var};
+*{$var};
+*var{cat};
+\&var;
+\&mod::var;
+\&mod'var;
+$a;
+$_;
+$a[1];
+$_[1];
+$a{cat};
+$_{cat};
+$a->[1];
+$a->{"cat"}[1];
+@$listref;
+@{$listref};
+$obj->nextval;
+$obj->_nextval;
+$obj->next_val_;
+@{$obj->nextval};
+@{$obj->nextval($cat,$dog)->{new}};
+@{$obj->nextval($cat?$dog:$fish)->{new}};
+@{$obj->nextval(cat()?$dog:$fish)->{new}};
+$ a {'cat'};
+$a::b::c{d}->{$e->()};
+$a'b'c'd{e}->{$e->()};
+$a'b::c'd{e}->{$e->()};
+$#_;
+$#array;
+$#{array};
+$var[$#var];
 
 # THESE SHOULD FAIL
-{an unmatched nested { isn't okay, nor are ( and < };
-{an unbalanced nested [ even with } and ] to match them;
+$a->;
+@{$;
+$ a :: b :: c
+$ a ' b ' c
 
-
-# USING: extract_bracketed($str,'<"`q>');
-<a q{uoted} ">" unbalanced right bracket of /(q>)/ either sort (`>>>""">>>>`) is okay >;
-
-# USING: extract_bracketed($str,'<">');
-<a quoted ">" unbalanced right bracket is okay >;
-
-# USING: extract_bracketed($str,'<"`>');
-<a quoted ">" unbalanced right bracket of either sort (`>>>""">>>>`) is okay >;
-
-# THIS SHOULD FAIL
-<a misquoted '>' unbalanced right bracket is bad >;
+# USING: extract_variable($str,'=*');
+========$a;
