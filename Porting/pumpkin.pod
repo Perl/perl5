@@ -189,6 +189,16 @@ may help out folks on another platform who have the same problem.
 We should never release a main version without testing it as a
 subversion first.
 
+=head2 Test popular applications and modules.
+
+We should never release a main version without testing whether or not
+it breaks various popular modules and applications.  A partial list of
+such things would include majordomo, metaconfig, apache, Tk, CGI,
+libnet, and libwww, to name just a few.  Of course it's quite possible
+that some of those things will be just plain broken and need to be fixed,
+but, in general, we ought to try to avoid breaking widely-installed
+things.
+
 =head2 Automate generation of derivative files
 
 The F<embed.h>, F<keywords.h>, F<opcode.h>, and F<perltoc.pod> files
@@ -1150,10 +1160,10 @@ and/or fcntl() file locking.  It's a mess.
 
 Andy Dougherty <doughera@lafcol.lafayette.edu>.
 
-Additions by Chip Salzenberg <chip@atlantic.net>.
+Additions by Chip Salzenberg <chip@perl.com>.
 
 All opinions expressed herein are those of the authorZ<>(s).
 
 =head1 LAST MODIFIED
 
-$Id: pumpkin.pod,v 1.9 1997/02/24 20:37:43 doughera Released $
+$Id: pumpkin.pod,v 1.10 1997/04/16 20:46:47 doughera Released $

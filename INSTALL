@@ -971,7 +971,8 @@ If you have problems with dynamic loading using gcc on SunOS or
 Solaris, and you are using GNU as and GNU ld, you may need to add
 -B/bin/ (for SunOS) or -B/usr/ccs/bin/ (for Solaris) to your
 $ccflags, $ldflags, and $lddlflags so that the system's versions of as
-and ld are used.  Alternatively, you can use the GCC_EXEC_PREFIX
+and ld are used.  Note that the trailing '/' is required.
+Alternatively, you can use the GCC_EXEC_PREFIX
 environment variable to ensure that Sun's as and ld are used.  Consult
 your gcc documentation for further information on the -B option and
 the GCC_EXEC_PREFIX variable.
@@ -1283,6 +1284,11 @@ and adding /opt/perl5.004/bin to the shell PATH variable.  Such users
 may also wish to add a symbolic link /usr/local/bin/perl so that
 scripts can still start with #!/usr/local/bin/perl.
 
+If you are installing a development subversion, you probably ought to
+seriously consider using a separate directory, since development
+subversions may not have all the compatibility wrinkles ironed out
+yet.
+
 =head1 Coexistence with perl4
 
 You can safely install perl5 even if you want to keep perl4 around.
@@ -1378,4 +1384,4 @@ feedback from the perl5-porters@perl.org folks.
 
 =head1 LAST MODIFIED
 
-$Id: INSTALL,v 1.13 1997/04/03 18:29:14 doughera Released $
+$Id: INSTALL,v 1.15 1997/04/16 20:49:24 doughera Exp $
