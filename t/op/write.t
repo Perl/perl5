@@ -200,6 +200,7 @@ $this,$that
     write LEX;
     $that = 8;
     write LEX;
+    close LEX;
 }
 # LEX_INTERPNORMAL test
 my %e = ( a => 1 );
