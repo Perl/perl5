@@ -119,15 +119,15 @@ Perl_is_utf8_char(pTHX_ U8 *s)
     STRLEN slen, len;
     UV uv, ouv;
 
-    if (u <= 0x7f)
+    if (UTF8_IS_ASCII(u))
 	return 1;
 
-    if (u >= 0x80 && u <= 0xbf)
+    if (!UTF8_IS_START(u))
 	return 0;
 
     len = UTF8SKIP(s);
 
-    if (len < 2 || (u >= 0xc0 && u <= 0xfd && s[1] < 0x80))
+    if (len < 2 || !UTF8_IS_CONTINUATION(s[1]))
 	return 0;
 
     slen = len - 1;
@@ -135,7 +135,7 @@ Perl_is_utf8_char(pTHX_ U8 *s)
     uv = u;
     ouv = uv;
     while (slen--) {
-	if ((*s & 0xc0) != 0x80)
+	if (!UTF8_IS_CONTINUATION(*s))
 	    return 0;
 	uv = UTF8_ACCUMULATE(uv, *s);
 	if (uv < ouv)
@@ -175,9 +175,9 @@ Perl_is_utf8_string(pTHX_ U8 *s, STRLEN len)
 	if (!c)
 	    return FALSE;
         x += c;
-        if (x > send)
-            return FALSE;
     }
+    if (x != send)
+	return FALSE;
 
     return TRUE;
 }
