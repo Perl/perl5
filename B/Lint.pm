@@ -18,10 +18,12 @@ out a similar process for C programs.
 
 Option words are separated by commas (not whitespace) and follow the
 usual conventions of compiler backend options. Following any options
-(indicated by a leading B<->) come lint check arguments. Each is a
+(indicated by a leading B<->) come lint check arguments. Each such
+argument (apart from the special B<all> and B<none> options) is a
 word representing one possible lint check (turning on that check) or
-is B<no-foo> meaning to turn off check B<foo>. By default, a standard
-list of checks is turned on. Available checks are:
+is B<no-foo> (turning off that check). Before processing the check
+arguments, a standard list of checks is turned on. Later options
+override earlier ones. Available options are:
 
 =over 8
 
@@ -49,6 +51,35 @@ and B<implicit-write> will warn about these:
 
     s/foo/bar/;
 
+Both B<implicit-read> and B<implicit-write> warn about this:
+
+    for (@a) { ... }
+
+=item B<dollar_underscore>
+
+This option warns whenever $_ is used either explicitly anywhere or
+as the implicit argument of a B<print> statement.
+
+=item B<all>
+
+Turn all warnings on.
+
+=item B<none>
+
+Turn all warnings off.
+
+=back
+
+=head1 NON LINT-CHECK OPTIONS
+
+=over 8
+
+=item B<-u Package>
+
+Normally, Lint only checks the main code of the program together
+with all subs defined in package main. The B<-u> option lets you
+include other package names whose subs are then checked by Lint.
+
 =back
 
 =head1 BUGS
@@ -62,7 +93,7 @@ Malcolm Beattie, mbeattie@sable.ox.ac.uk.
 =cut
 
 use strict;
-use B qw(walkoptree_slow main_root parents);
+use B qw(walkoptree_slow main_root walksymtable svref_2object parents);
 
 # Constants (should probably be elsewhere)
 sub G_ARRAY () { 1 }
@@ -85,8 +116,19 @@ BEGIN {
 # Lint checks turned on by default
 my @default_checks = qw(context);
 
+my %valid_check;
+# All valid checks
+BEGIN {
+    map($valid_check{$_}++,
+	qw(context implicit_read implicit_write dollar_underscore));
+}
+
 # Debugging options
 my ($debug_op);
+
+my %done_cv;		# used to mark which subs have already been linted
+my @extra_packages;	# Lint checks mainline code and all subs which are
+			# in main:: or in one of these packages.
 
 sub warning {
     my $format = (@_ < 2) ? "%s" : shift;
@@ -141,12 +183,67 @@ sub B::PMOP::lint {
 	    warning('Implicit match on $_');
 	}
     }
-    elsif ($check{implicit_write}) {
+    if ($check{implicit_write}) {
 	my $ppaddr = $op->ppaddr;
 	if ($ppaddr eq "pp_subst" && !($op->flags & OPf_STACKED)) {
 	    warning('Implicit substitution on $_');
 	}
     }
+}
+
+sub B::LOOP::lint {
+    my $op = shift;
+    if ($check{implicit_read} || $check{implicit_write}) {
+	my $ppaddr = $op->ppaddr;
+	if ($ppaddr eq "pp_enteriter") {
+	    my $last = $op->last;
+	    if ($last->ppaddr eq "pp_gv" && $last->gv->NAME eq "_") {
+		warning('Implicit use of $_ in foreach');
+	    }
+	}
+    }
+}
+
+sub B::GVOP::lint {
+    my $op = shift;
+    if ($check{dollar_underscore} && $op->ppaddr eq "pp_gvsv"
+	&& $op->gv->NAME eq "_") {
+	warning('Use of $_');
+    }
+}
+
+sub B::GV::lintcv {
+    my $gv = shift;
+    my $cv = $gv->CV;
+    #warn sprintf("lintcv: %s::%s (done=%d)\n",
+    #		 $gv->STASH->NAME, $gv->NAME, $done_cv{$$cv});#debug
+    return if !$$cv || $done_cv{$$cv}++;
+    my $root = $cv->ROOT;
+    #warn "    root = $root (0x$$root)\n";#debug
+    walkoptree_slow($root, "lint") if $$root;
+}
+
+sub do_lint {
+    my %search_pack;
+    walkoptree_slow(main_root, "lint") if ${main_root()};
+    
+    # Now do subs in main
+    no strict qw(vars refs);
+    my $sym;
+    local(*glob);
+    while (($sym, *glob) = each %{"main::"}) {
+	#warn "Trying $sym\n";#debug
+	svref_2object(\*glob)->EGV->lintcv unless $sym =~ /::$/;
+    }
+
+    # Now do subs in non-main packages given by -u options
+    map { $search_pack{$_} = 1 } @extra_packages;
+    walksymtable(\%{"main::"}, "lintcv", sub {
+	my $package = shift;
+	$package =~ s/::$//;
+	#warn "Considering $package\n";#debug
+	return exists $search_pack{$package};
+    });
 }
 
 sub compile {
@@ -177,19 +274,32 @@ sub compile {
 		    $debug_op = 1;
 		}
 	    }
+	} elsif ($opt eq "u") {
+	    $arg ||= shift @options;
+	    push(@extra_packages, $arg);
 	}
     }
     foreach $opt (@default_checks, @options) {
 	$opt =~ tr/-/_/;
-	if ($opt =~ s/^no-//) {
-	    $check{$opt} = 0;
-	} else {
-	    $check{$opt} = 1;
+	if ($opt eq "all") {
+	    %check = %valid_check;
+	}
+	elsif ($opt eq "none") {
+	    %check = ();
+	}
+	else {
+	    if ($opt =~ s/^no-//) {
+		$check{$opt} = 0;
+	    }
+	    else {
+		$check{$opt} = 1;
+	    }
+	    warn "No such check: $opt\n" unless defined $valid_check{$opt};
 	}
     }
     # Remaining arguments are things to check
     
-    return sub { walkoptree_slow(main_root, "lint") };
+    return \&do_lint;
 }
 
 1;
