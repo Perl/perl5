@@ -257,19 +257,18 @@ sub _createCode
 
     local($") = " -I";
 
-    open(GENFILE, "> $generated_file") || die "Can't open $generated_file: $!";
-
     if ($backend eq "Bytecode")
     {
         require ByteLoader;
 
+	open(GENFILE, "> $generated_file") || die "Can't open $generated_file: $!";
+	binmode GENFILE;
         print GENFILE "#!$^X\n" if @_ == 3;
         print GENFILE "use ByteLoader $ByteLoader::VERSION;\n";
+	close(GENFILE);
 
 	$output_switch ="a";
     }
-
-    close(GENFILE);
 
     if (@_ == 3)                                   # compiling a program   
     {
