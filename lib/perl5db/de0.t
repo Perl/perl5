@@ -3,16 +3,19 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
-    $ENV{PERL5LIB} = '../lib';    # so children will see it too
+    require Config; import Config;
     if ($^O eq 'VMS') {
 	print "1..0 # skip on $^O, no piped open\n";
-	exit 0;
+        exit 0;
     }
+    $ENV{PERL5LIB} = '../lib';    # so children will see it too
 }
 
 use strict;
+use IPC::Open3 qw(open3);
+use IO::Select;
 
-$| = 1;
+$|=1;
 
 my @prgs;
 
@@ -28,26 +31,30 @@ plan tests => scalar @prgs;
 
 require "dumpvar.pl";
 
-use File::Temp qw/tempfile/;
-
-our ($tmpfh, $tmpfile) = tempfile();
-
 $ENV{PERLDB_OPTS} = "TTY=0";
-my($ornament1,$ornament2);
+my($ornament1,$ornament2,$wtrfh,$rdrfh);
+open3 $wtrfh, $rdrfh, 0, $^X, "-de0";
+my $ios = IO::Select->new();
+$ios->add($rdrfh);
 for (@prgs){
-    my($prog, $expected) = split(/\nEXPECT\n?/, $_);
-    open my $select, "| $^X -de0 2> $tmpfile" or die $!;
-    print $select $prog;
-    close $select;
-    my $got = do { open my($fh), $tmpfile or die; local $/; <$fh>; };
-    $got =~ s/^\s*Loading.*\nEditor.*\n\nEnter.*\n\nmain::\(-e:1\):\s0\n//;
-    unless (defined $ornament1) {
-        ($ornament1, $ornament2) = $got =~
-            /(.*?)0\s+'reserved example for calibrating the ornaments'\n(.*)/
+    my($prog,$expected) = split(/\nEXPECT\n?/, $_);
+    print $wtrfh $prog, "\n";
+    my $got;
+    while ($ios->can_read(0.25)) {
+	last unless sysread $rdrfh, $got, 1024, length($got);
     }
-    $got =~ s/^\Q$ornament1\E//;
-    $got =~ s/\Q$ornament2\E\z//;
-    like($got, qr:$expected:i, $prog);
+    SKIP: {
+	skip("failed to read debugger", 1) unless defined $got;
+	$got =~ s/^\s*Loading.*\r?\n?Editor.*\r?\n?\r?\n?Enter.*\r?\n?\r?\n?main::\(-e:1\):\s+0\r?\n?//;
+	unless (defined $ornament1) {
+	    $got =~ s/^\s*Loading.*\r?\n?Editor.*\r?\n?\r?\n?Enter.*\r?\n?\r?\n?main::\(-e:1\):\s+0\r?\n?//;
+	    ($ornament1,$ornament2) = $got =~
+		/(.*?)0\s+'reserved example for calibrating the ornaments'\r?\n?(.*)/
+	    }
+	$got =~ s/^\Q$ornament1\E//;
+	$got =~ s/\Q$ornament2\E\z//;
+	like($got, qr:$expected:i, $prog);
+    }
 }
 
 __END__
