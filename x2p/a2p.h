@@ -415,6 +415,7 @@ EXT bool nomemok INIT(FALSE);
 EXT char const_FS INIT(0);
 EXT char *namelist INIT(Nullch);
 EXT char fswitch INIT(0);
+EXT bool old_awk INIT(0);
 
 EXT int saw_FS INIT(0);
 EXT int maxfld INIT(0);

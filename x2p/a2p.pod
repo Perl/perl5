@@ -41,6 +41,12 @@ Any delimiter can be used to separate the field names.
 
 causes a2p to assume that input will always have that many fields.
 
+=item B<-o>
+
+tells a2p to use old awk behavior.  For now, the only difference is
+that old awk always has a line loop, even if there are no line
+actions, whereas new awk does not.
+
 =back
 
 =head2 "Considerations"

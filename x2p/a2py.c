@@ -80,6 +80,9 @@ register char **env;
 	case 'n':
 	    namelist = savestr(argv[0]+2);
 	    break;
+	case 'o':
+	    old_awk = TRUE;
+	    break;
 	case '-':
 	    argc--,argv++;
 	    goto switch_end;
