@@ -31,6 +31,123 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 12256] By: jhi                                   on 2001/09/28  12:18:29
+        Log: Move the B tests to B/t.
+     Branch: perl
+	   + ext/B/t/b.t ext/B/t/debug.t ext/B/t/deparse.t
+	   + ext/B/t/showlex.t ext/B/t/stash.t ext/B/t/terse.t
+	   - ext/B/B.t ext/B/B/Terse.t ext/B/Debug.t ext/B/Deparse.t
+	   - ext/B/Showlex.t ext/B/Stash.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 12255] By: jhi                                   on 2001/09/28  12:09:40
+        Log: Forgot from #12254.
+     Branch: perl
+	   + ext/B/B/Terse.t
+____________________________________________________________________________
+[ 12254] By: jhi                                   on 2001/09/28  12:09:06
+        Log: Subject: [PATCH MANIFEST ext/B/B/Terse.t] Add tests for B::Terse
+             From: "chromatic" <chromatic@rmci.net>
+             Date: Thu, 27 Sep 2001 23:22:17 -0600
+             Message-ID: <20010928052747.56587.qmail@onion.perl.org>   
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 12253] By: jhi                                   on 2001/09/28  02:31:49
+        Log: Test numbering mismatch.
+     Branch: perl
+	   ! t/op/chdir.t
+____________________________________________________________________________
+[ 12252] By: jhi                                   on 2001/09/27  22:46:42
+        Log: Subject: [PATCH perl@12239] slightly less broken chdir.t for VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Wed, 26 Sep 2001 17:43:14 -0500
+             Message-Id: <5.1.0.14.0.20010926173048.01aac5b0@exchi01>
+     Branch: perl
+	   ! iperlsys.h t/op/chdir.t
+____________________________________________________________________________
+[ 12251] By: jhi                                   on 2001/09/27  22:44:35
+        Log: Subject: [PATCH gv.c] make __ANON__ global
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Wed, 26 Sep 2001 17:56:28 +0100 (BST)
+             Message-Id: <200109261656.RAA27762@tempest.npl.co.uk>
+     Branch: perl
+	   ! gv.c t/op/anonsub.t t/op/runlevel.t
+____________________________________________________________________________
+[ 12250] By: jhi                                   on 2001/09/27  22:33:11
+        Log: Subject: Re: [BUG] B::Terse can't handle constant scalar refs
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Thu, 27 Sep 2001 22:34:32 +0200
+             Message-ID: <20010927223432.A1485@rafael>
+     Branch: perl
+	   ! ext/B/B/Terse.pm
+____________________________________________________________________________
+[ 12249] By: jhi                                   on 2001/09/27  22:29:32
+        Log: Subject: [PATCH] Cleanup of perldsc.pod      
+             From: Casey West <casey@geeknest.com>
+             Date: Thu, 27 Sep 2001 11:13:17 -0400
+             Message-ID: <20010927111317.A1942@stupid.geeknest.com>
+     Branch: perl
+	   ! pod/perldsc.pod
+____________________________________________________________________________
+[ 12248] By: jhi                                   on 2001/09/27  22:23:24
+        Log: Not everyone is using ithreads...
+     Branch: perl
+	   ! ext/Devel/Peek/Peek.t
+____________________________________________________________________________
+[ 12247] By: jhi                                   on 2001/09/27  13:39:39
+        Log: Document the nss_delete core dump workaround for HP-UX
+             and Solaris, bug IDs 20010805.018 and 20010629.004.
+     Branch: perl
+	   ! README.hpux README.solaris
+____________________________________________________________________________
+[ 12246] By: jhi                                   on 2001/09/27  12:05:36
+        Log: Dump Unicode hash keys also as Unicode,
+             not just as a byte string.
+     Branch: perl
+	   ! dump.c ext/Devel/Peek/Peek.t
+____________________________________________________________________________
+[ 12245] By: jhi                                   on 2001/09/27  11:15:51
+        Log: Integrate changes #12241 and #12242 from macperl:
+             
+             Remove unneeded disabling of umask() calls
+             
+             Note (get|set)sockopt are available.
+     Branch: perl
+	  !> lib/File/Temp.pm pod/perlport.pod
+____________________________________________________________________________
+[ 12244] By: sky                                   on 2001/09/27  08:53:00
+        Log: Flush buffers on thread closedown.
+     Branch: perl
+	   ! ext/threads/threads.xs
+____________________________________________________________________________
+[ 12243] By: jhi                                   on 2001/09/27  02:20:06
+        Log: Dump SvUTF8(sv)s also as \x{...}.
+             
+             TODO: dump the SvUTF8() hash keys similarly. 
+     Branch: perl
+	   ! dump.c embed.h embed.pl ext/Devel/Peek/Peek.t proto.h
+____________________________________________________________________________
+[ 12242] By: pudge                                 on 2001/09/26  20:41:35
+        Log: Note (get|set)sockopt are available.
+     Branch: maint-5.6/macperl
+	   ! pod/perlport.pod
+____________________________________________________________________________
+[ 12241] By: pudge                                 on 2001/09/26  20:28:49
+        Log: Remove unneeded disabling of umask() calls
+     Branch: maint-5.6/macperl
+	   ! lib/File/Temp.pm
+____________________________________________________________________________
+[ 12240] By: sky                                   on 2001/09/26  18:44:56
+        Log: Documention update
+     Branch: perl
+	   ! ext/threads/threads.pm
+____________________________________________________________________________
+[ 12239] By: jhi                                   on 2001/09/26  13:49:05
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 12238] By: jhi                                   on 2001/09/26  13:40:53
         Log: Check that all environment variables are tainted.
      Branch: perl
