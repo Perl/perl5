@@ -12,7 +12,7 @@ use Config;
 $Is_VMS = $^O eq 'VMS';
 $Is_MacOS = $^O eq 'MacOS';
 
-plan tests => 95;
+plan tests => 99;
 
 my $Perl = which_perl();
 
@@ -244,3 +244,34 @@ SKIP: {
     ok( !eval { open F, "BAR", "QUUX" },       'Unknown open() mode' );
     like( $@, qr/\QUnknown open() mode 'BAR'/, '       right error' );
 }
+
+{
+    local $SIG{__WARN__} = sub { $@ = shift };
+
+    sub gimme {
+        my $tmphandle = shift;
+	my $line = scalar <$tmphandle>;
+	warn "gimme";
+	return $line;
+    }
+
+    open($fh0[0], "TEST");
+    gimme($fh0[0]);
+    like($@, qr/<\$fh0\[...\]> line 1\./, "autoviv fh package aelem");
+
+    open($fh1{k}, "TEST");
+    gimme($fh1{k});
+    like($@, qr/<\$fh1{...}> line 1\./, "autoviv fh package helem");
+
+    my @fh2;
+    open($fh2[0], "TEST");
+    gimme($fh2[0]);
+    like($@, qr/<\$fh2\[...\]> line 1\./, "autoviv fh lexical aelem");
+
+    my %fh3;
+    open($fh3{k}, "TEST");
+    gimme($fh3{k});
+    like($@, qr/<\$fh3{...}> line 1\./, "autoviv fh lexical helem");
+
+}
+    

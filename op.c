@@ -5108,9 +5108,51 @@ Perl_ck_fun(pTHX_ OP *o)
 			    else if (kid->op_type == OP_AELEM
 				     || kid->op_type == OP_HELEM)
 			    {
-				name = "__ANONIO__";
-				len = 10;
-				mod(kid,type);
+				 OP *op;
+
+				 name = 0;
+				 if ((op = ((BINOP*)kid)->op_first)) {
+				      SV *tmpstr = Nullsv;
+				      char *a =
+					   kid->op_type == OP_AELEM ?
+					   "[]" : "{}";
+				      if (((op->op_type == OP_RV2AV) ||
+					   (op->op_type == OP_RV2HV)) &&
+					  (op = ((UNOP*)op)->op_first) &&
+					  (op->op_type == OP_GV)) {
+					   /* packagevar $a[] or $h{} */
+					   GV *gv = cGVOPx_gv(op);
+					   if (gv)
+						tmpstr =
+						     Perl_newSVpvf(aTHX_
+								   "%s%c...%c",
+								   GvNAME(gv),
+								   a[0], a[1]);
+				      }
+				      else if (op->op_type == OP_PADAV
+					       || op->op_type == OP_PADHV) {
+					   /* lexicalvar $a[] or $h{} */
+					   char *padname =
+						PAD_COMPNAME_PV(op->op_targ);
+					   if (padname)
+						tmpstr =
+						     Perl_newSVpvf(aTHX_
+								   "%s%c...%c",
+								   padname + 1,
+								   a[0], a[1]);
+					   
+				      }
+				      if (tmpstr) {
+					   name = savepv(SvPVX(tmpstr));
+					   len = strlen(name);
+					   sv_2mortal(tmpstr);
+				      }
+				 }
+				 if (!name) {
+				      name = "__ANONIO__";
+				      len = 10;
+				 }
+				 mod(kid, type);
 			    }
 			    if (name) {
 				SV *namesv;
