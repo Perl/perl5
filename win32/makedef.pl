@@ -351,6 +351,7 @@ win32_sendto
 win32_recv
 win32_recvfrom
 win32_shutdown
+win32_closesocket
 win32_ioctlsocket
 win32_setsockopt
 win32_getsockopt

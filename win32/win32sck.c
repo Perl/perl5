@@ -33,6 +33,7 @@
 #undef recv
 #undef recvfrom
 #undef shutdown
+#undef closesocket
 #undef ioctlsocket
 #undef setsockopt
 #undef getsockopt
@@ -382,15 +383,24 @@ win32_shutdown(SOCKET s, int how)
     return r;
 }
 
+int
+win32_closesocket(SOCKET s)
+{
+    int r;
+
+    SOCKET_TEST_ERROR(r = closesocket(TO_SOCKET(s)));
+    return r;
+}
+
 SOCKET
 win32_socket(int af, int type, int protocol)
 {
     SOCKET s;
 
-    StartSockets();
 #ifndef USE_SOCKETS_AS_HANDLES
     SOCKET_TEST(s = socket(af, type, protocol), INVALID_SOCKET);
 #else
+    StartSockets();
     if((s = socket(af, type, protocol)) == INVALID_SOCKET)
 	errno = WSAGetLastError();
     else
