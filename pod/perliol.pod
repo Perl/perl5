@@ -11,14 +11,14 @@ perliol - C API for Perl's implementation of IO in Layers.
 
 =head1 DESCRIPTION
 
-This document describes the behavior and implementation of the PerlIO abstraction
+This document describes the behaviour and implementation of the PerlIO abstraction
 described in L<perlapio> when C<USE_PERLIO> is defined (and C<USE_SFIO> is not).
 
 =head2 History and Background
 
 The PerlIO abstraction was introduced in perl5.003_02 but languished as just
-an abstraction until perl5.7.0. However during that time a number of perl extenstions
-switch to using it, so the API is mostly fixed to maintain (source) compatibility.
+an abstraction until perl5.7.0. However during that time a number of perl extensions
+switched to using it, so the API is mostly fixed to maintain (source) compatibility.
 
 The aim of the implementation is to provide the PerlIO API in a flexible and
 platform neutral manner. It is also a trial of an "Object Oriented C, with vtables"
@@ -30,7 +30,7 @@ Initial discussion of the ability to modify IO streams behaviour used the term
 "discipline" for the entities which were added. This came (I believe) from the use
 of the term in "sfio", which in turn borowed it from "line disciplines" on Unix
 terminals. However, this document (and the C code) uses the term "layer".
-This is I hope a natural term given the implementation, and should avoid conotations
+This is I hope a natural term given the implementation, and should avoid connotations
 that are inherent in earlier uses of "discipline" for things which are rather different.
 
 =head2 Data Structures
@@ -165,7 +165,7 @@ as a pointer to a PerlIOl.
 
 
 The above attempts to show how the layer scheme works in a simple case.
-The applications PerlIO * points to an entry in the table(s) representing open
+The application's PerlIO * points to an entry in the table(s) representing open
 (allocated) handles. For example the first three slots in the table correspond
 to C<stdin>,C<stdout> and C<stderr>. The table in turn points to the current
 "top" layer for the handle - in this case an instance of the generic buffering
@@ -220,15 +220,15 @@ End of file.
 
 =item PERLIO_F_CANWRITE
 
-Writes are permited i.e. opened as "w" or "r+" or "a". etc.
+Writes are permitted, i.e. opened as "w" or "r+" or "a", etc.
 
 =item  PERLIO_F_CANREAD
 
-Reads are permited i.e. opened "r" or "w+" (or even "a+" - ick).
+Reads are permitted i.e. opened "r" or "w+" (or even "a+" - ick).
 
 =item PERLIO_F_ERROR
 
-An error has occured (for PerlIO_error())
+An error has occurred (for PerlIO_error())
 
 =item PERLIO_F_TRUNCATE
 
@@ -247,7 +247,7 @@ if the PERLIO_K_CANCRLF bit is set for the layers class.
 
 =item PERLIO_F_UTF8
 
-Data for this written to this layer should be UTF-8 encoded, data provided
+Data written to this layer should be UTF-8 encoded; data provided
 by this layer should be considered UTF-8 encoded. Can be set on any layer
 by ":utf8" dummy layer. Also set on ":encoding" layer.
 
@@ -283,11 +283,11 @@ Handle is open.
 
 This instance of this layer supports the "fast gets" interface.
 Normally set based on PERLIO_K_FASTGETS for the class and by the
-existance of the function(s) in the table. However a class that
+existence of the function(s) in the table. However a class that
 normally provides that interface may need to avoid it on a
 particular instance. The "pending" layer needs to do this when
-it is pushed above an layer which does not support the interface.
-(Perls sv_gets() does not expect the steams fast gets behaviour
+it is pushed above a layer which does not support the interface.
+(Perls sv_gets() does not expect the stream's fast gets behaviour
 to change during one "get".)
 
 =back
@@ -322,7 +322,7 @@ Perl does not use this and L<perlapio> marks it as subject to change.
 
 Called when the layer is pushed onto the stack. The C<mode> argument may be NULL if this
 occurs post-open. The C<arg> and C<len> will be present if an argument string was
-passed. In most cases this should call PerlIOBase_pushed() to conver C<mode> into
+passed. In most cases this should call PerlIOBase_pushed() to convert C<mode> into
 the appropriate PERLIO_F_XXXXX flags in addition to any actions the layer itself takes.
 
 =item  IV		(*Popped)(PerlIO *f);
@@ -369,7 +369,7 @@ tables, ...) not  held directly in the data structure.
 
 Should make streams state consistent with layers below. That is any
 buffered write data should be written, and file position of lower layer
-adjusted for data read fron below but not actually consumed.
+adjusted for data read from below but not actually consumed.
 
 =item  IV		(*Fill)(PerlIO *f);
 
@@ -403,7 +403,7 @@ Return the number of bytes that last Fill() put in the buffer.
 
 =item  STDCHAR *	(*Get_ptr)(PerlIO *f);
 
-Return the current read pointer relative to this layers buffer.
+Return the current read pointer relative to this layer's buffer.
 
 =item  SSize_t	(*Get_cnt)(PerlIO *f);
 
