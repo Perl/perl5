@@ -1314,9 +1314,10 @@ Creates a new C<POSIX::SigAction> object which corresponds to the C
 C<struct sigaction>.  This object will be destroyed automatically when it is
 no longer needed.  The first parameter is the fully-qualified name of a sub
 which is a signal-handler.  The second parameter is a C<POSIX::SigSet>
-object.  The third parameter contains the C<sa_flags>.
+object, it defaults to the empty set.  The third parameter contains the
+C<sa_flags>, it defaults to 0.
 
-	$sigset = POSIX::SigSet->new;
+	$sigset = POSIX::SigSet->new(SIGINT, SIGQUIT);
 	$sigaction = POSIX::SigAction->new( 'main::handler', $sigset, &POSIX::SA_NOCLDSTOP );
 
 This C<POSIX::SigAction> object should be used with the C<POSIX::sigaction()>

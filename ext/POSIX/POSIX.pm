@@ -231,7 +231,7 @@ sub unimpl {
 package POSIX::SigAction;
 
 sub new {
-    bless {HANDLER => $_[1], MASK => $_[2], FLAGS => $_[3]};
+    bless {HANDLER => $_[1], MASK => $_[2], FLAGS => $_[3] || 0}, $_[0];
 }
 
 ############################
