@@ -717,11 +717,15 @@ S_op_clear(pTHX_ OP *o)
     case OP_GVSV:
     case OP_GV:
     case OP_AELEMFAST:
-	SvREFCNT_dec(cGVOPo);
 #ifdef USE_ITHREADS
+	if (PL_curpad) {
+	    SvREFCNT_dec(cGVOPo);
+	    PL_curpad[cPADOPo->op_padix] = Nullsv;
+	}
 	pad_free(cPADOPo->op_padix);
 	cPADOPo->op_padix = 0;
 #else
+	SvREFCNT_dec(cGVOPo);
 	cSVOPo->op_sv = Nullsv;
 #endif
 	break;

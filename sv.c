@@ -5684,7 +5684,7 @@ Perl_mg_dup(pTHX_ MAGIC *mg)
 	    if (mg->mg_len >= 0)
 		nmg->mg_ptr	= SAVEPVN(mg->mg_ptr, mg->mg_len);
 	    else if (mg->mg_len == HEf_SVKEY)
-		nmg->mg_ptr	= (char*)sv_dup((SV*)mg->mg_ptr);
+		nmg->mg_ptr	= (char*)sv_dup_inc((SV*)mg->mg_ptr);
 	}
 	mgprev = nmg;
     }
@@ -5750,7 +5750,7 @@ Perl_sv_table_split(pTHX_ SVTBL *tbl)
     UV i;
 
     Renew(ary, newsize, SVTBLENT*);
-    Zero(&ary[oldsize * sizeof(SVTBLENT*)], (newsize-oldsize) * sizeof(SVTBLENT*), char);
+    Zero(&ary[oldsize], newsize-oldsize, SVTBLENT*);
     tbl->tbl_max = --newsize;
     tbl->tbl_ary = ary;
     for (i=0; i < oldsize; i++, ary++) {
