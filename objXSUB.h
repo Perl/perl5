@@ -502,6 +502,8 @@
 #define PL_preprocess		pPerl->PL_preprocess
 #undef  PL_profiledata
 #define PL_profiledata		pPerl->PL_profiledata
+#undef  PL_protect
+#define PL_protect		pPerl->PL_protect
 #undef  PL_reg_call_cc
 #define PL_reg_call_cc		pPerl->PL_reg_call_cc
 #undef  PL_reg_curpm
@@ -1001,6 +1003,8 @@
 #define debstack		pPerl->Perl_debstack
 #undef  debstackptrs
 #define debstackptrs		pPerl->Perl_debstackptrs
+#undef  default_protect
+#define default_protect		pPerl->Perl_default_protect
 #undef  del_he
 #define del_he			pPerl->Perl_del_he
 #undef  del_sv

@@ -93,8 +93,10 @@ PERLVAR(Tlocalizing,	int)		/* are we processing a local() list? */
 PERLVAR(Tcurstack,	AV *)		/* THE STACK */
 PERLVAR(Tcurstackinfo,	PERL_SI *)	/* current stack + context */
 PERLVAR(Tmainstack,	AV *)		/* the stack when nothing funny is happening */
+
 PERLVAR(Ttop_env,	JMPENV *)	/* ptr. to current sigjmp() environment */
 PERLVAR(Tstart_env,	JMPENV)		/* empty startup sigjmp() environment */
+PERLVARI(Tprotect,	protect_proc_t,	FUNC_NAME_TO_PTR(default_protect))
 
 /* statics "owned" by various functions */
 PERLVAR(Tav_fetch_sv,	SV *)		/* owned by av_fetch() */

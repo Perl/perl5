@@ -107,9 +107,7 @@ class CPerlObj;
 #define PERL_OBJECT_THIS this
 #define _PERL_OBJECT_THIS ,this
 #define PERL_OBJECT_THIS_ this,
-#define CALLRUNOPS (this->*PL_runops)
-#define CALLREGCOMP (this->*PL_regcompp)
-#define CALLREGEXEC (this->*PL_regexecp)
+#define CALL_FPTR(fptr) (this->*fptr)
 
 #else /* !PERL_OBJECT */
 
@@ -123,11 +121,14 @@ class CPerlObj;
 #define PERL_OBJECT_THIS
 #define _PERL_OBJECT_THIS
 #define PERL_OBJECT_THIS_
-#define CALLRUNOPS (*PL_runops)
-#define CALLREGCOMP (*PL_regcompp)
-#define CALLREGEXEC (*PL_regexecp)
+#define CALL_FPTR(fptr) (*fptr)
 
 #endif /* PERL_OBJECT */
+
+#define CALLRUNOPS  CALL_FPTR(PL_runops)
+#define CALLREGCOMP CALL_FPTR(PL_regcompp)
+#define CALLREGEXEC CALL_FPTR(PL_regexecp)
+#define CALLPROTECT CALL_FPTR(PL_protect)
 
 #define VOIDUSED 1
 #include "config.h"

@@ -29,6 +29,7 @@
 #define CALLOP this->*PL_op
 #else
 #define CALLOP *PL_op
+static void *docatch_body _((void *o));
 static OP *docatch _((OP *o));
 static OP *dofindlabel _((OP *o, char *label, OP **opstack, OP **oplimit));
 static void doparseform _((SV *sv));
@@ -2491,38 +2492,41 @@ save_lines(AV *array, SV *sv)
     }
 }
 
+STATIC void *
+docatch_body(va_list args)
+{
+    CALLRUNOPS();
+    return NULL;
+}
+
 STATIC OP *
 docatch(OP *o)
 {
     dTHR;
     int ret;
     OP *oldop = PL_op;
-    dJMPENV;
 
-    PL_op = o;
 #ifdef DEBUGGING
     assert(CATCH_GET == TRUE);
-    DEBUG_l(deb("Setting up local jumplevel %p, was %p\n", &cur_env, PL_top_env));
 #endif
-    JMPENV_PUSH(ret);
+    PL_op = o;
+ redo_body:
+    CALLPROTECT(&ret, docatch_body);
     switch (ret) {
-    default:				/* topmost level handles it */
-pass_the_buck:
-	JMPENV_POP;
+    case 0:
+	break;
+    case 3:
+	if (PL_restartop) {
+	    PL_op = PL_restartop;
+	    PL_restartop = 0;
+	    goto redo_body;
+	}
+	/* FALL THROUGH */
+    default:
 	PL_op = oldop;
 	JMPENV_JUMP(ret);
 	/* NOTREACHED */
-    case 3:
-	if (!PL_restartop)
-	    goto pass_the_buck;
-	PL_op = PL_restartop;
-	PL_restartop = 0;
-	/* FALL THROUGH */
-    case 0:
-        CALLRUNOPS();
-	break;
     }
-    JMPENV_POP;
     PL_op = oldop;
     return Nullop;
 }

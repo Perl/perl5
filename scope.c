@@ -15,6 +15,30 @@
 #include "EXTERN.h"
 #include "perl.h"
 
+void *
+default_protect(int *except, protect_body_t body, ...)
+{
+    dTHR;
+    dJMPENV;
+    va_list args;
+    int ex;
+    void *ret;
+
+    DEBUG_l(deb("Setting up local jumplevel %p, was %p\n",
+		&cur_env, PL_top_env));
+    JMPENV_PUSH(ex);
+    if (ex)
+	ret = NULL;
+    else {
+	va_start(args, body);
+	ret = body(args);
+	va_end(args);
+    }
+    *except = ex;
+    JMPENV_POP;
+    return ret;
+}
+
 SV**
 stack_grow(SV **sp, SV **p, int n)
 {

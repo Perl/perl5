@@ -87,6 +87,7 @@ debop
 debprofdump
 debstack
 debstackptrs
+default_protect
 delimcpy
 deprecate
 die

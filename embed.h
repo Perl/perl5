@@ -96,6 +96,7 @@
 #define debprofdump		Perl_debprofdump
 #define debstack		Perl_debstack
 #define debstackptrs		Perl_debstackptrs
+#define default_protect		Perl_default_protect
 #define delimcpy		Perl_delimcpy
 #define deprecate		Perl_deprecate
 #define die			Perl_die
@@ -1072,6 +1073,7 @@
 #define debprofdump		CPerlObj::Perl_debprofdump
 #define debstack		CPerlObj::Perl_debstack
 #define debstackptrs		CPerlObj::Perl_debstackptrs
+#define default_protect		CPerlObj::Perl_default_protect
 #define del_he			CPerlObj::Perl_del_he
 #define del_sv			CPerlObj::Perl_del_sv
 #define del_xiv			CPerlObj::Perl_del_xiv

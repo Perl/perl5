@@ -2932,6 +2932,8 @@ new_struct_thread(struct perl_thread *t)
     Zero(thr, 1, struct perl_thread);
 #endif
 
+    PL_protect = FUNC_NAME_TO_PTR(default_protect);
+
     thr->oursv = sv;
     init_stacks(ARGS);
 
@@ -2974,6 +2976,8 @@ new_struct_thread(struct perl_thread *t)
 
     /* parent thread's data needs to be locked while we make copy */
     MUTEX_LOCK(&t->mutex);
+
+    PL_protect = t->Tprotect;
 
     PL_curcop = t->Tcurcop;       /* XXX As good a guess as any? */
     PL_defstash = t->Tdefstash;   /* XXX maybe these should */
