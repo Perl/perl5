@@ -2971,6 +2971,11 @@ If this test fails, it indicates that your libc (C library) is not
 threadsafe.  This particular test stress tests the localtime() call to
 find out whether it is threadsafe.  See L<perlthrtut> for more information.
 
+=head2 FreeBSD built with ithreads coredumps reading large directories
+
+This is a known bug in FreeBSD's readdir_r() (see L<perlfreebsd>
+(README.freebsd)), which hopefully will be fixed in FreeBSD 4.6.
+
 =head2 FreeBSD Failing locale Test 117 For ISO8859-15 Locales
 
 The ISO8859-15 locales may fail the locale test 117 in FreeBSD.
