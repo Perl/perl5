@@ -10,6 +10,8 @@ use Devel::SelfStubber;
 
 my $runperl = "$^X \"-I../lib\"";
 
+$| = 1;
+
 print "1..12\n";
 
 my @cleanup;
