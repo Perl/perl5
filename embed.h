@@ -1033,12 +1033,7 @@
 #define sv_unglob		S_sv_unglob
 #define not_a_number		S_not_a_number
 #define visit			S_visit
-#  if defined(PURIFY)
-#define reg_add			S_reg_add
-#define reg_remove		S_reg_remove
-#  else
 #define my_safemalloc		S_my_safemalloc
-#  endif
 #define sv_add_backref		S_sv_add_backref
 #define sv_del_backref		S_sv_del_backref
 #  if defined(DEBUGGING)
@@ -2445,12 +2440,7 @@
 #define sv_unglob(a)		S_sv_unglob(aTHX_ a)
 #define not_a_number(a)		S_not_a_number(aTHX_ a)
 #define visit(a)		S_visit(aTHX_ a)
-#  if defined(PURIFY)
-#define reg_add(a)		S_reg_add(aTHX_ a)
-#define reg_remove(a)		S_reg_remove(aTHX_ a)
-#  else
 #define my_safemalloc		S_my_safemalloc
-#  endif
 #define sv_add_backref(a,b)	S_sv_add_backref(aTHX_ a,b)
 #define sv_del_backref(a)	S_sv_del_backref(aTHX_ a)
 #  if defined(DEBUGGING)
@@ -4763,15 +4753,8 @@
 #define not_a_number		S_not_a_number
 #define S_visit			CPerlObj::S_visit
 #define visit			S_visit
-#  if defined(PURIFY)
-#define S_reg_add		CPerlObj::S_reg_add
-#define reg_add			S_reg_add
-#define S_reg_remove		CPerlObj::S_reg_remove
-#define reg_remove		S_reg_remove
-#  else
 #define S_my_safemalloc		CPerlObj::S_my_safemalloc
 #define my_safemalloc		S_my_safemalloc
-#  endif
 #define S_sv_add_backref	CPerlObj::S_sv_add_backref
 #define sv_add_backref		S_sv_add_backref
 #define S_sv_del_backref	CPerlObj::S_sv_del_backref

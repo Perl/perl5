@@ -25,105 +25,6 @@ static void do_clean_named_objs(pTHXo_ SV *sv);
 #endif
 static void do_clean_all(pTHXo_ SV *sv);
 
-
-#ifdef PURIFY
-
-#define new_SV(p) \
-    STMT_START {					\
-	LOCK_SV_MUTEX;					\
-	(p) = (SV*)safemalloc(sizeof(SV));		\
-	reg_add(p);					\
-	UNLOCK_SV_MUTEX;				\
-	SvANY(p) = 0;					\
-	SvREFCNT(p) = 1;				\
-	SvFLAGS(p) = 0;					\
-    } STMT_END
-
-#define del_SV(p) \
-    STMT_START {					\
-	LOCK_SV_MUTEX;					\
-	reg_remove(p);					\
-        Safefree((char*)(p));				\
-	UNLOCK_SV_MUTEX;				\
-    } STMT_END
-
-static SV **registry;
-static I32 registry_size;
-
-#define REGHASH(sv,size)  ((((U32)(sv)) >> 2) % (size))
-
-#define REG_REPLACE(sv,a,b) \
-    STMT_START {					\
-	void* p = sv->sv_any;				\
-	I32 h = REGHASH(sv, registry_size);		\
-	I32 i = h;					\
-	while (registry[i] != (a)) {			\
-	    if (++i >= registry_size)			\
-		i = 0;					\
-	    if (i == h)					\
-		Perl_die(aTHX_ "SV registry bug");			\
-	}						\
-	registry[i] = (b);				\
-    } STMT_END
-
-#define REG_ADD(sv)	REG_REPLACE(sv,Nullsv,sv)
-#define REG_REMOVE(sv)	REG_REPLACE(sv,sv,Nullsv)
-
-STATIC void
-S_reg_add(pTHX_ SV *sv)
-{
-    if (PL_sv_count >= (registry_size >> 1))
-    {
-	SV **oldreg = registry;
-	I32 oldsize = registry_size;
-
-	registry_size = registry_size ? ((registry_size << 2) + 1) : 2037;
-	Newz(707, registry, registry_size, SV*);
-
-	if (oldreg) {
-	    I32 i;
-
-	    for (i = 0; i < oldsize; ++i) {
-		SV* oldsv = oldreg[i];
-		if (oldsv)
-		    REG_ADD(oldsv);
-	    }
-	    Safefree(oldreg);
-	}
-    }
-
-    REG_ADD(sv);
-    ++PL_sv_count;
-}
-
-STATIC void
-S_reg_remove(pTHX_ SV *sv)
-{
-    REG_REMOVE(sv);
-    --PL_sv_count;
-}
-
-STATIC void
-S_visit(pTHX_ SVFUNC_t f)
-{
-    I32 i;
-
-    for (i = 0; i < registry_size; ++i) {
-	SV* sv = registry[i];
-	if (sv && SvTYPE(sv) != SVTYPEMASK)
-	    (*f)(sv);
-    }
-}
-
-void
-Perl_sv_add_arena(pTHX_ char *ptr, U32 size, U32 flags)
-{
-    if (!(flags & SVf_FAKE))
-	Safefree(ptr);
-}
-
-#else /* ! PURIFY */
-
 /*
  * "A time to plant, and a time to uproot what was planted..."
  */
@@ -261,8 +162,6 @@ S_visit(pTHX_ SVFUNC_t f)
 	}
     }
 }
-
-#endif /* PURIFY */
 
 void
 Perl_sv_report_used(pTHX)
@@ -801,42 +700,18 @@ S_more_xpvbm(pTHX)
     xpvbm->xpv_pv = 0;
 }
 
-#ifdef PURIFY
-#define new_XIV() (void*)safemalloc(sizeof(XPVIV))
-#define del_XIV(p) Safefree((char*)p)
-#else
 #define new_XIV() (void*)new_xiv()
 #define del_XIV(p) del_xiv((XPVIV*) p)
-#endif
 
-#ifdef PURIFY
-#define new_XNV() (void*)safemalloc(sizeof(XPVNV))
-#define del_XNV(p) Safefree((char*)p)
-#else
 #define new_XNV() (void*)new_xnv()
 #define del_XNV(p) del_xnv((XPVNV*) p)
-#endif
 
-#ifdef PURIFY
-#define new_XRV() (void*)safemalloc(sizeof(XRV))
-#define del_XRV(p) Safefree((char*)p)
-#else
 #define new_XRV() (void*)new_xrv()
 #define del_XRV(p) del_xrv((XRV*) p)
-#endif
 
-#ifdef PURIFY
-#define new_XPV() (void*)safemalloc(sizeof(XPV))
-#define del_XPV(p) Safefree((char*)p)
-#else
 #define new_XPV() (void*)new_xpv()
 #define del_XPV(p) del_xpv((XPV *)p)
-#endif
 
-#ifdef PURIFY
-#  define my_safemalloc(s) safemalloc(s)
-#  define my_safefree(s) safefree(s)
-#else
 STATIC void* 
 S_my_safemalloc(MEM_SIZE size)
 {
@@ -845,76 +720,34 @@ S_my_safemalloc(MEM_SIZE size)
     return (void*)p;
 }
 #  define my_safefree(s) Safefree(s)
-#endif 
 
-#ifdef PURIFY
-#define new_XPVIV() (void*)safemalloc(sizeof(XPVIV))
-#define del_XPVIV(p) Safefree((char*)p)
-#else
 #define new_XPVIV() (void*)new_xpviv()
 #define del_XPVIV(p) del_xpviv((XPVIV *)p)
-#endif
-  
-#ifdef PURIFY
-#define new_XPVNV() (void*)safemalloc(sizeof(XPVNV))
-#define del_XPVNV(p) Safefree((char*)p)
-#else
+
 #define new_XPVNV() (void*)new_xpvnv()
 #define del_XPVNV(p) del_xpvnv((XPVNV *)p)
-#endif
 
-
-#ifdef PURIFY
-#define new_XPVCV() (void*)safemalloc(sizeof(XPVCV))
-#define del_XPVCV(p) Safefree((char*)p)
-#else
 #define new_XPVCV() (void*)new_xpvcv()
 #define del_XPVCV(p) del_xpvcv((XPVCV *)p)
-#endif
 
-#ifdef PURIFY
-#define new_XPVAV() (void*)safemalloc(sizeof(XPVAV))
-#define del_XPVAV(p) Safefree((char*)p)
-#else
 #define new_XPVAV() (void*)new_xpvav()
 #define del_XPVAV(p) del_xpvav((XPVAV *)p)
-#endif
 
-#ifdef PURIFY
-#define new_XPVHV() (void*)safemalloc(sizeof(XPVHV))
-#define del_XPVHV(p) Safefree((char*)p)
-#else
 #define new_XPVHV() (void*)new_xpvhv()
 #define del_XPVHV(p) del_xpvhv((XPVHV *)p)
-#endif
   
-#ifdef PURIFY
-#define new_XPVMG() (void*)safemalloc(sizeof(XPVMG))
-#define del_XPVMG(p) Safefree((char*)p)
-#else
 #define new_XPVMG() (void*)new_xpvmg()
 #define del_XPVMG(p) del_xpvmg((XPVMG *)p)
-#endif
-  
-#ifdef PURIFY
-#define new_XPVLV() (void*)safemalloc(sizeof(XPVLV))
-#define del_XPVLV(p) Safefree((char*)p)
-#else
+
 #define new_XPVLV() (void*)new_xpvlv()
 #define del_XPVLV(p) del_xpvlv((XPVLV *)p)
-#endif
-  
+
 #define new_XPVGV() (void*)my_safemalloc(sizeof(XPVGV))
 #define del_XPVGV(p) my_safefree((char*)p)
   
-#ifdef PURIFY
-#define new_XPVBM() (void*)safemalloc(sizeof(XPVBM))
-#define del_XPVBM(p) Safefree((char*)p)
-#else
 #define new_XPVBM() (void*)new_xpvbm()
 #define del_XPVBM(p) del_xpvbm((XPVBM *)p)
-#endif
-  
+
 #define new_XPVFM() (void*)my_safemalloc(sizeof(XPVFM))
 #define del_XPVFM(p) my_safefree((char*)p)
   
