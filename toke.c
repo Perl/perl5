@@ -369,7 +369,9 @@ register char *s;
 	    return s;
 	if ((s = filter_gets(linestr, rsfp, (prevlen = SvCUR(linestr)))) == Nullch) {
 	    if (minus_n || minus_p) {
-		sv_setpv(linestr,minus_p ? ";}continue{print" : "");
+		sv_setpv(linestr,minus_p ?
+			 ";}continue{print or die qq(-p destination: $!\\n)" :
+			 "");
 		sv_catpv(linestr,";}");
 		minus_n = minus_p = 0;
 	    }

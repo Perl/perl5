@@ -376,8 +376,10 @@ B<awk>:
     }
 
 Note that the lines are not printed by default.  See B<-p> to have
-lines printed.  Here is an efficient way to delete all files older than
-a week:
+lines printed.  If a file named by an argument cannot be opened for
+some reason, Perl warns you about it, and moves on to the next file.
+
+Here is an efficient way to delete all files older than a week:
 
     find . -mtime +7 -print | perl -nle 'unlink;'
 
@@ -396,11 +398,14 @@ makes it iterate over filename arguments somewhat like B<sed>:
     while (<>) {
 	...		# your script goes here
     } continue {
-	print;
+	print or die "-p destination: $!\n";
     }
 
-Note that the lines are printed automatically.  To suppress printing
-use the B<-n> switch.  A B<-p> overrides a B<-n> switch.
+If a file named by an argument cannot be opened for some reason, Perl
+warns you about it, and moves on to the next file.  Note that the
+lines are printed automatically.  An error occuring during printing is
+treated as fatal.  To suppress printing use the B<-n> switch.  A B<-p>
+overrides a B<-n> switch.
 
 C<BEGIN> and C<END> blocks may be used to capture control before or after
 the implicit loop, just as in awk.

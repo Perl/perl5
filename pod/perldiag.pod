@@ -153,6 +153,12 @@ which provides a race condition that breaks security.
 (F) Perl can't peek at the stdio buffer of filehandles when it doesn't
 know about your kind of stdio.  You'll have to use a filename instead.
 
+=item C<-p> destination: %s
+
+(F) An error occurred during the implicit output invoked by the C<-p>
+command-line switch.  (This output goes to STDOUT unless you've
+redirected it with select().)
+
 =item 500 Server error
 
 See Server error.
@@ -656,8 +662,11 @@ buffer.
 
 =item Can't open %s: %s
 
-(S) An inplace edit couldn't open the original file for the indicated reason.
-Usually this is because you don't have read permission for the file.
+(S) The implicit opening of a file through use of the C<E<lt>E<gt>>
+filehandle, either implicitly under the C<-n> or C<-p> command-line
+switches, or explicitly, failed for the indicated reason.  Usually this
+is because you don't have read permission for a file which you named
+on the command line.
 
 =item Can't open bidirectional pipe
 
