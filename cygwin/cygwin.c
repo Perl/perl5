@@ -147,6 +147,9 @@ XS(Cygwin_cwd)
     if((cwd = getcwd(NULL, -1))) {
 	ST(0) = sv_2mortal(newSVpv(cwd, 0));
 	safesysfree(cwd);
+#ifndef INCOMPLETE_TAINTS
+	SvTAINTED_on(ST(0));
+#endif
 	XSRETURN(1);
     }
     XSRETURN_UNDEF;
