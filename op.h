@@ -465,8 +465,8 @@ typedef struct {
   struct tm* tmbuff;
 } REBUF;
 
-#define localtime(a)       (localtime_r(a,PL_reentrant_buffer->tmbuff && PL_reentrant_buffer->tmbuff)
-#define gmtime(a)          (gmtime_r(a,PL_reentrant_buffer->tmbuff && PL_reentrant_buffer->tmbuff)
+#define localtime(a)       (localtime_r((a),PL_reentrant_buffer->tmbuff) ? PL_reentrant_buffer->tmbuff : NULL)
+#define gmtime(a)          (gmtime_r((a),PL_reentrant_buffer->tmbuff) ?  PL_reentrant_buffer->tmbuff : NULL)
 
 #if defined(__hpux) && defined(__ux_version) && __ux_version <= 1020
 
@@ -476,8 +476,8 @@ typedef struct {
 
 #undef localtime
 #undef gmtime
-#define localtime(a)       ((localtime_r(a,PL_reentrant_buffer->tmbuff)+1) && PL_reentrant_buffer->tmbuff)
-#define gmtime(a)          ((gmtime_r(a,PL_reentrant_buffer->tmbuff)+1) && PL_reentrant_buffer->tmbuff)
+#define localtime(a)       ((localtime_r((a),PL_reentrant_buffer->tmbuff) == 0) ? PL_reentrant_buffer->tmbuff : NULL)
+#define gmtime(a)          ((gmtime_r((a),PL_reentrant_buffer->tmbuff) == 0) ? PL_reentrant_buffer->tmbuff : NULL)
 #endif /* HP-UX 10.20 */
 
 #endif
