@@ -1,5 +1,5 @@
 
-# Time-stamp: "2004-01-19 15:11:14 AST"
+# Time-stamp: "2004-03-30 16:33:31 AST"
 
 require 5;
 package Locale::Maketext;
@@ -7,14 +7,14 @@ use strict;
 use vars qw( @ISA $VERSION $MATCH_SUPERS $USING_LANGUAGE_TAGS
              $USE_LITERALS $MATCH_SUPERS_TIGHTLY);
 use Carp ();
-use I18N::LangTags 0.21 ();
+use I18N::LangTags 0.30 ();
 
 #--------------------------------------------------------------------------
 
 BEGIN { unless(defined &DEBUG) { *DEBUG = sub () {0} } }
  # define the constant 'DEBUG' at compile-time
 
-$VERSION = "1.08";
+$VERSION = "1.09";
 @ISA = ();
 
 $MATCH_SUPERS = 1;
@@ -251,8 +251,24 @@ sub get_handle {  # This is a constructor and, yes, it CAN FAIL.
   my($base_class, @languages) = @_;
   $base_class = ref($base_class) || $base_class;
    # Complain if they use __PACKAGE__ as a project base class?
-
-  @languages = $base_class->_ambient_langprefs() unless @languages;
+  
+  if( @languages ) {
+    DEBUG and print "Lgs\@", __LINE__, ": ", map("<$_>", @languages), "\n";
+    if($USING_LANGUAGE_TAGS) {   # An explicit language-list was given!
+      @languages =
+       map {; $_, I18N::LangTags::alternate_language_tags($_) }
+        # Catch alternation
+       map I18N::LangTags::locale2language_tag($_),
+        # If it's a lg tag, fine, pass thru (untainted)
+        # If it's a locale ID, try converting to a lg tag (untainted),
+        # otherwise nix it.
+       @languages;
+      DEBUG and print "Lgs\@", __LINE__, ": ", map("<$_>", @languages), "\n";
+    }
+  } else {
+    @languages = $base_class->_ambient_langprefs;
+  }
+ 
   @languages = $base_class->_langtag_munging(@languages);
 
   my %seen;
@@ -271,31 +287,24 @@ sub get_handle {  # This is a constructor and, yes, it CAN FAIL.
 sub _langtag_munging {
   my($base_class, @languages) = @_;
 
+  # We have all these DEBUG statements because otherwise it's hard as hell
+  # to diagnose ifwhen something goes wrong.
+
   DEBUG and print "Lgs1: ", map("<$_>", @languages), "\n";
 
   if($USING_LANGUAGE_TAGS) {
-    @languages = map &I18N::LangTags::locale2language_tag($_), @languages;
-     # if it's a lg tag, fine, pass thru (untainted)
-     # if it's a locale ID, try converting to a lg tag (untainted),
-     # otherwise nix it.
-
-    @languages = map {; $_, I18N::LangTags::alternate_language_tags($_) }
-                      @languages;    # catch alternation
     DEBUG and print "Lgs\@", __LINE__, ": ", map("<$_>", @languages), "\n";
-
     @languages     = $base_class->_add_supers( @languages );
 
-    if( defined &I18N::LangTags::panic_languages ) {
-      push @languages, I18N::LangTags::panic_languages(@languages);
-      DEBUG and print "After adding panic languages:\n", 
-        " Lgs\@", __LINE__, ": ", map("<$_>", @languages), "\n";
-    }
+    push @languages, I18N::LangTags::panic_languages(@languages);
+    DEBUG and print "After adding panic languages:\n", 
+      " Lgs\@", __LINE__, ": ", map("<$_>", @languages), "\n";
 
     push @languages, $base_class->fallback_languages;
      # You are free to override fallback_languages to return empty-list!
     DEBUG and print "Lgs\@", __LINE__, ": ", map("<$_>", @languages), "\n";
 
-    @languages =  # final bit of processing:
+    @languages =  # final bit of processing to turn them into classname things
       map {
         my $it = $_;  # copy
         $it =~ tr<-A-Z><_a-z>; # lc, and turn - to _
@@ -325,34 +334,8 @@ sub _langtag_munging {
 ###########################################################################
 
 sub _ambient_langprefs {
-  my $base_class = $_[0];
-  
-  return $base_class->_http_accept_langs
-   if length( $ENV{'REQUEST_METHOD'} || '' ); # I'm a CGI
-       # it's off in its own routine because it's complicated
-
-  # Not running as a CGI: try to puzzle out from the environment
-  my @languages;
-
-  if(length( $ENV{'LANG'} || '' )) {
-    push @languages, split m/[,:]/, $ENV{'LANG'};
-     # LANG can be only /one/ locale as far as I know, but what the hey.
-  }
-
-  if(length( $ENV{'LANGUAGE'} || '' )) {
-    push @languages, split m/[,:]/, $ENV{'LANGUAGE'};
-  }
-
-  print "Noting ENV LANG ", join(',', @languages),"\n" if DEBUG;
-  # Those are really locale IDs, but they get xlated a few lines down.
-  
-  if(&_try_use('Win32::Locale')) {
-    # If we have that module installed...
-    push @languages, Win32::Locale::get_language() || ''
-     if defined &Win32::Locale::get_language;
-  }
-
-  return @languages;
+  require I18N::LangTags::Detect;
+  return  I18N::LangTags::Detect::detect();
 }
 
 ###########################################################################
@@ -368,29 +351,14 @@ sub _add_supers {
   } elsif( $MATCH_SUPERS_TIGHTLY ) {
     DEBUG and print "Before adding new supers tightly:\n", 
       " Lgs\@", __LINE__, ": ", map("<$_>", @languages), "\n";
-
-    my %seen_encoded;
-    foreach my $lang (@languages) {
-      $seen_encoded{ I18N::LangTags::encode_language_tag($lang) } = 1
-    }
-
-    my(@output_languages);
-    foreach my $lang (@languages) {
-      push @output_languages, $lang;
-      foreach my $s ( I18N::LangTags::super_languages($lang) ) {
-        # Note that super_languages returns the longest first.
-        last if $seen_encoded{ I18N::LangTags::encode_language_tag($s) };
-        push @output_languages, $s;
-      }
-    }
-    @languages = @output_languages;
-
+    @languages = I18N::LangTags::implicate_supers( @languages );
     DEBUG and print "After adding new supers tightly:\n", 
       " Lgs\@", __LINE__, ": ", map("<$_>", @languages), "\n";
 
   } else {
-
-    push @languages,  map I18N::LangTags::super_languages($_), @languages;
+    DEBUG and print "Before adding supers to end:\n", 
+      " Lgs\@", __LINE__, ": ", map("<$_>", @languages), "\n";
+    @languages = I18N::LangTags::implicate_supers_strictly( @languages );
     DEBUG and print "After adding supers to end:\n", 
       " Lgs\@", __LINE__, ": ", map("<$_>", @languages), "\n";
   }
@@ -405,60 +373,6 @@ sub _add_supers {
 ###########################################################################
 
 use Locale::Maketext::GutsLoader;
-
-sub _http_accept_langs {
-  # Deal with HTTP "Accept-Language:" stuff.  Hassle.
-  # This code is more lenient than RFC 3282, which you must read.
-  # Hm.  Should I just move this into I18N::LangTags at some point?
-  no integer;
-
-  my $in = (@_ > 1) ? $_[1] : $ENV{'HTTP_ACCEPT_LANGUAGE'};
-  # (always ends up untainting)
-
-  return() unless defined $in and length $in;
-
-  $in =~ s/\([^\)]*\)//g; # nix just about any comment
-  
-  if( $in =~ m/^\s*([a-zA-Z][-a-zA-Z]+)\s*$/s ) {
-    # Very common case: just one language tag
-    return lc $1;
-  } elsif( $in =~ m/^\s*[a-zA-Z][-a-zA-Z]+(?:\s*,\s*[a-zA-Z][-a-zA-Z]+)*\s*$/s ) {
-    # Common case these days: just "foo, bar, baz"
-    return map lc($_), $in =~ m/([a-zA-Z][-a-zA-Z]+)/g;
-  }
-
-  # Else it's complicated...
-
-  $in =~ s/\s+//g;  # Yes, we can just do without the WS!
-  my @in = $in =~ m/([^,]+)/g;
-  my %pref;
-  
-  my $q;
-  foreach my $tag (@in) {
-    next unless $tag =~
-     m/^([a-zA-Z][-a-zA-Z]+)
-        (?:
-         ;q=
-         (
-          \d*   # a bit too broad of a RE, but so what.
-          (?:
-            \.\d+
-          )?
-         )
-        )?
-       $
-      /sx
-    ;
-    $q = (defined $2 and length $2) ? $2 : 1;
-    #print "$1 with q=$q\n";
-    push @{ $pref{$q} }, lc $1;
-  }
-
-  return # Read off %pref, in descending key order...
-    map @{$pref{$_}},
-    sort {$b <=> $a}
-    keys %pref;
-}
 
 ###########################################################################
 

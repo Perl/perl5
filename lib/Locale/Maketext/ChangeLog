@@ -1,6 +1,16 @@
 Revision history for Perl suite Locale::Maketext
-                                        Time-stamp: "2004-01-19 15:11:56 AST"
+                                        Time-stamp: "2004-03-30 21:38:07 AST"
 
+2004-03-30  Sean M. Burke  sburke@cpan.org
+	* Release 1.09:
+
+	* Moved the language-preference-detecting code into new module
+	I18N::LangTags::Detect.
+	
+	Thanks to Autrijus Tang for catching some errors in the dist!
+
+
+	
 2004-01-19  Sean M. Burke  sburke@cpan.org
 	
 	* Release 1.08:
