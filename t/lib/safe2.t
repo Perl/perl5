@@ -124,7 +124,7 @@ print $@ =~ /foo bar/ ? "ok 29\n" : "not ok 29\n";
 my $t = 30;
 $cpt->rdo('/non/existant/file.name');
 # The regexp is getting rather baroque.
-print $! =~ /No such file|file specification syntax error|A file or directory in the path name does not exist|Invalid argument|Device not configured|file not found|File or directory doesn't exist/i ? "ok $t\n" : "not ok $t # $!\n"; $t++;
+print $! =~ /cannot find|No such file|file specification syntax error|A file or directory in the path name does not exist|Invalid argument|Device not configured|file not found|File or directory doesn't exist/i ? "ok $t\n" : "not ok $t # $!\n"; $t++;
 # test #31 is gone.
 print 1 ? "ok $t\n" : "not ok $t\n#$@/$!\n"; $t++;
   

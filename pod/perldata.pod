@@ -600,16 +600,16 @@ of how to arrange for an output ordering.
 
 =head2 Slices
 
-A common way access an array or a hash is one scalar element at a time.
-You can also subscript a list to get a single element from it.
+A common way to access an array or a hash is one scalar element at a
+time.  You can also subscript a list to get a single element from it.
 
     $whoami = $ENV{"USER"};		# one element from the hash
     $parent = $ISA[0];		        # one element from the array
     $dir    = (getpwnam("daemon"))[7];	# likewise, but with list
 
 A slice accesses several elements of a list, an array, or a hash
-simultaneously using a list of subscripts.  It's a more convenient
-that writing out the individual elements as a list of separate
+simultaneously using a list of subscripts.  It's more convenient
+than writing out the individual elements as a list of separate
 scalar values.
 
     ($him, $her)   = @folks[0,-1];		# array slice
@@ -633,8 +633,8 @@ The previous assignments are exactly equivalent to
     ($folks[0], $folks[-1]) = ($folks[0], $folks[-1]);
 
 Since changing a slice changes the original array or hash that it's
-slicing, a C<foreach> construct will alter through some--or even
-all--of the values of the array or hash.
+slicing, a C<foreach> construct will alter some--or even all--of the
+values of the array or hash.
 
     foreach (@array[ 4 .. 10 ]) { s/peter/paul/ } 
 
@@ -644,15 +644,16 @@ all--of the values of the array or hash.
 	s/(\w+)/\u\L$1/g;   # "titlecase" words
     }
 
-You couldn't just loop through C<values %hash> to do this because
-that function produces a new list which is a copy of the values,
-so changing them doesn't change the original.
-
 A slice of an empty list is still an empty list.  Thus:
 
     @a = ()[1,0];           # @a has no elements
     @b = (@a)[0,1];         # @b has no elements
-    @b = (1,undef)[1,0,1];  # @b has three elements
+    @c = (0,1)[2,3];        # @c has no elements
+
+But:
+
+    @a = (1)[1,0];          # @a has two elements
+    @b = (1,undef)[1,0,2];  # @b has three elements
 
 This makes it easy to write loops that terminate when a null list
 is returned:

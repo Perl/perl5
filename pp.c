@@ -585,8 +585,8 @@ PP(pp_bless)
 	SV *ssv = POPs;
 	STRLEN len;
 	char *ptr = SvPV(ssv,len);
-	if (ckWARN(WARN_UNSAFE) && len == 0)
-	    Perl_warner(aTHX_ WARN_UNSAFE, 
+	if (ckWARN(WARN_MISC) && len == 0)
+	    Perl_warner(aTHX_ WARN_MISC, 
 		   "Explicit blessing to '' (assuming package main)");
 	stash = gv_stashpvn(ptr, len, TRUE);
     }
@@ -832,8 +832,8 @@ PP(pp_undef)
 	hv_undef((HV*)sv);
 	break;
     case SVt_PVCV:
-	if (ckWARN(WARN_UNSAFE) && cv_const_sv((CV*)sv))
-	    Perl_warner(aTHX_ WARN_UNSAFE, "Constant subroutine %s undefined",
+	if (ckWARN(WARN_MISC) && cv_const_sv((CV*)sv))
+	    Perl_warner(aTHX_ WARN_MISC, "Constant subroutine %s undefined",
 		 CvANON((CV*)sv) ? "(anonymous)" : GvENAME(CvGV((CV*)sv)));
 	/* FALL THROUGH */
     case SVt_PVFM:
@@ -2012,7 +2012,9 @@ PP(pp_substr)
 	rem -= pos;
     }
     if (fail < 0) {
-	if (ckWARN(WARN_SUBSTR) || lvalue || repl)
+	if (lvalue || repl)
+	    Perl_croak(aTHX_ "substr outside of string");
+	if (ckWARN(WARN_SUBSTR))
 	    Perl_warner(aTHX_ WARN_SUBSTR, "substr outside of string");
 	RETPUSHUNDEF;
     }
@@ -2202,13 +2204,13 @@ PP(pp_chr)
     (void)SvUPGRADE(TARG,SVt_PV);
 
     if (value > 255 && !IN_BYTE) {
-	SvGROW(TARG,8);
+	SvGROW(TARG, UTF8_MAXLEN+1);
 	tmps = SvPVX(TARG);
 	tmps = (char*)uv_to_utf8((U8*)tmps, (UV)value);
 	SvCUR_set(TARG, tmps - SvPVX(TARG));
 	*tmps = '\0';
-	SvUTF8_on(TARG);
 	(void)SvPOK_only(TARG);
+	SvUTF8_on(TARG);
 	XPUSHs(TARG);
 	RETURN;
     }
@@ -2252,7 +2254,7 @@ PP(pp_ucfirst)
 
     if (DO_UTF8(sv) && (s = (U8*)SvPV(sv, slen)) && slen && (*s & 0xc0) == 0xc0) {
 	I32 ulen;
-	U8 tmpbuf[10];
+	U8 tmpbuf[UTF8_MAXLEN];
 	U8 *tend;
 	UV uv = utf8_to_uv(s, &ulen);
 
@@ -2311,7 +2313,7 @@ PP(pp_lcfirst)
 
     if (DO_UTF8(sv) && (s = (U8*)SvPV(sv, slen)) && slen && (*s & 0xc0) == 0xc0) {
 	I32 ulen;
-	U8 tmpbuf[10];
+	U8 tmpbuf[UTF8_MAXLEN];
 	U8 *tend;
 	UV uv = utf8_to_uv(s, &ulen);
 
@@ -2881,8 +2883,8 @@ PP(pp_anonhash)
 	SV *val = NEWSV(46, 0);
 	if (MARK < SP)
 	    sv_setsv(val, *++MARK);
-	else if (ckWARN(WARN_UNSAFE))
-	    Perl_warner(aTHX_ WARN_UNSAFE, "Odd number of elements in hash assignment");
+	else if (ckWARN(WARN_MISC))
+	    Perl_warner(aTHX_ WARN_MISC, "Odd number of elements in hash assignment");
 	(void)hv_store_ent(hv,key,val,0);
     }
     SP = ORIGMARK;
@@ -3392,8 +3394,8 @@ PP(pp_unpack)
 	default:
 	    DIE(aTHX_ "Invalid type in unpack: '%c'", (int)datumtype);
 	case ',': /* grandfather in commas but with a warning */
-	    if (commas++ == 0 && ckWARN(WARN_UNSAFE))
-		Perl_warner(aTHX_ WARN_UNSAFE,
+	    if (commas++ == 0 && ckWARN(WARN_UNPACK))
+		Perl_warner(aTHX_ WARN_UNPACK,
 			    "Invalid type in unpack: '%c'", (int)datumtype);
 	    break;
 	case '%':
@@ -4455,8 +4457,8 @@ PP(pp_pack)
 	default:
 	    DIE(aTHX_ "Invalid type in pack: '%c'", (int)datumtype);
 	case ',': /* grandfather in commas but with a warning */
-	    if (commas++ == 0 && ckWARN(WARN_UNSAFE))
-		Perl_warner(aTHX_ WARN_UNSAFE,
+	    if (commas++ == 0 && ckWARN(WARN_PACK))
+		Perl_warner(aTHX_ WARN_PACK,
 			    "Invalid type in pack: '%c'", (int)datumtype);
 	    break;
 	case '%':
@@ -4643,7 +4645,7 @@ PP(pp_pack)
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
 		auint = SvUV(fromstr);
-		SvGROW(cat, SvCUR(cat) + 10);
+		SvGROW(cat, SvCUR(cat) + UTF8_MAXLEN);
 		SvCUR_set(cat, (char*)uv_to_utf8((U8*)SvEND(cat),auint)
 			       - SvPVX(cat));
 	    }
@@ -4908,11 +4910,11 @@ PP(pp_pack)
 		     * of pack() (and all copies of the result) are
 		     * gone.
 		     */
-		    if (ckWARN(WARN_UNSAFE) && (SvTEMP(fromstr)
+		    if (ckWARN(WARN_PACK) && (SvTEMP(fromstr)
 						|| (SvPADTMP(fromstr)
 						    && !SvREADONLY(fromstr))))
 		    {
-			Perl_warner(aTHX_ WARN_UNSAFE,
+			Perl_warner(aTHX_ WARN_PACK,
 				"Attempt to pack pointer to temporary value");
 		    }
 		    if (SvPOK(fromstr) || SvNIOK(fromstr))

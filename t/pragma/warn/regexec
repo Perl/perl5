@@ -16,7 +16,7 @@
 __END__
 # regexec.c
 print("SKIPPED\n# most systems run into stacksize limits\n"),exit;
-use warnings 'unsafe' ;
+use warnings 'regexp' ;
 $SIG{__WARN__} = sub{local ($m) = shift;
                  $m =~ s/\(\d+\)/(*MASKED*)/;
                  print STDERR $m};
@@ -42,7 +42,7 @@ Complex regular subexpression recursion limit (*MASKED*) exceeded at - line 9.
 ########
 # regexec.c
 print("SKIPPED\n# most systems run into stacksize limits\n"),exit;
-no warnings 'unsafe' ;
+no warnings 'regexp' ;
 $SIG{__WARN__} = sub{local ($m) = shift;
                  $m =~ s/\(\d+\)/(*MASKED*)/;
                  print STDERR $m};
@@ -68,7 +68,7 @@ EXPECT
 ########
 # regexec.c
 print("SKIPPED\n# most systems run into stacksize limits\n"),exit;
-use warnings 'unsafe' ;
+use warnings 'regexp' ;
 $SIG{__WARN__} = sub{local ($m) = shift;
                  $m =~ s/\(\d+\)/(*MASKED*)/;
                  print STDERR $m};
@@ -94,7 +94,7 @@ Complex regular subexpression recursion limit (*MASKED*) exceeded at - line 9.
 ########
 # regexec.c
 print("SKIPPED\n# most systems run into stacksize limits\n"),exit;
-no warnings 'unsafe' ;
+no warnings 'regexp' ;
 $SIG{__WARN__} = sub{local ($m) = shift;
                  $m =~ s/\(\d+\)/(*MASKED*)/;
                  print STDERR $m};

@@ -688,7 +688,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		? s + (prog->minlen? cl_l : 0)
 		: (prog->float_substr ? check_at - start_shift + cl_l
 				      : strend) ;
-	char *startpos = sv ? strend - SvCUR(sv) : s;
+	char *startpos = sv && SvPOK(sv) ? strend - SvCUR(sv) : s;
 
 	t = s;
 	if (prog->reganch & ROPT_UTF8) {	
@@ -1670,7 +1670,7 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
 	    SAVEDESTRUCTOR_X(restore_pos, 0);
         }
 	if (!PL_reg_curpm)
-	    New(22,PL_reg_curpm, 1, PMOP);
+	    Newz(22,PL_reg_curpm, 1, PMOP);
 	PL_reg_curpm->op_pmregexp = prog;
 	PL_reg_oldcurpm = PL_curpm;
 	PL_curpm = PL_reg_curpm;
@@ -2084,7 +2084,7 @@ S_regmatch(pTHX_ regnode *prog)
 	    PL_reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
 	case SPACE:
-	    if (!nextchr && locinput >= PL_regeol)
+	    if (!nextchr)
 		sayNO;
 	    if (!(OP(scan) == SPACE
 		  ? isSPACE(nextchr) : isSPACE_LC(nextchr)))
@@ -2095,11 +2095,11 @@ S_regmatch(pTHX_ regnode *prog)
 	    PL_reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
 	case SPACEUTF8:
-	    if (!nextchr && locinput >= PL_regeol)
+	    if (!nextchr)
 		sayNO;
 	    if (nextchr & 0x80) {
 		if (!(OP(scan) == SPACEUTF8
-		      ? swash_fetch(PL_utf8_space,(U8*)locinput)
+		      ? swash_fetch(PL_utf8_space, (U8*)locinput)
 		      : isSPACE_LC_utf8((U8*)locinput)))
 		{
 		    sayNO;
@@ -2117,9 +2117,9 @@ S_regmatch(pTHX_ regnode *prog)
 	    PL_reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
 	case NSPACE:
-	    if (!nextchr)
+	    if (!nextchr && locinput >= PL_regeol)
 		sayNO;
-	    if (OP(scan) == SPACE
+	    if (OP(scan) == NSPACE
 		? isSPACE(nextchr) : isSPACE_LC(nextchr))
 		sayNO;
 	    nextchr = UCHARAT(++locinput);
@@ -2128,11 +2128,11 @@ S_regmatch(pTHX_ regnode *prog)
 	    PL_reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
 	case NSPACEUTF8:
-	    if (!nextchr)
+	    if (!nextchr && locinput >= PL_regeol)
 		sayNO;
 	    if (nextchr & 0x80) {
 		if (OP(scan) == NSPACEUTF8
-		    ? swash_fetch(PL_utf8_space,(U8*)locinput)
+		    ? swash_fetch(PL_utf8_space, (U8*)locinput)
 		    : isSPACE_LC_utf8((U8*)locinput))
 		{
 		    sayNO;
@@ -2150,7 +2150,7 @@ S_regmatch(pTHX_ regnode *prog)
 	    PL_reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
 	case DIGIT:
-	    if (!nextchr && locinput >= PL_regeol)
+	    if (!nextchr)
 		sayNO;
 	    if (!(OP(scan) == DIGIT
 		  ? isDIGIT(nextchr) : isDIGIT_LC(nextchr)))
@@ -2164,9 +2164,9 @@ S_regmatch(pTHX_ regnode *prog)
 	    if (!nextchr)
 		sayNO;
 	    if (nextchr & 0x80) {
-		if (OP(scan) == NDIGITUTF8
-		    ? swash_fetch(PL_utf8_digit,(U8*)locinput)
-		    : isDIGIT_LC_utf8((U8*)locinput))
+		if (!(OP(scan) == DIGITUTF8
+		      ? swash_fetch(PL_utf8_digit, (U8*)locinput)
+		      : isDIGIT_LC_utf8((U8*)locinput)))
 		{
 		    sayNO;
 		}
@@ -2174,7 +2174,8 @@ S_regmatch(pTHX_ regnode *prog)
 		nextchr = UCHARAT(locinput);
 		break;
 	    }
-	    if (!isDIGIT(nextchr))
+	    if (!(OP(scan) == DIGITUTF8
+		  ? isDIGIT(nextchr) : isDIGIT_LC(nextchr)))
 		sayNO;
 	    nextchr = UCHARAT(++locinput);
 	    break;
@@ -2182,9 +2183,9 @@ S_regmatch(pTHX_ regnode *prog)
 	    PL_reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
 	case NDIGIT:
-	    if (!nextchr)
+	    if (!nextchr && locinput >= PL_regeol)
 		sayNO;
-	    if (OP(scan) == DIGIT
+	    if (OP(scan) == NDIGIT
 		? isDIGIT(nextchr) : isDIGIT_LC(nextchr))
 		sayNO;
 	    nextchr = UCHARAT(++locinput);
@@ -2196,13 +2197,18 @@ S_regmatch(pTHX_ regnode *prog)
 	    if (!nextchr && locinput >= PL_regeol)
 		sayNO;
 	    if (nextchr & 0x80) {
-		if (swash_fetch(PL_utf8_digit,(U8*)locinput))
+		if (OP(scan) == NDIGITUTF8
+		    ? swash_fetch(PL_utf8_digit, (U8*)locinput)
+		    : isDIGIT_LC_utf8((U8*)locinput))
+		{
 		    sayNO;
+		}
 		locinput += PL_utf8skip[nextchr];
 		nextchr = UCHARAT(locinput);
 		break;
 	    }
-	    if (isDIGIT(nextchr))
+	    if (OP(scan) == NDIGITUTF8
+		? isDIGIT(nextchr) : isDIGIT_LC(nextchr))
 		sayNO;
 	    nextchr = UCHARAT(++locinput);
 	    break;
@@ -2657,10 +2663,10 @@ S_regmatch(pTHX_ regnode *prog)
 		    PL_regcc = cc;
 
 		    if (n >= cc->max) {	/* Maximum greed exceeded? */
-			if (ckWARN(WARN_UNSAFE) && n >= REG_INFTY 
+			if (ckWARN(WARN_REGEXP) && n >= REG_INFTY 
 			    && !(PL_reg_flags & RF_warned)) {
 			    PL_reg_flags |= RF_warned;
-			    Perl_warner(aTHX_ WARN_UNSAFE, "%s limit (%d) exceeded",
+			    Perl_warner(aTHX_ WARN_REGEXP, "%s limit (%d) exceeded",
 				 "Complex regular subexpression recursion",
 				 REG_INFTY - 1);
 			}
@@ -2709,10 +2715,10 @@ S_regmatch(pTHX_ regnode *prog)
 				      REPORT_CODE_OFF+PL_regindent*2, "")
 			);
 		}
-		if (ckWARN(WARN_UNSAFE) && n >= REG_INFTY 
+		if (ckWARN(WARN_REGEXP) && n >= REG_INFTY 
 			&& !(PL_reg_flags & RF_warned)) {
 		    PL_reg_flags |= RF_warned;
-		    Perl_warner(aTHX_ WARN_UNSAFE, "%s limit (%d) exceeded",
+		    Perl_warner(aTHX_ WARN_REGEXP, "%s limit (%d) exceeded",
 			 "Complex regular subexpression recursion",
 			 REG_INFTY - 1);
 		}
@@ -3039,8 +3045,14 @@ S_regmatch(pTHX_ regnode *prog)
 		n = regrepeat(scan, n);
 		locinput = PL_reginput;
 		if (ln < n && PL_regkind[(U8)OP(next)] == EOL &&
-		    (!PL_multiline  || OP(next) == SEOL))
+		    (!PL_multiline  || OP(next) == SEOL || OP(next) == EOS)) {
 		    ln = n;			/* why back off? */
+		    /* ...because $ and \Z can match before *and* after
+		       newline at the end.  Consider "\n\n" =~ /\n+\Z\n/.
+		       We should back off by one in this case. */
+		    if (UCHARAT(PL_reginput - 1) == '\n' && OP(next) != EOS)
+			ln--;
+		}
 		REGCP_SET;
 		if (paren) {
 		    while (n >= ln) {
@@ -3598,7 +3610,7 @@ S_reginclassutf8(pTHX_ regnode *f, U8 *p)
 	match = TRUE;
     else if (flags & ANYOF_FOLD) {
 	I32 cf;
-	U8 tmpbuf[10];
+	U8 tmpbuf[UTF8_MAXLEN];
 	if (flags & ANYOF_LOCALE) {
 	    PL_reg_flags |= RF_tainted;
 	    uv_to_utf8(tmpbuf, toLOWER_LC_utf8(p));

@@ -1293,9 +1293,8 @@ Ajno	|PerlInterpreter*	|perl_alloc_using \
 				|struct IPerlStdIO* io|struct IPerlLIO* lio \
 				|struct IPerlDir* d|struct IPerlSock* s \
 				|struct IPerlProc* p
-#else
-Ajnod	|PerlInterpreter*	|perl_alloc
 #endif
+Ajnod	|PerlInterpreter*	|perl_alloc
 Ajnod	|void	|perl_construct	|PerlInterpreter* interp
 Ajnod	|void	|perl_destruct	|PerlInterpreter* interp
 Ajnod	|void	|perl_free	|PerlInterpreter* interp
@@ -2005,6 +2004,7 @@ Apd	|void	|sv_vcatpvfn	|SV* sv|const char* pat|STRLEN patlen \
 Apd	|void	|sv_vsetpvfn	|SV* sv|const char* pat|STRLEN patlen \
 				|va_list* args|SV** svargs|I32 svmax \
 				|bool *maybe_tainted
+Ap	|NV	|str_to_version	|SV *sv
 Ap	|SV*	|swash_init	|char* pkg|char* name|SV* listsv \
 				|I32 minbits|I32 none
 Ap	|UV	|swash_fetch	|SV *sv|U8 *ptr
@@ -2049,6 +2049,7 @@ p	|int	|yyparse
 p	|int	|yywarn		|char* s
 #if defined(MYMALLOC)
 Ap	|void	|dump_mstats	|char* s
+Ap	|int	|get_mstats	|perl_mstats_t *buf|int buflen|int level
 #endif
 Anp	|Malloc_t|safesysmalloc	|MEM_SIZE nbytes
 Anp	|Malloc_t|safesyscalloc	|MEM_SIZE elements|MEM_SIZE size
@@ -2096,10 +2097,12 @@ Ap	|void	|do_pmop_dump	|I32 level|PerlIO *file|PMOP *pm
 Ap	|void	|do_sv_dump	|I32 level|PerlIO *file|SV *sv|I32 nest \
 				|I32 maxnest|bool dumpops|STRLEN pvlim
 Ap	|void	|magic_dump	|MAGIC *mg
+#if defined(PERL_FLEXIBLE_EXCEPTIONS)
 Ap	|void*	|default_protect|volatile JMPENV *je|int *excpt \
 				|protect_body_t body|...
 Ap	|void*	|vdefault_protect|volatile JMPENV *je|int *excpt \
 				|protect_body_t body|va_list *args
+#endif
 Ap	|void	|reginitcolors
 Ap	|char*	|sv_2pv_nolen	|SV* sv
 Ap	|char*	|sv_2pvutf8_nolen|SV* sv
@@ -2107,6 +2110,10 @@ Ap	|char*	|sv_2pvbyte_nolen|SV* sv
 Ap	|char*	|sv_pv		|SV *sv
 Ap	|char*	|sv_pvutf8	|SV *sv
 Ap	|char*	|sv_pvbyte	|SV *sv
+Ap      |void   |sv_utf8_upgrade|SV *sv
+Ap      |bool   |sv_utf8_downgrade|SV *sv|bool fail_ok
+Ap      |void   |sv_utf8_encode |SV *sv
+Ap      |bool   |sv_utf8_decode |SV *sv
 Ap	|void	|sv_force_normal|SV *sv
 Ap	|void	|tmps_grow	|I32 n
 Ap	|SV*	|sv_rvweaken	|SV *sv
@@ -2232,11 +2239,16 @@ s	|void	|validate_suid	|char *|char*|int
 #  if defined(IAMSUID)
 s	|int	|fd_on_nosuid_fs|int fd
 #  endif
-s	|void*	|parse_body	|va_list args
-s	|void*	|run_body	|va_list args
-s	|void*	|call_body	|va_list args
-s	|void	|call_xbody	|OP *myop|int is_eval
-s	|void*	|call_list_body	|va_list args
+s	|void*	|parse_body	|char **env|XSINIT_t xsinit
+s	|void*	|run_body	|I32 oldscope
+s	|void	|call_body	|OP *myop|int is_eval
+s	|void*	|call_list_body	|CV *cv
+#if defined(PERL_FLEXIBLE_EXCEPTIONS)
+s	|void*	|vparse_body	|va_list args
+s	|void*	|vrun_body	|va_list args
+s	|void*	|vcall_body	|va_list args
+s	|void*	|vcall_list_body|va_list args
+#endif
 #  if defined(USE_THREADS)
 s	|struct perl_thread *	|init_main_thread
 #  endif
@@ -2253,7 +2265,10 @@ s	|int	|div128		|SV *pnum|bool *done
 
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
 s	|OP*	|docatch	|OP *o
-s	|void*	|docatch_body	|va_list args
+s	|void*	|docatch_body
+#if defined(PERL_FLEXIBLE_EXCEPTIONS)
+s	|void*	|vdocatch_body	|va_list args
+#endif
 s	|OP*	|dofindlabel	|OP *o|char *label|OP **opstack|OP **oplimit
 s	|void	|doparseform	|SV *sv
 s	|I32	|dopoptoeval	|I32 startingblock
@@ -2385,12 +2400,6 @@ s	|void	|del_xrv	|XRV* p
 s	|void	|sv_unglob	|SV* sv
 s	|void	|not_a_number	|SV *sv
 s	|void	|visit		|SVFUNC_t f
-#  if defined(PURIFY)
-s	|void	|reg_add	|SV *sv
-s	|void	|reg_remove	|SV *sv
-#  else
-ns	|void*	|my_safemalloc	|MEM_SIZE size
-#  endif
 s	|void	|sv_add_backref	|SV *tsv|SV *sv
 s	|void	|sv_del_backref	|SV *sv
 #  if defined(DEBUGGING)

@@ -551,6 +551,7 @@ _PATH_LOG()
 	RETVAL = _PATH_LOG;
 #else
 	croak("Your vendor has not defined the Sys::Syslog macro _PATH_LOG");
+	RETVAL = NULL;
 #endif
     OUTPUT:
 	RETVAL
@@ -564,6 +565,7 @@ LOG_FAC(p)
 	RETVAL = LOG_FAC(p);
 #else
 	croak("Your vendor has not defined the Sys::Syslog macro LOG_FAC");
+	RETVAL = -1;
 #endif
     OUTPUT:
 	RETVAL
@@ -577,6 +579,7 @@ LOG_PRI(p)
 	RETVAL = LOG_PRI(p);
 #else
 	croak("Your vendor has not defined the Sys::Syslog macro LOG_PRI");
+	RETVAL = -1;
 #endif
     OUTPUT:
 	RETVAL
@@ -591,6 +594,7 @@ LOG_MAKEPRI(fac,pri)
 	RETVAL = LOG_MAKEPRI(fac,pri);
 #else
 	croak("Your vendor has not defined the Sys::Syslog macro LOG_MAKEPRI");
+	RETVAL = -1;
 #endif
     OUTPUT:
 	RETVAL
@@ -604,6 +608,7 @@ LOG_MASK(pri)
 	RETVAL = LOG_MASK(pri);
 #else
 	croak("Your vendor has not defined the Sys::Syslog macro LOG_MASK");
+	RETVAL = -1;
 #endif
     OUTPUT:
 	RETVAL
@@ -617,6 +622,7 @@ LOG_UPTO(pri)
 	RETVAL = LOG_UPTO(pri);
 #else
 	croak("Your vendor has not defined the Sys::Syslog macro LOG_UPTO");
+	RETVAL = -1;
 #endif
     OUTPUT:
 	RETVAL

@@ -4,7 +4,7 @@ Perl 5 README file for the EPOC operating system.
 
 Olaf Flebbe <o.flebbe@gmx.de>
 http://www.linuxstart.com/~oflebbe/perl/perl5.html
-2000-01-08
+2000-02-20
 
 =====================================================================
 Introduction
@@ -13,9 +13,9 @@ Introduction
 EPOC is a OS for palmtops and mobile phones. For more informations look at:
 http://www.symbian.com/
 
-This is a port of Perl version 5.005_63 to EPOC. It runs on the Perl
-Series 5, Series 5mx. I have no reports about the Psion Revo, the
-Ericcson (??) and the Psion NetBook. I only have acess to an Series 5.
+This is a port of Perl version 5.5.650 to EPOC. It runs on the Perl
+Series 5, Series 5mx and the Psion Revo. I have no reports for other
+EPOC devices.
 
 Features are left out, because of restrictions of the POSIX support.
 
@@ -105,8 +105,6 @@ The following things are left out of this perl port:
   directory very well (i.e. not at all, but it tries hard to emulate
   one) See PATH.
 
-+ sockets seems to work now!
-
 + You need the shell eshell.exe in order to run perl.exe and supply
   it with arguments.
 
@@ -132,15 +130,13 @@ Sorry, this is far too short.
 
     Unpack the sources. 
 
-      Build a native miniperl... 
+      Build a native perl from this sources... 
       cp epoc/* .
-      for i in *.SH ; do
-	  sh $i
-      done
+      ./Configure -S
       make perl
       cp miniperl.native miniperl
       make perl
-      perl linkit perlmain.o lib/auto/DynaLoader/DynaLoader.a \
+      perl link.pl perlmain.o lib/auto/DynaLoader/DynaLoader.a \
          lib/auto/Data/Dumper.a \
          lib/auto/File/Glob/Glob.a lib/auto/IO/IO.a \
          lib/auto/Socket/Socket.a perl.a `cat ext.libs`
@@ -149,10 +145,9 @@ Sorry, this is far too short.
 
 
 ====================================================================
-TODO
+Wish List
 ====================================================================
 
-- Get the HTTPD::* working (Hey, It worked the first time for me!)
 - Threads ?
 - Acess to the GUI?
 

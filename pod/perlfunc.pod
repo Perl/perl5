@@ -376,6 +376,10 @@ Accepts an incoming socket connect, just as the accept(2) system call
 does.  Returns the packed address if it succeeded, false otherwise.
 See the example in L<perlipc/"Sockets: Client/Server Communication">.
 
+On systems that support a close-on-exec flag on files, the flag will
+be set for the newly opened file descriptor, as determined by the
+value of $^F.  See L<perlvar/$^F>.
+
 =item alarm SECONDS
 
 =item alarm
@@ -423,7 +427,7 @@ modulo the caveats given in L<perlipc/"Signals">.
 
 Returns the arctangent of Y/X in the range -PI to PI.
 
-For the tangent operation, you may use the C<POSIX::tan()>
+For the tangent operation, you may use the C<Math::Trig::tan>
 function, or use the familiar relation:
 
     sub tan { sin($_[0]) / cos($_[0])  }
@@ -513,7 +517,7 @@ print a stack trace.  The value of EXPR indicates how many call frames
 to go back before the current one.
 
     ($package, $filename, $line, $subroutine, $hasargs,
-    $wantarray, $evaltext, $is_require, $hints) = caller($i);
+    $wantarray, $evaltext, $is_require, $hints, $bitmask) = caller($i);
 
 Here $subroutine may be C<(eval)> if the frame is not a subroutine
 call, but an C<eval>.  In such a case additional elements $evaltext and
@@ -522,9 +526,9 @@ C<require> or C<use> statement, $evaltext contains the text of the
 C<eval EXPR> statement.  In particular, for a C<eval BLOCK> statement,
 $filename is C<(eval)>, but $evaltext is undefined.  (Note also that
 each C<use> statement creates a C<require> frame inside an C<eval EXPR>)
-frame.  C<$hints> contains pragmatic hints that the caller was
-compiled with.  The C<$hints> value is subject to change between versions
-of Perl, and is not meant for external use.
+frame.  C<$hints> and C<$bitmask> contain pragmatic hints that the caller
+was compiled with.  The C<$hints> and C<$bitmask> values are subject to
+change between versions of Perl, and are not meant for external use.
 
 Furthermore, when called from within the DB package, caller returns more
 detailed information: it sets the list variable C<@DB::args> to be the
@@ -558,6 +562,14 @@ successfully changed.  See also L</oct>, if all you have is a string.
                                              # --w----r-T
     $mode = '0644'; chmod oct($mode), 'foo'; # this is better
     $mode = 0644;   chmod $mode, 'foo';      # this is best
+
+You can also import the symbolic C<S_I*> constants from the Fcntl
+module:
+
+    use Fcntl ':mode';
+
+    chmod S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH, @executables;
+    # This is identical to the chmod 0755 of the above example.
 
 =item chomp VARIABLE
 
@@ -766,7 +778,7 @@ to check the condition at the top of the loop.
 Returns the cosine of EXPR (expressed in radians).  If EXPR is omitted,
 takes cosine of C<$_>.
 
-For the inverse cosine operation, you may use the C<POSIX::acos()>
+For the inverse cosine operation, you may use the C<Math::Trig::acos()>
 function, or use this relation:
 
     sub acos { atan2( sqrt(1 - $_[0] * $_[0]), $_[0] ) }
@@ -929,8 +941,9 @@ See also L</undef>, L</exists>, L</ref>.
 
 Given an expression that specifies a hash element, array element, hash slice,
 or array slice, deletes the specified element(s) from the hash or array.
-If the array elements happen to be at the end of the array, the size
-of the array will shrink by that number of elements.
+In the case of an array, if the array elements happen to be at the end,
+the size of the array will shrink to the highest element that tests 
+true for exists() (or 0 if no such element exists).
 
 Returns each element so deleted or the undefined value if there was no such
 element.  Deleting from C<$ENV{}> modifies the environment.  Deleting from
@@ -939,7 +952,9 @@ from a C<tie>d hash or array may not necessarily return anything.
 
 Deleting an array element effectively returns that position of the array
 to its initial, uninitialized state.  Subsequently testing for the same
-element with exists() will return false.  See L</exists>.
+element with exists() will return false.  Note that deleting array
+elements in the middle of an array will not shift the index of the ones
+after them down--use splice() for that.  See L</exists>.
 
 The following (inefficiently) deletes all the values of %HASH and @ARRAY:
 
@@ -1153,9 +1168,7 @@ make your program I<appear> to run faster.
 When called in list context, returns a 2-element list consisting of the
 key and value for the next element of a hash, so that you can iterate over
 it.  When called in scalar context, returns the key for only the "next"
-element in the hash.  (Note: Keys may be C<"0"> or C<"">, which are logically
-false; you may wish to avoid constructs like C<while ($k = each %foo) {}>
-for this reason.)
+element in the hash.
 
 Entries are returned in an apparently random order.  The actual random
 order is subject to change in future versions of perl, but it is guaranteed
@@ -2316,7 +2329,7 @@ This scalar value is B<not> locale dependent, see L<perllocale>, but
 instead a Perl builtin.  Also see the C<Time::Local> module
 (to convert the second, minutes, hours, ... back to seconds since the
 stroke of midnight the 1st of January 1970, the value returned by
-time()), and the strftime(3) and mktime(3) function available via the
+time()), and the strftime(3) and mktime(3) functions available via the
 POSIX module.  To get somewhat similar but locale dependent date
 strings, set up your locale environment variables appropriately
 (please see L<perllocale>) and try for example:
@@ -2404,9 +2417,12 @@ the original list for which the BLOCK or EXPR evaluates to true.
 
 =item mkdir FILENAME,MASK
 
+=item mkdir FILENAME
+
 Creates the directory specified by FILENAME, with permissions
 specified by MASK (as modified by C<umask>).  If it succeeds it
 returns true, otherwise it returns false and sets C<$!> (errno).
+If omitted, MASK defaults to 0777.
 
 In general, it is better to create directories with permissive MASK,
 and let the user modify that with their C<umask>, than it is to supply
@@ -3533,9 +3549,18 @@ rename(2) manpage or equivalent system documentation for details.
 =item require
 
 Demands some semantics specified by EXPR, or by C<$_> if EXPR is not
-supplied.  If a version number or tuple is specified, or if EXPR is
-numeric, demands that the current version of Perl
-(C<$^V> or C<$]> or $PERL_VERSION) be equal or greater than EXPR.
+supplied.
+
+If a VERSION is specified as a literal of the form v5.6.1,
+demands that the current version of Perl (C<$^V> or $PERL_VERSION) be
+at least as recent as that version, at run time.  (For compatibility
+with older versions of Perl, a numeric argument will also be interpreted
+as VERSION.)  Compare with L</use>, which can do a similar check at
+compile time.
+
+    require v5.6.1;	# run time version check
+    require 5.6.1;	# ditto
+    require 5.005_03;	# float version allowed for compatibility
 
 Otherwise, demands that a library file be included if it hasn't already
 been included.  The file is included via the do-FILE mechanism, which is
@@ -3716,9 +3741,8 @@ filehandle.  The values for WHENCE are C<0> to set the new position to
 POSITION, C<1> to set it to the current position plus POSITION, and
 C<2> to set it to EOF plus POSITION (typically negative).  For WHENCE
 you may use the constants C<SEEK_SET>, C<SEEK_CUR>, and C<SEEK_END>
-(start of the file, current position, end of the file) from any of the
-modules Fcntl, C<IO::Seekable>, or POSIX.  Returns C<1> upon success,
-C<0> otherwise.
+(start of the file, current position, end of the file) from the Fcntl
+module.  Returns C<1> upon success, C<0> otherwise.
 
 If you want to position file for C<sysread> or C<syswrite>, don't use
 C<seek>--buffering makes its effect on the file's system position
@@ -3967,7 +3991,7 @@ processes.
 Returns the sine of EXPR (expressed in radians).  If EXPR is omitted,
 returns sine of C<$_>.
 
-For the inverse sine operation, you may use the C<POSIX::asin>
+For the inverse sine operation, you may use the C<Math::Trig::asin>
 function, or use this relation:
 
     sub asin { atan2($_[0], sqrt(1 - $_[0] * $_[0])) }
@@ -4003,12 +4027,20 @@ the system call of the same name.  You should C<use Socket> first
 to get the proper definitions imported.  See the examples in
 L<perlipc/"Sockets: Client/Server Communication">.
 
+On systems that support a close-on-exec flag on files, the flag will
+be set for the newly opened file descriptor, as determined by the
+value of $^F.  See L<perlvar/$^F>.
+
 =item socketpair SOCKET1,SOCKET2,DOMAIN,TYPE,PROTOCOL
 
 Creates an unnamed pair of sockets in the specified domain, of the
 specified type.  DOMAIN, TYPE, and PROTOCOL are specified the same as
 for the system call of the same name.  If unimplemented, yields a fatal
 error.  Returns true if successful.
+
+On systems that support a close-on-exec flag on files, the flag will
+be set for the newly opened file descriptors, as determined by the value
+of $^F.  See L<perlvar/$^F>.
 
 Some systems defined C<pipe> in terms of C<socketpair>, in which a call
 to C<pipe(Rdr, Wtr)> is essentially:
@@ -4160,6 +4192,8 @@ well-defined.
 
 =item splice ARRAY,OFFSET
 
+=item splice ARRAY
+
 Removes the elements designated by OFFSET and LENGTH from an array, and
 replaces them with the elements of LIST, if any.  In list context,
 returns the elements removed from the array.  In scalar context,
@@ -4167,7 +4201,9 @@ returns the last element removed, or C<undef> if no elements are
 removed.  The array grows or shrinks as necessary.
 If OFFSET is negative then it starts that far from the end of the array.
 If LENGTH is omitted, removes everything from OFFSET onward.
-If LENGTH is negative, leave that many elements off the end of the array.
+If LENGTH is negative, leaves that many elements off the end of the array.
+If both OFFSET and LENGTH are omitted, removes everything.
+
 The following equivalences hold (assuming C<$[ == 0>):
 
     push(@a,$x,$y)	splice(@a,@a,0,$x,$y)
@@ -4310,10 +4346,6 @@ In addition, Perl permits the following widely-supported conversions:
    %n	special: *stores* the number of characters output so far
         into the next variable in the parameter list 
 
-And the following Perl-specific conversion:
-
-   %v   a string, output as a tuple of integers ("Perl" is 80.101.114.108)
-
 Finally, for backward (and we do mean "backward") compatibility, Perl
 permits these unnecessary but widely-supported conversions:
 
@@ -4339,9 +4371,13 @@ and the conversion letter:
    h       interpret integer as C type "short" or "unsigned short"
            If no flags, interpret integer as C type "int" or "unsigned"
 
-There is also one Perl-specific flag:
+There are also two Perl-specific flags:
 
    V       interpret integer as Perl's standard integer type
+   v       interpret string as a vector of integers, output as
+           numbers separated either by dots, or by an arbitrary
+	   string received from the argument list when the flag
+	   is preceded by C<*>
 
 Where a number would appear in the flags, an asterisk (C<*>) may be
 used instead, in which case Perl uses the next item in the parameter
@@ -4349,13 +4385,20 @@ list as the given number (that is, as the field width or precision).
 If a field width obtained through C<*> is negative, it has the same
 effect as the C<-> flag: left-justification.
 
+The C<v> flag is useful for displaying ordinal values of characters
+in arbitrary strings:
+
+    printf "version is v%vd\n", $^V;		# Perl's version
+    printf "address is %*vX\n", ":", $addr;	# IPv6 address
+    printf "bits are %*vb\n", " ", $bits;	# random bitstring
+
 If C<use locale> is in effect, the character used for the decimal
 point in formatted real numbers is affected by the LC_NUMERIC locale.
 See L<perllocale>.
 
 If Perl understands "quads" (64-bit integers) (this requires
-either that the platform natively supports quads or that Perl
-has been specifically compiled to support quads), the characters
+either that the platform natively support quads or that Perl
+be specifically compiled to support quads), the characters
 
 	d u o x X b i D U O
 
@@ -4370,11 +4413,11 @@ For example
 You can find out whether your Perl supports quads via L<Config>:
 
 	use Config;
-	($Config{use64bits} eq 'define' || $Config{longsize} == 8) &&
+	($Config{use64bitint} eq 'define' || $Config{longsize} == 8) &&
 		print "quads\n";
 
 If Perl understands "long doubles" (this requires that the platform
-supports long doubles), the flags
+support long doubles), the flags
 
 	e f g E F G
 
@@ -4488,7 +4531,8 @@ last stat or filetest are returned.  Example:
 	print "$file is executable NFS file\n";
     }
 
-(This works on machines only for which the device number is negative under NFS.)
+(This works on machines only for which the device number is negative
+under NFS.)
 
 Because the mode contains both the file type and its permissions, you
 should mask off the file type portion and (s)printf using a C<"%o"> 
@@ -4508,6 +4552,66 @@ The File::stat module provides a convenient, by-name access mechanism:
     printf "File is %s, size is %s, perm %04o, mtime %s\n", 
 	$filename, $sb->size, $sb->mode & 07777,
 	scalar localtime $sb->mtime;
+
+You can import symbolic mode constants (C<S_IF*>) and functions
+(C<S_IS*>) from the Fcntl module:
+
+    use Fcntl ':mode';
+
+    $mode = (stat($filename))[2];
+
+    $user_rwx      = ($mode & S_IRWXU) >> 6;
+    $group_read    = ($mode & S_IRGRP) >> 3;
+    $other_execute =  $mode & S_IXOTH;
+
+    printf "Permissions are %04o\n", S_ISMODE($mode), "\n";
+
+    $is_setuid     =  $mode & S_ISUID;
+    $is_setgid     =  S_ISDIR($mode);
+
+You could write the last two using the C<-u> and C<-d> operators.
+The commonly available S_IF* constants are
+
+    # Permissions: read, write, execute, for user, group, others.
+
+    S_IRWXU S_IRUSR S_IWUSR S_IXUSR
+    S_IRWXG S_IRGRP S_IWGRP S_IXGRP
+    S_IRWXO S_IROTH S_IWOTH S_IXOTH
+    
+    # Setuid/Setgid/Stickiness.
+
+    S_ISUID S_ISGID S_ISVTX S_ISTXT
+
+    # File types.  Not necessarily all are available on your system.
+
+    S_IFREG S_IFDIR S_IFLNK S_IFBLK S_ISCHR S_IFIFO S_IFSOCK S_IFWHT S_ENFMT
+
+    # The following are compatibility aliases for S_IRUSR, S_IWUSR, S_IXUSR.
+
+    S_IREAD S_IWRITE S_IEXEC
+
+and the S_IF* functions are
+
+    S_IFMODE($mode)	the part of $mode containg the permission bits
+			and the setuid/setgid/sticky bits
+
+    S_IFMT($mode)	the part of $mode containing the file type
+			which can be bit-anded with e.g. S_IFREG 
+                        or with the following functions
+
+    # The operators -f, -d, -l, -b, -c, -p, and -s.
+
+    S_ISREG($mode) S_ISDIR($mode) S_ISLNK($mode)
+    S_ISBLK($mode) S_ISCHR($mode) S_ISFIFO($mode) S_ISSOCK($mode)
+
+    # No direct -X operator counterpart, but for the first one
+    # the -g operator is often equivalent.  The ENFMT stands for
+    # record flocking enforcement, a platform-dependent feature.
+
+    S_ISENFMT($mode) S_ISWHT($mode)
+
+See your native chmod(2) and stat(2) documentation for more details
+about the S_* constants.
 
 =item study SCALAR
 
@@ -4748,7 +4852,7 @@ POSITION, C<1> to set the it to the current position plus POSITION,
 and C<2> to set it to EOF plus POSITION (typically negative).  For
 WHENCE, you may also use the constants C<SEEK_SET>, C<SEEK_CUR>, and
 C<SEEK_END> (start of the file, current position, end of the file)
-from any of the modules Fcntl, C<IO::Seekable>, or POSIX.
+from the Fcntl module.
 
 Returns the new position, or the undefined value on failure.  A position
 of zero is returned as the string C<"0 but true">; thus C<sysseek> returns
@@ -5134,11 +5238,13 @@ Note the LIST is prepended whole, not one element at a time, so the
 prepended elements stay in the same order.  Use C<reverse> to do the
 reverse.
 
+=item use Module VERSION LIST
+
+=item use Module VERSION
+
 =item use Module LIST
 
 =item use Module
-
-=item use Module VERSION LIST
 
 =item use VERSION
 
@@ -5150,13 +5256,18 @@ package.  It is exactly equivalent to
 
 except that Module I<must> be a bareword.
 
-If the first argument to C<use> is a number or a version tuple, it is
-treated as a version instead of a module name.  If the version
-of the Perl interpreter is less than VERSION, then an error message
-is printed and Perl exits immediately.
+VERSION, which can be specified as a literal of the form v5.6.1, demands
+that the current version of Perl (C<$^V> or $PERL_VERSION) be at least
+as recent as that version.  (For compatibility with older versions of Perl,
+a numeric literal will also be interpreted as VERSION.)  If the version
+of the running Perl interpreter is less than VERSION, then an error
+message is printed and Perl exits immediately without attempting to
+parse the rest of the file.  Compare with L</require>, which can do a
+similar check at run time.
 
-    use 5.005_03;	# version number
-    use v5.6.0;		# version tuple
+    use v5.6.1;		# compile time version check
+    use 5.6.1;		# ditto
+    use 5.005_03;	# float version allowed for compatibility
 
 This is often useful if you need to check the current Perl version before
 C<use>ing library modules that have changed in incompatible ways from
@@ -5183,9 +5294,12 @@ That is exactly equivalent to
 If the VERSION argument is present between Module and LIST, then the
 C<use> will call the VERSION method in class Module with the given
 version as an argument.  The default VERSION method, inherited from
-the Universal class, croaks if the given version is larger than the
-value of the variable C<$Module::VERSION>.  (Note that there is not a
-comma after VERSION!)
+the UNIVERSAL class, croaks if the given version is larger than the
+value of the variable C<$Module::VERSION>. 
+
+Again, there is a distinction between omitting LIST (C<import> called
+with no arguments) and an explicit empty LIST C<()> (C<import> not
+called).  Note that there is no comma after VERSION!
 
 Because this is a wide-open interface, pragmas (compiler directives)
 are also implemented this way.  Currently implemented pragmas are:

@@ -132,22 +132,27 @@ else {
     print "ok 10\n";
 }
 
-# check that status for the correct process is collected
-my $zombie = fork or exit 37;
-my $pipe = open *FH, "sleep 2;exit 13|" or die "Open: $!\n";
-$SIG{ALRM} = sub { return };
-alarm(1);
-my $close = close FH;
-if ($? == 13*256 && ! length $close && ! $!) {
-    print "ok 11\n";
+if ($^O eq 'mpeix') {
+    print "ok 11 # skipped\n";
+    print "ok 12 # skipped\n";
 } else {
-    print "not ok 11\n# close $close\$?=$?   \$!=", $!+0, ":$!\n";
-};
-my $wait = wait;
-if ($? == 37*256 && $wait == $zombie && ! $!) {
-    print "ok 12\n";
-} else {
-    print "not ok 12\n# pid=$wait first=$pid pipe=$pipe zombie=$zombie me=$$ \$?=$?   \$!=", $!+0, ":$!\n";
+    # check that status for the correct process is collected
+    my $zombie = fork or exit 37;
+    my $pipe = open *FH, "sleep 2;exit 13|" or die "Open: $!\n";
+    $SIG{ALRM} = sub { return };
+    alarm(1);
+    my $close = close FH;
+    if ($? == 13*256 && ! length $close && ! $!) {
+        print "ok 11\n";
+    } else {
+        print "not ok 11\n# close $close\$?=$?   \$!=", $!+0, ":$!\n";
+    };
+    my $wait = wait;
+    if ($? == 37*256 && $wait == $zombie && ! $!) {
+        print "ok 12\n";
+    } else {
+        print "not ok 12\n# pid=$wait first=$pid pipe=$pipe zombie=$zombie me=$$ \$?=$?   \$!=", $!+0, ":$!\n";
+    }
 }
 
 # Test new semantics for missing command in piped open

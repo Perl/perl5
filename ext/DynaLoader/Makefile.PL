@@ -12,7 +12,8 @@ WriteMakefile(
 		    'XSLoader_pm.PL'=>'XSLoader.pm'},
     PM		=> {'DynaLoader.pm' => '$(INST_LIBDIR)/DynaLoader.pm',
 		    'XSLoader.pm' => '$(INST_LIBDIR)/XSLoader.pm'},
-    clean	=> {FILES => 'DynaLoader.c DynaLoader.xs DynaLoader.pm'},
+    clean	=> {FILES => 'DynaLoader.c DynaLoader.xs DynaLoader.pm ' .
+			     'XSLoader.pm'},
 );
 
 sub MY::postamble {

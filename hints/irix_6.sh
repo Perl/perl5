@@ -47,6 +47,11 @@ esac
 case "$cc" in
 *"cc -n32"*)
 
+	libscheck='case "`file $xxx`" in
+*N32*) ;;
+*) xxx=/no/n32$xxx ;;
+esac'
+
 	# Perl 5.004_57 introduced new qsort code into pp_ctl.c that
 	# makes IRIX  cc prior to 7.2.1 to emit bad code.
 	# so some serious hackery follows to set pp_ctl flags correctly.
@@ -54,11 +59,11 @@ case "$cc" in
 	# Check for which version of the compiler we're running
 	case "`$cc -version 2>&1`" in
 	*7.0*)                        # Mongoose 7.0
-	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1042,1048,1110,1116,1184 -OPT:Olimit=0"
+	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1042,1048,1110,1116,1174,1184,1552 -OPT:Olimit=0"
 	     optimize='none'
 	     ;;
 	*7.1*|*7.2|*7.20)             # Mongoose 7.1+
-	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1110,1184 -OPT:Olimit=0"
+	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1110,1174,1184,1552 -OPT:Olimit=0"
 	     optimize='-O3'
 # This is a temporary fix for 5.005.
 # Leave pp_ctl_cflags  line at left margin for Configure.  See 
@@ -67,15 +72,15 @@ case "$cc" in
 pp_ctl_cflags='optimize=-O'
 	     ;;
 	*7.*)                         # Mongoose 7.2.1+
-	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1110,1184 -OPT:Olimit=0:space=ON"
+	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1110,1174,1184,1552 -OPT:Olimit=0:space=ON"
 	     optimize='-O3'
 	     ;;
 	*6.2*)                        # Ragnarok 6.2
-	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1110,1184"
+	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1110,1174,1184,1552"
 	     optimize='none'
 	     ;;
 	*)                            # Be safe and not optimize
-	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1110,1184 -OPT:Olimit=0"
+	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1110,1174,1184,1552 -OPT:Olimit=0"
 	     optimize='none'
 	     ;;
 	esac
@@ -151,6 +156,11 @@ ldflags="$ldflags -Wl,-woff,84"
 set `echo X "$libswanted "|sed -e 's/ socket / /' -e 's/ nsl / /' -e 's/ dl / /'`
 shift
 libswanted="$*"
+
+# Irix 6.5.6 seems to have a broken header <sys/mode.h>
+# don't include that (it doesn't contain S_IFMT, S_IFREG, et al)
+
+i_sysmode="$undef"
 
 # I have conflicting reports about the sun, crypt, bsd, and PW
 # libraries on Irix 6.2.
@@ -228,10 +238,10 @@ EOCBU
 
 # The -n32 makes off_t to be 8 bytes, so we should have largefileness.
 
-# This script UU/use64bits.cbu will get 'called-back' by Configure 
+# This script UU/use64bitint.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use 64 bits.
-cat > UU/use64bits.cbu <<'EOCBU'
-case "$use64bits" in
+cat > UU/use64bitint.cbu <<'EOCBU'
+case "$use64bitint" in
 $define|true|[yY]*)
 	    case "`uname -r`" in
 	    [1-5]*|6.[01])
@@ -243,15 +253,25 @@ EOM
 		exit 1
 		;;
 	    esac
-	    case "$cc $ccflags" in
-	    *-n32*)
-		case "$ccflags" in
-		*-DUSE_LONG_LONG) ;;
-		*) ccflags="$ccflags -DUSE_LONG_LONG" ;;
-		esac
-		archname64="-n32"
-		;;
-	    esac
 	    ;;
 esac
 EOCBU
+
+# This script UU/use64bitall.cbu will get 'called-back' by Configure 
+# after it has prompted the user for whether to use 64 bits.
+cat > UU/use64bitall.cbu <<'EOCBU'
+case "$use64bitall" in
+$define|true|[yY]*)
+	ccflags="`echo $ccflags|sed -e 's%-n32%%'` -64"
+	ldflags="`echo $ldflags|sed -e 's%-n32%%'` -64"
+	lddlflags="`echo $ldfdllags|sed -e 's%-n32%%'` -64"
+	loclibpth="$loclibpth /usr/lib64"
+	libscheck='case "`file $xxx`" in
+*64-bit*) ;;
+*) xxx=/no/64-bit$xxx ;;
+esac'
+	;;
+esac
+EOCBU
+
+

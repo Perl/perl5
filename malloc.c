@@ -125,6 +125,9 @@
      # Type of size argument for allocation functions
      MEM_SIZE				unsigned long
 
+     # size of void*
+     PTRSIZE				4
+
      # Maximal value in LONG
      LONG_MAX				0x7FFFFFFF
 
@@ -245,6 +248,9 @@
 #    ifndef Malloc_t
 #      define Malloc_t void *
 #    endif
+#    ifndef PTRSIZE
+#      define PTRSIZE 4
+#    endif
 #    ifndef MEM_SIZE
 #      define MEM_SIZE unsigned long
 #    endif
@@ -331,6 +337,13 @@
 	if (PERL_GET_INTERP) { dTHX; if (PL_debug & 128) { a; } }	\
     } STMT_END
 #endif
+
+#ifdef PERL_IMPLICIT_CONTEXT
+#  define PERL_IS_ALIVE		aTHX
+#else
+#  define PERL_IS_ALIVE		TRUE
+#endif
+    
 
 /*
  * Layout of memory:
@@ -815,6 +828,16 @@ static char bucket_of[] =
 #  define SBRK_FAILURE_PRICE 50
 #endif 
 
+static void	morecore	(register int bucket);
+#  if defined(DEBUGGING)
+static void	botch		(char *diag, char *s);
+#  endif
+static void	add_to_chain	(void *p, MEM_SIZE size, MEM_SIZE chip);
+static void*	get_from_chain	(MEM_SIZE size);
+static void*	get_from_bigger_buckets(int bucket, MEM_SIZE size);
+static union overhead *getpages	(MEM_SIZE needed, int *nblksp, int bucket);
+static int	getpages_adjacent(MEM_SIZE require);
+
 #if defined(PERL_EMERGENCY_SBRK) && defined(PERL_CORE)
 
 #  ifndef BIG_SIZE
@@ -830,18 +853,6 @@ static char bucket_of[] =
 
 static char *emergency_buffer;
 static MEM_SIZE emergency_buffer_size;
-
-static int	findbucket	(union overhead *freep, int srchlen);
-static void	morecore	(register int bucket);
-#  if defined(DEBUGGING)
-static void	botch		(char *diag, char *s);
-#  endif
-static void	add_to_chain	(void *p, MEM_SIZE size, MEM_SIZE chip);
-static Malloc_t	emergency_sbrk	(MEM_SIZE size);
-static void*	get_from_chain	(MEM_SIZE size);
-static void*	get_from_bigger_buckets(int bucket, MEM_SIZE size);
-static union overhead *getpages	(int needed, int *nblksp, int bucket);
-static int	getpages_adjacent(int require);
 
 static Malloc_t
 emergency_sbrk(MEM_SIZE size)
@@ -908,13 +919,21 @@ emergency_sbrk(MEM_SIZE size)
 #  define emergency_sbrk(size)	-1
 #endif /* !(defined(PERL_EMERGENCY_SBRK) && defined(PERL_CORE)) */
 
+#ifndef BITS_IN_PTR
+#  define BITS_IN_PTR (8*PTRSIZE)
+#endif
+
 /*
  * nextf[i] is the pointer to the next free block of size 2^i.  The
  * smallest allocatable block is 8 bytes.  The overhead information
  * precedes the data area returned to the user.
  */
-#define	NBUCKETS (32*BUCKETS_PER_POW2 + 1)
+#define	NBUCKETS (BITS_IN_PTR*BUCKETS_PER_POW2 + 1)
 static	union overhead *nextf[NBUCKETS];
+
+#if defined(PURIFY) && !defined(USE_PERL_SBRK)
+#  define USE_PERL_SBRK
+#endif
 
 #ifdef USE_PERL_SBRK
 #define sbrk(a) Perl_sbrk(a)
@@ -947,7 +966,7 @@ static	u_int goodsbrk;
 static void
 botch(char *diag, char *s)
 {
-	dTHXo;
+	dTHX;
 	PerlIO_printf(PerlIO_stderr(), "assertion botched (%s?): %s\n", diag, s);
 	PerlProc_abort();
 }
@@ -1032,13 +1051,13 @@ Perl_malloc(register size_t nbytes)
 	/* remove from linked list */
 #if defined(RCHECK)
 	if ((PTR2UV(p)) & (MEM_ALIGNBYTES - 1)) {
-	    dTHXo;
+	    dTHX;
 	    PerlIO_printf(PerlIO_stderr(),
 			  "Unaligned pointer in the free chain 0x%"UVxf"\n",
 			  PTR2UV(p));
 	}
 	if ((PTR2UV(p->ov_next)) & (MEM_ALIGNBYTES - 1)) {
-	    dTHXo;
+	    dTHX;
 	    PerlIO_printf(PerlIO_stderr(),
 			  "Unaligned `next' pointer in the free "
 			  "chain 0x"UVxf" at 0x%"UVxf"\n",
@@ -1179,14 +1198,14 @@ get_from_bigger_buckets(int bucket, MEM_SIZE size)
 }
 
 static union overhead *
-getpages(int needed, int *nblksp, int bucket)
+getpages(MEM_SIZE needed, int *nblksp, int bucket)
 {
     /* Need to do (possibly expensive) system call. Try to
        optimize it for rare calling. */
     MEM_SIZE require = needed - sbrked_remains;
     char *cp;
     union overhead *ovp;
-    int slack = 0;
+    MEM_SIZE slack = 0;
 
     if (sbrk_good > 0) {
 	if (!last_sbrk_top && require < FIRST_SBRK) 
@@ -1332,7 +1351,7 @@ getpages(int needed, int *nblksp, int bucket)
 }
 
 static int
-getpages_adjacent(int require)
+getpages_adjacent(MEM_SIZE require)
 {	    
     if (require <= sbrked_remains) {
 	sbrked_remains -= require;
@@ -1502,17 +1521,35 @@ Perl_mfree(void *mp)
 	    {
 		static int bad_free_warn = -1;
 		if (bad_free_warn == -1) {
-		    dTHXo;
+		    dTHX;
 		    char *pbf = PerlEnv_getenv("PERL_BADFREE");
 		    bad_free_warn = (pbf) ? atoi(pbf) : 1;
 		}
 		if (!bad_free_warn)
 		    return;
 #ifdef RCHECK
+#ifdef PERL_CORE
+		{
+		    dTHX;
+		    if (!PERL_IS_ALIVE || !PL_curcop || ckWARN_d(WARN_MALLOC))
+			Perl_warner(aTHX_ WARN_MALLOC, "%s free() ignored",
+				    ovp->ov_rmagic == RMAGIC - 1 ?
+				    "Duplicate" : "Bad");
+		}
+#else
 		warn("%s free() ignored",
 		    ovp->ov_rmagic == RMAGIC - 1 ? "Duplicate" : "Bad");
+#endif		
+#else
+#ifdef PERL_CORE
+		{
+		    dTHX;
+		    if (!PERL_IS_ALIVE || !PL_curcop || ckWARN_d(WARN_MALLOC))
+			Perl_warner(aTHX_ WARN_MALLOC, "%s", "Bad free() ignored");
+		}
 #else
 		warn("%s", "Bad free() ignored");
+#endif
 #endif
 		return;				/* sanity */
 	    }
@@ -1584,18 +1621,38 @@ Perl_realloc(void *mp, size_t nbytes)
 	    {
 		static int bad_free_warn = -1;
 		if (bad_free_warn == -1) {
-		    dTHXo;
+		    dTHX;
 		    char *pbf = PerlEnv_getenv("PERL_BADFREE");
 		    bad_free_warn = (pbf) ? atoi(pbf) : 1;
 		}
 		if (!bad_free_warn)
 		    return Nullch;
 #ifdef RCHECK
+#ifdef PERL_CORE
+		{
+		    dTHX;
+		    if (!PERL_IS_ALIVE || !PL_curcop || ckWARN_d(WARN_MALLOC))
+			Perl_warner(aTHX_ WARN_MALLOC, "%srealloc() %signored",
+				    (ovp->ov_rmagic == RMAGIC - 1 ? "" : "Bad "),
+				    ovp->ov_rmagic == RMAGIC - 1
+				    ? "of freed memory " : "");
+		}
+#else
 		warn("%srealloc() %signored",
 		    (ovp->ov_rmagic == RMAGIC - 1 ? "" : "Bad "),
 		     ovp->ov_rmagic == RMAGIC - 1 ? "of freed memory " : "");
+#endif
+#else
+#ifdef PERL_CORE
+		{
+		    dTHX;
+		    if (!PERL_IS_ALIVE || !PL_curcop || ckWARN_d(WARN_MALLOC))
+			Perl_warner(aTHX_ WARN_MALLOC, "%s",
+				    "Bad realloc() ignored");
+		}
 #else
 		warn("%s", "Bad realloc() ignored");
+#endif
 #endif
 		return Nullch;			/* sanity */
 	    }
@@ -1717,28 +1774,6 @@ Perl_realloc(void *mp, size_t nbytes)
   	return ((Malloc_t)res);
 }
 
-/*
- * Search ``srchlen'' elements of each free list for a block whose
- * header starts at ``freep''.  If srchlen is -1 search the whole list.
- * Return bucket number, or -1 if not found.
- */
-static int
-findbucket(union overhead *freep, int srchlen)
-{
-	register union overhead *p;
-	register int i, j;
-
-	for (i = 0; i < NBUCKETS; i++) {
-		j = 0;
-		for (p = nextf[i]; p && j != srchlen; p = p->ov_next) {
-			if (p == freep)
-				return (i);
-			j++;
-		}
-	}
-	return (-1);
-}
-
 Malloc_t
 Perl_calloc(register size_t elements, register size_t size)
 {
@@ -1814,6 +1849,57 @@ Perl_malloced_size(void *p)
 #  else
 #    define MIN_EVEN_REPORT MIN_BUCKET
 #  endif 
+
+int
+Perl_get_mstats(pTHX_ perl_mstats_t *buf, int buflen, int level)
+{
+#ifdef DEBUGGING_MSTATS
+  	register int i, j;
+  	register union overhead *p;
+	struct chunk_chain_s* nextchain;
+
+  	buf->topbucket = buf->topbucket_ev = buf->topbucket_odd 
+	    = buf->totfree = buf->total = buf->total_chain = 0;
+
+	buf->minbucket = MIN_BUCKET;
+	MALLOC_LOCK;
+  	for (i = MIN_BUCKET ; i < NBUCKETS; i++) {
+  		for (j = 0, p = nextf[i]; p; p = p->ov_next, j++)
+  			;
+		if (i < buflen) {
+		    buf->nfree[i] = j;
+		    buf->ntotal[i] = nmalloc[i];
+		}		
+  		buf->totfree += j * BUCKET_SIZE_REAL(i);
+  		buf->total += nmalloc[i] * BUCKET_SIZE_REAL(i);
+		if (nmalloc[i]) {
+		    i % 2 ? (buf->topbucket_odd = i) : (buf->topbucket_ev = i);
+		    buf->topbucket = i;
+		}
+  	}
+	nextchain = chunk_chain;
+	while (nextchain) {
+	    buf->total_chain += nextchain->size;
+	    nextchain = nextchain->next;
+	}
+	buf->total_sbrk = goodsbrk + sbrk_slack;
+	buf->sbrks = sbrks;
+	buf->sbrk_good = sbrk_good;
+	buf->sbrk_slack = sbrk_slack;
+	buf->start_slack = start_slack;
+	buf->sbrked_remains = sbrked_remains;
+	MALLOC_UNLOCK;
+	if (level) {
+	    for (i = MIN_BUCKET ; i < NBUCKETS; i++) {
+		if (i >= buflen)
+		    break;
+		buf->bucket_mem_size[i] = BUCKET_SIZE(i);
+		buf->bucket_available_size[i] = BUCKET_SIZE_REAL(i);
+	    }
+	}
+#endif	/* defined DEBUGGING_MSTATS */
+	return 0;		/* XXX unused */
+}
 /*
  * mstats - print out statistics about malloc
  * 
@@ -1827,82 +1913,70 @@ Perl_dump_mstats(pTHX_ char *s)
 #ifdef DEBUGGING_MSTATS
   	register int i, j;
   	register union overhead *p;
-  	int topbucket=0, topbucket_ev=0, topbucket_odd=0, totfree=0, total=0;
-	u_int nfree[NBUCKETS];
-	int total_chain = 0;
+	perl_mstats_t buffer;
+	unsigned long nf[NBUCKETS];
+	unsigned long nt[NBUCKETS];
 	struct chunk_chain_s* nextchain;
 
-	MALLOC_LOCK;
-  	for (i = MIN_BUCKET ; i < NBUCKETS; i++) {
-  		for (j = 0, p = nextf[i]; p; p = p->ov_next, j++)
-  			;
-		nfree[i] = j;
-  		totfree += nfree[i] * BUCKET_SIZE_REAL(i);
-  		total += nmalloc[i] * BUCKET_SIZE_REAL(i);
-		if (nmalloc[i]) {
-		    i % 2 ? (topbucket_odd = i) : (topbucket_ev = i);
-		    topbucket = i;
-		}
-  	}
-	nextchain = chunk_chain;
-	while (nextchain) {
-	    total_chain += nextchain->size;
-	    nextchain = nextchain->next;
-	}
-	MALLOC_UNLOCK;
+	buffer.nfree  = nf;
+	buffer.ntotal = nt;
+	get_mstats(&buffer, NBUCKETS, 0);
+
   	if (s)
 	    PerlIO_printf(Perl_error_log,
 			  "Memory allocation statistics %s (buckets %ld(%ld)..%ld(%ld)\n",
 			  s, 
 			  (long)BUCKET_SIZE_REAL(MIN_BUCKET), 
 			  (long)BUCKET_SIZE(MIN_BUCKET),
-			  (long)BUCKET_SIZE_REAL(topbucket), (long)BUCKET_SIZE(topbucket));
-  	PerlIO_printf(Perl_error_log, "%8d free:", totfree);
-  	for (i = MIN_EVEN_REPORT; i <= topbucket; i += BUCKETS_PER_POW2) {
+			  (long)BUCKET_SIZE_REAL(buffer.topbucket), 
+			  (long)BUCKET_SIZE(buffer.topbucket));
+  	PerlIO_printf(Perl_error_log, "%8ld free:", buffer.totfree);
+  	for (i = MIN_EVEN_REPORT; i <= buffer.topbucket; i += BUCKETS_PER_POW2) {
   		PerlIO_printf(Perl_error_log, 
 			      ((i < 8*BUCKETS_PER_POW2 || i == 10*BUCKETS_PER_POW2)
 			       ? " %5d" 
 			       : ((i < 12*BUCKETS_PER_POW2) ? " %3d" : " %d")),
-			      nfree[i]);
+			      buffer.nfree[i]);
   	}
 #ifdef BUCKETS_ROOT2
 	PerlIO_printf(Perl_error_log, "\n\t   ");
-  	for (i = MIN_BUCKET + 1; i <= topbucket_odd; i += BUCKETS_PER_POW2) {
+  	for (i = MIN_BUCKET + 1; i <= buffer.topbucket_odd; i += BUCKETS_PER_POW2) {
   		PerlIO_printf(Perl_error_log, 
 			      ((i < 8*BUCKETS_PER_POW2 || i == 10*BUCKETS_PER_POW2)
 			       ? " %5d" 
 			       : ((i < 12*BUCKETS_PER_POW2) ? " %3d" : " %d")),
-			      nfree[i]);
+			      buffer.nfree[i]);
   	}
 #endif 
-  	PerlIO_printf(Perl_error_log, "\n%8d used:", total - totfree);
-  	for (i = MIN_EVEN_REPORT; i <= topbucket; i += BUCKETS_PER_POW2) {
+  	PerlIO_printf(Perl_error_log, "\n%8ld used:", buffer.total - buffer.totfree);
+  	for (i = MIN_EVEN_REPORT; i <= buffer.topbucket; i += BUCKETS_PER_POW2) {
   		PerlIO_printf(Perl_error_log, 
 			      ((i < 8*BUCKETS_PER_POW2 || i == 10*BUCKETS_PER_POW2)
 			       ? " %5d" 
 			       : ((i < 12*BUCKETS_PER_POW2) ? " %3d" : " %d")), 
-			      nmalloc[i] - nfree[i]);
+			      buffer.ntotal[i] - buffer.nfree[i]);
   	}
 #ifdef BUCKETS_ROOT2
 	PerlIO_printf(Perl_error_log, "\n\t   ");
-  	for (i = MIN_BUCKET + 1; i <= topbucket_odd; i += BUCKETS_PER_POW2) {
+  	for (i = MIN_BUCKET + 1; i <= buffer.topbucket_odd; i += BUCKETS_PER_POW2) {
   		PerlIO_printf(Perl_error_log, 
 			      ((i < 8*BUCKETS_PER_POW2 || i == 10*BUCKETS_PER_POW2)
 			       ? " %5d" 
 			       : ((i < 12*BUCKETS_PER_POW2) ? " %3d" : " %d")),
-			      nmalloc[i] - nfree[i]);
+			      buffer.ntotal[i] - buffer.nfree[i]);
   	}
 #endif 
-	PerlIO_printf(Perl_error_log, "\nTotal sbrk(): %d/%d:%d. Odd ends: pad+heads+chain+tail: %d+%d+%d+%d.\n",
-		      goodsbrk + sbrk_slack, sbrks, sbrk_good, sbrk_slack,
-		      start_slack, total_chain, sbrked_remains);
+	PerlIO_printf(Perl_error_log, "\nTotal sbrk(): %ld/%ld:%ld. Odd ends: pad+heads+chain+tail: %ld+%ld+%ld+%ld.\n",
+		      buffer.total_sbrk, buffer.sbrks, buffer.sbrk_good,
+		      buffer.sbrk_slack, buffer.start_slack,
+		      buffer.total_chain, buffer.sbrked_remains);
 #endif /* DEBUGGING_MSTATS */
 }
 #endif /* lint */
 
 #ifdef USE_PERL_SBRK
 
-#   if defined(__MACHTEN_PPC__) || defined(NeXT) || defined(__NeXT__)
+#   if defined(__MACHTEN_PPC__) || defined(NeXT) || defined(__NeXT__) || defined(PURIFY)
 #      define PERL_SBRK_VIA_MALLOC
 /*
  * MachTen's malloc() returns a buffer aligned on a two-byte boundary.

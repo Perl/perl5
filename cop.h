@@ -149,23 +149,28 @@ struct block_sub {
 struct block_eval {
     I32		old_in_eval;
     I32		old_op_type;
-    char *	old_name;
+    SV *	old_namesv;
     OP *	old_eval_root;
     SV *	cur_text;
 };
 
 #define PUSHEVAL(cx,n,fgv)						\
+    STMT_START {							\
 	cx->blk_eval.old_in_eval = PL_in_eval;				\
 	cx->blk_eval.old_op_type = PL_op->op_type;			\
-	cx->blk_eval.old_name = (n ? savepv(n) : Nullch);		\
+	cx->blk_eval.old_namesv = (n ? newSVpv(n,0) : Nullsv);		\
 	cx->blk_eval.old_eval_root = PL_eval_root;			\
-	cx->blk_eval.cur_text = PL_linestr;
+	cx->blk_eval.cur_text = PL_linestr;				\
+    } STMT_END
 
 #define POPEVAL(cx)							\
+    STMT_START {							\
 	PL_in_eval = cx->blk_eval.old_in_eval;				\
 	optype = cx->blk_eval.old_op_type;				\
 	PL_eval_root = cx->blk_eval.old_eval_root;			\
-	Safefree(cx->blk_eval.old_name);
+	if (cx->blk_eval.old_namesv)					\
+	    sv_2mortal(cx->blk_eval.old_namesv);			\
+    } STMT_END
 
 /* loop context */
 struct block_loop {

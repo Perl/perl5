@@ -376,6 +376,18 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_mktime HAS_MKTIME		/**/
 
+/* HAS_MSYNC:
+ *	This symbol, if defined, indicates that the msync system call is
+ *	available to synchronize a mapped file.
+ */
+#$d_msync HAS_MSYNC		/**/
+
+/* HAS_MUNMAP:
+ *	This symbol, if defined, indicates that the munmap system call is
+ *	available to unmap a region, usually mapped by mmap().
+ */
+#$d_munmap HAS_MUNMAP		/**/
+
 /* HAS_NICE:
  *	This symbol, if defined, indicates that the nice routine is
  *	available.
@@ -1078,8 +1090,8 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 
 /* MEM_ALIGNBYTES:
  *	This symbol contains the number of bytes required to align a
- *	double. Usual values are 2, 4 and 8. The default is eight,
- *	for safety.
+ *	double, or a long double when applicable. Usual values are 2,
+ *	4 and 8. The default is eight, for safety.
  */
 #if defined(CROSSCOMPILE) || defined(MULTIARCH)
 #  define MEM_ALIGNBYTES 8
@@ -1344,6 +1356,11 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_fd_set HAS_FD_SET	/**/
 
+/* HAS_FPOS64_T:
+ *	This symbol will be defined if the C compiler supports fpos64_t.
+ */
+#$d_fpos64_t	HAS_FPOS64_T    	/**/
+
 /* HAS_STRUCT_FS_DATA:
  *	This symbol, if defined, indicates that the struct fs_data
  *	to do statfs() is supported.
@@ -1361,6 +1378,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	available to stat filesystems by file descriptors.
  */
 #$d_fstatfs HAS_FSTATFS		/**/
+
 /* HAS_FTELLO:
  *	This symbol, if defined, indicates that the ftello routine is
  *	available to ftell beyond 32 bits (useful for ILP32 hosts).
@@ -1383,6 +1401,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	The last two assume trailing zeros should not be kept.
  */
 #define Gconvert(x,n,t,b) $d_Gconvert
+
+/* HAS_GETCWD:
+ *	This symbol, if defined, indicates that the getcwd routine is
+ *	available to get the current working directory.
+ */
+#$d_getcwd HAS_GETCWD		/**/
 
 /* HAS_GETGRENT:
  *	This symbol, if defined, indicates that the getgrent routine is
@@ -1597,6 +1621,13 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_iconv HAS_ICONV		/**/
 
+/* HAS_INT64_T:
+ *     This symbol will defined if the C compiler supports int64_t.
+ *     Usually the <inttypes.h> needs to be included, but sometimes
+ *	<sys/types.h> is enough.
+ */
+#$d_int64_t     HAS_INT64_T               /**/
+
 /* HAS_ISASCII:
  *	This manifest constant lets the C program know that isascii 
  *	is available.
@@ -1651,11 +1682,54 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_memchr HAS_MEMCHR	/**/
 
+/* HAS_MKDTEMP:
+ *	This symbol, if defined, indicates that the mkdtemp routine is
+ *	available to exclusively create a uniquely named temporary directory.
+ */
+#$d_mkdtemp HAS_MKDTEMP		/**/
+
+/* HAS_MKSTEMP:
+ *	This symbol, if defined, indicates that the mkstemp routine is
+ *	available to exclusively create and open a uniquely named
+ *	temporary file.
+ */
+#$d_mkstemp HAS_MKSTEMP		/**/
+
+/* HAS_MKSTEMPS:
+ *	This symbol, if defined, indicates that the mkstemps routine is
+ *	available to excluslvely create and open a uniquely named
+ *	(with a suffix) temporary file.
+ */
+#$d_mkstemps HAS_MKSTEMPS		/**/
+
+/* HAS_MMAP:
+ *	This symbol, if defined, indicates that the mmap system call is
+ *	available to map a file into memory.
+ */
+/* Mmap_t:
+ *	This symbol holds the return type of the mmap() system call
+ *	(and simultaneously the type of the first argument).
+ *	Usually set to 'void *' or 'cadd_t'.
+ */
+#$d_mmap HAS_MMAP		/**/
+#define Mmap_t $mmaptype	/**/
+
+/* HAS_MPROTECT:
+ *	This symbol, if defined, indicates that the mprotect system call is
+ *	available to modify the access protection of a memory mapped file.
+ */
+#$d_mprotect HAS_MPROTECT		/**/
+
 /* HAS_MSG:
  *	This symbol, if defined, indicates that the entire msg*(2) library is
  *	supported (IPC mechanism based on message queues).
  */
 #$d_msg HAS_MSG		/**/
+
+/* HAS_OFF64_T:
+ *	This symbol will be defined if the C compiler supports off64_t.
+ */
+#$d_off64_t	HAS_OFF64_T    		/**/
 
 /* HAS_OPEN3:
  *	This manifest constant lets the C program know that the three
@@ -2290,6 +2364,18 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$i_socks	I_SOCKS		/**/
 
+/* I_SYSLOG:
+ *	This symbol, if defined, indicates that <syslog.h> exists and
+ *	should be included.
+ */
+#$i_syslog	I_SYSLOG		/**/
+
+/* I_SYSMODE:
+ *	This symbol, if defined, indicates that <sys/mode.h> exists and
+ *	should be included.
+ */
+#$i_sysmode	I_SYSMODE		/**/
+
 /* I_SYS_MOUNT:
  *	This symbol, if defined, indicates that <sys/mount.h> exists and
  *	should be included.
@@ -2312,6 +2398,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	should be included.
  */
 #$i_sysuio	I_SYSUIO		/**/
+
+/* I_SYSUTSNAME:
+ *	This symbol, if defined, indicates that <sys/utsname.h> exists and
+ *	should be included.
+ */
+#$i_sysutsname	I_SYSUTSNAME		/**/
 
 /* I_SYS_VFS:
  *	This symbol, if defined, indicates that <sys/vfs.h> exists and
@@ -2350,14 +2442,11 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #define PERL_INC_VERSION_LIST $inc_version_list_init		/**/
 
-/* HAS_OFF64_T:
- *	This symbol will be defined if the C compiler supports off64_t.
+/* INSTALL_USR_BIN_PERL:
+ *	This symbol, if defined, indicates that Perl is to be installed
+ * 	also as /usr/bin/perl.
  */
-/* HAS_FPOS64_T:
- *	This symbol will be defined if the C compiler supports fpos64_t.
- */
-#$d_off64_t	HAS_OFF64_T    		/**/
-#$d_fpos64_t	HAS_FPOS64_T    	/**/
+#$installusrbinperl INSTALL_USR_BIN_PERL	/**/
 
 /* PERL_PRIfldbl:
  *	This symbol, if defined, contains the string used by stdio to
@@ -2761,19 +2850,35 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #define Uid_t $uidtype		/* UID type */
 
-/* USE_64_BITS:
+/* USE_64_BIT_INT:
  *	This symbol, if defined, indicates that 64-bit integers should
  *	be used when available.  If not defined, the native integers
- *	will be used (be they 32 or 64 bits).
+ *	will be employed (be they 32 or 64 bits).  The minimal possible
+ *	64-bitness is used, just enough to get 64-bit integers into Perl.
+ *	This may mean using for example "long longs", while your memory
+ *	may still be limited to 2 gigabytes.
  */
-#ifndef USE_64_BITS
-#$use64bits	USE_64_BITS		/**/
+/* USE_64_BIT_ALL:
+ *	This symbol, if defined, indicates that 64-bit integers should
+ *	be used when available.  If not defined, the native integers
+ *	will be used (be they 32 or 64 bits).  The maximal possible
+ *	64-bitness is employed: LP64 or ILP64, meaning that you will
+ *	be able to use more than 2 gigabytes of memory.  This mode is
+ *	even more binary incompatible than USE_64_BIT_INT. You may not
+ *	be able to run the resulting executable in a 32-bit CPU at all or
+ *	you may need at least to reboot your OS to 64-bit mode.
+ */
+#ifndef USE_64_BIT_INT
+#$use64bitint	USE_64_BIT_INT		/**/
+#endif
+
+#ifndef USE_64_BIT_ALL
+#$use64bitall	USE_64_BIT_ALL		/**/
 #endif
 
 /* USE_LARGE_FILES:
  *	This symbol, if defined, indicates that large file support
- *	should be used when available.  The USE_64_BITS symbol will
- *	also be turned on if necessary.
+ *	should be used when available.
  */
 #ifndef USE_LARGE_FILES
 #$uselargefiles	USE_LARGE_FILES		/**/
@@ -2785,14 +2890,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #ifndef USE_LONG_DOUBLE
 #$uselongdouble	USE_LONG_DOUBLE		/**/
-#endif
-
-/* USE_LONG_LONG:
- *	This symbol, if defined, indicates that long longs should
- *	be used when available.
- */
-#ifndef USE_LONG_LONG
-#$uselonglong	USE_LONG_LONG		/**/
 #endif
 
 /* USE_MORE_BITS:
@@ -2877,6 +2974,61 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #define void int		/* is void to be avoided? */
 #define M_VOID			/* Xenix strikes again */
 #endif
+
+/* PERL_XS_APIVERSION:
+ *	This variable contains the version of the oldest perl binary
+ *	compatible with the present perl.  perl.c:incpush() and
+ *	lib/lib.pm will automatically search in $sitearch for older
+ *	directories across major versions back to xs_apiversion.
+ *	This is only useful if you have a perl library directory tree
+ *	structured like the default one.
+ *	See INSTALL for how this works.
+ *	The versioned site_perl directory was introduced in 5.005,
+ *	so that is the lowest possible value.
+ *	Since this can depend on compile time options (such as
+ *	bincompat) it is set by Configure.  Other non-default sources
+ *	of potential incompatibility, such as multiplicity, threads,
+ *	debugging, 64bits, sfio, etc., are not checked for currently,
+ *	though in principle we could go snooping around in old
+ *	Config.pm files.
+ */
+/* PERL_PM_APIVERSION:
+ *	This variable contains the version of the oldest perl
+ *	compatible with the present perl.  (That is, pure perl modules
+ *	written for pm_apiversion will still work for the current
+ *	version).  perl.c:incpush() and lib/lib.pm will automatically
+ *	search in $sitelib for older directories across major versions
+ *	back to pm_apiversion.  This is only useful if you have a perl
+ *	library directory tree structured like the default one.  The
+ *	versioned site_perl library was introduced in 5.005, so that's
+ *	the default setting for this variable.  It's hard to imagine
+ *	it changing before Perl6.  It is included here for symmetry
+ *	with xs_apiveprsion -- the searching algorithms will
+ *	(presumably) be similar.
+ *	See the INSTALL file for how this works.
+ */
+#define PERL_XS_APIVERSION "$xs_apiversion"
+#define PERL_PM_APIVERSION "$pm_apiversion"
+
+/* HAS_GETFSSTAT:
+ *	This symbol, if defined, indicates that the getfsstat routine is
+ *	available to stat filesystems in bulk.
+ */
+#$d_getfsstat HAS_GETFSSTAT		/**/
+
+/* HAS_LSEEK_PROTO:
+ *	This symbol, if defined, indicates that the system provides
+ *	a prototype for the lseek() function.  Otherwise, it is up
+ *	to the program to supply one.  A good guess is
+ *		extern off_t lseek(int, off_t, int);
+ */
+#$d_lseekproto	HAS_LSEEK_PROTO	/**/
+
+/* Sock_size_t:
+ *	This symbol holds the type used for the size argument of
+ *	various socket calls (just the base type, not the pointer-to).
+ */
+#define Sock_size_t		$socksizetype /**/
 
 #endif
 !GROK!THIS!

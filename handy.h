@@ -48,18 +48,18 @@ Null SV pointer.
    just figure out all the headers such a test needs.
    Andy Dougherty	August 1996
 */
-/* bool is built-in for g++-2.6.3, which might be used for an extension.
-   If the extension includes <_G_config.h> before this file then
-   _G_HAVE_BOOL will be properly set.  If, however, the extension includes
-   this file first, then you will have to manually set -DHAS_BOOL in 
-   your command line to avoid a conflict.
+/* bool is built-in for g++-2.6.3 and later, which might be used 
+   for extensions.  <_G_config.h> defines _G_HAVE_BOOL, but we can't
+   be sure _G_config.h will be included before this file.  _G_config.h
+   also defines _G_HAVE_BOOL for both gcc and g++, but only g++ 
+   actually has bool.  Hence, _G_HAVE_BOOL is pretty useless for us.
+   g++ can be identified by __GNUG__.
+   Andy Dougherty	February 2000
 */
-#ifdef _G_HAVE_BOOL
-# if _G_HAVE_BOOL
+#ifdef __GNUG__ 	/* GNU g++ has bool built-in */
 #  ifndef HAS_BOOL
-#   define HAS_BOOL 1
+#    define HAS_BOOL 1
 #  endif
-# endif
 #endif
 
 /* The NeXT dynamic loader headers will not build with the bool macro
@@ -81,6 +81,7 @@ Null SV pointer.
 # else
 #  define bool char
 # endif
+# define HAS_BOOL 1
 #endif
 
 /* XXX A note on the perl source internal type system.  The
@@ -466,10 +467,10 @@ typedef U16 line_t;
 #endif
 
 
-/* This looks obsolete (IZ):
-
+/* 
    XXX LEAKTEST doesn't really work in perl5.  There are direct calls to
    safemalloc() in the source, so LEAKTEST won't pick them up.
+   (The main "offenders" are extensions.)
    Further, if you try LEAKTEST, you'll also end up calling
    Safefree, which might call safexfree() on some things that weren't
    malloced with safexmalloc.  The correct "fix" to this, if anyone

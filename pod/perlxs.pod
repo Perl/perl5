@@ -502,9 +502,9 @@ C<ST(1)>.
 
 =head2 Default Parameter Values
 
-Default values for XSUB arguments can be specified by
-placing an assignment statement in the parameter list.  The
-default value may be a number or a string.  Defaults should
+Default values for XSUB arguments can be specified by placing an
+assignment statement in the parameter list.  The default value may
+be a number, a string or the special string C<NO_INIT>.  Defaults should
 always be used on the right-most parameters only.
 
 To allow the XSUB for rpcb_gettime() to have a default host
@@ -1313,6 +1313,19 @@ methods will be called as this:
      RETVAL = THIS->blue();
 
      THIS->set_blue( val );
+
+You could also write a single get/set method using an optional argument:
+
+     int
+     color::blue( val = NO_INIT )
+         int val
+         PROTOTYPE $;$
+         CODE:
+             if (items > 1)
+                 THIS->set_blue( val );
+             RETVAL = THIS->blue();
+         OUTPUT:
+             RETVAL
 
 If the function's name is B<DESTROY> then the C++ C<delete> function will be
 called and C<THIS> will be given as its parameter.  The generated C++ code for

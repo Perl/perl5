@@ -1,7 +1,7 @@
 #############################################################################
 # Pod/ParseUtils.pm -- helpers for POD parsing and conversion
 #
-# Copyright (C) 1999 by Marek Rouchal. All rights reserved.
+# Copyright (C) 1999-2000 by Marek Rouchal. All rights reserved.
 # This file is part of "PodParser". PodParser is free software;
 # you can redistribute it and/or modify it under the same terms
 # as Perl itself.
@@ -305,32 +305,38 @@ sub parse {
     #warn "DEBUG: link=$_\n";
 
     # only page
-    if(m!^(\w+(?:::\w+)*)\s*(\(\w*\)|)$!) {
-        $page = $1 . $2;
+    # problem: a lot of people use (), or (1) or the like to indicate
+    # man page sections. But this collides with L<func()> that is supposed
+    # to point to an internal funtion...
+    # I would like the following better, here and below:
+    #if(m!^(\w+(?:::\w+)*)$!) {
+    my $page_rx = '[\w.]+(?:::[\w.]+)*';
+    if(m!^($page_rx)$!o) {
+        $page = $1;
         $type = 'page';
     }
-    # alttext, page and section
-    elsif(m!^(.+?)\s*[|]\s*(\w+(?:::\w+)*)\s*(\(\w*\)|)\s*/\s*"(.+)"$!) {
-        ($alttext, $page, $node) = ($1, $2 . $3, $4);
+    # alttext, page and "section"
+    elsif(m!^(.+?)\s*[|]\s*($page_rx)\s*/\s*"(.+)"$!o) {
+        ($alttext, $page, $node) = ($1, $2, $3);
         $type = 'section';
     }
-    # page and section
-    elsif(m!^(\w+(?:::\w+)*)\s*(\(\w*\)|)\s*/\s*"(.+)"$!) {
-        ($page, $node) = ($1 . $2, $3);
+    # page and "section"
+    elsif(m!^($page_rx)\s*/\s*"(.+)"$!o) {
+        ($page, $node) = ($1, $2);
         $type = 'section';
     }
     # page and item
-    elsif(m!^(\w+(?:::\w+)*)\s*(\(\w*\)|)\s*/\s*(.+)$!) {
-        ($page, $node) = ($1 . $2, $3);
+    elsif(m!^($page_rx)\s*/\s*(.+)$!o) {
+        ($page, $node) = ($1, $2);
         $type = 'item';
     }
-    # only section
-    elsif(m!^(?:/\s*|)"(.+)"$!) {
+    # only "section"
+    elsif(m!^/?"(.+)"$!) {
         $node = $1;
         $type = 'section';
     }
     # only item
-    elsif(m!^/(.+)$!) {
+    elsif(m!^\s*/(.+)$!) {
         $node = $1;
         $type = 'item';
     }
@@ -340,16 +346,16 @@ sub parse {
         $type = 'hyperlink';
     }
     # alttext, page and item
-    elsif(m!^(.+?)\s*[|]\s*(\w+(?:::\w+)*)\s*(\(\w*\)|)\s*/\s*(.+)$!) {
-        ($alttext, $page, $node) = ($1, $2 . $3, $4);
+    elsif(m!^(.+?)\s*[|]\s*($page_rx)\s*/\s*(.+)$!o) {
+        ($alttext, $page, $node) = ($1, $2, $3);
         $type = 'item';
     }
     # alttext and page
-    elsif(m!^(.+?)\s*[|]\s*(\w+(?:::\w+)*)\s*(\(\w*\)|)$!) {
-        ($alttext, $page) = ($1, $2 . $3);
+    elsif(m!^(.+?)\s*[|]\s*($page_rx)$!o) {
+        ($alttext, $page) = ($1, $2);
         $type = 'page';
     }
-    # alttext and section
+    # alttext and "section"
     elsif(m!^(.+?)\s*[|]\s*(?:/\s*|)"(.+)"$!) {
         ($alttext, $node) = ($1,$2);
         $type = 'section';
@@ -368,9 +374,17 @@ sub parse {
         $node = $_;
         $type = 'item';
     }
+    # collapse whitespace in nodes
+    $node =~ s/\s+/ /gs;
 
-    if($page =~ /[(]\w*[)]$/) {
-        $self->warning("section in `$page' deprecated");
+    #if($page =~ /[(]\w*[)]$/) {
+    #    $self->warning("section in '$page' deprecated");
+    #}
+    if($node =~ m:[|/]:) {
+        $self->warning("node '$node' contains non-escaped | or /");
+    }
+    if($alttext =~ m:[|/]:) {
+        $self->warning("alternative text '$node' contains non-escaped | or /");
     }
     $self->{-page} = $page;
     $self->{-node} = $node;
@@ -559,18 +573,24 @@ sub link {
     my $self = shift;
     my $link = $self->page() || '';
     if($self->node()) {
+        my $node = $self->node();
+        $text =~ s/\|/E<verbar>/g;
+        $text =~ s:/:E<sol>:g;
         if($self->type() eq 'section') {
-            $link .= ($link ? '/' : '') . '"' . $self->node() . '"';
+            $link .= ($link ? '/' : '') . '"' . $node . '"';
         }
         elsif($self->type() eq 'hyperlink') {
             $link = $self->node();
         }
         else { # item
-            $link .= '/' . $self->node();
+            $link .= '/' . $node;
         }
     }
     if($self->alttext()) {
-        $link = $self->alttext() . '|' . $link;
+        my $text = $self->alttext();
+        $text =~ s/\|/E<verbar>/g;
+        $text =~ s:/:E<sol>:g;
+        $link = "$text|$link";
     }
     $link;
 }

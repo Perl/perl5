@@ -277,6 +277,7 @@ S_cl_is_anything(pTHX_ struct regnode_charclass_class *cl)
 STATIC void
 S_cl_init(pTHX_ struct regnode_charclass_class *cl)
 {
+    Zero(cl, 1, struct regnode_charclass_class);
     cl->type = ANYOF;
     cl_anything(cl);
 }
@@ -284,10 +285,9 @@ S_cl_init(pTHX_ struct regnode_charclass_class *cl)
 STATIC void
 S_cl_init_zero(pTHX_ struct regnode_charclass_class *cl)
 {
+    Zero(cl, 1, struct regnode_charclass_class);
     cl->type = ANYOF;
     cl_anything(cl);
-    ANYOF_CLASS_ZERO(cl);
-    ANYOF_BITMAP_ZERO(cl);
     if (LOC)
 	cl->flags |= ANYOF_LOCALE;
 }
@@ -765,10 +765,10 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		}
 		if (!scan) 		/* It was not CURLYX, but CURLY. */
 		    scan = next;
-		if (ckWARN(WARN_UNSAFE) && (minnext + deltanext == 0) 
+		if (ckWARN(WARN_REGEXP) && (minnext + deltanext == 0) 
 		    && !(data->flags & (SF_HAS_PAR|SF_IN_PAR))
 		    && maxcount <= REG_INFTY/3) /* Complement check for big count */
-		    Perl_warner(aTHX_ WARN_UNSAFE,
+		    Perl_warner(aTHX_ WARN_REGEXP,
 				"Strange *+?{} on zero-length expression");
 		min += minnext * mincount;
 		is_inf_internal |= (maxcount == REG_INFTY 
@@ -1388,6 +1388,10 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	 char, regexp);
     if (r == NULL)
 	FAIL("regexp out of space");
+#ifdef DEBUGGING
+    /* avoid reading uninitialized memory in DEBUGGING code in study_chunk() */
+    Zero(r, sizeof(regexp) + (unsigned)PL_regsize * sizeof(regnode), char);
+#endif
     r->refcnt = 1;
     r->prelen = xend - exp;
     r->precomp = PL_regprecomp;
@@ -2202,8 +2206,8 @@ S_regpiece(pTHX_ I32 *flagp)
 	goto do_curly;
     }
   nest_check:
-    if (ckWARN(WARN_UNSAFE) && !SIZE_ONLY && !(flags&HASWIDTH) && max > REG_INFTY/3) {
-	Perl_warner(aTHX_ WARN_UNSAFE, "%.*s matches null string many times",
+    if (ckWARN(WARN_REGEXP) && !SIZE_ONLY && !(flags&HASWIDTH) && max > REG_INFTY/3) {
+	Perl_warner(aTHX_ WARN_REGEXP, "%.*s matches null string many times",
 	    PL_regcomp_parse - origparse, origparse);
     }
 
@@ -2630,8 +2634,8 @@ tryagain:
 			    FAIL("trailing \\ in regexp");
 			/* FALL THROUGH */
 		    default:
-			if (!SIZE_ONLY && ckWARN(WARN_UNSAFE) && isALPHA(*p))
-			    Perl_warner(aTHX_ WARN_UNSAFE, 
+			if (!SIZE_ONLY && ckWARN(WARN_REGEXP) && isALPHA(*p))
+			    Perl_warner(aTHX_ WARN_REGEXP, 
 					"/%.127s/: Unrecognized escape \\%c passed through",
 					PL_regprecomp,
 					*p);
@@ -2822,9 +2826,9 @@ S_regpposixcc(pTHX_ I32 value)
 			    posixcc[skip + 1] == ']'))))
 			Perl_croak(aTHX_ "Character class [:%.*s:] unknown",
 				   t - s - 1, s + 1); 
-		} else if (ckWARN(WARN_UNSAFE) && !SIZE_ONLY)
+		} else if (ckWARN(WARN_REGEXP) && !SIZE_ONLY)
 		    /* [[=foo=]] and [[.foo.]] are still future. */
-		    Perl_warner(aTHX_ WARN_UNSAFE,
+		    Perl_warner(aTHX_ WARN_REGEXP,
 				"Character class syntax [%c %c] is reserved for future extensions", c, c);
 	    } else {
 		/* Maternal grandfather:
@@ -2840,7 +2844,7 @@ S_regpposixcc(pTHX_ I32 value)
 STATIC void
 S_checkposixcc(pTHX)
 {
-    if (!SIZE_ONLY && ckWARN(WARN_UNSAFE) &&
+    if (!SIZE_ONLY && ckWARN(WARN_REGEXP) &&
 	(*PL_regcomp_parse == ':' ||
 	 *PL_regcomp_parse == '=' ||
 	 *PL_regcomp_parse == '.')) {
@@ -2850,10 +2854,10 @@ S_checkposixcc(pTHX)
 	while(*s && isALNUM(*s))
 	    s++;
 	if (*s && c == *s && s[1] == ']') {
-	    Perl_warner(aTHX_ WARN_UNSAFE,
+	    Perl_warner(aTHX_ WARN_REGEXP,
 			"Character class syntax [%c %c] belongs inside character classes", c, c);
 	    if (c == '=' || c == '.')
-		Perl_warner(aTHX_ WARN_UNSAFE,
+		Perl_warner(aTHX_ WARN_REGEXP,
 			    "Character class syntax [%c %c] is reserved for future extensions", c, c);
 	}
     }
@@ -2892,7 +2896,7 @@ S_regclass(pTHX)
 	    ANYOF_FLAGS(ret) |= ANYOF_INVERT;
     }
 
-    if (!SIZE_ONLY && ckWARN(WARN_UNSAFE))
+    if (!SIZE_ONLY && ckWARN(WARN_REGEXP))
 	checkposixcc();
 
     if (*PL_regcomp_parse == ']' || *PL_regcomp_parse == '-')
@@ -2940,8 +2944,8 @@ S_regclass(pTHX)
 		PL_regcomp_parse += numlen;
 		break;
 	    default:
-		if (!SIZE_ONLY && ckWARN(WARN_UNSAFE) && isALPHA(value))
-		    Perl_warner(aTHX_ WARN_UNSAFE, 
+		if (!SIZE_ONLY && ckWARN(WARN_REGEXP) && isALPHA(value))
+		    Perl_warner(aTHX_ WARN_REGEXP, 
 				"/%.127s/: Unrecognized escape \\%c in character class passed through",
 				PL_regprecomp,
 				(int)value);
@@ -2954,8 +2958,8 @@ S_regclass(pTHX)
 	    need_class = 1;
 	    if (range) { /* a-\d, a-[:digit:] */
 		if (!SIZE_ONLY) {
-		    if (ckWARN(WARN_UNSAFE))
-			Perl_warner(aTHX_ WARN_UNSAFE,
+		    if (ckWARN(WARN_REGEXP))
+			Perl_warner(aTHX_ WARN_REGEXP,
 				    "/%.127s/: false [] range \"%*.*s\" in regexp",
 				    PL_regprecomp,
 				    PL_regcomp_parse - rangebegin,
@@ -3239,8 +3243,8 @@ S_regclass(pTHX)
 		PL_regcomp_parse[1] != ']') {
 		PL_regcomp_parse++;
 		if (namedclass > OOB_NAMEDCLASS) { /* \w-, [:word:]- */
-		    if (ckWARN(WARN_UNSAFE))
-			Perl_warner(aTHX_ WARN_UNSAFE,
+		    if (ckWARN(WARN_REGEXP))
+			Perl_warner(aTHX_ WARN_REGEXP,
 				    "/%.127s/: false [] range \"%*.*s\" in regexp",
 				    PL_regprecomp,
 				    PL_regcomp_parse - rangebegin,
@@ -3333,7 +3337,7 @@ S_regclassutf8(pTHX)
 	listsv = newSVpvn("# comment\n",10);
     }
 
-    if (!SIZE_ONLY && ckWARN(WARN_UNSAFE))
+    if (!SIZE_ONLY && ckWARN(WARN_REGEXP))
 	checkposixcc();
 
     if (*PL_regcomp_parse == ']' || *PL_regcomp_parse == '-')
@@ -3418,8 +3422,8 @@ S_regclassutf8(pTHX)
 		PL_regcomp_parse += numlen;
 		break;
 	    default:
-		if (!SIZE_ONLY && ckWARN(WARN_UNSAFE) && isALPHA(value))
-		    Perl_warner(aTHX_ WARN_UNSAFE, 
+		if (!SIZE_ONLY && ckWARN(WARN_REGEXP) && isALPHA(value))
+		    Perl_warner(aTHX_ WARN_REGEXP, 
 				"/%.127s/: Unrecognized escape \\%c in character class passed through",
 				PL_regprecomp,
 				(int)value);
@@ -3429,8 +3433,8 @@ S_regclassutf8(pTHX)
 	if (namedclass > OOB_NAMEDCLASS) {
 	    if (range) { /* a-\d, a-[:digit:] */
 		if (!SIZE_ONLY) {
-		    if (ckWARN(WARN_UNSAFE))
-			Perl_warner(aTHX_ WARN_UNSAFE,
+		    if (ckWARN(WARN_REGEXP))
+			Perl_warner(aTHX_ WARN_REGEXP,
 				    "/%.127s/: false [] range \"%*.*s\" in regexp",
 				    PL_regprecomp,
 				    PL_regcomp_parse - rangebegin,
@@ -3517,8 +3521,8 @@ S_regclassutf8(pTHX)
 		PL_regcomp_parse[1] != ']') {
 		PL_regcomp_parse++;
 		if (namedclass > OOB_NAMEDCLASS) { /* \w-, [:word:]- */
-		    if (ckWARN(WARN_UNSAFE))
-			Perl_warner(aTHX_ WARN_UNSAFE,
+		    if (ckWARN(WARN_REGEXP))
+			Perl_warner(aTHX_ WARN_REGEXP,
 				    "/%.127s/: false [] range \"%*.*s\" in regexp",
 				    PL_regprecomp,
 				    PL_regcomp_parse - rangebegin,
@@ -3642,7 +3646,7 @@ S_reguni(pTHX_ UV uv, char* s, I32* lenp)
 {
     dTHR;
     if (SIZE_ONLY) {
-	U8 tmpbuf[10];
+	U8 tmpbuf[UTF8_MAXLEN];
 	*lenp = uv_to_utf8(tmpbuf, uv) - tmpbuf;
     }
     else

@@ -282,7 +282,7 @@ S_do_trans_CU_simple(pTHX_ SV *sv)
     UV extra = none + 1;
     UV final;
     UV uv;
-    U8 tmpbuf[10];
+    U8 tmpbuf[UTF8_MAXLEN];
     I32 bits = 16;
 
     s = (U8*)SvPV(sv, len);
@@ -956,6 +956,7 @@ Perl_do_chop(pTHX_ register SV *astr, register SV *sv)
 	sv_setpvn(astr, s, 1);
 	*s = '\0';
 	SvCUR_set(sv, len);
+	SvUTF8_off(sv);
 	SvNIOK_off(sv);
     }
     else

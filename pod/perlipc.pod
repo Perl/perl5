@@ -126,7 +126,7 @@ or even the more elaborate:
     use POSIX ":sys_wait_h";
     sub REAPER {
 	my $child;
-        while ($child = waitpid(-1,WNOHANG)) {
+        while (($child = waitpid(-1,WNOHANG)) > 0) {
 	    $Kid_Status{$child} = $?;
 	}
 	$SIG{CHLD} = \&REAPER;  # still loathe sysV

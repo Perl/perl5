@@ -139,13 +139,6 @@ $define|true|[yY]*)
 	    # (e.g. pragma/overload core dumps)	 Let's suspect xlC_r, too.
 	    # --jhi@iki.fi
 	    cc=cc_r
-	    if test ! -e /bin/cc_r; then
-		    cat >&4 <<EOM
-For pthreads you should use the AIX C compiler cc_r.
-But I cannot find it as /bin/cc_r.
-Cannot continue, aborting.
-EOM
-	    fi
 	    ;;
 	'') 
 	    cc=cc_r
@@ -186,7 +179,7 @@ EOCBU
 # after it has prompted the user for whether to use large files.
 cat > UU/uselfs.cbu <<'EOCBU'
 case "$uselargefiles" in
-$define|true|[yY]*)
+''|$define|true|[yY]*)
 	lfcflags="`getconf XBS5_ILP32_OFFBIG_CFLAGS 2>/dev/null`"
 	lfldflags="`getconf XBS5_ILP32_OFFBIG_LDFLAGS 2>/dev/null`"
 	# _Somehow_ in AIX 4.3.1.0 the above getconf call manages to
@@ -215,10 +208,10 @@ $define|true|[yY]*)
 esac
 EOCBU
 
-# This script UU/use64bits.cbu will get 'called-back' by Configure 
+# This script UU/use64bitint.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use 64 bits.
-cat > UU/use64bits.cbu <<'EOCBU'
-case "$use64bits" in
+cat > UU/use64bitint.cbu <<'EOCBU'
+case "$use64bitint" in
 $define|true|[yY]*)
 	    case "`oslevel`" in
 	    3.*|4.[012].*)
@@ -228,10 +221,6 @@ You should upgrade to at least AIX 4.2.
 EOM
 		exit 1
 		;;
-	    esac
-	    case "$ccflags" in
-	    *-DUSE_LONG_LONG*) ;;
-	    *) ccflags="$ccflags -DUSE_LONG_LONG" ;;
 	    esac
 	    # When a 64-bit cc becomes available $archname64
 	    # may need setting so that $archname gets it attached.

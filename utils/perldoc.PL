@@ -56,7 +56,7 @@ Usage: $me [-h] [-r] [-i] [-v] [-t] [-u] [-m] [-n program] [-l] [-F] [-X] PageNa
        $me -q FAQKeywords
 
 The -h option prints more help.  Also try "perldoc perldoc" to get
-aquainted with the system.
+acquainted with the system.
 EOF
 }
 

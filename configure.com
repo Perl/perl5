@@ -41,13 +41,14 @@ $ ans = ""
 $ macros = ""
 $ use_vmsdebug_perl = "N"
 $ use_debugging_perl = "Y"
-$ use_64bit = "n"
+$ use_64bitint = "n"
 $ C_Compiler_Replace = "CC="
 $ Thread_Live_Dangerously = "MT="
 $ use_two_pot_malloc = "N"
 $ use_pack_malloc = "N"
 $ use_debugmalloc = "N"
 $ d_secintgenv = "N"
+$ cc_flags = ""
 $ use_multiplicity = "N"
 $ vms_default_directory_name = F$ENVIRONMENT("DEFAULT")
 $ max_allowed_dir_depth = 3  ! e.g. [A.B.PERL5_00n] not [A.B.C.PERL5_00n]
@@ -1152,12 +1153,12 @@ $ WRITE CONFIG "        exit(0);"
 $ WRITE CONFIG "}"
 $ CLOSE CONFIG
 $!
-$ DEFINE SYS$ERROR _NLA0:
-$ DEFINE SYS$OUTPUT _NLA0:
+$! DEFINE SYS$ERROR _NLA0:
+$! DEFINE SYS$OUTPUT _NLA0:
 $ cc/NoObj/list=ccvms.lis ccvms.c
 $ tmp = $status
-$ DEASSIGN SYS$OUTPUT
-$ DEASSIGN SYS$ERROR
+$! DEASSIGN SYS$OUTPUT
+$! DEASSIGN SYS$ERROR
 $ IF (silent) THEN GOSUB Shut_up
 $! echo "%Config-I-VMS, After cc compile $status = >''tmp'<" !diagnostic
 $!
@@ -1199,7 +1200,7 @@ $     echo "%Config-I-VMS, You also have: ''line' ''archsufx' ''F$GETSYI("VERSIO
 $     vms_cc_available = vms_cc_available + "cc/decc "
 $   ENDIF
 $ ELSE
-$   IF F$LOCATE("DEC",line).NE.F$LENGTH(line) 
+$   IF (F$LOCATE("DEC",line).NE.F$LENGTH(line)).or.(F$LOCATE("Compaq",line).NE.F$LENGTH(line))
 $   THEN 
 $     vms_cc_dflt = "/decc"
 $     vms_cc_available = vms_cc_available + "cc/decc "
@@ -1269,7 +1270,7 @@ $ IF ans.NES.""
 $ THEN
 $   ans = F$EDIT(ans,"TRIM, COMPRESS, LOWERCASE")
 $   Mcc = ans
-$   IF F$LOCATE("dec",ans).NE.F$LENGTH(ans)
+$   IF (F$LOCATE("dec",ans).NE.F$LENGTH(ans)).or.(F$LOCATE("compaq",ans).NE.F$LENGTH(ans))
 $   THEN
 $     Mcc = "cc/decc"
 $     Using_Dec_C = "Yes"
@@ -1283,7 +1284,7 @@ $     C_COMPILER_Replace = "CC=cc=''Mcc'"
 $   ENDIF
 $   IF Mcc.NES.dflt
 $   THEN
-$     IF F$LOCATE("dec",dflt).NE.F$LENGTH(dflt) 
+$     IF (F$LOCATE("dec",dflt).NE.F$LENGTH(dflt)).or(F$LOCATE("compaq",dflt).NE.F$LENGTH(dflt))
 $     THEN 
 $       C_COMPILER_Replace = "CC=cc=''Mcc'"
 $     ELSE
@@ -1367,6 +1368,8 @@ $   CLOSE CONFIG
 $!   DELETE/NOLOG/NOCONFIRM deccvers.*;
 $   echo "You are using Dec C ''line'"
 $   Dec_C_Version = line
+$   Dec_C_Version = Dec_C_Version + 0
+$   if Dec_C_Version.ge.60200000 THEN CC_FLAGS = CC_FLAGS + "/NOANSI_ALIAS"
 $ ENDIF
 $Vaxc_Invoke_check:
 $ IF "''Using_Vax_C'".EQS."Yes"
@@ -1743,15 +1746,15 @@ $   echo "64 bit integers and 128 bit floating point variables. This gives
 $   echo "a much larger range for perl's mathematical operations. (Note that
 $   echo "does *not* enable 64-bit fileops at the moment, as Dec C doesn't
 $   echo "do that yet)"
-$   dflt = use_64bit
-$   rp = "Build with 64 bits? [''dflt'] "
+$   dflt = use_64bitint
+$   rp = "Build with 64 bit integers and 128 bit floating point variable? [''dflt'] "
 $   GOSUB myread
 $   if ans.eqs."" then ans = dflt
 $   if (f$extract(0, 1, "''ans'").eqs."Y").or.(f$extract(0, 1, "''ans'").eqs."y")
 $   THEN
-$     use_64bit="Y"
+$     use_64bitint="Y"
 $   ELSE
-$     use_64bit="N"
+$     use_64bitint="N"
 $   ENDIF
 $ ENDIF
 $!
@@ -1895,6 +1898,7 @@ $ rp = "[''dflt'] "
 $ GOSUB myread
 $ if ans.eqs."" then ans = "''dflt'"
 $ extensions = "''ans'"
+$ perl_known_extensions = "''dflt'"
 $!
 $! %Config-I-VMS, determine build/make utility here (make gmake mmk mms)
 $ echo ""

@@ -70,6 +70,6 @@ of byte semantics.
 
 =head1 SEE ALSO
 
-L<perlunicode>, L<byte>
+L<perlunicode>, L<bytes>
 
 =cut

@@ -597,6 +597,7 @@ typedef char*		(*LPENVGetenv_len)(struct IPerlEnv*,
 typedef unsigned long	(*LPEnvOsID)(struct IPerlEnv*);
 typedef char*		(*LPEnvLibPath)(struct IPerlEnv*, char*);
 typedef char*		(*LPEnvSiteLibPath)(struct IPerlEnv*, char*);
+typedef void		(*LPEnvGetChildIO)(struct IPerlEnv*, child_IO_table*);
 #endif
 
 struct IPerlEnv
@@ -618,6 +619,7 @@ struct IPerlEnv
     LPEnvOsID		pEnvOsID;
     LPEnvLibPath	pLibPath;
     LPEnvSiteLibPath	pSiteLibPath;
+    LPEnvGetChildIO	pGetChildIO;
 #endif
 };
 
@@ -663,6 +665,8 @@ struct IPerlEnvInfo
 	(*PL_Env->pLibPath)(PL_Env,(str))
 #define PerlEnv_sitelib_path(str)				\
 	(*PL_Env->pSiteLibPath)(PL_Env,(str))
+#define PerlEnv_get_child_IO(ptr)				\
+	(*PL_Env->pGetChildIO)(PL_Env, ptr)
 #endif
 
 #else	/* PERL_IMPLICIT_SYS */
@@ -686,6 +690,7 @@ struct IPerlEnvInfo
 
 #ifdef WIN32
 #define PerlEnv_os_id()			win32_os_id()
+#define PerlEnv_get_child_IO(ptr)	win32_get_child_IO(ptr)
 #endif
 
 #endif	/* PERL_IMPLICIT_SYS */

@@ -58,13 +58,6 @@ static void restore_rsfp(pTHXo_ void *f);
 #define LEX_FORMLINE		 1
 #define LEX_KNOWNEXT		 0
 
-#ifdef I_FCNTL
-#include <fcntl.h>
-#endif
-#ifdef I_SYS_FILE
-#include <sys/file.h>
-#endif
-
 /* XXX If this causes problems, set i_unistd=undef in the hint file.  */
 #ifdef I_UNISTD
 #  include <unistd.h> /* Needed for execv() */
@@ -464,17 +457,22 @@ S_incline(pTHX_ char *s)
     dTHR;
     char *t;
     char *n;
+    char *e;
     char ch;
-    int sawline = 0;
 
     CopLINE_inc(PL_curcop);
     if (*s++ != '#')
 	return;
     while (*s == ' ' || *s == '\t') s++;
-    if (strnEQ(s, "line ", 5)) {
-	s += 5;
-	sawline = 1;
-    }
+    if (strnEQ(s, "line", 4))
+	s += 4;
+    else
+	return;
+    if (*s == ' ' || *s == '\t')
+	s++;
+    else 
+	return;
+    while (*s == ' ' || *s == '\t') s++;
     if (!isDIGIT(*s))
 	return;
     n = s;
@@ -482,13 +480,19 @@ S_incline(pTHX_ char *s)
 	s++;
     while (*s == ' ' || *s == '\t')
 	s++;
-    if (*s == '"' && (t = strchr(s+1, '"')))
+    if (*s == '"' && (t = strchr(s+1, '"'))) {
 	s++;
-    else {
-	if (!sawline)
-	    return;		/* false alarm */
-	for (t = s; !isSPACE(*t); t++) ;
+	e = t + 1;
     }
+    else {
+	for (t = s; !isSPACE(*t); t++) ;
+	e = t;
+    }
+    while (*e == ' ' || *e == '\t' || *e == '\r' || *e == '\f')
+	e++;
+    if (*e != '\n' && *e != '\0')
+	return;		/* false alarm */
+
     ch = *t;
     *t = '\0';
     if (t - s > 0)
@@ -808,6 +812,31 @@ S_force_ident(pTHX_ register char *s, int kind)
     }
 }
 
+NV
+Perl_str_to_version(pTHX_ SV *sv)
+{
+    NV retval = 0.0;
+    NV nshift = 1.0;
+    STRLEN len;
+    char *start = SvPVx(sv,len);
+    bool utf = SvUTF8(sv);
+    char *end = start + len;
+    while (start < end) {
+	I32 skip;
+	UV n;
+	if (utf)
+	    n = utf8_to_uv((U8*)start, &skip);
+	else {
+	    n = *(U8*)start;
+	    skip = 1;
+	}
+	retval += ((NV)n)/nshift;
+	start += skip;
+	nshift *= 1000;
+    }
+    return retval;
+}
+
 /* 
  * S_force_version
  * Forces the next token to be a version number.
@@ -817,18 +846,25 @@ STATIC char *
 S_force_version(pTHX_ char *s)
 {
     OP *version = Nullop;
+    char *d;
 
     s = skipspace(s);
 
-    if (isDIGIT(*s) || (*s == 'v' && isDIGIT(s[1]))) {
-        char *d = s;
-	if (*d == 'v')
-	    d++;
+    d = s;
+    if (*d == 'v')
+	d++;
+    if (isDIGIT(*d)) {
         for (; isDIGIT(*d) || *d == '_' || *d == '.'; d++);
-        if ((*d == ';' || isSPACE(*d)) && *(skipspace(d)) != ',') {
+        if (*d == ';' || isSPACE(*d) || *d == '}' || !*d) {
+	    SV *ver;
             s = scan_num(s);
-            /* real VERSION number -- GBARR */
             version = yylval.opval;
+	    ver = cSVOPx(version)->op_sv;
+	    if (SvPOK(ver) && !SvNIOK(ver)) {
+		SvUPGRADE(ver, SVt_PVNV);
+		SvNVX(ver) = str_to_version(ver);
+		SvNOK_on(ver);		/* hint that it is a version */
+	    }
         }
     }
 
@@ -1159,6 +1195,8 @@ S_scan_const(pTHX_ char *start)
     bool dorange = FALSE;			/* are we in a translit range? */
     bool has_utf = FALSE;			/* embedded \x{} */
     I32 len;					/* ? */
+    UV uv;
+
     I32 utf = (PL_lex_inwhat == OP_TRANS && PL_sublex_info.sub_op)
 	? (PL_sublex_info.sub_op->op_private & (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF))
 	: UTF;
@@ -1280,18 +1318,20 @@ S_scan_const(pTHX_ char *start)
 	/* (now in tr/// code again) */
 
 	if (*s & 0x80 && thisutf) {
-	    dTHR;			/* only for ckWARN */
-	    if (ckWARN(WARN_UTF8)) {
-		(void)utf8_to_uv((U8*)s, &len);	/* could cvt latin-1 to utf8 here... */
-		if (len) {
-		    has_utf = TRUE;
-		    while (len--)
-			*d++ = *s++;
-		    continue;
-		}
-	    }
-	    else
-		has_utf = TRUE;		/* assume valid utf8 */
+	   (void)utf8_to_uv((U8*)s, &len);
+	   if (len == 1) {
+	       /* illegal UTF8, make it valid */
+	       char *old_pvx = SvPVX(sv);
+	       /* need space for one extra char (NOTE: SvCUR() not set here) */
+	       d = SvGROW(sv, SvLEN(sv) + 1) + (d - old_pvx);
+	       d = (char*)uv_to_utf8((U8*)d, (U8)*s++);
+	   }
+	   else {
+	       while (len--)
+		   *d++ = *s++;
+	   }
+	   has_utf = TRUE;
+	   continue;
 	}
 
 	/* backslashes */
@@ -1335,8 +1375,8 @@ S_scan_const(pTHX_ char *start)
 	    default:
 	        {
 		    dTHR;
-		    if (ckWARN(WARN_UNSAFE) && isALPHA(*s))
-			Perl_warner(aTHX_ WARN_UNSAFE, 
+		    if (ckWARN(WARN_MISC) && isALPHA(*s))
+			Perl_warner(aTHX_ WARN_MISC, 
 			       "Unrecognized escape \\%c passed through",
 			       *s);
 		    /* default action is to copy the quoted character */
@@ -1347,51 +1387,75 @@ S_scan_const(pTHX_ char *start)
 	    /* \132 indicates an octal constant */
 	    case '0': case '1': case '2': case '3':
 	    case '4': case '5': case '6': case '7':
-		*d++ = (char)scan_oct(s, 3, &len);
+		uv = (UV)scan_oct(s, 3, &len);
 		s += len;
-		continue;
+		goto NUM_ESCAPE_INSERT;
 
 	    /* \x24 indicates a hex constant */
 	    case 'x':
 		++s;
 		if (*s == '{') {
 		    char* e = strchr(s, '}');
-		    UV uv;
-
 		    if (!e) {
 			yyerror("Missing right brace on \\x{}");
 			e = s;
 		    }
-		    /* note: utf always shorter than hex */
-		    uv = (UV)scan_hex(s + 1, e - s - 1, &len);
-		    if (uv > 127) {
-			d = (char*)uv_to_utf8((U8*)d, uv);
-			has_utf = TRUE;
-		    }
-		    else
-			*d++ = (char)uv;
-		    s = e + 1;
+                    uv = (UV)scan_hex(s + 1, e - s - 1, &len);
+                    s = e + 1;
 		}
 		else {
-		    /* XXX collapse this branch into the one above */
-		    UV uv = (UV)scan_hex(s, 2, &len);
-		    if (utf && PL_lex_inwhat == OP_TRANS &&
-			utf != (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF))
-		    {
-			d = (char*)uv_to_utf8((U8*)d, uv);	/* doing a CU or UC */
-			has_utf = TRUE;
-		    }
-		    else {
-			if (uv >= 127 && UTF) {
-			    dTHR;
-			    if (ckWARN(WARN_UTF8))
-				Perl_warner(aTHX_ WARN_UTF8,
-				    "\\x%.*s will produce malformed UTF-8 character; use \\x{%.*s} for that",
-				    (int)len,s,(int)len,s);
-			}
-			*d++ = (char)uv;
-		    }
+		    uv = (UV)scan_hex(s, 2, &len);
 		    s += len;
+		}
+
+	      NUM_ESCAPE_INSERT:
+		/* Insert oct or hex escaped character.
+		 * There will always enough room in sv since such escapes will
+		 * be longer than any utf8 sequence they can end up as
+		 */
+		if (uv > 127) {
+		    if (!thisutf && !has_utf && uv > 255) {
+		        /* might need to recode whatever we have accumulated so far
+			 * if it contains any hibit chars
+			 */
+		        int hicount = 0;
+			char *c;
+			for (c = SvPVX(sv); c < d; c++) {
+			    if (*c & 0x80)
+			        hicount++;
+			}
+			if (hicount) {
+			    char *old_pvx = SvPVX(sv);
+			    char *src, *dst;
+			    d = SvGROW(sv, SvCUR(sv) + hicount + 1) + (d - old_pvx);
+
+			    src = d - 1;
+			    d += hicount;
+			    dst = d - 1;
+
+			    while (src < dst) {
+			        if (*src & 0x80) {
+				    dst--;
+				    uv_to_utf8((U8*)dst, (U8)*src--);
+				    dst--;
+			        }
+			        else {
+				    *dst-- = *src--;
+			        }
+			    }
+                        }
+                    }
+
+                    if (thisutf || uv > 255) {
+		        d = (char*)uv_to_utf8((U8*)d, uv);
+			has_utf = TRUE;
+                    }
+		    else {
+		        *d++ = (char)uv;
+		    }
+		}
+		else {
+		    *d++ = (char)uv;
 		}
 		continue;
 
@@ -3454,15 +3518,27 @@ Perl_yylex(pTHX)
 	OPERATOR(REFGEN);
 
     case 'v':
-	if (isDIGIT(s[1]) && PL_expect == XTERM) {
+	if (isDIGIT(s[1]) && PL_expect != XOPERATOR) {
 	    char *start = s;
 	    start++;
 	    start++;
-	    while (isDIGIT(*start))
+	    while (isDIGIT(*start) || *start == '_')
 		start++;
 	    if (*start == '.' && isDIGIT(start[1])) {
 		s = scan_num(s);
 		TERM(THING);
+	    }
+	    /* avoid v123abc() or $h{v1}, allow C<print v10;> */
+	    else if (!isALPHA(*start) && (PL_expect == XTERM || PL_expect == XREF)) {
+		char c = *start;
+		GV *gv;
+		*start = '\0';
+		gv = gv_fetchpv(s, FALSE, SVt_PVCV);
+		*start = c;
+		if (!gv) {
+		    s = scan_num(s);
+		    TERM(THING);
+		}
 	    }
 	}
 	goto keylookup;
@@ -3623,8 +3699,8 @@ Perl_yylex(pTHX)
 		if (len > 2 &&
 		    PL_tokenbuf[len - 2] == ':' && PL_tokenbuf[len - 1] == ':')
 		{
-		    if (ckWARN(WARN_UNSAFE) && ! gv_fetchpv(PL_tokenbuf, FALSE, SVt_PVHV))
-			Perl_warner(aTHX_ WARN_UNSAFE, 
+		    if (ckWARN(WARN_BAREWORD) && ! gv_fetchpv(PL_tokenbuf, FALSE, SVt_PVHV))
+			Perl_warner(aTHX_ WARN_BAREWORD, 
 		  	    "Bareword \"%s\" refers to nonexistent package",
 			     PL_tokenbuf);
 		    len -= 2;
@@ -3947,11 +4023,11 @@ Perl_yylex(pTHX)
 	    LOP(OP_CRYPT,XTERM);
 
 	case KEY_chmod:
-	    if (ckWARN(WARN_OCTAL)) {
+	    if (ckWARN(WARN_CHMOD)) {
 		for (d = s; d < PL_bufend && (isSPACE(*d) || *d == '('); d++) ;
 		if (*d != '0' && isDIGIT(*d))
-		    Perl_warner(aTHX_ WARN_OCTAL,
-		    		"chmod: mode argument is missing initial 0");
+		    Perl_warner(aTHX_ WARN_CHMOD,
+		    		"chmod() mode argument is missing initial 0");
 	    }
 	    LOP(OP_CHMOD,XTERM);
 
@@ -4321,8 +4397,8 @@ Perl_yylex(pTHX)
 		char *t;
 		for (d = s; isALNUM_lazy_if(d,UTF); d++) ;
 		t = skipspace(d);
-		if (strchr("|&*+-=!?:.", *t) && ckWARN_d(WARN_AMBIGUOUS))
-		    Perl_warner(aTHX_ WARN_AMBIGUOUS,
+		if (strchr("|&*+-=!?:.", *t) && ckWARN_d(WARN_PRECEDENCE))
+		    Perl_warner(aTHX_ WARN_PRECEDENCE,
 			   "Precedence problem: open %.*s should be open(%.*s)",
 			    d-s,s, d-s,s);
 	    }
@@ -4394,15 +4470,15 @@ Perl_yylex(pTHX)
 		    for (; isSPACE(*d) && len; --len, ++d) ;
 		    if (len) {
 			char *b = d;
-			if (!warned && ckWARN(WARN_SYNTAX)) {
+			if (!warned && ckWARN(WARN_QW)) {
 			    for (; !isSPACE(*d) && len; --len, ++d) {
 				if (*d == ',') {
-				    Perl_warner(aTHX_ WARN_SYNTAX,
+				    Perl_warner(aTHX_ WARN_QW,
 					"Possible attempt to separate words with commas");
 				    ++warned;
 				}
 				else if (*d == '#') {
-				    Perl_warner(aTHX_ WARN_SYNTAX,
+				    Perl_warner(aTHX_ WARN_QW,
 					"Possible attempt to put comments in qw() list");
 				    ++warned;
 				}
@@ -4809,10 +4885,10 @@ Perl_yylex(pTHX)
 	    LOP(OP_UTIME,XTERM);
 
 	case KEY_umask:
-	    if (ckWARN(WARN_OCTAL)) {
+	    if (ckWARN(WARN_UMASK)) {
 		for (d = s; d < PL_bufend && (isSPACE(*d) || *d == '('); d++) ;
 		if (*d != '0' && isDIGIT(*d)) 
-		    Perl_warner(aTHX_ WARN_OCTAL,
+		    Perl_warner(aTHX_ WARN_UMASK,
 		    		"umask: argument is missing initial 0");
 	    }
 	    UNI(OP_UMASK);
@@ -6833,6 +6909,11 @@ Perl_scan_num(pTHX_ char *start)
 		if (*s != '_')
 		    *d++ = *s;
 	    }
+	    if (*s == '.' && isDIGIT(s[1])) {
+		/* oops, it's really a v-string, but without the "v" */
+		s = start - 1;
+		goto vstring;
+	    }
 	}
 
 	/* read exponent part, if present */
@@ -6886,62 +6967,61 @@ Perl_scan_num(pTHX_ char *start)
 	break;
     /* if it starts with a v, it could be a version number */
     case 'v':
+vstring:
 	{
 	    char *pos = s;
 	    pos++;
-	    while (isDIGIT(*pos))
+	    while (isDIGIT(*pos) || *pos == '_')
 		pos++;
-	    if (*pos == '.' && isDIGIT(pos[1])) {
+	    if (!isALPHA(*pos)) {
 		UV rev;
-		U8 tmpbuf[10];
+		U8 tmpbuf[UTF8_MAXLEN];
 		U8 *tmpend;
-		NV nshift = 1.0;
 		bool utf8 = FALSE;
 		s++;				/* get past 'v' */
 
 		sv = NEWSV(92,5);
-		SvUPGRADE(sv, SVt_PVNV);
 		sv_setpvn(sv, "", 0);
 
-		do {
+		for (;;) {
 		    if (*s == '0' && isDIGIT(s[1]))
 			yyerror("Octal number in vector unsupported");
-		    rev = atoi(s);
-		    s = ++pos;
-		    while (isDIGIT(*pos))
-			pos++;
-
-		    if (rev > 127) {
-			tmpend = uv_to_utf8(tmpbuf, rev);
-			utf8 = TRUE;
+		    rev = 0;
+		    {
+			/* this is atoi() that tolerates underscores */
+			char *end = pos;
+			UV mult = 1;
+			while (--end >= s) {
+			    UV orev;
+			    if (*end == '_')
+				continue;
+			    orev = rev;
+			    rev += (*end - '0') * mult;
+			    mult *= 10;
+			    if (orev > rev && ckWARN_d(WARN_OVERFLOW))
+				Perl_warner(aTHX_ WARN_OVERFLOW,
+					    "Integer overflow in decimal number");
+			}
 		    }
-		    else {
-			tmpbuf[0] = (U8)rev;
-			tmpend = &tmpbuf[1];
-		    }
-		    *tmpend = '\0';
+		    tmpend = uv_to_utf8(tmpbuf, rev);
+		    utf8 = utf8 || rev > 127;
 		    sv_catpvn(sv, (const char*)tmpbuf, tmpend - tmpbuf);
-		    if (rev > 0)
-			SvNVX(sv) += (NV)rev/nshift;
-		    nshift *= 1000;
-		} while (*pos == '.' && isDIGIT(pos[1]));
-
-		if (*s == '0' && isDIGIT(s[1]))
-		    yyerror("Octal number in vector unsupported");
-		rev = atoi(s);
-		s = pos;
-		tmpend = uv_to_utf8(tmpbuf, rev);
-		utf8 = utf8 || rev > 127;
-		*tmpend = '\0';
-		sv_catpvn(sv, (const char*)tmpbuf, tmpend - tmpbuf);
-		if (rev > 0)
-		    SvNVX(sv) += (NV)rev/nshift;
+		    if (*pos == '.' && isDIGIT(pos[1]))
+			s = ++pos;
+		    else {
+			s = pos;
+			break;
+		    }
+		    while (isDIGIT(*pos) || *pos == '_')
+			pos++;
+		}
 
 		SvPOK_on(sv);
-		SvNOK_on(sv);
 		SvREADONLY_on(sv);
-		if (utf8)
+		if (utf8) {
 		    SvUTF8_on(sv);
+		    sv_utf8_downgrade(sv, TRUE);
+		}
 	    }
 	}
 	break;
@@ -7141,7 +7221,12 @@ Perl_yyerror(pTHX_ char *s)
     }
     else if (yychar > 255)
 	where = "next token ???";
+#ifdef USE_PURE_BISON
+/*  GNU Bison sets the value -2 */
+    else if (yychar == -2) {
+#else
     else if ((yychar & 127) == 127) {
+#endif
 	if (PL_lex_state == LEX_NORMAL ||
 	   (PL_lex_state == LEX_KNOWNEXT && PL_lex_defer == LEX_NORMAL))
 	    where = "at end of line";

@@ -37,8 +37,21 @@ applications the newer versions of these constants are suggested
 (O_APPEND, O_ASYNC, O_CREAT, O_DEFER, O_EXCL, O_NDELAY, O_NONBLOCK,
 O_SYNC, O_TRUNC).
 
-Please refer to your native fcntl() and open() documentation to see
-what constants are implemented in your system.
+For ease of use also the SEEK_* constants (for seek() and sysseek(),
+e.g. SEEK_END) and the S_I* constants (for chmod() and stat()) are
+available for import.  They can be imported either separately or using
+the tags C<:seek> and C<:mode>.
+
+Please refer to your native fcntl(2), open(2), fseek(3), lseek(2)
+(equal to Perl's seek() and sysseek(), respectively), and chmod(2)
+documentation to see what constants are implemented in your system.
+
+See L<perlopentut> to learn about the uses of the O_* constants
+with sysopen().
+
+See L<perlfunc/seek> and L<perlfunc/sysseek> about the SEEK_* constants.
+
+See L<perlfunc/stat> about the S_I* constants.
 
 =cut
 
@@ -90,31 +103,32 @@ $VERSION = "1.03";
 	F_WRDNY
 	F_WRLCK
 	O_ACCMODE
+	O_ALIAS
 	O_APPEND
 	O_ASYNC
 	O_BINARY
 	O_CREAT
 	O_DEFER
+	O_DIRECT
+	O_DIRECTORY
 	O_DSYNC
 	O_EXCL
 	O_EXLOCK
 	O_LARGEFILE
 	O_NDELAY
 	O_NOCTTY
+	O_NOFOLLOW
 	O_NONBLOCK
 	O_RDONLY
 	O_RDWR
+	O_RSRC
 	O_RSYNC
 	O_SHLOCK
 	O_SYNC
+	O_TEMPORARY
 	O_TEXT
 	O_TRUNC
 	O_WRONLY
-	O_ALIAS
-	O_RSRC
-	SEEK_SET
-	SEEK_CUR
-	SEEK_END
      );
 
 # Other items we are prepared to export if requested
@@ -135,13 +149,51 @@ $VERSION = "1.03";
 	LOCK_NB
 	LOCK_SH
 	LOCK_UN
+	S_ISUID S_ISGID S_ISVTX S_ISTXT
+	_S_IFMT S_IFREG S_IFDIR S_IFLNK
+	S_IFSOCK S_IFBLK S_IFCHR S_IFIFO S_IFWHT S_ENFMT
+	S_IRUSR S_IWUSR S_IXUSR S_IRWXU
+	S_IRGRP S_IWGRP S_IXGRP S_IRWXG
+	S_IROTH S_IWOTH S_IXOTH S_IRWXO
+	S_IREAD S_IWRITE S_IEXEC
+	&S_ISREG &S_ISDIR &S_ISLNK &S_ISSOCK &S_ISBLK &S_ISCHR &S_ISFIFO
+	&S_ISWHT &S_ISENFMT &S_IFMT &S_IMODE
+	SEEK_SET
+	SEEK_CUR
+	SEEK_END
 );
 # Named groups of exports
 %EXPORT_TAGS = (
     'flock'   => [qw(LOCK_SH LOCK_EX LOCK_NB LOCK_UN)],
     'Fcompat' => [qw(FAPPEND FASYNC FCREAT FDEFER FDSYNC FEXCL FLARGEFILE
-	             FNDELAY FNONBLOCK FRSYNC FSYNC FTRUNC)],
+		     FNDELAY FNONBLOCK FRSYNC FSYNC FTRUNC)],
+    'seek'    => [qw(SEEK_SET SEEK_CUR SEEK_END)],
+    'mode'    => [qw(S_ISUID S_ISGID S_ISVTX S_ISTXT
+		     _S_IFMT S_IFREG S_IFDIR S_IFLNK
+		     S_IFSOCK S_IFBLK S_IFCHR S_IFIFO S_IFWHT S_ENFMT
+		     S_IRUSR S_IWUSR S_IXUSR S_IRWXU
+		     S_IRGRP S_IWGRP S_IXGRP S_IRWXG
+		     S_IROTH S_IWOTH S_IXOTH S_IRWXO
+		     S_IREAD S_IWRITE S_IEXEC
+		     S_ISREG S_ISDIR S_ISLNK S_ISSOCK
+		     S_ISBLK S_ISCHR S_ISFIFO
+		     S_ISWHT S_ISENFMT		
+		     S_IFMT S_IMODE
+                  )],
 );
+
+sub S_IFMT  { @_ ? ( $_[0] & _S_IFMT() ) : _S_IFMT()  }
+sub S_IMODE { $_[0] & 07777 }
+
+sub S_ISREG    { ( $_[0] & _S_IFMT() ) == S_IFREG()   }
+sub S_ISDIR    { ( $_[0] & _S_IFMT() ) == S_IFDIR()   }
+sub S_ISLNK    { ( $_[0] & _S_IFMT() ) == S_IFLNK()   }
+sub S_ISSOCK   { ( $_[0] & _S_IFMT() ) == S_IFSOCK()  }
+sub S_ISBLK    { ( $_[0] & _S_IFMT() ) == S_IFBLK()   }
+sub S_ISCHR    { ( $_[0] & _S_IFMT() ) == S_IFCHR()   }
+sub S_ISFIFO   { ( $_[0] & _S_IFMT() ) == S_IFIFO()   }
+sub S_ISWHT    { ( $_[0] & _S_IFMT() ) == S_ISWHT()   }
+sub S_ISENFMT  { ( $_[0] & _S_IFMT() ) == S_ISENFMT() }
 
 sub AUTOLOAD {
     (my $constname = $AUTOLOAD) =~ s/.*:://;

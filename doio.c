@@ -41,12 +41,6 @@
 #  endif
 #endif
 
-#ifdef I_FCNTL
-#include <fcntl.h>
-#endif
-#ifdef I_SYS_FILE
-#include <sys/file.h>
-#endif
 #ifdef O_EXCL
 #  define OPEN_EXCL O_EXCL
 #else
@@ -75,15 +69,6 @@
 #   include <net/errno.h>
 #  endif
 # endif
-#endif
-
-/* Put this after #includes because <unistd.h> defines _XOPEN_*. */
-#ifndef Sock_size_t
-#  if _XOPEN_VERSION >= 5 || defined(_XOPEN_SOURCE_EXTENDED) || defined(__GLIBC__)
-#    define Sock_size_t Size_t
-#  else
-#    define Sock_size_t int
-#  endif
 #endif
 
 bool

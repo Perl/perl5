@@ -9,43 +9,52 @@ sub DEFAULT_ON  () { 1 }
 sub DEFAULT_OFF () { 2 }
 
 my $tree = {
-       	 'unsafe'	=> { 	'untie'		=> DEFAULT_OFF,
-				'substr'	=> DEFAULT_OFF,
-				'taint'		=> DEFAULT_OFF,
-				'signal'	=> DEFAULT_OFF,
-				'closure'	=> DEFAULT_OFF,
-				'overflow'	=> DEFAULT_OFF,
-				'portable'	=> DEFAULT_OFF,
-				'utf8'		=> DEFAULT_OFF,
-			   } ,
-       	 'io'  		=> { 	'pipe' 		=> DEFAULT_OFF,
+       	'io'  		=> { 	'pipe' 		=> DEFAULT_OFF,
        				'unopened'	=> DEFAULT_OFF,
        				'closed'	=> DEFAULT_OFF,
        				'newline'	=> DEFAULT_OFF,
        				'exec'		=> DEFAULT_OFF,
-       				#'wr in in file'=> DEFAULT_OFF,
 			   },
-       	 'syntax'	=> { 	'ambiguous'	=> DEFAULT_OFF,
+       	'syntax'	=> { 	'ambiguous'	=> DEFAULT_OFF,
 			     	'semicolon'	=> DEFAULT_OFF,
 			     	'precedence'	=> DEFAULT_OFF,
+			     	'bareword'	=> DEFAULT_OFF,
 			     	'reserved'	=> DEFAULT_OFF,
-				'octal'		=> DEFAULT_OFF,
 				'digit'		=> DEFAULT_OFF,
 			     	'parenthesis'	=> DEFAULT_OFF,
        	 			'deprecated'	=> DEFAULT_OFF,
        	 			'printf'	=> DEFAULT_OFF,
+       	 			'prototype'	=> DEFAULT_OFF,
+       	 			'qw'		=> DEFAULT_OFF,
 			   },
-       	 'severe'	=> { 	'inplace'	=> DEFAULT_ON,
+       	'severe'	=> { 	'inplace'	=> DEFAULT_ON,
 	 			'internal'	=> DEFAULT_ON,
          			'debugging'	=> DEFAULT_ON,
+         			'malloc'	=> DEFAULT_ON,
 	 		   },
-       	 'void'		=> DEFAULT_OFF,
-       	 'recursion'	=> DEFAULT_OFF,
-       	 'redefine'	=> DEFAULT_OFF,
-       	 'numeric'	=> DEFAULT_OFF,
-         'uninitialized'=> DEFAULT_OFF,
-       	 'once'		=> DEFAULT_OFF,
-       	 'misc'		=> DEFAULT_OFF,
+       	'void'		=> DEFAULT_OFF,
+       	'recursion'	=> DEFAULT_OFF,
+       	'redefine'	=> DEFAULT_OFF,
+       	'numeric'	=> DEFAULT_OFF,
+        'uninitialized'	=> DEFAULT_OFF,
+       	'once'		=> DEFAULT_OFF,
+       	'misc'		=> DEFAULT_OFF,
+       	'regexp'	=> DEFAULT_OFF,
+       	'glob'		=> DEFAULT_OFF,
+       	'y2k'		=> DEFAULT_OFF,
+       	'chmod'		=> DEFAULT_OFF,
+       	'umask'		=> DEFAULT_OFF,
+       	'untie'		=> DEFAULT_OFF,
+	'substr'	=> DEFAULT_OFF,
+	'taint'		=> DEFAULT_OFF,
+	'signal'	=> DEFAULT_OFF,
+	'closure'	=> DEFAULT_OFF,
+	'overflow'	=> DEFAULT_OFF,
+	'portable'	=> DEFAULT_OFF,
+	'utf8'		=> DEFAULT_OFF,
+       	'exiting'	=> DEFAULT_OFF,
+       	'pack'		=> DEFAULT_OFF,
+       	'unpack'	=> DEFAULT_OFF,
        	 #'default'	=> DEFAULT_ON,
 	} ;
 
@@ -103,6 +112,32 @@ sub mkRange
 }
 
 ###########################################################################
+sub printTree
+{
+    my $tre = shift ;
+    my $prefix = shift ;
+    my $indent = shift ;
+    my ($k, $v) ;
+
+    my $max = (sort {$a <=> $b} map { length $_ } keys %$tre)[-1] ;
+
+    $prefix .= " " x $indent ;
+    foreach $k (sort keys %$tre) {
+	$v = $tre->{$k};
+	print $prefix . "|\n" ;
+	print $prefix . "+- $k" ;
+	if (ref $v)
+	{ 
+	    print " " . "-" x ($max - length $k ) . "+\n" ;
+	    printTree ($v, $prefix . "|" , $max + $indent - 1) 
+	}
+	else
+	  { print "\n" }
+    }
+
+}
+
+###########################################################################
 
 sub mkHex
 {
@@ -124,6 +159,12 @@ sub mkHex
 
 ###########################################################################
 
+if (@ARGV && $ARGV[0] eq "tree")
+{
+    print "  all -+\n" ;
+    printTree($tree, "   ", 4) ;
+    exit ;
+}
 
 #unlink "warnings.h";
 #unlink "lib/warnings.pm";
@@ -255,6 +296,7 @@ foreach $k (sort keys  %list) {
 }
 
 print PM "  );\n\n" ;
+print PM '$NONE = "', ('\0' x $warn_size) , "\";\n" ;
 while (<DATA>) {
     print PM $_ ;
 }
@@ -281,13 +323,35 @@ warnings - Perl pragma to control optional warnings
     use warnings "all";
     no warnings "all";
 
+    if (warnings::enabled("void") {
+        warnings::warn("void", "some warning");
+    }
+
 =head1 DESCRIPTION
 
 If no import list is supplied, all possible warnings are either enabled
 or disabled.
 
-See L<perlmod/Pragmatic Modules> and L<perllexwarn>.
+Two functions are provided to assist module authors.
 
+=over 4
+
+=item warnings::enabled($category)
+
+Returns TRUE if the warnings category in C<$category> is enabled in the
+calling module. Otherwise returns FALSE.
+
+
+=item warnings::warn($category, $message)
+
+If the calling module has I<not> set C<$category> to "FATAL", print
+C<$message> to STDERR.
+If the calling module has set C<$category> to "FATAL", print C<$message>
+STDERR then die.
+
+=back
+
+See L<perlmod/Pragmatic Modules> and L<perllexwarn>.
 
 =cut
 
@@ -326,12 +390,34 @@ sub unimport {
 
 sub enabled
 {
-    my $string = shift ;
+    # If no parameters, check for any lexical warnings enabled
+    # in the users scope.
+    my $callers_bitmask = (caller(1))[9] ; 
+    return ($callers_bitmask ne $NONE) if @_ == 0 ;
 
+    # otherwise check for the category supplied.
+    my $category = shift ;
+    return 0
+	unless $Bits{$category} ;
+    return 0 unless defined $callers_bitmask ;
     return 1
-	if $bits{$string} && ${^WARNING_BITS} & $bits{$string} ;
+	if ($callers_bitmask & $Bits{$category}) ne $NONE ;
    
     return 0 ; 
+}
+
+sub warn
+{
+    croak "Usage: warnings::warn('category', 'message')"
+	unless @_ == 2 ;
+    my $category = shift ;
+    my $message = shift ;
+    local $Carp::CarpLevel = 1 ;
+    my $callers_bitmask = (caller(1))[9] ; 
+    croak($message) 
+	if defined $callers_bitmask &&
+           ($callers_bitmask & $DeadBits{$category}) ne $NONE ;
+    carp($message) ;
 }
 
 1;

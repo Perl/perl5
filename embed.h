@@ -46,7 +46,6 @@
 #if !defined(PERL_IMPLICIT_CONTEXT)
 
 #if defined(PERL_IMPLICIT_SYS)
-#else
 #endif
 #if defined(USE_ITHREADS)
 #  if defined(PERL_IMPLICIT_SYS)
@@ -687,6 +686,7 @@
 #define sv_usepvn		Perl_sv_usepvn
 #define sv_vcatpvfn		Perl_sv_vcatpvfn
 #define sv_vsetpvfn		Perl_sv_vsetpvfn
+#define str_to_version		Perl_str_to_version
 #define swash_init		Perl_swash_init
 #define swash_fetch		Perl_swash_fetch
 #define taint_env		Perl_taint_env
@@ -730,6 +730,7 @@
 #define yywarn			Perl_yywarn
 #if defined(MYMALLOC)
 #define dump_mstats		Perl_dump_mstats
+#define get_mstats		Perl_get_mstats
 #endif
 #define safesysmalloc		Perl_safesysmalloc
 #define safesyscalloc		Perl_safesyscalloc
@@ -773,8 +774,10 @@
 #define do_pmop_dump		Perl_do_pmop_dump
 #define do_sv_dump		Perl_do_sv_dump
 #define magic_dump		Perl_magic_dump
+#if defined(PERL_FLEXIBLE_EXCEPTIONS)
 #define default_protect		Perl_default_protect
 #define vdefault_protect	Perl_vdefault_protect
+#endif
 #define reginitcolors		Perl_reginitcolors
 #define sv_2pv_nolen		Perl_sv_2pv_nolen
 #define sv_2pvutf8_nolen	Perl_sv_2pvutf8_nolen
@@ -782,6 +785,10 @@
 #define sv_pv			Perl_sv_pv
 #define sv_pvutf8		Perl_sv_pvutf8
 #define sv_pvbyte		Perl_sv_pvbyte
+#define sv_utf8_upgrade		Perl_sv_utf8_upgrade
+#define sv_utf8_downgrade	Perl_sv_utf8_downgrade
+#define sv_utf8_encode		Perl_sv_utf8_encode
+#define sv_utf8_decode		Perl_sv_utf8_decode
 #define sv_force_normal		Perl_sv_force_normal
 #define tmps_grow		Perl_tmps_grow
 #define sv_rvweaken		Perl_sv_rvweaken
@@ -897,8 +904,13 @@
 #define parse_body		S_parse_body
 #define run_body		S_run_body
 #define call_body		S_call_body
-#define call_xbody		S_call_xbody
 #define call_list_body		S_call_list_body
+#if defined(PERL_FLEXIBLE_EXCEPTIONS)
+#define vparse_body		S_vparse_body
+#define vrun_body		S_vrun_body
+#define vcall_body		S_vcall_body
+#define vcall_list_body		S_vcall_list_body
+#endif
 #  if defined(USE_THREADS)
 #define init_main_thread	S_init_main_thread
 #  endif
@@ -914,6 +926,9 @@
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
 #define docatch			S_docatch
 #define docatch_body		S_docatch_body
+#if defined(PERL_FLEXIBLE_EXCEPTIONS)
+#define vdocatch_body		S_vdocatch_body
+#endif
 #define dofindlabel		S_dofindlabel
 #define doparseform		S_doparseform
 #define dopoptoeval		S_dopoptoeval
@@ -1033,12 +1048,6 @@
 #define sv_unglob		S_sv_unglob
 #define not_a_number		S_not_a_number
 #define visit			S_visit
-#  if defined(PURIFY)
-#define reg_add			S_reg_add
-#define reg_remove		S_reg_remove
-#  else
-#define my_safemalloc		S_my_safemalloc
-#  endif
 #define sv_add_backref		S_sv_add_backref
 #define sv_del_backref		S_sv_del_backref
 #  if defined(DEBUGGING)
@@ -1486,7 +1495,6 @@
 #else	/* PERL_IMPLICIT_CONTEXT */
 
 #if defined(PERL_IMPLICIT_SYS)
-#else
 #endif
 #if defined(USE_ITHREADS)
 #  if defined(PERL_IMPLICIT_SYS)
@@ -2106,6 +2114,7 @@
 #define sv_usepvn(a,b,c)	Perl_sv_usepvn(aTHX_ a,b,c)
 #define sv_vcatpvfn(a,b,c,d,e,f,g)	Perl_sv_vcatpvfn(aTHX_ a,b,c,d,e,f,g)
 #define sv_vsetpvfn(a,b,c,d,e,f,g)	Perl_sv_vsetpvfn(aTHX_ a,b,c,d,e,f,g)
+#define str_to_version(a)	Perl_str_to_version(aTHX_ a)
 #define swash_init(a,b,c,d,e)	Perl_swash_init(aTHX_ a,b,c,d,e)
 #define swash_fetch(a,b)	Perl_swash_fetch(aTHX_ a,b)
 #define taint_env()		Perl_taint_env(aTHX)
@@ -2147,6 +2156,7 @@
 #define yywarn(a)		Perl_yywarn(aTHX_ a)
 #if defined(MYMALLOC)
 #define dump_mstats(a)		Perl_dump_mstats(aTHX_ a)
+#define get_mstats(a,b,c)	Perl_get_mstats(aTHX_ a,b,c)
 #endif
 #define safesysmalloc		Perl_safesysmalloc
 #define safesyscalloc		Perl_safesyscalloc
@@ -2187,7 +2197,9 @@
 #define do_pmop_dump(a,b,c)	Perl_do_pmop_dump(aTHX_ a,b,c)
 #define do_sv_dump(a,b,c,d,e,f,g)	Perl_do_sv_dump(aTHX_ a,b,c,d,e,f,g)
 #define magic_dump(a)		Perl_magic_dump(aTHX_ a)
+#if defined(PERL_FLEXIBLE_EXCEPTIONS)
 #define vdefault_protect(a,b,c,d)	Perl_vdefault_protect(aTHX_ a,b,c,d)
+#endif
 #define reginitcolors()		Perl_reginitcolors(aTHX)
 #define sv_2pv_nolen(a)		Perl_sv_2pv_nolen(aTHX_ a)
 #define sv_2pvutf8_nolen(a)	Perl_sv_2pvutf8_nolen(aTHX_ a)
@@ -2195,6 +2207,10 @@
 #define sv_pv(a)		Perl_sv_pv(aTHX_ a)
 #define sv_pvutf8(a)		Perl_sv_pvutf8(aTHX_ a)
 #define sv_pvbyte(a)		Perl_sv_pvbyte(aTHX_ a)
+#define sv_utf8_upgrade(a)	Perl_sv_utf8_upgrade(aTHX_ a)
+#define sv_utf8_downgrade(a,b)	Perl_sv_utf8_downgrade(aTHX_ a,b)
+#define sv_utf8_encode(a)	Perl_sv_utf8_encode(aTHX_ a)
+#define sv_utf8_decode(a)	Perl_sv_utf8_decode(aTHX_ a)
 #define sv_force_normal(a)	Perl_sv_force_normal(aTHX_ a)
 #define tmps_grow(a)		Perl_tmps_grow(aTHX_ a)
 #define sv_rvweaken(a)		Perl_sv_rvweaken(aTHX_ a)
@@ -2307,11 +2323,16 @@
 #  if defined(IAMSUID)
 #define fd_on_nosuid_fs(a)	S_fd_on_nosuid_fs(aTHX_ a)
 #  endif
-#define parse_body(a)		S_parse_body(aTHX_ a)
+#define parse_body(a,b)		S_parse_body(aTHX_ a,b)
 #define run_body(a)		S_run_body(aTHX_ a)
-#define call_body(a)		S_call_body(aTHX_ a)
-#define call_xbody(a,b)		S_call_xbody(aTHX_ a,b)
+#define call_body(a,b)		S_call_body(aTHX_ a,b)
 #define call_list_body(a)	S_call_list_body(aTHX_ a)
+#if defined(PERL_FLEXIBLE_EXCEPTIONS)
+#define vparse_body(a)		S_vparse_body(aTHX_ a)
+#define vrun_body(a)		S_vrun_body(aTHX_ a)
+#define vcall_body(a)		S_vcall_body(aTHX_ a)
+#define vcall_list_body(a)	S_vcall_list_body(aTHX_ a)
+#endif
 #  if defined(USE_THREADS)
 #define init_main_thread()	S_init_main_thread(aTHX)
 #  endif
@@ -2326,7 +2347,10 @@
 #endif
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
 #define docatch(a)		S_docatch(aTHX_ a)
-#define docatch_body(a)		S_docatch_body(aTHX_ a)
+#define docatch_body()		S_docatch_body(aTHX)
+#if defined(PERL_FLEXIBLE_EXCEPTIONS)
+#define vdocatch_body(a)	S_vdocatch_body(aTHX_ a)
+#endif
 #define dofindlabel(a,b,c,d)	S_dofindlabel(aTHX_ a,b,c,d)
 #define doparseform(a)		S_doparseform(aTHX_ a)
 #define dopoptoeval(a)		S_dopoptoeval(aTHX_ a)
@@ -2445,12 +2469,6 @@
 #define sv_unglob(a)		S_sv_unglob(aTHX_ a)
 #define not_a_number(a)		S_not_a_number(aTHX_ a)
 #define visit(a)		S_visit(aTHX_ a)
-#  if defined(PURIFY)
-#define reg_add(a)		S_reg_add(aTHX_ a)
-#define reg_remove(a)		S_reg_remove(aTHX_ a)
-#  else
-#define my_safemalloc		S_my_safemalloc
-#  endif
 #define sv_add_backref(a,b)	S_sv_add_backref(aTHX_ a,b)
 #define sv_del_backref(a)	S_sv_del_backref(aTHX_ a)
 #  if defined(DEBUGGING)
@@ -2899,7 +2917,6 @@
 #else	/* PERL_OBJECT */
 
 #if defined(PERL_IMPLICIT_SYS)
-#else
 #endif
 #if defined(USE_ITHREADS)
 #  if defined(PERL_IMPLICIT_SYS)
@@ -4130,6 +4147,8 @@
 #define sv_vcatpvfn		Perl_sv_vcatpvfn
 #define Perl_sv_vsetpvfn	CPerlObj::Perl_sv_vsetpvfn
 #define sv_vsetpvfn		Perl_sv_vsetpvfn
+#define Perl_str_to_version	CPerlObj::Perl_str_to_version
+#define str_to_version		Perl_str_to_version
 #define Perl_swash_init		CPerlObj::Perl_swash_init
 #define swash_init		Perl_swash_init
 #define Perl_swash_fetch	CPerlObj::Perl_swash_fetch
@@ -4208,6 +4227,8 @@
 #if defined(MYMALLOC)
 #define Perl_dump_mstats	CPerlObj::Perl_dump_mstats
 #define dump_mstats		Perl_dump_mstats
+#define Perl_get_mstats		CPerlObj::Perl_get_mstats
+#define get_mstats		Perl_get_mstats
 #endif
 #define Perl_safesysmalloc	CPerlObj::Perl_safesysmalloc
 #define safesysmalloc		Perl_safesysmalloc
@@ -4289,10 +4310,12 @@
 #define do_sv_dump		Perl_do_sv_dump
 #define Perl_magic_dump		CPerlObj::Perl_magic_dump
 #define magic_dump		Perl_magic_dump
+#if defined(PERL_FLEXIBLE_EXCEPTIONS)
 #define Perl_default_protect	CPerlObj::Perl_default_protect
 #define default_protect		Perl_default_protect
 #define Perl_vdefault_protect	CPerlObj::Perl_vdefault_protect
 #define vdefault_protect	Perl_vdefault_protect
+#endif
 #define Perl_reginitcolors	CPerlObj::Perl_reginitcolors
 #define reginitcolors		Perl_reginitcolors
 #define Perl_sv_2pv_nolen	CPerlObj::Perl_sv_2pv_nolen
@@ -4307,6 +4330,14 @@
 #define sv_pvutf8		Perl_sv_pvutf8
 #define Perl_sv_pvbyte		CPerlObj::Perl_sv_pvbyte
 #define sv_pvbyte		Perl_sv_pvbyte
+#define Perl_sv_utf8_upgrade	CPerlObj::Perl_sv_utf8_upgrade
+#define sv_utf8_upgrade		Perl_sv_utf8_upgrade
+#define Perl_sv_utf8_downgrade	CPerlObj::Perl_sv_utf8_downgrade
+#define sv_utf8_downgrade	Perl_sv_utf8_downgrade
+#define Perl_sv_utf8_encode	CPerlObj::Perl_sv_utf8_encode
+#define sv_utf8_encode		Perl_sv_utf8_encode
+#define Perl_sv_utf8_decode	CPerlObj::Perl_sv_utf8_decode
+#define sv_utf8_decode		Perl_sv_utf8_decode
 #define Perl_sv_force_normal	CPerlObj::Perl_sv_force_normal
 #define sv_force_normal		Perl_sv_force_normal
 #define Perl_tmps_grow		CPerlObj::Perl_tmps_grow
@@ -4513,10 +4544,18 @@
 #define run_body		S_run_body
 #define S_call_body		CPerlObj::S_call_body
 #define call_body		S_call_body
-#define S_call_xbody		CPerlObj::S_call_xbody
-#define call_xbody		S_call_xbody
 #define S_call_list_body	CPerlObj::S_call_list_body
 #define call_list_body		S_call_list_body
+#if defined(PERL_FLEXIBLE_EXCEPTIONS)
+#define S_vparse_body		CPerlObj::S_vparse_body
+#define vparse_body		S_vparse_body
+#define S_vrun_body		CPerlObj::S_vrun_body
+#define vrun_body		S_vrun_body
+#define S_vcall_body		CPerlObj::S_vcall_body
+#define vcall_body		S_vcall_body
+#define S_vcall_list_body	CPerlObj::S_vcall_list_body
+#define vcall_list_body		S_vcall_list_body
+#endif
 #  if defined(USE_THREADS)
 #define S_init_main_thread	CPerlObj::S_init_main_thread
 #define init_main_thread	S_init_main_thread
@@ -4541,6 +4580,10 @@
 #define docatch			S_docatch
 #define S_docatch_body		CPerlObj::S_docatch_body
 #define docatch_body		S_docatch_body
+#if defined(PERL_FLEXIBLE_EXCEPTIONS)
+#define S_vdocatch_body		CPerlObj::S_vdocatch_body
+#define vdocatch_body		S_vdocatch_body
+#endif
 #define S_dofindlabel		CPerlObj::S_dofindlabel
 #define dofindlabel		S_dofindlabel
 #define S_doparseform		CPerlObj::S_doparseform
@@ -4763,15 +4806,6 @@
 #define not_a_number		S_not_a_number
 #define S_visit			CPerlObj::S_visit
 #define visit			S_visit
-#  if defined(PURIFY)
-#define S_reg_add		CPerlObj::S_reg_add
-#define reg_add			S_reg_add
-#define S_reg_remove		CPerlObj::S_reg_remove
-#define reg_remove		S_reg_remove
-#  else
-#define S_my_safemalloc		CPerlObj::S_my_safemalloc
-#define my_safemalloc		S_my_safemalloc
-#  endif
 #define S_sv_add_backref	CPerlObj::S_sv_add_backref
 #define sv_add_backref		S_sv_add_backref
 #define S_sv_del_backref	CPerlObj::S_sv_del_backref

@@ -86,6 +86,11 @@ extern void Perl_dump_mstats (char *s)
      bomb ("Perl_dump_mstats");
 }
 
+extern int Perl_get_mstats (struct perl_mstats *buf, int buflen, int level)
+{
+     bomb ("Perl_get_mstats");
+}
+
 extern pid_t waitpid (pid_t pid, int *stat_loc, int options)
 {
 

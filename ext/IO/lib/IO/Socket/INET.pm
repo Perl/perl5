@@ -12,9 +12,12 @@ use IO::Socket;
 use Socket;
 use Carp;
 use Exporter;
+use Errno;
 
 @ISA = qw(IO::Socket);
-$VERSION = "1.24";
+$VERSION = "1.25";
+
+my $EINVAL = exists(&Errno::EINVAL) ? Errno::EINVAL() : 1;
 
 IO::Socket::INET->register_domain( AF_INET );
 
@@ -38,10 +41,16 @@ sub _sock_info {
 	if(defined $addr && $addr =~ s,:([\w\(\)/]+)$,,);
 
   if(defined $proto) {
-    @proto = $proto =~ m,\D, ? getprotobyname($proto)
-			     : getprotobynumber($proto);
-
-    $proto = $proto[2] || undef;
+    if (@proto = ( $proto =~ m,\D,
+		? getprotobyname($proto)
+		: getprotobynumber($proto))
+    ) {
+      $proto = $proto[2] || undef;
+    }
+    else {
+      $@ = "Bad protocol '$proto'";
+      return;
+    }
   }
 
   if(defined $port) {
@@ -50,8 +59,12 @@ sub _sock_info {
     my $defport = $1 || undef;
     my $pnum = ($port =~ m,^(\d+)$,)[0];
 
-    @serv= getservbyname($port, $proto[0] || "")
-	if($port =~ m,\D,);
+    if ($port =~ m,\D,) {
+      unless (@serv = getservbyname($port, $proto[0] || "")) {
+	$@ = "Bad service '$port'";
+	return;
+      }
+    }
 
     $port = $pnum || $serv[2] || $defport || undef;
 
@@ -67,10 +80,14 @@ sub _sock_info {
 
 sub _error {
     my $sock = shift;
-    local($!);
-    $@ = join("",ref($sock),": ",@_);
-    close($sock)
+    my $err = shift;
+    {
+      local($!);
+      $@ = join("",ref($sock),": ",@_);
+      close($sock)
 	if(defined fileno($sock));
+    }
+    $! = $err;
     return undef;
 }
 
@@ -96,12 +113,13 @@ sub configure {
 
     ($laddr,$lport,$proto) = _sock_info($arg->{LocalAddr},
 					$arg->{LocalPort},
-					$arg->{Proto});
+					$arg->{Proto})
+			or return _error($sock, $!, $@);
 
     $laddr = defined $laddr ? inet_aton($laddr)
 			    : INADDR_ANY;
 
-    return _error($sock,"Bad hostname '",$arg->{LocalAddr},"'")
+    return _error($sock, $EINVAL, "Bad hostname '",$arg->{LocalAddr},"'")
 	unless(defined $laddr);
 
     $arg->{PeerAddr} = $arg->{PeerHost}
@@ -110,7 +128,8 @@ sub configure {
     unless(exists $arg->{Listen}) {
 	($raddr,$rport,$proto) = _sock_info($arg->{PeerAddr},
 					    $arg->{PeerPort},
-					    $proto);
+					    $proto)
+			or return _error($sock, $!, $@);
     }
 
     $proto ||= (getprotobyname('tcp'))[2];
@@ -122,28 +141,28 @@ sub configure {
 
     if(defined $raddr) {
 	@raddr = $sock->_get_addr($raddr, $arg->{MultiHomed});
-	return _error($sock,"Bad hostname '",$arg->{PeerAddr},"'")
+	return _error($sock, $EINVAL, "Bad hostname '",$arg->{PeerAddr},"'")
 	    unless @raddr;
     }
 
     while(1) {
 
 	$sock->socket(AF_INET, $type, $proto) or
-	    return _error($sock,"$!");
+	    return _error($sock, $!, "$!");
 
 	if ($arg->{Reuse}) {
 	    $sock->sockopt(SO_REUSEADDR,1) or
-		    return _error($sock,"$!");
+		    return _error($sock, $!, "$!");
 	}
 
 	if($lport || ($laddr ne INADDR_ANY) || exists $arg->{Listen}) {
 	    $sock->bind($lport || 0, $laddr) or
-		    return _error($sock,"$!");
+		    return _error($sock, $!, "$!");
 	}
 
 	if(exists $arg->{Listen}) {
 	    $sock->listen($arg->{Listen} || 5) or
-		return _error($sock,"$!");
+		return _error($sock, $!, "$!");
 	    last;
 	}
 
@@ -152,13 +171,13 @@ sub configure {
  
         $raddr = shift @raddr;
 
-	return _error($sock,'Cannot determine remote port')
+	return _error($sock, $EINVAL, 'Cannot determine remote port')
 		unless($rport || $type == SOCK_DGRAM || $type == SOCK_RAW);
 
 	last
 	    unless($type == SOCK_STREAM || defined $raddr);
 
-	return _error($sock,"Bad hostname '",$arg->{PeerAddr},"'")
+	return _error($sock, $EINVAL, "Bad hostname '",$arg->{PeerAddr},"'")
 	    unless defined $raddr;
 
 #        my $timeout = ${*$sock}{'io_socket_timeout'};
@@ -169,12 +188,14 @@ sub configure {
             return $sock;
         }
 
-	return _error($sock,"$!")
+	return _error($sock, $!, "Timeout")
 	    unless @raddr;
 
 #	if ($timeout) {
 #	    my $new_timeout = $timeout - (time() - $before);
-#	    return _error($sock, "Timeout") if $new_timeout <= 0;
+#	    return _error($sock,
+#                         (exists(&Errno::ETIMEDOUT) ? Errno::ETIMEDOUT() : $EINVAL),
+#                         "Timeout") if $new_timeout <= 0;
 #	    ${*$sock}{'io_socket_timeout'} = $new_timeout;
 #        }
 

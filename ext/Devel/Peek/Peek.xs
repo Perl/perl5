@@ -3,12 +3,12 @@
 #include "perl.h"
 #include "XSUB.h"
 
-#ifdef PURIFY
-#define DeadCode() NULL
-#else
 SV *
 DeadCode(pTHX)
 {
+#ifdef PURIFY
+    return Nullsv;
+#else
     SV* sva;
     SV* sv, *dbg;
     SV* ret = newRV_noinc((SV*)newAV());
@@ -114,8 +114,8 @@ DeadCode(pTHX)
     PerlIO_printf(Perl_debug_log, "total: refs: %i, strings: %i in %i\targsarray: %i, argsstrings: %i\n", tref, tm, ts, ta, tas);
 
     return ret;
-}
 #endif /* !PURIFY */
+}
 
 #if defined(PERL_DEBUGGING_MSTATS) || defined(DEBUGGING_MSTATS) \
 	|| (defined(MYMALLOC) && !defined(PLAIN_MALLOC))

@@ -458,11 +458,4 @@ BOOT:
 #ifdef SEEK_END
         newCONSTSUB(stash,"SEEK_END", newSViv(SEEK_END));
 #endif
-    /*
-     * constant subs for IO
-     */
-    stash = gv_stashpvn("IO", 2, TRUE);
-#ifdef EINPROGRESS
-        newCONSTSUB(stash,"EINPROGRESS", newSViv(EINPROGRESS));
-#endif
 }

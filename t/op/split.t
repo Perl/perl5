@@ -52,7 +52,7 @@ else                  { $foo = `./perl -D1024 -e '(\$a,\$b) = split;' 2>&1` }
 if ($foo =~ /DCL-W-NOCOMD/) {
   $foo = `\$ mcr sys\$disk:[]perl. "-D1024" -e "(\$a,\$b) = split;"`;
 }
-print $foo =~ /DEBUGGING/ || $foo =~ /SV = IV\(3\)/ ? "ok 11\n" : "not ok 11\n";
+print $foo =~ /DEBUGGING/ || $foo =~ /SV = (VOID|IV\(3\))/ ? "ok 11\n" : "not ok 11\n";
 
 # Can we say how many fields to split to when assigning to a list?
 ($a,$b) = split(' ','1 2 3 4 5 6', 2);

@@ -47,63 +47,46 @@ Archives of the list are held at:
 
 =head1 How are Perl Releases Numbered?
 
-Perl version numbers are floating point numbers, such as 5.004.
-(Observations about the imprecision of floating point numbers for
-representing reality probably have more relevance than you might
-imagine :-) The major version number is 5 and the '004' is the
-patchlevel.  (Questions such as whether or not '004' is really a minor
-version number can safely be ignored.:)
+Beginning with v5.6.0, even versions will stand for maintenance releases
+and odd versions for development releases, i.e., v5.6.x for maintenance
+releases, and v5.7.x for development releases.  Before v5.6.0, subversions
+_01 through _49 were reserved for bug-fix maintenance releases, and
+subversions _50 through _99 for unstable development versions.
 
-The version number is available as the magic variable $],
-and can be used in comparisons, e.g.
+For example, in v5.6.1, the revision number is 5, the version is 6,
+and 1 is the subversion.
 
-	print "You've got an old perl\n" if $] < 5.002;
+For compatibility with the older numbering scheme the composite floating
+point version number continues to be available as the magic variable $],
+and amounts to C<$revision + $version/1000 + $subversion/1000000>.  This
+can still be used in comparisons.
 
-You can also require particular version (or later) with
+	print "You've got an old perl\n" if $] < 5.005_03;
 
-	use 5.002;
+In addition, the version is also available as a string in $^V.
+
+	print "You've got a new perl\n" if $^V and $^V ge v5.6.0;
+
+You can also require particular version (or later) with:
+
+        use 5.006;
+
+or using the new syntax available only from v5.6 onward:
+
+	use v5.6.0;
 
 At some point in the future, we may need to decide what to call the
 next big revision.  In the .package file used by metaconfig to
 generate Configure, there are two variables that might be relevant:
-$baserev=5.0 and $package=perl5.   At various times, I have suggested
-we might change them to $baserev=5.1 and $package=perl5.1 if want
-to signify a fairly major update.  Or, we might want to jump to perl6.
-Let's worry about that problem when we get there.
+$baserev=5 and $package=perl5.
 
-=head2 Subversions
-
-In addition, there usually are sub-versions available. Sub-versions
-are numbered with sub-version numbers. For example, version 5.003_04
-is the 4'th developer version built on top of 5.003. It might include
-the _01, _02, and _03 changes, but it also might not. Sub-versions are
-allowed to be subversive. (But see the next section for recent
-changes.)
-
-These sub-versions can also be used as floating point numbers, so
-you can do things such as
-
-	print "You've got an unstable perl\n" if $] == 5.00303;
-
-You can also require particular version (or later) with
-
-	use 5.003_03;    # the "_" is optional
-
-Sub-versions produced by the members of perl5-porters are usually
+Perl releases produced by the members of perl5-porters are usually
 available on CPAN in the F<src/5.0/maint> and F<src/5.0/devel>
 directories.
 
 =head2 Maintenance and Development Subversions
 
-Starting with version 5.004, subversions _01 through _49 are reserved
-for bug-fix maintenance releases, and subversions _50 through _99 for
-unstable development versions.
-
-The separate bug-fix track is being established to allow us an easy
-way to distribute important bug fixes without waiting for the
-developers to untangle all the other problems in the current
-developer's release. The first rule of maintenance work is "First, do
-no harm."
+The first rule of maintenance work is "First, do no harm."
 
 Trial releases of bug-fix maintenance releases are announced on
 perl5-porters. Trial releases use the new subversion number (to avoid
@@ -113,17 +96,12 @@ string C<MAINT_TRIAL> to make clear that the file is not meant for
 public consumption.
 
 In general, the names of official distribution files for the public
-always match the regular expression
+always match the regular expression:
 
-    ^perl5\.\d{3}(_[0-4]\d)?\.tar\.gz$
+    ^perl\d+\.(\d+)\.\d+(-MAINT_TRIAL_\d+)\.tar\.gz$
 
-Developer releases always match
-
-    ^perl5\.\d{3}(_[5-9]\d)?\.tar\.gz$
-
-And the trial versions for a new maintainance release match
-
-    ^perl5\.\d{3}(_[0-4]\d)-MAINT_TRIAL_\d+\.tar\.gz$
+C<$1> in the pattern is always an even number for maintenance
+versions, and odd for developer releases.
 
 In the past it has been observed that pumkings tend to invent new
 naming conventions on the fly. If you are a pumpking, before you
@@ -131,26 +109,6 @@ invent a new name for any of the three types of perl distributions,
 please inform the guys from the CPAN who are doing indexing and
 provide the trees of symlinks and the like. They will have to know
 I<in advance> what you decide.
-
-=head2 Why such a complicated scheme?
-
-Two reasons, really.  At least.
-
-First, we need some way to identify and release collections of patches
-that are known to have new features that need testing and exploration.  The
-subversion scheme does that nicely while fitting into the
-C<use 5.004;> mold.
-
-Second, since most of the folks who help maintain perl do so on a
-free-time voluntary basis, perl development does not proceed at a
-precise pace, though it always seems to be moving ahead quickly.
-We needed some way to pass around the "patch pumpkin" to allow
-different people chances to work on different aspects of the
-distribution without getting in each other's way.  It wouldn't be
-constructive to have multiple people working on incompatible
-implementations of the same idea.  Instead what was needed was
-some kind of "baton" or "token" to pass around so everyone knew
-whose turn was next.
 
 =head2 Why is it called the patch pumpkin?
 
@@ -742,6 +700,42 @@ supports dynamic loading, you can also test static loading with
 
 You can also hand-tweak your config.h to try out different #ifdef
 branches.
+
+=head1 Running Purify
+
+Purify is a commercial tool that is helpful in identifying memory
+overruns, wild pointers, memory leaks and other such badness.  Perl
+must be compiled in a specific way for optimal testing with Purify.
+
+Use the following commands to test perl with Purify:
+
+	sh Configure -des -Doptimize=-g -Uusemymalloc -Dusemultiplicity \
+	    -Accflags=-DPURIFY
+	setenv PURIFYOPTIONS "-chain-length=25"
+	make all pureperl
+	cd t
+	ln -s ../pureperl perl
+	setenv PERL_DESTRUCT_LEVEL 5
+	./perl TEST
+
+Disabling Perl's malloc allows Purify to monitor allocations and leaks
+more closely; using Perl's malloc will make Purify report most leaks
+in the "potential" leaks category.  Enabling the multiplicity option
+allows perl to clean up thoroughly when the interpreter shuts down, which
+reduces the number of bogus leak reports from Purify.  The -DPURIFY
+enables any Purify-specific debugging code in the sources.
+
+Purify outputs messages in "Viewer" windows by default.  If you don't have
+a windowing environment or if you simply want the Purify output to
+unobtrusively go to a log file instead of to the interactive window,
+use the following options instead:
+
+	setenv PURIFYOPTIONS "-chain-length=25 -windows=no -log-file=perl.log \
+	    -append-logfile=yes"
+
+The only currently known leaks happen when there are compile-time errors
+within eval or require.  (Fixing these is non-trivial, unfortunately, but
+they must be fixed eventually.)
 
 =head1 Common Gotcha's
 

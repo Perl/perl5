@@ -27,13 +27,6 @@ char *getenv (char *); /* Usually in <stdlib.h> */
 
 static I32 read_e_script(pTHXo_ int idx, SV *buf_sv, int maxlen);
 
-#ifdef I_FCNTL
-#include <fcntl.h>
-#endif
-#ifdef I_SYS_FILE
-#include <sys/file.h>
-#endif
-
 #ifdef IAMSUID
 #ifndef DOSUID
 #define DOSUID
@@ -162,7 +155,9 @@ perl_construct(pTHXx)
 	thr = init_main_thread();
 #endif /* USE_THREADS */
 
+#ifdef PERL_FLEXIBLE_EXCEPTIONS
 	PL_protect = MEMBER_TO_FPTR(Perl_default_protect); /* for exceptions */
+#endif
 
 	PL_curcop = &PL_compiling;	/* needed by ckWARN, right away */
 
@@ -225,7 +220,7 @@ perl_construct(pTHXx)
 	PL_patchlevel = NEWSV(0,4);
 	SvUPGRADE(PL_patchlevel, SVt_PVNV);
 	if (PERL_REVISION > 127 || PERL_VERSION > 127 || PERL_SUBVERSION > 127)
-	    SvGROW(PL_patchlevel,24);
+	    SvGROW(PL_patchlevel, UTF8_MAXLEN*3+1);
 	s = (U8*)SvPVX(PL_patchlevel);
 	s = uv_to_utf8(s, (UV)PERL_REVISION);
 	s = uv_to_utf8(s, (UV)PERL_VERSION);
@@ -442,10 +437,10 @@ perl_destruct(pTHXx)
 
     /* magical thingies */
 
-    Safefree(PL_ofs);	/* $, */
+    Safefree(PL_ofs);		/* $, */
     PL_ofs = Nullch;
 
-    Safefree(PL_ors);	/* $\ */
+    Safefree(PL_ors);		/* $\ */
     PL_ors = Nullch;
 
     SvREFCNT_dec(PL_rs);	/* $/ */
@@ -454,7 +449,9 @@ perl_destruct(pTHXx)
     SvREFCNT_dec(PL_nrs);	/* $/ helper */
     PL_nrs = Nullsv;
 
-    PL_multiline = 0;	/* $* */
+    PL_multiline = 0;		/* $* */
+    Safefree(PL_osname);	/* $^O */
+    PL_osname = Nullch;
 
     SvREFCNT_dec(PL_statname);
     PL_statname = Nullsv;
@@ -504,8 +501,6 @@ perl_destruct(pTHXx)
     SvREFCNT_dec(PL_argvout_stack);
     PL_argvout_stack = Nullav;
 
-    SvREFCNT_dec(PL_fdpid);
-    PL_fdpid = Nullav;
     SvREFCNT_dec(PL_modglobal);
     PL_modglobal = Nullhv;
     SvREFCNT_dec(PL_preambleav);
@@ -521,6 +516,17 @@ perl_destruct(pTHXx)
     SvREFCNT_dec(PL_bodytarget);
     PL_bodytarget = Nullsv;
     PL_formtarget = Nullsv;
+
+    /* free locale stuff */
+#ifdef USE_LOCALE_COLLATE
+    Safefree(PL_collation_name);
+    PL_collation_name = Nullch;
+#endif
+
+#ifdef USE_LOCALE_NUMERIC
+    Safefree(PL_numeric_name);
+    PL_numeric_name = Nullch;
+#endif
 
     /* clear utf8 character classes */
     SvREFCNT_dec(PL_utf8_alnum);
@@ -593,14 +599,21 @@ perl_destruct(pTHXx)
 
     /* Now absolutely destruct everything, somehow or other, loops or no. */
     last_sv_count = 0;
+    SvFLAGS(PL_fdpid) |= SVTYPEMASK;		/* don't clean out pid table now */
     SvFLAGS(PL_strtab) |= SVTYPEMASK;		/* don't clean out strtab now */
     while (PL_sv_count != 0 && PL_sv_count != last_sv_count) {
 	last_sv_count = PL_sv_count;
 	sv_clean_all();
     }
+    SvFLAGS(PL_fdpid) &= ~SVTYPEMASK;
+    SvFLAGS(PL_fdpid) |= SVt_PVAV;
     SvFLAGS(PL_strtab) &= ~SVTYPEMASK;
     SvFLAGS(PL_strtab) |= SVt_PVHV;
-    
+
+    AvREAL_off(PL_fdpid);		/* no surviving entries */
+    SvREFCNT_dec(PL_fdpid);		/* needed in io_close() */
+    PL_fdpid = Nullav;
+
     /* Destruct the global string table. */
     {
 	/* Yell and reset the HeVAL() slots that are still holding refcounts,
@@ -631,6 +644,16 @@ perl_destruct(pTHXx)
 	}
     }
     SvREFCNT_dec(PL_strtab);
+
+    /* free special SVs */
+
+    SvREFCNT(&PL_sv_yes) = 0;
+    sv_clear(&PL_sv_yes);
+    SvANY(&PL_sv_yes) = NULL;
+
+    SvREFCNT(&PL_sv_no) = 0;
+    sv_clear(&PL_sv_no);
+    SvANY(&PL_sv_no) = NULL;
 
     if (PL_sv_count != 0 && ckWARN_d(WARN_INTERNAL))
 	Perl_warner(aTHX_ WARN_INTERNAL,"Scalars leaked: %ld\n", (long)PL_sv_count);
@@ -665,7 +688,7 @@ perl_destruct(pTHXx)
     Safefree(PL_thrsv);
     PL_thrsv = Nullsv;
 #endif /* USE_THREADS */
-    
+
     /* As the absolutely last thing, free the non-arena SV for mess() */
 
     if (PL_mess_sv) {
@@ -779,13 +802,20 @@ setuid perl scripts securely.\n");
     oldscope = PL_scopestack_ix;
     PL_dowarn = G_WARN_OFF;
 
-    CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_parse_body),
-		env, xsinit);
+#ifdef PERL_FLEXIBLE_EXCEPTIONS
+    CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_vparse_body), env, xsinit);
+#else
+    JMPENV_PUSH(ret);
+#endif
     switch (ret) {
     case 0:
+#ifndef PERL_FLEXIBLE_EXCEPTIONS
+	parse_body(env,xsinit);
+#endif
 	if (PL_checkav)
 	    call_list(oldscope, PL_checkav);
-	return 0;
+	ret = 0;
+	break;
     case 1:
 	STATUS_ALL_FAILURE;
 	/* FALL THROUGH */
@@ -797,21 +827,34 @@ setuid perl scripts securely.\n");
 	PL_curstash = PL_defstash;
 	if (PL_checkav)
 	    call_list(oldscope, PL_checkav);
-	return STATUS_NATIVE_EXPORT;
+	ret = STATUS_NATIVE_EXPORT;
+	break;
     case 3:
 	PerlIO_printf(Perl_error_log, "panic: top_env\n");
-	return 1;
+	ret = 1;
+	break;
     }
-    return 0;
+    JMPENV_POP;
+    return ret;
 }
 
+#ifdef PERL_FLEXIBLE_EXCEPTIONS
 STATIC void *
-S_parse_body(pTHX_ va_list args)
+S_vparse_body(pTHX_ va_list args)
+{
+    char **env = va_arg(args, char**);
+    XSINIT_t xsinit = va_arg(args, XSINIT_t);
+
+    return parse_body(env, xsinit);
+}
+#endif
+
+STATIC void *
+S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 {
     dTHR;
     int argc = PL_origargc;
     char **argv = PL_origargv;
-    char **env = va_arg(args, char**);
     char *scriptname = NULL;
     int fdscript = -1;
     VOL bool dosearch = FALSE;
@@ -820,8 +863,6 @@ S_parse_body(pTHX_ va_list args)
     register SV *sv;
     register char *s;
     char *cddir = Nullch;
-
-    XSINIT_t xsinit = va_arg(args, XSINIT_t);
 
     sv_setpvn(PL_linestr,"",0);
     sv = newSVpvn("",0);		/* first used for -I flags */
@@ -944,8 +985,11 @@ S_parse_body(pTHX_ va_list args)
 #  ifdef USE_ITHREADS
 		sv_catpv(PL_Sv," USE_ITHREADS");
 #  endif
-#  ifdef USE_64_BITS
-		sv_catpv(PL_Sv," USE_64_BITS");
+#  ifdef USE_64_BIT_INT
+		sv_catpv(PL_Sv," USE_64_BIT_INT");
+#  endif
+#  ifdef USE_64_BIT_ALL
+		sv_catpv(PL_Sv," USE_64_BIT_ALL");
 #  endif
 #  ifdef USE_LONG_DOUBLE
 		sv_catpv(PL_Sv," USE_LONG_DOUBLE");
@@ -1127,11 +1171,13 @@ print \"  \\@INC:\\n    @INC\\n\";");
     CvPADLIST(PL_compcv) = comppadlist;
 
     boot_core_UNIVERSAL();
+#ifndef PERL_MICRO
     boot_core_xsutils();
+#endif
 
     if (xsinit)
 	(*xsinit)(aTHXo);	/* in case linked C routines want magical variables */
-#if defined(VMS) || defined(WIN32) || defined(DJGPP)
+#if defined(VMS) || defined(WIN32) || defined(DJGPP) || defined(__CYGWIN__)
     init_os_extras();
 #endif
 
@@ -1207,7 +1253,7 @@ perl_run(pTHXx)
 {
     dTHR;
     I32 oldscope;
-    int ret;
+    int ret = 0;
     dJMPENV;
 #ifdef USE_THREADS
     dTHX;
@@ -1215,14 +1261,23 @@ perl_run(pTHXx)
 
     oldscope = PL_scopestack_ix;
 
+#ifdef PERL_FLEXIBLE_EXCEPTIONS
  redo_body:
-    CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_run_body), oldscope);
+    CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_vrun_body), oldscope);
+#else
+    JMPENV_PUSH(ret);
+#endif
     switch (ret) {
     case 1:
 	cxstack_ix = -1;		/* start context stack again */
 	goto redo_body;
-    case 0:  /* normal completion */
-    case 2:  /* my_exit() */
+    case 0:				/* normal completion */
+#ifndef PERL_FLEXIBLE_EXCEPTIONS
+ redo_body:
+	run_body(oldscope);
+#endif
+	/* FALL THROUGH */
+    case 2:				/* my_exit() */
 	while (PL_scopestack_ix > oldscope)
 	    LEAVE;
 	FREETMPS;
@@ -1233,7 +1288,8 @@ perl_run(pTHXx)
 	if (PerlEnv_getenv("PERL_DEBUG_MSTATS"))
 	    dump_mstats("after execution:  ");
 #endif
-	return STATUS_NATIVE_EXPORT;
+	ret = STATUS_NATIVE_EXPORT;
+	break;
     case 3:
 	if (PL_restartop) {
 	    POPSTACK_TO(PL_mainstack);
@@ -1241,18 +1297,29 @@ perl_run(pTHXx)
 	}
 	PerlIO_printf(Perl_error_log, "panic: restartop\n");
 	FREETMPS;
-	return 1;
+	ret = 1;
+	break;
     }
 
-    /* NOTREACHED */
-    return 0;
+    JMPENV_POP;
+    return ret;
 }
 
+#ifdef PERL_FLEXIBLE_EXCEPTIONS
 STATIC void *
-S_run_body(pTHX_ va_list args)
+S_vrun_body(pTHX_ va_list args)
+{
+    I32 oldscope = va_arg(args, I32);
+
+    return run_body(oldscope);
+}
+#endif
+
+
+STATIC void *
+S_run_body(pTHX_ I32 oldscope)
 {
     dTHR;
-    I32 oldscope = va_arg(args, I32);
 
     DEBUG_r(PerlIO_printf(Perl_debug_log, "%s $` $& $' support.\n",
                     PL_sawampersand ? "Enabling" : "Omitting"));
@@ -1452,13 +1519,15 @@ Perl_call_method(pTHX_ const char *methname, I32 flags)
 {
     dSP;
     OP myop;
-    if (!PL_op)
+    if (!PL_op) {
+	Zero(&myop, 1, OP);
 	PL_op = &myop;
+    }
     XPUSHs(sv_2mortal(newSVpv(methname,0)));
     PUTBACK;
     pp_method();
-	if(PL_op == &myop)
-		PL_op = Nullop;
+    if (PL_op == &myop)
+	PL_op = Nullop;
     return call_sv(*PL_stack_sp--, flags);
 }
 
@@ -1518,7 +1587,7 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
 
     if (!(flags & G_EVAL)) {
 	CATCH_SET(TRUE);
-	call_xbody((OP*)&myop, FALSE);
+	call_body((OP*)&myop, FALSE);
 	retval = PL_stack_sp - (PL_stack_base + oldmark);
 	CATCH_SET(oldcatch);
     }
@@ -1546,11 +1615,19 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
 	}
 	PL_markstack_ptr++;
 
-  redo_body:
-	CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_call_body),
+#ifdef PERL_FLEXIBLE_EXCEPTIONS
+ redo_body:
+	CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_vcall_body),
 		    (OP*)&myop, FALSE);
+#else
+	JMPENV_PUSH(ret);
+#endif
 	switch (ret) {
 	case 0:
+#ifndef PERL_FLEXIBLE_EXCEPTIONS
+ redo_body:
+	    call_body((OP*)&myop, FALSE);
+#endif
 	    retval = PL_stack_sp - (PL_stack_base + oldmark);
 	    if (!(flags & G_KEEPERR))
 		sv_setpv(ERRSV,"");
@@ -1562,6 +1639,7 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
 	    /* my_exit() was called */
 	    PL_curstash = PL_defstash;
 	    FREETMPS;
+	    JMPENV_POP;
 	    if (PL_statusvalue && !(PL_exit_flags & PERL_EXIT_EXPECTED))
 		Perl_croak(aTHX_ "Callback called exit");
 	    my_exit_jump();
@@ -1595,6 +1673,7 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
 	    PL_curpm = newpm;
 	    LEAVE;
 	}
+	JMPENV_POP;
     }
 
     if (flags & G_DISCARD) {
@@ -1607,18 +1686,20 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
     return retval;
 }
 
+#ifdef PERL_FLEXIBLE_EXCEPTIONS
 STATIC void *
-S_call_body(pTHX_ va_list args)
+S_vcall_body(pTHX_ va_list args)
 {
     OP *myop = va_arg(args, OP*);
     int is_eval = va_arg(args, int);
 
-    call_xbody(myop, is_eval);
+    call_body(myop, is_eval);
     return NULL;
 }
+#endif
 
 STATIC void
-S_call_xbody(pTHX_ OP *myop, int is_eval)
+S_call_body(pTHX_ OP *myop, int is_eval)
 {
     dTHR;
 
@@ -1678,11 +1759,19 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
     if (flags & G_KEEPERR)
 	myop.op_flags |= OPf_SPECIAL;
 
+#ifdef PERL_FLEXIBLE_EXCEPTIONS
  redo_body:
-    CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_call_body),
+    CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_vcall_body),
 		(OP*)&myop, TRUE);
+#else
+    JMPENV_PUSH(ret);
+#endif
     switch (ret) {
     case 0:
+#ifndef PERL_FLEXIBLE_EXCEPTIONS
+ redo_body:
+	call_body((OP*)&myop,TRUE);
+#endif
 	retval = PL_stack_sp - (PL_stack_base + oldmark);
 	if (!(flags & G_KEEPERR))
 	    sv_setpv(ERRSV,"");
@@ -1694,6 +1783,7 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
 	/* my_exit() was called */
 	PL_curstash = PL_defstash;
 	FREETMPS;
+	JMPENV_POP;
 	if (PL_statusvalue && !(PL_exit_flags & PERL_EXIT_EXPECTED))
 	    Perl_croak(aTHX_ "Callback called exit");
 	my_exit_jump();
@@ -1714,6 +1804,7 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
 	break;
     }
 
+    JMPENV_POP;
     if (flags & G_DISCARD) {
 	PL_stack_sp = PL_stack_base + oldmark;
 	retval = 0;
@@ -1819,6 +1910,8 @@ S_usage(pTHX_ char *name)		/* XXX move this out into a module ? */
 "-v              print version, subversion (includes VERY IMPORTANT perl info)",
 "-V[:variable]   print configuration summary (or a single Config.pm variable)",
 "-w              enable many useful warnings (RECOMMENDED)",
+"-W              enable all warnings",
+"-X              disable all warnings",
 "-x[directory]   strip off text before #!perl line and perhaps cd to directory",
 "\n",
 NULL
@@ -2034,7 +2127,7 @@ Perl_moreswitches(pTHX_ char *s)
 	s++;
 	return s;
     case 'v':
-	printf(Perl_form(aTHX_ "\nThis is perl, v%v built for %s",
+	printf(Perl_form(aTHX_ "\nThis is perl, v%vd built for %s",
 			 PL_patchlevel, ARCHNAME));
 #if defined(LOCAL_PATCH_COUNT)
 	if (LOCAL_PATCH_COUNT > 0)
@@ -2077,6 +2170,9 @@ Perl_moreswitches(pTHX_ char *s)
 #endif
 #ifdef __MINT__
 	printf("MiNT port by Guido Flohr, 1997-1999\n");
+#endif
+#ifdef EPOC
+	printf("EPOC port by Olaf Flebbe, 1999-2000\n");
 #endif
 #ifdef BINARY_BUILD_NOTICE
 	BINARY_BUILD_NOTICE;
@@ -2446,7 +2542,7 @@ sed %s -e \"/^[^#]/b\" \
 /* Mention
  * I_SYSSTATVFS	HAS_FSTATVFS
  * I_SYSMOUNT
- * I_STATFS	HAS_FSTATFS
+ * I_STATFS	HAS_FSTATFS	HAS_GETFSSTAT
  * I_MNTENT	HAS_GETMNTENT	HAS_HASMNTOPT
  * here so that metaconfig picks them up. */
 
@@ -3348,9 +3444,16 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
     while (AvFILL(paramList) >= 0) {
 	cv = (CV*)av_shift(paramList);
 	SAVEFREESV(cv);
-	CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_call_list_body), cv);
+#ifdef PERL_FLEXIBLE_EXCEPTIONS
+	CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_vcall_list_body), cv);
+#else
+	JMPENV_PUSH(ret);
+#endif
 	switch (ret) {
 	case 0:
+#ifndef PERL_FLEXIBLE_EXCEPTIONS
+	    call_list_body(cv);
+#endif
 	    atsv = ERRSV;
 	    (void)SvPV(atsv, len);
 	    if (len) {
@@ -3367,6 +3470,7 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 				   : "END");
 		while (PL_scopestack_ix > oldscope)
 		    LEAVE;
+		JMPENV_POP;
 		Perl_croak(aTHX_ "%s", SvPVx(atsv, n_a));
 	    }
 	    break;
@@ -3381,6 +3485,7 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 	    PL_curstash = PL_defstash;
 	    PL_curcop = &PL_compiling;
 	    CopLINE_set(PL_curcop, oldline);
+	    JMPENV_POP;
 	    if (PL_statusvalue && !(PL_exit_flags & PERL_EXIT_EXPECTED)) {
 		if (paramList == PL_beginav)
 		    Perl_croak(aTHX_ "BEGIN failed--compilation aborted");
@@ -3402,15 +3507,22 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 	    FREETMPS;
 	    break;
 	}
+	JMPENV_POP;
     }
 }
 
+#ifdef PERL_FLEXIBLE_EXCEPTIONS
 STATIC void *
-S_call_list_body(pTHX_ va_list args)
+S_vcall_list_body(pTHX_ va_list args)
 {
-    dTHR;
     CV *cv = va_arg(args, CV*);
+    return call_list_body(cv);
+}
+#endif
 
+STATIC void *
+S_call_list_body(pTHX_ CV *cv)
+{
     PUSHMARK(PL_stack_sp);
     call_sv((SV*)cv, G_EVAL|G_DISCARD);
     return NULL;

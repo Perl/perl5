@@ -7,7 +7,7 @@ BEGIN {
 
 # don't make this lexical
 $i = 1;
-print "1..16\n";
+print "1..19\n";
 
 sub do_require {
     %INC = ();
@@ -23,13 +23,31 @@ sub write_file {
     close REQ;
 }
 
+eval {require 5.005};
+print "# $@\nnot " if $@;
+print "ok ",$i++,"\n";
+
+eval { require 5.005 };
+print "# $@\nnot " if $@;
+print "ok ",$i++,"\n";
+
+eval { require 5.005; };
+print "# $@\nnot " if $@;
+print "ok ",$i++,"\n";
+
+eval {
+    require 5.005
+};
+print "# $@\nnot " if $@;
+print "ok ",$i++,"\n";
+
 # new style version numbers
 
 eval { require v5.5.630; };
 print "# $@\nnot " if $@;
 print "ok ",$i++,"\n";
 
-eval { require v10.0.2; };
+eval { require 10.0.2; };
 print "# $@\nnot " unless $@ =~ /^Perl v10\.0\.2 required/;
 print "ok ",$i++,"\n";
 
@@ -37,27 +55,27 @@ eval q{ use v5.5.630; };
 print "# $@\nnot " if $@;
 print "ok ",$i++,"\n";
 
-eval q{ use v10.0.2; };
+eval q{ use 10.0.2; };
 print "# $@\nnot " unless $@ =~ /^Perl v10\.0\.2 required/;
 print "ok ",$i++,"\n";
 
-my $ver = v5.5.630;
+my $ver = 5.005_63;
 eval { require $ver; };
 print "# $@\nnot " if $@;
 print "ok ",$i++,"\n";
 
-$ver = v10.0.2;
+# check inaccurate fp
+$ver = 10.2;
 eval { require $ver; };
-print "# $@\nnot " unless $@ =~ /^Perl v10\.0\.2 required/;
+print "# $@\nnot " unless $@ =~ /^Perl v10\.200\.0 required/;
 print "ok ",$i++,"\n";
 
-print "not " unless v5.5.1 gt v5.5;
+$ver = 10.000_02;
+eval { require $ver; };
+print "# $@\nnot " unless $@ =~ /^Perl v10\.0\.20 required/;
 print "ok ",$i++,"\n";
 
-print "not " unless 5.005_01 > v5.5;
-print "ok ",$i++,"\n";
-
-print "not " unless 5.005_64 - v5.5.640 < 0.0000001;
+print "not " unless 5.5.1 gt v5.5;
 print "ok ",$i++,"\n";
 
 {

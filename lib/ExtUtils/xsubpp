@@ -273,7 +273,7 @@ $END = "!End!\n\n";		# "impossible" keyword (multiple newline)
 $BLOCK_re= '\s*(' . join('|', qw(
 	REQUIRE BOOT CASE PREINIT INPUT INIT CODE PPCODE OUTPUT 
 	CLEANUP ALIAS PROTOTYPES PROTOTYPE VERSIONCHECK INCLUDE
-	SCOPE INTERFACE INTERFACE_MACRO C_ARGS
+	SCOPE INTERFACE INTERFACE_MACRO C_ARGS POST_CALL
 	)) . "|$END)\\s*:";
 
 # Input:  ($_, @line) == unparsed input.
@@ -284,6 +284,19 @@ sub check_keyword {
 	s/^(\s*)($_[0])\s*:\s*(?:#.*)?/$1/s && $2;
 }
 
+my ($C_group_rex, $C_arg);
+# Group in C (no support for comments or literals)
+$C_group_rex = qr/ [({\[]
+		   (?: (?> [^()\[\]{}]+ ) | (?p{ $C_group_rex }) )*
+		   [)}\]] /x ;
+# Chunk in C without comma at toplevel (no comments):
+$C_arg = qr/ (?: (?> [^()\[\]{},"']+ )
+	     |   (?p{ $C_group_rex })
+	     |   " (?: (?> [^\\"]+ )
+		   |   \\.
+		   )* "		# String literal
+	     |   ' (?: (?> [^\\']+ ) | \\. )* ' # Char literal
+	     )* /xs;
 
 if ($WantLineNumbers) {
     {
@@ -372,6 +385,9 @@ sub CASE_handler {
     $_ = '' ;
 }
 
+my $process_inout = 1;
+my $process_argtypes = 1;
+
 sub INPUT_handler {
     for (;  !/^$BLOCK_re/o;  $_ = shift(@line)) {
 	last if /^\s*NOT_IMPLEMENTED_YET/;
@@ -394,7 +410,8 @@ sub INPUT_handler {
 
 	# Check for duplicate definitions
 	blurt ("Error: duplicate definition of argument '$var_name' ignored"), next
-	    if $arg_list{$var_name} ++  ;
+	    if $arg_list{$var_name}++ 
+	      or defined $arg_types{$var_name} and not $processing_arg_with_types;
 
 	$thisdone |= $var_name eq "THIS";
 	$retvaldone |= $var_name eq "RETVAL";
@@ -418,7 +435,9 @@ sub INPUT_handler {
 	    $var_addr{$var_name} = 1;
 	    $func_args =~ s/\b($var_name)\b/&$1/;
 	}
-	if ($var_init =~ /^[=;]\s*NO_INIT\s*;?\s*$/) {
+	if ($var_init =~ /^[=;]\s*NO_INIT\s*;?\s*$/
+	    or $in_out{$var_name} and $in_out{$var_name} eq 'outlist'
+	    and $var_init !~ /\S/) {
 	  if ($name_printed) {
 	    print ";\n";
 	  } else {
@@ -503,6 +522,7 @@ EOF
 
 sub CLEANUP_handler() { print_section() } 
 sub PREINIT_handler() { print_section() } 
+sub POST_CALL_handler() { print_section() } 
 sub INIT_handler()    { print_section() } 
 
 sub GetAliases
@@ -872,7 +892,7 @@ sub fetch_para {
 	my $tmp_line;
 	$lastline .= $tmp_line
 	    while ($lastline =~ /\\$/ && defined($tmp_line = <$FH>));
-	    
+
 	chomp $lastline;
 	$lastline =~ s/^\s+$//;
     }
@@ -939,15 +959,23 @@ while (fetch_para()) {
     undef($static);
     undef($elipsis);
     undef($wantRETVAL) ;
+    undef($RETVAL_no_return) ;
     undef(%arg_list) ;
     undef(@proto_arg) ;
+    undef(@arg_with_types) ;
+    undef($processing_arg_with_types) ;
+    undef(%arg_types) ;
+    undef(@in_out) ;
+    undef(%in_out) ;
     undef($proto_in_this_xsub) ;
     undef($scope_in_this_xsub) ;
     undef($interface);
+    undef($prepush_done);
     $interface_macro = 'XSINTERFACE_FUNC' ;
     $interface_macro_set = 'XSINTERFACE_FUNC_SET' ;
     $ProtoThisXSUB = $WantPrototypes ;
     $ScopeThisXSUB = 0;
+    $xsreturn = 0;
 
     $_ = shift(@line);
     while ($kwd = check_keyword("REQUIRE|PROTOTYPES|VERSIONCHECK|INCLUDE")) {
@@ -967,6 +995,7 @@ while (fetch_para()) {
 
     # extract return type, function name and arguments
     ($ret_type) = TidyType($_);
+    $RETVAL_no_return = 1 if $ret_type =~ s/^NO_OUTPUT\s+//;
 
     # a function definition needs at least 2 lines
     blurt ("Error: Function definition too short '$ret_type'"), next PARAGRAPH
@@ -976,7 +1005,7 @@ while (fetch_para()) {
 
     $func_header = shift(@line);
     blurt ("Error: Cannot parse function definition from '$func_header'"), next PARAGRAPH
-	unless $func_header =~ /^(?:([\w:]*)::)?(\w+)\s*\(\s*(.*?)\s*\)\s*(const)?\s*$/s;
+	unless $func_header =~ /^(?:([\w:]*)::)?(\w+)\s*\(\s*(.*?)\s*\)\s*(const)?\s*(;\s*)?$/s;
 
     ($class, $func_name, $orig_args) =  ($1, $2, $3) ;
     $class = "$4 $class" if $4;
@@ -995,40 +1024,98 @@ while (fetch_para()) {
     %XsubAliases = %XsubAliasValues = %Interfaces = ();
     $DoSetMagic = 1;
 
-    my $temp_args = $orig_args;
-    $temp_args =~ s/\\\s*//g;
-    @args = split(/\s*,\s*/, $temp_args);
+    $orig_args =~ s/\\\s*/ /g;		# process line continuations
+
+    my %out_vars;
+    if ($process_argtypes and $orig_args =~ /\S/) {
+	my $args = "$orig_args ,";
+	if ($args =~ /^( (?p{ $C_arg }) , )* $ /x) {
+	    @args = ($args =~ /\G ( (?p{ $C_arg }) ) , /xg);
+	    for ( @args ) {
+		s/^\s+//;
+		s/\s+$//;
+		my $arg = $_;
+		my $default;
+		($arg, $default) = / ( [^=]* ) ( (?: = .* )? ) /x;
+		my ($pre, $name) = ($arg =~ /(.*?) \s* \b(\w+) \s* $ /x);
+		next unless length $pre;
+		my $out_type;
+		my $inout_var;
+		if ($process_inout and s/^(in|in_outlist|outlist)\s+//) {
+		    my $type = $1;
+		    $out_type = $type if $type ne 'in';
+		    $arg =~ s/^(in|in_outlist|outlist)\s+//;
+		}
+		if (/\W/) {	# Has a type
+		    push @arg_with_types, $arg;
+		    # warn "pushing '$arg'\n";
+		    $arg_types{$name} = $arg;
+		    $_ = "$name$default";
+		}
+		$out_vars{$_} = 1 if $out_type eq 'outlist';
+		push @in_out, $name if $out_type;
+		$in_out{$name} = $out_type if $out_type;
+	    }
+	} else {
+	    @args = split(/\s*,\s*/, $orig_args);
+	    Warn("Warning: cannot parse argument list '$orig_args', fallback to split");
+	}
+    } else {
+	@args = split(/\s*,\s*/, $orig_args);
+	for (@args) {
+	    if ($process_inout and s/^(in|in_outlist|outlist)\s+//) {
+		my $out_type = $1;
+		next if $out_type eq 'in';
+		$out_vars{$_} = 1 if $out_type eq 'outlist';
+		push @in_out, $name;
+		$in_out{$_} = $out_type;
+	    }
+	}
+    }
     if (defined($class)) {
 	my $arg0 = ((defined($static) or $func_name eq 'new')
 		    ? "CLASS" : "THIS");
 	unshift(@args, $arg0);
-	($orig_args = "$arg0, $orig_args") =~ s/^$arg0, $/$arg0/;
+	($report_args = "$arg0, $report_args") =~ s/^\w+, $/$arg0/;
     }
-    $orig_args =~ s/"/\\"/g;
-    $min_args = $num_args = @args;
-    foreach $i (0..$num_args-1) {
+    my $extra_args = 0;
+    @args_num = ();
+    $num_args = 0;
+    my $report_args = '';
+    foreach $i (0 .. $#args) {
 	    if ($args[$i] =~ s/\.\.\.//) {
 		    $elipsis = 1;
-		    $min_args--;
-		    if ($args[$i] eq '' && $i == $num_args - 1) {
+		    if ($args[$i] eq '' && $i == $#args) {
+		        $report_args .= ", ...";
 			pop(@args);
 			last;
 		    }
 	    }
+	    if ($out_vars{$args[$i]}) {
+		push @args_num, undef;
+	    } else {
+		push @args_num, ++$num_args;
+		$report_args .= ", $args[$i]";
+	    }
 	    if ($args[$i] =~ /^([^=]*[^\s=])\s*=\s*(.*)/s) {
-		    $min_args--;
+		    $extra_args++;
 		    $args[$i] = $1;
 		    $defaults{$args[$i]} = $2;
 		    $defaults{$args[$i]} =~ s/"/\\"/g;
 	    }
 	    $proto_arg[$i+1] = "\$" ;
     }
-    if (defined($class)) {
-	    $func_args = join(", ", @args[1..$#args]);
-    } else {
-	    $func_args = join(", ", @args);
+    $min_args = $num_args - $extra_args;
+    $report_args =~ s/"/\\"/g;
+    $report_args =~ s/^,\s+//;
+    my @func_args = @args;
+    shift @func_args if defined($class);
+
+    for (@func_args) {
+	s/^/&/ if $in_out{$_};
     }
-    @args_match{@args} = 1..@args;
+    $func_args = join(", ", @func_args);
+    @args_match{@args} = @args_num;
 
     $PPCODE = grep(/^\s*PPCODE\s*:/, @line);
     $CODE = grep(/^\s*CODE\s*:/, @line);
@@ -1038,6 +1125,8 @@ while (fetch_para()) {
 		("@line" =~ /(\bST\s*\([^;]*=) | (\bXST_m\w+\s*\()/x ));
     $ALIAS  = grep(/^\s*ALIAS\s*:/,  @line);
     $INTERFACE  = grep(/^\s*INTERFACE\s*:/,  @line);
+
+    $xsreturn = 1 if $EXPLICIT_RETURN;
 
     # print function header
     print Q<<"EOF";
@@ -1069,12 +1158,12 @@ EOF
     if ($ALIAS) 
       { print Q<<"EOF" if $cond }
 #    if ($cond)
-#       Perl_croak(aTHX_ "Usage: %s($orig_args)", GvNAME(CvGV(cv)));
+#       Perl_croak(aTHX_ "Usage: %s($report_args)", GvNAME(CvGV(cv)));
 EOF
     else 
       { print Q<<"EOF" if $cond }
 #    if ($cond)
-#	Perl_croak(aTHX_ "Usage: $pname($orig_args)");
+#	Perl_croak(aTHX_ "Usage: $pname($report_args)");
 EOF
 
     print Q<<"EOF" if $PPCODE;
@@ -1137,6 +1226,12 @@ EOF
 				if $WantOptimize and $targetable{$type_kind{$ret_type}};
 		}
 
+		if (@arg_with_types) {
+		    unshift @line, @arg_with_types, $_;
+		    $_ = "";
+		    $processing_arg_with_types = 1;
+		    INPUT_handler() ;
+		}
 		print $deferred;
 
         process_keyword("INIT|ALIAS|PROTOTYPE|INTERFACE_MACRO|INTERFACE|C_ARGS") ;
@@ -1178,10 +1273,12 @@ EOF
 	}
 
 	# do output variables
-	$gotRETVAL = 0;
-	undef $RETVAL_code ;
+	$gotRETVAL = 0;		# 1 if RETVAL seen in OUTPUT section;
+	undef $RETVAL_code ;	# code to set RETVAL (from OUTPUT section);
+	# $wantRETVAL set if 'RETVAL =' autogenerated
+	($wantRETVAL, $ret_type) = (0, 'void') if $RETVAL_no_return;
 	undef %outargs ;
-        process_keyword("OUTPUT|ALIAS|PROTOTYPE"); 
+	process_keyword("POST_CALL|OUTPUT|ALIAS|PROTOTYPE"); 
 
 	# all OUTPUT done, so now push the return value on the stack
 	if ($gotRETVAL && $RETVAL_code) {
@@ -1198,6 +1295,7 @@ EOF
 		warn $@ if $@;
 
 		print "\tsv_setpv(TARG, $what); XSprePUSH; PUSHTARG;\n";
+		$prepush_done = 1;
 	    }
 	    elsif ($t) {
 		my $what = eval qq("$t->[2]");
@@ -1208,12 +1306,21 @@ EOF
 		$size = eval qq("$size");
 		warn $@ if $@;
 		print "\tXSprePUSH; PUSH$t->[0]($what$size);\n";
+		$prepush_done = 1;
 	    }
 	    else {
 		# RETVAL almost never needs SvSETMAGIC()
 		&generate_output($ret_type, 0, 'RETVAL', 0);
 	    }
 	}
+
+	$xsreturn = 1 if $ret_type ne "void";
+	my $num = $xsreturn;
+	my $c = @in_out;
+	print "\tXSprePUSH;" if $c and not $prepush_done;
+	print "\tEXTEND(SP,$c);\n" if $c;
+	$xsreturn += $c;
+	generate_output($var_types{$_}, $num++, $_, 0, 1) for @in_out;
 
 	# do cleanup
 	process_keyword("CLEANUP|ALIAS|PROTOTYPE") ;
@@ -1250,9 +1357,9 @@ EOF
 #	Perl_croak(aTHX_ errbuf);
 EOF
 
-    if ($ret_type ne "void" or $EXPLICIT_RETURN) {
+    if ($xsreturn) {
         print Q<<EOF unless $PPCODE;
-#    XSRETURN(1);
+#    XSRETURN($xsreturn);
 EOF
     } else {
         print Q<<EOF unless $PPCODE;
@@ -1469,7 +1576,11 @@ sub generate_init {
 	      eval qq/print "\\t$var;\\n"/;
 	      warn $@   if  $@;
 	    }
-	    $deferred .= eval qq/"\\n\\tif (items < $num)\\n\\t    $var = $defaults{$var};\\n\\telse {\\n$expr;\\n\\t}\\n"/;
+	    if ($defaults{$var} eq 'NO_INIT') {
+		$deferred .= eval qq/"\\n\\tif (items >= $num) {\\n$expr;\\n\\t}\\n"/;
+	    } else {
+		$deferred .= eval qq/"\\n\\tif (items < $num)\\n\\t    $var = $defaults{$var};\\n\\telse {\\n$expr;\\n\\t}\\n"/;
+	    }
 	    warn $@   if  $@;
     } elsif ($ScopeThisXSUB or $expr !~ /^\t\$var =/) {
 	    if ($name_printed) {
@@ -1489,7 +1600,7 @@ sub generate_init {
 }
 
 sub generate_output {
-    local($type, $num, $var, $do_setmagic) = @_;
+    local($type, $num, $var, $do_setmagic, $do_push) = @_;
     local($arg) = "ST(" . ($num - ($num != 0)) . ")";
     local($argoff) = $num - 1;
     local($ntype);
@@ -1528,8 +1639,8 @@ sub generate_output {
 		    # mortalize it.
 		    eval "print qq\a$expr\a";
 		    warn $@   if  $@;
-		    print "\tsv_2mortal(ST(0));\n";
-		    print "\tSvSETMAGIC(ST(0));\n" if $do_setmagic;
+		    print "\tsv_2mortal(ST($num));\n";
+		    print "\tSvSETMAGIC(ST($num));\n" if $do_setmagic;
 		}
 		elsif ($expr =~ /^\s*\$arg\s*=/) {
 		    # We expect that $arg has refcnt >=1, so we need
@@ -1549,6 +1660,13 @@ sub generate_output {
 		    warn $@   if  $@;
 		    # new mortals don't have set magic
 		}
+	    }
+	    elsif ($do_push) {
+	        print "\tPUSHs(sv_newmortal());\n";
+		$arg = "ST($num)";
+		eval "print qq\a$expr\a";
+		warn $@   if  $@;
+		print "\tSvSETMAGIC($arg);\n" if $do_setmagic;
 	    }
 	    elsif ($arg =~ /^ST\(\d+\)$/) {
 		eval "print qq\a$expr\a";

@@ -45,11 +45,11 @@ README.mpeix		Notes about MPE/iX port
 README.os2		Notes about OS/2 port
 README.os390		Notes about OS/390 (nee MVS) port
 README.plan9		Notes about Plan9 port
-README.posix-bc		Notes about BC2000 POSIX port
+README.posix-bc		Notes about BS2000 POSIX port
 README.qnx		Notes about QNX port
 README.threads		Notes about multithreading
 README.vmesa		Notes about VM/ESA port
-README.vms		Notes about VMS port
+README.vms		Notes about installing the VMS port
 README.vos		Notes about Stratus VOS port
 README.win32		Notes about Win32 port
 Todo			The Wishlist
@@ -68,6 +68,7 @@ configure.com		Configure-equivalent for VMS
 configure.gnu		Crude emulation of GNU configure
 cop.h			Control operator header
 cv.h			Code value header
+cygwin/cygwin.c		Additional code for Cygwin port
 cygwin/Makefile.SHs	Shared library generation for Cygwin port
 cygwin/ld2.in		ld wrapper template for Cygwin port
 cygwin/perlld.in	dll generator template for Cygwin port
@@ -234,11 +235,11 @@ ext/DynaLoader/dl_aix.xs	AIX implementation
 ext/DynaLoader/dl_beos.xs	BeOS implementation
 ext/DynaLoader/dl_dld.xs	GNU dld style implementation
 ext/DynaLoader/dl_dlopen.xs	BSD/SunOS4&5 dlopen() style implementation
+ext/DynaLoader/dl_dyld.xs	NeXT/Apple dyld implementation
 ext/DynaLoader/dl_hpux.xs	HP-UX implementation
 ext/DynaLoader/dl_mpeix.xs	MPE/iX implementation
-ext/DynaLoader/dl_next.xs	Next implementation
+ext/DynaLoader/dl_next.xs	NeXT implementation
 ext/DynaLoader/dl_none.xs	Stub implementation
-ext/DynaLoader/dl_rhapsody.xs	Rhapsody implementation
 ext/DynaLoader/dl_vmesa.xs	VM/ESA implementation
 ext/DynaLoader/dl_vms.xs	VMS implementation
 ext/DynaLoader/dlutils.c	Dynamic loader utilities for dl_*.xs files
@@ -364,6 +365,9 @@ ext/SDBM_File/typemap		SDBM extension interface types
 ext/Socket/Makefile.PL	Socket extension makefile writer
 ext/Socket/Socket.pm	Socket extension Perl module
 ext/Socket/Socket.xs	Socket extension external subroutines
+ext/Sys/Hostname/Makefile.PL	Sys::Hostname extension makefile writer
+ext/Sys/Hostname/Hostname.pm	Sys::Hostname extension Perl module
+ext/Sys/Hostname/Hostname.xs	Sys::Hostname extension external subroutines
 ext/Sys/Syslog/Makefile.PL	Sys::Syslog extension makefile writer
 ext/Sys/Syslog/Syslog.pm	Sys::Syslog extension Perl module
 ext/Sys/Syslog/Syslog.xs	Sys::Syslog extension external subroutines
@@ -436,6 +440,7 @@ hints/bsdos.sh		Hints for named architecture
 hints/convexos.sh	Hints for named architecture
 hints/cxux.sh		Hints for named architecture
 hints/cygwin.sh		Hints for named architecture
+hints/darwin.sh		Hints for named architecture
 hints/dcosx.sh		Hints for named architecture
 hints/dec_osf.sh	Hints for named architecture
 hints/dgux.sh		Hints for named architecture
@@ -646,7 +651,6 @@ lib/SelectSaver.pm	Enforce proper select scoping
 lib/SelfLoader.pm	Load functions only on demand
 lib/Shell.pm		Make AUTOLOADed system() calls
 lib/Symbol.pm		Symbol table manipulation routines
-lib/Sys/Hostname.pm	Hostname methods
 lib/Term/Cap.pm		Perl module supporting termcap usage
 lib/Term/Complete.pm	A command completion subroutine
 lib/Term/ReadLine.pm	Stub readline library
@@ -679,8 +683,8 @@ lib/bigfloat.pl		An arbitrary precision floating point package
 lib/bigint.pl		An arbitrary precision integer arithmetic package
 lib/bigrat.pl		An arbitrary precision rational arithmetic package
 lib/blib.pm		For "use blib"
-lib/byte.pm		Pragma to enable byte operations
-lib/byte_heavy.pl	Support routines for byte pragma
+lib/bytes.pm		Pragma to enable byte operations
+lib/bytes_heavy.pl	Support routines for byte pragma
 lib/cacheout.pl		Manages output filehandles when you need too many
 lib/charnames.pm	Character names
 lib/chat2.pl            Obsolete ipc library (use Comm.pm etc instead)
@@ -734,8 +738,6 @@ lib/unicode/CombiningClass.pl			Unicode character database
 lib/unicode/CompExcl.txt			Unicode character database
 lib/unicode/Decomposition.pl			Unicode character database
 lib/unicode/EAWidth.txt				Unicode character database
-lib/unicode/Eq/Latin1.pl			Unicode character database
-lib/unicode/Eq/Unicode.pl			Unicode character database
 lib/unicode/In/AlphabeticPresentationForms.pl	Unicode character database
 lib/unicode/In/Arabic.pl			Unicode character database
 lib/unicode/In/ArabicPresentationForms-A.pl	Unicode character database
@@ -1388,7 +1390,7 @@ t/op/undef.t		See if undef works
 t/op/universal.t	See if UNIVERSAL class works
 t/op/unshift.t		See if unshift works
 t/op/vec.t		See if vectors work
-t/op/ver.t		See if version tuples work
+t/op/ver.t		See if v-strings and the %v format flag work
 t/op/wantarray.t	See if wantarray works
 t/op/write.t		See if write works
 t/pod/emptycmd.t	Test empty pod directives
@@ -1443,6 +1445,7 @@ t/pragma/warn/5nolint	Tests for -X switch
 t/pragma/warn/6default	Tests default warnings
 t/pragma/warn/7fatal	Tests fatal warnings
 t/pragma/warn/8signal	Tests warnings + __WARN__ and __DIE__
+t/pragma/warn/9enabled	Tests warnings
 t/pragma/warn/av	Tests for av.c for warnings.t
 t/pragma/warn/doio	Tests for doio.c for warnings.t
 t/pragma/warn/doop	Tests for doop.c for warnings.t

@@ -100,6 +100,33 @@ while (<CFG>) {
 }
 close(CFG);
 
+# perl.h logic duplication begins
+
+if ($define{USE_ITHREADS}) {
+    if (!$define{MULTIPLICITY} && !defined{PERL_OBJECT}) {
+        $define{MULTIPLICITY} = 1;
+    }
+}
+
+$define{PERL_IMPLICIT_CONTEXT} ||=
+    $define{USE_ITHREADS} ||
+    $define{USE_THREADS}  ||
+    $define{MULTIPLICITY} ;
+
+if ($define{PERL_CAPI}) {
+    delete $define{PERL_OBJECT};
+    $define{MULTIPLICITY} = 1; 
+    $define{PERL_IMPLICIT_CONTEXT} = 1;
+    $define{PERL_IMPLICIT_SYS}     = 1;
+}
+
+if ($define{PERL_OBJECT}) {
+    $define{PERL_IMPLICIT_CONTEXT} = 1;
+    $define{PERL_IMPLICIT_SYS}     = 1;
+}
+
+# perl.h logic duplication ends
+
 if ($PLATFORM eq 'win32') {
     warn join(' ',keys %define)."\n";
     print "LIBRARY Perl56\n";
@@ -314,9 +341,18 @@ else {
 		    )];
 }
 
+unless ($define{'PERL_FLEXIBLE_EXCEPTIONS'}) {
+    skip_symbols [qw(
+		    PL_protect
+		    Perl_default_protect
+		    Perl_vdefault_protect
+		    )];
+}
+
 if ($define{'MYMALLOC'}) {
     emit_symbols [qw(
 		    Perl_dump_mstats
+		    Perl_get_mstats
 		    Perl_malloc
 		    Perl_mfree
 		    Perl_realloc
@@ -332,6 +368,7 @@ else {
     skip_symbols [qw(
 		    PL_malloc_mutex
 		    Perl_dump_mstats
+		    Perl_get_mstats
 		    Perl_malloc
 		    Perl_mfree
 		    Perl_realloc
@@ -474,6 +511,11 @@ for my $syms (@syms) {
 if ($define{'PERL_OBJECT'} || $define{'MULTIPLICITY'}) {
     for my $f ($perlvars_h, $intrpvar_h, $thrdvar_h) {
 	my $glob = readvar($f, sub { "Perl_" . $_[1] . $_[2] . "_ptr" });
+	emit_symbols $glob;
+    }
+    # XXX AIX seems to want the perlvars.h symbols, for some reason
+    if ($PLATFORM eq 'aix') {
+	my $glob = readvar($perlvars_h);
 	emit_symbols $glob;
     }
 }

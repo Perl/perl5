@@ -21,14 +21,14 @@ finddepth(sub { print "ok 2\n" if $_ eq 'filefind.t'; }, ".");
 my $case = 2;
 
 END {
-    unlink 'FA/FA_ord','FA/FSL','FA/FAA/FAA_ord',
-	   'FA/FAB/FAB_ord','FA/FAB/FABA/FABA_ord','FB/FB_ord','FB/FBA/FBA_ord';
-    rmdir 'FA/FAA';
-    rmdir 'FA/FAB/FABA';
-    rmdir 'FA/FAB';
-    rmdir 'FA';
-    rmdir 'FB/FBA';
-    rmdir 'FB';
+    unlink 'fa/fa_ord','fa/fsl','fa/faa/faa_ord',
+	   'fa/fab/fab_ord','fa/fab/faba/faba_ord','fb/fb_ord','fb/fba/fba_ord';
+    rmdir 'fa/faa';
+    rmdir 'fa/fab/faba';
+    rmdir 'fa/fab';
+    rmdir 'fa';
+    rmdir 'fb/fba';
+    rmdir 'fb';
 }
 
 sub Check($) {
@@ -55,50 +55,50 @@ sub wanted {
   print "# '$_' => 1\n";
   Check( $Expect{$_} );
   delete $Expect{$_};
-  $File::Find::prune=1 if  $_ eq 'FABA';
+  $File::Find::prune=1 if  $_ eq 'faba';
 }
 
-MkDir( 'FA',0770 );
-MkDir( 'FB',0770  );
-touch('FB/FB_ord');
-MkDir( 'FB/FBA',0770  );
-touch('FB/FBA/FBA_ord');
-CheckDie( symlink('../FB','FA/FSL') ) if $symlink_exists;
-touch('FA/FA_ord');
+MkDir( 'fa',0770 );
+MkDir( 'fb',0770  );
+touch('fb/fb_ord');
+MkDir( 'fb/fba',0770  );
+touch('fb/fba/fba_ord');
+CheckDie( symlink('../fb','fa/fsl') ) if $symlink_exists;
+touch('fa/fa_ord');
 
-MkDir( 'FA/FAA',0770  );
-touch('FA/FAA/FAA_ord');
-MkDir( 'FA/FAB',0770  );
-touch('FA/FAB/FAB_ord');
-MkDir( 'FA/FAB/FABA',0770  );
-touch('FA/FAB/FABA/FABA_ord');
+MkDir( 'fa/faa',0770  );
+touch('fa/faa/faa_ord');
+MkDir( 'fa/fab',0770  );
+touch('fa/fab/fab_ord');
+MkDir( 'fa/fab/faba',0770  );
+touch('fa/fab/faba/faba_ord');
 
-%Expect = ('.' => 1, 'FSL' => 1, 'FA_ord' => 1, 'FAB' => 1, 'FAB_ord' => 1,
-	   'FABA' => 1, 'FAA' => 1, 'FAA_ord' => 1);
-delete $Expect{'FSL'} unless $symlink_exists;
-File::Find::find( {wanted => \&wanted, },'FA' );
+%Expect = ('.' => 1, 'fsl' => 1, 'fa_ord' => 1, 'fab' => 1, 'fab_ord' => 1,
+	   'faba' => 1, 'faa' => 1, 'faa_ord' => 1);
+delete $Expect{'fsl'} unless $symlink_exists;
+File::Find::find( {wanted => \&wanted, },'fa' );
 Check( scalar(keys %Expect) == 0 );
 
-%Expect=('FA' => 1, 'FA/FSL' => 1, 'FA/FA_ord' => 1, 'FA/FAB' => 1,
-	 'FA/FAB/FAB_ord' => 1, 'FA/FAB/FABA' => 1,
-	 'FA/FAB/FABA/FABA_ord' => 1, 'FA/FAA' => 1, 'FA/FAA/FAA_ord' => 1);
-delete $Expect{'FA/FSL'} unless $symlink_exists;
-File::Find::find( {wanted => \&wanted, no_chdir => 1},'FA' );
+%Expect=('fa' => 1, 'fa/fsl' => 1, 'fa/fa_ord' => 1, 'fa/fab' => 1,
+	 'fa/fab/fab_ord' => 1, 'fa/fab/faba' => 1,
+	 'fa/fab/faba/faba_ord' => 1, 'fa/faa' => 1, 'fa/faa/faa_ord' => 1);
+delete $Expect{'fa/fsl'} unless $symlink_exists;
+File::Find::find( {wanted => \&wanted, no_chdir => 1},'fa' );
 
 Check( scalar(keys %Expect) == 0 );
 
 if ( $symlink_exists ) {
-  %Expect=('.' => 1, 'FA_ord' => 1, 'FSL' => 1, 'FB_ord' => 1, 'FBA' => 1, 
-           'FBA_ord' => 1, 'FAB' => 1, 'FAB_ord' => 1, 'FABA' => 1, 'FAA' => 1,
-           'FAA_ord' => 1);
+  %Expect=('.' => 1, 'fa_ord' => 1, 'fsl' => 1, 'fb_ord' => 1, 'fba' => 1,
+           'fba_ord' => 1, 'fab' => 1, 'fab_ord' => 1, 'faba' => 1, 'faa' => 1,
+           'faa_ord' => 1);
 
-  File::Find::find( {wanted => \&wanted, follow_fast => 1},'FA' );
+  File::Find::find( {wanted => \&wanted, follow_fast => 1},'fa' );
   Check( scalar(keys %Expect) == 0 );
-  %Expect=('FA' => 1, 'FA/FA_ord' => 1, 'FA/FSL' => 1, 'FA/FSL/FB_ord' => 1,
-           'FA/FSL/FBA' => 1, 'FA/FSL/FBA/FBA_ord' => 1, 'FA/FAB' => 1,
-           'FA/FAB/FAB_ord' => 1, 'FA/FAB/FABA' => 1, 'FA/FAB/FABA/FABA_ord' => 1,
-           'FA/FAA' => 1, 'FA/FAA/FAA_ord' => 1);
-  File::Find::find( {wanted => \&wanted, follow_fast => 1, no_chdir => 1},'FA' );
+  %Expect=('fa' => 1, 'fa/fa_ord' => 1, 'fa/fsl' => 1, 'fa/fsl/fb_ord' => 1,
+           'fa/fsl/fba' => 1, 'fa/fsl/fba/fba_ord' => 1, 'fa/fab' => 1,
+           'fa/fab/fab_ord' => 1, 'fa/fab/faba' => 1, 'fa/fab/faba/faba_ord' => 1,
+           'fa/faa' => 1, 'fa/faa/faa_ord' => 1);
+  File::Find::find( {wanted => \&wanted, follow_fast => 1, no_chdir => 1},'fa' );
   Check( scalar(keys %Expect) == 0 );
 }
 

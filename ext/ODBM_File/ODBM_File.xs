@@ -2,9 +2,6 @@
 #include "perl.h"
 #include "XSUB.h"
 
-#ifdef NULL
-#undef NULL  /* XXX Why? */
-#endif
 #ifdef I_DBM
 #  include <dbm.h>
 #else
@@ -76,10 +73,6 @@ static int dbmrefcnt;
 
 MODULE = ODBM_File	PACKAGE = ODBM_File	PREFIX = odbm_
 
-#ifndef NULL
-#  define NULL 0
-#endif
-
 ODBM_File
 odbm_TIEHASH(dbtype, filename, flags, mode)
 	char *		dbtype
@@ -120,6 +113,7 @@ DESTROY(db)
 	CODE:
 	dbmrefcnt--;
 	dbmclose();
+	safefree(db);
 
 datum_value
 odbm_FETCH(db, key)

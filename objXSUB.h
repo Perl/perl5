@@ -13,7 +13,6 @@
 /* XXX soon to be eliminated, only a few things in PERLCORE need these now */
 
 #if defined(PERL_IMPLICIT_SYS)
-#else
 #endif
 #if defined(USE_ITHREADS)
 #  if defined(PERL_IMPLICIT_SYS)
@@ -1738,6 +1737,10 @@
 #define Perl_sv_vsetpvfn	pPerl->Perl_sv_vsetpvfn
 #undef  sv_vsetpvfn
 #define sv_vsetpvfn		Perl_sv_vsetpvfn
+#undef  Perl_str_to_version
+#define Perl_str_to_version	pPerl->Perl_str_to_version
+#undef  str_to_version
+#define str_to_version		Perl_str_to_version
 #undef  Perl_swash_init
 #define Perl_swash_init		pPerl->Perl_swash_init
 #undef  swash_init
@@ -1830,6 +1833,10 @@
 #define Perl_dump_mstats	pPerl->Perl_dump_mstats
 #undef  dump_mstats
 #define dump_mstats		Perl_dump_mstats
+#undef  Perl_get_mstats
+#define Perl_get_mstats		pPerl->Perl_get_mstats
+#undef  get_mstats
+#define get_mstats		Perl_get_mstats
 #endif
 #undef  Perl_safesysmalloc
 #define Perl_safesysmalloc	pPerl->Perl_safesysmalloc
@@ -1983,6 +1990,7 @@
 #define Perl_magic_dump		pPerl->Perl_magic_dump
 #undef  magic_dump
 #define magic_dump		Perl_magic_dump
+#if defined(PERL_FLEXIBLE_EXCEPTIONS)
 #undef  Perl_default_protect
 #define Perl_default_protect	pPerl->Perl_default_protect
 #undef  default_protect
@@ -1991,6 +1999,7 @@
 #define Perl_vdefault_protect	pPerl->Perl_vdefault_protect
 #undef  vdefault_protect
 #define vdefault_protect	Perl_vdefault_protect
+#endif
 #undef  Perl_reginitcolors
 #define Perl_reginitcolors	pPerl->Perl_reginitcolors
 #undef  reginitcolors
@@ -2019,6 +2028,22 @@
 #define Perl_sv_pvbyte		pPerl->Perl_sv_pvbyte
 #undef  sv_pvbyte
 #define sv_pvbyte		Perl_sv_pvbyte
+#undef  Perl_sv_utf8_upgrade
+#define Perl_sv_utf8_upgrade	pPerl->Perl_sv_utf8_upgrade
+#undef  sv_utf8_upgrade
+#define sv_utf8_upgrade		Perl_sv_utf8_upgrade
+#undef  Perl_sv_utf8_downgrade
+#define Perl_sv_utf8_downgrade	pPerl->Perl_sv_utf8_downgrade
+#undef  sv_utf8_downgrade
+#define sv_utf8_downgrade	Perl_sv_utf8_downgrade
+#undef  Perl_sv_utf8_encode
+#define Perl_sv_utf8_encode	pPerl->Perl_sv_utf8_encode
+#undef  sv_utf8_encode
+#define sv_utf8_encode		Perl_sv_utf8_encode
+#undef  Perl_sv_utf8_decode
+#define Perl_sv_utf8_decode	pPerl->Perl_sv_utf8_decode
+#undef  sv_utf8_decode
+#define sv_utf8_decode		Perl_sv_utf8_decode
 #undef  Perl_sv_force_normal
 #define Perl_sv_force_normal	pPerl->Perl_sv_force_normal
 #undef  sv_force_normal
@@ -2131,12 +2156,16 @@
 #if defined(PERL_IN_PERL_C) || defined(PERL_DECL_PROT)
 #  if defined(IAMSUID)
 #  endif
+#if defined(PERL_FLEXIBLE_EXCEPTIONS)
+#endif
 #  if defined(USE_THREADS)
 #  endif
 #endif
 #if defined(PERL_IN_PP_C) || defined(PERL_DECL_PROT)
 #endif
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
+#if defined(PERL_FLEXIBLE_EXCEPTIONS)
+#endif
 #endif
 #if defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
 #endif
@@ -2153,9 +2182,6 @@
 #if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)
 #endif
 #if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
-#  if defined(PURIFY)
-#  else
-#  endif
 #  if defined(DEBUGGING)
 #  endif
 #endif

@@ -169,6 +169,12 @@ This has a meaning when taken together with the B<locked> attribute,
 as described there.  It also means that a subroutine so marked
 will not trigger the "Ambiguous call resolved as CORE::%s" warning.
 
+=item lvalue
+
+Indicates that the referenced subroutine is a valid lvalue and can
+be assigned to. The subroutine must return a modifiable value such
+as a scalar variable, as described in L<perlsub>.
+
 =back
 
 There are no built-in attributes for anything other than subroutines.

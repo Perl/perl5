@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..19\n";
+print "1..22\n";
 
 open (tmp,'>Cmd_while.tmp') || die "Can't create Cmd_while.tmp.";
 print tmp "tvi925\n";
@@ -158,5 +158,22 @@ print "ok $i\n";
     }
     continue {
         print "ok $l\n"
+    }
+}
+
+$i = 20;
+{
+    while (1) {
+	my $x;
+	print $x if defined $x;
+	$x = "not ";
+	print "ok $i\n"; ++$i;
+	if ($i == 21) {
+	    next;
+	}
+	last;
+    }
+    continue {
+        print "ok $i\n"; ++$i;
     }
 }

@@ -40,13 +40,6 @@
 #   define vfork fork
 #endif
 
-#ifdef I_FCNTL
-#  include <fcntl.h>
-#endif
-#ifdef I_SYS_FILE
-#  include <sys/file.h>
-#endif
-
 #ifdef I_SYS_WAIT
 #  include <sys/wait.h>
 #endif
@@ -116,7 +109,7 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 {
     dTHX;
     Malloc_t ptr;
-#if !defined(STANDARD_C) && !defined(HAS_REALLOC_PROTOTYPE)
+#if !defined(STANDARD_C) && !defined(HAS_REALLOC_PROTOTYPE) && !defined(PERL_MICRO)
     Malloc_t PerlMem_realloc();
 #endif /* !defined(STANDARD_C) && !defined(HAS_REALLOC_PROTOTYPE) */
 
@@ -1504,6 +1497,7 @@ Perl_vdie(pTHX_ const char* pat, va_list *args)
     }
     else {
 	message = Nullch;
+	msglen = 0;
     }
 
     DEBUG_S(PerlIO_printf(Perl_debug_log,
@@ -3494,7 +3488,9 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
     /* parent thread's data needs to be locked while we make copy */
     MUTEX_LOCK(&t->mutex);
 
+#ifdef PERL_FLEXIBLE_EXCEPTIONS
     PL_protect = t->Tprotect;
+#endif
 
     PL_curcop = t->Tcurcop;       /* XXX As good a guess as any? */
     PL_defstash = t->Tdefstash;   /* XXX maybe these should */

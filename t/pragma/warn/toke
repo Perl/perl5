@@ -52,7 +52,7 @@ toke.c	AOK
      warn(warn_reserved	
 	$a = abc;
 
-     chmod: mode argument is missing initial 0 
+     chmod() mode argument is missing initial 0 
 	chmod 3;
 
      Possible attempt to separate words with commas 
@@ -88,10 +88,6 @@ toke.c	AOK
     Ambiguous call resolved as CORE::%s(), qualify as such or use &
 	sub time {} 
 	my $a = time()
-
-    \x%.*s will produce malformed UTF-8 character; use \x{%.*s} for that
-        use utf8 ; 
-	$_ = "\xffe"
 
     Unrecognized escape \\%c passed through
         $a = "\m" ;
@@ -300,33 +296,33 @@ EXPECT
 Unquoted string "abc" may clash with future reserved word at - line 3.
 ########
 # toke.c
-use warnings 'octal' ;
+use warnings 'chmod' ;
 chmod 3;
-no warnings 'octal' ;
+no warnings 'chmod' ;
 chmod 3;
 EXPECT
-chmod: mode argument is missing initial 0 at - line 3.
+chmod() mode argument is missing initial 0 at - line 3.
 ########
 # toke.c
-use warnings 'syntax' ;
+use warnings 'qw' ;
 @a = qw(a, b, c) ;
-no warnings 'syntax' ;
+no warnings 'qw' ;
 @a = qw(a, b, c) ;
 EXPECT
 Possible attempt to separate words with commas at - line 3.
 ########
 # toke.c
-use warnings 'syntax' ;
+use warnings 'qw' ;
 @a = qw(a b #) ;
-no warnings 'syntax' ;
+no warnings 'qw' ;
 @a = qw(a b #) ;
 EXPECT
 Possible attempt to put comments in qw() list at - line 3.
 ########
 # toke.c
-use warnings 'octal' ;
+use warnings 'umask' ;
 umask 3;
-no warnings 'octal' ;
+no warnings 'umask' ;
 umask 3;
 EXPECT
 umask: argument is missing initial 0 at - line 3.
@@ -417,10 +413,10 @@ Misplaced _ in number at - line 4.
 Misplaced _ in number at - line 4.
 ########
 # toke.c
-use warnings 'unsafe' ;
+use warnings 'bareword' ;
 #line 25 "bar"
 $a = FRED:: ;
-no warnings 'unsafe' ;
+no warnings 'bareword' ;
 #line 25 "bar"
 $a = FRED:: ;
 EXPECT
@@ -445,21 +441,6 @@ eval <<'EOE';
 EOE
 EXPECT
 
-########
-# toke.c
-BEGIN {
-    if (ord("\t") == 5) {
-        print "SKIPPED\n# Ebcdic platforms have different \\x constructs.";
-        exit 0;
-    }
-}
-use warnings 'utf8' ;
-use utf8 ;
-$_ = " \xffe " ;
-no warnings 'utf8' ;
-$_ = " \xffe " ;
-EXPECT
-\xff will produce malformed UTF-8 character; use \x{ff} for that at - line 10.
 ########
 # toke.c
 my $a = rand + 4 ;
@@ -512,9 +493,9 @@ Precedence problem: open FOO should be open(FOO) at - line 2.
 $^W = 0 ;
 open FOO || time;
 {
-    no warnings 'ambiguous' ;
+    no warnings 'precedence' ;
     open FOO || time;
-    use warnings 'ambiguous' ;
+    use warnings 'precedence' ;
     open FOO || time;
 }
 open FOO || time;
@@ -542,9 +523,9 @@ Operator or semicolon missing before *foo at - line 10.
 Ambiguous use of * resolved as operator * at - line 10.
 ########
 # toke.c
-use warnings 'unsafe' ;
+use warnings 'misc' ;
 my $a = "\m" ;
-no warnings 'unsafe' ;
+no warnings 'misc' ;
 $a = "\m" ;
 EXPECT
 Unrecognized escape \m passed through at - line 3.

@@ -121,9 +121,9 @@ GCC-2.95.2 binaries can be downloaded from:
 
 The GCC-2.95.2 bundle comes with Mingw32 libraries and headers.
 
-Make sure you install the binaries as indicated in the README for
-the GCC bundle.  You may need to set up a few environment variables
-(usually run from a batch file).
+Make sure you install the binaries that work with MSVCRT.DLL as indicated
+in the README for the GCC bundle.  You may need to set up a few environment
+variables (usually run from a batch file).
 
 You also need dmake.  See L</"Borland C++"> above on how to get it.
 

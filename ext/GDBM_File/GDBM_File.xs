@@ -236,6 +236,7 @@ gdbm_DESTROY(db)
 	GDBM_File	db
 	CODE:
 	gdbm_close(db);
+	safefree(db);
 
 #define gdbm_FETCH(db,key)			gdbm_fetch(db->dbp,key)
 datum_value

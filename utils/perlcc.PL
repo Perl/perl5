@@ -254,8 +254,13 @@ sub _createCode
     my ( $backend, $generated_file, $file, $final_output ) = @_;
     my $return;
     my $output_switch = "o";
+    my $max_line_len = '';
 
     local($") = " -I";
+
+    if ($^O eq 'MSWin32' && $backend =~ /^CC?$/ && $Config{cc} =~ /^cl/i) {
+	$max_line_len = '-l2000,';
+    }
 
     if ($backend eq "Bytecode")
     {
@@ -279,16 +284,16 @@ sub _createCode
 	my $stash=$stash[-1];
         chomp $stash;
 
-        _print( "$^X -I@INC -MO=$backend,$stash $file\n", 36);
-        $return =  _run("$^X -I@INC -MO=$backend,$stash,-$output_switch$generated_file $file", 9);
+        _print( "$^X -I@INC -MO=$backend,$max_line_len$stash $file\n", 36);
+        $return =  _run("$^X -I@INC -MO=$backend,$max_line_len$stash,-$output_switch$generated_file $file", 9);
         $return;
     }
     else                                           # compiling a shared object
     {            
         _print( 
-            "$^X -I@INC -MO=$backend,-m$final_output $file\n", 36);
+            "$^X -I@INC -MO=$backend,$max_line_len-m$final_output $file\n", 36);
         $return = 
-        _run("$^X -I@INC -MO=$backend,-m$final_output,-$output_switch$generated_file $file  ", 9);
+        _run("$^X -I@INC -MO=$backend,$max_line_len-m$final_output,-$output_switch$generated_file $file  ", 9);
         $return;
     }
 }
@@ -344,18 +349,21 @@ sub _ccharness
     my $sourceprog = shift(@args);
     my ($libdir, $incdir);
 
+    my $L = '-L';
+    $L = '-libpath:' if $^O eq 'MSWin32' && $Config{cc} =~ /^cl/i;
+
     if (-d "$Config{installarchlib}/CORE")
     {
-        $libdir = "-L$Config{installarchlib}/CORE";
+        $libdir = "$L$Config{installarchlib}/CORE";
         $incdir = "-I$Config{installarchlib}/CORE";
     }
     else
     {
-        $libdir = "-L.. -L."; 
+        $libdir = "$L.. $L."; 
         $incdir = "-I.. -I.";
     }
 
-    $libdir .= " -L$options->{L}" if (defined($options->{L}));
+    $libdir .= " $L$options->{L}" if (defined($options->{L}));
     $incdir .= " -I$options->{L}" if (defined($options->{L}));
 
     my $linkargs = '';
@@ -366,7 +374,7 @@ sub _ccharness
     if (!grep(/^-[cS]$/, @args))
     {
 	my $lperl = $^O eq 'os2' ? '-llibperl' 
-	   : $^O eq 'MSWin32' ? "$Config{archlibexp}\\CORE\\perl.lib"
+	   : $^O eq 'MSWin32' ? "$Config{archlibexp}\\CORE\\$Config{libperl}"
 	   : '-lperl';
        ($lperl = $Config{libperl}) =~ s/lib(.*)\Q$Config{_a}\E/-l$1/
 	    if($^O eq 'cygwin');
@@ -375,6 +383,7 @@ sub _ccharness
 
 	$flags = $type eq 'dynamic' ? $Config{lddlflags} : $Config{ldflags};
 	$linkargs = "$flags $libdir $lperl @Config{libs}";
+	$linkargs = "/link $linkargs" if $^O eq 'MSWin32' && $Config{cc} =~ /^cl/i;
     }
 
     my $libs = _getSharedObjects($sourceprog);

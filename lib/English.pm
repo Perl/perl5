@@ -87,7 +87,6 @@ sub import {
 	*EGID
 	*PROGRAM_NAME
 	*PERL_VERSION
-	*PERL_VERSION_TUPLE
 	*ACCUMULATOR
 	*DEBUGGING
 	*SYSTEM_FD_MAX
@@ -97,6 +96,8 @@ sub import {
 	*WARNING
 	*EXECUTABLE_NAME
 	*OSNAME
+	*LAST_REGEXP_CODE_RESULT
+	*EXCEPTIONS_BEING_CAUGHT
 );
 
 # The ground of all being. @ARG is deprecated (5.005 makes @_ lexical)
@@ -165,14 +166,15 @@ sub import {
 
 # Internals.
 
-	*PERL_VERSION				= *]	;
-	*PERL_VERSION_TUPLE			= *^V	;
+	*PERL_VERSION				= *^V	;
 	*ACCUMULATOR				= *^A	;
 	*COMPILING				= *^C	;
 	*DEBUGGING				= *^D	;
 	*SYSTEM_FD_MAX				= *^F	;
 	*INPLACE_EDIT				= *^I	;
 	*PERLDB					= *^P	;
+	*LAST_REGEXP_CODE_RESULT		= *^R	;
+	*EXCEPTIONS_BEING_CAUGHT		= *^S	;
 	*BASETIME				= *^T	;
 	*WARNING				= *^W	;
 	*EXECUTABLE_NAME			= *^X	;
@@ -183,5 +185,6 @@ sub import {
 #	*ARRAY_BASE				= *[	;
 #	*OFMT					= *#	;
 #	*MULTILINE_MATCHING			= **	;
+#	*OLD_PERL_VERSION			= *]	;
 
 1;

@@ -263,6 +263,220 @@ sub file_name_is_absolute {
 		  $file =~ /:[^<\[]/);
 }
 
+=item splitpath
+
+    ($volume,$directories,$file) = File::Spec->splitpath( $path );
+    ($volume,$directories,$file) = File::Spec->splitpath( $path, $no_file );
+
+Splits a VMS path in to volume, directory, and filename portions.
+Ignores $no_file, if present, since VMS paths indicate the 'fileness' of a 
+file.
+
+The results can be passed to L</catpath()> to get back a path equivalent to
+(usually identical to) the original path.
+
+=cut
+
+sub splitpath {
+    my $self = shift ;
+    my ($path, $nofile) = @_;
+
+    my ($volume,$directory,$file) ;
+
+    if ( $path =~ m{/} ) {
+        $path =~ 
+            m{^ ( (?: /[^/]* )? )
+                ( (?: .*/(?:[^/]+.dir)? )? )
+                (.*)
+             }x;
+        $volume    = $1;
+        $directory = $2;
+        $file      = $3;
+    }
+    else {
+        $path =~ 
+            m{^ ( (?: (?: (?: [\w\$-]+ (?: "[^"]*")?:: )? [\w\$-]+: )? ) )
+                ( (?:\[.*\])? )
+                (.*)
+             }x;
+        $volume    = $1;
+        $directory = $2;
+        $file      = $3;
+    }
+
+    $directory = $1
+        if $directory =~ /^\[(.*)\]$/ ;
+
+    return ($volume,$directory,$file);
+}
+
+
+=item splitdir
+
+The opposite of L</catdir()>.
+
+    @dirs = File::Spec->splitdir( $directories );
+
+$directories must be only the directory portion of the path.
+
+'[' and ']' delimiters are optional. An empty string argument is
+equivalent to '[]': both return an array with no elements.
+
+=cut
+
+sub splitdir {
+    my $self = shift ;
+    my $directories = $_[0] ;
+
+    return File::Spec::Unix::splitdir( $self, @_ )
+        if ( $directories =~ m{/} ) ;
+
+    $directories =~ s/^\[(.*)\]$/$1/ ;
+
+    #
+    # split() likes to forget about trailing null fields, so here we
+    # check to be sure that there will not be any before handling the
+    # simple case.
+    #
+    if ( $directories !~ m{\.$} ) {
+        return split( m{\.}, $directories );
+    }
+    else {
+        #
+        # since there was a trailing separator, add a file name to the end, 
+        # then do the split, then replace it with ''.
+        #
+        my( @directories )= split( m{\.}, "${directories}dummy" ) ;
+        $directories[ $#directories ]= '' ;
+        return @directories ;
+    }
+}
+
+
+sub catpath {
+    my $self = shift;
+
+    return File::Spec::Unix::catpath( $self, @_ )
+        if ( join( '', @_ ) =~ m{/} ) ;
+
+    my ($volume,$directory,$file) = @_;
+
+    $volume .= ':'
+        if $volume =~ /[^:]$/ ;
+
+    $directory = "[$directory"
+        if $directory =~ /^[^\[]/ ;
+
+    $directory .= ']'
+        if $directory =~ /[^\]]$/ ;
+
+    return "$volume$directory$file" ;
+}
+
+
+sub abs2rel {
+    my $self = shift;
+
+    return File::Spec::Unix::abs2rel( $self, @_ )
+        if ( join( '', @_ ) =~ m{/} ) ;
+
+    my($path,$base) = @_;
+
+    # Note: we use '/' to glue things together here, then let canonpath()
+    # clean them up at the end.
+
+    # Clean up $path
+    if ( ! $self->file_name_is_absolute( $path ) ) {
+        $path = $self->rel2abs( $path ) ;
+    }
+    else {
+        $path = $self->canonpath( $path ) ;
+    }
+
+    # Figure out the effective $base and clean it up.
+    if ( ! $self->file_name_is_absolute( $base ) ) {
+        $base = $self->rel2abs( $base ) ;
+    }
+    elsif ( !defined( $base ) || $base eq '' ) {
+        $base = cwd() ;
+    }
+    else {
+        $base = $self->canonpath( $base ) ;
+    }
+
+    # Split up paths
+    my ( undef, $path_directories, $path_file ) =
+        $self->splitpath( $path, 1 ) ;
+
+    $path_directories = $1
+        if $path_directories =~ /^\[(.*)\]$/ ;
+
+    my ( undef, $base_directories, undef ) =
+        $self->splitpath( $base, 1 ) ;
+
+    $base_directories = $1
+        if $base_directories =~ /^\[(.*)\]$/ ;
+
+    # Now, remove all leading components that are the same
+    my @pathchunks = $self->splitdir( $path_directories );
+    my @basechunks = $self->splitdir( $base_directories );
+
+    while ( @pathchunks && 
+            @basechunks && 
+            lc( $pathchunks[0] ) eq lc( $basechunks[0] ) 
+          ) {
+        shift @pathchunks ;
+        shift @basechunks ;
+    }
+
+    # @basechunks now contains the directories to climb out of,
+    # @pathchunks now has the directories to descend in to.
+    $path_directories = '-.' x @basechunks . join( '.', @pathchunks ) ;
+    $path_directories =~ s{\.$}{} ;
+    return $self->catpath( '', $path_directories, $path_file ) ;
+}
+
+
+sub rel2abs($;$;) {
+    my $self = shift ;
+    return File::Spec::Unix::rel2abs( $self, @_ )
+        if ( join( '', @_ ) =~ m{/} ) ;
+
+    my ($path,$base ) = @_;
+    # Clean up and split up $path
+    if ( ! $self->file_name_is_absolute( $path ) ) {
+        # Figure out the effective $base and clean it up.
+        if ( !defined( $base ) || $base eq '' ) {
+            $base = cwd() ;
+        }
+        elsif ( ! $self->file_name_is_absolute( $base ) ) {
+            $base = $self->rel2abs( $base ) ;
+        }
+        else {
+            $base = $self->canonpath( $base ) ;
+        }
+
+        # Split up paths
+        my ( undef, $path_directories, $path_file ) =
+            $self->splitpath( $path ) ;
+
+        my ( $base_volume, $base_directories, undef ) =
+            $self->splitpath( $base ) ;
+
+        my $sep = '' ;
+        $sep = '.'
+            if ( $base_directories =~ m{[^.]$} &&
+                 $path_directories =~ m{^[^.]}
+            ) ;
+        $base_directories = "$base_directories$sep$path_directories" ;
+
+        $path = $self->catpath( $base_volume, $base_directories, $path_file );
+   }
+
+    return $self->canonpath( $path ) ;
+}
+
+
 =back
 
 =head1 SEE ALSO

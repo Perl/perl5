@@ -16,6 +16,7 @@
 #define PERL_IN_SCOPE_C
 #include "perl.h"
 
+#if defined(PERL_FLEXIBLE_EXCEPTIONS)
 void *
 Perl_default_protect(pTHX_ volatile JMPENV *pcur_env, int *excpt,
 		     protect_body_t body, ...)
@@ -36,8 +37,6 @@ Perl_vdefault_protect(pTHX_ volatile JMPENV *pcur_env, int *excpt,
     int ex;
     void *ret;
 
-    DEBUG_l(Perl_deb(aTHX_ "Setting up local jumplevel %p, was %p\n",
-		pcur_env, PL_top_env));
     JMPENV_PUSH(ex);
     if (ex)
 	ret = NULL;
@@ -47,6 +46,7 @@ Perl_vdefault_protect(pTHX_ volatile JMPENV *pcur_env, int *excpt,
     JMPENV_POP;
     return ret;
 }
+#endif
 
 SV**
 Perl_stack_grow(pTHX_ SV **sp, SV **p, int n)
@@ -994,8 +994,9 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
 	PerlIO_printf(Perl_debug_log, "BLK_EVAL.OLD_OP_TYPE = %s (%s)\n",
 		PL_op_name[cx->blk_eval.old_op_type],
 		PL_op_desc[cx->blk_eval.old_op_type]);
-	PerlIO_printf(Perl_debug_log, "BLK_EVAL.OLD_NAME = %s\n",
-		cx->blk_eval.old_name);
+	if (cx->blk_eval.old_namesv)
+	    PerlIO_printf(Perl_debug_log, "BLK_EVAL.OLD_NAME = %s\n",
+			  SvPVX(cx->blk_eval.old_namesv));
 	PerlIO_printf(Perl_debug_log, "BLK_EVAL.OLD_EVAL_ROOT = 0x%"UVxf"\n",
 		PTR2UV(cx->blk_eval.old_eval_root));
 	break;

@@ -431,6 +431,7 @@ Perl_sv_upgrade
 Perl_sv_usepvn
 Perl_sv_vcatpvfn
 Perl_sv_vsetpvfn
+Perl_str_to_version
 Perl_swash_init
 Perl_swash_fetch
 Perl_taint_env
@@ -452,6 +453,7 @@ Perl_vwarn
 Perl_warner
 Perl_vwarner
 Perl_dump_mstats
+Perl_get_mstats
 Perl_safesysmalloc
 Perl_safesyscalloc
 Perl_safesysrealloc
@@ -498,6 +500,10 @@ Perl_sv_2pvbyte_nolen
 Perl_sv_pv
 Perl_sv_pvutf8
 Perl_sv_pvbyte
+Perl_sv_utf8_upgrade
+Perl_sv_utf8_downgrade
+Perl_sv_utf8_encode
+Perl_sv_utf8_decode
 Perl_sv_force_normal
 Perl_tmps_grow
 Perl_sv_rvweaken

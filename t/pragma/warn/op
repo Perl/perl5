@@ -58,8 +58,8 @@
      Parentheses missing around "local" list at -e line 1.
        local $a, $b = (1,2);
  
-     Probable precedence problem on logical or at -e line 1.
-       use warnings 'syntax'; my $x = print(ABC || 1);
+     Bareword found in conditional at -e line 1.
+       use warnings 'bareword'; my $x = print(ABC || 1);
  
      Value of %s may be \"0\"; use \"defined\" 
 	$x = 1 if $x = <FH> ;
@@ -117,16 +117,16 @@
 
 __END__
 # op.c
-use warnings 'unsafe' ;
+use warnings 'misc' ;
 my $x ;
 my $x ;
-no warnings 'unsafe' ;
+no warnings 'misc' ;
 my $x ;
 EXPECT
 "my" variable $x masks earlier declaration in same scope at - line 4.
 ########
 # op.c
-use warnings 'unsafe' ;
+use warnings 'closure' ;
 sub x {
       my $x;
       sub y {
@@ -137,7 +137,7 @@ EXPECT
 Variable "$x" will not stay shared at - line 7.
 ########
 # op.c
-no warnings 'unsafe' ;
+no warnings 'closure' ;
 sub x {
       my $x;
       sub y {
@@ -148,7 +148,7 @@ EXPECT
 
 ########
 # op.c
-use warnings 'unsafe' ;
+use warnings 'closure' ;
 sub x {
       my $x;
       sub y {
@@ -159,7 +159,7 @@ EXPECT
 Variable "$x" may be unavailable at - line 6.
 ########
 # op.c
-no warnings 'unsafe' ;
+no warnings 'closure' ;
 sub x {
       my $x;
       sub y {
@@ -559,7 +559,7 @@ Useless use of a constant in void context at - line 4.
 ########
 # op.c
 BEGIN{ $ENV{PERL_DESTRUCT_LEVEL} = 0 unless $ENV{PERL_DESTRUCT_LEVEL} > 3; } # known scalar leak
-use warnings 'unsafe' ;
+use warnings 'misc' ;
 my $a ; my @a = () ; my %a = () ; my $b = \@a ; my $c = \%a ;
 @a =~ /abc/ ;
 @a =~ s/a/b/ ;
@@ -574,7 +574,7 @@ my $a ; my @a = () ; my %a = () ; my $b = \@a ; my $c = \%a ;
 %$c =~ s/a/b/ ;
 %$c =~ tr/a/b/ ;
 {
-no warnings 'unsafe' ;
+no warnings 'misc' ;
 my $a ; my @a = () ; my %a = () ; my $b = \@a ; my $c = \%a ;
 @a =~ /abc/ ;
 @a =~ s/a/b/ ;
@@ -622,65 +622,65 @@ EXPECT
 Parentheses missing around "local" list at - line 3.
 ########
 # op.c
-use warnings 'syntax' ;
+use warnings 'bareword' ;
 print (ABC || 1) ;
-no warnings 'syntax' ;
+no warnings 'bareword' ;
 print (ABC || 1) ;
 EXPECT
-Probable precedence problem on logical or (||) at - line 3.
+Bareword found in conditional at - line 3.
 ########
 --FILE-- abc
 
 --FILE--
 # op.c
-use warnings 'unsafe' ;
+use warnings 'misc' ;
 open FH, "<abc" ;
 $x = 1 if $x = <FH> ;
-no warnings 'unsafe' ;
+no warnings 'misc' ;
 $x = 1 if $x = <FH> ;
 EXPECT
 Value of <HANDLE> construct can be "0"; test with defined() at - line 4.
 ########
 # op.c
-use warnings 'unsafe' ;
+use warnings 'misc' ;
 opendir FH, "." ;
 $x = 1 if $x = readdir FH ;
-no warnings 'unsafe' ;
+no warnings 'misc' ;
 $x = 1 if $x = readdir FH ;
 closedir FH ;
 EXPECT
 Value of readdir() operator can be "0"; test with defined() at - line 4.
 ########
 # op.c
-use warnings 'unsafe' ;
+use warnings 'misc' ;
 $x = 1 if $x = <*> ;
-no warnings 'unsafe' ;
+no warnings 'misc' ;
 $x = 1 if $x = <*> ;
 EXPECT
 Value of glob construct can be "0"; test with defined() at - line 3.
 ########
 # op.c
-use warnings 'unsafe' ;
+use warnings 'misc' ;
 %a = (1,2,3,4) ;
 $x = 1 if $x = each %a ;
-no warnings 'unsafe' ;
+no warnings 'misc' ;
 $x = 1 if $x = each %a ;
 EXPECT
 Value of each() operator can be "0"; test with defined() at - line 4.
 ########
 # op.c
-use warnings 'unsafe' ;
+use warnings 'misc' ;
 $x = 1 while $x = <*> and 0 ;
-no warnings 'unsafe' ;
+no warnings 'misc' ;
 $x = 1 while $x = <*> and 0 ;
 EXPECT
 Value of glob construct can be "0"; test with defined() at - line 3.
 ########
 # op.c
-use warnings 'unsafe' ;
+use warnings 'misc' ;
 opendir FH, "." ;
 $x = 1 while $x = readdir FH and 0 ;
-no warnings 'unsafe' ;
+no warnings 'misc' ;
 $x = 1 while $x = readdir FH and 0 ;
 closedir FH ;
 EXPECT
@@ -717,17 +717,17 @@ EXPECT
 Format FRED redefined at - line 5.
 ########
 # op.c
-use warnings 'syntax' ;
+use warnings 'deprecated' ;
 push FRED;
-no warnings 'syntax' ;
+no warnings 'deprecated' ;
 push FRED;
 EXPECT
 Array @FRED missing the @ in argument 1 of push() at - line 3.
 ########
 # op.c
-use warnings 'syntax' ;
+use warnings 'deprecated' ;
 @a = keys FRED ;
-no warnings 'syntax' ;
+no warnings 'deprecated' ;
 @a = keys FRED ;
 EXPECT
 Hash %FRED missing the % in argument 1 of keys() at - line 3.
@@ -779,10 +779,10 @@ $^W = 0 ;
 sub fred() ;
 sub fred($) {}
 {
-    no warnings 'unsafe' ;
+    no warnings 'prototype' ;
     sub Fred() ;
     sub Fred($) {}
-    use warnings 'unsafe' ;
+    use warnings 'prototype' ;
     sub freD() ;
     sub freD($) {}
 }
@@ -800,10 +800,10 @@ EXPECT
 /---/ should probably be written as "---" at - line 3.
 ########
 # op.c [Perl_peep]
-use warnings 'unsafe' ;
+use warnings 'prototype' ;
 fred() ; 
 sub fred ($$) {}
-no warnings 'unsafe' ;
+no warnings 'prototype' ;
 joe() ; 
 sub joe ($$) {}
 EXPECT

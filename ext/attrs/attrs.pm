@@ -20,7 +20,7 @@ attrs - set/get attributes of a subroutine (deprecated)
 
 NOTE: Use of this pragma is deprecated.  Use the syntax
 
-    sub foo : locked, method { }
+    sub foo : locked method { }
 
 to declare attributes instead.  See also L<attributes>.
 

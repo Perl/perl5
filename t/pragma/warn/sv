@@ -261,34 +261,15 @@ Invalid conversion in printf: end of string at - line 6.
 Invalid conversion in printf: "%\002" at - line 8.
 ########
 # sv.c
-use warnings 'unsafe' ;
+use warnings 'misc' ;
 *a = undef ;
-no warnings 'unsafe' ;
+no warnings 'misc' ;
 *b = undef ;
 EXPECT
 Undefined value assigned to typeglob at - line 3.
 ########
 # sv.c
-BEGIN {
-    if (ord("\t") == 5) {
-        print "SKIPPED\n# ebcdic \\x characters differ.";
-        exit 0;
-    }
-}
-use utf8 ;
-$^W =0 ;
-{
-  use warnings 'utf8' ;
-  my $a = rindex "a\xff bc ", "bc" ;
-  no warnings 'utf8' ;
-  $a = rindex "a\xff bc ", "bc" ;
-}
-my $a = rindex "a\xff bc ", "bc" ;
-EXPECT
-\xff will produce malformed UTF-8 character; use \x{ff} for that at - line 12.
-########
-# sv.c
-use warnings 'misc';
+use warnings 'y2k';
 use Config;
 BEGIN {
     unless ($Config{ccflags} =~ /Y2KWARN/) {
@@ -305,7 +286,7 @@ $x     = printf  " 19%02d\n", 78;
 $x     = sprintf "19%02d\n", 78;
 $x     = printf  "319%02d\n", $yy;
 $x     = sprintf "319%02d\n", $yy;
-no warnings 'misc';
+no warnings 'y2k';
 $x     = printf  "19%02d\n", $yy;
 $x     = sprintf "19%02d\n", $yy;
 $x     = printf  "19%02d\n", 78;

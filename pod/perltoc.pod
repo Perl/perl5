@@ -3878,7 +3878,7 @@ method, locked
 
 =back
 
-=head2 byte - Perl pragma to turn force treating strings as bytes not
+=head2 bytes - Perl pragma to turn force treating strings as bytes not
 UNICODE
 
 =over

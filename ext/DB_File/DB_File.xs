@@ -1586,7 +1586,7 @@ db_DESTROY(db)
 	  if (db->filter_store_value)
 	    SvREFCNT_dec(db->filter_store_value) ;
 #endif /* DBM_FILTERING */
-	  Safefree(db) ;
+	  safefree(db) ;
 #ifdef DB_VERSION_MAJOR
 	  if (RETVAL > 0)
 	    RETVAL = -1 ;

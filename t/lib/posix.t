@@ -14,7 +14,7 @@ use POSIX qw(fcntl_h signal_h limits_h _exit getcwd open read strftime write);
 use strict subs;
 
 $| = 1;
-print "1..26\n";
+print "1..27\n";
 
 $Is_W32 = $^O eq 'MSWin32';
 
@@ -121,6 +121,7 @@ try_strftime(23, "Mon Mar 01 00:00:00 1999 060", 0,0,24, 28,1,99);
 try_strftime(24, "Mon Feb 28 00:00:00 2000 059", 0,0,0, 28,1,100);
 try_strftime(25, "Tue Feb 29 00:00:00 2000 060", 0,0,0, 0,2,100);
 try_strftime(26, "Wed Mar 01 00:00:00 2000 061", 0,0,0, 1,2,100);
+try_strftime(27, "Fri Mar 31 00:00:00 2000 091", 0,0,0, 31,2,100);
 &POSIX::setlocale(&POSIX::LC_TIME, $lc) if $Config{d_setlocale};
 
 $| = 0;

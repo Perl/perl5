@@ -22,13 +22,6 @@
 #ifdef I_UNISTD
 #include <unistd.h>
 #endif
-#ifdef I_FCNTL
-#include <fcntl.h>
-#endif
-#ifdef I_SYS_FILE
-#include <sys/file.h>
-#endif
-
 
 /* Hot code. */
 
@@ -173,18 +166,27 @@ PP(pp_concat)
     s = SvPV(right,len);
     if (SvOK(TARG)) {
 #if defined(PERL_Y2KWARN)
-	if ((SvIOK(right) || SvNOK(right)) && ckWARN(WARN_MISC)) {
+	if ((SvIOK(right) || SvNOK(right)) && ckWARN(WARN_Y2K)) {
 	    STRLEN n;
 	    char *s = SvPV(TARG,n);
 	    if (n >= 2 && s[n-2] == '1' && s[n-1] == '9'
 		&& (n == 2 || !isDIGIT(s[n-3])))
 	    {
-		Perl_warner(aTHX_ WARN_MISC, "Possible Y2K bug: %s",
+		Perl_warner(aTHX_ WARN_Y2K, "Possible Y2K bug: %s",
 			    "about to append an integer to '19'");
 	    }
 	}
 #endif
+	if (DO_UTF8(right))
+	    sv_utf8_upgrade(TARG);
 	sv_catpvn(TARG,s,len);
+	if (!IN_BYTE) {
+	    if (SvUTF8(right))
+		SvUTF8_on(TARG);
+	}
+	else if (!SvUTF8(right)) {
+	    SvUTF8_off(TARG);
+	}
     }
     else
 	sv_setpvn(TARG,s,len);	/* suppress warning */
@@ -715,14 +717,14 @@ PP(pp_aassign)
 		if (relem == lastrelem) {
 		    if (*relem) {
 			HE *didstore;
-			if (ckWARN(WARN_UNSAFE)) {
+			if (ckWARN(WARN_MISC)) {
 			    if (relem == firstrelem &&
 				SvROK(*relem) &&
 				( SvTYPE(SvRV(*relem)) == SVt_PVAV ||
 				  SvTYPE(SvRV(*relem)) == SVt_PVHV ) )
-				Perl_warner(aTHX_ WARN_UNSAFE, "Reference found where even-sized list expected");
+				Perl_warner(aTHX_ WARN_MISC, "Reference found where even-sized list expected");
 			    else
-				Perl_warner(aTHX_ WARN_UNSAFE, "Odd number of elements in hash assignment");
+				Perl_warner(aTHX_ WARN_MISC, "Odd number of elements in hash assignment");
 			}
 			tmpstr = NEWSV(29,0);
 			didstore = hv_store_ent(hash,*relem,tmpstr,0);
@@ -1254,9 +1256,9 @@ Perl_do_readline(pTHX)
 	}
     }
     if (!fp) {
-	if (ckWARN(WARN_CLOSED) && io && !(IoFLAGS(io) & IOf_START)) {
+	if (ckWARN2(WARN_GLOB,WARN_CLOSED) && io && !(IoFLAGS(io) & IOf_START)) {
 	    if (type == OP_GLOB)
-		Perl_warner(aTHX_ WARN_CLOSED,
+		Perl_warner(aTHX_ WARN_GLOB,
 			    "glob failed (can't start child: %s)",
 			    Strerror(errno));
 	    else
@@ -1305,8 +1307,8 @@ Perl_do_readline(pTHX)
 		(void)do_close(PL_last_in_gv, FALSE);
 	    }
 	    else if (type == OP_GLOB) {
-		if (!do_close(PL_last_in_gv, FALSE) && ckWARN(WARN_CLOSED)) {
-		    Perl_warner(aTHX_ WARN_CLOSED,
+		if (!do_close(PL_last_in_gv, FALSE) && ckWARN(WARN_GLOB)) {
+		    Perl_warner(aTHX_ WARN_GLOB,
 			   "glob failed (child exited with status %d%s)",
 			   (int)(STATUS_CURRENT >> 8),
 			   (STATUS_CURRENT & 0x80) ? ", core dumped" : "");

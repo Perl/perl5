@@ -3,7 +3,11 @@
 BEGIN {
     chdir 't' if -d 't';
     unshift @INC, '../lib';
-
+    require Config; import Config;
+    if ($Config{'extensions'} !~ /\bFile\/Glob\b/i) {
+        print "1..0\n";
+        exit 0;
+    }
     print "1..9\n";
 }
 END {
@@ -68,7 +72,7 @@ print "ok 5\n";
 
 # check bad protections
 # should return an empty list, and set ERROR
-if ($^O eq 'MSWin32' or $^O eq 'os2' or not $>) {
+if ($^O eq 'mpeix' or $^O eq 'MSWin32' or $^O eq 'os2' or not $>) {
     print "ok 6 # skipped\n";
 }
 else {

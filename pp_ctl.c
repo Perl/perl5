@@ -302,8 +302,13 @@ PP(pp_formline)
     bool item_is_utf = FALSE;
 
     if (!SvMAGICAL(tmpForm) || !SvCOMPILED(tmpForm)) {
-	SvREADONLY_off(tmpForm);
-	doparseform(tmpForm);
+	if (SvREADONLY(tmpForm)) {
+	    SvREADONLY_off(tmpForm);
+	    doparseform(tmpForm);
+	    SvREADONLY_on(tmpForm);
+	}
+	else
+	    doparseform(tmpForm);
     }
 
     SvPV_force(PL_formtarget, len);
@@ -1070,28 +1075,28 @@ S_dopoptolabel(pTHX_ char *label)
 	cx = &cxstack[i];
 	switch (CxTYPE(cx)) {
 	case CXt_SUBST:
-	    if (ckWARN(WARN_UNSAFE))
-		Perl_warner(aTHX_ WARN_UNSAFE, "Exiting substitution via %s", 
+	    if (ckWARN(WARN_EXITING))
+		Perl_warner(aTHX_ WARN_EXITING, "Exiting substitution via %s", 
 			PL_op_name[PL_op->op_type]);
 	    break;
 	case CXt_SUB:
-	    if (ckWARN(WARN_UNSAFE))
-		Perl_warner(aTHX_ WARN_UNSAFE, "Exiting subroutine via %s", 
+	    if (ckWARN(WARN_EXITING))
+		Perl_warner(aTHX_ WARN_EXITING, "Exiting subroutine via %s", 
 			PL_op_name[PL_op->op_type]);
 	    break;
 	case CXt_FORMAT:
-	    if (ckWARN(WARN_UNSAFE))
-		Perl_warner(aTHX_ WARN_UNSAFE, "Exiting format via %s", 
+	    if (ckWARN(WARN_EXITING))
+		Perl_warner(aTHX_ WARN_EXITING, "Exiting format via %s", 
 			PL_op_name[PL_op->op_type]);
 	    break;
 	case CXt_EVAL:
-	    if (ckWARN(WARN_UNSAFE))
-		Perl_warner(aTHX_ WARN_UNSAFE, "Exiting eval via %s", 
+	    if (ckWARN(WARN_EXITING))
+		Perl_warner(aTHX_ WARN_EXITING, "Exiting eval via %s", 
 			PL_op_name[PL_op->op_type]);
 	    break;
 	case CXt_NULL:
-	    if (ckWARN(WARN_UNSAFE))
-		Perl_warner(aTHX_ WARN_UNSAFE, "Exiting pseudo-block via %s", 
+	    if (ckWARN(WARN_EXITING))
+		Perl_warner(aTHX_ WARN_EXITING, "Exiting pseudo-block via %s", 
 			PL_op_name[PL_op->op_type]);
 	    return -1;
 	case CXt_LOOP:
@@ -1196,28 +1201,28 @@ S_dopoptoloop(pTHX_ I32 startingblock)
 	cx = &cxstack[i];
 	switch (CxTYPE(cx)) {
 	case CXt_SUBST:
-	    if (ckWARN(WARN_UNSAFE))
-		Perl_warner(aTHX_ WARN_UNSAFE, "Exiting substitution via %s", 
+	    if (ckWARN(WARN_EXITING))
+		Perl_warner(aTHX_ WARN_EXITING, "Exiting substitution via %s", 
 			PL_op_name[PL_op->op_type]);
 	    break;
 	case CXt_SUB:
-	    if (ckWARN(WARN_UNSAFE))
-		Perl_warner(aTHX_ WARN_UNSAFE, "Exiting subroutine via %s", 
+	    if (ckWARN(WARN_EXITING))
+		Perl_warner(aTHX_ WARN_EXITING, "Exiting subroutine via %s", 
 			PL_op_name[PL_op->op_type]);
 	    break;
 	case CXt_FORMAT:
-	    if (ckWARN(WARN_UNSAFE))
-		Perl_warner(aTHX_ WARN_UNSAFE, "Exiting format via %s", 
+	    if (ckWARN(WARN_EXITING))
+		Perl_warner(aTHX_ WARN_EXITING, "Exiting format via %s", 
 			PL_op_name[PL_op->op_type]);
 	    break;
 	case CXt_EVAL:
-	    if (ckWARN(WARN_UNSAFE))
-		Perl_warner(aTHX_ WARN_UNSAFE, "Exiting eval via %s", 
+	    if (ckWARN(WARN_EXITING))
+		Perl_warner(aTHX_ WARN_EXITING, "Exiting eval via %s", 
 			PL_op_name[PL_op->op_type]);
 	    break;
 	case CXt_NULL:
-	    if (ckWARN(WARN_UNSAFE))
-		Perl_warner(aTHX_ WARN_UNSAFE, "Exiting pseudo-block via %s", 
+	    if (ckWARN(WARN_EXITING))
+		Perl_warner(aTHX_ WARN_EXITING, "Exiting pseudo-block via %s", 
 			PL_op_name[PL_op->op_type]);
 	    return -1;
 	case CXt_LOOP:
@@ -1342,9 +1347,9 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 		    SvGROW(err, SvCUR(err)+sizeof(prefix)+msglen);
 		    sv_catpvn(err, prefix, sizeof(prefix)-1);
 		    sv_catpvn(err, message, msglen);
-		    if (ckWARN(WARN_UNSAFE)) {
+		    if (ckWARN(WARN_MISC)) {
 			STRLEN start = SvCUR(err)-msglen-sizeof(prefix)+1;
-			Perl_warner(aTHX_ WARN_UNSAFE, SvPVX(err)+start);
+			Perl_warner(aTHX_ WARN_MISC, SvPVX(err)+start);
 		    }
 		}
 	    }
@@ -1451,7 +1456,7 @@ PP(pp_caller)
 
     if (MAXARG)
 	count = POPi;
-    EXTEND(SP, 7);
+    EXTEND(SP, 10);
     for (;;) {
 	/* we may be in a higher stacklevel, so dig down deeper */
 	while (cxix < 0 && top_si->si_type != PERLSI_MAIN) {
@@ -1521,10 +1526,10 @@ PP(pp_caller)
 	if (cx->blk_eval.old_op_type == OP_ENTEREVAL) {
 	    PUSHs(cx->blk_eval.cur_text);
 	    PUSHs(&PL_sv_no);
-	} 
-	else if (cx->blk_eval.old_name) { /* Try blocks have old_name == 0. */
-	    /* Require, put the name. */
-	    PUSHs(sv_2mortal(newSVpv(cx->blk_eval.old_name, 0)));
+	}
+	/* try blocks have old_namesv == 0 */
+	else if (cx->blk_eval.old_namesv) {
+	    PUSHs(sv_2mortal(newSVsv(cx->blk_eval.old_namesv)));
 	    PUSHs(&PL_sv_yes);
 	}
     }
@@ -1556,6 +1561,17 @@ PP(pp_caller)
      * use the global PL_hints) */
     PUSHs(sv_2mortal(newSViv((I32)cx->blk_oldcop->op_private &
 			     HINT_PRIVATE_MASK)));
+    {
+	SV * mask ;
+	SV * old_warnings = cx->blk_oldcop->cop_warnings ;
+	if  (old_warnings == WARN_NONE || old_warnings == WARN_STD)
+            mask = newSVpvn(WARN_NONEstring, WARNsize) ;
+        else if (old_warnings == WARN_ALL)
+            mask = newSVpvn(WARN_ALLstring, WARNsize) ;
+        else
+            mask = newSVsv(old_warnings);
+        PUSHs(sv_2mortal(mask));
+    }
     RETURN;
 }
 
@@ -1808,9 +1824,9 @@ PP(pp_return)
 	    (MARK == SP || (gimme == G_SCALAR && !SvTRUE(*SP))) )
 	{
 	    /* Unassume the success we assumed earlier. */
-	    char *name = cx->blk_eval.old_name;
-	    (void)hv_delete(GvHVn(PL_incgv), name, strlen(name), G_DISCARD);
-	    DIE(aTHX_ "%s did not return a true value", name);
+	    SV *nsv = cx->blk_eval.old_namesv;
+	    (void)hv_delete(GvHVn(PL_incgv), SvPVX(nsv), SvCUR(nsv), G_DISCARD);
+	    DIE(aTHX_ "%s did not return a true value", SvPVX(nsv));
 	}
 	break;
     case CXt_FORMAT:
@@ -1967,17 +1983,14 @@ PP(pp_next)
     if (cxix < cxstack_ix)
 	dounwind(cxix);
 
-    cx = &cxstack[cxstack_ix];
-    {
-	OP *nextop = cx->blk_loop.next_op;
-	/* clean scope, but only if there's no continue block */
-	if (nextop == cUNOPx(cx->blk_loop.last_op)->op_first->op_next) {
-	    TOPBLOCK(cx);
-	    oldsave = PL_scopestack[PL_scopestack_ix - 1];
-	    LEAVE_SCOPE(oldsave);
-	}
-	return nextop;
+    TOPBLOCK(cx);
+
+    /* clean scope, but only if there's no continue block */
+    if (!(cx->blk_loop.last_op->op_private & OPpLOOP_CONTINUE)) {
+	oldsave = PL_scopestack[PL_scopestack_ix - 1];
+	LEAVE_SCOPE(oldsave);
     }
+    return cx->blk_loop.next_op;
 }
 
 PP(pp_redo)
@@ -2516,8 +2529,16 @@ S_save_lines(pTHX_ AV *array, SV *sv)
     }
 }
 
+#ifdef PERL_FLEXIBLE_EXCEPTIONS
 STATIC void *
 S_docatch_body(pTHX_ va_list args)
+{
+    return docatch_body();
+}
+#endif
+
+STATIC void *
+S_docatch_body(pTHX)
 {
     CALLRUNOPS(aTHX);
     return NULL;
@@ -2536,10 +2557,18 @@ S_docatch(pTHX_ OP *o)
     assert(CATCH_GET == TRUE);
 #endif
     PL_op = o;
+#ifdef PERL_FLEXIBLE_EXCEPTIONS
  redo_body:
     CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_docatch_body));
+#else
+    JMPENV_PUSH(ret);
+#endif
     switch (ret) {
     case 0:
+#ifndef PERL_FLEXIBLE_EXCEPTIONS
+ redo_body:
+	docatch_body();
+#endif
 	break;
     case 3:
 	if (PL_restartop && cursi == PL_curstackinfo) {
@@ -2549,10 +2578,12 @@ S_docatch(pTHX_ OP *o)
 	}
 	/* FALL THROUGH */
     default:
+	JMPENV_POP;
 	PL_op = oldop;
 	JMPENV_JUMP(ret);
 	/* NOTREACHED */
     }
+    JMPENV_POP;
     PL_op = oldop;
     return Nullop;
 }
@@ -2897,15 +2928,17 @@ PP(pp_require)
 	    }
 	}
 	else if (!SvPOKp(sv)) {			/* require 5.005_03 */
-	    NV n = SvNV(sv);
-	    rev = (UV)n;
-	    ver = (UV)((n-rev)*1000);
-	    sver = (UV)((((n-rev)*1000 - ver) + 0.0009) * 1000);
-
 	    if ((NV)PERL_REVISION + ((NV)PERL_VERSION/(NV)1000)
 		+ ((NV)PERL_SUBVERSION/(NV)1000000)
 		+ 0.00000099 < SvNV(sv))
 	    {
+		NV nrev = SvNV(sv);
+		UV rev = (UV)nrev;
+		NV nver = (nrev - rev) * 1000;
+		UV ver = (UV)(nver + 0.0009);
+		NV nsver = (nver - ver) * 1000;
+		UV sver = (UV)(nsver + 0.0009);
+
 		DIE(aTHX_ "Perl v%"UVuf".%"UVuf".%"UVuf" required--this is only version "
 		    "v%d.%d.%d, stopped", rev, ver, sver, PERL_REVISION,
 		    PERL_VERSION, PERL_SUBVERSION);
@@ -3289,9 +3322,9 @@ PP(pp_leaveeval)
 	!(gimme == G_SCALAR ? SvTRUE(*SP) : SP > newsp))
     {
 	/* Unassume the success we assumed earlier. */
-	char *name = cx->blk_eval.old_name;
-	(void)hv_delete(GvHVn(PL_incgv), name, strlen(name), G_DISCARD);
-	retop = Perl_die(aTHX_ "%s did not return a true value", name);
+	SV *nsv = cx->blk_eval.old_namesv;
+	(void)hv_delete(GvHVn(PL_incgv), SvPVX(nsv), SvCUR(nsv), G_DISCARD);
+	retop = Perl_die(aTHX_ "%s did not return a true value", SvPVX(nsv));
 	/* die_where() did LEAVE, or we won't be here */
     }
     else {

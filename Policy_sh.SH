@@ -86,8 +86,8 @@ esac
 
 for var in \
 	bin scriptdir privlib archlib man1dir man3dir html1dir html3dir \
-	sitebin sitescriptdir sitelib sitearch \
-		siteman1dir siteman3dir sitehtml1dir sitehtml3dir \
+	sitebin sitescript sitelib sitearch \
+		siteman1 siteman3 sitehtml1 sitehtml3 \
 	vendorbin vendorscript vendorlib vendorarch \
 		vendorman1 vendorman3 vendorhtml1 vendorhtml3
 do
@@ -124,8 +124,7 @@ do
 
     # Directories for site-specific add-on files
     sitebin)	dflt=$siteprefix/bin ;;
-    # The scriptdir test is more complex, but this is probably usually ok.
-    sitescriptdir)
+    sitescript)
 	if $test -d $siteprefix/script; then
 	    dflt=$siteprefix/script
 	else
@@ -140,10 +139,10 @@ do
 	;;
     sitearch)	dflt="$sitelib/$archname" ;;
 
-    siteman1dir)	dflt="$siteprefix/man/man1" ;;
-    siteman3dir)	dflt="$siteprefix/man/man3" ;;
+    siteman1)	dflt="$siteprefix/man/man1" ;;
+    siteman3)	dflt="$siteprefix/man/man3" ;;
     # We don't know what to do with these yet.
-    sitehtml1dir)	dflt='' ;;
+    sitehtml1)	dflt='' ;;
     sitehtm31dir)	dflt='' ;;
     
     # Directories for vendor-supplied add-on files
@@ -154,10 +153,7 @@ do
 	else
 	    case "$var" in
 	    vendorbin)	dflt=$vendorprefix/bin ;;
-
-	    # The scriptdir test is more complex, 
-	    # but this is probably usually ok.
-	    vendorscriptdir)
+	    vendorscript)
 		if $test -d $vendorprefix/script; then
 		    dflt=$vendorprefix/script
 		else
@@ -172,11 +168,11 @@ do
 		;;
 	    vendorarch)	dflt="$vendorlib/$archname" ;;
 
-	    vendorman1dir)	dflt="$vendorprefix/man/man1" ;;
-	    vendorman3dir)	dflt="$vendorprefix/man/man3" ;;
+	    vendorman1)	dflt="$vendorprefix/man/man1" ;;
+	    vendorman3)	dflt="$vendorprefix/man/man3" ;;
 	    # We don't know what to do with these yet.
-	    vendorhtml1dir)	dflt='' ;;
-	    vendorhtm31dir)	dflt='' ;;
+	    vendorhtml1)	dflt='' ;;
+	    vendorhtm3)	dflt='' ;;
 
 	    esac  # End of vendorprefix != ''
 	fi

@@ -176,16 +176,16 @@ This variable is read-only and dynamically scoped to the current BLOCK.
 
 =item @+
 
-$+[0] is the offset of the end of the last successful match.
-C<$+[>I<n>C<]> is the offset of the end of the substring matched by
-I<n>-th subpattern, or undef if the subpattern did not match.
-
-Thus after a match against $_, $& coincides with C<substr $_, $-[0],
-$+[0] - $-[0]>.  Similarly, C<$>I<n> coincides with C<substr $_, $-[>I<n>C<],
-$+[>I<n>C<] - $-[>I<n>C<]> if C<$-[>I<n>C<]> is defined, and $+ coincides with
-C<substr $_, $-[$#-], $+[$#-]>.  One can use C<$#+> to find the number
-of subgroups in the last successful match.  Contrast with
-C<$#E<45>>, the last I<matched> subgroup.  Compare with C<@E<45>>.
+This array holds the offsets of the ends of the last successful
+submatches in the currently active dynamic scope.  C<$+[0]> is
+the offset into the string of the end of the entire match.  This
+is the same value as what the C<pos> function returns when called
+on the variable that was matched against.  The I<n>th element
+of this array holds the offset of the I<n>th submatch, so
+C<$+[1]> is the offset past where $1 ends, C<$+[2]> the offset
+past where $2 ends, and so on.  You can use C<$#+> to determine
+how many subgroups were in the last successful match.  See the
+examples given for the C<@-> variable.
 
 =item $MULTILINE_MATCHING
 
@@ -425,6 +425,33 @@ C<substr $_, $-[$#-], $+[$#-]>.  One can use C<$#E<45>> to find the last
 matched subgroup in the last successful match.  Contrast with
 C<$#+>, the number of subgroups in the regular expression.  Compare
 with C<@+>.
+
+This array holds the offsets of the beginnings of the last
+successful submatches in the currently active dynamic scope.
+C<$-[0]> is the offset into the string of the beginning of the
+entire match.  The I<n>th element of this array holds the offset
+of the I<n>th submatch, so C<$+[1]> is the offset where $1
+begins, C<$+[2]> the offset where $2 begins, and so on.
+You can use C<$#-> to determine how many subgroups were in the
+last successful match.  Compare with the C<@+> variable.
+
+After a match against some variable $var:
+
+=over 5
+
+=item C<$`> is the same as C<substr($var, 0, $-[0]>)
+
+=item C<$&> is the same as C<substr($var, $-[0], $+[0] - $-[0]>) 
+
+=item C<$'> is the same as C<substr($var, $+[0]>)
+
+=item C<$1> is the same as C<substr($var, $-[1], $+[1] - $-[1])>  
+
+=item C<$2> is the same as C<substr($var, $-[2], $+[2] - $-[2])>
+
+=item C<$3> is the same as C<substr $var, $-[3], $+[3] - $-[3]>) 
+
+=back
 
 =item format_name HANDLE EXPR
 
@@ -672,8 +699,6 @@ As of release 5 of Perl, assignment to C<$[> is treated as a compiler
 directive, and cannot influence the behavior of any other file.
 Its use is highly discouraged.
 
-=item $PERL_VERSION
-
 =item $]
 
 The version + patchlevel / 1000 of the Perl interpreter.  This variable
@@ -686,7 +711,10 @@ of perl in the right bracket?)  Example:
 See also the documentation of C<use VERSION> and C<require VERSION>
 for a convenient way to fail if the running Perl interpreter is too old.
 
-See C<$^V> for a more modern representation of the Perl version.
+The use of this variable is deprecated.  The floating point representation
+can sometimes lead to inaccurate numeric comparisons.  See C<$^V> for a
+more modern representation of the Perl version that allows accurate string
+comparisons.
 
 =item $COMPILING
 
@@ -715,7 +743,8 @@ descriptors are not.  Also, during an open(), system file descriptors are
 preserved even if the open() fails.  (Ordinary file descriptors are
 closed before the open() is attempted.)  The close-on-exec
 status of a file descriptor will be decided according to the value of
-C<$^F> when the open() or pipe() was called, not the time of the exec().
+C<$^F> when the corresponding file, pipe, or socket was opened, not the
+time of the exec().
 
 =item $^H
 
@@ -854,10 +883,14 @@ were compiled.
 Some bits may be relevant at compile-time only, some at
 run-time only.  This is a new mechanism and the details may change.
 
+=item $LAST_REGEXP_CODE_RESULT
+
 =item $^R
 
 The result of evaluation of the last successful C<(?{ code })>
 regular expression assertion (see L<perlre>).  May be written to.
+
+=item $EXCEPTIONS_BEING_CAUGHT
 
 =item $^S
 
@@ -873,24 +906,23 @@ The time at which the program began running, in seconds since the
 epoch (beginning of 1970).  The values returned by the B<-M>, B<-A>,
 and B<-C> filetests are based on this value.
 
-=item $PERL_VERSION_TUPLE
+=item $PERL_VERSION
 
 =item $^V
 
 The revision, version, and subversion of the Perl interpreter, represented
-as a "version tuple".  Version tuples have both a numeric value and a
-string value.  The numeric value is a floating point number that amounts
-to revision + version/1000 + subversion/1000000, and the string value
-is made of characters possibly in the UTF-8 range:
-C<chr($revision) . chr($version) . chr($subversion)>.
+as a string composed of characters with those ordinals.  Thus in Perl v5.6.0
+it equals C<chr(5) . chr(6) . chr(0)> and will return true for
+C<$^V eq v5.6.0>.  Note that the characters in this string value can
+potentially be in Unicode range.
 
 This can be used to determine whether the Perl interpreter executing a
 script is in the right range of versions.  (Mnemonic: use ^V for Version
-control.)  Example:
+Control.)  Example:
 
-    warn "No "our" declarations!\n" if $^V and $^V lt v5.6;
+    warn "No "our" declarations!\n" if $^V and $^V lt v5.6.0;
 
-See also the documentation of C<use VERSION> and C<require VERSION>
+See the documentation of C<use VERSION> and C<require VERSION>
 for a convenient way to fail if the running Perl interpreter is too old.
 
 See also C<$]> for an older representation of the Perl version.
@@ -920,8 +952,8 @@ The initial value is typically C<0> for compatibility with Perl versions
 earlier than 5.6, but may be automatically set to C<1> by Perl if the system
 provides a user-settable default (e.g., C<$ENV{LC_CTYPE}>).
 
-The C<byte> pragma always overrides the effect of this flag in the current
-lexical scope.  See L<byte>.
+The C<bytes> pragma always overrides the effect of this flag in the current
+lexical scope.  See L<bytes>.
 
 =item $EXECUTABLE_NAME
 

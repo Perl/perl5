@@ -36,8 +36,8 @@ global flag is set to C<1>), all system calls will use the
 corresponding wide character APIs.  This is currently only implemented
 on Windows.
 
-Regardless of the above, the C<byte> pragma can always be used to force
-byte semantics in a particular lexical scope.  See L<byte>.
+Regardless of the above, the C<bytes> pragma can always be used to force
+byte semantics in a particular lexical scope.  See L<bytes>.
 
 The C<utf8> pragma is primarily a compatibility device that enables
 recognition of UTF-8 in literals encountered by the parser.  It is also
@@ -53,7 +53,7 @@ the input data came from a Unicode source (for example, by adding a
 character encoding discipline to the filehandle whence it came, or a
 literal UTF-8 string constant in the program), character semantics
 apply; otherwise, byte semantics are in effect.  To force byte semantics
-on Unicode data, the C<byte> pragma should be used.
+on Unicode data, the C<bytes> pragma should be used.
 
 Under character semantics, many operations that formerly operated on
 bytes change to operating on characters.  For ASCII data this makes
@@ -227,6 +227,6 @@ tend to run slower.  Avoidance of locales is strongly encouraged.
 
 =head1 SEE ALSO
 
-L<byte>, L<utf8>, L<perlvar/"${^WIDE_SYSTEM_CALLS}">
+L<bytes>, L<utf8>, L<perlvar/"${^WIDE_SYSTEM_CALLS}">
 
 =cut

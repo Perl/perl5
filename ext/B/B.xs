@@ -95,6 +95,11 @@ cc_opclass(pTHX_ OP *o)
     if (o->op_type == OP_SASSIGN)
 	return ((o->op_private & OPpASSIGN_BACKWARDS) ? OPc_UNOP : OPc_BINOP);
 
+#ifdef USE_ITHREADS
+    if (o->op_type == OP_GV || o->op_type == OP_GVSV || o->op_type == OP_AELEMFAST)
+	return OPc_PADOP;
+#endif
+
     switch (PL_opargs[o->op_type] & OA_CLASS_MASK) {
     case OA_BASEOP:
 	return OPc_BASEOP;
@@ -158,8 +163,11 @@ cc_opclass(pTHX_ OP *o)
 	 * an SVOP (and op_sv is the GV for the filehandle argument).
 	 */
 	return ((o->op_flags & OPf_KIDS) ? OPc_UNOP :
+#ifdef USE_ITHREADS
+		(o->op_flags & OPf_REF) ? OPc_PADOP : OPc_BASEOP);
+#else
 		(o->op_flags & OPf_REF) ? OPc_SVOP : OPc_BASEOP);
-
+#endif
     case OA_LOOPEXOP:
 	/*
 	 * next, last, redo, dump and goto use OPf_SPECIAL to indicate that a
@@ -566,10 +574,16 @@ OP_name(o)
 char *
 OP_ppaddr(o)
 	B::OP		o
+    PREINIT:
+	int i;
+	SV *sv = sv_newmortal();
     CODE:
-	ST(0) = sv_newmortal();
-	sv_setpvn(ST(0), "Perl_pp_", 8);
-	sv_catpv(ST(0), PL_op_name[o->op_type]);
+	sv_setpvn(sv, "PL_ppaddr[OP_", 13);
+	sv_catpv(sv, PL_op_name[o->op_type]);
+	for (i=13; i<SvCUR(sv); ++i)
+	    SvPVX(sv)[i] = toUPPER(SvPVX(sv)[i]);
+	sv_catpv(sv, "]");
+	ST(0) = sv;
 
 char *
 OP_desc(o)
@@ -679,8 +693,8 @@ PMOP_precomp(o)
 	if (rx)
 	    sv_setpvn(ST(0), rx->precomp, rx->prelen);
 
-#define SVOP_sv(o)	cSVOPx_sv(o)
-#define SVOP_gv(o)	cGVOPx_gv(o)
+#define SVOP_sv(o)	cSVOPo->op_sv
+#define SVOP_gv(o)	((GV*)cSVOPo->op_sv)
 
 MODULE = B	PACKAGE = B::SVOP		PREFIX = SVOP_
 
@@ -991,6 +1005,14 @@ GvNAME(gv)
 	B::GV	gv
     CODE:
 	ST(0) = sv_2mortal(newSVpvn(GvNAME(gv), GvNAMELEN(gv)));
+
+bool
+is_empty(gv)
+        B::GV   gv
+    CODE:
+        RETVAL = GvGP(gv) == Null(GP*);
+    OUTPUT:
+        RETVAL
 
 B::HV
 GvSTASH(gv)
