@@ -631,7 +631,7 @@ sub installlib {
 sub copy_if_diff {
     my($from,$to)=@_;
     return 1 if (($^O eq 'VMS') && (-d $from));
-    -f $from || die "$0: $from not found";
+    -f $from || warn "$0: $from not found";
     $packlist->{$to} = { type => 'file' };
     if (compare($from, $to) || $nonono) {
 	safe_unlink($to);   # In case we don't have write permissions.
