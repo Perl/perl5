@@ -278,17 +278,10 @@ integer formats:
     0377                # octal
     0b011011            # binary
 
-You are allowed to use underscores (underbars) in numeric literals for
-legibility, as long as the underscores are spaced at least one digit
-apart, and they do not begin or end the integer or fractional part of
-a decimal constant.  You could, for example, group binary digits by
-threes (as for a Unix-style mode argument such as 0b110_100_100) or by
-fours (to represent nibbles, as in 0b1010_0110) or in other groups.
-
-(Note that if you try to begin a number with an underscore, it won't
-even be understood as a number, it will be understood as a bareword,
-which depending on the context may mean for example a string constant,
-a function call, or a filehandle.)
+You are allowed to use underscores (underbars) in numeric literals
+between digits for legibility.  You could, for example, group binary
+digits by threes (as for a Unix-style mode argument such as 0b110_100_100)
+or by fours (to represent nibbles, as in 0b1010_0110) or in other groups.
 
 String literals are usually delimited by either single or double
 quotes.  They work much like quotes in the standard Unix shells:
