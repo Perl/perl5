@@ -107,7 +107,7 @@ unless ($OS) {
 	$OS = $Config::Config{'osname'};
     }
 }
-if ($OS=~/Win/i) {
+if ($OS=~/win32/i) {
   $OS = 'WINDOWS';
 } elsif ($OS=~/vms/i) {
   $OS = 'VMS';
