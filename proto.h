@@ -925,7 +925,6 @@ STATIC void	S_more_xrv(pTHX);
 STATIC XPVIV*	S_new_xiv(pTHX);
 STATIC XPVNV*	S_new_xnv(pTHX);
 STATIC XPV*	S_new_xpv(pTHX);
-STATIC XPV*	S_new_xpv(pTHX);
 STATIC XPVIV*	S_new_xpviv(pTHX);
 STATIC XPVNV*	S_new_xpvnv(pTHX);
 STATIC XPVCV*	S_new_xpvcv(pTHX);
