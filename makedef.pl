@@ -424,6 +424,7 @@ unless ($define{'DEBUGGING'}) {
 		    Perl_debstackptrs
 		    Perl_sv_peek
 		    PL_block_type
+		    PL_debug_pad
 		    PL_watchaddr
 		    PL_watchok
 		    )];
