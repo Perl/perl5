@@ -3680,7 +3680,7 @@ S_doparseform(pTHX_ SV *sv)
  *
  * See also: "Optimistic Merge Sort" (SODA '92)
  *      
- * The integration to Perl is by John P. Linderman <jpl@rearch.att.com>.
+ * The integration to Perl is by John P. Linderman <jpl@research.att.com>.
  *
  * The code can be distributed under the same terms as Perl itself.
  *
