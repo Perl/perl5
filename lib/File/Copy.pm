@@ -18,7 +18,7 @@ use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION $Too_Big
 # package has not yet been updated to work with Perl 5.004, and so it
 # would be a Bad Thing for the CPAN module to grab it and replace this
 # module.  Therefore, we set this module's version higher than 2.0.
-$VERSION = '2.01';
+$VERSION = '2.02';
 
 require Exporter;
 @ISA = qw(Exporter);
@@ -60,8 +60,8 @@ sub copy {
     }
 
     if (defined &syscopy && \&syscopy != \&copy
-	&& $from_a_handle
-	&& ($to_a_handle || $^O eq 'os2'))
+	&& !$to_a_handle
+	&& !($from_a_handle && $^O eq 'os2'))	# OS/2 cannot handle handles
     {
 	return syscopy($from, $to);
     }
@@ -146,6 +146,10 @@ sub move {
 
     ($tosz1,$tomt1) = (stat($to))[7,9];
     $fromsz = -s $from;
+    if ($^O eq 'os2' and defined $tosz1 and defined $fromsz) {
+      # will not rename with overwrite
+      unlink $to;
+    }
     return 1 if rename $from, $to;
 
     ($sts,$ossts) = ($! + 0, $^E + 0);
@@ -209,14 +213,14 @@ argument may be a string, a FileHandle reference or a FileHandle
 glob. Obviously, if the first argument is a filehandle of some
 sort, it will be read from, and if it is a file I<name> it will
 be opened for reading. Likewise, the second argument will be
-written to (and created if need be).  If the second argument is
-a file name and specifies an existing directory, and the first
-argument does not specify
+written to (and created if need be).
 
 B<Note that passing in
 files as handles instead of names may lead to loss of information
 on some operating systems; it is recommended that you use file
-names whenever possible.>
+names whenever possible.>  Files are opened in binary mode where
+applicable.  To get a consistent behavour when copying from a
+filehandle to a file, use C<binmode> on the filehandle.
 
 An optional third parameter can be used to specify the buffer
 size used for copying. This is the number of bytes from the
