@@ -150,17 +150,24 @@ The following functions
 	acoth
 
 cannot be computed for all arguments because that would mean dividing
-by zero. These situations cause fatal runtime errors looking like this
+by zero or taking logarithm of zero. These situations cause fatal
+runtime errors looking like this
 
 	cot(0): Division by zero.
 	(Because in the definition of cot(0), the divisor sin(0) is 0)
 	Died at ...
 
-For the C<csc>, C<cot>, C<asec>, C<acsc>, C<csch>, C<coth>, C<asech>,
-C<acsch>, the argument cannot be C<0> (zero). For the C<atanh>,
-C<acoth>, the argument cannot be C<1> (one). For the C<tan>, C<sec>,
-C<tanh>, C<sech>, the argument cannot be I<pi/2 + k * pi>, where I<k> is
-any integer.
+or
+
+	atanh(-1): Logarithm of zero.
+	Died at...
+
+For the C<csc>, C<cot>, C<asec>, C<acsc>, C<acot>, C<csch>, C<coth>,
+C<asech>, C<acsch>, the argument cannot be C<0> (zero).  For the
+C<atanh>, C<acoth>, the argument cannot be C<1> (one).  For the
+C<atanh>, C<acoth>, the argument cannot be C<-1> (minus one).  For the
+C<tan>, C<sec>, C<tanh>, C<sech>, the argument cannot be I<pi/2 + k *
+pi>, where I<k> is any integer.
 
 =head2 SIMPLE (REAL) ARGUMENTS, COMPLEX RESULTS
 
