@@ -1119,7 +1119,10 @@ foreach my $template (qw(A Z c C s S i I l L n N v V q Q j J f d F D u U w)) {
 
 ok(pack('u2', 'AA'), "[perl #8026]"); # used to hang and eat RAM in perl 5.7.2
 
-ok(1, "fake success (change #18751, feature not present in 5.8.1)");
+$_ = pack('c', 65); # 'A' would not be EBCDIC-friendly
+eval "unpack('c')";
+like ($@, qr/Not enough arguments for unpack/,
+      "one-arg unpack (change #18751) is not in maint");
 
 {
     my $a = "X\t01234567\n" x 100;
