@@ -2666,6 +2666,8 @@ conversion assumes base 10.)
 
 =item open FILEHANDLE,MODE,EXPR,LIST
 
+=item open FILEHANDLE,MODE,REFERENCE
+
 =item open FILEHANDLE
 
 Opens the file whose filename is given by EXPR, and associates it with
@@ -2778,6 +2780,10 @@ argument being C<undef>:
 
 opens a filehandle to an anonymous temporary file.
 
+File handles can be opened to "in memory" files held in Perl scalars via:
+
+    open($fh,'>', \$variable) || ..
+
 Examples:
 
     $ARTICLE = 100;
@@ -2801,6 +2807,11 @@ Examples:
 
     open(EXTRACT, "|sort >/tmp/Tmp$$")		# $$ is our process id
 	or die "Can't start sort: $!";
+
+    # in memory files
+    open(MEMORY,'>', \$var)
+	or die "Can't open memory file: $!";
+    print MEMORY "foo!\n";			# output will end up in $var
 
     # process argument list of files along with any includes
 

@@ -8,7 +8,8 @@ no strict 'refs';
 our $Debug = 0;
 our $ExportLevel = 0;
 our $Verbose ||= 0;
-our $VERSION = '5.563';
+our $VERSION = '5.564';
+$Carp::Internal{Exporter} = 1;
 
 sub export_to_level {
   require Exporter::Heavy;
@@ -56,7 +57,7 @@ sub import {
     return export $pkg, $callpkg, ($args ? @_ : ());
   }
   local $SIG{__WARN__} = 
-	sub {require Carp; local $Carp::CarpLevel = 1; &Carp::carp};
+	sub {require Carp; &Carp::carp};
   foreach my $sym (@_) {
     # shortcut for the common case of no type character
     *{"$callpkg\::$sym"} = \&{"$pkg\::$sym"};

@@ -1,5 +1,5 @@
 # Pod::Text::Termcap -- Convert POD data to ASCII text with format escapes.
-# $Id: Termcap.pm,v 1.5 2001/11/28 00:21:28 eagle Exp $
+# $Id: Termcap.pm,v 1.6 2001/11/28 05:44:09 eagle Exp $
 #
 # Copyright 1999, 2001 by Russ Allbery <rra@stanford.edu>
 #
@@ -48,7 +48,7 @@ sub initialize {
         . ":/usr/share/misc/termcap:/usr/share/lib/termcap";
 
     # Fall back on a hard-coded terminal speed if POSIX::Termios isn't
-    # available.
+    # available (such as on VMS).
     eval { $termios = POSIX::Termios->new };
     if ($@) {
         $ospeed = '9600';

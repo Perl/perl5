@@ -54,7 +54,7 @@ do_test( 1,
   FLAGS = \\(POK,pPOK\\)
   PV = $ADDR "foo"\\\0
   CUR = 3
-  LEN = 4'
+  LEN = \\d+'
        );
 
 do_test( 2,
@@ -64,7 +64,7 @@ do_test( 2,
   FLAGS = \\(.*POK,READONLY,pPOK\\)
   PV = $ADDR "bar"\\\0
   CUR = 3
-  LEN = 4');
+  LEN = \\d+');
 
 do_test( 3,
         $b = 123,
@@ -110,7 +110,7 @@ do_test( 7,
   NV = 789\\.(?:1(?:000+\d+)?|0999+\d+)
   PV = $ADDR "789"\\\0
   CUR = 3
-  LEN = 4');
+  LEN = \\d+');
 
 do_test( 8,
         0xabcd,
@@ -136,7 +136,7 @@ do_test(10,
     FLAGS = \\(POK,pPOK\\)
     PV = $ADDR "foo"\\\0
     CUR = 3
-    LEN = 4');
+    LEN = \\d+');
 
 my $c_pattern;
 if ($type eq 'N') {
@@ -325,7 +325,7 @@ do_test(18,
   FLAGS = \\((?:PADBUSY,PADTMP,)?POK,READONLY,pPOK,UTF8\\)
   PV = $ADDR "\\\214\\\101\\\0\\\235\\\101"\\\0 \[UTF8 "\\\x\{100\}\\\x\{0\}\\\x\{200\}"\]
   CUR = 5
-  LEN = 6');
+  LEN = \\d+');
 } else {
 do_test(18,
 	chr(256).chr(0).chr(512),
@@ -334,7 +334,7 @@ do_test(18,
   FLAGS = \\((?:PADBUSY,PADTMP,)?POK,READONLY,pPOK,UTF8\\)
   PV = $ADDR "\\\304\\\200\\\0\\\310\\\200"\\\0 \[UTF8 "\\\x\{100\}\\\x\{0\}\\\x\{200\}"\]
   CUR = 5
-  LEN = 6');
+  LEN = \\d+');
 }
 
 if (ord('A') == 193) {
@@ -362,7 +362,7 @@ do_test(19,
       FLAGS = \\(POK,pPOK,UTF8\\)
       PV = $ADDR "\\\235\\\101"\\\0 \[UTF8 "\\\x\{200\}"\]
       CUR = 2
-      LEN = 3');
+      LEN = \\d+');
 } else {
 do_test(19,
 	{chr(256)=>chr(512)},
@@ -388,7 +388,7 @@ do_test(19,
       FLAGS = \\(POK,pPOK,UTF8\\)
       PV = $ADDR "\\\310\\\200"\\\0 \[UTF8 "\\\x\{200\}"\]
       CUR = 2
-      LEN = 3');
+      LEN = \\d+');
 }
 
 END {

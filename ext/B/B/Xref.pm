@@ -281,6 +281,7 @@ sub pp_const {
     }
     else {
 	$top = $pad[$op->targ];
+	$top = UNKNOWN unless $top;
     }
 }
 

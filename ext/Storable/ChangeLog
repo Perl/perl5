@@ -1,3 +1,18 @@
+Sat Dec  1 14:37:54 MET 2001   Raphael Manfredi <Raphael_Manfredi@pobox.com>
+
+. Description:
+
+	This is the LAST maintenance release of the Storable module.
+	Indeed, Storable is now part of perl 5.8, and will be maintained
+	as part of Perl.  The CPAN module will remain available there
+	for people running pre-5.8 perls.
+
+	Avoid requiring Fcntl upfront, useful to embedded runtimes.
+	Use an eval {} for testing, instead of making Storable.pm
+	simply fail its compilation in the BEGIN block.
+
+	store_fd() will now correctly autoflush file if needed.
+
 Tue Aug 28 23:53:20 MEST 2001   Raphael Manfredi <Raphael_Manfredi@pobox.com>
 
 . Description:

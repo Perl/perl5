@@ -123,6 +123,8 @@ sub import
   }
 }
 
+my %viacode;
+
 sub viacode
 {
     if (@_ != 1) {
@@ -139,14 +141,18 @@ sub viacode
         return;
     }
 
+    return $viacode{$hex} if exists $viacode{$hex};
+
     $txt = do "unicore/Name.pl" unless $txt;
 
     if ($txt =~ m/^$hex\t\t(.+)/m) {
-        return $1;
+        return $viacode{$hex} = $1;
     } else {
         return;
     }
 }
+
+my %vianame;
 
 sub vianame
 {
@@ -157,10 +163,12 @@ sub vianame
 
     my $arg = shift;
 
+    return $vianame{$arg} if exists $vianame{$arg};
+
     $txt = do "unicore/Name.pl" unless $txt;
 
     if ($txt =~ m/^([0-9A-F]+)\t\t($arg)/m) {
-        return hex $1;
+        return $vianame{$arg} = hex $1;
     } else {
         return;
     }
@@ -213,7 +221,7 @@ is ignored.
 
 Note that C<\N{...}> is compile-time, it's a special form of string
 constant used inside double-quoted strings: in other words, you cannot
-used variables inside the C<\N{...}>.  If you want similar run-time
+use variables inside the C<\N{...}>.  If you want similar run-time
 functionality, use charnames::vianame().
 
 =head1 CUSTOM TRANSLATORS

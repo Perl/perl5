@@ -1544,11 +1544,14 @@ PP(pp_lt)
     }
 #endif
 #ifndef NV_PRESERVES_UV
-    else if (SvROK(TOPs) && SvROK(TOPm1s)) {
-        SP--;
-        SETs(boolSV(SvRV(TOPs) < SvRV(TOPp1s)));
-        RETURN;
-    }
+#ifdef PERL_PRESERVE_IVUV
+    else
+#endif
+        if (SvROK(TOPs) && SvROK(TOPm1s)) {
+            SP--;
+            SETs(boolSV(SvRV(TOPs) < SvRV(TOPp1s)));
+            RETURN;
+        }
 #endif
     {
       dPOPnv;
@@ -1619,7 +1622,10 @@ PP(pp_gt)
     }
 #endif
 #ifndef NV_PRESERVES_UV
-    else if (SvROK(TOPs) && SvROK(TOPm1s)) {
+#ifdef PERL_PRESERVE_IVUV
+    else
+#endif
+        if (SvROK(TOPs) && SvROK(TOPm1s)) {
         SP--;
         SETs(boolSV(SvRV(TOPs) > SvRV(TOPp1s)));
         RETURN;
@@ -1694,7 +1700,10 @@ PP(pp_le)
     }
 #endif
 #ifndef NV_PRESERVES_UV
-    else if (SvROK(TOPs) && SvROK(TOPm1s)) {
+#ifdef PERL_PRESERVE_IVUV
+    else
+#endif
+        if (SvROK(TOPs) && SvROK(TOPm1s)) {
         SP--;
         SETs(boolSV(SvRV(TOPs) <= SvRV(TOPp1s)));
         RETURN;
@@ -1769,7 +1778,10 @@ PP(pp_ge)
     }
 #endif
 #ifndef NV_PRESERVES_UV
-    else if (SvROK(TOPs) && SvROK(TOPm1s)) {
+#ifdef PERL_PRESERVE_IVUV
+    else
+#endif
+        if (SvROK(TOPs) && SvROK(TOPm1s)) {
         SP--;
         SETs(boolSV(SvRV(TOPs) >= SvRV(TOPp1s)));
         RETURN;

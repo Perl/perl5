@@ -777,7 +777,7 @@ Convert POD data to formatted *roff input
 
 =item Pod::ParseLink
 
-Parse an L<> formatting code in POD text
+Parse an LE<lt>E<gt> formatting code in POD text
 
 =item Pod::ParseUtils
 

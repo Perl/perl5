@@ -180,12 +180,12 @@ if ($Is_MPE or $^O eq 'amigaos' or $Is_Dosish or $Is_Cygwin) {
 $cnt = $uid = 0;
 
 die "Can't run op/stat.t test 35 without pwd working" unless $cwd;
-my @bin = grep {-d} ($^O eq 'machten' ?
-		     qw(/usr/bin /bin) :
-		     qw(/sbin /usr/sbin /bin /usr/bin));
+my @bin = grep {-d && -r && -x} ($^O eq 'machten' ?
+                                 qw(/usr/bin /bin) :
+                                 qw(/sbin /usr/sbin /bin /usr/bin));
 unless (@bin) { print ("not ok 35\n"), goto tty_test; }
 for my $bin (@bin) {
-    opendir BIN, $bin or warn "Can't opendir $bin: $!";
+    opendir BIN, $bin or die "Can't opendir $bin: $!";
     while (defined($_ = readdir BIN)) {
         $_ = "$bin/$_";
         $cnt++;
