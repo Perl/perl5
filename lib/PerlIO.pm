@@ -234,7 +234,8 @@ The following returns the B<names> of the PerlIO layers on a filehandle.
 
 The layers are returned in the order an open() or binmode() call would
 use them.  Note that the "default stack" depends on the operating
-system and on the perl version.
+system and on the Perl version, and both the compile-time and
+runtime configurations of Perl.
 
 The following table summarizes the default layers on UNIX-like and
 DOS-like platforms and depending on the setting of the C<$ENV{PERLIO}>:
