@@ -198,7 +198,7 @@ Who wrote it (or AUTHORS if multiple).
 =item HISTORY
 
 Programs derived from other sources sometimes have this, or
-you might keep a modification long here.
+you might keep a modification log here.
 
 =back
 
@@ -248,7 +248,7 @@ not having a NAME is a fatal.
 =item Unknown escape: %s in %s
 
 (W) An unknown HTML entity (probably for an 8-bit character) was given via
-a C<E<lt>E<gt>> directive.  Besides amp, lt, gt, and quot, recognized
+a C<EE<lt>E<gt>> directive.  Besides amp, lt, gt, and quot, recognized
 entities are Aacute, aacute, Acirc, acirc, AElig, aelig, Agrave, agrave,
 Aring, aring, Atilde, atilde, Auml, auml, Ccedil, ccedil, Eacute, eacute,
 Ecirc, ecirc, Egrave, egrave, ETH, eth, Euml, euml, Iacute, iacute, Icirc,
@@ -273,7 +273,7 @@ C<=head1>, C<=head2>, C<=item>, C<=over>, C<=back>, or C<=cut>.
 
 If you would like to print out a lot of man page continuously, you
 probably want to set the C and D registers to set contiguous page
-numbering and even/odd paging, at least one some versions of man(7).
+numbering and even/odd paging, at least on some versions of man(7).
 Settting the F register will get you some additional experimental
 indexing:
 
@@ -390,6 +390,7 @@ $name = @ARGV ? $ARGV[0] : "<STDIN>";
 $Filename = $name;
 $name = uc($name) if $section =~ /^1/;
 $name =~ s/\.[^.]*$//;
+$name =~ s(/)(::)g; # translate Getopt/Long to Getopt::Long, etc.
 
 if ($name ne 'something') {
     FCHECK: {
@@ -755,7 +756,7 @@ while (<>) {
 		    ?  "the section on I<$2> in the I<$1> manpage"
 		    :  "the section on I<$2>"
 	    }
-	}gex;
+	}gesx; # s in case it goes over multiple lines, so . matches \n
 
 	s/Z<>/\\&/g;
 
@@ -1004,7 +1005,7 @@ sub internal_lrefs {
     }
 
     $retstr .= " entr" . ( @items > 1  ? "ies" : "y" )
-	    .  " elsewhere in this document";
+	    .  " elsewhere in this document "; # terminal space to avoid words running together (pattern used strips terminal spaces)
 
     return $retstr;
 
