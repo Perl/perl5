@@ -46,7 +46,6 @@ our($VERSION, @ISA, @EXPORT, $AUTOLOAD);
 require Carp;
 require Tie::Hash;
 require Exporter;
-use AutoLoader;
 use XSLoader ();
 @ISA = qw(Tie::Hash Exporter);
 @EXPORT = qw(
@@ -61,29 +60,17 @@ use XSLoader ();
 	GDBM_WRITER
 );
 
-$VERSION = "1.05";
+$VERSION = "1.06";
 
 sub AUTOLOAD {
     my($constname);
     ($constname = $AUTOLOAD) =~ s/.*:://;
-    my $val = constant($constname, @_ ? $_[0] : 0);
-    if ($! != 0) {
-	if ($! =~ /Invalid/ || $!{EINVAL}) {
-	    $AutoLoader::AUTOLOAD = $AUTOLOAD;
-	    goto &AutoLoader::AUTOLOAD;
-	}
-	else {
-	    Carp::croak("Your vendor has not defined GDBM_File macro $constname, used");
-	}
-    }
+    my ($error, $val) = constant($constname);
+    Carp::croak $error if $error;
     eval "sub $AUTOLOAD { $val }";
     goto &$AUTOLOAD;
 }
 
 XSLoader::load 'GDBM_File', $VERSION;
 
-# Preloaded methods go here.  Autoload methods go after __END__, and are
-# processed by the autosplit program.
-
 1;
-__END__
