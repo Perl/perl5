@@ -387,6 +387,8 @@ EXPECT
 # multiple our declarations in same scope, same package, warning
 use strict 'vars';
 use warnings;
+{ our $x = 1 }
+{ our $x = 0 }
 our $foo;
 {
     our $foo;
@@ -394,9 +396,9 @@ our $foo;
     our $foo;
 }
 EXPECT
-"our" variable $foo redeclared at - line 7.
+"our" variable $foo redeclared at - line 9.
 	(Did you mean "local" instead of "our"?)
-Name "Foo::foo" used only once: possible typo at - line 9.
+Name "Foo::foo" used only once: possible typo at - line 11.
 ########
 
 # Make sure the strict vars failure still occurs
