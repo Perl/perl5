@@ -1,6 +1,7 @@
-# Written $Id: //depot/perlio/ext/Encode/compile#14 $
-# compile -n ascii -o Encode/ascii.ucm Encode/ascii.enc
-<code_set_name> "ascii"
+# Written $Id: //depot/perlio/ext/Encode/compile#15 $
+# ./compile -n US-ascii -o Encode/ascii.ucm Encode/ascii.enc
+<code_set_name> "US-ascii"
+<code_set_alias> "ascii"
 <mb_cur_min> 1
 <mb_cur_max> 1
 <subchar> \x3F
