@@ -350,7 +350,7 @@ returned and retlen is set, if possible, to -1.
 UV
 Perl_utf8_to_uv_simple(pTHX_ U8* s, STRLEN* retlen)
 {
-    return Perl_utf8_to_uv(aTHX_ s, (STRLEN)-1, retlen, 0);
+    return Perl_utf8_to_uv(aTHX_ s, UTF8_MAXLEN, retlen, 0);
 }
 
 /*
