@@ -78,3 +78,5 @@ Perl_fprintf_nocontext(PerlIO *stream, const char *format, ...)
     va_start(arglist, format);
     return PerlIO_vprintf(stream, format, arglist);
 }
+
+#include "perlapi.h"		/* bring in PL_force_link_funcs */

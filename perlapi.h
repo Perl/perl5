@@ -39,9 +39,46 @@ START_EXTERN_C
 
 END_EXTERN_C
 
-#if !defined(PERL_CORE)
+#if defined(PERL_CORE)
 
-/* accessor functions for Perl variables (provides binary compatibility) */
+/* accessor functions for Perl variables (provide binary compatibility) */
+
+/* these need to be mentioned here, or most linkers won't put them in
+   the perl executable */
+
+#ifndef PERL_NO_FORCE_LINK
+
+START_EXTERN_C
+
+#ifndef DOINIT
+EXT void *PL_force_link_funcs[];
+#else
+EXT void *PL_force_link_funcs[] = {
+#undef PERLVAR
+#undef PERLVARA
+#undef PERLVARI
+#undef PERLVARIC
+#define PERLVAR(v,t)	Perl_##v##_ptr,
+#define PERLVARA(v,n,t)	PERLVAR(v,t)
+#define PERLVARI(v,t,i)	PERLVAR(v,t)
+#define PERLVARIC(v,t,i) PERLVAR(v,t)
+
+#include "thrdvar.h"
+#include "intrpvar.h"
+#include "perlvars.h"
+
+#undef PERLVAR
+#undef PERLVARA
+#undef PERLVARI
+#undef PERLVARIC
+};
+#endif	/* DOINIT */
+
+START_EXTERN_C
+
+#endif	/* PERL_NO_FORCE_LINK */
+
+#else	/* !PERL_CORE */
 
 #undef  PL_Argv
 #define PL_Argv			(*Perl_IArgv_ptr(aTHXo))
