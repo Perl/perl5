@@ -53,7 +53,7 @@ sub longmess_heavy {
 	#  subsequent times: $mess .= $sub $error at $file line $line
 	#                                  ^^^^^^
 	#                                 "called"
-	if ($error =~ m/\n$/) {
+	if ($error =~ m/\n\z/) {
 	    $mess .= $error;
 	} else {
 	    # Build a string, $sub, which names the sub-routine called.
@@ -226,12 +226,18 @@ CALLER:
 	    # OK!  We've got a candidate package.  Time to construct the
 	    # relevant error message and return it.
 	    my $msg;
-	    $msg = "$error at $file line $line";
-	    if (defined &Thread::tid) {
-		my $tid = Thread->self->tid;
-		$msg .= " thread $tid" if $tid;
+	    # make sure we don't add debug info if it ends with a newline
+	    if ($error =~ /\n\z/) {
+		$msg = $error;
 	    }
-	    $msg .= "\n";
+	    else {
+		$msg = "$error at $file line $line";
+		if (defined &Thread::tid) {
+		    my $tid = Thread->self->tid;
+		    $msg .= " thread $tid" if $tid;
+		}
+		$msg .= "\n";
+	    }
 	    return $msg;
 	}
     }

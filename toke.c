@@ -6569,12 +6569,29 @@ S_scan_inputsymbol(pTHX_ char *start)
 	       add symbol table ops
 	    */
 	    if ((tmp = pad_findmy(d)) != NOT_IN_PAD) {
-		OP *o = newOP(OP_PADSV, 0);
-		o->op_targ = tmp;
-		PL_lex_op = (OP*)newUNOP(OP_READLINE, 0, o);
+		SV *namesv = AvARRAY(PL_comppad_name)[tmp];
+		if (SvFLAGS(namesv) & SVpad_OUR) {
+		    SV *sym = sv_2mortal(newSVpv(HvNAME(GvSTASH(namesv)),0));
+		    sv_catpvn(sym, "::", 2);
+		    sv_catpv(sym, d+1);
+		    d = SvPVX(sym);
+		    goto intro_sym;
+		}
+		else {
+		    OP *o = newOP(OP_PADSV, 0);
+		    o->op_targ = tmp;
+		    PL_lex_op = (OP*)newUNOP(OP_READLINE, 0, o);
+		}
 	    }
 	    else {
-		GV *gv = gv_fetchpv(d+1,TRUE, SVt_PV);
+		GV *gv;
+		++d;
+intro_sym:
+		gv = gv_fetchpv(d,
+				(PL_in_eval
+				 ? (GV_ADDMULTI | GV_ADDINEVAL)
+				 : TRUE),
+				SVt_PV);
 		PL_lex_op = (OP*)newUNOP(OP_READLINE, 0,
 					    newUNOP(OP_RV2SV, 0,
 						newGVOP(OP_GV, 0, gv)));
