@@ -6,14 +6,14 @@ require 5.005_02;
 use strict;
 
 use Exporter;
-use Math::BigInt(1.45);
+use Math::BigInt(1.49);
 use vars qw($VERSION @ISA $PACKAGE @EXPORT_OK
             $accuracy $precision $round_mode $div_scale);
 
 @ISA = qw(Exporter Math::BigInt);
 @EXPORT_OK = qw(bgcd);
 
-$VERSION = 0.01;
+$VERSION = 0.02;
 
 # Globals
 $accuracy = $precision = undef;
@@ -26,10 +26,10 @@ sub new
         my $class  = ref($proto) || $proto;
 
         my $value       = shift;
-	$value 		= 0 if !defined $value; 	# no || 0 here!
-
-        # Store the floating point value
-        my $self = bless Math::BigInt->new($value), $class;
+	my $a = $accuracy; $a = $_[0] if defined $_[0];
+	my $p = $precision; $p = $_[1] if defined $_[1];
+        my $self = Math::BigInt->new($value,$a,$p,$round_mode);
+	bless $self,$class;
         $self->{'_custom'} = 1; # make sure this never goes away
         return $self;
 }
@@ -47,7 +47,6 @@ sub blcm
 sub import
   {
   my $self = shift;
-#  Math::BigInt->import(@_);
   $self->SUPER::import(@_);                     # need it for subclasses
   #$self->export_to_level(1,$self,@_);           # need this ?
   }

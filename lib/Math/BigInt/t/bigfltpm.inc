@@ -76,6 +76,8 @@ while (<DATA>)
       $try .= "\$y = new $class \"$args[1]\";";
       if ($f eq "fcmp") {
         $try .= '$x <=> $y;';
+      } elsif ($f eq "flog") {
+        $try .= '$x->flog($y);';
       } elsif ($f eq "facmp") {
         $try .= '$x->facmp($y);';
       } elsif ($f eq "fpow") {
@@ -139,6 +141,7 @@ ok ($y,1200); ok ($x,1200);
 
 ###############################################################################
 # fdiv() in list context
+
 $x = $class->bzero(); ($x,$y) = $x->fdiv(0);
 ok ($x,'NaN'); ok ($y,'NaN');
 
@@ -150,6 +153,26 @@ $x = $class->new(2); $x->fzero(); ok_undef ($x->{_a}); ok_undef ($x->{_p});
 $x = $class->new(2); $x->finf();  ok_undef ($x->{_a}); ok_undef ($x->{_p});
 $x = $class->new(2); $x->fone();  ok_undef ($x->{_a}); ok_undef ($x->{_p});
 $x = $class->new(2); $x->fnan();  ok_undef ($x->{_a}); ok_undef ($x->{_p});
+        
+###############################################################################
+# fsqrt() with set global A/P or A/P enabled on $x, also a test whether fsqrt()
+# correctly modifies $x
+
+$class->accuracy(undef); $class->precision(undef);	# reset
+
+$x = $class->new(12); $class->precision(-2); $x->fsqrt(); ok ($x,'3.46');
+
+$class->precision(undef);
+$x = $class->new(12); $class->precision(0); $x->fsqrt(); ok ($x,'3');
+
+$class->precision(-3); $x = $class->new(12); $x->fsqrt(); ok ($x,'3.464');
+
+# A and P set => NaN
+$class->accuracy(4); $x = $class->new(12); $x->fsqrt(3); ok ($x,'NaN');
+# supplied arg overrides set global
+$class->precision(undef); $x = $class->new(12); $x->fsqrt(3); ok ($x,'3.46');
+
+$class->accuracy(undef); $class->precision(undef); # reset for further tests
 
 1; # all done
 
@@ -165,6 +188,17 @@ sub ok_undef
   }
 
 __DATA__
+#&flog
+#$div_scale = 14;
+#10:0:2.30258509299405
+#1000:0:6.90775527898214
+#100:0:4.60517018598809
+#2:0:0.693147180559945
+#3.1415:0:1.14470039286086
+#12345:0:9.42100640177928
+#0.001:0:-6.90775527898214
+## reset for further tests
+#$div_scale = 40;
 &frsft
 #NaNfrsft:NaN
 0:2:0
@@ -924,14 +958,89 @@ $div_scale = 1
 # reset scale for further tests
 $div_scale = 40
 &fmod
-+0:0:NaN
-+0:1:0
-+3:1:0
-#+5:2:1
-#+9:4:1
-#+9:5:4
-#+9000:56:40
-#+56:9000:56
++9:4:1
++9:5:4
++9000:56:40
++56:9000:56
+# inf handling, see table in doc
+0:inf:0
+0:-inf:0
+5:inf:5
+5:-inf:5
+-5:inf:-5
+-5:-inf:-5
+inf:5:0
+-inf:5:0
+inf:-5:0
+-inf:-5:0
+5:5:0
+-5:-5:0
+inf:inf:0
+-inf:-inf:0
+-inf:inf:0
+inf:-inf:0
+8:0:8
+inf:0:inf
+# exceptions to reminder rule
+-inf:0:-inf
+-8:0:-8
+0:0:NaN
+abc:abc:NaN
+abc:1:abc:NaN
+1:abc:NaN
+0:0:NaN
+0:1:0
+1:0:1
+0:-1:0
+-1:0:-1
+1:1:0
+-1:-1:0
+1:-1:0
+-1:1:0
+1:2:1
+2:1:0
+1000000000:9:1
+2000000000:9:2
+3000000000:9:3
+4000000000:9:4
+5000000000:9:5
+6000000000:9:6
+7000000000:9:7
+8000000000:9:8
+9000000000:9:0
+35500000:113:33
+71000000:226:66
+106500000:339:99
+1000000000:3:1
+10:5:0
+100:4:0
+1000:8:0
+10000:16:0
+999999999999:9:0
+999999999999:99:0
+999999999999:999:0
+999999999999:9999:0
+999999999999999:99999:0
+-9:+5:1
++9:-5:-1
+-9:-5:-4
+-5:3:1
+-2:3:1
+4:3:1
+1:3:1
+-5:-3:-2
+-2:-3:-2
+4:-3:-2
+1:-3:-2
+4095:4095:0
+100041000510123:3:0
+152403346:12345:4321
+87654321:87654321:0
+# now some floating point tests
+123:2.5:0.5
+1230:2.5:0
+123.4:2.5:0.9
+123e1:25:5
 &fsqrt
 +0:0
 -1:NaN
@@ -953,6 +1062,8 @@ nanfsqrt:NaN
 # sqrt(1.44) = 1.2, sqrt(e10) = e5 => 12e4
 1.44E10:120000
 2e10:141421.356237309504880168872420969807857
+# proved to be an endless loop under 7-9
+12:3.464101615137754587054892683011744733886
 &is_nan
 123:0
 abc:1
