@@ -1,6 +1,6 @@
 package ExtUtils::MakeMaker;
 
-$Version = 4.085; # Last edited 21st Feb 1995 by Andreas Koenig
+$Version = 4.086; # Last edited 9 Mar 1995 by Andy Dougherty
 
 use Config;
 check_hints();
@@ -1374,7 +1374,7 @@ $att{BASEEXT}.exp: Makefile.PL
 ",'	$(PERL) $(I_PERL_LIBS) -e \'use ExtUtils::MakeMaker; \\
 	mksymlists(DL_FUNCS => ',
 	%$funcs ? neatvalue($funcs) : '""',', DL_VARS => ',
-	@$vars  ? neatvalue($vars)  : '""',")'
+	@$vars  ? neatvalue($vars)  : '""', ", NAME => \"$att{NAME}\")'
 ");
 
     join('',@m);
@@ -1977,9 +1977,16 @@ sub extliblist{
 	my($found_lib)=0;
 	foreach $thispth (@searchpath, @libpath){
 
+		# Try to find the full name of the library.  We need this to
+		# determine whether it's a dynamically-loadable library or not.
+		# This tends to be subject to various os-specific quirks.
+		# For gcc-2.6.2 on linux (March 1995), DLD can not load
+		# .sa libraries, with the exception of libm.sa, so we
+		# deliberately skip them.
 	    if (@fullname=<${thispth}/lib${thislib}.${so}.[0-9]*>){
 		$fullname=$fullname[-1]; #ATTN: 10 looses against 9!
-	    } elsif (-f ($fullname="$thispth/lib$thislib.$so")){
+	    } elsif (-f ($fullname="$thispth/lib$thislib.$so")
+		     && (($Config{'dlsrc'} ne "dl_dld") || ($thislib eq "m"))){
 	    } elsif (-f ($fullname="$thispth/lib${thislib}_s.a")
 		     && ($thislib .= "_s") ){ # we must explicitly ask for _s version
 	    } elsif (-f ($fullname="$thispth/lib$thislib.a")){
@@ -2257,6 +2264,10 @@ library has been found, even if a -L directory has been found.
 Fixed a bug that didn't allow lib/ directory work as documented.
 
 Allowed C<make test TEST_VERBOSE=1>
+
+v4.086 March 9 1995 by Andy Dougherty
+
+Fixed some AIX buglets.  Fixed DLD support for Linux with gcc 2.6.2.
 
 =head1 NOTES
 

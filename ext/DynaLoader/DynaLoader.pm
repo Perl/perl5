@@ -18,7 +18,7 @@ use Config;
 use Carp;
 use AutoLoader;
 
-@ISA=(AutoLoader);
+@ISA=qw(AutoLoader);
 
 
 # enable messages from DynaLoader perl code

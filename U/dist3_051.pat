@@ -5,8 +5,11 @@ These patches do the following:
 
 Oldconfig.U
     Clean up and extend the $osvers detection for DEC OSF/1 on the Alpha.
+    Add MachTen detection (requires adding awk to ?MAKE line).
 archname.U
     Protect against spaces in the output of uname -m.
+Inhdr.U
+    Delete tabs that caused /bin/sh to core dump on Mach Ten 2.1.1.
 libc.U
     Pick up Linux nm output with leading __IO.
 sig_name.U
@@ -18,10 +21,70 @@ usrinc.U
 	Dept. of Physics
 	Lafayette College,	Easton, PA  18042  USA
 
+Index: Inhdr.U
+Prereq:  3.0.1.1 
+*** mcon/U/Inhdr.U	Sat Oct 29 15:28:15 1994
+--- /home2/doughera/lib/dist/U/Inhdr.U	Wed Mar  8 15:52:13 1995
+***************
+*** 52,61 ****
+  	var=$2; eval "was=\$$2";
+  	if $test "$xxx" && $test -r "$xxx";
+  	then eval $xxf;
+! 		eval "case \"\$$var\" in $undef) . ./whoa; esac"; eval "$var=\$td";
+  		cont="";
+  	else eval $xxnf;
+! 		eval "case \"\$$var\" in $define) . ./whoa; esac"; eval "$var=\$tu"; fi;
+  	set $yyy; shift; shift; yyy=$@;
+  	case $# in 0) cont="";;
+  	2) xxf="echo \"but I found <\$1> $instead.\" >&4";
+--- 52,65 ----
+  	var=$2; eval "was=\$$2";
+  	if $test "$xxx" && $test -r "$xxx";
+  	then eval $xxf;
+! ?X: This line deliberately shifted left 1 tabstop to avoid /bin/sh core dump
+! ?X: on MachTen 2.1.1.   --AD   March 8, 1995
+! 	eval "case \"\$$var\" in $undef) . ./whoa; esac"; eval "$var=\$td";
+  		cont="";
+  	else eval $xxnf;
+! ?X: This line deliberately shifted left 1 tabstop to avoid /bin/sh core dump
+! ?X: on MachTen 2.1.1.   --AD   March 8, 1995
+! 	eval "case \"\$$var\" in $define) . ./whoa; esac"; eval "$var=\$tu"; fi;
+  	set $yyy; shift; shift; yyy=$@;
+  	case $# in 0) cont="";;
+  	2) xxf="echo \"but I found <\$1> $instead.\" >&4";
 Index: Oldconfig.U
 Prereq:  3.0.1.7 
 *** mcon/U/Oldconfig.U	Thu Feb 16 09:52:38 1995
---- /home2/doughera/lib/dist/U/Oldconfig.U	Thu Feb 16 16:26:25 1995
+--- /home2/doughera/lib/dist/U/Oldconfig.U	Fri Mar 10 09:43:30 1995
+***************
+*** 45,51 ****
+  ?X: for the sake of setting defaults.
+  ?X:
+  ?MAKE:Oldconfig hint myuname osname osvers: Instruct Myread uname \
+! 	sed test cat rm lns n c contains Loc Options Tr
+  ?MAKE:	-pick wipe $@ %<
+  ?S:myuname:
+  ?S:	The output of 'uname -a' if available, otherwise the hostname. On Xenix,
+--- 45,51 ----
+  ?X: for the sake of setting defaults.
+  ?X:
+  ?MAKE:Oldconfig hint myuname osname osvers: Instruct Myread uname \
+! 	awk sed test cat rm lns n c contains Loc Options Tr
+  ?MAKE:	-pick wipe $@ %<
+  ?S:myuname:
+  ?S:	The output of 'uname -a' if available, otherwise the hostname. On Xenix,
+***************
+*** 150,155 ****
+--- 150,158 ----
+  	$test -d /usr/apollo/bin && osname=apollo
+  	$test -f /etc/saf/_sactab && osname=svr4
+  	$test -d /usr/include/minix && osname=minix
++ 	$test -d /MachTen && osname=machten && \
++ 		osvers=`/usr/etc/version | $awk '{print $2}' | \
++ 		$sed -e 's/[A-Za-z]$//'`
+  ?X: If we have uname, we already computed a suitable uname -a output, correctly
+  ?X: formatted for Xenix, and it lies in $myuname.
+  	if $test -f $uname; then
 ***************
 *** 264,275 ****
   			osvers="$3"
@@ -36,7 +99,7 @@ Prereq:  3.0.1.7
   					;;
   			hp*)	osname=hp_osf1	;;
   			mips)	osname=mips_osf1 ;;
---- 264,274 ----
+--- 267,277 ----
   			osvers="$3"
   			;;
   		osf1)	case "$5" in

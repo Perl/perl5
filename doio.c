@@ -168,7 +168,8 @@ FILE *supplied_fp;
 		if (dodup)
 		    fd = dup(fd);
 		if (!(fp = fdopen(fd,mode)))
-		    close(fd);
+		    if (dodup)
+			close(fd);
 	    }
 	}
 	else {

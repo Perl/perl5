@@ -9,6 +9,9 @@ $config_pm = $ARGV[0] || 'lib/Config.pm';
 	dynamic_ext static_ext extensions dl_src
 	sig_name ccflags cppflags intsize);
 
+# names of things which may need to have slashes changed to double-colons
+@extensions = qw(dynamic_ext static_ext extensions known_extensions);
+
 
 open CONFIG, ">$config_pm" or die "Can't open $config_pm: $!\n";
 $myver = sprintf("%.3f", $]);
@@ -27,6 +30,7 @@ require Exporter;
 ENDOFBEG
 
 @fast{@fast} = @fast;
+@extensions{@extensions} = @extensions;
 @non_v=();
 @v_fast=();
 @v_others=();
@@ -39,7 +43,9 @@ while (<>) {
 	push(@non_v, "#$_"); # not a name='value' line
 	next;
     }
-    if (!$fast{$1}){ push(@v_others, $_); next; }
+    $name = $1;
+    if ($extensions{$name}) { s,/,::,g }
+    if (!$fast{$name}){ push(@v_others, $_); next; }
     push(@v_fast,$_);
 }
 

@@ -201,6 +201,7 @@ hints/irix_6.sh		Hints for named architecture
 hints/isc.sh		Hints for named architecture
 hints/isc_2.sh		Hints for named architecture
 hints/linux.sh		Hints for named architecture
+hints/machten.sh	Hints for named architecture
 hints/mips.sh		Hints for named architecture
 hints/mpc.sh		Hints for named architecture
 hints/mpeix.sh		Hints for named architecture

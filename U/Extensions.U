@@ -36,18 +36,32 @@
 ?S:	for hints files to indicate that POSIX will not compile
 ?S:	on a particular system.
 ?S:.
-?T:xxx avail_ext
+?T:xxx yyy avail_ext
 ?INIT:: set useposix=false in your hint file to disable the POSIX extension.
 ?INIT:useposix=true
 echo " "
 echo "Looking for extensions..." >&4
 cd ../ext
-?X: If we're using the old config.sh, known_extensions may contain
-?X: old or inaccurate (or duplicate) values.
+: If we are using the old config.sh, known_extensions may contain
+: old or inaccurate or duplicate values.
 known_extensions=''
+: We do not use find because it might not be available.
+: We do not just use MANIFEST because the user may have dropped
+: some additional extensions into the source tree and expect them
+: to be built.
 for xxx in * ; do
 	if $test -f $xxx/$xxx.xs; then
 		known_extensions="$known_extensions $xxx"
+	else
+		if $test -d $xxx; then
+			cd $xxx
+			for yyy in * ; do
+				if $test -f $yyy/$yyy.xs; then
+					known_extensions="$known_extensions $xxx/$yyy"
+				fi
+			done
+			cd ..
+		fi
 	fi
 done
 set X $known_extensions

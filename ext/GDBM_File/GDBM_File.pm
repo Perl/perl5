@@ -5,7 +5,7 @@ require TieHash;
 require Exporter;
 require AutoLoader;
 require DynaLoader;
-@ISA = (TieHash, Exporter, DynaLoader);
+@ISA = qw(TieHash Exporter DynaLoader);
 @EXPORT = qw(
 	GDBM_CACHESIZE
 	GDBM_FAST

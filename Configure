@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.6 1994/10/29 15:54:19 ram Exp $
 #
-# Generated on Mon Mar  6 11:00:02 EST 1995 [metaconfig 3.0 PL51]
+# Generated on Fri Mar 10 09:48:55 EST 1995 [metaconfig 3.0 PL51]
 
 cat >/tmp/c1$$ <<EOF
 ARGGGHHHH!!!!!
@@ -1479,6 +1479,9 @@ EOM
 	$test -d /usr/apollo/bin && osname=apollo
 	$test -f /etc/saf/_sactab && osname=svr4
 	$test -d /usr/include/minix && osname=minix
+	$test -d /MachTen && osname=machten && \
+		osvers=`/usr/etc/version | $awk '{print $2}' | \
+		$sed -e 's/[A-Za-z]$//'`
 	if $test -f $uname; then
 		set X $myuname
 		shift
@@ -4016,10 +4019,10 @@ while $test "$cont"; do
 	var=$2; eval "was=\$$2";
 	if $test "$xxx" && $test -r "$xxx";
 	then eval $xxf;
-		eval "case \"\$$var\" in $undef) . ./whoa; esac"; eval "$var=\$td";
+	eval "case \"\$$var\" in $undef) . ./whoa; esac"; eval "$var=\$td";
 		cont="";
 	else eval $xxnf;
-		eval "case \"\$$var\" in $define) . ./whoa; esac"; eval "$var=\$tu"; fi;
+	eval "case \"\$$var\" in $define) . ./whoa; esac"; eval "$var=\$tu"; fi;
 	set $yyy; shift; shift; yyy=$@;
 	case $# in 0) cont="";;
 	2) xxf="echo \"but I found <\$1> $instead.\" >&4";
@@ -6314,10 +6317,26 @@ eval $setvar
 echo " "
 echo "Looking for extensions..." >&4
 cd ../ext
+: If we are using the old config.sh, known_extensions may contain
+: old or inaccurate or duplicate values.
 known_extensions=''
+: We do not use find because it might not be available.
+: We do not just use MANIFEST because the user may have dropped
+: some additional extensions into the source tree and expect them
+: to be built.
 for xxx in * ; do
 	if $test -f $xxx/$xxx.xs; then
 		known_extensions="$known_extensions $xxx"
+	else
+		if $test -d $xxx; then
+			cd $xxx
+			for yyy in * ; do
+				if $test -f $yyy/$yyy.xs; then
+					known_extensions="$known_extensions $xxx/$yyy"
+				fi
+			done
+			cd ..
+		fi
 	fi
 done
 set X $known_extensions

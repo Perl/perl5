@@ -1322,25 +1322,29 @@ char *s;
 #endif
 
 #ifndef HAS_DUP2
+int
 dup2(oldfd,newfd)
 int oldfd;
 int newfd;
 {
 #if defined(HAS_FCNTL) && defined(F_DUPFD)
+    if (oldfd == newfd)
+	return oldfd;
     close(newfd);
-    fcntl(oldfd, F_DUPFD, newfd);
+    return fcntl(oldfd, F_DUPFD, newfd);
 #else
     int fdtmp[256];
     I32 fdx = 0;
     int fd;
 
     if (oldfd == newfd)
-	return 0;
+	return oldfd;
     close(newfd);
-    while ((fd = dup(oldfd)) != newfd)	/* good enough for low fd's */
+    while ((fd = dup(oldfd)) != newfd && fd >= 0) /* good enough for low fd's */
 	fdtmp[fdx++] = fd;
     while (fdx > 0)
 	close(fdtmp[--fdx]);
+    return fd;
 #endif
 }
 #endif

@@ -4,7 +4,7 @@ use Carp;
 require Exporter;
 require AutoLoader;
 require DynaLoader;
-@ISA = (Exporter, DynaLoader);
+@ISA = qw(Exporter DynaLoader);
 @EXPORT = qw(
 	AF_802
 	AF_APPLETALK

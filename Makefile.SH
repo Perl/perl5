@@ -254,6 +254,9 @@ opcode.h: opcode.pl
 embed.h: embed_h.sh global.sym interp.sym
 	sh embed_h.sh
 
+# We have to call our ./makedir because Ultrix 4.3 make can't handle the line
+#	test -d lib/auto || mkdir lib/auto
+#
 preplibrary: miniperl lib/Config.pm
 	@./makedir lib/auto
 	@echo "	AutoSplitting perl library"
