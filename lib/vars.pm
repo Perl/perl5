@@ -45,13 +45,17 @@ __END__
 
 =head1 NAME
 
-vars - Perl pragma to predeclare global variable names
+vars - Perl pragma to predeclare global variable names (obsolete)
 
 =head1 SYNOPSIS
 
     use vars qw($frob @mung %seen);
 
 =head1 DESCRIPTION
+
+NOTE: The functionality provided by this pragma has been superseded
+by C<our> declarations, available in Perl v5.6.0 or later.  See
+L<perlfunc/our>.
 
 This will predeclare all the variables whose names are 
 in the list, allowing you to use them under "use strict", and
