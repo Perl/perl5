@@ -38,6 +38,14 @@ lexical variables.  The effect of this should be largely transparent to
 the user, but there are some boundary conditions under which user will
 need to be aware of the issues. [XXX Add e.g. here.]
 
+Some new keywords have been introduced.  These are generally expected to
+have very little impact on compatibility.  See L</New C<INIT> keyword>,
+L</New C<lock> keyword>, and L</New C<qr//> operator>.
+
+Certain barewords are now reserved.  Use of these will provoke a warning
+if you have asked for them with the C<-w> switch.
+See L</C<our> is now a reserved word>.
+
 =head2 C Source Compatibility
 
 =item Core sources now require ANSI C compiler
@@ -61,15 +69,16 @@ Oneliners with the C<-e> switch do not create temporary files anymore.
 
 =head2 Relaxed new mandatory warnings introduced in 5.004
 
-Many new warnings that were introduced in 5.004 have either been made
+Many new warnings that were introduced in 5.004 have been made
 optional.  Some of these warnings are still present, but perl's new
 features make them less often a problem.  See L<New Diagnostics>.
 
 =head2 Licensing
 
-Perl has a new Social Contract for contributors.
+Perl has a new Social Contract for contributors.  See F<Porting/Contract>.
 
-Perl's documentation license has changed.
+The license included in much of the Perl documentation has changed.
+[XXX See where?]
 
 =head1 Core Changes
 
@@ -78,7 +87,7 @@ Perl's documentation license has changed.
 
 WARNING: Threading is considered an experimental feature.  Details of the
 implementation may change without notice.  There are known limitations
-and bugs.
+and and some bugs.
 
 See L<README.threads>.
 
@@ -88,10 +97,33 @@ WARNING: The Compiler and related tools are considered experimental.
 Features may change without notice, and there are known limitations
 and bugs.
 
-B::Lint is an experimental module to detect and warn about suspicious
-code, especially the cases that the -w switch does not detect.
+The Compiler produces three different types of transformations of a
+perl program.  The C backend generates C code that captures perl's state
+just before execution begins.  It eliminates the compile-time overheads
+of the regular perl interpreter, but the run-time performance remains
+comparatively the same.  The CC backend generates optimized C code
+equivivalent to the code path at run-time.  The CC backend has greater
+potential for big optimizations, but only a few optimizations are
+implemented currently.  The Bytecode backend generates a platform
+independent bytecode representation of the interpreter's state
+just before execution.  Thus, the Bytecode back end also eliminates
+much of the compilation overhead of the interpreter.
 
-B::Deparse can be used to demystify perl code.
+The compiler comes with several valuable utilities.
+
+C<B::Lint> is an experimental module to detect and warn about suspicious
+code, especially the cases that the C<-w> switch does not detect.
+
+C<B::Deparse> can be used to demystify perl code, and understand
+how perl optimizes certain constructs.
+
+C<B::Xref> generates cross reference reports of all definition and use
+of variables, subroutines and formats in a program.
+
+C<B::Showlex> show the lexical variables used by a subroutine or file
+at a glance.
+
+C<perlcc> is a simple frontend for compiling perl.
 
 See C<ext/B/README>.
 
@@ -109,24 +141,27 @@ See C<perlfunc/sort>.
 
 =head2 Reliable signals
 
-Via Thread::Signal.
+Two kinds.
 
-Via switched runtime op loop.
+Via C<Thread::Signal>.
+
+Via switched runtime op loop.  [XXX Not yet available.]
 
 =head2 Reliable stack pointers
 
-The internals now reallocate the perl stack only at predicatable times.
+The internals now reallocate the perl stack only at predictable times.
 In particular, magic calls never trigger reallocations of the stack,
 because all reentrancy of the runtime is handled using a "stack of stacks".
-This should improve reliability of cached stack pointers in XSUBs.
+This should improve reliability of cached stack pointers in the internals
+and in XSUBs.
 
-=head2 Behavior of local() on composites is well-defined
+=head2 Behavior of local() on composites is now well-defined
 
 See L<perlfunc/local>.
 
 =head2 C<%!> is transparently tied to the L<Errno> module
 
-See L<perlvar>.
+See L<perlvar>, and L<Errno>.
 
 =head2 Pseudo-hashes are supported
 
@@ -191,16 +226,29 @@ See L<perlfunc/printf>.
 
 =head2 New C<INIT> keyword
 
-C<INIT> subs are like C<BEGIN> and C<END>, but they get called just before
-the perl runtime begins execution.
+C<INIT> subs are like C<BEGIN> and C<END>, but they get run just before
+the perl runtime begins execution.  e.g., the Perl Compiler makes use of
+C<INIT> blocks to initialize and resolve pointers to XSUBs.
 
 [XXX Needs to be documented in perlsub or perlmod.]
 
 =head2 New C<lock> keyword
 
+The C<lock> keyword is the fundamental synchronization primitive
+in threaded perl.  When threads are not enabled, it is currently a noop.
+
 To minimize impact on source compatibility this keyword is "weak", i.e., any
 user-defined subroutine of the same name overrides it, unless a C<use Thread>
 has been seen.
+
+=head2 New C<qr//> operator
+
+The C<qr//> operator, which is syntactically similar to the other quote-like
+operators, is used to create compiled regular expressions.  This compiled
+form can now be explicitly passed around in variables, and interpolated in
+other regular expressions.  See L<perlop> and L<perlre>.
+
+=head2 C<our> is now a reserved word
 
 =head2 Tied arrays are now fully supported
 
@@ -215,7 +263,7 @@ TIEARRAY implementations.  See L<Tie::Array>.
 =head1 Supported Platforms
 
 Configure has many incremental improvements.  Site-wide policy for building
-perl can now be made perlsistent, via Policy.sh.  Configure also records
+perl can now be made persistent, via Policy.sh.  Configure also records
 the command-line arguments used in F<config.sh>.
 
 =head2 New Platforms
