@@ -195,6 +195,13 @@ extern void PerlIO_clone(pTHX_ PerlInterpreter *proto, CLONE_PARAMS *param);
 /* --------------------- Now prototypes for functions --------------- */
 
 START_EXTERN_C
+#ifndef __attribute__format__
+#ifdef CHECK_FORMAT
+#define __attribute__format__(x,y,z) __attribute__((__format__(x,y,z)))
+#else
+#define __attribute__format__(x,y,z)
+#endif
+#endif
 #ifndef NEXT30_NO_ATTRIBUTE
 #ifndef HASATTRIBUTE		/* disable GNU-cc attribute checking? */
 #ifdef  __attribute__		/* Avoid possible redefinition errors */
