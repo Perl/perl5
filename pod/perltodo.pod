@@ -112,17 +112,18 @@ class subtraction.
 
 	http://www.unicode.org/unicode/reports/tr18/
 
-=head2 use Thread for iThreads
-
-Artur Bergman's C<iThreads> module is a start on this, but needs to
-be more mature.
-
-=head2 make perl_clone optionally clone ops
-
-So that pseudoforking, mod_perl, iThreads and nvi will work properly
-(but not as efficiently) until the regex engine is fixed to be threadsafe.
-
 =head2 Work out exit/die semantics for threads
+
+There are some suggestion for use a 
+C<use threads wait => x> syntax.
+
+http://archive.develooper.com/perl5-porters@perl.org/msg79618.html
+
+=head2 Better support for nonpreemptive threading systems like PTH
+
+Perhaps do yield() before blocking calls, exchange calls to non blocking
+calls specific for those libraries (for example GNUpth has a pth_sleep
+which is a non pth aware version of sleep).
 
 =head2 Typed lexicals for compiler
 
@@ -169,10 +170,6 @@ Locales and Unicode interact with each other in unpleasant ways.
 One possible solution would be to adopt/support ICU:
 
 	http://oss.software.ibm.com/developerworks/opensource/icu/project/
-
-=head2 Thread-safe regexes
-
-The regular expression engine is currently non-threadsafe.
 
 =head2 Arithmetic on non-Arabic numerals
 
