@@ -33,6 +33,13 @@ L<perlcall>.
 Declares a local copy of perl's stack pointer for the XSUB, available via
 the C<SP> macro.  See C<SP>.
 
+=for apidoc ms||djSP
+
+Declare Just C<SP>. This is actually identical to C<dSP>, and declares
+a local copy of perl's stack pointer, available via the C<SP> macro.
+See C<SP>.  (Available for backward source code compatibility with the
+old (Perl 5.005) thread model.)
+
 =for apidoc Ams||dMARK
 Declare a stack marker variable, C<mark>, for the XSUB.  See C<MARK> and
 C<dORIGMARK>.
@@ -46,8 +53,7 @@ The original stack mark for the XSUB.  See C<dORIGMARK>.
 =for apidoc Ams||SPAGAIN
 Refetch the stack pointer.  Used after a callback.  See L<perlcall>.
 
-=cut
-*/
+=cut */
 
 #define SP sp
 #define MARK mark
