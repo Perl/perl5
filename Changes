@@ -79,6 +79,233 @@ Version v5.5.640        Development release working toward 5.6
 ----------------
 
 ____________________________________________________________________________
+[  4879] By: gsar                                  on 2000/01/24  14:14:20
+        Log: force linkage of the function wrappers for globals in change#4878
+     Branch: perl
+	   ! embed.pl globals.c perlapi.h win32/win32.h
+____________________________________________________________________________
+[  4878] By: gsar                                  on 2000/01/24  13:04:45
+        Log: enable function wrappers for access to globals under MULTIPLICITY
+             (provides binary compatibility in the face of changes in interpreter
+             structure)
+     Branch: perl
+	   ! Makefile.SH XSUB.h cflags.SH embed.pl makedef.pl objXSUB.h
+	   ! perl.h perlapi.c perlapi.h win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[  4877] By: jhi                                   on 2000/01/24  11:41:57
+        Log: perlhist update.
+     Branch: cfgperl
+	   ! pod/perlhist.pod
+____________________________________________________________________________
+[  4876] By: jhi                                   on 2000/01/24  11:32:07
+        Log: Updates on the large file support status.
+     Branch: cfgperl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[  4875] By: jhi                                   on 2000/01/24  11:23:16
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> ext/DB_File/Makefile.PL ext/NDBM_File/NDBM_File.pm
+	  !> ext/ODBM_File/ODBM_File.pm lib/AutoSplit.pm
+	  !> lib/Math/Complex.pm lib/Math/Trig.pm lib/Shell.pm
+____________________________________________________________________________
+[  4874] By: gsar                                  on 2000/01/24  10:43:03
+        Log: fix typos; avoid use constant for lowercase constants (produces
+             warnings now)
+     Branch: perl
+	   ! ext/DB_File/Makefile.PL lib/Math/Complex.pm lib/Math/Trig.pm
+	   ! lib/Shell.pm
+____________________________________________________________________________
+[  4873] By: gsar                                  on 2000/01/24  09:40:24
+        Log: avoid warnings when there's no subs to autosplit
+     Branch: perl
+	   ! lib/AutoSplit.pm
+____________________________________________________________________________
+[  4872] By: jhi                                   on 2000/01/24  09:39:01
+        Log: Create a tool for converting a config_h.SH into a VOS config.h.
+     Branch: cfgperl
+	   + vos/config.def vos/config.pl
+	   ! MANIFEST vos/config.h vos/config_h.SH_orig
+____________________________________________________________________________
+[  4871] By: gsar                                  on 2000/01/24  09:15:20
+        Log: typos in change#4623
+     Branch: perl
+	   ! ext/NDBM_File/NDBM_File.pm ext/ODBM_File/ODBM_File.pm
+____________________________________________________________________________
+[  4870] By: jhi                                   on 2000/01/24  06:43:19
+        Log: Sync metaconfig units to comply with the typo fixes of #4869. 
+     Branch: cfgperl
+	   ! Configure config_h.SH
+     Branch: metaconfig
+	   + U/modified/cf_email.U U/modified/so.U
+     Branch: metaconfig/U/perl
+	   ! dlsrc.U
+____________________________________________________________________________
+[  4869] By: jhi                                   on 2000/01/24  06:04:31
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  +> t/pragma/diagnostics.t
+	  !> (integrate 120 files)
+____________________________________________________________________________
+[  4868] By: gsar                                  on 2000/01/23  21:49:28
+        Log: on windows, set seek position to end for files opened in append mode
+             (improves compatibility with Unix, avoids buffering issues)
+     Branch: perl
+	   ! win32/win32.c
+____________________________________________________________________________
+[  4867] By: gsar                                  on 2000/01/23  21:19:31
+        Log: change#4866 was flawed; revert and add better fix for warning
+     Branch: perl
+	   ! op.c op.h
+____________________________________________________________________________
+[  4866] By: gsar                                  on 2000/01/23  20:43:56
+        Log: optimize away runtime code for our($foo) (also avoid warnings)
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[  4865] By: gsar                                  on 2000/01/23  13:17:18
+        Log: DB_File 1.72 update from Paul Marquess <paul.marquess@bt.com>
+     Branch: perl
+	   ! ext/DB_File/Changes ext/DB_File/DB_File.pm
+	   ! ext/DB_File/DB_File.xs ext/DB_File/version.c
+____________________________________________________________________________
+[  4864] By: gsar                                  on 2000/01/23  13:12:31
+        Log: system('VAR123=foo cmd') wasn't invoking shell (de-locale-ized patch
+             suggested by Dominic Dunlop <domo@computer.org>)
+     Branch: perl
+	   ! doio.c
+____________________________________________________________________________
+[  4863] By: gsar                                  on 2000/01/23  13:01:35
+        Log: fix misclassified warnings
+     Branch: perl
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[  4862] By: gsar                                  on 2000/01/23  12:52:12
+        Log: document bareword prototype incompatibility
+     Branch: perl
+	   ! pod/perldelta.pod pod/perlsub.pod
+____________________________________________________________________________
+[  4861] By: gsar                                  on 2000/01/23  12:32:25
+        Log: faulty edit
+     Branch: perl
+	   ! lib/File/stat.pm
+____________________________________________________________________________
+[  4860] By: gsar                                  on 2000/01/23  12:23:48
+        Log: s/use vars/our/g modules that aren't independently maintained on CPAN
+     Branch: perl
+	   ! ext/B/B/Asmdata.pm ext/Data/Dumper/Dumper.pm
+	   ! ext/Devel/DProf/DProf.pm ext/Fcntl/Fcntl.pm
+	   ! ext/File/Glob/Glob.pm ext/GDBM_File/GDBM_File.pm
+	   ! ext/IO/lib/IO/Dir.pm ext/IO/lib/IO/File.pm
+	   ! ext/IO/lib/IO/Handle.pm ext/IO/lib/IO/Pipe.pm
+	   ! ext/IO/lib/IO/Poll.pm ext/IO/lib/IO/Seekable.pm
+	   ! ext/IO/lib/IO/Socket.pm ext/IO/lib/IO/Socket/INET.pm
+	   ! ext/IO/lib/IO/Socket/UNIX.pm ext/NDBM_File/NDBM_File.pm
+	   ! ext/ODBM_File/ODBM_File.pm ext/Opcode/Opcode.pm
+	   ! ext/Opcode/Safe.pm ext/POSIX/POSIX.pm
+	   ! ext/SDBM_File/SDBM_File.pm ext/Socket/Socket.pm
+	   ! ext/Thread/Thread.pm lib/AnyDBM_File.pm lib/AutoLoader.pm
+	   ! lib/AutoSplit.pm lib/Class/Struct.pm lib/Dumpvalue.pm
+	   ! lib/ExtUtils/Command.pm lib/ExtUtils/Install.pm
+	   ! lib/ExtUtils/Installed.pm lib/ExtUtils/Liblist.pm
+	   ! lib/ExtUtils/MM_VMS.pm lib/ExtUtils/Mksymlists.pm
+	   ! lib/ExtUtils/Packlist.pm lib/Fatal.pm lib/File/Basename.pm
+	   ! lib/File/Compare.pm lib/File/Copy.pm lib/File/Find.pm
+	   ! lib/File/Path.pm lib/File/stat.pm lib/FileHandle.pm
+	   ! lib/Math/Complex.pm lib/Math/Trig.pm lib/Net/Ping.pm
+	   ! lib/Net/hostent.pm lib/Net/netent.pm lib/Net/protoent.pm
+	   ! lib/Net/servent.pm lib/Shell.pm lib/Test.pm
+	   ! lib/Test/Harness.pm lib/Tie/Array.pm lib/Tie/Handle.pm
+	   ! lib/Time/gmtime.pm lib/Time/localtime.pm lib/User/grent.pm
+	   ! lib/User/pwent.pm lib/base.pm lib/caller.pm lib/constant.pm
+	   ! lib/diagnostics.pm lib/fields.pm lib/lib.pm lib/strict.pm
+____________________________________________________________________________
+[  4859] By: gsar                                  on 2000/01/23  11:29:22
+        Log: fix diagnostics to report "our" vs "my" correctly
+     Branch: perl
+	   ! op.c pod/perldiag.pod
+____________________________________________________________________________
+[  4858] By: gsar                                  on 2000/01/23  10:14:46
+        Log: set api_version to 5.5.0 (binary compatibility needs to get tested
+             more widely)
+     Branch: perl
+	   ! patchlevel.h
+____________________________________________________________________________
+[  4857] By: gsar                                  on 2000/01/23  10:04:03
+        Log: disallow our($foo::bar)
+     Branch: perl
+	   ! pod/perldiag.pod toke.c
+____________________________________________________________________________
+[  4856] By: gsar                                  on 2000/01/23  09:50:54
+        Log: dprofpp can't find Devel::DProf::VERSION due to change#4852
+     Branch: perl
+	   ! utils/dprofpp.PL
+____________________________________________________________________________
+[  4855] By: gsar                                  on 2000/01/23  09:36:51
+        Log: new test (from Michael G Schwern <schwern@pobox.com>)
+     Branch: perl
+	   + t/pragma/diagnostics.t
+	   ! MANIFEST
+____________________________________________________________________________
+[  4854] By: gsar                                  on 2000/01/23  09:24:40
+        Log: add PREREQ_PM to default template (suggested by Michael G Schwern
+             <schwern@pobox.com>)
+     Branch: perl
+	   ! utils/h2xs.PL
+____________________________________________________________________________
+[  4853] By: gsar                                  on 2000/01/23  09:08:30
+        Log: cygwin update (from Eric Fifer <EFifer@sanwaint.com>)
+     Branch: perl
+	   ! cygwin/Makefile.SHs hints/cygwin.sh t/io/tell.t
+____________________________________________________________________________
+[  4852] By: gsar                                  on 2000/01/23  08:52:44
+        Log: mark some extensions as "special versions" to avoid CPAN indexer
+             confusion (from Ilya Zakharevich)
+     Branch: perl
+	   ! ext/Devel/DProf/DProf.pm ext/Devel/Peek/Peek.pm
+____________________________________________________________________________
+[  4851] By: gsar                                  on 2000/01/23  08:48:46
+        Log: prefer POSIX::uname() rather than syscalls, which require attempting
+             to load syscall.ph (from David Huggins-Daines <dhd@eradicator.org>)
+     Branch: perl
+	   ! lib/Sys/Hostname.pm
+____________________________________________________________________________
+[  4850] By: gsar                                  on 2000/01/23  08:36:43
+        Log: integrate cfgperl contents into mainline
+     Branch: perl
+	  !> Configure Policy_sh.SH Porting/Glossary Porting/config.sh
+	  !> Porting/config_H config_h.SH perl.h
+____________________________________________________________________________
+[  4849] By: gsar                                  on 2000/01/23  08:17:30
+        Log: fix localization in while BLOCK when there is a continue BLOCK
+             by introducing an explicit scope (c.f. change#4848)
+     Branch: perl
+	   ! op.c pp_ctl.c t/cmd/while.t
+____________________________________________________________________________
+[  4848] By: gsar                                  on 2000/01/23  06:43:51
+        Log: fix scope cleanup when next jumps to a continue block; this is rather
+             in the nature of a kludge; it doesn't fix the longstanding bug that
+             makes C<while (!$x++) { local $x = 7 } continue { print $x }> print "7"
+             instead of "1")
+     Branch: perl
+	   ! pp_ctl.c t/cmd/while.t
+____________________________________________________________________________
+[  4847] By: gsar                                  on 2000/01/23  04:47:25
+        Log: don't warn about masked lexical in C<if (my $x = 1) { my $x; }>,
+             C<while (my $x = foo()) { my $x = bar(); }> etc.
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[  4846] By: gsar                                  on 2000/01/23  04:44:17
+        Log: avoid warnings in change#4839
+     Branch: perl
+	   ! lib/Carp/Heavy.pm
+____________________________________________________________________________
+[  4845] By: gsar                                  on 2000/01/22  13:12:38
+        Log: Configure typos (from Ray Phillips <r.phillips@mailbox.uq.edu.au>)
+     Branch: perl
+	   ! Changes Configure
+____________________________________________________________________________
 [  4844] By: gsar                                  on 2000/01/22  12:46:26
         Log: wrong category for exec() warning
      Branch: perl
