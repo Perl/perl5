@@ -66,16 +66,15 @@ kept up to date if all packages which use chdir import it from Cwd.
 
 =cut
 
-## use strict;
+use strict;
 
 use Carp;
 
-$VERSION = '2.02';
+our $VERSION = '2.03';
 
-require Exporter;
-@ISA = qw(Exporter);
-@EXPORT = qw(cwd getcwd fastcwd fastgetcwd);
-@EXPORT_OK = qw(chdir abs_path fast_abs_path realpath fast_realpath);
+use base qw/ Exporter /;
+our @EXPORT = qw(cwd getcwd fastcwd fastgetcwd);
+our @EXPORT_OK = qw(chdir abs_path fast_abs_path realpath fast_realpath);
 
 
 # The 'natural and safe form' for UNIX (pwd may be setuid root)
