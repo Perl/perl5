@@ -33,7 +33,7 @@ sub Tgetent {
 	    while (<TERMCAP>) {
 		next if /^#/;
 		next if /^\t/;
-		if (/(^|\\|)$TERM[:\\|]/) {
+		if (/(^|\\|)$TERM\[:\\|]/) {
 		    chop;
 		    while (chop eq '\\\\') {
 			\$_ .= <TERMCAP>;

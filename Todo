@@ -8,6 +8,12 @@ Bugs
 	perl -c shell_script bug
 	fix the need for double ^D on $x
 	STDOUT->print("howdy\n");
+	%ENV not there
+	Make "delete $array{$key} while ($key) = each %array" safe
+	using unpack(P,$ref) shouldn't unref the ref
+	binary function is missing
+	wrong line reported for runtime elsif condition error
+	unreference variable warnings busted (but don't warn on $seen{$key}++)
 
 Regexp extensions
 	/m  for multiline
@@ -24,6 +30,7 @@ Nice to have
 	lexperl
 	Bundled perl preprocessor
 	FILEHANDLE methods
+	Make $[ compile-time instead of run-time
 
 Optimizations
 	Make specialized allocators
@@ -35,6 +42,7 @@ Optimizations
 	rcatmaybe
 	Shrink opcode tables via multiple implementations selected in peep
 	Cache hash value?
+	Optimize away @_ where possible
 	sfio?
 
 Need to think more about
@@ -42,9 +50,12 @@ Need to think more about
 	When does split() go to @_?
 	Figure out BEGIN { ... @ARGV ... }
 	Implement eval once?  (Unnecessary with cache?)
-	detect inconsistent linkage when using -DDEBUGGING?
+	Detect inconsistent linkage when using -DDEBUGGING?
+	Populate %SIG at startup if appropriate
+	Multiple levels of warning
 
 Vague possibilities
+	readonly variables
 	sub mysplice(@, $, $, ...)
 	data prettyprint function?  (or is it, as I suspect, a lib routine?)
 	Nested destructors

@@ -278,6 +278,11 @@ I32 add;
 
     /* set up magic where warranted */
     switch (*name) {
+    case 'a':
+    case 'b':
+	if (len == 1)
+	    SvMULTI_on(gv);
+	break;
     case 'I':
 	if (strEQ(name, "ISA")) {
 	    AV* av = GvAVn(gv);

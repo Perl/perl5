@@ -29,9 +29,9 @@
 
 typedef enum {
 	SVt_NULL,
-	SVt_REF,
 	SVt_IV,
 	SVt_NV,
+	SVt_RV,
 	SVt_PV,
 	SVt_PVIV,
 	SVt_PVNV,
@@ -112,10 +112,19 @@ struct hv {
 #define SVf_NOK		2		/* has valid numeric value */
 #define SVf_POK		4		/* has valid pointer value */
 #define SVf_OOK		8		/* has valid offset value */
-#define SVf_MAGICAL	16		/* has special methods */
+#define SVf_ROK		16		/* has a valid reference pointer */
 #define SVf_OK		32		/* has defined value */
-#define SVf_TEMP	64		/* eventually in sv_private? */
-#define SVf_READONLY	128		/* may not be modified */
+#define SVf_MAGICAL	64		/* has special methods */
+#define SVf_THINKFIRST	128		/* may not be changed without thought */
+
+#define SVs_PADBUSY	1		/* reserved for tmp or my already */
+#define SVs_PADTMP	2		/* in use as tmp */
+#define SVs_PADMY	4		/* in use a "my" variable */
+#define SVs_8		8
+#define SVs_16		16
+#define SVs_TEMP	32		/* string is stealable? */
+#define SVs_OBJECT	64		/* is "blessed" */
+#define SVs_READONLY	128		/* may not be modified */
 
 #define SVp_IOK		1		/* has valid non-public integer value */
 #define SVp_NOK		2		/* has valid non-public numeric value */
@@ -131,43 +140,47 @@ struct hv {
 
 #define SVpgv_MULTI	128
 
+struct xrv {
+    SV *	xrv_rv;		/* pointer to another SV */
+};
+
 struct xpv {
-    char *      xpv_pv;		/* pointer to malloced string */
-    STRLEN      xpv_cur;	/* length of xpv_pv as a C string */
-    STRLEN      xpv_len;	/* allocated size */
+    char *	xpv_pv;		/* pointer to malloced string */
+    STRLEN	xpv_cur;	/* length of xpv_pv as a C string */
+    STRLEN	xpv_len;	/* allocated size */
 };
 
 struct xpviv {
-    char *      xpv_pv;		/* pointer to malloced string */
-    STRLEN      xpv_cur;	/* length of xpv_pv as a C string */
-    STRLEN      xpv_len;	/* allocated size */
+    char *	xpv_pv;		/* pointer to malloced string */
+    STRLEN	xpv_cur;	/* length of xpv_pv as a C string */
+    STRLEN	xpv_len;	/* allocated size */
     I32		xiv_iv;		/* integer value or pv offset */
 };
 
 struct xpvnv {
-    char *      xpv_pv;		/* pointer to malloced string */
-    STRLEN      xpv_cur;	/* length of xpv_pv as a C string */
-    STRLEN      xpv_len;	/* allocated size */
+    char *	xpv_pv;		/* pointer to malloced string */
+    STRLEN	xpv_cur;	/* length of xpv_pv as a C string */
+    STRLEN	xpv_len;	/* allocated size */
     I32		xiv_iv;		/* integer value or pv offset */
-    double      xnv_nv;		/* numeric value, if any */
+    double	xnv_nv;		/* numeric value, if any */
 };
 
 struct xpvmg {
-    char *      xpv_pv;		/* pointer to malloced string */
-    STRLEN      xpv_cur;	/* length of xpv_pv as a C string */
-    STRLEN      xpv_len;	/* allocated size */
+    char *	xpv_pv;		/* pointer to malloced string */
+    STRLEN	xpv_cur;	/* length of xpv_pv as a C string */
+    STRLEN	xpv_len;	/* allocated size */
     I32		xiv_iv;		/* integer value or pv offset */
-    double      xnv_nv;		/* numeric value, if any */
+    double	xnv_nv;		/* numeric value, if any */
     MAGIC*	xmg_magic;	/* linked list of magicalness */
     HV*		xmg_stash;	/* class package */
 };
 
 struct xpvlv {
-    char *      xpv_pv;		/* pointer to malloced string */
-    STRLEN      xpv_cur;	/* length of xpv_pv as a C string */
-    STRLEN      xpv_len;	/* allocated size */
+    char *	xpv_pv;		/* pointer to malloced string */
+    STRLEN	xpv_cur;	/* length of xpv_pv as a C string */
+    STRLEN	xpv_len;	/* allocated size */
     I32		xiv_iv;		/* integer value or pv offset */
-    double      xnv_nv;		/* numeric value, if any */
+    double	xnv_nv;		/* numeric value, if any */
     MAGIC*	xmg_magic;	/* linked list of magicalness */
     HV*		xmg_stash;	/* class package */
     STRLEN	xlv_targoff;
@@ -177,11 +190,11 @@ struct xpvlv {
 };
 
 struct xpvgv {
-    char *      xpv_pv;		/* pointer to malloced string */
-    STRLEN      xpv_cur;	/* length of xpv_pv as a C string */
-    STRLEN      xpv_len;	/* allocated size */
+    char *	xpv_pv;		/* pointer to malloced string */
+    STRLEN	xpv_cur;	/* length of xpv_pv as a C string */
+    STRLEN	xpv_len;	/* allocated size */
     I32		xiv_iv;		/* integer value or pv offset */
-    double      xnv_nv;		/* numeric value, if any */
+    double	xnv_nv;		/* numeric value, if any */
     MAGIC*	xmg_magic;	/* linked list of magicalness */
     HV*		xmg_stash;	/* class package */
     GP*		xgv_gp;
@@ -191,11 +204,11 @@ struct xpvgv {
 };
 
 struct xpvbm {
-    char *      xpv_pv;		/* pointer to malloced string */
-    STRLEN      xpv_cur;	/* length of xpv_pv as a C string */
-    STRLEN      xpv_len;	/* allocated size */
+    char *	xpv_pv;		/* pointer to malloced string */
+    STRLEN	xpv_cur;	/* length of xpv_pv as a C string */
+    STRLEN	xpv_len;	/* allocated size */
     I32		xiv_iv;		/* integer value or pv offset */
-    double      xnv_nv;		/* numeric value, if any */
+    double	xnv_nv;		/* numeric value, if any */
     MAGIC*	xmg_magic;	/* linked list of magicalness */
     HV*		xmg_stash;	/* class package */
     I32		xbm_useful;	/* is this constant pattern being useful? */
@@ -204,11 +217,11 @@ struct xpvbm {
 };
 
 struct xpvfm {
-    char *      xpv_pv;		/* pointer to malloced string */
-    STRLEN      xpv_cur;	/* length of xpv_pv as a C string */
-    STRLEN      xpv_len;	/* allocated size */
+    char *	xpv_pv;		/* pointer to malloced string */
+    STRLEN	xpv_cur;	/* length of xpv_pv as a C string */
+    STRLEN	xpv_len;	/* allocated size */
     I32		xiv_iv;		/* integer value or pv offset */
-    double      xnv_nv;		/* numeric value, if any */
+    double	xnv_nv;		/* numeric value, if any */
     MAGIC*	xmg_magic;	/* linked list of magicalness */
     HV*		xmg_stash;	/* class package */
     HV *	xcv_stash;
@@ -222,6 +235,8 @@ struct xpvfm {
     bool	xcv_deleted;
     I32		xfm_lines;
 };
+
+/* The following macros define implementation-independent predicates on SVs. */
 
 #define SvNIOK(sv)		(SvFLAGS(sv) & (SVf_IOK|SVf_NOK))
 
@@ -258,21 +273,43 @@ struct xpvfm {
 #define SvOOK_on(sv)		(SvIOK_off(sv), SvFLAGS(sv) |= SVf_OOK)
 #define SvOOK_off(sv)		(SvOOK(sv) && sv_backoff(sv))
 
-#define SvREADONLY(sv)		(SvFLAGS(sv) & SVf_READONLY)
-#define SvREADONLY_on(sv)	(SvFLAGS(sv) |= SVf_READONLY)
-#define SvREADONLY_off(sv)	(SvFLAGS(sv) &= ~SVf_READONLY)
+#define SvROK(sv)		(SvFLAGS(sv) & SVf_ROK)
+#define SvROK_on(sv)		(SvFLAGS(sv) |= SVf_ROK|SVf_THINKFIRST|SVf_OK)
+#define SvROK_off(sv)		(SvFLAGS(sv) &= ~SVf_ROK)
 
 #define SvMAGICAL(sv)		(SvFLAGS(sv) & SVf_MAGICAL)
 #define SvMAGICAL_on(sv)	(SvFLAGS(sv) |= SVf_MAGICAL)
 #define SvMAGICAL_off(sv)	(SvFLAGS(sv) &= ~SVf_MAGICAL)
 
+#define SvTHINKFIRST(sv)	(SvFLAGS(sv) & SVf_THINKFIRST)
+#define SvTHINKFIRST_on(sv)	(SvFLAGS(sv) |= SVf_THINKFIRST)
+#define SvTHINKFIRST_off(sv)	(SvFLAGS(sv) &= ~SVf_THINKFIRST)
+
+#define SvPADBUSY(sv)		(SvSTORAGE(sv) & SVs_PADBUSY)
+
+#define SvPADTMP(sv)		(SvSTORAGE(sv) & SVs_PADTMP)
+#define SvPADTMP_on(sv)		(SvSTORAGE(sv) |= SVs_PADTMP|SVs_PADBUSY)
+#define SvPADTMP_off(sv)	(SvSTORAGE(sv) &= ~SVs_PADTMP)
+
+#define SvPADMY(sv)		(SvSTORAGE(sv) & SVs_PADMY)
+#define SvPADMY_on(sv)		(SvSTORAGE(sv) |= SVs_PADMY|SVs_PADBUSY)
+
+#define SvTEMP(sv)		(SvSTORAGE(sv) & SVs_TEMP)
+#define SvTEMP_on(sv)		(SvSTORAGE(sv) |= SVs_TEMP)
+#define SvTEMP_off(sv)		(SvSTORAGE(sv) &= ~SVs_TEMP)
+
+#define SvOBJECT(sv)		(SvSTORAGE(sv) & SVs_OBJECT)
+#define SvOBJECT_on(sv)		(SvSTORAGE(sv) |= SVs_OBJECT)
+#define SvOBJECT_off(sv)	(SvSTORAGE(sv) &= ~SVs_OBJECT)
+
+#define SvREADONLY(sv)		(SvSTORAGE(sv) & SVs_READONLY)
+#define SvREADONLY_on(sv)	(SvSTORAGE(sv) |= SVs_READONLY, \
+					SvTHINKFIRST_on(sv))
+#define SvREADONLY_off(sv)	(SvSTORAGE(sv) &= ~SVs_READONLY)
+
 #define SvSCREAM(sv)		(SvPRIVATE(sv) & SVp_SCREAM)
 #define SvSCREAM_on(sv)		(SvPRIVATE(sv) |= SVp_SCREAM)
 #define SvSCREAM_off(sv)	(SvPRIVATE(sv) &= ~SVp_SCREAM)
-
-#define SvTEMP(sv)		(SvFLAGS(sv) & SVf_TEMP)
-#define SvTEMP_on(sv)		(SvFLAGS(sv) |= SVf_TEMP)
-#define SvTEMP_off(sv)		(SvFLAGS(sv) &= ~SVf_TEMP)
 
 #define SvCOMPILED(sv)		(SvPRIVATE(sv) & SVpfm_COMPILED)
 #define SvCOMPILED_on(sv)	(SvPRIVATE(sv) |= SVpfm_COMPILED)
@@ -293,6 +330,9 @@ struct xpvfm {
 #define SvMULTI(sv)		(SvPRIVATE(sv) & SVpgv_MULTI)
 #define SvMULTI_on(sv)		(SvPRIVATE(sv) |= SVpgv_MULTI)
 #define SvMULTI_off(sv)		(SvPRIVATE(sv) &= ~SVpgv_MULTI)
+
+#define SvRV(sv) ((XRV*)  SvANY(sv))->xrv_rv
+#define SvRVx(sv) SvRV(sv)
 
 #define SvIVX(sv) ((XPVIV*)  SvANY(sv))->xiv_iv
 #define SvIVXx(sv) SvIVX(sv)

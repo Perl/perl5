@@ -421,8 +421,12 @@ register SV *sv;
 
     if (!sv)
 	return;
-    if (SvREADONLY(sv))
-	croak("Can't chop readonly value");
+    if (SvTHINKFIRST(sv)) {
+	if (SvREADONLY(sv))
+	    croak("Can't chop readonly value");
+	if (SvROK(sv))
+	    sv_unref(sv);
+    }
     if (SvTYPE(sv) == SVt_PVAV) {
 	I32 max;
 	SV **array = AvARRAY(sv);
@@ -471,8 +475,12 @@ SV *right;
     register char *rc = SvPV(right, rightlen);
     register I32 len;
 
-    if (SvREADONLY(sv))
-	croak("Can't do %s to readonly value", op_name[optype]);
+    if (SvTHINKFIRST(sv)) {
+	if (SvREADONLY(sv))
+	    croak("Can't do %s to readonly value", op_name[optype]);
+	if (SvROK(sv))
+	    sv_unref(sv);
+    }
     len = leftlen < rightlen ? leftlen : rightlen;
     if (SvTYPE(sv) < SVt_PV)
 	sv_upgrade(sv, SVt_PV);

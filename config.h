@@ -106,6 +106,12 @@
 #define	CASTNEGFLOAT	/**/
 #define	CASTFLAGS 0	/**/
 
+/* CASTI32
+ *	This symbol, if defined, indicates that this C compiler knows how to
+ *	cast negative or large floating point numbers to 32-bit ints.
+ */
+#define CASTI32 	/**/
+
 /* CHARSPRINTF
  *	This symbol is defined if this system declares "char *sprintf()" in
  *	stdio.h.  The trend seems to be to declare it as "int sprintf()".  It

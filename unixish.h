@@ -28,6 +28,11 @@
 #define HAS_PASSWD
 #endif
 
+
+#if !defined(NSIG) || defined(M_UNIX) || defined(M_XENIX)
+# include <signal.h>
+#endif
+
 #ifndef SIGABRT
 #    define SIGABRT SIGILL
 #endif

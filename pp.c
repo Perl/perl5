@@ -204,6 +204,11 @@ PP(pp_padhv)
     return pp_rv2hv();
 }
 
+PP(pp_padany)
+{
+    DIE("NOT IMPL LINE %d",__LINE__);
+}
+
 PP(pp_pushre)
 {
     dSP;
@@ -216,8 +221,8 @@ PP(pp_pushre)
 PP(pp_rv2gv)
 {
     dSP; dTOPss;
-    if (SvTYPE(sv) == SVt_REF) {
-	sv = (SV*)SvANY(sv);
+    if (SvROK(sv)) {
+	sv = SvRV(sv);
 	if (SvTYPE(sv) != SVt_PVGV)
 	    DIE("Not a glob reference");
     }
@@ -264,8 +269,8 @@ PP(pp_rv2sv)
 {
     dSP; dTOPss;
 
-    if (SvTYPE(sv) == SVt_REF) {
-	sv = (SV*)SvANY(sv);
+    if (SvROK(sv)) {
+	sv = SvRV(sv);
 	switch (SvTYPE(sv)) {
 	case SVt_PVAV:
 	case SVt_PVHV:
@@ -282,19 +287,21 @@ PP(pp_rv2sv)
 	}
 	sv = GvSV(gv);
 	if (op->op_private == OP_RV2HV &&
-	  (SvTYPE(sv) != SVt_REF || SvTYPE((SV*)SvANY(sv)) != SVt_PVHV)) {
+	  (!SvROK(sv) || SvTYPE(SvRV(sv)) != SVt_PVHV)) {
 	    sv_free(sv);
 	    sv = NEWSV(0,0);
-	    sv_upgrade(sv, SVt_REF);
-	    SvANY(sv) = (void*)sv_ref((SV*)newHV());
+	    sv_upgrade(sv, SVt_RV);
+	    SvRV(sv) = sv_ref((SV*)newHV());
+	    SvROK_on(sv);
 	    GvSV(gv) = sv;
 	}
 	else if (op->op_private == OP_RV2AV &&
-	  (SvTYPE(sv) != SVt_REF || SvTYPE((SV*)SvANY(sv)) != SVt_PVAV)) {
+	  (!SvROK(sv) || SvTYPE(SvRV(sv)) != SVt_PVAV)) {
 	    sv_free(sv);
 	    sv = NEWSV(0,0);
-	    sv_upgrade(sv, SVt_REF);
-	    SvANY(sv) = (void*)sv_ref((SV*)newAV());
+	    sv_upgrade(sv, SVt_RV);
+	    SvRV(sv) = sv_ref((SV*)newAV());
+	    SvROK_on(sv);
 	    GvSV(gv) = sv;
 	}
     }
@@ -338,8 +345,9 @@ PP(pp_refgen)
     if (!sv)
 	RETSETUNDEF;
     rv = sv_mortalcopy(&sv_undef);
-    sv_upgrade(rv, SVt_REF);
-    SvANY(rv) = (void*)sv_ref(sv);
+    sv_upgrade(rv, SVt_RV);
+    SvRV(rv) = sv_ref(sv);
+    SvROK_on(rv);
     SETs(rv);
     RETURN;
 }
@@ -356,23 +364,28 @@ PP(pp_ref)
     }
     else
 	sv = POPs;
-    if (SvTYPE(sv) != SVt_REF)
+    if (!SvROK(sv))
 	RETPUSHUNDEF;
 
-    sv = (SV*)SvANY(sv);
-    if (SvSTORAGE(sv) == 'O')
+    sv = SvRV(sv);
+    if (SvOBJECT(sv))
 	pv = HvNAME(SvSTASH(sv));
     else {
 	switch (SvTYPE(sv)) {
-	case SVt_REF:		pv = "REF";		break;
 	case SVt_NULL:
 	case SVt_IV:
 	case SVt_NV:
+	case SVt_RV:
 	case SVt_PV:
 	case SVt_PVIV:
 	case SVt_PVNV:
 	case SVt_PVMG:
-	case SVt_PVBM:		pv = "SCALAR";		break;
+	case SVt_PVBM:
+				if (SvROK(sv))
+				    pv = "REF";
+				else
+				    pv = "SCALAR";
+				break;
 	case SVt_PVLV:		pv = "LVALUE";		break;
 	case SVt_PVAV:		pv = "ARRAY";		break;
 	case SVt_PVHV:		pv = "HASH";		break;
@@ -399,12 +412,10 @@ PP(pp_bless)
 	stash = fetch_stash(POPs, TRUE);
 
     sv = TOPs;
-    if (SvTYPE(sv) != SVt_REF)
+    if (!SvROK(sv))
 	DIE("Can't bless non-reference value");
-    ref = (SV*)SvANY(sv);
-    if (SvSTORAGE(ref) && SvSTORAGE(ref) != 'O')
-	DIE("Can't bless temporary scalar");
-    SvSTORAGE(ref) = 'O';
+    ref = SvRV(sv);
+    SvOBJECT_on(ref);
     SvUPGRADE(ref, SVt_PVMG);
     SvSTASH(ref) = stash;
     RETURN;
@@ -832,7 +843,7 @@ yup:
     if (pm->op_pmflags & PMf_ONCE)
 	pm->op_pmflags |= PMf_USED;
     if (global) {
-	rx->subbeg = t;
+	rx->subbeg = truebase;
 	rx->subend = strend;
 	rx->startp[0] = s;
 	rx->endp[0] = s + SvCUR(pm->op_pmshort);
@@ -1254,11 +1265,15 @@ PP(pp_aassign)
 	    }
 	    break;
 	default:
-	    if (SvREADONLY(sv)) {
-		if (sv != &sv_undef && sv != &sv_yes && sv != &sv_no)
-		    DIE(no_modify);
-		if (relem <= lastrelem)
-		    relem++;
+	    if (SvTHINKFIRST(sv)) {
+		if (SvREADONLY(sv)) {
+		    if (sv != &sv_undef && sv != &sv_yes && sv != &sv_no)
+			DIE(no_modify);
+		    if (relem <= lastrelem)
+			relem++;
+		}
+		if (SvROK(sv))
+		    sv_unref(sv);
 		break;
 	    }
 	    if (relem <= lastrelem) {
@@ -1405,16 +1420,18 @@ PP(pp_undef)
 	RETPUSHUNDEF;
 
     sv = POPs;
-    if (!sv || SvREADONLY(sv))
+    if (!sv)
 	RETPUSHUNDEF;
+
+    if (SvTHINKFIRST(sv)) {
+	if (SvREADONLY(sv))
+	    RETPUSHUNDEF;
+	if (SvROK(sv))
+	    sv_unref(sv);
+    }
 
     switch (SvTYPE(sv)) {
     case SVt_NULL:
-	break;
-    case SVt_REF:
-	sv_free((SV*)SvANY(sv));
-	SvANY(sv) = 0;
-	SvTYPE(sv) = SVt_NULL;
 	break;
     case SVt_PVAV:
 	av_undef((AV*)sv);
@@ -1634,8 +1651,12 @@ PP(pp_repeat)
 	char *tmps;
 
 	tmpstr = POPs;
-	if (SvREADONLY(tmpstr))
-	    DIE("Can't x= to readonly value");
+	if (SvTHINKFIRST(tmpstr)) {
+	    if (SvREADONLY(tmpstr))
+		DIE("Can't x= to readonly value");
+	    if (SvROK(tmpstr))
+		sv_unref(tmpstr);
+	}
 	SvSetSV(TARG, tmpstr);
 	if (count >= 1) {
 	    STRLEN len;
@@ -2138,8 +2159,12 @@ PP(pp_substr)
 	    rem = len;
 	sv_setpvn(TARG, tmps, rem);
 	if (lvalue) {			/* it's an lvalue! */
-	    if (SvREADONLY(sv))
-		DIE(no_modify);
+	    if (SvTHINKFIRST(sv)) {
+		if (SvREADONLY(sv))
+		    DIE(no_modify);
+		if (SvROK(sv))
+		    sv_unref(sv);
+	    }
 	    LvTYPE(TARG) = 's';
 	    LvTARG(TARG) = sv;
 	    LvTARGOFF(TARG) = tmps - SvPV(sv, na); 
@@ -2190,8 +2215,12 @@ PP(pp_vec)
 	}
 
 	if (lvalue) {                      /* it's an lvalue! */
-	    if (SvREADONLY(src))
-		DIE(no_modify);
+	    if (SvTHINKFIRST(src)) {
+		if (SvREADONLY(src))
+		    DIE(no_modify);
+		if (SvROK(src))
+		    sv_unref(src);
+	    }
 	    LvTYPE(TARG) = 'v';
 	    LvTARG(TARG) = src;
 	    LvTARGOFF(TARG) = offset; 
@@ -2795,7 +2824,7 @@ PP(pp_ucfirst)
     SV *sv = TOPs;
     register char *s;
 
-    if (SvSTORAGE(sv) != 'T') {
+    if (!SvPADTMP(sv)) {
 	dTARGET;
 	sv_setsv(TARG, sv);
 	sv = TARG;
@@ -2814,7 +2843,7 @@ PP(pp_lcfirst)
     SV *sv = TOPs;
     register char *s;
 
-    if (SvSTORAGE(sv) != 'T') {
+    if (!SvPADTMP(sv)) {
 	dTARGET;
 	sv_setsv(TARG, sv);
 	sv = TARG;
@@ -2836,7 +2865,7 @@ PP(pp_uc)
     register char *send;
     STRLEN len;
 
-    if (SvSTORAGE(sv) != 'T') {
+    if (!SvPADTMP(sv)) {
 	dTARGET;
 	sv_setsv(TARG, sv);
 	sv = TARG;
@@ -2860,7 +2889,7 @@ PP(pp_lc)
     register char *send;
     STRLEN len;
 
-    if (SvSTORAGE(sv) != 'T') {
+    if (!SvPADTMP(sv)) {
 	dTARGET;
 	sv_setsv(TARG, sv);
 	sv = TARG;
@@ -2884,8 +2913,8 @@ PP(pp_rv2av)
 
     AV *av;
 
-    if (SvTYPE(sv) == SVt_REF) {
-	av = (AV*)SvANY(sv);
+    if (SvROK(sv)) {
+	av = (AV*)SvRV(sv);
 	if (SvTYPE(av) != SVt_PVAV)
 	    DIE("Not an array reference");
 	if (op->op_flags & OPf_LVAL) {
@@ -2959,14 +2988,16 @@ PP(pp_aelem)
 	    if (op->op_private == OP_RV2HV) {
 		sv_free(*svp);
 		*svp = NEWSV(0,0);
-		sv_upgrade(*svp, SVt_REF);
-		SvANY(*svp) = (void*)sv_ref((SV*)newHV());
+		sv_upgrade(*svp, SVt_RV);
+		SvRV(*svp) = sv_ref((SV*)newHV());
+		SvROK_on(*svp);
 	    }
 	    else if (op->op_private == OP_RV2AV) {
 		sv_free(*svp);
 		*svp = NEWSV(0,0);
-		sv_upgrade(*svp, SVt_REF);
-		SvANY(*svp) = (void*)sv_ref((SV*)newAV());
+		sv_upgrade(*svp, SVt_RV);
+		SvRV(*svp) = sv_ref((SV*)newAV());
+		SvROK_on(*svp);
 	    }
 	}
     }
@@ -3075,8 +3106,8 @@ PP(pp_rv2hv)
 
     HV *hv;
 
-    if (SvTYPE(sv) == SVt_REF) {
-	hv = (HV*)SvANY(sv);
+    if (SvTYPE(sv) == SVt_RV) {
+	hv = (HV*)SvRV(sv);
 	if (SvTYPE(hv) != SVt_PVHV)
 	    DIE("Not an associative array reference");
 	if (op->op_flags & OPf_LVAL) {
@@ -3146,14 +3177,16 @@ PP(pp_helem)
 	    if (op->op_private == OP_RV2HV) {
 		sv_free(*svp);
 		*svp = NEWSV(0,0);
-		sv_upgrade(*svp, SVt_REF);
-		SvANY(*svp) = (void*)sv_ref((SV*)newHV());
+		sv_upgrade(*svp, SVt_RV);
+		SvRV(*svp) = sv_ref((SV*)newHV());
+		SvROK_on(*svp);
 	    }
 	    else if (op->op_private == OP_RV2AV) {
 		sv_free(*svp);
 		*svp = NEWSV(0,0);
-		sv_upgrade(*svp, SVt_REF);
-		SvANY(*svp) = (void*)sv_ref((SV*)newAV());
+		sv_upgrade(*svp, SVt_RV);
+		SvRV(*svp) = sv_ref((SV*)newAV());
+		SvROK_on(*svp);
 	    }
 	}
     }
@@ -4431,6 +4464,8 @@ PP(pp_list)
 	    *MARK = &sv_undef;
 	SP = MARK;
     }
+    else if (op->op_private & OPpLIST_GUESSED)	/* didn't need that pushmark */
+	markstack_ptr--;
     RETURN;
 }
 
@@ -4465,7 +4500,14 @@ PP(pp_lslice)
 
     for (lelem = firstlelem; lelem <= lastlelem; lelem++) {
 	ix = SvIVx(*lelem) - arybase;
-	if (ix < 0 || ix >= max || !(*lelem = firstrelem[ix]))
+	if (ix < 0) {
+	    ix += max;
+	    if (ix < 0)
+		*lelem = &sv_undef;
+	    else if (!(*lelem = firstrelem[ix]))
+		*lelem = &sv_undef;
+	}
+	else if (ix >= max || !(*lelem = firstrelem[ix]))
 	    *lelem = &sv_undef;
 	if (!is_something_there && SvOK(*lelem))
 	    is_something_there = TRUE;
@@ -4501,6 +4543,7 @@ PP(pp_anonhash)
 	(void)hv_store(hv,tmps,SvCUROK(key),val,0);
     }
     SP = ORIGMARK;
+    SvOK_on(hv);
     XPUSHs((SV*)hv);
     RETURN;
 }
@@ -5331,7 +5374,9 @@ PP(pp_method)
     EXTEND(sp,2);
 
     gv = 0;
-    if (SvTYPE(sv) != SVt_REF) {
+    if (SvROK(sv))
+	ob = SvRV(sv);
+    else {
 	GV* iogv;
 	IO* io;
 
@@ -5358,19 +5403,15 @@ DIE("Can't call method \"%s\" without a package or object reference", name);
 	}
 	if (!(ob = io->object)) {
 	    ob = sv_ref((SV*)newHV());
-	    SvSTORAGE(ob) = 'O';
+	    SvOBJECT_on(ob);
 	    SvUPGRADE(ob, SVt_PVMG);
 	    iogv = gv_fetchpv("FILEHANDLE'flush", TRUE);
 	    SvSTASH(ob) = GvSTASH(iogv);
 	    io->object = ob;
 	}
     }
-    else {
-	gv = 0;
-	ob = (SV*)SvANY(sv);
-    }
 
-    if (!ob || SvSTORAGE(ob) != 'O') {
+    if (!ob || !SvOBJECT(ob)) {
 	char *name = SvPVX(((SVOP*)cLOGOP->op_other)->op_sv);
 	DIE("Can't call method \"%s\" on unblessed reference", name);
     }
@@ -5814,6 +5855,7 @@ PP(pp_iter)
 	RETPUSHNO;
 
     sv = AvARRAY(cx->blk_loop.iterary)[++cx->blk_loop.iterix];
+    SvTEMP_off(sv);
     *cx->blk_loop.itervar = sv ? sv : &sv_undef;
 
     RETPUSHYES;
@@ -6939,8 +6981,12 @@ PP(pp_sysread)
     bufstr = *++MARK;
     buffer = SvPV(bufstr, blen);
     length = SvIVx(*++MARK);
-    if (SvREADONLY(bufstr))
-	DIE(no_modify);
+    if (SvTHINKFIRST(bufstr)) {
+	if (SvREADONLY(bufstr))
+	    DIE(no_modify);
+	if (SvROK(bufstr))
+	    sv_unref(bufstr);
+    }
     errno = 0;
     if (MARK < SP)
 	offset = SvIVx(*++MARK);
@@ -7217,7 +7263,8 @@ PP(pp_ioctl)
 
     if (SvPOK(argstr)) {
 	if (s[SvCUR(argstr)] != 17)
-	    DIE("Return value overflowed string");
+	    DIE("Possible memory corruption: %s overflowed 3rd argument",
+		op_name[optype]);
 	s[SvCUR(argstr)] = 0;		/* put our null back */
     }
 
@@ -9153,12 +9200,19 @@ PP(pp_require)
 {
     dSP;
     register CONTEXT *cx;
-    dPOPss;
-    char *name = SvPV(sv, na);
+    SV *sv;
+    char *name;
     char *tmpname;
     SV** svp;
     I32 gimme = G_SCALAR;
 
+    if (MAXARG < 1) {
+	sv = GvSV(defgv);
+	EXTEND(SP, 1);
+    }
+    else
+	sv = POPs;
+    name = SvPV(sv, na);
     if (op->op_type == OP_REQUIRE &&
       (svp = hv_fetch(GvHVn(incgv), name, SvCUR(sv), 0)) &&
       *svp != &sv_undef)

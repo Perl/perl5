@@ -867,9 +867,6 @@ FILE *fp;
     switch (SvTYPE(sv)) {
     case SVt_NULL:
 	return TRUE;
-    case SVt_REF:
-	fprintf(fp, "%s", sv_2pv(sv, &na));
-	return !ferror(fp);
     case SVt_IV:
 	if (SvMAGICAL(sv))
 	    mg_get(sv);
@@ -1378,8 +1375,12 @@ SV **sp;
     {
 	if (getinfo)
 	{
-	    if (SvREADONLY(astr))
-		croak("Can't %s to readonly var", op_name[optype]);
+	    if (SvTHINKFIRST(astr)) {
+		if (SvREADONLY(astr))
+		    croak("Can't %s to readonly var", op_name[optype]);
+		if (SvROK(astr))
+		    sv_unref(astr);
+	    }
 	    SvGROW(astr, infosize+1);
 	    a = SvPV(astr, na);
 	}
@@ -1464,8 +1465,12 @@ SV **sp;
     msize = SvIVx(*++mark);
     mtype = (long)SvIVx(*++mark);
     flags = SvIVx(*++mark);
-    if (SvREADONLY(mstr))
-	croak("Can't msgrcv to readonly var");
+    if (SvTHINKFIRST(mstr)) {
+	if (SvREADONLY(mstr))
+	    croak("Can't msgrcv to readonly var");
+	if (SvROK(mstr))
+	    sv_unref(mstr);
+    }
     mbuf = SvPV(mstr, len);
     if (len < sizeof(long)+msize+1) {
 	SvGROW(mstr, sizeof(long)+msize+1);
@@ -1541,8 +1546,12 @@ SV **sp;
 	return -1;
     mbuf = SvPV(mstr, len);
     if (optype == OP_SHMREAD) {
-	if (SvREADONLY(mstr))
-	    croak("Can't shmread to readonly var");
+	if (SvTHINKFIRST(mstr)) {
+	    if (SvREADONLY(mstr))
+		croak("Can't shmread to readonly var");
+	    if (SvROK(mstr))
+		sv_unref(mstr);
+	}
 	if (len < msize) {
 	    SvGROW(mstr, msize+1);
 	    mbuf = SvPV(mstr, len);

@@ -1,5 +1,12 @@
 #!./perl
 
-# Test the singlequoted eval optimizer
+tie ( @a, TST_tie, "arg1", "arg2" ); 
+$a[2]=[1];
 
-for (1..1) { }
+package TST_tie;
+
+sub new { bless []; }
+
+sub fetch { print "store @_\n" }
+sub store { print "store @_\n" }
+sub delete { print "store @_\n" }

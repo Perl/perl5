@@ -75,7 +75,7 @@ PADOFFSET
 pad_allocmy(name)
 char *name;
 {
-    PADOFFSET off = pad_alloc(OP_PADSV, 'M');
+    PADOFFSET off = pad_alloc(OP_PADSV, SVs_PADMY);
     SV *sv = NEWSV(0,0);
     sv_upgrade(sv, SVt_PVNV);
     sv_setpv(sv, name);
@@ -86,6 +86,7 @@ char *name;
 	av_store(comppad, off, (SV*)newAV());
     else if (*name == '%')
 	av_store(comppad, off, (SV*)newHV());
+    SvPADMY_on(curpad[off]);
     return off;
 }
 
@@ -144,7 +145,7 @@ char *name;
 		    seq > (I32)SvNVX(sv) &&
 		    strEQ(SvPVX(sv), name))
 		{
-		    PADOFFSET newoff = pad_alloc(OP_PADSV, 'M');
+		    PADOFFSET newoff = pad_alloc(OP_PADSV, SVs_PADMY);
 		    AV *oldpad = (AV*)*av_fetch(curlist, CvDEPTH(cv), FALSE);
 		    SV *oldsv = *av_fetch(oldpad, off, TRUE);
 		    SV *sv = NEWSV(0,0);
@@ -180,26 +181,26 @@ I32 fill;
 PADOFFSET
 pad_alloc(optype,tmptype)	
 I32 optype;
-char tmptype;
+U32 tmptype;
 {
     SV *sv;
     I32 retval;
 
     if (AvARRAY(comppad) != curpad)
 	croak("panic: pad_alloc");
-    if (tmptype == 'M') {
+    if (tmptype & SVs_PADMY) {
 	do {
 	    sv = *av_fetch(comppad, AvFILL(comppad) + 1, TRUE);
-	} while (SvSTORAGE(sv));		/* need a fresh one */
+	} while (SvPADBUSY(sv));		/* need a fresh one */
 	retval = AvFILL(comppad);
     }
     else {
 	do {
 	    sv = *av_fetch(comppad, ++padix, TRUE);
-	} while (SvSTORAGE(sv) == 'T' || SvSTORAGE(sv) == 'M');
+	} while (SvSTORAGE(sv) & (SVs_PADTMP|SVs_PADMY));
 	retval = padix;
     }
-    SvSTORAGE(sv) = tmptype;
+    SvSTORAGE(sv) |= tmptype;
     curpad = AvARRAY(comppad);
     DEBUG_X(fprintf(stderr, "Pad alloc %d for %s\n", retval, op_name[optype]));
     return (PADOFFSET)retval;
@@ -225,7 +226,7 @@ PADOFFSET po;
 	croak("panic: pad_free po");
     DEBUG_X(fprintf(stderr, "Pad free %d\n", po));
     if (curpad[po])
-	SvSTORAGE(curpad[po]) = 'F';
+	SvPADTMP_off(curpad[po]);
     if (po < padix)
 	padix = po - 1;
 }
@@ -240,7 +241,7 @@ PADOFFSET po;
 	croak("panic: pad_swipe po");
     DEBUG_X(fprintf(stderr, "Pad swipe %d\n", po));
     curpad[po] = NEWSV(0,0);
-    SvSTORAGE(curpad[po]) = 'F';
+    SvPADTMP_off(curpad[po]);
     if (po < padix)
 	padix = po - 1;
 }
@@ -254,8 +255,8 @@ pad_reset()
 	croak("panic: pad_reset curpad");
     DEBUG_X(fprintf(stderr, "Pad reset\n"));
     for (po = AvMAX(comppad); po > 0; po--) {
-	if (curpad[po] && SvSTORAGE(curpad[po]) == 'T')
-	    SvSTORAGE(curpad[po]) = 'F';
+	if (curpad[po])
+	    SvPADTMP_off(curpad[po]);
     }
     padix = 0;
 }
@@ -514,11 +515,26 @@ OP *op;
     return op;
 }
 
+static OP *
+guess_mark(op)
+OP *op;
+{
+    if (op->op_type == OP_LIST &&
+	     (!cLISTOP->op_first ||
+	      cLISTOP->op_first->op_type != OP_PUSHMARK))
+    {
+	op = prepend_elem(OP_LIST, newOP(OP_PUSHMARK, 0), op);
+	op->op_private |= OPpLIST_GUESSED;
+    }
+    return op;
+}
+
 OP *
 scalarseq(op)
 OP *op;
 {
     OP *kid;
+    OP **prev;
 
     if (op) {
 	if (op->op_type == OP_LINESEQ ||
@@ -526,9 +542,14 @@ OP *op;
 	     op->op_type == OP_LEAVE ||
 	     op->op_type == OP_LEAVETRY)
 	{
+	    prev = &cLISTOP->op_first;
 	    for (kid = cLISTOP->op_first; kid; kid = kid->op_sibling) {
-		if (kid->op_sibling)
+		if (kid->op_sibling) {
 		    scalarvoid(kid);
+		    prev = &kid->op_sibling;
+		}
+		else
+		    *prev = guess_mark(kid);
 	    }
 	    curcop = &compiling;
 	}
@@ -625,7 +646,7 @@ I32 type;
 
     case OP_SUBSTR:
     case OP_VEC:
-	op->op_targ = pad_alloc(op->op_type,'M');
+	op->op_targ = pad_alloc(op->op_type, SVs_PADMY);
 	sv = PAD_SV(op->op_targ);
 	sv_upgrade(sv, SVt_PVLV);
 	sv_magic(sv, 0, op->op_type == OP_VEC ? 'v' : 'x', 0, 0);
@@ -736,7 +757,7 @@ I32 type;
 
     case OP_SUBSTR:
     case OP_VEC:
-	op->op_targ = pad_alloc(op->op_type,'M');
+	op->op_targ = pad_alloc(op->op_type, SVs_PADMY);
 	sv = PAD_SV(op->op_targ);
 	sv_upgrade(sv, SVt_PVLV);
 	sv_magic(sv, 0, op->op_type == OP_VEC ? 'v' : 'x', 0, 0);
@@ -936,7 +957,7 @@ register OP *o;
     if (opargs[type] & OA_RETSCALAR)
 	scalar(o);
     if (opargs[type] & OA_TARGET)
-	o->op_targ = pad_alloc(type,'T');
+	o->op_targ = pad_alloc(type, SVs_PADTMP);
 
     if (!(opargs[type] & OA_FOLDCONST))
 	goto nope;
@@ -1183,7 +1204,7 @@ I32 flags;
     if (opargs[type] & OA_RETSCALAR)
 	scalar(op);
     if (opargs[type] & OA_TARGET)
-	op->op_targ = pad_alloc(type,'T');
+	op->op_targ = pad_alloc(type, SVs_PADTMP);
     return (*check[type])(op);
 }
 
@@ -1473,7 +1494,7 @@ SV *sv;
     if (opargs[type] & OA_RETSCALAR)
 	scalar((OP*)svop);
     if (opargs[type] & OA_TARGET)
-	svop->op_targ = pad_alloc(type,'T');
+	svop->op_targ = pad_alloc(type, SVs_PADTMP);
     return (*check[type])((OP*)svop);
 }
 
@@ -1493,7 +1514,7 @@ GV *gv;
     if (opargs[type] & OA_RETSCALAR)
 	scalar((OP*)gvop);
     if (opargs[type] & OA_TARGET)
-	gvop->op_targ = pad_alloc(type,'T');
+	gvop->op_targ = pad_alloc(type, SVs_PADTMP);
     return (*check[type])((OP*)gvop);
 }
 
@@ -1513,7 +1534,7 @@ char *pv;
     if (opargs[type] & OA_RETSCALAR)
 	scalar((OP*)pvop);
     if (opargs[type] & OA_TARGET)
-	pvop->op_targ = pad_alloc(type,'T');
+	pvop->op_targ = pad_alloc(type, SVs_PADTMP);
     return (*check[type])((OP*)pvop);
 }
 
@@ -1535,7 +1556,7 @@ OP *cont;
     if (opargs[type] & OA_RETSCALAR)
 	scalar((OP*)cvop);
     if (opargs[type] & OA_TARGET)
-	cvop->op_targ = pad_alloc(type,'T');
+	cvop->op_targ = pad_alloc(type, SVs_PADTMP);
     return (*check[type])((OP*)cvop);
 }
 
@@ -1697,7 +1718,7 @@ OP *right;
 	    if (curop != op)
 		op->op_private = OPpASSIGN_COMMON;
 	}
-	op->op_targ = pad_alloc(OP_AASSIGN, 'T');	/* for scalar context */
+	op->op_targ = pad_alloc(OP_AASSIGN, SVs_PADTMP);	/* for scalar context */
 	return op;
     }
     if (!right)
@@ -1912,9 +1933,9 @@ OP *right;
     left->op_next = flip;
     right->op_next = flop;
 
-    condop->op_targ = pad_alloc(OP_RANGE, 'M');
+    condop->op_targ = pad_alloc(OP_RANGE, SVs_PADMY);
     sv_upgrade(PAD_SV(condop->op_targ), SVt_PVNV);
-    flip->op_targ = pad_alloc(OP_RANGE, 'M');
+    flip->op_targ = pad_alloc(OP_RANGE, SVs_PADMY);
     sv_upgrade(PAD_SV(flip->op_targ), SVt_PVNV);
 
     flip->op_private =  left->op_type == OP_CONST ? OPpFLIP_LINENUM : 0;
@@ -1946,7 +1967,7 @@ OP *block;
 	    expr = newASSIGNOP(0, newSVREF(newGVOP(OP_GV, 0, defgv)), expr);
     }
 
-    listop = append_elem(OP_LINESEQ, block, newOP(OP_UNSTACK, 0));
+    listop = append_elem(OP_LINESEQ, guess_mark(block), newOP(OP_UNSTACK, 0));
     op = newLOGOP(OP_AND, 0, expr, listop);
 
     ((LISTOP*)listop)->op_last->op_next = LINKLIST(op);
@@ -2285,7 +2306,7 @@ OP *name;
     mop->op_flags |= OPf_KIDS;
     mop->op_private = 1;
     mop->op_other = LINKLIST(name);
-    mop->op_targ = pad_alloc(OP_METHOD,'T');
+    mop->op_targ = pad_alloc(OP_METHOD, SVs_PADTMP);
     mop->op_next = LINKLIST(ref);
     ref->op_next = (OP*)mop;
     return (OP*)mop;
@@ -2311,15 +2332,22 @@ OP *
 oopsAV(o)
 OP *o;
 {
-    if (o->op_type == OP_PADAV)
-	return o;
-    if (o->op_type == OP_RV2SV) {
+    switch (o->op_type) {
+    case OP_PADSV:
+	o->op_type = OP_PADAV;
+	o->op_ppaddr = ppaddr[OP_PADAV];
+	return ref(newUNOP(OP_RV2AV, 0, scalar(o)), OP_RV2AV);
+	
+    case OP_RV2SV:
 	o->op_type = OP_RV2AV;
 	o->op_ppaddr = ppaddr[OP_RV2AV];
 	ref(o, OP_RV2AV);
-    }
-    else
+	break;
+
+    default:
 	warn("oops: oopsAV");
+	break;
+    }
     return o;
 }
 
@@ -2327,15 +2355,24 @@ OP *
 oopsHV(o)
 OP *o;
 {
-    if (o->op_type == OP_PADHV)
-	return o;
-    if (o->op_type == OP_RV2SV || o->op_type == OP_RV2AV) {
+    switch (o->op_type) {
+    case OP_PADSV:
+    case OP_PADAV:
+	o->op_type = OP_PADHV;
+	o->op_ppaddr = ppaddr[OP_PADHV];
+	return ref(newUNOP(OP_RV2HV, 0, scalar(o)), OP_RV2HV);
+
+    case OP_RV2SV:
+    case OP_RV2AV:
 	o->op_type = OP_RV2HV;
 	o->op_ppaddr = ppaddr[OP_RV2HV];
 	ref(o, OP_RV2HV);
-    }
-    else
+	break;
+
+    default:
 	warn("oops: oopsHV");
+	break;
+    }
     return o;
 }
 
@@ -2343,8 +2380,11 @@ OP *
 newAVREF(o)
 OP *o;
 {
-    if (o->op_type == OP_PADAV)
+    if (o->op_type == OP_PADANY) {
+	o->op_type = OP_PADAV;
+	o->op_ppaddr = ppaddr[OP_PADAV];
 	return o;
+    }
     return newUNOP(OP_RV2AV, 0, scalar(o));
 }
 
@@ -2359,8 +2399,11 @@ OP *
 newHVREF(o)
 OP *o;
 {
-    if (o->op_type == OP_PADHV)
+    if (o->op_type == OP_PADANY) {
+	o->op_type = OP_PADHV;
+	o->op_ppaddr = ppaddr[OP_PADHV];
 	return o;
+    }
     return newUNOP(OP_RV2HV, 0, scalar(o));
 }
 
@@ -2384,8 +2427,11 @@ OP *
 newSVREF(o)
 OP *o;
 {
-    if (o->op_type == OP_PADSV)
+    if (o->op_type == OP_PADANY) {
+	o->op_type = OP_PADSV;
+	o->op_ppaddr = ppaddr[OP_PADSV];
 	return o;
+    }
     return newUNOP(OP_RV2SV, 0, scalar(o));
 }
 
@@ -2723,7 +2769,7 @@ OP *op;
     gwop->op_flags |= OPf_KIDS;
     gwop->op_private = 1;
     gwop->op_other = LINKLIST(kid);
-    gwop->op_targ = pad_alloc(OP_GREPWHILE,'T');
+    gwop->op_targ = pad_alloc(OP_GREPWHILE, SVs_PADTMP);
     kid->op_next = (OP*)gwop;
 
     return (OP*)gwop;
@@ -2899,6 +2945,7 @@ ck_split(op)
 OP *op;
 {
     register OP *kid;
+    PMOP* pm;
     
     if (op->op_flags & OPf_STACKED)
 	return no_fh_allowed(op);
@@ -2923,6 +2970,11 @@ OP *op;
 	    cLISTOP->op_last = kid;
 	cLISTOP->op_first = kid;
 	kid->op_sibling = sibl;
+    }
+    pm = (PMOP*)kid;
+    if (pm->op_pmshort && !(pm->op_pmflags & PMf_ALL)) {
+	sv_free(pm->op_pmshort);	/* can't use substring to optimize */
+	pm->op_pmshort = 0;
     }
 
     kid->op_type = OP_PUSHRE;

@@ -66,7 +66,7 @@ GV* gv;
 	gv_fullname(sv,gv);
 	dump("\nSUB %s = ", SvPVX(sv));
 	if (CvUSERSUB(GvCV(gv)))
-	    dump("(usersub 0x%x %d)\n",
+	    dump("(xsub 0x%x %d)\n",
 		(long)CvUSERSUB(GvCV(gv)),
 		CvUSERINDEX(GvCV(gv)));
 	else if (CvROOT(GvCV(gv)))

@@ -1,0 +1,1 @@
+print( STDOUT "hello\n" )

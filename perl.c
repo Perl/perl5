@@ -109,6 +109,7 @@ register PerlInterpreter *sv_interp;
     /* Init the real globals? */
     if (!linestr) {
 	linestr = NEWSV(65,80);
+	sv_upgrade(linestr,SVt_PVIV);
 
 	SvREADONLY_on(&sv_undef);
 
@@ -693,7 +694,7 @@ char *s;
 	s++;
 	return s;
     case 'v':
-	fputs("\nThis is perl, version 5.0, Alpha 4 (unsupported)\n\n",stdout);
+	fputs("\nThis is perl, version 5.0, Alpha 5 (unsupported)\n\n",stdout);
 	fputs(rcsid,stdout);
 	fputs("\nCopyright (c) 1989, 1990, 1991, 1992, 1993, 1994 Larry Wall\n",stdout);
 #ifdef MSDOS

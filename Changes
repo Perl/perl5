@@ -96,3 +96,7 @@ Incompatibilities
     taintperl is no longer a separate executable.  There is now a -T
     switch to turn on tainting when it isn't turned on automatically.
 
+    Symbols starting with _ are no longer forced into package main, except
+    for $_ itself (and @_, etc.).
+
+    Double-quoted strings may no longer end with an unescaped $.

@@ -51,15 +51,20 @@ I32 lval;
     }
 
     if (key < 0 || key > AvFILL(av)) {
-	if (lval && key >= 0) {
+	if (key < 0) {
+	    key += AvFILL(av) + 1;
+	    if (key < 0)
+		return 0;
+	}
+	else {
+	    if (!lval)
+		return 0;
 	    if (AvREAL(av))
 		sv = NEWSV(5,0);
 	    else
 		sv = sv_mortalcopy(&sv_undef);
 	    return av_store(av,key,sv);
 	}
-	else
-	    return 0;
     }
     if (!AvARRAY(av)[key]) {
 	if (lval) {
@@ -80,8 +85,11 @@ SV *val;
     I32 tmp;
     SV** ary;
 
-    if (key < 0)
-	return 0;
+    if (key < 0) {
+	key += AvFILL(av) + 1;
+	if (key < 0)
+	    return 0;
+    }
 
     if (SvMAGICAL(av)) {
 	if (mg_find((SV*)av,'P')) {
@@ -181,6 +189,7 @@ register SV **strp;
 	}
 	strp++;
     }
+    SvOK_on(av);
     return av;
 }
 
@@ -207,6 +216,7 @@ register SV **strp;
 	    SvTEMP_off(*strp);
 	strp++;
     }
+    SvOK_on(av);
     return av;
 }
 

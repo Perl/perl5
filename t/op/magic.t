@@ -4,7 +4,7 @@
 
 $| = 1;		# command buffering
 
-print "1..5\n";
+print "1..6\n";
 
 eval '$ENV{"foo"} = "hi there";';	# check that ENV is inited inside eval
 if (`echo \$foo` eq "hi there\n") {print "ok 1\n";} else {print "not ok 1\n";}
@@ -40,3 +40,6 @@ END
 @val2 = values(%ENV);
 
 print join(':',@val1) eq join(':',@val2) ? "ok 5\n" : "not ok 5\n";
+
+print @val1 > 1 ? "ok 6\n" : "not ok 6\n";
+

@@ -1,11 +1,11 @@
 make: Warning: Both `makefile' and `Makefile' exists
-`sh  cflags taint.o` taint.c
+`sh  cflags perl.o` perl.c
 	  CCCMD =  cc -c -DDEBUGGING -DHAS_SDBM -g  
-`sh  cflags NDBM_File.o` NDBM_File.c
+`sh  cflags op.o` op.c
 	  CCCMD =  cc -c -DDEBUGGING -DHAS_SDBM -g  
-`sh  cflags ODBM_File.o` ODBM_File.c
+`sh  cflags mg.o` mg.c
 	  CCCMD =  cc -c -DDEBUGGING -DHAS_SDBM -g  
-`sh  cflags SDBM_File.o` SDBM_File.c
+`sh  cflags toke.o` toke.c
 	  CCCMD =  cc -c -DDEBUGGING -DHAS_SDBM -g  
 cc -Bstatic   main.o perly.o perl.o av.o scope.o op.o doop.o doio.o dump.o hv.o malloc.o mg.o pp.o regcomp.o regexec.o gv.o sv.o taint.o toke.o util.o deb.o run.o NDBM_File.o ODBM_File.o SDBM_File.o -ldbm -lm -lposix ext/dbm/sdbm/libsdbm.a -o perl
 echo ""

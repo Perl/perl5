@@ -1500,6 +1500,24 @@ double f;
     along = (long)f;
     return (unsigned long)along;
 }
+# undef BIGDOUBLE
+#endif
+
+#ifndef CASTI32
+I32
+cast_i32(f)
+double f;
+{
+#   define BIGDOUBLE 2147483648.0        /* Assume 32 bit int's ! */
+#   define BIGNEGDOUBLE (-2147483648.0)
+    if (f >= BIGDOUBLE)
+	return (I32)fmod(f, BIGDOUBLE);
+    if (f <= BIGNEGDOUBLE)
+	return (I32)fmod(f, BIGNEGDOUBLE);
+    return (I32) f;
+}
+# undef BIGDOUBLE
+# undef BIGNEGDOUBLE
 #endif
 
 #ifndef HAS_RENAME

@@ -84,6 +84,9 @@ typedef U16 PADOFFSET;
 /* Private for OP_FLIP/FLOP */
 #define OPpFLIP_LINENUM		1	/* Range arg potentially a line num. */
 
+/* Private for OP_LIST */
+#define OPpLIST_GUESSED		1	/* Guessed that pushmark was needed. */
+
 struct op {
     BASEOP
 };

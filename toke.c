@@ -168,6 +168,8 @@ no_op(what)
 char *what;
 {
     warn("%s found where operator expected", what);
+    if (bufptr == SvPVX(linestr))
+	warn("\t(Missing semicolon on previous line?)\n", what);
 }
 
 void
@@ -433,7 +435,7 @@ SV *sv;
     if (s == send)
 	return sv;
     d = s;
-    delim = SvSTORAGE(sv);
+    delim = SvIVX(sv);
     while (s < send) {
 	if (*s == '\\') {
 	    if (s + 1 < send && (s[1] == '\\' || s[1] == delim))
@@ -569,7 +571,7 @@ char *start;
     SV *sv = NEWSV(93, send - start);
     register char *s = start;
     register char *d = SvPVX(sv);
-    char delim = SvSTORAGE(linestr);
+    char delim = SvIVX(linestr);
     bool dorange = FALSE;
     I32 len;
     char *leave =
@@ -951,7 +953,7 @@ yylex()
 	if (bufptr == bufend)
 	    return sublex_done();
 
-	if (SvSTORAGE(linestr) == '\'') {
+	if (SvIVX(linestr) == '\'') {
 	    SV *sv = newSVsv(linestr);
 	    if (!lex_inpat)
 		sv = q(sv);
@@ -1257,14 +1259,14 @@ yylex()
 		if (in_my) {
 		    if (strchr(tokenbuf,':'))
 			croak("\"my\" variable %s can't be in a package",tokenbuf);
-		    nextval[nexttoke].opval = newOP(OP_PADHV, 0);
+		    nextval[nexttoke].opval = newOP(OP_PADANY, 0);
 		    nextval[nexttoke].opval->op_targ = pad_allocmy(tokenbuf);
 		    force_next(PRIVATEREF);
 		    TERM('%');
 		}
 		if (!strchr(tokenbuf,':')) {
 		    if (tmp = pad_findmy(tokenbuf)) {
-			nextval[nexttoke].opval = newOP(OP_PADHV, 0);
+			nextval[nexttoke].opval = newOP(OP_PADANY, 0);
 			nextval[nexttoke].opval->op_targ = tmp;
 			force_next(PRIVATEREF);
 			TERM('%');
@@ -1506,22 +1508,17 @@ yylex()
 	    if (in_my) {
 		if (strchr(tokenbuf,':'))
 		    croak("\"my\" variable %s can't be in a package",tokenbuf);
-		nextval[nexttoke].opval = newOP(OP_PADSV, 0);
+		nextval[nexttoke].opval = newOP(OP_PADANY, 0);
 		nextval[nexttoke].opval->op_targ = pad_allocmy(tokenbuf);
 		force_next(PRIVATEREF);
 	    }
 	    else if (!strchr(tokenbuf,':')) {
-		I32 optype = OP_PADSV;
-		if (*s == '[') {
+		if (*s == '[')
 		    tokenbuf[0] = '@';
-		    optype = OP_PADAV;
-		}
-		else if (*s == '{') {
+		else if (*s == '{')
 		    tokenbuf[0] = '%';
-		    optype = OP_PADHV;
-		}
 		if (tmp = pad_findmy(tokenbuf)) {
-		    nextval[nexttoke].opval = newOP(optype, 0);
+		    nextval[nexttoke].opval = newOP(OP_PADANY, 0);
 		    nextval[nexttoke].opval->op_targ = tmp;
 		    force_next(PRIVATEREF);
 		}
@@ -1548,19 +1545,16 @@ yylex()
 	    if (in_my) {
 		if (strchr(tokenbuf,':'))
 		    croak("\"my\" variable %s can't be in a package",tokenbuf);
-		nextval[nexttoke].opval = newOP(OP_PADAV, 0);
+		nextval[nexttoke].opval = newOP(OP_PADANY, 0);
 		nextval[nexttoke].opval->op_targ = pad_allocmy(tokenbuf);
 		force_next(PRIVATEREF);
 		TERM('@');
 	    }
 	    else if (!strchr(tokenbuf,':')) {
-		I32 optype = OP_PADAV;
-		if (*s == '{') {
+		if (*s == '{')
 		    tokenbuf[0] = '%';
-		    optype = OP_PADHV;
-		}
 		if (tmp = pad_findmy(tokenbuf)) {
-		    nextval[nexttoke].opval = newOP(optype, 0);
+		    nextval[nexttoke].opval = newOP(OP_PADANY, 0);
 		    nextval[nexttoke].opval->op_targ = tmp;
 		    force_next(PRIVATEREF);
 		    TERM('@');
@@ -1843,6 +1837,7 @@ yylex()
 	    goto fake_eof;
 	}
 
+	case KEY_DESTROY:
 	case KEY_BEGIN:
 	case KEY_END:
 	    s = skipspace(s);
@@ -2275,8 +2270,8 @@ yylex()
 	    if (!s)
 		croak("EOF in string");
 	    yylval.ival = OP_SCALAR;
-	    if (SvSTORAGE(lex_stuff) == '\'')
-		SvSTORAGE(lex_stuff) = 0;	/* qq'$foo' should intepolate */
+	    if (SvIVX(lex_stuff) == '\'')
+		SvIVX(lex_stuff) = 0;	/* qq'$foo' should intepolate */
 	    TERM(sublex_start());
 
 	case KEY_qx:
@@ -2689,6 +2684,9 @@ I32 len;
 	    if (strEQ(d,"continue"))		return KEY_continue;
 	    break;
 	}
+	break;
+    case 'D':
+	if (strEQ(d,"DESTROY"))			return KEY_DESTROY;
 	break;
     case 'd':
 	switch (len) {
@@ -3834,8 +3832,8 @@ char *start;
     multi_close = term;
 
     sv = NEWSV(87,80);
-    sv_upgrade(sv, SVt_PV);
-    SvSTORAGE(sv) = term;
+    sv_upgrade(sv, SVt_PVIV);
+    SvIVX(sv) = term;
     SvPOK_only(sv);		/* validate pointer */
     s++;
     for (;;) {
@@ -4000,7 +3998,7 @@ char *start;
 	*d = '\0';
 	sv = NEWSV(92,0);
 	value = atof(tokenbuf);
-	tryi32 = (I32)value;
+	tryi32 = I_32(value);
 	if (!floatit && (double)tryi32 == value)
 	    sv_setiv(sv,tryi32);
 	else

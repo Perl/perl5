@@ -5,6 +5,7 @@
 
 typedef DBM* SDBM_File;
 #define sdbm_new(dbtype,filename,flags,mode) sdbm_open(filename,flags,mode)
+#define nextkey(db,key) sdbm_nextkey(db)
 
 static int
 XS_SDBM_File_sdbm_new(ix, sp, items)
@@ -42,7 +43,7 @@ register int items;
 	SDBM_File	db;
 
 	if (sv_isa(ST(1), "SDBM_File"))
-	    db = (SDBM_File)(unsigned long)SvNV((SV*)SvANY(ST(1)));
+	    db = (SDBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
 	else
 	    croak("db is not of type SDBM_File");
 	sdbm_close(db);
@@ -65,7 +66,7 @@ register int items;
 	datum	RETVAL;
 
 	if (sv_isa(ST(1), "SDBM_File"))
-	    db = (SDBM_File)(unsigned long)SvNV((SV*)SvANY(ST(1)));
+	    db = (SDBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
 	else
 	    croak("db is not of type SDBM_File");
 
@@ -95,7 +96,7 @@ register int items;
 	int	RETVAL;
 
 	if (sv_isa(ST(1), "SDBM_File"))
-	    db = (SDBM_File)(unsigned long)SvNV((SV*)SvANY(ST(1)));
+	    db = (SDBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
 	else
 	    croak("db is not of type SDBM_File");
 
@@ -131,7 +132,7 @@ register int items;
 	int	RETVAL;
 
 	if (sv_isa(ST(1), "SDBM_File"))
-	    db = (SDBM_File)(unsigned long)SvNV((SV*)SvANY(ST(1)));
+	    db = (SDBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
 	else
 	    croak("db is not of type SDBM_File");
 
@@ -158,7 +159,7 @@ register int items;
 	datum	RETVAL;
 
 	if (sv_isa(ST(1), "SDBM_File"))
-	    db = (SDBM_File)(unsigned long)SvNV((SV*)SvANY(ST(1)));
+	    db = (SDBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
 	else
 	    croak("db is not of type SDBM_File");
 
@@ -170,7 +171,7 @@ register int items;
 }
 
 static int
-XS_SDBM_File_sdbm_nextkey(ix, sp, items)
+XS_SDBM_File_nextkey(ix, sp, items)
 register int ix;
 register int sp;
 register int items;
@@ -184,13 +185,13 @@ register int items;
 	datum	RETVAL;
 
 	if (sv_isa(ST(1), "SDBM_File"))
-	    db = (SDBM_File)(unsigned long)SvNV((SV*)SvANY(ST(1)));
+	    db = (SDBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
 	else
 	    croak("db is not of type SDBM_File");
 
 	key.dptr = SvPV(ST(2), key.dsize);;
 
-	RETVAL = sdbm_nextkey(db, key);
+	RETVAL = nextkey(db, key);
 	ST(0) = sv_mortalcopy(&sv_undef);
 	sv_setpvn(ST(0), RETVAL.dptr, RETVAL.dsize);
     }
@@ -211,7 +212,7 @@ register int items;
 	int	RETVAL;
 
 	if (sv_isa(ST(1), "SDBM_File"))
-	    db = (SDBM_File)(unsigned long)SvNV((SV*)SvANY(ST(1)));
+	    db = (SDBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
 	else
 	    croak("db is not of type SDBM_File");
 
@@ -236,7 +237,7 @@ register int items;
 	int	RETVAL;
 
 	if (sv_isa(ST(1), "SDBM_File"))
-	    db = (SDBM_File)(unsigned long)SvNV((SV*)SvANY(ST(1)));
+	    db = (SDBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
 	else
 	    croak("db is not of type SDBM_File");
 
@@ -260,7 +261,7 @@ int items;
     newXSUB("SDBM_File::store", 0, XS_SDBM_File_sdbm_store, file);
     newXSUB("SDBM_File::delete", 0, XS_SDBM_File_sdbm_delete, file);
     newXSUB("SDBM_File::firstkey", 0, XS_SDBM_File_sdbm_firstkey, file);
-    newXSUB("SDBM_File::nextkey", 0, XS_SDBM_File_sdbm_nextkey, file);
+    newXSUB("SDBM_File::nextkey", 0, XS_SDBM_File_nextkey, file);
     newXSUB("SDBM_File::error", 0, XS_SDBM_File_sdbm_error, file);
     newXSUB("SDBM_File::clearerr", 0, XS_SDBM_File_sdbm_clearerr, file);
 }

@@ -74,14 +74,14 @@ else {
 open(IN, "<$console") || open(IN,  "<&STDIN");	# so we don't dingle stdin
 open(OUT,">$console") || open(OUT, ">&STDOUT");	# so we don't dongle stdout
 select(OUT);
-$| = 1;				# for DB'OUT
+$| = 1;				# for DB::OUT
 select(STDOUT);
 $| = 1;				# for real STDOUT
 $sub = '';
 
 # Is Perl being run from Emacs?
-$emacs = $main'ARGV[$[] eq '-emacs';
-shift(@main'ARGV) if $emacs;
+$emacs = $main::ARGV[$[] eq '-emacs';
+shift(@main::ARGV) if $emacs;
 
 $header =~ s/.Header: ([^,]+),v(\s+\S+\s+\S+).*$/$1$2/;
 print OUT "\nLoading DB routines from $header\n";
@@ -96,14 +96,14 @@ sub DB {
     $usercontext = '($@, $!, $[, $,, $/, $\) = @saved;' .
 	"package $package;";		# this won't let them modify, alas
     local($^P) = 0;			# don't debug our own evals
-    local(*dbline) = "_<$filename";
+    local(*dbline) = "::_<$filename";
     $max = $#dbline;
     if (($stop,$action) = split(/\0/,$dbline{$line})) {
 	if ($stop eq '1') {
 	    $signal |= 1;
 	}
 	else {
-	    $evalarg = "\$DB'signal |= do {$stop;}"; &eval;
+	    $evalarg = "\$DB::signal |= do {$stop;}"; &eval;
 	    $dbline{$line} =~ s/;9($|\0)/$1/;
 	}
     }
@@ -111,7 +111,7 @@ sub DB {
 	if ($emacs) {
 	    print OUT "\032\032$filename:$line:0\n";
 	} else {
-	    print OUT "$package'" unless $sub =~ /'/;
+	    print OUT "$package::" unless $sub =~ /'|::/;
 	    print OUT "$sub($filename:$line):\t",$dbline[$line];
 	    for ($i = $line + 1; $i <= $max && $dbline[$i] == 0; ++$i) {
 		last if $dbline[$i] =~ /^\s*(}|#|\n)/;
@@ -184,7 +184,7 @@ X [vars]	Same as \"V currentpackage [vars]\".
 ! -number	Redo number\'th to last command.
 H -number	Display last number commands (default all).
 q or ^D		Quit.
-p expr		Same as \"print DB'OUT expr\" in current package.
+p expr		Same as \"print DB::OUT expr\" in current package.
 = [alias value]	Define a command alias, or list current aliases.
 command		Execute as a perl statement in current package.
 
@@ -206,12 +206,12 @@ command		Execute as a perl statement in current package.
 		    local ($savout) = select(OUT);
 		    $packname = $1;
 		    @vars = split(' ',$2);
-		    do 'dumpvar.pl' unless defined &main'dumpvar;
-		    if (defined &main'dumpvar) {
-			&main'dumpvar($packname,@vars);
+		    do 'dumpvar.pl' unless defined &main::dumpvar;
+		    if (defined &main::dumpvar) {
+			&main::dumpvar($packname,@vars);
 		    }
 		    else {
-			print DB'OUT "dumpvar.pl not available.\n";
+			print DB::OUT "dumpvar.pl not available.\n";
 		    }
 		    select ($savout);
 		    next CMD; };
@@ -222,30 +222,31 @@ command		Execute as a perl statement in current package.
 			print OUT "The new f command switches filenames.\n";
 			next CMD;
 		    }
-		    if (!defined $_main{'_<' . $file}) {
-			if (($try) = grep(m#^_<.*$file#, keys %_main)) {
+		    if (!defined $::_main{'_<' . $file}) {
+			if (($try) = grep(m#^_<.*$file#, keys %::_main)) {
 			    $file = substr($try,2);
 			    print "\n$file:\n";
 			}
 		    }
-		    if (!defined $_main{'_<' . $file}) {
+		    if (!defined $::_main{'_<' . $file}) {
 			print OUT "There's no code here anything matching $file.\n";
 			next CMD;
 		    }
 		    elsif ($file ne $filename) {
-			*dbline = "_<$file";
+			*dbline = "::_<$file";
 			$max = $#dbline;
 			$filename = $file;
 			$start = 1;
 			$cmd = "l";
 		    } };
-		$cmd =~ /^l\b\s*(['A-Za-z_]['\w]*)/ && do {
+		$cmd =~ /^l\b\s*([':A-Za-z_][':\w]*)/ && do {
 		    $subname = $1;
-		    $subname = "main'" . $subname unless $subname =~ /'/;
-		    $subname = "main" . $subname if substr($subname,0,1) eq "'";
+		    $subname = "main::" . $subname unless $subname =~ /'|::/;
+		    $subname = "main" . $subname if substr($subname,0,1)eq "'";
+		    $subname = "main" . $subname if substr($subname,0,2)eq "::";
 		    ($file,$subrange) = split(/:/,$sub{$subname});
 		    if ($file ne $filename) {
-			*dbline = "_<$file";
+			*dbline = "::_<$file";
 			$max = $#dbline;
 			$filename = $file;
 		    }
@@ -316,15 +317,16 @@ command		Execute as a perl statement in current package.
 			}
 		    }
 		    next CMD; };
-		$cmd =~ /^b\b\s*(['A-Za-z_]['\w]*)\s*(.*)/ && do {
+		$cmd =~ /^b\b\s*([':A-Za-z_][':\w]*)\s*(.*)/ && do {
 		    $subname = $1;
 		    $cond = $2 || '1';
-		    $subname = "$package'" . $subname unless $subname =~ /'/;
+		    $subname = "$package::" . $subname unless $subname =~ /'|::/;
 		    $subname = "main" . $subname if substr($subname,0,1) eq "'";
+		    $subname = "main" . $subname if substr($subname,0,2) eq "::";
 		    ($filename,$i) = split(/:/, $sub{$subname});
 		    $i += 0;
 		    if ($i) {
-			*dbline = "_<$filename";
+			*dbline = "::_<$filename";
 			++$i while $dbline[$i] == 0 && $i < $#dbline;
 			$dbline{$i} =~ s/^[^\0]*/$cond/;
 		    } else {
@@ -397,15 +399,10 @@ command		Execute as a perl statement in current package.
 		    for ($i = 1; ($p,$f,$l,$s,$h,$w) = caller($i); $i++) {
 			@a = @args;
 			for (@a) {
-			    if (/^StB\000/ && length($_) == length($_main{'_main'})) {
-				$_ = sprintf("%s",$_);
-			    }
-			    else {
-				s/'/\\'/g;
-				s/([^\0]*)/'$1'/ unless /^-?[\d.]+$/;
-				s/([\200-\377])/sprintf("M-%c",ord($1)&0177)/eg;
-				s/([\0-\37\177])/sprintf("^%c",ord($1)^64)/eg;
-			    }
+			    s/'/\\'/g;
+			    s/([^\0]*)/'$1'/ unless /^-?[\d.]+$/;
+			    s/([\200-\377])/sprintf("M-%c",ord($1)&0177)/eg;
+			    s/([\0-\37\177])/sprintf("^%c",ord($1)^64)/eg;
 			}
 			$w = $w ? '@ = ' : '$ = ';
 			$a = $h ? '(' . join(', ', @a) . ')' : '';
@@ -500,7 +497,7 @@ command		Execute as a perl statement in current package.
 			    unless $hist[$i] =~ /^.?$/;
 		    };
 		    next CMD; };
-		$cmd =~ s/^p( .*)?$/print DB'OUT$1/;
+		$cmd =~ s/^p( .*)?$/print DB::OUT$1/;
 		$cmd =~ /^=/ && do {
 		    if (local($k,$v) = ($cmd =~ /^=\s*(\S+)\s+(.*)/)) {
 			$alias{$k}="s~$k~$v~";
@@ -534,7 +531,7 @@ sub save {
 # The following takes its argument via $evalarg to preserve current @_
 
 sub eval {
-    eval "$usercontext $evalarg; &DB'save";
+    eval "$usercontext $evalarg; &DB::save";
     print OUT $@;
 }
 
@@ -574,7 +571,7 @@ sub sub {
 
 $single = 1;			# so it stops on first executable statement
 @hist = ('?');
-$SIG{'INT'} = "DB'catch";
+$SIG{'INT'} = "DB::catch";
 $deep = 100;		# warning if stack gets this deep
 $window = 10;
 $preview = 3;

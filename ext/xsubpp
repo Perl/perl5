@@ -52,30 +52,30 @@ T_STRING
 T_PTR
 	$var = ($type)(unsigned long)SvNV($arg)
 T_PTRREF
-	if (SvTYPE($arg) == SVt_REF)
-	    $var = ($type)(unsigned long)SvNV((SV*)SvANY($arg));
+	if (SvROK($arg))
+	    $var = ($type)(unsigned long)SvNV((SV*)SvRV($arg));
 	else
 	    croak(\"$var is not a reference\")
 T_PTROBJ
 	if (sv_isa($arg, \"${ntype}\"))
-	    $var = ($type)(unsigned long)SvNV((SV*)SvANY($arg));
+	    $var = ($type)(unsigned long)SvNV((SV*)SvRV($arg));
 	else
 	    croak(\"$var is not of type ${ntype}\")
 T_PTRDESC
 	if (sv_isa($arg, \"${ntype}\")) {
-	    ${type}_desc = (\U${type}_DESC\E*)(unsigned long)SvNV((SV*)SvANY($arg));
+	    ${type}_desc = (\U${type}_DESC\E*)(unsigned long)SvNV((SV*)SvRV($arg));
 	    $var = ${type}_desc->ptr;
 	}
 	else
 	    croak(\"$var is not of type ${ntype}\")
 T_REFREF
-	if (SvTYPE($arg) == SVt_REF)
-	    $var = *($type)(unsigned long)SvNV((SV*)SvANY($arg));
+	if (SvROK($arg))
+	    $var = *($type)(unsigned long)SvNV((SV*)SvRV($arg));
 	else
 	    croak(\"$var is not a reference\")
 T_REFOBJ
 	if (sv_isa($arg, \"${ntype}\"))
-	    $var = *($type)(unsigned long)SvNV((SV*)SvANY($arg));
+	    $var = *($type)(unsigned long)SvNV((SV*)SvRV($arg));
 	else
 	    croak(\"$var is not of type ${ntype}\")
 T_OPAQUE

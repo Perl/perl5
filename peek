@@ -1,0 +1,31 @@
+#!./perl
+
+sub peekstr {
+    local ($addr, $len) = @_;
+    local ($mem) = unpack("P$len", pack("L",$addr+0));
+    $mem;
+}
+
+sub unpackmem {
+    local ($addr, $len, $template) = @_;
+    local $mem = peekstr($addr, $len);
+    unpack($template, $mem);
+}
+
+$foo = "stuff";
+
+($any, $refcnt, $type, $flags, $storage, $private) =
+	unpackmem(\$foo, 12, "L2 C4");
+
+printf "SV = any %lx refcnt %d type %d flags %x storage '%c' private %x\n",
+	$any, $refcnt, $type, $flags, $storage, $private;
+
+if ($type >= 4) {
+    ($pv, $cur, $len) = unpackmem($any, 12, "L3");
+
+    printf "XPV = pv %lx cur %d len %d\n", $pv,$cur,$len;
+
+    $string = peekstr($pv, $cur);
+
+    print "String = $string\n"
+}

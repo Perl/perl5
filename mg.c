@@ -512,7 +512,7 @@ SV* sv;
 MAGIC* mg;
 {
     SV* rv = mg->mg_obj;
-    HV* stash = SvSTASH((SV*)SvANY(rv));
+    HV* stash = SvSTASH(SvRV(rv));
     GV* gv = gv_fetchmethod(stash, "fetch");
     dSP;
     BINOP myop;
@@ -558,7 +558,7 @@ SV* sv;
 MAGIC* mg;
 {
     SV* rv = mg->mg_obj;
-    HV* stash = SvSTASH((SV*)SvANY(rv));
+    HV* stash = SvSTASH(SvRV(rv));
     GV* gv = gv_fetchmethod(stash, "store");
     dSP;
     BINOP myop;
@@ -605,7 +605,7 @@ SV* sv;
 MAGIC* mg;
 {
     SV* rv = mg->mg_obj;
-    HV* stash = SvSTASH((SV*)SvANY(rv));
+    HV* stash = SvSTASH(SvRV(rv));
     GV* gv = gv_fetchmethod(stash, "delete");
     dSP;
     BINOP myop;
@@ -652,7 +652,7 @@ MAGIC* mg;
 SV* key;
 {
     SV* rv = mg->mg_obj;
-    HV* stash = SvSTASH((SV*)SvANY(rv));
+    HV* stash = SvSTASH(SvRV(rv));
     GV* gv = gv_fetchmethod(stash, SvOK(key) ? "nextkey" : "firstkey");
     dSP;
     BINOP myop;
@@ -1072,7 +1072,9 @@ MAGIC* mg;
 	    s = origargv[0]+i;
 	    *s++ = '\0';
 	    while (++i < origalen)
-		*s++ = ' ';
+		*s++ = '\0';
+	    for (i = 1; i < origargc; i++)
+		origargv[i] = NULL;
 	}
 	break;
     }

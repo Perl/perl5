@@ -134,7 +134,8 @@ print ref $object2	eq MYHASH  ? "ok 32\n" : "not ok 32\n";
 
 sub mymethod {
     local($THIS, @ARGS) = @_;
-    die "Not a MYHASH" unless ref $THIS eq MYHASH;
+    die 'Got a "' . ref($THIS). '" instead of a MYHASH'
+	unless ref $THIS eq MYHASH;
     print $THIS->{FOO} eq BAR  ? "ok $ARGS[0]\n" : "not ok $ARGS[0]\n";
 }
 
@@ -146,7 +147,7 @@ $string = "ok 34\n";
 $main'anonhash2 = "foo";
 $string = "not ok 34\n";
 
-sub DESTROY {
+DESTROY {
     print $string;
 
     # Test that the object has already been "cursed".

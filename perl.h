@@ -272,6 +272,12 @@ char Error[1];
 #endif
 
 #include <errno.h>
+#ifdef HAS_SOCKET
+#   ifndef ENOTSOCK
+#     include <net/errno.h>
+#   endif
+#endif
+
 #ifndef MSDOS
 #   ifndef errno
 	extern int errno;     /* ANSI allows errno to be an lvalue expr */
@@ -520,6 +526,7 @@ typedef struct context CONTEXT;
 typedef struct block BLOCK;
 
 typedef struct magic MAGIC;
+typedef struct xrv XRV;
 typedef struct xpv XPV;
 typedef struct xpviv XPVIV;
 typedef struct xpvnv XPVNV;
@@ -629,6 +636,13 @@ U32 cast_ulong P((double));
 #define U_S(what) ((U16)cast_ulong(what))
 #define U_I(what) ((unsigned int)cast_ulong(what))
 #define U_L(what) (cast_ulong(what))
+#endif
+
+#ifdef CASTI32
+#define I_32(what) ((I32)(what))
+#else
+I32 cast_i32 P((double));
+#define I_32(what) (cast_i32(what))
 #endif
 
 struct Outrec {

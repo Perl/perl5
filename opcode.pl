@@ -171,6 +171,7 @@ gv		glob value		ck_null		ds
 padsv		private variable	ck_null		0
 padav		private array		ck_null		0
 padhv		private hash		ck_null		0
+padany		private something	ck_null		0
 
 pushre		push regexp		ck_null		0
 
@@ -538,7 +539,7 @@ semop		semop			ck_fun		imst	S S S
 
 # Eval.
 
-require		require			ck_fun		d	S
+require		require			ck_fun		d	S?
 dofile		do 'file'		ck_fun		d	S
 entereval	eval string		ck_eval		d	S
 leaveeval	eval exit		ck_null		0	S

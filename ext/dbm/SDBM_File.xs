@@ -5,6 +5,7 @@
 
 typedef DBM* SDBM_File;
 #define sdbm_new(dbtype,filename,flags,mode) sdbm_open(filename,flags,mode)
+#define nextkey(db,key) sdbm_nextkey(db)
 
 MODULE = SDBM_File	PACKAGE = SDBM_File	PREFIX = sdbm_
 
@@ -43,7 +44,7 @@ sdbm_firstkey(db)
 	SDBM_File	db
 
 datum
-sdbm_nextkey(db, key)
+nextkey(db, key)
 	SDBM_File	db
 	datum		key
 
