@@ -14,7 +14,7 @@ END { print @warnings }
 
 ######################### We start with some black magic to print on failure.
 
-BEGIN { $| = 1; print "1..73\n"; }
+BEGIN { $| = 1; print "1..82\n"; }
 END {print "not ok 1\n" unless $loaded;}
 use constant 1.01;
 $loaded = 1;
@@ -229,3 +229,23 @@ test 71, (shift @warnings) =~ /^Constant name 'ENV' is forced into package main:
 test 72, (shift @warnings) =~ /^Constant name 'INC' is forced into package main:: at/;
 test 73, (shift @warnings) =~ /^Constant name 'SIG' is forced into package main:: at/;
 @warnings = ();
+
+
+use constant {
+	THREE  => 3,
+	FAMILY => [ qw( John Jane Sally ) ],
+	AGES   => { John => 33, Jane => 28, Sally => 3 },
+	RFAM   => [ [ qw( John Jane Sally ) ] ],
+	SPIT   => sub { shift },
+	PHFAM  => [ { John => 1, Jane => 2, Sally => 3 }, 33, 28, 3 ],
+};
+
+test 74, @{+FAMILY} == THREE;
+test 75, @{+FAMILY} == @{RFAM->[0]};
+test 76, FAMILY->[2] eq RFAM->[0]->[2];
+test 77, AGES->{FAMILY->[1]} == 28;
+test 78, PHFAM->{John} == AGES->{John};
+test 79, PHFAM->[3] == AGES->{FAMILY->[2]};
+test 80, @{+PHFAM} == SPIT->(THREE+1);
+test 81, THREE**3 eq SPIT->(@{+FAMILY}**3);
+test 82, AGES->{FAMILY->[THREE-1]} == PHFAM->[THREE];
