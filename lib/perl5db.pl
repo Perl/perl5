@@ -235,7 +235,11 @@ $pretype = [] unless defined $pretype;
 warnLevel($warnLevel);
 dieLevel($dieLevel);
 signalLevel($signalLevel);
-&pager(defined($ENV{PAGER}) ? $ENV{PAGER} : "|more") unless defined $pager;
+&pager((defined($ENV{PAGER}) 
+	? $ENV{PAGER}
+	: ($^O eq 'os2' 
+	   ? 'cmd /c more' 
+	   : 'more'))) unless defined $pager;
 &recallCommand("!") unless defined $prc;
 &shellBang("!") unless defined $psh;
 $maxtrace = 400 unless defined $maxtrace;
@@ -412,11 +416,11 @@ EOP
     $was_signal = $signal;
     $signal = 0;
     if ($single || ($trace & 1) || $was_signal) {
-	$term || &setterm;
 	if ($emacs) {
 	    $position = "\032\032$filename:$line:0\n";
 	    print $LINEINFO $position;
 	} elsif ($package eq 'DB::fake') {
+	  $term || &setterm;
 	  print_help(<<EOP);
 Debugged program terminated.  Use B<q> to quit or B<R> to restart,
   use B<O> I<inhibit_exit> to avoid stopping after program termination,
@@ -640,8 +644,9 @@ EOP
 				$arrow .= 'b' if $stop;
 				$arrow .= 'a' if $action;
 				print $OUT "$i$arrow\t", $dbline[$i];
-				last if $signal;
+				$i++, last if $signal;
 			    }
+			    print $OUT "\n" unless $dbline[$i-1] =~ /\n$/;
 			}
 			$start = $i; # remember in case they want more
 			$start = $max if $start > $max;
