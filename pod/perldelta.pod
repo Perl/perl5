@@ -11,17 +11,17 @@ the 5.7.0 release.
 
 A potential security vulnerability in the optional suidperl component
 of Perl has been identified.  suidperl is neither built nor installed
-by default.  As of August the 20th, 2000, the only known vulnerable
+by default.  As of September the 2nd, 2000, the only known vulnerable
 platform is Linux, most likely all Linux distributions.  CERT and
 various vendors have been alerted about the vulnerability.
 
 The problem was caused by Perl trying to report a suspected security
 exploit attempt using an external program, /bin/mail.  On Linux
-platforms the /bin/mail program had an undocumented feature which gave
-access to a root shell, resulting in a serious compromise instead of
-reporting the exploit attempt.  If you don't have /bin/mail, or if you
-have 'safe setuid scripts', or if suidperl is not installed, you
-are safe.
+platforms the /bin/mail program had an undocumented feature which
+when combined with suidperl gave access to a root shell, resulting in
+a serious compromise instead of reporting the exploit attempt.  If you
+don't have /bin/mail, or if you have 'safe setuid scripts', or if
+suidperl is not installed, you are safe.
 
 The exploit attempt reporting feature has been completely removed from
 the Perl 5.7.0 release, so that particular vulnerability isn't there
@@ -180,7 +180,7 @@ hit by saying
 	use English '-no_performance_hit';
 
 (Assuming, of course, that one doesn't need the troublesome variables
-C<$`>, C<$&>, or C<$'>.)  Also, introduce C<@LAST_MATCH_START> and
+C<$`>, C<$&>, or C<$'>.)  Also, introduced C<@LAST_MATCH_START> and
 C<@LAST_MATCH_END> English aliases for C<@-> and C<@+>.
 
 =item *
@@ -221,12 +221,13 @@ The Shell module now has an OO interface.
 
 =item *
 
-The Emacs perl mode (emacs/cperl-mode.el) has been updated to version 4.31.
+The Emacs perl mode (emacs/cperl-mode.el) has been updated to version
+4.31.
 
 =item *
 
-Perlbug is now much more robust.  It also sends the bug report to perl.org,
-not perl.com.
+Perlbug is now much more robust.  It also sends the bug report to
+perl.org, not perl.com.
 
 =item *
 
@@ -297,12 +298,12 @@ map() that changes the size of the list should now work faster.
  
 sort() has been changed to use mergesort internally as opposed to the
 earlier quicksort.  For very small lists this may result in slightly
-slower sorting times, but in general the speedup should be at least 20%.
-Additional bonuses are that the worst case behaviour of sort() is now
-better (in computer science terms it now runs in time O(N log N), as
-opposed to quicksorts Theta(N**2) worst-case run time behaviour), and
-that sort() is now stable (meaning that elements with identical keys
-will stay ordered as they were before the sort).
+slower sorting times, but in general the speedup should be at least
+20%.  Additional bonuses are that the worst case behaviour of sort()
+is now better (in computer science terms it now runs in time O(N log N),
+as opposed to quicksort's Theta(N**2) worst-case run time behaviour),
+and that sort() is now stable (meaning that elements with identical
+keys will stay ordered as they were before the sort).
 
 =back
 
@@ -319,8 +320,8 @@ integers even on non-64-bit platforms.
 
 =item *
 
-Policy.sh policy change: if you are reusing a Policy.sh file (see
-INSTALL) and you use Configure -Dprefix=/foo/bar and in the old
+Policy.sh policy change: if you are reusing a Policy.sh file
+(see INSTALL) and you use Configure -Dprefix=/foo/bar and in the old
 Policy $prefix eq $siteprefix and $prefix eq $vendorprefix, all of
 them will now be changed to the new prefix, /foo/bar.  (Previously
 only $prefix changed.)  If you do not like this new behaviour,
