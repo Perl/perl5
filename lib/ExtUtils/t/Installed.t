@@ -26,7 +26,7 @@ use Test::More tests => 43;
 
 BEGIN { use_ok( 'ExtUtils::Installed' ) }
 
-my $noman = ! ($Config{installman1dir} && $Config{installman3dir});
+my $mandirs =  !!$Config{man1direxp} + !!$Config{man3direxp};
 
 # saves having to qualify package name for class methods
 my $ei = bless( {}, 'ExtUtils::Installed' );
@@ -40,17 +40,22 @@ is( $ei->_is_prefix('\foo\bar', '\bar'), 0,
 # _is_type
 is( $ei->_is_type(0, 'all'), 1, '_is_type() should be true for type of "all"' );
 
-foreach my $path (qw( installman1dir installman3dir )) {
-	my $file = $Config{$path} . '/foo';
+foreach my $path (qw( man1dir man3dir )) {
+SKIP: {
+	my $dir = $Config{$path.'exp'};
+        skip("no man directory $path on this system", 2 ) unless $dir;
+
+	my $file = $dir . '/foo';
 	is( $ei->_is_type($file, 'doc'), 1, "... should find doc file in $path" );
 	is( $ei->_is_type($file, 'prog'), 0, "... but not prog file in $path" );
+    }
 }
 
-is( $ei->_is_type($Config{prefix} . '/bar', 'prog'), 1, 
-	"... should find prog file under $Config{prefix}" );
+is( $ei->_is_type($Config{prefixexp} . '/bar', 'prog'), 1, 
+	"... should find prog file under $Config{prefixexp}" );
 
 SKIP: {
-	skip('no man directories on this system', 1) if $noman;
+	skip('no man directories on this system', 1) unless $mandirs;
 	is( $ei->_is_type('bar', 'doc'), 0, 
 		'... should not find doc file outside path' );
 }
@@ -103,15 +108,14 @@ FAKE
 
 
 SKIP: {
-	skip( "could not write packlist: $!", 3 ) unless $wrotelist;
+	skip("could not write packlist: $!", 3 ) unless $wrotelist;
 
 	# avoid warning and death by localizing glob
 	local *ExtUtils::Installed::Config;
-    my $fake_mod_dir = File::Spec->catdir(cwd(), 'auto', 'FakeMod');
+	my $fake_mod_dir = File::Spec->catdir(cwd(), 'auto', 'FakeMod');
 	%ExtUtils::Installed::Config = (
-		archlib		   => cwd(),
-        installarchlib => cwd(),
-		sitearch	   => $fake_mod_dir,
+		archlibexp	   => cwd(),
+		sitearchexp	   => $fake_mod_dir,
 	);
 
 	# necessary to fool new()
@@ -132,9 +136,13 @@ is( join(' ', $ei->modules()), 'abc def ghi',
 # files
 $ei->{goodmod} = { 
 	packlist => { 
-		File::Spec->catdir($Config{installman1dir}, 'foo') => 1,
-		File::Spec->catdir($Config{installman3dir}, 'bar') => 1,
-		File::Spec->catdir($Config{prefix}, 'foobar') => 1,
+                ($Config{man1direxp} ? 
+                    (File::Spec->catdir($Config{man1direxp}, 'foo') => 1) : 
+                        ()),
+                ($Config{man3direxp} ? 
+                    (File::Spec->catdir($Config{man3direxp}, 'bar') => 1) : 
+                        ()),
+                File::Spec->catdir($Config{prefixexp}, 'foobar') => 1,
 		foobaz	=> 1,
 	},
 };
@@ -146,13 +154,15 @@ like( $@, qr/type must be/,'files() should croak given bad type' );
 
 my @files;
 SKIP: {
-	skip('no man directories on this system', 3) if $noman;
-	
-	@files = $ei->files('goodmod', 'doc', $Config{installman1dir});
-	is( scalar @files, 1, '... should find doc file under given dir' );
-	is( grep({ /foo$/ } @files), 1, '... checking file name' );
-	@files = $ei->files('goodmod', 'doc');
-	is( scalar @files, 2, '... should find all doc files with no dir' );
+    skip('no man directory man1dir on this system', 2) unless $Config{man1direxp}; 
+    @files = $ei->files('goodmod', 'doc', $Config{man1direxp});
+    is( scalar @files, 1, '... should find doc file under given dir' );
+    is( grep({ /foo$/ } @files), 1, '... checking file name' );
+}
+SKIP: {
+    skip('no man directories on this system', 1) unless $mandirs;
+    @files = $ei->files('goodmod', 'doc');
+    is( scalar @files, $mandirs, '... should find all doc files with no dir' );
 }
 
 @files = $ei->files('goodmod', 'prog', 'fake', 'fake2');
@@ -161,7 +171,7 @@ is( scalar @files, 0, '... should find no doc files given wrong dirs' );
 is( scalar @files, 1, '... should find doc file in correct dir' );
 like( $files[0], qr/foobar$/, '... checking file name' );
 @files = $ei->files('goodmod');
-is( scalar @files, 4, '... should find all files with no type specified' );
+is( scalar @files, 2 + $mandirs, '... should find all files with no type specified' );
 my %dirnames = map { lc($_) => dirname($_) } @files;
 
 # directories
@@ -169,24 +179,27 @@ my @dirs = $ei->directories('goodmod', 'prog', 'fake');
 is( scalar @dirs, 0, 'directories() should return no dirs if no files found' );
 
 SKIP: {
-	skip('no man directories on this system', 4) if $noman;
+    skip('no man directories on this system', 1) unless $mandirs;
+    @dirs = $ei->directories('goodmod', 'doc');
+    is( scalar @dirs, $mandirs, '... should find all files files() would' );
+}
+@dirs = $ei->directories('goodmod');
+is( scalar @dirs, 2 + $mandirs, '... should find all files files() would, again' );
+@files = sort map { exists $dirnames{lc($_)} ? $dirnames{lc($_)} : '' } @files;
+is( join(' ', @files), join(' ', @dirs), '... should sort output' );
 
-	@dirs = $ei->directories('goodmod', 'doc');
-	is( scalar @dirs, 2, '... should find all files files() would' );
-	@dirs = $ei->directories('goodmod');
-	is( scalar @dirs, 4, '... should find all files files() would, again' );
-	@files = sort map { exists $dirnames{lc($_)} ? $dirnames{lc($_)} : '' } 
-		@files;
-	is( join(' ', @files), join(' ', @dirs), '... should sort output' );
-
-	# directory_tree
-	my $expectdirs = dirname($Config{installman1dir}) eq 
-		dirname($Config{installman3dir}) ? 3 :2;
-
-	@dirs = $ei->directory_tree('goodmod', 'doc', 
-		dirname($Config{installman1dir}));
-	is( scalar @dirs, $expectdirs, 
-		'directory_tree() should report intermediate dirs to those requested' );
+# directory_tree
+my $expectdirs = 
+       ($mandirs == 2) && 
+       (dirname($Config{man1direxp}) eq dirname($Config{man3direxp}))
+       ? 3 : 2;
+ 
+SKIP: {
+    skip('no man directories on this system', 1) unless $mandirs;
+    @dirs = $ei->directory_tree('goodmod', 'doc', $Config{man1direxp} ?
+       dirname($Config{man1direxp}) : dirname($Config{man3direxp}));
+    is( scalar @dirs, $expectdirs, 
+        'directory_tree() should report intermediate dirs to those requested' );
 }
 
 my $fakepak = Fakepak->new(102);
