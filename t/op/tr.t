@@ -286,6 +286,7 @@ print "ok 49\n";
 
 # UTF8 range tests from Inaba Hiroto
 
+# Not working in EBCDIC as of 12674.
 ($a = v300.196.172.302.197.172) =~ tr/\x{12c}-\x{130}/\xc0-\xc4/;
 print "not " unless $a eq v192.196.172.194.197.172;
 print "ok 50\n";
@@ -326,10 +327,12 @@ print "ok 57\n";
 # (i-j, r-s, I-J, R-S), [\x89-\x91] [\xc9-\xd1] has to match them,
 # from Karsten Sperling.
 
+# Not working in EBCDIC as of 12674.
 $c = ($a = "\x89\x8a\x8b\x8c\x8d\x8f\x90\x91") =~ tr/\x89-\x91/X/;
 print "not " unless $c == 8 and $a eq "XXXXXXXX";
 print "ok 58\n";
    
+# Not working in EBCDIC as of 12674.
 $c = ($a = "\xc9\xca\xcb\xcc\xcd\xcf\xd0\xd1") =~ tr/\xc9-\xd1/X/;
 print "not " unless $c == 8 and $a eq "XXXXXXXX";
 print "ok 59\n";
