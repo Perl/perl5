@@ -212,9 +212,9 @@ This also has implications for the use of the SUPER:: qualifier
 
 =head2 Package Constructors and Destructors
 
-Three special subroutines act as package
-constructors and destructors.  These are the C<BEGIN>, C<STOP>, C<INIT>,
-and C<END> routines.  The C<sub> is optional for these routines.
+Four special subroutines act as package constructors and destructors.
+These are the C<BEGIN>, C<STOP>, C<INIT>, and C<END> routines.  The
+C<sub> is optional for these routines.
 
 A C<BEGIN> subroutine is executed as soon as possible, that is, the moment
 it is completely defined, even before the rest of the containing file
