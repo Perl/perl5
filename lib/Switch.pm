@@ -742,7 +742,7 @@ behaviour of the third case.
 
 Perl 6 will provide a built-in switch statement with essentially the
 same semantics as those offered by Switch.pm, but with a different
-pair of keywords. In Perl 6 C<switch> with be spelled C<given>, and
+pair of keywords. In Perl 6 C<switch> will be spelled C<given>, and
 C<case> will be pronounced C<when>. In addition, the C<when> statement
 will not require switch or case values to be parenthesized.
 

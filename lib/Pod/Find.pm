@@ -334,7 +334,7 @@ List directories as they are searched
 
 =back
 
-Returns the full path of the first occurence to the file.
+Returns the full path of the first occurrence to the file.
 Package names (eg 'A::B') are automatically converted to directory
 names in the selected directory. (eg on unix 'A::B' is converted to
 'A/B'). Additionally, '.pm', '.pl' and '.pod' are appended to the

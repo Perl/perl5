@@ -603,7 +603,7 @@ Embedding Perl inside a 64-bit application.
 
 =back
 
-=item Running Perl Scripts
+=head2 Running Perl Scripts
 
 Perl scripts on UNIX use the "#!" (a.k.a "shebang") line to
 indicate to the OS that it should execute the file using perl.

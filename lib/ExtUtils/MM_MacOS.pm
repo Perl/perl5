@@ -242,22 +242,19 @@ Translate relative path names into Mac names.
 =cut
 
 sub macify {
-    # mmm, better ... and this condition should always be satisified,
-    # as the module is now distributed with MacPerl, but leave in anyway
-    if ($Mac_FS) {
-        return Mac::FileSpec::Unixish::nativize($_[0]);
-    }
-
     my($unix) = @_;
     my(@mac);
 
-    $unix =~ s|^\./||;
-
     foreach (split(/[ \t\n]+/, $unix)) {
 	if (m|/|) {
-	    $_ = ":$_";
-	    s|/|:|g;
-	} 
+	    if ($Mac_FS) { # should always be true
+		$_ = Mac::FileSpec::Unixish::nativize($_);
+	    } else {
+		s|^\./||;
+		s|/|:|g;
+		$_ = ":$_";
+	    }
+	}
 	push(@mac, $_);
     }
     

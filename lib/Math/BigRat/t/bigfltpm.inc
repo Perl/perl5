@@ -4,7 +4,7 @@ ok ($class->config()->{lib},$CL);
 
 while (<DATA>)
   {
-  chop;
+  chomp;
   $_ =~ s/#.*$//;	# remove comments
   $_ =~ s/\s+$//;	# trailing spaces
   next if /^$/;		# skip empty lines & comments
@@ -1054,10 +1054,10 @@ abc:1:abc:NaN
 152403346:12345:4321
 87654321:87654321:0
 # now some floating point tests
-123:2.5:0.5
-1230:2.5:0
-123.4:2.5:0.9
-123e1:25:5
+#123:2.5:0.5
+#1230:2.5:0
+#123.4:2.5:0.9
+#123e1:25:5
 &ffac
 Nanfac:NaN
 -1:NaN

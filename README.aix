@@ -78,7 +78,7 @@ called runtime linking mode instead of the emulated interface that was
 used in Perl releases 5.6.1 and earlier or, for AIX releases 4.2 and
 earlier.  This change does break backward compatibility with compiled
 modules from earlier perl releases.  The change was made to make Perl
-more compliant with other applications like Apache/modperl which are
+more compliant with other applications like Apache/mod_perl which are
 using the AIX native interface. This change also enables the use of C++
 code with static constructors and destructors in perl extensions, which
 was not possible using the emulated interface.

@@ -149,7 +149,7 @@ sub _get_dirs {
 sub _nativize {
     my($dir) = @_;
 
-    if ($Is_MacOS && $Mac_FS) {
+    if ($Is_MacOS && $Mac_FS && ! -d $dir) {
 	$dir = Mac::FileSpec::Unixish::nativize($dir);
 	$dir .= ":" unless $dir =~ /:$/;
     }

@@ -841,7 +841,7 @@ Like -print, but terminates with \0 instead of \n.
 
 =item C<-exec OPTIONS ;>
 
-exec() the arguments in OPTIONS in a subprocess; any occurence of {} in
+exec() the arguments in OPTIONS in a subprocess; any occurrence of {} in
 OPTIONS will first be substituted with the path of the current
 file.  Note that the command "rm" has been special-cased to use perl's
 unlink() function instead (as an optimization).  The C<;> must be passed as

@@ -196,7 +196,11 @@ $pwd_cmd ||= 'pwd';
 
 # The 'natural and safe form' for UNIX (pwd may be setuid root)
 sub _backtick_pwd {
-    local @ENV{qw(PATH IFS CDPATH ENV BASH_ENV)};
+    local $ENV{PATH};
+    local $ENV{IFS};
+    local $ENV{CDPATH};
+    local $ENV{ENV};
+    local $ENV{BASH_ENV};
     my $cwd = `$pwd_cmd`;
     # Belt-and-suspenders in case someone said "undef $/".
     local $/ = "\n";

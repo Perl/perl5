@@ -2655,9 +2655,9 @@ ExtUtils::Mkbootstrap, ExtUtils::Mksymlists, ExtUtils::Packlist,
 ExtUtils::testlib, Fatal, Fcntl, File::Basename, File::CheckTree,
 File::Compare, File::Copy, File::DosGlob, File::Find, File::Path,
 File::Spec, File::Spec::Cygwin, File::Spec::Epoc, File::Spec::Functions,
-File::Spec::Mac, File::Spec::OS2, File::Spec::Unix, File::Spec::VMS,
-File::Spec::Win32, File::Temp, File::stat, FileCache, FileHandle,
-Filter::Simple, FindBin, Getopt::Long, Getopt::Std, Hash::Util,
+File::Spec::Mac, File::Spec::NW5, File::Spec::OS2, File::Spec::Unix,
+File::Spec::VMS, File::Spec::Win32, File::Temp, File::stat, FileCache,
+FileHandle, Filter::Simple, FindBin, Getopt::Long, Getopt::Std, Hash::Util,
 I18N::Collate, I18N::LangTags, I18N::LangTags::List, IO, IPC::Open2,
 IPC::Open3, Locale::Constants, Locale::Country, Locale::Currency,
 Locale::Language, Locale::Maketext, Locale::Maketext::TPJ13,
@@ -3047,8 +3047,8 @@ my C program; what am I doing wrong?
 
 =back
 
-=head2 perlfaq4 - Data Manipulation ($Revision: 1.24 $, $Date: 2002/05/20
-16:50:08 $)
+=head2 perlfaq4 - Data Manipulation ($Revision: 1.25 $, $Date: 2002/05/30
+07:04:25 $)
 
 =over 4
 
@@ -3264,8 +3264,8 @@ array of hashes or arrays?
 
 =back
 
-=head2 perlfaq5 - Files and Formats ($Revision: 1.17 $, $Date: 2002/05/23
-19:33:50 $)
+=head2 perlfaq5 - Files and Formats ($Revision: 1.18 $, $Date: 2002/05/30
+07:04:25 $)
 
 =over 4
 
@@ -5230,6 +5230,8 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =back
 
+=head2 perldelta - what is new for perl v5.8.0
+
 =over 4
 
 =item DESCRIPTION
@@ -5328,7 +5330,13 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item AIX
 
+=item Alpha systems with old gccs fail several tests
+
+=item AmigaOS
+
 =item BeOS
+
+=item Cygwin "unable to remap"
 
 =item ext/threads/t/libc
 
@@ -5345,6 +5353,8 @@ I<The Road goes ever on and on, down from the door where it began.>
 =item Linux with glibc 2.2.5 fails t/op/int subtest #6 with -Duse64bitint
 
 =item Linux With Sfio Fails op/misc Test 48
+
+=item libwww-perl (LWP) fails base/date #51
 
 =item Mac OS X
 
@@ -7468,7 +7478,7 @@ public_html/feedback.cgi, src/perl-5.6.0-mpe
 
 =item Setup
 
-SetNWDef.bat, Custom Build Environment, Buildtype.bat, SetNWBld.bat
+SetNWBld.bat, Buildtype.bat
 
 =item Make
 
@@ -7479,8 +7489,6 @@ SetNWDef.bat, Custom Build Environment, Buildtype.bat, SetNWBld.bat
 =back
 
 =item Install
-
-=item Build new extensions
 
 =item Acknowledgements
 
@@ -8719,6 +8727,8 @@ point
 =back
 
 =item CAVEATS
+
+=item NOTES
 
 =item SEE ALSO
 
@@ -13332,6 +13342,36 @@ rel2abs
 
 =back
 
+=head2 File::Spec::NW5 - methods for NW5 file specs
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+devnull
+
+=back
+
+tmpdir
+
+catfile
+
+canonpath
+
+splitpath
+
+splitdir
+
+catpath
+
+=over 4
+
+=item SEE ALSO
+
+=back
+
 canonpath
 
 splitpath
@@ -16535,7 +16575,7 @@ after =back
 
 =item Warnings
 
-multiple occurence of link target I<name>, line containing nothing but
+multiple occurrence of link target I<name>, line containing nothing but
 whitespace in paragraph, file does not start with =head, previous =item has
 no contents, preceding non-item paragraph(s), =item type mismatch (I<one>
 vs. I<two>), I<N> unescaped C<E<lt>E<gt>> in paragraph, Unknown entity, No

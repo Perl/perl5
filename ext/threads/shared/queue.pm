@@ -68,8 +68,7 @@ L<threads>, L<threads::shared>
 sub new {
     my $class = shift;
     my @q : shared = @_;
-    my $q = \@q;
-    return bless $q, $class;
+    return bless \@q, $class;
 }
 
 sub dequeue  {

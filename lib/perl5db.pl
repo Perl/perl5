@@ -897,7 +897,7 @@ EOP
 			$incr = $window - 1;
 			$cmd = 'l ' . ($start) . '+'; };
 			# rjsf ->
-		  $cmd =~ /^([aAbBDhlLMoOvwW])\b\s*(.*)/s && do { 
+		  $cmd =~ /^([aAbBhlLMoOvwW])\b\s*(.*)/s && do { 
 				&cmd_wrapper($1, $2, $line); 
 				next CMD; 
 			};

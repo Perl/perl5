@@ -1,7 +1,7 @@
 package Encode::Alias;
 use strict;
 use Encode;
-our $VERSION = do { my @r = (q$Revision: 1.31 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.32 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG = 0;
 
 use base qw(Exporter);
@@ -139,6 +139,7 @@ sub init_aliases
     # ASCII
     define_alias(qr/^(?:US-?)ascii$/i => '"ascii"');
     define_alias('C' => 'ascii');
+    define_alias(qr/\bISO[-_]?646[-_]?US$/i => '"ascii"');
     # Allow variants of iso-8859-1 etc.
     define_alias( qr/\biso[-_]?(\d+)[-_](\d+)$/i => '"iso-$1-$2"' );
 
@@ -176,7 +177,7 @@ sub init_aliases
     # At least AIX has IBM-NNN (surprisingly...) instead of cpNNN.
     # And Microsoft has their own naming (again, surprisingly).
     # And windows-* is registered in IANA! 
-    define_alias( qr/\b(?:ibm|ms|windows)[-_]?(\d\d\d\d?)$/i => '"cp$1"');
+    define_alias( qr/\b(?:cp|ibm|ms|windows)[-_ ]?(\d{2,4})$/i => '"cp$1"');
 
     # Sometimes seen with a leading zero.
     # define_alias( qr/\bcp037\b/i => '"cp37"');
@@ -219,7 +220,9 @@ sub init_aliases
         # for Encode::TW
 	define_alias( qr/\bbig-?5$/i		  => '"big5-eten"' );
 	define_alias( qr/\bbig5-?et(?:en)$/i	  => '"big5-eten"' );
+	define_alias( qr/\btca[-_]?big5$/i	  => '"big5-eten"' );
 	define_alias( qr/\bbig5-?hk(?:scs)?$/i	  => '"big5-hkscs"' );
+	define_alias( qr/\bhk(?:scs)?[-_]?big5$/i  => '"big5-hkscs"' );
     }
     # utf8 is blessed :)
     define_alias( qr/^UTF-8$/i => '"utf8"',);
