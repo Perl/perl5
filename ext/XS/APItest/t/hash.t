@@ -13,87 +13,197 @@ BEGIN {
   }
 }
 
+use strict;
+use utf8;
 use Tie::Hash;
-
-my @testkeys = ('N', chr 256);
-
-my $utf8_for_258 = chr 258;
-utf8::encode $utf8_for_258;
-
-my @keys = (@testkeys, $utf8_for_258);
-my (%hash, %tiehash);
-tie %tiehash, 'Tie::StdHash';
-
-@hash{@keys} = @keys;
-@tiehash{@keys} = @keys;
-
-
 use Test::More 'no_plan';
 
 use_ok('XS::APItest');
 
-sub test_present {
-  my $key = shift;
+sub preform_test;
+sub test_present;
+sub test_absent;
+sub test_delete_present;
+sub test_delete_absent;
+sub brute_force_exists;
+sub test_store;
+sub test_fetch_present;
+sub test_fetch_absent;
+
+my $utf8_for_258 = chr 258;
+utf8::encode $utf8_for_258;
+
+my @testkeys = ('N', chr 198, chr 256);
+my @keys = (@testkeys, $utf8_for_258);
+
+foreach (@keys) {
+  utf8::downgrade $_, 1;
+}
+main_tests (\@keys, \@testkeys, '');
+
+foreach (@keys) {
+  utf8::upgrade $_;
+}
+main_tests (\@keys, \@testkeys, ' [utf8 hash]');
+
+{
+  my %h = (a=>'cheat');
+  tie %h, 'Tie::StdHash';
+  is (XS::APItest::Hash::store(\%h, chr 258,  1), 1);
+    
+  ok (!exists $h{$utf8_for_258},
+      "hv_store doesn't insert a key with the raw utf8 on a tied hash");
+}
+
+exit;
+
+################################   The End   ################################
+
+sub main_tests {
+  my ($keys, $testkeys, $description) = @_;
+  foreach my $key (@$testkeys) {
+    my $lckey = ($key eq chr 198) ? chr 230 : lc $key;
+    my $unikey = $key;
+    utf8::encode $unikey;
+
+    utf8::downgrade $key, 1;
+    utf8::downgrade $lckey, 1;
+    utf8::downgrade $unikey, 1;
+    main_test_inner ($key, $lckey, $unikey, $keys, $description);
+
+    utf8::upgrade $key;
+    utf8::upgrade $lckey;
+    utf8::upgrade $unikey;
+    main_test_inner ($key, $lckey, $unikey, $keys,
+		     $description . ' [key utf8 on]');
+  }
+
+  # hv_exists was buggy for tied hashes, in that the raw utf8 key was being
+  # used - the utf8 flag was being lost.
+  perform_test (\&test_absent, (chr 258), $keys, '');
+
+  perform_test (\&test_fetch_absent, (chr 258), $keys, '');
+  perform_test (\&test_delete_absent, (chr 258), $keys, '');
+}
+
+sub main_test_inner {
+  my ($key, $lckey, $unikey, $keys, $description) = @_;
+  perform_test (\&test_present, $key, $keys, $description);
+  perform_test (\&test_fetch_present, $key, $keys, $description);
+  perform_test (\&test_delete_present, $key, $keys, $description);
+
+  perform_test (\&test_store, $key, $keys, $description, [a=>'cheat']);
+  perform_test (\&test_store, $key, $keys, $description, []);
+
+  perform_test (\&test_absent, $lckey, $keys, $description);
+  perform_test (\&test_fetch_absent, $lckey, $keys, $description);
+  perform_test (\&test_delete_absent, $lckey, $keys, $description);
+
+  return if $unikey eq $key;
+
+  perform_test (\&test_absent, $unikey, $keys, $description);
+  perform_test (\&test_fetch_absent, $unikey, $keys, $description);
+  perform_test (\&test_delete_absent, $unikey, $keys, $description);
+}
+
+sub perform_test {
+  my ($test_sub, $key, $keys, $message, @other) = @_;
   my $printable = join ',', map {ord} split //, $key;
 
-  ok (exists $hash{$key}, "hv_exists_ent present $printable");
-  ok (XS::APItest::Hash::exists (\%hash, $key), "hv_exists present $printable");
+  my (%hash, %tiehash);
+  tie %tiehash, 'Tie::StdHash';
 
-  ok (exists $tiehash{$key}, "hv_exists_ent tie present  $printable");
-  ok (XS::APItest::Hash::exists (\%tiehash, $key),
-      "hv_exists tie present $printable");
+  @hash{@$keys} = @$keys;
+  @tiehash{@$keys} = @$keys;
+
+  &$test_sub (\%hash, $key, $printable, $message, @other);
+  &$test_sub (\%tiehash, $key, $printable, "$message tie", @other);
+}
+
+sub test_present {
+  my ($hash, $key, $printable, $message) = @_;
+
+  ok (exists $hash->{$key}, "hv_exists_ent present$message $printable");
+  ok (XS::APItest::Hash::exists ($hash, $key),
+      "hv_exists present$message $printable");
 }
 
 sub test_absent {
-  my $key = shift;
-  my $printable = join ',', map {ord} split //, $key;
+  my ($hash, $key, $printable, $message) = @_;
 
-  ok (!exists $hash{$key}, "hv_exists_ent absent $printable");
-  ok (!XS::APItest::Hash::exists (\%hash, $key), "hv_exists absent $printable");
-
-  ok (!exists $tiehash{$key}, "hv_exists_ent tie absent  $printable");
-  ok (!XS::APItest::Hash::exists (\%tiehash, $key),
-      "hv_exists tie absent $printable");
+  ok (!exists $hash->{$key}, "hv_exists_ent absent$message $printable");
+  ok (!XS::APItest::Hash::exists ($hash, $key),
+      "hv_exists absent$message $printable");
 }
 
 sub test_delete_present {
-  my $key = shift;
-  my $printable = join ',', map {ord} split //, $key;
+  my ($hash, $key, $printable, $message) = @_;
 
-  my $copy = {%hash};
-  is (delete $copy->{$key}, $key, "hv_delete_ent present $printable");
-  $copy = {%hash};
+  my $copy = {};
+  my $class = tied %$hash;
+  if (defined $class) {
+    tie %$copy, ref $class;
+  }
+  $copy = {%$hash};
+  is (delete $copy->{$key}, $key, "hv_delete_ent present$message $printable");
+  $copy = {%$hash};
   is (XS::APItest::Hash::delete ($copy, $key), $key,
-      "hv_delete present $printable");
-
-  $copy = {};
-  tie %$copy, 'Tie::StdHash';
-  %$copy = %tiehash;
-  is (delete $copy->{$key}, $key, "hv_delete_ent tie present $printable");
-
-  %$copy = %tiehash;
-  is (XS::APItest::Hash::delete ($copy, $key), $key,
-      "hv_delete tie present $printable");
+      "hv_delete present$message $printable");
 }
 
 sub test_delete_absent {
-  my $key = shift;
-  my $printable = join ',', map {ord} split //, $key;
+  my ($hash, $key, $printable, $message) = @_;
 
-  my $copy = {%hash};
-  is (delete $copy->{$key}, undef, "hv_delete_ent absent $printable");
-  $copy = {%hash};
+  my $copy = {};
+  my $class = tied %$hash;
+  if (defined $class) {
+    tie %$copy, ref $class;
+  }
+  $copy = {%$hash};
+  is (delete $copy->{$key}, undef, "hv_delete_ent absent$message $printable");
+  $copy = {%$hash};
   is (XS::APItest::Hash::delete ($copy, $key), undef,
-      "hv_delete absent $printable");
+      "hv_delete absent$message $printable");
+}
 
-  $copy = {};
-  tie %$copy, 'Tie::StdHash';
-  %$copy = %tiehash;
-  is (delete $copy->{$key}, undef, "hv_delete_ent tie absent $printable");
+sub test_store {
+  my ($hash, $key, $printable, $message, $defaults) = @_;
+  my $HV_STORE_IS_CRAZY = 1;
 
-  %$copy = %tiehash;
-  is (XS::APItest::Hash::delete ($copy, $key), undef,
-      "hv_delete tie absent $printable");
+  # We are cheating - hv_store returns NULL for a store into an empty
+  # tied hash. This isn't helpful here.
+
+  my $class = tied %$hash;
+
+  my %h1 = @$defaults;
+  my %h2 = @$defaults;
+  if (defined $class) {
+    tie %h1, ref $class;
+    tie %h2, ref $class;
+    $HV_STORE_IS_CRAZY = undef unless @$defaults;
+  }
+  is (XS::APItest::Hash::store_ent(\%h1, $key, 1), 1,
+      "hv_store_ent$message $printable"); 
+  ok (brute_force_exists (\%h1, $key), "hv_store_ent$message $printable");
+  is (XS::APItest::Hash::store(\%h2, $key,  1), $HV_STORE_IS_CRAZY,
+      "hv_store$message $printable");
+  ok (brute_force_exists (\%h2, $key), "hv_store$message $printable");
+}
+
+sub test_fetch_present {
+  my ($hash, $key, $printable, $message) = @_;
+
+  is ($hash->{$key}, $key, "hv_fetch_ent present$message $printable");
+  is (XS::APItest::Hash::fetch ($hash, $key), $key,
+      "hv_fetch present$message $printable");
+}
+
+sub test_fetch_absent {
+  my ($hash, $key, $printable, $message) = @_;
+
+  is ($hash->{$key}, undef, "hv_fetch_ent absent$message $printable");
+  is (XS::APItest::Hash::fetch ($hash, $key), undef,
+      "hv_fetch absent$message $printable");
 }
 
 sub brute_force_exists {
@@ -102,93 +212,4 @@ sub brute_force_exists {
     return 1 if $key eq $_;
   }
   return 0;
-}
-
-sub test_store {
-  my $key = shift;
-  my $defaults = shift;
-  my $HV_STORE_IS_CRAZY = @$defaults ? 1 : undef;
-  my $name = join ',', map {ord} split //, $key;
-  $name .= ' (hash starts empty)' unless @$defaults;
-
-  my %h1 = @$defaults;
-  is (XS::APItest::Hash::store_ent (\%h1, $key, 1), 1, "hv_store_ent $name"); 
-  ok (brute_force_exists (\%h1, $key), "hv_store_ent $name");
-  my %h2 = @$defaults;
-  is (XS::APItest::Hash::store(\%h2, $key,  1), 1, "hv_store $name");
-  ok (brute_force_exists (\%h2, $key), "hv_store $name");
-  my %h3 = @$defaults;
-  tie %h3, 'Tie::StdHash';
-  is (XS::APItest::Hash::store_ent (\%h3, $key, 1), 1,
-      "hv_store_ent tie $name");
-  ok (brute_force_exists (\%h3, $key), "hv_store_ent tie $name");
-  my %h4 = @$defaults;
-  tie %h4, 'Tie::StdHash';
-  is (XS::APItest::Hash::store(\%h4, $key, 1), $HV_STORE_IS_CRAZY,
-      "hv_store tie $name");
-  ok (brute_force_exists (\%h4, $key), "hv_store tie $name");
-}
-
-sub test_fetch_present {
-  my $key = shift;
-  my $printable = join ',', map {ord} split //, $key;
-
-  is ($hash{$key}, $key, "hv_fetch_ent present $printable");
-  is (XS::APItest::Hash::fetch (\%hash, $key), $key,
-      "hv_fetch present $printable");
-
-  is ($tiehash{$key}, $key, "hv_fetch_ent tie  present $printable");
-  is (XS::APItest::Hash::fetch (\%tiehash, $key), $key,
-      "hv_fetch tie present $printable");
-}
-
-sub test_fetch_absent {
-  my $key = shift;
-  my $printable = join ',', map {ord} split //, $key;
-
-  is ($hash{$key}, undef, "hv_fetch_ent absent $printable");
-  is (XS::APItest::Hash::fetch (\%hash, $key), undef,
-      "hv_fetch absent $printable");
-
-  is ($tiehash{$key}, undef, "hv_fetch_ent tie  absent $printable");
-  is (XS::APItest::Hash::fetch (\%tiehash, $key), undef,
-      "hv_fetch tie absent $printable");
-}
-
-foreach my $key (@testkeys) {
-  test_present ($key);
-  test_fetch_present ($key);
-  test_delete_present ($key);
-
-  test_store ($key, [a=>'cheat']);
-  test_store ($key, []);
-
-  my $lckey = lc $key;
-  test_absent ($lckey);
-  test_fetch_absent ($lckey);
-  test_delete_absent ($lckey);
-
-  my $unikey = $key;
-  utf8::encode $unikey;
-
-  next if $unikey eq $key;
-
-  test_absent ($unikey);
-  test_fetch_absent ($unikey);
-  test_delete_absent ($unikey);
-}
-
-# hv_exists was buggy for tied hashes, in that the raw utf8 key was being
-# used - the utf8 flag was being lost.
-test_absent (chr 258);
-test_fetch_absent (chr 258);
-test_delete_absent (chr 258);
-
-{
-  my %h = (a=>'cheat');
-  tie %h, 'Tie::StdHash';
-  is (XS::APItest::Hash::store(\%h, chr 258,  1), 1);
-
-  ok (!exists $h{$utf8_for_258},
-      "hv_store doesn't insert a key with the raw utf8 on a tied hash");
 }
