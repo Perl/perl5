@@ -303,9 +303,32 @@ cat > UU/usethreads.cbu <<'EOCBU'
 # after it has prompted the user for whether to use threads.
 case "$usethreads" in
 $define|true|[yY]*)
+	# In Tru64 V5 (at least V5.1A, V5.1B) gcc (at least 3.2.2)
+	# cannot be used to compile a threaded Perl.
+	cat > pthread.c <<EOF
+#include <pthread.h>
+extern int foo;	
+EOF
+	$cc -c pthread.c 2> pthread.err
+	if grep -q "unrecognized compiler" pthread.err; then
+	    cat >&4 <<EOF
+***
+*** I'm sorry but your C compiler ($cc) cannot be used to
+*** compile Perl with threads.  The system C compiler should work.
+***
+
+Cannot continue, aborting.
+
+EOF
+	    rm -f pthread.*
+	    exit 1
+	fi
+	rm -f pthread.*
 	# Threads interfaces changed with V4.0.
 	case "$isgcc" in
-	gcc)	ccflags="-D_REENTRANT $ccflags" ;;
+	gcc)
+	    ccflags="-D_REENTRANT $ccflags"
+	    ;;
 	*)  case "`uname -r`" in
 	    *[123].*)	ccflags="-threads $ccflags" ;;
 	    *)          ccflags="-pthread $ccflags" ;;

@@ -2706,6 +2706,27 @@ Returns a boolean indicating whether the SV contains an unsigned integer.
 =for hackers
 Found in file sv.h
 
+=item SvIsCOW
+
+Returns a boolean indicating whether the SV is Copy-On-Write. (either shared
+hash key scalars, or full Copy On Write scalars if 5.9.0 is configured for
+COW)
+
+	bool	SvIsCOW(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvIsCOW_shared_hash
+
+Returns a boolean indicating whether the SV is Copy-On-Write shared hash key
+scalar.
+
+	bool	SvIsCOW_shared_hash(SV* sv)
+
+=for hackers
+Found in file sv.h
+
 =item SvIV
 
 Coerces the given SV to an integer and returns it. See  C<SvIVx> for a
@@ -2956,7 +2977,6 @@ Found in file sv.h
 Like C<SvPV>, but converts sv to byte representation first if necessary.
 Guarantees to evaluate sv only once; use the more efficient C<SvPVbyte>
 otherwise.
-
 
 	char*	SvPVbytex(SV* sv, STRLEN len)
 

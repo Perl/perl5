@@ -1656,6 +1656,11 @@ Not implemented. (S<Mac OS>, Win32, VM/ESA)
 
 Not implemented. (S<Mac OS>, Win32, VMS, VM/ESA)
 
+=item gethostbyname
+
+C<gethostbyname('localhost')> does not work everywhere: you may have
+to use C<gethostbyname('127.0.0.1')>. (S<Mac OS>, S<Irix 5>)
+
 =item gethostent
 
 Not implemented. (S<Mac OS>, Win32)

@@ -54,6 +54,11 @@ Either thread model is going to work only in Tru64 4.0 and newer
 releases, older operating releases like 3.2 aren't probably going
 to work properly with threads.
 
+In Tru64 V5 (at least V5.1A, V5.1B) you cannot build threaded Perl with gcc
+because the system header <pthread.h> explicitly checks for supported
+C compilers, gcc (at least 3.2.2) not being one of them.  But the
+system C compiler should work just fine.
+
 =head2 Long Doubles on Tru64
 
 You cannot Configure Perl to use long doubles unless you have at least
