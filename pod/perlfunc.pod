@@ -334,6 +334,23 @@ syscall() interface to access setitimer(2) if your system supports it,
 or else see L</select()> below.  It is not advised to intermix alarm() 
 and sleep() calls.
 
+If you want to use alarm() to time out a system call you need to use an
+eval/die pair. You can't rely on the alarm causing the system call to
+fail with $! set to EINTR because Perl sets up signal handlers to
+restart system calls on some systems.  Using eval/die always works.
+
+    eval {
+    	local $SIG{ALRM} = sub { die "alarm\n" };	# NB \n required
+	$nread = sysread SOCKET, $buffer, $size;
+    };
+    die if $@ and $@ ne "alarm\n";	# propagate errors
+    if ($@) {
+    	# timed out
+    }
+    else {
+    	# didn't
+    }
+
 =item atan2 Y,X
 
 Returns the arctangent of Y/X in the range -PI to PI.
