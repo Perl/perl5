@@ -307,6 +307,10 @@ Add a global watch-expression.
 
 Delete all watch-expressions.
 
+=item r
+
+Continue until return from the current subroutine, and dump the return value.
+
 =item O [opt[=val]] [opt"val"] [opt?]...
 
 Set or query values of options.  val defaults to 1.  opt can

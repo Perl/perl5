@@ -293,7 +293,7 @@ sub try_dot_al {
 	$pkg =~ s|::|/|g;
 	if (defined($name=$INC{"$pkg.pm"}))
 	    {
-		$name =~ s|^(.*)$pkg\.pm$|$1auto/$pkg/$func.al|;
+		$name =~ s|^(.*)$pkg\.pm\z|$1auto/$pkg/$func.al|s;
 		$name = undef unless (-r $name);
 	    }
 	unless (defined $name)
@@ -309,7 +309,7 @@ sub try_dot_al {
 	    *$autoload = sub {};
 	    $ok = 1;
 	} else {
-	    if ($name =~ s{(\w{12,})\.al$}{substr($1,0,11).".al"}e){
+	    if ($name =~ s{(\w{12,})\.al\z}{substr($1,0,11).".al"}e){
 		eval {local $SIG{__DIE__};require $name};
 	    }
 	    if ($@){
@@ -1253,7 +1253,7 @@ sub b {
 	    my($entry);
 	    for $entry ($dh->read) {
 		next if -d MM->catdir($bdir,$entry);
-		next unless $entry =~ s/\.pm$//;
+		next unless $entry =~ s/\.pm\z//;
 		$CPAN::META->instance('CPAN::Bundle',"Bundle::$entry");
 	    }
 	}
@@ -1424,7 +1424,7 @@ index    re-reads the index files\n});
 sub _binary_extensions {
     my($self) = shift @_;
     my(@result,$module,%seen,%need,$headerdone);
-    my $isaperl = q{perl5[._-]\\d{3}(_[0-4][0-9])?\\.tar[._-]gz$};
+    my $isaperl = q{perl5[._-]\\d{3}(_[0-4][0-9])?\\.tar[._-]gz\z};
     for $module ($self->expand('Module','/./')) {
 	my $file  = $module->cpan_file;
 	next if $file eq "N/A";
@@ -2079,7 +2079,7 @@ sub hosteasy {
 		$l =~ s|^file:||;                   # assume they
                                                     # meant
                                                     # file://localhost
-		$l =~ s|^/|| unless -f $l;          # e.g. /P:
+		$l =~ s|^/||s unless -f $l;         # e.g. /P:
 	    }
 	    if ( -f $l && -r _) {
 		$Thesite = $i;
@@ -2110,7 +2110,7 @@ sub hosteasy {
 	    utime $now, $now, $aslocal; # download time is more
                                         # important than upload time
 	    return $aslocal;
-	  } elsif ($url !~ /\.gz$/) {
+	  } elsif ($url !~ /\.gz\z/) {
 	    my $gzurl = "$url.gz";
 	    $CPAN::Frontend->myprint("Fetching with LWP:
   $gzurl
@@ -2147,7 +2147,7 @@ sub hosteasy {
 		    $Thesite = $i;
 		    return $aslocal;
 		}
-		if ($aslocal !~ /\.gz$/) {
+		if ($aslocal !~ /\.gz\z/) {
 		    my $gz = "$aslocal.gz";
 		    $CPAN::Frontend->myprint("Fetching with Net::FTP
   $url.gz
@@ -2254,7 +2254,7 @@ Trying with "$funkyftp$source_switch" to get
 	    }
 	    $Thesite = $i;
 	    return $aslocal;
-	  } elsif ($url !~ /\.gz$/) {
+	  } elsif ($url !~ /\.gz\z/) {
 	    unlink $aslocal_uncompressed if
 		-f $aslocal_uncompressed && -s _ == 0;
 	    my $gz = "$aslocal.gz";
@@ -3078,11 +3078,11 @@ sub get {
     $self->debug("Changed directory to tmp") if $CPAN::DEBUG;
     if (! $local_file) {
 	Carp::croak "bad download, can't do anything :-(\n";
-    } elsif ($local_file =~ /(\.tar\.(gz|Z)|\.tgz)$/i){
+    } elsif ($local_file =~ /(\.tar\.(gz|Z)|\.tgz)\z/i){
 	$self->untar_me($local_file);
-    } elsif ( $local_file =~ /\.zip$/i ) {
+    } elsif ( $local_file =~ /\.zip\z/i ) {
 	$self->unzip_me($local_file);
-    } elsif ( $local_file =~ /\.pm\.(gz|Z)$/) {
+    } elsif ( $local_file =~ /\.pm\.(gz|Z)\z/) {
 	$self->pm2dir_me($local_file);
     } else {
 	$self->{archived} = "NO";
@@ -3093,7 +3093,7 @@ sub get {
 	# Let's check if the package has its own directory.
 	my $dh = DirHandle->new(File::Spec->curdir)
 	    or Carp::croak("Couldn't opendir .: $!");
-	my @readdir = grep $_ !~ /^\.\.?$/, $dh->read; ### MAC??
+	my @readdir = grep $_ !~ /^\.\.?\z/s, $dh->read; ### MAC??
 	$dh->close;
 	my ($distdir,$packagedir);
 	if (@readdir == 1 && -d $readdir[0]) {
@@ -3183,7 +3183,7 @@ sub pm2dir_me {
     my($self,$local_file) = @_;
     $self->{archived} = "pm";
     my $to = File::Basename::basename($local_file);
-    $to =~ s/\.(gz|Z)$//;
+    $to =~ s/\.(gz|Z)\z//;
     if (CPAN::Tarzip->gunzip($local_file,$to)) {
 	$self->{unwrapped} = "YES";
     } else {
@@ -3246,7 +3246,7 @@ sub cvs_import {
     my $userid = $self->{CPAN_USERID};
 
     my $cvs_dir = (split '/', $dir)[-1];
-    $cvs_dir =~ s/-\d+[^-]+$//;
+    $cvs_dir =~ s/-\d+[^-]+\z//;
     my $cvs_root = 
       $CPAN::Config->{cvsroot} || $ENV{CVSROOT};
     my $cvs_site_perl = 
@@ -3343,7 +3343,7 @@ sub verifyMD5 {
 	$lc_file = CPAN::FTP->localize("authors/id/@local",
 				       "$lc_want.gz",1);
 	if ($lc_file) {
-	    $lc_file =~ s/\.gz$//;
+	    $lc_file =~ s/\.gz\z//;
 	    CPAN::Tarzip->gunzip("$lc_file.gz",$lc_file);
 	} else {
 	    return;
@@ -3468,8 +3468,8 @@ sub isa_perl {
 			    ([._-])
 			    (\d{3}(_[0-4][0-9])?)
 			    \.tar[._-]gz
-			    $
-			  }x;
+			    \z
+			  }xs;
   "$1.$3";
 }
 
@@ -4124,7 +4124,7 @@ sub as_string {
 sub manpage_headline {
   my($self,$local_file) = @_;
   my(@local_file) = $local_file;
-  $local_file =~ s/\.pm$/.pod/;
+  $local_file =~ s/\.pm\z/.pod/;
   push @local_file, $local_file;
   my(@result,$locf);
   for $locf (@local_file) {
@@ -4441,7 +4441,7 @@ sub untar {
 			       qq{Couldn\'t uncompress $file\n}
 			      );
       }
-      $file =~ s/\.gz$//;
+      $file =~ s/\.gz\z//;
       $system = "$CPAN::Config->{tar} xvf $file";
       $CPAN::Frontend->myprint(qq{Using Tar:$system:\n});
       if (system($system)==0) {
