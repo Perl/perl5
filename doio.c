@@ -1141,7 +1141,7 @@ Perl_mode_from_discipline(pTHX_ SV *discp)
 	    if (*s == ':') {
 		switch (s[1]) {
 		case 'r':
-		    if (len > 3 && strnEQ(s+1, "raw", 3)
+		    if (s[2] == 'a' && s[3] == 'w'
 			&& (!s[4] || s[4] == ':' || isSPACE(s[4])))
 		    {
 			mode = O_BINARY;
@@ -1151,7 +1151,7 @@ Perl_mode_from_discipline(pTHX_ SV *discp)
 		    }
 		    /* FALL THROUGH */
 		case 'c':
-		    if (len > 4 && strnEQ(s+1, "crlf", 4)
+		    if (s[2] == 'r' && s[3] == 'l' && s[4] == 'f'
 			&& (!s[5] || s[5] == ':' || isSPACE(s[5])))
 		    {
 			mode = O_TEXT;
