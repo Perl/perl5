@@ -1305,9 +1305,11 @@ S_scan_const(pTHX_ char *start)
 		*d++ = *s++;
 	}
 
-	/* check for embedded arrays (@foo, @:foo, @'foo, @{foo}, @$foo) */
+	/* check for embedded arrays
+	   (@foo, @:foo, @'foo, @{foo}, @$foo, @+, @-)
+	   */
 	else if (*s == '@' && s[1]
-		 && (isALNUM_lazy_if(s+1,UTF) || strchr(":'{$", s[1])))
+		 && (isALNUM_lazy_if(s+1,UTF) || strchr(":'{$+-", s[1])))
 	    break;
 
 	/* check for embedded scalars.  only stop if we're sure it's a
