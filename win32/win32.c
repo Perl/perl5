@@ -2961,6 +2961,17 @@ XS(w32_Sleep)
     XSRETURN_YES;
 }
 
+static
+XS(w32_CopyFile)
+{
+    dXSARGS;
+    if (items != 3)
+	croak("usage: Win32::CopyFile($from, $to, $overwrite)");
+    if (CopyFile(SvPV_nolen(ST(0)), SvPV_nolen(ST(1)), !SvTRUE(ST(2))))
+	XSRETURN_YES;
+    XSRETURN_NO;
+}
+
 void
 Perl_init_os_extras()
 {
@@ -2992,6 +3003,7 @@ Perl_init_os_extras()
     newXS("Win32::GetShortPathName", w32_GetShortPathName, file);
     newXS("Win32::GetFullPathName", w32_GetFullPathName, file);
     newXS("Win32::GetLongPathName", w32_GetLongPathName, file);
+    newXS("Win32::CopyFile", w32_CopyFile, file);
     newXS("Win32::Sleep", w32_Sleep, file);
 
     /* XXX Bloat Alert! The following Activeware preloads really
