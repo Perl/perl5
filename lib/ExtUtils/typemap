@@ -45,6 +45,7 @@ FileHandle		T_PTROBJ
 InputStream		T_IN
 InOutStream		T_INOUT
 OutputStream		T_OUT
+bool			T_BOOL
 
 #############################################################################
 INPUT
@@ -78,6 +79,8 @@ T_INT
 	$var = (int)SvIV($arg)
 T_ENUM
 	$var = ($type)SvIV($arg)
+T_BOOL
+	$var = (int)SvIV($arg)
 T_U_INT
 	$var = (unsigned int)SvIV($arg)
 T_SHORT
@@ -199,6 +202,8 @@ T_SYSRET
 	}
 T_ENUM
 	sv_setiv($arg, (IV)$var);
+T_BOOL
+	$arg = $var ? &sv_yes : &sv_no;
 T_U_INT
 	sv_setiv($arg, (IV)$var);
 T_SHORT
