@@ -630,8 +630,8 @@ newline-separated lines.  Each line must be one of the following:
 
 =item *
 
-Two hexadecimal numbers separated by a tabulator denoting a range
-of Unicode codepoints to include.
+Two hexadecimal numbers separated by horizontal whitespace (space or
+tabulator characters) denoting a range of Unicode codepoints to include.
 
 =item *
 

@@ -271,7 +271,7 @@ sub SWASHGET {
 	}
 	else {
 	  LINE:
-	    while (/^([0-9a-fA-F]+)(?:\t([0-9a-fA-F]+))?/mg) {
+	    while (/^([0-9a-fA-F]+)(?:[ \t]+([0-9a-fA-F]+))?/mg) {
 		my $min = hex $1;
 		my $max = (defined $2 ? hex $2 : $min);
 		next if $max < $start;
