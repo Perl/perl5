@@ -137,6 +137,36 @@ static int no_translate_barewords;
 static int tz_updated = 1;
 #endif
 
+/* my_maxidx
+ * Routine to retrieve the maximum equivalence index for an input
+ * logical name.  Some calls to this routine have no knowledge if
+ * the variable is a logical or not.  So on error we return a max
+ * index of zero.
+ */
+/*{{{int my_maxidx(char *lnm) */
+static int
+my_maxidx(char *lnm)
+{
+    int status;
+    int midx;
+    int attr = LNM$M_CASE_BLIND;
+    struct dsc$descriptor lnmdsc;
+    struct itmlst_3 itlst[2] = {{sizeof(midx), LNM$_MAX_INDEX, &midx, 0},
+                                {0, 0, 0, 0}};
+
+    lnmdsc.dsc$w_length = strlen(lnm);
+    lnmdsc.dsc$b_dtype = DSC$K_DTYPE_T;
+    lnmdsc.dsc$b_class = DSC$K_CLASS_S;
+    lnmdsc.dsc$a_pointer = lnm;
+
+    status = sys$trnlnm(&attr, &fildevdsc, &lnmdsc, 0, itlst);
+    if ((status & 1) == 0)
+       midx = 0;
+
+    return (midx);
+}
+/*}}}*/
+
 /*{{{int vmstrnenv(const char *lnm, char *eqv, unsigned long int idx, struct dsc$descriptor_s **tabvec, unsigned long int flags) */
 int
 Perl_vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
@@ -145,6 +175,7 @@ Perl_vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
     char uplnm[LNM$C_NAMLENGTH+1], *cp1, *cp2;
     unsigned short int eqvlen, curtab, ivlnm = 0, ivsym = 0, ivenv = 0, secure;
     unsigned long int retsts, attr = LNM$M_CASE_BLIND;
+    int midx;
     unsigned char acmode;
     struct dsc$descriptor_s lnmdsc = {0,DSC$K_DTYPE_T,DSC$K_CLASS_S,0},
                             tmpdsc = {6,DSC$K_DTYPE_T,DSC$K_CLASS_S,0};
@@ -161,7 +192,7 @@ Perl_vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
     }
 #endif
 
-    if (!lnm || !eqv || idx > PERL_LNM_MAX_ALLOWED_INDEX) {
+    if (!lnm || !eqv || ((idx != 0) && ((idx-1) > PERL_LNM_MAX_ALLOWED_INDEX))) {
       set_errno(EINVAL); set_vaxc_errno(SS$_BADPARAM); return 0;
     }
     for (cp1 = (char *)lnm, cp2 = uplnm; *cp1; cp1++, cp2++) {
@@ -231,22 +262,41 @@ Perl_vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
         }
       }
       else if (!ivlnm) {
-        retsts = sys$trnlnm(&attr,tabvec[curtab],&lnmdsc,&acmode,lnmlst);
-        if (retsts == SS$_IVLOGNAM) { ivlnm = 1; continue; }
-        if (retsts == SS$_NOLOGNAM) continue;
-        /* PPFs have a prefix */
-        if (
+        if (idx == 0) {
+          midx = my_maxidx((char *) lnm);
+          for (idx = 0, cp1 = eqv; idx <= midx; idx++) {
+            lnmlst[1].bufadr = cp1;
+            eqvlen = 0;
+            retsts = sys$trnlnm(&attr,tabvec[curtab],&lnmdsc,&acmode,lnmlst);
+            if (retsts == SS$_IVLOGNAM) { ivlnm = 1; break; }
+            if (retsts == SS$_NOLOGNAM) break;
+            /* PPFs have a prefix */
+            if (
 #if INTSIZE == 4
-             *((int *)uplnm) == *((int *)"SYS$")                    &&
+                 *((int *)uplnm) == *((int *)"SYS$")                    &&
 #endif
-             eqvlen >= 4 && eqv[0] == 0x1b && eqv[1] == 0x00        &&
-             ( (uplnm[4] == 'O' && !strcmp(uplnm,"SYS$OUTPUT"))  ||
-               (uplnm[4] == 'I' && !strcmp(uplnm,"SYS$INPUT"))   ||
-               (uplnm[4] == 'E' && !strcmp(uplnm,"SYS$ERROR"))   ||
-               (uplnm[4] == 'C' && !strcmp(uplnm,"SYS$COMMAND")) )  ) {
-          memcpy(eqv,eqv+4,eqvlen-4);
-          eqvlen -= 4;
+                 eqvlen >= 4 && eqv[0] == 0x1b && eqv[1] == 0x00        &&
+                 ( (uplnm[4] == 'O' && !strcmp(uplnm,"SYS$OUTPUT"))  ||
+                   (uplnm[4] == 'I' && !strcmp(uplnm,"SYS$INPUT"))   ||
+                   (uplnm[4] == 'E' && !strcmp(uplnm,"SYS$ERROR"))   ||
+                   (uplnm[4] == 'C' && !strcmp(uplnm,"SYS$COMMAND")) )  ) {
+              memcpy(eqv,eqv+4,eqvlen-4);
+              eqvlen -= 4;
+            }
+            cp1 += eqvlen;
+            *cp1 = '\0';
+          }
+          if ((retsts == SS$_IVLOGNAM) ||
+              (retsts == SS$_NOLOGNAM)) { continue; }
         }
+        else {
+	  idx -= 1;
+          retsts = sys$trnlnm(&attr,tabvec[curtab],&lnmdsc,&acmode,lnmlst);
+          if (retsts == SS$_IVLOGNAM) { ivlnm = 1; continue; }
+          if (retsts == SS$_NOLOGNAM) continue;
+          eqv[eqvlen] = '\0';
+        }
+        eqvlen = strlen(eqv);
         break;
       }
     }
@@ -287,20 +337,33 @@ int Perl_my_trnlnm(pTHX_ const char *lnm, char *eqv, unsigned long int idx)
 char *
 Perl_my_getenv(pTHX_ const char *lnm, bool sys)
 {
-    static char __my_getenv_eqv[LNM$C_NAMLENGTH+1];
+    static char *__my_getenv_eqv = NULL;
     char uplnm[LNM$C_NAMLENGTH+1], *cp1, *cp2, *eqv;
     unsigned long int idx = 0;
     int trnsuccess, success, secure, saverr, savvmserr;
+    int midx;
     SV *tmpsv;
+
+    midx = my_maxidx((char *) lnm) + 1;
 
     if (PL_curinterp) {  /* Perl interpreter running -- may be threaded */
       /* Set up a temporary buffer for the return value; Perl will
        * clean it up at the next statement transition */
-      tmpsv = sv_2mortal(newSVpv("",LNM$C_NAMLENGTH+1));
+      tmpsv = sv_2mortal(newSVpv("",(LNM$C_NAMLENGTH*midx)+1));
       if (!tmpsv) return NULL;
       eqv = SvPVX(tmpsv);
     }
-    else eqv = __my_getenv_eqv;  /* Assume no interpreter ==> single thread */
+    else {
+      /* Assume no interpreter ==> single thread */
+      if (__my_getenv_eqv != NULL) {
+        Renew(__my_getenv_eqv,LNM$C_NAMLENGTH*midx+1,char);
+      }
+      else {
+        New(1380,__my_getenv_eqv,LNM$C_NAMLENGTH*midx+1,char);
+      }
+      eqv = __my_getenv_eqv;  
+    }
+
     for (cp1 = (char *) lnm, cp2 = eqv; *cp1; cp1++,cp2++) *cp2 = _toupper(*cp1);
     if (cp1 - lnm == 7 && !strncmp(eqv,"DEFAULT",7)) {
       getcwd(eqv,LNM$C_NAMLENGTH);
@@ -310,7 +373,7 @@ Perl_my_getenv(pTHX_ const char *lnm, bool sys)
       if ((cp2 = strchr(lnm,';')) != NULL) {
         strcpy(uplnm,lnm);
         uplnm[cp2-lnm] = '\0';
-        idx = strtoul(cp2+1,NULL,0);
+        idx = strtoul(cp2+1,NULL,0) + 1;
         lnm = uplnm;
       }
       /* Impose security constraints only if tainting */
@@ -345,18 +408,31 @@ Perl_my_getenv_len(pTHX_ const char *lnm, unsigned long *len, bool sys)
 {
     char *buf, *cp1, *cp2;
     unsigned long idx = 0;
-    static char __my_getenv_len_eqv[LNM$C_NAMLENGTH+1];
+    int midx;
+    static char *__my_getenv_len_eqv = NULL;
     int secure, saverr, savvmserr;
     SV *tmpsv;
     
+    midx = my_maxidx((char *) lnm) + 1;
+
     if (PL_curinterp) {  /* Perl interpreter running -- may be threaded */
       /* Set up a temporary buffer for the return value; Perl will
        * clean it up at the next statement transition */
-      tmpsv = sv_2mortal(newSVpv("",LNM$C_NAMLENGTH+1));
+      tmpsv = sv_2mortal(newSVpv("",(LNM$C_NAMLENGTH*midx)+1));
       if (!tmpsv) return NULL;
       buf = SvPVX(tmpsv);
     }
-    else buf = __my_getenv_len_eqv;  /* Assume no interpreter ==> single thread */
+    else {
+      /* Assume no interpreter ==> single thread */
+      if (__my_getenv_len_eqv != NULL) {
+        Renew(__my_getenv_len_eqv,LNM$C_NAMLENGTH*midx+1,char);
+      }
+      else {
+        New(1381,__my_getenv_len_eqv,LNM$C_NAMLENGTH*midx+1,char);
+      }
+      buf = __my_getenv_len_eqv;  
+    }
+
     for (cp1 = (char *)lnm, cp2 = buf; *cp1; cp1++,cp2++) *cp2 = _toupper(*cp1);
     if (cp1 - lnm == 7 && !strncmp(buf,"DEFAULT",7)) {
       getcwd(buf,LNM$C_NAMLENGTH);
@@ -367,7 +443,7 @@ Perl_my_getenv_len(pTHX_ const char *lnm, unsigned long *len, bool sys)
       if ((cp2 = strchr(lnm,';')) != NULL) {
         strcpy(buf,lnm);
         buf[cp2-lnm] = '\0';
-        idx = strtoul(cp2+1,NULL,0);
+        idx = strtoul(cp2+1,NULL,0) + 1;
         lnm = buf;
       }
       if (sys) {
@@ -603,9 +679,11 @@ prime_env_iter(void)
 int
 Perl_vmssetenv(pTHX_ char *lnm, char *eqv, struct dsc$descriptor_s **tabvec)
 {
-    char uplnm[LNM$C_NAMLENGTH], *cp1, *cp2;
+    char uplnm[LNM$C_NAMLENGTH], *cp1, *cp2, *c;
     unsigned short int curtab, ivlnm = 0, ivsym = 0, ivenv = 0;
+    int nseg = 0, j;
     unsigned long int retsts, usermode = PSL$C_USER;
+    struct itmlst_3 *ile, *ilist;
     struct dsc$descriptor_s lnmdsc = {0,DSC$K_DTYPE_T,DSC$K_CLASS_S,uplnm},
                             eqvdsc = {0,DSC$K_DTYPE_T,DSC$K_CLASS_S,0},
                             tmpdsc = {6,DSC$K_DTYPE_T,DSC$K_CLASS_S,0};
@@ -691,12 +769,42 @@ Perl_vmssetenv(pTHX_ char *lnm, char *eqv, struct dsc$descriptor_s **tabvec)
         else {
           if (!*eqv) eqvdsc.dsc$w_length = 1;
 	  if (eqvdsc.dsc$w_length > LNM$C_NAMLENGTH) {
-	    eqvdsc.dsc$w_length = LNM$C_NAMLENGTH;
-	    if (ckWARN(WARN_MISC)) {
-	      Perl_warner(aTHX_ packWARN(WARN_MISC),"Value of logical \"%s\" too long. Truncating to %i bytes",lnm, LNM$C_NAMLENGTH);
+
+            nseg = (eqvdsc.dsc$w_length + LNM$C_NAMLENGTH - 1) / LNM$C_NAMLENGTH;
+            if (nseg > PERL_LNM_MAX_ALLOWED_INDEX + 1) {
+	      Perl_warner(aTHX_ packWARN(WARN_MISC),"Value of logical \"%s\" too long. Truncating to %i bytes",
+                          lnm, LNM$C_NAMLENGTH * (PERL_LNM_MAX_ALLOWED_INDEX+1));
+              eqvdsc.dsc$w_length = LNM$C_NAMLENGTH * (PERL_LNM_MAX_ALLOWED_INDEX+1);
+              nseg = PERL_LNM_MAX_ALLOWED_INDEX + 1;
 	    }
+
+            New(1382,ilist,nseg+1,struct itmlst_3);
+            ile = ilist;
+            if (!ile) {
+	      set_errno(ENOMEM); set_vaxc_errno(SS$_INSFMEM);
+              return SS$_INSFMEM;
+	    }
+            memset(ilist, 0, (sizeof(struct itmlst_3) * (nseg+1)));
+
+            for (j = 0, c = eqvdsc.dsc$a_pointer; j < nseg; j++, ile++, c += LNM$C_NAMLENGTH) {
+              ile->itmcode = LNM$_STRING;
+              ile->bufadr = c;
+              if ((j+1) == nseg) {
+                ile->buflen = strlen(c);
+                /* in case we are truncating one that's too long */
+                if (ile->buflen > LNM$C_NAMLENGTH) ile->buflen = LNM$C_NAMLENGTH;
+              }
+              else {
+                ile->buflen = LNM$C_NAMLENGTH;
+              }
+            }
+
+            retsts = lib$set_logical(&lnmdsc,0,tabvec[0],0,ilist);
+            Safefree (ilist);
 	  }
-          retsts = lib$set_logical(&lnmdsc,&eqvdsc,tabvec[0],0,0);
+          else {
+            retsts = lib$set_logical(&lnmdsc,&eqvdsc,tabvec[0],0,0);
+	  }
         }
       }
     }
