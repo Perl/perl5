@@ -7,6 +7,7 @@
 # Perl built with this hints file under IRIX 6.0.1 passes 
 # all tests (`make test').
 
+ld=ld
 i_time='define'
 cc="cc -32"
 ccflags="$ccflags -D_POSIX_SOURCE -ansiposix -D_BSD_TYPES -Olimit 3000"

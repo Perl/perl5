@@ -89,25 +89,62 @@ HTML = \
 	perltrap.html	\
 	perlvar.html
 
-man: $(MAN)
+TEX = \
+	perl.tex	\
+	perlapi.tex	\
+	perlbook.tex	\
+	perlbot.tex	\
+	perlcall.tex	\
+	perldata.tex	\
+	perldebug.tex	\
+	perldiag.tex	\
+	perlembed.tex	\
+	perlform.tex	\
+	perlfunc.tex	\
+	perlguts.tex	\
+	perlipc.tex	\
+	perlmod.tex	\
+	perlobj.tex	\
+	perlop.tex	\
+	perlovl.tex	\
+	perlpod.tex	\
+	perlre.tex	\
+	perlref.tex	\
+	perlrun.tex	\
+	perlsec.tex	\
+	perlstyle.tex	\
+	perlsub.tex	\
+	perlsyn.tex	\
+	perltrap.tex	\
+	perlvar.tex
 
-# pod2html runs on all the pods at once in order to build up
+
+man:  pod2man $(MAN)
+
+# pod2html normally runs on all the pods at once in order to build up
 # cross-references.
-html:
+html: pod2html
 	$(PERL) pod2html *.pod
+
+tex:	pod2latex $(TEX)
 
 .SUFFIXES: .pod .man
 
-.pod.man:
+.pod.man:     pod2man
 	$(PERL) pod2man $*.pod >$*.man
 
 .SUFFIXES: .pod .html
 
-.pod.html:
+.pod.html:    pod2html
 	$(PERL) pod2html $*.pod
 
+.SUFFIXES: .pod .tex
+
+.pod.tex: pod2latex
+	$(PERL) pod2latex $*.pod
+
 clean:
-	rm -f $(MAN) $(HTML)
+	rm -f $(MAN) $(HTML) $(TEX)
 
 realclean:	clean
 	rm -f pod2man pod2latex pod2html

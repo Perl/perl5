@@ -1,4 +1,5 @@
 # irix_5.sh
+ld=ld
 i_time='define'
 ccflags="$ccflags -D_POSIX_SOURCE -ansiposix -D_BSD_TYPES -Olimit 3000"
 lddlflags="-shared"

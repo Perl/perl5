@@ -10,6 +10,10 @@
 #
 # Last updated Thu Apr  6 12:22:03 EDT 1995
 #
+# If you wish to use something other than 'gcc' for your compiler,
+# you should specify it on the Configure command line.  To use
+# gcc-elf, for exmample, type 
+# ./Configure -Dcc=gcc-elf
 
 # perl goes into the /usr tree.  See the Filesystem Standard
 # available via anonymous FTP at tsx-11.mit.edu in
@@ -64,7 +68,7 @@ main() {
 	exit(0); /* succeed (yes, it's ELF) */
 }
 EOM
-if gcc try.c >/dev/null 2>&1 && ./a.out; then
+if ${cc:-gcc} try.c >/dev/null 2>&1 && ./a.out; then
     cat <<'EOM'
 
 You appear to have ELF support.  I'll try to use it for dynamic loading.

@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.7 1995/03/21 08:46:15 ram Exp $
 #
-# Generated on Fri Apr 14 15:43:12 EDT 1995 [metaconfig 3.0 PL53]
+# Generated on Mon Apr 17 15:46:57 EDT 1995 [metaconfig 3.0 PL53]
 
 cat >/tmp/c1$$ <<EOF
 ARGGGHHHH!!!!!
@@ -4296,7 +4296,7 @@ use no flags, say "none".
 
 EOM
     case "$lddlflags" in
-    ''|' ') case "$osname" in
+    '') case "$osname" in
 			hpux)  dflt='-b' ;;
 			linux)	dflt='-shared' ;;
 			next)  dflt='none' ;;
@@ -4323,7 +4323,7 @@ say "none".
 
 EOM
     case "$ccdlflags" in
-    ''|' ') case "$osname" in
+    '') case "$osname" in
 		hpux)	dflt='-Wl,-E' ;;
 		linux)	dflt='-rdynamic' ;;
 		next)	dflt='none' ;;
@@ -7392,7 +7392,8 @@ EOS
 chmod +x ccsym
 $eunicefix ccsym
 ./ccsym | $sort | $uniq >ccsym.raw
-$awk '/\=/ { print $0; next } { print $0"=1" }' ccsym.raw >ccsym.list
+$awk '/\=/ { print $0; next }
+	{ print $0"=1" }' ccsym.raw >ccsym.list
 $awk '{ print $0"=1" }' Cppsym.true >ccsym.true
 $comm -13 ccsym.true ccsym.list >ccsym.own
 $comm -12 ccsym.true ccsym.list >ccsym.com

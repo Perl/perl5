@@ -1,6 +1,6 @@
 package ExtUtils::MakeMaker;
 
-$Version = 4.093; # Last edited 12 Apr 1995 by Andy Dougherty
+$Version = 4.094; # Last edited 17 Apr 1995 by Andy Dougherty
 
 use Config;
 use Carp;
@@ -1229,7 +1229,7 @@ sub const_cccmd{
 	."Please notify perl5-porters\@nicoh.com\n";
     }
     my($cccmd)=($old) ? $old : $new;
-    $cccmd =~ s/\b\Q$Config{'cc'}\E\b/\$(CC)/;
+    $cccmd =~ s/^\s*\Q$Config{'cc'}\E\s/\$(CC) /;
     "CCCMD = $cccmd\n";
 }
 
@@ -2436,7 +2436,6 @@ v4.091 April 3 1995 by Andy Dougherty
 
 Another attempt to fix writedoc() from Dean Roehrich.
 
-
 v4.092 April 11 1994 by Andreas Koenig
 
 Fixed a docu bug in hint file description. Added printing of a warning
@@ -2469,7 +2468,9 @@ are handled.
 Include Tim's suggestions about $verbose and more careful substitution
 of $(CC) for $Config{'cc'}.
 
-Minor cosmetic fixes for my 80-character wide terminal.
+v4.094 April 12 1994 by Andy Dougherty
+
+Include Andreas' improvement of $(CC) detection.
 
 =head1 NOTES
 
