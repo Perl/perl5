@@ -37,7 +37,7 @@ use Pod::Html;
 open(POD, "<$$.pod") or die "$$.pod: $!";
 open(IN,  ">$$.in")  or die "$$.in: $!";
 while (<POD>) {
-  s/[\r\n]+/\r/gs;
+  s/[\r\n]+/\r/g;
   print IN $_;
 }
 close(POD);
@@ -50,7 +50,7 @@ pod2html("--title=eol", "--infile=$$.in", "--outfile=$$.o1");
 open(POD, "<$$.pod") or die "$$.pod: $!";
 open(IN,  ">$$.in")  or die "$$.in: $!";
 while (<POD>) {
-  s/[\r\n]+/\n/gs;
+  s/[\r\n]+/\n/g;
   print IN $_;
 }
 close(POD);
@@ -63,7 +63,7 @@ pod2html("--title=eol", "--infile=$$.in", "--outfile=$$.o2");
 open(POD, "<$$.pod") or die "$$.pod: $!";
 open(IN,  ">$$.in")  or die "$$.in: $!";
 while (<POD>) {
-  s/[\r\n]+/\r\n/gs;
+  s/[\r\n]+/\r\n/g;
   print IN $_;
 }
 close(POD);
