@@ -546,10 +546,16 @@
 #define PL_regexecp		pPerl->PL_regexecp
 #undef  PL_regflags
 #define PL_regflags		pPerl->PL_regflags
+#undef  PL_regfree
+#define PL_regfree		pPerl->PL_regfree
 #undef  PL_regindent
 #define PL_regindent		pPerl->PL_regindent
 #undef  PL_reginput
 #define PL_reginput		pPerl->PL_reginput
+#undef  PL_regint_start
+#define PL_regint_start		pPerl->PL_regint_start
+#undef  PL_regint_string
+#define PL_regint_string	pPerl->PL_regint_string
 #undef  PL_reginterp_cnt
 #define PL_reginterp_cnt	pPerl->PL_reginterp_cnt
 #undef  PL_reglastparen
@@ -2426,6 +2432,14 @@
 #define Perl_pregcomp		pPerl->Perl_pregcomp
 #undef  pregcomp
 #define pregcomp		Perl_pregcomp
+#undef  Perl_re_intuit_start
+#define Perl_re_intuit_start	pPerl->Perl_re_intuit_start
+#undef  re_intuit_start
+#define re_intuit_start		Perl_re_intuit_start
+#undef  Perl_re_intuit_string
+#define Perl_re_intuit_string	pPerl->Perl_re_intuit_string
+#undef  re_intuit_string
+#define re_intuit_string	Perl_re_intuit_string
 #undef  Perl_regexec_flags
 #define Perl_regexec_flags	pPerl->Perl_regexec_flags
 #undef  regexec_flags

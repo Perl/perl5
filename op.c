@@ -192,7 +192,7 @@ Perl_pad_allocmy(pTHX_ char *name)
 	PL_sv_objcount++;
     }
     av_store(PL_comppad_name, off, sv);
-    SvNVX(sv) = (double)PAD_MAX;
+    SvNVX(sv) = (NV)PAD_MAX;
     SvIVX(sv) = 0;			/* Not yet introduced--see newSTATEOP */
     if (!PL_min_intro_pending)
 	PL_min_intro_pending = off;
@@ -255,7 +255,7 @@ S_pad_findlex(pTHX_ char *name, PADOFFSET newoff, U32 seq, CV* startcv,
 		    sv_upgrade(namesv, SVt_PVNV);
 		    sv_setpv(namesv, name);
 		    av_store(PL_comppad_name, newoff, namesv);
-		    SvNVX(namesv) = (double)PL_curcop->cop_seq;
+		    SvNVX(namesv) = (NV)PL_curcop->cop_seq;
 		    SvIVX(namesv) = PAD_MAX;	/* A ref, intro immediately */
 		    SvFAKE_on(namesv);		/* A ref, not a real var */
 		    if (SvOBJECT(sv)) {		/* A typed var */
@@ -1899,7 +1899,7 @@ Perl_fold_constants(pTHX_ register OP *o)
 	    type != OP_NEGATE)
 	{
 	    IV iv = SvIV(sv);
-	    if ((double)iv == SvNV(sv)) {
+	    if ((NV)iv == SvNV(sv)) {
 		SvREFCNT_dec(sv);
 		sv = newSViv(iv);
 	    }
@@ -3083,7 +3083,7 @@ Perl_intro_my(pTHX)
     for (i = PL_min_intro_pending; i <= PL_max_intro_pending; i++) {
 	if ((sv = svp[i]) && sv != &PL_sv_undef && !SvIVX(sv)) {
 	    SvIVX(sv) = PAD_MAX;	/* Don't know scope end yet. */
-	    SvNVX(sv) = (double)PL_cop_seqmax;
+	    SvNVX(sv) = (NV)PL_cop_seqmax;
 	}
     }
     PL_min_intro_pending = 0;

@@ -448,6 +448,8 @@
 #define pregexec		Perl_pregexec
 #define pregfree		Perl_pregfree
 #define pregcomp		Perl_pregcomp
+#define re_intuit_start		Perl_re_intuit_start
+#define re_intuit_string	Perl_re_intuit_string
 #define regexec_flags		Perl_regexec_flags
 #define regnext			Perl_regnext
 #define regprop			Perl_regprop
@@ -1762,6 +1764,8 @@
 #define pregexec(a,b,c,d,e,f,g)	Perl_pregexec(aTHX_ a,b,c,d,e,f,g)
 #define pregfree(a)		Perl_pregfree(aTHX_ a)
 #define pregcomp(a,b,c)		Perl_pregcomp(aTHX_ a,b,c)
+#define re_intuit_start(a,b,c,d,e,f)	Perl_re_intuit_start(aTHX_ a,b,c,d,e,f)
+#define re_intuit_string(a)	Perl_re_intuit_string(aTHX_ a)
 #define regexec_flags(a,b,c,d,e,f,g,h)	Perl_regexec_flags(aTHX_ a,b,c,d,e,f,g,h)
 #define regnext(a)		Perl_regnext(aTHX_ a)
 #define regprop(a,b)		Perl_regprop(aTHX_ a,b)
@@ -3486,6 +3490,10 @@
 #define pregfree		Perl_pregfree
 #define Perl_pregcomp		CPerlObj::Perl_pregcomp
 #define pregcomp		Perl_pregcomp
+#define Perl_re_intuit_start	CPerlObj::Perl_re_intuit_start
+#define re_intuit_start		Perl_re_intuit_start
+#define Perl_re_intuit_string	CPerlObj::Perl_re_intuit_string
+#define re_intuit_string	Perl_re_intuit_string
 #define Perl_regexec_flags	CPerlObj::Perl_regexec_flags
 #define regexec_flags		Perl_regexec_flags
 #define Perl_regnext		CPerlObj::Perl_regnext

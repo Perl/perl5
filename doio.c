@@ -898,7 +898,7 @@ Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
 	if (SvGMAGICAL(sv))
 	    mg_get(sv);
         if (SvIOK(sv) && SvIVX(sv) != 0) {
-	    PerlIO_printf(fp, PL_ofmt, (double)SvIVX(sv));
+	    PerlIO_printf(fp, PL_ofmt, (NV)SvIVX(sv));
 	    return !PerlIO_error(fp);
 	}
 	if (  (SvNOK(sv) && SvNVX(sv) != 0.0)

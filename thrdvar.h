@@ -170,9 +170,16 @@ PERLVAR(Treg_oldsaved,	char*)		/* old saved substr during match */
 PERLVAR(Treg_oldsavedlen, STRLEN)	/* old length of saved substr during match */
 
 PERLVARI(Tregcompp,	regcomp_t, FUNC_NAME_TO_PTR(Perl_pregcomp))
-					/* Pointer to RE compiler */
+					/* Pointer to REx compiler */
 PERLVARI(Tregexecp,	regexec_t, FUNC_NAME_TO_PTR(Perl_regexec_flags))
-					/* Pointer to RE executer */
+					/* Pointer to REx executer */
+PERLVARI(Tregint_start,	re_intuit_start_t, FUNC_NAME_TO_PTR(Perl_re_intuit_start))
+					/* Pointer to optimized REx executer */
+PERLVARI(Tregint_string,re_intuit_string_t, FUNC_NAME_TO_PTR(Perl_re_intuit_string))
+					/* Pointer to optimized REx string */
+PERLVARI(Tregfree,	regfree_t, FUNC_NAME_TO_PTR(Perl_pregfree))
+					/* Pointer to REx free()er */
+
 PERLVARI(Treginterp_cnt,int,	    0)	/* Whether `Regexp'
 						   was interpolated. */
 PERLVARI(Treg_starttry,	char *,	    0)	/* -Dr: where regtry was called. */

@@ -12,7 +12,7 @@ struct xpvav {
     SSize_t	xav_fill;       /* Index of last element present */
     SSize_t	xav_max;        /* Number of elements for which array has space */
     IV		xof_off;	/* ptr is incremented by offset */
-    double	xnv_nv;		/* numeric value, if any */
+    NV		xnv_nv;		/* numeric value, if any */
     MAGIC*	xmg_magic;	/* magic for scalar array */
     HV*		xmg_stash;	/* class package */
 

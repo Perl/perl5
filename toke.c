@@ -5953,7 +5953,7 @@ Perl_scan_num(pTHX_ char *start)
     register char *d;			/* destination in temp buffer */
     register char *e;			/* end of temp buffer */
     I32 tryiv;				/* used to see if it can be an int */
-    double value;			/* number read, as a double */
+    NV value;				/* number read, as a double */
     SV *sv;				/* place to put the converted number */
     I32 floatit;			/* boolean: int or float? */
     char *lastub = 0;			/* position of last underbar */
@@ -6169,7 +6169,7 @@ Perl_scan_num(pTHX_ char *start)
 	   conversion at all.
 	*/
 	tryiv = I_V(value);
-	if (!floatit && (double)tryiv == value)
+	if (!floatit && (NV)tryiv == value)
 	    sv_setiv(sv, tryiv);
 	else
 	    sv_setnv(sv, value);

@@ -59,7 +59,7 @@ require DynaLoader;
 	GDBM_WRITER
 );
 
-$VERSION = "1.02";
+$VERSION = "1.03";
 
 sub AUTOLOAD {
     my($constname);

@@ -85,8 +85,11 @@
 #define PL_regeol		(my_perl->Tregeol)
 #define PL_regexecp		(my_perl->Tregexecp)
 #define PL_regflags		(my_perl->Tregflags)
+#define PL_regfree		(my_perl->Tregfree)
 #define PL_regindent		(my_perl->Tregindent)
 #define PL_reginput		(my_perl->Treginput)
+#define PL_regint_start		(my_perl->Tregint_start)
+#define PL_regint_string	(my_perl->Tregint_string)
 #define PL_reginterp_cnt	(my_perl->Treginterp_cnt)
 #define PL_reglastparen		(my_perl->Treglastparen)
 #define PL_regnarrate		(my_perl->Tregnarrate)
@@ -212,8 +215,11 @@
 #define PL_regeol		(PL_curinterp->Tregeol)
 #define PL_regexecp		(PL_curinterp->Tregexecp)
 #define PL_regflags		(PL_curinterp->Tregflags)
+#define PL_regfree		(PL_curinterp->Tregfree)
 #define PL_regindent		(PL_curinterp->Tregindent)
 #define PL_reginput		(PL_curinterp->Treginput)
+#define PL_regint_start		(PL_curinterp->Tregint_start)
+#define PL_regint_string	(PL_curinterp->Tregint_string)
 #define PL_reginterp_cnt	(PL_curinterp->Treginterp_cnt)
 #define PL_reglastparen		(PL_curinterp->Treglastparen)
 #define PL_regnarrate		(PL_curinterp->Tregnarrate)
@@ -854,8 +860,11 @@
 #define PL_Tregeol		PL_regeol
 #define PL_Tregexecp		PL_regexecp
 #define PL_Tregflags		PL_regflags
+#define PL_Tregfree		PL_regfree
 #define PL_Tregindent		PL_regindent
 #define PL_Treginput		PL_reginput
+#define PL_Tregint_start	PL_regint_start
+#define PL_Tregint_string	PL_regint_string
 #define PL_Treginterp_cnt	PL_reginterp_cnt
 #define PL_Treglastparen	PL_reglastparen
 #define PL_Tregnarrate		PL_regnarrate
@@ -992,8 +1001,11 @@
 #define PL_regeol		(thr->Tregeol)
 #define PL_regexecp		(thr->Tregexecp)
 #define PL_regflags		(thr->Tregflags)
+#define PL_regfree		(thr->Tregfree)
 #define PL_regindent		(thr->Tregindent)
 #define PL_reginput		(thr->Treginput)
+#define PL_regint_start		(thr->Tregint_start)
+#define PL_regint_string	(thr->Tregint_string)
 #define PL_reginterp_cnt	(thr->Treginterp_cnt)
 #define PL_reglastparen		(thr->Treglastparen)
 #define PL_regnarrate		(thr->Tregnarrate)

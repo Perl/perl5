@@ -70,10 +70,10 @@ typedef IV IV64;
 	arg = PL_tokenbuf;			\
     } STMT_END
 
-#define BGET_double(arg) STMT_START {	\
+#define BGET_NV(arg) STMT_START {	\
 	char *str;			\
 	BGET_strconst(str);		\
-	arg = atof(str);		\
+	arg = Perl_atonv(str);		\
     } STMT_END
 
 #define BGET_objindex(arg, type) STMT_START {	\

@@ -2630,7 +2630,7 @@ Perl_repeatcpy(pTHX_ register char *to, register const char *from, I32 len, regi
 }
 
 U32
-Perl_cast_ulong(pTHX_ double f)
+Perl_cast_ulong(pTHX_ NV f)
 {
     long along;
 
@@ -2667,7 +2667,7 @@ Perl_cast_ulong(pTHX_ double f)
 #endif
 
 I32
-Perl_cast_i32(pTHX_ double f)
+Perl_cast_i32(pTHX_ NV f)
 {
     if (f >= I32_MAX)
 	return (I32) I32_MAX;
@@ -2677,12 +2677,12 @@ Perl_cast_i32(pTHX_ double f)
 }
 
 IV
-Perl_cast_iv(pTHX_ double f)
+Perl_cast_iv(pTHX_ NV f)
 {
     if (f >= IV_MAX) {
 	UV uv;
 	
-	if (f >= (double)UV_MAX)
+	if (f >= (NV)UV_MAX)
 	    return (IV) UV_MAX;	
 	uv = (UV) f;
 	return (IV)uv;
@@ -2693,7 +2693,7 @@ Perl_cast_iv(pTHX_ double f)
 }
 
 UV
-Perl_cast_uv(pTHX_ double f)
+Perl_cast_uv(pTHX_ NV f)
 {
     if (f >= MY_UV_MAX)
 	return (UV) MY_UV_MAX;
@@ -3235,6 +3235,9 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
     PL_maxscream = -1;
     PL_regcompp = FUNC_NAME_TO_PTR(Perl_pregcomp);
     PL_regexecp = FUNC_NAME_TO_PTR(Perl_regexec_flags);
+    PL_regint_start = FUNC_NAME_TO_PTR(Perl_re_intuit_start);
+    PL_regint_string = FUNC_NAME_TO_PTR(Perl_re_intuit_string);
+    PL_regfree = FUNC_NAME_TO_PTR(Perl_pregfree);
     PL_regindent = 0;
     PL_reginterp_cnt = 0;
     PL_lastscream = Nullsv;
@@ -3303,7 +3306,7 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
  * So it is in perl for (say) POSIX to use. 
  * Needed for SunOS with Sun's 'acc' for example.
  */
-double 
+NV 
 Perl_huge(void)
 {
  return HUGE_VAL;
@@ -3506,22 +3509,23 @@ Perl_my_fflush_all(pTHX)
 #endif
 }
 
-double
+NV
 Perl_my_atof(pTHX_ const char* s) {
 #ifdef USE_LOCALE_NUMERIC
     if ((PL_hints & HINT_LOCALE) && PL_numeric_local) {
-	double x, y;
+	NV x, y;
 
-	x = atof(s);
+	x = Perl_atof(s);
 	SET_NUMERIC_STANDARD();
-	y = atof(s);
+	y = Perl_atof(s);
 	SET_NUMERIC_LOCAL();
 	if ((y < 0.0 && y < x) || (y > 0.0 && y > x))
 	    return y;
 	return x;
-    } else
-	return atof(s);
+    }
+    else
+	return Perl_atof(s);
 #else
-    return atof(s);
+    return Perl_atof(s);
 #endif
 }

@@ -312,7 +312,7 @@ xrv		SvRV(bytecode_sv)			svindex
 xpv		bytecode_sv				none		x
 xiv32		SvIVX(bytecode_sv)			I32
 xiv64		SvIVX(bytecode_sv)			IV64
-xnv		SvNVX(bytecode_sv)			double
+xnv		SvNVX(bytecode_sv)			NV
 xlv_targoff	LvTARGOFF(bytecode_sv)			STRLEN
 xlv_targlen	LvTARGLEN(bytecode_sv)			STRLEN
 xlv_targ	LvTARG(bytecode_sv)			svindex

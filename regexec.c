@@ -25,7 +25,7 @@
 #    define PERL_IN_XSUB_RE
 #  endif
 /* need access to debugger hooks */
-#  ifndef DEBUGGING
+#  if defined(PERL_EXT_RE_DEBUG) && !defined(DEBUGGING)
 #    define DEBUGGING
 #  endif
 #endif
@@ -35,6 +35,7 @@
 #  define Perl_regexec_flags my_regexec
 #  define Perl_regdump my_regdump
 #  define Perl_regprop my_regprop
+#  define Perl_re_intuit_start my_re_intuit_start
 /* *These* symbols are masked to allow static link. */
 #  define Perl_pregexec my_pregexec
 #  define Perl_reginitcolors my_reginitcolors 
@@ -258,6 +259,192 @@ S_restore_pos(pTHX_ void *arg)
     }	
 }
 
+/* 
+ * Need to implement the following flags for reg_anch:
+ *
+ * USE_INTUIT_NOML		- Useful to call re_intuit_start() first
+ * USE_INTUIT_ML
+ * INTUIT_AUTORITATIVE_NOML	- Can trust a positive answer
+ * INTUIT_AUTORITATIVE_ML
+ * INTUIT_ONCE_NOML		- Intuit can match in one location only.
+ * INTUIT_ONCE_ML
+ *
+ * Another flag for this function: SECOND_TIME (so that float substrs
+ * with giant delta may be not rechecked).
+ */
+
+/* Assumptions: if ANCH_GPOS, then strpos is anchored. XXXX Check GPOS logic */
+
+/* If SCREAM, then sv should be compatible with strpos and strend.
+   Otherwise, only SvCUR(sv) is used to get strbeg. */
+
+/* XXXX We assume that strpos is strbeg unless sv. */
+
+char *
+Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
+		     char *strend, U32 flags, re_scream_pos_data *data)
+{
+    I32 start_shift;
+    /* Should be nonnegative! */
+    I32 end_shift;
+    char *s;
+    char *t;
+    I32 ml_anch;
+
+    DEBUG_r( if (!PL_colorset) reginitcolors() );
+    DEBUG_r(PerlIO_printf(Perl_debug_log,
+		      "%sGuessing start of match:%s `%s%.60s%s%s' against `%s%.*s%s%s'\n",
+		      PL_colors[4],PL_colors[5],PL_colors[0],
+		      prog->precomp,
+		      PL_colors[1],
+		      (strlen(prog->precomp) > 60 ? "..." : ""),
+		      PL_colors[0],
+		      (strend - strpos > 60 ? 60 : strend - strpos),
+		      strpos, PL_colors[1],
+		      (strend - strpos > 60 ? "..." : ""))
+	);
+
+    if (prog->minlen > strend - strpos)
+	goto fail;
+
+    /* XXXX Move further down? */
+    start_shift = prog->check_offset_min;	/* okay to underestimate on CC */
+    /* Should be nonnegative! */
+    end_shift = prog->minlen - start_shift -
+	CHR_SVLEN(prog->check_substr) + (SvTAIL(prog->check_substr) != 0);
+
+    if (prog->reganch & ROPT_ANCH) {
+	ml_anch = !( (prog->reganch & ROPT_ANCH_SINGLE)
+		     || ( (prog->reganch & ROPT_ANCH_BOL)
+			  && !PL_multiline ) );
+
+	if ((prog->check_offset_min == prog->check_offset_max) && !ml_anch) {
+	    /* Anchored... */
+	    I32 slen;
+
+	    if ( !(prog->reganch & ROPT_ANCH_GPOS) /* Checked by the caller */
+		 && (sv && (strpos + SvCUR(sv) != strend)) )
+		goto fail;
+
+	    s = (char*)HOP((U8*)strpos, prog->check_offset_min);
+	    if (SvTAIL(prog->check_substr)) {
+		slen = SvCUR(prog->check_substr);	/* >= 1 */
+
+		if ( strend - s > slen || strend - s < slen - 1 ) {
+		    s = Nullch;
+		    goto finish;
+		}
+		if ( strend - s == slen && strend[-1] != '\n') {
+		    s = Nullch;
+		    goto finish;
+		}
+		/* Now should match s[0..slen-2] */
+		slen--;
+		if (slen && (*SvPVX(prog->check_substr) != *s
+			     || (slen > 1
+				 && memNE(SvPVX(prog->check_substr), s, slen))))
+		    s = Nullch;
+	    }
+	    else if (*SvPVX(prog->check_substr) != *s
+		     || ((slen = SvCUR(prog->check_substr)) > 1
+			 && memNE(SvPVX(prog->check_substr), s, slen)))
+		    s = Nullch;
+	    else
+		    s = strpos;
+	    goto finish;
+	}
+	s = strpos;
+	if (!ml_anch && (s + prog->check_offset_max < strend - prog->minlen))
+	    end_shift += strend - s - prog->minlen - prog->check_offset_max;
+    }
+    else {
+	ml_anch = 0;
+	s = strpos;
+    }
+
+  restart:
+    if (flags & REXEC_SCREAM) {
+	SV *c = prog->check_substr;
+	char *strbeg = SvPVX(sv);	/* XXXX Assume PV_force() on SCREAM! */
+	I32 p = -1;			/* Internal iterator of scream. */
+	I32 *pp = data ? data->scream_pos : &p;
+
+	if (PL_screamfirst[BmRARE(c)] >= 0
+	    || ( BmRARE(c) == '\n'
+		 && (BmPREVIOUS(c) == SvCUR(c) - 1)
+		 && SvTAIL(c) ))
+	    s = screaminstr(sv, prog->check_substr, 
+			    start_shift + (strpos - strbeg), end_shift, pp, 0);
+	else
+	    s = Nullch;
+	if (data)
+	    *data->scream_olds = s;
+    }
+    else
+	s = fbm_instr((unsigned char*)s + start_shift,
+		      (unsigned char*)strend - end_shift,
+		      prog->check_substr, PL_multiline ? FBMrf_MULTILINE : 0);
+
+    /* Update the count-of-usability, remove useless subpatterns,
+	unshift s.  */
+  finish:
+    if (!s) {
+	++BmUSEFUL(prog->check_substr);	/* hooray */
+	goto fail;			/* not present */
+    }
+    else if (s - strpos > prog->check_offset_max &&
+	     ((prog->reganch & ROPT_UTF8)
+	      ? ((t = reghopmaybe_c(s, -(prog->check_offset_max)))
+		 && t >= strpos)
+	      : (t = s - prog->check_offset_max) != 0) ) {
+	if (ml_anch && t[-1] != '\n') {
+	  find_anchor:
+	    while (t < strend - end_shift - prog->minlen) {
+		if (*t == '\n') {
+		    if (t < s - prog->check_offset_min) {
+			s = t + 1;
+			goto set_useful;
+		    }
+		    s = t + 1;
+		    goto restart;
+		}
+		t++;
+	    }
+	    s = Nullch;
+	    goto finish;
+	}
+	s = t;
+      set_useful:
+	++BmUSEFUL(prog->check_substr);	/* hooray/2 */
+    }
+    else {
+	if (ml_anch && sv 
+	    && (strpos + SvCUR(sv) != strend) && strpos[-1] != '\n') {
+	    t = strpos;
+	    goto find_anchor;
+	}
+	if (!(prog->reganch & ROPT_NAUGHTY)
+	    && --BmUSEFUL(prog->check_substr) < 0
+	    && prog->check_substr == prog->float_substr) { /* boo */
+	    /* If flags & SOMETHING - do not do it many times on the same match */
+	    SvREFCNT_dec(prog->check_substr);
+	    prog->check_substr = Nullsv;	/* disable */
+	    prog->float_substr = Nullsv;	/* clear */
+	    s = strpos;
+	    prog->reganch &= ~RE_USE_INTUIT;
+	}
+	else
+	    s = strpos;
+    }
+
+    DEBUG_r(PerlIO_printf(Perl_debug_log, "%sFound%s at offset %ld\n",
+			  PL_colors[4],PL_colors[5], (long)(s - strpos)) );
+    return s;
+  fail:
+    DEBUG_r(PerlIO_printf(Perl_debug_log, "%sNot found...%s\n",
+			  PL_colors[4],PL_colors[5]));
+    return Nullch;
+}
 
 /*
  - regexec_flags - match a regexp against a string
@@ -339,73 +526,6 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 
     /* If there is a "must appear" string, look for it. */
     s = startpos;
-    if (!(flags & REXEC_CHECKED) 
-	&& prog->check_substr != Nullsv &&
-	!(prog->reganch & ROPT_ANCH_GPOS) &&
-	(!(prog->reganch & (ROPT_ANCH_BOL | ROPT_ANCH_MBOL))
-	 || (PL_multiline && prog->check_substr == prog->anchored_substr)) )
-    {
-	char *t;
-	start_shift = prog->check_offset_min;	/* okay to underestimate on CC */
-	/* Should be nonnegative! */
-	end_shift = minlen - start_shift -
-	    CHR_SVLEN(prog->check_substr) + (SvTAIL(prog->check_substr) != 0);
-	if (flags & REXEC_SCREAM) {
-	    SV *c = prog->check_substr;
-
-	    if (PL_screamfirst[BmRARE(c)] >= 0
-		|| ( BmRARE(c) == '\n'
-		     && (BmPREVIOUS(c) == SvCUR(c) - 1)
-		     && SvTAIL(c) ))
-		    s = screaminstr(sv, prog->check_substr, 
-				    start_shift + (stringarg - strbeg),
-				    end_shift, &scream_pos, 0);
-	    else
-		    s = Nullch;
-	    scream_olds = s;
-	}
-	else
-	    s = fbm_instr((unsigned char*)s + start_shift,
-			  (unsigned char*)strend - end_shift,
-		prog->check_substr, PL_multiline ? FBMrf_MULTILINE : 0);
-	if (!s) {
-	    ++BmUSEFUL(prog->check_substr);	/* hooray */
-	    goto phooey;	/* not present */
-	}
-	else if (s - stringarg > prog->check_offset_max &&
-		 (UTF 
-		    ? ((t = reghopmaybe_c(s, -(prog->check_offset_max))) && t >= stringarg)
-		    : (t = s - prog->check_offset_max) != 0
-		 )
-		)
-	{
-	    ++BmUSEFUL(prog->check_substr);	/* hooray/2 */
-	    s = t;
-	}
-	else if (!(prog->reganch & ROPT_NAUGHTY)
-		   && --BmUSEFUL(prog->check_substr) < 0
-		   && prog->check_substr == prog->float_substr) { /* boo */
-	    SvREFCNT_dec(prog->check_substr);
-	    prog->check_substr = Nullsv;	/* disable */
-	    prog->float_substr = Nullsv;	/* clear */
-	    s = startpos;
-	}
-	else
-	    s = startpos;
-    }
-
-    DEBUG_r(if (!PL_colorset) reginitcolors());
-    DEBUG_r(PerlIO_printf(Perl_debug_log, 
-		      "%sMatching%s `%s%.60s%s%s' against `%s%.*s%s%s'\n",
-		      PL_colors[4],PL_colors[5],PL_colors[0],
-		      prog->precomp,
-		      PL_colors[1],
-		      (strlen(prog->precomp) > 60 ? "..." : ""),
-		      PL_colors[0], 
-		      (strend - startpos > 60 ? 60 : strend - startpos),
-		      startpos, PL_colors[1],
-		      (strend - startpos > 60 ? "..." : ""))
-	);
 
     if (prog->reganch & ROPT_GPOS_SEEN) {
 	MAGIC *mg;
@@ -415,27 +535,69 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	    PL_reg_ganch = strbeg + mg->mg_len;
 	else
 	    PL_reg_ganch = startpos;
+	if (prog->reganch & ROPT_ANCH_GPOS) {
+	    if (s > PL_reg_ganch)
+		goto phooey;
+	    s = PL_reg_ganch;
+	}
     }
+
+    if (!(flags & REXEC_CHECKED) && prog->check_substr != Nullsv) {
+	re_scream_pos_data d;
+
+	d.scream_olds = &scream_olds;
+	d.scream_pos = &scream_pos;
+	s = re_intuit_start(prog, sv, s, strend, flags, &d);
+	if (!s)
+	    goto phooey;	/* not present */
+    }
+
+    DEBUG_r( if (!PL_colorset) reginitcolors() );
+    DEBUG_r(PerlIO_printf(Perl_debug_log,
+		      "%sMatching%s `%s%.60s%s%s' against `%s%.*s%s%s'\n",
+		      PL_colors[4],PL_colors[5],PL_colors[0],
+		      prog->precomp,
+		      PL_colors[1],
+		      (strlen(prog->precomp) > 60 ? "..." : ""),
+		      PL_colors[0],
+		      (strend - startpos > 60 ? 60 : strend - startpos),
+		      startpos, PL_colors[1],
+		      (strend - startpos > 60 ? "..." : ""))
+	);
 
     /* Simplest case:  anchored match need be tried only once. */
     /*  [unless only anchor is BOL and multiline is set] */
     if (prog->reganch & (ROPT_ANCH & ~ROPT_ANCH_GPOS)) {
-	if (regtry(prog, startpos))
+	if (s == startpos && regtry(prog, startpos))
 	    goto got_it;
 	else if (PL_multiline || (prog->reganch & ROPT_IMPLICIT)
 		 || (prog->reganch & ROPT_ANCH_MBOL)) /* XXXX SBOL? */
 	{
+	    char *end;
+
 	    if (minlen)
 		dontbother = minlen - 1;
-	    strend = HOPc(strend, -dontbother);
+	    end = HOPc(strend, -dontbother) - 1;
 	    /* for multiline we only have to try after newlines */
-	    if (s > startpos)
-		s--;
-	    while (s < strend) {
-		if (*s++ == '\n') {	/* don't need PL_utf8skip here */
-		    if (s < strend && regtry(prog, s))
+	    if (prog->check_substr) {
+		while (1) {
+		    if (regtry(prog, s))
 			goto got_it;
-		}
+		    if (s >= end)
+			goto phooey;
+		    s = re_intuit_start(prog, sv, s + 1, strend, flags, NULL);
+		    if (!s)
+			goto phooey;
+		}		
+	    } else {
+		if (s > startpos)
+		    s--;
+		while (s < end) {
+		    if (*s++ == '\n') {	/* don't need PL_utf8skip here */
+			if (regtry(prog, s))
+			    goto got_it;
+		    }
+		}		
 	    }
 	}
 	goto phooey;
@@ -448,7 +610,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     /* Messy cases:  unanchored match. */
     if (prog->anchored_substr && prog->reganch & ROPT_SKIP) { 
 	/* we have /x+whatever/ */
-	/* it must be a one character string */
+	/* it must be a one character string (XXXX Except UTF?) */
 	char ch = SvPVX(prog->anchored_substr)[0];
 	if (UTF) {
 	    while (s < strend) {

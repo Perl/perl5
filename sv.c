@@ -435,12 +435,12 @@ S_more_xiv(pTHX)
 STATIC XPVNV*
 S_new_xnv(pTHX)
 {
-    double* xnv;
+    NV* xnv;
     LOCK_SV_MUTEX;
     if (!PL_xnv_root)
 	more_xnv();
     xnv = PL_xnv_root;
-    PL_xnv_root = *(double**)xnv;
+    PL_xnv_root = *(NV**)xnv;
     UNLOCK_SV_MUTEX;
     return (XPVNV*)((char*)xnv - STRUCT_OFFSET(XPVNV, xnv_nv));
 }
@@ -448,9 +448,9 @@ S_new_xnv(pTHX)
 STATIC void
 S_del_xnv(pTHX_ XPVNV *p)
 {
-    double* xnv = (double*)((char*)(p) + STRUCT_OFFSET(XPVNV, xnv_nv));
+    NV* xnv = (NV*)((char*)(p) + STRUCT_OFFSET(XPVNV, xnv_nv));
     LOCK_SV_MUTEX;
-    *(double**)xnv = PL_xnv_root;
+    *(NV**)xnv = PL_xnv_root;
     PL_xnv_root = xnv;
     UNLOCK_SV_MUTEX;
 }
@@ -458,17 +458,17 @@ S_del_xnv(pTHX_ XPVNV *p)
 STATIC void
 S_more_xnv(pTHX)
 {
-    register double* xnv;
-    register double* xnvend;
-    New(711, xnv, 1008/sizeof(double), double);
-    xnvend = &xnv[1008 / sizeof(double) - 1];
-    xnv += (sizeof(XPVIV) - 1) / sizeof(double) + 1; /* fudge by sizeof XPVIV */
+    register NV* xnv;
+    register NV* xnvend;
+    New(711, xnv, 1008/sizeof(NV), NV);
+    xnvend = &xnv[1008 / sizeof(NV) - 1];
+    xnv += (sizeof(XPVIV) - 1) / sizeof(NV) + 1; /* fudge by sizeof XPVIV */
     PL_xnv_root = xnv;
     while (xnv < xnvend) {
-	*(double**)xnv = (double*)(xnv + 1);
+	*(NV**)xnv = (NV*)(xnv + 1);
 	xnv++;
     }
-    *(double**)xnv = 0;
+    *(NV**)xnv = 0;
 }
 
 STATIC XRV*
@@ -631,7 +631,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
     U32		cur;
     U32		len;
     IV		iv;
-    double	nv;
+    NV		nv;
     MAGIC*	magic;
     HV*		stash;
 
@@ -656,7 +656,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	cur	= 0;
 	len	= 0;
 	iv	= SvIVX(sv);
-	nv	= (double)SvIVX(sv);
+	nv	= (NV)SvIVX(sv);
 	del_XIV(SvANY(sv));
 	magic	= 0;
 	stash	= 0;
@@ -683,7 +683,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	cur	= 0;
 	len	= 0;
 	iv	= (IV)pv;
-	nv	= (double)(unsigned long)pv;
+	nv	= (NV)(unsigned long)pv;
 	del_XRV(SvANY(sv));
 	magic	= 0;
 	stash	= 0;
@@ -1017,7 +1017,7 @@ Perl_sv_setuv_mg(pTHX_ register SV *sv, UV u)
 }
 
 void
-Perl_sv_setnv(pTHX_ register SV *sv, double num)
+Perl_sv_setnv(pTHX_ register SV *sv, NV num)
 {
     SV_CHECK_THINKFIRST(sv);
     switch (SvTYPE(sv)) {
@@ -1049,7 +1049,7 @@ Perl_sv_setnv(pTHX_ register SV *sv, double num)
 }
 
 void
-Perl_sv_setnv_mg(pTHX_ register SV *sv, double num)
+Perl_sv_setnv_mg(pTHX_ register SV *sv, NV num)
 {
     sv_setnv(sv,num);
     SvSETMAGIC(sv);
@@ -1181,7 +1181,7 @@ Perl_sv_2iv(pTHX_ register SV *sv)
 	    sv_upgrade(sv, SVt_PVNV);
 
 	(void)SvIOK_on(sv);
-	if (SvNVX(sv) < (double)IV_MAX + 0.5)
+	if (SvNVX(sv) < (NV)IV_MAX + 0.5)
 	    SvIVX(sv) = I_V(SvNVX(sv));
 	else {
 	    SvUVX(sv) = U_V(SvNVX(sv));
@@ -1208,7 +1208,7 @@ Perl_sv_2iv(pTHX_ register SV *sv)
 	if (numtype & IS_NUMBER_NOT_IV) {
 	    /* May be not an integer.  Need to cache NV if we cache IV
 	     * - otherwise future conversion to NV will be wrong.  */
-	    double d;
+	    NV d;
 
 	    d = Atof(SvPVX(sv));
 
@@ -1217,10 +1217,14 @@ Perl_sv_2iv(pTHX_ register SV *sv)
 	    SvNVX(sv) = d;
 	    (void)SvNOK_on(sv);
 	    (void)SvIOK_on(sv);
-	    DEBUG_c(PerlIO_printf(Perl_debug_log,
-				  "0x%lx 2nv(%g)\n",(unsigned long)sv,
-				  SvNVX(sv)));
-	    if (SvNVX(sv) < (double)IV_MAX + 0.5)
+#if defined(USE_LONG_DOUBLE)
+	    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2nv(%Lg)\n",
+				  (unsigned long)sv, SvNVX(sv)));
+#else
+	    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2nv(%g)\n",
+				  (unsigned long)sv, SvNVX(sv)));
+#endif
+	    if (SvNVX(sv) < (NV)IV_MAX + 0.5)
 		SvIVX(sv) = I_V(SvNVX(sv));
 	    else {
 		SvUVX(sv) = U_V(SvNVX(sv));
@@ -1348,7 +1352,7 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 	if (numtype & IS_NUMBER_NOT_IV) {
 	    /* May be not an integer.  Need to cache NV if we cache IV
 	     * - otherwise future conversion to NV will be wrong.  */
-	    double d;
+	    NV d;
 
 	    d = Atof(SvPVX(sv));	/* XXXX 64-bit? */
 
@@ -1357,9 +1361,13 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 	    SvNVX(sv) = d;
 	    (void)SvNOK_on(sv);
 	    (void)SvIOK_on(sv);
-	    DEBUG_c(PerlIO_printf(Perl_debug_log,
-				  "0x%lx 2nv(%g)\n",(unsigned long)sv,
-				  SvNVX(sv)));
+#if defined(USE_LONG_DOUBLE)
+	    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2nv(%Lg)\n",
+				  (unsigned long)sv, SvNVX(sv)));
+#else
+	    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2nv(%g)\n",
+				  (unsigned long)sv, SvNVX(sv)));
+#endif
 	    if (SvNVX(sv) < -0.5) {
 		SvIVX(sv) = I_V(SvNVX(sv));
 		goto ret_zero;
@@ -1420,7 +1428,7 @@ Perl_sv_2uv(pTHX_ register SV *sv)
     return SvIsUV(sv) ? SvUVX(sv) : (UV)SvIVX(sv);
 }
 
-double
+NV
 Perl_sv_2nv(pTHX_ register SV *sv)
 {
     if (!sv)
@@ -1437,9 +1445,9 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 	}
 	if (SvIOKp(sv)) {
 	    if (SvIsUV(sv)) 
-		return (double)SvUVX(sv);
+		return (NV)SvUVX(sv);
 	    else
-		return (double)SvIVX(sv);
+		return (NV)SvIVX(sv);
 	}	
         if (!SvROK(sv)) {
 	    if (!(SvFLAGS(sv) & SVs_PADTMP)) {
@@ -1455,7 +1463,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 	  SV* tmpstr;
 	  if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,numer)))
 	      return SvNV(tmpstr);
-	  return (double)(unsigned long)SvRV(sv);
+	  return (NV)(unsigned long)SvRV(sv);
 	}
 	if (SvREADONLY(sv)) {
 	    dTHR;
@@ -1466,9 +1474,9 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 	    }
 	    if (SvIOKp(sv)) {
 		if (SvIsUV(sv)) 
-		    return (double)SvUVX(sv);
+		    return (NV)SvUVX(sv);
 		else
-		    return (double)SvIVX(sv);
+		    return (NV)SvIVX(sv);
 	    }
 	    if (ckWARN(WARN_UNINITIALIZED))
 		Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
@@ -1480,19 +1488,28 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 	    sv_upgrade(sv, SVt_PVNV);
 	else
 	    sv_upgrade(sv, SVt_NV);
+#if defined(USE_LONG_DOUBLE)
 	DEBUG_c({
 	    RESTORE_NUMERIC_STANDARD();
-	    PerlIO_printf(Perl_debug_log,
-			  "0x%lx num(%g)\n",(unsigned long)sv,SvNVX(sv));
+	    PerlIO_printf(Perl_debug_log, "0x%lx num(%Lg)\n",
+			  (unsigned long)sv, SvNVX(sv));
 	    RESTORE_NUMERIC_LOCAL();
 	});
+#else
+	DEBUG_c({
+	    RESTORE_NUMERIC_STANDARD();
+	    PerlIO_printf(Perl_debug_log, "0x%lx num(%g)\n",
+			  (unsigned long)sv, SvNVX(sv));
+	    RESTORE_NUMERIC_LOCAL();
+	});
+#endif
     }
     else if (SvTYPE(sv) < SVt_PVNV)
 	sv_upgrade(sv, SVt_PVNV);
     if (SvIOKp(sv) &&
 	    (!SvPOKp(sv) || !strchr(SvPVX(sv),'.') || !looks_like_number(sv)))
     {
-	SvNVX(sv) = SvIsUV(sv) ? (double)SvUVX(sv) : (double)SvIVX(sv);
+	SvNVX(sv) = SvIsUV(sv) ? (NV)SvUVX(sv) : (NV)SvIVX(sv);
     }
     else if (SvPOKp(sv) && SvLEN(sv)) {
 	dTHR;
@@ -1510,12 +1527,21 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 	return 0.0;
     }
     SvNOK_on(sv);
+#if defined(USE_LONG_DOUBLE)
     DEBUG_c({
 	RESTORE_NUMERIC_STANDARD();
-	PerlIO_printf(Perl_debug_log,
-		      "0x%lx 2nv(%g)\n",(unsigned long)sv,SvNVX(sv));
+	PerlIO_printf(Perl_debug_log, "0x%lx 2nv(%Lg)\n",
+		      (unsigned long)sv, SvNVX(sv));
 	RESTORE_NUMERIC_LOCAL();
     });
+#else
+    DEBUG_c({
+	RESTORE_NUMERIC_STANDARD();
+	PerlIO_printf(Perl_debug_log, "0x%lx 1nv(%g)\n",
+		      (unsigned long)sv, SvNVX(sv));
+	RESTORE_NUMERIC_LOCAL();
+    });
+#endif
     return SvNVX(sv);
 }
 
@@ -1523,7 +1549,7 @@ STATIC IV
 S_asIV(pTHX_ SV *sv)
 {
     I32 numtype = looks_like_number(sv);
-    double d;
+    NV d;
 
     if (numtype & IS_NUMBER_TO_INT_BY_ATOL)
 	return atol(SvPVX(sv));		/* XXXX 64-bit? */
@@ -3754,13 +3780,13 @@ Perl_sv_inc(pTHX_ register SV *sv)
     if (flags & SVp_IOK) {
 	if (SvIsUV(sv)) {
 	    if (SvUVX(sv) == UV_MAX)
-		sv_setnv(sv, (double)UV_MAX + 1.0);
+		sv_setnv(sv, (NV)UV_MAX + 1.0);
 	    else
 		(void)SvIOK_only_UV(sv);
 		++SvUVX(sv);
 	} else {
 	    if (SvIVX(sv) == IV_MAX)
-		sv_setnv(sv, (double)IV_MAX + 1.0);
+		sv_setnv(sv, (NV)IV_MAX + 1.0);
 	    else {
 		(void)SvIOK_only(sv);
 		++SvIVX(sv);
@@ -3863,7 +3889,7 @@ Perl_sv_dec(pTHX_ register SV *sv)
 	    }	    
 	} else {
 	    if (SvIVX(sv) == IV_MIN)
-		sv_setnv(sv, (double)IV_MIN - 1.0);
+		sv_setnv(sv, (NV)IV_MIN - 1.0);
 	    else {
 		(void)SvIOK_only(sv);
 		--SvIVX(sv);
@@ -3981,7 +4007,7 @@ Perl_newSVpvf(pTHX_ const char* pat, ...)
 }
 
 SV *
-Perl_newSVnv(pTHX_ double n)
+Perl_newSVnv(pTHX_ NV n)
 {
     register SV *sv;
 
@@ -4273,7 +4299,7 @@ Perl_sv_uv(pTHX_ register SV *sv)
     return sv_2uv(sv);
 }
 
-double
+NV
 Perl_sv_nv(pTHX_ register SV *sv)
 {
     if (SvNOK(sv))
@@ -4449,7 +4475,7 @@ Perl_sv_setref_iv(pTHX_ SV *rv, const char *classname, IV iv)
 }
 
 SV*
-Perl_sv_setref_nv(pTHX_ SV *rv, const char *classname, double nv)
+Perl_sv_setref_nv(pTHX_ SV *rv, const char *classname, NV nv)
 {
     sv_setnv(newSVrv(rv,classname), nv);
     return rv;
@@ -4733,7 +4759,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	unsigned base;
 	IV iv;
 	UV uv;
-	double nv;
+	NV nv;
 	STRLEN have;
 	STRLEN need;
 	STRLEN gap;
@@ -5051,7 +5077,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    /* This is evil, but floating point is even more evil */
 
 	    if (args)
-		nv = va_arg(*args, double);
+		nv = va_arg(*args, NV);
 	    else
 		nv = (svix < svmax) ? SvNVx(svargs[svix++]) : 0.0;
 
@@ -5078,6 +5104,9 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    eptr = ebuf + sizeof ebuf;
 	    *--eptr = '\0';
 	    *--eptr = c;
+#ifdef USE_LONG_DOUBLE
+	    *--eptr = 'L';
+#endif
 	    if (has_precis) {
 		base = precis;
 		do { *--eptr = '0' + (base % 10); } while (base /= 10);

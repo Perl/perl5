@@ -221,8 +221,8 @@ byterun(pTHXo_ struct bytestream bs)
 	    }
 	  case INSN_XNV:		/* 21 */
 	    {
-		double arg;
-		BGET_double(arg);
+		NV arg;
+		BGET_NV(arg);
 		SvNVX(bytecode_sv) = arg;
 		break;
 	    }

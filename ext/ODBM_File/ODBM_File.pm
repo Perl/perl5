@@ -8,7 +8,7 @@ require DynaLoader;
 
 @ISA = qw(Tie::Hash DynaLoader);
 
-$VERSION = "1.01";
+$VERSION = "1.02";
 
 bootstrap ODBM_File $VERSION;
 
