@@ -6,12 +6,17 @@ BEGIN {
 }
 
 use Test;
-BEGIN { plan tests => 9; }
+BEGIN { plan tests => 10; }
 
 BEGIN {
     require autouse;
     eval {
-        "autouse"->import('List::Util' => 'List::Util::first');
+        "autouse"->import('List::Util' => 'List::Util::first(&@)');
+    };
+    ok( !$@ );
+
+    eval {
+        "autouse"->import('List::Util' => 'Foo::min');
     };
     ok( $@, qr/^autouse into different package attempted/ );
 
