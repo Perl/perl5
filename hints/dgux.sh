@@ -102,15 +102,6 @@ usedl=true
 # -G for loading.  I haven't tested this.
 cccdlflags=-fpic
 lddlflags=-shared
-# The Perl library has to be built as a shared library so that dynamic
-# loading will work (otherwise code loaded with dlopen() won't be able
-# to reference symbols in the main part of perl).  Note that since
-# Configure doesn't normally prompt about $d_shrplib this will cause a
-# `Whoa there!'.  This is normal, just keep the recommended value.  A
-# consequence of all this is that you've got to include the source
-# directory in your LD_LIBRARY_PATH when you're building and testing
-# perl.
-d_shrplib=define
 
 # The system has a function called dg_flock() which is an flock()
 # emulation built using fcntl() locking.  Perl currently comes with an
