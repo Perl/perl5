@@ -20,7 +20,7 @@ use Test::More tests => 37;
 use Encode;
 use File::Basename;
 use File::Spec;
-use File::Compare;
+use File::Compare qw(compare_text);
 require_ok "Encode::JP";
 
 my ($src, $uni, $dst, $txt, $euc, $utf, $ref, $rnd);
@@ -50,7 +50,7 @@ for my $charset (qw(jisx0201 jisx0212 jisx0208)){
     binmode($dst);
     print $dst $uni;
     close($dst); 
-    is(compare($utf, $ref), 0, "$utf eq $ref");
+    is(compare_text($utf, $ref), 0, "$utf eq $ref");
     
     open $src, "<:utf8", $ref or die "$ref : $!";
     $uni = join('', <$src>);
@@ -81,7 +81,7 @@ for my $charset (qw(jisx0201 jisx0212 jisx0208)){
     binmode($dst);
     print $dst $txt;
     close($dst); 
-    is(compare($euc, $rnd), 0 => "$rnd eq $euc");
+    is(compare_text($euc, $rnd), 0 => "$rnd eq $euc");
 }
 
 END {
