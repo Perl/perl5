@@ -576,6 +576,7 @@ sub runpod2html {
 #system("./pod2html",
         Pod::Html'pod2html(
         #Pod::Html'pod2html($pod2html,
+        "--htmldir=$htmldir",
 	"--htmlroot=$htmlroot",
 	"--podpath=".join(":", @podpath),
 	"--podroot=$podroot", "--netscape",

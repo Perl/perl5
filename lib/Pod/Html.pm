@@ -2,6 +2,7 @@ package Pod::Html;
 
 use Pod::Functions;
 use Getopt::Long;	# package for handling command-line parameters
+use File::PathConvert 0.84 ;   # Used to do relative URLs
 require Exporter;
 use vars qw($VERSION);
 $VERSION = 1.01;
@@ -43,6 +44,13 @@ Pod::Html takes the following arguments:
     --help
 
 Displays the usage message.
+
+=item htmldir
+
+    --htmldir=name
+
+Sets the directory in which the resulting HTML file is placed.  This
+is used to generate relative links to other files.
 
 =item htmlroot
 
@@ -169,10 +177,16 @@ my $itemcache = "pod2html-itemcache";
 
 my @begin_stack = ();		# begin/end stack
 
-my @libpods = ();	    	# files to search for links from C<> directives
-my $htmlroot = "/";	    	# http-server base directory from which all
+my @libpods = ();		# files to search for links from C<> directives
+my $htmlroot = "/";		# http-server base directory from which all
 				#   relative paths in $podpath stem.
+my $htmldir = "";		# The directory to which the html pages
+				# will (eventually) be written.
 my $htmlfile = "";		# write to stdout by default
+my $htmlfileurl = "";		# The url that other files would use to
+				# refer to this file.  This is only used
+				# to make relative urls that point to
+				# other files.
 my $podfile = "";		# read from stdin by default
 my @podpath = ();		# list of directories containing library pods.
 my $podroot = ".";		# filesystem base directory from which all
@@ -283,6 +297,14 @@ sub pod2html {
     } 
     $htmlfile = "-" unless $htmlfile;	# stdout
     $htmlroot = "" if $htmlroot eq "/";	# so we don't get a //
+    $htmldir =~ s#/$## ;		# so we don't get a //
+    if (  $htmldir ne ''
+	  && substr( $htmlfile, 0, length( $htmldir ) ) eq $htmldir
+       )
+    {
+	$htmlfileurl= "$htmlroot/" . substr( $htmlfile, length( $htmldir ) + 1 );
+    }
+    File::PathConvert::setfstype( 'URL' ) ;
 
     # read the pod a paragraph at a time
     warn "Scanning for sections in input file(s)\n" if $verbose;
@@ -465,12 +487,15 @@ Usage:  $0 --help --htmlroot=<name> --infile=<name> --outfile=<name>
 END_OF_USAGE
 
 sub parse_command_line {
-    my ($opt_flush,$opt_help,$opt_htmlroot,$opt_index,$opt_infile,$opt_libpods,$opt_netscape,$opt_outfile,$opt_podpath,$opt_podroot,$opt_norecurse,$opt_recurse,$opt_title,$opt_verbose);
+    my ($opt_flush,$opt_help,$opt_htmldir,$opt_htmlroot,$opt_index,$opt_infile
+,$opt_libpods,$opt_netscape,$opt_outfile,$opt_podpath,$opt_podroot,$opt_norecur
+se,$opt_recurse,$opt_title,$opt_verbose);
     my $result = GetOptions(
-			    'flush'      => \$opt_flush,
-			    'help'       => \$opt_help,
+			    'flush'	 => \$opt_flush,
+			    'help'	 => \$opt_help,
+			    'htmldir=s'	 => \$opt_htmldir,
 			    'htmlroot=s' => \$opt_htmlroot,
-			    'index!'     => \$opt_index,
+			    'index!'	 => \$opt_index,
 			    'infile=s'   => \$opt_infile,
 			    'libpods=s'  => \$opt_libpods,
 			    'netscape!'  => \$opt_netscape,
@@ -489,6 +514,7 @@ sub parse_command_line {
 
     $podfile  = $opt_infile if defined $opt_infile;
     $htmlfile = $opt_outfile if defined $opt_outfile;
+    $htmldir  = $opt_htmldir if defined $opt_outfile;
 
     @podpath  = split(":", $opt_podpath) if defined $opt_podpath;
     @libpods  = split(":", $opt_libpods) if defined $opt_libpods;
@@ -1098,8 +1124,18 @@ sub process_text {
 			"$1$2";
 		    }
 		  }xeg;
-	$rest =~ s/(<A HREF=)([^>:]*:)?([^>:]*)\.pod:([^>:]*:)?/$1$3.html/g;
+#	$rest =~ s/(<A HREF=)([^>:]*:)?([^>:]*)\.pod:([^>:]*:)?/$1$3.html/g;
+	$rest =~ s{
+		    (<A\ HREF="?)([^>:]*:)?([^>:]*)\.pod:([^>:]*:)?
+		   }{
+		     my $url=
+			File::PathConvert::abs2rel( "$3.html", $htmlfileurl );
+#		    print( "	$htmlfileurl $3.html [$url]\n" ) ;
+		    "$1$url" ;
+		  }xeg;
 
+  # Look for embedded URLs and make them in to links.  We don't
+  # relativize them since they are best left as the author intended.
   my $urls = '(' . join ('|', qw{
                 http
                 telnet
@@ -1296,6 +1332,7 @@ sub process_puretext {
 	    $word = process_C($word, 1);
 	} elsif ($word =~ m,^\w+://\w,) {
 	    # looks like a URL
+            # Don't relativize it: leave it as the author intended
 	    $word = qq(<A HREF="$word">$word</A>);
 	} elsif ($word =~ /[\w.-]+\@[\w-]+\.\w/) {
 	    # looks like an e-mail address
@@ -1437,7 +1474,9 @@ sub process_L {
 
     process_text(\$linktext, 0);
     if ($link) {
-	$s1 = "<A HREF=\"$link\">$linktext</A>";
+        my $url= File::PathConvert::abs2rel( $link, $htmlfileurl ) ;
+#        print( "    $htmlfileurl $link [$url]\n" ) ;
+	$s1 = "<A HREF=\"$url\">$linktext</A>";
     } else {
 	$s1 = "<EM>$linktext</EM>";
     }
@@ -1476,9 +1515,15 @@ sub process_C {
     # if there was a pod file that we found earlier with an appropriate
     # =item directive, then create a link to that page.
     if ($doref && defined $items{$s1}) {
-	$s1 = ($items{$s1} ?
-	       "<A HREF=\"$htmlroot/$items{$s1}#item_" . htmlify(0,$s2) .  "\">$str</A>" :
-	       "<A HREF=\"#item_" . htmlify(0,$s2) .  "\">$str</A>");
+        if ( $items{$s1} ) {
+            my $link = "$htmlroot/$items{$s1}#item_" . htmlify(0,$s2) ;
+            my $url = File::PathConvert::abs2rel( $link, $htmlfileurl ) ;
+#            print( "    $htmlfileurl $link [$url]\n" ) ;
+	    $s1 = "<A HREF=\"$url\">$str</A>" ;
+        }
+        else {
+	    $s1 = "<A HREF=\"#item_" . htmlify(0,$s2) .  "\">$str</A>" ;
+        }
 	$s1 =~ s,(perl\w+/(\S+)\.html)#item_\2\b,$1,; 
 	confess "s1 has space: $s1" if $s1 =~ /HREF="[^"]*\s[^"]*"/;
     } else {
