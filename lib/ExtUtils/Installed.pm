@@ -8,7 +8,28 @@ use ExtUtils::MakeMaker;
 use Config;
 use File::Find;
 use File::Basename;
-our $VERSION = '0.02';
+our $VERSION = '0.03';
+
+my $DOSISH = ($^O =~ /^(MSWin\d\d|os2|dos|mint)$/);
+
+sub _is_prefix
+{
+my ($self, $path, $prefix) = @_;
+if (substr($path, 0, length($prefix)) eq $prefix)
+   {
+   return(1);
+   }
+if ($DOSISH)
+   {
+   $path =~ s|\\|/|g;
+   $prefix =~ s|\\|/|g;
+   if ($path =~ m{^\Q$prefix\E}i)
+      {
+      return(1);
+      }
+   }
+return(0);
+}
 
 sub _is_type($$$)
 {
@@ -16,22 +37,18 @@ my ($self, $path, $type) = @_;
 return(1) if ($type eq "all");
 if ($type eq "doc")
    {
-   return(substr($path, 0, length($Config{installman1dir}))
-              eq $Config{installman1dir}
+   return($self->_is_prefix($path, $Config{installman1dir})
           ||
-          substr($path, 0, length($Config{installman3dir}))
-              eq $Config{installman3dir}
+          $self->_is_prefix($path, $Config{installman3dir})
           ? 1 : 0)
    }
 if ($type eq "prog")
    {
-   return(substr($path, 0, length($Config{prefix})) eq $Config{prefix}
+   return($self->_is_prefix($path, $Config{prefix})
           &&
-          substr($path, 0, length($Config{installman1dir}))
-             ne $Config{installman1dir}
+          !$self->_is_prefix($path, $Config{installman1dir})
           &&
-          substr($path, 0, length($Config{installman3dir}))
-              ne $Config{installman3dir}
+          !$self->_is_prefix($path, $Config{installman3dir})
           ? 1 : 0);
    }
 return(0);
@@ -43,7 +60,7 @@ my ($self, $path, @under) = @_;
 $under[0] = "" if (! @under);
 foreach my $dir (@under)
    {
-   return(1) if (substr($path, 0, length($dir)) eq $dir);
+   return(1) if ($self->_is_prefix($path, $dir));
    }
 return(0);
 }
@@ -54,21 +71,32 @@ my ($class) = @_;
 $class = ref($class) || $class;
 my $self = {};
 
+my $installarchlib = $Config{installarchlib};
+my $archlib = $Config{archlib};
+my $sitearch = $Config{sitearch};
+
+if ($DOSISH)
+   {
+   $installarchlib =~ s|\\|/|g;
+   $archlib =~ s|\\|/|g;
+   $sitearch =~ s|\\|/|g;
+   }
+
 # Read the core packlist
 $self->{Perl}{packlist} =
-   ExtUtils::Packlist->new("$Config{installarchlib}/.packlist");
+   ExtUtils::Packlist->new("$installarchlib/.packlist");
 $self->{Perl}{version} = $Config{version};
 
 # Read the module packlists
 my $sub = sub
    {
    # Only process module .packlists
-   return if ($_) ne ".packlist" || $File::Find::dir eq $Config{installarchlib};
+   return if ($_) ne ".packlist" || $File::Find::dir eq $installarchlib;
 
    # Hack of the leading bits of the paths & convert to a module name
    my $module = $File::Find::name;
-   $module =~ s!$Config{archlib}/auto/(.*)/.packlist!$1!s;
-   $module =~ s!$Config{sitearch}/auto/(.*)/.packlist!$1!s;
+   $module =~ s!\Q$archlib\E/auto/(.*)/.packlist!$1!s;
+   $module =~ s!\Q$sitearch\E/auto/(.*)/.packlist!$1!s;
    my $modfile = "$module.pm";
    $module =~ s!/!::!g;
 
@@ -87,7 +115,7 @@ my $sub = sub
    # Read the .packlist
    $self->{$module}{packlist} = ExtUtils::Packlist->new($File::Find::name);
    };
-find($sub, $Config{archlib}, $Config{sitearch});
+find($sub, $archlib, $sitearch);
 
 return(bless($self, $class));
 }
