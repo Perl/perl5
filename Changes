@@ -95,6 +95,46 @@ Version v5.6.0
 --------------
 
 ____________________________________________________________________________
+[  5747] By: gsar                                  on 2000/03/14  22:44:27
+        Log: more warnings tidy-ups (from Paul Marquess)
+     Branch: perl
+	   ! pod/perldelta.pod pod/perldiag.pod pod/perlfaq4.pod
+	   ! t/lib/attrs.t utils/h2xs.PL
+____________________________________________________________________________
+[  5746] By: gsar                                  on 2000/03/14  22:30:43
+        Log: Sys::Syslog fix for accidental arguments to autoloaded constants
+     Branch: perl
+	   ! ext/Sys/Syslog/Syslog.pm ext/Sys/Syslog/Syslog.xs
+____________________________________________________________________________
+[  5745] By: gsar                                  on 2000/03/14  22:20:27
+        Log: tweak to use SIZE_ONLY
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[  5744] By: gsar                                  on 2000/03/14  21:56:48
+        Log: regen win32/config*
+     Branch: perl
+	   ! win32/Makefile win32/config_H.bc win32/config_H.gc
+	   ! win32/config_H.vc win32/makefile.mk
+____________________________________________________________________________
+[  5743] By: gsar                                  on 2000/03/14  21:46:25
+        Log: change#5729 had syntax errors
+     Branch: perl
+	   ! t/lib/complex.t
+____________________________________________________________________________
+[  5742] By: gsar                                  on 2000/03/14  21:26:33
+        Log: integrate vmsperl changes into mainline (change#5693 denied)
+     Branch: perl
+	  !> configure.com lib/File/Spec/VMS.pm t/lib/complex.t
+	  !> t/lib/filespec.t vms/ext/filespec.t vms/subconfigure.com
+	  !> vms/vms.c
+____________________________________________________________________________
+[  5741] By: gsar                                  on 2000/03/14  21:17:34
+        Log: update Changes; integrate cfgperl contents into mainline
+     Branch: perl
+	   ! Changes
+	  !> ext/Socket/Socket.xs patchlevel.h perl.h t/lib/complex.t
+____________________________________________________________________________
 [  5740] By: gsar                                  on 2000/03/14  20:57:12
         Log: perlfaq4 tweak (from Damian Conway <damian@cs.monash.edu.au>)
      Branch: perl
