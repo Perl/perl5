@@ -367,10 +367,10 @@ cat > UU/use64bits.cbu <<'EOCBU'
 case "$use64bits" in
 $define|true|[yY]*)
 	    case "`uname -r`" in
-	    2.[1-5])
+	    2.[1-6])
 		cat >&4 <<EOM
-Solaris `uname -r` does not support 64-bit interfaces.
-You should upgrade to at least Solaris 2.6.
+Solaris `uname -r` does not support 64-bit integers.
+You should upgrade to at least Solaris 2.7.
 EOM
 		exit 1
 		;;
@@ -515,6 +515,52 @@ Date: 25 Jul 1995 12:20:18 GMT
     Don't include -ldbm, -lmalloc and -lucb.
 
     Perl 5 compiled out of the box.
+
+7.0) 64-bitness, from Alan Burlison (added by jhi 2000-02-21)
+
+  You need a machine running Solaris 2.7 or above.
+
+  Here's some rules:
+  
+  1. Solaris 2.7 and above will run in either 32 bit or 64 bit mode,
+     via a reboot.
+  2. You can build 64 bit apps whilst running 32 bit mode and vice-versa.
+  3. 32 bit apps will run under Solaris running in either 32 or 64 bit mode.
+  4. 64 bit apps require Solaris to be running 64 bit mode
+  5. It is possible to select the appropriate 32 or 64 bit version of an
+     app at run-time using isaexec(3).
+  6. You can detect the OS mode using "isainfo -v", e.g.
+      fubar$ isainfo -v   # Ultra 30 in 64 bit mode
+      64-bit sparcv9 applications
+      32-bit sparc applications
+  7. To compile 64 bit you need to use the flag "-xarch=v9".
+     getconf(1) will tell you this, e.g.
+      fubar$ getconf -a | grep v9
+      XBS5_LP64_OFF64_CFLAGS:         -xarch=v9
+      XBS5_LP64_OFF64_LDFLAGS:        -xarch=v9
+      XBS5_LP64_OFF64_LINTFLAGS:      -xarch=v9
+      XBS5_LPBIG_OFFBIG_CFLAGS:       -xarch=v9
+      XBS5_LPBIG_OFFBIG_LDFLAGS:      -xarch=v9
+      XBS5_LPBIG_OFFBIG_LINTFLAGS:    -xarch=v9
+      _XBS5_LP64_OFF64_CFLAGS:        -xarch=v9
+      _XBS5_LP64_OFF64_LDFLAGS:       -xarch=v9
+      _XBS5_LP64_OFF64_LINTFLAGS:     -xarch=v9
+      _XBS5_LPBIG_OFFBIG_CFLAGS:      -xarch=v9
+      _XBS5_LPBIG_OFFBIG_LDFLAGS:     -xarch=v9
+      _XBS5_LPBIG_OFFBIG_LINTFLAGS:   -xarch=v9
+
+  > > Now, what should we do, then?  Should -Duse64bits in a v9 box cause
+  > > Perl to compiled in v9 mode?  Or should we for compatibility stick
+  > > with 32 bit builds and let the people in the know to add the -xarch=v9
+  > > to ccflags (and ldflags?)?
+
+  > I think the second (explicit) mechanism should be the default.  Unless
+  > you want to allocate more than ~ 4Gb of memory inside Perl, you don't
+  > need Perl to be a 64-bit app.  Put it this way, on a machine running
+  > Solaris 8, there are 463 executables under /usr/bin, but only 15 of
+  > those require 64 bit versions - mainly because they invade the kernel
+  > address space, e.g. adb, kgmon etc.  Certainly we don't recommend users
+  > to build 64 bit apps unless they need the address space.
 
 End_of_Solaris_Notes
 
