@@ -20,6 +20,8 @@ have_long_double()
 #else
         RETVAL = 0;
 #endif
+        OUTPUT:
+        RETVAL
 
 void
 print_long_double()
