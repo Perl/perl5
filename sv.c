@@ -335,8 +335,19 @@ do_clean_objs(SV *sv)
 static void
 do_clean_named_objs(SV *sv)
 {
-    if (SvTYPE(sv) == SVt_PVGV && GvSV(sv))
-	do_clean_objs(GvSV(sv));
+    if (SvTYPE(sv) == SVt_PVGV) {
+	if ( SvOBJECT(GvSV(sv)) ||
+	     GvAV(sv) && SvOBJECT(GvAV(sv)) ||
+	     GvHV(sv) && SvOBJECT(GvHV(sv)) ||
+	     GvIO(sv) && SvOBJECT(GvIO(sv)) ||
+	     GvCV(sv) && SvOBJECT(GvCV(sv)) )
+	{
+	    DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning named glob object:\n "), sv_dump(sv));)
+	    SvREFCNT_dec(sv);
+	}
+	else if (GvSV(sv))
+	    do_clean_objs(GvSV(sv));
+    }
 }
 #endif
 
