@@ -1463,13 +1463,13 @@ C<gvsv gvsv add whatever>.
 
 =head2 Compile pass 1: check routines
 
-The tree is created by the I<pseudo-compiler> while yacc code feeds it
-the constructions it recognizes. Since yacc works bottom-up, so does
+The tree is created by the compiler while I<yacc> code feeds it
+the constructions it recognizes. Since I<yacc> works bottom-up, so does
 the first pass of perl compilation.
 
 What makes this pass interesting for perl developers is that some
 optimization may be performed on this pass.  This is optimization by
-so-called I<check routines>.  The correspondence between node names
+so-called "check routines".  The correspondence between node names
 and corresponding check routines is described in F<opcode.pl> (do not
 forget to run C<make regen_headers> if you modify this file).
 
@@ -1522,9 +1522,6 @@ done in the subroutine peep().  Optimizations performed at this stage
 are subject to the same restrictions as in the pass 2.
 
 =head1 How multiple interpreters and concurrency are supported
-
-WARNING: This information is subject to radical changes prior to
-the Perl 5.6 release.  Use with caution.
 
 =head2 Background and PERL_IMPLICIT_CONTEXT
 
