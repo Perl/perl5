@@ -150,6 +150,9 @@ foreach $file (<*.h libperl*.*>) {
 # AIX needs perl.exp installed as well.
 cp_if_diff("perl.exp" ,"$installarchlib/CORE/perl.exp") if ($osname eq 'aix');
 
+# If they have built sperl.o...
+cp_if_diff("sperl.o" ,"$installarchlib/CORE/sperl.o") if (-f 'sperl.o');
+
 
 # Offer to install perl in a "standard" location
 

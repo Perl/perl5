@@ -1,3 +1,5 @@
+# MPE/IX does not have nm, and the linker doesn't complain
+# about unresolved symbols, so these are all filled in by hand.
 osname='mpeix'
 osvers='5.0'
 alignbytes='8'

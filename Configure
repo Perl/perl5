@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.6 1994/10/29 15:54:19 ram Exp $
 #
-# Generated on Mon Feb  6 10:35:10 EST 1995 [metaconfig 3.0 PL50]
+# Generated on Sat Feb 11 11:56:23 EST 1995 [metaconfig 3.0 PL50]
 
 cat >/tmp/c1$$ <<EOF
 ARGGGHHHH!!!!!
@@ -441,6 +441,7 @@ i_sysparam=''
 i_sysselct=''
 i_sysstat=''
 i_systimes=''
+i_systypes=''
 i_sgtty=''
 i_termio=''
 i_termios=''
@@ -1581,12 +1582,9 @@ EOM
 			osvers="$3"
 			;;
 		osf1)	case "$5" in
-				alpha)  osname=dec_osf
-					case "$3" in
-						[vt]1\.*) osvers=1 ;;
-						[vt]2\.*) osvers=2 ;;
-						[vt]3\.*) osvers=3 ;;
-					esac
+				alpha)
+					osname=dec_osf
+					osvers=`echo "$3" | sed 's/^[vt]//'`
 					;;
 			hp*)	osname=hp_osf1	;;
 			mips)	osname=mips_osf1 ;;
@@ -3528,18 +3526,22 @@ prefixup='case "$prefixexp" in
 esac'
 
 : determine where public architecture dependent libraries go
-if xxx=`./loc arch blurfl $pth`; test -f "$xxx"; then
-	tarchname=`arch`
-	archname="${tarchname}-$osname"
-elif xxx=`./loc uname blurfl $pth`; test -f "$xxx" ; then
-	if uname -m > tmparch 2>&1 ; then
-		tarchname=`cat tmparch`
+case "$archname" in
+'')
+    if xxx=`./loc arch blurfl $pth`; test -f "$xxx"; then
+		tarchname=`arch`
 		archname="${tarchname}-$osname"
+	elif xxx=`./loc uname blurfl $pth`; test -f "$xxx" ; then
+		if uname -m > tmparch 2>&1 ; then
+			tarchname=`cat tmparch`
+			archname="${tarchname}-$osname"
+		fi
+		$rm -f tmparch
+	else
+		archname="$osname"
 	fi
-	$rm -f tmparch
-else
-	archname="$osname"
-fi
+    ;;
+esac
 set archlib archlib
 eval $prefixit
 case "$archlib" in
@@ -4181,7 +4183,7 @@ y*) usedl="$define"
 	: Can not go over to $dldir because getfile has path hard-coded in.
     cd ..; ls -C $dldir/dl*.xs; cd UU
     rp="Source file to use for dynamic loading"
-    fn="fne~"
+    fn="fne"
     . ./getfile
 	usedl="$define"
 	: emulate basename
@@ -7509,6 +7511,10 @@ eval $inhdr
 set sys/stat.h i_sysstat
 eval $inhdr
 
+: see if sys/types.h has to be included
+set sys/types.h i_systypes
+eval $inhdr
+
 : see if this is a unistd.h system
 set unistd.h i_unistd
 eval $inhdr
@@ -7862,6 +7868,7 @@ i_sysstat='$i_sysstat'
 i_systime='$i_systime'
 i_systimek='$i_systimek'
 i_systimes='$i_systimes'
+i_systypes='$i_systypes'
 i_termio='$i_termio'
 i_termios='$i_termios'
 i_time='$i_time'

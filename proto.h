@@ -1,8 +1,10 @@
+#ifndef NEXT30_NO_ATTRIBUTE
 #ifndef HASATTRIBUTE       /* disable GNU-cc attribute checking? */
 #ifdef  __attribute__      /* Avoid possible redefinition errors */
 #undef  __attribute__
 #endif
 #define __attribute__(attr)
+#endif 
 #endif
 #ifdef OVERLOAD
 SV*	amagic_call _((SV* left,SV* right,int method,int dir));

@@ -14,7 +14,7 @@
  * $Id: Config_h.U,v 3.0.1.3 1995/01/30 14:25:39 ram Exp $
  */
 
-/* Configuration time: Sat Feb  4 14:42:43 EST 1995
+/* Configuration time: Sat Feb 11 12:02:12 EST 1995
  * Configured by: andy
  * Target system: crystal crystal 3.2 2 i386 
  */
@@ -27,17 +27,6 @@
  *	double. Usual values are 2, 4 and 8.
  */
 #define MEM_ALIGNBYTES 4	/**/
-
-/* ARCHLIB:
- *	This variable, if defined, holds the name of the directory in
- *	which the user wants to put architecture-dependent public
- *	library files for perl5.  It is most often a local directory
- *	such as /usr/local/lib.  Programs using this variable must be
- *	prepared to deal with filename expansion.  If ARCHLIB is the
- *	same as PRIVLIB, it is not defined, since presumably the
- *	program already searches PRIVLIB.
- */
-#define ARCHLIB "/usr/local/lib/perl5/i386-isc"		/**/
 
 /* BIN:
  *	This symbol holds the path of the bin directory where the package will
@@ -1135,6 +1124,12 @@
  */
 #define	I_SYS_TIMES		/**/
 
+/* I_SYS_TYPES:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <sys/types.h>.
+ */
+#define	I_SYS_TYPES		/**/
+
 /* I_TERMIO:
  *	This symbol, if defined, indicates that the program should include
  *	<termio.h> rather than <sgtty.h>.  There are also differences in
@@ -1221,13 +1216,11 @@
  */
 #define Mode_t mode_t	 /* file mode parameter for system calls */
 
-/* PRIVLIB:
- *	This symbol contains the name of the private library for this package.
- *	The library is private in the sense that it needn't be in anyone's
- *	execution path, but it should be accessible by the world.  The program
- *	should be prepared to do ~ expansion.
+/* PRIVLIB_EXP:
+ *	This symbol contains the ~name expanded version of PRIVLIB, to be used
+ *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define PRIVLIB "/usr/local/lib/perl5"		/**/
+#define PRIVLIB_EXP "/usr/local/lib/perl5"		/**/
 
 /* CAN_PROTOTYPE:
  *	If defined, this macro indicates that the C compiler can handle
@@ -1353,6 +1346,12 @@
  *	This symbol holds the complete pathname to the sed program.
  */
 #define LOC_SED 	"/bin/sed"	/**/
+
+/* ARCHLIB_EXP:
+ *	This symbol contains the ~name expanded version of ARCHLIB, to be used
+ *	in programs that are not prepared to deal with ~ expansion at run-time.
+ */
+#define ARCHLIB_EXP "/usr/local/lib/perl5/i386-isc"		/**/
 
 /* CSH:
  *	This symbol, if defined, indicates that the C-shell exists.

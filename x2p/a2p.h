@@ -19,11 +19,17 @@
 #if defined(STANDARD_C) && defined(I_STDLIB)
 #   include <stdlib.h>
 #endif /* STANDARD_C */
+
 #include <stdio.h>
 
 #ifdef I_MATH
 #include <math.h>
 #endif
+
+#ifdef I_SYS_TYPES
+#  include <sys/types.h>
+#endif
+
 
 #ifdef USE_NEXT_CTYPE 
 #include <appkit/NXCType.h>

@@ -1,0 +1,140 @@
+?RCS: $Id: archlib.U,v 3.0.1.2 1995/01/30 14:32:22 ram Exp $
+?RCS:
+?RCS: Copyright (c) 1991-1993, Raphael Manfredi
+?RCS: 
+?RCS: You may redistribute only under the terms of the Artistic Licence,
+?RCS: as specified in the README file that comes with the distribution.
+?RCS: You may reuse parts of this distribution only within the terms of
+?RCS: that same Artistic Licence; a copy of which may be found at the root
+?RCS: of the source tree for dist 3.0.
+?RCS:
+?RCS: Original Author: Andy Dougherty <doughera@lafcol.lafayette.edu>
+?RCS:
+?RCS: $Log: archlib.U,v $
+?RCS: Revision 3.0.1.2  1995/01/30  14:32:22  ram
+?RCS: patch49: archname is now systematically recomputed
+?RCS: patch49: can now handle installation prefix changes (from WED)
+?RCS:
+?RCS: Revision 3.0.1.1  1994/10/29  16:02:36  ram
+?RCS: patch36: created by ADO
+?RCS:
+?MAKE:d_archlib archlib archlibexp installarchlib archname: afs spackage \
+	cat Getfile Loc Oldconfig prefixexp privlib osname test Prefixit rm \
+	Prefixup
+?MAKE:	-pick add $@ %<
+?S:d_archlib:
+?S:	This variable conditionally defines ARCHLIB to hold the pathname
+?S:	of architecture-dependent library files for $package.  If
+?S:	$archlib is the same as $privlib, then this is set to undef.
+?S:.
+?S:archname:
+?S:	This variable is a short name to characterize the current
+?S:	architecture.  It is used to construct the default archlib.
+?S:.
+?S:archlib:
+?S:	This variable holds the name of the directory in which the user wants
+?S:	to put architecture-dependent public library files for $package.
+?S:	It is most often a local directory such as /usr/local/lib.
+?S:	Programs using this variable must be prepared to deal 
+?S:	with filename expansion.
+?S:.
+?S:archlibexp:
+?S:	This variable is the same as the archlib variable, but is 
+?S:	filename expanded at configuration time, for convenient use.
+?S:.
+?S:installarchlib:
+?S:	This variable is really the same as archlibexp but may differ on
+?S:	those systems using AFS. For extra portability, only this variable
+?S:	should be used in makefiles.
+?S:.
+?C:ARCHLIB:
+?C:	This variable, if defined, holds the name of the directory in
+?C:	which the user wants to put architecture-dependent public
+?C:	library files for $package.  It is most often a local directory
+?C:	such as /usr/local/lib.  Programs using this variable must be
+?C:	prepared to deal with filename expansion.  If ARCHLIB is the
+?C:	same as PRIVLIB, it is not defined, since presumably the
+?C:	program already searches PRIVLIB.
+?C:.
+?C:ARCHLIB_EXP:
+?C:	This symbol contains the ~name expanded version of ARCHLIB, to be used
+?C:	in programs that are not prepared to deal with ~ expansion at run-time.
+?C:.
+?H:#$d_archlib ARCHLIB "$archlib"		/**/
+?H:#$d_archlib ARCHLIB_EXP "$archlibexp"		/**/
+?H:.
+?T:xxx tarchname
+: determine where public architecture dependent libraries go
+?X: Always recompute archname in case osname changes -- RAM
+?X: But this prevents us from setting a sensible value in a hints file
+?X: or on the command line. -- ADO.
+case "$archname" in
+'')
+    if xxx=`./loc arch blurfl $pth`; test -f "$xxx"; then
+		tarchname=`arch`
+		archname="${tarchname}-$osname"
+	elif xxx=`./loc uname blurfl $pth`; test -f "$xxx" ; then
+		if uname -m > tmparch 2>&1 ; then
+			tarchname=`cat tmparch`
+			archname="${tarchname}-$osname"
+		fi
+		$rm -f tmparch
+	else
+		archname="$osname"
+	fi
+    ;;
+esac
+set archlib archlib
+eval $prefixit
+case "$archlib" in
+'')
+	case "$privlib" in
+	'')
+		dflt=`./loc . "." $prefixexp/lib /usr/local/lib /usr/lib /lib`
+		set dflt
+		eval $prefixup
+		;;
+	*)  dflt="$privlib/$archname";;
+	esac
+	;;
+*) dflt="$archlib";;
+esac
+cat <<EOM
+
+$spackage contains architecture-dependent library files.  If you are
+sharing libraries in a heterogeneous environment, you might store
+these files in a separate location.  Otherwise, you can just include
+them with the rest of the public library files.
+
+EOM
+fn=d~
+rp='Where do you want to put the public architecture-dependent libraries?'
+. ./getfile
+archlib="$ans"
+archlibexp="$ansexp"
+
+if $afs; then
+	$cat <<EOM
+
+Since you are running AFS, I need to distinguish the directory in which
+private files reside from the directory in which they are installed (and from
+which they are presumably copied to the former directory by occult means).
+
+EOM
+	case "$installarchlib" in
+	'') dflt=`echo $archlibexp | sed 's#^/afs/#/afs/.#'`;;
+	*) dflt="$installarchlib";;
+	esac
+	fn=de~
+	rp='Where will architecture-dependent library files be installed?'
+	. ./getfile
+	installarchlib="$ans"
+else
+	installarchlib="$archlibexp"
+fi
+if $test X"$archlib" = X"$privlib"; then
+	d_archlib="$undef"
+else
+	d_archlib="$define"
+fi
+

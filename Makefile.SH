@@ -70,7 +70,7 @@ $spitshell >Makefile <<'!NO!SUBS!'
 #  Makefile is used to generate makefile.  The only difference
 #  is that makefile has the dependencies filled in at the end.
 #
-# 
+#
 !NO!SUBS!
 
 $spitshell >>Makefile <<!GROK!THIS!
@@ -124,7 +124,7 @@ $spitshell >>Makefile <<'!NO!SUBS!'
 
 CCCMD = `sh $(shellflags) cflags $(perllib) $@`
 
-private = 
+private = preplibrary lib/ExtUtils/Miniperl.pm lib/Config.pm
 
 scripts =
 
@@ -134,7 +134,7 @@ util =
 
 sh = Makefile.SH cflags.SH makedepend.SH makedir.SH writemain.SH
 
-h1 = EXTERN.h INTERN.h XSUB.h av.h config.h cop.h cv.h dosish.h 
+h1 = EXTERN.h INTERN.h XSUB.h av.h config.h cop.h cv.h dosish.h
 h2 = embed.h form.h gv.h handy.h hv.h keywords.h mg.h op.h
 h3 = opcode.h patchlevel.h perl.h perly.h pp.h proto.h regcomp.h
 h4 = regexp.h scope.h sv.h unixish.h util.h
@@ -173,7 +173,7 @@ SHELL = /bin/sh
 .c.o:
 	$(CCCMD) $(PLDLFLAGS) $*.c
 
-all: makefile miniperl preplibrary $(public) $(dynamic_ext)
+all: makefile miniperl $(private) $(public) $(dynamic_ext)
 	@echo " "; echo "	Making x2p stuff"; cd x2p; $(MAKE) all
 	@echo " "; echo "	Making docs"; cd pod; $(MAKE) all;
 
@@ -203,7 +203,7 @@ perlmain.o: perlmain.c
 # The file ext.libs is a list of libraries that must be linked in
 # for static extensions, e.g. -lm -lgdbm, etc.  The individual
 # static extension Makefile's add to it.
-ext.libs:	$(static_ext)
+ext.libs: $(static_ext)
 	-@test -f ext.libs || touch ext.libs
 
 perl: $& perlmain.o $(perllib) $(DYNALOADER) $(static_ext) ext.libs
@@ -265,6 +265,9 @@ lib/Config.pm: config.sh miniperl
 	./miniperl configpm tmp
 	sh mv-if-diff tmp lib/Config.pm
 
+lib/ExtUtils/Miniperl.pm: miniperlmain.c miniperl minimod.PL lib/Config.pm
+	./miniperl minimod.PL > tmp && mv tmp $@
+
 install: all
 	./perl installperl
 !NO!SUBS!
@@ -274,7 +277,7 @@ install: all
 : doing can uncomment them and run yacc or bison or whatever.
 case "$d_byacc" in
 'define')
-	comment1='' 
+	comment1=''
 	comment2='#' ;;
 *)	comment1='#'
 	comment2='' ;;
@@ -305,7 +308,7 @@ ${comment2}	touch perly.c
 $spitshell >>Makefile <<'!NO!SUBS!'
 # Extensions:
 # Names added to $(dynamic_ext) or $(static_ext) will automatically
-# get built.  There should ordinarily be no need to change any of 
+# get built.  There should ordinarily be no need to change any of
 # this part of makefile.
 #
 # The dummy dependency is a place holder in case $(dynamic_ext) or
@@ -324,7 +327,7 @@ s_dummy $(static_ext):	miniperl preplibrary $(DYNALOADER) FORCE
 
 clean:
 	rm -f *.o *.a all perlmain.c
-	rm -f perl.exp ext.libs ext/util/extlibist
+	rm -f perl.exp ext.libs
 	-cd x2p; $(MAKE) clean
 	-cd pod; $(MAKE) clean
 	-@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) ; do \
@@ -341,7 +344,7 @@ realclean: clean
 	rm -rf $(addedbyconf)
 	rm -f Makefile cflags makedepend makedir writemain
 	rm -f config.h makefile makefile.old
-	rm -f lib/Config.pm
+	rm -f $(private)
 	rm -rf lib/auto
 	rm -f h2ph h2ph.man c2ph pstruct
 	rm -rf .config
@@ -349,7 +352,7 @@ realclean: clean
 
 clobber:	realclean
 	rm -f config.sh cppstdin
-    
+
 distclean:	clobber
 
 # The following lint has practically everything turned on.  Unfortunately,

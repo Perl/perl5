@@ -1,0 +1,30 @@
+Index: Oldconfig.U
+Prereq:  3.0.1.6 
+*** /home2/doughera/lib/dist/U/Oldconfig.U	Thu Feb  2 14:42:37 1995
+--- Oldconfig.U	Sat Feb 11 10:51:05 1995
+***************
+*** 261,272 ****
+  			osvers="$3"
+  			;;
+  		osf1)	case "$5" in
+! 				alpha)  osname=dec_osf
+! 					case "$3" in
+! 						[vt]1\.*) osvers=1 ;;
+! 						[vt]2\.*) osvers=2 ;;
+! 						[vt]3\.*) osvers=3 ;;
+! 					esac
+  					;;
+  			hp*)	osname=hp_osf1	;;
+  			mips)	osname=mips_osf1 ;;
+--- 261,271 ----
+  			osvers="$3"
+  			;;
+  		osf1)	case "$5" in
+! 				alpha)
+! ?X: DEC OSF/1 myuname -a output looks like:  osf1 xxxx t3.2 123.4 alpha
+! ?X: where the version number can be either vn.n or tn.n.
+! 					osname=dec_osf
+! 					osvers=`echo "$3" | sed 's/^[vt]//'`
+  					;;
+  			hp*)	osname=hp_osf1	;;
+  			mips)	osname=mips_osf1 ;;

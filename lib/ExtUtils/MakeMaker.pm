@@ -1,6 +1,6 @@
 package ExtUtils::MakeMaker;
 
-$Version = 4.03; # Last edited 30th Jan 1995 by Andreas Koenig
+$Version = 4.06; # Last edited 10th Feb 1995 by Andreas Koenig
 
 use Config;
 check_hints();
@@ -32,7 +32,7 @@ ExtUtils::MakeMaker - create an extension Makefile
 
 C<use ExtUtils::MakeMaker;>
 
-C<WriteMakefile( ATTRIBUTE => VALUE [, ...] );>
+C<WriteMakefile( ATTRIBUTE =E<gt> VALUE [, ...] );>
 
 =head1 DESCRIPTION
 
@@ -48,9 +48,10 @@ MakeMaker.pm uses the architecture specific information from
 Config.pm. In addition the extension may contribute to the C<%Config>
 hash table of Config.pm by supplying hints files in a C<hints/>
 directory. The hints files are expected to be named like their
-counterparts in PERL_SRC/hints (eg. next_3_2.sh). They are both
-executed by the shell and parsed by MakeMaker to include the variables
-in C<%Config>. If there is no hintsfile for the actual system, but for
+counterparts in C<PERL_SRC/hints>, but with an C<.pl> file name
+extension (eg. C<next_3_2.sh>). They are simply C<eval>ed by MakeMaker
+and can be used to execute commands as well as to include special
+variables. If there is no hintsfile for the actual system, but for
 some previous releases of the same operating system, the latest one of
 those is used.
 
@@ -93,6 +94,35 @@ set automatically when INST_LIB is given as argument.
 
 The generated Makefile does not set any permissions. The installer has
 to decide, which umask should be in effect.
+
+=head2 Support to Link a New Perl Binary
+
+An extension that is built with the above steps is ready to use on
+systems supporting dynamic loading. On systems that do not support
+dynamic loading, any newly created extension has to be linked together
+with the available ressources. MakeMaker supports the linking process
+by creating appropriate targets in the Makefile whenever an extension
+is built. You can invoke the corresponding section of the makefile with
+
+    make perl
+
+That produces a new perl binary in the current directory with all
+extensions that are present on the system (either in the current build
+environment or in the perl library) linked in.
+
+The binary can be installed into the directory where perl normally
+resides on your machine with
+
+    make inst_perl
+
+Note, that there is a C<makeaperl> scipt available, that supports the
+linking of a new perl binary in a similar fashion, but with more
+options for those, that want to build perl binaries of the
+not-quite-everyday type. 
+
+Warning: The perl: and inst_perl: targets are new in MakeMaker v4.06,
+and should be watched with care. Watch out for what it does and what
+you want!
 
 =head2 Determination of Perl Library and Installation Locations
 
@@ -145,11 +175,11 @@ we default to PERL_SRC/lib, else we default to ./blib.
 
 INST_ARCHLIB = Same as above for architecture dependent files
 
-INST_LIBDIR = $(INST_LIB)$(ROOTEXT)
+INST_LIBDIR = C<$(INST_LIB)$(ROOTEXT)>
 
-INST_AUTODIR = $(INST_LIB)/auto/$(FULLEXT)
+INST_AUTODIR = C<$(INST_LIB)/auto/$(FULLEXT)>
 
-INST_ARCHAUTODIR = $(INST_ARCHLIB)/auto/$(FULLEXT)
+INST_ARCHAUTODIR = C<$(INST_ARCHLIB)/auto/$(FULLEXT)>
 
 =head2 Customizing The Generated Makefile
 
@@ -163,9 +193,12 @@ or as NAME=VALUE pairs on the command line:
 
 This description is not yet documented; you can get at the description
 with the command
-    C<perl Makefile.PL help>    (if you already have a basic Makefile.PL)
+
+C<perl Makefile.PL help>    (if you already have a basic Makefile.PL)
+
 or
-    C<perl -e 'use ExtUtils::MakeMaker qw(&help); &help;'>
+
+C<perl -e 'use ExtUtils::MakeMaker qw(&help); &help;'>
 
 =head2 Overriding MakeMaker Methods
 
@@ -181,113 +214,9 @@ or you can edit the default by saying something like:
 
 	sub MY::c_o { $_=MM->c_o; s/old text/new text/; $_ }
 
-If you still need a different solution, try to develop another 
-subroutine, that fits your needs and submit the diffs to 
-perl5-porters@nicoh.com or comp.lang.perl as appropriate.
-
-
-=head1 AUTHORS
-
-Andy Dougherty <doughera@lafcol.lafayette.edu>, Andreas Koenig
-<k@franz.ww.TU-Berlin.DE>, Tim Bunce <Tim.Bunce@ig.co.uk>
-
-=head1 MODIFICATION HISTORY
-
-v1, August 1994; by Andreas Koenig. Based on Andy Dougherty's Makefile.SH.
-v2, September 1994 by Tim Bunce.
-v3.0 October  1994 by Tim Bunce.
-v3.1 November 11th 1994 by Tim Bunce.
-v3.2 November 18th 1994 by Tim Bunce.
-v3.3 November 27th 1994 by Andreas Koenig.
-v3.4 December  7th 1994 by Andreas Koenig and Tim Bunce.
-v3.5 December 15th 1994 by Tim Bunce.
-v3.6 December 15th 1994 by Tim Bunce.
-v3.7 December 30th 1994 By Tim Bunce
-v3.8 January  17th 1995 By Andreas Koenig and Tim Bunce
-
-v3.9 January 19th 1995 By Tim Bunce
-
-Added ~ processing to parse_args to allow perl Makefile.PL X=~/path.
-Added warning about LDTARGET to LDFROM attribute name change.
-Fallback INST_ARCHLIB is INST_LIB, or INST_LIB/$archname if it exists.
-Tightened up dependency checking of Makefile against config.sh etc.
-INST_STATIC is now INST_ARCHLIBDIR/BASEEXT.a for later make-a-perl.
-AUTOSPLITFILE tidied up (AutoSplit patch included in this version).
-MKPATH now skips inner loop if directory already exists.
-The dynamic_lib section was revised with explicit dec_osf support added.
-Make clean now renames Makefile to Makefile.old (make_ext also patched).
-The large initialize function has been split into smaller pieces.
-Added I_PERL_LIBS to simplify -I paths for PERL_*LIB.
-
-v3.10 January 23rd 1995 By Tim Bunce
-
-miniperl now given preference when defining PERL. This improves the
-reliability of ext/*/Makefile's recreating themselves if needed.
-$(XS), $(C) and $(H) renamed to XS_FILES C_FILES and H_FILES.
-INST_STATIC now INST_ARCHLIBDIR/BASEEXT.a (alongside INST_DYNAMIC).
-Static lib no longer copied back to local directory.
-
-v3.11 January 24th 1995 By Andreas Koenig
-
-DynaLoader.c was not deleted by clean target, now fixed.
-Added PMDIR attribute that allows directories to be named that contain
-only *.p[pl] files to be installed into INST_LIB. Added some documentation.
-
-v4.00 January 24th 1995 By Tim Bunce
-
-Revised some of the documentation. Changed version number to 4.00 to
-avoid problems caused by my earlier poor choice of 3.10!  Renamed PMDIR
-to PMLIBDIRS and restructured find code to use inherited MY->libscan.
-Added ability to say: "perl Makefile.PL help"  to get help.
-Added ability to say: "perl Makefile.PL verbose"  to get debugging.
-Added MakeMaker version number to generated Makefiles.
-
-v4.01 January 25th 1995 By Tim Bunce
-
-Changes in the section that deals with PMLIBDIRS: some pm files were
-put into INST_LIB instead of INST_LIBDIR.
-
-v4.02 January 29th 1995 By Andreas Koenig
-
-Enabled the use of the XXX_cflags variable from Config.pm for nested
-extensions: to change e.g. the $Config{"ccflags"} variable on the NeXT
-for the nTk::pTk extension, say
-    nTk__pTk_cflags='ccflags="-posix $ccflags"'
-in the hints-file. 
-
-Hints may now be put in a hints/*.sh file within the the module's
-directory tree. Any *.sh file in that directory acts as if it had been
-parsed during the perl build process.
-
-Added O_FILES, which is an array like C_FILES. Done so to add a
-dependency O_FILES from H_FILES. This has the effect, that the
-extension gets rebuilt after some headerfiles have changed.
-
-Made life easier in some "I've just edited config.sh" situations and
-reduce the risk of "MakeMaker is being pedantic" complaints by letting
-the Makefile proceed with a warning if Config.pm is out of date (Tim's
-suggestion).
-
-$Verbose now passed to the findperl routine, to get debugging output
-from there, too.
-
-Make clean now also deletes the ./blib directory.
-
-Added lots of ideas of Charles Bailey that enable VMS support.
-
-v4.03 January 30th 1995 By Andreas Koenig
-
-check_hints() now also called within runsubdirpl(). More VMS code
-included. Trivial cosmetics.
-
-=head1 NOTES
-
-MakeMaker development work still to be done:
-
-Needs more complete documentation.
-
-Add a html: target when there has been found a general solution to
-installing html files.
+If you still need a different solution, try to develop another
+subroutine, that fits your needs and submit the diffs to
+F<perl5-porters@nicoh.com> or F<comp.lang.perl> as appropriate.
 
 =cut
 
@@ -303,7 +232,7 @@ sub check_hints {
     opendir DIR, "hints";
     while (defined ($_ = readdir DIR)) {
 	next if /^\./;
-	next unless s/\.sh$//;
+	next unless s/\.pl$//;
 	next unless /^$Config{'osname'}/;
 	# Don't trust a hintfile for a later OS version:
 	next if $_ gt $hint;
@@ -316,24 +245,10 @@ sub check_hints {
     closedir DIR;
     return unless @goodhints; # There was no hintsfile
     # the last one in lexical ordering is our choice:
-    $hint=(reverse sort @goodhints)[0]; 
+    $hint=(reverse sort @goodhints)[0];
 
     # execute the hintsfile:
-    system "/bin/sh hints/$hint.sh" unless $Is_VMS;
-    # Read the hintsfile and process it similarly as in configpm
-    open HINT, "hints/$hint.sh";
-    my(@v_others);
-    while (<HINT>) {
-	next if /^\s*$/; # empty lines
-	next if /^\s*#/; # comments
-	s/^(\w+)=(true|\d+)\s*$/$1='$2'\n/;
-	next unless (m/^(\w+)='(.*)'\s*$/);
-	push @v_others, $_;
-    }
-    close HINT;
-
-    # The lines we found take precedence over those in Config.pm:
-    $Config::config_sh = "@v_others" . $Config::config_sh;
+    eval `cat hints/$hint.pl`;
 }
 
 # Setup dummy package:
@@ -435,7 +350,7 @@ $Attrib_Help = <<'END';
 		universal symbols.  Used only under AIX (export lists) and VMS
 		(linker options) at present.  Defaults to [].
 		(e.g. [ qw( Foo_version Foo_numstreams Foo_tree ) ])
- 
+
  CONFIG:	=>[qw(archname manext)] defines ARCHNAME & MANEXT from config.sh
  SKIP:  	=>[qw(name1 name2)] skip (do not write) sections of the Makefile
 
@@ -489,6 +404,7 @@ sub help {print $Attrib_Help;}
     'perldepend'	=> {},
     'makefile'		=> {},
     'postamble'		=> {},
+    'staticmake'	=> {},
 );
 %MM_Sections = @MM_Sections_spec; # looses section ordering
 @MM_Sections = grep(!ref, @MM_Sections_spec); # keeps order
@@ -507,20 +423,20 @@ foreach(split(/\n/,$Attrib_Help)){
 sub skipcheck{
     my($section) = @_;
     if ($section eq 'dynamic') {
-        warn "Warning (non-fatal): Target 'dynamic' depends on targets "
+	print STDOUT "Warning (non-fatal): Target 'dynamic' depends on targets "
 	  . "in skipped section 'dynamic_bs'\n"
             if $skip{'dynamic_bs'} && $Verbose;
-        warn "Warning (non-fatal): Target 'dynamic' depends on targets "
+        print STDOUT "Warning (non-fatal): Target 'dynamic' depends on targets "
 	  . "in skipped section 'dynamic_lib'\n"
             if $skip{'dynamic_lib'} && $Verbose;
     }
     if ($section eq 'dynamic_lib') {
-        warn "Warning (non-fatal): Target '\$(INST_DYNAMIC)' depends on "
+        print STDOUT "Warning (non-fatal): Target '\$(INST_DYNAMIC)' depends on "
 	  . "targets in skipped section 'dynamic_bs'\n"
             if $skip{'dynamic_bs'} && $Verbose;
     }
     if ($section eq 'static') {
-        warn "Warning (non-fatal): Target 'static' depends on targets "
+        print STDOUT "Warning (non-fatal): Target 'static' depends on targets "
 	  . "in skipped section 'static_lib'\n"
             if $skip{'static_lib'} && $Verbose;
     }
@@ -627,9 +543,9 @@ sub parse_args{
     if (defined $$attr{'potential_libs'}){
 	my($msg)="'potential_libs' => '$$attr{potential_libs}' should be";
 	if ($$attr{'potential_libs'}){
-	    print STDERR "$msg changed to:\n\t'LIBS' => ['$$attr{potential_libs}']\n";
+	    print STDOUT "$msg changed to:\n\t'LIBS' => ['$$attr{potential_libs}']\n";
 	} else {
-	    print STDERR "$msg deleted.\n";
+	    print STDOUT "$msg deleted.\n";
 	}
 	$$attr{LIBS} = [$$attr{'potential_libs'}];
 	delete $$attr{'potential_libs'};
@@ -637,20 +553,20 @@ sub parse_args{
     # catch old-style 'ARMAYBE' and inform user how to 'upgrade'
     if (defined $$attr{'ARMAYBE'}){
 	my($armaybe) = $$attr{'ARMAYBE'};
-	print STDERR "ARMAYBE => '$armaybe' should be changed to:\n",
+	print STDOUT "ARMAYBE => '$armaybe' should be changed to:\n",
 			"\t'dynamic_lib' => {ARMAYBE => '$armaybe'}\n";
 	my(%dl) = %{$$attr{'dynamic_lib'} || {}};
 	$$attr{'dynamic_lib'} = { %dl, ARMAYBE => $armaybe};
 	delete $$attr{'ARMAYBE'};
     }
     if (defined $$attr{'LDTARGET'}){
-	print STDERR "LDTARGET should be changed to LDFROM\n";
+	print STDOUT "LDTARGET should be changed to LDFROM\n";
 	$$attr{'LDFROM'} = $$attr{'LDTARGET'};
 	delete $$attr{'LDTARGET'};
     }
     foreach(sort keys %{$attr}){
 	print STDOUT "	$_ => ".neatvalue($$attr{$_}) if ($Verbose);
-	warn "'$_' is not a known MakeMaker parameter name.\n"
+	print STDOUT "'$_' is not a known MakeMaker parameter name.\n"
 	    unless exists $Recognized_Att_Keys{$_};
     }
 }
@@ -658,6 +574,7 @@ sub parse_args{
 
 sub neatvalue{
     my($v) = @_;
+    return "undef" unless defined $v;
     my($t) = ref $v;
     return "'$v'" unless $t;
     return "[ ".join(', ',map("'$_'",@$v))." ]" if ($t eq 'ARRAY');
@@ -717,13 +634,13 @@ sub init_main {
 	}
     }
     unless ($att{PERL_SRC}){
-	warn "Unable to locate perl source.\n";
 	# we should also consider $ENV{PERL5LIB} here
 	$att{PERL_LIB}     = $Config{'privlib'} unless $att{PERL_LIB};
 	$att{PERL_ARCHLIB} = $Config{'archlib'} unless $att{PERL_ARCHLIB};
 	$att{PERL_INC}     = "$att{PERL_ARCHLIB}/CORE"; # wild guess for now
-	die "Try setting PERL_SRC in Makefile.PL or on command line.\n"
+	die "Unable to locate Perl source. Try setting PERL_SRC in Makefile.PL or on command line.\n"
 		unless (-f "$att{PERL_INC}/perl.h");
+	print STDOUT "Using header files found in $att{PERL_INC}" if $Verbose;
     } else {
 	$att{PERL_LIB}     = "$att{PERL_SRC}/lib" unless $att{PERL_LIB};
 	$att{PERL_ARCHLIB} = $att{PERL_LIB};
@@ -755,10 +672,10 @@ sub init_main {
 	    my($archname) = $Config{'archname'};
 	    if (-d "$att{INST_LIB}/$archname"){
 		$att{INST_ARCHLIB} = "$att{INST_LIB}/$archname";
-		warn "Defaulting INST_ARCHLIB to INST_LIB/$archname\n";
+		print STDOUT "Defaulting INST_ARCHLIB to INST_LIB/$archname\n";
 	    } else {
 		$att{INST_ARCHLIB} = $att{INST_LIB};
-		warn "Warning: Defaulting INST_ARCHLIB to INST_LIB ",
+		print STDOUT "Warning: Defaulting INST_ARCHLIB to INST_LIB ",
 			"(not architecture independent).\n";
 	    }
 	}
@@ -789,7 +706,7 @@ sub init_main {
     ($att{ROOTEXT} =$att{FULLEXT}) =~ s#/?\Q$att{BASEEXT}\E$## ; # eg. /BSD/Foo
     $att{ROOTEXT} = ($Is_VMS ? '' : '/') . $att{ROOTEXT} if $att{ROOTEXT};
 
-    ($att{DISTNAME}=$att{NAME}) =~ s#(::)#-#g;
+    ($att{DISTNAME}=$att{NAME}) =~ s#(::)#-#g unless $att{DISTNAME};
     $att{VERSION} = "0.1" unless $att{VERSION};
 
 
@@ -799,7 +716,7 @@ sub init_main {
     # will be working versions of perl 5. miniperl has priority over perl
     # for PERL to ensure that $(PERL) is usable while building ./ext/*
     $att{'PERL'} = MY->find_perl(5.0, [ qw(miniperl perl) ],
-	    [ $att{PERL_SRC}, split(":", $ENV{PATH}), $Config{'bin'} ], $Verbose )
+	    [ grep defined $_, $att{PERL_SRC}, split(":", $ENV{PATH}), $Config{'bin'} ], $Verbose )
 	unless ($att{'PERL'} && -x $att{'PERL'});
 
     # Define 'FULLPERL' to be a non-miniperl (used in test: target)
@@ -872,7 +789,10 @@ sub init_dirscan {	# --- File and Directory Lists (.xs .pm etc)
 	    if ($Verbose >= 2);
 	use File::Find;		# try changing to require !
 	File::Find::find(sub {
-		return unless m/\.p[ml]$/;
+# We now allow any file in PMLIBDIRS to be installed. nTk needs that, and
+# we should allow it.
+#               return unless m/\.p[ml]$/;
+	        return if -d $_; # anything else that Can't be copied?
 		my($path, $prefix) = ($File::Find::name, '$(INST_LIBDIR)');
 		$prefix =  '$(INST_LIB)' if ($path =~ s:^lib/::);
 		local($_) = "$prefix/$path";
@@ -920,7 +840,7 @@ sub init_others {	# --- Initialize Other Attributes
 	}
     }
 
-    warn "CONFIG must be an array ref\n"
+    print STDOUT "CONFIG must be an array ref\n"
 	if ($att{CONFIG} and ref $att{CONFIG} ne 'ARRAY');
     $att{CONFIG} = [] unless (ref $att{CONFIG});
     push(@{$att{CONFIG}},
@@ -976,17 +896,21 @@ sub lsdir{
 sub find_perl{
     my($self, $ver, $names, $dirs, $trace) = @_;
     my($name, $dir);
-    print "Looking for perl $ver by these names: @$names, in these dirs: @$dirs\n"
-	if ($trace);
+    if ($trace){
+	print "Looking for perl $ver by these names: ";
+	print "@$names, ";
+	print "in these dirs:";
+	print "@$dirs";
+    }
     foreach $dir (@$dirs){
 	next unless defined $dir; # $att{PERL_SRC} may be undefined
 	foreach $name (@$names){
-	    print "checking $dir/$name\n" if ($trace >= 2);
+	    print "checking $dir/$name" if ($trace >= 2);
 	    if ($Is_VMS) {
 	      $name .= ".exe" unless -x "$dir/$name";
 	    }
 	    next unless -x "$dir/$name";
-	    print "executing $dir/$name\n" if ($trace);
+	    print "Executing $dir/$name" if ($trace);
 	    my($out);
 	    if ($Is_VMS) {
 	      my($vmscmd) = 'MCR ' . vmsify("$dir/$name");
@@ -997,7 +921,7 @@ sub find_perl{
 	    return "$dir/$name" if $out =~ /VER_OK/;
 	}
     }
-    warn "Unable to find a perl $ver (by these names: @$names, in these dirs: @$dirs)\n";
+    print STDOUT "Unable to find a perl $ver (by these names: @$names, in these dirs: @$dirs)\n";
     0; # false and not empty
 }
 
@@ -1005,7 +929,7 @@ sub find_perl{
 sub post_initialize{
     "";
 }
- 
+
 
 sub constants {
     my(@m);
@@ -1038,10 +962,10 @@ PERL_ARCHLIB = $att{PERL_ARCHLIB}
     }
 
     push @m, "
-# Where is the perl source code located? (Eventually we should
-# be able to build extensions without requiring the perl source
-# but that's a way off yet).
-PERL_SRC = $att{PERL_SRC}
+# Where is the perl source code located?
+PERL_SRC = $att{PERL_SRC}\n" if $att{PERL_SRC};
+
+    push @m, "
 # Perl header files (will eventually be under PERL_LIB)
 PERL_INC = $att{PERL_INC}
 # Perl binaries
@@ -1117,7 +1041,7 @@ sub const_cccmd{
     ( $name = $att{NAME} . "_cflags" ) =~ s/:/_/g ;
     if ($prog = $Config{$name}) {
 	# Expand hints for this extension via the shell
-	print STDERR "Processing $name hint:\n" if $Verbose;
+	print STDOUT "Processing $name hint:\n" if $Verbose;
 	my(@o)=`cc=\"$cc\"
 	  ccflags=\"$ccflags\"
 	  optimize=\"$optimize\"
@@ -1135,9 +1059,9 @@ sub const_cccmd{
 	    chomp $line;
 	    if ($line =~ /(.*?)=\s*(.*)\s*$/){
 		$cflags{$1} = $2;
-		print STDERR "	$1 = $2" if $Verbose;
+		print STDOUT "	$1 = $2" if $Verbose;
 	    } else {
-		print STDERR "Unrecognised result from hint: '$line'\n";
+		print STDOUT "Unrecognised result from hint: '$line'\n";
 	    }
 	}
 	($cc,$ccflags,$optimize,$large,$split)=@cflags{qw(cc ccflags optimize large split)};
@@ -1145,7 +1069,7 @@ sub const_cccmd{
 
     my($new) = "$cc -c $ccflags $optimize  $large $split";
     if (defined($old) and $new ne $old) {
-	warn "Warning (non-fatal): cflags evaluation in MakeMaker differs from shell output\n"
+	print STDOUT "Warning (non-fatal): cflags evaluation in MakeMaker differs from shell output\n"
 	."   package: $att{NAME}\n"
 	."   old: $old\n"
 	."   new: $new\n"
@@ -1165,7 +1089,7 @@ sub const_config{
     my(%once_only);
     foreach $m (@{$att{'CONFIG'}}){
 	next if $once_only{$m};
-	warn "CONFIG key '$m' does not exist in Config.pm\n"
+	print STDOUT "CONFIG key '$m' does not exist in Config.pm\n"
 		unless exists $Config{$m};
 	push @m, "\U$m\E = $Config{$m}\n";
 	$once_only{$m} = 1;
@@ -1220,9 +1144,7 @@ sub tool_autosplit{
     $asl = "\$AutoSplit::Maxlen=$attribs{MAXLEN};" if $attribs{MAXLEN};
     q{
 # Usage: $(AUTOSPLITFILE) FileToSplit AutoDirToSplitInto
-# Remark: the "" around the -I switches are helpful for the VMS support
-AUTOSPLITFILE = $(PERL) $(I_PERL_LIBS) -e 'use AutoSplit;}.$asl.q{ \
-	AutoSplit::autosplit($$ARGV[0], $$ARGV[1], 0, 1, 1) ;'
+AUTOSPLITFILE = $(PERL) $(I_PERL_LIBS) -e 'use AutoSplit;}.$asl.q{autosplit($$ARGV[0], $$ARGV[1], 0, 1, 1) ;'
 };
 }
 
@@ -1267,18 +1189,17 @@ sub post_constants{
 # --- Translation Sections ---
 
 sub c_o {
-    '
-$(O_FILES): $(H_FILES)
-
+    push @m, '
 .c.o:
 	$(CCCMD) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) $(INC) $*.c
 ';
+    join "", @m;
 }
 
 sub xs_c {
     '
 .xs.c:
-	$(PERL) $(XSUBPP) $(XSUBPPARGS) $*.xs >xstmp.c && mv xstmp.c $@
+	$(PERL) $(XSUBPP) $(XSUBPPARGS) $*.xs >$*.tc && mv $*.tc $@
 ';
 }
 
@@ -1294,13 +1215,18 @@ sub xs_o {	# many makes are too dumb to use xs_c then c_o
 # --- Target Sections ---
 
 sub top_targets{
-    '
+    push @m, '
 all ::	config linkext $(INST_PM)
 '.$att{NOOP}.'
 
 config :: '.$att{MAKEFILE}.'
-	@$(MKPATH) $(INST_LIBDIR) $(INST_ARCHAUTODIR)
+	@ $(MKPATH) $(INST_LIBDIR) $(INST_ARCHAUTODIR)
 ';
+
+    push @m, '
+$(O_FILES): $(H_FILES)
+' if @{$att{O_FILES} || []} && @{$att{H} || []};
+    join('',@m);
 }
 
 sub linkext {
@@ -1335,8 +1261,10 @@ static :: $att{BASEEXT}.exp
     push(@m,"
 $att{BASEEXT}.exp: Makefile.PL
 ",'	$(PERL) $(I_PERL_LIBS) -e \'use ExtUtils::MakeMaker; \\
-	mksymlists(DL_FUNCS => ',neatvalue($att{DL_FUNCS}),', DL_VARS => ',neatvalue($att{DL_VARS}),')\'
-');
+	mksymlists(DL_FUNCS => ',
+	%$funcs ? neatvalue($funcs) : "''",', DL_VARS => ',
+	@$vars  ? neatvalue($vars)  : "''",")'
+");
 
     join('',@m);
 }
@@ -1364,11 +1292,11 @@ $(BOOTSTRAP): '."$att{MAKEFILE} $att{BOOTDEP}".'
 	$(PERL) $(I_PERL_LIBS) \
 		-e \'use ExtUtils::MakeMaker; &mkbootstrap("$(BSLOADLIBS)");\' \
 		INST_LIB=$(INST_LIB) INST_ARCHLIB=$(INST_ARCHLIB) PERL_SRC=$(PERL_SRC) NAME=$(NAME)
-	@$(TOUCH) $(BOOTSTRAP)
+	@ $(TOUCH) $(BOOTSTRAP)
 
 $(INST_BOOT): $(BOOTSTRAP)
-	@'.$att{RM_RF}.' $(INST_BOOT)
-	'.$att{CP}.' $(BOOTSTRAP) $(INST_BOOT)
+	@ '.$att{RM_RF}.' $(INST_BOOT)
+	- '.$att{CP}.' $(BOOTSTRAP) $(INST_BOOT)
 ';
 }
 
@@ -1388,7 +1316,7 @@ ARMAYBE = '.$armaybe.'
 OTHERLDFLAGS = '.$otherldflags.'
 
 $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP)
-	@$(MKPATH) $(INST_ARCHAUTODIR)
+	@ $(MKPATH) $(INST_ARCHAUTODIR)
 ');
     if ($armaybe ne ':'){
 	$ldfrom = "tmp.a";
@@ -1408,7 +1336,7 @@ sub static {
     '
 # $(INST_PM) has been moved to the all: target.
 # It remains here for awhile to allow for old usage: "make static"
-static :: '.$att{MAKEFILE}.' $(INST_STATIC) $(INST_PM) 
+static :: '.$att{MAKEFILE}.' $(INST_STATIC) $(INST_PM)
 '.$att{NOOP}.'
 ';
 }
@@ -1417,18 +1345,22 @@ sub static_lib{
     my(@m);
     push(@m, <<'END');
 $(INST_STATIC): $(OBJECT) $(MYEXTLIB)
+	@ $(MKPATH) $(INST_ARCHAUTODIR)
 END
     # If this extension has it's own library (eg SDBM_File)
     # then copy that to $(INST_STATIC) and add $(OBJECT) into it.
     push(@m, "	$att{CP} \$(MYEXTLIB) \$\@\n") if $att{MYEXTLIB};
 
     push(@m, <<'END');
+	@ $(MKPATH) $(INST_ARCHAUTODIR)
 	ar cr $@ $(OBJECT) && $(RANLIB) $@
 	@echo "$(EXTRALIBS)" > $(INST_ARCHAUTODIR)/extralibs.ld
 END
+
+# Old mechanism - still available:
+
     push(@m, <<'END') if $att{PERL_SRC};
-	@: Old mechanism - still needed:
-	@echo "$(EXTRALIBS)" >> $(PERL_SRC)/ext.libs
+	@ echo "$(EXTRALIBS)" >> $(PERL_SRC)/ext.libs
 END
     join('', "\n",@m);
 }
@@ -1459,10 +1391,10 @@ sub installpm_x { # called by installpm per file
     my($instdir) = $inst =~ m|(.*)/|;
     my(@m);
     push(@m,"
-$inst: $dist
-".'	@'.$att{RM_F}.' $@
-	@$(MKPATH) '.$instdir.'
-	'.$att{CP}.' $? $@
+$inst: $dist Makefile
+".'	@ '.$att{RM_F}.' $@
+	@ $(MKPATH) '.$instdir.'
+	'."$att{CP} $dist".' $@
 ');
     push(@m, "\t\$(AUTOSPLITFILE) \$@ $splitlib/auto\n")
 	if ($splitlib and $inst =~ m/\.pm$/);
@@ -1569,7 +1501,8 @@ realclean purge ::  clean
     push(@m, "	$att{RM_RF} \$(INST_AUTODIR) \$(INST_ARCHAUTODIR)\n");
     push(@m, "	$att{RM_F} \$(INST_DYNAMIC) \$(INST_BOOT)\n");
     push(@m, "	$att{RM_F} \$(INST_STATIC) \$(INST_PM)\n");
-    my(@otherfiles) = ($att{MAKEFILE}, "$att{MAKEFILE}.old"); # Makefiles last
+    my(@otherfiles) = ($att{MAKEFILE}, 
+		       "Perl.make", "$att{MAKEFILE}.old"); # Makefiles last
     push(@otherfiles, $attribs{FILES}) if $attribs{FILES};
     push(@m, "	$att{RM_RF} @otherfiles\n") if @otherfiles;
     push(@m, "	$attribs{POSTOP}\n")       if $attribs{POSTOP};
@@ -1585,7 +1518,7 @@ sub distclean {
     my($compress) = $attribs{COMPRESS} || 'compress'; # eg gzip
     my($preop)    = $attribs{PREOP}  || '@:'; # e.g., update MANIFEST
     my($postop)   = $attribs{POSTOP} || '@:';
-    my($mkfiles)  = join(' ', map("$_/$att{MAKEFILE}", ".", @{$att{DIR}}));
+    my($mkfiles)  = join(' ', map("$_/$att{MAKEFILE} $_/$att{MAKEFILE}.old", ".", @{$att{DIR}}));
     "
 distclean:     clean
 	$preop
@@ -1610,7 +1543,7 @@ test :: all
 	\$(FULLPERL) -I\$(INST_ARCHLIB) -I\$(INST_LIB) -I\$(PERL_ARCHLIB) -I\$(PERL_LIB) -e 'use Test::Harness; runtests \@ARGV;' $tests
 END
     push(@m, <<'END') if -f "test.pl";
-	$(FULLPERL) -I$(INST_ARCHLIB) -I$(INST_LIB) $(I_PERL_LIBS) test.pl
+	$(FULLPERL) -I$(INST_ARCHLIB) -I$(INST_LIB) -I$(PERL_ARCHLIB) -I$(PERL_LIB) test.pl
 END
     push(@m, map("\tcd $_ && test -f $att{MAKEFILE} && \$(MAKE) test LINKTYPE=\$(LINKTYPE)\n",@{$att{DIR}}));
     push(@m, "\t\@echo 'No tests defined for \$(NAME) extension.'\n") unless @m > 1;
@@ -1628,8 +1561,8 @@ install :: all
     push(@m, map("\tcd $_ && test -f $att{MAKEFILE} && \$(MAKE) install\n",@{$att{DIR}}));
 
     push(@m, "\t: perl5.000 and MM pre 3.8 autosplit into INST_ARCHLIB, we delete these old files here
-	$att{RM_F} \$(INST_ARCHLIB)/auto/\$(FULLEXT)/*.al \$(INST_ARCHLIB)/auto/\$(FULLEXT)/*.ix
-	\$(MAKE) INST_LIB=\$(INST_PRIVLIB) INST_ARCHLIB=\$(INST_ARCHLIB)
+	$att{RM_F} $Config{'installarchlib'}/auto/\$(FULLEXT)/*.al $Config{'installarchlib'}/auto/\$(FULLEXT)/*.ix
+	\$(MAKE) INST_LIB=$Config{'installprivlib'} INST_ARCHLIB=$Config{'installarchlib'}
 ");
 
     join("",@m);
@@ -1686,7 +1619,7 @@ $(OBJECT) : '.$att{MAKEFILE}.'
 
 # We take a very conservative approach here, but it\'s worth it.
 # We move Makefile to Makefile.old here to avoid gnu make looping.
-'.$att{MAKEFILE}.':	Makefile.PL $(CONFIGDEP) 
+'.$att{MAKEFILE}.':	Makefile.PL $(CONFIGDEP)
 	@echo "Makefile out-of-date with respect to $?"
 	@echo "Cleaning current config before rebuilding Makefile..."
 	-@mv '."$att{MAKEFILE} $att{MAKEFILE}.old".'
@@ -1701,20 +1634,176 @@ sub postamble{
     "";
 }
 
+# --- Make-A-Perl section ---
+
+sub staticmake {
+    my($self, %attribs) = @_;
+
+    my(%searchdirs)=($att{PERL_ARCHLIB} => 1,  $att{INST_ARCHLIB} => 1);
+    my(@searchdirs)=keys %searchdirs;
+    # And as it's not yet built, we add the current extension
+    my(@static)="$att{INST_ARCHLIB}/auto/$att{FULLEXT}/$att{BASEEXT}.a";
+    my(@extra);
+    push(@extra, split(' ', $att{EXTRALIBS})) if defined $att{EXTRALIBS};
+    my(@perlinc) = ($att{INST_ARCHLIB}, $att{INST_LIB}, $att{PERL_ARCHLIB}, $att{PERL_LIB});
+    MY->makeaperl('MAKE' => $att{MAKEFILE}, 
+			     'DIRS' => \@searchdirs, 
+			     'STAT' => \@static, 
+			     'EXTRA' => \@extra, 
+			     'INCL' => \@perlinc,
+			     'TARGET' => "perl",
+			     'TMP' => "",
+			     'LIBPERL' => "$att{PERL_INC}/libperl.a"
+			     );
+}
+
+sub makeaperl {
+    my($self, %attribs) = @_;
+    my($makefilename, $searchdirs, $static, $extra, $perlinc, $target, $tmp, $libperl) = 
+      @attribs{qw(MAKE DIRS STAT EXTRA INCL TARGET TMP LIBPERL)};
+    my(@m);
+    my($cccmd, $linkcmd, %map);
+
+    # This emulates cflags to get the compiler invocation...
+    $cccmd = MY->const_cccmd();
+    $cccmd =~ s/^CCCMD\s*=\s*//;
+    chomp $cccmd;
+    $cccmd =~ s/\s/ -I$att{PERL_INC} /;
+    $cccmd .= " $Config{'cccdlflags'}" if ($Config{'d_shrplib'});
+
+    # The front matter of the linkcommand...
+    $linkcmd = join ' ', $Config{'cc'},
+	    grep($_, @Config{qw(large split ldflags ccdlflags)});
+    $linkcmd =~ s/\s+/ /g;
+
+    # Which *.a files could we make use of...
+    local(%static,%libperl);
+    File::Find::find(sub {
+	return unless m/\.a$/;
+	if (m/^libperl/) {
+	    $libperl{$File::Find::name}++;
+	    return;
+	}
+	$static{$File::Find::name}++;
+    }, grep( -d $_, @{$searchdirs || []}) );
+
+    $extra = [] unless $extra && ref $extra eq 'ARRAY';
+    for (sort keys %static) {
+	next unless /\.a$/;
+	s#^#./# unless m#/#;        # Prepend "./" if it is in the current dir
+	s#(.*/).*#$1extralibs.ld#;
+	if (-f $_){
+	    push @$extra, split(' ',`cat $_`);
+	} else {
+	    print STDOUT "$0: warning $_ not found";
+	}
+    }
+
+    # These have been handed in explicitly, so we do not read extralibs.ld for them,
+    # they might not even exist, and extralibs.ld might be outdated.
+    @static{@{$static || []}} = (1) x @{$static || []};
+    grep(s/^/-I/, @$perlinc);
+
+    $target = "perl" unless $target;
+    $tmp = "." unless $tmp;
+
+    push @m, "
+# Fill in the target you want to produce if it's not perl
+MAP_TARGET    = $target
+FULLPERL      = $att{'FULLPERL'}
+MAP_LINKCMD   = $linkcmd
+MAP_PERLINC   = @{$perlinc}
+MAP_STATIC    = ",
+join(" ", sort keys %static), "
+MAP_EXTRA     = @{$extra}
+MAP_PRELIBS   = $Config{'libs'} $Config{'cryptlib'}
+";
+
+    my(@libperl);
+    if ($libperl) {
+	@libperl = $libperl;
+    } else {
+	@libperl = sort keys %libperl;
+	if (@libperl==0 && defined $att{PERL_SRC}) {
+	    push @libperl, "$att{PERL_SRC}/libperl.a";
+	}
+	if (@libperl==0 && -f "$INC[0]/CORE/libperl.a") {
+	    push @libperl, "$INC[0]/CORE/libperl.a";
+	}
+	if (@libperl==0){
+	    push @m, "\nMAP_LIBPERL = ---NOT FOUND---\n\n";
+	}
+    }
+
+    # if we have to work with other libraries than libperl.a...
+    %map = (
+		D =>   '-DDEBUGGING',
+		E =>   '-DEMBED',
+		DE =>  '-DDEBUGGING -DEMBED',
+		M =>   '-DEMBED -DMULTIPLICITY',
+		DM =>  '-DDEBUGGING -DEMBED -DMULTIPLICITY',
+		);
+    for (@libperl) {
+	my($uc, $thiscccmd);
+	( $uc = $_ ) =~ s!.*/libperl(\w*)\.a!uc($1)!e;
+
+	# We have to tamper with the cccmd...
+	$thiscccmd = $cccmd;
+	# All perls of flavor D need a compilation with -g instead of 
+	# whatever optimize was before
+	if ($uc =~ /^D/) {
+	    $thiscccmd =~ s/\B$Config{'optimize'}\b/-g/;
+	}
+	$thiscccmd .= $map{$uc} if $uc;
+	$thiscccmd =~ s/\s+/ /g;
+
+	# If we have to write the Makefile for only one
+	# target, we do not need the variable $uc
+	$uc = "" if @libperl == 1;
+
+	push @m, "MAP_LIBPERL$uc = $_
+$target$uc: $tmp/perlmain$uc.o \$(MAP_LIBPERL$uc) \$(MAP_STATIC)
+	\$(MAP_LINKCMD) -o \$\@ $tmp/perlmain$uc.o \$(MAP_LIBPERL$uc) \$(MAP_STATIC) \$(MAP_EXTRA) \$(MAP_PRELIBS)
+
+$tmp/perlmain$uc.o: $tmp/perlmain$uc.c
+";
+	push @m, "\tcd $tmp && $thiscccmd perlmain$uc.c\n";
+
+	if ($uc) {
+	    push @m, "$tmp/perlmain$uc.c: $tmp/perlmain.c
+	cp \$< \$\@\n\n";
+	}
+    }
+
+    push @m, qq{
+$tmp/perlmain.c: $makefilename}, q{
+	$(FULLPERL) $(MAP_PERLINC) -e 'use ExtUtils::Miniperl; \\
+		writemain(grep s#.*/auto/##, qw|$(MAP_STATIC)|)' > $@
+
+};
+
+    push @m, qq{
+inst_perl: \$(MAP_TARGET)
+	$att{CP} \$(MAP_TARGET) $Config{'installbin'}/\$(MAP_TARGET)
+
+};
+
+    join '', @m;
+}
 
 # --- Determine libraries to use and how to use them ---
 
 sub extliblist{
     my($self, $libs) = @_;
     return ("", "", "") unless $libs;
-    print STDERR "Potential libraries are '$libs':" if $Verbose;
+    print STDOUT "Potential libraries are '$libs':" if $Verbose;
     my(@new) = MY->new_extliblist($libs);
 
     if ($att{PERL_SRC}){
 	my(@old) = MY->old_extliblist($libs);
 	my($oldlibs) = join(" : ",@old);
 	my($newlibs) = join(" : ",@new);
-	warn "Warning (non-fatal): $att{NAME} extliblist consistency check failed:\n".
+	print STDOUT "Warning (non-fatal): $att{NAME} extliblist consistency check failed:\n".
 	    "  old: $oldlibs\n".
 	    "  new: $newlibs\n".
 	    "Using 'new' set. Please notify perl5-porters\@nicoh.com.\n"
@@ -1743,12 +1832,12 @@ sub old_extliblist {
 	chomp $line;
 	if ($line =~ /(.*)\s*=\s*(.*)\s*$/){
 	    $attrib{$1} = $2;
-	    print STDERR "	$1 = $2" if $Verbose;
+	    print STDOUT "	$1 = $2" if $Verbose;
 	}else{
 	    push(@w, $line);
 	}
     }
-    print STDERR "Messages from extliblist:\n", join("\n",@w,'')
+    print STDOUT "Messages from extliblist:\n", join("\n",@w,'')
        if @w ;
     @attrib{qw(EXTRALIBS BSLOADLIBS LDLOADLIBS)};
 }
@@ -1780,12 +1869,12 @@ sub new_extliblist {
 	if ($thislib =~ s/^(-[LR])//){	# save path flag type
 	    my($ptype) = $1;
 	    unless (-d $thislib){
-		warn "$ptype$thislib ignored, directory does not exist\n"
+		print STDOUT "$ptype$thislib ignored, directory does not exist\n"
 			if $Verbose;
 		next;
 	    }
 	    if ($thislib !~ m|^/|) {
-	      warn "Warning: $ptype$thislib changed to $ptype$pwd/$thislib\n";
+	      print STDOUT "Warning: $ptype$thislib changed to $ptype$pwd/$thislib\n";
 	      $thislib = "$pwd/$thislib";
 	    }
 	    push(@searchpath, $thislib);
@@ -1796,7 +1885,7 @@ sub new_extliblist {
 
 	# Handle possible library arguments.
 	unless ($thislib =~ s/^-l//){
-	  warn "Unrecognized argument in LIBS ignored: '$thislib'\n";
+	  print STDOUT "Unrecognized argument in LIBS ignored: '$thislib'\n";
 	  next;
 	}
 
@@ -1810,11 +1899,11 @@ sub new_extliblist {
 		     && ($thislib .= "_s") ){ # we must explicitly ask for _s version
 	    } elsif (-f ($fullname="$thispth/lib$thislib.a")){
 	    } elsif (-f ($fullname="$thispth/Slib$thislib.a")){
-	    } else { 
-		warn "$thislib not found in $thispth\n" if $Verbose;
+	    } else {
+		print STDOUT "$thislib not found in $thispth\n" if $Verbose;
 		next;
 	    }
-	    warn "'-l$thislib' found at $fullname\n" if $Verbose;
+	    print STDOUT "'-l$thislib' found at $fullname" if $Verbose;
 	    $found_lib++;
 
 	    # Now update library lists
@@ -1829,7 +1918,7 @@ sub new_extliblist {
 	    unless ( $in_perl || ($Config{'osname'} eq 'next' && $thislib eq 'm') ){
 		push(@extralibs, "-l$thislib");
 	    }
-			
+
 
 	    # We might be able to load this archive file dynamically
 	    if ( $Config{'dlsrc'} =~ /dl_next|dl_dld/){
@@ -1852,7 +1941,7 @@ sub new_extliblist {
 	    }
 	    last;	# found one here so don't bother looking further
 	}
-	warn "Warning (non-fatal): No library found for -l$thislib\n" unless $found_lib>0;
+	print STDOUT "Warning (non-fatal): No library found for -l$thislib\n" unless $found_lib>0;
     }
     ("@extralibs", "@bsloadlibs", "@ldloadlibs");
 }
@@ -1862,40 +1951,32 @@ sub new_extliblist {
 
 sub mkbootstrap {
 
-=head1 NAME
+=head1 USEFUL SUBROUTINES
 
-mkbootstrap
+=head2 mkbootstrap()
 
-=head1 DESCRIPTION
+Make a bootstrap file for use by this system's DynaLoader.  It
+typically gets called from an extension Makefile.
 
-Make a bootstrap file for use by this system's DynaLoader.
-It typically gets called from an extension Makefile.
-
-There is no .bs file supplied with the extension. Instead a _BS file
-which has code for the special cases, like posix for berkeley db on the
-NeXT.
+There is no C<*.bs> file supplied with the extension. Instead a
+C<*_BS> file which has code for the special cases, like posix for
+berkeley db on the NeXT.
 
 This file will get parsed, and produce a maybe empty
-@DynaLoader::dl_resolve_using array for the current architecture.
+C<@DynaLoader::dl_resolve_using> array for the current architecture.
 That will be extended by $BSLOADLIBS, which was computed by Andy's
 extliblist script. If this array still is empty, we do nothing, else
-we write a .bs file with an @DynaLoader::dl_resolve_using array, but
+we write a .bs file with an C<@DynaLoader::dl_resolve_using> array, but
 without any C<if>s, because there is no longer a need to deal with
 special cases.
 
-The _BS file can put some code into the generated .bs file by placing
-it in $bscode. This is a handy 'escape' mechanism that may prove
+The C<*_BS> file can put some code into the generated C<*.bs> file by placing
+it in C<$bscode>. This is a handy 'escape' mechanism that may prove
 useful in complex situations.
 
 If @DynaLoader::dl_resolve_using contains C<-L*> or C<-l*> entries then
 mkbootstrap will automatically add a dl_findfile() call to the
-generated .bs file.
-
-=head1 AUTHORS
-
-Andreas Koenig <k@otto.ww.TU-Berlin.DE>, Tim Bunce
-<Tim.Bunce@ig.co.uk>, Andy Dougherty <doughera@lafcol.lafayette.edu>.
-VMS support by Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>.
+generated C<*.bs> file.
 
 =cut
 
@@ -1903,7 +1984,7 @@ VMS support by Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>.
 
     @bsloadlibs = grep($_, @bsloadlibs); # strip empty libs
 
-    print STDERR "	bsloadlibs=@bsloadlibs\n" if $Verbose;
+    print STDOUT "	bsloadlibs=@bsloadlibs\n" if $Verbose;
 
     # We need DynaLoader here because we and/or the *_BS file may
     # call dl_findfile(). We don't say `use' here because when
@@ -1956,16 +2037,6 @@ VMS support by Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>.
 	print BS "\n1;\n";
 	close BS;
     }
-
-    # special handling for systems which needs a list of all global
-    # symbols exported by a modules to be dynamically linked.
-    if ($Config{'dlsrc'} =~ /^dl_aix/){
-       my($bootfunc);
-       ($bootfunc = $att{NAME}) =~ s/\W/_/g;
-       open EXP, ">$att{BASEEXT}.exp";
-       print EXP "#!\nboot_$bootfunc\n";
-       close EXP;
-    }
 }
 
 sub mksymlists {
@@ -1976,7 +2047,7 @@ sub mksymlists {
     return '' unless $Config{'osname'} eq 'AIX';
 
     init_main(@ARGV) unless defined $att{'BASEEXT'};
-    if (!$att{DL_FUNCS}) {
+    if (! %{$att{DL_FUNCS}}) {
        (my($bootfunc) = $att{NAME}) =~ s/\W/_/g;
        $att{DL_FUNCS} = {$att{BASEEXT} => ["boot_$bootfunc"]};
     }
@@ -2000,7 +2071,140 @@ sub nicetext { # Just return the input - no action needed
     my($self,$text) = @_;
     $text;
 }
- 
+
+=head1 AUTHORS
+
+Andy Dougherty F<E<lt>doughera@lafcol.lafayette.eduE<gt>>, Andreas
+Koenig F<E<lt>k@franz.ww.TU-Berlin.DEE<gt>>, Tim Bunce
+F<E<lt>Tim.Bunce@ig.co.ukE<gt>>.  VMS support by Charles Bailey
+F<E<lt>bailey@HMIVAX.HUMGEN.UPENN.EDUE<gt>>.
+
+=head1 MODIFICATION HISTORY
+
+v1, August 1994; by Andreas Koenig. Based on Andy Dougherty's Makefile.SH.
+v2, September 1994 by Tim Bunce.
+v3.0 October  1994 by Tim Bunce.
+v3.1 November 11th 1994 by Tim Bunce.
+v3.2 November 18th 1994 by Tim Bunce.
+v3.3 November 27th 1994 by Andreas Koenig.
+v3.4 December  7th 1994 by Andreas Koenig and Tim Bunce.
+v3.5 December 15th 1994 by Tim Bunce.
+v3.6 December 15th 1994 by Tim Bunce.
+v3.7 December 30th 1994 By Tim Bunce
+v3.8 January  17th 1995 By Andreas Koenig and Tim Bunce
+v3.9 January 19th 1995 By Tim Bunce
+
+v3.10 January 23rd 1995 By Tim Bunce
+
+miniperl now given preference when defining PERL. This improves the
+reliability of ext/*/Makefile's recreating themselves if needed.
+$(XS), $(C) and $(H) renamed to XS_FILES C_FILES and H_FILES.
+INST_STATIC now INST_ARCHLIBDIR/BASEEXT.a (alongside INST_DYNAMIC).
+Static lib no longer copied back to local directory.
+
+v3.11 January 24th 1995 By Andreas Koenig
+
+DynaLoader.c was not deleted by clean target, now fixed.
+Added PMDIR attribute that allows directories to be named that contain
+only *.p[pl] files to be installed into INST_LIB. Added some documentation.
+
+v4.00 January 24th 1995 By Tim Bunce
+
+Revised some of the documentation. Changed version number to 4.00 to
+avoid problems caused by my earlier poor choice of 3.10!  Renamed PMDIR
+to PMLIBDIRS and restructured find code to use inherited MY->libscan.
+Added ability to say: "perl Makefile.PL help"  to get help.
+Added ability to say: "perl Makefile.PL verbose"  to get debugging.
+Added MakeMaker version number to generated Makefiles.
+
+v4.01 January 25th 1995 By Tim Bunce
+
+Changes in the section that deals with PMLIBDIRS: some pm files were
+put into INST_LIB instead of INST_LIBDIR.
+
+v4.02 January 29th 1995 By Andreas Koenig
+
+Enabled the use of the XXX_cflags variable from Config.pm for nested
+extensions: to change e.g. the $Config{"ccflags"} variable on the NeXT
+for the nTk::pTk extension, say
+    nTk__pTk_cflags='ccflags="-posix $ccflags"'
+in the hints-file.
+
+Hints may now be put in a hints/*.sh file within the the module's
+directory tree. Any *.sh file in that directory acts as if it had been
+parsed during the perl build process.
+
+Added O_FILES, which is an array like C_FILES. Done so to add a
+dependency O_FILES from H_FILES. This has the effect, that the
+extension gets rebuilt after some headerfiles have changed.
+
+Made life easier in some "I've just edited config.sh" situations and
+reduce the risk of "MakeMaker is being pedantic" complaints by letting
+the Makefile proceed with a warning if Config.pm is out of date (Tim's
+suggestion).
+
+$Verbose now passed to the findperl routine, to get debugging output
+from there, too.
+
+Make clean now also deletes the ./blib directory.
+
+Added lots of ideas of Charles Bailey that enable VMS support.
+
+v4.03 January 30th 1995 By Andreas Koenig
+
+check_hints() now also called within runsubdirpl(). More VMS code
+included. Trivial cosmetics.
+
+v4.04 Februeary 5th 1995 By Andreas Koenig
+
+Another VMS patch by Charles Bailey added. Documentation restructured.
+ext/util/make_ext minor change. 
+
+All *.pm and *.pl files are now touched when MakeMaker finds
+them. This inhibits that make omits their installation in
+circumstances, where an older version has recently been built.
+
+installperl: perl.exp now goes into $installarchlib/CORE
+
+New files: lib/File/Path.pm, minimod.PL, perllink, and
+vms/ext/MM_VMS.pm while writemain.SH is gone. minimod.PL writes a
+trivial module, ExtUtils::Miniperl, which has the writemain function
+in it to write perlmain.c files. perllink was not in the 4.01 patch
+(which was 0i in fact), but it was introduced in 3.10. It is much
+smaller now than it was -- most of its code has gone into minimod.PL
+and MakeMaker.
+
+MakeMaker now writes a second Makefile that can be perused to make a
+new perl binary from some extensions and some libperl libraries. This
+Makefile has most likely to be adjusted to needs by hand, but it's a
+quite reasonable starting point. The routines related to the writing
+of the Makefile are also exploited by a new makeaperl script, that is
+not in the patch, but distributed seperately.
+
+v4.05 February 8th 1995 By Andreas Koenig
+
+When searching for static extensions makeaperl() now ignores
+inexistent directories. Updated documentation (check_hints() now uses
+eval instead of running a shell script)
+
+v4.06 February 10th 1995 By Andreas Koenig
+
+Cleaning up the new interface. Suggestion to freeze now until 5.001.
+
+=head1 NOTES
+
+MakeMaker development work still to be done:
+
+Needs more complete documentation.
+
+Add a html: target when there has been found a general solution to
+installing html files.
+
+Create a perllocal.pod somewhere that documents what has been done 
+on this system. (Thanks to Jarkko Hietaniemi for the idea)
+
+=cut
+
 # the following keeps AutoSplit happy
 package ExtUtils::MakeMaker;
 1;

@@ -114,7 +114,7 @@ y*) usedl="$define"
 	: Can not go over to $dldir because getfile has path hard-coded in.
     cd ..; ls -C $dldir/dl*.xs; cd UU
     rp="Source file to use for dynamic loading"
-    fn="fne~"
+    fn="fne"
     . ./getfile
 	usedl="$define"
 	: emulate basename

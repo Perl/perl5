@@ -30,16 +30,16 @@
  */
 #define BYTEORDER 0x1234	/* large digits for MSB */
 
-/* ARCHLIB:
+/* ARCHLIB_EXP:
  *	This variable, if defined, holds the name of the directory in
  *	which the user wants to put architecture-dependent public
  *	library files for $package.  It is most often a local directory
  *	such as /usr/local/lib.  Programs using this variable must be
- *	prepared to deal with filename expansion.  If ARCHLIB is the
- *	same as PRIVLIB, it is not defined, since presumably the
- *	program already searches PRIVLIB.
+ *	prepared to deal with filename expansion.  If ARCHLIB_EXP is the
+ *	same as PRIVLIB_EXP, it is not defined, since presumably the
+ *	program already searches PRIVLIB_EXP.
  */
-#undef ARCHLIB		/**/
+#undef ARCHLIB_EXP		/**/
 
 /* CAT2:
  *	This macro catenates 2 tokens together.
@@ -1185,13 +1185,13 @@
 #define SSize_t int	 /* signed count of bytes */
 
 
-/* PRIVLIB:
+/* PRIVLIB_EXP:
  *	This symbol contains the name of the private library for this package.
  *	The library is private in the sense that it needn't be in anyone's
  *	execution path, but it should be accessible by the world.  The program
  *	should be prepared to do ~ expansion.
  */
-#define PRIVLIB "/perl_root/lib"		/**/
+#define PRIVLIB_EXP "/perl_root/lib"		/**/
 
 /* SCRIPTDIR:
  *	This symbol holds the name of the directory in which the user wants

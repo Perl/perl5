@@ -1132,7 +1132,7 @@ SV *sv;
 	else
 	    sprintf(tokenbuf, "%s", cpp);
 	sv_catpv(sv,"-I");
-	sv_catpv(sv,PRIVLIB);
+	sv_catpv(sv,PRIVLIB_EXP);
 #ifdef MSDOS
 	(void)sprintf(buf, "\
 sed %s -e \"/^[^#]/b\" \
@@ -1659,13 +1659,13 @@ init_perllib()
 	    incpush(getenv("PERLLIB"));
     }
 
-#ifdef ARCHLIB
-    incpush(ARCHLIB);
+#ifdef ARCHLIB_EXP
+    incpush(ARCHLIB_EXP);
 #endif
-#ifndef PRIVLIB
-#define PRIVLIB "/usr/local/lib/perl5:/usr/local/lib/perl"
+#ifndef PRIVLIB_EXP
+#define PRIVLIB_EXP "/usr/local/lib/perl5:/usr/local/lib/perl"
 #endif
-    incpush(PRIVLIB);
+    incpush(PRIVLIB_EXP);
     
     av_push(GvAVn(incgv),newSVpv(".",1));
 }

@@ -42,17 +42,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  */
 #define MEM_ALIGNBYTES $alignbytes	/**/
 
-/* ARCHLIB:
- *	This variable, if defined, holds the name of the directory in
- *	which the user wants to put architecture-dependent public
- *	library files for $package.  It is most often a local directory
- *	such as /usr/local/lib.  Programs using this variable must be
- *	prepared to deal with filename expansion.  If ARCHLIB is the
- *	same as PRIVLIB, it is not defined, since presumably the
- *	program already searches PRIVLIB.
- */
-#$d_archlib ARCHLIB "$archlib"		/**/
-
 /* BIN:
  *	This symbol holds the path of the bin directory where the package will
  *	be installed. Program must be prepared to deal with ~name substitution.
@@ -1149,6 +1138,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  */
 #$i_systimes	I_SYS_TIMES		/**/
 
+/* I_SYS_TYPES:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <sys/types.h>.
+ */
+#$i_systypes	I_SYS_TYPES		/**/
+
 /* I_TERMIO:
  *	This symbol, if defined, indicates that the program should include
  *	<termio.h> rather than <sgtty.h>.  There are also differences in
@@ -1235,13 +1230,11 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  */
 #define Mode_t $modetype	 /* file mode parameter for system calls */
 
-/* PRIVLIB:
- *	This symbol contains the name of the private library for this package.
- *	The library is private in the sense that it needn't be in anyone's
- *	execution path, but it should be accessible by the world.  The program
- *	should be prepared to do ~ expansion.
+/* PRIVLIB_EXP:
+ *	This symbol contains the ~name expanded version of PRIVLIB, to be used
+ *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define PRIVLIB "$privlib"		/**/
+#define PRIVLIB_EXP "$privlibexp"		/**/
 
 /* CAN_PROTOTYPE:
  *	If defined, this macro indicates that the C compiler can handle
@@ -1367,6 +1360,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  *	This symbol holds the complete pathname to the sed program.
  */
 #define LOC_SED 	"$full_sed"	/**/
+
+/* ARCHLIB_EXP:
+ *	This symbol contains the ~name expanded version of ARCHLIB, to be used
+ *	in programs that are not prepared to deal with ~ expansion at run-time.
+ */
+#$d_archlib ARCHLIB_EXP "$archlibexp"		/**/
 
 /* CSH:
  *	This symbol, if defined, indicates that the C-shell exists.
