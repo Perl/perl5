@@ -4,15 +4,19 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
+    unless (find PerlIO::Layer 'perlio') {
+	print "1..0 # Skip: not perlio\n";
+	exit 0;
+    }
 }
 
 plan tests => 43;
 
 use Config;
 
-{
-    skip("This perl does not have perlio and Encode", 43)
-	unless $Config{useperlio} && " $Config{extensions} " =~ / Encode /;
+SKIP: {
+    skip("This perl does not have Encode", 43)
+	unless " $Config{extensions} " =~ / Encode /;
 
     sub check {
 	my ($result, $expected, $id) = @_;
@@ -98,6 +102,7 @@ use Config;
 
     {
 	use open(IN => ":crlf", OUT => ":encoding(cp1252)");
+
 	open F, "<afile";
 	open G, ">afile";
 
