@@ -700,6 +700,7 @@ sub _find_opt {
 	    }
 
 	    $name = $abs_dir . $_; # $File::Find::name
+	    $_ = $name if $no_chdir;
 
 	    { $wanted_callback->() }; # protect against wild "next"
 
