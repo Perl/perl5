@@ -46,6 +46,11 @@ CC backend invocation
 			foo which you initialise with $SIG{BAR} = "foo".
 			A better fix, though, is just to change it to
 			$SIG{BAR} = \&foo. You can have multiple -u options.
+	-mModulename	Instead of generating source for a runnable executable,
+			generate source for an XSUB module. The
+			boot_Modulename function (which DynaLoader can look
+			for) does the appropriate initialisation and runs the
+			main part of the Perl source that is being compiled.
 	-D		Debug options (concat or separate flags like perl -D)
 		r	Writes debugging output to STDERR just as it's about
 			to write to the program's runtime (otherwise writes
@@ -82,6 +87,9 @@ CC backend invocation
 Example
 	perl -MO=CC,-O2,-ofoo.c foo.pl
 	perl cc_harness -o foo foo.c
+
+	perl -MO=CC,-mFoo,-oFoo.c Foo.pm
+	perl cc_harness -shared -c -o Foo.so Foo.c
 
 
 Bytecode backend invocation
