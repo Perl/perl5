@@ -12,6 +12,7 @@ ld='gcc'
 lddlflags="-shared $lddlflags"
 rpathflag='-Wl,-R'
 sharpbang='#!'
+usemymalloc='false'
 usenm='false'
 
 # This script UU/usethreads.cbu will get 'called-back' by Configure 
