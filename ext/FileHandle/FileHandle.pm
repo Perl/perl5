@@ -252,7 +252,19 @@ sub new_from_fd {
 
 sub DESTROY {
     my ($fh) = @_;
-    close($fh);
+
+   # During global object destruction, this function may be called
+   # on FILEHANDLEs as well as on the GLOBs that contains them.
+   # Thus the following trickery.  If only the CORE file operators
+   # could deal with FILEHANDLEs, it wouldn't be necessary...
+
+   if ($fh =~ /=FILEHANDLE\(/) {
+     local *TMP = $fh;
+     close(TMP) if fileno(TMP);
+   }
+   else {
+     close($fh) if fileno($fh);
+   }
 }
 
 ################################################
