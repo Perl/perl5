@@ -12,10 +12,11 @@ BEGIN {
 	print "1..0 # Skip: EBCDIC\n";
 	exit 0;
     }
-    unless (PerlIO::Layer->find('perlio')){
-	print "1..0 # Skip: PerlIO required\n";
-	exit 0;
-    }
+# should work w/o PerlIO now!
+#    unless (PerlIO::Layer->find('perlio')){
+#	print "1..0 # Skip: PerlIO required\n";
+#	exit 0;
+#   }
     $| = 1;
 }
 use strict;
@@ -55,7 +56,8 @@ for my $charset (sort keys %Charset){
     my $dst_utf = File::Spec->catfile($dir,"$$.utf");
 
     open $src, "<$src_enc" or die "$src_enc : $!";
-    binmode($src, ":bytes"); # needed when :utf8 in default open layer
+    binmode($src, ":bytes") # needed if :utf8 in default open layer
+	if PerlIO::Layer->find('perlio');
 
     $txt = join('',<$src>);
     close($src);
