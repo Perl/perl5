@@ -187,7 +187,13 @@ There is also a Usenet gateway to Perl mailing lists sponsored by perl.org at
 nntp://nntp.perl.org , a web interface to the same lists at
 http://nntp.perl.org/group/ and these lists are also available under the
 C<perl.*> hierarchy at http://groups.google.com . Other groups are listed at
-http://lists.perl.org/ .
+http://lists.perl.org/ ( also known as http://lists.cpan.org/ ).
+
+A nice place to ask questions is the PerlMonks site, http://www.perlmonks.org/
+
+Note that none of the above are supposed to write your code for you:
+asking questions about particular problems or general advice is fine,
+but asking someone to write your code for free is not very cool.
 
 =head2 Where should I post source code?
 
@@ -423,6 +429,8 @@ subscription information.
 A comprehensive list of Perl related mailing lists can be found at:
 
 	http://lists.cpan.org/
+
+( also visible as http://lists.perl.org/ )
 
 =head2 Archives of comp.lang.perl.misc
 
