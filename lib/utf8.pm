@@ -79,21 +79,27 @@ The following functions are defined in the C<utf8::> package by the perl core.
 
 Converts internal representation of string to the Perl's internal
 I<UTF-X> form.  Returns the number of octets necessary to represent
-the string as I<UTF-X>.
+the string as I<UTF-X>.  Note that this should not be used to convert
+a legacy byte encoding to Unicode: use Encode for that.  Affected
+by the encoding pragma.
 
 =item * utf8::downgrade($string[, CHECK])
 
 Converts internal representation of string to be un-encoded bytes.
+Note that this should not be used to convert Unicode back to a legacy
+byte encoding: use Encode for that.  B<Not> affected by the encoding
+pragma.
 
 =item * utf8::encode($string)
 
-Converts (in-place) I<$string> from logical characters to octet sequence
-representing it in Perl's I<UTF-X> encoding.
-
-=item * $flag = utf8::decode($string)
+Converts (in-place) I<$string> from logical characters to octet
+sequence representing it in Perl's I<UTF-X> encoding.  Note that this
+should not be used to convert a legacy byte encoding to Unicode: use
+Encode for that.  =item * $flag = utf8::decode($string)
 
 Attempts to convert I<$string> in-place from Perl's I<UTF-X> encoding
-into logical characters.
+into logical characters.  Note that this should not be used to convert
+Unicode back to a legacy byte encoding: use Encode for that.
 
 =back
 

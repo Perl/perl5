@@ -3313,6 +3313,9 @@ Forces the SV to string form if it is not already.
 Always sets the SvUTF8 flag to avoid future validity checks even
 if all the bytes have hibit clear.
 
+This is not as a general purpose byte encoding to Unicode interface:
+use the Encode extension for that.
+
 =cut
 */
 
@@ -3331,6 +3334,9 @@ Always sets the SvUTF8 flag to avoid future validity checks even
 if all the bytes have hibit clear. If C<flags> has C<SV_GMAGIC> bit set,
 will C<mg_get> on C<sv> if appropriate, else not. C<sv_utf8_upgrade> and
 C<sv_utf8_upgrade_nomg> are implemented in terms of this function.
+
+This is not as a general purpose byte encoding to Unicode interface:
+use the Encode extension for that.
 
 =cut
 */
@@ -3396,6 +3402,9 @@ Attempt to convert the PV of an SV from UTF8-encoded to byte encoding.
 This may not be possible if the PV contains non-byte encoding characters;
 if this is the case, either returns false or, if C<fail_ok> is not
 true, croaks.
+
+This is not as a general purpose Unicode to byte encoding interface:
+use the Encode extension for that.
 
 =cut
 */
