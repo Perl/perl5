@@ -148,10 +148,12 @@ if (defined (&Dos::UseLFN)) {
 my $Is_VMS = ($^O eq 'VMS');
 
 # allow checking for valid ': attrlist' attachments
-my $nested;
+# (we use 'our' rather than 'my' here, due to the rather complex and buggy
+# behaviour of lexicals with qr// and (??{$lex}) )
+our $nested;
 $nested = qr{ \( (?: (?> [^()]+ ) | (??{ $nested }) )* \) }x;
-my $one_attr = qr{ (?> (?! \d) \w+ (?:$nested)? ) (?:\s*\:\s*|\s+(?!\:)) }x;
-my $attr_list = qr{ \s* : \s* (?: $one_attr )* }x;
+our $one_attr = qr{ (?> (?! \d) \w+ (?:$nested)? ) (?:\s*\:\s*|\s+(?!\:)) }x;
+our $attr_list = qr{ \s* : \s* (?: $one_attr )* }x;
 
 
 
