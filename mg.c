@@ -1964,12 +1964,10 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	    STATUS_POSIX_SET(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
 	break;
     case '!':
-#define GETERRNO(sv) (SvIOK(sv) ? SvIVX(sv) : SvOK(sv) ? sv_2iv(sv) : 0)
 #ifdef VMS
-	SETERRNO(GETERRNO(sv),
-		 (SvIV(sv) == EVMSERR) ? 4 : vaxc$errno);
+	SETERRNO(0, (SvIV(sv) == EVMSERR) ? 4 : vaxc$errno);
 #else
-	SETERRNO(GETERRNO(sv), 0);
+	SETERRNO(SvIOK(sv) ? SvIVX(sv) : SvOK(sv) ? sv_2iv(sv) : 0, 0);
 #endif
 	break;
     case '<':
