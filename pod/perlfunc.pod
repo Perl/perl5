@@ -5626,7 +5626,7 @@ for a return value for 0 to decide whether you're done.
 
 Note that if the filehandle has been marked as C<:utf8> Unicode
 characters are read instead of bytes (the LENGTH, OFFSET, and the
-return value of sysread() are in UTF-8 encoded Unicode characters).
+return value of sysread() are in Unicode characters).
 The C<:encoding(...)> layer implicitly introduces the C<:utf8> layer.
 See L</binmode>, L</open>, and the C<open> pragma, L<open>.
 
