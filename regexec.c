@@ -1283,7 +1283,7 @@ regmatch(regnode *prog)
 		minmod = 0;
 		if (ln && regrepeat_hard(scan, ln, &l) < ln)
 		    sayNO;
-		if (l == 0 && n >= ln
+		if (ln && l == 0 && n >= ln
 		    /* In fact, this is tricky.  If paren, then the
 		       fact that we did/didnot match may influence
 		       future execution. */
@@ -1301,6 +1301,7 @@ regmatch(regnode *prog)
 		} else
 		    c1 = c2 = -1000;
 		REGCP_SET;
+		/* This may be improved if l == 0.  */
 		while (n >= ln || (n == REG_INFTY && ln > 0 && l)) { /* ln overflow ? */
 		    /* If it could work, try it. */
 		    if (c1 == -1000 ||
