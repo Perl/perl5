@@ -908,7 +908,7 @@ this checklist:
 
 =over 4
 
-=item What version of perl you are running?
+=item What version of Perl you are running?
 
 Type C<perl -v> at the command line to find out.
 
@@ -916,16 +916,16 @@ Type C<perl -v> at the command line to find out.
 
 Look at http://www.perl.com/ to find out.  If it is not the latest
 released version, get that one and see whether your bug has been
-fixed.  Note that bug reports about old versions of perl, especially
+fixed.  Note that bug reports about old versions of Perl, especially
 those prior to the 5.0 release, are likely to fall upon deaf ears.
 You are on your own if you continue to use perl1 .. perl4.
 
 =item Are you sure what you have is a bug?
 
 A significant number of the bug reports we get turn out to be documented
-features in perl.  Make sure the behavior you are witnessing doesn't fall
+features in Perl.  Make sure the behavior you are witnessing doesn't fall
 under that category, by glancing through the documentation that comes
-with perl (we'll admit this is no mean task, given the sheer volume of
+with Perl (we'll admit this is no mean task, given the sheer volume of
 it all, but at least have a look at the sections that I<seem> relevant).
 
 Be aware of the familiar traps that perl programmers of various hues
@@ -938,7 +938,7 @@ Consult your operating system documentation instead.
 If you are on a non-UNIX platform check also L<perlport>, as some
 features may be unimplemented or work differently.
 
-Try to study the problem under the perl debugger, if necessary.
+Try to study the problem under the Perl debugger, if necessary.
 See L<perldebug>.
 
 =item Do you have a proper test case?
@@ -960,7 +960,7 @@ If you get a core dump (or equivalent), you may use a debugger
 (B<dbx>, B<gdb>, etc) to produce a stack trace to include in the bug
 report.  NOTE: unless your Perl has been compiled with debug info
 (often B<-g>), the stack trace is likely to be somewhat hard to use
-because it will most probably contain only the function names, not
+because it will most probably contain only the function names and not
 their arguments.  If possible, recompile your Perl with debug info and
 reproduce the dump and the stack trace.
 
@@ -968,8 +968,8 @@ reproduce the dump and the stack trace.
 
 The easier it is to understand a reproducible bug, the more likely it
 will be fixed.  Anything you can provide by way of insight into the
-problem helps a great deal.  In other words, try to analyse the
-problem to the extent you feel qualified and report your discoveries.
+problem helps a great deal.  In other words, try to analyze the
+problem (to the extent you can) and report your discoveries.
 
 =item Can you fix the bug yourself?
 
@@ -1003,14 +1003,14 @@ C<perlbug> at all on your system, be sure to include the entire output
 produced by running C<perl -V> (note the uppercase V).
 
 Whether you use C<perlbug> or send the email manually, please make
-your subject informative.  "a bug" not informative.  Neither is "perl
-crashes" nor "HELP!!!", these all are null information.  A compact
-description of what's wrong is fine.
+your Subject line informative.  "a bug" not informative.  Neither is
+"perl crashes" nor "HELP!!!".  These don't help.
+A compact description of what's wrong is fine.
 
 =back
 
 Having done your bit, please be prepared to wait, to be told the bug
-is in your code, or even to get no reply at all.  The perl maintainers
+is in your code, or even to get no reply at all.  The Perl maintainers
 are busy folks, so if your problem is a small one or if it is difficult
 to understand or already known, they may not respond with a personal reply.
 If it is important to you that your bug be fixed, do monitor the
@@ -1126,8 +1126,8 @@ by Gurusamy Sarathy (E<lt>gsar@umich.eduE<gt>), Tom Christiansen
 Charles F. Randall (E<lt>cfr@pobox.comE<gt>), Mike Guy
 (E<lt>mjtg@cam.a.ukE<gt>), Dominic Dunlop (E<lt>domo@computer.orgE<gt>),
 Hugo van der Sanden (E<lt>hv@crypt0.demon.co.ukE<gt>),
-Jarkko Hietaniemi (E<lt>jhi@iki.fiE<gt>), and Chris Nandor
-(E<lt>pudge@pobox.comE<gt>).
+Jarkko Hietaniemi (E<lt>jhi@iki.fiE<gt>), hris Nandor
+(E<lt>pudge@pobox.comE<gt>), and Jon Orwant (E<lt>orwant@media.mit.eduE<gt>).
 
 =head1 SEE ALSO
 
