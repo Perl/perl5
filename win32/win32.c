@@ -127,12 +127,14 @@ static char	crypt_buffer[30];
 #endif
 
 int 
-IsWin95(void) {
+IsWin95(void)
+{
     return (os_id() == VER_PLATFORM_WIN32_WINDOWS);
 }
 
 int
-IsWinNT(void) {
+IsWinNT(void)
+{
     return (os_id() == VER_PLATFORM_WIN32_NT);
 }
 

@@ -504,7 +504,8 @@ skipspace(register char *s)
 }
 
 STATIC void
-check_uni(void) {
+check_uni(void)
+{
     char *s;
     char ch;
     char *t;

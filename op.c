@@ -3638,8 +3638,7 @@ cv_undef(CV *cv)
 
 #ifdef DEBUG_CLOSURES
 STATIC void
-cv_dump(cv)
-CV* cv;
+cv_dump(CV *cv)
 {
     CV *outside = CvOUTSIDE(cv);
     AV* padlist = CvPADLIST(cv);

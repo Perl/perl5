@@ -228,7 +228,8 @@ static char zero_but_true[ZBTLEN + 1] = "0 but true";
 	|| defined(HAS_SETREGID) || defined(HAS_SETRESGID))
 /* The Hard Way. */
 STATIC int
-emulate_eaccess (const char* path, int mode) {
+emulate_eaccess (const char* path, int mode)
+{
     Uid_t ruid = getuid();
     Uid_t euid = geteuid();
     Gid_t rgid = getgid();
@@ -292,7 +293,8 @@ emulate_eaccess (const char* path, int mode) {
 
 #if !defined(PERL_EFF_ACCESS_R_OK)
 STATIC int
-emulate_eaccess (const char* path, int mode) {
+emulate_eaccess (const char* path, int mode)
+{
     croak("switching effective uid is not implemented");
     /*NOTREACHED*/
     return -1;
@@ -3173,10 +3175,8 @@ PP(pp_readlink)
 }
 
 #if !defined(HAS_MKDIR) || !defined(HAS_RMDIR)
-static int
-dooneliner(cmd, filename)
-char *cmd;
-char *filename;
+STATIC int
+dooneliner(char *cmd, char *filename)
 {
     char *save_filename = filename;
     char *cmdline;
@@ -4958,10 +4958,8 @@ fcntl_emulate_flock(int fd, int operation)
 #  define F_TEST	3	/* Test a region for other processes locks */
 # endif
 
-static int
-lockf_emulate_flock (fd, operation)
-int fd;
-int operation;
+STATIC int
+lockf_emulate_flock (int fd, int operation)
 {
     int i;
     int save_errno;

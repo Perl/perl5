@@ -434,8 +434,7 @@ magic_len(SV *sv, MAGIC *mg)
 
 #if 0
 static char * 
-printW(sv)
-SV * sv ;
+printW(SV *sv)
 {
 #if 1
     return "" ;

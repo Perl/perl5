@@ -52,10 +52,7 @@ char *optarg;			       /* Global argument pointer. */
 #endif
 
 char
-getopt(argc, argv, optstring)
-int argc;
-char **argv;
-char *optstring;
+getopt(int argc, char **argv, char *optstring)
 {
 	register int c;
 	register char *place;
@@ -131,8 +128,7 @@ char *optstring;
 
 
 void
-print_datum(db)
-datum db;
+print_datum(datum db)
 {
 	int i;
 
@@ -152,8 +148,7 @@ datum db;
 
 
 datum
-read_datum(s)
-char *s;
+read_datum(char *s)
 {
 	datum db;
 	char *p;
@@ -197,8 +192,7 @@ char *s;
 
 
 char *
-key2s(db)
-datum db;
+key2s(datum db)
 {
 	char *buf;
 	char *p1, *p2;
@@ -211,10 +205,8 @@ datum db;
 	return buf;
 }
 
-
-main(argc, argv)
-int argc;
-char **argv;
+int
+main(int argc, char **argv)
 {
 	typedef enum {
 		YOW, FETCH, STORE, DELETE, SCAN, REGEXP

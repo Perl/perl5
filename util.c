@@ -1797,8 +1797,7 @@ setenv_getix(char *nam)
 
 #ifdef UNLINK_ALL_VERSIONS
 I32
-unlnk(f)	/* unlink all versions of a file */
-char *f;
+unlnk(char *f)	/* unlink all versions of a file */
 {
     I32 i;
 
@@ -1983,8 +1982,7 @@ my_ntohl(long l)
 
 #define HTOV(name,type)						\
 	type							\
-	name (n)						\
-	register type n;					\
+	name (register type n)					\
 	{							\
 	    union {						\
 		type value;					\
@@ -2000,8 +1998,7 @@ my_ntohl(long l)
 
 #define VTOH(name,type)						\
 	type							\
-	name (n)						\
-	register type n;					\
+	name (register type n)					\
 	{							\
 	    union {						\
 		type value;					\
@@ -2183,9 +2180,7 @@ dump_fds(char *s)
 
 #ifndef HAS_DUP2
 int
-dup2(oldfd,newfd)
-int oldfd;
-int newfd;
+dup2(int oldfd, int newfd)
 {
 #if defined(HAS_FCNTL) && defined(F_DUPFD)
     if (oldfd == newfd)
@@ -2457,12 +2452,11 @@ int pclose();
 #ifdef HAS_FORK
 int					/* Cannot prototype with I32
 					   in os2ish.h. */
-my_syspclose(ptr)
+my_syspclose(PerlIO *ptr)
 #else
 I32
-my_pclose(ptr)
+my_pclose(PerlIO *ptr)
 #endif 
-PerlIO *ptr;
 {
     /* Needs work for PerlIO ! */
     FILE *f = PerlIO_findFILE(ptr);

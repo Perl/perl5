@@ -116,9 +116,8 @@ static I32 registry_size;
 #define REG_ADD(sv)	REG_REPLACE(sv,Nullsv,sv)
 #define REG_REMOVE(sv)	REG_REPLACE(sv,sv,Nullsv)
 
-static void
-reg_add(sv)
-SV* sv;
+STATIC void
+reg_add(SV *sv)
 {
     if (PL_sv_count >= (registry_size >> 1))
     {
@@ -144,17 +143,15 @@ SV* sv;
     ++PL_sv_count;
 }
 
-static void
-reg_remove(sv)
-SV* sv;
+STATIC void
+reg_remove(SV *sv)
 {
     REG_REMOVE(sv);
     --PL_sv_count;
 }
 
-static void
-visit(f)
-SVFUNC f;
+STATIC void
+visit(SVFUNC f)
 {
     I32 i;
 
@@ -166,10 +163,7 @@ SVFUNC f;
 }
 
 void
-sv_add_arena(ptr, size, flags)
-char* ptr;
-U32 size;
-U32 flags;
+sv_add_arena(char *ptr, U32 size, U32 flags)
 {
     if (!(flags & SVf_FAKE))
 	Safefree(ptr);

@@ -3591,10 +3591,7 @@ STATIC void
 #ifdef PERL_OBJECT
 qsortsv(SV ** array, size_t num_elts, SVCOMPARE compare)
 #else
-qsortsv(
-   SV ** array,
-   size_t num_elts,
-   I32 (*compare)(SV *a, SV *b))
+qsortsv(SV ** array, size_t num_elts, I32 (*compare)(SV *a, SV *b))
 #endif
 {
    register SV * temp;
