@@ -57,27 +57,37 @@ our %winlatin2cp   = (
 		      'Vietnamese' => 1258,
 		     );
 
-our %external_tables = (
-    'euc-cn'		=> 'Encode/CN.pm',
-    gb2312		=> 'Encode/CN.pm',
-    gb12345		=> 'Encode/CN.pm',
-    gbk			=> 'Encode/CN.pm',
-    cp936		=> 'Encode/CN.pm',
-    'iso-ir-165'	=> 'Encode/CN.pm',
-    'euc-jp'		=> 'Encode/JP.pm',
-    shiftjis		=> 'Encode/JP.pm',
-    macjapan		=> 'Encode/JP.pm',
-    cp932		=> 'Encode/JP.pm',
-    'euc-kr'		=> 'Encode/KR.pm',
-    ksc5601		=> 'Encode/KR.pm',
-    cp949		=> 'Encode/KR.pm',
-    big5		=> 'Encode/TW.pm',
-    'big5-hkscs'	=> 'Encode/TW.pm',
-    cp950		=> 'Encode/TW.pm',
-    gb18030		=> 'Encode/CN.pm', # HanExtra
-    big5plus		=> 'Encode/TW.pm', # HanExtra
-    'euc-tw',		=> 'Encode/TW.pm', # HanExtra
-);
+BEGIN {
+    our %external_tables =
+	(
+	 'euc-cn'	=> 'Encode/CN.pm',
+	 gb2312		=> 'Encode/CN.pm',
+	 gb12345	=> 'Encode/CN.pm',
+	 gbk		=> 'Encode/CN.pm',
+	 cp936		=> 'Encode/CN.pm',
+	 'iso-ir-165'	=> 'Encode/CN.pm',
+	 'euc-jp'	=> 'Encode/JP.pm',
+	 shiftjis	=> 'Encode/JP.pm',
+	 macjapan	=> 'Encode/JP.pm',
+	 cp932		=> 'Encode/JP.pm',
+	 'euc-kr'	=> 'Encode/KR.pm',
+	 ksc5601	=> 'Encode/KR.pm',
+	 cp949		=> 'Encode/KR.pm',
+	 big5		=> 'Encode/TW.pm',
+	 'big5-hkscs'	=> 'Encode/TW.pm',
+	 cp950		=> 'Encode/TW.pm',
+	);
+    
+    eval 'require Encode::HanExtra';
+    unless ($@) {
+	push %external_tables,
+	(
+	 gb18030	=> 'Encode/CN.pm', # HanExtra
+	 big5plus	=> 'Encode/TW.pm', # HanExtra
+	 'euc-tw',	=> 'Encode/TW.pm', # HanExtra
+	);
+    }
+}
 
 sub encodings
 {
