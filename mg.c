@@ -1102,6 +1102,7 @@ Perl_csighandler_init(void)
 
     for (sig = 1; sig < SIG_SIZE; sig++) {
 #ifdef FAKE_DEFAULT_SIGNAL_HANDLERS
+        dTHX;
         sig_defaulting[sig] = 1;
         (void) rsignal(sig, &Perl_csighandler);
 #endif
