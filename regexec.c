@@ -114,9 +114,11 @@ static I32 regmatch _((regnode *prog));
 static I32 regrepeat _((regnode *p, I32 max));
 static I32 regrepeat_hard _((regnode *p, I32 max, I32 *lp));
 static I32 regtry _((regexp *prog, char *startpos));
+
 static bool reginclass _((char *p, I32 c));
 static CHECKPOINT regcppush _((I32 parenfloor));
 static char * regcppop _((void));
+#define REGINCLASS(p,c)  (*(p) ? reginclass(p,c) : ANYOF_TEST(p,c))
 
 static CHECKPOINT
 regcppush(I32 parenfloor)
@@ -422,7 +424,7 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend, cha
 	case ANYOF:
 	    Class = (char *) OPERAND(c);
 	    while (s < strend) {
-		if (reginclass(Class, *s)) {
+		if (REGINCLASS(Class, *s)) {
 		    if (tmp && regtry(prog, s))
 			goto got_it;
 		    else
@@ -890,7 +892,7 @@ regmatch(regnode *prog)
 	    s = (char *) OPERAND(scan);
 	    if (nextchar < 0)
 		nextchar = UCHARAT(locinput);
-	    if (!reginclass(s, nextchar))
+	    if (!REGINCLASS(s, nextchar))
 		sayNO;
 	    if (!nextchar && locinput >= regeol)
 		sayNO;
@@ -1663,7 +1665,7 @@ regrepeat(regnode *p, I32 max)
 	    scan++;
 	break;
     case ANYOF:
-	while (scan < loceol && reginclass(opnd, *scan))
+	while (scan < loceol && REGINCLASS(opnd, *scan))
 	    scan++;
 	break;
     case ALNUM:
@@ -1774,7 +1776,7 @@ reginclass(register char *p, register I32 c)
     bool match = FALSE;
 
     c &= 0xFF;
-    if (p[1 + (c >> 3)] & (1 << (c & 7)))
+    if (ANYOF_TEST(p, c))
 	match = TRUE;
     else if (flags & ANYOF_FOLD) {
 	I32 cf;
@@ -1784,7 +1786,7 @@ reginclass(register char *p, register I32 c)
 	}
 	else
 	    cf = fold[c];
-	if (p[1 + (cf >> 3)] & (1 << (cf & 7)))
+	if (ANYOF_TEST(p, cf))
 	    match = TRUE;
     }
 
@@ -1800,7 +1802,7 @@ reginclass(register char *p, register I32 c)
 	}
     }
 
-    return match ^ ((flags & ANYOF_INVERT) != 0);
+    return (flags & ANYOF_INVERT) ? !match : match;
 }
 
 

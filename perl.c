@@ -2836,7 +2836,6 @@ init_main_thread()
     SvLEN_set(thrsv, sizeof(thr));
     *SvEND(thrsv) = '\0';	/* in the trailing_nul field */
     thr->oursv = thrsv;
-    curcop = &compiling;
     chopset = " \n-";
 
     MUTEX_LOCK(&threads_mutex);

@@ -948,7 +948,7 @@ win32/bin/search.pl	Win32 port
 win32/bin/webget.pl	Win32 port
 win32/bin/www.pl	Win32 port
 win32/config.bc		Win32 base line config.sh (Borland C++ build)
-win32/config.gc		Win32 base line config.sh (GNU build)?
+win32/config.gc		Win32 base line config.sh (mingw32/gcc build)
 win32/config.vc		Win32 base line config.sh (Visual C++ build)
 win32/config_H.bc	Win32 config header (Borland C++ build)
 win32/config_H.gc	Win32 config header (GNU build)?

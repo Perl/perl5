@@ -200,6 +200,8 @@ if ($define{'MYMALLOC'})
 unless ($define{'USE_THREADS'})
  {
   skip_symbols [qw(
+Perl_getTHR
+Perl_setTHR
 Perl_condpair_magic
 Perl_thr_key
 Perl_sv_mutex

@@ -172,7 +172,6 @@ sub minus_f_nocase {
      my($p,$cip);
      foreach $p (split(/\//, $file)){
 	my $try = "@p/$p";
-	warn "$try\n";
 	stat $try;
  	if (-d _){
  	    push @p, $p;
