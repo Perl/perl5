@@ -15,6 +15,7 @@ Changes5.003		Differences between 5.002 and 5.003
 Changes5.004		Differences between 5.003 and 5.004
 Changes5.005		Differences between 5.004 and 5.005
 Changes5.6		Differences between 5.005 and 5.6
+check83.pl		Check whether we are 8.3-friendly
 configpm		Produces lib/Config.pm
 Configure		Portability tool
 configure.com		Configure-equivalent for VMS
