@@ -849,8 +849,9 @@ run-time methods: $PERLLIB, $PERL5LIB, -I, use lib, etc.
 
 Run-time customization of @INC can be enabled with:
 
-	sh Configure -Accflags=-DUSE_SITECUSTOMIZE
+	sh Configure -Dusesitecustomize
 
+Which will define USE_SITECUSTOMIZE and $Config{usesitecustomize}.
 When enabled, make perl run F<$sitelibexp/sitecustomize.pl> before
 anything else.  This script can then be set up to add additional
 entries to @INC.
