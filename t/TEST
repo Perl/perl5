@@ -68,7 +68,8 @@ sub _find_tests {
     my($dir) = @_;
     opendir DIR, $dir or die "Trouble opening $dir: $!";
     foreach my $f (sort { $a cmp $b } readdir DIR) {
-        next if $f eq $curdir or $f eq $updir;
+        next if $f eq $curdir or $f eq $updir or
+	    $f =~ /^(?:CVS|RCS|SCCS|\.svn)$/;
 
         my $fullpath = File::Spec->catfile($dir, $f);
 
