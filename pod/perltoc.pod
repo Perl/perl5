@@ -24,7 +24,7 @@ through to locate the proper section you're looking for.
 
 Many usability enhancements, Simplified grammar, Lexical scoping,
 Arbitrarily nested data structures, Modularity and reusability,
-Object-oriented programming, Embeddible and Extensible, POSIX
+Object-oriented programming, Embeddable and Extensible, POSIX
 compliant, Package constructors and destructors, Multiple simultaneous
 DBM implementations, Subroutine definitions may now be autoloaded,
 Regular expression enhancements
@@ -254,6 +254,9 @@ y/SEARCHLIST/REPLACEMENTLIST/cds
 
 (?#text), (?:regexp), (?=regexp), (?!regexp), (?imsx)
 
+=item Backtracking
+
+
 =item Version 8 Regular Expressions
 
 
@@ -280,10 +283,11 @@ y/SEARCHLIST/REPLACEMENTLIST/cds
 =item Switches
 
 
-B<-0>I<digits>, B<-a>, B<-c>, B<-d>, B<-D>I<number>, B<-D>I<list>,
-B<-e> I<commandline>, B<-F>I<regexp>, B<-i>I<extension>,
-B<-I>I<directory>, B<-l>I<octnum>, B<-n>, B<-p>, B<-P>, B<-s>, B<-S>,
-B<-T>, B<-u>, B<-U>, B<-v>, B<-w>, B<-x> I<directory>
+B<-0>I<digits>, B<-a>, B<-c>, B<-d>, B<-d:foo>, B<-D>I<number>,
+B<-D>I<list>, B<-e> I<commandline>, B<-F>I<regexp>, B<-i>I<extension>,
+B<-I>I<directory>, B<-l>I<octnum>, B<-m>I<module>, B<-M>I<module>,
+B<-n>, B<-p>, B<-P>, B<-s>, B<-S>, B<-T>, B<-u>, B<-U>, B<-v>, B<-V>,
+B<-V:name>, B<-w>, B<-x> I<directory>
 
 
 
@@ -681,6 +685,9 @@ structures, objects
 
 =back
 
+=item Database Ties
+
+
 =item SEE ALSO
 
 
@@ -1071,6 +1078,9 @@ pipes, safe subprocceses, sockets, and semaphores)
 =item The CODE: Keyword
 
 
+=item The INIT: Keyword
+
+
 =item The NO_INIT Keyword
 
 
@@ -1078,6 +1088,12 @@ pipes, safe subprocceses, sockets, and semaphores)
 
 
 =item Default Parameter Values
+
+
+=item The PREINIT: Keyword
+
+
+=item The INPUT: Keyword
 
 
 =item Variable-length Parameter Lists
@@ -1096,6 +1112,27 @@ pipes, safe subprocceses, sockets, and semaphores)
 
 
 =item The BOOT: Keyword
+
+
+=item The VERSIONCHECK: Keyword
+
+
+=item The PROTOTYPES: Keyword
+
+
+=item The PROTOTYPE: Keyword
+
+
+=item The ALIAS: Keyword
+
+
+=item The INCLUDE: Keyword
+
+
+=item The CASE: Keyword
+
+
+=item The & Unary Operator
 
 
 =item Inserting Comments and C Preprocessor Directives
@@ -1120,6 +1157,9 @@ pipes, safe subprocceses, sockets, and semaphores)
 =item EXAMPLES
 
 
+=item XS VERSION
+
+
 =item AUTHOR
 
 
@@ -1129,6 +1169,14 @@ pipes, safe subprocceses, sockets, and semaphores)
 =head2 perlxstut, perlXStut - Tutorial for XSUB's
 
 =item DESCRIPTION
+
+
+=over
+
+=item VERSION CAVEAT
+
+
+=item DYNAMIC VERSUS STATIC
 
 
 =item EXAMPLE 1
@@ -1158,7 +1206,22 @@ pipes, safe subprocceses, sockets, and semaphores)
 =item WARNING
 
 
-=item EXAMPLE 4
+=item SPECIFYING ARGUMENTS TO XSUBPP
+
+
+=item THE ARGUMENT STACK
+
+
+=item EXTENDING YOUR EXTENSION
+
+
+=item DOCUMENTING YOUR EXTENSION
+
+
+=item INSTALLING YOUR EXTENSION
+
+
+=item SEE ALSO
 
 
 =item Author
@@ -1166,6 +1229,10 @@ pipes, safe subprocceses, sockets, and semaphores)
 
 =item Last Changed
 
+
+
+
+=back
 
 
 
@@ -1306,6 +1373,9 @@ B<perl_call_argv>
 =item G_EVAL
 
 
+=item G_KEEPERR
+
+
 =item Determining the Context
 
 
@@ -1340,6 +1410,9 @@ B<perl_call_argv>
 
 
 =item Using G_EVAL
+
+
+=item Using G_KEEPERR
 
 
 =item Using perl_call_sv
@@ -1677,6 +1750,17 @@ C<strict refs>, C<strict vars>, C<strict subs>
 
 
 
+=head2 vars - Perl pragma to predeclare global variable names
+
+=item SYNOPSIS
+
+
+=item DESCRIPTION
+
+
+
+
+
 =head1 MODULE DOCUMENTATION
 
 
@@ -1785,23 +1869,6 @@ timeit(COUNT, CODE), timethis, timethese, timediff, timestr
 
 
 
-=head2 Config - access Perl configuration option
-
-=item SYNOPSIS
-
-
-=item DESCRIPTION
-
-
-=item EXAMPLE
-
-
-=item NOTE
-
-
-
-
-
 =head2 Cwd, getcwd - get pathname of current working directory
 
 =item SYNOPSIS
@@ -1899,6 +1966,17 @@ get, put, del, fd, seq, sync
 
 
 
+=head2 DirHandle - supply object methods for directory handles
+
+=item SYNOPSIS
+
+
+=item DESCRIPTION
+
+
+
+
+
 =head2 DynaLoader - Dynamically load C libraries into Perl code
 
 =item SYNOPSIS
@@ -1975,6 +2053,17 @@ variables
 
 
 
+=head2 ExtUtils::Install - install files from here to there
+
+=item SYNOPSIS
+
+
+=item DESCRIPTION
+
+
+
+
+
 =head2 ExtUtils::Liblist - determine libraries to use and how to use
 them
 
@@ -2010,6 +2099,72 @@ For static extensions, For dynamic extensions, For dynamic extensions
 
 
 
+=head2 ExtUtils::MM_OS2 - methods to override UN*X behaviour in
+ExtUtils::MakeMaker
+
+=item DESCRIPTION
+
+
+
+
+
+=head2 ExtUtils::MM_Unix - methods used by ExtUtils::MakeMaker
+
+=item SYNOPSIS
+
+
+=item DESCRIPTION
+
+
+=item METHODS
+
+
+=over
+
+=item Preloaded methods
+
+
+catdir, catfile, nicetext, libscan, exescan, lsdir, path,
+replace_manpage_separator, file_name_is_absolute, prefixify,
+maybe_command_in_dirs, maybe_command, perl_script
+
+=item SelfLoaded methods
+
+
+guess_name, init_main, init_dirscan, init_others, find_perl
+
+=item Methods to actually produce chunks of text for the Makefile
+
+
+post_initialize, const_config, constants, const_loadlibs, const_cccmd,
+tool_autosplit, tool_xsubpp, tools_other, dist, macro, depend,
+post_constants, pasthru, c_o, xs_c, xs_o, top_targets, linkext, dlsyms,
+dynamic, dynamic_bs, dynamic_lib, static, static_lib, installpm,
+installpm_x, manifypods, processPL, installbin, subdirs, subdir_x,
+clean, realclean, dist_basics, dist_core, dist_dir, dist_test, dist_ci,
+install, force, perldepend, makefile, staticmake, test,
+test_via_harness, test_via_script, postamble, makeaperl, extliblist,
+dir_target, needs_linking, has_link_code, writedoc
+
+
+
+=back
+
+=item SEE ALSO
+
+
+
+
+
+=head2 ExtUtils::MM_VMS - methods to override UN*X behaviour in
+ExtUtils::MakeMaker
+
+=item DESCRIPTION
+
+
+
+
+
 =head2 ExtUtils::MakeMaker - create an extension Makefile
 
 =item SYNOPSIS
@@ -2032,7 +2187,10 @@ For static extensions, For dynamic extensions, For dynamic extensions
 =item Default Makefile Behaviour
 
 
-=item Special case make install
+=item make test
+
+
+=item make install
 
 
 =item PREFIX attribute
@@ -2050,23 +2208,24 @@ For static extensions, For dynamic extensions, For dynamic extensions
 =item Useful Default Makefile Macros
 
 
-=item Using Attributes (and Parameters)
+=item Using Attributes and Parameters
 
 
 C, CONFIG, CONFIGURE, DEFINE, DIR, DISTNAME, DL_FUNCS, DL_VARS,
 EXE_FILES, FIRST_MAKEFILE, FULLPERL, H, INC, INSTALLARCHLIB,
-INSTALLBIN, INSTALLMAN1DIR, INSTALLMAN3DIR, INSTALLPRIVLIB,
-INST_ARCHLIB, INST_EXE, INST_LIB, INST_MAN1DIR, INST_MAN3DIR, LDFROM,
-LIBPERL_A, LIBS, LINKTYPE, MAKEAPERL, MAKEFILE, MAN1PODS, MAN3PODS,
-MAP_TARGET, MYEXTLIB, NAME, NEEDS_LINKING, NORECURS, OBJECT, PERL,
+INSTALLBIN, INSTALLDIRS, INSTALLMAN1DIR, INSTALLMAN3DIR,
+INSTALLPRIVLIB, INSTALLSITELIB, INSTALLSITEARCH, INST_ARCHLIB,
+INST_EXE, INST_LIB, INST_MAN1DIR, INST_MAN3DIR, LDFROM, LIBPERL_A,
+LIBS, LINKTYPE, MAKEAPERL, MAKEFILE, MAN1PODS, MAN3PODS, MAP_TARGET,
+MYEXTLIB, NAME, NEEDS_LINKING, NOECHO, NORECURS, OBJECT, PERL,
 PERLMAINCC, PERL_ARCHLIB, PERL_LIB, PERL_SRC, PL_FILES, PM, PMLIBDIRS,
-PREFIX, PREREQ, SKIP, TYPEMAPS, VERSION, XS, XSOPT, XSPROTOARG,
-XS_VERSION
+PREFIX, PREREQ, SKIP, TYPEMAPS, VERSION, VERSION_FROM, XS, XSOPT,
+XSPROTOARG, XS_VERSION
 
 =item Additional lowercase attributes
 
 
-clean, dist, dynamic_lib, installpm, linkext, macro, realclean,
+clean, depend, dist, dynamic_lib, installpm, linkext, macro, realclean,
 tool_autosplit
 
 =item Overriding MakeMaker Methods
@@ -2135,6 +2294,26 @@ DynaLoader
 
 
 =item DESCRIPTION
+
+
+
+
+
+=head2 ExtUtils::Mksymlists - write linker options files for dynamic
+extension
+
+=item SYNOPSIS
+
+
+=item DESCRIPTION
+
+
+NAME, DL_FUNCS, DL_VARS, FILE, FUNCLIST, DLBASE
+
+=item AUTHOR
+
+
+=item REVISION
 
 
 
@@ -2211,6 +2390,20 @@ C<basename>, C<dirname>
 
 
 
+=head2 FileCache - keep more files open than the system permits
+
+=item SYNOPSIS
+
+
+=item DESCRIPTION
+
+
+=item BUGS
+
+
+
+
+
 =head2 FileHandle - supply object methods for filehandles
 
 =item SYNOPSIS
@@ -2221,15 +2414,6 @@ C<basename>, C<dirname>
 
 $fh->print, $fh->printf, $fh->getline, $fh->getlines
 
-=over
-
-=item The cacheout() Library
-
-
-
-
-=back
-
 =item SEE ALSO
 
 
@@ -2239,7 +2423,7 @@ $fh->print, $fh->printf, $fh->getline, $fh->getlines
 
 
 
-=head2 Getopt::Long, GetOptions - extended getopt processing
+=head2 GDBM_File - Perl5 access to the gdbm library.
 
 =item SYNOPSIS
 
@@ -2247,13 +2431,62 @@ $fh->print, $fh->printf, $fh->getline, $fh->getlines
 =item DESCRIPTION
 
 
+=item AVAILABILITY
+
+
+=item BUGS
+
+
+=item SEE ALSO
+
+
+
+
+
+=head2 Getopt::Long, GetOptions - extended processing of command line
+options
+
+=item SYNOPSIS
+
+
+=item DESCRIPTION
+
+
+<none>, !, =s, :s, =i, :i, =f, :f
+
+=over
+
+=item Linkage specification
+
+
+=item Aliases and abbreviations
+
+
+=item Non-option call-back routine
+
+
+=item Option starters
+
+
+=item Return value
+
+
+
+
+=back
+
+=item COMPATIBILITY
+
+
 =item EXAMPLES
 
 
-$autoabbrev, $getopt_compat, $option_start, $order, $ignorecase, $debug
+=item CONFIGURATION VARIABLES
 
-=item NOTE
 
+$Getopt::Long::autoabbrev, $Getopt::Long::getopt_compat,
+$Getopt::Long::order, $Getopt::Long::ignorecase,
+$Getopt::Long::VERSION, $Getopt::Long::error, $Getopt::Long::debug
 
 
 
@@ -2270,8 +2503,8 @@ switch clustering
 
 
 
-=head2 I18N::Collate, Collate - compare 8-bit scalar data according to
-the current locale
+=head2 I18N::Collate - compare 8-bit scalar data according to the
+current locale
 
 =item SYNOPSIS
 
@@ -2373,12 +2606,6 @@ mkfifo, mktime, modf, nice, offsetof, open, opendir, pat
 
 
 =over
-
-=item FileHandle
-
-
-new, clearerr, close, eof, error, fileno, flush, getc, getpos, gets,
-new_from_fd, new_tmpfile, seek, setbuf, setpos, setvbuf, tell, ungetc
 
 =item POSIX::SigAction
 
@@ -2541,6 +2768,28 @@ ops_to_mask (OP, ...), mask_to_ops (MASK), opcode (OP, ...), opname
 
 
 
+=head2 Search::Dict, look - search for key in dictionary file
+
+=item SYNOPSIS
+
+
+=item DESCRIPTION
+
+
+
+
+
+=head2 SelectSaver - save and restore selected file handle
+
+=item SYNOPSIS
+
+
+=item DESCRIPTION
+
+
+
+
+
 =head2 SelfLoader - load functions only on demand
 
 =item SYNOPSIS
@@ -2597,12 +2846,50 @@ unpack_sockaddr_un SOCKADDR_UN
 
 
 
+=head2 Symbol - manipulate Perl symbols and their names
+
+=item SYNOPSIS
+
+
+=item DESCRIPTION
+
+
+
+
+
 =head2 Sys::Hostname - Try every conceivable way to get hostname
 
 =item SYNOPSIS
 
 
 =item DESCRIPTION
+
+
+=item AUTHOR
+
+
+
+
+
+=head2 Syslog, Sys::Syslog, openlog, closelog, setlogmask, syslog -
+Perl interface to the UNIX syslog(3) calls
+
+=item SYNOPSIS
+
+
+=item DESCRIPTION
+
+
+openlog $ident, $logopt, $facility, syslog $priority, $mask, $format,
+@args, setlogmask $mask_priority, closelog
+
+=item EXAMPLES
+
+
+=item DEPENDENCIES
+
+
+=item SEE ALSO
 
 
 =item AUTHOR
@@ -2647,6 +2934,28 @@ unpack_sockaddr_un SOCKADDR_UN
 
 
 
+=head2 Term::ReadLine - Perl interface to various C<readline> packages.
+If no real package is found, substitutes stubs instead of basic
+functions.
+
+=item SYNOPSIS
+
+
+=item DESCRIPTION
+
+
+=item Minimal set of supported functions
+
+
+C<ReadLine>, C<new>, C<readline>, C<addhistory>, C<IN>, $C<OUT>,
+C<MinLine>, C<findConsole>, C<Features>
+
+=item EXPORTS
+
+
+
+
+
 =head2 Test::Harness - run perl standard test scripts with statistics
 
 =item SYNOPSIS
@@ -2655,16 +2964,30 @@ unpack_sockaddr_un SOCKADDR_UN
 =item DESCRIPTION
 
 
+=over
+
+=item The test script output
+
+
+
+
+=back
+
 =item EXPORT
 
 
 =item DIAGNOSTICS
 
 
-C<All tests successful.\nFiles=%d,  Tests=%d, %s>, C<Failed 1 test,
-$pct% okay.>, C<Failed %d/%d tests, %.2f%% okay.>
+C<All tests successful.\nFiles=%d,  Tests=%d, %s>, C<FAILED tests
+%s\n\tFailed %d/%d tests, %.2f%% okay.>, C<Test returned status %d
+(wstat %d)>, C<Failed 1 test, %.2f%% okay. %s>, C<Failed %d/%d tests,
+%.2f%% okay. %s>
 
 =item SEE ALSO
+
+
+=item AUTHORS
 
 
 =item BUGS
@@ -2736,7 +3059,7 @@ Described by Knuth
 
 
 
-=head2 TieHash, TieHash::Std - base class definitions for tied hashes
+=head2 Tie::Hash, Tie::StdHash - base class definitions for tied hashes
 
 =item SYNOPSIS
 
@@ -2752,6 +3075,37 @@ key, CLEAR this
 
 
 =item MORE INFORMATION
+
+
+
+
+
+=head2 Tie::Scalar, Tie::StdScalar - base class definitions for tied
+scalars
+
+=item SYNOPSIS
+
+
+=item DESCRIPTION
+
+
+TIESCALAR classname, LIST, FETCH this, STORE this, value, DESTROY this
+
+=item MORE INFORMATION
+
+
+
+
+
+=head2 Tie::SubstrHash - Fixed-table-size, fixed-key-length hashing
+
+=item SYNOPSIS
+
+
+=item DESCRIPTION
+
+
+=item CAVEATS
 
 
 
