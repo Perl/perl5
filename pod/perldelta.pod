@@ -221,10 +221,10 @@ expect the data structures to be pseudohashes any more.
 =head3 (Reminder) 5.005-style threads really are deprecated
 
 5.005-style threads (activated by C<use Thread;>) were deprecated in
-5.Perl 8.0 and will be removed after Perl 5.8, see L<perl58delta> for
-5.details.  Each 5.005-style thread creation will trigger the warning
-5.C<5.005 threads are deprecated>.  If you really want to continue
-5.using the 5.005 threads but not to see the deprecation warnings, use:
+Perl 8.0 and will be removed after Perl 5.8, see L<perl58delta> for
+details.  Each 5.005-style thread creation will trigger the warning
+C<5.005 threads are deprecated>.  If you really want to continue
+using the 5.005 threads but not to see the deprecation warnings, use:
 
     no warnings 'deprecated';
 
@@ -831,7 +831,7 @@ and
 
 instead of
 
-   $c = $d unless defined $d;
+   $c = $d unless defined $c;
 
 The operator will have the same precedence and associativity as C<||>.
 
