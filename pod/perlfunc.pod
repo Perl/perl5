@@ -5745,9 +5745,17 @@ your program.
 You can check all the failure possibilities by inspecting
 C<$?> like this:
 
-    $exit_value  = $? >> 8;
-    $signal_num  = $? & 127;
-    $dumped_core = $? & 128;
+    if ($? == -1) {
+	print "failed to execute: $!\n";
+    }
+    elsif ($? & 127) {
+	printf "child died with signal %d, %s coredump\n",
+	    ($? & 127),  ($? & 128) ? 'with' : 'without';
+    }
+    else {
+	printf "child exited with value %d\n", $? >> 8;
+    }
+
 
 or more portably by using the W*() calls of the POSIX extension;
 see L<perlport> for more information.
