@@ -215,6 +215,8 @@ I<SEE ALSO> section).  If that fails, try the following command lines:
 
         ls /usr/lib/nls
 
+	ls /usr/share/locale
+
 and see whether they list something resembling these
 
         en_US.ISO8859-1     de_DE.ISO8859-1     ru_RU.ISO8859-5
