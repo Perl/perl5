@@ -25,15 +25,20 @@
 
 #define BIT_BUCKET "/dev/null"  /* Will this work? */
 
-#define PERL_SYS_INIT(argcp, argvp) do {	\
+void Perl_OS2_init();
+
+#define PERL_SYS_INIT(argcp, argvp) STMT_START {	\
     _response(argcp, argvp);			\
     _wildcard(argcp, argvp);			\
-    settmppath(); } while (0)
+    Perl_OS2_init();	} STMT_END
+
+#define PERL_SYS_TERM()
+
+#define dXSUB_SYS int fake = OS2_XS_init()
 
 #define TMPPATH tmppath
 #define TMPPATH1 "plXXXXXX"
 extern char *tmppath;
-void settmppath();
 
 /*
  * fwrite1() should be a routine with the same calling sequence as fwrite(),
@@ -70,7 +75,7 @@ void settmppath();
 
 #define Stat(fname,bufptr) os2_stat((fname),(bufptr))
 #define Fstat(fd,bufptr)   fstat((fd),(bufptr))
-#define FFlush(fp)         fflush(fp)
+#define Fflush(fp)         fflush(fp)
 
 #undef S_IFBLK
 #undef S_ISBLK
@@ -81,6 +86,24 @@ void settmppath();
 
 #define Stat(fname,bufptr) stat((fname),(bufptr))
 #define Fstat(fd,bufptr)   fstat((fd),(bufptr))
-#define FFlush(fp)         fflush(fp)
+#define Fflush(fp)         fflush(fp)
 
 #endif
+
+/* Our private OS/2 specific data. */
+
+typedef struct OS2_Perl_data {
+  unsigned long flags;
+  unsigned long phab;
+  int (*xs_init)();
+} OS2_Perl_data_t;
+
+extern OS2_Perl_data_t OS2_Perl_data;
+
+#define hab		((HAB)OS2_Perl_data->phab)
+#define OS2_Perl_flag	(OS2_Perl_data->flag)
+#define Perl_HAB_set_f	1
+#define Perl_HAB_set	(OS2_Perl_flag & Perl_HAB_set_f)
+#define set_Perl_HAB_f	(OS2_Perl_flag |= Perl_HAB_set_f)
+#define set_Perl_HAB(h) (set_Perl_HAB_f, hab = h)
+#define OS2_XS_init() (*OS2_Perl_data.xs_init)()
