@@ -426,6 +426,7 @@ lib/Text/ParseWords.pm	Perl module to split words on arbitrary delimiter
 lib/Text/Soundex.pm	Perl module to implement Soundex
 lib/Text/Tabs.pm	Do expand and unexpand
 lib/Text/Wrap.pm	Paragraph formatter
+lib/Tie/Array.pm	Base class for tied arrays
 lib/Tie/Hash.pm		Base class for tied hashes
 lib/Tie/RefHash.pm	Base class for tied hashes with references as keys
 lib/Tie/Scalar.pm	Base class for tied scalars
@@ -550,12 +551,18 @@ patchlevel.h		The current patch level of perl
 perl.c			main()
 perl.h			Global declarations
 perl_exp.SH		Creates list of exported symbols for AIX
+perldir.h		perldir stuff
+perlenv.h		perlenv stuff
 perlio.c		C code for PerlIO abstraction
 perlio.h		Interface to PerlIO abstraction
 perlio.sym		Symbols for PerlIO abstraction
+perllio.h		perllio stuff
+perlmem.h		perlmem stuff
+perlproc.h		perlproc stuff
 perlsdio.h		Fake stdio using perlio
 perlsfio.h		Prototype sfio mapping for PerlIO
 perlsh			A poor man's perl shell
+perlsock.h		perlsock stuff
 perlvars.h		Global variables
 perly.c			A byacc'ed perly.y
 perly.c.diff		Fixup perly.c to allow recursion
@@ -604,6 +611,7 @@ pod/perlfaq9.pod	Frequently Asked Questions, Part 9
 pod/perlform.pod	Format info
 pod/perlfunc.pod	Function info
 pod/perlguts.pod	Internals info
+pod/perlhist.pod	Perl history info
 pod/perlipc.pod		IPC info
 pod/perllocale.pod	Locale support info
 pod/perllol.pod		How to use lists of lists
@@ -737,6 +745,9 @@ t/lib/texttabs.t	See if Text::Tabs works
 t/lib/textwrap.t	See if Text::Wrap works
 t/lib/timelocal.t	See if Time::Local works
 t/lib/thread.t		Basic test of threading (skipped if no threads) 
+t/lib/tie-push.t	See if pushing onto tied arrays works
+t/lib/tie-stdarray.t	See if tied arrays work
+t/lib/tie-stdpush.t	See if pushing onto standard tied arrays works
 t/lib/trig.t		See if Math::Trig works
 t/op/append.t		See if . works
 t/op/arith.t		See if arithmetic works
@@ -800,6 +811,7 @@ t/op/substr.t		See if substr works
 t/op/sysio.t		See if sysread and syswrite work
 t/op/taint.t		See if tainting works
 t/op/tie.t		See if tie/untie functions work
+t/op/tiearray.t		See if tie for arrays works
 t/op/time.t		See if time functions work
 t/op/undef.t		See if undef works
 t/op/universal.t	See if UNIVERSAL class works
@@ -871,6 +883,7 @@ win32/Makefile		Win32 makefile for NMAKE (Visual C++ build)
 win32/TEST		Win32 port
 win32/autosplit.pl	Win32 port
 win32/bin/network.pl	Win32 port
+win32/bin/perlglob.pl	Win32 globbing
 win32/bin/pl2bat.pl	wrap perl scripts into batch files
 win32/bin/runperl.pl	run perl script via batch file namesake
 win32/bin/search.pl	Win32 port
