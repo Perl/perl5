@@ -17,7 +17,7 @@
  */
 
 #ifdef PERL_OBJECT
-#define CALLOP this->*op
+#define CALLOP this->*PL_op
 #else
 #define CALLOP *PL_op
 #endif

@@ -26,7 +26,7 @@
 #define DOCATCH(o) ((CATCH_GET == TRUE) ? docatch(o) : (o))
 
 #ifdef PERL_OBJECT
-#define CALLOP this->*op
+#define CALLOP this->*PL_op
 #else
 #define CALLOP *PL_op
 static OP *docatch _((OP *o));

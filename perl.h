@@ -111,9 +111,9 @@ class CPerlObj;
 #define PERL_OBJECT_THIS this
 #define _PERL_OBJECT_THIS ,this
 #define PERL_OBJECT_THIS_ this,
-#define CALLRUNOPS (this->*runops)
-#define CALLREGCOMP (this->*regcompp)
-#define CALLREGEXEC (this->*regexecp)
+#define CALLRUNOPS (this->*PL_runops)
+#define CALLREGCOMP (this->*PL_regcompp)
+#define CALLREGEXEC (this->*PL_regexecp)
 
 #else /* !PERL_OBJECT */
 

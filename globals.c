@@ -1412,9 +1412,9 @@ fprintf(PerlIO *stream, const char *format, ...)
 #undef PERLVAR
 #define PERLVAR(x, y)
 #undef PERLVARI
-#define PERLVARI(x, y, z) x = z;
+#define PERLVARI(x, y, z) PL_##x = z;
 #undef PERLVARIC
-#define PERLVARIC(x, y, z) x = z;
+#define PERLVARIC(x, y, z) PL_##x = z;
 
 CPerlObj::CPerlObj(IPerlMem* ipM, IPerlEnv* ipE, IPerlStdIO* ipStd,
 					     IPerlLIO* ipLIO, IPerlDir* ipD, IPerlSock* ipS, IPerlProc* ipP)
@@ -1425,13 +1425,13 @@ CPerlObj::CPerlObj(IPerlMem* ipM, IPerlEnv* ipE, IPerlStdIO* ipStd,
 #include "intrpvar.h"
 #include "perlvars.h"
 
-    piMem = ipM;
-    piENV = ipE;
-    piStdIO = ipStd;
-    piLIO = ipLIO;
-    piDir = ipD;
-    piSock = ipS;
-    piProc = ipP;
+    PL_piMem = ipM;
+    PL_piENV = ipE;
+    PL_piStdIO = ipStd;
+    PL_piLIO = ipLIO;
+    PL_piDir = ipD;
+    PL_piSock = ipS;
+    PL_piProc = ipP;
 }
 
 void*
