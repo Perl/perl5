@@ -18,6 +18,11 @@ if( $^O eq 'VMS' && $] <= 5.00503 ) {
     exit 0;
 }
 
+if( $^O eq 'MacOS' ) {
+    print "1..0 # Skip exit status broken on Mac OS\n";
+    exit 0;
+}
+
 my $test_num = 1;
 # Utility testing functions.
 sub ok ($;$) {

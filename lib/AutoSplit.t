@@ -3,8 +3,7 @@
 # AutoLoader.t runs before this test, so it seems safe to assume that it will
 # work.
 
-my $incdir;
-my $lib = '"-I../lib"'; # ok on unix, nt, The extra \" are for VMS
+my($incdir, $lib);
 BEGIN {
     chdir 't' if -d 't';
     if ($^O eq 'dos') {
@@ -13,9 +12,10 @@ BEGIN {
     }
     if ($^O eq 'MacOS') {
 	$incdir = ":auto-$$";
-        $lib = '-x -I::lib:'; # -x overcomes MPW $Config{startperl} anomaly
+        $lib = '-I::lib:';
     } else {
 	$incdir = "auto-$$";
+	$lib = '"-I../lib"'; # ok on unix, nt, The extra \" are for VMS
     }
     @INC = $incdir;
     push @INC, '../lib';
@@ -49,8 +49,9 @@ my @tests;
   close DATA;
 }
 
-my $pathsep = $^O eq 'MSWin32' ? '\\' : '/';
- 
+my $pathsep = $^O eq 'MSWin32' ? '\\' : $^O eq 'MacOS' ? ':' : '/';
+my $endpathsep = $^O eq 'MacOS' ? ':' : '';
+
 sub split_a_file {
   my $contents = shift;
   my $file = $_[0];
@@ -76,7 +77,10 @@ my $dir = File::Spec->catdir($incdir, 'auto');
 if ($^O eq 'VMS') {
   $dir = VMS::Filespec::unixify($dir);
   $dir =~ s/\/$//;
+} elsif ($^O eq 'MacOS') {
+  $dir =~ s/:$//;
 }
+
 foreach (@tests) {
   my $module = 'A' . $i . '_' . $$ . 'splittest';
   my $file = File::Spec->catfile($incdir,"$module.pm");
@@ -84,6 +88,7 @@ foreach (@tests) {
   s/\*DIR\*/$dir/gm;
   s/\*MOD\*/$module/gm;
   s/\*PATHSEP\*/$pathsep/gm;
+  s/\*ENDPATHSEP\*/$endpathsep/gm;
   s#//#/#gm;
   # Build a hash for this test.
   my %args = /^\#\#\ ([^\n]*)\n	# Key is on a line starting ##
@@ -142,6 +147,7 @@ foreach (@tests) {
     }
   }
   if ($args{Require}) {
+    $args{Require} =~ s|/|:|gm if $^O eq 'MacOS';
     my $com = 'require "' . File::Spec->catfile ('auto', $args{Require}) . '"';
     $com =~ s{\\}{/}gm if ($^O eq 'MSWin32');
     eval $com;
@@ -221,11 +227,11 @@ sub test_a2 : locked { 1; }
 # And that was all it has. You were expected to manually inspect the output
 ## Get
 Warning: AutoSplit had to create top-level *DIR* unexpectedly.
-AutoSplitting *INC**PATHSEP**MOD*.pm (*DIR**PATHSEP**MOD*)
+AutoSplitting *INC**PATHSEP**MOD*.pm (*DIR**PATHSEP**MOD**ENDPATHSEP*)
 *INC**PATHSEP**MOD*.pm: some names are not unique when truncated to 8 characters:
- directory *DIR**PATHSEP**MOD*:
+ directory *DIR**PATHSEP**MOD**ENDPATHSEP*:
   testtesttesttest4_1.al, testtesttesttest4_2.al truncate to testtest
- directory *DIR**PATHSEP*Yet*PATHSEP*Another*PATHSEP*AutoSplit:
+ directory *DIR**PATHSEP*Yet*PATHSEP*Another*PATHSEP*AutoSplit*ENDPATHSEP*:
   testtesttesttest4_1.al, testtesttesttest4_2.al truncate to testtest
 ## Files
 *DIR*/*MOD*/autosplit.ix
@@ -281,7 +287,7 @@ missing use AutoLoader; (but don't skip)
 1;
 __END__
 ## Get
-AutoSplitting *INC**PATHSEP**MOD*.pm (*DIR**PATHSEP**MOD*)
+AutoSplitting *INC**PATHSEP**MOD*.pm (*DIR**PATHSEP**MOD**ENDPATHSEP*)
 ## Require
 *MOD*/autosplit.ix
 ## Files
@@ -296,7 +302,7 @@ __END__
 sub obsolete {my $a if 0; return $a++;}
 sub gonner {warn "This gonner function should never get called"}
 ## Get
-AutoSplitting *INC**PATHSEP**MOD*.pm (*DIR**PATHSEP**MOD*)
+AutoSplitting *INC**PATHSEP**MOD*.pm (*DIR**PATHSEP**MOD**ENDPATHSEP*)
 ## Require
 *MOD*/autosplit.ix
 ## Files
@@ -324,7 +330,7 @@ sub ghoul {"wail"};
 sub zombie {"You didn't use fire."};
 sub flying_pig {"Oink oink flap flap"};
 ## Get
-AutoSplitting *INC**PATHSEP**MOD*.pm (*DIR**PATHSEP**MOD*)
+AutoSplitting *INC**PATHSEP**MOD*.pm (*DIR**PATHSEP**MOD**ENDPATHSEP*)
 ## Require
 *MOD*/autosplit.ix
 ## Files
@@ -353,7 +359,7 @@ __END__
 sub ghost {"bump"};
 sub wraith {9};
 ## Get
-AutoSplitting *INC**PATHSEP**MOD*.pm (*DIR**PATHSEP**MOD*)
+AutoSplitting *INC**PATHSEP**MOD*.pm (*DIR**PATHSEP**MOD**ENDPATHSEP*)
 ## Require
 *MOD*/autosplit.ix
 ## Files
@@ -399,7 +405,7 @@ With the timestamp check make sure that things happen (stuff gets deleted)
 ## Extra
 0, 1, 0
 ## Get
-AutoSplitting *INC**PATHSEP**MOD*.pm (*DIR**PATHSEP**MOD*)
+AutoSplitting *INC**PATHSEP**MOD*.pm (*DIR**PATHSEP**MOD**ENDPATHSEP*)
 ## Require
 *MOD*/autosplit.ix
 ## Files

@@ -10,6 +10,7 @@ use 5.006;
 use strict;
 use warnings;
 use Carp;
+use File::Spec;
 
 require Exporter;
 
@@ -151,8 +152,9 @@ sub read_table {
     my $self = shift;
     my $file = $self->{table} ne '' ? $self->{table} : $KeyFile;
 
-    open my $fk, "<$Path/$file"
-	or croak "File does not exist at $Path/$file";
+    my $filepath = File::Spec->catfile($Path, $file);
+    open my $fk, "<$filepath"
+	or croak "File does not exist at $filepath";
 
     while (<$fk>) {
 	next if /^\s*#/;

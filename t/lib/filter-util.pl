@@ -45,6 +45,7 @@ sub ok
 $Inc = '' ;
 foreach (@INC)
  { $Inc .= "\"-I$_\" " }
+$Inc = "-I::lib" if $^O eq 'MacOS';
 
 $Perl = '' ;
 $Perl = ($ENV{'FULLPERL'} or $^X or 'perl') ;

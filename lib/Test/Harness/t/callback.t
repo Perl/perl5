@@ -10,7 +10,11 @@ BEGIN {
     }
 }
 
-my $SAMPLE_TESTS = $ENV{PERL_CORE} ? 'lib/sample-tests' : 't/sample-tests';
+use File::Spec::Functions;
+
+my $SAMPLE_TESTS = $ENV{PERL_CORE}
+    ? catdir(curdir(), 'lib', 'sample-tests')
+    : catdir(curdir(), 't', 'sample-tests');
 
 use Test::More;
 
@@ -49,7 +53,7 @@ $strap->{callback} = sub {
                             
 while( my($test, $expect) = each %samples ) {
     local @out = ();
-    $strap->analyze_file("$SAMPLE_TESTS/$test");
+    $strap->analyze_file(catfile($SAMPLE_TESTS, $test));
 
     is_deeply(\@out, $expect,   "$test callback");
 }

@@ -9,11 +9,13 @@ use Config;
 use Cwd;
 use strict;
 use warnings;
+use File::Spec;
 use File::Path;
 
 use Test::More tests => 16;
 
 my $IsVMS = $^O eq 'VMS';
+my $IsMacOS = $^O eq 'MacOS';
 
 # check imports
 can_ok('main', qw(cwd getcwd fastcwd fastgetcwd));
@@ -32,6 +34,8 @@ my $pwd = $^O eq 'MSWin32' ? "cmd" : "pwd";
 my $pwd_cmd =
     ($^O eq "NetWare") ?
         "cd" :
+    ($IsMacOS) ?
+        "pwd" :
         (grep { -x && -f } map { "$_/$pwd$Config{exe_ext}" }
 	                   split m/$Config{path_sep}/, $ENV{PATH})[0];
 
@@ -77,6 +81,9 @@ if( $IsVMS ) {
     $want =~ s|/|\.|g;
     $want .= '\]';
     $want = '((?i)' . $want . ')';  # might be ODS-2 or ODS-5
+} elsif ( $IsMacOS ) {
+    $_ = ":$_" for ($Top_Test_Dir, $Test_Dir);
+    s|/|:|g, s|$|:| for ($want, $Test_Dir);
 }
 
 mkpath(["$Test_Dir"], 0, 0777);
@@ -89,21 +96,25 @@ like(fastgetcwd(), qr|$want$|, '        + fastgetcwd()');
 
 # Cwd::chdir should also update $ENV{PWD}
 like($ENV{PWD}, qr|$want$|,      'Cwd::chdir() updates $ENV{PWD}');
-Cwd::chdir "..";
+my $updir = File::Spec->updir;
+Cwd::chdir $updir;
 print "#$ENV{PWD}\n";
-Cwd::chdir "..";
+Cwd::chdir $updir;
 print "#$ENV{PWD}\n";
-Cwd::chdir "..";
+Cwd::chdir $updir;
 print "#$ENV{PWD}\n";
-Cwd::chdir "..";
+Cwd::chdir $updir;
 print "#$ENV{PWD}\n";
-Cwd::chdir "..";
+Cwd::chdir $updir;
 print "#$ENV{PWD}\n";
 
 rmtree([$Top_Test_Dir], 0, 0);
 
 if ($IsVMS) {
     like($ENV{PWD}, qr|\b((?i)t)\]$|);
+}
+elsif ($IsMacOS) {
+    like($ENV{PWD}, qr|\bt:$|);
 }
 else {
     like($ENV{PWD}, qr|\bt$|);
@@ -117,7 +128,7 @@ SKIP: {
 
     my $abs_path      =  Cwd::abs_path("linktest");
     my $fast_abs_path =  Cwd::fast_abs_path("linktest");
-    my $want          = "t/$Test_Dir";
+    my $want          =  File::Spec->catdir("t", $Test_Dir) if $IsMacOS;
 
     like($abs_path,      qr|$want$|);
     like($fast_abs_path, qr|$want$|);

@@ -10,10 +10,18 @@ BEGIN {
     }
 }
 
-my $SAMPLE_TESTS = $ENV{PERL_CORE} ? 'lib/sample-tests' : 't/sample-tests';
+use File::Spec::Functions;
+
+my $SAMPLE_TESTS = $ENV{PERL_CORE}
+    ? catdir(curdir(), 'lib', 'sample-tests')
+    : catdir(curdir(), 't', 'sample-tests');
 
 use strict;
 use Test::More;
+
+if ($^O eq 'MacOS') {
+    plan skip_all => "Exit status broken on Mac OS";
+}
 
 my $IsVMS = $^O eq 'VMS';
 
@@ -417,7 +425,7 @@ while( my($test, $expect) = each %samples ) {
     }
 
     my $strap = Test::Harness::Straps->new;
-    my %results = $strap->analyze_file("$SAMPLE_TESTS/$test");
+    my %results = $strap->analyze_file(catfile($SAMPLE_TESTS, $test));
 
     is_deeply($results{details}, $expect->{details}, "$test details" );
 

@@ -10,7 +10,7 @@ BEGIN{
 	use Config;
 	eval { use POSIX; };
 	if($@ || $^O eq 'MSWin32' || $^O eq 'NetWare' || $^O eq 'dos' ||
-	   ($^O eq 'VMS' && !$Config{'d_sigaction'})) {
+	   $^O eq 'MacOS' || ($^O eq 'VMS' && !$Config{'d_sigaction'})) {
 		print "1..0\n";
 		exit 0;
 	}

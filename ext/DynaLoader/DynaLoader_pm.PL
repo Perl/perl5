@@ -246,8 +246,9 @@ sub bootstrap {
 	chop($_ = VMS::Filespec::unixpath($_)) if $Is_VMS;
 	my $dir;
 	if ($Is_MacOS) {
-	    $_ .= ":"  unless /:$/;
-	    $dir = "${_}auto:$modpname";
+	    my $path = $_;
+	    $path .= ":"  unless /:$/;
+	    $dir = "${path}auto:$modpname";
 	} else {
 	    $dir = "$_/auto/$modpname";
 	}

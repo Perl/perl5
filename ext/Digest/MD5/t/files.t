@@ -20,14 +20,23 @@ my $EXPECT;
 # (You'll need to have Perl 5.7.3 or later, to have the Encode installed.)
 # (And remember that under the Perl core distribution you should
 #  also have the $ENV{PERL_CORE} set to a true value.)
+# Similarly, to update MacOS section, run with $ENV{MAC_MD5SUM} set.
 
 if (ord "A" == 193) { # EBCDIC
     $EXPECT = <<EOT;
-b362148b17a451f0d81e0ebb2487756e Changes
-5a591a47e8c40fe4b78c744111511c45 README
-3157e2d2e27dacddea7c54efddc32520 MD5.pm
-4850753428db9422e8e5f97b401d5a13 MD5.xs
-276da0aa4e9a08b7fe09430c9c5690aa rfc1321.txt
+b362148b17a451f0d81e0ebb2487756e  Changes
+5a591a47e8c40fe4b78c744111511c45  README
+3157e2d2e27dacddea7c54efddc32520  MD5.pm
+4850753428db9422e8e5f97b401d5a13  MD5.xs
+276da0aa4e9a08b7fe09430c9c5690aa  rfc1321.txt
+EOT
+} elsif ("\n" == "\015") { # MacOS
+    $EXPECT = <<EOT;
+cc90a85f89b397341f97c9279640fbf5  Changes
+127952946201e6afc19eb41250c56871  README
+d87ec77c963d27198b7427156167a5b3  MD5.pm
+5be7049479ea47d7c257dabcae835720  MD5.xs
+f9a35714ee1d1d0c5a3a80f4dbea956a  rfc1321.txt
 EOT
 } else {
     $EXPECT = <<EOT;
@@ -77,7 +86,12 @@ for (split /^/, $EXPECT) {
          require Encode;
 	 my $data = cat_file($file);	
 	 Encode::from_to($data, 'latin1', 'cp1047');
-	 print md5_hex($data), " $base\n";
+	 print md5_hex($data), "  $base\n";
+	 next;
+     }
+     if ($ENV{MAC_MD5SUM}) {
+	 my $data = cat_file($file);	
+	 print md5_hex($data), "  $base\n";
 	 next;
      }
      my $md5bin = pack("H*", $md5hex);

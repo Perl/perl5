@@ -13,12 +13,12 @@ my $Is_MSWin32 = $^O eq 'MSWin32';
 my $Is_NetWare = $^O eq 'NetWare';
 my $tmpfile = "tmp0000";
 my $i = 0 ;
-1 while -f ++$tmpfile;
+1 while -e ++$tmpfile;
 END { if ($tmpfile) { 1 while unlink $tmpfile; } }
 
 my @prgs = () ;
 
-foreach (sort glob($^O eq 'MacOS' ? ":lib::strict:*" : "lib/strict/*")) {
+foreach (sort glob($^O eq 'MacOS' ? ":lib:strict:*" : "lib/strict/*")) {
 
     next if /(~|\.orig|,v)$/;
 
@@ -65,7 +65,7 @@ for (@prgs){
 	$prog = shift @files ;
 	$prog =~ s|\./abc|:abc|g if $^O eq 'MacOS';
     }
-    open TEST, ">$tmpfile";
+    open TEST, ">$tmpfile" or die "Could not open: $!";
     print TEST $prog,"\n";
     close TEST or die "Could not close: $!";
     my $results = $Is_MSWin32 ?
