@@ -238,6 +238,13 @@ constant used inside double-quoted strings: in other words, you cannot
 use variables inside the C<\N{...}>.  If you want similar run-time
 functionality, use charnames::vianame().
 
+For the C0 and C1 control characters (U+0000..U+001F, U+0080..U+009F)
+as of Unicode 3.1, there are no official Unicode names but you can
+use instead the ISO 6429 names (LINE FEED, ESCAPE, and so forth).
+In Unicode 3.2 some naming changes will happen since ISO 6429 has been
+updated.  Also note that the U+UU80, U+0081, U+0084, and U+0099
+do not have names even in ISO 6429.
+
 =head1 CUSTOM TRANSLATORS
 
 The mechanism of translation of C<\N{...}> escapes is general and not
