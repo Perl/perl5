@@ -196,6 +196,17 @@ non-default location for where Perl will be installed:
 
     @ Configure "-d" "-Dprefix=dka100:[utils.perl5.]"
 
+Note that the installation location would be by default where you unpacked 
+the source with a "ROOT." appended.  For example if you unpacked the perl 
+source into:
+
+   DKA200:[PERL-5_10_2...]
+
+Then the PERL_SETUP.COM that gets written out by Configure.com will
+try to DEFINE your installation PERL_ROOT to be:
+
+   DKA200:[PERL-5_10_2ROOT.]
+
 More help with configure.com is available from:
 
     @ Configure "-h"
@@ -451,6 +462,20 @@ it is probably beneficial to INSTALL at least portions of perl.
 While there is code in perl to remove privileges as it runs you are advised
 to NOT INSTALL PERL.EXE with PRIVs!
 
+=head2 Running h2ph to create perl header files (optional) on VMS
+
+If using DEC C or Compaq C ensure that you have extracted loose versions
+of your compiler's header or *.H files.  Be sure to check the contents of:
+
+    SYS$LIBRARY:DECC$RTLDEF.TLB
+    SYS$LIBRARY:SYS$LIB_C.TLB
+    SYS$LIBRARY:SYS$STARLET_C.TLB
+
+etcetera.
+
+If using GNU cc then also check your GNU_CC:[000000...] tree for the locations
+of the GNU cc headers.
+
 =head1 Reporting Bugs
 
 If you come across what you think might be a bug in Perl, please report
@@ -467,8 +492,9 @@ script prints!
 
 The next big gotcha is directory depth.  Perl can create directories four,
 five, or even six levels deep during the build, so you don't have to be 
-too deep to start to hit the RMS 8 level limit (for versions of VMS prior 
-to V7.2 and even with V7.2 on the VAX).  It is best to do
+too deep to start to hit the RMS 8 level limit (for ODS 2 volumes which were
+common on versions of VMS prior to V7.2 and even with V7.2 on the VAX).  
+It is best to do:
 
     DEFINE/TRANS=(CONC,TERM) PERLSRC "disk:[dir.dir.dir.perldir.]"
     SET DEFAULT PERLSRC:[000000]

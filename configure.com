@@ -427,11 +427,15 @@ $     miss_list = ""
 $     GOTO Beyond_manifest
 $   ENDIF
 $ ELSE
-$! MANIFEST. has been found and we have set def'ed there - 
-$! time to bail out before it's too late.
-$ tmp = f$extract(1,3,f$edit(f$getsyi("VERSION"),"TRIM,COLLAPSE"))
-$ IF (tmp .GES. "7.2") .AND. (F$GETSYI("HW_MODEL") .GE. 1024) THEN GOTO Beyond_depth_check
-$   IF (F$ELEMENT(max_allowed_dir_depth,".",F$ENVIRONMENT("Default")).nes.".")
+$! MANIFEST. has been found and we have set def'ed there.
+$! Time to bail out before it's too late, i.e. too deep.
+$! Depth check is unnecessary on Alpha VMS V7.2++ (even for ODS-2).
+$   tmp = f$extract(1,3,f$edit(f$getsyi("VERSION"),"TRIM,COLLAPSE"))
+$   IF (tmp .GES. "7.2") .AND. (F$GETSYI("HW_MODEL") .GE. 1024) THEN GOTO Beyond_depth_check
+$! Depth check also unnecessary on ODS 5 (or later) file systems.
+$   tmp = F$INTEGER(F$GETDVI(F$ENVIRONMENT("DEFAULT"),"ACPTYPE") - "F11V")
+$   IF (tmp .GE. 5) THEN GOTO Beyond_depth_check
+$   IF (F$ELEMENT(max_allowed_dir_depth,".",F$ENVIRONMENT("DEFAULT")).nes.".")
 $   THEN
 $     TYPE SYS$INPUT:
 $     DECK
@@ -1130,7 +1134,8 @@ $ THEN
 $   prefix = F$ENVIRONMENT("DEFAULT") - ".UU]" + "]"
 $   prefix = F$PARSE(prefix,,,,"NO_CONCEAL") - "][" - ".;"
 $   prefixbase = prefix - "]"
-$   prefix = prefixbase + ".]"
+$!  Add ROOT to make install PERL_ROOT differ from build directory.
+$   prefix = prefixbase + "ROOT.]"
 $ ENDIF
 $ src = prefix
 $!: determine root of directory hierarchy where package will be installed.
@@ -1159,6 +1164,22 @@ $! Check here for pre-existing PERL_ROOT.
 $!  -> ask if removal desired.
 $! Check here for writability of requested PERL_ROOT if it is not the default (cwd).
 $!  -> recommend letting PERL_ROOT be PERL_SRC if requested PERL_ROOT is not writable.
+$!
+$ IF .NOT. F$GETDVI(perl_root,"MNT")
+$ THEN
+$   tmp = F$PARSE(perl_root,,,"DEVICE",)
+$   echo4 "''tmp' is not mounted."
+$ ELSE
+$   tmp = perl_root - ".]" + "]"
+$   dflt = F$PARSE(tmp,,,,)
+$   IF dflt .eqs. ""
+$   THEN
+$       echo4 "''tmp' does not yet exist."
+$!      create/directory 'tmp'
+$   ELSE
+$       echo4 "''tmp' already exists."
+$   ENDIF
+$ ENDIF
 $!
 $ vms_skip_install = "true"
 $ dflt = "y"
@@ -2481,6 +2502,7 @@ $ dflt = dflt - "GDBM_File"           ! needs porting/special library
 $ dflt = dflt - "IPC/SysV"            ! needs to be ported
 $ dflt = dflt - "NDBM_File"           ! needs porting/special library
 $ dflt = dflt - "ODBM_File"           ! needs porting/special library
+$ dflt = dflt - "Sys/Syslog"          ! needs porting/special library "GDBM_File macro LOG_DEBUG"
 $ IF .NOT. Has_socketshr .AND. .NOT. Has_Dec_C_Sockets
 $ THEN
 $   dflt = dflt - "Socket"            ! optional on VMS
@@ -6042,7 +6064,7 @@ $ ELSE    !leave in but commented out (in case setting was from perl :-)
 $ WRITE CONFIG "$! define SYS$TIMEZONE_DIFFERENTIAL ''tzd'"
 $ ENDIF
 $ WRITE CONFIG "$!"
-$ WRITE CONFIG "$! Symbols for commonly used scripts:"
+$ WRITE CONFIG "$! Symbols for commonly used programs:"
 $ WRITE CONFIG "$!"
 $ IF (perl_symbol)
 $ THEN
@@ -6060,6 +6082,7 @@ $   ENDIF
 $   WRITE CONFIG "$ h2ph     == ""'"+"'Perl' ''vms_prefix':[utils]h2ph.com"""
 $   WRITE CONFIG "$ h2xs     == ""'"+"'Perl' ''vms_prefix':[utils]h2xs.com"""
 $   WRITE CONFIG "$!perlcc   == ""'"+"'Perl' ''vms_prefix':[utils]perlcc.com"""
+$   WRITE CONFIG "$ perlivp  == ""'"+"'Perl' ''vms_prefix':[utils]perlivp.com"""
 $   WRITE CONFIG "$ splain   == ""'"+"'Perl' ''vms_prefix':[utils]splain.com"""
 $ ELSE
 $   WRITE CONFIG "$ Perldoc  == ""Perl ''vms_prefix':[lib.pod]Perldoc.com -t"""
@@ -6076,6 +6099,7 @@ $   ENDIF
 $   WRITE CONFIG "$ h2ph     == ""Perl ''vms_prefix':[utils]h2ph.com"""
 $   WRITE CONFIG "$ h2xs     == ""Perl ''vms_prefix':[utils]h2xs.com"""
 $   WRITE CONFIG "$!perlcc   == ""Perl ''vms_prefix':[utils]perlcc.com"""
+$   WRITE CONFIG "$ perlivp  == ""Perl ''vms_prefix':[utils]perlivp.com"""
 $   WRITE CONFIG "$ splain   == ""Perl ''vms_prefix':[utils]splain.com"""
 $ ENDIF
 $ CLOSE CONFIG
