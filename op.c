@@ -4165,9 +4165,10 @@ Perl_cv_undef(pTHX_ CV *cv)
 
 #ifdef USE_ITHREADS
     if (CvFILE(cv) && !CvXSUB(cv)) {
+	/* for XSUBs CvFILE point directly to static memory; __FILE__ */
 	Safefree(CvFILE(cv));
-	CvFILE(cv) = 0;
     }
+    CvFILE(cv) = 0;
 #endif
 
     if (!CvXSUB(cv) && CvROOT(cv)) {
