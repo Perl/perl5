@@ -842,12 +842,12 @@ clear_pmop:
 		    lastpmop = pmop;
 		    pmop = pmop->op_pmnext;
 		}
-#ifdef USE_ITHREADS
-		Safefree(PmopSTASHPV(cPMOPo));
-#else
-		/* NOTE: PMOP.op_pmstash is not refcounted */
-#endif
 	    }
+#ifdef USE_ITHREADS
+	    Safefree(PmopSTASHPV(cPMOPo));
+#else
+	    /* NOTE: PMOP.op_pmstash is not refcounted */
+#endif
 	}
 	cPMOPo->op_pmreplroot = Nullop;
 	ReREFCNT_dec(PM_GETRE(cPMOPo));
