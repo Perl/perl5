@@ -34,3 +34,7 @@ struct magic {
 
 #define MgTAINTEDDIR(mg) (mg->mg_flags & MGf_TAINTEDDIR)
 #define MgTAINTEDDIR_on(mg) (mg->mg_flags |= MGf_TAINTEDDIR)
+
+#define MgPV(mg)                ((mg)->mg_len == HEf_SVKEY) ?   \
+                                SvPV((SV*)((mg)->mg_ptr),na) :   \
+                                (mg)->mg_ptr
