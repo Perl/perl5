@@ -31,6 +31,8 @@ The following modules have been upgraded :
 
 =item File::Temp 0.14
 
+=item Safe 2.10
+
 =item Test 1.24
 
 =item Test::Builder 0.17
