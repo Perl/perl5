@@ -454,27 +454,31 @@ d_poll (d_poll.U):
 	to poll active file descriptors.
 
 d_pwage (i_pwd.U):
-	This varaible conditionally defines PWAGE, which indicates
+	This variable conditionally defines PWAGE, which indicates
 	that struct passwd contains pw_age.
 
 d_pwchange (i_pwd.U):
-	This varaible conditionally defines PWCHANGE, which indicates
+	This variable conditionally defines PWCHANGE, which indicates
 	that struct passwd contains pw_change.
 
 d_pwclass (i_pwd.U):
-	This varaible conditionally defines PWCLASS, which indicates
+	This variable conditionally defines PWCLASS, which indicates
 	that struct passwd contains pw_class.
 
 d_pwcomment (i_pwd.U):
-	This varaible conditionally defines PWCOMMENT, which indicates
+	This variable conditionally defines PWCOMMENT, which indicates
 	that struct passwd contains pw_comment.
 
 d_pwexpire (i_pwd.U):
-	This varaible conditionally defines PWEXPIRE, which indicates
+	This variable conditionally defines PWEXPIRE, which indicates
 	that struct passwd contains pw_expire.
 
+d_pwgecos (i_pwd.U):
+	This variable conditionally defines PWGECOS, which indicates
+	that struct passwd contains pw_gecos.
+
 d_pwquota (i_pwd.U):
-	This varaible conditionally defines PWQUOTA, which indicates
+	This variable conditionally defines PWQUOTA, which indicates
 	that struct passwd contains pw_quota.
 
 d_readdir (d_readdir.U):

@@ -182,7 +182,7 @@ sub findConsole {
 	$console = "sys\$command";
     }
 
-    if ($^O eq 'amigaos') {
+    if (($^O eq 'amigaos') || ($^O eq 'beos')) {
 	$console = undef;
     }
     elsif ($^O eq 'os2') {
