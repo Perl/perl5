@@ -122,11 +122,6 @@ struct utsname {
 
 #define PERL_NO_FORCE_LINK		/* no need for PL_force_link_funcs */
 
-/* if USE_WIN32_RTL_ENV is not defined, Perl uses direct Win32 calls
- * to read the environment, bypassing the runtime's (usually broken)
- * facilities for accessing the same.  See note in util.c/my_setenv(). */
-/*#define USE_WIN32_RTL_ENV */
-
 /* Define USE_FIXED_OSFHANDLE to fix MSVCRT's _open_osfhandle() on W95.
    It now uses some black magic to work seamlessly with the DLL CRT and
    works with MSVC++ 4.0+ or GCC/Mingw32
