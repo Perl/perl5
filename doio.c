@@ -134,7 +134,7 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	else
 	    result = PerlIO_close(IoIFP(io));
 	if (result == EOF && fd > PL_maxsysfd)
-	    PerlIO_printf(PerlIO_stderr(),
+	    PerlIO_printf(Perl_error_log,
 			  "Warning: unable to close filehandle %s properly.\n",
 			  GvENAME(gv));
 	IoOFP(io) = IoIFP(io) = Nullfp;

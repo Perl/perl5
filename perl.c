@@ -220,7 +220,7 @@ perl_destruct(pTHXx)
     /* Pass 1 on any remaining threads: detach joinables, join zombies */
   retry_cleanup:
     MUTEX_LOCK(&PL_threads_mutex);
-    DEBUG_S(PerlIO_printf(PerlIO_stderr(),
+    DEBUG_S(PerlIO_printf(Perl_debug_log,
 			  "perl_destruct: waiting for %d threads...\n",
 			  PL_nthreads - 1));
     for (t = thr->next; t != thr; t = t->next) {
@@ -228,7 +228,7 @@ perl_destruct(pTHXx)
 	switch (ThrSTATE(t)) {
 	    AV *av;
 	case THRf_ZOMBIE:
-	    DEBUG_S(PerlIO_printf(PerlIO_stderr(),
+	    DEBUG_S(PerlIO_printf(Perl_debug_log,
 				  "perl_destruct: joining zombie %p\n", t));
 	    ThrSETSTATE(t, THRf_DEAD);
 	    MUTEX_UNLOCK(&t->mutex);
@@ -242,11 +242,11 @@ perl_destruct(pTHXx)
 	    MUTEX_UNLOCK(&PL_threads_mutex);
 	    JOIN(t, &av);
 	    SvREFCNT_dec((SV*)av);
-	    DEBUG_S(PerlIO_printf(PerlIO_stderr(),
+	    DEBUG_S(PerlIO_printf(Perl_debug_log,
 				  "perl_destruct: joined zombie %p OK\n", t));
 	    goto retry_cleanup;
 	case THRf_R_JOINABLE:
-	    DEBUG_S(PerlIO_printf(PerlIO_stderr(),
+	    DEBUG_S(PerlIO_printf(Perl_debug_log,
 				  "perl_destruct: detaching thread %p\n", t));
 	    ThrSETSTATE(t, THRf_R_DETACHED);
 	    /* 
@@ -260,7 +260,7 @@ perl_destruct(pTHXx)
 	    MUTEX_UNLOCK(&t->mutex);
 	    goto retry_cleanup;
 	default:
-	    DEBUG_S(PerlIO_printf(PerlIO_stderr(),
+	    DEBUG_S(PerlIO_printf(Perl_debug_log,
 				  "perl_destruct: ignoring %p (state %u)\n",
 				  t, ThrSTATE(t)));
 	    MUTEX_UNLOCK(&t->mutex);
@@ -272,14 +272,14 @@ perl_destruct(pTHXx)
     /* Pass 2 on remaining threads: wait for the thread count to drop to one */
     while (PL_nthreads > 1)
     {
-	DEBUG_S(PerlIO_printf(PerlIO_stderr(),
+	DEBUG_S(PerlIO_printf(Perl_debug_log,
 			      "perl_destruct: final wait for %d threads\n",
 			      PL_nthreads - 1));
 	COND_WAIT(&PL_nthreads_cond, &PL_threads_mutex);
     }
     /* At this point, we're the last thread */
     MUTEX_UNLOCK(&PL_threads_mutex);
-    DEBUG_S(PerlIO_printf(PerlIO_stderr(), "perl_destruct: armageddon has arrived\n"));
+    DEBUG_S(PerlIO_printf(Perl_debug_log, "perl_destruct: armageddon has arrived\n"));
     MUTEX_DESTROY(&PL_threads_mutex);
     COND_DESTROY(&PL_nthreads_cond);
 #endif /* !defined(FAKE_THREADS) */
@@ -429,6 +429,7 @@ perl_destruct(pTHXx)
     PL_argvgv = Nullgv;
     PL_argvoutgv = Nullgv;
     PL_stdingv = Nullgv;
+    PL_stderrgv = Nullgv;
     PL_last_in_gv = Nullgv;
     PL_replgv = Nullgv;
 
@@ -654,7 +655,7 @@ setuid perl scripts securely.\n");
 	    call_list(oldscope, PL_endav);
 	return STATUS_NATIVE_EXPORT;
     case 3:
-	PerlIO_printf(PerlIO_stderr(), "panic: top_env\n");
+	PerlIO_printf(Perl_error_log, "panic: top_env\n");
 	return 1;
     }
     return 0;
@@ -1034,7 +1035,7 @@ perl_run(pTHXx)
 	    POPSTACK_TO(PL_mainstack);
 	    goto redo_body;
 	}
-	PerlIO_printf(PerlIO_stderr(), "panic: restartop\n");
+	PerlIO_printf(Perl_error_log, "panic: restartop\n");
 	FREETMPS;
 	return 1;
     }
@@ -1059,7 +1060,7 @@ S_run_body(pTHX_ va_list args)
 			      (unsigned long) thr));
 
 	if (PL_minus_c) {
-	    PerlIO_printf(PerlIO_stderr(), "%s syntax OK\n", PL_origfilename);
+	    PerlIO_printf(Perl_error_log, "%s syntax OK\n", PL_origfilename);
 	    my_exit(0);
 	}
 	if (PERLDB_SINGLE && PL_DBsingle)
@@ -2636,9 +2637,9 @@ S_init_predump_symbols(pTHX)
     GvMULTI_on(tmpgv);
     GvIOp(tmpgv) = (IO*)SvREFCNT_inc(io);
 
-    othergv = gv_fetchpv("STDERR",TRUE, SVt_PVIO);
-    GvMULTI_on(othergv);
-    io = GvIOp(othergv);
+    PL_stderrgv = gv_fetchpv("STDERR",TRUE, SVt_PVIO);
+    GvMULTI_on(PL_stderrgv);
+    io = GvIOp(PL_stderrgv);
     IoOFP(io) = IoIFP(io) = PerlIO_stderr();
     tmpgv = gv_fetchpv("stderr",TRUE, SVt_PV);
     GvMULTI_on(tmpgv);
@@ -2877,7 +2878,7 @@ S_incpush(pTHX_ char *p, int addsubdirs)
 		sv_usepvn(libdir,unix,len);
 	    }
 	    else
-		PerlIO_printf(PerlIO_stderr(),
+		PerlIO_printf(Perl_error_log,
 		              "Failed to unixify @INC element \"%s\"\n",
 			      SvPV(libdir,len));
 #endif
@@ -3037,7 +3038,7 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 		PL_curcop->cop_line = oldline;
 		JMPENV_JUMP(3);
 	    }
-	    PerlIO_printf(PerlIO_stderr(), "panic: restartop\n");
+	    PerlIO_printf(Perl_error_log, "panic: restartop\n");
 	    FREETMPS;
 	    break;
 	}

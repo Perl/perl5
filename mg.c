@@ -1941,7 +1941,7 @@ int
 Perl_magic_mutexfree(pTHX_ SV *sv, MAGIC *mg)
 {
     dTHR;
-    DEBUG_S(PerlIO_printf(PerlIO_stderr(), "0x%lx: magic_mutexfree 0x%lx\n",
+    DEBUG_S(PerlIO_printf(Perl_debug_log, "0x%lx: magic_mutexfree 0x%lx\n",
 			  (unsigned long)thr, (unsigned long)sv);)
     if (MgOWNER(mg))
 	Perl_croak(aTHX_ "panic: magic_mutexfree");

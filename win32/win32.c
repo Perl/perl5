@@ -208,9 +208,9 @@ get_emd_part(SV **prev_pathp, char *trailing_path, ...)
 
 	/* try to get full path to binary (which may be mangled when perl is
 	 * run from a 16-bit app) */
-	/*PerlIO_printf(PerlIO_stderr(), "Before %s\n", w32_module_name);*/
+	/*PerlIO_printf(Perl_debug_log, "Before %s\n", w32_module_name);*/
 	(void)win32_longpath(w32_module_name);
-	/*PerlIO_printf(PerlIO_stderr(), "After  %s\n", w32_module_name);*/
+	/*PerlIO_printf(Perl_debug_log, "After  %s\n", w32_module_name);*/
 
 	/* normalize to forward slashes */
 	ptr = w32_module_name;
@@ -1118,7 +1118,7 @@ win32_longpath(char *path)
 	}
 	else {
 	    /* failed a step, just return without side effects */
-	    /*PerlIO_printf(PerlIO_stderr(), "Failed to find %s\n", path);*/
+	    /*PerlIO_printf(Perl_debug_log, "Failed to find %s\n", path);*/
 	    *start = sep;
 	    return Nullch;
 	}

@@ -330,9 +330,9 @@ PP(pp_formline)
 	    case FF_END:	name = "END";		break;
 	    }
 	    if (arg >= 0)
-		PerlIO_printf(PerlIO_stderr(), "%-16s%ld\n", name, (long) arg);
+		PerlIO_printf(Perl_debug_log, "%-16s%ld\n", name, (long) arg);
 	    else
-		PerlIO_printf(PerlIO_stderr(), "%-16s\n", name);
+		PerlIO_printf(Perl_debug_log, "%-16s\n", name);
 	} )
 	switch (*fpc++) {
 	case FF_LINEMARK:
@@ -1315,8 +1315,8 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 
 	    POPBLOCK(cx,PL_curpm);
 	    if (CxTYPE(cx) != CXt_EVAL) {
-		PerlIO_write(PerlIO_stderr(), "panic: die ", 11);
-		PerlIO_write(PerlIO_stderr(), message, msglen);
+		PerlIO_write(Perl_error_log, "panic: die ", 11);
+		PerlIO_write(Perl_error_log, message, msglen);
 		my_exit(1);
 	    }
 	    POPEVAL(cx);
@@ -1342,8 +1342,10 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 	/* SFIO can really mess with your errno */
 	int e = errno;
 #endif
-	PerlIO_write(PerlIO_stderr(), message, msglen);
-	(void)PerlIO_flush(PerlIO_stderr());
+	PerlIO *serr = Perl_error_log;
+
+	PerlIO_write(serr, message, msglen);
+	(void)PerlIO_flush(serr);
 #ifdef USE_SFIO
 	errno = e;
 #endif

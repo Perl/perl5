@@ -34,12 +34,12 @@ DeadCode(pTHX)
 		    continue;		/* file-level scope. */
 		}
 		if (!CvROOT(cv)) {
-		    /* PerlIO_printf(PerlIO_stderr(), "  no root?!\n"); */
+		    /* PerlIO_printf(Perl_debug_log, "  no root?!\n"); */
 		    continue;		/* autoloading stub. */
 		}
-		do_gvgv_dump(0, PerlIO_stderr(), "GVGV::GV", CvGV(sv));
+		do_gvgv_dump(0, Perl_debug_log, "GVGV::GV", CvGV(sv));
 		if (CvDEPTH(cv)) {
-		    PerlIO_printf(PerlIO_stderr(), "  busy\n");
+		    PerlIO_printf(Perl_debug_log, "  busy\n");
 		    continue;
 		}
 		svp = AvARRAY(padlist);
@@ -49,7 +49,7 @@ DeadCode(pTHX)
 		    pad = AvARRAY((AV*)svp[i]);
 		    argav = (AV*)pad[0];
 		    if (!argav || (SV*)argav == &PL_sv_undef) {
-			PerlIO_printf(PerlIO_stderr(), "    closure-template\n");
+			PerlIO_printf(Perl_debug_log, "    closure-template\n");
 			continue;
 		    }
 		    args = AvARRAY(argav);
@@ -58,7 +58,7 @@ DeadCode(pTHX)
 		    if (AvREAL(argav)) {
 			for (j = 0; j < AvFILL(argav); j++) {
 			    if (SvROK(args[j])) {
-				PerlIO_printf(PerlIO_stderr(), "     ref in args!\n");
+				PerlIO_printf(Perl_debug_log, "     ref in args!\n");
 				levelref++;
 			    }
 			    /* else if (SvPOK(args[j]) && SvPVX(args[j])) { */
@@ -70,14 +70,14 @@ DeadCode(pTHX)
 		    for (j = 1; j < AvFILL((AV*)svp[1]); j++) {	/* Vars. */
 			if (SvROK(pad[j])) {
 			    levelref++;
-			    do_sv_dump(0, PerlIO_stderr(), pad[j], 0, 4, 0, 0);
+			    do_sv_dump(0, Perl_debug_log, pad[j], 0, 4, 0, 0);
 			    dumpit = 1;
 			}
 			/* else if (SvPOK(pad[j]) && SvPVX(pad[j])) { */
 			else if (SvTYPE(pad[j]) >= SVt_PVAV) {
 			    if (!SvPADMY(pad[j])) {
 				levelref++;
-				do_sv_dump(0, PerlIO_stderr(), pad[j], 0, 4, 0, 0);
+				do_sv_dump(0, Perl_debug_log, pad[j], 0, 4, 0, 0);
 				dumpit = 1;
 			    }
 			}
@@ -89,7 +89,7 @@ DeadCode(pTHX)
 				/* Dump(pad[j],4); */
 			}
 		    }
-		    PerlIO_printf(PerlIO_stderr(), "    level %i: refs: %i, strings: %i in %i,\targsarray: %i, argsstrings: %i\n", 
+		    PerlIO_printf(Perl_debug_log, "    level %i: refs: %i, strings: %i in %i,\targsarray: %i, argsstrings: %i\n", 
 			    i, levelref, levelm, levels, levela, levelas);
 		    totm += levelm;
 		    tota += levela;
@@ -97,10 +97,10 @@ DeadCode(pTHX)
 		    tots += levels;
 		    totref += levelref;
 		    if (dumpit)
-			do_sv_dump(0, PerlIO_stderr(), (SV*)cv, 0, 2, 0, 0);
+			do_sv_dump(0, Perl_debug_log, (SV*)cv, 0, 2, 0, 0);
 		}
 		if (AvFILL(padlist) > 1) {
-		    PerlIO_printf(PerlIO_stderr(), "  total: refs: %i, strings: %i in %i,\targsarrays: %i, argsstrings: %i\n", 
+		    PerlIO_printf(Perl_debug_log, "  total: refs: %i, strings: %i in %i,\targsarrays: %i, argsstrings: %i\n", 
 			    totref, totm, tots, tota, totas);
 		}
 		tref += totref;
@@ -111,7 +111,7 @@ DeadCode(pTHX)
 	    }
 	}
     }
-    PerlIO_printf(PerlIO_stderr(), "total: refs: %i, strings: %i in %i\targsarray: %i, argsstrings: %i\n", tref, tm, ts, ta, tas);
+    PerlIO_printf(Perl_debug_log, "total: refs: %i, strings: %i in %i\targsarray: %i, argsstrings: %i\n", tref, tm, ts, ta, tas);
 
     return ret;
 }
@@ -122,7 +122,7 @@ DeadCode(pTHX)
 #   define mstat(str) dump_mstats(str)
 #else
 #   define mstat(str) \
-	PerlIO_printf(PerlIO_stderr(), "%s: perl not compiled with DEBUGGING_MSTATS\n",str);
+	PerlIO_printf(Perl_debug_log, "%s: perl not compiled with DEBUGGING_MSTATS\n",str);
 #endif
 
 MODULE = Devel::Peek		PACKAGE = Devel::Peek
@@ -142,7 +142,7 @@ PPCODE:
     SV *dumpop = perl_get_sv("Devel::Peek::dump_ops", FALSE);
     I32 save_dumpindent = PL_dumpindent;
     PL_dumpindent = 2;
-    do_sv_dump(0, PerlIO_stderr(), sv, 0, lim, dumpop && SvTRUE(dumpop), pv_lim);
+    do_sv_dump(0, Perl_debug_log, sv, 0, lim, dumpop && SvTRUE(dumpop), pv_lim);
     PL_dumpindent = save_dumpindent;
 }
 
@@ -159,8 +159,8 @@ PPCODE:
     PL_dumpindent = 2;
 
     for (i=1; i<items; i++) {
-	PerlIO_printf(PerlIO_stderr(), "Elt No. %ld  0x%lx\n", i - 1, ST(i));
-	do_sv_dump(0, PerlIO_stderr(), ST(i), 0, lim, dumpop && SvTRUE(dumpop), pv_lim);
+	PerlIO_printf(Perl_debug_log, "Elt No. %ld  0x%lx\n", i - 1, ST(i));
+	do_sv_dump(0, Perl_debug_log, ST(i), 0, lim, dumpop && SvTRUE(dumpop), pv_lim);
     }
     PL_dumpindent = save_dumpindent;
 }

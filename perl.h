@@ -1959,7 +1959,13 @@ Gid_t getegid (void);
 #endif
 
 #ifndef Perl_debug_log
-#define Perl_debug_log	PerlIO_stderr()
+#  define Perl_debug_log	PerlIO_stderr()
+#endif
+
+#ifndef Perl_error_log
+#  define Perl_error_log	(PL_stderrgv			\
+				 ? IoOFP(GvIOp(PL_stderrgv))	\
+				 : PerlIO_stderr())
 #endif
 
 #ifdef DEBUGGING

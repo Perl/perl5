@@ -2294,7 +2294,7 @@ try_autoload:
 	    while (MgOWNER(mg))
 		COND_WAIT(MgOWNERCONDP(mg), MgMUTEXP(mg));
 	    MgOWNER(mg) = thr;
-	    DEBUG_S(PerlIO_printf(PerlIO_stderr(), "%p: pp_entersub lock %p\n",
+	    DEBUG_S(PerlIO_printf(Perl_debug_log, "%p: pp_entersub lock %p\n",
 				  thr, sv);)
 	    MUTEX_UNLOCK(MgMUTEXP(mg));
 	    SAVEDESTRUCTOR(Perl_unlock_condpair, sv);
@@ -2336,7 +2336,7 @@ try_autoload:
 	    /* We already have a clone to use */
 	    MUTEX_UNLOCK(CvMUTEXP(cv));
 	    cv = *(CV**)svp;
-	    DEBUG_S(PerlIO_printf(PerlIO_stderr(),
+	    DEBUG_S(PerlIO_printf(Perl_debug_log,
 				  "entersub: %p already has clone %p:%s\n",
 				  thr, cv, SvPEEK((SV*)cv)));
 	    CvOWNER(cv) = thr;
@@ -2350,7 +2350,7 @@ try_autoload:
 		CvOWNER(cv) = thr;
 		SvREFCNT_inc(cv);
 		MUTEX_UNLOCK(CvMUTEXP(cv));
-		DEBUG_S(PerlIO_printf(PerlIO_stderr(),
+		DEBUG_S(PerlIO_printf(Perl_debug_log,
 			    "entersub: %p grabbing %p:%s in stash %s\n",
 			    thr, cv, SvPEEK((SV*)cv), CvSTASH(cv) ?
 	    			HvNAME(CvSTASH(cv)) : "(none)"));
@@ -2360,7 +2360,7 @@ try_autoload:
 		CV *clonecv;
 		SvREFCNT_inc(cv); /* don't let it vanish from under us */
 		MUTEX_UNLOCK(CvMUTEXP(cv));
-		DEBUG_S((PerlIO_printf(PerlIO_stderr(),
+		DEBUG_S((PerlIO_printf(Perl_debug_log,
 				       "entersub: %p cloning %p:%s\n",
 				       thr, cv, SvPEEK((SV*)cv))));
 		/*
@@ -2378,7 +2378,7 @@ try_autoload:
 		SvREFCNT_inc(cv);
 	    }
 	    DEBUG_S(if (CvDEPTH(cv) != 0)
-			PerlIO_printf(PerlIO_stderr(), "depth %ld != 0\n",
+			PerlIO_printf(Perl_debug_log, "depth %ld != 0\n",
 				      CvDEPTH(cv)););
 	    SAVEDESTRUCTOR(unset_cvowner, (void*) cv);
 	}
@@ -2531,7 +2531,7 @@ try_autoload:
 	    SV** ary;
 
 #if 0
-	    DEBUG_S(PerlIO_printf(PerlIO_stderr(),
+	    DEBUG_S(PerlIO_printf(Perl_debug_log,
 	    			  "%p entersub preparing @_\n", thr));
 #endif
 	    av = (AV*)PL_curpad[0];
@@ -2573,7 +2573,7 @@ try_autoload:
 	    && !(PERLDB_SUB && cv == GvCV(PL_DBsub)))
 	    sub_crush_depth(cv);
 #if 0
-	DEBUG_S(PerlIO_printf(PerlIO_stderr(),
+	DEBUG_S(PerlIO_printf(Perl_debug_log,
 			      "%p entersub returning %p\n", thr, CvSTART(cv)));
 #endif
 	RETURNOP(CvSTART(cv));
@@ -2792,11 +2792,11 @@ unset_cvowner(pTHXo_ void *cvarg)
     dTHR;
 #endif /* DEBUGGING */
 
-    DEBUG_S((PerlIO_printf(PerlIO_stderr(), "%p unsetting CvOWNER of %p:%s\n",
+    DEBUG_S((PerlIO_printf(Perl_debug_log, "%p unsetting CvOWNER of %p:%s\n",
 			   thr, cv, SvPEEK((SV*)cv))));
     MUTEX_LOCK(CvMUTEXP(cv));
     DEBUG_S(if (CvDEPTH(cv) != 0)
-		PerlIO_printf(PerlIO_stderr(), "depth %ld != 0\n",
+		PerlIO_printf(Perl_debug_log, "depth %ld != 0\n",
 			      CvDEPTH(cv)););
     assert(thr == CvOWNER(cv));
     CvOWNER(cv) = 0;

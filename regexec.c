@@ -3047,7 +3047,7 @@ S_regmatch(pTHX_ regnode *prog)
 		next = NULL;
 	    break;
 	default:
-	    PerlIO_printf(PerlIO_stderr(), "%lx %d\n",
+	    PerlIO_printf(Perl_error_log, "%lx %d\n",
 			  (unsigned long)scan, OP(scan));
 	    Perl_croak(aTHX_ "regexp memory corruption");
 	}

@@ -314,7 +314,7 @@ struct perl_thread *getTHR (void);
 #define ThrSETSTATE(t, s) STMT_START {		\
 	(t)->flags &= ~THRf_STATE_MASK;		\
 	(t)->flags |= (s);			\
-	DEBUG_S(PerlIO_printf(PerlIO_stderr(),	\
+	DEBUG_S(PerlIO_printf(Perl_debug_log,	\
 			      "thread %p set to state %d\n", (t), (s))); \
     } STMT_END
 

@@ -614,7 +614,7 @@ Perl_find_threadsv(pTHX_ const char *name)
 	default:
 	    sv_magic(sv, 0, 0, name, 1); 
 	}
-	DEBUG_S(PerlIO_printf(PerlIO_stderr(),
+	DEBUG_S(PerlIO_printf(Perl_error_log,
 			      "find_threadsv: new SV %p for $%s%c\n",
 			      sv, (*name < 32) ? "^" : "",
 			      (*name < 32) ? toCTRL(*name) : *name));

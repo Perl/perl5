@@ -5170,7 +5170,7 @@ Perl_unlock_condpair(pTHX_ void *svv)
 	Perl_croak(aTHX_ "panic: unlock_condpair unlocking mutex that we don't own");
     MgOWNER(mg) = 0;
     COND_SIGNAL(MgOWNERCONDP(mg));
-    DEBUG_S(PerlIO_printf(PerlIO_stderr(), "0x%lx: unlock 0x%lx\n",
+    DEBUG_S(PerlIO_printf(Perl_debug_log, "0x%lx: unlock 0x%lx\n",
 			  (unsigned long)thr, (unsigned long)svv);)
     MUTEX_UNLOCK(MgMUTEXP(mg));
 }
@@ -5195,7 +5195,7 @@ PP(pp_lock)
 	while (MgOWNER(mg))
 	    COND_WAIT(MgOWNERCONDP(mg), MgMUTEXP(mg));
 	MgOWNER(mg) = thr;
-	DEBUG_S(PerlIO_printf(PerlIO_stderr(), "0x%lx: pp_lock lock 0x%lx\n",
+	DEBUG_S(PerlIO_printf(Perl_debug_log, "0x%lx: pp_lock lock 0x%lx\n",
 			      (unsigned long)thr, (unsigned long)sv);)
 	MUTEX_UNLOCK(MgMUTEXP(mg));
 	SAVEDESTRUCTOR(Perl_unlock_condpair, sv);

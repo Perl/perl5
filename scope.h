@@ -260,7 +260,7 @@ typedef void *(CPERLscope(*protect_proc_t)) (pTHX_ int *, protect_body_t, ...);
 	}							\
 	if ((v) == 2)						\
 	    PerlProc_exit(STATUS_NATIVE_EXPORT);		\
-	PerlIO_printf(PerlIO_stderr(), "panic: top_env\n");	\
+	PerlIO_printf(Perl_error_log, "panic: top_env\n");	\
 	PerlProc_exit(1);					\
     } STMT_END
 

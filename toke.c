@@ -2266,7 +2266,8 @@ Perl_yylex(pTHX)
     PL_oldoldbufptr = PL_oldbufptr;
     PL_oldbufptr = s;
     DEBUG_p( {
-	PerlIO_printf(PerlIO_stderr(), "### Tokener expecting %s at %s\n", exp_name[PL_expect], s);
+	PerlIO_printf(Perl_debug_log, "### Tokener expecting %s at %s\n",
+		      exp_name[PL_expect], s);
     } )
 
   retry:
