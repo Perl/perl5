@@ -97,6 +97,8 @@ Deprecated.  Use C<GIMME_V> instead.
 				/*  On regcomp, "use re 'eval'" was in scope */
 				/*  On OP_READLINE, was <$filehandle> */
 				/*  On RV2[SG]V, don't create GV--in defined()*/
+				/*  On OP_DBSTATE, indicates breakpoint
+				 *    (runtime property) */
 
 /* old names; don't use in new code, but don't break them, either */
 #define OPf_LIST	OPf_WANT_LIST

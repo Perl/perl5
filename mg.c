@@ -1458,8 +1458,13 @@ Perl_magic_setdbline(pTHX_ SV *sv, MAGIC *mg)
     i = SvTRUE(sv);
     svp = av_fetch(GvAV(gv),
 		     atoi(MgPV(mg,n_a)), FALSE);
-    if (svp && SvIOKp(*svp) && (o = INT2PTR(OP*,SvIVX(*svp))))
-	o->op_private = (U8)i;
+    if (svp && SvIOKp(*svp) && (o = INT2PTR(OP*,SvIVX(*svp)))) {
+	/* set or clear breakpoint in the relevant control op */
+	if (i)
+	    o->op_flags |= OPf_SPECIAL;
+	else
+	    o->op_flags &= ~OPf_SPECIAL;
+    }
     return 0;
 }
 
