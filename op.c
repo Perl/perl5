@@ -3374,7 +3374,7 @@ newSUB(I32 floor, OP *o, OP *proto, OP *block)
 	else
 	    sv_setiv((SV*)gv, -1);
 	SvREFCNT_dec(compcv);
-	compcv = NULL;
+	cv = compcv = NULL;
 	sub_generation++;
 	goto noblock;
     }

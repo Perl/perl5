@@ -111,6 +111,7 @@ gv_init(GV *gv, HV *stash, char *name, STRLEN len, int multi)
     if (multi)
 	GvMULTI_on(gv);
     if (doproto) {			/* Replicate part of newSUB here. */
+	SvIOK_off(gv);
 	ENTER;
 	start_subparse(0,0);		/* Create CV in compcv. */
 	GvCV(gv) = compcv;
