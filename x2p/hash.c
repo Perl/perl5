@@ -137,7 +137,7 @@ hsplit(HASH *tb)
     register HENT **oentry;
 
     a = (HENT**) saferealloc((char*)tb->tbl_array, newsize * sizeof(HENT*));
-    Zero(&a[oldsize], oldsize, HENT*); /* zero second half */
+    memset(&a[oldsize], 0, oldsize * sizeof(HENT*)); /* zero second half */
     tb->tbl_max = --newsize;
     tb->tbl_array = a;
 
@@ -171,7 +171,7 @@ hnew(void)
     tb->tbl_fill = 0;
     tb->tbl_max = 7;
     hiterinit(tb);	/* so each() will start off right */
-    Zero(tb->tbl_array, 8, sizeof(HENT*));
+    memset(tb->tbl_array, 0, 8 * sizeof(HENT*));
     return tb;
 }
 
