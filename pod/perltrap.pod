@@ -671,7 +671,7 @@ are to used around the name.
     # perl4 prints: {a}
     # perl5 prints: 2
 
-=item * Perl guesses on C<map>, C<grep> followed by C<{> whether C<{> starts BLOCK or hash ref
+=item * Perl guesses on C<map>, C<grep> followed by C<{> if it starts BLOCK or hash ref
 
 When perl sees C<map {> (or C<grep {>), it has to guess whether the C<{>
 starts a BLOCK or a hash reference. If it guesses wrong, it will report
@@ -720,7 +720,7 @@ If in doubt:
 
    use Math::BigInt;
 
-=item * Assignment of return values from numeric equality tests doesn't works
+=item * Assignment of return values from numeric equality tests doesn't work
 
 Assignment of return values from numeric equality tests
 does not work in perl5 when the test evaluates to false (0).
@@ -1258,7 +1258,7 @@ general subroutine traps.  Includes some OS-Specific traps.
 
 =over 5
 
-=item * Barewords that used to look like strings look like subroutine calls if a subroutine by that name is defined
+=item * Barewords that used to look like strings look like subroutine calls
 
 Barewords that used to look like strings to Perl will now look like subroutine
 calls if a subroutine by that name is defined before the compiler sees them.
@@ -1378,7 +1378,7 @@ Double-quoted strings may no longer end with an unescaped $.
 
 Note: perl5 DOES NOT error on the terminating @ in $bar
 
-=item * Arbitrary expressions are evaluated inside braces that occur within double quotes
+=item * Arbitrary expressions are evaluated inside braces within double quotes
 
 Perl now sometimes evaluates arbitrary expressions inside braces that occur
 within double quotes (usually when the opening brace is preceded by C<$>
@@ -1407,7 +1407,7 @@ now tries to dereference $x.  C<$$> by itself still works fine, however.
     # perl4 prints: this is XXXx   (XXX is the current pid)
     # perl5 prints: this is a reference
 
-=item * Creation of hashes on the fly with C<eval "EXPR"> requires protection of C<$>'s or both curlies
+=item * Creation of hashes on the fly with C<eval "EXPR"> requires protection
 
 Creation of hashes on the fly with C<eval "EXPR"> now requires either both
 C<$>'s to be protected in the specification of the hash name, or both curlies
@@ -1514,7 +1514,7 @@ General DBM traps.
 
 =over 5
 
-=item * Perl5 must have been linked with the same dbm/ndbm as the default for C<dbmopen()> to function properly without C<tie>'ing
+=item * Perl5 must have been linked with same dbm/ndbm as the default for C<dbmopen()>
 
 Existing dbm databases created under perl4 (or any other dbm/ndbm tool)
 may cause the same script, run under perl5, to fail.  The build of perl5
@@ -1528,7 +1528,7 @@ to function properly without C<tie>'ing to an extension dbm implementation.
     # perl5 prints: ok (IFF linked with -ldbm or -lndbm)
 
 
-=item * DBM exceeding the limit on the key/value size will cause perl5 to exit immediately
+=item * DBM exceeding limit on the key/value size will cause perl5 to exit immediately
 
 Existing dbm databases created under perl4 (or any other dbm/ndbm tool)
 may cause the same script, run under perl5, to fail.  The error generated
