@@ -95,7 +95,6 @@ sub find {
 		    my $fixtopdir = $topdir;
 	            $fixtopdir =~ s,/$,, ;
 		    $fixtopdir =~ s/\.dir$// if $Is_VMS;
-		    $fixtopdir =~ s/\\dir$// if $Is_NT;
 		    &finddir($wanted,$fixtopdir,$topnlink);
 		}
 	    }
@@ -156,7 +155,6 @@ sub finddir {
 
 		    if (!$prune && chdir $_) {
 			$name =~ s/\.dir$// if $Is_VMS;
-			$name =~ s/\\dir$// if $Is_NT;
 			&finddir($wanted,$name,$nlink);
 			chdir '..';
 		    }
@@ -185,7 +183,6 @@ sub finddepth {
 		my $fixtopdir = $topdir;
 		$fixtopdir =~ s,/$,, ;
 		$fixtopdir =~ s/\.dir$// if $Is_VMS;
-		$fixtopdir =~ s/\\dir$// if $Is_NT;
 		&finddepthdir($wanted,$fixtopdir,$topnlink);
 		($dir,$_) = ($fixtopdir,'.');
 		$name = $fixtopdir;
@@ -245,7 +242,6 @@ sub finddepthdir {
 
 		    if (chdir $_) {
 			$name =~ s/\.dir$// if $Is_VMS;
-			$name =~ s/\\dir$// if $Is_NT;
 			&finddepthdir($wanted,$name,$nlink);
 			chdir '..';
 		    }
