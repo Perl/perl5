@@ -1496,7 +1496,7 @@ Clears any placeholders from a hash.  If a restricted hash has any of its keys
 marked as readonly and the key is subsequently deleted, the key is not actually
 deleted but is marked by assigning it a value of &PL_sv_placeholder.  This tags
 it so it will be ignored by future operations such as iterating over the hash,
-but will still allow the hash to have a value reaasigned to the key at some
+but will still allow the hash to have a value reassigned to the key at some
 future point.  This function clears any such placeholder keys from the hash.
 See Hash::Util::lock_keys() for an example of its use.
 
