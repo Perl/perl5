@@ -2445,7 +2445,7 @@ PP(pp_quotemeta)
 	SvGROW(TARG, (len * 2) + 1);
 	d = SvPVX(TARG);
 	while (len--) {
-	    if (!(*s & 0x80) && !isALNUM(*s))
+	    if (!isALNUM(*s))
 		*d++ = '\\';
 	    *d++ = *s++;
 	}
