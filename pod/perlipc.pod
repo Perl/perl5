@@ -494,7 +494,7 @@ instead.
 		inet_ntoa($iaddr), "] 
 		at port $port";
 
-	print CLIENT "Hello there, $name, it's now ", 
+	print Client "Hello there, $name, it's now ", 
 			scalar localtime, "\n";
     } 
 
@@ -515,6 +515,8 @@ go back to service a new client.
 
     my $port = shift || 2345;
     my $proto = getprotobyname('tcp');
+    $port = $1 if $port =~ /(\d+)/; # untaint port number
+    
     socket(Server, PF_INET, SOCK_STREAM, $proto)	|| die "socket: $!";
     setsockopt(Server, SOL_SOCKET, SO_REUSEADDR, 
 					pack("l", 1)) 	|| die "setsockopt: $!";
