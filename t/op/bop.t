@@ -4,6 +4,11 @@
 # test the bit operators '&', '|', '^', '~', '<<', and '>>'
 #
 
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+}
+
 print "1..18\n";
 
 # numerics
@@ -19,16 +24,22 @@ print ((33023 >> 7) == 257 ? "ok 6\n" : "not ok 6\n");
 # signed vs. unsigned
 print ((~0 > 0 && do { use integer; ~0 } == -1)
        ? "ok 7\n" : "not ok 7\n");
-print (((2147483648 & -1) > 0 && do { use integer; 2147483648 & -1 } < 0)
+
+my $bits = 0;
+for (my $i = ~0; $i; $i >>= 1) { ++$bits; }
+my $cusp = 1 << ($bits - 1);
+
+print ((($cusp & -1) > 0 && do { use integer; $cusp & -1 } < 0)
        ? "ok 8\n" : "not ok 8\n");
-print (((2147483648 | 1) > 0 && do { use integer; 2147483648 | 1 } < 0)
+print ((($cusp | 1) > 0 && do { use integer; $cusp | 1 } < 0)
        ? "ok 9\n" : "not ok 9\n");
-print (((2147483648 ^ 1) > 0 && do { use integer; 2147483648 ^ 1 } < 0)
+print ((($cusp ^ 1) > 0 && do { use integer; $cusp ^ 1 } < 0)
        ? "ok 10\n" : "not ok 10\n");
-print (((1 << 31) == 2147483648 && do { use integer; 1 << 31 } == -2147483648)
+print (((1 << ($bits - 1)) == $cusp &&
+	do { use integer; 1 << ($bits - 1) } == -$cusp)
        ? "ok 11\n" : "not ok 11\n");
-print (((2147483648 >> 1) == 1073741824 &&
-       do { use integer; 2147483648 >> 1 } == -1073741824)
+print ((($cusp >> 1) == ($cusp / 2) &&
+	do { use integer; $cusp >> 1 } == -($cusp / 2))
        ? "ok 12\n" : "not ok 12\n");
 
 # short strings
