@@ -122,6 +122,7 @@
 #define eval_start		(curinterp->Ieval_start)
 #define exitlist		(curinterp->Iexitlist)
 #define exitlistlen		(curinterp->Iexitlistlen)
+#define extralen		(curinterp->Iextralen)
 #define fdpid			(curinterp->Ifdpid)
 #define filemode		(curinterp->Ifilemode)
 #define firstgv			(curinterp->Ifirstgv)
@@ -285,6 +286,7 @@
 #define Ieval_start		eval_start
 #define Iexitlist		exitlist
 #define Iexitlistlen		exitlistlen
+#define Iextralen		extralen
 #define Ifdpid			fdpid
 #define Ifilemode		filemode
 #define Ifirstgv		firstgv
@@ -510,6 +512,7 @@
 #define eval_start		Perl_eval_start
 #define exitlist		Perl_exitlist
 #define exitlistlen		Perl_exitlistlen
+#define extralen		Perl_extralen
 #define fdpid			Perl_fdpid
 #define filemode		Perl_filemode
 #define firstgv			Perl_firstgv

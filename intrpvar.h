@@ -162,7 +162,6 @@ PERLVAR(Isys_intern,	struct interp_intern)		/* platform internals */
 
 /* more statics moved here */
 PERLVAR(Imh,		HE)		/* from hv.c */
-PERLVAR(Imodcount,	I32)		/* from op.c */
 PERLVARI(Igeneration,	int,	100)	/* from op.c */
 PERLVAR(IDBcv,		CV *)		/* from perl.c */
 PERLVAR(Iarchpat_auto,	char*)		/* from perl.c */

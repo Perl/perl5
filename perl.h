@@ -110,6 +110,7 @@ class CPerlObj;
 #define _CPERLarg ,CPERLarg
 #define THIS this
 #define _THIS ,this
+#define THIS_ this,
 #define CALLRUNOPS (this->*runops)
 
 #else /* !PERL_OBJECT */
@@ -1076,7 +1077,12 @@ typedef union any ANY;
 
 #include "handy.h"
 
+#ifdef PERL_OBJECT
+typedef I32 (*filter_t) _((CPerlObj*, int, SV *, int));
+#else
 typedef I32 (*filter_t) _((int, SV *, int));
+#endif
+
 #define FILTER_READ(idx, sv, len)  filter_read(idx, sv, len)
 #define FILTER_DATA(idx)	   (AvARRAY(rsfp_filters)[idx])
 #define FILTER_ISREADER(idx)	   (idx >= AvFILLp(rsfp_filters))
@@ -1838,7 +1844,11 @@ public:
 
 /* Interpreter exitlist entry */
 typedef struct exitlistentry {
+#ifdef PERL_OBJECT
+    void (*fn) _((CPerlObj*, void*));
+#else
     void (*fn) _((void*));
+#endif
     void *ptr;
 } PerlExitListEntry;
 

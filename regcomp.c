@@ -102,7 +102,6 @@
  * Forward declarations for pregcomp()'s friends.
  */
 
-static char* regwhite _((char *, char *));
 #ifndef PERL_OBJECT
 static regnode *reg _((I32, I32 *));
 static regnode *reganode _((U8, U32));
@@ -116,8 +115,8 @@ static regnode *regpiece _((I32 *));
 static void reginsert _((U8, regnode *));
 static void regoptail _((regnode *, regnode *));
 static void regtail _((regnode *, regnode *));
+static char* regwhite _((char *, char *));
 static char* nextchar _((void));
-
 static void re_croak2 _((const char* pat1,const char* pat2,...)) __attribute__((noreturn));
 #endif
 
@@ -1798,7 +1797,7 @@ tryagain:
     return(ret);
 }
 
-static char *
+STATIC char *
 regwhite(char *p, char *e)
 {
     while (p < e) {

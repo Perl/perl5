@@ -50,6 +50,7 @@ eval_root
 eval_start
 exitlist
 exitlistlen
+extralen
 fdpid
 filemode
 firstgv
@@ -94,6 +95,7 @@ minus_l
 minus_n
 minus_p
 modglobal
+modcount
 multiline
 mystrk
 nrs

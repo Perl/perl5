@@ -80,7 +80,12 @@ VIRTUAL CV*	cv_clone _((CV* proto));
 VIRTUAL SV*	cv_const_sv _((CV* cv));
 VIRTUAL void	cv_undef _((CV* cv));
 #ifdef DEBUGGING
-void	cx_dump _((PERL_CONTEXT* cs));
+VIRTUAL void	cx_dump _((PERL_CONTEXT* cs));
+#else
+#ifdef PERL_OBJECT
+/* create a matching set of virtual entries for the non debugging version */
+VIRTUAL void	cx_dump_place_holder _((PERL_CONTEXT* cs));
+#endif
 #endif
 VIRTUAL SV*	filter_add _((filter_t funcp, SV* datasv));
 VIRTUAL void	filter_del _((filter_t funcp));
@@ -151,20 +156,25 @@ VIRTUAL void	do_vop _((I32 optype, SV* sv, SV* left, SV* right));
 VIRTUAL I32	dowantarray _((void));
 VIRTUAL void	dump_all _((void));
 #ifdef DEBUGGING
-void	dump_eval _((void));
+VIRTUAL void	dump_eval _((void));
+#else
+#ifdef PERL_OBJECT
+/* create a matching set of virtual entries for the non debugging version */
+VIRTUAL void	dump_eval_place_holder _((void));
+#endif
 #endif
 #ifdef DUMP_FDS  /* See util.c */
-int	dump_fds _((char* s));
+VIRTUAL int	dump_fds _((char* s));
 #endif
-void	dump_form _((GV* gv));
-void	dump_gv _((GV* gv));
+VIRTUAL void	dump_form _((GV* gv));
+VIRTUAL void	dump_gv _((GV* gv));
 #ifdef MYMALLOC
-void	dump_mstats _((char* s));
+VIRTUAL void	dump_mstats _((char* s));
 #endif
-void	dump_op _((OP* arg));
-void	dump_pm _((PMOP* pm));
-void	dump_packsubs _((HV* stash));
-void	dump_sub _((GV* gv));
+VIRTUAL void	dump_op _((OP* arg));
+VIRTUAL void	dump_pm _((PMOP* pm));
+VIRTUAL void	dump_packsubs _((HV* stash));
+VIRTUAL void	dump_sub _((GV* gv));
 VIRTUAL void	fbm_compile _((SV* sv, U32 flags));
 VIRTUAL char*	fbm_instr _((unsigned char* big, unsigned char* bigend, SV* littlesv));
 VIRTUAL char*	find_script _((char *scriptname, bool dosearch, char **search_ext, I32 flags));
@@ -314,10 +324,10 @@ VIRTUAL void	my_exit _((U32 status)) __attribute__((noreturn));
 VIRTUAL void	my_failure_exit _((void)) __attribute__((noreturn));
 VIRTUAL I32	my_lstat _((ARGSproto));
 #if !defined(HAS_MEMCMP) || !defined(HAS_SANE_MEMCMP)
-I32	my_memcmp _((char* s1, char* s2, I32 len));
+VIRTUAL I32	my_memcmp _((char* s1, char* s2, I32 len));
 #endif
 #if !defined(HAS_MEMSET)
-void*	my_memset _((char* loc, I32 ch, I32 len));
+VIRTUAL void*	my_memset _((char* loc, I32 ch, I32 len));
 #endif
 #ifndef PERL_OBJECT
 VIRTUAL I32	my_pclose _((PerlIO* ptr));
@@ -402,7 +412,11 @@ VIRTUAL void	peep _((OP* o));
 #ifndef PERL_OBJECT
 PerlInterpreter*	perl_alloc _((void));
 #endif
-VIRTUAL void    perl_atexit _((void(*fn)(void *), void*));
+#ifdef PERL_OBJECT
+VIRTUAL void    perl_atexit _((void(*fn)(CPerlObj *, void *), void*));
+#else
+void    perl_atexit _((void(*fn)(void *), void*));
+#endif
 VIRTUAL I32	perl_call_argv _((char* sub_name, I32 flags, char** argv));
 VIRTUAL I32	perl_call_method _((char* methname, I32 flags));
 VIRTUAL I32	perl_call_pv _((char* sub_name, I32 flags));
@@ -457,14 +471,24 @@ VIRTUAL regexp*	pregcomp _((char* exp, char* xend, PMOP* pm));
 VIRTUAL OP*	ref _((OP* o, I32 type));
 VIRTUAL OP*	refkids _((OP* o, I32 type));
 #ifdef DEBUGGING
-void	regdump _((regexp* r));
+VIRTUAL void	regdump _((regexp* r));
+#else
+#ifdef PERL_OBJECT
+/* create a matching set of virtual entries for the non debugging version */
+VIRTUAL void	regdump_place_holder _((regexp* r));
+#endif
 #endif
 VIRTUAL I32	pregexec _((regexp* prog, char* stringarg, char* strend, char* strbeg, I32 minend, SV* screamer, U32 nosave));
 VIRTUAL I32	regexec_flags _((regexp* prog, char* stringarg, char* strend, char* strbeg, I32 minend, SV* screamer, void* data, U32 flags));
 VIRTUAL void	pregfree _((struct regexp* r));
 VIRTUAL regnode* regnext _((regnode* p));
 #ifdef DEBUGGING
-void	regprop _((SV* sv, regnode* o));
+VIRTUAL void	regprop _((SV* sv, regnode* o));
+#else
+#ifdef PERL_OBJECT
+/* create a matching set of virtual entries for the non debugging version */
+VIRTUAL void	regprop_place_holder _((SV* sv, regnode* o));
+#endif
 #endif
 VIRTUAL void	repeatcpy _((char* to, char* from, I32 len, I32 count));
 VIRTUAL char*	rninstr _((char* big, char* bigend, char* little, char* lend));
@@ -587,7 +611,12 @@ VIRTUAL SV*	sv_mortalcopy _((SV* oldsv));
 VIRTUAL SV*	sv_newmortal _((void));
 VIRTUAL SV*	sv_newref _((SV* sv));
 #ifdef DEBUGGING
-char*	sv_peek _((SV* sv));
+VIRTUAL char*	sv_peek _((SV* sv));
+#else
+#ifdef PERL_OBJECT
+/* create a matching set of virtual entries for the non debugging version */
+VIRTUAL char*	sv_peek_place_holder _((SV* sv));
+#endif
 #endif
 VIRTUAL char*	sv_pvn_force _((SV* sv, STRLEN* lp));
 VIRTUAL char*	sv_reftype _((SV* sv, int ob));
@@ -635,7 +664,12 @@ VIRTUAL void	vivify_ref _((SV* sv, U32 to_what));
 VIRTUAL I32	wait4pid _((int pid, int* statusp, int flags));
 VIRTUAL void	warn _((const char* pat,...));
 #ifdef DEBUGGING
-void	watch _((char** addr));
+VIRTUAL void	watch _((char** addr));
+#else
+#ifdef PERL_OBJECT
+/* create a matching set of virtual entries for the non debugging version */
+VIRTUAL void	watch_place_holder _((char** addr));
+#endif
 #endif
 VIRTUAL I32	whichsig _((char* sig));
 VIRTUAL int	yyerror _((char* s));
@@ -743,6 +777,11 @@ int div128 _((SV *pnum, bool *done));
 int runops_standard _((void));
 #ifdef DEBUGGING
 int runops_debug _((void));
+#else
+#ifdef PERL_OBJECT
+/* create a matching set of virtual entries for the non debugging version */
+int runops_debug_place_holder _((void));
+#endif
 #endif
 void check_uni _((void));
 void  force_next _((I32 type));
@@ -829,6 +868,7 @@ void reginsert _((U8, regnode *));
 void regoptail _((regnode *, regnode *));
 void regset _((char *, I32));
 void regtail _((regnode *, regnode *));
+char* regwhite _((char *, char *));
 char* nextchar _((void));
 regnode *dumpuntil _((regnode *start, regnode *node, regnode *last, SV* sv, I32 l));
 void scan_commit _((scan_data_t *data));
@@ -850,6 +890,12 @@ int do_aspawn _((void *vreally, void **vmark, void **vsp));
 #ifdef DEBUGGING
 void del_sv _((SV *p));
 void debprof _((OP *o));
+#else
+#ifdef PERL_OBJECT
+/* create a matching set of virtual entries for the non debugging version */
+void del_sv_place_holder _((SV *p));
+void debprof_place_holder _((OP *o));
+#endif
 #endif
 
 void *bset_obj_store _((void *obj, I32 ix));

@@ -151,10 +151,8 @@
 #define dowarn			pPerl->Perl_dowarn
 #undef  dumplvl
 #define dumplvl			pPerl->Perl_dumplvl
-#undef  e_fp
-#define e_fp			pPerl->Perl_e_fp
-#undef  e_tmpname
-#define e_tmpname		pPerl->Perl_e_tmpname
+#undef  e_script
+#define e_script		pPerl->Perl_e_script
 #undef  egid
 #define egid			pPerl->Perl_egid
 #undef  endav
@@ -607,6 +605,8 @@
 #define sv_undef		pPerl->Perl_sv_undef
 #undef  sv_yes
 #define sv_yes			pPerl->Perl_sv_yes
+#undef  sys_intern
+#define sys_intern		pPerl->Perl_sys_intern
 #undef  tainted
 #define tainted			pPerl->Perl_tainted
 #undef  tainting
@@ -838,6 +838,8 @@
 #define dounwind            pPerl->Perl_dounwind
 #undef  do_aexec
 #define do_aexec            pPerl->Perl_do_aexec
+#undef  do_binmode
+#define do_binmode          pPerl->Perl_do_binmode
 #undef  do_chomp
 #define do_chomp            pPerl->Perl_do_chomp
 #undef  do_chop
@@ -892,6 +894,8 @@
 #define filter_read         pPerl->Perl_filter_read
 #undef  find_threadsv
 #define find_threadsv       pPerl->Perl_find_threadsv
+#undef  find_script
+#define find_script         pPerl->Perl_find_script
 #undef  force_ident
 #define force_ident         pPerl->Perl_force_ident
 #undef  force_list
@@ -1078,14 +1082,20 @@
 #define magic_getpack       pPerl->Perl_magic_getpack
 #undef  magic_getglob
 #define magic_getglob       pPerl->Perl_magic_getglob
+#undef  magic_getnkeys
+#define magic_getnkeys      pPerl->Perl_magic_getnkeys
 #undef  magic_getpos
 #define magic_getpos        pPerl->Perl_magic_getpos
 #undef  magic_getsig
 #define magic_getsig        pPerl->Perl_magic_getsig
+#undef  magic_getsubstr
+#define magic_getsubstr     pPerl->Perl_magic_getsubstr
 #undef  magic_gettaint
 #define magic_gettaint      pPerl->Perl_magic_gettaint
 #undef  magic_getuvar
 #define magic_getuvar       pPerl->Perl_magic_getuvar
+#undef  magic_getvec
+#define magic_getvec        pPerl->Perl_magic_getvec
 #undef  magic_len
 #define magic_len           pPerl->Perl_magic_len
 #undef  magic_methpack

@@ -852,7 +852,7 @@ regmatch(regnode *prog)
 	    s = (char *) OPERAND(scan);
 	    if (nextchr < 0)
 		nextchr = UCHARAT(locinput);
-	    if (!REGINCLASS(s, nextchar))
+	    if (!REGINCLASS(s, nextchr))
 		sayNO;
 	    if (!nextchr && locinput >= regeol)
 		sayNO;

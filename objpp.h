@@ -249,6 +249,8 @@
 #define do_aexec          CPerlObj::Perl_do_aexec
 #undef  do_aspawn
 #define do_aspawn         CPerlObj::do_aspawn
+#undef  do_binmode
+#define do_binmode        CPerlObj::Perl_do_binmode
 #undef  do_chop
 #define do_chop           CPerlObj::Perl_do_chop
 #undef  do_close
@@ -347,6 +349,8 @@
 #define filter_read       CPerlObj::Perl_filter_read
 #undef  find_beginning
 #define find_beginning    CPerlObj::find_beginning
+#undef  find_script
+#define find_script       CPerlObj::Perl_find_script
 #undef  forbid_setid
 #define forbid_setid      CPerlObj::forbid_setid
 #undef  force_ident
@@ -571,14 +575,20 @@
 #define magic_getpack     CPerlObj::Perl_magic_getpack
 #undef  magic_getglob
 #define magic_getglob     CPerlObj::Perl_magic_getglob
+#undef  magic_getnkeys
+#define magic_getnkeys    CPerlObj::Perl_magic_getnkeys
 #undef  magic_getpos
 #define magic_getpos      CPerlObj::Perl_magic_getpos
 #undef  magic_getsig
 #define magic_getsig      CPerlObj::Perl_magic_getsig
+#undef  magic_getsubstr
+#define magic_getsubstr   CPerlObj::Perl_magic_getsubstr
 #undef  magic_gettaint
 #define magic_gettaint    CPerlObj::Perl_magic_gettaint
 #undef  magic_getuvar
 #define magic_getuvar     CPerlObj::Perl_magic_getuvar
+#undef  magic_getvec
+#define magic_getvec     CPerlObj::Perl_magic_getvec
 #undef  magic_len
 #define magic_len         CPerlObj::Perl_magic_len
 #undef  magic_methcall
@@ -1021,6 +1031,8 @@
 #define regtail           CPerlObj::regtail
 #undef  regtry
 #define regtry            CPerlObj::regtry
+#undef  regwhite
+#define regwhite          CPerlObj::regwhite
 #undef  repeatcpy
 #define repeatcpy         CPerlObj::Perl_repeatcpy
 #undef  restore_expect

@@ -69,7 +69,9 @@ dEXTCONST char rcsid[] = "perl.c\nPatch level: ###\n";
     mess_sv     = Nullsv;	\
   } STMT_END
 
-#ifndef PERL_OBJECT
+#ifdef PERL_OBJECT
+static I32 read_e_script _((CPerlObj* pPerl, int idx, SV *buf_sv, int maxlen));
+#else
 static void find_beginning _((void));
 static void forbid_setid _((char *));
 static void incpush _((char *, int));
@@ -384,7 +386,7 @@ perl_destruct(register PerlInterpreter *sv_interp)
 
     /* call exit list functions */
     while (exitlistlen-- > 0)
-	exitlist[exitlistlen].fn(exitlist[exitlistlen].ptr);
+	exitlist[exitlistlen].fn(THIS_ exitlist[exitlistlen].ptr);
 
     Safefree(exitlist);
 
@@ -595,7 +597,11 @@ perl_free(PerlInterpreter *sv_interp)
 }
 
 void
+#ifdef PERL_OBJECT
+CPerlObj::perl_atexit(void (*fn) (CPerlObj*,void *), void *ptr)
+#else
 perl_atexit(void (*fn) (void *), void *ptr)
+#endif
 {
     Renew(exitlist, exitlistlen+1, PerlExitListEntry);
     exitlist[exitlistlen].fn = fn;
@@ -2219,22 +2225,6 @@ find_beginning(void)
 }
 
 
-STATIC I32
-read_e_script(int idx, SV *buf_sv, int maxlen)
-{
-    char *p, *nl;
-    FILTER_READ(idx+1, buf_sv, maxlen);
-    p  = SvPVX(e_script);
-    nl = strchr(p, '\n');
-    nl = (nl) ? nl+1 : SvEND(e_script);
-    if (nl-p == 0)
-	return 0;
-    sv_catpvn(buf_sv, p, nl-p);
-    sv_chop(e_script, nl);
-    return 1;
-}
-
-
 STATIC void
 init_ids(void)
 {
@@ -2876,3 +2866,27 @@ my_exit_jump(void)
 
     JMPENV_JUMP(2);
 }
+
+
+#include "XSUB.h"
+
+static I32
+#ifdef PERL_OBJECT
+read_e_script(CPerlObj *pPerl, int idx, SV *buf_sv, int maxlen)
+#else
+read_e_script(int idx, SV *buf_sv, int maxlen)
+#endif
+{
+    char *p, *nl;
+    FILTER_READ(idx+1, buf_sv, maxlen);
+    p  = SvPVX(e_script);
+    nl = strchr(p, '\n');
+    nl = (nl) ? nl+1 : SvEND(e_script);
+    if (nl-p == 0)
+	return 0;
+    sv_catpvn(buf_sv, p, nl-p);
+    sv_chop(e_script, nl);
+    return 1;
+}
+
+
