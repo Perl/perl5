@@ -625,13 +625,16 @@ EOP
 }
 
 
-SKIP: {
-    skip("(EBCDIC and) version strings are bad idea", 2) if $Is_EBCDIC;
+{
+    no warnings 'deprecated'; # v-strings
+  SKIP: {
+      skip("(EBCDIC and) version strings are bad idea", 2) if $Is_EBCDIC;
 
-    is("1.20.300.4000", sprintf "%vd", pack("U*",1,20,300,4000));
-    is("1.20.300.4000", sprintf "%vd", pack("  U*",1,20,300,4000));
+      is("1.20.300.4000", sprintf "%vd", pack("U*",1,20,300,4000));
+      is("1.20.300.4000", sprintf "%vd", pack("  U*",1,20,300,4000));
+  }
+    isnt(v1.20.300.4000, sprintf "%vd", pack("C0U*",1,20,300,4000));
 }
-isnt(v1.20.300.4000, sprintf "%vd", pack("C0U*",1,20,300,4000));
 
 my $rslt = $Is_EBCDIC ? "156 67" : "199 162";
 is(join(" ", unpack("C*", chr(0x1e2))), $rslt);
@@ -656,7 +659,10 @@ SKIP: {
     is("@{[unpack('C*', pack('U*', 100, 200))]}", "100 195 136");
 
     # does pack U0C create Unicode?
-    is("@{[pack('U0C*', 100, 195, 136)]}", v100.v200);
+    {
+	no warnings 'deprecated'; # v-strings
+	is("@{[pack('U0C*', 100, 195, 136)]}", v100.v200);
+    }
 
     # does pack C0U create characters?
     is("@{[pack('C0U*', 100, 200)]}", pack("C*", 100, 195, 136));

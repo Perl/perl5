@@ -4437,6 +4437,11 @@ won't suddenly start understanding newer features, but at least
 they will show a sensible error message indicating the required
 minimum version.
 
+=item v-strings are deprecated
+
+(D deprecated) v-strings are deprecated.  Their semantics and use were
+overly confusing.
+
 =item Warning: something's wrong
 
 (W) You passed warn() an empty string (the equivalent of C<warn "">) or

@@ -190,44 +190,55 @@ Unicode Character Database has been updated to 4.0.0 from 3.2.0.
 
 =head2 Deprecation Warnings
 
-Perl 5.8.0 forgot to add some deprecation warnings.  These warnings
-have now been added.
+There is one new feature deprecation.  Perl 5.8.0 forgot to add
+some deprecation warnings, these warnings have now been added.
+Finally, a reminder of an impending feature removal.
 
-=head3 Pseudo-hashes really are deprecated
+=head3 (New) Version Strings (v-strings) Are Deprecated
 
-Pseudo-hashes were deprecated in Perl 5.8.0 and will be removed in Perl
-5.10.0, see L<perl58delta> for details.  Each attempt to access pseudo-hashes
-will trigger the warning C<Pseudo-hashes are deprecated>.  If you really want
-to continue using pseudo-hashes but not to see the deprecation warnings, add:
+Version Strings (v-strings) have been deprecated and they will be
+removed in some future release of Perl.  Each v-string will trigger
+the warning C<v-strings are deprecated>.   The marginal benefits of
+v-strings were greatly outweighed by the potential for Surprise and
+Confusion.  If you really want to continue using v-strings but not to
+see the deprecation warnings, use:
+
+    no warnings 'deprecated';
+
+=head3 (Reminder) Pseudo-hashes really are deprecated
+
+Pseudo-hashes were deprecated in Perl 5.8.0 and will be removed in
+Perl 5.10.0, see L<perl58delta> for details.  Each attempt to access
+pseudo-hashes will trigger the warning C<Pseudo-hashes are deprecated>.
+If you really want to continue using pseudo-hashes but not to see the
+deprecation warnings, use:
 
     no warnings 'deprecated';
 
 Or you can continue to use the L<fields> pragma, but please don't
 expect the data structures to be pseudohashes any more.
 
-=head3 5.005-style threads really are deprecated
+=head3 (Reminder) 5.005-style threads really are deprecated
 
-5.005-style threads (activated by C<use Thread;>) were deprecated in Perl
-5.8.0 and will be removed in Perl 5.10.0, see L<perl58delta> for details.
-Each attempt to create a 5.005-style thread will trigger the warning
-C<5.005 threads are deprecated>.  If you really want to continue using
-5.005 threads but not to see the deprecation warnings, add:
+5.005-style threads (activated by C<use Thread;>) were deprecated in
+5.Perl 8.0 and will be removed after Perl 5.8, see L<perl58delta> for
+5.details.  Each 5.005-style thread creation will trigger the warning
+5.C<5.005 threads are deprecated>.  If you really want to continue
+5.using the 5.005 threads but not to see the deprecation warnings, use:
 
     no warnings 'deprecated';
 
-=head3 (New) Version Strings (v-strings) Are Deprecated
+=head3 (Reminder) The $* Variable Really Is Deprecated
 
-Version Strings (v-strings) have been deprecated.  They will not be
-available after Perl 5.8.  The marginal benefits of v-strings were
-greatly outweighed by the potential for Surprise and Confusion.
+The C<$*> variable controlling multi-line matching has been deprecated
+and will be removed after 5.8.  The variable has been deprecated for a
+long time, and a deprecation warning C<Use of $* is deprecated> is given,
+now the variable will just finally be removed.  The functionality has
+been supplanted by the C</s> and C</m> modifiers on pattern matching.
+If you really want to continue using the C<$*>-variable but not to see
+the deprecation warnings, use:
 
-=head3 The $* Variable Really Is Deprecated
-
-The C<$*> variable controlling multi-line matching has been
-deprecated.  It will not be available after Perl 5.8.  The variable
-has been deprecated for a long time, now it will just finally be
-removed.  The functionality has been supplanted by the C</s> and
-C</m> modifiers on pattern matching.
+    no warnings 'deprecated';
 
 =head2 Miscellaneous Enhancements
 

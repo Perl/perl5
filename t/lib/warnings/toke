@@ -799,4 +799,12 @@ use warnings 'ambiguous';
 $s = "(@-)(@+)";
 EXPECT
 
+########
+# toke.c
+use warnings 'deprecated';
+$v = v65.66;
+no warnings 'deprecated';
+$v = v65.66;
+EXPECT
+v-strings are deprecated at - line 3.
 
