@@ -77,6 +77,9 @@ $Is_VMS    = $^O eq 'VMS';
 $do_expand = $Is_VMS;
 $Is_MacOS  = $^O eq 'MacOS';
 
+my $Mac_FS;
+$Mac_FS = eval { require Mac::FileSpec::Unixish } if $Is_MacOS;
+
 @dl_require_symbols = ();       # names of symbols we need
 @dl_resolve_using   = ();       # names of files to link with
 @dl_library_path    = ();       # path to look for files
@@ -251,6 +254,9 @@ sub bootstrap {
 	my $dir;
 	if ($Is_MacOS) {
 	    my $path = $_;
+	    if ($Mac_FS) {
+		$path = Mac::FileSpec::Unixish::nativize($path);
+	    }
 	    $path .= ":"  unless /:$/;
 	    $dir = "${path}auto:$modpname";
 	} else {
