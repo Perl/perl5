@@ -158,7 +158,7 @@ S_visit(pTHX_ SVFUNC_t f)
     for (sva = PL_sv_arenaroot; sva; sva = (SV*)SvANY(sva)) {
 	svend = &sva[SvREFCNT(sva)];
 	for (sv = sva + 1; sv < svend; ++sv) {
-	    if (SvTYPE(sv) != SVTYPEMASK) {
+	    if (SvTYPE(sv) != SVTYPEMASK && SvREFCNT(sv)) {
 		(FCALL)(aTHXo_ sv);
 		++visited;
 	    }
@@ -8202,7 +8202,7 @@ dup_pvcv:
 	CvROOT(dstr)	= OpREFCNT_inc(CvROOT(sstr));
 	CvXSUB(dstr)	= CvXSUB(sstr);
 	CvXSUBANY(dstr)	= CvXSUBANY(sstr);
-	CvGV(dstr)	= gv_dup_inc(CvGV(sstr));
+	CvGV(dstr)	= gv_dup(CvGV(sstr));
 	CvDEPTH(dstr)	= CvDEPTH(sstr);
 	if (CvPADLIST(sstr) && !AvREAL(CvPADLIST(sstr))) {
 	    /* XXX padlists are real, but pretend to be not */
@@ -8270,7 +8270,7 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max)
 		ncx->blk_sub.argarray	= (cx->blk_sub.hasargs
 					   ? av_dup_inc(cx->blk_sub.argarray)
 					   : Nullav);
-		ncx->blk_sub.savearray	= av_dup(cx->blk_sub.savearray);
+		ncx->blk_sub.savearray	= av_dup_inc(cx->blk_sub.savearray);
 		ncx->blk_sub.olddepth	= cx->blk_sub.olddepth;
 		ncx->blk_sub.hasargs	= cx->blk_sub.hasargs;
 		ncx->blk_sub.lval	= cx->blk_sub.lval;
@@ -8857,7 +8857,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_defgv		= gv_dup(proto_perl->Idefgv);
     PL_argvgv		= gv_dup(proto_perl->Iargvgv);
     PL_argvoutgv	= gv_dup(proto_perl->Iargvoutgv);
-    PL_argvout_stack	= av_dup(proto_perl->Iargvout_stack);
+    PL_argvout_stack	= av_dup_inc(proto_perl->Iargvout_stack);
 
     /* shortcuts to regexp stuff */
     PL_replgv		= gv_dup(proto_perl->Ireplgv);
