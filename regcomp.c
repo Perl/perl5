@@ -3180,6 +3180,11 @@ S_regwhite(pTHX_ char *p, char *e)
    Returns a named class id (ANYOF_XXX) if successful, -1 otherwise.
    Equivalence classes ([=foo=]) and composites ([.foo.]) are parsed,
    but trigger failures because they are currently unimplemented. */
+
+#define POSIXCC_DONE(c)   ((c) == ':')
+#define POSIXCC_NOTYET(c) ((c) == '=' || (c) == '.')
+#define POSIXCC(c) (POSIXCC_DONE(c) || POSIXCC_NOTYET(c))
+
 STATIC I32
 S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value)
 {
@@ -3188,13 +3193,11 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value)
 
     if (value == '[' && RExC_parse + 1 < RExC_end &&
 	/* I smell either [: or [= or [. -- POSIX has been here, right? */
-	(*RExC_parse == ':' ||
-	 *RExC_parse == '=' ||
-	 *RExC_parse == '.')) {
-	char  c = *RExC_parse;
+	POSIXCC(UCHARAT(RExC_parse))) {
+	char  c = UCHARAT(RExC_parse);
 	char* s = RExC_parse++;
 	
-	while (RExC_parse < RExC_end && *RExC_parse != c)
+	while (RExC_parse < RExC_end && UCHARAT(RExC_parse) != c)
 	    RExC_parse++;
 	if (RExC_parse == RExC_end)
 	    /* Grandfather lone [:, [=, [. */
@@ -3202,7 +3205,7 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value)
 	else {
 	    char* t = RExC_parse++; /* skip over the c */
 
-  	    if (*RExC_parse == ']') {
+  	    if (UCHARAT(RExC_parse) == ']') {
   		RExC_parse++; /* skip over the ending ] */
   		posixcc = s + 1;
 		if (*s == ':') {
@@ -3291,7 +3294,7 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value)
 
 		    /* adjust RExC_parse so the warning shows after
 		       the class closes */
-		    while (*RExC_parse && *RExC_parse != ']')
+		    while (UCHARAT(RExC_parse) && UCHARAT(RExC_parse) != ']')
 			RExC_parse++;
 		    Simple_vFAIL3("POSIX syntax [%c %c] is reserved for future extensions", c, c);
 		}
@@ -3310,9 +3313,7 @@ STATIC void
 S_checkposixcc(pTHX_ RExC_state_t *pRExC_state)
 {
     if (!SIZE_ONLY && ckWARN(WARN_REGEXP) &&
-	(*RExC_parse == ':' ||
-	 *RExC_parse == '=' ||
-	 *RExC_parse == '.')) {
+	POSIXCC(UCHARAT(RExC_parse))) {
 	char *s = RExC_parse;
  	char  c = *s++;
 
@@ -3322,11 +3323,10 @@ S_checkposixcc(pTHX_ RExC_state_t *pRExC_state)
 	    vWARN3(s+2, "POSIX syntax [%c %c] belongs inside character classes", c, c);
 
 	    /* [[=foo=]] and [[.foo.]] are still future. */
-	    if (c == '=' || c == '.')
-	    {
+	    if (POSIXCC_NOTYET(c)) {
 		/* adjust RExC_parse so the error shows after
 		   the class closes */
-		while (*RExC_parse && *RExC_parse++ != ']')
+		while (UCHARAT(RExC_parse) && UCHARAT(RExC_parse++) != ']')
 		    ;
 		Simple_vFAIL3("POSIX syntax [%c %c] is reserved for future extensions", c, c);
 	    }
@@ -3338,6 +3338,7 @@ STATIC regnode *
 S_regclass(pTHX_ RExC_state_t *pRExC_state)
 {
     register UV value;
+    register UV nextvalue;
     register IV prevvalue = OOB_UNICODE;
     register IV range = 0;
     register regnode *ret;
@@ -3355,7 +3356,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
     if (!SIZE_ONLY)
 	ANYOF_FLAGS(ret) = 0;
 
-    if (*RExC_parse == '^') {	/* Complement of range. */
+    if (UCHARAT(RExC_parse) == '^') {	/* Complement of range. */
 	RExC_naughty++;
 	RExC_parse++;
 	if (!SIZE_ONLY)
@@ -3374,13 +3375,15 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	listsv = newSVpvn("# comment\n", 10);
     }
 
-    if (!SIZE_ONLY && ckWARN(WARN_REGEXP))
+    nextvalue = RExC_parse < RExC_end ? UCHARAT(RExC_parse) : 0;
+
+    if (!SIZE_ONLY && ckWARN(WARN_REGEXP) && POSIXCC(nextvalue))
 	checkposixcc(pRExC_state);
 
-    if (*RExC_parse == ']' || *RExC_parse == '-')
+    if (UCHARAT(RExC_parse) == ']' || UCHARAT(RExC_parse) == '-')
 	goto charclassloop;		/* allow 1st char to be ] or - */
 
-    while (RExC_parse < RExC_end && *RExC_parse != ']') {
+    while (RExC_parse < RExC_end && UCHARAT(RExC_parse) != ']') {
 
     charclassloop:
 
@@ -3396,7 +3399,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	}
 	else
 	    value = UCHARAT(RExC_parse++);
-	if (value == '[')
+	nextvalue = RExC_parse < RExC_end ? UCHARAT(RExC_parse) : 0;
+	if (value == '[' && POSIXCC(nextvalue))
 	    namedclass = regpposixcc(pRExC_state, value);
 	else if (value == '\\') {
 	    if (UTF) {
