@@ -7700,6 +7700,51 @@ Perl_ptr_table_split(pTHX_ PTR_TBL_t *tbl)
     }
 }
 
+void
+Perl_ptr_table_clear(pTHX_ PTR_TBL_t *tbl)
+{
+    register PTR_TBL_ENT_t **array;
+    register PTR_TBL_ENT_t *entry;
+    register PTR_TBL_ENT_t *oentry = Null(PTR_TBL_ENT_t*);
+    UV riter = 0;
+    UV max;
+
+    if (!tbl || !tbl->tbl_items) {
+        return;
+    }
+
+    array = tbl->tbl_ary;
+    entry = array[0];
+    max = tbl->tbl_max;
+
+    for (;;) {
+        if (entry) {
+            oentry = entry;
+            entry = entry->next;
+            Safefree(oentry);
+        }
+        if (!entry) {
+            if (++riter > max) {
+                break;
+            }
+            entry = array[riter];
+        }
+    }
+
+    tbl->tbl_items = 0;
+}
+
+void
+Perl_ptr_table_free(pTHX_ PTR_TBL_t *tbl)
+{
+    if (!tbl) {
+        return;
+    }
+    ptr_table_clear(tbl);
+    Safefree(tbl->tbl_ary);
+    Safefree(tbl);
+}
+
 #ifdef DEBUGGING
 char *PL_watch_pvx;
 #endif
@@ -8910,7 +8955,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     /* thrdvar.h stuff */
 
-    if (flags & 1) {
+    if (flags & CLONEf_COPY_STACKS) {
 	/* next allocation will be PL_tmps_stack[PL_tmps_ix+1] */
 	PL_tmps_ix		= proto_perl->Ttmps_ix;
 	PL_tmps_max		= proto_perl->Ttmps_max;
@@ -9095,6 +9140,11 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     PL_reginterp_cnt	= 0;
     PL_reg_starttry	= 0;
+
+    if (!(flags & CLONEf_KEEP_PTR_TABLE)) {
+        ptr_table_free(PL_ptr_table);
+        PL_ptr_table = NULL;
+    }
 
 #ifdef PERL_OBJECT
     return (PerlInterpreter*)pPerl;

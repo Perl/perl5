@@ -2209,6 +2209,8 @@ Ap	|PTR_TBL_t*|ptr_table_new
 Ap	|void*	|ptr_table_fetch|PTR_TBL_t *tbl|void *sv
 Ap	|void	|ptr_table_store|PTR_TBL_t *tbl|void *oldsv|void *newsv
 Ap	|void	|ptr_table_split|PTR_TBL_t *tbl
+Ap	|void	|ptr_table_clear|PTR_TBL_t *tbl
+Ap	|void	|ptr_table_free|PTR_TBL_t *tbl
 #endif
 #if defined(HAVE_INTERP_INTERN)
 Ap	|void	|sys_intern_clear
