@@ -1,4 +1,4 @@
-/* $Header: str.c,v 3.0.1.7 90/03/27 16:24:11 lwall Locked $
+/* $Header: str.c,v 3.0.1.8 90/08/09 05:22:18 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	str.c,v $
+ * Revision 3.0.1.8  90/08/09  05:22:18  lwall
+ * patch19: the number to string converter wasn't allocating enough space
+ * patch19: tainting didn't work on setgid scripts
+ * 
  * Revision 3.0.1.7  90/03/27  16:24:11  lwall
  * patch16: strings with prefix chopped off sometimes freed wrong
  * patch16: taint check blows up on undefined array element
@@ -97,10 +101,20 @@ STR *Str;
 char *
 str_grow(str,newlen)
 register STR *str;
+#ifndef MSDOS
 register int newlen;
+#else
+unsigned long newlen;
+#endif
 {
     register char *s = str->str_ptr;
 
+#ifdef MSDOS
+    if (newlen >= 0x10000) {
+	fprintf(stderr, "Allocation too large: %lx\n", newlen);
+	exit(1);
+    }
+#endif /* MSDOS */
     if (str->str_state == SS_INCR) {		/* data before str_ptr? */
 	str->str_len += str->str_u.str_useful;
 	str->str_ptr -= str->str_u.str_useful;
@@ -129,7 +143,7 @@ double num;
     if (str->str_pok) {
 	str->str_pok = 0;	/* invalidate pointer */
 	if (str->str_state == SS_INCR)
-	    str_grow(str,0);
+	    Str_Grow(str,0);
     }
     str->str_u.str_nval = num;
     str->str_state = SS_NORM;
@@ -149,15 +163,7 @@ register STR *str;
     if (!str)
 	return "";
     if (str->str_nok) {
-/* this is a problem on the sun 4... 24 bytes is not always enough and the
-	exponent blows away the malloc stack
-	PEJ Wed Jan 31 18:41:34 CST 1990
-*/
-#ifdef sun4
 	STR_GROW(str, 30);
-#else
-	STR_GROW(str, 24);
-#endif /* sun 4 */
 	s = str->str_ptr;
 	olderrno = errno;	/* some Xenix systems wipe out errno here */
 #if defined(scs) && defined(ns32000)
@@ -182,11 +188,7 @@ register STR *str;
 	    return No;
 	if (dowarn)
 	    warn("Use of uninitialized variable");
-#ifdef sun4
 	STR_GROW(str, 30);
-#else
-	STR_GROW(str, 24);
-#endif
 	s = str->str_ptr;
     }
     *s = '\0';
@@ -206,7 +208,7 @@ register STR *str;
     if (!str)
 	return 0.0;
     if (str->str_state == SS_INCR)
-	str_grow(str,0);       /* just force copy down */
+	Str_Grow(str,0);       /* just force copy down */
     str->str_state = SS_NORM;
     if (str->str_len && str->str_pok)
 	str->str_u.str_nval = atof(str->str_ptr);
@@ -257,7 +259,7 @@ register STR *sstr;
 	str_numset(dstr,sstr->str_u.str_nval);
     else {
 	if (dstr->str_state == SS_INCR)
-	    str_grow(dstr,0);       /* just force copy down */
+	    Str_Grow(dstr,0);       /* just force copy down */
 
 #ifdef STRUCTCOPY
 	dstr->str_u = sstr->str_u;
@@ -271,7 +273,7 @@ register STR *sstr;
 str_nset(str,ptr,len)
 register STR *str;
 register char *ptr;
-register int len;
+register STRLEN len;
 {
     STR_GROW(str, len + 1);
     if (ptr)
@@ -289,7 +291,7 @@ str_set(str,ptr)
 register STR *str;
 register char *ptr;
 {
-    register int len;
+    register STRLEN len;
 
     if (!ptr)
 	ptr = "";
@@ -308,7 +310,7 @@ str_chop(str,ptr)	/* like set but assuming ptr is in str */
 register STR *str;
 register char *ptr;
 {
-    register int delta;
+    register STRLEN delta;
 
     if (!(str->str_pok))
 	fatal("str_chop: internal inconsistency");
@@ -329,7 +331,7 @@ register char *ptr;
 str_ncat(str,ptr,len)
 register STR *str;
 register char *ptr;
-register int len;
+register STRLEN len;
 {
     if (!(str->str_pok))
 	(void)str_2ptr(str);
@@ -363,7 +365,7 @@ str_cat(str,ptr)
 register STR *str;
 register char *ptr;
 {
-    register int len;
+    register STRLEN len;
 
     if (!ptr)
 	return;
@@ -389,7 +391,7 @@ register int delim;
 char *keeplist;
 {
     register char *to;
-    register int len;
+    register STRLEN len;
 
     if (!from)
 	return Nullch;
@@ -427,7 +429,7 @@ int x;
 #else
 str_new(len)
 #endif
-int len;
+STRLEN len;
 {
     register STR *str;
     
@@ -451,7 +453,7 @@ register STR *str;
 STAB *stab;
 int how;
 char *name;
-int namlen;
+STRLEN namlen;
 {
     if (str->str_magic)
 	return;
@@ -466,10 +468,10 @@ int namlen;
 void
 str_insert(bigstr,offset,len,little,littlelen)
 STR *bigstr;
-int offset;
-int len;
+STRLEN offset;
+STRLEN len;
 char *little;
-int littlelen;
+STRLEN littlelen;
 {
     register char *big;
     register char *mid;
@@ -549,9 +551,9 @@ register STR *str;
 register STR *nstr;
 {
     if (str->str_state == SS_INCR)
-	str_grow(str,0);	/* just force copy down */
+	Str_Grow(str,0);	/* just force copy down */
     if (nstr->str_state == SS_INCR)
-	str_grow(nstr,0);
+	Str_Grow(nstr,0);
     if (str->str_ptr)
 	Safefree(str->str_ptr);
     str->str_ptr = nstr->str_ptr;
@@ -616,6 +618,7 @@ register STR *str;
 #endif /* LEAKTEST */
 }
 
+STRLEN
 str_len(str)
 register STR *str;
 {
@@ -690,8 +693,8 @@ int append;
     register STDCHAR *ptr;	/*   in the innermost loop into registers */
     register int newline = record_separator;/* (assuming >= 6 registers) */
     int i;
-    int bpx;
-    int obpx;
+    STRLEN bpx;
+    STRLEN obpx;
     register int get_paragraph;
     register char *oldbp;
 
@@ -786,9 +789,8 @@ STR *str;
 {
     register CMD *cmd;
     register ARG *arg;
-    line_t oldline = line;
+    CMD *oldcurcmd = curcmd;
     int retval;
-    char *tmps;
 
     str_sset(linestr,str);
     in_eval++;
@@ -812,14 +814,17 @@ STR *str;
     }
 #ifdef DEBUGGING
     if (debug & 4) {
-	tmps = loop_stack[loop_ptr].loop_label;
+	char *tmps = loop_stack[loop_ptr].loop_label;
 	deb("(Popping label #%d %s)\n",loop_ptr,
 	    tmps ? tmps : "" );
     }
 #endif
     loop_ptr--;
     error_count = 0;
+    curcmd = &compiling;
+    curcmd->c_line = oldcurcmd->c_line;
     retval = yyparse();
+    curcmd = oldcurcmd;
     in_eval--;
     if (retval || error_count)
 	fatal("Invalid component in string or format");
@@ -828,7 +833,6 @@ STR *str;
     if (cmd->c_type != C_EXPR || cmd->c_next || arg->arg_type != O_LIST)
 	fatal("panic: error in parselist %d %x %d", cmd->c_type,
 	  cmd->c_next, arg ? arg->arg_type : -1);
-    line = oldline;
     Safefree(cmd);
     return arg;
 }
@@ -842,7 +846,7 @@ STR *src;
     register STR *str;
     register char *t;
     STR *toparse;
-    int len;
+    STRLEN len;
     register int brackets;
     register char *d;
     STAB *stab;
@@ -1222,7 +1226,7 @@ register STR *str;
 STR *
 str_make(s,len)
 char *s;
-int len;
+STRLEN len;
 {
     register STR *str = Str_new(79,0);
 
@@ -1257,7 +1261,7 @@ register STR *old;
 	return Nullstr;
     }
     if (old->str_state == SS_INCR && !(old->str_pok & 2))
-	str_grow(old,0);
+	Str_Grow(old,0);
     if (new->str_ptr)
 	Safefree(new->str_ptr);
     Copy(old,new,1,STR);
@@ -1328,7 +1332,7 @@ char *s;
     if (debug & 2048)
 	fprintf(stderr,"%s %d %d %d\n",s,tainted,uid, euid);
 #endif
-    if (tainted && (!euid || euid != uid)) {
+    if (tainted && (!euid || euid != uid || egid != gid)) {
 	if (!unsafe)
 	    fatal("%s", s);
 	else if (dowarn)

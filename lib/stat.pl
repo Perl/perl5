@@ -1,6 +1,7 @@
-;# $Header: stat.pl,v 3.0 89/10/18 15:19:53 lwall Locked $
+;# $Header: stat.pl,v 3.0.1.1 90/08/09 04:01:34 lwall Locked $
 
 ;# Usage:
+;#	require 'stat.pl';
 ;#	@ary = stat(foo);
 ;#	$st_dev = @ary[$ST_DEV];
 ;#
@@ -19,6 +20,7 @@ $ST_BLKSIZE =	11 + $[;
 $ST_BLOCKS =	12 + $[;
 
 ;# Usage:
+;#	require 'stat.pl';
 ;#	do Stat('foo');		# sets st_* as a side effect
 ;#
 sub Stat {

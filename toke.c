@@ -1,4 +1,4 @@
-/* $Header: toke.c,v 3.0.1.7 90/03/27 16:32:37 lwall Locked $
+/* $Header: toke.c,v 3.0.1.8 90/08/09 05:39:58 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,18 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	toke.c,v $
+ * Revision 3.0.1.8  90/08/09  05:39:58  lwall
+ * patch19: added require operator
+ * patch19: added -x switch to extract script from input trash
+ * patch19: bare @name didn't add array to symbol table
+ * patch19: Added __LINE__ and __FILE__ tokens
+ * patch19: Added __END__ token
+ * patch19: Numeric literals are now stored only in floating point
+ * patch19: some support for FPS compiler misfunction
+ * patch19: "\\$foo" not handled right
+ * patch19: program and data can now both come from STDIN
+ * patch19: "here" strings caused warnings about uninitialized variables
+ * 
  * Revision 3.0.1.7  90/03/27  16:32:37  lwall
  * patch16: MSDOS support
  * patch16: formats didn't work inside eval
@@ -52,7 +64,7 @@ char *reparse;		/* if non-null, scanreg found ${foo[$bar]} */
 #ifdef CLINE
 #undef CLINE
 #endif
-#define CLINE (cmdline = (line < cmdline ? line : cmdline))
+#define CLINE (cmdline = (curcmd->c_line < cmdline ? curcmd->c_line : cmdline))
 
 #define META(c) ((c) | 128)
 
@@ -172,6 +184,15 @@ yylex()
 	else
 	    fprintf(stderr,"Tokener at %s\n",s);
 #endif
+#ifdef BADSWITCH
+    if (*s & 128) {
+	if ((*s & 127) == '(')
+	    *s++ = '(';
+	else
+	    warn("Unrecognized character \\%03o ignored", *s++);
+	goto retry;
+    }
+#endif
     switch (*s) {
     default:
 	if ((*s & 127) == '(')
@@ -179,6 +200,9 @@ yylex()
 	else
 	    warn("Unrecognized character \\%03o ignored", *s++);
 	goto retry;
+    case 4:
+    case 26:
+	goto fake_eof;			/* emulate EOF on ^D or ^Z */
     case 0:
 	if (!rsfp)
 	    RETURN(0);
@@ -189,8 +213,7 @@ yylex()
 	    if (minus_n || minus_p || perldb) {
 		str_set(linestr,"");
 		if (perldb)
-		    str_cat(linestr,
-"do 'perldb.pl' || die \"Can't find perldb.pl in @INC\"; print $@;");
+		    str_cat(linestr, "require 'perldb.pl';");
 		if (minus_n || minus_p) {
 		    str_cat(linestr,"line: while (<>) {");
 		    if (minus_a)
@@ -207,33 +230,43 @@ yylex()
 	    in_format = FALSE;
 	    oldoldbufptr = oldbufptr = s = str_get(linestr) + 1;
 	    bufend = linestr->str_ptr + linestr->str_cur;
-	    TERM(FORMLIST);
+	    OPERATOR(FORMLIST);
 	}
-	line++;
-	if ((s = str_gets(linestr, rsfp, 0)) == Nullch) {
-	    if (preprocess)
-		(void)mypclose(rsfp);
-	    else if (rsfp != stdin)
-		(void)fclose(rsfp);
-	    rsfp = Nullfp;
-	    if (minus_n || minus_p) {
-		str_set(linestr,minus_p ? ";}continue{print" : "");
-		str_cat(linestr,";}");
+	curcmd->c_line++;
+#ifdef CRYPTSCRIPT
+	cryptswitch();
+#endif /* CRYPTSCRIPT */
+	do {
+	    if ((s = str_gets(linestr, rsfp, 0)) == Nullch) {
+	      fake_eof:
+		if (preprocess)
+		    (void)mypclose(rsfp);
+		else if (rsfp == stdin)
+		    clearerr(stdin);
+		else
+		    (void)fclose(rsfp);
+		rsfp = Nullfp;
+		if (minus_n || minus_p) {
+		    str_set(linestr,minus_p ? ";}continue{print" : "");
+		    str_cat(linestr,";}");
+		    oldoldbufptr = oldbufptr = s = str_get(linestr);
+		    bufend = linestr->str_ptr + linestr->str_cur;
+		    minus_n = minus_p = 0;
+		    goto retry;
+		}
 		oldoldbufptr = oldbufptr = s = str_get(linestr);
-		bufend = linestr->str_ptr + linestr->str_cur;
-		minus_n = minus_p = 0;
-		goto retry;
+		str_set(linestr,"");
+		RETURN(';');	/* not infinite loop because rsfp is NULL now */
 	    }
-	    oldoldbufptr = oldbufptr = s = str_get(linestr);
-	    str_set(linestr,"");
-	    RETURN(';');	/* not infinite loop because rsfp is NULL now */
-	}
+	    if (doextract && *linestr->str_ptr == '#')
+		doextract = FALSE;
+	} while (doextract);
 	oldoldbufptr = oldbufptr = bufptr = s;
 	if (perldb) {
 	    STR *str = Str_new(85,0);
 
 	    str_sset(str,linestr);
-	    astore(lineary,(int)line,str);
+	    astore(lineary,(int)curcmd->c_line,str);
 	}
 #ifdef DEBUG
 	if (firstline) {
@@ -242,7 +275,7 @@ yylex()
 	}
 #endif
 	bufend = linestr->str_ptr + linestr->str_cur;
-	if (line == 1) {
+	if (curcmd->c_line == 1) {
 	    if (*s == '#' && s[1] == '!') {
 		if (!in_eval && !instr(s,"perl") && instr(origargv[0],"perl")) {
 		    char **newargv;
@@ -283,16 +316,13 @@ yylex()
     case ' ': case '\t': case '\f':
 	s++;
 	goto retry;
-    case '\n':
     case '#':
 	if (preprocess && s == str_get(linestr) &&
 	       s[1] == ' ' && isdigit(s[2])) {
-	    line = atoi(s+2)-1;
+	    curcmd->c_line = atoi(s+2)-1;
 	    for (s += 2; isdigit(*s); s++) ;
 	    d = bufend;
 	    while (s < d && isspace(*s)) s++;
-	    if (filename)
-		Safefree(filename);
 	    s[strlen(s)-1] = '\0';	/* wipe out newline */
 	    if (*s == '"') {
 		s++;
@@ -301,9 +331,11 @@ yylex()
 	    if (*s)
 		filename = savestr(s);
 	    else
-		filename = savestr(origfilename);
+		filename = origfilename;
 	    oldoldbufptr = oldbufptr = s = str_get(linestr);
 	}
+	/* FALL THROUGH */
+    case '\n':
 	if (in_eval && !rsfp) {
 	    d = bufend;
 	    while (s < d && *s != '\n')
@@ -317,7 +349,7 @@ yylex()
 		oldoldbufptr = oldbufptr = s = bufptr + 1;
 		TERM(FORMLIST);
 	    }
-	    line++;
+	    curcmd->c_line++;
 	}
 	else {
 	    *s = '\0';
@@ -412,8 +444,8 @@ yylex()
 	    cmdline = NOLINE;   /* invalidate current command line number */
 	OPERATOR(tmp);
     case ';':
-	if (line < cmdline)
-	    cmdline = line;
+	if (curcmd->c_line < cmdline)
+	    cmdline = curcmd->c_line;
 	tmp = *s++;
 	OPERATOR(tmp);
     case ')':
@@ -521,7 +553,7 @@ yylex()
 	s = scanreg(s,bufend,tokenbuf);
 	if (reparse)
 	    goto do_reparse;
-	yylval.stabval = stabent(tokenbuf,TRUE);
+	yylval.stabval = aadd(stabent(tokenbuf,TRUE));
 	TERM(ARY);
 
     case '/':			/* may either be division or pattern */
@@ -556,6 +588,23 @@ yylex()
 	/* FALL THROUGH */
     case '_':
 	SNARFWORD;
+	if (d[1] == '_') {
+	    if (strEQ(d,"__LINE__") || strEQ(d,"__FILE__")) {
+		ARG *arg = op_new(1);
+
+		yylval.arg = arg;
+		arg->arg_type = O_ITEM;
+		if (d[2] == 'L')
+		    (void)sprintf(tokenbuf,"%ld",(long)curcmd->c_line);
+		else
+		    strcpy(tokenbuf, filename);
+		arg[1].arg_type = A_SINGLE;
+		arg[1].arg_ptr.arg_str = str_make(tokenbuf,strlen(tokenbuf));
+		TERM(RSTRING);
+	    }
+	    else if (strEQ(d,"__END__"))
+		goto fake_eof;
+	}
 	break;
     case 'a': case 'A':
 	SNARFWORD;
@@ -630,7 +679,7 @@ yylex()
 	if (strEQ(d,"else"))
 	    OPERATOR(ELSE);
 	if (strEQ(d,"elsif")) {
-	    yylval.ival = line;
+	    yylval.ival = curcmd->c_line;
 	    OPERATOR(ELSIF);
 	}
 	if (strEQ(d,"eq") || strEQ(d,"EQ"))
@@ -667,7 +716,7 @@ yylex()
     case 'f': case 'F':
 	SNARFWORD;
 	if (strEQ(d,"for") || strEQ(d,"foreach")) {
-	    yylval.ival = line;
+	    yylval.ival = curcmd->c_line;
 	    OPERATOR(FOR);
 	}
 	if (strEQ(d,"format")) {
@@ -778,7 +827,7 @@ yylex()
     case 'i': case 'I':
 	SNARFWORD;
 	if (strEQ(d,"if")) {
-	    yylval.ival = line;
+	    yylval.ival = curcmd->c_line;
 	    OPERATOR(IF);
 	}
 	if (strEQ(d,"index"))
@@ -897,6 +946,10 @@ yylex()
 	SNARFWORD;
 	if (strEQ(d,"return"))
 	    OLDLOP(O_RETURN);
+	if (strEQ(d,"require")) {
+	    allstabs = TRUE;		/* must initialize everything since */
+	    UNI(O_REQUIRE);		/* we don't know what will be used */
+	}
 	if (strEQ(d,"reset"))
 	    UNI(O_RESET);
 	if (strEQ(d,"redo"))
@@ -945,7 +998,7 @@ yylex()
 	    break;
 	case 'e':
 	    if (strEQ(d,"select"))
-		OPERATOR(SELECT);
+		OPERATOR(SSELECT);
 	    if (strEQ(d,"seek"))
 		FOP3(O_SEEK);
 	    if (strEQ(d,"send"))
@@ -998,7 +1051,7 @@ yylex()
 	    if (strEQ(d,"socket"))
 		FOP4(O_SOCKET);
 	    if (strEQ(d,"socketpair"))
-		FOP25(O_SOCKETPAIR);
+		FOP25(O_SOCKPAIR);
 	    if (strEQ(d,"sort")) {
 		checkcomma(s,"subroutine name");
 		d = bufend;
@@ -1053,7 +1106,7 @@ yylex()
 	    if (strEQ(d,"substr"))
 		FUN3(O_SUBSTR);
 	    if (strEQ(d,"sub")) {
-		subline = line;
+		subline = curcmd->c_line;
 		d = bufend;
 		while (s < d && isspace(*s))
 		    s++;
@@ -1110,17 +1163,19 @@ yylex()
 	    FUN0(O_TIME);
 	if (strEQ(d,"times"))
 	    FUN0(O_TMS);
+	if (strEQ(d,"truncate"))
+	    FOP2(O_TRUNCATE);
 	break;
     case 'u': case 'U':
 	SNARFWORD;
 	if (strEQ(d,"using"))
 	    OPERATOR(USING);
 	if (strEQ(d,"until")) {
-	    yylval.ival = line;
+	    yylval.ival = curcmd->c_line;
 	    OPERATOR(UNTIL);
 	}
 	if (strEQ(d,"unless")) {
-	    yylval.ival = line;
+	    yylval.ival = curcmd->c_line;
 	    OPERATOR(UNLESS);
 	}
 	if (strEQ(d,"unlink"))
@@ -1150,7 +1205,7 @@ yylex()
     case 'w': case 'W':
 	SNARFWORD;
 	if (strEQ(d,"while")) {
-	    yylval.ival = line;
+	    yylval.ival = curcmd->c_line;
 	    OPERATOR(WHILE);
 	}
 	if (strEQ(d,"warn"))
@@ -1206,18 +1261,29 @@ checkcomma(s,what)
 register char *s;
 char *what;
 {
+    char *word;
+
     if (*s == '(')
 	s++;
     while (s < bufend && isascii(*s) && isspace(*s))
 	s++;
     if (isascii(*s) && (isalpha(*s) || *s == '_')) {
-	s++;
+	word = s++;
 	while (isalpha(*s) || isdigit(*s) || *s == '_')
 	    s++;
 	while (s < bufend && isspace(*s))
 	    s++;
-	if (*s == ',')
+	if (*s == ',') {
+	    *s = '\0';
+	    word = instr(
+	      "tell eof times getlogin wait length shift umask getppid \
+	      cos exp int log rand sin sqrt ord wantarray",
+	      word);
+	    *s = ',';
+	    if (word)
+		return;
 	    fatal("No comma allowed after %s", what);
+	}
     }
 }
 
@@ -1396,8 +1462,10 @@ register char *s;
     }
     e = tokenbuf + len;
     for (d=tokenbuf; d < e; d++) {
-	if ((*d == '$' && d[1] && d[-1] != '\\' && d[1] != '|') ||
-	    (*d == '@' && d[-1] != '\\')) {
+	if (*d == '\\')
+	    d++;
+	else if ((*d == '$' && d[1] && d[1] != '|' && d[1] != ')') ||
+		 (*d == '@')) {
 	    register ARG *arg;
 
 	    spat->spat_runtime = arg = op_new(1);
@@ -1408,11 +1476,13 @@ register char *s;
 	    d = scanreg(d,bufend,buf);
 	    (void)stabent(buf,TRUE);		/* make sure it's created */
 	    for (; d < e; d++) {
-		if (*d == '$' && d[1] && d[-1] != '\\' && d[1] != '|') {
+		if (*d == '\\')
+		    d++;
+		else if (*d == '$' && d[1] && d[1] != '|' && d[1] != ')') {
 		    d = scanreg(d,bufend,buf);
 		    (void)stabent(buf,TRUE);
 		}
-		else if (*d == '@' && d[-1] != '\\') {
+		else if (*d == '@') {
 		    d = scanreg(d,bufend,buf);
 		    if (strEQ(buf,"ARGV") || strEQ(buf,"ENV") ||
 		      strEQ(buf,"SIG") || strEQ(buf,"INC"))
@@ -1448,7 +1518,7 @@ register char *s;
     if ((spat->spat_flags & SPAT_ALL) && (spat->spat_flags & SPAT_SCANFIRST)) {
 	fbmcompile(spat->spat_short, spat->spat_flags & SPAT_FOLD);
 	spat->spat_regexp = regcomp(tokenbuf,tokenbuf+len,
-	    spat->spat_flags & SPAT_FOLD,1);
+	    spat->spat_flags & SPAT_FOLD);
 		/* Note that this regexp can still be used if someone says
 		 * something like /a/ && s//b/;  so we can't delete it.
 		 */
@@ -1629,12 +1699,12 @@ register char *s;
 int len;
 int *retlen;
 {
-    char t[512];
+    char t[520];
     register char *d = t;
     register int i;
     register char *send = s + len;
 
-    while (s < send) {
+    while (s < send && d - t <= 256) {
 	if (s[1] == '-' && s+2 < send) {
 	    for (i = s[0]; i <= s[2]; i++)
 		*d++ = i;
@@ -1711,6 +1781,7 @@ register char *s;
     bool alwaysdollar = FALSE;
     bool hereis = FALSE;
     STR *herewas;
+    STR *str;
     char *leave = "\\$@nrtfb0123456789[{]}"; /* which backslash sequences to keep */
     int len;
 
@@ -1764,13 +1835,14 @@ register char *s;
 		}
 	    }
 	  out:
-	    (void)sprintf(tokenbuf,"%ld",i);
-	    arg[1].arg_ptr.arg_str = str_make(tokenbuf,strlen(tokenbuf));
-#ifdef MICROPORT	/* Microport 2.4 hack */
-	    { double zz = str_2num(arg[1].arg_ptr.arg_str); }
-#else
-	    (void)str_2num(arg[1].arg_ptr.arg_str);
-#endif		/* Microport 2.4 hack */
+	    str = Str_new(92,0);
+	    str_numset(str,(double)i);
+	    if (str->str_ptr) {
+		Safefree(str->str_ptr);
+		str->str_ptr = Nullch;
+		str->str_len = str->str_cur = 0;
+	    }
+	    arg[1].arg_ptr.arg_str = str;
 	}
 	break;
     case '1': case '2': case '3': case '4': case '5':
@@ -1801,12 +1873,14 @@ register char *s;
 		*d++ = *s++;
 	}
 	*d = '\0';
-	arg[1].arg_ptr.arg_str = str_make(tokenbuf, d - tokenbuf);
-#ifdef MICROPORT	/* Microport 2.4 hack */
-	{ double zz = str_2num(arg[1].arg_ptr.arg_str); }
-#else
-	(void)str_2num(arg[1].arg_ptr.arg_str);
-#endif		/* Microport 2.4 hack */
+	str = Str_new(92,0);
+	str_numset(str,atof(tokenbuf));
+	if (str->str_ptr) {
+	    Safefree(str->str_ptr);
+	    str->str_ptr = Nullch;
+	    str->str_len = str->str_cur = 0;
+	}
+	arg[1].arg_ptr.arg_str = str;
 	break;
     case '<':
 	if (*++s == '<') {
@@ -1873,8 +1947,10 @@ register char *s;
 	    }
 	    else {
 		arg[1].arg_type = A_READ;
+#ifdef NOTDEF
 		if (rsfp == stdin && (strEQ(d,"stdin") || strEQ(d,"STDIN")))
 		    yyerror("Can't get both program and data from <STDIN>");
+#endif
 		arg[1].arg_ptr.arg_stab = stabent(d,TRUE);
 		if (!stab_io(arg[1].arg_ptr.arg_stab))
 		    stab_io(arg[1].arg_ptr.arg_stab) = stio_new();
@@ -1919,7 +1995,7 @@ register char *s;
 	    STR *tmpstr;
 	    char *tmps;
 
-	    multi_start = line;
+	    multi_start = curcmd->c_line;
 	    if (hereis)
 		multi_open = multi_close = '<';
 	    else {
@@ -1936,10 +2012,10 @@ register char *s;
 		    while (s < bufend &&
 		      (*s != term || bcmp(s,tokenbuf,len) != 0) ) {
 			if (*s++ == '\n')
-			    line++;
+			    curcmd->c_line++;
 		    }
 		    if (s >= bufend) {
-			line = multi_start;
+			curcmd->c_line = multi_start;
 			fatal("EOF in string");
 		    }
 		    str_nset(tmpstr,d+1,s-d);
@@ -1950,21 +2026,23 @@ register char *s;
 		    bufend = linestr->str_ptr + linestr->str_cur;
 		    hereis = FALSE;
 		}
+		else
+		    str_nset(tmpstr,"",0);   /* avoid "uninitialized" warning */
 	    }
 	    else
 		s = str_append_till(tmpstr,s+1,bufend,term,leave);
 	    while (s >= bufend) {	/* multiple line string? */
 		if (!rsfp ||
 		 !(oldoldbufptr = oldbufptr = s = str_gets(linestr, rsfp, 0))) {
-		    line = multi_start;
+		    curcmd->c_line = multi_start;
 		    fatal("EOF in string");
 		}
-		line++;
+		curcmd->c_line++;
 		if (perldb) {
 		    STR *str = Str_new(88,0);
 
 		    str_sset(str,linestr);
-		    astore(lineary,(int)line,str);
+		    astore(lineary,(int)curcmd->c_line,str);
 		}
 		bufend = linestr->str_ptr + linestr->str_cur;
 		if (hereis) {
@@ -1982,7 +2060,7 @@ register char *s;
 		else
 		    s = str_append_till(tmpstr,s,bufend,term,leave);
 	    }
-	    multi_end = line;
+	    multi_end = curcmd->c_line;
 	    s++;
 	    if (tmpstr->str_cur + 5 < tmpstr->str_len) {
 		tmpstr->str_len = tmpstr->str_cur + 1;
@@ -1997,7 +2075,7 @@ register char *s;
 	    send = s + tmpstr->str_cur;
 	    while (s < send) {		/* see if we can make SINGLE */
 		if (*s == '\\' && s[1] && isdigit(s[1]) && !isdigit(s[2]) &&
-		  !alwaysdollar )
+		  !alwaysdollar && s[1] != '0')
 		    *s = '$';		/* grandfather \digit in subst */
 		if ((*s == '$' || *s == '@') && s+1 < send &&
 		  (alwaysdollar || (s[1] != ')' && s[1] != '|'))) {
@@ -2100,12 +2178,12 @@ load_format()
     Zero(&froot, 1, FCMD);
     s = bufptr;
     while (s < bufend || (s = str_gets(linestr,rsfp, 0)) != Nullch) {
-	line++;
+	curcmd->c_line++;
 	if (perldb) {
 	    STR *tmpstr = Str_new(89,0);
 
 	    str_sset(tmpstr,linestr);
-	    astore(lineary,(int)line,tmpstr);
+	    astore(lineary,(int)curcmd->c_line,tmpstr);
 	}
 	if (in_eval && !rsfp) {
 	    eol = index(s,'\n');
@@ -2188,12 +2266,12 @@ load_format()
 	  again:
 	    if (s >= bufend && (s = str_gets(linestr, rsfp, 0)) == Nullch)
 		goto badform;
-	    line++;
+	    curcmd->c_line++;
 	    if (perldb) {
 		STR *tmpstr = Str_new(90,0);
 
 		str_sset(tmpstr,linestr);
-		astore(lineary,(int)line,tmpstr);
+		astore(lineary,(int)curcmd->c_line,tmpstr);
 	    }
 	    if (in_eval && !rsfp) {
 		eol = index(s,'\n');
@@ -2214,7 +2292,7 @@ load_format()
 	    str = flinebeg->f_unparsed = Str_new(91,eol - s);
 	    str->str_u.str_hash = curstash;
 	    str_nset(str,"(",1);
-	    flinebeg->f_line = line;
+	    flinebeg->f_line = curcmd->c_line;
 	    eol[-1] = '\0';
 	    if (!flinebeg->f_next->f_type || index(s, ',')) {
 		eol[-1] = '\n';

@@ -8,7 +8,7 @@
 # call syslog() with a string priority and a list of printf() args
 # like syslog(3)
 #
-#  usage: do 'syslog.pl' || die "syslog.pl: $@";
+#  usage: require 'syslog.pl';
 #
 #  then (put these all in a script to test function)
 #		
@@ -29,8 +29,7 @@ package syslog;
 
 $host = 'localhost' unless $host;	# set $syslog'host to change
 
-do '/usr/local/lib/perl/syslog.h'
-	|| die "syslog: Can't do syslog.h: ",($@||$!),"\n";
+require 'syslog.ph';
 
 sub main'openlog {
     ($ident, $logopt, $facility) = @_;  # package vars

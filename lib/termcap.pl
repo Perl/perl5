@@ -1,10 +1,10 @@
-;# $Header: termcap.pl,v 3.0.1.2 90/03/14 12:28:28 lwall Locked $
+;# $Header: termcap.pl,v 3.0.1.3 90/08/09 04:02:53 lwall Locked $
 ;#
 ;# Usage:
-;#	do 'ioctl.pl';
+;#	require 'ioctl.pl';
 ;#	ioctl(TTY,$TIOCGETP,$foo);
 ;#	($ispeed,$ospeed) = unpack('cc',$foo);
-;#	do 'termcap.pl' || die "Can't get termcap.pl";
+;#	require 'termcap.pl';
 ;#	&Tgetent('vt100');	# sets $TC{'cm'}, etc.
 ;#	&Tputs(&Tgoto($TC{'cm'},$col,$row), 0, 'FILEHANDLE');
 ;#	&Tputs($TC{'dl'},$affcnt,'FILEHANDLE');

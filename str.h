@@ -1,4 +1,4 @@
-/* $Header: str.h,v 3.0.1.1 89/10/26 23:24:42 lwall Locked $
+/* $Header: str.h,v 3.0.1.2 90/08/09 05:23:24 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	str.h,v $
+ * Revision 3.0.1.2  90/08/09  05:23:24  lwall
+ * patch19: various MSDOS and OS/2 patches folded in
+ * 
  * Revision 3.0.1.1  89/10/26  23:24:42  lwall
  * patch1: rearranged some structures to align doubles better on Gould
  * 
@@ -16,7 +19,7 @@
 
 struct string {
     char *	str_ptr;	/* pointer to malloced string */
-    int		str_len;	/* allocated size */
+    STRLEN	str_len;	/* allocated size */
     union {
 	double	str_nval;	/* numeric value, if any */
 	STAB	*str_stab;	/* magic stab for magic "key" string */
@@ -25,8 +28,8 @@ struct string {
 	HASH	*str_hash;	/* string represents an assoc array (stab?) */
 	ARRAY	*str_array;	/* string represents an array */
     } str_u;
-    int		str_cur;	/* length of str_ptr as a C string */
-    STR *str_magic;		/* while free, link to next free str */
+    STRLEN	str_cur;	/* length of str_ptr as a C string */
+    STR		*str_magic;	/* while free, link to next free str */
 				/* while in use, ptr to "key" for magic items */
     char	str_pok;	/* state of str_ptr */
     char	str_nok;	/* state of str_nval */
@@ -40,7 +43,7 @@ struct string {
 
 struct stab {	/* should be identical, except for str_ptr */
     STBP *	str_ptr;	/* pointer to malloced string */
-    int		str_len;	/* allocated size */
+    STRLEN	str_len;	/* allocated size */
     union {
 	double	str_nval;	/* numeric value, if any */
 	STAB	*str_stab;	/* magic stab for magic "key" string */
@@ -49,8 +52,8 @@ struct stab {	/* should be identical, except for str_ptr */
 	HASH	*str_hash;	/* string represents an assoc array (stab?) */
 	ARRAY	*str_array;	/* string represents an array */
     } str_u;
-    int		str_cur;	/* length of str_ptr as a C string */
-    STR *str_magic;		/* while free, link to next free str */
+    STRLEN	str_cur;	/* length of str_ptr as a C string */
+    STR		*str_magic;	/* while free, link to next free str */
 				/* while in use, ptr to "key" for magic items */
     char	str_pok;	/* state of str_ptr */
     char	str_nok;	/* state of str_nval */
@@ -66,8 +69,8 @@ struct stab {	/* should be identical, except for str_ptr */
 
 struct lstring {
     struct string lstr;
-    int	lstr_offset;
-    int	lstr_len;
+    STRLEN	lstr_offset;
+    STRLEN	lstr_len;
 };
 
 /* These are the values of str_pok:		*/
@@ -127,3 +130,4 @@ int str_cmp();
 int str_eq();
 void str_magic();
 void str_insert();
+STRLEN str_len();

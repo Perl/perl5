@@ -1,4 +1,4 @@
-/* $Header: stab.h,v 3.0.1.2 90/03/12 17:00:43 lwall Locked $
+/* $Header: stab.h,v 3.0.1.3 90/08/09 05:18:42 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	stab.h,v $
+ * Revision 3.0.1.3  90/08/09  05:18:42  lwall
+ * patch19: Added support for linked-in C subroutines
+ * 
  * Revision 3.0.1.2  90/03/12  17:00:43  lwall
  * patch13: did some ndir straightening up for Xenix
  * 
@@ -88,6 +91,8 @@ struct stio {
 
 struct sub {
     CMD		*cmd;
+    int		(*usersub)();
+    int		userindex;
     char	*filename;
     long	depth;	/* >= 2 indicates recursive call */
     ARRAY	*tosave;
