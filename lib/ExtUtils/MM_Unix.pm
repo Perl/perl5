@@ -8,7 +8,7 @@ use strict;
 use vars qw($VERSION $Is_Mac $Is_OS2 $Is_VMS $Is_Win32 $Is_Dos $Is_PERL_OBJECT
 	    $Verbose %pm %static $Xsubpp_Version);
 
-$VERSION = substr q$Revision: 1.12601 $, 10;
+$VERSION = substr q$Revision: 1.12602 $, 10;
 # $Id: MM_Unix.pm,v 1.126 1998/06/28 21:32:49 k Exp k $
 
 Exporter::import('ExtUtils::MakeMaker',
@@ -2350,7 +2350,7 @@ $tmp/perlmain\$(OBJ_EXT): $tmp/perlmain.c
 $tmp/perlmain.c: $makefilename}, q{
 	}.$self->{NOECHO}.q{echo Writing $@
 	}.$self->{NOECHO}.q{$(PERL) $(MAP_PERLINC) -MExtUtils::Miniperl \\
-		-e "writemain(grep s#.*/auto/##, qw|$(MAP_STATIC)|)" > $@t && $(MV) $@t $@
+		-e "writemain(grep s#.*/auto/##, split(q| |, q|$(MAP_STATIC)|))" > $@t && $(MV) $@t $@
 
 };
     push @m, "\t",$self->{NOECHO}.q{$(PERL) $(INSTALLSCRIPT)/fixpmain
