@@ -136,6 +136,7 @@
 #define incgv			(curinterp->Iincgv)
 #define initav			(curinterp->Iinitav)
 #define inplace			(curinterp->Iinplace)
+#define last_proto		(curinterp->Ilast_proto)
 #define lastfd			(curinterp->Ilastfd)
 #define lastgotoprobe		(curinterp->Ilastgotoprobe)
 #define lastscream		(curinterp->Ilastscream)
@@ -300,6 +301,7 @@
 #define Iincgv			incgv
 #define Iinitav			initav
 #define Iinplace		inplace
+#define Ilast_proto		last_proto
 #define Ilastfd			lastfd
 #define Ilastgotoprobe		lastgotoprobe
 #define Ilastscream		lastscream
@@ -526,6 +528,7 @@
 #define incgv			Perl_incgv
 #define initav			Perl_initav
 #define inplace			Perl_inplace
+#define last_proto		Perl_last_proto
 #define lastfd			Perl_lastfd
 #define lastgotoprobe		Perl_lastgotoprobe
 #define lastscream		Perl_lastscream

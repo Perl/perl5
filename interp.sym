@@ -68,6 +68,7 @@ initav
 inplace
 sys_intern
 last_in_gv
+last_proto
 lastfd
 lastgotoprobe
 lastscream

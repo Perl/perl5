@@ -234,6 +234,8 @@
 #define inplace			pPerl->Perl_inplace
 #undef  last_in_gv
 #define last_in_gv		pPerl->Perl_last_in_gv
+#undef  last_proto
+#define last_proto		pPerl->Perl_last_proto
 #undef  last_lop
 #define last_lop		pPerl->Perl_last_lop
 #undef  last_lop_op

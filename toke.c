@@ -2893,8 +2893,11 @@ yylex(void)
 		    oldoldbufptr < bufptr &&
 		    (oldoldbufptr == last_lop || oldoldbufptr == last_uni) &&
 		    /* NO SKIPSPACE BEFORE HERE! */
-		    (expect == XREF ||
-		     ((opargs[last_lop_op] >> OASHIFT)& 7) == OA_FILEREF) )
+		    (expect == XREF 
+		     || ((opargs[last_lop_op] >> OASHIFT)& 7) == OA_FILEREF
+		     || (last_lop_op == OP_ENTERSUB 
+			 && last_proto 
+			 && last_proto[last_proto[0] == ';' ? 1 : 0] == '*')) )
 		{
 		    bool immediate_paren = *s == '(';
 
@@ -2975,16 +2978,17 @@ yylex(void)
 		    /* Is there a prototype? */
 		    if (SvPOK(cv)) {
 			STRLEN len;
-			char *proto = SvPV((SV*)cv, len);
+			last_proto = SvPV((SV*)cv, len);
 			if (!len)
 			    TERM(FUNC0SUB);
-			if (strEQ(proto, "$"))
+			if (strEQ(last_proto, "$"))
 			    OPERATOR(UNIOPSUB);
-			if (*proto == '&' && *s == '{') {
+			if (*last_proto == '&' && *s == '{') {
 			    sv_setpv(subname,"__ANON__");
 			    PREBLOCK(LSTOPSUB);
 			}
-		    }
+		    } else
+			last_proto = NULL;
 		    nextval[nexttoke].opval = yylval.opval;
 		    expect = XTERM;
 		    force_next(WORD);
