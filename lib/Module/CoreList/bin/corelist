@@ -1,0 +1,149 @@
+#!/usr/bin/perl -w
+
+=head1 NAME
+
+corelist - a commandline frontend to Module::CoreList
+
+=head1 DESCRIPTION
+
+See L<Module::CoreList> for one.
+
+=head1 SYNOPSIS
+
+    corelist [-help] [-a] [-man] [-v [ version ]] [ Modulename [ version ]]
+
+=head1 OPTIONS
+
+=head2 a
+
+    corelist -a utf8
+
+    utf8  was first released with perl 5.006
+      5.006      undef
+      5.006001   undef
+      5.006002   undef
+      5.007003   1.00
+      5.008      1.00
+      5.008001   1.02
+      5.008002   1.02
+      5.008003   1.02
+      5.008004   1.03
+      5.008005   1.04
+      5.008006   1.04
+      5.009      1.02
+      5.009001   1.02
+
+=head2 -?
+
+help! help! help! to see more help, try --man.
+
+=head2 man
+
+all of the help
+
+=head2 v
+
+lists all of the perl release versions we got the CoreList for.
+
+If you pass a version argument (value of $], like 5.00503),
+you get a list of all the modules and their respective versions.
+
+
+=cut
+
+use Module::CoreList;
+use Getopt::Long;
+use Pod::Usage;
+use strict;
+
+my %Opts;
+
+GetOptions(\%Opts, qw[ help|?! man! v|version:f a! ] );
+
+pod2usage(1) if $Opts{help};
+pod2usage(-verbose=>2) if $Opts{man};
+
+if(exists $Opts{v} ){
+    if( $Opts{v} ) {
+        if( exists $Module::CoreList::version{$Opts{v}} ) {
+            print "\nThe following modules were in perl v$Opts{v} CORE\n";
+            print "$_ ", $Module::CoreList::version{$Opts{v}}{$_} || " ","\n"
+                for sort keys %{$Module::CoreList::version{$Opts{v}}};
+            print "\n";
+        } else {
+            print "\nModue::CoreList has no info on perl v$Opts{v}\n\n";
+        }
+    } else {
+        print "\nModue::CoreList has info on the following perl versions:\n";
+        print "$_\n" for sort keys %Module::CoreList::version;
+        print "\n";
+    }
+}elsif(@ARGV){
+    module_version(@ARGV);
+} else {
+    pod2usage(0);
+}
+
+exit();
+
+sub module_version {
+    my($mod,$ver) = @_;
+
+    $ver = "" unless defined $ver;
+
+    my $ret = Module::CoreList->first_release(@_);
+    my $msg = "$mod $ver";
+
+    if( defined $ret ) {
+        $msg .= " was ";
+        $msg .= "first " unless $ver;
+        $msg .= "released with perl $ret"
+    } else {
+        $msg .= " was not in CORE (or so I think)";
+    }
+
+    print "\n",$msg,"\n";
+    
+    if(defined $ret and exists $Opts{a} and $Opts{a}){
+        for my $v(
+#            grep { $ret ne $_ }
+            sort keys %Module::CoreList::version ){
+
+            printf "  %-10s %-10s\n",
+                $v,
+                $Module::CoreList::version{$v}{$mod}
+                    || 'undef'
+                    if exists $Module::CoreList::version{$v}{$mod};
+        }
+        print "\n";
+    }
+}
+
+
+=head1 EXAMPLES
+
+    $ corelist File::Spec
+
+    File::Spec  was first released with perl 5.005
+
+    $ corelist File::Spec 0.83
+
+    File::Spec 0.83 was released with perl 5.007003
+
+    $ corelist File::Spec 0.89
+
+    File::Spec 0.89 was not in CORE (or so I think)
+
+    $ corelist File::Spec::Aliens
+
+    File::Spec::Aliens  was not in CORE (or so I think)
+
+
+=head1 COPYRIGHT
+
+Copyright (c) 2002-2003 by D.H. aka PodMaster
+
+This program is distributed under the same terms as perl itself.
+See http://perl.com or http://cpan.org for more info on that.
+
+=cut

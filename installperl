@@ -805,8 +805,9 @@ sub installlib {
 	      $dir  =~ m{/t(?:/|$)};
     # ignore the cpan script in lib/CPAN/bin, the instmodsh and xsubpp
     # scripts in lib/ExtUtils, and the prove script in lib/Test/Harness
+    # as well as the corelist script from lib/Module/CoreList/bin
     # (they're installed later with other utils)
-    return if $name =~ /^(?:cpan|instmodsh|prove)\z/;
+    return if $name =~ /^(?:cpan|instmodsh|prove|corelist)\z/;
     # ignore the Makefiles
     return if $name =~ /^makefile$/i;
     # ignore the test extensions
