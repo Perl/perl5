@@ -67,7 +67,21 @@ sub replace_manpage_separator {
 
 sub maybe_command {
     my($self,$file) = @_;
-    return "$file.exe" if -e "$file.exe";
+    my @e = exists($ENV{'PATHEXT'})
+          ? split(/;/, $ENV{PATHEXT})
+	  : qw(.com .exe .bat .cmd);
+    my $e = '';
+    for (@e) { $e .= "\Q$_\E|" }
+    chop $e;
+    # see if file ends in one of the known extensions
+    if ($file =~ /($e)$/) {
+	return $file if -e $file;
+    }
+    else {
+	for (@e) {
+	    return "$file$_" if -e "$file$_";
+	}
+    }
     return;
 }
 
@@ -718,6 +732,7 @@ We don't want manpage process.  XXX add pod2html support later.
 =cut
 
 sub manifypods {
+    my($self) = shift;
     return "\nmanifypods :\n\t$self->{NOECHO}\$(NOOP)\n";
 }
 
