@@ -444,11 +444,11 @@ sockatmark (sock)
      {
        int flag = 0;
 #   ifdef SIOCATMARK
-	#ifdef NETWARE
+#     ifdef NETWARE
        if (ioctl(fd, SIOCATMARK, (void*)&flag) != 0)
-	#else
-	   if (ioctl(fd, SIOCATMARK, &flag) != 0)
-	#endif
+#     else
+       if (ioctl(fd, SIOCATMARK, &flag) != 0)
+#     endif
 	 XSRETURN_UNDEF;
 #   else
        not_here("IO::Socket::atmark");
