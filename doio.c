@@ -1126,6 +1126,20 @@ Perl_do_exec3(pTHX_ char *cmd, int fd, int do_report)
 		*s = '\0';
 		break;
 	    }
+	    /* handle the 2>&1 construct at the end */
+	    if (*s == '>' && s[1] == '&' && s[2] == '1'
+		&& s > cmd + 1 && s[-1] == '2' && isSPACE(s[-2])
+		&& (!s[3] || isSPACE(s[3])))
+	    {
+		char *t = s + 3;
+
+		while (*t && isSPACE(*t))
+		    ++t;
+		if (!*t && (dup2(1,2) != -1)) {
+		    s[-2] = '\0';
+		    break;
+		}
+	    }
 	  doshell:
 	    PerlProc_execl(PL_sh_path, "sh", "-c", cmd, (char*)0);
 	    return FALSE;
