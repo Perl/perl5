@@ -249,11 +249,13 @@ newthread (SV *startsv, AV *initargs, char *classname)
 	XPUSHs(SvREFCNT_inc(*av_fetch(initargs, i, FALSE)));
     XPUSHs(SvREFCNT_inc(startsv));
     PUTBACK;
+
+    /* On your marks... */
+    MUTEX_LOCK(&thr->mutex);
+
 #ifdef THREAD_CREATE
     err = THREAD_CREATE(thr, threadstart);
 #else    
-    /* On your marks... */
-    MUTEX_LOCK(&thr->mutex);
     /* Get set...  */
     sigfillset(&fullmask);
     if (sigprocmask(SIG_SETMASK, &fullmask, &oldmask) == -1)
@@ -272,10 +274,10 @@ newthread (SV *startsv, AV *initargs, char *classname)
     }
     if (err == 0)
 	err = PTHREAD_CREATE(&thr->self, attr, threadstart, (void*) thr);
-    /* Go */
-    MUTEX_UNLOCK(&thr->mutex);
 #endif
+
     if (err) {
+	MUTEX_UNLOCK(&thr->mutex);
         DEBUG_S(PerlIO_printf(PerlIO_stderr(),
 			      "%p: create of %p failed %d\n",
 			      savethread, thr, err));
@@ -288,16 +290,23 @@ newthread (SV *startsv, AV *initargs, char *classname)
 	SvREFCNT_dec(startsv);
 	return NULL;
     }
+
 #ifdef THREAD_POST_CREATE
     THREAD_POST_CREATE(thr);
 #else
     if (sigprocmask(SIG_SETMASK, &oldmask, 0))
 	croak("panic: sigprocmask");
 #endif
+
     sv = newSViv(thr->tid);
     sv_magic(sv, thr->oursv, '~', 0, 0);
     SvMAGIC(sv)->mg_private = Thread_MAGIC_SIGNATURE;
-    return sv_bless(newRV_noinc(sv), gv_stashpv(classname, TRUE));
+    sv = sv_bless(newRV_noinc(sv), gv_stashpv(classname, TRUE));
+
+    /* Go */
+    MUTEX_UNLOCK(&thr->mutex);
+
+    return sv;
 #else
     croak("No threads in this perl");
     return &PL_sv_undef;

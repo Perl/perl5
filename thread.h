@@ -216,6 +216,8 @@ struct perl_thread *getTHR _((void));
  * from thrsv which is cached in the per-interpreter structure.
  * Systems with very fast pthread_get_specific (which should be all systems
  * but unfortunately isn't) may wish to simplify to "...*thr = THR".
+ *
+ * The use of PL_threadnum should be safe here.
  */
 #ifndef dTHR
 #  define dTHR \
@@ -238,30 +240,27 @@ struct perl_thread *getTHR _((void));
  * try only locking them if there may be more than one thread in existence.
  * Systems with very fast mutexes (and/or slow conditionals) may wish to
  * remove the "if (threadnum) ..." test.
+ * XXX do NOT use C<if (PL_threadnum) ...> -- it sets up race conditions!
  */
 #define LOCK_SV_MUTEX				\
     STMT_START {				\
-	if (PL_threadnum)			\
-	    MUTEX_LOCK(&PL_sv_mutex);		\
+	MUTEX_LOCK(&PL_sv_mutex);		\
     } STMT_END
 
 #define UNLOCK_SV_MUTEX				\
     STMT_START {				\
-	if (PL_threadnum)			\
-	    MUTEX_UNLOCK(&PL_sv_mutex);		\
+	MUTEX_UNLOCK(&PL_sv_mutex);		\
     } STMT_END
 
 /* Likewise for strtab_mutex */
 #define LOCK_STRTAB_MUTEX			\
     STMT_START {				\
-	if (PL_threadnum)			\
-	    MUTEX_LOCK(&PL_strtab_mutex);	\
+	MUTEX_LOCK(&PL_strtab_mutex);		\
     } STMT_END
 
 #define UNLOCK_STRTAB_MUTEX			\
     STMT_START {				\
-	if (PL_threadnum)			\
-	    MUTEX_UNLOCK(&PL_strtab_mutex);	\
+	MUTEX_UNLOCK(&PL_strtab_mutex);		\
     } STMT_END
 
 #ifndef THREAD_RET_TYPE

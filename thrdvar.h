@@ -52,6 +52,8 @@ PERLVAR(Tretstack_max,	I32)
 
 PERLVAR(TSv,		SV *)		/* used to hold temporary values */
 PERLVAR(TXpv,		XPV *)		/* used to hold temporary values */
+PERLVAR(Tna,		STRLEN)		/* for use in SvPV when length is
+					   Not Applicable */
 
 /* stat stuff */
 PERLVAR(Tstatbuf,	Stat_t)

@@ -2170,8 +2170,7 @@ PP(pp_entersub)
      	 * (3) instead of (2) so we'd have to clone. Would the fact
      	 * that we released the mutex more quickly make up for this?
      	 */
-	if (PL_threadnum &&
-	    (svp = hv_fetch(thr->cvcache, (char *)cv, sizeof(cv), FALSE)))
+	if ((svp = hv_fetch(thr->cvcache, (char *)cv, sizeof(cv), FALSE)))
 	{
 	    /* We already have a clone to use */
 	    MUTEX_UNLOCK(CvMUTEXP(cv));

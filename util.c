@@ -2837,11 +2837,6 @@ new_struct_thread(struct perl_thread *t)
     thr->flags = THRf_R_JOINABLE;
     MUTEX_INIT(&thr->mutex);
 
-    PL_curcop = t->Tcurcop;       /* XXX As good a guess as any? */
-    PL_defstash = t->Tdefstash;   /* XXX maybe these should */
-    PL_curstash = t->Tcurstash;   /* always be set to main? */
-
-
     /* top_env needs to be non-zero. It points to an area
        in which longjmp() stuff is stored, as C callstack
        info there at least is thread specific this has to
@@ -2858,6 +2853,25 @@ new_struct_thread(struct perl_thread *t)
     PL_in_eval = FALSE;
     PL_restartop = 0;
 
+    PL_statname = NEWSV(66,0);
+    PL_maxscream = -1;
+    PL_regcompp = FUNC_NAME_TO_PTR(pregcomp);
+    PL_regexecp = FUNC_NAME_TO_PTR(regexec_flags);
+    PL_regindent = 0;
+    PL_reginterp_cnt = 0;
+    PL_lastscream = Nullsv;
+    PL_screamfirst = 0;
+    PL_screamnext = 0;
+    PL_reg_start_tmp = 0;
+    PL_reg_start_tmpl = 0;
+
+    /* parent thread's data needs to be locked while we make copy */
+    MUTEX_LOCK(&t->mutex);
+
+    PL_curcop = t->Tcurcop;       /* XXX As good a guess as any? */
+    PL_defstash = t->Tdefstash;   /* XXX maybe these should */
+    PL_curstash = t->Tcurstash;   /* always be set to main? */
+
     PL_tainted = t->Ttainted;
     PL_curpm = t->Tcurpm;         /* XXX No PMOP ref count */
     PL_nrs = newSVsv(t->Tnrs);
@@ -2871,18 +2885,6 @@ new_struct_thread(struct perl_thread *t)
     PL_bodytarget = newSVsv(t->Tbodytarget);
     PL_toptarget = newSVsv(t->Ttoptarget);
 
-    PL_statname = NEWSV(66,0);
-    PL_maxscream = -1;
-    PL_regcompp = FUNC_NAME_TO_PTR(pregcomp);
-    PL_regexecp = FUNC_NAME_TO_PTR(regexec_flags);
-    PL_regindent = 0;
-    PL_reginterp_cnt = 0;
-    PL_lastscream = Nullsv;
-    PL_screamfirst = 0;
-    PL_screamnext = 0;
-    PL_reg_start_tmp = 0;
-    PL_reg_start_tmpl = 0;
-    
     /* Initialise all per-thread SVs that the template thread used */
     svp = AvARRAY(t->threadsv);
     for (i = 0; i <= AvFILLp(t->threadsv); i++, svp++) {
@@ -2904,6 +2906,9 @@ new_struct_thread(struct perl_thread *t)
     t->next = thr;
     thr->next->prev = thr;
     MUTEX_UNLOCK(&PL_threads_mutex);
+
+    /* done copying parent's state */
+    MUTEX_UNLOCK(&t->mutex);
 
 #ifdef HAVE_THREAD_INTERN
     init_thread_intern(thr);

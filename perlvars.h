@@ -73,8 +73,6 @@ PERLVAR(Gnice_chunk_size,	U32)	/* how nice the chunk of memory is */
 PERLVARI(Grunops,	runops_proc_t,	FUNC_NAME_TO_PTR(RUNOPS_DEFAULT))
 
 PERLVAR(Gtokenbuf[256],	char)
-PERLVAR(Gna,		STRLEN)		/* for use in SvPV when length is
-					   Not Applicable */
 
 PERLVAR(Gsv_undef,	SV)
 PERLVAR(Gsv_no,		SV)

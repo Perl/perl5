@@ -3690,7 +3690,11 @@ cv_clone2(CV *proto, CV *outside)
 CV *
 cv_clone(CV *proto)
 {
-    return cv_clone2(proto, CvOUTSIDE(proto));
+    CV *cv;
+    MUTEX_LOCK(&PL_cred_mutex);		/* XXX create separate mutex */
+    cv = cv_clone2(proto, CvOUTSIDE(proto));
+    MUTEX_UNLOCK(&PL_cred_mutex);	/* XXX create separate mutex */
+    return cv;
 }
 
 void
@@ -4002,6 +4006,7 @@ newSUB(I32 floor, OP *o, OP *proto, OP *block)
     return cv;
 }
 
+/* XXX unsafe for threads if eval_owner isn't held */
 void
 newCONSTSUB(HV *stash, char *name, SV *sv)
 {

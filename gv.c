@@ -112,6 +112,7 @@ gv_init(GV *gv, HV *stash, char *name, STRLEN len, int multi)
     if (doproto) {			/* Replicate part of newSUB here. */
 	SvIOK_off(gv);
 	ENTER;
+	/* XXX unsafe for threads if eval_owner isn't held */
 	start_subparse(0,0);		/* Create CV in compcv. */
 	GvCV(gv) = PL_compcv;
 	LEAVE;
