@@ -3676,7 +3676,7 @@ signals and core dumps.
 	# forked, so the errno value is not visible in the parent.
 	printf "command failed: %s\n", ($! || "Unknown system() error");
     }
-    elsif ($rc > 0x80) {
+    elsif (($rc & 0xff) == 0) {
 	$rc >>= 8;
 	print "ran with non-zero exit status $rc\n";
     }
