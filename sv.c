@@ -8404,10 +8404,8 @@ char *
 Perl_sv_reftype(pTHX_ SV *sv, int ob)
 {
     if (ob && SvOBJECT(sv)) {
-	if (HvNAME(SvSTASH(sv)))
-	    return HvNAME(SvSTASH(sv));
-	else
-	    return "__ANON__";
+	char *name = HvNAME(SvSTASH(sv));
+	return name ? name : "__ANON__";
     }
     else {
 	switch (SvTYPE(sv)) {
