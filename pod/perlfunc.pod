@@ -460,7 +460,7 @@ otherwise it returns C<undef> and sets C<$!> (errno).
 If LAYER is omitted or specified as C<:raw> the filehandle is made
 suitable for passing binary data. This includes turning off possible CRLF
 translation and marking it as bytes (as opposed to Unicode characters).
-Note that as desipite what may be implied in I<"Programming Perl">
+Note that as despite what may be implied in I<"Programming Perl">
 (the Camel) or elsewhere C<:raw> is I<not> the simply inverse of C<:crlf>
 -- other layers which would affect binary nature of the stream are
 I<also> disabled. See L<PerlIO>, L<perlrun> and the discussion about the
