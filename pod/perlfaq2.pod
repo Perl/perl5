@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.31 $, $Date: 1999/04/14 03:46:19 $)
+perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.32 $, $Date: 1999/10/14 18:46:09 $)
 
 =head1 DESCRIPTION
 
@@ -436,7 +436,7 @@ bugs.
 
 Read the perlbug(1) man page (perl5.004 or later) for more information.
 
-=head2 What is perl.com?  
+=head2 What is perl.com? Perl Mongers? pm.org? perl.org?
 
 The perl.com domain is owned by Tom Christiansen, who created it as a
 public service long before perl.org came about.  Despite the name, it's a
@@ -450,6 +450,24 @@ Other starting points include
     http://language.perl.com/
     http://conference.perl.com/
     http://reference.perl.com/
+
+Perl Mongers is an advocacy organization for the Perl language.  For
+details, see the Perl Mongers web site at http://www.perlmongers.org/.
+
+Perl Mongers uses the pm.org domain for services related to Perl user
+groups.  See the Perl user group web site at http://www.pm.org/ for more
+information about joining, starting, or requesting services for a Perl
+user group.
+
+Perl Mongers also maintains the perl.org domain to provide general
+support services to the Perl community, including the hosting of mailing
+lists, web sites, and other services.  The web site
+http://www.perl.org/ is a general advocacy site for the Perl language,
+and there are many other sub-domains for special topics, such as
+
+    http://history.perl.org/
+    http://bugs.perl.org/
+    http://www.news.perl.org/
 
 =head1 AUTHOR AND COPYRIGHT
 
