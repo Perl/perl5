@@ -46,7 +46,6 @@
 #if !defined(PERL_IMPLICIT_CONTEXT)
 
 #if defined(PERL_IMPLICIT_SYS)
-#else
 #endif
 #if defined(USE_ITHREADS)
 #  if defined(PERL_IMPLICIT_SYS)
@@ -1495,7 +1494,6 @@
 #else	/* PERL_IMPLICIT_CONTEXT */
 
 #if defined(PERL_IMPLICIT_SYS)
-#else
 #endif
 #if defined(USE_ITHREADS)
 #  if defined(PERL_IMPLICIT_SYS)
@@ -2917,7 +2915,6 @@
 #else	/* PERL_OBJECT */
 
 #if defined(PERL_IMPLICIT_SYS)
-#else
 #endif
 #if defined(USE_ITHREADS)
 #  if defined(PERL_IMPLICIT_SYS)

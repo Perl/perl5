@@ -1293,9 +1293,8 @@ Ajno	|PerlInterpreter*	|perl_alloc_using \
 				|struct IPerlStdIO* io|struct IPerlLIO* lio \
 				|struct IPerlDir* d|struct IPerlSock* s \
 				|struct IPerlProc* p
-#else
-Ajnod	|PerlInterpreter*	|perl_alloc
 #endif
+Ajnod	|PerlInterpreter*	|perl_alloc
 Ajnod	|void	|perl_construct	|PerlInterpreter* interp
 Ajnod	|void	|perl_destruct	|PerlInterpreter* interp
 Ajnod	|void	|perl_free	|PerlInterpreter* interp
