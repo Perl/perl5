@@ -4412,7 +4412,6 @@ Perl_get_hash_seed(pTHX)
      {
 	  /* Compute a random seed */
 	  (void)seedDrand01((Rand_seed_t)seed());
-	  PL_srand_called = TRUE;
 	  myseed = (UV)(Drand01() * (NV)UV_MAX);
 #if RANDBITS < (UVSIZE * 8)
 	  /* Since there are not enough randbits to to reach all
