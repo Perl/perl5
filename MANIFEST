@@ -939,6 +939,7 @@ lib/ExtUtils/Mkbootstrap.pm	Writes a bootstrap file (see MakeMaker)
 lib/ExtUtils/Mkbootstrap.t	See if ExtUtils::Mkbootstrap works
 lib/ExtUtils/Mksymlists.pm	Writes a linker options file for extensions
 lib/ExtUtils/MM_Cygwin.pm	MakeMaker methods for Cygwin
+lib/ExtUtils/MM_Cygwin.t	See if ExtUtils::MM_Cygwin works
 lib/ExtUtils/MM_NW5.pm		MakeMaker methods for NetWare
 lib/ExtUtils/MM_OS2.pm		MakeMaker methods for OS/2
 lib/ExtUtils/MM_Unix.pm		MakeMaker base class for Unix
