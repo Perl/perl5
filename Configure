@@ -7222,7 +7222,7 @@ $grep fprintf libc.tmp > libc.ptf
 xscan='eval "<libc.ptf $com >libc.list"; $echo $n ".$c" >&4'
 xrun='eval "<libc.tmp $com >libc.list"; echo "done." >&4'
 xxx='[ADTSIW]'
-if com="$sed -n -e 's/__IO//' -e 's/^.* $xxx  *_[_.]*//p' -e 's/^.* $xxx  *//p'";\
+if com="$sed -n -e 's/__IO//' -e 's/^.* $xxx  *//p'";\
 	eval $xscan;\
 	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
 		eval $xrun
@@ -7366,25 +7366,23 @@ true-*) tx=no; eval "tval=\$$4"; case "$tval" in "") tx=yes;; esac;;
 esac;
 case "$tx" in
 yes)
-	case "$runnm" in
-	true)
-		if $contains $tlook $tf >/dev/null 2>&1;
-		then tval=true;
-		else tval=false;
-		fi;;
-	*)
+	tval=false;
+	if $test "$runnm" = "true" && $contains $tlook $tf >/dev/null 2>&1; then
+		tval=true;
+	else
 		echo "int main() { extern short $1$tdc; printf(\"%hd\", $1$tc); }" > t.c;
-		if $cc -o t $optimize $ccflags $ldflags t.c $libs >/dev/null 2>&1;
-		then tval=true;
-		else tval=false;
+		if $cc -o t $optimize $ccflags $ldflags t.c $libs >/dev/null 2>&1; then
+			tval=true;
 		fi;
-		$rm -f t t.c;;
-	esac;;
+		$rm -f t t.c;
+	fi;
+	;;
 *)
 	case "$tval" in
 	$define) tval=true;;
 	*) tval=false;;
-	esac;;
+	esac;
+	;;
 esac;
 eval "$2=$tval"'
 
