@@ -51,7 +51,7 @@ ok( close( $test ),			'close test handle' );
 # Check decoding _with_ layers
 
 ok(
- open( my $in,'<:via(PerlIO::via::QuotedPrint)', $file ),
+ open( my $in,'<:via(QuotedPrint)', $file ),
  "opening '$file' for reading"
 );
 is( $decoded,join( '',<$in> ),		'check decoding' );
