@@ -1,16 +1,18 @@
 # hints/solaris_2.sh
-# Last modified:  27 September 1995 by
+# Last modified:  Thu Feb  8 11:38:12 EST 1996
 # Andy Dougherty  <doughera@lafcol.lafayette.edu>
 # Based on input from lots of folks, especially
 # Dean Roehrich <roehrich@ironwood-fddi.cray.com>
-# 
+ 
 # See man vfork.
 usevfork=false
-#
+
 d_suidsafe=define
+
 # Avoid all libraries in /usr/ucblib.
 set `echo $glibpth | sed -e 's@/usr/ucblib@@'`
 glibpth="$*"
+
 # Remove bad libraries.  -lucb contains incompatible routines.
 # -lld doesn't do anything useful.
 # -lmalloc can cause a problem with GNU CC & Solaris.  Specifically,
@@ -20,8 +22,7 @@ glibpth="$*"
 set `echo " $libswanted " | sed -e 's@ ld @ @' -e 's@ malloc @ @' -e 's@ ucb @ @'`
 libswanted="$*"
 
-# Look for architecture name.  We want to suggest a useful default
-# for archlib and also warn about possible -x486 flags needed.
+# Look for architecture name.  We want to suggest a useful default.
 case "$archname" in
 '')
     if test -f /usr/bin/arch; then
@@ -33,12 +34,20 @@ case "$archname" in
     fi
     ;;
 esac
-case "$archname" in
-*86*) echo "For an Intel platform you might need to add -x486 to ccflags" >&4;;
-*) ;;
-esac
 
-# See below for excerpts from the Solaris FAQ.
+# Solaris 2.5 has reintroduced some BSD-ish functions into libc.
+# This is no problem unless you compile perl under Solaris 2.5 but
+# try to run the binary on 2.4.  Here, we take the easy way out by
+# claiming we don't have these functions.  perl.h works around all of
+# these anyway.
+# XXX Eventually, I should fix perl.h to prefer the POSIX versions.
+d_bcmp='undef'
+d_bcopy='undef'
+d_safebcpy='undef'
+d_index='undef'
+
+######################################################
+# General sanity testing.  See below for excerpts from the Solaris FAQ.
 
 # From roehrich@ironwood-fddi.cray.com Wed Sep 27 12:51:46 1995
 # Date: Thu, 7 Sep 1995 16:31:40 -0500
