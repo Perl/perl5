@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq9 - Networking ($Revision: 1.7 $, $Date: 2002/01/28 04:17:27 $)
+perlfaq9 - Networking ($Revision: 1.9 $, $Date: 2002/04/07 18:46:13 $)
 
 =head1 DESCRIPTION
 
@@ -253,7 +253,7 @@ Basically, the following substitutions do it:
 
     s/([^\w()'*~!.-])/sprintf '%%%02x', ord $1/eg;   # encode
 
-    s/%([A-Fa-f\d]{2})/chr hex $1/eg;                # decode
+    s/%([A-Fa-f\d]{2})/chr hex $1/eg;            # decode
 
 However, you should only apply them to individual URI components, not
 the entire URI, otherwise you'll lose information and generally mess

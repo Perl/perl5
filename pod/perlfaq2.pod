@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.9 $, $Date: 2002/03/09 21:01:13 $)
+perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.11 $, $Date: 2002/04/08 15:39:59 $)
 
 =head1 DESCRIPTION
 
@@ -185,8 +185,8 @@ following groups:
 
 There is also a Usenet gateway to Perl mailing lists sponsored by perl.org at 
 nntp://nntp.perl.org, or a web interface to the same lists at
-http://nntp.perl.org/group/ .  Other groups are listed at 
-http://lists.perl.org/
+http://nntp.perl.org/group/.  Other groups are listed at 
+http://lists.perl.org/ .
 
 =head2 Where should I post source code?
 
@@ -197,8 +197,8 @@ including setting the Followup-To header line to NOT include alt.sources;
 see their FAQ ( http://www.faqs.org/faqs/alt-sources-intro/ ) for details.
 
 If you're just looking for software, first use Google
-( http://www.google.com/ ), Google's usenet search interface
-( http://groups.google.com/ ),  and CPAN Search ( http://search.cpan.org/ ).
+( http://www.google.com ), Google's usenet search interface
+( http://groups.google.com ),  and CPAN Search ( http://search.cpan.org ).  
 This is faster and more productive than just posting a request.
 
 =head2 Perl Books
@@ -375,7 +375,7 @@ development, databases, Win32 Perl, graphical programming, regular
 expressions, and networking, and sponsors the Obfuscated Perl Contest
 and the Perl Poetry Contests.  As of mid-2001, the dead tree version
 of TPJ will be published as a quarterly supplement of SysAdmin
-magazine ( http://www.sysadmin.com/ ) For more details on TPJ,
+magazine ( http://www.sysadminmag.com/ ) For more details on TPJ,
 see http://www.tpj.com/
 
 Beyond this, magazines that frequently carry quality articles on
@@ -394,7 +394,7 @@ http://www.stonehenge.com/merlyn/LinuxMag/ .
 
 To get the best performance, pick a site from
 the list below and use it to grab the complete list of mirror sites
-which is at /CPAN/MIRRORED.BY or at http://mirror.cpan.org/
+which is at /CPAN/MIRRORED.BY or at http://mirror.cpan.org/ .
 From there you can find the quickest site for you.  Remember, the
 following list is I<not> the complete list of CPAN mirrors
 (the complete list contains 165 sites as of January 2001):
@@ -407,7 +407,6 @@ following list is I<not> the complete list of CPAN mirrors
   ftp://ftp.uvsq.fr/pub/perl/CPAN/
   ftp://ftp.funet.fi/pub/languages/perl/CPAN/
   ftp://ftp.dti.ad.jp/pub/lang/CPAN/
-  ftp://mirror.aarnet.edu.au/pub/perl/CPAN/
   ftp://cpan.if.usp.br/pub/mirror/CPAN/
 
 One may also use xx.cpan.org where "xx" is the 2-letter country code

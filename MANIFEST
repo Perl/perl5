@@ -204,7 +204,7 @@ ext/Encode/CN/Makefile.PL	Encode extension
 ext/Encode/Changes		Change Log
 ext/Encode/EBCDIC/EBCDIC.pm       Encode extension
 ext/Encode/EBCDIC/Makefile.PL     Encode extension
-ext/Encode/Encode.pm			Encode extension
+ext/Encode/Encode.pm	       Mother of all Encode extensions
 ext/Encode/Encode.xs		Encode extension
 ext/Encode/Encode/Changes.e2x		Skeleton file for enc2xs
 ext/Encode/Encode/Makefile_PL.e2x	Skeleton file for enc2xs
@@ -232,6 +232,8 @@ ext/Encode/encoding.pm	Perl Pragmactic Module
 ext/Encode/lib/Encode/Alias.pm	        Encode extension
 ext/Encode/lib/Encode/CJKConstants.pm	Encode extension
 ext/Encode/lib/Encode/CN/HZ.pm		Encode extension
+ext/Encode/lib/Encode/Config.pm		Encode configuration module
+ext/Encode/lib/Encode/Encoder.pm	       OO Encoder
 ext/Encode/lib/Encode/Encoding.pm	Encode extension
 ext/Encode/lib/Encode/JP/2022_JP.pm	Encode extension
 ext/Encode/lib/Encode/JP/2022_JP1.pm	Encode extension
@@ -244,14 +246,15 @@ ext/Encode/lib/Encode/XS.pm		Encode extension
 ext/Encode/t/Aliases.t	Encode extension test
 ext/Encode/t/CN.t		Encode extension test
 ext/Encode/t/Encode.t		Encode extension test
+ext/Encode/t/Encoder.t		Encode::Encoder test
 ext/Encode/t/JP.t		Encode extension test
 ext/Encode/t/KR.t		Encode extension test
 ext/Encode/t/TW.t		Encode extension test
-ext/Encode/t/Unicode.t		Encode extension test
+ext/Encode/t/Unicode.t	Encode extension test
 ext/Encode/t/encoding.t	encoding extension test
 ext/Encode/t/gb2312.euc	test data
 ext/Encode/t/gb2312.ref	test data
-ext/Encode/t/grow.t		Encode extension test
+ext/Encode/t/grow.t	Encode extension test
 ext/Encode/t/jisx0208.euc	test data
 ext/Encode/t/jisx0208.ref	test data
 ext/Encode/t/jisx0212.euc	test data

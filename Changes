@@ -28,6 +28,396 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.7.X		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 15813] By: jhi                                   on 2002/04/08  18:56:58
+        Log: FAQ sync.  (Ignoring the few URL differences for now.)
+     Branch: perl
+	   ! pod/perlfaq1.pod pod/perlfaq2.pod pod/perlfaq3.pod
+	   ! pod/perlfaq4.pod pod/perlfaq5.pod pod/perlfaq6.pod
+	   ! pod/perlfaq7.pod pod/perlfaq9.pod
+____________________________________________________________________________
+[ 15812] By: jhi                                   on 2002/04/08  18:23:41
+        Log: Upgrade to Encode 1.31, from Dan Kogai.
+     Branch: perl
+	   + ext/Encode/lib/Encode/Config.pm ext/Encode/t/Encoder.t
+	   ! MANIFEST ext/Encode/Changes ext/Encode/Encode.pm
+	   ! ext/Encode/MANIFEST ext/Encode/lib/Encode/Encoder.pm
+	   ! ext/Encode/lib/Encode/Unicode.pm ext/Encode/t/Unicode.t
+____________________________________________________________________________
+[ 15811] By: ams                                   on 2002/04/08  17:00:37
+        Log: Subject: Re: lib/sort.t failure -- real PATCH enclosed
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Mon, 8 Apr 2002 13:20:39 -0400 (EDT)
+             Message-Id: <Pine.SOL.4.10.10204081317040.20618-100000@maxwell.phys.lafayette.edu>
+     Branch: perl
+	   ! lib/sort.t pp_sort.c
+____________________________________________________________________________
+[ 15810] By: jhi                                   on 2002/04/08  16:27:32
+        Log: metaconfig unit changes for #15809.
+     Branch: metaconfig
+	   ! U/Glossary.patch U/modified/Unix.U U/modified/libs.U
+____________________________________________________________________________
+[ 15809] By: jhi                                   on 2002/04/08  16:27:10
+        Log: Mirroring #15806.
+     Branch: perl
+	   ! Porting/Glossary Porting/config.sh Porting/config_H
+____________________________________________________________________________
+[ 15808] By: jhi                                   on 2002/04/08  13:57:41
+        Log: metaconfig unit changes for #15807.
+     Branch: metaconfig
+	   ! U/protos/Protochk.U U/threads/d_asctime_r.U
+	   ! U/threads/d_crypt_r.U U/threads/d_ctermid_r.U
+	   ! U/threads/d_ctime_r.U U/threads/d_drand48_r.U
+	   ! U/threads/d_endgrent_r.U U/threads/d_endhostent_r.U
+	   ! U/threads/d_endnetent_r.U U/threads/d_endprotoent_r.U
+	   ! U/threads/d_endpwent_r.U U/threads/d_endservent_r.U
+	   ! U/threads/d_getgrent_r.U U/threads/d_getgrgid_r.U
+	   ! U/threads/d_getgrnam_r.U U/threads/d_gethostbyaddr_r.U
+	   ! U/threads/d_gethostbyname_r.U U/threads/d_gethostent_r.U
+	   ! U/threads/d_getlogin_r.U U/threads/d_getnetbyaddr_r.U
+	   ! U/threads/d_getnetbyname_r.U U/threads/d_getnetent_r.U
+	   ! U/threads/d_getprotobyname_r.U
+	   ! U/threads/d_getprotobynumber_r.U U/threads/d_getprotoent_r.U
+	   ! U/threads/d_getpwent_r.U U/threads/d_getpwnam_r.U
+	   ! U/threads/d_getpwuid_r.U U/threads/d_getservbyname_r.U
+	   ! U/threads/d_getservbyport_r.U U/threads/d_getservent_r.U
+	   ! U/threads/d_getspnam_r.U U/threads/d_gmtime_r.U
+	   ! U/threads/d_localtime_r.U U/threads/d_random_r.U
+	   ! U/threads/d_readdir64_r.U U/threads/d_readdir_r.U
+	   ! U/threads/d_setgrent_r.U U/threads/d_sethostent_r.U
+	   ! U/threads/d_setlocale_r.U U/threads/d_setnetent_r.U
+	   ! U/threads/d_setprotoent_r.U U/threads/d_setpwent_r.U
+	   ! U/threads/d_setservent_r.U U/threads/d_srand48_r.U
+	   ! U/threads/d_srandom_r.U U/threads/d_strerror_r.U
+	   ! U/threads/d_tmpnam_r.U U/threads/d_ttyname_r.U
+	   ! U/threads/i_pthread.U
+     Branch: perl
+	   ! config_h.SH
+____________________________________________________________________________
+[ 15807] By: jhi                                   on 2002/04/08  13:57:12
+        Log: Subject: [ PATCH ] Re: no snapshot today, no RC1 Monday    
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Mon, 08 Apr 2002 14:34:27 +0200
+             Message-Id: <20020408141403.CE45.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! Configure hints/hpux.sh reentr.pl
+____________________________________________________________________________
+[ 15806] By: ams                                   on 2002/04/08  13:50:43
+        Log: Subject: [PATCH] Updates to Porting/Glossary
+             From: Paul_GreenVOS@vos.stratus.com
+             Date: Mon, 8 Apr 02 10:44 edt
+             Message-Id: <200204081445.KAA16861@mailhub1.stratus.com>
+     Branch: perl
+	   ! Porting/Glossary
+____________________________________________________________________________
+[ 15805] By: ams                                   on 2002/04/08  13:47:32
+        Log: Subject: [PATCH] Re: MakeMaker broken (was Re: perl patch level 15780
+             coredumps on startup)
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 8 Apr 2002 10:34:49 -0400
+             Message-Id: <20020408143449.GB3245@blackrider>
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 15804] By: ams                                   on 2002/04/08  13:29:28
+        Log: Subject: [PATCH] example in pod/perllexwarn.pod
+             From: Slaven Rezic <slaven.rezic@berlin.de>
+             Date: Mon, 8 Apr 2002 16:12:52 +0200 (CEST)
+             Message-Id: <200204081412.g38ECqkX049116@vran.herceg.de>
+     Branch: perl
+	   ! pod/perllexwarn.pod
+____________________________________________________________________________
+[ 15803] By: jhi                                   on 2002/04/08  12:35:08
+        Log: Upgrade to Encode 1.30, from Dan Kogai. 
+     Branch: perl
+	   + ext/Encode/lib/Encode/Encoder.pm
+	   ! MANIFEST ext/Encode/Changes ext/Encode/Encode.pm
+	   ! ext/Encode/MANIFEST ext/Encode/lib/Encode/Alias.pm
+	   ! ext/Encode/lib/Encode/Supported.pod
+	   ! ext/Encode/lib/Encode/Unicode.pm ext/Encode/t/Unicode.t
+	   ! ext/Encode/t/grow.t
+____________________________________________________________________________
+[ 15802] By: jhi                                   on 2002/04/08  12:11:26
+        Log: Subject: Re: [MIME::Base64 patch] t/base64.t fix
+             From: Hugo van der Sanden <hv@crypt.compulink.co.uk>
+             Date: Mon, 08 Apr 2002 01:08:40 +0100
+             Message-Id: <200204080008.g3808eT02175@crypt.compulink.co.uk>
+     Branch: perl
+	   ! ext/MIME/Base64/t/base64.t
+____________________________________________________________________________
+[ 15801] By: nick                                  on 2002/04/08  07:28:27
+        Log: Integrate mainline
+     Branch: perlio
+	  +> ext/Encode/t/Unicode.t ext/Encode/t/unibench.pl
+	  +> ext/Encode/ucm/jis0208.ucm ext/Encode/ucm/jis0212.ucm
+	  +> ext/File/Glob/t/utf8.t
+	  +> lib/ExtUtils/t/Big-Fat-Dummy/Liar/Makefile.PL
+	  +> lib/ExtUtils/t/Big-Fat-Dummy/Liar/lib/Big/Fat/Liar.pm
+	  +> lib/ExtUtils/t/INST.t lib/ExtUtils/t/prefixify.t
+	   - ext/Encode/lib/Encode/10646_1.pm
+	   - ext/Encode/lib/Encode/Internal.pm
+	   - ext/Encode/lib/Encode/ucs2_le.pm ext/Encode/lib/Encode/utf8.pm
+	   - ext/Encode/ucm/cp37.ucm ext/Encode/ucm/ibm-1250.ucm
+	   - ext/Encode/ucm/ibm-1251.ucm ext/Encode/ucm/ibm-1252.ucm
+	   - ext/Encode/ucm/ibm-1253.ucm ext/Encode/ucm/ibm-1254.ucm
+	   - ext/Encode/ucm/ibm-1255.ucm ext/Encode/ucm/ibm-1256.ucm
+	   - ext/Encode/ucm/ibm-1257.ucm ext/Encode/ucm/ibm-1258.ucm
+	   - ext/Encode/ucm/macJapan.ucm ext/Encode/ucm/macRumanian.ucm
+	  !> (integrate 157 files)
+____________________________________________________________________________
+[ 15800] By: ams                                   on 2002/04/08  07:06:21
+        Log: Subject: [PATCH] ExtUtils::Packlist doesn't grok filenames with spaces
+             From: Jan Dubois <JanD@ActiveState.com>
+             Date: Mon, 08 Apr 2002 00:10:39 -0700
+             Message-Id: <hkf2bu4tq2j4784o3mua795jgochaesuas@4ax.com>
+     Branch: perl
+	   ! lib/ExtUtils/Packlist.pm
+____________________________________________________________________________
+[ 15799] By: ams                                   on 2002/04/08  04:50:36
+        Log: Subject: [PATCH pod/perlguts.pod] docco fixes
+             From: Stas Bekman <stas@stason.org>
+             Date: Mon, 8 Apr 2002 13:43:36 +0800 (SGT)
+             Message-Id: <Pine.LNX.4.44.0204081316090.23983-100000@hope.stason.org>
+     Branch: perl
+	   ! pod/perlguts.pod
+____________________________________________________________________________
+[ 15798] By: ams                                   on 2002/04/08  03:56:52
+        Log: New descriptions for savepv*(), as suggested by Gisle Aas.
+     Branch: perl
+	   ! util.c
+____________________________________________________________________________
+[ 15797] By: ams                                   on 2002/04/08  01:30:38
+        Log: Remove, eliminate, and destroy multiple, redundant occurences of the
+             same line of code. (As suggested by Simon Cozens.)
+     Branch: perl
+	   ! mg.c
+____________________________________________________________________________
+[ 15796] By: ams                                   on 2002/04/08  01:27:24
+        Log: Fix prototypes of save{,shared}pv{,n} (s/sv/pv/) as suggested by
+             Simon Cozens.
+     Branch: perl
+	   ! embed.fnc util.c
+____________________________________________________________________________
+[ 15795] By: ams                                   on 2002/04/08  01:05:16
+        Log: Subject: [ID 20020407.002] Bug (?) and patch for DProf
+             From: Tom Brown <thecap@peach.ece.utexas.edu>
+             Date: Sun, 07 Apr 2002 23:20:05 GMT
+             Message-Id: <E16uM6r-0002up-00@peach.ece.utexas.edu>
+     Branch: perl
+	   ! ext/Devel/DProf/DProf.xs
+____________________________________________________________________________
+[ 15794] By: jhi                                   on 2002/04/07  23:31:28
+        Log: Retract #15793 since #15775 should fix the problem.
+     Branch: perl
+	   ! hv.c
+____________________________________________________________________________
+[ 15793] By: jhi                                   on 2002/04/07  23:25:14
+        Log: (Retracted by #15794)
+             Subject: [PATCH] hv.c
+             From: "Mattia Barbon" <mbarbon@dsi.unive.it>
+             Date: Sun, 7 Apr 2002 14:25:48 +0200
+             Message-ID: <3CB056EC.16340.1119992@localhost>
+     Branch: perl
+	   ! hv.c
+____________________________________________________________________________
+[ 15792] By: ams                                   on 2002/04/07  21:48:49
+        Log: Make other nits nervous.
+     Branch: perl
+	   ! gv.c perl.c
+____________________________________________________________________________
+[ 15791] By: ams                                   on 2002/04/07  20:31:08
+        Log: Subject: [MIME::Base64 patch] t/base64.t fix
+             From: Dan Kogai <dankogai@dan.co.jp>
+             Date: Mon, 8 Apr 2002 06:19:29 +0900
+             Message-Id: <25BF9A84-4A6D-11D6-9F9F-00039301D480@dan.co.jp>
+     Branch: perl
+	   ! ext/MIME/Base64/t/base64.t
+____________________________________________________________________________
+[ 15790] By: ams                                   on 2002/04/07  20:15:52
+        Log: Subject: [PATCH] Devel/Peek/Peek.xs: reverse ifdef logic
+             From: Slaven Rezic <slaven.rezic@berlin.de>
+             Date: Sun, 7 Apr 2002 22:59:47 +0200 (CEST)
+             Message-Id: <200204072059.g37KxlgN091129@vran.herceg.de>
+     Branch: perl
+	   ! ext/Devel/Peek/Peek.xs
+____________________________________________________________________________
+[ 15789] By: rgs                                   on 2002/04/07  19:34:10
+        Log: Fully qualify in warning message the name of a subroutine redefined
+             via glob assignment
+     Branch: perl
+	   ! sv.c t/lib/warnings/op t/lib/warnings/sv
+____________________________________________________________________________
+[ 15788] By: jhi                                   on 2002/04/07  17:32:49
+        Log: Update from Dan Kogai.
+     Branch: perl
+	   ! ext/Encode/t/Unicode.t
+____________________________________________________________________________
+[ 15787] By: jhi                                   on 2002/04/07  16:59:45
+        Log: Can't right now twist my brain to figure out
+             the right CR/LF code point mappings in EBCDIC.
+     Branch: perl
+	   ! lib/Pod/t/eol.t
+____________________________________________________________________________
+[ 15786] By: jhi                                   on 2002/04/07  16:57:21
+        Log: Subject: [PATCH] Re: [PATCH] Re: perl@15772
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Sun, 7 Apr 2002 15:01:56 +0100
+             Message-ID: <20020407150156.R10686@plum.flirble.org>
+     Branch: perl
+	   ! ext/Data/Dumper/Dumper.xs
+____________________________________________________________________________
+[ 15785] By: jhi                                   on 2002/04/07  16:52:53
+        Log: Tpyo.
+     Branch: perl
+	   ! lib/Pod/t/eol.t
+____________________________________________________________________________
+[ 15784] By: jhi                                   on 2002/04/07  16:41:29
+        Log: EBCDIC branch was forgotten.
+     Branch: perl
+	   ! ext/Devel/Peek/Peek.t
+____________________________________________________________________________
+[ 15783] By: jhi                                   on 2002/04/07  16:29:09
+        Log: charnames::viacode() was broken, noticed by Jeffrey.
+     Branch: perl
+	   ! lib/charnames.pm lib/charnames.t
+____________________________________________________________________________
+[ 15782] By: jhi                                   on 2002/04/07  15:53:35
+        Log: Missing files.
+     Branch: perl
+	   + ext/Encode/t/Unicode.t ext/Encode/t/grow.t
+	   ! MANIFEST ext/Encode/MANIFEST
+____________________________________________________________________________
+[ 15781] By: jhi                                   on 2002/04/07  15:47:27
+        Log: (intentionally empty)
+     Branch: perl
+	   ! MANIFEST sv.h
+____________________________________________________________________________
+[ 15780] By: jhi                                   on 2002/04/07  15:34:10
+        Log: Upgrade to Encode 1.26, from Dan Kogai.
+     Branch: perl
+	   + ext/Encode/t/unibench.pl ext/Encode/ucm/jis0208.ucm
+	   + ext/Encode/ucm/jis0212.ucm
+	   - ext/Encode/lib/Encode/10646_1.pm
+	   - ext/Encode/lib/Encode/Internal.pm
+	   - ext/Encode/lib/Encode/ucs2_le.pm ext/Encode/lib/Encode/utf8.pm
+	   - ext/Encode/t/grow.t ext/Encode/ucm/cp37.ucm
+	   - ext/Encode/ucm/ibm-1250.ucm ext/Encode/ucm/ibm-1251.ucm
+	   - ext/Encode/ucm/ibm-1252.ucm ext/Encode/ucm/ibm-1253.ucm
+	   - ext/Encode/ucm/ibm-1254.ucm ext/Encode/ucm/ibm-1255.ucm
+	   - ext/Encode/ucm/ibm-1256.ucm ext/Encode/ucm/ibm-1257.ucm
+	   - ext/Encode/ucm/ibm-1258.ucm ext/Encode/ucm/macJapan.ucm
+	   - ext/Encode/ucm/macRumanian.ucm
+	   ! MANIFEST ext/Encode/Changes ext/Encode/Encode.pm
+	   ! ext/Encode/Encode/Makefile_PL.e2x ext/Encode/JP/JP.pm
+	   ! ext/Encode/JP/Makefile.PL ext/Encode/MANIFEST
+	   ! ext/Encode/bin/piconv ext/Encode/bin/unidump
+	   ! ext/Encode/encoding.pm ext/Encode/lib/Encode/Alias.pm
+	   ! ext/Encode/lib/Encode/Encoding.pm
+	   ! ext/Encode/lib/Encode/Supported.pod
+	   ! ext/Encode/lib/Encode/Unicode.pm ext/Encode/t/Aliases.t
+	   ! ext/Encode/t/jperl.t ext/Encode/ucm/adobeStdenc.ucm
+	   ! ext/Encode/ucm/adobeSymbol.ucm
+	   ! ext/Encode/ucm/adobeZdingbat.ucm ext/Encode/ucm/ascii.ucm
+	   ! ext/Encode/ucm/cp037.ucm ext/Encode/ucm/cp1006.ucm
+	   ! ext/Encode/ucm/cp1026.ucm ext/Encode/ucm/cp1250.ucm
+	   ! ext/Encode/ucm/cp1251.ucm ext/Encode/ucm/cp1252.ucm
+	   ! ext/Encode/ucm/cp1253.ucm ext/Encode/ucm/cp1254.ucm
+	   ! ext/Encode/ucm/cp1255.ucm ext/Encode/ucm/cp1256.ucm
+	   ! ext/Encode/ucm/cp1257.ucm ext/Encode/ucm/cp1258.ucm
+	   ! ext/Encode/ucm/cp424.ucm ext/Encode/ucm/cp437.ucm
+	   ! ext/Encode/ucm/cp500.ucm ext/Encode/ucm/cp737.ucm
+	   ! ext/Encode/ucm/cp775.ucm ext/Encode/ucm/cp850.ucm
+	   ! ext/Encode/ucm/cp852.ucm ext/Encode/ucm/cp855.ucm
+	   ! ext/Encode/ucm/cp856.ucm ext/Encode/ucm/cp857.ucm
+	   ! ext/Encode/ucm/cp860.ucm ext/Encode/ucm/cp861.ucm
+	   ! ext/Encode/ucm/cp862.ucm ext/Encode/ucm/cp863.ucm
+	   ! ext/Encode/ucm/cp864.ucm ext/Encode/ucm/cp865.ucm
+	   ! ext/Encode/ucm/cp866.ucm ext/Encode/ucm/cp869.ucm
+	   ! ext/Encode/ucm/cp874.ucm ext/Encode/ucm/cp875.ucm
+	   ! ext/Encode/ucm/cp932.ucm ext/Encode/ucm/cp936.ucm
+	   ! ext/Encode/ucm/cp949.ucm ext/Encode/ucm/cp950.ucm
+	   ! ext/Encode/ucm/jis0201.ucm ext/Encode/ucm/koi8-r.ucm
+	   ! ext/Encode/ucm/macArabic.ucm ext/Encode/ucm/macCentEuro.ucm
+	   ! ext/Encode/ucm/macChinsimp.ucm ext/Encode/ucm/macChintrad.ucm
+	   ! ext/Encode/ucm/macCroatian.ucm ext/Encode/ucm/macCyrillic.ucm
+	   ! ext/Encode/ucm/macDevanaga.ucm ext/Encode/ucm/macDingbats.ucm
+	   ! ext/Encode/ucm/macFarsi.ucm ext/Encode/ucm/macGreek.ucm
+	   ! ext/Encode/ucm/macGujarati.ucm ext/Encode/ucm/macGurmukhi.ucm
+	   ! ext/Encode/ucm/macHebrew.ucm ext/Encode/ucm/macIceland.ucm
+	   ! ext/Encode/ucm/macJapanese.ucm ext/Encode/ucm/macKorean.ucm
+	   ! ext/Encode/ucm/macROMnn.ucm ext/Encode/ucm/macRoman.ucm
+	   ! ext/Encode/ucm/macSymbol.ucm ext/Encode/ucm/macThai.ucm
+	   ! ext/Encode/ucm/macTurkish.ucm ext/Encode/ucm/macUkraine.ucm
+	   ! ext/Encode/ucm/nextstep.ucm
+____________________________________________________________________________
+[ 15779] By: jhi                                   on 2002/04/07  14:51:04
+        Log: Duh.  If the input is a stream of UTF-8 bytes, all that's
+             needed is SvUTF8_on(), sv_utf8_upgrade() is quite bogus.
+             Now, where was my coffee mug...
+     Branch: perl
+	   ! ext/File/Glob/Glob.pm ext/File/Glob/Glob.xs pod/perlfunc.pod
+	   ! pp_sys.c
+____________________________________________________________________________
+[ 15778] By: jhi                                   on 2002/04/07  14:35:15
+        Log: Subject: [PATCH] MakeMaker basic.t on Win32
+             From: "Mattia Barbon" <mbarbon@dsi.unive.it>
+             Date: Sun, 7 Apr 2002 14:25:48 +0200
+             Message-ID: <3CB056EC.27101.1119A3D@localhost>
+             
+             Subject: [PATCH] MakeMaker && Win32 && nmake
+             From: "Mattia Barbon" <mbarbon@dsi.unive.it>
+             Date: Sun, 7 Apr 2002 14:25:48 +0200
+             Message-ID: <3CB056EC.9001.11199ED@localhost>
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm lib/ExtUtils/MM_Win32.pm
+____________________________________________________________________________
+[ 15777] By: jhi                                   on 2002/04/07  14:27:06
+        Log: Subject: Re: Change 15762: As noted by Philip Newton: nothing wrong with BOM,
+             From: Philip Newton <Philip.Newton@gmx.net>
+             Date: Sun, 07 Apr 2002 07:51:49 +0200      
+             Message-ID: <1dnvau4j684hke2igk990f01nit8r2811s@4ax.com>
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[ 15776] By: jhi                                   on 2002/04/07  14:25:28
+        Log: There was no nice way of getting in UTF-8 filenames:
+             now one can use in the (new) three-arg form of readdir()
+             and in File::Glob import a ":utf8" to transparently accept
+             the filenames as Unicode.  Note that only :utf8 is supported,
+             not fancier stuff like :encoding(foobar)
+     Branch: perl
+	   + ext/File/Glob/t/utf8.t
+	   ! MANIFEST ext/File/Glob/Glob.pm ext/File/Glob/Glob.xs
+	   ! ext/File/Glob/Makefile.PL ext/File/Glob/bsd_glob.h opcode.h
+	   ! opcode.pl pod/perldelta.pod pod/perldiag.pod pod/perlfunc.pod
+	   ! pod/perlunicode.pod pod/perluniintro.pod pp_sys.c sv.h
+	   ! t/op/readdir.t
+____________________________________________________________________________
+[ 15775] By: rgs                                   on 2002/04/07  11:15:46
+        Log: Subject: [PATCH] Re: perl@15772
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Sun, 7 Apr 2002 11:06:42 +0100
+             Message-ID: <20020407110641.O10686@plum.flirble.org>
+     Branch: perl
+	   ! hv.c
+____________________________________________________________________________
+[ 15774] By: jhi                                   on 2002/04/07  01:21:07
+        Log: Subject: [PATCH] Re: 15764 breakage
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sat, 6 Apr 2002 19:14:02 -0500
+             Message-ID: <20020407001401.GA7076@blackrider>
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 15773] By: jhi                                   on 2002/04/06  19:25:47
+        Log: Instruction tweak.
+     Branch: perl
+	   ! README.os390
+____________________________________________________________________________
+[ 15772] By: jhi                                   on 2002/04/06  19:05:50
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 15771] By: jhi                                   on 2002/04/06  18:59:53
         Log: Subject: [PATCH] Encode tweaks for VMS
              From: Michael G Schwern <schwern@pobox.com>

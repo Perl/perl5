@@ -1376,6 +1376,8 @@ Sort an array. Here is an example:
 
     sortsv(AvARRAY(av), av_len(av)+1, Perl_sv_cmp_locale);
 
+See lib/sort.pm for details about controlling the sorting algorithm.
+
 =cut
 */
 
@@ -1387,15 +1389,18 @@ Perl_sortsv(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp)
     SV **hintsvp;
     I32 hints;
 
-    if ((hints = SORTHINTS(hintsvp))) {
-	 if (hints & HINT_SORT_QUICKSORT)
-	      sortsvp = S_qsortsv;
-	 else {
-	      if (hints & HINT_SORT_MERGESORT)
-		   sortsvp = S_mergesortsv;
-	      else
-		   sortsvp = S_mergesortsv;
-	 }
+    /*  Sun's Compiler (cc: WorkShop Compilers 4.2 30 Oct 1996 C 4.2) used 
+	to miscompile this function under optimization -O.  If you get test 
+	errors related to picking the correct sort() function, try recompiling 
+	this file without optimiziation.  -- A.D.  4/2002.
+    */
+    hints = SORTHINTS(hintsvp);
+    if (hints & HINT_SORT_QUICKSORT) {
+	sortsvp = S_qsortsv;
+    }
+    else {
+	/* The default as of 5.8.0 is mergesort */
+	sortsvp = S_mergesortsv;
     }
 
     sortsvp(aTHX_ array, nmemb, cmp);

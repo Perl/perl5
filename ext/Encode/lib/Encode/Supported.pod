@@ -63,6 +63,15 @@ The following encodings are always available.
   ascii         US-ascii				    [ECMA]
   iso-8859-1	latin1					     [ISO]
   utf8          UTF-8					 [RFC2279]
+  ----------------------------------------------------------------
+
+
+=head2 Encode::Unicode -- other Unicode encodings
+
+Unicode coding schemes other than native utf8 are supported by
+Encode::Unicode which will be autoloaded on demand.
+
+  ----------------------------------------------------------------
   UCS-2BE       UCS-2, iso-10646-1                      [IANA, UC]
   UCS-2LE                                                     [UC]
   UTF-16                                                      [UC]
@@ -454,7 +463,7 @@ Encoding names
 are registered to IANA as preferred MIME names and may probably 
 be used over the Internet.
 
-C<Shift_JIS> has been officialized by JIS X 0208-1997.
+C<Shift_JIS> has been officialized by JIS X 0208:1997.
 L<Microsoft-related naming mess> gives details.
 
 C<GB2312> is the IANA name for C<EUC-CN>.
@@ -494,17 +503,17 @@ then C<UTF-8> support
 
 =item *
 
-data coded with C<UTF-8> seamlessly passes traditional
-command piping (C<cat>, C<more>, etc.) while UTF-16 coded
+C<UTF-8> coded data seamlessly passes traditional
+command piping (C<cat>, C<more>, etc.) while C<UTF-16> coded
 data is likely to cause confusion (with it's zero bytes,
 for example)
 
 =item *
 
 it is beyond the power of words to describe the way HTML browsers
-encode non-C<ASCII> form data. To get a general impression refer to
+encode non-C<ASCII> form data. To get a general impression visit
 L<http://ppewww.ph.gla.ac.uk/~flavell/charset/form-i18n.html>.
-While encoding of form data has stabilzed for C<UTF-8> coded pages
+While encoding of form data has stabilized for C<UTF-8> coded pages
 (at least IE 5/6, NS 6, Opera 6 behave consitently), be sure to
 expect fun (and cross-browser discrepancies) with C<UTF-16> coded
 pages!
@@ -512,7 +521,7 @@ pages!
 =back
 
 The rule of thumb is to use C<UTF-8> unless you know what
-you're doing and unless you really need from using C<UTF-16>.
+you're doing and unless you really benefit from using C<UTF-16>.
 
 
   ISO-IR-165    [RFC1345]
@@ -541,7 +550,7 @@ Microsoft products misuse the following names:
 
 Microsoft extension to C<EUC-KR>.
 
-Proper name: C<CP949>.
+Proper names: C<CP949>, C<UHC>, C<x-windows-949> (as used by Mozilla).
 
 See L<http://lists.w3.org/Archives/Public/ietf-charsets/2001AprJun/0033.html>
 for details.
@@ -583,14 +592,15 @@ Microsoft's understanding of C<Shift_JIS>.
 JIS has not endorsed the full Microsoft standard however.
 The official C<Shift_JIS> includes only JIS X 0201 and JIS X 0208
 subsets, while Microsoft has always been meaning C<Shift_JIS> to
-encode a wider character repertoire.
+encode a wider character repertoire, see C<IANA> registration for
+C<Windows-31J>.
 
 As a historical predecessor Microsoft's variant
 probably has more rights for the name, albeit it may be objected
 that Microsoft shouldn't have used JIS as part of the name
 in the first place.
 
-Unabiguous name: C<CP932>.
+Unabiguous name: C<CP932>. C<IANA> name (not used?): C<Windows-31J>.
 
 Encode separately supports C<Shift_JIS> and C<cp932>.
 

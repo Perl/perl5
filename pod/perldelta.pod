@@ -647,14 +647,15 @@ included since its further use is discouraged.
 
 =item *
 
-C<Encode>, by Nick Ing-Simmons and Dan Kogai, provides a mechanism to
-translate between different character encodings.  Support for Unicode,
-ISO-8859-1, and ASCII are compiled in to the module.  Several other
-encodings (like the rest of the ISO-8859, CP*/Win*, Mac, KOI8-R, three
-variants EBCDIC, Chinese, Japanese, and Korean encodings) are included
-and can be loaded at runtime.  (For space considerations, the largest
-Chinese encodings have been separated into their own CPAN module,
-Encode::HanExtra, which Encode will use if available).  See L<Encode>.
+C<Encode>, orginally by Nick Ing-Simmons and now maintained by Dan
+Kogai, provides a mechanism to translate between different character
+encodings.  Support for Unicode, ISO-8859-1, and ASCII are compiled in
+to the module.  Several other encodings (like the rest of the
+ISO-8859, CP*/Win*, Mac, KOI8-R, three variants EBCDIC, Chinese,
+Japanese, and Korean encodings) are included and can be loaded at
+runtime.  (For space considerations, the largest Chinese encodings
+have been separated into their own CPAN module, Encode::HanExtra,
+which Encode will use if available).  See L<Encode>.
 
 Any encoding supported by Encode module is also available to the
 ":encoding()" layer if PerlIO is used.
@@ -744,10 +745,10 @@ sum(), min(), first(), and shuffle(), by Graham Barr.  See L<List::Util>.
 
 =item *
 
-C<Locale::Constants>, C<Locale::Country>, C<Locale::Currency>, and
-C<Locale::Language>, from Neil Bowers, have been added.  They provide the
-codes for various locale standards, such as "fr" for France, "usd" for
-US Dollar, and "jp" for Japanese.
+C<Locale::Constants>, C<Locale::Country>, C<Locale::Currency>
+C<Locale::Language>, and L<Locale::Script>, from Neil Bowers, have
+been added.  They provide the codes for various locale standards, such
+as "fr" for France, "usd" for US Dollar, and "jp" for Japanese.
 
     use Locale::Country;
 
@@ -766,7 +767,7 @@ Journal #13, republished here with kind permission.
 
 =item *
 
-Math::BigRat for big rational numbers, to accompany Math::BigInt and
+C<Math::BigRat> for big rational numbers, to accompany Math::BigInt and
 Math::BigFloat, from Tels.
 
 =item *

@@ -43,92 +43,92 @@ $blah = 3;
 
 get_st = 7;
 
-print "# `$blah' ne 7\nnot " unless $blah eq 7;
+print "# `$blah' ne 7\nnot " unless $blah == 7;
 print "ok 4\n";
 
 get_lex = 7;
 
-print "# `$in' ne 7\nnot " unless $in eq 7;
+print "# `$in' ne 7\nnot " unless $in == 7;
 print "ok 5\n";
 
 ++get_st;
 
-print "# `$blah' ne 8\nnot " unless $blah eq 8;
+print "# `$blah' ne 8\nnot " unless $blah == 8;
 print "ok 6\n";
 
 ++get_lex;
 
-print "# `$in' ne 8\nnot " unless $in eq 8;
+print "# `$in' ne 8\nnot " unless $in == 8;
 print "ok 7\n";
 
 id(get_st) = 10;
 
-print "# `$blah' ne 10\nnot " unless $blah eq 10;
+print "# `$blah' ne 10\nnot " unless $blah == 10;
 print "ok 8\n";
 
 id(get_lex) = 10;
 
-print "# `$in' ne 10\nnot " unless $in eq 10;
+print "# `$in' ne 10\nnot " unless $in == 10;
 print "ok 9\n";
 
 ++id(get_st);
 
-print "# `$blah' ne 11\nnot " unless $blah eq 11;
+print "# `$blah' ne 11\nnot " unless $blah == 11;
 print "ok 10\n";
 
 ++id(get_lex);
 
-print "# `$in' ne 11\nnot " unless $in eq 11;
+print "# `$in' ne 11\nnot " unless $in == 11;
 print "ok 11\n";
 
 id1(get_st) = 20;
 
-print "# `$blah' ne 20\nnot " unless $blah eq 20;
+print "# `$blah' ne 20\nnot " unless $blah == 20;
 print "ok 12\n";
 
 id1(get_lex) = 20;
 
-print "# `$in' ne 20\nnot " unless $in eq 20;
+print "# `$in' ne 20\nnot " unless $in == 20;
 print "ok 13\n";
 
 ++id1(get_st);
 
-print "# `$blah' ne 21\nnot " unless $blah eq 21;
+print "# `$blah' ne 21\nnot " unless $blah == 21;
 print "ok 14\n";
 
 ++id1(get_lex);
 
-print "# `$in' ne 21\nnot " unless $in eq 21;
+print "# `$in' ne 21\nnot " unless $in == 21;
 print "ok 15\n";
 
 inc(get_st);
 
-print "# `$blah' ne 22\nnot " unless $blah eq 22;
+print "# `$blah' ne 22\nnot " unless $blah == 22;
 print "ok 16\n";
 
 inc(get_lex);
 
-print "# `$in' ne 22\nnot " unless $in eq 22;
+print "# `$in' ne 22\nnot " unless $in == 22;
 print "ok 17\n";
 
 inc(id(get_st));
 
-print "# `$blah' ne 23\nnot " unless $blah eq 23;
+print "# `$blah' ne 23\nnot " unless $blah == 23;
 print "ok 18\n";
 
 inc(id(get_lex));
 
-print "# `$in' ne 23\nnot " unless $in eq 23;
+print "# `$in' ne 23\nnot " unless $in == 23;
 print "ok 19\n";
 
 ++inc(id1(id(get_st)));
 
-print "# `$blah' ne 25\nnot " unless $blah eq 25;
+print "# `$blah' ne 25\nnot " unless $blah == 25;
 print "ok 20\n";
 
 ++inc(id1(id(get_lex)));
 
-print "# `$in' ne 25\nnot " unless $in eq 25;
+print "# `$in' ne 25\nnot " unless $in == 25;
 print "ok 21\n";
 
 @a = (1) x 3;
@@ -166,7 +166,7 @@ sub a::var : lvalue { $var }
 
 "a"->var = 45;
 
-print "# `$var' ne 45\nnot " unless $var eq 45;
+print "# `$var' ne 45\nnot " unless $var == 45;
 print "ok 23\n";
 
 my $oo;
@@ -174,14 +174,14 @@ $o = bless \$oo, "a";
 
 $o->var = 47;
 
-print "# `$var' ne 47\nnot " unless $var eq 47;
+print "# `$var' ne 47\nnot " unless $var == 47;
 print "ok 24\n";
 
 sub o : lvalue { $o }
 
 o->var = 49;
 
-print "# `$var' ne 49\nnot " unless $var eq 49;
+print "# `$var' ne 49\nnot " unless $var == 49;
 print "ok 25\n";
 
 sub nolv () { $x0, $x1 } # Not lvalue

@@ -1,6 +1,6 @@
 package Encode;
 use strict;
-our $VERSION = do { my @r = (q$Revision: 1.26 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.31 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG = 0;
 
 require DynaLoader;
@@ -43,102 +43,22 @@ use Encode::Alias;
 
 # Make a %Encoding package variable to allow a certain amount of cheating
 our %Encoding;
-our %ExtModule;
-
-my @codepages = qw(
-		     37  424  437  500  737  775  850  852  855 
-		    856  857  860  861  862  863  864  865  866 
-		    869  874  875  932  936  949  950 1006 1026 
-		   1047 1250 1251 1252 1253 1254 1255 1256 1257
-		   1258
-		   );
-
-my @macintosh = qw(
-		   CentralEurRoman  Croatian  Cyrillic   Greek
-		   Iceland          Roman     Rumanian   Sami
-		   Thai             Turkish   Ukrainian
-		   );
-
-for my $k (2..11,13..16){
-    $ExtModule{"iso-8859-$k"} = 'Encode/Byte.pm';
-}
-
-for my $k (@codepages){
-    $ExtModule{"cp$k"} = 'Encode/Byte.pm';
-}
-
-for my $k (@macintosh)
-{
-    $ExtModule{"mac$k"} = 'Encode/Byte.pm';
-}
-
-%ExtModule =
-    (%ExtModule,
-     'koi8-r'           => 'Encode/Byte.pm',
-     'posix-bc'         => 'Encode/EBCDIC.pm',
-     cp037              => 'Encode/EBCDIC.pm',
-     cp1026             => 'Encode/EBCDIC.pm',
-     cp1047             => 'Encode/EBCDIC.pm',
-     cp500              => 'Encode/EBCDIC.pm',
-     cp875              => 'Encode/EBCDIC.pm',
-     dingbats           => 'Encode/Symbol.pm',
-     macDingbats        => 'Encode/Symbol.pm',
-     macSymbol          => 'Encode/Symbol.pm',
-     symbol             => 'Encode/Symbol.pm',
-     viscii             => 'Encode/Byte.pm',
-);
-
-unless ($ON_EBCDIC) { # CJK added to autoload unless EBCDIC env
-%ExtModule =
-    (%ExtModule,
-
-     'cp936'		=> 'Encode/CN.pm',
-     'euc-cn'           => 'Encode/CN.pm',
-     'gb12345-raw'	=> 'Encode/CN.pm',
-     'gb2312-raw'	=> 'Encode/CN.pm',
-     'gbk'		=> 'Encode/CN.pm',
-     'iso-ir-165'	=> 'Encode/CN.pm',
-
-     '7bit-jis'         => 'Encode/JP.pm',
-     'cp932'		=> 'Encode/JP.pm',
-     'euc-jp'	        => 'Encode/JP.pm',
-     'iso-2022-jp'	=> 'Encode/JP.pm',
-     'iso-2022-jp-1'	=> 'Encode/JP.pm',
-     'jis0201-raw'      => 'Encode/JP.pm',
-     'jis0208-raw'      => 'Encode/JP.pm',
-     'jis0212-raw'      => 'Encode/JP.pm',
-     'macJapanese'      => 'Encode/JP.pm',
-     'shiftjis'	        => 'Encode/JP.pm',
-
-     'cp949'		=> 'Encode/KR.pm',
-     'euc-kr'       	=> 'Encode/KR.pm',
-     'ksc5601'		=> 'Encode/KR.pm',
-     'macKorean'        => 'Encode/KR.pm',
-
-     'big5'		=> 'Encode/TW.pm',
-     'big5-hkscs'	=> 'Encode/TW.pm',
-     'cp950'		=> 'Encode/TW.pm',
-
-     'big5plus'     	=> 'Encode/HanExtra.pm',
-     'euc-tw'   	=> 'Encode/HanExtra.pm',
-     'gb18030'		=> 'Encode/HanExtra.pm',
-    );
-}
+use Encode::Config;
 
 sub encodings
 {
     my $class = shift;
     my @modules = (@_ and $_[0] eq ":all") ? values %ExtModule : @_;
-    for my $m (@modules)
-    {
-	$DEBUG and warn "about to require $m;";
-	eval { require $m; };
+    for my $mod (@modules){
+	$mod =~ s,::,/,g or $mod = "Encode/$mod";
+	$mod .= '.pm'; 
+	$DEBUG and warn "about to require $mod;";
+	eval { require $mod; };
     }
+    my %modules = map {$_ => 1} @modules;
     return
-	map({$_->[0]} 
-	    sort({$a->[1] cmp $b->[1]}
-		 map({[$_, lc $_]} 
-		     grep({ $_ ne 'Internal' }  keys %Encoding))));
+	sort { lc $a cmp lc $b }
+             grep {!/^(?:Internal|Unicode)$/o} keys %Encoding;
 }
 
 sub define_encoding
@@ -180,12 +100,14 @@ sub getEncoding
     $oc = $class->find_alias($lc) if $lc ne $name;
     return $oc if defined $oc;
 
-    if (!$skip_external and exists $ExtModule{$lc})
+    unless ($skip_external)
     {
-	eval{ require $ExtModule{$lc}; };
-	return $Encoding{$name} if exists $Encoding{$name};
+	if (my $mod = $ExtModule{$name} || $ExtModule{$lc}){
+	    $mod =~ s,::,/,g ; $mod .= '.pm';
+	    eval{ require $mod; };
+	    return $Encoding{$name} if exists $Encoding{$name};
+	}
     }
-
     return;
 }
 
@@ -232,7 +154,7 @@ sub from_to
 sub encode_utf8
 {
     my ($str) = @_;
-  utf8::encode($str);
+    utf8::encode($str);
     return $str;
 }
 
@@ -274,8 +196,8 @@ sub predefine_encodings{
 	    $_[1] = '' if $chk;
 	    return $res;
 	};
-	$Encode::Encoding{Unicode} = 
-	    bless {Name => "UTF_EBCDIC"}, "Encode::UTF_EBCDIC";
+	$Encode::Encoding{Internal} = 
+	    bless {Name => "UTF_EBCDIC"} => "Encode::UTF_EBCDIC";
     } else {  
 	# was in Encode::UTF_EBCDIC
 	package Encode::Internal;
@@ -289,7 +211,7 @@ sub predefine_encodings{
 	};
 	*encode = \&decode;
 	$Encode::Encoding{Unicode} = 
-	    bless {Name => "Internal"}, "Encode::Internal";
+	    bless {Name => "Internal"} => "Encode::Internal";
     }
 
     {
@@ -313,12 +235,12 @@ sub predefine_encodings{
 	    return $octets;
 	};
 	$Encode::Encoding{utf8} = 
-	    bless {Name => "utf8"}, "Encode::utf8";
+	    bless {Name => "utf8"} => "Encode::utf8";
     }
     # do externals if necessary 
     require File::Basename;
     require File::Spec;
-    for my $ext (qw(Unicode)){
+    for my $ext (qw()){
 	my $pm =
 	    File::Spec->catfile(File::Basename::dirname($INC{'Encode.pm'}),
 				"Encode", "$ext.pm");
@@ -501,10 +423,11 @@ ones that are not loaded yet, say
 
 Or you can give the name of specific module.
 
-  @with_jp = Encode->encodings("Encode/JP.pm");
+  @with_jp = Encode->encodings("Encode::JP");
 
-Note in this case you have to say C<"Encode/JP.pm"> instead of
-C<"Encode::JP">.
+When "::" is not in the name, "Encode::" is assumed.
+
+  @ebcdic = Encode->encodings("EBCDIC");
 
 To find which encodings are supported by this package in details, 
 see L<Encode::Supported>.

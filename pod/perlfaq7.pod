@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq7 - General Perl Language Issues ($Revision: 1.7 $, $Date: 2002/01/31 04:27:55 $)
+perlfaq7 - General Perl Language Issues ($Revision: 1.8 $, $Date: 2002/03/26 15:48:32 $)
 
 =head1 DESCRIPTION
 
@@ -741,7 +741,8 @@ not necessarily the same as the one in which you were compiled):
 
 =head2 How can I comment out a large block of perl code?
 
-Use embedded POD to discard it:
+You can use embedded POD to discard it.  The =for directive
+lasts until the next paragraph (two consecutive newlines).
 
     # program is here
 
@@ -749,6 +750,9 @@ Use embedded POD to discard it:
     This paragraph is commented out
 
     # program continues
+
+The =begin and =end directives can contain multiple
+paragraphs.
 
     =begin comment text
 
@@ -759,11 +763,12 @@ Use embedded POD to discard it:
 
     =end comment text
 
-    =cut
+The pod directives cannot go just anywhere.  You must put a
+pod directive where the parser is expecting a new statement,
+not just in the middle of an expression or some other
+arbitrary s grammar production.
 
-This can't go just anywhere.  You have to put a pod directive where
-the parser is expecting a new statement, not just in the middle
-of an expression or some other arbitrary yacc grammar production.
+See L<perlpod> for more details.
 
 =head2 How do I clear a package?
 
