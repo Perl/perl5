@@ -27,6 +27,7 @@
 
 static char ident_too_long[] = "Identifier too long";
 static char c_without_g[] = "Use of /c modifier is meaningless without /g";
+static char c_in_subst[] = "Use of /c modifier is meaningless in s///";
 
 static void restore_rsfp(pTHX_ void *f);
 #ifndef PERL_NO_UTF16_FILTER
@@ -6340,11 +6341,10 @@ S_scan_subst(pTHX_ char *start)
 	    break;
     }
 
-    /* issue a warning if /c is specified,but /g is not */
-    if (ckWARN(WARN_REGEXP) &&
-        (pm->op_pmflags & PMf_CONTINUE) && !(pm->op_pmflags & PMf_GLOBAL))
+    /* /c is not meaningful with s/// */
+    if (ckWARN(WARN_REGEXP) && (pm->op_pmflags & PMf_CONTINUE))
     {
-        Perl_warner(aTHX_ packWARN(WARN_REGEXP), c_without_g);
+        Perl_warner(aTHX_ packWARN(WARN_REGEXP), c_in_subst);
     }
 
     if (es) {

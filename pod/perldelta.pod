@@ -559,6 +559,8 @@ The command-line options -s and -F are now recognized on the shebang
 
 Use of the C</c> match modifier without an accompanying C</g> modifier
 elicits a new warning: C<Use of /c modifier is meaningless without /g>.
+Use of C</c> in substitutions, even with C</g>, elicits 
+C<Use of /c modifier is meaningless in s///>.
 
 =back
 

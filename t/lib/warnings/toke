@@ -106,6 +106,8 @@ toke.c	AOK
 
     Use of /c modifier is meaningless without /g     
 
+    Use of /c modifier is meaningless in s///
+
     Mandatory Warnings
     ------------------
     Use of "%s" without parentheses is ambiguous	[check_uni]
@@ -745,8 +747,10 @@ Unrecognized escape \q passed through at - line 4.
 # 20020328 mjd@plover.com at behest of jfriedl@yahoo.com
 use warnings 'regexp';
 "foo" =~ /foo/c;
+"foo" =~ /foo/cg;
 no warnings 'regexp';
 "foo" =~ /foo/c;
+"foo" =~ /foo/cg;
 EXPECT
 Use of /c modifier is meaningless without /g at - line 4.
 ########
@@ -755,7 +759,10 @@ Use of /c modifier is meaningless without /g at - line 4.
 use warnings 'regexp';
 $_ = "ab" ; 
 s/ab/ab/c;
+s/ab/ab/cg;
 no warnings 'regexp';
 s/ab/ab/c;
+s/ab/ab/cg;
 EXPECT
-Use of /c modifier is meaningless without /g at - line 5.
+Use of /c modifier is meaningless in s/// at - line 5.
+Use of /c modifier is meaningless in s/// at - line 6.

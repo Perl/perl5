@@ -3985,6 +3985,11 @@ returns no useful value.  See L<perlmod>.
 (D deprecated) You are now encouraged to use the explicitly quoted form
 if you wish to use an empty line as the terminator of the here-document.
 
+=item Use of /c modifier is meaningless in s///
+
+(W regexp) You used the /c modifier in a substitution.  The /c
+modifier is not presently meaningful in substitutions.
+
 =item Use of /c modifier is meaningless without /g
 
 (W regexp) You used the /c modifier with a regex operand, but didn't
