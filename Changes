@@ -29,6 +29,26 @@ Version v5.9.X		Development release working toward v5.10
 --------------
 
 ____________________________________________________________________________
+[ 22509] By: rgs                                   on 2004/03/16  18:19:52
+        Log: Update copyright notices
+     Branch: perl
+	   ! cop.h cv.h doio.c doop.c dump.c embed.h embed.pl embedvar.h
+	   ! form.h global.sym gv.c handy.h hv.c mg.c op.c op.h opcode.h
+	   ! opcode.pl opnames.h pad.c patchlevel.h perl.c perl.h perlapi.h
+	   ! perlio.c pp.c pp_ctl.c pp_hot.c pp_pack.c pp_sort.c pp_sys.c
+	   ! proto.h regexec.c scope.c scope.h sv.c sv.h thread.h
+	   ! universal.c utf8.c util.c
+____________________________________________________________________________
+[ 22508] By: rgs                                   on 2004/03/16  16:31:03
+        Log: Regenerate META.yml
+     Branch: perl
+	   ! META.yml
+____________________________________________________________________________
+[ 22507] By: rgs                                   on 2004/03/16  15:36:32
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
 [ 22506] By: rgs                                   on 2004/03/16  15:32:42
         Log: This is 5.9.1.
      Branch: perl
