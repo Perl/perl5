@@ -1084,7 +1084,6 @@ sv_grow(SV* sv, unsigned long newlen)
 void
 sv_setiv(register SV *sv, IV i)
 {
-    dTHR;	/* just for taint */
     sv_check_thinkfirst(sv);
     switch (SvTYPE(sv)) {
     case SVt_NULL:
@@ -1132,7 +1131,6 @@ sv_setuv(register SV *sv, UV u)
 void
 sv_setnv(register SV *sv, double num)
 {
-    dTHR;	/* just for taint */
     sv_check_thinkfirst(sv);
     switch (SvTYPE(sv)) {
     case SVt_NULL:
@@ -1247,9 +1245,11 @@ sv_2iv(register SV *sv)
 	if (SvPOKp(sv) && SvLEN(sv))
 	    return asIV(sv);
 	if (!SvROK(sv)) {
-	    dTHR;		/* just for localizing */
-	    if (dowarn && !localizing && !(SvFLAGS(sv) & SVs_PADTMP))
-		warn(warn_uninit);
+	    if (dowarn && !(SvFLAGS(sv) & SVs_PADTMP)) {
+		dTHR;
+		if (!localizing)
+		    warn(warn_uninit);
+	    }
 	    return 0;
 	}
     }
@@ -1323,9 +1323,11 @@ sv_2uv(register SV *sv)
 	if (SvPOKp(sv) && SvLEN(sv))
 	    return asUV(sv);
 	if (!SvROK(sv)) {
-	    dTHR;		/* just for localizing */
-	    if (dowarn && !localizing && !(SvFLAGS(sv) & SVs_PADTMP))
-		warn(warn_uninit);
+	    if (dowarn && !(SvFLAGS(sv) & SVs_PADTMP)) {
+		dTHR;
+		if (!localizing)
+		    warn(warn_uninit);
+	    }
 	    return 0;
 	}
     }
@@ -1369,9 +1371,11 @@ sv_2uv(register SV *sv)
 	SvUVX(sv) = asUV(sv);
     }
     else  {
-	dTHR;		/* just for localizing */
-	if (dowarn && !localizing && !(SvFLAGS(sv) & SVs_PADTMP))
-	    warn(warn_uninit);
+	if (dowarn && !(SvFLAGS(sv) & SVs_PADTMP)) {
+	    dTHR;
+	    if (!localizing)
+		warn(warn_uninit);
+	}
 	return 0;
     }
     DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2uv(%lu)\n",
@@ -1397,9 +1401,11 @@ sv_2nv(register SV *sv)
 	if (SvIOKp(sv))
 	    return (double)SvIVX(sv);
         if (!SvROK(sv)) {
-	    dTHR;		/* just for localizing */
-	    if (dowarn && !localizing && !(SvFLAGS(sv) & SVs_PADTMP))
-		warn(warn_uninit);
+	    if (dowarn && !(SvFLAGS(sv) & SVs_PADTMP)) {
+		dTHR;
+		if (!localizing)
+		    warn(warn_uninit);
+	    }
             return 0;
         }
     }
@@ -1603,9 +1609,11 @@ sv_2pv(register SV *sv, STRLEN *lp)
 	    goto tokensave;
 	}
         if (!SvROK(sv)) {
-	    dTHR;		/* just for localizing */
-	    if (dowarn && !localizing && !(SvFLAGS(sv) & SVs_PADTMP))
-		warn(warn_uninit);
+	    if (dowarn && !(SvFLAGS(sv) & SVs_PADTMP)) {
+		dTHR;
+		if (!localizing)
+		    warn(warn_uninit);
+	    }
             *lp = 0;
             return "";
         }
@@ -2144,7 +2152,6 @@ sv_setsv(SV *dstr, register SV *sstr)
 void
 sv_setpvn(register SV *sv, register const char *ptr, register STRLEN len)
 {
-    dTHR;	/* just for taint */
     assert(len >= 0);  /* STRLEN is probably unsigned, so this may
 			  elicit a warning, but it won't hurt. */
     sv_check_thinkfirst(sv);
@@ -2169,7 +2176,6 @@ sv_setpvn(register SV *sv, register const char *ptr, register STRLEN len)
 void
 sv_setpv(register SV *sv, register const char *ptr)
 {
-    dTHR;	/* just for taint */
     register STRLEN len;
 
     sv_check_thinkfirst(sv);
@@ -2194,7 +2200,6 @@ sv_setpv(register SV *sv, register const char *ptr)
 void
 sv_usepvn(register SV *sv, register char *ptr, register STRLEN len)
 {
-    dTHR;	/* just for taint */
     sv_check_thinkfirst(sv);
     if (!SvUPGRADE(sv, SVt_PV))
 	return;
@@ -2255,7 +2260,6 @@ sv_chop(register SV *sv, register char *ptr)	/* like set but assuming ptr is in 
 void
 sv_catpvn(register SV *sv, register char *ptr, register STRLEN len)
 {
-    dTHR;	/* just for taint */
     STRLEN tlen;
     char *junk;
 
@@ -2284,7 +2288,6 @@ sv_catsv(SV *dstr, register SV *sstr)
 void
 sv_catpv(register SV *sv, register char *ptr)
 {
-    dTHR;	/* just for taint */
     register STRLEN len;
     STRLEN tlen;
     char *junk;
@@ -2363,10 +2366,8 @@ sv_magic(register SV *sv, SV *obj, int how, char *name, I32 namlen)
     if (name)
 	if (namlen >= 0)
 	    mg->mg_ptr = savepvn(name, namlen);
-	else if (namlen == HEf_SVKEY) {
-	    dTHR;		/* just for SvREFCNT_inc */
+	else if (namlen == HEf_SVKEY)
 	    mg->mg_ptr = (char*)SvREFCNT_inc((SV*)name);
-	}
     
     switch (how) {
     case 0:
@@ -3582,7 +3583,6 @@ sv_reset(register char *s, HV *stash)
 		sv = GvSV(gv);
 		(void)SvOK_off(sv);
 		if (SvTYPE(sv) >= SVt_PV) {
-		    dTHR;	/* just for taint */
 		    SvCUR_set(sv, 0);
 		    if (SvPVX(sv) != Nullch)
 			*SvPVX(sv) = '\0';
@@ -3801,7 +3801,6 @@ sv_pvn_force(SV *sv, STRLEN *lp)
 	    *SvEND(sv) = '\0';
 	}
 	if (!SvPOK(sv)) {
-	    dTHR;	/* just for taint */
 	    SvPOK_on(sv);		/* validate pointer */
 	    SvTAINT(sv);
 	    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2pv(%s)\n",

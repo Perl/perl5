@@ -31,7 +31,7 @@ do_trans(SV *sv, OP *arg)
     register I32 squash = op->op_private & OPpTRANS_SQUASH;
     STRLEN len;
 
-    if (SvREADONLY(sv))
+    if (SvREADONLY(sv) && !(op->op_private & OPpTRANS_COUNTONLY))
 	croak(no_modify);
     tbl = (short*)cPVOP->op_pv;
     s = (U8*)SvPV(sv, len);
@@ -50,6 +50,14 @@ do_trans(SV *sv, OP *arg)
 		matches++;
 		*s = ch;
 	    }
+	    s++;
+	}
+	SvSETMAGIC(sv);
+    }
+    else if (op->op_private & OPpTRANS_COUNTONLY) {
+	while (s < send) {
+	    if (tbl[*s] >= 0)
+		matches++;
 	    s++;
 	}
     }
@@ -74,8 +82,8 @@ do_trans(SV *sv, OP *arg)
 	matches += send - d;	/* account for disappeared chars */
 	*d = '\0';
 	SvCUR_set(sv, d - (U8*)SvPVX(sv));
+	SvSETMAGIC(sv);
     }
-    SvSETMAGIC(sv);
     return matches;
 }
 

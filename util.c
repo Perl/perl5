@@ -822,18 +822,20 @@ fbm_compile(SV *sv)
     sv_upgrade(sv, SVt_PVBM);
     if (len > 255 || len == 0)	/* TAIL might be on on a zero-length string. */
 	return;			/* can't have offsets that big */
-    Sv_Grow(sv,len+258);
-    table = (unsigned char*)(SvPVX(sv) + len + 1);
-    s = table - 2;
-    for (i = 0; i < 256; i++) {
-	table[i] = len;
-    }
-    i = 0;
-    while (s >= (unsigned char*)(SvPVX(sv)))
-    {
-	if (table[*s] == len)
-	    table[*s] = i;
-	s--,i++;
+    if (len > 2) {
+	Sv_Grow(sv,len + 258);
+	table = (unsigned char*)(SvPVX(sv) + len + 1);
+	s = table - 2;
+	for (i = 0; i < 256; i++) {
+	    table[i] = len;
+	}
+	i = 0;
+	while (s >= (unsigned char*)(SvPVX(sv)))
+	    {
+		if (table[*s] == len)
+		    table[*s] = i;
+		s--,i++;
+	    }
     }
     sv_magic(sv, Nullsv, 'B', Nullch, 0);	/* deep magic */
     SvVALID_on(sv);
@@ -865,7 +867,15 @@ fbm_instr(unsigned char *big, register unsigned char *bigend, SV *littlestr)
 	STRLEN len;
 	char *l = SvPV(littlestr,len);
 	if (!len) {
-	    if (SvTAIL(littlestr)) {
+	    if (SvTAIL(littlestr)) {	/* Can be only 0-len constant
+					   substr => we can ignore SvVALID */
+		if (multiline) {
+		    char *t = "\n";
+		    if ((s = (unsigned char*)ninstr((char*)big, (char*)bigend,
+			 			    t, t + len))) {
+			return (char*)s;
+		    }
+		}
 		if (bigend > big && bigend[-1] == '\n')
 		    return (char *)(bigend - 1);
 		else
@@ -882,13 +892,32 @@ fbm_instr(unsigned char *big, register unsigned char *bigend, SV *littlestr)
 	    return Nullch;
 	little = (unsigned char*)SvPVX(littlestr);
 	s = bigend - littlelen;
-	if (*s == *little && memEQ((char*)s,(char*)little,littlelen))
+	if (s > big
+	    && bigend[-1] == '\n' 
+	    && s[-1] == *little && memEQ((char*)s - 1,(char*)little,littlelen))
+	    return (char*)s - 1;	/* how sweet it is */
+	else if (*s == *little && memEQ((char*)s,(char*)little,littlelen))
 	    return (char*)s;		/* how sweet it is */
-	else if (bigend[-1] == '\n' && little[littlelen-1] != '\n'
-		 && s > big) {
-	    s--;
-	    if (*s == *little && memEQ((char*)s,(char*)little,littlelen))
+	return Nullch;
+    }
+    if (littlelen <= 2) {
+	unsigned char c1 = (unsigned char)SvPVX(littlestr)[0];
+	unsigned char c2 = (unsigned char)SvPVX(littlestr)[1];
+	/* This may do extra comparisons if littlelen == 2, but this
+	   should be hidden in the noise since we do less indirection. */
+	
+	s = big;
+	bigend -= littlelen;
+	while (s <= bigend) {
+	    if (s[0] == c1 
+		&& (littlelen == 1 || s[1] == c2)
+		&& (!SvTAIL(littlestr)
+		    || s == bigend
+		    || s[littlelen] == '\n')) /* Automatically multiline */
+	    {
 		return (char*)s;
+	    }
+	    s++;
 	}
 	return Nullch;
     }

@@ -572,18 +572,18 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_pthread_yield HAS_PTHREAD_YIELD
 
-/* HAS_SCHED_YIELD:
- *	This symbol, if defined, indicates that the sched_yield routine is
- *	available to yield the execution of the current thread.
- */
-#$d_sched_yield HAS_SCHED_YIELD
-
 /* HAS_READDIR:
  *	This symbol, if defined, indicates that the readdir routine is
  *	available to read directory entries. You may have to include
  *	<dirent.h>. See I_DIRENT.
  */
 #$d_readdir HAS_READDIR		/**/
+
+/* HAS_SCHED_YIELD:
+ *	This symbol, if defined, indicates that the sched_yield
+ *	routine is available to yield the execution of the current thread.
+ */
+#$d_sched_yield HAS_SCHED_YIELD
 
 /* HAS_SEEKDIR:
  *	This symbol, if defined, indicates that the seekdir routine is

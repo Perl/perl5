@@ -77,16 +77,63 @@ static int readExports(ModulePtr);
 static void terminate(void);
 static void *findMain(void);
 
+static char *strerror_failed   = "(strerror failed)";
+static char *strerror_r_failed = "(strerror_r failed)";
+
 char *strerrorcat(char *str, int err) {
-    char buf[8192];
-    strerror_r(err, buf, sizeof(buf));
-    strcat(str,buf);
+    int strsiz = strlen(str);
+    int msgsiz;
+    char *msg;
+
+#ifdef USE_THREADS
+    char *buf = malloc(BUFSIZ);
+
+    if (buf == 0)
+      return 0;
+    if (strerror_r(err, buf, sizeof(buf)) == 0)
+      msg = buf;
+    else
+      msg = strerror_r_failed;
+    msgsiz = strlen(msg);
+    if (strsiz + msgsiz < BUFSIZ)
+      strcat(str, msg);
+    free(buf);
+#else
+    if ((msg = strerror(err)) == 0)
+      msg = strerror_failed;
+    msgsiz = strlen(msg);		/* Note msg = buf and free() above. */
+    if (strsiz + msgsiz < BUFSIZ)	/* Do not move this after #endif. */
+      strcat(str, msg);
+#endif
+
     return str;
 }
+
 char *strerrorcpy(char *str, int err) {
-    char buf[8192];
-    strerror_r(err, buf, sizeof(buf));
-    strcpy(str,buf);
+    int msgsiz;
+    char *msg;
+
+#ifdef USE_THREADS
+    char *buf = malloc(BUFSIZ);
+
+    if (buf == 0)
+      return 0;
+    if (strerror_r(err, buf, sizeof(buf)) == 0)
+      msg = buf;
+    else
+      msg = strerror_r_failed;
+    msgsiz = strlen(msg);
+    if (msgsiz < BUFSIZ)
+      strcpy(str, msg);
+    free(buf);
+#else
+    if ((msg = strerror(err)) == 0)
+      msg = strerror_failed;
+    msgsiz = strlen(msg);	/* Note msg = buf and free() above. */
+    if (msgsiz < BUFSIZ)	/* Do not move this after #endif. */
+      strcpy(str, msg);
+#endif
+
     return str;
 }
   
