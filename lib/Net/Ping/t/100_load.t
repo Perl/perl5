@@ -3,6 +3,13 @@
 
 ######################### We start with some black magic to print on failure.
 
+BEGIN {
+    unless (eval "require Socket") {
+	print "1..0 # Skip: no Socket\n";
+	exit;
+    }
+}
+
 use Test;
 BEGIN { plan tests => 1; $loaded = 0}
 END { ok $loaded;}
