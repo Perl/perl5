@@ -532,6 +532,11 @@ find_threadsv(char *name)
 	    sawampersand = TRUE;
 	    SvREADONLY_on(sv);
 	    /* FALL THROUGH */
+
+	/* XXX %! tied to Errno.pm needs to be added here.
+	 * See gv_fetchpv(). */
+	/* case '!': */
+
 	default:
 	    sv_magic(sv, 0, 0, name, 1); 
 	}
