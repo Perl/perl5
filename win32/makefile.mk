@@ -429,6 +429,9 @@ UTILS		=			\
 		..\pod\pod2latex	\
 		..\pod\pod2man		\
 		..\pod\pod2text		\
+		..\pod\pod2usage	\
+		..\pod\podchecker	\
+		..\pod\podselect	\
 		..\x2p\find2perl	\
 		..\x2p\s2p		\
 		bin\runperl.pl		\
