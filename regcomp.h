@@ -1,6 +1,9 @@
-/* $Header: regcomp.h,v 4.0 91/03/20 01:39:09 lwall Locked $
+/* $RCSfile: regcomp.h,v $$Revision: 4.0.1.1 $$Date: 91/06/07 11:49:40 $
  *
  * $Log:	regcomp.h,v $
+ * Revision 4.0.1.1  91/06/07  11:49:40  lwall
+ * patch4: no change
+ * 
  * Revision 4.0  91/03/20  01:39:09  lwall
  * 4.0 baseline.
  * 

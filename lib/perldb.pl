@@ -1,6 +1,6 @@
 package DB;
 
-$header = '$Header: perldb.pl,v 4.0 91/03/20 01:25:50 lwall Locked $';
+$header = '$RCSfile: perldb.pl,v $$Revision: 4.0.1.1 $$Date: 91/06/07 11:17:44 $';
 #
 # This file is automatically included if you do perl -d.
 # It's probably not useful to include this yourself.
@@ -10,6 +10,10 @@ $header = '$Header: perldb.pl,v 4.0 91/03/20 01:25:50 lwall Locked $';
 # have a breakpoint.  It also inserts a do 'perldb.pl' before the first line.
 #
 # $Log:	perldb.pl,v $
+# Revision 4.0.1.1  91/06/07  11:17:44  lwall
+# patch4: added $^P variable to control calling of perldb routines
+# patch4: debugger sometimes listed wrong number of lines for a statement
+# 
 # Revision 4.0  91/03/20  01:25:50  lwall
 # 4.0 baseline.
 # 
@@ -61,6 +65,7 @@ sub DB {
     ($package, $filename, $line) = caller;
     $usercontext = '($@, $!, $[, $,, $/, $\) = @saved;' .
 	"package $package;";		# this won't let them modify, alas
+    local($^P) = 0;			# don't debug our own evals
     local(*dbline) = "_<$filename";
     $max = $#dbline;
     if (($stop,$action) = split(/\0/,$dbline{$line})) {
@@ -76,7 +81,7 @@ sub DB {
 	print OUT "$package'" unless $sub =~ /'/;
 	print OUT "$sub($filename:$line):\t",$dbline[$line];
 	for ($i = $line + 1; $i <= $max && $dbline[$i] == 0; ++$i) {
-	    last if $dbline[$i] =~ /^\s*(}|#|\n)/;
+	    last if $dbline[$i] =~ /^\s*(;|}|#|\n)/;
 	    print OUT "$sub($filename:$i):\t",$dbline[$i];
 	}
     }

@@ -7,9 +7,13 @@
  * blame Henry for some of the lack of readability.
  */
 
-/* $RCSfile: regexec.c,v $$Revision: 4.0.1.1 $$Date: 91/04/12 09:07:39 $
+/* $RCSfile: regexec.c,v $$Revision: 4.0.1.2 $$Date: 91/06/07 11:50:33 $
  *
  * $Log:	regexec.c,v $
+ * Revision 4.0.1.2  91/06/07  11:50:33  lwall
+ * patch4: new copyright notice
+ * patch4: // wouldn't use previous pattern if it started with a null character
+ * 
  * Revision 4.0.1.1  91/04/12  09:07:39  lwall
  * patch1: regexec only allocated space for 9 subexpresssions
  * 
@@ -40,10 +44,10 @@
  *
  ****    Alterations to Henry's code are...
  ****
- ****    Copyright (c) 1989, Larry Wall
+ ****    Copyright (c) 1991, Larry Wall
  ****
- ****    You may distribute under the terms of the GNU General Public License
- ****    as specified in the README file that comes with the perl 3.0 kit.
+ ****    You may distribute under the terms of either the GNU General Public
+ ****    License or the Artistic License, as specified in the README file.
  *
  * Beware that some of this code is subtly aware of the way operator
  * precedence is structured in regular expressions.  Serious changes in
@@ -151,7 +155,8 @@ int safebase;	/* no need to remember string in subbase */
 	/* If there is a "must appear" string, look for it. */
 	s = string;
 	if (prog->regmust != Nullstr &&
-	    (!(prog->reganch & 1) || (multiline && prog->regback >= 0)) ) {
+	    (!(prog->reganch & ROPT_ANCH)
+	     || (multiline && prog->regback >= 0)) ) {
 		if (stringarg == strbeg && screamer) {
 			if (screamfirst[prog->regmust->str_rare] >= 0)
 				s = screaminstr(screamer,prog->regmust);
@@ -213,7 +218,7 @@ int safebase;	/* no need to remember string in subbase */
 
 	/* Simplest case:  anchored match need be tried only once. */
 	/*  [unless multiline is set] */
-	if (prog->reganch & 1) {
+	if (prog->reganch & ROPT_ANCH) {
 		if (regtry(prog, string))
 			goto got_it;
 		else if (multiline) {
@@ -235,7 +240,7 @@ int safebase;	/* no need to remember string in subbase */
 
 	/* Messy cases:  unanchored match. */
 	if (prog->regstart) {
-		if (prog->reganch & 2) {	/* we have /x+whatever/ */
+		if (prog->reganch & ROPT_SKIP) {  /* we have /x+whatever/ */
 		    /* it must be a one character string */
 		    i = prog->regstart->str_ptr[0];
 		    while (s < strend) {
@@ -275,7 +280,7 @@ int safebase;	/* no need to remember string in subbase */
 		goto phooey;
 	}
 	if (c = prog->regstclass) {
-		int doevery = (prog->reganch & 2) == 0;
+		int doevery = (prog->reganch & ROPT_SKIP) == 0;
 
 		if (minlen)
 		    dontbother = minlen - 1;
@@ -445,7 +450,7 @@ int safebase;	/* no need to remember string in subbase */
 		    s = nsavestr(strbeg,i);	/* so $digit will work later */
 		    if (prog->subbase)
 			    Safefree(prog->subbase);
-		    prog->subbase = s;
+		    prog->subbeg = prog->subbase = s;
 		    prog->subend = s+i;
 		}
 		else

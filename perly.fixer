@@ -2,6 +2,9 @@
 
 #  Hacks to make it work with Interactive's SysVr3 Version 2.2
 #   doughera@lafvax.lafayette.edu (Andy Dougherty)   3/23/91
+#
+# Additional information to make the BSD section work with SunOS 4.0.2
+#   tdinger@East.Sun.COM (Tom Dinger)	4/15/1991
 
 input=$1
 output=$2
@@ -10,11 +13,12 @@ tmp=/tmp/f$$
 plan="unknown"
 
 #  Test for BSD 4.3 version.
+#  Also tests for the SunOS 4.0.2 version
 egrep 'YYSTYPE[ 	]*yyv\[ *YYMAXDEPTH *\];
 short[  ]*yys\[ *YYMAXDEPTH *\] *;
 yyps *= *&yys\[ *-1 *\];
 yypv *= *&yyv\[ *-1 *\];
-if *\( *\+\+yyps *> *&yys\[ *YYMAXDEPTH *\] *\)' $input >$tmp
+if *\( *\+\+yyps *>=* *&yys\[ *YYMAXDEPTH *\] *\)' $input >$tmp
 
 set `wc -l $tmp`
 if test "$1" = "5"; then
@@ -36,7 +40,10 @@ if *\( *\+\+yy_ps *>= *&yys\[ *YYMAXDEPTH *\] *\)' $input >$tmp
 fi
 
 case "$plan" in
-    #######################################################
+    ##################################################################
+    # The SunOS 4.0.2 version has the comparison fixed already.
+    # Also added are out of memory checks (makes porting the generated
+    # code easier) For most systems, it can't hurt. -- TD
     "bsd43")
 	echo "Patching perly.c to allow dynamic yacc stack allocation"
 	echo "Assuming bsd4.3 yaccpar"
@@ -55,13 +62,17 @@ short *maxyyps;
 \	if (!yyv) {\
 \	    yyv = (YYSTYPE*) malloc(yymaxdepth * sizeof(YYSTYPE));\
 \	    yys = (short*) malloc(yymaxdepth * sizeof(short));\
+\	    if ( !yyv || !yys ) {\
+\		yyerror( "out of memory" );\
+\		return(1);\
+\	    }\
 \	    maxyyps = &yys[yymaxdepth];\
 \	}\
 \	yyps = &yys[-1];\
 \	yypv = &yyv[-1];
 
 
-/if *( *\+\+yyps *> *&yys\[ *YYMAXDEPTH *\] *)/c\
+/if *( *\+\+yyps *>=* *&yys\[ *YYMAXDEPTH *\] *)/c\
 \		if( ++yyps >= maxyyps ) {\
 \		    int tv = yypv - yyv;\
 \		    int ts = yyps - yys;\
@@ -71,6 +82,10 @@ short *maxyyps;
 \		      yymaxdepth*sizeof(YYSTYPE));\
 \		    yys = (short*)realloc((char*)yys,\
 \		      yymaxdepth*sizeof(short));\
+\		    if ( !yyv || !yys ) {\
+\			yyerror( "yacc stack overflow" );\
+\			return(1);\
+\		    }\
 \		    yyps = yys + ts;\
 \		    yypv = yyv + tv;\
 \		    maxyyps = &yys[yymaxdepth];\

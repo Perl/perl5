@@ -1,11 +1,14 @@
-/* $Header: perly.y,v 4.0 91/03/20 01:38:40 lwall Locked $
+/* $RCSfile: perly.y,v $$Revision: 4.0.1.1 $$Date: 91/06/07 11:42:34 $
  *
- *    Copyright (c) 1989, Larry Wall
+ *    Copyright (c) 1991, Larry Wall
  *
- *    You may distribute under the terms of the GNU General Public License
- *    as specified in the README file that comes with the perl 3.0 kit.
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	perly.y,v $
+ * Revision 4.0.1.1  91/06/07  11:42:34  lwall
+ * patch4: new copyright notice
+ * 
  * Revision 4.0  91/03/20  01:38:40  lwall
  * 4.0 baseline.
  * 
@@ -788,5 +791,5 @@ bareword:	WORD
 				  "\"%s\" may clash with future reserved word",
 				  $1 );
 			}
-
+		;
 %% /* PROGRAM */

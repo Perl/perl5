@@ -1,7 +1,10 @@
 .rn '' }`
-''' $Header: s2p.man,v 4.0 91/03/20 01:58:07 lwall Locked $
+''' $RCSfile: s2p.man,v $$Revision: 4.0.1.1 $$Date: 91/06/07 12:19:57 $
 ''' 
 ''' $Log:	s2p.man,v $
+''' Revision 4.0.1.1  91/06/07  12:19:57  lwall
+''' patch4: s2p now handles embedded newlines better and optimizes common idioms
+''' 
 ''' Revision 4.0  91/03/20  01:58:07  lwall
 ''' 4.0 baseline.
 ''' 
@@ -86,6 +89,8 @@ The perl script you end up with may be either faster or slower than the original
 sed script.
 If you're only interested in speed you'll just have to try it both ways.
 Of course, if you want to do something sed doesn't do, you have no choice.
+It's often possible to speed up the perl script by various methods, such
+as deleting all references to $\e and chop.
 .SH ENVIRONMENT
 S2p uses no environment variables.
 .SH AUTHOR

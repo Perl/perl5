@@ -7,9 +7,14 @@
  * blame Henry for some of the lack of readability.
  */
 
-/* $RCSfile: regcomp.c,v $$Revision: 4.0.1.1 $$Date: 91/04/12 09:04:45 $
+/* $RCSfile: regcomp.c,v $$Revision: 4.0.1.2 $$Date: 91/06/07 11:48:24 $
  *
  * $Log:	regcomp.c,v $
+ * Revision 4.0.1.2  91/06/07  11:48:24  lwall
+ * patch4: new copyright notice
+ * patch4: /(x+) \1/ incorrectly optimized to not match "xxx xx"
+ * patch4: // wouldn't use previous pattern if it started with a null character
+ * 
  * Revision 4.0.1.1  91/04/12  09:04:45  lwall
  * patch1: random cleanup in cpp namespace
  * 
@@ -41,10 +46,11 @@
  *
  ****    Alterations to Henry's code are...
  ****
- ****    Copyright (c) 1989, Larry Wall
+ ****    Copyright (c) 1991, Larry Wall
  ****
- ****    You may distribute under the terms of the GNU General Public License
- ****    as specified in the README file that comes with the perl 3.0 kit.
+ ****    You may distribute under the terms of either the GNU General Public
+ ****    License or the Artistic License, as specified in the README file.
+
  *
  * Beware that some of this code is subtly aware of the way operator
  * precedence is structured in regular expressions.  Serious changes in
@@ -95,6 +101,7 @@ static char *regcode;		/* Code-emit pointer; &regdummy = don't. */
 static long regsize;		/* Code size. */
 static int regfold;
 static int regsawbracket;	/* Did we do {d,d} trick? */
+static int regsawback;		/* Did we see \1, ...? */
 
 /*
  * Forward declarations for regcomp()'s friends.
@@ -146,6 +153,7 @@ int fold;
 	extern char *safemalloc();
 	extern char *savestr();
 	int sawplus = 0;
+	int sawopen = 0;
 
 	if (exp == NULL)
 		fatal("NULL regexp argument");
@@ -156,6 +164,7 @@ int fold;
 	regxend = xend;
 	regprecomp = nsavestr(exp,xend-exp);
 	regsawbracket = 0;
+	regsawback = 0;
 	regnpar = 1;
 	regsize = 0L;
 	regcode = &regdummy;
@@ -178,8 +187,9 @@ int fold;
 	/* Second pass: emit code. */
 	if (regsawbracket)
 	    bcopy(regprecomp,exp,xend-exp);
+	r->prelen = xend-exp;
 	r->precomp = regprecomp;
-	r->subbase = NULL;
+	r->subbeg = r->subbase = NULL;
 	regparse = exp;
 	regnpar = 1;
 	regcode = r->program;
@@ -198,18 +208,19 @@ int fold;
 		scan = NEXTOPER(scan);
 
 		first = scan;
-		while (OP(first) == OPEN ||
+		while ((OP(first) == OPEN && (sawopen = 1)) ||
 		    (OP(first) == BRANCH && OP(regnext(first)) != BRANCH) ||
 		    (OP(first) == PLUS) ||
 		    (OP(first) == CURLY && ARG1(first) > 0) ) {
 			if (OP(first) == PLUS)
-			    sawplus = 2;
+			    sawplus = 1;
 			else
 			    first += regarglen[OP(first)];
 			first = NEXTOPER(first);
 		}
 
 		/* Starting-point info. */
+	    again:
 		if (OP(first) == EXACTLY) {
 			r->regstart =
 			    str_make(OPERAND(first)+1,*OPERAND(first));
@@ -221,9 +232,13 @@ int fold;
 		else if (OP(first) == BOUND || OP(first) == NBOUND)
 			r->regstclass = first;
 		else if (OP(first) == BOL ||
-		    (OP(first) == STAR && OP(NEXTOPER(first)) == ANY) )
-			r->reganch = 1;		/* kinda turn .* into ^.* */
-		r->reganch |= sawplus;
+		    (OP(first) == STAR && OP(NEXTOPER(first)) == ANY) ) {
+			r->reganch = ROPT_ANCH;	/* kinda turn .* into ^.* */
+			first = NEXTOPER(first);
+		    	goto again;
+		}
+		if (sawplus && (!sawopen || !regsawback))
+		    r->reganch |= ROPT_SKIP;	/* x+ must match 1st of run */
 
 #ifdef DEBUGGING
 		if (debug & 512)
@@ -741,6 +756,7 @@ int *flagp;
 			    if (num > 9 && num >= regnpar)
 				goto defchar;
 			    else {
+				regsawback = 1;
 				ret = reganode(REF, num);
 				while (isascii(*regparse) && isdigit(*regparse))
 				    regparse++;
@@ -1272,9 +1288,9 @@ regexp *r;
 		fprintf(stderr,"start `%s' ", r->regstart->str_ptr);
 	if (r->regstclass)
 		fprintf(stderr,"stclass `%s' ", regprop(r->regstclass));
-	if (r->reganch & 1)
+	if (r->reganch & ROPT_ANCH)
 		fprintf(stderr,"anchored ");
-	if (r->reganch & 2)
+	if (r->reganch & ROPT_SKIP)
 		fprintf(stderr,"plus ");
 	if (r->regmust != NULL)
 		fprintf(stderr,"must have \"%s\" back %d ", r->regmust->str_ptr,

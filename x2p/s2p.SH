@@ -29,9 +29,12 @@ $spitshell >s2p <<!GROK!THIS!
 : In the following dollars and backticks do not need the extra backslash.
 $spitshell >>s2p <<'!NO!SUBS!'
 
-# $Header: s2p.SH,v 4.0 91/03/20 01:57:59 lwall Locked $
+# $RCSfile: s2p.SH,v $$Revision: 4.0.1.1 $$Date: 91/06/07 12:19:18 $
 #
 # $Log:	s2p.SH,v $
+# Revision 4.0.1.1  91/06/07  12:19:18  lwall
+# patch4: s2p now handles embedded newlines better and optimizes common idioms
+# 
 # Revision 4.0  91/03/20  01:57:59  lwall
 # 4.0 baseline.
 # 
@@ -66,33 +69,43 @@ unless ($debug) {
 }
 
 if (!$assumen && !$assumep) {
-    print BODY <<'EOT';
-while ($ARGV[0] =~ /^-/) {
-    $_ = shift;
-  last if /^--/;
-    if (/^-n/) {
-	$nflag++;
-	next;
-    }
-    die "I don't recognize this switch: $_\\n";
-}
-
+    print BODY &q(<<'EOT');
+:	while ($ARGV[0] =~ /^-/) {
+:	    $_ = shift;
+:	  last if /^--/;
+:	    if (/^-n/) {
+:		$nflag++;
+:		next;
+:	    }
+:	    die "I don't recognize this switch: $_\\n";
+:	}
+:	
 EOT
 }
 
-print BODY <<'EOT';
-
-#ifdef PRINTIT
-#ifdef ASSUMEP
-$printit++;
-#else
-$printit++ unless $nflag;
-#endif
-#endif
-LINE: while (<>) {
+print BODY &q(<<'EOT');
+:	#ifdef PRINTIT
+:	#ifdef ASSUMEP
+:	$printit++;
+:	#else
+:	$printit++ unless $nflag;
+:	#endif
+:	#endif
+:	<><>
+:	$\ = "\n";		# automatically add newline on print
+:	<><>
+:	#ifdef TOPLABEL
+:	LINE:
+:	while (chop($_ = <>)) {
+:	#else
+:	LINE:
+:	while (<>) {
+:	    chop;
+:	#endif
 EOT
 
-LINE: while (<>) {
+LINE:
+while (<>) {
 
     # Wipe out surrounding whitespace.
 
@@ -105,6 +118,10 @@ LINE: while (<>) {
 	$label = &make_label($_);
 	if ($. == 1) {
 	    $toplabel = $label;
+	    if (/^(top|(re)?start|redo|begin(ning)|again|input)$/i) {
+		$_ = <>;
+		redo LINE; # Never referenced, so delete it if not a comment.
+	    }
 	}
 	$_ = "$label:";
 	if ($lastlinewaslabel++) {
@@ -127,6 +144,7 @@ LINE: while (<>) {
     $addr2 = '';
     if (s/^([0-9]+)//) {
 	$addr1 = "$1";
+	$addr1 = "\$. == $addr1" unless /^,/;
     }
     elsif (s/^\$//) {
 	$addr1 = 'eof()';
@@ -213,35 +231,39 @@ if ($lastlinewaslabel++) {
     $indent -= 4;
 }
 
-print BODY "}\n";
 if ($appendseen || $tseen || !$assumen) {
     $printit++ if $dseen || (!$assumen && !$assumep);
-    print BODY <<'EOT';
+    print BODY &q(<<'EOT');
+:	#ifdef SAWNEXT
+:	}
+:	continue {
+:	#endif
+:	#ifdef PRINTIT
+:	#ifdef DSEEN
+:	#ifdef ASSUMEP
+:	    print if $printit++;
+:	#else
+:	    if ($printit)
+:		{ print; }
+:	    else
+:		{ $printit++ unless $nflag; }
+:	#endif
+:	#else
+:	    print if $printit;
+:	#endif
+:	#else
+:	    print;
+:	#endif
+:	#ifdef TSEEN
+:	    $tflag = 0;
+:	#endif
+:	#ifdef APPENDSEEN
+:	    if ($atext) { chop $atext; print $atext; $atext = ''; }
+:	#endif
+EOT
 
-continue {
-#ifdef PRINTIT
-#ifdef DSEEN
-#ifdef ASSUMEP
-    print if $printit++;
-#else
-    if ($printit)
-	{ print; }
-    else
-	{ $printit++ unless $nflag; }
-#endif
-#else
-    print if $printit;
-#endif
-#else
-    print;
-#endif
-#ifdef TSEEN
-    $tflag = '';
-#endif
-#ifdef APPENDSEEN
-    if ($atext) { print $atext; $atext = ''; }
-#endif
-}
+print BODY &q(<<'EOT');
+:	}
 EOT
 }
 
@@ -250,12 +272,14 @@ close BODY;
 unless ($debug) {
     open(HEAD,">/tmp/sperl2$$.c")
       || &Die("Can't open temp file 2: $!\n");
-    print HEAD "#define PRINTIT\n" if ($printit);
-    print HEAD "#define APPENDSEEN\n" if ($appendseen);
-    print HEAD "#define TSEEN\n" if ($tseen);
-    print HEAD "#define DSEEN\n" if ($dseen);
-    print HEAD "#define ASSUMEN\n" if ($assumen);
-    print HEAD "#define ASSUMEP\n" if ($assumep);
+    print HEAD "#define PRINTIT\n"	if $printit;
+    print HEAD "#define APPENDSEEN\n"	if $appendseen;
+    print HEAD "#define TSEEN\n"	if $tseen;
+    print HEAD "#define DSEEN\n"	if $dseen;
+    print HEAD "#define ASSUMEN\n"	if $assumen;
+    print HEAD "#define ASSUMEP\n"	if $assumep;
+    print HEAD "#define TOPLABEL\n"	if $toplabel;
+    print HEAD "#define SAWNEXT\n"	if $sawnext;
     if ($opens) {print HEAD "$opens\n";}
     open(BODY,"/tmp/sperl$$")
       || &Die("Can't reopen temp file: $!\n");
@@ -264,11 +288,11 @@ unless ($debug) {
     }
     close HEAD;
 
-    print <<"EOT";
-#!$bin/perl
-eval 'exec $bin/perl -S \$0 \$*'
-	if \$running_under_some_shell;
-
+    print &q(<<"EOT");
+:	#!$bin/perl
+:	eval 'exec $bin/perl -S \$0 \${1+"\$@"}'
+:		if \$running_under_some_shell;
+:	
 EOT
     open(BODY,"cc -E /tmp/sperl2$$.c |") ||
 	&Die("Can't reopen temp file: $!\n");
@@ -297,15 +321,22 @@ sub tab {
 sub make_filehandle {
     local($_) = $_[0];
     local($fname) = $_;
-    s/[^a-zA-Z]/_/g;
-    s/^_*//;
-    substr($_,0,1) =~ y/a-z/A-Z/ if /^[a-z]/;
-    if (!$seen{$_}) {
-	$opens .= <<"EOT";
-open($_,'>$fname') || die "Can't create $fname";
+    if (!$seen{$fname}) {
+	$_ = "FH_" . $_ if /^\d/;
+	s/[^a-zA-Z0-9]/_/g;
+	s/^_*//;
+	$_ = "\U$_";
+	if ($fhseen{$_}) {
+	    for ($tmp = "a"; $fhseen{"$_$tmp"}; $a++) {}
+	    $_ .= $tmp;
+	}
+	$fhseen{$_} = 1;
+	$opens .= &q(<<"EOT");
+:	open($_, '>$fname') || die "Can't create $fname: \$!";
 EOT
+	$seen{$fname} = $_;
     }
-    $seen{$_} = $_;
+    $seen{$fname};
 }
 
 sub make_label {
@@ -325,67 +356,69 @@ sub transmogrify {
     {	# case
 	if (/^d/) {
 	    $dseen++;
-	    chop($_ = <<'EOT');
-<<--#ifdef PRINTIT
-$printit = '';
-<<--#endif
-next LINE;
+	    chop($_ = &q(<<'EOT'));
+:	<<--#ifdef PRINTIT
+:	$printit = 0;
+:	<<--#endif
+:	next LINE;
 EOT
+	    $sawnext++;
 	    next;
 	}
 
 	if (/^n/) {
-	    chop($_ = <<'EOT');
-<<--#ifdef PRINTIT
-<<--#ifdef DSEEN
-<<--#ifdef ASSUMEP
-print if $printit++;
-<<--#else
-if ($printit)
-    { print; }
-else
-    { $printit++ unless $nflag; }
-<<--#endif
-<<--#else
-print if $printit;
-<<--#endif
-<<--#else
-print;
-<<--#endif
-<<--#ifdef APPENDSEEN
-if ($atext) {print $atext; $atext = '';}
-<<--#endif
-$_ = <>;
-<<--#ifdef TSEEN
-$tflag = '';
-<<--#endif
+	    chop($_ = &q(<<'EOT'));
+:	<<--#ifdef PRINTIT
+:	<<--#ifdef DSEEN
+:	<<--#ifdef ASSUMEP
+:	print if $printit++;
+:	<<--#else
+:	if ($printit)
+:	    { print; }
+:	else
+:	    { $printit++ unless $nflag; }
+:	<<--#endif
+:	<<--#else
+:	print if $printit;
+:	<<--#endif
+:	<<--#else
+:	print;
+:	<<--#endif
+:	<<--#ifdef APPENDSEEN
+:	if ($atext) {chop $atext; print $atext; $atext = '';}
+:	<<--#endif
+:	$_ = <>;
+:	chop;
+:	<<--#ifdef TSEEN
+:	$tflag = 0;
+:	<<--#endif
 EOT
 	    next;
 	}
 
 	if (/^a/) {
 	    $appendseen++;
-	    $command = $space . '$atext .=' . "\n<<--'";
+	    $command = $space . "\$atext .= <<'End_Of_Text';\n<<--";
 	    $lastline = 0;
 	    while (<>) {
 		s/^[ \t]*//;
 		s/^[\\]//;
 		unless (s|\\$||) { $lastline = 1;}
-		s/'/\\'/g;
 		s/^([ \t]*\n)/<><>$1/;
 		$command .= $_;
 		$command .= '<<--';
 		last if $lastline;
 	    }
-	    $_ = $command . "';";
+	    $_ = $command . "End_Of_Text";
 	    last;
 	}
 
 	if (/^[ic]/) {
 	    if (/^c/) { $change = 1; }
+	    $addr1 = 1 if $addr1 eq '';
 	    $addr1 = '$iter = (' . $addr1 . ')';
-	    $command = $space . 'if ($iter == 1) { print'
-	      . "\n<<--'";
+	    $command = $space .
+	      "    if (\$iter == 1) { print <<'End_Of_Text'; }\n<<--";
 	    $lastline = 0;
 	    while (<>) {
 		s/^[ \t]*//;
@@ -397,16 +430,17 @@ EOT
 		$command .= '<<--';
 		last if $lastline;
 	    }
-	    $_ = $command . "';}";
+	    $_ = $command . "End_Of_Text";
 	    if ($change) {
 		$dseen++;
 		$change = "$_\n";
-		chop($_ = <<"EOT");
-<<--#ifdef PRINTIT
-$space\$printit = '';
-<<--#endif
-${space}next LINE;
+		chop($_ = &q(<<"EOT"));
+:	<<--#ifdef PRINTIT
+:	$space\$printit = 0;
+:	<<--#endif
+:	${space}next LINE;
 EOT
+		$sawnext++;
 	    }
 	    last;
 	}
@@ -463,6 +497,11 @@ EOT
 		elsif ($c eq ']') {
 		    $inbracket = 0;
 		}
+		elsif ($c eq "\t") {
+		    substr($_, $i, 1) = '\\t';
+		    $i++;
+		    $len++;
+		}
 		elsif (!$repl && index("()+",$c) >= 0) {
 		    substr($_, $i, 0) = '\\';
 		    $i++;
@@ -474,6 +513,7 @@ EOT
 	    $pat = substr($_, 0, $repl + 1);
 	    $repl = substr($_, $repl+1, $end-$repl-1);
 	    $end = substr($_, $end + 1, 1000);
+	    &simplify($pat);
 	    $dol = '$';
 	    $repl =~ s/\$/\\$/;
 	    $repl =~ s'&'$&'g;
@@ -498,12 +538,12 @@ EOT
 		&Die("Unrecognized substitution command".
 		  "($end) at line $.\n");
 	    }
-	    chop ($_ = <<"EOT");
-<<--#ifdef TSEEN
-$subst && \$tflag++$cmd;
-<<--#else
-$subst$cmd;
-<<--#endif
+	    chop ($_ = &q(<<"EOT"));
+:	<<--#ifdef TSEEN
+:	$subst && \$tflag++$cmd;
+:	<<--#else
+:	$subst$cmd;
+:	<<--#endif
 EOT
 	    next;
 	}
@@ -529,25 +569,29 @@ EOT
 	}
 
 	if (/^P/) {
-	    $_ = 'print $1 if /(^.*\n)/;';
+	    $_ = 'print $1 if /^(.*)/;';
 	    next;
 	}
 
 	if (/^D/) {
-	    chop($_ = <<'EOT');
-s/^.*\n//;
-redo LINE if $_;
-next LINE;
+	    chop($_ = &q(<<'EOT'));
+:	s/^.*\n?//;
+:	redo LINE if $_;
+:	next LINE;
 EOT
+	    $sawnext++;
 	    next;
 	}
 
 	if (/^N/) {
-	    chop($_ = <<'EOT');
-$_ .= <>;
-<<--#ifdef TSEEN
-$tflag = '';
-<<--#endif
+	    chop($_ = &q(<<'EOT'));
+:	$_ .= "\n";
+:	$len1 = length;
+:	$_ .= <>;
+:	chop if $len1 < length;
+:	<<--#ifdef TSEEN
+:	$tflag = 0;
+:	<<--#endif
 EOT
 	    next;
 	}
@@ -558,7 +602,7 @@ EOT
 	}
 
 	if (/^H/) {
-	    $_ = '$hold .= $_ ? $_ : "\n";';
+	    $_ = '$hold .= "\n"; $hold .= $_;';
 	    next;
 	}
 
@@ -568,7 +612,7 @@ EOT
 	}
 
 	if (/^G/) {
-	    $_ = '$_ .= $hold ? $hold : "\n";';
+	    $_ = '$_ .= "\n"; $_ .= $hold;';
 	    next;
 	}
 
@@ -579,6 +623,7 @@ EOT
 
 	if (/^b$/) {
 	    $_ = 'next LINE;';
+	    $sawnext++;
 	    next;
 	}
 
@@ -595,6 +640,7 @@ EOT
 
 	if (/^t$/) {
 	    $_ = 'next LINE if $tflag;';
+	    $sawnext++;
 	    $tseen++;
 	    next;
 	}
@@ -602,7 +648,7 @@ EOT
 	if (/^t/) {
 	    s/^t[ \t]*//;
 	    $lab = &make_label($_);
-	    $_ = q/if ($tflag) {$tflag = ''; /;
+	    $_ = q/if ($tflag) {$tflag = 0; /;
 	    if ($lab eq $toplabel) {
 		$_ .= 'redo LINE;}';
 	    } else {
@@ -612,17 +658,28 @@ EOT
 	    next;
 	}
 
+	if (/^y/) {
+	    s/abcdefghijklmnopqrstuvwxyz/a-z/g;
+	    s/ABCDEFGHIJKLMNOPQRSTUVWXYZ/A-Z/g;
+	    s/abcdef/a-f/g;
+	    s/ABCDEF/A-F/g;
+	    s/0123456789/0-9/g;
+	    s/01234567/0-7/g;
+	    $_ .= ';';
+	}
+
 	if (/^=/) {
-	    $_ = 'print "$.\n";';
+	    $_ = 'print $.;';
 	    next;
 	}
 
 	if (/^q/) {
-	    chop($_ = <<'EOT');
-close(ARGV);
-@ARGV = ();
-next LINE;
+	    chop($_ = &q(<<'EOT'));
+:	close(ARGV);
+:	@ARGV = ();
+:	next LINE;
 EOT
+	    $sawnext++;
 	    next;
 	}
     } continue {
@@ -670,7 +727,37 @@ sub fetchpat {
 	    last DELIM;
 	}
     }
+    $addr =~ s/\t/\\t/g;
+    &simplify($addr);
     $addr;
+}
+
+sub q {
+    local($string) = @_;
+    local($*) = 1;
+    $string =~ s/^:\t?//g;
+    $string;
+}
+
+sub simplify {
+    $_[0] =~ s/_a-za-z0-9/\\w/ig;
+    $_[0] =~ s/a-z_a-z0-9/\\w/ig;
+    $_[0] =~ s/a-za-z_0-9/\\w/ig;
+    $_[0] =~ s/a-za-z0-9_/\\w/ig;
+    $_[0] =~ s/_0-9a-za-z/\\w/ig;
+    $_[0] =~ s/0-9_a-za-z/\\w/ig;
+    $_[0] =~ s/0-9a-z_a-z/\\w/ig;
+    $_[0] =~ s/0-9a-za-z_/\\w/ig;
+    $_[0] =~ s/\[\\w\]/\\w/g;
+    $_[0] =~ s/\[^\\w\]/\\W/g;
+    $_[0] =~ s/\[0-9\]/\\d/g;
+    $_[0] =~ s/\[^0-9\]/\\D/g;
+    $_[0] =~ s/\\d\\d\*/\\d+/g;
+    $_[0] =~ s/\\D\\D\*/\\D+/g;
+    $_[0] =~ s/\\w\\w\*/\\w+/g;
+    $_[0] =~ s/\\t\\t\*/\\t+/g;
+    $_[0] =~ s/(\[.[^]]*\])\1\*/$1+/g;
+    $_[0] =~ s/([\w\s!@#%^&-=,:;'"])\1\*/$1+/g;
 }
 
 !NO!SUBS!

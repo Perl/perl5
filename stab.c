@@ -1,11 +1,20 @@
-/* $RCSfile: stab.c,v $$Revision: 4.0.1.1 $$Date: 91/04/12 09:10:24 $
+/* $RCSfile: stab.c,v $$Revision: 4.0.1.2 $$Date: 91/06/07 11:55:53 $
  *
- *    Copyright (c) 1989, Larry Wall
+ *    Copyright (c) 1991, Larry Wall
  *
- *    You may distribute under the terms of the GNU General Public License
- *    as specified in the README file that comes with the perl 3.0 kit.
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	stab.c,v $
+ * Revision 4.0.1.2  91/06/07  11:55:53  lwall
+ * patch4: new copyright notice
+ * patch4: added $^P variable to control calling of perldb routines
+ * patch4: added $^F variable to specify maximum system fd, default 2
+ * patch4: $` was busted inside s///
+ * patch4: default top-of-form format is now FILEHANDLE_TOP
+ * patch4: length($`), length($&), length($') now optimized to avoid string copy
+ * patch4: $^D |= 1024 now does syntax tree dump at run-time
+ * 
  * Revision 4.0.1.1  91/04/12  09:10:24  lwall
  * patch1: Configure now differentiates getgroups() type from getgid() type
  * patch1: you may now use "die" and "caller" in a signal handler
@@ -54,11 +63,17 @@ STR *str;
 	str_numset(stab_val(stab),(double)(debug & 32767));
 #endif
 	break;
+    case '\006':		/* ^F */
+	str_numset(stab_val(stab),(double)maxsysfd);
+	break;
     case '\t':			/* ^I */
 	if (inplace)
 	    str_set(stab_val(stab), inplace);
 	else
 	    str_sset(stab_val(stab),&str_undef);
+	break;
+    case '\020':		/* ^P */
+	str_numset(stab_val(stab),(double)perldb);
 	break;
     case '\024':		/* ^T */
 	str_numset(stab_val(stab),(double)basetime);
@@ -93,7 +108,7 @@ STR *str;
     case '`':
 	if (curspat) {
 	    if (curspat->spat_regexp &&
-	      (s = curspat->spat_regexp->subbase) ) {
+	      (s = curspat->spat_regexp->subbeg) ) {
 		i = curspat->spat_regexp->startp[0] - s;
 		if (i >= 0)
 		    str_nset(stab_val(stab),s,i);
@@ -126,10 +141,17 @@ STR *str;
 	break;
     case '^':
 	s = stab_io(curoutstab)->top_name;
-	str_set(stab_val(stab),s);
+	if (s)
+	    str_set(stab_val(stab),s);
+	else {
+	    str_set(stab_val(stab),stab_name(curoutstab));
+	    str_cat(stab_val(stab),"_TOP");
+	}
 	break;
     case '~':
 	s = stab_io(curoutstab)->fmt_name;
+	if (!s)
+	    s = stab_name(curoutstab);
 	str_set(stab_val(stab),s);
 	break;
 #ifndef lint
@@ -213,6 +235,76 @@ STR *str;
 	break;
     }
     return stab_val(stab);
+}
+
+STRLEN
+stab_len(str)
+STR *str;
+{
+    STAB *stab = str->str_u.str_stab;
+    int paren;
+    int i;
+    char *s;
+
+    if (str->str_rare)
+	return stab_val(stab)->str_cur;
+
+    switch (*stab->str_magic->str_ptr) {
+    case '1': case '2': case '3': case '4':
+    case '5': case '6': case '7': case '8': case '9': case '&':
+	if (curspat) {
+	    paren = atoi(stab_name(stab));
+	  getparen:
+	    if (curspat->spat_regexp &&
+	      paren <= curspat->spat_regexp->nparens &&
+	      (s = curspat->spat_regexp->startp[paren]) ) {
+		i = curspat->spat_regexp->endp[paren] - s;
+		if (i >= 0)
+		    return i;
+		else
+		    return 0;
+	    }
+	    else
+		return 0;
+	}
+	break;
+    case '+':
+	if (curspat) {
+	    paren = curspat->spat_regexp->lastparen;
+	    goto getparen;
+	}
+	break;
+    case '`':
+	if (curspat) {
+	    if (curspat->spat_regexp &&
+	      (s = curspat->spat_regexp->subbeg) ) {
+		i = curspat->spat_regexp->startp[0] - s;
+		if (i >= 0)
+		    return i;
+		else
+		    return 0;
+	    }
+	    else
+		return 0;
+	}
+	break;
+    case '\'':
+	if (curspat) {
+	    if (curspat->spat_regexp &&
+	      (s = curspat->spat_regexp->endp[0]) ) {
+		return (STRLEN) (curspat->spat_regexp->subend - s);
+	    }
+	    else
+		return 0;
+	}
+	break;
+    case ',':
+	return (STRLEN)ofslen;
+    case '\\':
+	return (STRLEN)orslen;
+    default:
+	return stab_str(str)->str_cur;
+    }
 }
 
 stabset(mstr,str)
@@ -334,7 +426,12 @@ STR *str;
 	case '\004':	/* ^D */
 #ifdef DEBUGGING
 	    debug = (int)(str_gnum(str)) | 32768;
+	    if (debug & 1024)
+		dump_all();
 #endif
+	    break;
+	case '\006':	/* ^F */
+	    maxsysfd = (int)str_gnum(str);
 	    break;
 	case '\t':	/* ^I */
 	    if (inplace)
@@ -343,6 +440,9 @@ STR *str;
 		inplace = savestr(str_get(str));
 	    else
 		inplace = Nullch;
+	    break;
+	case '\020':	/* ^P */
+	    perldb = (int)str_gnum(str);
 	    break;
 	case '\024':	/* ^T */
 	    basetime = (long)str_gnum(str);
@@ -430,12 +530,12 @@ STR *str;
 	    break;
 	case '<':
 	    uid = (int)str_gnum(str);
-#ifdef HAS_SETREUID
+#if defined(HAS_SETREUID) || !defined(HAS_SETRUID)
 	    if (delaymagic) {
 		delaymagic |= DM_REUID;
 		break;				/* don't do magic till later */
 	    }
-#endif /* HAS_SETREUID */
+#endif /* HAS_SETREUID or not HASSETRUID */
 #ifdef HAS_SETRUID
 	    if (setruid((UIDTYPE)uid) < 0)
 		uid = (int)getuid();
@@ -453,12 +553,12 @@ STR *str;
 	    break;
 	case '>':
 	    euid = (int)str_gnum(str);
-#ifdef HAS_SETREUID
+#if defined(HAS_SETREUID) || !defined(HAS_SETEUID)
 	    if (delaymagic) {
 		delaymagic |= DM_REUID;
 		break;				/* don't do magic till later */
 	    }
-#endif /* HAS_SETREUID */
+#endif /* HAS_SETREUID or not HAS_SETEUID */
 #ifdef HAS_SETEUID
 	    if (seteuid((UIDTYPE)euid) < 0)
 		euid = (int)geteuid();
@@ -476,12 +576,12 @@ STR *str;
 	    break;
 	case '(':
 	    gid = (int)str_gnum(str);
-#ifdef HAS_SETREGID
+#if defined(HAS_SETREGID) || !defined(HAS_SETRGID)
 	    if (delaymagic) {
 		delaymagic |= DM_REGID;
 		break;				/* don't do magic till later */
 	    }
-#endif /* HAS_SETREGID */
+#endif /* HAS_SETREGID or not HAS_SETRGID */
 #ifdef HAS_SETRGID
 	    (void)setrgid((GIDTYPE)gid);
 #else
@@ -494,12 +594,12 @@ STR *str;
 	    break;
 	case ')':
 	    egid = (int)str_gnum(str);
-#ifdef HAS_SETREGID
+#if defined(HAS_SETREGID) || !defined(HAS_SETEGID)
 	    if (delaymagic) {
 		delaymagic |= DM_REGID;
 		break;				/* don't do magic till later */
 	    }
-#endif /* HAS_SETREGID */
+#endif /* HAS_SETREGID or not HAS_SETEGID */
 #ifdef HAS_SETEGID
 	    (void)setegid((GIDTYPE)egid);
 #else

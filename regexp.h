@@ -5,9 +5,14 @@
  * not the System V one.
  */
 
-/* $Header: regexp.h,v 4.0 91/03/20 01:39:23 lwall Locked $
+/* $RCSfile: regexp.h,v $$Revision: 4.0.1.1 $$Date: 91/06/07 11:51:18 $
  *
  * $Log:	regexp.h,v $
+ * Revision 4.0.1.1  91/06/07  11:51:18  lwall
+ * patch4: new copyright notice
+ * patch4: // wouldn't use previous pattern if it started with a null character
+ * patch4: $` was busted inside s///
+ * 
  * Revision 4.0  91/03/20  01:39:23  lwall
  * 4.0 baseline.
  * 
@@ -20,8 +25,10 @@ typedef struct regexp {
 	char *regstclass;
 	STR *regmust;		/* Internal use only. */
 	int regback;		/* Can regmust locate first try? */
+	int prelen;		/* length of precomp */
 	char *precomp;		/* pre-compilation regular expression */
 	char *subbase;		/* saved string so \digit works forever */
+	char *subbeg;		/* same, but not responsible for allocation */
 	char *subend;		/* end of subbase */
 	char reganch;		/* Internal use only. */
 	char do_folding;	/* do case-insensitive match? */
@@ -29,6 +36,9 @@ typedef struct regexp {
 	char nparens;		/* number of parentheses */
 	char program[1];	/* Unwarranted chumminess with compiler. */
 } regexp;
+
+#define ROPT_ANCH 1
+#define ROPT_SKIP 2
 
 regexp *regcomp();
 int regexec();
