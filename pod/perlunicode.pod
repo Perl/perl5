@@ -137,6 +137,19 @@ This works for all characters that have names.
 
 =item *
 
+If Unicode is used in hash keys, there is a subtle effect on the hashes.
+The hash becomes "Unicode-sticky" so that keys retrieved from the hash
+(either by %hash, each %hash, or keys %hash) will be in Unicode, not
+in bytes, even when the keys were bytes went they "went in".  This
+"stickiness" persists unless the hash is completely emptied, either by
+using delete() or clearing the with undef() or assigning an empty list
+to the hash.  Most of the time this difference is negligible, but
+there are few places where it matters: for example the regular
+expression character classes like C<\w> behave differently for
+bytes and characters.
+
+=item *
+
 If an appropriate L<encoding> is specified, identifiers within the
 Perl script may contain Unicode alphanumeric characters, including
 ideographs.  (You are currently on your own when it comes to using the
