@@ -72,6 +72,7 @@ enum dyldErrorSource
 static void TranslateError
     (const char *path, enum dyldErrorSource type, int number)
 {
+    dTHX;
     char *error;
     unsigned int index;
     static char *OFIErrorStrings[] =

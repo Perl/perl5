@@ -106,10 +106,10 @@ esac
 #                           symbol: boot_$(EXP)  can it be auto-generated?
 case "$osvers" in
 3*) 
-    lddlflags="$lddlflags -H512 -T512 -bhalt:4 -bM:SRE -bI:$(PERL_INC)/perl.exp -bE:$(BASEEXT).exp -e _nostart"
+    lddlflags="$lddlflags -H512 -T512 -bhalt:4 -bM:SRE -bI:$(PERL_INC)/perl.exp -bE:$(BASEEXT).exp -e _nostart -lc"
     ;;
 *) 
-    lddlflags="$lddlflags -bhalt:4 -bM:SRE -bI:$(PERL_INC)/perl.exp -bE:$(BASEEXT).exp -b noentry"
+    lddlflags="$lddlflags -bhalt:4 -bM:SRE -bI:$(PERL_INC)/perl.exp -bE:$(BASEEXT).exp -b noentry -lc"
     ;;
 esac
 
@@ -161,8 +161,6 @@ for arg in $ccflags ; do
 
 done
 
-lddllibc="-lc"
-
 # This script UU/usethreads.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use threads.
 cat > UU/usethreads.cbu <<'EOCBU'
@@ -192,11 +190,12 @@ EOM
 	    ;;
         esac
 
-        # Add the POSIX threads library and the re-entrant libc.
+        # Add the POSIX threads library and the re-entrant libc to lddflags.
+        set `echo X "$lddlflags"| sed -e 's/ -lc$/ -lpthreads -lc_r/'`
+        shift
+        lddlflags="$*"
 
-        lddllibc="-lpthreads -lc_r"
-
-        # Add the c_r library to the list of wanted libraries.
+        # Add the POSIX threads library and the re-entrant libc to libswanted.
         # Make sure the c_r library is before the c library or
         # make will fail.
         set `echo X "$libswanted "| sed -e 's/ c / pthreads c_r /'`
@@ -204,10 +203,7 @@ EOM
         libswanted="$*"
 	;;
 esac
-
 EOCBU
-
-lddlflags="$lddlflags $lddllibc"
 
 # This script UU/use64bits.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use 64 bits.
@@ -232,3 +228,5 @@ EOM
 	    ;;
 esac
 EOCBU
+
+# EOF

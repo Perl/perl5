@@ -153,6 +153,7 @@ char *strerrorcpy(char *str, int err) {
 /* ARGSUSED */
 void *dlopen(char *path, int mode)
 {
+	dTHX;
 	register ModulePtr mp;
 	static int inited;			/* XXX threadead */
 
@@ -366,6 +367,7 @@ void *calloc(size_t ne, size_t sz)
  */
 static int readExports(ModulePtr mp)
 {
+	dTHX;
 	LDFILE *ldp = NULL;
 	SCNHDR sh;
 	LDHDR *lhp;

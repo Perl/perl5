@@ -1489,7 +1489,7 @@ Perl_die_nocontext(const char* pat, ...)
     OP *o;
     va_list args;
     va_start(args, pat);
-    o = do_die(aTHX_ pat, &args);
+    o = do_die(pat, &args);
     va_end(args);
     return o;
 }
@@ -1501,7 +1501,7 @@ Perl_die(pTHX_ const char* pat, ...)
     OP *o;
     va_list args;
     va_start(args, pat);
-    o = do_die(aTHX_ pat, &args);
+    o = do_die(pat, &args);
     va_end(args);
     return o;
 }
@@ -3507,7 +3507,7 @@ Perl_my_fflush_all(pTHX)
 }
 
 double
-Perl_my_atof(const char* s) {
+Perl_my_atof(pTHX_ const char* s) {
 #ifdef USE_LOCALE_NUMERIC
     if ((PL_hints & HINT_LOCALE) && PL_numeric_local) {
 	double x, y;

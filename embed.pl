@@ -1058,9 +1058,7 @@ p	|I32	|mg_size	|SV* sv
 p	|OP*	|mod		|OP* o|I32 type
 p	|char*	|moreswitches	|char* s
 p	|OP*	|my		|OP* o
-#ifdef USE_LOCALE_NUMERIC
 p	|double	|my_atof	|const char *s
-#endif
 #if !defined(HAS_BCOPY) || !defined(HAS_SAFE_BCOPY)
 p	|char*	|my_bcopy	|const char* from|char* to|I32 len
 #endif

@@ -77,9 +77,13 @@ fi
 #cat >>perl.exp <<END
 #END
 
+case "$usemymalloc" in
+true|[yY]*) usemymalloc=define ;;
+esac
+
 # Remove mymalloc if needed.
 case "$usemymalloc$d_mymalloc" in
-ydefine) ;;
+definedefine) ;;
 *)
 	egrep -v '^(Perl_(calloc|malloc|malloced_size|mfree|realloc|safexcalloc|safexfree|safexmalloc|safexrealloc)|^PL_malloc_mutex)$' < perl.exp > perl.exp$$
 	mv -f perl.exp$$ perl.exp
@@ -97,9 +101,13 @@ esac
 egrep -v '^(Perl_my_(bcopy|bzero|chsize|htonl|memcmp|memset|ntohl|swap))$' < perl.exp > perl.exp$$
 mv -f perl.exp$$ perl.exp
 
+case "$usethreads" in
+true|[yY]*) usethreads=define ;;
+esac
+
 # Remove thread symbols if needed.
 case "$usethreads" in
-y)	;;
+define)	;;
 *)
 	egrep -v '^(Perl_(condpair_magic|find_threadsv|magic_mutexfree|new_struct_thread|unlock_condpair)|^PL_((eval|nthreads)_cond|curthr|eval_owner|(cred|eval|strtab|sv|svref|threads|malloc|vtbl)_mutex|nthreads|threadnum|threadsv_names|thr_key|thrsv))$' < perl.exp > perl.exp$$
 	mv -f perl.exp$$ perl.exp

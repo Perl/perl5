@@ -314,9 +314,7 @@
 #define mod			Perl_mod
 #define moreswitches		Perl_moreswitches
 #define my			Perl_my
-#ifdef USE_LOCALE_NUMERIC
 #define my_atof			Perl_my_atof
-#endif
 #if !defined(HAS_BCOPY) || !defined(HAS_SAFE_BCOPY)
 #define my_bcopy		Perl_my_bcopy
 #endif
@@ -1631,9 +1629,7 @@
 #define mod(a,b)		Perl_mod(aTHX_ a,b)
 #define moreswitches(a)		Perl_moreswitches(aTHX_ a)
 #define my(a)			Perl_my(aTHX_ a)
-#ifdef USE_LOCALE_NUMERIC
 #define my_atof(a)		Perl_my_atof(aTHX_ a)
-#endif
 #if !defined(HAS_BCOPY) || !defined(HAS_SAFE_BCOPY)
 #define my_bcopy(a,b,c)		Perl_my_bcopy(aTHX_ a,b,c)
 #endif
@@ -3228,10 +3224,8 @@
 #define moreswitches		Perl_moreswitches
 #define Perl_my			CPerlObj::Perl_my
 #define my			Perl_my
-#ifdef USE_LOCALE_NUMERIC
 #define Perl_my_atof		CPerlObj::Perl_my_atof
 #define my_atof			Perl_my_atof
-#endif
 #if !defined(HAS_BCOPY) || !defined(HAS_SAFE_BCOPY)
 #define Perl_my_bcopy		CPerlObj::Perl_my_bcopy
 #define my_bcopy		Perl_my_bcopy
