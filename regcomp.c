@@ -427,11 +427,8 @@ S_scan_commit(pTHX_ scan_data_t *data)
 STATIC void
 S_cl_anything(pTHX_ struct regnode_charclass_class *cl)
 {
-    int value;
-
     ANYOF_CLASS_ZERO(cl);
-    for (value = 0; value < 256; ++value)
-	ANYOF_BITMAP_SET(cl, value);
+    ANYOF_BITMAP_SETALL(cl);
     cl->flags = ANYOF_EOS;
     if (LOC)
 	cl->flags |= ANYOF_LOCALE;
@@ -446,8 +443,8 @@ S_cl_is_anything(pTHX_ struct regnode_charclass_class *cl)
     for (value = 0; value <= ANYOF_MAX; value += 2)
 	if (ANYOF_CLASS_TEST(cl, value) && ANYOF_CLASS_TEST(cl, value + 1))
 	    return 1;
-    for (value = 0; value < 256; ++value)
-	if (!ANYOF_BITMAP_TEST(cl, value))
+    for (value = 0; value < ANYOF_BITMAP_SIZE; ++value)
+	if (!ANYOF_BITMAP_BYTE(cl, value))
 	    return 0;
     return 1;
 }
