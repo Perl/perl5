@@ -23,7 +23,7 @@
 #endif
 
 #ifdef __GNUC__
-typedef long long __int64;
+// typedef long long __int64;
 #  define Win32_Winsock
 /* GCC does not do __declspec() - render it a nop 
  * and turn on options to avoid importing data 
@@ -393,3 +393,4 @@ struct thread_intern {
 #endif /* USE_THREADS */
 
 #endif /* _INC_WIN32_PERL5 */
+

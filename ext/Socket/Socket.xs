@@ -26,7 +26,9 @@
 #include "sockadapt.h"
 #endif
 
+#ifndef WIN32 /* I_NETINET_TCP */
 #include <netinet/tcp.h>
+#endif
 
 #ifdef I_SYSUIO
 # include <sys/uio.h>

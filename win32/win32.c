@@ -35,6 +35,7 @@
 #define PerlIO FILE
 #endif
 
+#include <sys/stat.h>
 #include "EXTERN.h"
 #include "perl.h"
 
@@ -46,7 +47,6 @@ extern CPerlObj* pPerl;
 
 #include "Win32iop.h"
 #include <fcntl.h>
-#include <sys/stat.h>
 #ifndef __GNUC__
 /* assert.h conflicts with #define of assert in perl.h */
 #include <assert.h>
@@ -1320,10 +1320,14 @@ win32_uname(struct utsname *name)
 	char *arch;
 	GetSystemInfo(&info);
 
+#ifdef __MINGW32__
+	switch (info.DUMMYUNIONNAME.DUMMYSTRUCTNAME.wProcessorArchitecture) {
+#else
 #ifdef __BORLANDC__
 	switch (info.u.s.wProcessorArchitecture) {
 #else
 	switch (info.wProcessorArchitecture) {
+#endif
 #endif
 	case PROCESSOR_ARCHITECTURE_INTEL:
 	    arch = "x86"; break;
