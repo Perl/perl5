@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Dec 15 04:41:40 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Fri Dec 15 19:09:33 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -562,7 +562,6 @@ d_strtod=''
 d_strtol=''
 d_strtold=''
 d_strtoll=''
-d_strtoq=''
 d_strtoul=''
 d_strtoull=''
 d_strtouq=''
@@ -11928,10 +11927,6 @@ EOM
 	;;
 esac
 
-: see if strtoq exists
-set strtoq d_strtoq
-eval $inlibc
-
 : see if strtoul exists
 set strtoul d_strtoul
 eval $inlibc
@@ -11960,13 +11955,13 @@ EOCP
 	case "$longsize" in
 	8)
 	    $cat >>try.c <<'EOCP'
-	check("18446744073709551615", 18446744073709551615ULL, 0);
-	check("18446744073709551616", 18446744073709551615ULL, ERANGE);
-	check("-1", 18446744073709551615ULL, 0);
+	check("18446744073709551615", 18446744073709551615UL, 0);
+	check("18446744073709551616", 18446744073709551615UL, ERANGE);
+	check("-1", 18446744073709551615UL, 0);
 	check("-18446744073709551614", 2, 0);
 	check("-18446744073709551615", 1, 0);
-       	check("-18446744073709551616", 18446744073709551615ULL, ERANGE);
-	check("-18446744073709551617", 18446744073709551615ULL, ERANGE);
+       	check("-18446744073709551616", 18446744073709551615UL, ERANGE);
+	check("-18446744073709551617", 18446744073709551615UL, ERANGE);
 EOCP
 		;;
 	4)
@@ -16008,7 +16003,6 @@ d_strtod='$d_strtod'
 d_strtol='$d_strtol'
 d_strtold='$d_strtold'
 d_strtoll='$d_strtoll'
-d_strtoq='$d_strtoq'
 d_strtoul='$d_strtoul'
 d_strtoull='$d_strtoull'
 d_strtouq='$d_strtouq'
