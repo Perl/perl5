@@ -435,7 +435,7 @@ sub timestr {
 			    $r,$pu,$ps,$pt) if $style eq 'noc';
     $s=sprintf("%2d wallclock secs (%$f cusr + %$f csys = %$f CPU)",
 			    $r,$cu,$cs,$ct) if $style eq 'nop';
-    $s .= sprintf(" @ %$f/s (n=$n)", $n / ( $pu + $ps )) if $n;
+    $s .= sprintf(" @ %$f/s (n=$n)", $n / ( $pu + $ps )) if $pu + $ps;
     $s;
 }
 
