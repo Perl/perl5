@@ -1,5 +1,5 @@
-*** perly.c.orig	Wed Feb 14 15:29:04 1996
---- perly.c	Wed Feb 14 15:29:05 1996
+*** perly.c.orig	Sun Jul  7 23:27:45 1996
+--- perly.c	Sun Jul  7 23:27:46 1996
 ***************
 *** 12,82 ****
       deprecate("\"do\" to call subroutines");
@@ -75,7 +75,7 @@
      31,    0,    5,    3,    6,    6,    6,    7,    7,    7,
 --- 12,17 ----
 ***************
-*** 1381,1393 ****
+*** 1375,1387 ****
   int yynerrs;
   int yyerrflag;
   int yychar;
@@ -88,11 +88,11 @@
 - #define yystacksize YYSTACKSIZE
   #line 571 "perly.y"
    /* PROGRAM */
-  #line 1394 "y.tab.c"
---- 1316,1323 ----
+  #line 1388 "y.tab.c"
+--- 1310,1317 ----
 ***************
-*** 1394,1407 ****
---- 1324,1382 ----
+*** 1388,1401 ****
+--- 1318,1376 ----
   #define YYABORT goto yyabort
   #define YYACCEPT goto yyaccept
   #define YYERROR goto yyerrlab
@@ -113,15 +113,15 @@
 + void* ptr;
 + {
 +     struct ysv* ysave = (struct ysv*)ptr;
-+     if (ysave->yyss) Safefree(ysave->yyss);
-+     if (ysave->yyvs) Safefree(ysave->yyvs);
++     if (ysave->yyss) safefree((char *)ysave->yyss);
++     if (ysave->yyvs) safefree((char *)ysave->yyvs);
 +     yydebug	= ysave->oldyydebug;
 +     yynerrs	= ysave->oldyynerrs;
 +     yyerrflag	= ysave->oldyyerrflag;
 +     yychar	= ysave->oldyychar;
 +     yyval	= ysave->oldyyval;
 +     yylval	= ysave->oldyylval;
-+     Safefree(ysave);
++     safefree((char *)ysave);
 + }
 + 
   int
@@ -153,8 +153,8 @@
       {
           yyn = *yys;
 ***************
-*** 1414,1419 ****
---- 1389,1402 ----
+*** 1408,1413 ****
+--- 1383,1396 ----
       yyerrflag = 0;
       yychar = (-1);
   
@@ -170,7 +170,7 @@
       yyvsp = yyvs;
       *yyssp = yystate = 0;
 ***************
-*** 1429,1435 ****
+*** 1423,1429 ****
               yys = 0;
               if (yychar <= YYMAXTOKEN) yys = yyname[yychar];
               if (!yys) yys = "illegal-symbol";
@@ -178,7 +178,7 @@
                       yychar, yys);
           }
   #endif
---- 1412,1418 ----
+--- 1406,1412 ----
               yys = 0;
               if (yychar <= YYMAXTOKEN) yys = yyname[yychar];
               if (!yys) yys = "illegal-symbol";
@@ -187,7 +187,7 @@
           }
   #endif
 ***************
-*** 1439,1450 ****
+*** 1433,1444 ****
       {
   #if YYDEBUG
           if (yydebug)
@@ -200,7 +200,7 @@
           }
           *++yyssp = yystate = yytable[yyn];
           *++yyvsp = yylval;
---- 1422,1447 ----
+--- 1416,1441 ----
       {
   #if YYDEBUG
           if (yydebug)
@@ -228,7 +228,7 @@
           *++yyssp = yystate = yytable[yyn];
           *++yyvsp = yylval;
 ***************
-*** 1480,1491 ****
+*** 1474,1485 ****
               {
   #if YYDEBUG
                   if (yydebug)
@@ -241,7 +241,7 @@
                   }
                   *++yyssp = yystate = yytable[yyn];
                   *++yyvsp = yylval;
---- 1477,1503 ----
+--- 1471,1497 ----
               {
   #if YYDEBUG
                   if (yydebug)
@@ -270,7 +270,7 @@
                   *++yyssp = yystate = yytable[yyn];
                   *++yyvsp = yylval;
 ***************
-*** 1495,1502 ****
+*** 1489,1496 ****
               {
   #if YYDEBUG
                   if (yydebug)
@@ -279,7 +279,7 @@
   #endif
                   if (yyssp <= yyss) goto yyabort;
                   --yyssp;
---- 1507,1515 ----
+--- 1501,1509 ----
               {
   #if YYDEBUG
                   if (yydebug)
@@ -290,7 +290,7 @@
                   if (yyssp <= yyss) goto yyabort;
                   --yyssp;
 ***************
-*** 1513,1520 ****
+*** 1507,1514 ****
               yys = 0;
               if (yychar <= YYMAXTOKEN) yys = yyname[yychar];
               if (!yys) yys = "illegal-symbol";
@@ -299,7 +299,7 @@
           }
   #endif
           yychar = (-1);
---- 1526,1534 ----
+--- 1520,1528 ----
               yys = 0;
               if (yychar <= YYMAXTOKEN) yys = yyname[yychar];
               if (!yys) yys = "illegal-symbol";
@@ -310,7 +310,7 @@
   #endif
           yychar = (-1);
 ***************
-*** 1523,1529 ****
+*** 1517,1523 ****
   yyreduce:
   #if YYDEBUG
       if (yydebug)
@@ -318,7 +318,7 @@
                   yystate, yyn, yyrule[yyn]);
   #endif
       yym = yylen[yyn];
---- 1537,1543 ----
+--- 1531,1537 ----
   yyreduce:
   #if YYDEBUG
       if (yydebug)
@@ -327,7 +327,7 @@
   #endif
       yym = yylen[yyn];
 ***************
-*** 2242,2249 ****
+*** 2236,2243 ****
       {
   #if YYDEBUG
           if (yydebug)
@@ -336,7 +336,7 @@
   #endif
           yystate = YYFINAL;
           *++yyssp = YYFINAL;
---- 2256,2264 ----
+--- 2250,2258 ----
       {
   #if YYDEBUG
           if (yydebug)
@@ -347,7 +347,7 @@
           yystate = YYFINAL;
           *++yyssp = YYFINAL;
 ***************
-*** 2257,2263 ****
+*** 2251,2257 ****
                   yys = 0;
                   if (yychar <= YYMAXTOKEN) yys = yyname[yychar];
                   if (!yys) yys = "illegal-symbol";
@@ -355,7 +355,7 @@
                           YYFINAL, yychar, yys);
               }
   #endif
---- 2272,2278 ----
+--- 2266,2272 ----
                   yys = 0;
                   if (yychar <= YYMAXTOKEN) yys = yyname[yychar];
                   if (!yys) yys = "illegal-symbol";
@@ -364,7 +364,7 @@
               }
   #endif
 ***************
-*** 2272,2291 ****
+*** 2266,2285 ****
           yystate = yydgoto[yym];
   #if YYDEBUG
       if (yydebug)
@@ -385,7 +385,7 @@
   yyaccept:
 !     return (0);
   }
---- 2287,2321 ----
+--- 2281,2315 ----
           yystate = yydgoto[yym];
   #if YYDEBUG
       if (yydebug)
