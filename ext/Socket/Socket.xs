@@ -10,7 +10,7 @@
 # include <sys/socket.h>
 # if defined(USE_SOCKS) && defined(I_SOCKS)
 #   include <socks.h>
-# endif 
+# endif
 # ifdef MPE
 #  define PF_INET AF_INET
 #  define PF_UNIX AF_UNIX
@@ -63,7 +63,7 @@
 
 #ifndef HAS_INET_ATON
 
-/* 
+/*
  * Check whether "cp" is a valid ascii representation
  * of an Internet address and convert to a binary address.
  * Returns 1 if the address is valid, 0 if not.
@@ -104,7 +104,7 @@ my_inet_aton(register const char *cp, struct in_addr *addr)
 				continue;
 			}
 			if (base == 16 && (s=strchr(PL_hexdigit,c))) {
-				val = (val << 4) + 
+				val = (val << 4) +
 					((s - PL_hexdigit) & 15);
 				cp++;
 				continue;
@@ -397,7 +397,7 @@ constant_6 (pTHX_ const char *name, IV *iv_return, SV **sv_return) {
 }
 
 static int
-constant_7 (const char *name, IV *iv_return, SV **sv_return) {
+constant_7 (pTHX_ const char *name, IV *iv_return, SV **sv_return) {
   /* When generated this function returned values for the list of names given
      here.  However, subsequent manual editing may have added or removed some.
      AF_ECMA AF_INET AF_UNIX IOV_MAX MSG_EOF MSG_EOR MSG_FIN MSG_OOB MSG_RST
@@ -586,7 +586,7 @@ constant_7 (const char *name, IV *iv_return, SV **sv_return) {
 }
 
 static int
-constant_8 (const char *name, IV *iv_return, SV **sv_return) {
+constant_8 (pTHX_ const char *name, IV *iv_return, SV **sv_return) {
   /* When generated this function returned values for the list of names given
      here.  However, subsequent manual editing may have added or removed some.
      AF_CCITT AF_CHAOS AF_GOSIP MSG_PEEK PF_CCITT PF_CHAOS PF_GOSIP SOCK_RAW
@@ -713,7 +713,7 @@ constant_8 (const char *name, IV *iv_return, SV **sv_return) {
 }
 
 static int
-constant_9 (const char *name, IV *iv_return, SV **sv_return) {
+constant_9 (pTHX_ const char *name, IV *iv_return, SV **sv_return) {
   /* When generated this function returned values for the list of names given
      here.  However, subsequent manual editing may have added or removed some.
      AF_DECnet AF_HYLINK AF_OSINET AF_UNSPEC MSG_BCAST MSG_MCAST MSG_PROXY
@@ -1180,7 +1180,7 @@ struct in_addr ip_address; ip_address.s_addr = htonl(INADDR_NONE);
 }
 
 static int
-constant_12 (const char *name, IV *iv_return, SV **sv_return) {
+constant_12 (pTHX_ const char *name, IV *iv_return, SV **sv_return) {
   /* When generated this function returned values for the list of names given
      here.  However, subsequent manual editing may have added or removed some.
      AF_APPLETALK MSG_CTLFLAGS MSG_DONTWAIT MSG_ERRQUEUE MSG_NOSIGNAL
@@ -1323,7 +1323,7 @@ constant_12 (const char *name, IV *iv_return, SV **sv_return) {
 }
 
 static int
-constant_13 (const char *name, IV *iv_return, SV **sv_return) {
+constant_13 (pTHX_ const char *name, IV *iv_return, SV **sv_return) {
   /* When generated this function returned values for the list of names given
      here.  However, subsequent manual editing may have added or removed some.
      MSG_CTLIGNORE MSG_DONTROUTE MSG_MAXIOVLEN SCM_TIMESTAMP SO_ACCEPTCONN
@@ -1503,13 +1503,13 @@ __END__
     return constant_6 (aTHX_ name, iv_return, sv_return);
     break;
   case 7:
-    return constant_7 (name, iv_return, sv_return);
+    return constant_7 (aTHX_ name, iv_return, sv_return);
     break;
   case 8:
-    return constant_8 (name, iv_return, sv_return);
+    return constant_8 (aTHX_ name, iv_return, sv_return);
     break;
   case 9:
-    return constant_9 (name, iv_return, sv_return);
+    return constant_9 (aTHX_ name, iv_return, sv_return);
     break;
   case 10:
     return constant_10 (aTHX_ name, iv_return, sv_return);
@@ -1518,10 +1518,10 @@ __END__
     return constant_11 (aTHX_ name, iv_return, sv_return);
     break;
   case 12:
-    return constant_12 (name, iv_return, sv_return);
+    return constant_12 (aTHX_ name, iv_return, sv_return);
     break;
   case 13:
-    return constant_13 (name, iv_return, sv_return);
+    return constant_13 (aTHX_ name, iv_return, sv_return);
     break;
   case 14:
     /* Names all of length 14.  */
@@ -1717,7 +1717,7 @@ pack_sockaddr_un(pathname)
 
 	    if (pathname[0] != '/' && pathname[0] != '\\')
 		croak("Relative UNIX domain socket name '%s' unsupported", pathname);
-	    else if (len < 8 
+	    else if (len < 8
 		     || pathname[7] != '/' && pathname[7] != '\\'
 		     || !strnicmp(pathname + 1, "socket", 6))
 		off = 7;
@@ -1732,9 +1732,10 @@ pack_sockaddr_un(pathname)
 		if (*s = '/')
 		    *s = '\\';
 	}
-#  else	/* !( defined OS2 ) */ 
+#  else	/* !( defined OS2 ) */
 	Copy( pathname, sun_ad.sun_path, len, char );
 #  endif
+	if (0) not_here("dummy");
 	ST(0) = sv_2mortal(newSVpvn((char *)&sun_ad, sizeof sun_ad));
 #else
 	ST(0) = (SV *) not_here("pack_sockaddr_un");
@@ -1816,7 +1817,7 @@ unpack_sockaddr_in(sin_sv)
 			"Socket::unpack_sockaddr_in",
 			addr.sin_family,
 			AF_INET);
-	} 
+	}
 	port = ntohs(addr.sin_port);
 	ip_address = addr.sin_addr;
 
