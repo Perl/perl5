@@ -315,8 +315,6 @@ SV*
 eval_pv(p, croak_on_error)
     const char* p
     I32 croak_on_error
-    PREINIT:
-    	I32 i;
     PPCODE:
 	PUTBACK;
 	EXTEND(SP, 1);
@@ -325,8 +323,6 @@ eval_pv(p, croak_on_error)
 void
 require_pv(pv)
     const char* pv
-    PREINIT:
-    	I32 i;
     PPCODE:
 	PUTBACK;
 	require_pv(pv);
