@@ -3273,6 +3273,13 @@ END_EXTERN_C
 #endif
 #endif
 
+/* Win32 defines a type 'WORD' in windef.h. This conflicts with the enumerator
+ * 'WORD' defined in perly.h. The yytokentype enum is only a debugging aid, so
+ * it's not really needed.
+ */
+#if defined(WIN32)
+#  define YYTOKENTYPE
+#endif
 #include "perly.h"
 
 #define LEX_NOTPARSING		11	/* borrowed from toke.c */
