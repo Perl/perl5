@@ -2638,7 +2638,7 @@ Perl_moreswitches(pTHX_ char *s)
 #endif
 
 	PerlIO_printf(PerlIO_stdout(),
-		      "\n\nCopyright 1987-2003, Larry Wall\n");
+		      "\n\nCopyright 1987-2004, Larry Wall\n");
 #ifdef MACOS_TRADITIONAL
 	PerlIO_printf(PerlIO_stdout(),
 		      "\nMac OS port Copyright 1991-2002, Matthias Neeracher;\n"
