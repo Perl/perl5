@@ -86,6 +86,7 @@ perl(1), perlxs(1), perlxstut(1)
 require 5.002;
 use Cwd;
 use vars '$cplusplus';
+use vars '%v';
 
 use Config;
 
@@ -351,11 +352,11 @@ sub INPUT_handler {
 	my $line = $_ ;
 
 	# remove trailing semicolon if no initialisation
-	s/\s*;$//g unless /=/ ;
+	s/\s*;$//g unless /[=;+].*\S/ ;
 
 	# check for optional initialisation code
 	my $var_init = '' ;
-	$var_init = $1 if s/\s*(=.*)$//s ;
+	$var_init = $1 if s/\s*([=;+].*)$//s ;
 	$var_init =~ s/"/\\"/g;
 
 	s/\s+/ /g;
@@ -378,10 +379,10 @@ sub INPUT_handler {
 	    $var_addr{$var_name} = 1;
 	    $func_args =~ s/\b($var_name)\b/&$1/;
 	}
-	if ($var_init =~ /^=\s*NO_INIT\s*;?\s*$/) {
+	if ($var_init =~ /^[=;]\s*NO_INIT\s*;?\s*$/) {
 	    print "\t$var_name;\n";
 	} elsif ($var_init =~ /\S/) {
-	    &output_init($var_type, $var_num, "$var_name $var_init");
+	    &output_init($var_type, $var_num, $var_name, $var_init);
 	} elsif ($var_num) {
 	    # generate initialization code
 	    &generate_init($var_type, $var_num, $var_name);
@@ -1331,12 +1332,24 @@ warn("Please specify prototyping behavior for $filename (see perlxs manual)\n")
     unless $ProtoUsed ;
 &Exit;
 
-
 sub output_init {
-    local($type, $num, $init) = @_;
+    local($type, $num, $var, $init) = @_;
     local($arg) = "ST(" . ($num - 1) . ")";
 
-    eval qq/print " $init\\\n"/;
+    if(  $init =~ /^=/  ) {
+	eval qq/print "\\t$var $init\\n"/;
+	warn $@   if  $@;
+    } else {
+	if(  $init =~ s/^\+//  &&  $num  ) {
+	    &generate_init($type, $num, $var);
+	} else {
+	    eval qq/print "\\t$var;\\n"/;
+	    warn $@   if  $@;
+	    $init =~ s/^;//;
+	}
+	$deferred .= eval qq/"\\n\\t$init\\n"/;
+	warn $@   if  $@;
+    }
 }
 
 sub Warn
@@ -1398,12 +1411,17 @@ sub generate_init {
 	    $expr =~ s/(\t+)/$1    /g;
 	    $expr =~ s/        /\t/g;
 	    eval qq/print "\\t$var;\\n"/;
+	    warn $@   if  $@;
 	    $deferred .= eval qq/"\\n\\tif (items < $num)\\n\\t    $var = $defaults{$var};\\n\\telse {\\n$expr;\\n\\t}\\n"/;
+	    warn $@   if  $@;
     } elsif ($ScopeThisXSUB or $expr !~ /^\t\$var =/) {
 	    eval qq/print "\\t$var;\\n"/;
+	    warn $@   if  $@;
 	    $deferred .= eval qq/"\\n$expr;\\n"/;
+	    warn $@   if  $@;
     } else {
 	    eval qq/print "$expr;\\n"/;
+	    warn $@   if  $@;
     }
 }
 
@@ -1438,6 +1456,7 @@ sub generate_output {
 		$subexpr =~ s/\n\t/\n\t\t/g;
 		$expr =~ s/DO_ARRAY_ELEM\n/$subexpr/;
 		eval "print qq\a$expr\a";
+		warn $@   if  $@;
 		print "\t\tSvSETMAGIC(ST(ix_$var));\n" if $do_setmagic;
 	    }
 	    elsif ($var eq 'RETVAL') {
@@ -1445,6 +1464,7 @@ sub generate_output {
 		    # We expect that $arg has refcnt 1, so we need to
 		    # mortalize it.
 		    eval "print qq\a$expr\a";
+		    warn $@   if  $@;
 		    print "\tsv_2mortal(ST(0));\n";
 		    print "\tSvSETMAGIC(ST(0));\n" if $do_setmagic;
 		}
@@ -1452,6 +1472,7 @@ sub generate_output {
 		    # We expect that $arg has refcnt >=1, so we need
 		    # to mortalize it!
 		    eval "print qq\a$expr\a";
+		    warn $@   if  $@;
 		    print "\tsv_2mortal(ST(0));\n";
 		    print "\tSvSETMAGIC(ST(0));\n" if $do_setmagic;
 		}
@@ -1462,11 +1483,13 @@ sub generate_output {
 		    # works too.
 		    print "\tST(0) = sv_newmortal();\n";
 		    eval "print qq\a$expr\a";
+		    warn $@   if  $@;
 		    # new mortals don't have set magic
 		}
 	    }
 	    elsif ($arg =~ /^ST\(\d+\)$/) {
 		eval "print qq\a$expr\a";
+		warn $@   if  $@;
 		print "\tSvSETMAGIC($arg);\n" if $do_setmagic;
 	    }
     }

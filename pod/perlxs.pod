@@ -360,17 +360,19 @@ Function parameters are normally initialized with their
 values from the argument stack.  The typemaps contain the
 code segments which are used to transfer the Perl values to
 the C parameters.  The programmer, however, is allowed to
-override the typemaps and supply alternate initialization
-code.
+override the typemaps and supply alternate (or additional)
+initialization code.
 
 The following code demonstrates how to supply initialization code for
-function parameters.  The initialization code is eval'd by the compiler
-before it is added to the output so anything which should be interpreted
-literally, such as double quotes, must be protected with backslashes.
+function parameters.  The initialization code is eval'd within double
+quotes by the compiler before it is added to the output so anything
+which should be interpreted literally [mainly C<$>, C<@>, or C<\\>]
+must be protected with backslashes.  The variables C<$var>, C<$arg>,
+and C<$type> can be used as in typemaps.
 
      bool_t
      rpcb_gettime(host,timep)
-          char *host = (char *)SvPV(ST(0),na);
+          char *host = (char *)SvPV($arg,na);
           time_t &timep = 0;
           OUTPUT:
           timep
@@ -379,6 +381,24 @@ This should not be used to supply default values for parameters.  One
 would normally use this when a function parameter must be processed by
 another library function before it can be used.  Default parameters are
 covered in the next section.
+
+If the initialization begins with C<=>, then it is output on
+the same line where the input variable is declared.  If the
+initialization begins with C<;> or C<+>, then it is output after
+all of the input variables have been declared.  The C<=> and C<;>
+cases replace the initialization normally supplied from the typemap.
+For the C<+> case, the initialization from the typemap will preceed
+the initialization code included after the C<+>.  A global
+variable, C<%v>, is available for the truely rare case where
+information from one initialization is needed in another
+initialization.
+
+     bool_t
+     rpcb_gettime(host,timep)
+          time_t &timep ; /*\$v{time}=@{[$v{time}=$arg]}*/
+          char *host + SvOK($v{time}) ? SvPV($arg,na) : NULL;
+          OUTPUT:
+          timep
 
 =head2 Default Parameter Values
 
