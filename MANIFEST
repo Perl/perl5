@@ -1809,6 +1809,7 @@ t/pod/testcmp.pl	Module to compare output against expected results
 t/pod/testp2pt.pl	Module to test Pod::PlainText for a given file
 t/pod/testpchk.pl	Module to test Pod::Checker for a given file
 t/pod/testpods/lib/Pod/Stuff.pm        Sample data for find.t
+t/pragma/autouse.t	See if autouse works
 t/pragma/constant.t	See if compile-time constants work
 t/pragma/diagnostics.t	See if diagnostics.pm works
 t/pragma/locale.t	See if locale support works
