@@ -100,23 +100,18 @@ Perl_cxinc(pTHX)
     return cxstack_ix + 1;
 }
 
+/* XXX for 5.8.X BINCOMPAT only */
 void
 Perl_push_return(pTHX_ OP *retop)
 {
-    if (PL_retstack_ix == PL_retstack_max) {
-	PL_retstack_max = GROW(PL_retstack_max);
-	Renew(PL_retstack, PL_retstack_max, OP*);
-    }
-    PL_retstack[PL_retstack_ix++] = retop;
+    Perl_croak(aTHX_ "panic: obsolete function push_return() called");
 }
 
+/* XXX for 5.8.X BINCOMPAT only */
 OP *
 Perl_pop_return(pTHX)
 {
-    if (PL_retstack_ix > 0)
-	return PL_retstack[--PL_retstack_ix];
-    else
-	return Nullop;
+    Perl_croak(aTHX_ "panic: obsolete function pop_return() called");
 }
 
 void
@@ -1098,7 +1093,6 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
 		      PTR2UV(cx->blk_oldcop));
 	PerlIO_printf(Perl_debug_log, "BLK_OLDMARKSP = %ld\n", (long)cx->blk_oldmarksp);
 	PerlIO_printf(Perl_debug_log, "BLK_OLDSCOPESP = %ld\n", (long)cx->blk_oldscopesp);
-	PerlIO_printf(Perl_debug_log, "BLK_OLDRETSP = %ld\n", (long)cx->blk_oldretsp);
 	PerlIO_printf(Perl_debug_log, "BLK_OLDPM = 0x%"UVxf"\n",
 		      PTR2UV(cx->blk_oldpm));
 	PerlIO_printf(Perl_debug_log, "BLK_GIMME = %s\n", cx->blk_gimme ? "LIST" : "SCALAR");
@@ -1116,6 +1110,8 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
 		PTR2UV(cx->blk_sub.dfoutgv));
 	PerlIO_printf(Perl_debug_log, "BLK_SUB.HASARGS = %d\n",
 		(int)cx->blk_sub.hasargs);
+	PerlIO_printf(Perl_debug_log, "BLK_SUB.RETOP = 0x%"UVxf"\n",
+		PTR2UV(cx->blk_sub.retop));
 	break;
     case CXt_SUB:
 	PerlIO_printf(Perl_debug_log, "BLK_SUB.CV = 0x%"UVxf"\n",
@@ -1126,6 +1122,8 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
 		(int)cx->blk_sub.hasargs);
 	PerlIO_printf(Perl_debug_log, "BLK_SUB.LVAL = %d\n",
 		(int)cx->blk_sub.lval);
+	PerlIO_printf(Perl_debug_log, "BLK_SUB.RETOP = 0x%"UVxf"\n",
+		PTR2UV(cx->blk_sub.retop));
 	break;
     case CXt_EVAL:
 	PerlIO_printf(Perl_debug_log, "BLK_EVAL.OLD_IN_EVAL = %ld\n",
@@ -1138,6 +1136,8 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
 			  SvPVX(cx->blk_eval.old_namesv));
 	PerlIO_printf(Perl_debug_log, "BLK_EVAL.OLD_EVAL_ROOT = 0x%"UVxf"\n",
 		PTR2UV(cx->blk_eval.old_eval_root));
+	PerlIO_printf(Perl_debug_log, "BLK_EVAL.RETOP = 0x%"UVxf"\n",
+		PTR2UV(cx->blk_eval.retop));
 	break;
 
     case CXt_LOOP:

@@ -1247,9 +1247,9 @@ S_doform(pTHX_ CV *cv, GV *gv, OP *retop)
     ENTER;
     SAVETMPS;
 
-    push_return(retop);
     PUSHBLOCK(cx, CXt_FORMAT, PL_stack_sp);
     PUSHFORMAT(cx);
+    cx->blk_sub.retop = retop;
     PAD_SET_CUR(CvPADLIST(cv), 1);
 
     setdefout(gv);	    /* locally select filehandle so $% et al work */
@@ -1425,7 +1425,7 @@ PP(pp_leavewrite)
     /* bad_ofp: */
     PL_formtarget = PL_bodytarget;
     PUTBACK;
-    return pop_return();
+    return cx->blk_sub.retop;
 }
 
 PP(pp_prtf)

@@ -2051,7 +2051,6 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
 	    ENTER;
 	    SAVETMPS;
 	
-	    push_return(Nullop);
 	    PUSHBLOCK(cx, (CXt_EVAL|CXp_TRYBLOCK), PL_stack_sp);
 	    PUSHEVAL(cx, 0, 0);
 	    PL_eval_root = PL_op;             /* Only needed so that goto works right. */
@@ -2118,7 +2117,6 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
 
 	    POPBLOCK(cx,newpm);
 	    POPEVAL(cx);
-	    pop_return();
 	    PL_curpm = newpm;
 	    LEAVE;
 	}
@@ -3891,10 +3889,6 @@ Perl_init_stacks(pTHX)
     New(54,PL_savestack,REASONABLE(128),ANY);
     PL_savestack_ix = 0;
     PL_savestack_max = REASONABLE(128);
-
-    New(54,PL_retstack,REASONABLE(16),OP*);
-    PL_retstack_ix = 0;
-    PL_retstack_max = REASONABLE(16);
 }
 
 #undef REASONABLE
@@ -3915,7 +3909,6 @@ S_nuke_stacks(pTHX)
     Safefree(PL_markstack);
     Safefree(PL_scopestack);
     Safefree(PL_savestack);
-    Safefree(PL_retstack);
 }
 
 STATIC void

@@ -119,6 +119,7 @@ struct block_sub {
     U8		hasargs;
     U8		lval;		/* XXX merge lval and hasargs? */
     PAD		*oldcomppad;
+    OP *	retop;	/* op to execute on exit from sub */
 };
 
 /* base for the next two macros. Don't use directly.
@@ -129,6 +130,7 @@ struct block_sub {
 	cx->blk_sub.cv = cv;						\
 	cx->blk_sub.olddepth = CvDEPTH(cv);				\
 	cx->blk_sub.hasargs = hasargs;					\
+	cx->blk_sub.retop = Nullop;						\
 	if (!CvDEPTH(cv)) {						\
 	    (void)SvREFCNT_inc(cv);					\
 	    (void)SvREFCNT_inc(cv);					\
@@ -150,6 +152,7 @@ struct block_sub {
 #define PUSHFORMAT(cx)							\
 	cx->blk_sub.cv = cv;						\
 	cx->blk_sub.gv = gv;						\
+	cx->blk_sub.retop = Nullop;					\
 	cx->blk_sub.hasargs = 0;					\
 	cx->blk_sub.dfoutgv = PL_defoutgv;				\
 	(void)SvREFCNT_inc(cx->blk_sub.dfoutgv)
@@ -209,6 +212,7 @@ struct block_eval {
     OP *	old_eval_root;
     SV *	cur_text;
     CV *	cv;
+    OP *	retop;	/* op to execute on exit from eval */
 };
 
 #define PUSHEVAL(cx,n,fgv)						\
@@ -219,6 +223,7 @@ struct block_eval {
 	cx->blk_eval.old_eval_root = PL_eval_root;			\
 	cx->blk_eval.cur_text = PL_linestr;				\
 	cx->blk_eval.cv = Nullcv; /* set by doeval(), as applicable */	\
+	cx->blk_eval.retop = Nullop; 					\
     } STMT_END
 
 #define POPEVAL(cx)							\
@@ -298,7 +303,7 @@ struct block_loop {
 struct block {
     I32		blku_oldsp;	/* stack pointer to copy stuff down to */
     COP *	blku_oldcop;	/* old curcop pointer */
-    I32		blku_oldretsp;	/* return stack index */
+    I32		blku_SPARE1;	/* XXX for BINCOMPAT 5.8.x */
     I32		blku_oldmarksp;	/* mark stack index */
     I32		blku_oldscopesp;	/* scope stack index */
     PMOP *	blku_oldpm;	/* values of pattern match vars */
@@ -312,7 +317,6 @@ struct block {
 };
 #define blk_oldsp	cx_u.cx_blk.blku_oldsp
 #define blk_oldcop	cx_u.cx_blk.blku_oldcop
-#define blk_oldretsp	cx_u.cx_blk.blku_oldretsp
 #define blk_oldmarksp	cx_u.cx_blk.blku_oldmarksp
 #define blk_oldscopesp	cx_u.cx_blk.blku_oldscopesp
 #define blk_oldpm	cx_u.cx_blk.blku_oldpm
@@ -328,7 +332,6 @@ struct block {
 	cx->blk_oldcop		= PL_curcop,				\
 	cx->blk_oldmarksp	= PL_markstack_ptr - PL_markstack,	\
 	cx->blk_oldscopesp	= PL_scopestack_ix,			\
-	cx->blk_oldretsp	= PL_retstack_ix,			\
 	cx->blk_oldpm		= PL_curpm,				\
 	cx->blk_gimme		= (U8)gimme;				\
 	DEBUG_l( PerlIO_printf(Perl_debug_log, "Entering block %ld, type %s\n",	\
@@ -340,7 +343,6 @@ struct block {
 	PL_curcop	 = cx->blk_oldcop,				\
 	PL_markstack_ptr = PL_markstack + cx->blk_oldmarksp,		\
 	PL_scopestack_ix = cx->blk_oldscopesp,				\
-	PL_retstack_ix	 = cx->blk_oldretsp,				\
 	pm		 = cx->blk_oldpm,				\
 	gimme		 = cx->blk_gimme;				\
 	DEBUG_SCOPE("POPBLOCK");					\
@@ -352,7 +354,6 @@ struct block {
 	PL_stack_sp	 = PL_stack_base + cx->blk_oldsp,		\
 	PL_markstack_ptr = PL_markstack + cx->blk_oldmarksp,		\
 	PL_scopestack_ix = cx->blk_oldscopesp,				\
-	PL_retstack_ix	 = cx->blk_oldretsp,				\
 	PL_curpm         = cx->blk_oldpm;				\
 	DEBUG_SCOPE("TOPBLOCK");
 

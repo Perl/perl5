@@ -1434,7 +1434,8 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 		DIE(aTHX_ "%sCompilation failed in require",
 		    *msg ? msg : "Unknown error\n");
 	    }
-	    return pop_return();
+	    assert(CxTYPE(cx) == CXt_EVAL);
+	    return cx->blk_eval.retop;
 	}
     }
     if (!message)
@@ -1728,9 +1729,9 @@ PP(pp_dbstate)
 	hasargs = 0;
 	SPAGAIN;
 
-	push_return(PL_op->op_next);
 	PUSHBLOCK(cx, CXt_SUB, SP);
 	PUSHSUB_DB(cx);
+	cx->blk_sub.retop = PL_op->op_next;
 	CvDEPTH(cv)++;
 	PAD_SET_CUR(CvPADLIST(cv),1);
 	RETURNOP(CvSTART(cv));
@@ -1899,6 +1900,7 @@ PP(pp_return)
     PMOP *newpm;
     I32 optype = 0;
     SV *sv;
+    OP *retop;
 
     if (PL_curstackinfo->si_type == PERLSI_SORT) {
 	if (cxstack_ix == PL_sortcxix
@@ -1922,12 +1924,14 @@ PP(pp_return)
     switch (CxTYPE(cx)) {
     case CXt_SUB:
 	popsub2 = TRUE;
+	retop = cx->blk_sub.retop;
 	cxstack_ix++; /* preserve cx entry on stack for use by POPSUB */
 	break;
     case CXt_EVAL:
 	if (!(PL_in_eval & EVAL_KEEPERR))
 	    clear_errsv = TRUE;
 	POPEVAL(cx);
+	retop = cx->blk_eval.retop;
 	if (CxTRYBLOCK(cx))
 	    break;
 	lex_end();
@@ -1942,6 +1946,7 @@ PP(pp_return)
 	break;
     case CXt_FORMAT:
 	POPFORMAT(cx);
+	retop = cx->blk_sub.retop;
 	break;
     default:
 	DIE(aTHX_ "panic: return");
@@ -1995,7 +2000,7 @@ PP(pp_return)
     LEAVESUB(sv);
     if (clear_errsv)
 	sv_setpv(ERRSV,"");
-    return pop_return();
+    return retop;
 }
 
 PP(pp_last)
@@ -2036,15 +2041,15 @@ PP(pp_last)
 	break;
     case CXt_SUB:
 	pop2 = CXt_SUB;
-	nextop = pop_return();
+	nextop = cx->blk_sub.retop;
 	break;
     case CXt_EVAL:
 	POPEVAL(cx);
-	nextop = pop_return();
+	nextop = cx->blk_eval.retop;
 	break;
     case CXt_FORMAT:
 	POPFORMAT(cx);
-	nextop = pop_return();
+	nextop = cx->blk_sub.retop;
 	break;
     default:
 	DIE(aTHX_ "panic: last");
@@ -2324,7 +2329,8 @@ PP(pp_goto)
 		    /* Do _not_ use PUTBACK, keep the XSUB's return stack! */
 		}
 		LEAVE;
-		return pop_return();
+		assert(CxTYPE(cx) == CXt_SUB);
+		return cx->blk_sub.retop;
 	    }
 	    else {
 		AV* padlist = CvPADLIST(cv);
@@ -2659,8 +2665,10 @@ S_docatch(pTHX_ OP *o)
      * the op to Nullop, we force an exit from the inner runops()
      * loop. DAPM.
      */
-    retop = pop_return();
-    push_return(Nullop);
+    assert(cxstack_ix >= 0);
+    assert(CxTYPE(&cxstack[cxstack_ix]) == CXt_EVAL);
+    retop = cxstack[cxstack_ix].blk_eval.retop;
+    cxstack[cxstack_ix].blk_eval.retop = Nullop;
 
 #ifdef PERL_FLEXIBLE_EXCEPTIONS
  redo_body:
@@ -2898,7 +2906,6 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 	if (!startop) {
 	    POPBLOCK(cx,PL_curpm);
 	    POPEVAL(cx);
-	    pop_return();
 	}
 	lex_end();
 	LEAVE;
@@ -3356,9 +3363,9 @@ PP(pp_require)
     }
 
     /* switch to eval mode */
-    push_return(PL_op->op_next);
     PUSHBLOCK(cx, CXt_EVAL, SP);
     PUSHEVAL(cx, name, Nullgv);
+    cx->blk_eval.retop = PL_op->op_next;
 
     SAVECOPLINE(&PL_compiling);
     CopLINE_set(&PL_compiling, 0);
@@ -3449,9 +3456,9 @@ PP(pp_entereval)
      * to do the dirty work for us */
     runcv = find_runcv(&seq);
 
-    push_return(PL_op->op_next);
     PUSHBLOCK(cx, (CXt_EVAL|CXp_REAL), SP);
     PUSHEVAL(cx, 0, Nullgv);
+    cx->blk_eval.retop = PL_op->op_next;
 
     /* prepare to compile string */
 
@@ -3480,7 +3487,7 @@ PP(pp_leaveeval)
 
     POPBLOCK(cx,newpm);
     POPEVAL(cx);
-    retop = pop_return();
+    retop = cx->blk_eval.retop;
 
     TAINT_NOT;
     if (gimme == G_VOID)
@@ -3543,9 +3550,9 @@ PP(pp_entertry)
     ENTER;
     SAVETMPS;
 
-    push_return(cLOGOP->op_other->op_next);
     PUSHBLOCK(cx, (CXt_EVAL|CXp_TRYBLOCK), SP);
     PUSHEVAL(cx, 0, 0);
+    cx->blk_eval.retop = cLOGOP->op_other->op_next;
 
     PL_in_eval = EVAL_INEVAL;
     sv_setpv(ERRSV,"");
@@ -3566,7 +3573,7 @@ PP(pp_leavetry)
 
     POPBLOCK(cx,newpm);
     POPEVAL(cx);
-    retop = pop_return();
+    retop = cx->blk_eval.retop;
 
     TAINT_NOT;
     if (gimme == G_VOID)

@@ -10975,7 +10975,6 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 	else {
 	    ncx->blk_oldsp	= cx->blk_oldsp;
 	    ncx->blk_oldcop	= cx->blk_oldcop;
-	    ncx->blk_oldretsp	= cx->blk_oldretsp;
 	    ncx->blk_oldmarksp	= cx->blk_oldmarksp;
 	    ncx->blk_oldscopesp	= cx->blk_oldscopesp;
 	    ncx->blk_oldpm	= cx->blk_oldpm;
@@ -10992,6 +10991,7 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 		ncx->blk_sub.olddepth	= cx->blk_sub.olddepth;
 		ncx->blk_sub.hasargs	= cx->blk_sub.hasargs;
 		ncx->blk_sub.lval	= cx->blk_sub.lval;
+		ncx->blk_sub.retop	= cx->blk_sub.retop;
 		break;
 	    case CXt_EVAL:
 		ncx->blk_eval.old_in_eval = cx->blk_eval.old_in_eval;
@@ -10999,6 +10999,7 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 		ncx->blk_eval.old_namesv = sv_dup_inc(cx->blk_eval.old_namesv, param);
 		ncx->blk_eval.old_eval_root = cx->blk_eval.old_eval_root;
 		ncx->blk_eval.cur_text	= sv_dup(cx->blk_eval.cur_text, param);
+		ncx->blk_eval.retop = cx->blk_eval.retop;
 		break;
 	    case CXt_LOOP:
 		ncx->blk_loop.label	= cx->blk_loop.label;
@@ -11023,6 +11024,7 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 		ncx->blk_sub.gv		= gv_dup(cx->blk_sub.gv, param);
 		ncx->blk_sub.dfoutgv	= gv_dup_inc(cx->blk_sub.dfoutgv, param);
 		ncx->blk_sub.hasargs	= cx->blk_sub.hasargs;
+		ncx->blk_sub.retop	= cx->blk_sub.retop;
 		break;
 	    case CXt_BLOCK:
 	    case CXt_NULL:
@@ -11472,7 +11474,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_savestack = 0;
     PL_savestack_ix = 0;
     PL_savestack_max = -1;
-    PL_retstack = 0;
     PL_sig_pending = 0;
     Zero(&PL_debug_pad, 1, struct perl_debug_pad);
 #  else	/* !DEBUGGING */
@@ -11505,7 +11506,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_savestack = 0;
     PL_savestack_ix = 0;
     PL_savestack_max = -1;
-    PL_retstack = 0;
     PL_sig_pending = 0;
     Zero(&PL_debug_pad, 1, struct perl_debug_pad);
 #    else	/* !DEBUGGING */
@@ -12042,13 +12042,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	PL_scopestack_max	= proto_perl->Tscopestack_max;
 	Newz(54, PL_scopestack, PL_scopestack_max, I32);
 	Copy(proto_perl->Tscopestack, PL_scopestack, PL_scopestack_ix, I32);
-
-	/* next push_return() sets PL_retstack[PL_retstack_ix]
-	 * NOTE: unlike the others! */
-	PL_retstack_ix		= proto_perl->Tretstack_ix;
-	PL_retstack_max		= proto_perl->Tretstack_max;
-	Newz(54, PL_retstack, PL_retstack_max, OP*);
-	Copy(proto_perl->Tretstack, PL_retstack, PL_retstack_ix, OP*);
 
 	/* NOTE: si_dup() looks at PL_markstack */
 	PL_curstackinfo		= si_dup(proto_perl->Tcurstackinfo, param);

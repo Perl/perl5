@@ -206,9 +206,9 @@ Perl_deb_stack_all(pTHX)
 		 */
 
 		I32 i, stack_min, stack_max, mark_min, mark_max;
-		I32 ret_min, ret_max;
 		PERL_CONTEXT *cx_n;
 		PERL_SI      *si_n;
+		OP	     *retop;
 
 		cx_n = Null(PERL_CONTEXT*);
 
@@ -257,27 +257,26 @@ Perl_deb_stack_all(pTHX)
 		}
 
 		mark_min  = cx->blk_oldmarksp;
-		ret_min   = cx->blk_oldretsp;
 		if (cx_n) {
 		    mark_max  = cx_n->blk_oldmarksp;
-		    ret_max   = cx_n->blk_oldretsp;
 		}
 		else {
 		    mark_max = PL_markstack_ptr - PL_markstack;
-		    ret_max  = PL_retstack_ix;
 		}
 
 		deb_stack_n(AvARRAY(si->si_stack),
 			stack_min, stack_max, mark_min, mark_max);
 
-		if (ret_max > ret_min) {
+		if (CxTYPE(cx) == CXt_EVAL || CxTYPE(cx) == CXt_SUB
+			|| CxTYPE(cx) == CXt_FORMAT)
+		{
+		    retop = (CxTYPE(cx) == CXt_EVAL)
+			    ? cx->blk_eval.retop : cx->blk_sub.retop;
+
 		    PerlIO_printf(Perl_debug_log, "  retop=%s\n",
-			    PL_retstack[ret_min]
-				? OP_NAME(PL_retstack[ret_min])
-				: "(null)"
+			    retop ? OP_NAME(retop) : "(null)"
 		    );
 		}
-
 	    }
 	} /* next context */
 

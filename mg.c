@@ -2529,8 +2529,6 @@ Perl_sighandler(int sig)
 	flags |= 1;
     if (PL_markstack_ptr < PL_markstack_max - 2)
 	flags |= 4;
-    if (PL_retstack_ix < PL_retstack_max - 2)
-	flags |= 8;
     if (PL_scopestack_ix < PL_scopestack_max - 3)
 	flags |= 16;
 
@@ -2548,10 +2546,6 @@ Perl_sighandler(int sig)
     }
     if (flags & 4)
 	PL_markstack_ptr++;		/* Protect mark. */
-    if (flags & 8) {
-	PL_retstack_ix++;
-	PL_retstack[PL_retstack_ix] = NULL;
-    }
     if (flags & 16)
 	PL_scopestack_ix += 1;
     /* sv_2cv is too complicated, try a simpler variant first: */
@@ -2612,8 +2606,6 @@ cleanup:
 	PL_savestack_ix -= 8; /* Unprotect save in progress. */
     if (flags & 4)
 	PL_markstack_ptr--;
-    if (flags & 8)
-	PL_retstack_ix--;
     if (flags & 16)
 	PL_scopestack_ix -= 1;
     if (flags & 64)

@@ -2409,7 +2409,7 @@ PP(pp_leavesub)
     PL_curpm = newpm;	/* ... and pop $1 et al */
 
     LEAVESUB(sv);
-    return pop_return();
+    return cx->blk_sub.retop;
 }
 
 /* This duplicates the above code because the above code must not
@@ -2567,7 +2567,7 @@ PP(pp_leavesublv)
     PL_curpm = newpm;	/* ... and pop $1 et al */
 
     LEAVESUB(sv);
-    return pop_return();
+    return cx->blk_sub.retop;
 }
 
 
@@ -2697,9 +2697,9 @@ PP(pp_entersub)
 	dMARK;
 	register I32 items = SP - MARK;
 	AV* padlist = CvPADLIST(cv);
-	push_return(PL_op->op_next);
 	PUSHBLOCK(cx, CXt_SUB, MARK);
 	PUSHSUB(cx);
+	cx->blk_sub.retop = PL_op->op_next;
 	CvDEPTH(cv)++;
 	/* XXX This would be a natural place to set C<PL_compcv = cv> so
 	 * that eval'' ops within this sub know the correct lexical space.
