@@ -3509,30 +3509,32 @@ Perl_ebcdic_control(pTHX_ int ch)
 }
 #endif
 
-/* XXX struct tm on some systems (SunOS4/BSD) contains extra (non POSIX)
- * fields for which we don't have Configure support yet:
- *   char *tm_zone;   -- abbreviation of timezone name
- *   long tm_gmtoff;  -- offset from GMT in seconds
- * To workaround core dumps from the uninitialised tm_zone we get the
+/* To workaround core dumps from the uninitialised tm_zone we get the
  * system to give us a reasonable struct to copy.  This fix means that
  * strftime uses the tm_zone and tm_gmtoff values returned by
  * localtime(time()). That should give the desired result most of the
  * time. But probably not always!
  *
- * This is a temporary workaround to be removed once Configure
- * support is added and NETaa14816 is considered in full.
- * It does not address tzname aspects of NETaa14816.
+ * This does not address tzname aspects of NETaa14816.
+ *
  */
+
 #ifdef HAS_GNULIBC
 # ifndef STRUCT_TM_HASZONE
 #    define STRUCT_TM_HASZONE
 # endif
 #endif
 
+#ifdef STRUCT_TM_HASZONE /* Backward compat */
+# ifndef HAS_TM_TM_ZONE
+#    define HAS_TM_TM_ZONE
+# endif
+#endif
+
 void
 Perl_init_tm(pTHX_ struct tm *ptm)	/* see mktime, strftime and asctime */
 {
-#ifdef STRUCT_TM_HASZONE
+#ifdef HAS_TM_TM_ZONE
     Time_t now;
     (void)time(&now);
     Copy(localtime(&now), ptm, 1, struct tm);
