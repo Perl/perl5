@@ -453,8 +453,11 @@ Perl_av_clear(pTHX_ register AV *av)
 	ary = AvARRAY(av);
 	key = AvFILLp(av) + 1;
 	while (key) {
-	    SvREFCNT_dec(ary[--key]);
+	    SV * sv = ary[--key];
+	    /* undef the slot before freeing the value, because a
+	     * destructor might try to modify this arrray */
 	    ary[key] = &PL_sv_undef;
+	    SvREFCNT_dec(sv);
 	}
     }
     if ((key = AvARRAY(av) - AvALLOC(av))) {

@@ -1,7 +1,12 @@
+# $Id: enc_eucjp.t,v 1.1 2003/01/21 22:19:14 dankogai Exp $
 # This is the twin of enc_utf8.t, the only difference is that
 # this has "use encoding 'euc-jp'".
 
 BEGIN {
+    if ($] <= 5.008){
+	print "1..0 # Skip: Perl 5.8.1 or later required\n";
+	exit 0;
+    }
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bEncode\b/) {
       print "1..0 # Skip: Encode was not built\n";
@@ -30,6 +35,7 @@ for my $i (0..$#c) {
   open(F, ">f$i") or die "$0: failed to open 'f$i' for writing: $!";
   binmode(F, ":utf8");
   print F chr($c[$i]);
+  print F pack("C" => $c[$i]);
   close F;
 }
 

@@ -194,10 +194,22 @@ Perl_sv_peek(pTHX_ SV *sv)
 	sv_catpv(t, "(");
 	unref++;
     }
-    else if (DEBUG_R_TEST_ && SvREFCNT(sv) > 1) {
-	Perl_sv_catpvf(aTHX_ t, "<%"UVuf">", (UV)SvREFCNT(sv));
+    else if (DEBUG_R_TEST_) {
+	int is_tmp = 0;
+	I32 ix;
+	/* is this SV on the tmps stack? */
+	for (ix=PL_tmps_ix; ix>=0; ix--) {
+	    if (PL_tmps_stack[ix] == sv) {
+		is_tmp = 1;
+		break;
+	    }
+	}
+	if (SvREFCNT(sv) > 1)
+	    Perl_sv_catpvf(aTHX_ t, "<%"UVuf"%s>", (UV)SvREFCNT(sv),
+		    is_tmp ? "T" : "");
+	else if (is_tmp)
+	    sv_catpv(t, "<T>");
     }
-
 
     if (SvROK(sv)) {
 	sv_catpv(t, "\\");

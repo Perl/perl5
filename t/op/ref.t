@@ -5,7 +5,7 @@ BEGIN {
     @INC = qw(. ../lib);
 }
 
-print "1..63\n";
+print "1..65\n";
 
 require 'test.pl';
 
@@ -296,23 +296,44 @@ $a = $a->[1];
 print "not " unless $a == 2;
 print "ok 55\n";
 
-sub x::DESTROY {print "ok ", 55 + shift->[0], "\n"}
-{ my $a1 = bless [4],"x";
-  my $a2 = bless [3],"x";
-  { my $a3 = bless [2],"x";
-    my $a4 = bless [1],"x";
+# This test used to coredump. The BEGIN block is important as it causes the
+# op that created the constant reference to be freed. Hence the only
+# reference to the constant string "pass" is in $a. The hack that made
+# sure $a = $a->[1] would work didn't work with references to constants.
+
+my $test = 56;
+
+foreach my $lexical ('', 'my $a; ') {
+  my $expect = "pass\n";
+  my $result = runperl (switches => ['-wl'], stderr => 1,
+    prog => $lexical . 'BEGIN {$a = \q{pass}}; $a = $$a; print $a');
+
+  if ($? == 0 and $result eq $expect) {
+    print "ok $test\n";
+  } else {
+    print "not ok $test # \$? = $?\n";
+    print "# expected ", _qq ($expect), ", got ", _qq ($result), "\n";
+  }
+  $test++;
+}
+
+sub x::DESTROY {print "ok ", $test + shift->[0], "\n"}
+{ my $a1 = bless [3],"x";
+  my $a2 = bless [2],"x";
+  { my $a3 = bless [1],"x";
+    my $a4 = bless [0],"x";
     567;
   }
 }
-
+$test+=4;
 
 my $result = runperl (switches=>['-l'],
                       prog=> 'print 1; print qq-*$\*-;print 1;');
 my $expect = "1\n*\n*\n1\n";
 if ($result eq $expect) {
-  print "ok 60\n";
+  print "ok $test\n";
 } else {
-  print "not ok 60\n";
+  print "not ok $test\n";
   foreach ($expect, $result) {
     s/\n/\\n/gs;
   }
@@ -321,7 +342,7 @@ if ($result eq $expect) {
 
 # test global destruction
 
-my $test = 61;
+++$test;
 my $test1 = $test + 1;
 my $test2 = $test + 2;
 

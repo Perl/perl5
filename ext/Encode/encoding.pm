@@ -1,5 +1,5 @@
 package encoding;
-our $VERSION = do { my @r = (q$Revision: 1.38 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.40 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode;
 use strict;
@@ -17,6 +17,9 @@ unless ($@){
     $HAS_PERLIO = (PerlIO::encoding->VERSION >= 0.02);
 }
 
+my %utfs = map {$_=>1}
+    qw(utf8 UCS-2BE UCS-2LE UTF-16 UTF-16BE UTF-16LE UTF-32 UTF-32BE UTF-32LE);
+
 sub import {
     my $class = shift;
     my $name  = shift;
@@ -28,8 +31,9 @@ sub import {
 	require Carp;
 	Carp::croak("Unknown encoding '$name'");
     }
+    $name = $enc->name; # canonize
     unless ($arg{Filter}) {
-	${^ENCODING} = $enc;
+	${^ENCODING} = $enc unless $] <= 5.008 and $utfs{$name};
 	$HAS_PERLIO or return 1;
 	for my $h (qw(STDIN STDOUT)){
 	    if ($arg{$h}){
