@@ -253,6 +253,7 @@ vtbl_fm
 vtbl_glob
 vtbl_isa
 vtbl_isaelem
+vtbl_itervar
 vtbl_mglob
 vtbl_nkeys
 vtbl_pack
@@ -324,12 +325,14 @@ cast_ulong
 check_uni
 checkcomma
 ck_aelem
+ck_anoncode
 ck_bitop
 ck_concat
 ck_delete
 ck_eof
 ck_eval
 ck_exec
+ck_exists
 ck_ftst
 ck_fun
 ck_fun_locale

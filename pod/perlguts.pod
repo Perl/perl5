@@ -688,7 +688,7 @@ The current kinds of Magic Virtual Tables are:
     U        vtbl_uvar	         ???
     v        vtbl_vec	         Vector
     x        vtbl_substr         Substring???
-    y        vtbl_vivary         Shadow variable in foreach loop
+    y        vtbl_itervar        Shadow "foreach" iterator variable
     *        vtbl_glob           GV???
     #        vtbl_arylen         Array Length
     .        vtbl_pos	         $. scalar variable
