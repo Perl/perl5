@@ -147,7 +147,7 @@ case "$usethreads" in
 $define|true|[yY]*)
         lc_r=`/sbin/ldconfig -r|grep ':-lc_r'|awk '{print $NF}'`
         case "$osvers" in  
-	2.2.8|3.*|4.*)
+	2.2.8*|3.*|4.*)
 	      if [ ! -r "$lc_r" ]; then
 	      cat <<EOM >&4
 POSIX threads should be supported by FreeBSD $osvers --
