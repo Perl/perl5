@@ -2,7 +2,6 @@ package JNI;
 
 use strict;
 use Carp;
-use Errno;
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK $AUTOLOAD $JVM @JVM_ARGS $JAVALIB);
 
 require Exporter;
@@ -199,7 +198,7 @@ sub AUTOLOAD {
     ($constname = $AUTOLOAD) =~ s/.*:://;
     my $val = constant($constname, @_ ? $_[0] : 0);
     if ($! != 0) {
-	if ($!{EINVAL} || $! =~ /Invalid/) {
+	if ($! =~ /Invalid/ || $!{EINVAL}) {
 	    $AutoLoader::AUTOLOAD = $AUTOLOAD;
 	    goto &AutoLoader::AUTOLOAD;
 	}

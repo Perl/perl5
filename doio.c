@@ -675,7 +675,7 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
 	}
 	return FALSE;
     }
-    retval = io_close(io);
+    retval = io_close(io, not_implicit);
     if (not_implicit) {
 	IoLINES(io) = 0;
 	IoPAGE(io) = 0;
@@ -686,7 +686,7 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
 }
 
 bool
-Perl_io_close(pTHX_ IO *io)
+Perl_io_close(pTHX_ IO *io, bool not_implicit)
 {
     bool retval = FALSE;
     int status;
@@ -694,8 +694,13 @@ Perl_io_close(pTHX_ IO *io)
     if (IoIFP(io)) {
 	if (IoTYPE(io) == '|') {
 	    status = PerlProc_pclose(IoIFP(io));
-	    STATUS_NATIVE_SET(status);
-	    retval = (STATUS_POSIX == 0);
+	    if (not_implicit) {
+		STATUS_NATIVE_SET(status);
+		retval = (STATUS_POSIX == 0);
+	    }
+	    else {
+		retval = (status != -1);
+	    }
 	}
 	else if (IoTYPE(io) == '-')
 	    retval = TRUE;
@@ -709,7 +714,7 @@ Perl_io_close(pTHX_ IO *io)
 	}
 	IoOFP(io) = IoIFP(io) = Nullfp;
     }
-    else {
+    else if (not_implicit) {
 	SETERRNO(EBADF,SS$_IVCHAN);
     }
 

@@ -67,7 +67,7 @@ TRNL = '$trnl'
 src    = $src
 
 # nice makes grok this
-VPATH = .:$src
+#VPATH = .:$src
 
 !GROK!THIS!
 

@@ -1379,9 +1379,9 @@ Perl_instr(pTHXo_ const char* big, const char* little)
 
 #undef  Perl_io_close
 bool
-Perl_io_close(pTHXo_ IO* io)
+Perl_io_close(pTHXo_ IO* io, bool not_implicit)
 {
-    return ((CPerlObj*)pPerl)->Perl_io_close(io);
+    return ((CPerlObj*)pPerl)->Perl_io_close(io, not_implicit);
 }
 
 #undef  Perl_invert

@@ -43,7 +43,6 @@ use strict;
 use vars qw($VERSION @ISA @EXPORT $AUTOLOAD);
 
 require Carp;
-use Errno;
 require Tie::Hash;
 require Exporter;
 use AutoLoader;
@@ -67,7 +66,7 @@ sub AUTOLOAD {
     ($constname = $AUTOLOAD) =~ s/.*:://;
     my $val = constant($constname, @_ ? $_[0] : 0);
     if ($! != 0) {
-	if ($!{EINVAL} || $! =~ /Invalid/) {
+	if ($! =~ /Invalid/ || $!{EINVAL}) {
 	    $AutoLoader::AUTOLOAD = $AUTOLOAD;
 	    goto &AutoLoader::AUTOLOAD;
 	}

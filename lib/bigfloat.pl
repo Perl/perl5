@@ -1,5 +1,14 @@
 package bigfloat;
 require "bigint.pl";
+#
+# This library is no longer being maintained, and is included for backward
+# compatibility with Perl 4 programs which may require it.
+#
+# In particular, this should not be used as an example of modern Perl
+# programming techniques.
+#
+# Suggested alternative: Math::BigFloat
+#
 # Arbitrary length float math package
 #
 # by Mark Biggar

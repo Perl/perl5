@@ -180,11 +180,24 @@ usually either "live" via network connection, or by storing the
 numbers to secondary storage such as a disk file or tape.
 
 Conflicting storage orders make utter mess out of the numbers.  If a
-little-endian host (Intel, Alpha) stores 0x12345678 (305419896 in
+little-endian host (Intel, VAX) stores 0x12345678 (305419896 in
 decimal), a big-endian host (Motorola, MIPS, Sparc, PA) reads it as
 0x78563412 (2018915346 in decimal).  To avoid this problem in network
 (socket) connections use the C<pack> and C<unpack> formats C<n>
 and C<N>, the "network" orders.  These are guaranteed to be portable.
+
+You can explore the endianness of your platform by unpacking a
+data structure packed in native format such as:
+
+    print unpack("h*", pack("s2", 1, 2)), "\n";
+    # '10002000' on e.g. Intel x86 or Alpha 21064 in little-endian mode
+    # '00100020' on e.g. Motorola 68040
+
+If you need to distinguish between endian architectures you could use
+either of the variables set like so:
+
+    $is_big_endian   = unpack("h*", pack("s", 1)) =~ /01/;
+    $is_litte_endian = unpack("h*", pack("s", 1)) =~ /^1/;
 
 Differing widths can cause truncation even between platforms of equal
 endianness.  The platform of shorter width loses the upper parts of the
@@ -242,9 +255,13 @@ to be running the program.
     $file = catfile(curdir(), 'temp', 'file.txt');
     # on Unix and Win32, './temp/file.txt'
     # on Mac OS, ':temp:file.txt'
+    # on VMS, '[.temp]file.txt'
 
 File::Spec is available in the standard distribution as of version
-5.004_05.
+5.004_05.  File::Spec::Functions is only in File::Spec 0.7 and later,
+and some versions of perl come with version 0.6.  If File::Spec
+is not updated to 0.7 or later, you must use the object-oriented
+interface from File::Spec (or upgrade File::Spec).
 
 In general, production code should not have file paths hardcoded.
 Making them user-supplied or read from a configuration file is
@@ -317,7 +334,7 @@ Don't count on a specific environment variable existing in C<%ENV>.
 Don't count on C<%ENV> entries being case-sensitive, or even
 case-preserving.
 
-Don't count on signals for anything.
+Don't count on signals or C<%SIG> for anything.
 
 Don't count on filename globbing.  Use C<opendir>, C<readdir>, and
 C<closedir> instead.
@@ -534,10 +551,11 @@ edited after the fact.
 Perl works on a bewildering variety of Unix and Unix-like platforms (see
 e.g. most of the files in the F<hints/> directory in the source code kit).
 On most of these systems, the value of C<$^O> (hence C<$Config{'osname'}>,
-too) is determined by lowercasing and stripping punctuation from the first
-field of the string returned by typing C<uname -a> (or a similar command)
-at the shell prompt.  Here, for example, are a few of the more popular
-Unix flavors:
+too) is determined either by lowercasing and stripping punctuation from the
+first field of the string returned by typing C<uname -a> (or a similar command)
+at the shell prompt or by testing the file system for the presence of
+uniquely named files such as a kernel or header file.  Here, for example,
+are a few of the more popular Unix flavors:
 
     uname         $^O        $Config{'archname'}
     --------------------------------------------
@@ -546,11 +564,16 @@ Unix flavors:
     dgux          dgux       AViiON-dgux
     DYNIX/ptx     dynixptx   i386-dynixptx
     FreeBSD       freebsd    freebsd-i386    
+    Linux         linux      arm-linux
     Linux         linux      i386-linux
     Linux         linux      i586-linux
     Linux         linux      ppc-linux
     HP-UX         hpux       PA-RISC1.1
     IRIX          irix       irix
+    Mac OS X      rhapsody   rhapsody
+    MachTen PPC   machten    powerpc-machten
+    NeXT 3        next       next-fat
+    NeXT 4        next       OPENSTEP-Mach
     openbsd       openbsd    i386-openbsd
     OSF1          dec_osf    alpha-dec_osf
     reliantunix-n svr4       RM400-svr4
@@ -639,6 +662,13 @@ C<ftp://hobbes.nmsu.edu/pub/os2/dev/emx>
 =item Build instructions for Win32, L<perlwin32>.
 
 =item The ActiveState Pages, C<http://www.activestate.com/>
+
+=item The Cygwin32 environment for Win32; L<README.cygwin32>,
+C<http://www.cygnus.com/misc/gnu-win32/>
+
+=item The U/WIN environment for Win32,
+C<http://www.research.att.com/sw/tools/uwin/>
+
 
 =back
 
@@ -783,9 +813,9 @@ non-VMS platforms and can be helpful for conversions to and from RMS
 native formats.
 
 What C<\n> represents depends on the type of file opened.  It could
-be C<\015>, C<\012>, C<\015\012>, or nothing.  Reading from a file
-translates newlines to C<\012>, unless C<binmode> was executed on that
-handle, just like DOSish perls.
+be C<\015>, C<\012>, C<\015\012>, or nothing.  The VMS::Stdio module
+provides access to the special fopen() requirements of files with unusual
+attributes on VMS.
 
 TCP/IP stacks are optional on VMS, so socket routines might not be
 implemented.  UDP sockets may not be supported.
@@ -813,7 +843,7 @@ Also see:
 
 =over 4
 
-=item L<perlvms.pod>
+=item L<README.vms>, L<perlvms.pod>
 
 =item vmsperl list, C<majordomo@perl.org>
 
@@ -893,11 +923,12 @@ the message body to majordomo@list.stratagy.com.
 =head2 EBCDIC Platforms
 
 Recent versions of Perl have been ported to platforms such as OS/400 on
-AS/400 minicomputers as well as OS/390 & VM/ESA for IBM Mainframes.  Such
-computers use EBCDIC character sets internally (usually Character Code
-Set ID 00819 for OS/400 and IBM-1047 for OS/390 & VM/ESA).  On
-the mainframe perl currently works under the "Unix system services
-for OS/390" (formerly known as OpenEdition) and VM/ESA OpenEdition.
+AS/400 minicomputers as well as OS/390, VM/ESA, and BS2000 for S/390
+Mainframes.  Such computers use EBCDIC character sets internally (usually
+Character Code Set ID 00819 for OS/400 and 1047 for S/390 systems).
+On the mainframe perl currently works under the "Unix system services
+for OS/390" (formerly known as OpenEdition), VM/ESA OpenEdition, or
+the BS200 POSIX system (BS2000 is supported in perl 5.006 and greater).
 
 As of R2.5 of USS for OS/390 and Version 2.3 of VM/ESA these Unix
 sub-systems do not support the C<#!> shebang trick for script invocation.
@@ -910,6 +941,10 @@ similar to the following simple script:
     #!/usr/local/bin/perl     # just a comment really
 
     print "Hello from perl!\n";
+
+OS/390 will support the C<#!> shebang trick in release 2.8 and beyond.
+Calls to C<system> and backticks can use POSIX shell syntax on all
+S/390 systems.
 
 On the AS/400, if PERL5 is in your library list, you may need
 to wrap your perl scripts in a CL procedure to invoke them like so:
@@ -935,9 +970,14 @@ translate the C<\n> in the following statement to its ASCII equivalent
 
     print "Content-type: text/html\r\n\r\n";
 
-The value of C<$^O> on OS/390 is "os390".
+The values of C<$^O> on some of these platforms includes:
 
-The value of C<$^O> on VM/ESA is "vmesa".
+    uname         $^O        $Config{'archname'}
+    --------------------------------------------
+    OS/390        os390      os390
+    OS400         os400      os400
+    POSIX-BC      posix-bc   BS2000-posix-bc
+    VM/ESA        vmesa      vmesa
 
 Some simple tricks for determining if you are running on an EBCDIC
 platform could include any of the following (perhaps all):
@@ -957,6 +997,8 @@ Also see:
 
 =over 4
 
+=item L<README.os390>, L<README.posix-bc>, L<README.vmesa>
+
 =item perl-mvs list
 
 The perl-mvs@perl.org list is for discussion of porting issues as well as
@@ -964,6 +1006,7 @@ general usage issues for all EBCDIC Perls.  Send a message body of
 "subscribe perl-mvs" to majordomo@perl.org.
 
 =item AS/400 Perl information at C<http://as400.rochester.ibm.com/>
+as well as on CPAN in the F<ports/> directory.
 
 =back
 
@@ -1081,19 +1124,35 @@ for the likes of: aos, Atari ST, lynxos, riscos, Novell Netware,
 Tandem Guardian, I<etc.>  (Yes, we know that some of these OSes may
 fall under the Unix category, but we are not a standards body.)
 
+Some approximate operating system names and their C<$^O> values
+in the "OTHER" category include:
+
+    OS            $^O        $Config{'archname'}
+    ------------------------------------------
+    Amiga DOS     amigaos    m68k-amigos
+    MPE/iX        mpeix      PA-RISC1.1
+
 See also:
 
 =over 4
 
-=item Atari, Guido Flohr's page C<http://stud.uni-sb.de/~gufl0000/>
+=item Amiga, L<README.amiga>
 
-=item HP 300 MPE/iX  C<http://www.cccd.edu/~markb/perlix.html>
+=item Atari, L<README.mint> and Guido Flohr's web page
+C<http://stud.uni-sb.de/~gufl0000/>
+
+=item Be OS, L<README.beos>
+
+=item HP 300 MPE/iX, L<README.mpeix> and Mark Bixby's web page
+C<http://www.cccd.edu/~markb/perlix.html>
 
 =item Novell Netware
 
 A free perl5-based PERL.NLM for Novell Netware is available in
 precompiled binary and source code form from C<http://www.novell.com/>
 as well as from CPAN.
+
+=item Plan 9, L<README.plan9>
 
 =back
 
@@ -1604,6 +1663,11 @@ Not useful. (S<RISC OS>)
 
 =over 4
 
+=item v1.44, 19 July 1999
+
+A bunch of updates from Peter Prymmer for C<$^O> values,
+endianness, File::Spec, VMS, BS2000, OS/400.
+
 =item v1.43, 24 May 1999
 
 Added a lot of cleaning up from Tom Christiansen.
@@ -1616,7 +1680,7 @@ Added notes about tests, sprintf/printf, and epoch offsets.
 
 Lots more little changes to formatting and content.
 
-Added a bunch of <$^O> and related values
+Added a bunch of C<$^O> and related values
 for various platforms; fixed mail and web addresses, and added
 and changed miscellaneous notes.  (Peter Prymmer)
 
@@ -1673,9 +1737,11 @@ Charles Bailey E<lt>bailey@newman.upenn.eduE<gt>,
 Graham Barr E<lt>gbarr@pobox.comE<gt>,
 Tom Christiansen E<lt>tchrist@perl.comE<gt>,
 Nicholas Clark E<lt>Nicholas.Clark@liverpool.ac.ukE<gt>,
+Thomas Dorner E<lt>Thomas.Dorner@start.deE<gt>,
 Andy Dougherty E<lt>doughera@lafcol.lafayette.eduE<gt>,
 Dominic Dunlop E<lt>domo@vo.luE<gt>,
-Neale Ferguson E<lt>neale@mailbox.tabnsw.com.auE<gt>
+Neale Ferguson E<lt>neale@mailbox.tabnsw.com.auE<gt>,
+David J. Fiander E<lt>davidf@mks.comE<gt>,
 Paul Green E<lt>Paul_Green@stratus.comE<gt>,
 M.J.T. Guy E<lt>mjtg@cus.cam.ac.ukE<gt>,
 Jarkko Hietaniemi E<lt>jhi@iki.fi<gt>,
@@ -1703,4 +1769,4 @@ E<lt>pudge@pobox.comE<gt>.
 
 =head1 VERSION
 
-Version 1.43, last modified 24 May 1999
+Version 1.44, last modified 22 July 1999
