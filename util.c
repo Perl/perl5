@@ -1037,6 +1037,7 @@ Perl_vdie(pTHX_ const char* pat, va_list *args)
     CV *cv;
     SV *msv;
     STRLEN msglen;
+    I32 utf8 = 0;
 
     DEBUG_S(PerlIO_printf(Perl_debug_log,
 			  "%p: die: curstack = %p, mainstack = %p\n",
@@ -1051,6 +1052,7 @@ Perl_vdie(pTHX_ const char* pat, va_list *args)
 	}
 	else
 	    message = SvPV(msv,msglen);
+	utf8 = SvUTF8(msv);
     }
     else {
 	message = Nullch;
@@ -1076,6 +1078,7 @@ Perl_vdie(pTHX_ const char* pat, va_list *args)
 	    save_re_context();
 	    if (message) {
 		msg = newSVpvn(message, msglen);
+		SvFLAGS(msg) |= utf8;
 		SvREADONLY_on(msg);
 		SAVEFREESV(msg);
 	    }
@@ -1094,6 +1097,7 @@ Perl_vdie(pTHX_ const char* pat, va_list *args)
     }
 
     PL_restartop = die_where(message, msglen);
+    SvFLAGS(ERRSV) |= utf8;
     DEBUG_S(PerlIO_printf(Perl_debug_log,
 	  "%p: die: restartop = %p, was_in_eval = %d, top_env = %p\n",
 	  thr, PL_restartop, was_in_eval, PL_top_env));
@@ -1136,6 +1140,7 @@ Perl_vcroak(pTHX_ const char* pat, va_list *args)
     CV *cv;
     SV *msv;
     STRLEN msglen;
+    I32 utf8 = 0;
 
     if (pat) {
 	msv = vmess(pat, args);
@@ -1146,6 +1151,7 @@ Perl_vcroak(pTHX_ const char* pat, va_list *args)
 	}
 	else
 	    message = SvPV(msv,msglen);
+	utf8 = SvUTF8(msv);
     }
     else {
 	message = Nullch;
@@ -1171,6 +1177,7 @@ Perl_vcroak(pTHX_ const char* pat, va_list *args)
 	    save_re_context();
 	    if (message) {
 		msg = newSVpvn(message, msglen);
+		SvFLAGS(msg) |= utf8;
 		SvREADONLY_on(msg);
 		SAVEFREESV(msg);
 	    }
@@ -1189,6 +1196,7 @@ Perl_vcroak(pTHX_ const char* pat, va_list *args)
     }
     if (PL_in_eval) {
 	PL_restartop = die_where(message, msglen);
+	SvFLAGS(ERRSV) |= utf8;
 	JMPENV_JUMP(3);
     }
     else if (!message)
@@ -1249,8 +1257,10 @@ Perl_vwarn(pTHX_ const char* pat, va_list *args)
     CV *cv;
     SV *msv;
     STRLEN msglen;
+    I32 utf8 = 0;
 
     msv = vmess(pat, args);
+    utf8 = SvUTF8(msv);
     message = SvPV(msv, msglen);
 
     if (PL_warnhook) {
@@ -1268,6 +1278,7 @@ Perl_vwarn(pTHX_ const char* pat, va_list *args)
 	    ENTER;
 	    save_re_context();
 	    msg = newSVpvn(message, msglen);
+	    SvFLAGS(msg) |= utf8;
 	    SvREADONLY_on(msg);
 	    SAVEFREESV(msg);
 
@@ -1346,9 +1357,11 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
     CV *cv;
     SV *msv;
     STRLEN msglen;
+    I32 utf8 = 0;
 
     msv = vmess(pat, args);
     message = SvPV(msv, msglen);
+    utf8 = SvUTF8(msv);
 
     if (ckDEAD(err)) {
 #ifdef USE_5005THREADS
@@ -1369,6 +1382,7 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
 		ENTER;
 		save_re_context();
 		msg = newSVpvn(message, msglen);
+		SvFLAGS(msg) |= utf8;
 		SvREADONLY_on(msg);
 		SAVEFREESV(msg);
 
@@ -1383,6 +1397,7 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
 	}
 	if (PL_in_eval) {
 	    PL_restartop = die_where(message, msglen);
+	    SvFLAGS(ERRSV) |= utf8;
 	    JMPENV_JUMP(3);
 	}
 	write_to_stderr(message, msglen);
@@ -1404,6 +1419,7 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
 		ENTER;
 		save_re_context();
 		msg = newSVpvn(message, msglen);
+		SvFLAGS(msg) |= utf8;
 		SvREADONLY_on(msg);
 		SAVEFREESV(msg);
 
