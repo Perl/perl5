@@ -3214,8 +3214,8 @@ find out whether it is threadsafe.  See L<perlthrtut> for more information.
 
 =head2 FreeBSD built with ithreads coredumps reading large directories
 
-This is a known bug in FreeBSD's readdir_r() (see L<perlfreebsd>
-(README.freebsd)), which hopefully will be fixed in FreeBSD 4.6.
+This is a known bug in FreeBSD 4.5's readdir_r(), it has been fixed in
+FreeBSD 4.6 (see L<perlfreebsd> (README.freebsd)).
 
 =head2 FreeBSD Failing locale Test 117 For ISO 8859-15 Locales
 
