@@ -438,6 +438,19 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #  endif
 #endif
 
+/* Use the reentrant APIs like localtime_r and getpwent_r */
+#if defined(USE_THREADS) && defined(USE_ITHREADS) && !defined(USE_REENTRANT)
+#   define USE_REENTRANT
+#endif
+
+/* Tru64/Digital UNIX/DEC OSF/1 and Win32 have naturally
+ * threadsafe libraries, no need to use any _r variants. */
+#ifdef USE_REENTRANT_API
+#   if (defined(__osf__) && defined(__alpha)) || defined(WIN32)
+#       undef USE_REEENTRANT_API
+#   endif
+#endif
+
 /* HP-UX 10.X CMA (Common Multithreaded Architecure) insists that
    pthread.h must be included before all other header files.
 */
@@ -4015,8 +4028,6 @@ extern void moncontrol(int);
    I_SYSUIO
    HAS_STRUCT_MSGHDR
    HAS_STRUCT_CMSGHDR
-
-   USE_REENTRANT_API
 
    HAS_NL_LANGINFO
 
