@@ -125,7 +125,6 @@ sub INC_find
 
 require Encode::Tcl::Table;
 require Encode::Tcl::Escape;
-require Encode::Tcl::Extended;
 
 1;
 __END__
