@@ -56,7 +56,10 @@ extern "C" int syscall(unsigned long,...);
 
 /* XXX Configure test needed.
    h_errno might not be a simple 'int', especially for multi-threaded
-   applications.  HOST_NOT_FOUND is typically defined in <netdb.h>.
+   applications, see "extern int errno in perl.h".  Creating such
+   a test requires taking into account the differences between
+   compiling multithreaded and singlethreaded ($ccflags et al).
+   HOST_NOT_FOUND is typically defined in <netdb.h>.
 */
 #if defined(HOST_NOT_FOUND) && !defined(h_errno)
 extern int h_errno;
@@ -170,6 +173,112 @@ static int dooneliner _((char *cmd, char *filename));
 
 #endif /* no flock() */
 
+#if defined(I_SYS_ACCESS) && !defined(R_OK)
+#  include <sys/access.h>
+#endif
+
+#undef PERL_EFF_ACCESS_R_OK	/* EFFective uid/gid ACCESS R_OK */
+#undef PERL_EFF_ACCESS_W_OK
+#undef PERL_EFF_ACCESS_X_OK
+
+/* F_OK unused: if stat() cannot find it... */
+
+#if !defined(PERL_EFF_ACCESS_R_OK) && defined(HAS_ACCESS) && defined(EFF_ONLY_OK) && !defined(NO_EFF_ONLY_OK)
+/* Digital UNIX, UnixWare */
+#   define PERL_EFF_ACCESS_R_OK(p) (access((p), R_OK | EFF_ONLY_OK))
+#   define PERL_EFF_ACCESS_W_OK(p) (access((p), W_OK | EFF_ONLY_OK))
+#   define PERL_EFF_ACCESS_X_OK(p) (access((p), X_OK | EFF_ONLY_OK))
+#endif
+
+#if !defined(PERL_EFF_ACCESS_R_OK) && defined(HAS_EACCESS)
+/* HP SecureWare */
+#   if defined(I_SYS_SECURITY)
+#       include <sys/security.h>
+#   endif
+#   define PERL_EFF_ACCESS_R_OK(p) (eaccess((p), R_OK, ACC_SELF))
+#   define PERL_EFF_ACCESS_W_OK(p) (eaccess((p), W_OK, ACC_SELF))
+#   define PERL_EFF_ACCESS_X_OK(p) (eaccess((p), X_OK, ACC_SELF))
+#endif
+
+#if !defined(PERL_EFF_ACCESS_R_OK) && defined(HAS_ACCESSX) && defined(ACC_SELF)
+/* AIX */
+#   define PERL_EFF_ACCESS_R_OK(p) (accessx((p), R_OK, ACC_SELF))
+#   define PERL_EFF_ACCESS_W_OK(p) (accessx((p), W_OK, ACC_SELF))
+#   define PERL_EFF_ACCESS_X_OK(p) (accessx((p), X_OK, ACC_SELF))
+#endif
+
+#if !defined(PERL_EFF_ACCESS_R_OK) && defined(HAS_ACCESS)
+/* The Hard Way. */
+static int emulate_eaccess (const char* path, int mode) {
+    Uid_t ruid = getuid();
+    Uid_t euid = geteuid();
+    Gid_t rgid = getgid();
+    Gid_t egid = getegid();
+    int res;
+
+    MUTEX_LOCK(&PL_cred_mutex);
+#if !defined(HAS_SETREUID) && !defined(HAS_SETRESUID)
+    croak("effective uid access is not implemented");
+#else
+#ifdef HAS_SETREUID
+    if (setreuid(euid, ruid))
+#else
+#ifdef HAS_SETRESUID
+    if (setresuid(euid, ruid, (Uid_t)-1))
+#endif
+#endif
+	croak("entering effective uid access failed");
+#endif
+
+#if !defined(HAS_SETREGID) && !defined(HAS_SETRESGID)
+    croak("effective gid access is not implemented");
+#else
+#ifdef HAS_SETREGID
+    if (setregid(egid, rgid))
+#else
+#ifdef HAS_SETRESGID
+    if (setresgid(egid, rgid, (Gid_t)-1))
+#endif
+#endif
+	croak("entering effective gid access failed");
+#endif
+
+    res = access(path, mode);
+
+#ifdef HAS_SETREUID
+    if (setreuid(ruid, euid))
+#else
+#ifdef HAS_SETRESUID
+    if (setresuid(ruid, euid, (Uid_t)-1))
+#endif
+#endif
+	croak("leaving effective uid access failed");
+
+#ifdef HAS_SETREGID
+    if (setregid(rgid, egid))
+#else
+#ifdef HAS_SETRESGID
+    if (setresgid(rgid, egid, (Gid_t)-1))
+#endif
+#endif
+	croak("leaving effective gid access failed");
+    MUTEX_UNLOCK(&PL_cred_mutex);
+
+    return res;
+}
+#   define PERL_EFF_ACCESS_R_OK(p) (emulate_eaccess((p), R_OK))
+#   define PERL_EFF_ACCESS_W_OK(p) (emulate_eaccess((p), W_OK))
+#   define PERL_EFF_ACCESS_X_OK(p) (emulate_eaccess((p), X_OK))
+#endif
+
+#if !defined(PERL_EFF_ACCESS_R_OK)
+static int emulate_eaccess (const char* path, int mode) {
+    croak("effective uid access is not implemented");
+    /*NOTREACHED*/
+    return -1;
+}
+#endif
+
 #ifndef MAXPATHLEN
 #  ifdef PATH_MAX
 #    define MAXPATHLEN PATH_MAX
@@ -180,8 +289,6 @@ static int dooneliner _((char *cmd, char *filename));
 
 #define ZBTLEN 10
 static char zero_but_true[ZBTLEN + 1] = "0 but true";
-
-/* Pushy I/O. */
 
 PP(pp_backtick)
 {
@@ -754,24 +861,24 @@ PP(pp_sselect)
 	    maxlen = j;
     }
 
+/* little endians can use vecs directly */
 #if BYTEORDER == 0x1234 || BYTEORDER == 0x12345678
-/* XXX Configure test needed. */
-#if defined(__linux__) || defined(OS2) || defined(NeXT) || defined(__osf__) || defined(sun)
+#  if SELECT_MIN_BITS > 1
+    growsize = SELECT_MIN_BITS / 8;
+#  else
     growsize = sizeof(fd_set);
-#else
-    growsize = maxlen;		/* little endians can use vecs directly */
-#endif
-#else
-#ifdef NFDBITS
+#  endif
+# else
+#  ifdef NFDBITS
 
-#ifndef NBBY
-#define NBBY 8
-#endif
+#    ifndef NBBY
+#     define NBBY 8
+#    endif
 
     masksize = NFDBITS / NBBY;
-#else
+#  else
     masksize = sizeof(long);	/* documented int, everyone seems to use long */
-#endif
+#  endif
     growsize = maxlen + (masksize - (maxlen % masksize));
     Zero(&fd_sets[0], 4, char*);
 #endif
@@ -2211,8 +2318,21 @@ PP(pp_stat)
 
 PP(pp_ftrread)
 {
-    I32 result = my_stat(ARGS);
+    I32 result;
     djSP;
+#if defined(HAS_ACCESS) && defined(R_OK)
+    if ((PL_hints & HINT_FILETEST_ACCESS) && SvPOK(TOPs)) {
+	result = access(TOPp, R_OK);
+	if (result == 0)
+	    RETPUSHYES;
+	if (result < 0)
+	    RETPUSHUNDEF;
+	RETPUSHNO;
+    } else
+	result = my_stat(ARGS);
+#else
+    result = my_stat(ARGS);
+#endif
     if (result < 0)
 	RETPUSHUNDEF;
     if (cando(S_IRUSR, 0, &PL_statcache))
@@ -2222,8 +2342,21 @@ PP(pp_ftrread)
 
 PP(pp_ftrwrite)
 {
-    I32 result = my_stat(ARGS);
+    I32 result;
     djSP;
+#if defined(HAS_ACCESS) && defined(W_OK)
+    if ((PL_hints & HINT_FILETEST_ACCESS) && SvPOK(TOPs)) {
+	result = access(TOPp, W_OK);
+	if (result == 0)
+	    RETPUSHYES;
+	if (result < 0)
+	    RETPUSHUNDEF;
+	RETPUSHNO;
+    } else
+	result = my_stat(ARGS);
+#else
+    result = my_stat(ARGS);
+#endif
     if (result < 0)
 	RETPUSHUNDEF;
     if (cando(S_IWUSR, 0, &PL_statcache))
@@ -2233,8 +2366,21 @@ PP(pp_ftrwrite)
 
 PP(pp_ftrexec)
 {
-    I32 result = my_stat(ARGS);
+    I32 result;
     djSP;
+#if defined(HAS_ACCESS) && defined(X_OK)
+    if ((PL_hints & HINT_FILETEST_ACCESS) && SvPOK(TOPs)) {
+	result = access(TOPp, X_OK);
+	if (result == 0)
+	    RETPUSHYES;
+	if (result < 0)
+	    RETPUSHUNDEF;
+	RETPUSHNO;
+    } else
+	result = my_stat(ARGS);
+#else
+    result = my_stat(ARGS);
+#endif
     if (result < 0)
 	RETPUSHUNDEF;
     if (cando(S_IXUSR, 0, &PL_statcache))
@@ -2244,8 +2390,21 @@ PP(pp_ftrexec)
 
 PP(pp_fteread)
 {
-    I32 result = my_stat(ARGS);
+    I32 result;
     djSP;
+#ifdef PERL_EFF_ACCESS_R_OK
+    if ((PL_hints & HINT_FILETEST_ACCESS) && SvPOK(TOPs)) {
+	result = PERL_EFF_ACCESS_R_OK(TOPp);
+	if (result == 0)
+	    RETPUSHYES;
+	if (result < 0)
+	    RETPUSHUNDEF;
+	RETPUSHNO;
+    } else
+	result = my_stat(ARGS);
+#else
+    result = my_stat(ARGS);
+#endif
     if (result < 0)
 	RETPUSHUNDEF;
     if (cando(S_IRUSR, 1, &PL_statcache))
@@ -2255,8 +2414,21 @@ PP(pp_fteread)
 
 PP(pp_ftewrite)
 {
-    I32 result = my_stat(ARGS);
+    I32 result;
     djSP;
+#ifdef PERL_EFF_ACCESS_W_OK
+    if ((PL_hints & HINT_FILETEST_ACCESS) && SvPOK(TOPs)) {
+	result = PERL_EFF_ACCESS_W_OK(TOPp);
+	if (result == 0)
+	    RETPUSHYES;
+	if (result < 0)
+	    RETPUSHUNDEF;
+	RETPUSHNO;
+    } else
+	result = my_stat(ARGS);
+#else
+    result = my_stat(ARGS);
+#endif
     if (result < 0)
 	RETPUSHUNDEF;
     if (cando(S_IWUSR, 1, &PL_statcache))
@@ -2266,8 +2438,21 @@ PP(pp_ftewrite)
 
 PP(pp_fteexec)
 {
-    I32 result = my_stat(ARGS);
+    I32 result;
     djSP;
+#ifdef PERL_EFF_ACCESS_X_OK
+    if ((PL_hints & HINT_FILETEST_ACCESS) && SvPOK(TOPs)) {
+	result = PERL_EFF_ACCESS_X_OK(TOPp);
+	if (result == 0)
+	    RETPUSHYES;
+	if (result < 0)
+	    RETPUSHUNDEF;
+	RETPUSHNO;
+    } else
+	result = my_stat(ARGS);
+#else
+    result = my_stat(ARGS);
+#endif
     if (result < 0)
 	RETPUSHUNDEF;
     if (cando(S_IXUSR, 1, &PL_statcache))

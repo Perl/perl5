@@ -565,6 +565,7 @@ lib/dumpvar.pl		A variable dumper
 lib/exceptions.pl	catch and throw routines
 lib/fastcwd.pl		a faster but more dangerous getcwd
 lib/fields.pm		Set up object field names for pseudo-hash-using classes
+lib/filetest.pm		For "use filetest"
 lib/find.pl		A find emulator--used by find2perl
 lib/finddepth.pl	A depth-first find emulator--used by find2perl
 lib/flush.pl		Routines to do single flush

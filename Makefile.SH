@@ -650,3 +650,58 @@ case `pwd` in
     ;;
 esac
 $rm -f $firstmakefile
+
+# Now do any special processing required before building.
+
+case "$ebcdic" in
+$define)
+    xxx=''
+    echo "This is an EBCDIC system, checking if any parser files need regenerating." >&4
+    rm -f y.tab.c y.tab.h
+    yacc -d perly.y >/dev/null 2>&1
+    if cmp -s y.tab.c perly.c; then
+        rm -f y.tab.c
+    else
+        echo "perly.y -> perly.c" >&2
+        mv -f y.tab.c perly.c
+        chmod u+w perly.c
+        sed -e 's/fprintf *( *stderr *,/PerlIO_printf(Perl_debug_log,/g' \
+            -e 's/y\.tab/perly/g' perly.c >perly.tmp && mv perly.tmp perly.c
+        xxx="$xxx perly.c"
+    fi
+    if cmp -s y.tab.h perly.h; then
+        rm -f y.tab.h
+    else
+        echo "perly.y -> perly.h" >&2
+        mv -f y.tab.h perly.h
+        xxx="$xxx perly.h"
+    fi
+    cd x2p
+    rm -f y.tab.c
+    yacc a2p.y >/dev/null 2>&1
+    if cmp -s y.tab.c a2p.c
+    then
+        rm -f y.tab.c
+    else
+        echo "a2p.y -> a2p.c" >&2
+        mv -f y.tab.c a2p.c
+        chmod u+w a2p.c
+        sed -e 's/fprintf *( *stderr *,/PerlIO_printf(Perl_debug_log,/g' \
+            -e 's/y\.tab/a2p/g' a2p.c >a2p.tmp && mv a2p.tmp a2p.c
+        xxx="$xxx a2p.c"
+    fi
+    if cmp -s y.tab.h a2p.h
+    then
+        rm -f y.tab.h
+    else
+        echo "a2p.h -> a2p.h" >&2
+        mv -f y.tab.h a2p.h
+        xxx="$xxx a2p.h"
+    fi
+    cd ..
+    case "$xxx" in
+    '') echo "No parser files were regenerated.  That's okay." >&2 ;;
+    esac
+    ;;
+esac
+

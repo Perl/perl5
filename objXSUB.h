@@ -19,6 +19,9 @@
 #define PL_colors				pPerl->PL_colors		
 #undef  PL_colorset		
 #define PL_colorset				pPerl->PL_colorset		
+#undef  PL_cred_mutex		
+#define PL_cred_mutex				pPerl->PL_cred_mutex		
+#undef  PL_sv_no		
 #undef  PL_curcop		
 #define PL_curcop				pPerl->PL_curcop		
 #undef  PL_curpad		

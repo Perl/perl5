@@ -72,6 +72,12 @@ constant(char *name, int arg)
 #else
 	        goto not_there;
 #endif
+	    if (strEQ(name, "F_GETLK64"))
+#ifdef F_GETLK64
+	        return F_GETLK64;
+#else
+	        goto not_there;
+#endif
 	    if (strEQ(name, "F_GETOWN"))
 #ifdef F_GETOWN
 	        return F_GETOWN;
@@ -102,15 +108,21 @@ constant(char *name, int arg)
 #else
 	        goto not_there;
 #endif
-	    if (strEQ(name, "F_SETLK"))
-#ifdef F_SETLK
-	        return F_SETLK;
+	    if (strEQ(name, "F_SETLK64"))
+#ifdef F_SETLK64
+	        return F_SETLK64;
 #else
 	        goto not_there;
 #endif
 	    if (strEQ(name, "F_SETLKW"))
 #ifdef F_SETLKW
 	        return F_SETLKW;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "F_SETLKW64"))
+#ifdef F_SETLKW64
+	        return F_SETLKW64;
 #else
 	        goto not_there;
 #endif
@@ -286,6 +298,12 @@ constant(char *name, int arg)
 	    if (strEQ(name, "O_EXLOCK"))
 #ifdef O_EXLOCK
 	        return O_EXLOCK;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "O_LARGEFILE"))
+#ifdef O_LARGEFILE
+	        return O_LARGEFILE;
 #else
 	        goto not_there;
 #endif

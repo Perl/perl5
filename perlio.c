@@ -416,23 +416,30 @@ va_list ap;
  return vfprintf(f,fmt,ap);
 }
 
-
 #undef PerlIO_tell
-long
+Off_t
 PerlIO_tell(f)
 PerlIO *f;
 {
+#ifdef HAS_FTELLO
+ return ftello(f);
+#else
  return ftell(f);
+#endif
 }
 
 #undef PerlIO_seek
 int
 PerlIO_seek(f,offset,whence)
 PerlIO *f;
-off_t offset;
+Off_t offset;
 int whence;
 {
+#ifdef HAS_FSEEKO
+ return fseeko(f,offset,whence);
+#else
  return fseek(f,offset,whence);
+#endif
 }
 
 #undef PerlIO_rewind

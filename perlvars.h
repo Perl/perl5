@@ -37,6 +37,9 @@ PERLVARI(Gthreadsv_names,char *,	THREADSV_NAMES)
 PERLVAR(Gcurthr,	struct perl_thread *)
 					/* Currently executing (fake) thread */
 #endif
+
+PERLVAR(Gcred_mutex,	perl_mutex)	/* altered credentials in effect */
+
 #endif /* USE_THREADS */
 
 PERLVAR(Gninterps,	int)		/* number of active interpreters */

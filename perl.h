@@ -309,6 +309,12 @@ register struct op *op asm(stringify(OP_IN_REGISTER));
 #  include <pthread.h>
 #endif
 
+/* HP-UX 10.X CMA (Common Multithreaded Architecure) insists that
+   pthread.h must be included before all other header files.
+*/
+#if defined(USE_THREADS) && defined(PTHREAD_H_FIRST)
+#  include <pthread.h>
+#endif
 #ifndef _TYPES_		/* If types.h defines this it's easy. */
 #   ifndef major		/* Does everyone's types.h define this? */
 #	include <sys/types.h>
@@ -614,7 +620,11 @@ Free_t   Perl_free _((Malloc_t where));
 #endif /* USE_THREADS */
 
 #ifndef errno
-	extern int errno;     /* ANSI allows errno to be an lvalue expr */
+	extern int errno;     /* ANSI allows errno to be an lvalue expr.
+			       * For example in multithreaded environments
+			       * something like this might happen:
+			       * extern int *_errno(void);
+			       * #define errno (*_errno()) */
 #endif
 
 #ifdef HAS_STRERROR
@@ -801,6 +811,10 @@ Free_t   Perl_free _((Malloc_t where));
 #undef UV
 #endif
 
+#ifdef I_INTTYPES
+#include <inttypes.h>
+#endif
+
 /*  XXX QUAD stuff is not currently supported on most systems.
     Specifically, perl internals don't support long long.  Among
     the many problems is that some compilers support long long,
@@ -814,42 +828,95 @@ Free_t   Perl_free _((Malloc_t where));
     --Andy Dougherty	August 1996
 */
 
-#ifdef cray
-#   define Quad_t int
-#else
-#   ifdef convex
-#	define Quad_t long long
-#   else
-#	if LONGSIZE == 8
-#	    define Quad_t long
-#	endif
+/*  Much more 64-bit probing added.  Now we should get Quad_t
+    in most systems: int64_t, long long, long, int, will do.
+
+    Beware of LP32 systems (ILP32, ILP32LL64).  Such systems have been
+    used to sizeof(long) == sizeof(foo*).  This is a bad assumption
+    because then IV/UV have been 32 bits, too.  Which, in turn means
+    that even if the system has quads (e.g. long long), IV cannot be a
+    quad.  Introducing a 64-bit IV (because of long long existing)
+    would introduce binary incompatibility.  Therefore the
+    USE_LONG_LONG guard below when probing for quads and the check for
+    PTRSIZE further down when defining IV/UV.
+
+    Summary: a long long system needs to add -DUSE_LONG_LONG to $ccflags
+    to get quads -- and if its pointers are still 32 bits, this will break
+    binary compatibility.  Casting an IV (a long long) to a pointer will
+    truncate half of the IV away.
+
+    --jhi		September 1998 */
+
+#if INTSIZE == 4 && LONGSIZE == 4 && PTRSIZE == 4
+#   define PERL_ILP32
+#   if defined(HAS_LONG_LONG) && LONGLONGSIZE == 8
+#       define PERL_ILP32LL64
 #   endif
 #endif
 
-/* XXX Experimental set-up for long long.  Just add -DUSE_LONG_LONG
-   to your ccflags.  --Andy Dougherty   4/1998
-*/
-#ifdef USE_LONG_LONG
-#  if defined(HAS_LONG_LONG) && LONGLONGSIZE == 8
-#    define Quad_t long long
-#  endif
+#if LONGSIZE == 8 && PTRSIZE == 8
+#   define PERL_LP64
+#   if INTSIZE == 8
+#        define PERL_ILP64
+#   endif
+#endif
+
+#ifdef HAS_INT64_T
+#   define Quad_t int64_t
+#   define PERL_QUAD_IS_INT64_T
+#else
+#   if LONGSIZE == 8
+#       define Quad_t long
+#       define PERL_QUAD_IS_LONG
+#   else
+#       ifdef USE_LONG_LONG /* See above note about LP32. --jhi */
+#           if defined(HAS_LONG_LONG) && LONGLONGSIZE == 8
+#	         define Quad_t long long
+#                define PERL_QUAD_IS_LONG_LONG
+#           endif
+#       endif
+#       ifndef Quad_t
+#	    if INTSIZE == 8
+#	        define Quad_t int
+#               define PERL_QUAD_IS_INT
+#	    endif
+#       endif
+#   endif
 #endif
 
 #ifdef Quad_t
 #   define HAS_QUAD
-    typedef Quad_t IV;
-    typedef unsigned Quad_t UV;
-#   define IV_MAX PERL_QUAD_MAX
-#   define IV_MIN PERL_QUAD_MIN
-#   define UV_MAX PERL_UQUAD_MAX
-#   define UV_MIN PERL_UQUAD_MIN
+#endif
+
+/* See above note on LP32 about the PTRSIZE test. --jhi */
+#if defined(HAS_QUAD) && PTRSIZE > 4
+   typedef          Quad_t IV;
+   typedef unsigned Quad_t UV;
+#  if defined(PERL_QUAD_IS_INT64_T) && defined(INT64_MAX)
+#    define IV_MAX INT64_MAX
+#    define IV_MIN INT64_MIN
+#    define UV_MAX UINT64_MAX
+#    define UV_MIN UINT64_MIN
+#  else
+#    define IV_MAX PERL_QUAD_MAX
+#    define IV_MIN PERL_QUAD_MIN
+#    define UV_MAX PERL_UQUAD_MAX
+#    define UV_MIN PERL_UQUAD_MIN
+#  endif
 #else
-    typedef long IV;
-    typedef unsigned long UV;
-#   define IV_MAX PERL_LONG_MAX
-#   define IV_MIN PERL_LONG_MIN
-#   define UV_MAX PERL_ULONG_MAX
-#   define UV_MIN PERL_ULONG_MIN
+   typedef          long IV;
+   typedef unsigned long UV;
+#  if defined(INT32_MAX) && LONGSIZE == 4
+#    define IV_MAX INT32_MAX
+#    define IV_MIN INT32_MIN
+#    define UV_MAX UINT32_MAX
+#    define UV_MIN UINT32_MIN
+#  else
+#    define IV_MAX PERL_LONG_MAX
+#    define IV_MIN PERL_LONG_MIN
+#    define UV_MAX PERL_ULONG_MAX
+#    define UV_MIN PERL_ULONG_MIN
+#  endif
 #endif
 
 /* Previously these definitions used hardcoded figures. 
@@ -1095,6 +1162,122 @@ typedef struct mgvtbl MGVTBL;
 typedef union any ANY;
 
 #include "handy.h"
+
+#ifdef USE_64_BITS
+#   ifdef USE_64_BIT_FILES
+#       ifndef USE_64_BIT_IO
+#          define USE_64_BIT_IO
+#       endif
+#       ifndef USE_64_BIT_STDIO
+#           define USE_64_BIT_STDIO
+#       endif
+#       ifndef USE_64_BIT_DBM
+#           define USE_64_BIT_DBM
+#       endif
+#   endif
+#   ifdef USE_64_BIT_IO
+#       ifdef HAS_FSTAT64
+#           define fstat fstat64
+#       endif
+#       ifdef HAS_FTRUNCATE64
+#           define ftruncate ftruncate64
+#       endif
+#       ifdef HAS_LSEEK64
+#           define lseek lseek64
+#           ifdef HAS_OFF64_T
+#               undef Off_t
+#               define Off_t off64_t
+#           endif
+#       endif
+#       ifdef HAS_LSTAT64
+#           define lstat lstat64
+#       endif
+	/* Some systems have open64() in libc but use that only
+	 * for true LP64 mode, in mixed mode (ILP32LL64, for example)
+	 * they use the vanilla open(). --jhi */
+#       if defined(HAS_OPEN64) && !defined(NO_OPEN64)
+#           define open open64
+#       endif
+#       ifdef HAS_OPENDIR64
+#           define opendir opendir64
+#       endif
+#       ifdef HAS_READDIR64
+#           define readdir readdir64
+#	    ifdef HAS_STRUCT_DIRENT64
+#               define dirent dirent64
+#           endif
+#       endif
+#       ifdef HAS_SEEKDIR64
+#           define seekdir seekdir64
+#       endif
+#       ifdef HAS_STAT64
+#           define stat stat64 /* Affects also struct stat, hopefully okay. */
+#       endif
+#       ifdef HAS_TELLDIR64
+#           define telldir telldir64
+#       endif
+#       ifdef HAS_TRUNCATE64
+#           define truncate truncate64
+#       endif
+        /* flock is not #defined here to be flock64 because it seems
+	   that a system may have struct flock64 but still use flock()
+	   and not flock64().  The actual flocking code in pp_sys.c
+	   must be changed.  Also lockf and lockf64 must be dealt
+	   with in pp_sys.c. --jhi */
+#   endif
+#   ifdef USE_64_BIT_STDIO
+#       ifdef HAS_FGETPOS64
+#           define fgetpos fgetpos64
+#       endif
+#       ifdef HAS_FOPEN64
+#           define fopen fopen64
+#       endif
+#       ifdef HAS_FREOPEN64
+#           define freopen freopen64
+#       endif
+#       ifdef HAS_FSEEK64
+#           define fseek fseek64
+#       endif
+#       ifdef HAS_FSEEKO64
+#           define fseeko fseeko64
+#       endif
+#       ifdef HAS_FSETPOS64
+#           define fsetpos fsetpos64
+#       endif
+#       ifdef HAS_FTELL64
+#           define ftell ftell64
+#       endif
+#       ifdef HAS_FTELLO64
+#           define ftello ftello64
+#       endif
+#       ifdef HAS_TMPFILE64
+#           define tmpfile tmpfile64
+#       endif
+#   endif
+#   ifdef USE_64_BIT_DBM
+#       ifdef HAS_DBMINIT64
+#           define dbminit dbminit64
+#       endif
+#       ifdef HAS_DBMCLOSE64
+#           define dbmclose dbmclose64
+#       endif
+#       ifdef HAS_FETCH64
+#           define fetch fetch64
+#       endif
+#       ifdef HAS_DELETE64
+#           define delete delete64
+#       endif
+#       ifdef HAS_STORE64
+#           define store store64
+#       endif
+#       ifdef HAS_FIRSTKEY64
+#           define firstkey firstkey64
+#       endif
+#       ifdef HAS_NEXTKEY64
+#           define nextkey nextkey64
+#       endif
+#   endif
+#endif
 
 #ifdef PERL_OBJECT
 typedef I32 (*filter_t) _((CPerlObj*, int, SV *, int));
@@ -1942,6 +2125,8 @@ typedef enum {
 
 #define HINT_RE_TAINT		0x00100000
 #define HINT_RE_EVAL		0x00200000
+
+#define HINT_FILETEST_ACCESS	0x00400000
 
 /* Various states of an input record separator SV (rs, nrs) */
 #define RsSNARF(sv)   (! SvOK(sv))

@@ -138,6 +138,8 @@ perl_construct(register PerlInterpreter *sv_interp)
 	MUTEX_INIT(&PL_svref_mutex);
 #endif /* EMULATE_ATOMIC_REFCOUNTS */
 	
+	MUTEX_INIT(&PL_cred_mutex);
+
 	thr = init_main_thread();
 #endif /* USE_THREADS */
 
@@ -556,6 +558,7 @@ perl_destruct(register PerlInterpreter *sv_interp)
     MUTEX_DESTROY(&PL_strtab_mutex);
     MUTEX_DESTROY(&PL_sv_mutex);
     MUTEX_DESTROY(&PL_eval_mutex);
+    MUTEX_DESTROY(&PL_cred_mutex);
     COND_DESTROY(&PL_eval_cond);
 
     /* As the penultimate thing, free the non-arena SV for thrsv */

@@ -125,9 +125,14 @@ do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawpe
     }
 
     if (as_raw) {
+#if defined(O_LARGEFILE)
+	rawmode |= O_LARGEFILE;
+#endif
+
 #ifndef O_ACCMODE
 #define O_ACCMODE 3		/* Assume traditional implementation */
 #endif
+
 	switch (result = rawmode & O_ACCMODE) {
 	case O_RDONLY:
 	     IoTYPE(io) = '<';
@@ -705,7 +710,7 @@ do_eof(GV *gv)
     return TRUE;
 }
 
-long
+Off_t
 do_tell(GV *gv)
 {
     register IO *io;
@@ -724,11 +729,11 @@ do_tell(GV *gv)
 	    warner(WARN_UNOPENED, "tell() on unopened file");
     }
     SETERRNO(EBADF,RMS$_IFI);
-    return -1L;
+    return (Off_t)-1;
 }
 
 bool
-do_seek(GV *gv, long int pos, int whence)
+do_seek(GV *gv, Off_t pos, int whence)
 {
     register IO *io;
     register PerlIO *fp;

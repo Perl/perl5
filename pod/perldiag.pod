@@ -1096,6 +1096,16 @@ unlikely to be what you want.
 (F) An untrapped exception was raised while executing an END subroutine.
 The interpreter is immediately exited.
 
+=item effective %s access is not implemented
+
+(F) We cannot switch the real and effective uids or gids.
+The C<filetest access> pragma is unavailable in this system.
+
+=item entering effective %s access failed
+
+(F) While under the C<filetest access> pragma, switching the real and
+effective uids or gids failed.
+
 =item Error converting file specification %s
 
 (F) An error peculiar to VMS.  Because Perl may have to deal with file
@@ -1475,6 +1485,11 @@ L<perlfunc/last>.
 (F) You named a loop to restart, but you're not currently in a loop of
 that name, not even if you count where you were called from.  See
 L<perlfunc/last>.
+
+=item leaving effective %s access failed
+
+(F) While under the C<filetest access> pragma, switching the real and
+effective uids or gids failed.
 
 =item listen() on closed fd
 

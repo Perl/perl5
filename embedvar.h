@@ -655,6 +655,7 @@
 #define PL_collxfrm_base	(PL_Vars.Gcollxfrm_base)
 #define PL_collxfrm_mult	(PL_Vars.Gcollxfrm_mult)
 #define PL_cop_seqmax		(PL_Vars.Gcop_seqmax)
+#define PL_cred_mutex		(PL_Vars.Gcred_mutex)
 #define PL_cryptseen		(PL_Vars.Gcryptseen)
 #define PL_cshlen		(PL_Vars.Gcshlen)
 #define PL_cshname		(PL_Vars.Gcshname)
@@ -789,6 +790,7 @@
 #define PL_Gcollxfrm_base	PL_collxfrm_base
 #define PL_Gcollxfrm_mult	PL_collxfrm_mult
 #define PL_Gcop_seqmax		PL_cop_seqmax
+#define PL_Gcred_mutex		PL_cred_mutex
 #define PL_Gcryptseen		PL_cryptseen
 #define PL_Gcshlen		PL_cshlen
 #define PL_Gcshname		PL_cshname

@@ -219,6 +219,7 @@ PL_sv_mutex
 PL_strtab_mutex
 PL_svref_mutex
 PL_malloc_mutex
+PL_cred_mutex
 PL_eval_mutex
 PL_eval_cond
 PL_eval_owner

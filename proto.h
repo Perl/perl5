@@ -118,14 +118,14 @@ VIRTUAL void	do_pipe _((SV* sv, GV* rgv, GV* wgv));
 VIRTUAL bool	do_print _((SV* sv, PerlIO* fp));
 VIRTUAL OP*	do_readline _((void));
 VIRTUAL I32	do_chomp _((SV* sv));
-VIRTUAL bool	do_seek _((GV* gv, long pos, int whence));
+VIRTUAL bool	do_seek _((GV* gv, Off_t pos, int whence));
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
 I32	do_semop _((SV** mark, SV** sp));
 I32	do_shmio _((I32 optype, SV** mark, SV** sp));
 #endif
 VIRTUAL void	do_sprintf _((SV* sv, I32 len, SV** sarg));
 VIRTUAL long	do_sysseek _((GV* gv, long pos, int whence));
-VIRTUAL long	do_tell _((GV* gv));
+VIRTUAL Off_t	do_tell _((GV* gv));
 VIRTUAL I32	do_trans _((SV* sv));
 VIRTUAL void	do_vecset _((SV* sv));
 VIRTUAL void	do_vop _((I32 optype, SV* sv, SV* left, SV* right));

@@ -129,8 +129,9 @@ C<pack>, C<read>, C<syscall>, C<sysread>, C<syswrite>, C<unpack>, C<vec>
 =item Functions for filehandles, files, or directories
 
 C<-I<X>>, C<chdir>, C<chmod>, C<chown>, C<chroot>, C<fcntl>, C<glob>,
-C<ioctl>, C<link>, C<lstat>, C<mkdir>, C<open>, C<opendir>, C<readlink>,
-C<rename>, C<rmdir>, C<stat>, C<symlink>, C<umask>, C<unlink>, C<utime>
+C<ioctl>, C<link>, C<lstat>, C<mkdir>, C<open>, C<opendir>,
+C<readlink>, C<rename>, C<rmdir>, C<stat>, C<symlink>, C<umask>,
+C<unlink>, C<utime>
 
 =item Keywords related to the control flow of your perl program
 
@@ -262,15 +263,6 @@ X<-S>X<-b>X<-c>X<-t>X<-u>X<-g>X<-k>X<-T>X<-B>X<-M>X<-A>X<-C>
     -A	Same for access time.
     -C	Same for inode change time.
 
-The interpretation of the file permission operators C<-r>, C<-R>, C<-w>,
-C<-W>, C<-x>, and C<-X> is based solely on the mode of the file and the
-uids and gids of the user.  There may be other reasons you can't actually
-read, write, or execute the file, such as AFS access control lists.  Also note that, for the superuser,
-C<-r>, C<-R>, C<-w>, and C<-W> always return C<1>, and C<-x> and C<-X> return
-C<1> if any execute bit is set in the mode.  Scripts run by the superuser may
-thus need to do a C<stat()> to determine the actual mode of the
-file, or temporarily set the uid to something else.
-
 Example:
 
     while (<>) {
@@ -278,6 +270,31 @@ Example:
 	next unless -f $_;	# ignore specials
 	#...
     }
+
+The interpretation of the file permission operators C<-r>, C<-R>,
+C<-w>, C<-W>, C<-x>, and C<-X> is by default based solely on the mode
+of the file and the uids and gids of the user.  There may be other
+reasons you can't actually read, write, or execute the file.  Such
+reasons may be for example network filesystem access controls, ACLs
+(access control lists), read-only filesystems, and unrecognized
+executable formats.
+
+Also note that, for the superuser on the local filesystems, C<-r>,
+C<-R>, C<-w>, and C<-W> always return 1, and C<-x> and C<-X> return 1
+if any execute bit is set in the mode.  Scripts run by the superuser
+may thus need to do a stat() to determine the actual mode of the file,
+or temporarily set the uid to something else.
+
+If you are using ACLs, there is a pragma called C<filetest> that may
+produce more accurate results than the bare stat() mode bits.
+
+When under the C<use filetest 'access'> the above-mentioned filetests
+will test whether the permission can (not) be granted using the
+access() family of system calls.  Also note that the -x and -X may
+under this pragma return true even if there are no execute permission
+bits set (nor any extra execute permission ACLs).  This strangeness is
+due to the underlying system calls' definitions.  Read the
+documentation for the C<filetest> pragma for more information.
 
 Note that C<-s/a/b/> does not do a negated substitution.  Saying
 C<-exp($foo)> still works as expected, however--only single letters

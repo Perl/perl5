@@ -20,8 +20,8 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Jul  7 10:10:21 EDT 1998 [metaconfig 3.0 PL70]
-# (with additional metaconfig patches by doughera@lafayette.edu)
+# Generated on Fri Sep 11 21:59:48 EET DST 1998 [metaconfig 3.0 PL70]
+# (with additional metaconfig patches by jhi@iki.fi)
 
 cat >/tmp/c1$$ <<EOF
 ARGGGHHHH!!!!!
@@ -55,33 +55,6 @@ case "$0" in
 	test "$me" || me=$0
 	;;
 esac
-
-: the newline for tr
-if test X"$trnl" = X; then
-	case "`echo foo|tr '\n' x 2>/dev/null`" in
-	foox)
-		trnl='\n'
-		;;
-	esac
-fi
-if test X"$trnl" = X; then
-	case "`echo foo|tr '\012' x 2>/dev/null`" in
-	foox)
-		trnl='\012'
-		;;
-	esac
-fi
-if test -n "$DJGPP"; then
-	trnl='\012'
-fi
-if test X"$trnl" = X; then
-	cat <<EOM >&2
-
-$me: Fatal Error: cannot figure out how to translate newlines with 'tr'.
-
-EOM
-	exit 1
-fi
 
 : Proper separator for the PATH environment variable
 p_=:
@@ -317,6 +290,7 @@ cppminus=''
 cpprun=''
 cppstdin=''
 d_access=''
+d_accessx=''
 d_alarm=''
 d_attribut=''
 d_bcmp=''
@@ -344,9 +318,12 @@ d_dlsymun=''
 d_dosuid=''
 d_suidsafe=''
 d_dup2=''
+d_eaccess=''
+d_endgrent=''
 d_endhent=''
 d_endnent=''
 d_endpent=''
+d_endpwent=''
 d_endsent=''
 d_fchmod=''
 d_fchown=''
@@ -358,10 +335,13 @@ d_fgetpos=''
 d_flexfnam=''
 d_flock=''
 d_fork=''
+d_fseeko=''
 d_fsetpos=''
+d_ftello=''
 d_ftime=''
 d_gettimeod=''
 d_Gconvert=''
+d_getgrent=''
 d_getgrps=''
 d_gethbyaddr=''
 d_gethbyname=''
@@ -386,12 +366,12 @@ d_getprior=''
 d_getpbyname=''
 d_getpbynumber=''
 d_getprotoprotos=''
+d_getpwent=''
 d_getsent=''
 d_getservprotos=''
 d_getsbyname=''
 d_getsbyport=''
 d_gnulibc=''
-i_arpainet=''
 d_htonl=''
 d_inetaton=''
 d_isascii=''
@@ -448,6 +428,7 @@ d_semget=''
 d_semop=''
 d_setegid=''
 d_seteuid=''
+d_setgrent=''
 d_setgrps=''
 d_sethent=''
 d_setlinebuf=''
@@ -459,6 +440,7 @@ d_setpgrp2=''
 d_bsdsetpgrp=''
 d_setpgrp=''
 d_setprior=''
+d_setpwent=''
 d_setregid=''
 d_setresgid=''
 d_setresuid=''
@@ -533,6 +515,13 @@ d_wait4=''
 d_waitpid=''
 d_wcstombs=''
 d_wctomb=''
+d_dbmclose64=''
+d_dbminit64=''
+d_delete64=''
+d_fetch64=''
+d_firstkey64=''
+d_nextkey64=''
+d_store64=''
 dlext=''
 cccdlflags=''
 ccdlflags=''
@@ -541,11 +530,13 @@ ld=''
 lddlflags=''
 usedl=''
 doublesize=''
+ebcdic=''
 fpostype=''
 gidtype=''
 groupstype=''
 h_fcntl=''
 h_sysfile=''
+i_arpainet=''
 db_hashtype=''
 db_prefixtype=''
 i_db=''
@@ -560,10 +551,9 @@ i_fcntl=''
 i_float=''
 i_gdbm=''
 d_grpasswd=''
-d_setgrent=''
-d_getgrent=''
-d_endgrent=''
 i_grp=''
+d_int64t=''
+i_inttypes=''
 i_limits=''
 i_locale=''
 i_malloc=''
@@ -582,15 +572,13 @@ d_pwexpire=''
 d_pwgecos=''
 d_pwpasswd=''
 d_pwquota=''
-d_setpwent=''
-d_getpwent=''
-d_endpwent=''
 i_pwd=''
 i_sfio=''
 i_stddef=''
 i_stdlib=''
 i_string=''
 strings=''
+i_sysaccess=''
 i_sysdir=''
 i_sysfile=''
 d_voidtty=''
@@ -601,6 +589,7 @@ i_syssockio=''
 i_sysndir=''
 i_sysparam=''
 i_sysresrc=''
+i_syssecrt=''
 i_sysselct=''
 i_sysstat=''
 i_systimes=''
@@ -624,6 +613,22 @@ i_vfork=''
 intsize=''
 longsize=''
 shortsize=''
+d_dirent64s=''
+d_flock64s=''
+d_fstat64=''
+d_ftruncate64=''
+d_ino64t=''
+d_lockf64=''
+d_lseek64=''
+d_lstat64=''
+d_off64t=''
+d_open64=''
+d_opendir64=''
+d_readdir64=''
+d_seekdir64=''
+d_stat64=''
+d_telldir64=''
+d_truncate64=''
 libc=''
 libperl=''
 shrpenv=''
@@ -635,6 +640,7 @@ plibpth=''
 xlibpth=''
 libs=''
 lns=''
+lseeksize=''
 lseektype=''
 make_set_make=''
 d_mymalloc=''
@@ -697,6 +703,7 @@ randbits=''
 installscript=''
 scriptdir=''
 scriptdirexp=''
+selectminbits=''
 selecttype=''
 sh=''
 sig_name=''
@@ -718,8 +725,19 @@ ssizetype=''
 startperl=''
 startsh=''
 stdchar=''
+d_fgetpos64=''
+d_fopen64=''
+d_freopen64=''
+d_fseek64=''
+d_fseeko64=''
+d_fsetpos64=''
+d_ftell64=''
+d_ftello64=''
+d_tmpfile64=''
 sysman=''
+trnl=''
 uidtype=''
+use64bits=''
 nm_opt=''
 nm_so_opt=''
 runnm=''
@@ -733,7 +751,6 @@ mips_type=''
 usrinc=''
 defvoidused=''
 voidflags=''
-ebcdic=''
 CONFIG=''
 
 define='define'
@@ -750,6 +767,35 @@ if test -f /etc/unixtovms.exe; then
 	eunicefix=/etc/unixtovms.exe
 fi
 
+i_whoami=''
+: change the next line if compiling for Xenix/286 on Xenix/386
+xlibpth='/usr/lib/386 /lib/386'
+
+: Possible local library directories to search.
+loclibpth="/usr/local/lib /opt/local/lib /usr/gnu/lib"
+loclibpth="$loclibpth /opt/gnu/lib /usr/GNU/lib /opt/GNU/lib"
+
+: general looking path for locating libraries
+glibpth="/shlib /usr/shlib /lib/pa1.1 /usr/lib/large"
+glibpth="$glibpth /lib /usr/lib $xlibpth"
+glibpth="$glibpth /lib/large /usr/lib/small /lib/small"
+glibpth="$glibpth /usr/ccs/lib /usr/ucblib /usr/local/lib"
+
+: Private path used by Configure to find libraries.  Its value
+: is prepended to libpth. This variable takes care of special
+: machines, like the mips.  Usually, it should be empty.
+plibpth=''
+
+: default library list
+libswanted=''
+: Possible local include directories to search.
+: Set locincpth to "" in a hint file to defeat local include searches.
+locincpth="/usr/local/include /opt/local/include /usr/gnu/include"
+locincpth="$locincpth /opt/gnu/include /usr/GNU/include /opt/GNU/include"
+:
+: no include file wanted by default
+inclwanted=''
+
 : list of known cpp symbols, sorted alphabetically
 al="AMIX BIT_MSF BSD BSD4_3 BSD_NET2 CMU CRAY DGUX DOLPHIN DPX2"
 al="$al GO32 GOULD_PN HP700 I386 I80960 I960 Lynx M68000 M68K MACH"
@@ -761,8 +807,8 @@ al="$al PWB R3000 RES RISC6000 RT Sun386i SVR3 SVR4"
 al="$al SYSTYPE_BSD SYSTYPE_SVR4 SYSTYPE_SYSV Tek4132 Tek4300"
 al="$al UMAXV USGr4 USGr4_2 UTEK UTS UTek UnicomPBB UnicomPBD Utek"
 al="$al VMS Xenix286"
-al="$al _AIX _AIX32 _AIX370 _AIX41 _AM29000 _COFF _CRAY _CX_UX _EPI _POWER"
-al="$al _IBMESA _IBMR2 _M88K _M88KBCS_TARGET"
+al="$al _AIX _AIX32 _AIX370 _AIX41 _AM29000 _COFF _CRAY _CX_UX _EPI"
+al="$al _IBMESA _IBMR2 _M88K _M88KBCS_TARGET _POWER"
 al="$al _MIPSEB _MIPSEL _M_COFF _M_I86 _M_I86SM _M_SYS3"
 al="$al _M_SYS5 _M_SYSIII _M_SYSV _M_UNIX _M_XENIX _NLS _PGC_ _R3000"
 al="$al _SYSTYPE_BSD _SYSTYPE_BSD43 _SYSTYPE_SVR4"
@@ -814,35 +860,6 @@ al="$al titan tower tower32 tower32_200 tower32_600 tower32_700"
 al="$al tower32_800 tower32_850 tss u370 u3b u3b2 u3b20 u3b200"
 al="$al u3b20d u3b5 ultrix unix unixpc unos vax venix vms"
 al="$al xenix z8000"
-
-i_whoami=''
-: change the next line if compiling for Xenix/286 on Xenix/386
-xlibpth='/usr/lib/386 /lib/386'
-
-: Possible local library directories to search.
-loclibpth="/usr/local/lib /opt/local/lib /usr/gnu/lib"
-loclibpth="$loclibpth /opt/gnu/lib /usr/GNU/lib /opt/GNU/lib"
-
-: general looking path for locating libraries
-glibpth="/shlib /usr/shlib /lib/pa1.1 /usr/lib/large"
-glibpth="$glibpth /lib /usr/lib $xlibpth"
-glibpth="$glibpth /lib/large /usr/lib/small /lib/small"
-glibpth="$glibpth /usr/ccs/lib /usr/ucblib /usr/local/lib"
-
-: Private path used by Configure to find libraries.  Its value
-: is prepended to libpth. This variable takes care of special
-: machines, like the mips.  Usually, it should be empty.
-plibpth=''
-
-: default library list
-libswanted=''
-: Possible local include directories to search.
-: Set locincpth to "" in a hint file to defeat local include searches.
-locincpth="/usr/local/include /opt/local/include /usr/gnu/include"
-locincpth="$locincpth /opt/gnu/include /usr/GNU/include /opt/GNU/include"
-:
-: no include file wanted by default
-inclwanted=''
 
 : Trailing extension.  Override this in a hint file, if needed.
 _exe=''
@@ -904,7 +921,7 @@ case "$sh" in
 $me:  Fatal Error:  I can't find a Bourne Shell anywhere.  
 
 Usually it's in /bin/sh.  How did you even get this far?
-Please contact me (Andy Dougherty) at doughera@lafayette.edu and 
+Please contact me (Jarkko Hietaniemi) at jhi@iki.fi and 
 we'll try to straighten this all out.
 EOM
 	exit 1
@@ -1373,7 +1390,7 @@ THIS PACKAGE SEEMS TO BE INCOMPLETE.
 You have the option of continuing the configuration process, despite the
 distinct possibility that your kit is damaged, by typing 'y'es.  If you
 do, don't blame me if something goes wrong.  I advise you to type 'n'o
-and contact the author (doughera@lafayette.edu).
+and contact the author (jhi@iki.fi).
 
 EOM
 		echo $n "Continue? [n] $c" >&4
@@ -1395,6 +1412,30 @@ else
 	echo "There is no MANIFEST file.  I hope your kit is complete !"
 fi
 rm -f missing x??
+
+echo " "
+: Find the appropriate value for a newline for tr
+if test -n "$DJGPP"; then
+       trnl='\012'
+fi
+if test X"$trnl" = X; then
+	case "`echo foo|tr '\n' x 2>/dev/null`" in
+	foox) trnl='\n' ;;
+	esac
+fi
+if test X"$trnl" = X; then
+	case "`echo foo|tr '\012' x 2>/dev/null`" in
+	foox) trnl='\012' ;;
+	esac
+fi
+if test X"$trnl" = X; then
+	cat <<EOM >&2
+
+$me: Fatal Error: cannot figure out how to translate newlines with 'tr'.
+
+EOM
+	exit 1
+fi
 
 : compute the number of columns on the terminal for proper question formatting
 case "$COLUMNS" in
@@ -1574,7 +1615,7 @@ Much effort has been expended to ensure that this shell script will run on any
 Unix system.  If despite that it blows up on yours, your best bet is to edit
 Configure and run it again.  If you can't run Configure for some reason,
 you'll have to generate a config.sh file by hand.  Whatever problems you
-have, let me (doughera@lafayette.edu) know how I blew it.
+have, let me (jhi@iki.fi) know how I blew it.
 
 This installation script affects things in two ways:
 
@@ -1841,14 +1882,14 @@ ABYZ)
 	    *C9D1*|*c9d1*)
 		echo "Hey, this might be EBCDIC." >&4
 		if test "X$up" = X -o "X$low" = X; then
-		    case "`echo IJ | tr '[A-IJ-RS-Z]' '[a-ij-rs-z]' 2>/dev/null`" in
+		    case "`echo IJ | $tr '[A-IJ-RS-Z]' '[a-ij-rs-z]' 2>/dev/null`" in
 		    ij) up='[A-IJ-RS-Z]'
 		        low='[a-ij-rs-z]'
 			;;
 		    esac
 		fi
 		if test "X$up" = X -o "X$low" = X; then
-		    case "`echo IJ | tr A-IJ-RS-Z a-ij-rs-z 2>/dev/null`" in
+		    case "`echo IJ | $tr A-IJ-RS-Z a-ij-rs-z 2>/dev/null`" in
 		    ij) up='A-IJ-RS-Z'
 		        low='a-ij-rs-z'
 			;;
@@ -1941,7 +1982,7 @@ EOM
 	(cd $src/hints; ls -C *.sh) | $sed 's/\.sh/   /g' >&4
 	dflt=''
 	: Half the following guesses are probably wrong... If you have better
-	: tests or hints, please send them to doughera@lafayette.edu
+	: tests or hints, please send them to jhi@iki.fi
 	: The metaconfig authors would also appreciate a copy...
 	$test -f /irix && osname=irix
 	$test -f /xenix && osname=sco_xenix
@@ -3986,10 +4027,21 @@ rmlist="$rmlist pdp11"
 : coherency check
 echo " "
 echo "Checking your choice of C compiler and flags for coherency..." >&4
+$cat > try.c <<'EOF'
+#include <stdio.h>
+main() { printf("Ok\n"); exit(0); }
+EOF
 set X $cc $optimize $ccflags -o try $ldflags try.c $libs
 shift
-$cat >try.msg <<EOM
-I've tried to compile and run a simple program with:
+$cat >try.msg <<'EOM'
+I've tried to compile and run the following simple program:
+
+EOM
+$cat try.c
+
+$cat >> try.msg <<EOM
+
+I used the command:
 
 	$*
 	./try
@@ -3997,10 +4049,6 @@ I've tried to compile and run a simple program with:
 and I got the following output:
 
 EOM
-$cat > try.c <<'EOF'
-#include <stdio.h>
-main() { printf("Ok\n"); exit(0); }
-EOF
 dflt=y
 if sh -c "$cc $optimize $ccflags -o try $ldflags try.c $libs" >>try.msg 2>&1; then
 	if sh -c './try' >>try.msg 2>&1; then
@@ -4037,7 +4085,7 @@ y)
 	$cat try.msg >&4
 	case "$knowitall" in
 	'')
-		echo "(The supplied flags might be incorrect with this C compiler.)"
+		echo "(The supplied flags or libraries might be incorrect.)"
 		;;
 	*) dflt=n;;
 	esac
@@ -4155,9 +4203,8 @@ eval $inhdr
 : determine which malloc to compile in
 echo " "
 case "$usemymalloc" in
-''|y*|true)	dflt='y' ;;
-n*|false)	dflt='n' ;;
-*)	dflt="$usemymalloc" ;;
+''|[yY]*|true|$define)	dflt='y' ;;
+*)	dflt='n' ;;
 esac
 rp="Do you wish to attempt to use the malloc that comes with $package?"
 . ./myread
@@ -4259,7 +4306,7 @@ understands function prototypes.  Unfortunately, your C compiler
 	$cc $ccflags
 doesn't seem to understand them.  Sorry about that.
 
-If GNU cc is avaiable for your system, perhaps you could try that instead.  
+If GNU cc is available for your system, perhaps you could try that instead.  
 
 Eventually, we hope to support building Perl with pre-ANSI compilers.
 If you would like to help in that effort, please contact <perlbug@perl.org>.
@@ -4312,32 +4359,6 @@ compile_ok='
 mc_file=$1;
 shift;
 $cc $optimize $ccflags $ldflags -o ${mc_file} $* ${mc_file}.c $libs;'
-
-echo " "
-echo "Determining whether or not we are on an EBCDIC system..." >&4
-cat >tebcdic.c <<EOM
-int main()
-{
-  if ('M'==0xd4) return 0;
-  return 1;
-}
-EOM
-val=$undef
-set tebcdic
-if eval $compile_ok; then
-	if ./tebcdic; then
-		echo "You have EBCDIC." >&4
-		val="$define"
-	else
-		echo "Nope, no EBCDIC.  Assuming ASCII or some ISO Latin." >&4
-	fi
-else
-	echo "I'm unable to compile the test program." >&4
-	echo "I'll asuume ASCII or some ISO Latin." >&4
-fi
-$rm -f tebcdic.c tebcdic
-set ebcdic
-eval $setvar
 
 echo " "
 echo "Checking for GNU C Library..." >&4
@@ -5153,7 +5174,7 @@ case "$shrpdir" in
 *)	$cat >&4 <<EOM
 WARNING:  Use of the shrpdir variable for the installation location of
 the shared $libperl is not supported.  It was never documented and
-will not work in this version.  Let me (doughera@lafayette.edu)
+will not work in this version.  Let me (jhi@iki.fi)
 know of any problems this may cause.
 
 EOM
@@ -5980,6 +6001,30 @@ fi
 
 cat <<EOM
 
+Perl can be built to take advantage of 64-bit interfaces, on some systems.
+To do so, Configure must be run with -Dusethreads.
+
+If this doesn't make any sense to you, just accept the default 'n'.
+EOM
+case "$use64bits" in
+$define|true|[yY]*)	dflt='y';;
+*) dflt='n';;
+esac
+rp='Try to use 64-bit APIs, if available?'
+. ./myread
+case "$ans" in
+y|Y) 
+	val="$define"
+	;;     
+*)      
+	val="$undef"
+	;;
+esac
+set use64bits
+eval $setvar 
+
+cat <<EOM
+
 Previous version of $package used the standard IO mechanisms as defined
 in <stdio.h>.  Versions 5.003_02 and later of perl allow alternate IO
 mechanisms via a "PerlIO" abstraction, but the stdio mechanism is still
@@ -6010,9 +6055,9 @@ eval $setvar
 
 : Check how to convert floats to strings.
 if test "X$d_Gconvert" = X; then
-    echo " "
-    echo "Checking for an efficient way to convert floats to strings."
-    $cat >try.c <<'EOP'
+	echo " "
+	echo "Checking for an efficient way to convert floats to strings."
+	$cat >try.c <<'EOP'
 #ifdef TRY_gconvert
 #define Gconvert(x,n,t,b) gconvert((x),(n),(t),(b))
 char *myname = "gconvert";
@@ -6071,35 +6116,35 @@ main()
 	exit(0);
 }
 EOP
-    case "$d_Gconvert" in
-    gconvert*) xxx_list='gconvert gcvt sprintf' ;;
-    gcvt*) xxx_list='gcvt gconvert sprintf' ;;
-    sprintf*) xxx_list='sprintf gconvert gcvt' ;;
-    *) xxx_list='gconvert gcvt sprintf' ;;
-    esac
+	case "$d_Gconvert" in
+	gconvert*) xxx_list='gconvert gcvt sprintf' ;;
+	gcvt*) xxx_list='gcvt gconvert sprintf' ;;
+	sprintf*) xxx_list='sprintf gconvert gcvt' ;;
+	*) xxx_list='gconvert gcvt sprintf' ;;
+	esac
 
-    for xxx_convert in $xxx_list; do
-	echo "Trying $xxx_convert"
-	$rm -f try try$_o
-	set try -DTRY_$xxx_convert
-	if eval $compile; then
-		echo "$xxx_convert" found. >&4
-		if ./try; then
-			echo "I'll use $xxx_convert to convert floats into a string." >&4
-			break;
+	for xxx_convert in $xxx_list; do
+		echo "Trying $xxx_convert"
+		$rm -f try try$_o
+		set try -DTRY_$xxx_convert
+		if eval $compile; then
+			echo "$xxx_convert" found. >&4
+			if ./try; then
+				echo "I'll use $xxx_convert to convert floats into a string." >&4
+				break;
+			else
+				echo "...But $xxx_convert didn't work as I expected."
+			fi
 		else
-			echo "...But $xxx_convert didn't work as I expected."
+			echo "$xxx_convert NOT found." >&4
 		fi
-	else
-		echo "$xxx_convert NOT found." >&4
-	fi
-    done
+	done
 		
-    case "$xxx_convert" in
-    gconvert) d_Gconvert='gconvert((x),(n),(t),(b))' ;;
-    gcvt) d_Gconvert='gcvt((x),(n),(b))' ;;
-    *) d_Gconvert='sprintf((b),"%.*g",(n),(x))' ;;
-    esac
+	case "$xxx_convert" in
+	gconvert) d_Gconvert='gconvert((x),(n),(t),(b))' ;;
+	gcvt) d_Gconvert='gcvt((x),(n),(b))' ;;
+	*) d_Gconvert='sprintf((b),"%.*g",(n),(x))' ;;
+	esac
 fi
 
 : Initialize h_fcntl
@@ -6149,6 +6194,10 @@ EOCP
 	;;
 esac
 $rm -f access*
+
+: see if accessx exists
+set accessx d_accessx
+eval $inlibc
 
 : see if alarm exists
 set alarm d_alarm
@@ -6705,9 +6754,51 @@ $rm -f dbl_dig.?
 set d_dbl_dig
 eval $setvar
 
+
+if $test X"$use64bits" = X"$define"; then
+	: see if dbminit64 exists
+	set dbminit64 d_dbminit64
+	eval $inlibc
+
+	: see if dbmclose64 exists
+	set dbmclose64 d_dbmclose64
+	eval $inlibc
+
+	: see if fetch64 exists
+	set fetch64 d_fetch64
+	eval $inlibc
+
+	: see if store64 exists
+	set store64 d_store64
+	eval $inlibc
+
+	: see if delete64 exists
+	set delete64 d_delete64
+	eval $inlibc
+
+	: see if firstkey64 exists
+	set firstkey64 d_firstkey64
+	eval $inlibc
+
+	: see if nextkey64 exists
+	set nextkey64 d_nextkey64
+	eval $inlibc
+else
+	val="$undef"
+	for xxx in d_dbminit64 d_dbmclose64 d_fetch64 d_store64 d_delete64 d_firstkey64 d_nextkey64
+	do
+		set $xxx
+		eval $setvar
+	done
+fi
+
 : see if difftime exists
 set difftime d_difftime
 eval $inlibc
+
+: see if sys/stat.h is available
+set sys/stat.h i_sysstat
+eval $inhdr
 
 : see if this is a dirent system
 echo " "
@@ -6776,6 +6867,139 @@ fi
 set d_dirnamlen
 eval $setvar
 $rm -f try.c
+
+hasfield='varname=$1; struct=$2; field=$3; shift; shift; shift;
+while $test $# -ge 2; do
+	case "$1" in
+	$define) echo "#include <$2>";;
+	esac ;
+    shift 2;
+done > try.c;
+echo "int main () { struct $struct foo; foo.$field = 0; }" >> try.c;
+set try;
+if eval $cc $optimize $ccflags -c try.c; then
+	echo "Your struct $struct has field $field."; >&4
+	val="$define";
+else
+	echo "Your struct $struct does not have field $field."; >&4
+	val="$undef";
+fi;
+set $varname;
+eval $setvar;
+$rm -f try.c try'
+
+
+if $test X"$use64bits" = X"$define"; then
+	: see if fstat64 exists
+	set fstat64 d_fstat64
+	eval $inlibc
+
+	: see if ftruncate64 exists
+	set ftruncate64 d_ftruncate64
+	eval $inlibc
+
+	: see if lockf64 exists
+	set lockf64 d_lockf64
+	eval $inlibc
+
+	: see if lseek64 exists
+	set lseek64 d_lseek64
+	eval $inlibc
+
+	: see if lstat64 exists
+	set lstat64 d_lstat64
+	eval $inlibc
+
+	: see if open64 exists
+	set open64 d_open64
+	eval $inlibc
+
+	: see if opendir64 exists
+	set opendir64 d_opendir64
+	eval $inlibc
+
+	: see if readdir64 exists
+	set readdir64 d_readdir64
+	eval $inlibc
+
+	: see if seekdir64 exists
+	set seekdir64 d_seekdir64
+	eval $inlibc
+
+	: see if stat64 exists
+	set stat64 d_stat64
+	eval $inlibc
+
+	: see if telldir64 exists
+	set telldir64 d_telldir64
+	eval $inlibc
+
+	: see if truncate64 exists
+	set truncate64 d_truncate64
+	eval $inlibc
+
+	: check for off64_t
+	echo " "
+	echo $n "Checking to see if your system supports off64_t...$c" >&4
+	$cat >try.c <<EOCP
+#include <sys/types.h>
+off64_t foo() { off64_t x; x = 7; return x; }'
+EOCP
+	if $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
+		val="$define"
+		echo " Yup, it does." >&4
+	else
+		val="$undef"
+		echo " Nope, it doesn't." >&4
+	fi
+	$rm -f try.*
+	set d_off64t
+	eval $setvar
+
+	: check for ino64_t
+	echo " "
+	echo $n "Checking to see if your system supports ino64_t...$c" >&4
+	val="$undef"
+	case "$i_sysstat" in
+	"$define" )
+		$cat >try.c <<EOCP
+#include <sys/types.h>
+#include <sys/stat.h>
+ino64_t foo() { ino64_t x; x = 7; return x; }'
+EOCP
+		if $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
+			val="$define"
+		fi
+		$rm -f try.*
+		;;
+	esac
+	if $test "X$val" = X"$define"; then
+		echo " Yup, it does." >&4
+	else
+		echo " Nope, it doesn't." >&4
+	fi
+	set d_ino64t
+	eval $setvar
+
+	: check for struct flock64
+	echo " "
+	if $h_fcntl; then
+		set d_flock64s flock64 l_len define fcntl.h
+		eval $hasfield
+	fi
+
+	: check for struct dirent64
+	echo " "
+	set d_dirent64s dirent64 d_off $i_dirent dirent.h
+	eval $hasfield
+else
+	val="$undef"
+	for xxx in d_fstat64 d_ftruncate64 d_lockf64 d_lseek64 d_lstat64 d_open64 d_opendir64 d_readdir64 d_seekdir64 d_stat64 d_telldir64 d_truncate64 d_off64t d_ino64t d_flock64s d_dirent64s
+	do
+		set $xxx
+		eval $setvar
+	done
+fi
 
 : see if dlerror exists
 xxx_runnm="$runnm"
@@ -6897,6 +7121,14 @@ eval $setvar
 set dup2 d_dup2
 eval $inlibc
 
+: see if eaccess exists
+set eaccess d_eaccess
+eval $inlibc
+
+: see if endgrent exists
+set endgrent d_endgrent
+eval $inlibc
+
 : see if endhostent exists
 set endhostent d_endhent
 eval $inlibc
@@ -6907,6 +7139,10 @@ eval $inlibc
 
 : see if endprotoent exists
 set endprotoent d_endpent
+eval $inlibc
+
+: see if endpwent exists
+set endpwent d_endpwent
 eval $inlibc
 
 : see if endservent exists
@@ -7156,6 +7392,52 @@ eval $inlibc
 set fgetpos d_fgetpos
 eval $inlibc
 
+
+if $test X"$use64bits" = X"$define"; then
+	: see if fgetpos64 exists
+	set fgetpos64 d_fgetpos64
+	eval $inlibc
+
+	: see if fopen64 exists
+	set freopen64 d_fopen64
+	eval $inlibc
+
+	: see if freopen64 exists
+	set freopen64 d_freopen64
+	eval $inlibc
+
+	: see if fseek64 exists
+	set fseek64 d_fseek64
+	eval $inlibc
+
+	: see if fseeko64 exists
+	set fseeko64 d_fseeko64
+	eval $inlibc
+
+	: see if fsetpos64 exists
+	set fsetpos64 d_fsetpos64
+	eval $inlibc
+
+	: see if ftell64 exists
+	set ftell64 d_ftell64
+	eval $inlibc
+
+	: see if ftello64 exists
+	set ftello64 d_ftello64
+	eval $inlibc
+
+	: see if tmpfile64 exists
+	set tmpfile64 d_tmpfile64
+	eval $inlibc
+else
+	val="$undef"
+	for xxx in d_fgetpos64 d_fopen64 d_freopen64 d_fseek64 d_fseeko64 d_fsetpos64 d_ftell64 d_ftello64 d_tmpfile64
+	do
+		set $xxx
+		eval $setvar
+	done
+fi
+
 : see if flock exists
 set flock d_flock
 eval $inlibc
@@ -7172,8 +7454,20 @@ eval $inlibc
 set fpathconf d_fpathconf
 eval $inlibc
 
+: see if fseeko exists
+set fseeko d_fseeko
+eval $inlibc
+
 : see if fsetpos exists
 set fsetpos d_fsetpos
+eval $inlibc
+
+: see if ftello exists
+set ftello d_ftello
+eval $inlibc
+
+: see if getgrent exists
+set getgrent d_getgrent
 eval $inlibc
 
 : see if gethostbyaddr exists
@@ -7271,6 +7565,11 @@ echo " "
 set d_getprotoprotos getprotoent $i_netdb netdb.h
 eval $hasproto
 
+: see if getpwent exists
+set getpwent d_getpwent
+eval $inlibc
+
+
 : see if getservbyname exists
 set getservbyname d_getsbyname
 eval $inlibc
@@ -7307,11 +7606,36 @@ case "$d_gettimeod$d_ftime" in
 	;;
 esac
 
+: see if this is an grp system
+set grp.h i_grp
+eval $inhdr
+
+case "$i_grp" in
+$define)
+	xxx=`./findhdr grp.h`
+	$cppstdin $cppflags $cppminus < $xxx >$$.h
+
+	if $contains 'gr_passwd' $$.h >/dev/null 2>&1; then
+		val="$define"
+	else
+		val="$undef"
+	fi
+	set d_grpasswd
+	eval $setvar
+
+	$rm -f $$.h
+	;;
+*)
+	val="$undef";
+	set d_grpasswd; eval $setvar
+	;;
+esac
+
 : see if this is a netinet/in.h or sys/in.h system
 set netinet/in.h i_niin sys/in.h i_sysin
 eval $inhdr
 
-: see if this is an arpa/inet.h
+: see if arpa/inet.h has to be included
 set arpa/inet.h i_arpainet
 eval $inhdr
 
@@ -7411,6 +7735,32 @@ set d_index; eval $setvar
 : check whether inet_aton exists
 set inet_aton d_inetaton
 eval $inlibc
+
+: see if inttypes.h is available
+set inttypes.h i_inttypes
+eval $inhdr
+: check for int64_t
+echo " "
+echo $n "Checking to see if your system supports int64_t...$c" >&4
+$cat >try.c <<EOCP
+#include <sys/types.h>
+#$i_inttypes I_INTTYPES
+#ifdef I_INTTYPES
+#include <inttypes.h>
+#endif
+int64_t foo() { int64_t x; x = 7; return x; }'
+EOCP
+if $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
+	val="$define"
+	echo " Yup, it does." >&4
+else
+	val="$undef"
+	echo " Nope, it doesn't." >&4
+fi
+$rm -f try.*
+set d_int64t
+eval $setvar
+
 
 : Look for isascii
 echo " "
@@ -7641,7 +7991,7 @@ case "$osname" in
 freebsd)
     case "`ipcs 2>&1`" in
     "SVID messages"*"not configured"*)
-	echo "But your FreeBSD kernel does not have the msg*(2) configured." >&4
+	echo "Your $osname does not have the msg*(2) configured." >&4
         h_msg=false
 	val="$undef"
 	set msgctl d_msgctl
@@ -7765,18 +8115,6 @@ eval $inhdr
 
 case "$i_pwd" in
 $define)
-	: see if setpwent exists
-	set setpwent d_setpwent
-	eval $inlibc
-
-	: see if getpwent exists
-	set getpwent d_getpwent
-	eval $inlibc
-
-	: see if endpwent exists
-	set endpwent d_endpwent
-	eval $inlibc
-
 	xxx=`./findhdr pwd.h`
 	$cppstdin $cppflags $cppminus < $xxx >$$.h
 
@@ -7846,11 +8184,8 @@ $define)
 
 	$rm -f $$.h
 	;;
-*)	# Assume all is lost as far as the d_*pw* go.
+*)
 	val="$undef"; 
-	set d_setpwent; eval $setvar
-	set d_getpwent; eval $setvar
-	set d_endpwent; eval $setvar
 	set d_pwquota; eval $setvar
 	set d_pwage; eval $setvar
 	set d_pwchange; eval $setvar
@@ -8142,7 +8477,7 @@ case "$osname" in
 freebsd)
     case "`ipcs 2>&1`" in
     "SVID messages"*"not configured"*)
-	echo "But your FreeBSD kernel does not have the sem*(2) configured." >&4
+	echo "Your $osname does not have the sem*(2) configured." >&4
         h_sem=false
 	val="$undef"
 	set semctl d_semctl
@@ -8333,6 +8668,10 @@ eval $inlibc
 set seteuid d_seteuid
 eval $inlibc
 
+: see if setgrent exists
+set setgrent d_setgrent
+eval $inlibc
+
 : see if sethostent exists
 set sethostent d_sethent
 eval $inlibc
@@ -8363,6 +8702,10 @@ eval $inlibc
 
 : see if setpriority exists
 set setpriority d_setprior
+eval $inlibc
+
+: see if setpwent exists
+set setpwent d_setpwent
 eval $inlibc
 
 : see if setregid exists
@@ -8505,7 +8848,7 @@ case "$osname" in
 freebsd)
     case "`ipcs 2>&1`" in
     "SVID shared memory"*"not configured"*)
-	echo "But your FreeBSD kernel does not have the shm*(2) configured." >&4
+	echo "Your $osname does not have the shm*(2) configured." >&4
         h_shm=false
 	val="$undef"
 	set shmctl d_shmctl
@@ -8658,21 +9001,8 @@ eval $inlibc
 
 : see if stat knows about block sizes
 echo " "
-xxx=`./findhdr sys/stat.h`
-if $contains 'st_blocks;' "$xxx" >/dev/null 2>&1 ; then
-	if $contains 'st_blksize;' "$xxx" >/dev/null 2>&1 ; then
-		echo "Your stat() knows about block sizes." >&4
-		val="$define"
-	else
-		echo "Your stat() doesn't know about block sizes." >&4
-		val="$undef"
-	fi
-else
-	echo "Your stat() doesn't know about block sizes." >&4
-	val="$undef"
-fi
-set d_statblks
-eval $setvar
+set d_statblks stat st_blocks $i_sysstat sys/stat.h
+eval $hasfield
 
 : see if _ptr and _cnt from stdio act std
 echo " "
@@ -8833,38 +9163,38 @@ $rm -f try.*
 echo " "
 if test "X$d_strerror" = X -o "X$d_syserrlst" = X; then
     if set strerror val -f d_strerror; eval $csym; $val; then
-	echo 'strerror() found.' >&4
-	d_strerror="$define"
-	d_strerrm='strerror(e)'
-	if set sys_errlist val -a d_syserrlst; eval $csym; $val; then	
-	    echo "(You also have sys_errlist[], so we could roll our own strerror.)" 
-	    d_syserrlst="$define"
-	else
-	    echo "(Since you don't have sys_errlist[], sterror() is welcome.)"
-	    d_syserrlst="$undef"
-	fi
+		echo 'strerror() found.' >&4
+		d_strerror="$define"
+		d_strerrm='strerror(e)'
+		if set sys_errlist val -a d_syserrlst; eval $csym; $val; then	
+			echo "(You also have sys_errlist[], so we could roll our own strerror.)" 
+			d_syserrlst="$define"
+		else
+			echo "(Since you don't have sys_errlist[], sterror() is welcome.)"
+			d_syserrlst="$undef"
+		fi
     elif xxx=`./findhdr string.h`; test "$xxx" || xxx=`./findhdr strings.h`; \
-	$contains '#[ 	]*define.*strerror' "$xxx" >/dev/null 2>&1; then
-	echo 'strerror() found in string header.' >&4
-	d_strerror="$define"
-	d_strerrm='strerror(e)'
-	if set sys_errlist val -a d_syserrlst; eval $csym; $val; then	
-	echo "(Most probably, strerror() uses sys_errlist[] for descriptions.)"
-	    d_syserrlst="$define"
-	else
-	    echo "(You don't appear to have any sys_errlist[], how can this be?)"
-	d_syserrlst="$undef"
-	fi
+			$contains '#[ 	]*define.*strerror' "$xxx" >/dev/null 2>&1; then
+		echo 'strerror() found in string header.' >&4
+		d_strerror="$define"
+		d_strerrm='strerror(e)'
+		if set sys_errlist val -a d_syserrlst; eval $csym; $val; then	
+			echo "(Most probably, strerror() uses sys_errlist[] for descriptions.)"
+				d_syserrlst="$define"
+		else
+			echo "(You don't appear to have any sys_errlist[], how can this be?)"
+			d_syserrlst="$undef"
+		fi
     elif set sys_errlist val -a d_syserrlst; eval $csym; $val; then
-echo "strerror() not found, but you have sys_errlist[] so we'll use that." >&4
-	d_strerror="$undef"
-	d_syserrlst="$define"
-	d_strerrm='((e)<0||(e)>=sys_nerr?"unknown":sys_errlist[e])'
+		echo "strerror() not found, but you have sys_errlist[] so we'll use that." >&4
+		d_strerror="$undef"
+		d_syserrlst="$define"
+		d_strerrm='((e)<0||(e)>=sys_nerr?"unknown":sys_errlist[e])'
     else
-	echo 'strerror() and sys_errlist[] NOT found.' >&4
-	d_strerror="$undef"
-	d_syserrlst="$undef"
-	d_strerrm='"unknown"'
+		echo 'strerror() and sys_errlist[] NOT found.' >&4
+		d_strerror="$undef"
+		d_syserrlst="$undef"
+		d_strerrm='"unknown"'
     fi
 fi
 
@@ -9616,6 +9946,33 @@ EOCP
 esac
 $rm -f try.c try
 
+echo " "
+echo "Determining whether or not we are on an EBCDIC system..." >&4
+$cat >tebcdic.c <<'EOM'
+int main()
+{
+  if ('M'==0xd4) return 0;
+  return 1;
+}
+EOM
+
+val=$undef
+set tebcdic
+if eval $compile_ok; then
+	if ./tebcdic; then
+		echo "You have EBCDIC." >&4
+		val="$define"
+	else
+		echo "Nope, no EBCDIC.  Assuming ASCII or some ISO Latin." >&4
+	fi
+else
+	echo "$me: I'm unable to compile the test program." >&4
+	echo "I'll assume ASCII or some ISO Latin." >&4
+fi
+$rm -f tebcdic.c tebcdic
+set ebcdic
+eval $setvar
+
 : see what type file positions are declared as in the library
 rp="What is the type for file position used by fsetpos()?"
 set fpos_t fpostype long stdio.h sys/types.h
@@ -9693,6 +10050,30 @@ esac
 rp="What is the type used for lseek's offset on this system?"
 set off_t lseektype long stdio.h sys/types.h
 eval $typedef_ask
+
+echo " "
+$echo $n "Checking to see how big your file offsets are...$c" >&4
+$cat >try.c <<EOCP
+#include <sys/types.h>
+#include <stdio.h>
+main()
+{
+	printf("%d\n", sizeof($lseektype));
+}
+EOCP
+set try
+if eval $compile_ok; then
+	lseeksize=`./try`
+	$echo " $lseeksize bytes." >&4
+else
+	dflt='4'
+	echo " "
+	echo "(I can't seem to compile the test program.  Guessing...)"
+	rp="What is the size of your file offsets (in bytes)?"
+	. ./myread
+	lseeksize="$ans"
+fi
+$rm -f try.c try
 
 echo " "
 echo "Checking if your $make program sets \$(MAKE)..." >&4
@@ -10054,9 +10435,9 @@ eval $inhdr
 : see if we should include time.h, sys/time.h, or both
 echo " "
 if test "X$timeincl" = X; then
-    echo "Testing to see if we should include <time.h>, <sys/time.h> or both." >&4
-    $echo $n "I'm now running the test program...$c"
-    $cat >try.c <<'EOCP'
+	echo "Testing to see if we should include <time.h>, <sys/time.h> or both." >&4
+	$echo $n "I'm now running the test program...$c"
+	$cat >try.c <<'EOCP'
 #include <sys/types.h>
 #ifdef I_TIME
 #include <time.h>
@@ -10088,51 +10469,51 @@ main()
 	exit(1);
 }
 EOCP
-    flags=''
-    for s_timezone in '-DS_TIMEZONE' ''; do
-    sysselect=''
-    for s_timeval in '-DS_TIMEVAL' ''; do
-    for i_systimek in '' '-DSYSTIMEKERNEL'; do
-    for i_time in '' '-DI_TIME'; do
-    for i_systime in '-DI_SYSTIME' ''; do
-	case "$flags" in
-	'') $echo $n ".$c"
-		set try $i_time $i_systime $i_systimek $sysselect $s_timeval $s_timezone
-		if eval $compile; then
+	flags=''
+	for s_timezone in '-DS_TIMEZONE' ''; do
+	sysselect=''
+	for s_timeval in '-DS_TIMEVAL' ''; do
+	for i_systimek in '' '-DSYSTIMEKERNEL'; do
+	for i_time in '' '-DI_TIME'; do
+	for i_systime in '-DI_SYSTIME' ''; do
+		case "$flags" in
+		'') $echo $n ".$c"
+			set try $i_time $i_systime $i_systimek $sysselect $s_timeval $s_timezone
+			if eval $compile; then
 				set X $i_time $i_systime $i_systimek $sysselect $s_timeval
-			shift
-			flags="$*"
-			echo " "
-			$echo $n "Succeeded with $flags$c"
-		fi
-		;;
+				shift
+				flags="$*"
+				echo " "
+				$echo $n "Succeeded with $flags$c"
+			fi
+			;;
+		esac
+	done
+	done
+	done
+	done
+	done
+	timeincl=''
+	echo " "
+	case "$flags" in
+	*SYSTIMEKERNEL*) i_systimek="$define"
+		timeincl=`./findhdr sys/time.h`
+		echo "We'll include <sys/time.h> with KERNEL defined." >&4;;
+	*) i_systimek="$undef";;
 	esac
-    done
-    done
-    done
-    done
-    done
-    timeincl=''
-    echo " "
-    case "$flags" in
-    *SYSTIMEKERNEL*) i_systimek="$define"
-	timeincl=`./findhdr sys/time.h`
-	echo "We'll include <sys/time.h> with KERNEL defined." >&4;;
-    *) i_systimek="$undef";;
-    esac
-    case "$flags" in
-    *I_TIME*) i_time="$define"
-	timeincl=`./findhdr time.h`" $timeincl"
-	echo "We'll include <time.h>." >&4;;
-    *) i_time="$undef";;
-    esac
-    case "$flags" in
-    *I_SYSTIME*) i_systime="$define"
-	timeincl=`./findhdr sys/time.h`" $timeincl"
-	echo "We'll include <sys/time.h>." >&4;;
-    *) i_systime="$undef";;
-    esac
-    $rm -f try.c try
+	case "$flags" in
+	*I_TIME*) i_time="$define"
+		timeincl=`./findhdr time.h`" $timeincl"
+		echo "We'll include <time.h>." >&4;;
+	*) i_time="$undef";;
+	esac
+	case "$flags" in
+	*I_SYSTIME*) i_systime="$define"
+		timeincl=`./findhdr sys/time.h`" $timeincl"
+		echo "We'll include <sys/time.h>." >&4;;
+	*) i_systime="$undef";;
+	esac
+	$rm -f try.c try
 fi
 
 : check for fd_set items
@@ -10251,6 +10632,89 @@ EOM
 		;;
 	*)	: no select, so pick a harmless default
 		selecttype='int *'
+		;;
+	esac
+	;;
+esac
+
+: check for the select 'width'
+case "$selectminbits" in
+'') case "$d_select" in
+	$define)
+		$cat <<EOM
+
+Checking to see how on how many bits at a time your select() operates...
+EOM
+		$cat >try.c <<EOCP
+#include <sys/types.h>
+#$i_time I_TIME
+#$i_systime I_SYS_TIME
+#$i_systimek I_SYS_TIME_KERNEL
+#ifdef I_TIME
+#   include <time.h>
+#endif
+#ifdef I_SYS_TIME
+#   ifdef I_SYS_TIME_KERNEL
+#	define KERNEL
+#   endif
+#   include <sys/time.h>
+#   ifdef I_SYS_TIME_KERNEL
+#	undef KERNEL
+#   endif
+#endif
+#$i_sysselct I_SYS_SELECT
+#ifdef I_SYS_SELECT
+#include <sys/select.h>
+#endif
+#include <stdio.h>
+#define S sizeof($selecttype)
+#define MINBITS	64
+#define NBYTES (S * 8 > MINBITS ? S : MINBITS/8)
+#define NBITS  (NBYTES * 8)
+int main() {
+    char s[NBYTES];
+    $selecttype b;
+    struct timeval t;
+    int i;
+    FILE* fp;
+    int fd;
+
+    fclose(stdin);
+    fp = fopen("try.c", "r");
+    if (fp == 0)
+      exit(1);
+    fd = fileno(fp);
+    if (fd < 0)
+      exit(2);
+    b = ($selecttype)s;
+    for (i = 0; i < NBITS; i++)
+	FD_SET(i, b);
+    t.tv_sec  = 0;
+    t.tv_usec = 0;
+    select(fd + 1, b, 0, 0, &t);
+    for (i = NBITS - 1; i > fd && FD_ISSET(i, b); i--);
+    printf("%d\n", i + 1);
+    return 0;
+}
+EOCP
+		set try
+		if eval $compile_ok; then
+			selectminbits=`./try`
+			echo "Your select() operates on $selectminbits bits at a time." >&4
+		else
+			rp='What is the minimum number of bits your select() operates on?'
+			case "$byteorder" in
+			1234|12345678)	dflt=32 ;;
+			*)		dflt=1	;;
+			esac
+			. ./myread
+			val=$ans
+			selectminbits="$val"
+		fi
+		$rm -f try.* try
+		;;
+	*)	: no select, so pick a harmless default
+		selectminbits='32'
 		;;
 	esac
 	;;
@@ -10550,15 +11014,15 @@ fi
 echo " "
 if test "X$d_time" = X -o X"$timetype" = X; then
     if set time val -f d_time; eval $csym; $val; then
-	echo 'time() found.' >&4
-	val="$define"
-	rp="What is the type returned by time() on this system?"
-	set time_t timetype long stdio.h sys/types.h
-	eval $typedef_ask
+		echo 'time() found.' >&4
+		val="$define"
+		rp="What is the type returned by time() on this system?"
+		set time_t timetype long stdio.h sys/types.h
+		eval $typedef_ask
     else
-	echo 'time() not found, hope that will do.' >&4
-	val="$undef"
-	timetype='int';
+		echo 'time() not found, hope that will do.' >&4
+		val="$undef"
+		timetype='int';
     fi
     set d_time
     eval $setvar
@@ -10670,46 +11134,6 @@ case "$val" in
 esac
 set i_fcntl
 eval $setvar
-
-: see if this is an grp system
-set grp.h i_grp
-eval $inhdr
-
-case "$i_grp" in
-$define)
-	: see if setgrent exists
-	set setgrent d_setgrent
-	eval $inlibc
-
-	: see if getgrent exists
-	set getgrent d_getgrent
-	eval $inlibc
-
-	: see if endgrent exists
-	set endgrent d_endgrent
-	eval $inlibc
-
-	xxx=`./findhdr grp.h`
-	$cppstdin $cppflags $cppminus < $xxx >$$.h
-
-	if $contains 'gr_passwd' $$.h >/dev/null 2>&1; then
-		val="$define"
-	else
-		val="$undef"
-	fi
-	set d_grpasswd
-	eval $setvar
-
-	$rm -f $$.h
-	;;
-*)	# Assume all is lost as far as the d_*gr* go.
-	val="$undef"; 
-	set d_setgrent; eval $setvar
-	set d_getgrent; eval $setvar
-	set d_endgrent; eval $setvar
-	set d_grpasswd; eval $setvar
-	;;
-esac
 
 : see if locale.h is available
 set locale.h i_locale
@@ -10836,7 +11260,13 @@ $rm -f try.c
 EOS
 chmod +x ccsym
 $eunicefix ccsym
-./ccsym | $sort | $uniq >ccsym.raw
+./ccsym > ccsym1.raw
+if $test -s ccsym1.raw; then
+       $sort ccsym1.raw | $uniq >ccsym.raw
+else
+       mv ccsym1.raw ccsym.raw
+fi
+
 $awk '/\=/ { print $0; next }
 	{ print $0"=1" }' ccsym.raw >ccsym.list
 $awk '{ print $0"=1" }' Cppsym.true >ccsym.true
@@ -11032,6 +11462,10 @@ $rm -f varargs*
 set stddef.h i_stddef
 eval $inhdr
 
+: see if sys/access.h is available
+set sysaccess.h i_sysaccess
+eval $inhdr
+
 : see if ioctl defs are in sgtty, termio, sys/filio or sys/ioctl
 set sys/filio.h i_sysfilio
 eval $inhdr
@@ -11061,8 +11495,8 @@ eval $inhdr
 set sys/resource.h i_sysresrc
 eval $inhdr
 
-: see if sys/stat.h is available
-set sys/stat.h i_sysstat
+: see if sys/security.h is available
+set syssecrt.h i_syssecrt
 eval $inhdr
 
 : see if this is a sys/un.h system
@@ -11201,6 +11635,7 @@ for xxx in $known_extensions ; do
 		esac
 		;;
 	IPC/SysV|ipc/sysv)
+		: XXX Do we need a useipcsysv variable here
 		case "${d_msg}${d_sem}${d_shm}" in 
 		*"${define}"*) avail_ext="$avail_ext $xxx" ;;
 		esac
@@ -11470,6 +11905,7 @@ cryptlib='$cryptlib'
 csh='$csh'
 d_Gconvert='$d_Gconvert'
 d_access='$d_access'
+d_accessx='$d_accessx'
 d_alarm='$d_alarm'
 d_archlib='$d_archlib'
 d_attribut='$d_attribut'
@@ -11491,13 +11927,18 @@ d_crypt='$d_crypt'
 d_csh='$d_csh'
 d_cuserid='$d_cuserid'
 d_dbl_dig='$d_dbl_dig'
+d_dbmclose64='$d_dbmclose64'
+d_dbminit64='$d_dbminit64'
+d_delete64='$d_delete64'
 d_difftime='$d_difftime'
+d_dirent64s='$d_dirent64s'
 d_dirnamlen='$d_dirnamlen'
 d_dlerror='$d_dlerror'
 d_dlopen='$d_dlopen'
 d_dlsymun='$d_dlsymun'
 d_dosuid='$d_dosuid'
 d_dup2='$d_dup2'
+d_eaccess='$d_eaccess'
 d_endgrent='$d_endgrent'
 d_endhent='$d_endhent'
 d_endnent='$d_endnent'
@@ -11512,13 +11953,28 @@ d_fcntl='$d_fcntl'
 d_fd_macros='$d_fd_macros'
 d_fd_set='$d_fd_set'
 d_fds_bits='$d_fds_bits'
+d_fetch64='$d_fetch64'
+d_fgetpos64='$d_fgetpos64'
 d_fgetpos='$d_fgetpos'
+d_firstkey64='$d_firstkey64'
 d_flexfnam='$d_flexfnam'
+d_flock64s='$d_flock64s'
 d_flock='$d_flock'
+d_fopen64='$d_fopen64'
 d_fork='$d_fork'
 d_fpathconf='$d_fpathconf'
+d_freopen64='$d_freopen64'
+d_fseek64='$d_fseek64'
+d_fseeko64='$d_fseeko64'
+d_fseeko='$d_fseeko'
+d_fsetpos64='$d_fsetpos64'
 d_fsetpos='$d_fsetpos'
+d_fstat64='$d_fstat64'
+d_ftell64='$d_ftell64'
+d_ftello64='$d_ftello64'
+d_ftello='$d_ftello'
 d_ftime='$d_ftime'
+d_ftruncate64='$d_ftruncate64'
 d_getgrent='$d_getgrent'
 d_getgrps='$d_getgrps'
 d_gethbyaddr='$d_gethbyaddr'
@@ -11551,14 +12007,19 @@ d_grpasswd='$d_grpasswd'
 d_htonl='$d_htonl'
 d_index='$d_index'
 d_inetaton='$d_inetaton'
+d_ino64t='$d_ino64t'
+d_int64t='$d_int64t'
 d_isascii='$d_isascii'
 d_killpg='$d_killpg'
 d_lchown='$d_lchown'
 d_link='$d_link'
 d_locconv='$d_locconv'
+d_lockf64='$d_lockf64'
 d_lockf='$d_lockf'
 d_longdbl='$d_longdbl'
 d_longlong='$d_longlong'
+d_lseek64='$d_lseek64'
+d_lstat64='$d_lstat64'
 d_lstat='$d_lstat'
 d_mblen='$d_mblen'
 d_mbstowcs='$d_mbstowcs'
@@ -11576,10 +12037,14 @@ d_msgget='$d_msgget'
 d_msgrcv='$d_msgrcv'
 d_msgsnd='$d_msgsnd'
 d_mymalloc='$d_mymalloc'
+d_nextkey64='$d_nextkey64'
 d_nice='$d_nice'
+d_off64t='$d_off64t'
 d_oldpthreads='$d_oldpthreads'
 d_oldsock='$d_oldsock'
 d_open3='$d_open3'
+d_open64='$d_open64'
+d_opendir64='$d_opendir64'
 d_pathconf='$d_pathconf'
 d_pause='$d_pause'
 d_phostname='$d_phostname'
@@ -11594,8 +12059,9 @@ d_pwclass='$d_pwclass'
 d_pwcomment='$d_pwcomment'
 d_pwexpire='$d_pwexpire'
 d_pwgecos='$d_pwgecos'
-d_pwquota='$d_pwquota'
 d_pwpasswd='$d_pwpasswd'
+d_pwquota='$d_pwquota'
+d_readdir64='$d_readdir64'
 d_readdir='$d_readdir'
 d_readlink='$d_readlink'
 d_rename='$d_rename'
@@ -11605,6 +12071,7 @@ d_safebcpy='$d_safebcpy'
 d_safemcpy='$d_safemcpy'
 d_sanemcmp='$d_sanemcmp'
 d_sched_yield='$d_sched_yield'
+d_seekdir64='$d_seekdir64'
 d_seekdir='$d_seekdir'
 d_select='$d_select'
 d_sem='$d_sem'
@@ -11647,11 +12114,13 @@ d_sigaction='$d_sigaction'
 d_sigsetjmp='$d_sigsetjmp'
 d_socket='$d_socket'
 d_sockpair='$d_sockpair'
+d_stat64='$d_stat64'
 d_statblks='$d_statblks'
 d_stdio_cnt_lval='$d_stdio_cnt_lval'
 d_stdio_ptr_lval='$d_stdio_ptr_lval'
 d_stdiobase='$d_stdiobase'
 d_stdstdio='$d_stdstdio'
+d_store64='$d_store64'
 d_strchr='$d_strchr'
 d_strcoll='$d_strcoll'
 d_strctcpy='$d_strctcpy'
@@ -11670,9 +12139,12 @@ d_syserrlst='$d_syserrlst'
 d_system='$d_system'
 d_tcgetpgrp='$d_tcgetpgrp'
 d_tcsetpgrp='$d_tcsetpgrp'
+d_telldir64='$d_telldir64'
 d_telldir='$d_telldir'
 d_time='$d_time'
 d_times='$d_times'
+d_tmpfile64='$d_tmpfile64'
+d_truncate64='$d_truncate64'
 d_truncate='$d_truncate'
 d_tzname='$d_tzname'
 d_umask='$d_umask'
@@ -11737,6 +12209,7 @@ i_fcntl='$i_fcntl'
 i_float='$i_float'
 i_gdbm='$i_gdbm'
 i_grp='$i_grp'
+i_inttypes='$i_inttypes'
 i_limits='$i_limits'
 i_locale='$i_locale'
 i_malloc='$i_malloc'
@@ -11754,6 +12227,7 @@ i_stdarg='$i_stdarg'
 i_stddef='$i_stddef'
 i_stdlib='$i_stdlib'
 i_string='$i_string'
+i_sysaccess='$i_sysaccess'
 i_sysdir='$i_sysdir'
 i_sysfile='$i_sysfile'
 i_sysfilio='$i_sysfilio'
@@ -11762,6 +12236,7 @@ i_sysioctl='$i_sysioctl'
 i_sysndir='$i_sysndir'
 i_sysparam='$i_sysparam'
 i_sysresrc='$i_sysresrc'
+i_syssecrt='$i_syssecrt'
 i_sysselct='$i_sysselct'
 i_syssockio='$i_syssockio'
 i_sysstat='$i_sysstat'
@@ -11817,6 +12292,7 @@ longsize='$longsize'
 lp='$lp'
 lpr='$lpr'
 ls='$ls'
+lseeksize='$lseeksize'
 lseektype='$lseektype'
 mail='$mail'
 mailx='$mailx'
@@ -11888,6 +12364,7 @@ runnm='$runnm'
 scriptdir='$scriptdir'
 scriptdirexp='$scriptdirexp'
 sed='$sed'
+selectminbits='$selectminbits'
 selecttype='$selecttype'
 sendmail='$sendmail'
 sh='$sh'
@@ -11945,6 +12422,7 @@ troff='$troff'
 uidtype='$uidtype'
 uname='$uname'
 uniq='$uniq'
+use64bits='$use64bits'
 usedl='$usedl'
 usemymalloc='$usemymalloc'
 usenm='$usenm'
@@ -12028,51 +12506,6 @@ esac
 
 : if this fails, just run all the .SH files by hand
 . ./config.sh
-
-case "$ebcdic" in
-$define)
-    xxx=''
-    echo "This is an EBCDIC system, checking if any parser files need regenerating." >&4
-    rm -f y.tab.c y.tab.h
-    yacc -d perly.y >/dev/null 2>&1
-    if cmp -s y.tab.c perly.c; then
-        rm -f y.tab.c
-    else
-        echo "perly.y -> perly.c" >&4
-        mv -f y.tab.c perly.c
-        chmod u+w perly.c
-        sed -e 's/fprintf *( *stderr *,/PerlIO_printf(Perl_debug_log,/g' \
-            -e 's/y\.tab/perly/g' perly.c >perly.tmp && mv perly.tmp perly.c
-        xxx="$xxx perly.c"
-    fi
-    if cmp -s y.tab.h perly.h; then
-        rm -f y.tab.h
-    else
-        echo "perly.y -> perly.h" >&4
-        mv -f y.tab.h perly.h
-        xxx="$xxx perly.h"
-    fi
-    echo "x2p/a2p.y" >&4
-    cd x2p
-    rm -f y.tab.c
-    yacc a2p.y >/dev/null 2>&1
-    if cmp -s y.tab.c a2p.c
-    then
-        rm -f y.tab.c
-    else
-        echo "a2p.y -> a2p.c" >&4
-        mv -f y.tab.c a2p.c
-        chmod u+w a2p.c
-        sed -e 's/fprintf *( *stderr *,/PerlIO_printf(Perl_debug_log,/g' \
-            -e 's/y\.tab/a2p/g' a2p.c >a2p.tmp && mv a2p.tmp a2p.c
-        xxx="$xxx a2p.c"
-    fi
-    cd ..
-    case "$xxx" in
-    '') echo "No parser files were regenerated.  That's okay." >&4 ;;
-    esac
-    ;;
-esac
 
 echo " "
 exec 1>&4

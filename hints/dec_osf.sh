@@ -202,6 +202,12 @@ fi
 #	new.)	useshrplib="$define"	;;
 #esac
 
+# The EFF_ONLY_OK from <sys/access.h> is dysfunctional for [RWX]_OK
+# as of Digital UNIX 4.0[A-D]?.  If and when this gets fixed, adjust
+# this appropriately. 
+
+pp_sys_cflags='ccflags="$ccflags -DNO_EFF_ONLY_OK"'
+
 #
 # Unset temporary variables no more needed.
 #

@@ -64,7 +64,7 @@ sed -n 's/^PERLVAR.*(T\([^[,]*\).*/PL_\1/p' thrdvar.h  >> perl.exp
 # If we use the PerlIO abstraction layer, add its symbols.
 #
 
-if [ $useperlio = "define" ]
+if [ "X$useperlio" = "Xdefine" ]
 then
 	grep '^[A-Za-z]' perlio.sym >> perl.exp
 fi

@@ -105,6 +105,31 @@
    Andy Dougherty	April 1998
 */
 
+#ifdef I_INTTYPES
+
+typedef int8_t		I8;
+typedef uint8_t		U8;
+/* I8_MAX and I8_MIN constants are not defined, as I8 is an ambiguous type.
+   Please search CHAR_MAX in perl.h for further details. */
+#define U8_MAX UINT8_MAX
+#define U8_MIN UINT8_MIN
+
+typedef int16_t         I16;
+typedef uint16_t        U16;
+#define I16_MAX INT16_MAX
+#define I16_MIN INT16_MIN
+#define U16_MAX UINT16_MAX
+#define U16_MIN UINT16_MIN
+
+typedef int32_t         I32;
+typedef uint32_t        U32;
+#define I32_MAX INT32_MAX
+#define I32_MIN INT32_MIN
+#define U32_MAX UINT32_MAX
+#define U32_MIN UINT32_MIN
+
+#else
+
 typedef char		I8;
 typedef unsigned char	U8;
 /* I8_MAX and I8_MIN constants are not defined, as I8 is an ambiguous type.
@@ -112,6 +137,7 @@ typedef unsigned char	U8;
 #define U8_MAX PERL_UCHAR_MAX
 #define U8_MIN PERL_UCHAR_MIN
 
+/* Beware.  SHORTSIZE > 2 in Cray C90ties. */
 typedef short		I16;
 typedef unsigned short	U16;
 #define I16_MAX PERL_SHORT_MAX
@@ -133,6 +159,8 @@ typedef unsigned short	U16;
 # define I32_MIN PERL_LONG_MIN
 # define U32_MAX PERL_ULONG_MAX
 # define U32_MIN PERL_ULONG_MIN
+#endif
+
 #endif
 
 #define BIT_DIGITS(N)   (((N)*146)/485 + 1)  /* log2(10) =~ 146/485 */

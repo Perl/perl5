@@ -25,6 +25,8 @@
 
 # gcc-enabled by Kurt Starsinic <kstar@isinet.com> on 3/24/1998
 
+# 64-bitty by Jarkko Hietaniemi on 9/1998
+
 # Use   sh Configure -Dcc='cc -n32' to try compiling with -n32.
 #     or -Dcc='cc -n32 -mips3' (or -mips4) to force (non)portability
 # Don't bother with -n32 unless you have the 7.1 or later compilers.
@@ -208,4 +210,24 @@ EOF
     shift
     libswanted="$*"
     usemymalloc='n'
+fi
+
+# 64-bitness.
+# jhi@iki.fi, inspired by Scott Henry.
+
+if [ "X$use64bits" = "X$define" ]; then
+    uname_r=`uname -r`
+    case "$uname_r" in
+    [1-5]*|6.[01])
+	echo >&4 "IRIX $uname_r" does not support 64-bit types."
+	echo >&4 "You should upgrade to at least IRIX 6.2."
+	exit 1
+	;;
+    esac
+    case "$ccflags" in
+    *-n32*)
+        ccflags="$ccflags -DUSE_LONG_LONG"
+        ;;
+    esac
+    ccflags="$ccflags -DUSE_64_BIT_FILES -DNO_OPEN64"
 fi
