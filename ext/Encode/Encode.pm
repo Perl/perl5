@@ -22,6 +22,10 @@ require Exporter;
        off_utf8
        utf_to_utf
        encodings
+       utf8_decode
+       utf8_encode
+       utf8_upgrade
+       utf8_downgrade
       );
 
 bootstrap Encode ();
@@ -409,13 +413,19 @@ sub getEncoding
 package Encode::Unicode;
 
 # Dummy package that provides the encode interface but leaves data
-# as UTF-8 encoded. It is here so that from_to()
+# as UTF-8 encoded. It is here so that from_to() works.
 
 sub name { 'Unicode' }
 
-sub toUnicode   { $_[1] }
+sub toUnicode
+{
+ my ($obj,$str,$chk) = @_;
+ Encode::utf8_upgrade($str);
+ $_[1] = '' if $chk;
+ return $str;
+}
 
-sub fromUnicode { $_[1] }
+*fromUnicode = \&toUnicode;
 
 package Encode::Table;
 
@@ -550,6 +560,7 @@ sub toUnicode
    $uni .= chr($code);
   }
  $_[1] = $str if $chk;
+ Encode::utf8_upgrade($uni);
  return $uni;
 }
 
