@@ -1513,6 +1513,10 @@ as perlI<platform>:
     perlnetware perlos2 perlos390 perlplan9 perlqnx perlsolaris
     perltru64 perluts perlvmesa perlvms perlvos perlwin32
 
+These documents usually detail one or more of the following subjects:
+configuring, building, testing, installing, and sometimes also using
+Perl on the said platform.
+
 Eastern Asian Perl users are now welcomed in their own languages:
 README.jp (Japanese), README.ko (Korean), README.cn (simplified
 Chinese) and README.tw (traditional Chinese), which are written in
@@ -2511,9 +2515,6 @@ the system.
 
 POSIX-style signals are now emulated much better on VMS versions prior
 to 7.0.
-
-The Socket extension is now dynamically loaded instead of being
-statically built in.
 
 The C<system> function and backticks operator have improved
 functionality and better error handling. [561]
