@@ -1727,7 +1727,7 @@ as a class or object method is by usage only.  You could accidentally
 call a class method (one expecting a string argument) on an
 object (one expecting a reference), or vice versa.
 
-Z<>From the C++ perspective, all methods in Perl are virtual.
+From the C++ perspective, all methods in Perl are virtual.
 This, by the way, is why they are never checked for function
 prototypes in the argument list as regular builtin and user-defined
 functions can be.
