@@ -17,6 +17,8 @@ $CPAN::META->has_inst('Compress::Zlib','no');
 
 *AUTOLOAD = \&CPAN::AUTOLOAD;
 
+1;
+
 __END__
 
 =head1 NAME
