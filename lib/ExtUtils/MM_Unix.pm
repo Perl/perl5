@@ -2018,7 +2018,7 @@ uninstall_from_sitedirs ::
 
 =item installbin (o)
 
-Defines targets to install EXE_FILES.
+Defines targets to make and to install EXE_FILES.
 
 =cut
 
@@ -2045,7 +2045,7 @@ EXE_FILES = @{$self->{EXE_FILES}}
 } : q{FIXIN = $(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) -MExtUtils::MakeMaker \
     -e "MY->fixin(shift)"
 }).qq{
-all :: @to
+pure_all :: @to
 	$self->{NOECHO}\$(NOOP)
 
 realclean ::
