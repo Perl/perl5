@@ -28,6 +28,272 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 19612] By: jhi                                   on 2003/05/24  07:53:25
+        Log: Regen the old-style VOS config files.
+     Branch: maint-5.8/perl
+	   ! vos/config.alpha.def vos/config.alpha.h vos/config.ga.def
+	   ! vos/config.ga.h
+____________________________________________________________________________
+[ 19611] By: jhi                                   on 2003/05/24  07:50:43
+        Log: Integrate:
+             [ 19592]
+             Workaround for buggy gcc 2.95.3 in openbsd/sparc64.
+             
+             [ 19593]
+             Subject: Stateful PerlIO implemented [Was: [perl #22261] Was: Unrecognised BOM...]
+             From: Dan Kogai <dankogai@dan.co.jp>
+             Date: Fri, 23 May 2003 20:17:16 +0900
+             Message-Id: <1C123D88-8D10-11D7-B277-000393AE4244@dan.co.jp>
+             
+             [ 19594]
+             Subject: [PATCH] ExtUtils::MakeMaker 6.10_03 -> 6.10_04
+             From: Michael G Schwern <schwern@pobox.com> 
+             Date: Fri, 23 May 2003 02:10:46 -0700 
+             Message-ID: <20030523091046.GB11662@windhund.schwern.org> 
+             
+             [ 19595]
+             Subject: Re: Stateful PerlIO implemented [Was: [perl #22261] Was: Unrecognised BOM...]
+             From: Dan Kogai <dankogai@dan.co.jp>
+             Date: Sat, 24 May 2003 00:15:49 +0900
+             Message-Id: <6F7B29DA-8D31-11D7-9F95-000393AE4244@dan.co.jp>
+             
+             [ 19596]
+             U/WIN extension fix from John P. Linderman.
+             
+             [ 19597]
+             Linewrapping MUAs, grumble.
+             
+             [ 19598]
+             Hasty editing, grumble.
+             
+             [ 19599]
+             Subject: [PATCH] RE: [PATCH] RE: maint snapshot @ 19525
+             From: Robin Barker <Robin.Barker@npl.co.uk>
+             Date: Fri, 23 May 2003 17:32:22 +0100
+             Message-ID: <533D273D4014D411AB1D00062938C4D90404653C@hotel.npl.co.uk>
+             
+             [ 19600]
+             Subject: [PATCH] for Configure -Dnoextensions=Encode
+             From: Robin Barker <Robin.Barker@npl.co.uk>
+             Date: Fri, 23 May 2003 17:37:09 +0100
+             Message-ID: <533D273D4014D411AB1D00062938C4D90404653D@hotel.npl.co.uk>
+             
+             [ 19601]
+             Subject: [PATCH] RE: state of deparse?
+             From: Robin Barker <Robin.Barker@npl.co.uk>
+             Date: Fri, 23 May 2003 17:42:37 +0100
+             Message-ID: <533D273D4014D411AB1D00062938C4D90404653E@hotel.npl.co.uk>
+             
+             [ 19602]
+             Noticed by John P. Linderman.
+             
+             [ 19603]
+             lib/ftp.pl requires the obsoleted (and removed) chat2.pl.
+             
+             [ 19604]
+             Add a real scan for pthread_attr_setscope().
+             
+             [ 19606]
+             Regen Glossary et al.
+             
+             [ 19607]
+             Introduce (undefined) pthread_attr_setscope to non-Configure lands.
+             
+             [ 19608]
+             Missing "to".
+             
+             [ 19610]
+             Subject: [PATCH #2] Re: [perl #22181] goto undefines my() variables
+             From: Dave Mitchell <davem@fdgroup.com>
+             Date: Thu, 22 May 2003 10:13:19 +0100
+             Message-ID: <20030522091319.GA4568@fdgroup.com>
+             
+             Subject: Re: [PATCH #2] Re: [perl #22181] goto undefines my() variables
+             From: Dave Mitchell <davem@fdgroup.com>
+             Date: Fri, 23 May 2003 17:09:44 +0100
+             Message-ID: <20030523160944.GC9194@fdgroup.com>
+             
+             (Regen Configure, Glossary, et al)
+             (One metaconfig beauty tweak sneaked in)
+     Branch: maint-5.8/perl
+	  +> lib/ExtUtils/META.yml lib/ExtUtils/MakeMaker/bytes.pm
+	  +> lib/ExtUtils/t/bytes.t lib/ExtUtils/t/vmsish.t
+	   - lib/ftp.pl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH
+	  !> (integrate 71 files)
+     Branch: metaconfig
+	   ! U/compline/Csym.U
+____________________________________________________________________________
+[ 19591] By: jhi                                   on 2003/05/22  11:59:21
+        Log: Integrate:
+             [ 19578]
+             Subject: [Encode] 1.95 released
+             From: Dan Kogai <dankogai@dan.co.jp>
+             Date: Wed, 21 May 2003 18:26:26 +0900
+             Message-Id: <4B8D9AB5-8B6E-11D7-848A-000393AE4244@dan.co.jp>
+             
+             [ 19579]
+             U/WIN test nit for John P. Linderman.
+             
+             [ 19580]
+             VMS test tweak from Craig Berry.
+             
+             [ 19581]
+             U/WIN test tweak from John P. Linderman.
+             
+             [ 19582]
+             MAN3PODS => {} good.  (Was in 5.8.0, has been lost at some point.)
+             
+             [ 19583]
+             Subject: Re: [perl #22231] <$foo> is parsed as glob(' ' . $foo) if Switch.pm is used
+             From: Ronald J Kimball <rjk@linguist.Thayer.dartmouth.edu>
+             Date: Mon, 19 May 2003 17:53:25 -0400
+             Message-ID: <20030519215325.GE1629175@linguist.thayer.dartmouth.edu>
+             
+             (the bug id corrected to be #22231, not #22238)
+             
+             [ 19584]
+             Subject: [PATCH] perldata.pod revamp rev. 3
+             From: Shlomi Fish <shlomif@vipe.technion.ac.il>
+             Date: Wed, 14 May 2003 17:46:05 +0300 (IDT)
+             Message-ID: <Pine.LNX.4.33L2.0305141744520.24207-200000@vipe.technion.ac.il>
+             
+             [ 19585]
+             More U/WIN tweaks from John P. Linderman.
+             
+             [ 19586]
+             Introduce a new preprocessor symbol, PERL_DISABLE_PMC, to
+             disable the loading of .pmc files if defined.
+             Rename the function S_doopen_pmc to S_doopen_pm.
+             
+             [ 19589]
+             Subject: [PATCH] [perl #21887] h2xs becoming enum-aware
+             From: Tassilo von Parseval <tassilo.parseval@post.rwth-aachen.de>
+             Date: Tue, 13 May 2003 10:36:32 +0200
+             Message-id: <20030513083631.GA21782@ethan>
+             
+             [ 19590]
+             Subject: Re: [cpan #2629] Wrong assumption in numeric comparison
+             From: Dan Kogai <dankogai@dan.co.jp> 
+             Date: Thu, 22 May 2003 18:46:40 +0900 
+             Message-Id: <49E36875-8C3A-11D7-9C91-000393AE4244@dan.co.jp> 
+     Branch: maint-5.8/perl
+	  !> (integrate 39 files)
+____________________________________________________________________________
+[ 19590] By: jhi                                   on 2003/05/22  11:51:46
+        Log: Subject: Re: [cpan #2629] Wrong assumption in numeric comparison
+             From: Dan Kogai <dankogai@dan.co.jp> 
+             Date: Thu, 22 May 2003 18:46:40 +0900 
+             Message-Id: <49E36875-8C3A-11D7-9C91-000393AE4244@dan.co.jp> 
+     Branch: perl
+	   ! ext/Encode/encoding.pm
+____________________________________________________________________________
+[ 19589] By: rgs                                   on 2003/05/21  21:37:28
+        Log: Subject: [PATCH] [perl #21887] h2xs becoming enum-aware
+             From: Tassilo von Parseval <tassilo.parseval@post.rwth-aachen.de>
+             Date: Tue, 13 May 2003 10:36:32 +0200
+             Message-id: <20030513083631.GA21782@ethan>
+     Branch: perl
+	   ! utils/h2xs.PL
+____________________________________________________________________________
+[ 19588] By: rgs                                   on 2003/05/21  21:03:04
+        Log: New warning "Useless localization of %s", based on
+             Subject: [PATCH] new warning "Useless localization of %s is deprecated"
+             From: Dave Mitchell <davem@fdgroup.com>
+             Date: Wed, 30 Apr 2003 21:17:38 +0100
+             Message-ID: <20030430201738.GA22054@fdgroup.com>
+             
+             The proposed patch added this warning in the 'deprecated' category ;
+             I think this category is for things that exist and will be removed,
+             rather than for things that don't exist and that will maybe be added.
+     Branch: perl
+	   ! op.c pod/perldiag.pod t/lib/warnings/op
+____________________________________________________________________________
+[ 19587] By: nick                                  on 2003/05/21  20:16:45
+        Log: Work-in-progress - do not integrate yet
+             Experimental PerlIO_syslayer() [or sysread only at this point]
+             3 fails on a UNIX :perlio stack
+             - warnings misses Filehandle F opened only for output (weird)
+             - socketpair discovers that Unix_read() restarts on EINTR (gotcha)
+             - lib/open fails to sysread() chars (a feature?)
+     Branch: perlio
+	   ! makedef.pl perlio.c perlio.h perliol.h pp_sys.c
+____________________________________________________________________________
+[ 19586] By: rgs                                   on 2003/05/21  19:56:38
+        Log: Introduce a new preprocessor symbol, PERL_DISABLE_PMC, to
+             disable the loading of .pmc files if defined.
+             Rename the function S_doopen_pmc to S_doopen_pm.
+     Branch: perl
+	   ! Porting/thirdclean embed.fnc embed.h pp_ctl.c proto.h
+____________________________________________________________________________
+[ 19585] By: jhi                                   on 2003/05/21  19:28:23
+        Log: More U/WIN tweaks from John P. Linderman.
+     Branch: perl
+	   ! t/io/layers.t t/io/tell.t
+____________________________________________________________________________
+[ 19584] By: rgs                                   on 2003/05/21  19:27:13
+        Log: Subject: [PATCH] perldata.pod revamp rev. 3
+             From: Shlomi Fish <shlomif@vipe.technion.ac.il>
+             Date: Wed, 14 May 2003 17:46:05 +0300 (IDT)
+             Message-ID: <Pine.LNX.4.33L2.0305141744520.24207-200000@vipe.technion.ac.il>
+     Branch: perl
+	   ! pod/perldata.pod
+____________________________________________________________________________
+[ 19583] By: jhi                                   on 2003/05/21  19:18:21
+        Log: Subject: Re: [perl #22231] <$foo> is parsed as glob(' ' . $foo) if Switch.pm is used
+             From: Ronald J Kimball <rjk@linguist.Thayer.dartmouth.edu>
+             Date: Mon, 19 May 2003 17:53:25 -0400
+             Message-ID: <20030519215325.GE1629175@linguist.thayer.dartmouth.edu>
+             
+             (the bug id corrected to be #22231, not #22238)
+     Branch: perl
+	   ! lib/Switch.pm
+____________________________________________________________________________
+[ 19582] By: jhi                                   on 2003/05/21  14:17:14
+        Log: MAN3PODS => {} good.  (Was in 5.8.0, has been lost at some point.)
+     Branch: perl
+	   ! ext/MIME/Base64/Makefile.PL
+____________________________________________________________________________
+[ 19581] By: jhi                                   on 2003/05/21  14:15:26
+        Log: U/WIN test tweak from John P. Linderman.
+     Branch: perl
+	   ! t/op/chdir.t
+____________________________________________________________________________
+[ 19580] By: jhi                                   on 2003/05/21  13:06:13
+        Log: VMS test tweak from Craig Berry.
+     Branch: perl
+	   ! lib/DirHandle.t
+____________________________________________________________________________
+[ 19579] By: jhi                                   on 2003/05/21  13:03:34
+        Log: U/WIN test nit for John P. Linderman.
+     Branch: perl
+	   ! ext/Cwd/t/cwd.t
+____________________________________________________________________________
+[ 19578] By: jhi                                   on 2003/05/21  13:01:42
+        Log: Subject: [Encode] 1.95 released
+             From: Dan Kogai <dankogai@dan.co.jp>
+             Date: Wed, 21 May 2003 18:26:26 +0900
+             Message-Id: <4B8D9AB5-8B6E-11D7-848A-000393AE4244@dan.co.jp>
+     Branch: perl
+	   ! ext/Encode/Changes ext/Encode/Encode.pm ext/Encode/MANIFEST
+	   ! ext/Encode/META.yml ext/Encode/Unicode/Unicode.pm
+	   ! ext/Encode/lib/Encode/Alias.pm ext/Encode/lib/Encode/Config.pm
+	   ! ext/Encode/lib/Encode/Unicode/UTF7.pm ext/Encode/t/Unicode.t
+	   ! ext/Encode/ucm/8859-1.ucm ext/Encode/ucm/8859-10.ucm
+	   ! ext/Encode/ucm/8859-11.ucm ext/Encode/ucm/8859-13.ucm
+	   ! ext/Encode/ucm/8859-14.ucm ext/Encode/ucm/8859-15.ucm
+	   ! ext/Encode/ucm/8859-16.ucm ext/Encode/ucm/8859-2.ucm
+	   ! ext/Encode/ucm/8859-3.ucm ext/Encode/ucm/8859-4.ucm
+	   ! ext/Encode/ucm/8859-5.ucm ext/Encode/ucm/8859-6.ucm
+	   ! ext/Encode/ucm/8859-7.ucm ext/Encode/ucm/8859-8.ucm
+	   ! ext/Encode/ucm/8859-9.ucm
+____________________________________________________________________________
+[ 19577] By: jhi                                   on 2003/05/20  20:21:44
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 19576] By: jhi                                   on 2003/05/20  20:05:45
         Log: Integrate:
              [ 19569]
