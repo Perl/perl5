@@ -186,28 +186,3 @@ $Inst = ExtUtils::Installed->new();
 toplevel();
 
 ###############################################################################
-
-__END__
-
-=head1 NAME
-
-instmodsh - interactive inventory for installed Perl modules
-
-=head1 SYNOPSIS
-
-instmodsh
-
-=head1 DESCRIPTION
-
-C<instmodsh> provides an interactive shell to query details of
-installed Perl modules.
-
-The shell provides a list of installed modules, each of which
-may be queried to to list files and directories, checked for missing
-files or packaged up as a tar archive.
-
-=head1 SEE ALSO
-
-ExtUtils::Installed(3perl)
-
-=cut
