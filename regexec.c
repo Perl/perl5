@@ -597,7 +597,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		    DEBUG_r(PerlIO_printf(Perl_debug_log,
 			", trying anchored starting at offset %ld...\n",
 			(long)(s1 + 1 - i_strpos)));
-		    other_last = last + 1;
+		    other_last = last; /* Fix this later. --Hugo */
 		    s = HOP3c(t, 1, strend);
 		    goto restart;
 		}

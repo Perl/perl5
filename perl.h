@@ -1084,7 +1084,6 @@ typedef UVTYPE UV;
 #define IV_DIG (BIT_DIGITS(IVSIZE * 8))
 #define UV_DIG (BIT_DIGITS(UVSIZE * 8))
 
-#define NO_PERL_PRESEVE_IVUV	/* Not finished yet. */
 #ifndef NO_PERL_PRESERVE_IVUV
 #define PERL_PRESERVE_IVUV	/* We like our integers to stay integers. */
 #endif
