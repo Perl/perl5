@@ -3025,6 +3025,10 @@ troff (Loc.U):
 	This variable is defined but not used by Configure.
 	The value is a plain '' and is not useful.
 
+uidsign (uidsign.U):
+	This variable contains the signedness of a uidtype.
+	1 for unsigned, -1 for signed.
+
 uidtype (uidtype.U):
 	This variable defines Uid_t to be something like uid_t, int, 
 	ushort, or whatever type is used to declare user ids in the kernel.

@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Sat Oct  2 13:09:30 EET DST 1999
+ * Configuration time: Sun Oct  3 02:17:38 EET DST 1999
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -2720,6 +2720,12 @@
  *	<sys/types.h> to get any typedef'ed information.
  */
 #define Size_t size_t	 /* length paramater for string functions */
+
+/* Uid_t_SIGN:
+ *	This symbol holds the signedess of a Uid_t.
+ *	1 for unsigned, -1 for signed.
+ */
+#define Uid_t_SIGN	1		/* UID sign */
 
 /* Uid_t:
  *	This symbol holds the type used to declare user ids in the kernel.
