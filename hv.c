@@ -74,16 +74,10 @@ S_more_he(pTHX)
 #endif
 
 STATIC HEK *
-S_save_hek(pTHX_ const char *str, I32 len, U32 hash)
+S_save_hek_flags(pTHX_ const char *str, I32 len, U32 hash, int flags)
 {
     char *k;
     register HEK *hek;
-    bool is_utf8 = FALSE;
-
-    if (len < 0) {
-      len = -len;
-      is_utf8 = TRUE;
-    }
 
     New(54, k, HEK_BASESIZE + len + 2, char);
     hek = (HEK*)k;
@@ -91,15 +85,8 @@ S_save_hek(pTHX_ const char *str, I32 len, U32 hash)
     HEK_KEY(hek)[len] = 0;
     HEK_LEN(hek) = len;
     HEK_HASH(hek) = hash;
-    HEK_UTF8(hek) = (char)is_utf8;
+    HEK_FLAGS(hek) = (unsigned char)flags;
     return hek;
-}
-
-void
-Perl_unshare_hek(pTHX_ HEK *hek)
-{
-    unsharepvn(HEK_KEY(hek),HEK_UTF8(hek)?-HEK_LEN(hek):HEK_LEN(hek),
-		HEK_HASH(hek));
 }
 
 #if defined(USE_ITHREADS)
@@ -123,20 +110,22 @@ Perl_he_dup(pTHX_ HE *e, bool shared, CLONE_PARAMS* param)
     if (HeKLEN(e) == HEf_SVKEY)
 	HeKEY_sv(ret) = SvREFCNT_inc(sv_dup(HeKEY_sv(e), param));
     else if (shared)
-	HeKEY_hek(ret) = share_hek(HeKEY(e), HeKLEN_UTF8(e), HeHASH(e));
+	HeKEY_hek(ret) = share_hek_flags(HeKEY(e), HeKLEN(e), HeHASH(e),
+                                         HeKFLAGS(e));
     else
-	HeKEY_hek(ret) = save_hek(HeKEY(e), HeKLEN_UTF8(e), HeHASH(e));
+	HeKEY_hek(ret) = save_hek_flags(HeKEY(e), HeKLEN(e), HeHASH(e),
+                                        HeKFLAGS(e));
     HeVAL(ret) = SvREFCNT_inc(sv_dup(HeVAL(e), param));
     return ret;
 }
 #endif	/* USE_ITHREADS */
 
 static void
-Perl_hv_notallowed(pTHX_ bool is_utf8, const char *key, I32 klen,
-		   const char *keysave, const char *msg)
+Perl_hv_notallowed(pTHX_ int flags, const char *key, I32 klen,
+		   const char *msg)
 {
     SV *sv = sv_newmortal();
-    if (key == keysave) {
+    if (!(flags & HVhek_FREEKEY)) {
 	sv_setpvn(sv, key, klen);
     }
     else {
@@ -144,7 +133,7 @@ Perl_hv_notallowed(pTHX_ bool is_utf8, const char *key, I32 klen,
 	SV *sv = sv_newmortal();
 	sv_usepvn(sv, (char *) key, klen);
     }
-    if (is_utf8) {
+    if (flags & HVhek_UTF8) {
 	SvUTF8_on(sv);
     }
     Perl_croak(aTHX_ msg, sv);
@@ -167,28 +156,60 @@ information on how to use this function on tied hashes.
 =cut
 */
 
+
 SV**
 Perl_hv_fetch(pTHX_ HV *hv, const char *key, I32 klen, I32 lval)
 {
-    register XPVHV* xhv;
-    register U32 hash;
-    register HE *entry;
-    SV *sv;
     bool is_utf8 = FALSE;
     const char *keysave = key;
-
-    if (!hv)
-	return 0;
+    int flags = 0;
 
     if (klen < 0) {
       klen = -klen;
       is_utf8 = TRUE;
     }
 
+    if (is_utf8) {
+	STRLEN tmplen = klen;
+	/* Just casting the &klen to (STRLEN) won't work well
+	 * if STRLEN and I32 are of different widths. --jhi */
+	key = (char*)bytes_from_utf8((U8*)key, &tmplen, &is_utf8);
+	klen = tmplen;
+        /* If we were able to downgrade here, then than means that we were
+           passed in a key which only had chars 0-255, but was utf8 encoded.  */
+        if (is_utf8)
+            flags = HVhek_UTF8;
+        /* If we found we were able to downgrade the string to bytes, then
+           we should flag that it needs upgrading on keys or each.  */
+        if (key != keysave)
+            flags |= HVhek_WASUTF8 | HVhek_FREEKEY;
+    }
+
+    return hv_fetch_flags (hv, key, klen, lval, flags);
+}
+
+SV**
+S_hv_fetch_flags(pTHX_ HV *hv, const char *key, I32 klen, I32 lval, int flags)
+{
+    register XPVHV* xhv;
+    register U32 hash;
+    register HE *entry;
+    SV *sv;
+
+    if (!hv)
+	return 0;
+
     if (SvRMAGICAL(hv)) {
+        /* All this clause seems to be utf8 unaware.
+           By moving the utf8 stuff out to hv_fetch_flags I need to ensure
+           key doesn't leak. I've not tried solving the utf8-ness.
+           NWC.
+        */
 	if (mg_find((SV*)hv, PERL_MAGIC_tied) || SvGMAGICAL((SV*)hv)) {
 	    sv = sv_newmortal();
 	    mg_copy((SV*)hv, sv, key, klen);
+            if (flags & HVhek_FREEKEY)
+                Safefree(key);
 	    PL_hv_fetch_sv = sv;
 	    return &PL_hv_fetch_sv;
 	}
@@ -199,8 +220,11 @@ Perl_hv_fetch(pTHX_ HV *hv, const char *key, I32 klen, I32 lval)
 		if (isLOWER(key[i])) {
 		    char *nkey = strupr(SvPVX(sv_2mortal(newSVpvn(key,klen))));
 		    SV **ret = hv_fetch(hv, nkey, klen, 0);
-		    if (!ret && lval)
-			ret = hv_store(hv, key, klen, NEWSV(61,0), 0);
+		    if (!ret && lval) {
+			ret = hv_store_flags(hv, key, klen, NEWSV(61,0), 0,
+                                             flags);
+                    } else if (flags & HVhek_FREEKEY)
+                        Safefree(key);
 		    return ret;
 		}
 	}
@@ -219,16 +243,11 @@ Perl_hv_fetch(pTHX_ HV *hv, const char *key, I32 klen, I32 lval)
 	    Newz(503, xhv->xhv_array /* HvARRAY(hv) */,
 		 PERL_HV_ARRAY_ALLOC_BYTES(xhv->xhv_max+1 /* HvMAX(hv)+1 */),
 		 char);
-	else
+	else {
+            if (flags & HVhek_FREEKEY)
+                Safefree(key);
 	    return 0;
-    }
-
-    if (is_utf8) {
-	STRLEN tmplen = klen;
-	/* Just casting the &klen to (STRLEN) won't work well
-	 * if STRLEN and I32 are of different widths. --jhi */
-	key = (char*)bytes_from_utf8((U8*)key, &tmplen, &is_utf8);
-	klen = tmplen;
+        }
     }
 
     PERL_HASH(hash, key, klen);
@@ -242,10 +261,30 @@ Perl_hv_fetch(pTHX_ HV *hv, const char *key, I32 klen, I32 lval)
 	    continue;
 	if (HeKEY(entry) != key && memNE(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
-	if (HeKUTF8(entry) != (char)is_utf8)
+        /* flags is 0 if not utf8. need HeKFLAGS(entry) also 0.
+           flags is 1 if utf8. need HeKFLAGS(entry) also 1.
+           xor is true if bits differ, in which case this isn't a match.  */
+	if ((HeKFLAGS(entry) ^ flags) & HVhek_UTF8)
 	    continue;
-	if (key != keysave)
-	    Safefree(key);
+        if (lval && HeKFLAGS(entry) != flags) {
+            /* We match if HVhek_UTF8 bit in our flags and hash key's match.
+               But if entry was set previously with HVhek_WASUTF8 and key now
+               doesn't (or vice versa) then we should change the key's flag,
+               as this is assignment.  */
+            if (HvSHAREKEYS(hv)) {
+                /* Need to swap the key we have for a key with the flags we
+                   need. As keys are shared we can't just write to the flag,
+                   so we share the new one, unshare the old one.  */
+                int flags_nofree = flags & ~HVhek_FREEKEY;
+                HEK *new_hek = share_hek_flags(key, klen, hash, flags_nofree);
+                unshare_hek (HeKEY_hek(entry));
+                HeKEY_hek(entry) = new_hek;
+            }
+            else
+                HeKFLAGS(entry) = flags;
+        }
+        if (flags & HVhek_FREEKEY)
+            Safefree(key);
 	/* if we find a placeholder, we pretend we haven't found anything */
 	if (HeVAL(entry) == &PL_sv_undef)
 	    break;
@@ -266,22 +305,16 @@ Perl_hv_fetch(pTHX_ HV *hv, const char *key, I32 klen, I32 lval)
     }
 #endif
     if (!entry && SvREADONLY(hv)) {
-	Perl_hv_notallowed(aTHX_ is_utf8, key, klen, keysave,
+	Perl_hv_notallowed(aTHX_ flags, key, klen,
                  "Attempt to access disallowed key '%"SVf"' in a fixed hash"
                            );
     }
     if (lval) {		/* gonna assign to this, so it better be there */
 	sv = NEWSV(61,0);
-	if (key != keysave) { /* must be is_utf8 == 0 */
-	    SV **ret = hv_store(hv,key,klen,sv,hash);
-	    Safefree(key);
-	    return ret;
-	}
-	else
-	    return hv_store(hv,key,is_utf8?-klen:klen,sv,hash);
+        return hv_store_flags(hv,key,klen,sv,hash,flags);
     }
-    if (key != keysave)
-	Safefree(key);
+    if (flags & HVhek_FREEKEY)
+        Safefree(key);
     return 0;
 }
 
@@ -313,6 +346,7 @@ Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
     register HE *entry;
     SV *sv;
     bool is_utf8;
+    int flags = 0;
     char *keysave;
 
     if (!hv)
@@ -366,8 +400,13 @@ Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
     keysave = key = SvPV(keysv, klen);
     is_utf8 = (SvUTF8(keysv)!=0);
 
-    if (is_utf8)
+    if (is_utf8) {
 	key = (char*)bytes_from_utf8((U8*)key, &klen, &is_utf8);
+        if (is_utf8)
+            flags = HVhek_UTF8;
+        if (key != keysave)
+            flags |= HVhek_WASUTF8 | HVhek_FREEKEY;
+    }
 
     if (!hash)
 	PERL_HASH(hash, key, klen);
@@ -381,8 +420,25 @@ Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
 	    continue;
 	if (HeKEY(entry) != key && memNE(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
-	if (HeKUTF8(entry) != (char)is_utf8)
+	if ((HeKFLAGS(entry) ^ flags) & HVhek_UTF8)
 	    continue;
+        if (lval && HeKFLAGS(entry) != flags) {
+            /* We match if HVhek_UTF8 bit in our flags and hash key's match.
+               But if entry was set previously with HVhek_WASUTF8 and key now
+               doesn't (or vice versa) then we should change the key's flag,
+               as this is assignment.  */
+            if (HvSHAREKEYS(hv)) {
+                /* Need to swap the key we have for a key with the flags we
+                   need. As keys are shared we can't just write to the flag,
+                   so we share the new one, unshare the old one.  */
+                int flags_nofree = flags & ~HVhek_FREEKEY;
+                HEK *new_hek = share_hek_flags(key, klen, hash, flags_nofree);
+                unshare_hek (HeKEY_hek(entry));
+                HeKEY_hek(entry) = new_hek;
+            }
+            else
+                HeKFLAGS(entry) = flags;
+        }
 	if (key != keysave)
 	    Safefree(key);
 	/* if we find a placeholder, we pretend we haven't found anything */
@@ -402,11 +458,11 @@ Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
     }
 #endif
     if (!entry && SvREADONLY(hv)) {
-	Perl_hv_notallowed(aTHX_ is_utf8, key, klen, keysave,
+	Perl_hv_notallowed(aTHX_ flags, key, klen,
                  "Attempt to access disallowed key '%"SVf"' in a fixed hash"
                            );
     }
-    if (key != keysave)
+    if (flags & HVhek_FREEKEY)
 	Safefree(key);
     if (lval) {		/* gonna assign to this, so it better be there */
 	sv = NEWSV(61,0);
@@ -453,22 +509,42 @@ information on how to use this function on tied hashes.
 */
 
 SV**
-Perl_hv_store(pTHX_ HV *hv, const char *key, I32 klen, SV *val, register U32 hash)
+Perl_hv_store(pTHX_ HV *hv, const char *key, I32 klen, SV *val, U32 hash)
+{
+    bool is_utf8 = FALSE;
+    const char *keysave = key;
+    int flags = 0;
+
+    if (is_utf8) {
+	STRLEN tmplen = klen;
+	/* Just casting the &klen to (STRLEN) won't work well
+	 * if STRLEN and I32 are of different widths. --jhi */
+	key = (char*)bytes_from_utf8((U8*)key, &tmplen, &is_utf8);
+	klen = tmplen;
+        /* If we were able to downgrade here, then than means that we were
+           passed in a key which only had chars 0-255, but was utf8 encoded.  */
+        if (is_utf8)
+            flags = HVhek_UTF8;
+        /* If we found we were able to downgrade the string to bytes, then
+           we should flag that it needs upgrading on keys or each.  */
+        if (key != keysave)
+            flags |= HVhek_WASUTF8 | HVhek_FREEKEY;
+    }
+
+    return hv_store_flags (hv, key, klen, val, hash, flags);
+}
+
+SV**
+S_hv_store_flags(pTHX_ HV *hv, const char *key, I32 klen, SV *val,
+                 register U32 hash, int flags)
 {
     register XPVHV* xhv;
     register I32 i;
     register HE *entry;
     register HE **oentry;
-    bool is_utf8 = FALSE;
-    const char *keysave = key;
 
     if (!hv)
 	return 0;
-
-    if (klen < 0) {
-      klen = -klen;
-      is_utf8 = TRUE;
-    }
 
     xhv = (XPVHV*)SvANY(hv);
     if (SvMAGICAL(hv)) {
@@ -477,8 +553,11 @@ Perl_hv_store(pTHX_ HV *hv, const char *key, I32 klen, SV *val, register U32 has
 	hv_magic_check (hv, &needs_copy, &needs_store);
 	if (needs_copy) {
 	    mg_copy((SV*)hv, val, key, klen);
-	    if (!xhv->xhv_array /* !HvARRAY */ && !needs_store)
+	    if (!xhv->xhv_array /* !HvARRAY */ && !needs_store) {
+                if (flags & HVhek_FREEKEY)
+                    Safefree(key);
 		return 0;
+            }
 #ifdef ENV_IS_CASELESS
 	    else if (mg_find((SV*)hv, PERL_MAGIC_env)) {
 		key = savepvn(key,klen);
@@ -489,13 +568,8 @@ Perl_hv_store(pTHX_ HV *hv, const char *key, I32 klen, SV *val, register U32 has
 	}
     }
 
-    if (is_utf8) {
-	STRLEN tmplen = klen;
-	/* See the note in hv_fetch(). --jhi */
-	key = (char*)bytes_from_utf8((U8*)key, &tmplen, &is_utf8);
-	klen = tmplen;
-	HvUTF8KEYS_on((SV*)hv);
-    }
+    if (flags)
+        HvHASKFLAGS_on((SV*)hv);
 
     if (!hash)
 	PERL_HASH(hash, key, klen);
@@ -516,31 +590,49 @@ Perl_hv_store(pTHX_ HV *hv, const char *key, I32 klen, SV *val, register U32 has
 	    continue;
 	if (HeKEY(entry) != key && memNE(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
-	if (HeKUTF8(entry) != (char)is_utf8)
+	if ((HeKFLAGS(entry) ^ flags) & HVhek_UTF8)
 	    continue;
 	if (HeVAL(entry) == &PL_sv_undef)
 	    xhv->xhv_placeholders--; /* yes, can store into placeholder slot */
 	else
 	    SvREFCNT_dec(HeVAL(entry));
 	HeVAL(entry) = val;
-	if (key != keysave)
-	    Safefree(key);
+
+        if (HeKFLAGS(entry) != flags) {
+            /* We match if HVhek_UTF8 bit in our flags and hash key's match.
+               But if entry was set previously with HVhek_WASUTF8 and key now
+               doesn't (or vice versa) then we should change the key's flag,
+               as this is assignment.  */
+            if (HvSHAREKEYS(hv)) {
+                /* Need to swap the key we have for a key with the flags we
+                   need. As keys are shared we can't just write to the flag,
+                   so we share the new one, unshare the old one.  */
+                int flags_nofree = flags & ~HVhek_FREEKEY;
+                HEK *new_hek = share_hek_flags(key, klen, hash, flags_nofree);
+                unshare_hek (HeKEY_hek(entry));
+                HeKEY_hek(entry) = new_hek;
+            }
+            else
+                HeKFLAGS(entry) = flags;
+        }
+        if (flags & HVhek_FREEKEY)
+            Safefree(key);
 	return &HeVAL(entry);
     }
 
     if (SvREADONLY(hv)) {
-	Perl_hv_notallowed(aTHX_ is_utf8, key, klen, keysave,
+	Perl_hv_notallowed(aTHX_ flags, key, klen,
                  "Attempt to access disallowed key '%"SVf"' to a fixed hash"
                            );
     }
 
     entry = new_HE();
+    /* share_hek_flags will do the free for us.  This might be considered
+       bad API design.  */
     if (HvSHAREKEYS(hv))
-	HeKEY_hek(entry) = share_hek(key, is_utf8?-klen:klen, hash);
+	HeKEY_hek(entry) = share_hek_flags(key, klen, hash, flags);
     else                                       /* gotta do the real thing */
-	HeKEY_hek(entry) = save_hek(key, is_utf8?-klen:klen, hash);
-    if (key != keysave)
-	Safefree(key);
+	HeKEY_hek(entry) = save_hek_flags(key, klen, hash, flags);
     HeVAL(entry) = val;
     HeNEXT(entry) = *oentry;
     *oentry = entry;
@@ -575,15 +667,16 @@ information on how to use this function on tied hashes.
 */
 
 HE *
-Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, register U32 hash)
+Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, U32 hash)
 {
-    register XPVHV* xhv;
-    register char *key;
+    XPVHV* xhv;
+    char *key;
     STRLEN klen;
-    register I32 i;
-    register HE *entry;
-    register HE **oentry;
+    I32 i;
+    HE *entry;
+    HE **oentry;
     bool is_utf8;
+    int flags = 0;
     char *keysave;
 
     if (!hv)
@@ -619,7 +712,11 @@ Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, register U32 hash)
 
     if (is_utf8) {
 	key = (char*)bytes_from_utf8((U8*)key, &klen, &is_utf8);
-	HvUTF8KEYS_on((SV*)hv);
+        if (is_utf8)
+            flags = HVhek_UTF8;
+        if (key != keysave)
+            flags |= HVhek_WASUTF8 | HVhek_FREEKEY;
+        HvHASKFLAGS_on((SV*)hv);
     }
 
     if (!hash)
@@ -633,39 +730,56 @@ Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, register U32 hash)
     /* oentry = &(HvARRAY(hv))[hash & (I32) HvMAX(hv)]; */
     oentry = &((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
     i = 1;
-
-    for (entry = *oentry; entry; i=0, entry = HeNEXT(entry)) {
+    entry = *oentry;
+    for (; entry; i=0, entry = HeNEXT(entry)) {
 	if (HeHASH(entry) != hash)		/* strings can't be equal */
 	    continue;
 	if (HeKLEN(entry) != klen)
 	    continue;
 	if (HeKEY(entry) != key && memNE(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
-	if (HeKUTF8(entry) != (char)is_utf8)
+	if ((HeKFLAGS(entry) ^ flags) & HVhek_UTF8)
 	    continue;
 	if (HeVAL(entry) == &PL_sv_undef)
 	    xhv->xhv_placeholders--; /* yes, can store into placeholder slot */
 	else
 	    SvREFCNT_dec(HeVAL(entry));
 	HeVAL(entry) = val;
-	if (key != keysave)
+        if (HeKFLAGS(entry) != flags) {
+            /* We match if HVhek_UTF8 bit in our flags and hash key's match.
+               But if entry was set previously with HVhek_WASUTF8 and key now
+               doesn't (or vice versa) then we should change the key's flag,
+               as this is assignment.  */
+            if (HvSHAREKEYS(hv)) {
+                /* Need to swap the key we have for a key with the flags we
+                   need. As keys are shared we can't just write to the flag,
+                   so we share the new one, unshare the old one.  */
+                int flags_nofree = flags & ~HVhek_FREEKEY;
+                HEK *new_hek = share_hek_flags(key, klen, hash, flags_nofree);
+                unshare_hek (HeKEY_hek(entry));
+                HeKEY_hek(entry) = new_hek;
+            }
+            else
+                HeKFLAGS(entry) = flags;
+        }
+        if (flags & HVhek_FREEKEY)
 	    Safefree(key);
 	return entry;
     }
 
     if (SvREADONLY(hv)) {
-	Perl_hv_notallowed(aTHX_ is_utf8, key, klen, keysave,
+	Perl_hv_notallowed(aTHX_ flags, key, klen,
                  "Attempt to access disallowed key '%"SVf"' to a fixed hash"
                            );
     }
 
     entry = new_HE();
+    /* share_hek_flags will do the free for us.  This might be considered
+       bad API design.  */
     if (HvSHAREKEYS(hv))
-	HeKEY_hek(entry) = share_hek(key, is_utf8?-(I32)klen:klen, hash);
+	HeKEY_hek(entry) = share_hek_flags(key, klen, hash, flags);
     else                                       /* gotta do the real thing */
-	HeKEY_hek(entry) = save_hek(key, is_utf8?-(I32)klen:klen, hash);
-    if (key != keysave)
-	Safefree(key);
+	HeKEY_hek(entry) = save_hek_flags(key, klen, hash, flags);
     HeVAL(entry) = val;
     HeNEXT(entry) = *oentry;
     *oentry = entry;
@@ -702,6 +816,7 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen, I32 flags)
     SV **svp;
     SV *sv;
     bool is_utf8 = FALSE;
+    int k_flags = 0;
     const char *keysave = key;
 
     if (!hv)
@@ -743,6 +858,10 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen, I32 flags)
 	/* See the note in hv_fetch(). --jhi */
 	key = (char*)bytes_from_utf8((U8*)key, &tmplen, &is_utf8);
 	klen = tmplen;
+        if (is_utf8)
+            k_flags = HVhek_UTF8;
+        if (key != keysave)
+            k_flags |= HVhek_FREEKEY;
     }
 
     PERL_HASH(hash, key, klen);
@@ -758,9 +877,9 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen, I32 flags)
 	    continue;
 	if (HeKEY(entry) != key && memNE(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
-	if (HeKUTF8(entry) != (char)is_utf8)
+	if ((HeKFLAGS(entry) ^ k_flags) & HVhek_UTF8)
 	    continue;
-	if (key != keysave)
+	if (k_flags & HVhek_FREEKEY)
 	    Safefree(key);
 	/* if placeholder is here, it's already been deleted.... */
 	if (HeVAL(entry) == &PL_sv_undef)
@@ -778,13 +897,13 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen, I32 flags)
 		    hv_free_ent(hv, entry);
 		xhv->xhv_keys--; /* HvKEYS(hv)-- */
 		if (xhv->xhv_keys == 0)
-		    HvUTF8KEYS_off(hv);
+		    HvHASKFLAGS_off(hv);
 		xhv->xhv_placeholders--;
 		return Nullsv;
 	    }
 	}
 	else if (SvREADONLY(hv) && HeVAL(entry) && SvREADONLY(HeVAL(entry))) {
-	    Perl_hv_notallowed(aTHX_ is_utf8, key, klen, keysave,
+	    Perl_hv_notallowed(aTHX_ k_flags, key, klen,
                    "Attempt to delete readonly key '%"SVf"' from a fixed hash"
                                );
 	}
@@ -817,17 +936,17 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen, I32 flags)
 		hv_free_ent(hv, entry);
 	    xhv->xhv_keys--; /* HvKEYS(hv)-- */
 	    if (xhv->xhv_keys == 0)
-	        HvUTF8KEYS_off(hv);
+	        HvHASKFLAGS_off(hv);
 	}
 	return sv;
     }
     if (SvREADONLY(hv)) {
-	Perl_hv_notallowed(aTHX_ is_utf8, key, klen, keysave,
+	Perl_hv_notallowed(aTHX_ k_flags, key, klen,
                "Attempt to access disallowed key '%"SVf"' from a fixed hash"
                            );
     }
 
-    if (key != keysave)
+    if (k_flags & HVhek_FREEKEY)
 	Safefree(key);
     return Nullsv;
 }
@@ -854,6 +973,7 @@ Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
     register HE **oentry;
     SV *sv;
     bool is_utf8;
+    int k_flags = 0;
     char *keysave;
 
     if (!hv)
@@ -891,8 +1011,13 @@ Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
     keysave = key = SvPV(keysv, klen);
     is_utf8 = (SvUTF8(keysv) != 0);
 
-    if (is_utf8)
+    if (is_utf8) {
 	key = (char*)bytes_from_utf8((U8*)key, &klen, &is_utf8);
+        if (is_utf8)
+            k_flags = HVhek_UTF8;
+        if (key != keysave)
+            k_flags |= HVhek_FREEKEY;
+    }
 
     if (!hash)
 	PERL_HASH(hash, key, klen);
@@ -908,10 +1033,10 @@ Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
 	    continue;
 	if (HeKEY(entry) != key && memNE(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
-	if (HeKUTF8(entry) != (char)is_utf8)
+	if ((HeKFLAGS(entry) ^ k_flags) & HVhek_UTF8)
 	    continue;
-	if (key != keysave)
-	    Safefree(key);
+        if (k_flags & HVhek_FREEKEY)
+            Safefree(key);
 
 	/* if placeholder is here, it's already been deleted.... */
 	if (HeVAL(entry) == &PL_sv_undef)
@@ -929,12 +1054,12 @@ Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
                hv_free_ent(hv, entry);
            xhv->xhv_keys--; /* HvKEYS(hv)-- */
 	   if (xhv->xhv_keys == 0)
-               HvUTF8KEYS_off(hv);
+               HvHASKFLAGS_off(hv);
            xhv->xhv_placeholders--;
            return Nullsv;
 	}
 	else if (SvREADONLY(hv) && HeVAL(entry) && SvREADONLY(HeVAL(entry))) {
-	    Perl_hv_notallowed(aTHX_ is_utf8, key, klen, keysave,
+	    Perl_hv_notallowed(aTHX_ k_flags, key, klen,
                    "Attempt to delete readonly key '%"SVf"' from a fixed hash"
                                );
 	}
@@ -967,17 +1092,17 @@ Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
 		hv_free_ent(hv, entry);
 	    xhv->xhv_keys--; /* HvKEYS(hv)-- */
 	    if (xhv->xhv_keys == 0)
-	        HvUTF8KEYS_off(hv);
+	        HvHASKFLAGS_off(hv);
 	}
 	return sv;
     }
     if (SvREADONLY(hv)) {
-        Perl_hv_notallowed(aTHX_ is_utf8, key, klen, keysave,
+        Perl_hv_notallowed(aTHX_ k_flags, key, klen,
             "Attempt to delete disallowed key '%"SVf"' from a fixed hash"
            );
     }
 
-    if (key != keysave)
+    if (k_flags & HVhek_FREEKEY)
 	Safefree(key);
     return Nullsv;
 }
@@ -1000,6 +1125,7 @@ Perl_hv_exists(pTHX_ HV *hv, const char *key, I32 klen)
     SV *sv;
     bool is_utf8 = FALSE;
     const char *keysave = key;
+    int k_flags = 0;
 
     if (!hv)
 	return 0;
@@ -1035,6 +1161,10 @@ Perl_hv_exists(pTHX_ HV *hv, const char *key, I32 klen)
 	/* See the note in hv_fetch(). --jhi */
 	key = (char*)bytes_from_utf8((U8*)key, &tmplen, &is_utf8);
 	klen = tmplen;
+        if (is_utf8)
+            k_flags = HVhek_UTF8;
+        if (key != keysave)
+            k_flags |= HVhek_FREEKEY;
     }
 
     PERL_HASH(hash, key, klen);
@@ -1052,9 +1182,9 @@ Perl_hv_exists(pTHX_ HV *hv, const char *key, I32 klen)
 	    continue;
 	if (HeKEY(entry) != key && memNE(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
-	if (HeKUTF8(entry) != (char)is_utf8)
+	if ((HeKFLAGS(entry) ^ k_flags) & HVhek_UTF8)
 	    continue;
-	if (key != keysave)
+	if (k_flags & HVhek_FREEKEY)
 	    Safefree(key);
 	/* If we find the key, but the value is a placeholder, return false. */
 	if (HeVAL(entry) == &PL_sv_undef)
@@ -1070,12 +1200,14 @@ Perl_hv_exists(pTHX_ HV *hv, const char *key, I32 klen)
 	    sv = newSVpvn(env,len);
 	    SvTAINTED_on(sv);
 	    (void)hv_store(hv,key,klen,sv,hash);
+            if (k_flags & HVhek_FREEKEY)
+                Safefree(key);
 	    return TRUE;
 	}
     }
 #endif
-    if (key != keysave)
-	Safefree(key);
+    if (k_flags & HVhek_FREEKEY)
+        Safefree(key);
     return FALSE;
 }
 
@@ -1100,6 +1232,7 @@ Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
     SV *sv;
     bool is_utf8;
     char *keysave;
+    int k_flags = 0;
 
     if (!hv)
 	return 0;
@@ -1131,8 +1264,13 @@ Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
 
     keysave = key = SvPV(keysv, klen);
     is_utf8 = (SvUTF8(keysv) != 0);
-    if (is_utf8)
+    if (is_utf8) {
 	key = (char*)bytes_from_utf8((U8*)key, &klen, &is_utf8);
+        if (is_utf8)
+            k_flags = HVhek_UTF8;
+        if (key != keysave)
+            k_flags |= HVhek_FREEKEY;
+    }
     if (!hash)
 	PERL_HASH(hash, key, klen);
 
@@ -1149,9 +1287,9 @@ Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
 	    continue;
 	if (HeKEY(entry) != key && memNE(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
-	if (HeKUTF8(entry) != (char)is_utf8)
+	if ((HeKFLAGS(entry) ^ k_flags) & HVhek_UTF8)
 	    continue;
-	if (key != keysave)
+	if (k_flags & HVhek_FREEKEY)
 	    Safefree(key);
 	/* If we find the key, but the value is a placeholder, return false. */
 	if (HeVAL(entry) == &PL_sv_undef)
@@ -1166,12 +1304,14 @@ Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
 	    sv = newSVpvn(env,len);
 	    SvTAINTED_on(sv);
 	    (void)hv_store_ent(hv,keysv,sv,hash);
+            if (k_flags & HVhek_FREEKEY)
+                Safefree(key);
 	    return TRUE;
 	}
     }
 #endif
-    if (key != keysave)
-	Safefree(key);
+    if (k_flags & HVhek_FREEKEY)
+        Safefree(key);
     return FALSE;
 }
 
@@ -1376,12 +1516,14 @@ Perl_newHVhv(pTHX_ HV *ohv)
 	    for (oent = oents[i]; oent; oent = HeNEXT(oent)) {
 		U32 hash   = HeHASH(oent);
 		char *key  = HeKEY(oent);
-		STRLEN len = HeKLEN_UTF8(oent);
+		STRLEN len = HeKLEN(oent);
+                int flags  = HeKFLAGS(oent);
 
 		ent = new_HE();
 		HeVAL(ent)     = newSVsv(HeVAL(oent));
-		HeKEY_hek(ent) = shared ? share_hek(key, len, hash)
-					:  save_hek(key, len, hash);
+		HeKEY_hek(ent)
+                    = shared ? share_hek_flags(key, len, hash, flags)
+                             :  save_hek_flags(key, len, hash, flags);
 		if (prev)
 		    HeNEXT(prev) = ent;
 		else
@@ -1409,8 +1551,9 @@ Perl_newHVhv(pTHX_ HV *ohv)
 
 	hv_iterinit(ohv);
 	while ((entry = hv_iternext(ohv))) {
-	    hv_store(hv, HeKEY(entry), HeKLEN_UTF8(entry),
-		     newSVsv(HeVAL(entry)), HeHASH(entry));
+	    hv_store_flags(hv, HeKEY(entry), HeKLEN(entry),
+                           newSVsv(HeVAL(entry)), HeHASH(entry),
+                           HeKFLAGS(entry));
 	}
 	HvRITER(ohv) = riter;
 	HvEITER(ohv) = eiter;
@@ -1491,7 +1634,7 @@ Perl_hv_clear(pTHX_ HV *hv)
     if (SvRMAGICAL(hv))
 	mg_clear((SV*)hv);
 
-    HvUTF8KEYS_off(hv);
+    HvHASKFLAGS_off(hv);
 }
 
 STATIC void
@@ -1726,11 +1869,28 @@ see C<hv_iterinit>.
 SV *
 Perl_hv_iterkeysv(pTHX_ register HE *entry)
 {
-    if (HeKLEN(entry) == HEf_SVKEY)
-	return sv_mortalcopy(HeKEY_sv(entry));
-    else
-	return sv_2mortal(newSVpvn_share((HeKLEN(entry) ? HeKEY(entry) : ""),
-					 HeKLEN_UTF8(entry), HeHASH(entry)));
+    if (HeKLEN(entry) != HEf_SVKEY) {
+        HEK *hek = HeKEY_hek(entry);
+        int flags = HEK_FLAGS(hek);
+        SV *sv;
+
+        if (flags & HVhek_WASUTF8) {
+            /* Trouble :-)
+               Andreas would like keys he put in as utf8 to come back as utf8
+            */
+            STRLEN utf8_len = HEK_LEN(hek);
+            U8 *as_utf8 = bytes_to_utf8 (HEK_KEY(hek), &utf8_len);
+
+            sv = newSVpvn (as_utf8, utf8_len);
+            SvUTF8_on (sv);
+        } else {
+            sv = newSVpvn_share(HEK_KEY(hek),
+                                (HEK_UTF8(hek) ? -HEK_LEN(hek) : HEK_LEN(hek)),
+                                HEK_HASH(hek));
+        }
+        return sv_2mortal(sv);
+    }
+    return sv_mortalcopy(HeKEY_sv(entry));
 }
 
 /*
@@ -1806,20 +1966,44 @@ Perl_sharepvn(pTHX_ const char *sv, I32 len, U32 hash)
 void
 Perl_unsharepvn(pTHX_ const char *str, I32 len, U32 hash)
 {
+    unshare_hek_or_pvn (NULL, str, len, hash);
+}
+
+
+void
+Perl_unshare_hek(pTHX_ HEK *hek)
+{
+    unshare_hek_or_pvn(hek, NULL, 0, 0);
+}
+
+/* possibly free a shared string if no one has access to it
+   hek if non-NULL takes priority over the other 3, else str, len and hash
+   are used.  If so, len and hash must both be valid for str.
+ */
+void
+S_unshare_hek_or_pvn(pTHX_ HEK *hek, const char *str, I32 len, U32 hash)
+{
     register XPVHV* xhv;
     register HE *entry;
     register HE **oentry;
     register I32 i = 1;
     I32 found = 0;
     bool is_utf8 = FALSE;
+    int k_flags = 0;
     const char *save = str;
 
-    if (len < 0) {
-      STRLEN tmplen = -len;
-      is_utf8 = TRUE;
-      /* See the note in hv_fetch(). --jhi */
-      str = (char*)bytes_from_utf8((U8*)str, &tmplen, &is_utf8);
-      len = tmplen;
+    if (hek) {
+        hash = HEK_HASH(hek);
+    } else if (len < 0) {
+        STRLEN tmplen = -len;
+        is_utf8 = TRUE;
+        /* See the note in hv_fetch(). --jhi */
+        str = (char*)bytes_from_utf8((U8*)str, &tmplen, &is_utf8);
+        len = tmplen;
+        if (is_utf8)
+            k_flags = HVhek_UTF8;
+        if (str != save)
+            k_flags |= HVhek_WASUTF8 | HVhek_FREEKEY;
     }
 
     /* what follows is the moral equivalent of:
@@ -1832,31 +2016,48 @@ Perl_unsharepvn(pTHX_ const char *str, I32 len, U32 hash)
     LOCK_STRTAB_MUTEX;
     /* oentry = &(HvARRAY(hv))[hash & (I32) HvMAX(hv)]; */
     oentry = &((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
-    for (entry = *oentry; entry; i=0, oentry = &HeNEXT(entry), entry = *oentry) {
-	if (HeHASH(entry) != hash)		/* strings can't be equal */
-	    continue;
-	if (HeKLEN(entry) != len)
-	    continue;
-	if (HeKEY(entry) != str && memNE(HeKEY(entry),str,len))	/* is this it? */
-	    continue;
-	if (HeKUTF8(entry) != (char)is_utf8)
-	    continue;
-	found = 1;
-	if (--HeVAL(entry) == Nullsv) {
-	    *oentry = HeNEXT(entry);
-	    if (i && !*oentry)
-		xhv->xhv_fill--; /* HvFILL(hv)-- */
-	    Safefree(HeKEY_hek(entry));
-	    del_HE(entry);
-	    xhv->xhv_keys--; /* HvKEYS(hv)-- */
-	}
-	break;
+    if (hek) {
+        for (entry = *oentry; entry; i=0, oentry = &HeNEXT(entry), entry = *oentry) {
+            if (HeKEY_hek(entry) != hek)
+                continue;
+            found = 1;
+            break;
+        }
+    } else {
+        int flags_masked = k_flags & HVhek_MASK;
+        for (entry = *oentry; entry; i=0, oentry = &HeNEXT(entry), entry = *oentry) {
+            if (HeHASH(entry) != hash)		/* strings can't be equal */
+                continue;
+            if (HeKLEN(entry) != len)
+                continue;
+            if (HeKEY(entry) != str && memNE(HeKEY(entry),str,len))	/* is this it? */
+                continue;
+            if (HeKFLAGS(entry) != flags_masked)
+                continue;
+            found = 1;
+            break;
+        }
     }
+
+    if (found) {
+        if (--HeVAL(entry) == Nullsv) {
+            *oentry = HeNEXT(entry);
+            if (i && !*oentry)
+                xhv->xhv_fill--; /* HvFILL(hv)-- */
+            Safefree(HeKEY_hek(entry));
+            del_HE(entry);
+            xhv->xhv_keys--; /* HvKEYS(hv)-- */
+        }
+    }
+
     UNLOCK_STRTAB_MUTEX;
-    if (str != save)
-	Safefree(str);
     if (!found && ckWARN_d(WARN_INTERNAL))
-	Perl_warner(aTHX_ packWARN(WARN_INTERNAL), "Attempt to free non-existent shared string '%s'",str);
+	Perl_warner(aTHX_ packWARN(WARN_INTERNAL),
+                    "Attempt to free non-existent shared string '%s'%s",
+                    hek ? HEK_KEY(hek) : str,
+                    (k_flags & HVhek_UTF8) ? " (utf8)" : "");
+    if (k_flags & HVhek_FREEKEY)
+	Safefree(str);
 }
 
 /* get a (constant) string ptr from the global string table
@@ -1866,12 +2067,8 @@ Perl_unsharepvn(pTHX_ const char *str, I32 len, U32 hash)
 HEK *
 Perl_share_hek(pTHX_ const char *str, I32 len, register U32 hash)
 {
-    register XPVHV* xhv;
-    register HE *entry;
-    register HE **oentry;
-    register I32 i = 1;
-    I32 found = 0;
     bool is_utf8 = FALSE;
+    int flags = 0;
     const char *save = str;
 
     if (len < 0) {
@@ -1880,7 +2077,29 @@ Perl_share_hek(pTHX_ const char *str, I32 len, register U32 hash)
       /* See the note in hv_fetch(). --jhi */
       str = (char*)bytes_from_utf8((U8*)str, &tmplen, &is_utf8);
       len = tmplen;
+      /* If we were able to downgrade here, then than means that we were passed
+         in a key which only had chars 0-255, but was utf8 encoded.  */
+      if (is_utf8)
+          flags = HVhek_UTF8;
+      /* If we found we were able to downgrade the string to bytes, then
+         we should flag that it needs upgrading on keys or each.  Also flag
+         that we need share_hek_flags to free the string.  */
+      if (str != save)
+          flags |= HVhek_WASUTF8 | HVhek_FREEKEY;
     }
+
+    return share_hek_flags (str, len, hash, flags);
+}
+
+HEK *
+S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
+{
+    register XPVHV* xhv;
+    register HE *entry;
+    register HE **oentry;
+    register I32 i = 1;
+    I32 found = 0;
+    int flags_masked = flags & HVhek_MASK;
 
     /* what follows is the moral equivalent of:
 
@@ -1899,14 +2118,14 @@ Perl_share_hek(pTHX_ const char *str, I32 len, register U32 hash)
 	    continue;
 	if (HeKEY(entry) != str && memNE(HeKEY(entry),str,len))	/* is this it? */
 	    continue;
-	if (HeKUTF8(entry) != (char)is_utf8)
+	if (HeKFLAGS(entry) != flags_masked)
 	    continue;
 	found = 1;
 	break;
     }
     if (!found) {
 	entry = new_HE();
-	HeKEY_hek(entry) = save_hek(str, is_utf8?-len:len, hash);
+	HeKEY_hek(entry) = save_hek_flags(str, len, hash, flags);
 	HeVAL(entry) = Nullsv;
 	HeNEXT(entry) = *oentry;
 	*oentry = entry;
@@ -1920,7 +2139,9 @@ Perl_share_hek(pTHX_ const char *str, I32 len, register U32 hash)
 
     ++HeVAL(entry);				/* use value slot as REFCNT */
     UNLOCK_STRTAB_MUTEX;
-    if (str != save)
+
+    if (flags & HVhek_FREEKEY)
 	Safefree(str);
+
     return HeKEY_hek(entry);
 }

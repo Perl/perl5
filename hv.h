@@ -24,7 +24,8 @@ struct hek {
     I32		hek_len;	/* length of hash key */
     char	hek_key[1];	/* variable-length hash key */
     /* the hash-key is \0-terminated */
-    /* after the \0 there is a byte telling whether the key is UTF8 */
+    /* after the \0 there is a byte for flags, such as whehter the key is
+       UTF8 */
 };
 
 /* hash structure: */
@@ -163,9 +164,16 @@ C<SV*>.
 #define HvSHAREKEYS_on(hv)	(SvFLAGS(hv) |= SVphv_SHAREKEYS)
 #define HvSHAREKEYS_off(hv)	(SvFLAGS(hv) &= ~SVphv_SHAREKEYS)
 
-#define HvUTF8KEYS(hv)		(SvFLAGS(hv) & SVphv_UTF8KEYS)
-#define HvUTF8KEYS_on(hv)	(SvFLAGS(hv) |= SVphv_UTF8KEYS)
-#define HvUTF8KEYS_off(hv)	(SvFLAGS(hv) &= ~SVphv_UTF8KEYS)
+/* This is an optimisation flag. It won't be set if all hash keys have a 0
+ * flag. Currently the only flags relate to utf8.
+ * Hence it won't be set if all keys are 8 bit only. It will be set if any key
+ * is utf8 (including 8 bit keys that were entered as utf8, and need upgrading
+ * when retrieved during iteration. It may still be set when there are no longer
+ * any utf8 keys.
+ */
+#define HvHASKFLAGS(hv)		(SvFLAGS(hv) & SVphv_HASKFLAGS)
+#define HvHASKFLAGS_on(hv)	(SvFLAGS(hv) |= SVphv_HASKFLAGS)
+#define HvHASKFLAGS_off(hv)	(SvFLAGS(hv) &= ~SVphv_HASKFLAGS)
 
 #define HvLAZYDEL(hv)		(SvFLAGS(hv) & SVphv_LAZYDEL)
 #define HvLAZYDEL_on(hv)	(SvFLAGS(hv) |= SVphv_LAZYDEL)
@@ -191,7 +199,9 @@ C<SV*>.
 #define HeKEY_sv(he)		(*(SV**)HeKEY(he))
 #define HeKLEN(he)		HEK_LEN(HeKEY_hek(he))
 #define HeKUTF8(he)  HEK_UTF8(HeKEY_hek(he))
+#define HeKWASUTF8(he)  HEK_WASUTF8(HeKEY_hek(he))
 #define HeKLEN_UTF8(he)  (HeKUTF8(he) ? -HeKLEN(he) : HeKLEN(he))
+#define HeKFLAGS(he)  HEK_FLAGS(HeKEY_hek(he))
 #define HeVAL(he)		(he)->hent_val
 #define HeHASH(he)		HEK_HASH(HeKEY_hek(he))
 #define HePV(he,lp)		((HeKLEN(he) == HEf_SVKEY) ?		\
@@ -216,7 +226,19 @@ C<SV*>.
 #define HEK_HASH(hek)		(hek)->hek_hash
 #define HEK_LEN(hek)		(hek)->hek_len
 #define HEK_KEY(hek)		(hek)->hek_key
-#define HEK_UTF8(hek)		(*(HEK_KEY(hek)+HEK_LEN(hek)+1))
+#define HEK_FLAGS(hek)	(*((unsigned char *)(HEK_KEY(hek))+HEK_LEN(hek)+1))
+
+#define HVhek_UTF8	0x01 /* Key is utf8 encoded. */
+#define HVhek_WASUTF8	0x02 /* Key is bytes here, but was supplied as utf8. */
+#define HVhek_FREEKEY	0x100 /* Internal flag to say key is malloc()ed.  */
+#define HVhek_MASK	0xFF
+
+#define HEK_UTF8(hek)		(HEK_FLAGS(hek) & HVhek_UTF8)
+#define HEK_UTF8_on(hek)	(HEK_FLAGS(hek) |= HVhek_UTF8)
+#define HEK_UTF8_off(hek)	(HEK_FLAGS(hek) &= ~HVhek_UTF8)
+#define HEK_WASUTF8(hek)	(HEK_FLAGS(hek) & HVhek_WASUTF8)
+#define HEK_WASUTF8_on(hek)	(HEK_FLAGS(hek) |= HVhek_WASUTF8)
+#define HEK_WASUTF8_off(hek)	(HEK_FLAGS(hek) &= ~HVhek_WASUTF8)
 
 /* calculate HV array allocation */
 #if defined(STRANGE_MALLOC) || defined(MYMALLOC)

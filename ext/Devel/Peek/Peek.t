@@ -373,7 +373,7 @@ do_test(19,
   RV = $ADDR
   SV = PVHV\\($ADDR\\) at $ADDR
     REFCNT = 2
-    FLAGS = \\(SHAREKEYS,UTF8\\)
+    FLAGS = \\(SHAREKEYS,HASKFLAGS\\)
     UV = 1
     NV = 0
     ARRAY = $ADDR  \\(0:7, 1:1\\)

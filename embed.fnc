@@ -986,8 +986,14 @@ s	|void	|hfreeentries	|HV *hv
 s	|void	|more_he
 s	|HE*	|new_he
 s	|void	|del_he		|HE *p
-s	|HEK*	|save_hek	|const char *str|I32 len|U32 hash
+s	|HEK*	|save_hek_flags	|const char *str|I32 len|U32 hash|int flags
 s	|void	|hv_magic_check	|HV *hv|bool *needs_copy|bool *needs_store
+s	|void	|unshare_hek_or_pvn|HEK* hek|const char* sv|I32 len|U32 hash
+s	|HEK*	|share_hek_flags|const char* sv|I32 len|U32 hash|int flags
+s	|SV**	|hv_store_flags	|HV* tb|const char* key|I32 klen|SV* val \
+				|U32 hash|int flags
+s	|SV**	|hv_fetch_flags	|HV* tb|const char* key|I32 klen|I32 lval \
+                                |int flags
 #endif
 
 #if defined(PERL_IN_MG_C) || defined(PERL_DECL_PROT)
