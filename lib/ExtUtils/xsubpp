@@ -70,6 +70,14 @@ affected is the use of I<target>s by the output C code (see L<perlguts>).
 This may significantly slow down the generated code, but this is the way
 B<xsubpp> of 5.005 and earlier operated.
 
+=item B<-noinout>
+
+Disable recognition of C<IN>, C<OUT_LIST> and C<INOUT_LIST> declarations.
+
+=item B<-noargtypes>
+
+Disable recognition of ANSI-like descriptions of function signature.
+
 =back
 
 =head1 ENVIRONMENT
@@ -114,7 +122,7 @@ if ($^O eq 'VMS') {
 
 $FH = 'File0000' ;
 
-$usage = "Usage: xsubpp [-v] [-C++] [-except] [-prototypes] [-noversioncheck] [-nolinenumbers] [-nooptimize] [-s pattern] [-typemap typemap]... file.xs\n";
+$usage = "Usage: xsubpp [-v] [-C++] [-except] [-prototypes] [-noversioncheck] [-nolinenumbers] [-nooptimize] [-noinout] [-noargtypes] [-s pattern] [-typemap typemap]... file.xs\n";
 
 $proto_re = "[" . quotemeta('\$%&*@;') . "]" ;
 # mjn
@@ -126,6 +134,10 @@ $WantVersionChk = 1 ;
 $ProtoUsed = 0 ;
 $WantLineNumbers = 1 ;
 $WantOptimize = 1 ;
+
+my $process_inout = 1;
+my $process_argtypes = 1;
+
 SWITCH: while (@ARGV and $ARGV[0] =~ /^-./) {
     $flag = shift @ARGV;
     $flag =~ s/^-// ;
@@ -143,6 +155,10 @@ SWITCH: while (@ARGV and $ARGV[0] =~ /^-./) {
     $WantLineNumbers = 1, next SWITCH	if $flag eq 'linenumbers';
     $WantOptimize = 0, next SWITCH	if $flag eq 'nooptimize';
     $WantOptimize = 1, next SWITCH	if $flag eq 'optimize';
+    $process_inout = 0, next SWITCH	if $flag eq 'noinout';
+    $process_inout = 1, next SWITCH	if $flag eq 'inout';
+    $process_argtypes = 0, next SWITCH	if $flag eq 'noargtypes';
+    $process_argtypes = 1, next SWITCH	if $flag eq 'argtypes';
     (print "xsubpp version $XSUBPP_version\n"), exit
 	if $flag eq 'v';
     die $usage;
@@ -384,9 +400,6 @@ sub CASE_handler {
     print "   ", ($condnum++ ? " else" : ""), ($cond ? " if ($cond)\n" : "\n");
     $_ = '' ;
 }
-
-my $process_inout = 1;
-my $process_argtypes = 1;
 
 sub INPUT_handler {
     for (;  !/^$BLOCK_re/o;  $_ = shift(@line)) {
@@ -996,6 +1009,11 @@ while (fetch_para()) {
     # extract return type, function name and arguments
     ($ret_type) = TidyType($_);
     $RETVAL_no_return = 1 if $ret_type =~ s/^NO_OUTPUT\s+//;
+
+    # Allow one-line ANSI-like declaration
+    unshift @line, $2
+      if $process_argtypes
+	and $ret_type =~ s/^(.*?\w.*?)\s*\b(\w+\s*\(.*)/$1/s;
 
     # a function definition needs at least 2 lines
     blurt ("Error: Function definition too short '$ret_type'"), next PARAGRAPH
