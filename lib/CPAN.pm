@@ -308,10 +308,10 @@ sub shell {
     my $getcwd;
     $getcwd = $CPAN::Config->{'getcwd'} || 'cwd';
     my $cwd = Cwd->$getcwd();
-    # How should we determine if we have more than stub ReadLine enabled?
     my $rl_avail = $Suppress_readline ? "suppressed" :
-	defined &Term::ReadLine::Perl::readline ? "enabled" :
-	    "available (get Term::ReadKey and Term::ReadLine::Perl)";
+	($term->ReadLine ne "Term::ReadLine::Stub") ? "enabled" :
+	    "available (get Term::ReadKey and Term::ReadLine::Perl ".
+	    "or get Term::ReadLine::Gnu)";
 
     print qq{
 cpan shell -- CPAN exploration and modules installation (v$CPAN::VERSION)
