@@ -583,6 +583,12 @@ win32_wait
 win32_waitpid
 win32_kill
 win32_str_os_error
+win32_opendir
+win32_readdir
+win32_telldir
+win32_seekdir
+win32_rewinddir
+win32_closedir
 Perl_win32_init
 Perl_init_os_extras
 Perl_getTHR

@@ -262,6 +262,13 @@ END_EXTERN_C
 #define waitpid			win32_waitpid
 #define kill			win32_kill
 
+#define opendir			win32_opendir
+#define readdir			win32_readdir
+#define telldir			win32_telldir
+#define seekdir			win32_seekdir
+#define rewinddir		win32_rewinddir
+#define closedir		win32_closedir
+
 #ifdef HAVE_DES_FCRYPT
 #undef crypt
 #define crypt			win32_crypt
