@@ -1,8 +1,12 @@
 package Encode::TW;
-use Encode;
 our $VERSION = '0.02';
+
+use Encode;
 use XSLoader;
 XSLoader::load('Encode::TW',$VERSION);
+
+local $@;
+eval "use Encode::HanExtra"; # load extra encodings if they exist
 
 1;
 __END__
@@ -23,7 +27,7 @@ Encodings supported are as follows.
 
   big5		The original Big5 encoding
   big5-hkscs	Big5 plus Cantonese characters in Hong Kong
-  cp950	Code Page 950 (Big5 + Microsoft vendor mappings)
+  cp950		Code Page 950 (Big5 + Microsoft vendor mappings)
   
 To find how to use this module in detail, see L<Encode>.
 
@@ -32,6 +36,9 @@ To find how to use this module in detail, see L<Encode>.
 Due to size concerns, C<EUC-TW> (Extended Unix Character) and C<BIG5PLUS>
 (CMEX's Big5+) are distributed separately on CPAN, under the name
 L<Encode::HanExtra>. That module also contains extra China-based encodings.
+
+This module will automatically load L<Encode::HanExtra> if you have it on
+your machine.
 
 =head1 BUGS
 

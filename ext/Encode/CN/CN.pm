@@ -1,8 +1,13 @@
 package Encode::CN;
-use Encode;
 our $VERSION = '0.02';
+
+use Encode;
+use Encode::CN::HZ;
 use XSLoader;
 XSLoader::load('Encode::CN',$VERSION);
+
+local $@;
+eval "use Encode::HanExtra"; # load extra encodings if they exist
 
 1;
 __END__
@@ -25,7 +30,8 @@ Encodings supported are as follows.
   gb2312	The raw (low-bit) GB2312 character map
   gb12345	Traditional chinese counterpart to GB2312 (raw)
   iso-ir-165	GB2312 + GB6345 + GB8565 + additions
-  cp936	Code Page 936, also known as GBK (Extended GuoBiao)
+  cp936		Code Page 936, also known as GBK (Extended GuoBiao)
+  hz		7-bit escaped GB2312 encoding
 
 To find how to use this module in detail, see L<Encode>.
 
@@ -35,9 +41,10 @@ Due to size concerns, C<GB 18030> (an extension to C<GBK>) is distributed
 separately on CPAN, under the name L<Encode::HanExtra>. That module
 also contains extra Taiwan-based encodings.
 
-=head1 BUGS
+This module will automatically load L<Encode::HanExtra> if you have it on
+your machine.
 
-The C<HZ> (Hanzi) escaped encoding is not supported.
+=head1 BUGS
 
 ASCII part (0x00-0x7f) is preserved for all encodings, even though it
 conflicts with mappings by the Unicode Consortium.  See

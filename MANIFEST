@@ -296,7 +296,6 @@ ext/Encode/Encode/gb12345.enc		Encode table
 ext/Encode/Encode/gb1988.enc		Encode table
 ext/Encode/Encode/gb2312.enc		Encode table
 ext/Encode/Encode/gsm0338.enc		Encode table
-ext/Encode/Encode/HZ.enc		Encode table
 ext/Encode/Encode/ir-197.enc		Encode table
 ext/Encode/Encode/iso-ir-165.enc	Encode table
 ext/Encode/Encode/jis0201.enc		Encode table
@@ -338,6 +337,7 @@ ext/Encode/JP/JP.pm		Encode extension
 ext/Encode/JP/Makefile.PL	Encode extension
 ext/Encode/KR/KR.pm		Encode extension
 ext/Encode/KR/Makefile.PL		Encode extension
+ext/Encode/lib/Encode/CN/HZ.pm		Encode table
 ext/Encode/lib/Encode/Encoding.pm	Encode extension
 ext/Encode/lib/Encode/Internal.pm	Encode extension
 ext/Encode/lib/Encode/iso10646_1.pm	Encode extension
@@ -1145,8 +1145,8 @@ lib/Math/BigInt/t/calling.t	Test calling conventions
 lib/Math/BigInt/t/config.t	Test Math::BigInt->config()
 lib/Math/BigInt/t/constant.t	Test Math::BigInt/BigFloat under :constant
 lib/Math/BigInt/t/downgrade.t	Test if use Math::BigInt(); under downgrade works
-lib/Math/BigInt/t/isa.t		Test for Math::BigInt inheritance
 lib/Math/BigInt/t/inf_nan.t	Special tests for inf and NaN handling
+lib/Math/BigInt/t/isa.t		Test for Math::BigInt inheritance
 lib/Math/BigInt/t/mbimbf.inc	Actual BigInt/BigFloat accuracy, precicion and fallback, round_mode tests
 lib/Math/BigInt/t/mbimbf.t	BigInt/BigFloat accuracy, precicion and fallback, round_mode
 lib/Math/BigInt/t/require.t	Test if require Math::BigInt works

@@ -1,6 +1,7 @@
 package Encode::KR;
-use Encode;
 our $VERSION = '0.02';
+
+use Encode;
 use XSLoader;
 XSLoader::load('Encode::KR',$VERSION);
 
@@ -23,7 +24,7 @@ are as follows.
 
   euc-kr	EUC (Extended Unix Character)
   ksc5601	Korean standard code set
-  cp949	Code Page 949 (EUC-KR + Unified Hangul Code)
+  cp949		Code Page 949 (EUC-KR + Unified Hangul Code)
   
 To find how to use this module in detail, see L<Encode>.
 
