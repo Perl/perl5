@@ -241,7 +241,7 @@ EOM
 		exit 1
 		;;
 	    esac
-	    case "$ccflags" in
+	    case "$cc $ccflags" in
 	    *-n32*)
 		case "$ccflags" in
 		*-DUSE_LONG_LONG) ;;
