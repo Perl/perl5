@@ -811,6 +811,7 @@ lib/bigrat.pl			An arbitrary precision rational arithmetic package
 lib/blib.pm			For "use blib"
 lib/blib.t                      blib.pm test
 lib/bytes.pm			Pragma to enable byte operations
+lib/bytes.pm			bytes.pm test
 lib/bytes_heavy.pl		Support routines for byte pragma
 lib/cacheout.pl			Manages output filehandles when you need too many
 lib/Carp.pm			Error message base class
