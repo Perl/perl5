@@ -131,15 +131,22 @@
 /* for use after a quantifier and before an EXACT-like node -- japhy */
 #define JUMPABLE(rn) ( \
     OP(rn) == OPEN || OP(rn) == CLOSE || OP(rn) == EVAL || \
-    OP(rn) == SUSPEND || OP(rn) == IFMATCH \
+    OP(rn) == SUSPEND || OP(rn) == IFMATCH || \
+    OP(rn) == PLUS || OP(rn) == MINMOD || \
+    (PL_regkind[(U8)OP(rn)] == CURLY && ARG1(rn) > 0) \
 )
 
-#define NEAR_EXACT(rn) (PL_regkind[(U8)OP(rn)] == EXACT || JUMPABLE(rn))
+#define HAS_TEXT(rn) ( \
+    PL_regkind[(U8)OP(rn)] == EXACT || PL_regkind[(U8)OP(rn)] == REF \
+)
 
-#define NEXT_IMPT(rn) STMT_START { \
+#define FIND_NEXT_IMPT(rn) STMT_START { \
     while (JUMPABLE(rn)) \
-	if (OP(rn) == SUSPEND || OP(rn) == IFMATCH) \
+	if (OP(rn) == SUSPEND || OP(rn) == IFMATCH || \
+	    PL_regkind[(U8)OP(rn)] == CURLY) \
 	    rn = NEXTOPER(NEXTOPER(rn)); \
+	else if (OP(rn) == PLUS) \
+	    rn = NEXTOPER(rn); \
 	else rn += NEXT_OFF(rn); \
 } STMT_END 
 
@@ -3113,17 +3120,29 @@ S_regmatch(pTHX_ regnode *prog)
 		if (ln && l == 0)
 		    n = ln;	/* don't backtrack */
 		locinput = PL_reginput;
-		if (NEAR_EXACT(next)) {
+		if (HAS_TEXT(next) || JUMPABLE(next)) {
 		    regnode *text_node = next;
 
-		    if (PL_regkind[(U8)OP(next)] != EXACT)
-			NEXT_IMPT(text_node);
+		    if (! HAS_TEXT(text_node)) FIND_NEXT_IMPT(text_node);
 
-		    if (PL_regkind[(U8)OP(text_node)] != EXACT) {
-			c1 = c2 = -1000;
-		    }
+		    if (! HAS_TEXT(text_node)) c1 = c2 = -1000;
 		    else {
-			c1 = (U8)*STRING(text_node);
+			if (PL_regkind[(U8)OP(text_node)] == REF) {
+			    I32 n, ln;
+			    n = ARG(text_node);  /* which paren pair */
+			    ln = PL_regstartp[n];
+			    /* assume yes if we haven't seen CLOSEn */
+			    if (
+				*PL_reglastparen < n ||
+				ln == -1 ||
+				ln == PL_regendp[n]
+			    ) {
+				c1 = c2 = -1000;
+				goto assume_ok_MM;
+			    }
+			    c1 = *(PL_bostr + ln);
+			}
+			else { c1 = (U8)*STRING(text_node); }
 			if (OP(next) == EXACTF)
 			    c2 = PL_fold[c1];
 			else if (OP(text_node) == EXACTFL)
@@ -3134,6 +3153,7 @@ S_regmatch(pTHX_ regnode *prog)
 		}
 		else
 		    c1 = c2 = -1000;
+	    assume_ok_MM:
 		REGCP_SET(lastcp);
 		/* This may be improved if l == 0.  */
 		while (n >= ln || (n == REG_INFTY && ln > 0 && l)) { /* ln overflow ? */
@@ -3182,17 +3202,30 @@ S_regmatch(pTHX_ regnode *prog)
 				  (IV) n, (IV)l)
 		    );
 		if (n >= ln) {
-		    if (NEAR_EXACT(next)) {
+		    if (HAS_TEXT(next) || JUMPABLE(next)) {
 			regnode *text_node = next;
 
-			if (PL_regkind[(U8)OP(next)] != EXACT)
-			    NEXT_IMPT(text_node);
+			if (! HAS_TEXT(text_node)) FIND_NEXT_IMPT(text_node);
 
-			if (PL_regkind[(U8)OP(text_node)] != EXACT) {
-			    c1 = c2 = -1000;
-			}
+			if (! HAS_TEXT(text_node)) c1 = c2 = -1000;
 			else {
-			    c1 = (U8)*STRING(text_node);
+			    if (PL_regkind[(U8)OP(text_node)] == REF) {
+				I32 n, ln;
+				n = ARG(text_node);  /* which paren pair */
+				ln = PL_regstartp[n];
+				/* assume yes if we haven't seen CLOSEn */
+				if (
+				    *PL_reglastparen < n ||
+				    ln == -1 ||
+				    ln == PL_regendp[n]
+				) {
+				    c1 = c2 = -1000;
+				    goto assume_ok_REG;
+				}
+				c1 = *(PL_bostr + ln);
+			    }
+			    else { c1 = (U8)*STRING(text_node); }
+
 			    if (OP(text_node) == EXACTF)
 				c2 = PL_fold[c1];
 			    else if (OP(text_node) == EXACTFL)
@@ -3204,6 +3237,7 @@ S_regmatch(pTHX_ regnode *prog)
 		    else
 			c1 = c2 = -1000;
 		}
+	    assume_ok_REG:
 		REGCP_SET(lastcp);
 		while (n >= ln) {
 		    /* If it could work, try it. */
@@ -3276,18 +3310,30 @@ S_regmatch(pTHX_ regnode *prog)
 	    * of the quantifier and the EXACT-like node.  -- japhy
 	    */
 
-	    if (NEAR_EXACT(next)) {
+	    if (HAS_TEXT(next) || JUMPABLE(next)) {
 		U8 *s;
 		regnode *text_node = next;
 
-		if (PL_regkind[(U8)OP(next)] != EXACT)
-		    NEXT_IMPT(text_node);
+		if (! HAS_TEXT(text_node)) FIND_NEXT_IMPT(text_node);
 
-		if (PL_regkind[(U8)OP(text_node)] != EXACT) {
-		    c1 = c2 = -1000;
-		}
+		if (! HAS_TEXT(text_node)) c1 = c2 = -1000;
 		else {
-		    s = (U8*)STRING(text_node);
+		    if (PL_regkind[(U8)OP(text_node)] == REF) {
+			I32 n, ln;
+			n = ARG(text_node);  /* which paren pair */
+			ln = PL_regstartp[n];
+			/* assume yes if we haven't seen CLOSEn */
+			if (
+			    *PL_reglastparen < n ||
+			    ln == -1 ||
+			    ln == PL_regendp[n]
+			) {
+			    c1 = c2 = -1000;
+			    goto assume_ok_easy;
+			}
+			s = PL_bostr + ln;
+		    }
+		    else { s = (U8*)STRING(text_node); }
 
 		    if (!UTF) {
 			c2 = c1 = *s;
@@ -3316,6 +3362,7 @@ S_regmatch(pTHX_ regnode *prog)
 	    }
 	    else
 		c1 = c2 = -1000;
+	assume_ok_easy:
 	    PL_reginput = locinput;
 	    if (minmod) {
 		CHECKPOINT lastcp;
