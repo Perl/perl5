@@ -4,7 +4,7 @@ BEGIN {
 	die "Encode::TW not supported on EBCDIC\n";
     }
 }
-our $VERSION = do { my @r = (q$Revision: 1.24 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.25 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode;
 use XSLoader;
@@ -35,7 +35,7 @@ Encodings supported are as follows.
 	      /\bbig5-?et(en)?$/i
   big5-hkscs  /\bbig5-?hk(scs)?$/i
                                 Big5 + Cantonese characters in Hong Kong
-  MacChineseSimp		Big5 + Apple Vendor Mappings
+  MacChineseTrad		Big5 + Apple Vendor Mappings
   cp950		                Code Page 950 
                                 = Big5 + Microsoft vendor mappings
   --------------------------------------------------------------------

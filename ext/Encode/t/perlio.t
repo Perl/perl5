@@ -56,7 +56,7 @@ my %e =
 
 
 for my $src(sort keys %e) {
-    my $ufile = File::Spec->catfile($dir,"$src.ref");
+    my $ufile = File::Spec->catfile($dir,"$src.utf");
     open my $fh, "<:utf8", $ufile or die "$ufile : $!";
     my @uline = <$fh>;
     my $utext = join('' => @uline);

@@ -1,9 +1,22 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.57 2002/04/22 20:27:30 dankogai Exp dankogai $
+# $Id: Changes,v 1.58 2002/04/22 23:54:22 dankogai Exp $
 #
 
-$Revision: 1.57 $ $Date: 2002/04/22 20:27:30 $
+$Revision: 1.58 $ $Date: 2002/04/22 23:54:22 $
+! TW/TW.pm
+  s/MacChineseSimp/MacChineseTrad/ # ... oops.
+! bin/ucm2text
+! t/*.t
+- t/*.euc t/*.ref
++ t/*.enc t/*.utf
+  Now all CJKT encodings go thru round-trip test via t/CJKT.t.
+  t/(CN|TW).t by Autrijus are renamed at-(cn|tw).t
+  t/(JP|KR).t are aggregated to t/CJKT.t
+  test data are all remade via bin/ucm2text.
+  And ....  They are no longer skipped for -Uuseperlio !
+
+1.57 2002/04/22 20:27:30
 ! t/JP.t t/KR.t t/perlio.t
   unless (find PerlIO::Layer 'perlio') ... line is back again.
   t/JP.t and t/KR.t were supposed to work but maybe '>:utf8' lines
@@ -454,7 +467,7 @@ $Revision: 1.57 $ $Date: 2002/04/22 20:27:30 $
   Typo fixes and improvements by jhi
   Message-Id: <200204010201.FAA03564@alpha.hut.fi>, et al.
 
-1.11  $Date: 2002/04/22 20:27:30 $
+1.11  $Date: 2002/04/22 23:54:22 $
 + t/encoding.t
 + t/jperl.t
 ! MANIFEST
