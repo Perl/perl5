@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Apr 17 17:49:13 EET DST 2002 [metaconfig 3.0 PL70]
+# Generated on Tue Apr 23 06:12:13 EET DST 2002 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -16130,7 +16130,7 @@ case "$multiarch" in
 ''|[nN]*) multiarch="$undef" ;;
 esac
 
-: check for ordering of bytes in a long
+: check for ordering of bytes in a UV
 echo " "
 case "$usecrosscompile$multiarch" in
 *$define*)
@@ -16153,21 +16153,23 @@ an Alpha will report 12345678. If the test program works the default is
 probably right.
 I'm now running the test program...
 EOM
-		$cat >try.c <<'EOCP'
+		$cat >try.c <<EOCP
 #include <stdio.h>
+#include <sys/types.h>
+typedef $uvtype UV;
 int main()
 {
 	int i;
 	union {
-		unsigned long l;
-		char c[sizeof(long)];
+		UV l;
+		char c[$uvsize];
 	} u;
 
-	if (sizeof(long) > 4)
+	if ($uvsize > 4)
 		u.l = (0x08070605L << 32) | 0x04030201L;
 	else
 		u.l = 0x04030201L;
-	for (i = 0; i < sizeof(long); i++)
+	for (i = 0; i < $uvsize; i++)
 		printf("%c", u.c[i]+'0');
 	printf("\n");
 	exit(0);
@@ -16194,7 +16196,7 @@ EOM
 		fi
 		case "$xxx_prompt" in
 		y)
-			rp="What is the order of bytes in a long?"
+			rp="What is the order of bytes in $uvtype?"
 			. ./myread
 			byteorder="$ans"
 			;;
