@@ -17,7 +17,7 @@ ok(from_to($cpy,'Unicode','iso8859-1'),length($str),"Length wrong");
 ok($cpy,$str,"ASCII mangled by translating from Unicode to iso8859-1");
 
 $str = join('',map(chr($_),0xa0..0xff));
-my $cpy = $str;
+$cpy = $str;
 ok(length($str),from_to($cpy,'iso8859-1','Unicode'),"Length Wrong");
 
 my $sym = Encode->getEncoding('symbol');

@@ -5,7 +5,7 @@
 #define UNIMPLEMENTED(x,y) y x (SV *sv, char *encoding) {   \
                          Perl_croak(aTHX_ "panic_unimplemented"); \
 			 return (y)0; /* fool picky compilers */ \
-                         } 
+                         }
 UNIMPLEMENTED(_encoded_utf8_to_bytes, I32)
 UNIMPLEMENTED(_encoded_bytes_to_utf8, I32)
 
@@ -46,7 +46,7 @@ _utf8_to_bytes(sv, ...)
         {
           SV * to    = items > 1 ? ST(1) : Nullsv;
           SV * check = items > 2 ? ST(2) : Nullsv;
-          
+
           if (to)
             RETVAL = _encoded_utf8_to_bytes(sv, SvPV_nolen(to));
           else {
@@ -56,7 +56,7 @@ _utf8_to_bytes(sv, ...)
             if (SvTRUE(check)) {
               /* Must do things the slow way */
               U8 *dest;
-              U8 *src  = (U8*)savepv((char *)s); /* We need a copy to pass to check() */ 
+              U8 *src  = (U8*)savepv((char *)s); /* We need a copy to pass to check() */
               U8 *send = s + len;
 
               New(83, dest, len, U8); /* I think */
@@ -67,7 +67,7 @@ _utf8_to_bytes(sv, ...)
                 else {
                   STRLEN ulen;
 		  UV uv = *s++;
-                  
+
                   /* Have to do it all ourselves because of error routine,
 		     aargh. */
 		  if (!(uv & 0x40))
@@ -79,15 +79,15 @@ _utf8_to_bytes(sv, ...)
 		  else if (!(uv & 0x02)) { ulen = 6;  uv &= 0x01; }
 		  else if (!(uv & 0x01)) { ulen = 7;  uv = 0; }
 		  else                   { ulen = 13; uv = 0; }
-		  
+		
 		  /* Note change to utf8.c variable naming, for variety */
 		  while (ulen--) {
 		    if ((*s & 0xc0) != 0x80)
 		      goto failure;
-		    
+		
 		    else
 		      uv = (uv << 6) | (*s++ & 0x3f);
-		  } 
+		  }
 		  if (uv > 256) {
 		  failure:
 		    call_failure(check, s, dest, src);
@@ -200,8 +200,7 @@ _on_utf8(sv)
       CODE:
 	{
 	  if (SvPOK(sv)) {
-	    SV *rsv = newSViv(SvUTF8(sv)); 
-	    sv_2mortal(rsv);
+	    SV *rsv = newSViv(SvUTF8(sv));
 	    RETVAL = rsv;
 	    SvUTF8_on(sv);
 	  } else {
@@ -217,8 +216,7 @@ _off_utf8(sv)
       CODE:
 	{
 	  if (SvPOK(sv)) {
-	    SV *rsv = newSViv(SvUTF8(sv)); 
-	    sv_2mortal(rsv);
+	    SV *rsv = newSViv(SvUTF8(sv));
 	    RETVAL = rsv;
 	    SvUTF8_off(sv);
 	  } else {

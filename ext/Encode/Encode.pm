@@ -360,7 +360,9 @@ sub encodings
  return @names;
 }
 
-my %encoding = ( Unicode => 'Encode::Unicode' );
+my %encoding = ( Unicode      => bless({},'Encode::Unicode'),
+                 'iso10646-1' => bless({},'Encode::iso10646_1'),
+               );
 
 sub getEncoding
 {
@@ -383,6 +385,10 @@ sub getEncoding
       }
      $class .= ('::'.(($type eq 'E') ? 'Escape' : 'Table'));
      $encoding{$name} = $class->read($fh,$name,$type);
+    }
+   else
+    {
+     $encoding{$name} = undef;
     }
   }
  return $encoding{$name};
@@ -409,10 +415,11 @@ sub read
  my %fmuni;
  my $count = 0;
  $def = hex($def);
- $def = pack(&$rep($def),$def);
  while ($pages--)
   {
-   my $page = hex(<$fh>);
+   my $line = <$fh>;
+   chomp($line);
+   my $page = hex($line);
    my @page;
    my $ch = $page * 256;
    for (my $i = 0; $i < 16; $i++)
@@ -425,7 +432,7 @@ sub read
         {
          my $uch = chr($val);
          push(@page,$uch);
-         $fmuni{$uch} = pack(&$rep($ch),$ch);
+         $fmuni{$uch} = $ch;
          $count++;
         }
        else
@@ -498,6 +505,7 @@ sub fromUnicode
  my $fmuni = $obj->{'FmUni'};
  my $str   = '';
  my $def   = $obj->{'Def'};
+ my $rep   = $obj->{'Rep'};
  while (length($uni))
   {
    my $ch = substr($uni,0,1,'');
@@ -507,7 +515,43 @@ sub fromUnicode
      last if ($chk);
      $x = $def;
     }
-   $str .= $x;
+   $str .= pack(&$rep($x),$x);
+  }
+ $_[1] = $uni if $chk;
+ return $str;
+}
+
+package Encode::iso10646_1;#
+
+sub name { 'iso10646-1' }
+
+sub toUnicode
+{
+ my ($obj,$str,$chk) = @_;
+ my $uni   = '';
+ while (length($str))
+  {
+   my $code = unpack('S',substr($str,0,2,''));
+   $uni .= chr($code);
+  }
+ $_[1] = $str if $chk;
+ return $uni;
+}
+
+sub fromUnicode
+{
+ my ($obj,$uni,$chk) = @_;
+ my $str   = '';
+ while (length($uni))
+  {
+   my $ch = substr($uni,0,1,'');
+   my $x  = ord($ch);
+   unless ($x < 32768)
+    {
+     last if ($chk);
+     $x = 0;
+    }
+   $str .= pack('S',$x);
   }
  $_[1] = $uni if $chk;
  return $str;
