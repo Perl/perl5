@@ -962,7 +962,7 @@ Perl_magic_clear_all_env(pTHX_ SV *sv, MAGIC *mg)
 #   if defined(PERL_IMPLICIT_SYS) || defined(WIN32)
     PerlEnv_clearenv();
 #   else
-#if !defined(MACOS_TRADITIONAL)
+#       ifdef USE_ENVIRON_ARRAY
 #	    ifndef PERL_USE_SAFE_PUTENV
     I32 i;
 
@@ -975,9 +975,9 @@ Perl_magic_clear_all_env(pTHX_ SV *sv, MAGIC *mg)
 
     environ[0] = Nullch;
 
-#endif /* !defined(MACOS_TRADITIONAL) */
-#   endif /* PERL_IMPLICIT_SYS */
-#endif /* VMS */
+#       endif /* USE_ENVIRON_ARRAY */
+#   endif /* PERL_IMPLICIT_SYS || WIN32 */
+#endif /* VMS || EPC */
     return 0;
 }
 
