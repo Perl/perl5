@@ -1,6 +1,12 @@
 CHANGES
 -------
 
+2.17  May 03 18:00 2002
+	- RPM spec generalizations.
+	  michael.mclagan@linux.org (Michael McLagan)
+	- Win32 compatibility changes.
+	  (Didn't compile on Win32 since v2.11.)
+
 2.16  Apr 11 14:00 2002
 	- Documentation changes.
 	- Added INSTALL doc.
