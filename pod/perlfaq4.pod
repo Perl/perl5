@@ -2037,8 +2037,9 @@ and C<retrieve> functions:
 =head2 How do I print out or copy a recursive data structure?
 
 The Data::Dumper module on CPAN (or the 5.005 release of Perl) is great
-for printing out data structures.  The Storable module, found on CPAN,
-provides a function called C<dclone> that recursively copies its argument.
+for printing out data structures.  The Storable module on CPAN (or the
+5.8 release of Perl), provides a function called C<dclone> that recursively
+copies its argument.
 
     use Storable qw(dclone);
     $r2 = dclone($r1);
