@@ -1,5 +1,6 @@
 package AutoLoader;
 use Carp;
+$DB::sub = $DB::sub;	# Avoid warning
 
 =head1 NAME
 
