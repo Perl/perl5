@@ -1,8 +1,35 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 0.94 2002/03/20 19:59:38 dankogai Exp dankogai $
+# $Id: Changes,v 0.95 2002/03/21 15:52:20 dankogai Exp dankogai $
 #
-
+0.95  Thu Mar 22 2002
+  In this update, pod rewrites and alias fixes are the main issues
++ lib/Encode/Supported.pod
+  Describes supported encodings
+! Makefile.PL
+  streamlined compiled-in encodings.
+! lib/Encode/Description.pod -> lib/Encode/Details.pod
+  Renamed.
++ Encode/ibm-125?.ucm
+  Added from icu distibution with any occurance of
+   "IBM-125?" to "cp125?".  Filenames remain unchanged to pay
+   some respect to icu staff, however.
++ lib/Encode/Alias.pm
+! Encode.pm
+  Alias difinitions in Encode.pm relocated.
+! AUTHORS
+! Encode.xs
+  packWARN patch from Paul Marquess via jhi
+  Message-Id: <20020321010101.O28978@alpha.hut.fi>
+  Paul added to AUTHORS as a result.
+! t/CJKalias.t -> t/Aliases.t
+  Renamed.  Checks even more aliases and alias overloading
+! Encode.pm
+! CN/CN.pm
+  duplicate alias for ujis => euc-jp removed (Encode::JP has one)
+  gbk => cp936 relocated to CN.pm
+! t/CJKalias.t
+  Test::More with plans (by jhi)
 0.94  Thu Mar 21 2002
 + lib/Encode/Description.pod
 ! lib/Encode/Encoding.pm

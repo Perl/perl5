@@ -1,0 +1,213 @@
+=head1 NAME
+
+Encode::Supported -- Supported encodings by Encode
+
+=head1 DESCRIPTION
+
+=Encoding Names
+
+Encoding names are case insensitive. White space in names
+is ignored.  In addition an encoding may have aliases.
+Each encoding has one "canonical" name.  The "canonical"
+name is chosen from the names of the encoding by picking
+he first in the following sequence:
+
+       o The MIME name as defined in IETF RFCs.
+       o The name in the IANA registry.
+       o The name used by the organization that defined it.
+
+Because of all the alias issues, and because in the gen-
+eral case encodings have state, "Encode" uses the encoding
+object internally once an operation is in progress.
+
+=head2 Supported Encodings
+
+As of Perl 5.8.0, at least the following encodings are recognized.
+Note that unless otherwise specified, they are all case insensitive
+(via alias) and all occurance of spaces are replaced with '-'.  In
+other words, "ISO 8859 1" and "iso-8859-1" are identical.
+
+=head3 ASCII
+
+  Canonical	Aliases
+  -----------------------
+  ascii	        uc-ascii
+
+=head3 The Unicode
+
+  utf8		UTF-8
+  utf16		UTF-16
+  ucs2		UCS-2, iso-10646-1
+
+=head3 The ISO 8859, KOI, and other 1-byte encodings
+
+The following encodings are based upon ASCII.  For most cases it uses
+\x80-\xff (upper half) to map non-ASCII characters.
+
+  iso-8859-1	latin1
+  iso-8859-2	latin2
+  iso-8859-3	latin3
+  iso-8859-4	latin4
+  iso-8859-5	latin
+  iso-8859-6	latin
+  iso-8859-7
+  iso-8859-8
+  iso-8859-9	latin5
+  iso-8859-10	latin6
+  iso-8859-11
+  (iso-8859-12 is nonexistent)
+  iso-8859-13   latin7
+  iso-8859-14	latin8
+  iso-8859-15	latin9
+  iso-8859-16	latin10
+
+  koi8-f
+  koi8-r
+  koi8-u
+
+  viscii	# ASCII + vietnamese
+
+  cp1250	WinLatin2
+  cp1251	WinCyrillic
+  cp1252	WinLatin1
+  cp1253	WinGreek
+  cp1254	WinTurkiskh
+  cp1255	WinHebrew
+  cp1256	WinArabic
+  cp1257	WinBaltic
+  cp1258	WinVietnamese
+  # all cp* are also available as ibm-* and ms-*
+
+  maccentraleuropean  
+  maccroatian
+  macroman
+  maccyrillic
+  macromanian
+  macdingbats       
+  macsami
+  macgreek 
+  macthai
+  macicelandic    
+  macturkish
+  macukraine
+
+=head3 The CJK: Chinese, Japanese, Korean (Multibyte)
+
+Note Vietnamese is listed above.  Also read "Encoding vs Charset"
+below.  Also note these are impelemented in distinct module by
+languages, due the the size concerns.  See these perldocs also.
+
+  cp936      gbk		    # Encode::CN
+  euc-cn			    # Encode::CN
+  gb12345			    # Encode::CN
+  gb2312			    # Encode::CN
+  gb2312			    # Encode::CN
+  hz				    # Encode::CN
+  iso-ir-165			    # Encode::CN
+
+  7bit-jis	  jis		    # Encode::JP
+  cp932				    # Encode::JP
+  euc-jp	  ujis		    # Encode::JP
+  iso-2022-jp			    # Encode::JP
+  macjapan			    # Encode::JP
+  shiftjis	  Shift_JIS, sjis   # Encode::JP
+  
+  euc-kr			    # Encode::KR
+  ksc5601			    # Encode::KR
+  cp949                             # Encode::KR
+
+  big5				    # Encode::TW
+  big5-hkscs			    # Encode::TW
+  cp950                             # Encode::TW
+
+Due to size concerns, additional Chinese encodings including "GB
+18030", "EUC-TW" and "BIG5PLUS" are distributed separately on CPAN,
+under the name Encode::HanExtra.
+
+=head3 EBCDIC
+
+See perlebcdic for details.
+
+  cp1047
+  cp37
+  posix-bc
+
+=head3 Symbols and dingbats
+
+  symbol
+  dingbats
+
+=head1 Encoding vs. Charset
+
+Character encoding (or just "encoding") and Character Set (or just
+"charset") are often used interchangeably but they are different
+concepts.
+
+Charset determines which characters to be included in a given text.
+
+Encoding actually maps charset(s) to stream of bits.
+
+Note a given encoding contains multiple charsets.  For instance,
+euc-jp contains ASCII, JIS X 0201 (Hankaku Kana), JIS X 0208 (Zenkaku
+Kana and Kanji) and JIS X 0212 (Extended Kanji) in a single encoding.
+
+As the name suggests, the Encode module supports encodings, not
+individual charsets.
+
+=head1 Encoding Classification (by Anton Tagunov)
+
+Encodings
+
+  US-ASCII    UTF-8       KOI8-R      ISO-8859-*
+  ISO-2022-CN ISO-2022-JP Big5
+  EUC-CN      EUC-JP      EUC-KR
+
+are <http://www.iana.org/assignments/character-sets>-registered as
+preferred MIME names and may probably be used  over the Internet.  So is
+
+  Shift_JIS
+
+but despite its wide spread it bears the label of being
+Microsft proprietary -- was.  Now Shift JIS is official as of
+JIS X 0208-1997.
+
+         UTF-16 KOI8-U
+
+are IANA-registered preferred MIME names but probably
+shoule be avoided as encoding for web pages due to lack of
+browser support.
+
+  ISO-2022      (http://www.ecma.ch/ecma1/STAND/ECMA-035.HTM)
+  ISO-2022-JP-1 (http://www.faqs.org/rfcs/rfc2237.html)
+  ISO-IR-165    (http://www.faqs.org/rfcs/rfc1345.html)
+  GBK
+  VISCII
+  GB 12345      (only plains 1 and 2 available)
+  GB 18030
+  CNS 11643
+
+are totally valid encodings but not registered at IANA.
+
+   BIG5PLUS
+   EUC-JP-0212   (Encode::lib::Encode::Tcl::Extended)
+
+are a bit proprietary
+
+You may probably get some info on CJK encodings at
+
+brief description for most of the mentioned CJK encodings
+
+F<http://www.debian.org.ru/doc/manuals/intro-i18n/ch-codes.html>
+
+several years old, but still useful
+
+F<http://www.oreilly.com/people/authors/lunde/cjk_inf.html>
+
+and some in-depth reading for the heroes :-)
+F<http://www.ecma.ch/ecma1/STAND/ECMA-035.HTM> (eq ISO-2022)
+
+=head1 See Also
+
+L<Encode>, L<Encode::CN>, L<Encode::JP>, L<Encode::KR>, L<Encode::TW>
+
+=cut

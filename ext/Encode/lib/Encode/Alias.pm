@@ -1,0 +1,227 @@
+package Encode::Alias;
+use strict;
+use Encode qw(find_encoding);
+our $VERSION = do { my @r = (q$Revision: 0.95 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $DEBUG = 0;
+require Exporter;
+
+our @ISA = qw(Exporter);
+
+# Public, encouraged API is exported by default
+our @EXPORT = qw (
+		  findAlias
+		  define_alias
+		  );
+
+our @Alias;  # ordered matching list
+our %Alias;  # cached known aliases
+
+sub findAlias
+{
+    my $class = shift;
+    local $_ = shift;
+    unless (exists $Alias{$_})
+    {
+	for (my $i=0; $i < @Alias; $i += 2)
+	{
+	    my $alias = $Alias[$i];
+	    my $val   = $Alias[$i+1];
+	    my $new;
+	    if (ref($alias) eq 'Regexp' && $_ =~ $alias)
+	    {
+		$new = eval $val;
+		# $@ and warn "$val, $@";
+	    }
+	    elsif (ref($alias) eq 'CODE')
+	    {
+		$new = $alias->($val);
+	    }
+	    elsif (lc($_) eq lc($alias))
+	    {
+		$new = $val;
+	    }
+	    if (defined($new))
+	    {
+		next if $new eq $_; # avoid (direct) recursion on bugs
+		my $enc = (ref($new)) ? $new : Encode::find_encoding($new);
+		if ($enc)
+		{
+		    $Alias{$_} = $enc;
+		    last;
+		}
+	    }
+	}
+    }
+    return $Alias{$_};
+}
+
+sub define_alias
+{
+    while (@_)
+    {
+	my ($alias,$name) = splice(@_,0,2);
+	unshift(@Alias, $alias => $name);   # newer one has precedence
+	# clear %Alias cache to allow overrides
+	if (ref($alias)){
+	    for my $k (keys %Alias){
+		if (ref($alias) eq 'Regexp' && $k =~ $alias)
+		{
+		    $DEBUG and warn $k;
+		    delete $Alias{$k};
+		}
+		elsif (ref($alias) eq 'CODE')
+		{
+		    delete $Alias{$alias->($name)};
+		}
+	    }
+	}else{
+	    delete $Alias{$alias};
+	}
+    }
+}
+
+
+# Allow variants of iso-8859-1 etc.
+define_alias( qr/^iso[-_]?(\d+)[-_](\d+)$/i => '"iso-$1-$2"' );
+
+# At least HP-UX has these.
+define_alias( qr/^iso8859(\d+)$/i => '"iso-8859-$1"' );
+
+# More HP stuff.
+define_alias( qr/^(?:hp-)?(arabic|greek|hebrew|kana|roman|thai|turkish)8$/i => '"${1}8"' );
+
+# The Official name of ASCII.
+define_alias( qr/^ANSI[-_]?X3\.4[-_]?1968$/i => '"ascii"' );
+
+# This is a font issue, not an encoding issue.
+# (The currency symbol of the Latin 1 upper half
+#  has been redefined as the euro symbol.)
+define_alias( qr/^(.+)\@euro$/i => '"$1"' );
+
+# Allow latin-1 style names as well
+                     # 0  1  2  3  4  5   6   7   8   9  10
+our @Latin2iso = ( 0, 1, 2, 3, 4, 9, 10, 13, 14, 15, 16 );
+define_alias( qr/^(?:iso[-_]?)?latin[-_]?(\d+)$/i 
+	      => '"iso-8859-$Encode::Alias::Latin2iso[$1]"' );
+
+# Allow winlatin1 style names as well
+our %Winlatin2cp   = (
+		      'latin1'     => 1252,
+		      'latin2'     => 1250,
+		      'cyrillic'   => 1251,
+		      'greek'      => 1253,
+		      'turkish'    => 1254,
+		      'hebrew'     => 1255,
+		      'arabic'     => 1256,
+		      'baltic'     => 1257,
+		      'vietnamese' => 1258,
+		     );
+
+define_alias( qr/win(latin[12]|cyrillic|baltic|greek|turkish|
+		      hebrew|arabic|baltic|vietnamese)$/ix => 
+	      '"cp" . $Encode::Alias::Winlatin2cp{lc($1)}' );
+
+# Common names for non-latin prefered MIME names
+define_alias( 'ascii'    => 'US-ascii',
+              'cyrillic' => 'iso-8859-5',
+              'arabic'   => 'iso-8859-6',
+              'greek'    => 'iso-8859-7',
+              'hebrew'   => 'iso-8859-8',
+              'thai'     => 'iso-8859-11',
+              'tis620'   => 'iso-8859-11',
+	    );
+
+# At least AIX has IBM-NNN (surprisingly...) instead of cpNNN.
+# And Microsoft has their own naming (again, surprisingly).
+define_alias( qr/^(?:ibm|ms)[-_]?(\d\d\d\d?)$/i => '"cp$1"');
+
+# Sometimes seen with a leading zero.
+define_alias( qr/^cp037$/i => '"cp37"');
+
+# Ououououou.
+define_alias( qr/^macRomanian$/i => '"macRumanian"');
+
+# Standardize on the dashed versions.
+define_alias( qr/^utf8$/i  => 'utf-8' );
+define_alias( qr/^koi8r$/i => 'koi8-r' );
+define_alias( qr/^koi8u$/i => 'koi8-u' );
+
+# TODO: HP-UX '8' encodings arabic8 greek8 hebrew8 kana8 thai8 turkish8
+# TODO: HP-UX '15' encodings japanese15 korean15 roi15
+# TODO: Cyrillic encoding ISO-IR-111 (useful?)
+# TODO: Armenian encoding ARMSCII-8
+# TODO: Hebrew encoding ISO-8859-8-1
+# TODO: Thai encoding TCVN
+# TODO: Korean encoding Johab
+# TODO: Vietnamese encodings VPS
+# TODO: Mac Asian+African encodings: Arabic Armenian Bengali Burmese
+#       ChineseSimp ChineseTrad Devanagari Ethiopic ExtArabic
+#       Farsi Georgian Gujarati Gurmukhi Hebrew Japanese
+#       Kannada Khmer Korean Laotian Malayalam Mongolian
+#       Oriya Sinhalese Symbol Tamil Telugu Tibetan Vietnamese
+
+# Map white space and _ to '-'
+define_alias( qr/^(\S+)[\s_]+(.*)$/i => '"$1-$2"' );
+
+1;
+__END__
+=head1 NAME
+
+Encode::Alias - alias defintions to encodings
+
+=head1 SYNOPSIS
+
+  use Encode qw(define_alias);
+  define_alias( newName => ENCODING);
+
+=head1 DESCRIPTION
+
+Allows newName to be used as am alias for ENCODING. ENCODING may be
+either the name of an encoding or and encoding object (as described in L<Encode>).
+
+Currently I<newName> can be specified in the following ways:
+
+=over 4
+
+=item As a simple string.
+
+=item As a qr// compiled regular expression, e.g.:
+
+  define_alias( qr/^iso8859-(\d+)$/i => '"iso-8859-$1"' );
+
+In this case if I<ENCODING> is not a reference it is C<eval>-ed to
+allow C<$1> etc. to be subsituted.  The example is one way to names as
+used in X11 font names to alias the MIME names for the iso-8859-*
+family.  Note the double quote inside the single quote. 
+
+If you are using regex here, you have to do so or it won't work in
+this case.  Also not regex is tricky even for the experienced.  Use it
+with caution.
+
+=item As a code reference, e.g.:
+
+  define_alias( sub { return /^iso8859-(\d+)$/i ? "iso-8859-$1" : undef } , '');
+
+In this case C<$_> will be set to the name that is being looked up and
+I<ENCODING> is passed to the sub as its first argument.  The example
+is another way to names as used in X11 font names to alias the MIME
+names for the iso-8859-* family.
+
+=item Alias overloading
+
+You can override predefined aliases by simply applying define_alias().  
+New alias is always evaluated first and when neccessary define_alias()
+flushes internal cache to make new definition available.
+
+  # redirect  SHIFT_JIS to MS/IBM Code Page 932, which is a
+  # superset of SHIFT_JIS
+
+  Encode::define_alias( qr/shift.*jis$/i  => '"cp932"' );
+  Encode::define_alias( qr/sjis$/i        => '"cp932"' );
+
+=head1 SEE ALSO
+
+L<Encode>, L<Encode::Supported>
+
+=back
+

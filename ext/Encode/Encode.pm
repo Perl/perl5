@@ -1,6 +1,6 @@
 package Encode;
 use strict;
-our $VERSION = do { my @r = (q$Revision: 0.94 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 0.95 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 require DynaLoader;
 require Exporter;
@@ -37,25 +37,10 @@ bootstrap Encode ();
 
 use Carp;
 
+use Encode::Alias;
+
 # Make a %encoding package variable to allow a certain amount of cheating
 our %encoding;
-my @alias;  # ordered matching list
-my %alias;  # cached known aliases
-
-                     # 0  1  2  3  4  5   6   7   8   9  10
-our @latin2iso_num = ( 0, 1, 2, 3, 4, 9, 10, 13, 14, 15, 16 );
-
-our %winlatin2cp   = (
-		      'Latin1'     => 1252,
-		      'Latin2'     => 1250,
-		      'Cyrillic'   => 1251,
-		      'Greek'      => 1253,
-		      'Turkish'    => 1254,
-		      'Hebrew'     => 1255,
-		      'Arabic'     => 1256,
-		      'Baltic'     => 1257,
-		      'Vietnamese' => 1258,
-		     );
 
 our %external_tables =
     (
@@ -92,125 +77,6 @@ sub encodings
                    grep { $_ ne 'Internal' }
                         keys %encoding;
 }
-
-sub findAlias
-{
-    my $class = shift;
-    local $_ = shift;
-    # print "# findAlias $_\n";
-    unless (exists $alias{$_})
-    {
-	for (my $i=0; $i < @alias; $i += 2)
-	{
-	    my $alias = $alias[$i];
-	    my $val   = $alias[$i+1];
-	    my $new;
-	    if (ref($alias) eq 'Regexp' && $_ =~ $alias)
-	    {
-		$new = eval $val;
-	    }
-	    elsif (ref($alias) eq 'CODE')
-	    {
-		$new = &{$alias}($val)
-		}
-	    elsif (lc($_) eq lc($alias))
-	    {
-		$new = $val;
-	    }
-	    if (defined($new))
-	    {
-		next if $new eq $_; # avoid (direct) recursion on bugs
-		my $enc = (ref($new)) ? $new : find_encoding($new);
-		if ($enc)
-		{
-		    $alias{$_} = $enc;
-		    last;
-		}
-	    }
-	}
-    }
-    return $alias{$_};
-}
-
-sub define_alias
-{
-    while (@_)
-    {
-	my ($alias,$name) = splice(@_,0,2);
-	push(@alias, $alias => $name);
-    }
-}
-
-# Allow variants of iso-8859-1 etc.
-define_alias( qr/^iso[-_]?(\d+)[-_](\d+)$/i => '"iso-$1-$2"' );
-
-# At least HP-UX has these.
-define_alias( qr/^iso8859(\d+)$/i => '"iso-8859-$1"' );
-
-# More HP stuff.
-define_alias( qr/^(?:hp-)?(arabic|greek|hebrew|kana|roman|thai|turkish)8$/i => '"${1}8"' );
-
-# The Official name of ASCII.
-define_alias( qr/^ANSI[-_]?X3\.4[-_]?1968$/i => '"ascii"' );
-
-# This is a font issue, not an encoding issue.
-# (The currency symbol of the Latin 1 upper half
-#  has been redefined as the euro symbol.)
-define_alias( qr/^(.+)\@euro$/i => '"$1"' );
-
-# Allow latin-1 style names as well
-define_alias( qr/^(?:iso[-_]?)?latin[-_]?(\d+)$/i => '"iso-8859-$latin2iso_num[$1]"' );
-
-# Allow winlatin1 style names as well
-define_alias( qr/^win(latin[12]|cyrillic|baltic|greek|turkish|hebrew|arabic|baltic|vietnamese)$/i => '"cp$winlatin2cp{\u$1}"' );
-
-# Common names for non-latin prefered MIME names
-define_alias( 'ascii'    => 'US-ascii',
-              'cyrillic' => 'iso-8859-5',
-              'arabic'   => 'iso-8859-6',
-              'greek'    => 'iso-8859-7',
-              'hebrew'   => 'iso-8859-8',
-              'thai'     => 'iso-8859-11',
-              'tis620'   => 'iso-8859-11',
-	    );
-
-# At least AIX has IBM-NNN (surprisingly...) instead of cpNNN.
-# And Microsoft has their own naming (again, surprisingly).
-define_alias( qr/^(?:ibm|ms)[-_]?(\d\d\d\d?)$/i => '"cp$1"');
-
-# Sometimes seen with a leading zero.
-define_alias( qr/^cp037$/i => '"cp37"');
-
-# Ououououou.
-define_alias( qr/^macRomanian$/i => '"macRumanian"');
-
-# Standardize on the dashed versions.
-define_alias( qr/^utf8$/i  => 'utf-8' );
-define_alias( qr/^koi8r$/i => 'koi8-r' );
-define_alias( qr/^koi8u$/i => 'koi8-u' );
-
-# Seen in some Linuxes.
-define_alias( qr/^ujis$/i => 'euc-jp' );
-
-# CP936 doesn't have vendor-addon for GBK, so they're identical.
-define_alias( qr/^gbk$/i => '"cp936"');
-
-# TODO: HP-UX '8' encodings arabic8 greek8 hebrew8 kana8 thai8 turkish8
-# TODO: HP-UX '15' encodings japanese15 korean15 roi15
-# TODO: Cyrillic encoding ISO-IR-111 (useful?)
-# TODO: Armenian encoding ARMSCII-8
-# TODO: Hebrew encoding ISO-8859-8-1
-# TODO: Thai encoding TCVN
-# TODO: Korean encoding Johab
-# TODO: Vietnamese encodings VPS
-# TODO: Mac Asian+African encodings: Arabic Armenian Bengali Burmese
-#       ChineseSimp ChineseTrad Devanagari Ethiopic ExtArabic
-#       Farsi Georgian Gujarati Gurmukhi Hebrew Japanese
-#       Kannada Khmer Korean Laotian Malayalam Mongolian
-#       Oriya Sinhalese Symbol Tamil Telugu Tibetan Vietnamese
-
-# Map white space and _ to '-'
-define_alias( qr/^(\S+)[\s_]+(.*)$/i => '"$1-$2"' );
 
 sub define_encoding
 {
@@ -340,7 +206,7 @@ The C<Encode> module provides the interfaces between Perl's strings
 and the rest of the system.  Perl strings are sequences of B<characters>.
 
 To find more about character encodings, please consult
-L<Encode::Description> . This document focuses on programming references.
+L<Encode::Details> . This document focuses on programming references.
 
 =head1 PERL ENCODING API
 
@@ -487,7 +353,10 @@ For CHECK see L</"Handling Malformed Data">.
   use Encode qw(encodings);
   @list = encodings();
 
-Returns a list of the canonical names of the available encodings.
+Returns a list of the canonical names of the available encodings. 
+
+To find which encodings are suppoted by this package in details, 
+see L<Encode::Supported>.
 
 =head2 Defining Aliases
 
@@ -497,32 +366,7 @@ Returns a list of the canonical names of the available encodings.
 Allows newName to be used as am alias for ENCODING. ENCODING may be
 either the name of an encoding or and encoding object (as above).
 
-Currently I<newName> can be specified in the following ways:
-
-=over 4
-
-=item As a simple string.
-
-=item As a qr// compiled regular expression, e.g.:
-
-  define_alias( qr/^iso8859-(\d+)$/i => '"iso-8859-$1"' );
-
-In this case if I<ENCODING> is not a reference it is C<eval>-ed to
-allow C<$1> etc. to be subsituted.  The example is one way to names as
-used in X11 font names to alias the MIME names for the iso-8859-*
-family.  Note the double quote inside the single quote.  If you are
-using regex here, you have to do so or it won't work in this case.
-
-=item As a code reference, e.g.:
-
-  define_alias( sub { return /^iso8859-(\d+)$/i ? "iso-8859-$1" : undef } , '');
-
-In this case C<$_> will be set to the name that is being looked up and
-I<ENCODING> is passed to the sub as its first argument.  The example
-is another way to names as used in X11 font names to alias the MIME
-names for the iso-8859-* family.
-
-=back
+See L<Encode::Alias> on details.
 
 =head1 Defining Encodings
 
@@ -636,9 +480,15 @@ not a string.
 
 =head1 SEE ALSO
 
-L<perlunicode>, L<perlebcdic>, L<perlfunc/open>, L<PerlIO>, L<encoding>,
-L<utf8>, L<Encode::Description>, L<Encode::Encoding> the Perl Unicode Mailing List E<lt>perl-unicode@perl.orgE<gt>
-
+L<Encode::Details>, 
+L<Encode::Encoding>,
+L<Encode::Supported>,
+L<PerlIO>, 
+L<encoding>,
+L<perlebcdic>, 
+L<perlfunc/open>, 
+L<perlunicode>, 
+L<utf8>, 
+the Perl Unicode Mailing List E<lt>perl-unicode@perl.orgE<gt>
 
 =cut
-

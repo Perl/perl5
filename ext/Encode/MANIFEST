@@ -97,6 +97,15 @@ Encode/gb12345.enc		Encode table
 Encode/gb1988.enc		Encode table
 Encode/gb2312.enc		Encode table
 Encode/gsm0338.enc		Encode table
+Encode/ibm-1250.ucm		Encode table
+Encode/ibm-1251.ucm		Encode table
+Encode/ibm-1252.ucm		Encode table
+Encode/ibm-1253.ucm		Encode table
+Encode/ibm-1254.ucm		Encode table
+Encode/ibm-1255.ucm		Encode table
+Encode/ibm-1256.ucm		Encode table
+Encode/ibm-1257.ucm		Encode table
+Encode/ibm-1258.ucm		Encode table
 Encode/ir-197.enc		Encode table
 Encode/iso-ir-165.enc	Encode table
 Encode/jis0201.enc		Encode table
@@ -146,14 +155,16 @@ TW/TW.pm		Encode extension
 compile		Encode extension
 encengine.c		Encode extension
 encode.h		Encode extension
+lib/Encode/Alias.pm	        Encode extension
 lib/Encode/CN/HZ.pm		Encode extension
-lib/Encode/Description.pod	General topics on character encodings
+lib/Encode/Details.pod	Detailed topics on character encodings
 lib/Encode/Encoding.pm	Encode extension
 lib/Encode/Internal.pm	Encode extension
 lib/Encode/JP/Constants.pm	Encode extension
 lib/Encode/JP/H2Z.pm		Encode extension
 lib/Encode/JP/ISO_2022_JP.pm	Encode extension
 lib/Encode/JP/JIS.pm	Encode extension
+lib/Encode/Supported.pod	Documents supported encodings
 lib/Encode/Tcl.pm		Encode extension
 lib/Encode/Tcl/Escape.pm	Encode extension
 lib/Encode/Tcl/Table.pm	Encode extension
@@ -163,7 +174,7 @@ lib/Encode/iso10646_1.pm	Encode extension
 lib/Encode/ucs2_le.pm	Encode extension
 lib/Encode/utf8.pm		Encode extension
 lib/EncodeFormat.pod		Encode extension
-t/CJKalias.t	Encode extension test
+t/Aliases.t	Encode extension test
 t/CN.t		Encode extension test
 t/Encode.t		Encode extension test
 t/JP.t		Encode extension test

@@ -298,6 +298,15 @@ ext/Encode/Encode/gb12345.enc		Encode table
 ext/Encode/Encode/gb1988.enc		Encode table
 ext/Encode/Encode/gb2312.enc		Encode table
 ext/Encode/Encode/gsm0338.enc		Encode table
+ext/Encode/Encode/ibm-1250.ucm	Encode table
+ext/Encode/Encode/ibm-1251.ucm	Encode table
+ext/Encode/Encode/ibm-1252.ucm	Encode table
+ext/Encode/Encode/ibm-1253.ucm	Encode table
+ext/Encode/Encode/ibm-1254.ucm	Encode table
+ext/Encode/Encode/ibm-1255.ucm	Encode table
+ext/Encode/Encode/ibm-1256.ucm	Encode table
+ext/Encode/Encode/ibm-1257.ucm	Encode table
+ext/Encode/Encode/ibm-1258.ucm	Encode table
 ext/Encode/Encode/ir-197.enc		Encode table
 ext/Encode/Encode/iso-ir-165.enc	Encode table
 ext/Encode/Encode/jis0201.enc		Encode table
@@ -339,8 +348,9 @@ ext/Encode/JP/JP.pm		Encode extension
 ext/Encode/JP/Makefile.PL	Encode extension
 ext/Encode/KR/KR.pm		Encode extension
 ext/Encode/KR/Makefile.PL		Encode extension
+ext/Encode/lib/Encode/Alias.pm	Encode extension
 ext/Encode/lib/Encode/CN/HZ.pm		Encode extension
-ext/Encode/lib/Encode/Description.pod	Encode extension
+ext/Encode/lib/Encode/Details.pod	Encode extension
 ext/Encode/lib/Encode/Encoding.pm	Encode extension
 ext/Encode/lib/Encode/Internal.pm	Encode extension
 ext/Encode/lib/Encode/iso10646_1.pm	Encode extension
@@ -348,6 +358,7 @@ ext/Encode/lib/Encode/JP/Constants.pm	Encode extension
 ext/Encode/lib/Encode/JP/H2Z.pm		Encode extension
 ext/Encode/lib/Encode/JP/ISO_2022_JP.pm	Encode extension
 ext/Encode/lib/Encode/JP/JIS.pm	Encode extension
+ext/Encode/lib/Encode/Supported.pod	Encode extension
 ext/Encode/lib/Encode/Tcl.pm		Encode extension
 ext/Encode/lib/Encode/Tcl/Escape.pm	Encode extension
 ext/Encode/lib/Encode/Tcl/Table.pm	Encode extension
@@ -359,7 +370,7 @@ ext/Encode/lib/EncodeFormat.pod		Encode extension
 ext/Encode/Makefile.PL		Encode extension makefile writer
 ext/Encode/MANIFEST		Encode extension
 ext/Encode/README		Encode extension
-ext/Encode/t/CJKalias.t		Encode extension
+ext/Encode/t/Aliases.t	Encode extension
 ext/Encode/t/CN.t		Encode extension test
 ext/Encode/t/Encode.t		Encode extension test
 ext/Encode/t/jisx0208.euc	Encode extension test
@@ -1287,14 +1298,14 @@ lib/Pod/t/basic.ovr		podlators test
 lib/Pod/t/basic.pod		podlators test
 lib/Pod/t/basic.t		podlators test
 lib/Pod/t/basic.txt		podlators test
-lib/Pod/t/htmlescp.t            pod2html escape test
-lib/Pod/t/htmlescp.pod          pod2html escape test input data
-lib/Pod/t/pod2html-lib.pl       pod2html testing library
 lib/Pod/t/Functions.t		See if Pod::Functions works
+lib/Pod/t/htmlescp.pod          pod2html escape test input data
+lib/Pod/t/htmlescp.t            pod2html escape test
 lib/Pod/t/InputObjects.t	See if Pod::InputObjects works
 lib/Pod/t/latex.t		See if Pod::LaTeX works
 lib/Pod/t/man.t    		podlators test
 lib/Pod/t/parselink.t		podlators test
+lib/Pod/t/pod2html-lib.pl       pod2html testing library
 lib/Pod/t/Select.t		See if Pod::Select works
 lib/Pod/t/text-errors.t		podlators test
 lib/Pod/t/Usage.t		See if Pod::Usage works
