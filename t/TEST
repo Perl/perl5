@@ -90,9 +90,10 @@ EOT
 	    open(RESULTS,"./perl$switch $test |") or print "can't run.\n";
 	}
 	else {
-	    open(RESULTS, "./perl -I../lib ../utils/perlcc ./$test "
-	    		 ."-run -verbose dcf -log ../compilelog |")
+	    open(RESULTS, "./perl -I../lib ../utils/perlcc -o ./$test.plc ./$test "
+	    		 ." && ./$test.plc |")
 		or print "can't compile.\n";
+        unlink "./$test.plc";
 	}
 
 	$ok = 0;
