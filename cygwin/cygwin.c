@@ -7,7 +7,7 @@
 #undef USE_DYNAMIC_LOADING
 #include "XSUB.h"
 
-#include <sys/unistd.h>
+#include <unistd.h>
 
 
 /* see also Cwd.pm */

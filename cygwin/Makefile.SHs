@@ -26,7 +26,7 @@ addtopath=`pwd`
 $spitshell >>Makefile <<!GROK!THIS!
 
 cygwin.c: cygwin/cygwin.c
-	ln -s cygwin/cygwin.c
+	\$(LNS) cygwin/cygwin.c
 
 # shell script feeding perlld to decent perl
 ld2: $& Makefile perlld ${src}/cygwin/ld2.in

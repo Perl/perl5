@@ -183,9 +183,11 @@ F<ext/DB_File/DB_File.pm>.
 
 =item * C<-lcygipc> (C<use IPC::SysV>)
 
-A port of SysV IPC is available for Cygwin.  It has not been extensively
-tested.  In particular, C<d_semctl_semun> does not configure properly
-because the configure test fails and on Win9x the shm*() functions hang.
+A port of SysV IPC is available for Cygwin.
+
+NOTE: This has B<not> been extensively tested.  In particular,
+C<d_semctl_semun> is undefined because it fails a configure test and on
+Win9x the shm*() functions seem to hang.
 
 =back
 
@@ -210,7 +212,7 @@ want to force Perl to build with the system malloc(), you can either
 choose this when Configure prompts you or you can use the Configure
 command line option.
 
-=item * C<-Dusemultiplicty>
+=item * C<-Dusemultiplicity>
 
 Multiplicity is required when embedding Perl in a C program and using
 more than one interpreter instance.  This works with the Cygwin port.
@@ -518,10 +520,9 @@ be kept as clean as possible.
 
 =item Documentation
 
-  INSTALL
+  INSTALL README.cygwin
   Changes Changes5.005 Changes5.004
-  AUTHORS MAINTAIN MANIFEST
-  README.cygwin README.win32
+  AUTHORS MAINTAIN MANIFEST README.win32
   pod/perl.pod pod/perlfaq3.pod pod/perlhist.pod pod/perlmodlib.pod
   pod/perlport.pod pod/perltoc.pod pod/perl5004delta.pod
 
@@ -534,13 +535,13 @@ be kept as clean as possible.
   ext/NDBM_File/hints/cygwin.pl
   ext/ODBM_File/hints/cygwin.pl
   hints/cygwin.sh
-  Porting/patchls       - cygwin in port list
-  Makefile.SH           - linklibperl
-  makedepend.SH         - uwinfix
   Configure             - help finding hints from uname,
                           shared libperl required for dynamic loading
+  Makefile.SH           - linklibperl
+  Porting/patchls       - cygwin in port list
   installman            - man pages with :: translated to .
   installperl           - install dll/ld2/perlld, install to pods
+  makedepend.SH         - uwinfix
 
 =item Tests
 
@@ -553,14 +554,16 @@ be kept as clean as possible.
 
 =item Compiled Perl Source
 
-  cygwin/cygwin.c       - os_extras (getcwd)
-  doio.c                - win9x can not rename a file when it is open
   EXTERN.h              - __declspec(dllimport)
   XSUB.h                - __declspec(dllexport)
+  cygwin/cygwin.c       - os_extras (getcwd)
+  perl.c                - os_extras
   perl.h                - binmode
+  doio.c                - win9x can not rename a file when it is open
+  pp_sys.c              - do not define h_errno
   mg.c                  - environ WORKAROUND
-  util.c                - environ WORKAROUND
   unixish.h             - environ WORKAROUND
+  util.c                - environ WORKAROUND
 
 =item Compiled Module Source
 
@@ -572,15 +575,15 @@ be kept as clean as possible.
 
 =item Perl Modules/Scripts
 
-  lib/perl5db.pl        - use stdin not /dev/tty
-  utils/perlcc.PL       - DynaLoader.a in compile, -DUSEIMPORTLIB
-  utils/perldoc.PL      - version comment
-  lib/File/Spec/Unix.pm - preserve //unc
+  lib/Cwd.pm            - hook to internal Cwd::cwd
   lib/ExtUtils/MakeMaker.pm
                         - require MM_Cygwin.pm
   lib/ExtUtils/MM_Cygwin.pm
                         - canonpath, cflags, manifypods, perl_archive
-  lib/Cwd.pm            - `pwd`
+  lib/File/Spec/Unix.pm - preserve //unc
+  lib/perl5db.pl        - use stdin not /dev/tty
+  utils/perlcc.PL       - DynaLoader.a in compile, -DUSEIMPORTLIB
+  utils/perldoc.PL      - version comment
 
 =back
 
@@ -606,4 +609,4 @@ Teun Burgers E<lt>burgers@ecn.nlE<gt>.
 
 =head1 HISTORY
 
-Last updated: 24 February 2000
+Last updated: 25 February 2000
