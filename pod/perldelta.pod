@@ -7,11 +7,83 @@ perldelta - what is new for perl v5.8.3
 This document describes differences between the 5.8.2 release and
 the 5.8.3 release.
 
+If you are upgrading from an earlier release such as 5.6.1, first read
+the L<perl58delta>, which describes differences between 5.6.0 and
+5.8.0, and the L<perl581delta> and <perl582delta>, which describe differences
+between 5.8.0, 5.8.1 and 5.8.2
+
 =head1 Incompatible Changes
+
+There are no changes incompatible with 5.8.2.
 
 =head1 Core Enhancements
 
+A C<SCALAR> method is now available for tied hashes. This is called when
+a tied hash is used in scalar context, such as
+
+    if (%tied_hash) {
+	...
+    }
+
+Previously the FIRSTKEY method would be called on a tied hash, which has the
+side effect of resetting the iterator, behaviour inconsistent with normal
+hashes. The new code implementing C<SCALAR> will use the old behaviour for
+classes which do not (yet) provide C<SCALAR>. Please see L<perltie/SCALAR>
+for the full details and caveats.
+
 =head1 Modules and Pragmata
+
+=over 4
+
+=item CGI
+
+=item Cwd
+
+=item Digest
+
+=item Digest::MD5
+
+=item Encode
+
+=item ExtUtils::MakeMaker
+
+Now able to generate a SIGNATURE file if Module::Signature is installed,
+by passing (SIGN => 1) to WriteMakefile().  (Work completed as part of
+The Perl Foundation's grant to Autrijus Tang)
+
+=item File::Spec
+
+=item FindBin
+
+A function C<again> is provided to resolve problems where two modules in
+different directories which to use FindBin.
+
+=item List::Util
+
+You can now weaken references to read only values.
+
+=item Math::BigInt
+
+=item PodParser
+
+=item Pod::Perldoc
+
+=item POSIX
+
+=item Unicode::Collate
+
+=item Unicode::Normalize
+
+=item Test::Harness
+
+This provides the C<prove> utility, which makes it easy to run an individual
+regression test at the command line.
+
+=item threads::shared
+
+C<cond_wait> has a new two argument form. C<cond_timedwait> has been added.
+ 
+=back
 
 =head1 Utility Changes
 
@@ -20,19 +92,60 @@ specified explicitly.
 
 =head1 New Documentation
 
+The documentation has been revised in places to produce more standard manpages.
+
+The documentation for the special code blocks (BEGIN, CHECK, INIT, END)
+has been improved.
+
 =head1 Performance Enhancements
 
 =head1 Installation and Configuration Improvements
 
+Perl now builds on OpenVMS I64
+
 =head1 Selected Bug Fixes
+
+Using substr() on a UTF8 string could cause subsequent accesses on that
+string to return garbage. This was due to incorrect UTF8 offsets being
+cached, and is now fixed.
+
+C<$a .. $b> will now work as expected when either $a or $b is C<undef>
+
+Using Unicode keys with tied hashes should now work correctly.
+
+Reading $^E now preserves $!. Previously, the C code implementing $^E
+did not preserve C<errno>, so reading $^E could cause C<errno> and therefore
+C<$!> to change unexpectedly.
+
+Reentrant functions will (one more) work with C++. 5.8.2 introduced a bugfix
+which accidentally broke the compilation of Perl extensions written in C++
 
 =head1 New or Changed Diagnostics
 
 =head1 Changed Internals
 
+The hash code has been refactored to reduce source duplication. The
+external interface is unchanged, and aside from the bug fixes described
+above, there should be not change in behaviour.
+
+C<hv_clear_placeholders> is now part of the perl API
+
+Some C macros have been tidied. In particular macros which create temporary
+local variables now name these variables more defensively, which should
+avoid bugs where names clash.
+
+<signal.h> is now always included.
+
 =head1 New Tests
 
 =head1 Known Problems
+
+We have a backlog of unresolved bugs. Dealing with bugs and bug reports
+is  unglamorous work; not something ideally suited to volunteer labour,
+but that is all that we have.
+
+The perl5 development team are implementing changes to help address this
+problem, which should go live in early 2004.
 
 =head1 Platform Specific Problems
 
