@@ -79,6 +79,8 @@ outside of the package), it can act as an acceptable substitute by
 pre-declaring global symbols, ensuring their availability to the
 later-loaded routines.
 
+The C<use vars> does not work for UTF-8 variable names.
+
 See L<perlmodlib/Pragmatic Modules>.
 
 =cut

@@ -128,10 +128,9 @@ This model was found to be wrong, or at least clumsy: the Unicodeness
 is now carried with the data, not attached to the operations.  (There
 is one remaining case where an explicit C<use utf8> is needed: if your
 Perl script itself is encoded in UTF-8, you can use UTF-8 in your
-variable and subroutine names, and in your string and regular
-expression literals, by saying C<use utf8>.  This is not the default
-because that would break existing scripts having legacy 8-bit data in
-them.)
+identifier names, and in your string and regular expression literals,
+by saying C<use utf8>.  This is not the default because that would
+break existing scripts having legacy 8-bit data in them.)
 
 =head2 Perl's Unicode Model
 
