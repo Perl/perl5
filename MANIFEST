@@ -2383,7 +2383,7 @@ Porting/genlog		Generate formatted changelogs by querying p4d
 Porting/Glossary	Glossary of config.sh variables
 Porting/makerel		Release making utility
 Porting/manicheck	Check against MANIFEST
-Porting/Modules		List which files belong to which CPAN modules
+Porting/Modules		Information about modules and their maintainers
 Porting/p4d2p		Generate patch from p4 diff
 Porting/p4genpatch	Generate patch from p4 change in repository (obsoletes p4desc)
 Porting/patching.pod	How to report changes made to Perl
