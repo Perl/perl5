@@ -1,13 +1,5 @@
 package CGI::Util;
 
-=pod
-
-=head1 NAME
-
-CGI::Util - various utilities
-
-=cut
-
 use strict;
 use vars '$VERSION','@EXPORT_OK','@ISA','$EBCDIC','@A2E';
 require Exporter;
@@ -56,14 +48,14 @@ sub rearrange {
     my ($i,%pos);
     $i = 0;
     foreach (@$order) {
-	foreach (ref($_) eq 'ARRAY' ? @$_ : $_) { $pos{$_} = $i; }
+	foreach (ref($_) eq 'ARRAY' ? @$_ : $_) { $pos{lc($_)} = $i; }
 	$i++;
     }
 
     my (@result,%leftover);
     $#result = $#$order;  # preextend
     while (@param) {
-	my $key = uc(shift(@param));
+	my $key = lc(shift(@param));
 	$key =~ s/^\-//;
 	if (exists $pos{$key}) {
 	    $result[$pos{$key}] = shift(@param);
@@ -72,7 +64,7 @@ sub rearrange {
 	}
     }
 
-    push (@result,make_attributes(\%leftover)) if %leftover;
+    push (@result,make_attributes(\%leftover,1)) if %leftover;
     @result;
 }
 
@@ -84,7 +76,7 @@ sub make_attributes {
     foreach (keys %{$attr}) {
 	my($key) = $_;
 	$key=~s/^\-//;     # get rid of initial - if present
-	$key=~tr/a-z_/A-Z-/; # parameters are upper case, use dashes
+	$key=~tr/A-Z_/a-z-/; # parameters are lower case, use dashes
 	my $value = $escape ? simple_escape($attr->{$_}) : $attr->{$_};
 	push(@att,defined($attr->{$_}) ? qq/$key="$value"/ : qq/$key/);
     }
@@ -92,16 +84,14 @@ sub make_attributes {
 }
 
 sub simple_escape {
-  return unless defined (my $toencode = shift);
-  $toencode =~ s{(.)}{
-              if    ($1 eq '<')                            { '&lt;'    }
-              elsif ($1 eq '>')                            { '&gt;'    }
-              elsif ($1 eq '&')                            { '&amp;'   }
-              elsif ($1 eq '"')                            { '&quot;'  }
-              elsif ($1 eq "\x8b")                         { '&#139;'  }
-              elsif ($1 eq "\x9b")                         { '&#155;'  }
-              else                                         { $1        }
-       }gsex;
+  return unless defined(my $toencode = shift);
+  $toencode =~ s{&}{&amp;}gso;
+  $toencode =~ s{<}{&lt;}gso;
+  $toencode =~ s{>}{&gt;}gso;
+  $toencode =~ s{\"}{&quot;}gso;
+# Doesn't work.  Can't work.  forget it.
+#  $toencode =~ s{\x8b}{&#139;}gso;
+#  $toencode =~ s{\x9b}{&#155;}gso;
   $toencode;
 }
 
