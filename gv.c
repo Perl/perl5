@@ -428,7 +428,7 @@ I32 sv_type;
 		    sv_type != SVt_PVGV &&
 		    sv_type != SVt_PVFM &&
 		    sv_type != SVt_PVIO &&
-		    !(len == 1 && sv_type == SVt_PV && index("ab",*name)) )
+		    !(len == 1 && sv_type == SVt_PV && strchr("ab",*name)) )
 		{
 		    gvp = (GV**)hv_fetch(stash,name,len,0);
 		    if (!gvp ||
@@ -763,9 +763,8 @@ void
 gp_free(gv)
 GV* gv;
 {
-    IO *io;
-    CV *cv;
     GP* gp;
+    CV* cv;
 
     if (!gv || !(gp = GvGP(gv)))
 	return;
@@ -782,10 +781,7 @@ GV* gv;
     SvREFCNT_dec(gp->gp_sv);
     SvREFCNT_dec(gp->gp_av);
     SvREFCNT_dec(gp->gp_hv);
-    if ((io = gp->gp_io) && SvTYPE(io) != SVTYPEMASK) {
-	do_close(gv,FALSE);
-	SvREFCNT_dec(io);
-    }
+    SvREFCNT_dec(gp->gp_io);
     if ((cv = gp->gp_cv) && !GvCVGEN(gv))
 	SvREFCNT_dec(cv);
     SvREFCNT_dec(gp->gp_form);
