@@ -75,7 +75,7 @@ SECURITYBASE		= P:\apps\script\sw\nwsec
 SECURITY_IMPORTS	= $(SECURITYBASE)\imports
 
     # Here comes the CW tools - TO BE FILLED TO BUILD WITH CW -
-MODULE_DESC     = "Perl 5.7.3 for NetWare"
+MODULE_DESC     = "Perl 5.8.0 for NetWare"
 CCTYPE          = CodeWarrior
 C_COMPILER		= mwccnlm -c
 CPP_COMPILER	= mwccnlm
@@ -418,7 +418,7 @@ INST_NW_TOP2 = $(INST_NW_DRV)\perl
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-INST_VER	= \5.7.2
+INST_VER	= \5.8.0
 
 #
 # Comment this out if you DON'T want your perl installation to have

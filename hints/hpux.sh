@@ -555,6 +555,9 @@ EOCBU
 # The mysterious io_xs memory corruption in 11.00 32bit seems to get
 # fixed by not using Perl's malloc.  
 usemymalloc='n'
+case "$useperlio" in
+    $undef|false|[nN]*) usemymalloc='y' ;;
+    esac
 
 # fpclassify() is a macro, the library call is Fpclassify
 # Similarly with the others below.

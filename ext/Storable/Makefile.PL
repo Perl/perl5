@@ -5,13 +5,6 @@
 #  You may redistribute only under the same terms as Perl 5, as specified
 #  in the README file that comes with the distribution.
 #
-# $Log: Makefile.PL,v $
-# Revision 1.0.1.1  2001/01/03 09:38:39  ram
-# patch7: removed spurious 'clean' entry
-#
-# Revision 1.0  2000/09/01 19:40:41  ram
-# Baseline for first official release.
-#
 
 use ExtUtils::MakeMaker;
 use Config;

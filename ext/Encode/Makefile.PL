@@ -10,6 +10,8 @@ my %tables =
     (
      def_t => ['ascii.ucm',
 	       '8859-1.ucm',
+	       'null.ucm',
+	       'ctrl.ucm',
 	       ]
      );
 
@@ -75,6 +77,8 @@ sub post_initialize
     {
 	push (@files,$table.$ext);
     }
+    $self->{SOURCE} .= " $table.c"
+	if $^O eq 'MacOS' && $self->{SOURCE} !~ /\b$table\.c\b/;
 }
 $self->{'clean'}{'FILES'} .= join(' ',@files);
 return '';
@@ -85,7 +89,7 @@ sub postamble
     my $self = shift;
     my $dir  = $self->catdir($self->curdir,'ucm');
     my $str  = "# Encode\$(OBJ_EXT) depends on .h and .exh files not .c files - but all written by enc2xs\n";
-    $str  .= 'Encode$(OBJ_EXT) :';
+    $str  .= $^O eq 'MacOS' ? 'Encode.c.{$(MACPERL_BUILD_EXT_STATIC)}.o :' : 'Encode$(OBJ_EXT) :';
     foreach my $table (keys %tables)
     {
 	$str .= " $table.c";

@@ -40,7 +40,7 @@ sub _diag {
 
 sub skip_all {
     if (@_) {
-	print STDOUT "1..0 - @_\n";
+	print STDOUT "1..0 # Skipped: @_\n";
     } else {
 	print STDOUT "1..0\n";
     }

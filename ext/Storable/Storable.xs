@@ -10,47 +10,6 @@
  *  You may redistribute only under the same terms as Perl 5, as specified
  *  in the README file that comes with the distribution.
  *
- * $Log: Storable.xs,v $
- * Revision 1.0.1.10  2001/08/28 21:52:14  ram
- * patch13: removed spurious debugging messages
- *
- * Revision 1.0.1.9  2001/07/01 11:25:02  ram
- * patch12: fixed memory corruption on croaks during thaw()
- * patch12: made code compile cleanly with -Wall (Jarkko Hietaniemi)
- * patch12: changed tagnum and classnum from I32 to IV in context
- *
- * Revision 1.0.1.8  2001/03/15 00:20:55  ram
- * patch11: last version was wrongly compiling with assertions on
- *
- * Revision 1.0.1.7  2001/02/17 12:25:26  ram
- * patch8: now bless objects ASAP at retrieve time
- * patch8: added support for blessed ref to tied structures
- *
- * Revision 1.0.1.6  2001/01/03 09:40:40  ram
- * patch7: prototype and casting cleanup
- * patch7: trace offending package when overloading cannot be restored
- * patch7: made context cleanup safer to avoid dup freeing
- *
- * Revision 1.0.1.5  2000/11/05 17:21:24  ram
- * patch6: fixed severe "object lost" bug for STORABLE_freeze returns
- *
- * Revision 1.0.1.4  2000/10/26 17:11:04  ram
- * patch5: auto requires module of blessed ref when STORABLE_thaw misses
- *
- * Revision 1.0.1.3  2000/09/29 19:49:57  ram
- * patch3: avoid using "tainted" and "dirty" since Perl remaps them via cpp
- *
- * Revision 1.0.1.2  2000/09/28 21:43:10  ram
- * patch2: perls before 5.004_04 lack newSVpvn
- *
- * Revision 1.0.1.1  2000/09/17 16:47:49  ram
- * patch1: now only taint retrieved data when source was tainted
- * patch1: added support for UTF-8 strings
- * patch1: fixed store hook bug: was allocating class id too soon
- *
- * Revision 1.0  2000/09/01 19:40:41  ram
- * Baseline for first official release.
- *
  */
 
 #include <EXTERN.h>
@@ -5625,4 +5584,3 @@ is_storing()
 
 int
 is_retrieving()
-

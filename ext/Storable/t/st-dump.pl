@@ -1,14 +1,10 @@
-;# $Id: dump.pl,v 1.0 2000/09/01 19:40:41 ram Exp $
-;#
-;#  Copyright (c) 1995-2000, Raphael Manfredi
-;#  
-;#  You may redistribute only under the same terms as Perl 5, as specified
-;#  in the README file that comes with the distribution.
-;#
-;# $Log: dump.pl,v $
-;# Revision 1.0  2000/09/01 19:40:41  ram
-;# Baseline for first official release.
-;#
+# $Id: dump.pl,v 1.0 2000/09/01 19:40:41 ram Exp $
+#
+#  Copyright (c) 1995-2000, Raphael Manfredi
+#  
+#  You may redistribute only under the same terms as Perl 5, as specified
+#  in the README file that comes with the distribution.
+#
 
 # NOTE THAT THIS FILE IS COPIED FROM ext/Storable/t/st-dump.pl
 # TO t/lib/st-dump.pl.  One could also play games with

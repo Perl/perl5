@@ -77,6 +77,12 @@
 #  endif
 #endif
 
+/* undef WIN32 when building on Cygwin (for libwin32) - gph */
+#ifdef __CYGWIN__
+#   undef WIN32
+#   undef _WIN32
+#endif
+
 /* Use the reentrant APIs like localtime_r and getpwent_r */
 /* Win32 has naturally threadsafe libraries, no need to use any _r variants. */
 #if defined(USE_ITHREADS) && !defined(USE_REENTRANT_API) && !defined(NETWARE) && !defined(WIN32) && !defined(__APPLE__)

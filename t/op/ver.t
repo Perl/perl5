@@ -205,9 +205,20 @@ is(v200, eval("+v200"), 'v200 eq eval("+v200")' );
 # Tests for string/numeric value of $] itself
 my ($revision,$version,$subversion) = split '\.', sprintf("%vd",$^V);
 
+print "# revision   = '$revision'\n";
+print "# version    = '$version'\n";
+print "# subversion = '$subversion'\n";
+
 my $v = sprintf("%d.%.3d%.3d",$revision,$version,$subversion);
 
-ok( $v eq "$]", qq{"\$^V eq "\$]"});
+print "# v = '$v'\n";
+print "# ] = '$]'\n";
+
+$v =~ s/000$// if $subversion == 0;
+
+print "# v = '$v'\n";
+
+ok( $v eq "$]", qq{\$^V eq "\$]"});
 
 $v = $revision + $version/1000 + $subversion/1000000;
 

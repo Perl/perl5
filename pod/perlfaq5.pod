@@ -42,7 +42,7 @@ per-filehandle variables.
 Some idioms can handle this in a single statement:
 
     select((select(OUTPUT_HANDLE), $| = 1)[0]);
-    
+
     $| = 1, select $_ for select OUTPUT_HANDLE;
 
 Some modules offer object-oriented access to handles and their
@@ -162,11 +162,11 @@ You can then pass these references just like any other scalar,
 and use them in the place of named handles.
 
 	open my    $fh, $file_name;
-	
+
 	open local $fh, $file_name;
-	
+
 	print $fh "Hello World!\n";
-	
+
 	process_file( $fh );
 
 Before perl5.6, you had to deal with various typeglob idioms
@@ -175,7 +175,7 @@ which you may see in older code.
 	open FILE, "> $filename";
 	process_typeglob(   *FILE );
 	process_reference( \*FILE );
-	
+
 	sub process_typeglob  { local *FH = shift; print FH  "Typeglob!" }
 	sub process_reference { local $fh = shift; print $fh "Reference!" }
 

@@ -287,6 +287,7 @@ use strict;
 	die "Errno architecture ($Config{'archname'}-$Config{'osvers'}) does not match executable architecture (\$Config{'archname'}-\$Config{'osvers'})";
 
 \$VERSION = "$VERSION";
+\$VERSION = eval \$VERSION;
 \@ISA = qw(Exporter);
 
 EDQ

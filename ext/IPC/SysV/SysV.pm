@@ -7,7 +7,7 @@
 package IPC::SysV;
 
 use strict;
-use vars qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $VERSION);
+use vars qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $VERSION $XS_VERSION);
 use Carp;
 use Config;
 
@@ -15,6 +15,8 @@ require Exporter;
 @ISA = qw(Exporter);
 
 $VERSION = "1.03_00";
+$XS_VERSION = $VERSION;
+$VERSION = eval $VERSION;
 
 @EXPORT_OK = qw(
 	GETALL GETNCNT GETPID GETVAL GETZCNT
@@ -53,7 +55,7 @@ BOOT_XS: {
 
     do {
 	__PACKAGE__->can('bootstrap') || \&DynaLoader::bootstrap
-    }->(__PACKAGE__, $VERSION);
+    }->(__PACKAGE__, $XS_VERSION);
 }
 
 1;

@@ -10,13 +10,6 @@
 # Original Author: Ulrich Pfeifer
 # (C) Copyright 1997, Universitat Dortmund, all rights reserved.
 #
-# $Log: forgive.t,v $
-# Revision 1.0.1.1  2000/09/01 19:40:42  ram
-# Baseline for first official release.
-#
-# Revision 1.0  2000/09/01 19:40:41  ram
-# Baseline for first official release.
-#
 
 sub BEGIN {
     if ($ENV{PERL_CORE}){

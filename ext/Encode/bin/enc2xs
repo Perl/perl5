@@ -8,7 +8,7 @@ BEGIN {
 use strict;
 use Getopt::Std;
 my @orig_ARGV = @ARGV;
-our $VERSION  = do { my @r = (q$Revision: 1.27 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION  = do { my @r = (q$Revision: 1.29 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 # These may get re-ordered.
 # RAW is a do_now as inserted by &enter
@@ -265,6 +265,11 @@ if ($doC)
     my $sym = "${enc}_encoding";
     $sym =~ s/\W+/_/g;
     print C "encode_t $sym = \n";
+    # This is to make null encoding work -- dankogai
+    for (my $i = (scalar @info) - 1;  $i >= 0; --$i){
+	$info[$i] ||= 1;
+    }
+    # end of null tweak -- dankogai
     print C " {",join(',',@info,"{\"$enc\",(const char *)0}"),"};\n\n";
    }
 
@@ -702,7 +707,8 @@ sub outtable
   }
  if ($a->{'Forward'})
   {
-   print $fh "\nstatic encpage_t $name\[",scalar(@{$a->{'Entries'}}),"];\n";
+   my $var = $^O eq 'MacOS' ? 'extern' : 'static';
+   print $fh "\n$var encpage_t $name\[",scalar(@{$a->{'Entries'}}),"];\n";
   }
  $a->{'Done'} = 1;
  foreach my $b (@{$a->{'Entries'}})
@@ -1055,7 +1061,7 @@ the pod and to add more tests.
 
 Now issue a command all Perl Mongers love:
 
-  $ perl5.7.3 Makefile.PL
+  $ perl Makefile.PL
   Writing Makefile for Encode::My
 
 =item 4.

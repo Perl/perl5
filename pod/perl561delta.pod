@@ -3444,7 +3444,7 @@ is executed:
 
 =over
 
-=item 
+=item *
 
 64-bit builds
 
@@ -3459,7 +3459,7 @@ in 64-bit HP-UX.  The test attempts to create and connect to
 
 Note that 64-bit support is still experimental.
 
-=item 
+=item *
 
 Failure of Thread tests
 
@@ -3468,7 +3468,7 @@ fundamental problems in the 5.005 threading implementation.  These are
 not new failures--Perl 5.005_0x has the same bugs, but didn't have these
 tests.  (Note that support for 5.005-style threading remains experimental.)
 
-=item
+=item *
 
 NEXTSTEP 3.3 POSIX test failure
 
@@ -3477,7 +3477,7 @@ operating system libraries is buggy: the %j format numbers the days of
 a month starting from zero, which, while being logical to programmers,
 will cause the subtests 19 to 27 of the lib/posix test may fail.
 
-=item 
+=item *
 
 Tru64 (aka Digital UNIX, aka DEC OSF/1) lib/sdbm test failure with gcc
 

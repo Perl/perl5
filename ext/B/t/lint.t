@@ -63,13 +63,10 @@ RESULT
 Illegal reference to private name _x at -e line 1
 RESULT
 
-    {
-	local $TODO = q/doesn't catch methods/;
-	runlint 'private-names', 'sub A::_f{};A->_f()', <<'RESULT',
+    runlint 'private-names', 'sub A::_f{};A->_f()', <<'RESULT',
 Illegal reference to private method name _f at -e line 1
 RESULT
-	'private-names';
-    }
+    'private-names (method)';
 
     runlint 'undefined-subs', 'foo()', <<'RESULT';
 Undefined subroutine foo called at -e line 1

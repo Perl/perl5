@@ -304,7 +304,7 @@ those signals (it does not do the C<wait>). Again the failure will
 look like a loop as the operating system will re-issue the signal as
 there are un-waited-for completed child processes.
 
-=back 4
+=back
 
 =head1 Using open() for IPC
 

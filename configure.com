@@ -460,7 +460,7 @@ $     IF ( F$SEARCH("UU.DIR").EQS."" )
 $     THEN
 $       CREATE/DIRECTORY [.UU]
 $     ELSE
-$       IF ( F$SEARCH("[.UU]*.*").NES."" ) THEN DELETE/NOLOG [.UU]*.*;*
+$       IF ( F$SEARCH("[.UU]*.*").NES."" ) THEN DELETE/NOLOG/NOCONFIRM [.UU]*.*;*
 $     ENDIF
 $!: Configure runs within the UU subdirectory
 $     SET DEFAULT [.UU]
@@ -586,7 +586,7 @@ $       GOTO Clean_up
 $     ENDIF
 $   ELSE
 $     echo4 "Looks good..."
-$     DELETE/NOLOG MISSING.;
+$     DELETE/NOLOG/NOCONFIRM MISSING.;
 $   ENDIF ! (miss_list .NES. "")
 $ ENDIF   ! (manifestfound .EQS. "") ELSE 
 $!
@@ -2154,8 +2154,7 @@ $   echo4 "Hmm... Looks like you have SOCKETSHR Berkeley networking support."
 $ ELSE
 $   Has_socketshr     = "F"
 $ ENDIF
-$ IF (ccname .EQS. "DEC" .AND. Dec_C_Version .GE. 50200000) .OR. -
-     (ccname .EQS. "CXX")
+$ IF (ccname .EQS. "DEC" .AND. Dec_C_Version .GE. 50200000) .OR. (ccname .EQS. "CXX")
 $ THEN
 $   Has_Dec_C_Sockets = "T"
 $   echo ""
@@ -2172,9 +2171,9 @@ $   echo "build into Perl?"
 $   IF Has_Dec_C_Sockets
 $   THEN
 $     dflt = "DECC"
-$   else
+$   ELSE
 $     dflt = "SOCKETSHR"
-$   endif
+$   ENDIF
 $   rp = "Choose socket stack (NONE"
 $   IF Has_socketshr THEN rp = rp + ",SOCKETSHR"
 $   IF Has_Dec_C_Sockets THEN rp = rp + ",DECC"
@@ -2183,8 +2182,8 @@ $   GOSUB myread
 $   Has_Dec_C_Sockets = "F"
 $   Has_socketshr = "F"
 $   ans = F$EDIT(ans,"TRIM,COMPRESS,LOWERCASE")
-$   IF ans.eqs."decc" then Has_Dec_C_Sockets = "T"
-$   IF ans.eqs."socketshr" then Has_socketshr = "T"
+$   IF ans.eqs."decc" THEN Has_Dec_C_Sockets = "T"
+$   IF ans.eqs."socketshr" THEN Has_socketshr = "T"
 $ ENDIF
 $!
 $!
@@ -2669,7 +2668,7 @@ $     build = ans
 $   ENDIF
 $ ENDIF
 $!
-$ DELETE/NOLOG Makefile.;
+$ DELETE/NOLOG/NOCONFIRM Makefile.;
 $ GOTO Beyond_open
 $Open_error:
 $ TYPE SYS$INPUT:
@@ -5460,6 +5459,9 @@ $ WC "d_wctomb='" + d_wctomb + "'"
 $ WC "d_writev='undef'"
 $ WC "db_hashtype=' '"
 $ WC "db_prefixtype=' '"
+$ WC "db_version_major='" + "'"
+$ WC "db_version_minor='" + "'"
+$ WC "db_version_patch='" + "'"
 $ WC "dbgprefix='" + dbgprefix + "'"
 $ WC "defvoidused='15'"
 $ WC "devtype='" + devtype + "'"
@@ -5511,6 +5513,7 @@ $ WC "i8size='" + i8size + "'"
 $ WC "i8type='" + i8type + "'"
 $ WC "i_arpainet='undef'"
 $ WC "i_crypt='undef'"
+$ WC "i_db='undef'"
 $ WC "i_dbm='undef'"
 $ WC "i_dirent='" + i_dirent + "'"
 $ WC "i_dlfcn='undef'"
@@ -5908,7 +5911,7 @@ $ WC "srand48_r_proto='0'"
 $ WC "srandom_r_proto='0'"
 $ WC "strerror_r_proto='0'"
 $ WC "tmpnam_r_proto='0'"
-$ WC "ttyname_r_proto='0'
+$ WC "ttyname_r_proto='0'"
 $!
 $! ##END WRITE NEW CONSTANTS HERE##
 $!
@@ -6025,9 +6028,9 @@ $ mcr []munchconfig 'config_sh' [-]config_h.sh
 $ ! Concatenate them together
 $ copy [-]config.local,[-]config.main [-]config.h
 $! Clean up
-$ DELETE/NOLOG [-]CONFIG.MAIN;*
-$ DELETE/NOLOG [-]CONFIG.LOCAL;*
-$ DELETE/NOLOG [-]CONFIG.FDL;*
+$ DELETE/NOLOG/NOCONFIRM [-]CONFIG.MAIN;*
+$ DELETE/NOLOG/NOCONFIRM [-]CONFIG.LOCAL;*
+$ DELETE/NOLOG/NOCONFIRM [-]CONFIG.FDL;*
 $!
 $ IF ccname .EQS. "DEC"
 $ THEN
@@ -6283,7 +6286,18 @@ $ ENDIF ! (.NOT.perl_symbol)
 $ echo ""
 $ echo4 "The perl_setup.com file is now being written..."
 $ file_2_find = "[-]perl_setup.com"
-$ OPEN/WRITE CONFIG 'file_2_find'
+$!
+$! Folks are likely to want to edit perl_setup.com.
+$! STMLF RFM plays nicer with ported editors than does VFC.
+$!
+$ CREATE [-]CONFIG.FDL
+$ DECK
+RECORD
+  FORMAT STREAM_LF
+$ EOD
+$ CREATE /FDL=[-]CONFIG.FDL 'file_2_find'
+$ OPEN/APPEND CONFIG 'file_2_find'
+$ DELETE/NOLOG/NOCONFIRM [-]CONFIG.FDL;
 $ WRITE CONFIG "$!"
 $ WRITE CONFIG "$! Perl_Setup.com    ''cf_time'"
 $ IF cf_email.NES.perladmin

@@ -136,6 +136,7 @@ ucm/cp932.ucm	Unicode Character Map
 ucm/cp936.ucm	Unicode Character Map
 ucm/cp949.ucm	Unicode Character Map
 ucm/cp950.ucm	Unicode Character Map
+ucm/ctrl.ucm	Unicode Character Map
 ucm/dingbats.ucm	Unicode Character Map
 ucm/euc-cn.ucm	Unicode Character Map
 ucm/euc-jp.ucm	Unicode Character Map
@@ -175,6 +176,7 @@ ucm/macThai.ucm	Unicode Character Map
 ucm/macTurkish.ucm	Unicode Character Map
 ucm/macUkraine.ucm	Unicode Character Map
 ucm/nextstep.ucm	Unicode Character Map
+ucm/null.ucm	Unicode Character Map
 ucm/posix-bc.ucm	Unicode Character Map
 ucm/shiftjis.ucm	Unicode Character Map
 ucm/symbol.ucm	Unicode Character Map

@@ -1,58 +1,10 @@
-;# $Id: Storable.pm,v 1.0.1.13 2001/12/01 13:34:49 ram Exp $
-;#
-;#  Copyright (c) 1995-2000, Raphael Manfredi
-;#  
-;#  You may redistribute only under the same terms as Perl 5, as specified
-;#  in the README file that comes with the distribution.
-;#
-;# $Log: Storable.pm,v $
-;# Revision 1.0.1.13  2001/12/01 13:34:49  ram
-;# patch14: avoid requiring Fcntl upfront, useful to embedded runtimes
-;# patch14: store_fd() will now correctly autoflush file if needed
-;#
-;# Revision 1.0.1.12  2001/08/28 21:51:51  ram
-;# patch13: fixed truncation race with lock_retrieve() in lock_store()
-;#
-;# Revision 1.0.1.11  2001/07/01 11:22:14  ram
-;# patch12: systematically use "=over 4" for POD linters
-;# patch12: updated version number
-;#
-;# Revision 1.0.1.10  2001/03/15 00:20:25  ram
-;# patch11: updated version number
-;#
-;# Revision 1.0.1.9  2001/02/17 12:37:32  ram
-;# patch10: forgot to increase version number at previous patch
-;#
-;# Revision 1.0.1.8  2001/02/17 12:24:37  ram
-;# patch8: fixed incorrect error message
-;#
-;# Revision 1.0.1.7  2001/01/03 09:39:02  ram
-;# patch7: added CAN_FLOCK to determine whether we can flock() or not
-;#
-;# Revision 1.0.1.6  2000/11/05 17:20:25  ram
-;# patch6: increased version number
-;#
-;# Revision 1.0.1.5  2000/10/26 17:10:18  ram
-;# patch5: documented that store() and retrieve() can return undef
-;# patch5: added paragraph explaining the auto require for thaw hooks
-;#
-;# Revision 1.0.1.4  2000/10/23 18:02:57  ram
-;# patch4: protected calls to flock() for dos platform
-;# patch4: added logcarp emulation if they don't have Log::Agent
-;#
-;# Revision 1.0.1.3  2000/09/29 19:49:01  ram
-;# patch3: updated version number
-;#
-;# Revision 1.0.1.2  2000/09/28 21:42:51  ram
-;# patch2: added lock_store lock_nstore lock_retrieve
-;#
-;# Revision 1.0.1.1  2000/09/17 16:46:21  ram
-;# patch1: documented that doubles are stringified by nstore()
-;# patch1: added Salvador Ortiz Garcia in CREDITS section
-;#
-;# Revision 1.0  2000/09/01 19:40:41  ram
-;# Baseline for first official release.
-;#
+# $Id: Storable.pm,v 1.0.1.13 2001/12/01 13:34:49 ram Exp $
+#
+#  Copyright (c) 1995-2000, Raphael Manfredi
+#  
+#  You may redistribute only under the same terms as Perl 5, as specified
+#  in the README file that comes with the distribution.
+#
 
 require DynaLoader;
 require Exporter;
@@ -939,4 +891,3 @@ Storable, and your message will be delayed while he forwards it to us.
 L<Clone>.
 
 =cut
-

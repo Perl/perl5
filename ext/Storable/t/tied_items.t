@@ -7,10 +7,6 @@
 #  You may redistribute only under the same terms as Perl 5, as specified
 #  in the README file that comes with the distribution.
 #
-# $Log: tied_items.t,v $
-# Revision 1.0  2000/09/01 19:40:42  ram
-# Baseline for first official release.
-#
 
 #
 # Tests ref to items in tied hash/array structures.
@@ -68,4 +64,3 @@ ok 6, $$ref2 eq $$ref;
 ok 7, $$ref2 == 8;
 # I don't understand why it's 3 and not 2
 ok 8, $a_fetches == 3;
-

@@ -3666,7 +3666,7 @@
  *	(presumably) be similar.
  *	See the INSTALL file for how this works.
  */
-#define PERL_XS_APIVERSION "5.005"
+#define PERL_XS_APIVERSION "5.008"
 #define PERL_PM_APIVERSION "5.005"
 
 /* HAS_CRYPT:

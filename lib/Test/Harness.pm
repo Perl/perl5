@@ -159,6 +159,13 @@ emitted if the test script is skipped completely:
 
   1..0 # Skipped: no leverage found
 
+If you don't have any comment on skipping, just print C<1..0> with 
+nothing after it. Test::Harness will say something like this:
+
+op/64bitint..............skipped
+       skipped: no reason given
+       
+
 =item B<Todo tests>
 
 If the standard output line contains the substring C< # TODO> after

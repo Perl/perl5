@@ -84,6 +84,10 @@ cppflags="${cppflags} -no-cpp-precomp"
 # and ccflags needs them aswell since we don't use cpp directly
 ccflags="${ccflags} -no-cpp-precomp"
 
+# Known optimizer problems.
+case "`cc -v 2>&1`" in
+*"3.1 20020105"*) toke_cflags='optimize=""' ;;
+esac
 
 # Shared library extension is .dylib.
 # Bundle extension is .bundle.
@@ -128,7 +132,6 @@ firstmakefile=GNUmakefile;
 
 #
 # The libraries are not threadsafe as of OS X 10.1.
-# Better stop now.
 #
 # Fix when Apple fixes libc.
 #
@@ -137,12 +140,9 @@ case "$usethreads$useithreads$use5005threads" in
 cat <<EOM >&4
 
 *** Warning, there might be problems with your libraries with
-*** regards to threading.
+*** regards to threading.  The test ext/threads/t/libc.t is likely
+*** to fail.
 
 EOM
-#*** You do not have threadsafe libraries, I cannot use threads.
-#*** Cannot continue, aborting.
-#EOM
-#	exit 1
 	;;
 esac

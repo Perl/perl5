@@ -203,7 +203,7 @@ sub viacode
     }
 
     if ($code > 0x10FFFF) {
-	carp "Unicode characters only allocated up to 0x10FFFF (you asked for $hex)";
+	carp sprintf "Unicode characters only allocated up to U+10FFFF (you asked for U+%X)", $hex;
 	return;
     }
 
@@ -235,7 +235,7 @@ sub vianame
 
     $txt = do "unicore/Name.pl" unless $txt;
 
-    if ($txt =~ m/^([0-9A-F]+)\t\t($arg)/m) {
+    if ($txt =~ m/^([0-9A-F]+)\t\t($arg)$/m) {
         return $vianame{$arg} = hex $1;
     } else {
         return;
@@ -349,7 +349,7 @@ to custom translators.
 Notice that the name returned for of U+FEFF is "ZERO WIDTH NO-BREAK
 SPACE", not "BYTE ORDER MARK".
 
-=head1 charnames::vianame(code)
+=head1 charnames::vianame(name)
 
 Returns the code point indicated by the name.
 The example
@@ -358,9 +358,9 @@ The example
 
 prints "2722".
 
-Returns undef if no name is known for the name.
+Returns undef if the name is unknown.
 
-This works only for the standard names, and does not yet aply 
+This works only for the standard names, and does not yet apply 
 to custom translators.
 
 =head1 ALIASES
@@ -415,8 +415,12 @@ will also give a warning about being deprecated.
 
 =head1 ILLEGAL CHARACTERS
 
-If you ask for a character that does not exist, a warning is given
-and the Unicode I<replacement character> "\x{FFFD}" is returned.
+If you ask by name for a character that does not exist, a warning is
+given and the Unicode I<replacement character> "\x{FFFD}" is returned.
+
+If you ask by code for a character that does not exist, no warning is
+given and C<undef> is returned.  (Though if you ask for a code point
+past U+10FFFF you do get a warning.)
 
 =head1 BUGS
 

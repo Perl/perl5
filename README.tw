@@ -141,7 +141,11 @@ Unicode 學術學會 (Unicode 標準的制定者)
 
 Unix/Linux 上的 UTF-8 及 Unicode 答客問
 
+=back
+
 =head2 中文化資訊
+
+=over 4
 
 =item 為什麼叫 "正體中文" 不叫 "繁體中文"?
 

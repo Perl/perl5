@@ -1,4 +1,4 @@
-=head1 NAME
+.=head1 NAME
 
 perldelta - what is new for perl v5.8.0
 
@@ -2010,7 +2010,7 @@ exist, if that's what they were.
     # Nothing has set the FOO element so far
 
     { local $tied_hash{FOO} = 'Bar' }
-    
+
     # This used to print, but not now.
     print "exists!\n" if exists $tied_hash{FOO};
 
@@ -3031,15 +3031,11 @@ ability to build extensions, and that seems to be working reasonably well.)
 
     local %tied_array;
 
-doesn't work as one would expect: the old value is restored incorrectly.
-This will be fixed in a future release, but note that doing so will break
-existing code that relies on the broken semantics. It is important
-that you check and alter any such code now.  In the future release,
-localising a tied array or hash will convert that variable into a new,
-empty, and B<untied> array or hash. At the end of the block, the variable
-will be repointed at the original tied thingy. Note that no tied methods
-will be called at any point during this process. (With the existing
-behaviour, the variable remains tied while localised.)
+doesn't work as one would expect: the old value is restored
+incorrectly.  This will be changed in a future release, but we don't
+know yet which the new semantics will exactly be.  In any case the
+change will break existing code that relies on the current
+(ill-defined) semantics, so just avoid doing this in general.
 
 =head2 Self-tying of Arrays and Hashes Is Forbidden
 

@@ -335,6 +335,7 @@ ext/Encode/ucm/cp932.ucm	Unicode Character Map
 ext/Encode/ucm/cp936.ucm	Unicode Character Map
 ext/Encode/ucm/cp949.ucm	Unicode Character Map
 ext/Encode/ucm/cp950.ucm	Unicode Character Map
+ext/Encode/ucm/ctrl.ucm		Unicode Character Map
 ext/Encode/ucm/dingbats.ucm	Unicode Character Map
 ext/Encode/ucm/euc-cn.ucm	Unicode Character Map
 ext/Encode/ucm/euc-jp.ucm	Unicode Character Map
@@ -374,6 +375,7 @@ ext/Encode/ucm/macThai.ucm	Unicode Character Map
 ext/Encode/ucm/macTurkish.ucm	Unicode Character Map
 ext/Encode/ucm/macUkraine.ucm	Unicode Character Map
 ext/Encode/ucm/nextstep.ucm	Unicode Character Map
+ext/Encode/ucm/null.ucm		Unicode Character Map
 ext/Encode/ucm/posix-bc.ucm	Unicode Character Map
 ext/Encode/ucm/shiftjis.ucm	Unicode Character Map
 ext/Encode/ucm/symbol.ucm	Unicode Character Map
@@ -1946,9 +1948,11 @@ NetWare/bat/BldNWExt.bat	NetWare port
 NetWare/bat/Buildtype.bat	NetWare port
 NetWare/bat/CWbuild.bat		NetWare port
 NetWare/bat/MPKBuild.bat	NetWare port
+NetWare/bat/Setcw.bat		NetWare port
 NetWare/bat/Setmpksdk.bat	NetWare port
 NetWare/bat/Setnlmsdk.bat	NetWare port
 NetWare/bat/SetNWBld.bat	NetWare port
+NetWare/bat/SetNWDef.bat	NetWare port
 NetWare/bat/Setwatcom.bat	NetWare port
 NetWare/bat/ToggleD2.bat	NetWare port
 NetWare/bat/ToggleXDC.bat	NetWare port
@@ -1995,6 +1999,7 @@ NetWare/nwutil.h		NetWare port
 NetWare/nwvmem.h		NetWare port
 NetWare/perllib.cpp		NetWare port
 NetWare/splittree.pl		NetWare port
+NetWare/sv_nw.c			NetWare port
 NetWare/t/NWModify.pl		NetWare port
 NetWare/t/NWScripts.pl		NetWare port
 NetWare/t/Readme.txt		NetWare port

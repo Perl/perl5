@@ -281,13 +281,12 @@ END
 
     $m .= <<'END' if $self->{PERL_SRC};
         $(NOECHO)echo "$(EXTRALIBS)" >> $(PERL_SRC)\ext.libs
-
+    
+    
 END
-
     $m .= $self->dir_target('$(INST_ARCHAUTODIR)');
     return $m;
 }
-
 
 =item dynamic_lib (o)
 
@@ -328,7 +327,7 @@ MAKE_FRAG
 MAKE_FRAG
     }
 
-    $m .= '	$(LD) $(LDFLAGS) $(OBJECT:.obj=.obj) -desc "Perl 5.7.3 Extension ($(BASEEXT))  XS_VERSION: $(XS_VERSION)" -nlmversion $(NLM_VERSION)';
+    $m .= '	$(LD) $(LDFLAGS) $(OBJECT:.obj=.obj) -desc "Perl 5.8.0 Extension ($(BASEEXT))  XS_VERSION: $(XS_VERSION)" -nlmversion $(NLM_VERSION)';
 
     # Taking care of long names like FileHandle, ByteLoader, SDBM_File etc
     if($self->{NLM_SHORT_NAME}) {

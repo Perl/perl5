@@ -588,7 +588,7 @@ than ASCII 0 to 9 (and ASCII a to f for hexadecimal).
 
 =over 4
 
-=item 
+=item *
 
 Will My Old Scripts Break?
 
@@ -600,7 +600,7 @@ produced a character modulo 255.  C<chr(300)>, for example, was equal
 to C<chr(45)> or "-" (in ASCII), now it is LATIN CAPITAL LETTER I WITH
 BREVE.
 
-=item 
+=item *
 
 How Do I Make My Scripts Work With Unicode?
 
@@ -608,7 +608,7 @@ Very little work should be needed since nothing changes until you
 generate Unicode data.  The most important thing is getting input as
 Unicode; for that, see the earlier I/O discussion.
 
-=item 
+=item *
 
 How Do I Know Whether My String Is In Unicode?
 
@@ -655,7 +655,7 @@ defined function C<length()>:
     print length($unicode), "\n"; # will also print 2
                                   # (the 0xC4 0x80 of the UTF-8)
 
-=item 
+=item *
 
 How Do I Detect Data That's Not Valid In a Particular Encoding?
 
@@ -679,7 +679,7 @@ warning is produced. The "U0" means "expect strictly UTF-8 encoded
 Unicode".  Without that the C<unpack("U*", ...)> would accept also
 data like C<chr(0xFF>), similarly to the C<pack> as we saw earlier.
 
-=item 
+=item *
 
 How Do I Convert Binary Data Into a Particular Encoding, Or Vice Versa?
 
@@ -734,14 +734,14 @@ B<Any random collection of bytes isn't well-formed UTF-8>.  You can
 use C<unpack("C*", $string)> for the former, and you can create
 well-formed Unicode data by C<pack("U*", 0xff, ...)>.
 
-=item 
+=item *
 
 How Do I Display Unicode?  How Do I Input Unicode?
 
 See http://www.alanwood.net/unicode/ and
 http://www.cl.cam.ac.uk/~mgk25/unicode.html
 
-=item 
+=item *
 
 How Does Unicode Work With Traditional Locales?
 

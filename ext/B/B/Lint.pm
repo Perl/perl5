@@ -250,6 +250,11 @@ sub B::SVOP::lint {
 	    if ($gv->NAME =~ /^_./ && $gv->STASH->NAME ne $curstash) {
 		warning('Illegal reference to private name %s', $gv->NAME);
 	    }
+	} elsif ($opname eq "method_named") {
+	    my $method = $op->gv->PV;
+	    if ($method =~ /^_./) {
+		warning("Illegal reference to private method name $method");
+	    }
 	}
     }
     if ($check{undefined_subs}) {

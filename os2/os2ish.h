@@ -357,6 +357,8 @@ void *emx_realloc (void *, size_t);
 
 #include <stdlib.h>	/* before the following definitions */
 #include <unistd.h>	/* before the following definitions */
+#include <fcntl.h>
+#include <sys/stat.h>
 
 #define chdir	_chdir2
 #define getcwd	_getcwd2
@@ -371,6 +373,16 @@ void *emx_realloc (void *, size_t);
 #endif
 
 #define PERLIO_IS_BINMODE_FD(fd) _PERLIO_IS_BINMODE_FD(fd)
+
+#ifdef __GNUG__
+# define HAS_BOOL 
+#endif
+#ifndef HAS_BOOL
+# define bool char
+# define HAS_BOOL 1
+#endif
+
+extern int* _fd_flags(int fd); /* where's the real prototype of this? */
 
 static inline bool
 _PERLIO_IS_BINMODE_FD(int fd)
