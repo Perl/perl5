@@ -124,7 +124,7 @@ my $echo = "$Invoke_Perl $ECHO";
 
 my $TEST = catfile(curdir(), 'TEST');
 
-print "1..203\n";
+print "1..205\n";
 
 # First, let's make sure that Perl is checking the dangerous
 # environment variables. Maybe they aren't set yet, so we'll
@@ -452,7 +452,7 @@ else {
 	test 87, $@ eq '', $@;
     }
     else {
-	for (86..87) { print "ok $_ # Skipped: this is not VMS\n"; }
+	for (86..87) { print "ok $_ # Skipped: This is not VMS\n"; }
     }
 }
 
@@ -957,12 +957,17 @@ else
 
     test 194, eval { system $TAINT, $TAINT } eq '', 'system';
     test 195, $@ =~ $err, $@;
-    test 196, eval { system $TAINT $TAINT } eq '', 'exec';
+    test 196, eval { system $TAINT $TAINT } eq '', 'system';
     test 197, $@ =~ $err, $@;
-    test 198, eval { system $TAINT $TAINT, $TAINT } eq '', 'exec';
+    test 198, eval { system $TAINT $TAINT, $TAINT } eq '', 'system';
     test 199, $@ =~ $err, $@;
-    test 200, eval { system $TAINT 'notaint' } eq '', 'exec';
+    test 200, eval { system $TAINT 'notaint' } eq '', 'system';
     test 201, $@ =~ $err, $@;
-    test 202, eval { system {'notaint'} $TAINT } eq '', 'exec';
+    test 202, eval { system {'notaint'} $TAINT } eq '', 'system';
     test 203, $@ =~ $err, $@;
+
+    eval { system("lskdfj does not exist","with","args"); };
+    test 204, $@ eq '';
+    eval { exec("lskdfj does not exist","with","args"); };
+    test 205, $@ eq '';
 }
