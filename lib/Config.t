@@ -42,7 +42,10 @@ ok(exists $Config{ccflags_nolargefiles}, "has ccflags_nolargefiles");
 
 like(Config::myconfig(),  qr/cc='$Config{cc}'/, "myconfig");
 
-like(Config::config_sh(), qr/cc='$Config{cc}'/, "config_sh");
+SKIP: {
+	skip "cc is tied in $^O", 1 if $^O eq 'MacOS';
+	like(Config::config_sh(), qr/cc='$Config{cc}'/, "config_sh");
+}
 
 my $out = tie *STDOUT, 'FakeOut';
 
