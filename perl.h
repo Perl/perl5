@@ -1626,7 +1626,7 @@ typedef struct ptr_tbl PTR_TBL_t;
 #   endif
 #endif
 
-#if defined(OS2)
+#if defined(OS2) || defined(MACOS_TRADITIONAL)
 #  include "iperlsys.h"
 #endif
 
@@ -1947,7 +1947,7 @@ typedef I32 (*filter_t) (pTHXo_ int, SV *, int);
 #define FILTER_DATA(idx)	   (AvARRAY(PL_rsfp_filters)[idx])
 #define FILTER_ISREADER(idx)	   (idx >= AvFILLp(PL_rsfp_filters))
 
-#if !defined(OS2)
+#if !defined(OS2) && !defined(MACOS_TRADITIONAL)
 #  include "iperlsys.h"
 #endif
 #include "regexp.h"
