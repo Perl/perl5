@@ -79,6 +79,30 @@ Version v5.5.650        Development release working toward v5.6
 ----------------
 
 ____________________________________________________________________________
+[  5037] By: gsar                                  on 2000/02/08  06:59:55
+        Log: Windows has a somewhat different sitelib layout, and needs
+             $sitelib/archname added as well
+     Branch: perl
+	   ! perl.c
+____________________________________________________________________________
+[  5036] By: gsar                                  on 2000/02/08  06:59:03
+        Log: change#4987 appears to have broken libs scan for platforms that
+             don't set ignore_versioned_solibs (Solaris is one of them); add
+             derivative fix from the older logic for skipping versioned .so
+             libs
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[  5035] By: gsar                                  on 2000/02/07  21:21:44
+        Log: sprintf("%v"...) buffer resizing busted
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[  5034] By: gsar                                  on 2000/02/07  19:16:21
+        Log: update Changes
+     Branch: perl
+	   ! Changes pod/perlhist.pod
+____________________________________________________________________________
 [  5033] By: gsar                                  on 2000/02/07  19:01:08
         Log: stringify "\x{FFF}" to utf8 correctly; set SvUTF8 on "\x{XX}"
              only when XX > 127
