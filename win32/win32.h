@@ -199,6 +199,8 @@ struct utsname {
 /* Borland C thinks that a pointer to a member variable is 12 bytes in size. */
 #define PERL_MEMBER_PTR_SIZE	12
 
+#define isnan		_isnan
+
 #endif
 
 #ifdef _MSC_VER			/* Microsoft Visual C++ */
