@@ -79,7 +79,7 @@ static I32 utf16rev_textfilter(pTHXo_ int idx, SV *sv, int maxlen);
 #  endif
 YYSTYPE* yylval_pointer[YYMAXLEVEL];
 int* yychar_pointer[YYMAXLEVEL];
-int yyactlevel = 0;
+int yyactlevel = -1;
 #  undef yylval
 #  undef yychar
 #  define yylval (*yylval_pointer[yyactlevel])
@@ -2068,9 +2068,9 @@ Perl_yylex_r(pTHX_ YYSTYPE *lvalp, int *lcharp)
 {
     int r;
 
+    yyactlevel++;
     yylval_pointer[yyactlevel] = lvalp;
     yychar_pointer[yyactlevel] = lcharp;
-    yyactlevel++;
     if (yyactlevel >= YYMAXLEVEL)
 	Perl_croak(aTHX_ "panic: YYMAXLEVEL");
 
@@ -2085,13 +2085,8 @@ Perl_yylex_r(pTHX_ YYSTYPE *lvalp, int *lcharp)
 #ifdef __SC__
 #pragma segment Perl_yylex
 #endif
-
 int
-#ifdef USE_PURE_BISON
-Perl_yylex(pTHX_ YYSTYPE *lvalp, int *lcharp)
-#else
 Perl_yylex(pTHX)
-#endif
 {
     register char *s;
     register char *d;
