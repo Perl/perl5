@@ -184,6 +184,7 @@ statusvalue_vms
 stdingv
 strchop
 strtab
+sub_generation
 sublex_info
 sv_count
 sv_objcount

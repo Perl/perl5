@@ -243,6 +243,7 @@
 #define stdingv			(curinterp->Istdingv)
 #define strchop			(curinterp->Istrchop)
 #define strtab			(curinterp->Istrtab)
+#define sub_generation		(curinterp->Isub_generation)
 #define sublex_info		(curinterp->Isublex_info)
 #define sv_arenaroot		(curinterp->Isv_arenaroot)
 #define sv_count		(curinterp->Isv_count)
@@ -420,6 +421,7 @@
 #define Istdingv		stdingv
 #define Istrchop		strchop
 #define Istrtab			strtab
+#define Isub_generation		sub_generation
 #define Isublex_info		sublex_info
 #define Isv_arenaroot		sv_arenaroot
 #define Isv_count		sv_count
@@ -659,6 +661,7 @@
 #define stdingv			Perl_stdingv
 #define strchop			Perl_strchop
 #define strtab			Perl_strtab
+#define sub_generation		Perl_sub_generation
 #define sublex_info		Perl_sublex_info
 #define sv_arenaroot		Perl_sv_arenaroot
 #define sv_count		Perl_sv_count
@@ -886,7 +889,6 @@
 #define sh_path			(Perl_Vars.Gsh_path)
 #define sighandlerp		(Perl_Vars.Gsighandlerp)
 #define specialsv_list		(Perl_Vars.Gspecialsv_list)
-#define sub_generation		(Perl_Vars.Gsub_generation)
 #define subline			(Perl_Vars.Gsubline)
 #define subname			(Perl_Vars.Gsubname)
 #define sv_mutex		(Perl_Vars.Gsv_mutex)
@@ -997,7 +999,6 @@
 #define Gsh_path		sh_path
 #define Gsighandlerp		sighandlerp
 #define Gspecialsv_list		specialsv_list
-#define Gsub_generation		sub_generation
 #define Gsubline		subline
 #define Gsubname		subname
 #define Gsv_mutex		sv_mutex
@@ -1108,7 +1109,6 @@
 #define sh_path			Perl_sh_path
 #define sighandlerp		Perl_sighandlerp
 #define specialsv_list		Perl_specialsv_list
-#define sub_generation		Perl_sub_generation
 #define subline			Perl_subline
 #define subname			Perl_subname
 #define sv_mutex		Perl_sv_mutex
