@@ -452,7 +452,7 @@ sub ExtUtils::MakeMaker::new {
 	}
 	$self->{PARENT}->{CHILDREN}->{$newclass} = $self if $self->{PARENT};
     } else {
-	parse_args($self,@ARGV);
+	parse_args($self,split(' ', $ENV{MAKEMAKEROPT} || ''),@ARGV);
     }
 
     $self->{NAME} ||= $self->guess_name;
@@ -1915,6 +1915,18 @@ OK, as opposed to I<work> OK (say, this system-dependent module builds
 in a subdirectory of some other distribution, or is listed as a
 dependency in a CPAN::Bundle, but the functionality is supported by
 different means on the current architecture).
+
+=head1 ENVIRONMENT
+
+=over 8
+
+=item MAKEMAKEROPT
+
+Command line options used by C<MakeMaker-E<gt>new()>, and thus by
+C<WriteMakefile()>.  The string is split on whitespace, and the result
+is processed before any actual command line arguments are processed.
+
+=back
 
 =head1 SEE ALSO
 
