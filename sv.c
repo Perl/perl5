@@ -3553,6 +3553,9 @@ sv_reset(register char *s, HV *stash)
     register I32 max;
     char todo[256];
 
+    if (!stash)
+	return;
+
     if (!*s) {		/* reset ?? searches */
 	for (pm = HvPMROOT(stash); pm; pm = pm->op_pmnext) {
 	    pm->op_pmflags &= ~PMf_USED;

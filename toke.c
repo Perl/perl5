@@ -49,6 +49,8 @@ static int uni _((I32 f, char *s));
 #endif
 static char * filter_gets _((SV *sv, PerlIO *fp, STRLEN append));
 static void restore_rsfp _((void *f));
+static void restore_expect _((void *e));
+static void restore_lex_expect _((void *e));
 
 static char ident_too_long[] = "Identifier too long";
 
@@ -257,6 +259,11 @@ lex_start(SV *line)
     SAVEPPTR(lex_brackstack);
     SAVEPPTR(lex_casestack);
     SAVEDESTRUCTOR(restore_rsfp, rsfp);
+    SAVESPTR(lex_stuff);
+    SAVEI32(lex_defer);
+    SAVESPTR(lex_repl);
+    SAVEDESTRUCTOR(restore_expect, tokenbuf + expect); /* encode as pointer */
+    SAVEDESTRUCTOR(restore_lex_expect, tokenbuf + expect);
 
     lex_state = LEX_NORMAL;
     lex_defer = 0;
@@ -271,11 +278,7 @@ lex_start(SV *line)
     *lex_casestack = '\0';
     lex_dojoin = 0;
     lex_starts = 0;
-    if (lex_stuff)
-	SvREFCNT_dec(lex_stuff);
     lex_stuff = Nullsv;
-    if (lex_repl)
-	SvREFCNT_dec(lex_repl);
     lex_repl = Nullsv;
     lex_inpat = 0;
     lex_inwhat = 0;
@@ -312,6 +315,22 @@ restore_rsfp(void *f)
     else if (rsfp && (rsfp != fp))
 	PerlIO_close(rsfp);
     rsfp = fp;
+}
+
+static void
+restore_expect(e)
+void *e;
+{
+    /* a safe way to store a small integer in a pointer */
+    expect = (expectation)((char *)e - tokenbuf);
+}
+
+static void
+restore_lex_expect(e)
+void *e;
+{
+    /* a safe way to store a small integer in a pointer */
+    lex_expect = (expectation)((char *)e - tokenbuf);
 }
 
 static void
@@ -4841,6 +4860,8 @@ scan_heredoc(register char *s)
 	}
 	sv_setpvn(tmpstr,d+1,s-d);
 	s += len - 1;
+	curcop->cop_line++;     /* the preceding stmt passes a newline */
+
 	sv_catpvn(herewas,s,bufend-s);
 	sv_setsv(linestr,herewas);
 	oldoldbufptr = oldbufptr = bufptr = s = linestart = SvPVX(linestr);
