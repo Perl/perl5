@@ -347,7 +347,7 @@ foreach my $b (@base) {
 
 @unicode = sort keys %unicode;
 
-print "Eq/Unicode\n";
+print "EqUnicode\n";
 if (open(EQ_UNICODE, ">Eq/Unicode")) {
     foreach my $c (@unicode) {
 	print EQ_UNICODE "$c @{$unicode{$c}}\n";
@@ -357,7 +357,7 @@ if (open(EQ_UNICODE, ">Eq/Unicode")) {
     die "$0: failed to open Eq/Unicode for writing: $!\n";
 }
 
-print "Eq/Latin1\n";
+print "EqLatin1\n";
 if (open(EQ_LATIN1, ">Eq/Latin1")) {
     foreach my $c (@unicode) {
 	last if hex($c) > 255;
