@@ -106,6 +106,125 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  7385] By: jhi                                   on 2000/10/21  01:28:42
+        Log: The #7383 was right only in the context of the original bug report,
+             not in more general case.
+     Branch: perl
+	   ! pp_hot.c
+____________________________________________________________________________
+[  7384] By: jhi                                   on 2000/10/21  01:08:23
+        Log: Fix for ID 20000915.011, IO::Select warning for an undefined fd.
+     Branch: perl
+	   ! ext/IO/lib/IO/Select.pm
+____________________________________________________________________________
+[  7383] By: jhi                                   on 2000/10/21  00:44:18
+        Log: Fix for ID 20001020.006, concatenating an unset submatch
+             with utf8 resulted in "Modification of a read-only value".
+     Branch: perl
+	   ! pp_hot.c t/pragma/utf8.t
+____________________________________________________________________________
+[  7382] By: jhi                                   on 2000/10/20  20:44:31
+        Log: Make scan_num() reëntrant, as suggested in
+             
+             Subject: [PATCH perl@7229] Rentrant parser and yylex()
+             From: "Roca, Ignasi" <ignasi.roca@fujitsu.siemens.es>
+             Date: Fri, 20 Oct 2000 14:17:27 +0100
+             Message-ID: <5930DC161690D211966700902715754702DA09CD@madt009a.siemens.es>
+     Branch: perl
+	   ! embed.h embed.pl objXSUB.h perlapi.c perly.c perly.y proto.h
+	   ! toke.c
+____________________________________________________________________________
+[  7381] By: jhi                                   on 2000/10/20  20:07:29
+        Log: Reëntrancy fix.
+             
+             Subject: [PATCH perl@7229] Rentrant parser and yylex()
+             From: "Roca, Ignasi" <ignasi.roca@fujitsu.siemens.es>
+             Date: Fri, 20 Oct 2000 14:17:27 +0100
+             Message-ID: <5930DC161690D211966700902715754702DA09CD@madt009a.siemens.es>
+     Branch: perl
+	   ! embed.h embed.pl perl.h proto.h toke.c
+____________________________________________________________________________
+[  7380] By: jhi                                   on 2000/10/20  19:15:54
+        Log: Don't write double values through long double pointers,
+             based on a part of
+             
+             Subject: [ID 20001016.017] [jens: 5.7.0 Solaris 8, 64 Bit, Workshop 6.0 Compiler]
+             From: Jens Hamisch <jens@Strawberry.COM>
+             Date: Tue, 17 Oct 2000 08:39:36 +0200
+             Message-Id: <20001017083936.A11104@Strawberry.COM>
+     Branch: perl
+	   ! perl.h pp.c
+____________________________________________________________________________
+[  7379] By: jhi                                   on 2000/10/20  18:43:37
+        Log: Portability tweak on #7377.
+             
+             Subject:  Re: [nick@cow.org.uk: [ID 20001020.004] Not OK: perl v5.7.0 +DEVEL7368 on i386-freebsd-64all 4.1-stable (UNINSTALLED)]
+             From: lane@DUPHY4.Physics.Drexel.Edu (Charles Lane)
+             Date:     Fri, 20 Oct 2000 13:13:41 EDT
+             Message-Id: <001020131216.3b141@DUPHY4.Physics.Drexel.Edu>
+     Branch: perl
+	   ! t/lib/dprof.t
+____________________________________________________________________________
+[  7378] By: jhi                                   on 2000/10/20  12:57:19
+        Log: SOCKS function redefinitions need prototypes, too, otherwise
+             for example 32 bit versus 64 bit differences cause a lot of
+             problems.  Part of
+             
+             Subject: [ID 20001016.017] [jens: 5.7.0 Solaris 8, 64 Bit, Workshop 6.0 Compiler]
+             From: Jens Hamisch <jens@Strawberry.COM>
+             Date: Tue, 17 Oct 2000 08:39:36 +0200
+             Message-Id: <20001017083936.A11104@Strawberry.COM>
+     Branch: perl
+	   ! doio.c pp_sys.c
+____________________________________________________________________________
+[  7377] By: jhi                                   on 2000/10/20  12:37:12
+        Log: Subject:  [PATCH] Perl 5.6.0/5.7.0 enable DProf test for VMS
+             From: lane@DUPHY4.Physics.Drexel.Edu (Charles Lane)
+             Date:     Fri, 20 Oct 2000 08:26:04 EDT
+             Message-Id: <001020074851.3751a@DUPHY4.Physics.Drexel.Edu>
+     Branch: perl
+	   ! configure.com t/lib/dprof.t t/lib/dprof/V.pm vms/test.com
+____________________________________________________________________________
+[  7376] By: jhi                                   on 2000/10/20  12:35:31
+        Log: Subject:  [PATCH] Perl 5.6.0/5.7.0, vms/gen_shrfls.pl update
+             From: lane@DUPHY4.Physics.Drexel.Edu (Charles Lane)
+             Date:     Fri, 20 Oct 2000 07:48:15 EDT
+             Message-Id: <001020074423.39b82@DUPHY4.Physics.Drexel.Edu>
+     Branch: perl
+	   ! configure.com vms/gen_shrfls.pl
+____________________________________________________________________________
+[  7374] By: jhi                                   on 2000/10/20  00:59:48
+        Log: In the latest compiler builds cccdlflags must not become -fpic,
+             from Wilfredo Sánchez.
+     Branch: perl
+	   ! hints/darwin.sh
+____________________________________________________________________________
+[  7373] By: jhi                                   on 2000/10/20  00:56:35
+        Log: Subject: PATCH CR+LF should be "\cM\cJ" in perlop
+             From: Tony Cook <tony@develop-help.com>
+             Date: Fri, 20 Oct 2000 07:29:15 +1100 (EST)
+             Message-ID: <Pine.LNX.4.10.10010200725530.12682-100000@develop-help.com>
+     Branch: perl
+	   ! pod/perlop.pod
+____________________________________________________________________________
+[  7372] By: jhi                                   on 2000/10/19  19:34:40
+        Log: Typo noted by Mark Lutz.
+     Branch: perl
+	   ! t/op/64bitint.t
+____________________________________________________________________________
+[  7370] By: jhi                                   on 2000/10/19  17:18:08
+        Log: Subject: PATCH do_print has 2 PerlIO_error()s
+             From: nick@ccl4.org
+             Date: Thu, 19 Oct 2000 18:09:20 +0100
+             Message-ID: <20001019180920.A8440@babyhippo.co.uk>
+     Branch: perl
+	   ! doio.c
+____________________________________________________________________________
+[  7369] By: jhi                                   on 2000/10/19  14:01:49
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  7368] By: jhi                                   on 2000/10/19  13:04:29
         Log: Subject: Re: [ID 20001013.008] perl 5.6.0 on AIX w/GCC
              From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
