@@ -1,4 +1,4 @@
-/* $Header: doio.c,v 3.0.1.5 90/02/28 17:01:36 lwall Locked $
+/* $Header: doio.c,v 3.0.1.6 90/03/12 16:30:07 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	doio.c,v $
+ * Revision 3.0.1.6  90/03/12  16:30:07  lwall
+ * patch13: system 'FOO=bar command' didn't invoke sh as it should
+ * 
  * Revision 3.0.1.5  90/02/28  17:01:36  lwall
  * patch9: open(FOO,"$filename\0") will now protect trailing spaces in filename
  * patch9: removed obsolete checks to avoid opening block devices
@@ -939,6 +942,9 @@ char *cmd;
 	    return FALSE;
 	}
     }
+    for (s = cmd; *s && isalpha(*s); s++) ;	/* catch VAR=val gizmo */
+    if (*s == '=')
+	goto doshell;
     New(402,argv, (s - cmd) / 2 + 2, char*);
 
     a = argv;

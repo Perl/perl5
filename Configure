@@ -8,7 +8,7 @@
 # and edit it to reflect your system.  Some packages may include samples
 # of config.h for certain machines, so you might look for one of those.)
 #
-# $Header: Configure,v 3.0.1.5 90/02/28 16:17:50 lwall Locked $
+# $Header: Configure,v 3.0.1.6 90/03/12 16:10:23 lwall Locked $
 #
 # Yes, you may rip this off to use in other distribution packages.
 # (Note: this Configure script was generated automatically.  Rather than
@@ -257,7 +257,7 @@ attrlist="$attrlist i186 __m88k__ m88k DGUX __DGUX__"
 pth="/usr/ucb /bin /usr/bin /usr/local /usr/local/bin /usr/lbin /usr/plx /usr/5bin /vol/local/bin /etc /usr/lib /lib /usr/local/lib /sys5.3/bin /sys5.3/usr/bin /bsd4.3/bin /bsd4.3/usr/bin /bsd4.3/usr/ucb"
 d_newshome="/usr/NeWS"
 defvoidused=7
-libswanted="net_s net nsl_s nsl socket nm ndir ndbm dbm sun bsd BSD x c_s PW"
+libswanted="net_s net nsl_s nsl socket nm ndir ndbm dbm sun bsd BSD x c_s"
 inclwanted='/usr/netinclude /usr/include/sun /usr/include/bsd /usr/include/lan'
 : some greps do not return status, grrr.
 echo "grimblepritz" >grimble
@@ -638,11 +638,11 @@ esac
 cont=true
 while $test "$cont" ; do
     echo " "
-    rp="Where do you want to put the public executables? [$dflt]"
+    rp="Where do you want to put the public executables? (~name ok) [$dflt]"
     $echo $n "$rp $c"
     . myread
     bin="$ans"
-    bin=`filexp $bin`
+    bin=`./filexp "$bin"`
     if test -d $bin; then
 	cont=''
     else
@@ -675,10 +675,10 @@ esac
 cont=true
 while $test "$cont" ; do
     echo " "
-    rp="Where do the manual pages (source) go? [$dflt]"
+    rp="Where do the manual pages (source) go? (~name ok) [$dflt]"
     $echo $n "$rp $c"
     . myread
-    mansrc=`filexp "$ans"`
+    mansrc=`./filexp "$ans"`
     if $test -d "$mansrc"; then
 	cont=''
     else
@@ -707,7 +707,7 @@ case "$mansrc" in
     manext=l
     ;;
 *p)
-    manext=n
+    manext=p
     ;;
 *C)
     manext=C
@@ -1110,10 +1110,6 @@ rmlist="$rmlist pdp11"
 
 echo " "
 echo "Checking for optional libraries..."
-case "$libs" in
-'') dflt='';;
-*) dflt="$libs";;
-esac
 case "$libswanted" in
 '') libswanted='c_s';;
 esac
@@ -1156,6 +1152,9 @@ done
 set X $dflt
 shift
 dflt="$*"
+case "$libs" in
+*) dflt="$libs";;
+esac
 case "$dflt" in
 '') dflt='none';;
 esac
@@ -1206,7 +1205,7 @@ main()
     } u;
 
     if (sizeof(long) > 4)
-	u.l = 0x0807060504030201;
+	u.l = (0x08070605<<32) | 0x04030201;
     else
 	u.l = 0x04030201;
     for (i=0; i < sizeof(long); i++)
@@ -1214,7 +1213,7 @@ main()
     printf("\n");
 }
 EOCP
-    if $cc try.c -o try >/dev/null 2>&1 ; then
+    if $cc $ccflags try.c -o try >/dev/null 2>&1 ; then
 	dflt=`./try`
 	case "$dflt" in
 	????|????????) echo "(The test program ran ok.)";;
@@ -1513,6 +1512,7 @@ if $contains '^vprintf$' libc.list >/dev/null 2>&1; then
     echo 'vprintf() found.'
     d_vprintf="$define"
     cat >.ucbsprf.c <<'EOF'
+#include <stdio.h>
 #include <varargs.h>
 
 main() { xxx("foo"); }
@@ -1948,7 +1948,7 @@ main()
 	foo = bar;
 }
 EOCP
-if $cc -c try.c >/dev/null 2>&1 ; then
+if $cc -c $ccflags try.c >/dev/null 2>&1 ; then
     d_strctcpy="$define"
     echo "Yup, it can."
 else
@@ -2007,9 +2007,9 @@ for s_timeval in '-DS_TIMEVAL' ''; do
 	    for i_systime in '-DI_SYSTIME' ''; do
 		case "$flags" in
 		'') echo Trying $i_time $i_systime $d_systimekernel $s_timeval
-		    if $cc try.c $ccflags \
+		    if $cc $ccflags \
 			    $i_time $i_systime $d_systimekernel $s_timeval \
-			    -o try >/dev/null 2>&1 ; then
+			    try.c -o try >/dev/null 2>&1 ; then
 			set X $i_time $i_systime $d_systimekernel $s_timeval
 			shift
 			flags="$*"
@@ -2067,11 +2067,12 @@ echo 'Checking to see if your C compiler knows about "volatile"...'
 $cat >try.c <<'EOCP'
 main()
 {
-	volatile int foo;
+	char *volatile foo;
+	volatile int bar;
 	foo = foo;
 }
 EOCP
-if $cc -c try.c >/dev/null 2>&1 ; then
+if $cc -c $ccflags try.c >/dev/null 2>&1 ; then
     d_volatile="$define"
     echo "Yup, it does."
 else
@@ -2117,7 +2118,7 @@ main() {
 	exit(0);
 }
 EOCP
-    if $cc -S -DTRY=$defvoidused try.c >.out 2>&1 ; then
+    if $cc $ccflags -c -DTRY=$defvoidused try.c >.out 2>&1 ; then
 	voidflags=$defvoidused
 	echo "It appears to support void."
 	if $contains warning .out >/dev/null 2>&1; then
@@ -2126,14 +2127,14 @@ EOCP
 	fi
     else
 	echo "Hmm, your compiler has some difficulty with void.  Checking further..."
-	if $cc -S -DTRY=1 try.c >/dev/null 2>&1 ; then
+	if $cc $ccflags -c -DTRY=1 try.c >/dev/null 2>&1 ; then
 	    echo "It supports 1..."
-	    if $cc -S -DTRY=3 try.c >/dev/null 2>&1 ; then
+	    if $cc $ccflags -c -DTRY=3 try.c >/dev/null 2>&1 ; then
 		voidflags=3
 		echo "And it supports 2 but not 4."
 	    else
 		echo "It doesn't support 2..."
-		if $cc -S -DTRY=5 try.c >/dev/null 2>&1 ; then
+		if $cc $ccflags -c -DTRY=5 try.c >/dev/null 2>&1 ; then
 		    voidflags=5
 		    echo "But it supports 4."
 		else
@@ -2286,7 +2287,7 @@ main()
     printf("%d\n", sizeof(int));
 }
 EOCP
-    if $cc try.c -o try >/dev/null 2>&1 ; then
+    if $cc $ccflags try.c -o try >/dev/null 2>&1 ; then
 	dflt=`./try`
     else
 	dflt='4'
@@ -2317,10 +2318,10 @@ $cat <<EOM
 The $package package has some auxiliary files that should be put in a library
 that is accessible by everyone.  Where do you want to put these "private"
 EOM
-$echo $n "but accessible files? [$dflt] $c"
+$echo $n "but accessible files? (~name ok) [$dflt] $c"
 rp="Put private files where? [$dflt]"
 . myread
-privlib="$ans"
+privlib=`./filexp "$ans"`
 
 : check for size of random number generator
 echo " "
@@ -2344,7 +2345,7 @@ main()
     printf("%d\n",i);
 }
 EOCP
-    if $cc try.c -o try >/dev/null 2>&1 ; then
+    if $cc $ccflags try.c -o try >/dev/null 2>&1 ; then
 	dflt=`./try`
     else
 	dflt='?'

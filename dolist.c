@@ -1,4 +1,4 @@
-/* $Header: dolist.c,v 3.0.1.5 90/02/28 17:09:44 lwall Locked $
+/* $Header: dolist.c,v 3.0.1.6 90/03/12 16:33:02 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,11 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	dolist.c,v $
+ * Revision 3.0.1.6  90/03/12  16:33:02  lwall
+ * patch13: added list slice operator (LIST)[LIST]
+ * patch13: added splice operator: @oldelems = splice(@array,$offset,$len,LIST)
+ * patch13: made split('') act like split(//) rather than split(' ')
+ * 
  * Revision 3.0.1.5  90/02/28  17:09:44  lwall
  * patch9: split now can split into more than 10000 elements
  * patch9: @_ clobbered by ($foo,$bar) = split
@@ -287,7 +292,7 @@ int *arglast;
 	st = stack->ary_array;
 	m = str_get(dstr = st[sp--]);
 	nointrp = "";
-	if (!dstr->str_cur || (*m == ' ' && dstr->str_cur == 1)) {
+	if (*m == ' ' && dstr->str_cur == 1) {
 	    str_set(dstr,"\\s+");
 	    m = dstr->str_ptr;
 	    spat->spat_flags |= SPAT_SKIPWHITE;
@@ -658,8 +663,9 @@ int *arglast;
 }
 
 int
-do_slice(stab,numarray,lval,gimme,arglast)
-register STAB *stab;
+do_slice(stab,str,numarray,lval,gimme,arglast)
+STAB *stab;
+STR *str;
 int numarray;
 int lval;
 int gimme;
@@ -671,23 +677,40 @@ int *arglast;
     register char *tmps;
     register int len;
     register int magic = 0;
+    register ARRAY *ary;
+    register HASH *hash;
+    int oldarybase = arybase;
 
-    if (lval && !numarray) {
-	if (stab == envstab)
-	    magic = 'E';
-	else if (stab == sigstab)
-	    magic = 'S';
+    if (numarray) {
+	if (numarray == 2) {		/* a slice of a LIST */
+	    ary = stack;
+	    ary->ary_fill = arglast[3];
+	    arybase -= max + 1;
+	    st[sp] = str;		/* make stack size available */
+	    str_numset(str,(double)(sp - 1));
+	}
+	else
+	    ary = stab_array(stab);	/* a slice of an array */
+    }
+    else {
+	if (lval) {
+	    if (stab == envstab)
+		magic = 'E';
+	    else if (stab == sigstab)
+		magic = 'S';
 #ifdef SOME_DBM
-	else if (stab_hash(stab)->tbl_dbm)
-	    magic = 'D';
+	    else if (stab_hash(stab)->tbl_dbm)
+		magic = 'D';
 #endif /* SOME_DBM */
+	}
+	hash = stab_hash(stab);		/* a slice of an associative array */
     }
 
     if (gimme == G_ARRAY) {
 	if (numarray) {
 	    while (sp < max) {
 		if (st[++sp]) {
-		    st[sp-1] = afetch(stab_array(stab),
+		    st[sp-1] = afetch(ary,
 		      ((int)str_gnum(st[sp])) - arybase, lval);
 		}
 		else
@@ -699,7 +722,7 @@ int *arglast;
 		if (st[++sp]) {
 		    tmps = str_get(st[sp]);
 		    len = st[sp]->str_cur;
-		    st[sp-1] = hfetch(stab_hash(stab),tmps,len, lval);
+		    st[sp-1] = hfetch(hash,tmps,len, lval);
 		    if (magic)
 			str_magic(st[sp-1],stab,magic,tmps,len);
 		}
@@ -712,7 +735,7 @@ int *arglast;
     else {
 	if (numarray) {
 	    if (st[max])
-		st[sp] = afetch(stab_array(stab),
+		st[sp] = afetch(ary,
 		  ((int)str_gnum(st[max])) - arybase, lval);
 	    else
 		st[sp] = &str_undef;
@@ -721,13 +744,191 @@ int *arglast;
 	    if (st[max]) {
 		tmps = str_get(st[max]);
 		len = st[max]->str_cur;
-		st[sp] = hfetch(stab_hash(stab),tmps,len, lval);
+		st[sp] = hfetch(hash,tmps,len, lval);
 		if (magic)
 		    str_magic(st[sp],stab,magic,tmps,len);
 	    }
 	    else
 		st[sp] = &str_undef;
 	}
+    }
+    arybase = oldarybase;
+    return sp;
+}
+
+int
+do_splice(ary,str,gimme,arglast)
+register ARRAY *ary;
+STR *str;
+int gimme;
+int *arglast;
+{
+    register STR **st = stack->ary_array;
+    register int sp = arglast[1];
+    int max = arglast[2] + 1;
+    register STR **src;
+    register STR **dst;
+    register int i;
+    register int offset;
+    register int length;
+    int newlen;
+    int after;
+    int diff;
+    STR **tmparyval;
+
+    if (++sp < max) {
+	offset = ((int)str_gnum(st[sp])) - arybase;
+	if (offset < 0)
+	    offset += ary->ary_fill + 1;
+	if (++sp < max) {
+	    length = (int)str_gnum(st[sp++]);
+	    if (length < 0)
+		length = 0;
+	}
+	else
+	    length = ary->ary_max;		/* close enough to infinity */
+    }
+    else {
+	offset = 0;
+	length = ary->ary_max;
+    }
+    if (offset < 0) {
+	length += offset;
+	offset = 0;
+	if (length < 0)
+	    length = 0;
+    }
+    if (offset > ary->ary_fill + 1)
+	offset = ary->ary_fill + 1;
+    after = ary->ary_fill + 1 - (offset + length);
+    if (after < 0) {				/* not that much array */
+	length += after;			/* offset+length now in array */
+	after = 0;
+    }
+
+    /* At this point, sp .. max-1 is our new LIST */
+
+    newlen = max - sp;
+    diff = newlen - length;
+
+    if (diff < 0) {				/* shrinking the area */
+	if (newlen) {
+	    New(451, tmparyval, newlen, STR*);	/* so remember insertion */
+	    Copy(st+sp, tmparyval, newlen, STR*);
+	}
+
+	sp = arglast[0] + 1;
+	if (gimme == G_ARRAY) {			/* copy return vals to stack */
+	    if (sp + length >= stack->ary_max) {
+		astore(stack,sp + length, Nullstr);
+		st = stack->ary_array;
+	    }
+	    Copy(ary->ary_array+offset, st+sp, length, STR*);
+	    if (ary->ary_flags & ARF_REAL) {
+		for (i = length, dst = st+sp; i; i--)
+		    str_2static(*dst++);	/* free them eventualy */
+	    }
+	    sp += length - 1;
+	}
+	else {
+	    st[sp] = ary->ary_array[offset+length-1];
+	    if (ary->ary_flags & ARF_REAL)
+		str_2static(st[sp]);
+	}
+	ary->ary_fill += diff;
+
+	/* pull up or down? */
+
+	if (offset < after) {			/* easier to pull up */
+	    if (offset) {			/* esp. if nothing to pull */
+		src = &ary->ary_array[offset-1];
+		dst = src - diff;		/* diff is negative */
+		for (i = offset; i > 0; i--)	/* can't trust Copy */
+		    *dst-- = *src--;
+	    }
+	    ary->ary_array -= diff;		/* diff is negative */
+	    ary->ary_max += diff;
+	}
+	else {
+	    if (after) {			/* anything to pull down? */
+		src = ary->ary_array + offset + length;
+		dst = src + diff;		/* diff is negative */
+		Copy(src, dst, after, STR*);
+	    }
+	    Zero(&ary->ary_array[ary->ary_fill+1], -diff, STR*);
+						/* avoid later double free */
+	}
+	if (newlen) {
+	    for (src = tmparyval, dst = ary->ary_array + offset;
+	      newlen; newlen--) {
+		*dst = Str_new(46,0);
+		str_sset(*dst++,*src++);
+	    }
+	    Safefree(tmparyval);
+	}
+    }
+    else {					/* no, expanding (or same) */
+	if (length) {
+	    New(452, tmparyval, length, STR*);	/* so remember deletion */
+	    Copy(ary->ary_array+offset, tmparyval, length, STR*);
+	}
+
+	if (diff > 0) {				/* expanding */
+
+	    /* push up or down? */
+
+	    if (offset < after && diff <= ary->ary_array - ary->ary_alloc) {
+		if (offset) {
+		    src = ary->ary_array;
+		    dst = src - diff;
+		    Copy(src, dst, offset, STR*);
+		}
+		ary->ary_array -= diff;		/* diff is positive */
+		ary->ary_max += diff;
+		ary->ary_fill += diff;
+	    }
+	    else {
+		if (ary->ary_fill + diff >= ary->ary_max)	/* oh, well */
+		    astore(ary, ary->ary_fill + diff, Nullstr);
+		else
+		    ary->ary_fill += diff;
+		if (after) {
+		    dst = ary->ary_array + ary->ary_fill;
+		    src = dst - diff;
+		    for (i = after; i; i--) {
+			if (*dst)		/* str was hanging around */
+			    str_free(*dst);	/*  after $#foo */
+			*dst-- = *src;
+			*src-- = Nullstr;
+		    }
+		}
+	    }
+	}
+
+	for (src = st+sp, dst = ary->ary_array + offset; newlen; newlen--) {
+	    *dst = Str_new(46,0);
+	    str_sset(*dst++,*src++);
+	}
+	sp = arglast[0] + 1;
+	if (gimme == G_ARRAY) {			/* copy return vals to stack */
+	    if (length) {
+		Copy(tmparyval, st+sp, length, STR*);
+		if (ary->ary_flags & ARF_REAL) {
+		    for (i = length, dst = st+sp; i; i--)
+			str_2static(*dst++);	/* free them eventualy */
+		}
+		Safefree(tmparyval);
+	    }
+	    sp += length - 1;
+	}
+	else if (length) {
+	    st[sp] = tmparyval[length-1];
+	    if (ary->ary_flags & ARF_REAL)
+		str_2static(st[sp]);
+	    Safefree(tmparyval);
+	}
+	else
+	    st[sp] = &str_undef;
     }
     return sp;
 }

@@ -1,4 +1,4 @@
-/* $Header: consarg.c,v 3.0.1.3 90/02/28 16:47:54 lwall Locked $
+/* $Header: consarg.c,v 3.0.1.4 90/03/12 16:24:40 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	consarg.c,v $
+ * Revision 3.0.1.4  90/03/12  16:24:40  lwall
+ * patch13: return (@array) did counter-intuitive things
+ * 
  * Revision 3.0.1.3  90/02/28  16:47:54  lwall
  * patch9: the x operator is now up to 10 times faster
  * patch9: @_ clobbered by ($foo,$bar) = split
@@ -905,7 +908,16 @@ maybelistish(optype, arg)
 int optype;
 ARG *arg;
 {
-    if (optype == O_PRTF ||
+    ARG *tmparg = arg;
+
+    if (optype == O_RETURN && arg->arg_type == O_ITEM &&
+      arg[1].arg_type == A_EXPR && (tmparg = arg[1].arg_ptr.arg_arg) &&
+      ((tmparg->arg_flags & AF_LISTISH) || (tmparg->arg_type == O_ARRAY) )) {
+	tmparg = listish(tmparg);
+	free_arg(arg);
+	arg = tmparg;
+    }
+    else if (optype == O_PRTF ||
       (arg->arg_type == O_ASLICE || arg->arg_type == O_HSLICE ||
        arg->arg_type == O_F_OR_R) )
 	arg = listish(arg);

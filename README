@@ -80,6 +80,7 @@ Installation
     Ultrix (2.3) may need to hand assemble teval.s with a -J switch.
     Ultrix on MIPS machines may need -DLANGUAGE_C.
     SCO Xenix may need -m25000 for yacc.
+    Xenix 386 needs -Sm10000 for yacc.
     Genix needs to use libc rather than libc_s, or #undef VARARGS.
     NCR Tower 32 (OS 2.01.01) may need -W2,-Sl,2000 and #undef MKDIR.
     Machines with half-implemented dbm routines will need to #undef ODBM & NDBM.

@@ -25,9 +25,14 @@ esac
 
 echo "Extracting Makefile (with variable substitutions)"
 cat >Makefile <<!GROK!THIS!
-# $Header: Makefile.SH,v 3.0.1.4 90/02/28 16:19:43 lwall Locked $
+# $Header: Makefile.SH,v 3.0.1.5 90/03/12 16:15:17 lwall Locked $
 #
 # $Log:	Makefile.SH,v $
+# Revision 3.0.1.5  90/03/12  16:15:17  lwall
+# patch13: some dependencies missing on perly.h
+# patch13: some relief for buggy parallel makes
+# patch13: bison doesn't declare extern YYSTYPE yylval;
+# 
 # Revision 3.0.1.4  90/02/28  16:19:43  lwall
 # patch9: extraneous $ on suidperl in Makefile
 # 
@@ -167,7 +172,7 @@ tcmd.o: cmd.c $(h)
 	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tcmd.c
 	/bin/rm -f tcmd.c
 
-tcons.o: cons.c $(h)
+tcons.o: cons.c $(h) perly.h
 	/bin/rm -f tcons.c
 	$(SLN) cons.c tcons.c
 	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tcons.c
@@ -239,13 +244,13 @@ tstab.o: stab.c $(h)
 	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tstab.c
 	/bin/rm -f tstab.c
 
-tstr.o: str.c $(h)
+tstr.o: str.c $(h) perly.h
 	/bin/rm -f tstr.c
 	$(SLN) str.c tstr.c
 	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tstr.c
 	/bin/rm -f tstr.c
 
-ttoke.o: toke.c $(h)
+ttoke.o: toke.c $(h) perly.h
 	/bin/rm -f ttoke.c
 	$(SLN) toke.c ttoke.c
 	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) ttoke.c
@@ -257,11 +262,16 @@ tutil.o: util.c $(h)
 	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tutil.c
 	/bin/rm -f tutil.c
 
-perl.c perly.h: perl.y
+perly.h: perl.c
+	@ echo Dummy dependency for dumb parallel make
+	touch perly.h
+
+perl.c: perl.y
 	@ echo Expect 25 shift/reduce errors...
 	$(YACC) -d perl.y
 	mv y.tab.c perl.c
 	mv y.tab.h perly.h
+	echo 'extern YYSTYPE yylval;' >>perly.h
 
 perl.o: perl.c perly.h $(h)
 	$(CC) -c $(CFLAGS) $(LARGE) perl.c

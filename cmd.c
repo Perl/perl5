@@ -1,4 +1,4 @@
-/* $Header: cmd.c,v 3.0.1.5 90/02/28 16:38:31 lwall Locked $
+/* $Header: cmd.c,v 3.0.1.6 90/03/12 16:21:09 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,11 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	cmd.c,v $
+ * Revision 3.0.1.6  90/03/12  16:21:09  lwall
+ * patch13: fixed some backwards VOLATILE declarations
+ * patch13: while (s/x//) {} still caused some anomolies
+ * patch13: greater-than test of numeric switch structures did less-than action
+ * 
  * Revision 3.0.1.5  90/02/28  16:38:31  lwall
  * patch9: volatilized some more variables for super-optimizing compilers
  * patch9: nested foreach loops didn't reset inner loop on next to outer loop
@@ -77,8 +82,8 @@ VOLATILE int sp;
     register char *go_to = goto_targ;
     register int newsp = -2;
     register STR **st = stack->ary_array;
-    VOLATILE FILE *fp;
-    VOLATILE ARRAY *ar;
+    FILE *VOLATILE fp;
+    ARRAY *VOLATILE ar;
 
     lastsize = 0;
 #ifdef DEBUGGING
@@ -461,9 +466,9 @@ until_loop:
 		}
 	    }
 	    if (--cmd->c_short->str_u.str_useful < 0) {
-		cmdflags &= ~(CF_OPTIMIZE|CF_ONCE);
+		cmdflags &= ~CF_OPTIMIZE;
 		cmdflags |= CFT_EVAL;	/* never try this optimization again */
-		cmd->c_flags = cmdflags;
+		cmd->c_flags = (cmdflags & ~CF_ONCE);
 	    }
 	    break;			/* must evaluate */
 
@@ -681,7 +686,7 @@ until_loop:
 	if (match < 0)
 	    match = 0;
 	else if (match > cmd->ucmd.scmd.sc_max)
-	    match = cmd->c_slen;
+	    match = cmd->ucmd.scmd.sc_max;
 	cmd = cmd->ucmd.scmd.sc_next[match];
 	goto tail_recursion_entry;
     case C_NEXT:

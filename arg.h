@@ -1,4 +1,4 @@
-/* $Header: arg.h,v 3.0.1.3 90/02/28 16:21:55 lwall Locked $
+/* $Header: arg.h,v 3.0.1.4 90/03/12 16:18:21 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	arg.h,v $
+ * Revision 3.0.1.4  90/03/12  16:18:21  lwall
+ * patch13: added list slice operator (LIST)[LIST]
+ * patch13: added splice operator: @oldelems = splice(@array,$offset,$len,LIST)
+ * 
  * Revision 3.0.1.3  90/02/28  16:21:55  lwall
  * patch9: added pipe function
  * 
@@ -261,7 +265,9 @@
 #define O_SSOCKOPT 238
 #define O_GETSOCKNAME 239
 #define O_GETPEERNAME 240
-#define MAXO 241
+#define O_LSLICE 241
+#define O_SPLICE 242
+#define MAXO 243
 
 #ifndef DOINIT
 extern char *opname[];
@@ -508,7 +514,9 @@ char *opname[] = {
     "SSOCKOPT",
     "GETSOCKNAME",
     "GETPEERNAME",
-    "241"
+    "LSLICE",
+    "SPLICE",
+    "243"
 };
 #endif
 
@@ -882,6 +890,8 @@ char opargs[MAXO+1] = {
 	A(1,1,1),	/* SSOCKOPT */
 	A(1,0,0),	/* GETSOCKNAME */
 	A(1,0,0),	/* GETPEERNAME */
+	A(0,3,3),	/* LSLICE */
+	A(0,3,1),	/* SPLICE */
 	0
 };
 #undef A

@@ -1,4 +1,4 @@
-/* $Header: cons.c,v 3.0.1.4 90/02/28 16:44:00 lwall Locked $
+/* $Header: cons.c,v 3.0.1.5 90/03/12 16:23:10 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	cons.c,v $
+ * Revision 3.0.1.5  90/03/12  16:23:10  lwall
+ * patch13: perl -d coredumped on scripts with subs that did explicit return
+ * 
  * Revision 3.0.1.4  90/02/28  16:44:00  lwall
  * patch9: subs which return by both mechanisms can clobber local return data
  * patch9: changed internal SUB label to _SUB_
@@ -74,10 +77,7 @@ CMD *cmd;
 	mycompblock.comp_alt = Nullcmd;
 	cmd = add_label(savestr("_SUB_"),make_ccmd(C_BLOCK,Nullarg,mycompblock));
 	saw_return = FALSE;
-	if (perldb)
-	    cmd->c_next->c_flags |= CF_TERM;
-	else
-	    cmd->c_flags |= CF_TERM;
+	cmd->c_flags |= CF_TERM;
     }
     sub->cmd = cmd;
     stab_sub(stab) = sub;

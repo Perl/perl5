@@ -1,4 +1,4 @@
-/* $Header: doarg.c,v 3.0.1.3 90/02/28 16:56:58 lwall Locked $
+/* $Header: doarg.c,v 3.0.1.4 90/03/12 16:28:42 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	doarg.c,v $
+ * Revision 3.0.1.4  90/03/12  16:28:42  lwall
+ * patch13: pack of ascii strings could call str_ncat() with negative length
+ * patch13: printf("%s", *foo) was busted
+ * 
  * Revision 3.0.1.3  90/02/28  16:56:58  lwall
  * patch9: split now can split into more than 10000 elements
  * patch9: sped up pack and unpack
@@ -395,22 +399,23 @@ int *arglast;
 	    aptr = str_get(fromstr);
 	    if (fromstr->str_cur > len)
 		str_ncat(str,aptr,len);
-	    else
-		str_ncat(str,aptr,fromstr->str_cur);
-	    len -= fromstr->str_cur;
-	    if (datumtype == 'A') {
-		while (len >= 10) {
-		    str_ncat(str,space10,10);
-		    len -= 10;
-		}
-		str_ncat(str,space10,len);
-	    }
 	    else {
-		while (len >= 10) {
-		    str_ncat(str,null10,10);
-		    len -= 10;
+		str_ncat(str,aptr,fromstr->str_cur);
+		len -= fromstr->str_cur;
+		if (datumtype == 'A') {
+		    while (len >= 10) {
+			str_ncat(str,space10,10);
+			len -= 10;
+		    }
+		    str_ncat(str,space10,len);
 		}
-		str_ncat(str,null10,len);
+		else {
+		    while (len >= 10) {
+			str_ncat(str,null10,10);
+			len -= 10;
+		    }
+		    str_ncat(str,null10,len);
+		}
 	    }
 	    break;
 	case 'C':
@@ -601,7 +606,7 @@ register STR **sarg;
 		*t = '\0';
 		xs = str_get(*sarg);
 		xlen = (*sarg)->str_cur;
-		if (*xs == 'S' && xs[1] == 't' && xs[2] == 'a' && xs[3] == 'b'
+		if (*xs == 'S' && xs[1] == 't' && xs[2] == 'B'
 		  && xlen == sizeof(STBP) && strlen(xs) < xlen) {
 		    xs = stab_name(((STAB*)(*sarg))); /* a stab value! */
 		    sprintf(tokenbuf,"*%s",xs);	/* reformat to non-binary */
