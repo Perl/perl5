@@ -43,7 +43,9 @@ d_setruid='undef'
 
 alignbytes=8
 
-usemymalloc='n'
+case "$usemymalloc" in
+'')  usemymalloc='n' ;;
+esac
 
 # Intuiting the existence of system calls under AIX is difficult,
 # at best; the safest technique is to find them empirically.
@@ -79,7 +81,7 @@ case "$osvers" in
     ccflags="$ccflags -D_ALL_SOURCE -D_ANSI_C_SOURCE -D_POSIX_SOURCE"
     case "$cc" in
      *gcc*) ;;
-     *) ccflags="$ccflags -qmaxmem=8192" ;;
+     *) ccflags="$ccflags -qmaxmem=16384" ;;
     esac
     nm_opt='-B'
     ;;
@@ -111,15 +113,13 @@ case "$osvers" in
     ;;
 esac
 
+# Save this for backward compatibility for now.
+# Configure already (5.005_58) knows how to probe for
+# <socks.h> and libsocks.  What sucks is that the name
+# of the socks library seems to be version dependent
+# (e.g. libsocks5), bleagh.
 #
 # if $ccflags contains -DSOCKS, then add socks library support.
-#
-# SOCKS support also requires each source module with socket support
-# add the following lines directly after the #include <socket.h>:
-#
-#   #ifdef SOCKS
-#   #include <socks.h>
-#   #endif
 #
 # It is expected that libsocks.a resides in /usr/local/lib and that
 # socks.h resides in /usr/local/include. If these files live some
@@ -133,25 +133,6 @@ for arg in $ccflags ; do
       sockslib=socks5
       incpath=/usr/local/include
       libpath=/usr/local/lib
-
-      echo >&4 "SOCKS using $incpath/socks.h and $libpath/lib${sockslib}.a"
-      echo >&4 "SOCKS requires source modifications. #include <socket.h> must change to:"
-      echo >&4
-      echo >&4 "   #include <socket.h>"
-      echo >&4 "   #ifdef SOCKS"
-      echo >&4 "   #include <socks.h>"
-      echo >&4 "   #endif"
-      echo >&4
-      echo >&4 "in some or all of the following files:"
-      echo >&4
-
-      for arg in `find . \( -name '*.c' -o -name '*.xs' -o -name '*.h' \) \
-                         -exec egrep -l '#.*include.*socket\.h' {} \; | \
-                         egrep -v "win32|vms|t/lib|Socket.c` ; do
-         echo >&4 "   $arg"
-      done
-
-      echo >&4
 
       lddlflags="$lddlflags -l$sockslib"
 

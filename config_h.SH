@@ -2306,6 +2306,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$i_shadow	I_SHADOW		/**/
 
+/* I_SOCKS:
+ *	This symbol, if defined, indicates that <socks.h> exists and
+ *	should be included.
+ */
+#$i_socks	I_SOCKS		/**/
+
 /* I_SYS_MMAN:
  *	This symbol, if defined, indicates that <sys/mman.h> exists and
  *	should be included.
