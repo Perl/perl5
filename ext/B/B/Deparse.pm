@@ -2503,7 +2503,7 @@ sub loop_common {
 	my $var = $ary->sibling;
 	if ($ary->name eq 'null' and $enter->private & OPpITER_REVERSED) {
 	    # "reverse" was optimised away
-	    $ary = "reverse " . $self->deparse($ary->first->sibling->first->sibling, 1);
+	    $ary = listop($self, $ary->first->sibling, 1, 'reverse');
 	} elsif ($enter->flags & OPf_STACKED
 	    and not null $ary->first->sibling->sibling)
 	{

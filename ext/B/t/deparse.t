@@ -20,7 +20,7 @@ use warnings;
 use strict;
 use Config;
 
-print "1..36\n";
+print "1..37\n";
 
 use B::Deparse;
 my $deparse = B::Deparse->new() or print "not ";
@@ -281,3 +281,7 @@ print((reverse sort {$b <=> $a} @x));
 # 32
 our @a;
 print $_ foreach (reverse @a);
+####
+# 32
+our @a;
+print $_ foreach (reverse 1, 2..5);
