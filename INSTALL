@@ -1920,10 +1920,12 @@ external program.
 
 Several tests in the test suite check timing functions, such as
 sleep(), and see if they return in a reasonable amount of time.
-If your system is quite busy and doesn't return quickly enough,
-these tests might fail.  If possible, try running the tests again with
-the system under a lighter load.  These tests include F<t/op/alarm.t>,
-F<ext/Time/HiRes/HiRes.t>, and F<lib/Benchmark.t>.
+If your system is quite busy and doesn't respond quickly enough,
+these tests might fail.  If possible, try running the tests again
+with the system under a lighter load.  These timing-sensitive
+and load-sensitive tests include F<t/op/alarm.t>,
+F<ext/Time/HiRes/HiRes.t>, F<lib/Benchmark.t>,
+F<lib/Memoize/t/expmod_t.t>, and F<lib/Memoize/t/speed.t>.
 
 =item Out of memory
 
