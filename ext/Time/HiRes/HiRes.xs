@@ -223,8 +223,8 @@ PROTOTYPES: ENABLE
 
 BOOT:
 #ifdef HAS_GETTIMEOFDAY
-  hv_store(PL_modglobal, "Time::NVtime", 12, newSViv((IV) myNVtime), 0);
-  hv_store(PL_modglobal, "Time::U2time", 12, newSViv((IV) myU2time), 0);
+  hv_store(PL_modglobal, "Time::NVtime", 12, newSViv((IV) myNVtime ()), 0);
+  hv_store(PL_modglobal, "Time::U2time", 12, newSViv((IV) myU2time ()), 0);
 #endif
 
 IV
