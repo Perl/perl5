@@ -110,7 +110,7 @@ use Data::Dumper;
 sub read
 {
  my ($obj,$fh,$name,$type) = @_;
- my $rep = $obj->can("rep_$type");
+ my($rep, @leading);
  my ($def,$sym,$pages) = split(/\s+/,scalar(<$fh>));
  my @touni;
  my %fmuni;
@@ -122,6 +122,7 @@ sub read
    chomp($line);
    my $page = hex($line);
    my @page;
+   $leading[$page] = 1 if $page;
    my $ch = $page * 256;
    for (my $i = 0; $i < 16; $i++)
     {
@@ -131,7 +132,7 @@ sub read
        my $val = hex(substr($line,0,4,''));
        if ($val || !$ch)
         {
-         my $uch = chr($val);
+         my $uch = pack('U', $val); # chr($val);
          push(@page,$uch);
          $fmuni{$uch} = $ch;
          $count++;
@@ -145,6 +146,8 @@ sub read
     }
    $touni[$page] = \@page;
   }
+ $rep = $type ne 'M' ? $obj->can("rep_$type") :
+   sub { ($_[0] > 255) || $leading[$_[0]] ? 'n' : 'C'};
  $obj->{'Rep'}   = $rep;
  $obj->{'ToUni'} = \@touni;
  $obj->{'FmUni'} = \%fmuni;
@@ -157,13 +160,13 @@ sub rep_S { 'C' }
 
 sub rep_D { 'n' }
 
-sub rep_M { ($_[0] > 255) ? 'n' : 'C' }
+#sub rep_M { ($_[0] > 255) ? 'n' : 'C' }
 
 sub representation
 {
  my ($obj,$ch) = @_;
  $ch = 0 unless @_ > 1;
- $obj-{'Rep'}->($ch);
+ $obj->{'Rep'}->($ch);
 }
 
 sub decode
