@@ -309,19 +309,19 @@ Perl_utf8_to_uv(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, U32 flags)
 			"Malformed UTF-8 character (byte order mark 0x%04"UVxf")",
 			uv);
 	goto malformed;
-    } else if ((uv == 0xffff) &&
-	       !(flags & UTF8_ALLOW_FFFF)) {
-	if (dowarn)
-	    Perl_warner(aTHX_ WARN_UTF8,
-			"Malformed UTF-8 character (character 0x%04"UVxf")",
-			uv);
-	goto malformed;
     } else if ((expectlen > UNISKIP(uv)) &&
 	       !(flags & UTF8_ALLOW_LONG)) {
 	if (dowarn)
 	    Perl_warner(aTHX_ WARN_UTF8,
 			"Malformed UTF-8 character (%d byte%s, need %d)",
 			expectlen, expectlen == 1 ? "": "s", UNISKIP(uv));
+	goto malformed;
+    } else if ((uv == 0xffff) &&
+	       !(flags & UTF8_ALLOW_FFFF)) {
+	if (dowarn)
+	    Perl_warner(aTHX_ WARN_UTF8,
+			"Malformed UTF-8 character (character 0x%04"UVxf")",
+			uv);
 	goto malformed;
     }
 
