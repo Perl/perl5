@@ -105,29 +105,29 @@ else {
 }
 
 if ($Config{d_symlink}) {
-    my @dirs = grep(! -l $_ => (split " " => $Config{libpth}));
-    if (@dirs) {
-	my $target = pop @dirs;
-	symlink $target => "linktest";
-	mkdir "pteerslt";
-	chdir "pteerslt";
-	my $rel = "../../t/linktest";
-	
-	my $abs_path      = Cwd::abs_path($rel);
-	my $fast_abs_path = Cwd::fast_abs_path($rel);
-	print "# abs_path      $abs_path\n";
-	print "# fast_abs_path $fast_abs_path\n";
-	print "# target        $target\n";
-	print +($abs_path      eq $target ? "" : "not "), "ok 13\n";
-	print +($fast_abs_path eq $target ? "" : "not "), "ok 14\n";
-	
-	chdir "..";
-	rmdir "pteerslt";
-	unlink "linktest";
-    } else {
-	print "ok 13 # skipped\n";
-	print "ok 14 # skipped\n";
-    }
+    mkdir "pteerslt", 0777;
+    mkdir "pteerslt/path", 0777;
+    mkdir "pteerslt/path/to", 0777;
+    mkdir "pteerslt/path/to/a", 0777;
+    mkdir "pteerslt/path/to/a/dir", 0777;
+    symlink "pteerslt/path/to/a/dir" => "linktest";
+
+    my $abs_path      =  Cwd::abs_path("linktest");
+    my $fast_abs_path =  Cwd::fast_abs_path("linktest");
+    my $want          = "t/pteerslt/path/to/a/dir";
+
+    print "# abs_path      $abs_path\n";
+    print "# fast_abs_path $fast_abs_path\n";
+    print "# want          $want\n";
+    print +($abs_path      =~ m|$want$| ? "" : "not "), "ok 13\n";
+    print +($fast_abs_path =~ m|$want$| ? "" : "not "), "ok 14\n";
+
+    rmdir "pteerslt/path/to/a/dir";
+    rmdir "pteerslt/path/to/a";
+    rmdir "pteerslt/path/to";
+    rmdir "pteerslt/path";
+    rmdir "pteerslt";
+    unlink "linktest";
 } else {
     print "ok 13 # skipped\n";
     print "ok 14 # skipped\n";
