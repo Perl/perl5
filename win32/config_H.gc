@@ -352,7 +352,7 @@
  *	This symbol, if defined, indicates that the getlogin routine is
  *	available to get the login name.
  */
-/*#define HAS_GETLOGIN		/**/
+#define HAS_GETLOGIN		/**/
 
 /* HAS_GETPGRP2:
  *	This symbol, if defined, indicates that the getpgrp2() (as in DG/UX)
@@ -1467,7 +1467,7 @@
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
 #define ARCHLIB "c:\\perl\\lib\\MSWin32-x86-thread"		/**/
-#define ARCHLIB_EXP (win32PerlLibPath(ARCHNAME,NULL))	/**/
+#define ARCHLIB_EXP (win32_perllib_path(ARCHNAME,NULL))	/**/
 
 /* BINCOMPAT3:
  *	This symbol, if defined, indicates that Perl 5.004 should be
@@ -1714,7 +1714,7 @@
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
 #define PRIVLIB "c:\\perl\\lib"		/**/
-#define PRIVLIB_EXP (win32PerlLibPath(NULL))	/**/
+#define PRIVLIB_EXP (win32_perllib_path(NULL))	/**/
 
 /* SH_PATH:
  *	This symbol contains the full pathname to the shell used on this
@@ -1770,7 +1770,7 @@
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
 #define SITEARCH "c:\\perl\\lib\\site"		/**/
-#define SITEARCH_EXP (win32PerlLibPath("site",ARCHNAME,NULL))	/**/
+#define SITEARCH_EXP (win32_perllib_path("site",ARCHNAME,NULL))	/**/
 
 /* SITELIB:
  *	This symbol contains the name of the private library for this package.
@@ -1786,7 +1786,7 @@
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
 #define SITELIB "c:\\perl\\lib\\site"		/**/
-#define SITELIB_EXP (win32PerlLibPath("site",NULL))	/**/
+#define SITELIB_EXP (win32_perllib_path("site",NULL))	/**/
 
 /* STARTPERL:
  *	This variable contains the string to put in front of a perl

@@ -54,23 +54,23 @@ DllExport  int		win32_fputc(int c,FILE *pf);
 DllExport  int		win32_ungetc(int c,FILE *pf);
 DllExport  int		win32_getc(FILE *pf);
 DllExport  int		win32_fileno(FILE *pf);
-DllExport  void	win32_clearerr(FILE *pf);
+DllExport  void		win32_clearerr(FILE *pf);
 DllExport  int		win32_fflush(FILE *pf);
-DllExport  long	win32_ftell(FILE *pf);
+DllExport  long		win32_ftell(FILE *pf);
 DllExport  int		win32_fseek(FILE *pf,long offset,int origin);
 DllExport  int		win32_fgetpos(FILE *pf,fpos_t *p);
 DllExport  int		win32_fsetpos(FILE *pf,const fpos_t *p);
-DllExport  void	win32_rewind(FILE *pf);
+DllExport  void		win32_rewind(FILE *pf);
 DllExport  FILE*	win32_tmpfile(void);
-DllExport  void	win32_abort(void);
+DllExport  void		win32_abort(void);
 DllExport  int  	win32_fstat(int fd,struct stat *sbufptr);
 DllExport  int  	win32_stat(const char *name,struct stat *sbufptr);
 DllExport  int		win32_pipe( int *phandles, unsigned int psize, int textmode );
 DllExport  FILE*	win32_popen( const char *command, const char *mode );
 DllExport  int		win32_pclose( FILE *pf);
 DllExport  int		win32_setmode( int fd, int mode);
-DllExport  long	win32_lseek( int fd, long offset, int origin);
-DllExport  long	win32_tell( int fd);
+DllExport  long		win32_lseek( int fd, long offset, int origin);
+DllExport  long		win32_tell( int fd);
 DllExport  int		win32_dup( int fd);
 DllExport  int		win32_dup2(int h1, int h2);
 DllExport  int		win32_open(const char *path, int oflag,...);
@@ -85,8 +85,8 @@ DllExport  int		win32_rmdir(const char *dir);
 DllExport  int		win32_chdir(const char *dir);
 DllExport  int		win32_flock(int fd, int oper);
 DllExport  int		win32_execvp(const char *cmdname, const char *const *argv);
-DllExport  void	win32_perror(const char *str);
-DllExport  void	win32_setbuf(FILE *pf, char *buf);
+DllExport  void		win32_perror(const char *str);
+DllExport  void		win32_setbuf(FILE *pf, char *buf);
 DllExport  int		win32_setvbuf(FILE *pf, char *buf, int type, size_t size);
 DllExport  int		win32_flushall(void);
 DllExport  int		win32_fcloseall(void);
@@ -100,20 +100,25 @@ DllExport  int		win32_putchar(int c);
 DllExport  void*	win32_malloc(size_t size);
 DllExport  void*	win32_calloc(size_t numitems, size_t size);
 DllExport  void*	win32_realloc(void *block, size_t size);
-DllExport  void	win32_free(void *block);
+DllExport  void		win32_free(void *block);
 
 DllExport  int		win32_open_osfhandle(long handle, int flags);
-DllExport  long	win32_get_osfhandle(int fd);
+DllExport  long		win32_get_osfhandle(int fd);
 
 #ifndef USE_WIN32_RTL_ENV
 DllExport  char*	win32_getenv(const char *name);
 #endif
 
-DllExport  unsigned int	win32_sleep(unsigned int);
-DllExport  int			win32_times(struct tms *timebuf);
-DllExport  unsigned int	win32_alarm(unsigned int sec);
-DllExport  int			win32_flock(int fd, int oper);
-DllExport  int			win32_stat(const char *path, struct stat *buf);
+DllExport  unsigned 	win32_sleep(unsigned int);
+DllExport  int		win32_times(struct tms *timebuf);
+DllExport  unsigned 	win32_alarm(unsigned int sec);
+DllExport  int		win32_stat(const char *path, struct stat *buf);
+DllExport  int		win32_ioctl(int i, unsigned int u, char *data);
+DllExport  int		win32_wait(int *status);
+
+#ifdef HAVE_DES_FCRYPT
+DllExport char *	win32_crypt(const char *txt, const char *salt);
+#endif
 
 END_EXTERN_C
 
@@ -134,6 +139,8 @@ END_EXTERN_C
 #undef sleep
 #undef times
 #undef alarm
+#undef ioctl
+#undef wait
 
 #ifdef __BORLANDC__
 #undef ungetc
@@ -232,6 +239,13 @@ END_EXTERN_C
 #define sleep			win32_sleep
 #define times			win32_times
 #define alarm			win32_alarm
+#define ioctl			win32_ioctl
+#define wait			win32_wait
+
+#ifdef HAVE_DES_FCRYPT
+#undef crypt
+#define crypt			win32_crypt
+#endif
 
 #ifndef USE_WIN32_RTL_ENV
 #undef getenv

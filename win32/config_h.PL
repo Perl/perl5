@@ -37,19 +37,19 @@ while (<SH>)
   s#/[ *\*]*\*/#/**/#;
   if (/^\s*#define\s+ARCHLIB_EXP/)
    {
-     $_ = "#define ARCHLIB_EXP (win32PerlLibPath(ARCHNAME,NULL))\t/**/\n";
+     $_ = "#define ARCHLIB_EXP (win32_perllib_path(ARCHNAME,NULL))\t/**/\n";
    }
   if (/^\s*#define\s+PRIVLIB_EXP/)
    {
-     $_ = "#define PRIVLIB_EXP (win32PerlLibPath(NULL))\t/**/\n"
+     $_ = "#define PRIVLIB_EXP (win32_perllib_path(NULL))\t/**/\n"
    }
   if (/^\s*#define\s+SITEARCH_EXP/)
    {
-     $_ = "#define SITEARCH_EXP (win32PerlLibPath(\"site\",ARCHNAME,NULL))\t/**/\n";
+     $_ = "#define SITEARCH_EXP (win32_perllib_path(\"site\",ARCHNAME,NULL))\t/**/\n";
    }
   if (/^\s*#define\s+SITELIB_EXP/)
    {
-     $_ = "#define SITELIB_EXP (win32PerlLibPath(\"site\",NULL))\t/**/\n";
+     $_ = "#define SITELIB_EXP (win32_perllib_path(\"site\",NULL))\t/**/\n";
    }
   print H;
  }

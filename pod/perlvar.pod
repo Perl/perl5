@@ -432,10 +432,10 @@ status.
 
 If used in a numeric context, yields the current value of errno, with
 all the usual caveats.  (This means that you shouldn't depend on the
-value of "C<$!>" to be anything in particular unless you've gotten a
+value of C<$!> to be anything in particular unless you've gotten a
 specific error return indicating a system error.)  If used in a string
 context, yields the corresponding system error string.  You can assign
-to "C<$!>" to set I<errno> if, for instance, you want "C<$!>" to return the
+to C<$!> to set I<errno> if, for instance, you want C<"$!"> to return the
 string for error I<n>, or you want to set the exit value for the die()
 operator.  (Mnemonic: What just went bang?)
 
@@ -443,13 +443,31 @@ operator.  (Mnemonic: What just went bang?)
 
 =item $^E
 
-More specific information about the last system error than that provided by
-C<$!>, if available.  (If not, it's just C<$!> again.)
-At the moment, this differs from C<$!> under only VMS and OS/2, where it
-provides the VMS status value from the last system error, and OS/2 error
-code of the last call to OS/2 API either via CRT, or directly from perl.  The
-caveats mentioned in the description of C<$!> apply here, too.
-(Mnemonic: Extra error explanation.)
+Error information specific to the current operating system.  At
+the moment, this differs from C<$!> under only VMS, OS/2, and Win32
+(and for MacPerl).  On all other platforms, C<$^E> is always just
+the same as C<$!>.
+
+Under VMS, C<$^E> provides the VMS status value from the last
+system error.  This is more specific information about the last
+system error than that provided by C<$!>.  This is particularly
+important when C<$!> is set to E<EVMSERR>.
+
+Under OS/2, C<$^E> is set based on the value returned by the OS/2
+call C<_syserrno()> only when a call into the OS/2 API generates
+an error.  In this case, C<$!> is set to a special value to
+indicate that C<$^E> should be checked.  Otherwise, C<$^E> is
+just the same as C<$!>.
+
+Under Win32, C<$^E> always returns the last error information
+reported by the Win32 call C<GetLastError()> which describes
+the last error from within the Win32 API.  Most Win32-specific
+code will report errors via C<$^E>.  ANSI C and UNIX-like calls
+set C<errno> and so most portable Perl code will report errors
+via C<$!>. 
+
+Caveats mentioned in the description of C<$!> generally apply to
+C<$^E>, also.  (Mnemonic: Extra error explanation.)
 
 =item $EVAL_ERROR
 

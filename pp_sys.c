@@ -3097,7 +3097,7 @@ PP(pp_fork)
 
 PP(pp_wait)
 {
-#if !defined(DOSISH) || defined(OS2)
+#if !defined(DOSISH) || defined(OS2) || defined(WIN32)
     djSP; dTARGET;
     int childpid;
     int argflags;
@@ -3113,7 +3113,7 @@ PP(pp_wait)
 
 PP(pp_waitpid)
 {
-#if !defined(DOSISH) || defined(OS2)
+#if !defined(DOSISH) || defined(OS2) || defined(WIN32)
     djSP; dTARGET;
     int childpid;
     int optype;
@@ -3126,7 +3126,7 @@ PP(pp_waitpid)
     SETi(childpid);
     RETURN;
 #else
-    DIE(no_func, "Unsupported function wait");
+    DIE(no_func, "Unsupported function waitpid");
 #endif
 }
 

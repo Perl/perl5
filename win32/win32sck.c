@@ -466,6 +466,28 @@ win32_getservbyport(int port, const char *proto)
     return r;
 }
 
+int
+win32_ioctl(int i, unsigned int u, char *data)
+{
+    u_long argp = (u_long)data;
+    int retval;
+
+    if (!wsock_started) {
+	croak("ioctl implemented only on sockets");
+	/* NOTREACHED */
+    }
+
+    retval = ioctlsocket(TO_SOCKET(i), (long)u, &argp);
+    if (retval == SOCKET_ERROR) {
+	if (WSAGetLastError() == WSAENOTSOCK) {
+	    croak("ioctl implemented only on sockets");
+	    /* NOTREACHED */
+	}
+	errno = WSAGetLastError();
+    }
+    return retval;
+}
+
 char FAR *
 win32_inet_ntoa(struct in_addr in)
 {

@@ -2024,6 +2024,9 @@ my_pclose(FILE *ptr)
 #ifdef VMS
     int saved_vaxc_errno;
 #endif
+#ifdef WIN32
+    int saved_win32_errno;
+#endif
 
     svp = av_fetch(fdpid,PerlIO_fileno(ptr),TRUE);
     pid = (int)SvIVX(*svp);
@@ -2038,6 +2041,9 @@ my_pclose(FILE *ptr)
 	saved_errno = errno;
 #ifdef VMS
 	saved_vaxc_errno = vaxc$errno;
+#endif
+#ifdef WIN32
+	saved_win32_errno = GetLastError();
 #endif
     }
 #ifdef UTS
@@ -2060,7 +2066,7 @@ my_pclose(FILE *ptr)
 }
 #endif /* !DOSISH */
 
-#if  !defined(DOSISH) || defined(OS2)
+#if  !defined(DOSISH) || defined(OS2) || defined(WIN32)
 I32
 wait4pid(int pid, int *statusp, int flags)
 {
@@ -2118,7 +2124,7 @@ wait4pid(int pid, int *statusp, int flags)
     }
 #endif
 }
-#endif /* !DOSISH */
+#endif /* !DOSISH || OS2 || WIN32 */
 
 void
 /*SUPPRESS 590*/

@@ -84,11 +84,40 @@ int
 Perl_thread_create(struct perl_thread *thr, thread_func_t *fn)
 {
     DWORD junk;
+    unsigned long th;
 
     MUTEX_LOCK(&thr->mutex);
     DEBUG_L(PerlIO_printf(PerlIO_stderr(),
 			  "%p: create OS thread\n", thr));
+#ifdef USE_RTL_THREAD_API
+    /* See comment about USE_RTL_THREAD_API in win32thread.h */
+#if defined(__BORLANDC__)
+    th = _beginthreadNT(fn,				/* start address */
+			0,				/* stack size */
+			(void *)thr,			/* parameters */
+			(void *)NULL,			/* security attrib */
+			0,				/* creation flags */
+			(unsigned long *)&junk);	/* tid */
+    if (th == (unsigned long)-1)
+	th = 0;
+#elif defined(_MSC_VER_)
+    th = _beginthreadex((void *)NULL,			/* security attrib */
+			0,				/* stack size */
+			fn,				/* start address */
+			(void*)thr,			/* parameters */
+			0,				/* creation flags */
+			(unsigned *)&junk);		/* tid */
+#else /* compilers using CRTDLL.DLL only have _beginthread() */
+    th = _beginthread(fn,				/* start address */
+		      0,				/* stack size */
+		      (void*)thr);			/* parameters */
+    if (th == (unsigned long)-1)
+	th = 0;
+#endif
+    thr->self = (HANDLE)th;
+#else	/* !USE_RTL_THREAD_API */
     thr->self = CreateThread(NULL, 0, fn, (void*)thr, 0, &junk);
+#endif	/* !USE_RTL_THREAD_API */
     DEBUG_L(PerlIO_printf(PerlIO_stderr(),
 			  "%p: OS thread = %p, id=%ld\n", thr, thr->self, junk));
     MUTEX_UNLOCK(&thr->mutex);

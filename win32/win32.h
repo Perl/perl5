@@ -91,6 +91,8 @@ struct tms {
 #define USE_FIXED_OSFHANDLE
 #endif
 
+#define ENV_IS_CASELESS
+
 #ifndef VER_PLATFORM_WIN32_WINDOWS	/* VC-2.0 headers dont have this */
 #define VER_PLATFORM_WIN32_WINDOWS	1
 #endif
@@ -149,6 +151,7 @@ extern  int	setuid(uid_t uid);
 extern  int	setgid(gid_t gid);
 extern  int	kill(int pid, int sig);
 extern  void	*sbrk(int need);
+extern	char *	getlogin(void);
 
 #undef	 Stat
 #define  Stat		win32_stat
@@ -158,15 +161,17 @@ extern  void	*sbrk(int need);
 
 DllExport void		Perl_win32_init(int *argcp, char ***argvp);
 DllExport void		Perl_init_os_extras(void);
+DllExport void		win32_str_os_error(struct sv *s, DWORD err);
 
 #ifndef USE_SOCKETS_AS_HANDLES
 extern FILE *		my_fdopen(int, char *);
 #endif
 extern int		my_fclose(FILE *);
-extern int		do_aspawn(void* really, void ** mark, void ** arglast);
+extern int		do_aspawn(void *really, void **mark, void **sp);
 extern int		do_spawn(char *cmd);
+extern int		do_spawn_nowait(char *cmd);
 extern char		do_exec(char *cmd);
-extern char *		win32PerlLibPath(char *sfx,...);
+extern char *		win32_perllib_path(char *sfx,...);
 extern int		IsWin95(void);
 extern int		IsWinNT(void);
 
@@ -205,15 +210,22 @@ EXT void win32_strip_return(struct sv *sv);
  */
 
 #ifdef USE_THREADS
-#ifndef USE_DECLSPEC_THREAD
-#define HAVE_THREAD_INTERN
+#  ifndef USE_DECLSPEC_THREAD
+#    define HAVE_THREAD_INTERN
 
-struct thread_intern
-{
- char		Wstrerror_buffer[512];
- struct servent Wservent;
+struct thread_intern {
+    /* XXX can probably use one buffer instead of several */
+    char		Wstrerror_buffer[512];
+    struct servent	Wservent;
+    char		Wgetlogin_buffer[128];
+#    ifdef HAVE_DES_FCRYPT
+    char		Wcrypt_buffer[30];
+#    endif
+#    ifdef USE_RTL_THREAD_API
+    void *		retv;	/* slot for thread return value */
+#    endif
 };
-#endif
-#endif
+#  endif /* !USE_DECLSPEC_THREAD */
+#endif /* USE_THREADS */
 
 #endif /* _INC_WIN32_PERL5 */

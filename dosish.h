@@ -45,11 +45,6 @@
 #define dXSUB_SYS
 #define TMPPATH "plXXXXXX"
 
-#ifdef WIN32
-#define HAS_UTIME
-#define HAS_KILL
-#endif
-
 /*
  * 5.003_07 and earlier keyed on #ifdef MSDOS for determining if we were 
  * running on DOS, *and* if we had to cope with 16 bit memory addressing 
@@ -123,11 +118,15 @@
 #ifndef WIN32
 #  define Stat(fname,bufptr) stat((fname),(bufptr))
 #else
+#  define HAS_IOCTL
+#  define HAS_UTIME
+#  define HAS_KILL
+#  define HAS_WAIT
 /*
  * This provides a layer of functions and macros to ensure extensions will
  * get to use the same RTL functions as the core.
  */
-#ifndef HASATTRIBUTE
-#  include <win32iop.h>
-#endif
+#  ifndef HASATTRIBUTE
+#    include <win32iop.h>
+#  endif
 #endif	/* WIN32 */
