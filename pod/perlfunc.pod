@@ -4128,10 +4128,11 @@ For example
 
 	%lld %16LX %qo
 
-You can find out whether your Perl supports long doubles via L<Config>:
+You can find out whether your Perl supports quads via L<Config>:
 
 	use Config;
-	$Config{use64bits} and print "quads\n";
+	($Config{use64bits} eq 'define' || $Config{longsize} == 8) &&
+		print "quads\n";
 
 If Perl understands "long doubles" (this requires that the platform
 supports long doubles), the flags
@@ -4149,7 +4150,7 @@ For example
 You can find out whether your Perl supports long doubles via L<Config>:
 
 	use Config;
-	$Config{d_longdbl} and print "long doubles\n";
+	$Config{d_longdbl} eq 'define' && print "long doubles\n";
 
 =item sqrt EXPR
 
