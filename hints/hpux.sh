@@ -436,4 +436,8 @@ EOCBU
 	ccisgcc=''
 
 # Until we figure out what to be probe for in Configure (ditto for irix_6.sh)
-d_casti32='undef'
+case "$use64bitint" in
+$define|true|[yY]*) ;;
+*) d_casti32='undef' ;;
+esac
+
