@@ -6653,7 +6653,7 @@ Perl_ck_subr(pTHX_ OP *o)
 		switch (*proto++) {
 		case '[':
 		     if (contextclass++ == 0) {
-			  e = strchr(proto, ']');
+		          e = strchr(proto, ']');
 			  if (!e || e == proto)
 			       goto oops;
 		     }
@@ -6712,7 +6712,7 @@ Perl_ck_subr(pTHX_ OP *o)
 			o2->op_sibling = sib;
 			prev->op_sibling = o2;
 		    }
-		    if (contextclass) {
+		    if (contextclass && e) {
 			 proto = e + 1;
 			 contextclass = 0;
 		    }
