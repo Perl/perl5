@@ -4,9 +4,17 @@ specially designed to be readable as is.
 
 =head1 NAME
 
-perlamiga - Perl under Amiga OS
+perlamiga - Perl under Amiga OS (possibly very outdated information)
 
 =head1 SYNOPSIS
+
+NOTE: No one has reported building Perl on the Amiga in a long
+time.  The following information is highly unlikely to be correct.
+If you would like to help the Amiga port to stay current, see:
+
+    http://us.aminet.net/aminet/dirs/dev_gg.html
+
+for Amiga resources and information.
 
 One can read this document in the following formats:
 

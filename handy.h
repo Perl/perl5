@@ -260,18 +260,18 @@ C<strncmp>).
 
 /*
 =for apidoc Am|bool|isALNUM|char ch
-Returns a boolean indicating whether the C C<char> is an ascii alphanumeric
+Returns a boolean indicating whether the C C<char> is an ASCII alphanumeric
 character or digit.
 
 =for apidoc Am|bool|isALPHA|char ch
-Returns a boolean indicating whether the C C<char> is an ascii alphabetic
+Returns a boolean indicating whether the C C<char> is an ASCII alphabetic
 character.
 
 =for apidoc Am|bool|isSPACE|char ch
 Returns a boolean indicating whether the C C<char> is whitespace.
 
 =for apidoc Am|bool|isDIGIT|char ch
-Returns a boolean indicating whether the C C<char> is an ascii
+Returns a boolean indicating whether the C C<char> is an ASCII
 digit.
 
 =for apidoc Am|bool|isUPPER|char ch
@@ -524,7 +524,7 @@ The XSUB-writer's interface to the C C<memzero> function.  The C<dest> is the
 destination, C<nitems> is the number of items, and C<type> is the type.
 
 =for apidoc Am|void|StructCopy|type src|type dest|type
-This is an architecture-independant macro to copy one structure to another.
+This is an architecture-independent macro to copy one structure to another.
 
 =cut
 */

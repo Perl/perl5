@@ -197,7 +197,7 @@ If you need to distinguish between endian architectures you could use
 either of the variables set like so:
 
     $is_big_endian   = unpack("h*", pack("s", 1)) =~ /01/;
-    $is_litte_endian = unpack("h*", pack("s", 1)) =~ /^1/;
+    $is_little_endian = unpack("h*", pack("s", 1)) =~ /^1/;
 
 Differing widths can cause truncation even between platforms of equal
 endianness.  The platform of shorter width loses the upper parts of the
@@ -217,7 +217,7 @@ So, it is reasonably safe to assume that all platforms support the
 notion of a "path" to uniquely identify a file on the system.  How
 that path is really written, though, differs considerably.
 
-Atlhough similar, file path specifications differ between Unix,
+Although similar, file path specifications differ between Unix,
 Windows, S<Mac OS>, OS/2, VMS, VOS, S<RISC OS>, and probably others.
 Unix, for example, is one of the few OSes that has the elegant idea
 of a single root directory.
@@ -355,7 +355,7 @@ Commands that launch external processes are generally supported on
 most platforms (though many of them do not support any type of
 forking).  The problem with using them arises from what you invoke
 them on.  External tools are often named differently on different
-platforms, may not be available in the same location, migth accept
+platforms, may not be available in the same location, might accept
 different arguments, can behave differently, and often present their
 results in a platform-dependent way.  Thus, you should seldom depend
 on them to produce consistent results. (Then again, if you're calling 

@@ -506,7 +506,7 @@ If the array is tied, the EXISTS() method in the corresponding tied
 package will be invoked.
 
 delete() may be used to remove an element from the array and return
-it.  The array element at that position returns to its unintialized
+it.  The array element at that position returns to its uninitialized
 state, so that testing for the same element with exists() will return
 false.  If the element happens to be the one at the end, the size of
 the array also shrinks up to the highest element that tests true for
@@ -780,7 +780,7 @@ under the Compiler, but there is still a significant way to
 go to achieve production quality compiled executables.
 
     NOTE: The Compiler suite remains highly experimental.  The
-    generated code may not be correct, even it manages to execute
+    generated code may not be correct, even when it manages to execute
     without errors.
 
 =item Benchmark
@@ -1007,7 +1007,7 @@ messages. For example:
 
     =head1 DESCRIPTION
 
-    B<This program> will read the given input file(s) and do someting
+    B<This program> will read the given input file(s) and do something
     useful with the contents thereof.
 
     =cut
@@ -1039,7 +1039,7 @@ IO::Socket::accept now uses select() instead of alarm() for doing
 timeouts.
 
 IO::Socket::INET->new now sets $! correctly on failure. $@ is
-still set for backwards compatability.
+still set for backwards compatibility.
 
 =item JPL
 
@@ -1582,7 +1582,7 @@ platform, but the possibility exists.
 =head2 VMS
 
 Numerous revisions and extensions to configuration, build, testing, and
-installation process to accomodate core changes and VMS-specific options.
+installation process to accommodate core changes and VMS-specific options.
 
 Expand %ENV-handling code to allow runtime mapping to logical names,
 CLI symbols, and CRTL environ array.
@@ -1695,7 +1695,7 @@ been fixed.
 
 =head2 All compilation errors are true errors
 
-Some "errors" encountered at compile time were by neccessity 
+Some "errors" encountered at compile time were by necessity 
 generated as warnings followed by eventual termination of the
 program.  This enabled more such errors to be reported in a
 single run, rather than causing a hard stop at the first error
@@ -2147,7 +2147,7 @@ L<perlport> for more on portability concerns.
 
 (W internal) A warning peculiar to VMS.  Perl tried to read the CRTL's internal
 environ array, and encountered an element without the C<=> delimiter
-used to spearate keys from values.  The element is ignored.
+used to separate keys from values.  The element is ignored.
 
 =item Ill-formed message in prime_env_iter: |%s|
 
@@ -2305,7 +2305,7 @@ could be a potential Year 2000 problem.
 
 =item pragma "attrs" is deprecated, use "sub NAME : ATTRS" instead
 
-(W deprecated) You have written somehing like this:
+(W deprecated) You have written something like this:
 
     sub doit
     {
