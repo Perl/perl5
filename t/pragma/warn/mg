@@ -12,19 +12,19 @@
 
 __END__
 # mg.c
-use warning 'signal' ;
+use warnings 'signal' ;
 $SIG{FRED} = sub {};
 EXPECT
 No such signal: SIGFRED at - line 3.
 ########
 # mg.c
-no warning 'signal' ;
+no warnings 'signal' ;
 $SIG{FRED} = sub {};
 EXPECT
 
 ########
 # mg.c
-use warning 'signal' ;
+use warnings 'signal' ;
 if ($^O eq 'MSWin32' || $^O eq 'VMS') {
     print "SKIPPED\n# $^O, can't kill() to raise()\n"; exit;
 }
@@ -34,7 +34,7 @@ EXPECT
 SIGINT handler "fred" not defined.
 ########
 # mg.c
-no warning 'signal' ;
+no warnings 'signal' ;
 if ($^O eq 'MSWin32' || $^O eq 'VMS') {
     print "SKIPPED\n# win32, can't kill() to raise()\n"; exit;
 }

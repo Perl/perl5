@@ -3728,7 +3728,8 @@ Perl_yylex(pTHX)
 	    if (ckWARN(WARN_OCTAL)) {
 		for (d = s; d < PL_bufend && (isSPACE(*d) || *d == '('); d++) ;
 		if (*d != '0' && isDIGIT(*d))
-		    yywarn("chmod: mode argument is missing initial 0");
+		    Perl_warner(aTHX_ WARN_OCTAL,
+		    		"chmod: mode argument is missing initial 0");
 	    }
 	    LOP(OP_CHMOD,XTERM);
 
@@ -4543,8 +4544,9 @@ Perl_yylex(pTHX)
 	case KEY_umask:
 	    if (ckWARN(WARN_OCTAL)) {
 		for (d = s; d < PL_bufend && (isSPACE(*d) || *d == '('); d++) ;
-		if (*d != '0' && isDIGIT(*d))
-		    yywarn("umask: argument is missing initial 0");
+		if (*d != '0' && isDIGIT(*d)) 
+		    Perl_warner(aTHX_ WARN_OCTAL,
+		    		"umask: argument is missing initial 0");
 	    }
 	    UNI(OP_UMASK);
 

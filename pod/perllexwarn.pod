@@ -4,7 +4,7 @@ perllexwarn - Perl Lexical Warnings
 
 =head1 DESCRIPTION
  
-The C<use warning> pragma is a replacement for both the command line
+The C<use warnings> pragma is a replacement for both the command line
 flag B<-w> and the equivalent Perl variable, C<$^W>.
 
 The pragma works just like the existing "strict" pragma.
@@ -19,21 +19,21 @@ doesn't attempt to control the warnings will work unchanged.
 
 All warnings are enabled in a block by either of these:
  
-    use warning ;
-    use warning 'all' ;
+    use warnings ;
+    use warnings 'all' ;
  
 Similarly all warnings are disabled in a block by either of these:
 
-    no warning ;
-    no warning 'all' ;
+    no warnings ;
+    no warnings 'all' ;
 
 For example, consider the code below:
 
-    use warning ;
+    use warnings ;
     my $a ;
     my $b ;
     {
-        no warning ;
+        no warnings ;
 	$b = 2 if $a EQ 3 ;
     }
     $b = 1 if $a NE 3 ;
@@ -65,7 +65,7 @@ example, in the code below, an C<"integer overflow"> warning will only
 be reported for the C<$a> variable.
 
     my $a = "2:" + 3;
-    no warning ;
+    no warnings ;
     my $b = "2:" + 3;
 
 Note that neither the B<-w> flag or the C<$^W> can be used to
@@ -143,7 +143,7 @@ details of how this flag interacts with lexical warnings.
  
 If the B<-W> flag is used on the command line, it will enable all warnings
 throughout the program regardless of whether warnings were disabled
-locally using C<no warning> or C<$^W =0>. This includes all files that get
+locally using C<no warnings> or C<$^W =0>. This includes all files that get
 included via C<use>, C<require> or C<do>.
 Think of it as the Perl equivalent of the "lint" command.
 
@@ -197,7 +197,7 @@ or B<-X> command line flags.
 =back
 
 The combined effect of 3 & 4 is that it will will allow code which uses
-the lexical warning pragma to control the warning behavior of $^W-type
+the lexical warnings pragma to control the warning behavior of $^W-type
 code (using a C<local $^W=0>) if it really wants to, but not vice-versa.
 
 =head1 EXPERIMENTAL FEATURES
@@ -273,30 +273,37 @@ hierarchy is:
           |
           +--- misc
 
- 
-Just like the "strict" pragma any of these categories can be
-combined
 
-    use warning qw(void redefine) ;
-    no warning qw(io syntax untie) ;
+Just like the "strict" pragma any of these categories can be combined
+
+    use warnings qw(void redefine) ;
+    no warnings qw(io syntax untie) ;
+
+Also like the "strict" pragma, if there is more than one instance of the
+warnings pragma in a given scope the cumulative effect is additive. 
+
+    use warnings qw(void) ; # only "void" warnings enabled
+    ...
+    use warnings qw(io) ;   # only "void" & "io" warnings enabled
+    ...
+    no warnings qw(void) ;  # only "io" warnings enabled
+
 
 =head2 Fatal Warnings
  
-This feature is B<very> experimental.
- 
 The presence of the word "FATAL" in the category list will escalate any
-warnings from the category specified that are detected in the lexical
-scope into fatal errors. In the code below, there are 3 places where
-a deprecated warning will be detected, the middle one will produce a
-fatal error.
- 
- 
-    use warning ;
+warnings from the category/categories specified that are detected in
+the lexical scope into fatal errors. In the code below, there are 3
+places where a deprecated warning will be detected, the middle one will
+produce a fatal error.
+
+
+    use warnings ;
  
     $a = 1 if $a EQ $b ;
  
     {
-        use warning qw(FATAL deprecated) ;
+        use warnings FATAL => qw(deprecated) ;
         $a = 1 if $a EQ $b ;
     }
  
@@ -319,7 +326,7 @@ The experimental features need bottomed out.
 
 =head1 SEE ALSO
 
-L<warning>.
+L<warnings>.
  
 =head1 AUTHOR
  

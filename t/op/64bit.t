@@ -15,7 +15,7 @@ BEGIN {
 
 # so that using > 0xfffffff constants and
 # 32+ bit vector sizes doesn't cause noise
-no warning qw(overflow portable);
+no warnings qw(overflow portable);
 
 print "1..39\n";
 

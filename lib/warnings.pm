@@ -1,21 +1,21 @@
 
-# This file was created by warning.pl
+# This file was created by warnings.pl
 # Any changes made here will be lost.
 #
 
-package warning;
+package warnings;
 
 =head1 NAME
 
-warning - Perl pragma to control optional warnings
+warnings - Perl pragma to control optional warnings
 
 =head1 SYNOPSIS
 
-    use warning;
-    no warning;
+    use warnings;
+    no warnings;
 
-    use warning "all";
-    no warning "all";
+    use warnings "all";
+    no warnings "all";
 
 =head1 DESCRIPTION
 
@@ -130,30 +130,12 @@ sub bits {
 
 sub import {
     shift;
-    $^B |= bits(@_ ? @_ : 'all') ;
+    ${^Warnings} |= bits(@_ ? @_ : 'all') ;
 }
 
 sub unimport {
     shift;
-    $^B &= ~ bits(@_ ? @_ : 'all') ;
-}
-
-
-sub make_fatal
-{
-    my $self = shift ;
-    my $bitmask = $self->bits(@_) ;
-    $SIG{__WARN__} =
-        sub
-        {
-            die @_ if $^B & $bitmask ;
-            warn @_
-        } ;
-}
-
-sub bitmask
-{
-    return $^B ;
+    ${^Warnings} &= ~ bits(@_ ? @_ : 'all') ;
 }
 
 sub enabled
@@ -161,7 +143,7 @@ sub enabled
     my $string = shift ;
 
     return 1
-	if $bits{$string} && $^B & $bits{$string} ;
+	if $bits{$string} && ${^Warnings} & $bits{$string} ;
    
     return 0 ; 
 }

@@ -4932,10 +4932,10 @@ are also implemented this way.  Currently implemented pragmas are:
 
     use integer;
     use diagnostics;
-    use sigtrap qw(SEGV BUS);
-    use strict  qw(subs vars refs);
-    use subs    qw(afunc blurfl);
-    use warning qw(all);
+    use sigtrap  qw(SEGV BUS);
+    use strict   qw(subs vars refs);
+    use subs     qw(afunc blurfl);
+    use warnings qw(all);
 
 Some of these pseudo-modules import semantics into the current
 block scope (like C<strict> or C<integer>, unlike ordinary modules,
@@ -4947,7 +4947,7 @@ by C<use>, i.e., it calls C<unimport Module LIST> instead of C<import>.
 
     no integer;
     no strict 'refs';
-    no warning;
+    no warnings;
 
 If no C<unimport> method can be found the call fails with a fatal error.
 

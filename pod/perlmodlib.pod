@@ -30,7 +30,7 @@ by saying:
 
     no integer;
     no strict 'refs';
-    no warning;
+    no warnings;
 
 which lasts until the end of that BLOCK.
 
@@ -126,17 +126,13 @@ turn on UTF-8 and Unicode support
 
 predeclare global variable names
 
-=item warning
+=item warnings
 
 control optional warnings
 
 =item vmsish
 
 control VMS-specific language features
-
-=item warning
-
-control optional warnings
 
 =back
 

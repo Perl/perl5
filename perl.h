@@ -1764,7 +1764,7 @@ typedef I32 (*filter_t) (pTHXo_ int, SV *, int);
 #include "hv.h"
 #include "mg.h"
 #include "scope.h"
-#include "warning.h"
+#include "warnings.h"
 #include "utf8.h"
 
 /* Current curly descriptor */

@@ -34,44 +34,44 @@
 
 __END__
 # pp.c
-use warning 'substr' ;
+use warnings 'substr' ;
 $a = "ab" ; 
 $a = substr($a, 4,5);
-no warning 'substr' ;
+no warnings 'substr' ;
 $a = "ab" ; 
 $a = substr($a, 4,5);
 EXPECT
 substr outside of string at - line 4.
 ########
 # pp.c
-use warning 'substr' ;
+use warnings 'substr' ;
 $a = "ab" ; 
 $b = \$a ;  
 substr($b, 1,1) = "ab" ;
-no warning 'substr' ;
+no warnings 'substr' ;
 substr($b, 1,1) = "ab" ;
 EXPECT
 Attempt to use reference as lvalue in substr at - line 5.
 ########
 # pp.c
-use warning 'uninitialized' ;
+use warnings 'uninitialized' ;
 # TODO
 EXPECT
 
 ########
 # pp.c
-use warning 'unsafe' ;
+use warnings 'unsafe' ;
 my $a = { 1,2,3};
-no warning 'unsafe' ;
+no warnings 'unsafe' ;
 my $b = { 1,2,3};
 EXPECT
 Odd number of elements in hash assignment at - line 3.
 ########
 # pp.c
-use warning 'unsafe' ;
+use warnings 'unsafe' ;
 my @a = unpack ("A,A", "22") ;
 my $a = pack ("A,A", 1,2) ;
-no warning 'unsafe' ;
+no warnings 'unsafe' ;
 my @b = unpack ("A,A", "22") ;
 my $b = pack ("A,A", 1,2) ;
 EXPECT
@@ -79,27 +79,27 @@ Invalid type in unpack: ',' at - line 3.
 Invalid type in pack: ',' at - line 4.
 ########
 # pp.c
-use warning 'uninitialized' ;
+use warnings 'uninitialized' ;
 my $a = undef ; 
 my $b = $$a;
-no warning 'uninitialized' ;
+no warnings 'uninitialized' ;
 my $c = $$a;
 EXPECT
 Use of uninitialized value at - line 4.
 ########
 # pp.c
-use warning 'unsafe' ;
+use warnings 'unsafe' ;
 sub foo { my $a = "a"; return $a . $a++ . $a++ }
 my $a = pack("p", &foo) ;
-no warning 'unsafe' ;
+no warnings 'unsafe' ;
 my $b = pack("p", &foo) ;
 EXPECT
 Attempt to pack pointer to temporary value at - line 4.
 ########
 # pp.c
-use warning 'unsafe' ;
+use warnings 'unsafe' ;
 bless \[], "" ;
-no warning 'unsafe' ;
+no warnings 'unsafe' ;
 bless \[], "" ;
 EXPECT
 Explicit blessing to '' (assuming package main) at - line 3.
@@ -112,11 +112,11 @@ EXPECT
 Malformed UTF-8 character at - line 4.
 ########
 # pp.c
-use warning 'utf8'  ;
+use warnings 'utf8'  ;
 use utf8 ;
 $_ = "\x80  \xff" ;
 reverse ;
-no warning 'utf8'  ;
+no warnings 'utf8'  ;
 $_ = "\x80  \xff" ;
 reverse ;
 EXPECT

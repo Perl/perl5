@@ -2,9 +2,9 @@ Check interaction of $^W and lexical
 
 __END__
 
-# Check interaction of $^W and use warning
+# Check interaction of $^W and use warnings
 sub fred { 
-    use warning ;
+    use warnings ;
     my $b ; 
     chop $b ;
 }
@@ -16,9 +16,9 @@ EXPECT
 Use of uninitialized value at - line 6.
 ########
 
-# Check interaction of $^W and use warning
+# Check interaction of $^W and use warnings
 sub fred { 
-    use warning ;
+    use warnings ;
     my $b ; 
     chop $b ;
 }
@@ -30,9 +30,9 @@ EXPECT
 Use of uninitialized value at - line 6.
 ########
 
-# Check interaction of $^W and use warning
+# Check interaction of $^W and use warnings
 sub fred { 
-    no warning ;
+    no warnings ;
     my $b ; 
     chop $b ;
 }
@@ -44,9 +44,9 @@ EXPECT
 
 ########
 
-# Check interaction of $^W and use warning
+# Check interaction of $^W and use warnings
 sub fred { 
-    no warning ;
+    no warnings ;
     my $b ; 
     chop $b ;
 }
@@ -58,8 +58,8 @@ EXPECT
 
 ########
 
-# Check interaction of $^W and use warning
-use warning ;
+# Check interaction of $^W and use warnings
+use warnings ;
 $^W = 1 ;
 my $b ; 
 chop $b ;
@@ -67,26 +67,26 @@ EXPECT
 Use of uninitialized value at - line 6.
 ########
 
-# Check interaction of $^W and use warning
+# Check interaction of $^W and use warnings
 $^W = 1 ;
-use warning ;
+use warnings ;
 my $b ; 
 chop $b ;
 EXPECT
 Use of uninitialized value at - line 6.
 ########
 
-# Check interaction of $^W and use warning
+# Check interaction of $^W and use warnings
 $^W = 1 ;
-no warning ;
+no warnings ;
 my $b ; 
 chop $b ;
 EXPECT
 
 ########
 
-# Check interaction of $^W and use warning
-no warning ;
+# Check interaction of $^W and use warnings
+no warnings ;
 $^W = 1 ;
 my $b ; 
 chop $b ;
@@ -94,25 +94,25 @@ EXPECT
 
 ########
 -w
-# Check interaction of $^W and use warning
-no warning ;
+# Check interaction of $^W and use warnings
+no warnings ;
 my $b ; 
 chop $b ;
 EXPECT
 
 ########
 -w
-# Check interaction of $^W and use warning
-use warning ;
+# Check interaction of $^W and use warnings
+use warnings ;
 my $b ; 
 chop $b ;
 EXPECT
 Use of uninitialized value at - line 5.
 ########
 
-# Check interaction of $^W and use warning
+# Check interaction of $^W and use warnings
 sub fred { 
-    use warning ;
+    use warnings ;
     my $b ; 
     chop $b ;
 }
@@ -122,9 +122,9 @@ EXPECT
 Use of uninitialized value at - line 6.
 ########
 
-# Check interaction of $^W and use warning
+# Check interaction of $^W and use warnings
 sub fred { 
-    no warning ;
+    no warnings ;
     my $b ; 
     chop $b ;
 }
@@ -135,8 +135,8 @@ EXPECT
 
 ########
 
-# Check interaction of $^W and use warning
-use warning ;
+# Check interaction of $^W and use warnings
+use warnings ;
 BEGIN {  $^W = 1 }
 my $b ; 
 chop $b ;
@@ -144,26 +144,26 @@ EXPECT
 Use of uninitialized value at - line 6.
 ########
 
-# Check interaction of $^W and use warning
+# Check interaction of $^W and use warnings
 BEGIN {  $^W = 1 }
-use warning ;
+use warnings ;
 my $b ; 
 chop $b ;
 EXPECT
 Use of uninitialized value at - line 6.
 ########
 
-# Check interaction of $^W and use warning
+# Check interaction of $^W and use warnings
 BEGIN {  $^W = 1 }
-no warning ;
+no warnings ;
 my $b ; 
 chop $b ;
 EXPECT
 
 ########
 
-# Check interaction of $^W and use warning
-no warning ;
+# Check interaction of $^W and use warnings
+no warnings ;
 BEGIN {  $^W = 1 }
 my $b ; 
 chop $b ;
@@ -171,10 +171,10 @@ EXPECT
 
 ########
 
-# Check interaction of $^W and use warning
+# Check interaction of $^W and use warnings
 BEGIN {  $^W = 1 }
 {
-    no warning ;
+    no warnings ;
     my $b ; 
     chop $b ;
 }
@@ -184,10 +184,10 @@ EXPECT
 Use of uninitialized value at - line 10.
 ########
 
-# Check interaction of $^W and use warning
+# Check interaction of $^W and use warnings
 BEGIN {  $^W = 0 }
 {
-    use warning ;
+    use warnings ;
     my $b ; 
     chop $b ;
 }

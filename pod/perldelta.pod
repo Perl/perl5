@@ -127,7 +127,7 @@ scope.  See L<utf8> for more information.
 =head2 Lexically scoped warning categories
 
 You can now control the granularity of warnings emitted by perl at a finer
-level using the C<use warning> pragma.  See L<warning> and L<perllexwarn>
+level using the C<use warnings> pragma.  See L<warnings> and L<perllexwarn>
 for details.
 
 =head2 Binary numbers supported
@@ -546,7 +546,7 @@ C<use caller 'encoding'> allows modules to inherit pragmatic attributes
 from the caller's context.  C<encoding> is currently the only supported
 attribute.
 
-Lexical warnings pragma, C<use warning;>, to control optional warnings.
+Lexical warnings pragma, C<use warnings;>, to control optional warnings.
 
 C<use filetest> to control the behaviour of filetests (C<-r> C<-w> ...).
 Currently only one subpragma implemented, "use filetest 'access';",
