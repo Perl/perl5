@@ -731,7 +731,8 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
     gv_init(gv, stash, name, len, add & GV_ADDMULTI);
     gv_init_sv(gv, sv_type);
 
-    if (isLEXWARN_on && isALPHA(name[0]) && ! ckWARN(WARN_ONCE))
+    if (isALPHA(name[0]) && ! (isLEXWARN_on ? ckWARN(WARN_ONCE) 
+			                    : (PL_dowarn & G_WARN_ON ) ) )
         GvMULTI_on(gv) ;
 
     /* set up magic where warranted */

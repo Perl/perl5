@@ -29,7 +29,7 @@ $VERSION = "1.27";
 
 sub import {
     my $pkg = shift;
-    if ($_[0] eq 'sockatmark') { # not very extensible but for now, fast
+    if (@_ && $_[0] eq 'sockatmark') { # not very extensible but for now, fast
 	Exporter::export_to_level('IO::Socket', 1, $pkg, 'sockatmark');
     } else {
 	my $callpkg = caller;

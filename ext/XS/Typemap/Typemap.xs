@@ -584,6 +584,14 @@ T_OPAQUEPTR_OUT( ptr )
  OUTPUT:
   RETVAL
 
+short
+T_OPAQUEPTR_OUT_short( ptr )
+  shortOPQ * ptr
+ CODE:
+  RETVAL = *ptr;
+ OUTPUT:
+  RETVAL
+
 =item T_OPAQUE
 
 This can be used to store pointers to non-pointer types in an SV. It
