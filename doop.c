@@ -469,7 +469,6 @@ Perl_do_trans(pTHX_ SV *sv)
     I32 hasutf = (PL_op->op_private & 
                     (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF));
 
-    PL_op->op_private &= ~hasutf;
     if (SvREADONLY(sv) && !(PL_op->op_private & OPpTRANS_IDENTICAL))
 	Perl_croak(aTHX_ PL_no_modify);
 
@@ -483,7 +482,7 @@ Perl_do_trans(pTHX_ SV *sv)
 
     DEBUG_t( Perl_deb(aTHX_ "2.TBL\n"));
 
-    switch (PL_op->op_private & 63) {
+    switch (PL_op->op_private & ~hasutf & 63) {
     case 0:
     if (hasutf)
         return do_trans_simple_utf8(sv);
