@@ -1017,6 +1017,7 @@ t/pragma/strict.t	See if strictures work
 t/pragma/subs.t		See if subroutine pseudo-importation works
 t/pragma/warn-1global	Tests of global warnings for warning.t
 t/pragma/warning.t	See if warning controls work
+t/test.pl               Testing framework
 taint.c			Tainting code
 thrdvar.h		Per-thread variables
 thread.h		Threading header
