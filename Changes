@@ -9,6 +9,144 @@ releases.)
 
 
 ----------------
+Version 5.003_26
+----------------
+
+This release is beta candidate #4.  "Once more, dear friends...."
+
+ CORE LANGUAGE CHANGES
+
+  Title:  "Make \r in script an error (per Larry)"
+   From:  Chip Salzenberg
+  Files:  pod/perldiag.pod toke.c
+
+  Title:  "Support '%i' format and 'h' modifier in s?printf"
+   From:  Chip Salzenberg
+  Files:  doop.c pod/perldelta.pod
+
+ CORE PORTABILITY
+
+  Title:  "Fix value of system() and $? for DEC UNIX, VMS, others"
+   From:  Chip Salzenberg
+  Files:  mg.c perl.h pp_sys.c
+
+  Title:  "VMS patches post _25"
+   From:  Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>
+ Msg-ID:  <01IF48W3P39W0050BD@hmivax.humgen.upenn.edu>
+   Date:  Fri, 07 Feb 1997 01:56:12 -0500 (EST)
+  Files:  Porting/Glossary lib/ExtUtils/Liblist.pm
+          lib/ExtUtils/MM_VMS.pm lib/ExtUtils/xsubpp perl.c
+          vms/Makefile vms/config.vms vms/descrip.mms vms/genconfig.pl
+          vms/perlvms.pod vms/vms.c vms/vmsish.h x2p/a2p.c
+
+  Title:  "Hints for BSDOS"
+   From:  Christopher Davis <ckd@loiosh.kei.com>
+ Msg-ID:  <199702042011.PAA09206@loiosh.kei.com>
+   Date:  Tue, 4 Feb 1997 15:11:13 -0500 (EST)
+  Files:  hints/bsdos.sh
+
+  Title:  "On C<sysopen(..., O_APPEND)>, call C<fopen(..., "a")>"
+   From:  Chip Salzenberg
+  Files:  doio.c
+
+ OTHER CORE CHANGES
+
+  Title:  "Fix (yet another) Tk closure problem"
+   From:  Chip Salzenberg
+  Files:  op.c perl.c pp_ctl.c
+
+  Title:  "Fix value of C<foreach>"
+   From:  Chip Salzenberg
+  Files:  cop.h pp_ctl.c
+
+  Title:  "Regexp optimizations"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199702041102.GAA24805@monk.mps.ohio-state.edu>
+   Date:  Tue, 4 Feb 1997 06:02:10 -0500 (EST)
+  Files:  regcomp.c regexec.c
+
+  Title:  "Re: static buffer in not_a_number() [sv.c] might overflow"
+   From:  Gisle Aas <aas@bergen.sn.no>
+ Msg-ID:  <hbu9uz1si.fsf@bergen.sn.no>
+   Date:  09 Feb 1997 11:55:41 +0100
+  Files:  sv.c
+
+  Title:  "Refine 'runaway string' heuristic"
+   From:  Chip Salzenberg
+  Files:  toke.c
+
+  Title:  "Fix core dump on C<print "a", last> in eval"
+   From:  Chip Salzenberg
+  Files:  pp_ctl.c
+
+  Title:  "Catch C<use integer; $x % 0>"
+   From:  Chip Salzenberg
+  Files:  pp.c
+
+ BUILD PROCESS
+
+  Title:  "Fix usage message in configure.gnu"
+   From:  Jarkko Hietaniemi <jhi@cc.hut.fi>
+  Files:  configure.gnu
+
+ LIBRARY AND EXTENSIONS
+
+  Title:  "DB_File 1.11 patch"
+   From:  pmarquess@bfsec.bt.co.uk (Paul Marquess)
+ Msg-ID:  <9702061553.AA18147@claudius.bfsec.bt.co.uk>
+   Date:  Thu, 6 Feb 97 15:53:34 GMT
+  Files:  ext/DB_File/DB_File.pm ext/DB_File/DB_File.xs
+
+  Title:  "Faster File::Compare"
+   From:  Gisle Aas <aas@bergen.sn.no>
+ Msg-ID:  <199702051342.OAA02753@bergen.sn.no>
+   Date:  Wed, 5 Feb 1997 14:42:49 +0100
+  Files:  lib/File/Compare.pm
+
+  Title:  "Make diagnostics module strip formatting directives"
+   From:  Chip Salzenberg
+  Files:  lib/diagnostics.pm pod/perldiag.pod
+
+  Title:  "Fix warning from missing POSIX::setvbuf()"
+   From:  Chip Salzenberg
+  Files:  ext/IO/IO.xs
+
+ TESTS
+
+  Title:  "Fix closure.t for AmigaOS (again)"
+   From:  "Norbert Pueschel" <pueschel@imsdd.meb.uni-bonn.de>
+ Msg-ID:  <77724742@Armageddon.meb.uni-bonn.de>
+   Date:  Wed, 05 Feb 1997 18:56:45 +0100
+  Files:  t/op/closure.t
+
+ UTILITIES
+
+  Title:  "perldoc -f <perlfunc>"
+   From:  Gisle Aas <aas@bergen.sn.no>
+ Msg-ID:  <199702051127.MAA02090@bergen.sn.no>
+   Date:  Wed, 5 Feb 1997 12:27:36 +0100
+  Files:  utils/perldoc.PL
+
+  Title:  "Fix pod2man's handling of quotes in =items"
+   From:  Jarkko Hietaniemi <jhi@iki.fi>
+ Msg-ID:  <199702042023.WAA13143@alpha.hut.fi>
+   Date:  Tue, 4 Feb 1997 22:23:34 +0200 (EET)
+  Files:  pod/pod2man.PL
+
+ DOCUMENTATION
+
+  Title:  "return *FH pod patch"
+   From:  allen@gateway.grumman.com (John L. Allen)
+ Msg-ID:  <9702061507.AA04474@gateway.grumman.com>
+   Date:  Thu, 6 Feb 1997 10:07:28 -0500
+  Files:  pod/perldata.pod pod/perlsub.pod
+
+  Title:  "Describe interation of untie and DESTROY"
+   From:  Paul Marquess and Chip Salzenberg
+  Files:  pod/perltie.pod
+
+
+----------------
 Version 5.003_25
 ----------------
 

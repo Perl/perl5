@@ -1295,8 +1295,6 @@ sub map_type {
 
 
 sub Exit {
-# If this is VMS, the exit status has meaning to the shell, so we
-# use a predictable value (SS$_Normal or SS$_Abort) rather than an
-# arbitrary number.
-    exit ($Is_VMS ? ($errors ? 44 : 1) : $errors) ;
+    # VMS error exit: SS$_ABORT.
+    exit $errors ? ($Is_VMS ? 44 : 1) : 0;
 }

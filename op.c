@@ -177,9 +177,10 @@ pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix)
     int saweval;
 
     for (cv = startcv; cv; cv = CvOUTSIDE(cv)) {
-	AV* curlist = CvPADLIST(cv);
-	SV** svp = av_fetch(curlist, 0, FALSE);
+	AV *curlist = CvPADLIST(cv);
+	SV **svp = av_fetch(curlist, 0, FALSE);
 	AV *curname;
+
 	if (!svp || *svp == &sv_undef)
 	    continue;
 	curname = (AV*)*svp;
@@ -198,8 +199,8 @@ pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix)
 
 		depth = CvDEPTH(cv);
 		if (!depth) {
-		    if (newoff && !CvUNIQUE(cv))
-			return 0; /* don't clone inactive sub's stack frame */
+		    if (newoff)
+			return 0; /* don't clone from inactive stack frame */
 		    depth = 1;
 		}
 		oldpad = (AV*)*av_fetch(curlist, depth, FALSE);
@@ -1369,22 +1370,18 @@ OP *op;
 	peep(eval_start);
     }
     else {
-	if (!op) {
-	    main_start = 0;
+	if (!op)
 	    return;
-	}
 	main_root = scope(sawparens(scalarvoid(op)));
 	curcop = &compiling;
 	main_start = LINKLIST(main_root);
 	main_root->op_next = 0;
 	peep(main_start);
-	main_cv = compcv;
 	compcv = 0;
-	/* Register with debugger: */
 
+	/* Register with debugger */
 	if (perldb) {
 	    CV *cv = perl_get_cv("DB::postponed", FALSE);
-	
 	    if (cv) {
 		dSP;
 		PUSHMARK(sp);
@@ -2858,10 +2855,10 @@ CV* cv;
 {
     CV *outside = CvOUTSIDE(cv);
     AV* padlist = CvPADLIST(cv);
-    AV* pad_name = (AV*)*av_fetch(padlist, 0, FALSE);
-    AV* pad = (AV*)*av_fetch(padlist, 1, FALSE);
-    SV** pname = AvARRAY(pad_name);
-    SV** ppad = AvARRAY(pad);
+    AV* pad_name;
+    AV* pad;
+    SV** pname;
+    SV** ppad;
     I32 ix;
 
     PerlIO_printf(Perl_debug_log, "\tCV=0x%p (%s), OUTSIDE=0x%p (%s)\n",
@@ -2877,10 +2874,20 @@ CV* cv;
 		   : CvUNIQUE(outside) ? "UNIQUE"
 		   : CvGV(outside) ? GvNAME(CvGV(outside)) : "UNDEFINED"));
 
+    if (!padlist)
+	return;
+
+    pad_name = (AV*)*av_fetch(padlist, 0, FALSE);
+    pad = (AV*)*av_fetch(padlist, 1, FALSE);
+    pname = AvARRAY(pad_name);
+    ppad = AvARRAY(pad);
+
     for (ix = 1; ix <= AvFILL(pad); ix++) {
 	if (SvPOK(pname[ix]))
-	    PerlIO_printf(Perl_debug_log, "\t%4d. 0x%p (\"%s\" %ld-%ld)\n",
-			  ix, ppad[ix], SvPVX(pname[ix]),
+	    PerlIO_printf(Perl_debug_log, "\t%4d. 0x%p (%s\"%s\" %ld-%ld)\n",
+			  ix, ppad[ix],
+			  SvFAKE(pname[ix]) ? "FAKE " : "",
+			  SvPVX(pname[ix]),
 			  (long)I_32(SvNVX(pname[ix])),
 			  (long)SvIVX(pname[ix]));
     }

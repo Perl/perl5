@@ -290,7 +290,7 @@ sub _vms_ext {
       if ($ctype) { 
         eval '$' . $ctype . "{'$cand'}++";
         die "Error recording library: $@" if $@;
-        print STDOUT "\tFound as $name (really $test), type $type\n" if $verbose > 1;
+        print STDOUT "\tFound as $cand (really $ctest), type $ctype\n" if $verbose > 1;
         next LIB;
       }
     }

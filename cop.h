@@ -125,10 +125,10 @@ struct block_loop {
 	  POPLOOP2(); }
 
 #define POPLOOP1(cx)							\
-	cxloop = cx->blk_loop;	/* because DESTROY may clobber *cx */
+	cxloop = cx->blk_loop;	/* because DESTROY may clobber *cx */	\
+	newsp = stack_base + cxloop.resetsp;
 
 #define POPLOOP2()							\
-	newsp = stack_base + cxloop.resetsp;				\
 	SvREFCNT_dec(cxloop.iterlval);					\
 	if (cxloop.itervar) {						\
 	    SvREFCNT_dec(*cxloop.itervar);				\

@@ -65,7 +65,7 @@ OBJVAL = $(MMS$TARGET_NAME)$(O)
 .endif
 
 # Updated by fndvers.com -- do not edit by hand
-PERL_VERSION = 5_00325#
+PERL_VERSION = 5_00326#
 
 
 ARCHDIR =  [.lib.$(ARCH).$(PERL_VERSION)]
@@ -538,6 +538,13 @@ IO : [.lib]IO.pm [.lib.IO]File.pm [.lib.IO]Handle.pm [.lib.IO]Pipe.pm [.lib.IO]S
 [.x2p]$(DBG)a2p$(E) : [.x2p]a2p$(O), [.x2p]hash$(O), [.x2p]str$(O), [.x2p]util$(O), [.x2p]walk$(O)
 	@ If F$Search("a2p$(O)").nes."" Then Rename/NoLog a2p$(O),hash$(O),str$(O),util$(O),walk$(O) [.x2p]
 	Link $(LINKFLAGS) /Exe=$(MMS$TARGET) $(MMS$SOURCE_LIST) $(CRTLOPTS)
+
+# Accomodate buggy cpp in some version of DECC, which chokes on illegal
+# filespec "y.tab.c"
+[.x2p]a2p$(O) : [.x2p]a2p.c $(MINIPERL_EXE)
+	$(MINIPERL) -pe "s/^#line\s+(\d+)\s+\Q""y.tab.c""/#line $1 ""y_tab.c""/;" $(MMS$SOURCE) >$(MMS$TARGET_NAME)_vms.c
+	$(CC) $(CFLAGS) /Object=$(MMS$TARGET) $(MMS$TARGET_NAME)_vms.c
+	Delete/Log/NoConfirm $(MMS$TARGET_NAME)_vms.c;
 
 [.lib.pod]pod2html.com : [.pod]pod2html.PL $(ARCHDIR)Config.pm
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]

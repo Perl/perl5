@@ -32,7 +32,7 @@ ARCH = VMS_VAX
 OBJVAL = $@
 
 # Updated by fndvers.com -- do not edit by hand
-PERL_VERSION = 5_00325#
+PERL_VERSION = 5_00326#
 
 
 ARCHDIR =  [.lib.$(ARCH).$(PERL_VERSION)]
@@ -417,6 +417,13 @@ IO : [.lib]IO.pm [.lib.IO]File.pm [.lib.IO]Handle.pm [.lib.IO]Pipe.pm [.lib.IO]S
 [.x2p]$(DBG)a2p$(E) : [.x2p]a2p$(O), [.x2p]hash$(O), [.x2p]str$(O), [.x2p]util$(O), [.x2p]walk$(O)
 	@ If f$$Search("a2p$(O)").nes."" Then Rename/NoLog a2p$(O),hash$(O),str$(O),util$(O),walk$(O) [.x2p]
 	Link $(LINKFLAGS) /Exe=$@ $(MMS$SOURCE_LIST) $(CRTLOPTS)
+
+# Accomodate buggy cpp in some version of DECC, which chokes on illegal
+# filespec "y.tab.c"
+[.x2p]a2p$(O) : [.x2p]a2p.c $(MINIPERL_EXE)
+	$(MINIPERL) -pe "s/^#line\s+(\d+)\s+\Q""y.tab.c""/#line $1 ""y_tab.c""/;" [.x2p]a2p.c >$*_vms.c
+	$(CC) $(CFLAGS) /Object=$@ $*_vms.c
+	Delete/Log/NoConfirm $*_vms.c;
 
 [.lib.pod]pod2html.com : [.pod]pod2html.PL $(ARCHDIR)Config.pm
 	@ If f$$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]

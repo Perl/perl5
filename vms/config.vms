@@ -76,7 +76,7 @@
  * when Perl is built.  Please do not change it by hand; make
  * any changes to FndVers.Com instead.
  */
-#define ARCHLIB_EXP "/perl_root/lib/VMS_VAX/5_00325"  /**/
+#define ARCHLIB_EXP "/perl_root/lib/VMS_VAX/5_00326"  /**/
 #define ARCHLIB ARCHLIB_EXP	/*config-skip*/
 
 /* ARCHNAME:
@@ -1263,7 +1263,17 @@
  *	This symbol contains the size of an int, so that the C preprocessor
  *	can make decisions based on it.
  */
+/* LONGSIZE:
+ *	This symbol contains the value of sizeof(long) so that the C
+ *	preprocessor can make decisions based on it.
+ */
+/* SHORTSIZE:
+ *	This symbol contains the value of sizeof(short) so that the C
+ *	preprocessor can make decisions based on it.
+ */
 #define INTSIZE 4		/**/
+#define LONGSIZE 4		/**/
+#define SHORTSIZE 2		/**/
 
 /* Off_t:
  *	This symbol holds the type used to declare offsets in the kernel.

@@ -1287,9 +1287,9 @@ PP(pp_leaveloop)
     SV **mark;
 
     POPBLOCK(cx,newpm);
+    mark = newsp;
     POPLOOP1(cx);	/* Delay POPLOOP2 until stack values are safe */
 
-    mark = newsp;
     if (gimme == G_SCALAR) {
 	if (op->op_private & OPpLEAVE_VOID)
 	    ;
@@ -1422,8 +1422,7 @@ PP(pp_last)
     case CXt_LOOP:
 	POPLOOP1(cx);	/* Delay POPLOOP2 until stack values are safe */
 	pop2 = CXt_LOOP;
-	nextop = cx->blk_loop.last_op->op_next;
-	LEAVE;
+	nextop = cxloop.last_op->op_next;
 	break;
     case CXt_SUB:
 	POPSUB1(cx);	/* Delay POPSUB2 until stack values are safe */
@@ -1458,6 +1457,7 @@ PP(pp_last)
     switch (pop2) {
     case CXt_LOOP:
 	POPLOOP2();	/* release loop vars ... */
+	LEAVE;
 	break;
     case CXt_SUB:
 	POPSUB2();	/* release CV and @_ ... */
@@ -2035,10 +2035,8 @@ int gimme;
     DEBUG_x(dump_eval());
 
     /* Register with debugger: */
-
     if (perldb && saveop->op_type == OP_REQUIRE) {
 	CV *cv = perl_get_cv("DB::postponed", FALSE);
-	
 	if (cv) {
 	    dSP;
 	    PUSHMARK(sp);
@@ -2049,6 +2047,8 @@ int gimme;
     }
 
     /* compiled okay, so do it */
+
+    CvDEPTH(compcv) = 1;
 
     SP = stack_base + POPMARK;		/* pop original mark */
     RETURNOP(eval_start);
@@ -2271,6 +2271,11 @@ PP(pp_leaveeval)
     }
     curpm = newpm;	/* Don't pop $1 et al till now */
 
+#ifdef DEBUGGING
+    assert(CvDEPTH(compcv) == 1);
+#endif
+    CvDEPTH(compcv) = 0;
+
     if (optype == OP_REQUIRE &&
 	!(gimme == G_SCALAR ? SvTRUE(*sp) : sp > newsp)) {
 	char *name = cx->blk_eval.old_name;
@@ -2282,6 +2287,7 @@ PP(pp_leaveeval)
 
     lex_end();
     LEAVE;
+
     if (!(save_flags & OPf_SPECIAL))
 	sv_setpv(GvSV(errgv),"");
 

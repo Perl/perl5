@@ -22,13 +22,9 @@ sub fibonacci ($) {
 
 # Highly recursive, highly aggressive.
 # Kids, don't try this at home.
-# For example ackermann(4,0) will take quite a long time.
 #
-# In fact, the current Perl, 5.004, will complain loudly:
-# "Deep recursion on subroutine." (see perldiag) when
-# computing the ackermann(4,0) because the recursion will
-# become so deep (>100 levels) that Perl suspects the script
-# has been lost in an infinite recursion.
+# For example ackermann(4,1) will take quite a long time.
+# It will simply eat away your memory. Trust me.
 
 sub ackermann ($$) {
     return $_[1] + 1               if ($_[0] == 0);

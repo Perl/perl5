@@ -801,9 +801,9 @@ I32 my_pclose(FILE *fp)
 }  /* end of my_pclose() */
 
 /* sort-of waitpid; use only with popen() */
-/*{{{unsigned long int waitpid(unsigned long int pid, int *statusp, int flags)*/
-unsigned long int
-waitpid(unsigned long int pid, int *statusp, int flags)
+/*{{{Pid_t my_waitpid(Pid_t pid, int *statusp, int flags)*/
+Pid_t
+my_waitpid(Pid_t pid, int *statusp, int flags)
 {
     struct pipe_details *info;
     

@@ -6,9 +6,10 @@
 #   Author:  Charles Bailey  bailey@genetics.upenn.edu
 
 package ExtUtils::MM_VMS;
-$ExtUtils::MM_VMS::Revision=$ExtUtils::MM_VMS::Revision = '5.39 (16-Jan-1997)';
+$ExtUtils::MM_VMS::Revision=$ExtUtils::MM_VMS::Revision = '5.39 (31-Jan-1997)';
 unshift @MM::ISA, 'ExtUtils::MM_VMS';
 
+use Carp qw( &carp );
 use Config;
 require Exporter;
 use VMS::Filespec;
@@ -47,16 +48,23 @@ sub eliminate_macros {
 	return '';
     }
     my($npath) = unixify($path);
+    my($complex) = 0;
     my($head,$macro,$tail);
 
     # perform m##g in scalar context so it acts as an iterator
     while ($npath =~ m#(.*?)\$\((\S+?)\)(.*)#g) { 
         if ($self->{$2}) {
             ($head,$macro,$tail) = ($1,$2,$3);
-            ($macro = unixify($self->{$macro})) =~ s#/$##;
+            if (ref $self->{$macro}) {
+              carp "Can't expand macro containing " . ref $self->{$macro};
+              $npath = "$head\cB$macro\cB$tail";
+              $complex = 1;
+            }
+            else { ($macro = unixify($self->{$macro})) =~ s#/$##; }
             $npath = "$head$macro$tail";
         }
     }
+    if ($complex) { $npath =~ s#\cB(.*?)\cB#\$($1)#g; }
     print "eliminate_macros($path) = |$npath|\n" if $Verbose >= 3;
     $npath;
 }
@@ -590,8 +598,8 @@ sub constants {
 	foreach $def (@defs) {
 	    next unless $def;
 	    if ($def =~ s/^-D//) {       # If it was a Unix-style definition
-		$def =~ /='(.*)'$/=$1/;  # then remove shell-protection ''
-		$def =~ /^'(.*)'$/$1/;   # from entire term or argument
+		$def =~ s/='(.*)'$/=$1/;  # then remove shell-protection ''
+		$def =~ s/^'(.*)'$/$1/;   # from entire term or argument
 	    }
 	    if ($def =~ /=/) {
 		$def =~ s/"/""/g;  # Protect existing " from DCL
@@ -1590,7 +1598,19 @@ clean ::
 ';
 
     my(@otherfiles) = values %{$self->{XS}}; # .c files from *.xs files
-    push(@otherfiles, $attribs{FILES}) if $attribs{FILES};
+    # Unlink realclean, $attribs{FILES} is a string here; it may contain
+    # a list or a macro that expands to a list.
+    if ($attribs{FILES}) {
+	my($word,$key,@filist);
+	if (ref $attribs{FILES} eq 'ARRAY') { @filist = @{$attribs{FILES}}; }
+	else { @filist = split /\s+/, $attribs{FILES}; }
+	foreach $word (@filist) {
+	    if (($key) = $word =~ m#^\$\((.*)\)$# and ref $self->{$key} eq 'ARRAY') {
+		push(@otherfiles, @{$self->{$key}});
+	    }
+	    else { push(@otherfiles, $attribs{FILES}); }
+	}
+    }
     push(@otherfiles, qw[ blib $(MAKE_APERL_FILE) extralibs.ld perlmain.c pm_to_blib.ts ]);
     push(@otherfiles,$self->catfile('$(INST_ARCHAUTODIR)','extralibs.all'));
     my($file,$line);
@@ -1649,9 +1669,18 @@ realclean :: clean
 	else { $line .= " $file"; }
     }
     push @m, "\t\$(RM_F) $line\n" if $line;
-    if ($attribs{FILES} && ref $attribs{FILES} eq 'ARRAY') {
+    if ($attribs{FILES}) {
+	my($word,$key,@filist,@allfiles);
+	if (ref $attribs{FILES} eq 'ARRAY') { @filist = @{$attribs{FILES}}; }
+	else { @filist = split /\s+/, $attribs{FILES}; }
+	foreach $word (@filist) {
+	    if (($key) = $word =~ m#^\$\((.*)\)$# and ref $self->{$key} eq 'ARRAY') {
+		push(@allfiles, @{$self->{$key}});
+	    }
+	    else { push(@allfiles, $attribs{FILES}); }
+	}
 	$line = '';
-	foreach $file (@{$attribs{'FILES'}}) {
+	foreach $file (@allfiles) {
 	    $file = $self->fixpath($file);
 	    if (length($line) + length($file) > 80) {
 		push @m, "\t\$(RM_RF) $line\n";
@@ -1681,7 +1710,7 @@ distcheck :
 	$(PERL) "-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" -e "use ExtUtils::Manifest \'&fullcheck\'; fullcheck()"
 
 skipcheck :
-	$(PERL) "-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" -e "use ExtUtils::Manifest \'&fullcheck\'; skipcheck()"
+	$(PERL) "-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" -e "use ExtUtils::Manifest \'&skipcheck\'; skipcheck()"
 
 manifest :
 	$(PERL) "-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" -e "use ExtUtils::Manifest \'&mkmanifest\'; mkmanifest()"
@@ -1810,7 +1839,7 @@ pure__install : pure_site_install
 	$(NOECHO) $(SAY) "INSTALLDIRS not defined, defaulting to INSTALLDIRS=site"
 
 doc__install : doc_site_install
-	$(NOECHO} $(SAY) "INSTALLDIRS not defined, defaulting to INSTALLDIRS=site"
+	$(NOECHO) $(SAY) "INSTALLDIRS not defined, defaulting to INSTALLDIRS=site"
 
 # This hack brought to you by DCL's 255-character command line limit
 pure_perl_install ::

@@ -49,11 +49,11 @@
  * Not using SOFT_CAST on SAVEFREESV and SAVEFREESV
  * because these are used for several kinds of pointer values
  */
-#define SAVEI16(i)	save_I16(SOFT_CAST(I16*)&(i));
-#define SAVEI32(i)	save_I32(SOFT_CAST(I32*)&(i));
-#define SAVEINT(i)	save_int(SOFT_CAST(int*)&(i));
-#define SAVEIV(i)	save_iv(SOFT_CAST(IV*)&(i));
-#define SAVELONG(l)	save_long(SOFT_CAST(long*)&(l));
+#define SAVEI16(i)	save_I16(SOFT_CAST(I16*)&(i))
+#define SAVEI32(i)	save_I32(SOFT_CAST(I32*)&(i))
+#define SAVEINT(i)	save_int(SOFT_CAST(int*)&(i))
+#define SAVEIV(i)	save_iv(SOFT_CAST(IV*)&(i))
+#define SAVELONG(l)	save_long(SOFT_CAST(long*)&(l))
 #define SAVESPTR(s)	save_sptr((SV**)&(s))
 #define SAVEPPTR(s)	save_pptr(SOFT_CAST(char**)&(s))
 #define SAVEFREESV(s)	save_freesv((SV*)(s))

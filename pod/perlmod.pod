@@ -332,7 +332,8 @@ F<.pl> files will all eventually be converted into standard modules, and
 the F<.ph> files made by B<h2ph> will probably end up as extension modules
 made by B<h2xs>.  (Some F<.ph> values may already be available through the
 POSIX module.)  The B<pl2pm> file in the distribution may help in your
-conversion, but it's just a mechanical process, so is far from bulletproof.
+conversion, but it's just a mechanical process and therefore far from 
+bulletproof.
 
 =head2 Pragmatic Modules
 
@@ -349,7 +350,7 @@ which lasts until the end of that BLOCK.
 Unlike the pragmas that effect the C<$^H> hints variable, the C<use
 vars> and C<use subs> declarations are not BLOCK-scoped.  They allow
 you to pre-declare a variables or subroutines within a particular
-<I>file</I> rather than just a block.  Such declarations are effective
+I<file> rather than just a block.  Such declarations are effective
 for the entire file for which they were declared.  You cannot rescind
 them with C<no vars> or C<no subs>.
 

@@ -476,9 +476,11 @@ setuid perl scripts securely.\n");
 	return 0;
     }
 
+    SvREFCNT_dec(main_cv);
     if (main_root)
 	op_free(main_root);
-    main_root = 0;
+    main_cv = 0;
+    main_start = main_root = 0;
 
     time(&basetime);
 
@@ -687,7 +689,7 @@ setuid perl scripts securely.\n");
     if (doextract)
 	find_beginning();
 
-    compcv = (CV*)NEWSV(1104,0);
+    main_cv = compcv = (CV*)NEWSV(1104,0);
     sv_upgrade((SV *)compcv, SVt_PVCV);
     CvUNIQUE_on(compcv);
 
@@ -819,6 +821,7 @@ PerlInterpreter *sv_interp;
 	runops();
     }
     else if (main_start) {
+	CvDEPTH(main_cv) = 1;
 	op = main_start;
 	runops();
     }
@@ -2348,7 +2351,7 @@ int addsubdirs;
 	if (addsubdirs) {
 	    struct stat tmpstatbuf;
 
-	    /* .../archname/version if -d .../archname/auto */
+	    /* .../archname/version if -d .../archname/version/auto */
 	    sv_setsv(subdir, libdir);
 	    sv_catpv(subdir, archpat_auto);
 	    if (Stat(SvPVX(subdir), &tmpstatbuf) >= 0 &&
@@ -2356,7 +2359,7 @@ int addsubdirs;
 		av_push(GvAVn(incgv),
 			newSVpv(SvPVX(subdir), SvCUR(subdir) - sizeof "auto"));
 
-	    /* .../archname/version if -d .../archname/version/auto */
+	    /* .../archname if -d .../archname/auto */
 	    sv_insert(subdir, SvCUR(libdir) + sizeof(ARCHNAME),
 		      strlen(patchlevel) + 1, "", 0);
 	    if (Stat(SvPVX(subdir), &tmpstatbuf) >= 0 &&
@@ -2464,14 +2467,14 @@ my_failure_exit()
 {
 #ifdef VMS
     if (vaxc$errno & 1) {
-	if (GETSTATUS_NATIVE & 1)	/* fortuitiously includes "-1" */
-	    SETSTATUS_NATIVE(44);
+	if (STATUS_NATIVE & 1)		/* fortuitiously includes "-1" */
+	    STATUS_NATIVE_SET(44);
     }
     else {
 	if (!vaxc$errno && errno)	/* someone must have set $^E = 0 */
-	    SETSTATUS_NATIVE(44);
+	    STATUS_NATIVE_SET(44);
 	else
-	    SETSTATUS_NATIVE(vaxc$errno);
+	    STATUS_NATIVE_SET(vaxc$errno);
     }
 #else
     if (errno & 255)

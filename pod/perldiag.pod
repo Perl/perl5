@@ -1078,6 +1078,13 @@ appear in %ENV.  This may be a benign occurrence, as some software packages
 might directly modify logical name tables and introduce non-standard names,
 or it may indicate that a logical name table has been corrupted.
 
+=item Illegal character %s (carriage return)
+
+(F) A carriage return character was found in the input.  This is an
+error, and not a warning, because carriage return characters can break
+here documents (e.g. C<print E<LT>E<LT>EOF;>).  Note that Perl always
+opens scripts in text mode, so this error should only occur in C<eval>.
+
 =item Illegal division by zero
 
 (F) You tried to divide a number by 0.  Either something was wrong in your
@@ -2185,7 +2192,7 @@ you're not running on Unix.
 (F) There has to be at least one argument to syscall() to specify the
 system call to call, silly dilly.
 
-=item Too late for "-T" option (try putting it first)
+=item Too late for "B<-T>" option (try putting it first)
 
 (X) The #! line in a Perl script contains the "-T" option, but Perl
 was not invoked with "-T" in its argument list.  Due to the way Perl

@@ -13,7 +13,7 @@
 #include <libdef.h>  /* status codes for various places */
 #include <rmsdef.h>  /* at which errno and vaxc$errno are */
 #include <ssdef.h>   /* explicitly set in the perl source code */
-#include <stsdef.h>
+#include <stsdef.h>  /* bitmasks for exit status testing */
 
 /* Suppress compiler warnings from DECC for VMS-specific extensions:
  * GLOBALEXT, NOSHAREEXT, READONLYEXT: global[dr]ef declarations
@@ -56,6 +56,15 @@
 #  include <unistd.h> /* DECC has this; VAXC and gcc don't */
 #endif
 
+/* DECC introduces this routine in the RTL as of VMS 7.0; for now,
+ * we'll use ours, since it gives us the full VMS exit status. */
+#ifdef __PID_T
+#  define Pid_t pid_t
+#else
+#  define Pid_t unsigned int
+#endif
+#define waitpid my_waitpid
+
 /* Our own contribution to PerlShr's global symbols . . . */
 #ifdef EMBED
 #  define my_trnlnm		Perl_my_trnlnm
@@ -63,7 +72,7 @@
 #  define prime_env_iter	Perl_prime_env_iter
 #  define my_setenv		Perl_my_setenv
 #  define my_crypt		Perl_my_crypt
-#  define waitpid		Perl_waitpid
+#  define my_waitpid		Perl_my_waitpid
 #  define my_gconvert		Perl_my_gconvert
 #  define do_rmdir		Perl_do_rmdir
 #  define kill_file		Perl_kill_file
@@ -454,7 +463,7 @@ typedef char  __VMS_PROTOTYPES__;
 int	my_trnlnm _((char *, char *, unsigned long int));
 char *	my_getenv _((char *));
 char *	my_crypt _((const char *, const char *));
-unsigned long int	waitpid _((unsigned long int, int *, int));
+Pid_t	my_waitpid _((Pid_t, int *, int));
 char *	my_gconvert _((double, int, int, char *));
 int	do_rmdir _((char *));
 int	kill_file _((char *));

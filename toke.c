@@ -1696,7 +1696,9 @@ yylex()
 	    return yylex();
 	}
 	goto retry;
-    case ' ': case '\t': case '\f': case '\r': case 013:
+    case '\r':
+	croak("Illegal character \\%03o (carriage return)");
+    case ' ': case '\t': case '\f': case 013:
 	s++;
 	goto retry;
     case '#':
@@ -4445,6 +4447,7 @@ char *start;
 {
     register char *s;
     register PMOP *pm;
+    I32 first_start;
     I32 es = 0;
 
     yylval.ival = OP_NULL;
@@ -4461,6 +4464,7 @@ char *start;
     if (s[-1] == multi_open)
 	s--;
 
+    first_start = multi_start;
     s = scan_str(s);
     if (!s) {
 	if (lex_stuff)
@@ -4471,6 +4475,7 @@ char *start;
 	lex_repl = Nullsv;
 	croak("Substitution replacement not terminated");
     }
+    multi_start = first_start;	/* so whole substitution is taken together */
 
     pm = (PMOP*)newPMOP(OP_SUBST, 0);
     while (*s && strchr("iogmsex", *s)) {
@@ -5162,10 +5167,10 @@ char *s;
 	(void)sprintf(tname,"next char %c",yychar);
     (void)sprintf(buf, "%s at %s line %d, %s\n",
       s,SvPVX(GvSV(curcop->cop_filegv)),curcop->cop_line,tname);
-    if (curcop->cop_line == multi_end && multi_start < multi_end) {
+    if (multi_start < multi_end && (U32)(curcop->cop_line - multi_end) <= 1) {
 	sprintf(buf+strlen(buf),
-	  "  (Might be a runaway multi-line %c%c string starting on line %ld)\n",
-	  multi_open,multi_close,(long)multi_start);
+	"  (Might be a runaway multi-line %c%c string starting on line %ld)\n",
+		multi_open,multi_close,(long)multi_start);
         multi_end = 0;
     }
     if (in_eval & 2)

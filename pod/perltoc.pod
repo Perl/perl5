@@ -64,10 +64,10 @@ $^E, $^H, $^M, $^S
 
 =item New and Changed Built-in Functions
 
-delete on slices, flock, keys as an lvalue, my() in Control Structures,
-unpack() and pack(), use VERSION, use Module VERSION LIST,
-prototype(FUNCTION), $_ as Default, C<m//g> does not trigger a pos() reset
-on failure, nested C<sub{}> closures work now, formats work right on
+delete on slices, flock, printf and sprintf, keys as an lvalue, my() in
+Control Structures, unpack() and pack(), use VERSION, use Module VERSION
+LIST, prototype(FUNCTION), $_ as Default, C<m//g> does not trigger a pos()
+reset on failure, nested C<sub{}> closures work now, formats work right on
 changing lexicals
 
 =item New Built-in Methods
@@ -951,6 +951,8 @@ this, NEXTKEY this, lastkey, DESTROY this
 =item Tying FileHandles
 
 TIEHANDLE classname, LIST, PRINT this, LIST, READLINE this, DESTROY this
+
+=item The C<untie> Gotcha
 
 =back
 
@@ -2057,6 +2059,8 @@ $value, $flags) ;>, B<$status = $X-E<gt>sync([$flags]) ;>
 =item Locking Databases
 
 =item Sharing databases with C applications
+
+=item The untie gotcha
 
 =back
 

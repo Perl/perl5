@@ -1113,6 +1113,11 @@ lns (lns.U):
 	symbolic links (if they are supported).  It can be used
 	in the Makefile. It is either 'ln -s' or 'ln'
 
+longsize (intsize.U):
+	This variable contains the value of the LONGSIZE symbol,
+	which indicates to the C program how many bytes there are
+	in a long integer.
+
 lseektype (lseektype.U):
 	This variable defines lseektype to be something like off_t, long, 
 	or whatever type is used to declare lseek offset's type in the
@@ -1287,6 +1292,11 @@ sh (sh.U):
 shmattype (d_shmat.U):
 	This symbol contains the type of pointer returned by shmat().
 	It can be 'void *' or 'char *'.
+
+shortsize (intsize.U):
+	This variable contains the value of the SHORTSIZE symbol,
+	which indicates to the C program how many bytes there are
+	in a short integer.
 
 shrpenv (libperl.U):
 	If the user builds a shared libperl.so, then we need to tell the

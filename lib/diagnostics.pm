@@ -313,7 +313,9 @@ EOFUNC
 	    }
 	    next;
 	}
-	$header = $1;
+
+	# strip formatting directives in =item line
+	($header = $1) =~ s/[A-Z]<(.*?)>/$1/g;
 
 	if ($header =~ /%[sd]/) {
 	    $rhs = $lhs = $header;

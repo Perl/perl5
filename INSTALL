@@ -117,7 +117,7 @@ e.g.
 If your prefix contains the string "perl", then the directories
 are simplified.  For example, if you use prefix=/opt/perl,
 then Configure will suggest /opt/perl/lib instead of
-/usr/local/lib/perl5/.
+/opt/perl/lib/perl5/.
 
 By default, Configure will compile perl to use dynamic loading, if
 your system supports it.  If you want to force perl to be compiled
@@ -1102,4 +1102,4 @@ from the original README by Larry Wall.
 
 =head1 LAST MODIFIED
 
-22 January 1997
+8 February 1997
