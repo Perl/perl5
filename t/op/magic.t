@@ -299,8 +299,10 @@ else {
               $ps;
             };
             my $ps = $mydollarzero->("x");
-            ok(!$ps ||   # we allow that something goes wrong with the ps command
-               $ps eq "x", 'altering $0 is effective (testing with `ps`)');
+            ok(!$ps  # we allow that something goes wrong with the ps command
+	       # FreeBSD cannot get rid of the trailing " (perl)".
+               || $ps =~ /^x\b/,
+		       'altering $0 is effective (testing with `ps`)');
 	} else {
 	    skip("\$0 check only on Linux and FreeBSD") for 0, 1;
 	}
