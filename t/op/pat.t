@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..769\n";
+print "1..770\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2323,4 +2323,21 @@ print "# some Unicode properties\n";
     print $UPPER =~ m/$lower/i   ? "ok 767\n" : "not ok 767\n";
     print $lower =~ m/[$UPPER]/i ? "ok 768\n" : "not ok 768\n";
     print $UPPER =~ m/[$lower]/i ? "ok 769\n" : "not ok 769\n";
+}
+
+{
+    use warnings;
+    use charnames ':full';
+    
+    print "# GREEK CAPITAL LETTER SIGMA vs COMBINING GREEK PERISPOMENI\n";
+
+    my $SIGMA = "\N{GREEK CAPITAL LETTER SIGMA}";
+
+    my $hSIGMA = sprintf "%04x", ord $SIGMA;
+    
+    my $char = "\N{COMBINING GREEK PERISPOMENI}";
+    my $code = sprintf "%04x", ord($char);
+
+    # Before #13843 this was failing.
+    print "_:$char:_" =~ m/_:$SIGMA:_/i ? "not ok 770\n" : "ok 770\n";
 }
