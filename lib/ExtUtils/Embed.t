@@ -44,6 +44,14 @@ else {
 }
 push(@cmd,ldopts());
 
+if ($^O eq 'aix') { # AIX needs an explicit symbol export list.
+    my ($perl_exp) = grep { -f } qw(perl.exp ../perl.exp);
+    die "where is perl.exp?\n" unless defined $perl_exp;
+    for (@cmd) {
+        s!-bE:(\S+)!-bE:$perl_exp!;
+    }
+}
+
 print "# @cmd"; # where is the newline coming from? ldopts()?
 print "not " if system(join(' ',@cmd));
 print "ok 1\n";
