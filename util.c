@@ -3897,7 +3897,7 @@ Perl_report_evil_fh(pTHX_ GV *gv, IO *io, I32 op)
 	op == OP_LEAVEWRITE ? "write" :
 	PL_op_desc[op];
     char *pars = OP_IS_FILETEST(op) ? "" : "()";
-    char *type = OP_IS_SOCKET(op) || (io && IoTYPE(io) == 's') ?
+    char *type = OP_IS_SOCKET(op) || (io && IoTYPE(io) == IoTYPE_SOCKET) ?
                      "socket" : "filehandle";
     char *name = NULL;
 
@@ -3907,7 +3907,7 @@ Perl_report_evil_fh(pTHX_ GV *gv, IO *io, I32 op)
 	name = SvPVX(sv);
     }
 
-    if (io && IoTYPE(io) == ' ') {
+    if (io && IoTYPE(io) == IoTYPE_CLOSED) {
 	vile = "closed";
 	warn = WARN_CLOSED;
     }

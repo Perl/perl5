@@ -3980,11 +3980,11 @@ Perl_yylex(pTHX)
 		/* Mark this internal pseudo-handle as clean */
 		IoFLAGS(GvIOp(gv)) |= IOf_UNTAINT;
 		if (PL_preprocess)
-		    IoTYPE(GvIOp(gv)) = '|';
+		    IoTYPE(GvIOp(gv)) = IoTYPE_PIPE;
 		else if ((PerlIO*)PL_rsfp == PerlIO_stdin())
-		    IoTYPE(GvIOp(gv)) = '-';
+		    IoTYPE(GvIOp(gv)) = IoTYPE_STD;
 		else
-		    IoTYPE(GvIOp(gv)) = '<';
+		    IoTYPE(GvIOp(gv)) = IoTYPE_RDONLY;
 #if defined(WIN32) && !defined(PERL_TEXTMODE_SCRIPTS)
 		/* if the script was opened in binmode, we need to revert
 		 * it to text mode for compatibility; but only iff it has CRs
@@ -3993,7 +3993,7 @@ Perl_yylex(pTHX)
 		    && PL_bufend[-1] == '\n' && PL_bufend[-2] == '\r')
 		{
 		    Off_t loc = 0;
-		    if (IoTYPE(GvIOp(gv)) == '<') {
+		    if (IoTYPE(GvIOp(gv)) == IoTYPE_RDONLY) {
 			loc = PerlIO_tell(PL_rsfp);
 			(void)PerlIO_seek(PL_rsfp, 0L, 0);
 		    }

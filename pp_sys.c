@@ -612,8 +612,8 @@ PP(pp_pipe_op)
     IoIFP(rstio) = PerlIO_fdopen(fd[0], "r");
     IoOFP(wstio) = PerlIO_fdopen(fd[1], "w");
     IoIFP(wstio) = IoOFP(wstio);
-    IoTYPE(rstio) = '<';
-    IoTYPE(wstio) = '>';
+    IoTYPE(rstio) = IoTYPE_RDONLY;
+    IoTYPE(wstio) = IoTYPE_WRONLY;
 
     if (!IoIFP(rstio) || !IoOFP(wstio)) {
 	if (IoIFP(rstio)) PerlIO_close(IoIFP(rstio));
@@ -1541,7 +1541,7 @@ PP(pp_sysread)
     }
     if (PL_op->op_type == OP_SYSREAD) {
 #ifdef PERL_SOCK_SYSREAD_IS_RECV
-	if (IoTYPE(io) == 's') {
+	if (IoTYPE(io) == IoTYPE_SOCKET) {
 	    length = PerlSock_recv(PerlIO_fileno(IoIFP(io)),
 				   buffer+offset, length, 0);
 	}
@@ -1554,7 +1554,7 @@ PP(pp_sysread)
     }
     else
 #ifdef HAS_SOCKET__bad_code_maybe
-    if (IoTYPE(io) == 's') {
+    if (IoTYPE(io) == IoTYPE_SOCKET) {
 	char namebuf[MAXPATHLEN];
 #if defined(VMS_DO_SOCKETS) && defined(DECCRTL_SOCKETS)
 	bufsize = sizeof (struct sockaddr_in);
@@ -1573,7 +1573,7 @@ PP(pp_sysread)
 	    length = -1;
     }
     if (length < 0) {
-	if ((IoTYPE(io) == '>' || IoIFP(io) == PerlIO_stdout()
+	if ((IoTYPE(io) == IoTYPE_WRONLY || IoIFP(io) == PerlIO_stdout()
 	    || IoIFP(io) == PerlIO_stderr()) && ckWARN(WARN_IO))
 	{
 	    /* integrate with report_evil_fh()? */
@@ -1682,7 +1682,7 @@ PP(pp_send)
 	if (length > blen - offset)
 	    length = blen - offset;
 #ifdef PERL_SOCK_SYSWRITE_IS_SEND
-	if (IoTYPE(io) == 's') {
+	if (IoTYPE(io) == IoTYPE_SOCKET) {
 	    retval = PerlSock_send(PerlIO_fileno(IoIFP(io)),
 				   buffer+offset, length, 0);
 	}
@@ -2085,7 +2085,7 @@ PP(pp_socket)
 	RETPUSHUNDEF;
     IoIFP(io) = PerlIO_fdopen(fd, "r");	/* stdio gets confused about sockets */
     IoOFP(io) = PerlIO_fdopen(fd, "w");
-    IoTYPE(io) = 's';
+    IoTYPE(io) = IoTYPE_SOCKET;
     if (!IoIFP(io) || !IoOFP(io)) {
 	if (IoIFP(io)) PerlIO_close(IoIFP(io));
 	if (IoOFP(io)) PerlIO_close(IoOFP(io));
@@ -2132,10 +2132,10 @@ PP(pp_sockpair)
 	RETPUSHUNDEF;
     IoIFP(io1) = PerlIO_fdopen(fd[0], "r");
     IoOFP(io1) = PerlIO_fdopen(fd[0], "w");
-    IoTYPE(io1) = 's';
+    IoTYPE(io1) = IoTYPE_SOCKET;
     IoIFP(io2) = PerlIO_fdopen(fd[1], "r");
     IoOFP(io2) = PerlIO_fdopen(fd[1], "w");
-    IoTYPE(io2) = 's';
+    IoTYPE(io2) = IoTYPE_SOCKET;
     if (!IoIFP(io1) || !IoOFP(io1) || !IoIFP(io2) || !IoOFP(io2)) {
 	if (IoIFP(io1)) PerlIO_close(IoIFP(io1));
 	if (IoOFP(io1)) PerlIO_close(IoOFP(io1));
@@ -2304,7 +2304,7 @@ PP(pp_accept)
 	goto badexit;
     IoIFP(nstio) = PerlIO_fdopen(fd, "r");
     IoOFP(nstio) = PerlIO_fdopen(fd, "w");
-    IoTYPE(nstio) = 's';
+    IoTYPE(nstio) = IoTYPE_SOCKET;
     if (!IoIFP(nstio) || !IoOFP(nstio)) {
 	if (IoIFP(nstio)) PerlIO_close(IoIFP(nstio));
 	if (IoOFP(nstio)) PerlIO_close(IoOFP(nstio));

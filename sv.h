@@ -734,18 +734,15 @@ Set the length of the string which is in the SV.  See C<SvCUR>.
 #define IoTYPE(sv)	((XPVIO*)  SvANY(sv))->xio_type
 #define IoFLAGS(sv)	((XPVIO*)  SvANY(sv))->xio_flags
 
-/*
-IoTYPE(sv) is a single character saying what type of I/O connection
-this is:
-    |        pipe
-    -        stdin or stdout
-    <        read-only
-    >        write-only
-    a        append
-    +        read and write
-    s        socket
-    space    closed
-*/
+/* IoTYPE(sv) is a single character telling the type of I/O connection. */
+#define IoTYPE_RDONLY	'<'
+#define IoTYPE_WRONLY	'>'
+#define IoTYPE_RDWR	'+'
+#define IoTYPE_APPEND 	'a'
+#define IoTYPE_PIPE	'|'
+#define IoTYPE_STD	'-'	/* stdin or stdout */
+#define IoTYPE_SOCKET	's'
+#define IoTYPE_CLOSED	' '
 
 /*
 =for apidoc Am|bool|SvTAINTED|SV* sv

@@ -3093,7 +3093,7 @@ trylocal: {
 
 			    if (io) {
 				tryrsfp = IoIFP(io);
-				if (IoTYPE(io) == '|') {
+				if (IoTYPE(io) == IoTYPE_PIPE) {
 				    /* reading from a child process doesn't
 				       nest -- when returning from reading
 				       the inner module, the outer one is

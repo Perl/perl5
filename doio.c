@@ -108,7 +108,7 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 
     if (IoIFP(io)) {
 	fd = PerlIO_fileno(IoIFP(io));
-	if (IoTYPE(io) == '-')
+	if (IoTYPE(io) == IoTYPE_STD)
 	    result = 0;
 	else if (fd <= PL_maxsysfd) {
 	    saveifp = IoIFP(io);
@@ -116,7 +116,7 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    savetype = IoTYPE(io);
 	    result = 0;
 	}
-	else if (IoTYPE(io) == '|')
+	else if (IoTYPE(io) == IoTYPE_PIPE)
 	    result = PerlProc_pclose(IoIFP(io));
 	else if (IoIFP(io) != IoOFP(io)) {
 	    if (IoOFP(io)) {
@@ -146,14 +146,14 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 
 	switch (result = rawmode & O_ACCMODE) {
 	case O_RDONLY:
-	     IoTYPE(io) = '<';
+	     IoTYPE(io) = IoTYPE_RDONLY;
 	     break;
 	case O_WRONLY:
-	     IoTYPE(io) = '>';
+	     IoTYPE(io) = IoTYPE_WRONLY;
 	     break;
 	case O_RDWR:
 	default:
-	     IoTYPE(io) = '+';
+	     IoTYPE(io) = IoTYPE_RDWR;
 	     break;
 	}
 
@@ -265,7 +265,7 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    TAINT_PROPER("open");
 	    type++;
 	    if (*type == '>') {
-		mode[0] = IoTYPE(io) = 'a';
+		mode[0] = IoTYPE(io) = IoTYPE_APPEND;
 		type++;
 		tlen--;
 	    }
@@ -320,8 +320,8 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 			     * fsetpos(src)+fgetpos(dst)?  --nik */
 			    PerlIO_flush(fp);
 			    fd = PerlIO_fileno(fp);
-			    if (IoTYPE(thatio) == 's')
-				IoTYPE(io) = 's';
+			    if (IoTYPE(thatio) == IoTYPE_SOCKET)
+				IoTYPE(io) = IoTYPE_SOCKET;
 			}
 			else
 			    fd = -1;
@@ -341,7 +341,7 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		for (; isSPACE(*type); type++) ;
 		if (strEQ(type,"-")) {
 		    fp = PerlIO_stdout();
-		    IoTYPE(io) = '-';
+		    IoTYPE(io) = IoTYPE_STD;
 		}
 		else  {
 		    fp = PerlIO_open((num_svs ? name : type), mode);
@@ -365,7 +365,7 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    }
 	    if (strEQ(type,"-")) {
 		fp = PerlIO_stdin();
-		IoTYPE(io) = '-';
+		IoTYPE(io) = IoTYPE_STD;
 	    }
 	    else
 		fp = PerlIO_open((num_svs ? name : type), mode);
@@ -403,18 +403,18 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		    mode = "r";
 		fp = PerlProc_popen(name,mode);
 	    }
-	    IoTYPE(io) = '|';
+	    IoTYPE(io) = IoTYPE_PIPE;
 	}
 	else {
 	    if (num_svs)
 		goto unknown_desr;
 	    name = type;
-	    IoTYPE(io) = '<';
+	    IoTYPE(io) = IoTYPE_RDONLY;
 	    /*SUPPRESS 530*/
 	    for (; isSPACE(*name); name++) ;
 	    if (strEQ(name,"-")) {
 		fp = PerlIO_stdin();
-		IoTYPE(io) = '-';
+		IoTYPE(io) = IoTYPE_STD;
 	    }
 	    else {
 		char *mode;
@@ -430,19 +430,19 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
     }
     if (!fp) {
 	dTHR;
-	if (ckWARN(WARN_NEWLINE) && IoTYPE(io) == '<' && strchr(name, '\n'))
+	if (ckWARN(WARN_NEWLINE) && IoTYPE(io) == IoTYPE_RDONLY && strchr(name, '\n'))
 	    Perl_warner(aTHX_ WARN_NEWLINE, PL_warn_nl, "open");
 	goto say_false;
     }
     if (IoTYPE(io) &&
-      IoTYPE(io) != '|' && IoTYPE(io) != '-') {
+      IoTYPE(io) != IoTYPE_PIPE && IoTYPE(io) != IoTYPE_STD) {
 	dTHR;
 	if (PerlLIO_fstat(PerlIO_fileno(fp),&PL_statbuf) < 0) {
 	    (void)PerlIO_close(fp);
 	    goto say_false;
 	}
 	if (S_ISSOCK(PL_statbuf.st_mode))
-	    IoTYPE(io) = 's';	/* in case a socket was passed in to us */
+	    IoTYPE(io) = IoTYPE_SOCKET;	/* in case a socket was passed in to us */
 #ifdef HAS_SOCKET
 	else if (
 #ifdef S_IFMT
@@ -456,7 +456,7 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    if (PerlSock_getsockname(PerlIO_fileno(fp), (struct sockaddr *)tmpbuf,
 			    &buflen) >= 0
 		  || errno != ENOTSOCK)
-		IoTYPE(io) = 's'; /* some OS's return 0 on fstat()ed socket */
+		IoTYPE(io) = IoTYPE_SOCKET; /* some OS's return 0 on fstat()ed socket */
 				/* but some return 0 for streams too, sigh */
 	}
 #endif
@@ -504,8 +504,8 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
     IoFLAGS(io) &= ~IOf_NOLINE;
     if (writing) {
 	dTHR;
-	if (IoTYPE(io) == 's'
-	    || (IoTYPE(io) == '>' && S_ISCHR(PL_statbuf.st_mode)) )
+	if (IoTYPE(io) == IoTYPE_SOCKET
+	    || (IoTYPE(io) == IoTYPE_WRONLY && S_ISCHR(PL_statbuf.st_mode)) )
 	{
 	    char *mode;
 	    if (out_raw)
@@ -773,8 +773,8 @@ Perl_do_pipe(pTHX_ SV *sv, GV *rgv, GV *wgv)
     IoIFP(rstio) = PerlIO_fdopen(fd[0], "r");
     IoOFP(wstio) = PerlIO_fdopen(fd[1], "w");
     IoIFP(wstio) = IoOFP(wstio);
-    IoTYPE(rstio) = '<';
-    IoTYPE(wstio) = '>';
+    IoTYPE(rstio) = IoTYPE_RDONLY;
+    IoTYPE(wstio) = IoTYPE_WRONLY;
     if (!IoIFP(rstio) || !IoOFP(wstio)) {
 	if (IoIFP(rstio)) PerlIO_close(IoIFP(rstio));
 	else PerlLIO_close(fd[0]);
@@ -822,7 +822,7 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
 	IoPAGE(io) = 0;
 	IoLINES_LEFT(io) = IoPAGE_LEN(io);
     }
-    IoTYPE(io) = ' ';
+    IoTYPE(io) = IoTYPE_CLOSED;
     return retval;
 }
 
@@ -833,7 +833,7 @@ Perl_io_close(pTHX_ IO *io, bool not_implicit)
     int status;
 
     if (IoIFP(io)) {
-	if (IoTYPE(io) == '|') {
+	if (IoTYPE(io) == IoTYPE_PIPE) {
 	    status = PerlProc_pclose(IoIFP(io));
 	    if (not_implicit) {
 		STATUS_NATIVE_SET(status);
@@ -843,7 +843,7 @@ Perl_io_close(pTHX_ IO *io, bool not_implicit)
 		retval = (status != -1);
 	    }
 	}
-	else if (IoTYPE(io) == '-')
+	else if (IoTYPE(io) == IoTYPE_STD)
 	    retval = TRUE;
 	else {
 	    if (IoOFP(io) && IoOFP(io) != IoIFP(io)) {		/* a socket */
@@ -874,7 +874,7 @@ Perl_do_eof(pTHX_ GV *gv)
     if (!io)
 	return TRUE;
     else if (ckWARN(WARN_IO)
-	     && (IoTYPE(io) == '>' || IoIFP(io) == PerlIO_stdout()
+	     && (IoTYPE(io) == IoTYPE_WRONLY || IoIFP(io) == PerlIO_stdout()
 		 || IoIFP(io) == PerlIO_stderr()))
     {
 	/* integrate to report_evil_fh()? */
