@@ -3,6 +3,7 @@
 # There are few filetest operators that are portable enough to test.
 # See pod/perlport.pod for details.
 
+use Config;
 BEGIN {
     chdir 't' if -d 't';
     unshift @INC, '../lib' if -d '../lib';

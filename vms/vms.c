@@ -466,15 +466,22 @@ prime_env_iter(void)
       key = cp1;  keylen = cp2 - cp1;
       if (keylen && hv_exists(seenhv,key,keylen)) continue;
       while (*cp2 && *cp2 != '=') cp2++;
-      while (*cp2 && *cp2 != '"') cp2++;
-      for (cp1 = buf + retlen; *cp1 != '"'; cp1--) ;
-      if ((!keylen || (cp1 - cp2 <= 0)) && ckWARN(WARN_INTERNAL)) {
+      while (*cp2 && *cp2 == '=') cp2++;
+      while (*cp2 && *cp2 == ' ') cp2++;
+      if (*cp2 == '"') {  /* String translation; may embed "" */
+        for (cp1 = buf + retlen; *cp1 != '"'; cp1--) ;
+        cp2++;  cp1--; /* Skip "" surrounding translation */
+      }
+      else {  /* Numeric translation */
+        for (cp1 = cp2; *cp1 && *cp1 != ' '; cp1++) ;
+        cp1--;  /* stop on last non-space char */
+      }
+      if ((!keylen || (cp1 - cp2 < -1)) && ckWARN(WARN_INTERNAL)) {
         warner(WARN_INTERNAL,"Ill-formed message in prime_env_iter: |%s|",buf);
         continue;
       }
-      /* Skip "" surrounding translation */
       PERL_HASH(hash,key,keylen);
-      hv_store(envhv,key,keylen,newSVpv(cp2+1,cp1 - cp2 - 1),hash);
+      hv_store(envhv,key,keylen,newSVpvn(cp2,cp1 - cp2 + 1),hash);
       hv_store(seenhv,key,keylen,&PL_sv_yes,hash);
     }
     if (cmddsc.dsc$w_length == 14) { /* We just read LNM$FILE_DEV */
@@ -917,7 +924,7 @@ static int waitpid_asleep = 0;
  * to a mbx; that's the caller's responsibility.
  */
 static unsigned long int
-pipe_eof(FILE *fp)
+pipe_eof(FILE *fp, int immediate)
 {
   char devnam[NAM$C_MAXRSS+1], *cp;
   unsigned long int chan, iosb[2], retsts, retsts2;
@@ -929,7 +936,8 @@ pipe_eof(FILE *fp)
     if ((cp = strrchr(devnam,':')) != NULL) *(cp+1) = '\0';
     devdsc.dsc$w_length = strlen(devnam);
     _ckvmssts(sys$assign(&devdsc,&chan,0,0));
-    retsts = sys$qiow(0,chan,IO$_WRITEOF,iosb,0,0,0,0,0,0,0,0);
+    retsts = sys$qiow(0,chan,IO$_WRITEOF|(immediate?IO$M_NOW|IO$M_NORSWAIT:0),
+             iosb,0,0,0,0,0,0,0,0);
     if (retsts & 1) retsts = iosb[0];
     retsts2 = sys$dassgn(chan);  /* Be sure to deassign the channel */
     if (retsts & 1) retsts = retsts2;
@@ -956,7 +964,7 @@ pipe_exit_routine()
 
     while (info) {
       if (info->mode != 'r' && !info->done) {
-        if (pipe_eof(info->fp) & 1) did_stuff = 1;
+        if (pipe_eof(info->fp, 1) & 1) did_stuff = 1;
       }
       info = info->next;
     }
@@ -1098,7 +1106,7 @@ I32 my_pclose(FILE *fp)
     /* If we were writing to a subprocess, insure that someone reading from
      * the mailbox gets an EOF.  It looks like a simple fclose() doesn't
      * produce an EOF record in the mailbox.  */
-    if (info->mode != 'r' && !info->done) pipe_eof(info->fp);
+    if (info->mode != 'r' && !info->done) pipe_eof(info->fp,0);
     PerlIO_close(info->fp);
 
     if (info->done) retsts = info->completion;

@@ -14,7 +14,7 @@ use VMS::Filespec;
 use File::Basename;
 
 use vars qw($Revision);
-$Revision = '5.52 (12-Sep-1998)';
+$Revision = '5.56 (27-Apr-1999)';
 
 unshift @MM::ISA, 'ExtUtils::MM_VMS';
 
@@ -626,10 +626,13 @@ sub constants {
     my(@m,$def,$macro);
 
     if ($self->{DEFINE} ne '') {
-	my(@defs) = split(/\s+/,$self->{DEFINE});
-	foreach $def (@defs) {
+	my(@terms) = split(/\s+/,$self->{DEFINE});
+	my(@defs,@udefs);
+	foreach $def (@terms) {
 	    next unless $def;
-	    if ($def =~ s/^-D//) {       # If it was a Unix-style definition
+	    my $targ = \@defs;
+	    if ($def =~ s/^-([DU])//) {       # If it was a Unix-style definition
+		if ($1 eq 'U') { $targ = \@udefs; }
 		$def =~ s/='(.*)'$/=$1/;  # then remove shell-protection ''
 		$def =~ s/^'(.*)'$/$1/;   # from entire term or argument
 	    }
@@ -637,8 +640,11 @@ sub constants {
 		$def =~ s/"/""/g;  # Protect existing " from DCL
 		$def = qq["$def"]; # and quote to prevent parsing of =
 	    }
+	    push @$targ, $def;
 	}
-	$self->{DEFINE} = join ',',@defs;
+	$self->{DEFINE} = '';
+	if (@defs)  { $self->{DEFINE}  = '/Define=(' . join(',',@defs)  . ')'; }
+	if (@udefs) { $self->{DEFINE} .= '/Undef=('  . join(',',@udefs) . ')'; }
     }
 
     if ($self->{OBJECT} =~ /\s/) {
@@ -842,27 +848,25 @@ sub cflags {
     # Deal with $self->{DEFINE} here since some C compilers pay attention
     # to only one /Define clause on command line, so we have to
     # conflate the ones from $Config{'ccflags'} and $self->{DEFINE}
-    if ($quals =~ m:(.*)/define=\(?([^\(\/\)\s]+)\)?(.*)?:i) {
-	$quals = "$1/Define=($2," . ($self->{DEFINE} ? "$self->{DEFINE}," : '') .
-	         "\$(DEFINE_VERSION),\$(XS_DEFINE_VERSION))$3";
-    }
-    else {
-	$quals .= '/Define=(' . ($self->{DEFINE} ? "$self->{DEFINE}," : '') .
-	          '$(DEFINE_VERSION),$(XS_DEFINE_VERSION))';
+    # ($self->{DEFINE} has already been VMSified in constants() above)
+    if ($self->{DEFINE}) { $quals .= $self->{DEFINE}; }
+    for $type (qw(Def Undef)) {
+	my(@terms);
+	while ($quals =~ m:/${type}i?n?e?=([^/]+):ig) {
+		my $term = $1;
+		$term =~ s:^\((.+)\)$:$1:;
+		push @terms, $term;
+	    }
+	if ($type eq 'Def') {
+	    push @terms, qw[ $(DEFINE_VERSION) $(XS_DEFINE_VERSION) ];
+	}
+	if (@terms) {
+	    $quals =~ s:/${type}i?n?e?=[^/]+::ig;
+	    $quals .= "/${type}ine=(" . join(',',@terms) . ')';
+	}
     }
 
     $libperl or $libperl = $self->{LIBPERL_A} || "libperl.olb";
-# This whole section is commented out, since I don't think it's necessary (or applicable)
-#    if ($libperl =~ s/^$Config{'dbgprefix'}//) { $libperl =~ s/perl([^Dd]*)\./perld$1./; }
-#    if ($libperl =~ /libperl(\w+)\./i) {
-#	my($type) = uc $1;
-#	my(%map) = ( 'D'  => 'DEBUGGING', 'E' => 'EMBED', 'M' => 'MULTIPLICITY',
-#	             'DE' => 'DEBUGGING,EMBED', 'DM' => 'DEBUGGING,MULTIPLICITY',
-#	             'EM' => 'EMBED,MULTIPLICITY', 'DEM' => 'DEBUGGING,EMBED,MULTIPLICITY' );
-#	my($add) = join(',', grep { $quals !~ /\b$_\b/ } split(/,/,$map{$type}));
-#	$quals =~ s:/define=\(([^\)]+)\):/Define=($1,$add):i if $add;
-#	$self->{PERLTYPE} ||= $type;
-#    }
 
     # Likewise with $self->{INC} and /Include
     if ($self->{'INC'}) {
@@ -873,7 +877,7 @@ sub cflags {
 	}
     }
     $quals .= "$incstr)";
-    $quals =~ s/\(,/\(/g;
+#    $quals =~ s/,,/,/g; $quals =~ s/\(,/(/g;
     $self->{CCFLAGS} = $quals;
 
     $self->{OPTIMIZE} ||= $flagoptstr || $Config{'optimize'};

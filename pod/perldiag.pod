@@ -441,6 +441,12 @@ the return value of your socket() call?  See L<perlfunc/bind>.
 %ENV, it encountered a logical name or symbol definition which was too long,
 so it was truncated to the string shown.
 
+=item Buffer overflow in prime_env_iter: %s
+
+(W) A warning peculiar to VMS.  While Perl was preparing to iterate over
+%ENV, it encountered a logical name or symbol definition which was too long,
+so it was truncated to the string shown.
+
 =item Callback called exit
 
 (F) A subroutine invoked from an external package via perl_call_sv()
@@ -474,6 +480,13 @@ there isn't a current block.  Note that an "if" or "else" block doesn't
 count as a "loopish" block, as doesn't a block given to sort().  You can
 usually double the curlies to get the same effect though, because the inner
 curlies will be considered a block that loops once.  See L<perlfunc/next>.
+
+=item Can't read CRTL environ
+
+(S) A warning peculiar to VMS.  Perl tried to read an element of %ENV
+from the CRTL's internal environment array and discovered the array was
+missing.  You need to figure out where your CRTL misplaced its environ
+or define F<PERL_ENV_TABLES> (see L<perlvms>) so that environ is not searched.
 
 =item Can't read CRTL environ
 
@@ -1818,6 +1831,14 @@ to UTC.  If it's not, define the logical name F<SYS$TIMEZONE_DIFFERENTIAL>
 to translate to the number of seconds which need to be added to UTC to
 get local time.
 
+=item no UTC offset information; assuming local time is UTC
+
+(S) A warning peculiar to VMS.  Per was unable to find the local
+timezone offset, so it's assuming that local system time is equivalent
+to UTC.  If it's not, define the logical name F<SYS$TIMEZONE_DIFFERENTIAL>
+to translate to the number of seconds which need to be added to UTC to
+get local time.
+
 =item Not a CODE reference
 
 (F) Perl was trying to evaluate a reference to a code value (that is, a
@@ -2692,6 +2713,17 @@ rebuild Perl with a CRTL that does, or redefine F<PERL_ENV_TABLES> (see
 L<perlvms>) so that the environ array isn't the target of the change to
 %ENV which produced the warning.
 
+=item This Perl can't reset CRTL eviron elements (%s)
+
+=item This Perl can't set CRTL environ elements (%s=%s)
+
+(W) Warnings peculiar to VMS.  You tried to change or delete an element
+of the CRTL's internal environ array, but your copy of Perl wasn't
+built with a CRTL that contained the setenv() function.  You'll need to
+rebuild Perl with a CRTL that does, or redefine F<PERL_ENV_TABLES> (see
+L<perlvms>) so that the environ array isn't the target of the change to
+%ENV which produced the warning.
+
 =item times not implemented
 
 (F) Your version of the C library apparently doesn't do times().  I suspect
@@ -2845,6 +2877,13 @@ representative, who probably put it there in the first place.
 =item Unknown BYTEORDER
 
 (F) There are no byte-swapping functions for a machine with this byte order.
+
+=item Unknown process %x sent message to prime_env_iter: %s
+
+(P) An error peculiar to VMS.  Perl was reading values for %ENV before
+iterating over it, and someone else stuck a message in the stream of
+data Perl expected.  Someone's very confused, or perhaps trying to
+subvert Perl's population of %ENV for nefarious purposes.
 
 =item Unknown process %x sent message to prime_env_iter: %s
 
@@ -3053,6 +3092,13 @@ or C<readdir()> as a boolean value.  Each of these constructs can return a
 value of "0"; that would make the conditional expression false, which is
 probably not what you intended.  When using these constructs in conditional
 expressions, test their values with the C<defined> operator.
+
+=item Value of CLI symbol "%s" too long
+
+(W) A warning peculiar to VMS.  Perl tried to read the value of an %ENV
+element from a CLI symbol table, and found a resultant string longer
+than 1024 characters.  The return value has been truncated to 1024
+characters.
 
 =item Value of CLI symbol "%s" too long
 

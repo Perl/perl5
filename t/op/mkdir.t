@@ -4,7 +4,14 @@
 
 print "1..7\n";
 
-$^O eq 'MSWin32' ? `del /s /q blurfl 2>&1` : `rm -rf blurfl`;
+if ($^O eq 'VMS') { # May as well test the library too
+  unshift @INC, '../lib';
+  require File::Path;
+  File::Path::rmtree('blurfl');
+}
+else {
+  $^O eq 'MSWin32' ? `del /s /q blurfl 2>&1` : `rm -rf blurfl`;
+}
 
 # tests 3 and 7 rather naughtily expect English error messages
 $ENV{'LC_ALL'} = 'C';

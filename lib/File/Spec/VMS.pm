@@ -22,6 +22,74 @@ See File::Spec::Unix for a documentation of the methods provided
 there. This package overrides the implementation of these methods, not
 the semantics.
 
+=cut
+
+sub eliminate_macros {
+    my($self,$path) = @_;
+    return '' unless $path;
+    $self = {} unless ref $self;
+    my($npath) = unixify($path);
+    my($complex) = 0;
+    my($head,$macro,$tail);
+
+    # perform m##g in scalar context so it acts as an iterator
+    while ($npath =~ m#(.*?)\$\((\S+?)\)(.*)#g) { 
+        if ($self->{$2}) {
+            ($head,$macro,$tail) = ($1,$2,$3);
+            if (ref $self->{$macro}) {
+                if (ref $self->{$macro} eq 'ARRAY') {
+                    $macro = join ' ', @{$self->{$macro}};
+                }
+                else {
+                    print "Note: can't expand macro \$($macro) containing ",ref($self->{$macro}),
+                          "\n\t(using MMK-specific deferred substitutuon; MMS will break)\n";
+                    $macro = "\cB$macro\cB";
+                    $complex = 1;
+                }
+            }
+            else { ($macro = unixify($self->{$macro})) =~ s#/$##; }
+            $npath = "$head$macro$tail";
+        }
+    }
+    if ($complex) { $npath =~ s#\cB(.*?)\cB#\${$1}#g; }
+    $npath;
+}
+
+sub fixpath {
+    my($self,$path,$force_path) = @_;
+    return '' unless $path;
+    $self = bless {} unless ref $self;
+    my($fixedpath,$prefix,$name);
+
+    if ($path =~ m#^\$\([^\)]+\)$# || $path =~ m#[/:>\]]#) { 
+        if ($force_path or $path =~ /(?:DIR\)|\])$/) {
+            $fixedpath = vmspath($self->eliminate_macros($path));
+        }
+        else {
+            $fixedpath = vmsify($self->eliminate_macros($path));
+        }
+    }
+    elsif ((($prefix,$name) = ($path =~ m#^\$\(([^\)]+)\)(.+)#)) && $self->{$prefix}) {
+        my($vmspre) = $self->eliminate_macros("\$($prefix)");
+        # is it a dir or just a name?
+        $vmspre = ($vmspre =~ m|/| or $prefix =~ /DIR$/) ? vmspath($vmspre) : '';
+        $fixedpath = ($vmspre ? $vmspre : $self->{$prefix}) . $name;
+        $fixedpath = vmspath($fixedpath) if $force_path;
+    }
+    else {
+        $fixedpath = $path;
+        $fixedpath = vmspath($fixedpath) if $force_path;
+    }
+    # No hints, so we try to guess
+    if (!defined($force_path) and $fixedpath !~ /[:>(.\]]/) {
+        $fixedpath = vmspath($fixedpath) if -d $fixedpath;
+    }
+    # Trim off root dirname if it's had other dirs inserted in front of it.
+    $fixedpath =~ s/\.000000([\]>])/$1/;
+    $fixedpath;
+}
+
+
 =head2 Methods always loaded
 
 =over

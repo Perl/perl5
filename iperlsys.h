@@ -777,10 +777,11 @@ struct IPerlLIOInfo
 #define PerlLIO_ioctl(fd, u, buf)	ioctl((fd), (u), (buf))
 #define PerlLIO_isatty(fd)		isatty((fd))
 #define PerlLIO_lseek(fd, offset, mode)	lseek((fd), (offset), (mode))
+#define PerlLIO_stat(name, buf)		Stat((name), (buf))
 #ifdef HAS_LSTAT
-#define PerlLIO_lstat(name, buf)	lstat((name), (buf))
+#  define PerlLIO_lstat(name, buf)	lstat((name), (buf))
 #else
-#define PerlLIO_lstat(name, buf)	PerlLIO_stat((name), (buf))
+#  define PerlLIO_lstat(name, buf)	PerlLIO_stat((name), (buf))
 #endif
 #define PerlLIO_mktemp(file)		mktemp((file))
 #define PerlLIO_mkstemp(file)		mkstemp((file))
@@ -789,7 +790,6 @@ struct IPerlLIOInfo
 #define PerlLIO_read(fd, buf, count)	read((fd), (buf), (count))
 #define PerlLIO_rename(old, new)	rename((old), (new))
 #define PerlLIO_setmode(fd, mode)	setmode((fd), (mode))
-#define PerlLIO_stat(name, buf)		Stat((name), (buf))
 #define PerlLIO_tmpnam(str)		tmpnam((str))
 #define PerlLIO_umask(mode)		umask((mode))
 #define PerlLIO_unlink(file)		unlink((file))
