@@ -251,7 +251,7 @@ sub compile_ucm
    push(@byte,$1) while $attr{'subchar'} =~ /\G\\x([0-9a-f]+)/icg;
    $erep = join('',map(chr(hex($_)),@byte));
   }
- warn "Scanning $name ($cs)\n";
+ print "Scanning $name ($cs)\n";
  my $nfb = 0;
  my $hfb = 0;
  while (<$fh>)
