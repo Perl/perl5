@@ -115,6 +115,7 @@ while (defined (my $file = next_file())) {
 		$name = $1;
 		$new = '';
 		s/\s+$//;
+		s/\(\w+\s*\(\*\)\s*\(\w*\)\)\s*(-?\d+)/$1/; # (int (*)(foo_t))0
 		if (s/^\(([\w,\s]*)\)//) {
 		    $args = $1;
     	    	    my $proto = '() ';
