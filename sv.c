@@ -5947,12 +5947,16 @@ Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
 
 			while (backw--) {
 			    p--;
-			    while (UTF8_IS_CONTINUATION(*p))
+			    while (UTF8_IS_CONTINUATION(*p)) {
 				p--;
+				backw--;
+			    }
 			    ubackw++;
 			}
 
 			cache[0] -= ubackw;
+			*offsetp = cache[0];
+			return;
 		    }
 		}
 	    }
