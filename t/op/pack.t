@@ -43,7 +43,7 @@ $sum = 103 if ($Config{ebcdic} eq 'define');
 print +($x = unpack("%32B*", "Now is the time for all good blurfl")) == $sum
 	? "ok 7\n" : "not ok 7 $x\n";
 
-open(BIN, "./perl") || open(BIN, "./perl.exe") 
+open(BIN, "./perl") || open(BIN, "./perl.exe")
     || die "Can't open ../perl or ../perl.exe: $!\n";
 sysread BIN, $foo, 8192;
 close BIN;
@@ -119,10 +119,10 @@ print( ((unpack("i",pack("i",-1))) == -1 ? "ok " : "not ok "),$test++,"\n");
 # 31..36: test the pack lengths of s S i I l L
 print "not " unless length(pack("s", 0)) == 2;
 print "ok ", $test++, "\n";
- 
+
 print "not " unless length(pack("S", 0)) == 2;
 print "ok ", $test++, "\n";
- 
+
 print "not " unless length(pack("i", 0)) >= 4;
 print "ok ", $test++, "\n";
 
@@ -171,7 +171,7 @@ foreach my $t (@templates) {
 # binary values of the uuencoded version would not be portable between
 # character sets.  Uuencoding is meant for encoding binary data, not
 # text data.
- 
+
 $in = pack 'C*', 0 .. 255;
 
 # just to be anal, we do some random tr/`/ /
@@ -205,7 +205,7 @@ print "ok ", $test++, "\n";
 
 $uu = <<'EOUU';
 M'XL("%C<Q#4" TI!4%4 \RHM+E%(S,LOR4@M4@A(+<I1*"U-SD])+>(" &1F
-&8%P:    
+&8%P:
 EOUU
 
 print "not " unless unpack('u', $uu) eq $in;
@@ -407,15 +407,16 @@ $z = pack <<EOP,'string','etc';
 EOP
 print 'not ' unless $z eq "\000\006string\003etc"; print "ok $test\n"; $test++;
 
-print 'not ' unless "1.20.300.4000" eq sprintf "%vd", pack("U*",1,20,300,4000); 
+print 'not ' unless "1.20.300.4000" eq sprintf "%vd", pack("U*",1,20,300,4000);
 print "ok $test\n"; $test++;
-print 'not ' unless "1.20.300.4000" eq 
-                    sprintf "%vd", pack("  U*",1,20,300,4000); 
+print 'not ' unless "1.20.300.4000" eq
+                    sprintf "%vd", pack("  U*",1,20,300,4000);
 print "ok $test\n"; $test++;
-print 'not ' unless v1.20.300.4000 ne 
-                    sprintf "%vd", pack("C0U*",1,20,300,4000); 
+print 'not ' unless v1.20.300.4000 ne
+                    sprintf "%vd", pack("C0U*",1,20,300,4000);
 print "ok $test\n"; $test++;
 
 # 160
-print "not " unless join(" ", unpack("C*", chr(0x1e2))) eq "199 162";
+print "not " unless join(" ", unpack("C*", chr(0x1e2)))
+        eq ((ord(A) == 193) ? "156 67" : "199 162");
 print "ok $test\n"; $test++;

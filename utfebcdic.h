@@ -15,17 +15,18 @@ START_EXTERN_C
 #ifdef DOINIT
 /* Indexed by encoded byte this table gives the length of the sequence.
    Adapted from the shadow flags table in tr16.
-   The entries marked 9 are continuation bytes.
+   The entries marked 9 in tr6 are continuation bytes and are marked
+   as length 1 here so that we can recover.
 */
 EXTCONST unsigned char PL_utf8skip[] = {
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-1,9,9,9,9,9,9,9,9,9,9,1,1,1,1,1,
-1,9,9,9,9,9,9,9,9,9,1,1,1,1,1,1,
-1,1,9,9,9,9,9,9,9,9,9,1,1,1,1,1,
-9,9,9,9,2,2,2,2,2,1,1,1,1,1,1,1,
+1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,1,2,2,2,2,2,1,1,1,1,1,1,1,
 2,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,
 2,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,
 2,1,1,1,1,1,1,1,1,1,2,2,2,1,2,2,
@@ -221,7 +222,7 @@ END_EXTERN_C
 #define UTF_TO_NATIVE(ch)        PL_utf2e[(U8)(ch)]
 /* Transform in wide UV char space */
 #define NATIVE_TO_UNI(ch)        (((ch) > 255) ? (ch) : NATIVE_TO_ASCII(ch))
-#define UNI_TO_NATIVE(ch)        (((ch) > 255) ? (ch) : (UV) ASCII_TO_NATIVE(ch))
+#define UNI_TO_NATIVE(ch)        (((ch) > 255) ? (ch) : ASCII_TO_NATIVE(ch))
 /* Transform in invariant..byte space */
 #define NATIVE_TO_NEED(enc,ch)   ((enc) ? UTF_TO_NATIVE(NATIVE_TO_ASCII(ch)) : (ch))
 #define ASCII_TO_NEED(enc,ch)    ((enc) ? UTF_TO_NATIVE(ch) : ASCII_TO_NATIVE(ch))
@@ -267,8 +268,11 @@ END_EXTERN_C
 		      (uv) < 0x400000       ? 5 : \
 		      (uv) < 0x4000000      ? 6 : 7 )
 
+
+#define UNI_IS_INVARIANT(c)		((c) <  0xA0)
 /* UTF-EBCDIC sematic macros - transform back into UTF-8-Mod and then compare */
-#define UTF8_IS_INVARIANT(c) 		(NATIVE_TO_UTF(c) <  0xA0)
+#define NATIVE_IS_INVARIANT(c)		UNI_IS_INVARIANT(NATIVE_TO_ASCII(c))
+#define UTF8_IS_INVARIANT(c)		UNI_IS_INVARIANT(NATIVE_TO_UTF(c))
 #define UTF8_IS_START(c)		(NATIVE_TO_UTF(c) >= 0xA0 && (NATIVE_TO_UTF(c) & 0xE0) != 0xA0)
 #define UTF8_IS_CONTINUATION(c)		(NATIVE_TO_UTF(c) >= 0xA0 && (NATIVE_TO_UTF(c) & 0xE0) == 0xA0)
 #define UTF8_IS_CONTINUED(c) 		(NATIVE_TO_UTF(c) >= 0xA0)

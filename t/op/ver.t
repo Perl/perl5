@@ -114,7 +114,7 @@ print "not " unless sprintf("%*vb", "##", v1.22.333.4444)
 print "ok $test\n";  ++$test;
 
 print "not " unless sprintf("%vd", join("", map { chr }
-					    unpack "U*", v2001.2002.2003))
+					    unpack 'U*', pack('U*',2001,2002,2003)))
 		    eq '2001.2002.2003';
 print "ok $test\n";  ++$test;
 
