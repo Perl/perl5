@@ -486,6 +486,12 @@ PerlEnvSiteLibPath(struct IPerlEnv* piPerl, char *pl)
     return g_win32_get_sitelib(pl);
 }
 
+void
+PerlEnvGetChildIO(struct IPerlEnv* piPerl, child_IO_table* ptr)
+{
+    win32_get_child_IO(ptr);
+}
+
 struct IPerlEnv perlEnv = 
 {
     PerlEnvGetenv,
@@ -500,6 +506,7 @@ struct IPerlEnv perlEnv =
     PerlEnvOsId,
     PerlEnvLibPath,
     PerlEnvSiteLibPath,
+    PerlEnvGetChildIO,
 };
 
 #undef IPERL2HOST
