@@ -39,8 +39,12 @@ sub longmess {
     my $i = 1 + $CarpLevel;
     my ($pack,$file,$line,$sub);
     while (($pack,$file,$line,$sub) = caller($i++)) {
-	$mess .= "\t$sub " if $error eq "called";
-	$mess .= "$error at $file line $line\n";
+	if ($error =~ m/\n$/) {
+	    $mess .= $error;
+	} else {
+	    $mess .= "\t$sub " if $error eq "called";
+	    $mess .= "$error at $file line $line\n";
+	}
 	$error = "called";
     }
     $mess || $error;
