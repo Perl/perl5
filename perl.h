@@ -3437,7 +3437,7 @@ typedef struct am_table_short AMTS;
 #define IS_NUMERIC_RADIX(s, send)	\
 	(PL_numeric_radix_sv \
 	 && IN_LOCALE \
-	 && SvCUR(PL_numeric_radix_sv) < ((send)-(s)) \
+	 && SvCUR(PL_numeric_radix_sv) <= ((send)-(s)) \
 	 && memEQ(s, SvPVX(PL_numeric_radix_sv), SvCUR(PL_numeric_radix_sv)))
 
 #define STORE_NUMERIC_LOCAL_SET_STANDARD() \
