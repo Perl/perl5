@@ -13,7 +13,7 @@
 /*
  * Package name      : perl5
  * Source directory  : 
- * Configuration time: Mon Jul  2 02:03:57 2001
+ * Configuration time: Sat Nov 24 09:56:15 2001
  * Configured by     : gsar
  * Target system     : 
  */
@@ -922,15 +922,6 @@
 #define	_(args) ()
 #endif
 
-/* SH_PATH:
- *	This symbol contains the full pathname to the shell used on this
- *	on this system to execute Bourne shell scripts.  Usually, this will be
- *	/bin/sh, though it's possible that some systems will have /bin/ksh,
- *	/bin/pdksh, /bin/ash, /bin/bash, or even something such as
- *	D:/bin/sh.exe.
- */
-#define SH_PATH "cmd /x /c"  /**/
-
 /* INTSIZE:
  *	This symbol contains the value of sizeof(int) so that the C
  *	preprocessor can make decisions based on it.
@@ -1206,6 +1197,24 @@
 #define	CASTNEGFLOAT		/**/
 #define CASTFLAGS 0		/**/
 
+/* HAS_CLASS:
+ *	This symbol, if defined, indicates that the class routine is
+ *	available to classify doubles.  Available for example in AIX.
+ *	The returned values are defined in <float.h> and are:
+ *
+ *	FP_PLUS_NORM	Positive normalized, nonzero
+ *	FP_MINUS_NORM	Negative normalized, nonzero
+ *	FP_PLUS_DENORM	Positive denormalized, nonzero
+ *	FP_MINUS_DENORM	Negative denormalized, nonzero
+ *	FP_PLUS_ZERO	+0.0
+ *	FP_MINUS_ZERO	-0.0
+ *	FP_PLUS_INF	+INF
+ *	FP_MINUS_INF	-INF
+ *	FP_NANS		Signaling Not a Number (NaNS)
+ *	FP_NANQ		Quiet Not a Number (NaNQ)
+ */
+/*#define HAS_CLASS		/**/
+
 /* VOID_CLOSEDIR:
  *	This symbol, if defined, indicates that the closedir() routine
  *	does not return a value.
@@ -1300,11 +1309,74 @@
  */
 #define HAS_FD_SET	/**/
 
+/* HAS_FINITE:
+ *	This symbol, if defined, indicates that the finite routine is
+ *	available to check whether a double is finite (non-infinity non-NaN).
+ */
+/*#define HAS_FINITE		/**/
+
+/* HAS_FINITEL:
+ *	This symbol, if defined, indicates that the finitel routine is
+ *	available to check whether a long double is finite
+ *	(non-infinity non-NaN).
+ */
+/*#define HAS_FINITEL		/**/
+
 /* FLEXFILENAMES:
  *	This symbol, if defined, indicates that the system supports filenames
  *	longer than 14 characters.
  */
 #define	FLEXFILENAMES		/**/
+
+/* HAS_FP_CLASS:
+ *	This symbol, if defined, indicates that the fp_class routine is
+ *	available to classify doubles.  Available for example in Digital UNIX.
+ *	The returned values are defined in <math.h> and are:
+ *
+ *	FP_SNAN           Signaling NaN (Not-a-Number)
+ *	FP_QNAN           Quiet NaN (Not-a-Number)
+ *	FP_POS_INF        +infinity
+ *	FP_NEG_INF        -infinity
+ *	FP_POS_NORM       Positive normalized
+ *	FP_NEG_NORM       Negative normalized
+ *	FP_POS_DENORM     Positive denormalized
+ *	FP_NEG_DENORM     Negative denormalized
+ *	FP_POS_ZERO       +0.0 (positive zero)
+ *	FP_NEG_ZERO       -0.0 (negative zero)
+ */
+/*#define HAS_FP_CLASS		/**/
+
+/* HAS_FPCLASS:
+ *	This symbol, if defined, indicates that the fpclass routine is
+ *	available to classify doubles.  Available for example in Solaris/SVR4.
+ *	The returned values are defined in <ieeefp.h> and are:
+ *
+ *	FP_SNAN		signaling NaN
+ *	FP_QNAN		quiet NaN
+ *	FP_NINF		negative infinity
+ *	FP_PINF		positive infinity
+ *	FP_NDENORM	negative denormalized non-zero
+ *	FP_PDENORM	positive denormalized non-zero
+ *	FP_NZERO	negative zero
+ *	FP_PZERO	positive zero
+ *	FP_NNORM	negative normalized non-zero
+ *	FP_PNORM	positive normalized non-zero
+ */
+/*#define HAS_FPCLASS		/**/
+
+/* HAS_FPCLASSIFY:
+ *	This symbol, if defined, indicates that the fpclassify routine is
+ *	available to classify doubles.  Available for example in HP-UX.
+ *	The returned values are defined in <math.h> and are
+ *
+ *           FP_NORMAL     Normalized
+ *           FP_ZERO       Zero
+ *           FP_INFINITE   Infinity
+ *           FP_SUBNORMAL  Denormalized
+ *           FP_NAN        NaN
+ *
+ */
+/*#define HAS_FPCLASSIFY		/**/
 
 /* HAS_FPOS64_T:
  *	This symbol will be defined if the C compiler supports fpos64_t.
@@ -1627,6 +1699,18 @@
  *	is available.
  */
 #define HAS_ISASCII		/**/
+
+/* HAS_ISFINITE:
+ *	This symbol, if defined, indicates that the isfinite routine is
+ *	available to check whether a double is finite (non-infinity non-NaN).
+ */
+/*#define HAS_ISFINITE		/**/
+
+/* HAS_ISINF:
+ *	This symbol, if defined, indicates that the isinf routine is
+ *	available to check whether a double is an infinity.
+ */
+/*#define HAS_ISINF		/**/
 
 /* HAS_ISNAN:
  *	This symbol, if defined, indicates that the isnan routine is
@@ -2252,6 +2336,13 @@
 /*#define USE_SEMCTL_SEMUN	/**/
 /*#define USE_SEMCTL_SEMID_DS	/**/
 
+/* HAS_UNORDERED:
+ *	This symbol, if defined, indicates that the unordered routine is
+ *	available to check whether two doubles are unordered
+ *	(effectively: whether either of them is NaN)
+ */
+/*#define HAS_UNORDERED		/**/
+
 /* HAS_USTAT:
  *	This symbol, if defined, indicates that the ustat system call is
  *	available to query file system statistics by dev_t.
@@ -2397,6 +2488,12 @@
 #define DB_VERSION_MAJOR_CFG	undef  	/**/
 #define DB_VERSION_MINOR_CFG	undef  	/**/
 #define DB_VERSION_PATCH_CFG	undef  	/**/
+
+/* I_FP_CLASS:
+ *	This symbol, if defined, indicates that <fp_class.h> exists and
+ *	should be included.
+ */
+/*#define	I_FP_CLASS		/**/
 
 /* I_GRP:
  *	This symbol, if defined, indicates to the C program that it should
@@ -3208,7 +3305,7 @@
 /*#define	USE_5005THREADS		/**/
 #define	USE_ITHREADS		/**/
 #if defined(USE_5005THREADS) && !defined(USE_ITHREADS)
-#define		USE_5005THREADS		/* until src is revised*/
+#define		USE_THREADS		/* until src is revised*/
 #endif
 /*#define	OLD_PTHREADS_API		/**/
 /*#define	USE_REENTRANT_API	/**/
@@ -3334,6 +3431,15 @@
 #define I_STDARG		/**/
 /*#define I_VARARGS	/**/
 
+/* SH_PATH:
+ *	This symbol contains the full pathname to the shell used on this
+ *	on this system to execute Bourne shell scripts.  Usually, this will be
+ *	/bin/sh, though it's possible that some systems will have /bin/ksh,
+ *	/bin/pdksh, /bin/ash, /bin/bash, or even something such as
+ *	D:/bin/sh.exe.
+ */
+#define SH_PATH "cmd /x /c"  /**/
+
 /* USE_CROSS_COMPILE:
  *	This symbol, if defined, indicates that Perl is being cross-compiled.
  */
@@ -3354,6 +3460,12 @@
  */
 /*#define	HAS_DBMINIT_PROTO	/**/
 
+/* HAS_DIRFD:
+ *	This manifest constant lets the C program know that dirfd
+ *	is available.
+ */
+/*#define HAS_DIRFD		/**/
+
 /* HAS_FLOCK_PROTO:
  *	This symbol, if defined, indicates that the system provides
  *	a prototype for the flock() function.  Otherwise, it is up
@@ -3362,12 +3474,44 @@
  */
 /*#define	HAS_FLOCK_PROTO	/**/
 
+/* HAS_FPCLASSL:
+ *	This symbol, if defined, indicates that the fpclassl routine is
+ *	available to classify long doubles.  Available for example in IRIX.
+ *	The returned values are defined in <ieeefp.h> and are:
+ *
+ *	FP_SNAN		signaling NaN
+ *	FP_QNAN		quiet NaN
+ *	FP_NINF		negative infinity
+ *	FP_PINF		positive infinity
+ *	FP_NDENORM	negative denormalized non-zero
+ *	FP_PDENORM	positive denormalized non-zero
+ *	FP_NZERO	negative zero
+ *	FP_PZERO	positive zero
+ *	FP_NNORM	negative normalized non-zero
+ *	FP_PNORM	positive normalized non-zero
+ */
+/*#define HAS_FPCLASSL		/**/
+
 /* HAS_NL_LANGINFO:
  *	This symbol, if defined, indicates that the nl_langinfo routine is
  *	available to return local data.  You will also need <langinfo.h>
  *	and therefore I_LANGINFO.
  */
 /*#define HAS_NL_LANGINFO		/**/
+
+/* HAS_PROCSELFEXE:
+ *	This symbol is defined if PROCSELFEXE_PATH is a symlink
+ *	to the absolute pathname of the executing program.
+ */
+/* PROCSELFEXE_PATH:
+ *	If HAS_PROCSELFEXE is defined this symbol is the filename
+ *	of the symbolic link pointing to the absolute pathname of
+ *	the executing program.
+ */
+/*#define HAS_PROCSELFEXE	/**/
+#if defined(HAS_PROCSELFEXE) && !defined(PROCSELFEXE_PATH)
+#define PROCSELFEXE_PATH		/**/
+#endif
 
 /* HAS_SIGPROCMASK:
  *	This symbol, if defined, indicates that the sigprocmask
@@ -3434,6 +3578,12 @@
  *		extern int usleep(useconds_t);
  */
 /*#define	HAS_USLEEP_PROTO	/**/
+
+/* I_FP:
+ *	This symbol, if defined, indicates that <fp.h> exists and
+ *	should be included.
+ */
+/*#define	I_FP		/**/
 
 /* I_LANGINFO:
  *	This symbol, if defined, indicates that <langinfo.h> exists and
