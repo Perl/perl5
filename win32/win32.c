@@ -2974,6 +2974,10 @@ DllExport int
 win32_chdir(const char *dir)
 {
     dTHXo;
+    if (!dir) {
+	errno = ENOENT;
+	return -1;
+    }
     if (USING_WIDE()) {
 	WCHAR wBuffer[MAX_PATH+1];
 	A2WHELPER(dir, wBuffer, sizeof(wBuffer));
