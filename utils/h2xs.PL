@@ -403,7 +403,7 @@ See L<perlxs> and L<perlxstut> for additional details.
 use strict;
 
 
-my( $H2XS_VERSION ) = ' $Revision: 1.20 $ ' =~ /\$Revision:\s+([^\s]+)/;
+my( $H2XS_VERSION ) = ' $Revision: 1.21 $ ' =~ /\$Revision:\s+([^\s]+)/;
 my $TEMPLATE_VERSION = '0.01';
 my @ARGS = @ARGV;
 my $compat_version = $];
@@ -1043,7 +1043,7 @@ my $pod = <<"END" unless $opt_P;
 $exp_doc$meth_doc$revhist
 #=head1 AUTHOR
 #
-#$author, $email
+#$author, E<lt>${email}E<gt>
 #
 #=head1 SEE ALSO
 #
@@ -1717,6 +1717,9 @@ WriteMakefile(
     'NAME'		=> '$module',
     'VERSION_FROM'	=> '$modfname.pm', # finds \$VERSION
     'PREREQ_PM'		=> {}, # e.g., Module::Name => 1.1
+    (\$] >= 5.005 ?    ## Add these new keywords supported since 5.005
+      (ABSTRACT_FROM => '$modfname.pm', # retrieve abstract from module
+       AUTHOR     => '$author <$email>') : ()),
 END
 if (!$opt_X) { # print C stuff, unless XS is disabled
   $opt_F = '' unless defined $opt_F;
@@ -1744,6 +1747,52 @@ END
 }
 print PL ");\n";
 close(PL) || die "Can't close $ext$modpname/Makefile.PL: $!\n";
+
+# Create a simple README since this is a CPAN requirement
+# and it doesnt hurt to have one
+warn "Writing $ext$modpname/README\n";
+open(RM, ">README") || die "Can't create $ext$modpname/README:$!\n";
+my $thisyear = (gmtime)[5] + 1900;
+my $rmhead = "$modpname version $TEMPLATE_VERSION";
+my $rmheadeq = "=" x length($rmhead);
+print RM <<_RMEND_;
+$rmhead
+$rmheadeq
+
+The README is used to introduce the module and provide instructions on
+how to install the module, any machine dependencies it may have (for
+example C compilers and installed libraries) and any other information
+that should be provided before the module is installed.
+
+A README file is required for CPAN modules since CPAN extracts the
+README file from a module distribution so that people browsing the
+archive can use it get an idea of the modules uses. It is usually a
+good idea to provide version information here so that people can
+decide whether fixes for the module are worth downloading.
+
+INSTALLATION
+
+To install this module type the following:
+
+   perl Makefile.PL
+   make
+   make test
+   make install
+
+DEPENDENCIES
+
+This module requires these other modules and libraries:
+
+  blah blah blah
+
+COPYRIGHT AND LICENCE
+
+Put the correct copyright and licence information here.
+
+Copyright (C) $thisyear $author blah blah blah
+
+_RMEND_
+close(RM) || die "Can't close $ext$modpname/README: $!\n";
 
 warn "Writing $ext$modpname/test.pl\n";
 open(EX, ">test.pl") || die "Can't create $ext$modpname/test.pl: $!\n";
