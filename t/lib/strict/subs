@@ -317,3 +317,11 @@ Foo A 1
 Foo B 2
 Foo C 3
 Foo D 4
+########
+
+# Check that barewords on the RHS of a regex match are caught
+use strict;
+"" =~ foo;
+EXPECT
+Bareword "foo" not allowed while "strict subs" in use at - line 4.
+Execution of - aborted due to compilation errors.

@@ -2053,6 +2053,13 @@ Perl_bind_match(pTHX_ I32 type, OP *left, OP *right)
              desc, sample, sample);
     }
 
+    if (right->op_type == OP_CONST &&
+	cSVOPx(right)->op_private & OPpCONST_BARE &&
+	cSVOPx(right)->op_private & OPpCONST_STRICT)
+    {
+	no_bareword_allowed(right);
+    }
+
     if (!(right->op_flags & OPf_STACKED) &&
        (right->op_type == OP_MATCH ||
 	right->op_type == OP_SUBST ||
