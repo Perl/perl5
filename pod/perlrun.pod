@@ -588,6 +588,9 @@ like for example C<"!">:
 
     s!foo!!;
 
+If you're considering using C<-P>, you might also want to look at the
+Filter::cpp module from CPAN.
+
 =item B<-s>
 
 enables rudimentary switch parsing for switches on the command
