@@ -1130,6 +1130,9 @@
  */
 /* ASCTIME_R_PROTO:
  *	This symbol encodes the prototype of asctime_r.
+ *	It is zero if d_asctime_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_asctime_r
+ *	is defined.
  */
 /*#define HAS_ASCTIME_R	   / **/
 #define ASCTIME_R_PROTO 0	   /**/
@@ -1191,6 +1194,9 @@
  */
 /* CRYPT_R_PROTO:
  *	This symbol encodes the prototype of crypt_r.
+ *	It is zero if d_crypt_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_crypt_r
+ *	is defined.
  */
 /*#define HAS_CRYPT_R	   / **/
 #define CRYPT_R_PROTO 0	   /**/
@@ -1212,6 +1218,9 @@
  */
 /* CTIME_R_PROTO:
  *	This symbol encodes the prototype of ctime_r.
+ *	It is zero if d_ctime_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_ctime_r
+ *	is defined.
  */
 /*#define HAS_CTIME_R	   / **/
 #define CTIME_R_PROTO 0	   /**/
@@ -1230,6 +1239,9 @@
  */
 /* DRAND48_R_PROTO:
  *	This symbol encodes the prototype of drand48_r.
+ *	It is zero if d_drand48_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_drand48_r
+ *	is defined.
  */
 /*#define HAS_DRAND48_R	   / **/
 #define DRAND48_R_PROTO 0	   /**/
@@ -1254,6 +1266,9 @@
  */
 /* ENDGRENT_R_PROTO:
  *	This symbol encodes the prototype of endgrent_r.
+ *	It is zero if d_endgrent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_endgrent_r
+ *	is defined.
  */
 /*#define HAS_ENDGRENT_R	   / **/
 #define ENDGRENT_R_PROTO 0	   /**/
@@ -1288,6 +1303,9 @@
  */
 /* ENDPWENT_R_PROTO:
  *	This symbol encodes the prototype of endpwent_r.
+ *	It is zero if d_endpwent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_endpwent_r
+ *	is defined.
  */
 /*#define HAS_ENDPWENT_R	   / **/
 #define ENDPWENT_R_PROTO 0	   /**/
@@ -1476,6 +1494,9 @@
  */
 /* GETGRENT_R_PROTO:
  *	This symbol encodes the prototype of getgrent_r.
+ *	It is zero if d_getgrent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getgrent_r
+ *	is defined.
  */
 /*#define HAS_GETGRENT_R	   / **/
 #define GETGRENT_R_PROTO 0	   /**/
@@ -1486,6 +1507,9 @@
  */
 /* GETGRGID_R_PROTO:
  *	This symbol encodes the prototype of getgrgid_r.
+ *	It is zero if d_getgrgid_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getgrgid_r
+ *	is defined.
  */
 /*#define HAS_GETGRGID_R	   / **/
 #define GETGRGID_R_PROTO 0	   /**/
@@ -1496,6 +1520,9 @@
  */
 /* GETGRNAM_R_PROTO:
  *	This symbol encodes the prototype of getgrnam_r.
+ *	It is zero if d_getgrnam_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getgrnam_r
+ *	is defined.
  */
 /*#define HAS_GETGRNAM_R	   / **/
 #define GETGRNAM_R_PROTO 0	   /**/
@@ -1567,6 +1594,9 @@
  */
 /* GETLOGIN_R_PROTO:
  *	This symbol encodes the prototype of getlogin_r.
+ *	It is zero if d_getlogin_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getlogin_r
+ *	is defined.
  */
 /*#define HAS_GETLOGIN_R	   / **/
 #define GETLOGIN_R_PROTO 0	   /**/
@@ -1671,6 +1701,9 @@
  */
 /* GETPWENT_R_PROTO:
  *	This symbol encodes the prototype of getpwent_r.
+ *	It is zero if d_getpwent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getpwent_r
+ *	is defined.
  */
 /*#define HAS_GETPWENT_R	   / **/
 #define GETPWENT_R_PROTO 0	   /**/
@@ -1681,6 +1714,9 @@
  */
 /* GETPWNAM_R_PROTO:
  *	This symbol encodes the prototype of getpwnam_r.
+ *	It is zero if d_getpwnam_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getpwnam_r
+ *	is defined.
  */
 /*#define HAS_GETPWNAM_R	   / **/
 #define GETPWNAM_R_PROTO 0	   /**/
@@ -1691,6 +1727,9 @@
  */
 /* GETPWUID_R_PROTO:
  *	This symbol encodes the prototype of getpwuid_r.
+ *	It is zero if d_getpwuid_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getpwuid_r
+ *	is defined.
  */
 /*#define HAS_GETPWUID_R	   / **/
 #define GETPWUID_R_PROTO 0	   /**/
@@ -1721,6 +1760,9 @@
  */
 /* GETSPNAM_R_PROTO:
  *	This symbol encodes the prototype of getspnam_r.
+ *	It is zero if d_getspnam_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getspnam_r
+ *	is defined.
  */
 /*#define HAS_GETSPNAM_R	   / **/
 #define GETSPNAM_R_PROTO 0	   /**/
@@ -1742,6 +1784,9 @@
  */
 /* GMTIME_R_PROTO:
  *	This symbol encodes the prototype of gmtime_r.
+ *	It is zero if d_gmtime_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_gmtime_r
+ *	is defined.
  */
 /*#define HAS_GMTIME_R	   / **/
 #define GMTIME_R_PROTO 0	   /**/
@@ -1843,6 +1888,9 @@
  */
 /* LOCALTIME_R_PROTO:
  *	This symbol encodes the prototype of localtime_r.
+ *	It is zero if d_localtime_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_localtime_r
+ *	is defined.
  */
 /*#define HAS_LOCALTIME_R	   / **/
 #define LOCALTIME_R_PROTO 0	   /**/
@@ -2005,6 +2053,9 @@
  */
 /* RANDOM_R_PROTO:
  *	This symbol encodes the prototype of random_r.
+ *	It is zero if d_random_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_random_r
+ *	is defined.
  */
 /*#define HAS_RANDOM_R	   / **/
 #define RANDOM_R_PROTO 0	   /**/
@@ -2015,6 +2066,9 @@
  */
 /* READDIR_R_PROTO:
  *	This symbol encodes the prototype of readdir_r.
+ *	It is zero if d_readdir_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_readdir_r
+ *	is defined.
  */
 /*#define HAS_READDIR_R	   / **/
 #define READDIR_R_PROTO 0	   /**/
@@ -2088,6 +2142,9 @@
  */
 /* SETGRENT_R_PROTO:
  *	This symbol encodes the prototype of setgrent_r.
+ *	It is zero if d_setgrent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_setgrent_r
+ *	is defined.
  */
 /*#define HAS_SETGRENT_R	   / **/
 #define SETGRENT_R_PROTO 0	   /**/
@@ -2153,6 +2210,9 @@
  */
 /* SETPWENT_R_PROTO:
  *	This symbol encodes the prototype of setpwent_r.
+ *	It is zero if d_setpwent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_setpwent_r
+ *	is defined.
  */
 /*#define HAS_SETPWENT_R	   / **/
 #define SETPWENT_R_PROTO 0	   /**/
@@ -2284,6 +2344,9 @@
  */
 /* SRAND48_R_PROTO:
  *	This symbol encodes the prototype of srand48_r.
+ *	It is zero if d_srand48_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_srand48_r
+ *	is defined.
  */
 /*#define HAS_SRAND48_R	   / **/
 #define SRAND48_R_PROTO 0	   /**/
@@ -2294,6 +2357,9 @@
  */
 /* SRANDOM_R_PROTO:
  *	This symbol encodes the prototype of srandom_r.
+ *	It is zero if d_srandom_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_srandom_r
+ *	is defined.
  */
 /*#define HAS_SRANDOM_R	   / **/
 #define SRANDOM_R_PROTO 0	   /**/
@@ -2424,6 +2490,9 @@
  */
 /* STRERROR_R_PROTO:
  *	This symbol encodes the prototype of strerror_r.
+ *	It is zero if d_strerror_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_strerror_r
+ *	is defined.
  */
 /*#define HAS_STRERROR_R	   / **/
 #define STRERROR_R_PROTO 0	   /**/
@@ -2496,6 +2565,9 @@
  */
 /* TMPNAM_R_PROTO:
  *	This symbol encodes the prototype of tmpnam_r.
+ *	It is zero if d_tmpnam_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_tmpnam_r
+ *	is defined.
  */
 /*#define HAS_TMPNAM_R	   / **/
 #define TMPNAM_R_PROTO 0	   /**/
@@ -3846,6 +3918,9 @@
  */
 /* CTERMID_R_PROTO:
  *	This symbol encodes the prototype of ctermid_r.
+ *	It is zero if d_ctermid_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_ctermid_r
+ *	is defined.
  */
 /*#define HAS_CTERMID_R	   / **/
 #define CTERMID_R_PROTO 0	   /**/
@@ -3856,6 +3931,9 @@
  */
 /* ENDHOSTENT_R_PROTO:
  *	This symbol encodes the prototype of endhostent_r.
+ *	It is zero if d_endhostent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_endhostent_r
+ *	is defined.
  */
 /*#define HAS_ENDHOSTENT_R	   / **/
 #define ENDHOSTENT_R_PROTO 0	   /**/
@@ -3866,6 +3944,9 @@
  */
 /* ENDNETENT_R_PROTO:
  *	This symbol encodes the prototype of endnetent_r.
+ *	It is zero if d_endnetent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_endnetent_r
+ *	is defined.
  */
 /*#define HAS_ENDNETENT_R	   / **/
 #define ENDNETENT_R_PROTO 0	   /**/
@@ -3876,6 +3957,9 @@
  */
 /* ENDPROTOENT_R_PROTO:
  *	This symbol encodes the prototype of endprotoent_r.
+ *	It is zero if d_endprotoent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_endprotoent_r
+ *	is defined.
  */
 /*#define HAS_ENDPROTOENT_R	   / **/
 #define ENDPROTOENT_R_PROTO 0	   /**/
@@ -3886,6 +3970,9 @@
  */
 /* ENDSERVENT_R_PROTO:
  *	This symbol encodes the prototype of endservent_r.
+ *	It is zero if d_endservent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_endservent_r
+ *	is defined.
  */
 /*#define HAS_ENDSERVENT_R	   / **/
 #define ENDSERVENT_R_PROTO 0	   /**/
@@ -3896,6 +3983,9 @@
  */
 /* GETHOSTBYADDR_R_PROTO:
  *	This symbol encodes the prototype of gethostbyaddr_r.
+ *	It is zero if d_gethostbyaddr_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_gethostbyaddr_r
+ *	is defined.
  */
 /*#define HAS_GETHOSTBYADDR_R	   / **/
 #define GETHOSTBYADDR_R_PROTO 0	   /**/
@@ -3906,6 +3996,9 @@
  */
 /* GETHOSTBYNAME_R_PROTO:
  *	This symbol encodes the prototype of gethostbyname_r.
+ *	It is zero if d_gethostbyname_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_gethostbyname_r
+ *	is defined.
  */
 /*#define HAS_GETHOSTBYNAME_R	   / **/
 #define GETHOSTBYNAME_R_PROTO 0	   /**/
@@ -3916,6 +4009,9 @@
  */
 /* GETHOSTENT_R_PROTO:
  *	This symbol encodes the prototype of gethostent_r.
+ *	It is zero if d_gethostent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_gethostent_r
+ *	is defined.
  */
 /*#define HAS_GETHOSTENT_R	   / **/
 #define GETHOSTENT_R_PROTO 0	   /**/
@@ -3926,6 +4022,9 @@
  */
 /* GETNETBYADDR_R_PROTO:
  *	This symbol encodes the prototype of getnetbyaddr_r.
+ *	It is zero if d_getnetbyaddr_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getnetbyaddr_r
+ *	is defined.
  */
 /*#define HAS_GETNETBYADDR_R	   / **/
 #define GETNETBYADDR_R_PROTO 0	   /**/
@@ -3936,6 +4035,9 @@
  */
 /* GETNETBYNAME_R_PROTO:
  *	This symbol encodes the prototype of getnetbyname_r.
+ *	It is zero if d_getnetbyname_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getnetbyname_r
+ *	is defined.
  */
 /*#define HAS_GETNETBYNAME_R	   / **/
 #define GETNETBYNAME_R_PROTO 0	   /**/
@@ -3946,6 +4048,9 @@
  */
 /* GETNETENT_R_PROTO:
  *	This symbol encodes the prototype of getnetent_r.
+ *	It is zero if d_getnetent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getnetent_r
+ *	is defined.
  */
 /*#define HAS_GETNETENT_R	   / **/
 #define GETNETENT_R_PROTO 0	   /**/
@@ -3956,6 +4061,9 @@
  */
 /* GETPROTOBYNAME_R_PROTO:
  *	This symbol encodes the prototype of getprotobyname_r.
+ *	It is zero if d_getprotobyname_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getprotobyname_r
+ *	is defined.
  */
 /*#define HAS_GETPROTOBYNAME_R	   / **/
 #define GETPROTOBYNAME_R_PROTO 0	   /**/
@@ -3966,6 +4074,9 @@
  */
 /* GETPROTOBYNUMBER_R_PROTO:
  *	This symbol encodes the prototype of getprotobynumber_r.
+ *	It is zero if d_getprotobynumber_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getprotobynumber_r
+ *	is defined.
  */
 /*#define HAS_GETPROTOBYNUMBER_R	   / **/
 #define GETPROTOBYNUMBER_R_PROTO 0	   /**/
@@ -3976,6 +4087,9 @@
  */
 /* GETPROTOENT_R_PROTO:
  *	This symbol encodes the prototype of getprotoent_r.
+ *	It is zero if d_getprotoent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getprotoent_r
+ *	is defined.
  */
 /*#define HAS_GETPROTOENT_R	   / **/
 #define GETPROTOENT_R_PROTO 0	   /**/
@@ -3986,6 +4100,9 @@
  */
 /* GETSERVBYNAME_R_PROTO:
  *	This symbol encodes the prototype of getservbyname_r.
+ *	It is zero if d_getservbyname_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getservbyname_r
+ *	is defined.
  */
 /*#define HAS_GETSERVBYNAME_R	   / **/
 #define GETSERVBYNAME_R_PROTO 0	   /**/
@@ -3996,6 +4113,9 @@
  */
 /* GETSERVBYPORT_R_PROTO:
  *	This symbol encodes the prototype of getservbyport_r.
+ *	It is zero if d_getservbyport_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getservbyport_r
+ *	is defined.
  */
 /*#define HAS_GETSERVBYPORT_R	   / **/
 #define GETSERVBYPORT_R_PROTO 0	   /**/
@@ -4006,6 +4126,9 @@
  */
 /* GETSERVENT_R_PROTO:
  *	This symbol encodes the prototype of getservent_r.
+ *	It is zero if d_getservent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getservent_r
+ *	is defined.
  */
 /*#define HAS_GETSERVENT_R	   / **/
 #define GETSERVENT_R_PROTO 0	   /**/
@@ -4022,6 +4145,9 @@
  */
 /* READDIR64_R_PROTO:
  *	This symbol encodes the prototype of readdir64_r.
+ *	It is zero if d_readdir64_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_readdir64_r
+ *	is defined.
  */
 /*#define HAS_READDIR64_R	   / **/
 #define READDIR64_R_PROTO 0	   /**/
@@ -4032,6 +4158,9 @@
  */
 /* SETHOSTENT_R_PROTO:
  *	This symbol encodes the prototype of sethostent_r.
+ *	It is zero if d_sethostent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_sethostent_r
+ *	is defined.
  */
 /*#define HAS_SETHOSTENT_R	   / **/
 #define SETHOSTENT_R_PROTO 0	   /**/
@@ -4042,6 +4171,9 @@
  */
 /* SETLOCALE_R_PROTO:
  *	This symbol encodes the prototype of setlocale_r.
+ *	It is zero if d_setlocale_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_setlocale_r
+ *	is defined.
  */
 /*#define HAS_SETLOCALE_R	   / **/
 #define SETLOCALE_R_PROTO 0	   /**/
@@ -4052,6 +4184,9 @@
  */
 /* SETNETENT_R_PROTO:
  *	This symbol encodes the prototype of setnetent_r.
+ *	It is zero if d_setnetent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_setnetent_r
+ *	is defined.
  */
 /*#define HAS_SETNETENT_R	   / **/
 #define SETNETENT_R_PROTO 0	   /**/
@@ -4062,6 +4197,9 @@
  */
 /* SETPROTOENT_R_PROTO:
  *	This symbol encodes the prototype of setprotoent_r.
+ *	It is zero if d_setprotoent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_setprotoent_r
+ *	is defined.
  */
 /*#define HAS_SETPROTOENT_R	   / **/
 #define SETPROTOENT_R_PROTO 0	   /**/
@@ -4072,6 +4210,9 @@
  */
 /* SETSERVENT_R_PROTO:
  *	This symbol encodes the prototype of setservent_r.
+ *	It is zero if d_setservent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_setservent_r
+ *	is defined.
  */
 /*#define HAS_SETSERVENT_R	   / **/
 #define SETSERVENT_R_PROTO 0	   /**/
@@ -4082,6 +4223,9 @@
  */
 /* TTYNAME_R_PROTO:
  *	This symbol encodes the prototype of ttyname_r.
+ *	It is zero if d_ttyname_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_ttyname_r
+ *	is defined.
  */
 /*#define HAS_TTYNAME_R	   / **/
 #define TTYNAME_R_PROTO 0	   /**/
