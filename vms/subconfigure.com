@@ -4328,6 +4328,7 @@ $    If ext .eqs. " " Then Goto done
 $    Define/User Perl_Env_Tables CLISYM_LOCAL
 $    miniperl
      ($extdir = $ENV{'ext'}) =~ s/::/./g;
+     $extdir =~ s#/#.#g;
      if ($extdir =~ /^vms/i) { $extdir =~ s/vms/.vms.ext/i; }
      else                    { $extdir = ".ext.$extdir";   }
      ($ENV{'extdir'} = "[$extdir]");
