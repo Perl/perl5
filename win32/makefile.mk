@@ -89,14 +89,11 @@ USE_LARGE_FILES *= define
 # Visual C++ > 2.x and < 6.x
 #CCTYPE		*= MSVC
 # Visual C++ >= 6.x
-CCTYPE		*= MSVC60
+#CCTYPE		*= MSVC60
 # Borland 5.02 or later
 #CCTYPE		*= BORLAND
-# mingw32+gcc-2.95.2 or better
-#CCTYPE		*= GCC
-# Uncomment this if you are using the latest MinGW release (2.0.0)
-# with gcc3.2
-#USE_GCC_V3_2	*= define
+# MinGW with gcc-2.95.2 or later
+CCTYPE		*= GCC
 
 #
 # uncomment this if your Borland compiler is older than v5.4.
@@ -379,9 +376,6 @@ LINK_FLAGS	+= -L"$(CCLIBDIR)\Release"
 
 CC		= gcc
 LINK32		= g++
-.IF "$(USE_GCC_V3_2)" == "define"
-LINK32		= g++
-.END
 LIB32		= ar rc
 IMPLIB		= dlltool
 RSC		= windres
