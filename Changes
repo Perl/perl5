@@ -3,8 +3,9 @@ changes that went into every version of Perl.  If you'd like more
 detailed information, please consult the comments in the individual
 patches posted to the perl5-porters mailing list.  Patches for each
 individual change may also be obtained through ftp and rsync--see
-perlhack.pod for the details.
+pod/perlhack.pod for the details.
 
+For information on what's new in this release, see pod/perldelta.pod.
 
 [The "CAST AND CREW" list has been moved to AUTHORS.]
 
