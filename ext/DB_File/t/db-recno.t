@@ -1080,6 +1080,7 @@ sub test_splice {
     my ($s_r, $s_error, @s_warnings);
 
     my $gather_warning = sub { push @s_warnings, $_[0] };
+    $offset = $#array if $offset and $offset > @array;
     if ($context eq 'list') {
 	my @r;
 	eval {
@@ -1118,6 +1119,7 @@ sub test_splice {
     # Now do the same for DB_File's version of splice
     my ($ms_r, $ms_error, @ms_warnings);
     $gather_warning = sub { push @ms_warnings, $_[0] };
+    $offset = $#h if $offset and $offset > @h;
     if ($context eq 'list') {
 	my @r;
 	eval {
