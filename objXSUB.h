@@ -2263,6 +2263,10 @@
 #define Perl_newLISTOP		pPerl->Perl_newLISTOP
 #undef  newLISTOP
 #define newLISTOP		Perl_newLISTOP
+#undef  Perl_newPADOP
+#define Perl_newPADOP		pPerl->Perl_newPADOP
+#undef  newPADOP
+#define newPADOP		Perl_newPADOP
 #undef  Perl_newPMOP
 #define Perl_newPMOP		pPerl->Perl_newPMOP
 #undef  newPMOP

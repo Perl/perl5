@@ -358,6 +358,7 @@ Perl_newHV
 Perl_newHVhv
 Perl_newIO
 Perl_newLISTOP
+Perl_newPADOP
 Perl_newPMOP
 Perl_newPVOP
 Perl_newRV

@@ -2636,6 +2636,13 @@ Perl_newLISTOP(pTHXo_ I32 type, I32 flags, OP* first, OP* last)
     return ((CPerlObj*)pPerl)->Perl_newLISTOP(type, flags, first, last);
 }
 
+#undef  Perl_newPADOP
+OP*
+Perl_newPADOP(pTHXo_ I32 type, I32 flags, SV* sv)
+{
+    return ((CPerlObj*)pPerl)->Perl_newPADOP(type, flags, sv);
+}
+
 #undef  Perl_newPMOP
 OP*
 Perl_newPMOP(pTHXo_ I32 type, I32 flags)

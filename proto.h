@@ -397,6 +397,7 @@ PERL_CALLCONV HV*	Perl_newHV(pTHX);
 PERL_CALLCONV HV*	Perl_newHVhv(pTHX_ HV* hv);
 PERL_CALLCONV IO*	Perl_newIO(pTHX);
 PERL_CALLCONV OP*	Perl_newLISTOP(pTHX_ I32 type, I32 flags, OP* first, OP* last);
+PERL_CALLCONV OP*	Perl_newPADOP(pTHX_ I32 type, I32 flags, SV* sv);
 PERL_CALLCONV OP*	Perl_newPMOP(pTHX_ I32 type, I32 flags);
 PERL_CALLCONV OP*	Perl_newPVOP(pTHX_ I32 type, I32 flags, char* pv);
 PERL_CALLCONV SV*	Perl_newRV(pTHX_ SV* pref);

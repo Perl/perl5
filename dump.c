@@ -512,11 +512,11 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
     switch (o->op_type) {
     case OP_GVSV:
     case OP_GV:
-	if (cSVOPo->op_sv) {
+	if (cGVOPo) {
 	    SV *tmpsv = NEWSV(0,0);
 	    ENTER;
 	    SAVEFREESV(tmpsv);
-	    gv_fullname3(tmpsv, (GV*)cSVOPo->op_sv, Nullch);
+	    gv_fullname3(tmpsv, (GV*)cGVOPo, Nullch);
 	    Perl_dump_indent(aTHX_ level, file, "GV = %s\n", SvPV(tmpsv, n_a));
 	    LEAVE;
 	}

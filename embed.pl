@@ -1404,6 +1404,7 @@ p	|HV*	|newHV
 p	|HV*	|newHVhv	|HV* hv
 p	|IO*	|newIO
 p	|OP*	|newLISTOP	|I32 type|I32 flags|OP* first|OP* last
+p	|OP*	|newPADOP	|I32 type|I32 flags|SV* sv
 p	|OP*	|newPMOP	|I32 type|I32 flags
 p	|OP*	|newPVOP	|I32 type|I32 flags|char* pv
 p	|SV*	|newRV		|SV* pref
