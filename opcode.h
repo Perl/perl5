@@ -1445,7 +1445,7 @@ OP *	pp_lock		_((ARGSproto));
 OP *	pp_threadsv	_((ARGSproto));
 
 END_EXTERN_C
-#endif  /* PERL_OBJECT */
+#endif	/* PERL_OBJECT */
 
 #ifndef DOINIT
 EXT OP * (CPERLscope(*ppaddr)[])(ARGSproto);
@@ -1799,10 +1799,10 @@ EXT OP * (CPERLscope(*ppaddr)[])(ARGSproto) = {
 	pp_lock,
 	pp_threadsv,
 };
-#endif  /* PERL_OBJECT */
+#endif	/* PERL_OBJECT */
 #endif
 
-#ifndef DOINIT 
+#ifndef DOINIT
 EXT OP * (CPERLscope(*check)[]) _((OP *op));
 #else
 #ifndef PERL_OBJECT
@@ -2154,7 +2154,7 @@ EXT OP * (CPERLscope(*check)[]) _((OP *op)) = {
 	ck_rfun,	/* lock */
 	ck_null,	/* threadsv */
 };
-#endif  /* PERL_OBJECT */
+#endif	/* PERL_OBJECT */
 #endif
 
 #ifndef DOINIT
@@ -2181,8 +2181,8 @@ EXT U32 opargs[] = {
 	0x00000140,	/* rv2cv */
 	0x00000700,	/* anoncode */
 	0x00001c04,	/* prototype */
-	0x00002001,	/* refgen */
-	0x00001006,	/* srefgen */
+	0x00002101,	/* refgen */
+	0x00001106,	/* srefgen */
 	0x00009c8c,	/* ref */
 	0x00091504,	/* bless */
 	0x00000c08,	/* backtick */

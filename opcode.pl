@@ -77,6 +77,7 @@ print <<END;
 };
 #endif
 
+#ifndef PERL_OBJECT
 START_EXTERN_C
 
 END
@@ -98,11 +99,13 @@ for (@ops) {
 print <<END;
 
 END_EXTERN_C
+#endif	/* PERL_OBJECT */
 
 #ifndef DOINIT
-EXT OP * (*ppaddr[])(ARGSproto);
+EXT OP * (CPERLscope(*ppaddr)[])(ARGSproto);
 #else
-EXT OP * (*ppaddr[])(ARGSproto) = {
+#ifndef PERL_OBJECT
+EXT OP * (CPERLscope(*ppaddr)[])(ARGSproto) = {
 END
 
 for (@ops) {
@@ -111,6 +114,7 @@ for (@ops) {
 
 print <<END;
 };
+#endif	/* PERL_OBJECT */
 #endif
 
 END
@@ -119,9 +123,10 @@ END
 
 print <<END;
 #ifndef DOINIT
-EXT OP * (*check[]) _((OP *op));
+EXT OP * (CPERLscope(*check)[]) _((OP *op));
 #else
-EXT OP * (*check[]) _((OP *op)) = {
+#ifndef PERL_OBJECT
+EXT OP * (CPERLscope(*check)[]) _((OP *op)) = {
 END
 
 for (@ops) {
@@ -130,6 +135,7 @@ for (@ops) {
 
 print <<END;
 };
+#endif	/* PERL_OBJECT */
 #endif
 
 END
@@ -241,8 +247,8 @@ av2arylen	array length		ck_null		is1
 rv2cv		subroutine deref	ck_rvconst	d1
 anoncode	anonymous subroutine	ck_anoncode	$	
 prototype	subroutine prototype	ck_null		s%	S
-refgen		reference constructor	ck_spair	m0	L
-srefgen		scalar ref constructor	ck_null		fs0	S
+refgen		reference constructor	ck_spair	m1	L
+srefgen		scalar ref constructor	ck_null		fs1	S
 ref		reference-type operator	ck_fun		stu%	S?
 bless		bless			ck_fun		s@	S S?
 
