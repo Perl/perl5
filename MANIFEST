@@ -177,7 +177,7 @@ ext/DB_File/DB_File_BS		Berkeley DB extension mkbootstrap fodder
 ext/DB_File/Makefile.PL		Berkeley DB extension makefile writer
 ext/DB_File/dbinfo		Berkeley DB database version checker
 ext/DB_File/typemap		Berkeley DB extension interface types
-ext/DynaLoader/DynaLoader.pm.PL	Dynamic Loader perl module
+ext/DynaLoader/DynaLoader_pm.PL	Dynamic Loader perl module
 ext/DynaLoader/Makefile.PL	Dynamic Loader makefile writer
 ext/DynaLoader/README		Dynamic Loader notes and intro
 ext/DynaLoader/dl_aix.xs	AIX implementation
@@ -887,6 +887,7 @@ t/op/readdir.t		See if readdir() works
 t/op/recurse.t		See if deep recursion works
 t/op/ref.t		See if refs and objects work
 t/op/regexp.t		See if regular expressions work
+t/op/regexp_noamp.t	See if regular expressions work with optimizations
 t/op/repeat.t		See if x operator works
 t/op/runlevel.t		See if die() works from perl_call_*()
 t/op/sleep.t		See if sleep works

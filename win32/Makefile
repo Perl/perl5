@@ -600,7 +600,7 @@ $(PERL95EXE): $(PERLDLL) $(CONFIGPM) $(PERL95_OBJ)
 $(DYNALOADER).c: $(MINIPERL) $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM)
 	if not exist $(AUTODIR) mkdir $(AUTODIR)
 	cd $(EXTDIR)\$(*B)
-	..\$(MINIPERL) -I..\..\lib $(*B).pm.PL
+	..\$(MINIPERL) -I..\..\lib $(*B)_pm.PL
 	cd ..\..\win32
 	$(XCOPY) $(EXTDIR)\$(*B)\$(*B).pm $(LIBDIR)\$(NULL)
 	cd $(EXTDIR)\$(*B)
