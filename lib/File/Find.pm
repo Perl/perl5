@@ -44,21 +44,23 @@ but have subtle differences.
   find(\&wanted,  @directories);
   find(\%options, @directories);
 
-C<find()> does a breadth-first search over the given C<@directories> in the
-order they are given.  In essence, it works from the top down.
-
-For each file or directory found, the C<&wanted> subroutine is called,
-with the return code ignored.  (See below for details on how to use
-the C<&wanted> function).  Additionally, for each directory found,
-it will go into that directory and continue the search.
+C<find()> does a depth-first search over the given C<@directories> in
+the order they are given.  For each file or directory found, it calls
+the C<&wanted> subroutine.  (See below for details on how to use the
+C<&wanted> function).  Additionally, for each directory found, it will
+C<chdir()> into that directory and continue the search, invoking the
+C<&wanted> function on each file or subdirectory in the directory.
 
 =item B<finddepth>
 
   finddepth(\&wanted,  @directories);
   finddepth(\%options, @directories);
 
-C<finddepth()> works just like C<find()> except it does a depth-first search.
-It works from the bottom of the directory tree up.
+C<finddepth()> works just like C<find()> except that is invokes the
+C<&wanted> function for a directory I<after> invoking it for the
+directory's contents.  It does a postorder traversal instead of a
+preorder traversal, working from the bottom of the directory tree up
+where C<find()> works from the top of the tree down.
 
 =back
 
@@ -387,6 +389,12 @@ volume actually maintains its own "Desktop Folder" directory.
 =back
 
 =back
+
+=head1 BUGS AND CAVEATS
+
+Despite the name of the C<finddepth()> function, both C<find()> and
+C<finddepth()> perform a depth-first search of the directory
+hierarchy.
 
 =head1 HISTORY
 

@@ -5770,9 +5770,10 @@ indicates a failure to start the program (inspect $! for the reason).
 Like C<exec>, C<system> allows you to lie to a program about its name if
 you use the C<system PROGRAM LIST> syntax.  Again, see L</exec>.
 
-Because C<system> and backticks block C<SIGINT> and C<SIGQUIT>,
-killing the program they're running doesn't actually interrupt
-your program.
+Since C<SIGINT> and C<SIGQUIT> are ignored during the execution of
+C<system>, if you expect your program to terminate on receipt of these
+signals you will need to arrange to do so yourself based on the return
+value.
 
     @args = ("command", "arg1", "arg2");
     system(@args) == 0
@@ -5791,7 +5792,6 @@ C<$?> like this:
     else {
 	printf "child exited with value %d\n", $? >> 8;
     }
-
 
 or more portably by using the W*() calls of the POSIX extension;
 see L<perlport> for more information.
