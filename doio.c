@@ -218,7 +218,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		if (ckWARN(WARN_IO))
 		    Perl_warner(aTHX_ packWARN(WARN_IO),
 			    "Can't open a reference");
-		SETERRNO(EINVAL, LIB$_INVARG);
+		SETERRNO(EINVAL, LIB_INVARG);
 		goto say_false;
 	    }
 #endif /* USE_STDIO */
@@ -345,7 +345,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 			}
 			if (!thatio) {
 #ifdef EINVAL
-			    SETERRNO(EINVAL,SS$_IVCHAN);
+			    SETERRNO(EINVAL,SS_IVCHAN);
 #endif
 			    goto say_false;
 			}
@@ -954,7 +954,7 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
 	gv = PL_argvgv;
     if (!gv || SvTYPE(gv) != SVt_PVGV) {
 	if (not_implicit)
-	    SETERRNO(EBADF,SS$_IVCHAN);
+	    SETERRNO(EBADF,SS_IVCHAN);
 	return FALSE;
     }
     io = GvIO(gv);
@@ -962,7 +962,7 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
 	if (not_implicit) {
 	    if (ckWARN(WARN_UNOPENED)) /* no check for closed here */
 		report_evil_fh(gv, io, PL_op->op_type);
-	    SETERRNO(EBADF,SS$_IVCHAN);
+	    SETERRNO(EBADF,SS_IVCHAN);
 	}
 	return FALSE;
     }
@@ -1006,7 +1006,7 @@ Perl_io_close(pTHX_ IO *io, bool not_implicit)
 	IoOFP(io) = IoIFP(io) = Nullfp;
     }
     else if (not_implicit) {
-	SETERRNO(EBADF,SS$_IVCHAN);
+	SETERRNO(EBADF,SS_IVCHAN);
     }
 
     return retval;
@@ -1067,7 +1067,7 @@ Perl_do_tell(pTHX_ GV *gv)
     }
     if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
 	report_evil_fh(gv, io, PL_op->op_type);
-    SETERRNO(EBADF,RMS$_IFI);
+    SETERRNO(EBADF,RMS_IFI);
     return (Off_t)-1;
 }
 
@@ -1086,7 +1086,7 @@ Perl_do_seek(pTHX_ GV *gv, Off_t pos, int whence)
     }
     if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
 	report_evil_fh(gv, io, PL_op->op_type);
-    SETERRNO(EBADF,RMS$_IFI);
+    SETERRNO(EBADF,RMS_IFI);
     return FALSE;
 }
 
@@ -1100,7 +1100,7 @@ Perl_do_sysseek(pTHX_ GV *gv, Off_t pos, int whence)
 	return PerlLIO_lseek(PerlIO_fileno(fp), pos, whence);
     if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
 	report_evil_fh(gv, io, PL_op->op_type);
-    SETERRNO(EBADF,RMS$_IFI);
+    SETERRNO(EBADF,RMS_IFI);
     return (Off_t)-1;
 }
 
@@ -2089,7 +2089,7 @@ Perl_do_semop(pTHX_ SV **mark, SV **sp)
     opbuf = SvPV(opstr, opsize);
     if (opsize < 3 * SHORTSIZE
 	|| (opsize % (3 * SHORTSIZE))) {
-	SETERRNO(EINVAL,LIB$_INVARG);
+	SETERRNO(EINVAL,LIB_INVARG);
 	return -1;
     }
     SETERRNO(0,0);
@@ -2146,7 +2146,7 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
     if (shmctl(id, IPC_STAT, &shmds) == -1)
 	return -1;
     if (mpos < 0 || msize < 0 || mpos + msize > shmds.shm_segsz) {
-	SETERRNO(EFAULT,SS$_ACCVIO);		/* can't do as caller requested */
+	SETERRNO(EFAULT,SS_ACCVIO);		/* can't do as caller requested */
 	return -1;
     }
     shm = (char *)shmat(id, (char*)NULL, (optype == OP_SHMREAD) ? SHM_RDONLY : 0);
@@ -2273,7 +2273,7 @@ Perl_start_glob (pTHX_ SV *tmpglob, IO *io)
 	    }
 	    if (cxt) (void)lib$find_file_end(&cxt);
 	    if (ok && sts != RMS$_NMF &&
-		sts != RMS$_DNF && sts != RMS$_FNF) ok = 0;
+		sts != RMS$_DNF && sts != RMS_FNF) ok = 0;
 	    if (!ok) {
 		if (!(sts & 1)) {
 		    SETERRNO((sts == RMS$_SYN ? EINVAL : EVMSERR),sts);

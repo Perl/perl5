@@ -3307,7 +3307,7 @@ Perl_my_fflush_all(pTHX)
       return 0;
     }
 #  endif
-    SETERRNO(EBADF,RMS$_IFI);
+    SETERRNO(EBADF,RMS_IFI);
     return EOF;
 # endif
 #endif

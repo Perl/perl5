@@ -152,7 +152,7 @@ perform the upgrade if necessary.  See C<svtype>.
 #  define ATOMIC_DEC_AND_TEST(res, count) (res = (--count == 0))
 #endif /* USE_5005THREADS */
 
-#ifdef __GNUC__
+#if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(PERL_GCC_PEDANTIC)
 #  define SvREFCNT_inc(sv)		\
     ({					\
 	SV *nsv = (SV*)(sv);		\
@@ -1000,7 +1000,7 @@ otherwise.
 #define SvPVutf8x_force(sv, lp) sv_pvutf8n_force(sv, &lp)
 #define SvPVbytex_force(sv, lp) sv_pvbyten_force(sv, &lp)
 
-#ifdef __GNUC__
+#if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(PERL_GCC_PEDANTIC)
 
 #  define SvIVx(sv) ({SV *nsv = (SV*)(sv); SvIV(nsv); })
 #  define SvUVx(sv) ({SV *nsv = (SV*)(sv); SvUV(nsv); })

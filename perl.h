@@ -228,12 +228,12 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
  * Trying to select a version that gives no warnings...
  */
 #if !(defined(STMT_START) && defined(STMT_END))
-# if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(__cplusplus)
+# if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(PERL_GCC_PEDANTIC) && !defined(__cplusplus)
 #   define STMT_START	(void)(	/* gcc supports ``({ STATEMENTS; })'' */
 #   define STMT_END	)
 # else
    /* Now which other defined()s do we need here ??? */
-#  if (VOIDFLAGS) && (defined(sun) || defined(__sun__))
+#  if (VOIDFLAGS) && (defined(sun) || defined(__sun__)) && !defined(__GNUC__)
 #   define STMT_START	if (1)
 #   define STMT_END	else (void)0
 #  else
@@ -730,8 +730,32 @@ int sockatmark(int);
 	    set_errno(errcode);		\
 	    set_vaxc_errno(vmserrcode);	\
 	} STMT_END
+#   define LIB_INVARG 		LIB$_INVARG
+#   define RMS_DIR    		RMS$_DIR
+#   define RMS_FAC    		RMS$_FAC
+#   define RMS_FEX    		RMS$_FEX
+#   define RMS_FNF    		RMS$_FNF
+#   define RMS_IFI    		RMS$_IFI
+#   define RMS_ISI    		RMS$_ISI
+#   define RMS_PRV    		RMS$_PRV
+#   define SS_ACCVIO      	SS$_ACCVIO
+#   define SS_DEVOFFLINE	SS$_DEVOFFLINE
+#   define SS_IVCHAN  		SS$_IVCHAN
+#   define SS_NORMAL  		SS$_NORMAL
 #else
 #   define SETERRNO(errcode,vmserrcode) (errno = (errcode))
+#   define LIB_INVARG 		0
+#   define RMS_DIR    		0
+#   define RMS_FAC    		0
+#   define RMS_FEX    		0
+#   define RMS_FNF    		0
+#   define RMS_IFI    		0
+#   define RMS_ISI    		0
+#   define RMS_PRV    		0
+#   define SS_ACCVIO      	0
+#   define SS_DEVOFFLINE	0
+#   define SS_IVCHAN  		0
+#   define SS_NORMAL  		0
 #endif
 
 #ifdef USE_5005THREADS
@@ -3882,7 +3906,7 @@ typedef struct am_table_short AMTS;
  * Remap printf
  */
 #undef printf
-#ifdef __GNUC__
+#if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(PERL_GCC_PEDANTIC)
 #define printf(fmt,args...) PerlIO_stdoutf(fmt,##args)
 #else
 #define printf PerlIO_stdoutf

@@ -3221,7 +3221,7 @@ PP(pp_require)
 	RETPUSHUNDEF;
     }
     else
-	SETERRNO(0, SS$_NORMAL);
+	SETERRNO(0, SS_NORMAL);
 
     /* Assume success here to prevent recursive requirement. */
     len = strlen(name);

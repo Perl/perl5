@@ -1963,7 +1963,7 @@ S_incl_perldb(pTHX)
 
 	if (pdb)
 	    return pdb;
-	SETERRNO(0,SS$_NORMAL);
+	SETERRNO(0,SS_NORMAL);
 	return "BEGIN { require 'perl5db.pl' }";
     }
     return "";

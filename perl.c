@@ -1526,7 +1526,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
 
     /* now parse the script */
 
-    SETERRNO(0,SS$_NORMAL);
+    SETERRNO(0,SS_NORMAL);
     PL_error_count = 0;
 #ifdef MACOS_TRADITIONAL
     if (gMacPerl_SyntaxError = (yyparse() || PL_error_count)) {
