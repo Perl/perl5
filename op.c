@@ -2423,7 +2423,7 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 */
 
 	if (complement) {
-	    U8 tmpbuf[UTF8_MAXLEN+1];
+	    U8 tmpbuf[UTF8_MAXBYTES+1];
 	    UV *cp;
 	    UV nextmin = 0;
 	    New(1109, cp, 2*tlen, UV);

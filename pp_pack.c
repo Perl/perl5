@@ -2183,7 +2183,7 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
 		auint = UNI_TO_NATIVE(SvUV(fromstr));
-		SvGROW(cat, SvCUR(cat) + UTF8_MAXLEN + 1);
+		SvGROW(cat, SvCUR(cat) + UTF8_MAXBYTES + 1);
 		SvCUR_set(cat,
 			  (char*)uvchr_to_utf8_flags((U8*)SvEND(cat),
 						     auint,

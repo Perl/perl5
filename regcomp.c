@@ -3088,7 +3088,7 @@ tryagain:
 	    char *oldp, *s;
 	    STRLEN numlen;
 	    STRLEN foldlen;
-	    U8 tmpbuf[UTF8_MAXLEN_FOLD+1], *foldbuf;
+	    U8 tmpbuf[UTF8_MAXBYTES_CASE+1], *foldbuf;
 
             parse_start = RExC_parse - 1;
 
@@ -4199,7 +4199,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 		else if (prevnatvalue == natvalue) {
 		    Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\n", natvalue);
 		    if (FOLD) {
-			 U8 foldbuf[UTF8_MAXLEN_FOLD+1];
+			 U8 foldbuf[UTF8_MAXBYTES_CASE+1];
 			 STRLEN foldlen;
 			 UV f = to_uni_fold(natvalue, foldbuf, &foldlen);
 
@@ -4869,7 +4869,7 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 	
 	    if (lv) {
 		if (sw) {
-		    U8 s[UTF8_MAXLEN+1];
+		    U8 s[UTF8_MAXBYTES_CASE+1];
 		
 		    for (i = 0; i <= 256; i++) { /* just the first 256 */
 			U8 *e = uvchr_to_utf8(s, i);

@@ -1704,7 +1704,7 @@ S_scan_const(pTHX_ char *start)
 			 UV uv = utf8_to_uvchr((U8*)str, 0);
 
 			 if (uv < 0x100) {
-			      U8 tmpbuf[UTF8_MAXLEN+1], *d;
+			      U8 tmpbuf[UTF8_MAXBYTES+1], *d;
 
 			      d = uvchr_to_utf8(tmpbuf, UNI_TO_NATIVE(uv));
 			      sv_setpvn(res, (char *)tmpbuf, d - tmpbuf);
@@ -7137,7 +7137,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
     I32 brackets = 1;			/* bracket nesting level */
     bool has_utf8 = FALSE;		/* is there any utf8 content? */
     I32 termcode;			/* terminating char. code */
-    U8 termstr[UTF8_MAXLEN];		/* terminating string */
+    U8 termstr[UTF8_MAXBYTES];		/* terminating string */
     STRLEN termlen;			/* length of terminating string */
     char *last = NULL;			/* last position for nesting bracket */
 
@@ -8230,7 +8230,7 @@ Perl_scan_vstring(pTHX_ char *s, SV *sv)
 
     if (!isALPHA(*pos)) {
 	UV rev;
-	U8 tmpbuf[UTF8_MAXLEN+1];
+	U8 tmpbuf[UTF8_MAXBYTES+1];
 	U8 *tmpend;
 
 	if (*s == 'v') s++;  /* get past 'v' */

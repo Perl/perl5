@@ -3344,7 +3344,7 @@ PP(pp_ord)
     }
 
     XPUSHu(DO_UTF8(argsv) ?
-	   utf8n_to_uvchr(s, UTF8_MAXLEN, 0, UTF8_ALLOW_ANYUV) :
+	   utf8n_to_uvchr(s, UTF8_MAXBYTES, 0, UTF8_ALLOW_ANYUV) :
 	   (*s & 0xff));
 
     RETURN;
@@ -3454,7 +3454,7 @@ PP(pp_ucfirst)
     if (DO_UTF8(sv) &&
 	(s = (U8*)SvPV_nomg(sv, slen)) && slen &&
 	UTF8_IS_START(*s)) {
-	U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
+	U8 tmpbuf[UTF8_MAXBYTES_CASE+1];
 	STRLEN ulen;
 	STRLEN tculen;
 
@@ -3517,7 +3517,7 @@ PP(pp_lcfirst)
 	(s = (U8*)SvPV_nomg(sv, slen)) && slen &&
 	UTF8_IS_START(*s)) {
 	STRLEN ulen;
-	U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
+	U8 tmpbuf[UTF8_MAXBYTES_CASE+1];
 	U8 *tend;
 	UV uv;
 
@@ -3574,7 +3574,7 @@ PP(pp_uc)
 	STRLEN ulen;
 	register U8 *d;
 	U8 *send;
-	U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
+	U8 tmpbuf[UTF8_MAXBYTES+1];
 
 	s = (U8*)SvPV_nomg(sv,len);
 	if (!len) {
@@ -3583,18 +3583,28 @@ PP(pp_uc)
 	    SETs(TARG);
 	}
 	else {
-	    STRLEN nchar = utf8_length(s, s + len);
-
 	    (void)SvUPGRADE(TARG, SVt_PV);
-	    SvGROW(TARG, (nchar * UTF8_MAXLEN_UCLC) + 1);
+	    SvGROW(TARG, len + 1);
 	    (void)SvPOK_only(TARG);
 	    d = (U8*)SvPVX(TARG);
 	    send = s + len;
 	    while (s < send) {
+		STRLEN u = UTF8SKIP(s);
+
 		toUPPER_utf8(s, tmpbuf, &ulen);
+		if (ulen > u) {
+		    UV o = d - (U8*)SvPVX(TARG);
+
+		    /* If someone uppercases one million U+03B0s we
+		     * SvGROW() one million times.  Or we could try
+		     * guess how much to allocate without overdoing.
+		     * Such is life. */
+		    SvGROW(TARG, SvCUR(TARG) + ulen - u);
+		    d = (U8*)SvPVX(TARG) + o;
+		}
 		Copy(tmpbuf, d, ulen, U8);
 		d += ulen;
-		s += UTF8SKIP(s);
+		s += u;
 	    }
 	    *d = '\0';
 	    SvUTF8_on(TARG);
@@ -3643,7 +3653,7 @@ PP(pp_lc)
 	STRLEN ulen;
 	register U8 *d;
 	U8 *send;
-	U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
+	U8 tmpbuf[UTF8_MAXBYTES_CASE+1];
 
 	s = (U8*)SvPV_nomg(sv,len);
 	if (!len) {
@@ -3652,16 +3662,16 @@ PP(pp_lc)
 	    SETs(TARG);
 	}
 	else {
-	    STRLEN nchar = utf8_length(s, s + len);
-
 	    (void)SvUPGRADE(TARG, SVt_PV);
-	    SvGROW(TARG, (nchar * UTF8_MAXLEN_UCLC) + 1);
+	    SvGROW(TARG, len + 1);
 	    (void)SvPOK_only(TARG);
 	    d = (U8*)SvPVX(TARG);
 	    send = s + len;
 	    while (s < send) {
+		STRLEN u = UTF8SKIP(s);
 		UV uv = toLOWER_utf8(s, tmpbuf, &ulen);
-#define GREEK_CAPITAL_LETTER_SIGMA 0x03A3 /* Unicode */
+
+#define GREEK_CAPITAL_LETTER_SIGMA 0x03A3 /* Unicode U+03A3 */
 		if (uv == GREEK_CAPITAL_LETTER_SIGMA) {
 		     /*
 		      * Now if the sigma is NOT followed by
@@ -3675,12 +3685,24 @@ PP(pp_lc)
 		      * then it should be mapped to 0x03C2,
 		      * (GREEK SMALL LETTER FINAL SIGMA),
 		      * instead of staying 0x03A3.
-		      * See lib/unicore/SpecCase.txt.
+		      * "should be": in other words,
+		      * this is not implemented yet.
+		      * See lib/unicore/SpecialCasing.txt.
 		      */
+		}
+		if (ulen > u) {
+		    UV o = d - (U8*)SvPVX(TARG);
+
+		    /* If someone lowercases one million U+0130s we
+		     * SvGROW() one million times.  Or we could try
+		     * guess how much to allocate without overdoing.
+		     Such is life. */
+		    SvGROW(TARG, SvCUR(TARG) + ulen - u);
+		    d = (U8*)SvPVX(TARG) + o;
 		}
 		Copy(tmpbuf, d, ulen, U8);
 		d += ulen;
-		s += UTF8SKIP(s);
+		s += u;
 	    }
 	    *d = '\0';
 	    SvUTF8_on(TARG);
