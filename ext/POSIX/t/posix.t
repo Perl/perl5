@@ -80,7 +80,8 @@ SKIP: {
 
         printf "%s 11 -   masked SIGINT received %s\n",
           $sigint_called ? "ok" : "not ok",
-          $^O =~ /^(?:darwin|(?:free|net|open)bsd)$/ ?
+          # At least OpenBSD/i386 3.3 is okay, as is NetBSD 1.5.
+          $^O =~ /^(?:darwin|freebsd)$/ ?
 	      "# TODO $^O seems to loose blocked signals" 
 	      : '';
 
