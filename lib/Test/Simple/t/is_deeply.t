@@ -17,11 +17,13 @@ require Test::Simple::Catch;
 my($out, $err) = Test::Simple::Catch::caught();
 Test::Builder->new->no_header(1);
 Test::Builder->new->no_ending(1);
+local $ENV{HARNESS_ACTIVE} = 0;
+
 
 # Can't use Test.pm, that's a 5.005 thing.
 package main;
 
-print "1..22\n";
+print "1..25\n";
 
 my $test_num = 1;
 # Utility testing functions.
@@ -48,8 +50,9 @@ sub is ($$;$) {
 
 sub like ($$;$) {
     my($this, $regex, $name) = @_;
-
-    my $test = $$this =~ /$regex/;
+    
+    $regex = qr/$regex/ unless ref $regex;
+    my $test = $$this =~ $regex;
 
     my $ok = '';
     $ok .= "not " unless $test;
@@ -140,7 +143,7 @@ is( $err, <<ERR,                            '    right diagnostic' );
 ERR
 
 #line 131
-is_deeply({ foo => undef }, {},    'hashes of undefs',    'hashes of undefs' );
+is_deeply({ foo => undef }, {},    'hashes of undefs' );
 is( $out, "not ok 7 - hashes of undefs\n",  'hashes of undefs' );
 is( $err, <<ERR,                            '    right diagnostic' );
 #     Failed test ($0 at line 131)
@@ -213,3 +216,21 @@ is( $err, <<ERR,                            '    right diagnostic' );
 #          \$got->{that}{foo} = Does not exist
 #     \$expected->{that}{foo} = '42'
 ERR
+
+
+#line 221
+my @tests = ([],
+             [qw(42)],
+             [qw(42 23), qw(42 23)]
+            );
+
+foreach my $test (@tests) {
+    my $num_args = @$test;
+
+    my $warning;
+    local $SIG{__WARN__} = sub { $warning .= join '', @_; };
+    is_deeply(@$test);
+
+    like \$warning, 
+         qr/^is_deeply\(\) takes two or three args, you gave $num_args\.\n/;
+}

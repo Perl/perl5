@@ -18,7 +18,7 @@ sub _carp {
 
 require Exporter;
 use vars qw($VERSION @ISA @EXPORT %EXPORT_TAGS $TODO);
-$VERSION = '0.47';
+$VERSION = '0.50';
 @ISA    = qw(Exporter);
 @EXPORT = qw(ok use_ok require_ok
              is isnt like unlike is_deeply
@@ -33,6 +33,7 @@ $VERSION = '0.47';
             );
 
 my $Test = Test::Builder->new;
+my $Show_Diag = 1;
 
 
 # 5.004's Exporter doesn't have export_to_level.
@@ -138,6 +139,9 @@ have no plan.  (Try to avoid using this as it weakens your test.)
 
   use Test::More qw(no_plan);
 
+B<NOTE>: using no_plan requires a Test::Harness upgrade else it will
+think everything has failed.  See L<BUGS and CAVEATS>)
+
 In some cases, you'll want to completely skip an entire testing script.
 
   use Test::More skip_all => $skip_reason;
@@ -177,16 +181,25 @@ sub plan {
 
     $Test->exported_to($caller);
 
+    my @cleaned_plan;
     my @imports = ();
-    foreach my $idx (0..$#plan) {
+    my $idx = 0;
+    while( $idx <= $#plan ) {
         if( $plan[$idx] eq 'import' ) {
-            my($tag, $imports) = splice @plan, $idx, 2;
-            @imports = @$imports;
-            last;
+            @imports = @{$plan[$idx+1]};
+            $idx += 2;
+        }
+        elsif( $plan[$idx] eq 'no_diag' ) {
+            $Show_Diag = 0;
+            $idx++;
+        }
+        else {
+            push @cleaned_plan, $plan[$idx];
+            $idx++;
         }
     }
 
-    $Test->plan(@plan);
+    $Test->plan(@cleaned_plan);
 
     __PACKAGE__->_export_to_level(1, __PACKAGE__, @imports);
 }
@@ -314,14 +327,14 @@ You are encouraged to use is() and isnt() over ok() where possible,
 however do not be tempted to use them to find out if something is
 true or false!
 
-  # XXX BAD!  $pope->isa('Catholic') eq 1
-  is( $pope->isa('Catholic'), 1,        'Is the Pope Catholic?' );
+  # XXX BAD!
+  is( exists $brooklyn{tree}, 1, 'A tree grows in Brooklyn' );
 
-This does not check if C<$pope->isa('Catholic')> is true, it checks if
+This does not check if C<exists $brooklyn{tree}> is true, it checks if
 it returns 1.  Very different.  Similar caveats exist for false and 0.
 In these cases, use ok().
 
-  ok( $pope->isa('Catholic') ),         'Is the Pope Catholic?' );
+  ok( exists $brooklyn{tree},    'A tree grows in Brooklyn' );
 
 For those grammatical pedants out there, there's an C<isn't()>
 function which is an alias of isnt().
@@ -383,7 +396,7 @@ given pattern.
 
 =cut
 
-sub unlike {
+sub unlike ($$;$) {
     $Test->unlike(@_);
 }
 
@@ -402,7 +415,7 @@ compare two arguments using any binary perl operator.
     cmp_ok( $this, '==', $that, 'this == that' );
 
     # ok( $this && $that );
-    cmp_ok( $this, '&&', $that, 'this || that' );
+    cmp_ok( $this, '&&', $that, 'this && that' );
     ...etc...
 
 Its advantage over ok() is when the test fails you'll know what $this
@@ -488,7 +501,7 @@ sub can_ok ($@) {
   isa_ok($object, $class, $object_name);
   isa_ok($ref,    $type,  $ref_name);
 
-Checks to see if the given $object->isa($class).  Also checks to make
+Checks to see if the given C<< $object->isa($class) >>.  Also checks to make
 sure the object was defined in the first place.  Handy for this sort
 of thing:
 
@@ -619,6 +632,12 @@ which would produce:
 You might remember C<ok() or diag()> with the mnemonic C<open() or
 die()>.
 
+All diag()s can be made silent by passing the "no_diag" option to
+Test::More.  C<use Test::More tests => 1, 'no_diag'>.  This is useful
+if you have diagnostics for personal testing but then wish to make
+them silent for release without commenting out each individual
+statement.
+
 B<NOTE> The exact formatting of the diagnostic output is still
 changing, but it is guaranteed that whatever you throw at it it won't
 interfere with the test.
@@ -626,6 +645,7 @@ interfere with the test.
 =cut
 
 sub diag {
+    return unless $Show_Diag;
     $Test->diag(@_);
 }
 
@@ -658,7 +678,12 @@ is like doing this:
 
    use Some::Module qw(foo bar);
 
-don't try to do this:
+Version numbers can be checked like so:
+
+   # Just like "use Some::Module 1.02"
+   BEGIN { use_ok('Some::Module', 1.02) }
+
+Don't try to do this:
 
    BEGIN {
        use_ok('Some::Module');
@@ -667,7 +692,7 @@ don't try to do this:
        ...happening at compile time...
    }
 
-instead, you want:
+because the notion of "compile-time" is relative.  Instead, you want:
 
   BEGIN { use_ok('Some::Module') }
   BEGIN { ...some code that depends on the use... }
@@ -679,19 +704,31 @@ sub use_ok ($;@) {
     my($module, @imports) = @_;
     @imports = () unless @imports;
 
-    my $pack = caller;
+    my($pack,$filename,$line) = caller;
 
     local($@,$!);   # eval sometimes interferes with $!
-    eval <<USE;
+
+    if( @imports == 1 and $imports[0] =~ /^\d+(?:\.\d+)?$/ ) {
+        # probably a version check.  Perl needs to see the bare number
+        # for it to work with non-Exporter based modules.
+        eval <<USE;
 package $pack;
-require $module;
-'$module'->import(\@imports);
+use $module $imports[0];
 USE
+    }
+    else {
+        eval <<USE;
+package $pack;
+use $module \@imports;
+USE
+    }
 
     my $ok = $Test->ok( !$@, "use $module;" );
 
     unless( $ok ) {
         chomp $@;
+        $@ =~ s{^BEGIN failed--compilation aborted at .*$}
+                {BEGIN failed--compilation aborted at $filename line $line.}m;
         $Test->diag(<<DIAGNOSTIC);
     Tried to use '$module'.
     Error:  $@
@@ -851,6 +888,9 @@ and you'll know immediately when they're fixed.
 Once a todo test starts succeeding, simply move it outside the block.
 When the block is empty, delete it.
 
+B<NOTE>: TODO tests require a Test::Harness upgrade else it will
+treat it as a normal failure.  See L<BUGS and CAVEATS>)
+
 
 =item B<todo_skip>
 
@@ -924,16 +964,25 @@ references, it does a deep comparison walking each data structure to
 see if they are equivalent.  If the two structures are different, it
 will display the place where they start differing.
 
-Barrie Slaymaker's Test::Differences module provides more in-depth
-functionality along these lines, and it plays well with Test::More.
-
-B<NOTE> Display of scalar refs is not quite 100%
+Test::Differences and Test::Deep provide more in-depth functionality
+along these lines.
 
 =cut
 
 use vars qw(@Data_Stack);
 my $DNE = bless [], 'Does::Not::Exist';
 sub is_deeply {
+    unless( @_ == 2 or @_ == 3 ) {
+        my $msg = <<WARNING;
+is_deeply() takes two or three args, you gave %d.
+This usually means you passed an array or hash instead 
+of a reference to it
+WARNING
+        chop $msg;   # clip off newline so carp() will put in line/file
+
+        _carp sprintf $msg, scalar @_;
+    }
+
     my($this, $that, $name) = @_;
 
     my $ok;
@@ -1117,7 +1166,7 @@ While the order of elements does not matter, duplicate elements do.
 # We must make sure that references are treated neutrally.  It really
 # doesn't matter how we sort them, as long as both arrays are sorted
 # with the same algorithm.
-sub _bogus_sort { local $^W = 0;  ref $a ? 0 : $a cmp $b }
+sub _bogus_sort { local $^W = 0;  ref $a ? -1 : ref $b ? 1 : $a cmp $b }
 
 sub eq_set  {
     my($a1, $a2) = @_;
@@ -1159,15 +1208,45 @@ sub builder {
 =back
 
 
+=head1 EXIT CODES
+
+If all your tests passed, Test::Builder will exit with zero (which is
+normal).  If anything failed it will exit with how many failed.  If
+you run less (or more) tests than you planned, the missing (or extras)
+will be considered failures.  If no tests were ever run Test::Builder
+will throw a warning and exit with 255.  If the test died, even after
+having successfully completed all its tests, it will still be
+considered a failure and will exit with 255.
+
+So the exit codes are...
+
+    0                   all tests successful
+    255                 test died
+    any other number    how many failed (including missing or extras)
+
+If you fail more than 254 tests, it will be reported as 254.
+
+
 =head1 NOTES
 
 Test::More is B<explicitly> tested all the way back to perl 5.004.
 
-Test::More is thread-safe for perl 5.8.0 and up.
-
 =head1 BUGS and CAVEATS
 
 =over 4
+
+=item Threads
+
+Test::More will only be aware of threads if "use threads" has been done
+I<before> Test::More is loaded.  This is ok:
+
+    use threads;
+    use Test::More;
+
+This may cause problems:
+
+    use Test::More
+    use threads;
 
 =item Making your own ok()
 
@@ -1176,7 +1255,7 @@ instead.
 
 =item The eq_* family has some caveats.
 
-=item Test::Harness upgrades
+=item Test::Harness upgrade
 
 no_plan and todo depend on new Test::Harness features and fixes.  If
 you're going to distribute tests that use no_plan or todo your
@@ -1184,8 +1263,7 @@ end-users will have to upgrade Test::Harness to the latest one on
 CPAN.  If you avoid no_plan and TODO tests, the stock Test::Harness
 will work fine.
 
-If you simply depend on Test::More, it's own dependencies will cause a
-Test::Harness upgrade.
+Installing Test::More should also upgrade Test::Harness.
 
 =back
 
@@ -1211,32 +1289,36 @@ L<Test::Simple> if all this confuses you and you just want to write
 some tests.  You can upgrade to Test::More later (it's forward
 compatible).
 
-L<Test::Differences> for more ways to test complex data structures.
-And it plays well with Test::More.
-
 L<Test> is the old testing module.  Its main benefit is that it has
 been distributed with Perl since 5.004_05.
 
 L<Test::Harness> for details on how your test results are interpreted
 by Perl.
 
-L<Test::Unit> describes a very featureful unit testing interface.
+L<Test::Differences> for more ways to test complex data structures.
+And it plays well with Test::More.
+
+L<Test::Class> is like XUnit but more perlish.
+
+L<Test::Deep> gives you more powerful complex data structure testing.
+
+L<Test::Unit> is XUnit style testing.
 
 L<Test::Inline> shows the idea of embedded testing.
 
-L<SelfTest> is another approach to embedded testing.
+L<Bundle::Test> installs a whole bunch of useful test modules.
 
 
 =head1 AUTHORS
 
 Michael G Schwern E<lt>schwern@pobox.comE<gt> with much inspiration
 from Joshua Pritikin's Test module and lots of help from Barrie
-Slaymaker, Tony Bowden, chromatic and the perl-qa gang.
+Slaymaker, Tony Bowden, blackstar.co.uk, chromatic and the perl-qa gang.
 
 
 =head1 COPYRIGHT
 
-Copyright 2001 by Michael G Schwern E<lt>schwern@pobox.comE<gt>.
+Copyright 2001, 2002 by Michael G Schwern E<lt>schwern@pobox.comE<gt>.
 
 This program is free software; you can redistribute it and/or 
 modify it under the same terms as Perl itself.

@@ -7,7 +7,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 41;
+use Test::More tests => 42;
 
 # Make sure we don't mess with $@ or $!.  Test at bottom.
 my $Err   = "this should not be touched";
@@ -32,6 +32,9 @@ like("/usr/local/pr0n/", '/^\/usr\/local/',   'regexes with slashes in like' );
 unlike("fbar", '/^bar/',    'unlike bar');
 unlike("FooBle", '/foo/',   'foo is unlike FooBle');
 unlike("/var/local/pr0n/", '/^\/usr\/local/','regexes with slashes in unlike' );
+
+my @foo = qw(foo bar baz);
+unlike(@foo, '/foo/');
 
 can_ok('Test::More', qw(require_ok use_ok ok is isnt like skip can_ok
                         pass fail eq_array eq_hash eq_set));

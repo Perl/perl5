@@ -2,7 +2,7 @@
 # of high enough version.
 BEGIN { 
     if( $] < 5.005 ) {
-        print "1..0\n";
+        print "1..0 # Skipped Test requires qr//\n";
         exit(0);
     }
 }
@@ -24,6 +24,7 @@ use strict;
 
 require Test::Simple::Catch;
 my($out, $err) = Test::Simple::Catch::caught();
+local $ENV{HARNESS_ACTIVE} = 0;
 
 
 # Can't use Test.pm, that's a 5.005 thing.
@@ -63,7 +64,7 @@ OUT
 #     Failed test \\(.*\\)
 #                   'foo'
 #     doesn't match '\\(\\?-xism:that\\)'
-# Looks like you failed 1 tests of 1\\.
+# Looks like you failed 1 test of 1\\.
 ERR
 
 
