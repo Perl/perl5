@@ -777,7 +777,7 @@ U32 addflag;
 						   long enough. */
 			    a--;
 			}
-			while (nargs-- >= 0)
+			while (--nargs >= 0)
 			    PL_Argv[nargs] = argsp[nargs];
 			/* Enable pathless exec if #! (as pdksh). */
 			pass = (buf[0] == '#' ? 2 : 3);
