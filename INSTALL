@@ -666,7 +666,7 @@ a glossary of all those config.sh variables, is in the Porting
 subdirectory.
 
 Ports for other systems may also be available.  You should check out
-L<"http:/www.perl.com/CPAN/ports"> for current information on ports to
+L<"http://www.perl.com/CPAN/ports"> for current information on ports to
 various other operating systems.
 
 =back
