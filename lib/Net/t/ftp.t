@@ -5,6 +5,9 @@ BEGIN {
 	chdir 't' if -d 't';
 	@INC = '../lib';
     }
+    if (!eval "require Socket") {
+	print "1..0 # no Socket\n"; exit 0;
+    }
     if (ord('A') == 193 && !eval "require Convert::EBCDIC") {
         print "1..0 # EBCDIC but no Convert::EBCDIC\n"; exit 0;
     }
