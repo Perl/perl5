@@ -569,7 +569,7 @@ the same character fore and aft, but the 4 sorts of brackets
 
 Note that there can be whitespace between the operator and the quoting
 characters, except when C<#> is being used as the quoting character.
-C<q#foo#> is parsed as being the string C<foo>, which C<q #foo#> is the
+C<q#foo#> is parsed as being the string C<foo>, while C<q #foo#> is the
 operator C<q> followed by a comment. Its argument will be taken from the
 next line. This allows you to write:
 
@@ -670,7 +670,7 @@ C</o> constitutes a promise that you won't change the variables in the pattern.
 If you change them, Perl won't even notice.
 
 If the PATTERN evaluates to a null string, the last
-successfully executed regular expression is used instead.
+successfully matched regular expression is used instead.
 
 If used in a context that requires a list value, a pattern match returns a
 list consisting of the subexpressions matched by the parentheses in the

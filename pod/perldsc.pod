@@ -305,7 +305,7 @@ debugger includes several new features, including command line editing as
 well as the C<x> command to dump out complex data structures.  For
 example, given the assignment to $LoL above, here's the debugger output:
 
-    DB<1> X $LoL
+    DB<1> x $LoL
     $LoL = ARRAY(0x13b5a0)
        0  ARRAY(0x1f0a24)
 	  0  'fred'
@@ -323,8 +323,6 @@ example, given the assignment to $LoL above, here's the debugger output:
 	  1  'jane'
 	  2  'elroy'
 	  3  'judy'
-
-There's also a lowercase B<x> command which is nearly the same.
 
 =head1 CODE EXAMPLES
 

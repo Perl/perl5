@@ -1186,6 +1186,12 @@ that doesn't implement flock(2), fcntl(2) locking, or lockf(3).  flock()
 is Perl's portable file locking interface, although it locks only entire
 files, not records.
 
+On many platforms (including most versions or clones of Unix), locks
+established by flock() are B<merely advisory>.  This means that files
+locked with flock() may be modified by programs which do not also use
+flock().  Windows NT and OS/2, however, are among the platforms which
+supply mandatory locking.  See your local documentation for details.
+
 OPERATION is one of LOCK_SH, LOCK_EX, or LOCK_UN, possibly combined with
 LOCK_NB.  These constants are traditionally valued 1, 2, 8 and 4, but
 you can use the symbolic names if import them from the Fcntl module,
@@ -1815,10 +1821,18 @@ In a scalar context, returns the ctime(3) value:
 
     $now_string = localtime;  # e.g., "Thu Oct 13 04:54:34 1994"
 
-This scalar value is B<not> locale dependent, see L<perllocale>,
-but instead a Perl builtin.
-Also see the Time::Local module, and the strftime(3) and mktime(3)
-function available via the POSIX module.
+This scalar value is B<not> locale dependent, see L<perllocale>, but
+instead a Perl builtin.  Also see the Time::Local module, and the
+strftime(3) and mktime(3) function available via the POSIX module.  To
+get somewhat similar but locale dependent date strings, set up your
+locale environment variables appropriately (please see L<perllocale>)
+and try for example
+
+	use POSIX qw(strftime)
+	$now_string = strftime "%a %b %e %H:%M:%S %Y", localtime;
+
+Note that the C<%a> and C<%b>, the short forms of the day of the week
+and the month of the year, may not necessarily be three characters wide.
 
 =item log EXPR
 
@@ -2363,7 +2377,8 @@ you will have to use a block returning its value instead:
 
 =item printf FORMAT, LIST
 
-Equivalent to C<print FILEHANDLE sprintf(FORMAT, LIST)>.  The first argument
+Equivalent to C<print FILEHANDLE sprintf(FORMAT, LIST)>, except that $\
+(the output record separator) is not appended.  The first argument
 of the list will be interpreted as the printf format.  If C<use locale> is
 in effect, the character used for the decimal point in formatted real numbers
 is affected by the LC_NUMERIC locale.  See L<perllocale>.
@@ -2494,7 +2509,7 @@ operator is discussed in more detail in L<perlop/"I/O Operators">.
 
 Receives a message on a socket.  Attempts to receive LENGTH bytes of
 data into variable SCALAR from the specified SOCKET filehandle.
-Actually does a C recvfrom(), so that it can returns the address of the
+Actually does a C recvfrom(), so that it can return the address of the
 sender.  Returns the undefined value if there's an error.  SCALAR will
 be grown or shrunk to the length actually read.  Takes the same flags
 as the system call of the same name.
@@ -3258,7 +3273,7 @@ and the conversion letter:
    +       prefix positive number with a plus sign
    -       left-justify within the field
    0       use zeros, not spaces, to right-justify
-   #       prefix octal with "0", hex with "0x"
+   #       prefix non-zero octal with "0", non-zero hex with "0x"
    number  minimum field width
    .number "precision": digits after decimal point for floating-point,
            max length for string, minimum length for integer
@@ -3484,13 +3499,17 @@ unimplemented, produces a fatal error.  The arguments are interpreted
 as follows: if a given argument is numeric, the argument is passed as
 an int.  If not, the pointer to the string value is passed.  You are
 responsible to make sure a string is pre-extended long enough to
-receive any result that might be written into a string.  If your
+receive any result that might be written into a string.  You can't use a
+string literal (or other read-only string) as an argument to syscall()
+because Perl has to assume that any string pointer might be written
+through.  If your
 integer arguments are not literals and have never been interpreted in a
 numeric context, you may need to add 0 to them to force them to look
 like numbers.
 
     require 'syscall.ph';		# may need to run h2ph
-    syscall(&SYS_write, fileno(STDOUT), "hi there\n", 9);
+    $s = "hi there\n";
+    syscall(&SYS_write, fileno(STDOUT), $s, length $s);
 
 Note that Perl supports passing of up to only 14 arguments to your system call,
 which in practice should usually suffice.
@@ -3739,7 +3758,8 @@ The transliteration operator.  Same as y///. See L<perlop>.
 
 Truncates the file opened on FILEHANDLE, or named by EXPR, to the
 specified length.  Produces a fatal error if truncate isn't implemented
-on your system.
+on your system.  Returns TRUE if successful, the undefined value
+otherwise.
 
 =item uc EXPR
 
@@ -3936,7 +3956,8 @@ Changes the access and modification times on each file of a list of
 files.  The first two elements of the list must be the NUMERICAL access
 and modification times, in that order.  Returns the number of files
 successfully changed.  The inode modification time of each file is set
-to the current time.  Example of a "touch" command:
+to the current time.  This code has the same effect as the "touch"
+command if the files already exist:
 
     #!/usr/bin/perl
     $now = time;
