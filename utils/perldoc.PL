@@ -195,7 +195,11 @@ sub minus_f_nocase {
  		
  		if($recurse) {
 			opendir(D,$dir);
-			my(@newdirs) = grep(-d,map("$dir/$_",grep(!/^\.\.?$/,readdir(D))));
+            my @newdirs = map "$dir/$_", grep {
+                not /^\.\.?$/ and
+                not /^auto$/ and   # save time! don't search auto dirs
+                -d "$dir/$_"
+            } readdir D;
 			closedir(D);
 			@newdirs = map((s/.dir$//,$_)[1],@newdirs) if $Is_VMS;
 			next unless @newdirs;
