@@ -145,7 +145,7 @@ is returned.  One effect of these rules is that C<-bareword> is equivalent
 to C<"-bareword">.
 
 Unary "~" performs bitwise negation, i.e., 1's complement.
-(See also L<Integer Arithmetic>.)
+(See also L<Integer Arithmetic> and L<Bitwise String Operators>.)
 
 Unary "+" has no effect whatsoever, even on strings.  It is useful
 syntactically for separating a function name from a parenthesized expression
@@ -300,15 +300,15 @@ by the current locale if C<use locale> is in effect.  See L<perllocale>.
 =head2 Bitwise And
 
 Binary "&" returns its operators ANDed together bit by bit.
-(See also L<Integer Arithmetic>.)
+(See also L<Integer Arithmetic> and L<Bitwise String Operators>.)
 
 =head2 Bitwise Or and Exclusive Or
 
 Binary "|" returns its operators ORed together bit by bit.
-(See also L<Integer Arithmetic>.)
+(See also L<Integer Arithmetic> and L<Bitwise String Operators>.)
 
 Binary "^" returns its operators XORed together bit by bit.
-(See also L<Integer Arithmetic>.)
+(See also L<Integer Arithmetic> and L<Bitwise String Operators>.)
 
 =head2 C-style Logical And
 
@@ -1213,6 +1213,34 @@ the compiler will precompute the number that
 expression represents so that the interpreter
 won't have to.
 
+=head2 Bitwise String Operators
+
+Bitstrings of any size may be manipulated by the bitwise operators
+(C<~ | & ^>).
+
+If the operands to a binary bitwise op are strings of different sizes,
+B<or> and B<xor> ops will act as if the shorter operand had additional
+zero bits on the right, while the B<and> op will act as if the longer
+operand were truncated to the length of the shorter.
+
+    # ASCII-based examples 
+    print "j p \n" ^ " a h";        	# prints "JAPH\n"
+    print "JA" | "  ph\n";          	# prints "japh\n"
+    print "japh\nJunk" & '_____';   	# prints "JAPH\n";
+    print 'p N$' ^ " E<H\n";		# prints "Perl\n";
+
+If you are intending to manipulate bitstrings, you should be certain that
+you're supplying bitstrings: If an operand is a number, that will imply
+a B<numeric> bitwise operation. You may explicitly show which type of
+operation you intend by using C<""> or C<0+>, as in the examples below.
+
+    $foo =  150  |  105 ;	# yields 255  (0x96 | 0x69 is 0xFF)
+    $foo = '150' |  105 ;	# yields 255
+    $foo =  150  | '105';	# yields 255
+    $foo = '150' | '105';	# yields string '155' (under ASCII)
+
+    $baz = 0+$foo & 0+$bar;	# both ops explicitly numeric
+    $biz = "$foo" ^ "$bar";	# both ops explicitly stringy
 
 =head2 Integer Arithmetic
 
@@ -1230,7 +1258,8 @@ countermand this by saying
 which lasts until the end of that BLOCK.
 
 The bitwise operators ("&", "|", "^", "~", "<<", and ">>") always
-produce integral results.  However, C<use integer> still has meaning
+produce integral results.  (But see also L<Bitwise String Operators>.)
+However, C<use integer> still has meaning
 for them.  By default, their results are interpreted as unsigned
 integers.  However, if C<use integer> is in effect, their results are
 interpreted as signed integers.  For example, C<~0> usually evaluates
