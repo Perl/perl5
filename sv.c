@@ -19,6 +19,7 @@
 #include "EXTERN.h"
 #define PERL_IN_SV_C
 #include "perl.h"
+#include "regcomp.h"
 
 #define FCALL *f
 #define SV_CHECK_THINKFIRST(sv) if (SvTHINKFIRST(sv)) sv_force_normal(sv)
@@ -8339,14 +8340,99 @@ ptr_table_* functions.
 #define SAVEPVN(p,n)	(p ? savepvn(p,n) : Nullch)
  
 
-
-/* duplicate a regexp */
+/* Duplicate a regexp. Required reading: pregcomp() and pregfree() in
+   regcomp.c. AMS 20010712 */
 
 REGEXP *
-Perl_re_dup(pTHX_ REGEXP *r)
+Perl_re_dup(pTHX_ REGEXP *r, clone_params *param)
 {
-    /* XXX fix when pmop->op_pmregexp becomes shared */
-    return ReREFCNT_inc(r);
+    REGEXP *ret;
+    int i, len, npar;
+    struct reg_substr_datum *s;
+
+    if (!r)
+	return (REGEXP *)NULL;
+
+    if ((ret = (REGEXP *)ptr_table_fetch(PL_ptr_table, r)))
+	return ret;
+
+    len = r->offsets[0];
+    npar = r->nparens+1;
+
+    Newc(0, ret, sizeof(regexp) + (len+1)*sizeof(regnode), char, regexp);
+    Copy(r->program, ret->program, len+1, regnode);
+
+    New(0, ret->startp, npar, I32);
+    Copy(r->startp, ret->startp, npar, I32);
+    New(0, ret->endp, npar, I32);
+    Copy(r->startp, ret->startp, npar, I32);
+
+    if (r->regstclass) {
+	New(0, ret->regstclass, 1, regnode);
+	ret->regstclass->flags = r->regstclass->flags;
+    }
+    else
+	ret->regstclass = NULL;
+
+    New(0, ret->substrs, 1, struct reg_substr_data);
+    for (s = ret->substrs->data, i = 0; i < 3; i++, s++) {
+	s->min_offset = r->substrs->data[i].min_offset;
+	s->max_offset = r->substrs->data[i].max_offset;
+	s->substr     = sv_dup_inc(r->substrs->data[i].substr, param);
+    }
+
+    if (r->data) {
+	struct reg_data *d;
+	int count = r->data->count;
+
+	Newc(0, d, sizeof(struct reg_data) + count*sizeof(void *),
+		char, struct reg_data);
+	New(0, d->what, count, U8);
+
+	d->count = count;
+	for (i = 0; i < count; i++) {
+	    d->what[i] = r->data->what[i];
+	    switch (d->what[i]) {
+	    case 's':
+		d->data[i] = sv_dup_inc((SV *)r->data->data[i], param);
+		break;
+	    case 'p':
+		d->data[i] = av_dup_inc((AV *)r->data->data[i], param);
+		break;
+	    case 'f':
+		/* This is cheating. */
+		New(0, d->data[i], 1, struct regnode_charclass_class);
+		StructCopy(r->data->data[i], d->data[i],
+			    struct regnode_charclass_class);
+		break;
+	    case 'o':
+	    case 'n':
+		d->data[i] = r->data->data[i];
+		break;
+	    }
+	}
+
+	ret->data = d;
+    }
+    else
+	ret->data = NULL;
+
+    New(0, ret->offsets, 2*len+1, U32);
+    Copy(r->offsets, ret->offsets, 2*len+1, U32);
+
+    ret->precomp        = SAVEPV(r->precomp);
+    ret->subbeg         = SAVEPV(r->subbeg);
+    ret->sublen         = r->sublen;
+    ret->refcnt         = r->refcnt;
+    ret->minlen         = r->minlen;
+    ret->prelen         = r->prelen;
+    ret->nparens        = r->nparens;
+    ret->lastparen      = r->lastparen;
+    ret->lastcloseparen = r->lastcloseparen;
+    ret->reganch        = r->reganch;
+
+    ptr_table_store(PL_ptr_table, r, ret);
+    return ret;
 }
 
 /* duplicate a file handle */
@@ -8439,7 +8525,7 @@ Perl_mg_dup(pTHX_ MAGIC *mg, clone_params* param)
 	nmg->mg_type	= mg->mg_type;
 	nmg->mg_flags	= mg->mg_flags;
 	if (mg->mg_type == PERL_MAGIC_qr) {
-	    nmg->mg_obj	= (SV*)re_dup((REGEXP*)mg->mg_obj);
+	    nmg->mg_obj	= (SV*)re_dup((REGEXP*)mg->mg_obj, param);
 	}
 	else if(mg->mg_type == PERL_MAGIC_backref) {
 	     AV *av = (AV*) mg->mg_obj;
@@ -9698,18 +9784,17 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_statusvalue_vms	= proto_perl->Istatusvalue_vms;
 #endif
 
-        /* Clone the regex array */
-        PL_regex_padav = newAV();
-        {
-                I32 len = av_len((AV*)proto_perl->Iregex_padav);
-                SV** regexen = AvARRAY((AV*)proto_perl->Iregex_padav);
-                for(i = 0; i <= len; i++) {                             
-                        av_push(PL_regex_padav,
-                            newSViv((IV)re_dup((REGEXP*) SvIV(regexen[i])) ));
-                }
-        }
-        PL_regex_pad = AvARRAY(PL_regex_padav);
-        
+    /* Clone the regex array */
+    PL_regex_padav = newAV();
+    {
+	I32 len = av_len((AV*)proto_perl->Iregex_padav);
+	SV** regexen = AvARRAY((AV*)proto_perl->Iregex_padav);
+	for(i = 0; i <= len; i++) {                             
+	    av_push(PL_regex_padav,
+		    newSViv((IV)re_dup((REGEXP *)SvIV(regexen[i]), param)));
+	}
+    }
+    PL_regex_pad = AvARRAY(PL_regex_padav);
 
     /* shortcuts to various I/O objects */
     PL_stdingv		= gv_dup(proto_perl->Istdingv, param);
