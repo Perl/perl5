@@ -27,6 +27,7 @@ Contents
        DESCRIPTION 
          -  Prerequisites 
          -  Starting Perl programs under AmigaOS
+         -  Shortcomings of Perl under AmigaOS
        INSTALLATION 
        Accessing documentation 
          -  Manpages 
@@ -93,6 +94,24 @@ of your scripts. Then you can invoke your scripts like under UNIX with
 (Note that having *nixish full path to perl F</usr/bin/perl> is not
 necessary, F<perl> would be enough, but having full path would make it
 easier to use your script under *nix.)
+
+=head2 Shortcomings of Perl under AmigaOS
+
+Perl under AmigaOS lacks some features of perl under UNIX because of
+deficiencies in the UNIX-emulation, most notably:
+
+=over 6
+
+=item fork()
+
+=item some features of the UNIX filesystem regarding link count and file dates
+
+=item inplace operation (the -i switch) without backup file
+
+=item umask() works, but the correct permissions are only set when the file is
+      finally close()d
+ 
+=back
 
 =head1 INSTALLATION
 
@@ -199,26 +218,10 @@ Now run
 
   make test
 
-Some tests will fail. Here is which, and why:
+Some tests will be skipped because they need the fork() function:
 
-=over 8
-
-=item F<io/fs.t>, F<op/stat.t>, F<lib/*dbm.t>, F<lib/db-*.t>
-
-Check I<file system> operations. Failures result from the inability to
-emulate some Unixisms with the standard Amiga filesystem.
-
-=item F<io/pipe.t>, F<op/fork.t>, F<lib/filehand.t>, F<lib/open2.t>,
-      F<lib/open3.t>, F<lib/io_pipe.t>, F<lib/io_sock.t>
-
-These tests will be skipped because they use the fork() function, which is not
-supported under AmigaOS.
-
-=item F<op/magic.t>
-
-The ixemul.library doesn't set the expected values for $0 and $^X.
-
-=back
+F<io/pipe.t>, F<op/fork.t>, F<lib/filehand.t>, F<lib/open2.t>, F<lib/open3.t>, 
+F<lib/io_pipe.t>, F<lib/io_sock.t>
 
 =head2 Installing the built perl
 

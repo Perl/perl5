@@ -130,8 +130,8 @@ C<gv_fetchmethod> and C<perl_call_sv>
 
 =item Documentation Changes
 
-L<perldelta>, L<perllocale>, L<perltoot>, L<perlapio>, L<perldebug>,
-L<perlsec>
+L<perlbug>, L<perldelta>, L<perllocale>, L<perltoot>, L<perlapio>,
+L<perldebug>, L<perlsec>
 
 =item New Diagnostics
 
@@ -400,19 +400,20 @@ SOCKET1,SOCKET2,DOMAIN,TYPE,PROTOCOL, sort SUBNAME LIST, sort BLOCK LIST,
 sort LIST, splice ARRAY,OFFSET,LENGTH,LIST, splice ARRAY,OFFSET,LENGTH,
 splice ARRAY,OFFSET, split /PATTERN/,EXPR,LIMIT, split /PATTERN/,EXPR,
 split /PATTERN/, split, sprintf FORMAT, LIST, sqrt EXPR, sqrt, srand EXPR,
-stat FILEHANDLE, stat EXPR, stat, study SCALAR, study, sub BLOCK, sub NAME,
-sub NAME BLOCK, substr EXPR,OFFSET,LEN, substr EXPR,OFFSET, symlink
-OLDFILE,NEWFILE, syscall LIST, sysopen FILEHANDLE,FILENAME,MODE, sysopen
-FILEHANDLE,FILENAME,MODE,PERMS, sysread FILEHANDLE,SCALAR,LENGTH,OFFSET,
-sysread FILEHANDLE,SCALAR,LENGTH, system LIST, syswrite
-FILEHANDLE,SCALAR,LENGTH,OFFSET, syswrite FILEHANDLE,SCALAR,LENGTH, tell
-FILEHANDLE, tell, telldir DIRHANDLE, tie VARIABLE,CLASSNAME,LIST, tied
-VARIABLE, time, times, tr///, truncate FILEHANDLE,LENGTH, truncate
-EXPR,LENGTH, uc EXPR, uc, ucfirst EXPR, ucfirst, umask EXPR, umask, undef
-EXPR, undef, unlink LIST, unlink, unpack TEMPLATE,EXPR, untie VARIABLE,
-unshift ARRAY,LIST, use Module LIST, use Module, use Module VERSION LIST,
-use VERSION, utime LIST, values HASH, vec EXPR,OFFSET,BITS, wait, waitpid
-PID,FLAGS, wantarray, warn LIST, write FILEHANDLE, write EXPR, write, y///
+srand, stat FILEHANDLE, stat EXPR, stat, study SCALAR, study, sub BLOCK,
+sub NAME, sub NAME BLOCK, substr EXPR,OFFSET,LEN, substr EXPR,OFFSET,
+symlink OLDFILE,NEWFILE, syscall LIST, sysopen FILEHANDLE,FILENAME,MODE,
+sysopen FILEHANDLE,FILENAME,MODE,PERMS, sysread
+FILEHANDLE,SCALAR,LENGTH,OFFSET, sysread FILEHANDLE,SCALAR,LENGTH, system
+LIST, syswrite FILEHANDLE,SCALAR,LENGTH,OFFSET, syswrite
+FILEHANDLE,SCALAR,LENGTH, tell FILEHANDLE, tell, telldir DIRHANDLE, tie
+VARIABLE,CLASSNAME,LIST, tied VARIABLE, time, times, tr///, truncate
+FILEHANDLE,LENGTH, truncate EXPR,LENGTH, uc EXPR, uc, ucfirst EXPR,
+ucfirst, umask EXPR, umask, undef EXPR, undef, unlink LIST, unlink, unpack
+TEMPLATE,EXPR, untie VARIABLE, unshift ARRAY,LIST, use Module LIST, use
+Module, use Module VERSION LIST, use VERSION, utime LIST, values HASH, vec
+EXPR,OFFSET,BITS, wait, waitpid PID,FLAGS, wantarray, warn LIST, write
+FILEHANDLE, write EXPR, write, y///
 
 =back
 
@@ -1098,6 +1099,8 @@ Prompt, Multi-line commands, Stack backtrace, Listing, Frame listing
 
 =item Laundering and Detecting Tainted Data
 
+=item Switches On the "#!" Line
+
 =item Cleaning Up Your Path
 
 =item Security Bugs
@@ -1163,7 +1166,8 @@ Regular Expression
 
 =item Subroutine, Signal, Sorting Traps
 
-(Signals), (Sort Subroutine), warn() won't let you specify a filehandle
+Subroutine calls provide lvalue context to arguments, (Signals), (Sort
+Subroutine), warn() won't let you specify a filehandle
 
 =item OS Traps
 

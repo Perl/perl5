@@ -40,7 +40,7 @@ sleep 2;
 if ($Config{dont_use_nlink} || $nlink == 2)
     {print "ok 3\n";} else {print "not ok 3\n";}
 
-if (($mtime && $mtime != $ctime) || $cwd =~ m#/afs/#) {
+if (($mtime && $mtime != $ctime) || $cwd =~ m#/afs/# || $^O eq 'amigaos') {
     print "ok 4\n";
 }
 else {
@@ -123,18 +123,21 @@ else
     {print "not ok 33\n";}
 if (! -b '.') {print "ok 34\n";} else {print "not ok 34\n";}
 
+if ($^O eq 'amigaos') {print "ok 35\n"; goto tty_test;}
+
 $cnt = $uid = 0;
 
 die "Can't run op/stat.t test 35 without pwd working" unless $cwd;
 ($bin) = grep {-d} qw(/bin /usr/bin)
     or print ("not ok 35\n"), goto tty_test;
-chdir $bin || die "Can't cd to $bin: $!";
-while (defined($_ = <*>)) {
+opendir BIN, $bin or die "Can't opendir $bin: $!";
+while (defined($_ = readdir BIN)) {
+    $_ = "$bin/$_";
     $cnt++;
     $uid++ if -u;
     last if $uid && $uid < $cnt;
 }
-chdir $cwd || die "Can't cd back to $cwd";
+closedir BIN;
 
 # I suppose this is going to fail somewhere...
 if ($uid > 0 && $uid < $cnt)

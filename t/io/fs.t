@@ -36,7 +36,8 @@ if (eval {link('b','c')}) {print "ok 3\n";} else {print "not ok 3\n";}
 if ($Config{dont_use_nlink} || $nlink == 3)
     {print "ok 4\n";} else {print "not ok 4\n";}
 
-if (($mode & 0777) == 0666) {print "ok 5\n";} else {print "not ok 5\n";}
+if (($mode & 0777) == 0666 || $^O eq 'amigaos')
+    {print "ok 5\n";} else {print "not ok 5\n";}
 
 if ((chmod 0777,'a') == 1) {print "ok 6\n";} else {print "not ok 6\n";}
 
@@ -70,7 +71,8 @@ if ($foo == 1) {print "ok 16\n";} else {print "not ok 16 $foo\n";}
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
     $blksize,$blocks) = stat('b');
 if ($ino) {print "ok 17\n";} else {print "not ok 17\n";}
-if (($atime == 500000000 && $mtime == 500000001) || $wd =~ m#/afs/#)
+if (($atime == 500000000 && $mtime == 500000001)
+	|| $wd =~ m#/afs/# || $^O eq 'amigaos')
     {print "ok 18\n";}
 else
     {print "not ok 18 $atime $mtime\n";}

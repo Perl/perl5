@@ -90,54 +90,6 @@ if ($d_dosuid) {
     &chmod(04711, "$installbin/sperl$ver$exe_ext");
 }
 
-exit 0 if $versiononly;
-
-# Make links to ordinary names if installbin directory isn't current directory.
-
-if (! &samepath($installbin, '.')) {
-    &safe_unlink("$installbin/perl$exe_ext", "$installbin/suidperl$exe_ext");
-    &link("$installbin/perl$ver$exe_ext", "$installbin/perl$exe_ext");
-    &link("$installbin/sperl$ver$exe_ext", "$installbin/suidperl$exe_ext") 
-      if $d_dosuid;
-}
-
-if (! &samepath($installbin, 'x2p')) {
-    &safe_unlink("$installbin/a2p$exe_ext");
-    &cmd("cp x2p/a2p$exe_ext $installbin/a2p$exe_ext");
-    &chmod(0755, "$installbin/a2p$exe_ext");
-}
-
-# cppstdin is just a script, but it is architecture-dependent, so
-# it can't safely be shared.  Place it in $installbin.
-# Note that Configure doesn't build cppstin if it isn't needed, so
-# we skip this if cppstdin doesn't exist.
-if ((-f cppstdin) && (! &samepath($installbin, '.'))) {
-    &safe_unlink("$installbin/cppstdin");
-    &cmd("cp cppstdin $installbin/cppstdin");
-    &chmod(0755, "$installbin/cppstdin");
-}
-
-# Install scripts.
-
-mkpath($installscript, 1, 0777);
-
-for (@scripts) {
-    &cmd("cp $_ $installscript");
-    s#.*/##; &chmod(0755, "$installscript/$_");
-}
-
-# pstruct should be a link to c2ph
-
-&safe_unlink("$installscript/pstruct");
-&link("$installscript/c2ph","$installscript/pstruct");
-
-# Install pod pages.  Where? I guess in $installprivlib/pod.
-mkpath("${installprivlib}/pod", 1, 0777);
-foreach $file (@pods) {
-    # $file is a name like  pod/perl.pod
-    cp_if_diff($file, "${installprivlib}/${file}");
-}
-
 # Install library files.
 
 $do_installarchlib = $do_installprivlib = 0;
@@ -150,6 +102,7 @@ mkpath($installsitearch, 1, 0777) if ($installsitearch);
 if (chdir "lib") {
     $do_installarchlib = ! &samepath($installarchlib, '.');
     $do_installprivlib = ! &samepath($installprivlib, '.');
+    $do_installprivlib = 0 if $versiononly && !($installprivlib =~ m/\Q$]/);
 
     if ($do_installarchlib || $do_installprivlib) {
 	find(\&installlib, '.');
@@ -179,7 +132,7 @@ foreach $file (@corefiles) {
 
 $mainperl_is_instperl = 0;
 
-if (!$nonono && -t STDIN && -t STDERR
+if (!$versiononly && !$nonono && -t STDIN && -t STDERR
 	&& -w $mainperldir && ! &samepath($mainperldir, $installbin)) {
     local($usrbinperl)	= "$mainperldir/perl$exe_ext";
     local($instperl)	= "$installbin/perl$exe_ext";
@@ -210,32 +163,89 @@ if (!$nonono && -t STDIN && -t STDERR
     }
 }
 
+# Make links to ordinary names if installbin directory isn't current directory.
+
+if (! $versiononly && ! &samepath($installbin, '.')) {
+    &safe_unlink("$installbin/perl$exe_ext", "$installbin/suidperl$exe_ext");
+    &link("$installbin/perl$ver$exe_ext", "$installbin/perl$exe_ext");
+    &link("$installbin/sperl$ver$exe_ext", "$installbin/suidperl$exe_ext") 
+      if $d_dosuid;
+}
+
+if (!$versiononly && ! &samepath($installbin, 'x2p')) {
+    &safe_unlink("$installbin/a2p$exe_ext");
+    &cmd("cp x2p/a2p$exe_ext $installbin/a2p$exe_ext");
+    &chmod(0755, "$installbin/a2p$exe_ext");
+}
+
+# cppstdin is just a script, but it is architecture-dependent, so
+# it can't safely be shared.  Place it in $installbin.
+# Note that Configure doesn't build cppstin if it isn't needed, so
+# we skip this if cppstdin doesn't exist.
+if (! $versiononly && (-f cppstdin) && (! &samepath($installbin, '.'))) {
+    &safe_unlink("$installbin/cppstdin");
+    &cmd("cp cppstdin $installbin/cppstdin");
+    &chmod(0755, "$installbin/cppstdin");
+}
+
+# Install scripts.
+
+mkpath($installscript, 1, 0777);
+
+if (! $versiononly) {
+    for (@scripts) {
+        &cmd("cp $_ $installscript");
+        s#.*/##; &chmod(0755, "$installscript/$_");
+    }
+}
+
+# pstruct should be a link to c2ph
+
+if (! $versiononly) {
+    &safe_unlink("$installscript/pstruct");
+    &link("$installscript/c2ph","$installscript/pstruct");
+}
+
+# Install pod pages.  Where? I guess in $installprivlib/pod.
+
+if (! $versiononly && !($installprivlib =~ m/\Q$]/)) {
+    mkpath("${installprivlib}/pod", 1, 0777);
+    foreach $file (@pods) {
+	# $file is a name like  pod/perl.pod
+	cp_if_diff($file, "${installprivlib}/${file}");
+    }
+}
+
 # Check to make sure there aren't other perls around in installer's
 # path.  This is probably UNIX-specific.  Check all absolute directories
 # in the path except for where public executables are supposed to live.
 # Also skip $mainperl if the user opted to have it be a link to the
 # installed perl.
 
-$dirsep = ($^O eq 'os2') ? ';' : ':' ;
-($path = $ENV{"PATH"}) =~ s:\\:/:g ;
-@path = split(/$dirsep/, $path);
-@otherperls = ();
-for (@path) {
-    next unless m,^/,;
-    next if ($_ eq $binexp);
-    # Use &samepath here because some systems have other dirs linked
-    # to $mainperldir (like SunOS)
-    next if ($mainperl_is_instperl && &samepath($_, $mainperldir));
-    push(@otherperls, "$_/perl$exe_ext")
-      if (-x "$_/perl$exe_ext" && ! -d "$_/perl$exe_ext");
-}
-if (@otherperls) {
-    print STDERR "\nWarning: perl appears in your path in the following " .
-	"locations beyond where\nwe just installed it:\n";
-    for (@otherperls) {
-	print STDERR "    ", $_, "\n";
+if (!$versiononly) {
+
+    $dirsep = ($^O eq 'os2') ? ';' : ':' ;
+    ($path = $ENV{"PATH"}) =~ s:\\:/:g ;
+    @path = split(/$dirsep/, $path);
+    @otherperls = ();
+    for (@path) {
+	next unless m,^/,;
+	# Use &samepath here because some systems have other dirs linked
+	# to $mainperldir (like SunOS)
+	next if &samepath($_, $binexp);
+	next if ($mainperl_is_instperl && &samepath($_, $mainperldir));
+	push(@otherperls, "$_/perl$exe_ext")
+	    if (-x "$_/perl$exe_ext" && ! -d "$_/perl$exe_ext");
     }
-    print STDERR "\n";
+    if (@otherperls) {
+	print STDERR "\nWarning: perl appears in your path in the following " .
+	    "locations beyond where\nwe just installed it:\n";
+	for (@otherperls) {
+	    print STDERR "    ", $_, "\n";
+	}
+	print STDERR "\n";
+    }
+
 }
 
 print STDERR "  Installation complete\n";

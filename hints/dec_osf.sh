@@ -1,9 +1,6 @@
 # hints/dec_osf.sh
 
-#
-# How to make a DEBUGGING VERSION of perl for DECs cc compiler
-#
-#	If you want to debug perl or want to send a
+#	* If you want to debug perl or want to send a
 #	stack trace for inclusion into an bug report, call
 #	Configure with the additional argument  -Doptimize=-g2
 #	or uncomment this assignment to "optimize":
@@ -13,19 +10,19 @@
 #	If you want both to optimise and debug with the DEC cc
 #	you must have -g3, e.g. "-O4 -g3", and (re)run Configure.
 #
-#	Note 1: gcc can always have both -g and optimisation on.
+#	* gcc can always have both -g and optimisation on.
 #
-#	Note 2: debugging optimised code, no matter what compiler
+#	* debugging optimised code, no matter what compiler
 #	one is using, can be surprising and confusing because of
 #	the optimisation tricks like code motion, code removal,
 #	loop unrolling, and inlining. The source code and the
 #	executable code simply do not agree any more while in
 #	mid-execution, the optimiser only cares about the results.
 #
-#	Note 3: Configure will automatically add the often quoted
+#	* Configure will automatically add the often quoted
 #	-DDEBUGGING for you if the -g is specified.
 #
-#	Note 4: There is even more optimisation available in the new
+#	* There is even more optimisation available in the new
 #	(GEM) DEC cc: -O5 and -fast. "man cc" will tell more about them.
 #	The jury is still out whether either or neither help for Perl
 #	and how much. Based on very quick testing, -fast boosts
@@ -34,7 +31,7 @@
 #	hand searching things (index, m//, s///), seems to get slower.
 #	Your mileage will vary.
 #
-#	Note 5: The -std is needed because the following compiled
+#	* The -std is needed because the following compiled
 #	without the -std and linked with -lm
 #
 #	#include <math.h>
@@ -45,6 +42,14 @@
 #	UNIX 4.0{,a} dump core: Floating point exception in the printf(),
 #	the y has become a signaling NaN.
 #
+#	* Compilation warnings like:
+#
+#	"Undefined the ANSI standard macro ..."
+#
+#	can be ignored, at least while compiling the POSIX extension
+#	and especially if using the sfio (the latter is not a standard
+#	part of Perl, never mind if it says little to you).
+#
 
 # If using the DEC compiler we must find out the DEC compiler style:
 # the style changed between Digital UNIX (aka DEC OSF/1) 3 and
@@ -53,8 +58,13 @@
 # and it is called GEM. Many of the options we are going to use depend
 # on the compiler style.
 
-# do NOT, I repeat, *NOT* take away that leading tab
+# do NOT, I repeat, *NOT* take away those leading tabs
+	# reset
+	_DEC_uname_r=
 	_DEC_cc_style=
+	# set
+	_DEC_uname_r=`uname -r`
+	# _DEC_cc_style set soon below
 # Configure Black Magic (TM)
 
 case "$cc" in
@@ -74,6 +84,17 @@ case "$cc" in
 	;;
 esac
 
+# be nauseatingly ANSI
+case "$cc" in
+gcc)	ccflags="$ccflags -ansi"
+	;;
+*)	ccflags="$ccflags -std"
+	;;
+esac
+
+# for gcc the Configure knows about the -fpic:
+# position-independent code for dynamic loading
+
 # we want optimisation
 
 case "$optimize" in
@@ -84,48 +105,60 @@ case "$optimize" in
 		new)	optimize='-O4'			;;
 		old)	optimize='-O2 -Olimit 3200'	;;
 	    	esac
+		ccflags="$ccflags -D_INTRINSICS"
 		;;
 	esac
-	;;
-esac
-
-# all compilers are ANSI
-ccflags="$ccflags -DSTANDARD_C"
-
-# be nauseatingly ANSI
-case "$cc" in
-gcc)	ccflags="$ccflags -ansi"
-	;;
-*)	ccflags="$ccflags -std"
 	;;
 esac
 
 # dlopen() is in libc
 libswanted="`echo $libswanted | sed -e 's/ dl / /'`"
 
-# PW contains nothing useful for perl
+# libPW contains nothing useful for perl
 libswanted="`echo $libswanted | sed -e 's/ PW / /'`"
 
-# bsd contains nothing used by perl that is not already in libc
+# libbsd contains nothing used by perl that is not already in libc
 libswanted="`echo $libswanted | sed -e 's/ bsd / /'`"
 
-# c need not be separately listed
+# libc need not be separately listed
 libswanted="`echo $libswanted | sed -e 's/ c / /'`"
 
-# dbm is already in libc (as is ndbm)
-libswanted="`echo $libswanted | sed -e 's/ dbm / /'`"
+# ndbm is already in libc
+libswanted="`echo $libswanted | sed -e 's/ ndbm / /'`"
 
 # the basic lddlflags used always
 lddlflags='-shared -expect_unresolved "*"'
 
-# Check if it's a CMW version of OSF1,
-# if so, do not hide the symbols.
-test `uname -s` = "MLS+" || lddlflags="$lddlflags -hidden"
+# Fancy compiler suites use optimising linker as well as compiler.
+# <spider@Orb.Nashua.NH.US>
+case "$_DEC_uname_r" in
+*[123].*)	# old loader
+		lddlflags="$lddlflags -O3"
+		;;
+*)		lddlflags="$lddlflags $optimize -msym"
+		# -msym: If using a sufficiently recent /sbin/loader,
+		# keep the module symbols with the modules.
+		;;
+esac
+# Yes, the above loses if gcc does not use the system linker.
+# If that happens, let me know about it. <jhi@iki.fi>
 
-# If debugging (-g) do not strip the objects, otherwise, strip.
+
+# If debugging or (old systems and doing shared)
+# then do not strip the lib, otherwise, strip.
+# As noted above the -DDEBUGGING is added automagically by Configure if -g.
 case "$optimize" in
 	*-g*) ;; # left intentionally blank
+*)	case "$_DEC_uname_r" in
+	*[123].*)
+		case "$useshrplib" in
+		false|undef|'')	lddlflags="$lddlflags -s"	;;
+		esac
+		;;
         *) lddlflags="$lddlflags -s"
+	        ;;
+    	esac
+    	;;
 esac
 
 #
@@ -133,9 +166,36 @@ esac
 #
 
 unset _DEC_cc_style
+unset _DEC_uname_r
     
 #
 # History:
+#
+# perl5.003_28:
+#
+#       22-Feb-1997 Jarkko Hietaniemi <jhi@iki.fi>
+#
+#	* Restructuring Spider's suggestions.
+#
+#	* Older Digital UNIXes cannot handle -Olimit ... for $lddlflags.
+#	
+#	* ld -s cannot be used in older Digital UNIXes when doing shared.
+#
+#
+#       21-Feb-1997 Spider Boardman <spider@Orb.Nashua.NH.US>
+#
+#	* -hidden removed.
+#	
+#	* -DSTANDARD_C removed.
+#
+#	* -D_INTRINSICS added. (that -fast does not seem to buy much confirmed)
+#
+#	* odbm not in libc, only ndbm. Therefore dbm back to $libswanted.
+#
+#	* -msym for the newer runtime loaders.
+#
+#	* $optimize also in $lddflags.
+#
 #
 # perl5.003_27:
 #

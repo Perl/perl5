@@ -4718,7 +4718,7 @@ if "$useshrplib"; then
 	freebsd)
 		xxx="-Wl,-R$shrpdir"
 		;;
-	linux|irix*)
+	linux|irix*|dec_osf)
 		xxx="-Wl,-rpath,$shrpdir"
 		;;
 	*)
@@ -4727,14 +4727,20 @@ if "$useshrplib"; then
 	esac
 	case "$xxx" in
 	'') ;;
-	*)	ccdlflags="$ccdlflags $xxx"
-		cat <<EOM >&4
+	*)	
+		# Only add $xxx if it isn't already in ccdlflags.
+		case " $ccdlflags " in
+		*" $xxx "*)	;;
+		*)	ccdlflags="$ccdlflags $xxx"
+			cat <<EOM >&4
 
 Adding $xxx to the flags
 passed to $ld so that the perl executable will find the 
 installed shared $libperl.
 
 EOM
+			;;
+		esac
 		;;
 	esac
 fi
@@ -8569,7 +8575,7 @@ main()
 	printf("%d\n",i);
 }
 EOCP
-	if $cc try.c -o try >/dev/null 2>&1 ; then
+	if $cc $ccflags $ldflags -o try try.c $libs >/dev/null 2>&1 ; then
 		dflt=`try`
 	else
 		dflt='?'
@@ -8583,7 +8589,7 @@ esac
 rp='How many bits does your rand() function produce?'
 . ./myread
 randbits="$ans"
-$rm -f try.c try
+$rm -f try.c try.o try
 
 : see if ar generates random libraries by itself
 echo " "

@@ -1,7 +1,5 @@
 #!./perl
 
-# $RCSfile: magic.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:05 $
-
 BEGIN {
     $^W = 1;
     $| = 1;
@@ -97,7 +95,7 @@ ok 17, $@ eq "foo\n", $@;
 ok 18, $$ > 0, $$;
 
 # $^X and $0
-if ($^O eq 'qnx') {
+if ($^O eq 'qnx' || $^O eq 'amigaos') {
     chomp($wd = `pwd`);
 }
 else {
@@ -118,6 +116,7 @@ EOF
 ok 21, close(SCRIPT), $!;
 ok 22, chmod(0755, $script), $!;
 $_ = `$script`;
+s{\bminiperl\b}{perl}; # so that test doesn't fail with miniperl
 s{is perl}{is $wd/perl}; # for systems where $^X is only a basename
 ok 23, $_ eq $s2, ":$_:!=:$s2:";
 $_ = `$wd/perl $script`;
