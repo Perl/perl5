@@ -4341,7 +4341,7 @@ $rm -f try try.* core
 compile='
 mc_file=$1;
 shift;
-$cc $optimize $ccflags $ldflags -o ${mc_file}$_exe $* ${mc_file}.c $libs > /dev/null 2>&1;'
+$cc $optimize $ccflags $ldflags -o ${mc_file} $* ${mc_file}.c $libs > /dev/null 2>&1;'
 
 echo " "
 echo "Checking for GNU C Library..." >&4
@@ -5137,7 +5137,9 @@ EOM
 		next4*)	xxx='DYLD_LIBRARY_PATH' ;;
 		*)		xxx='LD_LIBRARY_PATH' ;;
 		esac
-		$cat <<EOM  | $tee -a ../config.msg >&4
+		case "$osname" in
+		    os2) ;;
+		    *) $cat <<EOM  | $tee -a ../config.msg >&4
 
 To build perl, you must add the current working directory to your
 $xxx environment variable before running make.  You can do
@@ -5148,6 +5150,7 @@ for Bourne-style shells, or
 for Csh-style shells.  You *MUST* do this before running make.
 
 EOM
+		esac
 		;;
 	*)	useshrplib='false' ;;
 	esac
@@ -8006,7 +8009,7 @@ else
 		echo "You don't have Berkeley networking in libc$_a..." >&4
 		if test -f /usr/lib/libnet$_a; then
 			( (nm $nm_opt /usr/lib/libnet$_a | eval $nm_extract) ||  \
-			ar t /usr/lib/libnet$_a) 2>/dev/null >> libc.list
+			$ar t /usr/lib/libnet$_a) 2>/dev/null >> libc.list
 			if $contains socket libc.list >/dev/null 2>&1; then
 			echo "...but the Wollongong group seems to have hacked it in." >&4
 				socketlib="-lnet"
