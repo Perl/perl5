@@ -1054,7 +1054,7 @@ Equivalent examples:
     die "Can't cd to spool: $!\n" unless chdir '/usr/spool/news';
     chdir '/usr/spool/news' or die "Can't cd to spool: $!\n"
 
-If the last value of LIST does not end in a newline, the current
+If the last element of LIST does not end in a newline, the current
 script line number and input line number (if any) are also printed,
 and a newline is supplied.  Note that the "input line number" (also
 known as "chunk") is subject to whatever notion of "line" happens to
