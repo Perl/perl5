@@ -29,10 +29,13 @@ xsfiles="`find . -name '*.xs' -print | sort`"
 ## IEXT char *     Isplitstr IINIT(" ");
 ## dEXTCONST char rcsid[] = "perl.c\nPatch level: ###\n";
 ## PP(pp_const)
+## PERLVARI(Grsfp, PerlIO *, Nullfp)
+## PERLVAR(cvcache,      HV *)
 
 set x	-d -l c \
 	-r '/[dI]?EXT\(CONST\)?[ \t*]+\([a-zA-Z_0-9]+[ \t*]+\)*\([a-zA-Z_0-9]+\)[ \t]*\($\|;\|\[\|[ \t]I+NIT[ \t]*(\|\/\*\)/\3/' \
 	-r '/IEXT[ \t][^\/]*[ \t*]I\([a-zA-Z_][a-zA-Z_0-9]*\)[\[; \t]/\1/'  \
+	-r '/PERLVAR[a-zA-Z_0-9]*[ \t]*([ \t]*[GIT]?\([a-zA-Z_][a-zA-Z_0-9]*\)[ \t]*,/\1/'  \
 	-r '/PP[ \t]*([ \t]*\([^ \t()]*\)[ \t]*)/\1/'
 
 shift
