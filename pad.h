@@ -249,7 +249,7 @@ Clone the state variables associated with running and compiling pads.
  * sub's CV or padlist. */
 
 #define PAD_CLONE_VARS(proto_perl, param)				\
-    PL_comppad = ptr_table_fetch(PL_ptr_table, proto_perl->Icomppad);	\
+    PL_comppad = ptr_table_fetch(PL_ptr_table, proto_perl->Tcomppad);	\
     PL_curpad = PL_comppad ?  AvARRAY(PL_comppad) : Null(SV**);		\
     PL_comppad_name		= av_dup(proto_perl->Icomppad_name, param); \
     PL_comppad_name_fill	= proto_perl->Icomppad_name_fill;	\
