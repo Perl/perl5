@@ -3941,12 +3941,16 @@ the name of (or a reference to) the actual subroutine to use.  In place
 of a SUBNAME, you can provide a BLOCK as an anonymous, in-line sort
 subroutine.
 
-In the interests of efficiency the normal calling code for subroutines is
-bypassed, with the following effects: the subroutine may not be a
-recursive subroutine, and the two elements to be compared are passed into
-the subroutine not via C<@_> but as the package global variables $a and
-$b (see example below).  They are passed by reference, so don't
-modify $a and $b.  And don't try to declare them as lexicals either.
+If the subroutine's prototype is C<($$)>, the elements to be compared
+are passed by reference in C<@_>, as for a normal subroutine.  If not,
+the normal calling code for subroutines is bypassed in the interests of
+efficiency, and the elements to be compared are passed into the subroutine
+as the package global variables $a and $b (see example below).  Note that
+in the latter case, it is usually counter-productive to declare $a and
+$b as lexicals.
+
+In either case, the subroutine may not be recursive.  The values to be
+compared are always passed by reference, so don't modify them.
 
 You also cannot exit out of the sort block or subroutine using any of the
 loop control operators described in L<perlsyn> or with C<goto>.
@@ -4026,6 +4030,14 @@ Examples:
                            ||
                   $a->[2] cmp $b->[2]
            } map { [$_, /=(\d+)/, uc($_)] } @old;
+    
+    # using a prototype allows you to use any comparison subroutine
+    # as a sort subroutine (including other package's subroutines)
+    package other;
+    sub backwards ($$) { $_[1] cmp $_[0]; }	# $a and $b are not set here
+
+    package main;
+    @new = sort other::backwards @old;
 
 If you're using strict, you I<must not> declare $a
 and $b as lexicals.  They are package globals.  That means

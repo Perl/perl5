@@ -27,6 +27,8 @@
 #define DOCATCH(o) ((CATCH_GET == TRUE) ? docatch(o) : (o))
 
 static I32 sortcv(pTHXo_ SV *a, SV *b);
+static I32 sortcv_stacked(pTHXo_ SV *a, SV *b);
+static I32 sortcv_xsub(pTHXo_ SV *a, SV *b);
 static I32 sv_ncmp(pTHXo_ SV *a, SV *b);
 static I32 sv_i_ncmp(pTHXo_ SV *a, SV *b);
 static I32 amagic_ncmp(pTHXo_ SV *a, SV *b);
@@ -778,6 +780,8 @@ PP(pp_sort)
     I32 gimme = GIMME;
     OP* nextop = PL_op->op_next;
     I32 overloading = 0;
+    bool hasargs = FALSE;
+    I32 is_xsub = 0;
 
     if (gimme != G_ARRAY) {
 	SP = MARK;
@@ -796,28 +800,38 @@ PP(pp_sort)
 	}
 	else {
 	    cv = sv_2cv(*++MARK, &stash, &gv, 0);
+	    if (cv && SvPOK(cv)) {
+		STRLEN n_a;
+		char *proto = SvPV((SV*)cv, n_a);
+		if (proto && strEQ(proto, "$$")) {
+		    hasargs = TRUE;
+		}
+	    }
 	    if (!(cv && CvROOT(cv))) {
-		if (gv) {
+		if (cv && CvXSUB(cv)) {
+		    is_xsub = 1;
+		}
+		else if (gv) {
 		    SV *tmpstr = sv_newmortal();
 		    gv_efullname3(tmpstr, gv, Nullch);
-		    if (cv && CvXSUB(cv))
-			DIE(aTHX_ "Xsub \"%s\" called in sort", SvPVX(tmpstr));
 		    DIE(aTHX_ "Undefined sort subroutine \"%s\" called",
 			SvPVX(tmpstr));
 		}
-		if (cv) {
-		    if (CvXSUB(cv))
-			DIE(aTHX_ "Xsub called in sort");
+		else {
 		    DIE(aTHX_ "Undefined subroutine in sort");
 		}
-		DIE(aTHX_ "Not a CODE reference in sort");
 	    }
-	    PL_sortcop = CvSTART(cv);
-	    SAVEVPTR(CvROOT(cv)->op_ppaddr);
-	    CvROOT(cv)->op_ppaddr = PL_ppaddr[OP_NULL];
 
-	    SAVEVPTR(PL_curpad);
-	    PL_curpad = AvARRAY((AV*)AvARRAY(CvPADLIST(cv))[1]);
+	    if (is_xsub)
+		PL_sortcop = (OP*)cv;
+	    else {
+		PL_sortcop = CvSTART(cv);
+		SAVEVPTR(CvROOT(cv)->op_ppaddr);
+		CvROOT(cv)->op_ppaddr = PL_ppaddr[OP_NULL];
+
+		SAVEVPTR(PL_curpad);
+		PL_curpad = AvARRAY((AV*)AvARRAY(CvPADLIST(cv))[1]);
+            }
 	}
     }
     else {
@@ -863,7 +877,6 @@ PP(pp_sort)
 
 	    PUSHBLOCK(cx, CXt_NULL, PL_stack_base);
 	    if (!(PL_op->op_flags & OPf_SPECIAL)) {
-		bool hasargs = FALSE;
 		cx->cx_type = CXt_SUB;
 		cx->blk_gimme = G_SCALAR;
 		PUSHSUB(cx);
@@ -871,7 +884,19 @@ PP(pp_sort)
 		    (void)SvREFCNT_inc(cv); /* in preparation for POPSUB */
 	    }
 	    PL_sortcxix = cxstack_ix;
-	    qsortsv((myorigmark+1), max, sortcv);
+
+	    if (hasargs && !is_xsub) {
+		/* This is mostly copied from pp_entersub */
+		AV *av = (AV*)PL_curpad[0];
+
+#ifndef USE_THREADS
+		cx->blk_sub.savearray = GvAV(PL_defgv);
+		GvAV(PL_defgv) = (AV*)SvREFCNT_inc(av);
+#endif /* USE_THREADS */
+		cx->blk_sub.argarray = av;
+	    }
+	    qsortsv((myorigmark+1), max,
+		    is_xsub ? sortcv_xsub : hasargs ? sortcv_stacked : sortcv);
 
 	    POPBLOCK(cx,PL_curpm);
 	    PL_stack_sp = newsp;
@@ -4136,6 +4161,74 @@ sortcv(pTHXo_ SV *a, SV *b)
     PL_stack_sp = PL_stack_base;
     PL_op = PL_sortcop;
     CALLRUNOPS(aTHX);
+    if (PL_stack_sp != PL_stack_base + 1)
+	Perl_croak(aTHX_ "Sort subroutine didn't return single value");
+    if (!SvNIOKp(*PL_stack_sp))
+	Perl_croak(aTHX_ "Sort subroutine didn't return a numeric value");
+    result = SvIV(*PL_stack_sp);
+    while (PL_scopestack_ix > oldscopeix) {
+	LEAVE;
+    }
+    leave_scope(oldsaveix);
+    return result;
+}
+
+static I32
+sortcv_stacked(pTHXo_ SV *a, SV *b)
+{
+    dTHR;
+    I32 oldsaveix = PL_savestack_ix;
+    I32 oldscopeix = PL_scopestack_ix;
+    I32 result;
+    AV *av = GvAV(PL_defgv);
+
+    if (AvMAX(av) < 1) {
+	SV** ary = AvALLOC(av);
+	if (AvARRAY(av) != ary) {
+	    AvMAX(av) += AvARRAY(av) - AvALLOC(av);
+	    SvPVX(av) = (char*)ary;
+	}
+	if (AvMAX(av) < 1) {
+	    AvMAX(av) = 1;
+	    Renew(ary,2,SV*);
+	    SvPVX(av) = (char*)ary;
+	}
+    }
+    AvFILLp(av) = 1;
+
+    AvARRAY(av)[0] = a;
+    AvARRAY(av)[1] = b;
+    PL_stack_sp = PL_stack_base;
+    PL_op = PL_sortcop;
+    CALLRUNOPS(aTHX);
+    if (PL_stack_sp != PL_stack_base + 1)
+	Perl_croak(aTHX_ "Sort subroutine didn't return single value");
+    if (!SvNIOKp(*PL_stack_sp))
+	Perl_croak(aTHX_ "Sort subroutine didn't return a numeric value");
+    result = SvIV(*PL_stack_sp);
+    while (PL_scopestack_ix > oldscopeix) {
+	LEAVE;
+    }
+    leave_scope(oldsaveix);
+    return result;
+}
+
+static I32
+sortcv_xsub(pTHXo_ SV *a, SV *b)
+{
+    dSP;
+    I32 oldsaveix = PL_savestack_ix;
+    I32 oldscopeix = PL_scopestack_ix;
+    I32 result;
+    CV *cv=(CV*)PL_sortcop;
+
+    SP = PL_stack_base;
+    PUSHMARK(SP);
+    EXTEND(SP, 2);
+    *++SP = a;
+    *++SP = b;
+    PUTBACK;
+    (void)(*CvXSUB(cv))(aTHXo_ cv);
     if (PL_stack_sp != PL_stack_base + 1)
 	Perl_croak(aTHX_ "Sort subroutine didn't return single value");
     if (!SvNIOKp(*PL_stack_sp))

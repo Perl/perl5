@@ -469,6 +469,16 @@ this support (if it is available).
 You can Configure -Dusemorebits to turn on both the 64-bit support
 and the long double support.
 
+=head2 Enhanced support for sort() subroutines
+
+Perl subroutines with a prototype of C<($$)> and XSUBs in general can
+now be used as sort subroutines.  In either case, the two elements to
+be compared as passed as normal parameters in @_.  See L<perlfunc/sort>.
+
+For unprototyped sort subroutines, the historical behavior of passing 
+the elements to be compared as the global variables $a and $b remains
+unchanged.
+
 =head2 Better syntax checks on parenthesized unary operators
 
 Expressions such as:
