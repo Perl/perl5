@@ -88,10 +88,10 @@ fi
 # -ldbm is obsolete and should not be used
 # -lBSD contains BSD-style duplicates of SVR4 routines that cause confusion
 # -lPW is obsolete and should not be used
-# Although -lndbm should be included, it will make perl blow up if you should
-# copy the binary to a system without libndbm.sl.
 # The libraries crypt, malloc, ndir, and net are empty.
-set `echo " $libswanted " | sed -e 's@ ndbm @ @' -e 's@ ld @ @' -e 's@ dbm @ @' -e 's@ BSD @ @' -e 's@ PW @ @'`
+# Although -lndbm should be included, it will make perl blow up if you should
+# copy the binary to a system without libndbm.sl.  See ccdlflags below.
+set `echo " $libswanted " | sed  -e 's@ ld @ @' -e 's@ dbm @ @' -e 's@ BSD @ @' -e 's@ PW @ @'`
 libswanted="$*"
 
 # If you copy the perl binaries to other systems and the dynamic loader
