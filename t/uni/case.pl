@@ -64,7 +64,7 @@ sub casetest {
 
     for my $i (sort keys %$spec) {
 	my $w = unidump($spec->{$i});
-	my $u = unpack "U0U", $i;
+	my $u = unpack "C0U", $i;
 	my $h = sprintf "%04X", $u;
 	my $c = chr($u); $c .= chr(0x100); chop $c;
 	my $d = $func->($c);

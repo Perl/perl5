@@ -62,35 +62,47 @@
 
 #if U16SIZE > SIZE16 || U32SIZE > SIZE32
 #  if BYTEORDER == 0x1234 || BYTEORDER == 0x12345678    /* little-endian */
-#    define OFF16(p)	(char*)(p)
-#    define OFF32(p)	(char*)(p)
+#    define OFF16(p)	((char*)(p))
+#    define OFF32(p)	((char*)(p))
 #  else
 #    if BYTEORDER == 0x4321 || BYTEORDER == 0x87654321  /* big-endian */
 #      define OFF16(p)	((char*)(p) + (sizeof(U16) - SIZE16))
 #      define OFF32(p)	((char*)(p) + (sizeof(U32) - SIZE32))
 #    else
-       }}}} bad cray byte order
+       ++++ bad cray byte order
 #    endif
 #  endif
-#  define COPY16(s,p)  (*(p) = 0, Copy(s, OFF16(p), SIZE16, char))
-#  define COPY32(s,p)  (*(p) = 0, Copy(s, OFF32(p), SIZE32, char))
-#  define COPYNN(s,p,n) (*(p) = 0, Copy(s, (char *)(p), n, char))
-#  define CAT16(sv,p)  sv_catpvn(sv, OFF16(p), SIZE16)
-#  define CAT32(sv,p)  sv_catpvn(sv, OFF32(p), SIZE32)
 #else
-#  define COPY16(s,p)  Copy(s, p, SIZE16, char)
-#  define COPY32(s,p)  Copy(s, p, SIZE32, char)
-#  define COPYNN(s,p,n) Copy(s, (char *)(p), n, char)
-#  define CAT16(sv,p)  sv_catpvn(sv, (char*)(p), SIZE16)
-#  define CAT32(sv,p)  sv_catpvn(sv, (char*)(p), SIZE32)
+#  define OFF16(p)     ((char *) (p))
+#  define OFF32(p)     ((char *) (p))
 #endif
+
+#define COPY16(s,p)  Copy(s, OFF16(p), SIZE16, char)
+#define COPY32(s,p)  Copy(s, OFF32(p), SIZE32, char)
+#define CAT16(sv,p)  sv_catpvn(sv, OFF16(p), SIZE16)
+#define CAT32(sv,p)  sv_catpvn(sv, OFF32(p), SIZE32)
+
+/* Only to be used inside a loop (see the break) */
+#define COPYVAR(s,strend,utf8,var,format)		\
+STMT_START {						\
+    if (utf8) {						\
+        if (!next_uni_bytes(aTHX_ &s, strend,		\
+            (char *) &var, sizeof(var))) break;		\
+    } else {						\
+        Copy(s, (char *) &var, sizeof(var), char);	\
+        s += sizeof(var);				\
+    }							\
+    DO_BO_UNPACK(var, format);				\
+} STMT_END
 
 /* Avoid stack overflow due to pathological templates. 100 should be plenty. */
 #define MAX_SUB_TEMPLATE_LEVEL 100
 
 /* flags (note that type modifiers can also be used as flags!) */
+#define FLAG_UNPACK_WAS_UTF8    0x40	/* original had FLAG_UNPACK_DO_UTF8 */
+#define FLAG_UNPACK_PARSE_UTF8  0x20	/* Parse as utf8 */
 #define FLAG_UNPACK_ONLY_ONE  0x10
-#define FLAG_UNPACK_DO_UTF8   0x08
+#define FLAG_UNPACK_DO_UTF8     0x08	/* The underlying string is utf8 */
 #define FLAG_SLASH            0x04
 #define FLAG_COMMA            0x02
 #define FLAG_PACK             0x01
@@ -316,7 +328,8 @@ unsigned char size_normal[53] = {
   0,
   /* U */ sizeof(char),
   /* V */ SIZE32,
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  /* W */ sizeof(unsigned char),
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   /* c */ sizeof(char),
   /* d */ sizeof(double),
   0,
@@ -384,7 +397,7 @@ struct packsize_t packsize[2] = {
 };
 #else
 /* EBCDIC (or bust) */
-unsigned char size_normal[99] = {
+unsigned char size_normal[100] = {
   /* c */ sizeof(char),
   /* d */ sizeof(double),
   0,
@@ -438,6 +451,7 @@ unsigned char size_normal[99] = {
   0,
   /* U */ sizeof(char),
   /* V */ SIZE32,
+  /* W */ sizeof(unsigned char),
 };
 unsigned char size_shrieking[93] = {
   /* i */ sizeof(int),
@@ -478,11 +492,96 @@ unsigned char size_shrieking[93] = {
 #endif
 };
 struct packsize_t packsize[2] = {
-  {size_normal, 131, 99},
+  {size_normal, 131, 100},
   {size_shrieking, 137, 93}
 };
 #endif
 
+STATIC U8
+next_uni_byte(pTHX_ char **s, const char *end, I32 datumtype)
+{
+    UV val;
+    STRLEN retlen;
+    val =
+	UNI_TO_NATIVE(utf8n_to_uvuni(*s, end-*s, &retlen,
+				     ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY));
+    /* We try to process malformed UTF-8 as much as possible (preferrably with
+       warnings), but these two mean we make no progress in the string and
+       might enter an infinite loop */
+    if (retlen == (STRLEN) -1 || retlen == 0)
+	Perl_croak(aTHX_ "Malformed UTF-8 string in unpack");
+    if (val >= 0x100) {
+	Perl_warner(aTHX_ packWARN(WARN_UNPACK),
+		    "Character in '%c' format wrapped in unpack",
+		    (int) datumtype);
+	val &= 0xff;
+    }
+    *s += retlen;
+    return val;
+}
+
+#define NEXT_BYTE(utf8, s, strend, datumtype) ((utf8) ? \
+	next_uni_byte(aTHX_ &(s), (strend), (datumtype)) : \
+	*(U8 *)(s)++)
+
+STATIC bool
+next_uni_bytes(pTHX_ char **s, char *end, char *buf, int buf_len)
+{
+    UV val;
+    STRLEN retlen;
+    char *from = *s;
+    int bad = 0;
+    U32 flags = ckWARN(WARN_UTF8) ?
+	UTF8_CHECK_ONLY : (UTF8_CHECK_ONLY | UTF8_ALLOW_ANY);
+    for (;buf_len > 0; buf_len--) {
+	if (from >= end) return FALSE;
+	val = UNI_TO_NATIVE(utf8n_to_uvuni(from, end-from, &retlen, flags));
+	if (retlen == (STRLEN) -1 || retlen == 0) {
+	    from += UTF8SKIP(from);
+	    bad |= 1;
+	} else from += retlen;
+	if (val >= 0x100) {
+	    bad |= 2;
+	    val &= 0xff;
+	}
+	*(U8 *)buf++ = val;
+    }
+    /* We have enough characters for the buffer. Did we have problems ? */
+    if (bad) {
+	if (bad & 1) {
+	    /* Rewalk the string fragment while warning */
+	    char *ptr;
+	    flags = ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY;
+	    for (ptr = *s; ptr < from; ptr += UTF8SKIP(ptr)) {
+		if (ptr >= end) break;
+		utf8n_to_uvuni(ptr, end-ptr, &retlen, flags);
+	    }
+	    if (from > end) from = end;
+	}
+	if ((bad & 2) && ckWARN(WARN_UNPACK))
+	    Perl_warner(aTHX_ packWARN(WARN_UNPACK),
+			"Character(s) wrapped in unpack");
+    }
+    *s = from;
+    return TRUE;
+}
+
+STATIC bool
+next_uni_uu(pTHX_ char **s, const char *end, I32 *out)
+{
+    UV val;
+    STRLEN retlen;
+    char *from = *s;
+    val = UNI_TO_NATIVE(utf8n_to_uvuni(*s, end-*s, &retlen, UTF8_CHECK_ONLY));
+    if (val >= 0x100 || !ISUUCHAR(val) ||
+	retlen == (STRLEN) -1 || retlen == 0) {
+	*out = 0;
+	return FALSE;
+    }
+    *out = PL_uudmap[val] & 077;
+    *s = from;
+    return TRUE;
+}
 
 /* Returns the sizeof() struct described by pat */
 STATIC I32
@@ -573,8 +672,6 @@ S_measure_struct(pTHX_ register tempsym_t* symptr)
 	    case 'A':
 	    case 'Z':
 	    case 'a':
-	    case 'c':
-	    case 'C':
 		size = 1;
 		break;
 	    case 'B':
@@ -822,6 +919,44 @@ S_next_symbol(pTHX_ register tempsym_t* symptr )
 }
 
 /*
+   There is no way to cleanly handle the case where we should process the 
+   string per byte in its upgraded form while it's really in downgraded form
+   (e.g. estimates like strend-s as an upper bound for the number of 
+   characters left wouldn't work). So if we foresee the need of this 
+   (pattern starts with U or contains U0), we want to work on the encoded 
+   version of the string. Users are advised to upgrade their pack string 
+   themselves if they need to do a lot of unpacks like this on it
+*/
+STATIC bool 
+need_utf8(const char *pat, const char *patend)
+{
+    bool first = TRUE;
+    while (pat < patend) {
+	if (pat[0] == '#') {
+	    pat++;
+	    pat = memchr(pat, '\n', patend-pat);
+	    if (!pat) return FALSE;
+	} else if (pat[0] == 'U') {
+	    if (first || pat[1] == '0') return TRUE;
+	} else first = FALSE;
+	pat++;
+    }
+    return FALSE;
+}
+
+STATIC char
+first_symbol(const char *pat, const char *patend) {
+    while (pat < patend) {
+	if (pat[0] != '#') return pat[0];
+	pat++;
+	pat = memchr(pat, '\n', patend-pat);
+	if (!pat) return 0;
+	pat++;
+    }
+    return 0;
+}
+
+/*
 =for apidoc unpack_str
 
 The engine implementing unpack() Perl function. Note: parameters strbeg, new_s
@@ -833,6 +968,21 @@ I32
 Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *strbeg, char *strend, char **new_s, I32 ocnt, U32 flags)
 {
     tempsym_t sym = { 0 };
+
+    if (flags & FLAG_UNPACK_DO_UTF8) flags |= FLAG_UNPACK_WAS_UTF8;
+    else if (need_utf8(pat, patend)) {
+	/* We probably should try to avoid this in case a scalar context call
+	   wouldn't get to the "U0" */
+	STRLEN len = strend - s;
+	s = bytes_to_utf8(s, &len);
+	SAVEFREEPV(s);
+	strend = s + len;
+	flags |= FLAG_UNPACK_DO_UTF8;
+    }
+
+    if (first_symbol(pat, patend) != 'U' && (flags & FLAG_UNPACK_DO_UTF8))
+	flags |= FLAG_UNPACK_PARSE_UTF8;
+
     sym.patptr = pat;
     sym.patend = patend;
     sym.flags  = flags;
@@ -853,6 +1003,21 @@ I32
 Perl_unpackstring(pTHX_ char *pat, register char *patend, register char *s, char *strend, U32 flags)
 {
     tempsym_t sym = { 0 };
+
+    if (flags & FLAG_UNPACK_DO_UTF8) flags |= FLAG_UNPACK_WAS_UTF8;
+    else if (need_utf8(pat, patend)) {
+	/* We probably should try to avoid this in case a scalar context call
+	   wouldn't get to the "U0" */
+	STRLEN len = strend - s;
+	s = bytes_to_utf8(s, &len);
+	SAVEFREEPV(s);
+	strend = s + len;
+	flags |= FLAG_UNPACK_DO_UTF8;
+    }
+
+    if (first_symbol(pat, patend) != 'U' && (flags & FLAG_UNPACK_DO_UTF8))
+	flags |= FLAG_UNPACK_PARSE_UTF8;
+
     sym.patptr = pat;
     sym.patend = patend;
     sym.flags  = flags;
@@ -862,45 +1027,14 @@ Perl_unpackstring(pTHX_ char *pat, register char *patend, register char *s, char
 
 STATIC
 I32
-S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, char *strend, char **new_s )
+S_unpack_rec(pTHX_ tempsym_t* symptr, char *s, char *strbeg, char *strend, char **new_s )
 {
     dSP;
-    I32 datumtype;
-    register I32 len = 0;
-    register I32 bits = 0;
-    register char *str;
+    I32 datumtype, ai32;
+    I32 len = 0;
     SV *sv;
     I32 start_sp_offset = SP - PL_stack_base;
     howlen_t howlen;
-
-    /* These must not be in registers: */
-    I16 ai16;
-    U16 au16;
-    I32 ai32;
-    U32 au32;
-#ifdef HAS_QUAD
-    Quad_t aquad;
-    Uquad_t auquad;
-#endif
-#if SHORTSIZE != SIZE16
-    short ashort;
-    unsigned short aushort;
-#endif
-    int aint;
-    unsigned int auint;
-    long along;
-#if LONGSIZE != SIZE32
-    unsigned long aulong;
-#endif
-    char *aptr;
-    float afloat;
-    double adouble;
-#if defined(HAS_LONG_DOUBLE) && defined(USE_LONG_DOUBLE)
-    long double aldouble;
-#endif
-    IV aiv;
-    UV auv;
-    NV anv;
 
     I32 checksum = 0;
     UV cuv = 0;
@@ -910,11 +1044,12 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
     bool beyond = FALSE;
     bool explicit_length;
     bool unpack_only_one = (symptr->flags & FLAG_UNPACK_ONLY_ONE) != 0;
+    bool utf8 = (symptr->flags & FLAG_UNPACK_PARSE_UTF8) ? 1 : 0;
 
     while (next_symbol(symptr)) {
         datumtype = symptr->code;
 	/* do first one only unless in list context
-	   / is implemented by unpacking the count, then poping it from the
+	   / is implemented by unpacking the count, then popping it from the
 	   stack, so must check that we're not in the middle of a /  */
         if ( unpack_only_one
 	     && (SP - PL_stack_base == start_sp_offset + 1)
@@ -951,18 +1086,8 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		    if (len > howmany)
 			len = howmany;
 
-		    /* In the old code, 'p' was the only type without shortcut
-		       code to curtail unpacking to only one.  As far as I can
-		       see the only point of retaining this anomaly is to make
-		       code such as $_ = unpack "p2", pack "pI", "Hi", 2
-		       continue to segfault. ie, it probably should be
-		       construed as a bug.
-		    */
-
 		    if (!checksum || (data & PACK_SIZE_CANNOT_CSUM)) {
-			if (len && unpack_only_one &&
-			    rawtype != 'p')
-			    len = 1;
+			if (len && unpack_only_one) len = 1;
 			EXTEND(SP, len);
 			EXTEND_MORTAL(len);
 		    }
@@ -983,7 +1108,6 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	    break;
 	case '(':
 	{
-	    char *ss = s;		/* Move from register */
             tempsym_t savsym = *symptr;
 	    U32 group_modifiers = TYPE_MODIFIERS(datumtype & ~symptr->flags);
 	    symptr->flags |= group_modifiers;
@@ -992,49 +1116,94 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	    PUTBACK;
 	    while (len--) {
   	        symptr->patptr = savsym.grpbeg;
- 	        unpack_rec(symptr, ss, strbeg, strend, &ss );
-		if (savsym.flags & FLAG_UNPACK_DO_UTF8)
-		    symptr->flags |=  FLAG_UNPACK_DO_UTF8;
-		else
-		    symptr->flags &= ~FLAG_UNPACK_DO_UTF8;
-                if (ss == strend && savsym.howlen == e_star)
+		if (utf8) symptr->flags |=  FLAG_UNPACK_PARSE_UTF8;
+		else      symptr->flags &= ~FLAG_UNPACK_PARSE_UTF8;
+ 	        unpack_rec(symptr, s, strbeg, strend, &s);
+                if (s == strend && savsym.howlen == e_star)
 		    break; /* No way to continue */
 	    }
 	    SPAGAIN;
-	    s = ss;
 	    symptr->flags &= ~group_modifiers;
             savsym.flags = symptr->flags;
             *symptr = savsym;
 	    break;
 	}
 	case '@':
+	    if (utf8) {
+		s = strrelbeg;
+		while (len > 0) {
+		    if (s >= strend)
+			Perl_croak(aTHX_ "'@' outside of string in unpack");
+		    s += UTF8SKIP(s);
+		    len--;
+		}
+		if (s > strend)
+		    Perl_croak(aTHX_ "'@' outside of string with malformed UTF-8 in unpack");
+	    } else {
 	    if (len > strend - strrelbeg)
 		Perl_croak(aTHX_ "'@' outside of string in unpack");
 	    s = strrelbeg + len;
+	    }
 	    break;
  	case 'X' | TYPE_IS_SHRIEKING:
  	    if (!len)			/* Avoid division by 0 */
  		len = 1;
- 	    len = (s - strbeg) % len;
+	    if (utf8) {
+		char *hop, *last;
+		I32 l;
+		for (l=len, hop = strbeg; hop < s; l++, hop += UTF8SKIP(hop))
+		    if (l == len) {
+			last = hop;
+			l = 0;
+		    }
+		s = last;
+		break;
+	    } else len = (s - strbeg) % len;
  	    /* FALL THROUGH */
 	case 'X':
+	    if (utf8) {
+		while (len > 0) {
+		    if (s <= strbeg)
+			Perl_croak(aTHX_ "'X' outside of string in unpack");
+		    while (UTF8_IS_CONTINUATION(*--s)) {
+			if (s <= strbeg)
+			    Perl_croak(aTHX_ "'X' outside of string in unpack");
+		    }
+		    len--;
+		}
+	    } else {
 	    if (len > s - strbeg)
 		Perl_croak(aTHX_ "'X' outside of string in unpack" );
 	    s -= len;
+	    }
 	    break;
  	case 'x' | TYPE_IS_SHRIEKING:
  	    if (!len)			/* Avoid division by 0 */
  		len = 1;
- 	    aint = (s - strbeg) % len;
- 	    if (aint)			/* Other portable ways? */
- 		len = len - aint;
- 	    else
- 		len = 0;
+	    if (utf8) {
+		char *hop = strbeg;
+		I32 l = 0;
+		for (hop = strbeg; hop < s; hop += UTF8SKIP(hop)) l++;
+		if (s != hop)
+		    Perl_croak(aTHX_ "Malformed UTF-8 string in unpack");
+		ai32 = l % len;
+	    } else ai32 = (s - strbeg) % len;
+	    if (ai32 == 0) break;
+	    len -= ai32;
  	    /* FALL THROUGH */
 	case 'x':
+	    if (utf8) {
+		while (len>0) {
+		    if (s >= strend)
+			Perl_croak(aTHX_ "'x' outside of string in unpack");
+		    s += UTF8SKIP(s);
+		    len--;
+		}
+	    } else {
 	    if (len > strend - s)
 		Perl_croak(aTHX_ "'x' outside of string in unpack");
 	    s += len;
+	    };
 	    break;
 	case '/':
 	    Perl_croak(aTHX_ "'/' must follow a numeric type in unpack");
@@ -1042,38 +1211,60 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	case 'A':
 	case 'Z':
 	case 'a':
-	    if (len > strend - s)
-		len = strend - s;
-	    if (checksum)
-		goto uchar_checksum;
-	    sv = newSVpvn(s, len);
-	    if (len > 0 && (datumtype == 'A' || datumtype == 'Z')) {
-		aptr = s;	/* borrow register */
-		if (datumtype == 'Z') {	/* 'Z' strips stuff after first null */
-		    s = SvPVX(sv);
-		    while (*s)
-			s++;
-		    if (howlen == e_star) /* exact for 'Z*' */
-		        len = s - SvPVX(sv) + 1;
-		}
-		else {		/* 'A' strips both nulls and spaces */
-		    s = SvPVX(sv) + len - 1;
-		    while (s >= SvPVX(sv) && (!*s || isSPACE(*s)))
-			s--;
-		    *++s = '\0';
-		}
-		SvCUR_set(sv, s - SvPVX(sv));
-		s = aptr;	/* unborrow register */
+	    if (checksum) {
+		/* Preliminary length estimate is assumed done in 'W' */
+		if (len > strend - s) len = strend - s;
+		goto W_checksum;
 	    }
-	    s += len;
+	    if (utf8) {
+		I32 l;
+		char *hop;
+		for (l=len, hop=s; l>0; l--, hop += UTF8SKIP(hop)) {
+		    if (hop >= strend) {
+			if (hop > strend)
+			    Perl_croak(aTHX_ "Malformed UTF-8 string in unpack");
+			break;
+		}
+		}
+		if (hop > strend)
+		    Perl_croak(aTHX_ "Malformed UTF-8 string in unpack");
+		len = hop - s;
+	    } else if (len > strend - s)
+		len = strend - s;
+
+	    if (datumtype == 'Z') {
+		/* 'Z' strips stuff after first null */
+		char *ptr;
+		for (ptr = s; ptr < strend; ptr++) if (*ptr == 0) break;
+		sv = newSVpvn(s, ptr-s);
+		if (howlen == e_star) /* exact for 'Z*' */
+		    len = ptr-s + (ptr != strend ? 1 : 0);
+	    } else if (datumtype == 'A') {
+		/* 'A' strips both nulls and spaces */
+		char *ptr;
+		for (ptr = s+len-1; ptr >= s; ptr--)
+		    if (*ptr != 0 && !isSPACE(*ptr)) break;
+		ptr++;
+		sv = newSVpvn(s, ptr-s);
+	    } else sv = newSVpvn(s, len);
+
+	    if (utf8) {
+		SvUTF8_on(sv);
+		/* Undo any upgrade done due to need_utf8() */
+		if (!(symptr->flags & FLAG_UNPACK_WAS_UTF8))
+		    sv_utf8_downgrade(sv, 0);
+	    }
 	    XPUSHs(sv_2mortal(sv));
+	    s += len;
 	    break;
 	case 'B':
-	case 'b':
+	case 'b': {
+	    char *str;
 	    if (howlen == e_star || len > (strend - s) * 8)
 		len = (strend - s) * 8;
 	    if (checksum) {
 		if (!PL_bitcount) {
+		    int bits;
 		    Newz(601, PL_bitcount, 256, char);
 		    for (bits = 1; bits < 256; bits++) {
 			if (bits & 1)	PL_bitcount[bits]++;
@@ -1086,93 +1277,110 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 			if (bits & 128)	PL_bitcount[bits]++;
 		    }
 		}
+		if (utf8) {
+		    while (len >= 8 && s < strend) {
+			cuv += PL_bitcount[next_uni_byte(aTHX_ &s, strend, datumtype)];
+			len -= 8;
+		    }
+		} else {
 		while (len >= 8) {
-		    cuv += PL_bitcount[*(unsigned char*)s++];
+			cuv += PL_bitcount[*(U8 *)s++];
 		    len -= 8;
 		}
-		if (len) {
-		    bits = *s++;
+		}
+		if (len && s < strend) {
+		    U8 bits;
+		    bits = NEXT_BYTE(utf8, s, strend, datumtype);
 		    if (datumtype == 'b') {
 			while (len-- > 0) {
 			    if (bits & 1) cuv++;
 			    bits >>= 1;
 			}
-		    }
-		    else {
+		    } else {
 			while (len-- > 0) {
-			    if (bits & 128) cuv++;
+			    if (bits & 0x80) cuv++;
 			    bits <<= 1;
 			}
 		    }
 		}
 		break;
 	    }
-	    sv = NEWSV(35, len + 1);
-	    SvCUR_set(sv, len);
+
+	    sv = sv_2mortal(NEWSV(35, len ? len : 1));
 	    SvPOK_on(sv);
 	    str = SvPVX(sv);
 	    if (datumtype == 'b') {
-		aint = len;
-		for (len = 0; len < aint; len++) {
-		    if (len & 7)		/*SUPPRESS 595*/
-			bits >>= 1;
-		    else
-			bits = *s++;
-		    *str++ = '0' + (bits & 1);
+		U8 bits;
+		ai32 = len;
+		for (len = 0; len < ai32; len++) {
+		    if (len & 7) bits >>= 1;
+		    else if (utf8) {
+			if (s >= strend) break;
+			bits = next_uni_byte(aTHX_ &s, strend, datumtype);
+		    } else bits = *(U8 *) s++;
+		    *str++ = bits & 1 ? '1' : '0';
 		}
-	    }
-	    else {
-		aint = len;
-		for (len = 0; len < aint; len++) {
-		    if (len & 7)
-			bits <<= 1;
-		    else
-			bits = *s++;
-		    *str++ = '0' + ((bits & 128) != 0);
+	    } else {
+		U8 bits;
+		ai32 = len;
+		for (len = 0; len < ai32; len++) {
+		    if (len & 7) bits <<= 1;
+		    else if (utf8) {
+			if (s >= strend) break;
+			bits = next_uni_byte(aTHX_ &s, strend, datumtype);
+		    } else bits = *(U8 *) s++;
+		    *str++ = bits & 0x80 ? '1' : '0';
 		}
 	    }
 	    *str = '\0';
-	    XPUSHs(sv_2mortal(sv));
+	    SvCUR_set(sv, str - SvPVX(sv));
+	    XPUSHs(sv);
 	    break;
+	}
 	case 'H':
-	case 'h':
+	case 'h': {
+	    char *str;
+	      /* Preliminary length estimate, acceptable for utf8 too */
 	    if (howlen == e_star || len > (strend - s) * 2)
 		len = (strend - s) * 2;
-	    sv = NEWSV(35, len + 1);
-	    SvCUR_set(sv, len);
+	      sv = sv_2mortal(NEWSV(35, len ? len : 1));
 	    SvPOK_on(sv);
 	    str = SvPVX(sv);
 	    if (datumtype == 'h') {
-		aint = len;
-		for (len = 0; len < aint; len++) {
-		    if (len & 1)
-			bits >>= 4;
-		    else
-			bits = *s++;
+		  U8 bits;
+		  ai32 = len;
+		  for (len = 0; len < ai32; len++) {
+		      if (len & 1) bits >>= 4;
+		      else if (utf8) {
+			  if (s >= strend) break;
+			  bits = next_uni_byte(aTHX_ &s, strend, datumtype);
+		      } else bits = * (U8 *) s++;
 		    *str++ = PL_hexdigit[bits & 15];
 		}
-	    }
-	    else {
-		aint = len;
-		for (len = 0; len < aint; len++) {
-		    if (len & 1)
-			bits <<= 4;
-		    else
-			bits = *s++;
+	    } else {
+		U8 bits;
+		ai32 = len;
+		for (len = 0; len < ai32; len++) {
+		    if (len & 1) bits <<= 4;
+		    else if (utf8) {
+			if (s >= strend) break;
+			bits = next_uni_byte(aTHX_ &s, strend, datumtype);
+		    } else bits = *(U8 *) s++;
 		    *str++ = PL_hexdigit[(bits >> 4) & 15];
 		}
 	    }
 	    *str = '\0';
-	    XPUSHs(sv_2mortal(sv));
+	    SvCUR_set(sv, str - SvPVX(sv));
+	    XPUSHs(sv);
 	    break;
+	}
 	case 'c':
 	    while (len-- > 0) {
-		aint = *s++;
+		int aint = NEXT_BYTE(utf8, s, strend, datumtype);
 		if (aint >= 128)	/* fake up signed chars */
 		    aint -= 256;
-		if (!checksum) {
+		if (!checksum)
 		    PUSHs(sv_2mortal(newSViv((IV)aint)));
-		}
 		else if (checksum > bits_in_uv)
 		    cdouble += (NV)aint;
 		else
@@ -1180,60 +1388,98 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	    }
 	    break;
 	case 'C':
-	unpack_C: /* unpack U will jump here if not UTF-8 */
+	case 'W':
+	  W_checksum:
             if (len == 0) {
-                if (explicit_length) 
-                    symptr->flags &= ~FLAG_UNPACK_DO_UTF8;
+                if (explicit_length && datumtype == 'C') 
+		    /* Switch to "character" mode */
+		    utf8 = (symptr->flags & FLAG_UNPACK_DO_UTF8) ? 1 : 0;
 		break;
 	    }
-	    if (checksum) {
-	      uchar_checksum:
-		while (len-- > 0) {
-		    auint = *s++ & 255;
-		    if (checksum > bits_in_uv)
-			cdouble += (NV)auint;
+	    if (datumtype == 'C' ? 
+		 (symptr->flags & FLAG_UNPACK_DO_UTF8) && 
+		!(symptr->flags & FLAG_UNPACK_WAS_UTF8) : utf8) {
+		while (len-- > 0 && s < strend) {
+		    UV val;
+		    STRLEN retlen;
+		    val =
+			UNI_TO_NATIVE(utf8n_to_uvuni(s, strend-s, &retlen,
+						     ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY));
+		    if (retlen == (STRLEN) -1 || retlen == 0)
+			Perl_croak(aTHX_ "Malformed UTF-8 string in unpack");
+		    s += retlen;
+		    if (!checksum)
+			PUSHs(sv_2mortal(newSVuv((UV) val)));
+		    else if (checksum > bits_in_uv)
+			cdouble += (NV) val;
 		    else
-			cuv += auint;
-		}
+			cuv += val;
 	    }
-	    else {
+	    } else if (!checksum)
 		while (len-- > 0) {
-		    auint = *s++ & 255;
-		    PUSHs(sv_2mortal(newSViv((IV)auint)));
-		}
+		    U8 ch = *(U8 *) s++;
+		    PUSHs(sv_2mortal(newSVuv((UV) ch)));
 	    }
+	    else if (checksum > bits_in_uv)
+		while (len-- > 0) cdouble += (NV) *(U8 *) s++;
+	    else
+		while (len-- > 0) cuv += *(U8 *) s++;
 	    break;
 	case 'U':
 	    if (len == 0) {
-                if (explicit_length) 
-                    symptr->flags |= FLAG_UNPACK_DO_UTF8;
+                if (explicit_length) {
+		    /* Switch to "bytes in UTF-8" mode */
+		    if (symptr->flags & FLAG_UNPACK_DO_UTF8) utf8 = 0;
+		    else
+			/* Should be impossible due to the need_utf8() test */
+			Perl_croak(aTHX_ "U0 mode on a byte string");
+		}
 		break;
 	    }
-	    if ((symptr->flags & FLAG_UNPACK_DO_UTF8) == 0)
-		 goto unpack_C;
-	    while (len-- > 0 && s < strend) {
-		STRLEN alen;
-		auint = NATIVE_TO_UNI(utf8n_to_uvchr((U8*)s, strend - s, &alen, ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANYUV));
-		along = alen;
-		s += along;
+	    if (len > strend - s) len = strend - s;
 		if (!checksum) {
-		    PUSHs(sv_2mortal(newSVuv((UV)auint)));
+		if (len && unpack_only_one) len = 1;
+		EXTEND(SP, len);
+		EXTEND_MORTAL(len);
 		}
+	    while (len-- > 0 && s < strend) {
+		STRLEN retlen;
+		UV auv;
+		if (utf8) {
+		    U8 result[UTF8_MAXLEN];
+		    char *ptr;
+		    STRLEN len;
+		    ptr = s;
+		    /* Bug: warns about bad utf8 even if we are short on bytes
+		       and will break out of the loop */
+		    if (!next_uni_bytes(aTHX_ &ptr, strend, result, 1))
+			break;
+		    len = UTF8SKIP(result);
+		    if (!next_uni_bytes(aTHX_ &ptr, strend, &result[1], len-1))
+			break;
+		    auv = utf8n_to_uvuni(result, len, &retlen, ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANYUV);
+		    s = ptr;
+		} else {
+		    auv = utf8n_to_uvuni((U8*)s, strend - s, &retlen, ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANYUV);
+		    if (retlen == (STRLEN) -1 || retlen == 0)
+			Perl_croak(aTHX_ "Malformed UTF-8 string in unpack");
+		    s += retlen;
+		}
+		if (!checksum)
+		    PUSHs(sv_2mortal(newSVuv((UV) auv)));
 		else if (checksum > bits_in_uv)
-		    cdouble += (NV)auint;
+		    cdouble += (NV) auv;
 		else
-		    cuv += auint;
+		    cuv += auv;
 	    }
 	    break;
 	case 's' | TYPE_IS_SHRIEKING:
 #if SHORTSIZE != SIZE16
 	    while (len-- > 0) {
-		COPYNN(s, &ashort, sizeof(short));
-		DO_BO_UNPACK(ashort, s);
-		s += sizeof(short);
-		if (!checksum) {
+		short ashort;
+		COPYVAR(s, strend, utf8, ashort, s);
+		if (!checksum)
 		    PUSHs(sv_2mortal(newSViv((IV)ashort)));
-		}
 		else if (checksum > bits_in_uv)
 		    cdouble += (NV)ashort;
 		else
@@ -1245,16 +1491,25 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 #endif
 	case 's':
 	    while (len-- > 0) {
+		I16 ai16;
+
+#if U16SIZE > SIZE16
+		ai16 = 0;
+#endif
+		if (utf8) {
+		    if (!next_uni_bytes(aTHX_ &s, strend, 
+					OFF16(&ai16), SIZE16)) break;
+		} else {
 		COPY16(s, &ai16);
+		    s += SIZE16;
+		}
 		DO_BO_UNPACK(ai16, 16);
 #if U16SIZE > SIZE16
 		if (ai16 > 32767)
 		    ai16 -= 65536;
 #endif
-		s += SIZE16;
-		if (!checksum) {
+		if (!checksum)
 		    PUSHs(sv_2mortal(newSViv((IV)ai16)));
-		}
 		else if (checksum > bits_in_uv)
 		    cdouble += (NV)ai16;
 		else
@@ -1264,12 +1519,10 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	case 'S' | TYPE_IS_SHRIEKING:
 #if SHORTSIZE != SIZE16
 	    while (len-- > 0) {
-		COPYNN(s, &aushort, sizeof(unsigned short));
-		DO_BO_UNPACK(aushort, s);
-		s += sizeof(unsigned short);
-		if (!checksum) {
-		    PUSHs(sv_2mortal(newSViv((UV)aushort)));
-		}
+		unsigned short aushort;
+		COPYVAR(s, strend, utf8, aushort, s);
+		if (!checksum)
+		    PUSHs(sv_2mortal(newSVuv((UV) aushort)));
 		else if (checksum > bits_in_uv)
 		    cdouble += (NV)aushort;
 		else
@@ -1283,9 +1536,18 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	case 'n':
 	case 'S':
 	    while (len-- > 0) {
+		U16 au16;
+#if U16SIZE > SIZE16
+		au16 = 0;
+#endif
+		if (utf8) {
+		    if (!next_uni_bytes(aTHX_ &s, strend, 
+					OFF16(&au16), SIZE16)) break;
+		} else {
 		COPY16(s, &au16);
-		DO_BO_UNPACK(au16, 16);
 		s += SIZE16;
+		}
+		DO_BO_UNPACK(au16, 16);
 #ifdef HAS_NTOHS
 		if (datumtype == 'n')
 		    au16 = PerlSock_ntohs(au16);
@@ -1294,9 +1556,8 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		if (datumtype == 'v')
 		    au16 = vtohs(au16);
 #endif
-		if (!checksum) {
-		    PUSHs(sv_2mortal(newSViv((UV)au16)));
-		}
+		if (!checksum)
+		    PUSHs(sv_2mortal(newSVuv((UV)au16)));
 		else if (checksum > bits_in_uv)
 		    cdouble += (NV)au16;
 		else
@@ -1307,35 +1568,41 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	case 'v' | TYPE_IS_SHRIEKING:
 	case 'n' | TYPE_IS_SHRIEKING:
 	    while (len-- > 0) {
+		I16 ai16;
+# if U16SIZE > SIZE16
+		ai16 = 0;
+# endif
+		if (utf8) {
+		    if (!next_uni_bytes(aTHX_ &s, strend,
+					(char *) &ai16, sizeof(ai16))) break;
+		} else {
 		COPY16(s, &ai16);
 		s += SIZE16;
-#ifdef HAS_NTOHS
-		if (datumtype == ('n' | TYPE_IS_SHRIEKING))
-		    ai16 = (I16)PerlSock_ntohs((U16)ai16);
-#endif
-#ifdef HAS_VTOHS
-		if (datumtype == ('v' | TYPE_IS_SHRIEKING))
-		    ai16 = (I16)vtohs((U16)ai16);
-#endif
-		if (!checksum) {
-		    PUSHs(sv_2mortal(newSViv((IV)ai16)));
 		}
+# ifdef HAS_NTOHS
+		if (datumtype == ('n' | TYPE_IS_SHRIEKING))
+		    ai16 = (I16) PerlSock_ntohs((U16) ai16);
+# endif /* HAS_NTOHS */
+# ifdef HAS_VTOHS
+		if (datumtype == ('v' | TYPE_IS_SHRIEKING))
+		    ai16 = (I16) vtohs((U16) ai16);
+# endif /* HAS_VTOHS */
+		if (!checksum)
+		    PUSHs(sv_2mortal(newSViv((IV)ai16)));
 		else if (checksum > bits_in_uv)
-		    cdouble += (NV)ai16;
+		    cdouble += (NV) ai16;
 		else
 		    cuv += ai16;
 	    }
 	    break;
-#endif
+#endif /* PERL_PACK_CAN_SHRIEKSIGN */
 	case 'i':
 	case 'i' | TYPE_IS_SHRIEKING:
 	    while (len-- > 0) {
-		Copy(s, &aint, 1, int);
-		DO_BO_UNPACK(aint, i);
-		s += sizeof(int);
-		if (!checksum) {
+		int aint;
+		COPYVAR(s, strend, utf8, aint, i);
+		if (!checksum)
 		    PUSHs(sv_2mortal(newSViv((IV)aint)));
-		}
 		else if (checksum > bits_in_uv)
 		    cdouble += (NV)aint;
 		else
@@ -1345,12 +1612,10 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	case 'I':
 	case 'I' | TYPE_IS_SHRIEKING:
 	    while (len-- > 0) {
-		Copy(s, &auint, 1, unsigned int);
-		DO_BO_UNPACK(auint, i);
-		s += sizeof(unsigned int);
-		if (!checksum) {
+		unsigned int auint;
+		COPYVAR(s, strend, utf8, auint, i);
+		if (!checksum)
 		    PUSHs(sv_2mortal(newSVuv((UV)auint)));
-		}
 		else if (checksum > bits_in_uv)
 		    cdouble += (NV)auint;
 		else
@@ -1359,18 +1624,18 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	    break;
 	case 'j':
 	    while (len-- > 0) {
-		Copy(s, &aiv, 1, IV);
+		IV aiv;
 #if IVSIZE == INTSIZE
-		DO_BO_UNPACK(aiv, i);
+		COPYVAR(s, strend, utf8, aiv, i);
 #elif IVSIZE == LONGSIZE
-		DO_BO_UNPACK(aiv, l);
+		COPYVAR(s, strend, utf8, aiv, l);
 #elif defined(HAS_QUAD) && IVSIZE == U64SIZE
-		DO_BO_UNPACK(aiv, 64);
+		COPYVAR(s, strend, utf8, aiv, 64);
+#else
+		Perl_croak(aTHX_ "'j' not supported on this platform");
 #endif
-		s += IVSIZE;
-		if (!checksum) {
+		if (!checksum)
 		    PUSHs(sv_2mortal(newSViv(aiv)));
-		}
 		else if (checksum > bits_in_uv)
 		    cdouble += (NV)aiv;
 		else
@@ -1379,18 +1644,18 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	    break;
 	case 'J':
 	    while (len-- > 0) {
-		Copy(s, &auv, 1, UV);
-#if UVSIZE == INTSIZE
-		DO_BO_UNPACK(auv, i);
-#elif UVSIZE == LONGSIZE
-		DO_BO_UNPACK(auv, l);
-#elif defined(HAS_QUAD) && UVSIZE == U64SIZE
-		DO_BO_UNPACK(auv, 64);
+		UV auv;
+#if IVSIZE == INTSIZE
+		COPYVAR(s, strend, utf8, auv, i);
+#elif IVSIZE == LONGSIZE
+		COPYVAR(s, strend, utf8, auv, l);
+#elif defined(HAS_QUAD) && IVSIZE == U64SIZE
+		COPYVAR(s, strend, utf8, auv, 64);
+#else
+		Perl_croak(aTHX_ "'J' not supported on this platform");
 #endif
-		s += UVSIZE;
-		if (!checksum) {
+		if (!checksum)
 		    PUSHs(sv_2mortal(newSVuv(auv)));
-		}
 		else if (checksum > bits_in_uv)
 		    cdouble += (NV)auv;
 		else
@@ -1400,12 +1665,10 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	case 'l' | TYPE_IS_SHRIEKING:
 #if LONGSIZE != SIZE32
 	    while (len-- > 0) {
-		COPYNN(s, &along, sizeof(long));
-		DO_BO_UNPACK(along, l);
-		s += sizeof(long);
-		if (!checksum) {
+		long along;
+		COPYVAR(s, strend, utf8, along, l);
+		if (!checksum)
 		    PUSHs(sv_2mortal(newSViv((IV)along)));
-		}
 		else if (checksum > bits_in_uv)
 		    cdouble += (NV)along;
 		else
@@ -1417,16 +1680,23 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 #endif
 	case 'l':
 	    while (len-- > 0) {
+		I32 ai32;
+#if U32SIZE > SIZE32
+		ai32 = 0;
+#endif
+		if (utf8) {
+		    if (!next_uni_bytes(aTHX_ &s, strend,
+					OFF32(&ai32), SIZE32)) break;
+		} else {
 		COPY32(s, &ai32);
+		    s += SIZE32;
+		}
 		DO_BO_UNPACK(ai32, 32);
 #if U32SIZE > SIZE32
-		if (ai32 > 2147483647)
-		    ai32 -= 4294967296;
+		if (ai32 > 2147483647) ai32 -= 4294967296;
 #endif
-		s += SIZE32;
-		if (!checksum) {
+		if (!checksum)
 		    PUSHs(sv_2mortal(newSViv((IV)ai32)));
-		}
 		else if (checksum > bits_in_uv)
 		    cdouble += (NV)ai32;
 		else
@@ -1436,12 +1706,10 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	case 'L' | TYPE_IS_SHRIEKING:
 #if LONGSIZE != SIZE32
 	    while (len-- > 0) {
-		COPYNN(s, &aulong, sizeof(unsigned long));
-		DO_BO_UNPACK(aulong, l);
-		s += sizeof(unsigned long);
-		if (!checksum) {
+		unsigned long aulong;
+		COPYVAR(s, strend, utf8, aulong, l);
+		if (!checksum)
 		    PUSHs(sv_2mortal(newSVuv((UV)aulong)));
-		}
 		else if (checksum > bits_in_uv)
 		    cdouble += (NV)aulong;
 		else
@@ -1455,9 +1723,18 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	case 'N':
 	case 'L':
 	    while (len-- > 0) {
+		U32 au32;
+#if U32SIZE > SIZE32
+		au32 = 0;
+#endif
+		if (utf8) {
+		    if (!next_uni_bytes(aTHX_ &s, strend,
+					OFF32(&au32), SIZE32)) break;
+		} else {
 		COPY32(s, &au32);
-		DO_BO_UNPACK(au32, 32);
 		s += SIZE32;
+		}
+		DO_BO_UNPACK(au32, 32);
 #ifdef HAS_NTOHL
 		if (datumtype == 'N')
 		    au32 = PerlSock_ntohl(au32);
@@ -1466,9 +1743,8 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		if (datumtype == 'V')
 		    au32 = vtohl(au32);
 #endif
-		 if (!checksum) {
+		if (!checksum)
 		     PUSHs(sv_2mortal(newSVuv((UV)au32)));
-		 }
 		 else if (checksum > bits_in_uv)
 		     cdouble += (NV)au32;
 		 else
@@ -1479,32 +1755,45 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	case 'V' | TYPE_IS_SHRIEKING:
 	case 'N' | TYPE_IS_SHRIEKING:
 	    while (len-- > 0) {
+		I32 ai32;
+# if U32SIZE > SIZE32
+		ai32 = 0;
+# endif
+		if (utf8) {
+		    if (!next_uni_bytes(aTHX_ &s, strend,
+					OFF32(&ai32), SIZE32)) break;
+		} else {
 		COPY32(s, &ai32);
 		s += SIZE32;
-#ifdef HAS_NTOHL
+		}
+# ifdef HAS_NTOHL
 		if (datumtype == ('N' | TYPE_IS_SHRIEKING))
 		    ai32 = (I32)PerlSock_ntohl((U32)ai32);
-#endif
-#ifdef HAS_VTOHL
+# endif
+# ifdef HAS_VTOHL
 		if (datumtype == ('V' | TYPE_IS_SHRIEKING))
 		    ai32 = (I32)vtohl((U32)ai32);
-#endif
-		if (!checksum) {
+# endif
+		if (!checksum)
 		    PUSHs(sv_2mortal(newSViv((IV)ai32)));
-		}
 		else if (checksum > bits_in_uv)
 		    cdouble += (NV)ai32;
 		else
 		    cuv += ai32;
 	    }
 	    break;
-#endif
+#endif /* PERL_PACK_CAN_SHRIEKSIGN */
 	case 'p':
 	    while (len-- > 0) {
-		assert (sizeof(char*) <= strend - s);
+		char *aptr;
+		if (utf8) {
+		    if (!next_uni_bytes(aTHX_ &s, strend,
+					(char *) &aptr, sizeof(aptr))) break;
+		} else {
 		Copy(s, &aptr, 1, char*);
+		    s += sizeof(aptr);
+		}
 		DO_BO_UNPACK_P(aptr);
-		s += sizeof(char*);
 		/* newSVpv generates undef if aptr is NULL */
 		PUSHs(sv_2mortal(newSVpv(aptr, 0)));
 	    }
@@ -1514,23 +1803,27 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		UV auv = 0;
 		U32 bytes = 0;
 		
-		while ((len > 0) && (s < strend)) {
-		    auv = (auv << 7) | (*s & 0x7f);
+		while (len > 0 && s < strend) {
+		    U8 ch;
+		    ch = NEXT_BYTE(utf8, s, strend, 'w');
+		    auv = (auv << 7) | (ch & 0x7f);
 		    /* UTF8_IS_XXXXX not right here - using constant 0x80 */
-		    if ((U8)(*s++) < 0x80) {
+		    if (ch < 0x80) {
 			bytes = 0;
 			PUSHs(sv_2mortal(newSVuv(auv)));
 			len--;
 			auv = 0;
+			continue;
 		    }
-		    else if (++bytes >= sizeof(UV)) {	/* promote to string */
+		    if (++bytes >= sizeof(UV)) {	/* promote to string */
 			char *t;
 			STRLEN n_a;
 
 			sv = Perl_newSVpvf(aTHX_ "%.*"UVf, (int)TYPE_DIGITS(UV), auv);
 			while (s < strend) {
-			    sv = mul128(sv, (U8)(*s & 0x7f));
-			    if (!(*s++ & 0x80)) {
+			    ch = NEXT_BYTE(utf8, s, strend, 'w');
+			    sv = mul128(sv, (U8)(ch & 0x7f));
+			    if (!(ch & 0x80)) {
 				bytes = 0;
 				break;
 			    }
@@ -1552,27 +1845,28 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	    if (symptr->howlen == e_star)
 	        Perl_croak(aTHX_ "'P' must have an explicit size in unpack");
 	    EXTEND(SP, 1);
-	    if (sizeof(char*) > strend - s)
-		break;
-	    else {
+	    if (sizeof(char*) <= strend - s) {
+		char *aptr;
+		if (utf8) {
+		    if (!next_uni_bytes(aTHX_ &s, strend, (char *) &aptr,
+					sizeof(aptr))) break;
+		} else {
 		Copy(s, &aptr, 1, char*);
-		DO_BO_UNPACK_P(aptr);
-		s += sizeof(char*);
+		    s += sizeof(aptr);
 	    }
+		DO_BO_UNPACK_P(aptr);
 	    /* newSVpvn generates undef if aptr is NULL */
 	    PUSHs(sv_2mortal(newSVpvn(aptr, len)));
+	    }
 	    break;
 #ifdef HAS_QUAD
 	case 'q':
 	    while (len-- > 0) {
-		assert (s + sizeof(Quad_t) <= strend);
-		Copy(s, &aquad, 1, Quad_t);
-		DO_BO_UNPACK(aquad, 64);
-		s += sizeof(Quad_t);
-		if (!checksum) {
-                    PUSHs(sv_2mortal((aquad >= IV_MIN && aquad <= IV_MAX) ?
+		Quad_t aquad;
+		COPYVAR(s, strend, utf8, aquad, 64);
+		if (!checksum)
+                    PUSHs(sv_2mortal(aquad >= IV_MIN && aquad <= IV_MAX ?
 				     newSViv((IV)aquad) : newSVnv((NV)aquad)));
-                }
 		else if (checksum > bits_in_uv)
 		    cdouble += (NV)aquad;
 		else
@@ -1581,72 +1875,86 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	    break;
 	case 'Q':
 	    while (len-- > 0) {
-		assert (s + sizeof(Uquad_t) <= strend);
-		Copy(s, &auquad, 1, Uquad_t);
-		DO_BO_UNPACK(auquad, 64);
-		s += sizeof(Uquad_t);
-		if (!checksum) {
-		    PUSHs(sv_2mortal((auquad <= UV_MAX) ?
-				     newSVuv((UV)auquad) : newSVnv((NV)auquad)));
-		}
+		Uquad_t auquad;
+		COPYVAR(s, strend, utf8, auquad, 64);
+		if (!checksum)
+		    PUSHs(sv_2mortal(auquad <= UV_MAX ?
+				     newSVuv((UV)auquad):newSVnv((NV)auquad)));
 		else if (checksum > bits_in_uv)
 		    cdouble += (NV)auquad;
 		else
 		    cuv += auquad;
 	    }
 	    break;
-#endif
+#endif /* HAS_QUAD */
 	/* float and double added gnb@melba.bby.oz.au 22/11/89 */
 	case 'f':
 	    while (len-- > 0) {
+		float afloat;
+		if (utf8) {
+		    if (!next_uni_bytes(aTHX_ &s, strend, (char *) &afloat,
+					sizeof(afloat))) break;
+		} else {
 		Copy(s, &afloat, 1, float);
-		DO_BO_UNPACK_N(afloat, float);
 		s += sizeof(float);
-		if (!checksum) {
-		    PUSHs(sv_2mortal(newSVnv((NV)afloat)));
 		}
-		else {
+		DO_BO_UNPACK_N(afloat, float);
+		if (!checksum)
+		    PUSHs(sv_2mortal(newSVnv((NV)afloat)));
+		else
 		    cdouble += afloat;
 		}
-	    }
 	    break;
 	case 'd':
 	    while (len-- > 0) {
+		double adouble;
+		if (utf8) {
+		    if (!next_uni_bytes(aTHX_ &s, strend, (char *) &adouble,
+					sizeof(adouble))) break;
+		} else {
 		Copy(s, &adouble, 1, double);
-		DO_BO_UNPACK_N(adouble, double);
 		s += sizeof(double);
-		if (!checksum) {
-		    PUSHs(sv_2mortal(newSVnv((NV)adouble)));
 		}
-		else {
+		DO_BO_UNPACK_N(adouble, double);
+		if (!checksum)
+		    PUSHs(sv_2mortal(newSVnv((NV)adouble)));
+		else
 		    cdouble += adouble;
 		}
-	    }
 	    break;
 	case 'F':
 	    while (len-- > 0) {
+		NV anv;
+		if (utf8) {
+		    if (!next_uni_bytes(aTHX_ &s, strend,
+					(char *) &anv, sizeof(anv))) break;
+		} else {
 		Copy(s, &anv, 1, NV);
-		DO_BO_UNPACK_N(anv, NV);
 		s += NVSIZE;
-		if (!checksum) {
-		    PUSHs(sv_2mortal(newSVnv(anv)));
 		}
-		else {
+		DO_BO_UNPACK_N(anv, NV);
+		if (!checksum)
+		    PUSHs(sv_2mortal(newSVnv(anv)));
+		else
 		    cdouble += anv;
 		}
-	    }
 	    break;
 #if defined(HAS_LONG_DOUBLE) && defined(USE_LONG_DOUBLE)
 	case 'D':
 	    while (len-- > 0) {
+		long double aldouble;
+		if (utf8) {
+		    if (!next_uni_bytes(aTHX_ &s, strend, (char *) &aldouble,
+					sizeof(aldouble))) break;
+		} else {
 		Copy(s, &aldouble, 1, long double);
-		DO_BO_UNPACK_N(aldouble, long double);
 		s += LONG_DOUBLESIZE;
-		if (!checksum) {
+		}
+		DO_BO_UNPACK_N(aldouble, long double);
+		if (!checksum)
 		    PUSHs(sv_2mortal(newSVnv((NV)aldouble)));
-		}
-		else {cdouble += aldouble;
-		}
+		else
+		    cdouble += aldouble;
 	    }
 	    break;
 #endif
@@ -1667,11 +1975,38 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
                  */
                 PL_uudmap[' '] = 0;
             }
+	    {
+		STRLEN l = (STRLEN) (strend - s) * 3 / 4;
+		sv = sv_2mortal(NEWSV(42, l));
+		if (l) SvPOK_on(sv);
+	    }
+	    if (utf8) {
+		while (next_uni_uu(aTHX_ &s, strend, &len)) {
+		    I32 a, b, c, d;
+		    char hunk[4];
 
-	    along = (strend - s) * 3 / 4;
-	    sv = NEWSV(42, along);
-	    if (along)
-		SvPOK_on(sv);
+		    hunk[3] = '\0';
+		    while (len > 0) {
+			next_uni_uu(aTHX_ &s, strend, &a);
+			next_uni_uu(aTHX_ &s, strend, &b);
+			next_uni_uu(aTHX_ &s, strend, &c);
+			next_uni_uu(aTHX_ &s, strend, &d);
+			hunk[0] = (char)((a << 2) | (b >> 4));
+			hunk[1] = (char)((b << 4) | (c >> 2));
+			hunk[2] = (char)((c << 6) | d);
+			sv_catpvn(sv, hunk, (len > 3) ? 3 : len);
+			len -= 3;
+		    }
+		    if (s < strend) {
+			if (*s == '\n') s++;
+			else {
+			    /* possible checksum byte */
+			    char *skip = s+UTF8SKIP(s);
+			    if (skip < strend && *skip == '\n') s = skip+1;
+			}
+		    }
+		}
+	    } else {
 	    while (s < strend && *s > ' ' && ISUUCHAR(*s)) {
 		I32 a, b, c, d;
 		char hunk[4];
@@ -1707,24 +2042,25 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		    if (s + 1 < strend && s[1] == '\n')
 		        s += 2;
 	    }
-	    XPUSHs(sv_2mortal(sv));
+	    }
+	    XPUSHs(sv);
 	    break;
 	}
 
 	if (checksum) {
 	    if (strchr("fFdD", TYPE_NO_MODIFIERS(datumtype)) ||
 	      (checksum > bits_in_uv &&
-	       strchr("cCsSiIlLnNUvVqQjJ", TYPE_NO_MODIFIERS(datumtype))) ) {
-		NV trouble;
+	       strchr("cCsSiIlLnNUWvVqQjJ", TYPE_NO_MODIFIERS(datumtype))) ) {
+		NV trouble, anv;
 
-                adouble = (NV) (1 << (checksum & 15));
+                anv = (NV) (1 << (checksum & 15));
 		while (checksum >= 16) {
 		    checksum -= 16;
-		    adouble *= 65536.0;
+		    anv *= 65536.0;
 		}
 		while (cdouble < 0.0)
-		    cdouble += adouble;
-		cdouble = Perl_modf(cdouble / adouble, &trouble) * adouble;
+		    cdouble += anv;
+		cdouble = Perl_modf(cdouble / anv, &trouble) * anv;
 		sv = newSVnv(cdouble);
 	    }
 	    else {
@@ -1775,18 +2111,11 @@ PP(pp_unpack)
     I32 gimme = GIMME_V;
     STRLEN llen;
     STRLEN rlen;
-    register char *pat = SvPV(left, llen);
-#ifdef PACKED_IS_OCTETS
-    /* Packed side is assumed to be octets - so force downgrade if it
-       has been UTF-8 encoded by accident
-     */
-    register char *s = SvPVbyte(right, rlen);
-#else
-    register char *s = SvPV(right, rlen);
-#endif
+    char *pat = SvPV(left,  llen);
+    char *s   = SvPV(right, rlen);
     char *strend = s + rlen;
-    register char *patend = pat + llen;
-    register I32 cnt;
+    char *patend = pat + llen;
+    I32 cnt;
 
     PUTBACK;
     cnt = unpackstring(pat, patend, s, strend,

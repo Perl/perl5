@@ -942,8 +942,9 @@ SKIP: {
 
     # does unpack U0U on byte data warn?
     {
+        my $bad = pack("U0C", 255);
         local $SIG{__WARN__} = sub { $@ = "@_" };
-        my @null = unpack('U0U', chr(255));
+        my @null = unpack('U0U', $bad);
         like($@, qr/^Malformed UTF-8 character /);
     }
 }
@@ -1507,16 +1508,16 @@ is(unpack('c'), 65, "one-arg unpack (change #18751)"); # defaulting to $_
     # U0 and C0 must be scoped
     my (@x) = unpack("a(U0)U", "b\341\277\274");
     is($x[0], 'b', 'before scope');
-    is($x[1], 225, 'after scope');
+    is($x[1], 8188, 'after scope');
 }
 
 {
     # counted length prefixes shouldn't change C0/U0 mode
     # (note the length is actually 0 in this test)
-    is(join(',', unpack("aC/UU",   "b\0\341\277\274")), 'b,225');
-    is(join(',', unpack("aC/CU",   "b\0\341\277\274")), 'b,225');
-    is(join(',', unpack("aU0C/UU", "b\0\341\277\274")), 'b,8188');
-    is(join(',', unpack("aU0C/CU", "b\0\341\277\274")), 'b,8188');
+    is(join(',', unpack("aC/UU",   "b\0\341\277\274")), 'b,8188');
+    is(join(',', unpack("aC/CU",   "b\0\341\277\274")), 'b,8188');
+    is(join(',', unpack("aU0C/UU", "b\0\341\277\274")), 'b,225');
+    is(join(',', unpack("aU0C/CU", "b\0\341\277\274")), 'b,225');
 }
 
 {
