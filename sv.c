@@ -9004,6 +9004,7 @@ Perl_sv_dup(pTHX_ SV *sstr, clone_params* param)
 	else
 	    CvOUTSIDE(dstr)	= cv_dup(CvOUTSIDE(sstr), param);
 	CvFLAGS(dstr)	= CvFLAGS(sstr);
+	CvFILE(dstr) = CvXSUB(sstr) ? CvFILE(sstr) : SAVEPV(CvFILE(sstr));
 	break;
     default:
 	Perl_croak(aTHX_ "Bizarre SvTYPE [%d]", SvTYPE(sstr));
