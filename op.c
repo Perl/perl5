@@ -1756,9 +1756,14 @@ Perl_block_end(pTHX_ I32 floor, OP *seq)
 {
     int needblockscope = PL_hints & HINT_BLOCK_SCOPE;
     line_t copline = PL_copline;
-    /* there should be a nextstate in every block */
-    OP* retval = seq ? scalarseq(seq) : newSTATEOP(0, Nullch, seq);
-    PL_copline = copline;  /* XXX newSTATEOP may reset PL_copline */
+    OP* retval = scalarseq(seq);
+    if (!seq) {
+	/* scalarseq() gave us an OP_STUB */
+	retval->op_flags |= OPf_PARENS;
+	/* there should be a nextstate in every block */
+	retval = newSTATEOP(0, Nullch, retval);
+	PL_copline = copline;  /* XXX newSTATEOP may reset PL_copline */
+    }
     LEAVE_SCOPE(floor);
     PL_compiling.op_private = (U8)(PL_hints & HINT_PRIVATE_MASK);
     if (needblockscope)

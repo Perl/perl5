@@ -13,7 +13,7 @@ BEGIN {
 
 use Config;
 
-print "1..173\n";
+print "1..174\n";
 
 my $test = 1;
 sub test (&) {
@@ -527,3 +527,10 @@ sub {
 }->();
 test {1};
 
+# [perl #17605] found that an empty block called in scalar context
+# can lead to stack corruption
+{
+    my $x = "foooobar";
+    $x =~ s/o//eg;
+    test { $x eq 'fbar' }
+}
