@@ -2231,10 +2231,12 @@ Pod::Plainer, Pod::Select, Pod::Text, Pod::Text::Color,
 Pod::Text::Overstrike, Pod::Text::Termcap, Pod::Usage, SDBM_File, Safe,
 Search::Dict, SelectSaver, SelfLoader, Shell, Socket, Storable, Switch,
 Symbol, Term::ANSIColor, Term::Cap, Term::Complete, Term::ReadLine, Test,
-Test::Harness, Text::Abbrev, Text::Balanced, Text::ParseWords,
-Text::Soundex, Text::Tabs, Text::Wrap, Tie::Array, Tie::Handle, Tie::Hash,
-Tie::RefHash, Tie::Scalar, Tie::SubstrHash, Time::Local, Time::gmtime,
-Time::localtime, Time::tm, UNIVERSAL, User::grent, User::pwent, Win32
+Test::Harness, Test::More, Test::Simple, Text::Abbrev, Text::Balanced,
+Text::ParseWords, Text::Soundex, Text::Tabs, Text::Wrap, Thread,
+Thread::Queue, Thread::Semaphore, Thread::Signal, Thread::Specific,
+Tie::Array, Tie::Handle, Tie::Hash, Tie::RefHash, Tie::Scalar,
+Tie::SubstrHash, Time::Local, Time::gmtime, Time::localtime, Time::tm,
+UNIVERSAL, User::grent, User::pwent, Win32
 
 =item Extension Modules
 
@@ -3910,14 +3912,14 @@ strLE, strLT, strNE, strnEQ, strnNE, StructCopy, SvCUR, SvCUR_set, SvEND,
 SvGETMAGIC, SvGROW, SvIOK, SvIOKp, SvIOK_notUV, SvIOK_off, SvIOK_on,
 SvIOK_only, SvIOK_only_UV, SvIOK_UV, SvIV, SvIVX, SvIVx, SvLEN, SvNIOK,
 SvNIOKp, SvNIOK_off, SvNOK, SvNOKp, SvNOK_off, SvNOK_on, SvNOK_only, SvNV,
-SvNVX, SvNVx, SvOK, SvOOK, SvPOK, SvPOKp, SvPOK_off, SvPOK_on, SvPOK_only,
+SvNVx, SvNVX, SvOK, SvOOK, SvPOK, SvPOKp, SvPOK_off, SvPOK_on, SvPOK_only,
 SvPOK_only_UTF8, SvPV, SvPVbyte, SvPVbytex, SvPVbytex_force,
 SvPVbyte_force, SvPVbyte_nolen, SvPVutf8, SvPVutf8x, SvPVutf8x_force,
 SvPVutf8_force, SvPVutf8_nolen, SvPVX, SvPVx, SvPV_force, SvPV_force_nomg,
 SvPV_nolen, SvREFCNT, SvREFCNT_dec, SvREFCNT_inc, SvROK, SvROK_off,
 SvROK_on, SvRV, SvSETMAGIC, SvSetMagicSV, SvSetMagicSV_nosteal, SvSetSV,
 SvSetSV_nosteal, SvSTASH, SvTAINT, SvTAINTED, SvTAINTED_off, SvTAINTED_on,
-SvTRUE, SvTYPE, svtype, SVt_IV, SVt_NV, SVt_PV, SVt_PVAV, SVt_PVCV,
+SvTRUE, svtype, SvTYPE, SVt_IV, SVt_NV, SVt_PV, SVt_PVAV, SVt_PVCV,
 SVt_PVHV, SVt_PVMG, SvUOK, SvUPGRADE, SvUTF8, SvUTF8_off, SvUTF8_on, SvUV,
 SvUVX, SvUVx, sv_2bool, sv_2cv, sv_2io, sv_2iv, sv_2mortal, sv_2nv,
 sv_2pvbyte, sv_2pvbyte_nolen, sv_2pvutf8, sv_2pvutf8_nolen, sv_2pv_flags,
@@ -4579,7 +4581,11 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item 64-bit platforms and malloc
 
-=item Future Deprecations
+=item AIX Dynaloading
+
+=item Socket Extension Dynamic in VMS
+
+=item Deprecations
 
 =back
 
@@ -4633,23 +4639,29 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =over 4
 
-=item AIX vac 5.0.0.0 May Produce Buggy Code For Perl
+=item AIX
+
+=item Amiga Perl Invoking Mystery
 
 =item lib/ftmp-security tests warn 'system possibly insecure'
 
-=item lib/io_multihomed Fails In LP64-Configured HP-UX
+=item Cygwin intermittent failures of lib/Memoize/t/expire_file 11 and 12
 
-=item Test lib/posix Subtest 9 Fails In LP64-Configured HP-UX
+=item HP-UX lib/io_multihomed Fails When LP64-Configur
 
-=item lib/b test 19
+=item  HP-UX lib/posix Subtest 9 Fails When LP64-Configured
 
 =item Linux With Sfio Fails op/misc Test 48
 
-=item sigaction test 13 in VMS
-
-=item sprintf tests 129 and 130
+=item op/sprintf tests 129 and 130
 
 =item  Failure of Thread tests
+
+=item UNICOS
+
+=item UNICOS/mk ext/IPC/SysV/t/sem test 8
+
+=item UTS
 
 =item Localising a Tied Variable Leaks Memory
 
@@ -4660,6 +4672,8 @@ I<The Road goes ever on and on, down from the door where it began.>
 =item Building Extensions Can Fail Because Of Largefiles
 
 =item The Compiler Suite Is Still Experimental
+
+=item The Long Double Support is Still Experimental
 
 =back
 
