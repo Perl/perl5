@@ -2,10 +2,10 @@ BEGIN {require 5.004;}
 
 package ExtUtils::MakeMaker;
 
-$VERSION = "5.90_01";
+$VERSION = "5.91_02";
 $Version_OK = "5.49";   # Makefiles older than $Version_OK will die
                         # (Will be checked from MakeMaker version 4.13 onwards)
-($Revision = substr(q$Revision: 1.37 $, 10)) =~ s/\s+$//;
+($Revision = substr(q$Revision: 1.44 $, 10)) =~ s/\s+$//;
 
 require Exporter;
 use Config;
@@ -33,6 +33,10 @@ full_setup();
 
 require ExtUtils::MM;  # Things like CPAN assume loading ExtUtils::MakeMaker
                        # will give them MM.
+
+require ExtUtils::MY;  # XXX pre-5.8 versions of ExtUtils::Embed expect
+                       # loading ExtUtils::MakeMaker will give them MY.
+                       # This will go when Embed is it's own CPAN module.
 
 
 sub WriteMakefile {
@@ -100,7 +104,7 @@ sub eval_in_x {
 #         } else {
 #             warn "WARNING from evaluation of $dir/Makefile.PL: $@";
 #         }
-        warn "WARNING from evaluation of $dir/Makefile.PL: $@";
+        die "ERROR from evaluation of $dir/Makefile.PL: $@";
     }
 }
 
@@ -117,12 +121,16 @@ sub full_setup {
     EXCLUDE_EXT EXE_FILES FIRST_MAKEFILE 
     FULLPERL FULLPERLRUN FULLPERLRUNINST
     FUNCLIST H IMPORTS
-    INST_ARCHLIB INST_SCRIPT INST_BIN INST_LIB
+    INST_ARCHLIB INST_SCRIPT INST_BIN INST_LIB INST_MAN1DIR INST_MAN3DIR
     INSTALLDIRS
     PREFIX          SITEPREFIX      VENDORPREFIX
     INSTALLPRIVLIB  INSTALLSITELIB  INSTALLVENDORLIB
     INSTALLARCHLIB  INSTALLSITEARCH INSTALLVENDORARCH
-    INSTALLBIN      INSTALLSITEBIN  INSTALLVENDORBIN  INSTALLSCRIPT 
+    INSTALLBIN      INSTALLSITEBIN  INSTALLVENDORBIN
+    INSTALLMAN1DIR          INSTALLMAN3DIR
+    INSTALLSITEMAN1DIR      INSTALLSITEMAN3DIR
+    INSTALLVENDORMAN1DIR    INSTALLVENDORMAN3DIR
+    INSTALLSCRIPT 
     PERL_LIB        PERL_ARCHLIB 
     SITELIBEXP      SITEARCHEXP 
     INC INCLUDE_EXT LDFROM LIB LIBPERL_A LIBS
@@ -281,7 +289,7 @@ sub new {
                    unless $self->{PREREQ_FATAL};
             $unsatisfied{$prereq} = 'not installed';
         } elsif ($pr_version < $self->{PREREQ_PM}->{$prereq} ){
-            warn "Warning: prerequisite %s %s not found. We have %s.\n",
+            warn sprintf "Warning: prerequisite %s %s not found. We have %s.\n",
               $prereq, $self->{PREREQ_PM}{$prereq}, 
                 ($pr_version || 'unknown version') 
                   unless $self->{PREREQ_FATAL};
@@ -712,21 +720,16 @@ sub skipcheck {
 sub flush {
     my $self = shift;
     my($chunk);
-#    use FileHandle ();
-#    my $fh = new FileHandle;
     local *FH;
     print STDOUT "Writing $self->{MAKEFILE} for $self->{NAME}\n";
 
     unlink($self->{MAKEFILE}, "MakeMaker.tmp", $Is_VMS ? 'Descrip.MMS' : '');
-#    $fh->open(">MakeMaker.tmp") or die "Unable to open MakeMaker.tmp: $!";
     open(FH,">MakeMaker.tmp") or die "Unable to open MakeMaker.tmp: $!";
 
     for $chunk (@{$self->{RESULT}}) {
-#       print $fh "$chunk\n";
         print FH "$chunk\n";
     }
 
-#    $fh->close;
     close FH;
     my($finalname) = $self->{MAKEFILE};
     rename("MakeMaker.tmp", $finalname);
@@ -884,8 +887,8 @@ set of perl C<-I> options.
 
 MakeMaker also checks for any files matching glob("t/*.t"). It will
 add commands to the test target of the generated Makefile that execute
-all matching files via the L<Test::Harness> module with the C<-I>
-switches set correctly.
+all matching files in alphabetical order via the L<Test::Harness>
+module with the C<-I> switches set correctly.
 
 =head2 make testdb
 
@@ -1783,6 +1786,10 @@ Like PREFIX, but only for the vendor install locations.
 
 Defaults to PREFIX (if set) or $Config{vendorprefixexp}
 
+=item VERBINST
+
+If true, make install will be verbose
+
 =item VERSION
 
 Your version number for distributing the package.  This defaults to
@@ -1804,7 +1811,7 @@ MakeMaker object. The following lines will be parsed o.k.:
 
     $VERSION = '1.00';
     *VERSION = \'1.01';
-    ( $VERSION ) = '$Revision: 1.37 $ ' =~ /\$Revision:\s+([^\s]+)/;
+    ( $VERSION ) = '$Revision: 1.43 $ ' =~ /\$Revision:\s+([^\s]+)/;
     $FOO::VERSION = '1.10';
     *FOO::VERSION = \'1.11';
     our $VERSION = 1.2.3;       # new for perl5.6.0 

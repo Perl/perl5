@@ -1,3 +1,40 @@
+5.91_02 Wed Apr 24 01:29:56 EDT 2002
+    - Adjustments to tests for inclusion in the core.
+
+5.91_01 Wed Apr 24 00:11:06 EDT 2002
+    [[ API Changes ]]
+    * A failing Makefile.PL in a subdir will now kill the whole
+      makefile making process.
+    * "make install PREFIX=something" will no longer work.  Sorry.
+    - Now supporting the usevendorprefix %Config setting
+    - Tests now guaranteed to run in alphabetical order.
+    - Allowing $VERSION = 0.
+
+    [[ Bug Fixes ]]
+    - Missing prerequisite warning malformatted.
+    - INSTALL*MAN*DIR and INST_MAN*DIR weren't allowed on the command 
+      line.
+    * For years now skipcheck() has been returning a different
+      value than what was documented.
+    - Partially reversing Ken's "speed up ExtUtils::Manifest" patch
+      from 5.51_01 so MANIFEST overrides MANIFEST.SKIP.
+    * Fixed PREFIXification so it works on Win32.
+    * Fixed PREFIXification so it works on VMS.
+    - Fixed INSTALLMAN*DIR=none on VMS.
+    * NetWare fixes (bleadperl@16076)
+    - Craig Berry fixed some macro corruption on VMS.
+    - Systems configured to not have man pages now honored thanks to
+      Paul Green
+    - Hack to allow 5.6.X versions of ExtUtils::Embed use MY implicitly.
+    - Moved use of glob out of MM_Unix so MacPerl could build
+
+    [[ Test Changes ]]
+    - Shortening directory levels to accomodate old VMS's
+    - was using a slightly wrong prefix for the prefix tests
+
+    [[ Doc Fixes ]]
+    - Documenting VERBINST
+
 5.90_01 Thu Apr 11 01:11:54 EDT 2002
     [[ API Changes ]]
     * Implementation of the new PREFIX logic.

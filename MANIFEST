@@ -1025,11 +1025,9 @@ lib/ExtUtils/MM_Win32.pm	MakeMaker methods for Win32
 lib/ExtUtils/MM_Win95.pm        MakeMaker methods for Win95
 lib/ExtUtils/MY.pm              MakeMaker user override class
 lib/ExtUtils/Packlist.pm	Manipulates .packlist files
+lib/ExtUtils/t/00setup_dummy.t  Setup MakeMaker test module
+lib/ExtUtils/t/backwards.t      Check MakeMaker's backwards compatibility
 lib/ExtUtils/t/basic.t		See if MakeMaker can build a module
-lib/ExtUtils/t/Big-Fat-Dummy/Liar/lib/Big/Fat/Liar.pm MakeMaker dummy module
-lib/ExtUtils/t/Big-Fat-Dummy/Liar/Makefile.PL         MakeMaker dummy module
-lib/ExtUtils/t/Big-Fat-Dummy/lib/Big/Fat/Dummy.pm     MakeMaker dummy module
-lib/ExtUtils/t/Big-Fat-Dummy/Makefile.PL              MakeMaker dummy module
 lib/ExtUtils/t/Command.t	See if ExtUtils::Command works (Win32 only)
 lib/ExtUtils/t/Constant.t	See if ExtUtils::Constant works
 lib/ExtUtils/t/Embed.t		See if ExtUtils::Embed and embedding works
@@ -1047,10 +1045,10 @@ lib/ExtUtils/t/MM_VMS.t		See if ExtUtils::MM_VMS works
 lib/ExtUtils/t/MM_Win32.t	See if ExtUtils::MM_Win32 works
 lib/ExtUtils/t/Packlist.t	See if Packlist works
 lib/ExtUtils/t/prefixify.t      See if MakeMaker can apply a PREFIX
-lib/ExtUtils/t/Problem-Module/Makefile.PL           MakeMaker dummy module
-lib/ExtUtils/t/Problem-Module/subdir/Makefile.PL    MakeMaker dummy module
 lib/ExtUtils/t/problems.t       How MakeMaker reacts to build problems
 lib/ExtUtils/t/testlib.t	See if ExtUtils::testlib works
+lib/ExtUtils/t/VERSION_FROM.t   See if MakeMaker's VERSION_FROM works
+lib/ExtUtils/t/zz_cleanup_dummy.t   Cleanup MakeMaker test module
 lib/ExtUtils/testlib.pm		Fixes up @INC to use just-built extension
 lib/ExtUtils/typemap		Extension interface types
 lib/ExtUtils/xsubpp		External subroutine preprocessor

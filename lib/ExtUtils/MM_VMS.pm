@@ -431,6 +431,7 @@ sub constants {
             PERL_LIB PERL_ARCHLIB
             PERL_INC PERL_SRC FULLEXT ] ) {
 	next unless defined $self->{$macro};
+        next if $macro =~ /MAN/ && $self->{$macro} eq 'none';
 	$self->{$macro} = $self->fixpath($self->{$macro},1);
     }
     $self->{PERL_VMS} = File::Spec->catdir($self->{PERL_SRC},q(VMS))
@@ -744,10 +745,13 @@ sub pm_to_blib {
 pm_to_blib : pm_to_blib.ts
 	$(NOECHO) $(NOOP)
 
+};
+
+    push @m, <<'MAKE_FRAG', 
 # As always, keep under DCL's 255-char limit
 pm_to_blib.ts : $(TO_INST_PM)
-	$(NOECHO) $(PERL) -e "print '},shift(@files),q{ },shift(@files),q{'" >.MM_tmp
-};
+	$(NOECHO) $(RM_F) .MM_tmp
+MAKE_FRAG
 
     $line = '';  # avoid uninitialized var warning
     while ($from = shift(@files),$to = shift(@files)) {
@@ -1853,6 +1857,15 @@ $(MAKEFILE) : Makefile.PL $(CONFIGDEP)
     join('',@m);
 }
 
+=item find_tests (override)
+
+=cut
+
+sub find_tests {
+    my $self = shift;
+    return -d 't' ? 't/*.t' : '';
+}
+
 =item test (override)
 
 Use VMS commands for handling subdirectories.
@@ -1861,7 +1874,7 @@ Use VMS commands for handling subdirectories.
 
 sub test {
     my($self, %attribs) = @_;
-    my($tests) = $attribs{TESTS} || ( -d 't' ? 't/*.t' : '');
+    my($tests) = $attribs{TESTS} || $self->find_tests;
     my(@m);
     push @m,"
 TEST_VERBOSE = 0
@@ -2173,17 +2186,103 @@ part of a filespec.
 =cut
 
 sub nicetext {
-
     my($self,$text) = @_;
+    return $text if $text =~ m/^\w+\s*=/; # leave macro defs alone
     $text =~ s/([^\s:])(:+\s)/$1 $2/gs;
     $text;
 }
 
-1;
+=item prefixify (override)
+
+prefixifying on VMS is simple.  Each should simply be:
+
+    perl_root:[some.dir]
+
+which can just be converted to:
+
+    volume:[your.prefix.some.dir]
+
+otherwise you get the default layout.
+
+In effect, your search prefix is ignored and $Config{vms_prefix} is
+used instead.
+
+=cut
+
+sub prefixify {
+    my($self, $var, $sprefix, $rprefix, $default) = @_;
+    $default = VMS::Filespec::vmsify($default) 
+      unless $default =~ /\[.*\]/;
+
+    (my $var_no_install = $var) =~ s/^install//;
+    my $path = $self->{uc $var} || $Config{lc $var} || 
+               $Config{lc $var_no_install};
+
+    if( !$path ) {
+        print STDERR "  no Config found for $var.\n" if $Verbose >= 2;
+        $path = $self->_prefixify_default($rprefix, $default);
+    }
+    elsif( $sprefix eq $rprefix ) {
+        print STDERR "  no new prefix.\n" if $Verbose >= 2;
+    }
+    else {
+
+        print STDERR "  prefixify $var => $path\n"     if $Verbose >= 2;
+        print STDERR "    from $sprefix to $rprefix\n" if $Verbose >= 2;
+
+        my($path_vol, $path_dirs) = File::Spec->splitpath( $path );
+        if( $path_vol eq $Config{vms_prefix}.':' ) {
+            print STDERR "  $Config{vms_prefix}: seen\n" if $Verbose >= 2;
+
+            $path_dirs =~ s{^\[}{\[.} unless $path_dirs =~ m{^\[\.};
+            $path = $self->_catprefix($rprefix, $path_dirs);
+        }
+        else {
+            $path = $self->_prefixify_default($rprefix, $default);
+        }
+    }
+
+    print "    now $path\n" if $Verbose >= 2;
+    return $self->{uc $var} = $path;
+}
+
+
+sub _prefixify_default {
+    my($self, $rprefix, $default) = @_;
+
+    print STDERR "  cannot prefix, using default.\n" if $Verbose >= 2;
+
+    if( !$default ) {
+        print STDERR "No default!\n" if $Verbose >= 1;
+        return;
+    }
+    if( !$rprefix ) {
+        print STDERR "No replacement prefix!\n" if $Verbose >= 1;
+        return '';
+    }
+
+    return $self->_catprefix($rprefix, $default);
+}
+
+sub _catprefix {
+    my($self, $rprefix, $default) = @_;
+
+    my($rvol, $rdirs) = File::Spec->splitpath($rprefix);
+    if( $rvol ) {
+        return File::Spec->catpath($rvol,
+                                   File::Spec->catdir($rdirs, $default),
+                                   ''
+                                  )
+    }
+    else {
+        return File::Spec->catdir($rdirs, $default);
+    }
+}
+
 
 =back
 
 =cut
 
-__END__
+1;
 

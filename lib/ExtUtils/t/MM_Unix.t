@@ -18,7 +18,7 @@ BEGIN {
         plan skip_all => 'Non-Unix platform';
     }
     else {
-        plan tests => 108;
+        plan tests => 112;
     }
 }
 
@@ -185,8 +185,25 @@ is ($t->nicetext('LOTR'),'LOTR','nicetext');
 my $self_name = $ENV{PERL_CORE} ? '../lib/ExtUtils/t/MM_Unix.t' 
                                 : 'MM_Unix.t';
 
-is ($t->parse_version($self_name),'0.02',
-  'parse_version on ourself');
+is( $t->parse_version($self_name), '0.02',  'parse_version on ourself');
+
+my %versions = (
+                '$VERSION = 0.0'    => 0.0,
+                '$VERSION = -1.0'   => -1.0,
+                '$VERSION = undef'  => 'undef',
+                '$wibble  = 1.0'    => 'undef',
+               );
+
+while( my($code, $expect) = each %versions ) {
+    open(FILE, ">VERSION.tmp") || die $!;
+    print FILE "$code\n";
+    close FILE;
+
+    is( $t->parse_version('VERSION.tmp'), $expect, $code );
+
+    unlink "VERSION.tmp";
+}
+
 
 ###############################################################################
 # perl_script (on unix any ordinary, readable file)

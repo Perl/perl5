@@ -39,6 +39,8 @@ Any $(FOO) used in the examples are make variables, not Perl.
 Runs the tests on @ARGV via Test::Harness passing through the $verbose
 flag.  Any @test_libs will be unshifted onto the test's @INC.
 
+@test_libs are run in alphabetical order.
+
 =cut
 
 sub test_harness {
@@ -49,7 +51,7 @@ sub test_harness {
 
     local @INC = @INC;
     unshift @INC, map { File::Spec->rel2abs($_) } @_;
-    Test::Harness::runtests(@ARGV);
+    Test::Harness::runtests(sort { lc $a cmp lc $b } @ARGV);
 }
 
 =back

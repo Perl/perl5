@@ -5,40 +5,31 @@ require 5.005_03;  # Maybe further back, dunno
 use strict;
 
 use Exporter ();
-use Carp ();
+use Carp;
 use Config;
 use File::Basename qw(basename dirname fileparse);
 use File::Spec;
 use DirHandle;
 use strict;
 use vars qw($VERSION @ISA
-            $Is_Mac $Is_OS2 $Is_VMS $Is_Win32 $Is_Dos $Is_VOS $Is_NetWare
+            $Is_Mac $Is_OS2 $Is_VMS $Is_Win32 $Is_Dos $Is_VOS
             $Verbose %pm %static $Xsubpp_Version
             %Config_Override
            );
 
 use ExtUtils::MakeMaker qw($Verbose neatvalue);
 
-$VERSION = '1.30_01';
+$VERSION = '1.31_01';
 
 require ExtUtils::MM_Any;
 @ISA = qw(ExtUtils::MM_Any);
 
 $Is_OS2   = $^O eq 'os2';
 $Is_Mac   = $^O eq 'MacOS';
-$Is_Win32 = $^O eq 'MSWin32';
+$Is_Win32 = $^O eq 'MSWin32' || $Config{osname} eq 'NetWare';
 $Is_Dos   = $^O eq 'dos';
 $Is_VOS   = $^O eq 'vos';
-+$Is_NetWare = $Config{'osname'} eq 'NetWare'; # Config{'osname'} intentional
-if ($Is_NetWare) {
-	$^O = 'NetWare';
- 	$Is_Win32 = 0;
-}
-
-if ($Is_VMS = $^O eq 'VMS') {
-    require VMS::Filespec;
-    import VMS::Filespec qw( &vmsify );
-}
+$Is_VMS   = $^O eq 'VMS';
 
 =head1 NAME
 
@@ -1107,6 +1098,20 @@ in these dirs:
     0; # false and not empty
 }
 
+=item find_tests
+
+  my $test = $mm->find_tests;
+
+Returns a string suitable for feeding to the shell to return all
+tests in t/*.t.
+
+=cut
+
+sub find_tests {
+    my($self) = shift;
+    return 't/*.t';
+}
+
 =back
 
 =head2 Methods to actually produce chunks of text for the Makefile
@@ -1131,7 +1136,7 @@ sub fixin { # stolen from the pink Camel book, more or less
     for my $file (@files) {
 	local(*FIXIN);
 	local(*FIXOUT);
-	open(FIXIN, $file) or Carp::croak "Can't process '$file': $!";
+	open(FIXIN, $file) or croak "Can't process '$file': $!";
 	local $/ = "\n";
 	chomp(my $line = <FIXIN>);
 	next unless $line =~ s/^\s*\#!\s*//;     # Not a shbang file.
@@ -1562,7 +1567,7 @@ sub init_main {
     if ($self->{PERL_SRC}){
 	$self->{PERL_LIB}     ||= File::Spec->catdir("$self->{PERL_SRC}","lib");
 	$self->{PERL_ARCHLIB} = $self->{PERL_LIB};
-	$self->{PERL_INC}     = ($Is_Win32 || $Is_NetWare) ? File::Spec->catdir($self->{PERL_LIB},"CORE") : $self->{PERL_SRC};
+	$self->{PERL_INC}     = ($Is_Win32) ? File::Spec->catdir($self->{PERL_LIB},"CORE") : $self->{PERL_SRC};
 
 	# catch a situation that has occurred a few times in the past:
 	unless (
@@ -1575,8 +1580,6 @@ sub init_main {
 		$Is_Mac
 		or
 		$Is_Win32
-		or
-		$Is_NetWare
 	       ){
 	    warn qq{
 You cannot build extensions below the perl source tree after executing
@@ -1698,8 +1701,11 @@ usually solves this kind of problem.
     # Determine VERSION and VERSION_FROM
     ($self->{DISTNAME}=$self->{NAME}) =~ s#(::)#-#g unless $self->{DISTNAME};
     if ($self->{VERSION_FROM}){
-	$self->{VERSION} = $self->parse_version($self->{VERSION_FROM}) or
-	    Carp::carp "WARNING: Setting VERSION via file '$self->{VERSION_FROM}' failed\n"
+	$self->{VERSION} = $self->parse_version($self->{VERSION_FROM});
+        if( $self->{VERSION} eq 'undef' ) {
+	    carp "WARNING: Setting VERSION via file ".
+                 "'$self->{VERSION_FROM}' failed\n";
+        }
     }
 
     # strip blanks
@@ -1707,8 +1713,6 @@ usually solves this kind of problem.
 	$self->{VERSION} =~ s/^\s+//;
 	$self->{VERSION} =~ s/\s+$//;
     }
-
-    $self->{VERSION} ||= "0.10";
     ($self->{VERSION_SYM} = $self->{VERSION}) =~ s/\W/_/g;
 
     $self->{DISTVNAME} = "$self->{DISTNAME}-$self->{VERSION}";
@@ -1849,46 +1853,28 @@ INSTALLDIRS) and PREFIX.
 sub init_INSTALL {
     my($self) = shift;
 
-    # The user who requests an installation directory explicitly
-    # should not have to tell us an architecture installation directory
-    # as well. We look if a directory exists that is named after the
-    # architecture. If not we take it as a sign that it should be the
-    # same as the requested installation directory. Otherwise we take
-    # the found one.
-    # We do the same thing twice: for privlib/archlib and for sitelib/sitearch
-    for my $libpair ({l=>"privlib", a=>"archlib"}, 
-                     {l=>"sitelib", a=>"sitearch"}) 
-    {
-        my $lib = "install$libpair->{l}";
-        my $Lib = uc $lib;
-        my $Arch = uc "install$libpair->{a}";
-        if( $self->{$Lib} && ! $self->{$Arch} ){
-            my($ilib) = $Config{$lib};
-            $ilib = VMS::Filespec::unixify($ilib) if $Is_VMS;
-
-            $self->prefixify($Arch,$ilib,$self->{$Lib});
-
-            unless (-d $self->{$Arch}) {
-                print STDOUT "Directory $self->{$Arch} not found\n" 
-                  if $Verbose;
-                $self->{$Arch} = $self->{$Lib};
-            }
-            print STDOUT "Defaulting $Arch to $self->{$Arch}\n" if $Verbose;
-        }
-    }
+    $self->init_lib2arch;
 
     # There are no Config.pm defaults for these.
     $Config_Override{installsiteman1dir} = 
-        "$Config{siteprefixexp}/man/man\$(MAN1EXT)";
+        File::Spec->catdir($Config{siteprefixexp}, 'man', 'man$(MAN1EXT)');
     $Config_Override{installsiteman3dir} = 
-        "$Config{siteprefixexp}/man/man\$(MAN3EXT)";
-    $Config_Override{installvendorman1dir} =
-        "$Config{vendorprefixexp}/man/man\$(MAN1EXT)";
-    $Config_Override{installvendorman3dir} =
-        "$Config{vendorprefixexp}/man/man\$(MAN3EXT)";
+        File::Spec->catdir($Config{siteprefixexp}, 'man', 'man$(MAN3EXT)');
 
-    my $iprefix = $Config{installprefixexp} || '';
-    my $vprefix = $Config{vendorprefixexp}  || $iprefix;
+    if( $Config{usevendorprefix} ) {
+        $Config_Override{installvendorman1dir} =
+          File::Spec->catdir($Config{vendorprefixexp}, 'man', 'man$(MAN1EXT)');
+        $Config_Override{installvendorman3dir} =
+          File::Spec->catdir($Config{vendorprefixexp}, 'man', 'man$(MAN3EXT)');
+    }
+    else {
+        $Config_Override{installvendorman1dir} = '';
+        $Config_Override{installvendorman3dir} = '';
+    }
+
+    my $iprefix = $Config{installprefixexp} || $Config{installprefix} || 
+                  $Config{prefixexp}        || $Config{prefix} || '';
+    my $vprefix = $Config{usevendorprefix}  ? $Config{vendorprefixexp} : '';
     my $sprefix = $Config{siteprefixexp}    || '';
 
     my $u_prefix  = $self->{PREFIX}       || '';
@@ -1911,47 +1897,54 @@ sub init_INSTALL {
         $manstyle = $self->{LIBSTYLE} eq 'lib/perl5' ? 'lib/perl5' : '';
     }
 
+    # Some systems, like VOS, set installman*dir to '' if they can't
+    # read man pages.
+    for my $num (1, 3) {
+        $self->{'INSTALLMAN'.$num.'DIR'} ||= 'none'
+          unless $Config{'installman'.$num.'dir'};
+    }
+
     my %bin_layouts = 
     (
         bin         => { s => $iprefix,
-                         r => '$(PREFIX)',
+                         r => $u_prefix,
                          d => 'bin' },
         vendorbin   => { s => $vprefix,
-                         r => '$(VENDORPREFIX)',
+                         r => $u_vprefix,
                          d => 'bin' },
         sitebin     => { s => $sprefix,
-                         r => '$(SITEPREFIX)',
+                         r => $u_sprefix,
                          d => 'bin' },
         script      => { s => $iprefix,
-                         r => '$(PREFIX)',
+                         r => $u_prefix,
                          d => 'bin' },
     );
     
     my %man_layouts =
     (
         man1dir         => { s => $iprefix,
-                             r => '$(PREFIX)',
+                             r => $u_prefix,
                              d => 'man/man$(MAN1EXT)',
                              style => $manstyle, },
         siteman1dir     => { s => $sprefix,
-                             r => '$(SITEPREFIX)',
+                             r => $u_sprefix,
                              d => 'man/man$(MAN1EXT)',
                              style => $manstyle, },
         vendorman1dir   => { s => $vprefix,
-                             r => '$(VENDORPREFIX)',
+                             r => $u_vprefix,
                              d => 'man/man$(MAN1EXT)',
                              style => $manstyle, },
 
         man3dir         => { s => $iprefix,
-                             r => '$(PREFIX)',
+                             r => $u_prefix,
                              d => 'man/man$(MAN3EXT)',
                              style => $manstyle, },
         siteman3dir     => { s => $sprefix,
-                             r => '$(SITEPREFIX)',
+                             r => $u_sprefix,
                              d => 'man/man$(MAN3EXT)',
                              style => $manstyle, },
         vendorman3dir   => { s => $vprefix,
-                             r => '$(VENDORPREFIX)',
+                             r => $u_vprefix,
                              d => 'man/man$(MAN3EXT)',
                              style => $manstyle, },
     );
@@ -1959,28 +1952,28 @@ sub init_INSTALL {
     my %lib_layouts =
     (
         privlib     => { s => $iprefix,
-                         r => '$(PREFIX)',
+                         r => $u_prefix,
                          d => '',
                          style => $libstyle, },
         vendorlib   => { s => $vprefix,
-                         r => '$(VENDORPREFIX)',
+                         r => $u_vprefix,
                          d => '',
                          style => $libstyle, },
         sitelib     => { s => $sprefix,
-                         r => '$(SITEPREFIX)',
+                         r => $u_sprefix,
                          d => 'site_perl',
                          style => $libstyle, },
         
         archlib     => { s => $iprefix,
-                         r => '$(PREFIX)',
+                         r => $u_prefix,
                          d => "$version/$arch",
                          style => $libstyle },
         vendorarch  => { s => $vprefix,
-                         r => '$(VENDORPREFIX)',
+                         r => $u_vprefix,
                          d => "$version/$arch",
                          style => $libstyle },
         sitearch    => { s => $sprefix,
-                         r => '$(SITEPREFIX)',
+                         r => $u_sprefix,
                          d => "site_perl/$version/$arch",
                          style => $libstyle },
     );
@@ -2025,9 +2018,49 @@ sub init_INSTALL {
           if $Verbose >= 2;
     }
 
-    $self->{PREFIX} ||= $iprefix;
-
     return 1;
+}
+
+=begin _protected
+
+=item init_lib2arch
+
+    $mm->init_lib2arch
+
+=end _protected
+
+=cut
+
+sub init_lib2arch {
+    my($self) = shift;
+
+    # The user who requests an installation directory explicitly
+    # should not have to tell us an architecture installation directory
+    # as well. We look if a directory exists that is named after the
+    # architecture. If not we take it as a sign that it should be the
+    # same as the requested installation directory. Otherwise we take
+    # the found one.
+    for my $libpair ({l=>"privlib",   a=>"archlib"}, 
+                     {l=>"sitelib",   a=>"sitearch"},
+                     {l=>"vendorlib", a=>"vendorarch"},
+                    )
+    {
+        my $lib = "install$libpair->{l}";
+        my $Lib = uc $lib;
+        my $Arch = uc "install$libpair->{a}";
+        if( $self->{$Lib} && ! $self->{$Arch} ){
+            my($ilib) = $Config{$lib};
+
+            $self->prefixify($Arch,$ilib,$self->{$Lib});
+
+            unless (-d $self->{$Arch}) {
+                print STDOUT "Directory $self->{$Arch} not found\n" 
+                  if $Verbose;
+                $self->{$Arch} = $self->{$Lib};
+            }
+            print STDOUT "Defaulting $Arch to $self->{$Arch}\n" if $Verbose;
+        }
+    }
 }
 
 
@@ -2262,7 +2295,7 @@ sub installbin {
     push(@m, qq{
 EXE_FILES = @{$self->{EXE_FILES}}
 
-} . (($Is_Win32 || $Is_NetWare)
+} . ($Is_Win32
   ? q{FIXIN = pl2bat.bat
 } : q{FIXIN = $(PERLRUN) "-MExtUtils::MY" \
     -e "MY->fixin(shift)"
@@ -2752,7 +2785,8 @@ sub needs_linking {
     my($self) = shift;
     my($child,$caller);
     $caller = (caller(0))[3];
-    Carp::confess("Needs_linking called too early") if $caller =~ /^ExtUtils::MakeMaker::/;
+    confess("Needs_linking called too early") if 
+      $caller =~ /^ExtUtils::MakeMaker::/;
     return $self->{NEEDS_LINKING} if defined $self->{NEEDS_LINKING};
     if ($self->has_link_code or $self->{MAKEAPERL}){
 	$self->{NEEDS_LINKING} = 1;
@@ -2845,10 +2879,11 @@ sub parse_version {
 	no warnings;
 	$result = eval($eval);
 	warn "Could not eval '$eval' in $parsefile: $@" if $@;
-	$result = "undef" unless defined $result;
 	last;
     }
     close FH;
+
+    $result = "undef" unless defined $result;
     return $result;
 }
 
@@ -3092,8 +3127,8 @@ sub ppd {
 
     if ($self->{ABSTRACT_FROM}){
         $self->{ABSTRACT} = $self->parse_abstract($self->{ABSTRACT_FROM}) or
-            Carp::carp "WARNING: Setting ABSTRACT via file ".
-                       "'$self->{ABSTRACT_FROM}' failed\n";
+            carp "WARNING: Setting ABSTRACT via file ".
+                 "'$self->{ABSTRACT_FROM}' failed\n";
     }
 
     my ($pack_ver) = join ",", (split (/\./, $self->{VERSION}), (0)x4)[0..3];
@@ -3182,15 +3217,12 @@ sub prefixify {
     my($self,$var,$sprefix,$rprefix,$default) = @_;
 
     my $path = $self->{uc $var} || 
-               $Config_Override{lc $var} || $Config{lc $var};
+               $Config_Override{lc $var} || $Config{lc $var} || '';
 
-    print STDERR "  prefixify $var=$path\n" if $Verbose >= 2;
-    print STDERR "    from $sprefix to $rprefix\n" 
-      if $Verbose >= 2;
+    print STDERR "  prefixify $var => $path\n" if $Verbose >= 2;
+    print STDERR "    from $sprefix to $rprefix\n" if $Verbose >= 2;
 
-    $path = VMS::Filespec::unixpath($path) if $Is_VMS;
-
-    unless( $path =~ s,^\Q$sprefix\E(?=/|\z),$rprefix,s ) {
+    unless( $path =~ s{^\Q$sprefix\E\b}{$rprefix}s ) {
 
         print STDERR "    cannot prefix, using default.\n" if $Verbose >= 2;
         print STDERR "    no default!\n" if !$default && $Verbose >= 2;
@@ -3513,7 +3545,7 @@ sub test {
     my($self, %attribs) = @_;
     my $tests = $attribs{TESTS} || '';
     if (!$tests && -d 't') {
-	$tests = $Is_Win32 ? join(' ', <t\\*.t>) : 't/*.t';
+        $tests = $self->find_tests;
     }
     # note: 'test.pl' name is also hardcoded in init_dirscan()
     my(@m);
