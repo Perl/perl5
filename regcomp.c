@@ -3656,7 +3656,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 		}
 		RExC_parse = e + 1;
 		ANYOF_FLAGS(ret) |= ANYOF_UNICODE;
-		continue;
+		namedclass = ANYOF_MAX;  /* no official name, but it's named */
+		break;
 	    case 'n':	value = '\n';			break;
 	    case 'r':	value = '\r';			break;
 	    case 't':	value = '\t';			break;
@@ -4060,6 +4061,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 				ANYOF_BITMAP_SET(ret, value);
 		    }
 		    Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsXDigit\n");
+		    break;
+		case ANYOF_MAX:
+		    /* this is to handle \p and \P */
 		    break;
 		default:
 		    vFAIL("Invalid [::] class");
