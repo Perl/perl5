@@ -169,6 +169,13 @@ ext/Devel/Peek/Changes		Data debugging tool, changelog
 ext/Devel/Peek/Makefile.PL	Data debugging tool, makefile writer
 ext/Devel/Peek/Peek.pm		Data debugging tool, module and pod
 ext/Devel/Peek/Peek.xs		Data debugging tool, externals
+ext/Digest/MD5/Changes	Digest::MD5 extension changes
+ext/Digest/MD5/MD5.pm	Digest::MD5 extension
+ext/Digest/MD5/MD5.xs	Digest::MD5 extension
+ext/Digest/MD5/Makefile.PL	Digest::MD5 extension makefile writer
+ext/Digest/MD5/hints/dec_osf.pl	Hints for named architecture
+ext/Digest/MD5/hints/irix_6.pl	Hints for named architecture
+ext/Digest/MD5/typemap	Digest::MD5 extension
 ext/DynaLoader/DynaLoader_pm.PL	Dynamic Loader perl module
 ext/DynaLoader/Makefile.PL	Dynamic Loader makefile writer
 ext/DynaLoader/README		Dynamic Loader notes and intro
@@ -668,6 +675,7 @@ lib/Class/Struct.pm	Declare struct-like datatypes as Perl classes
 lib/Cwd.pm		Various cwd routines (getcwd, fastcwd, chdir)
 lib/DB.pm		Debugger API (draft)
 lib/Devel/SelfStubber.pm Generate stubs for SelfLoader.pm
+lib/Digest.pm	Digest extensions
 lib/DirHandle.pm	like FileHandle only for directories
 lib/Dumpvalue.pm	Screen dump of perl values
 lib/English.pm		Readable aliases for short variables
@@ -1411,6 +1419,7 @@ t/lib/compmod.pl	Helper for 1_compile.t
 t/lib/db-btree.t	See if DB_File works
 t/lib/db-hash.t		See if DB_File works
 t/lib/db-recno.t	See if DB_File works
+t/lib/digest.t	See if Digest extensions work
 t/lib/dirhand.t		See if DirHandle works
 t/lib/dosglob.t		See if File::DosGlob works
 t/lib/dprof.t		Perl code profiler testsuite driver
@@ -1485,6 +1494,9 @@ t/lib/lc-country.t	See if Locale::Codes work
 t/lib/lc-currency.t	See if Locale::Codes work
 t/lib/lc-language.t	See if Locale::Codes work
 t/lib/lc-uk.t	See if Locale::Codes work
+t/lib/md5-aaa.t	See if Digest::MD5 extension works
+t/lib/md5-badf.t	See if Digest::MD5 extension works
+t/lib/md5-file.t	See if Digest::MD5 extension works
 t/lib/ndbm.t		See if NDBM_File works
 t/lib/net-hostent.t	See if Net::hostent works
 t/lib/odbm.t		See if ODBM_File works
