@@ -554,6 +554,7 @@ Perl_av_unshift(pTHX_ register AV *av, register I32 num)
     register I32 i;
     register SV **ary;
     MAGIC* mg;
+    I32 slide;
 
     if (!av || num <= 0)
 	return;
@@ -591,6 +592,9 @@ Perl_av_unshift(pTHX_ register AV *av, register I32 num)
     }
     if (num) {
 	i = AvFILLp(av);
+	/* Create extra elements */
+	slide = i > 0 ? i : 0;
+	num += slide;
 	av_extend(av, i + num);
 	AvFILLp(av) += num;
 	ary = AvARRAY(av);
@@ -598,6 +602,10 @@ Perl_av_unshift(pTHX_ register AV *av, register I32 num)
 	do {
 	    ary[--num] = &PL_sv_undef;
 	} while (num);
+	/* Make extra elements into a buffer */
+	AvMAX(av) -= slide;
+	AvFILLp(av) -= slide;
+	SvPVX(av) = (char*)(AvARRAY(av) + slide);
     }
 }
 

@@ -33,8 +33,12 @@ epoc_spawn( char *cmd, char *cmdline) {
 
 
   /* Workaround for defect atof(), see java defect list for epoc */
-  double epoc_atof( const char* str) {
+  double epoc_atof( char* str) {
     TReal64 aRes;
+    
+    while (TChar( *str).IsSpace()) {
+      str++;
+    }
 
     TLex lex( _L( str));
     TInt err = lex.Val( aRes, TChar( '.'));

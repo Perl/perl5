@@ -1064,7 +1064,8 @@ my %space = ( spc   => " ",
 	      cr    => "\r",
 	      lf    => "\n",
 	      ff    => "\f",
-# The vertical tabulator seems miraculously be 12 both in ASCII and EBCDIC.
+# There's no \v but the vertical tabulator seems miraculously
+# be 11 both in ASCII and EBCDIC.
 	      vt    => chr(11),
 	      false => "space" );
 

@@ -24,11 +24,6 @@
 # define SIG_ERR ((Sighandler_t) -1)
 #endif
 
-/* XXX If this causes problems, set i_unistd=undef in the hint file.  */
-#ifdef I_UNISTD
-#  include <unistd.h>
-#endif
-
 #ifdef I_VFORK
 #  include <vfork.h>
 #endif
@@ -3865,30 +3860,36 @@ Perl_get_vtbl(pTHX_ int vtbl_id)
 I32
 Perl_my_fflush_all(pTHX)
 {
-#ifdef FFLUSH_NULL
+#if defined(FFLUSH_NULL)
     return PerlIO_flush(NULL);
 #else
-    long open_max = -1;
-# if defined(FFLUSH_ALL) && defined(HAS_STDIO_STREAM_ARRAY)
-#  ifdef PERL_FFLUSH_ALL_FOPEN_MAX
-    open_max = PERL_FFLUSH_ALL_FOPEN_MAX;
-#  else
-#  if defined(HAS_SYSCONF) && defined(_SC_OPEN_MAX)
-    open_max = sysconf(_SC_OPEN_MAX);
-#  else
-#   ifdef FOPEN_MAX
-    open_max = FOPEN_MAX;
+# if defined(HAS__FWALK)
+    /* undocumented, unprototyped, but very useful BSDism */
+    extern void _fwalk(int (*)(FILE *));
+    _fwalk(&fflush);
+    return 0;
 #   else
-#    ifdef OPEN_MAX
-    open_max = OPEN_MAX;
+    long open_max = -1;
+#  if defined(FFLUSH_ALL) && defined(HAS_STDIO_STREAM_ARRAY)
+#   ifdef PERL_FFLUSH_ALL_FOPEN_MAX
+    open_max = PERL_FFLUSH_ALL_FOPEN_MAX;
+#   else
+#   if defined(HAS_SYSCONF) && defined(_SC_OPEN_MAX)
+    open_max = sysconf(_SC_OPEN_MAX);
+#   else
+#    ifdef FOPEN_MAX
+    open_max = FOPEN_MAX;
 #    else
-#     ifdef _NFILE
+#     ifdef OPEN_MAX
+    open_max = OPEN_MAX;
+#     else
+#      ifdef _NFILE
     open_max = _NFILE;
+#      endif
 #     endif
 #    endif
 #   endif
-#  endif
-#  endif
+#   endif
     if (open_max > 0) {
       long i;
       for (i = 0; i < open_max; i++)
@@ -3898,9 +3899,10 @@ Perl_my_fflush_all(pTHX)
 		PerlIO_flush(&STDIO_STREAM_ARRAY[i]);
       return 0;
     }
-# endif
+#  endif
     SETERRNO(EBADF,RMS$_IFI);
     return EOF;
+# endif
 #endif
 }
 

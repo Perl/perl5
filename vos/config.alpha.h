@@ -165,6 +165,12 @@
  */
 #define HAS_FCNTL		/**/
 
+/* HAS__FWALK:
+ *	This symbol, if defined, indicates that the _fwalk system call is
+ *	available to apply a function to all the file handles.
+ */
+/*#define HAS__FWALK		/ **/
+
 /* FCNTL_CAN_LOCK:
  *	This symbol, if defined, indicates that fcntl() can be used
  *	for file locking.  Normally on Unix systems this is defined.
@@ -219,6 +225,13 @@
  *	available to get the login name.
  */
 #define HAS_GETLOGIN		/**/
+
+/* HAS_GETPAGESIZE:
+ *	This symbol, if defined, indicates that the getpagesize system call
+ *	is available to get system page size, which is the granularity of
+ *	many memory management calls.
+ */
+/*#define HAS_GETPAGESIZE		/**/
 
 /* HAS_GETPGID:
  *	This symbol, if defined, indicates to the C program that 
@@ -1349,6 +1362,13 @@
  *	available to stat filesystems by file descriptors.
  */
 /*#define HAS_FSTATFS		/**/
+
+/* HAS_FSYNC:
+ *	This symbol, if defined, indicates that the fsync routine is
+ *	available to write a file's modified data and attributes to
+ *	permanent storage.
+ */
+/*#define HAS_FSYNC		/**/
 
 /* HAS_FTELLO:
  *	This symbol, if defined, indicates that the ftello routine is

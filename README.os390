@@ -1,5 +1,6 @@
+
 This document is written in pod format hence there are punctuation 
-characters in in odd places.  Do not worry, you've apparently got 
+characters in odd places.  Do not worry, you've apparently got 
 the ASCII->EBCDIC translation worked out correctly.  You can read 
 more about pod in pod/perlpod.pod or the short summary in the 
 INSTALL file.
@@ -15,12 +16,12 @@ on OS/390 Unix System Services.
 
 =head1 DESCRIPTION
 
-This is a fully ported perl for OS/390 Release 3, 5 and 6.
-It may work on other versions, but those are the ones we've 
-tested it on.
+This is a fully ported Perl for OS/390 Version 2 Release 3, 5, 6, 7, 
+8, and 9.  It may work on other versions or releases, but those are 
+the ones we've tested it on.
 
 You may need to carry out some system configuration tasks before 
-running the Configure script for perl.  
+running the Configure script for Perl.  
 
 =head2 Unpacking
 
@@ -41,11 +42,38 @@ parser template files. If you have not already done so then be sure to:
 
 This may also be a good time to ensure that your /etc/protocol file 
 and either your /etc/resolv.conf or /etc/hosts files are in place.
+The IBM document that described such USS system setup issues was
+SC28-1890-07 "OS/390 UNIX System Services Planning", in particular
+Chapter 6 on customizing the OE shell.
 
-GNU make for OS/390, which may be required for the build of perl, 
-is available from:
+GNU make for OS/390, which is required for the build of perl (as well as
+building CPAN modules and extensions), is available from:
 
   http://www.mks.com/s390/gnu/index.htm
+
+Some people have reported encountering "Out of memory!" errors while 
+trying to build Perl using GNU make binaries.  If you encounter such 
+trouble then try to download the source code kit and build GNU make 
+from source to eliminate any such trouble.  You might also find GNU make 
+(as well as Perl and Apache) in the red-piece/book "Open Source Software 
+for OS/390 UNIX", SG24-5944-00 from IBM.
+
+There is a syntax error in the /usr/include/sys/socket.h header file
+that IBM supplies with USS V2R7, V2R8, and possibly V2R9.  The problem with
+the header file is that near the definition of the SO_REUSEPORT constant
+there is a spurious extra '/' character outside of a comment like so:
+
+ #define SO_REUSEPORT    0x0200    /* allow local address & port
+                                      reuse */                    /
+
+You could edit that header yourself to remove that last '/', or you might 
+note that Language Environment (LE) APAR PQ39997 describes the problem 
+and PTF's UQ46272 and UQ46271 are the (R8 at least) fixes and apply them.
+If left unattended that syntax error will turn up as an inability for Perl 
+to build its "Socket" extension.
+
+For successful testing you may need to turn on the sticky bit for your 
+world readable /tmp directory if you have not already done so (see man chmod).
 
 =head2 Configure
 
@@ -58,25 +86,83 @@ to watch out for include:
 
 =item *
 
+A message of the form:
+
+ (I see you are using the Korn shell.  Some ksh's blow up on Configure,
+ mainly on older exotic systems.  If yours does, try the Bourne shell instead.)
+
+is nothing to worry about at all.
+
+=item *
+
 Some of the parser default template files in /samples are needed in /etc.
 In particular be sure that you at least copy /samples/yyparse.c to /etc
-before running perl's Configure.  This step ensures successful extraction
-of EBCDIC versions of parser files such as perly.c.
+before running Perl's Configure.  This step ensures successful extraction
+of EBCDIC versions of parser files such as perly.c.  This has to be done
+before running Configure the first time.  If you failed to do so then the
+easiest way to re-Configure Perl is to delete your misconfigured build root
+and re extract the source from the tar ball.  If for some reason you do not
+want to do that then, after ensuring that /etc/yyparse.c is properly in place 
+run the following commands from within the Perl build directory:
+
+    rm -f y.tab.c y.tab.h
+    yacc -d perly.y 
+    mv -f y.tab.c perly.c
+    chmod u+w perly.c
+    sed -e '/^#include "perl\.h"/a\
+ \
+ #define yydebug    PL_yydebug\
+ #define yynerrs    PL_yynerrs\
+ #define yyerrflag  PL_yyerrflag\
+ #define yychar     PL_yychar\
+ #define yyval      PL_yyval\
+ #define yylval     PL_yylval'                           \
+            -e '/YYSTYPE *yyval;/D'                     \
+            -e '/YYSTYPE *yylval;/D'                    \
+            -e '/int  yychar,/,/yynerrs;/D'             \
+            -e 's/int yydebug = 0;/yydebug = 0;/'       \
+            -e 's/[^_]realloc(/PerlMem_realloc(/g'      \
+            -e 's/fprintf *( *stderr *,/PerlIO_printf(Perl_debug_log,/g' \
+            -e 's/y\.tab/perly/g' perly.c >perly.tmp
+    mv -f perly.tmp perly.c
+    mv -f y.tab.h perly.h
+    cd x2p
+    rm -f y.tab.c y.tab.h
+    yacc  a2p.y
+    mv -f y.tab.c a2p.c
+    chmod u+w a2p.c
+    sed -e 's/fprintf *( *stderr *,/PerlIO_printf(Perl_debug_log,/g' \
+                -e 's/y\.tab/a2p/g' a2p.c >a2p.tmp
+    mv -f a2p.tmp a2p.c
+    mv -f y.tab.h a2p.h
+    cd ..
+
+There, easy huh?  If you find typing all that in difficult then perhaps
+you should reconsider the rm -rf of the perl build directory and 
+re extraction of the source tar ball.
 
 =item *
 
-This port doesn't support dynamic loading.  Although
-OS/390 has support for DLLs, there are some differences
-that cause problems for perl.
+This port doesn't support dynamic loading.  Although OS/390 has support 
+for DLLs via dllload(), there are some differences that cause problems 
+for Perl.  (We need a volunteer to write a ext/DynaLoader/dl_dllload.xs 
+file).
 
 =item *
 
-You may see a "WHOA THERE!!!" message for $d_shmatprototype
-it is OK to keep the recommended "define".
+A message of the form:
+
+ shmat() found.
+ and it returns (void *).
+ *** WHOA THERE!!! ***
+     The recommended value for $d_shmatprototype on this machine was "define"!
+     Keep the recommended value? [y]
+
+is nothing to worry about at all.
 
 =item *
 
-Don't turn on the compiler optimization flag "-O".  There's
+Do not turn on the compiler optimization flag "-O".  There is
 a bug in either the optimizer or perl that causes perl to
 not work correctly when the optimizer is on.
 
@@ -85,7 +171,7 @@ not work correctly when the optimizer is on.
 Some of the configuration files in /etc used by the
 networking APIs are either missing or have the wrong
 names.  In particular, make sure that there's either
-an /etc/resolv.conf or and /etc/hosts, so that
+an /etc/resolv.conf or an /etc/hosts, so that
 gethostbyname() works, and make sure that the file
 /etc/proto has been renamed to /etc/protocol (NOT
 /etc/protocols, as used by other Unix systems).
@@ -100,7 +186,7 @@ Simply put:
     make
     make test
 
-if everything looks ok then:
+if everything looks ok (see the next section for test/IVP diagnosis) then:
 
     make install
 
@@ -108,51 +194,168 @@ this last step may or may not require UID=0 privileges depending
 on how you answered the questions that Configure asked and whether
 or not you have write access to the directories you specified.
 
+=head2 build anomalies
+
+"Out of memory!" messages during the build of Perl are most often fixed
+by re building the GNU make utility for OS/390 from a source code kit.
+
+Another memory limiting item to check is your MAXASSIZE parameter in your
+'SYS1.PARMLIB(BPXPRMxx)' data set (note too that as of V2R8 address space
+limits can be set on a per user ID basis in the USS segment of a RACF 
+profile).  People have reported successful builds of Perl with MAXASSIZE
+parameters as small as 503316480 (and it may be possible to build Perl
+with a MAXASSIZE smaller than that).
+
+Within USS your /etc/profile or $HOME/.profile may limit your ulimit 
+settings.  Check that the following command returns reasonable values:
+
+    ulimit -a
+
+To conserve memory you should have your compiler modules loaded into the
+Link Pack Area (LPA/ELPA) rather than in a link list or step lib.
+
+If the c89 compiler complains of syntax errors during the build of the
+Socket extension then be sure to fix the syntax error in the system
+header /usr/include/sys/socket.h.
+
+=head2 testing anomalies
+
+The `make test` step runs a Perl Verification Procedure, usually before
+installation.  You might encounter STDERR messages even during a successful
+run of `make test`.  Here is a guide to some of the more commonly seen
+anomalies:
+
+=over 4
+
+=item *
+
+A message of the form:
+
+ comp/cpp.............ERROR CBC3191 ./.301989890.c:1     The character $ is not a
+  valid C source character.
+ FSUM3065 The COMPILE step ended with return code 12.
+ FSUM3017 Could not compile .301989890.c. Correct the errors and try again.
+ ok
+
+indicates that the t/comp/cpp.t test of Perl's -P command line switch has
+passed but that the particular invocation of c89 -E in the cpp script does
+not suppress the C compiler check of source code validity.
+
+=item *
+
+A message of the form:
+
+ io/openpid...........CEE5210S The signal SIGHUP was received.
+ CEE5210S The signal SIGHUP was received.
+ CEE5210S The signal SIGHUP was received.
+ ok
+
+indicates that the t/io/openpid.t test of Perl has passed but done so
+with extraneous messages on stderr from CEE.
+
+=item *
+
+A message of the form:
+
+ lib/ftmp-security....File::Temp::_gettemp: Parent directory (/tmp/) is not safe
+ (sticky bit not set when world writable?) at lib/ftmp-security.t line 100
+ File::Temp::_gettemp: Parent directory (/tmp/) is not safe (sticky bit not
+ set when world writable?) at lib/ftmp-security.t line 100
+ ok
+
+indicates a problem with the permissions on your /tmp directory within the HFS.
+To correct that problem issue the command:
+
+     chmod a+t /tmp
+
+from an account with write access to the directory entry for /tmp.
+
+=back
+
 =head2 Usage Hints
 
 When using perl on OS/390 please keep in mind that the EBCDIC and ASCII
-character sets are different.  Perl builtin functions that may behave
-differently under EBCDIC are mentioned in the perlport.pod document.
+character sets are different.  See perlebcdic.pod for more on such character 
+set issues.  Perl builtin functions that may behave differently under 
+EBCDIC are also mentioned in the perlport.pod document.
 
-OpenEdition (UNIX System Services) does not (yet) support the #! means 
-of script invocation.
-See:
+Open Edition (UNIX System Services) from V2R8 onward does support 
+#!/path/to/perl script invocation.  There is a PTF available from 
+IBM for V2R7 that will allow shell/kernel support for #!.  USS
+releases prior to V2R7 did not support the #! means of script invocation.  
+If you are running V2R6 or earlier then see:
 
     head `whence perldoc`
 
 for an example of how to use the "eval exec" trick to ask the shell to
-have perl run your scripts for you.
+have Perl run your scripts on those older releases of Unix System Services.
 
-=head2 Extensions
+=head2 Modules and Extensions
 
-You can build xs based extensions to Perl for OS/390 but will need to
-follow the instructions in ExtUtils::MakeMaker for building statically
-linked perl binaries.  In most cases people have reported better 
-results with GNU make rather than the system's /bin/make.
+Pure pure (that is non xs) modules may be installed via the usual:
+
+    perl Makefile.PL
+    make
+    make test
+    make install
+
+You can also build xs based extensions to Perl for OS/390 but will need 
+to follow the instructions in ExtUtils::MakeMaker for building 
+statically linked perl binaries.  In the simplest configurations building
+a static perl + xs extension boils down to:
+
+    perl Makefile.PL
+    make
+    make perl
+    make test
+    make install
+    make -f Makefile.aperl inst_perl MAP_TARGET=perl
+
+In most cases people have reported better results with GNU make rather 
+than the system's /bin/make program, whether for plain modules or for
+xs based extensions.
 
 =head1 AUTHORS
 
-David Fiander and Peter Prymmer.
+David Fiander and Peter Prymmer with thanks to Dennis Longnecker
+and William Raffloer for valuable reports, LPAR and PTF feedback.
+Thanks to Mike MacIsaac and Egon Terwedow for SG24-5944-00.
 
 =head1 SEE ALSO
 
-L<INSTALL>, L<perlport>, L<ExtUtils::MakeMaker>.
+L<INSTALL>, L<perlport>, L<perlebcdic>, L<ExtUtils::MakeMaker>.
+
+    http://www.mks.com/s390/gnu/index.htm
+
+    http://www.redbooks.ibm.com/abstracts/sg245944.html
+
+    http://www.s390.ibm.com/products/oe/bpxa1ty1.html#opensrc
+
+    http://www.s390.ibm.com/products/oe/portbk/bpxacenv.html
+
+    http://www.xray.mpe.mpg.de/mailing-lists/perl-mvs/
 
 =head2 Mailing list
 
 The Perl Institute (http://www.perl.org/) maintains a perl-mvs 
 mailing list of interest to all folks building and/or
-using perl on EBCDIC platforms.  To subscribe, send a message of:
+using perl on all EBCDIC platforms (not just OS/390).  
+To subscribe, send a message of:
 
     subscribe perl-mvs
 
-to majordomo@perl.org.
+to majordomo@perl.org.  There is a web archive of the mailing list at:
+
+    http://www.xray.mpe.mpg.de/mailing-lists/perl-mvs/
 
 =head1 HISTORY
 
 This document was originally written by David Fiander for the 5.005
 release of Perl.
 
-This document was podified for the 5.005_03 release of perl 11 March 1999.
+This document was podified for the 5.005_03 release of Perl 11 March 1999.
+
+Updated 12 November 2000 for the 5.7.1 release of Perl.
 
 =cut
+

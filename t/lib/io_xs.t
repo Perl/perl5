@@ -40,3 +40,4 @@ print scalar <$x>;
 $! = 0;
 $x->setpos(undef);
 print $! ? "ok 4 # $!\n" : "not ok 4\n";
+

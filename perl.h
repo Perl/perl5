@@ -488,10 +488,14 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #   include <sys/param.h>
 #endif
 
-
 /* Use all the "standard" definitions? */
 #if defined(STANDARD_C) && defined(I_STDLIB)
 #   include <stdlib.h>
+#endif
+
+/* If this causes problems, set i_unistd=undef in the hint file.  */
+#ifdef I_UNISTD
+#   include <unistd.h>
 #endif
 
 #ifdef PERL_MICRO /* Last chance to export Perl_my_swap */
@@ -700,10 +704,46 @@ typedef struct perl_mstats perl_mstats_t;
 #endif
 
 #include <errno.h>
-#ifdef HAS_SOCKET
-#   ifdef I_NET_ERRNO
-#     include <net/errno.h>
+
+#if defined(HAS_SOCKET) && !defined(VMS) /* VMS handles sockets via vmsish.h */
+# include <sys/socket.h>
+# if defined(USE_SOCKS) && defined(I_SOCKS)
+#   if !defined(INCLUDE_PROTOTYPES)
+#       define INCLUDE_PROTOTYPES /* for <socks.h> */
+#       define PERL_SOCKS_NEED_PROTOTYPES
 #   endif
+#   ifdef USE_THREADS
+#       define PERL_USE_THREADS /* store our value */
+#       undef USE_THREADS
+#   endif
+#   include <socks.h>
+#   ifdef USE_THREADS
+#       undef USE_THREADS /* socks.h does this on its own */
+#   endif
+#   ifdef PERL_USE_THREADS
+#       define USE_THREADS /* restore our value */
+#       undef PERL_USE_THREADS
+#   endif
+#   ifdef PERL_SOCKS_NEED_PROTOTYPES /* keep cpp space clean */
+#       undef INCLUDE_PROTOTYPES
+#       undef PERL_SOCKS_NEED_PROTOTYPES
+#   endif
+#   ifdef USE_64_BIT_ALL
+#       define SOCKS_64BIT_BUG /* until proven otherwise */
+#   endif
+# endif 
+# ifdef I_NETDB
+#  include <netdb.h>
+# endif
+# ifndef ENOTSOCK
+#  ifdef I_NET_ERRNO
+#   include <net/errno.h>
+#  endif
+# endif
+#endif
+
+#ifdef SETERRNO
+# undef SETERRNO  /* SOCKS might have defined this */
 #endif
 
 #ifdef VMS
@@ -1614,6 +1654,9 @@ typedef struct ptr_tbl PTR_TBL_t;
 #         else
 #           if defined(MACOS_TRADITIONAL)
 #             include "macos/macish.h"
+#	      ifndef NO_ENVIRON_ARRAY
+#               define NO_ENVIRON_ARRAY
+#             endif
 #           else
 #             include "unixish.h"
 #           endif
@@ -2183,8 +2226,12 @@ char *crypt (const char*, const char*);
 #    ifndef getenv
 char *getenv (const char*);
 #    endif /* !getenv */
-#    if !defined(EPOC) && !(defined(__hpux) && defined(_FILE_OFFSET_BITS) && _FILE_OFFSET_BITS == 64) && !defined(HAS_LSEEK_PROTO)
+#    if !defined(HAS_LSEEK_PROTO) && !defined(EPOC) && !defined(__hpux)
+#      ifdef _FILE_OFFSET_BITS
+#        if _FILE_OFFSET_BITS == 64
 Off_t lseek (int,Off_t,int);
+#        endif
+#      endif
 #    endif
 #  endif /* !DONT_DECLARE_STD */
 char *getlogin (void);

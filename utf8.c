@@ -192,9 +192,20 @@ Perl_utf8_to_uv(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, U32 flags)
     dTHR;
     UV uv = *s, ouv;
     STRLEN len = 1;
+#ifdef EBCDIC
+    bool dowarn = 0;
+#else
     bool dowarn = ckWARN_d(WARN_UTF8);
+#endif
     STRLEN expectlen = 0;
     
+    if (curlen == 0) {
+	if (dowarn)
+	    Perl_warner(aTHX_ WARN_UTF8,
+			"Malformed UTF-8 character (an empty string)");
+	goto malformed;
+    }
+
     if (uv <= 0x7f) { /* Pure ASCII. */
 	if (retlen)
 	    *retlen = 1;
@@ -210,7 +221,7 @@ Perl_utf8_to_uv(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, U32 flags)
 	goto malformed;
     }
 
-    if ((uv >= 0xc0 && uv <= 0xfd && curlen >1 && s[1] < 0x80) &&
+    if ((uv >= 0xc0 && uv <= 0xfd && curlen > 1 && s[1] < 0x80) &&
 	!(flags & UTF8_ALLOW_NON_CONTINUATION)) {
 	if (dowarn)
 	    Perl_warner(aTHX_ WARN_UTF8,
@@ -246,7 +257,7 @@ Perl_utf8_to_uv(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, U32 flags)
 	if (dowarn)
 	    Perl_warner(aTHX_ WARN_UTF8,
 			"Malformed UTF-8 character (%d byte%s, need %d)",
-			curlen, curlen > 1 ? "s" : "", expectlen);
+			curlen, curlen == 1 ? "" : "s", expectlen);
 	goto malformed;
     }
 
@@ -302,7 +313,7 @@ Perl_utf8_to_uv(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, U32 flags)
 	if (dowarn)
 	    Perl_warner(aTHX_ WARN_UTF8,
 			"Malformed UTF-8 character (%d byte%s, need %d)",
-			expectlen, expectlen > 1 ? "s": "", UNISKIP(uv));
+			expectlen, expectlen == 1 ? "": "s", UNISKIP(uv));
 	goto malformed;
     }
 
@@ -312,12 +323,12 @@ malformed:
 
     if (flags & UTF8_CHECK_ONLY) {
 	if (retlen)
-	    *retlen = len;
+	    *retlen = -1;
 	return 0;
     }
 
     if (retlen)
-	*retlen = -1;
+	*retlen = expectlen ? expectlen : len;
 
     return UNICODE_REPLACEMENT_CHARACTER;
 }
@@ -1089,7 +1100,7 @@ Perl_swash_fetch(pTHX_ SV *sv, U8 *ptr)
 	    Copy(ptr, PL_last_swash_key, klen, U8);
     }
 
-    switch ((slen << 3) / needents) {
+    switch ((int)((slen << 3) / needents)) {
     case 1:
 	bit = 1 << (off & 7);
 	off >>= 3;
