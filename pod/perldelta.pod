@@ -238,6 +238,10 @@ extension.
 
 GNU/Hurd is now supported.
 
+=item *
+
+Rhapsody is now supported.
+
 =back
 
 =head1 New tests
