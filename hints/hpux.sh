@@ -134,7 +134,7 @@ case `$cc -v 2>&1`"" in
 		esac
 	    ;;
     *)      ccisgcc=''
-	    ccversion=`which cc | xargs what | awk '/Compiler/{print $2}'`
+	    ccversion=`which cc | xargs what | awk '/Compiler/{print $2}/Itanium/{print $6,$7}'`
 	    case "$ccflags" in
                "-Ae "*) ;;
                *) ccflags="-Ae $cc_cppflags -Wl,+vnocompatwarnings" ;;
