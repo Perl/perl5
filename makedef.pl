@@ -174,7 +174,7 @@ elsif ($PLATFORM eq 'netware') {
 	if ($define{PERL_IMPLICIT_SYS}) {
 	output_symbol("perl_get_host_info");
 	output_symbol("perl_alloc_override");
-    output_symbol("perl_clone_host");
+	output_symbol("perl_clone_host");
 	}
 }
 
@@ -655,7 +655,6 @@ my @layer_syms = qw(
 			 PerlIO_pending
 			 PerlIO_push
 			 PerlIO_sv_dup
-			 PerlIO_unread
 			 PL_def_layerlist
 			 PL_known_layers
 			 PL_perlio
@@ -1200,6 +1199,5 @@ PerlIO_setpos
 PerlIO_sprintf
 PerlIO_sv_dup
 PerlIO_tmpfile
-PerlIO_unread
 PerlIO_vsprintf
 perlsio_binmode

@@ -210,9 +210,6 @@ extern PerlIO *PerlIO_openn(pTHX_ const char *layers, const char *mode,
 			    int fd, int imode, int perm, PerlIO *old,
 			    int narg, SV **arg);
 #endif
-#ifndef PerlIO_close
-extern int PerlIO_close(PerlIO *);
-#endif
 #ifndef PerlIO_eof
 extern int PerlIO_eof(PerlIO *);
 #endif
@@ -228,14 +225,8 @@ extern int PerlIO_getc(PerlIO *);
 #ifndef PerlIO_putc
 extern int PerlIO_putc(PerlIO *, int);
 #endif
-#ifndef PerlIO_flush
-extern int PerlIO_flush(PerlIO *);
-#endif
 #ifndef PerlIO_ungetc
 extern int PerlIO_ungetc(PerlIO *, int);
-#endif
-#ifndef PerlIO_fileno
-extern int PerlIO_fileno(PerlIO *);
 #endif
 #ifndef PerlIO_fdopen
 extern PerlIO *PerlIO_fdopen(int, const char *);
