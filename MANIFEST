@@ -1386,6 +1386,8 @@ lib/Tie/Array/stdpush.t		Test for Tie::StdArray
 lib/Tie/Handle.pm		Base class for tied handles
 lib/Tie/Handle/stdhandle.t	Test for Tie::StdHandle
 lib/Tie/Hash.pm			Base class for tied hashes
+lib/Tie/Memoize.pm		Base class for memoized tied hashes
+lib/Tie/Memoize.t		Test for Memoize.t
 lib/Tie/RefHash.pm		Base class for tied hashes with references as keys
 lib/Tie/RefHash.t		Test for Tie::RefHash and Tie::RefHash::Nestable
 lib/Tie/Scalar.pm		Base class for tied scalars
