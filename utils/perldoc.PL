@@ -3,9 +3,12 @@
 use Config;
 use File::Basename qw(&basename &dirname);
 
-# List explicitly here the shell variables you want Configure
-# to look for.
+# List explicitly here the variables you want Configure to
+# generate.  Metaconfig only looks for shell variables, so you
+# have to mention them as if they were shell variables, not
+# %Config entries.  Thus you write
 #  $startperl
+# to ensure Configure will look for $Config{startperl}.
 
 # This forces PL files to create target in same directory as PL file.
 # This is so that make depend always knows where to find PL derivatives.
@@ -22,7 +25,7 @@ print "Extracting $file (with variable substitutions)\n";
 # In this section, perl variables will be expanded during extraction.
 # You can use $Config{...} to use Configure variables.
 
-print OUT <<"!GROK!THIS!";	
+print OUT <<"!GROK!THIS!";
 $Config{'startperl'}
     eval 'exec perl -S \$0 "\$@"'
 	if 0;
@@ -31,6 +34,8 @@ $Config{'startperl'}
 # In the following, perl variables are not expanded during extraction.
 
 print OUT <<'!NO!SUBS!';
+    eval 'exec perl -S $0 "$@"'
+	if 0;
 
 #
 # Perldoc revision #1 -- look up a piece of documentation in .pod format that
@@ -40,7 +45,12 @@ print OUT <<'!NO!SUBS!';
 # man replacement, written in perl. This perldoc is strictly for reading
 # the perl manuals, though it too is written in perl.
 #
-# Version 1.1: Thu Nov  9 07:23:47 EST 1995
+# Version 1.11: Tue Dec 26 09:54:33 EST 1995
+#       Kenneth Albanowski <kjahds@kjahds.com>
+#   -added Charles Bailey's further VMS patches, and -u switch
+#   -added -t switch, with pod2text support
+# 
+# Version 1.10: Thu Nov  9 07:23:47 EST 1995
 #		Kenneth Albanowski <kjahds@kjahds.com>
 #	-added VMS support
 #	-added better error recognition (on no found pages, just exit. On
@@ -68,7 +78,7 @@ perldoc - Look up Perl documentation in pod format.
 
 =head1 SYNOPSIS
 
-B<perldoc> [B<-h>] [B<-v>] PageName|ModuleName|ProgramName
+B<perldoc> [B<-h>] [B<-v>] [B<-t>] [B<-u>] PageName|ModuleName|ProgramName
 
 =head1 DESCRIPTION
 
@@ -91,6 +101,15 @@ Prints out a brief help message.
 =item B<-v> verbose
 
 Describes search for the item in detail.
+
+=item B<-t> text output
+
+Display docs using plain text converter, instead of nroff. This may be faster,
+but it won't look as nice.
+
+=item B<-u> unformatted
+
+Find docs only; skip reformatting by pod2*
 
 =item B<PageName|ModuleName|ProgramName>
 
@@ -126,7 +145,7 @@ Minor updates by Andy Dougherty <doughera@lafcol.lafayette.edu>
 
 if(@ARGV<1) {
 	die <<EOF;
-Usage: $0 [-h] [-v] PageName|ModuleName|ProgramName
+Usage: $0 [-h] [-v] [-t] [-u] PageName|ModuleName|ProgramName
 
 We suggest you use "perldoc perldoc" to get aquainted 
 with the system.
@@ -134,12 +153,16 @@ EOF
 }
 
 use Getopt::Std;
+use Config;
+$Is_VMS = $Config{'osname'} eq 'VMS';
 
 sub usage{
         warn "@_\n" if @_;
     die <<EOF;
-perldoc [-h] [-v] PageName|ModuleName|ProgramName...
+perldoc [-h] [-v] [-u] PageName|ModuleName|ProgramName...
     -h   Display this help message.
+    -t   Display pod using pod2text instead of pod2man and nroff.
+    -u	 Display unformatted pod text
     -v	 Verbosely describe what's going on.
 PageName|ModuleName...
          is the name of a piece of documentation that you want to look at. You 
@@ -159,12 +182,27 @@ use Text::ParseWords;
 
 unshift(@ARGV,shellwords($ENV{"PERLDOC"}));
 
-getopts("hv") || usage;
+getopts("htuv") || usage;
 
-usage if $opt_h;
+usage if $opt_h || $opt_h; # avoid -w warning
 
-$index = $opt_i;
+eval "use Pod::Text" if $opt_t;
+
 @pages = @ARGV;
+
+# VMS only -- use this hack until support for searchlist
+# logical names is better integrated into the Perl core
+sub translate_searchlist_logical {
+	my($lnm) = @_;
+	my($trans,@trans);
+	return unless $ENV{$lnm};
+	$trans = `show logical $lnm`;
+	$trans =~ s/\n1(.|\n)*//;  # clip off iterative translations
+	@trans = split(/[\"=\s\n]+/,$trans); # break into words
+	splice(@trans,0,2); # pop off initial blank and orig name
+	@trans = grep(!/^\(/,@trans); # filter out table names
+	wantarray ? @trans : $trans[0];
+}
 
 sub containspod {
 	my($file) = @_;
@@ -186,6 +224,11 @@ sub containspod {
      local($")="/";
      my(@p,$p,$cip);
      foreach $p (split(/\//, $file)){
+	if ($Is_VMS and not scalar @p) {
+	    # VMS filesystems don't begin at '/'
+	    push(@p,$p);
+	    next;
+	}
  	if (-d ("@p/$p")){
  	    push @p, $p;
  	} elsif (-f ("@p/$p")) {
@@ -195,6 +238,7 @@ sub containspod {
  	    my $lcp = lc $p;
  	    opendir DIR, "@p";
  	    while ($cip=readdir(DIR)) {
+		$cip =~ s/\.dir$// if $Is_VMS;
  		if (lc $cip eq $lcp){
  		    $found++;
  		    last;
@@ -212,15 +256,19 @@ sub containspod {
   sub searchfor {
   	my($recurse,$s,@dirs) = @_;
   	$s =~ s!::!/!g;
+  	$s = VMS::Filespec::unixify($s) if $Is_VMS;
   	printf STDERR "looking for $s in @dirs\n" if $opt_v;
  	my $ret;
  	my $i;
  	my $dir;
   	for ($i=0;$i<@dirs;$i++) {
   		$dir = $dirs[$i];
+  		($dir = VMS::Filespec::unixpath($dir)) =~ s!/$!! if $Is_VMS;
  	    if ((    $ret = minus_f_nocase "$dir/$s.pod")
  		or ( $ret = minus_f_nocase "$dir/$s.pm"  and containspod($ret))
  		or ( $ret = minus_f_nocase "$dir/$s"     and containspod($ret))
+ 		or ( $Is_VMS and 
+ 		     $ret = minus_f_nocase "$dir/$s.com" and containspod($ret))
  		or ( $ret = minus_f_nocase "$dir/pod/$s.pod")
  		or ( $ret = minus_f_nocase "$dir/pod/$s" and containspod($ret)))
  		{ return $ret; }
@@ -229,6 +277,8 @@ sub containspod {
 			opendir(D,$dir);
 			my(@newdirs) = grep(-d,map("$dir/$_",grep(!/^\.\.?$/,readdir(D))));
 			closedir(D);
+			@newdirs = map((s/.dir$//,$_)[1],@newdirs) if $Is_VMS;
+			last unless @newdirs;
 			print STDERR "Also looking in @newdirs\n" if $opt_v;
 			push(@dirs,@newdirs);
  		}
@@ -242,7 +292,11 @@ foreach (@pages) {
 	# We must look both in @INC for library modules and in PATH
 	# for executables, like h2xs or perldoc itself.
 	@searchdirs = @INC;
-	push(@searchdirs, grep(-d, split(':', $ENV{'PATH'})));
+	if ($Is_VMS) {
+		push(@searchdirs, translate_searchlist_logical('DCL$PATH'));
+	} else {
+		push(@searchdirs, grep(-d, split(':', $ENV{'PATH'})));
+	}
 	@files= searchfor(0,$_,@searchdirs);
 	if( @files ) {
 		print STDERR "Found as @files\n" if $opt_v;
@@ -254,7 +308,7 @@ foreach (@pages) {
 		
 		@files= searchfor(1,$_,@searchdirs);
 		if( @files ) {
-			print STDERR "Loosly found as @files\n" if $opt_v;
+			print STDERR "Loosely found as @files\n" if $opt_v;
 		} else {
 			print STDERR "No documentation found for '$_'\n";
 		}
@@ -263,42 +317,47 @@ foreach (@pages) {
 }
 
 if(!@found) {
-	exit 1;
+	exit ($Is_VMS ? 98962 : 1);
 }
-
-$cmd=$filter="";
 
 if( ! -t STDOUT ) { $opt_f = 1 }
 
-require Config;
-
-$VMS = $Config::Config{'osname'} eq "VMS";
-
-unless($VMS) {
+unless($Is_VMS) {
 	$tmp = "/tmp/perldoc1.$$";
-	$tmp2 = "/tmp/perldoc2.$$";
 	$goodresult = 0;
+	@pagers = qw( more less pg view cat );
+	unshift(@pagers,$ENV{PAGER}) if $ENV{PAGER};
 } else {
 	$tmp = 'Sys$Scratch:perldoc.tmp1_'.$$;
-	$tmp2 = 'Sys$Scratch:perldoc.tmp2_'.$$;
+	@pagers = qw( most more less type/page );
+	unshift(@pagers,$ENV{PERLDOC_PAGER}) if $ENV{PERLDOC_PAGER};
 	$goodresult = 1;
 }
 
 foreach (@found) {
 	
-	open(TMP,">>$tmp");
-	$rslt = `pod2man $_ | nroff -man`;
-	if ($VMS) { $err = !($? % 2) || $rslt =~ /IVVERB/; }
-	else      { $err = $?; }
-	print TMP $rslt unless $err;
-	close TMP;
+	if($opt_t) {
+		open(TMP,">>$tmp");
+		Pod::Text::pod2text($_,*TMP);
+		close(TMP);
+	} elsif(not $opt_u) {
+		open(TMP,">>$tmp");
+		$rslt = `pod2man $_ | nroff -man`;
+		if ($Is_VMS) { $err = !($? % 2) || $rslt =~ /IVVERB/; }
+		else      { $err = $?; }
+		print TMP $rslt unless $err;
+		close TMP;
+	}
 	                                                
-	1 while unlink($tmp2); # Possibly pointless VMSism
-	
-	if( $err or -z $tmp) {
+	if( $opt_u or $err or -z $tmp) {
 		open(OUT,">>$tmp");
 		open(IN,"<$_");
-		print OUT while <IN>;
+		$cut = 1;
+		while (<IN>) {
+			$cut = $1 eq 'cut' if /^=(\w+)/;
+			next if $cut;
+			print OUT;
+		}
 		close(IN);
 		close(OUT);
 	}
@@ -309,20 +368,10 @@ if( $opt_f ) {
 	print while <TMP>;
 	close(TMP);
 } else {
-    pager:
-    {
-		if( $ENV{PAGER} and system("$ENV{PAGER} $tmp")==$goodresult) 
-			{ last pager }
-		if( $Config{pager} and system("$Config{pager} $tmp")==$goodresult) 
-			{ last pager }
-		if( system("more $tmp")==$goodresult)
-			{ last pager }
-		if( system("less $tmp")==$goodresult) 
-			{ last pager }
-		if( system("pg $tmp")==$goodresult) 
-			{ last pager }
-		if( system("view $tmp")==$goodresult) 
-			{ last pager }
+	foreach $pager (@pagers) {
+		$sts = system("$pager $tmp");
+		last if $Is_VMS && ($sts & 1);
+		last unless $sts;
 	}
 }
 
