@@ -767,6 +767,11 @@ Breakable lines are marked with C<:>.  Lines with breakpoints are
 marked by C<b> and those with actions by C<a>.  The line that's
 about to be executed is marked by C<< ==> >>.
 
+Please be aware that code in debugger listings may not look the same
+as your original source code.  Line directives and external source
+filters can alter the code before Perl sees it, causing code to move
+from its original positions or take on entirely different forms.
+
 =item Frame listing
 
 When the C<frame> option is set, the debugger would print entered (and

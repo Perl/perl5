@@ -598,6 +598,11 @@ C</^#\s*line\s+(\d+)\s*(?:\s"([^"]+)")?\s*$/> with C<$1> being the line
 number for the next line, and C<$2> being the optional filename
 (specified within quotes).
 
+There is a fairly obvious gotcha included with the line directive:
+Debuggers and profilers will only show the last source line to appear
+at a particular line number in a given file.  Care should be taken not
+to cause line number collisions in code you'd like to debug later.
+
 Here are some examples that you should be able to type into your command
 shell:
 

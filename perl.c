@@ -1570,18 +1570,7 @@ Perl_call_method(pTHX_ const char *methname, I32 flags)
                		/* name of the subroutine */
           		/* See G_* flags in cop.h */
 {
-    dSP;
-    OP myop;
-    if (!PL_op) {
-	Zero(&myop, 1, OP);
-	PL_op = &myop;
-    }
-    XPUSHs(sv_2mortal(newSVpv(methname,0)));
-    PUTBACK;
-    pp_method();
-    if (PL_op == &myop)
-	PL_op = Nullop;
-    return call_sv(*PL_stack_sp--, flags);
+    return call_sv(sv_2mortal(newSVpv(methname,0)), flags | G_METHOD);
 }
 
 /* May be called with any of a CV, a GV, or an SV containing the name. */
@@ -1601,6 +1590,7 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
 {
     dSP;
     LOGOP myop;		/* fake syntax tree node */
+    UNOP method_op;
     I32 oldmark;
     I32 retval;
     I32 oldscope;
@@ -1638,6 +1628,14 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
 	  && !(flags & G_NODEBUG))
 	PL_op->op_private |= OPpENTERSUB_DB;
 
+    if (flags & G_METHOD) {
+	Zero(&method_op, 1, UNOP);
+	method_op.op_next = PL_op;
+	method_op.op_ppaddr = PL_ppaddr[OP_METHOD];
+	myop.op_ppaddr = PL_ppaddr[OP_ENTERSUB];
+	PL_op = &method_op;
+    }
+
     if (!(flags & G_EVAL)) {
 	CATCH_SET(TRUE);
 	call_body((OP*)&myop, FALSE);
@@ -1655,7 +1653,7 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
 	    ENTER;
 	    SAVETMPS;
 	    
-	    push_return(PL_op->op_next);
+	    push_return(Nullop);
 	    PUSHBLOCK(cx, (CXt_EVAL|CXp_TRYBLOCK), PL_stack_sp);
 	    PUSHEVAL(cx, 0, 0);
 	    PL_eval_root = PL_op;             /* Only needed so that goto works right. */

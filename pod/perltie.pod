@@ -260,6 +260,10 @@ index whose value we're trying to fetch.
       return $self->{ARRAY}[$idx];
     }
 
+If a negative array index is used to read from an array, the index 
+will be translated to a positive one internally by calling FETCHSIZE
+before being passed to FETCH. 
+ 
 As you may have noticed, the name of the FETCH method (et al.) is the same
 for all accesses, even though the constructors differ in names (TIESCALAR
 vs TIEARRAY).  While in theory you could have the same class servicing
@@ -281,6 +285,8 @@ there.  For example:
       }
       return $self->{ARRAY}[$idx] = $value;
     }
+ 
+Negative indexes are treated the same as with FETCH.  
 
 =item DESTROY this
 

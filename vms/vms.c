@@ -732,8 +732,7 @@ my_crypt(const char *textpasswd, const char *usrname)
     usrdsc.dsc$a_pointer = usrname;
     if (!((sts = sys$getuai(0, 0, &usrdsc, uailst, 0, 0, 0)) & 1)) {
       switch (sts) {
-        case SS$_NOGRPPRV:
-        case SS$_NOSYSPRV:
+        case SS$_NOGRPPRV: case SS$_NOSYSPRV:
           set_errno(EACCES);
           break;
         case RMS$_RNF:
@@ -832,15 +831,13 @@ kill_file(char *name)
     newace.myace$l_ident = oldace.myace$l_ident;
     if (!((aclsts = sys$change_acl(0,&type,&fildsc,lcklst,0,0,0)) & 1)) {
       switch (aclsts) {
-        case RMS$_FNF:
-        case RMS$_DNF:
-        case RMS$_DIR:
-        case SS$_NOSUCHOBJECT:
+        case RMS$_FNF: case RMS$_DNF: case SS$_NOSUCHOBJECT:
           set_errno(ENOENT); break;
+        case RMS$_DIR:
+          set_errno(ENOTDIR); break;
         case RMS$_DEV:
           set_errno(ENODEV); break;
-        case RMS$_SYN:
-        case SS$_INVFILFOROP:
+        case RMS$_SYN: case SS$_INVFILFOROP:
           set_errno(EINVAL); break;
         case RMS$_PRV:
           set_errno(EACCES); break;
@@ -896,6 +893,9 @@ my_mkdir(char *dir, Mode_t mode)
 {
   STRLEN dirlen = strlen(dir);
   dTHX;
+
+  /* zero length string sometimes gives ACCVIO */
+  if (dirlen == 0) return -1;
 
   /* CRTL mkdir() doesn't tolerate trailing /, since that implies
    * null file name/type.  However, it's commonplace under Unix,
@@ -1340,8 +1340,7 @@ do_rmsexpand(char *filespec, char *outbuf, int ts, char *defspec, unsigned opts)
   retsts = sys$parse(&myfab,0,0);
   if (!(retsts & 1)) {
     mynam.nam$b_nop |= NAM$M_SYNCHK;
-    if (retsts == RMS$_DNF || retsts == RMS$_DIR ||
-        retsts == RMS$_DEV || retsts == RMS$_DEV) {
+    if (retsts == RMS$_DNF || retsts == RMS$_DIR || retsts == RMS$_DEV) {
       retsts = sys$parse(&myfab,0,0);
       if (retsts & 1) goto expanded;
     }  
@@ -1484,7 +1483,7 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
       set_errno(EINVAL); set_vaxc_errno(SS$_BADPARAM); return NULL;
     }
     dirlen = strlen(dir);
-    while (dir[dirlen-1] == '/') --dirlen;
+    while (dirlen && dir[dirlen-1] == '/') --dirlen;
     if (!dirlen) { /* We had Unixish '/' -- substitute top of current tree */
       strcpy(trndir,"/sys$disk/000000");
       dir = trndir;
@@ -1510,7 +1509,7 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
      *    ... do_fileify_dirspec("myroot",buf,1) ...
      * does something useful.
      */
-    if (!strcmp(dir+dirlen-2,".]")) {
+    if (dirlen >= 2 && !strcmp(dir+dirlen-2,".]")) {
       dir[--dirlen] = '\0';
       dir[dirlen-1] = ']';
     }
@@ -1540,7 +1539,7 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
                  (dir[2] == '\0' || (dir[2] == '/' && dir[3] == '\0')))
           return do_fileify_dirspec("[-]",buf,ts);
       }
-      if (dir[dirlen-1] == '/') {    /* path ends with '/'; just add .dir;1 */
+      if (dirlen && dir[dirlen-1] == '/') {    /* path ends with '/'; just add .dir;1 */
         dirlen -= 1;                 /* to last element */
         lastdir = strrchr(dir,'/');
       }
@@ -1567,7 +1566,7 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
         } while ((cp1 = strstr(cp1,"/.")) != NULL);
         lastdir = strrchr(dir,'/');
       }
-      else if (!strcmp(&dir[dirlen-7],"/000000")) {
+      else if (dirlen >= 7 && !strcmp(&dir[dirlen-7],"/000000")) {
         /* Ditto for specs that end in an MFD -- let the VMS code
          * figure out whether it's a real device or a rooted logical. */
         dir[dirlen] = '/'; dir[dirlen+1] = '\0';
@@ -2687,14 +2686,13 @@ unsigned long int zero = 0, sts;
 	set_vaxc_errno(sts);
 	switch (sts)
 	    {
-	    case RMS$_FNF:
-	    case RMS$_DNF:
-	    case RMS$_DIR:
+	    case RMS$_FNF: case RMS$_DNF:
 		set_errno(ENOENT); break;
+	    case RMS$_DIR:
+		set_errno(ENOTDIR); break;
 	    case RMS$_DEV:
 		set_errno(ENODEV); break;
-	    case RMS$_FNM:
-	    case RMS$_SYN:
+	    case RMS$_FNM: case RMS$_SYN:
 		set_errno(EINVAL); break;
 	    case RMS$_PRV:
 		set_errno(EACCES); break;
@@ -3264,7 +3262,8 @@ readdir(DIR *dd)
         case RMS$_DEV:
           set_errno(ENODEV); break;
         case RMS$_DIR:
-        case RMS$_FNF:
+          set_errno(ENOTDIR); break;
+        case RMS$_FNF: case RMS$_DNF:
           set_errno(ENOENT); break;
         default:
           set_errno(EVMSERR);
@@ -3604,10 +3603,12 @@ vms_do_exec(char *cmd)
       retsts = lib$do_command(&VMScmd);
 
     switch (retsts) {
-      case RMS$_FNF:
+      case RMS$_FNF: case RMS$_DNF:
         set_errno(ENOENT); break;
-      case RMS$_DNF: case RMS$_DIR: case RMS$_DEV:
+      case RMS$_DIR:
         set_errno(ENOTDIR); break;
+      case RMS$_DEV:
+        set_errno(ENODEV); break;
       case RMS$_PRV:
         set_errno(EACCES); break;
       case RMS$_SYN:
@@ -3664,10 +3665,12 @@ do_spawn(char *cmd)
   
   if (!(sts & 1)) {
     switch (sts) {
-      case RMS$_FNF:
+      case RMS$_FNF:  case RMS$_DNF:
         set_errno(ENOENT); break;
-      case RMS$_DNF: case RMS$_DIR: case RMS$_DEV:
+      case RMS$_DIR:
         set_errno(ENOTDIR); break;
+      case RMS$_DEV:
+        set_errno(ENODEV); break;
       case RMS$_PRV:
         set_errno(EACCES); break;
       case RMS$_SYN:
@@ -4645,26 +4648,14 @@ cando_by_name(I32 bit, Uid_t effective, char *fname)
   }
 
   switch (bit) {
-    case S_IXUSR:
-    case S_IXGRP:
-    case S_IXOTH:
-      access = ARM$M_EXECUTE;
-      break;
-    case S_IRUSR:
-    case S_IRGRP:
-    case S_IROTH:
-      access = ARM$M_READ;
-      break;
-    case S_IWUSR:
-    case S_IWGRP:
-    case S_IWOTH:
-      access = ARM$M_WRITE;
-      break;
-    case S_IDUSR:
-    case S_IDGRP:
-    case S_IDOTH:
-      access = ARM$M_DELETE;
-      break;
+    case S_IXUSR: case S_IXGRP: case S_IXOTH:
+      access = ARM$M_EXECUTE; break;
+    case S_IRUSR: case S_IRGRP: case S_IROTH:
+      access = ARM$M_READ; break;
+    case S_IWUSR: case S_IWGRP: case S_IWOTH:
+      access = ARM$M_WRITE; break;
+    case S_IDUSR: case S_IDGRP: case S_IDOTH:
+      access = ARM$M_DELETE; break;
     default:
       return FALSE;
   }
@@ -4695,6 +4686,12 @@ cando_by_name(I32 bit, Uid_t effective, char *fname)
   if (retsts == SS$_ACCONFLICT) {
     return TRUE;
   }
+
+#if defined(__ALPHA) && defined(__VMS_VER) && __VMS_VER == 70100022 &&  defined(__DECC_VER) && __DECC_VER == 6009001
+  /* XXX Hideous kluge to accomodate error in specific version of RTL;
+     we hope it'll be buried soon */
+  if (retsts == 114762) return TRUE;
+#endif
   _ckvmssts(retsts);
 
   return FALSE;  /* Should never get here */
@@ -4885,9 +4882,10 @@ rmscopy(char *spec_in, char *spec_out, int preserve_dates)
     if (!((sts = sys$open(&fab_in)) & 1)) {
       set_vaxc_errno(sts);
       switch (sts) {
-        case RMS$_FNF:
-        case RMS$_DIR:
+        case RMS$_FNF: case RMS$_DNF:
           set_errno(ENOENT); break;
+        case RMS$_DIR:
+          set_errno(ENOTDIR); break;
         case RMS$_DEV:
           set_errno(ENODEV); break;
         case RMS$_SYN:
@@ -4929,8 +4927,10 @@ rmscopy(char *spec_in, char *spec_out, int preserve_dates)
     if (!((sts = sys$create(&fab_out)) & 1)) {
       set_vaxc_errno(sts);
       switch (sts) {
-        case RMS$_DIR:
+        case RMS$_DNF:
           set_errno(ENOENT); break;
+        case RMS$_DIR:
+          set_errno(ENOTDIR); break;
         case RMS$_DEV:
           set_errno(ENODEV); break;
         case RMS$_SYN:

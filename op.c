@@ -162,6 +162,7 @@ Perl_pad_allocmy(pTHX_ char *name)
 	    do {
 		if ((sv = svp[off])
 		    && sv != &PL_sv_undef
+		    && (SvIVX(sv) == PAD_MAX || SvIVX(sv) == 0)
 		    && ((SvFLAGS(sv) & SVpad_OUR) && GvSTASH(sv) == ourstash)
 		    && strEQ(name, SvPVX(sv)))
 		{

@@ -269,6 +269,7 @@
 #define instr			Perl_instr
 #define io_close		Perl_io_close
 #define invert			Perl_invert
+#define is_gv_magical		Perl_is_gv_magical
 #define is_uni_alnum		Perl_is_uni_alnum
 #define is_uni_alnumc		Perl_is_uni_alnumc
 #define is_uni_idfirst		Perl_is_uni_idfirst
@@ -1719,6 +1720,7 @@
 #define instr(a,b)		Perl_instr(aTHX_ a,b)
 #define io_close(a,b)		Perl_io_close(aTHX_ a,b)
 #define invert(a)		Perl_invert(aTHX_ a)
+#define is_gv_magical(a,b,c)	Perl_is_gv_magical(aTHX_ a,b,c)
 #define is_uni_alnum(a)		Perl_is_uni_alnum(aTHX_ a)
 #define is_uni_alnumc(a)	Perl_is_uni_alnumc(aTHX_ a)
 #define is_uni_idfirst(a)	Perl_is_uni_idfirst(aTHX_ a)
@@ -3367,6 +3369,8 @@
 #define io_close		Perl_io_close
 #define Perl_invert		CPerlObj::Perl_invert
 #define invert			Perl_invert
+#define Perl_is_gv_magical	CPerlObj::Perl_is_gv_magical
+#define is_gv_magical		Perl_is_gv_magical
 #define Perl_is_uni_alnum	CPerlObj::Perl_is_uni_alnum
 #define is_uni_alnum		Perl_is_uni_alnum
 #define Perl_is_uni_alnumc	CPerlObj::Perl_is_uni_alnumc

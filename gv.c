@@ -1580,3 +1580,110 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
     }
   }
 }
+
+/*
+=for apidoc is_gv_magical
+
+Returns C<TRUE> if given the name of a magical GV.
+
+Currently only useful internally when determining if a GV should be
+created even in rvalue contexts.
+
+C<flags> is not used at present but available for future extension to
+allow selecting particular classes of magical variable.
+
+=cut
+*/
+bool
+Perl_is_gv_magical(pTHX_ char *name, STRLEN len, U32 flags)
+{
+    if (!len)
+	return FALSE;
+
+    switch (*name) {
+    case 'I':
+	if (len == 3 && strEQ(name, "ISA"))
+	    goto yes;
+	break;
+    case 'O':
+	if (len == 8 && strEQ(name, "OVERLOAD"))
+	    goto yes;
+	break;
+    case 'S':
+	if (len == 3 && strEQ(name, "SIG"))
+	    goto yes;
+	break;
+    case '\027':   /* $^W & $^WARNING_BITS */
+	if (len == 1
+	    || (len == 12 && strEQ(name, "\027ARNING_BITS"))
+	    || (len == 17 && strEQ(name, "\027IDE_SYSTEM_CALLS")))
+	{
+	    goto yes;
+	}
+	break;
+
+    case '&':
+    case '`':
+    case '\'':
+    case ':':
+    case '?':
+    case '!':
+    case '-':
+    case '#':
+    case '*':
+    case '[':
+    case '^':
+    case '~':
+    case '=':
+    case '%':
+    case '.':
+    case '(':
+    case ')':
+    case '<':
+    case '>':
+    case ',':
+    case '\\':
+    case '/':
+    case '|':
+    case '+':
+    case ';':
+    case ']':
+    case '\001':   /* $^A */
+    case '\003':   /* $^C */
+    case '\004':   /* $^D */
+    case '\005':   /* $^E */
+    case '\006':   /* $^F */
+    case '\010':   /* $^H */
+    case '\011':   /* $^I, NOT \t in EBCDIC */
+    case '\014':   /* $^L */
+    case '\017':   /* $^O */
+    case '\020':   /* $^P */
+    case '\023':   /* $^S */
+    case '\024':   /* $^T */
+    case '\026':   /* $^V */
+	if (len == 1)
+	    goto yes;
+	break;
+    case '1':
+    case '2':
+    case '3':
+    case '4':
+    case '5':
+    case '6':
+    case '7':
+    case '8':
+    case '9':
+	if (len > 1) {
+	    char *end = name + len;
+	    while (--end > name) {
+		if (!isDIGIT(*end))
+		    return FALSE;
+	    }
+	}
+    yes:
+	return TRUE;
+    default:
+	break;
+    }
+    return FALSE;
+}

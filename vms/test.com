@@ -41,7 +41,7 @@ $   if p2.nes."" then dbg  = "dbg"
 $   if p2.nes."" then ndbg = "ndbg"
 $!
 $!  Pick up a copy of perl to use for the tests
-$   Delete/Log/NoConfirm Perl.;*
+$   If F$Search("Perl.").nes."" Then Delete/Log/NoConfirm Perl.;*
 $   Copy/Log/NoConfirm [-]'ndbg'Perl'exe' []Perl.
 $
 $!  Make the environment look a little friendlier to tests which assume Unix
@@ -93,7 +93,7 @@ $
 $!  And do it
 $   Show Process/Accounting
 $   testdir = "Directory/NoHead/NoTrail/Column=1"
-$   Define/User 'dbg'Perlshr Sys$Disk:[-]'dbg'PerlShr'exe'
+$   Define 'dbg'Perlshr Sys$Disk:[-]'dbg'PerlShr'exe'
 $   MCR Sys$Disk:[]Perl. "-I[-.lib]" - "''p3'" "''p4'" "''p5'" "''p6'"
 $   Deck/Dollar=$$END-OF-TEST$$
 # $RCSfile: TEST,v $$Revision: 4.1 $$Date: 92/08/07 18:27:00 $
@@ -240,6 +240,7 @@ print sprintf("u=%g  s=%g  cu=%g  cs=%g  files=%d  tests=%d\n",
     $user,$sys,$cuser,$csys,$files,$totmax);
 $$END-OF-TEST$$
 $ wrapup:
+$   deassign 'dbg'Perlshr
 $   Show Process/Accounting
 $   If F$Search("Echo.Exe").nes."" Then Delete/Log/NoConfirm Echo.Exe;*
 $   Set Default &olddef

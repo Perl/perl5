@@ -357,7 +357,7 @@ A compilation error results otherwise.  An inner block may countermand
 this with C<no strict 'vars'>.
 
 A C<my> has both a compile-time and a run-time effect.  At compile
-time, the compiler takes notice of it.  The principle usefulness
+time, the compiler takes notice of it.  The principal usefulness
 of this is to quiet C<use strict 'vars'>, but it is also essential
 for generation of closures as detailed in L<perlref>.  Actual
 initialization is delayed until run time, though, so it gets executed
