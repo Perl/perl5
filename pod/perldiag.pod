@@ -2747,6 +2747,15 @@ In code that currently says C<use AutoLoader; @ISA = qw(AutoLoader);> you
 should remove AutoLoader from @ISA and change C<use AutoLoader;> to
 C<use AutoLoader 'AUTOLOAD';>.
 
+=item Use of reserved word "%s" is deprecated
+
+(D) The indicated bareword is a reserved word.  Future versions of perl
+may use it as a keyword, so you're better off either explicitly quoting
+the word in a manner appropriate for its context of use, or using a
+different name altogether.  The warning can be suppressed for subroutine
+names by either adding a C<&> prefix, or using a package qualifier,
+e.g. C<&our()>, or C<Foo::our()>.
+
 =item Use of %s is deprecated
 
 (D) The construct indicated is no longer recommended for use, generally

@@ -4399,6 +4399,8 @@ keyword(register char *d, I32 len)
 	case 3:
 	    if (strEQ(d,"ord"))			return -KEY_ord;
 	    if (strEQ(d,"oct"))			return -KEY_oct;
+	    if (strEQ(d,"our")) { deprecate("reserved keyword \"our\"");
+						return 0;}
 	    break;
 	case 4:
 	    if (strEQ(d,"open"))		return -KEY_open;
