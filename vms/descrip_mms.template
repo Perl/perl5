@@ -1385,7 +1385,7 @@ $(ARCHCORE)$(DBG)libperl$(OLB) : $(DBG)libperl$(OLB) $(DBG)perlshr_xtras.ts
 	Copy/NoConfirm/Log $(MMS$SOURCE) $(ARCHCORE)
 $(ARCHCORE)perlshr_attr.opt : $(DBG)perlshr_xtras.ts
 	@ If F$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
-	Copy/NoConfirm/Log $(DBG)perlshr_attr.opt $(ARCHCORE)
+	Copy/NoConfirm/Log perlshr_attr.opt $(ARCHCORE)
 $(ARCHCORE)$(DBG)perlshr_bld.opt : $(DBG)perlshr_xtras.ts
 	@ If F$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/NoConfirm/Log $(DBG)perlshr_bld.opt $(ARCHCORE)
