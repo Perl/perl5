@@ -58,6 +58,8 @@ cat perly.y >> /tmp/perly.y
 cp y.tab.c perly.c
 cp y.tab.h perly.h
 
+We still used the normal yacc for a2p.y though!!!
+ 
 We build perl using GNU make, but it should compile with the native
 make too.
 
