@@ -35,10 +35,10 @@ Perl_reentrant_size(pTHX) {
 #ifdef HAS_DRAND48_R
 #endif /* HAS_DRAND48_R */
 #ifdef HAS_GETGRNAM_R
-#   if defined(HAS_SYSCONF) && defined(_SC_GETPW_R_SIZE_MAX) && !defined(__GLIBC__)
-	PL_reentrant_buffer->_grent_size = sysconf(_SC_GETPW_R_SIZE_MAX);
-	if (PL_reentrant_buffer->_pwent_size == -1)
-		PL_reentrant_buffer->_pwent_size = REENTRANTUSUALSIZE;
+#   if defined(HAS_SYSCONF) && defined(_SC_GETGR_R_SIZE_MAX) && !defined(__GLIBC__)
+	PL_reentrant_buffer->_grent_size = sysconf(_SC_GETGR_R_SIZE_MAX);
+	if (PL_reentrant_buffer->_grent_size == -1)
+		PL_reentrant_buffer->_grent_size = REENTRANTUSUALSIZE;
 #   else
 #       if defined(__osf__) && defined(__alpha) && defined(SIABUFSIZ)
 	PL_reentrant_buffer->_grent_size = SIABUFSIZ;
@@ -93,7 +93,7 @@ Perl_reentrant_size(pTHX) {
 #endif /* HAS_GETSERVBYNAME_R */
 #ifdef HAS_GETSPNAM_R
 #   if defined(HAS_SYSCONF) && defined(_SC_GETPW_R_SIZE_MAX) && !defined(__GLIBC__)
-	PL_reentrant_buffer->_spent_size = sysconf(_SC_GETPW_R_SIZE_MAX);
+	PL_reentrant_buffer->_pwent_size = sysconf(_SC_GETPW_R_SIZE_MAX);
 	if (PL_reentrant_buffer->_pwent_size == -1)
 		PL_reentrant_buffer->_pwent_size = REENTRANTUSUALSIZE;
 #   else
@@ -342,10 +342,10 @@ Perl_reentrant_retry(const char *f, ...)
 	        case OP_GHOSTENT:
 		    retptr = gethostent(); break;
 	        default:
+		    SETERRNO(ERANGE, LIB_INVARG);
 		    break;
 	        }
 	    }
-	    SETERRNO(ERANGE, LIB_INVARG);
 	}
 	break;
 #endif
@@ -373,10 +373,10 @@ Perl_reentrant_retry(const char *f, ...)
 	        case OP_GGRENT:
 		    retptr = getgrent(); break;
 	        default:
+		    SETERRNO(ERANGE, LIB_INVARG);
 		    break;
 	        }
 	    }
-	    SETERRNO(ERANGE, LIB_INVARG);
 	}
 	break;
 #endif
@@ -405,10 +405,10 @@ Perl_reentrant_retry(const char *f, ...)
 	        case OP_GNETENT:
 		    retptr = getnetent(); break;
 	        default:
+		    SETERRNO(ERANGE, LIB_INVARG);
 		    break;
 	        }
 	    }
-	    SETERRNO(ERANGE, LIB_INVARG);
 	}
 	break;
 #endif
@@ -436,6 +436,7 @@ Perl_reentrant_retry(const char *f, ...)
 	        case OP_GPWENT:
 		    retptr = getpwent(); break;
 	        default:
+		    SETERRNO(ERANGE, LIB_INVARG);
 		    break;
 	        }
 	    }
@@ -465,10 +466,10 @@ Perl_reentrant_retry(const char *f, ...)
 	        case OP_GPROTOENT:
 		    retptr = getprotoent(); break;
 	        default:
+		    SETERRNO(ERANGE, LIB_INVARG);
 		    break;
 	        }
 	    }
-	    SETERRNO(ERANGE, LIB_INVARG);
 	}
 	break;
 #endif
@@ -497,10 +498,10 @@ Perl_reentrant_retry(const char *f, ...)
 	        case OP_GSERVENT:
 		    retptr = getservent(); break;
 	        default:
+		    SETERRNO(ERANGE, LIB_INVARG);
 		    break;
 	        }
 	    }
-	    SETERRNO(ERANGE, LIB_INVARG);
 	}
 	break;
 #endif
