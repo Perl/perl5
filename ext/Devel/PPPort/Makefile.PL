@@ -1,4 +1,3 @@
-
 use ExtUtils::MakeMaker;
 
 WriteMakefile(
@@ -7,19 +6,21 @@ WriteMakefile(
     VERSION_FROM=> 'PPPort.pm',
 
     #PM		=> {'PPPort.pm' => '$(INST_LIBDIR)/PPPort.pm'},
-    OBJECT	=> 'PPPort$(OBJ_EXT) module2$(OBJ_EXT) module3$(OBJ_EXT)',
+    C		=> [qw(module2.c module3.c)],
+    H		=> [qw(ppport.h)],
+    OBJECT	=> '$(BASEEXT)$(OBJ_EXT) $(O_FILES)',
     XSPROTOARG	=> '-noprototypes',
     'dist'	=> { COMPRESS=>"gzip", SUFFIX=>"gz" },
-    'clean'	=> { FILES => "ppport.h ppport_h"},
+    'clean'	=> { FILES => qw($(H_FILES))}
 );
 
 sub MY::postamble {
     return <<"EOM";
 
-ppport.h:	ppport_h
-	\$(TOUCH) ppport_h
+\$(H_FILES)  :	ppport_h.PL
+	\$(PERLRUNINST) ppport_h.PL
 
-PPPort\$(OBJ_EXT) module2\$(OBJ_EXT) module3\$(OBJ_EXT): ppport.h
+\$(OBJECT)   :	\$(H_FILES)
 
 EOM
 }
