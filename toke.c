@@ -196,7 +196,7 @@ S_tokereport(pTHX_ char *thing, char* s, I32 rv)
                 sv_catpv(report, PL_tokenbuf);
         }
         PerlIO_printf(Perl_debug_log, "### %s\n", SvPV_nolen(report));
-    })
+    });
 }
 
 /*
@@ -2168,7 +2168,7 @@ Perl_yylex(pTHX)
 	PL_pending_ident = 0;
 
 	DEBUG_T({ PerlIO_printf(Perl_debug_log,
-              "### Tokener saw identifier '%s'\n", PL_tokenbuf); })
+              "### Tokener saw identifier '%s'\n", PL_tokenbuf); });
 
 	/* if we're in a my(), we can't allow dynamics here.
 	   $foo'bar has already been turned into $foo::bar, so
@@ -2309,7 +2309,7 @@ Perl_yylex(pTHX)
 	}
 	DEBUG_T({ PerlIO_printf(Perl_debug_log,
               "### Next token after '%s' was known, type %"IVdf"\n", PL_bufptr,
-              (IV)PL_nexttype[PL_nexttoke]); })
+              (IV)PL_nexttype[PL_nexttoke]); });
 
 	return(PL_nexttype[PL_nexttoke]);
 
@@ -2343,7 +2343,7 @@ Perl_yylex(pTHX)
 	}
 	else {
 	    DEBUG_T({ PerlIO_printf(Perl_debug_log,
-              "### Saw case modifier at '%s'\n", PL_bufptr); })
+              "### Saw case modifier at '%s'\n", PL_bufptr); });
 	    s = PL_bufptr + 1;
 	    if (strnEQ(s, "L\\u", 3) || strnEQ(s, "U\\l", 3))
 		tmp = *s, *s = s[2], s[2] = tmp;	/* misordered... */
@@ -2395,7 +2395,7 @@ Perl_yylex(pTHX)
 	if (PL_bufptr == PL_bufend)
 	    return sublex_done();
 	DEBUG_T({ PerlIO_printf(Perl_debug_log,
-              "### Interpolated variable at '%s'\n", PL_bufptr); })
+              "### Interpolated variable at '%s'\n", PL_bufptr); });
 	PL_expect = XTERM;
 	PL_lex_dojoin = (*PL_bufptr == '@');
 	PL_lex_state = LEX_INTERPNORMAL;
@@ -2495,7 +2495,7 @@ Perl_yylex(pTHX)
     DEBUG_T( {
 	PerlIO_printf(Perl_debug_log, "### Tokener expecting %s at %s\n",
 		      exp_name[PL_expect], s);
-    } )
+    } );
 
   retry:
     switch (*s) {
@@ -2514,7 +2514,7 @@ Perl_yylex(pTHX)
 		yyerror("Missing right curly or square bracket");
             DEBUG_T( { PerlIO_printf(Perl_debug_log,
                         "### Tokener got EOF\n");
-            } )
+            } );
 	    TOKEN(0);
 	}
 	if (s++ < PL_bufend)
@@ -2876,7 +2876,7 @@ Perl_yylex(pTHX)
 		s = force_word(PL_bufptr,WORD,FALSE,FALSE,FALSE);
                 DEBUG_T( { PerlIO_printf(Perl_debug_log,
                             "### Saw unary minus before =>, forcing word '%s'\n", s);
-                } )
+                } );
 		OPERATOR('-');		/* unary minus */
 	    }
 	    PL_last_uni = PL_oldbufptr;
@@ -2921,7 +2921,7 @@ Perl_yylex(pTHX)
 		PL_last_lop_op = ftst;
 		DEBUG_T( { PerlIO_printf(Perl_debug_log,
                         "### Saw file test %c\n", (int)ftst);
-		} )
+		} );
 		FTST(ftst);
 	    }
 	    else {
@@ -2930,7 +2930,7 @@ Perl_yylex(pTHX)
 		DEBUG_T( { PerlIO_printf(Perl_debug_log,
 			"### %c looked like a file test but was not\n",
 			(int)ftst);
-		} )
+		} );
 		s -= 2;
 	    }
 	}
@@ -3698,7 +3698,7 @@ Perl_yylex(pTHX)
 	s = scan_num(s, &yylval);
         DEBUG_T( { PerlIO_printf(Perl_debug_log,
                     "### Saw number in '%s'\n", s);
-        } )
+        } );
 	if (PL_expect == XOPERATOR)
 	    no_op("Number",s);
 	TERM(THING);
@@ -3707,7 +3707,7 @@ Perl_yylex(pTHX)
 	s = scan_str(s,FALSE,FALSE);
         DEBUG_T( { PerlIO_printf(Perl_debug_log,
                     "### Saw string before '%s'\n", s);
-        } )
+        } );
 	if (PL_expect == XOPERATOR) {
 	    if (PL_lex_formbrack && PL_lex_brackets == PL_lex_formbrack) {
 		PL_expect = XTERM;
@@ -3726,7 +3726,7 @@ Perl_yylex(pTHX)
 	s = scan_str(s,FALSE,FALSE);
         DEBUG_T( { PerlIO_printf(Perl_debug_log,
                     "### Saw string before '%s'\n", s);
-        } )
+        } );
 	if (PL_expect == XOPERATOR) {
 	    if (PL_lex_formbrack && PL_lex_brackets == PL_lex_formbrack) {
 		PL_expect = XTERM;
@@ -3751,7 +3751,7 @@ Perl_yylex(pTHX)
 	s = scan_str(s,FALSE,FALSE);
         DEBUG_T( { PerlIO_printf(Perl_debug_log,
                     "### Saw backtick string before '%s'\n", s);
-        } )
+        } );
 	if (PL_expect == XOPERATOR)
 	    no_op("Backticks",s);
 	if (!s)
