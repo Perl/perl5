@@ -1,12 +1,12 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 package CPAN;
-$VERSION = '1.57_65';
+$VERSION = '1.57_68RC';
 
-# $Id: CPAN.pm,v 1.351 2000/09/10 08:02:42 k Exp $
+# $Id: CPAN.pm,v 1.354 2000/10/08 14:20:57 k Exp $
 
 # only used during development:
 $Revision = "";
-# $Revision = "[".substr(q$Revision: 1.351 $, 10)."]";
+# $Revision = "[".substr(q$Revision: 1.354 $, 10)."]";
 
 use Carp ();
 use Config ();
@@ -57,7 +57,7 @@ use strict qw(vars);
 
 use vars qw($VERSION @EXPORT $AUTOLOAD $DEBUG $META $HAS_USABLE $term
             $Revision $Signal $Cwd $End $Suppress_readline $Frontend
-            $Defaultsite );
+            $Defaultsite $Have_warned);
 
 @CPAN::ISA = qw(CPAN::Debug Exporter);
 
@@ -685,8 +685,8 @@ sub has_inst {
   if you just type
       install Bundle::libnet
 
-});
-	sleep 2;
+}) unless $Have_warned->{"Net::FTP"}++;
+	sleep 3;
     } elsif ($mod eq "MD5"){
 	$CPAN::Frontend->myprint(qq{
   CPAN: MD5 security checks disabled because MD5 not installed.
@@ -1156,13 +1156,12 @@ sub missing_config_data {
     my(@miss);
     for (
          "cpan_home", "keep_source_where", "build_dir", "build_cache",
-         "scan_cache", "index_expire", "gzip", "tar", "unzip", "make", "pager",
+         "scan_cache", "index_expire", "gzip", "tar", "unzip", "make",
+         "pager",
          "makepl_arg", "make_arg", "make_install_arg", "urllist",
          "inhibit_startup_message", "ftp_proxy", "http_proxy", "no_proxy",
          "prerequisites_policy",
-
-         # "cache_metadata" # not yet stable enough
-
+         "cache_metadata",
         ) {
 	push @miss, $_ unless defined $CPAN::Config->{$_};
     }
@@ -2016,32 +2015,6 @@ sub ftp_get {
  # >       my $p;
 
 
-# this is quite optimistic and returns one on several occasions where
-# inappropriate. But this does no harm. It would do harm if we were
-# too pessimistic (as I was before the http_proxy
-sub is_reachable {
-    my($self,$url) = @_;
-    return 1; # we can't simply roll our own, firewalls may break ping
-    return 0 unless $url;
-    return 1 if substr($url,0,4) eq "file";
-    return 1 unless $url =~ m|^(\w+)://([^/]+)|;
-    my $proxytype = $1 . "_proxy"; # ftp_proxy or http_proxy
-    my $host = $2;
-    return 1 if $CPAN::Config->{$proxytype} || $ENV{$proxytype};
-    require Net::Ping;
-    return 1 unless $Net::Ping::VERSION >= 2;
-    my $p;
-    # 1.3101 had it different: only if the first eval raised an
-    # exception we tried it with TCP. Now we are happy if icmp wins
-    # the order and return, we don't even check for $@. Thanks to
-    # thayer@uis.edu for the suggestion.
-    eval {$p = Net::Ping->new("icmp");};
-    return 1 if $p && ref($p) && $p->ping($host, 10);
-    eval {$p = Net::Ping->new("tcp");};
-    $CPAN::Frontend->mydie($@) if $@;
-    return $p->ping($host, 10);
-}
-
 #-> sub CPAN::FTP::localize ;
 sub localize {
     my($self,$file,$aslocal,$force) = @_;
@@ -2180,11 +2153,6 @@ sub hosteasy {
     my($i);
   HOSTEASY: for $i (@$host_seq) {
         my $url = $CPAN::Config->{urllist}[$i] || $CPAN::Defaultsite;
-	unless ($self->is_reachable($url)) {
-	    $CPAN::Frontend->myprint("Skipping $url (seems to be not reachable)\n");
-	    sleep 2;
-	    next;
-	}
 	$url .= "/" unless substr($url,-1) eq "/";
 	$url .= $file;
 	$self->debug("localizing perlish[$url]") if $CPAN::DEBUG;
@@ -2305,10 +2273,6 @@ sub hosthard {
   File::Path::mkpath($aslocal_dir);
   HOSTHARD: for $i (@$host_seq) {
 	my $url = $CPAN::Config->{urllist}[$i] || $CPAN::Defaultsite;
-	unless ($self->is_reachable($url)) {
-	  $CPAN::Frontend->myprint("Skipping $url (not reachable)\n");
-	  next;
-	}
 	$url .= "/" unless substr($url,-1) eq "/";
 	$url .= $file;
 	my($proto,$host,$dir,$getfile);
@@ -2322,6 +2286,8 @@ sub hosthard {
 	} else {
 	  next HOSTHARD; # who said, we could ftp anything except ftp?
 	}
+        next HOSTHARD if $proto eq "file"; # file URLs would have had
+                                           # success above. Likely a bogus URL
 
 	$self->debug("localizing funkyftpwise[$url]") if $CPAN::DEBUG;
 	my($f,$funkyftp);
@@ -2357,8 +2323,7 @@ Trying with "$funkyftp$src_switch" to get
 	  if (($wstatus = system($system)) == 0
 	      &&
 	      ($f eq "lynx" ?
-	       -s $asl_ungz   # lynx returns 0 on my
-                                          # system even if it fails
+	       -s $asl_ungz # lynx returns 0 when it fails somewhere
 	       : 1
 	      )
 	     ) {
@@ -2366,12 +2331,11 @@ Trying with "$funkyftp$src_switch" to get
 	      # Looks good
 	    } elsif ($asl_ungz ne $aslocal) {
 	      # test gzip integrity
-	      if (
-		  CPAN::Tarzip->gtest($asl_ungz)
-		 ) {
-		rename $asl_ungz, $aslocal;
+	      if (CPAN::Tarzip->gtest($asl_ungz)) {
+                  # e.g. foo.tar is gzipped --> foo.tar.gz
+                  rename $asl_ungz, $aslocal;
 	      } else {
-		CPAN::Tarzip->gzip($asl_ungz,$asl_gz);
+                  CPAN::Tarzip->gzip($asl_ungz,$asl_gz);
 	      }
 	    }
 	    $Thesite = $i;
@@ -2395,9 +2359,10 @@ Trying with "$funkyftp$src_switch" to get
 	       ) {
 	      # test gzip integrity
 	      if (CPAN::Tarzip->gtest($asl_gz)) {
-		CPAN::Tarzip->gunzip($asl_gz,$aslocal);
+                  CPAN::Tarzip->gunzip($asl_gz,$aslocal);
 	      } else {
-		rename $asl_ungz, $aslocal;
+                  # somebody uncompressed file for us?
+                  rename $asl_ungz, $aslocal;
 	      }
 	      $Thesite = $i;
 	      return $aslocal;
@@ -2431,10 +2396,6 @@ sub hosthardest {
 	    last HOSTHARDEST;
 	}
 	my $url = $CPAN::Config->{urllist}[$i] || $CPAN::Defaultsite;
-	unless ($self->is_reachable($url)) {
-	    $CPAN::Frontend->myprint("Skipping $url (not reachable)\n");
-	    next;
-	}
 	$url .= "/" unless substr($url,-1) eq "/";
 	$url .= $file;
 	$self->debug("localizing ftpwise[$url]") if $CPAN::DEBUG;
@@ -3368,12 +3329,12 @@ sub get {
     }
     my($local_file);
     my($local_wanted) =
-	 MM->catfile(
-			$CPAN::Config->{keep_source_where},
-			"authors",
-			"id",
-			split("/",$self->{ID})
-		       );
+        MM->catfile(
+                    $CPAN::Config->{keep_source_where},
+                    "authors",
+                    "id",
+                    split("/",$self->id)
+                   );
 
     $self->debug("Doing localize") if $CPAN::DEBUG;
     $local_file =
@@ -3403,10 +3364,12 @@ sub get {
     if (! $local_file) {
 	Carp::croak "bad download, can't do anything :-(\n";
     } elsif ($local_file =~ /(\.tar\.(gz|Z)|\.tgz)(?!\n)\Z/i){
+        $self->{was_uncompressed}++ unless CPAN::Tarzip->gtest($local_file);
 	$self->untar_me($local_file);
     } elsif ( $local_file =~ /\.zip(?!\n)\Z/i ) {
 	$self->unzip_me($local_file);
     } elsif ( $local_file =~ /\.pm\.(gz|Z)(?!\n)\Z/) {
+        $self->{was_uncompressed}++ unless CPAN::Tarzip->gtest($local_file);
 	$self->pm2dir_me($local_file);
     } else {
 	$self->{archived} = "NO";
@@ -3431,16 +3394,21 @@ sub get {
         rename($distdir,$packagedir) or
             Carp::confess("Couldn't rename $distdir to $packagedir: $!");
       } else {
-        my $pragmatic_dir = $self->cpan_userid . '000';
-        $pragmatic_dir =~ s/\W_//g;
-        $pragmatic_dir++ while -d "../$pragmatic_dir";
-        $packagedir = MM->catdir($builddir,$pragmatic_dir);
-        File::Path::mkpath($packagedir);
-        my($f);
-        for $f (@readdir) { # is already without "." and ".."
-          my $to = MM->catdir($packagedir,$f);
-          rename($f,$to) or Carp::confess("Couldn't rename $f to $to: $!");
-        }
+          my $userid = $self->cpan_userid;
+          unless ($userid) {
+              CPAN->debug("no userid? self[$self]");
+              $userid = "anon";
+          }
+          my $pragmatic_dir = $userid . '000';
+          $pragmatic_dir =~ s/\W_//g;
+          $pragmatic_dir++ while -d "../$pragmatic_dir";
+          $packagedir = MM->catdir($builddir,$pragmatic_dir);
+          File::Path::mkpath($packagedir);
+          my($f);
+          for $f (@readdir) { # is already without "." and ".."
+              my $to = MM->catdir($packagedir,$f);
+              rename($f,$to) or Carp::confess("Couldn't rename $f to $to: $!");
+          }
       }
       $self->{'build_dir'} = $packagedir;
       $cwd = File::Spec->updir;
@@ -3467,9 +3435,18 @@ We\'ll try to build it with that Makefile then.
           $self->{writemakefile} = "YES";
           sleep 2;
         } else {
+          my $cf = $self->called_for || "unknown";
+          if ($cf =~ m|/|) {
+              $cf =~ s|.*/||;
+              $cf =~ s|\W.*||;
+          }
+          $cf =~ s|[/\\:]||g; # risk of filesystem damage
+          $cf = "unknown" unless length($cf);
+          $CPAN::Frontend->myprint(qq{Package comes without Makefile.PL.
+  Writing one on our own (calling it $cf)\n});
+          $self->{had_no_makefile_pl}++;
           my $fh = FileHandle->new(">$makefilepl")
               or Carp::croak("Could not open >$makefilepl");
-          my $cf = $self->called_for || "unknown";
           $fh->print(
 qq{# This Makefile.PL has been autogenerated by the module CPAN.pm
 # because there was no Makefile.PL supplied.
@@ -3479,8 +3456,7 @@ use ExtUtils::MakeMaker;
 WriteMakefile(NAME => q[$cf]);
 
 });
-          $CPAN::Frontend->myprint(qq{Package comes without Makefile.PL.
-  Writing one on our own (calling it $cf)\n});
+          $fh->close;
         }
       }
     }
@@ -3760,12 +3736,15 @@ retry.};
     } else {
 	$self->{MD5_STATUS} ||= "";
 	if ($self->{MD5_STATUS} eq "NIL") {
-	    $CPAN::Frontend->myprint(qq{
-No md5 checksum for $basename in local $chk_file.
-Removing $chk_file
+	    $CPAN::Frontend->mywarn(qq{
+Warning: No md5 checksum for $basename in $chk_file.
+
+The cause for this may be that the file is very new and the checksum
+has not yet been calculated, but it may also be that something is
+going awry right now.
 });
-	    unlink $chk_file or $CPAN::Frontend->myprint("Could not unlink: $!");
-	    sleep 1;
+            my $answer = ExtUtils::MakeMaker::prompt("Proceed?", "yes");
+            $answer =~ /^\s*y/i or $CPAN::Frontend->mydie("Aborted.");
 	}
 	$self->{MD5_STATUS} = "NIL";
 	return;
@@ -4982,7 +4961,7 @@ sub gzip {
     $fhw->close;
     return 1;
   } else {
-    system("$CPAN::Config->{'gzip'} -c $read > $write")==0;
+    system("$CPAN::Config->{gzip} -c $read > $write")==0;
   }
 }
 
@@ -5004,7 +4983,7 @@ sub gunzip {
     $fhw->close;
     return 1;
   } else {
-    system("$CPAN::Config->{'gzip'} -dc $read > $write")==0;
+    system("$CPAN::Config->{gzip} -dc $read > $write")==0;
   }
 }
 
@@ -5012,18 +4991,30 @@ sub gunzip {
 # CPAN::Tarzip::gtest
 sub gtest {
   my($class,$read) = @_;
-  if ($CPAN::META->has_inst("Compress::Zlib")) {
-    my($buffer);
+  # After I had reread the documentation in zlib.h, I discovered that
+  # uncompressed files do not lead to an gzerror (anymore?).
+  if ( $CPAN::META->has_inst("Compress::Zlib") ) {
+    my($buffer,$len);
+    $len = 0;
     my $gz = Compress::Zlib::gzopen($read, "rb")
-	or $CPAN::Frontend->mydie("Cannot open $read: $!\n");
-    1 while $gz->gzread($buffer) > 0 ;
+	or $CPAN::Frontend->mydie(sprintf("Cannot gzopen %s: %s\n",
+                                          $read,
+                                          $Compress::Zlib::gzerrno));
+    while ($gz->gzread($buffer) > 0 ){
+        $len += length($buffer);
+        $buffer = "";
+    }
     my $err = $gz->gzerror;
     my $success = ! $err || $err == Compress::Zlib::Z_STREAM_END();
+    if ($len == -s $read){
+        $success = 0;
+        CPAN->debug("hit an uncompressed file") if $CPAN::DEBUG;
+    }
     $gz->gzclose();
-    $class->debug("err[$err]success[$success]") if $CPAN::DEBUG;
+    CPAN->debug("err[$err]success[$success]") if $CPAN::DEBUG;
     return $success;
   } else {
-    return system("$CPAN::Config->{'gzip'} -dt $read")==0;
+      return system("$CPAN::Config->{gzip} -dt $read")==0;
   }
 }
 
@@ -5038,7 +5029,7 @@ sub TIEHANDLE {
 	die "Could not gzopen $file";
     $ret = bless {GZ => $gz}, $class;
   } else {
-    my $pipe = "$CPAN::Config->{'gzip'} --decompress --stdout $file |";
+    my $pipe = "$CPAN::Config->{gzip} --decompress --stdout $file |";
     my $fh = FileHandle->new($pipe) or die "Could pipe[$pipe]: $!";
     binmode $fh;
     $ret = bless {FH => $fh}, $class;
@@ -5080,15 +5071,16 @@ sub READ {
 
 # CPAN::Tarzip::DESTROY
 sub DESTROY {
-  my($self) = @_;
-  if (exists $self->{GZ}) {
-    my $gz = $self->{GZ};
-    $gz->gzclose();
-  } else {
-    my $fh = $self->{FH};
-    $fh->close if defined $fh;
-  }
-  undef $self;
+    my($self) = @_;
+    if (exists $self->{GZ}) {
+        my $gz = $self->{GZ};
+        $gz->gzclose() if defined $gz; # hard to say if it is allowed
+                                       # to be undef ever. AK, 2000-09
+    } else {
+        my $fh = $self->{FH};
+        $fh->close if defined $fh;
+    }
+    undef $self;
 }
 
 
@@ -5096,48 +5088,56 @@ sub DESTROY {
 sub untar {
   my($class,$file) = @_;
   if (0) { # makes changing order easier
-  } elsif (MM->maybe_command($CPAN::Config->{'gzip'})
+  } elsif (MM->maybe_command($CPAN::Config->{gzip})
       &&
       MM->maybe_command($CPAN::Config->{'tar'})) {
-    my $system = "$CPAN::Config->{'gzip'} --decompress --stdout " .
-      "< $file | $CPAN::Config->{tar} xvf -";
-    if (system($system) != 0) {
-      # people find the most curious tar binaries that cannot handle
-      # pipes
-      my $system = "$CPAN::Config->{'gzip'} --decompress $file";
-      if (system($system)==0) {
-	$CPAN::Frontend->myprint(qq{Uncompressed $file successfully\n});
-      } else {
-	$CPAN::Frontend->mydie(
-			       qq{Couldn\'t uncompress $file\n}
-			      );
-      }
-      $file =~ s/\.gz(?!\n)\Z//;
-      $system = "$CPAN::Config->{tar} xvf $file";
-      $CPAN::Frontend->myprint(qq{Using Tar:$system:\n});
-      if (system($system)==0) {
-	$CPAN::Frontend->myprint(qq{Untarred $file successfully\n});
-      } else {
-	$CPAN::Frontend->mydie(qq{Couldn\'t untar $file\n});
-      }
-      return 1;
+    my($system);
+    my $is_compressed = $class->gtest($file);
+    if ($is_compressed) {
+        $system = "$CPAN::Config->{gzip} --decompress --stdout " .
+            "< $file | $CPAN::Config->{tar} xvf -";
     } else {
-      return 1;
+        $system = "$CPAN::Config->{tar} xvf $file";
+    }
+    if (system($system) != 0) {
+        # people find the most curious tar binaries that cannot handle
+        # pipes
+        if ($is_compressed) {
+            (my $ungzf = $file) =~ s/\.gz(?!\n)\Z//;
+            if (CPAN::Tarzip->gunzip($file, $ungzf)) {
+                $CPAN::Frontend->myprint(qq{Uncompressed $file successfully\n});
+            } else {
+                $CPAN::Frontend->mydie(qq{Couldn\'t uncompress $file\n});
+            }
+            $file = $ungzf;
+        }
+        $system = "$CPAN::Config->{tar} xvf $file";
+        $CPAN::Frontend->myprint(qq{Using Tar:$system:\n});
+        if (system($system)==0) {
+            $CPAN::Frontend->myprint(qq{Untarred $file successfully\n});
+        } else {
+            $CPAN::Frontend->mydie(qq{Couldn\'t untar $file\n});
+        }
+        return 1;
+    } else {
+        return 1;
     }
   } elsif ($CPAN::META->has_inst("Archive::Tar")
       &&
       $CPAN::META->has_inst("Compress::Zlib") ) {
     my $tar = Archive::Tar->new($file,1);
     my $af; # archive file
+    my @af;
     for $af ($tar->list_files) {
         if ($af =~ m!^(/|\.\./)!) {
             $CPAN::Frontend->mydie("ALERT: Archive contains ".
                                    "illegal member [$af]");
         }
         $CPAN::Frontend->myprint("$af\n");
-        $tar->extract($af);
+        push @af, $af;
         return if $CPAN::Signal;
     }
+    $tar->extract(@af);
 
     ExtUtils::MM_MacOS::convert_files([$tar->list_files], 1)
         if ($^O eq 'MacOS');
@@ -5933,8 +5933,8 @@ Your milage may vary...
 
 =over
 
-=item I installed a new version of module X but CPAN keeps saying, I
-      have the old version installed
+=item 1) I installed a new version of module X but CPAN keeps saying,
+      I have the old version installed
 
 Most probably you B<do> have the old version installed. This can
 happen if a module installs itself into a different directory in the
@@ -5946,13 +5946,13 @@ many people add this argument permanently by configuring
 
   o conf make_install_arg UNINST=1
 
-=item So why is UNINST=1 not the default?
+=item 2) So why is UNINST=1 not the default?
 
 Because there are people who have their precise expectations about who
 may install where in the @INC path and who uses which @INC array. In
 fine tuned environments C<UNINST=1> can cause damage.
 
-=item When I install bundles or multiple modules with one command
+=item 3) When I install bundles or multiple modules with one command
       there is too much output to keep track of
 
 You may want to configure something like
@@ -5963,7 +5963,8 @@ You may want to configure something like
 so that STDOUT is captured in a file for later inspection.
 
 
-=item I am not root, how can I install a module in a personal directory?
+=item 4) I am not root, how can I install a module in a personal
+      directory?
 
 You will most probably like something like this:
 
@@ -5986,13 +5987,14 @@ or setting the PERL5LIB environment variable.
 Another thing you should bear in mind is that the UNINST parameter
 should never be set if you are not root.
 
-=item How to get a package, unwrap it, and make a change before building it?
+=item 5) How to get a package, unwrap it, and make a change before
+      building it?
 
   look Sybase::Sybperl
 
-=item I installed a Bundle and had a couple of fails. When I retried,
-      everything resolved nicely. Can this be fixed to work on first
-      try?
+=item 6) I installed a Bundle and had a couple of fails. When I
+      retried, everything resolved nicely. Can this be fixed to work
+      on first try?
 
 The reason for this is that CPAN does not know the dependencies of all
 modules when it starts out. To decide about the additional items to
@@ -6001,11 +6003,19 @@ undetected missing piece breaks the process. But it may well be that
 your Bundle installs some prerequisite later than some depending item
 and thus your second try is able to resolve everything. Please note,
 CPAN.pm does not know the dependency tree in advance and cannot sort
-the queue of things to install in a topologically correct order.
-For bundles which you need to install often, it is recommended to do
-the sorting manually. It is planned to improve the metadata situation
-for dependencies on CPAN in general, but this will still take some
-time.
+the queue of things to install in a topologically correct order. It
+resolves perfectly well IFF all modules declare the prerequisites
+correctly with the PREREQ_PM attribute to MakeMaker. For bundles which
+fail and you need to install often, it is recommended sort the Bundle
+definition file manually. It is planned to improve the metadata
+situation for dependencies on CPAN in general, but this will still
+take some time.
+
+=item 7) In our intranet we have many modules for internal use. How
+      can I integrate these modules with CPAN.pm but without uploading
+      the modules to CPAN?
+
+Have a look at the CPAN::Site module.
 
 =back
 
