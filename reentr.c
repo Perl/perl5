@@ -35,25 +35,25 @@ Perl_reentrant_size(pTHX) {
 #ifdef HAS_DRAND48_R
 #endif /* HAS_DRAND48_R */
 #ifdef HAS_GETGRNAM_R
-#   if defined(HAS_SYSCONF) && defined(_SC_GETGR_R_SIZE_MAX) && !defined(__GLIBC__)
-	PL_reentrant_buffer->_getgrent_size = sysconf(_SC_GETGR_R_SIZE_MAX);
-	if (PL_reentrant_buffer->_getgrent_size == -1)
-		PL_reentrant_buffer->_getgrent_size = REENTRANTUSUALSIZE;
+#   if defined(HAS_SYSCONF) && defined(_SC_GETPW_R_SIZE_MAX) && !defined(__GLIBC__)
+	PL_reentrant_buffer->_grent_size = sysconf(_SC_GETPW_R_SIZE_MAX);
+	if (PL_reentrant_buffer->_pwent_size == -1)
+		PL_reentrant_buffer->_pwent_size = REENTRANTUSUALSIZE;
 #   else
 #       if defined(__osf__) && defined(__alpha) && defined(SIABUFSIZ)
-	PL_reentrant_buffer->_getgrent_size = SIABUFSIZ;
+	PL_reentrant_buffer->_grent_size = SIABUFSIZ;
 #       else
 #           ifdef __sgi
-	PL_reentrant_buffer->_getgrent_size = BUFSIZ;
+	PL_reentrant_buffer->_grent_size = BUFSIZ;
 #           else
-	PL_reentrant_buffer->_getgrent_size = REENTRANTUSUALSIZE;
+	PL_reentrant_buffer->_grent_size = REENTRANTUSUALSIZE;
 #           endif
 #       endif
 #   endif 
 #endif /* HAS_GETGRNAM_R */
 #ifdef HAS_GETHOSTBYNAME_R
 #if   !(GETHOSTBYNAME_R_PROTO == REENTRANT_PROTO_I_CSD)
-	PL_reentrant_buffer->_gethostent_size = REENTRANTUSUALSIZE;
+	PL_reentrant_buffer->_hostent_size = REENTRANTUSUALSIZE;
 #endif
 #endif /* HAS_GETHOSTBYNAME_R */
 #ifdef HAS_GETLOGIN_R
@@ -61,38 +61,52 @@ Perl_reentrant_size(pTHX) {
 #endif /* HAS_GETLOGIN_R */
 #ifdef HAS_GETNETBYNAME_R
 #if   !(GETNETBYNAME_R_PROTO == REENTRANT_PROTO_I_CSD)
-	PL_reentrant_buffer->_getnetent_size = REENTRANTUSUALSIZE;
+	PL_reentrant_buffer->_netent_size = REENTRANTUSUALSIZE;
 #endif
 #endif /* HAS_GETNETBYNAME_R */
 #ifdef HAS_GETPROTOBYNAME_R
 #if   !(GETPROTOBYNAME_R_PROTO == REENTRANT_PROTO_I_CSD)
-	PL_reentrant_buffer->_getprotoent_size = REENTRANTUSUALSIZE;
+	PL_reentrant_buffer->_protoent_size = REENTRANTUSUALSIZE;
 #endif
 #endif /* HAS_GETPROTOBYNAME_R */
 #ifdef HAS_GETPWNAM_R
 #   if defined(HAS_SYSCONF) && defined(_SC_GETPW_R_SIZE_MAX) && !defined(__GLIBC__)
-	PL_reentrant_buffer->_getpwent_size = sysconf(_SC_GETPW_R_SIZE_MAX);
-	if (PL_reentrant_buffer->_getpwent_size == -1)
-		PL_reentrant_buffer->_getpwent_size = REENTRANTUSUALSIZE;
+	PL_reentrant_buffer->_pwent_size = sysconf(_SC_GETPW_R_SIZE_MAX);
+	if (PL_reentrant_buffer->_pwent_size == -1)
+		PL_reentrant_buffer->_pwent_size = REENTRANTUSUALSIZE;
 #   else
 #       if defined(__osf__) && defined(__alpha) && defined(SIABUFSIZ)
-	PL_reentrant_buffer->_getpwent_size = SIABUFSIZ;
+	PL_reentrant_buffer->_pwent_size = SIABUFSIZ;
 #       else
 #           ifdef __sgi
-	PL_reentrant_buffer->_getpwent_size = BUFSIZ;
+	PL_reentrant_buffer->_pwent_size = BUFSIZ;
 #           else
-	PL_reentrant_buffer->_getpwent_size = REENTRANTUSUALSIZE;
+	PL_reentrant_buffer->_pwent_size = REENTRANTUSUALSIZE;
 #           endif
 #       endif
 #   endif 
 #endif /* HAS_GETPWNAM_R */
 #ifdef HAS_GETSERVBYNAME_R
 #if   !(GETSERVBYNAME_R_PROTO == REENTRANT_PROTO_I_CCSD)
-	PL_reentrant_buffer->_getservent_size = REENTRANTUSUALSIZE;
+	PL_reentrant_buffer->_servent_size = REENTRANTUSUALSIZE;
 #endif
 #endif /* HAS_GETSERVBYNAME_R */
 #ifdef HAS_GETSPNAM_R
-	PL_reentrant_buffer->_getspent_size = 1024;
+#   if defined(HAS_SYSCONF) && defined(_SC_GETPW_R_SIZE_MAX) && !defined(__GLIBC__)
+	PL_reentrant_buffer->_spent_size = sysconf(_SC_GETPW_R_SIZE_MAX);
+	if (PL_reentrant_buffer->_pwent_size == -1)
+		PL_reentrant_buffer->_pwent_size = REENTRANTUSUALSIZE;
+#   else
+#       if defined(__osf__) && defined(__alpha) && defined(SIABUFSIZ)
+	PL_reentrant_buffer->_spent_size = SIABUFSIZ;
+#       else
+#           ifdef __sgi
+	PL_reentrant_buffer->_spent_size = BUFSIZ;
+#           else
+	PL_reentrant_buffer->_spent_size = REENTRANTUSUALSIZE;
+#           endif
+#       endif
+#   endif 
 #endif /* HAS_GETSPNAM_R */
 #ifdef HAS_GMTIME_R
 #endif /* HAS_GMTIME_R */
@@ -142,14 +156,14 @@ Perl_reentrant_init(pTHX) {
 #ifdef HAS_DRAND48_R
 #endif /* HAS_DRAND48_R */
 #ifdef HAS_GETGRNAM_R
-#   ifdef USE_GETGRENT_FPTR
-	PL_reentrant_buffer->_getgrent_fptr = NULL;
+#   ifdef USE_GRENT_FPTR
+	PL_reentrant_buffer->_grent_fptr = NULL;
 #   endif
-	New(31338, PL_reentrant_buffer->_getgrent_buffer, PL_reentrant_buffer->_getgrent_size, char);
+	New(31338, PL_reentrant_buffer->_grent_buffer, PL_reentrant_buffer->_grent_size, char);
 #endif /* HAS_GETGRNAM_R */
 #ifdef HAS_GETHOSTBYNAME_R
 #if   !(GETHOSTBYNAME_R_PROTO == REENTRANT_PROTO_I_CSD)
-	New(31338, PL_reentrant_buffer->_gethostent_buffer, PL_reentrant_buffer->_gethostent_size, char);
+	New(31338, PL_reentrant_buffer->_hostent_buffer, PL_reentrant_buffer->_hostent_size, char);
 #endif
 #endif /* HAS_GETHOSTBYNAME_R */
 #ifdef HAS_GETLOGIN_R
@@ -157,27 +171,30 @@ Perl_reentrant_init(pTHX) {
 #endif /* HAS_GETLOGIN_R */
 #ifdef HAS_GETNETBYNAME_R
 #if   !(GETNETBYNAME_R_PROTO == REENTRANT_PROTO_I_CSD)
-	New(31338, PL_reentrant_buffer->_getnetent_buffer, PL_reentrant_buffer->_getnetent_size, char);
+	New(31338, PL_reentrant_buffer->_netent_buffer, PL_reentrant_buffer->_netent_size, char);
 #endif
 #endif /* HAS_GETNETBYNAME_R */
 #ifdef HAS_GETPROTOBYNAME_R
 #if   !(GETPROTOBYNAME_R_PROTO == REENTRANT_PROTO_I_CSD)
-	New(31338, PL_reentrant_buffer->_getprotoent_buffer, PL_reentrant_buffer->_getprotoent_size, char);
+	New(31338, PL_reentrant_buffer->_protoent_buffer, PL_reentrant_buffer->_protoent_size, char);
 #endif
 #endif /* HAS_GETPROTOBYNAME_R */
 #ifdef HAS_GETPWNAM_R
-#   ifdef USE_GETPWENT_FPTR
-	PL_reentrant_buffer->_getpwent_fptr = NULL;
+#   ifdef USE_PWENT_FPTR
+	PL_reentrant_buffer->_pwent_fptr = NULL;
 #   endif
-	New(31338, PL_reentrant_buffer->_getpwent_buffer, PL_reentrant_buffer->_getpwent_size, char);
+	New(31338, PL_reentrant_buffer->_pwent_buffer, PL_reentrant_buffer->_pwent_size, char);
 #endif /* HAS_GETPWNAM_R */
 #ifdef HAS_GETSERVBYNAME_R
 #if   !(GETSERVBYNAME_R_PROTO == REENTRANT_PROTO_I_CCSD)
-	New(31338, PL_reentrant_buffer->_getservent_buffer, PL_reentrant_buffer->_getservent_size, char);
+	New(31338, PL_reentrant_buffer->_servent_buffer, PL_reentrant_buffer->_servent_size, char);
 #endif
 #endif /* HAS_GETSERVBYNAME_R */
 #ifdef HAS_GETSPNAM_R
-	New(31338, PL_reentrant_buffer->_getspent_buffer, PL_reentrant_buffer->_getspent_size, char);
+#   ifdef USE_SPENT_FPTR
+	PL_reentrant_buffer->_spent_fptr = NULL;
+#   endif
+	New(31338, PL_reentrant_buffer->_spent_buffer, PL_reentrant_buffer->_spent_size, char);
 #endif /* HAS_GETSPNAM_R */
 #ifdef HAS_GMTIME_R
 #endif /* HAS_GMTIME_R */
@@ -218,11 +235,11 @@ Perl_reentrant_free(pTHX) {
 #ifdef HAS_DRAND48_R
 #endif /* HAS_DRAND48_R */
 #ifdef HAS_GETGRNAM_R
-	Safefree(PL_reentrant_buffer->_getgrent_buffer);
+	Safefree(PL_reentrant_buffer->_grent_buffer);
 #endif /* HAS_GETGRNAM_R */
 #ifdef HAS_GETHOSTBYNAME_R
 #if   !(GETHOSTBYNAME_R_PROTO == REENTRANT_PROTO_I_CSD)
-	Safefree(PL_reentrant_buffer->_gethostent_buffer);
+	Safefree(PL_reentrant_buffer->_hostent_buffer);
 #endif
 #endif /* HAS_GETHOSTBYNAME_R */
 #ifdef HAS_GETLOGIN_R
@@ -230,24 +247,24 @@ Perl_reentrant_free(pTHX) {
 #endif /* HAS_GETLOGIN_R */
 #ifdef HAS_GETNETBYNAME_R
 #if   !(GETNETBYNAME_R_PROTO == REENTRANT_PROTO_I_CSD)
-	Safefree(PL_reentrant_buffer->_getnetent_buffer);
+	Safefree(PL_reentrant_buffer->_netent_buffer);
 #endif
 #endif /* HAS_GETNETBYNAME_R */
 #ifdef HAS_GETPROTOBYNAME_R
 #if   !(GETPROTOBYNAME_R_PROTO == REENTRANT_PROTO_I_CSD)
-	Safefree(PL_reentrant_buffer->_getprotoent_buffer);
+	Safefree(PL_reentrant_buffer->_protoent_buffer);
 #endif
 #endif /* HAS_GETPROTOBYNAME_R */
 #ifdef HAS_GETPWNAM_R
-	Safefree(PL_reentrant_buffer->_getpwent_buffer);
+	Safefree(PL_reentrant_buffer->_pwent_buffer);
 #endif /* HAS_GETPWNAM_R */
 #ifdef HAS_GETSERVBYNAME_R
 #if   !(GETSERVBYNAME_R_PROTO == REENTRANT_PROTO_I_CCSD)
-	Safefree(PL_reentrant_buffer->_getservent_buffer);
+	Safefree(PL_reentrant_buffer->_servent_buffer);
 #endif
 #endif /* HAS_GETSERVBYNAME_R */
 #ifdef HAS_GETSPNAM_R
-	Safefree(PL_reentrant_buffer->_getspent_buffer);
+	Safefree(PL_reentrant_buffer->_spent_buffer);
 #endif /* HAS_GETSPNAM_R */
 #ifdef HAS_GMTIME_R
 #endif /* HAS_GMTIME_R */
@@ -281,16 +298,16 @@ Perl_reentrant_retry(const char *f, ...)
     dTHX;
     void *retptr = NULL;
 #ifdef USE_REENTRANT_API
-#  if defined(USE_GETHOSTENT_BUFFER) || defined(USE_GETGRENT_BUFFER) || defined(USE_GETNETENT_BUFFER) || defined(USE_GETPWENT_BUFFER) || defined(USE_GETPROTOENT_BUFFER) || defined(USE_GETSERVENT_BUFFER)
+#  if defined(USE_HOSTENT_BUFFER) || defined(USE_GRENT_BUFFER) || defined(USE_NETENT_BUFFER) || defined(USE_PWENT_BUFFER) || defined(USE_PROTOENT_BUFFER) || defined(USE_SRVENT_BUFFER)
     void *p0;
 #  endif
-#  if defined(USE_GETSERVENT_BUFFER)
+#  if defined(USE_SERVENT_BUFFER)
     void *p1;
 #  endif
-#  if defined(USE_GETHOSTENT_BUFFER)
+#  if defined(USE_HOSTENT_BUFFER)
     size_t asize;
 #  endif
-#  if defined(USE_GETHOSTENT_BUFFER) || defined(USE_GETNETENT_BUFFER) || defined(USE_GETPROTOENT_BUFFER) || defined(USE_GETSERVENT_BUFFER)
+#  if defined(USE_HOSTENT_BUFFER) || defined(USE_NETENT_BUFFER) || defined(USE_PROTOENT_BUFFER) || defined(USE_SERVENT_BUFFER)
     int anint;
 #  endif
     va_list ap;
@@ -300,15 +317,15 @@ Perl_reentrant_retry(const char *f, ...)
 #define REENTRANTHALFMAXSIZE 32768 /* The maximum may end up twice this. */
 
     switch (PL_op->op_type) {
-#ifdef USE_GETHOSTENT_BUFFER
+#ifdef USE_HOSTENT_BUFFER
     case OP_GHBYADDR:
     case OP_GHBYNAME:
     case OP_GHOSTENT:
 	{
-	    if (PL_reentrant_buffer->_gethostent_size <= REENTRANTHALFMAXSIZE) {
-		PL_reentrant_buffer->_gethostent_size *= 2;
-		Renew(PL_reentrant_buffer->_gethostent_buffer,
-		      PL_reentrant_buffer->_gethostent_size, char);
+	    if (PL_reentrant_buffer->_hostent_size <= REENTRANTHALFMAXSIZE) {
+		PL_reentrant_buffer->_hostent_size *= 2;
+		Renew(PL_reentrant_buffer->_hostent_buffer,
+		      PL_reentrant_buffer->_hostent_size, char);
 		switch (PL_op->op_type) {
 	        case OP_GHBYADDR:
 		    p0    = va_arg(ap, void *);
@@ -327,16 +344,16 @@ Perl_reentrant_retry(const char *f, ...)
 	}
 	break;
 #endif
-#ifdef USE_GETGRENT_BUFFER
+#ifdef USE_GRENT_BUFFER
     case OP_GGRNAM:
     case OP_GGRGID:
     case OP_GGRENT:
 	{
-	    if (PL_reentrant_buffer->_getgrent_size <= REENTRANTHALFMAXSIZE) {
+	    if (PL_reentrant_buffer->_grent_size <= REENTRANTHALFMAXSIZE) {
 		Gid_t gid;
-		PL_reentrant_buffer->_getgrent_size *= 2;
-		Renew(PL_reentrant_buffer->_getgrent_buffer,
-		      PL_reentrant_buffer->_getgrent_size, char);
+		PL_reentrant_buffer->_grent_size *= 2;
+		Renew(PL_reentrant_buffer->_grent_buffer,
+		      PL_reentrant_buffer->_grent_size, char);
 		switch (PL_op->op_type) {
 	        case OP_GGRNAM:
 		    p0 = va_arg(ap, void *);
@@ -353,16 +370,16 @@ Perl_reentrant_retry(const char *f, ...)
 	}
 	break;
 #endif
-#ifdef USE_GETNETENT_BUFFER
+#ifdef USE_NETENT_BUFFER
     case OP_GNBYADDR:
     case OP_GNBYNAME:
     case OP_GNETENT:
 	{
-	    if (PL_reentrant_buffer->_getnetent_size <= REENTRANTHALFMAXSIZE) {
+	    if (PL_reentrant_buffer->_netent_size <= REENTRANTHALFMAXSIZE) {
 		Netdb_net_t net;
-		PL_reentrant_buffer->_getnetent_size *= 2;
-		Renew(PL_reentrant_buffer->_getnetent_buffer,
-		      PL_reentrant_buffer->_getnetent_size, char);
+		PL_reentrant_buffer->_netent_size *= 2;
+		Renew(PL_reentrant_buffer->_netent_buffer,
+		      PL_reentrant_buffer->_netent_size, char);
 		switch (PL_op->op_type) {
 	        case OP_GNBYADDR:
 		    net = va_arg(ap, Netdb_net_t);
@@ -380,16 +397,16 @@ Perl_reentrant_retry(const char *f, ...)
 	}
 	break;
 #endif
-#ifdef USE_GETPWENT_BUFFER
+#ifdef USE_PWENT_BUFFER
     case OP_GPWNAM:
     case OP_GPWUID:
     case OP_GPWENT:
 	{
-	    if (PL_reentrant_buffer->_getpwent_size <= REENTRANTHALFMAXSIZE) {
+	    if (PL_reentrant_buffer->_pwent_size <= REENTRANTHALFMAXSIZE) {
 		Uid_t uid;
-		PL_reentrant_buffer->_getpwent_size *= 2;
-		Renew(PL_reentrant_buffer->_getpwent_buffer,
-		      PL_reentrant_buffer->_getpwent_size, char);
+		PL_reentrant_buffer->_pwent_size *= 2;
+		Renew(PL_reentrant_buffer->_pwent_buffer,
+		      PL_reentrant_buffer->_pwent_size, char);
 		switch (PL_op->op_type) {
 	        case OP_GPWNAM:
 		    p0 = va_arg(ap, void *);
@@ -406,15 +423,15 @@ Perl_reentrant_retry(const char *f, ...)
 	}
 	break;
 #endif
-#ifdef USE_GETPROTOENT_BUFFER
+#ifdef USE_PROTOENT_BUFFER
     case OP_GPBYNAME:
     case OP_GPBYNUMBER:
     case OP_GPROTOENT:
 	{
-	    if (PL_reentrant_buffer->_getprotoent_size <= REENTRANTHALFMAXSIZE) {
-		PL_reentrant_buffer->_getprotoent_size *= 2;
-		Renew(PL_reentrant_buffer->_getprotoent_buffer,
-		      PL_reentrant_buffer->_getprotoent_size, char);
+	    if (PL_reentrant_buffer->_protoent_size <= REENTRANTHALFMAXSIZE) {
+		PL_reentrant_buffer->_protoent_size *= 2;
+		Renew(PL_reentrant_buffer->_protoent_buffer,
+		      PL_reentrant_buffer->_protoent_size, char);
 		switch (PL_op->op_type) {
 	        case OP_GPBYNAME:
 		    p0 = va_arg(ap, void *);
@@ -431,15 +448,15 @@ Perl_reentrant_retry(const char *f, ...)
 	}
 	break;
 #endif
-#ifdef USE_GETSERVENT_BUFFER
+#ifdef USE_SERVENT_BUFFER
     case OP_GSBYNAME:
     case OP_GSBYPORT:
     case OP_GSERVENT:
 	{
-	    if (PL_reentrant_buffer->_getservent_size <= REENTRANTHALFMAXSIZE) {
-		PL_reentrant_buffer->_getservent_size *= 2;
-		Renew(PL_reentrant_buffer->_getservent_buffer,
-		      PL_reentrant_buffer->_getservent_size, char);
+	    if (PL_reentrant_buffer->_servent_size <= REENTRANTHALFMAXSIZE) {
+		PL_reentrant_buffer->_servent_size *= 2;
+		Renew(PL_reentrant_buffer->_servent_buffer,
+		      PL_reentrant_buffer->_servent_size, char);
 		switch (PL_op->op_type) {
 	        case OP_GSBYNAME:
 		    p0 = va_arg(ap, void *);
