@@ -1871,21 +1871,10 @@ sub pp_null {
     }
 }
 
-# the aassign in-common check messes up SvCUR (always setting it
-# to a value >= 100), but it's probably safe to assume there
-# won't be any NULs in the names of my() variables. (with
-# stash variables, I wouldn't be so sure)
-sub padname_fix {
-    my $str = shift;
-    $str = substr($str, 0, index($str, "\0")) if index($str, "\0") != -1;
-    return $str;
-}
-
 sub padname {
     my $self = shift;
     my $targ = shift;
-    my $str = $self->padname_sv($targ)->PV;
-    return padname_fix($str);
+    return $self->padname_sv($targ)->PVX;
 }
 
 sub padany {
