@@ -973,7 +973,7 @@ element to return happens to be C<undef>.
 
 You may also use C<defined(&func)> to check whether subroutine C<&func>
 has ever been defined.  The return value is unaffected by any forward
-declarations of C<&foo>.  Note that a subroutine which is not defined
+declarations of C<&func>.  Note that a subroutine which is not defined
 may still be callable: its package may have an C<AUTOLOAD> method that
 makes it spring into existence the first time that it is called -- see
 L<perlsub>.
