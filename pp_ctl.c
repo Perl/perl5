@@ -2139,7 +2139,7 @@ PP(pp_redo)
 STATIC OP *
 S_dofindlabel(pTHX_ OP *o, char *label, OP **opstack, OP **oplimit)
 {
-    OP *kid;
+    OP *kid = Nullop;
     OP **ops = opstack;
     static char too_deep[] = "Target of goto is too deeply nested";
 

@@ -1344,7 +1344,7 @@ Perl_swash_fetch(pTHX_ SV *sv, U8 *ptr, bool do_utf8)
     U32 off;
     STRLEN slen;
     STRLEN needents;
-    U8 *tmps;
+    U8 *tmps = NULL;
     U32 bit;
     SV *retval;
     U8 tmputf8[2];

@@ -1297,7 +1297,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 	    if (GvNAMELEN(CvGV(cv)) == 3 && strEQ(GvNAME(CvGV(cv)), "nil")
 		&& strEQ(HvNAME(GvSTASH(CvGV(cv))), "overload")) {
 		/* GvSV contains the name of the method. */
-		GV *ngv;
+		GV *ngv = Nullgv;
 		
 		DEBUG_o( Perl_deb(aTHX_ "Resolving method `%.256s' for overloaded `%s' in package `%.256s'\n",
 			     SvPV_nolen(GvSV(gv)), cp, HvNAME(stash)) );
