@@ -2611,72 +2611,85 @@ S_fd_on_nosuid_fs(pTHX_ int fd)
  * an irrelevant filesystem while trying to reach the right one.
  */
 
-#   ifdef HAS_FSTATVFS
+#undef FD_ON_NOSUID_CHECK_OKAY  /* found the syscalls to do the check? */
+
+#   if !defined(FD_ON_NOSUID_CHECK_OKAY) && \
+        defined(HAS_FSTATVFS)
+#   define FD_ON_NOSUID_CHECK_OKAY
     struct statvfs stfs;
+
     check_okay = fstatvfs(fd, &stfs) == 0;
     on_nosuid  = check_okay && (stfs.f_flag  & ST_NOSUID);
-#   else
-#       ifdef PERL_MOUNT_NOSUID
-#           if defined(HAS_FSTATFS) && \
-	       defined(HAS_STRUCT_STATFS) && \
-	       defined(HAS_STRUCT_STATFS_F_FLAGS)
+#   endif /* fstatvfs */
+ 
+#   if !defined(FD_ON_NOSUID_CHECK_OKAY) && \
+        defined(PERL_MOUNT_NOSUID)	&& \
+        defined(HAS_FSTATFS) 		&& \
+        defined(HAS_STRUCT_STATFS)	&& \
+        defined(HAS_STRUCT_STATFS_F_FLAGS)
+#   define FD_ON_NOSUID_CHECK_OKAY
     struct statfs  stfs;
+
     check_okay = fstatfs(fd, &stfs)  == 0;
     on_nosuid  = check_okay && (stfs.f_flags & PERL_MOUNT_NOSUID);
-#           else
-#               if defined(HAS_FSTAT) && \
-		   defined(HAS_USTAT) && \
-		   defined(HAS_GETMNT) && \
-		   defined(HAS_STRUCT_FS_DATA) && \
-		   defined(NOSTAT_ONE)
+#   endif /* fstatfs */
+
+#   if !defined(FD_ON_NOSUID_CHECK_OKAY) && \
+        defined(PERL_MOUNT_NOSUID)	&& \
+        defined(HAS_FSTAT)		&& \
+        defined(HAS_USTAT)		&& \
+        defined(HAS_GETMNT)		&& \
+        defined(HAS_STRUCT_FS_DATA)	&& \
+        defined(NOSTAT_ONE)
+#   define FD_ON_NOSUID_CHECK_OKAY
     struct stat fdst;
+
     if (fstat(fd, &fdst) == 0) {
-	struct ustat us;
-	if (ustat(fdst.st_dev, &us) == 0) {
-	    struct fs_data fsd;
-	    /* NOSTAT_ONE here because we're not examining fields which
-	     * vary between that case and STAT_ONE. */
+        struct ustat us;
+        if (ustat(fdst.st_dev, &us) == 0) {
+            struct fs_data fsd;
+            /* NOSTAT_ONE here because we're not examining fields which
+             * vary between that case and STAT_ONE. */
             if (getmnt((int*)0, &fsd, (int)0, NOSTAT_ONE, us.f_fname) == 0) {
-		size_t cmplen = sizeof(us.f_fname);
-		if (sizeof(fsd.fd_req.path) < cmplen)
-		    cmplen = sizeof(fsd.fd_req.path);
-		if (strnEQ(fsd.fd_req.path, us.f_fname, cmplen) &&
-		    fdst.st_dev == fsd.fd_req.dev) {
-			check_okay = 1;
-			on_nosuid = fsd.fd_req.flags & PERL_MOUNT_NOSUID;
-		    }
-		}
-	    }
-	}
+                size_t cmplen = sizeof(us.f_fname);
+                if (sizeof(fsd.fd_req.path) < cmplen)
+                    cmplen = sizeof(fsd.fd_req.path);
+                if (strnEQ(fsd.fd_req.path, us.f_fname, cmplen) &&
+                    fdst.st_dev == fsd.fd_req.dev) {
+                        check_okay = 1;
+                        on_nosuid = fsd.fd_req.flags & PERL_MOUNT_NOSUID;
+                    }
+                }
+            }
+        }
     }
-#               endif /* fstat+ustat+getmnt */
-#           endif /* fstatfs */
-#       else
-#           if defined(HAS_GETMNTENT) && \
-	       defined(HAS_HASMNTOPT) && \
-	       defined(MNTOPT_NOSUID)
-    FILE		*mtab = fopen("/etc/mtab", "r");
-    struct mntent	*entry;
-    struct stat		stb, fsb;
+#   endif /* fstat+ustat+getmnt */
+
+#   if !defined(FD_ON_NOSUID_CHECK_OKAY) && \
+        defined(HAS_GETMNTENT)		&& \
+        defined(HAS_HASMNTOPT)		&& \
+        defined(MNTOPT_NOSUID)
+#   define FD_ON_NOSUID_CHECK_OKAY
+    FILE                *mtab = fopen("/etc/mtab", "r");
+    struct mntent       *entry;
+    struct stat         stb, fsb;
 
     if (mtab && (fstat(fd, &stb) == 0)) {
-	while (entry = getmntent(mtab)) {
-	    if (stat(entry->mnt_dir, &fsb) == 0
-		&& fsb.st_dev == stb.st_dev)
-	    {
-		/* found the filesystem */
-		check_okay = 1;
-		if (hasmntopt(entry, MNTOPT_NOSUID))
-		    on_nosuid = 1;
-		break;
-	    } /* A single fs may well fail its stat(). */
-	}
+        while (entry = getmntent(mtab)) {
+            if (stat(entry->mnt_dir, &fsb) == 0
+                && fsb.st_dev == stb.st_dev)
+            {
+                /* found the filesystem */
+                check_okay = 1;
+                if (hasmntopt(entry, MNTOPT_NOSUID))
+                    on_nosuid = 1;
+                break;
+            } /* A single fs may well fail its stat(). */
+        }
     }
     if (mtab)
-	fclose(mtab);
-#           endif /* getmntent+hasmntopt */
-#       endif /* PERL_MOUNT_NOSUID: fstatfs or fstat+ustat+statfs */
-#   endif /* statvfs */
+        fclose(mtab);
+#   endif /* getmntent+hasmntopt */
 
     if (!check_okay) 
 	Perl_croak(aTHX_ "Can't check filesystem of script \"%s\" for nosuid", PL_origfilename);

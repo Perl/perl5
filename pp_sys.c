@@ -198,7 +198,6 @@ static char zero_but_true[ZBTLEN + 1] = "0 but true";
 #   if defined(I_SYS_SECURITY)
 #       include <sys/security.h>
 #   endif
-    /* XXX Configure test needed for eaccess */
 #   ifdef ACC_SELF
         /* HP SecureWare */
 #       define PERL_EFF_ACCESS_R_OK(p) (eaccess((p), R_OK, ACC_SELF))

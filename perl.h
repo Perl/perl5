@@ -1145,15 +1145,6 @@ typedef NVTYPE NV;
 #   endif
 #   define NV_DIG LDBL_DIG
 #   ifdef HAS_SQRTL
-        /* libsunmath doesn't have modfl and frexpl as of mid-March 2000 */
-	/* XXX Configure probe for modfl and frexpl needed XXX */
-#       if defined(__sun) && defined(__svr4)
-#           define Perl_modf(x,y) ((long double)modf((double)(x),(double*)(y)))
-#           define Perl_frexp(x) ((long double)frexp((double)(x)))
-#       else
-#           define Perl_modf modfl
-#           define Perl_frexp frexpl
-#       endif
 #       define Perl_cos cosl
 #       define Perl_sin sinl
 #       define Perl_sqrt sqrtl
@@ -1164,10 +1155,28 @@ typedef NVTYPE NV;
 #       define Perl_floor floorl
 #       define Perl_fmod fmodl
 #   endif
+/* e.g. libsunmath doesn't have modfl and frexpl as of mid-March 2000 */
+#   ifdef HAS_MODFL
+#       define Perl_modf(x,y) modfl(x,y)
+#   else
+#       define Perl_modf(x,y) ((long double)modf((double)(x),(double*)(y)))
+#   endif
+#   ifdef HAS_FREXPL
+#       define Perl_frexp(x,y) frexpl(x,y)
+#   else
+#       define Perl_frexp(x,y) ((long double)frexp((double)(x),y))
+#   endif
+#   ifdef HAS_ISNANL
+#       define Perl_isnan(x) isnanl(x)
+#   else
+#       ifdef HAS_ISNAN
+#           define Perl_isnan(x) isnan((double)(x))
+#       else
+#           define Perl_isnan(x) ((x)!=(x))
+#       endif
+#   endif
 #else
 #   define NV_DIG DBL_DIG
-#   define Perl_modf modf
-#   define Perl_frexp frexp
 #   define Perl_cos cos
 #   define Perl_sin sin
 #   define Perl_sqrt sqrt
@@ -1177,6 +1186,13 @@ typedef NVTYPE NV;
 #   define Perl_pow pow
 #   define Perl_floor floor
 #   define Perl_fmod fmod
+#   define Perl_modf(x,y) modf(x,y)
+#   define Perl_frexp(x,y) frexp(x,y)
+#   ifdef HAS_ISNAN
+#       define Perl_isnan(x) isnan(x)
+#   else
+#       define Perl_isnan(x) ((x)!=(x))
+#   endif
 #endif
 
 #if !defined(Perl_atof) && defined(USE_LONG_DOUBLE) && defined(HAS_LONG_DOUBLE)

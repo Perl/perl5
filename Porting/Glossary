@@ -573,6 +573,10 @@ d_fpathconf (d_pathconf.U):
 d_fpos64_t (d_fpos64_t.U):
 	This symbol will be defined if the C compiler supports fpos64_t.
 
+d_frexpl (d_frexpl.U):
+	This variable conditionally defines the HAS_FREXPL symbol, which
+	indicates to the C program that the frexpl() routine is available.
+
 d_fs_data_s (d_fs_data_s.U):
 	This variable conditionally defines the HAS_STRUCT_FS_DATA symbol,
 	which indicates that the struct fs_data is supported.
@@ -811,6 +815,14 @@ d_isascii (d_isascii.U):
 	This variable conditionally defines the HAS_ISASCII constant,
 	which indicates to the C program that isascii() is available.
 
+d_isnan (d_isnan.U):
+	This variable conditionally defines the HAS_ISNAN symbol, which
+	indicates to the C program that the isnan() routine is available.
+
+d_isnanl (d_isnanl.U):
+	This variable conditionally defines the HAS_ISNANL symbol, which
+	indicates to the C program that the isnanl() routine is available.
+
 d_killpg (d_killpg.U):
 	This variable conditionally defines the HAS_KILLPG symbol, which
 	indicates to the C program that the killpg() routine is available
@@ -932,6 +944,10 @@ d_mktime (d_mktime.U):
 d_mmap (d_mmap.U):
 	This variable conditionally defines HAS_MMAP if mmap() is
 	available to map a file into memory.
+
+d_modfl (d_modfl.U):
+	This variable conditionally defines the HAS_MODFL symbol, which
+	indicates to the C program that the modfl() routine is available.
 
 d_mprotect (d_mprotect.U):
 	This variable conditionally defines HAS_MPROTECT if mprotect() is
