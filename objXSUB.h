@@ -128,6 +128,10 @@
 #define Perl_block_gimme	pPerl->Perl_block_gimme
 #undef  block_gimme
 #define block_gimme		Perl_block_gimme
+#undef  Perl_call_list
+#define Perl_call_list		pPerl->Perl_call_list
+#undef  call_list
+#define call_list		Perl_call_list
 #undef  Perl_cast_ulong
 #define Perl_cast_ulong		pPerl->Perl_cast_ulong
 #undef  cast_ulong
@@ -151,6 +155,10 @@
 #define my_chsize		Perl_my_chsize
 #endif
 #if defined(USE_THREADS)
+#undef  Perl_condpair_magic
+#define Perl_condpair_magic	pPerl->Perl_condpair_magic
+#undef  condpair_magic
+#define condpair_magic		Perl_condpair_magic
 #endif
 #undef  Perl_croak
 #define Perl_croak		pPerl->Perl_croak
@@ -270,6 +278,14 @@
 #define Perl_delimcpy		pPerl->Perl_delimcpy
 #undef  delimcpy
 #define delimcpy		Perl_delimcpy
+#undef  Perl_die
+#define Perl_die		pPerl->Perl_die
+#undef  die
+#define die			Perl_die
+#undef  Perl_dounwind
+#define Perl_dounwind		pPerl->Perl_dounwind
+#undef  dounwind
+#define dounwind		Perl_dounwind
 #undef  Perl_do_binmode
 #define Perl_do_binmode		pPerl->Perl_do_binmode
 #undef  do_binmode
@@ -520,6 +536,10 @@
 #define Perl_ibcmp_locale	pPerl->Perl_ibcmp_locale
 #undef  ibcmp_locale
 #define ibcmp_locale		Perl_ibcmp_locale
+#undef  Perl_init_stacks
+#define Perl_init_stacks	pPerl->Perl_init_stacks
+#undef  init_stacks
+#define init_stacks		Perl_init_stacks
 #undef  Perl_instr
 #define Perl_instr		pPerl->Perl_instr
 #undef  instr
@@ -720,6 +740,10 @@
 #define Perl_is_utf8_mark	pPerl->Perl_is_utf8_mark
 #undef  is_utf8_mark
 #define is_utf8_mark		Perl_is_utf8_mark
+#undef  Perl_leave_scope
+#define Perl_leave_scope	pPerl->Perl_leave_scope
+#undef  leave_scope
+#define leave_scope		Perl_leave_scope
 #undef  Perl_looks_like_number
 #define Perl_looks_like_number	pPerl->Perl_looks_like_number
 #undef  looks_like_number
@@ -778,6 +802,10 @@
 #define Perl_mg_size		pPerl->Perl_mg_size
 #undef  mg_size
 #define mg_size			Perl_mg_size
+#undef  Perl_moreswitches
+#define Perl_moreswitches	pPerl->Perl_moreswitches
+#undef  moreswitches
+#define moreswitches		Perl_moreswitches
 #undef  Perl_my_atof
 #define Perl_my_atof		pPerl->Perl_my_atof
 #undef  my_atof
@@ -1050,10 +1078,22 @@
 #define Perl_newWHILEOP		pPerl->Perl_newWHILEOP
 #undef  newWHILEOP
 #define newWHILEOP		Perl_newWHILEOP
+#undef  Perl_new_stackinfo
+#define Perl_new_stackinfo	pPerl->Perl_new_stackinfo
+#undef  new_stackinfo
+#define new_stackinfo		Perl_new_stackinfo
 #undef  Perl_ninstr
 #define Perl_ninstr		pPerl->Perl_ninstr
 #undef  ninstr
 #define ninstr			Perl_ninstr
+#undef  Perl_op_free
+#define Perl_op_free		pPerl->Perl_op_free
+#undef  op_free
+#define op_free			Perl_op_free
+#undef  Perl_pad_sv
+#define Perl_pad_sv		pPerl->Perl_pad_sv
+#undef  pad_sv
+#define pad_sv			Perl_pad_sv
 #if defined(PERL_OBJECT)
 #undef  Perl_construct
 #define Perl_construct		pPerl->Perl_construct
@@ -1116,6 +1156,14 @@
 #define Perl_get_cv		pPerl->Perl_get_cv
 #undef  get_cv
 #define get_cv			Perl_get_cv
+#undef  Perl_init_i18nl10n
+#define Perl_init_i18nl10n	pPerl->Perl_init_i18nl10n
+#undef  init_i18nl10n
+#define init_i18nl10n		Perl_init_i18nl10n
+#undef  Perl_init_i18nl14n
+#define Perl_init_i18nl14n	pPerl->Perl_init_i18nl14n
+#undef  init_i18nl14n
+#define init_i18nl14n		Perl_init_i18nl14n
 #undef  Perl_new_collate
 #define Perl_new_collate	pPerl->Perl_new_collate
 #undef  new_collate
@@ -1144,6 +1192,10 @@
 #define Perl_require_pv		pPerl->Perl_require_pv
 #undef  require_pv
 #define require_pv		Perl_require_pv
+#undef  Perl_pmflag
+#define Perl_pmflag		pPerl->Perl_pmflag
+#undef  pmflag
+#define pmflag			Perl_pmflag
 #undef  Perl_pop_scope
 #define Perl_pop_scope		pPerl->Perl_pop_scope
 #undef  pop_scope
@@ -1156,6 +1208,34 @@
 #define Perl_regdump		pPerl->Perl_regdump
 #undef  regdump
 #define regdump			Perl_regdump
+#undef  Perl_pregfree
+#define Perl_pregfree		pPerl->Perl_pregfree
+#undef  pregfree
+#define pregfree		Perl_pregfree
+#undef  Perl_pregcomp
+#define Perl_pregcomp		pPerl->Perl_pregcomp
+#undef  pregcomp
+#define pregcomp		Perl_pregcomp
+#undef  Perl_re_intuit_start
+#define Perl_re_intuit_start	pPerl->Perl_re_intuit_start
+#undef  re_intuit_start
+#define re_intuit_start		Perl_re_intuit_start
+#undef  Perl_re_intuit_string
+#define Perl_re_intuit_string	pPerl->Perl_re_intuit_string
+#undef  re_intuit_string
+#define re_intuit_string	Perl_re_intuit_string
+#undef  Perl_regexec_flags
+#define Perl_regexec_flags	pPerl->Perl_regexec_flags
+#undef  regexec_flags
+#define regexec_flags		Perl_regexec_flags
+#undef  Perl_regnext
+#define Perl_regnext		pPerl->Perl_regnext
+#undef  regnext
+#define regnext			Perl_regnext
+#undef  Perl_repeatcpy
+#define Perl_repeatcpy		pPerl->Perl_repeatcpy
+#undef  repeatcpy
+#define repeatcpy		Perl_repeatcpy
 #undef  Perl_rninstr
 #define Perl_rninstr		pPerl->Perl_rninstr
 #undef  rninstr
@@ -1302,8 +1382,32 @@
 #define Perl_save_threadsv	pPerl->Perl_save_threadsv
 #undef  save_threadsv
 #define save_threadsv		Perl_save_threadsv
+#undef  Perl_scan_bin
+#define Perl_scan_bin		pPerl->Perl_scan_bin
+#undef  scan_bin
+#define scan_bin		Perl_scan_bin
+#undef  Perl_scan_hex
+#define Perl_scan_hex		pPerl->Perl_scan_hex
+#undef  scan_hex
+#define scan_hex		Perl_scan_hex
+#undef  Perl_scan_num
+#define Perl_scan_num		pPerl->Perl_scan_num
+#undef  scan_num
+#define scan_num		Perl_scan_num
+#undef  Perl_scan_oct
+#define Perl_scan_oct		pPerl->Perl_scan_oct
+#undef  scan_oct
+#define scan_oct		Perl_scan_oct
+#undef  Perl_screaminstr
+#define Perl_screaminstr	pPerl->Perl_screaminstr
+#undef  screaminstr
+#define screaminstr		Perl_screaminstr
 #if !defined(VMS)
 #endif
+#undef  Perl_sharepvn
+#define Perl_sharepvn		pPerl->Perl_sharepvn
+#undef  sharepvn
+#define sharepvn		Perl_sharepvn
 #undef  Perl_stack_grow
 #define Perl_stack_grow		pPerl->Perl_stack_grow
 #undef  stack_grow
@@ -1430,6 +1534,10 @@
 #undef  sv_collxfrm
 #define sv_collxfrm		Perl_sv_collxfrm
 #endif
+#undef  Perl_sv_compile_2op
+#define Perl_sv_compile_2op	pPerl->Perl_sv_compile_2op
+#undef  sv_compile_2op
+#define sv_compile_2op		Perl_sv_compile_2op
 #undef  Perl_sv_dec
 #define Perl_sv_dec		pPerl->Perl_sv_dec
 #undef  sv_dec
@@ -1450,6 +1558,10 @@
 #define Perl_sv_free		pPerl->Perl_sv_free
 #undef  sv_free
 #define sv_free			Perl_sv_free
+#undef  Perl_sv_gets
+#define Perl_sv_gets		pPerl->Perl_sv_gets
+#undef  sv_gets
+#define sv_gets			Perl_sv_gets
 #undef  Perl_sv_grow
 #define Perl_sv_grow		pPerl->Perl_sv_grow
 #undef  sv_grow
@@ -1622,6 +1734,14 @@
 #define Perl_sv_vsetpvfn	pPerl->Perl_sv_vsetpvfn
 #undef  sv_vsetpvfn
 #define sv_vsetpvfn		Perl_sv_vsetpvfn
+#undef  Perl_swash_init
+#define Perl_swash_init		pPerl->Perl_swash_init
+#undef  swash_init
+#define swash_init		Perl_swash_init
+#undef  Perl_swash_fetch
+#define Perl_swash_fetch	pPerl->Perl_swash_fetch
+#undef  swash_fetch
+#define swash_fetch		Perl_swash_fetch
 #undef  Perl_taint_env
 #define Perl_taint_env		pPerl->Perl_taint_env
 #undef  taint_env
@@ -1649,7 +1769,15 @@
 #define unlnk			Perl_unlnk
 #endif
 #if defined(USE_THREADS)
+#undef  Perl_unlock_condpair
+#define Perl_unlock_condpair	pPerl->Perl_unlock_condpair
+#undef  unlock_condpair
+#define unlock_condpair		Perl_unlock_condpair
 #endif
+#undef  Perl_unsharepvn
+#define Perl_unsharepvn		pPerl->Perl_unsharepvn
+#undef  unsharepvn
+#define unsharepvn		Perl_unsharepvn
 #undef  Perl_utf16_to_utf8
 #define Perl_utf16_to_utf8	pPerl->Perl_utf16_to_utf8
 #undef  utf16_to_utf8
