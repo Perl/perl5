@@ -9,7 +9,7 @@ package Math::Complex;
 
 our($VERSION, @ISA, @EXPORT, %EXPORT_TAGS, $Inf);
 
-$VERSION = 1.33;
+$VERSION = 1.34;
 
 BEGIN {
     unless ($^O eq 'unicosmk') {
@@ -1936,10 +1936,10 @@ Whatever it is, it does not manifest itself anywhere else where Perl runs.
 
 =head1 AUTHORS
 
-Raphael Manfredi <F<Raphael_Manfredi@pobox.com>> and
-Jarkko Hietaniemi <F<jhi@iki.fi>>.
+Daniel S. Lewart <F<d-lewart@uiuc.edu>>
 
-Extensive patches by Daniel S. Lewart <F<d-lewart@uiuc.edu>>.
+Original authors Raphael Manfredi <F<Raphael_Manfredi@pobox.com>> and
+Jarkko Hietaniemi <F<jhi@iki.fi>>
 
 =cut
 
