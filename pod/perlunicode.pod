@@ -47,7 +47,8 @@ normally be used.
 
 However, as a compatibility measure, this pragma must be explicitly used
 to enable recognition of UTF-8 encoded literals and identifiers in the
-source text.
+source text on ASCII based machines or recognize UTF-EBCDIC encoded literals
+and identifiers on EBCDIC based machines.
 
 =back
 
@@ -55,7 +56,7 @@ source text.
 
 Beginning with version 5.6, Perl uses logically wide characters to
 represent strings internally.  This internal representation of strings
-uses the UTF-8 encoding.
+uses either the UTF-8 or the UTF-EBCDIC encoding.
 
 In future, Perl-level operations can be expected to work with characters
 rather than bytes, in general.
@@ -84,7 +85,7 @@ Regardless of the above, the C<bytes> pragma can always be used to force
 byte semantics in a particular lexical scope.  See L<bytes>.
 
 The C<utf8> pragma is primarily a compatibility device that enables
-recognition of UTF-8 in literals encountered by the parser.  It may also
+recognition of UTF-(8|EBCDIC) in literals encountered by the parser.  It may also
 be used for enabling some of the more experimental Unicode support features.
 Note that this pragma is only required until a future version of Perl
 in which character semantics will become the default.  This pragma may
@@ -104,6 +105,8 @@ bytes change to operating on characters.  For ASCII data this makes
 no difference, because UTF-8 stores ASCII in single bytes, but for
 any character greater than C<chr(127)>, the character may be stored in
 a sequence of two or more bytes, all of which have the high bit set.
+For C1 controls or Latin 1 characters on an EBCDIC platform the character
+may be stored in a UTF-EBCDIC multi byte sequence.
 But by and large, the user need not worry about this, because Perl
 hides it from the user.  A character in Perl is logically just a number
 ranging from 0 to 2**32 or so.  Larger characters encode to longer
@@ -122,9 +125,9 @@ Strings and patterns may contain characters that have an ordinal value
 larger than 255.
 
 Presuming you use a Unicode editor to edit your program, such characters
-will typically occur directly within the literal strings as UTF-8
+will typically occur directly within the literal strings as UTF-(8|EBCDIC)
 characters, but you can also specify a particular character with an
-extension of the C<\x> notation.  UTF-8 characters are specified by
+extension of the C<\x> notation.  UTF-X characters are specified by
 putting the hexadecimal code within curlies after the C<\x>.  For instance,
 a Unicode smiley face is C<\x{263A}>.
 
@@ -233,8 +236,8 @@ And finally, C<scalar reverse()> reverses by character rather than by byte.
 =head1 CAVEATS
 
 As of yet, there is no method for automatically coercing input and
-output to some encoding other than UTF-8.  This is planned in the near
-future, however.
+output to some encoding other than UTF-8 or UTF-EBCDIC.  This is planned 
+in the near future, however.
 
 Whether an arbitrary piece of data will be treated as "characters" or
 "bytes" by internal operations cannot be divined at the current time.

@@ -25,7 +25,7 @@ __END__
 
 =head1 NAME
 
-utf8 - Perl pragma to enable/disable UTF-8 in source code
+utf8 - Perl pragma to enable/disable UTF-8 (or UTF-EBCDIC) in source code
 
 =head1 SYNOPSIS
 
@@ -38,9 +38,9 @@ WARNING: The implementation of Unicode support in Perl is incomplete.
 See L<perlunicode> for the exact details.
 
 The C<use utf8> pragma tells the Perl parser to allow UTF-8 in the
-program text in the current lexical scope.  The C<no utf8> pragma
-tells Perl to switch back to treating the source text as literal
-bytes in the current lexical scope.
+program text in the current lexical scope (allow UTF-EBCDIC on EBCDIC based
+platforms).  The C<no utf8> pragma tells Perl to switch back to treating 
+the source text as literal bytes in the current lexical scope.
 
 This pragma is primarily a compatibility device.  Perl versions
 earlier than 5.6 allowed arbitrary bytes in source code, whereas
@@ -48,9 +48,9 @@ in future we would like to standardize on the UTF-8 encoding for
 source text.  Until UTF-8 becomes the default format for source
 text, this pragma should be used to recognize UTF-8 in the source.
 When UTF-8 becomes the standard source format, this pragma will
-effectively become a no-op.  This pragma already is a no-op on
-EBCDIC platforms (where it is alright to code perl in EBCDIC
-rather than UTF-8).
+effectively become a no-op.  For convenience in what follows the
+term UTF-X is used to refer to UTF-8 on ASCII and ISO Latin based
+platforms and UTF-EBCDIC on EBCDIC based platforms.
 
 Enabling the C<utf8> pragma has the following effects:
 
@@ -61,16 +61,18 @@ Enabling the C<utf8> pragma has the following effects:
 Bytes in the source text that have their high-bit set will be treated
 as being part of a literal UTF-8 character.  This includes most literals
 such as identifiers, string constants, constant regular expression patterns
-and package names.
+and package names.  On EBCDIC platforms, characters in the C1 control group 
+and the Latin 1 character set are treated as being part of a literal
+UTF-EBCDIC character.
 
 =item *
 
-In the absence of inputs marked as UTF-8, regular expressions within the
+In the absence of inputs marked as UTF-X, regular expressions within the 
 scope of this pragma will default to using character semantics instead
 of byte semantics.
 
     @bytes_or_chars = split //, $data;	# may split to bytes if data
-					# $data isn't UTF-8
+					# $data isn't UTF-X
     {
 	use utf8;			# force char semantics
 	@chars = split //, $data;	# splits characters
@@ -100,7 +102,7 @@ representing it in perl's UTF-X encoding.
 
 =item * $flag = utf8::decode($string)
 
-Attempts to converts I<$string> in-place from perl's UTF-X encoding into logical characters.
+Attempts to convert I<$string> in-place from perl's UTF-X encoding into logical characters.
 
 =back
 
