@@ -128,6 +128,7 @@ struct thread *getTHR _((void));
 #  endif
 #endif
 
+
 #ifndef THREAD_RET_TYPE
 #  define THREAD_RET_TYPE	void *
 #  define THREAD_RET_CAST(p)	((void *)(p))
@@ -223,7 +224,7 @@ struct thread {
     perl_mutex	mutex;			/* For the fields others can change */
     U32		tid;
     struct thread *next, *prev;		/* Circular linked list of threads */
-
+    JMPENV	Tstart_env;	        /* Top of top_env longjmp() chain */ 
 #ifdef ADD_THREAD_INTERN
     struct thread_intern i;		/* Platform-dependent internals */
 #endif
@@ -306,6 +307,7 @@ typedef struct condpair {
 #undef	chopset
 #undef	formtarget
 #undef	bodytarget
+#undef  start_env
 #undef	toptarget
 #undef	top_env
 #undef	runlevel
@@ -381,6 +383,7 @@ typedef struct condpair {
 
 #define	top_env		(thr->Ttop_env)
 #define	runlevel	(thr->Trunlevel)
+#define start_env       (thr->Tstart_env)
 
 #else
 /* USE_THREADS is not defined */

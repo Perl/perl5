@@ -89,8 +89,10 @@ threadstart(void *arg)
     AV *returnav;
     int i, ret;
     dJMPENV;
+    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "new thread %p waiting to start\n",
+			  thr));
 
-    /* Don't call *anything* requiring dTHR until after pthread_setspecific */
+    /* Don't call *anything* requiring dTHR until after SET_THR() */
     /*
      * Wait until our creator releases us. If we didn't do this, then
      * it would be potentially possible for out thread to carry on and
@@ -226,8 +228,8 @@ newthread (SV *startsv, AV *initargs, char *Class)
     thr = new_struct_thread(thr);
     SPAGAIN;
     DEBUG_L(PerlIO_printf(PerlIO_stderr(),
-			  "%p: newthread, tid is %u, preparing stack\n",
-			  savethread, thr->tid));
+			  "%p: newthread (%p), tid is %u, preparing stack\n",
+			  savethread, thr, thr->tid));
     /* The following pushes the arg list and startsv onto the *new* stack */
     PUSHMARK(sp);
     /* Could easily speed up the following greatly */
@@ -235,7 +237,6 @@ newthread (SV *startsv, AV *initargs, char *Class)
 	XPUSHs(SvREFCNT_inc(*av_fetch(initargs, i, FALSE)));
     XPUSHs(SvREFCNT_inc(startsv));
     PUTBACK;
-
 #ifdef THREAD_CREATE
     err = THREAD_CREATE(thr, threadstart);
 #else    
@@ -251,6 +252,8 @@ newthread (SV *startsv, AV *initargs, char *Class)
     MUTEX_UNLOCK(&thr->mutex);
 #endif
     if (err) {
+        DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+			  "%p: create of %p failed %d\n", savethread, thr, err));
 	/* Thread creation failed--clean up */
 	SvREFCNT_dec(thr->cvcache);
 	remove_thread(thr);
@@ -286,6 +289,7 @@ handle_thread_signal(int sig)
 }
 
 MODULE = Thread		PACKAGE = Thread
+PROTOTYPES: DISABLE
 
 void
 new(Class, startsv, ...)

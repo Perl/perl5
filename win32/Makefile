@@ -360,8 +360,8 @@ $(PERLEXE): $(PERLDLL) $(CONFIGPM) perlmain.obj
 	del perl.exe
 	copy splittree.pl .. 
 	$(MINIPERL) -I..\lib ..\splittree.pl "../LIB" "../LIB/auto"
-	attrib -r ..\t\*.*
-	copy test ..\t
+#	attrib -r ..\t\*.*
+#	copy test ..\t
 
 perl95.c : runperl.c 
 	copy runperl.c perl95.c

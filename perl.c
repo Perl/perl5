@@ -128,7 +128,9 @@ perl_construct(register PerlInterpreter *sv_interp)
 #ifdef USE_THREADS
 
     	INIT_THREADS;
-#ifndef WIN32
+#ifdef ALLOC_THREAD_KEY
+        ALLOC_THREAD_KEY;
+#else
 	if (pthread_key_create(&thr_key, 0))
 	    croak("panic: pthread_key_create");
 #endif
@@ -2829,8 +2831,8 @@ init_main_thread()
     thr->prev = thr;
     MUTEX_UNLOCK(&threads_mutex);
 
-#ifdef HAVE_THREAD_INTERN
-    init_thread_intern(thr);
+#ifdef INIT_THREAD_INTERN
+    INIT_THREAD_INTERN(thr);
 #else
     thr->self = pthread_self();
 #endif /* HAVE_THREAD_INTERN */
