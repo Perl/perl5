@@ -28,6 +28,589 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.7.X		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 16082] By: jhi                                   on 2002/04/22  16:22:50
+        Log: In MANIFEST but not added.
+     Branch: perl
+	   + NetWare/interface.cpp
+____________________________________________________________________________
+[ 16081] By: jhi                                   on 2002/04/22  16:15:26
+        Log: Duh.
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 16080] By: jhi                                   on 2002/04/22  16:07:26
+        Log: Subject: Re: t/japh/abigail.t [PATCH]
+             From: Norton Allen <allen@huarp.harvard.edu>
+             Date: Sun, 21 Apr 2002 21:14:59 -0400 (edt)
+             Message-Id: <200204220114.VAA06066@bottesini.harvard.edu>
+     Branch: perl
+	   ! t/japh/abigail.t
+____________________________________________________________________________
+[ 16079] By: ams                                   on 2002/04/22  15:59:55
+        Log: Subject: {PATCH docs] sockatmark
+             From: Mark-Jason Dominus <mjd@plover.com>
+             Date: Mon, 22 Apr 2002 02:43:42 -0400
+             Message-Id: <20020422064342.24646.qmail@plover.com>
+     Branch: perl
+	   ! ext/IO/lib/IO/Socket.pm pod/perlfunc.pod
+____________________________________________________________________________
+[ 16078] By: jhi                                   on 2002/04/22  15:57:21
+        Log: Subject: [PATCH] cflags.SH -- to preserve hint file options
+             From: Paul_GreenVOS@vos.stratus.com
+             Date: Mon, 22 Apr 02 12:40 edt
+             Message-Id: <200204221639.MAA11298@mailhub2.stratus.com>
+     Branch: perl
+	   ! cflags.SH
+____________________________________________________________________________
+[ 16077] By: jhi                                   on 2002/04/22  15:18:18
+        Log: Add new files from #16076; re-sort.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 16076] By: jhi                                   on 2002/04/22  15:15:22
+        Log: NetWare changeover from Watcom to Codewarrior, from C Aditya.
+     Branch: perl
+	   + NetWare/MP.imp NetWare/bat/CWbuild.bat NetWare/nwhashcls.cpp
+	   + NetWare/nwhashcls.h NetWare/nwperlhost.h NetWare/nwvmem.h
+	   + NetWare/perllib.cpp NetWare/splittree.pl
+	   ! NetWare/Makefile NetWare/Nwmain.c NetWare/config.wc
+	   ! NetWare/dl_netware.xs NetWare/interface.h NetWare/iperlhost.h
+	   ! NetWare/nw5.c NetWare/nw5sck.c NetWare/t/NWScripts.pl
+	   ! NetWare/testnlm/type/type.c ext/File/Glob/bsd_glob.c
+	   ! iperlsys.h lib/ExtUtils/MM.pm lib/ExtUtils/MM_NW5.pm
+	   ! lib/ExtUtils/MM_Unix.pm makedef.pl perl.c x2p/a2py.c
+	   ! x2p/hash.c x2p/walk.c
+____________________________________________________________________________
+[ 16074] By: jhi                                   on 2002/04/22  15:04:25
+        Log: Subject: Re: [ID 20020422.003] Suggestion in Perl 5.6.1 installation on AIX
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Mon, 22 Apr 2002 17:56:17 +0200
+             Message-Id: <20020422175549.BECB.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! README.aix
+____________________________________________________________________________
+[ 16073] By: jhi                                   on 2002/04/22  12:59:17
+        Log: Signedness nit.
+     Branch: perl
+	   ! ext/PerlIO/encoding/encoding.xs
+____________________________________________________________________________
+[ 16072] By: jhi                                   on 2002/04/22  12:58:04
+        Log: No semicolons after blocks.
+     Branch: perl
+	   ! ext/Encode/Encode.xs
+____________________________________________________________________________
+[ 16071] By: jhi                                   on 2002/04/22  12:48:19
+        Log: Upgrade to PerlIO::encoding 0.04, from Dan Kogai.
+     Branch: perl
+	   ! ext/PerlIO/encoding/encoding.pm
+	   ! ext/PerlIO/encoding/encoding.xs
+____________________________________________________________________________
+[ 16070] By: jhi                                   on 2002/04/22  12:44:09
+        Log: Upgrade to Encode 1.56, from Dan Kogai.
+     Branch: perl
+	   ! ext/Encode/AUTHORS ext/Encode/Byte/Byte.pm ext/Encode/CN/CN.pm
+	   ! ext/Encode/Changes ext/Encode/Encode.pm ext/Encode/Encode.xs
+	   ! ext/Encode/JP/JP.pm ext/Encode/KR/KR.pm ext/Encode/README
+	   ! ext/Encode/Symbol/Symbol.pm ext/Encode/TW/TW.pm
+	   ! ext/Encode/Unicode/Unicode.pm ext/Encode/Unicode/Unicode.xs
+	   ! ext/Encode/bin/enc2xs ext/Encode/bin/piconv
+	   ! ext/Encode/bin/ucmlint ext/Encode/encoding.pm
+	   ! ext/Encode/lib/Encode/Alias.pm ext/Encode/lib/Encode/CN/HZ.pm
+	   ! ext/Encode/lib/Encode/Config.pm
+	   ! ext/Encode/lib/Encode/Encoder.pm
+	   ! ext/Encode/lib/Encode/Encoding.pm
+	   ! ext/Encode/lib/Encode/JP/H2Z.pm
+	   ! ext/Encode/lib/Encode/JP/JIS7.pm
+	   ! ext/Encode/lib/Encode/KR/2022_KR.pm
+	   ! ext/Encode/lib/Encode/PerlIO.pod
+	   ! ext/Encode/lib/Encode/Supported.pod ext/Encode/t/jperl.t
+	   ! ext/Encode/t/perlio.t ext/Encode/ucm/big5-eten.ucm
+	   ! ext/Encode/ucm/big5-hkscs.ucm
+____________________________________________________________________________
+[ 16069] By: jhi                                   on 2002/04/22  12:38:30
+        Log: Comment tweak from Philip.
+     Branch: perl
+	   ! opcode.pl
+____________________________________________________________________________
+[ 16068] By: gsar                                  on 2002/04/22  09:53:36
+        Log: a Test::Harness tweak to make the test lines show up prettier
+     Branch: perl
+	   ! lib/Test/Harness.pm
+____________________________________________________________________________
+[ 16067] By: nick                                  on 2002/04/22  09:19:23
+        Log: Integrate mainline
+     Branch: perlio
+	  !> lib/FileCache.t lib/Pod/t/eol.t lib/Tie/File/t/31_autodefer.t
+	  !> lib/Tie/File/t/32_defer_misc.t lib/Tie/File/t/33_defer_vs.t
+	  !> t/lib/warnings/perlio t/win32/system.t
+____________________________________________________________________________
+[ 16066] By: nick                                  on 2002/04/22  09:01:43
+        Log: Integrate //depot/perlio into mainline
+     Branch: perl
+	  !> ext/Encode/Encode.pm ext/Encode/Encode.xs
+	  !> ext/Encode/t/perlio.t ext/PerlIO/encoding/encoding.pm
+	  !> ext/PerlIO/encoding/encoding.xs pod/perliol.pod
+____________________________________________________________________________
+[ 16065] By: gsar                                  on 2002/04/22  08:37:17
+        Log: clean up after stray test file littering
+             
+             NOTE: PerlIO/t/via.t leaves behind a via$$ file on windows when
+             it seems that it shouldn't (looks like a handle leak in PerlIO
+             to me)
+     Branch: perl
+	   ! lib/FileCache.t lib/Pod/t/eol.t lib/Tie/File/t/31_autodefer.t
+	   ! lib/Tie/File/t/32_defer_misc.t lib/Tie/File/t/33_defer_vs.t
+	   ! t/lib/warnings/perlio t/win32/system.t
+____________________________________________________________________________
+[ 16064] By: nick                                  on 2002/04/22  08:02:58
+        Log: Integrate mainline into perlio
+     Branch: perlio
+	  +> ext/Storable/t/malice.t
+	   ! pod/perliol.pod
+	  !> (integrate 57 files)
+____________________________________________________________________________
+[ 16063] By: gsar                                  on 2002/04/22  07:23:30
+        Log: integrate change#16062 from mainline
+             
+             another windows fix: only create a new console for subprocesses
+             when all three stdhandles are invalid (from Jan Dubois)
+     Branch: maint-5.6/perl
+	   ! win32/win32.c
+____________________________________________________________________________
+[ 16062] By: gsar                                  on 2002/04/22  07:02:03
+        Log: another windows fix: only create a new console for subprocesses
+             when all three stdhandles are invalid (from Jan Dubois)
+     Branch: perl
+	   ! win32/win32.c
+____________________________________________________________________________
+[ 16060] By: gsar                                  on 2002/04/22  02:40:57
+        Log: all the thread tests now pass on windows (32-bit and 64-bit)
+     Branch: perl
+	   ! README.win32
+____________________________________________________________________________
+[ 16059] By: gsar                                  on 2002/04/22  02:35:45
+        Log: enable maximal optimizations on win64
+     Branch: perl
+	   ! win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[ 16058] By: jhi                                   on 2002/04/22  01:38:31
+        Log: Tweaks copied from Philip Newton's Encode patches.
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[ 16057] By: sky                                   on 2002/04/22  00:19:40
+        Log: End blocks were not run on Win32.
+             The real fix should be to turn this flag on in RunPerl but
+             I think we are too close 5.8 to change that.
+     Branch: perl
+	   ! ext/threads/threads.xs
+____________________________________________________________________________
+[ 16056] By: sky                                   on 2002/04/21  23:29:22
+        Log: Do not unlock mutex twice.
+             Do not unlock mutex after it has been destroyed and freed.
+             Do not email p5p without uncrossing eyes.
+     Branch: perl
+	   ! ext/threads/threads.xs
+____________________________________________________________________________
+[ 16055] By: gsar                                  on 2002/04/21  22:32:29
+        Log: squelch some more type mismatch warnings
+             
+             SvREFCNT_dec(x ? y : z) did not typecast the right thing due to
+             missing parens in macro definition
+     Branch: perl
+	   ! dump.c ext/Cwd/Cwd.xs ext/Data/Dumper/Dumper.xs
+	   ! ext/File/Glob/bsd_glob.c ext/IO/IO.xs ext/IO/poll.c
+	   ! ext/PerlIO/Scalar/Scalar.xs ext/PerlIO/encoding/encoding.xs
+	   ! pp.c regexec.c sv.h
+____________________________________________________________________________
+[ 16054] By: jhi                                   on 2002/04/21  22:24:52
+        Log: Make writing user-defined character properties nicer.
+     Branch: perl
+	   ! lib/utf8_heavy.pl pod/perlunicode.pod t/op/pat.t
+____________________________________________________________________________
+[ 16053] By: gsar                                  on 2002/04/21  21:39:08
+        Log: test appears to be ass_u_ming sizeof(long) == sizeof(IV), which
+             isn't the case on win64
+     Branch: perl
+	   ! ext/Storable/t/malice.t
+____________________________________________________________________________
+[ 16052] By: jhi                                   on 2002/04/21  21:24:07
+        Log: One more way to do character class subtraction.
+     Branch: perl
+	   ! pod/perlunicode.pod
+____________________________________________________________________________
+[ 16051] By: jhi                                   on 2002/04/21  21:04:19
+        Log: Mopup of #16048.
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[ 16050] By: gsar                                  on 2002/04/21  20:55:38
+        Log: some test failures have been fixed
+     Branch: perl
+	   ! README.win32
+____________________________________________________________________________
+[ 16049] By: gsar                                  on 2002/04/21  20:50:21
+        Log: use compare_text() rather than compare() to avoid bogus
+             failures when the test files happen to be CRLF terminated
+     Branch: perl
+	   ! ext/Encode/t/JP.t
+____________________________________________________________________________
+[ 16048] By: gsar                                  on 2002/04/21  19:53:08
+        Log: fixes for all the warnings reported by Visual C (most of this
+             change is from change#12026)
+     Branch: perl
+	   ! av.c cop.h doop.c dump.c ext/Devel/Peek/Peek.xs gv.c hv.c
+	   ! locale.c mg.c op.c perl.c perl.h perlio.c perly.c perly.y pp.c
+	   ! pp_ctl.c pp_hot.c pp_pack.c pp_sort.c pp_sys.c regcomp.c
+	   ! regexec.c sv.c toke.c universal.c utf8.c util.c
+	   ! vms/perly_c.vms win32/perllib.c win32/win32.c win32/win32sck.c
+____________________________________________________________________________
+[ 16047] By: jhi                                   on 2002/04/21  17:21:56
+        Log: Subject: [PATCH] another Storable test (Re: perl@16005)
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Sun, 21 Apr 2002 19:15:24 +0100
+             Message-ID: <20020421181523.GC332@Bagpuss.unfortu.net>
+     Branch: perl
+	   + ext/Storable/t/malice.t
+	   ! MANIFEST ext/Storable/Storable.pm
+____________________________________________________________________________
+[ 16046] By: jhi                                   on 2002/04/21  17:09:01
+        Log: Subject: [PATCH] Win32: encode/t/perlio.t needs some binmode
+             From: "Mattia Barbon" <mbarbon@dsi.unive.it>
+             Date: Sun, 21 Apr 2002 19:37:51 +0200
+             Message-ID: <3CC3150F.5798.22A05AE@localhost>
+     Branch: perl
+	   ! ext/Encode/t/perlio.t
+____________________________________________________________________________
+[ 16045] By: jhi                                   on 2002/04/21  16:29:28
+        Log: Subject: [PATCH 5.7.3 docs] Typo in pod/perltrap.pod
+             From: Andrey Sapozhnikov <sapa@icb.chel.su>
+             Date: Fri, 19 Apr 2002 19:55:56 +0600
+             Message-ID: <3CC021EC.5080005@icb.chel.su>
+             
+             (tweaked a bit)
+     Branch: perl
+	   ! pod/perltrap.pod
+____________________________________________________________________________
+[ 16044] By: jhi                                   on 2002/04/21  16:22:17
+        Log: Do not assume that io buffer flushing happens in the same
+             order as joins (that assumption broke in a multicpu IRIX box)
+     Branch: perl
+	   ! ext/threads/t/thread.t
+____________________________________________________________________________
+[ 16043] By: jhi                                   on 2002/04/21  15:56:30
+        Log: As if people would be reading the documentation :-)
+     Branch: perl
+	   ! opcode.pl
+____________________________________________________________________________
+[ 16042] By: jhi                                   on 2002/04/21  15:15:05
+        Log: Typo tweaks.
+     Branch: perl
+	   ! pod/perlrun.pod
+____________________________________________________________________________
+[ 16041] By: sky                                   on 2002/04/21  13:53:54
+        Log: Got the last memory leak in the while(1) { threads->create(sub 
+             {})->join() }, now we can loop over a million threads without a 
+             problem. 
+             Cleared up SVs that should have been mortal but never where.
+     Branch: perl
+	   ! ext/threads/threads.xs
+____________________________________________________________________________
+[ 16040] By: rgs                                   on 2002/04/21  12:25:15
+        Log: Make doc clearer, as suggested by Brent Dax
+     Branch: perl
+	   ! opcode.pl
+____________________________________________________________________________
+[ 16039] By: rgs                                   on 2002/04/21  12:20:47
+        Log: Revert change #15974.
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[ 16038] By: nick                                  on 2002/04/21  08:43:48
+        Log: Integrate mainline
+     Branch: perlio
+	  +> win32/config.vc64 win32/config_H.vc64
+	  !> (integrate 43 files)
+____________________________________________________________________________
+[ 16037] By: nick                                  on 2002/04/21  08:10:07
+        Log: Integrate mainline
+     Branch: perlio
+	  +> ext/Encode/ucm/big5-eten.ucm
+	   - ext/Encode/ucm/big5.ucm win32/Makefile.win64
+	   - win32/config.win64 win32/config_H.win64
+	  !> MANIFEST Porting/makerel ext/Encode/Changes
+	  !> ext/Encode/Encode.pm ext/Encode/Encode.xs ext/Encode/MANIFEST
+	  !> ext/Encode/TW/Makefile.PL ext/Encode/TW/TW.pm
+	  !> ext/Encode/encoding.pm ext/Encode/lib/Encode/Alias.pm
+	  !> ext/Encode/lib/Encode/Config.pm
+	  !> ext/Encode/lib/Encode/Supported.pod ext/Encode/t/Aliases.t
+	  !> ext/Encode/t/TW.t ext/Encode/ucm/big5-hkscs.ucm
+	  !> ext/threads/threads.xs lib/Memoize/t/errors.t pod/perlfunc.pod
+	  !> pod/perlunicode.pod vms/vms.c
+____________________________________________________________________________
+[ 16036] By: jhi                                   on 2002/04/21  03:04:41
+        Log: S_ stands sfor static.
+     Branch: perl
+	   ! hv.c
+____________________________________________________________________________
+[ 16035] By: jhi                                   on 2002/04/21  02:52:35
+        Log: htovs et al might be macros.
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[ 16034] By: gsar                                  on 2002/04/21  02:11:06
+        Log: missed checkin of this file in change#16033
+     Branch: perl
+	   ! makedef.pl
+____________________________________________________________________________
+[ 16033] By: gsar                                  on 2002/04/21  01:55:35
+        Log: Windows 64-bit support:
+             
+             * support for building it in the regular makefiles
+             * large files support via the _*i64() functions (this should be
+             portable to the 32-bit universe too, but quite untested and
+             and binary-incompatible, therefore not enabled there)
+             * three additional test failures in addition to the t/end.t one
+             (see README.win32)
+             * sprintf() on Windows gets %I{32,64,}[xoud] format that parallel
+             the ones available from the CRT (needed because Perl uses
+             the UVxf macros in both sprintf() *and* in sv_catpvf() et al.)
+             * add a few 64-bit notes to README.win32
+             
+             The following general problems were also fixed:
+             
+             * s/struct stat/Stat_t/g
+             * Data::Dumper had some naughty 'long' typecasts
+             * Errno_pm.PL didn't work safe when winsock.h was not in the same
+             directory as errno.h
+             * various tell/seek things were incorrectly prototyped
+             * squelch ugly looking noise when running tests
+             * Embed.t wasn't linking in all the libraries
+             * perl57.dll is now perl58.dll (anticipating 5.8.0-RC1)
+             * re-enable all the disabled warnings (additional fixes may be
+             needed for the warnings uncovered by this)
+     Branch: perl
+	   + win32/config.vc64 win32/config_H.vc64
+	   ! MANIFEST README.win32 doio.c dosish.h
+	   ! ext/Data/Dumper/Dumper.xs ext/Errno/Errno_pm.PL iperlsys.h
+	   ! lib/ExtUtils/t/Embed.t lib/ExtUtils/t/basic.t mg.c perl.c
+	   ! perl.h sv.c t/op/exec.t util.c win32/Makefile win32/config.gc
+	   ! win32/config.vc win32/makefile.mk win32/perlglob.c
+	   ! win32/perlhost.h win32/win32.c win32/win32.h win32/win32io.c
+	   ! win32/win32iop.h win32/win32sck.c
+____________________________________________________________________________
+[ 16032] By: jhi                                   on 2002/04/20  23:07:20
+        Log: Upgrade to Encode 1.52, from Dan Kogai.
+     Branch: perl
+	   ! ext/Encode/Changes ext/Encode/Encode.pm ext/Encode/Encode.xs
+	   ! ext/Encode/Unicode/Unicode.xs ext/Encode/bin/enc2xs
+	   ! ext/Encode/encoding.pm ext/Encode/lib/Encode/Encoding.pm
+	   ! ext/Encode/lib/Encode/JP/JIS7.pm
+	   ! ext/Encode/lib/Encode/KR/2022_KR.pm ext/Encode/t/TW.t
+	   ! ext/Encode/t/perlio.t ext/Encode/ucm/big5-eten.ucm
+	   ! ext/Encode/ucm/big5-hkscs.ucm
+____________________________________________________________________________
+[ 16031] By: jhi                                   on 2002/04/20  22:22:23
+        Log: Subject: Re: [PATCH 5.7.3 docs] The question deals with a bug that was fixed
+             From: Mark-Jason Dominus <mjd@plover.com>
+             Date: Sat, 20 Apr 2002 03:36:28 -0400
+             Message-ID: <20020420073628.324.qmail@plover.com>
+     Branch: perl
+	   ! pod/perlopentut.pod
+____________________________________________________________________________
+[ 16030] By: sky                                   on 2002/04/20  22:02:32
+        Log: Remove auto-detach
+             Cleans up memory now, destroys the mutex and frees thread
+             Makes returnvalues mortal
+             Doesn't run thread_destruct until the thread has stopped AND
+             all references to it are gone.
+     Branch: perl
+	   ! ext/threads/threads.xs
+____________________________________________________________________________
+[ 16029] By: jhi                                   on 2002/04/20  21:46:33
+        Log: Subject: [PATCH @16005] rescue perldoc for VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Sat, 20 Apr 2002 15:16:30 -0500
+             Message-Id: <a05111701b8e779a639b9@[172.16.52.1]>
+     Branch: perl
+	   ! vms/vms.c
+____________________________________________________________________________
+[ 16028] By: jhi                                   on 2002/04/20  21:44:27
+        Log: Subject: Re: [PATCH] typo
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: Sat, 20 Apr 2002 15:41:23 +0200
+             Message-ID: <m37kn2o5bw.fsf@anima.de>
+     Branch: perl
+	   ! ext/Encode/encoding.pm
+____________________________________________________________________________
+[ 16027] By: nick                                  on 2002/04/20  21:42:09
+        Log: Fix perlio for Encode/t/perlio.t's SKIPPED TODO tests,
+             and change test not to skip them.
+     Branch: perlio
+	   ! ext/Encode/t/perlio.t ext/PerlIO/encoding/encoding.xs
+____________________________________________________________________________
+[ 16026] By: jhi                                   on 2002/04/20  21:40:20
+        Log: Upgrade to Encode 1.51, from Dan Kogai.
+     Branch: perl
+	   + ext/Encode/ucm/big5-eten.ucm
+	   - ext/Encode/ucm/big5.ucm
+	   ! MANIFEST ext/Encode/Changes ext/Encode/Encode.pm
+	   ! ext/Encode/Encode.xs ext/Encode/MANIFEST
+	   ! ext/Encode/TW/Makefile.PL ext/Encode/TW/TW.pm
+	   ! ext/Encode/lib/Encode/Alias.pm ext/Encode/lib/Encode/Config.pm
+	   ! ext/Encode/lib/Encode/Supported.pod ext/Encode/t/Aliases.t
+	   ! ext/Encode/t/TW.t ext/Encode/ucm/big5-hkscs.ucm
+____________________________________________________________________________
+[ 16025] By: gsar                                  on 2002/04/20  19:58:59
+        Log: purge existing win64 stuff (this never really worked in 5.7.x)
+             in preparation for completely redone win64 support
+     Branch: perl
+	   - win32/Makefile.win64 win32/config.win64 win32/config_H.win64
+	   ! MANIFEST Porting/makerel
+____________________________________________________________________________
+[ 16024] By: rgs                                   on 2002/04/20  19:09:35
+        Log: Subject: Re: perl@16005
+             From: Stas Bekman <stas@stason.org>
+             Date: Sat, 20 Apr 2002 13:06:49 +0800
+             Message-ID: <3CC0F769.1010705@stason.org>
+             (with a minor formatting nit)
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 16023] By: nick                                  on 2002/04/20  19:06:04
+        Log: Some tweaks for encodings which need lines.
+             Also disabled trial of using fallbacks.
+     Branch: perlio
+	   ! ext/PerlIO/encoding/encoding.pm
+	   ! ext/PerlIO/encoding/encoding.xs
+____________________________________________________________________________
+[ 16022] By: nick                                  on 2002/04/20  18:37:38
+        Log: Various tweaks to Encode
+     Branch: perlio
+	   ! ext/Encode/Encode.pm ext/Encode/Encode.xs
+	   ! ext/Encode/Unicode/Unicode.xs
+	   ! ext/Encode/lib/Encode/Encoding.pm
+	   ! ext/Encode/lib/Encode/JP/JIS7.pm
+	   ! ext/Encode/lib/Encode/KR/2022_KR.pm ext/Encode/t/perlio.t
+____________________________________________________________________________
+[ 16021] By: jhi                                   on 2002/04/20  14:31:31
+        Log: Subject: [PATCH] perlunicode.pod typos
+             From: andreas.koenig@anima.de (Andreas J. Koenig)     
+             Date: Sat, 20 Apr 2002 11:20:25 +0200
+             Message-ID: <m3vgamoheu.fsf@anima.de>
+     Branch: perl
+	   ! pod/perlunicode.pod
+____________________________________________________________________________
+[ 16020] By: jhi                                   on 2002/04/20  14:28:12
+        Log: Test tweak from mjd.
+     Branch: perl
+	   ! lib/Memoize/t/errors.t
+____________________________________________________________________________
+[ 16019] By: jhi                                   on 2002/04/20  14:26:17
+        Log: Integrate perlio;
+             
+             Tweak to Encode.xs to avoid buffer overrun.
+             
+             Add :bytes to POD part.
+             Remove 'alias' to Encode now it exists as a module.
+             
+             Fill in the PERLIO sections.
+     Branch: perl
+	  !> ext/Encode/Encode.xs lib/PerlIO.pm pod/perlrun.pod
+____________________________________________________________________________
+[ 16018] By: nick                                  on 2002/04/20  13:38:24
+        Log: Fill in the PERLIO sections.
+     Branch: perlio
+	   ! pod/perlrun.pod
+____________________________________________________________________________
+[ 16017] By: nick                                  on 2002/04/20  13:37:15
+        Log: Add :bytes to POD part.
+             Remove 'alias' to Encode now it exists as a module.
+     Branch: perlio
+	   ! lib/PerlIO.pm
+____________________________________________________________________________
+[ 16016] By: sky                                   on 2002/04/20  13:12:31
+        Log: Really let the update of the link list do something.
+     Branch: perl
+	   ! ext/threads/threads.xs
+____________________________________________________________________________
+[ 16015] By: nick                                  on 2002/04/20  07:51:26
+        Log: Integrate mainline
+     Branch: perlio
+	  !> README.cn README.tw ext/B/O.pm lib/utf8_heavy.pl
+	  !> pod/perlre.pod pod/perlretut.pod pod/perlunicode.pod
+	  !> t/io/open.t t/japh/abigail.t t/lib/warnings/doio t/op/pat.t
+____________________________________________________________________________
+[ 16014] By: nick                                  on 2002/04/20  07:46:11
+        Log: Tweak to Encode.xs to avoid buffer overrun.
+     Branch: perlio
+	   ! ext/Encode/Encode.xs
+____________________________________________________________________________
+[ 16013] By: jhi                                   on 2002/04/20  01:48:13
+        Log: Subject: [PATCH] t/japh/abigail.t
+             From: abigail@foad.org
+             Date: Fri, 19 Apr 2002 02:21:36 +0200
+             Message-ID: <20020419002136.16948.qmail@foad.org>
+             
+             Subject: Re: [PATCH] t/japh/abigail.t
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Fri, 19 Apr 2002 11:23:45 -0500
+             Message-Id: <a05111705b8e5f49d5618@[172.16.52.1]>
+     Branch: perl
+	   ! t/japh/abigail.t
+____________________________________________________________________________
+[ 16012] By: jhi                                   on 2002/04/20  01:46:03
+        Log: User-defined character properties were unintentionally
+             removed, noticed by Dan Kogai.
+     Branch: perl
+	   ! lib/utf8_heavy.pl pod/perlre.pod pod/perlretut.pod
+	   ! pod/perlunicode.pod t/op/pat.t
+____________________________________________________________________________
+[ 16011] By: jhi                                   on 2002/04/19  21:53:55
+        Log: Subject: Re: [PATCH] Big5-related changes.
+             From: Autrijus Tang <autrijus@autrijus.org>
+             Date: Sat, 20 Apr 2002 04:06:31 +0800
+             Message-ID: <20020419200631.GA20964@not.autrijus.org>
+     Branch: perl
+	   ! README.cn README.tw
+____________________________________________________________________________
+[ 16010] By: rgs                                   on 2002/04/19  20:52:19
+        Log: Add a BUGS sections to O.pm
+     Branch: perl
+	   ! ext/B/O.pm
+____________________________________________________________________________
+[ 16009] By: rgs                                   on 2002/04/19  20:07:02
+        Log: Disable warning noise
+     Branch: perl
+	   ! t/io/open.t
+____________________________________________________________________________
+[ 16008] By: rgs                                   on 2002/04/19  19:54:08
+        Log: More tests for the 3-arg open
+     Branch: perl
+	   ! t/io/open.t t/lib/warnings/doio
+____________________________________________________________________________
+[ 16007] By: nick                                  on 2002/04/19  17:45:53
+        Log: Silence warning generating warning message for U+FFFF does not map etc.
+     Branch: perlio
+	   ! ext/Encode/Encode.xs
+____________________________________________________________________________
+[ 16006] By: nick                                  on 2002/04/19  15:24:57
+        Log: Integrate mainline (for Tk with Encode testing)
+             Some perlio & encode issues otherwise cleanish.
+     Branch: perlio
+	  +> ext/Encode/Unicode/Makefile.PL ext/Encode/Unicode/Unicode.pm
+	  +> ext/Encode/Unicode/Unicode.xs ext/Encode/lib/Encode/PerlIO.pod
+	  +> ext/Encode/t/fallback.t ext/Encode/t/jisx0201.euc
+	  +> ext/Encode/t/jisx0201.ref ext/Encode/t/perlio.t
+	  +> ext/threads/t/thread.t
+	   - ext/Encode/lib/Encode/Unicode.pm
+	  !> (integrate 38 files)
+____________________________________________________________________________
+[ 16005] By: jhi                                   on 2002/04/19  13:26:39
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 16004] By: jhi                                   on 2002/04/19  13:15:22
         Log: Subject: [PATCH] warn on ref open without perlio
              From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
