@@ -50,7 +50,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw(
 async	
 );
-our $VERSION = '1.01';
+our $VERSION = '1.02';
 
 
 # || 0 to ensure compatibility with previous versions
@@ -263,11 +263,6 @@ implemented in very much the same way as threads.)
 If your Perl has been built with PERL_OLD_SIGNALS (one has
 to explicitly add that symbol to ccflags, see C<perl -V>),
 signal handling is not threadsafe.
-
-=item Detached threads on Windows
-
-These aren't yet supported (as of perl 5.8.3), as they may lead to
-memory access violation problems.
 
 =back
 
