@@ -41,7 +41,6 @@ PERLVAR(Gsharedsv_space, PerlInterpreter*) /* The shared sv space */
 PERLVAR(Gsharedsv_space_mutex, perl_mutex) /* Mutex protecting the shared sv space */
 #endif
 
-/* Force inclusion of both runops options */
+/* Force inclusion of runops */
 PERLVARI(Grunops_std,	runops_proc_t,	MEMBER_TO_FPTR(Perl_runops_standard))
-PERLVARI(Grunops_dbg,	runops_proc_t,	MEMBER_TO_FPTR(Perl_runops_debug))
 
