@@ -1953,7 +1953,6 @@ NetWare/bat/Setmpksdk.bat	NetWare port
 NetWare/bat/Setnlmsdk.bat	NetWare port
 NetWare/bat/SetNWBld.bat	NetWare port
 NetWare/bat/SetNWDef.bat	NetWare port
-NetWare/bat/Setwatcom.bat	NetWare port
 NetWare/bat/ToggleD2.bat	NetWare port
 NetWare/bat/ToggleXDC.bat	NetWare port
 NetWare/CLIBsdio.h		NetWare port
