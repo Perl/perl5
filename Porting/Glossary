@@ -57,7 +57,8 @@ api_revision (patchlevel.U):
 	such as '5.6.1', api_revision is the '5'.
 	Prior to 5.5.640, the format was a floating point number,
 	like 5.00563.
-		perl.c:incpush() and lib/lib.pm will automatically search in
+
+	perl.c:incpush() and lib/lib.pm will automatically search in
 	$sitelib/.. for older directories back to the limit specified
 	by these api_ variables.  This is only useful if you have a
 	perl library directory tree structured like the default one.
@@ -65,7 +66,8 @@ api_revision (patchlevel.U):
 	directory was introduced in 5.005, so that is the lowest
 	possible value.  The version list appropriate for the current
 	system is determined in inc_version_list.U.
-		XXX To do:  Since compatibility can depend on compile time
+
+	XXX To do:  Since compatibility can depend on compile time
 	options (such as bincompat, longlong, etc.) it should
 	(perhaps) be set by Configure, but currently it isn't.
 	Currently, we read a hard-wired value from patchlevel.h.
@@ -771,7 +773,8 @@ d_Gconvert (d_gconvert.U):
 	long doubles, respectively.  If present, they contain a       
 	space-separated list of one or more of the above function       
 	names in the order they should be tried.
-		d_Gconvert may be set to override Configure with a platform-
+
+	d_Gconvert may be set to override Configure with a platform-
 	specific function.  If this function expects a double, a
 	different value may need to be set by the uselongdouble.cbu
 	call-back unit so that long doubles can be formatted without
@@ -3065,9 +3068,11 @@ installstyle (installstyle.U):
 	directory dedicated to perl (e.g. /opt/perl), while the latter
 	is useful if $prefix is shared by many packages, e.g. if
 	$prefix=/usr/local.
-		This may later be extended to include other information, so
+
+	This may later be extended to include other information, so
 	be careful with pattern-matching on the results.
-		For compatibility with perl5.005 and earlier, the default
+
+	For compatibility with perl5.005 and earlier, the default
 	setting is based on whether or not $prefix contains the string
 	"perl".
 
@@ -3570,11 +3575,6 @@ patchlevel (patchlevel.U):
 path_sep (Unix.U):
 	This is an old synonym for p_ in Head.U, the character
 	used to separate elements in the command shell search PATH.
-
-perl5 (perl5.U):
-	This variable contains the full path (if any) to a previously
-	installed perl5.005 or later suitable for running the script
-	to determine inc_version_list.
 
 perl5 (perl5.U):
 	This variable contains the full path (if any) to a previously
@@ -4593,6 +4593,10 @@ xs_apiversion (xs_apiversion.U):
 	debugging, 64bits, sfio, etc., are not checked for currently,
 	though in principle we could go snooping around in old
 	Config.pm files.
+
+yacc (yacc.U):
+	This variable holds the name of the compiler compiler we
+	want to use in the Makefile. It can be yacc, byacc, or bison -y.
 
 yaccflags (yacc.U):
 	This variable contains any additional yacc flags desired by the
