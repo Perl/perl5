@@ -2858,24 +2858,14 @@ Perl_yylex(pTHX)
 		}
 		break;
 	    default:
+		Perl_croak(aTHX_ "Unrecognized file test: -%c", (int)tmp);
 		break;
 	    }
-	    if (ftst) {
-		PL_last_lop_op = ftst;
-		DEBUG_T( { PerlIO_printf(Perl_debug_log,
-                        "### Saw file test %c\n", (int)ftst);
-		} )
-		FTST(ftst);
-	    }
-	    else {
-		/* Assume it was a minus followed by a one-letter named
-		 * subroutine call (or a -bareword), then. */
-		DEBUG_T( { PerlIO_printf(Perl_debug_log,
-			"### %c looked like a file test but was not\n",
-			(int)ftst);
-		} )
-		s -= 2;
-	    }
+	    PL_last_lop_op = ftst;
+	    DEBUG_T( { PerlIO_printf(Perl_debug_log,
+				     "### Saw file test %c\n", (int)ftst);
+	    } )
+	    FTST(ftst);
 	}
 	tmp = *s++;
 	if (*s == tmp) {
