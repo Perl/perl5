@@ -34,6 +34,239 @@ Version v5.6.1
 --------------
 
 ____________________________________________________________________________
+[  9640] By: gsar                                  on 2001/04/08  19:20:46
+        Log: integrate change#9634 from mainline
+             
+             Fix the perlmodlib generation (didn't understand separate .pod
+             files; didn't understand -- as the name-thing separator).
+             Update the CPAN mirrors list.
+     Branch: maint-5.6/perl
+	   ! pod/perlmodlib.pod
+	  !> pod/perlmodlib.PL
+____________________________________________________________________________
+[  9639] By: gsar                                  on 2001/04/08  18:57:31
+        Log: on windows, many of the README.* pods were being copied to the wrong
+             location
+     Branch: maint-5.6/perl
+	   ! win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[  9638] By: gsar                                  on 2001/04/08  18:38:25
+        Log: update to latest JPL from the anoncvs repository
+     Branch: maint-5.6/perl
+	   + jpl/ChangeLog jpl/README.JUST-JNI jpl/docs/Tutorial.pod
+	   ! MANIFEST jpl/JNI/JNI.pm jpl/JNI/JNI.xs jpl/JNI/Makefile.PL
+	   ! jpl/PerlInterpreter/PerlInterpreter.h jpl/README
+____________________________________________________________________________
+[  9632] By: gsar                                  on 2001/04/08  16:36:06
+        Log: add $Tie::RefHash::VERSION
+     Branch: maint-5.6/perl
+	   ! lib/Tie/RefHash.pm
+____________________________________________________________________________
+[  9624] By: gsar                                  on 2001/04/08  06:08:17
+        Log: test in t/pod/* were busted
+             
+             these tests are still not enabled in t/{harness,TEST}
+     Branch: maint-5.6/perl
+	   ! lib/Pod/Find.pm t/pod/emptycmd.t t/pod/find.t t/pod/for.t
+	   ! t/pod/headings.t t/pod/include.t t/pod/included.t t/pod/lref.t
+	   ! t/pod/multiline_items.t t/pod/nested_items.t
+	   ! t/pod/nested_seqs.t t/pod/oneline_cmds.t t/pod/pod2usage.t
+	   ! t/pod/poderrs.t t/pod/podselect.t t/pod/special_seqs.t
+____________________________________________________________________________
+[  9623] By: gsar                                  on 2001/04/08  03:37:01
+        Log: integrate change#9470 from mainline
+             
+             Subject: Re: [ID 20010215.006] Bad arg length for Socket::unpack_sockaddr_un, length is 14 ... 
+     Branch: maint-5.6/perl
+	  !> ext/Socket/Socket.xs
+____________________________________________________________________________
+[  9605] By: gsar                                  on 2001/04/07  11:52:40
+        Log: can't optimize away scope entry if tr/// is present
+     Branch: maint-5.6/perl
+	   ! op.c t/op/tr.t
+____________________________________________________________________________
+[  9597] By: gsar                                  on 2001/04/06  18:06:35
+        Log: integrate change#9464 from mainline (addendum to change#8313)
+             
+             Subject: [PATCH @9452] Better peep()ing for foreach() loops
+     Branch: maint-5.6/perl
+	  !> op.c
+____________________________________________________________________________
+[  9595] By: gsar                                  on 2001/04/06  14:57:17
+        Log: add a low-impact fix to accomodate darwin-ism
+     Branch: maint-5.6/perl
+	   ! ext/Errno/Errno_pm.PL
+____________________________________________________________________________
+[  9594] By: jhi                                   on 2001/04/06  14:55:14
+        Log: Integrate changes #9528,9593 from mainline into maintperl;
+             tweaking the editor/IDE/shell list.
+     Branch: maint-5.6/perl
+	  !> pod/perlfaq3.pod
+____________________________________________________________________________
+[  9592] By: gsar                                  on 2001/04/06  14:45:18
+        Log: integrate change#9477 from mainline (base.pm doc tweak)
+             
+             missing doc entry for fmod()
+     Branch: maint-5.6/perl
+	   ! lib/Math/BigFloat.pm
+	  !> lib/base.pm
+____________________________________________________________________________
+[  9587] By: gsar                                  on 2001/04/06  07:31:30
+        Log: add README.macos (from Chris Nandor)
+             
+             tyop in change#9555
+     Branch: maint-5.6/perl
+	   + README.macos
+	   ! MANIFEST pod/buildtoc.PL pod/perl.pod pod/perlfaq9.pod
+	   ! win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[  9586] By: gsar                                  on 2001/04/06  07:08:54
+        Log: fixes for Math::BigFloat bugs; add fmod() (from John Peacock)
+     Branch: maint-5.6/perl
+	   ! lib/Math/BigFloat.pm t/lib/bigfltpm.t
+____________________________________________________________________________
+[  9585] By: gsar                                  on 2001/04/06  06:58:44
+        Log: integrate changes#9555,9556,9563..9567,9570..9575,9577..9578
+             from mainline
+             
+             Subject: [PATCH] Base64 update to perlfaq9.pod
+             
+             Subject: [PATCH AUTHORS] Housekeeping
+             
+             Subject: Re: Not OK: perl v5.6.1 +fools-gold on darwin 1.3 (UNINSTALLED)
+             Mac OS X (Darwin) has extra pwent fields.
+             
+             Subject: [PATCH B::*] print control-character vars readably
+             Needs EBCDICification.
+             
+             Subject: [PATCH B::Deparse] lexical variables with ridiculously long names that are used in list assignments
+             
+             Subject: [PATCH B::*] cope with SVf_IVisUV, and cope with $^^ and friends
+             
+             Subject: [PATCH B::Deparse] "${foo}bar", "${foo}[1]" etc.
+             
+             Subject: [PATCH B::Deparse] binmode is no longer an UNOP
+             
+             Subject: [PATCH B::Deparse] regex quoting, and a minor milestone
+             
+             Subject: [PATCH B::Deparse] suppress "unintialized value" warnings
+             
+             Subject: bleadperl / hex ignores variable length and/or tr doesn't null terminate   ( with patch)
+             
+             Subject: patch for t/op/oct.t that shows need for patch supplied with bug 20010404.009, (bugs in hex and oct)
+             
+             FreeBSD hints tweak from Anton Berezin.
+             
+             Subject: [PATCH foolperl & bleadperl] README.vms update
+             
+             Subject: Re: [PATCH foolperl & bleadperl] README.vms update
+     Branch: maint-5.6/perl
+	  !> AUTHORS README.vms ext/B/B.pm ext/B/B/Concise.pm
+	  !> ext/B/B/Debug.pm ext/B/B/Deparse.pm ext/B/B/Terse.pm
+	  !> hints/freebsd.sh pod/perlfaq9.pod pp.c t/op/oct.t t/op/pwent.t
+____________________________________________________________________________
+[  9584] By: gsar                                  on 2001/04/06  04:09:00
+        Log: keep eval"" CVs alive until the end of the statement in which
+             they're called; this avoids a coredump ensuing from search for
+             lexicals in code such as:
+             
+             sub bug {
+             my $s = @_;
+             eval q[sub { eval 'sub { &$s }' }];
+             }
+             bug("x")->()->();
+             
+             this code still doesn't work as intended (as it has remained
+             since time immemorial), but it doesn't provoke a coredump anymore
+     Branch: maint-5.6/perl
+	   ! embed.h embed.pl global.sym objXSUB.h perlapi.c
+	   ! pod/perlguts.pod pp_ctl.c proto.h scope.c scope.h sv.c
+____________________________________________________________________________
+[  9551] By: gsar                                  on 2001/04/05  00:18:34
+        Log: tr/// doesn't null-terminate the result in some situations
+             (from Gisle Aas)
+     Branch: maint-5.6/perl
+	   ! doop.c t/op/tr.t
+____________________________________________________________________________
+[  9550] By: gsar                                  on 2001/04/04  20:04:17
+        Log: B::Deparse fix for ${^FOO} and documentation for PVX() method
+             (from Robin Houston)
+     Branch: maint-5.6/perl
+	   ! ext/B/B.pm ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  9548] By: gsar                                  on 2001/04/04  18:51:49
+        Log: integrate changes#9460,9462,9482,9521,9522
+             
+             Subject: PATCH: B::Debug should show LOOP-specific fields
+             
+             Subject: B::Deparse precedence bug. (Patch included.)
+             
+             Subject: Re: [ID 20010330.003] O=Deparse,-p does not preserve "operational semantics"
+             
+             Subject: [PATCH B::Concise] @stash_array = split(/pat/, str);
+             
+             Subject: [PATCH B::Concise] padname values may have bogus SvCUR
+     Branch: maint-5.6/perl
+	  !> ext/B/B.pm ext/B/B.xs ext/B/B/Concise.pm ext/B/B/Debug.pm
+	  !> ext/B/B/Deparse.pm ext/B/B/Showlex.pm
+____________________________________________________________________________
+[  9547] By: gsar                                  on 2001/04/04  18:49:16
+        Log: s/djSP/dSP/
+     Branch: maint-5.6/perl
+	   ! ext/Thread/Thread.xs
+____________________________________________________________________________
+[  9545] By: gsar                                  on 2001/04/04  18:38:52
+        Log: integrate change#8837 from mainline
+             
+             Subject: [patch] -Wall cleanup round 2
+     Branch: maint-5.6/perl
+	  !> ext/B/B.xs ext/Data/Dumper/Dumper.xs ext/Devel/DProf/DProf.xs
+	  !> ext/Devel/Peek/Peek.xs ext/Fcntl/Fcntl.xs
+	  !> ext/File/Glob/Glob.xs ext/GDBM_File/GDBM_File.xs ext/IO/IO.xs
+	  !> ext/IPC/SysV/SysV.xs ext/Opcode/Opcode.xs ext/POSIX/POSIX.xs
+	  !> ext/SDBM_File/SDBM_File.xs
+____________________________________________________________________________
+[  9544] By: gsar                                  on 2001/04/04  17:49:57
+        Log: "double" should be "NV"; standard typemap is missing entry
+             for NV
+     Branch: maint-5.6/perl
+	   ! ext/B/B.xs ext/B/B/C.pm lib/ExtUtils/typemap
+____________________________________________________________________________
+[  9539] By: gsar                                  on 2001/04/04  03:01:14
+        Log: another tweak needed for SunOS 4.1.x build (from Mike Guy)
+     Branch: maint-5.6/perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  9538] By: gsar                                  on 2001/04/04  01:00:38
+        Log: fflush() is a macro on SunOS 4.1.x, so provide a wrapper
+             for use with _fwalk() (fix for change#7705)
+     Branch: maint-5.6/perl
+	   ! util.c
+____________________________________________________________________________
+[  9533] By: gsar                                  on 2001/04/03  14:30:07
+        Log: better fix for change#9517 to accomodate UNC paths like
+             \\server\share\foo, and paths with trailing backslash
+             like c:\this\
+     Branch: maint-5.6/perl
+	   ! utils/perldoc.PL x2p/find2perl.PL x2p/s2p.PL
+____________________________________________________________________________
+[  9530] By: gsar                                  on 2001/04/03  04:56:41
+        Log: accomodate VMS "mailbox overflow" quirk in testsuite (from
+             Craig Berry)
+     Branch: maint-5.6/perl
+	   ! t/lib/socket.t
+____________________________________________________________________________
+[  9524] By: gsar                                  on 2001/04/03  01:09:12
+        Log: EPOC fix for lib/io_udp.t failure (from Olaf Flebbe)
+     Branch: maint-5.6/perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[  9517] By: gsar                                  on 2001/04/02  19:52:21
+        Log: many of the utilities interpolate literal paths within doublequotes
+             (fails on dosish platforms where path contains backslashes)
+     Branch: maint-5.6/perl
+	   ! utils/perldoc.PL x2p/find2perl.PL x2p/s2p.PL
+____________________________________________________________________________
 [  9516] By: gsar                                  on 2001/04/02  06:12:01
         Log: a foolish release
      Branch: maint-5.6/perl
@@ -2929,7 +3162,7 @@ ____________________________________________________________________________
 	  !> (integrate 26 files)
 ____________________________________________________________________________
 [  8173] By: gsar                                  on 2000/12/18  03:37:02
-        Log: integrate changes#7472,7474..7479,7481,7485,7489,7493,7494,7496,
+        Log: integrate changes#7472,7474..7478,7481,7485,7489,7493,7494,7496,
              7497,7499..7503,7505..7507,7509..7513,7515..7523,7526..7534,
              7536,7540,7542,7544..7546,7549,7553,7556,7557,7559,7561..7563,
              7565,7568..7572,7576,7578..7589,9592..7594,7596..7601 from mainline
@@ -2946,9 +3179,6 @@ ____________________________________________________________________________
              The #7476 needs a MANIFEST change, too.
              
              Add also emailless people.
-             
-             Prototype (stdio-like) PerlIO passing basic tests. Checked in
-             in case of accidents. Still several worrying fails, no line disciplines yet.
              
              UTF-8 decoder tweak.
              
