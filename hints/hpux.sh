@@ -630,6 +630,11 @@ case "$useperlio" in
     $undef|false|[nN]*) usemymalloc='y' ;;
     esac
 
+# malloc wrap works
+case "$usemallocwrap" in
+'') usemallocwrap='define' ;;
+esac
+
 # fpclassify() is a macro, the library call is Fpclassify
 # Similarly with the others below.
 d_fpclassify='define'

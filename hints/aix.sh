@@ -39,6 +39,11 @@ case "$usemymalloc" in
     '')  usemymalloc='n' ;;
     esac
 
+# malloc wrap works
+case "$usemallocwrap" in
+'') usemallocwrap='define' ;;
+esac
+
 # Intuiting the existence of system calls under AIX is difficult,
 # at best; the safest technique is to find them empirically.
 
