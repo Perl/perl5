@@ -612,7 +612,10 @@ op_free(OP *o)
 	    break;
 	/* FALL THROUGH */
     case OP_TRANS:
-	Safefree(cPVOPo->op_pv);
+	if (o->op_private & (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF))
+	    SvREFCNT_dec(cSVOPo->op_sv);
+	else
+	    Safefree(cPVOPo->op_pv);
 	break;
     case OP_SUBST:
 	op_free(cPMOPo->op_pmreplroot);
@@ -1566,6 +1569,7 @@ block_end(I32 floor, OP *seq)
     OP* retval = scalarseq(seq);
     LEAVE_SCOPE(floor);
     PL_pad_reset_pending = FALSE;
+    compiling.op_private = PL_hints;
     if (needblockscope)
 	PL_hints |= HINT_BLOCK_SCOPE; /* propagate out */
     pad_leavemy(PL_comppad_name_fill);
@@ -2021,6 +2025,19 @@ newBINOP(I32 type, I32 flags, OP *first, OP *last)
     return fold_constants((OP *)binop);
 }
 
+static int
+utf8compare(const void *a, const void *b)
+{
+    int i;
+    for (i = 0; i < 10; i++) {
+	if ((*(U8**)a)[i] < (*(U8**)b)[i])
+	    return -1;
+	if ((*(U8**)a)[i] > (*(U8**)b)[i])
+	    return 1;
+    }
+    return 0;
+}
+
 OP *
 pmtrans(OP *o, OP *expr, OP *repl)
 {
@@ -2032,16 +2049,191 @@ pmtrans(OP *o, OP *expr, OP *repl)
     register U8 *r = (U8*)SvPV(rstr, rlen);
     register I32 i;
     register I32 j;
-    I32 Delete;
+    I32 del;
     I32 complement;
     I32 squash;
     register short *tbl;
 
-    tbl = (short*)cPVOPo->op_pv;
     complement	= o->op_private & OPpTRANS_COMPLEMENT;
-    Delete	= o->op_private & OPpTRANS_DELETE;
+    del		= o->op_private & OPpTRANS_DELETE;
     squash	= o->op_private & OPpTRANS_SQUASH;
 
+    if (o->op_private & (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF)) {
+	SV* listsv = newSVpv("# comment\n",0);
+	SV* transv = 0;
+	U8* tend = t + tlen;
+	U8* rend = r + rlen;
+	I32 ulen;
+	U32 tfirst = 1;
+	U32 tlast = 0;
+	I32 tdiff;
+	U32 rfirst = 1;
+	U32 rlast = 0;
+	I32 rdiff;
+	I32 diff;
+	I32 none = 0;
+	U32 max = 0;
+	I32 bits;
+	I32 grows = 0;
+	I32 havefinal = 0;
+	U32 final;
+	HV *hv;
+	I32 from_utf	= o->op_private & OPpTRANS_FROM_UTF;
+	I32 to_utf	= o->op_private & OPpTRANS_TO_UTF;
+
+	if (complement) {
+	    U8 tmpbuf[10];
+	    U8** cp;
+	    UV nextmin = 0;
+	    New(1109, cp, tlen, U8*);
+	    i = 0;
+	    transv = newSVpv("",0);
+	    while (t < tend) {
+		cp[i++] = t;
+		t += UTF8SKIP(t);
+		if (*t == 0xff) {
+		    t++;
+		    t += UTF8SKIP(t);
+		}
+	    }
+	    qsort(cp, i, sizeof(U8*), utf8compare);
+	    for (j = 0; j < i; j++) {
+		U8 *s = cp[j];
+		UV val = utf8_to_uv(s, &ulen);
+		s += ulen;
+		diff = val - nextmin;
+		if (diff > 0) {
+		    t = uv_to_utf8(tmpbuf,nextmin);
+		    sv_catpvn(transv, tmpbuf, t - tmpbuf);
+		    if (diff > 1) {
+			t = uv_to_utf8(tmpbuf, val - 1);
+			sv_catpvn(transv, "\377", 1);
+			sv_catpvn(transv, tmpbuf, t - tmpbuf);
+		    }
+	        }
+		if (*s == 0xff)
+		    val = utf8_to_uv(s+1, &ulen);
+		if (val >= nextmin)
+		    nextmin = val + 1;
+	    }
+	    t = uv_to_utf8(tmpbuf,nextmin);
+	    sv_catpvn(transv, tmpbuf, t - tmpbuf);
+	    t = uv_to_utf8(tmpbuf, 0x7fffffff);
+	    sv_catpvn(transv, "\377", 1);
+	    sv_catpvn(transv, tmpbuf, t - tmpbuf);
+	    t = SvPVX(transv);
+	    tlen = SvCUR(transv);
+	    tend = t + tlen;
+	}
+	else if (!rlen && !del) {
+	    r = t; rlen = tlen; rend = tend;
+	    if (!squash && to_utf && from_utf)
+		o->op_private |= OPpTRANS_COUNTONLY;
+	}
+
+	while (t < tend || tfirst <= tlast) {
+	    /* see if we need more "t" chars */
+	    if (tfirst > tlast) {
+		tfirst = (I32)utf8_to_uv(t, &ulen);
+		t += ulen;
+		if (t < tend && *t == 0xff) {	/* illegal utf8 val indicates range */
+		    tlast = (I32)utf8_to_uv(++t, &ulen);
+		    t += ulen;
+		}
+		else
+		    tlast = tfirst;
+	    }
+
+	    /* now see if we need more "r" chars */
+	    if (rfirst > rlast) {
+		if (r < rend) {
+		    rfirst = (I32)utf8_to_uv(r, &ulen);
+		    r += ulen;
+		    if (r < rend && *r == 0xff) {	/* illegal utf8 val indicates range */
+			rlast = (I32)utf8_to_uv(++r, &ulen);
+			r += ulen;
+		    }
+		    else
+			rlast = rfirst;
+		}
+		else {
+		    if (!havefinal++)
+			final = rlast;
+		    rfirst = rlast = 0xffffffff;
+		}
+	    }
+
+	    /* now see which range will peter our first, if either. */
+	    tdiff = tlast - tfirst;
+	    rdiff = rlast - rfirst;
+
+	    if (tdiff <= rdiff)
+		diff = tdiff;
+	    else
+		diff = rdiff;
+
+	    if (rfirst == 0xffffffff) {
+		diff = tdiff;	/* oops, pretend rdiff is infinite */
+		if (diff > 0)
+		    sv_catpvf(listsv, "%04x\t%04x\tXXXX\n", tfirst, tlast);
+		else
+		    sv_catpvf(listsv, "%04x\t\tXXXX\n", tfirst);
+	    }
+	    else {
+		if (diff > 0)
+		    sv_catpvf(listsv, "%04x\t%04x\t%04x\n", tfirst, tfirst + diff, rfirst);
+		else
+		    sv_catpvf(listsv, "%04x\t\t%04x\n", tfirst, rfirst);
+
+		if (rfirst + diff > max)
+		    max = rfirst + diff;
+		rfirst += diff + 1;
+		if (!grows) {
+		    if (rfirst <= 0x80)
+			;
+		    else if (rfirst <= 0x800)
+			grows |= (tfirst < 0x80);
+		    else if (rfirst <= 0x10000)
+			grows |= (tfirst < 0x800);
+		    else if (rfirst <= 0x200000)
+			grows |= (tfirst < 0x10000);
+		    else if (rfirst <= 0x4000000)
+			grows |= (tfirst < 0x200000);
+		    else if (rfirst <= 0x80000000)
+			grows |= (tfirst < 0x4000000);
+		}
+	    }
+	    tfirst += diff + 1;
+	}
+
+	none = ++max;
+	if (del)
+	    del = ++max;
+
+	if (max > 0xffff)
+	    bits = 32;
+	else if (max > 0xff)
+	    bits = 16;
+	else
+	    bits = 8;
+
+	cSVOPo->op_sv = (SV*)swash_init("utf8", "", listsv, bits, none);
+	SvREFCNT_dec(listsv);
+	if (transv)
+	    SvREFCNT_dec(transv);
+
+	if (!del && havefinal)
+	    (void)hv_store((HV*)SvRV((cSVOPo->op_sv)), "FINAL", 5, newSViv((IV)final), 0);
+
+	if (grows && to_utf)
+	    o->op_private |= OPpTRANS_GROWS;
+
+	op_free(expr);
+	op_free(repl);
+	return o;
+    }
+
+    tbl = (short*)cPVOPo->op_pv;
     if (complement) {
 	Zero(tbl, 256, short);
 	for (i = 0; i < tlen; i++)
@@ -2049,7 +2241,7 @@ pmtrans(OP *o, OP *expr, OP *repl)
 	for (i = 0, j = 0; i < 256; i++) {
 	    if (!tbl[i]) {
 		if (j >= rlen) {
-		    if (Delete)
+		    if (del)
 			tbl[i] = -2;
 		    else if (rlen)
 			tbl[i] = r[j-1];
@@ -2062,7 +2254,7 @@ pmtrans(OP *o, OP *expr, OP *repl)
 	}
     }
     else {
-	if (!rlen && !Delete) {
+	if (!rlen && !del) {
 	    r = t; rlen = tlen;
 	    if (!squash)
 		o->op_private |= OPpTRANS_COUNTONLY;
@@ -2071,7 +2263,7 @@ pmtrans(OP *o, OP *expr, OP *repl)
 	    tbl[i] = -1;
 	for (i = 0, j = 0; i < tlen; i++,j++) {
 	    if (j >= rlen) {
-		if (Delete) {
+		if (del) {
 		    if (tbl[t[i]] == -1)
 			tbl[t[i]] = -2;
 		    continue;
@@ -2611,10 +2803,11 @@ newSTATEOP(I32 flags, char *label, OP *o)
 	cop->op_ppaddr = ppaddr[ OP_NEXTSTATE ];
     }
     cop->op_flags = flags;
-    cop->op_private = 0 | (flags >> 8);
+    cop->op_private = (PL_hints & HINT_UTF8);
 #ifdef NATIVE_HINTS
     cop->op_private |= NATIVE_HINTS;
 #endif
+    compiling.op_private = cop->op_private;
     cop->op_next = (OP*)cop;
 
     if (label) {
@@ -3656,6 +3849,7 @@ newSUB(I32 floor, OP *o, OP *proto, OP *block)
 	    call_list(oldscope, PL_beginav);
 
 	    PL_curcop = &PL_compiling;
+	    PL_compiling.op_private = PL_hints;
 	    LEAVE;
 	}
 	else if (strEQ(s, "END") && !PL_error_count) {

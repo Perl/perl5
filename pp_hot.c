@@ -22,6 +22,8 @@
 #include <unistd.h>
 #endif
 
+#define HOP(pos,off) (IN_UTF8 ? utf8_hop(pos, off) : (pos + off))
+
 /* Hot code. */
 
 #ifdef USE_THREADS
@@ -873,17 +875,20 @@ play_it_again:
 	if (!(rx->reganch & ROPT_NOSCAN)) { /* Floating checkstring. */
 	    if ( screamer ) {
 		I32 p = -1;
+		char *b;
 		
 		if (PL_screamfirst[BmRARE(rx->check_substr)] < 0)
 		    goto nope;
-		else if (!(s = screaminstr(TARG, rx->check_substr, 
-					   rx->check_offset_min, 0, &p, 0)))
+
+		b = HOP((U8*)s, rx->check_offset_min);
+		if (!(s = screaminstr(TARG, rx->check_substr, b - s, 0, &p, 0)))
 		    goto nope;
-		else if ((rx->reganch & ROPT_CHECK_ALL)
+
+		if ((rx->reganch & ROPT_CHECK_ALL)
 			 && !PL_sawampersand && !SvTAIL(rx->check_substr))
 		    goto yup;
 	    }
-	    else if (!(s = fbm_instr((unsigned char*)s + rx->check_offset_min,
+	    else if (!(s = fbm_instr((unsigned char*)HOP((U8*)s, rx->check_offset_min),
 				     (unsigned char*)strend, 
 				     rx->check_substr, 0)))
 		goto nope;
@@ -891,7 +896,7 @@ play_it_again:
 		goto yup;
 	    if (s && rx->check_offset_max < s - t) {
 		++BmUSEFUL(rx->check_substr);
-		s -= rx->check_offset_max;
+		s = HOP((U8*)s, -rx->check_offset_max);
 	    }
 	    else
 		s = t;
@@ -900,13 +905,13 @@ play_it_again:
 	   beginning of match, and the match is anchored at s. */
 	else if (!PL_multiline) {	/* Anchored near beginning of string. */
 	    I32 slen;
-	    if (*SvPVX(rx->check_substr) != s[rx->check_offset_min]
+	    char *b = HOP((U8*)s, rx->check_offset_min);
+	    if (*SvPVX(rx->check_substr) != *b
 		|| ((slen = SvCUR(rx->check_substr)) > 1
-		    && memNE(SvPVX(rx->check_substr), 
-			     s + rx->check_offset_min, slen)))
+		    && memNE(SvPVX(rx->check_substr), b, slen)))
 		goto nope;
 	}
-	if (!rx->naughty && --BmUSEFUL(rx->check_substr) < 0
+	if (!(rx->reganch & ROPT_NAUGHTY) && --BmUSEFUL(rx->check_substr) < 0
 	    && rx->check_substr == rx->float_substr) {
 	    SvREFCNT_dec(rx->check_substr);
 	    rx->check_substr = Nullsv;	/* opt is being useless */
@@ -1614,19 +1619,22 @@ PP(pp_subst)
 	if (!(rx->reganch & ROPT_NOSCAN)) { /* It floats. */
 	    if (screamer) {
 		I32 p = -1;
+		char *b;
 		
 		if (PL_screamfirst[BmRARE(rx->check_substr)] < 0)
 		    goto nope;
-		else if (!(s = screaminstr(TARG, rx->check_substr, rx->check_offset_min, 0, &p, 0)))
+
+		b = HOP((U8*)s, rx->check_offset_min);
+		if (!(s = screaminstr(TARG, rx->check_substr, b - s, 0, &p, 0)))
 		    goto nope;
 	    }
-	    else if (!(s = fbm_instr((unsigned char*)s + rx->check_offset_min, 
+	    else if (!(s = fbm_instr((unsigned char*)HOP((U8*)s, rx->check_offset_min), 
 				     (unsigned char*)strend,
 				     rx->check_substr, 0)))
 		goto nope;
 	    if (s && rx->check_offset_max < s - m) {
 		++BmUSEFUL(rx->check_substr);
-		s -= rx->check_offset_max;
+		s = HOP((U8*)s, -rx->check_offset_max);
 	    }
 	    else
 		s = m;
@@ -1635,13 +1643,13 @@ PP(pp_subst)
 	   beginning of match, and the match is anchored at s. */
 	else if (!PL_multiline) { /* Anchored at beginning of string. */
 	    I32 slen;
-	    if (*SvPVX(rx->check_substr) != s[rx->check_offset_min]
+	    char *b = HOP((U8*)s, rx->check_offset_min);
+	    if (*SvPVX(rx->check_substr) != *b
 		|| ((slen = SvCUR(rx->check_substr)) > 1
-		    && memNE(SvPVX(rx->check_substr), 
-			     s + rx->check_offset_min, slen)))
+		    && memNE(SvPVX(rx->check_substr), b, slen)))
 		goto nope;
 	}
-	if (!rx->naughty && --BmUSEFUL(rx->check_substr) < 0
+	if (!(rx->reganch & ROPT_NAUGHTY) && --BmUSEFUL(rx->check_substr) < 0
 	    && rx->check_substr == rx->float_substr) {
 	    SvREFCNT_dec(rx->check_substr);
 	    rx->check_substr = Nullsv;	/* opt is being useless */

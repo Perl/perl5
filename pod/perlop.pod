@@ -636,7 +636,7 @@ next line. This allows you to write:
 
 For constructs that do interpolation, variables beginning with "C<$>"
 or "C<@>" are interpolated, as are the following sequences. Within
-a transliteration, the first ten of these sequences may be used.
+a transliteration, the first eleven of these sequences may be used.
 
     \t		tab             (HT, TAB)
     \n		newline         (NL)
@@ -645,8 +645,9 @@ a transliteration, the first ten of these sequences may be used.
     \b		backspace       (BS)
     \a		alarm (bell)    (BEL)
     \e		escape          (ESC)
-    \033	octal char
-    \x1b	hex char
+    \033	octal char	(ESC)
+    \x1b	hex char	(ESC)
+    \x{263a}	wide hex char	(SMILEY)
     \c[		control char
 
     \l		lowercase next char
@@ -1138,9 +1139,9 @@ to occur.  Here are two common cases:
     1 while s/\t+/' ' x (length($&)*8 - length($`)%8)/e;
 
 
-=item tr/SEARCHLIST/REPLACEMENTLIST/cds
+=item tr/SEARCHLIST/REPLACEMENTLIST/cdsUC
 
-=item y/SEARCHLIST/REPLACEMENTLIST/cds
+=item y/SEARCHLIST/REPLACEMENTLIST/cdsUC
 
 Transliterates all occurrences of the characters found in the search list
 with the corresponding character in the replacement list.  It returns
@@ -1160,6 +1161,8 @@ Options:
     c	Complement the SEARCHLIST.
     d	Delete found but unreplaced characters.
     s	Squash duplicate replaced characters.
+    U	Translate to/from UTF-8.
+    C	Translate to/from 8-bit char (octet).
 
 If the C</c> modifier is specified, the SEARCHLIST character set is
 complemented.  If the C</d> modifier is specified, any characters specified
@@ -1176,6 +1179,10 @@ than the SEARCHLIST, the final character is replicated till it is long
 enough.  If the REPLACEMENTLIST is empty, the SEARCHLIST is replicated.
 This latter is useful for counting characters in a class or for
 squashing character sequences in a class.
+
+The first C</U> or C</C> modifier applies to the left side of the translation.
+The second one applies to the right side.  If present, these modifiers override
+the current utf8 state.
 
 Examples:
 
@@ -1195,6 +1202,9 @@ Examples:
 
     tr [\200-\377]
        [\000-\177];		# delete 8th bit
+
+    tr/\0-\xFF//CU;		# translate Latin-1 to Unicode
+    tr/\0-\x{FF}//UC;		# translate Unicode to Latin-1
 
 If multiple transliterations are given for a character, only the first one is used:
 

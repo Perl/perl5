@@ -141,6 +141,7 @@ also work:
     \e		escape (think troff)  (ESC)
     \033	octal char (think of a PDP-11)
     \x1B	hex char
+    \x{263a}	wide hex char         (Unicode SMILEY)
     \c[		control char
     \l		lowercase next char (think vi)
     \u		uppercase next char (think vi)
@@ -165,6 +166,10 @@ In addition, Perl defines the following:
     \S	Match a non-whitespace character
     \d	Match a digit character
     \D	Match a non-digit character
+    \pP	Match P, named property.  Use \p{Prop} for longer names.
+    \PP	Match non-P
+    \X	Match eXtended Unicode "combining character sequence", \pM\pm*
+    \C	Match a single C char (octet) even under utf8.
 
 A C<\w> matches a single alphanumeric character, not a whole
 word.  To match a word you'd need to say C<\w+>.  If C<use locale> is in

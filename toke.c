@@ -59,6 +59,8 @@ static void restore_lex_expect _((void *e));
 
 static char ident_too_long[] = "Identifier too long";
 
+#define UTF (PL_hints & HINT_UTF8)
+
 /* The following are arranged oddly so that the guard on the switch statement
  * can get by with a single comparison (if the compiler is smart enough).
  */
@@ -228,6 +230,35 @@ win32_textfilter(int idx, SV *sv, int maxlen)
 }
 #endif
 
+STATIC I32
+utf16_textfilter(int idx, SV *sv, int maxlen)
+{
+    I32 count = FILTER_READ(idx+1, sv, maxlen);
+    if (count) {
+	char* tmps;
+	char* tend;
+	New(898, tmps, SvCUR(sv) * 3 / 2 + 1, char);
+	tend = utf16_to_utf8((U16*)SvPVX(sv), tmps, SvCUR(sv));
+	sv_usepvn(sv, tmps, tend - tmps);
+    
+    }
+    return count;
+}
+
+STATIC I32
+utf16rev_textfilter(int idx, SV *sv, int maxlen)
+{
+    I32 count = FILTER_READ(idx+1, sv, maxlen);
+    if (count) {
+	char* tmps;
+	char* tend;
+	New(898, tmps, SvCUR(sv) * 3 / 2 + 1, char);
+	tend = utf16_to_utf8_reversed((U16*)SvPVX(sv), tmps, SvCUR(sv));
+	sv_usepvn(sv, tmps, tend - tmps);
+    
+    }
+    return count;
+}
 
 void
 lex_start(SV *line)
@@ -845,11 +876,17 @@ scan_const(char *start)
     register char *d = SvPVX(sv);		/* destination for copies */
     bool dorange = FALSE;			/* are we in a translit range? */
     I32 len;					/* ? */
+    I32 utf = PL_lex_inwhat == OP_TRANS
+	? (PL_sublex_info.sub_op->op_private & (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF))
+	: UTF;
+    I32 thisutf = PL_lex_inwhat == OP_TRANS
+	? (PL_sublex_info.sub_op->op_private & (PL_lex_repl ? OPpTRANS_FROM_UTF : OPpTRANS_TO_UTF))
+	: UTF;
 
     /* leaveit is the set of acceptably-backslashed characters */
     char *leaveit =
 	PL_lex_inpat
-	    ? "\\.^$@AGZdDwWsSbB+*?|()-nrtfeaxcz0123456789[{]} \t\n\r\f\v#"
+	    ? "\\.^$@AGZdDwWsSbBpPXC+*?|()-nrtfeaxcz0123456789[{]} \t\n\r\f\v#"
 	    : "";
 
     while (s < send || dorange) {
@@ -877,6 +914,11 @@ scan_const(char *start)
 
 	    /* range begins (ignore - as first or last char) */
 	    else if (*s == '-' && s+1 < send  && s != start) {
+		if (utf) {
+		    *d++ = 0xff;	/* use illegal utf8 byte--see pmtrans */
+		    s++;
+		    continue;
+		}
 		dorange = TRUE;
 		s++;
 	    }
@@ -933,6 +975,17 @@ scan_const(char *start)
 		break;		/* in regexp, $ might be tail anchor */
 	}
 
+	/* (now in tr/// code again) */
+
+	if (*s & 0x80 && dowarn && thisutf) {
+	    (void)utf8_to_uv(s, &len);	/* could cvt latin-1 to utf8 here... */
+	    if (len) {
+		while (len--)
+		    *d++ = *s++;
+		continue;
+	    }
+	}
+
 	/* backslashes */
 	if (*s == '\\' && s+1 < send) {
 	    s++;
@@ -984,8 +1037,35 @@ scan_const(char *start)
 
 	    /* \x24 indicates a hex constant */
 	    case 'x':
-		*d++ = scan_hex(++s, 2, &len);
-		s += len;
+		++s;
+		if (*s == '{') {
+		    char* e = strchr(s, '}');
+
+		    if (!e)
+			yyerror("Missing right brace on \\x{}");
+		    if (dowarn && !utf)
+			warn("Use of \\x{} without utf8 declaration");
+		    /* note: utf always shorter than hex */
+		    d = uv_to_utf8(d, scan_hex(s + 1, e - s, &len));
+		    s = e + 1;
+			
+		}
+		else {
+		    UV uv = (UV)scan_hex(s, 2, &len);
+		    if (utf && PL_lex_inwhat == OP_TRANS &&
+			utf != (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF))
+		    {
+			d = uv_to_utf8(d, uv);		/* doing a CU or UC */
+		    }
+		    else {
+			if (dowarn && uv >= 127 && UTF)
+			    warn(
+				"\\x%.*s will produce malformed UTF-8 character; use \\x{%.*s} for that",
+				len,s,len,s);
+			*d++ = (char)uv;
+		    }
+		    s += len;
+		}
 		continue;
 
 	    /* \c is a control character */
@@ -1726,7 +1806,17 @@ yylex(void)
   retry:
     switch (*s) {
     default:
-	croak("Unrecognized character \\%03o", *s & 255);
+	/*
+	 * Note: we try to be careful never to call the isXXX_utf8() functions unless we're
+	 * pretty sure we've seen the beginning of a UTF-8 character (that is, the two high
+	 * bits are set).  Otherwise we risk loading in the heavy-duty SWASHINIT and SWASHGET
+	 * routines unnecessarily.  You will see this not just here but throughout this file.
+	 */
+	if (UTF && (*s & 0xc0) == 0x80) {
+	    if (isIDFIRST_utf8(s))
+		goto keylookup;
+	}
+	croak("Unrecognized character \\x%02X", *s & 255);
     case 4:
     case 26:
 	goto fake_eof;			/* emulate EOF on ^D or ^Z */
@@ -2721,7 +2811,7 @@ yylex(void)
 	    missingterm((char*)0);
 	yylval.ival = OP_CONST;
 	for (d = SvPV(PL_lex_stuff, len); len; len--, d++) {
-	    if (*d == '$' || *d == '@' || *d == '\\') {
+	    if (*d == '$' || *d == '@' || *d == '\\' || *d & 0x80) {
 		yylval.ival = OP_STRINGIFY;
 		break;
 	    }
@@ -4828,6 +4918,16 @@ scan_word(register char *s, char *dest, STRLEN destlen, int allow_package, STRLE
 	    *d++ = *s++;
 	    *d++ = *s++;
 	}
+	else if (UTF && (*s & 0xc0) == 0x80 && isALNUM_utf8(s)) {
+	    char *t = s + UTF8SKIP(s);
+	    while (*t & 0x80 && is_utf8_mark(t))
+		t += UTF8SKIP(t);
+	    if (d + (t - s) > e)
+		croak(ident_too_long);
+	    Copy(s, d, t - s, char);
+	    d += t - s;
+	    s = t;
+	}
 	else {
 	    *d = '\0';
 	    *slp = d - dest;
@@ -4872,6 +4972,16 @@ scan_ident(register char *s, register char *send, char *dest, STRLEN destlen, I3
 		*d++ = *s++;
 		*d++ = *s++;
 	    }
+	    else if (UTF && (*s & 0xc0) == 0x80 && isALNUM_utf8(s)) {
+		char *t = s + UTF8SKIP(s);
+		while (*t & 0x80 && is_utf8_mark(t))
+		    t += UTF8SKIP(t);
+		if (d + (t - s) > e)
+		    croak(ident_too_long);
+		Copy(s, d, t - s, char);
+		d += t - s;
+		s = t;
+	    }
 	    else
 		break;
 	}
@@ -4914,10 +5024,23 @@ scan_ident(register char *s, register char *send, char *dest, STRLEN destlen, I3
 		}
 	    }
 	}
-	if (isIDFIRST(*d)) {
+	if (isIDFIRST(*d) || (UTF && (*d & 0xc0) == 0x80 && isIDFIRST_utf8(d))) {
 	    d++;
-	    while (isALNUM(*s) || *s == ':')
-		*d++ = *s++;
+	    if (UTF) {
+		e = s;
+		while (e < send && (isALNUM(*e) || ((*e & 0xc0) == 0x80 && isALNUM_utf8((U8*)e)) || *e == ':')) {
+		    e += UTF8SKIP(e);
+		    while (e < send && *e & 0x80 && is_utf8_mark(e))
+			e += UTF8SKIP(e);
+		}
+		Copy(s, d, e - s, char);
+		d += e - s;
+		s = e;
+	    }
+	    else {
+		while (isALNUM(*s) || *s == ':')
+		    *d++ = *s++;
+	    }
 	    *d = '\0';
 	    while (s < send && (*s == ' ' || *s == '\t')) s++;
 	    if ((*s == '[' || (*s == '{' && strNE(dest, "sub")))) {
@@ -5077,8 +5200,10 @@ scan_trans(char *start)
     OP *o;
     short *tbl;
     I32 squash;
-    I32 Delete;
+    I32 del;
     I32 complement;
+    I32 utf8;
+    I32 count = 0;
 
     yylval.ival = OP_NULL;
 
@@ -5103,20 +5228,45 @@ scan_trans(char *start)
 	croak("Transliteration replacement not terminated");
     }
 
-    New(803,tbl,256,short);
-    o = newPVOP(OP_TRANS, 0, (char*)tbl);
+    if (UTF) {
+	o = newSVOP(OP_TRANS, 0, 0);
+	utf8 = OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF;
+    }
+    else {
+	New(803,tbl,256,short);
+	o = newPVOP(OP_TRANS, 0, (char*)tbl);
+	utf8 = 0;
+    }
 
-    complement = Delete = squash = 0;
-    while (*s == 'c' || *s == 'd' || *s == 's') {
+    complement = del = squash = 0;
+    while (strchr("cdsCU", *s)) {
 	if (*s == 'c')
 	    complement = OPpTRANS_COMPLEMENT;
 	else if (*s == 'd')
-	    Delete = OPpTRANS_DELETE;
-	else
+	    del = OPpTRANS_DELETE;
+	else if (*s == 's')
 	    squash = OPpTRANS_SQUASH;
+	else {
+	    switch (count++) {
+	    case 0:
+		if (*s == 'C')
+		    utf8 &= ~OPpTRANS_FROM_UTF;
+		else
+		    utf8 |= OPpTRANS_FROM_UTF;
+		break;
+	    case 1:
+		if (*s == 'C')
+		    utf8 &= ~OPpTRANS_TO_UTF;
+		else
+		    utf8 |= OPpTRANS_TO_UTF;
+		break;
+	    default: 
+		croak("Too many /C and /U options");
+	    }
+	}
 	s++;
     }
-    o->op_private = Delete|squash|complement;
+    o->op_private = del|squash|complement|utf8;
 
     PL_lex_op = o;
     yylval.ival = OP_TRANS;
@@ -5570,7 +5720,7 @@ scan_str(char *start)
 	}
 	/* we read a line, so increment our line counter */
 	PL_curcop->cop_line++;
-	
+
 	/* update debugger info */
 	if (PERLDB_LINE && PL_curstash != PL_debstash) {
 	    SV *sv = NEWSV(88,0);
@@ -5580,7 +5730,7 @@ scan_str(char *start)
 	    av_store(GvAV(PL_curcop->cop_filegv),
 	      (I32)PL_curcop->cop_line, sv);
 	}
-	
+
 	/* having changed the buffer, we must update PL_bufend */
 	PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
     }

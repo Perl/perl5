@@ -553,7 +553,9 @@ restrictions may be relaxed, but this is not a portable assumption.
 =item chr
 
 Returns the character represented by that NUMBER in the character set.
-For example, C<chr(65)> is C<"A"> in ASCII.  For the reverse, use L</ord>.
+For example, C<chr(65)> is C<"A"> in either ASCII or Unicode, and
+chr(0x263a) is a Unicode smiley face (but only within the scope of a
+C<use utf8>).  For the reverse, use L</ord>.
 
 If NUMBER is omitted, uses C<$_>.
 
@@ -1937,7 +1939,7 @@ C<redo> work.
 
 Returns an lowercased version of EXPR.  This is the internal function
 implementing the C<\L> escape in double-quoted strings.
-Respects current C<LC_CTYPE> locale if C<use locale> in force.  See L<perllocale>.
+Respects current LC_CTYPE locale if C<use locale> in force.  See L<perllocale>.
 
 If EXPR is omitted, uses C<$_>.
 
@@ -1947,7 +1949,7 @@ If EXPR is omitted, uses C<$_>.
 
 Returns the value of EXPR with the first character lowercased.  This is
 the internal function implementing the C<\l> escape in double-quoted strings.
-Respects current C<LC_CTYPE> locale if C<use locale> in force.  See L<perllocale>.
+Respects current LC_CTYPE locale if C<use locale> in force.  See L<perllocale>.
 
 If EXPR is omitted, uses C<$_>.
 
@@ -1955,7 +1957,7 @@ If EXPR is omitted, uses C<$_>.
 
 =item length
 
-Returns the length in bytes of the value of EXPR.  If EXPR is
+Returns the length in characters of the value of EXPR.  If EXPR is
 omitted, returns length of C<$_>.
 
 =item link OLDFILE,NEWFILE
@@ -2374,7 +2376,7 @@ DIRHANDLEs have their own namespace separate from FILEHANDLEs.
 
 =item ord
 
-Returns the numeric ascii value of the first character of EXPR.  If
+Returns the numeric (ASCII or Unicode) value of the first character of EXPR.  If
 EXPR is omitted, uses C<$_>.  For the reverse, see L</chr>.
 
 =item pack TEMPLATE,LIST
@@ -2392,7 +2394,7 @@ follows:
     H	A hex string (high nybble first).
 
     c	A signed char value.
-    C	An unsigned char value.
+    C	An unsigned char value.  Only does bytes.  See U for Unicode.
 
     s	A signed short value.
     S	An unsigned short value.
@@ -2425,6 +2427,8 @@ follows:
     P	A pointer to a structure (fixed-length string).
 
     u	A uuencoded string.
+    U	A Unicode character number.  Encodes to UTF-8 internally.
+	Works even if C<use utf8> is not in effect.
 
     w	A BER compressed integer.  Its bytes represent an unsigned
 	integer in base 128, most significant digit first, with as
@@ -2462,10 +2466,12 @@ C<unpack("f", pack("f", $foo)>) will not in general equal C<$foo>).
 
 Examples:
 
-    $foo = pack("cccc",65,66,67,68);
+    $foo = pack("CCCC",65,66,67,68);
     # foo eq "ABCD"
-    $foo = pack("c4",65,66,67,68);
+    $foo = pack("C4",65,66,67,68);
     # same thing
+    $foo = pack("U4",0x24b6,0x24b7,0x24b8,0x24b9);
+    # same thing with Unicode circled letters
 
     $foo = pack("ccxxcc",65,66,67,68);
     # foo eq "AB\0\0CD"
@@ -2897,13 +2903,13 @@ will automatically return the value of the last expression evaluated.)
 
 In list context, returns a list value consisting of the elements
 of LIST in the opposite order.  In scalar context, concatenates the
-elements of LIST, and returns a string value consisting of those bytes,
-but in the opposite order.
+elements of LIST, and returns a string value with all the characters
+in the opposite order.
 
     print reverse <>;		# line tac, last line first
 
     undef $/;			# for efficiency of <>
-    print scalar reverse <>;	# byte tac, last line tsrif
+    print scalar reverse <>;	# character tac, last line tsrif
 
 This operator is also handy for inverting a hash, although there are some
 caveats.  If a value is duplicated in the original hash, only one of those
@@ -4059,6 +4065,8 @@ otherwise.
 Returns an uppercased version of EXPR.  This is the internal function
 implementing the C<\U> escape in double-quoted strings.
 Respects current LC_CTYPE locale if C<use locale> in force.  See L<perllocale>.
+Under Unicode (C<use utf8>) it uses the standard Unicode uppercase mappings.  (It
+does not attempt to do titlecase mapping on initial letters.  See C<ucfirst()> for that.)
 
 If EXPR is omitted, uses C<$_>.
 
@@ -4066,7 +4074,8 @@ If EXPR is omitted, uses C<$_>.
 
 =item ucfirst
 
-Returns the value of EXPR with the first character uppercased.  This is
+Returns the value of EXPR with the first character
+in uppercase (titlecase in Unicode).  This is
 the internal function implementing the C<\u> escape in double-quoted strings.
 Respects current LC_CTYPE locale if C<use locale> in force.  See L<perllocale>.
 

@@ -46,8 +46,7 @@ typedef struct regexp {
 	char *subbase;		/* saved string so \digit works forever */
 	char *subbeg;		/* same, but not responsible for allocation */
 	char *subend;		/* end of subbase */
-	U16 naughty;		/* how exponential is this pattern? */
-	U16 reganch;		/* Internal use only +
+	U32 reganch;		/* Internal use only +
 				   Tainted information used by regexec? */
 #if 0
         SV *anchored_substr;	/* Substring at fixed position wrt start. */
@@ -76,18 +75,22 @@ typedef struct regexp {
 
 #define ROPT_ANCH		(ROPT_ANCH_BOL|ROPT_ANCH_MBOL|ROPT_ANCH_GPOS)
 #define ROPT_ANCH_SINGLE	(ROPT_ANCH_BOL|ROPT_ANCH_GPOS)
-#define ROPT_ANCH_BOL	 	1
-#define ROPT_ANCH_MBOL	 	2
-#define ROPT_ANCH_GPOS	 	4
-#define ROPT_SKIP		8
-#define ROPT_IMPLICIT		0x10	/* Converted .* to ^.* */
-#define ROPT_NOSCAN		0x20	/* Check-string always at start. */
-#define ROPT_GPOS_SEEN		0x40
-#define ROPT_CHECK_ALL		0x80
-#define ROPT_LOOKBEHIND_SEEN	0x100
-#define ROPT_EVAL_SEEN		0x200
-#define ROPT_TAINTED_SEEN	0x400
+#define ROPT_ANCH_BOL	 	0x00001
+#define ROPT_ANCH_MBOL	 	0x00002
+#define ROPT_ANCH_GPOS	 	0x00004
+#define ROPT_SKIP		0x00008
+#define ROPT_IMPLICIT		0x00010	/* Converted .* to ^.* */
+#define ROPT_NOSCAN		0x00020	/* Check-string always at start. */
+#define ROPT_GPOS_SEEN		0x00040
+#define ROPT_CHECK_ALL		0x00080
+#define ROPT_LOOKBEHIND_SEEN	0x00100
+#define ROPT_EVAL_SEEN		0x00200
+#define ROPT_TAINTED_SEEN	0x00400
+
 /* 0xf800 of reganch is used by PMf_COMPILETIME */
+
+#define ROPT_UTF8		0x10000
+#define ROPT_NAUGHTY		0x20000 /* how exponential is this pattern? */
 
 #define RX_MATCH_TAINTED(prog)	((prog)->reganch & ROPT_TAINTED_SEEN)
 #define RX_MATCH_TAINTED_on(prog) ((prog)->reganch |= ROPT_TAINTED_SEEN)

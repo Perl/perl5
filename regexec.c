@@ -62,7 +62,7 @@
  *
  ****    Alterations to Henry's code are...
  ****
- ****    Copyright (c) 1991-1997, Larry Wall
+ ****    Copyright (c) 1991-1998, Larry Wall
  ****
  ****    You may distribute under the terms of either the GNU General Public
  ****    License or the Artistic License, as specified in the README file.
@@ -78,6 +78,9 @@
 #define RF_tainted	1		/* tainted information used? */
 #define RF_warned	2		/* warned about big count? */
 #define RF_evaled	4		/* Did an EVAL with setting? */
+#define RF_utf8		8		/* String contains multibyte chars? */
+
+#define UTF (PL_reg_flags & RF_utf8)
 
 #define RS_init		1		/* eval environment created */
 #define RS_set		2		/* replsv value is set */
@@ -99,10 +102,21 @@ static I32 regrepeat_hard _((regnode *p, I32 max, I32 *lp));
 static I32 regtry _((regexp *prog, char *startpos));
 
 static bool reginclass _((char *p, I32 c));
+static bool reginclassutf8 _((regnode *f, U8* p));
 static CHECKPOINT regcppush _((I32 parenfloor));
 static char * regcppop _((void));
 #endif
+
 #define REGINCLASS(p,c)  (*(p) ? reginclass(p,c) : ANYOF_TEST(p,c))
+#define REGINCLASSUTF8(f,p)  (ARG1(f) ? reginclassutf8(f,p) : swash_fetch((SV*)PL_regdata->data[ARG2(f)],p))
+
+#define CHR_SVLEN(sv) (UTF ? sv_len_utf8(sv) : SvCUR(sv))
+#define CHR_DIST(a,b) (UTF ? utf8_distance(a,b) : a - b)
+
+static char * reghop _((unsigned char *pos, I32 off));
+static char * reghopmaybe _((unsigned char *pos, I32 off));
+#define HOP(pos,off) (UTF ? reghop(pos, off) : (pos + off))
+#define HOPMAYBE(pos,off) (UTF ? reghopmaybe(pos, off) : (pos + off))
 
 STATIC CHECKPOINT
 regcppush(I32 parenfloor)
@@ -224,8 +238,8 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
     I32 dontbother = 0;	/* how many characters not to try at end */
     CURCUR cc;
     I32 start_shift = 0;		/* Offset of the start to find
-					 constant substr. */
-    I32 end_shift = 0;			/* Same for the end. */
+					 constant substr. */		/* CC */
+    I32 end_shift = 0;			/* Same for the end. */		/* CC */
     I32 scream_pos = -1;		/* Internal iterator of scream. */
     char *scream_olds;
     SV* oreplsv = GvSV(PL_replgv);
@@ -252,7 +266,7 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
     if (startpos == strbeg)	/* is ^ valid at stringarg? */
 	PL_regprev = '\n';
     else {
-	PL_regprev = stringarg[-1];
+	PL_regprev = (U32)stringarg[-1];
 	if (!PL_multiline && PL_regprev == '\n')
 	    PL_regprev = '\0';		/* force ^ to NOT match */
     }
@@ -266,6 +280,19 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
     PL_reg_flags = 0;
     PL_reg_eval_set = 0;
 
+    if (prog->reganch & ROPT_UTF8)
+	PL_reg_flags |= RF_utf8;
+
+    /* Mark beginning of line for ^ and lookbehind. */
+    PL_regbol = startpos;
+    PL_bostr  = strbeg;
+
+    /* Mark end of line for $ (and such) */
+    PL_regeol = strend;
+
+    /* see how far we have to get to not match where we matched before */
+    PL_regtill = startpos+minend;
+
     /* If there is a "must appear" string, look for it. */
     s = startpos;
     if (!(flags & REXEC_CHECKED) 
@@ -274,9 +301,10 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 	(!(prog->reganch & (ROPT_ANCH_BOL | ROPT_ANCH_MBOL))
 	 || (PL_multiline && prog->check_substr == prog->anchored_substr)) )
     {
-	start_shift = prog->check_offset_min;
+	char *t;
+	start_shift = prog->check_offset_min;	/* okay to underestimate on CC */
 	/* Should be nonnegative! */
-	end_shift = minlen - start_shift - SvCUR(prog->check_substr);
+	end_shift = minlen - start_shift - CHR_SVLEN(prog->check_substr);
 	if (screamer) {
 	    if (PL_screamfirst[BmRARE(prog->check_substr)] >= 0)
 		    s = screaminstr(screamer, prog->check_substr, 
@@ -293,28 +321,28 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 	if (!s) {
 	    ++BmUSEFUL(prog->check_substr);	/* hooray */
 	    goto phooey;	/* not present */
-	} else if ((s - stringarg) > prog->check_offset_max) {
+	}
+	else if (s - stringarg > prog->check_offset_max &&
+		 (UTF 
+		    ? ((t = reghopmaybe(s, -(prog->check_offset_max))) && t >= stringarg)
+		    : (t = s - prog->check_offset_max) != 0
+		 )
+		)
+	{
 	    ++BmUSEFUL(prog->check_substr);	/* hooray/2 */
-	    s -= prog->check_offset_max;
-	} else if (!prog->naughty 
+	    s = t;
+	}
+	else if (!(prog->reganch & ROPT_NAUGHTY)
 		   && --BmUSEFUL(prog->check_substr) < 0
 		   && prog->check_substr == prog->float_substr) { /* boo */
 	    SvREFCNT_dec(prog->check_substr);
 	    prog->check_substr = Nullsv;	/* disable */
 	    prog->float_substr = Nullsv;	/* clear */
 	    s = startpos;
-	} else s = startpos;
+	}
+	else
+	    s = startpos;
     }
-
-    /* Mark beginning of line for ^ and lookbehind. */
-    PL_regbol = startpos;
-    PL_bostr  = strbeg;
-
-    /* Mark end of line for $ (and such) */
-    PL_regeol = strend;
-
-    /* see how far we have to get to not match where we matched before */
-    PL_regtill = startpos+minend;
 
     DEBUG_r(
 	PerlIO_printf(Perl_debug_log, 
@@ -325,6 +353,8 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 		      startpos, 
 		      (strend - startpos > 60 ? "..." : ""))
 	);
+
+    PL_regdata = prog->data;
 
     /* Simplest case:  anchored match need be tried only once. */
     /*  [unless only anchor is BOL and multiline is set] */
@@ -337,12 +367,12 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 	{
 	    if (minlen)
 		dontbother = minlen - 1;
-	    strend -= dontbother;
+	    strend = HOP(strend, -dontbother);
 	    /* for multiline we only have to try after newlines */
 	    if (s > startpos)
 		s--;
 	    while (s < strend) {
-		if (*s++ == '\n') {
+		if (*s++ == '\n') {	/* don't need utf8skip here */
 		    if (s < strend && regtry(prog, s))
 			goto got_it;
 		}
@@ -356,14 +386,27 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 	/* we have /x+whatever/ */
 	/* it must be a one character string */
 	char ch = SvPVX(prog->anchored_substr)[0];
-	while (s < strend) {
-	    if (*s == ch) {
-		if (regtry(prog, s)) goto got_it;
-		s++;
-		while (s < strend && *s == ch)
-		    s++;
+	if (UTF) {
+	    while (s < strend) {
+		if (*s == ch) {
+		    if (regtry(prog, s)) goto got_it;
+		    s += UTF8SKIP(s);
+		    while (s < strend && *s == ch)
+			s += UTF8SKIP(s);
+		}
+		s += UTF8SKIP(s);
 	    }
-	    s++;
+	}
+	else {
+	    while (s < strend) {
+		if (*s == ch) {
+		    if (regtry(prog, s)) goto got_it;
+		    s++;
+		    while (s < strend && *s == ch)
+			s++;
+		}
+		s++;
+	    }
 	}
     }
     /*SUPPRESS 560*/
@@ -377,50 +420,80 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 	I32 back_min = 
 	    prog->anchored_substr ? prog->anchored_offset : prog->float_min_offset;
 	I32 delta = back_max - back_min;
-	char *last = strend - SvCUR(must) - back_min; /* Cannot start after this */
-	char *last1 = s - 1;		/* Last position checked before */
+	char *last = HOP(strend, -(CHR_SVLEN(must) + back_min)); /* Cannot start after this */
+	char *last1;		/* Last position checked before */
+
+	if (s > PL_bostr)
+	    last1 = HOP(s, -1);
+	else
+	    last1 = s - 1;	/* bogus */
 
 	/* XXXX check_substr already used to find `s', can optimize if
 	   check_substr==must. */
 	scream_pos = -1;
 	dontbother = end_shift;
-	strend -= dontbother;
+	strend = HOP(strend, -dontbother);
 	while ( (s <= last) &&
 		(screamer 
-		 ? (s = screaminstr(screamer, must, s + back_min - strbeg,
+		 ? (s = screaminstr(screamer, must, HOP(s, back_min) - strbeg,
 				    end_shift, &scream_pos, 0))
-		 : (s = fbm_instr((unsigned char*)s + back_min,
+		 : (s = fbm_instr((unsigned char*)HOP(s, back_min),
 				  (unsigned char*)strend, must, 0))) ) {
-	    if (s - back_max > last1) {
-		last1 = s - back_min;
-		s = s - back_max;
-	    } else {
-		char *t = last1 + 1;		
+	    if (HOP(s, -back_max) > last1) {
+		last1 = HOP(s, -back_min);
+		s = HOP(s, -back_max);
+	    }
+	    else {
+		char *t = (last1 >= PL_bostr) ? HOP(last1, 1) : last + 1;
 
-		last1 = s - back_min;
+		last1 = HOP(s, -back_min);
 		s = t;		
 	    }
-	    while (s <= last1) {
-		if (regtry(prog, s))
-		    goto got_it;
-		s++;
+	    if (UTF) {
+		while (s <= last1) {
+		    if (regtry(prog, s))
+			goto got_it;
+		    s += UTF8SKIP(s);
+		}
+	    }
+	    else {
+		while (s <= last1) {
+		    if (regtry(prog, s))
+			goto got_it;
+		    s++;
+		}
 	    }
 	}
 	goto phooey;
-    } else if (c = prog->regstclass) {
+    }
+    else if (c = prog->regstclass) {
 	I32 doevery = (prog->reganch & ROPT_SKIP) == 0;
-	char *Class;
+	char *cc;
 
 	if (minlen)
 	    dontbother = minlen - 1;
-	strend -= dontbother;	/* don't bother with what can't match */
+	strend = HOP(strend, -dontbother);	/* don't bother with what can't match */
 	tmp = 1;
 	/* We know what class it must start with. */
 	switch (OP(c)) {
-	case ANYOF:
-	    Class = (char *) OPERAND(c);
+	case ANYOFUTF8:
+	    cc = (char *) OPERAND(c);
 	    while (s < strend) {
-		if (REGINCLASS(Class, *s)) {
+		if (REGINCLASSUTF8(c, (U8*)s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s += UTF8SKIP(s);
+	    }
+	    break;
+	case ANYOF:
+	    cc = (char *) OPERAND(c);
+	    while (s < strend) {
+		if (REGINCLASS(cc, *s)) {
 		    if (tmp && regtry(prog, s))
 			goto got_it;
 		    else
@@ -435,8 +508,10 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 	    PL_reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
 	case BOUND:
-	    if (minlen)
-		dontbother++,strend--;
+	    if (minlen) {
+		dontbother++;
+		strend -= 1;
+	    }
 	    tmp = (s != startpos) ? UCHARAT(s - 1) : PL_regprev;
 	    tmp = ((OP(c) == BOUND ? isALNUM(tmp) : isALNUM_LC(tmp)) != 0);
 	    while (s < strend) {
@@ -450,12 +525,35 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 	    if ((minlen || tmp) && regtry(prog,s))
 		goto got_it;
 	    break;
+	case BOUNDLUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
+	case BOUNDUTF8:
+	    if (minlen) {
+		dontbother++;
+		strend = reghop(strend, -1);
+	    }
+	    tmp = (I32)(s != startpos) ? utf8_to_uv(reghop(s, -1), 0) : PL_regprev;
+	    tmp = ((OP(c) == BOUND ? isALNUM_uni(tmp) : isALNUM_LC_uni(tmp)) != 0);
+	    while (s < strend) {
+		if (tmp == !(OP(c) == BOUND ? swash_fetch(PL_utf8_alnum, s) : isALNUM_LC_utf8(s))) {
+		    tmp = !tmp;
+		    if (regtry(prog, s))
+			goto got_it;
+		}
+		s += UTF8SKIP(s);
+	    }
+	    if ((minlen || tmp) && regtry(prog,s))
+		goto got_it;
+	    break;
 	case NBOUNDL:
 	    PL_reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
 	case NBOUND:
-	    if (minlen)
-		dontbother++,strend--;
+	    if (minlen) {
+		dontbother++;
+		strend -= 1;
+	    }
 	    tmp = (s != startpos) ? UCHARAT(s - 1) : PL_regprev;
 	    tmp = ((OP(c) == NBOUND ? isALNUM(tmp) : isALNUM_LC(tmp)) != 0);
 	    while (s < strend) {
@@ -464,6 +562,26 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 		else if (regtry(prog, s))
 		    goto got_it;
 		s++;
+	    }
+	    if ((minlen || !tmp) && regtry(prog,s))
+		goto got_it;
+	    break;
+	case NBOUNDLUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
+	case NBOUNDUTF8:
+	    if (minlen) {
+		dontbother++;
+		strend = reghop(strend, -1);
+	    }
+	    tmp = (I32)(s != startpos) ? utf8_to_uv(reghop(s, -1), 0) : PL_regprev;
+	    tmp = ((OP(c) == NBOUND ? isALNUM_uni(tmp) : isALNUM_LC_uni(tmp)) != 0);
+	    while (s < strend) {
+		if (tmp == !(OP(c) == NBOUND ? swash_fetch(PL_utf8_alnum, s) : isALNUM_LC_utf8(s)))
+		    tmp = !tmp;
+		else if (regtry(prog, s))
+		    goto got_it;
+		s += UTF8SKIP(s);
 	    }
 	    if ((minlen || !tmp) && regtry(prog,s))
 		goto got_it;
@@ -481,6 +599,19 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 		s++;
 	    }
 	    break;
+	case ALNUMUTF8:
+	    while (s < strend) {
+		if (swash_fetch(PL_utf8_alnum, s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s += UTF8SKIP(s);
+	    }
+	    break;
 	case ALNUML:
 	    PL_reg_flags |= RF_tainted;
 	    while (s < strend) {
@@ -495,6 +626,20 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 		s++;
 	    }
 	    break;
+	case ALNUMLUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    while (s < strend) {
+		if (isALNUM_LC_utf8(s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s += UTF8SKIP(s);
+	    }
+	    break;
 	case NALNUM:
 	    while (s < strend) {
 		if (!isALNUM(*s)) {
@@ -506,6 +651,19 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 		else
 		    tmp = 1;
 		s++;
+	    }
+	    break;
+	case NALNUMUTF8:
+	    while (s < strend) {
+		if (!swash_fetch(PL_utf8_alnum, s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s += UTF8SKIP(s);
 	    }
 	    break;
 	case NALNUML:
@@ -522,6 +680,20 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 		s++;
 	    }
 	    break;
+	case NALNUMLUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    while (s < strend) {
+		if (!isALNUM_LC_utf8(s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s += UTF8SKIP(s);
+	    }
+	    break;
 	case SPACE:
 	    while (s < strend) {
 		if (isSPACE(*s)) {
@@ -533,6 +705,19 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 		else
 		    tmp = 1;
 		s++;
+	    }
+	    break;
+	case SPACEUTF8:
+	    while (s < strend) {
+		if (*s == ' ' || swash_fetch(PL_utf8_space,s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s += UTF8SKIP(s);
 	    }
 	    break;
 	case SPACEL:
@@ -549,6 +734,20 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 		s++;
 	    }
 	    break;
+	case SPACELUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    while (s < strend) {
+		if (*s == ' ' || isSPACE_LC_utf8(s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s += UTF8SKIP(s);
+	    }
+	    break;
 	case NSPACE:
 	    while (s < strend) {
 		if (!isSPACE(*s)) {
@@ -560,6 +759,19 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 		else
 		    tmp = 1;
 		s++;
+	    }
+	    break;
+	case NSPACEUTF8:
+	    while (s < strend) {
+		if (!(*s == ' ' || swash_fetch(PL_utf8_space,s))) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s += UTF8SKIP(s);
 	    }
 	    break;
 	case NSPACEL:
@@ -576,6 +788,20 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 		s++;
 	    }
 	    break;
+	case NSPACELUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    while (s < strend) {
+		if (!(*s == ' ' || isSPACE_LC_utf8(s))) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s += UTF8SKIP(s);
+	    }
+	    break;
 	case DIGIT:
 	    while (s < strend) {
 		if (isDIGIT(*s)) {
@@ -589,6 +815,19 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 		s++;
 	    }
 	    break;
+	case DIGITUTF8:
+	    while (s < strend) {
+		if (swash_fetch(PL_utf8_digit,s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s += UTF8SKIP(s);
+	    }
+	    break;
 	case NDIGIT:
 	    while (s < strend) {
 		if (!isDIGIT(*s)) {
@@ -600,6 +839,19 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 		else
 		    tmp = 1;
 		s++;
+	    }
+	    break;
+	case NDIGITUTF8:
+	    while (s < strend) {
+		if (!swash_fetch(PL_utf8_digit,s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s += UTF8SKIP(s);
 	    }
 	    break;
 	}
@@ -616,7 +868,8 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 		if (!last) {
 		    last = scream_olds; /* Only one occurence. */
 		}
-	    } else {
+	    }
+	    else {
 		STRLEN len;
 		char *little = SvPV(prog->float_substr, len);
 		last = rninstr(s, strend, little, little + len);
@@ -626,19 +879,33 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 	}
 	if (minlen && (dontbother < minlen))
 	    dontbother = minlen - 1;
-	strend -= dontbother;
+	strend -= dontbother; 		   /* this one's always in bytes! */
 	/* We don't know much -- general case. */
-	do {
-	    if (regtry(prog, s))
-		goto got_it;
-	} while (s++ < strend);
+	if (UTF) {
+	    for (;;) {
+		if (regtry(prog, s)) {
+		    strend += dontbother;  /* this one's always in bytes! */
+		    dontbother = 0;
+		    goto got_it;
+		}
+		if (s >= strend)
+		    break;
+		s += UTF8SKIP(s);
+	    };
+	}
+	else {
+	    do {
+		if (regtry(prog, s))
+		    goto got_it;
+	    } while (s++ < strend);
+	}
     }
 
     /* Failure. */
     goto phooey;
 
 got_it:
-    strend += dontbother;	/* uncheat */
+    strend = HOP(strend, dontbother);	/* uncheat */
     prog->subbeg = strbeg;
     prog->subend = strend;
     RX_MATCH_TAINTED_set(prog, PL_reg_flags & RF_tainted);
@@ -721,7 +988,6 @@ regtry(regexp *prog, char *startpos)
 
     sp = prog->startp;
     ep = prog->endp;
-    PL_regdata = prog->data;
     if (prog->nparens) {
 	for (i = prog->nparens; i >= 0; i--) {
 	    *sp++ = NULL;
@@ -771,6 +1037,7 @@ regmatch(regnode *prog)
     PL_regindent++;
 #endif
 
+    /* Note that nextchr is a byte even in UTF */
     nextchr = UCHARAT(locinput);
     scan = prog;
     while (scan != NULL) {
@@ -820,7 +1087,7 @@ regmatch(regnode *prog)
 		: (PL_multiline && 
 		   (nextchr || locinput < PL_regeol) && locinput[-1] == '\n') )
 	    {
-		/* PL_regtill = PL_regbol; */
+		/* regtill = regbol; */
 		break;
 	    }
 	    sayNO;
@@ -861,8 +1128,32 @@ regmatch(regnode *prog)
 	    if (PL_regeol != locinput)
 		sayNO;
 	    break;
+	case SANYUTF8:
+	    if (nextchr & 0x80) {
+		locinput += PL_utf8skip[nextchr];
+		if (locinput > PL_regeol)
+		    sayNO;
+		nextchr = UCHARAT(locinput);
+		break;
+	    }
+	    if (!nextchr && locinput >= PL_regeol)
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
 	case SANY:
 	    if (!nextchr && locinput >= PL_regeol)
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
+	case ANYUTF8:
+	    if (nextchr & 0x80) {
+		locinput += PL_utf8skip[nextchr];
+		if (locinput > PL_regeol)
+		    sayNO;
+		nextchr = UCHARAT(locinput);
+		break;
+	    }
+	    if (!nextchr && locinput >= PL_regeol || nextchr == '\n')
 		sayNO;
 	    nextchr = UCHARAT(++locinput);
 	    break;
@@ -890,6 +1181,24 @@ regmatch(regnode *prog)
 	case EXACTF:
 	    s = (char *) OPERAND(scan);
 	    ln = UCHARAT(s++);
+
+	    if (UTF) {
+		char *l = locinput;
+		char *e = s + ln;
+		c1 = OP(scan) == EXACTF;
+		while (s < e) {
+		    if (l >= PL_regeol)
+			sayNO;
+		    if (utf8_to_uv(s, 0) != (c1 ? toLOWER_utf8(l) : toLOWER_LC_utf8(l)))
+			sayNO;
+		    s += UTF8SKIP(s);
+		    l += UTF8SKIP(l);
+		}
+		locinput = l;
+		nextchr = UCHARAT(locinput);
+		break;
+	    }
+
 	    /* Inline the first character, for speed. */
 	    if (UCHARAT(s) != nextchr &&
 		UCHARAT(s) != ((OP(scan) == EXACTF)
@@ -902,6 +1211,15 @@ regmatch(regnode *prog)
 			   : ibcmp_locale(s, locinput, ln)))
 		sayNO;
 	    locinput += ln;
+	    nextchr = UCHARAT(locinput);
+	    break;
+	case ANYOFUTF8:
+	    s = (char *) OPERAND(scan);
+	    if (!REGINCLASSUTF8(scan, (U8*)locinput))
+		sayNO;
+	    if (locinput >= PL_regeol)
+		sayNO;
+	    locinput += PL_utf8skip[nextchr];
 	    nextchr = UCHARAT(locinput);
 	    break;
 	case ANYOF:
@@ -925,6 +1243,25 @@ regmatch(regnode *prog)
 		sayNO;
 	    nextchr = UCHARAT(++locinput);
 	    break;
+	case ALNUMLUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
+	case ALNUMUTF8:
+	    if (!nextchr)
+		sayNO;
+	    if (nextchr & 0x80) {
+		if (!(OP(scan) == ALNUMUTF8
+		      ? swash_fetch(PL_utf8_alnum, locinput) : isALNUM_LC_utf8(locinput)))
+		    sayNO;
+		locinput += PL_utf8skip[nextchr];
+		nextchr = UCHARAT(locinput);
+		break;
+	    }
+	    if (!(OP(scan) == ALNUMUTF8
+		  ? isALNUM(nextchr) : isALNUM_LC(nextchr)))
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
 	case NALNUML:
 	    PL_reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
@@ -932,6 +1269,25 @@ regmatch(regnode *prog)
 	    if (!nextchr && locinput >= PL_regeol)
 		sayNO;
 	    if (OP(scan) == NALNUM
+		? isALNUM(nextchr) : isALNUM_LC(nextchr))
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
+	case NALNUMLUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
+	case NALNUMUTF8:
+	    if (!nextchr && locinput >= PL_regeol)
+		sayNO;
+	    if (nextchr & 0x80) {
+		if (OP(scan) == NALNUMUTF8
+		      ? swash_fetch(PL_utf8_alnum, locinput) : isALNUM_LC_utf8(locinput))
+		    sayNO;
+		locinput += PL_utf8skip[nextchr];
+		nextchr = UCHARAT(locinput);
+		break;
+	    }
+	    if (OP(scan) == NALNUMUTF8
 		? isALNUM(nextchr) : isALNUM_LC(nextchr))
 		sayNO;
 	    nextchr = UCHARAT(++locinput);
@@ -955,6 +1311,25 @@ regmatch(regnode *prog)
 	    if (((!ln) == (!n)) == (OP(scan) == BOUND || OP(scan) == BOUNDL))
 		sayNO;
 	    break;
+	case BOUNDLUTF8:
+	case NBOUNDLUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
+	case BOUNDUTF8:
+	case NBOUNDUTF8:
+	    /* was last char in word? */
+	    ln = (locinput != PL_regbol) ? utf8_to_uv(reghop(locinput, -1), 0) : PL_regprev;
+	    if (OP(scan) == BOUNDUTF8 || OP(scan) == NBOUNDUTF8) {
+		ln = isALNUM_uni(ln);
+		n = swash_fetch(PL_utf8_alnum, locinput);
+	    }
+	    else {
+		ln = isALNUM_LC_uni(ln);
+		n = isALNUM_LC_utf8(locinput);
+	    }
+	    if (((!ln) == (!n)) == (OP(scan) == BOUNDUTF8 || OP(scan) == BOUNDLUTF8))
+		sayNO;
+	    break;
 	case SPACEL:
 	    PL_reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
@@ -962,6 +1337,25 @@ regmatch(regnode *prog)
 	    if (!nextchr && locinput >= PL_regeol)
 		sayNO;
 	    if (!(OP(scan) == SPACE
+		  ? isSPACE(nextchr) : isSPACE_LC(nextchr)))
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
+	case SPACELUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
+	case SPACEUTF8:
+	    if (!nextchr && locinput >= PL_regeol)
+		sayNO;
+	    if (nextchr & 0x80) {
+		if (!(OP(scan) == SPACEUTF8
+		      ? swash_fetch(PL_utf8_space,locinput) : isSPACE_LC_utf8(locinput)))
+		    sayNO;
+		locinput += PL_utf8skip[nextchr];
+		nextchr = UCHARAT(locinput);
+		break;
+	    }
+	    if (!(OP(scan) == SPACEUTF8
 		  ? isSPACE(nextchr) : isSPACE_LC(nextchr)))
 		sayNO;
 	    nextchr = UCHARAT(++locinput);
@@ -977,7 +1371,38 @@ regmatch(regnode *prog)
 		sayNO;
 	    nextchr = UCHARAT(++locinput);
 	    break;
+	case NSPACELUTF8:
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
+	case NSPACEUTF8:
+	    if (!nextchr)
+		sayNO;
+	    if (nextchr & 0x80) {
+		if (OP(scan) == NSPACEUTF8
+		      ? swash_fetch(PL_utf8_space,locinput) : isSPACE_LC_utf8(locinput))
+		    sayNO;
+		locinput += PL_utf8skip[nextchr];
+		nextchr = UCHARAT(locinput);
+		break;
+	    }
+	    if (OP(scan) == NSPACEUTF8
+		? isSPACE(nextchr) : isSPACE_LC(nextchr))
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
 	case DIGIT:
+	    if (!isDIGIT(nextchr))
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
+	case DIGITUTF8:
+	    if (nextchr & 0x80) {
+		if (!(swash_fetch(PL_utf8_digit,locinput)))
+		    sayNO;
+		locinput += PL_utf8skip[nextchr];
+		nextchr = UCHARAT(locinput);
+		break;
+	    }
 	    if (!isDIGIT(nextchr))
 		sayNO;
 	    nextchr = UCHARAT(++locinput);
@@ -988,6 +1413,30 @@ regmatch(regnode *prog)
 	    if (isDIGIT(nextchr))
 		sayNO;
 	    nextchr = UCHARAT(++locinput);
+	    break;
+	case NDIGITUTF8:
+	    if (!nextchr && locinput >= PL_regeol)
+		sayNO;
+	    if (nextchr & 0x80) {
+		if (swash_fetch(PL_utf8_digit,locinput))
+		    sayNO;
+		locinput += PL_utf8skip[nextchr];
+		nextchr = UCHARAT(locinput);
+		break;
+	    }
+	    if (isDIGIT(nextchr))
+		sayNO;
+	    nextchr = UCHARAT(++locinput);
+	    break;
+	case CLUMP:
+	    if (locinput >= PL_regeol || swash_fetch(PL_utf8_mark, locinput))
+		sayNO;
+	    locinput += PL_utf8skip[nextchr];
+	    while (locinput < PL_regeol && swash_fetch(PL_utf8_mark, locinput))
+		locinput += UTF8SKIP(locinput);
+	    if (locinput > PL_regeol)
+		sayNO;
+	    nextchr = UCHARAT(locinput);
 	    break;
 	case REFFL:
 	    PL_reg_flags |= RF_tainted;
@@ -1000,6 +1449,40 @@ regmatch(regnode *prog)
 		sayNO;			/* Do not match unless seen CLOSEn. */
 	    if (s == PL_regendp[n])
 		break;
+
+	    if (UTF && OP(scan) != REF) {	/* REF can do byte comparison */
+		char *l = locinput;
+		char *e = PL_regendp[n];
+		/*
+		 * Note that we can't do the "other character" lookup trick as
+		 * in the 8-bit case (no pun intended) because in Unicode we
+		 * have to map both upper and title case to lower case.
+		 */
+		if (OP(scan) == REFF) {
+		    while (s < e) {
+			if (l >= PL_regeol)
+			    sayNO;
+			if (toLOWER_utf8(s) != toLOWER_utf8(l))
+			    sayNO;
+			s += UTF8SKIP(s);
+			l += UTF8SKIP(l);
+		    }
+		}
+		else {
+		    while (s < e) {
+			if (l >= PL_regeol)
+			    sayNO;
+			if (toLOWER_LC_utf8(s) != toLOWER_LC_utf8(l))
+			    sayNO;
+			s += UTF8SKIP(s);
+			l += UTF8SKIP(l);
+		    }
+		}
+		locinput = l;
+		nextchr = UCHARAT(locinput);
+		break;
+	    }
+
 	    /* Inline the first character, for speed. */
 	    if (UCHARAT(s) != nextchr &&
 		(OP(scan) == REF ||
@@ -1045,7 +1528,8 @@ regmatch(regnode *prog)
 	    if (logical) {
 		logical = 0;
 		sw = SvTRUE(ret);
-	    } else
+	    }
+	    else
 		sv_setsv(save_scalar(PL_replgv), ret);
 	    PL_op = oop;
 	    PL_curpad = ocurpad;
@@ -1348,7 +1832,8 @@ regmatch(regnode *prog)
 			c2 = fold_locale[c1];
 		    else
 			c2 = c1;
-		} else
+		}
+		else
 		    c1 = c2 = -1000;
 		REGCP_SET;
 		/* This may be improved if l == 0.  */
@@ -1360,9 +1845,10 @@ regmatch(regnode *prog)
 		    {
 			if (paren) {
 			    if (n) {
-				PL_regstartp[paren] = PL_reginput - l;
+				PL_regstartp[paren] = HOP(PL_reginput, -l);
 				PL_regendp[paren] = PL_reginput;
-			    } else
+			    }
+			    else
 				PL_regendp[paren] = NULL;
 			}
 			if (regmatch(next))
@@ -1378,7 +1864,8 @@ regmatch(regnode *prog)
 		    else
 			sayNO;
 		}
-	    } else {
+	    }
+	    else {
 		n = regrepeat_hard(scan, n, &l);
 		if (n != 0 && l == 0
 		    /* In fact, this is tricky.  If paren, then the
@@ -1401,7 +1888,8 @@ regmatch(regnode *prog)
 			    c2 = fold_locale[c1];
 			else
 			    c2 = c1;
-		    } else
+		    }
+		    else
 			c1 = c2 = -1000;
 		}
 		REGCP_SET;
@@ -1410,26 +1898,27 @@ regmatch(regnode *prog)
 		    if (c1 == -1000 ||
 			UCHARAT(PL_reginput) == c1 ||
 			UCHARAT(PL_reginput) == c2)
-			{
-			    DEBUG_r(
+		    {
+			DEBUG_r(
 				PerlIO_printf(Perl_debug_log,
 					      "%*s  trying tail with n=%ld...\n",
 					      REPORT_CODE_OFF+PL_regindent*2, "", n)
-				);
-			    if (paren) {
-				if (n) {
-				    PL_regstartp[paren] = PL_reginput - l;
-				    PL_regendp[paren] = PL_reginput;
-				} else
-				    PL_regendp[paren] = NULL;
+			    );
+			if (paren) {
+			    if (n) {
+				PL_regstartp[paren] = HOP(PL_reginput, -l);
+				PL_regendp[paren] = PL_reginput;
 			    }
-			    if (regmatch(next))
-				sayYES;
-			    REGCP_UNWIND;
+			    else
+				PL_regendp[paren] = NULL;
 			}
+			if (regmatch(next))
+			    sayYES;
+			REGCP_UNWIND;
+		    }
 		    /* Couldn't or didn't -- back up. */
 		    n--;
-		    locinput -= l;
+		    locinput = HOP(locinput, -l);
 		    PL_reginput = locinput;
 		}
 	    }
@@ -1485,6 +1974,7 @@ regmatch(regnode *prog)
 		minmod = 0;
 		if (ln && regrepeat(scan, ln) < ln)
 		    sayNO;
+		locinput = PL_reginput;
 		REGCP_SET;
 		while (n >= ln || (n == REG_INFTY && ln > 0)) { /* ln overflow ? */
 		    /* If it could work, try it. */
@@ -1494,9 +1984,10 @@ regmatch(regnode *prog)
 		    {
 			if (paren) {
 			    if (n) {
-				PL_regstartp[paren] = PL_reginput - 1;
+				PL_regstartp[paren] = HOP(PL_reginput, -1);
 				PL_regendp[paren] = PL_reginput;
-			    } else
+			    }
+			    else
 				PL_regendp[paren] = NULL;
 			}
 			if (regmatch(next))
@@ -1504,17 +1995,19 @@ regmatch(regnode *prog)
 			REGCP_UNWIND;
 		    }
 		    /* Couldn't or didn't -- move forward. */
-		    PL_reginput = locinput + ln;
+		    PL_reginput = locinput;
 		    if (regrepeat(scan, 1)) {
 			ln++;
-			PL_reginput = locinput + ln;
-		    } else
+			locinput = PL_reginput;
+		    }
+		    else
 			sayNO;
 		}
 	    }
 	    else {
 		CHECKPOINT lastcp;
 		n = regrepeat(scan, n);
+		locinput = PL_reginput;
 		if (ln < n && regkind[(U8)OP(next)] == EOL &&
 		    (!PL_multiline  || OP(next) == SEOL))
 		    ln = n;			/* why back off? */
@@ -1528,9 +2021,10 @@ regmatch(regnode *prog)
 			    {
 				if (paren && n) {
 				    if (n) {
-					PL_regstartp[paren] = PL_reginput - 1;
+					PL_regstartp[paren] = HOP(PL_reginput, -1);
 					PL_regendp[paren] = PL_reginput;
-				    } else
+				    }
+				    else
 					PL_regendp[paren] = NULL;
 				}
 				if (regmatch(next))
@@ -1539,9 +2033,10 @@ regmatch(regnode *prog)
 			    }
 			/* Couldn't or didn't -- back up. */
 			n--;
-			PL_reginput = locinput + n;
+			PL_reginput = locinput = HOP(locinput, -1);
 		    }
-		} else {
+		}
+		else {
 		    while (n >= ln) {
 			/* If it could work, try it. */
 			if (c1 == -1000 ||
@@ -1554,7 +2049,7 @@ regmatch(regnode *prog)
 			    }
 			/* Couldn't or didn't -- back up. */
 			n--;
-			PL_reginput = locinput + n;
+			PL_reginput = locinput = HOP(locinput, -1);
 		    }
 		}
 	    }
@@ -1572,15 +2067,27 @@ regmatch(regnode *prog)
 	    goto do_ifmatch;	    
 	case UNLESSM:
 	    n = 0;
-	    if (locinput < PL_bostr + scan->flags) 
-		goto say_yes;
+	    if (scan->flags) {
+		s = HOPMAYBE(locinput, -scan->flags);
+		if (!s)
+		    goto say_yes;
+		PL_reginput = s;
+	    }
+	    else
+		PL_reginput = locinput;
 	    goto do_ifmatch;
 	case IFMATCH:
 	    n = 1;
-	    if (locinput < PL_bostr + scan->flags) 
-		goto say_no;
+	    if (scan->flags) {
+		s = HOPMAYBE(locinput, -scan->flags);
+		if (!s)
+		    goto say_no;
+		PL_reginput = s;
+	    }
+	    else
+		PL_reginput = locinput;
+
 	  do_ifmatch:
-	    PL_reginput = locinput - scan->flags;
 	    inner = NEXTOPER(NEXTOPER(scan));
 	    if (regmatch(inner) != n) {
 	      say_no:
@@ -1588,7 +2095,8 @@ regmatch(regnode *prog)
 		    logical = 0;
 		    sw = 0;
 		    goto do_longjump;
-		} else
+		}
+		else
 		    sayNO;
 	    }
 	  say_yes:
@@ -1642,7 +2150,7 @@ no:
 /*
  * [This routine now assumes that it will only match on things of length 1.
  * That was true before, but now we assume scan - reginput is the count,
- * rather than incrementing count on every character.]
+ * rather than incrementing count on every character.  [Er, except utf8.]]
  */
 STATIC I32
 regrepeat(regnode *p, I32 max)
@@ -1652,6 +2160,7 @@ regrepeat(regnode *p, I32 max)
     register char *opnd;
     register I32 c;
     register char *loceol = PL_regeol;
+    register I32 hardcount = 0;
 
     scan = PL_reginput;
     if (max != REG_INFTY && max < loceol - scan)
@@ -1664,6 +2173,20 @@ regrepeat(regnode *p, I32 max)
 	break;
     case SANY:
 	scan = loceol;
+	break;
+    case ANYUTF8:
+	loceol = PL_regeol;
+	while (scan < loceol && *scan != '\n') {
+	    scan += UTF8SKIP(scan);
+	    hardcount++;
+	}
+	break;
+    case SANYUTF8:
+	loceol = PL_regeol;
+	while (scan < loceol) {
+	    scan += UTF8SKIP(scan);
+	    hardcount++;
+	}
 	break;
     case EXACT:		/* length of string is 1 */
 	c = UCHARAT(++opnd);
@@ -1683,6 +2206,13 @@ regrepeat(regnode *p, I32 max)
 	       (UCHARAT(scan) == c || UCHARAT(scan) == fold_locale[c]))
 	    scan++;
 	break;
+    case ANYOFUTF8:
+	loceol = PL_regeol;
+	while (scan < loceol && REGINCLASSUTF8(p, (U8*)scan)) {
+	    scan += UTF8SKIP(scan);
+	    hardcount++;
+	}
+	break;
     case ANYOF:
 	while (scan < loceol && REGINCLASS(opnd, *scan))
 	    scan++;
@@ -1691,51 +2221,130 @@ regrepeat(regnode *p, I32 max)
 	while (scan < loceol && isALNUM(*scan))
 	    scan++;
 	break;
+    case ALNUMUTF8:
+	loceol = PL_regeol;
+	while (scan < loceol && swash_fetch(PL_utf8_alnum, scan)) {
+	    scan += UTF8SKIP(scan);
+	    hardcount++;
+	}
+	break;
     case ALNUML:
 	PL_reg_flags |= RF_tainted;
 	while (scan < loceol && isALNUM_LC(*scan))
 	    scan++;
 	break;
+    case ALNUMLUTF8:
+	PL_reg_flags |= RF_tainted;
+	loceol = PL_regeol;
+	while (scan < loceol && isALNUM_LC_utf8(scan)) {
+	    scan += UTF8SKIP(scan);
+	    hardcount++;
+	}
+	break;
+	break;
     case NALNUM:
 	while (scan < loceol && !isALNUM(*scan))
 	    scan++;
+	break;
+    case NALNUMUTF8:
+	loceol = PL_regeol;
+	while (scan < loceol && !swash_fetch(PL_utf8_alnum, scan)) {
+	    scan += UTF8SKIP(scan);
+	    hardcount++;
+	}
 	break;
     case NALNUML:
 	PL_reg_flags |= RF_tainted;
 	while (scan < loceol && !isALNUM_LC(*scan))
 	    scan++;
 	break;
+    case NALNUMLUTF8:
+	PL_reg_flags |= RF_tainted;
+	loceol = PL_regeol;
+	while (scan < loceol && !isALNUM_LC_utf8(scan)) {
+	    scan += UTF8SKIP(scan);
+	    hardcount++;
+	}
+	break;
     case SPACE:
 	while (scan < loceol && isSPACE(*scan))
 	    scan++;
+	break;
+    case SPACEUTF8:
+	loceol = PL_regeol;
+	while (scan < loceol && (*scan == ' ' || swash_fetch(PL_utf8_space,scan))) {
+	    scan += UTF8SKIP(scan);
+	    hardcount++;
+	}
 	break;
     case SPACEL:
 	PL_reg_flags |= RF_tainted;
 	while (scan < loceol && isSPACE_LC(*scan))
 	    scan++;
 	break;
+    case SPACELUTF8:
+	PL_reg_flags |= RF_tainted;
+	loceol = PL_regeol;
+	while (scan < loceol && (*scan == ' ' || isSPACE_LC_utf8(scan))) {
+	    scan += UTF8SKIP(scan);
+	    hardcount++;
+	}
+	break;
     case NSPACE:
 	while (scan < loceol && !isSPACE(*scan))
 	    scan++;
+	break;
+    case NSPACEUTF8:
+	loceol = PL_regeol;
+	while (scan < loceol && !(*scan == ' ' || swash_fetch(PL_utf8_space,scan))) {
+	    scan += UTF8SKIP(scan);
+	    hardcount++;
+	}
 	break;
     case NSPACEL:
 	PL_reg_flags |= RF_tainted;
 	while (scan < loceol && !isSPACE_LC(*scan))
 	    scan++;
 	break;
+    case NSPACELUTF8:
+	PL_reg_flags |= RF_tainted;
+	loceol = PL_regeol;
+	while (scan < loceol && !(*scan == ' ' || isSPACE_LC_utf8(scan))) {
+	    scan += UTF8SKIP(scan);
+	    hardcount++;
+	}
+	break;
     case DIGIT:
 	while (scan < loceol && isDIGIT(*scan))
 	    scan++;
+	break;
+    case DIGITUTF8:
+	loceol = PL_regeol;
+	while (scan < loceol && swash_fetch(PL_utf8_digit,scan)) {
+	    scan += UTF8SKIP(scan);
+	    hardcount++;
+	}
+	break;
 	break;
     case NDIGIT:
 	while (scan < loceol && !isDIGIT(*scan))
 	    scan++;
 	break;
+    case NDIGITUTF8:
+	loceol = PL_regeol;
+	while (scan < loceol && !swash_fetch(PL_utf8_digit,scan)) {
+	    scan += UTF8SKIP(scan);
+	    hardcount++;
+	}
+	break;
     default:		/* Called on something of 0 width. */
 	break;		/* So match right here or not at all. */
     }
 
-    c = scan - PL_reginput;
+    if (hardcount)
+	c = hardcount;
+    else
+	c = scan - PL_reginput;
     PL_reginput = scan;
 
     DEBUG_r( 
@@ -1764,25 +2373,44 @@ regrepeat_hard(regnode *p, I32 max, I32 *lp)
     register char *scan;
     register char *start;
     register char *loceol = PL_regeol;
-    I32 l = -1;
+    I32 l = 0;
+    I32 count = 0;
+
+    if (!max)
+	return 0;
 
     start = PL_reginput;
-    while (PL_reginput < loceol && (scan = PL_reginput, regmatch(p))) {
-	if (l == -1) {
-	    *lp = l = PL_reginput - start;
-	    if (max != REG_INFTY && l*max < loceol - scan)
-		loceol = scan + l*max;
-	    if (l == 0) {
-		return max;
+    if (UTF) {
+	while (PL_reginput < loceol && (scan = PL_reginput, regmatch(p))) {
+	    if (!count++) {
+		l = 0;
+		while (start < PL_reginput) {
+		    l++;
+		    start += UTF8SKIP(start);
+		}
+		*lp = l;
+		if (l == 0)
+		    return max;
+	    }
+	    if (count == max)
+		return count;
+	}
+    }
+    else {
+	while (PL_reginput < loceol && (scan = PL_reginput, regmatch(p))) {
+	    if (!count++) {
+		*lp = l = PL_reginput - start;
+		if (max != REG_INFTY && l*max < loceol - scan)
+		    loceol = scan + l*max;
+		if (l == 0)
+		    return max;
 	    }
 	}
     }
     if (PL_reginput < loceol)
 	PL_reginput = scan;
-    else
-	scan = PL_reginput;
     
-    return (scan - start)/l;
+    return count;
 }
 
 /*
@@ -1826,5 +2454,87 @@ reginclass(register char *p, register I32 c)
     return (flags & ANYOF_INVERT) ? !match : match;
 }
 
+STATIC bool
+reginclassutf8(regnode *f, U8 *p)
+{
+    char flags = ARG1(f);
+    bool match = FALSE;
+    SV *sv = (SV*)PL_regdata->data[ARG2(f)];
 
+    if (swash_fetch(sv, p))
+	match = TRUE;
+    else if (flags & ANYOF_FOLD) {
+	I32 cf;
+	char tmpbuf[10];
+	if (flags & ANYOF_LOCALE) {
+	    PL_reg_flags |= RF_tainted;
+	    uv_to_utf8(tmpbuf, toLOWER_LC_utf8(p));
+	}
+	else
+	    uv_to_utf8(tmpbuf, toLOWER_utf8(p));
+	if (swash_fetch(sv, tmpbuf))
+	    match = TRUE;
+    }
 
+    if (!match && (flags & ANYOF_ISA)) {
+	PL_reg_flags |= RF_tainted;
+
+	if (((flags & ANYOF_ALNUML)  && isALNUM_LC_utf8(p))  ||
+	    ((flags & ANYOF_NALNUML) && !isALNUM_LC_utf8(p)) ||
+	    ((flags & ANYOF_SPACEL)  && isSPACE_LC_utf8(p))  ||
+	    ((flags & ANYOF_NSPACEL) && !isSPACE_LC_utf8(p)))
+	{
+	    match = TRUE;
+	}
+    }
+
+    return (flags & ANYOF_INVERT) ? !match : match;
+}
+
+STATIC char *
+reghop(unsigned char *s, I32 off)
+{
+    if (off >= 0) {
+	while (off-- && s < (U8*)PL_regeol)
+	    s += UTF8SKIP(s);
+    }
+    else {
+	while (off++) {
+	    if (s > (U8*)PL_bostr) {
+		s--;
+		if (*s & 0x80) {
+		    while (s > (U8*)PL_bostr && (*s & 0xc0) == 0x80)
+			s--;
+		}		/* XXX could check well-formedness here */
+	    }
+	}
+    }
+    return s;
+}
+
+STATIC char *
+reghopmaybe(unsigned char *s, I32 off)
+{
+    if (off >= 0) {
+	while (off-- && s < (U8*)PL_regeol)
+	    s += UTF8SKIP(s);
+	if (off >= 0)
+	    return 0;
+    }
+    else {
+	while (off++) {
+	    if (s > (U8*)PL_bostr) {
+		s--;
+		if (*s & 0x80) {
+		    while (s > (U8*)PL_bostr && (*s & 0xc0) == 0x80)
+			s--;
+		}		/* XXX could check well-formedness here */
+	    }
+	    else
+		break;
+	}
+	if (off <= 0)
+	    return 0;
+    }
+    return s;
+}

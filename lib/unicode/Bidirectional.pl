@@ -1,0 +1,369 @@
+return <<'END';
+0000	0008	ON
+0009		S
+000a	001f	ON
+0020		WS
+0021	0022	ON
+0023	0025	ET
+0026	002a	ON
+002b		ET
+002c		CS
+002d		ET
+002e		CS
+002f		ES
+0030	0039	EN
+003a		CS
+003b	0040	ON
+0041	005a	L
+005b	0060	ON
+0061	007a	L
+007b	009f	ON
+00a0		WS
+00a1		ON
+00a2	00a5	ET
+00a6	00af	ON
+00b0	00b1	ET
+00b2	00b3	EN
+00b4	00b8	ON
+00b9		EN
+00ba	00bf	ON
+00c0	00d6	L
+00d7		ON
+00d8	00f6	L
+00f7		ON
+00f8	01f5	L
+01fa	0217	L
+0250	02a8	L
+02b0	02de	L
+02e0	02e9	L
+0300	0345	L
+0360	0361	L
+0374	0375	L
+037a		L
+037e		L
+0384	038a	L
+038c		L
+038e	03a1	L
+03a3	03ce	L
+03d0	03d6	L
+03da		L
+03dc		L
+03de		L
+03e0		L
+03e2	03f3	L
+0401	040c	L
+040e	044f	L
+0451	045c	L
+045e	0486	L
+0490	04c4	L
+04c7	04c8	L
+04cb	04cc	L
+04d0	04eb	L
+04ee	04f5	L
+04f8	04f9	L
+0531	0556	L
+0559	055f	L
+0561	0587	L
+0589		L
+0591	05a1	R
+05a3	05b9	R
+05bb	05c4	R
+05d0	05ea	R
+05f0	05f4	R
+060c		R
+061b		R
+061f		R
+0621	063a	R
+0640	0652	R
+0660	0669	AN
+066a		ET
+066b	066c	AN
+066d		R
+0670	06b7	R
+06ba	06be	R
+06c0	06ce	R
+06d0	06ed	R
+06f0	06f9	EN
+0901	0903	L
+0905	0939	L
+093c	094d	L
+0950	0954	L
+0958	0970	L
+0981	0983	L
+0985	098c	L
+098f	0990	L
+0993	09a8	L
+09aa	09b0	L
+09b2		L
+09b6	09b9	L
+09bc		L
+09be	09c4	L
+09c7	09c8	L
+09cb	09cd	L
+09d7		L
+09dc	09dd	L
+09df	09e3	L
+09e6	09fa	L
+0a02		L
+0a05	0a0a	L
+0a0f	0a10	L
+0a13	0a28	L
+0a2a	0a30	L
+0a32	0a33	L
+0a35	0a36	L
+0a38	0a39	L
+0a3c		L
+0a3e	0a42	L
+0a47	0a48	L
+0a4b	0a4d	L
+0a59	0a5c	L
+0a5e		L
+0a66	0a74	L
+0a81	0a83	L
+0a85	0a8b	L
+0a8d		L
+0a8f	0a91	L
+0a93	0aa8	L
+0aaa	0ab0	L
+0ab2	0ab3	L
+0ab5	0ab9	L
+0abc	0ac5	L
+0ac7	0ac9	L
+0acb	0acd	L
+0ad0		L
+0ae0		L
+0ae6	0aef	L
+0b01	0b03	L
+0b05	0b0c	L
+0b0f	0b10	L
+0b13	0b28	L
+0b2a	0b30	L
+0b32	0b33	L
+0b36	0b39	L
+0b3c	0b43	L
+0b47	0b48	L
+0b4b	0b4d	L
+0b56	0b57	L
+0b5c	0b5d	L
+0b5f	0b61	L
+0b66	0b70	L
+0b82	0b83	L
+0b85	0b8a	L
+0b8e	0b90	L
+0b92	0b95	L
+0b99	0b9a	L
+0b9c		L
+0b9e	0b9f	L
+0ba3	0ba4	L
+0ba8	0baa	L
+0bae	0bb5	L
+0bb7	0bb9	L
+0bbe	0bc2	L
+0bc6	0bc8	L
+0bca	0bcd	L
+0bd7		L
+0be7	0bf2	L
+0c01	0c03	L
+0c05	0c0c	L
+0c0e	0c10	L
+0c12	0c28	L
+0c2a	0c33	L
+0c35	0c39	L
+0c3e	0c44	L
+0c46	0c48	L
+0c4a	0c4d	L
+0c55	0c56	L
+0c60	0c61	L
+0c66	0c6f	L
+0c82	0c83	L
+0c85	0c8c	L
+0c8e	0c90	L
+0c92	0ca8	L
+0caa	0cb3	L
+0cb5	0cb9	L
+0cbe	0cc4	L
+0cc6	0cc8	L
+0cca	0ccd	L
+0cd5	0cd6	L
+0cde		L
+0ce0	0ce1	L
+0ce6	0cef	L
+0d02	0d03	L
+0d05	0d0c	L
+0d0e	0d10	L
+0d12	0d28	L
+0d2a	0d39	L
+0d3e	0d43	L
+0d46	0d48	L
+0d4a	0d4d	L
+0d57		L
+0d60	0d61	L
+0d66	0d6f	L
+0e01	0e3a	L
+0e3f	0e5b	L
+0e81	0e82	L
+0e84		L
+0e87	0e88	L
+0e8a		L
+0e8d		L
+0e94	0e97	L
+0e99	0e9f	L
+0ea1	0ea3	L
+0ea5		L
+0ea7		L
+0eaa	0eab	L
+0ead	0eb9	L
+0ebb	0ebd	L
+0ec0	0ec4	L
+0ec6		L
+0ec8	0ecd	L
+0ed0	0ed9	L
+0edc	0edd	L
+0f00	0f47	L
+0f49	0f69	L
+0f71	0f8b	L
+0f90	0f95	L
+0f97		L
+0f99	0fad	L
+0fb1	0fb7	L
+0fb9		L
+10a0	10c5	L
+10d0	10f6	L
+10fb		L
+1100	1159	L
+115f	11a2	L
+11a8	11f9	L
+1e00	1e9b	L
+1ea0	1ef9	L
+1f00	1f15	L
+1f18	1f1d	L
+1f20	1f45	L
+1f48	1f4d	L
+1f50	1f57	L
+1f59		L
+1f5b		L
+1f5d		L
+1f5f	1f7d	L
+1f80	1fb4	L
+1fb6	1fc4	L
+1fc6	1fd3	L
+1fd6	1fdb	L
+1fdd	1fef	L
+1ff2	1ff4	L
+1ff6	1ffe	L
+2000	2006	WS
+2007		CS
+2008	200b	WS
+200c	200d	ON
+200e		L
+200f		R
+2010	2027	ON
+2028	2029	B
+202a	202e	ON
+2030	2034	ET
+2035	2046	ON
+206a	206f	ON
+2070		EN
+2074	2079	EN
+207a	207b	ET
+207c	207f	ON
+2080	2089	EN
+208a	208b	ET
+208c	208e	ON
+20a0	20ac	ET
+20d0	20e1	L
+2100	2138	ON
+2153	215f	ON
+2160	2182	L
+2190	21ea	ON
+2200	2211	ON
+2212	2213	ET
+2214	22f1	ON
+2300		ON
+2302	2335	ON
+2336	237a	L
+2400	2424	ON
+2440	244a	ON
+2460	24ea	ON
+2500	2595	ON
+25a0	25ef	ON
+2600	2613	ON
+261a	266f	ON
+2701	2704	ON
+2706	2709	ON
+270c	2727	ON
+2729	274b	ON
+274d		ON
+274f	2752	ON
+2756		ON
+2758	275e	ON
+2761	2767	ON
+2776	2794	ON
+2798	27af	ON
+27b1	27be	ON
+3000		WS
+3001	3020	ON
+3021	302f	L
+3030	3037	ON
+303f		ON
+3041	3094	L
+3099	309e	L
+30a1	30fe	L
+3105	312c	L
+3131	318e	L
+3190	319f	L
+3200	321c	L
+3220	3243	L
+3260	327b	L
+327f	32b0	L
+32c0	32cb	L
+32d0	32fe	L
+3300	3376	L
+337b	33dd	L
+33e0	33fe	L
+4e00	9fa5	L
+ac00	d7a3	L
+d800	db7f	L
+db80	dbff	L
+dc00	dfff	L
+e000	f8ff	L
+f900	fa2d	L
+fb00	fb06	L
+fb13	fb17	L
+fb1e	fb36	R
+fb38	fb3c	R
+fb3e		R
+fb40	fb41	R
+fb43	fb44	R
+fb46	fbb1	R
+fbd3	fd3d	R
+fd3e	fd3f	ON
+fd50	fd8f	R
+fd92	fdc7	R
+fdf0	fdfb	R
+fe20	fe23	ON
+fe30	fe44	ON
+fe49	fe52	ON
+fe54	fe66	ON
+fe68	fe6b	ON
+fe70	fe72	R
+fe74		R
+fe76	fefc	R
+feff		ON
+ff01	ff0f	ON
+ff10	ff19	EN
+ff1a	ff20	ON
+ff21	ff3a	L
+ff3b	ff40	ON
+ff41	ff5a	L
+ff5b	ff5e	ON
+ff61	ff64	ON
+ff65	ffbe	L
+ffc2	ffc7	L
+ffca	ffcf	L
+ffd2	ffd7	L
+ffda	ffdc	L
+ffe0	ffe6	ON
+ffe8	ffee	ON
+fffc	fffd	ON
+END
