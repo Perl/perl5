@@ -172,8 +172,9 @@ sub new
     # undef,undef to signal MBI that we don't need no bloody rounding
     $self->{_e} = $MBI->new("$$es$$ev",undef,undef);	# exponent
     $self->{_m} = $MBI->new("$$miv$$mfv",undef,undef); 	# create mant.
+    # print  $self->{_e}, " ", $self->{_m},"\n";
     # 3.123E0 = 3123E-3, and 3.123E-2 => 3123E-5
-    $self->{_e} -= CORE::length($$mfv) if CORE::length($$mfv) != 0; 		
+    $self->{_e} -= CORE::length($$mfv) if CORE::length($$mfv) != 0;
     $self->{sign} = $$mis;
     }
   # if downgrade, inf, NaN or integers go down
@@ -186,7 +187,7 @@ sub new
       $self->{_m}->{sign} = $$mis;		# negative if wanted
       return $downgrade->new($self->{_m});
       }
-    return $downgrade->new("$$mis$$miv$$mfv"."E$$es$$ev");
+    return $downgrade->new($self->bsstr()); 
     }
   #print "mbf new $self->{sign} $self->{_m} e $self->{_e} ",ref($self),"\n";
   $self->bnorm()->round(@r);			# first normalize, then round

@@ -1250,7 +1250,7 @@ sub blog
 
   if ($CAN{log_int})
     {
-    my $rc = $CALC->_log_int($x->{value},$base->{value});
+    my ($rc,$exact) = $CALC->_log_int($x->{value},$base->{value});
     return $x->bnan() unless defined $rc;
     $x->{value} = $rc;
     return $x->round(@r);
@@ -3093,7 +3093,7 @@ sub _split
     # valid mantissa?
     return if $m eq '.' || $m eq '';
     my ($mi,$mf,$lastf) = split /\./,$m;
-    return if defined $lastf;		# last defined => 1.2.3 or others
+    return if defined $lastf;		# lastf defined => 1.2.3 or others
     $mi = '0' if !defined $mi;
     $mi .= '0' if $mi =~ /^[\-\+]?$/;
     $mf = '0' if !defined $mf || $mf eq '';

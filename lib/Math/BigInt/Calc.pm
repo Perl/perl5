@@ -1351,38 +1351,48 @@ sub _log_int
   if ($cmp == 0)
     {
     splice (@$x,1); $x->[0] = 1;
-    return $x;
+    return ($x,1)
     }
   # X < BASE
   if ($cmp < 0)
     {
     splice (@$x,1); $x->[0] = 0;
-    return $x;
+    return ($x,undef);
     }
 
   # this trial multiplication is very fast, even for large counts (like for
   # 2 ** 1024, since this still requires only 1024 very fast steps
   # (multiplication of a large number by a very small number is very fast))
   my $x_org = _copy($c,$x);		# preserve x
-  splice(@$x,1); $x->[0] = 0;		# keep ref to $x
+  splice(@$x,1); $x->[0] = 1;		# keep ref to $x
+
+  # simple loop that increments $x by two in each step, possible overstepping
+  # the real result by one
 
   # use a loop that keeps $x as scalar as long as possible (this is faster)
-  my $trial = _copy($c,$base); my $count = 0; my $a;
-  while (($a = _acmp($x,$trial,$x_org) <= 0) && $count < $BASE)
+  my $trial = _copy($c,$base); my $a;
+  my $base_mul = _mul($c, _copy($c,$base), $base);
+
+  while (($a = _acmp($x,$trial,$x_org)) < 0)
     {
-    _mul($c,$trial,$base); $count++;
+    _mul($c,$trial,$base_mul); _add($c, $x, [2]);
     }
-  if ($a <= 0)
+
+  my $exact = 1;
+  if ($a > 0)
     {
-    # not done yet?
-    $x->[0] = $count;
-    while (_acmp($x,$trial,$x_org) <= 0)
+    # overstepped the result
+    _dec($c, $x);
+    _div($c,$trial,$base);
+    $a = _acmp($x,$trial,$x_org);
+    if ($a > 0)
       {
-      _mul($c,$trial,$base); _inc($c,$x);
+      _dec($c, $x);
       }
+    $exact = 0 if $a != 0;
     }
   
-  $x;				# return result
+  ($x,$exact);				# return result
   }
 
 # for debugging:
@@ -1978,6 +1988,10 @@ slow) fallback routines to emulate these:
 	_modpow		return modulus of power ($x ** $y) % $z
 	_log_int(X,N)	calculate integer log() of X in base N
 			X >= 0, N >= 0 (return undef for NaN)
+			returns (RESULT, EXACT) where EXACT is:
+			 1     : result is exactly RESULT
+			 0     : result was truncated to RESULT
+			 undef : unknown whether result is exactly RESULT
 
 Input strings come in as unsigned but with prefix (i.e. as '123', '0xabc'
 or '0b1101').
