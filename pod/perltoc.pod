@@ -3787,10 +3787,10 @@ callback
 
 =item DOCUMENTATION
 
-L<perldoc|perldoc>, L<pod2man|pod2man> and L<pod2text|pod2text>,
-L<pod2html|pod2html> and L<pod2latex|pod2latex>, L<pod2usage|pod2usage>,
-L<podselect|podselect>, L<podchecker|podchecker>, L<splain|splain>,
-L<roffitall|roffitall>
+L<libnetcfg|libnetcfg>, L<perldoc|perldoc>, L<pod2man|pod2man> and
+L<pod2text|pod2text>, L<pod2html|pod2html> and L<pod2latex|pod2latex>,
+L<pod2usage|pod2usage>, L<podselect|podselect>, L<podchecker|podchecker>,
+L<splain|splain>, L<roffitall|roffitall>
 
 =item CONVERTORS
 
@@ -10406,8 +10406,8 @@ rmscopy($from,$to[,$date_flag])
 =item DESCRIPTION
 
 C<wanted>, C<bydepth>, C<preprocess>, C<postprocess>, C<follow>,
-C<follow_fast>, C<follow_skip>, C<no_chdir>, C<untaint>,
-C<untaint_pattern>, C<untaint_skip>
+C<follow_fast>, C<follow_skip>, C<dangling_symlinks>, C<no_chdir>,
+C<untaint>, C<untaint_pattern>, C<untaint_skip>
 
 =item CAVEAT
 
@@ -12645,6 +12645,259 @@ C<O_RDONLY>, C<O_WRONLY>, C<O_RDWR>
 
 =back
 
+=head2 Net::Cmd - Network Command class (as used by FTP, SMTP etc)
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item USER METHODS
+
+debug ( VALUE ), message (), code (), ok (), status (), datasend ( DATA ),
+dataend ()
+
+=item CLASS METHODS
+
+debug_print ( DIR, TEXT ), debug_text ( TEXT ), command ( CMD [, ARGS, ...
+]), unsupported (), response (), parse_response ( TEXT ), getline (),
+ungetline ( TEXT ), read_until_dot ()
+
+=item EXPORTS
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 Net::Config - Local configuration data for libnet
+
+=over 4
+
+=item SYNOPSYS
+
+=item DESCRIPTION
+
+=item METHODS
+
+requires_firewall HOST
+
+=item NetConfig VALUES
+
+nntp_hosts, snpp_hosts, pop3_hosts, smtp_hosts, ph_hosts, daytime_hosts,
+time_hosts, inet_domain, ftp_firewall, ftp_ext_passive, ftp_int_pasive,
+local_netmask, test_hosts, test_exists
+
+=back
+
+=head2 Net::Domain - Attempt to evaluate the current host's internet name
+and domain
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+hostfqdn (), hostname (), hostdomain ()
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 Net::DummyInetd - A dummy Inetd server
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item CONSTRUCTOR
+
+new ( CMD )
+
+=item METHODS
+
+port
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 Net::FTP - FTP Client class
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item OVERVIEW
+
+=item CONSTRUCTOR
+
+new (HOST [,OPTIONS])
+
+=item METHODS
+
+login ([LOGIN [,PASSWORD [, ACCOUNT] ] ]), authorize ( [AUTH [, RESP]]),
+site (ARGS), type (TYPE [, ARGS]), ascii ([ARGS]) binary([ARGS])
+ebcdic([ARGS]) byte([ARGS]), rename ( OLDNAME, NEWNAME ), delete ( FILENAME
+), cwd ( [ DIR ] ), cdup (), pwd (), rmdir ( DIR ), mkdir ( DIR [, RECURSE
+]), ls ( [ DIR ] ), dir ( [ DIR ] ), get ( REMOTE_FILE [, LOCAL_FILE [,
+WHERE]] ), put ( LOCAL_FILE [, REMOTE_FILE ] ), put_unique ( LOCAL_FILE [,
+REMOTE_FILE ] ), append ( LOCAL_FILE [, REMOTE_FILE ] ), unique_name (),
+mdtm ( FILE ), size ( FILE ), supported ( CMD ), hash (
+[FILEHANDLE_GLOB_REF],[ BYTES_PER_HASH_MARK] ), nlst ( [ DIR ] ), list ( [
+DIR ] ), retr ( FILE ), stor ( FILE ), stou ( FILE ), appe ( FILE ), port (
+[ PORT ] ), pasv (), pasv_xfer ( SRC_FILE, DEST_SERVER [, DEST_FILE ] ),
+pasv_xfer_unique ( SRC_FILE, DEST_SERVER [, DEST_FILE ] ), pasv_wait (
+NON_PASV_SERVER ), abort (), quit ()
+
+=over 4
+
+=item Methods for the adventurous
+
+quot (CMD [,ARGS])
+
+=back
+
+=item THE dataconn CLASS
+
+read ( BUFFER, SIZE [, TIMEOUT ] ), write ( BUFFER, SIZE [, TIMEOUT ] ),
+abort (), close ()
+
+=item UNIMPLEMENTED
+
+B<ALLO>, B<SMNT>, B<HELP>, B<MODE>, B<SYST>, B<STAT>, B<STRU>, B<REIN>
+
+=item REPORTING BUGS
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=item CREDITS
+
+=item COPYRIGHT
+
+=back
+
+=head2 Net::NNTP - NNTP Client class
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item CONSTRUCTOR
+
+new ( [ HOST ] [, OPTIONS ])
+
+=item METHODS
+
+article ( [ MSGID|MSGNUM ], [FH] ), body ( [ MSGID|MSGNUM ], [FH] ), head (
+[ MSGID|MSGNUM ], [FH] ), nntpstat ( [ MSGID|MSGNUM ] ), group ( [ GROUP ]
+), ihave ( MSGID [, MESSAGE ]), last (), date (), postok (), authinfo (
+USER, PASS ), list (), newgroups ( SINCE [, DISTRIBUTIONS ]), newnews (
+SINCE [, GROUPS [, DISTRIBUTIONS ]]), next (), post ( [ MESSAGE ] ), slave
+(), quit ()
+
+=over 4
+
+=item Extension methods
+
+newsgroups ( [ PATTERN ] ), distributions (), subscriptions (),
+overview_fmt (), active_times (), active ( [ PATTERN ] ), xgtitle ( PATTERN
+), xhdr ( HEADER, MESSAGE-SPEC ), xover ( MESSAGE-SPEC ), xpath (
+MESSAGE-ID ), xpat ( HEADER, PATTERN, MESSAGE-SPEC), xrover, listgroup ( [
+GROUP ] ), reader
+
+=back
+
+=item UNSUPPORTED
+
+=item DEFINITIONS
+
+MESSAGE-SPEC, PATTERN, Examples, C<[^]-]>, C<*bdc>, C<[0-9a-zA-Z]>, C<a??d>
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 Net::PH - CCSO Nameserver Client class
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item CONSTRUCTOR
+
+new ( [ HOST ] [, OPTIONS ])
+
+=item METHODS
+
+query( SEARCH [, RETURN ] ), change( SEARCH , MAKE ), login( USER, PASS [,
+ENCRYPT ]), logout(), fields( [ FIELD_LIST ] ), add( FIELD_VALUES ),
+delete( FIELD_VALUES ), id( [ ID ] ), status(), siteinfo(), quit()
+
+=item Q&A
+
+=item SEE ALSO
+
+=item AUTHORS
+
+=item ACKNOWLEDGMENTS
+
+=item COPYRIGHT
+
+=back
+
+=head2 Net::POP3 - Post Office Protocol 3 Client class (RFC1081)
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item EXAMPLES
+
+=item CONSTRUCTOR
+
+new ( [ HOST, ] [ OPTIONS ] )
+
+=item METHODS
+
+user ( USER ), pass ( PASS ), login ( [ USER [, PASS ]] ), apop ( USER,
+PASS ), top ( MSGNUM [, NUMLINES ] ), list ( [ MSGNUM ] ), get ( MSGNUM [,
+FH ] ), last (), popstat (), ping ( USER ), uidl ( [ MSGNUM ] ), delete (
+MSGNUM ), reset (), quit ()
+
+=item NOTES
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
 =head2 Net::Ping - check a remote host for reachability
 
 =over 4
@@ -12668,6 +12921,83 @@ $timeout]);, $p->open($host);, $p->close();, pingecho($host [, $timeout]);
 
 =back
 
+=head2 Net::SMTP - Simple Mail Transfer Protocol Client
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item EXAMPLES
+
+=item CONSTRUCTOR
+
+new Net::SMTP [ HOST, ] [ OPTIONS ]
+
+=item METHODS
+
+banner (), domain (), hello ( DOMAIN ), etrn ( DOMAIN ), mail ( ADDRESS [,
+OPTIONS] ), send ( ADDRESS ), send_or_mail ( ADDRESS ), send_and_mail (
+ADDRESS ), reset (), recipient ( ADDRESS [, ADDRESS [ ...]] [, OPTIONS ] ),
+to ( ADDRESS [, ADDRESS [...]] ), data ( [ DATA ] ), expand ( ADDRESS ),
+verify ( ADDRESS ), help ( [ $subject ] ), quit ()
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 Net::SNPP - Simple Network Pager Protocol Client
+
+=over 4
+
+=item SYNOPSIS
+
+=item NOTE
+
+=item DESCRIPTION
+
+=item EXAMPLES
+
+=item CONSTRUCTOR
+
+new ( [ HOST, ] [ OPTIONS ] )
+
+=item METHODS
+
+reset (), help (), quit ()
+
+=item EXPORTS
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 Net::Time - time and daytime network client interface
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+inet_time ( [HOST [, PROTOCOL [, TIMEOUT]]]), inet_daytime ( [HOST [,
+PROTOCOL [, TIMEOUT]]])
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
 =head2 Net::hostent - by-name interface to Perl's built-in gethost*()
 functions
 
@@ -12682,6 +13012,107 @@ functions
 =item NOTE
 
 =item AUTHOR
+
+=back
+
+=head2 Net::libnetFAQ, libnetFAQ - libnet Frequently Asked Questions
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item Where to get this document
+
+=item How to contribute to this document
+
+=back
+
+=item Author and Copyright Information
+
+=over 4
+
+=item Disclaimer
+
+=back
+
+=item Obtaining and installing libnet
+
+=over 4
+
+=item What is libnet ?
+
+=item Which version of perl do I need ?
+
+=item What other modules do I need ?
+
+=item What machines support libnet ?
+
+=item Where can I get the latest libnet release
+
+=back
+
+=item Using Net::FTP
+
+=over 4
+
+=item How do I download files from a FTP server ?
+
+=item How do I transfer files in binary mode ?
+
+=item How can I get the size of a file on a remote FTP server ?
+
+=item How can I get the modification time of a file on a remote FTP server
+?
+
+=item How can I change the permissions of a file on a remote server ?
+
+=item Can I do a reget operation like the ftp command ?
+
+=item How do I get a directory listing from a FTP server ?
+
+=item Changeing directory to "" does not fail ?
+
+=item I am behind a SOCKS firewall, but the Firewall option does not work ?
+
+=item I am behind a FTP proxy firewall, but cannot access machines outside
+?
+
+=item My ftp proxy firewall does not listen on port 21
+
+=item Is it possible to change the file permissions of a file on an FTP
+server ?
+
+=item I have seen scripts call a method message, but cannot find it
+documented ?
+
+=item Why does Net::FTP not implement mput and mget methods
+
+=back
+
+=item Using Net::SMTP
+
+=over 4
+
+=item Why can't the part of an Email address after the @ be used as the
+hostname ?
+
+=item Why does Net::SMTP not do DNS MX lookups ?
+
+=item The verify method always returns true ?
+
+=back
+
+=item Debugging scripts
+
+=over 4
+
+=item How can I debug my scripts that use Net::* modules ?
+
+=back
+
+=item AUTHOR AND COPYRIGHT
 
 =back
 
@@ -12731,6 +13162,35 @@ functions
 =item NOTE
 
 =item AUTHOR
+
+=back
+
+=head2 Netrc, Net::Netrc - OO interface to users netrc file
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item THE .netrc FILE
+
+machine name, default, login name, password string, account string, macdef
+name
+
+=item CONSTRUCTOR
+
+lookup ( MACHINE [, LOGIN ])
+
+=item METHODS
+
+login (), password (), account (), lpa ()
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=item COPYRIGHT
 
 =back
 
