@@ -28,6 +28,291 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.7.X		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 16224] By: jhi                                   on 2002/04/27  17:53:20
+        Log: Integrate perlio;
+             
+             Correct which var is nulled, stack movement protection.
+     Branch: perl
+	  !> ext/PerlIO/encoding/encoding.xs
+____________________________________________________________________________
+[ 16223] By: jhi                                   on 2002/04/27  17:43:26
+        Log: Subject: PATCH t/TEST
+             From: Mark-Jason Dominus <mjd@plover.com>
+             Date: Sat, 27 Apr 2002 14:06:56 -0400
+             Message-ID: <20020427180656.5422.qmail@plover.com>
+     Branch: perl
+	   ! t/TEST
+____________________________________________________________________________
+[ 16222] By: sky                                   on 2002/04/27  17:00:29
+        Log: Ahem, look another way.
+     Branch: perl
+	   ! ext/threads/shared/t/queue.t
+____________________________________________________________________________
+[ 16221] By: nick                                  on 2002/04/27  16:34:48
+        Log: Correct which var is nulled, stack movement protection.
+     Branch: perlio
+	   ! ext/PerlIO/encoding/encoding.xs
+____________________________________________________________________________
+[ 16220] By: jhi                                   on 2002/04/27  16:27:18
+        Log: Integrate perlio;
+             
+             Fix weird warnings and/pr segfaults on binmode(,"encoding(...)")
+             - if encoding loads Encode then stack grows.
+             - pp_binmode was not allowing for that to happen
+             - added PUTBACK/SPAGAIN.
+     Branch: perl
+	  !> pp_sys.c
+____________________________________________________________________________
+[ 16219] By: jhi                                   on 2002/04/27  16:23:44
+        Log: First half of NetBSD patch-ai, from Johnny Lam:
+             
+             The first part removes "installman" and "installhtml" from the
+             .PHONY target, which was causing problems during installation.
+             
+             (the installman and installhtml are not phony targets,
+             they are real files)
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[ 16218] By: nick                                  on 2002/04/27  16:22:40
+        Log: Integrate mainline
+     Branch: perlio
+	  +> ext/threads/shared/t/cond.t
+	  !> MANIFEST ext/threads/shared/shared.xs
+	  !> ext/threads/shared/t/queue.t
+____________________________________________________________________________
+[ 16217] By: jhi                                   on 2002/04/27  16:20:49
+        Log: NetBSD patch-ab from Johnny Lam:
+             
+             Some tweaks to the NetBSD hints file to make the Configure
+             process more useful when not building from pkgsrc.  This file
+             will definitely need to change again when the 1.6 release of
+             NetBSD comes out, but I'll handle the changes at the later
+             date.
+     Branch: perl
+	   ! hints/netbsd.sh
+____________________________________________________________________________
+[ 16216] By: nick                                  on 2002/04/27  16:19:21
+        Log: Fix weird warnings and/pr segfaults on binmode(,"encoding(...)")
+             - if encoding loads Encode then stack grows.
+             - pp_binmode was not allowing for that to happen
+             - added PUTBACK/SPAGAIN.
+     Branch: perlio
+	   ! pp_sys.c
+____________________________________________________________________________
+[ 16215] By: jhi                                   on 2002/04/27  15:52:24
+        Log: Integrate perlio;
+             
+             Fix fd leak on Via(bogus).
+             Finish implementing PerlIOVia_open().
+             Export more guts of PerlIO_* so Via_open() can work.
+             Fix various PerlIO_allocate() features exposed by above.
+             
+             Re-instate $PerlIO::encoding::check at boot.
+             (Retaining Dan's XS side require though I don't see need.)
+     Branch: perl
+	  !> embed.fnc ext/PerlIO/Via/Via.xs
+	  !> ext/PerlIO/encoding/encoding.pm
+	  !> ext/PerlIO/encoding/encoding.xs ext/PerlIO/t/via.t makedef.pl
+	  !> perlio.c perlio.h perliol.h
+____________________________________________________________________________
+[ 16214] By: jhi                                   on 2002/04/27  15:48:34
+        Log: Upgrade to Encode 1.62.
+     Branch: perl
+	   ! ext/Encode/Changes ext/Encode/Encode.pm ext/Encode/Encode.xs
+____________________________________________________________________________
+[ 16213] By: ams                                   on 2002/04/27  15:38:50
+        Log: Subject: Re: Change 16122: Try to be clearer about perlio.
+             From: Philip Newton <Philip.Newton@gmx.net>
+             Date: Sat, 27 Apr 2002 08:51:30 +0200
+             Message-Id: <bgikcuc301j0ehljjpqbtr5b3tts50m1ge@4ax.com>
+             
+             Subject: Re: Change 16183: Stop being coy.
+             From: Philip Newton <Philip.Newton@gmx.net>
+             Date: Sat, 27 Apr 2002 08:52:13 +0200
+             Message-Id: <djikcuksn2cvm35broiqfu8c89abtprfmc@4ax.com>
+     Branch: perl
+	   ! INSTALL pod/perldelta.pod
+____________________________________________________________________________
+[ 16212] By: sky                                   on 2002/04/27  13:54:46
+        Log: Add test numbers to make "make test" happy. Order is irrelevant
+             but number of oks is not.
+     Branch: perl
+	   ! ext/threads/shared/t/queue.t
+____________________________________________________________________________
+[ 16211] By: nick                                  on 2002/04/27  13:29:55
+        Log: Re-instate $PerlIO::encoding::check at boot.
+             (Retaining Dan's XS side require though I don't see need.)
+     Branch: perlio
+	   ! ext/PerlIO/encoding/encoding.pm
+	   ! ext/PerlIO/encoding/encoding.xs
+____________________________________________________________________________
+[ 16210] By: sky                                   on 2002/04/27  12:56:44
+        Log: Fixed race condtions and deadlocks in interaction with 
+             cond_wait/cond_signal and lock.
+             Now we wait for a lock to gie up if we return from COND_WAIT
+             and we are still locked. We also notifiers potential 
+             lockers that it is free for locking when we go into COND_WAIT.
+     Branch: perl
+	   + ext/threads/shared/t/cond.t
+	   ! MANIFEST ext/threads/shared/shared.xs
+	   ! ext/threads/shared/t/queue.t
+____________________________________________________________________________
+[ 16209] By: nick                                  on 2002/04/27  12:32:41
+        Log: Integrate mainline
+     Branch: perlio
+	  +> t/win32/system_tests
+	   - t/op/system_tests
+	  !> MANIFEST ext/Digest/MD5/t/files.t ext/Time/HiRes/HiRes.pm
+	  !> hints/netbsd.sh lib/ExtUtils/MM_Unix.pm lib/Time/Local.pm
+	  !> pod/perldelta.pod pod/perltodo.pod pp_ctl.c t/japh/abigail.t
+	  !> t/lib/warnings/pp_hot t/win32/system.t
+____________________________________________________________________________
+[ 16208] By: sky                                   on 2002/04/27  11:46:53
+        Log: Saving locks after we set it to 0 was kind of pointless.
+             Hunting down fixes in cond_* functions.
+     Branch: perl
+	   ! ext/threads/shared/shared.xs
+____________________________________________________________________________
+[ 16207] By: nick                                  on 2002/04/27  10:12:00
+        Log: Fix fd leak on Via(bogus).
+             Finish implementing PerlIOVia_open().
+             Export more guts of PerlIO_* so Via_open() can work.
+             Fix various PerlIO_allocate() features exposed by above.
+     Branch: perlio
+	   ! ext/PerlIO/Via/Via.xs ext/PerlIO/t/via.t makedef.pl perlio.c
+	   ! perlio.h perliol.h
+____________________________________________________________________________
+[ 16206] By: jhi                                   on 2002/04/27  00:52:30
+        Log: NetBSD and OpenBSD cannot do comments at #! line
+             (or long #! lines?)
+     Branch: perl
+	   ! t/japh/abigail.t
+____________________________________________________________________________
+[ 16205] By: jhi                                   on 2002/04/26  23:56:32
+        Log: Add taint rethink to the todo list.
+     Branch: perl
+	   ! pod/perltodo.pod
+____________________________________________________________________________
+[ 16204] By: jhi                                   on 2002/04/26  22:33:45
+        Log: Integrate changes #16199 and #16201 from macperl;
+             
+             Time::Local compatibility patches, from Graham
+             
+             MacPerl require() portability patches
+     Branch: perl
+	  !> lib/Time/Local.pm pp_ctl.c
+____________________________________________________________________________
+[ 16203] By: jhi                                   on 2002/04/26  21:47:06
+        Log: Subject: [PATCH] Re: [ID 20020425.012] segfault when printing to close indirect filehandle
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Fri, 26 Apr 2002 23:27:23 +0100
+             Message-ID: <20020426222722.GH312@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! t/lib/warnings/pp_hot
+____________________________________________________________________________
+[ 16202] By: pudge                                 on 2002/04/26  21:11:06
+        Log: Working on MacPerl tests
+     Branch: macperl
+	   ! macos/MacPerlTests.cmd
+____________________________________________________________________________
+[ 16201] By: pudge                                 on 2002/04/26  21:10:49
+        Log: MacPerl require() portability patches
+     Branch: macperl
+	   ! pp_ctl.c
+____________________________________________________________________________
+[ 16200] By: pudge                                 on 2002/04/26  21:09:45
+        Log: Fix a few MacPerl_CanonDir() problems
+     Branch: macperl
+	   ! macos/macish.c macos/macish.h
+____________________________________________________________________________
+[ 16199] By: pudge                                 on 2002/04/26  21:08:52
+        Log: Time::Local compatibility patches, from Graham
+     Branch: macperl
+	   ! lib/Time/Local.pm
+____________________________________________________________________________
+[ 16198] By: jhi                                   on 2002/04/26  20:10:53
+        Log: Subject: Re: [PATCH ext/Time/HiRes/HiRes.pm] Political Correctness
+             From: Simon Cozens <simon@netthink.co.uk>
+             Date: Fri, 26 Apr 2002 21:58:21 +0100
+             Message-ID: <20020426205821.GB5855@netthink.co.uk>
+     Branch: perl
+	   ! ext/Time/HiRes/HiRes.pm
+____________________________________________________________________________
+[ 16197] By: jhi                                   on 2002/04/26  20:04:44
+        Log: NetBSD: if the /usr/pkg/lib is there, the linker wants
+             to know about it always (not just when using the pth).
+     Branch: perl
+	   ! hints/netbsd.sh
+____________________________________________________________________________
+[ 16196] By: jhi                                   on 2002/04/26  18:27:39
+        Log: EBCDIC MD5.xs checksum update from Merijn Broeren.
+     Branch: perl
+	   ! ext/Digest/MD5/t/files.t
+____________________________________________________________________________
+[ 16195] By: jhi                                   on 2002/04/26  17:56:51
+        Log: Subject: FIXIN problem under Win32
+             From: Nikola Knezevic <indy@tesla.rcub.bg.ac.yu>
+             Date: Thu, 25 Apr 2002 23:03:31 +0200
+             Message-ID: <8920180377.20020425230331@tesla.rcub.bg.ac.yu>
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 16194] By: nick                                  on 2002/04/26  17:36:16
+        Log: Integrate mainline
+     Branch: perlio
+	  +> ext/Encode/lib/Encode/Guess.pm
+	  +> ext/Encode/lib/Encode/MIME/Header.pm ext/Encode/t/guess.t
+	  +> ext/Encode/t/mime-header.t ext/Storable/t/croak.t
+	  +> ext/Storable/t/downgrade.t ext/Storable/t/make_downgrade.pl
+	  +> lib/Test/Simple/t/curr_test.t lib/Test/Simple/t/maybe_regex.t
+	  +> lib/Test/Simple/t/strays.t t/lib/sample-tests/bignum
+	  +> t/lib/sample-tests/die t/lib/sample-tests/die_head_end
+	  +> t/lib/sample-tests/die_last_minute
+	  !> (integrate 94 files)
+____________________________________________________________________________
+[ 16193] By: jhi                                   on 2002/04/26  17:11:30
+        Log: Subject: [PATCH t\win32] system_tests are relevant only to win32\system.t
+             From: Nikola Knezevic <indy@tesla.rcub.bg.ac.yu>
+             Date: Fri, 26 Apr 2002 15:38:16 +0200
+             Message-ID: <14316006107.20020426153816@tesla.rcub.bg.ac.yu>
+     Branch: perl
+	   + t/win32/system_tests
+	   - t/op/system_tests
+	   ! MANIFEST t/win32/system.t
+____________________________________________________________________________
+[ 16192] By: jhi                                   on 2002/04/26  16:45:28
+        Log: Mention explicitly the NetBSD + pth combination.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 16191] By: jhi                                   on 2002/04/26  15:06:20
+        Log: Subject: [PATCH] Fix email address.
+             From: Abigail <abigail@foad.org>
+             Date: Fri, 26 Apr 2002 18:03:11 +0200
+             Message-ID: <20020426180311.A23545@gatekeeper.osp.nl>
+     Branch: perl
+	   ! t/japh/abigail.t
+____________________________________________________________________________
+[ 16190] By: jhi                                   on 2002/04/26  14:33:03
+        Log: NetWare update from C Aditya.
+     Branch: perl
+	   ! NetWare/Makefile lib/ExtUtils/MM_NW5.pm
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 16189] By: jhi                                   on 2002/04/26  13:35:48
+        Log: Subject: [PATCH vms/test.com] use t/TEST
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Fri, 26 Apr 2002 09:34:46 -0500
+             Message-Id: <a05111708b8ef12696579@[172.16.52.1]>
+     Branch: perl
+	   ! vms/test.com
+____________________________________________________________________________
+[ 16188] By: jhi                                   on 2002/04/26  13:34:35
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 16187] By: jhi                                   on 2002/04/26  12:43:48
         Log: Subject: [Encode] s/=over2/=over 2/g
              From: Dan Kogai <dankogai@dan.co.jp>
