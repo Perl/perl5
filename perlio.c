@@ -274,11 +274,10 @@ const char *mode;
 
 #undef PerlIO_reopen
 PerlIO * 
-PerlIO_reopen(fd,mode)
-char *name;
-char *mode;
-PerlIO *f;
+PerlIO_reopen(name, mode, f)
+const char *name;
 const char *mode;
+PerlIO *f;
 {
  return freopen(name,mode,f);
 }
