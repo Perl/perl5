@@ -704,6 +704,11 @@ elements of a subroutine attribute list.  If the previous attribute
 had a parenthesised parameter list, perhaps that list was terminated
 too soon.
 
+=item Possible Y2K bug: %s
+
+(W) You are concatenating the number 19 with another number, which
+could be a potential Year 2000 problem.
+
 =item Unterminated attribute parameter in subroutine attribute list
 
 (F) The lexer saw an opening (left) parenthesis character while parsing a

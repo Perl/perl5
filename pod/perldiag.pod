@@ -2348,6 +2348,11 @@ perspective, it's probably not what you intended.
 (F) Your C compiler uses POSIX getpgrp(), which takes no argument, unlike
 the BSD version, which takes a pid.
 
+=item Possible Y2K bug: %s
+
+(W) You are concatenating the number 19 with another number, which
+could be a potential Year 2000 problem.
+
 =item Possible attempt to put comments in qw() list
 
 (W) qw() lists contain items separated by whitespace; as with literal
