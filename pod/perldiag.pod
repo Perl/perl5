@@ -3778,14 +3778,16 @@ old way has bad side effects.
 (D deprecated) This was an ill-advised attempt to emulate a poorly
 defined B<awk> feature.  Use an explicit printf() or sprintf() instead.
 
-=item Use of reference "%s" in array index
+=item Use of reference "%s" as array index
 
 (W) You tried to use a reference as an array index; this probably
-isn't what you mean, because references tend to be huge numbers which
-take you out of memory, and so usually indicates programmer error.
+isn't what you mean, because references in numerical context tend
+to be huge numbers, and so usually indicates programmer error.
 
 If you really do mean it, explicitly numify your reference, like so:
-C<$array[0+$ref]>
+C<$array[0+$ref]>.  This warning is not given for overloaded objects,
+either, because you can overload the numification and stringification
+operators and then you assumedly know what you are doing.
 
 =item Use of reserved word "%s" is deprecated
 

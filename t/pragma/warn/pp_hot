@@ -245,3 +245,21 @@ print $x[\1];
 EXPECT
 OPTION regex
 Use of reference ".*" as array index at - line 4.
+########
+# pp_hot.c [pp_aelem]
+package Foo;use overload q("") => sub {};package main;$a = bless {}, "Foo";
+$b = {};
+{
+use warnings 'misc';
+print $x[$a];
+print $x[$b];
+}
+{
+no warnings 'misc';
+print $x[$a];
+print $x[$b];
+}
+
+EXPECT
+OPTION regex
+Use of reference ".*" as array index at - line 7.
