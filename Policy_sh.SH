@@ -32,6 +32,8 @@ esac
 # Installation prefixes.  Allow a Configure -D override.  You
 # may wish to reinstall perl under a different prefix, perhaps
 # in order to test a different configuration.
+# For an explanation of the installation directories, see the
+# INSTALL file section on "Installation Directories".
 case "\$prefix" in
 '') prefix='$prefix' ;;
 esac
@@ -59,8 +61,18 @@ esac
 #     this too is handled automatically by Configure based on
 #     $installprefix, so it isn't included here either.
 #
+# Note also that there are three broad hierarchies of installation 
+# directories, as discussed in the INSTALL file under 
+# "Installation Directories":
+#
+#  =item Directories for the perl distribution
+#
+#  =item Directories for site-specific add-on files
+#
+#  =item Directories for vendor-supplied add-on files
+#
 #  See Porting/Glossary for the definitions of these names, and see the
-#  INSTALL file for some examples.
+#  INSTALL file for further explanation and some examples.
 # 
 # In each case, if your previous value was the default, leave it commented
 # out.  That way, if you override prefix, all of these will be
@@ -110,7 +122,7 @@ do
     html1dir)	dflt='' ;;
     htm31dir)	dflt='' ;;
 
-    # Site-specific add-ons.
+    # Directories for site-specific add-on files
     sitebin)	dflt=$siteprefix/bin ;;
     # The scriptdir test is more complex, but this is probably usually ok.
     sitescriptdir)
@@ -134,7 +146,8 @@ do
     sitehtml1dir)	dflt='' ;;
     sitehtm31dir)	dflt='' ;;
     
-    # Vendor-specific add-ons.  These are all usually empty.
+    # Directories for vendor-supplied add-on files
+    # These are all usually empty.
     vendor*)
 	if test X"$vendorprefix" = X""; then
 	    dflt=''
@@ -197,5 +210,5 @@ $spitshell <<!GROK!THIS! >>Policy.sh
 #   The original design for this Policy.sh file came from Wayne Davison,
 #   maintainer of trn.
 #   This version for Perl5.004_61 originally written by
-#   Andy Dougherty <doughera@lafcol.lafayette.edu>.
+#   Andy Dougherty <doughera@lafayette.edu>.
 #   This file may be distributed under the same terms as Perl itself.
