@@ -14,7 +14,7 @@ use Math::BigInt::Calc;
 
 BEGIN
   {
-  plan tests => 296;
+  plan tests => 300;
   }
 
 my ($BASE_LEN, $AND_BITS, $XOR_BITS, $OR_BITS, $BASE_LEN_SMALL, $MAX_VAL) =
@@ -224,6 +224,15 @@ $x = $C->_new(\"81"); $n = $C->_new(\"4"); 	# 3*3*3*3 == 81
 ok (${$C->_str($C->_root($x,$n))},'3');
 
 # _pow (and _root)
+$x = $C->_new(\"0"); $n = $C->_new(\"3"); 	# 0 ** y => 0
+ok (${$C->_str($C->_pow($x,$n))}, 0);
+$x = $C->_new(\"3"); $n = $C->_new(\"0"); 	# x ** 0 => 1
+ok (${$C->_str($C->_pow($x,$n))}, 1);
+$x = $C->_new(\"1"); $n = $C->_new(\"3"); 	# 1 ** y => 1
+ok (${$C->_str($C->_pow($x,$n))}, 1);
+$x = $C->_new(\"5"); $n = $C->_new(\"1"); 	# x ** 1 => x
+ok (${$C->_str($C->_pow($x,$n))}, 5);
+
 $x = $C->_new(\"81"); $n = $C->_new(\"3"); 	# 81 ** 3 == 531441 
 ok (${$C->_str($C->_pow($x,$n))},81 ** 3);
 
