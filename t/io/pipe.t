@@ -99,12 +99,23 @@ else {
     local $SIG{PIPE} = 'IGNORE';
     open NIL, '|true'	or die "open failed: $!";
     sleep 5;
-    print NIL 'foo'	or die "print failed: $!";
-    if (close NIL) {
-	print "not ok 9\n";
+    if (print NIL 'foo') {
+	# If print was allowed we had better get an error on close
+	if (close NIL) {
+	    print "not ok 9\n";
+	}
+	else {
+	    print "ok 9\n";
+	}
     }
     else {
-	print "ok 9\n";
+	# If print failed, the close should be clean
+	if (close NIL) {
+	    print "ok 9\n";
+	}
+	else {
+	    print "not ok 9\n";
+	}
     }
 }
 
