@@ -4502,26 +4502,68 @@ static
 XS(w32_GetOSVersion)
 {
     dXSARGS;
-    OSVERSIONINFOA osver;
+    /* Use explicit struct definition because wSuiteMask and
+     * wProductType are not defined in the VC++ 6.0 headers.
+     * WORD type has been replaced by unsigned short because
+     * WORD is already used by Perl itself.
+     */
+    struct {
+        DWORD dwOSVersionInfoSize;
+        DWORD dwMajorVersion;
+        DWORD dwMinorVersion;
+        DWORD dwBuildNumber;
+        DWORD dwPlatformId;
+        CHAR  szCSDVersion[128];
+        unsigned short wServicePackMajor;
+        unsigned short wServicePackMinor;
+        unsigned short wSuiteMask;
+        BYTE  wProductType;
+        BYTE  wReserved;
+    }   osver;
+    BOOL bEx = TRUE;
 
     if (USING_WIDE()) {
-	OSVERSIONINFOW osverw;
+        struct {
+            DWORD dwOSVersionInfoSize;
+            DWORD dwMajorVersion;
+            DWORD dwMinorVersion;
+            DWORD dwBuildNumber;
+            DWORD dwPlatformId;
+            WCHAR szCSDVersion[128];
+            unsigned short wServicePackMajor;
+            unsigned short wServicePackMinor;
+            unsigned short wSuiteMask;
+            BYTE  wProductType;
+            BYTE  wReserved;
+        } osverw;
 	char szCSDVersion[sizeof(osverw.szCSDVersion)];
-	osverw.dwOSVersionInfoSize = sizeof(OSVERSIONINFOW);
-	if (!GetVersionExW(&osverw)) {
-	    XSRETURN_EMPTY;
+	osverw.dwOSVersionInfoSize = sizeof(osverw);
+	if (!GetVersionExW((OSVERSIONINFOW*)&osverw)) {
+            bEx = FALSE;
+            osverw.dwOSVersionInfoSize = sizeof(OSVERSIONINFOW);
+            if (!GetVersionExW((OSVERSIONINFOW*)&osverw)) {
+                XSRETURN_EMPTY;
+            }
 	}
 	W2AHELPER(osverw.szCSDVersion, szCSDVersion, sizeof(szCSDVersion));
 	XPUSHs(newSVpvn(szCSDVersion, strlen(szCSDVersion)));
-	osver.dwMajorVersion = osverw.dwMajorVersion;
-	osver.dwMinorVersion = osverw.dwMinorVersion;
-	osver.dwBuildNumber = osverw.dwBuildNumber;
-	osver.dwPlatformId = osverw.dwPlatformId;
+        osver.dwMajorVersion    = osverw.dwMajorVersion;
+        osver.dwMinorVersion    = osverw.dwMinorVersion;
+        osver.dwBuildNumber     = osverw.dwBuildNumber;
+        osver.dwPlatformId      = osverw.dwPlatformId;
+        osver.wServicePackMajor = osverw.wServicePackMajor;
+        osver.wServicePackMinor = osverw.wServicePackMinor;
+        osver.wSuiteMask        = osverw.wSuiteMask;
+        osver.wProductType      = osverw.wProductType;
     }
     else {
-	osver.dwOSVersionInfoSize = sizeof(OSVERSIONINFOA);
-	if (!GetVersionExA(&osver)) {
-	    XSRETURN_EMPTY;
+	osver.dwOSVersionInfoSize = sizeof(osver);
+	if (!GetVersionExA((OSVERSIONINFOA*)&osver)) {
+            bEx = FALSE;
+            osver.dwOSVersionInfoSize = sizeof(OSVERSIONINFOA);
+            if (!GetVersionExA((OSVERSIONINFOA*)&osver)) {
+                XSRETURN_EMPTY;
+            }
 	}
 	XPUSHs(newSVpvn(osver.szCSDVersion, strlen(osver.szCSDVersion)));
     }
@@ -4529,6 +4571,12 @@ XS(w32_GetOSVersion)
     XPUSHs(newSViv(osver.dwMinorVersion));
     XPUSHs(newSViv(osver.dwBuildNumber));
     XPUSHs(newSViv(osver.dwPlatformId));
+    if (bEx) {
+        XPUSHs(newSViv(osver.wServicePackMajor));
+        XPUSHs(newSViv(osver.wServicePackMinor));
+        XPUSHs(newSViv(osver.wSuiteMask));
+        XPUSHs(newSViv(osver.wProductType));
+    }
     PUTBACK;
 }
 
