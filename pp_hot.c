@@ -612,6 +612,7 @@ PP(pp_aassign)
 	    magic = SvMAGICAL(ary) != 0;
 	    
 	    av_clear(ary);
+	    av_extend(ary, lastrelem - relem);
 	    i = 0;
 	    while (relem <= lastrelem) {	/* gobble up all the rest */
 		sv = NEWSV(28,0);
