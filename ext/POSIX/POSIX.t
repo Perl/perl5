@@ -87,7 +87,7 @@ if ($Config{d_strtod}) {
     $lc = &POSIX::setlocale(&POSIX::LC_NUMERIC, 'C') if $Config{d_setlocale};
     ($n, $x) = &POSIX::strtod('3.14159_OR_SO');
 # we're just checking that strtod works, not how accurate it is
-    print (("3.14159" eq $n + 0) && ($x == 6) ?
+    print ((abs("3.14159" - $n) < 1e-6) && ($x == 6) ?
           "ok 14\n" : "not ok 14\n");
     &POSIX::setlocale(&POSIX::LC_NUMERIC, $lc) if $Config{d_setlocale};
 } else { print "# strtod not present\n", "ok 14\n"; }
