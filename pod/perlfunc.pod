@@ -1089,7 +1089,7 @@ This is useful for propagating exceptions:
 If LIST is empty and C<$@> contains an object reference that has a
 C<PROPAGATE> method, that method will be called with additional file
 and line number parameters.  The return value replaces the value in
-C<$@>.  ie. as if C<<$@ = eval { $@->PROPAGATE(__FILE__, __LINE__) };>> 
+C<$@>.  ie. as if C<<$@ = eval { $@->PROPAGATE(__FILE__, __LINE__) };>>
 were called.
 
 If C<$@> is empty then the string C<"Died"> is used.
@@ -1280,7 +1280,7 @@ formed from the files listed on the command line and accessed via the
 C<< <> >> operator.  Since C<< <> >> isn't explicitly opened,
 as a normal filehandle is, an C<eof()> before C<< <> >> has been
 used will cause C<@ARGV> to be examined to determine if input is
-available.   Similarly, an C<eof()> after C<< <> >> has returned 
+available.   Similarly, an C<eof()> after C<< <> >> has returned
 end-of-file will assume you are processing another C<@ARGV> list,
 and if you haven't set C<@ARGV>, will read input from C<STDIN>;
 see L<perlop/"I/O Operators">.
@@ -2474,7 +2474,7 @@ or referenced object contained in I<THING> until the lock goes out
 of scope.
 
 lock() is a "weak keyword" : this means that if you've defined a function
-by this name, (before any calls to it), that function will be called
+by this name (before any calls to it), that function will be called
 instead. (However, if you've said C<use Thread>, lock() is always a
 keyword.) See L<Thread>.
 
@@ -2717,7 +2717,7 @@ strict 'refs'> should I<not> be in effect.)
 If EXPR is omitted, the scalar variable of the same name as the
 FILEHANDLE contains the filename.  (Note that lexical variables--those
 declared with C<my>--will not work for this purpose; so if you're
-using C<my>, specify EXPR in your call to open.) 
+using C<my>, specify EXPR in your call to open.)
 
 If three or more arguments are specified then the mode of opening and
 the file name are separate. If MODE is C<< '<' >> or nothing, the file
@@ -4967,7 +4967,7 @@ Most programs won't even call srand() at all, except those that
 need a cryptographically-strong starting point rather than the
 generally acceptable default, which is based on time of day,
 process ID, and memory allocation, or the F</dev/urandom> device,
-if available. 
+if available.
 
 You can call srand($seed) with the same $seed to reproduce the
 I<same> sequence from rand(), but this is usually reserved for
