@@ -94,7 +94,7 @@ I32 key;
 #endif
 		ary = AvALLOC(av) + AvMAX(av) + 1;
 		tmp = newmax - AvMAX(av);
-		if (av == stack) {	/* Oops, grew stack (via av_store()?) */
+		if (av == curstack) {	/* Oops, grew stack (via av_store()?) */
 		    stack_sp = AvALLOC(av) + (stack_sp - stack_base);
 		    stack_base = AvALLOC(av);
 		    stack_max = stack_base + newmax;
@@ -196,7 +196,7 @@ SV *val;
     ary = AvARRAY(av);
     if (AvFILL(av) < key) {
 	if (!AvREAL(av)) {
-	    if (av == stack && key > stack_sp - stack_base)
+	    if (av == curstack && key > stack_sp - stack_base)
 		stack_sp = stack_base + key;	/* XPUSH in disguise */
 	    do
 		ary[++AvFILL(av)] = &sv_undef;
@@ -289,6 +289,11 @@ register AV *av;
     register I32 key;
     SV** ary;
 
+#ifdef DEBUGGING
+    if (SvREFCNT(av) <= 0) {
+	warn("Attempt to clear deleted array");
+    }
+#endif
     if (!av || AvMAX(av) < 0)
 	return;
     /*SUPPRESS 560*/
