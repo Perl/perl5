@@ -415,7 +415,7 @@ Prints to STDOUT the value of the named configuration variable.
 
 =item B<-w>
 
-prints warnings about identifiers that are mentioned only once, and
+prints warnings about variable names that are mentioned only once, and
 scalar variables that are used before being set.  Also warns about
 redefined subroutines, and references to undefined filehandles or
 filehandles opened readonly that you are attempting to write on.  Also
