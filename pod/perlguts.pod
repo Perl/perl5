@@ -2349,7 +2349,7 @@ optimizations through the creation of "macro-ops" (ops which perform the
 functions of multiple ops which are usually executed together, such as
 C<gvsv, gvsv, add>.) 
 
-This feature is implmented as a new op type, C<OP_CUSTOM>. The Perl
+This feature is implemented as a new op type, C<OP_CUSTOM>. The Perl
 core does not "know" anything special about this op type, and so it will
 not be involved in any optimizations. This also means that you can
 define your custom ops to be any op structure - unary, binary, list and
