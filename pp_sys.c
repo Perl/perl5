@@ -525,16 +525,17 @@ PP(pp_binmode)
 PP(pp_tie)
 {
     djSP;
+    dMARK;
     SV *varsv;
     HV* stash;
     GV *gv;
     SV *sv;
-    SV **mark = stack_base + ++*markstack_ptr;	/* reuse in entersub */
-    I32 markoff = mark - stack_base - 1;
+    I32 markoff = MARK - stack_base;
     char *methname;
     int how = 'P';
+    U32 items;
 
-    varsv = mark[0];  
+    varsv = *++MARK;
     switch(SvTYPE(varsv)) {
 	case SVt_PVHV:
 	    methname = "TIEHASH";
@@ -551,26 +552,39 @@ PP(pp_tie)
 	    how = 'q';
 	    break;
     }
-
-    if (sv_isobject(mark[1])) {
+    items = SP - MARK++;
+    if (sv_isobject(*MARK)) {
 	ENTER;
+	PUSHSTACK(SI_MAGIC);
+	PUSHMARK(SP);
+	EXTEND(SP,items);
+	while (items--)
+	    PUSHs(*MARK++);
+	PUTBACK;
 	perl_call_method(methname, G_SCALAR);
     } 
     else {
 	/* Not clear why we don't call perl_call_method here too.
 	 * perhaps to get different error message ?
 	 */
-	stash = gv_stashsv(mark[1], FALSE);
+	stash = gv_stashsv(*MARK, FALSE);
 	if (!stash || !(gv = gv_fetchmethod(stash, methname))) {
 	    DIE("Can't locate object method \"%s\" via package \"%s\"",
-		 methname, SvPV(mark[1],na));                   
+		 methname, SvPV(*MARK,na));                   
 	}
 	ENTER;
+	PUSHSTACK(SI_MAGIC);
+	PUSHMARK(SP);
+	EXTEND(SP,items);
+	while (items--)
+	    PUSHs(*MARK++);
+	PUTBACK;
 	perl_call_sv((SV*)GvCV(gv), G_SCALAR);
     }
     SPAGAIN;
 
     sv = TOPs;
+    POPSTACK();
     if (sv_isobject(sv)) {
 	sv_unmagic(varsv, how);            
 	sv_magic(varsv, sv, how, Nullch, 0);

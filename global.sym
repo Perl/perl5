@@ -53,6 +53,7 @@ ncmp_amg
 ne_amg
 neg_amg
 new_struct_thread
+new_stackinfo
 no_aelem
 no_dir_func
 no_func

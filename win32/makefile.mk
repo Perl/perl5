@@ -117,7 +117,7 @@ IMPLIB = implib -c
 #
 RUNTIME  = -D_RTLDLL
 INCLUDES = -I.\include -I. -I.. -I$(CCINCDIR)
-#PCHFLAGS = -H -H$(INTDIR)\bcmoduls.pch 
+#PCHFLAGS = -H -Hc -H=c:\temp\bcmoduls.pch 
 DEFINES  = -DWIN32 $(BUILDOPT) $(CRYPT_FLAG)
 LOCDEFS  = -DPERLDLL -DPERL_CORE
 SUBSYS   = console
@@ -187,7 +187,7 @@ LIB32=$(LINK32) -lib
 RUNTIME  = -MD
 .ENDIF
 INCLUDES = -I.\include -I. -I..
-#PCHFLAGS = -Fp$(INTDIR)\vcmoduls.pch -YX 
+#PCHFLAGS = -Fpc:\temp\vcmoduls.pch -YX 
 DEFINES  = -DWIN32 -D_CONSOLE $(BUILDOPT) $(CRYPT_FLAG)
 LOCDEFS  = -DPERLDLL -DPERL_CORE
 SUBSYS   = console
@@ -490,6 +490,7 @@ CFG_VARS=   "INST_DRV=$(INST_DRV)"		\
 	    "incpath=$(CCINCDIR)"		\
 	    "libpth=$(strip $(CCLIBDIR) $(LIBFILES:d))" \
 	    "libc=$(LIBC)"			\
+	    "make=dmake"			\
 	    "static_ext=$(STATIC_EXT)"		\
 	    "dynamic_ext=$(DYNAMIC_EXT)"	\
 	    "usethreads=$(USE_THREADS)"		\
@@ -625,7 +626,7 @@ $(X2P) : $(X2P_OBJ)
 	    $(mktmp $(LKPRE) $(X2P_OBJ:s,\,\\) $(LIBFILES) $(LKPOST))
 .ELSE
 	$(LINK32) -subsystem:console -out:$@ \
-	    @$(mktmp $(LINK_FLAGS) $(LIBFILES) $(X2P_OBJ:s,\,\\)
+	    @$(mktmp $(LINK_FLAGS) $(LIBFILES) $(X2P_OBJ:s,\,\\))
 .ENDIF
 
 perlmain.c : runperl.c 
@@ -727,7 +728,7 @@ doc: $(PERLEXE)
 	cd ..\pod && $(XCOPY) *.bat ..\win32\bin\*.*
 	copy ..\README.win32 ..\pod\perlwin32.pod
 	$(PERLEXE) -I..\lib ..\installhtml --podroot=.. --htmldir=./html \
-	    --podpath=pod:lib:ext:utils --htmlroot="//$(INST_HTML:s,:,|,)" \
+	    --podpath=pod:lib:ext:utils --htmlroot="file://$(INST_HTML:s,:,|,)"\
 	    --libpod=perlfunc:perlguts:perlvar:perlrun:perlop --recurse
 
 utils: $(PERLEXE)

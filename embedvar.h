@@ -29,10 +29,8 @@
 #define curpad			(curinterp->Tcurpad)
 #define curpm			(curinterp->Tcurpm)
 #define curstack		(curinterp->Tcurstack)
+#define curstackinfo		(curinterp->Tcurstackinfo)
 #define curstash		(curinterp->Tcurstash)
-#define cxstack			(curinterp->Tcxstack)
-#define cxstack_ix		(curinterp->Tcxstack_ix)
-#define cxstack_max		(curinterp->Tcxstack_max)
 #define defoutgv		(curinterp->Tdefoutgv)
 #define defstash		(curinterp->Tdefstash)
 #define delaymagic		(curinterp->Tdelaymagic)
@@ -174,9 +172,7 @@
 #define screamnext		(curinterp->Iscreamnext)
 #define secondgv		(curinterp->Isecondgv)
 #define siggv			(curinterp->Isiggv)
-#define signalstack		(curinterp->Isignalstack)
 #define sortcop			(curinterp->Isortcop)
-#define sortstack		(curinterp->Isortstack)
 #define sortstash		(curinterp->Isortstash)
 #define splitstr		(curinterp->Isplitstr)
 #define statcache		(curinterp->Istatcache)
@@ -292,9 +288,7 @@
 #define Iscreamnext		screamnext
 #define Isecondgv		secondgv
 #define Isiggv			siggv
-#define Isignalstack		signalstack
 #define Isortcop		sortcop
-#define Isortstack		sortstack
 #define Isortstash		sortstash
 #define Isplitstr		splitstr
 #define Istatcache		statcache
@@ -326,10 +320,8 @@
 #define Tcurpad			curpad
 #define Tcurpm			curpm
 #define Tcurstack		curstack
+#define Tcurstackinfo		curstackinfo
 #define Tcurstash		curstash
-#define Tcxstack		cxstack
-#define Tcxstack_ix		cxstack_ix
-#define Tcxstack_max		cxstack_max
 #define Tdefoutgv		defoutgv
 #define Tdefstash		defstash
 #define Tdelaymagic		delaymagic
@@ -473,9 +465,7 @@
 #define screamnext		Perl_screamnext
 #define secondgv		Perl_secondgv
 #define siggv			Perl_siggv
-#define signalstack		Perl_signalstack
 #define sortcop			Perl_sortcop
-#define sortstack		Perl_sortstack
 #define sortstash		Perl_sortstash
 #define splitstr		Perl_splitstr
 #define statcache		Perl_statcache
@@ -507,10 +497,8 @@
 #define curpad			Perl_curpad
 #define curpm			Perl_curpm
 #define curstack		Perl_curstack
+#define curstackinfo		Perl_curstackinfo
 #define curstash		Perl_curstash
-#define cxstack			Perl_cxstack
-#define cxstack_ix		Perl_cxstack_ix
-#define cxstack_max		Perl_cxstack_max
 #define defoutgv		Perl_defoutgv
 #define defstash		Perl_defstash
 #define delaymagic		Perl_delaymagic
@@ -572,10 +560,8 @@
 #define curpad			(thr->Tcurpad)
 #define curpm			(thr->Tcurpm)
 #define curstack		(thr->Tcurstack)
+#define curstackinfo		(thr->Tcurstackinfo)
 #define curstash		(thr->Tcurstash)
-#define cxstack			(thr->Tcxstack)
-#define cxstack_ix		(thr->Tcxstack_ix)
-#define cxstack_max		(thr->Tcxstack_max)
 #define defoutgv		(thr->Tdefoutgv)
 #define defstash		(thr->Tdefstash)
 #define delaymagic		(thr->Tdelaymagic)

@@ -53,12 +53,14 @@ av_extend(AV *av, I32 key)
 	dSP;
 	ENTER;
 	SAVETMPS;
+	PUSHSTACK(SI_MAGIC);
 	PUSHMARK(SP);
 	EXTEND(SP,2);
 	PUSHs(mg->mg_obj);
 	PUSHs(sv_2mortal(newSViv(key+1)));
         PUTBACK;
 	perl_call_method("EXTEND", G_SCALAR|G_DISCARD);
+	POPSTACK();
 	FREETMPS;
 	LEAVE;
 	return;
@@ -388,6 +390,7 @@ av_push(register AV *av, SV *val)
 
     if (SvRMAGICAL(av) && (mg = mg_find((SV*)av,'P'))) {
 	dSP;
+	PUSHSTACK(SI_MAGIC);
 	PUSHMARK(SP);
 	EXTEND(SP,2);
 	PUSHs(mg->mg_obj);
@@ -396,6 +399,7 @@ av_push(register AV *av, SV *val)
 	ENTER;
 	perl_call_method("PUSH", G_SCALAR|G_DISCARD);
 	LEAVE;
+	POPSTACK();
 	return;
     }
     av_store(av,AvFILLp(av)+1,val);
@@ -413,6 +417,7 @@ av_pop(register AV *av)
 	croak(no_modify);
     if (SvRMAGICAL(av) && (mg = mg_find((SV*)av,'P'))) {
 	dSP;    
+	PUSHSTACK(SI_MAGIC);
 	PUSHMARK(SP);
 	XPUSHs(mg->mg_obj);
 	PUTBACK;
@@ -423,6 +428,7 @@ av_pop(register AV *av)
 	    retval = &sv_undef;
 	}
 	LEAVE;
+	POPSTACK();
 	return retval;
     }
     retval = AvARRAY(av)[AvFILLp(av)];
@@ -446,6 +452,7 @@ av_unshift(register AV *av, register I32 num)
 
     if (SvRMAGICAL(av) && (mg = mg_find((SV*)av,'P'))) {
 	dSP;
+	PUSHSTACK(SI_MAGIC);
 	PUSHMARK(SP);
 	EXTEND(SP,1+num);
 	PUSHs(mg->mg_obj);
@@ -456,6 +463,7 @@ av_unshift(register AV *av, register I32 num)
 	ENTER;
 	perl_call_method("UNSHIFT", G_SCALAR|G_DISCARD);
 	LEAVE;
+	POPSTACK();
 	return;
     }
 
@@ -495,6 +503,7 @@ av_shift(register AV *av)
 	croak(no_modify);
     if (SvRMAGICAL(av) && (mg = mg_find((SV*)av,'P'))) {
 	dSP;
+	PUSHSTACK(SI_MAGIC);
 	PUSHMARK(SP);
 	XPUSHs(mg->mg_obj);
 	PUTBACK;
@@ -505,6 +514,7 @@ av_shift(register AV *av)
 	    retval = &sv_undef;
 	}     
 	LEAVE;
+	POPSTACK();
 	return retval;
     }
     retval = *AvARRAY(av);
@@ -536,12 +546,14 @@ av_fill(register AV *av, I32 fill)
 	dSP;            
 	ENTER;
 	SAVETMPS;
+	PUSHSTACK(SI_MAGIC);
 	PUSHMARK(SP);
 	EXTEND(SP,2);
 	PUSHs(mg->mg_obj);
 	PUSHs(sv_2mortal(newSViv(fill+1)));
 	PUTBACK;
 	perl_call_method("STORESIZE", G_SCALAR|G_DISCARD);
+	POPSTACK();
 	FREETMPS;
 	LEAVE;
 	return;

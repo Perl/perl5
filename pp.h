@@ -150,11 +150,14 @@
 #define ARGTARG		op->op_targ
 #define MAXARG		op->op_private
 
-#define SWITCHSTACK(f,t)	AvFILLp(f) = sp - stack_base;		\
-				stack_base = AvARRAY(t);		\
-				stack_max = stack_base + AvMAX(t);	\
-				sp = stack_sp = stack_base + AvFILLp(t);	\
-				curstack = t;
+#define SWITCHSTACK(f,t) \
+    STMT_START {							\
+	AvFILLp(f) = sp - stack_base;					\
+	stack_base = AvARRAY(t);					\
+	stack_max = stack_base + AvMAX(t);				\
+	sp = stack_sp = stack_base + AvFILLp(t);			\
+	curstack = t;							\
+    } STMT_END
 
 #define EXTEND_MORTAL(n) \
 	STMT_START { \

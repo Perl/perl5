@@ -1964,7 +1964,7 @@ sv_setsv(SV *dstr, register SV *sstr)
 		SvFAKE_on(dstr);	/* can coerce to non-glob */
 	    }
 	    /* ahem, death to those who redefine active sort subs */
-	    else if (curstack == sortstack
+	    else if (curstackinfo->si_type == SI_SORT
 		     && GvCV(dstr) && sortcop == CvSTART(GvCV(dstr)))
 		croak("Can't redefine active sort subroutine %s",
 		      GvNAME(dstr));
@@ -2055,7 +2055,7 @@ sv_setsv(SV *dstr, register SV *sstr)
 			    {
 				/* ahem, death to those who redefine
 				 * active sort subs */
-				if (curstack == sortstack &&
+				if (curstackinfo->si_type == SI_SORT &&
 				      sortcop == CvSTART(cv))
 				    croak(
 				    "Can't redefine active sort subroutine %s",
@@ -2740,6 +2740,7 @@ sv_clear(register SV *sv)
 		destructor = gv_fetchmethod(SvSTASH(sv), "DESTROY");
 		if (destructor) {
 		    ENTER;
+		    PUSHSTACK(SI_DESTROY);
 		    SvRV(&ref) = SvREFCNT_inc(sv);
 		    EXTEND(SP, 2);
 		    PUSHMARK(SP);
@@ -2748,6 +2749,7 @@ sv_clear(register SV *sv)
 		    perl_call_sv((SV*)GvCV(destructor),
 				 G_DISCARD|G_EVAL|G_KEEPERR);
 		    SvREFCNT(sv)--;
+		    POPSTACK();
 		    LEAVE;
 		}
 	    } while (SvOBJECT(sv) && SvSTASH(sv) != stash);

@@ -353,6 +353,7 @@ OP*	newWHILEOP _((I32 flags, I32 debuggable, LOOP* loop,
 #ifdef USE_THREADS
 struct perl_thread *	new_struct_thread _((struct perl_thread *t));
 #endif
+PERL_SI *	new_stackinfo _((I32 stitems, I32 cxitems));
 PerlIO*	nextargv _((GV* gv));
 char*	ninstr _((char* big, char* bigend, char* little, char* lend));
 OP*	oopsCV _((OP* o));

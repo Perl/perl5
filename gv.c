@@ -639,11 +639,6 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
 	    	psig_ptr[i] = 0;
 	    	psig_name[i] = 0;
 	    }
-	    /* initialize signal stack */
-	    signalstack = newAV();
-	    AvREAL_off(signalstack);
-	    av_extend(signalstack, 30);
-	    av_fill(signalstack, 0);
 	}
 	break;
 
@@ -1094,9 +1089,6 @@ Gv_AMupdate(HV *stash)
   return FALSE;
 }
 
-/* During call to this subroutine stack can be reallocated. It is
- * advised to call SPAGAIN macro in your code after call */
-
 SV*
 amagic_call(SV *left, SV *right, int method, int flags)
 {
@@ -1311,6 +1303,7 @@ amagic_call(SV *left, SV *right, int method, int flags)
     myop.op_next = Nullop;
     myop.op_flags = OPf_WANT_SCALAR | OPf_STACKED;
 
+    PUSHSTACK(SI_OVERLOAD);
     ENTER;
     SAVEOP();
     op = (OP *) &myop;
@@ -1335,7 +1328,7 @@ amagic_call(SV *left, SV *right, int method, int flags)
     SPAGAIN;
 
     res=POPs;
-    PUTBACK;
+    POPSTACK();
     CATCH_SET(oldcatch);
 
     if (postpr) {

@@ -430,10 +430,6 @@ perl_destruct(register PerlInterpreter *sv_interp)
     endav = Nullav;
     initav = Nullav;
 
-    /* temp stack during pp_sort() */
-    SvREFCNT_dec(sortstack);
-    sortstack = Nullav;
-
     /* shortcuts just get cleared */
     envgv = Nullgv;
     siggv = Nullgv;
@@ -977,7 +973,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
 int
 perl_run(PerlInterpreter *sv_interp)
 {
-    dTHR;
+    dSP;
     I32 oldscope;
     dJMPENV;
     int ret;
@@ -1013,10 +1009,7 @@ perl_run(PerlInterpreter *sv_interp)
 	    JMPENV_POP;
 	    return 1;
 	}
-	if (curstack != mainstack) {
-	    dSP;
-	    SWITCHSTACK(curstack, mainstack);
-	}
+	POPSTACK_TO(mainstack);
 	break;
     }
 
@@ -2432,19 +2425,16 @@ init_debugger(void)
 void
 init_stacks(ARGSproto)
 {
-    curstack = newAV();
+    /* start with 128-item stack and 8K cxstack */
+    curstackinfo = new_stackinfo(REASONABLE(128),
+				 REASONABLE(8192/sizeof(PERL_CONTEXT) - 1));
+    curstackinfo->si_type = SI_MAIN;
+    curstack = curstackinfo->si_stack;
     mainstack = curstack;		/* remember in case we switch stacks */
-    AvREAL_off(curstack);		/* not a real array */
-    av_extend(curstack,REASONABLE(127));
 
     stack_base = AvARRAY(curstack);
     stack_sp = stack_base;
-    stack_max = stack_base + REASONABLE(127);
-
-    /* Use most of 8K. */
-    cxstack_max = REASONABLE(8192 / sizeof(PERL_CONTEXT) - 2);
-    New(50,cxstack,cxstack_max + 1,PERL_CONTEXT);
-    cxstack_ix	= -1;
+    stack_max = stack_base + AvMAX(curstack);
 
     New(50,tmps_stack,REASONABLE(128),SV*);
     tmps_floor = -1;
@@ -2463,6 +2453,8 @@ init_stacks(ARGSproto)
 	markstack_ptr = markstack;
 	markstack_max = markstack + REASONABLE(32);
     }
+
+    SET_MARKBASE;
 
     if (scopestack) {
 	scopestack_ix = 0;
@@ -2495,7 +2487,15 @@ static void
 nuke_stacks(void)
 {
     dTHR;
-    Safefree(cxstack);
+    while (curstackinfo->si_next)
+	curstackinfo = curstackinfo->si_next;
+    while (curstackinfo) {
+	PERL_SI *p = curstackinfo->si_prev;
+	SvREFCNT_dec(curstackinfo->si_stack);
+	Safefree(curstackinfo->si_cxstack);
+	Safefree(curstackinfo);
+	curstackinfo = p;
+    }
     Safefree(tmps_stack);
     DEBUG( {
 	Safefree(debname);

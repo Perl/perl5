@@ -285,3 +285,78 @@ struct context {
 #define G_EVAL		4	/* Assume eval {} around subroutine call. */
 #define G_NOARGS	8	/* Don't construct a @_ array. */
 #define G_KEEPERR      16	/* Append errors to $@, don't overwrite it */
+
+/* Support for switching (stack and block) contexts.
+ * This ensures magic doesn't invalidate local stack and cx pointers.
+ */
+
+#define SI_UNDEF	0
+#define SI_MAIN		1
+#define SI_MAGIC	2
+#define SI_SORT		3
+#define SI_SIGNAL	4
+#define SI_OVERLOAD	5
+#define SI_DESTROY	6
+/* XXX todo
+#define SI_WARNHOOK	7
+#define SI_DIEHOOK	8
+*/
+
+struct stackinfo {
+    AV *		si_stack;	/* stack for current runlevel */
+    PERL_CONTEXT *	si_cxstack;	/* context stack for runlevel */
+    I32			si_cxix;	/* current context index */
+    I32			si_cxmax;	/* maximum allocated index */
+    I32			si_type;	/* type of runlevel */
+    struct stackinfo *	si_prev;
+    struct stackinfo *	si_next;
+    I32 *		si_markbase;	/* where markstack begins for us.
+					 * currently used only with DEBUGGING,
+					 * but not #ifdef-ed for bincompat */
+};
+
+typedef struct stackinfo PERL_SI;
+
+#define cxstack		(curstackinfo->si_cxstack)
+#define cxstack_ix	(curstackinfo->si_cxix)
+#define cxstack_max	(curstackinfo->si_cxmax)
+
+#ifdef DEBUGGING
+#  define	SET_MARKBASE curstackinfo->si_markbase = markstack_ptr
+#else
+#  define	SET_MARKBASE NOOP
+#endif
+
+#define PUSHSTACK(type) \
+    STMT_START {							\
+	PERL_SI *next = curstackinfo->si_next;				\
+	if (!next) {							\
+	    next = new_stackinfo(32, 2048/sizeof(PERL_CONTEXT) - 1);	\
+	    next->si_prev = curstackinfo;				\
+	    curstackinfo->si_next = next;				\
+	}								\
+	next->si_type = type;						\
+	next->si_cxix = -1;						\
+	AvFILLp(next->si_stack) = 0;					\
+	SWITCHSTACK(curstack,next->si_stack);				\
+	curstackinfo = next;						\
+	SET_MARKBASE;							\
+    } STMT_END
+
+#define POPSTACK() \
+    STMT_START {							\
+	PERL_SI *prev = curstackinfo->si_prev;				\
+	if (!prev) {							\
+	    PerlIO_printf(PerlIO_stderr(), "panic: POPSTACK\n");	\
+	    my_exit(1);							\
+	}								\
+	SWITCHSTACK(curstack,prev->si_stack);				\
+	/* don't free prev here, free them all at the END{} */		\
+	curstackinfo = prev;						\
+    } STMT_END
+
+#define POPSTACK_TO(s) \
+    STMT_START {							\
+	while (curstack != s)						\
+	    POPSTACK();							\
+    } STMT_END
