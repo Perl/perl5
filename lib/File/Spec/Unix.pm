@@ -1,7 +1,7 @@
 package File::Spec::Unix;
 
 use strict;
-use vars qw($VERSION);
+our($VERSION);
 
 $VERSION = '1.2';
 

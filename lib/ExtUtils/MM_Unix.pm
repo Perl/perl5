@@ -7,8 +7,8 @@ use Config;
 use File::Basename qw(basename dirname fileparse);
 use DirHandle;
 use strict;
-use vars qw($VERSION $Is_Mac $Is_OS2 $Is_VMS $Is_Win32 $Is_Dos $Is_PERL_OBJECT
-	    $Verbose %pm %static $Xsubpp_Version);
+our ($Is_Mac,$Is_OS2,$Is_VMS,$Is_Win32,$Is_Dos,$Is_PERL_OBJECT,
+	    $Verbose,%pm,%static,$Xsubpp_Version);
 
 our $VERSION = '1.12603';
 

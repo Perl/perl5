@@ -8,8 +8,8 @@ use File::Spec::Functions qw(splitpath);
 use Carp;
 use strict;
 
-use vars qw($VERSION @ISA @EXPORT_OK
-	    $Is_VMS $Debug $Verbose $Quiet $MANIFEST $found $DEFAULT_MSKIP);
+our ($VERSION,@ISA,@EXPORT_OK,
+	    $Is_VMS,$Debug,$Verbose,$Quiet,$MANIFEST,$found,$DEFAULT_MSKIP);
 
 $VERSION = substr(q$Revision: 1.33 $, 10);
 @ISA=('Exporter');

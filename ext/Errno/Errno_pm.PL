@@ -2,9 +2,7 @@ use ExtUtils::MakeMaker;
 use Config;
 use strict;
 
-use vars qw($VERSION);
-
-$VERSION = "1.111";
+our $VERSION = "1.111";
 
 my %err = ();
 
@@ -185,7 +183,7 @@ sub write_errno_pm {
 #
 
 package Errno;
-use vars qw(\@EXPORT_OK \%EXPORT_TAGS \@ISA \$VERSION \%errno \$AUTOLOAD);
+our (\@EXPORT_OK,\%EXPORT_TAGS,\@ISA,\$VERSION,\%errno,\$AUTOLOAD);
 use Exporter ();
 use Config;
 use strict;
