@@ -2074,17 +2074,22 @@ XS(XS_Cwd_sys_abspath)
 	    l--;
 	ST(0) = sv_newmortal();
 	sv_setpvn( sv = (SV*)ST(0), RETVAL, l);
-	/* Remove duplicate slashes */
-	s = t = 1 + SvPV_force(sv, n_a);
+	/* Remove duplicate slashes, skipping the first three, which
+	   may be parts of a server-based path */
+	s = t = 3 + SvPV_force(sv, n_a);
 	e = SvEND(sv);
+	/* Do not worry about multibyte chars here, this would contradict the
+	   eventual UTFization, and currently most other places break too... */
 	while (s < e) {
 	    if (s[0] == t[-1] && s[0] == '/')
 		s++;				/* Skip duplicate / */
 	    else
 		*t++ = *s++;
 	}
-	*s = 0;
-	SvCUR_set(sv, s - SvPVX(sv));
+	if (t < e) {
+	    *t = 0;
+	    SvCUR_set(sv, t - SvPVX(sv));
+	}
     }
     XSRETURN(1);
 }
