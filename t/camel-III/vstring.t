@@ -35,4 +35,5 @@ else
 ok(v5.6.0 lt v5.7.0,1,"v5.6.0 lt v5.7.0 fails");
 # Some floating-point risk here ...
 my $v = ord($^V)+ord(substr($^V,1,1))/1000+ord(substr($^V,2,1))/1000000;
+$v =~ s/^5\.006999\d+/5.007/; # floating point fun
 ok($v,$],"\$^V and \$] do not match");
