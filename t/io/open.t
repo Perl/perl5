@@ -12,7 +12,7 @@ use Config;
 $Is_VMS = $^O eq 'VMS';
 $Is_MacOS = $^O eq 'MacOS';
 
-plan tests => 99;
+plan tests => 100;
 
 my $Perl = which_perl();
 
@@ -227,6 +227,11 @@ like( $@, qr/Bad filehandle:\s+afile/,          '       right error' );
 {
     ok( open(my $stdout, ">&", \*STDOUT),       'dup \*STDOUT into lexical fh');
     ok( open(STDOUT,     ">&", $stdout),        'restore dupped STDOUT from lexical fh');
+
+    {
+	use strict; # the below should not warn
+	ok( open(my $stdout, ">&", STDOUT),         'dup STDOUT into lexical fh');
+    }
 
     # used to try to open a file [perl #17830]
     ok( open(my $stdin,  "<&", fileno STDIN),   'dup fileno(STDIN) into lexical fh');

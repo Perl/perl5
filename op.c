@@ -5499,6 +5499,25 @@ Perl_ck_open(pTHX_ OP *o)
     }
     if (o->op_type == OP_BACKTICK)
 	return o;
+    {
+	 /* In case of three-arg dup open remove strictness
+	  * from the last arg if it is a bareword. */
+	 OP *first = cLISTOPx(o)->op_first; /* The pushmark. */
+	 OP *last  = cLISTOPx(o)->op_last;  /* The bareword. */
+	 OP *oa;
+	 char *mode;
+
+	 if ((last->op_type == OP_CONST) &&		/* The bareword. */
+	     (last->op_private & OPpCONST_BARE) &&
+	     (last->op_private & OPpCONST_STRICT) &&
+	     (oa = first->op_sibling) &&		/* The fh. */
+	     (oa = oa->op_sibling) &&			/* The mode. */
+	     SvPOK(((SVOP*)oa)->op_sv) &&
+	     (mode = SvPVX(((SVOP*)oa)->op_sv)) &&
+	     mode[0] == '>' && mode[1] == '&' &&	/* A dup open. */
+	     (last == oa->op_sibling))			/* The bareword. */
+	      last->op_private &= ~OPpCONST_STRICT;
+    }
     return ck_fun(o);
 }
 
