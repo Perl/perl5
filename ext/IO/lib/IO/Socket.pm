@@ -106,7 +106,7 @@ sub connect {
     $blocking = $sock->blocking(0) if $timeout;
 
     if (!connect($sock, $addr)) {
-	if ($timeout && exists(&IO::EINPROGRESS) && ($! == &IO::EINPROGRESS)) {
+	if ($timeout && exists &IO::EINPROGRESS && ($! == &IO::EINPROGRESS)) {
 	    require IO::Select;
 
 	    my $sel = new IO::Select $sock;
@@ -116,8 +116,17 @@ sub connect {
 		$@ = "connect: timeout";
 	    }
 	    elsif(!connect($sock,$addr)) {
-		$err = $!;
-		$@ = "connect: $!";
+		if (exists &Errno::EISCONN && ($! == &Errno::EISCONN)) {
+		    # Some systems (e.g. Digital UNIX/Tru64) fail to
+		    # re-connect() to an already open socket and set
+		    # errno to EISCONN (Socket is already connected)
+		    # for such an attempt.
+		    $err = 0;
+		} else {
+		    # But in other cases, there is no redemption.
+		    $err = $!;
+		    $@ = "connect: $!";
+		}
 	    }
 	}
 	else {
