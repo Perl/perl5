@@ -19,8 +19,9 @@ $winsize = 80 unless defined $winsize;
 
 # $globPrint = 1;
 $printUndef = 1 unless defined $printUndef;
-$tick = "'" unless defined $tick;
+$tick = "auto" unless defined $tick;
 $unctrl = 'quote' unless defined $unctrl;
+$subdump = 1;
 
 sub main::dumpValue {
   local %address;
@@ -43,9 +44,17 @@ sub unctrl {
 sub stringify {
 	local($_,$noticks) = @_;
 	local($v) ; 
+	my $tick = $tick;
 
 	return 'undef' unless defined $_ or not $printUndef;
 	return $_ . "" if ref \$_ eq 'GLOB';
+	if ($tick eq 'auto') {
+	  if (/[\000-\011\013-\037\177]/) {
+	    $tick = '"';
+	  }else {
+	    $tick = "'";
+	  }
+	}
 	if ($tick eq "'") {
 	  s/([\'\\])/\\$1/g;
 	} elsif ($unctrl eq 'unctrl') {
@@ -168,8 +177,10 @@ sub unwrap {
 	$shortmore = " ..." if $tArrayDepth < $#{$v} ;
 	if ($compactDump && !grep(ref $_, @{$v})) {
 	  if ($#$v >= 0) {
-	    $short = $sp . "0..$#{$v}  '" . 
-	      join("' '", @{$v}[0..$tArrayDepth]) . "'$shortmore";
+	    $short = $sp . "0..$#{$v}  " . 
+	      join(" ", 
+		   map {stringify $_} @{$v}[0..$tArrayDepth])
+		. "$shortmore";
 	  } else {
 	    $short = $sp . "empty array";
 	  }
@@ -189,6 +200,9 @@ sub unwrap {
     } elsif ( ref $v eq 'SCALAR' or ref $v eq 'REF' or $type eq 'SCALAR' ) { 
 	    print "$sp-> ";
 	    DumpElem $$v, $s;
+    } elsif ( ref $v eq 'CODE' or $type eq 'CODE' ) { 
+	    print "$sp-> ";
+	    dumpsub (0, $v);
     } elsif (ref $v eq 'GLOB') {
       print "$sp-> ",&stringify($$v,1),"\n";
       if ($globPrint) {
@@ -240,6 +254,9 @@ sub quote {
   if (@_ and $_[0] eq '"') {
     $tick = '"';
     $unctrl = 'quote';
+  } elsif (@_ and $_[0] eq 'auto') {
+    $tick = 'auto';
+    $unctrl = 'quote';
   } elsif (@_) {		# Need to set
     $tick = "'";
     $unctrl = 'unctrl';
@@ -252,7 +269,7 @@ sub dumpglob {
     my ($off,$key, $val, $all) = @_;
     local(*entry) = $val;
     my $fileno;
-    if (defined $entry) {
+    if (($key !~ /^_</ or $dumpDBFiles) and defined $entry) {
       print( (' ' x $off) . "\$", &unctrl($key), " = " );
       DumpElem $entry, 3+$off;
     }
@@ -263,6 +280,7 @@ sub dumpglob {
     }
     if ($key ne "main::" && $key ne "DB::" && defined %entry
 	&& ($dumpPackages or $key !~ /::$/)
+	&& ($key !~ /^_</ or $dumpDBFiles)
 	&& !($package eq "dumpvar" and $key eq "stab")) {
       print( (' ' x $off) . "\%$key = (\n" );
       unwrap(\%entry,3+$off) ;
@@ -273,13 +291,30 @@ sub dumpglob {
     }
     if ($all) {
       if (defined &entry) {
-	my $sub = $key;
-	$sub = $1 if $sub =~ /^\{\*(.*)\}$/;
-	my $place = $DB::sub{$sub};
-	$place = '???' unless defined $place;
-	print( (' ' x $off) .  "&$sub in $place\n" );
+	dumpsub($off, $key);
       }
     }
+}
+
+sub dumpsub {
+    my ($off,$sub) = @_;
+    $sub = $1 if $sub =~ /^\{\*(.*)\}$/;
+    my $subref = \&$sub;
+    my $place = $DB::sub{$sub} || (($sub = $subs{"$subref"}) && $DB::sub{$sub})
+      || ($subdump && ($sub = findsubs("$subref")) && $DB::sub{$sub});
+    $place = '???' unless defined $place;
+    print( (' ' x $off) .  "&$sub in $place\n" );
+}
+
+sub findsubs {
+  return undef unless defined %DB::sub;
+  my ($addr, $name, $loc);
+  while (($name, $loc) = each %DB::sub) {
+    $addr = \&$name;
+    $subs{"$addr"} = $name;
+  }
+  $subdump = 0;
+  $subs{ shift() };
 }
 
 sub main::dumpvar {
@@ -371,46 +406,3 @@ sub packageUsage {
 
 1;
 
-package dumpvar;
-
-# translate control chars to ^X - Randal Schwartz
-sub unctrl {
-	local($_) = @_;
-	return \$_ if ref \$_ eq "GLOB";
-	s/([\001-\037\177])/'^'.pack('c',ord($1)^64)/eg;
-	$_;
-}
-sub main'dumpvar {
-    ($package,@vars) = @_;
-    $package .= "::" unless $package =~ /::$/;
-    *stab = *{"main::"};
-    while ($package =~ /(\w+?::)/g){
-	*stab = ${stab}{$1};
-    }
-    while (($key,$val) = each(%stab)) {
-	{
-	    next if @vars && !grep($key eq $_,@vars);
-	    local(*entry) = $val;
-	    if (defined $entry) {
-		print "\$",&unctrl($key)," = '",&unctrl($entry),"'\n";
-	    }
-	    if (defined @entry) {
-		print "\@$key = (\n";
-		foreach $num ($[ .. $#entry) {
-		    print "  $num\t'",&unctrl($entry[$num]),"'\n";
-		}
-		print ")\n";
-	    }
-	    if ($key ne "main::" && $key ne "DB::" && defined %entry
-		&& !($package eq "dumpvar" and $key eq "stab")) {
-		print "\%$key = (\n";
-		foreach $key (sort keys(%entry)) {
-		    print "  $key\t'",&unctrl($entry{$key}),"'\n";
-		}
-		print ")\n";
-	    }
-	}
-    }
-}
-
-1;
