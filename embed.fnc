@@ -1571,6 +1571,8 @@ p	|void	|offer_nice_chunk	|NN void *chunk|U32 chunk_size
 p	|void	|dump_sv_child	|NN SV *sv
 #endif
 
+Apod	|void	|hv_assert	|HV* tb
+
 #ifdef PERL_DONT_CREATE_GVSV
 Ap	|GV*	|gv_SVadd	|NN GV* gv
 #endif

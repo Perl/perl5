@@ -2968,6 +2968,7 @@ Gid_t getegid (void);
 #define DEBUG_r_FLAG		0x00000200 /*    512 */
 #define DEBUG_x_FLAG		0x00000400 /*   1024 */
 #define DEBUG_u_FLAG		0x00000800 /*   2048 */
+					   /*  spare */
 #define DEBUG_H_FLAG		0x00002000 /*   8192 */
 #define DEBUG_X_FLAG		0x00004000 /*  16384 */
 #define DEBUG_D_FLAG		0x00008000 /*  32768 */
@@ -2976,7 +2977,9 @@ Gid_t getegid (void);
 #define DEBUG_R_FLAG		0x00040000 /* 262144 */
 #define DEBUG_J_FLAG		0x00080000 /* 524288 */
 #define DEBUG_v_FLAG		0x00100000 /*1048576 */
-#define DEBUG_MASK		0x001FEFFF /* mask of all the standard flags */
+#define DEBUG_A_FLAG		0x00400000 /*4194304 */
+#define DEBUG_q_FLAG		0x00800000 /*8388608 */
+#define DEBUG_MASK		0x00DFEFFF /* mask of all the standard flags */
 
 #define DEBUG_DB_RECURSE_FLAG	0x40000000
 #define DEBUG_TOP_FLAG		0x80000000 /* XXX what's this for ??? Signal
@@ -3002,6 +3005,8 @@ Gid_t getegid (void);
 #  define DEBUG_R_TEST_ (PL_debug & DEBUG_R_FLAG)
 #  define DEBUG_J_TEST_ (PL_debug & DEBUG_J_FLAG)
 #  define DEBUG_v_TEST_ (PL_debug & DEBUG_v_FLAG)
+#  define DEBUG_A_TEST_ (PL_debug & DEBUG_A_FLAG)
+#  define DEBUG_q_TEST_ (PL_debug & DEBUG_q_FLAG)
 #  define DEBUG_Xv_TEST_ (DEBUG_X_TEST_ && DEBUG_v_TEST_)
 
 
@@ -3031,6 +3036,8 @@ Gid_t getegid (void);
 #  define DEBUG_R_TEST DEBUG_R_TEST_
 #  define DEBUG_J_TEST DEBUG_J_TEST_
 #  define DEBUG_v_TEST DEBUG_v_TEST_
+#  define DEBUG_A_TEST DEBUG_A_TEST_
+#  define DEBUG_q_TEST DEBUG_q_TEST_
 
 #  define PERL_DEB(a)                  a
 #  define PERL_DEBUG(a) if (PL_debug)  a
@@ -3072,6 +3079,8 @@ Gid_t getegid (void);
 #  define DEBUG_T(a) DEBUG__(DEBUG_T_TEST, a)
 #  define DEBUG_R(a) DEBUG__(DEBUG_R_TEST, a)
 #  define DEBUG_v(a) DEBUG__(DEBUG_v_TEST, a)
+#  define DEBUG_A(a) DEBUG__(DEBUG_A_TEST, a)
+#  define DEBUG_q(a) DEBUG__(DEBUG_q_TEST, a)
 
 #else /* DEBUGGING */
 
@@ -3096,6 +3105,8 @@ Gid_t getegid (void);
 #  define DEBUG_R_TEST (0)
 #  define DEBUG_J_TEST (0)
 #  define DEBUG_v_TEST (0)
+#  define DEBUG_A_TEST (0)
+#  define DEBUG_q_TEST (0)
 
 #  define PERL_DEB(a)
 #  define PERL_DEBUG(a)
@@ -3119,6 +3130,8 @@ Gid_t getegid (void);
 #  define DEBUG_T(a)
 #  define DEBUG_R(a)
 #  define DEBUG_v(a)
+#  define DEBUG_A(a)
+#  define DEBUG_q(a)
 #endif /* DEBUGGING */
 
 

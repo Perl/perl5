@@ -2301,6 +2301,8 @@ PERL_CALLCONV void	Perl_offer_nice_chunk(pTHX_ void *chunk, U32 chunk_size);
 PERL_CALLCONV void	Perl_dump_sv_child(pTHX_ SV *sv);
 #endif
 
+PERL_CALLCONV void	Perl_hv_assert(pTHX_ HV* tb);
+
 #ifdef PERL_DONT_CREATE_GVSV
 PERL_CALLCONV GV*	Perl_gv_SVadd(pTHX_ GV* gv);
 #endif
