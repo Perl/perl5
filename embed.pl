@@ -74,7 +74,11 @@ while (<INT>) {
 }
 close(INT) || warn "Can't close interp.sym: $!\n";
 
-print EM "\n";
+print EM <<'END';
+
+#ifdef EMBED
+
+END
 
 open(INT, "<interp.sym") || die "Can't open interp.sym: $!\n";
 while (<INT>) {
@@ -87,6 +91,8 @@ while (<INT>) {
 close(INT) || warn "Can't close interp.sym: $!\n";
 
 print EM <<'END';
+
+#endif /* EMBED */
 
 #endif /* MULTIPLICITY */
 END
