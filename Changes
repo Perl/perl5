@@ -29,6 +29,28 @@ Version v5.8.2		Maintenance release working toward v5.8.2
 --------------
 ____________________________________________________________________________
 ____________________________________________________________________________
+[ 21640] By: nicholas                              on 2003/11/03  07:11:34
+        Log: Integrate:
+             [ 21638]
+             s/new_hash/rehash/g (Stas suggested a better name)
+             
+             [ 21639]
+             Stas would prefer not to have MOD_PERL defines in perl.
+     Branch: maint-5.8/perl
+	   ! embedvar.h
+	  !> hv.c hv.h intrpvar.h lib/Hash/Util.pm perl.c perlapi.h sv.c
+	  !> universal.c util.c
+____________________________________________________________________________
+[ 21637] By: nicholas                              on 2003/11/02  23:07:41
+        Log: Update our sample config with one generated for 5.8.2
+     Branch: maint-5.8/perl
+	   ! Porting/config.sh Porting/config_H
+____________________________________________________________________________
+[ 21636] By: nicholas                              on 2003/11/02  22:47:37
+        Log: Update changes
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 21635] By: nicholas                              on 2003/11/02  22:45:22
         Log: Integrate:
              [ 21634]
