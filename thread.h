@@ -73,8 +73,12 @@ typedef pthread_t perl_thread;
 #define COND_DESTROY(c) \
     if (pthread_cond_destroy((c))) croak("panic: COND_DESTROY"); else 1
 
-#define DETACH(t) \
-    if (pthread_detach((t)->Tself)) croak("panic: DETACH"); else 1
+/* DETACH(t) must only be called while holding t->mutex */
+#define DETACH(t)			\
+    if (pthread_detach((t)->Tself)) {	\
+	MUTEX_UNLOCK(&(t)->mutex);	\
+	croak("panic: DETACH");		\
+    } else 1
 
 /* XXX Add "old" (?) POSIX draft interface too */
 #ifdef OLD_PTHREADS_API
@@ -164,16 +168,13 @@ struct thread {
     SV *	Toursv;
     HV *	Tcvcache;
     U32		flags;
-    perl_mutex	mutex;
+    perl_mutex	mutex;			/* For the fields others can change */
     U32		tid;
     struct thread *next, *prev;		/* Circular linked list of threads */
 
-#ifdef FAKE_THREADS
-    perl_thread next_run, prev_run;	/* Linked list of runnable threads */
-    perl_cond	wait_queue;		/* Wait queue that we are waiting on */
-    IV		private;		/* Holds data across time slices */
-    I32		savemark;		/* Holds MARK for thread join values */
-#endif /* FAKE_THREADS */
+#ifdef ADD_THREAD_INTERN
+    struct thread_intern i;		/* Platform-dependent internals */
+#endif
 };
 
 typedef struct thread *Thread;
@@ -188,21 +189,20 @@ typedef struct thread *Thread;
 
 #define THRf_DIE_FATAL	8
 
+/* ThrSTATE(t) and ThrSETSTATE(t) must only be called while holding t->mutex */
 #define ThrSTATE(t) ((t)->flags)
 #define ThrSETSTATE(t, s) STMT_START {		\
-	MUTEX_LOCK(&(t)->mutex);		\
 	(t)->flags &= ~THRf_STATE_MASK;		\
 	(t)->flags |= (s);			\
-	MUTEX_UNLOCK(&(t)->mutex);		\
 	DEBUG_L(PerlIO_printf(PerlIO_stderr(),	\
 			      "thread %p set to state %d\n", (t), (s))); \
     } STMT_END
 
 typedef struct condpair {
-    perl_mutex	mutex;
-    perl_cond	owner_cond;
-    perl_cond	cond;
-    Thread	owner;
+    perl_mutex	mutex;		/* Protects all other fields */
+    perl_cond	owner_cond;	/* For when owner changes at all */
+    perl_cond	cond;		/* For cond_signal and cond_broadcast */
+    Thread	owner;		/* Currently owning thread */
 } condpair_t;
 
 #define MgMUTEXP(mg) (&((condpair_t *)(mg->mg_ptr))->mutex)
