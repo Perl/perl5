@@ -2161,6 +2161,7 @@ plan9/aperl			Shell to make Perl error messages Acme-friendly
 plan9/arpa/inet.h		Plan9 port: replacement C header file
 plan9/buildinfo			Plan9 port: configuration information
 plan9/config.plan9		Plan9 port: config.h template
+plan9/config_h.sample		Plan9 port: 5.8.0 sample config.h
 plan9/exclude			Plan9 port: tests to skip
 plan9/fndvers			Plan9 port: update Perl version in config.plan9
 plan9/genconfig.pl		Plan9 port: generate config.sh
