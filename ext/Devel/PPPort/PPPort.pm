@@ -103,7 +103,6 @@ even if available, access to a fixed interface):
     PERL_REVISION
     PERL_SUBVERSION
     PERL_UNUSED_DECL
-    PERL_UNUSED_DECL
     PERL_VERSION
     PL_compiling
     PL_copline
@@ -418,7 +417,7 @@ __DATA__
 #endif
 
 #ifdef HASATTRIBUTE
-#  if defined(__GNUC__) && defined(__cplusplus)
+#  if (defined(__GNUC__) && defined(__cplusplus)) || defined(__INTEL_COMPILER)
 #    define PERL_UNUSED_DECL
 #  else
 #    define PERL_UNUSED_DECL __attribute__((unused))
