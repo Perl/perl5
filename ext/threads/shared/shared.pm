@@ -18,21 +18,21 @@ BEGIN {
 	push @EXPORT,'bless';
     }
     else {
-	*share = \&share_disabled;
-	*cond_wait = \&cond_wait_disabled;
-	*cond_signal = \&cond_signal_disabled;
-	*cond_broadcast = \&cond_broadcast_disabled;
+
+# String eval is generally evil, but we don't want these subs to exist at all
+# if threads are loaded successfully.  Vivifying them conditionally this way
+# saves on average about 4K of memory per thread.
+
+        eval <<'EOD';
+sub cond_wait      (\[$@%]) { undef }
+sub cond_signal    (\[$@%]) { undef }
+sub cond_broadcast (\[$@%]) { undef }
+sub share          (\[$@%]) { return $_[0] }
+EOD
     }
 }
 
-
-sub cond_wait_disabled      (\[$@%]) { undef }
-sub cond_signal_disabled    (\[$@%]) { undef }
-sub cond_broadcast_disabled (\[$@%]) { undef }
-sub share_disabled          (\[$@%]) { return $_[0] }
-
 $threads::shared::threads_shared = 1;
-
 
 sub threads::shared::tie::SPLICE
 {
