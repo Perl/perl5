@@ -221,15 +221,9 @@ foreach my $pain ($first, @virtual) {
   my @result = $Config{$pain};
   is (scalar @result, 1, "single result for \$config('$pain')");
 
- TODO: {
-    local $TODO;
-    $TODO = "No regexp lookup for $pain yet"
-      unless $pain eq 'byteorder' or $pain eq $first;
-
-    @result = Config::config_re($pain);
-    is (scalar @result, 1, "single result for config_re('$pain')");
-    like ($result[0], qr/^$pain=(['"])$Config{$pain}\1$/, # grr '
-	  "which is the expected result for $pain");
-  }
+  @result = Config::config_re($pain);
+  is (scalar @result, 1, "single result for config_re('$pain')");
+  like ($result[0], qr/^$pain=(['"])$Config{$pain}\1$/, # grr '
+	"which is the expected result for $pain");
 }
 

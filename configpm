@@ -207,7 +207,7 @@ close CONFIG_SH;
 
 # Calculation for the keys for byteorder
 # This is somewhat grim, but I need to run fetch_string here.
-our $Config_SH_expanded = join "\n", @v_fast, @v_others;
+our $Config_SH_expanded = join "\n", '', @v_fast, @v_others;
 
 my $t = fetch_string ({}, 'ivtype');
 my $s = fetch_string ({}, 'ivsize');
@@ -267,47 +267,42 @@ print CONFIG <<'EOT';
 s/(byteorder=)(['"]).*?\2/$1$2$byteorder$2/m;
 our $Config_SH : unique = $_;
 
-our $Config_SH_expanded : unique = "\n$_";
+our $Config_SH_expanded : unique = "\n$_" . << 'EOVIRTUAL';
 EOT
+
+foreach my $prefix (qw(ccflags ldflags)) {
+    my $value = fetch_string ({}, $prefix);
+    my $withlargefiles = fetch_string ({}, $prefix . "_uselargefiles");
+    $value =~ s/\Q$withlargefiles\E\b//;
+    print CONFIG "${prefix}_nolargefiles='$value'\n";
+}
+
+foreach my $prefix (qw(libs libswanted)) {
+    my $value = fetch_string ({}, $prefix);
+    my @lflibswanted
+       = split(' ', fetch_string ({}, 'libswanted_uselargefiles'));
+    if (@lflibswanted) {
+	my %lflibswanted;
+	@lflibswanted{@lflibswanted} = ();
+	if ($prefix eq 'libs') {
+	    my @libs = grep { /^-l(.+)/ &&
+                            not exists $lflibswanted{$1} }
+		                    split(' ', fetch_string ({}, 'libs'));
+	    $value = join(' ', @libs);
+	} else {
+	    my @libswanted = grep { not exists $lflibswanted{$_} }
+	                          split(' ', fetch_string ({}, 'libswanted'));
+	    $value = join(' ', @libswanted);
+	}
+    }
+    print CONFIG "${prefix}_nolargefiles='$value'\n";
+}
+
+print CONFIG "EOVIRTUAL\n";
 
 print CONFIG $fetch_string;
 
 print CONFIG <<'ENDOFEND';
-
-sub fetch_virtual {
-    my($self, $key) = @_;
-
-    my $value;
-
-    if ($key =~ /^((?:cc|ld)flags|libs(?:wanted)?)_nolargefiles/) {
-	# These are purely virtual, they do not exist, but need to
-	# be computed on demand for largefile-incapable extensions.
-	my $new_key = "${1}_uselargefiles";
-	$value = $Config{$1};
-	my $withlargefiles = $Config{$new_key};
-	if ($new_key =~ /^(?:cc|ld)flags_/) {
-	    $value =~ s/\Q$withlargefiles\E\b//;
-	} elsif ($new_key =~ /^libs/) {
-	    my @lflibswanted = split(' ', $Config{libswanted_uselargefiles});
-	    if (@lflibswanted) {
-		my %lflibswanted;
-		@lflibswanted{@lflibswanted} = ();
-		if ($new_key =~ /^libs_/) {
-		    my @libs = grep { /^-l(.+)/ &&
-                                      not exists $lflibswanted{$1} }
-		                    split(' ', $Config{libs});
-		    $value = join(' ', @libs);
-		} elsif ($new_key =~ /^libswanted_/) {
-		    my @libswanted = grep { not exists $lflibswanted{$_} }
-		                          split(' ', $Config{libswanted});
-		    $value = join(' ', @libswanted);
-		}
-	    }
-	}
-    }
-
-    $self->{$key} = $value;
-}
 
 sub FETCH { 
     my($self, $key) = @_;
@@ -315,12 +310,7 @@ sub FETCH {
     # check for cached value (which may be undef so we use exists not defined)
     return $self->{$key} if exists $self->{$key};
 
-    $self->fetch_string($key);
-    return $self->{$key} if exists $self->{$key};
-    $self->fetch_virtual($key);
-
-    # Might not exist, in which undef is correct.
-    return $self->{$key};
+    return $self->fetch_string($key);
 }
  
 my $prevpos = 0;
