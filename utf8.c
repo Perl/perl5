@@ -1348,8 +1348,8 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, char *norma
 		   Copy(tmpbuf, ustrp, len, U8);
 #else
 		   Copy(s, ustrp, len, U8);
-	      }
 #endif
+	      }
 	 }
     }
 
