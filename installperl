@@ -213,7 +213,7 @@ if ($Is_VMS) {  # Hang in there until File::Spec hits the big time
 
 # Do some quick sanity checks.
 
-if ($d_dosuid && $>) { die "You must run as root to install suidperl\n"; }
+if (!$nonono && $d_dosuid && $>) { die "You must run as root to install suidperl\n"; }
 
    $installbin		|| die "No installbin directory in config.sh\n";
 -d $installbin		|| mkpath($installbin, $verbose, 0777);
