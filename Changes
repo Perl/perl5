@@ -31,6 +31,304 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 14106] By: jhi                                   on 2002/01/06  15:33:51
+        Log: Subject: [PATCH pp_sys.c] Fix segfault in dbmclose in DESTROY (was Re: [ID 20020104.007] coredump on dbmclose)
+             From: Jonathan Stowe <gellyfish@gellyfish.com>
+             Date: Sat, 5 Jan 2002 12:43:47 +0000 (GMT)
+             Message-ID: <Pine.LNX.4.33.0201051240130.5428-100000@orpheus.gellyfish.com>
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[ 14105] By: jhi                                   on 2002/01/06  15:11:15
+        Log: DB_File sync from Paul Marquess.
+     Branch: perl
+	   ! ext/DB_File/Changes ext/DB_File/DB_File.pm
+	   ! ext/DB_File/DB_File.xs ext/DB_File/dbinfo
+	   ! ext/DB_File/t/db-recno.t ext/DB_File/version.c
+____________________________________________________________________________
+[ 14104] By: jhi                                   on 2002/01/06  15:08:14
+        Log: Subject: [PATCH] B, B::C, perlcc, t/TEST
+             From: "Mattia Barbon" <mbarbon@dsi.unive.it>  
+             Date: Sun, 6 Jan 2002 11:44:30 +0100
+             Message-ID: <3C38389E.7831.493570@localhost>
+     Branch: perl
+	   ! ext/B/B.xs ext/B/B/C.pm ext/B/defsubs_h.PL t/TEST
+	   ! utils/perlcc.PL
+____________________________________________________________________________
+[ 14103] By: jhi                                   on 2002/01/06  14:57:01
+        Log: Tests for #14098.
+     Branch: perl
+	   ! t/op/lc.t
+____________________________________________________________________________
+[ 14101] By: ams                                   on 2002/01/06  04:52:50
+        Log: Subject: [PATCH] Bad prototype detection now an optional warning
+             From: Sam Tregar <sam@tregar.com>
+             Date: Sun, 6 Jan 2002 00:29:25 -0500 (EST)
+             Message-Id: <Pine.LNX.4.33.0201060023160.3715-200000@localhost.localdomain>
+     Branch: perl
+	   ! pod/perldelta.pod pod/perldiag.pod pod/perlsub.pod
+	   ! t/comp/proto.t toke.c
+____________________________________________________________________________
+[ 14100] By: ams                                   on 2002/01/06  01:56:59
+        Log: Subject: [PATCH] Correct several Stratus VOS build issues
+             From: "Green, Paul" <Paul.Green@stratus.com>
+             Date: Sat, 5 Jan 2002 21:30:56 -0500
+             Message-Id: <95AE3CDB3543D511883A0020485B38B90235348A@exna3.stratus.com>
+     Branch: perl
+	   ! ext/Time/HiRes/HiRes.xs hints/vos.sh perl.h vos/vosish.h
+____________________________________________________________________________
+[ 14099] By: jhi                                   on 2002/01/05  22:51:38
+        Log: Further perl.org URL elaboration from Ask.
+     Branch: perl
+	   ! pod/perlfaq1.pod pod/perlfaq2.pod
+____________________________________________________________________________
+[ 14098] By: jhi                                   on 2002/01/05  22:47:59
+        Log: The same problem with To{Lower,Title,Upper}
+             as earlier with ToFold.
+     Branch: perl
+	   ! lib/unicore/To/Lower.pl lib/unicore/To/Title.pl
+	   ! lib/unicore/To/Upper.pl lib/unicore/mktables
+____________________________________________________________________________
+[ 14097] By: jhi                                   on 2002/01/05  22:11:35
+        Log: Retract #14057 for now; the alarm/setitimer timers
+             seen to be the same in many systems, which leads into
+             hangups.
+     Branch: perl
+	   ! ext/Time/HiRes/HiRes.t
+____________________________________________________________________________
+[ 14096] By: jhi                                   on 2002/01/05  22:09:20
+        Log: Finish up (ha!) the Unicode case folding;
+             enhance regex dumping code.
+     Branch: perl
+	   + lib/unifold.t
+	   ! MANIFEST embed.fnc embed.h perl.h pp_hot.c proto.h regcomp.c
+	   ! regcomp.h regexec.c t/op/pat.t utf8.c utf8.h
+____________________________________________________________________________
+[ 14095] By: jhi                                   on 2002/01/05  22:07:33
+        Log: Use the perl.org news gw instead of the perl.com one
+             (from Ask).
+     Branch: perl
+	   ! pod/perlfaq1.pod pod/perlfaq2.pod
+____________________________________________________________________________
+[ 14094] By: jhi                                   on 2002/01/05  21:26:09
+        Log: Zero() wasn't documented.
+     Branch: perl
+	   ! pod/perlclib.pod
+____________________________________________________________________________
+[ 14093] By: ams                                   on 2002/01/05  17:58:35
+        Log: Subject: [PATCH] make lib/Memoize/t/tie_ndbm.t tidy up more.
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Sat, 5 Jan 2002 18:55:39 +0000
+             Message-Id: <20020105185538.K300@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! lib/Memoize/t/tie_ndbm.t
+____________________________________________________________________________
+[ 14092] By: jhi                                   on 2002/01/05  17:26:05
+        Log: Also UNICOS/mk has deviant socketpair().
+     Branch: perl
+	   ! ext/Socket/socketpair.t
+____________________________________________________________________________
+[ 14091] By: jhi                                   on 2002/01/05  17:21:12
+        Log: Ooops.  Retract the regex parts of #14090.
+     Branch: perl
+	   ! embed.fnc embed.h proto.h regcomp.c regcomp.h regexec.c
+____________________________________________________________________________
+[ 14090] By: jhi                                   on 2002/01/05  17:18:43
+        Log: Subject: [REPATCH] Re: [PATCH] Re: socketpair blip on unicos/mk, too
+             From: Nicholas Clark <nick@unfortu.net> 
+             Date: Sat, 5 Jan 2002 18:10:13 +0000
+             Message-ID: <20020105181013.I300@Bagpuss.unfortu.net>              
+     Branch: perl
+	   ! embed.fnc embed.h ext/Socket/socketpair.t proto.h regcomp.c
+	   ! regcomp.h regexec.c
+____________________________________________________________________________
+[ 14089] By: jhi                                   on 2002/01/05  15:42:12
+        Log: Integrate perlio; a missing aTHX.
+     Branch: perl
+	  !> op.c
+____________________________________________________________________________
+[ 14085] By: jhi                                   on 2002/01/04  23:36:23
+        Log: In the UTF-8 branch of crypt() the extra \0 byte is required,
+             found by Marc Lehmann.
+     Branch: perl
+	   ! pp.c
+____________________________________________________________________________
+[ 14084] By: jhi                                   on 2002/01/04  22:57:03
+        Log: Subject: Re: [PATCH op.c] Bad \[...] prototype checking
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Sat, 5 Jan 2002 00:31:12 +0100
+             Message-ID: <20020105003112.E1850@rafael>              
+     Branch: perl
+	   ! t/comp/proto.t
+____________________________________________________________________________
+[ 14083] By: jhi                                   on 2002/01/04  22:56:23
+        Log: A bit of "perl.com" cleanup.
+     Branch: perl
+	   ! pod/perldelta.pod pod/perldiag.pod pod/perlfaq.pod
+	   ! pod/perlfaq1.pod pod/perlfaq2.pod pod/perlfaq3.pod
+	   ! pod/perlfaq4.pod pod/perlfaq5.pod pod/perlfaq8.pod
+	   ! pod/perlmodlib.PL pod/perlmodlib.pod
+____________________________________________________________________________
+[ 14082] By: jhi                                   on 2002/01/04  21:53:30
+        Log: Subject: [PATCH op.c] Bad \[...] prototype checking
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Fri, 4 Jan 2002 23:35:19 +0100
+             Message-ID: <20020104233519.A1850@rafael>
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[ 14081] By: jhi                                   on 2002/01/04  21:45:22
+        Log: Integrate change #14062 from macperl;
+             Define setbuf, setvbuf for Mac OS
+     Branch: perl
+	  !> ext/IO/IO.xs
+____________________________________________________________________________
+[ 14078] By: jhi                                   on 2002/01/04  21:07:05
+        Log: Display the native pwd command.
+     Branch: perl
+	   ! ext/Cwd/t/cwd.t
+____________________________________________________________________________
+[ 14077] By: jhi                                   on 2002/01/04  21:00:53
+        Log: Under Mac OS X /dev/stdout is normally a symlink,
+             but when running the test it seems to become a socket.
+             So let's extend our censorship.
+     Branch: perl
+	   ! t/op/stat.t
+____________________________________________________________________________
+[ 14068] By: jhi                                   on 2002/01/04  20:24:59
+        Log: If we do have socketpair(), make my_socketpair()
+             just call the real socketpair().  This way we always
+             have real code behind my_socketpair() and a symbol
+             corresponding to the my_socketpair in global.sym.
+     Branch: perl
+	   ! embed.fnc embed.h makedef.pl proto.h util.c
+____________________________________________________________________________
+[ 14060] By: jhi                                   on 2002/01/04  20:06:58
+        Log: Spread the good word of "env".
+     Branch: perl
+	   ! pod/perlhack.pod pod/perllocale.pod pod/perlrun.pod
+____________________________________________________________________________
+[ 14059] By: jhi                                   on 2002/01/04  19:57:11
+        Log: Till the system tests do something non-Win*, better rename
+             the test so that people on other platforms don't get confused.
+             (Not win32system, because assumedly there's win64, too.)
+     Branch: perl
+	   + t/op/winsystem.t
+	   - t/op/system.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 14058] By: jhi                                   on 2002/01/04  19:48:09
+        Log: Some tweaks.
+     Branch: perl
+	   ! lib/Pod/t/Functions.t
+____________________________________________________________________________
+[ 14057] By: ams                                   on 2002/01/04  17:40:31
+        Log: (retracted by #14057)
+             
+             Subject: [PATCH] Time/HiRes/HiRes.t
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Fri, 4 Jan 2002 17:28:46 +0000
+             Message-Id: <20020104172845.D1013@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! ext/Time/HiRes/HiRes.t
+____________________________________________________________________________
+[ 14056] By: jhi                                   on 2002/01/04  17:35:34
+        Log: Subject: [PATCH lib/Pod/Functions.pm] + Docs and test         
+             From: Abe Timmerman <abe@ztreet.demon.nl>
+             Date: Fri, 04 Jan 2002 18:42:33 +0100
+             Message-ID: <bm5b3usi1f65td4c9bo9fand20p0vnupf2@4ax.com>      
+     Branch: perl
+	   + lib/Pod/t/Functions.t
+	   ! MANIFEST lib/Pod/Functions.pm
+____________________________________________________________________________
+[ 14055] By: jhi                                   on 2002/01/04  14:33:09
+        Log: Subject: [PATCH perl@14042] Devel::PPPort Makefile.PL umpteenth try
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Thu, 3 Jan 2002 17:32:20 -0600
+             Message-Id: <a05101004b85a82bb7352@[172.16.52.1]>
+     Branch: perl
+	   ! ext/Devel/PPPort/Makefile.PL lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 14054] By: jhi                                   on 2002/01/04  04:04:05
+        Log: Document the U+0085, U+2028, and U+2029.
+     Branch: perl
+	   ! pod/perlre.pod pod/perlretut.pod
+____________________________________________________________________________
+[ 14053] By: ams                                   on 2002/01/04  03:27:44
+        Log: Subject: [PATCH] warn if not CORE::dump
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Thu, 3 Jan 2002 22:04:00 +0100
+             Message-Id: <20020103220400.A13958@rafael>
+     Branch: perl
+	   ! pod/perldiag.pod pod/perlfunc.pod t/lib/warnings/toke toke.c
+____________________________________________________________________________
+[ 14052] By: jhi                                   on 2002/01/04  03:13:50
+        Log: Add U+0085, U+2028, and U+2029 to \s under Unicode.
+     Branch: perl
+	   ! lib/unicore/Is/SpacePerl.pl lib/unicore/mktables t/op/pat.t
+____________________________________________________________________________
+[ 14051] By: ams                                   on 2002/01/04  03:00:12
+        Log: Subject: [PATCH] File::Compare::VERSION
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Thu, 3 Jan 2002 23:42:52 +0100
+             Message-Id: <20020103234252.G13958@rafael>
+     Branch: perl
+	   ! lib/File/Compare.pm
+____________________________________________________________________________
+[ 14050] By: ams                                   on 2002/01/04  02:58:05
+        Log: Subject: [PATCH @14042] threads::shared doc
+             From: =?iso-8859-1?q?Andy=20Bussey?= <andybussey@yahoo.co.uk>
+             Date: Thu, 3 Jan 2002 23:24:13 +0000 (GMT)
+             Message-Id: <20020103232413.3690.qmail@web21001.mail.yahoo.com>
+     Branch: perl
+	   ! ext/threads/shared/shared.pm
+____________________________________________________________________________
+[ 14049] By: jhi                                   on 2002/01/03  20:38:22
+        Log: #14048 exposed few false positives, to be fixed soonish.
+     Branch: perl
+	   ! t/op/pat.t
+____________________________________________________________________________
+[ 14048] By: jhi                                   on 2002/01/03  20:36:38
+        Log: Do not add the first characters of multicharacter foldings
+             into character classes.
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[ 14047] By: jhi                                   on 2002/01/03  20:30:55
+        Log: A bit of testing for #14046.
+     Branch: perl
+	   ! t/op/pat.t
+____________________________________________________________________________
+[ 14046] By: jhi                                   on 2002/01/03  20:22:48
+        Log: Allow emitting the foldcased version of "\x{df}", "ss"
+             (among others, another example would be \x{fb00} -> "ff")
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[ 14045] By: jhi                                   on 2002/01/03  19:29:35
+        Log: Subject: [PATCH] File::Spec & NetWare
+             From: Dave Rolsky <autarch@urth.org>
+             Date: Thu, 3 Jan 2002 12:53:19 -0600 (CST)
+             Message-ID: <Pine.LNX.4.43.0201031252130.27977-100000@urth.org>
+     Branch: perl
+	   - lib/File/Spec/NW5.pm
+	   ! MANIFEST lib/File/Spec.pm
+____________________________________________________________________________
+[ 14044] By: jhi                                   on 2002/01/03  19:26:53
+        Log: FAQ sync (RCS Ids only?)
+     Branch: perl
+	   ! pod/perlfaq4.pod pod/perlfaq6.pod pod/perlfaq7.pod
+____________________________________________________________________________
+[ 14043] By: jhi                                   on 2002/01/03  19:25:48
+        Log: AUTHORs updates.
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[ 14042] By: jhi                                   on 2002/01/03  16:04:24
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 14041] By: jhi                                   on 2002/01/03  15:57:42
         Log: Missed the =head1 additions.
      Branch: perl
