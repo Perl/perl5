@@ -92,4 +92,11 @@ EOM
     # Add the POSIX threads library and the re-entrant libc.
 
     lddlflags=`echo $lddlflags | sed 's/ -lc$/ -lpthreads -lc_r -lc/'`
+
+    # Add the c_r library to the list of libraries wanted
+    # Make sure the c_r library is before the c library or
+    # make will fail.
+    set `echo X "$libswanted "| sed -e 's/ c / c_r c /'`
+    shift
+    libswanted="$*"
 fi
