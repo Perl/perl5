@@ -576,9 +576,9 @@ S_require_errno(pTHX_ GV *gv)
 =for apidoc gv_stashpv
 
 Returns a pointer to the stash for a specified package.  C<name> should
-be a valid UTF-8 string.  If C<create> is set then the package will be
-created if it does not already exist.  If C<create> is not set and the
-package does not exist then NULL is returned.
+be a valid UTF-8 string and must be null-terminated.  If C<create> is set
+then the package will be created if it does not already exist.  If C<create>
+is not set and the package does not exist then NULL is returned.
 
 =cut
 */
@@ -588,6 +588,18 @@ Perl_gv_stashpv(pTHX_ const char *name, I32 create)
 {
     return gv_stashpvn(name, strlen(name), create);
 }
+
+/*
+=for apidoc gv_stashpvn
+
+Returns a pointer to the stash for a specified package.  C<name> should
+be a valid UTF-8 string.  The C<namelen> parameter indicates the length of
+the C<name>, in bytes.  If C<create> is set then the package will be
+created if it does not already exist.  If C<create> is not set and the
+package does not exist then NULL is returned.
+
+=cut
+*/
 
 HV*
 Perl_gv_stashpvn(pTHX_ const char *name, U32 namelen, I32 create)
