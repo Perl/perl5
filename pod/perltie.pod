@@ -463,17 +463,6 @@ just leave it out.
 
 =back
 
-The code we presented at the top of the tied array class accesses many
-elements of the array, far more than we've set the bounds to.  Therefore,
-it will blow up once they try to access beyond the 2nd element of @ary, as
-the following output demonstrates:
-
-    setting index 0: value of elt 0 now 0
-    setting index 1: value of elt 1 now 10
-    setting index 2: value of elt 2 now 20
-    setting index 3: Array OOB: 3 > 2 at Bounded_Array.pm line 39
-            Bounded_Array::FETCH called at testba line 12
-
 =head2 Tying Hashes
 
 Hashes were the first Perl data type to be tied (see dbmopen()).  A class
