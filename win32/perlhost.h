@@ -585,7 +585,7 @@ public:
 			  |FORMAT_MESSAGE_FROM_SYSTEM, NULL,
 			   dwErr, 0, (char *)&sMsg, 1, NULL);
 	if (0 < dwLen) {
-	    while (0 < dwLen  &&  isspace(sMsg[--dwLen]))
+	    while (0 < dwLen  &&  isSPACE(sMsg[--dwLen]))
 		;
 	    if ('.' != sMsg[dwLen])
 		dwLen++;

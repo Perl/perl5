@@ -138,7 +138,7 @@ datum db;
 
 	putchar('"');
 	for (i = 0; i < db.dsize; i++) {
-		if (isprint(db.dptr[i]))
+		if (isprint((unsigned char)db.dptr[i]))
 			putchar(db.dptr[i]);
 		else {
 			putchar('\\');
@@ -174,7 +174,10 @@ char *s;
 				*p = '\f';
 			else if (*s == 't')
 				*p = '\t';
-			else if (isdigit(*s) && isdigit(*(s + 1)) && isdigit(*(s + 2))) {
+			else if (isdigit((unsigned char)*s)
+				 && isdigit((unsigned char)*(s + 1))
+				 && isdigit((unsigned char)*(s + 2)))
+			{
 				i = (*s++ - '0') << 6;
 				i |= (*s++ - '0') << 3;
 				i |= *s - '0';
