@@ -789,7 +789,7 @@ do_chop(register SV *astr, register SV *sv)
         return;
     }
     else if (SvREADONLY(sv))
-	croak(no_modify);
+	croak(PL_no_modify);
     s = SvPV(sv, len);
     if (len && !SvPOK(sv))
 	s = SvPV_force(sv, len);
@@ -858,7 +858,7 @@ do_chomp(register SV *sv)
         return count;
     }
     else if (SvREADONLY(sv))
-	croak(no_modify);
+	croak(PL_no_modify);
     s = SvPV(sv, len);
     if (len && !SvPOKp(sv))
 	s = SvPV_force(sv, len);
