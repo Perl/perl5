@@ -203,3 +203,11 @@
 
 1.60
    Changed the test to check for full tied array support
+
+1.61 19th November 1998
+
+   Added a note to README about how to build Berkeley DB 2.x when
+   using HP-UX.
+   Minor modifications to get the module to build with DB 2.5.x
+   Fixed a typo in the definition of O_RDONLY, courtesy of Mark Kettenis.
+
