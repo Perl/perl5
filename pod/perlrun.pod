@@ -1091,6 +1091,8 @@ and Win32 approximate equivalent:
    set PERLIO_DEBUG=CON
    perl script ...
 
+This functionality is disabled for setuid scripts and for scripts run
+with B<-T>.
 
 =item PERLLIB
 
