@@ -767,6 +767,7 @@ lib/Getopt/Long.pm	Fetch command options (GetOptions)
 lib/Getopt/Std.pm	Fetch command options (getopt, getopts)
 lib/I18N/Collate.pm	Routines to do strxfrm-based collation
 lib/I18N/LangTags.pm	I18N::LangTags
+lib/I18N/LangTags/List.pod	list of tags for human languages
 lib/IPC/Open2.pm	Open a two-ended pipe
 lib/IPC/Open3.pm	Open a three-ended pipe!
 lib/Locale/Constants.pm	Locale::Codes

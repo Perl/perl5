@@ -1,5 +1,5 @@
 
-# Time-stamp: "2001-05-25 07:36:55 MDT"
+# Time-stamp: "2001-05-27 19:53:11 MDT"
 # Sean M. Burke <sburke@cpan.org>
 
 require 5.000;
@@ -17,7 +17,7 @@ require Exporter;
                 encode_language_tag
                );
 
-$VERSION = "0.21";
+$VERSION = "0.22";
 
 =head1 NAME
 
@@ -568,6 +568,8 @@ for RFC2482-style language tags -- which are basically just normal
 language tags with their ASCII characters shifted into Plane 14.
 
 =head1 SEE ALSO
+
+* L<I18N::LangTags::List|I18N::LangTags::List>
 
 * RFC 3066, C<ftp://ftp.isi.edu/in-notes/rfc3066.txt>, "Tags for the
 Identification of Languages".  (Obsoletes RFC 1766)
