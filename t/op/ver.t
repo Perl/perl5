@@ -9,10 +9,9 @@ BEGIN {
 $DOWARN = 1; # enable run-time warnings now
 
 use Config;
-$tests = $Config{'uvsize'} == 8 ? 47 : 44;
 
 require "test.pl";
-plan( tests => $tests );
+plan( tests => 47 );
 
 eval { use v5.5.640; };
 is( $@, '', "use v5.5.640; $@");
@@ -214,15 +213,24 @@ $v = $revision + $version/1000 + $subversion/1000000;
 
 ok( $v == $], "\$^V == \$] (numeric)" );
 
-# [ID 20010902.001] check if v-strings handle full UV range or not
-if ( $Config{'uvsize'} >= 4 ) {
-    is(  sprintf("%vd", v2147483647.2147483648),   '2147483647.2147483648', 'v-string > IV_MAX[32-bit]' );
-    is(  sprintf("%vd", v3141592653),              '3141592653',            'IV_MAX < v-string < UV_MAX[32-bit]');
-    is(  sprintf("%vd", v4294967295),              '4294967295',            'v-string == UV_MAX[32-bit] - 1');
-}
+SKIP: {
+  skip("In EBCDIC the v-string components cannot exceed 2147483647", 6)
+    if ord "A" == 193;
 
-if ( $Config{'uvsize'} >= 8 ) {
-    is(  sprintf("%vd", v9223372036854775807.9223372036854775808),   '9223372036854775807.9223372036854775808', 'v-string > IV_MAX[64-bit]' );
-    is(  sprintf("%vd", v17446744073709551615),                      '17446744073709551615',                    'IV_MAX < v-string < UV_MAX[64-bit]');
-    is(  sprintf("%vd", v18446744073709551615),                      '18446744073709551615',                    'v-string == UV_MAX[64-bit] - 1');
+  # [ID 20010902.001] check if v-strings handle full UV range or not
+  if ( $Config{'uvsize'} >= 4 ) {
+    is(  sprintf("%vd", eval 'v2147483647.2147483648'),   '2147483647.2147483648', 'v-string > IV_MAX[32-bit]' );
+    is(  sprintf("%vd", eval 'v3141592653'),              '3141592653',            'IV_MAX < v-string < UV_MAX[32-bit]');
+    is(  sprintf("%vd", eval 'v4294967295'),              '4294967295',            'v-string == UV_MAX[32-bit] - 1');
+  }
+
+  SKIP: {
+    skip("No quads", 3) if $Config{uvsize} < 8;
+
+    if ( $Config{'uvsize'} >= 8 ) {
+      is(  sprintf("%vd", eval 'v9223372036854775807.9223372036854775808'),   '9223372036854775807.9223372036854775808', 'v-string > IV_MAX[64-bit]' );
+      is(  sprintf("%vd", eval 'v17446744073709551615'),                      '17446744073709551615',                    'IV_MAX < v-string < UV_MAX[64-bit]');
+      is(  sprintf("%vd", eval 'v18446744073709551615'),                      '18446744073709551615',                    'v-string == UV_MAX[64-bit] - 1');
+    }
+  }
 }

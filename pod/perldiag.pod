@@ -1690,6 +1690,12 @@ would otherwise result in the same message being repeated.
 Failure of user callbacks dispatched using the C<G_KEEPERR> flag could
 also result in this warning.  See L<perlcall/G_KEEPERR>.
 
+=item In EBCDIC the v-string components cannot exceed 2147483647
+
+(F) An error peculiar to EBCDIC.  Internally, v-strings are stored as
+Unicode code points, and encoded in EBCDIC as UTF-EBCDIC.  The UTF-EBCDIC
+encoding is limited to code points no larger than 2147483647 (0x7FFFFFFF).
+
 =item Insecure dependency in %s
 
 (F) You tried to do something that the tainting mechanism didn't like.
