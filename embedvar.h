@@ -350,6 +350,7 @@
 #define PL_pending_ident	(PERL_GET_INTERP->Ipending_ident)
 #define PL_perl_destruct_level	(PERL_GET_INTERP->Iperl_destruct_level)
 #define PL_perldb		(PERL_GET_INTERP->Iperldb)
+#define PL_perlio		(PERL_GET_INTERP->Iperlio)
 #define PL_pidstatus		(PERL_GET_INTERP->Ipidstatus)
 #define PL_preambleav		(PERL_GET_INTERP->Ipreambleav)
 #define PL_preambled		(PERL_GET_INTERP->Ipreambled)
@@ -638,6 +639,7 @@
 #define PL_pending_ident	(vTHX->Ipending_ident)
 #define PL_perl_destruct_level	(vTHX->Iperl_destruct_level)
 #define PL_perldb		(vTHX->Iperldb)
+#define PL_perlio		(vTHX->Iperlio)
 #define PL_pidstatus		(vTHX->Ipidstatus)
 #define PL_preambleav		(vTHX->Ipreambleav)
 #define PL_preambled		(vTHX->Ipreambled)
@@ -929,6 +931,7 @@
 #define PL_Ipending_ident	PL_pending_ident
 #define PL_Iperl_destruct_level	PL_perl_destruct_level
 #define PL_Iperldb		PL_perldb
+#define PL_Iperlio		PL_perlio
 #define PL_Ipidstatus		PL_pidstatus
 #define PL_Ipreambleav		PL_preambleav
 #define PL_Ipreambled		PL_preambled
@@ -1321,7 +1324,6 @@
 #define PL_do_undump		(PL_Vars.Gdo_undump)
 #define PL_hexdigit		(PL_Vars.Ghexdigit)
 #define PL_malloc_mutex		(PL_Vars.Gmalloc_mutex)
-#define PL_my_inv_rand_max	(PL_Vars.Gmy_inv_rand_max)
 #define PL_op_mutex		(PL_Vars.Gop_mutex)
 #define PL_patleave		(PL_Vars.Gpatleave)
 #define PL_sharedsv_space	(PL_Vars.Gsharedsv_space)
@@ -1336,7 +1338,6 @@
 #define PL_Gdo_undump		PL_do_undump
 #define PL_Ghexdigit		PL_hexdigit
 #define PL_Gmalloc_mutex	PL_malloc_mutex
-#define PL_Gmy_inv_rand_max	PL_my_inv_rand_max
 #define PL_Gop_mutex		PL_op_mutex
 #define PL_Gpatleave		PL_patleave
 #define PL_Gsharedsv_space	PL_sharedsv_space

@@ -93,6 +93,7 @@ extern PerlIO_funcs *PerlIO_find_layer(pTHX_ const char *name, STRLEN len,
 extern PerlIO *PerlIO_push(pTHX_ PerlIO *f, PerlIO_funcs *tab,
 			   const char *mode, SV *arg);
 extern void PerlIO_pop(pTHX_ PerlIO *f);
+extern void PerlIO_clone(pTHX_ PerlIO *proto, CLONE_PARAMS *param);
 
 #endif				/* PerlIO */
 

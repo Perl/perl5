@@ -405,10 +405,7 @@ PerlIO_debug(const char *fmt, ...)
 /*
  * Table of pointers to the PerlIO structs (malloc'ed)
  */
-PerlIO *_perlio = NULL;
 #define PERLIO_TABLE_SIZE 64
-
-
 
 PerlIO *
 PerlIO_allocate(pTHX)
@@ -418,7 +415,7 @@ PerlIO_allocate(pTHX)
      */
     PerlIO **last;
     PerlIO *f;
-    last = &_perlio;
+    last = &PL_perlio;
     while ((f = *last)) {
 	int i;
 	last = (PerlIO **) (f);
@@ -434,6 +431,42 @@ PerlIO_allocate(pTHX)
     }
     *last = f;
     return f + 1;
+}
+
+#undef PerlIO_fdupopen
+PerlIO *
+PerlIO_fdupopen(pTHX_ PerlIO *f, CLONE_PARAMS *param)
+{
+    if (f && *f) {
+	PerlIO_funcs *tab = PerlIOBase(f)->tab;
+	PerlIO *new;
+	PerlIO_debug("fdupopen f=%p param=%p\n",f,param);
+        new = (*tab->Dup)(aTHX_ PerlIO_allocate(aTHX),f,param);
+	return new;
+    }
+    else {
+	SETERRNO(EBADF, SS$_IVCHAN);
+	return NULL;
+    }
+}
+
+void
+PerlIO_clone(pTHX_ PerlIO *proto, CLONE_PARAMS *param)
+{
+    PerlIO **table = &proto;
+    PerlIO *f;
+    PL_perlio = NULL;
+    PerlIO_allocate(aTHX); /* root slot is never used */
+    while ((f = *table)) {
+	    int i;
+	    table = (PerlIO **) (f++);
+	    for (i = 1; i < PERLIO_TABLE_SIZE; i++) {
+		if (*f) {
+		    PerlIO_fdupopen(aTHX_ f, param);
+		}
+		f++;
+	    }
+	}
 }
 
 void
@@ -518,13 +551,13 @@ void
 PerlIO_cleanup()
 {
     dTHX;
-    PerlIO_cleantable(aTHX_ & _perlio);
+    PerlIO_cleantable(aTHX_ &PL_perlio);
 }
 
 void
 PerlIO_destruct(pTHX)
 {
-    PerlIO **table = &_perlio;
+    PerlIO **table = &PL_perlio;
     PerlIO *f;
     while ((f = *table)) {
 	int i;
@@ -904,7 +937,7 @@ PerlIO_default_layer(pTHX_ I32 n)
 void
 PerlIO_stdstreams(pTHX)
 {
-    if (!_perlio) {
+    if (!PL_perlio) {
 	PerlIO_allocate(aTHX);
 	PerlIO_fdopen(0, "Ir" PERLIO_STDTEXT);
 	PerlIO_fdopen(1, "Iw" PERLIO_STDTEXT);
@@ -1051,23 +1084,6 @@ PerlIO__close(PerlIO *f)
     }
 }
 
-#undef PerlIO_fdupopen
-PerlIO *
-PerlIO_fdupopen(pTHX_ PerlIO *f, CLONE_PARAMS *param)
-{
-    if (f && *f) {
-	PerlIO_funcs *tab = PerlIOBase(f)->tab;
-	PerlIO *new;
-	PerlIO_debug("fdupopen f=%p param=%p\n",f,param);
-        new = (*tab->Dup)(aTHX_ PerlIO_allocate(aTHX),f,param);
-	return new;
-    }
-    else {
-	SETERRNO(EBADF, SS$_IVCHAN);
-	return NULL;
-    }
-}
-
 #undef PerlIO_close
 int
 PerlIO_close(PerlIO *f)
@@ -1152,7 +1168,7 @@ PerlIO_resolve_layers(pTHX_ const char *layers,
 {
     PerlIO_list_t *def = PerlIO_default_layers(aTHX);
     int incdef = 1;
-    if (!_perlio)
+    if (!PL_perlio)
 	PerlIO_stdstreams(aTHX);
     if (narg) {
 	SV *arg = *args;
@@ -1389,7 +1405,8 @@ PerlIO_flush(PerlIO *f)
 	 * things on fflush(NULL), but should we be bound by their design
 	 * decisions? --jhi
 	 */
-	PerlIO **table = &_perlio;
+	dTHX;
+	PerlIO **table = &PL_perlio;
 	int code = 0;
 	while ((f = *table)) {
 	    int i;
@@ -1407,7 +1424,8 @@ PerlIO_flush(PerlIO *f)
 void
 PerlIOBase_flush_linebuf()
 {
-    PerlIO **table = &_perlio;
+    dTHX;
+    PerlIO **table = &PL_perlio;
     PerlIO *f;
     while ((f = *table)) {
 	int i;
@@ -3093,7 +3111,7 @@ PerlIOBuf_get_base(PerlIO *f)
     if (!b->buf) {
 	if (!b->bufsiz)
 	    b->bufsiz = 4096;
-	b->buf = 
+	b->buf =
 	Newz('B',b->buf,b->bufsiz, STDCHAR);
 	if (!b->buf) {
 	    b->buf = (STDCHAR *) & b->oneword;
@@ -3902,7 +3920,7 @@ PerlIO_init(void)
 #ifndef WIN32
     call_atexit(PerlIO_cleanup_layers, NULL);
 #endif
-    if (!_perlio) {
+    if (!PL_perlio) {
 #ifndef WIN32
 	atexit(&PerlIO_cleanup);
 #endif
@@ -3913,33 +3931,33 @@ PerlIO_init(void)
 PerlIO *
 PerlIO_stdin(void)
 {
-    if (!_perlio) {
-	dTHX;
+    dTHX;
+    if (!PL_perlio) {
 	PerlIO_stdstreams(aTHX);
     }
-    return &_perlio[1];
+    return &PL_perlio[1];
 }
 
 #undef PerlIO_stdout
 PerlIO *
 PerlIO_stdout(void)
 {
-    if (!_perlio) {
-	dTHX;
+    dTHX;
+    if (!PL_perlio) {
 	PerlIO_stdstreams(aTHX);
     }
-    return &_perlio[2];
+    return &PL_perlio[2];
 }
 
 #undef PerlIO_stderr
 PerlIO *
 PerlIO_stderr(void)
 {
-    if (!_perlio) {
-	dTHX;
+    dTHX;
+    if (!PL_perlio) {
 	PerlIO_stdstreams(aTHX);
     }
-    return &_perlio[3];
+    return &PL_perlio[3];
 }
 
 /*--------------------------------------------------------------------------------------*/

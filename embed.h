@@ -1197,6 +1197,7 @@
 #define ck_concat		Perl_ck_concat
 #define ck_defined		Perl_ck_defined
 #define ck_delete		Perl_ck_delete
+#define ck_die			Perl_ck_die
 #define ck_eof			Perl_ck_eof
 #define ck_eval			Perl_ck_eval
 #define ck_exec			Perl_ck_exec
@@ -2699,6 +2700,7 @@
 #define ck_concat(a)		Perl_ck_concat(aTHX_ a)
 #define ck_defined(a)		Perl_ck_defined(aTHX_ a)
 #define ck_delete(a)		Perl_ck_delete(aTHX_ a)
+#define ck_die(a)		Perl_ck_die(aTHX_ a)
 #define ck_eof(a)		Perl_ck_eof(aTHX_ a)
 #define ck_eval(a)		Perl_ck_eval(aTHX_ a)
 #define ck_exec(a)		Perl_ck_exec(aTHX_ a)

@@ -437,6 +437,8 @@ END_EXTERN_C
 #define PL_perl_destruct_level	(*Perl_Iperl_destruct_level_ptr(aTHX))
 #undef  PL_perldb
 #define PL_perldb		(*Perl_Iperldb_ptr(aTHX))
+#undef  PL_perlio
+#define PL_perlio		(*Perl_Iperlio_ptr(aTHX))
 #undef  PL_pidstatus
 #define PL_pidstatus		(*Perl_Ipidstatus_ptr(aTHX))
 #undef  PL_preambleav
@@ -923,8 +925,6 @@ END_EXTERN_C
 #define PL_hexdigit		(*Perl_Ghexdigit_ptr(NULL))
 #undef  PL_malloc_mutex
 #define PL_malloc_mutex		(*Perl_Gmalloc_mutex_ptr(NULL))
-#undef  PL_my_inv_rand_max
-#define PL_my_inv_rand_max	(*Perl_Gmy_inv_rand_max_ptr(NULL))
 #undef  PL_op_mutex
 #define PL_op_mutex		(*Perl_Gop_mutex_ptr(NULL))
 #undef  PL_patleave
