@@ -4025,9 +4025,10 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			 to_utf8_fold(tmpbuf, foldbuf, &foldlen);
 			 f = utf8_to_uvchr(foldbuf, 0);
 
-			 /* If folding and foldable, insert also
-			  * the folded version to the charclass. */
-			 if (f != value)
+			 /* If folding and foldable and a single
+			  * character, insert also the folded version
+			  * to the charclass. */
+			 if (f != value && foldlen == UNISKIP(f))
 			      Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\n", f);
 
 			 /* If folding and the value is one of the Greek
