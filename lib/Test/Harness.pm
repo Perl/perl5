@@ -13,12 +13,12 @@ use strict;
 
 use vars qw($VERSION $Verbose $Switches $Have_Devel_Corestack $Curtest
             $Columns $verbose $switches $ML $Strap
-            @ISA @EXPORT @EXPORT_OK
+            @ISA @EXPORT @EXPORT_OK $Last_ML_Print
            );
 
 # Backwards compatibility for exportable variable names.
-*verbose  = \$Verbose;
-*switches = \$Switches;
+*verbose  = *Verbose;
+*switches = *Switches;
 
 $Have_Devel_Corestack = 0;
 
@@ -449,7 +449,7 @@ sub _run_all_tests {
 
     my $width = _leader_width(@tests);
     foreach my $tfile (@tests) {
-
+        $Last_ML_Print = 0;  # so each test prints at least once
         my($leader, $ml) = _mk_leader($tfile, $width);
         local $ML = $ml;
         print $leader;
@@ -706,7 +706,7 @@ $Handlers{test} = sub {
     my $detail = $totals->{details}[-1];
 
     if( $detail->{ok} ) {
-        _print_ml("ok $curr/$max");
+        _print_ml_less("ok $curr/$max");
 
         if( $detail->{type} eq 'skip' ) {
             $totals->{skip_reason} = $detail->{reason}
@@ -741,6 +741,15 @@ sub _print_ml {
     print join '', $ML, @_ if $ML;
 }
 
+
+# For slow connections, we save lots of bandwidth by printing only once
+# per second.
+sub _print_ml_less {
+    if( $Last_ML_Print != time ) {
+        _print_ml(@_);
+        $Last_ML_Print = time;
+    }
+}
 
 sub _bonusmsg {
     my($tot) = @_;
