@@ -77,7 +77,8 @@ sub runtests {
 	my $blank = (' ' x 77);
 	my $leader = "$te" . '.' x (20 - length($te));
 	my $ml = "";
-	$ml = "\r$blank\r$leader" if -t STDOUT and not $ENV{HARNESS_NOTTY};
+	$ml = "\r$blank\r$leader"
+	    if -t STDOUT and not $ENV{HARNESS_NOTTY} and not $verbose;
 	print $leader;
 	my $fh = new FileHandle;
 	$fh->open($test) or print "can't open $test. $!\n";
@@ -117,7 +118,7 @@ sub runtests {
 		my $this = $next;
 		if (/^not ok\s*(\d*)/){
 		    $this = $1 if $1 > 0;
-		    print "${ml}NOK $this\n" if $ml;
+		    print "${ml}NOK $this" if $ml;
 		    if (!$todo{$this}) {
 			push @failed, $this;
 		    } else {
