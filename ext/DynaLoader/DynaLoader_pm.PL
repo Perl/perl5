@@ -544,7 +544,9 @@ useless for accessing non-Perl libraries because it provides almost no
 Perl-to-C 'glue'.  There is, for example, no mechanism for calling a C
 library function or supplying arguments.  A C::DynaLib module
 is available from CPAN sites which performs that function for some
-common system types.
+common system types.  And since the year 2000, there's also Inline::C,
+a module that allows you to write Perl subroutines in C.  Also available
+from your local CPAN site.
 
 DynaLoader Interface Summary
 
