@@ -133,7 +133,7 @@ my $embed_test = File::Spec->catfile(File::Spec->curdir, $exe);
 $embed_test = "run/nodebug $exe" if $^O eq 'VMS';
 print "# embed_test = $embed_test\n";
 $status = system($embed_test);
-print (($status? 'not ':'')."ok 9 # $status\n");
+print (($status? 'not ':'')."ok 9 # system returned $status\n");
 unlink($exe,"embed_test.c",$obj);
 unlink("$exe$Config{exe_ext}") if $skip_exe;
 unlink("embed_test.map","embed_test.lis") if $^O eq 'VMS';
@@ -183,7 +183,3 @@ int main(int argc, char **argv, char **env)
 
     return 0;
 }
-
-
-
-
