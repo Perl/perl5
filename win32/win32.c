@@ -518,7 +518,7 @@ get_shell(void)
 	 */
 	const char* defaultshell = (IsWinNT()
 				    ? "cmd.exe /x/c" : "command.com /c");
-	const char *usershell = getenv("PERL5SHELL");
+	const char *usershell = PerlEnv_getenv("PERL5SHELL");
 	w32_perlshell_items = tokenize(usershell ? usershell : defaultshell,
 				       &w32_perlshell_tokens,
 				       &w32_perlshell_vec);
@@ -3096,7 +3096,7 @@ qualified_path(const char *cmd)
     }
 
     /* look in PATH */
-    pathstr = win32_getenv("PATH");
+    pathstr = PerlEnv_getenv("PATH");
     New(0, fullcmd, MAX_PATH+1, char);
     curfullcmd = fullcmd;
 

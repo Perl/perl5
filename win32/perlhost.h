@@ -2315,9 +2315,10 @@ CPerlHost::Reset(void)
 void
 CPerlHost::Clearenv(void)
 {
+    dTHXo;
     char ch;
     LPSTR lpPtr, lpStr, lpEnvPtr;
-    if(m_lppEnvList != NULL) {
+    if (m_lppEnvList != NULL) {
 	/* set every entry to an empty string */
 	for(DWORD index = 0; index < m_dwEnvCount; ++index) {
 	    char* ptr = strchr(m_lppEnvList[index], '=');
@@ -2340,6 +2341,8 @@ CPerlHost::Clearenv(void)
 	    ch = *++lpPtr;
 	    *lpPtr = 0;
 	    Add(lpStr);
+	    if (!w32_pseudo_id)
+		(void)win32_putenv(lpStr);
 	    *lpPtr = ch;
 	}
 	lpStr += strlen(lpStr) + 1;
@@ -2352,22 +2355,23 @@ CPerlHost::Clearenv(void)
 char*
 CPerlHost::Getenv(const char *varname)
 {
-    char* pEnv = Find(varname);
-    if(pEnv == NULL) {
-	pEnv = win32_getenv(varname);
+    dTHXo;
+    if (w32_pseudo_id) {
+	char *pEnv = Find(varname);
+	if (pEnv && !*pEnv)
+	    return pEnv;
     }
-    else {
-	if(!*pEnv)
-	    pEnv = 0;
-    }
-
-    return pEnv;
+    return win32_getenv(varname);
 }
 
 int
 CPerlHost::Putenv(const char *envstring)
 {
+    dTHXo;
     Add(envstring);
+    if (!w32_pseudo_id)
+	return win32_putenv(envstring);
+
     return 0;
 }
 
