@@ -9,7 +9,7 @@ BEGIN {
     $| = 1;
 }
 
-print "1..87\n";
+print "1..90\n";
 
 $a = {};
 bless $a, "Bob";
@@ -46,7 +46,12 @@ $Alice::VERSION = 2.718;
 package main;
 
 { my $i = 2;
-  sub test { print "not " unless shift; print "ok $i\n"; $i++; }
+  sub test {
+      print "not " unless $_[0];
+      print "ok ", $i++;
+      print "# at ", (caller)[1], ", line ", (caller)[2] unless $_[0];
+      print "\n";
+  }
 }
 
 $a = new Alice;
@@ -115,10 +120,12 @@ test ! (eval { $a->VERSION(2.719) }) &&
 test (eval { $a->VERSION(2.718) }) && ! $@;
 
 my $subs = join ' ', sort grep { defined &{"UNIVERSAL::$_"} } keys %UNIVERSAL::;
+## The test for import here is *not* because we want to ensure that UNIVERSAL
+## can always import; it is an historical accident that UNIVERSAL can import.
 if ('a' lt 'A') {
-    test $subs eq "can isa VERSION";
+    test $subs eq "can import isa VERSION";
 } else {
-    test $subs eq "VERSION can isa";
+    test $subs eq "VERSION can import isa";
 }
 
 test $a->isa("UNIVERSAL");
@@ -152,3 +159,12 @@ test ! UNIVERSAL::can($b, "can");
 test ! $a->can("export_tags");	# a method in Exporter
 
 test ! UNIVERSAL::isa("\xff\xff\xff\0", 'HASH');
+
+{
+    package Pickup;
+    use UNIVERSAL qw( isa can VERSION );
+
+    main::test isa "Pickup", UNIVERSAL;
+    main::test can( "Pickup", "can" ) == \&UNIVERSAL::can;
+    main::test VERSION "UNIVERSAL" ;
+}
