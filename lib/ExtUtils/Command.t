@@ -64,7 +64,6 @@ SKIP: {
 
 	# these are destructive, have to keep setting @ARGV
 	@ARGV = ( 'ecmdfile' );
-        my $now = time;
 	touch();
 
 	@ARGV = ( 'ecmdfile' );
@@ -72,6 +71,9 @@ SKIP: {
 
 	@ARGV = ( 'ecmdfile' );
 	ok( -e $ARGV[0], 'created!' );
+
+	my ($now) = time;
+	utime ($now, $now, $ARGV[0]);
 
 	# Just checking modify time stamp, access time stamp is set
 	# to the beginning of the day in Win95
