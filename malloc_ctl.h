@@ -25,6 +25,7 @@ END_EXTERN_C
 
 #ifndef NO_MALLOC_DYNAMIC_CFG
 
+/* IV configuration data */
 enum {
   MallocCfg_FIRST_SBRK,
   MallocCfg_MIN_SBRK,
@@ -47,8 +48,15 @@ enum {
 
   MallocCfg_last
 };
+/* char* configuration data */
+enum {
+  MallocCfgP_emergency_buffer,
+  MallocCfgP_emergency_buffer_prepared,
+  MallocCfgP_last
+};
 START_EXTERN_C
 extern IV *MallocCfg_ptr;
+extern char **MallocCfgP_ptr;
 END_EXTERN_C
 
 #endif

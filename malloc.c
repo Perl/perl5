@@ -1068,6 +1068,12 @@ static IV MallocCfg[MallocCfg_last] = {
 };
 IV *MallocCfg_ptr = MallocCfg;
 
+static char* MallocCfgP[MallocCfg_last] = {
+  0,			/* MallocCfgP_emergency_buffer */
+  0,			/* MallocCfgP_emergency_buffer_prepared */
+};
+char **MallocCfgP_ptr = MallocCfgP;
+
 #  undef MIN_SBRK
 #  undef FIRST_SBRK
 #  undef MIN_SBRK_FRAC1000
@@ -1089,6 +1095,9 @@ IV *MallocCfg_ptr = MallocCfg;
 #  define FILL_ALIVE		MallocCfg[MallocCfg_fillalive]
 #  define FILL_CHECK_CFG	MallocCfg[MallocCfg_fillcheck]
 #  define FILL_CHECK		(FILL_DEAD && FILL_CHECK_CFG)
+
+#  define emergency_buffer	MallocCfgP[MallocCfgP_emergency_buffer]
+#  define emergency_buffer_prepared	MallocCfgP[MallocCfgP_emergency_buffer_prepared]
 
 #else	/* defined(NO_MALLOC_DYNAMIC_CFG) */
 
@@ -1121,14 +1130,13 @@ static	u_int goodsbrk;
 #    define BIG_SIZE (1<<16)		/* 64K */
 #  endif
 
-static char *emergency_buffer;
-static char *emergency_buffer_prepared;
-
 #  ifdef NO_MALLOC_DYNAMIC_CFG
 static MEM_SIZE emergency_buffer_size;
 	/* 0 if the last request for more memory succeeded.
 	   Otherwise the size of the failing request. */
 static MEM_SIZE emergency_buffer_last_req;
+static char *emergency_buffer;
+static char *emergency_buffer_prepared;
 #  endif
 
 #  ifndef emergency_sbrk_croak

@@ -602,6 +602,8 @@ if ($define{'MYMALLOC'}) {
 		    Perl_get_mstats
 		    Perl_strdup
 		    Perl_putenv
+		    MallocCfg_ptr
+		    MallocCfgP_ptr
 		    )];
     if ($define{'USE_ITHREADS'}) {
 	emit_symbols [qw(
@@ -620,6 +622,8 @@ else {
 		    Perl_dump_mstats
 		    Perl_get_mstats
 		    Perl_malloced_size
+		    MallocCfg_ptr
+		    MallocCfgP_ptr
 		    )];
 }
 
