@@ -183,6 +183,7 @@ if (-w $mainperldir && ! &samepath($mainperldir, $installbin) && !$nonono) {
 	# to binexp/perl if binexp and installbin are different.
 	$mainperl_is_instperl =
 	    &samepath($usrbinperl, $instperl) ||
+	    &samepath($usrbinperl, $expinstperl) ||
 	     (($binexp ne $installbin) &&
 	      (-l $usrbinperl) &&
 	      ((readlink $usrbinperl) eq $expinstperl));
