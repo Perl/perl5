@@ -290,7 +290,7 @@ LE<lt>...E<gt>.
 =item * (section) in '$page' deprecated
 
 There is a section detected in the page name of LE<lt>...E<gt>, e.g.
-C<LE<gt>passwd(2)E<gt>>. POD hyperlinks may point to POD documents only.
+C<LE<lt>passwd(2)E<gt>>. POD hyperlinks may point to POD documents only.
 Please write C<CE<lt>passwd(2)E<gt>> instead. Some formatters are able
 to expand this to appropriate code. For links to (builtin) functions,
 please say C<LE<lt>perlfunc/mkdirE<gt>>, without ().

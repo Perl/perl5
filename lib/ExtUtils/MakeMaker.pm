@@ -139,7 +139,7 @@ sub prompt ($;$) {
     my $ans;
     local $|=1;
     print "$mess $dispdef";
-    if ($ISA_TTY) {
+    if ($ISA_TTY && !$ENV{PERL_MM_USE_DEFAULT}) {
 	chomp($ans = <STDIN>);
     } else {
 	print "$def\n";
@@ -2146,6 +2146,11 @@ different means on the current architecture).
 Command line options used by C<MakeMaker-E<gt>new()>, and thus by
 C<WriteMakefile()>.  The string is split on whitespace, and the result
 is processed before any actual command line arguments are processed.
+
+=item PERL_MM_USE_DEFAULT
+
+If set to a true value then MakeMaker's prompt function will
+always return the default without waiting for user input.
 
 =back
 

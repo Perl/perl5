@@ -9,6 +9,7 @@ Perl_ck_bitop
 Perl_ck_concat
 Perl_ck_defined
 Perl_ck_delete
+Perl_ck_die
 Perl_ck_eof
 Perl_ck_eval
 Perl_ck_exec

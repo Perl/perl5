@@ -15,7 +15,7 @@ SKIP: {
     use_ok( 'Term::Complete' );
   
     # this skips tests AND prevents the "used only once" warning
-    skip('No stty, Term::Complete will not run here', 8)
+    skip('No stty, Term::Complete will not run here', 7)
 	unless defined $Term::Complete::tty_raw_noecho &&
 	       defined $Term::Complete::tty_restore;
 

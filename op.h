@@ -197,7 +197,8 @@ Deprecated.  Use C<GIMME_V> instead.
 #define OPpOPEN_OUT_RAW		64	/* binmode(F,":raw") on output fh */
 #define OPpOPEN_OUT_CRLF	128	/* binmode(F,":crlf") on output fh */
 
-/* Private for OP_EXIT */
+/* Private for OP_EXIT, HUSH also for OP_DIE */
+#define OPpHUSH_VMSISH		64	/* hush DCL exit msg vmsish mode*/
 #define OPpEXIT_VMSISH		128	/* exit(0) vs. exit(1) vmsish mode*/
 
 struct op {

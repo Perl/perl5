@@ -129,6 +129,8 @@ sub configure {
 			or return _error($sock, $!, $@);
     }
 
+    $sock->blocking($arg->{Blocking}) if defined $arg->{Blocking};
+
     $proto ||= (getprotobyname('tcp'))[2];
 
     my $pname = (getprotobynumber($proto))[0];
@@ -309,7 +311,7 @@ C<IO::Socket::INET> provides.
     ReusePort	Set SO_REUSEPORT before binding
     Timeout	Timeout	value for various operations
     MultiHomed  Try all adresses for multi-homed hosts
-
+    Blocking    Determine if connection will be blocking mode
 
 If C<Listen> is defined then a listen socket is created, else if the
 socket type, which is derived from the protocol, is SOCK_STREAM then
@@ -334,6 +336,9 @@ parameter will be deduced from C<Proto> if not specified.
 
 If the constructor is only passed a single argument, it is assumed to
 be a C<PeerAddr> specification.
+
+If C<Blocking> is set to 0, the connection will be in nonblocking mode.
+If not specified it defaults to 1 (blocking mode).
 
 Examples:
 

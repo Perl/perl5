@@ -6911,6 +6911,44 @@ mod2fname(pTHX_ CV *cv)
 }
 
 void
+hushexit_fromperl(pTHX_ CV *cv)
+{
+    dXSARGS;
+
+    if (items > 0) {
+        VMSISH_HUSHED = SvTRUE(ST(0));
+    }
+    ST(0) = boolSV(VMSISH_HUSHED);
+    XSRETURN(1);
+}
+
+void  
+Perl_sys_intern_dup(pTHX_ struct interp_intern *src, 
+                          struct interp_intern *dst)
+{
+    memcpy(dst,src,sizeof(struct interp_intern));
+}
+
+void  
+Perl_sys_intern_clear(pTHX)
+{
+}
+
+void  
+Perl_sys_intern_init(pTHX)
+{
+    int ix = RAND_MAX;
+    float x;
+
+    VMSISH_HUSHED = 0;
+
+    x = (float)ix;
+    MY_INV_RAND_MAX = 1./x;
+}
+
+
+
+void
 init_os_extras()
 {
   dTHX;
@@ -6932,17 +6970,9 @@ init_os_extras()
   newXSproto("VMS::Filespec::candelete",candelete_fromperl,file,"$");
   newXSproto("DynaLoader::mod2fname", mod2fname, file, "$");
   newXS("File::Copy::rmscopy",rmscopy_fromperl,file);
+  newXSproto("vmsish::hushed",hushexit_fromperl,file,";$");
 
   store_pipelocs(aTHX);
-
-#ifdef Drand01_is_rand
-/* this hackery brought to you by a bug in DECC for /ieee=denorm */
-  { 
-    int ix = RAND_MAX;
-    float x = (float)ix;
-    PL_my_inv_rand_max = 1./x;
-  }
-#endif
 
   return;
 }

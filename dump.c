@@ -616,7 +616,13 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
 	}
 	else if (o->op_type == OP_EXIT) {
 	    if (o->op_private & OPpEXIT_VMSISH)
-		sv_catpv(tmpsv, ",EXIST_VMSISH");
+		sv_catpv(tmpsv, ",EXIT_VMSISH");
+	    if (o->op_private & OPpHUSH_VMSISH)
+		sv_catpv(tmpsv, ",HUSH_VMSISH");
+	}
+	else if (o->op_type == OP_DIE) {
+	    if (o->op_private & OPpHUSH_VMSISH)
+		sv_catpv(tmpsv, ",HUSH_VMSISH");
 	}
 	if (o->op_flags & OPf_MOD && o->op_private & OPpLVAL_INTRO)
 	    sv_catpv(tmpsv, ",INTRO");

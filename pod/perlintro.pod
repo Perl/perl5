@@ -311,7 +311,7 @@ There's also a negated version of it:
         ...
     }
 
-This is provided as a more readable version of C<if (! condition)>.
+This is provided as a more readable version of C<if (!I<condition>)>.
 
 Note that the braces are required in Perl, even if you've only got one
 line in the block.  However, there is a clever way of making your one-line
@@ -374,7 +374,7 @@ this overview) see L<perlsyn>.
 Perl comes with a wide selection of builtin functions.  Some of the ones
 we've already seen include C<print>, C<sort> and C<reverse>.  A list of
 them is given at the start of L<perlfunc> and you can easily read 
-about any given function by using C<perldoc -f functionname>.
+about any given function by using C<perldoc -f I<functionname>>.
 
 Perl operators are documented in full in L<perlop>, but here are a few
 of the most common ones:
@@ -627,9 +627,9 @@ also available from CPAN.
 To learn how to install modules you download from CPAN, read
 L<perlmodinstall>
 
-To learn how to use a particular module, use C<perldoc Module::Name>.
-Typically you will want to C<use Module::Name>, which will then give you
-access to exported functions or an OO interface to the module.
+To learn how to use a particular module, use C<perldoc I<Module::Name>>.
+Typically you will want to C<use I<Module::Name>>, which will then give
+you access to exported functions or an OO interface to the module.
 
 L<perlfaq> contains questions and answers related to many common
 tasks, and often provides suggestions for good CPAN modules to use.

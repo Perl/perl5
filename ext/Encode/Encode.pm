@@ -225,7 +225,7 @@ sub decode
  my $enc = find_encoding($name);
  croak("Unknown encoding '$name'") unless defined $enc;
  my $string = $enc->decode($octets,$check);
- return undef if ($check && length($octets));
+ $_[1] = $octets if $check;
  return $string;
 }
 

@@ -306,23 +306,21 @@ EOT
 	    warn "Failed $bad test scripts out of $files, $pct% okay.\n";
 	}
 	warn <<'SHRDLU';
-   ### Since not all tests were successful, you may want to run some
-   ### of them individually and examine any diagnostic messages they
-   ### produce.  See the INSTALL document's section on "make test".
+   ### Since not all tests were successful, you may want to run some of
+   ### them individually and examine any diagnostic messages they produce.
+   ### See the INSTALL document's section on "make test".
 SHRDLU
 	warn <<'SHRDLU' if $good / $total > 0.8;
-   ### Since most tests were successful you have a good chance
-   ### to get information better granularity by running
+   ### You have a good chance to get more information by running
    ###     ./perl harness
-   ### in the 't' directory.
+   ### in the 't' directory since most (>=80%) of the tests succeeded.
 SHRDLU
 	use Config;
 	if ($Config{ldlibpthname}) {
 	    warn <<SHRDLU;
-   ### Since you seem to have a dynamic library search path,
-   ### $Config{ldlibpthname}, you probably should set that
-   ### to point to the build directory before running the harness.
-   ### Depending on your shell style:
+   ### You may have to set your dynamic library search path,
+   ### $Config{ldlibpthname}, to point to the build directory
+   ### before running the harness-- depending on your shell style:
    ###     setenv $Config{ldlibpthname} `pwd`; cd t; ./perl harness
    ###     $Config{ldlibpthname}=`pwd`; export $Config{ldlibpthname}; cd t; ./perl harness
    ###     export $Config{ldlibpthname}=`pwd`; cd t; ./perl harness

@@ -1,5 +1,5 @@
 # Pod::Text -- Convert POD data to formatted ASCII text.
-# $Id: Text.pm,v 2.11 2001/07/10 11:08:10 eagle Exp $
+# $Id: Text.pm,v 2.13 2001/10/20 08:07:21 eagle Exp $
 #
 # Copyright 1999, 2000, 2001 by Russ Allbery <rra@stanford.edu>
 #
@@ -41,7 +41,7 @@ use vars qw(@ISA @EXPORT %ESCAPES $VERSION);
 # Don't use the CVS revision as the version, since this module is also in Perl
 # core and too many things could munge CVS magic revision strings.  This
 # number should ideally be the same as the CVS revision in podlators, however.
-$VERSION = 2.11;
+$VERSION = 2.13;
 
 
 ##############################################################################
@@ -194,6 +194,9 @@ sub initialize {
     $$self{MARGIN}   = $$self{indent};  # Current left margin in spaces.
 
     $self->SUPER::initialize;
+
+    # Tell Pod::Parser that we want the non-POD stuff too if code was set.
+    $self->parseopts ('-want_nonPODs' => 1) if $$self{code};
 }
 
 
@@ -306,13 +309,15 @@ sub interior_sequence {
     local $_ = shift;
     return '' if ($command eq 'X' || $command eq 'Z');
 
-    # Expand escapes into the actual character now, carping if invalid.
+    # Expand escapes into the actual character now, warning if invalid.
     if ($command eq 'E') {
         if (/^\d+$/) {
             return chr;
         } else {
             return $ESCAPES{$_} if defined $ESCAPES{$_};
-            carp "Unknown escape: E<$_>";
+            my $seq = shift;
+            my ($file, $line) = $seq->file_line;
+            warn "$file:$line: Unknown escape: E<$_>\n";
             return "E<$_>";
         }
     }
@@ -334,15 +339,22 @@ sub interior_sequence {
     elsif ($command eq 'F') { return $self->seq_f ($_) }
     elsif ($command eq 'I') { return $self->seq_i ($_) }
     elsif ($command eq 'L') { return $self->seq_l ($_) }
-    else { carp "Unknown sequence $command<$_>" }
+    else {
+        my $seq = shift;
+        my ($file, $line) = $seq->file_line;
+        warn "$file:$line: Unknown sequence $command<$_>\n";
+    }
 }
 
 # Called for each paragraph that's actually part of the POD.  We take
-# advantage of this opportunity to untabify the input.
+# advantage of this opportunity to untabify the input.  Also, if given the
+# code option, we may see paragraphs that aren't part of the POD and need to
+# output them directly.
 sub preprocess_paragraph {
     my $self = shift;
     local $_ = shift;
     1 while s/^(.*?)(\t+)/$1 . ' ' x (length ($2) * 8 - length ($1) % 8)/me;
+    $self->output_code ($_) if $self->cutting;
     $_;
 }
 
@@ -417,10 +429,12 @@ sub cmd_over {
 
 # End a list.
 sub cmd_back {
-    my $self = shift;
+    my ($self, $text, $line, $paragraph) = @_;
     $$self{MARGIN} = pop @{ $$self{INDENTS} };
     unless (defined $$self{MARGIN}) {
-        carp "Unmatched =back";
+        my $file;
+        ($file, $line) = $paragraph->file_line;
+        warn "$file:$line: Unmatched =back\n";
         $$self{MARGIN} = $$self{indent};
     }
 }
@@ -576,7 +590,7 @@ sub item {
     local $_ = shift;
     my $tag = $$self{ITEM};
     unless (defined $tag) {
-        carp "item called without tag";
+        carp "Item called without tag";
         return;
     }
     undef $$self{ITEM};
@@ -649,6 +663,11 @@ sub reformat {
 
 # Output text to the output device.
 sub output { $_[1] =~ tr/\01/ /; print { $_[0]->output_handle } $_[1] }
+
+# Output a block of code (something that isn't part of the POD text).  Called
+# by preprocess_paragraph only if we were given the code option.  Exists here
+# only so that it can be overridden by subclasses.
+sub output_code { $_[0]->output ($_[1]) }
 
 
 ##############################################################################
@@ -740,6 +759,12 @@ If set to a true value, selects an alternate output format that, among other
 things, uses a different heading style and marks C<=item> entries with a
 colon in the left margin.  Defaults to false.
 
+=item code
+
+If set to a true value, the non-POD parts of the input file will be included
+in the output.  Useful for viewing code documented with POD blocks with the
+POD rendered and the code left intact.
+
 =item indent
 
 The number of spaces to indent regular text, and the default indentation for
@@ -792,8 +817,10 @@ details.
 
 =item Bizarre space in item
 
-(W) Something has gone wrong in internal C<=item> processing.  This message
-indicates a bug in Pod::Text; you should never see it.
+=item Item called without tag
+
+(W) Something has gone wrong in internal C<=item> processing.  These
+messages indicate a bug in Pod::Text; you should never see them.
 
 =item Can't open %s for reading: %s
 
@@ -810,17 +837,17 @@ invalid.  A quote specification must be one, two, or four characters long.
 (W) The POD source contained a non-standard command paragraph (something of
 the form C<=command args>) that Pod::Man didn't know about.  It was ignored.
 
-=item Unknown escape: %s
+=item %s:%d: Unknown escape: %s
 
 (W) The POD source contained an C<EE<lt>E<gt>> escape that Pod::Text didn't
 know about.
 
-=item Unknown sequence: %s
+=item %s:%d: Unknown sequence: %s
 
 (W) The POD source contained a non-standard internal sequence (something of
 the form C<XE<lt>E<gt>>) that Pod::Text didn't know about.
 
-=item Unmatched =back
+=item %s:%d: Unmatched =back
 
 (W) Pod::Text encountered a C<=back> command that didn't correspond to an
 C<=over> command.

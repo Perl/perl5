@@ -40,7 +40,3 @@ PERLVAR(Gop_mutex,	perl_mutex)	/* Mutex for op refcounting */
 PERLVAR(Gsharedsv_space, PerlInterpreter*) /* The shared sv space */
 PERLVAR(Gsharedsv_space_mutex, perl_mutex) /* Mutex protecting the shared sv space */
 #endif
-
-#if defined(VMS) && defined(Drand01_is_rand)
-PERLVAR(Gmy_inv_rand_max, float) /* nasty compiler bug workaround */
-#endif

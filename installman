@@ -7,6 +7,7 @@ use File::Find;
 use File::Copy;
 use File::Path qw(mkpath);
 use ExtUtils::Packlist;
+use Pod::Man;
 use subs qw(unlink chmod rename link);
 use vars qw($packlist @modpods);
 require Cwd;
@@ -34,7 +35,6 @@ my $usage =
 	man1ext = $Config{'man1ext'};
 	man3dir = $Config{'installman3dir'};
 	man3ext = $Config{'man3ext'};
-        batchlimit is maximum number of pod files per invocation of pod2man
 	--notify  (or -n) just lists commands that would be executed.
         --verbose (or -V) report all progress.
         --silent  (or -S) be silent. Only report errors.\n";
@@ -54,7 +54,6 @@ $opts{man3dir} = $Config{'installman3dir'}
     unless defined($opts{man3dir}); 
 $opts{man3ext} = $Config{'man3ext'}
     unless defined($opts{man3ext}); 
-$opts{batchlimit} ||= 40;
 $opts{silent} ||= $opts{S};
 $opts{notify} ||= $opts{n};
 $opts{verbose} ||= $opts{V} || $opts{notify};
@@ -73,10 +72,10 @@ $packlist = ExtUtils::Packlist->new("$Config{installarchlib}/.packlist");
 
 
 # Install the main pod pages.
-runpod2man('pod', $opts{man1dir}, $opts{man1ext});
+pod2man('pod', $opts{man1dir}, $opts{man1ext});
 
 # Install the pods for library modules.
-runpod2man('lib', $opts{man3dir}, $opts{man3ext});
+pod2man('lib', $opts{man3dir}, $opts{man3ext});
 
 # Install the pods embedded in the installed scripts
 open UTILS, "utils.lst" or die "Can't open 'utils.lst': $!";
@@ -85,13 +84,13 @@ while (<UTILS>) {
     chomp;
     $_ = $1 if /#.*pod\s*=\s*(\S+)/;
     my ($where, $what) = m|^(.*?)/(\S+)|;
-    runpod2man($where, $opts{man1dir}, $opts{man1ext}, $what);
+    pod2man($where, $opts{man1dir}, $opts{man1ext}, $what);
     if (($where, $what) = m|#.*link\s*=\s*(\S+)/(\S+)|) {
-        runpod2man($where, $opts{man1dir}, $opts{man1ext}, $what);
+        pod2man($where, $opts{man1dir}, $opts{man1ext}, $what);
     }
 }
 
-sub runpod2man {
+sub pod2man {
     # @script is scripts names if we are installing manpages embedded 
     # in scripts, () otherwise
     my($poddir, $mandir, $manext, @script) = @_;
@@ -115,23 +114,10 @@ sub runpod2man {
     print "chdir $poddir\n" if $opts{verbose};
     chdir $poddir || die "Unable to cd to $poddir directory!\n$!\n";
 
-    # We insist on using the current version of pod2man in case there
-    # are enhancements or changes from previous installed versions.
-    # The error message doesn't include the '..' because the user
-    # won't be aware that we've chdir to $poddir.
-    -r  "$downdir/pod/pod2man" || die "Executable pod/pod2man not found.\n";
-
-    # We want to be sure to use the current perl.  We can't rely on
-    # the installed perl because it might not be actually installed
-    # yet. (The user may have set the $install* Configure variables 
-    # to point to some temporary home, from which the executable gets
-    # installed by occult means.)
-    my $pod2man = "$downdir/perl -I $downdir/lib $downdir/pod/pod2man --section=$manext --official";
-
     mkpath($mandir, $opts{verbose}, 0777) unless $opts{notify};  # In File::Path
     # Make a list of all the .pm and .pod files in the directory.  We will
-    # always run pod2man from the lib directory and feed it the full pathname
-    # of the pod.  This might be useful for pod2man someday.
+    # always run from the lib directory and use the full pathname
+    # of the pod.
     if (@script) {
 	@modpods = @script;
     }
@@ -160,22 +146,23 @@ sub runpod2man {
 	$manpage = "${mandir}/${manpage}.${manext}";
 	push @to_process, [$mod, $tmp, $manpage];
     }
-    # Don't do all pods in same command to avoid busting command line limits
-    while (my @this_batch = splice @to_process, 0, $opts{batchlimit}) {
-	my $cmd = join " ", $pod2man, map "$$_[0] $$_[1]", @this_batch;
-	if (&cmd($cmd) == 0 && !$opts{notify}) {
-	    foreach (@this_batch) {
-		my (undef, $tmp, $manpage) = @$_;
-		if (-s $tmp) {
-		    if (rename($tmp, $manpage)) {
-			$packlist->{$manpage} = { type => 'file' };
-			next;
-		    }
-		}
-		unless ($opts{notify}) {
-		    unlink($tmp);
-		}
-	    }
+
+    my $parser = Pod::Man->new( section => $manext,
+                                official=> 1,
+                                center  => 'Perl Programmers Reference Guide'
+                              );
+    foreach my $page (@to_process) {
+	my($pod, $tmp, $manpage) = @$page;
+
+        print "  $manpage\n";
+	if (!$opts{notify} && $parser->parse_from_file($pod, $tmp)) {
+            if (-s $tmp) {
+                if (rename($tmp, $manpage)) {
+                    $packlist->{$manpage} = { type => 'file' };
+                    next;
+                }
+            }
+            unlink($tmp);
 	}
     }
     chdir "$builddir" || die "Unable to cd back to $builddir directory!\n$!\n";
@@ -200,21 +187,6 @@ exit 0;
 ###############################################################################
 # Utility subroutines from installperl
 
-sub cmd {
-    my ($cmd) = @_;
-    print "  $cmd\n" if $opts{verbose};
-    unless ($opts{notify}) {
-	if ($Config{d_fork}) {
-	    fork ? wait : exec $cmd;  # Allow user to ^C out of command.
-	}
-	else {
-	    system $cmd;
-	}
-	warn "Command failed!!\n" if $?;
-    }
-    return $? != 0;
-}
-
 sub unlink {
     my(@names) = @_;
     my $cnt = 0;
@@ -233,7 +205,7 @@ sub link {
     my($from,$to) = @_;
     my($success) = 0;
 
-    print $opts{verbose} ? "  ln $from $to\n" : "  $to\n" unless $opts{silent};
+    print "  ln $from $to\n" if $opts{verbose};
     eval {
         CORE::link($from, $to)
             ? $success++

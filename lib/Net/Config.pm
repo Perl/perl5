@@ -107,8 +107,8 @@ C<Net::Config> holds configuration data for the modules in the libnet
 distribuion. During installation you will be asked for these values.
 
 The configuration data is held globally in a file in the perl installation
-tree, but a user may override any of these values by providing thier own. This
-can be done by having a C<.libnetrc> file in thier home directory. This file
+tree, but a user may override any of these values by providing their own. This
+can be done by having a C<.libnetrc> file in their home directory. This file
 should return a reference to a HASH containing the keys described below.
 For example
 
@@ -175,8 +175,8 @@ C<"hostname:port"> (eg C<"hostname:99">)
 
 =item ftp_firewall_type
 
-There are many different ftp firewall products avaliable. But unfortunately there
-is not standard for how to traverse a firewall.  The list below shows the
+There are many different ftp firewall products available. But unfortunately
+there is no standard for how to traverse a firewall.  The list below shows the
 sequence of commands that Net::FTP will use
 
   user        Username for remote host
@@ -248,14 +248,14 @@ FTP servers normally work on a non-passive mode. That is when you want to
 transfer data you have to tell the server the address and port to
 connect to.
 
-With some firewalls this does not work as te server cannot
-connect to your machine (because you are beind a firewall) and the firewall
-does not re-write te command. In this case you should set C<ftp_ext_passive>
+With some firewalls this does not work as the server cannot
+connect to your machine (because you are behind a firewall) and the firewall
+does not re-write the command. In this case you should set C<ftp_ext_passive>
 to a I<true> value.
 
 Some servers are configured to only work in passive mode. If you have
 one of these you can force C<Net::FTP> to always transfer in passive
-mode, when not going via a firewall, by cetting C<ftp_int_passive> to
+mode; when not going via a firewall, by setting C<ftp_int_passive> to
 a I<true> value.
 
 =item local_netmask
@@ -273,12 +273,12 @@ libnet package
 
 =item test_hosts
 
-If true them C<make test> may attempt to connect to hosts given in the
+If true then C<make test> may attempt to connect to hosts given in the
 configuration.
 
 =item test_exists
 
-If true the C<Configure> will check each hostname given that it exists
+If true then C<Configure> will check each hostname given that it exists
 
 =back
 

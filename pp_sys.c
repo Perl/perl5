@@ -433,6 +433,9 @@ PP(pp_die)
     SV *tmpsv;
     STRLEN len;
     bool multiarg = 0;
+#ifdef VMS
+    VMSISH_HUSHED  = VMSISH_HUSHED || (PL_op->op_private & OPpHUSH_VMSISH);
+#endif
     if (SP - MARK != 1) {
 	dTARGET;
 	do_join(TARG, &PL_sv_no, MARK, SP);

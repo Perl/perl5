@@ -1074,7 +1074,7 @@ sub outindex {
     $$self{INDEX} = [];
     my $output;
     if (@entries) {
-        my $output = '.IX Xref "'
+        $output = '.IX Xref "'
             . join (' ', map { s/\"/\"\"/; $_ } @entries)
             . '"' . "\n";
     }
@@ -1132,10 +1132,10 @@ sub switchquotes {
         # changes for nroff in =item tags, since they're unnecessary.
         $nroff =~ s/\\f\(CW(.*)\\f[PR]/$1/g;
 
-        # Now finally output the command.  Only bother with .if if the nroff
+        # Now finally output the command.  Only bother with .ie if the nroff
         # and troff output isn't the same.
         if ($nroff ne $troff) {
-            return ".if n $command $nroff\n.el $command $troff\n";
+            return ".ie n $command $nroff\n.el $command $troff\n";
         } else {
             return "$command $nroff\n";
         }

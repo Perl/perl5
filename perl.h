@@ -425,10 +425,10 @@ int usleep(unsigned int);
 #  define MYSWAP
 #endif
 
-/* Cannot include embed.h here on Win32 as win32.h has not 
+/* Cannot include embed.h here on Win32 as win32.h has not
    yet been included and defines some config variables e.g. HAVE_INTERP_INTERN
  */
-#if !defined(PERL_FOR_X2P) && !defined(WIN32)
+#if !defined(PERL_FOR_X2P) && !(defined(WIN32)||defined(VMS))
 #  include "embed.h"
 #endif
 
@@ -1757,6 +1757,7 @@ typedef struct clone_params CLONE_PARAMS;
 #else
 # if defined(VMS)
 #   include "vmsish.h"
+#   include "embed.h"
 # else
 #   if defined(PLAN9)
 #     include "./plan9/plan9ish.h"

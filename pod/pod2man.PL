@@ -36,7 +36,7 @@ $Config{startperl}
 print OUT <<'!NO!SUBS!';
 
 # pod2man -- Convert POD data to formatted *roff input.
-# $Id: pod2man.PL,v 1.6 2001/07/10 11:23:46 eagle Exp $
+# $Id: pod2man.PL,v 1.7 2001/10/20 08:24:15 eagle Exp $
 #
 # Copyright 1999, 2000, 2001 by Russ Allbery <rra@stanford.edu>
 #
@@ -51,6 +51,9 @@ use Pod::Usage qw(pod2usage);
 
 use strict;
 
+# Silence -w warnings.
+use vars qw($running_under_some_shell);
+
 # Insert -- into @ARGV before any single dash argument to hide it from
 # Getopt::Long; we want to interpret it as meaning stdin (which Pod::Parser
 # does correctly).
@@ -64,7 +67,7 @@ Getopt::Long::config ('bundling_override');
 GetOptions (\%options, 'section|s=s', 'release|r=s', 'center|c=s',
             'date|d=s', 'fixed=s', 'fixedbold=s', 'fixeditalic=s',
             'fixedbolditalic=s', 'official|o', 'quotes|q=s', 'lax|l',
-            'help|h') or exit 1;
+            'help|h', 'verbose|v') or exit 1;
 pod2usage (0) if $options{help};
 
 # Official sets --center, but don't override things explicitly set.
@@ -72,12 +75,17 @@ if ($options{official} && !defined $options{center}) {
     $options{center} = 'Perl Programmers Reference Guide';
 }
 
+# Verbose is only our flag, not a Pod::Man flag.
+my $verbose = $options{verbose};
+delete $options{verbose};
+
 # Initialize and run the formatter, pulling a pair of input and output off at
 # a time.
 my $parser = Pod::Man->new (%options);
 my @files;
 do {
     @files = splice (@ARGV, 0, 2);
+    print "  $files[1]\n" if $verbose;
     $parser->parse_from_file (@files);
 } while (@ARGV);
 
@@ -93,7 +101,7 @@ pod2man [B<--section>=I<manext>] [B<--release>=I<version>]
 [B<--center>=I<string>] [B<--date>=I<string>] [B<--fixed>=I<font>]
 [B<--fixedbold>=I<font>] [B<--fixeditalic>=I<font>]
 [B<--fixedbolditalic>=I<font>] [B<--official>] [B<--lax>]
-[B<--quotes>=I<quotes>] [I<input> [I<output>] ...]
+[B<--quotes>=I<quotes>] [B<--verbose>] [I<input> [I<output>] ...]
 
 pod2man B<--help>
 
@@ -216,6 +224,10 @@ that are reliably consistent are 1, 2, and 3.
 
 By default, section 1 will be used unless the file ends in .pm in which case
 section 3 will be selected.
+
+=item B<-v>, B<--verbose>
+
+Print out the name of each output file as it is being generated.
 
 =back
 
