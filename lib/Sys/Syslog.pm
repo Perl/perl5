@@ -23,7 +23,7 @@ Sys::Syslog, openlog, closelog, setlogmask, syslog - Perl interface to the UNIX 
     use Sys::Syslog;
 
     openlog $ident, $logopt, $facility;
-    syslog $priority, $mask, $format, @args;
+    syslog $priority, $format, @args;
     $oldmask = setlogmask $mask_priority;
     closelog;
 
@@ -43,9 +43,9 @@ I<$ident> is prepended to every message.
 I<$logopt> contains one or more of the words I<pid>, I<ndelay>, I<cons>, I<nowait>.
 I<$facility> specifies the part of the system
 
-=item syslog $priority, $mask, $format, @args
+=item syslog $priority, $format, @args
 
-If I<$priority> and I<$mask> permit, logs I<($format, @args)>
+If I<$priority> permits, logs I<($format, @args)>
 printed as by C<printf(3V)>, with the addition that I<%m>
 is replaced with C<"$!"> (the latest error message).
 
@@ -88,8 +88,6 @@ L<syslog(3)>
 Tom Christiansen E<lt>F<tchrist@perl.com>E<gt> and Larry Wall E<lt>F<lwall@sems.com>E<gt>
 
 =cut
-
-$host = hostname() unless $host;	# set $Syslog::host to change
 
 require 'syslog.ph';
 
@@ -201,7 +199,8 @@ sub xlate {
 sub connect {
     unless ($host) {
 	require Sys::Hostname;
-	$host = Sys::Hostname::hostname();
+	my($host_uniq) = Sys::Hostname::hostname();
+	($host) = $host_uniq =~ /(\w+)/;
     }
     my $udp = getprotobyname('udp');
     my $syslog = getservbyname('syslog','udp');
