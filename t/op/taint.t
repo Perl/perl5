@@ -15,6 +15,8 @@ BEGIN {
 use strict;
 use Config;
 
+$| = 1;
+
 # We do not want the whole taint.t to fail
 # just because Errno possibly failing.
 eval { require Errno; import Errno };

@@ -16,6 +16,8 @@ BEGIN {
 
 use strict;
 
+$| = 1;
+
 our @s;
 our $fail;
 
