@@ -3717,6 +3717,8 @@ C<!!!>, C<!!>, C<!>
 
 =item The OUTPUT: Keyword
 
+=item The NO_OUTPUT Keyword
+
 =item The CODE: Keyword
 
 =item The INIT: Keyword
@@ -3733,6 +3735,8 @@ C<!!!>, C<!!>, C<!>
 
 =item The INPUT: Keyword
 
+=item The IN/OUTLIST/IN_OUTLIST Keywords
+
 =item Variable-length Parameter Lists
 
 =item The C_ARGS: Keyword
@@ -3744,6 +3748,8 @@ C<!!!>, C<!!>, C<!>
 =item The REQUIRE: Keyword
 
 =item The CLEANUP: Keyword
+
+=item The POST_CALL: Keyword
 
 =item The BOOT: Keyword
 
@@ -4129,38 +4135,40 @@ hv_iterval, hv_magic, hv_store, hv_store_ent, hv_undef, isALNUM, isALPHA,
 isDIGIT, isLOWER, isSPACE, isUPPER, items, ix, LEAVE, looks_like_number,
 MARK, mg_clear, mg_copy, mg_find, mg_free, mg_get, mg_length, mg_magical,
 mg_set, Move, New, newAV, Newc, newCONSTSUB, newHV, newRV_inc, newRV_noinc,
-NEWSV, newSViv, newSVnv, newSVpv, newSVpvf, newSVpvn, newSVrv, newSVsv,
-newSVuv, newXS, newXSproto, Newz, Nullav, Nullch, Nullcv, Nullhv, Nullsv,
-ORIGMARK, perl_alloc, perl_construct, perl_destruct, perl_free, perl_parse,
-perl_run, PL_DBsingle, PL_DBsub, PL_DBtrace, PL_dowarn, PL_modglobal,
-PL_na, PL_sv_no, PL_sv_undef, PL_sv_yes, POPi, POPl, POPn, POPp, POPs,
-PUSHi, PUSHMARK, PUSHn, PUSHp, PUSHs, PUSHu, PUTBACK, Renew, Renewc,
-require_pv, RETVAL, Safefree, savepv, savepvn, SAVETMPS, SP, SPAGAIN, ST,
-strEQ, strGE, strGT, strLE, strLT, strNE, strnEQ, strnNE, StructCopy,
-SvCUR, SvCUR_set, SvEND, SvGETMAGIC, SvGROW, SvIOK, SvIOKp, SvIOK_off,
-SvIOK_on, SvIOK_only, SvIV, SvIVX, SvLEN, SvNIOK, SvNIOKp, SvNIOK_off,
-SvNOK, SvNOKp, SvNOK_off, SvNOK_on, SvNOK_only, SvNV, SvNVX, SvOK, SvOOK,
-SvPOK, SvPOKp, SvPOK_off, SvPOK_on, SvPOK_only, SvPV, SvPVX, SvPV_force,
+NEWSV, newSViv, newSVnv, newSVpv, newSVpvf, newSVpvn, newSVpvn_share,
+newSVrv, newSVsv, newSVuv, newXS, newXSproto, Newz, Nullav, Nullch, Nullcv,
+Nullhv, Nullsv, ORIGMARK, perl_alloc, perl_construct, perl_destruct,
+perl_free, perl_parse, perl_run, PL_DBsingle, PL_DBsub, PL_DBtrace,
+PL_dowarn, PL_modglobal, PL_na, PL_sv_no, PL_sv_undef, PL_sv_yes, POPi,
+POPl, POPn, POPp, POPs, PUSHi, PUSHMARK, PUSHn, PUSHp, PUSHs, PUSHu,
+PUTBACK, Renew, Renewc, require_pv, RETVAL, Safefree, savepv, savepvn,
+SAVETMPS, SP, SPAGAIN, ST, strEQ, strGE, strGT, strLE, strLT, strNE,
+strnEQ, strnNE, StructCopy, SvCUR, SvCUR_set, SvEND, SvGETMAGIC, SvGROW,
+SvIOK, SvIOKp, SvIOK_notUV, SvIOK_off, SvIOK_on, SvIOK_only, SvIOK_only_UV,
+SvIOK_UV, SvIV, SvIVX, SvLEN, SvNIOK, SvNIOKp, SvNIOK_off, SvNOK, SvNOKp,
+SvNOK_off, SvNOK_on, SvNOK_only, SvNV, SvNVX, SvOK, SvOOK, SvPOK, SvPOKp,
+SvPOK_off, SvPOK_on, SvPOK_only, SvPOK_only_UTF8, SvPV, SvPVX, SvPV_force,
 SvPV_nolen, SvREFCNT, SvREFCNT_dec, SvREFCNT_inc, SvROK, SvROK_off,
 SvROK_on, SvRV, SvSETMAGIC, SvSetSV, SvSetSV_nosteal, SvSTASH, SvTAINT,
 SvTAINTED, SvTAINTED_off, SvTAINTED_on, SvTRUE, svtype, SvTYPE, SVt_IV,
-SVt_NV, SVt_PV, SVt_PVAV, SVt_PVCV, SVt_PVHV, SVt_PVMG, SvUPGRADE, SvUV,
-SvUVX, sv_2mortal, sv_bless, sv_catpv, sv_catpvf, sv_catpvf_mg, sv_catpvn,
-sv_catpvn_mg, sv_catpv_mg, sv_catsv, sv_catsv_mg, sv_chop, sv_clear,
-sv_cmp, sv_cmp_locale, sv_dec, sv_derived_from, sv_eq, sv_free, sv_gets,
-sv_grow, sv_inc, sv_insert, sv_isa, sv_isobject, sv_len, sv_len_utf8,
-sv_magic, sv_mortalcopy, sv_newmortal, sv_pvn_force, sv_pvutf8n_force,
-sv_reftype, sv_replace, sv_rvweaken, sv_setiv, sv_setiv_mg, sv_setnv,
-sv_setnv_mg, sv_setpv, sv_setpvf, sv_setpvf_mg, sv_setpviv, sv_setpviv_mg,
-sv_setpvn, sv_setpvn_mg, sv_setpv_mg, sv_setref_iv, sv_setref_nv,
-sv_setref_pv, sv_setref_pvn, sv_setsv, sv_setsv_mg, sv_setuv, sv_setuv_mg,
-sv_true, sv_unmagic, sv_unref, sv_upgrade, sv_usepvn, sv_usepvn_mg,
+SVt_NV, SVt_PV, SVt_PVAV, SVt_PVCV, SVt_PVHV, SVt_PVMG, SvUPGRADE, SvUTF8,
+SvUTF8_off, SvUTF8_on, SvUV, SvUVX, sv_2mortal, sv_bless, sv_catpv,
+sv_catpvf, sv_catpvf_mg, sv_catpvn, sv_catpvn_mg, sv_catpv_mg, sv_catsv,
+sv_catsv_mg, sv_chop, sv_clear, sv_cmp, sv_cmp_locale, sv_dec,
+sv_derived_from, sv_eq, sv_free, sv_gets, sv_grow, sv_inc, sv_insert,
+sv_isa, sv_isobject, sv_len, sv_len_utf8, sv_magic, sv_mortalcopy,
+sv_newmortal, sv_pvn_force, sv_pvutf8n_force, sv_reftype, sv_replace,
+sv_rvweaken, sv_setiv, sv_setiv_mg, sv_setnv, sv_setnv_mg, sv_setpv,
+sv_setpvf, sv_setpvf_mg, sv_setpviv, sv_setpviv_mg, sv_setpvn,
+sv_setpvn_mg, sv_setpv_mg, sv_setref_iv, sv_setref_nv, sv_setref_pv,
+sv_setref_pvn, sv_setsv, sv_setsv_mg, sv_setuv, sv_setuv_mg, sv_true,
+sv_unmagic, sv_unref, sv_upgrade, sv_usepvn, sv_usepvn_mg,
 sv_utf8_downgrade, sv_utf8_encode, sv_utf8_upgrade, sv_vcatpvfn,
-sv_vsetpvfn, THIS, toLOWER, toUPPER, U8 *s, utf8_to_bytes, warn, XPUSHi,
-XPUSHn, XPUSHp, XPUSHs, XPUSHu, XS, XSRETURN, XSRETURN_EMPTY, XSRETURN_IV,
-XSRETURN_NO, XSRETURN_NV, XSRETURN_PV, XSRETURN_UNDEF, XSRETURN_YES,
-XST_mIV, XST_mNO, XST_mNV, XST_mPV, XST_mUNDEF, XST_mYES, XS_VERSION,
-XS_VERSION_BOOTCHECK, Zero
+sv_vsetpvfn, THIS, toLOWER, toUPPER, U8 *s, utf8_to_bytes, utf8_to_uv,
+utf8_to_uv_chk, warn, XPUSHi, XPUSHn, XPUSHp, XPUSHs, XPUSHu, XS, XSRETURN,
+XSRETURN_EMPTY, XSRETURN_IV, XSRETURN_NO, XSRETURN_NV, XSRETURN_PV,
+XSRETURN_UNDEF, XSRETURN_YES, XST_mIV, XST_mNO, XST_mNV, XST_mPV,
+XST_mUNDEF, XST_mYES, XS_VERSION, XS_VERSION_BOOTCHECK, Zero
 
 =item AUTHORS
 
@@ -4168,7 +4176,7 @@ XS_VERSION_BOOTCHECK, Zero
 
 =back
 
-=head2 perlintern - autogenerated documentation of purely B<internal> 
+=head2 perlintern - autogenerated documentation of purely B<internal>
 		 Perl functions
 
 =over
@@ -4573,6 +4581,22 @@ finish, print
 
 =item Patching
 
+=back
+
+=item EXTERNAL TOOLS FOR DEBUGGING PERL
+
+=over
+
+=item Rational Software's Purify
+
+=item Purify on Unix
+
+-Accflags=-DPURIFY, -Doptimize='-g', -Uusemymalloc, -Dusemultiplicity
+
+=item Purify on NT
+
+DEFINES, USE_MULTI = define, #PERL_MALLOC = define, CFG = Debug
+
 =item CONCLUSION
 
 I<The Road goes ever on and on, down from the door where it began.>
@@ -4643,10 +4667,10 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 sort() has been changed to use mergesort internally as opposed to the
 earlier quicksort.  For very small lists this may result in slightly slower
-sorting times, but in general the speedup should be at least 20%.
+sorting times, but in general the speedup should be at least 20%. 
 Additional bonuses are that the worst case behaviour of sort() is now
 better (in computer science terms it now runs in time O(N log N), as
-opposed to quicksorts Theta(N**2) worst-case run time behaviour), and that
+opposed to quicksort's Theta(N**2) worst-case run time behaviour), and that
 sort() is now stable (meaning that elements with identical keys will stay
 ordered as they were before the sort)
 
@@ -6494,7 +6518,7 @@ is inherited by derived classes
 
 =item Last Resort
 
-=item Fallback 
+=item Fallback
 
 C<undef>, TRUE, defined, but FALSE
 
@@ -6907,7 +6931,7 @@ bytecode
 
 B<-ofilename>, B<-afilename>, B<-->, B<-f>, B<-fcompress-nullops>,
 B<-fomit-sequence-numbers>, B<-fbypass-nullops>, B<-On>, B<-D>, B<-Do>,
-B<-Db>, B<-Da>, B<-DC>, B<-S>, B<-Ppackage>    Stores package in the
+B<-Db>, B<-Da>, B<-DC>, B<-S>, B<-upackage>    Stores package in the
 output.    =back
 
 =item EXAMPLES
@@ -7209,7 +7233,7 @@ STYLE ] ), cmpthese ( RESULTSHASHREF ), countit(TIME, CODE), disablecache (
 
 B<-ofilename>, B<-afilename>, B<-->, B<-f>, B<-fcompress-nullops>,
 B<-fomit-sequence-numbers>, B<-fbypass-nullops>, B<-On>, B<-D>, B<-Do>,
-B<-Db>, B<-Da>, B<-DC>, B<-S>, B<-Ppackage>    Stores package in the
+B<-Db>, B<-Da>, B<-DC>, B<-S>, B<-upackage>    Stores package in the
 output.    =back
 
 =item EXAMPLES
@@ -7951,7 +7975,7 @@ C<gidtype>, C<glibpth>, C<grep>, C<groupcat>, C<groupstype>, C<gzip>
 
 =item h
 
-C<h_fcntl>, C<h_sysfile>, C<hint>, C<hostcat>, C<huge>
+C<h_fcntl>, C<h_sysfile>, C<hint>, C<hostcat>
 
 =item i
 
@@ -7975,9 +7999,10 @@ C<i_varargs>, C<i_varhdr>, C<i_vfork>, C<ignore_versioned_solibs>,
 C<inc_version_list>, C<inc_version_list_init>, C<incpath>, C<inews>,
 C<installarchlib>, C<installbin>, C<installman1dir>, C<installman3dir>,
 C<installprefix>, C<installprefixexp>, C<installprivlib>, C<installscript>,
-C<installsitearch>, C<installsitebin>, C<installsitelib>, C<installstyle>,
-C<installusrbinperl>, C<installvendorarch>, C<installvendorbin>,
-C<installvendorlib>, C<intsize>, C<ivdformat>, C<ivsize>, C<ivtype>
+C<installscripts>, C<installsitearch>, C<installsitebin>,
+C<installsitelib>, C<installstyle>, C<installusrbinperl>,
+C<installvendorarch>, C<installvendorbin>, C<installvendorlib>, C<intsize>,
+C<ivdformat>, C<ivsize>, C<ivtype>
 
 =item k
 
@@ -7985,12 +8010,12 @@ C<known_extensions>, C<ksh>
 
 =item l
 
-C<large>, C<ld>, C<lddlflags>, C<ldflags>, C<ldflags_uselargefiles>,
-C<ldlibpthname>, C<less>, C<lib_ext>, C<libc>, C<libperl>, C<libpth>,
-C<libs>, C<libsdirs>, C<libsfiles>, C<libsfound>, C<libspath>,
-C<libswanted>, C<libswanted_uselargefiles>, C<line>, C<lint>, C<lkflags>,
-C<ln>, C<lns>, C<locincpth>, C<loclibpth>, C<longdblsize>, C<longlongsize>,
-C<longsize>, C<lp>, C<lpr>, C<ls>, C<lseeksize>, C<lseektype>
+C<ld>, C<lddlflags>, C<ldflags>, C<ldflags_uselargefiles>, C<ldlibpthname>,
+C<less>, C<lib_ext>, C<libc>, C<libperl>, C<libpth>, C<libs>, C<libsdirs>,
+C<libsfiles>, C<libsfound>, C<libspath>, C<libswanted>,
+C<libswanted_uselargefiles>, C<line>, C<lint>, C<lkflags>, C<ln>, C<lns>,
+C<locincpth>, C<loclibpth>, C<longdblsize>, C<longlongsize>, C<longsize>,
+C<lp>, C<lpr>, C<ls>, C<lseeksize>, C<lseektype>
 
 =item m
 
@@ -8000,9 +8025,8 @@ C<man3direxp>, C<man3ext>
 
 =item M
 
-C<Mcc>, C<medium>, C<mips_type>, C<mkdir>, C<mmaptype>, C<models>,
-C<modetype>, C<more>, C<multiarch>, C<mv>, C<myarchname>, C<mydomain>,
-C<myhostname>, C<myuname>
+C<Mcc>, C<mips_type>, C<mkdir>, C<mmaptype>, C<modetype>, C<more>,
+C<multiarch>, C<mv>, C<myarchname>, C<mydomain>, C<myhostname>, C<myuname>
 
 =item n
 
@@ -8024,9 +8048,9 @@ C<perl>
 =item P
 
 C<PERL_REVISION>, C<PERL_SUBVERSION>, C<PERL_VERSION>, C<perladmin>,
-C<perlpath>, C<pg>, C<phostname>, C<pidtype>, C<plibpth>, C<pm_apiversion>,
-C<pmake>, C<pr>, C<prefix>, C<prefixexp>, C<privlib>, C<privlibexp>,
-C<prototype>, C<ptrsize>
+C<perllibs>, C<perlpath>, C<pg>, C<phostname>, C<pidtype>, C<plibpth>,
+C<pm_apiversion>, C<pmake>, C<pr>, C<prefix>, C<prefixexp>, C<privlib>,
+C<privlibexp>, C<prototype>, C<ptrsize>
 
 =item q
 
@@ -8045,15 +8069,14 @@ C<shmattype>, C<shortsize>, C<shrpenv>, C<shsharp>, C<sig_count>,
 C<sig_name>, C<sig_name_init>, C<sig_num>, C<sig_num_init>, C<signal_t>,
 C<sitearch>, C<sitearchexp>, C<sitebin>, C<sitebinexp>, C<sitelib>,
 C<sitelib_stem>, C<sitelibexp>, C<siteprefix>, C<siteprefixexp>,
-C<sizesize>, C<sizetype>, C<sleep>, C<smail>, C<small>, C<so>,
-C<sockethdr>, C<socketlib>, C<socksizetype>, C<sort>, C<spackage>,
-C<spitshell>, C<split>, C<sPRId64>, C<sPRIeldbl>, C<sPRIEUldbl>,
-C<sPRIfldbl>, C<sPRIFUldbl>, C<sPRIgldbl>, C<sPRIGUldbl>, C<sPRIi64>,
-C<sPRIo64>, C<sPRIu64>, C<sPRIx64>, C<sPRIXU64>, C<src>, C<sSCNfldbl>,
-C<ssizetype>, C<startperl>, C<startsh>, C<static_ext>, C<stdchar>,
-C<stdio_base>, C<stdio_bufsiz>, C<stdio_cnt>, C<stdio_filbuf>,
-C<stdio_ptr>, C<stdio_stream_array>, C<strings>, C<submit>, C<subversion>,
-C<sysman>
+C<sizesize>, C<sizetype>, C<sleep>, C<smail>, C<so>, C<sockethdr>,
+C<socketlib>, C<socksizetype>, C<sort>, C<spackage>, C<spitshell>,
+C<sPRId64>, C<sPRIeldbl>, C<sPRIEUldbl>, C<sPRIfldbl>, C<sPRIFUldbl>,
+C<sPRIgldbl>, C<sPRIGUldbl>, C<sPRIi64>, C<sPRIo64>, C<sPRIu64>,
+C<sPRIx64>, C<sPRIXU64>, C<src>, C<sSCNfldbl>, C<ssizetype>, C<startperl>,
+C<startsh>, C<static_ext>, C<stdchar>, C<stdio_base>, C<stdio_bufsiz>,
+C<stdio_cnt>, C<stdio_filbuf>, C<stdio_ptr>, C<stdio_stream_array>,
+C<strings>, C<submit>, C<subversion>, C<sysman>
 
 =item t
 
@@ -8465,6 +8488,28 @@ Perl code
 =item DESCRIPTION
 
 =item AUTHOR
+
+=back
+
+=head2 Encode - character encodings
+
+=over
+
+=item TERMINOLOGY
+
+=item bytes
+
+=item chars
+
+=item chars With Encoding
+
+=item Testing For UTF-8
+
+=item Toggling UTF-8-ness
+
+=item UTF-16 and UTF-32 Encodings
+
+=item Handling Malformed Data
 
 =back
 
@@ -11517,12 +11562,13 @@ B<_clean_latex_commands>
 
 =item DESCRIPTION
 
-center, date, fixed, fixedbold, fixeditalic, fixedbolditalic, release,
-section
+center, date, fixed, fixedbold, fixeditalic, fixedbolditalic, quotes,
+release, section
 
 =item DIAGNOSTICS
 
-roff font should be 1 or 2 chars, not `%s', Invalid link %s, Unknown escape
+roff font should be 1 or 2 chars, not "%s", Invalid link %s, Invalid quote
+specification "%s", %s:%d: Unknown command paragraph "%s", Unknown escape
 EE<lt>%sE<gt>, Unknown sequence %s, %s: Unknown command paragraph "%s" on
 line %d, Unmatched =back
 
@@ -12012,12 +12058,13 @@ B<-output>, B<-sections>, B<-ranges>
 
 =item DESCRIPTION
 
-alt, indent, loose, sentence, width
+alt, indent, loose, quotes, sentence, width
 
 =item DIAGNOSTICS
 
-Bizarre space in item, Can't open %s for reading: %s, Unknown escape: %s,
-Unknown sequence: %s, Unmatched =back
+Bizarre space in item, Can't open %s for reading: %s, Invalid quote
+specification "%s", %s:%d: Unknown command paragraph "%s", Unknown escape:
+%s, Unknown sequence: %s, Unmatched =back
 
 =item RESTRICTIONS
 
@@ -12237,6 +12284,8 @@ pack_sockaddr_un PATH, unpack_sockaddr_un SOCKADDR_UN
 =item DESCRIPTION
 
 =item MEMORY STORE
+
+=item ADVISORY LOCKING
 
 =item SPEED
 
