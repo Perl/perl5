@@ -1,3 +1,17 @@
+Thu Aug 24 01:02:02 MEST 2000   Raphael Manfredi <Raphael_Manfredi@pobox.com>
+
+. Description:
+
+
+	ANSI-fied most of the code, preparing for Perl core integration.
+	The next version of Storable will be 0.8, and will be integrated
+	into the Perl core (development branch).
+
+	Dispatch tables were moved upfront to relieve some compilers,
+	especially on AIX and Windows platforms.
+
+	Merged 64-bit fixes from perl5-porters.
+
 Mon Aug 14 09:22:04 MEST 2000   Raphael Manfredi <Raphael_Manfredi@pobox.com>
 
 . Description:

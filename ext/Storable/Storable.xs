@@ -3,7 +3,7 @@
  */
 
 /*
- * $Id: Storable.xs,v 0.7.1.2 2000/08/14 07:19:27 ram Exp $
+ * $Id: Storable.xs,v 0.7.1.3 2000/08/23 23:00:41 ram Exp $
  *
  *  Copyright (c) 1995-2000, Raphael Manfredi
  *  
@@ -11,6 +11,11 @@
  *  as specified in the README file that comes with the distribution.
  *
  * $Log: Storable.xs,v $
+ * Revision 0.7.1.3  2000/08/23 23:00:41  ram
+ * patch3: ANSI-fied most of the code, preparing for Perl core integration
+ * patch3: dispatch tables moved upfront to relieve some compilers
+ * patch3: merged 64-bit fixes from perl5-porters
+ *
  * Revision 0.7.1.2  2000/08/14 07:19:27  ram
  * patch2: added a refcnt dec in retrieve_tied_key()
  *
@@ -50,6 +55,9 @@
 /*
  * Earlier versions of perl might be used, we can't assume they have the latest!
  */
+
+#ifndef PERL_VERSION		/* For perls < 5.6 */
+#define PERL_VERSION PATCHLEVEL
 #ifndef newRV_noinc
 #define newRV_noinc(sv)		((Sv = newRV(sv)), --SvREFCNT(SvRV(Sv)), Sv)
 #endif
@@ -61,6 +69,14 @@
 #ifndef HvSHAREKEYS_off
 #define HvSHAREKEYS_off(hv)	/* Ignore */
 #endif
+#ifndef INT2PTR
+#define INT2PTR(t,v)	(t)(IV)(v)
+#endif
+#ifndef AvFILLp				/* Older perls (<=5.003) lack AvFILLp */
+#define AvFILLp AvFILL
+#endif
+typedef double NV;			/* Older perls lack the NV type */
+#endif						/* PERL_VERSION -- perls < 5.6 */
 
 #ifdef DEBUGME
 #ifndef DASSERT
@@ -645,6 +661,7 @@ static int store_hash(stcxt_t *cxt, HV *hv);
 static int store_tied(stcxt_t *cxt, SV *sv);
 static int store_tied_item(stcxt_t *cxt, SV *sv);
 static int store_other(stcxt_t *cxt, SV *sv);
+static int store_blessed(stcxt_t *cxt, SV *sv, int type, HV *pkg);
 
 static int (*sv_store[])() = {
 	store_ref,			/* svis_REF */
@@ -745,8 +762,7 @@ static SV *(*sv_retrieve[])() = {
 
 #define RETRIEVE(c,x) (*(c)->retrieve_vtbl[(x) >= SX_ERROR ? SX_ERROR : (x)])
 
-static SV *mbuf2sv();
-static int store_blessed();
+static SV *mbuf2sv(void);
 
 /***
  *** Context management.
@@ -757,7 +773,8 @@ static int store_blessed();
  *
  * Called once per "thread" (interpreter) to initialize some global context.
  */
-static void init_perinterp() {
+static void init_perinterp(void)
+{
     INIT_STCXT;
 
     cxt->netorder = 0;		/* true if network order used */
@@ -769,11 +786,11 @@ static void init_perinterp() {
  *
  * Initialize a new store context for real recursion.
  */
-static void init_store_context(cxt, f, optype, network_order)
-stcxt_t *cxt;
-PerlIO *f;
-int optype;
-int network_order;
+static void init_store_context(
+	stcxt_t *cxt,
+	PerlIO *f,
+	int optype,
+	int network_order)
 {
 	TRACEME(("init_store_context"));
 
@@ -817,7 +834,7 @@ int network_order;
 	 *
 	 * It is reported fixed in 5.005, hence the #if.
 	 */
-#if PATCHLEVEL < 5
+#if PERL_VERSION >= 5
 #define HBUCKETS	4096				/* Buckets for %hseen */
 	HvMAX(cxt->hseen) = HBUCKETS - 1;	/* keys %hseen = $HBUCKETS; */
 #endif
@@ -832,7 +849,7 @@ int network_order;
 
 	cxt->hclass = newHV();			/* Where seen classnames are stored */
 
-#if PATCHLEVEL < 5
+#if PERL_VERSION >= 5
 	HvMAX(cxt->hclass) = HBUCKETS - 1;	/* keys %hclass = $HBUCKETS; */
 #endif
 
@@ -853,8 +870,7 @@ int network_order;
  *
  * Clean store context by
  */
-static void clean_store_context(cxt)
-stcxt_t *cxt;
+static void clean_store_context(stcxt_t *cxt)
 {
 	HE *he;
 
@@ -1032,7 +1048,7 @@ stcxt_t *cxt;
  *
  * Tells whether we're in the middle of a store operation.
  */
-int is_storing()
+int is_storing(void)
 {
 	dSTCXT;
 
@@ -1044,7 +1060,7 @@ int is_storing()
  *
  * Tells whether we're in the middle of a retrieve operation.
  */
-int is_retrieving()
+int is_retrieving(void)
 {
 	dSTCXT;
 
@@ -1059,7 +1075,7 @@ int is_retrieving()
  * This is typically out-of-band information that might prove useful
  * to people wishing to convert native to network order data when used.
  */
-int last_op_in_netorder()
+int last_op_in_netorder(void)
 {
 	dSTCXT;
 
@@ -1078,10 +1094,10 @@ int last_op_in_netorder()
  * Returns the routine reference as an SV*, or null if neither the package
  * nor its ancestors know about the method.
  */
-static SV *pkg_fetchmeth(cache, pkg, method)
-HV *cache;
-HV *pkg;
-char *method;
+static SV *pkg_fetchmeth(
+	HV *cache,
+	HV *pkg,
+	char *method)
 {
 	GV *gv;
 	SV *sv;
@@ -1116,10 +1132,10 @@ char *method;
  *
  * Force cached value to be undef: hook ignored even if present.
  */
-static void pkg_hide(cache, pkg, method)
-HV *cache;
-HV *pkg;
-char *method;
+static void pkg_hide(
+	HV *cache,
+	HV *pkg,
+	char *method)
 {
 	(void) hv_store(cache,
 		HvNAME(pkg), strlen(HvNAME(pkg)), newSVsv(&PL_sv_undef), 0);
@@ -1133,10 +1149,10 @@ char *method;
  * Returns the routine reference as an SV*, or null if the object does not
  * know about the method.
  */
-static SV *pkg_can(cache, pkg, method)
-HV *cache;
-HV *pkg;
-char *method;
+static SV *pkg_can(
+	HV *cache,
+	HV *pkg,
+	char *method)
 {
 	SV **svh;
 	SV *sv;
@@ -1174,12 +1190,12 @@ char *method;
  * Call routine as obj->hook(av) in scalar context.
  * Propagates the single returned value if not called in void context.
  */
-static SV *scalar_call(obj, hook, cloning, av, flags)
-SV *obj;
-SV *hook;
-int cloning;
-AV *av;
-I32 flags;
+static SV *scalar_call(
+	SV *obj,
+	SV *hook,
+	int cloning,
+	AV *av,
+	I32 flags)
 {
 	dSP;
 	int count;
@@ -1229,17 +1245,17 @@ I32 flags;
  * Call routine obj->hook(cloning) in list context.
  * Returns the list of returned values in an array.
  */
-static AV *array_call(obj, hook, cloning)
-SV *obj;
-SV *hook;
-int cloning;
+static AV *array_call(
+	SV *obj,
+	SV *hook,
+	int cloning)
 {
 	dSP;
 	int count;
 	AV *av;
 	int i;
 
-	TRACEME(("arrary_call (cloning=%d)", cloning));
+	TRACEME(("array_call (cloning=%d)", cloning));
 
 	ENTER;
 	SAVETMPS;
@@ -1274,11 +1290,11 @@ int cloning;
  *
  * Return true if the class was known, false if the ID was just generated.
  */
-static int known_class(cxt, name, len, classnum)
-stcxt_t *cxt;
-char *name;		/* Class name */
-int len;		/* Name length */
-I32 *classnum;
+static int known_class(
+	stcxt_t *cxt,
+	char *name,		/* Class name */
+	int len,		/* Name length */
+	I32 *classnum)
 {
 	SV **svh;
 	HV *hclass = cxt->hclass;
@@ -1318,9 +1334,7 @@ I32 *classnum;
  * Store a reference.
  * Layout is SX_REF <object> or SX_OVERLOAD <object>.
  */
-static int store_ref(cxt, sv)
-stcxt_t *cxt;
-SV *sv;
+static int store_ref(stcxt_t *cxt, SV *sv)
 {
 	TRACEME(("store_ref (0x%lx)", (unsigned long) sv));
 
@@ -1354,9 +1368,7 @@ SV *sv;
  * If integer or double, the layout is SX_INTEGER <data> or SX_DOUBLE <data>.
  * Small integers (within [-127, +127]) are stored as SX_BYTE <byte>.
  */
-static int store_scalar(cxt, sv)
-stcxt_t *cxt;
-SV *sv;
+static int store_scalar(stcxt_t *cxt, SV *sv)
 {
 	IV iv;
 	char *pv;
@@ -1511,9 +1523,7 @@ SV *sv;
  * Layout is SX_ARRAY <size> followed by each item, in increading index order.
  * Each item is stored as <object>.
  */
-static int store_array(cxt, av)
-stcxt_t *cxt;
-AV *av;
+static int store_array(stcxt_t *cxt, AV *av)
 {
 	SV **sav;
 	I32 len = av_len(av) + 1;
@@ -1558,9 +1568,7 @@ AV *av;
  * Borrowed from perl source file pp_ctl.c, where it is used by pp_sort.
  */
 static int
-sortcmp(a, b)
-const void *a;
-const void *b;
+sortcmp(const void *a, const void *b)
 {
 	return sv_cmp(*(SV * const *) a, *(SV * const *) b);
 }
@@ -1576,9 +1584,7 @@ const void *b;
  * Keys are stored as <length> <data>, the <data> section being omitted
  * if length is 0.
  */
-static int store_hash(cxt, hv)
-stcxt_t *cxt;
-HV *hv;
+static int store_hash(stcxt_t *cxt, HV *hv)
 {
 	I32 len = HvKEYS(hv);
 	I32 i;
@@ -1735,9 +1741,7 @@ out:
  * dealing with a tied hash, we store SX_TIED_HASH <hash object>, where
  * <hash object> stands for the serialization of the tied hash.
  */
-static int store_tied(cxt, sv)
-stcxt_t *cxt;
-SV *sv;
+static int store_tied(stcxt_t *cxt, SV *sv)
 {
 	MAGIC *mg;
 	int ret = 0;
@@ -1805,9 +1809,7 @@ SV *sv;
  *     SX_TIED_KEY <object> <key>
  *     SX_TIED_IDX <object> <index>
  */
-static int store_tied_item(cxt, sv)
-stcxt_t *cxt;
-SV *sv;
+static int store_tied_item(stcxt_t *cxt, SV *sv)
 {
 	MAGIC *mg;
 	int ret;
@@ -1891,11 +1893,12 @@ SV *sv;
  * recursion, until we reach flags indicating no recursion, at which point
  * we know we've resynchronized with a single layout, after <flags>.
  */
-static int store_hook(cxt, sv, type, pkg, hook)
-stcxt_t *cxt;
-SV *sv;
-HV *pkg;
-SV *hook;
+static int store_hook(
+	stcxt_t *cxt,
+	SV *sv,
+	int type,
+	HV *pkg,
+	SV *hook)
 {
 	I32 len;
 	char *class;
@@ -2190,11 +2193,11 @@ SV *hook;
  * where <index> is the classname index, stored on 0 or 4 bytes depending
  * on the high-order bit in flag (same encoding as above for <len>).
  */
-static int store_blessed(cxt, sv, type, pkg)
-stcxt_t *cxt;
-SV *sv;
-int type;
-HV *pkg;
+static int store_blessed(
+	stcxt_t *cxt,
+	SV *sv,
+	int type,
+	HV *pkg)
 {
 	SV *hook;
 	I32 len;
@@ -2271,9 +2274,7 @@ HV *pkg;
  * true value, then don't croak, just warn, and store a placeholder string
  * instead.
  */
-static int store_other(cxt, sv)
-stcxt_t *cxt;
-SV *sv;
+static int store_other(stcxt_t *cxt, SV *sv)
 {
 	STRLEN len;
 	static char buf[80];
@@ -2320,8 +2321,7 @@ SV *sv;
  * Returns the type of the SV, identified by an integer. That integer
  * may then be used to index the dynamic routine dispatch table.
  */
-static int sv_type(sv)
-SV *sv;
+static int sv_type(SV *sv)
 {
 	switch (SvTYPE(sv)) {
 	case SVt_NULL:
@@ -2379,9 +2379,7 @@ SV *sv;
  * object (one for which storage has started -- it may not be over if we have
  * a self-referenced structure). This data set forms a stored <object>.
  */
-static int store(cxt, sv)
-stcxt_t *cxt;
-SV *sv;
+static int store(stcxt_t *cxt, SV *sv)
 {
 	SV **svh;
 	int ret;
@@ -2465,8 +2463,7 @@ SV *sv;
  * Note that no byte ordering info is emitted when <network> is true, since
  * integers will be emitted in network order in that case.
  */
-static int magic_write(cxt)
-stcxt_t *cxt;
+static int magic_write(stcxt_t *cxt)
 {
 	char buf[256];	/* Enough room for 256 hexa digits */
 	unsigned char c;
@@ -2524,12 +2521,12 @@ stcxt_t *cxt;
  * It is required to provide a non-null `res' when the operation type is not
  * dclone() and store() is performed to memory.
  */
-static int do_store(f, sv, optype, network_order, res)
-PerlIO *f;
-SV *sv;
-int optype;
-int network_order;
-SV **res;
+static int do_store(
+	PerlIO *f,
+	SV *sv,
+	int optype,
+	int network_order,
+	SV **res)
 {
 	dSTCXT;
 	int status;
@@ -2641,12 +2638,10 @@ SV **res;
  * Store the transitive data closure of given object to disk.
  * Returns 0 on error, a true value otherwise.
  */
-int pstore(f, sv)
-PerlIO *f;
-SV *sv;
+int pstore(PerlIO *f, SV *sv)
 {
 	TRACEME(("pstore"));
-	return do_store(f, sv, 0, FALSE, (SV**)0);
+	return do_store(f, sv, 0, FALSE, (SV**) 0);
 
 }
 
@@ -2656,12 +2651,10 @@ SV *sv;
  * Same as pstore(), but network order is used for integers and doubles are
  * emitted as strings.
  */
-int net_pstore(f, sv)
-PerlIO *f;
-SV *sv;
+int net_pstore(PerlIO *f, SV *sv)
 {
 	TRACEME(("net_pstore"));
-	return do_store(f, sv, 0, TRUE, (SV**)0);
+	return do_store(f, sv, 0, TRUE, (SV**) 0);
 }
 
 /***
@@ -2673,7 +2666,7 @@ SV *sv;
  *
  * Build a new SV out of the content of the internal memory buffer.
  */
-static SV *mbuf2sv()
+static SV *mbuf2sv(void)
 {
 	dSTCXT;
 
@@ -2686,15 +2679,14 @@ static SV *mbuf2sv()
  * Store the transitive data closure of given object to memory.
  * Returns undef on error, a scalar value containing the data otherwise.
  */
-SV *mstore(sv)
-SV *sv;
+SV *mstore(SV *sv)
 {
 	dSTCXT;
 	SV *out;
 
 	TRACEME(("mstore"));
 
-	if (!do_store((PerlIO*)0, sv, 0, FALSE, &out))
+	if (!do_store((PerlIO*) 0, sv, 0, FALSE, &out))
 		return &PL_sv_undef;
 
 	return out;
@@ -2706,15 +2698,14 @@ SV *sv;
  * Same as mstore(), but network order is used for integers and doubles are
  * emitted as strings.
  */
-SV *net_mstore(sv)
-SV *sv;
+SV *net_mstore(SV *sv)
 {
 	dSTCXT;
 	SV *out;
 
 	TRACEME(("net_mstore"));
 
-	if (!do_store((PerlIO*)0, sv, 0, TRUE, &out))
+	if (!do_store((PerlIO*) 0, sv, 0, TRUE, &out))
 		return &PL_sv_undef;
 
 	return out;
@@ -2730,8 +2721,7 @@ SV *sv;
  * Return an error via croak, since it is not possible that we get here
  * under normal conditions, when facing a file produced via pstore().
  */
-static SV *retrieve_other(cxt)
-stcxt_t *cxt;
+static SV *retrieve_other(stcxt_t *cxt)
 {
 	if (
 		cxt->ver_major != STORABLE_BIN_MAJOR &&
@@ -2756,8 +2746,7 @@ stcxt_t *cxt;
  * Layout is SX_IX_BLESS <index> <object> with SX_IX_BLESS already read.
  * <index> can be coded on either 1 or 5 bytes.
  */
-static SV *retrieve_idx_blessed(cxt)
-stcxt_t *cxt;
+static SV *retrieve_idx_blessed(stcxt_t *cxt)
 {
 	I32 idx;
 	char *class;
@@ -2799,8 +2788,7 @@ stcxt_t *cxt;
  * Layout is SX_BLESS <len> <classname> <object> with SX_BLESS already read.
  * <len> can be coded on either 1 or 5 bytes.
  */
-static SV *retrieve_blessed(cxt)
-stcxt_t *cxt;
+static SV *retrieve_blessed(stcxt_t *cxt)
 {
 	I32 len;
 	SV *sv;
@@ -2856,8 +2844,7 @@ stcxt_t *cxt;
  * is an unknown amount of serialized objects after the SX_HOOK mark.  Until
  * we reach a <flags> marker with the recursion bit cleared.
  */
-static SV *retrieve_hook(cxt)
-stcxt_t *cxt;
+static SV *retrieve_hook(stcxt_t *cxt)
 {
 	I32 len;
 	char buf[LG_BLESS + 1];		/* Avoid malloc() if possible */
@@ -3106,8 +3093,7 @@ stcxt_t *cxt;
  * Retrieve reference to some other scalar.
  * Layout is SX_REF <object>, with SX_REF already read.
  */
-static SV *retrieve_ref(cxt)
-stcxt_t *cxt;
+static SV *retrieve_ref(stcxt_t *cxt)
 {
 	SV *rv;
 	SV *sv;
@@ -3161,8 +3147,7 @@ stcxt_t *cxt;
  * Retrieve reference to some other scalar with overloading.
  * Layout is SX_OVERLOAD <object>, with SX_OVERLOAD already read.
  */
-static SV *retrieve_overloaded(cxt)
-stcxt_t *cxt;
+static SV *retrieve_overloaded(stcxt_t *cxt)
 {
 	SV *rv;
 	SV *sv;
@@ -3210,8 +3195,7 @@ stcxt_t *cxt;
  * Retrieve tied array
  * Layout is SX_TIED_ARRAY <object>, with SX_TIED_ARRAY already read.
  */
-static SV *retrieve_tied_array(cxt)
-stcxt_t *cxt;
+static SV *retrieve_tied_array(stcxt_t *cxt)
 {
 	SV *tv;
 	SV *sv;
@@ -3240,8 +3224,7 @@ stcxt_t *cxt;
  * Retrieve tied hash
  * Layout is SX_TIED_HASH <object>, with SX_TIED_HASH already read.
  */
-static SV *retrieve_tied_hash(cxt)
-stcxt_t *cxt;
+static SV *retrieve_tied_hash(stcxt_t *cxt)
 {
 	SV *tv;
 	SV *sv;
@@ -3298,8 +3281,7 @@ stcxt_t *cxt;
  * Retrieve reference to value in a tied hash.
  * Layout is SX_TIED_KEY <object> <key>, with SX_TIED_KEY already read.
  */
-static SV *retrieve_tied_key(cxt)
-stcxt_t *cxt;
+static SV *retrieve_tied_key(stcxt_t *cxt)
 {
 	SV *tv;
 	SV *sv;
@@ -3331,8 +3313,7 @@ stcxt_t *cxt;
  * Retrieve reference to value in a tied array.
  * Layout is SX_TIED_IDX <object> <idx>, with SX_TIED_IDX already read.
  */
-static SV *retrieve_tied_idx(cxt)
-stcxt_t *cxt;
+static SV *retrieve_tied_idx(stcxt_t *cxt)
 {
 	SV *tv;
 	SV *sv;
@@ -3365,8 +3346,7 @@ stcxt_t *cxt;
  * The scalar is "long" in that <length> is larger than LG_SCALAR so it
  * was not stored on a single byte.
  */
-static SV *retrieve_lscalar(cxt)
-stcxt_t *cxt;
+static SV *retrieve_lscalar(stcxt_t *cxt)
 {
 	STRLEN len;
 	SV *sv;
@@ -3411,8 +3391,7 @@ stcxt_t *cxt;
  * The scalar is "short" so <length> is single byte. If it is 0, there
  * is no <data> section.
  */
-static SV *retrieve_scalar(cxt)
-stcxt_t *cxt;
+static SV *retrieve_scalar(stcxt_t *cxt)
 {
 	int len;
 	SV *sv;
@@ -3466,8 +3445,7 @@ stcxt_t *cxt;
  * Retrieve defined integer.
  * Layout is SX_INTEGER <data>, whith SX_INTEGER already read.
  */
-static SV *retrieve_integer(cxt)
-stcxt_t *cxt;
+static SV *retrieve_integer(stcxt_t *cxt)
 {
 	SV *sv;
 	IV iv;
@@ -3490,8 +3468,7 @@ stcxt_t *cxt;
  * Retrieve defined integer in network order.
  * Layout is SX_NETINT <data>, whith SX_NETINT already read.
  */
-static SV *retrieve_netint(cxt)
-stcxt_t *cxt;
+static SV *retrieve_netint(stcxt_t *cxt)
 {
 	SV *sv;
 	int iv;
@@ -3519,8 +3496,7 @@ stcxt_t *cxt;
  * Retrieve defined double.
  * Layout is SX_DOUBLE <data>, whith SX_DOUBLE already read.
  */
-static SV *retrieve_double(cxt)
-stcxt_t *cxt;
+static SV *retrieve_double(stcxt_t *cxt)
 {
 	SV *sv;
 	NV nv;
@@ -3543,8 +3519,7 @@ stcxt_t *cxt;
  * Retrieve defined byte (small integer within the [-128, +127] range).
  * Layout is SX_BYTE <data>, whith SX_BYTE already read.
  */
-static SV *retrieve_byte(cxt)
-stcxt_t *cxt;
+static SV *retrieve_byte(stcxt_t *cxt)
 {
 	SV *sv;
 	int siv;
@@ -3567,8 +3542,7 @@ stcxt_t *cxt;
  *
  * Return the undefined value.
  */
-static SV *retrieve_undef(cxt)
-stcxt_t *cxt;
+static SV *retrieve_undef(stcxt_t *cxt)
 {
 	SV* sv;
 
@@ -3585,8 +3559,7 @@ stcxt_t *cxt;
  *
  * Return the immortal undefined value.
  */
-static SV *retrieve_sv_undef(cxt)
-stcxt_t *cxt;
+static SV *retrieve_sv_undef(stcxt_t *cxt)
 {
 	SV *sv = &PL_sv_undef;
 
@@ -3601,8 +3574,7 @@ stcxt_t *cxt;
  *
  * Return the immortal yes value.
  */
-static SV *retrieve_sv_yes(cxt)
-stcxt_t *cxt;
+static SV *retrieve_sv_yes(stcxt_t *cxt)
 {
 	SV *sv = &PL_sv_yes;
 
@@ -3617,8 +3589,7 @@ stcxt_t *cxt;
  *
  * Return the immortal no value.
  */
-static SV *retrieve_sv_no(cxt)
-stcxt_t *cxt;
+static SV *retrieve_sv_no(stcxt_t *cxt)
 {
 	SV *sv = &PL_sv_no;
 
@@ -3637,8 +3608,7 @@ stcxt_t *cxt;
  *
  * When we come here, SX_ARRAY has been read already.
  */
-static SV *retrieve_array(cxt)
-stcxt_t *cxt;
+static SV *retrieve_array(stcxt_t *cxt)
 {
 	I32 len;
 	I32 i;
@@ -3689,8 +3659,7 @@ stcxt_t *cxt;
  *
  * When we come here, SX_HASH has been read already.
  */
-static SV *retrieve_hash(cxt)
-stcxt_t *cxt;
+static SV *retrieve_hash(stcxt_t *cxt)
 {
 	I32 len;
 	I32 size;
@@ -3763,8 +3732,7 @@ stcxt_t *cxt;
  *
  * When we come here, SX_ARRAY has been read already.
  */
-static SV *old_retrieve_array(cxt)
-stcxt_t *cxt;
+static SV *old_retrieve_array(stcxt_t *cxt)
 {
 	I32 len;
 	I32 i;
@@ -3798,9 +3766,9 @@ stcxt_t *cxt;
 			continue;			/* av_extend() already filled us with undef */
 		}
 		if (c != SX_ITEM)
-			(void) retrieve_other(0);	/* Will croak out */
+			(void) retrieve_other((stcxt_t *) 0);	/* Will croak out */
 		TRACEME(("(#%d) item", i));
-		sv = retrieve(cxt);				/* Retrieve item */
+		sv = retrieve(cxt);							/* Retrieve item */
 		if (!sv)
 			return (SV *) 0;
 		if (av_store(av, i, sv) == 0)
@@ -3824,8 +3792,7 @@ stcxt_t *cxt;
  *
  * When we come here, SX_HASH has been read already.
  */
-static SV *old_retrieve_hash(cxt)
-stcxt_t *cxt;
+static SV *old_retrieve_hash(stcxt_t *cxt)
 {
 	I32 len;
 	I32 size;
@@ -3874,7 +3841,7 @@ stcxt_t *cxt;
 			if (!sv)
 				return (SV *) 0;
 		} else
-			(void) retrieve_other(0);	/* Will croak out */
+			(void) retrieve_other((stcxt_t *) 0);	/* Will croak out */
 
 		/*
 		 * Get key.
@@ -3885,7 +3852,7 @@ stcxt_t *cxt;
 
 		GETMARK(c);
 		if (c != SX_KEY)
-			(void) retrieve_other(0);	/* Will croak out */
+			(void) retrieve_other((stcxt_t *) 0);	/* Will croak out */
 		RLEN(size);						/* Get key size */
 		KBUFCHK(size);					/* Grow hash key read pool if needed */
 		if (size)
@@ -3921,8 +3888,7 @@ stcxt_t *cxt;
  * Note that there's no byte ordering info emitted when network order was
  * used at store time.
  */
-static SV *magic_check(cxt)
-stcxt_t *cxt;
+static SV *magic_check(stcxt_t *cxt)
 {
 	char buf[256];
 	char byteorder[256];
@@ -4041,8 +4007,7 @@ magic_ok:
  * root SV (which may be an AV or an HV for what we care).
  * Returns null if there is a problem.
  */
-static SV *retrieve(cxt)
-stcxt_t *cxt;
+static SV *retrieve(stcxt_t *cxt)
 {
 	int type;
 	SV **svh;
@@ -4187,10 +4152,10 @@ first_time:		/* Will disappear when support for old format is dropped */
  * Retrieve data held in file and return the root object.
  * Common routine for pretrieve and mretrieve.
  */
-static SV *do_retrieve(f, in, optype)
-PerlIO *f;
-SV *in;
-int optype;
+static SV *do_retrieve(
+	PerlIO *f,
+	SV *in,
+	int optype)
 {
 	dSTCXT;
 	SV *sv;
@@ -4351,8 +4316,7 @@ int optype;
  *
  * Retrieve data held in file and return the root object, undef on error.
  */
-SV *pretrieve(f)
-PerlIO *f;
+SV *pretrieve(PerlIO *f)
 {
 	TRACEME(("pretrieve"));
 	return do_retrieve(f, Nullsv, 0);
@@ -4363,11 +4327,10 @@ PerlIO *f;
  *
  * Retrieve data held in scalar and return the root object, undef on error.
  */
-SV *mretrieve(sv)
-SV *sv;
+SV *mretrieve(SV *sv)
 {
 	TRACEME(("mretrieve"));
-	return do_retrieve((PerlIO*)0, sv, 0);
+	return do_retrieve((PerlIO*) 0, sv, 0);
 }
 
 /***
@@ -4383,8 +4346,7 @@ SV *sv;
  * there. Not that efficient, but it should be faster than doing it from
  * pure perl anyway.
  */
-SV *dclone(sv)
-SV *sv;
+SV *dclone(SV *sv)
 {
 	dSTCXT;
 	int size;
@@ -4406,7 +4368,7 @@ SV *sv;
 	 * we need to allocate one because we're deep cloning from a hook.
 	 */
 
-	if (!do_store((PerlIO*)0, sv, ST_CLONE, FALSE, (SV**)0))
+	if (!do_store((PerlIO*) 0, sv, ST_CLONE, FALSE, (SV**) 0))
 		return &PL_sv_undef;				/* Error during store */
 
 	/*
@@ -4428,7 +4390,7 @@ SV *sv;
 	TRACEME(("dclone stored %d bytes", size));
 
 	MBUF_INIT(size);
-	out = do_retrieve((PerlIO*)0, Nullsv, ST_CLONE);	/* Will free non-root context */
+	out = do_retrieve((PerlIO*) 0, Nullsv, ST_CLONE);	/* Will free non-root context */
 
 	TRACEME(("dclone returns 0x%lx", (unsigned long) out));
 
