@@ -2598,7 +2598,7 @@ init_postdump_symbols(register int argc, register char **argv, register char **e
 	for (; argc > 0 && **argv == '-'; argc--,argv++) {
 	    if (!argv[0][1])
 		break;
-	    if (argv[0][1] == '-') {
+	    if (argv[0][1] == '-' && !argv[0][2]) {
 		argc--,argv++;
 		break;
 	    }
