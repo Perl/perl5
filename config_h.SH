@@ -757,12 +757,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$i_memory I_MEMORY		/**/
 
-/* I_NDBM:
- *	This symbol, if defined, indicates that <ndbm.h> exists and should
- *	be included.
- */
-#$i_ndbm I_NDBM	/**/
-
 /* I_NET_ERRNO:
  *	This symbol, if defined, indicates that <net/errno.h> exists and 
  *	should be included.
@@ -3443,6 +3437,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_suidsafe SETUID_SCRIPTS_ARE_SECURE_NOW	/**/
 #$d_dosuid DOSUID		/**/
+
+/* I_NDBM:
+ *	This symbol, if defined, indicates that <ndbm.h> exists and should
+ *	be included.
+ */
+#$i_ndbm I_NDBM	/**/
 
 /* I_STDARG:
  *	This symbol, if defined, indicates that <stdarg.h> exists and should
