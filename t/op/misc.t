@@ -677,3 +677,8 @@ sub bad {
 }
 EXPECT
 OK
+########
+# Bug 20010506.041
+"abcd\x{1234}" =~ /(a)(b[c])(d+)?/i and print "ok\n";
+EXPECT
+ok
