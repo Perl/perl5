@@ -102,7 +102,7 @@ I32 lval;
 	    continue;
 	if (HeKLEN(entry) != klen)
 	    continue;
-	if (bcmp(HeKEY(entry),key,klen))	/* is this it? */
+	if (memcmp(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
 	return &HeVAL(entry);
     }
@@ -145,17 +145,12 @@ register U32 hash;
     xhv = (XPVHV*)SvANY(hv);
 
     if (SvRMAGICAL(hv) && mg_find((SV*)hv,'P')) {
-	if (!(entry = xhv->xhv_eiter)) {
-	    xhv->xhv_eiter = entry = new_he();	/* only one HE per MAGICAL hash */
-	    Zero(entry, 1, HE);
-	    HeKLEN(entry) = HEf_SVKEY;		/* hent_key is holding an SV* */
-	}
-	else if ((sv = HeSVKEY(entry)))
-	    SvREFCNT_dec(sv);
 	sv = sv_newmortal();
 	mg_copy((SV*)hv, sv, (char*)keysv, HEf_SVKEY);
+	entry = &He;
 	HeVAL(entry) = sv;
-	HeKEY(entry) = (char*)SvREFCNT_inc(keysv);
+	HeKEY(entry) = (char*)keysv;
+	HeKLEN(entry) = HEf_SVKEY;		/* hent_key is holding an SV* */
 	return entry;
     }
 
@@ -181,7 +176,7 @@ register U32 hash;
 	    continue;
 	if (HeKLEN(entry) != klen)
 	    continue;
-	if (bcmp(HeKEY(entry),key,klen))	/* is this it? */
+	if (memcmp(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
 	return entry;
     }
@@ -245,7 +240,7 @@ register U32 hash;
 	    continue;
 	if (HeKLEN(entry) != klen)
 	    continue;
-	if (bcmp(HeKEY(entry),key,klen))	/* is this it? */
+	if (memcmp(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
 	SvREFCNT_dec(HeVAL(entry));
 	HeVAL(entry) = val;
@@ -319,7 +314,7 @@ register U32 hash;
 	    continue;
 	if (HeKLEN(entry) != klen)
 	    continue;
-	if (bcmp(HeKEY(entry),key,klen))	/* is this it? */
+	if (memcmp(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
 	SvREFCNT_dec(HeVAL(entry));
 	HeVAL(entry) = val;
@@ -388,7 +383,7 @@ I32 flags;
 	    continue;
 	if (HeKLEN(entry) != klen)
 	    continue;
-	if (bcmp(HeKEY(entry),key,klen))	/* is this it? */
+	if (memcmp(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
 	*oentry = HeNEXT(entry);
 	if (i && !*oentry)
@@ -450,7 +445,7 @@ U32 hash;
 	    continue;
 	if (HeKLEN(entry) != klen)
 	    continue;
-	if (bcmp(HeKEY(entry),key,klen))	/* is this it? */
+	if (memcmp(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
 	*oentry = HeNEXT(entry);
 	if (i && !*oentry)
@@ -504,7 +499,7 @@ U32 klen;
 	    continue;
 	if (HeKLEN(entry) != klen)
 	    continue;
-	if (bcmp(HeKEY(entry),key,klen))	/* is this it? */
+	if (memcmp(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
 	return TRUE;
     }
@@ -550,7 +545,7 @@ U32 hash;
 	    continue;
 	if (HeKLEN(entry) != klen)
 	    continue;
-	if (bcmp(HeKEY(entry),key,klen))	/* is this it? */
+	if (memcmp(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
 	return TRUE;
     }
@@ -783,16 +778,18 @@ HV *hv;
 
     if (SvRMAGICAL(hv) && (mg = mg_find((SV*)hv,'P'))) {
 	SV *key = sv_newmortal();
-	if (entry)
+	if (entry) {
 	    sv_setsv(key, HeSVKEY_force(entry));
+	    SvREFCNT_dec(HeSVKEY(entry));	/* get rid of previous key */
+	}
 	else {
-	    xhv->xhv_eiter = entry = new_he();   /* only one HE per MAGICAL hash */
+	    xhv->xhv_eiter = entry = new_he();	/* only one HE per MAGICAL hash */
 	    Zero(entry, 1, HE);
 	    HeKLEN(entry) = HEf_SVKEY;
 	}
 	magic_nextpack((SV*) hv,mg,key);
         if (SvOK(key)) {
-	    SvREFCNT_dec(HeSVKEY(entry));
+	    /* force key to stay around until next time */
 	    HeKEY(entry) = (char*)SvREFCNT_inc(key);
 	    return entry;			/* beware, hent_val is not set */
         }
@@ -915,7 +912,7 @@ register U32 hash;
 	    continue;
 	if (HeKLEN(entry) != len)
 	    continue;
-	if (bcmp(HeKEY(entry),str,len))		/* is this it? */
+	if (memcmp(HeKEY(entry),str,len))		/* is this it? */
 	    continue;
 	found = 1;
 	break;
@@ -968,7 +965,7 @@ register U32 hash;
 	    continue;
 	if (HeKLEN(entry) != len)
 	    continue;
-	if (bcmp(HeKEY(entry),str,len))		/* is this it? */
+	if (memcmp(HeKEY(entry),str,len))		/* is this it? */
 	    continue;
 	found = 1;
 	if (--HeVAL(entry) == Nullsv) {
