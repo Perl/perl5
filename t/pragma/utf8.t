@@ -10,7 +10,7 @@ BEGIN {
     }
 }
 
-print "1..95\n";
+print "1..90\n";
 
 my $test = 1;
 
@@ -351,30 +351,6 @@ sub nok_bytes {
 	use utf8;
 	$latin =~ s!(s)tr(?:aß|s+e)!$1tr.!; # \303\237 after the a
     }
-}
-
-{
-    # bug id 20000323.056
-
-    print "not " unless "\x{41}" eq +v65;
-    print "ok $test\n";
-    $test++;
-
-    print "not " unless "\x41" eq +v65;
-    print "ok $test\n";
-    $test++;
-
-    print "not " unless "\x{c8}" eq +v200;
-    print "ok $test\n";
-    $test++;
-
-    print "not " unless "\xc8" eq +v200;
-    print "ok $test\n";
-    $test++;
-
-    print "not " unless "\x{221b}" eq v8731;
-    print "ok $test\n";
-    $test++;
 }
 
 {

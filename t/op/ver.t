@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..23\n";
+print "1..28\n";
 
 my $test = 1;
 
@@ -154,4 +154,28 @@ print "ok $test\n";  ++$test;
     print "not " unless sprintf("%*vb", "##", v1.22.333.4444)
 	eq '1##10110##11000101##10001101##11100001##10000101##10011100';
     print "ok $test\n";  ++$test;
+}
+
+{
+    # bug id 20000323.056
+
+    print "not " unless "\x{41}" eq +v65;
+    print "ok $test\n";
+    $test++;
+
+    print "not " unless "\x41" eq +v65;
+    print "ok $test\n";
+    $test++;
+
+    print "not " unless "\x{c8}" eq +v200;
+    print "ok $test\n";
+    $test++;
+
+    print "not " unless "\xc8" eq +v200;
+    print "ok $test\n";
+    $test++;
+
+    print "not " unless "\x{221b}" eq v8731;
+    print "ok $test\n";
+    $test++;
 }
