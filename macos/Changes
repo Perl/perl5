@@ -1,5 +1,9 @@
 Please note: This file provides a complete, temporally ordered log of
-changes that went into MacPerl, back to 5.6.1a2.
+changes that went into MacPerl, back to 5.6.1a2. Patches for each
+individual change may also be obtained through ftp and rsync--see
+pod/perlhack.pod for the details.
+
+For information on what's new in this release, see pod/macperldelta.pod.
 
 NOTE: Each change entry shows the change number; who checked it into the
 repository; when; description of the change; which branch the change
@@ -24,6 +28,31 @@ This file contains only changes that affect the maint-5.6/macperl branch.
 Version v5.6.1r1
 ----------------
 
+____________________________________________________________________________
+[ 15099] By: pudge                                 on 2002/03/08  03:20:06
+        Log: Replace macperlbundled with macperldelta
+     Branch: maint-5.6/macperl
+           ! macos/macperl/MacPerl.podhelp
+____________________________________________________________________________
+[ 15098] By: pudge                                 on 2002/03/08  03:19:44
+        Log: Comsetic fixes (Thomas Wegner)
+     Branch: maint-5.6/macperl
+           ! macos/macperl/MPBalloons.ball macos/macperl/MacPerl.r
+____________________________________________________________________________
+[ 15097] By: pudge                                 on 2002/03/08  03:19:08
+        Log: Bump OS version
+     Branch: maint-5.6/macperl
+           ! macos/config.sh
+____________________________________________________________________________
+[ 15090] By: pudge                                 on 2002/03/08  02:15:01
+        Log: Integrate recent perlport changes
+     Branch: maint-5.6/macperl
+          !> pod/perlport.pod
+____________________________________________________________________________
+[ 14936] By: pudge                                 on 2002/03/01  18:02:45
+        Log: Update Changes
+     Branch: maint-5.6/macperl
+	   ! macos/Changes
 ____________________________________________________________________________
 [ 14935] By: pudge                                 on 2002/03/01  17:58:11
         Log: Fix update to resources
