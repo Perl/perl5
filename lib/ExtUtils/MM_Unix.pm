@@ -1167,6 +1167,7 @@ sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
     $ignore{'test.pl'} = 1;
     $ignore{'makefile.pl'} = 1 if $Is_VMS;
     foreach $name ($self->lsdir($self->curdir)){
+	next if $name =~ /\#/;
 	next if $name eq $self->curdir or $name eq $self->updir or $ignore{$name};
 	next unless $self->libscan($name);
 	if (-d $name){
@@ -1242,6 +1243,7 @@ sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
 		}
 		return;
 	    }
+	    return if /\#/;
 	    my($path, $prefix) = ($File::Find::name, '$(INST_LIBDIR)');
 	    my($striplibpath,$striplibname);
 	    $prefix =  '$(INST_LIB)' if (($striplibpath = $path) =~ s:^(\W*)lib\W:$1:i);
