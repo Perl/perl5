@@ -148,6 +148,7 @@ if ($PLATFORM eq 'win32') {
     if ($define{PERL_IMPLICIT_SYS}) {
 	output_symbol("perl_get_host_info");
 	output_symbol("perl_alloc_override");
+    output_symbol("perl_clone_host");
     }
 }
 elsif ($PLATFORM eq 'os2') {
@@ -185,6 +186,7 @@ elsif ($PLATFORM eq 'netware') {
 	if ($define{PERL_IMPLICIT_SYS}) {
 	output_symbol("perl_get_host_info");
 	output_symbol("perl_alloc_override");
+    output_symbol("perl_clone_host");
 	}
 }
 

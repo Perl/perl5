@@ -8957,7 +8957,7 @@ Perl_sv_dup(pTHX_ SV *sstr, clone_params* param)
 	}
 	HvPMROOT((HV*)dstr)	= HvPMROOT((HV*)sstr);		/* XXX */
 	HvNAME((HV*)dstr)	= SAVEPV(HvNAME((HV*)sstr));
-    /* Record stashes for possible cloning in Perl_clone_using(). */
+    /* Record stashes for possible cloning in Perl_clone(). */
 	if(HvNAME((HV*)dstr))
 	    av_push(param->stashes, dstr);
 	break;
@@ -9451,7 +9451,14 @@ perl_clone(PerlInterpreter *proto_perl, UV flags)
 #endif
 
 #ifdef PERL_IMPLICIT_SYS
-    return perl_clone_using(proto_perl, flags,
+
+   /* perlhost.h so we need to call into it
+   to clone the host, CPerlHost should have a c interface, sky */
+
+   if (flags & CLONEf_CLONE_HOST) {
+       return perl_clone_host(proto_perl,flags);
+   }
+   return perl_clone_using(proto_perl, flags,
 			    proto_perl->IMem,
 			    proto_perl->IMemShared,
 			    proto_perl->IMemParse,

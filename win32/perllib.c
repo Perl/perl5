@@ -396,3 +396,26 @@ DllMain(HANDLE hModule,		/* DLL module handle */
     }
     return TRUE;
 }
+
+#ifdef USE_ITHREADS
+EXTERN_C PerlInterpreter *
+perl_clone_host(PerlInterpreter* proto_perl, UV flags) {
+    dTHXo;
+    CPerlHost *h;
+    h = new CPerlHost(*(CPerlHost*)PL_sys_intern.internal_host);
+    proto_perl = perl_clone_using(proto_perl, flags,
+                        h->m_pHostperlMem,
+                        h->m_pHostperlMemShared,
+                        h->m_pHostperlMemParse,
+                        h->m_pHostperlEnv,
+                        h->m_pHostperlStdIO,
+                        h->m_pHostperlLIO,
+                        h->m_pHostperlDir,
+                        h->m_pHostperlSock,
+                        h->m_pHostperlProc
+    );
+    proto_perl->Isys_intern.internal_host = h;
+    return proto_perl;
+	
+}
+#endif
