@@ -1177,6 +1177,7 @@ t/op/glob.t		See if <*> works
 t/op/goto.t		See if goto works
 t/op/goto_xs.t		See if "goto &sub" works on XSUBs
 t/op/grent.t		See if getgr*() functions work
+t/op/grep.t		See if grep() and map() work
 t/op/groups.t		See if $( works
 t/op/gv.t		See if typeglobs work
 t/op/hashwarn.t		See if warnings for bad hash assignments work

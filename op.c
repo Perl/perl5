@@ -4306,7 +4306,7 @@ newAVREF(OP *o)
 OP *
 newGVREF(I32 type, OP *o)
 {
-    if (type == OP_MAPSTART)
+    if (type == OP_MAPSTART || type == OP_GREPSTART)
 	return newUNOP(OP_NULL, 0, o);
     return ref(newUNOP(OP_RV2GV, OPf_REF, o), type);
 }
