@@ -68,7 +68,10 @@ my $tst = 1;
 my %perfect;
 my %seen;
 
+print "# where $where\n";
+
 setpwent();
+
 while (<PW>) {
     chomp;
     # LIMIT -1 so that users with empty shells don't fall off
@@ -115,9 +118,12 @@ while (<PW>) {
     }
     $n++;
 }
+
 endpwent();
 
-if (keys %perfect == 0) {
+print "# max = $max, n = $n, perfect = ", scalar keys %perfect, "\n";
+
+if (keys %perfect < $n) {
     $max++;
     print <<EOEX;
 #

@@ -67,7 +67,10 @@ my $tst = 1;
 my %perfect;
 my %seen;
 
+print "# where $where\n";
+
 setgrent();
+
 while (<GR>) {
     chomp;
     # LIMIT -1 so that groups with no users don't fall off
@@ -115,7 +118,9 @@ while (<GR>) {
 
 endgrent();
 
-if (keys %perfect == 0) {
+print "# max = $max, n = $n, perfect = ", scalar keys %perfect, "\n";
+
+if (keys %perfect < $n) {
     $max++;
     print <<EOEX;
 #
