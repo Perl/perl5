@@ -1269,8 +1269,17 @@ croak(pat, va_alist)
 	restartop = die_where(message);
 	JMPENV_JUMP(3);
     }
-    PerlIO_puts(PerlIO_stderr(),message);
-    (void)PerlIO_flush(PerlIO_stderr());
+    {
+#ifdef USE_SFIO
+	/* SFIO can really mess with your errno */
+	int e = errno;
+#endif
+	PerlIO_puts(PerlIO_stderr(), message);
+	(void)PerlIO_flush(PerlIO_stderr());
+#ifdef USE_SFIO
+	errno = e;
+#endif
+    }
     my_failure_exit();
 }
 
