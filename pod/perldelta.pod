@@ -15,8 +15,8 @@ This document describes differences between the 5.005 release and this one.
 
 =head2 Perl Source Incompatibilities
 
-Beware that any new warnings that have been added are B<not> considered
-incompatible changes.
+Beware that any new warnings that have been added or enhanced old
+warnings are B<not> considered incompatible changes.
 
 Since all new warnings must be explicitly requested via the C<-w>
 switch or the C<warnings> pragma, it is ultimately the programmer's
@@ -1012,7 +1012,7 @@ change#4052
 =item Data::Dumper
 
 A C<Maxdepth> setting can be specified to avoid venturing
-too deeply into depp data structures.  See L<Data::Dumper>.
+too deeply into deep data structures.  See L<Data::Dumper>.
 
 Dumping C<qr//> objects works correctly.
 
@@ -1342,7 +1342,7 @@ A tutorial on managing class data for object modules.
 
 =back
 
-=head1 New Diagnostics
+=head1 New or Changed Diagnostics
 
 =over 4
 
@@ -1561,6 +1561,13 @@ See Server error.
 (F) While under the C<use filetest> pragma, switching the real and
 effective uids or gids failed.
 
+=item false [] range "%s" in regexp
+
+(W) A character class range must start and end at a literal character, not
+another character class like C<\d> or C<[:alpha:]>.  The "-" in your false
+range is interpreted as a literal "-".  Consider quoting the "-",  "\-".
+See L<perlre>.
+
 =item Filehandle %s opened only for output
 
 (W) You tried to read from a filehandle opened only for writing.  If you
@@ -1623,6 +1630,10 @@ by Perl or by a user-supplied handler.  See L<attributes>.
 
 The indicated attributes for a subroutine or variable were not recognized
 by Perl or by a user-supplied handler.  See L<attributes>.
+
+=item invalid [] range "%s" in regexp
+
+The offending range is now explicitly displayed.
 
 =item Invalid separator character %s in attribute list
 

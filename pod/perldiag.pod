@@ -1380,6 +1380,13 @@ the effect of blessing the reference into the package main.  This is
 usually not what you want.  Consider providing a default target
 package, e.g. bless($ref, $p || 'MyPackage');
 
+=item false [] range "%s" in regexp
+
+(W) A character class range must start and end at a literal character, not
+another character class like C<\d> or C<[:alpha:]>.  The "-" in your false
+range is interpreted as a literal "-".  Consider quoting the "-",  "\-".
+See L<perlre>.
+
 =item Fatal VMS error at %s, line %d
 
 (P) An error peculiar to VMS.  Something untoward happened in a VMS system
@@ -1680,7 +1687,7 @@ by Perl or by a user-supplied handler.  See L<attributes>.
 The indicated attributes for a subroutine or variable were not recognized
 by Perl or by a user-supplied handler.  See L<attributes>.
 
-=item invalid [] range in regexp
+=item invalid [] range "%s" in regexp
 
 (F) The range specified in a character class had a minimum character
 greater than the maximum character.  See L<perlre>.
