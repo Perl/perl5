@@ -64,8 +64,10 @@ sub profile {
 sub verify {
 	my $test = shift;
 
-        system $perl, '"-I../lib"', '"-I./lib/dprof"', $test,
-		$opt_v?'-v':'', '-p', $perl;
+	my $command = $perl.' "-I../lib" "-I./lib/dprof" '.$test;
+	$command .= ' -v' if $opt_v;
+	$command .= ' -p '. $perl;
+	system $command;
 }
 
 
