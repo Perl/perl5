@@ -362,6 +362,12 @@ lib/File/Copy.pm	Emulation of cp command
 lib/File/DosGlob.pm	Win32 DOS-globbing module
 lib/File/Find.pm	Routines to do a find
 lib/File/Path.pm	Do things like `mkdir -p' and `rm -r'
+lib/File/Spec.pm	Portable operations on file names
+lib/File/Spec/Mac.pm	Portable operations on Mac file names
+lib/File/Spec/OS2.pm	Portable operations on OS2 file names
+lib/File/Spec/Unix.pm	Portable operations on Unix file names
+lib/File/Spec/VMS.pm	Portable operations on VMS file names
+lib/File/Spec/Win32.pm	Portable operations on Win32 file names
 lib/File/stat.pm	By-name interface to Perl's builtin stat
 lib/FileCache.pm	Keep more files open than the system permits
 lib/FileHandle.pm	Backward-compatible front end to IO extension
@@ -393,6 +399,7 @@ lib/Sys/Syslog.pm	Perl module supporting syslogging
 lib/Term/Cap.pm		Perl module supporting termcap usage
 lib/Term/Complete.pm	A command completion subroutine
 lib/Term/ReadLine.pm	Stub readline library
+lib/Test.pm		A simple framework for writing test scripts
 lib/Test/Harness.pm	A test harness
 lib/Text/Abbrev.pm	An abbreviation table builder
 lib/Text/ParseWords.pm	Perl module to split words on arbitrary delimiter

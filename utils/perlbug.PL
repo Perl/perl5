@@ -2,6 +2,7 @@
 
 use Config;
 use File::Basename qw(&basename &dirname);
+use Cwd;
 
 # List explicitly here the variables you want Configure to
 # generate.  Metaconfig only looks for shell variables, so you
@@ -13,6 +14,7 @@ use File::Basename qw(&basename &dirname);
 
 # This forces PL files to create target in same directory as PL file.
 # This is so that make depend always knows where to find PL derivatives.
+$origdir = cwd;
 chdir dirname($0);
 $file = basename($0, '.PL');
 $file .= '.com' if $^O eq 'VMS';
@@ -84,7 +86,7 @@ BEGIN {
     $::HaveUtil = ($@ eq "");
 };
 
-my $Version = "1.23";
+my $Version = "1.24";
 
 # Changed in 1.06 to skip Mail::Send and Mail::Util if not available.
 # Changed in 1.07 to see more sendmail execs, and added pipe output.
@@ -112,6 +114,7 @@ my $Version = "1.23";
 # Changed in 1.21 Added '-nok' for reporting build failure DFD 98-05-05
 # Changed in 1.22 Heavy reformatting & minor bugfixes HVDS 98-05-10
 # Changed in 1.23 Restore -ok(ay): say 'success'; don't prompt
+# Changed in 1.24 Added '-F<file>' to save report HVDS 98-07-01
 
 # TODO: - Allow the user to re-name the file on mail failure, and
 #       make sure failure (transmission-wise) of Mail::Send is
@@ -119,7 +122,7 @@ my $Version = "1.23";
 #       - Test -b option
 
 my( $file, $usefile, $cc, $address, $perlbug, $testaddress, $filename,
-    $subject, $from, $verbose, $ed,
+    $subject, $from, $verbose, $ed, $outfile,
     $fh, $me, $Is_MSWin32, $Is_VMS, $msg, $body, $andcc, %REP, $ok);
 
 my $config_tag2 = "$] - $Config{cf_time}";
@@ -135,7 +138,7 @@ include a file, you can use the -f switch.
 EOF
     die "\n";
 }
-if (!-t STDOUT) { Dump(*STDOUT); exit; }
+if (!-t STDOUT && !$outfile) { Dump(*STDOUT); exit; }
 
 Query();
 Edit() unless $usefile || ($ok and not $::opt_n);
@@ -150,7 +153,7 @@ sub Init {
     $Is_MSWin32 = $^O eq 'MSWin32';
     $Is_VMS = $^O eq 'VMS';
 
-    getopts("dhva:s:b:f:r:e:SCc:to:n:");
+    getopts("dhva:s:b:f:F:r:e:SCc:to:n:");
 
     # This comment is needed to notify metaconfig that we are
     # using the $perladmin, $cf_by, and $cf_time definitions.
@@ -180,6 +183,9 @@ sub Init {
 
     # File to send as report
     $file = $::opt_f || "";
+
+    # File to output to
+    $outfile = $::opt_F || "";
 
     # Body of report
     $body = $::opt_b || "";
@@ -248,6 +254,10 @@ EOF
     $me = $Is_MSWin32 ? $ENV{'USERNAME'}
 	    : $^O eq 'os2' ? $ENV{'USER'} || $ENV{'LOGNAME'}
 	    : eval { getpwuid($<) };	# May be missing
+
+    $from = $::Config{'cf_email'}
+       if !$from && $::Config{'cf_email'} && $::Config{'cf_by'} && $me &&
+               ($me eq $::Config{'cf_by'});
 } # sub Init
 
 sub Query {
@@ -671,6 +681,10 @@ EOF
 
 sub Send {
     # Message has been accepted for transmission -- Send the message
+    if ($outfile) {
+	open SENDMAIL, ">$outfile" or die "Couldn't open '$outfile': $!\n";
+	goto sendout;
+    }
     if ($::HaveSend) {
 	$msg = new Mail::Send Subject => $subject, To => $address;
 	$msg->cc($cc) if $cc;
@@ -725,6 +739,7 @@ So you may attempt to find some way of sending your message, it has
 been left in the file `$filename'.
 EOF
 	open(SENDMAIL, "|$sendmail -t") || die "'|$sendmail -t' failed: $!";
+sendout:
 	print SENDMAIL "To: $address\n";
 	print SENDMAIL "Subject: $subject\n";
 	print SENDMAIL "Cc: $cc\n" if $cc;
@@ -735,7 +750,7 @@ EOF
 	close(REP);
 
 	if (close(SENDMAIL)) {
-	    print "\nMessage sent.\n";
+	    printf "\nMessage %s.\n", $outfile ? "saved" : "sent";
 	} else {
 	    warn "\nSendmail returned status '", $? >> 8, "'\n";
 	}
@@ -751,7 +766,7 @@ It is designed to be used interactively. Normally no arguments will
 be needed.
 
 Usage:
-$0  [-v] [-a address] [-s subject] [-b body | -f file ]
+$0  [-v] [-a address] [-s subject] [-b body | -f inpufile ] [ -F outputfile ]
     [-r returnaddress] [-e editor] [-c adminaddress | -C] [-S] [-t] [-h]
 $0  [-v] [-r returnaddress] [-ok | -okay | -nok | -nokay]
 
@@ -762,6 +777,7 @@ Options:
   -v    Include Verbose configuration data in the report
   -f    File containing the body of the report. Use this to
         quickly send a prepared message.
+  -F	File to output the resulting mail message to, instead of mailing.
   -S    Send without asking for confirmation.
   -a    Address to send the report to. Defaults to `$address'.
   -c    Address to send copy of report to. Defaults to `$cc'.
@@ -824,7 +840,8 @@ perlbug - how to submit bug reports on Perl
 =head1 SYNOPSIS
 
 B<perlbug> S<[ B<-v> ]> S<[ B<-a> I<address> ]> S<[ B<-s> I<subject> ]>
-S<[ B<-b> I<body> | B<-f> I<file> ]> S<[ B<-r> I<returnaddress> ]>
+S<[ B<-b> I<body> | B<-f> I<inputfile> ]> S<[ B<-F> I<outputfile> ]>
+S<[ B<-r> I<returnaddress> ]>
 S<[ B<-e> I<editor> ]> S<[ B<-c> I<adminaddress> | B<-C> ]>
 S<[ B<-S> ]> S<[ B<-t> ]>  S<[ B<-d> ]>  S<[ B<-h> ]>
 
@@ -980,6 +997,12 @@ Editor to use.
 File containing the body of the report.  Use this to quickly send a
 prepared message.
 
+=item B<-F>
+
+File to output the results to instead of sending as an email. Useful
+particularly when running perlbug on a machine with no direct internet
+connection.
+
 =item B<-h>
 
 Prints a brief summary of the options.
@@ -1060,4 +1083,5 @@ None known (guess what must have been used to report them?)
 close OUT or die "Can't close $file: $!";
 chmod 0755, $file or die "Can't reset permissions for $file: $!\n";
 exec("$Config{'eunicefix'} $file") if $Config{'eunicefix'} ne ':';
+chdir $origdir;
 
