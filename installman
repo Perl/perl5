@@ -30,7 +30,7 @@ $usage =
 	man3ext = $Config{'man3ext'};
 	--notify (or -n) just lists commands that would be executed.\n";
 
-GetOptions( qw( man1dir=s man1ext=s man3dir=s man3ext=s notify n help S|silent)) 
+GetOptions( qw( man1dir=s man1ext=s man3dir=s man3ext=s notify n help silent S)) 
 	|| die $usage;
 die $usage if $opt_help;
 
@@ -39,7 +39,7 @@ $man1dir = defined($opt_man1dir) ? $opt_man1dir : $Config{'installman1dir'};
 $man1ext = defined($opt_man1ext) ? $opt_man1ext : $Config{'man1ext'};
 $man3dir = defined($opt_man3dir) ? $opt_man3dir : $Config{'installman3dir'};
 $man3ext = defined($opt_man3ext) ? $opt_man3ext : $Config{'man3ext'};
-$silent  = defined($opt_silent)  ? $opt_silent  : 0;
+$silent  = $opt_silent || $opt_s;
 
 $notify = $opt_notify || $opt_n;
 
@@ -150,7 +150,7 @@ sub runpod2man {
 	}
 	$tmp = "${mandir}/${manpage}.tmp";
 	$manpage = "${mandir}/${manpage}.${manext}";
-	if (&cmd("$pod2man $mod > $tmp", $mod) == 0 && !$notify && -s $tmp) {
+	if (&cmd("$pod2man $mod > $tmp", $tmp) == 0 && !$notify && -s $tmp) {
 	    if (rename($tmp, $manpage)) {
 		$packlist->{$manpage} = { type => 'file' };
 		next;
@@ -183,9 +183,8 @@ exit 0;
 # Utility subroutines from installperl
 
 sub cmd {
-    local($cmd, $mod) = @_;
-    warn "$mod...\n";
-    warn "  $cmd\n" unless $silent;
+    local($cmd, $tmp) = @_;
+    warn $silent ? "  $tmp\n" : "  $cmd\n";
     unless ($notify) {
 	if ($Config{d_fork}) {
 	    fork ? wait : exec $cmd;  # Allow user to ^C out of command.
