@@ -2332,6 +2332,7 @@ t/op/time.t			See if time functions work
 t/op/tr.t			See if tr works
 t/op/undef.t			See if undef works
 t/op/unifold.t			See if Unicode folding works
+t/op/unisprintf.t		See if Unicode sprintf works
 t/op/universal.t		See if UNIVERSAL class works
 t/op/unshift.t			See if unshift works
 t/op/utf8decode.t		See if UTF-8 decoding works
