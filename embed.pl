@@ -2354,7 +2354,6 @@ Apd	|char*	|sv_pvn_force_flags|SV* sv|STRLEN* lp|I32 flags
 Apd	|char*	|sv_2pv_flags	|SV* sv|STRLEN* lp|I32 flags
 Ap	|char*	|my_atof2	|const char *s|NV* value
 
-END_EXTERN_C
 
 #if defined(USE_PERLIO) && !defined(USE_SFIO)
 Ap	|int	|PerlIO_close		|PerlIO *
@@ -2382,3 +2381,6 @@ Ap	|PerlIO *|PerlIO_stdin
 Ap	|PerlIO *|PerlIO_stdout
 Ap	|PerlIO *|PerlIO_stderr
 #endif /* PERLIO_LAYERS */
+
+END_EXTERN_C
+

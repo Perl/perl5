@@ -1332,7 +1332,6 @@ PERL_CALLCONV char*	Perl_sv_pvn_force_flags(pTHX_ SV* sv, STRLEN* lp, I32 flags)
 PERL_CALLCONV char*	Perl_sv_2pv_flags(pTHX_ SV* sv, STRLEN* lp, I32 flags);
 PERL_CALLCONV char*	Perl_my_atof2(pTHX_ const char *s, NV* value);
 
-END_EXTERN_C
 
 #if defined(USE_PERLIO) && !defined(USE_SFIO)
 PERL_CALLCONV int	Perl_PerlIO_close(pTHX_ PerlIO *);
@@ -1360,3 +1359,6 @@ PERL_CALLCONV PerlIO *	Perl_PerlIO_stdin(pTHX);
 PERL_CALLCONV PerlIO *	Perl_PerlIO_stdout(pTHX);
 PERL_CALLCONV PerlIO *	Perl_PerlIO_stderr(pTHX);
 #endif /* PERLIO_LAYERS */
+
+END_EXTERN_C
+
