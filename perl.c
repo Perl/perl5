@@ -377,6 +377,7 @@ perl_destruct(pTHXx)
     DEBUG_S(PerlIO_printf(Perl_debug_log, "perl_destruct: armageddon has arrived\n"));
     MUTEX_DESTROY(&PL_threads_mutex);
     COND_DESTROY(&PL_nthreads_cond);
+    PL_nthreads--;
 #endif /* !defined(FAKE_THREADS) */
 #endif /* USE_THREADS */
 
