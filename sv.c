@@ -7870,6 +7870,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     }
     else {
 	init_stacks();
+	ENTER;			/* perl_destruct() wants to LEAVE; */
     }
 
     PL_start_env	= proto_perl->Tstart_env;	/* XXXXXX */
