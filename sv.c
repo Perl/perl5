@@ -4582,8 +4582,7 @@ Perl_sv_true(pTHX_ register SV *sv)
     if (SvPOK(sv)) {
 	register XPV* tXpv;
 	if ((tXpv = (XPV*)SvANY(sv)) &&
-		(*tXpv->xpv_pv > '0' ||
-		tXpv->xpv_cur > 1 ||
+		(tXpv->xpv_cur > 1 ||
 		(tXpv->xpv_cur && *tXpv->xpv_pv != '0')))
 	    return 1;
 	else
