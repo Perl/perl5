@@ -144,7 +144,7 @@ dl_undef_symbols()
     if (dld_undefined_sym_count) {
 	int x;
 	char **undef_syms = dld_list_undefined_sym();
-	EXTEND(sp, dld_undefined_sym_count);
+	EXTEND(SP, dld_undefined_sym_count);
 	for (x=0; x < dld_undefined_sym_count; x++)
 	    PUSHs(sv_2mortal(newSVpv(undef_syms[x]+1, 0)));
 	free(undef_syms);

@@ -1124,7 +1124,7 @@ I32 type;
 	modcount++;
 	if (!type)
 	    croak("Can't localize lexical variable %s",
-		SvPV(*av_fetch(comppad_name, op->op_targ, 4), na));
+		SvPV(*av_fetch(comppad_name, o->op_targ, 4), na));
 	break;
 
     case OP_PUSHMARK:

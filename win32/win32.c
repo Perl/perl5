@@ -1860,7 +1860,7 @@ XS(w32_GetCwd)
      */
     if (SvCUR(sv))
 	SvPOK_on(sv);
-    EXTEND(sp,1);
+    EXTEND(SP,1);
     ST(0) = sv;
     XSRETURN(1);
 }

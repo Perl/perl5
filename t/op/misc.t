@@ -354,3 +354,8 @@ select STDERR; $| = 1; print fileno STDERR;
 EXPECT
 1
 2
+########
+-w
+sub testme { my $a = "test"; { local $a = "new test"; print $a }}
+EXPECT
+Can't localize lexical variable $a at - line 2.

@@ -46,7 +46,7 @@
 #endif
 #endif
 
-#ifdef HOST_NOT_FOUND
+#if defined(HOST_NOT_FOUND) && !defined(h_errno)
 extern int h_errno;
 #endif
 

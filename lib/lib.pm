@@ -18,7 +18,7 @@ sub import {
 	    Carp::carp("Empty compile time value given to use lib");
 							# at foo.pl line ...
 	}
-	if (-f) {
+	if (-e && ! -d _) {
 	    require Carp;
 	    Carp::carp("Parameter to use lib must be directory, not file");
 	}

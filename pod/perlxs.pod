@@ -558,7 +558,7 @@ Perl as a single list.
           bool_t  status;
           PPCODE:
           status = rpcb_gettime( host, &timep );
-          EXTEND(sp, 2);
+          EXTEND(SP, 2);
           PUSHs(sv_2mortal(newSViv(status)));
           PUSHs(sv_2mortal(newSViv(timep)));
 
@@ -573,7 +573,7 @@ directive.
 
 The EXTEND() macro is used to make room on the argument
 stack for 2 return values.  The PPCODE: directive causes the
-B<xsubpp> compiler to create a stack pointer called C<sp>, and it
+B<xsubpp> compiler to create a stack pointer available as C<SP>, and it
 is this pointer which is being used in the EXTEND() macro.
 The values are then pushed onto the stack with the PUSHs()
 macro.
