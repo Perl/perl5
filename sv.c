@@ -10768,23 +10768,11 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_watchok		= Nullch;
 
     PL_regdummy		= proto_perl->Tregdummy;
-    PL_regcomp_parse	= Nullch;
-    PL_regxend		= Nullch;
-    PL_regcode		= (regnode*)NULL;
-    PL_regnaughty	= 0;
-    PL_regsawback	= 0;
     PL_regprecomp	= Nullch;
     PL_regnpar		= 0;
     PL_regsize		= 0;
-    PL_regflags		= 0;
-    PL_regseen		= 0;
-    PL_seen_zerolen	= 0;
-    PL_seen_evals	= 0;
-    PL_regcomp_rx	= (regexp*)NULL;
-    PL_extralen		= 0;
     PL_colorset		= 0;		/* reinits PL_colors[] */
     /*PL_colors[6]	= {0,0,0,0,0,0};*/
-    PL_reg_whilem_seen	= 0;
     PL_reginput		= Nullch;
     PL_regbol		= Nullch;
     PL_regeol		= Nullch;
