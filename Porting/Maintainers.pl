@@ -37,7 +37,7 @@
 	'rra'		=> 'Russ Allbery <rra@cpan.org>',
 	'sadahiro'	=> 'SADAHIRO Tomoyuki <SADAHIRO@cpan.org>',
 	'sburke'	=> 'Sean Burke <sburke@cpan.org>',
-	'schwern'	=> 'Michael Schwern <schwern@cpan.org>',
+	'mschwern'	=> 'Michael Schwern <mschwern@cpan.org>',
 	'smccam'	=> 'Stephen McCamant <smccam@cpan.org>',
 	'tels'		=> 'perl_dummy a-t bloodgate.com',
 	'tjenness'	=> 'Tim Jenness <tjenness@cpan.org>'
@@ -150,7 +150,7 @@
 
 	'ExtUtils::MakeMaker' =>
 		{
-		'MAINTAINER'	=> 'schwern',
+		'MAINTAINER'	=> 'mschwern',
 		'FILES'		=> q[lib/ExtUtils/{Command,Install,Installed,Liblist,MakeMaker,Manifest,Mkbootstrap,Mksymlists,MM*,MY,Packlist,testlib}.pm lib/ExtUtils/{Command,Liblist,MakeMaker}
 				     lib/ExtUtils/t t/lib/MakeMaker t/lib/TieIn.pm t/lib/TieOut.pm],
 		'CPAN'		=> 1,
@@ -380,14 +380,14 @@
 
 	'Test' =>
 		{
-		'MAINTAINER'	=> 'schwern',
+		'MAINTAINER'	=> 'mschwern',
 		'FILES'		=> q[lib/Test.pm lib/Test/t],
 		'CPAN'		=> 1,
 		},
 
 	'Test::Builder' =>
 		{
-		'MAINTAINER'	=> 'schwern',
+		'MAINTAINER'	=> 'mschwern',
 		'FILES'		=> q[lib/Test/Builder.pm],
 		'CPAN'		=> 1,
 		},
@@ -402,14 +402,14 @@
 
 	'Test::More' =>
 		{
-		'MAINTAINER'	=> 'schwern',
+		'MAINTAINER'	=> 'mschwern',
 		'FILES'		=> q[lib/Test/More.pm],
 		'CPAN'		=> 1,
 		},
 
 	'Test::Simple' =>
 		{
-		'MAINTAINER'	=> 'schwern',
+		'MAINTAINER'	=> 'mschwern',
 		'FILES'		=> q[lib/Test/Simple.pm lib/Test/Simple
 				     t/lib/Test/Simple],
 		'CPAN'		=> 1,
