@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Feb 29 17:34:18 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Tue Feb 29 18:49:00 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -4557,7 +4557,7 @@ case "$use64bitall" in
 		. ./use64bitall.cbu
 	fi
 	case "$longsize" in
-	4) ccase "$archname64" in
+	4) case "$archname64" in
 	   ''|64int) archname64=64all ;;
 	   esac
 	   ;;
@@ -6189,6 +6189,7 @@ EOM
   			beos) dflt='-nostart' ;;
 			hpux) case "$gccversion" in
 			      '') dflt='-b +vnocompatwarnings' ;;
+			      *)  dflt='none' ;;
 			      esac
 			      ;;	
 			linux|irix*)	dflt='-shared' ;;
