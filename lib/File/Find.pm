@@ -3,7 +3,7 @@ use 5.006;
 use strict;
 use warnings;
 use warnings::register;
-our $VERSION = '1.04';
+our $VERSION = '1.05';
 require Exporter;
 require Cwd;
 

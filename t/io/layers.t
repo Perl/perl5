@@ -25,14 +25,16 @@ BEGIN {
     $PERLIO = exists $ENV{PERLIO} ? $ENV{PERLIO} : "(undef)";
 }
 
-plan tests => 43;
-
 use Config;
 
 my $DOSISH    = $^O =~ /^(?:MSWin32|os2|dos|NetWare|mint)$/ ? 1 : 0;
    $DOSISH    = 1 if !$DOSISH and $^O =~ /^uwin/;
 my $NONSTDIO  = exists $ENV{PERLIO} && $ENV{PERLIO} ne 'stdio'     ? 1 : 0;
 my $FASTSTDIO = $Config{d_faststdio} && $Config{usefaststdio}      ? 1 : 0;
+
+my $NTEST = 43 - (($DOSISH || !$FASTSTDIO) ? 7 : 0) - ($DOSISH ? 5 : 0);
+
+plan tests => $NTEST;
 
 print <<__EOH__;
 # PERLIO    = $PERLIO
@@ -42,7 +44,7 @@ print <<__EOH__;
 __EOH__
 
 SKIP: {
-    skip("This perl does not have Encode", 43)
+    skip("This perl does not have Encode", $NTEST)
 	unless " $Config{extensions} " =~ / Encode /;
 
     sub check {
@@ -80,8 +82,14 @@ SKIP: {
 		   $result->[0] eq "unix" &&
 		   $result->[1] eq "crlf";
 	}
+	if ($DOSISH && grep { $_ eq 'crlf' } @$expected) {
+	    # 5 tests potentially skipped because
+	    # DOSISH systems already have a CRLF layer
+	    # which will make new ones not stick.
+	    @$expected = grep { $_ ne 'crlf' } @$expected;
+	}
 	my $n = scalar @$expected;
-	is($n, scalar @$expected, "$id - layers = $n");
+	is($n, scalar @$expected, "$id - layers == $n");
 	for (my $i = 0; $i < $n; $i++) {
 	    my $j = $expected->[$i];
 	    if (ref $j eq 'CODE') {
@@ -122,7 +130,6 @@ SKIP: {
 	  [ "stdio" ],
 	  ":raw");
 
-    binmode(F, ":pop") if $DOSISH; # Drop one extra :crlf.
     binmode(F, ":utf8");
 
     check([ PerlIO::get_layers(F) ],
@@ -149,9 +156,8 @@ SKIP: {
 
     binmode(F, ":raw :encoding(latin1)"); # "latin1" will be canonized
 
-    SKIP: {
-	skip("too complex layer coreography", 7) if $DOSISH || !$FASTSTDIO;
-
+    # 7 tests potentially skipped.
+    unless ($DOSISH || !$FASTSTDIO) {
 	my @results = PerlIO::get_layers(F, details => 1);
 
 	# Get rid of the args and the flags.
