@@ -106,7 +106,8 @@ struct itmlst_3 {
 /* see system service docs for $TRNLNM -- NOT the same as LNM$_MAX_INDEX */
 #define PERL_LNM_MAX_ALLOWED_INDEX 127
 
-#define MAX_DCL_LINE_LENGTH        255
+#define MAX_DCL_SYMBOL              255     /* well, what *we* can set, at least*/
+#define MAX_DCL_LINE_LENGTH        (4*MAX_DCL_SYMBOL-4)
 
 static char *__mystrtolower(char *str)
 {
@@ -1463,7 +1464,6 @@ popen_translate(pTHX_ char *logical, char *result)
     return ifi;     /* this is the RMS internal file id */
 }
 
-#define MAX_DCL_SYMBOL        255
 static void pipe_infromchild_ast(pPipe p);
 
 /*
@@ -2029,14 +2029,19 @@ vmspipe_tempfile(pTHX)
     fprintf(fp,"$ pif perl_popen_in  .nes. \"\" then perl_define/user/name_attributes=confine sys$input  'perl_popen_in'\n");
     fprintf(fp,"$ pif perl_popen_err .nes. \"\" then perl_define/user/name_attributes=confine sys$error  'perl_popen_err'\n");
     fprintf(fp,"$ pif perl_popen_out .nes. \"\" then perl_define      sys$output 'perl_popen_out'\n");
-    fprintf(fp,"$ cmd = perl_popen_cmd\n");
+    fprintf(fp,"$!  --- build command line to get max possible length\n");
+    fprintf(fp,"$c=perl_popen_cmd0\n"); 
+    fprintf(fp,"$c=c+perl_popen_cmd1\n"); 
+    fprintf(fp,"$c=c+perl_popen_cmd2\n"); 
+    fprintf(fp,"$x=perl_popen_cmd3\n"); 
+    fprintf(fp,"$c=c+x\n"); 
     fprintf(fp,"$!  --- get rid of global symbols\n");
     fprintf(fp,"$ perl_del/symbol/global perl_popen_in\n");
     fprintf(fp,"$ perl_del/symbol/global perl_popen_err\n");
     fprintf(fp,"$ perl_del/symbol/global perl_popen_out\n");
     fprintf(fp,"$ perl_del/symbol/global perl_popen_cmd\n");
     fprintf(fp,"$ perl_on\n");
-    fprintf(fp,"$ 'cmd\n");
+    fprintf(fp,"$ 'c\n");
     fprintf(fp,"$ perl_status = $STATUS\n");
     fprintf(fp,"$ perl_del  'perl_cfile'\n");
     fprintf(fp,"$ perl_exit 'perl_status'\n");
@@ -2069,18 +2074,19 @@ safe_popen(pTHX_ char *cmd, char *in_mode, int *psts)
     static int handler_set_up = FALSE;
     unsigned long int sts, flags=1;  /* nowait - gnu c doesn't allow &1 */
     unsigned int table = LIB$K_CLI_GLOBAL_SYM;
-    int wait = 0;
+    int j, wait = 0;
     char *p, mode[10], symbol[MAX_DCL_SYMBOL+1], *vmspipe;
     char in[512], out[512], err[512], mbx[512];
     FILE *tpipe = 0;
     char tfilebuf[NAM$C_MAXRSS+1];
     pInfo info;
+    char cmd_sym_name[20];
     struct dsc$descriptor_s d_symbol= {0, DSC$K_DTYPE_T,
                                       DSC$K_CLASS_S, symbol};
     struct dsc$descriptor_s vmspipedsc = {0, DSC$K_DTYPE_T,
                                       DSC$K_CLASS_S, 0};
-
-    $DESCRIPTOR(d_sym_cmd,"PERL_POPEN_CMD");
+    struct dsc$descriptor_s d_sym_cmd = {0, DSC$K_DTYPE_T,
+                                      DSC$K_CLASS_S, cmd_sym_name};
     $DESCRIPTOR(d_sym_in ,"PERL_POPEN_IN");
     $DESCRIPTOR(d_sym_out,"PERL_POPEN_OUT");
     $DESCRIPTOR(d_sym_err,"PERL_POPEN_ERR");
@@ -2315,10 +2321,21 @@ safe_popen(pTHX_ char *cmd, char *in_mode, int *psts)
     while (*p == ' ' || *p == '\t') p++;        /* remove leading whitespace */
     if (*p == '$') p++;                         /* remove leading $ */
     while (*p == ' ' || *p == '\t') p++;
+
+    for (j = 0; j < 4; j++) {
+        sprintf(cmd_sym_name,"PERL_POPEN_CMD%d",j);
+        d_sym_cmd.dsc$w_length = strlen(cmd_sym_name);
+
     strncpy(symbol, p, MAX_DCL_SYMBOL);
     d_symbol.dsc$w_length = strlen(symbol);
     _ckvmssts(lib$set_symbol(&d_sym_cmd, &d_symbol, &table));
 
+        if (strlen(p) > MAX_DCL_SYMBOL) {
+            p += MAX_DCL_SYMBOL;
+        } else {
+            p += strlen(p);
+        }
+    }
     _ckvmssts(sys$setast(0));
     info->next=open_pipes;  /* prepend to list */
     open_pipes=info;
@@ -2334,7 +2351,11 @@ safe_popen(pTHX_ char *cmd, char *in_mode, int *psts)
     /* once the subprocess is spawned, it has copied the symbols and
        we can get rid of ours */
 
+    for (j = 0; j < 4; j++) {
+        sprintf(cmd_sym_name,"PERL_POPEN_CMD%d",j);
+        d_sym_cmd.dsc$w_length = strlen(cmd_sym_name);
     _ckvmssts(lib$delete_symbol(&d_sym_cmd, &table));
+    }
     _ckvmssts(lib$delete_symbol(&d_sym_in,  &table));
     _ckvmssts(lib$delete_symbol(&d_sym_err, &table));
     _ckvmssts(lib$delete_symbol(&d_sym_out, &table));
