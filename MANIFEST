@@ -432,6 +432,7 @@ hints/unicosmk.sh	Hints for named architecture
 hints/unisysdynix.sh	Hints for named architecture
 hints/utekv.sh		Hints for named architecture
 hints/uts.sh		Hints for named architecture
+hints/uwin.sh		Hints for named architecture
 hv.c			Hash value code
 hv.h			Hash value header
 installhtml		Perl script to install html files for pods
