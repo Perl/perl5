@@ -52,9 +52,9 @@ if ("@$missentry" =~ m/\.orig\b/) {
 die "Aborted.\n" if @$missentry or @$missfile;
 print "\n";
 
-
-print "Updating VMS version specific files with $vms_vers...\n";
-system("perl -pi -e 's/^\QPERL_VERSION = \E\d\_\d+(\s*\#)/PERL_VERSION = $vms_vers$1/' vms/descrip.mms");
+# VMS no longer has hardcoded version numbers descrip.mms
+#print "Updating VMS version specific files with $vms_vers...\n";
+#system("perl -pi -e 's/^\QPERL_VERSION = \E\d\_\d+(\s*\#)/PERL_VERSION = $vms_vers$1/' vms/descrip.mms");
 
 
 print "Setting file permissions...\n";
