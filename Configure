@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Nov 23 21:55:36 EET 2001 [metaconfig 3.0 PL70]
+# Generated on Sun Nov 25 08:58:37 EET 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -11523,7 +11523,6 @@ case "$d_readlink" in
 			echo "You have Linux-like /proc/self/exe."
 			procselfexe='"/proc/self/exe"'
 			val="$define"
-			break
 		fi
 	fi
 	if $issymlink /proc/curproc/file ; then
@@ -11532,7 +11531,6 @@ case "$d_readlink" in
 			echo "You have BSD-like /proc/curproc/file."
 			procselfexe='"/proc/curproc/file"'
 			val="$define"
-			break
 		fi
 	fi
 	;;
