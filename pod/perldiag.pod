@@ -1216,7 +1216,7 @@ See L<perlsub/"Constant Functions"> and L<constant>.
 
 =item Constant subroutine %s redefined
 
-(S|W redefine) You redefined a subroutine which had previously been
+(S) You redefined a subroutine which had previously been
 eligible for inlining.  See L<perlsub/"Constant Functions"> for
 commentary and workarounds.
 
