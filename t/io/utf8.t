@@ -76,7 +76,7 @@ print "ok 15\n";
 close F;
 
 open F, ">:utf8", 'a' or die $!;
-
+binmode(F);  # we write a "\n" and then tell() - avoid CRLF issues.
 print F $a;
 my $y;
 { my $x = tell(F); 
