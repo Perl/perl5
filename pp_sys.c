@@ -442,7 +442,7 @@ PP(pp_warn)
     if (!tmps || !len)
 	tmpsv = sv_2mortal(newSVpvn("Warning: something's wrong", 26));
 
-    Perl_warn(aTHX_ "%_", tmpsv);
+    Perl_warn(aTHX_ "%"SVf, tmpsv);
     RETSETYES;
 }
 
@@ -500,7 +500,7 @@ PP(pp_die)
     if (!tmps || !len)
 	tmpsv = sv_2mortal(newSVpvn("Died", 4));
 
-    DIE(aTHX_ "%_", tmpsv);
+    DIE(aTHX_ "%"SVf, tmpsv);
 }
 
 /* I/O. */

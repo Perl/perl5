@@ -77,7 +77,7 @@
 				    vn = "VERSION"), FALSE);		\
 	}								\
 	if (tmpsv && (!SvOK(tmpsv) || strNE(XS_VERSION, SvPV(tmpsv, n_a))))	\
-	    Perl_croak(aTHX_ "%s object version %s does not match %s%s%s%s %_",	\
+	    Perl_croak(aTHX_ "%s object version %s does not match %s%s%s%s %"SVf,\
 		  module, XS_VERSION,					\
 		  vn ? "$" : "", vn ? module : "", vn ? "::" : "",	\
 		  vn ? vn : "bootstrap parameter", tmpsv);		\

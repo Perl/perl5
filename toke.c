@@ -1384,7 +1384,7 @@ S_scan_const(pTHX_ char *start)
 			    if (ckWARN(WARN_UTF8))
 				Perl_warner(aTHX_ WARN_UTF8,
 				    "\\x%.*s will produce malformed UTF-8 character; use \\x{%.*s} for that",
-				    len,s,len,s);
+				    (int)len,s,(int)len,s);
 			}
 			*d++ = (char)uv;
 		    }
@@ -7122,7 +7122,7 @@ Perl_yyerror(pTHX_ char *s)
         PL_multi_end = 0;
     }
     if (PL_in_eval & EVAL_WARNONLY)
-	Perl_warn(aTHX_ "%_", msg);
+	Perl_warn(aTHX_ "%"SVf, msg);
     else
 	qerror(msg);
     if (PL_error_count >= 10)

@@ -217,7 +217,7 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	if (*type == '|') {
 	    if (num_svs && (tlen != 2 || type[1] != '-')) {
 	      unknown_desr:
-		Perl_croak(aTHX_ "Unknown open() mode '%.*s'", olen, oname);
+		Perl_croak(aTHX_ "Unknown open() mode '%.*s'", (int)olen, oname);
 	    }
 	    /*SUPPRESS 530*/
 	    for (type++, tlen--; isSPACE(*type); type++, tlen--) ;

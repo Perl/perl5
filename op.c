@@ -2686,15 +2686,19 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    if (rfirst == 0xffffffff) {
 		diff = tdiff;	/* oops, pretend rdiff is infinite */
 		if (diff > 0)
-		    Perl_sv_catpvf(aTHX_ listsv, "%04x\t%04x\tXXXX\n", tfirst, tlast);
+		    Perl_sv_catpvf(aTHX_ listsv, "%04lx\t%04lx\tXXXX\n",
+				   (long)tfirst, (long)tlast);
 		else
-		    Perl_sv_catpvf(aTHX_ listsv, "%04x\t\tXXXX\n", tfirst);
+		    Perl_sv_catpvf(aTHX_ listsv, "%04lx\t\tXXXX\n", (long)tfirst);
 	    }
 	    else {
 		if (diff > 0)
-		    Perl_sv_catpvf(aTHX_ listsv, "%04x\t%04x\t%04x\n", tfirst, tfirst + diff, rfirst);
+		    Perl_sv_catpvf(aTHX_ listsv, "%04lx\t%04lx\t%04lx\n",
+				   (long)tfirst, (long)(tfirst + diff),
+				   (long)rfirst);
 		else
-		    Perl_sv_catpvf(aTHX_ listsv, "%04x\t\t%04x\n", tfirst, rfirst);
+		    Perl_sv_catpvf(aTHX_ listsv, "%04lx\t\t%04lx\n",
+				   (long)tfirst, (long)rfirst);
 
 		if (rfirst + diff > max)
 		    max = rfirst + diff;
@@ -4023,7 +4027,7 @@ S_cv_dump(pTHX_ CV *cv)
 	if (SvPOK(pname[ix]))
 	    PerlIO_printf(Perl_debug_log,
 			  "\t%4d. 0x%"UVxf" (%s\"%s\" %"IVdf"-%"IVdf")\n",
-			  ix, PTR2UV(ppad[ix]),
+			  (int)ix, PTR2UV(ppad[ix]),
 			  SvFAKE(pname[ix]) ? "FAKE " : "",
 			  SvPVX(pname[ix]),
 			  (IV)I_32(SvNVX(pname[ix])),
@@ -4190,7 +4194,7 @@ Perl_cv_ckproto(pTHX_ CV *cv, GV *gv, char *p)
 	    gv_efullname3(name = sv_newmortal(), gv, Nullch);
 	sv_setpv(msg, "Prototype mismatch:");
 	if (name)
-	    Perl_sv_catpvf(aTHX_ msg, " sub %_", name);
+	    Perl_sv_catpvf(aTHX_ msg, " sub %"SVf, name);
 	if (SvPOK(cv))
 	    Perl_sv_catpvf(aTHX_ msg, " (%s)", SvPVX(cv));
 	sv_catpv(msg, " vs ");
@@ -4198,7 +4202,7 @@ Perl_cv_ckproto(pTHX_ CV *cv, GV *gv, char *p)
 	    Perl_sv_catpvf(aTHX_ msg, "(%s)", p);
 	else
 	    sv_catpv(msg, "none");
-	Perl_warner(aTHX_ WARN_UNSAFE, "%_", msg);
+	Perl_warner(aTHX_ WARN_UNSAFE, "%"SVf, msg);
     }
 }
 
@@ -5567,7 +5571,7 @@ Perl_ck_defined(pTHX_ OP *o)		/* 19990527 MJD */
 	    break;                      /* Globals via GV can be undef */ 
 	case OP_PADHV:
 	    Perl_warner(aTHX_ WARN_DEPRECATED,
-			"defined(%hash) is deprecated");
+			"defined(%%hash) is deprecated");
 	    Perl_warner(aTHX_ WARN_DEPRECATED,
 			"(Maybe you should just omit the defined()?)\n");
 	    break;

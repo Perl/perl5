@@ -1302,7 +1302,7 @@ Perl_qerror(pTHX_ SV *err)
     else if (PL_errors)
 	sv_catsv(PL_errors, err);
     else
-	Perl_warn(aTHX_ "%_", err);
+	Perl_warn(aTHX_ "%"SVf, err);
     ++PL_error_count;
 }
 
@@ -2391,8 +2391,7 @@ PP(pp_goto)
 		/* Eventually we may want to stack the needed arguments
 		 * for each op.  For now, we punt on the hard ones. */
 		if (PL_op->op_type == OP_ENTERITER)
-		    DIE(aTHX_ "Can't \"goto\" into the middle of a foreach loop",
-			label);
+		    DIE(aTHX_ "Can't \"goto\" into the middle of a foreach loop");
 		CALL_FPTR(PL_op->op_ppaddr)(aTHX);
 	    }
 	    PL_op = oldop;
@@ -2869,7 +2868,7 @@ PP(pp_require)
 			    && PERL_SUBVERSION < sver))))
 	    {
 		DIE(aTHX_ "Perl v%"UVuf".%"UVuf".%"UVuf" required--this is only version "
-		    "v%"UVuf".%"UVuf".%"UVuf", stopped", rev, ver, sver, PERL_REVISION,
+		    "v%d.%d.%d, stopped", rev, ver, sver, PERL_REVISION,
 		    PERL_VERSION, PERL_SUBVERSION);
 	    }
 	}
@@ -2884,7 +2883,7 @@ PP(pp_require)
 		+ 0.00000099 < SvNV(sv))
 	    {
 		DIE(aTHX_ "Perl v%"UVuf".%"UVuf".%"UVuf" required--this is only version "
-		    "v%"UVuf".%"UVuf".%"UVuf", stopped", rev, ver, sver, PERL_REVISION,
+		    "v%d.%d.%d, stopped", rev, ver, sver, PERL_REVISION,
 		    PERL_VERSION, PERL_SUBVERSION);
 	    }
 	}

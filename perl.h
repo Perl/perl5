@@ -189,6 +189,10 @@ struct perl_thread;
 #  define dTHX		dTHXa(PERL_GET_THX)
 #  define pTHX_		pTHX,
 #  define aTHX_		aTHX,
+#  define pTHX_1	2	
+#  define pTHX_2	3
+#  define pTHX_3	4
+#  define pTHX_4	5
 #endif
 
 #define STATIC static
@@ -221,6 +225,10 @@ struct perl_thread;
 #  define aTHX_
 #  define dTHXa(a)	dNOOP
 #  define dTHX		dNOOP
+#  define pTHX_1	1	
+#  define pTHX_2	2
+#  define pTHX_3	3
+#  define pTHX_4	4
 #endif
 
 #ifndef pTHXo
@@ -1672,6 +1680,14 @@ typedef pthread_key_t	perl_key;
 #  endif
 #  endif
 #  endif
+#endif
+
+#ifndef SVf
+#  ifdef CHECK_FORMAT
+#    define SVf "p"
+#  else
+#    define SVf "_"
+#  endif 
 #endif
 
 /* Some unistd.h's give a prototype for pause() even though
