@@ -56,13 +56,20 @@ struct xpvhv {
  * (a) the hashed data being interpreted as "unsigned char" (new since 5.8,
  *     a "char" can be either signed or signed, depending on the compiler)
  * (b) catering for old code that uses a "char"
+ * The "hash seed" feature was added in Perl 5.8.1 to perturb the results
+ * to avoid "algorithmic complexity attacks".
  */
+#if defined(USE_HASH_SEED) || defined(USE_HASH_SEED_EXPLICIT)
+#   define PERL_HASH_SEED	PL_hash_seed
+#else
+#   define PERL_HASH_SEED	0
+#endif
 #define PERL_HASH(hash,str,len) \
      STMT_START	{ \
 	register const char *s_PeRlHaSh_tmp = str; \
 	register const unsigned char *s_PeRlHaSh = (const unsigned char *)s_PeRlHaSh_tmp; \
 	register I32 i_PeRlHaSh = len; \
-	register U32 hash_PeRlHaSh = 0; \
+	register U32 hash_PeRlHaSh = PERL_HASH_SEED; \
 	while (i_PeRlHaSh--) { \
 	    hash_PeRlHaSh += *s_PeRlHaSh++; \
 	    hash_PeRlHaSh += (hash_PeRlHaSh << 10); \

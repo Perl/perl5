@@ -556,6 +556,8 @@ PERLVARI(Irunops_dbg,	runops_proc_t,	MEMBER_TO_FPTR(Perl_runops_debug))
 PERLVARI(Ippid,		IV,		0)
 #endif
 
+PERLVARI(Ihash_seed, UV, 0)		/* Hash initializer */
+
 /* New variables must be added to the very end, before this comment,
  * for binary compatibility (the offsets of the old members must not change).
  * (Don't forget to add your variable also to perl_clone()!)

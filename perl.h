@@ -2302,6 +2302,12 @@ typedef        struct crypt_data {     /* straight from /usr/include/crypt.h */
 #if !defined(OS2) && !defined(MACOS_TRADITIONAL)
 #  include "iperlsys.h"
 #endif
+
+/* [perl #22371] Algorimic Complexity Attack on Perl 5.6.1, 5.8.0 */
+#if !defined(NO_HASH_SEED) && !defined(USE_HASH_SEED) && !defined(USE_HASH_SEED_EXPLICIT)
+#  define USE_HASH_SEED
+#endif
+
 #include "regexp.h"
 #include "sv.h"
 #include "util.h"

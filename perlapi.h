@@ -274,6 +274,8 @@ END_EXTERN_C
 #define PL_glob_index		(*Perl_Iglob_index_ptr(aTHX))
 #undef  PL_globalstash
 #define PL_globalstash		(*Perl_Iglobalstash_ptr(aTHX))
+#undef  PL_hash_seed
+#define PL_hash_seed		(*Perl_Ihash_seed_ptr(aTHX))
 #undef  PL_he_arenaroot
 #define PL_he_arenaroot		(*Perl_Ihe_arenaroot_ptr(aTHX))
 #undef  PL_he_root
