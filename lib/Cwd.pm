@@ -8,70 +8,109 @@ Cwd - get pathname of current working directory
 =head1 SYNOPSIS
 
     use Cwd;
-    $dir = cwd;
+    my $dir = getcwd;
 
-    use Cwd;
-    $dir = getcwd;
-
-    use Cwd;
-    $dir = fastcwd;
-
-    use Cwd;
-    $dir = fastgetcwd;
-
-    use Cwd 'chdir';
-    chdir "/tmp";
-    print $ENV{'PWD'};
-
-    use Cwd 'abs_path';	    # aka realpath()
-    print abs_path($ENV{'PWD'});
-
-    use Cwd 'fast_abs_path';
-    print fast_abs_path($ENV{'PWD'});
+    use Cwd 'abs_path';
+    my $abs_path = abs_path($file);
 
 =head1 DESCRIPTION
 
 This module provides functions for determining the pathname of the
-current working directory.  By default, it exports the functions
-cwd(), getcwd(), fastcwd(), and fastgetcwd() into the caller's
-namespace.  Each of these functions are called without arguments and
-return the absolute path of the current working directory.  It is
-recommended that cwd (or another *cwd() function) be used in I<all>
-code to ensure portability.
+current working directory.  It is recommended that getcwd (or another
+*cwd() function) be used in I<all> code to ensure portability.
 
-The cwd() is the most natural and safe form for the current
-architecture. For most systems it is identical to `pwd` (but without
-the trailing line terminator).
+By default, it exports the functions cwd(), getcwd(), fastcwd(), and
+fastgetcwd() into the caller's namespace.  
 
-The getcwd() function re-implements the getcwd(3) (or getwd(3)) functions
-in Perl.
 
-The fastcwd() function looks the same as getcwd(), but runs faster.
-It's also more dangerous because it might conceivably chdir() you out
-of a directory that it can't chdir() you back into.  If fastcwd
-encounters a problem it will return undef but will probably leave you
-in a different directory.  For a measure of extra security, if
-everything appears to have worked, the fastcwd() function will check
-that it leaves you in the same directory that it started in. If it has
-changed it will C<die> with the message "Unstable directory path,
-current directory changed unexpectedly". That should never happen.
+=head2 getcwd and friends
+
+Each of these functions are called without arguments and return the
+absolute path of the current working directory.
+
+=over 4
+
+=item getcwd
+
+    my $cwd = getcwd();
+
+Returns the current working directory.
+
+Re-implements the getcwd(3) (or getwd(3)) functions in Perl.
+
+=item cwd
+
+    my $cwd = cwd();
+
+The cwd() is the most natural form for the current architecture. For
+most systems it is identical to `pwd` (but without the trailing line
+terminator).
+
+Unfortunately, cwd() tends to break if called under taint mode.
+
+=item fastcwd
+
+    my $cwd = fastcwd();
+
+A more dangerous version of getcwd(), but potentially faster.
+
+It might conceivably chdir() you out of a directory that it can't
+chdir() you back into.  If fastcwd encounters a problem it will return
+undef but will probably leave you in a different directory.  For a
+measure of extra security, if everything appears to have worked, the
+fastcwd() function will check that it leaves you in the same directory
+that it started in. If it has changed it will C<die> with the message
+"Unstable directory path, current directory changed
+unexpectedly". That should never happen.
+
+=item fastgetcwd
+
+  my $cwd = fastgetcwd();
 
 The fastgetcwd() function is provided as a synonym for cwd().
 
-The abs_path() function takes a single argument and returns the
-absolute pathname for that argument.  It uses the same algorithm as
-getcwd().  (Actually, getcwd() is abs_path("."))  Symbolic links and
-relative-path components ("." and "..") are resolved to return the
-canonical pathname, just like realpath(3).  This function is also
-callable as realpath().
+=back
 
-The fast_abs_path() function looks the same as abs_path() but runs
-faster and, like fastcwd(), is more dangerous.
 
-If you ask to override your chdir() built-in function, then your PWD
-environment variable will be kept up to date.  (See
-L<perlsub/Overriding Builtin Functions>.) Note that it will only be
-kept up to date if all packages which use chdir import it from Cwd.
+=head2 abs_path and friends
+
+These functions are exported only on request.  They each take a single
+argument and return the absolute pathname for it.
+
+=over 4
+
+=item abs_path
+
+  my $abs_path = abs_path($file);
+
+Uses the same algorithm as getcwd().  Symbolic links and relative-path
+components ("." and "..") are resolved to return the canonical
+pathname, just like realpath(3).
+
+=item realpath
+
+  my $abs_path = realpath($file);
+
+A synonym for abs_path().
+
+=item fast_abs_path
+
+  my $abs_path = abs_path($file);
+
+A more dangerous, but potentially faster version of abs_path.
+
+=back
+
+=head2 $ENV{PWD}
+
+If you ask to override your chdir() built-in function, 
+
+  use Cwd qw(chdir);
+
+then your PWD environment variable will be kept up to date.  Note that
+it will only be kept up to date if all packages which use chdir import
+it from Cwd.
+
 
 =head1 NOTES
 
@@ -79,21 +118,26 @@ kept up to date if all packages which use chdir import it from Cwd.
 
 =item *
 
-On Mac OS (Classic), the path separator is ':', not '/', and the 
-current directory is denoted as ':', not '.'. To move up the directory 
-tree, you will use '::' to move up one level, but ':::' and so on to 
-move up the tree two or more levels (i.e. the equivalent to '../../..'
-is '::::'). Generally, you should be careful about specifying relative pathnames. 
-While a full path always begins with a volume name, a relative pathname 
-should always begin with a ':'.  If specifying a volume name only, a 
-trailing ':' is required.
+Since the path seperators are different on some operating systems ('/'
+on Unix, ':' on MacPerl, etc...) we recommend you use the File::Spec
+modules wherever portability is a concern.
+
+=begin _private
+
+=item *
 
 Actually, on Mac OS, the C<getcwd()>, C<fastgetcwd()> and C<fastcwd()>
 functions  are all aliases for the C<cwd()> function, which, on Mac OS,
 calls `pwd`. Likewise, the C<abs_path()> function is an alias for
 C<fast_abs_path()>.
 
+=end _private
+
 =back
+
+=head1 SEE ALSO
+
+L<File::chdir>
 
 =cut
 
@@ -101,7 +145,7 @@ use strict;
 
 use Carp;
 
-our $VERSION = '2.05';
+our $VERSION = '2.06';
 
 use base qw/ Exporter /;
 our @EXPORT = qw(cwd getcwd fastcwd fastgetcwd);
