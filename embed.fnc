@@ -130,7 +130,7 @@ p	|void	|cv_ckproto	|CV* cv|GV* gv|char* p
 pd	|CV*	|cv_clone	|CV* proto
 Apd	|SV*	|cv_const_sv	|CV* cv
 p	|SV*	|op_const_sv	|OP* o|CV* cv
-Ap	|void	|cv_undef	|CV* cv
+Apd	|void	|cv_undef	|CV* cv
 Ap	|void	|cx_dump	|PERL_CONTEXT* cs
 Ap	|SV*	|filter_add	|filter_t funcp|SV* datasv
 Ap	|void	|filter_del	|filter_t funcp
@@ -626,6 +626,7 @@ Ap	|void	|save_aelem	|AV* av|I32 idx|SV **sptr
 Ap	|I32	|save_alloc	|I32 size|I32 pad
 Ap	|void	|save_aptr	|AV** aptr
 Ap	|AV*	|save_ary	|GV* gv
+Ap	|void	|save_bool	|bool* boolp
 Ap	|void	|save_clearsv	|SV** svp
 Ap	|void	|save_delete	|HV* hv|char* key|I32 klen
 Ap	|void	|save_destructor|DESTRUCTORFUNC_NOCONTEXT_t f|void* p
@@ -1328,7 +1329,7 @@ s	|void	|deb_stack_n	|SV** stack_base|I32 stack_min \
 				|I32 stack_max|I32 mark_min|I32 mark_max
 #endif
 
-pd	|PADLIST*|pad_new	|padnew_flags flags
+pd	|PADLIST*|pad_new	|int flags
 pd	|void	|pad_undef	|CV* cv
 pd	|PADOFFSET|pad_add_name	|char *name\
 				|HV* typestash|HV* ourstash \
@@ -1353,7 +1354,7 @@ sd	|void	|cv_dump	|CV *cv|char *title
 #  endif
 s	|CV*	|cv_clone2	|CV *proto|CV *outside
 #endif
-pd 	|CV*	|find_runcv
+pd 	|CV*	|find_runcv	|U32 *db_seqp
 
 
 

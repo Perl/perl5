@@ -188,6 +188,7 @@ In addition, Perl defines the following:
     \C	Match a single C char (octet) even under Unicode.
 	NOTE: breaks up characters into their UTF-8 bytes,
 	so you may end up with malformed pieces of UTF-8.
+	Unsupported in lookbehind.
 
 A C<\w> matches a single alphanumeric character (an alphabetic
 character, or a decimal digit) or C<_>, not a whole word.  Use C<\w+>

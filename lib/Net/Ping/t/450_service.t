@@ -9,50 +9,37 @@ BEGIN {
     print "1..0 \# Skip: no echo port\n";
     exit;
   }
-  unless (0) {
-    print "1..0 \# Skip: too many problems right now\n";
-    exit;
-  }
 }
 
 use strict;
 use Test;
 use Net::Ping;
-use IO::Socket;
 
 # I'm lazy so I'll just use IO::Socket
 # for the TCP Server stuff instead of doing
 # all that direct socket() junk manually.
 
-plan tests => 37;
+plan tests => 26;
 
 # Everything loaded fine
 ok 1;
 
-"0" =~ /(0)/; # IO::Socket::INET ephemeral buttwag hack
-
 # Start a tcp listen server on ephemeral port
 my $sock1 = new IO::Socket::INET
-  LocalAddr => "127.1.1.1",
+  LocalAddr => "127.0.0.1",
   Proto => "tcp",
   Listen => 8,
-  Reuse => 1,
-  Type => SOCK_STREAM,
-  ;
+  or warn "bind: $!";
 
 # Make sure it worked.
 ok !!$sock1;
 
-"0" =~ /(0)/; # IO::Socket::INET ephemeral buttwag hack
-
 # Start listening on another ephemeral port
 my $sock2 = new IO::Socket::INET
-  LocalAddr => "127.2.2.2",
+  LocalAddr => "127.0.0.1",
   Proto => "tcp",
   Listen => 8,
-  Reuse => 1,
-  Type => SOCK_STREAM,
-  ;
+  or warn "bind: $!";
 
 # Make sure it worked too.
 ok !!$sock2;
@@ -66,11 +53,11 @@ ok $port2;
 # Make sure the sockets are listening on different ports.
 ok ($port1 != $port2);
 
+$sock2->close;
+
 # This is how it should be:
-# 127.1.1.1:$port1 - service ON
-# 127.2.2.2:$port2 - service ON
-# 127.1.1.1:$port2 - service OFF
-# 127.2.2.2:$port1 - service OFF
+# 127.0.0.1:$port1 - service ON
+# 127.0.0.1:$port2 - service OFF
 
 #####
 # First, we test using the "tcp" protocol.
@@ -86,20 +73,15 @@ $p->tcp_service_check(0);
 # Try on the first port
 $p->{port_num} = $port1;
 
-# Make sure IP1 is reachable
-ok $p -> ping("127.1.1.1");
-
-# Make sure IP2 is reachable
-ok $p -> ping("127.2.2.2");
+# Make sure it is reachable
+ok $p -> ping("127.0.0.1");
 
 # Try on the other port
 $p->{port_num} = $port2;
 
-# Make sure IP1 is reachable
-ok $p -> ping("127.1.1.1");
+# Make sure it is reachable
+ok $p -> ping("127.0.0.1");
 
-# Make sure IP2 is reachable
-ok $p -> ping("127.2.2.2");
 
 
 # Enable service checking
@@ -108,21 +90,16 @@ $p->tcp_service_check(1);
 # Try on the first port
 $p->{port_num} = $port1;
 
-# Make sure service on IP1 
-ok $p -> ping("127.1.1.1");
-
-# Make sure not service on IP2
-ok !$p -> ping("127.2.2.2");
+# Make sure service is on
+ok $p -> ping("127.0.0.1");
 
 # Try on the other port
 $p->{port_num} = $port2;
 
-# Make sure not service on IP1
-ok !$p -> ping("127.1.1.1");
+# Make sure service is off
+ok !$p -> ping("127.0.0.1");
 
-# Make sure service on IP2
-ok $p -> ping("127.2.2.2");
-
+# test 11 just finished.
 
 #####
 # Lastly, we test using the "syn" protocol.
@@ -137,12 +114,10 @@ $p->tcp_service_check(0);
 # Try on the first port
 $p->{port_num} = $port1;
 
-# Send SYN to both IPs
-ok $p -> ping("127.1.1.1");
-ok $p -> ping("127.2.2.2");
+# Send SYN
+if (!ok $p -> ping("127.0.0.1")) {warn "ERRNO: $!";}
 
-# Both IPs should be reachable
-ok $p -> ack();
+# IP should be reachable
 ok $p -> ack();
 # No more sockets?
 ok !$p -> ack();
@@ -160,12 +135,10 @@ $p->tcp_service_check(0);
 # Try on the other port
 $p->{port_num} = $port2;
 
-# Send SYN to both IPs
-ok $p -> ping("127.1.1.1");
-ok $p -> ping("127.2.2.2");
+# Send SYN
+if (!ok $p -> ping("127.0.0.1")) {warn "ERRNO: $!";}
 
-# Both IPs should be reachable
-ok $p -> ack();
+# IP should still be reachable
 ok $p -> ack();
 # No more sockets?
 ok !$p -> ack();
@@ -184,12 +157,11 @@ $p->tcp_service_check(1);
 # Try on the first port
 $p->{port_num} = $port1;
 
-# Send SYN to both IPs
-ok $p -> ping("127.1.1.1");
-ok $p -> ping("127.2.2.2");
+# Send SYN
+ok $p -> ping("127.0.0.1");
 
-# Only IP1 should have service
-ok "127.1.1.1",$p -> ack();
+# Should have service on
+ok ($p -> ack(),"127.0.0.1");
 # No more good sockets?
 ok !$p -> ack();
 
@@ -207,11 +179,8 @@ $p->tcp_service_check(1);
 # Try on the other port
 $p->{port_num} = $port2;
 
-# Send SYN to both IPs
-ok $p -> ping("127.1.1.1");
-ok $p -> ping("127.2.2.2");
+# Send SYN
+if (!ok $p -> ping("127.0.0.1")) {warn "ERRNO: $!";}
 
-# Only IP2 should have service
-ok "127.2.2.2",$p -> ack();
-# No more good sockets?
+# No sockets should have service on
 ok !$p -> ack();

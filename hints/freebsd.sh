@@ -20,7 +20,7 @@
 #
 # Modified to ensure we replace -lc with -lc_r, and
 # to put in place-holders for various specific hints.
-# Andy Dougherty <doughera@lafcol.lafayette.edu>
+# Andy Dougherty <doughera@lafayette.edu>
 # Date: Tue Mar 10 16:07:00 EST 1998
 #
 # Support for FreeBSD/ELF

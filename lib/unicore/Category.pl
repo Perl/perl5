@@ -41,7 +41,7 @@ return <<'END';
 00AA		Ll
 00AB		Pi
 00AC		Sm
-00AD		Pd
+00AD		Cf
 00AE		So
 00AF		Sk
 00B0		So

@@ -598,7 +598,7 @@ typedef int		(*LPLIOAccess)(struct IPerlLIO*, const char*, int);
 typedef int		(*LPLIOChmod)(struct IPerlLIO*, const char*, int);
 typedef int		(*LPLIOChown)(struct IPerlLIO*, const char*, uid_t,
 			    gid_t);
-typedef int		(*LPLIOChsize)(struct IPerlLIO*, int, long);
+typedef int		(*LPLIOChsize)(struct IPerlLIO*, int, Off_t);
 typedef int		(*LPLIOClose)(struct IPerlLIO*, int);
 typedef int		(*LPLIODup)(struct IPerlLIO*, int);
 typedef int		(*LPLIODup2)(struct IPerlLIO*, int, int);

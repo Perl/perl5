@@ -2,7 +2,7 @@
 #
 # hints file for OpenBSD; Todd Miller <millert@openbsd.org>
 # Edited to allow Configure command-line overrides by
-#  Andy Dougherty <doughera@lafcol.lafayette.edu>
+#  Andy Dougherty <doughera@lafayette.edu>
 #
 # To build with distribution paths, use:
 #	./Configure -des -Dopenbsd_distribution=defined

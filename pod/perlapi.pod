@@ -512,6 +512,35 @@ Found in file handy.h
 
 Create and return a new interpreter by cloning the current one.
 
+perl_clone takes these flags as paramters:
+
+CLONEf_COPY_STACKS - is used to, well, copy the stacks also, 
+without it we only clone the data and zero the stacks, 
+with it we copy the stacks and the new perl interpreter is 
+ready to run at the exact same point as the previous one. 
+The pseudo-fork code uses COPY_STACKS while the 
+threads->new doesn't.
+
+CLONEf_KEEP_PTR_TABLE
+perl_clone keeps a ptr_table with the pointer of the old 
+variable as a key and the new variable as a value, 
+this allows it to check if something has been cloned and not 
+clone it again but rather just use the value and increase the 
+refcount. If KEEP_PTR_TABLE is not set then perl_clone will kill 
+the ptr_table using the function 
+C<ptr_table_free(PL_ptr_table); PL_ptr_table = NULL;>, 
+reason to keep it around is if you want to dup some of your own 
+variable who are outside the graph perl scans, example of this 
+code is in threads.xs create
+
+CLONEf_CLONE_HOST
+This is a win32 thing, it is ignored on unix, it tells perls 
+win32host code (which is c++) to clone itself, this is needed on 
+win32 if you want to run two threads at the same time, 
+if you just want to do some stuff in a separate perl interpreter 
+and then throw it away and return to the original one, 
+you don't need to do anything.
+
 	PerlInterpreter*	perl_clone(PerlInterpreter* interp, UV flags)
 
 =for hackers
@@ -561,6 +590,18 @@ Found in file cv.h
 =head1 Embedding Functions
 
 =over 8
+
+=item cv_undef
+
+Clear out all the active components of a CV. This can happen either
+by an explicit C<undef &foo>, or by the reference count going to zero.
+In the former case, we keep the CvOUTSIDE pointer, so that any anonymous
+children can still follow the full lexical scope chain.
+
+	void	cv_undef(CV* cv)
+
+=for hackers
+Found in file op.c
 
 =item load_module
 

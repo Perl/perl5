@@ -1,5 +1,8 @@
 Revision history for Perl extension Time::HiRes.
 
+1.39
+	- fix from Craig Berry for better building in VMS with PERL_CORE
+
 1.38
 	- no functional changes
 	- move lib/Time/HiRes.pm as Hires.pm

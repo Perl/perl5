@@ -106,6 +106,7 @@ sub Complete {
 	    $tty_saved_state = undef;
 	}
 	else {
+	    chomp $tty_saved_state;
 	    $tty_restore = qq($stty "$tty_saved_state");
 	}
     }

@@ -939,9 +939,9 @@ PerlLIOChown(struct IPerlLIO* piPerl, const char *filename, uid_t owner, gid_t g
 }
 
 int
-PerlLIOChsize(struct IPerlLIO* piPerl, int handle, long size)
+PerlLIOChsize(struct IPerlLIO* piPerl, int handle, Off_t size)
 {
-    return chsize(handle, size);
+    return win32_chsize(handle, size);
 }
 
 int

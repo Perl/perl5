@@ -696,8 +696,6 @@ END_EXTERN_C
 #define PL_efloatsize		(*Perl_Tefloatsize_ptr(aTHX))
 #undef  PL_errors
 #define PL_errors		(*Perl_Terrors_ptr(aTHX))
-#undef  PL_extralen
-#define PL_extralen		(*Perl_Textralen_ptr(aTHX))
 #undef  PL_firstgv
 #define PL_firstgv		(*Perl_Tfirstgv_ptr(aTHX))
 #undef  PL_formtarget
@@ -782,20 +780,10 @@ END_EXTERN_C
 #define PL_reg_starttry		(*Perl_Treg_starttry_ptr(aTHX))
 #undef  PL_reg_sv
 #define PL_reg_sv		(*Perl_Treg_sv_ptr(aTHX))
-#undef  PL_reg_whilem_seen
-#define PL_reg_whilem_seen	(*Perl_Treg_whilem_seen_ptr(aTHX))
 #undef  PL_regbol
 #define PL_regbol		(*Perl_Tregbol_ptr(aTHX))
 #undef  PL_regcc
 #define PL_regcc		(*Perl_Tregcc_ptr(aTHX))
-#undef  PL_regcode
-#define PL_regcode		(*Perl_Tregcode_ptr(aTHX))
-#undef  PL_regcomp_parse
-#define PL_regcomp_parse	(*Perl_Tregcomp_parse_ptr(aTHX))
-#undef  PL_regcomp_rx
-#define PL_regcomp_rx		(*Perl_Tregcomp_rx_ptr(aTHX))
-#undef  PL_regcompat1
-#define PL_regcompat1		(*Perl_Tregcompat1_ptr(aTHX))
 #undef  PL_regcompp
 #define PL_regcompp		(*Perl_Tregcompp_ptr(aTHX))
 #undef  PL_regdata
@@ -808,8 +796,6 @@ END_EXTERN_C
 #define PL_regeol		(*Perl_Tregeol_ptr(aTHX))
 #undef  PL_regexecp
 #define PL_regexecp		(*Perl_Tregexecp_ptr(aTHX))
-#undef  PL_regflags
-#define PL_regflags		(*Perl_Tregflags_ptr(aTHX))
 #undef  PL_regfree
 #define PL_regfree		(*Perl_Tregfree_ptr(aTHX))
 #undef  PL_regindent
@@ -828,26 +814,18 @@ END_EXTERN_C
 #define PL_reglastparen		(*Perl_Treglastparen_ptr(aTHX))
 #undef  PL_regnarrate
 #define PL_regnarrate		(*Perl_Tregnarrate_ptr(aTHX))
-#undef  PL_regnaughty
-#define PL_regnaughty		(*Perl_Tregnaughty_ptr(aTHX))
 #undef  PL_regnpar
 #define PL_regnpar		(*Perl_Tregnpar_ptr(aTHX))
 #undef  PL_regprecomp
 #define PL_regprecomp		(*Perl_Tregprecomp_ptr(aTHX))
 #undef  PL_regprogram
 #define PL_regprogram		(*Perl_Tregprogram_ptr(aTHX))
-#undef  PL_regsawback
-#define PL_regsawback		(*Perl_Tregsawback_ptr(aTHX))
-#undef  PL_regseen
-#define PL_regseen		(*Perl_Tregseen_ptr(aTHX))
 #undef  PL_regsize
 #define PL_regsize		(*Perl_Tregsize_ptr(aTHX))
 #undef  PL_regstartp
 #define PL_regstartp		(*Perl_Tregstartp_ptr(aTHX))
 #undef  PL_regtill
 #define PL_regtill		(*Perl_Tregtill_ptr(aTHX))
-#undef  PL_regxend
-#define PL_regxend		(*Perl_Tregxend_ptr(aTHX))
 #undef  PL_restartop
 #define PL_restartop		(*Perl_Trestartop_ptr(aTHX))
 #undef  PL_retstack
@@ -876,10 +854,6 @@ END_EXTERN_C
 #define PL_screamnext		(*Perl_Tscreamnext_ptr(aTHX))
 #undef  PL_secondgv
 #define PL_secondgv		(*Perl_Tsecondgv_ptr(aTHX))
-#undef  PL_seen_evals
-#define PL_seen_evals		(*Perl_Tseen_evals_ptr(aTHX))
-#undef  PL_seen_zerolen
-#define PL_seen_zerolen		(*Perl_Tseen_zerolen_ptr(aTHX))
 #undef  PL_sortcop
 #define PL_sortcop		(*Perl_Tsortcop_ptr(aTHX))
 #undef  PL_sortcxix

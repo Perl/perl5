@@ -281,7 +281,7 @@ L<ExtUtils::MakeMaker>
 =head1 AUTHORS
 
 Kenneth Albanowski <kjahds@kjahds.com>, Andy Dougherty
-<doughera@lafcol.lafayette.edu>, Andreas KE<ouml>nig
+<doughera@lafayette.edu>, Andreas KE<ouml>nig
 <A.Koenig@franz.ww.TU-Berlin.DE>, Tim Bunce <Tim.Bunce@ig.co.uk.
 VMS support by Charles Bailey <bailey@newman.upenn.edu>.
 OS/2 support by Ilya Zakharevich <ilya@math.ohio-state.edu>.

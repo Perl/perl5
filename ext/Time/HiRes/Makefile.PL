@@ -83,7 +83,9 @@ sub try_compile_and_link {
 	my $ccflags = $Config{'ccflags'} . ' ' . "-I$COREincdir";
 	if ($^O eq 'VMS') {
 	    if ($ENV{PERL_CORE}) {
-                $cccmd = "$Config{'cc'} /include=(perl_root:[000000]) $tmp.c"; 
+		# Fragile if the extensions change hierachy within
+		# the Perl core but this should do for now.
+                $cccmd = "$Config{'cc'} /include=([---]) $tmp.c";
 	    } else {
 		my $perl_core = $Config{'installarchlib'};
 		$perl_core =~ s/\]$/.CORE]/;

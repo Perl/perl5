@@ -580,15 +580,20 @@ see L<perlfunc/gmtime>.
 
 =item isalnum
 
-This is identical to the C function, except that it can apply to a single
-character or to a whole string.  Consider using regular expressions and the
-C</[[:alnum:]]/> construct instead, or possibly the C</\w/> construct.
+This is identical to the C function, except that it can apply to a
+single character or to a whole string.  Note that locale settings may
+affect what characters are considered C<isalnum>.  Does not work on
+Unicode characters code point 256 or higher.  Consider using regular
+expressions and the C</[[:alnum:]]/> construct instead, or possibly
+the C</\w/> construct.
 
 =item isalpha
 
-This is identical to the C function, except that it can apply to a single
-character or to a whole string.  Consider using regular expressions and the
-C</[[:alpha:]]/> construct instead.
+This is identical to the C function, except that it can apply to
+a single character or to a whole string.  Note that locale settings
+may affect what characters are considered C<isalpha>.  Does not work
+on Unicode characters code point 256 or higher.  Consider using regular
+expressions and the C</[[:alpha:]]/> construct instead.
 
 =item isatty
 
@@ -597,60 +602,82 @@ to a tty.  Similar to the C<-t> operator, see L<perlfunc/-X>.
 
 =item iscntrl
 
-This is identical to the C function, except that it can apply to a single
-character or to a whole string.  Consider using regular expressions and the
-C</[[:cntrl:]]/> construct instead.
+This is identical to the C function, except that it can apply to
+a single character or to a whole string.  Note that locale settings
+may affect what characters are considered C<iscntrl>.  Does not work
+on Unicode characters code point 256 or higher.  Consider using regular
+expressions and the C</[[:cntrl:]]/> construct instead.
 
 =item isdigit
 
-This is identical to the C function, except that it can apply to a single
-character or to a whole string.  Consider using regular expressions and the
-C</[[:digit:]]/> construct instead, or the C</\d/> construct.
+This is identical to the C function, except that it can apply to
+a single character or to a whole string.  Note that locale settings
+may affect what characters are considered C<isdigit> (unlikely, but
+still possible). Does not work on Unicode characters code point 256
+or higher.  Consider using regular expressions and the C</[[:digit:]]/>
+construct instead, or the C</\d/> construct.
 
 =item isgraph
 
-This is identical to the C function, except that it can apply to a single
-character or to a whole string.  Consider using regular expressions and the
-C</[[:graph:]]/> construct instead.
+This is identical to the C function, except that it can apply to
+a single character or to a whole string.  Note that locale settings
+may affect what characters are considered C<isgraph>.  Does not work
+on Unicode characters code point 256 or higher.  Consider using regular
+expressions and the C</[[:graph:]]/> construct instead.
 
 =item islower
 
-This is identical to the C function, except that it can apply to a single
-character or to a whole string.  Consider using regular expressions and the
-C</[[:lower:]]/> construct instead.  Do B<not> use C</[a-z]/>.
+This is identical to the C function, except that it can apply to
+a single character or to a whole string.  Note that locale settings
+may affect what characters are considered C<islower>.  Does not work
+on Unicode characters code point 256 or higher.  Consider using regular
+expressions and the C</[[:lower:]]/> construct instead.  Do B<not> use
+C</[a-z]/>.
 
 =item isprint
 
-This is identical to the C function, except that it can apply to a single
-character or to a whole string.  Consider using regular expressions and the
-C</[[:print:]]/> construct instead.
+This is identical to the C function, except that it can apply to
+a single character or to a whole string.  Note that locale settings
+may affect what characters are considered C<isprint>.  Does not work
+on Unicode characters code point 256 or higher.  Consider using regular
+expressions and the C</[[:print:]]/> construct instead.
 
 =item ispunct
 
-This is identical to the C function, except that it can apply to a single
-character or to a whole string.  Consider using regular expressions and the
-C</[[:punct:]]/> construct instead.
+This is identical to the C function, except that it can apply to
+a single character or to a whole string.  Note that locale settings
+may affect what characters are considered C<ispunct>.  Does not work
+on Unicode characters code point 256 or higher.  Consider using regular
+expressions and the C</[[:punct:]]/> construct instead.
 
 =item isspace
 
-This is identical to the C function, except that it can apply to a single
-character or to a whole string.  Consider using regular expressions and the
-C</[[:space:]]/> construct instead, or the C</\s/> construct.
-(Note that C</\s/> and C</[[:space:]]/> are slightly different in that
-C</[[:space:]]/> can normally match a vertical tab, while C</\s/> does
-not.)
+This is identical to the C function, except that it can apply to
+a single character or to a whole string.  Note that locale settings
+may affect what characters are considered C<isspace>.  Does not work
+on Unicode characters code point 256 or higher.  Consider using regular
+expressions and the C</[[:space:]]/> construct instead, or the C</\s/>
+construct.  (Note that C</\s/> and C</[[:space:]]/> are slightly
+different in that C</[[:space:]]/> can normally match a vertical tab,
+while C</\s/> does not.)
 
 =item isupper
 
-This is identical to the C function, except that it can apply to a single
-character or to a whole string.  Consider using regular expressions and the
-C</[[:upper:]]/> construct instead.  Do B<not> use C</[A-Z]/>.
+This is identical to the C function, except that it can apply to
+a single character or to a whole string.  Note that locale settings
+may affect what characters are considered C<isupper>.  Does not work
+on Unicode characters code point 256 or higher.  Consider using regular
+expressions and the C</[[:upper:]]/> construct instead.  Do B<not> use
+C</[A-Z]/>.
 
 =item isxdigit
 
 This is identical to the C function, except that it can apply to a single
-character or to a whole string.  Consider using regular expressions and the
-C</[[:xdigit:]]/> construct instead, or simply C</[0-9a-f]/i>.
+character or to a whole string.  Note that locale settings may affect what
+characters are considered C<isxdigit> (unlikely, but still possible).
+Does not work on Unicode characters code point 256 or higher.
+Consider using regular expressions and the C</[[:xdigit:]]/>
+construct instead, or simply C</[0-9a-f]/i>.
 
 =item kill
 
@@ -1224,12 +1251,23 @@ I.e. January is 0, not 1; Sunday is 0, not 1; January 1st is 0, not 1.  The
 year (C<year>) is given in years since 1900.  I.e., the year 1995 is 95; the
 year 2001 is 101.  Consult your system's C<strftime()> manpage for details
 about these and the other arguments.
+
 If you want your code to be portable, your format (C<fmt>) argument
 should use only the conversion specifiers defined by the ANSI C
-standard.  These are C<aAbBcdHIjmMpSUwWxXyYZ%>.
-The given arguments are made consistent
-as though by calling C<mktime()> before calling your system's
-C<strftime()> function, except that the C<isdst> value is not affected.
+standard (C89, to play safe).  These are C<aAbBcdHIjmMpSUwWxXyYZ%>.
+But even then, the B<results> of some of the conversion specifiers are
+non-portable.  For example, the specifiers C<aAbBcpZ> change according
+to the locale settings of the user, and both how to set locales (the
+locale names) and what output to expect are non-standard.
+The specifier C<c> changes according to the timezone settings of the
+user and the timezone computation rules of the operating system.
+The C<Z> specifier is notoriously unportable since the names of
+timezones are non-standard. Sticking to the numeric specifiers is the
+safest route.
+
+The given arguments are made consistent as though by calling
+C<mktime()> before calling your system's C<strftime()> function,
+except that the C<isdst> value is not affected.
 
 The string for Tuesday, December 12, 1995.
 

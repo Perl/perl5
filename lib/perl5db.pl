@@ -1743,6 +1743,7 @@ sub cmd_h {
 }
 
 sub cmd_l {
+	my $current_line = $line;
 	my $line = shift;
 	$line =~ s/^-\s*$/-/;
 	if ($line =~ /^(\$.*)/s) {
@@ -1806,7 +1807,7 @@ sub cmd_l {
 				my ($stop,$action);
 				($stop,$action) = split(/\0/, $dbline{$i}) if
 						$dbline{$i};
-							$arrow = ($i==$line 
+						$arrow = ($i==$current_line
 						and $filename eq $filename_ini) 
 					?  '==>' 
 						: ($dbline[$i]+0 ? ':' : ' ') ;
@@ -2738,6 +2739,7 @@ B<W> I<*>             Delete all watch-expressions.
 B<V> [I<pkg> [I<vars>]]	List some (default all) variables in package (default current).
 		Use B<~>I<pattern> and B<!>I<pattern> for positive and negative regexps.
 B<X> [I<vars>]	Same as \"B<V> I<currentpackage> [I<vars>]\".
+B<y> [I<n> [I<Vars>]]   List lexicals in higher scope <n>.  Vars same as B<V>.
 B<x> I<expr>		Evals expression in list context, dumps the result.
 B<m> I<expr>		Evals expression in list context, prints methods callable
 		on the first element of the result.

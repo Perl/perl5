@@ -5,7 +5,7 @@
 #	  Jarkko Hietaniemi <jhi@iki.fi>.
 # AIX 4.3.x LP64 build by Steven Hirsch <hirschs@btv.ibm.com>
 # Merged on Mon Feb  6 10:22:35 EST 1995 by
-#   Andy Dougherty  <doughera@lafcol.lafayette.edu>
+#   Andy Dougherty  <doughera@lafayette.edu>
 
 #
 # Contact dfavor@corridor.com for any of the following:

@@ -1807,9 +1807,9 @@ the world.  See L<perlsec>.
 
 (F) You can't use system(), exec(), or a piped open in a setuid or
 setgid script if any of C<$ENV{PATH}>, C<$ENV{IFS}>, C<$ENV{CDPATH}>,
-C<$ENV{ENV}> or C<$ENV{BASH_ENV}> are derived from data supplied (or
-potentially supplied) by the user.  The script must set the path to a
-known value, using trustworthy data.  See L<perlsec>.
+C<$ENV{ENV}>, C<$ENV{BASH_ENV}> or C<$ENV{TERM}> are derived from data
+supplied (or potentially supplied) by the user.  The script must set
+the path to a known value, using trustworthy data.  See L<perlsec>.
 
 =item Integer overflow in %s number
 
@@ -3667,6 +3667,13 @@ target of the change to
 
 (F) Your version of the C library apparently doesn't do times().  I
 suspect you're not running on Unix.
+
+=item To%s: illegal mapping '%s'
+
+(F) You tried to define a customized To-mapping for lc(), lcfirst,
+uc(), or ucfirst() (or their string-inlined versions), but you
+specified an illegal mapping.
+See L<perlunicode/"User-Defined Character Properties">.
 
 =item Too few args to syscall
 

@@ -1346,8 +1346,8 @@ lib/Net/Ping/t/150_syn_inst.t	Ping Net::Ping
 lib/Net/Ping/t/200_ping_tcp.t	Ping Net::Ping
 lib/Net/Ping/t/250_ping_hires.t	Ping Net::Ping
 lib/Net/Ping/t/300_ping_stream.t	Ping Net::Ping
-lib/Net/Ping/t/300_ping_stream.t	Ping Net::Ping
 lib/Net/Ping/t/400_ping_syn.t	Ping Net::Ping
+lib/Net/Ping/t/410_syn_host.t	Ping Net::Ping
 lib/Net/Ping/t/450_service.t	Ping Net::Ping
 lib/Net/POP3.pm			libnet
 lib/Net/protoent.pm		By-name interface to Perl's builtin getproto*
@@ -2567,6 +2567,7 @@ t/op/index.t			See if index works
 t/op/int.t			See if int works
 t/op/join.t			See if join works
 t/op/lc.t			See if lc, uc, lcfirst, ucfirst, quotemeta work
+t/op/lc_user.t			See if user-defined lc et alia work
 t/op/length.t			See if length works
 t/op/lex_assign.t		See if ops involving lexicals or pad temps work
 t/op/lfs.t			See if large files work for perlio

@@ -9602,12 +9602,11 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	  CvDEPTH(dstr) = 0;
 	}
 	PAD_DUP(CvPADLIST(dstr), CvPADLIST(sstr), param);
-	/* anon prototypes aren't refcounted */
-	if (!CvANON(sstr) || CvCLONED(sstr))
-	    CvOUTSIDE(dstr)	= cv_dup_inc(CvOUTSIDE(sstr), param);
-	else
-	    CvOUTSIDE(dstr)	= cv_dup(CvOUTSIDE(sstr), param);
-	CvOUTSIDE_SEQ(dstr)	= CvOUTSIDE_SEQ(sstr);
+	CvOUTSIDE_SEQ(dstr) = CvOUTSIDE_SEQ(sstr);
+	CvOUTSIDE(dstr)	=
+		CvWEAKOUTSIDE(sstr)
+			? cv_dup(    CvOUTSIDE(sstr), param)
+			: cv_dup_inc(CvOUTSIDE(sstr), param);
 	CvFLAGS(dstr)	= CvFLAGS(sstr);
 	CvFILE(dstr) = CvXSUB(sstr) ? CvFILE(sstr) : SAVEPV(CvFILE(sstr));
 	break;
@@ -9747,6 +9746,8 @@ Perl_si_dup(pTHX_ PERL_SI *si, CLONE_PARAMS* param)
 #define TOPLONG(ss,ix)	((ss)[ix].any_long)
 #define POPIV(ss,ix)	((ss)[--(ix)].any_iv)
 #define TOPIV(ss,ix)	((ss)[ix].any_iv)
+#define POPBOOL(ss,ix)	((ss)[--(ix)].any_bool)
+#define TOPBOOL(ss,ix)	((ss)[ix].any_bool)
 #define POPPTR(ss,ix)	((ss)[--(ix)].any_ptr)
 #define TOPPTR(ss,ix)	((ss)[ix].any_ptr)
 #define POPDPTR(ss,ix)	((ss)[--(ix)].any_dptr)
@@ -10034,6 +10035,12 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    sv = (SV*)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = sv_dup(sv, param);
 	    break;
+	case SAVEt_BOOL:
+	    ptr = POPPTR(ss,ix);
+	    TOPPTR(nss,ix) = any_dup(ptr, proto_perl);
+	    longval = (long)POPBOOL(ss,ix);
+	    TOPBOOL(nss,ix) = (bool)longval;
+	    break;
 	default:
 	    Perl_croak(aTHX_ "panic: ss_dup inconsistency");
 	}
@@ -10046,6 +10053,35 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 =for apidoc perl_clone
 
 Create and return a new interpreter by cloning the current one.
+
+perl_clone takes these flags as paramters:
+
+CLONEf_COPY_STACKS - is used to, well, copy the stacks also, 
+without it we only clone the data and zero the stacks, 
+with it we copy the stacks and the new perl interpreter is 
+ready to run at the exact same point as the previous one. 
+The pseudo-fork code uses COPY_STACKS while the 
+threads->new doesn't.
+
+CLONEf_KEEP_PTR_TABLE
+perl_clone keeps a ptr_table with the pointer of the old 
+variable as a key and the new variable as a value, 
+this allows it to check if something has been cloned and not 
+clone it again but rather just use the value and increase the 
+refcount. If KEEP_PTR_TABLE is not set then perl_clone will kill 
+the ptr_table using the function 
+C<ptr_table_free(PL_ptr_table); PL_ptr_table = NULL;>, 
+reason to keep it around is if you want to dup some of your own 
+variable who are outside the graph perl scans, example of this 
+code is in threads.xs create
+
+CLONEf_CLONE_HOST
+This is a win32 thing, it is ignored on unix, it tells perls 
+win32host code (which is c++) to clone itself, this is needed on 
+win32 if you want to run two threads at the same time, 
+if you just want to do some stuff in a separate perl interpreter 
+and then throw it away and return to the original one, 
+you don't need to do anything.
 
 =cut
 */
@@ -10732,23 +10768,11 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_watchok		= Nullch;
 
     PL_regdummy		= proto_perl->Tregdummy;
-    PL_regcomp_parse	= Nullch;
-    PL_regxend		= Nullch;
-    PL_regcode		= (regnode*)NULL;
-    PL_regnaughty	= 0;
-    PL_regsawback	= 0;
     PL_regprecomp	= Nullch;
     PL_regnpar		= 0;
     PL_regsize		= 0;
-    PL_regflags		= 0;
-    PL_regseen		= 0;
-    PL_seen_zerolen	= 0;
-    PL_seen_evals	= 0;
-    PL_regcomp_rx	= (regexp*)NULL;
-    PL_extralen		= 0;
     PL_colorset		= 0;		/* reinits PL_colors[] */
     /*PL_colors[6]	= {0,0,0,0,0,0};*/
-    PL_reg_whilem_seen	= 0;
     PL_reginput		= Nullch;
     PL_regbol		= Nullch;
     PL_regeol		= Nullch;

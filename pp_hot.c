@@ -2457,6 +2457,16 @@ PP(pp_entersub)
     if (!sv)
 	DIE(aTHX_ "Not a CODE reference");
     switch (SvTYPE(sv)) {
+	/* This is overwhelming the most common case:  */
+    case SVt_PVGV:
+	if (!(cv = GvCVu((GV*)sv)))
+	    cv = sv_2cv(sv, &stash, &gv, FALSE);
+	if (!cv) {
+	    ENTER;
+	    SAVETMPS;
+	    goto try_autoload;
+	}
+	break;
     default:
 	if (!SvROK(sv)) {
 	    char *sym;
@@ -2494,17 +2504,9 @@ PP(pp_entersub)
     case SVt_PVHV:
     case SVt_PVAV:
 	DIE(aTHX_ "Not a CODE reference");
+	/* This is the second most common case:  */
     case SVt_PVCV:
 	cv = (CV*)sv;
-	break;
-    case SVt_PVGV:
-	if (!(cv = GvCVu((GV*)sv)))
-	    cv = sv_2cv(sv, &stash, &gv, FALSE);
-	if (!cv) {
-	    ENTER;
-	    SAVETMPS;
-	    goto try_autoload;
-	}
 	break;
     }
 
@@ -2513,35 +2515,7 @@ PP(pp_entersub)
 
   retry:
     if (!CvROOT(cv) && !CvXSUB(cv)) {
-	GV* autogv;
-	SV* sub_name;
-
-	/* anonymous or undef'd function leaves us no recourse */
-	if (CvANON(cv) || !(gv = CvGV(cv)))
-	    DIE(aTHX_ "Undefined subroutine called");
-
-	/* autoloaded stub? */
-	if (cv != GvCV(gv)) {
-	    cv = GvCV(gv);
-	}
-	/* should call AUTOLOAD now? */
-	else {
-try_autoload:
-	    if ((autogv = gv_autoload4(GvSTASH(gv), GvNAME(gv), GvNAMELEN(gv),
-				   FALSE)))
-	    {
-		cv = GvCV(autogv);
-	    }
-	    /* sorry */
-	    else {
-		sub_name = sv_newmortal();
-		gv_efullname3(sub_name, gv, Nullch);
-		DIE(aTHX_ "Undefined subroutine &%s called", SvPVX(sub_name));
-	    }
-	}
-	if (!cv)
-	    DIE(aTHX_ "Not a CODE reference");
-	goto retry;
+	goto fooey;
     }
 
     gimme = GIMME_V;
@@ -2551,70 +2525,8 @@ try_autoload:
 	    DIE(aTHX_ "No DBsub routine");
     }
 
-    if (CvXSUB(cv)) {
-#ifdef PERL_XSUB_OLDSTYLE
-	if (CvOLDSTYLE(cv)) {
-	    I32 (*fp3)(int,int,int);
-	    dMARK;
-	    register I32 items = SP - MARK;
-					/* We dont worry to copy from @_. */
-	    while (SP > mark) {
-		SP[1] = SP[0];
-		SP--;
-	    }
-	    PL_stack_sp = mark + 1;
-	    fp3 = (I32(*)(int,int,int))CvXSUB(cv);
-	    items = (*fp3)(CvXSUBANY(cv).any_i32,
-			   MARK - PL_stack_base + 1,
-			   items);
-	    PL_stack_sp = PL_stack_base + items;
-	}
-	else
-#endif /* PERL_XSUB_OLDSTYLE */
-	{
-	    I32 markix = TOPMARK;
-
-	    PUTBACK;
-
-	    if (!hasargs) {
-		/* Need to copy @_ to stack. Alternative may be to
-		 * switch stack to @_, and copy return values
-		 * back. This would allow popping @_ in XSUB, e.g.. XXXX */
-		AV* av;
-		I32 items;
-		av = GvAV(PL_defgv);
-		items = AvFILLp(av) + 1;   /* @_ is not tieable */
-
-		if (items) {
-		    /* Mark is at the end of the stack. */
-		    EXTEND(SP, items);
-		    Copy(AvARRAY(av), SP + 1, items, SV*);
-		    SP += items;
-		    PUTBACK ;		
-		}
-	    }
-	    /* We assume first XSUB in &DB::sub is the called one. */
-	    if (PL_curcopdb) {
-		SAVEVPTR(PL_curcop);
-		PL_curcop = PL_curcopdb;
-		PL_curcopdb = NULL;
-	    }
-	    /* Do we need to open block here? XXXX */
-	    (void)(*CvXSUB(cv))(aTHX_ cv);
-
-	    /* Enforce some sanity in scalar context. */
-	    if (gimme == G_SCALAR && ++markix != PL_stack_sp - PL_stack_base ) {
-		if (markix > PL_stack_sp - PL_stack_base)
-		    *(PL_stack_base + markix) = &PL_sv_undef;
-		else
-		    *(PL_stack_base + markix) = *PL_stack_sp;
-		PL_stack_sp = PL_stack_base + markix;
-	    }
-	}
-	LEAVE;
-	return NORMAL;
-    }
-    else {
+    if (!(CvXSUB(cv))) {
+	/* This path taken at least 75% of the time   */
 	dMARK;
 	register I32 items = SP - MARK;
 	AV* padlist = CvPADLIST(cv);
@@ -2691,6 +2603,105 @@ try_autoload:
 			      "%p entersub returning %p\n", thr, CvSTART(cv)));
 #endif
 	RETURNOP(CvSTART(cv));
+    }
+    else {
+#ifdef PERL_XSUB_OLDSTYLE
+	if (CvOLDSTYLE(cv)) {
+	    I32 (*fp3)(int,int,int);
+	    dMARK;
+	    register I32 items = SP - MARK;
+					/* We dont worry to copy from @_. */
+	    while (SP > mark) {
+		SP[1] = SP[0];
+		SP--;
+	    }
+	    PL_stack_sp = mark + 1;
+	    fp3 = (I32(*)(int,int,int))CvXSUB(cv);
+	    items = (*fp3)(CvXSUBANY(cv).any_i32,
+			   MARK - PL_stack_base + 1,
+			   items);
+	    PL_stack_sp = PL_stack_base + items;
+	}
+	else
+#endif /* PERL_XSUB_OLDSTYLE */
+	{
+	    I32 markix = TOPMARK;
+
+	    PUTBACK;
+
+	    if (!hasargs) {
+		/* Need to copy @_ to stack. Alternative may be to
+		 * switch stack to @_, and copy return values
+		 * back. This would allow popping @_ in XSUB, e.g.. XXXX */
+		AV* av;
+		I32 items;
+		av = GvAV(PL_defgv);
+		items = AvFILLp(av) + 1;   /* @_ is not tieable */
+
+		if (items) {
+		    /* Mark is at the end of the stack. */
+		    EXTEND(SP, items);
+		    Copy(AvARRAY(av), SP + 1, items, SV*);
+		    SP += items;
+		    PUTBACK ;		
+		}
+	    }
+	    /* We assume first XSUB in &DB::sub is the called one. */
+	    if (PL_curcopdb) {
+		SAVEVPTR(PL_curcop);
+		PL_curcop = PL_curcopdb;
+		PL_curcopdb = NULL;
+	    }
+	    /* Do we need to open block here? XXXX */
+	    (void)(*CvXSUB(cv))(aTHX_ cv);
+
+	    /* Enforce some sanity in scalar context. */
+	    if (gimme == G_SCALAR && ++markix != PL_stack_sp - PL_stack_base ) {
+		if (markix > PL_stack_sp - PL_stack_base)
+		    *(PL_stack_base + markix) = &PL_sv_undef;
+		else
+		    *(PL_stack_base + markix) = *PL_stack_sp;
+		PL_stack_sp = PL_stack_base + markix;
+	    }
+	}
+	LEAVE;
+	return NORMAL;
+    }
+
+    assert (0); /* Cannot get here.  */
+    /* This is deliberately moved here as spaghetti code to keep it out of the
+       hot path.  */
+    {
+	GV* autogv;
+	SV* sub_name;
+
+      fooey:
+	/* anonymous or undef'd function leaves us no recourse */
+	if (CvANON(cv) || !(gv = CvGV(cv)))
+	    DIE(aTHX_ "Undefined subroutine called");
+
+	/* autoloaded stub? */
+	if (cv != GvCV(gv)) {
+	    cv = GvCV(gv);
+	}
+	/* should call AUTOLOAD now? */
+	else {
+try_autoload:
+	    if ((autogv = gv_autoload4(GvSTASH(gv), GvNAME(gv), GvNAMELEN(gv),
+				   FALSE)))
+	    {
+		cv = GvCV(autogv);
+	    }
+	    /* sorry */
+	    else {
+		sub_name = sv_newmortal();
+		gv_efullname3(sub_name, gv, Nullch);
+		DIE(aTHX_ "Undefined subroutine &%s called", SvPVX(sub_name));
+	    }
+	}
+	if (!cv)
+	    DIE(aTHX_ "Not a CODE reference");
+	goto retry;
     }
 }
 

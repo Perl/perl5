@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..942\n";
+print "1..968\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2996,7 +2996,8 @@ print "\x{0712}" =~ /\p{Syriac1}/ ? "ok $test\n" : "not ok $test\n"; $test++;
 print "\x{072F}" =~ /\P{Syriac1}/ ? "ok $test\n" : "not ok $test\n"; $test++;
 
 {
-    # Change #18179: previously failed with "panic: end_shift"
+    print "# Change #18179\n";
+    # previously failed with "panic: end_shift
     my $s = "\x{100}" x 5;
     my $ok = $s =~ /(\x{100}{4})/;
     my($ord, $len) = (ord $1, length $1);
@@ -3005,4 +3006,53 @@ print "\x{072F}" =~ /\P{Syriac1}/ ? "ok $test\n" : "not ok $test\n"; $test++;
     ++$test;
 }
 
-# last test 942
+{
+    print "# [perl #15763]\n";
+
+    $a = "x\x{100}";
+    chop $a; # but leaves the UTF-8 flag
+    $a .= "y"; # 1 byte before "y"
+
+    ok($a =~ /^\C/,      'match one \C on 1-byte UTF-8');
+    ok($a =~ /^\C{1}/,   'match \C{1}');
+
+    ok($a =~ /^\Cy/,      'match \Cy');
+    ok($a =~ /^\C{1}y/,   'match \C{1}y');
+
+    $a = "\x{100}y"; # 2 bytes before "y"
+
+    ok($a =~ /^\C/,       'match one \C on 2-byte UTF-8');
+    ok($a =~ /^\C{1}/,    'match \C{1}');
+    ok($a =~ /^\C\C/,     'match two \C');
+    ok($a =~ /^\C{2}/,    'match \C{2}');
+
+    ok($a =~ /^\C\C\C/,    'match three \C on 2-byte UTF-8 and a byte');
+    ok($a =~ /^\C{3}/,     'match \C{3}');
+
+    ok($a =~ /^\C\Cy/,     'match two \C');
+    ok($a =~ /^\C{2}y/,    'match \C{2}');
+
+    ok($a !~ /^\C\C\Cy/,    'not match three \Cy');
+    ok($a !~ /^\C{2}\Cy/,   'not match \C{3}y');
+
+    $a = "\x{1000}y"; # 3 bytes before "y"
+
+    ok($a =~ /^\C/,         'match one \C on three-byte UTF-8');
+    ok($a =~ /^\C{1}/,      'match \C{1}');
+    ok($a =~ /^\C\C/,       'match two \C');
+    ok($a =~ /^\C{2}/,      'match \C{2}');
+    ok($a =~ /^\C\C\C/,     'match three \C');
+    ok($a =~ /^\C{3}/,      'match \C{3}');
+
+    ok($a =~ /^\C\C\C\C/,   'match four \C on three-byte UTF-8 and a byte');
+    ok($a =~ /^\C{4}/,      'match \C{4}');
+
+    ok($a =~ /^\C\C\Cy/,    'match three \Cy');
+    ok($a =~ /^\C{3}y/,     'match \C{3}y');
+
+    ok($a !~ /^\C\C\C\C\y/, 'not match four \Cy');
+    ok($a !~ /^\C{4}y/,     'not match \C{4}y');
+}
+
+# last test 968
+

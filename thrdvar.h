@@ -168,23 +168,11 @@ PERLVARI(Tmaxscream,	I32,	-1)
 PERLVAR(Tlastscream,	SV *)
 
 PERLVAR(Tregdummy,	regnode)	/* from regcomp.c */
-PERLVAR(Tregcomp_parse,	char*)		/* Input-scan pointer. */
-PERLVAR(Tregxend,	char*)		/* End of input for compile */
-PERLVAR(Tregcode,	regnode*)	/* Code-emit pointer; &regdummy = don't */
-PERLVAR(Tregnaughty,	I32)		/* How bad is this pattern? */
-PERLVAR(Tregsawback,	I32)		/* Did we see \1, ...? */
 PERLVAR(Tregprecomp,	char *)		/* uncompiled string. */
 PERLVAR(Tregnpar,	I32)		/* () count. */
 PERLVAR(Tregsize,	I32)		/* Code size. */
-PERLVAR(Tregflags,	U32)		/* are we folding, multilining? */
-PERLVAR(Tregseen,	U32)		/* from regcomp.c */
-PERLVAR(Tseen_zerolen,	I32)		/* from regcomp.c */
-PERLVAR(Tseen_evals,	I32)		/* from regcomp.c */
-PERLVAR(Tregcomp_rx,	regexp *)	/* from regcomp.c */
-PERLVAR(Textralen,	I32)		/* from regcomp.c */
 PERLVAR(Tcolorset,	int)		/* from regcomp.c */
 PERLVARA(Tcolors,6,	char *)		/* from regcomp.c */
-PERLVAR(Treg_whilem_seen, I32)		/* number of WHILEM in this expr */
 PERLVAR(Treginput,	char *)		/* String-input pointer. */
 PERLVAR(Tregbol,	char *)		/* Beginning of input, for ^ check. */
 PERLVAR(Tregeol,	char *)		/* End of input, for $ check. */
@@ -193,7 +181,6 @@ PERLVAR(Tregendp,	I32 *)		/* Ditto for endp. */
 PERLVAR(Treglastparen,	U32 *)		/* Similarly for lastparen. */
 PERLVAR(Treglastcloseparen, U32 *)	/* Similarly for lastcloseparen. */
 PERLVAR(Tregtill,	char *)		/* How far we are required to go. */
-PERLVAR(Tregcompat1,	char)		/* used to be regprev1 */
 PERLVAR(Treg_start_tmp,	char **)	/* from regexec.c */
 PERLVAR(Treg_start_tmpl,U32)		/* from regexec.c */
 PERLVAR(Tregdata,	struct reg_data *)

@@ -10,6 +10,7 @@
 # Meaning: General Category 'Cf'
 #
 return <<'END';
+00AD		
 06DD		
 070F		
 180E		

@@ -1690,11 +1690,11 @@ PP(pp_enteriter)
 	cx->blk_loop.iterary = (AV*)SvREFCNT_inc(POPs);
 	if (SvTYPE(cx->blk_loop.iterary) != SVt_PVAV) {
 	    dPOPss;
+	    /* See comment in pp_flop() */
 	    if (SvNIOKp(sv) || !SvPOKp(sv) ||
 		SvNIOKp(cx->blk_loop.iterary) || !SvPOKp(cx->blk_loop.iterary) ||
 		(looks_like_number(sv) && *SvPVX(sv) != '0' &&
-		 looks_like_number((SV*)cx->blk_loop.iterary) &&
-		 *SvPVX(cx->blk_loop.iterary) != '0'))
+		 looks_like_number((SV*)cx->blk_loop.iterary)))
 	    {
 		 if (SvNV(sv) < IV_MIN ||
 		     SvNV((SV*)cx->blk_loop.iterary) >= IV_MAX)
@@ -2615,7 +2615,7 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, PAD** padp)
     /* we get here either during compilation, or via pp_regcomp at runtime */
     runtime = PL_op && (PL_op->op_type == OP_REGCOMP);
     if (runtime)
-	runcv = find_runcv();
+	runcv = find_runcv(NULL);
 
     PL_op = &dummy;
     PL_op->op_type = OP_ENTEREVAL;
@@ -2649,22 +2649,35 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, PAD** padp)
 =for apidoc find_runcv
 
 Locate the CV corresponding to the currently executing sub or eval.
+If db_seqp is non_null, skip CVs that are in the DB package and populate
+*db_seqp with the cop sequence number at the point that the DB:: code was
+entered. (allows debuggers to eval in the scope of the breakpoint rather
+than in in the scope of the debuger itself).
 
 =cut
 */
 
 CV*
-Perl_find_runcv(pTHX)
+Perl_find_runcv(pTHX_ U32 *db_seqp)
 {
     I32		 ix;
     PERL_SI	 *si;
     PERL_CONTEXT *cx;
 
+    if (db_seqp)
+	*db_seqp = PL_curcop->cop_seq;
     for (si = PL_curstackinfo; si; si = si->si_prev) {
 	for (ix = si->si_cxix; ix >= 0; ix--) {
 	    cx = &(si->si_cxstack[ix]);
-	    if (CxTYPE(cx) == CXt_SUB || CxTYPE(cx) == CXt_FORMAT)
-		return cx->blk_sub.cv;
+	    if (CxTYPE(cx) == CXt_SUB || CxTYPE(cx) == CXt_FORMAT) {
+		CV *cv = cx->blk_sub.cv;
+		/* skip DB:: code */
+		if (db_seqp && PL_debstash && CvSTASH(cv) == PL_debstash) {
+		    *db_seqp = cx->blk_oldcop->cop_seq;
+		    continue;
+		}
+		return cv;
+	    }
 	    else if (CxTYPE(cx) == CXt_EVAL && !CxTRYBLOCK(cx))
 		return PL_compcv;
 	}
@@ -2700,7 +2713,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
     cxstack[cxstack_ix].blk_eval.cv = PL_compcv;
 
     CvOUTSIDE_SEQ(PL_compcv) = seq;
-    CvOUTSIDE(PL_compcv) = outside ? (CV*)SvREFCNT_inc(outside) : outside;
+    CvOUTSIDE(PL_compcv) = (CV*)SvREFCNT_inc(outside);
 
     /* set up a scratch pad */
 
@@ -3222,6 +3235,7 @@ PP(pp_entereval)
     STRLEN len;
     OP *ret;
     CV* runcv;
+    U32 seq;
 
     if (!SvPV(sv,len))
 	RETPUSHUNDEF;
@@ -3269,7 +3283,12 @@ PP(pp_entereval)
         PL_compiling.cop_io = newSVsv(PL_curcop->cop_io);
         SAVEFREESV(PL_compiling.cop_io);
     }
-    runcv = find_runcv();
+    /* special case: an eval '' executed within the DB package gets lexically
+     * placed in the first non-DB CV rather than the current CV - this
+     * allows the debugger to execute code, find lexicals etc, in the
+     * scope of the code being debugged. Passing &seq gets find_runcv
+     * to do the dirty work for us */
+    runcv = find_runcv(&seq);
 
     push_return(PL_op->op_next);
     PUSHBLOCK(cx, (CXt_EVAL|CXp_REAL), SP);
@@ -3280,7 +3299,7 @@ PP(pp_entereval)
     if (PERLDB_LINE && PL_curstash != PL_debstash)
 	save_lines(CopFILEAV(&PL_compiling), PL_linestr);
     PUTBACK;
-    ret = doeval(gimme, NULL, runcv, PL_curcop->cop_seq);
+    ret = doeval(gimme, NULL, runcv, seq);
     if (PERLDB_INTER && was != (I32)PL_sub_generation /* Some subs defined here. */
 	&& ret != PL_op->op_next) {	/* Successive compilation. */
 	strcpy(safestr, "_<(eval )");	/* Anything fake and short. */

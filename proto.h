@@ -661,6 +661,7 @@ PERL_CALLCONV void	Perl_save_aelem(pTHX_ AV* av, I32 idx, SV **sptr);
 PERL_CALLCONV I32	Perl_save_alloc(pTHX_ I32 size, I32 pad);
 PERL_CALLCONV void	Perl_save_aptr(pTHX_ AV** aptr);
 PERL_CALLCONV AV*	Perl_save_ary(pTHX_ GV* gv);
+PERL_CALLCONV void	Perl_save_bool(pTHX_ bool* boolp);
 PERL_CALLCONV void	Perl_save_clearsv(pTHX_ SV** svp);
 PERL_CALLCONV void	Perl_save_delete(pTHX_ HV* hv, char* key, I32 klen);
 PERL_CALLCONV void	Perl_save_destructor(pTHX_ DESTRUCTORFUNC_NOCONTEXT_t f, void* p);
@@ -1359,7 +1360,7 @@ PERL_CALLCONV void	Perl_deb_stack_all(pTHX);
 STATIC void	S_deb_stack_n(pTHX_ SV** stack_base, I32 stack_min, I32 stack_max, I32 mark_min, I32 mark_max);
 #endif
 
-PERL_CALLCONV PADLIST*	Perl_pad_new(pTHX_ padnew_flags flags);
+PERL_CALLCONV PADLIST*	Perl_pad_new(pTHX_ int flags);
 PERL_CALLCONV void	Perl_pad_undef(pTHX_ CV* cv);
 PERL_CALLCONV PADOFFSET	Perl_pad_add_name(pTHX_ char *name, HV* typestash, HV* ourstash, bool clone);
 PERL_CALLCONV PADOFFSET	Perl_pad_add_anon(pTHX_ SV* sv, OPCODE op_type);
@@ -1381,7 +1382,7 @@ STATIC void	S_cv_dump(pTHX_ CV *cv, char *title);
 #  endif
 STATIC CV*	S_cv_clone2(pTHX_ CV *proto, CV *outside);
 #endif
-PERL_CALLCONV CV*	Perl_find_runcv(pTHX);
+PERL_CALLCONV CV*	Perl_find_runcv(pTHX_ U32 *db_seqp);
 
 
 
