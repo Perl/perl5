@@ -1,7 +1,7 @@
-#!./perl
 BEGIN {
-   chdir 't' if -d 't';
-   unshift @INC, './pod', '../lib';
+   use File::Basename;
+   my $THISDIR = dirname $0;
+   unshift @INC, $THISDIR;
    require "testp2pt.pl";
    import TestPodIncPlainText;
 }

@@ -1,12 +1,13 @@
-#!./perl
+#!/usr/local/bin/perl -w
+
+BEGIN {
+    chdir('t') if -d 't';
+    unshift @INC, '../lib';
+}
 
 # Test ability to retrieve HTTP request info
 ######################### We start with some black magic to print on failure.
-
-BEGIN {
-    chdir 't' if -d 't';
-    unshift @INC, '../lib' if -d '../lib';
-}
+use lib '../blib/lib','../blib/arch';
 
 BEGIN {$| = 1; print "1..27\n"; }
 END {print "not ok 1\n" unless $loaded;}
@@ -25,6 +26,15 @@ sub test {
 }
 
 my $CRLF = "\015\012";
+
+# A peculiarity of sending "\n" through MBX|Socket|web-server on VMS 
+# is that a CR character gets inserted automatically in the web server 
+# case but not internal to perl's double quoted strings "\n".  This
+# test would need to be modified to use the "\015\012" on VMS if it
+# were actually run through a web server.
+# Thanks to Peter Prymmer for this
+
+if ($^O eq 'VMS') { $CRLF = "\n"; }
 
 # Set up a CGI environment
 $ENV{REQUEST_METHOD}='GET';
@@ -80,12 +90,12 @@ if ($Config{d_fork}) {
   }
   # at this point, we're in a new (child) process
   test(23,param('weather') eq 'nice',"CGI::param() from POST");
-  test(24,url_param('big_balls') eq 'basketball',"CGI::url_param()");
+  test(24,(url_param('big_balls') eq 'basketball'),"CGI::url_param()");
 } else {
   print "ok 23 # Skip\n";
   print "ok 24 # Skip\n";
 }
-
-test(25,redirect('http://somewhere.else') eq "Status: 302 Moved${CRLF}Location: http://somewhere.else${CRLF}${CRLF}","CGI::redirect() 1");
-test(26,redirect(-Location=>'http://somewhere.else',-Type=>'text/html') eq "Status: 302 Moved${CRLF}Location: http://somewhere.else${CRLF}Content-Type: text/html; charset=ISO-8859-1${CRLF}${CRLF}","CGI::redirect() 2");
-test(27,redirect(-Location=>'http://somewhere.else/bin/foo&bar',-Type=>'text/html') eq "Status: 302 Moved${CRLF}Location: http://somewhere.else/bin/foo&bar${CRLF}Content-Type: text/html; charset=ISO-8859-1${CRLF}${CRLF}","CGI::redirect() 2");
+test(25,redirect('http://somewhere.else') eq "Status: 302 Moved${CRLF}location: http://somewhere.else${CRLF}${CRLF}","CGI::redirect() 1");
+my $h = redirect(-Location=>'http://somewhere.else',-Type=>'text/html');
+test(26,$h eq "Status: 302 Moved${CRLF}location: http://somewhere.else${CRLF}Content-Type: text/html; charset=ISO-8859-1${CRLF}${CRLF}","CGI::redirect() 2");
+test(27,redirect(-Location=>'http://somewhere.else/bin/foo&bar',-Type=>'text/html') eq "Status: 302 Moved${CRLF}location: http://somewhere.else/bin/foo&bar${CRLF}Content-Type: text/html; charset=ISO-8859-1${CRLF}${CRLF}","CGI::redirect() 2");

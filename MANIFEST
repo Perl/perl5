@@ -69,8 +69,8 @@ configure.com		Configure-equivalent for VMS
 configure.gnu		Crude emulation of GNU configure
 cop.h			Control operator header
 cv.h			Code value header
-cygwin/cygwin.c		Additional code for Cygwin port
 cygwin/Makefile.SHs	Shared library generation for Cygwin port
+cygwin/cygwin.c		Additional code for Cygwin port
 cygwin/ld2.in		ld wrapper template for Cygwin port
 cygwin/perlld.in	dll generator template for Cygwin port
 deb.c			Debugging routines
@@ -302,8 +302,8 @@ ext/NDBM_File/NDBM_File.xs	NDBM extension external subroutines
 ext/NDBM_File/hints/cygwin.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/dec_osf.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/dynixptx.pl	Hint for NDBM_File for named architecture
-ext/NDBM_File/hints/solaris.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/sco.pl	Hint for NDBM_File for named architecture
+ext/NDBM_File/hints/solaris.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/svr4.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/typemap		NDBM extension interface types
 ext/ODBM_File/Makefile.PL	ODBM extension makefile writer
@@ -368,9 +368,9 @@ ext/SDBM_File/typemap		SDBM extension interface types
 ext/Socket/Makefile.PL	Socket extension makefile writer
 ext/Socket/Socket.pm	Socket extension Perl module
 ext/Socket/Socket.xs	Socket extension external subroutines
-ext/Sys/Hostname/Makefile.PL	Sys::Hostname extension makefile writer
 ext/Sys/Hostname/Hostname.pm	Sys::Hostname extension Perl module
 ext/Sys/Hostname/Hostname.xs	Sys::Hostname extension external subroutines
+ext/Sys/Hostname/Makefile.PL	Sys::Hostname extension makefile writer
 ext/Sys/Syslog/Makefile.PL	Sys::Syslog extension makefile writer
 ext/Sys/Syslog/Syslog.pm	Sys::Syslog extension Perl module
 ext/Sys/Syslog/Syslog.xs	Sys::Syslog extension external subroutines
@@ -647,6 +647,7 @@ lib/Pod/LaTeX.pm	Convert POD data to LaTeX
 lib/Pod/Man.pm		Convert POD data to *roff
 lib/Pod/ParseUtils.pm	Pod-Parser - pod utility functions
 lib/Pod/Parser.pm	Pod-Parser - define base class for parsing POD
+lib/Pod/PlainText.pm	Convert POD data to formatted ASCII text
 lib/Pod/Plainer.pm	Pod migration utility module
 lib/Pod/Select.pm	Pod-Parser - select portions of POD docs
 lib/Pod/Text.pm		Pod-Parser - convert POD data to formatted ASCII text
@@ -682,6 +683,7 @@ lib/Time/tm.pm		Internal object for Time::{gm,local}time
 lib/UNIVERSAL.pm	Base class for ALL classes
 lib/User/grent.pm	By-name interface to Perl's builtin getgr*
 lib/User/pwent.pm	By-name interface to Perl's builtin getpw*
+lib/Win32.pod		Documentation for Win32 extras
 lib/abbrev.pl		An abbreviation table builder
 lib/assert.pl		assertion and panic with stack trace
 lib/attributes.pm	For "sub foo : attrlist"
@@ -1005,7 +1007,6 @@ lib/validate.pl		Perl library supporting wholesale file mode validation
 lib/vars.pm		Declare pseudo-imported global variables
 lib/warnings.pm		For "use warnings"
 lib/warnings/register.pm	For "use warnings::register"
-lib/Win32.pod		Documentation for Win32 extras
 makeaperl.SH		perl script that produces a new perl binary
 makedef.pl		Create symbol export lists for linking
 makedepend.SH		Precursor to makedepend
@@ -1056,12 +1057,12 @@ os2/OS2/Process/Makefile.PL	system() constants in a module
 os2/OS2/Process/Process.pm	system() constants in a module
 os2/OS2/Process/Process.xs	system() constants in a module
 os2/OS2/REXX/Changes		DLL access module
-os2/OS2/REXX/MANIFEST		DLL access module
 os2/OS2/REXX/DLL/Changes		DLL access module
 os2/OS2/REXX/DLL/DLL.pm		DLL access module
 os2/OS2/REXX/DLL/DLL.xs		DLL access module
 os2/OS2/REXX/DLL/MANIFEST	DLL access module
 os2/OS2/REXX/DLL/Makefile.PL	DLL access module
+os2/OS2/REXX/MANIFEST		DLL access module
 os2/OS2/REXX/Makefile.PL	DLL access module
 os2/OS2/REXX/REXX.pm		DLL access module
 os2/OS2/REXX/REXX.xs		DLL access module
@@ -1131,6 +1132,7 @@ pod/perlcompile.pod	Info on using the Compiler suite
 pod/perldata.pod	Data structure info
 pod/perldbmfilter.pod	Info about DBM Filters
 pod/perldebguts.pod	Debugger guts info
+pod/perldebtut.pod	Perl debugging tutorial
 pod/perldebug.pod	Debugger info
 pod/perldelta.pod	Changes since last version
 pod/perldiag.pod	Diagnostic info
@@ -1160,10 +1162,10 @@ pod/perllocale.pod	Locale support info
 pod/perllol.pod		How to use lists of lists
 pod/perlmod.pod		Module mechanism info
 pod/perlmodinstall.pod	Installing CPAN Modules
-pod/perlmodlib.pod	Module policy info
 pod/perlmodlib.PL	Generate pod/perlmodlib.pod
-pod/perlnumber.pod	Semantics of numbers and numeric operations
+pod/perlmodlib.pod	Module policy info
 pod/perlnewmod.pod	Preparing a new module for distribution
+pod/perlnumber.pod	Semantics of numbers and numeric operations
 pod/perlobj.pod		Object info
 pod/perlop.pod		Operator info
 pod/perlopentut.pod	open() tutorial
@@ -1307,8 +1309,8 @@ t/lib/dprof/test6_v	Perl code profiler tests
 t/lib/dumper-ovl.t	See if Data::Dumper works for overloaded data
 t/lib/dumper.t		See if Data::Dumper works
 t/lib/english.t		See if English works
-t/lib/env.t		See if Env works
 t/lib/env-array.t	See if Env works for arrays
+t/lib/env.t		See if Env works
 t/lib/errno.t		See if Errno works
 t/lib/fatal.t           See if Fatal works
 t/lib/fields.t          See if base/fields works
@@ -1333,6 +1335,7 @@ t/lib/glob-taint.t	See if File::Glob works
 t/lib/gol-basic.t	See if Getopt::Long works
 t/lib/gol-compat.t	See if Getopt::Long works
 t/lib/gol-linkage.t	See if Getopt::Long works
+t/lib/gol-oo.t		See if Getopt::Long works
 t/lib/h2ph.h		Test header file for h2ph
 t/lib/h2ph.pht		Generated output from h2ph.h by h2ph, for comparison
 t/lib/h2ph.t		See if h2ph works like it should
@@ -1455,6 +1458,7 @@ t/op/recurse.t		See if deep recursion works
 t/op/ref.t		See if refs and objects work
 t/op/regexp.t		See if regular expressions work
 t/op/regexp_noamp.t	See if regular expressions work with optimizations
+t/op/regmesg.t		See if one can get regular expression errors
 t/op/repeat.t		See if x operator works
 t/op/runlevel.t		See if die() works from perl_call_*()
 t/op/sleep.t		See if sleep works
@@ -1484,6 +1488,7 @@ t/op/wantarray.t	See if wantarray works
 t/op/write.t		See if write works
 t/pod/emptycmd.t	Test empty pod directives
 t/pod/emptycmd.xr	Expected results for emptycmd.t
+t/pod/find.t		See if Pod::Find works
 t/pod/for.t		Test =for directive
 t/pod/for.xr		Expected results for for.t
 t/pod/headings.t	Test =head directives
@@ -1523,8 +1528,8 @@ t/pragma/strict-refs	Tests of "use strict 'refs'" for strict.t
 t/pragma/strict-subs	Tests of "use strict 'subs'" for strict.t
 t/pragma/strict-vars	Tests of "use strict 'vars'" for strict.t
 t/pragma/strict.t	See if strictures work
-t/pragma/subs.t		See if subroutine pseudo-importation works
 t/pragma/sub_lval.t	See if lvalue subroutines work
+t/pragma/subs.t		See if subroutine pseudo-importation works
 t/pragma/utf8.t		See if utf8 operations work
 t/pragma/warn/1global	Tests of global warnings for warnings.t
 t/pragma/warn/2use	Tests for "use warnings" for warnings.t
@@ -1584,6 +1589,7 @@ utils/splain.PL		Stand-alone version of diagnostics.pm
 vmesa/Makefile		VM/ESA Makefile
 vmesa/vmesa.c		VM/ESA-specific C code for Perl core
 vmesa/vmesaish.h	VM/ESA-specific C header for Perl core
+vms/configure.com	performs compiler checks and writes config.sh, config.h, and descrip.mms
 vms/descrip_mms.template		Template MM[SK] description file for build
 vms/ext/DCLsym/0README.txt	ReadMe file for VMS::DCLsym
 vms/ext/DCLsym/DCLsym.pm	Perl access to CLI symbols
@@ -1612,7 +1618,6 @@ vms/perly_c.vms		perly.c with fixed declarations for global syms
 vms/perly_h.vms		perly.h with fixed declarations for global syms
 vms/sockadapt.c		glue for SockshShr socket support
 vms/sockadapt.h		glue for SockshShr socket support
-vms/subconfigure.com    performs compiler checks and writes config.sh, config.h, and descrip.mms
 vms/test.com		DCL driver for regression tests
 vms/vms.c		VMS-specific C code for Perl core
 vms/vms_yfix.pl		convert Unix perly.[ch] to VMS perly_[ch].vms

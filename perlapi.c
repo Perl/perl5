@@ -829,6 +829,13 @@ Perl_gv_efullname3(pTHXo_ SV* sv, GV* gv, const char* prefix)
     ((CPerlObj*)pPerl)->Perl_gv_efullname3(sv, gv, prefix);
 }
 
+#undef  Perl_gv_efullname4
+void
+Perl_gv_efullname4(pTHXo_ SV* sv, GV* gv, const char* prefix, bool keepmain)
+{
+    ((CPerlObj*)pPerl)->Perl_gv_efullname4(sv, gv, prefix, keepmain);
+}
+
 #undef  Perl_gv_fetchfile
 GV*
 Perl_gv_fetchfile(pTHXo_ const char* name)
@@ -876,6 +883,13 @@ void
 Perl_gv_fullname3(pTHXo_ SV* sv, GV* gv, const char* prefix)
 {
     ((CPerlObj*)pPerl)->Perl_gv_fullname3(sv, gv, prefix);
+}
+
+#undef  Perl_gv_fullname4
+void
+Perl_gv_fullname4(pTHXo_ SV* sv, GV* gv, const char* prefix, bool keepmain)
+{
+    ((CPerlObj*)pPerl)->Perl_gv_fullname4(sv, gv, prefix, keepmain);
 }
 
 #undef  Perl_gv_init

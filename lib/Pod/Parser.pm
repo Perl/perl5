@@ -205,7 +205,6 @@ use strict;
 use Pod::InputObjects;
 use Carp;
 use Exporter;
-require VMS::Filespec if $^O eq 'VMS';
 BEGIN {
    if ($] < 5.6) {
       require Symbol;
@@ -848,7 +847,6 @@ sub parse_text {
     my $errorsub = (@seq_stack > 1) ? $self->errorsub() : undef;
     while (@seq_stack > 1) {
        ($cmd, $file, $line) = ($seq->name, $seq->file_line);
-       $file = VMS::Filespec::unixify($file) if $^O eq 'VMS';
        $ldelim  = $seq->ldelim;
        ($rdelim = $ldelim) =~ tr/</>/;
        $rdelim  =~ s/^(\S+)(\s*)$/$2$1/;
@@ -1081,10 +1079,9 @@ sub parse_from_filehandle {
                                      && (length $paragraph));
 
         ## Issue a warning about any non-empty blank lines
-        if (length($1) > 1 and $myOpts{'-warnings'} and ! $myData{_CUTTING}) {
+        if (length($1) > 0 and $myOpts{'-warnings'} and ! $myData{_CUTTING}) {
             my $errorsub = $self->errorsub();
             my $file = $self->input_file();
-            $file = VMS::Filespec::unixify($file) if $^O eq 'VMS';
             my $errmsg = "*** WARNING: line containing nothing but whitespace".
                          " in paragraph at line $nlines in file $file\n";
             (ref $errorsub) and &{$errorsub}($errmsg)

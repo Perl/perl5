@@ -1,11 +1,13 @@
-#!./perl
+#!/usr/local/bin/perl -w
+
+BEGIN {
+    chdir('t') if -d 't';
+    unshift @INC, '../lib';
+}
 
 # Test ability to retrieve HTTP request info
 ######################### We start with some black magic to print on failure.
-BEGIN {
-    chdir 't' if -d 't';
-    unshift @INC, '../lib' if -d '../lib';
-}
+use lib '../blib/lib','../blib/arch';
 
 BEGIN {$| = 1; print "1..5\n"; }
 END {print "not ok 1\n" unless $loaded;}
@@ -23,17 +25,17 @@ sub test {
 }
 
 # all the automatic tags
-test(2,h1() eq '<H1>',"single tag");
-test(3,ol(li('fred'),li('ethel')) eq "<OL>\n\t<LI>\n\t\tfred\n\t</LI>\n\t <LI>\n\t\tethel\n\t</LI>\n</OL>\n","basic indentation");
+test(2,h1() eq '<h1>',"single tag");
+test(3,ol(li('fred'),li('ethel')) eq "<ol>\n\t<li>\n\t\tfred\n\t</li>\n\t <li>\n\t\tethel\n\t</li>\n</ol>\n","basic indentation");
 test(4,p('hi',pre('there'),'frog') eq 
-'<P>
-	hi <PRE>there</PRE>
+'<p>
+	hi <pre>there</pre>
 	 frog
-</P>
+</p>
 ',"<pre> tags");
 test(5,p('hi',a({-href=>'frog'},'there'),'frog') eq 
-'<P>
-	hi <A HREF="frog">there</A>
+'<p>
+	hi <a href="frog">there</a>
 	 frog
-</P>
+</p>
 ',"as-is");

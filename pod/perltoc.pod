@@ -585,26 +585,25 @@ import, index STR,SUBSTR,POSITION, index STR,SUBSTR, int EXPR, int, ioctl
 FILEHANDLE,FUNCTION,SCALAR, join EXPR,LIST, keys HASH, kill SIGNAL, LIST,
 last LABEL, last, lc EXPR, lc, lcfirst EXPR, lcfirst, length EXPR, length,
 link OLDFILE,NEWFILE, listen SOCKET,QUEUESIZE, local EXPR, localtime EXPR,
-lock, log EXPR, log, lstat FILEHANDLE, lstat EXPR, lstat, m//, map BLOCK
-LIST, map EXPR,LIST, mkdir FILENAME,MASK, mkdir FILENAME, msgctl
-ID,CMD,ARG, msgget KEY,FLAGS, msgrcv ID,VAR,SIZE,TYPE,FLAGS, msgsnd
-ID,MSG,FLAGS, my EXPR, my EXPR : ATTRIBUTES, next LABEL, next, no Module
-LIST, oct EXPR, oct, open FILEHANDLE,MODE,LIST, open FILEHANDLE,EXPR, open
-FILEHANDLE, opendir DIRHANDLE,EXPR, ord EXPR, ord, our EXPR, pack
-TEMPLATE,LIST, package, package NAMESPACE, pipe READHANDLE,WRITEHANDLE, pop
-ARRAY, pop, pos SCALAR, pos, print FILEHANDLE LIST, print LIST, print,
-printf FILEHANDLE FORMAT, LIST, printf FORMAT, LIST, prototype FUNCTION,
-push ARRAY,LIST, q/STRING/, qq/STRING/, qr/STRING/, qx/STRING/, qw/STRING/,
-quotemeta EXPR, quotemeta, rand EXPR, rand, read
-FILEHANDLE,SCALAR,LENGTH,OFFSET, read FILEHANDLE,SCALAR,LENGTH, readdir
-DIRHANDLE, readline EXPR, readlink EXPR, readlink, readpipe EXPR, recv
-SOCKET,SCALAR,LENGTH,FLAGS, redo LABEL, redo, ref EXPR, ref, rename
-OLDNAME,NEWNAME, require VERSION, require EXPR, require, reset EXPR, reset,
-return EXPR, return, reverse LIST, rewinddir DIRHANDLE, rindex
-STR,SUBSTR,POSITION, rindex STR,SUBSTR, rmdir FILENAME, rmdir, s///, scalar
-EXPR, seek FILEHANDLE,POSITION,WHENCE, seekdir DIRHANDLE,POS, select
-FILEHANDLE, select, select RBITS,WBITS,EBITS,TIMEOUT, semctl
-ID,SEMNUM,CMD,ARG, semget KEY,NSEMS,FLAGS, semop KEY,OPSTRING, send
+lock, log EXPR, log, lstat EXPR, lstat, m//, map BLOCK LIST, map EXPR,LIST,
+mkdir FILENAME,MASK, mkdir FILENAME, msgctl ID,CMD,ARG, msgget KEY,FLAGS,
+msgrcv ID,VAR,SIZE,TYPE,FLAGS, msgsnd ID,MSG,FLAGS, my EXPR, my EXPR :
+ATTRIBUTES, next LABEL, next, no Module LIST, oct EXPR, oct, open
+FILEHANDLE,MODE,LIST, open FILEHANDLE,EXPR, open FILEHANDLE, opendir
+DIRHANDLE,EXPR, ord EXPR, ord, our EXPR, pack TEMPLATE,LIST, package,
+package NAMESPACE, pipe READHANDLE,WRITEHANDLE, pop ARRAY, pop, pos SCALAR,
+pos, print FILEHANDLE LIST, print LIST, print, printf FILEHANDLE FORMAT,
+LIST, printf FORMAT, LIST, prototype FUNCTION, push ARRAY,LIST, q/STRING/,
+qq/STRING/, qr/STRING/, qx/STRING/, qw/STRING/, quotemeta EXPR, quotemeta,
+rand EXPR, rand, read FILEHANDLE,SCALAR,LENGTH,OFFSET, read
+FILEHANDLE,SCALAR,LENGTH, readdir DIRHANDLE, readline EXPR, readlink EXPR,
+readlink, readpipe EXPR, recv SOCKET,SCALAR,LENGTH,FLAGS, redo LABEL, redo,
+ref EXPR, ref, rename OLDNAME,NEWNAME, require VERSION, require EXPR,
+require, reset EXPR, reset, return EXPR, return, reverse LIST, rewinddir
+DIRHANDLE, rindex STR,SUBSTR,POSITION, rindex STR,SUBSTR, rmdir FILENAME,
+rmdir, s///, scalar EXPR, seek FILEHANDLE,POSITION,WHENCE, seekdir
+DIRHANDLE,POS, select FILEHANDLE, select, select RBITS,WBITS,EBITS,TIMEOUT,
+semctl ID,SEMNUM,CMD,ARG, semget KEY,NSEMS,FLAGS, semop KEY,OPSTRING, send
 SOCKET,MSG,FLAGS,TO, send SOCKET,MSG,FLAGS, setpgrp PID,PGRP, setpriority
 WHICH,WHO,PRIORITY, setsockopt SOCKET,LEVEL,OPTNAME,OPTVAL, shift ARRAY,
 shift, shmctl ID,CMD,ARG, shmget KEY,SIZE,FLAGS, shmread ID,VAR,POS,SIZE,
@@ -960,7 +959,7 @@ OS/2, MS-DOS, Win95/NT, Macintosh, VMS
 
 =item Command Switches
 
-B<-0>[I<digits>], B<-a>, B<-C>, B<-c>, B<-d>, B<-d:>I<foo>,
+B<-0>[I<digits>], B<-a>, B<-C>, B<-c>, B<-d>, B<-d:>I<foo[=bar,baz]>,
 B<-D>I<letters>, B<-D>I<number>, B<-e> I<commandline>, B<-F>I<pattern>,
 B<-h>, B<-i>[I<extension>], B<-I>I<directory>, B<-l>[I<octnum>],
 B<-m>[B<->]I<module>, B<-M>[B<->]I<module>, B<-M>[B<->]I<'module ...'>,
@@ -1017,6 +1016,38 @@ B<-w>, B<-W>, B<-X>
 =item SEE ALSO
 
 =item AUTHOR
+
+=back
+
+=head2 perldebtut - Perl debugging tutorial
+
+=over
+
+=item DESCRIPTION
+
+=item use strict
+
+=item Looking at data and -w
+
+=item Stepping through code
+
+=item Placeholder for a, w, t, T
+
+=item Regular expressions
+
+=item Some ideas for output
+
+=item CGI
+
+=item GUIs
+
+=item Summary
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item CONTRIBUTORS
 
 =back
 
@@ -3770,6 +3801,8 @@ A, p, d, s, n, r, f, m, o, j, x
 
 =over
 
+=item Formatted Printing of IVs and UVs
+
 =item Source Documentation
 
 =back
@@ -5394,8 +5427,8 @@ C<-Duse64bitint>, C<-Duselongdouble>, C<-Dusethreads>, C<-Duselargefiles>
 
 =item Suspicious Warnings
 
-Whoa There, I<dlsym()>, Win9x and C<d_eofnblk>, Checking how std your stdio
-is.., Compiler/Preprocessor defines
+I<dlsym()>, Win9x and C<d_eofnblk>, Checking how std your stdio is..,
+Compiler/Preprocessor defines
 
 =back
 
@@ -7085,8 +7118,8 @@ B<:standard>, B<:all>
 
 =item PRAGMAS
 
--any, -compile, -nosticky, -nph, -newstyle_urls, -oldstyle_urls, -autoload,
--no_debug, -debug, -private_tempfiles
+-any, -compile, -nosticky, -no_xhtml, -nph, -newstyle_urls, -oldstyle_urls,
+-autoload, -no_debug, -debug, -private_tempfiles
 
 =item SPECIAL FORMS FOR IMPORTING HTML-TAG FUNCTIONS
 
@@ -7311,6 +7344,8 @@ other) error log
 
 =back
 
+=item MAKING WARNINGS APPEAR AS HTML COMMENTS
+
 =item CHANGE LOG
 
 =item AUTHORS
@@ -7451,8 +7486,6 @@ B<name()>, B<value()>, B<domain()>, B<path()>, B<expires()>
 
 =back
 
-=head2 CGI::Util - various utilities
-
 =head2 CPAN - query, download and build perl modules from CPAN sites
 
 =over
@@ -7477,7 +7510,7 @@ distribution, Signals
 
 =item The four C<CPAN::*> Classes: Author, Bundle, Module, Distribution
 
-=item ProgrammerE<39>s interface
+=item Programmer's interface
 
 expand($type,@things), Programming Examples
 
@@ -7520,7 +7553,22 @@ optionE<gt> [shift|pop]>, C<o conf E<lt>list optionE<gt>
 
 =item WORKING WITH CPAN.pm BEHIND FIREWALLS
 
+=over
+
+=item Three basic types of firewalls
+
 http firewall, ftp firewall, One way visibility, SOCKS, IP Masquerade
+
+=item Configuring lynx or ncftp for going throught the firewall
+
+=back
+
+=item FAQ
+
+I installed a new version of module X but CPAN keeps saying, I	     have
+the old version installed, So why is UNINST=1 not the default?, When I
+install bundles or multiple modules with one command	   there is too
+much output to keep track of
 
 =item BUGS
 
@@ -9145,8 +9193,9 @@ rmscopy($from,$to[,$date_flag])
 
 =item DESCRIPTION
 
-C<wanted>, C<bydepth>, C<follow>, C<follow_fast>, C<follow_skip>,
-C<no_chdir>, C<untaint>, C<untaint_pattern>, C<untaint_skip>
+C<wanted>, C<bydepth>, C<preprocess>, C<postprocess>, C<follow>,
+C<follow_fast>, C<follow_skip>, C<no_chdir>, C<untaint>,
+C<untaint_pattern>, C<untaint_skip>
 
 =item CAVEAT
 
@@ -9615,6 +9664,8 @@ $fh->print, $fh->printf, $fh->getline, $fh->getlines
 
 =over
 
+=item Object oriented interface
+
 =item Documentation and help texts
 
 =item Storing options in a hash
@@ -9629,10 +9680,11 @@ $fh->print, $fh->printf, $fh->getline, $fh->getlines
 
 =item Configuring Getopt::Long
 
-default, auto_abbrev, getopt_compat, require_order, permute, bundling
-(default: reset), bundling_override (default: reset), ignore_case 
-(default: set), ignore_case_always (default: reset), pass_through (default:
-reset), prefix, prefix_pattern, debug (default: reset)
+default, posix_default, auto_abbrev, getopt_compat, require_order, permute,
+bundling (default: disabled), bundling_override (default: disabled),
+ignore_case  (default: enabled), ignore_case_always (default: disabled),
+pass_through (default: disabled), prefix, prefix_pattern, debug (default:
+disabled)
 
 =item Return values and Errors
 
@@ -9645,6 +9697,17 @@ reset), prefix, prefix_pattern, debug (default: reset)
 =item Alternative option starters
 
 =item Configuration variables
+
+=back
+
+=item Trouble Shooting
+
+=over
+
+=item Warning: Ignoring '!' modifier for short option
+
+=item GetOptions does not return a false result when an option is not
+supplied
 
 =back
 
@@ -10798,7 +10861,13 @@ argument for =over, previous =item has no contents, preceding non-item
 paragraph(s), =item type mismatch (I<one> vs. I<two>), I<N> unescaped
 C<E<lt>E<gt>> in paragraph, Unknown entity, No items in =over, No argument
 for =item, empty section in previous paragraph, Verbatim paragraph in NAME
-section, Hyperlinks
+section
+
+=item Hyperlinks
+
+collapsing newlines to blanks, ignoring leading/trailing whitespace in
+link, (section) in '$page' deprecated, alternative text/node '%s' contains
+non-escaped | or /
 
 =back
 
@@ -10809,6 +10878,8 @@ section, Hyperlinks
 =item INTERFACE
 
 =back
+
+C<Pod::Checker-E<gt>new( %options )>
 
 C<$checker-E<gt>poderror( @args )>, C<$checker-E<gt>poderror( {%opts},
 @args )>
@@ -10837,9 +10908,39 @@ C<$checker-E<gt>hyperlink()>
 
 =item DESCRIPTION
 
-=item OPTIONS
+=back
 
-B<-verbose>, B<-perl>, B<-script>, B<-inc>
+=over
+
+=item C<pod_find( { %opts } , @directories )>
+
+C<-verbose =E<gt> 1>, C<-perl =E<gt> 1>, C<-script =E<gt> 1>, C<-inc =E<gt>
+1>
+
+=back
+
+=over
+
+=item C<simplify_name( $str )>
+
+=back
+
+=over
+
+=item C<pod_where( { %opts }, $pod )>
+
+C<-inc =E<gt> 1>, C<-dirs =E<gt> [ $dir1, $dir2, ... ]>, C<-verbose =E<gt>
+1>
+
+=back
+
+=over
+
+=item C<contains_pod( $file , $verbose )>
+
+=back
+
+=over
 
 =item AUTHOR
 
@@ -10886,8 +10987,8 @@ commands, etc.
 
 =item DESCRIPTION
 
-B<Pod::InputSource>, B<Pod::Paragraph>, B<Pod::InteriorSequence>,
-B<Pod::ParseTree>
+package B<Pod::InputSource>, package B<Pod::Paragraph>, package
+B<Pod::InteriorSequence>, package B<Pod::ParseTree>
 
 =back
 
@@ -10929,49 +11030,49 @@ B<Pod::ParseTree>
 
 =over
 
-=item B<new()>
+=item Pod::Paragraph-E<gt>B<new()>
 
 =back
 
 =over
 
-=item B<cmd_name()>
+=item $pod_para-E<gt>B<cmd_name()>
 
 =back
 
 =over
 
-=item B<text()>
+=item $pod_para-E<gt>B<text()>
 
 =back
 
 =over
 
-=item B<raw_text()>
+=item $pod_para-E<gt>B<raw_text()>
 
 =back
 
 =over
 
-=item B<cmd_prefix()>
+=item $pod_para-E<gt>B<cmd_prefix()>
 
 =back
 
 =over
 
-=item B<cmd_separator()>
+=item $pod_para-E<gt>B<cmd_separator()>
 
 =back
 
 =over
 
-=item B<parse_tree()>
+=item $pod_para-E<gt>B<parse_tree()>
 
 =back
 
 =over
 
-=item B<file_line()>
+=item $pod_para-E<gt>B<file_line()>
 
 =back
 
@@ -10983,67 +11084,67 @@ B<Pod::ParseTree>
 
 =over
 
-=item B<new()>
+=item Pod::InteriorSequence-E<gt>B<new()>
 
 =back
 
 =over
 
-=item B<cmd_name()>
+=item $pod_seq-E<gt>B<cmd_name()>
 
 =back
 
 =over
 
-=item B<prepend()>
+=item $pod_seq-E<gt>B<prepend()>
 
 =back
 
 =over
 
-=item B<append()>
+=item $pod_seq-E<gt>B<append()>
 
 =back
 
 =over
 
-=item B<nested()>
+=item $pod_seq-E<gt>B<nested()>
 
 =back
 
 =over
 
-=item B<raw_text()>
+=item $pod_seq-E<gt>B<raw_text()>
 
 =back
 
 =over
 
-=item B<left_delimiter()>
+=item $pod_seq-E<gt>B<left_delimiter()>
 
 =back
 
 =over
 
-=item B<right_delimiter()>
+=item $pod_seq-E<gt>B<right_delimiter()>
 
 =back
 
 =over
 
-=item B<parse_tree()>
+=item $pod_seq-E<gt>B<parse_tree()>
 
 =back
 
 =over
 
-=item B<file_line()>
+=item $pod_seq-E<gt>B<file_line()>
 
 =back
 
 =over
 
-=item B<DESTROY()>
+=item Pod::InteriorSequence::B<DESTROY()>
 
 =back
 
@@ -11055,43 +11156,43 @@ B<Pod::ParseTree>
 
 =over
 
-=item B<new()>
+=item Pod::ParseTree-E<gt>B<new()>
 
 =back
 
 =over
 
-=item B<top()>
+=item $ptree-E<gt>B<top()>
 
 =back
 
 =over
 
-=item B<children()>
+=item $ptree-E<gt>B<children()>
 
 =back
 
 =over
 
-=item B<prepend()>
+=item $ptree-E<gt>B<prepend()>
 
 =back
 
 =over
 
-=item B<append()>
+=item $ptree-E<gt>B<append()>
 
 =back
 
 =over
 
-=item B<raw_text()>
+=item $ptree-E<gt>B<raw_text()>
 
 =back
 
 =over
 
-=item B<DESTROY()>
+=item Pod::ParseTree::B<DESTROY()>
 
 =back
 
@@ -11259,87 +11360,87 @@ EE<lt>%sE<gt>, Unknown sequence %s, Unmatched =back
 
 =item Pod::List
 
-new()
+Pod::List-E<gt>new()
 
 =back
 
-file()
+$list-E<gt>file()
 
-start()
+$list-E<gt>start()
 
-indent()
+$list-E<gt>indent()
 
-type()
+$list-E<gt>type()
 
-rx()
+$list-E<gt>rx()
 
-item()
+$list-E<gt>item()
 
-parent()
+$list-E<gt>parent()
 
-tag()
+$list-E<gt>tag()
 
 =over
 
 =item Pod::Hyperlink
 
-new()
+Pod::Hyperlink-E<gt>new()
 
 =back
 
-parse($string)
+$link-E<gt>parse($string)
 
-markup($string)
+$link-E<gt>markup($string)
 
-text()
+$link-E<gt>text()
 
-warning()
+$link-E<gt>warning()
 
-line(), file()
+$link-E<gt>file(), $link-E<gt>line()
 
-page()
+$link-E<gt>page()
 
-node()
+$link-E<gt>node()
 
-alttext()
+$link-E<gt>alttext()
 
-type()
+$link-E<gt>type()
 
-link()
+$link-E<gt>link()
 
 =over
 
 =item Pod::Cache
 
-new()
+Pod::Cache-E<gt>new()
 
 =back
 
-item()
+$cache-E<gt>item()
 
-find_page($name)
+$cache-E<gt>find_page($name)
 
 =over
 
 =item Pod::Cache::Item
 
-new()
+Pod::Cache::Item-E<gt>new()
 
 =back
 
-page()
+$cacheitem-E<gt>page()
 
-description()
+$cacheitem-E<gt>description()
 
-path()
+$cacheitem-E<gt>path()
 
-file()
+$cacheitem-E<gt>file()
 
-nodes()
+$cacheitem-E<gt>nodes()
 
-find_node($name)
+$cacheitem-E<gt>find_node($name)
 
-idx()
+$cacheitem-E<gt>idx()
 
 =over
 
@@ -11581,6 +11682,31 @@ I<code-ref>|I<method-name>
 =over
 
 =item TREE-BASED PARSING
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=back
+
+=head2 Pod::PlainText - Convert POD data to formatted ASCII text
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+alt, indent, loose, sentence, width
+
+=item DIAGNOSTICS
+
+Bizarre space in item, Can't open %s for reading: %s, Unknown escape: %s,
+Unknown sequence: %s, Unmatched =back
+
+=item RESTRICTIONS
+
+=item NOTES
 
 =item SEE ALSO
 
@@ -12007,11 +12133,13 @@ closelog
 
 =item DIAGNOSTICS
 
-Invalid attribute name %s, Identifier %s used only once: possible typo, No
-comma allowed after filehandle, Bareword %s not allowed while "strict subs"
-in use
+Invalid attribute name %s, Name "%s" used only once: possible typo, No
+comma allowed after filehandle, Bareword "%s" not allowed while "strict
+subs" in use
 
 =item RESTRICTIONS
+
+=item NOTES
 
 =item AUTHORS
 

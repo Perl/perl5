@@ -72,7 +72,7 @@ sub _make_tag_func {
 		\$attr = " \@attr" if \@attr;
 	    }
 
-	    my(\$tag,\$untag) = ("\U<$tagname\E\$attr>","\U</$tagname>\E");
+	    my(\$tag,\$untag) = ("\L<$tagname\E\$attr>","\L</$tagname>\E");
 	    return \$tag unless \@_;
 
 	    my \@result;
@@ -128,7 +128,7 @@ sub initialize_globals {
     $CGI::Pretty::LINEBREAK = "\n";
 
     # These tags are not prettify'd.
-    @CGI::Pretty::AS_IS = qw( A PRE CODE SCRIPT TEXTAREA );
+    @CGI::Pretty::AS_IS = qw( a pre code script textarea );
 
     1;
 }

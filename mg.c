@@ -1275,8 +1275,6 @@ Perl_magic_setdbline(pTHX_ SV *sv, MAGIC *mg)
 		     atoi(MgPV(mg,n_a)), FALSE);
     if (svp && SvIOKp(*svp) && (o = INT2PTR(OP*,SvIVX(*svp))))
 	o->op_private = i;
-    else if (ckWARN_d(WARN_INTERNAL))
-	Perl_warner(aTHX_ WARN_INTERNAL, "Can't break at that line\n");
     return 0;
 }
 

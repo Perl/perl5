@@ -393,7 +393,7 @@ Used to indicate scalar context.  See C<GIMME_V>, C<GIMME>, and
 L<perlcall>.
 
 =for apidoc AmU||G_ARRAY
-Used to indicate array context.  See C<GIMME_V>, C<GIMME> and
+Used to indicate list context.  See C<GIMME_V>, C<GIMME> and
 L<perlcall>.
 
 =for apidoc AmU||G_VOID

@@ -251,7 +251,7 @@
 #  define ALLOC_THREAD_KEY \
     STMT_START {						\
 	if (pthread_key_create(&PL_thr_key, 0))	{		\
-	    fprintf(stderr, "panic: pthread_key_create");	\
+	    PerlIO_printf(PerlIO_stderr(), "panic: pthread_key_create");	\
 	    exit(1);						\
 	}							\
     } STMT_END

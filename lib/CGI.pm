@@ -17,18 +17,24 @@ require 5.004;
 # The most recent version and complete docs are available at:
 #   http://stein.cshl.org/WWW/software/CGI/
 
-$CGI::revision = '$Id: CGI.pm,v 1.30 2000/03/28 21:31:40 lstein Exp $';
-$CGI::VERSION='2.66';
+$CGI::revision = '$Id: CGI.pm,v 1.42 2000/08/13 16:04:43 lstein Exp $';
+$CGI::VERSION='2.71';
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
 # $TempFile::TMPDIRECTORY = '/usr/tmp';
 use CGI::Util qw(rearrange make_attributes unescape escape expires);
 
+use constant XHTML_DTD => ['-//W3C//DTD XHTML 1.0 Transitional//EN',
+			   'DTD/xhtml1-transitional.dtd'];
+
 # >>>>> Here are some globals that you might want to adjust <<<<<<
 sub initialize_globals {
     # Set this to 1 to enable copious autoloader debugging messages
     $AUTOLOAD_DEBUG = 0;
+    
+    # Set this to 1 to generate XTML-compatible output
+    $XHTML = 1;
 
     # Change this to the preferred DTD to print in start_html()
     # or use default_dtd('text of DTD to use');
@@ -356,6 +362,9 @@ sub init {
 
     $fh = to_filehandle($initializer) if $initializer;
 
+    # set charset to the safe ISO-8859-1
+    $self->charset('ISO-8859-1');
+
   METHOD: {
 
       # avoid unreasonably large postings
@@ -468,8 +477,6 @@ sub init {
     $self->delete('.submit');
     $self->delete('.cgifields');
 
-    # set charset to the safe ISO-8859-1
-    $self->charset('ISO-8859-1');
     $self->save_request unless $initializer;
 }
 
@@ -569,13 +576,13 @@ sub _make_tag_func {
 	    }
 	);
     if ($tagname=~/start_(\w+)/i) {
-	$func .= qq! return "<\U$1\E\$attr>";} !;
+	$func .= qq! return "<\L$1\E\$attr>";} !;
     } elsif ($tagname=~/end_(\w+)/i) {
-	$func .= qq! return "<\U/$1\E>"; } !;
+	$func .= qq! return "<\L/$1\E>"; } !;
     } else {
 	$func .= qq#
-	    my(\$tag,\$untag) = ("\U<$tagname\E\$attr>","\U</$tagname>\E");
-	    return \$tag unless \@_;
+	    return \$XHTML ? "\L<$tagname\E\$attr />" : "\L<$tagname\E\$attr>" unless \@_;
+	    my(\$tag,\$untag) = ("\L<$tagname\E\$attr>","\L</$tagname>\E");
 	    my \@result = map { "\$tag\$_\$untag" } 
                               (ref(\$_[0]) eq 'ARRAY') ? \@{\$_[0]} : "\@_";
 	    return "\@result";
@@ -644,6 +651,8 @@ sub _setup_symbols {
 	$DEBUG=0,                next if /^[:-]no_?[Dd]ebug$/;
 	$DEBUG=2,                next if /^[:-][Dd]ebug$/;
 	$USE_PARAM_SEMICOLONS++, next if /^[:-]newstyle_urls$/;
+	$XHTML++,                next if /^[:-]xhtml$/;
+	$XHTML=0,                next if /^[:-]no_?xhtml$/;
 	$USE_PARAM_SEMICOLONS=0, next if /^[:-]oldstyle_urls$/;
 	$PRIVATE_TEMPFILES++,    next if /^[:-]private_tempfiles$/;
 	$EXPORT{$_}++,           next if /^[:-]any$/;
@@ -717,7 +726,8 @@ END_OF_FUNC
 # Deletes the named parameter entirely.
 ####
 sub delete {
-    my($self,$name) = self_or_default(@_);
+    my($self,@p) = self_or_default(@_);
+    my($name) = rearrange([NAME],@p);
     CORE::delete $self->{$name};
     CORE::delete $self->{'.fieldnames'}->{$name};
     @{$self->{'.parameters'}}=grep($_ ne $name,$self->param());
@@ -851,7 +861,8 @@ END_OF_FUNC
 sub STORE {
     my $self = shift;
     my $tag  = shift;
-    my @vals = split("\0",shift);
+    my $vals = shift;
+    my @vals = index($vals,"\0")!=-1 ? split("\0",$vals) : $vals;
     $self->param(-name=>$tag,-value=>\@vals);
 }
 END_OF_FUNC
@@ -1135,10 +1146,11 @@ sub header {
 
     return undef if $self->{'.header_printed'}++ and $HEADERS_ONCE;
 
-    my($type,$status,$cookie,$target,$expires,$nph,$charset,@other) = 
+    my($type,$status,$cookie,$target,$expires,$nph,$charset,$attachment,@other) = 
 	rearrange([['TYPE','CONTENT_TYPE','CONTENT-TYPE'],
 			    'STATUS',['COOKIE','COOKIES'],'TARGET',
-                            'EXPIRES','NPH','CHARSET'],@p);
+                            'EXPIRES','NPH','CHARSET',
+                            'ATTACHMENT'],@p);
 
     $nph     ||= $NPH;
     if (defined $charset) {
@@ -1151,11 +1163,11 @@ sub header {
     # need to fix it up a little.
     foreach (@other) {
         next unless my($header,$value) = /([^\s=]+)=\"?(.+?)\"?$/;
-	($_ = $header) =~ s/^(\w)(.*)/$1 . lc ($2) . ": $value"/e;
+	($_ = $header) =~ s/^(\w)(.*)/$1 . lc ($2) . ': '.$self->unescapeHTML($value)/e;
     }
 
     $type ||= 'text/html' unless defined($type);
-    $type .= "; charset=$charset" if $type ne '' and $type !~ /\bcharset\b/;
+    $type .= "; charset=$charset" if $type ne '' and $type =~ m!^text/! and $type !~ /\bcharset\b/;
 
     # Maybe future compatibility.  Maybe not.
     my $protocol = $ENV{SERVER_PROTOCOL} || 'HTTP/1.0';
@@ -1178,6 +1190,7 @@ sub header {
 	if $expires;
     push(@header,"Date: " . expires(0,'http')) if $expires || $cookie;
     push(@header,"Pragma: no-cache") if $self->cache();
+    push(@header,"Content-Disposition: attachment; filename=\"$attachment\"") if $attachment;
     push(@header,@other);
     push(@header,"Content-Type: $type") if $type ne '';
 
@@ -1216,7 +1229,7 @@ END_OF_FUNC
 sub redirect {
     my($self,@p) = self_or_default(@_);
     my($url,$target,$cookie,$nph,@other) = rearrange([[LOCATION,URI,URL],TARGET,COOKIE,NPH],@p);
-    $url = $url || $self->self_url;
+    $url ||= $self->self_url;
     my(@o);
     foreach (@other) { tr/\"//d; push(@o,split("=",$_,2)); }
     unshift(@o,
@@ -1253,39 +1266,45 @@ END_OF_FUNC
 'start_html' => <<'END_OF_FUNC',
 sub start_html {
     my($self,@p) = &self_or_default(@_);
-    my($title,$author,$base,$xbase,$script,$noscript,$target,$meta,$head,$style,$dtd,@other) = 
-	rearrange([TITLE,AUTHOR,BASE,XBASE,SCRIPT,NOSCRIPT,TARGET,META,HEAD,STYLE,DTD],@p);
+    my($title,$author,$base,$xbase,$script,$noscript,$target,$meta,$head,$style,$dtd,$lang,@other) = 
+	rearrange([TITLE,AUTHOR,BASE,XBASE,SCRIPT,NOSCRIPT,TARGET,META,HEAD,STYLE,DTD,LANG],@p);
 
     # strangely enough, the title needs to be escaped as HTML
     # while the author needs to be escaped as a URL
     $title = $self->escapeHTML($title || 'Untitled Document');
     $author = $self->escape($author);
+    $lang ||= 'en-US';
     my(@result);
     if ($dtd) {
-        if (ref $dtd && $ref eq 'ARRAY') {
+        if (defined(ref($dtd)) and (ref($dtd) eq 'ARRAY')) {
             $dtd = $DEFAULT_DTD unless $dtd->[0] =~ m|^-//|;
         } else {
             $dtd = $DEFAULT_DTD unless $dtd =~ m|^-//|;
         }
     } else {
-        $dtd = $DEFAULT_DTD;
+        $dtd = $XHTML ? XHTML_DTD : $DEFAULT_DTD;
     }
     if (ref($dtd) && ref($dtd) eq 'ARRAY') {
-        push(@result,qq(<!DOCTYPE HTML PUBLIC "$dtd->[0]"\n\t"$dtd->[1]">));
+        push(@result,qq(<!DOCTYPE HTML\n\tPUBLIC "$dtd->[0]"\n\t"$dtd->[1]">));
     } else {
-        push(@result,qq(<!DOCTYPE HTML PUBLIC "$dtd">));
+        push(@result,qq(<!DOCTYPE HTML\n\tPUBLIC "$dtd">));
     }
-    push(@result,"<HTML><HEAD><TITLE>$title</TITLE>");
-    push(@result,"<LINK REV=MADE HREF=\"mailto:$author\">") if defined $author;
+    push(@result,$XHTML ? qq(<html xmlns="http://www.w3.org/1999/xhtml" lang="$lang"><head><title>$title</title>)
+                        : qq(<html lang="$lang"><head><title>$title</title>));
+	if (defined $author) {
+    push(@result,$XHTML ? "<link rev=\"made\" href=\"mailto:$author\" />"
+								: "<link rev=made href=\"mailto:$author\">");
+	}
 
     if ($base || $xbase || $target) {
 	my $href = $xbase || $self->url('-path'=>1);
-	my $t = $target ? qq/ TARGET="$target"/ : '';
-	push(@result,qq/<BASE HREF="$href"$t>/);
+	my $t = $target ? qq/ target="$target"/ : '';
+	push(@result,$XHTML ? qq(<base href="$href"$t />) : qq(<base href="$href"$t>));
     }
 
     if ($meta && ref($meta) && (ref($meta) eq 'HASH')) {
-	foreach (keys %$meta) { push(@result,qq(<META NAME="$_" CONTENT="$meta->{$_}">)); }
+	foreach (keys %$meta) { push(@result,$XHTML ? qq(<meta name="$_" content="$meta->{$_}" />) 
+			: qq(<meta name="$_" content="$meta->{$_}">)); }
     }
 
     push(@result,ref($head) ? @$head : $head) if $head;
@@ -1296,13 +1315,13 @@ sub start_html {
 
     # handle -noscript parameter
     push(@result,<<END) if $noscript;
-<NOSCRIPT>
+<noscript>
 $noscript
-</NOSCRIPT>
+</noscript>
 END
     ;
     my($other) = @other ? " @other" : '';
-    push(@result,"</HEAD><BODY$other>");
+    push(@result,"</head><body$other>");
     return join("\n",@result);
 }
 END_OF_FUNC
@@ -1315,26 +1334,40 @@ sub _style {
     my ($self,$style) = @_;
     my (@result);
     my $type = 'text/css';
+
+    my $cdata_start = $XHTML ? "\n<!--/* <![CDATA[ */" : "\n<!-- ";
+    my $cdata_end   = $XHTML ? "\n/* ]]> */-->\n" : " -->\n";
+
     if (ref($style)) {
-	my($src,$code,$stype,@other) =
-	    rearrange([SRC,CODE,TYPE],
-			     '-foo'=>'bar',	# a trick to allow the '-' to be omitted
-			     ref($style) eq 'ARRAY' ? @$style : %$style);
-	$type = $stype if $stype;
-	push(@result,qq/<LINK REL="stylesheet" TYPE="$type" HREF="$src">/) if $src;
-	push(@result,style({'type'=>$type},"<!--\n$code\n-->")) if $code;
+     my($src,$code,$stype,@other) =
+         rearrange([SRC,CODE,TYPE],
+                    '-foo'=>'bar', # a trick to allow the '-' to be omitted
+                    ref($style) eq 'ARRAY' ? @$style : %$style);
+     $type = $stype if $stype;
+     if (ref($src) eq "ARRAY") # Check to see if the $src variable is an array reference
+     { # If it is, push a LINK tag for each one.
+       foreach $src (@$src)
+       {
+         push(@result,qq/<link rel="stylesheet" type="$type" href="$src">/) if $src;
+       }
+     }
+     else
+     { # Otherwise, push the single -src, if it exists.
+       push(@result,qq/<link rel="stylesheet" type="$type" href="$src">/) if $src;
+      }
+     push(@result,style({'type'=>$type},"$cdata_start\n$code\n$cdata_end")) if $code;
     } else {
-	push(@result,style({'type'=>$type},"<!--\n$style\n-->"));
+     push(@result,style({'type'=>$type},"$cdata_start\n$style\n$cdata_end"));
     }
     @result;
 }
 END_OF_FUNC
 
-
 '_script' => <<'END_OF_FUNC',
 sub _script {
     my ($self,$script) = @_;
     my (@result);
+
     my (@scripts) = ref($script) eq 'ARRAY' ? @$script : ($script);
     foreach $script (@scripts) {
 	my($src,$code,$language);
@@ -1353,18 +1386,21 @@ sub _script {
 	} else {
 	    ($src,$code,$language, $type) = ('',$script,'JavaScript', 'text/javascript');
 	}
+
+    my $comment = '//';  # javascript by default
+    $comment = '#' if $type=~/perl|tcl/i;
+    $comment = "'" if $type=~/vbscript/i;
+
+    my $cdata_start  =  "\n<!-- Hide script\n";
+    $cdata_start    .= "$comment<![CDATA[\n"  if $XHTML; 
+    my $cdata_end    = $XHTML ? "\n$comment]]>" : $comment;
+    $cdata_end      .= " End script hiding -->\n";
+
 	my(@satts);
 	push(@satts,'src'=>$src) if $src;
 	push(@satts,'language'=>$language);
         push(@satts,'type'=>$type);
-	$code = "<!-- Hide script\n$code\n// End script hiding -->"
-	    if $code && $type=~/javascript/i;
-	$code = "<!-- Hide script\n$code\n\# End script hiding -->"
-	    if $code && $type=~/perl/i;
-	$code = "<!-- Hide script\n$code\n\# End script hiding -->"
-	    if $code && $type=~/tcl/i;
-        $code = "<!-- Hide script\n$code\n' End script hiding -->"
-            if $code && $type=~/vbscript/i;
+	$code = "$cdata_start$code$cdata_end";
 	push(@result,script({@satts},$code || ''));
     }
     @result;
@@ -1377,7 +1413,7 @@ END_OF_FUNC
 ####
 'end_html' => <<'END_OF_FUNC',
 sub end_html {
-    return "</BODY></HTML>";
+    return "</body></html>";
 }
 END_OF_FUNC
 
@@ -1396,9 +1432,9 @@ END_OF_FUNC
 sub isindex {
     my($self,@p) = self_or_default(@_);
     my($action,@other) = rearrange([ACTION],@p);
-    $action = qq/ACTION="$action"/ if $action;
+    $action = qq/action="$action"/ if $action;
     my($other) = @other ? " @other" : '';
-    return "<ISINDEX $action$other>";
+    return $XHTML ? "<isindex $action$other />" : "<isindex $action$other>";
 }
 END_OF_FUNC
 
@@ -1416,13 +1452,13 @@ sub startform {
     my($method,$action,$enctype,@other) = 
 	rearrange([METHOD,ACTION,ENCTYPE],@p);
 
-    $method = $method || 'POST';
+    $method = uc($method) || 'POST';
     $enctype = $enctype || &URL_ENCODED;
-    $action = $action ? qq/ACTION="$action"/ : $method eq 'GET' ?
-	'ACTION="'.$self->script_name.'"' : '';
+    $action = $action ? qq(action="$action") : qq 'action="' . 
+              $self->url(-absolute=>1,-path=>1,-query=>1) . '"';
     my($other) = @other ? " @other" : '';
     $self->{'.parametersToAdd'}={};
-    return qq/<FORM METHOD="$method" $action ENCTYPE="$enctype"$other>\n/;
+    return qq/<form method="$method" $action enctype="$enctype"$other>\n/;
 }
 END_OF_FUNC
 
@@ -1465,10 +1501,10 @@ END_OF_FUNC
 sub endform {
     my($self,@p) = self_or_default(@_);    
     if ( $NOSTICKY ) {
-    return wantarray ? ("</FORM>") : "\n</FORM>";
+    return wantarray ? ("</form>") : "\n</form>";
     } else {
-    return wantarray ? ($self->get_fields,"</FORM>") : 
-                        $self->get_fields ."\n</FORM>";
+    return wantarray ? ($self->get_fields,"</form>") : 
+                        $self->get_fields ."\n</form>";
     }
 }
 END_OF_FUNC
@@ -1492,15 +1528,16 @@ sub _textfield {
     my $current = $override ? $default : 
 	(defined($self->param($name)) ? $self->param($name) : $default);
 
-    $current = defined($current) ? $self->escapeHTML($current) : '';
+    $current = defined($current) ? $self->escapeHTML($current,1) : '';
     $name = defined($name) ? $self->escapeHTML($name) : '';
-    my($s) = defined($size) ? qq/ SIZE=$size/ : '';
-    my($m) = defined($maxlength) ? qq/ MAXLENGTH=$maxlength/ : '';
+    my($s) = defined($size) ? qq/ size=$size/ : '';
+    my($m) = defined($maxlength) ? qq/ maxlength=$maxlength/ : '';
     my($other) = @other ? " @other" : '';
     # this entered at cristy's request to fix problems with file upload fields
     # and WebTV -- not sure it won't break stuff
-    my($value) = $current ne '' ? qq(VALUE="$current") : '';
-    return qq/<INPUT TYPE="$tag" NAME="$name" $value$s$m$other>/;
+    my($value) = $current ne '' ? qq(value="$current") : '';
+    return $XHTML ? qq(<input type="$tag" name="$name" $value$s$m$other />) 
+                  : qq/<input type="$tag" name="$name" $value$s$m$other>/;
 }
 END_OF_FUNC
 
@@ -1578,10 +1615,10 @@ sub textarea {
 
     $name = defined($name) ? $self->escapeHTML($name) : '';
     $current = defined($current) ? $self->escapeHTML($current) : '';
-    my($r) = $rows ? " ROWS=$rows" : '';
-    my($c) = $cols ? " COLS=$cols" : '';
+    my($r) = $rows ? " rows=$rows" : '';
+    my($c) = $cols ? " cols=$cols" : '';
     my($other) = @other ? " @other" : '';
-    return qq{<TEXTAREA NAME="$name"$r$c$other>$current</TEXTAREA>};
+    return qq{<textarea name="$name"$r$c$other>$current</textarea>};
 }
 END_OF_FUNC
 
@@ -1604,17 +1641,18 @@ sub button {
 							 [ONCLICK,SCRIPT]],@p);
 
     $label=$self->escapeHTML($label);
-    $value=$self->escapeHTML($value);
+    $value=$self->escapeHTML($value,1);
     $script=$self->escapeHTML($script);
 
     my($name) = '';
     $name = qq/ NAME="$label"/ if $label;
     $value = $value || $label;
     my($val) = '';
-    $val = qq/ VALUE="$value"/ if $value;
-    $script = qq/ ONCLICK="$script"/ if $script;
+    $val = qq/ value="$value"/ if $value;
+    $script = qq/ onclick="$script"/ if $script;
     my($other) = @other ? " @other" : '';
-    return qq/<INPUT TYPE="button"$name$val$script$other>/;
+    return $XHTML ? qq(<input type="button"$name$val$script$other />)
+                  : qq/<input type="button"$name$val$script$other>/;
 }
 END_OF_FUNC
 
@@ -1635,15 +1673,16 @@ sub submit {
     my($label,$value,@other) = rearrange([NAME,[VALUE,LABEL]],@p);
 
     $label=$self->escapeHTML($label);
-    $value=$self->escapeHTML($value);
+    $value=$self->escapeHTML($value,1);
 
-    my($name) = ' NAME=".submit"' unless $NOSTICKY;
-    $name = qq/ NAME="$label"/ if defined($label);
+    my($name) = ' name=".submit"' unless $NOSTICKY;
+    $name = qq/ name="$label"/ if defined($label);
     $value = defined($value) ? $value : $label;
     my($val) = '';
-    $val = qq/ VALUE="$value"/ if defined($value);
+    $val = qq/ value="$value"/ if defined($value);
     my($other) = @other ? " @other" : '';
-    return qq/<INPUT TYPE="submit"$name$val$other>/;
+    return $XHTML ? qq(<input type="submit"$name$val$other />)
+                  : qq/<input type="submit"$name$val$other>/;
 }
 END_OF_FUNC
 
@@ -1660,9 +1699,10 @@ sub reset {
     my($self,@p) = self_or_default(@_);
     my($label,@other) = rearrange([NAME],@p);
     $label=$self->escapeHTML($label);
-    my($value) = defined($label) ? qq/ VALUE="$label"/ : '';
+    my($value) = defined($label) ? qq/ value="$label"/ : '';
     my($other) = @other ? " @other" : '';
-    return qq/<INPUT TYPE="reset"$value$other>/;
+    return $XHTML ? qq(<input type="reset"$value$other />)
+                  : qq/<input type="reset"$value$other>/;
 }
 END_OF_FUNC
 
@@ -1684,11 +1724,12 @@ sub defaults {
 
     my($label,@other) = rearrange([[NAME,VALUE]],@p);
 
-    $label=$self->escapeHTML($label);
+    $label=$self->escapeHTML($label,1);
     $label = $label || "Defaults";
-    my($value) = qq/ VALUE="$label"/;
+    my($value) = qq/ value="$label"/;
     my($other) = @other ? " @other" : '';
-    return qq/<INPUT TYPE="submit" NAME=".defaults"$value$other>/;
+    return $XHTML ? qq(<input type="submit" value".defaults"$value$other />)
+                  : qq/<input type="submit" NAME=".defaults"$value$other>/;
 }
 END_OF_FUNC
 
@@ -1726,17 +1767,18 @@ sub checkbox {
 
     if (!$override && ($self->{'.fieldnames'}->{$name} || 
 		       defined $self->param($name))) {
-	$checked = grep($_ eq $value,$self->param($name)) ? ' CHECKED' : '';
+	$checked = grep($_ eq $value,$self->param($name)) ? ' checked="yes"' : '';
     } else {
-	$checked = $checked ? ' CHECKED' : '';
+	$checked = $checked ? qq/ checked="yes"/ : '';
     }
     my($the_label) = defined $label ? $label : $name;
     $name = $self->escapeHTML($name);
-    $value = $self->escapeHTML($value);
+    $value = $self->escapeHTML($value,1);
     $the_label = $self->escapeHTML($the_label);
     my($other) = @other ? " @other" : '';
     $self->register_parameter($name);
-    return qq{<INPUT TYPE="checkbox" NAME="$name" VALUE="$value"$checked$other>$the_label};
+    return $XHTML ? qq{<input type="checkbox" name="$name" value="$value"$checked$other />$the_label}
+                  : qq{<input type="checkbox" name="$name" value="$value"$checked$other>$the_label};
 }
 END_OF_FUNC
 
@@ -1777,7 +1819,12 @@ sub checkbox_group {
 
     my(%checked) = $self->previous_or_default($name,$defaults,$override);
 
-    $break = $linebreak ? "<BR>" : '';
+	if ($linebreak) {
+    $break = $XHTML ? "<br />" : "<br>";
+	}
+	else {
+	$break = '';
+	}
     $name=$self->escapeHTML($name);
 
     # Create the elements
@@ -1787,15 +1834,16 @@ sub checkbox_group {
 
     my($other) = @other ? " @other" : '';
     foreach (@values) {
-	$checked = $checked{$_} ? ' CHECKED' : '';
+	$checked = $checked{$_} ? qq/ checked="yes"/ : '';
 	$label = '';
 	unless (defined($nolabels) && $nolabels) {
 	    $label = $_;
 	    $label = $labels->{$_} if defined($labels) && defined($labels->{$_});
 	    $label = $self->escapeHTML($label);
 	}
-	$_ = $self->escapeHTML($_);
-	push(@elements,qq/<INPUT TYPE="checkbox" NAME="$name" VALUE="$_"$checked$other>${label}${break}/);
+	$_ = $self->escapeHTML($_,1);
+	push(@elements,$XHTML ? qq(<input type="checkbox" name="$name" value="$_"$checked$other />${label}${break})
+                              : qq/<input type="checkbox" name="$name" value="$_"$checked$other>${label}${break}/);
     }
     $self->register_parameter($name);
     return wantarray ? @elements : join(' ',@elements)            
@@ -1807,32 +1855,34 @@ END_OF_FUNC
 # Escape HTML -- used internally
 'escapeHTML' => <<'END_OF_FUNC',
 sub escapeHTML {
-    my ($self,$toencode) = self_or_default(@_);
-    return undef unless defined($toencode);
-    return $toencode if ref($self) && $self->{'dontescape'};
-    if (uc $self->{'.charset'} eq 'ISO-8859-1') {
-       # fix non-compliant bug in IE and Netscape
-       $toencode =~ s{(.)}{
-              if    ($1 eq '<')                            { '&lt;'    }
-              elsif ($1 eq '>')                            { '&gt;'    }
-              elsif ($1 eq '&')                            { '&amp;'   }
-              elsif ($1 eq '"')                            { '&quot;'  }
-              elsif ($1 eq "\x8b")                         { '&#139;'  }
-              elsif ($1 eq "\x9b")                         { '&#155;'  }
-              else                                         { $1        }
-       }gsex;
-     } else {
-        $toencode =~ s/(.)/'&#'.ord($1).';'/gsex;
-     }
-    return $toencode;
+         my ($self,$toencode,$newlinestoo) = CGI::self_or_default(@_);
+         return undef unless defined($toencode);
+         return $toencode if ref($self) && $self->{'dontescape'};
+         $toencode =~ s{&}{&amp;}gso;
+         $toencode =~ s{<}{&lt;}gso;
+         $toencode =~ s{>}{&gt;}gso;
+         $toencode =~ s{"}{&quot;}gso;
+         my $latin = uc $self->{'.charset'} eq 'ISO-8859-1' ||
+                     uc $self->{'.charset'} eq 'WINDOWS-1252';
+         if ($latin) {  # bug in some browsers
+                $toencode =~ s{\x8b}{&#139;}gso;
+                $toencode =~ s{\x9b}{&#155;}gso;
+                if (defined $newlinestoo && $newlinestoo) {
+                     $toencode =~ s{\012}{&#10;}gso;
+                     $toencode =~ s{\015}{&#13;}gso;
+                }
+         }
+         return $toencode;
 }
 END_OF_FUNC
 
 # unescape HTML -- used internally
 'unescapeHTML' => <<'END_OF_FUNC',
 sub unescapeHTML {
-    my $string = ref($_[0]) ? $_[1] : $_[0];
+    my ($self,$string) = CGI::self_or_default(@_);
     return undef unless defined($string);
+    my $latin = defined $self->{'.charset'} ? $self->{'.charset'} =~ /^(ISO-8859-1|WINDOWS-1252)$/i
+                                            : 1;
     # thanks to Randal Schwartz for the correct solution to this one
     $string=~ s[&(.*?);]{
 	local $_ = $1;
@@ -1840,8 +1890,8 @@ sub unescapeHTML {
 	/^quot$/i	? '"' :
         /^gt$/i		? ">" :
 	/^lt$/i		? "<" :
-	/^#(\d+)$/	? chr($1) :
-	/^#x([0-9a-f]+)$/i ? chr(hex($1)) :
+	/^#(\d+)$/ && $latin	     ? chr($1) :
+	/^#x([0-9a-f]+)$/i && $latin ? chr(hex($1)) :
 	$_
 	}gex;
     return $string;
@@ -1852,6 +1902,8 @@ END_OF_FUNC
 '_tableize' => <<'END_OF_FUNC',
 sub _tableize {
     my($rows,$columns,$rowheaders,$colheaders,@elements) = @_;
+    $rowheaders = [] unless defined $rowheaders;
+    $colheaders = [] unless defined $colheaders;
     my($result);
 
     if (defined($columns)) {
@@ -1862,23 +1914,23 @@ sub _tableize {
     }
     
     # rearrange into a pretty table
-    $result = "<TABLE>";
+    $result = "<table>";
     my($row,$column);
     unshift(@$colheaders,'') if @$colheaders && @$rowheaders;
-    $result .= "<TR>" if @{$colheaders};
+    $result .= "<tr>" if @{$colheaders};
     foreach (@{$colheaders}) {
-	$result .= "<TH>$_</TH>";
+	$result .= "<th>$_</th>";
     }
     for ($row=0;$row<$rows;$row++) {
-	$result .= "<TR>";
-	$result .= "<TH>$rowheaders->[$row]</TH>" if @$rowheaders;
+	$result .= "<tr>";
+	$result .= "<th>$rowheaders->[$row]</th>" if @$rowheaders;
 	for ($column=0;$column<$columns;$column++) {
-	    $result .= "<TD>" . $elements[$column*$rows + $row] . "</TD>"
+	    $result .= "<td>" . $elements[$column*$rows + $row] . "</td>"
 		if defined($elements[$column*$rows + $row]);
 	}
-	$result .= "</TR>";
+	$result .= "</tr>";
     }
-    $result .= "</TABLE>";
+    $result .= "</table>";
     return $result;
 }
 END_OF_FUNC
@@ -1927,16 +1979,23 @@ sub radio_group {
 
     my($other) = @other ? " @other" : '';
     foreach (@values) {
-	my($checkit) = $checked eq $_ ? ' CHECKED' : '';
-	my($break) = $linebreak ? '<BR>' : '';
+	my($checkit) = $checked eq $_ ? qq/ checked="yes"/ : '';
+	my($break);
+	if ($linebreak) {
+    $break = $XHTML ? "<br />" : "<br>";
+	}
+	else {
+	$break = '';
+	}
 	my($label)='';
 	unless (defined($nolabels) && $nolabels) {
 	    $label = $_;
 	    $label = $labels->{$_} if defined($labels) && defined($labels->{$_});
-	    $label = $self->escapeHTML($label);
+	    $label = $self->escapeHTML($label,1);
 	}
 	$_=$self->escapeHTML($_);
-	push(@elements,qq/<INPUT TYPE="radio" NAME="$name" VALUE="$_"$checkit$other>${label}${break}/);
+	push(@elements,$XHTML ? qq(<input type="radio" name="$name" value="$_"$checkit$other />${label}${break})
+                              : qq/<input type="radio" name="$name" value="$_"$checkit$other>${label}${break}/);
     }
     $self->register_parameter($name);
     return wantarray ? @elements : join(' ',@elements) 
@@ -1979,17 +2038,17 @@ sub popup_menu {
     my(@values);
     @values = $self->_set_values_and_labels($values,\$labels,$name);
 
-    $result = qq/<SELECT NAME="$name"$other>\n/;
+    $result = qq/<select name="$name"$other>\n/;
     foreach (@values) {
-	my($selectit) = defined($selected) ? ($selected eq $_ ? 'SELECTED' : '' ) : '';
+	my($selectit) = defined($selected) ? ($selected eq $_ ? qq/selected="yes"/ : '' ) : '';
 	my($label) = $_;
 	$label = $labels->{$_} if defined($labels) && defined($labels->{$_});
 	my($value) = $self->escapeHTML($_);
-	$label=$self->escapeHTML($label);
-	$result .= "<OPTION $selectit VALUE=\"$value\">$label\n";
+	$label=$self->escapeHTML($label,1);
+	$result .= "<option $selectit value=\"$value\">$label</option>\n";
     }
 
-    $result .= "</SELECT>\n";
+    $result .= "</select>\n";
     return $result;
 }
 END_OF_FUNC
@@ -2028,21 +2087,21 @@ sub scrolling_list {
     $size = $size || scalar(@values);
 
     my(%selected) = $self->previous_or_default($name,$defaults,$override);
-    my($is_multiple) = $multiple ? ' MULTIPLE' : '';
-    my($has_size) = $size ? " SIZE=$size" : '';
+    my($is_multiple) = $multiple ? qq/ multiple="yes"/ : '';
+    my($has_size) = $size ? qq/ size="$size"/: '';
     my($other) = @other ? " @other" : '';
 
     $name=$self->escapeHTML($name);
-    $result = qq/<SELECT NAME="$name"$has_size$is_multiple$other>\n/;
+    $result = qq/<select name="$name"$has_size$is_multiple$other>\n/;
     foreach (@values) {
-	my($selectit) = $selected{$_} ? 'SELECTED' : '';
+	my($selectit) = $selected{$_} ? qq/selected="yes"/ : '';
 	my($label) = $_;
 	$label = $labels->{$_} if defined($labels) && defined($labels->{$_});
 	$label=$self->escapeHTML($label);
-	my($value)=$self->escapeHTML($_);
-	$result .= "<OPTION $selectit VALUE=\"$value\">$label</OPTION>\n";
+	my($value)=$self->escapeHTML($_,1);
+	$result .= "<option $selectit value=\"$value\">$label</option>\n";
     }
-    $result .= "</SELECT>\n";
+    $result .= "</select>\n";
     $self->register_parameter($name);
     return $result;
 }
@@ -2084,8 +2143,9 @@ sub hidden {
 
     $name=$self->escapeHTML($name);
     foreach (@value) {
-	$_ = defined($_) ? $self->escapeHTML($_) : '';
-	push(@result,qq/<INPUT TYPE="hidden" NAME="$name" VALUE="$_">/);
+	$_ = defined($_) ? $self->escapeHTML($_,1) : '';
+	push(@result,$XHTMl ? qq(<input type="hidden" name="$name" value="$_" />)
+                            : qq/<input type="hidden" name="$name" value="$_">/);
     }
     return wantarray ? @result : join('',@result);
 }
@@ -2107,10 +2167,11 @@ sub image_button {
     my($name,$src,$alignment,@other) =
 	rearrange([NAME,SRC,ALIGN],@p);
 
-    my($align) = $alignment ? " ALIGN=\U$alignment" : '';
+    my($align) = $alignment ? " align=\U$alignment" : '';
     my($other) = @other ? " @other" : '';
     $name=$self->escapeHTML($name);
-    return qq/<INPUT TYPE="image" NAME="$name" SRC="$src"$align$other>/;
+    return $XHTML ? qq(<input type="image" name="$name" src="$src"$align$other />)
+                  : qq/<input type="image" name="$name" src="$src"$align$other>/;
 }
 END_OF_FUNC
 
@@ -2239,7 +2300,7 @@ sub cookie {
     push(@param,'-expires'=>$expires) if $expires;
     push(@param,'-secure'=>$secure) if $secure;
 
-    return CGI::Cookie->new(@param);
+    return new CGI::Cookie(@param);
 }
 END_OF_FUNC
 
@@ -2762,7 +2823,7 @@ sub read_multipart {
 	my($param)= $header{'Content-Disposition'}=~/ name="?([^\";]*)"?/;
 
 	# Bug:  Netscape doesn't escape quotation marks in file names!!!
-	my($filename) = $header{'Content-Disposition'}=~/ filename="?([^\";]*)"?/;
+	my($filename) = $header{'Content-Disposition'}=~/ filename="?([^\"]*)"?/;
 
 	# add this parameter to our list
 	$self->add_parameter($param);
@@ -2920,12 +2981,12 @@ END_OF_FUNC
 sub new {
     my($pack,$name,$file,$delete) = @_;
     require Fcntl unless defined &Fcntl::O_RDWR;
-    my $fv = ('Fh::' .  ++$FH . quotemeta($name));
-    warn unless *{$fv};
-    my $ref = \*{$fv};
+    my $fv = ++$FH . quotemeta($name);
+    warn unless *{"Fh::$fv"};
+    my $ref = \*{"Fh::$fv"};
     sysopen($ref,$file,Fcntl::O_RDWR()|Fcntl::O_CREAT()|Fcntl::O_EXCL(),0600) || return;
     unlink($file) if $delete;
-    CORE::delete $Fh::{$FH};
+    CORE::delete $Fh::{$fv};
     return bless $ref,$pack;
 }
 END_OF_FUNC
@@ -3678,13 +3739,13 @@ the keys are the names of the CGI parameters, and the values are the
 parameters' values.  The Vars() method does this.  Called in a scalar
 context, it returns the parameter list as a tied hash reference.
 Changing a key changes the value of the parameter in the underlying
-CGI parameter list.  Called in an array context, it returns the
+CGI parameter list.  Called in a list context, it returns the
 parameter list as an ordinary hash.  This allows you to read the
 contents of the parameter list, but not to change it.
 
 When using this, the thing you must watch out for are multivalued CGI
 parameters.  Because a hash cannot distinguish between scalar and
-array context, multivalued parameters will be returned as a packed
+list context, multivalued parameters will be returned as a packed
 string, separated by the "\0" (null) character.  You must split this
 packed string in order to get at the individual values.  This is the
 convention introduced long ago by Steve Brenner in his cgi-lib.pl
@@ -3942,6 +4003,13 @@ have the hidden fields appear in the querystring in a GET method.
 For example, a search script generated this way will have
 a very nice url with search parameters for bookmarking.
 
+=item -no_xhtml
+
+By default, CGI.pm versions 2.69 and higher emit XHTML
+(http://www.w3.org/TR/xhtml1/).  The -no_xhtml pragma disables this
+feature.  Thanks to Michalis Kabrianis <kabrianis@hellug.gr> for this
+feature.
+
 =item -nph
 
 This makes CGI.pm produce a header appropriate for an NPH (no
@@ -4114,6 +4182,7 @@ pages.
 			     -expires=>'+3d',
 			     -cookie=>$cookie,
                              -charset=>'utf-7',
+                             -attachment=>'foo.gif',
 			     -Cost=>'$2.00');
 
 header() returns the Content-type: header.  You can provide your own
@@ -4162,6 +4231,12 @@ The B<-charset> parameter can be used to control the character set
 sent to the browser.  If not provided, defaults to ISO-8859-1.  As a
 side effect, this sets the charset() method as well.
 
+The B<-attachment> parameter can be used to turn the page into an
+attachment.  Instead of displaying the page, some browsers will prompt
+the user to save it to disk.  The value of the argument is the
+suggested name for the saved file.  In order for this to work, you may
+have to set the B<-type> to "application/octet-stream".
+
 =head2 GENERATING A REDIRECTION HEADER
 
    print $query->redirect('http://somewhere.else/in/movie/land');
@@ -4172,9 +4247,7 @@ time of day or the identity of the user.
 
 The redirect() function redirects the browser to a different URL.  If
 you use redirection like this, you should B<not> print out a header as
-well.  As of version 2.0, we produce both the unofficial Location:
-header and the official URI: header.  This should satisfy most servers
-and browsers.
+well.
 
 One hint I can offer is that relative links may not work correctly
 when you generate a redirection to another document on your site.
@@ -4210,10 +4283,11 @@ page's appearance and behavior.
 
 This method returns a canned HTML header and the opening <BODY> tag.
 All parameters are optional.  In the named parameter form, recognized
-parameters are -title, -author, -base, -xbase and -target (see below
-for the explanation).  Any additional parameters you provide, such as
-the Netscape unofficial BGCOLOR attribute, are added to the <BODY>
-tag.  Additional parameters must be proceeded by a hyphen.
+parameters are -title, -author, -base, -xbase, -dtd, -lang and -target
+(see below for the explanation).  Any additional parameters you
+provide, such as the Netscape unofficial BGCOLOR attribute, are added
+to the <BODY> tag.  Additional parameters must be proceeded by a
+hyphen.
 
 The argument B<-xbase> allows you to provide an HREF for the <BASE> tag
 different from the current location, as in
@@ -4239,22 +4313,25 @@ into a series of header <META> tags that look something like this:
     <META NAME="keywords" CONTENT="pharaoh secret mummy">
     <META NAME="description" CONTENT="copyright 1996 King Tut">
 
-There is no direct support for the HTTP-EQUIV type of <META> tag.
-This is because you can modify the HTTP header directly with the
-B<header()> method.  For example, if you want to send the Refresh:
-header, do it in the header() method:
+To create an HTTP-EQUIV type of <META> tag, use B<-head>, described
+below.
 
-    print $q->header(-Refresh=>'10; URL=http://www.capricorn.com');
+The B<-style> argument is used to incorporate cascading stylesheets
+into your code.  See the section on CASCADING STYLESHEETS for more
+information.
 
-The B<-style> tag is used to incorporate cascading stylesheets into
-your code.  See the section on CASCADING STYLESHEETS for more information.
+The B<-lang> argument is used to incorporate a language attribute into
+the <HTML> tag.  The default if not specified is "en-US" for US
+English.  For example:
+
+    print $q->header(-lang=>'fr-CA');
 
 You can place other arbitrary HTML elements to the <HEAD> section with the
 B<-head> tag.  For example, to place the rarely-used <LINK> element in the
 head section, use this:
 
     print start_html(-head=>Link({-rel=>'next',
-		     -href=>'http://www.capricorn.com/s2.html'}));
+		                  -href=>'http://www.capricorn.com/s2.html'}));
 
 To incorporate multiple HTML elements into the <HEAD> section, just pass an
 array reference:
@@ -4266,6 +4343,12 @@ array reference:
 				   -href=>'http://www.capricorn.com/s1.html'})
 			     ]
 		     );
+
+And here's how to create an HTTP-EQUIV <META> tag:
+
+      print header(-head=>meta({-http_equiv => 'Content-Type',
+                                -content    => 'text/html'}))
+
 
 JAVASCRIPTING: The B<-script>, B<-noScript>, B<-onLoad>,
 B<-onMouseOver>, B<-onMouseOut> and B<-onUnload> parameters are used
@@ -4579,7 +4662,7 @@ element of the list.  For example, here's one way to make an ordered
 list:
 
    print ul(
-             li({-type=>'disc'},['Sneezy','Doc','Sleepy','Happy']);
+             li({-type=>'disc'},['Sneezy','Doc','Sleepy','Happy'])
            );
 
 This example will result in HTML output that looks like this:
@@ -4793,7 +4876,7 @@ This is the older type of encoding used by all browsers prior to
 Netscape 2.0.  It is compatible with many CGI scripts and is
 suitable for short fields containing text data.  For your
 convenience, CGI.pm stores the name of this encoding
-type in B<$CGI::URL_ENCODED>.
+type in B<&CGI::URL_ENCODED>.
 
 =item B<multipart/form-data>
 
@@ -4947,7 +5030,7 @@ recognized.  See textfield().
 filefield() will return a file upload field for Netscape 2.0 browsers.
 In order to take full advantage of this I<you must use the new 
 multipart encoding scheme> for the form.  You can do this either
-by calling B<start_form()> with an encoding type of B<$CGI::MULTIPART>,
+by calling B<start_form()> with an encoding type of B<&CGI::MULTIPART>,
 or by calling the new method B<start_multipart_form()> instead of
 vanilla B<start_form()>.
 
@@ -5854,6 +5937,9 @@ http://www.w3.org/pub/WWW/TR/Wd-css-1.html for more information.
 	       );
     print end_html;
 
+Pass an array reference to B<-style> in order to incorporate multiple
+stylesheets into your document.
+
 =head1 DEBUGGING
 
 If you are running the script from the command line or in the perl
@@ -5962,9 +6048,8 @@ like $query->user_agent(netscape);
 =item B<path_info()>
 
 Returns additional path information from the script URL.
-E.G. fetching /cgi-bin/your_script/additional/stuff will
-result in $query->path_info() returning
-"additional/stuff".
+E.G. fetching /cgi-bin/your_script/additional/stuff will result in
+$query->path_info() returning "/additional/stuff".
 
 NOTE: The Microsoft Internet Information Server
 is broken with respect to additional path information.  If

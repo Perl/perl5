@@ -2,17 +2,17 @@ package CPAN;
 use vars qw{$Try_autoload
             $Revision
 	    $META $Signal $Cwd $End
-	    $Suppress_readline %Dontload
+	    $Suppress_readline
 	    $Frontend  $Defaultsite
 	   }; #};
 
-$VERSION = '1.52';
+$VERSION = '1.56';
 
-# $Id: CPAN.pm,v 1.276 2000/01/08 15:29:46 k Exp $
+# $Id: CPAN.pm,v 1.303 2000/08/01 15:57:15 k Exp $
 
 # only used during development:
 $Revision = "";
-# $Revision = "[".substr(q$Revision: 1.276 $, 10)."]";
+# $Revision = "[".substr(q$Revision: 1.303 $, 10)."]";
 
 use Carp ();
 use Config ();
@@ -29,6 +29,8 @@ use Safe ();
 use Text::ParseWords ();
 use Text::Wrap;
 use File::Spec;
+no lib "."; # we need to run chdir all over and we would get at wrong
+            # libraries there
 
 END { $End++; &cleanup; }
 
@@ -55,7 +57,7 @@ $CPAN::Frontend ||= "CPAN::Shell";
 $CPAN::Defaultsite ||= "ftp://ftp.perl.org/pub/CPAN";
 
 package CPAN;
-use vars qw($VERSION @EXPORT $AUTOLOAD $DEBUG $META $term);
+use vars qw($VERSION @EXPORT $AUTOLOAD $DEBUG $META $HAS_USABLE $term);
 use strict qw(vars);
 
 @CPAN::ISA = qw(CPAN::Debug Exporter);
@@ -293,7 +295,7 @@ sub try_dot_al {
 	$pkg =~ s|::|/|g;
 	if (defined($name=$INC{"$pkg.pm"}))
 	    {
-		$name =~ s|^(.*)$pkg\.pm\z|$1auto/$pkg/$func.al|s;
+		$name =~ s|^(.*)$pkg\.pm$|$1auto/$pkg/$func.al|s;
 		$name = undef unless (-r $name);
 	    }
 	unless (defined $name)
@@ -309,7 +311,7 @@ sub try_dot_al {
 	    *$autoload = sub {};
 	    $ok = 1;
 	} else {
-	    if ($name =~ s{(\w{12,})\.al\z}{substr($1,0,11).".al"}e){
+	    if ($name =~ s{(\w{12,})\.al$}{substr($1,0,11).".al"}e){
 		eval {local $SIG{__DIE__};require $name};
 	    }
 	    if ($@){
@@ -672,16 +674,56 @@ sub delete {
   delete $META->{$class}{$id};
 }
 
+#-> sub CPAN::has_usable
+# has_inst is sometimes too optimistic, we should replace it with this
+# has_usable whenever a case is given
+sub has_usable {
+    my($self,$mod,$message) = @_;
+    return 1 if $HAS_USABLE->{$mod};
+    my $has_inst = $self->has_inst($mod,$message);
+    return unless $has_inst;
+    my $capabilities;
+    $capabilities = {
+                     LWP => [ # we frequently had "Can't locate object
+                              # method "new" via package
+                              # "LWP::UserAgent" at (eval 69) line
+                              # 2006
+                             sub {require LWP},
+                             sub {require LWP::UserAgent},
+                             sub {require HTTP::Request},
+                             sub {require URI::URL},
+                            ],
+                     Net::FTP => [
+                                  sub {require Net::FTP},
+                                  sub {require Net::Config},
+                                 ]
+                    };
+    if ($capabilities->{$mod}) {
+      for my $c (0..$#{$capabilities->{$mod}}) {
+        my $code = $capabilities->{$mod}[$c];
+        my $ret = eval { &$code() };
+        if ($@) {
+          warn "DEBUG: c[$c]\$\@[$@]ret[$ret]";
+          return;
+        }
+      }
+    }
+    return $HAS_USABLE->{$mod} = 1;
+}
+
 #-> sub CPAN::has_inst
 sub has_inst {
     my($self,$mod,$message) = @_;
     Carp::croak("CPAN->has_inst() called without an argument")
 	unless defined $mod;
-    if (defined $message && $message eq "no") {
-	$Dontload{$mod}||=1;
-	return 0;
-    } elsif (exists $Dontload{$mod}) {
-	return 0;
+    if (defined $message && $message eq "no"
+        ||
+        exists $CPAN::META->{dontload_hash}{$mod}
+        ||
+        exists $CPAN::Config->{dontload_hash}{$mod}
+       ) {
+      $CPAN::META->{dontload_hash}{$mod}||=1;
+      return 0;
     }
     my $file = $mod;
     my $obj;
@@ -942,6 +984,7 @@ sub debug {
 package CPAN::Config;
 
 #-> sub CPAN::Config::edit ;
+# returns true on successful action
 sub edit {
     my($class,@args) = @_;
     return unless @args;
@@ -952,22 +995,31 @@ sub edit {
 	$class->$o(@args);
 	return 1;
     } else {
-	if (ref($CPAN::Config->{$o}) eq ARRAY) {
+        CPAN->debug("o[$o]");
+	if ($o =~ /list$/) {
 	    $func = shift @args;
 	    $func ||= "";
+            CPAN->debug("func[$func]");
+            my $changed;
 	    # Let's avoid eval, it's easier to comprehend without.
 	    if ($func eq "push") {
 		push @{$CPAN::Config->{$o}}, @args;
+                $changed = 1;
 	    } elsif ($func eq "pop") {
 		pop @{$CPAN::Config->{$o}};
+                $changed = 1;
 	    } elsif ($func eq "shift") {
 		shift @{$CPAN::Config->{$o}};
+                $changed = 1;
 	    } elsif ($func eq "unshift") {
 		unshift @{$CPAN::Config->{$o}}, @args;
+                $changed = 1;
 	    } elsif ($func eq "splice") {
 		splice @{$CPAN::Config->{$o}}, @args;
+                $changed = 1;
 	    } elsif (@args) {
 		$CPAN::Config->{$o} = [@args];
+                $changed = 1;
 	    } else {
 		$CPAN::Frontend->myprint(
 					 join "",
@@ -976,6 +1028,12 @@ sub edit {
 					 "\n"
 		     );
 	    }
+            if ($o eq "urllist" && $changed) {
+                # reset the cached values
+                undef $CPAN::FTP::Thesite;
+                undef $CPAN::FTP::Themethod;
+            }
+            return $changed;
 	} else {
 	    $CPAN::Config->{$o} = $args[0] if defined $args[0];
 	    $CPAN::Frontend->myprint("    $o    " .
@@ -1005,7 +1063,8 @@ Please specify a filename where to save the configuration or try
 	}
     }
 
-    my $msg = <<EOF unless $configpm =~ /MyConfig/;
+    my $msg;
+    $msg = <<EOF unless $configpm =~ /MyConfig/;
 
 # This is CPAN.pm's systemwide configuration file. This file provides
 # defaults for users, and the values can be changed in a per-user
@@ -1241,7 +1300,14 @@ Other
 *help = \&h;
 
 #-> sub CPAN::Shell::a ;
-sub a { $CPAN::Frontend->myprint(shift->format_result('Author',@_));}
+sub a {
+  my($self,@arg) = @_;
+  # authors are always UPPERCASE
+  for (@arg) {
+    $_ = uc $_;
+  }
+  $CPAN::Frontend->myprint($self->format_result('Author',@arg));
+}
 #-> sub CPAN::Shell::b ;
 sub b {
     my($self,@which) = @_;
@@ -1253,7 +1319,7 @@ sub b {
 	    my($entry);
 	    for $entry ($dh->read) {
 		next if -d MM->catdir($bdir,$entry);
-		next unless $entry =~ s/\.pm\z//;
+		next unless $entry =~ s/\.pm$//;
 		$CPAN::META->instance('CPAN::Bundle',"Bundle::$entry");
 	    }
 	}
@@ -1310,6 +1376,7 @@ sub o {
 	    for $k (sort keys %$CPAN::Config) {
 		$v = $CPAN::Config->{$k};
 		if (ref $v) {
+                  my(@report) = ref $v eq "ARRAY" ? @$v : %$v;
 		    $CPAN::Frontend->myprint(
 					     join(
 						  "",
@@ -1317,7 +1384,7 @@ sub o {
 							  "    %-18s\n",
 							  $k
 							 ),
-						  map {"\t$_\n"} @{$v}
+						  map {"\t$_\n"} @report
 						 )
 					    );
 		} else {
@@ -1424,12 +1491,21 @@ index    re-reads the index files\n});
 sub _binary_extensions {
     my($self) = shift @_;
     my(@result,$module,%seen,%need,$headerdone);
-    my $isaperl = q{perl5[._-]\\d{3}(_[0-4][0-9])?\\.tar[._-]gz\z};
+    my $isaperl = q{ perl
+                     -?
+                     5[._-]
+                     (
+                      \\d{3}(_[0-4][0-9])?
+                      |
+                      \\d*[24680]\\.\\d+
+                     )
+                     \\.tar[._-]gz$
+                    };
     for $module ($self->expand('Module','/./')) {
 	my $file  = $module->cpan_file;
 	next if $file eq "N/A";
 	next if $file =~ /^Contact Author/;
-	next if $file =~ / $isaperl /xo;
+	next if $file =~ / $isaperl /x;
 	next unless $module->xs_file;
 	local($|) = 1;
 	$CPAN::Frontend->myprint(".");
@@ -1973,8 +2049,7 @@ sub localize {
     to insufficient permissions.\n}) unless -w $aslocal_dir;
 
     # Inheritance is not easier to manage than a few if/else branches
-    if ($CPAN::META->has_inst('LWP::UserAgent')) {
-	require LWP::UserAgent;
+    if ($CPAN::META->has_usable('LWP::UserAgent')) {
  	unless ($Ua) {
 	    $Ua = LWP::UserAgent->new;
 	    my($var);
@@ -2065,8 +2140,7 @@ sub hosteasy {
 	$self->debug("localizing perlish[$url]") if $CPAN::DEBUG;
 	if ($url =~ /^file:/) {
 	    my $l;
-	    if ($CPAN::META->has_inst('LWP')) {
-		require URI::URL;
+	    if ($CPAN::META->has_inst('URI::URL')) {
 		my $u =  URI::URL->new($url);
 		$l = $u->path;
 	    } else { # works only on Unix, is poorly constructed, but
@@ -2095,7 +2169,7 @@ sub hosteasy {
 		}
 	    }
 	}
-      if ($CPAN::META->has_inst('LWP')) {
+      if ($CPAN::META->has_usable('LWP')) {
 	  $CPAN::Frontend->myprint("Fetching with LWP:
   $url
 ");
@@ -2110,7 +2184,7 @@ sub hosteasy {
 	    utime $now, $now, $aslocal; # download time is more
                                         # important than upload time
 	    return $aslocal;
-	  } elsif ($url !~ /\.gz\z/) {
+	  } elsif ($url !~ /\.gz$/) {
 	    my $gzurl = "$url.gz";
 	    $CPAN::Frontend->myprint("Fetching with LWP:
   $gzurl
@@ -2136,7 +2210,7 @@ sub hosteasy {
 	if ($url =~ m|^ftp://(.*?)/(.*)/(.*)|) {
 	    # that's the nice and easy way thanks to Graham
 	    my($host,$dir,$getfile) = ($1,$2,$3);
-	    if ($CPAN::META->has_inst('Net::FTP')) {
+	    if ($CPAN::META->has_usable('Net::FTP')) {
 		$dir =~ s|/+|/|g;
 		$CPAN::Frontend->myprint("Fetching with Net::FTP:
   $url
@@ -2147,7 +2221,7 @@ sub hosteasy {
 		    $Thesite = $i;
 		    return $aslocal;
 		}
-		if ($aslocal !~ /\.gz\z/) {
+		if ($aslocal !~ /\.gz$/) {
 		    my $gz = "$aslocal.gz";
 		    $CPAN::Frontend->myprint("Fetching with Net::FTP
   $url.gz
@@ -2207,83 +2281,79 @@ sub hosthard {
 	  $funkyftp = $CPAN::Config->{$f};
 	  next unless defined $funkyftp;
 	  next if $funkyftp =~ /^\s*$/;
-	  my($want_compressed);
-	  my $aslocal_uncompressed;
-	  ($aslocal_uncompressed = $aslocal) =~ s/\.gz//;
-	  my($source_switch) = "";
+	  my($asl_ungz, $asl_gz);
+	  ($asl_ungz = $aslocal) =~ s/\.gz//;
+          $asl_gz = "$asl_ungz.gz";
+	  my($src_switch) = "";
 	  if ($f eq "lynx"){
-	    $source_switch = " -source";
+	    $src_switch = " -source";
 	  } elsif ($f eq "ncftp"){
-	    $source_switch = " -c";
+	    $src_switch = " -c";
 	  }
 	  my($chdir) = "";
-	  my($stdout_redir) = " > $aslocal_uncompressed";
+	  my($stdout_redir) = " > $asl_ungz";
 	  if ($f eq "ncftpget"){
 	    $chdir = "cd $aslocal_dir && ";
 	    $stdout_redir = "";
 	  }
 	  $CPAN::Frontend->myprint(
 				   qq[
-Trying with "$funkyftp$source_switch" to get
+Trying with "$funkyftp$src_switch" to get
     $url
 ]);
 	  my($system) =
-	      "$chdir$funkyftp$source_switch '$url' $devnull$stdout_redir";
+	      "$chdir$funkyftp$src_switch '$url' $devnull$stdout_redir";
 	  $self->debug("system[$system]") if $CPAN::DEBUG;
 	  my($wstatus);
 	  if (($wstatus = system($system)) == 0
 	      &&
 	      ($f eq "lynx" ?
-	       -s $aslocal_uncompressed   # lynx returns 0 on my
+	       -s $asl_ungz   # lynx returns 0 on my
                                           # system even if it fails
 	       : 1
 	      )
 	     ) {
 	    if (-s $aslocal) {
 	      # Looks good
-	    } elsif ($aslocal_uncompressed ne $aslocal) {
+	    } elsif ($asl_ungz ne $aslocal) {
 	      # test gzip integrity
 	      if (
-		  CPAN::Tarzip->gtest($aslocal_uncompressed)
+		  CPAN::Tarzip->gtest($asl_ungz)
 		 ) {
-		rename $aslocal_uncompressed, $aslocal;
+		rename $asl_ungz, $aslocal;
 	      } else {
-		CPAN::Tarzip->gzip($aslocal_uncompressed,
-				   "$aslocal_uncompressed.gz");
+		CPAN::Tarzip->gzip($asl_ungz,$asl_gz);
 	      }
 	    }
 	    $Thesite = $i;
 	    return $aslocal;
-	  } elsif ($url !~ /\.gz\z/) {
-	    unlink $aslocal_uncompressed if
-		-f $aslocal_uncompressed && -s _ == 0;
+	  } elsif ($url !~ /\.gz$/) {
+	    unlink $asl_ungz if
+		-f $asl_ungz && -s _ == 0;
 	    my $gz = "$aslocal.gz";
 	    my $gzurl = "$url.gz";
 	    $CPAN::Frontend->myprint(
 				     qq[
-Trying with "$funkyftp$source_switch" to get
+Trying with "$funkyftp$src_switch" to get
   $url.gz
 ]);
-	    my($system) = "$funkyftp$source_switch '$url.gz' $devnull > ".
-		"$aslocal_uncompressed.gz";
+	    my($system) = "$funkyftp$src_switch '$url.gz' $devnull > $asl_gz";
 	    $self->debug("system[$system]") if $CPAN::DEBUG;
 	    my($wstatus);
 	    if (($wstatus = system($system)) == 0
 		&&
-		-s "$aslocal_uncompressed.gz"
+		-s $asl_gz
 	       ) {
 	      # test gzip integrity
-	      if (CPAN::Tarzip->gtest("$aslocal_uncompressed.gz")) {
-		CPAN::Tarzip->gunzip("$aslocal_uncompressed.gz",
-				     $aslocal);
+	      if (CPAN::Tarzip->gtest($asl_gz)) {
+		CPAN::Tarzip->gunzip($asl_gz,$aslocal);
 	      } else {
-		rename $aslocal_uncompressed, $aslocal;
+		rename $asl_ungz, $aslocal;
 	      }
 	      $Thesite = $i;
 	      return $aslocal;
 	    } else {
-	      unlink "$aslocal_uncompressed.gz" if
-		  -f "$aslocal_uncompressed.gz";
+	      unlink $asl_gz if -f $asl_gz;
 	    }
 	  } else {
 	    my $estatus = $wstatus >> 8;
@@ -2605,7 +2675,11 @@ sub cpl {
 #-> sub CPAN::Complete::cplx ;
 sub cplx {
     my($class, $word) = @_;
-    grep /^\Q$word\E/, map { $_->id } $CPAN::META->all_objects($class);
+    # I believed for many years that this was sorted, today I
+    # realized, it wasn't sorted anymore. Now (rev 1.301 / v 1.55) I
+    # make it sorted again. Maybe sort was dropped when GNU-readline
+    # support came in? The RCS file is difficult to read on that:-(
+    sort grep /^\Q$word\E/, map { $_->id } $CPAN::META->all_objects($class);
 }
 
 #-> sub CPAN::Complete::cpl_any ;
@@ -2785,9 +2859,28 @@ sub rd_modpacks {
 	unshift @ls, "\n" x length($1) if /^(\n+)/;
 	push @lines, @ls;
     }
+    # read header
+    my $line_count;
     while (@lines) {
 	my $shift = shift(@lines);
+	$shift =~ /^Line-Count:\s+(\d+)/;
+	$line_count = $1 if $1;
 	last if $shift =~ /^\s*$/;
+    }
+    if (not defined $line_count) {
+	warn qq{Warning: Your $index_target does not contain a Line-Count header.
+Please check the validity of the index file by comparing it to more than one CPAN
+mirror. I'll continue but problems seem likely to happen.\a
+};
+	sleep 5;
+    } elsif ($line_count != scalar @lines) {
+
+	warn sprintf qq{Warning: Your %s
+contains a Line-Count header of %d but I see %d lines there. Please
+check the validity of the index file by comparing it to more than one
+CPAN mirror. I'll continue but problems seem likely to happen.\a\n},
+$index_target, $line_count, scalar(@lines);
+
     }
     foreach (@lines) {
 	chomp;
@@ -3078,11 +3171,11 @@ sub get {
     $self->debug("Changed directory to tmp") if $CPAN::DEBUG;
     if (! $local_file) {
 	Carp::croak "bad download, can't do anything :-(\n";
-    } elsif ($local_file =~ /(\.tar\.(gz|Z)|\.tgz)\z/i){
+    } elsif ($local_file =~ /(\.tar\.(gz|Z)|\.tgz)$/i){
 	$self->untar_me($local_file);
-    } elsif ( $local_file =~ /\.zip\z/i ) {
+    } elsif ( $local_file =~ /\.zip$/i ) {
 	$self->unzip_me($local_file);
-    } elsif ( $local_file =~ /\.pm\.(gz|Z)\z/) {
+    } elsif ( $local_file =~ /\.pm\.(gz|Z)$/) {
 	$self->pm2dir_me($local_file);
     } else {
 	$self->{archived} = "NO";
@@ -3093,7 +3186,7 @@ sub get {
 	# Let's check if the package has its own directory.
 	my $dh = DirHandle->new(File::Spec->curdir)
 	    or Carp::croak("Couldn't opendir .: $!");
-	my @readdir = grep $_ !~ /^\.\.?\z/s, $dh->read; ### MAC??
+	my @readdir = grep $_ !~ /^\.\.?$/s, $dh->read; ### MAC??
 	$dh->close;
 	my ($distdir,$packagedir);
 	if (@readdir == 1 && -d $readdir[0]) {
@@ -3170,9 +3263,15 @@ sub untar_me {
 
 sub unzip_me {
     my($self,$local_file) = @_;
+    if ($CPAN::META->has_inst("Archive::Zip")) {
+      $CPAN::Frontend->mywarn("Archive::Zip not yet supported. ".
+                              "Will use external unzip");
+    }
+    my $unzip = $CPAN::Config->{unzip} or
+        $CPAN::Frontend->mydie("Cannot unzip, no unzip program available");
     $self->{archived} = "zip";
-    my $system = "$CPAN::Config->{unzip} $local_file";
-    if (system($system) == 0) {
+    my @system = ($unzip, $local_file);
+    if (system(@system) == 0) {
 	$self->{unwrapped} = "YES";
     } else {
 	$self->{unwrapped} = "NO";
@@ -3183,7 +3282,7 @@ sub pm2dir_me {
     my($self,$local_file) = @_;
     $self->{archived} = "pm";
     my $to = File::Basename::basename($local_file);
-    $to =~ s/\.(gz|Z)\z//;
+    $to =~ s/\.(gz|Z)$//;
     if (CPAN::Tarzip->gunzip($local_file,$to)) {
 	$self->{unwrapped} = "YES";
     } else {
@@ -3246,7 +3345,7 @@ sub cvs_import {
     my $userid = $self->{CPAN_USERID};
 
     my $cvs_dir = (split '/', $dir)[-1];
-    $cvs_dir =~ s/-\d+[^-]+\z//;
+    $cvs_dir =~ s/-\d+[^-]+$//;
     my $cvs_root = 
       $CPAN::Config->{cvsroot} || $ENV{CVSROOT};
     my $cvs_site_perl = 
@@ -3267,7 +3366,7 @@ sub cvs_import {
     $CPAN::Frontend->myprint(qq{Working directory is $dir\n});
 
     $CPAN::Frontend->myprint(qq{@cmd\n});
-    system(@cmd) == 0 or 
+    system(@cmd) == 0 or
 	$CPAN::Frontend->mydie("cvs import failed");
     chdir($pwd);
 }
@@ -3343,7 +3442,7 @@ sub verifyMD5 {
 	$lc_file = CPAN::FTP->localize("authors/id/@local",
 				       "$lc_want.gz",1);
 	if ($lc_file) {
-	    $lc_file =~ s/\.gz\z//;
+	    $lc_file =~ s/\.gz$//;
 	    CPAN::Tarzip->gunzip("$lc_file.gz",$lc_file);
 	} else {
 	    return;
@@ -3401,7 +3500,7 @@ sub MD5_check_file {
 	  $CPAN::Frontend->myprint("Checksum for $file ok\n");
 	  return $self->{MD5_STATUS} = "OK";
 	} else {
-	    $CPAN::Frontend->myprint(qq{Checksum mismatch for }.
+	    $CPAN::Frontend->myprint(qq{\nChecksum mismatch for }.
 				     qq{distribution file. }.
 				     qq{Please investigate.\n\n}.
 				     $self->as_string,
@@ -3409,10 +3508,12 @@ sub MD5_check_file {
 							   'CPAN::Author',
 							   $self->{CPAN_USERID}
 							  )->as_string);
-	    my $wrap = qq{I\'d recommend removing $file. It seems to
-be a bogus file. Maybe you have configured your \`urllist\' with a
-bad URL. Please check this array with \`o conf urllist\', and
+
+	    my $wrap = qq{I\'d recommend removing $file. Its MD5
+checksum is incorrect. Maybe you have configured your \`urllist\' with
+a bad URL. Please check this array with \`o conf urllist\', and
 retry.};
+
 	    $CPAN::Frontend->myprint(Text::Wrap::wrap("","",$wrap));
 	    $CPAN::Frontend->myprint("\n\n");
 	    sleep 3;
@@ -3460,15 +3561,21 @@ sub force {
   }
 }
 
+#-> sub CPAN::Distribution::isa_perl ;
 sub isa_perl {
   my($self) = @_;
   my $file = File::Basename::basename($self->id);
   return unless $file =~ m{ ^ perl
+                            -?
 			    (5)
 			    ([._-])
-			    (\d{3}(_[0-4][0-9])?)
+			    (
+                             \d{3}(_[0-4][0-9])?
+                             |
+                             \d*[24680]\.\d+
+                            )
 			    \.tar[._-]gz
-			    \z
+			    $
 			  }xs;
   "$1.$3";
 }
@@ -3507,7 +3614,8 @@ sub make {
       if (
 	  $self->called_for ne $self->id && ! $self->{'force_update'}
 	 ) {
-	$CPAN::Frontend->mydie(sprintf qq{
+        # if we die here, we break bundles
+	$CPAN::Frontend->mywarn(sprintf qq{
 The most recent version "%s" of the module "%s"
 comes with the current version of perl (%s).
 I\'ll build that only if you ask for something like
@@ -3523,6 +3631,7 @@ or
 			       $self->isa_perl,
 			       $self->called_for,
 			       $self->id);
+        sleep 5; return;
       }
     }
     $self->get;
@@ -3635,7 +3744,8 @@ of modules we are processing right now?", "yes");
 	$follow = $answer =~ /^\s*y/i;
       } else {
 	local($") = ", ";
-	$CPAN::Frontend->myprint("  Ignoring dependencies on modules @prereq\n");
+	$CPAN::Frontend->
+            myprint("  Ignoring dependencies on modules @prereq\n");
       }
       if ($follow) {
 	CPAN::Queue->jumpqueue(@prereq,$id); # requeue yourself
@@ -3661,7 +3771,9 @@ sub needs_prereq {
       $CPAN::Frontend->mydie("Couldn't open Makefile: $!");
   local($/) = "\n";
 
-  my(@p,@need);
+  #  A.Speer @p -> %p, where %p is $p{Module::Name}=Required_Version
+  #
+  my(%p,@need);
   while (<$fh>) {
     last if /MakeMaker post_initialize section/;
     my($p) = m{^[\#]
@@ -3670,23 +3782,43 @@ sub needs_prereq {
     next unless $p;
     # warn "Found prereq expr[$p]";
 
-    while ( $p =~ m/(?:\s)([\w\:]+)=>q\[.*?\],?/g ){
-      push @p, $1;
+    #  Regexp modified by A.Speer to remember actual version of file
+    #  PREREQ_PM hash key wants, then add to
+    while ( $p =~ m/(?:\s)([\w\:]+)=>q\[(.*?)\],?/g ){
+      # In case a prereq is mentioned twice, complain.
+      if ( defined $p{$1} ) {
+        warn "Warning: PREREQ_PM mentions $1 more than once, last mention wins";
+      }
+      $p{$1} = $2;
     }
     last;
   }
-  for my $p (@p) {
-    my $mo = $CPAN::META->instance("CPAN::Module",$p);
-    next if $mo->uptodate;
-    # it's not needed, so don't push it. We cannot omit this step, because
-    # if 'force' is in effect, nobody else will check.
-    if ($self->{have_sponsored}{$p}++){
+ NEED: while (my($module, $need_version) = each %p) {
+    my $mo = $CPAN::META->instance("CPAN::Module",$module);
+    # we were too demanding:
+    # next if $mo->uptodate;
+
+    # We only want to install prereqs if either they're not installed
+    # or if the installed version is too old. We cannot omit this
+    # check, because if 'force' is in effect, nobody else will check.
+    {
+      local($^W) = 0;
+      if (defined $mo->inst_file &&
+          $mo->inst_version >= $need_version){
+        CPAN->debug(sprintf "inst_file[%s]inst_version[%s]need_version[%s]",
+                    $mo->inst_file, $mo->inst_version, $need_version
+                   );
+        next NEED;
+      }
+    }
+
+    if ($self->{have_sponsored}{$module}++){
       # We have already sponsored it and for some reason it's still
       # not available. So we do nothing. Or what should we do?
       # if we push it again, we have a potential infinite loop
       next;
     }
-    push @need, $p;
+    push @need, $module;
   }
   return @need;
 }
@@ -3973,14 +4105,36 @@ explicitly a file $s.
 	    sleep 3;
 	}
 	# possibly noisy action:
+        $self->debug("type[$type] s[$s]") if $CPAN::DEBUG;
 	my $obj = $CPAN::META->instance($type,$s);
 	$obj->$meth();
-	my $success = $obj->can("uptodate") ? $obj->uptodate : 0;
-	$success ||= $obj->{'install'} && $obj->{'install'} eq "YES";
-	$fail{$s} = 1 unless $success;
+        if ($obj->isa(CPAN::Bundle)
+            &&
+            exists $obj->{install_failed}
+            &&
+            ref($obj->{install_failed}) eq "HASH"
+           ) {
+          for (keys %{$obj->{install_failed}}) {
+            $self->{install_failed}{$_} = undef; # propagate faiure up
+                                                 # to me in a
+                                                 # recursive call
+            $fail{$s} = 1; # the bundle itself may have succeeded but
+                           # not all children
+          }
+        } else {
+          my $success;
+          $success = $obj->can("uptodate") ? $obj->uptodate : 0;
+          $success ||= $obj->{'install'} && $obj->{'install'} eq "YES";
+          if ($success) {
+            delete $self->{install_failed}{$s};
+          } else {
+            $fail{$s} = 1;
+          }
+        }
     }
+
     # recap with less noise
-    if ( $meth eq "install") {
+    if ( $meth eq "install" ) {
 	if (%fail) {
 	    require Text::Wrap;
 	    my $raw = sprintf(qq{Bundle summary:
@@ -3990,9 +4144,21 @@ The following items in bundle %s had installation problems:},
 	    $CPAN::Frontend->myprint(Text::Wrap::fill("","",$raw));
 	    $CPAN::Frontend->myprint("\n");
 	    my $paragraph = "";
+            my %reported;
 	    for $s ($self->contains) {
-		$paragraph .= "$s " if $fail{$s};
+              if ($fail{$s}){
+		$paragraph .= "$s ";
+                $self->{install_failed}{$s} = undef;
+                $reported{$s} = undef;
+              }
 	    }
+            my $report_propagated;
+            for $s (sort keys %{$self->{install_failed}}) {
+              next if exists $reported{$s};
+              $paragraph .= "and the following items had problems
+during recursive bundle calls: " unless $report_propagated++;
+              $paragraph .= "$s ";
+            }
 	    $CPAN::Frontend->myprint(Text::Wrap::fill("  ","  ",$paragraph));
 	    $CPAN::Frontend->myprint("\n");
 	} else {
@@ -4124,7 +4290,7 @@ sub as_string {
 sub manpage_headline {
   my($self,$local_file) = @_;
   my(@local_file) = $local_file;
-  $local_file =~ s/\.pm\z/.pod/;
+  $local_file =~ s/\.pm$/.pod/;
   push @local_file, $local_file;
   my(@result,$locf);
   for $locf (@local_file) {
@@ -4305,13 +4471,26 @@ sub inst_version {
     my $parsefile = $self->inst_file or return;
     local($^W) = 0 if $] < 5.00303 && $ExtUtils::MakeMaker::VERSION < 5.38;
     # warn "HERE";
-    my $have = MM->parse_version($parsefile) || "undef";
+    my $have;
+    # local($SIG{__WARN__}) =  sub { warn "1. have[$have]"; };
+
+    # there was a bug in 5.6.0 that let lots of unini warnings out of
+    # parse_version. Fixed shortly after 5.6.0 by PMQS. We can remove
+    # this workaround after 5.6.1 is out.
+    local($SIG{__WARN__}) =  sub { my $w = shift;
+                                   return if $w =~ /uninitialized/i;
+                                   warn $w;
+                                 };
+    $have = MM->parse_version($parsefile) || "undef";
+    # local($SIG{__WARN__}) =  sub { warn "2. have[$have]"; };
     $have =~ s/\s*//g; # stringify to float around floating point issues
-    $have;
+    # local($SIG{__WARN__}) =  sub { warn "3. have[$have]"; };
+    $have; # no stringify needed, \s* above matches always
 }
 
 package CPAN::Tarzip;
 
+# CPAN::Tarzip::gzip
 sub gzip {
   my($class,$read,$write) = @_;
   if ($CPAN::META->has_inst("Compress::Zlib")) {
@@ -4330,6 +4509,8 @@ sub gzip {
   }
 }
 
+
+# CPAN::Tarzip::gunzip
 sub gunzip {
   my($class,$read,$write) = @_;
   if ($CPAN::META->has_inst("Compress::Zlib")) {
@@ -4350,6 +4531,8 @@ sub gunzip {
   }
 }
 
+
+# CPAN::Tarzip::gtest
 sub gtest {
   my($class,$read) = @_;
   if ($CPAN::META->has_inst("Compress::Zlib")) {
@@ -4357,15 +4540,18 @@ sub gtest {
     my $gz = Compress::Zlib::gzopen($read, "rb")
 	or $CPAN::Frontend->mydie("Cannot open $read: $!\n");
     1 while $gz->gzread($buffer) > 0 ;
-    $CPAN::Frontend->mydie("Error reading from $read: $!\n")
-	if $gz->gzerror != Compress::Zlib::Z_STREAM_END();
-    $gz->gzclose() ;
-    return 1;
+    my $err = $gz->gzerror;
+    my $success = ! $err || $err == Compress::Zlib::Z_STREAM_END();
+    $gz->gzclose();
+    $class->debug("err[$err]success[$success]") if $CPAN::DEBUG;
+    return $success;
   } else {
     return system("$CPAN::Config->{'gzip'} -dt $read")==0;
   }
 }
 
+
+# CPAN::Tarzip::TIEHANDLE
 sub TIEHANDLE {
   my($class,$file) = @_;
   my $ret;
@@ -4383,6 +4569,8 @@ sub TIEHANDLE {
   $ret;
 }
 
+
+# CPAN::Tarzip::READLINE
 sub READLINE {
   my($self) = @_;
   if (exists $self->{GZ}) {
@@ -4397,6 +4585,8 @@ sub READLINE {
   }
 }
 
+
+# CPAN::Tarzip::READ
 sub READ {
   my($self,$ref,$length,$offset) = @_;
   die "read with offset not implemented" if defined $offset;
@@ -4410,6 +4600,8 @@ sub READ {
   }
 }
 
+
+# CPAN::Tarzip::DESTROY
 sub DESTROY {
   my($self) = @_;
   if (exists $self->{GZ}) {
@@ -4422,6 +4614,8 @@ sub DESTROY {
   undef $self;
 }
 
+
+# CPAN::Tarzip::untar
 sub untar {
   my($class,$file) = @_;
   # had to disable, because version 0.07 seems to be buggy
@@ -4441,7 +4635,7 @@ sub untar {
 			       qq{Couldn\'t uncompress $file\n}
 			      );
       }
-      $file =~ s/\.gz\z//;
+      $file =~ s/\.gz$//;
       $system = "$CPAN::Config->{tar} xvf $file";
       $CPAN::Frontend->myprint(qq{Using Tar:$system:\n});
       if (system($system)==0) {
@@ -4584,10 +4778,10 @@ also is run unconditionally. But for
 
 CPAN checks if an install is actually needed for it and prints
 I<module up to date> in the case that the distribution file containing
-the module doesnE<39>t need to be updated.
+the module doesn't need to be updated.
 
 CPAN also keeps track of what it has done within the current session
-and doesnE<39>t try to build a package a second time regardless if it
+and doesn't try to build a package a second time regardless if it
 succeeded or not. The C<force> command takes as a first argument the
 method to invoke (currently: C<make>, C<test>, or C<install>) and executes the
 command from scratch.
@@ -4659,7 +4853,7 @@ installation. You start on one architecture with the help of a Bundle
 file produced earlier. CPAN installs the whole Bundle for you, but
 when you try to repeat the job on the second architecture, CPAN
 responds with a C<"Foo up to date"> message for all modules. So you
-invoke CPAN's recompile on the second architecture and youE<39>re done.
+invoke CPAN's recompile on the second architecture and you're done.
 
 Another popular use for C<recompile> is to act as a rescue in case your
 perl breaks binary compatibility. If one of the modules that CPAN uses
@@ -4704,7 +4898,7 @@ so you would have to say
 The first example will be driven by an object of the class
 CPAN::Module, the second by an object of class CPAN::Distribution.
 
-=head2 ProgrammerE<39>s interface
+=head2 Programmer's interface
 
 If you do not enter the shell, the available shell commands are both
 available as methods (C<CPAN::Shell-E<gt>install(...)>) and as
@@ -4749,8 +4943,11 @@ functionalities that are available in the shell.
 	print "No VERSION in ", $mod->id, "\n";
     }
 
+    # find out which distribution on CPAN contains a module:
+    print CPAN::Shell->expand("Module","Apache::Constants")->cpan_file
+
 Or if you want to write a cronjob to watch The CPAN, you could list
-all modules that need updating:
+all modules that need updating. First a quick and dirty way:
 
     perl -e 'use CPAN; CPAN::Shell->r;'
 
@@ -4919,6 +5116,8 @@ defined:
   build_dir          locally accessible directory to build modules
   index_expire       after this many days refetch index files
   cpan_home          local directory reserved for this package
+  dontload_hash      anonymous hash: modules in the keys will not be
+                     loaded by the CPAN::has_inst() routine
   gzip		     location of external program gzip
   inactivity_timeout breaks interactive Makefile.PLs after this
                      many seconds inactivity. Set to 0 to never break.
@@ -5048,7 +5247,13 @@ unattained.
 =head1 WORKING WITH CPAN.pm BEHIND FIREWALLS
 
 Thanks to Graham Barr for contributing the following paragraphs about
-the interaction between perl, and various firewall configurations.
+the interaction between perl, and various firewall configurations. For
+further informations on firewalls, it is recommended to consult the
+documentation that comes with the ncftp program. If you are unable to
+go through the firewall with a simple Perl setup, it is very likely
+that you can configure ncftp so that it works for your firewall.
+
+=head2 Three basic types of firewalls
 
 Firewalls can be categorized into three basic types.
 
@@ -5102,6 +5307,59 @@ hide a complete network behind one IP address. With this firewall no
 special compiling is need as you can access hosts directly.
 
 =back
+
+=back
+
+=head2 Configuring lynx or ncftp for going throught the firewall
+
+If you can go through your firewall with e.g. lynx, presumably with a
+command such as
+
+    /usr/local/bin/lynx -pscott:tiger
+
+then you would configure CPAN.pm with the command
+
+    o conf lynx "/usr/local/bin/lynx -pscott:tiger"
+
+That's all. Similarly for ncftp or ftp, you would configure something
+like
+
+    o conf ncftp "/usr/bin/ncftp -f /home/scott/ncftplogin.cfg"
+
+Your milage may vary...
+
+=head1 FAQ
+
+=over
+
+=item I installed a new version of module X but CPAN keeps saying, I
+      have the old version installed
+
+Most probably you B<do> have the old version installed. This can
+happen if a module installs itself into a different directory in the
+@INC path than it was previously installed. This is not really a
+CPAN.pm problem, you would have the same problem when installing the
+module manually. The easiest way to prevent this behaviour is to add
+the argument C<UNINST=1> to the C<make install> call, and that is why
+many people add this argument permanently by configuring
+
+  o conf make_install_arg UNINST=1
+
+=item So why is UNINST=1 not the default?
+
+Because there are people who have their precise expectations about who
+may install where in the @INC path and who uses which @INC array. In
+fine tuned environments C<UNINST=1> can cause damage.
+
+=item When I install bundles or multiple modules with one command
+      there is too much output to keep track of
+
+You may want to configure something like
+
+  o conf make_arg "| tee -ai /root/.cpan/logs/make.out"
+  o conf make_install_arg "| tee -ai /root/.cpan/logs/make_install.out"
+
+so that STDOUT is captured in a file for later inspection.
 
 =back
 

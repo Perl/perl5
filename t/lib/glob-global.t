@@ -56,7 +56,7 @@ while (defined($_ = <*/*.t>)) {
 print "not " if @r != $r;
 print "ok 5\n";
 
-# check if array context works
+# check if list context works
 @r = ();
 for (<*/*.t>) {
     #print "# $_\n";

@@ -462,6 +462,22 @@ from each line manually:
 	down from the door where it began.
     FINIS
 
+If you use a here-doc within a delimited construct, such as in C<s///eg>,
+the quoted material must come on the lines following the final delimiter.
+So instead of
+
+    s/this/<<E . 'that'
+    the other
+    E
+     . 'more '/eg;
+
+you have to write
+
+    s/this/<<E . 'that' 
+     . 'more '/eg; 
+    the other 
+    E 
+
 =head2 List value constructors
 
 List values are denoted by separating individual values by commas

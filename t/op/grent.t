@@ -140,7 +140,7 @@ print "ok ", $tst++;
 print "\t# (not necessarily serious: run t/op/grent.t by itself)" if $not;
 print "\n";
 
-# Test both the scalar and array contexts.
+# Test both the scalar and list contexts.
 
 my @gr1;
 

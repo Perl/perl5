@@ -35,9 +35,6 @@ ld='ld2'
 # - perl malloc needs to be unpolluted
 bincompat5005='undef'
 
-# stubs (ENOSYS, not implemented)
-d_chroot='undef'
-
 # Win9x problem with non-blocking read from a closed pipe
 d_eofnblk='define'
 

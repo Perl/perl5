@@ -4,7 +4,7 @@
 # the format supported by op/regexp.t.  If you want to add a test
 # that does fit that format, add it to op/re_tests, not here.
 
-print "1..215\n";
+print "1..216\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -266,12 +266,12 @@ print "ok 68\n";
 
 undef $@;
 eval "'aaa' =~ /a{1,$reg_infty}/";
-print "not " if $@ !~ m%^\Q/a{1,$reg_infty}/: Quantifier in {,} bigger than%;
+print "not " if $@ !~ m%^\QQuantifier in {,} bigger than%;
 print "ok 69\n";
 
 eval "'aaa' =~ /a{1,$reg_infty_p}/";
 print "not "
-	if $@ !~ m%^\Q/a{1,$reg_infty_p}/: Quantifier in {,} bigger than%;
+	if $@ !~ m%^\QQuantifier in {,} bigger than%;
 print "ok 70\n";
 undef $@;
 
@@ -279,7 +279,7 @@ undef $@;
 
 $context = 'x' x 256;
 eval qq("${context}y" =~ /(?<=$context)y/);
-print "not " if $@ !~ m%^\Q/(?<=\Ex+/: lookbehind longer than 255 not%;
+print "not " if $@ !~ m%^\QLookbehind longer than 255 not%;
 print "ok 71\n";
 
 # removed test
@@ -588,8 +588,12 @@ sub make_must_warn {
 my $for_future = make_must_warn('reserved for future extensions');
 
 &$for_future('q(a:[b]:) =~ /[x[:foo:]]/');
-&$for_future('q(a=[b]=) =~ /[x[=foo=]]/');
-&$for_future('q(a.[b].) =~ /[x[.foo.]]/');
+
+#&$for_future('q(a=[b]=) =~ /[x[=foo=]]/');
+print "ok $test\n"; $test++; # now a fatal croak
+
+#&$for_future('q(a.[b].) =~ /[x[.foo.]]/');
+print "ok $test\n"; $test++; # now a fatal croak
 
 # test if failure of patterns returns empty list
 $_ = 'aaa';
@@ -1020,4 +1024,13 @@ $test++;
 
 'a1b' =~ ('xyz' =~ /t/) and $` eq 'a' or print "not ";
 print "ok $test\n";
+$test++;
+
+$w = 0;
+{
+    local $SIG{__WARN__} = sub { $w = 1 };
+    local $^W = 1;
+	$w = 1 if ("1\n" x 102) =~ /^\s*\n/m;
+}
+print $w ? "not " : "", "ok $test\n";
 $test++;

@@ -30,7 +30,7 @@ sub do_test {
 	    print $pattern, "\n" if $DEBUG;
 	    my $dump = <IN>;
 	    print $dump, "\n"    if $DEBUG;
-	    print "[$dump] vs [$pattern]\nnot " unless $dump =~ /$pattern/m;
+	    print "[$dump] vs [$pattern]\nnot " unless $dump =~ /$pattern/ms;
 	    print "ok $_[0]\n";
 	    close(IN);
 	} else {
@@ -207,6 +207,8 @@ do_test(13,
     GVGV::GV = $ADDR\\t"main" :: "__ANON__"
     FILE = ".+\\b(?i:peek\\.t)"
     DEPTH = 0
+(?:    MUTEXP = $ADDR
+    OWNER = $ADDR)?
     FLAGS = 0x4
     PADLIST = $ADDR
     OUTSIDE = $ADDR \\(MAIN\\)');
@@ -218,7 +220,7 @@ do_test(14,
   FLAGS = \\(ROK\\)
   RV = $ADDR
   SV = PVCV\\($ADDR\\) at $ADDR
-    REFCNT = 3
+    REFCNT = (3|4)
     FLAGS = \\(\\)
     IV = 0
     NV = 0
@@ -230,6 +232,8 @@ do_test(14,
     GVGV::GV = $ADDR\\t"main" :: "do_test"
     FILE = ".+\\b(?i:peek\\.t)"
     DEPTH = 1
+(?:    MUTEXP = $ADDR
+    OWNER = $ADDR)?
     FLAGS = 0x0
     PADLIST = $ADDR
       \\d+\\. $ADDR \\("\\$pattern" \\d+-\\d+\\)

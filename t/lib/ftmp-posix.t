@@ -25,11 +25,11 @@ ok( !(-e $tmpnam ));
 
 print "# TMPNAM file name: $tmpnam\n";
 
-# TMPNAM array context
+# TMPNAM list context
 # Not strict posix behaviour
 (my $fh, $tmpnam) = tmpnam();
 
-print "# TMPNAM: in array context: $fh $tmpnam\n";
+print "# TMPNAM: in list context: $fh $tmpnam\n";
 
 # File is opened - make sure it exists
 ok( (-e $tmpnam ));

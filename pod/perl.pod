@@ -34,6 +34,7 @@ For ease of access, the Perl manual has been split up into several sections:
     perlrun		Perl execution and options
     perldiag		Perl diagnostic messages
     perllexwarn		Perl warnings and their control
+    perldebtut		Perl debugging tutorial
     perldebug		Perl debugging
 
     perlvar		Perl predefined variables

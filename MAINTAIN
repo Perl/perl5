@@ -449,6 +449,7 @@ lib/Shell.pm
 lib/Symbol.pm	
 lib/Sys/Hostname.pm		sundstrom
 lib/Sys/Syslog.pm		tchrist
+lib/Term/ANSIcolor.pm		rra
 lib/Term/Cap.pm	
 lib/Term/Complete.pm		wayne.thompson
 lib/Term/ReadLine.pm	
@@ -684,6 +685,7 @@ t/io/read.t
 t/io/tell.t	
 t/lib/abbrev.t	
 t/lib/anydbm.t	
+t/lib/ansicolor.t		rra
 t/lib/autoloader.t	
 t/lib/basename.t	
 t/lib/bigint.t	
@@ -714,6 +716,9 @@ t/lib/filepath.t
 t/lib/filespec.t		kjahds
 t/lib/findbin.t	
 t/lib/ftmp-*.t			tjenness
+t/lib/gol-basic.t		jvromans
+t/lib/gol-compat.t		jvromans
+t/lib/gol-linkage.t		jvromans
 t/lib/gdbm.t	
 t/lib/getopt.t			jvromans
 t/lib/h2ph*			kstar

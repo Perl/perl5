@@ -321,7 +321,7 @@ sub tab {
 #	trans not OK (dTARG; TARG = sv_newmortal();)
 #	ucfirst etc not OK: TMP arg processed inplace
 #	quotemeta not OK (unsafe when TARG == arg)
-#	each repeat not OK too due to array context
+#	each repeat not OK too due to list context
 #	pack split - unknown whether they are safe
 #	sprintf: is calling do_sprintf(TARG,...) which can act on TARG
 #	  before other args are processed.

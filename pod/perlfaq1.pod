@@ -89,24 +89,21 @@ See L<perlhist> for a history of Perl revisions.
 
 =head2 What is perl6?
 
-Perl6 is a semi-jocular reference to the Topaz project.  Headed by Chip
-Salzenberg, Topaz is yet-another ground-up rewrite of the current release
-of Perl, one whose major goal is to create a more maintainable core than
-found in release 5.  Written in nominally portable C++, Topaz hopes to
-maintain 100% source-compatibility with previous releases of Perl but to
-run significantly faster and smaller.  The Topaz team hopes to provide
-an XS compatibility interface to allow most XS modules to work unchanged,
-albeit perhaps without the efficiency that the new interface would allow.
-New features in Topaz are as yet undetermined, and will be addressed
-once compatibility and performance goals are met.
+At The Second O'Reilly Open Source Software Convention, Larry Wall            
+announced Perl6 development would begin in earnest. Perl6 was an oft
+used term for Chip Salzenberg's project to rewrite Perl in C++ named
+Topaz. However, Topaz should not be confused with the nisus to rewrite
+Perl while keeping the lessons learned from other software, as well as
+Perl5, in mind.
 
-If you are a hard-working C++ wizard with a firm command of Perl's
-internals, and you would like to work on the project, send a request to
-perl6-porters-request@perl.org to subscribe to the Topaz mailing list.
+If you have a desire to help in the crusade to make Perl a better place
+then peruse the Perl6 developers page at http://www.perl.org/perl6/ and 
+get involved.
 
-There is no ETA for Topaz.  It is expected to be several years before it
-achieves enough robustness, compatibility, portability, and performance
-to replace perl5 for ordinary use by mere mortals.
+The first alpha release is expected by Summer 2001.
+
+"We're really serious about reinventing everything that needs reinventing."
+--Larry Wall
 
 =head2 How stable is Perl?
 

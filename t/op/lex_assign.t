@@ -309,7 +309,7 @@ getpriority $$, $$		# getpriority
 time				# time
 localtime $^T			# localtime
 gmtime $^T			# gmtime
-sleep 1				# sleep
+'???'				# sleep: can randomly fail
 '???'				# alarm
 '???'				# shmget
 '???'				# shmctl

@@ -10,7 +10,7 @@ use warnings;
 use strict;
 use Config;
 
-print "1..10\n";
+print "1..13\n";
 
 my $test = 1;
 
@@ -30,6 +30,28 @@ ok;
 print "not " if "{\n    \$test /= 2 if ++\$test;\n}" ne
                     $deparse->coderef2text(sub {++$test and $test/=2;});
 ok;
+{
+my $a = <<'EOF';
+{
+    $test = sub : lvalue {
+        1;
+    }
+    ;
+}
+EOF
+chomp $a;
+print "not " if $deparse->coderef2text(sub{$test = sub : lvalue { 1 }}) ne $a;
+ok;
+
+$a =~ s/lvalue/method/;
+print "not " if $deparse->coderef2text(sub{$test = sub : method { 1 }}) ne $a;
+ok;
+
+$a =~ s/method/locked method/;
+print "not " if $deparse->coderef2text(sub{$test = sub : method locked { 1 }})
+                                     ne $a;
+ok;
+}
 
 my $a;
 my $Is_VMS = $^O eq 'VMS';
@@ -92,15 +114,22 @@ $a =~ s/\s+/ /g;
 $a =~ s/\b(s|foo|bar|ullsv)\b\s?//g;
 $a =~ s/^\s+//;
 $a =~ s/\s+$//;
-$b=<<EOF;
+if ($Config{use5005threads} eq 'define') {
+    $b=<<EOF;
+leave enter nextstate label leaveloop enterloop null and defined null
+threadsv readline gv lineseq nextstate aassign null pushmark split pushre
+threadsv const null pushmark rvav gv nextstate subst const unstack nextstate
+EOF
+} else {
+    $b=<<EOF;
 leave enter nextstate label leaveloop enterloop null and defined null
 null gvsv readline gv lineseq nextstate aassign null pushmark split pushre
-null gvsv const null pushmark rvav gv nextstate subst const unstack
-nextstate
+null gvsv const null pushmark rvav gv nextstate subst const unstack nextstate
 EOF
+}
 $b=~s/\n/ /g;$b=~s/\s+/ /g;
 $b =~ s/\s+$//;
-print "# [$a] vs [$b]\nnot " if $a ne $b;
+print "# [$a]\n# vs\n# [$b]\nnot " if $a ne $b;
 ok;
 
 if ($Is_VMS) {
@@ -121,11 +150,15 @@ if ($Config{static_ext} eq ' ') {
   print "ok $test # skipped: one or more static extensions\n"; $test++;
 }
 
-if ($Is_VMS) {
-    $a = `$^X "-I../lib" "-MO=Showlex" -e "my %one"`;
+if ($Config{use5005threads} eq 'define') {
+    print "# use5005threads: test $test skipped\n";
+} else {
+    if ($Is_VMS) {
+        $a = `$^X "-I../lib" "-MO=Showlex" -e "my %one"`;
+    }
+    else {
+        $a = `$^X -I../lib -MO=Showlex -e "my %one" 2>&1`;
+    }
+    print "# [$a]\nnot " unless $a =~ /sv_undef.*PVNV.*%one.*sv_undef.*HV/s;
 }
-else {
-    $a = `$^X -I../lib -MO=Showlex -e "my %one" 2>&1`;
-}
-print "# [$a]\nnot " unless $a =~ /sv_undef.*PVNV.*%one.*sv_undef.*HV/s;
 ok;

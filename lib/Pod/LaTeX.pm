@@ -675,7 +675,7 @@ pushed onto this stack. When the list context ends, it
 is popped from the stack. The array will be empty if no
 lists are active.
 
-Returns array of list information in array context
+Returns array of list information in list context
 Returns array ref in scalar context
 
 =cut

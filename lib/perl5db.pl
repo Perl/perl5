@@ -899,9 +899,9 @@ EOP
 			print $OUT "Will stop on load of `@{[join '\', `', sort keys %break_on_load]}'.\n";
 			next CMD; };
 		    $cmd =~ /^b\b\s*(postpone|compile)\b\s*([':A-Za-z_][':\w]*)\s*(.*)/ && do {
-			my $cond = $3 || '1';
+			my $cond = length $3 ? $3 : '1';
 			my ($subname, $break) = ($2, $1 eq 'postpone');
-			$subname =~ s/\'/::/;
+			$subname =~ s/\'/::/g;
 			$subname = "${'package'}::" . $subname
 			  unless $subname =~ /::/;
 			$subname = "main".$subname if substr($subname,0,2) eq "::";
@@ -910,8 +910,8 @@ EOP
 			next CMD; };
 		    $cmd =~ /^b\b\s*([':A-Za-z_][':\w]*(?:\[.*\])?)\s*(.*)/ && do {
 			$subname = $1;
-			$cond = $2 || '1';
-			$subname =~ s/\'/::/;
+			$cond = length $2 ? $2 : '1';
+			$subname =~ s/\'/::/g;
 			$subname = "${'package'}::" . $subname
 			  unless $subname =~ /::/;
 			$subname = "main".$subname if substr($subname,0,2) eq "::";
@@ -931,7 +931,7 @@ EOP
 			next CMD; };
 		    $cmd =~ /^b\b\s*(\d*)\s*(.*)/ && do {
 			$i = $1 || $line;
-			$cond = $2 || '1';
+			$cond = defined $2 ? $2 : '1';
 			if ($dbline[$i] == 0) {
 			    print $OUT "Line $i not breakable.\n";
 			} else {
@@ -941,8 +941,12 @@ EOP
 			next CMD; };
 		    $cmd =~ /^d\b\s*(\d*)/ && do {
 			$i = $1 || $line;
-			$dbline{$i} =~ s/^[^\0]*//;
-			delete $dbline{$i} if $dbline{$i} eq '';
+                        if ($dbline[$i] == 0) {
+                            print $OUT "Line $i not breakable.\n";
+                        } else {
+			    $dbline{$i} =~ s/^[^\0]*//;
+			    delete $dbline{$i} if $dbline{$i} eq '';
+                        }
 			next CMD; };
 		    $cmd =~ /^A$/ && do {
 		      print $OUT "Deleting all actions...\n";
@@ -1507,6 +1511,7 @@ sub eval {
 	local $otrace = $trace;
 	local $osingle = $single;
 	local $od = $^D;
+	{ ($evalarg) = $evalarg =~ /(.*)/s; }
 	@res = eval "$usercontext $evalarg;\n"; # '\n' for nice recursive debug
 	$trace = $otrace;
 	$single = $osingle;
@@ -2160,8 +2165,8 @@ B<W>		Delete all watch-expressions.
 B<V> [I<pkg> [I<vars>]]	List some (default all) variables in package (default current).
 		Use B<~>I<pattern> and B<!>I<pattern> for positive and negative regexps.
 B<X> [I<vars>]	Same as \"B<V> I<currentpackage> [I<vars>]\".
-B<x> I<expr>		Evals expression in array context, dumps the result.
-B<m> I<expr>		Evals expression in array context, prints methods callable
+B<x> I<expr>		Evals expression in list context, dumps the result.
+B<m> I<expr>		Evals expression in list context, prints methods callable
 		on the first element of the result.
 B<m> I<class>		Prints methods callable via the given class.
 
@@ -2256,7 +2261,7 @@ I<Debugger controls:>                        B<L>           List break/watch/act
   B<|>[B<|>]I<db_cmd>  Send output to pager        B<$psh>\[B<$psh>\] I<syscmd> Run cmd in a subprocess
   B<q> or B<^D>     Quit			  B<R>	      Attempt a restart
 I<Data Examination:>	      B<expr>     Execute perl code, also see: B<s>,B<n>,B<t> I<expr>
-  B<x>|B<m> I<expr>	Evals expr in array context, dumps the result or lists methods.
+  B<x>|B<m> I<expr>	Evals expr in list context, dumps the result or lists methods.
   B<p> I<expr>	Print expression (uses script's current package).
   B<S> [[B<!>]I<pat>]	List subroutine names [not] matching pattern
   B<V> [I<Pk> [I<Vars>]]	List Variables in Package.  Vars can be ~pattern or !pattern.

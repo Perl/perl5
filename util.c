@@ -3881,44 +3881,44 @@ void
 Perl_report_evil_fh(pTHX_ GV *gv, IO *io, I32 op)
 {
     char *vile;
-    I32   warn;
+    I32   warn_type;
     char *func =
-	op == OP_READLINE   ? "readline"  :
-	op == OP_LEAVEWRITE ? "write" :
+	op == OP_READLINE   ? "readline"  :	/* "<HANDLE>" not nice */
+	op == OP_LEAVEWRITE ? "write" :		/* "write exit" not nice */
 	PL_op_desc[op];
     char *pars = OP_IS_FILETEST(op) ? "" : "()";
     char *type = OP_IS_SOCKET(op) || (io && IoTYPE(io) == IoTYPE_SOCKET) ?
                      "socket" : "filehandle";
     char *name = NULL;
 
-    if (isGV(gv)) {
+    if (io && IoTYPE(io) == IoTYPE_CLOSED) {
+	vile = "closed";
+	warn_type = WARN_CLOSED;
+    }
+    else {
+	vile = "unopened";
+	warn_type = WARN_UNOPENED;
+    }
+
+    if (gv && isGV(gv)) {
 	SV *sv = sv_newmortal();
 	gv_efullname4(sv, gv, Nullch, FALSE);
 	name = SvPVX(sv);
     }
 
-    if (io && IoTYPE(io) == IoTYPE_CLOSED) {
-	vile = "closed";
-	warn = WARN_CLOSED;
-    }
-    else {
-	vile = "unopened";
-	warn = WARN_UNOPENED;
-    }
-
     if (name && *name) {
-	Perl_warner(aTHX_ warn,
+	Perl_warner(aTHX_ warn_type,
 		    "%s%s on %s %s %s", func, pars, vile, type, name);
-	if (io && IoDIRP(io))
-	    Perl_warner(aTHX_ warn,
+	if (io && IoDIRP(io) && !(IoFLAGS(io) & IOf_FAKE_DIRP))
+	    Perl_warner(aTHX_ warn_type,
 			"\t(Are you trying to call %s%s on dirhandle %s?)\n",
 			func, pars, name);
     }
     else {
-	Perl_warner(aTHX_ warn,
+	Perl_warner(aTHX_ warn_type,
 		    "%s%s on %s %s", func, pars, vile, type);
-	if (io && IoDIRP(io))
-	    Perl_warner(aTHX_ warn,
+	if (io && IoDIRP(io) && !(IoFLAGS(io) & IOf_FAKE_DIRP))
+	    Perl_warner(aTHX_ warn_type,
 			"\t(Are you trying to call %s%s on dirhandle?)\n",
 			func, pars);
     }

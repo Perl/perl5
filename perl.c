@@ -2056,9 +2056,25 @@ Perl_moreswitches(pTHX_ char *s)
     case 'd':
 	forbid_setid("-d");
 	s++;
-	if (*s == ':' || *s == '=')  {
-	    my_setenv("PERL5DB", Perl_form(aTHX_ "use Devel::%s;", ++s));
+	/* The following permits -d:Mod to accepts arguments following an =
+	   in the fashion that -MSome::Mod does. */
+	if (*s == ':' || *s == '=') {
+	    char *start;
+	    SV *sv;
+	    sv = newSVpv("use Devel::", 0);
+	    start = ++s;
+	    /* We now allow -d:Module=Foo,Bar */
+	    while(isALNUM(*s) || *s==':') ++s;
+	    if (*s != '=')
+		sv_catpv(sv, start);
+	    else {
+		sv_catpvn(sv, start, s-start);
+		sv_catpv(sv, " split(/,/,q{");
+		sv_catpv(sv, ++s);
+		sv_catpv(sv,    "})");
+	    }
 	    s += strlen(s);
+	    my_setenv("PERL5DB", SvPV(sv, PL_na));
 	}
 	if (!PL_perldb) {
 	    PL_perldb = PERLDB_ALL;
