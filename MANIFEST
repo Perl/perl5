@@ -1111,6 +1111,7 @@ lib/Locale/Codes/t/constants.t	See if Locale::Codes work
 lib/Locale/Codes/t/country.t	See if Locale::Codes work
 lib/Locale/Codes/t/currency.t	See if Locale::Codes work
 lib/Locale/Codes/t/languages.t	See if Locale::Codes work
+lib/Locale/Codes/t/rename.t	See if Locale::Codes work
 lib/Locale/Codes/t/script.t	See if Locale::Codes work
 lib/Locale/Codes/t/uk.t		See if Locale::Codes work
 lib/Locale/Constants.pm		Locale::Codes

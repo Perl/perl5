@@ -1,16 +1,13 @@
 #!./perl
 #
-# uk.t - tests for Locale::Country with "uk" aliases to "gb"
+# rename.t - tests for Locale::Country with "uk" aliases to "gb"
 #
-
-BEGIN {
-	chdir 't' if -d 't';
-	@INC = '../lib';
-}
 
 use Locale::Country;
 
-Locale::Country::alias_code('uk' => 'gb');
+local $SIG{__WARN__} = sub { };		# muffle warnings from carp
+
+Locale::Country::rename_country('gb' => 'Great Britain');
 
 #-----------------------------------------------------------------------
 # This is an array of tests. Each test is eval'd as an expression.
@@ -28,6 +25,10 @@ Locale::Country::alias_code('uk' => 'gb');
  '!defined code2country(undef)',             # undef argument
  '!defined code2country("zz")',              # illegal code
  '!defined code2country("ja")',              # should be jp for country
+ '!defined code2country("uk")',              # code for United Kingdom is 'gb'
+
+ #---- this call should return 0, since code doesn't exist --------------
+ '!Locale::Country::rename_country("ukz", "United Karz")',
 
  #---- some successful examples -----------------------------------------
  'code2country("BO") eq "Bolivia"',
@@ -36,7 +37,7 @@ Locale::Country::alias_code('uk' => 'gb');
  'code2country("us") eq "United States"',
  'code2country("ad") eq "Andorra"',          # first in DATA segment
  'code2country("zw") eq "Zimbabwe"',         # last in DATA segment
- 'code2country("uk") eq "United Kingdom"',   # normally "gb"
+ 'code2country("gb") eq "Great Britain"',    # normally "United Kingdom"
 
 	#================================================
 	# TESTS FOR country2code
@@ -52,7 +53,15 @@ Locale::Country::alias_code('uk' => 'gb');
  'country2code("japan")          ne "ja"',
  'country2code("Japan")          eq "jp"',
  'country2code("United States")  eq "us"',
- 'country2code("United Kingdom") eq "uk"',
+
+ 'country2code("Great Britain") eq "gb"',
+ 'country2code("Great Britain", LOCALE_CODE_ALPHA_3) eq "gbr"',
+ 'country2code("Great Britain", LOCALE_CODE_NUMERIC) eq "826"',
+
+ 'country2code("United Kingdom") eq "gb"',
+ 'country2code("United Kingdom", LOCALE_CODE_ALPHA_3)  eq "gbr"',
+ 'country2code("United Kingdom", LOCALE_CODE_NUMERIC)  eq "826"',
+
  'country2code("Andorra")        eq "ad"',    # first in DATA segment
  'country2code("Zimbabwe")       eq "zw"',    # last in DATA segment
 );

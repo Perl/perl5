@@ -1,6 +1,15 @@
 
 		ChangeLog for Locale-Codes Distribution
 
+2.02  2002-03-09 neilb
+
+	* added semi-private routine rename_country() to Locale::Country,
+	  based on a patch from Iain Chalmers.
+	* added test rename.t for the above function.
+	* renamed _alias_code to be alias_code. Have retained the old
+	  name for backwards compatibility. Will remove it when the
+	  major version number next changes.
+
 2.01  2002-02-18 neilb
 
 	* Split the documentation for all modules into separate pod files.
