@@ -794,7 +794,7 @@ C<< Guru->find("Samy") >>) instead.  Object notation is explained in
 L<perlobj>.
 
 Make sure to read about creating modules in L<perlmod> and
-the perils of indirect objects in L<perlobj/"WARNING">.
+the perils of indirect objects in L<perlobj/"Method Invocation">.
 
 =head2 How can I find out my current package?
 
