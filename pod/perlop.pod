@@ -1521,7 +1521,8 @@ security concerns.)
 In a scalar context, evaluating a filehandle in angle brackets yields the
 next line from that file (newline, if any, included), or C<undef> at
 end-of-file.  When C<$/> is set to C<undef> (i.e. file slurp mode),
-it returns C<''> the first time, followed by C<undef> subsequently.
+and the file is empty, it returns C<''> the first time, followed by
+C<undef> subsequently.
 
 Ordinarily you must assign the returned value to a variable, but there is one
 situation where an automatic assignment happens.  I<If and ONLY if> the

@@ -2911,9 +2911,9 @@ reads until end-of-file is reached and returns a list of lines.  Note that
 the notion of "line" used here is however you may have defined it
 with C<$/> or C<$INPUT_RECORD_SEPARATOR>).  See L<perlvar/"$/">.
 
-When C<$/> is set to C<undef> and when readline() is in a scalar
-context (i.e. file slurp mode), it returns C<''> the first time,
-followed by C<undef> subsequently.
+When C<$/> is set to C<undef>, when readline() is in a scalar
+context (i.e. file slurp mode), and when an empty file is read, it
+returns C<''> the first time, followed by C<undef> subsequently.
 
 This is the internal function implementing the C<E<lt>EXPRE<gt>>
 operator, but you can use it directly.  The C<E<lt>EXPRE<gt>>
