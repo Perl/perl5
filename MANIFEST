@@ -1833,6 +1833,7 @@ pod/perlguts.pod		Internals info
 pod/perlhack.pod		Perl hackers guide
 pod/perlhist.pod		Perl history info
 pod/perlintern.pod		Perl internal function docs (autogenrated)
+pod/perlintro.pod               Perl introduction for beginners
 pod/perliol.pod			Internals of PerlIO with layers.
 pod/perlipc.pod			IPC info
 pod/perllexwarn.pod		Lexical Warnings info
