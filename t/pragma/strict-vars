@@ -339,3 +339,18 @@ ${foo} = 10;
 our $foo;
 EXPECT
 "our" variable $foo masks earlier declaration in same scope at - line 7.
+########
+
+# multiple our declarations in same scope, same package, warning
+use strict 'vars';
+use warnings;
+our $foo;
+{
+    our $foo;
+    package Foo;
+    our $foo;
+}
+EXPECT
+"our" variable $foo redeclared at - line 7.
+(Did you mean "local" instead of "our"?)
+Name "Foo::foo" used only once: possible typo at - line 9.

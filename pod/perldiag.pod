@@ -31,6 +31,14 @@ C<"%(-?@> sort before the letters, while C<[> and C<\> sort after.
 
 =over 4
 
+=item "%s" variable %s masks earlier declaration in same %s
+
+(W) A "my" or "our" variable has been redeclared in the current scope or statement,
+effectively eliminating all access to the previous instance.  This is almost
+always a typographical error.  Note that the earlier variable will still exist
+until the end of the scope or until all closure referents to it are
+destroyed.
+
 =item "my sub" not yet implemented
 
 (F) Lexically scoped subroutines are not yet implemented.  Don't try that
@@ -42,18 +50,15 @@ yet.
 to try to declare one with a package qualifier on the front.  Use local()
 if you want to localize a package variable.
 
-=item "%s" variable %s masks earlier declaration in same %s
-
-(W) A "my" or "our" variable has been redeclared in the current scope or statement,
-effectively eliminating all access to the previous instance.  This is almost
-always a typographical error.  Note that the earlier variable will still exist
-until the end of the scope or until all closure referents to it are
-destroyed.
-
 =item "no" not allowed in expression
 
 (F) The "no" keyword is recognized and executed at compile time, and returns
 no useful value.  See L<perlmod>.
+
+=item "our" variable %s redeclared
+
+(W) You seem to have already declared the same global once before in the
+current lexical scope.
 
 =item "use" not allowed in expression
 
@@ -1283,6 +1288,11 @@ See Server error.
 =item Did you mean &%s instead?
 
 (W) You probably referred to an imported subroutine &FOO as $FOO or some such.
+
+=item Did you mean "local" instead of "our"?
+
+(W) Remember that "our" does not localize the declared global variable.
+You have declared it again in the same lexical scope, which seems superfluous.
 
 =item Did you mean $ or @ instead of %?
 

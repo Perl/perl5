@@ -153,22 +153,39 @@ Perl_pad_allocmy(pTHX_ char *name)
     }
     if (ckWARN(WARN_UNSAFE) && AvFILLp(PL_comppad_name) >= 0) {
 	SV **svp = AvARRAY(PL_comppad_name);
-	for (off = AvFILLp(PL_comppad_name); off > PL_comppad_name_floor; off--) {
+	HV *ourstash = (PL_curstash ? PL_curstash : PL_defstash);
+	PADOFFSET top = AvFILLp(PL_comppad_name);
+	for (off = top; off > PL_comppad_name_floor; off--) {
 	    if ((sv = svp[off])
 		&& sv != &PL_sv_undef
 		&& (SvIVX(sv) == PAD_MAX || SvIVX(sv) == 0)
+		&& (PL_in_my != KEY_our
+		    || ((SvFLAGS(sv) & SVpad_OUR) && GvSTASH(sv) == ourstash))
 		&& strEQ(name, SvPVX(sv)))
 	    {
-		if (PL_in_my != KEY_our
-		    || GvSTASH(sv) == (PL_curstash ? PL_curstash : PL_defstash))
+		Perl_warner(aTHX_ WARN_UNSAFE,
+		    "\"%s\" variable %s masks earlier declaration in same %s", 
+		    (PL_in_my == KEY_our ? "our" : "my"),
+		    name,
+		    (SvIVX(sv) == PAD_MAX ? "scope" : "statement"));
+		--off;
+		break;
+	    }
+	}
+	if (PL_in_my == KEY_our) {
+	    while (off >= 0 && off <= top) {
+		if ((sv = svp[off])
+		    && sv != &PL_sv_undef
+		    && ((SvFLAGS(sv) & SVpad_OUR) && GvSTASH(sv) == ourstash)
+		    && strEQ(name, SvPVX(sv)))
 		{
 		    Perl_warner(aTHX_ WARN_UNSAFE,
-			"\"%s\" variable %s masks earlier declaration in same %s", 
-			(PL_in_my == KEY_our ? "our" : "my"),
-			name,
-			(SvIVX(sv) == PAD_MAX ? "scope" : "statement"));
+			"\"our\" variable %s redeclared", name);
+		    Perl_warner(aTHX_ WARN_UNSAFE,
+			"(Did you mean \"local\" instead of \"our\"?)\n");
+		    break;
 		}
-		break;
+		--off;
 	    }
 	}
     }
