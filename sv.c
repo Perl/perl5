@@ -2758,6 +2758,11 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 	    SvPV_set(dstr, SvPVX(sstr));
 	    SvLEN_set(dstr, SvLEN(sstr));
 	    SvCUR_set(dstr, SvCUR(sstr));
+	    if (SvUTF8(sstr))
+		SvUTF8_on(dstr);
+	    else
+		SvUTF8_off(dstr);
+
 	    SvTEMP_off(dstr);
 	    (void)SvOK_off(sstr);
 	    SvPV_set(sstr, Nullch);
@@ -7237,13 +7242,13 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl)
 	    ptr = POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = any_dup(ptr, proto_perl);	/* XXX quite arbitrary */
 	    dptr = POPDPTR(ss,ix);
-	    TOPDPTR(nss,ix) = (void (*)(void*))any_dup(dptr, proto_perl);
+	    TOPDPTR(nss,ix) = (void (*)(void*))any_dup((void *)dptr, proto_perl);
 	    break;
 	case SAVEt_DESTRUCTOR_X:
 	    ptr = POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = any_dup(ptr, proto_perl);	/* XXX quite arbitrary */
 	    dxptr = POPDXPTR(ss,ix);
-	    TOPDXPTR(nss,ix) = (void (*)(pTHXo_ void*))any_dup(dxptr, proto_perl);
+	    TOPDXPTR(nss,ix) = (void (*)(pTHXo_ void*))any_dup((void *)dxptr, proto_perl);
 	    break;
 	case SAVEt_REGCONTEXT:
 	case SAVEt_ALLOC:

@@ -356,6 +356,10 @@ PP(pp_glob)
     OP *result;
     tryAMAGICunTARGET(iter, -1);
 
+    /* Note that we only ever get here if File::Glob fails to load
+     * without at the same time croaking, for some reason, or if
+     * perl was built with PERL_EXTERNAL_GLOB */
+
     ENTER;
 
 #ifndef VMS
@@ -3462,7 +3466,8 @@ PP(pp_readdir)
 	    sv = newSVpv(dp->d_name, 0);
 #endif
 #ifndef INCOMPLETE_TAINTS
-  	    SvTAINTED_on(sv);
+	    if (!(IoFLAGS(io) & IOf_UNTAINT))
+		SvTAINTED_on(sv);
 #endif
 	    XPUSHs(sv_2mortal(sv));
 	}
@@ -3476,7 +3481,8 @@ PP(pp_readdir)
 	sv = newSVpv(dp->d_name, 0);
 #endif
 #ifndef INCOMPLETE_TAINTS
-	SvTAINTED_on(sv);
+	if (!(IoFLAGS(io) & IOf_UNTAINT))
+	    SvTAINTED_on(sv);
 #endif
 	XPUSHs(sv_2mortal(sv));
     }

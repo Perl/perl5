@@ -3,6 +3,7 @@
 
 # 971015 - archname changed from 'djgpp' to 'dos-djgpp'
 # 971210 - threads support
+# 000222 - added -DPERL_EXTERNAL_GLOB to ccflags
 
 archname='dos-djgpp'
 archobjs='djgpp.o'
@@ -39,6 +40,7 @@ case "X$optimize" in
 	optimize="-O2 -malign-loops=2 -malign-jumps=2 -malign-functions=2"
 	;;
 esac
+ccflags="$ccflags -DPERL_EXTERNAL_GLOB"
 ldflags='-s'
 usemymalloc='n'
 timetype='time_t'

@@ -204,7 +204,7 @@ Perl_pad_allocmy(pTHX_ char *name)
     }
     if (PL_in_my == KEY_our) {
 	(void)SvUPGRADE(sv, SVt_PVGV);
-	GvSTASH(sv) = (HV*)SvREFCNT_inc(PL_curstash ? PL_curstash : PL_defstash);
+	GvSTASH(sv) = (HV*)SvREFCNT_inc(PL_curstash ? (SV*)PL_curstash : (SV*)PL_defstash);
 	SvFLAGS(sv) |= SVpad_OUR;
     }
     av_store(PL_comppad_name, off, sv);

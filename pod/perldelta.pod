@@ -1280,7 +1280,7 @@ detected at the end of the line containing the __END__ or __DATA__
 token; if not, the DATA filehandle will be left open in binary mode.
 Earlier versions always opened the DATA filehandle in text mode.
 
-The glob() operator is implemented via the L<File::Glob> extension,
+The glob() operator is implemented via the C<File::Glob> extension,
 which supports glob syntax of the C shell.  This increases the flexibility
 of the glob() operator, but there may be compatibility issues for
 programs that relied on the older globbing syntax.  If you want to

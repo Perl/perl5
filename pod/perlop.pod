@@ -1696,7 +1696,7 @@ way to have done it in the first place.)  For example:
 	chmod 0644, $_;
     }
 
-is equivalent to
+is roughly equivalent to:
 
     open(FOO, "echo *.c | tr -s ' \t\r\f' '\\012\\012\\012\\012'|");
     while (<FOO>) {
@@ -1704,19 +1704,10 @@ is equivalent to
 	chmod 0644, $_;
     }
 
-In fact, it's currently implemented that way, but this is expected
-to be made completely internal in the near future.  (Which means
-it will not work on filenames with spaces in them unless you have
-csh(1) on your machine.)  Of course, the shortest way to do the
-above is:
+except that the globbing is actually done internally using the standard
+C<File::Glob> extension.  Of course, the shortest way to do the above is:
 
     chmod 0644, <*.c>;
-
-Because globbing currently invokes a shell, it's often faster to
-call readdir() yourself and do your own grep() on the filenames.
-Furthermore, due to its current implementation of using a shell,
-the glob() routine may get "Arg list too long" errors (unless you've
-installed tcsh(1L) as F</bin/csh> or hacked your F<config.sh>).
 
 A (file)glob evaluates its (embedded) argument only when it is
 starting a new list.  All values must be read before it will start

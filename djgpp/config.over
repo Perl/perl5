@@ -30,6 +30,7 @@ repair()
      -e 's=devel/peek=Devel/Peek='\
      -e 's=devel/dprof=Devel/DProf='\
      -e 's=sys/sys=Sys/Sys='\
+     -e 's=sys/hos=Sys/Hos='\
      -e 's=file/=='\
      -e 's=File/=='\
      -e 's=glob=='\

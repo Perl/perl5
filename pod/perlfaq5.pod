@@ -559,14 +559,15 @@ See also the new L<perlopentut> if you have it (new for 5.6).
 =head2 Why do I sometimes get an "Argument list too long" when I use E<lt>*E<gt>?
 
 The C<E<lt>E<gt>> operator performs a globbing operation (see above).
-By default glob() forks csh(1) to do the actual glob expansion, but
+In Perl versions earlier than v5.6.0, the internal glob() operator forks
+csh(1) to do the actual glob expansion, but
 csh can't handle more than 127 items and so gives the error message
 C<Argument list too long>.  People who installed tcsh as csh won't
 have this problem, but their users may be surprised by it.
 
-To get around this, either do the glob yourself with readdir() and
-patterns, or use a module like Glob::KGlob, one that doesn't use the
-shell to do globbing.  This is expected to be fixed soon.
+To get around this, either upgrade to Perl v5.6.0 or later, do the glob
+yourself with readdir() and patterns, or use a module like Glob::KGlob,
+one that doesn't use the shell to do globbing.
 
 =head2 Is there a leak/bug in glob()?
 
