@@ -472,12 +472,15 @@ problem.
 PerlIO_debug writes to the file named by $ENV{'PERLIO_DEBUG'} typical
 use might be
 
-  Bourne shells:
+  Bourne shells (sh, ksh, bash, zsh, ash, ...):
    PERLIO_DEBUG=/dev/tty ./perl somescript some args
 
-  Csh:
+  Csh/Tcsh:
    setenv PERLIO_DEBUG /dev/tty
    ./perl somescript some args
+
+  If you have the "env" utility:
+   env PERLIO_DEBUG=/dev/tty ./perl somescript some args
 
   Win32:
    set PERLIO_DEBUG=CON
