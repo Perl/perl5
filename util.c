@@ -1,6 +1,6 @@
 /*    util.c
  *
- *    Copyright (c) 1991-1999, Larry Wall
+ *    Copyright (c) 1991-2000, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -1881,7 +1881,7 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
 }
 
 #ifndef VMS  /* VMS' my_setenv() is in VMS.c */
-#if !defined(WIN32) && !defined(CYGWIN)
+#if !defined(WIN32) && !defined(__CYGWIN__)
 void
 Perl_my_setenv(pTHX_ char *nam, char *val)
 {
@@ -1931,8 +1931,8 @@ Perl_my_setenv(pTHX_ char *nam, char *val)
 #endif  /* PERL_USE_SAFE_PUTENV */
 }
 
-#else /* WIN32 || CYGWIN */
-#if defined(CYGWIN)
+#else /* WIN32 || __CYGWIN__ */
+#if defined(__CYGWIN__)
 /*
  * Save environ of perl.exe, currently Cygwin links in separate environ's
  * for each exe/dll.  Probably should be a member of impure_ptr.

@@ -422,15 +422,17 @@ struct interp_intern {
 /* Use CP_ACP when mode is ANSI */
 /* Use CP_UTF8 when mode is UTF8 */
 
-#define A2WHELPER(lpa, lpw, nBytes)\
-    lpw[0] = 0, MultiByteToWideChar((IN_BYTE) ? CP_ACP : CP_UTF8, 0, \
-				    lpa, -1, lpw, (nBytes/sizeof(WCHAR)))
+#define A2WHELPER_LEN(lpa, alen, lpw, nBytes)\
+    (lpw[0] = 0, MultiByteToWideChar((IN_BYTE) ? CP_ACP : CP_UTF8, 0, \
+				    lpa, alen, lpw, (nBytes/sizeof(WCHAR))))
+#define A2WHELPER(lpa, lpw, nBytes)	A2WHELPER_LEN(lpa, -1, lpw, nBytes)
 
-#define W2AHELPER(lpw, lpa, nChars)\
-    lpa[0] = '\0', WideCharToMultiByte((IN_BYTE) ? CP_ACP : CP_UTF8, 0, \
-				       lpw, -1, (LPSTR)lpa, nChars, NULL, NULL)
+#define W2AHELPER_LEN(lpw, wlen, lpa, nChars)\
+    (lpa[0] = '\0', WideCharToMultiByte((IN_BYTE) ? CP_ACP : CP_UTF8, 0, \
+				       lpw, wlen, (LPSTR)lpa, nChars,NULL,NULL))
+#define W2AHELPER(lpw, lpa, nChars)	W2AHELPER_LEN(lpw, -1, lpa, nChars)
 
-#define USING_WIDE() (PL_bigchar && PerlEnv_os_id() == VER_PLATFORM_WIN32_NT)
+#define USING_WIDE() (PL_widesyscalls && PerlEnv_os_id() == VER_PLATFORM_WIN32_NT)
 
 #ifdef USE_ITHREADS
 #  define PERL_WAIT_FOR_CHILDREN \

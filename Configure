@@ -3686,12 +3686,9 @@ esac
 for thislib in $libswanted; do
 	
 	libname="$thislib"
-	if xxx=`./loc lib$thislib.$so.[0-9]'*' X $libpth`; $test -f "$xxx"; then
-		if $test "X$ignore_versioned_solibs" = "X"; then
-			xxx=/ignored$xxx
-		else
-			libstyle=shared
-		fi
+	if xxx=`./loc lib$thislib.$so.[0-9]'*' X $libpth`;
+		$test -f "$xxx" -a "X$ignore_versioned_solibs" = "X"; then
+		libstyle=shared
 	elif xxx=`./loc lib$thislib.$so X $libpth` ; $test -f "$xxx"; then
 		libstyle=shared
 	elif xxx=`./loc lib$thislib$_a X $libpth`; $test -f "$xxx"; then
@@ -3739,18 +3736,6 @@ case "$libs" in
 esac
 case "$dflt" in
 ' '|'') dflt='none';;
-esac
-
-case "$libsfound" in
-*libm*) ;;
-*) cat <<EOM >&4
-
-I could not find -lm, the mathematics library.
-This means that something went awfully wrong.
-
-EOM
-   exit 1
-   ;;
 esac
 
 $cat <<EOM
@@ -5381,9 +5366,9 @@ case "$ans" in
 esac
 case "$inc_version_list" in
 ''|' ') 
-	inc_version_list_init='""';;
+	inc_version_list_init='0';;
 *)	inc_version_list_init=`echo $inc_version_list |
-		$sed -e 's/^/"/' -e 's/ /","/g' -e 's/$/"/'`
+		$sed -e 's/^/"/' -e 's/ /","/g' -e 's/$/",0/'`
 	;;
 esac
 $rm -f getverlist

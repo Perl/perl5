@@ -1,6 +1,6 @@
 /*    pp_hot.c
  *
- *    Copyright (c) 1991-1999, Larry Wall
+ *    Copyright (c) 1991-2000, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -87,6 +87,8 @@ PP(pp_stringify)
     char *s;
     s = SvPV(TOPs,len);
     sv_setpvn(TARG,s,len);
+    if (SvUTF8(TOPs) && !IN_BYTE)
+	SvUTF8_on(TARG);
     SETTARG;
     RETURN;
 }

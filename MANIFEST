@@ -53,7 +53,7 @@ README.vms		Notes about VMS port
 README.vos		Notes about Stratus VOS port
 README.win32		Notes about Win32 port
 Todo			The Wishlist
-Todo-5.005		What needs doing before 5.005 release
+Todo-5.6		What needs doing before/during the 5.6.x release cycle
 XSUB.h			Include file for extension subroutines
 apollo/netinet/in.h	Apollo DomainOS port: C header file frontend
 av.c			Array value code
@@ -1388,6 +1388,7 @@ t/op/undef.t		See if undef works
 t/op/universal.t	See if UNIVERSAL class works
 t/op/unshift.t		See if unshift works
 t/op/vec.t		See if vectors work
+t/op/ver.t		See if version tuples work
 t/op/wantarray.t	See if wantarray works
 t/op/write.t		See if write works
 t/pod/emptycmd.t	Test empty pod directives
@@ -1539,6 +1540,7 @@ vos/vosish.h		VOS-specific header file
 warnings.h		The warning numbers
 warnings.pl		Program to write warnings.h and lib/warnings.pm
 win32/Makefile		Win32 makefile for NMAKE (Visual C++ build)
+win32/bin/exetype.pl	Set executable type to CONSOLE or WINDOWS
 win32/bin/perlglob.pl	Win32 globbing
 win32/bin/pl2bat.pl	wrap perl scripts into batch files
 win32/bin/runperl.pl	run perl script via batch file namesake

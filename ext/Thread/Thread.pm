@@ -10,7 +10,7 @@ $VERSION = "1.0";
 
 =head1 NAME
 
-Thread - multithreading
+Thread - manipulate threads in Perl (EXPERIMENTAL, subject to change)
 
 =head1 SYNOPSIS
 
@@ -40,6 +40,12 @@ The C<Thread> module provides multithreading support for perl.
 
 WARNING: Threading is an experimental feature.  Both the interface
 and implementation are subject to change drastically.
+
+In fact, this documentation describes the flavor of threads that was in
+version 5.005.  Perl v5.6 has the beginnings of support for interpreter
+threads, which (when finished) is expected to be significantly different
+from what is described here.  The information contained here may therefore
+soon be obsolete.  Use at your own risk!
 
 =head1 FUNCTIONS
 

@@ -1,6 +1,6 @@
 /*    dump.c
  *
- *    Copyright (c) 1991-1999, Larry Wall
+ *    Copyright (c) 1991-2000, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -131,9 +131,9 @@ Perl_pv_display(pTHX_ SV *sv, char *pv, STRLEN cur, STRLEN len, STRLEN pvlim)
         }
 	else {
 	    if (cur && isDIGIT(*(pv+1)))
-		Perl_sv_catpvf(aTHX_ sv, "\\%03o", *pv);
+		Perl_sv_catpvf(aTHX_ sv, "\\%03o", (U8)*pv);
 	    else
-		Perl_sv_catpvf(aTHX_ sv, "\\%o", *pv);
+		Perl_sv_catpvf(aTHX_ sv, "\\%o", (U8)*pv);
         }
     }
     sv_catpvn(sv, "\"", 1);
@@ -846,6 +846,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
     default:
 	if (SvEVALED(sv))	sv_catpv(d, "EVALED,");
 	if (SvIsUV(sv))		sv_catpv(d, "IsUV,");
+	if (SvUTF8(sv))         sv_catpv(d, "UTF8");
 	break;
     case SVt_PVBM:
 	if (SvTAIL(sv))		sv_catpv(d, "TAIL,");

@@ -185,7 +185,7 @@ $+[0] - $-[0]>.  Similarly, C<$>I<n> coincides with C<substr $_, $-[>I<n>C<],
 $+[>I<n>C<] - $-[>I<n>C<]> if C<$-[>I<n>C<]> is defined, and $+ coincides with
 C<substr $_, $-[$#-], $+[$#-]>.  One can use C<$#+> to find the number
 of subgroups in the last successful match.  Contrast with
-C<$#->, the last I<matched> subgroup.  Compare with C<@->.
+C<$#E<45>>, the last I<matched> subgroup.  Compare with C<@E<45>>.
 
 =item $MULTILINE_MATCHING
 
@@ -421,7 +421,7 @@ I<n>-th subpattern, or undef if the subpattern did not match.
 Thus after a match against $_, $& coincides with C<substr $_, $-[0],
 $+[0] - $-[0]>.  Similarly, C<$>I<n> coincides with C<substr $_, $-[>I<n>C<],
 $+[>I<n>C<] - $-[>I<n>C<]> if C<$-[>I<n>C<]> is defined, and $+ coincides with
-C<substr $_, $-[$#-], $+[$#-]>.  One can use C<$#-> to find the last
+C<substr $_, $-[$#-], $+[$#-]>.  One can use C<$#E<45>> to find the last
 matched subgroup in the last successful match.  Contrast with
 C<$#+>, the number of subgroups in the regular expression.  Compare
 with C<@+>.
@@ -873,40 +873,7 @@ The time at which the program began running, in seconds since the
 epoch (beginning of 1970).  The values returned by the B<-M>, B<-A>,
 and B<-C> filetests are based on this value.
 
-=item $^U
-
-Global flag that switches on Unicode character support in the Perl
-interpreter.  The initial value is usually C<0> for compatibility
-with Perl versions earlier than 5.6, but may be automatically set
-to C<1> by Perl if the system provides a user-settable default
-(e.g., C<$ENV{LC_CTYPE}>).  It is also implicitly set to C<1>
-whenever the utf8 pragma is loaded.
-
-Setting it to C<1> has the following effects:
-
-=over
-
-=item *
-
-C<chr> produces UTF-8 encoded Unicode characters.  These are the same
-as the corresponding ASCII characters if the argument is less than 128.
-
-=item *
-
-The C<%c> format in C<sprintf> generates a UTF-8 encoded Unicode
-character.  This is the same as the corresponding ASCII character
-if the argument is less than 128.
-
-=item *
-
-Any system calls made by Perl will use wide character APIs native to
-the system, if available.  This is currently only implemented on the
-Windows platform.
-
-=back
-
-The C<byte> pragma overrides the value of this flag in the current
-lexical scope.  See L<byte>.
+=item $PERL_VERSION_TUPLE
 
 =item $^V
 
@@ -914,7 +881,7 @@ The revision, version, and subversion of the Perl interpreter, represented
 as a "version tuple".  Version tuples have both a numeric value and a
 string value.  The numeric value is a floating point number that amounts
 to revision + version/1000 + subversion/1000000, and the string value
-is made of utf8 characters:
+is made of characters possibly in the UTF-8 range:
 C<chr($revision) . chr($version) . chr($subversion)>.
 
 This can be used to determine whether the Perl interpreter executing a
@@ -936,10 +903,25 @@ The current value of the warning switch, initially true if B<-w>
 was used, false otherwise, but directly modifiable.  (Mnemonic:
 related to the B<-w> switch.)  See also L<warnings>.
 
-=item ${^Warnings}
+=item ${^WARNING_BITS}
 
 The current set of warning checks enabled by the C<use warnings> pragma.
 See the documentation of C<warnings> for more details.
+
+=item ${^WIDE_SYSTEM_CALLS}
+
+Global flag that enables system calls made by Perl to use wide character
+APIs native to the system, if available.  This is currently only implemented
+on the Windows platform.
+
+This can also be enabled from the command line using the C<-C> switch.
+
+The initial value is typically C<0> for compatibility with Perl versions
+earlier than 5.6, but may be automatically set to C<1> by Perl if the system
+provides a user-settable default (e.g., C<$ENV{LC_CTYPE}>).
+
+The C<byte> pragma always overrides the effect of this flag in the current
+lexical scope.  See L<byte>.
 
 =item $EXECUTABLE_NAME
 

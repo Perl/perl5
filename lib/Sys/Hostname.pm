@@ -71,21 +71,15 @@ sub hostname {
   }
   else {  # Unix
 
-    # method 2 - use POSIX.pm, prefer the standard library to system calls
+    # method 2 - syscall is preferred since it avoids tainting problems
     eval {
-	local $SIG{__DIE__};
-	require POSIX;
-	$host = (POSIX::uname())[1];
-    }
-    # method 3 - otherwise syscall is preferred since it avoids tainting problems
-    || eval {
 	local $SIG{__DIE__};
 	require "syscall.ph";
 	$host = "\0" x 65; ## preload scalar
 	syscall(&SYS_gethostname, $host, 65) == 0;
     }
 
-    # method 3a - syscall using systeminfo instead of gethostname
+    # method 2a - syscall using systeminfo instead of gethostname
     #           -- needed on systems like Solaris
     || eval {
 	local $SIG{__DIE__};
@@ -95,11 +89,19 @@ sub hostname {
 	syscall(&SYS_systeminfo, &SI_HOSTNAME, $host, 65) != -1;
     }
 
-    # method 4 - trusty old hostname command
+    # method 3 - trusty old hostname command
     || eval {
 	local $SIG{__DIE__};
 	local $SIG{CHLD};
 	$host = `(hostname) 2>/dev/null`; # bsdish
+    }
+
+    # method 4 - use POSIX::uname(), which strictly can't be expected to be
+    # correct
+    || eval {
+	local $SIG{__DIE__};
+	require POSIX;
+	$host = (POSIX::uname())[1];
     }
 
     # method 5 - sysV uname command (may truncate)

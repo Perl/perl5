@@ -1,6 +1,6 @@
 /*    perl.c
  *
- *    Copyright (c) 1987-1999 Larry Wall
+ *    Copyright (c) 1987-2000 Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -845,6 +845,7 @@ S_parse_body(pTHX_ va_list args)
 #endif
 	case ' ':
 	case '0':
+	case 'C':
 	case 'F':
 	case 'a':
 	case 'c':
@@ -1797,6 +1798,7 @@ S_usage(pTHX_ char *name)		/* XXX move this out into a module ? */
     static char *usage_msg[] = {
 "-0[octal]       specify record separator (\\0, if no argument)",
 "-a              autosplit mode with -n or -p (splits $_ into @F)",
+"-C              enable native wide character system interfaces",
 "-c              check syntax only (runs BEGIN and END blocks)",
 "-d[:debugger]   run program under debugger",
 "-D[number/list] set debugging flags (argument is a bit mask or alphabets)",
@@ -1852,6 +1854,10 @@ Perl_moreswitches(pTHX_ char *s)
 	}
 	return s + numlen;
     }
+    case 'C':
+	PL_widesyscalls = TRUE;
+	s++;
+	return s;
     case 'F':
 	PL_minus_F = TRUE;
 	PL_splitstr = savepv(s + 1);
@@ -2028,15 +2034,15 @@ Perl_moreswitches(pTHX_ char *s)
 	s++;
 	return s;
     case 'v':
-	printf("\nThis is perl, v%"UVuf".%"UVuf".%"UVuf" built for %s",
-	       (UV)PERL_REVISION, (UV)PERL_VERSION, (UV)PERL_SUBVERSION, ARCHNAME);
+	printf(Perl_form(aTHX_ "\nThis is perl, v%v built for %s",
+			 PL_patchlevel, ARCHNAME));
 #if defined(LOCAL_PATCH_COUNT)
 	if (LOCAL_PATCH_COUNT > 0)
 	    printf("\n(with %d registered patch%s, see perl -V for more detail)",
 		(int)LOCAL_PATCH_COUNT, (LOCAL_PATCH_COUNT!=1) ? "es" : "");
 #endif
 
-	printf("\n\nCopyright 1987-1999, Larry Wall\n");
+	printf("\n\nCopyright 1987-2000, Larry Wall\n");
 #ifdef MSDOS
 	printf("\nMS-DOS port Copyright (c) 1989, 1990, Diomidis Spinellis\n");
 #endif
@@ -3113,14 +3119,21 @@ S_init_perllib(pTHX)
     incpush(PRIVLIB_EXP, FALSE);
 #endif
 
-#ifdef SITEARCH_EXP
-    incpush(SITEARCH_EXP, FALSE);
-#endif
-#ifdef SITELIB_EXP
-#if defined(WIN32) 
-    incpush(SITELIB_EXP, TRUE);
+#if defined(WIN32)
+    incpush(SITELIB_EXP, TRUE);	/* XXX Win32 needs inc_version_list support */
 #else
-    incpush(SITELIB_EXP, FALSE);
+#ifdef SITELIB_EXP
+    {
+	char *path = SITELIB_EXP;
+
+	if (path) {
+	    char buf[1024];
+	    strcpy(buf,path);
+	    if (strrchr(buf,'/'))	/* XXX Hack, Configure var needed */
+		*strrchr(buf,'/') = '\0';
+	    incpush(buf, TRUE);
+	}
+    }
 #endif
 #endif
 #if defined(PERL_VENDORLIB_EXP)
@@ -3186,6 +3199,11 @@ S_incpush(pTHX_ char *p, int addsubdirs)
 	 * archname-specific sub-directories.
 	 */
 	if (addsubdirs) {
+#ifdef PERL_INC_VERSION_LIST
+	    /* Configure terminates PERL_INC_VERSION_LIST with a NULL */
+	    const char *incverlist[] = { PERL_INC_VERSION_LIST };
+	    const char **incver;
+#endif
 	    struct stat tmpstatbuf;
 #ifdef VMS
 	    char *unix;
@@ -3201,21 +3219,37 @@ S_incpush(pTHX_ char *p, int addsubdirs)
 		              "Failed to unixify @INC element \"%s\"\n",
 			      SvPV(libdir,len));
 #endif
-	    /* .../archname/version if -d .../archname/version/auto */
-	    Perl_sv_setpvf(aTHX_ subdir, "%"SVf"/%s/"PERL_FS_VER_FMT"/auto", libdir,
-			   ARCHNAME, (int)PERL_REVISION,
-			   (int)PERL_VERSION, (int)PERL_SUBVERSION);
+	    /* .../version/archname if -d .../version/archname */
+	    Perl_sv_setpvf(aTHX_ subdir, "%"SVf"/"PERL_FS_VER_FMT"/%s", libdir,
+			   (int)PERL_REVISION, (int)PERL_VERSION,
+			   (int)PERL_SUBVERSION, ARCHNAME);
 	    if (PerlLIO_stat(SvPVX(subdir), &tmpstatbuf) >= 0 &&
 		  S_ISDIR(tmpstatbuf.st_mode))
-		av_push(GvAVn(PL_incgv),
-			newSVpvn(SvPVX(subdir), SvCUR(subdir) - sizeof "auto"));
+		av_push(GvAVn(PL_incgv), newSVsv(subdir));
 
-	    /* .../archname if -d .../archname/auto */
-	    Perl_sv_setpvf(aTHX_ subdir, "%"SVf"/%s/auto", libdir, ARCHNAME);
+	    /* .../version if -d .../version */
+	    Perl_sv_setpvf(aTHX_ subdir, "%"SVf"/"PERL_FS_VER_FMT, libdir,
+			   (int)PERL_REVISION, (int)PERL_VERSION,
+			   (int)PERL_SUBVERSION);
 	    if (PerlLIO_stat(SvPVX(subdir), &tmpstatbuf) >= 0 &&
 		  S_ISDIR(tmpstatbuf.st_mode))
-		av_push(GvAVn(PL_incgv),
-			newSVpvn(SvPVX(subdir), SvCUR(subdir) - sizeof "auto"));
+		av_push(GvAVn(PL_incgv), newSVsv(subdir));
+
+	    /* .../archname if -d .../archname */
+	    Perl_sv_setpvf(aTHX_ subdir, "%"SVf"/%s", libdir, ARCHNAME);
+	    if (PerlLIO_stat(SvPVX(subdir), &tmpstatbuf) >= 0 &&
+		  S_ISDIR(tmpstatbuf.st_mode))
+		av_push(GvAVn(PL_incgv), newSVsv(subdir));
+
+#ifdef PERL_INC_VERSION_LIST
+	    for (incver = incverlist; *incver; incver++) {
+		/* .../xxx if -d .../xxx */
+		Perl_sv_setpvf(aTHX_ subdir, "%"SVf"/%s", libdir, *incver);
+		if (PerlLIO_stat(SvPVX(subdir), &tmpstatbuf) >= 0 &&
+		      S_ISDIR(tmpstatbuf.st_mode))
+		    av_push(GvAVn(PL_incgv), newSVsv(subdir));
+	    }
+#endif
 	}
 
 	/* finally push this lib directory on the end of @INC */

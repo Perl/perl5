@@ -1584,22 +1584,11 @@ line was ignored.
 
 =item Illegal character %s (carriage return)
 
-(F) A carriage return character was found in the input.  This is an
-error, and not a warning, because carriage return characters can break
-multi-line strings, including here documents (e.g., C<print E<lt>E<lt>EOF;>).
-
-Under Unix, this error is usually caused by executing Perl code --
-either the main program, a module, or an eval'd string -- that was
-transferred over a network connection from a non-Unix system without
-properly converting the text file format.
-
-Under systems that use something other than '\n' to delimit lines of
-text, this error can also be caused by reading Perl code from a file
-handle that is in binary mode (as set by the C<binmode> operator).
-
-In either case, the Perl code in question will probably need to be
-converted with something like C<s/\x0D\x0A?/\n/g> before it can be
-executed.
+(F) Perl normally treats carriage returns in the program text as it
+would any other whitespace, which means you should never see this
+error when Perl was built using standard options.  For some reason,
+your version of Perl appears to have been built without this support.
+Talk to your Perl administrator.
 
 =item Illegal division by zero
 
@@ -2169,6 +2158,12 @@ and therefore non-portable between systems.  See L<perlport> for more
 on portability concerns.
 
 See also L<perlport> for writing portable code.
+
+=item Octal number in vector unsupported
+
+(F) Numbers with a leading C<0> are not currently allowed in vectors.  The
+octal number interpretation of such numbers may be supported in a future
+version.
 
 =item Odd number of elements in hash assignment
 
@@ -3137,8 +3132,8 @@ representative, who probably put it there in the first place.
 =item Unknown open() mode '%s'
 
 (F) The second argument of 3-argument open() is not among the list
-of valid modes: C<L<lt>>, C<L<gt>>, C<E<gt>E<gt>>, C<+L<lt>>,
-C<+L<gt>>, C<+E<gt>E<gt>>, C<-|>, C<|->.
+of valid modes: C<E<lt>>, C<E<gt>>, C<E<gt>E<gt>>, C<+E<lt>>,
+C<+E<gt>>, C<+E<gt>E<gt>>, C<-|>, C<|E<45>>.
 
 =item Unknown process %x sent message to prime_env_iter: %s
 

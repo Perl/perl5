@@ -196,7 +196,6 @@
 #define PL_argvoutgv		(PERL_GET_INTERP->Iargvoutgv)
 #define PL_basetime		(PERL_GET_INTERP->Ibasetime)
 #define PL_beginav		(PERL_GET_INTERP->Ibeginav)
-#define PL_bigchar		(PERL_GET_INTERP->Ibigchar)
 #define PL_bitcount		(PERL_GET_INTERP->Ibitcount)
 #define PL_bufend		(PERL_GET_INTERP->Ibufend)
 #define PL_bufptr		(PERL_GET_INTERP->Ibufptr)
@@ -413,6 +412,7 @@
 #define PL_utf8_xdigit		(PERL_GET_INTERP->Iutf8_xdigit)
 #define PL_uudmap		(PERL_GET_INTERP->Iuudmap)
 #define PL_warnhook		(PERL_GET_INTERP->Iwarnhook)
+#define PL_widesyscalls		(PERL_GET_INTERP->Iwidesyscalls)
 #define PL_xiv_arenaroot	(PERL_GET_INTERP->Ixiv_arenaroot)
 #define PL_xiv_root		(PERL_GET_INTERP->Ixiv_root)
 #define PL_xnv_root		(PERL_GET_INTERP->Ixnv_root)
@@ -461,7 +461,6 @@
 #define PL_argvoutgv		(vTHX->Iargvoutgv)
 #define PL_basetime		(vTHX->Ibasetime)
 #define PL_beginav		(vTHX->Ibeginav)
-#define PL_bigchar		(vTHX->Ibigchar)
 #define PL_bitcount		(vTHX->Ibitcount)
 #define PL_bufend		(vTHX->Ibufend)
 #define PL_bufptr		(vTHX->Ibufptr)
@@ -678,6 +677,7 @@
 #define PL_utf8_xdigit		(vTHX->Iutf8_xdigit)
 #define PL_uudmap		(vTHX->Iuudmap)
 #define PL_warnhook		(vTHX->Iwarnhook)
+#define PL_widesyscalls		(vTHX->Iwidesyscalls)
 #define PL_xiv_arenaroot	(vTHX->Ixiv_arenaroot)
 #define PL_xiv_root		(vTHX->Ixiv_root)
 #define PL_xnv_root		(vTHX->Ixnv_root)
@@ -863,7 +863,6 @@
 #define PL_argvoutgv		(aTHXo->interp.Iargvoutgv)
 #define PL_basetime		(aTHXo->interp.Ibasetime)
 #define PL_beginav		(aTHXo->interp.Ibeginav)
-#define PL_bigchar		(aTHXo->interp.Ibigchar)
 #define PL_bitcount		(aTHXo->interp.Ibitcount)
 #define PL_bufend		(aTHXo->interp.Ibufend)
 #define PL_bufptr		(aTHXo->interp.Ibufptr)
@@ -1080,6 +1079,7 @@
 #define PL_utf8_xdigit		(aTHXo->interp.Iutf8_xdigit)
 #define PL_uudmap		(aTHXo->interp.Iuudmap)
 #define PL_warnhook		(aTHXo->interp.Iwarnhook)
+#define PL_widesyscalls		(aTHXo->interp.Iwidesyscalls)
 #define PL_xiv_arenaroot	(aTHXo->interp.Ixiv_arenaroot)
 #define PL_xiv_root		(aTHXo->interp.Ixiv_root)
 #define PL_xnv_root		(aTHXo->interp.Ixnv_root)
@@ -1129,7 +1129,6 @@
 #define PL_Iargvoutgv		PL_argvoutgv
 #define PL_Ibasetime		PL_basetime
 #define PL_Ibeginav		PL_beginav
-#define PL_Ibigchar		PL_bigchar
 #define PL_Ibitcount		PL_bitcount
 #define PL_Ibufend		PL_bufend
 #define PL_Ibufptr		PL_bufptr
@@ -1346,6 +1345,7 @@
 #define PL_Iutf8_xdigit		PL_utf8_xdigit
 #define PL_Iuudmap		PL_uudmap
 #define PL_Iwarnhook		PL_warnhook
+#define PL_Iwidesyscalls	PL_widesyscalls
 #define PL_Ixiv_arenaroot	PL_xiv_arenaroot
 #define PL_Ixiv_root		PL_xiv_root
 #define PL_Ixnv_root		PL_xnv_root

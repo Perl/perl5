@@ -90,7 +90,7 @@ work for MakeMaker builds.)
 
 A port of dmake for win32 platforms is available from:
 
-    ftp://ftp.linux.activestate.com/pub/staff/gsar/dmake-4.1-win32.zip
+    http://cpan.perl.org/authors/id/GSAR/dmake-4.1pl1-win32.zip
 
 (This is a fixed version of original dmake sources obtained from
 http://www.wticorp.com/dmake/.  As of version 4.1PL1, the original

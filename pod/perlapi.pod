@@ -45,8 +45,8 @@ Returns the SV at the specified index in the array.  The C<key> is the
 index.  If C<lval> is set then the fetch will be part of a store.  Check
 that the return value is non-null before dereferencing it to a C<SV*>.
 
-See L<Understanding the Magic of Tied Hashes and Arrays> for more information
-on how to use this function on tied arrays. 
+See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for
+more information on how to use this function on tied arrays. 
 
 	SV**	av_fetch(AV* ar, I32 key, I32 lval)
 
@@ -95,7 +95,7 @@ that the caller is responsible for suitably incrementing the reference
 count of C<val> before the call, and decrementing it if the function
 returned NULL.
 
-See L<Understanding the Magic of Tied Hashes and Arrays> for
+See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for
 more information on how to use this function on tied arrays.
 
 	SV**	av_store(AV* ar, I32 key, SV* val)
@@ -349,7 +349,7 @@ obtained from the GV with the C<GvCV> macro.
 
 =item gv_fetchmethod
 
-See L<gv_fetchmethod_autoload.
+See L<gv_fetchmethod_autoload>.
 
 	GV*	gv_fetchmethod(HV* stash, const char* name)
 
@@ -548,7 +548,7 @@ C<klen> is the length of the key.  If C<lval> is set then the fetch will be
 part of a store.  Check that the return value is non-null before
 dereferencing it to a C<SV*>. 
 
-See L<Understanding the Magic of Tied Hashes and Arrays> for more
+See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
 
 	SV**	hv_fetch(HV* tb, const char* key, U32 klen, I32 lval)
@@ -563,7 +563,7 @@ accessing it.  The return value when C<tb> is a tied hash is a pointer to a
 static location, so be sure to make a copy of the structure if you need to
 store it somewhere. 
 
-See L<Understanding the Magic of Tied Hashes and Arrays> for more
+See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
 
 	HE*	hv_fetch_ent(HV* tb, SV* key, I32 lval, U32 hash)
@@ -632,7 +632,7 @@ be dereferenced to get the original C<SV*>.  Note that the caller is
 responsible for suitably incrementing the reference count of C<val> before
 the call, and decrementing it if the function returned NULL.  
 
-See L<Understanding the Magic of Tied Hashes and Arrays> for more
+See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
 
 	SV**	hv_store(HV* tb, const char* key, U32 klen, SV* val, U32 hash)
@@ -649,7 +649,7 @@ described here.  Note that the caller is responsible for suitably
 incrementing the reference count of C<val> before the call, and
 decrementing it if the function returned NULL. 
 
-See L<Understanding the Magic of Tied Hashes and Arrays> for more
+See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
 
 	HE*	hv_store_ent(HV* tb, SV* key, SV* val, U32 hash)

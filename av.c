@@ -1,6 +1,6 @@
 /*    av.c
  *
- *    Copyright (c) 1991-1999, Larry Wall
+ *    Copyright (c) 1991-2000, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -167,8 +167,8 @@ Returns the SV at the specified index in the array.  The C<key> is the
 index.  If C<lval> is set then the fetch will be part of a store.  Check
 that the return value is non-null before dereferencing it to a C<SV*>.
 
-See L<Understanding the Magic of Tied Hashes and Arrays> for more information
-on how to use this function on tied arrays. 
+See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for
+more information on how to use this function on tied arrays. 
 
 =cut
 */
@@ -231,7 +231,7 @@ that the caller is responsible for suitably incrementing the reference
 count of C<val> before the call, and decrementing it if the function
 returned NULL.
 
-See L<Understanding the Magic of Tied Hashes and Arrays> for
+See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for
 more information on how to use this function on tied arrays.
 
 =cut

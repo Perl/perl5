@@ -1,6 +1,6 @@
 /*    gv.c
  *
- *    Copyright (c) 1991-1999, Larry Wall
+ *    Copyright (c) 1991-2000, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -299,7 +299,7 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
 /*
 =for apidoc gv_fetchmethod
 
-See L<gv_fetchmethod_autoload.
+See L<gv_fetchmethod_autoload>.
 
 =cut
 */
@@ -837,7 +837,6 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
     case '\017':	/* $^O */
     case '\020':	/* $^P */
     case '\024':	/* $^T */
-    case '\025':	/* $^U */
 	if (len > 1)
 	    break;
 	goto magicalize;
@@ -845,8 +844,9 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	if (len > 1)
 	    break;
 	goto ro_magicalize;
-    case '\027':	/* $^W & $^Warnings */
-	if (len > 1 && strNE(name, "\027arnings"))
+    case '\027':	/* $^W & $^WARNING_BITS */
+	if (len > 1 && strNE(name, "\027ARNING_BITS")
+	    && strNE(name, "\027IDE_SYSTEM_CALLS"))
 	    break;
 	goto magicalize;
 

@@ -1,6 +1,6 @@
 /*    doio.c
  *
- *    Copyright (c) 1991-1999, Larry Wall
+ *    Copyright (c) 1991-2000, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -573,7 +573,7 @@ Perl_nextargv(pTHX_ register GV *gv)
 		    }
 #endif
 #ifdef HAS_RENAME
-#if !defined(DOSISH) && !defined(CYGWIN)
+#if !defined(DOSISH) && !defined(__CYGWIN__)
 		    if (PerlLIO_rename(PL_oldname,SvPVX(sv)) < 0) {
 		        if (ckWARN_d(WARN_INPLACE))	
 			    Perl_warner(aTHX_ WARN_INPLACE, 

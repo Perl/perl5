@@ -31,12 +31,10 @@ or from literals and constants in the source text.  Later, in
 L</Character encodings for input and output>, we'll see how such
 inputs may be marked as being Unicode character data sources.
 
-One particular condition will enable character semantics on the entire
-program, bypassing the compatibility mode: if the C<$^U> global flag is
-set to C<1>, nearly all operations will use character semantics by
-default.  As an added convenience, if the C<utf8> pragma is used in the
-C<main> package, C<$^U> is enabled automatically.  [XXX: Should there
-be a -C switch to enable $^U?]
+If the C<-C> command line switch is used, (or the ${^WIDE_SYSTEM_CALLS}
+global flag is set to C<1>), all system calls will use the
+corresponding wide character APIs.  This is currently only implemented
+on Windows.
 
 Regardless of the above, the C<byte> pragma can always be used to force
 byte semantics in a particular lexical scope.  See L<byte>.
@@ -229,6 +227,6 @@ tend to run slower.  Avoidance of locales is strongly encouraged.
 
 =head1 SEE ALSO
 
-L<byte>, L<utf8>, L<perlvar/"$^U">
+L<byte>, L<utf8>, L<perlvar/"${^WIDE_SYSTEM_CALLS}">
 
 =cut

@@ -1,6 +1,6 @@
 /*    hv.c
  *
- *    Copyright (c) 1991-1999, Larry Wall
+ *    Copyright (c) 1991-2000, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -113,7 +113,7 @@ C<klen> is the length of the key.  If C<lval> is set then the fetch will be
 part of a store.  Check that the return value is non-null before
 dereferencing it to a C<SV*>. 
 
-See L<Understanding the Magic of Tied Hashes and Arrays> for more
+See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
 
 =cut
@@ -209,7 +209,7 @@ accessing it.  The return value when C<tb> is a tied hash is a pointer to a
 static location, so be sure to make a copy of the structure if you need to
 store it somewhere. 
 
-See L<Understanding the Magic of Tied Hashes and Arrays> for more
+See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
 
 =cut
@@ -336,7 +336,7 @@ be dereferenced to get the original C<SV*>.  Note that the caller is
 responsible for suitably incrementing the reference count of C<val> before
 the call, and decrementing it if the function returned NULL.  
 
-See L<Understanding the Magic of Tied Hashes and Arrays> for more
+See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
 
 =cut
@@ -425,7 +425,7 @@ described here.  Note that the caller is responsible for suitably
 incrementing the reference count of C<val> before the call, and
 decrementing it if the function returned NULL. 
 
-See L<Understanding the Magic of Tied Hashes and Arrays> for more
+See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
 
 =cut

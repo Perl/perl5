@@ -1,6 +1,6 @@
 /*  +++begin copyright+++ *******************************************  */
 /*                                                                     */
-/*  COPYRIGHT (c) 1997, 1998 Stratus Computer, Inc.                    */
+/*  COPYRIGHT (c) 1997, 1998, 1999, 2000 Stratus Computer (DE), Inc.   */
 /*                                                                     */
 /*  This program is free software; you can redistribute it and/or      */
 /*  modify it under the terms of either:                               */
@@ -29,7 +29,7 @@
 /*                                                                     */
 /*  +++end copyright+++ *********************************************  */
 
-#define _POSIX_C_SOURCE
+#define _POSIX_C_SOURCE 199309L
 
 #include <stdio.h>
 #include <string.h>
@@ -46,7 +46,7 @@ static void bomb (char *p_name)
 {
 char_varying(256)   msgvs;
 
-     strcpy_vstr_nstr (&msgvs, "FATAL ERROR: Call to missing function '");
+     strcpy_vstr_nstr (&msgvs, "FATAL ERROR: Call to unimplemented function '");
      strcat_vstr_nstr (&msgvs, p_name);
      strcat_vstr_nstr (&msgvs, "'. Entering debugger.");
      s$write_code (&msgvs, &0);
@@ -74,21 +74,6 @@ extern int do_aspawn ()
 extern int do_spawn ()
 {
      bomb ("do_spawn");
-}
-
-extern int execlp (const char *_file, const char *_arg, ...)
-{
-     bomb ("execlp");
-}
-
-extern int execl  (const char *_path, const char *_arg, ...)
-{
-     bomb ("execl");
-}
-
-extern int execvp (const char *_file, char *const _argv[], ...)
-{
-     bomb ("execvp");
 }
 
 extern pid_t fork (void)

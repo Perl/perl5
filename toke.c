@@ -1,6 +1,6 @@
 /*    toke.c
  *
- *    Copyright (c) 1991-1999, Larry Wall
+ *    Copyright (c) 1991-2000, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -376,6 +376,15 @@ Perl_lex_start(pTHX_ SV *line)
     SAVEI32(PL_lex_state);
     SAVEVPTR(PL_lex_inpat);
     SAVEI32(PL_lex_inwhat);
+    if (PL_lex_state == LEX_KNOWNEXT) {
+	I32 toke = PL_nexttoke;
+	while (--toke >= 0) {
+	    SAVEI32(PL_nexttype[toke]);
+	    SAVEVPTR(PL_nextval[toke]);
+	}
+	SAVEI32(PL_nexttoke);
+	PL_nexttoke = 0;
+    }
     SAVECOPLINE(PL_curcop);
     SAVEPPTR(PL_bufptr);
     SAVEPPTR(PL_bufend);
@@ -1347,24 +1356,24 @@ S_scan_const(pTHX_ char *start)
 		++s;
 		if (*s == '{') {
 		    char* e = strchr(s, '}');
+		    UV uv;
 
 		    if (!e) {
 			yyerror("Missing right brace on \\x{}");
 			e = s;
 		    }
-		    if (!utf) {
-			dTHR;
-			if (ckWARN(WARN_UTF8))
-			    Perl_warner(aTHX_ WARN_UTF8,
-				   "Use of \\x{} without utf8 declaration");
-		    }
 		    /* note: utf always shorter than hex */
-		    d = (char*)uv_to_utf8((U8*)d,
-					  (UV)scan_hex(s + 1, e - s - 1, &len));
+		    uv = (UV)scan_hex(s + 1, e - s - 1, &len);
+		    if (uv > 127) {
+			d = (char*)uv_to_utf8((U8*)d, uv);
+			has_utf = TRUE;
+		    }
+		    else
+			*d++ = (char)uv;
 		    s = e + 1;
-		    has_utf = TRUE;
 		}
 		else {
+		    /* XXX collapse this branch into the one above */
 		    UV uv = (UV)scan_hex(s, 2, &len);
 		    if (utf && PL_lex_inwhat == OP_TRANS &&
 			utf != (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF))
@@ -1675,7 +1684,7 @@ S_intuit_more(pTHX_ register char *s)
  * Not a method if it's really "print foo $bar"
  * Method if it's really "foo package::" (interpreted as package->foo)
  * Not a method if bar is known to be a subroutne ("sub bar; foo bar")
- * Not a method if bar is a filehandle or package, but is quotd with
+ * Not a method if bar is a filehandle or package, but is quoted with
  *   =>
  */
 
@@ -6887,6 +6896,7 @@ Perl_scan_num(pTHX_ char *start)
 		U8 tmpbuf[10];
 		U8 *tmpend;
 		NV nshift = 1.0;
+		bool utf8 = FALSE;
 		s++;				/* get past 'v' */
 
 		sv = NEWSV(92,5);
@@ -6894,12 +6904,21 @@ Perl_scan_num(pTHX_ char *start)
 		sv_setpvn(sv, "", 0);
 
 		do {
+		    if (*s == '0' && isDIGIT(s[1]))
+			yyerror("Octal number in vector unsupported");
 		    rev = atoi(s);
 		    s = ++pos;
 		    while (isDIGIT(*pos))
 			pos++;
 
-		    tmpend = uv_to_utf8(tmpbuf, rev);
+		    if (rev > 127) {
+			tmpend = uv_to_utf8(tmpbuf, rev);
+			utf8 = TRUE;
+		    }
+		    else {
+			tmpbuf[0] = (U8)rev;
+			tmpend = &tmpbuf[1];
+		    }
 		    *tmpend = '\0';
 		    sv_catpvn(sv, (const char*)tmpbuf, tmpend - tmpbuf);
 		    if (rev > 0)
@@ -6907,9 +6926,12 @@ Perl_scan_num(pTHX_ char *start)
 		    nshift *= 1000;
 		} while (*pos == '.' && isDIGIT(pos[1]));
 
+		if (*s == '0' && isDIGIT(s[1]))
+		    yyerror("Octal number in vector unsupported");
 		rev = atoi(s);
 		s = pos;
 		tmpend = uv_to_utf8(tmpbuf, rev);
+		utf8 = utf8 || rev > 127;
 		*tmpend = '\0';
 		sv_catpvn(sv, (const char*)tmpbuf, tmpend - tmpbuf);
 		if (rev > 0)
@@ -6918,7 +6940,8 @@ Perl_scan_num(pTHX_ char *start)
 		SvPOK_on(sv);
 		SvNOK_on(sv);
 		SvREADONLY_on(sv);
-		SvUTF8_on(sv);
+		if (utf8)
+		    SvUTF8_on(sv);
 	    }
 	}
 	break;

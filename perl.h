@@ -1,6 +1,6 @@
 /*    perl.h
  *
- *    Copyright (c) 1987-1997, Larry Wall
+ *    Copyright (c) 1987-2000, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -1712,7 +1712,7 @@ typedef pthread_key_t	perl_key;
 #   endif
 #endif
 
-#if defined(CYGWIN)
+#if defined(__CYGWIN__)
 /* USEMYBINMODE
  *   This symbol, if defined, indicates that the program should
  *   use the routine my_binmode(FILE *fp, char iotype) to insure

@@ -1,6 +1,6 @@
 /*    pp_ctl.c
  *
- *    Copyright (c) 1991-1999, Larry Wall
+ *    Copyright (c) 1991-2000, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -2865,7 +2865,7 @@ PP(pp_require)
     sv = POPs;
     if (SvNIOKp(sv)) {
 	UV rev, ver, sver;
-	if (SvPOKp(sv) && SvUTF8(sv)) {		/* require v5.6.1 */
+	if (SvPOKp(sv)) {		/* require v5.6.1 */
 	    I32 len;
 	    U8 *s = (U8*)SvPVX(sv);
 	    U8 *end = (U8*)SvPVX(sv) + SvCUR(sv);

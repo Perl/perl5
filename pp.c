@@ -1,6 +1,6 @@
 /*    pp.c
  *
- *    Copyright (c) 1991-1999, Larry Wall
+ *    Copyright (c) 1991-2000, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -2199,10 +2199,9 @@ PP(pp_chr)
     char *tmps;
     U32 value = POPu;
 
-    SvUTF8_off(TARG);				/* decontaminate */
     (void)SvUPGRADE(TARG,SVt_PV);
 
-    if (value >= 128 && PL_bigchar && !IN_BYTE) {
+    if (value > 255 && !IN_BYTE) {
 	SvGROW(TARG,8);
 	tmps = SvPVX(TARG);
 	tmps = (char*)uv_to_utf8((U8*)tmps, (UV)value);
@@ -2219,6 +2218,7 @@ PP(pp_chr)
     tmps = SvPVX(TARG);
     *tmps++ = value;
     *tmps = '\0';
+    SvUTF8_off(TARG);				/* decontaminate */
     (void)SvPOK_only(TARG);
     XPUSHs(TARG);
     RETURN;

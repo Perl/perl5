@@ -130,8 +130,6 @@ START_EXTERN_C
 #define PL_basetime		(*Perl_Ibasetime_ptr(aTHXo))
 #undef  PL_beginav
 #define PL_beginav		(*Perl_Ibeginav_ptr(aTHXo))
-#undef  PL_bigchar
-#define PL_bigchar		(*Perl_Ibigchar_ptr(aTHXo))
 #undef  PL_bitcount
 #define PL_bitcount		(*Perl_Ibitcount_ptr(aTHXo))
 #undef  PL_bufend
@@ -564,6 +562,8 @@ START_EXTERN_C
 #define PL_uudmap		(*Perl_Iuudmap_ptr(aTHXo))
 #undef  PL_warnhook
 #define PL_warnhook		(*Perl_Iwarnhook_ptr(aTHXo))
+#undef  PL_widesyscalls
+#define PL_widesyscalls		(*Perl_Iwidesyscalls_ptr(aTHXo))
 #undef  PL_xiv_arenaroot
 #define PL_xiv_arenaroot	(*Perl_Ixiv_arenaroot_ptr(aTHXo))
 #undef  PL_xiv_root

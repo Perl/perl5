@@ -29,7 +29,7 @@ INST_TOP	= $(INST_DRV)\perl
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-INST_VER	= \5.5.640
+INST_VER	= \5.5.650
 
 #
 # Comment this out if you DON'T want your perl installation to have
@@ -432,7 +432,7 @@ $(o).dll:
 	    -out:$@ $(LINK_FLAGS) $(LIBFILES) $< $(LIBPERL)  
 
 .rc.res:
-	$(RSC) $<
+	$(RSC) -i.. $<
 
 #
 # various targets
@@ -854,7 +854,7 @@ $(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ) $(PERLEXE_RES)
 	$(LINK32) -subsystem:console -out:$@ $(LINK_FLAGS) $(LIBFILES) \
 	    $(PERLEXE_OBJ) $(SETARGV_OBJ) $(PERLIMPLIB) $(PERLEXE_RES)
 	copy $(PERLEXE) $(WPERLEXE)
-	editbin /subsystem:windows $(WPERLEXE)
+	$(MINIPERL) -I..\lib bin\exetype.pl $(WPERLEXE) WINDOWS
 	copy splittree.pl .. 
 	$(MINIPERL) -I..\lib ..\splittree.pl "../LIB" $(AUTODIR)
 

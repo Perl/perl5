@@ -1,8 +1,5 @@
 package utf8;
 
-$^U = 1 if caller and caller eq 'main';	# they are unicode aware
-					# XXX split this out?
-
 sub import {
     $^H |= 0x00800000;
     $enc{caller()} = $_[1] if $_[1];
@@ -60,15 +57,6 @@ and package names.
 
 =item *
 
-As a side effect, when this pragma is used within the main package,
-it also enables Unicode character semantics for the entire program.
-See L<perlunicode> for more on that.
-
-[XXX: split this out into separate "pragma" and/or -C command-line
-switch?]
-
-=item *
-
 In the absence of inputs marked as UTF-8, regular expressions within the
 scope of this pragma will default to using character semantics instead
 of byte semantics.
@@ -79,9 +67,6 @@ of byte semantics.
 	use utf8;			# force char semantics
 	@chars = split //, $data;	# splits characters
     }
-
-[XXX: Should this should be enabled like chr()/sprintf("%c") by looking
-at $^U instead?]
 
 =head1 SEE ALSO
 

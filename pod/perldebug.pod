@@ -145,7 +145,7 @@ List C<incr+1> lines starting at C<min>.
 
 =item l min-max
 
-List lines C<min> through C<max>.  C<l -> is synonymous to C<->.
+List lines C<min> through C<max>.  C<l E<45>> is synonymous to C<E<45>>.
 
 =item l line
 

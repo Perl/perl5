@@ -21,7 +21,6 @@ so='dll'
 # - eliminate -lc, implied by gcc
 libswanted=`echo " $libswanted " | sed -e 's/ c / /g'`
 libswanted="$libswanted cygipc cygwin kernel32"
-ccflags="$ccflags -DCYGWIN"
 # - otherwise i686-cygwin
 archname='cygwin'
 

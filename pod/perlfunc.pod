@@ -4310,6 +4310,10 @@ In addition, Perl permits the following widely-supported conversions:
    %n	special: *stores* the number of characters output so far
         into the next variable in the parameter list 
 
+And the following Perl-specific conversion:
+
+   %v   a string, output as a tuple of integers ("Perl" is 80.101.114.108)
+
 Finally, for backward (and we do mean "backward") compatibility, Perl
 permits these unnecessary but widely-supported conversions:
 
@@ -5269,9 +5273,13 @@ to give the expression the correct precedence as in
 
     vec($image, $max_x * $x + $y, 8) = 3;
 
-Vectors created with C<vec> can also be manipulated with the logical
-operators C<|>, C<&>, and C<^>, which will assume a bit vector
-operation is desired when both operands are strings.
+If the selected element is off the end of the string, the value 0 is
+returned.  If an element off the end of the string is written to,
+Perl will first extend the string with sufficiently many zero bytes.
+
+Strings created with C<vec> can also be manipulated with the logical
+operators C<|>, C<&>, C<^>, and C<~>.  These operators will assume a bit
+vector operation is desired when both operands are strings.
 See L<perlop/"Bitwise String Operators">.
 
 The following code will build up an ASCII string saying C<'PerlPerlPerl'>.
