@@ -889,7 +889,9 @@ static	union overhead *nextf[NBUCKETS];
 # define sbrk(a) Perl_sbrk(a)
 Malloc_t Perl_sbrk (int size);
 #else
+#ifndef HAS_SBRK_PROTO
 extern	Malloc_t sbrk(int);
+#endif
 #endif
 
 #ifdef DEBUGGING_MSTATS
