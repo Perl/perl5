@@ -10,8 +10,8 @@
 package Pod::Select;
 
 use vars qw($VERSION);
-$VERSION = 1.11;  ## Current version of this package
-require  5.004;    ## requires this Perl version or later
+$VERSION = 1.12;  ## Current version of this package
+require  5.005;    ## requires this Perl version or later
 
 #############################################################################
 
@@ -62,7 +62,7 @@ or
 
 =head1 REQUIRES
 
-perl5.004, Pod::Parser, Exporter, Carp
+perl5.005, Pod::Parser, Exporter, Carp
 
 =head1 EXPORTS
 

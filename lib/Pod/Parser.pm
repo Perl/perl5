@@ -10,8 +10,8 @@
 package Pod::Parser;
 
 use vars qw($VERSION);
-$VERSION = 1.11;  ## Current version of this package
-require  5.004;    ## requires this Perl version or later
+$VERSION = 1.12;  ## Current version of this package
+require  5.005;    ## requires this Perl version or later
 
 #############################################################################
 
@@ -71,7 +71,7 @@ Pod::Parser - base class for creating POD filters and translators
 
 =head1 REQUIRES
 
-perl5.004, Pod::InputObjects, Exporter, Carp
+perl5.005, Pod::InputObjects, Exporter, Symbol, Carp
 
 =head1 EXPORTS
 
@@ -206,6 +206,12 @@ use Pod::InputObjects;
 use Carp;
 use Exporter;
 require VMS::Filespec if $^O eq 'VMS';
+BEGIN {
+   if ($] < 5.6) {
+      require Symbol;
+      import Symbol;
+   }
+}
 @ISA = qw(Exporter);
 
 ## These "variables" are used as local "glob aliases" for performance
@@ -1146,7 +1152,7 @@ sub parse_from_file {
     my $self = shift;
     my %opts = (ref $_[0] eq 'HASH') ? %{ shift() } : ();
     my ($infile, $outfile) = @_;
-    my ($in_fh,  $out_fh);
+    my ($in_fh,  $out_fh) = (gensym, gensym)  if ($] < 5.6);
     my ($close_input, $close_output) = (0, 0);
     local *myData = $self;
     local $_;
@@ -1197,12 +1203,13 @@ sub parse_from_file {
         elsif (ref $outfile) {
             ## Must be a filehandle-ref (or else assume its a ref to an
             ## object that supports the common IO write operations).
-            $myData{_OUTFILE} = ${$outfile};;
+            $myData{_OUTFILE} = ${$outfile};
             $out_fh = $outfile;
         }
         else {
             ## We have a filename, open it for writing
             $myData{_OUTFILE} = $outfile;
+            (-d $outfile) and croak "$outfile is a directory, not POD input!\n";
             open($out_fh, "> $outfile")  or
                  croak "Can't open $outfile for writing: $!\n";
             $close_output = 1;
