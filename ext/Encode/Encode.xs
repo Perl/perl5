@@ -248,9 +248,11 @@ PerlIOEncode_fill(pTHX_ PerlIO * f)
 	/* Now get translated string (forced to UTF-8) and use as buffer */
 	if (SvPOK(uni)) {
 	    s = SvPVutf8(uni, len);
+#ifdef PARANOID_ENCODE_CHECKS
 	    if (len && !is_utf8_string((U8*)s,len)) {
 		Perl_warn(aTHX_ "panic: decode did not return UTF-8 '%.*s'",(int) len,s);
 	    }
+#endif
 	}
 	if (len > 0) {
 	    /* Got _something */
@@ -499,9 +501,9 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
     STRLEN ddone = 0;
     STRLEN sdone = 0;
 
-    /* We allocate slen+1.  
+    /* We allocate slen+1.
         PerlIO dumps core if this value is smaller than this. */
-    SV *dst = sv_2mortal(newSV(slen+1)); 
+    SV *dst = sv_2mortal(newSV(slen+1));
     if (slen) {
 	U8 *d = (U8 *) SvPVX(dst);
 	STRLEN dlen = SvLEN(dst)-1;
@@ -526,7 +528,7 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 		    ddone += dlen;
 		    sleft = tlen - sdone;
 #if ENCODE_XS_PROFILE >= 2
-		  Perl_warn(aTHX_ 
+		  Perl_warn(aTHX_
 		  "more=%d, sdone=%d, sleft=%d, SvLEN(dst)=%d\n",
 			    more, sdone, sleft, SvLEN(dst));
 #endif
@@ -543,7 +545,7 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 		    }
 		    more += UTF8_MAXLEN; /* insurance policy */
 #if ENCODE_XS_PROFILE >= 2
-		  Perl_warn(aTHX_ 
+		  Perl_warn(aTHX_
 		  "more=%d, sdone=%d, sleft=%d, SvLEN(dst)=%d\n",
 			    more, sdone, sleft, SvLEN(dst));
 #endif
@@ -620,14 +622,14 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
     }
 #if ENCODE_XS_PROFILE
     if (SvCUR(dst) > SvCUR(src)){
-	    Perl_warn(aTHX_ 
+	    Perl_warn(aTHX_
 		      "SvLEN(dst)=%d, SvCUR(dst)=%d. "
 		      "%d bytes unused(%f %%)\n",
-		      SvLEN(dst), SvCUR(dst), SvLEN(dst) - SvCUR(dst), 
+		      SvLEN(dst), SvCUR(dst), SvLEN(dst) - SvCUR(dst),
 		      (SvLEN(dst) - SvCUR(dst))*1.0/SvLEN(dst)*100.0);
-	    
+	
     }
-#endif      
+#endif
     *SvEND(dst) = '\0';
     return dst;
 }
