@@ -98,17 +98,23 @@ SV* sv;
 {
     MGS* mgs;
     MAGIC* mg;
+    MAGIC** mgp;
 
     ENTER;
     mgs = save_magic(sv);
 
-    for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
+    mgp = &SvMAGIC(sv);
+    while ((mg = *mgp) != 0) {
 	MGVTBL* vtbl = mg->mg_virtual;
 	if (!(mg->mg_flags & MGf_GSKIP) && vtbl && vtbl->svt_get) {
 	    (*vtbl->svt_get)(sv, mg);
-	    if (mg->mg_flags & MGf_GSKIP)
+	    /* Ignore this magic if it's been deleted */
+	    if (*mgp == mg && (mg->mg_flags & MGf_GSKIP))
 		mgs->mgs_flags = 0;
 	}
+	/* Advance to next magic (complicated by possible deletion) */
+	if (*mgp == mg)
+	    mgp = &mg->mg_moremagic;
     }
 
     LEAVE;
@@ -992,6 +998,7 @@ SV* sv;
 MAGIC* mg;
 {
     mg->mg_len = -1;
+    SvSCREAM_off(sv);
     return 0;
 }
 
