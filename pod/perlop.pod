@@ -204,11 +204,11 @@ Binary "." concatenates two strings.
 
 =head2 Shift Operators
 
-Binary "<<" returns the value of its left argument shifted left by the
+Binary "E<lt>E<lt>" returns the value of its left argument shifted left by the
 number of bits specified by the right argument.  Arguments should be 
 integers.
 
-Binary ">>" returns the value of its left argument shifted right by the
+Binary "E<gt>E<gt>" returns the value of its left argument shifted right by the
 number of bits specified by the right argument.  Arguments should be 
 integers.
 
@@ -244,16 +244,16 @@ See also L<"List Operators">.
 
 =head2 Relational Operators
 
-Binary "<" returns true if the left argument is numerically less than
+Binary "E<lt>" returns true if the left argument is numerically less than
 the right argument.
 
-Binary ">" returns true if the left argument is numerically greater
+Binary "E<gt>" returns true if the left argument is numerically greater
 than the right argument.
 
-Binary "<=" returns true if the left argument is numerically less than
+Binary "E<lt>=" returns true if the left argument is numerically less than
 or equal to the right argument.
 
-Binary ">=" returns true if the left argument is numerically greater
+Binary "E<gt>=" returns true if the left argument is numerically greater
 than or equal to the right argument.
 
 Binary "lt" returns true if the left argument is stringwise less than
@@ -276,8 +276,9 @@ the right argument.
 Binary "!=" returns true if the left argument is numerically not equal
 to the right argument.
 
-Binary "<=>" returns -1, 0, or 1 depending on whether the left argument is numerically
-less than, equal to, or greater than the right argument.
+Binary "E<lt>=E<gt>" returns -1, 0, or 1 depending on whether the left
+argument is numerically less than, equal to, or greater than the right
+argument.
 
 Binary "eq" returns true if the left argument is stringwise equal to
 the right argument.
@@ -475,7 +476,7 @@ argument and returns that value.  This is just like C's comma operator.
 In a list context, it's just the list argument separator, and inserts
 both its arguments into the list.
 
-The => digraph is mostly just a synonym for the comma operator.  It's useful for
+The =E<gt> digraph is mostly just a synonym for the comma operator.  It's useful for
 documenting arguments that come in pairs.  As of release 5.001, it also forces
 any word to the left of it to be interpreted as a string.
 
@@ -558,13 +559,13 @@ the same character fore and aft, but the 4 sorts of brackets
 For constructs that do interpolation, variables beginning with "C<$>" or "C<@>"
 are interpolated, as are the following sequences:
 
-    \t		tab
-    \n		newline
-    \r		return
-    \f		form feed
-    \b		backspace
-    \a		alarm (bell)
-    \e		escape
+    \t		tab             (HT, TAB)
+    \n		newline         (LF, NL)
+    \r		return          (CR)
+    \f		form feed       (FF)
+    \b		backspace       (BS)
+    \a		alarm (bell)    (BEL)
+    \e		escape          (ESC)
     \033	octal char
     \x1b	hex char
     \c[		control char
@@ -644,7 +645,7 @@ successfully executed regular expression is used instead.
 
 If used in a context that requires a list value, a pattern match returns a
 list consisting of the subexpressions matched by the parentheses in the
-pattern, i.e. ($1, $2, $3...).  (Note that here $1 etc. are also set, and
+pattern, i.e. (C<$1>, $2, $3...).  (Note that here $1 etc. are also set, and
 that this differs from Perl 4's behavior.)  If the match fails, a null
 array is returned.  If the match succeeds, but there were no parentheses,
 a list value of (1) is returned.
@@ -824,8 +825,8 @@ Examples:
     s/([^ ]*) *([^ ]*)/$2 $1/;	# reverse 1st two fields
 
 Note the use of $ instead of \ in the last example.  Unlike 
-B<sed>, we only use the \<I<digit>> form in the left hand side.
-Anywhere else it's $<I<digit>>.
+B<sed>, we only use the \E<lt>I<digit>E<gt> form in the left hand side.
+Anywhere else it's $E<lt>I<digit>E<gt>.
 
 Occasionally, you can't just use a C</g> to get all the changes
 to occur.  Here are two common cases:
@@ -955,7 +956,7 @@ packages, where they would be interpreted as local identifiers rather
 than global.)  Additional filehandles may be created with the open()
 function.  See L<perlfunc/open()> for details on this.
 
-If a <FILEHANDLE> is used in a context that is looking for a list, a
+If a E<lt>FILEHANDLEE<gt> is used in a context that is looking for a list, a
 list consisting of all the input lines is returned, one line per list
 element.  It's easy to make a I<LARGE> data space this way, so use with
 care.
@@ -985,8 +986,8 @@ is equivalent to the following Perl-like pseudo code:
 except that it isn't so cumbersome to say, and will actually work.  It
 really does shift array @ARGV and put the current filename into variable
 $ARGV.  It also uses filehandle I<ARGV> internally--E<lt>E<gt> is just a synonym
-for <ARGV>, which is magical.  (The pseudo code above doesn't work
-because it treats <ARGV> as non-magical.)
+for E<lt>ARGVE<gt>, which is magical.  (The pseudo code above doesn't work
+because it treats E<lt>ARGVE<gt> as non-magical.)
 
 You can modify @ARGV before the first E<lt>E<gt> as long as the array ends up
 containing the list of filenames you really want.  Line numbers (C<$.>)
@@ -1013,7 +1014,7 @@ this it will assume you are processing another @ARGV list, and if you
 haven't set @ARGV, will input from STDIN.
 
 If the string inside the angle brackets is a reference to a scalar
-variable (e.g. <$foo>), then that variable contains the name of the
+variable (e.g. E<lt>$fooE<gt>), then that variable contains the name of the
 filehandle to input from, or a reference to the same.  For example:
 
     $fh = \*STDIN;
@@ -1025,7 +1026,7 @@ as a filename pattern to be globbed, and either a list of filenames or the
 next filename in the list is returned, depending on context.  One level of
 $ interpretation is done first, but you can't say C<E<lt>$fooE<gt>>
 because that's an indirect filehandle as explained in the previous
-paragraph.  In older version of Perl, programmers would insert curly
+paragraph.  (In older versions of Perl, programmers would insert curly
 brackets to force interpretation as a filename glob: C<E<lt>${foo}E<gt>>.
 These days, it's considered cleaner to call the internal function directly
 as C<glob($foo)>, which is probably the right way to have done it in the
