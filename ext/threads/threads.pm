@@ -50,7 +50,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw(
 async	
 );
-our $VERSION = '1.04';
+our $VERSION = '1.05';
 
 
 # || 0 to ensure compatibility with previous versions
@@ -139,7 +139,8 @@ it the other way around.
 
 This will create a new thread with the entry point function and give
 it LIST as parameters.  It will return the corresponding threads
-object. The new() method is an alias for create().
+object, or C<undef> if thread creation failed. The new() method is an
+alias for create().
 
 =item $thread->join
 
