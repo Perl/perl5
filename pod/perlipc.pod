@@ -111,7 +111,7 @@ signal handlers like this:
 
 or even the more elaborate:
 
-    use POSIX "wait_h";
+    use POSIX ":wait_h";
     sub REAPER { 
 	my $child;
 	$SIG{CHLD} = \&REAPER;  # loathe sysV
