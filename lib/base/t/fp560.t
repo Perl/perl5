@@ -57,6 +57,11 @@ BEGIN {
            $w++;
            return;
        }
+       if ($_[0] =~ /^Pseudo-hashes are deprecated/ &&
+	   ($] >= 5.008 && $] < 5.009)) {
+	   print "# $_[0]"; # Yes, we know they are deprecated.
+	   return;
+       }
        print $_[0];
    };
 }
