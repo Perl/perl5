@@ -1092,7 +1092,7 @@ setuid perl scripts securely.\n");
     {
 	/* Set PL_origalen be the sum of the contiguous argv[]
 	 * elements plus the size of the env in case that it is
-	 * contiguous with the argv[].  This is used in mg.c:mg_set()
+	 * contiguous with the argv[].  This is used in mg.c:Perl_magic_set()
 	 * as the maximum modifiable length of $0.  In the worst case
 	 * the area we are able to modify is limited to the size of
 	 * the original argv[0].  (See below for 'contiguous', though.)
